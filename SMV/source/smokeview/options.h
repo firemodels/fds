@@ -23,6 +23,7 @@
 //*** turn on options that are being tested
 
 #ifdef pp_BETA
+#define pp_GPU_VOLRENDER
 #define pp_SLICECONTOURS
 #define pp_SHOWLIGHT
 // #define pp_BENCHMARK

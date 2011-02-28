@@ -398,6 +398,10 @@ typedef struct mesh_ {
   terraindata *terrain;
   int mesh_type;
   int is_bottom;
+#ifdef pp_GPU_VOLRENDER
+  GLuint smoke_texture_id,hrr_texture_id;
+  float *smoke_texture_buffer,*hrr_texture_buffer;
+#endif
   float meshrgb[3], *meshrgb_ptr;
   float mesh_offset[3], *mesh_offset_ptr;
   int blockvis;

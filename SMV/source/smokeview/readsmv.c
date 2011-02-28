@@ -3182,6 +3182,13 @@ typedef struct {
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 
+  glGenTextures(1,&texture_3dsmoke_colorbar_id);
+  glBindTexture(GL_TEXTURE_1D,texture_3dsmoke_colorbar_id);
+  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_3dsmoke);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+
   glGenTextures(1,&texture_patch_colorbar_id);
   glBindTexture(GL_TEXTURE_1D,texture_patch_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_patch);
@@ -6769,6 +6776,12 @@ void initobst(blockagedata *bc, surface *surf,int index,int meshindex){
 
 void initmesh(mesh *meshi){
 
+#ifdef pp_GPU_VOLRENDER
+  meshi->smoke_texture_buffer=NULL;
+  meshi->hrr_texture_buffer=NULL;
+  meshi->smoke_texture_id=-1;
+  meshi->hrr_texture_id=-1;
+#endif
   meshi->mesh_offset_ptr=NULL;
 #ifdef pp_CULL
   meshi->cullinfo=NULL;

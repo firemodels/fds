@@ -329,7 +329,7 @@ void initdefaultcolorbars(void){
   colorbardata *cbi;
   int ii;
 
-  ndefaultcolorbars=8;
+  ndefaultcolorbars=9;
   
   FREEMEMORY(colorbarinfo);
   ncolorbars=ndefaultcolorbars;
@@ -479,6 +479,46 @@ void initdefaultcolorbars(void){
   cbi->rgb_node[11]=0;
   cbi++;
 
+  // black->orange
+
+  levelset_colorbar=cbi-colorbarinfo;
+  strcpy(cbi->label,"black->orange");
+  cbi->label_ptr=cbi->label;
+
+  cbi->nnodes=6;
+  cbi->nodehilight=0;
+
+  cbi->index_node[0]=0;
+  cbi->rgb_node[0]=0;
+  cbi->rgb_node[1]=0;
+  cbi->rgb_node[2]=0;
+
+  cbi->index_node[1]=51;
+  cbi->rgb_node[3]=109;
+  cbi->rgb_node[4]=3;
+  cbi->rgb_node[5]=10;
+
+  cbi->index_node[2]=102;
+  cbi->rgb_node[6]=198;
+  cbi->rgb_node[7]=23;
+  cbi->rgb_node[8]=15;
+
+  cbi->index_node[3]=153;
+  cbi->rgb_node[9]=240;
+  cbi->rgb_node[10]=79;
+  cbi->rgb_node[11]=20;
+
+  cbi->index_node[4]=204;
+  cbi->rgb_node[12]=245;
+  cbi->rgb_node[13]=151;
+  cbi->rgb_node[14]=30;
+
+  cbi->index_node[5]=255;
+  cbi->rgb_node[15]=245;
+  cbi->rgb_node[16]=151;
+  cbi->rgb_node[17]=30;
+  cbi++;
+  
   // red/black
 
   levelset_colorbar=cbi-colorbarinfo;

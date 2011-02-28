@@ -194,6 +194,141 @@ int setSmokeShaders() {
   };
 
   const GLchar *VertexShaderSource[]={
+    "uniform float aspectratio;"
+    "uniform float smoke_shade;"
+  	"uniform int is_smoke;"
+    "uniform float smoke3d_rthick;"
+    "uniform int adjustalphaflag;"
+    "varying vec4 newcolor;"
+    "uniform sampler1D colormap;"
+
+#ifdef pp_GPU_BLANK
+    "varying float fblank;"
+    "attribute float blank;"
+#endif
+    "attribute float hrr, smoke_alpha;"
+    "void main()"
+    "{"
+    "  float alpha,r;"
+    "  float term1, term2, term3, term4;"
+    "  vec4 hrrcolor;"
+    "  int colorindex;"
+    "  colorindex=clamp(int(255.0*hrr/600.0),0,255);"
+	"  if(is_smoke==1){"
+    "    alpha=smoke_alpha/256.0;"
+    "    if(adjustalphaflag==1||adjustalphaflag==2){"
+    "      r=aspectratio;"
+    "      term1 = alpha*r;"
+    "      term2 = -term1*alpha*(r-1.0)/2.0;"
+    "      term3 = -term2*alpha*(r-2.0)/3.0;"
+    "      term4 = -term3*alpha*(r-3.0)/4.0;"
+    "      alpha = term1+term2+term3+term4;"
+    "    }"
+    // newcolor.a *= (1.0 - pow(1.0-gl_Cdwolor.a,aspectratio*top/bottom));
+    "    alpha /= smoke3d_rthick;"
+    "  }"
+    "  else{"
+    "    alpha=1.0;"
+    "  }"
+    "  hrrcolor = texture1D(colormap,colorindex);"
+
+#ifdef pp_GPU_BLANK
+    "  fblank=blank;"
+#endif
+    "  newcolor = vec4(vec3(hrrcolor),alpha);"
+    "  gl_Position = ftransform();"
+    "}"
+};
+
+  v = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
+  f = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
+
+  glShaderSource(v,1, VertexShaderSource,NULL);
+  glCompileShaderARB(v);
+
+  glShaderSource(f, 1, FragmentShaderSource,NULL);
+  glCompileShaderARB(f);
+
+#ifdef _DEBUG
+  printInfoLog(v);
+  printInfoLog(f);
+#endif
+
+  p_smoke = glCreateProgramObjectARB();
+  glAttachObjectARB(p_smoke,v);
+  glAttachObjectARB(p_smoke,f);
+
+  glLinkProgram(p_smoke);
+  glGetObjectParameterivARB(p_smoke,GL_OBJECT_LINK_STATUS_ARB,&error_code);
+#ifdef _DEBUG
+  printf("  Smoke shader completion code:");
+  switch (error_code){
+  case GL_INVALID_VALUE:
+    printf(" INVALID VALUE\n");
+    break;
+  case GL_INVALID_OPERATION:
+    printf(" INVALID OPERATION\n");
+    break;
+  case GL_INVALID_ENUM:
+    printf(" INVALID ENUM\n");
+    break;
+  case 0:
+    printf(" Link failed\n");
+    break;
+  case 1:
+    printf(" Link succeeded\n");
+    break;
+  default:
+    printf(" unknown error\n");
+    break;
+  }
+  printInfoLog(p_smoke);
+#endif
+  if(error_code!=1)return error_code;
+  GPU_hrr = glGetAttribLocation(p_smoke,"hrr");
+  GPU_smokealpha = glGetAttribLocation(p_smoke,"smoke_alpha");
+  GPU_blank = glGetAttribLocation(p_smoke,"blank");
+  GPU_skip = glGetUniformLocation(p_smoke,"skip");
+  GPU_smoke3d_rthick = glGetUniformLocation(p_smoke,"smoke3d_rthick");
+  GPU_smokeshade = glGetUniformLocation(p_smoke,"smoke_shade");
+  GPU_is_smoke = glGetUniformLocation(p_smoke,"is_smoke");
+  GPU_aspectratio = glGetUniformLocation(p_smoke,"aspectratio");
+  GPU_adjustalphaflag = glGetUniformLocation(p_smoke,"adjustalphaflag");
+  return error_code;
+
+}
+// 888888888888888888888888888888888
+
+/* ------------------ setSmokeShaders ------------------------ */
+
+int setSmokeShaders2() {
+  GLint error_code;
+
+  const GLchar *FragmentShaderSource[]={
+    "varying vec4 newcolor;"
+#ifdef pp_GPU_BLANK
+    "varying float fblank;"
+#endif
+    "void main(){"
+#ifdef pp_GPU_BLANK
+     "float a,base;"
+     "if(fblank>0.95)discard;"
+     "if(fblank>0.001){"
+     "  a=1.0-fblank;"
+     "  base=1.0-newcolor.a/a;"
+     "  if(base>0.0){"
+     "    newcolor.a=(1.0-pow(base,a));"
+     "  }"
+     "  else{"
+     "    newcolor.a=0.0;"
+     "  }"
+     "}"
+#endif
+      "gl_FragColor = newcolor;"
+    "}"
+  };
+
+  const GLchar *VertexShaderSource[]={
     "uniform vec4 firecolor;"
     "uniform float aspectratio;"
     "uniform float hrrcutoff;"
@@ -292,6 +427,7 @@ int setSmokeShaders() {
   printInfoLog(p_smoke);
 #endif
   if(error_code!=1)return error_code;
+  GPU_colormap = glGetUniformLocation(p_smoke,"colormap");
   GPU_hrrcutoff = glGetUniformLocation(p_smoke,"hrrcutoff");
   GPU_hrr = glGetAttribLocation(p_smoke,"hrr");
   GPU_smokealpha = glGetAttribLocation(p_smoke,"smoke_alpha");
@@ -307,6 +443,7 @@ int setSmokeShaders() {
 
 }
 
+// 888888888888888888888888888888888
 /* ------------------ LoadZoneSmokeShaders ------------------------ */
 
 void LoadZoneSmokeShaders(void){

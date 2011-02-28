@@ -11,6 +11,10 @@
 #include "egz_stdio.h"
 #endif
 
+#ifdef pp_GPU_VOLRENDER
+void init_3dsmoke_texture(mesh *meshi);
+void update_3dsmoke_texture(mesh *meshi, float *data);
+#endif
 int SUB_portortho(int quad, 
                    GLint i_left, GLint i_down, GLsizei i_width, GLsizei i_height,
                    GLdouble x_left, GLdouble x_right, GLdouble x_bottom, GLdouble x_top,

@@ -1992,6 +1992,9 @@ void update_texturebar(void){
   glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_slice);
 
+  glBindTexture(GL_TEXTURE_1D,texture_3dsmoke_colorbar_id);
+  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_3dsmoke);
+
   glBindTexture(GL_TEXTURE_1D,texture_patch_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_patch);
 
@@ -2282,6 +2285,16 @@ void updatechopcolors(void){
     }
     else{
       rgb_iso[4*i+3]=0.0;
+    }
+
+    rgb_3dsmoke[4*i+0]=rgb_full[i][0];
+    rgb_3dsmoke[4*i+1]=rgb_full[i][1];
+    rgb_3dsmoke[4*i+2]=rgb_full[i][2];
+    if(rgb_full[i][3]>0.001){
+      rgb_3dsmoke[4*i+3]=transparentlevel_local;
+    }
+    else{
+      rgb_3dsmoke[4*i+3]=0.0;
     }
 
     rgb_slice[4*i+0]=rgb_full[i][0];
