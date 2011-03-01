@@ -427,7 +427,9 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS+N_VIRTUAL_WA
          ENDIF
  
       CASE (SPECIFIED_MASS_FLUX) METHOD_OF_MASS_TRANSFER
+
          ! If the current time is before the "activation" time, TW, apply simple BCs and get out
+
          IF (T < TW(IW)) THEN
             MASSFLUX(IW,0) = 0._EB
             IF (N_GAS_SPECIES > 0)  THEN
@@ -489,9 +491,10 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS+N_VIRTUAL_WA
 
 ENDDO WALL_CELL_LOOP
 
-! Add gases from virtual particles
+! Add evaporating gases from virtual particles to the mesh using a volumetric source term
 
 IF (VIRTUAL_PARTICLES .AND. CORRECTOR) THEN
+
    DROPLET_LOOP: DO I=1,NLP
       DR => DROPLET(I)
       PC => PARTICLE_CLASS(DR%CLASS)
@@ -524,13 +527,12 @@ IF (VIRTUAL_PARTICLES .AND. CORRECTOR) THEN
             IF (SF%THERMAL_BC_INDEX == THERMALLY_THICK) AREA_SCALING = (SF%THICKNESS/RADIUS)**2
       END SELECT
 
-      ! In PYROLYSIS, all the massfluxes were normalized by a virtual area
-      ! based on the INITIAL radius. Here, correct the massflux using the CURRENT radius.
-      ! Also, multiply by DR%PWT to account for split particles
+      ! In PYROLYSIS, all the mass fluxes are normalized by a virtual area based on the INITIAL radius. 
+      ! Here, correct the mass flux using the CURRENT radius. Also, multiply by DR%PWT to account for split particles
 
       AREA_SCALING = AREA_SCALING*DR%PWT
-      MASSFLUX(IW,1:N_GAS_SPECIES)         = MASSFLUX(IW,1:N_GAS_SPECIES)       *AREA_SCALING
-      MASSFLUX_ACTUAL(IW,1:N_GAS_SPECIES)  = MASSFLUX_ACTUAL(IW,1:N_GAS_SPECIES)*AREA_SCALING
+      MASSFLUX(IW,0:N_GAS_SPECIES)         = MASSFLUX(IW,0:N_GAS_SPECIES)       *AREA_SCALING
+      MASSFLUX_ACTUAL(IW,0:N_GAS_SPECIES)  = MASSFLUX_ACTUAL(IW,0:N_GAS_SPECIES)*AREA_SCALING
 
       RVC = RDX(II)*RRN(II)*RDY(JJ)*RDZ(KK)
       IF (N_GAS_SPECIES > 0) THEN
@@ -541,18 +543,26 @@ IF (VIRTUAL_PARTICLES .AND. CORRECTOR) THEN
          CALL GET_SPECIFIC_HEAT_BG(CP,TMP(II,JJ,KK))
          H_G = CP*TMP(II,JJ,KK)
       ENDIF
-      DO NS=1,N_GAS_SPECIES
+      DO NS=0,N_GAS_SPECIES
          IF (ABS(MASSFLUX(IW,NS))<=ZERO_P) CYCLE
-         MW_RATIO = SPECIES(Y2SPEC(NS))%RCON/RSUM(II,JJ,KK)         
+         IF (N_GAS_SPECIES>0) THEN
+            MW_RATIO = SPECIES(Y2SPEC(NS))%RCON/RSUM(II,JJ,KK)         
+         ELSE
+            MW_RATIO = 1._EB
+         ENDIF
          M_DOT_PPP = MASSFLUX(IW,NS)*AW(IW)*RVC
          YY_GET=0._EB
-         YY_GET(NS)=1._EB
+         IF (NS>0) YY_GET(NS)=1._EB
          CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CPBAR,TMP(II,JJ,KK))
          CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CPBAR2,TMP_F(IW))
          DELTA_H_G = CPBAR2*TMP_F(IW)-CPBAR*TMP(II,JJ,KK)
          D_LAGRANGIAN(II,JJ,KK) =  D_LAGRANGIAN(II,JJ,KK) + DR%PWT*M_DOT_PPP*(MW_RATIO + DELTA_H_G/H_G)/RHO(II,JJ,KK)
          RHO_NEW = RHO(II,JJ,KK) + M_DOT_PPP*DT
-         YYP(II,JJ,KK,NS) = (RHO(II,JJ,KK)*YYP(II,JJ,KK,NS) + M_DOT_PPP*DT)/RHO_NEW
+         IF (NS>0) THEN
+            YYP(II,JJ,KK,NS) = (RHO(II,JJ,KK)*YYP(II,JJ,KK,NS) + M_DOT_PPP*DT)/RHO_NEW
+         ELSE
+            IF (N_GAS_SPECIES>0) YYP(II,JJ,KK,1:N_GAS_SPECIES) = RHO(II,JJ,KK)*YYP(II,JJ,KK,1:N_GAS_SPECIES)/RHO_NEW
+         ENDIF
          RHO(II,JJ,KK) = RHO_NEW
       ENDDO
       D_LAGRANGIAN(II,JJ,KK) =  D_LAGRANGIAN(II,JJ,KK) - QCONF(IW)*AW(IW)*RVC/(RHO(II,JJ,KK)*H_G) * DR%PWT
