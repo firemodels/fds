@@ -400,6 +400,7 @@ IF (MEAN_FORCING(1)) THEN
             IC1 = CELL_INDEX(I,J,K)
             IC2 = CELL_INDEX(I+1,J,K)
             IF (SOLID(IC1) .OR. SOLID(IC2)) CYCLE
+            IF (IMMERSED_BOUNDARY_METHOD>0 .AND. U_MASK(I,J,K)==-1) CYCLE
             DVOLUME = DXN(I)*DY(J)*DZ(K)
             INTEGRAL = INTEGRAL + UU(I,J,K)*DVOLUME
             SUM_VOLUME = SUM_VOLUME + DVOLUME
@@ -421,6 +422,7 @@ IF (MEAN_FORCING(2)) THEN
             IC1 = CELL_INDEX(I,J,K)
             IC2 = CELL_INDEX(I,J+1,K)
             IF (SOLID(IC1) .OR. SOLID(IC2)) CYCLE
+            IF (IMMERSED_BOUNDARY_METHOD>0 .AND. V_MASK(I,J,K)==-1) CYCLE
             DVOLUME = DX(I)*DYN(J)*DZ(K)
             INTEGRAL = INTEGRAL + VV(I,J,K)*DVOLUME
             SUM_VOLUME = SUM_VOLUME + DVOLUME
@@ -442,6 +444,7 @@ IF (MEAN_FORCING(3)) THEN
             IC1 = CELL_INDEX(I,J,K)
             IC2 = CELL_INDEX(I,J,K+1)
             IF (SOLID(IC1) .OR. SOLID(IC2)) CYCLE
+            IF (IMMERSED_BOUNDARY_METHOD>0 .AND. W_MASK(I,J,K)==-1) CYCLE
             DVOLUME = DX(I)*DY(J)*DZN(K)
             INTEGRAL = INTEGRAL + WW(I,J,K)*DVOLUME
             SUM_VOLUME = SUM_VOLUME + DVOLUME
@@ -2541,6 +2544,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
             XEDGY = (/X(I),YC(J),Z(K)/)
             XEDGZ = (/X(I),Y(J),ZC(K)/)
             DXC   = (/DX(I),DY(J),DZ(K)/)
+            WT    = 0._EB
   
             SELECT CASE(U_MASK(I,J,K))
                CASE(-1)
@@ -2649,16 +2653,15 @@ GEOM_LOOP: DO NG=1,N_GEOM
                         
                         WT = MIN(1._EB,(DN/DELTA)**7._EB)
                         
-                        U_IBM = WT*U_IBM + &
-                                (1._EB-WT)*VELTAN3D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ, &
-                                                    DT,RRHO,MUA,I_VEL,G%ROUGHNESS,U_IBM)
+                        U_IBM = VELTAN3D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MUA,I_VEL,G%ROUGHNESS,U_IBM)
+                        
                   END SELECT SELECT_METHOD1
             END SELECT
             
             IF (PREDICTOR) DUUDT = (U_IBM-U(I,J,K))/DT
             IF (CORRECTOR) DUUDT = (2._EB*U_IBM-(U(I,J,K)+US(I,J,K)))/DT
             
-            FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
+            FVX(I,J,K) = WT*FVX(I,J,K) + (1._EB-WT)*(-RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT)
         
          ENDDO
       ENDDO
@@ -2677,6 +2680,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
                XEDGY = (/X(I),YC(J),Z(K)/)
                XEDGZ = (/X(I),Y(J),ZC(K)/)
                DXC   = (/DX(I),DY(J),DZ(K)/)
+               WT    = 0._EB
          
                SELECT CASE(V_MASK(I,J,K))
                   CASE(-1)
@@ -2764,16 +2768,15 @@ GEOM_LOOP: DO NG=1,N_GEOM
                            
                            WT = MIN(1._EB,(DN/DELTA)**7._EB)
                            
-                           V_IBM = WT*V_IBM + &
-                                   (1._EB-WT)*VELTAN3D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ, &
-                                                       DT,RRHO,MUA,I_VEL,G%ROUGHNESS,V_IBM)
+                           V_IBM = VELTAN3D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MUA,I_VEL,G%ROUGHNESS,V_IBM)
+                           
                      END SELECT SELECT_METHOD2
                END SELECT
                
                IF (PREDICTOR) DVVDT = (V_IBM-V(I,J,K))/DT
                IF (CORRECTOR) DVVDT = (2._EB*V_IBM-(V(I,J,K)+VS(I,J,K)))/DT
          
-               FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT
+               FVY(I,J,K) = WT*FVY(I,J,K) + (1._EB-WT)*(-RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT)
          
             ENDDO
          ENDDO 
@@ -2791,7 +2794,8 @@ GEOM_LOOP: DO NG=1,N_GEOM
             XEDGX = (/XC(I),Y(J),Z(K)/)
             XEDGY = (/X(I),YC(J),Z(K)/)
             XEDGZ = (/X(I),Y(J),ZC(K)/)
-            DXC   = (/DX(I),DY(J),DZ(K)/) ! assume uniform grids for now
+            DXC   = (/DX(I),DY(J),DZ(K)/)
+            WT    = 0._EB
             
             SELECT CASE(W_MASK(I,J,K))
                CASE(-1)
@@ -2900,16 +2904,15 @@ GEOM_LOOP: DO NG=1,N_GEOM
                         
                         WT = MIN(1._EB,(DN/DELTA)**7._EB)
                         
-                        W_IBM = WT*W_IBM + &
-                                (1._EB-WT)*VELTAN3D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ, &
-                                                    DT,RRHO,MUA,I_VEL,G%ROUGHNESS,W_IBM)
+                        W_IBM = VELTAN3D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MUA,I_VEL,G%ROUGHNESS,W_IBM)
+                        
                   END SELECT SELECT_METHOD3
             END SELECT
             
             IF (PREDICTOR) DWWDT = (W_IBM-W(I,J,K))/DT
             IF (CORRECTOR) DWWDT = (2._EB*W_IBM-(W(I,J,K)+WS(I,J,K)))/DT
          
-            FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
+            FVZ(I,J,K) = WT*FVZ(I,J,K) + (1._EB-WT)*(-RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT)
          
          ENDDO
       ENDDO
