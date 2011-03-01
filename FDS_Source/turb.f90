@@ -2341,16 +2341,38 @@ GEOM_LOOP: DO NG=1,N_GEOM
          Y_MAX = G%Y+G%RADIUS
          Z_MAX = G%Z+G%RADIUS
          IBM_UVWMAX = IBM_UVWMAX + G%RADIUS*MAXVAL((/ABS(G%OMEGA_X),ABS(G%OMEGA_Y),ABS(G%OMEGA_Z)/))*RDX(1)
-      CASE(ICYLINDER) SELECT_SHAPE ! assume aligned with y axis
+      CASE(ICYLINDER) SELECT_SHAPE
          G%HL(1) = 0.5_EB*(G%X2-G%X1)
          G%HL(2) = 0.5_EB*(G%Y2-G%Y1)
          G%HL(3) = 0.5_EB*(G%Z2-G%Z1)
-         X_MIN = G%X-G%RADIUS
-         Y_MIN = G%Y-G%HL(2)
-         Z_MIN = G%Z-G%RADIUS
-         X_MAX = G%X+G%RADIUS
-         Y_MAX = G%Y+G%HL(2)
-         Z_MAX = G%Z+G%RADIUS
+         
+         IF (G%XOR==1) THEN ! cylinder aligned with x axis
+            X_MIN = G%X-G%HL(1)
+            Y_MIN = G%Y-G%RADIUS
+            Z_MIN = G%Z-G%RADIUS
+            X_MAX = G%X+G%HL(1)
+            Y_MAX = G%Y+G%RADIUS
+            Z_MAX = G%Z+G%RADIUS
+         ENDIF
+         
+         IF (G%YOR==1) THEN ! cylinder aligned with y axis
+            X_MIN = G%X-G%RADIUS
+            Y_MIN = G%Y-G%HL(2)
+            Z_MIN = G%Z-G%RADIUS
+            X_MAX = G%X+G%RADIUS
+            Y_MAX = G%Y+G%HL(2)
+            Z_MAX = G%Z+G%RADIUS
+         ENDIF
+         
+         IF (G%ZOR==1) THEN ! cylinder aligned with z axis
+            X_MIN = G%X-G%RADIUS
+            Y_MIN = G%Y-G%RADIUS
+            Z_MIN = G%Z-G%HL(3)
+            X_MAX = G%X+G%RADIUS
+            Y_MAX = G%Y+G%RADIUS
+            Z_MAX = G%Z+G%HL(3)
+         ENDIF
+         
       CASE(IPLANE)
          X_MIN = M%XS
          Y_MIN = M%YS
@@ -2429,39 +2451,60 @@ GEOM_LOOP: DO NG=1,N_GEOM
                CASE(ISPHERE) MASK_SHAPE
                
                   RP = SQRT( (M%X(I)-G%X)**2+(M%YC(J)-G%Y)**2+(M%ZC(K)-G%Z)**2 )
-                  IF (RP-G%RADIUS < DELTA-TOL) M%U_MASK(I,J,K) = 0
-                  IF (RP-G%RADIUS < TOL)       M%U_MASK(I,J,K) = -1
+                  IF (RP-G%RADIUS < DELTA) M%U_MASK(I,J,K) = 0
+                  IF (RP-G%RADIUS < 0._EB) M%U_MASK(I,J,K) = -1
                   
                   RP = SQRT( (M%XC(I)-G%X)**2+(M%Y(J)-G%Y)**2+(M%ZC(K)-G%Z)**2 )
-                  IF (RP-G%RADIUS < DELTA-TOL) M%V_MASK(I,J,K) = 0
-                  IF (RP-G%RADIUS < TOL)       M%V_MASK(I,J,K) = -1
+                  IF (RP-G%RADIUS < DELTA) M%V_MASK(I,J,K) = 0
+                  IF (RP-G%RADIUS < 0._EB) M%V_MASK(I,J,K) = -1
                   
                   RP = SQRT( (M%XC(I)-G%X)**2+(M%YC(J)-G%Y)**2+(M%Z(K)-G%Z)**2 )
-                  IF (RP-G%RADIUS < DELTA-TOL) M%W_MASK(I,J,K) = 0
-                  IF (RP-G%RADIUS < TOL)       M%W_MASK(I,J,K) = -1
+                  IF (RP-G%RADIUS < DELTA) M%W_MASK(I,J,K) = 0
+                  IF (RP-G%RADIUS < 0._EB) M%W_MASK(I,J,K) = -1
                   
                   RP = SQRT( (M%XC(I)-G%X)**2+(M%YC(J)-G%Y)**2+(M%ZC(K)-G%Z)**2 )
-                  IF (RP-G%RADIUS < DELTA-TOL) M%P_MASK(I,J,K) = 0
-                  IF (RP-G%RADIUS < TOL)       M%P_MASK(I,J,K) = -1
+                  IF (RP-G%RADIUS < DELTA) M%P_MASK(I,J,K) = 0
+                  IF (RP-G%RADIUS < 0._EB) M%P_MASK(I,J,K) = -1
                   
-               CASE(ICYLINDER) MASK_SHAPE ! align with y axis for now
+               CASE(ICYLINDER) MASK_SHAPE
                
-                  RP = SQRT( (M%X(I)-G%X)**2+(M%ZC(K)-G%Z)**2 )
-                  IF (RP-G%RADIUS < DELTA-TOL) M%U_MASK(I,J,K) = 0
-                  IF (RP-G%RADIUS < TOL)       M%U_MASK(I,J,K) = -1
+                  CYLINDER_Y: IF (G%YOR==1) THEN
+                     RP = SQRT( (M%X(I)-G%X)**2+(M%ZC(K)-G%Z)**2 )
+                     IF (RP-G%RADIUS < DELTA) M%U_MASK(I,J,K) = 0
+                     IF (RP-G%RADIUS < 0._EB) M%U_MASK(I,J,K) = -1
                   
-                  RP = SQRT( (M%XC(I)-G%X)**2+(M%ZC(K)-G%Z)**2 )
-                  IF (RP-G%RADIUS < DELTA-TOL) M%V_MASK(I,J,K) = 0
-                  IF (RP-G%RADIUS < TOL)       M%V_MASK(I,J,K) = -1
-                  IF (J==0 .OR. J==JBAR)       M%V_MASK = -1 ! deal with boundaries later
+                     RP = SQRT( (M%XC(I)-G%X)**2+(M%ZC(K)-G%Z)**2 )
+                     IF (RP-G%RADIUS < DELTA) M%V_MASK(I,J,K) = 0
+                     IF (RP-G%RADIUS < 0._EB) M%V_MASK(I,J,K) = -1
                   
-                  RP = SQRT( (M%XC(I)-G%X)**2+(M%Z(K)-G%Z)**2 )
-                  IF (RP-G%RADIUS < DELTA-TOL) M%W_MASK(I,J,K) = 0
-                  IF (RP-G%RADIUS < TOL)       M%W_MASK(I,J,K) = -1
+                     RP = SQRT( (M%XC(I)-G%X)**2+(M%Z(K)-G%Z)**2 )
+                     IF (RP-G%RADIUS < DELTA) M%W_MASK(I,J,K) = 0
+                     IF (RP-G%RADIUS < 0._EB) M%W_MASK(I,J,K) = -1
                   
-                  RP = SQRT( (M%XC(I)-G%X)**2+(M%ZC(K)-G%Z)**2 )
-                  IF (RP-G%RADIUS < DELTA-TOL) M%P_MASK(I,J,K) = 0
-                  IF (RP-G%RADIUS < TOL)       M%P_MASK(I,J,K) = -1
+                     RP = SQRT( (M%XC(I)-G%X)**2+(M%ZC(K)-G%Z)**2 )
+                     IF (RP-G%RADIUS < DELTA) M%P_MASK(I,J,K) = 0
+                     IF (RP-G%RADIUS < 0._EB) M%P_MASK(I,J,K) = -1
+                  ENDIF CYLINDER_Y
+                  
+                  CYLINDER_Z: IF (G%ZOR==1) THEN
+                     RP = SQRT( (M%X(I)-G%X)**2+(M%YC(J)-G%Y)**2 )
+                     IF (RP-G%RADIUS < DELTA) M%U_MASK(I,J,K) = 0
+                     IF (RP-G%RADIUS < 0._EB) M%U_MASK(I,J,K) = -1
+                  
+                     RP = SQRT( (M%XC(I)-G%X)**2+(M%Y(J)-G%Y)**2 )
+                     IF (RP-G%RADIUS < DELTA) M%V_MASK(I,J,K) = 0
+                     IF (RP-G%RADIUS < 0._EB) M%V_MASK(I,J,K) = -1
+                  
+                     RP = SQRT( (M%XC(I)-G%X)**2+(M%YC(J)-G%Y)**2 )
+                     IF (RP-G%RADIUS < DELTA) M%W_MASK(I,J,K) = 0
+                     IF (RP-G%RADIUS < 0._EB) M%W_MASK(I,J,K) = -1
+                  
+                     RP = SQRT( (M%XC(I)-G%X)**2+(M%YC(J)-G%Y)**2 )
+                     IF (RP-G%RADIUS < DELTA) M%P_MASK(I,J,K) = 0
+                     IF (RP-G%RADIUS < 0._EB) M%P_MASK(I,J,K) = -1
+                     
+                  ENDIF CYLINDER_Z
+
                   
                CASE(IPLANE) MASK_SHAPE
                
@@ -2571,7 +2614,10 @@ SELECT CASE(G%ISHAPE)
       DR     = RUMAG-G%RADIUS
       XI     = XU + DR*RU/RUMAG
    CASE(ICYLINDER)
-      RU     = (/XU(1),0._EB,XU(3)/)-(/G%X,0._EB,G%Z/)
+      ! at the moment, cylinder must be aligned with an axis
+      IF (G%XOR==1) RU = (/0._EB,XU(2),XU(3)/)-(/0._EB,G%Y,G%Z/)
+      IF (G%YOR==1) RU = (/XU(1),0._EB,XU(3)/)-(/G%X,0._EB,G%Z/)
+      IF (G%ZOR==1) RU = (/XU(1),XU(2),0._EB/)-(/G%X,G%Y,0._EB/)
       RUMAG  = SQRT(DOT_PRODUCT(RU,RU))
       DR     = RUMAG-G%RADIUS
       XI     = XU + DR*RU/RUMAG
