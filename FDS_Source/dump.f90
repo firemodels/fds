@@ -1692,7 +1692,12 @@ DO N=1,N_GEOM
    WRITE(LU_SMV,'(1X,A,1F12.5)') 'VZ=', RR(1,3)*G%U0 + RR(2,3)*G%V0 + RR(3,3)*G%W0
    WRITE(LU_SMV,'(1X,A,1F12.5)') 'ROTATE_RATE=',G%OMEGA*180._EB/PI
    WRITE(LU_SMV,'(1X,A,1F12.5)') 'D=',2._EB*G%RADIUS
-   IF (G%ISHAPE==ICYLINDER) WRITE(LU_SMV,'(1X,A,1F12.5)') 'L=',G%Y2-G%Y1
+   IF (G%ISHAPE==ICYLINDER) THEN
+      ! for now, cylinder aligned with coordinate axis
+      IF (G%XOR==1) WRITE(LU_SMV,'(1X,A,1F12.5)') 'L=',G%X2-G%X1
+      IF (G%YOR==1) WRITE(LU_SMV,'(1X,A,1F12.5)') 'L=',G%Y2-G%Y1
+      IF (G%ZOR==1) WRITE(LU_SMV,'(1X,A,1F12.5)') 'L=',G%Z2-G%Z1
+   ENDIF
    WRITE(LU_SMV,'(1X,A,1F12.5)') 'XMAX=',G%X+G%RADIUS
    WRITE(LU_SMV,'(1X,A,1F12.5)') 'YMAX=',G%Y+G%RADIUS
    WRITE(LU_SMV,'(1X,A,1F12.5)') 'ZMAX=',G%Z+G%RADIUS
