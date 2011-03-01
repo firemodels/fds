@@ -113,10 +113,51 @@ WLOOP_FL: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    JJG = IJKW(7,IW)
    KKG = IJKW(8,IW)
    
+   ! overwrite first off-wall advective flux if flow is away from the wall and if the face is not also a wall cell
+
+   OFF_WALL_SELECT_1: SELECT CASE(IOR)
+      CASE( 1) OFF_WALL_SELECT_1
+         !      ghost          FX/UU(II+1)
+         ! ///   II   ///  II+1  |  II+2  | ...
+         !                       ^ WALL_INDEX(II+1,+1)
+         IF ((UU(II+1,JJ,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0)) THEN
+            ZZ(1:3) = (/RHO_F(IW),RHOP(II+1:II+2,JJ,KK)/)
+            FX(II+1,JJ,KK) = UU(II+1,JJ,KK)*SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZ,FLUX_LIMITER)*R(II+1)
+         ENDIF
+      CASE(-1) OFF_WALL_SELECT_1
+         !            FX/UU(II-2)     ghost
+         ! ... |  II-2  |  II-1  ///   II   ///
+         !              ^ WALL_INDEX(II-1,-1)
+         IF ((UU(II-2,JJ,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0)) THEN
+            ZZ(2:4) = (/RHOP(II-2:II-1,JJ,KK),RHO_F(IW)/)
+            FX(II-2,JJ,KK) = UU(II-2,JJ,KK)*SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZ,FLUX_LIMITER)*R(II-2)
+         ENDIF
+      CASE( 2) OFF_WALL_SELECT_1
+         IF ((VV(II,JJ+1,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0)) THEN
+            ZZ(1:3) = (/RHO_F(IW),RHOP(II,JJ+1:JJ+2,KK)/)
+            FY(II,JJ+1,KK) = VV(II,JJ+1,KK)*SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZ,FLUX_LIMITER)
+         ENDIF
+      CASE(-2) OFF_WALL_SELECT_1
+         IF ((VV(II,JJ-2,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0)) THEN
+            ZZ(2:4) = (/RHOP(II,JJ-2:JJ-1,KK),RHO_F(IW)/)
+            FY(II,JJ-2,KK) = VV(II,JJ-2,KK)*SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZ,FLUX_LIMITER)
+         ENDIF
+      CASE( 3) OFF_WALL_SELECT_1
+         IF ((WW(II,JJ,KK+1)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0)) THEN
+            ZZ(1:3) = (/RHO_F(IW),RHOP(II,JJ,KK+1:KK+2)/)
+            FZ(II,JJ,KK+1) = WW(II,JJ,KK+1)*SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZ,FLUX_LIMITER)
+         ENDIF
+      CASE(-3) OFF_WALL_SELECT_1
+         IF ((WW(II,JJ,KK-2)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0)) THEN
+            ZZ(2:4) = (/RHOP(II,JJ,KK-2:KK-1),RHO_F(IW)/)
+            FZ(II,JJ,KK-2) = WW(II,JJ,KK-2)*SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZ,FLUX_LIMITER)
+         ENDIF
+   END SELECT OFF_WALL_SELECT_1
+   
    SELECT CASE(IOR)
       CASE( 1)
          UN = UU(II,JJ,KK)
-   CASE(-1)
+      CASE(-1)
          UN = UU(II-1,JJ,KK)
       CASE( 2)
          UN = VV(II,JJ,KK)
@@ -130,7 +171,6 @@ WLOOP_FL: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
    
    MASS_COR_IF: IF (SURFACE(IBC)%SPECIES_BC_INDEX==NO_MASS_FLUX) THEN
-      RHO_F(IW)=RHOP(IIG,JJG,KKG)
       UN=0._EB
       SELECT CASE(IOR)
          CASE( 1)
@@ -164,48 +204,7 @@ WLOOP_FL: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       CASE(-3)
          FZ(II,JJ,KK-1) = UN*RHO_F(IW)
    END SELECT
-   
-   ! overwrite first off-wall advective flux if necessary
-
-   OFF_WALL_SELECT_1: SELECT CASE(IOR)
-      CASE( 1) OFF_WALL_SELECT_1
-         !      ghost          FX/UU(II+1)
-         ! ///   II   ///  II+1  |  II+2  | ...
-         !                       ^ WALL_INDEX(II+1,+1)
-         IF (UU(II+1,JJ,KK)<0._EB)                    CYCLE WLOOP_FL ! handled by 3D gas phase loop
-         IF (WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0) CYCLE WLOOP_FL ! face II+1 is a wall cell
-         ZZ(1:3) = (/RHO_F(IW),RHOP(II+1:II+2,JJ,KK)/)
-         FX(II+1,JJ,KK) = UU(II+1,JJ,KK)*SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZ,FLUX_LIMITER)*R(II+1)
-      CASE(-1) OFF_WALL_SELECT_1
-         !            FX/UU(II-2)     ghost
-         ! ... |  II-2  |  II-1  ///   II   ///
-         !              ^ WALL_INDEX(II-1,-1)
-         IF (UU(II-2,JJ,KK)>0._EB)                    CYCLE WLOOP_FL ! handled by 3D gas phase loop
-         IF (WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0) CYCLE WLOOP_FL ! face II-2 is a wall cell
-         ZZ(2:4) = (/RHOP(II-2:II-1,JJ,KK),RHO_F(IW)/)
-         FX(II-2,JJ,KK) = UU(II-2,JJ,KK)*SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZ,FLUX_LIMITER)*R(II-2)
-      CASE( 2) OFF_WALL_SELECT_1
-         IF (VV(II,JJ+1,KK)<0._EB)                    CYCLE WLOOP_FL
-         IF (WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0) CYCLE WLOOP_FL
-         ZZ(1:3) = (/RHO_F(IW),RHOP(II,JJ+1:JJ+2,KK)/)
-         FY(II,JJ+1,KK) = VV(II,JJ+1,KK)*SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZ,FLUX_LIMITER)
-      CASE(-2) OFF_WALL_SELECT_1
-         IF (VV(II,JJ-2,KK)>0._EB)                    CYCLE WLOOP_FL
-         IF (WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0) CYCLE WLOOP_FL
-         ZZ(2:4) = (/RHOP(II,JJ-2:JJ-1,KK),RHO_F(IW)/)
-         FY(II,JJ-2,KK) = VV(II,JJ-2,KK)*SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZ,FLUX_LIMITER)
-      CASE( 3) OFF_WALL_SELECT_1
-         IF (WW(II,JJ,KK+1)<0._EB)                    CYCLE WLOOP_FL
-         IF (WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0) CYCLE WLOOP_FL
-         ZZ(1:3) = (/RHO_F(IW),RHOP(II,JJ,KK+1:KK+2)/)
-         FZ(II,JJ,KK+1) = WW(II,JJ,KK+1)*SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZ,FLUX_LIMITER)
-      CASE(-3) OFF_WALL_SELECT_1
-         IF (WW(II,JJ,KK-2)>0._EB)                    CYCLE WLOOP_FL
-         IF (WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0) CYCLE WLOOP_FL
-         ZZ(2:4) = (/RHOP(II,JJ,KK-2:KK-1),RHO_F(IW)/)
-         FZ(II,JJ,KK-2) = WW(II,JJ,KK-2)*SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZ,FLUX_LIMITER)
-   END SELECT OFF_WALL_SELECT_1
-   
+      
 ENDDO WLOOP_FL
 !!$OMP END DO
 !$OMP END SINGLE
@@ -243,8 +242,6 @@ SPECIES_LOOP: DO N=1,N_GAS_SPECIES
       FX=>WORK4
       FY=>WORK5
       FZ=>WORK6
-      MASS_COR=>WORK7
-      MASS_COR=0._EB
    
       !$OMP PARALLEL
       !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ZZ)
@@ -296,6 +293,48 @@ SPECIES_LOOP: DO N=1,N_GAS_SPECIES
          JJG = IJKW(7,IW)
          KKG = IJKW(8,IW)
          
+         ! overwrite first off-wall advective flux if flow is away from the wall and if the face is not also a wall cell
+
+         OFF_WALL_SELECT_2: SELECT CASE(IOR)
+            CASE( 1) OFF_WALL_SELECT_2
+               !      ghost          FX/UU(II+1)
+               ! ///   II   ///  II+1  |  II+2  | ...
+               !                       ^ WALL_INDEX(II+1,+1)
+               IF ((UU(II+1,JJ,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0)) THEN
+                  ZZ(1:3) = (/RHO_F(IW),RHOP(II+1:II+2,JJ,KK)/)*(/YY_F(IW,N),YYP(II+1:II+2,JJ,KK,N)/)
+                  FX(II+1,JJ,KK) = UU(II+1,JJ,KK)*SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZ,FLUX_LIMITER)*R(II+1)
+               ENDIF
+            CASE(-1) OFF_WALL_SELECT_2
+               !            FX/UU(II-2)     ghost
+               ! ... |  II-2  |  II-1  ///   II   ///
+               !              ^ WALL_INDEX(II-1,-1)
+               IF ((UU(II-2,JJ,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0)) THEN
+                  ZZ(2:4) = (/RHOP(II-2:II-1,JJ,KK),RHO_F(IW)/)*(/YYP(II-2:II-1,JJ,KK,N),YY_F(IW,N)/)
+                  FX(II-2,JJ,KK) = UU(II-2,JJ,KK)*SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZ,FLUX_LIMITER)*R(II-2)
+               ENDIF
+            CASE( 2) OFF_WALL_SELECT_2
+               IF ((VV(II,JJ+1,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0)) THEN
+                  ZZ(1:3) = (/RHO_F(IW),RHOP(II,JJ+1:JJ+2,KK)/)*(/YY_F(IW,N),YYP(II,JJ+1:JJ+2,KK,N)/)
+                  FY(II,JJ+1,KK) = VV(II,JJ+1,KK)*SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZ,FLUX_LIMITER)
+               ENDIF
+            CASE(-2) OFF_WALL_SELECT_2
+               IF ((VV(II,JJ-2,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0)) THEN
+                  ZZ(2:4) = (/RHOP(II,JJ-2:JJ-1,KK),RHO_F(IW)/)*(/YYP(II,JJ-2:JJ-1,KK,N),YY_F(IW,N)/)
+                  FY(II,JJ-2,KK) = VV(II,JJ-2,KK)*SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZ,FLUX_LIMITER)
+               ENDIF
+            CASE( 3) OFF_WALL_SELECT_2
+               IF ((WW(II,JJ,KK+1)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0)) THEN
+                  ZZ(1:3) = (/RHO_F(IW),RHOP(II,JJ,KK+1:KK+2)/)*(/YY_F(IW,N),YYP(II,JJ,KK+1:KK+2,N)/)
+                  FZ(II,JJ,KK+1) = WW(II,JJ,KK+1)*SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZ,FLUX_LIMITER)
+               ENDIF
+            CASE(-3) OFF_WALL_SELECT_2
+               IF ((WW(II,JJ,KK-2)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0)) THEN
+                  ZZ(2:4) = (/RHOP(II,JJ,KK-2:KK-1),RHO_F(IW)/)*(/YYP(II,JJ,KK-2:KK-1,N),YY_F(IW,N)/)
+                  FZ(II,JJ,KK-2) = WW(II,JJ,KK-2)*SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZ,FLUX_LIMITER)
+               ENDIF
+         END SELECT OFF_WALL_SELECT_2
+
+         
          SELECT CASE(IOR)
             CASE( 1)
                UN = UU(II,JJ,KK)
@@ -333,48 +372,7 @@ SPECIES_LOOP: DO N=1,N_GAS_SPECIES
             CASE(-3) 
                FZ(II,JJ,KK-1) = UN*RHO_F(IW)*YY_F(IW,N)
          END SELECT
-         
-         ! Overwrite first off-wall advective flux if necessary
 
-         OFF_WALL_SELECT_2: SELECT CASE(IOR)
-            CASE( 1) OFF_WALL_SELECT_2
-               !      ghost          FX/UU(II+1)
-               ! ///   II   ///  II+1  |  II+2  | ...
-               !                       ^ WALL_INDEX(II+1,+1)
-               IF (UU(II+1,JJ,KK)<0._EB)                    CYCLE WLOOP2_FL ! handled by 3D gas phase loop
-               IF (WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0) CYCLE WLOOP2_FL ! face II+1 is a wall cell
-               ZZ(1:3) = (/RHO_F(IW),RHOP(II+1:II+2,JJ,KK)/)*(/YY_F(IW,N),YYP(II+1:II+2,JJ,KK,N)/)
-               FX(II+1,JJ,KK) = UU(II+1,JJ,KK)*SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZ,FLUX_LIMITER)*R(II+1)
-            CASE(-1) OFF_WALL_SELECT_2
-               !            FX/UU(II-2)     ghost
-               ! ... |  II-2  |  II-1  ///   II   ///
-               !              ^ WALL_INDEX(II-1,-1)
-               IF (UU(II-2,JJ,KK)>0._EB)                    CYCLE WLOOP2_FL ! handled by 3D gas phase loop
-               IF (WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0) CYCLE WLOOP2_FL ! face II-2 is a wall cell
-               ZZ(2:4) = (/RHOP(II-2:II-1,JJ,KK),RHO_F(IW)/)*(/YYP(II-2:II-1,JJ,KK,N),YY_F(IW,N)/)
-               FX(II-2,JJ,KK) = UU(II-2,JJ,KK)*SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZ,FLUX_LIMITER)*R(II-2)
-            CASE( 2) OFF_WALL_SELECT_2
-               IF (VV(II,JJ+1,KK)<0._EB)                    CYCLE WLOOP2_FL
-               IF (WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0) CYCLE WLOOP2_FL
-               ZZ(1:3) = (/RHO_F(IW),RHOP(II,JJ+1:JJ+2,KK)/)*(/YY_F(IW,N),YYP(II,JJ+1:JJ+2,KK,N)/)
-               FY(II,JJ+1,KK) = VV(II,JJ+1,KK)*SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZ,FLUX_LIMITER)
-            CASE(-2) OFF_WALL_SELECT_2
-               IF (VV(II,JJ-2,KK)>0._EB)                    CYCLE WLOOP2_FL
-               IF (WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0) CYCLE WLOOP2_FL
-               ZZ(2:4) = (/RHOP(II,JJ-2:JJ-1,KK),RHO_F(IW)/)*(/YYP(II,JJ-2:JJ-1,KK,N),YY_F(IW,N)/)
-               FY(II,JJ-2,KK) = VV(II,JJ-2,KK)*SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZ,FLUX_LIMITER)
-            CASE( 3) OFF_WALL_SELECT_2
-               IF (WW(II,JJ,KK+1)<0._EB)                    CYCLE WLOOP2_FL
-               IF (WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0) CYCLE WLOOP2_FL
-               ZZ(1:3) = (/RHO_F(IW),RHOP(II,JJ,KK+1:KK+2)/)*(/YY_F(IW,N),YYP(II,JJ,KK+1:KK+2,N)/)
-               FZ(II,JJ,KK+1) = WW(II,JJ,KK+1)*SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZ,FLUX_LIMITER)
-            CASE(-3) OFF_WALL_SELECT_2
-               IF (WW(II,JJ,KK-2)>0._EB)                    CYCLE WLOOP2_FL
-               IF (WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0) CYCLE WLOOP2_FL
-               ZZ(2:4) = (/RHOP(II,JJ,KK-2:KK-1),RHO_F(IW)/)*(/YYP(II,JJ,KK-2:KK-1,N),YY_F(IW,N)/)
-               FZ(II,JJ,KK-2) = WW(II,JJ,KK-2)*SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZ,FLUX_LIMITER)
-         END SELECT OFF_WALL_SELECT_2
-         
       ENDDO WLOOP2_FL
       !!$OMP END DO
       !$OMP END SINGLE
@@ -387,8 +385,7 @@ SPECIES_LOOP: DO N=1,N_GAS_SPECIES
                DEL_RHO_D_DEL_Y(I,J,K,N) = -DEL_RHO_D_DEL_Y(I,J,K,N)             &
                                         + (FX(I,J,K)-FX(I-1,J,K))*RDX(I)*RRN(I) &
                                         + (FY(I,J,K)-FY(I,J-1,K))*RDY(J)        &
-                                        + (FZ(I,J,K)-FZ(I,J,K-1))*RDZ(K)        &
-                                        - MASS_COR(I,J,K)
+                                        + (FZ(I,J,K)-FZ(I,J,K-1))*RDZ(K)
             ENDDO
          ENDDO
       ENDDO
