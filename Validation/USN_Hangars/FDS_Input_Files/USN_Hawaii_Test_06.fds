@@ -1,4 +1,4 @@
-&HEAD CHID='USN_Hawaii_Test_06b', TITLE='Barbers Point Hawaii USN Hangar Test 6b' /
+&HEAD CHID='USN_Hawaii_Test_06', TITLE='Barbers Point Hawaii USN Hangar Test 6b' /
 
 &MESH ID='PLUME', COLOR='RED',  IJK=126,94,76, XB=24.0,49.2, 30.4,49.2, 0.0,15.2 /
 &MESH ID='NORTH', COLOR='BLUE', IJK=244,62,38,   XB= 0.0,97.6, 49.2, 74.0, 0.0, 15.2 /
