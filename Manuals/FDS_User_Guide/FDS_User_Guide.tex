@@ -2034,7 +2034,6 @@ development of a perfectly symmetric flow when the boundary
 and initial conditions are perfectly symmetric. To turn this off, set {\ct NOISE=.FALSE.}
 \item[{\ct OVERWRITE}] If {\ct .FALSE.} FDS checks for the existence of  {\ct CHID.out} and stops execution if it exists.
 \item[{\ct P\_INF}] Background pressure (at the ground) in Pa. The default is 101325 Pa.
-\item[{\ct RADIATION}] A logical parameter indicating whether radiation transport ought to be calculated. The default is {\ct .TRUE.}
 \item[{\ct SUPPRESSION}] A logical parameter indicating whether FDS should include gas phase flame extinction. The default is {\ct .TRUE.}
 \item[{\ct SURF\_DEFAULT}] The {\ct SURF} line that is to be applied to all boundaries, unless otherwise specified.
 The default is {\ct 'INERT'}, a non-reacting solid boundary whose temperature is fixed at {\ct TMPA}.
@@ -2356,12 +2355,23 @@ rectangular region of the domain. If so, add lines of the form
 
 \normalsize
 \noindent Here, within the region whose bounds are given by the sextuplet {\ct XB}, the initial temperature shall be 30~$^\circ$C instead of the ambient.
-This construct can also be used for {\ct DENSITY} or {\ct MASS\_FRACTION(N)} where {\ct N} indicates the {\ct N}th species listed in the input file.
+This construct can also be used for {\ct DENSITY} or pairs of {\ct SPEC\_ID(N)} and {\ct MASS\_FRACTION(N)} where {\ct N} is an ordinal index starting from 1. Note that
+{\ct N} is not necessarily indicative of the order in which the species are listed in the input file.
 Make sure that you specify all species (components of {\ct MASS\_FRACTION(N)}) on the same {\ct INIT} line.
 
 The {\ct INIT} construct may be useful in examining the influence of
 stack effect in a building, where the temperature
 is different inside and out.
+
+The {\ct INIT} line may also be used to specify a volumetric heat source term. For example, 
+
+\footnotesize
+\begin{verbatim}
+&INIT XB=0.5,0.8,2.1,3.4,2.5,3.6, HRRPUV=1000. /
+\end{verbatim}
+
+\normalsize
+\noindent indicates that the region bounded by {\ct XB} shall generate 1000~kW/m$^3$. This feature is mainly useful for diagnostics, or to model a fire in a very simple way.
 
 Note that a solid obstruction can be given an initial temperature via the
 parameter {\ct TMP\_INNER} on the {\ct SURF} line. An initial velocity
@@ -3567,7 +3577,7 @@ See Section~\ref{solid_phase_verification} for ways to check and improve the acc
 FDS has several approaches for describing the pyrolysis of solids and liquids. The approach to take depends largely
 on the availability of material properties and the appropriateness of the underlying pyrolysis model. This
 section provides a description of the parameters that describe a burning solid material when the burning rate is known. In other
-words, you use these parameters to {\em specify} the burning rate.  
+words, you use these parameters to {\em specify} the burning rate.
 Note that all pyrolysis models in FDS require the user to explicitly define the gas phase reaction. See Chapter~\ref{chap:combustion} for details.
 
 \subsection{A Gas Burner with a Specified Heat Release Rate}
@@ -5542,10 +5552,10 @@ will depend upon the type of TABL and those requirements are provided in the app
 
 FDS was designed primarily to study fire phenomena, and much of the basic chemistry of combustion is handled with a minimum of user inputs. However, there
 are many applications in which you might want to simulate the movement of gases in the absence of fire, or additional chemical species might be added to a simulation that
-involves fire. 
+involves fire.
 
 There are two namelist groups that describe gas species. The first is {\ct SPEC}, which describes each gas species that is included in the simulation. There are
-different roles that a gas species might play in a simulation. A gas 
+different roles that a gas species might play in a simulation. A gas
 species might be explicitly tracked. In other words, a transport equation is solved for it. Or a gas species might just serve as the ``background'' species; that is, it is
 the gas that is present at the start of the simulation. Or, a gas species might be one component of a mixture of
 gases that are transported together. FDS exploits the idea that the products of combustion from a fire mix and travel together; and, thus, there is only need to solve
@@ -5554,7 +5564,7 @@ transport equations for only the lumped species -- air, fuel, and products -- ar
 for the major reactants and products of combustion -- fuel, O$_2$, CO$_2$,
 H$_2$O, N$_2$, CO and soot -- because they are all pre-tabulated functions of
 the three lumped species. More detail is given in Chapter~\ref{chap:combustion}. For the moment, just realize that you need not, {\em and should not},
-explicitly list the reactants and products of combustion using {\ct SPEC} lines if all you want is to model a fire involving a hydrocarbon fuel. 
+explicitly list the reactants and products of combustion using {\ct SPEC} lines if all you want is to model a fire involving a hydrocarbon fuel.
 
 
 
@@ -5602,8 +5612,8 @@ Table~\ref{tab:gasspecies}. Here is an example:
 
 \noindent
 Once the extra species has been declared, you introduce it at surfaces via the
-parameters {\ct MASS\_FRACTION(N)} or {\ct MASS\_FLUX(N)} along with the character array {\ct SPEC\_ID}. 
-The index {\ct N} refers to the position in the {\ct SPEC\_ID} array with the exception that the background species is not listed and is always defined by N=0. 
+parameters {\ct MASS\_FRACTION(N)} or {\ct MASS\_FLUX(N)} along with the character array {\ct SPEC\_ID}.
+The index {\ct N} refers to the position in the {\ct SPEC\_ID} array with the exception that the background species is not listed and is always defined by N=0.
 Following is a very simple example of how a gas can be introduced into the simulation.
 
 
@@ -5667,7 +5677,7 @@ desired or if a finite rate reaction(s) is being specified (see Section~\ref{inf
 specify that the background gas species be something other than air. For a gas mixture comprised of
 $n$ species, FDS only solves transport equations for $n-1$ because it also solves an equation for
 total mass conservation. To set the properties of the background species, use the
-{\ct SPEC} line with the {\ct BACKGROUND\_SPECIES} and if needed {\ct BACKGROUND\_SPECIES\_ONLY} keywords.  
+{\ct SPEC} line with the {\ct BACKGROUND\_SPECIES} and if needed {\ct BACKGROUND\_SPECIES\_ONLY} keywords.
 If this species is not listed in Table~\ref{tab:gasspecies}, specify its molecular weight, {\ct MW},
 and (optionally) its {\ct VISCOSITY}; {\ct CONDUCTIVITY}; and {\ct SPECIFIC\_HEAT},
 {\ct SPECIFIC\_ENTHALPY}, and {\ct REFERENCE\_TEMPERATURE}.
@@ -5780,7 +5790,7 @@ The available inputs for {\ct SMIX} are:
 \item[{\ct BACKGROUND}] Denotes that this lumped species is to be used as the background species.  The {\ct BACKGROUND} lumped species must be defined first.
 \item[{\ct ID}] Character string identifying the name of the species.  If no {\ct ID} is given the background lumped species will be named LUMPED SPECIES 0
 and any remaining lumped species will be named LUMPED SPECIES N where N is the position of the the input following any background lumped species.   This name should not unique over all {\ct SMIX} and {\ct SPEC} inputs.
-\item[{\ct SPEC\_ID}] Character array containing the names of the species that make up the lumped species. 
+\item[{\ct SPEC\_ID}] Character array containing the names of the species that make up the lumped species.
 \item[{\ct MASS\_FRACTION}] The mass fractions of the species making up the lumped species in the order listed by {\ct SPEC\_ID}.  FDS will normalize the values to 1.
 Specify only one of {\ct MASS\_FRACTION} or {\ct VOLUME\_FRACTION}.
 \item[{\ct VOLUME\_FRACTION}]  The volume fractions of the species making up the lumped species in the order listed by {\ct SPEC\_ID}.  FDS will normalize the values to 1.
@@ -5799,7 +5809,7 @@ Specify only one of {\ct MASS\_FRACTION} or {\ct VOLUME\_FRACTION}.
 
 A common source of confusion in FDS is the distinction between gas phase {\em combustion} and solid phase {\em pyrolysis}. The former
 refers to the reaction of fuel vapor and oxygen; the latter the generation of fuel vapor at a solid or liquid surface. Whereas there
-can be many types of combustibles in an FDS fire simulation, in the simple chemistry, mixing-controlled combustion model there can only be one gaseous fuel. The reason is cost. 
+can be many types of combustibles in an FDS fire simulation, in the simple chemistry, mixing-controlled combustion model there can only be one gaseous fuel. The reason is cost.
 It is expensive to
 solve transport equations for multiple gaseous fuels. Consequently, the burning rates of solids and liquids are automatically adjusted by
 FDS to account for the difference in the heats of combustion of the various combustibles. In effect, you specify a single gas phase
@@ -5808,14 +5818,14 @@ reaction as a surrogate for all the potential fuel sources.
 The gas phase reaction can be described in two ways. By default, the reaction of fuel and oxygen is infinitely fast and controlled only by mixing, hence
 the label {\em mixing-controlled}. The alternative is that the reaction is {\em finite-rate}. The latter approach usually requires very fine grid resolution is not
 practical for large-scale fire applications. This chapter describes both methods, with an emphasis on the more
-commonly used mixing-controlled model. The {\ct REAC} namelist group contains the parameters for both modes of combustion. 
+commonly used mixing-controlled model. The {\ct REAC} namelist group contains the parameters for both modes of combustion.
 
 
 \section{Mixing Controlled Reactions with Simple Chemistry}
 
-This approach to combustion considers a single fuel species that is composed primarily of C,H,O, and N that reacts with 
+This approach to combustion considers a single fuel species that is composed primarily of C,H,O, and N that reacts with
 oxygen in one or two mixing-controlled steps to form H$_2$O, CO$_2$, soot, and CO.
-For the default simple chemistry model, only a single {\ct REAC} line is needed. 
+For the default simple chemistry model, only a single {\ct REAC} line is needed.
 
 \begin{warning}
 \noindent
@@ -5849,9 +5859,9 @@ Note that the various {\ct YIELD}s are for well-ventilated, post-flame condition
 predict various species yields in under-ventilated fire scenarios, but these special models still require
 the post-flame yields for CO, soot and any other species listed below.
 \begin{description}
-\item[{\ct FUEL}] A character string that identifies fuel species for the reaction. When using simple chemistry, specifying {\ct FUEL} will 
-cause FDS to use the built-in thermo-physical properties for that species when computing quantities such as specific heat or viscosity.  
-This parameter is independent of the inputs for the fuel chemistry, i.e. {\ct C, H, O, N, OTHER}. Table~\ref{tab:gasspecies} provides a listing of the available species.  
+\item[{\ct FUEL}] A character string that identifies fuel species for the reaction. When using simple chemistry, specifying {\ct FUEL} will
+cause FDS to use the built-in thermo-physical properties for that species when computing quantities such as specific heat or viscosity.
+This parameter is independent of the inputs for the fuel chemistry, i.e. {\ct C, H, O, N, OTHER}. Table~\ref{tab:gasspecies} provides a listing of the available species.
 By default, FDS uses the gas thermophysical properties of {\ct ETHYLENE} for the fuel.
 \item[{\ct ID}] A character string that identifies the reaction. Normally, this label is not used by FDS, but it is useful to
 label the {\ct REAC} line to more easily identify the fuel species.
@@ -5878,7 +5888,7 @@ specified that FDS will ignore the value for {\ct EPUMO2}.
 values represent values for complete combustion ({\ct .TRUE.}) or for incomplete combustion ({\ct .FALSE.}),
 i.e. the values account for the specified $y_{CO}$, $y_{H_2}$, and $y_s$.  If {\ct IDEAL=.TRUE.}, then
 FDS will internally adjust $\Delta H$ to account for products of incomplete combustion. The default value is {\ct .FALSE.}
-\item[{\ct AUTO\_IGNITION\_TEMPERATURE}] The temperature below which combustion will not occur.  
+\item[{\ct AUTO\_IGNITION\_TEMPERATURE}] The temperature below which combustion will not occur.
 Note that if this parameter is used, then some form of ignition source must be present in order for combustion to begin.
 \item[{\ct HUMIDITY}] Relative humidity of the background air species, in units of \%. (Default 40~\%).
 \end{description}
@@ -6034,9 +6044,9 @@ User defined lumped species:
 &SPEC ID='WATER VAPOR', SMIX_COMPONENT_ONLY=.TRUE. /
 &SPEC ID='CARBON DIOXIDE', SMIX_COMPONENT_ONLY=.TRUE. /
 &SPEC ID='METHANE' /
-&SMIX ID='AIR', SPEC_ID='NITROGEN','OXYGEN','CARBON DIOXIDE','WATER VAPOR', 
+&SMIX ID='AIR', SPEC_ID='NITROGEN','OXYGEN','CARBON DIOXIDE','WATER VAPOR',
       MASS_FRACTION=0.75778,0.21312,0.00577,0.00524, BACKGROUND=.TRUE. /
-&SMIX ID='PRODUCTS', SPEC_ID='NITROGEN','CARBON DIOXIDE','WATER VAPOR', 
+&SMIX ID='PRODUCTS', SPEC_ID='NITROGEN','CARBON DIOXIDE','WATER VAPOR',
       MASS_FRACTION=0.71637,0.15572,0.12791 /
 &REAC FUEL='METHANE', SPEC_ID='METHANE','AIR','PRODUCTS',
       NU=-1,-9.60825,10.60825, HEAT_OF_COMBUSTION=50000. /
@@ -6116,10 +6126,10 @@ The inputs to use the finite rate model are given below:
 units of cm$^3$/mole/s.
 \item[{\ct E}] Activation energy for one-step chemical reaction in
 units of kJ/kmol.
-\item[{\ct NU}] Array containing the stoichiometry of the chemical reaction for each {\ct SPEC} where negative values indicate reactants and positive values indicate products.  
+\item[{\ct NU}] Array containing the stoichiometry of the chemical reaction for each {\ct SPEC} where negative values indicate reactants and positive values indicate products.
 The background species can be specified as NU(0).
 \item[{\ct N\_S}] Array containing the exponents for the finite rate equation for each {\ct SPEC}. The background species can be specified as  N\_S(0)
-\item[{\ct SPEC\_ID}] Array containing the names of the species that participate in the reaction. Note that it is possible that a given {\ct SPEC} can 
+\item[{\ct SPEC\_ID}] Array containing the names of the species that participate in the reaction. Note that it is possible that a given {\ct SPEC} can
 be assigned a value of {\ct N\_S} greater than zero and a value of {\ct NU} equal to zero. In other words,
 the rate equation can be dependent on a species that does not participate directly in the reaction.  The background species should not be specified in the array.
 \item[{\ct HEAT\_OF\_COMBUSTION}] The effective heat of combustion of the {\ct FUEL} in chemical reaction in units of kJ/kg. (No default)
@@ -6132,27 +6142,27 @@ the rate equation can be dependent on a species that does not participate direct
 \subsection{Special Topic: Mixed-Mode Combustion}
 \label{info:mixedmode}
 
-In a typical simulation, flame temperatures are not likely to be resolved well enough to allow for a finite rate reaction to be computed.  
-However, the temperatures in a layer environment are likely to support a finite rate reaction for slow reactions ({\em e.g.} carbon monoxide oxidation in a hot layer).  
-A mixed-mode combustion model can be used for this situation.  To enable this model, specify the finite-rate reaction inputs described in the previous section 
-as well as the input parameter {\ct THRESHOLD\_TEMPERATURE}.  During a simulation, if there is heat release from other reactions, 
-then a mixed-mode reaction will be evaluated as mixing-controlled reaction.  If there is no heat release from other reactions and the local 
+In a typical simulation, flame temperatures are not likely to be resolved well enough to allow for a finite rate reaction to be computed.
+However, the temperatures in a layer environment are likely to support a finite rate reaction for slow reactions ({\em e.g.} carbon monoxide oxidation in a hot layer).
+A mixed-mode combustion model can be used for this situation.  To enable this model, specify the finite-rate reaction inputs described in the previous section
+as well as the input parameter {\ct THRESHOLD\_TEMPERATURE}.  During a simulation, if there is heat release from other reactions,
+then a mixed-mode reaction will be evaluated as mixing-controlled reaction.  If there is no heat release from other reactions and the local
 temperature exceeds the {\ct THRESHOLD\_TEMPERATURE}, then the mixed-mode reaction will be evaluated as a finite-rate reaction.
 
 \begin{description}
-\item[{\ct AUTO\_IGNITION\_TEMPERATURE}] The temperature below which combustion will not occur.  
-Note that if this parameter is used, then some form of ignition source must be present in order for combustion to begin. 
+\item[{\ct AUTO\_IGNITION\_TEMPERATURE}] The temperature below which combustion will not occur.
+Note that if this parameter is used, then some form of ignition source must be present in order for combustion to begin.
 \item[{\ct BOF}] Pre-exponential factor in one-step chemical reaction in
 units of cm$^3$/mole/s.
 \item[{\ct E}] Activation energy for one-step chemical reaction in
 units of kJ/kmol.
 \item[{\ct NU}] Array containing the stoichiometry of the chemical reaction for each {\ct SPEC} where negative values indicate reactants and positive values indicate products.
 \item[{\ct N\_S}] Array containing the exponents for the finite rate equation for each {\ct SPEC}.
-\item[{\ct SPEC\_ID}] Array containing the names of the species that participate in the reaction. Note that it is possible that a given {\ct SPEC} 
+\item[{\ct SPEC\_ID}] Array containing the names of the species that participate in the reaction. Note that it is possible that a given {\ct SPEC}
 can be assigned a value of {\ct N\_S} greater than zero and a value of {\ct NU} equal to zero. In other words,
 the rate equation can be dependent on a species that does not participate directly in the reaction.
 \item[{\ct HEAT\_OF\_COMBUSTION}] The effective heat of combustion of the {\ct FUEL} in chemical reaction in units of kJ/kg. (No default)
-\item[{\ct THRESHOLD\_TEMPERATURE}] The temperature at which finite-rate combustion will be computed when there is no heat release from other reactions. 
+\item[{\ct THRESHOLD\_TEMPERATURE}] The temperature at which finite-rate combustion will be computed when there is no heat release from other reactions.
 \end{description}
 
 
@@ -6196,6 +6206,7 @@ release rate is reduced by the {\ct RADIATIVE\_FRACTION}, which is
 input on the {\ct RADI} line. This radiated energy completely
 disappears from the calculation. For fire scenarios it is not recommended that you turn off the
 radiation transport. This feature is used mainly for diagnostic purposes.
+
 
 
 \subsection{Spatial and Temporal Resolution of the Radiation Transport Equation}
@@ -6374,16 +6385,16 @@ droplets created per second than the number that can be simulated.
 \label{info:initial_droplets}
 
 
-Sometimes it is convenient to introduce droplets or particles at the start of the simulation. For this purpose, add {\ct NUMBER\_INITIAL\_DROPLETS}
-to the {\ct INIT} line\footnote{Prior to FDS~5.5, it was possible to use the {\ct PART} line to specify {\ct NUMBER\_INITIAL\_DROPLETS}.}
-to indicate the number of particles/droplets within the computational domain at the start of the simulation.
+Sometimes it is convenient to introduce droplets or particles at the start of the simulation. For this purpose, use an {\ct INIT} line with the parameter
+{\ct NUMBER\_INITIAL\_DROPLETS} to indicate the number of particles/droplets within the computational domain at the start of the simulation.
 Its default value is 0, meaning that initially there are no particles or droplets present. If non-zero, also specify {\ct MASS\_PER\_VOLUME} (kg/m$^3$) which
 specifies the particle/droplet mass per unit volume (Default 1~kg/m$^3$). Do
 not confuse this parameter with {\ct DENSITY}, explained in the next section. For example, water has a
 {\ct DENSITY} of 1000~kg/m$^3$, whereas a liter of water broken up into droplets
 and spread over a cubic meter has a {\ct MASS\_PER\_VOLUME} of 1~kg/m$^3$. Also, to limit the particles/droplets to a
 certain region of the domain, add the real sextuplet {\ct XB} to designate the coordinates of a rectangular volume. The format
-for {\ct XB} is the same as that used on the {\ct OBST} line.
+for {\ct XB} is the same as that used on the {\ct OBST} line. For the moment, you can only introduce a cloud of particles within a rectangular block. In future 
+versions, the parameter {\ct SHAPE} will be used to indicate other types of initial volumes.
 
 
 \footnotesize
@@ -6666,7 +6677,7 @@ However, for arbitrary particles or droplets, there is no assumed radiative abso
 Modeling suppression of a fire by a water spray is challenging because
 the relevant physical mechanisms occur at length scales smaller than a
 single mesh cell. In the gas phase, flames are extinguished due to lowered
-temperatures and dilution of the oxygen supply. 
+temperatures and dilution of the oxygen supply.
 
 For the solid phase,
 water reduces the fuel pyrolysis rate by cooling the fuel surface and also
@@ -8198,12 +8209,17 @@ Three different values of the temperature can be saved via the line:
 \normalsize
 
 \noindent
-where the values are in degrees C. Note that the isosurface output
+where the values are in $^\circ$C. Note that the isosurface output
 files {\bf CHID\_$n$.iso} can become very large, so experiment with different sampling rates ({\ct DT\_ISOF} on the {\ct DUMP} line).
+
 
 Any gas phase quantity can animated via iso-surfaces, but use caution. To render an iso-surface, the desired quantity must be
 computed in every mesh cell at every output time step. For quantities like {\ct TEMPERATURE}, this is not a problem, as FDS computes it and saves it
-anyway. However, {\ct soot density} or {\ct oxygen} demand substantial amounts of time to compute at each mesh cell.
+anyway. However, species volume fractions demand substantial amounts of time to compute at each mesh cell.
+
+Note that if you add the additional parameter {\ct COLOR\_QUANTITY} to the {\ct ISOF} line, then the given isosurface will be colored using
+this extra quantity. Remember to include the {\ct SPEC\_ID} or {\ct COLOR\_SPEC\_ID} corresponding to the given {\ct QUANTITY} or
+{\ct COLOR\_QUANTITY}, if necessary.
 
 
 
@@ -9625,6 +9641,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct COLOR    }    & Character         & Color name of obstruction color                           &       &           \\ \hline
 {\ct CTRL\_ID}     & Character         & {\ct ID} of {\ct ConTRoL} to control hole's existence     &       &           \\ \hline
 {\ct DEVC\_ID}     & Character         & {\ct ID} of {\ct DEViCe} to control hole's existence      &       &           \\ \hline
+{\ct EVACUATION}   & Logical           & See FDS+Evac User's Guide                                 &       &           \\ \hline
+{\ct MESH\_ID }    & Character         & See FDS+Evac User's Guide                                 &       &           \\ \hline
 {\ct MULT\_ID }    & Character         & See Section~\ref{info:MULT}                               &       &           \\ \hline
 {\ct RGB(3)   }    & Integer Triplet   & Color indices (0 - 255) for resulting obstruction(s)      &       &           \\ \hline
 {\ct TRANSPARENCY} & Real              & Transparency of obstruction                               &       &           \\ \hline
@@ -9697,17 +9715,22 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct INIT} (Initial Conditions)} \\
 \hline \hline
 \endhead
-{\ct DENSITY}                   & Real              & Initial value of density                          & kg/m$^3$      & Ambient       \\ \hline
-{\ct MASS\_FRACTION(II)}        & Real Array        & Initial value of species {\ct II}                 & kg/kg         & Ambient       \\ \hline
+{\ct DENSITY}                   & Real              & See Section~\ref{info:INIT}                       & kg/m$^3$      & Ambient       \\ \hline
+{\ct DT\_INSERT}                & Real              & See Section~\ref{info:initial_droplets}           & s             &               \\ \hline
+{\ct HRRPUV}                    & Real              & See Section~\ref{info:INIT}                       & kW/m$^3$      &               \\ \hline
+{\ct MASS\_FRACTION(N)}         & Real Array        & See Section~\ref{info:INIT}                       & kg/kg         & Ambient       \\ \hline
 {\ct MASS\_PER\_TIME}           & Real              & See Section~\ref{info:initial_droplets}           & kg/s          &               \\ \hline
 {\ct MASS\_PER\_VOLUME}         & Real              & See Section~\ref{info:initial_droplets}           & kg/m$^3$      & 1             \\ \hline
 {\ct MULT\_ID }                 & Character         & See Section~\ref{info:MULT}                       &               &               \\ \hline
 {\ct NUMBER\_INITIAL\_DROPLETS} & Integer           & See Section~\ref{info:initial_droplets}           &               & 0             \\ \hline
 {\ct PART\_ID}                  & Character         & See Section~\ref{info:initial_droplets}           &               &               \\ \hline
-{\ct SPEC\_ID}                  & Character         & {\ct ID}s of species in {\ct MASS\_FRACTION}          &               &               \\ \hline
-{\ct TEMPERATURE}               & Real              & Initial value of temperature                      & $^\circ$C     & {\ct TMPA}    \\ \hline
-{\ct XB(6)}                     & Real Sextuplet    & Coordinates                                       & m             &               \\ \hline
+{\ct SHAPE}                     & Character         & See Section~\ref{info:initial_droplets}           &               & {\ct 'BLOCK'} \\ \hline
+{\ct SPEC\_ID(N)}               & Character Array   & See Section~\ref{info:INIT}                       &               &               \\ \hline
+{\ct TEMPERATURE}               & Real              & See Section~\ref{info:INIT}                       & $^\circ$C     & {\ct TMPA}    \\ \hline
+{\ct XB(6)}                     & Real Sextuplet    & Rectangular block coordinates                     & m             &               \\ \hline
 \end{longtable}
+
+% Undocumented: PROF_ID, ORIGIN, XYZ, UVW, DIAMETER
 
 
 \vspace{\baselineskip}
@@ -9731,14 +9754,16 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct ISOF} (Isosurface Parameters)} \\
 \hline \hline
 \endhead
-%{\ct COLOR\_QUANTITY}       & Character     & Secondary quantity to color surface   &       &         \\ \hline
-%{\ct COLOR\_SPEC\_ID}       & Character     & Species indicator (if needed)         &       &         \\ \hline
-{\ct QUANTITY}              & Character     & Quantity to visualize                 &       &         \\ \hline
-%{\ct REDUCE\_TRIANGLES}     & Integer       & Smokeview parameter                   &       & 1       \\ \hline
-{\ct SPEC\_ID}              & Character     & Species indicator (if needed)         &       &         \\ \hline
-{\ct VALUE(I)}              & Real Array    & Contour value(s)                      &       &         \\ \hline
+{\ct COLOR\_QUANTITY}       & Character     & See Section~\ref{info:ISOF}           &       &         \\ \hline
+{\ct COLOR\_SPEC\_ID}       & Character     & See Section~\ref{info:ISOF}           &       &         \\ \hline
+{\ct QUANTITY}              & Character     & See Section~\ref{info:ISOF}           &       &         \\ \hline
+{\ct REDUCE\_TRIANGLES}     & Integer       & Sampling parameter to reduce size     &       & 1       \\ \hline
+{\ct SPEC\_ID}              & Character     & See Section~\ref{info:ISOF}           &       &         \\ \hline
+{\ct VALUE(I)}              & Real Array    & See Section~\ref{info:ISOF}           &       &         \\ \hline
 {\ct VELO\_INDEX}           & Integer       & See Section~\ref{info:velocity}       &       &  0      \\ \hline
 \end{longtable}
+
+% Undocumented: AUTO_HRRPUV_VALUE
 
 
 \vspace{\baselineskip}
@@ -10190,7 +10215,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct NMIEANG                  } & Integer  & Number of polar angles              &                   & 15            \\ \hline
 {\ct NUMBER\_RADIATION\_ANGLES} & Integer  & Number of solid angles              &                   & 104           \\ \hline
 {\ct PATH\_LENGTH }             & Real     & Path length for radiation calc.     &   m               &               \\ \hline
-{\ct RADIATION}                 & Logical  & Radiation calculation flag          &               & {\ct .TRUE.}      \\ \hline
+{\ct RADIATION}                 & Logical  & Radiation calculation flag          &                   & {\ct .TRUE.}      \\ \hline
 {\ct RADIATIVE\_FRACTION}       & Real     & Radiative Loss Fraction             &                   & 0.35          \\ \hline
 {\ct RADTMP                   } & Real     & Assumed radiative source temp.      & $^\circ$C         & 900           \\ \hline
 {\ct TIME\_STEP\_INCREMENT}     & Integer  & Number time steps skipped           &                   & 3             \\ \hline
@@ -10653,6 +10678,7 @@ FDS 5 Parameter & Namelist  & FDS 6 Parameter & Namelist  & Notes \\
 {\ct NU\_GAS}                   & {\ct MATL}    & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
 {\ct NU\_RESIDUE}               & {\ct MATL}    & {\ct NU\_MATL}                              &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
 {\ct NU\_WATER}                 & {\ct MATL}    & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
+{\ct RADIATION}                 & {\ct MISC}    & {\ct RADIATION}                             &   {\ct RADI}        & Same functionality                           \\ \hline
 {\ct RESIDUE}                   & {\ct MATL}    & {\ct MATL\_ID}                              &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
 {\ct STATE\_FILE}               & {\ct DUMP}    & Eliminated                                  &                     &                                              \\ \hline
 \end{longtable}
