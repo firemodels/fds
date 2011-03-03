@@ -2363,7 +2363,7 @@ The {\ct INIT} construct may be useful in examining the influence of
 stack effect in a building, where the temperature
 is different inside and out.
 
-The {\ct INIT} line may also be used to specify a volumetric heat source term. For example, 
+The {\ct INIT} line may also be used to specify a volumetric heat source term. For example,
 
 \footnotesize
 \begin{verbatim}
@@ -3372,6 +3372,8 @@ brick.
 
 \subsection{Thermal Properties}
 
+\label{info:thermal_properties}
+
 For any solid material, specify its thermal
 {\ct CONDUCTIVITY} (W/m$\cdot$K), {\ct DENSITY} (kg/m$^3$),
 {\ct SPECIFIC\_HEAT} (kJ/kg/K), and {\ct EMISSIVITY} (0.9 by default).
@@ -4200,6 +4202,8 @@ the blue line and heating phase by the red line.
 
 \subsection{Liquid Fuels}
 
+\label{info:liquid_fuels}
+
 For a liquid fuel, the thermal properties are similar to those of a solid
 material, with a few exceptions. The evaporation rate of the fuel
 is governed by the Clausius-Clapeyron equation (see FDS Technical Reference
@@ -4266,8 +4270,7 @@ the convection of the liquid is important, but is not considered in
 the model.
 
 The initial value of the fuel vapor volume flux can be specified using
-the parameter {\ct INITIAL\_VAPOR\_FLUX}. Its default value is
-$5\cdot10^{-4}$~m$^3/$(sm$^2$).
+the parameter {\ct INITIAL\_VAPOR\_FLUX}. Its default value is $5 \times 10^{-4}$~m/s.
 
 Note also the {\ct ABSORPTION\_COEFFICIENT} for the liquid. This
 denotes the absorption in depth of thermal radiation. Liquids do not
@@ -6393,7 +6396,7 @@ not confuse this parameter with {\ct DENSITY}, explained in the next section. Fo
 {\ct DENSITY} of 1000~kg/m$^3$, whereas a liter of water broken up into droplets
 and spread over a cubic meter has a {\ct MASS\_PER\_VOLUME} of 1~kg/m$^3$. Also, to limit the particles/droplets to a
 certain region of the domain, add the real sextuplet {\ct XB} to designate the coordinates of a rectangular volume. The format
-for {\ct XB} is the same as that used on the {\ct OBST} line. For the moment, you can only introduce a cloud of particles within a rectangular block. In future 
+for {\ct XB} is the same as that used on the {\ct OBST} line. For the moment, you can only introduce a cloud of particles within a rectangular block. In future
 versions, the parameter {\ct SHAPE} will be used to indicate other types of initial volumes.
 
 
@@ -9786,31 +9789,32 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct MATL} (Material Properties)} \\
 \hline \hline
 \endhead
-{\ct A(:)}                          & Real array    & Pre-exponential factors                   &    1/s            &        \\ \hline
-{\ct ABSORPTION\_COEFFICIENT}       & Real          & Absorption Coefficient                    &    1/m            & 50000. \\ \hline
-{\ct BOILING\_TEMPERATURE}          & Real          & Boiling temperature                       & $^\circ$C         & 5000.  \\ \hline
-{\ct CONDUCTIVITY}                  & Real          & Thermal conductivity                      & W/m/K             & 0.     \\ \hline
-{\ct CONDUCTIVITY\_RAMP}            & Character     & Ramp ID for conductivity                  &                   &        \\ \hline
-{\ct DENSITY}                       & Real          & Solid mass per unit volume                & kg/m$^3$          & 0.     \\ \hline
-{\ct E(:)}                          & Real array    & Activation energies                       & kJ/kmol           &        \\ \hline
-{\ct EMISSIVITY    }                & Real          & Emissivity                                &                   & 0.9    \\ \hline
+{\ct A(:)}                          & Real array    & See Section~\ref{info:solid_pyrolysis}    &    1/s            &        \\ \hline
+{\ct ABSORPTION\_COEFFICIENT}       & Real          & See Section~\ref{info:thermal_properties} &    1/m            & 50000. \\ \hline
+{\ct BOILING\_TEMPERATURE}          & Real          & See Section~\ref{info:liquid_fuels}       & $^\circ$C         & 5000.  \\ \hline
+{\ct CONDUCTIVITY}                  & Real          & See Section~\ref{info:thermal_properties} & W/m/K             & 0.     \\ \hline
+{\ct CONDUCTIVITY\_RAMP}            & Character     & See Section~\ref{info:thermal_properties} &                   &        \\ \hline
+{\ct DENSITY}                       & Real          & See Section~\ref{info:thermal_properties} & kg/m$^3$          & 0.     \\ \hline
+{\ct E(:)}                          & Real array    & See Section~\ref{info:solid_pyrolysis}    & kJ/kmol           &        \\ \hline
+{\ct EMISSIVITY    }                & Real          & See Section~\ref{info:thermal_properties} &                   & 0.9    \\ \hline
 {\ct HEATING\_RATE(:)}              & Real array    & See Section~\ref{info:solid_pyrolysis}    & $^\circ$C/min     & 5.     \\ \hline
 {\ct HEAT\_OF\_COMBUSTION(:)}       & Real array    & See Section~\ref{info:solid_pyrolysis}    & kJ/kg             &        \\ \hline
 {\ct HEAT\_OF\_REACTION(:)}         & Real array    & See Section~\ref{info:solid_pyrolysis}    & kJ/kg             & 0.     \\ \hline
-{\ct INITIAL\_VAPOR\_FLUX}          & Real          & Initial evaporation rate                  & m$^2$/(sm$^2$)    & 0.0005   \\ \hline
-{\ct ID     }                       & Character     & IDentifier                                &                   &        \\ \hline
+{\ct INITIAL\_VAPOR\_FLUX}          & Real          & See Section~\ref{info:liquid_fuels}       & m/s               & 0.0005 \\ \hline
+{\ct ID     }                       & Character     & Identification tag                        &                   &        \\ \hline
 {\ct MATL\_ID(:,:)}                 & Character     & See Section~\ref{info:solid_pyrolysis}    &                   &        \\ \hline
-{\ct N\_REACTIONS}                  & Character     & Number of Reactions                       &                   & 0      \\ \hline
+{\ct N\_REACTIONS}                  & Character     & See Section~\ref{info:solid_pyrolysis}    &                   & 0      \\ \hline
 {\ct N\_S(:)}                       & Real array    & See Section~\ref{info:solid_pyrolysis}    &                   & 1.     \\ \hline
 {\ct N\_T(:)}                       & Real array    & See Section~\ref{info:solid_pyrolysis}    &                   & 0.     \\ \hline
 {\ct NU\_MATL(:,:)}                 & Real array    & See Section~\ref{info:solid_pyrolysis}    & kg/kg             & 0.     \\ \hline
 {\ct NU\_SPEC(:,:)}                 & Real array    & See Section~\ref{info:solid_pyrolysis}    & kg/kg             & 0.     \\ \hline
-{\ct PCR(:)}                        & Logical array & See Section~\ref{info:solid_pyrolysis})   &                   & {\ct.FALSE.}\\ \hline
+{\ct PCR(:)}                        & Logical array & See Section~\ref{info:solid_pyrolysis}    &                   & {\ct.FALSE.}\\ \hline
 {\ct PYROLYSIS\_RANGE(:)}           & Real array    & See Section~\ref{info:solid_pyrolysis}    & $^\circ$C         & 80.    \\ \hline
+{\ct REFERENCE\_RATE(:)}            & Real array    & See Section~\ref{info:solid_pyrolysis}    & 1/s               &        \\ \hline
 {\ct REFERENCE\_TEMPERATURE(:)}     & Real array    & See Section~\ref{info:solid_pyrolysis}    & $^\circ$C         &        \\ \hline
 {\ct SPEC\_ID(:,:)}                 & Character     & See Section~\ref{info:solid_pyrolysis}    &                   &        \\ \hline
-{\ct SPECIFIC\_HEAT}                & Real          & Specific heat                             & kJ/kg/K           & 0.     \\ \hline
-{\ct SPECIFIC\_HEAT\_RAMP}          & Character     & Ramp ID for specific heat                 &                   &        \\ \hline
+{\ct SPECIFIC\_HEAT}                & Real          & See Section~\ref{info:thermal_properties} & kJ/kg/K           & 0.     \\ \hline
+{\ct SPECIFIC\_HEAT\_RAMP}          & Character     & See Section~\ref{info:thermal_properties} &                   &        \\ \hline
 {\ct THRESHOLD\_SIGN(:)}            & Real array    & See Section~\ref{info:solid_pyrolysis}    &                   & 1.0    \\ \hline
 {\ct THRESHOLD\_TEMPERATURE(:)}     & Real array    & See Section~\ref{info:solid_pyrolysis}    & $^\circ$C         & -273.15 \\ \hline
 \end{longtable}
