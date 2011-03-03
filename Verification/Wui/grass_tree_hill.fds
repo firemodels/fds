@@ -1,5 +1,5 @@
 &HEAD CHID='grass_tree_hill', TITLE='Simple case for development of devices and OBST separate from terrain SVN $Revision$' /
-&MISC U0=1,TERRAIN_CASE=.FALSE.,FDS6=.TRUE.,BNDF_DEFAULT=.FALSE. /
+&MISC U0=1,TERRAIN_CASE=.FALSE.,BNDF_DEFAULT=.FALSE. /
 &TIME T_END=60 / 
 
 2 grids
@@ -13,7 +13,7 @@ cMESH IJK=50,25,25, XB=0,50,  0,25,0,25 /
 &MESH IJK=50,10,25, XB=0,50,  5, 15,0,25 /
 &MESH IJK=50,10,25, XB=0,50, 15, 25,0,25 /
 
-&REAC ID='WOOD'
+&REAC FUEL='WOOD'
       FYI='Ritchie, et al., 5th IAFSS, C_3.4 H_6.2 O_2.5, dHc = 15MW/kg'
       SOOT_YIELD = 0.02
       O          = 2.5
