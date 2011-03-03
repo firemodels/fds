@@ -1604,7 +1604,7 @@ uniformity of the mesh (See Section~\ref{info:TRNX}).
 
 Any obstructions or vents that extend beyond the boundary of the mesh
 are cut off at the boundary. There is no penalty for defining objects
-outside of the mesh, and these objects will not appear in Smokeview. 
+outside of the mesh, and these objects will not appear in Smokeview.
 
 \begin{warning}
 \noindent
@@ -2281,12 +2281,12 @@ in a velocity of 10.09~m/s through the vent.  FDS computes a peak velocity of 10
 \subsection{Special Topic: Large Eddy Simulation Parameters}
 \label{info:LES}
 
-In default mode, FDS uses the dynamic form of the Smagorinsky Large Eddy Simulation (LES) to model subgrid-scale turbulence. 
+In default mode, FDS uses the dynamic form of the Smagorinsky Large Eddy Simulation (LES) to model subgrid-scale turbulence.
 The viscosity $\mu$ is modeled
 \be \mu_{\hbox{\tiny LES}} = \rho \, (C_s\, \Delta)^2 \,
    \left(2 \; \overline{\bS}_{ij} : \overline{\bS}_{ij} - \frac{2}{3} (\nabla \cdot \overline{\bu})^2 \right)^\ha \ee
 where $C_s$ is a function of the local flow conditions and $\Delta$ is a length on the
-order of the size of a grid cell. 
+order of the size of a grid cell.
 The bar above the various quantities denotes that these are the resolved, or {\em filtered}, values, meaning
 that they are computed on a numerical grid.
 The other diffusive parameters,
@@ -2425,7 +2425,7 @@ There are two parameters on the {\ct PRES} line that control iterative procedure
 called {\ct RELAXATION\_FACTOR} and its default value is 1. When there is an error in the normal component of velocity at a solid boundary, this
 parameter dictates that the correction be applied in 1 time step. If its value were 0.5, the correction would be applied in 2 time steps. A similar
 parameter is called {\ct PRESSURE\_RELAX\_FACTOR}. It controls the rate at which the pressures in adjacent compartments are brought into equilibrium following a
-breach. Its value is 0.2, meaning that equilibrium is achieved in roughly 5 time steps. 
+breach. Its value is 0.2, meaning that equilibrium is achieved in roughly 5 time steps.
 
 \subsubsection{Example Case: {\bf duct\_flow}}
 
@@ -2513,6 +2513,7 @@ The namelist group {\ct OBST} contains parameters used to define obstructions. T
 of rectangular solids, each one introduced on a single line in the input file.
 
 \subsection{Basics}
+\label{info:OBST_Basics}
 
 Each {\ct OBST} line contains the coordinates of a rectangular
 solid within the flow domain. This solid is defined by two points
@@ -5701,8 +5702,8 @@ the {\ct VISCOSITY} (kg/m/s), {\ct CONDUCTIVITY} (W/m/K), and
 {\ct DIFFUSIVITY} (m$^2$/s) between the given species
 and the background species should be specified. In the latter case, if you specify the gas properties directly, they will still
 be temperature dependent:
-\be \mu(T) = \mu_\infty \, \left( \frac{T}{T_\infty} \right)^{0.75} \quad ; \quad 
-    k(T) = k_\infty \, \left( \frac{T}{T_\infty} \right)^{0.75} \quad ; \quad 
+\be \mu(T) = \mu_\infty \, \left( \frac{T}{T_\infty} \right)^{0.75} \quad ; \quad
+    k(T) = k_\infty \, \left( \frac{T}{T_\infty} \right)^{0.75} \quad ; \quad
     D(T) = D_\infty \, \left( \frac{T}{T_\infty} \right)^{1.75}   \ee
 If you do not want to assume this temperature dependence, set {\ct CONSTANT\_PROPERTIES=.TRUE.} on the {\ct MISC} line.
 
@@ -9981,7 +9982,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SURF\_DEFAULT}             & Character     & See Section~\ref{info:MISC_Basics}                        &               & {\ct 'INERT'}     \\ \hline
 {\ct TERRAIN\_CASE}             & Logical       & See Wildland Fire User's Guide                            &               & {\ct .FALSE.}     \\ \hline
 {\ct TEXTURE\_ORIGIN(3)}        & Char.~Triplet & See Section~\ref{info:texture_map}                        & m             & (0.,0.,0.)        \\ \hline
-{\ct THICKEN\_OBSTRUCTIONS}     & Logical       & See Section~\ref{info:OBST}                               &               & {\ct .FALSE.}     \\ \hline
+{\ct THICKEN\_OBSTRUCTIONS}     & Logical       & See Section~\ref{info:OBST_Basics}                        &               & {\ct .FALSE.}     \\ \hline
 {\ct TMPA}                      & Real          & See Section~\ref{info:MISC_Basics}                         & $^\circ$C     & 20.               \\ \hline
 %{\ct TURB\_INIT}                & Logical       & Write `ini\_salsa.dat' for turb_init.exe                 &               & {\ct .FALSE.}     \\ \hline
 {\ct U0,V0,W0}                  & Reals         & See Section~\ref{info:MISC_Basics}                        & m/s           & 0.                \\ \hline
@@ -9991,7 +9992,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \end{longtable}
 
 %Undocumented: H_LOGLAW, H_CHILTON_COLBURN, LIMITING_DT_RATIO, VAN_DRIEST, HRRPUVCUT_MAX, RUN_AVG_FAC, THERMOPHORETIC_DEPOSITION, TURBULENT_DEPOSITION,
-%               VEG_LEVEL_SET, CP_FTMP, HRRPUV_MAX_SMV, TERRAIN_IMAGE,N EW_EVAP, SCALAR_ENERGY_TOLERANCE, TKE_TOLERANCE, MEAN_FORCING, RFAC_FORCING, USE_MAX_FILTER_WIDTH, 
+%               VEG_LEVEL_SET, CP_FTMP, HRRPUV_MAX_SMV, TERRAIN_IMAGE,N EW_EVAP, SCALAR_ENERGY_TOLERANCE, TKE_TOLERANCE, MEAN_FORCING, RFAC_FORCING, USE_MAX_FILTER_WIDTH,
 %               WFDS,PATCH_VELOCITY,UVW_FILE,VREMAN_EDDY_VISCOSITY,BUOYANCY_PRODUCTION
 
 
@@ -10020,7 +10021,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DX0}            & Real             & Translation in the $x$ direction            & m  & 0.                         \\ \hline
 {\ct DY0}            & Real             & Translation in the $y$ direction            & m  & 0.                         \\ \hline
 {\ct DZ0}            & Real             & Translation in the $z$ direction            & m  & 0.                         \\ \hline
-{\ct ID }            & Character        & {\ct ID}entifier                            &    &                            \\ \hline
+{\ct ID }            & Character        & Identification tag                          &    &                            \\ \hline
 {\ct I\_LOWER}       & Integer          & Lower array bound, $x$ direction            &    & 0                          \\ \hline
 {\ct I\_UPPER}       & Integer          & Upper array bound, $x$ direction            &    & 0                          \\ \hline
 {\ct J\_LOWER}       & Integer          & Lower array bound, $y$ direction            &    & 0                          \\ \hline
@@ -10053,29 +10054,31 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct OBST} (Obstruction Parameters)} \\
 \hline \hline
 \endhead
-{\ct ALLOW\_VENT}         & Logical             & Allow vents on obstruction            &    & {\ct .TRUE.}  \\ \hline
-{\ct BNDF\_FACE(-3:3)}    & Logical Array       & See Section~\ref{info:BNDF}           &    & {\ct .TRUE.}  \\ \hline
-{\ct BNDF\_OBST}          & Logical             & See Section~\ref{info:BNDF}           &    & {\ct .TRUE.}  \\ \hline
-{\ct BULK\_DENSITY}       & Real                & See Section~\ref{info:BURN_AWAY}      &    &  1            \\ \hline
-{\ct COLOR    }           & Character           & Color name of obstruction color       &    &               \\ \hline
-{\ct CTRL\_ID }           & Character           & {\ct ID} of Controlling {\ct ConTRoL} &    &               \\ \hline
-{\ct DEVC\_ID }           & Character           & {\ct ID} of Controlling {\ct DEViCe}  &    &               \\ \hline
-%{\ct EVACUATION}          & Logical             & Only use for Evac case                &    & {\ct .FALSE.} \\ \hline
-%{\ct MESH\_ID}            & Character           & Only include in given mesh            &    &               \\ \hline
-{\ct MULT\_ID }           & Character           & See Section~\ref{info:MULT}           &    &               \\ \hline
-{\ct OUTLINE}             & Logical             & Draw as Outline                       &    & {\ct .FALSE.} \\ \hline
-{\ct PERMIT\_HOLE}        & Logical             & Allow a Hole                          &    & {\ct .TRUE.}  \\ \hline
-%{\ct PROP\_ID}            & Character           & Name of Property line (if needed)     &    &               \\ \hline
-{\ct REMOVABLE}           & Logical             & Allow obstruction to be removed       &    & {\ct .TRUE.}  \\ \hline
-{\ct RGB(3)}              & Integer Triplet     & Color indices (0 - 255)               &    &               \\ \hline
-{\ct SAWTOOTH}            & Logical             & See Section~\ref{info:SAWTOOTH}       &    & {\ct .TRUE.}  \\ \hline
-{\ct SURF\_ID}            & Character           & Associated Surface                    &    &               \\ \hline
-{\ct SURF\_IDS(3)}        & Character Triplet   & Associated Surfaces (top,side,bot.)   &    &               \\ \hline
-{\ct SURF\_ID6(6)}        & Character Sextuplet & Associated Surfaces (like {\ct XB})   &    &               \\ \hline
-{\ct THICKEN}             & Logical             & Force at least one cell thick         &    & {\ct .FALSE.} \\ \hline
-{\ct TEXTURE\_ORIGIN(3)}  & Real Triplet        & See Section~\ref{info:texture_map}    & m  & (0.,0.,0.)    \\ \hline
-{\ct TRANSPARENCY}        & Real                & Transparency indicator                &    &  1            \\ \hline
-{\ct XB(6) }              & Real Sextuplet      & Min/Max Physical coordinates          & m  &               \\ \hline
+{\ct ALLOW\_VENT}         & Logical             & See Section~\ref{info:OBST_Basics}            &           & {\ct .TRUE.}  \\ \hline
+{\ct BNDF\_FACE(-3:3)}    & Logical Array       & See Section~\ref{info:BNDF}                   &           & {\ct .TRUE.}  \\ \hline
+{\ct BNDF\_OBST}          & Logical             & See Section~\ref{info:BNDF}                   &           & {\ct .TRUE.}  \\ \hline
+{\ct BULK\_DENSITY}       & Real                & See Section~\ref{info:BURN_AWAY}              & kg/m$^3$  &               \\ \hline
+{\ct COLOR    }           & Character           & See Section~\ref{info:OBST_Basics}            &           &               \\ \hline
+{\ct CTRL\_ID }           & Character           & See Section~\ref{info:activate_deactivate}    &           &               \\ \hline
+{\ct DEVC\_ID }           & Character           & See Section~\ref{info:activate_deactivate}    &           &               \\ \hline
+{\ct EVACUATION}          & Logical             & See FDS+Evac User's Guide                     &           & {\ct .FALSE.} \\ \hline
+{\ct ID }                 & Character           & See Section~\ref{info:OBST_Basics}            &           &               \\ \hline
+{\ct MESH\_ID}            & Character           & See FDS+Evac User's Guide                     &           &               \\ \hline
+{\ct MULT\_ID }           & Character           & See Section~\ref{info:MULT}                   &           &               \\ \hline
+{\ct NOTERRAIN}           & Logical             & See Wildland Fire User's Guide                &           & {\ct .FALSE.} \\ \hline
+{\ct OUTLINE}             & Logical             & See Section~\ref{info:OBST_Basics}            &           & {\ct .FALSE.} \\ \hline
+{\ct PERMIT\_HOLE}        & Logical             & See Section~\ref{info:HOLE}                   &           & {\ct .TRUE.}  \\ \hline
+{\ct PROP\_ID}            & Character           & See Smokeview User's Guide                    &           &               \\ \hline
+{\ct REMOVABLE}           & Logical             & See Section~\ref{info:HOLE}                   &           & {\ct .TRUE.}  \\ \hline
+{\ct RGB(3)}              & Integer Triplet     & See Section~\ref{info:OBST_Basics}            &           &               \\ \hline
+{\ct SAWTOOTH}            & Logical             & See Section~\ref{info:SAWTOOTH}               &           & {\ct .TRUE.}  \\ \hline
+{\ct SURF\_ID}            & Character           & See Section~\ref{info:OBST_Basics}            &           &               \\ \hline
+{\ct SURF\_IDS(3)}        & Character Triplet   & See Section~\ref{info:OBST_Basics}            &           &               \\ \hline
+{\ct SURF\_ID6(6)}        & Character Sextuplet & See Section~\ref{info:OBST_Basics}            &           &               \\ \hline
+{\ct THICKEN}             & Logical             & See Section~\ref{info:OBST_Basics}            &           & {\ct .FALSE.} \\ \hline
+{\ct TEXTURE\_ORIGIN(3)}  & Real Triplet        & See Section~\ref{info:texture_map}            & m         & (0.,0.,0.)    \\ \hline
+{\ct TRANSPARENCY}        & Real                & See Section~\ref{info:OBST_Basics}            &           &  1            \\ \hline
+{\ct XB(6) }              & Real Sextuplet      & See Section~\ref{info:OBST_Basics}            & m         &               \\ \hline
 \end{longtable}
 
 
@@ -10738,10 +10741,13 @@ FDS 5 Parameter & Namelist  & FDS 6 Parameter & Namelist  & Notes \\
 \hline
 \endhead
 {\ct BACKGROUND\_SPECIES}       & {\ct MISC}    & {\ct BACKGROUND=.TRUE.}                     &   {\ct SPEC}        & See Section~\ref{info:SPEC}                  \\ \hline
+{\ct CONDUCTIVITY}              & {\ct MISC}    & {\ct CONDUCTIVITY}                          &   {\ct SPEC}        & See Section~\ref{info:SPEC}                  \\ \hline
+{\ct CO\_PRODUCTION}            & {\ct MISC}    & {\ct CO\_PRODUCTION}                        &   {\ct REAC}        & See Section~\ref{info:CO}                    \\ \hline
 {\ct HUMIDITY}                  & {\ct MISC}    & {\ct HUMIDITY}                              &   {\ct SPEC}        & See Section~\ref{info:SPEC}                  \\ \hline
 {\ct ISOTHERMAL}                & {\ct MISC}    & Eliminated                                  &                     &                                              \\ \hline
 {\ct MAXIMUM\_MASS\_FRACTION}   & {\ct CLIP}    & Eliminated                                  &                     &                                              \\ \hline
 {\ct MINIMUM\_MASS\_FRACTION}   & {\ct CLIP}    & Eliminated                                  &                     &                                              \\ \hline
+{\ct MW}                        & {\ct MISC}    & {\ct MW}                                    &   {\ct SPEC}        & See Section~\ref{info:SPEC}                  \\ \hline
 {\ct NU\_FUEL}                  & {\ct MATL}    & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
 {\ct NU\_GAS}                   & {\ct MATL}    & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
 {\ct NU\_RESIDUE}               & {\ct MATL}    & {\ct NU\_MATL}                              &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
@@ -10750,6 +10756,8 @@ FDS 5 Parameter & Namelist  & FDS 6 Parameter & Namelist  & Notes \\
 {\ct RADIATION}                 & {\ct MISC}    & {\ct RADIATION}                             &   {\ct RADI}        & Same functionality                           \\ \hline
 {\ct RESIDUE}                   & {\ct MATL}    & {\ct MATL\_ID}                              &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
 {\ct STATE\_FILE}               & {\ct DUMP}    & Eliminated                                  &                     &                                              \\ \hline
+{\ct SUPPRESSION}               & {\ct MISC}    & {\ct SUPPRESSION}                           &   {\ct REAC}        & See Section~\ref{info:extinction}            \\ \hline
+{\ct VISCOSITY}                 & {\ct MISC}    & {\ct VISCOSITY}                             &   {\ct SPEC}        & See Section~\ref{info:SPEC}                  \\ \hline
 \end{longtable}
 
 
