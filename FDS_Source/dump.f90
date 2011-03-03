@@ -1204,6 +1204,7 @@ IF (RENDER_FILE/='null') THEN
 ENDIF
 
 ! Write out smoke albedo
+
 WRITE(LU_SMV,'(/A)') 'ALBEDO'
 WRITE(LU_SMV,'(F13.5)') SMOKE_ALBEDO
 

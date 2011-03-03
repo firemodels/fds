@@ -1578,6 +1578,7 @@ the number of which depends on the desired resolution of the flow dynamics.
 {\ct MESH} is the namelist group that defines the computational domain.
 
 \subsection{Basics}
+\label{info:MESH_Basics}
 
 A mesh is a single right parallelepiped, {\em i.e.} a box.
 The coordinate system within a mesh conforms to the right hand rule.
@@ -1603,7 +1604,7 @@ uniformity of the mesh (See Section~\ref{info:TRNX}).
 
 Any obstructions or vents that extend beyond the boundary of the mesh
 are cut off at the boundary. There is no penalty for defining objects
-outside of the mesh, and these objects will not appear in Smokeview.
+outside of the mesh, and these objects will not appear in Smokeview. 
 
 \begin{warning}
 \noindent
@@ -1682,7 +1683,7 @@ computers available, but be aware that two computers will not necessarily finish
 parallel version to work well, there has to be a comparable number of cells in each mesh, or otherwise most of the computers will sit idle
 waiting for the one with the largest mesh to finish processing each time step. You can use multiple meshes even when running the serial version of FDS,
 in which case one CPU will serially process each mesh, one by one. Why do this?
-For one, if you set \\ {\ct SYNCHRONIZE=.FALSE.} \\ on the {\ct TIME} line,
+For one, if you set {\ct SYNCHRONIZE=.FALSE.} on the {\ct TIME} line,
 then in each mesh, the governing equations will be solved with a time
 step based on the flow speed within that particular mesh. Because each
 mesh can have different time steps, this technique can save CPU time by
@@ -1725,6 +1726,12 @@ can communicate directly with each other without having to transmit data
 using MPI calls over the network. Same goes for `mesh5' and `mesh6'.
 In essence, it is as if these mesh pairs are neighbors and need not send mail to each other via the postal system. The letters can just be
 walked next door.
+
+For cases involving many meshes, you might want to assign them colors using either the character string {\ct COLOR} or the integer triplet {\ct RGB}. You may also
+want to consider using the multiplying feature to easily create a 3-D array of meshes. See Section~\ref{info:MULT} for details.
+
+Some parallel computing environments do not have a centralized file system, in which case FDS must write the output files for each process to a separate disk. If
+your computing cluster does not have a {\ct SHARED\_FILE\_SYSTEM}, then set this parameter to {\ct .FALSE.} on the {\ct MISC} line.
 
 
 \subsection{Mesh Alignment}
@@ -2008,11 +2015,13 @@ There are a number of special output quantities that provide local measures of g
 
 \subsection{Basics}
 
+\label{info:MISC_Basics}
+
 Only one {\ct MISC} line should be entered in the data file. For example, the input line
 
 \footnotesize
 \begin{verbatim}
-&MISC SURF_DEFAULT='CONCRETE',TMPA=25. /
+&MISC SURF_DEFAULT='CONCRETE', TMPA=25. /
 \end{verbatim}
 \normalsize
 
@@ -2028,6 +2037,9 @@ guide.
 \item[{\ct DNS}] A logical parameter that, if {\ct .TRUE.}, directs FDS to perform a Direct Numerical Simulation,
 as opposed to the default Large Eddy Simulation (LES). This feature is appropriate only for simulations that use mesh cells that are
 on the order of a millimeter or less in size, or for diagnostic purposes.
+\item[{\ct GAMMA}] Ratio of specific heats. Normally, FDS derives gas properties using look-up tables for known gases. However, sometimes there
+are declared gaseous species with no known properties, in which case FDS uses this parameter to estimate the specific heat and other properties. The default is
+1.4, based on an assumption of a perfect diatomic molecule like nitrogen.
 \item[{\ct GVEC}] The 3 components of gravity, in m/s$^2$. The default is {\ct GVEC=0,0,-9.81}.
 \item[{\ct NOISE}] FDS initializes the flow field with a very small amount of ``noise'' to prevent the
 development of a perfectly symmetric flow when the boundary
@@ -2173,17 +2185,12 @@ The pressure term is written like this so that a separable elliptic partial diff
 the pressure field from the previous time step, a slight approximation necessary to render the pressure equation separable.
 This term is sometimes referred to as the baroclinic torque, and it is responsible for
 generating vorticity due to the non-alignment of pressure and density gradients.
-For an LES calculation, it can be included by setting {\ct BAROCLINIC=.TRUE.} on the {\ct MISC} line. For DNS, it is included by default.
+In versions of FDS prior to 6, the inclusion of the baroclinic torque term was found to sometimes cause numerical
+instabilities. If it is suspected that the term is responsible for numerical problems, it can be removed by setting {\ct BAROCLINIC=.FALSE.} on the {\ct MISC} line.
 For example, in the simple helium plume test case below,
 neglecting the baroclinic torque changes the puffing behavior noticeably. In other applications, however, its effect is less significant.
 For further discussion of its effect, see Ref.~\cite{Xin:JSS2005}.
 
-\begin{warning}
-\noindent
-In versions of FDS prior to 5.5.0, {\ct BAROCLINIC=.FALSE.} was the default for LES.
-For FDS~5.5.0 and 5.5.1, however, {\ct BAROCLINIC} was set to {\ct .TRUE.} by default. Its use was responsible for numerical instabilities in a number
-of cases. In test versions of FDS~6, the problems do not occur, thus {\ct BAROCLINIC=.TRUE.} for test versions of FDS~6.
-\end{warning}
 
 
 
@@ -2274,12 +2281,12 @@ in a velocity of 10.09~m/s through the vent.  FDS computes a peak velocity of 10
 \subsection{Special Topic: Large Eddy Simulation Parameters}
 \label{info:LES}
 
-In default mode, FDS uses the Smagorinsky form of Large Eddy Simulation (LES) to model subgrid-scale turbulence.
+In default mode, FDS uses the dynamic form of the Smagorinsky Large Eddy Simulation (LES) to model subgrid-scale turbulence. 
 The viscosity $\mu$ is modeled
 \be \mu_{\hbox{\tiny LES}} = \rho \, (C_s\, \Delta)^2 \,
    \left(2 \; \overline{\bS}_{ij} : \overline{\bS}_{ij} - \frac{2}{3} (\nabla \cdot \overline{\bu})^2 \right)^\ha \ee
-where $C_s$ is an empirical constant and $\Delta$ is a length on the
-order of the size of a grid cell.
+where $C_s$ is a function of the local flow conditions and $\Delta$ is a length on the
+order of the size of a grid cell. 
 The bar above the various quantities denotes that these are the resolved, or {\em filtered}, values, meaning
 that they are computed on a numerical grid.
 The other diffusive parameters,
@@ -2289,9 +2296,20 @@ the thermal conductivity and material diffusivity, are related to the turbulent 
  (\rho D)_{l,\hbox{\tiny LES}} =\frac{\mu_{\hbox{\tiny LES}}}{\SC_t} \ee
 The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ are assumed to be
 constant for a given scenario. Although it is not recommended for most calculations, you can modify
-$C_s=0.2$, $\PR_t=0.5$, and $\SC_t=0.5$ via the parameters {\ct CSMAG}, {\ct PR}, and {\ct SC} on the {\ct MISC} line. A more detailed
+$\PR_t=0.5$, and $\SC_t=0.5$ via the parameters {\ct PR}, and {\ct SC} on the {\ct MISC} line. A more detailed
 discussion of these parameters is given in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 
+The dynamic form of LES is more costly than the constant coefficient form. To save on CPU time, you can try setting
+{\ct COMPUTE\_VISCOSITY\_TWICE} equal to {\ct .FALSE.} to force FDS to compute the viscosity only once per time step. You can
+also reduce the number of times that the dynamic coefficient, $C_s$, is computed by setting {\ct DSMAG\_FREQ} equal to an
+integer greater than or equal to 1. A value of 3, for example, means that $C_s$ should be computed every third time that the
+viscosity is computed.
+
+\begin{warning}
+\noindent
+To return to the non-dynamic form of LES used in FDS versions 1-5, set {\ct DYNSMAG=.FALSE.} on the {\ct MISC} line. You can change
+the empirical constant $C_s$ via {\ct CSMAG}. Its default value is 0.2.
+\end{warning}
 
 
 \subsection{Special Topic: Numerical Stability Parameters}
@@ -2402,6 +2420,12 @@ boundary or the largest error at a mesh interface. It is in units of m/s.
 If you set this, experiment with different values, and monitor the number of pressure iterations required at each time step to achieve your
 desired tolerance. The number of iterations are written out to the file {\bf CHID.out}. If you use a value that is too small, the CPU time required might be prohibitive.
 The maximum number of iterations per time step is given by {\ct MAX\_PRESSURE\_ITERATIONS}, also on the {\ct PRES} line. Its default value is 10000.
+
+There are two parameters on the {\ct PRES} line that control iterative procedures related to the coupling of velocity and pressure. One is
+called {\ct RELAXATION\_FACTOR} and its default value is 1. When there is an error in the normal component of velocity at a solid boundary, this
+parameter dictates that the correction be applied in 1 time step. If its value were 0.5, the correction would be applied in 2 time steps. A similar
+parameter is called {\ct PRESSURE\_RELAX\_FACTOR}. It controls the rate at which the pressures in adjacent compartments are brought into equilibrium following a
+breach. Its value is 0.2, meaning that equilibrium is achieved in roughly 5 time steps. 
 
 \subsubsection{Example Case: {\bf duct\_flow}}
 
@@ -3209,22 +3233,24 @@ obtained from a combination of natural and forced
 convection correlations
 \be \dq_c'' = h \; \Delta T
     \quad \hbox{W/m}^2 \quad ; \quad h =
-    \max \; \left[ \; C_1 \, |\Delta T|^\ot \; , \;
-            \frac{k}{L} \; C_2 \; \RE^\fofi \; \PR^\ot \;
+    \max \; \left[ \; C \, |\Delta T|^\ot \; , \;
+            \frac{k}{L} \; \NU
             \right]  \quad
     \hbox{W/m$^2$/K} \ee
 where $\Delta T$ is the difference between the wall and the gas temperature,
-$C_1$ is the coefficient for natural convection (1.52 for a horizontal surface
-and 1.31 for a vertical surface, by default) and $C_2$ is the coefficient for forced convection (0.037 by default, see \cite{Holman:1} Eq.~(5-85));
+$C$ is the coefficient for natural convection (1.52 for a horizontal surface
+and 1.31 for a vertical surface, by default). The Nusselt number, Nu, depends on the shape of the obstruction~\cite{Holman:1}:
+\be \NU = \left\{ \begin{array}{ll} 0.037 \; \RE^\fofi \; \PR^\ot & \hbox{Cartesian} \\
+                                    0.664 \; \RE^\ha \; \PR^\ot & \hbox{Cylindrical} \\
+                                    2 + 0.6 \; \RE^\ha \; \PR^\ot & \hbox{Spherical} \end{array} \right. \ee
 $L$ is a characteristic length related to the size of the physical
 obstruction; $k$ is the thermal conductivity of the
 gas, and the Reynolds $\RE$ and Prandtl $\PR$ numbers are based on the
-gas flowing
-past the obstruction. Since the Reynolds number is proportional to the
+gas flowing past the obstruction. Since the Reynolds number is proportional to the
 characteristic length, $L$, the heat transfer coefficient is weakly
 related to $L$ (for high $\RE$, $h \sim L^{-1/5}$). For this reason, $L$ is taken to be 1~m for most
-calculations. You can change the empirical coefficients using {\ct C\_HORIZONTAL} or {\ct C\_VERTICAL} for $C_1$ and
-{\ct C\_FORCED} for $C_2$, all of which are input on the {\ct MISC} line.
+calculations. You can change the empirical coefficients using {\ct C\_HORIZONTAL} or {\ct C\_VERTICAL} for $C$ and
+{\ct C\_FORCED}, {\ct C\_FORCED\_CYLINDER}, or {\ct C\_FORCED\_SPHERE} for the constant in the Nusselt number correlation, all of which are input on the {\ct MISC} line.
 
 \subsubsection{Changing the Convective Heat Transfer Coefficient}
 
@@ -5673,7 +5699,12 @@ the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and
 $\epsilon/k$ ({\ct EPSILONKLJ}) should be specified; or
 the {\ct VISCOSITY} (kg/m/s), {\ct CONDUCTIVITY} (W/m/K), and
 {\ct DIFFUSIVITY} (m$^2$/s) between the given species
-and the background species should be specified.
+and the background species should be specified. In the latter case, if you specify the gas properties directly, they will still
+be temperature dependent:
+\be \mu(T) = \mu_\infty \, \left( \frac{T}{T_\infty} \right)^{0.75} \quad ; \quad 
+    k(T) = k_\infty \, \left( \frac{T}{T_\infty} \right)^{0.75} \quad ; \quad 
+    D(T) = D_\infty \, \left( \frac{T}{T_\infty} \right)^{1.75}   \ee
+If you do not want to assume this temperature dependence, set {\ct CONSTANT\_PROPERTIES=.TRUE.} on the {\ct MISC} line.
 
 If the simulation does not involve the simple chemistry model -- either because no combustion is
 desired or if a finite rate reaction(s) is being specified (see Section~\ref{info:finite}) -- you can
@@ -6498,6 +6529,7 @@ the user may specify a constant value of the drag coefficient for a particle cla
 The {\ct USER\_DRAG\_COEFFICIENT} trumps the {\ct DRAG\_LAW}.
 
 \subsection{Velocity on Solid Surfaces}
+\label{info:surface_droplets}
 
 When a droplet strikes a solid surface, it sticks and is reassigned a new speed and direction. If the surface is
 horizontal, the direction is randomly chosen. If vertical, the direction is downwards.
@@ -6530,6 +6562,11 @@ of water droplets impinging on the top of a box followed by the cascading of wat
 \caption[Example of water cascading over solid obstructions.]{Smokeview rendering of the {\bf cascade} test case.}
 \label{cascade}
 \end{figure}
+
+\begin{warning}
+\noindent If you do not want droplets to accumulate on solid surfaces, set {\ct ALLOW\_UNDERSIDE\_DROPLETS=.FALSE.} on the
+{\ct MISC} line. It is normally true.
+\end{warning}
 
 
 
@@ -9840,17 +9877,19 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct MESH} (Mesh Parameters)} \\
 \hline \hline
 \endhead
-{\ct COLOR}       & Character                   & Mesh Line Color                             &    & {\ct 'BLACK'}    \\ \hline
-{\ct CYLINDRICAL} & Logical                     & 2-D Axi-symmetric calculation               &    & {\ct .FALSE.}    \\ \hline
-{\ct ID}          & Character                   & MESH IDentifier                             &    &                  \\ \hline
-{\ct IJK}         & Integer Triplet             & No. cells in $x$, $y$, and $z$ directions   &    & 10               \\ \hline
-%{\ct LEVEL}        & Integer                    & Level in EMBedded mesh hierarchy            &    & 0                \\ \hline
-{\ct MPI\_PROCESS} & Integer                    & See Section~\ref{info:multimesh}            &    &    \\ \hline
-{\ct RGB}         & Integer Triplet             & Color indices (0-255)                       &    & 0,0,0            \\ \hline
-{\ct MULT\_ID }   & Character                   & See Section~\ref{info:MULT}                 &    &               \\ \hline
-{\ct SYNCHRONIZE} & Logical                     & Sync. time steps of multiple meshes         &    & {\ct .TRUE.}     \\ \hline
-{\ct XB(6)}       & Real Sextuplet              & Min/Max Coordinates of the MESH             & m  & 0,1,0,1,0,1      \\ \hline
-%{\ct EVAC_Z_OFFSET} & Real                      & Floor level vs evacuation mesh $z$&  m & 1.0  \\ \hline
+{\ct COLOR}             & Character                     & See Section~\ref{info:multimesh}              &    & {\ct 'BLACK'}    \\ \hline
+{\ct CYLINDRICAL}       & Logical                       & See Section~\ref{info:2D}                     &    & {\ct .FALSE.}    \\ \hline
+{\ct EVAC\_HUMANS}      & Logical                       & See FDS+Evac User's Guide                     &    & {\ct .FALSE.}    \\ \hline
+{\ct EVACUATION}        & Logical                       & See FDS+Evac User's Guide                     &    & {\ct .FALSE.}    \\ \hline
+{\ct EVAC\_Z\_OFFSET}   & Real                          & See FDS+Evac User's Guide                     & m  & 1                \\ \hline
+{\ct ID}                & Character                     & Identification tag                            &    &                  \\ \hline
+{\ct IJK}               & Integer Triplet               & See Section~\ref{info:MESH_Basics}            &    & 10,10,10         \\ \hline
+{\ct LEVEL}             & Integer                       & For future use                                &    & 0                \\ \hline
+{\ct MPI\_PROCESS}      & Integer                       & See Section~\ref{info:multimesh}              &    &                  \\ \hline
+{\ct RGB}               & Integer Triplet               & See Section~\ref{info:multimesh}              &    & 0,0,0            \\ \hline
+{\ct MULT\_ID }         & Character                     & See Section~\ref{info:MULT}                   &    &                  \\ \hline
+{\ct SYNCHRONIZE}       & Logical                       & See Section~\ref{info:multimesh}              &    & {\ct .TRUE.}     \\ \hline
+{\ct XB(6)}             & Real Sextuplet                & See Section~\ref{info:MESH_Basics}            & m  & 0,1,0,1,0,1      \\ \hline
 \end{longtable}
 
 
@@ -9875,66 +9914,85 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct MISC} (Miscellaneous Parameters)} \\
 \hline \hline
 \endhead
-{\ct \footnotesize ALLOW\_UNDERSIDE\_DROPLETS} & Logical & See Section~\ref{info:controlling_droplets}    &               & {\ct .FALSE.}    \\ \hline
-{\ct \footnotesize ASSUMED\_GAS\_TEMPERATURE} & Real & See Section~\ref{solid_phase_verification}    &               &                   \\ \hline
-{\ct BAROCLINIC}                & Logical       & Baroclinic torque correction                  &               & {\ct .TRUE.}     \\ \hline
-{\ct BNDF\_DEFAULT}             & Logical       & See Section~\ref{info:BNDF}                   &               & {\ct .TRUE.}      \\ \hline
-{\ct CFL\_MAX}                  & Real          & See Section~\ref{info:CFL}                    &               & 1.0               \\ \hline
-{\ct CFL\_MIN}                  & Real          & See Section~\ref{info:CFL}                    &               & 0.8               \\ \hline
-%{\ct CFL\_VELOCITY\_NORM}       & Integer       & Select velocity norm used in CFL calculation  &               & 0                \\ \hline
-%{\ct CHECK\_POISSON}            & Logical       & Poisson solver diagnostic print out           &               & {\ct .FALSE.}     \\ \hline
-%{\ct CHECK\_VOLUME\_FLOW}       & Logical       & Multiple mesh diagnostic                      &               & {\ct .FALSE.}     \\ \hline
-%{\ct CHECK\_KINETIC\_ENERGY}    & Logical       & Estimate unresolved (subgrid) kinetic energy  &               & {\ct .FALSE.}     \\ \hline
-%{\ct CHECK\_MU\_DNS}            & Logical       & Store molecular dynamic viscosity             &               & {\ct .FALSE.}     \\ \hline
-{\ct C\_FORCED}                 & Real          & See Section~\ref{info:convection}             &               & 0.037             \\ \hline
-{\ct C\_HORIZONTAL}             & Real          & See Section~\ref{info:convection}             &               & 1.52             \\ \hline
-{\ct C\_VERTICAL}               & Real          & See Section~\ref{info:convection}             &               & 1.31             \\ \hline
-{\ct CSMAG}                     & Real          & Smagorinsky constant                          &               & 0.20              \\ \hline
-%{\ct COMPUTE\_VISCOSITY\_TWICE} & Logical       & Compute twice per time step                   &               & {\ct .TRUE.}     \\ \hline
-%{\ct CONSTANT\_PROPERTIES}      & Logical       & Use exact fluid properties, not from table    &               & {\ct .FALSE.}     \\ \hline
-{\ct DNS}                       & Logical       & Direct Numerical Simulation                   &               & {\ct .FALSE.}     \\ \hline
-%{\ct DYNSMAG}                   & Logical       & Dynamic Smagorinsky model                     &               & {\ct .FALSE.}     \\ \hline
-%{\ct DSMAG\_FREQ}               & Integer       & Call DYNSMAG every DSMAG_FREQ time steps      &               & 1                 \\ \hline
-%{\ct EVAC\_PRESSURE\_ITERATIONS}& Character     & Pressure solves for Evac Model                &               &                   \\ \hline
-%{\ct EVAC\_SURF\_DEFAULT}       & Character     & Default SURFace type for Evac Model           &               & {\ct 'INERT'}     \\ \hline
-%{\ct EVAC\_TIME\_ITERATIONS}    & Character     & Time iterations for Evac Model                &               &                   \\ \hline
-%{\ct FDS6}                      & Logical       & FDS 6.0 expected default parameters turned on &               & {\ct .FALSE.}     \\ \hline
-%{\ct FISHPAK\_BC(3)}            & Integer       & Override FFT solver boundary conditions       &               & -1                \\ \hline
-%{\ct FLUX\_LIMITER}             & Integer       & Scalar transport scheme                       &               & -1                \\ \hline
-%{\ct FORCE\_VECTOR(3)}          & Real          & Uniform volumetric momentum source vector     &               & 0.                \\ \hline
-%{\ct FREEZE\_VELOCITY}          & Logical       & Do not update momentum equation               &               & {\ct .FALSE.}     \\ \hline
-%{\ct GAMMA}                     & Real          & Ratio of specific heats                       &               & 1.4               \\ \hline
-{\ct GROUND\_LEVEL}             & Real          & See Section~\ref{info:stratification}         & m             & 0.                  \\ \hline
-{\ct GVEC}                      & Real triplet  & Gravity vector                                & m/s$^2$       & 0,0,-9.81         \\ \hline
-{\ct H\_EDDY}                   & Logical       & See Section~\ref{info:convection}             &               & {\ct .FALSE.}     \\ \hline
-{\ct LAPSE\_RATE}               & Real          & See Section~\ref{info:stratification}         &  $^\circ$C/m  & 0                 \\ \hline
-{\ct LES}                       & Logical       & Large Eddy Simulation                         &               & {\ct .TRUE.}      \\ \hline
-{\ct NOISE}                     & Logical       & Toggle initial noise on and off               &               & {\ct .TRUE.}      \\ \hline
-%{\ct NSTRATA}                   & Logical       & No. bins for droplet distribution             &               & 7                 \\ \hline
-{\ct OVERWRITE}                 & Logical       & Prevevts overwriting of output files               &               & {\ct .TRUE.}      \\ \hline
-{\ct PR}                        & Real          & Prandtl number (LES only)                     &               & 0.5               \\ \hline
-{\ct P\_INF}                    & Real          & Ambient pressure                              & Pa            & 101325            \\ \hline
-%{\ct PERIODIC\_TEST}           & Integer       & Initial condition for verification test       &               & 0                 \\ \hline
-{\ct POROUS\_FLOOR}             & Logical       & See Section~\ref{info:sprinklers}             &               & {\ct .TRUE.}      \\ \hline
+%{\ct AL2O3}                     & Logical      &                                                            &               & {\ct .FALSE.}    \\ \hline
+{\ct \footnotesize ALLOW\_SURFACE\_DROPLETS}  & Logical & See Section~\ref{info:surface_droplets}           &               & {\ct .TRUE.}    \\ \hline
+{\ct \footnotesize ALLOW\_UNDERSIDE\_DROPLETS}  & Logical & See Section~\ref{info:surface_droplets}         &               & {\ct .FALSE.}    \\ \hline
+{\ct \footnotesize ASSUMED\_GAS\_TEMPERATURE}   & Real & See Section~\ref{solid_phase_verification}         &               &                   \\ \hline
+{\ct BAROCLINIC}                & Logical       & See Section~\ref{baroclinic_torque}                       &               & {\ct .TRUE.}     \\ \hline
+{\ct BNDF\_DEFAULT}             & Logical       & See Section~\ref{info:BNDF}                               &               & {\ct .TRUE.}      \\ \hline
+{\ct CFL\_MAX}                  & Real          & See Section~\ref{info:CFL}                                &               & 1.0               \\ \hline
+{\ct CFL\_MIN}                  & Real          & See Section~\ref{info:CFL}                                &               & 0.8               \\ \hline
+%{\ct CFL\_VELOCITY\_NORM}       & Integer       & Select velocity norm used in CFL calculation              &               & 0                \\ \hline
+%{\ct CHECK\_KINETIC\_ENERGY}    & Logical       & Estimate unresolved (subgrid) kinetic energy              &               & {\ct .FALSE.}     \\ \hline
+%{\ct CHECK\_MU\_DNS}            & Logical       & Store molecular dynamic viscosity                         &               & {\ct .FALSE.}     \\ \hline
+%{\ct CHECK\_GR}                 & Logical       &                                                           &               & {\ct .FALSE.}     \\ \hline
+%{\ct CHECK\_VN}                 & Logical       &                                                           &               & {\ct .FALSE.}     \\ \hline
+{\ct C\_FORCED}                 & Real          & See Section~\ref{info:convection}                         &               & 0.037             \\ \hline
+{\ct C\_FORCED\_CYLINDER}       & Real          & See Section~\ref{info:convection}                         &               & 0.664             \\ \hline
+{\ct C\_FORCED\_SPHERE }        & Real          & See Section~\ref{info:convection}                         &               & 0.600             \\ \hline
+{\ct C\_HORIZONTAL}             & Real          & See Section~\ref{info:convection}                         &               & 1.52             \\ \hline
+{\ct C\_VERTICAL}               & Real          & See Section~\ref{info:convection}                         &               & 1.31             \\ \hline
+%{\ct CLIP\_MASS\_FRACTION}      & Logical       &                                                           &               & {\ct .FALSE.}     \\ \hline
+{\ct CSMAG}                     & Real          & See Section~\ref{info:LES}                                &               & 0.20              \\ \hline
+{\ct COMPUTE\_VISCOSITY\_TWICE} & Logical       & See Section~\ref{info:LES}                                &               & {\ct .TRUE.}     \\ \hline
+{\ct CONSTANT\_PROPERTIES}      & Logical       & See Section~\ref{gas_species_props}                       &               & {\ct .FALSE.}     \\ \hline
+%{\ct DEBUG\_OPENMP}             & Logical       & Debug flag for OpenMP                                     &               & {\ct .FALSE.}     \\ \hline
+{\ct DNS}                       & Logical       & See Section~\ref{info:MISC_Basics}                        &               & {\ct .FALSE.}     \\ \hline
+{\ct DYNSMAG}                   & Logical       & See Section~\ref{info:LES}                                &               & {\ct .FALSE.}     \\ \hline
+{\ct DSMAG\_FREQ}               & Integer       & See Section~\ref{info:LES}                                &               & 1                 \\ \hline
+{\ct EVAC\_PRESSURE\_ITERATIONS}& Character     & See FDS+Evac User's Guide                                 &               &                   \\ \hline
+{\ct EVAC\_SURF\_DEFAULT}       & Character     & See FDS+Evac User's Guide                                 &               & {\ct 'INERT'}     \\ \hline
+{\ct EVAC\_TIME\_ITERATIONS}    & Character     & See FDS+Evac User's Guide                                 &               &                   \\ \hline
+{\ct EVACUATION\_DRILL}         & Logical       & See FDS+Evac User's Guide                                 &               & {\ct .FALSE.}     \\ \hline
+{\ct EVACUATION\_MC\_MODE}      & Logical       & See FDS+Evac User's Guide                                 &               & {\ct .FALSE.}     \\ \hline
+%{\ct FISHPAK\_BC(3)}            & Integer       & Override FFT solver boundary conditions                   &               & -1                \\ \hline
+%{\ct FLUX\_LIMITER}             & Integer       & Scalar transport scheme                                   &               & -1                \\ \hline
+%{\ct FORCE\_VECTOR(3)}          & Real          & Uniform volumetric momentum source vector                 &               & 0.                \\ \hline
+%{\ct FREEZE\_VELOCITY}          & Logical       & Do not update momentum equation                           &               & {\ct .FALSE.}     \\ \hline
+{\ct GAMMA}                     & Real          & See Section~\ref{info:MISC_Basics}                        &               & 1.4               \\ \hline
+{\ct GROUND\_LEVEL}             & Real          & See Section~\ref{info:stratification}                     & m             & 0.                  \\ \hline
+{\ct GVEC}                      & Real triplet  & See Section~\ref{info:GVEC}                               & m/s$^2$       & 0,0,-9.81         \\ \hline
+{\ct H\_EDDY}                   & Logical       & See Section~\ref{info:convection}                         &               & {\ct .FALSE.}     \\ \hline
+%{\ct IMMERSED\_BOUNDARY\_METHOD} & Logical       &                                                           &               & {\ct .FALSE.}     \\ \hline
+{\ct LAPSE\_RATE}               & Real          & See Section~\ref{info:stratification}                     &  $^\circ$C/m  & 0                 \\ \hline
+{\ct LES}                       & Logical       & See Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
+{\ct NOISE}                     & Logical       & See Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
+{\ct NO\_EVACUATION}            & Logical       & See FDS+Evac User's Guide                                 &               & {\ct .FALSE.}     \\ \hline
+%{\ct NSTRATA}                   & Logical       & No. bins for droplet distribution                         &               & 7                 \\ \hline
+{\ct OVERWRITE}                 & Logical       & See Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
+%{\ct PARTICLE\_CFL}             & Logical       &                                                           &               & {\ct .FALSE.}    \\ \hline
+%{\ct PARTICLE\_CFL\_MAX}        & Integer       &                                                           &               & 1                \\ \hline
+{\ct PR}                        & Real          & See Section~\ref{info:LES}                                &               & 0.5               \\ \hline
+{\ct P\_INF}                    & Real          & See Section~\ref{info:MISC_Basics}                        & Pa            & 101325            \\ \hline
+%{\ct PERIODIC\_TEST}           & Integer       & Initial condition for verification test                    &               & 0                 \\ \hline
+{\ct POROUS\_FLOOR}             & Logical       & See Section~\ref{info:sprinklers}                         &               & {\ct .TRUE.}      \\ \hline
 %{\ct PROJECTION}                & Logical       & Use formal projection method (eliminates initial divergence errors) &               & {\ct .FALSE.}     \\ \hline
-{\ct RAMP\_GX}                  & Character     & Time function, $x$ comp. of gravity           &               &                   \\ \hline
-{\ct RAMP\_GY}                  & Character     & Time function, $y$ comp. of gravity           &               &                   \\ \hline
-{\ct RAMP\_GZ}                  & Character     & Time function, $z$ comp. of gravity           &               &                   \\ \hline
-%{\ct RELAXATION\_FACTOR}        & Real          & Pressure solver parameter                     &               & 1.0               \\ \hline
-{\ct RESTART}                   & Logical       & Restart previous calculation                  &               & {\ct .FALSE.}     \\ \hline
-{\ct RESTART\_CHID}             & Character     & Restart file CHID                             &               & {\ct CHID}        \\ \hline
-{\ct SC}                        & Real          & Schmidt number (LES only)                     &               & 0.5               \\ \hline
-{\ct SOLID\_PHASE\_ONLY}        & Logical       & See Section~\ref{solid_phase_verification}    &               & {\ct .FALSE.}     \\ \hline
-{\ct STRATIFICATION}            & Logical       & See Section~\ref{info:stratification}         &               & {\ct .TRUE.}      \\ \hline
-{\ct SURF\_DEFAULT}             & Character     & Default SURFace type                          &               & {\ct 'INERT'}     \\ \hline
-{\ct TEXTURE\_ORIGIN(3)}        & Char.~Triplet & See Section~\ref{info:texture_map}            & m             & (0.,0.,0.)        \\ \hline
-{\ct THICKEN\_OBSTRUCTIONS}     & Logical       & See Section~\ref{info:OBST}                   &               & {\ct .FALSE.}     \\ \hline
-{\ct TMPA}                      & Real          & Ambient Temperature                           & $^\circ$C     & 20.               \\ \hline
-%{\ct TURB\_INIT}                & Logical       & Write `ini\_salsa.dat' for turb_init.exe      &               & {\ct .FALSE.}     \\ \hline
-{\ct U0,V0,W0}                  & Reals         & Prevailing velocity field                     & m/s           & 0.                \\ \hline
-{\ct VN\_MAX}                   & Real          & See Section~\ref{info:CFL}                    &               & 1.0               \\ \hline
-{\ct VN\_MIN}                   & Real          & See Section~\ref{info:CFL}                    &               & 0.8               \\ \hline
+{\ct RAMP\_GX}                  & Character     & See Section~\ref{info:GVEC}                               &               &                   \\ \hline
+{\ct RAMP\_GY}                  & Character     & See Section~\ref{info:GVEC}                               &               &                   \\ \hline
+{\ct RAMP\_GZ}                  & Character     & See Section~\ref{info:GVEC}                               &               &                   \\ \hline
+{\ct RESTART}                   & Logical       & See Section~\ref{info:restart}                            &               & {\ct .FALSE.}     \\ \hline
+{\ct RESTART\_CHID}             & Character     & See Section~\ref{info:restart}                            &               & {\ct CHID}        \\ \hline
+{\ct SC}                        & Real          & See Section~\ref{info:LES}                                &               & 0.5               \\ \hline
+{\ct SHARED\_FILE\_SYSTEM}      & Logical       & See Section~\ref{info:multimesh}                          &               & {\ct .TRUE.}      \\ \hline
+{\ct SOLID\_PHASE\_ONLY}        & Logical       & See Section~\ref{solid_phase_verification}                &               & {\ct .FALSE.}     \\ \hline
+{\ct SMOKE\_ALBEDO}             & Real          & See Smokeview User's Guide                                &               & 0.3               \\ \hline
+%{\ct STORE\_MU\_DNS}            & Logical       &                                                           &               & {\ct .FALSE.}      \\ \hline
+{\ct STRATIFICATION}            & Logical       & See Section~\ref{info:stratification}                     &               & {\ct .TRUE.}      \\ \hline
+{\ct SURF\_DEFAULT}             & Character     & See Section~\ref{info:MISC_Basics}                        &               & {\ct 'INERT'}     \\ \hline
+{\ct TERRAIN\_CASE}             & Logical       & See Wildland Fire User's Guide                            &               & {\ct .FALSE.}     \\ \hline
+{\ct TEXTURE\_ORIGIN(3)}        & Char.~Triplet & See Section~\ref{info:texture_map}                        & m             & (0.,0.,0.)        \\ \hline
+{\ct THICKEN\_OBSTRUCTIONS}     & Logical       & See Section~\ref{info:OBST}                               &               & {\ct .FALSE.}     \\ \hline
+{\ct TMPA}                      & Real          & See Section~\ref{info:MISC_Basics}                         & $^\circ$C     & 20.               \\ \hline
+%{\ct TURB\_INIT}                & Logical       & Write `ini\_salsa.dat' for turb_init.exe                 &               & {\ct .FALSE.}     \\ \hline
+{\ct U0,V0,W0}                  & Reals         & See Section~\ref{info:MISC_Basics}                        & m/s           & 0.                \\ \hline
+{\ct VN\_MAX}                   & Real          & See Section~\ref{info:CFL}                                &               & 1.0               \\ \hline
+{\ct VN\_MIN}                   & Real          & See Section~\ref{info:CFL}                                &               & 0.8               \\ \hline
+{\ct WIND\_ONLY}                & Logical       & See Wildland Fire User's Guide                            &               & {\ct .FALSE.}     \\ \hline
 \end{longtable}
+
+%Undocumented: H_LOGLAW, H_CHILTON_COLBURN, LIMITING_DT_RATIO, VAN_DRIEST, HRRPUVCUT_MAX, RUN_AVG_FAC, THERMOPHORETIC_DEPOSITION, TURBULENT_DEPOSITION,
+%               VEG_LEVEL_SET, CP_FTMP, HRRPUV_MAX_SMV, TERRAIN_IMAGE,N EW_EVAP, SCALAR_ENERGY_TOLERANCE, TKE_TOLERANCE, MEAN_FORCING, RFAC_FORCING, USE_MAX_FILTER_WIDTH, 
+%               WFDS,PATCH_VELOCITY,UVW_FILE,VREMAN_EDDY_VISCOSITY,BUOYANCY_PRODUCTION
 
 
 \vspace{\baselineskip}
@@ -10096,7 +10154,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct PRES} (Pressure Solver Parameters)} \\
 \hline \hline
 \endhead
+{\ct CHECK\_POISSON}                & Logical       & See Section~\ref{info:PRES}           &               & {\ct .FALSE.}         \\ \hline
 {\ct MAX\_PRESSURE\_ITERATIONS}     & Integer       & See Section~\ref{info:PRES}           &               &   10000                \\ \hline
+{\ct PRESSURE\_RELAX\_FACTOR}       & Real          & See Section~\ref{info:PRES}           &               & 0.2                       \\ \hline
+{\ct RELAXATION\_FACTOR}            & Real          & See Section~\ref{info:PRES}           &               & 1.0                       \\ \hline
 {\ct VELOCITY\_TOLERANCE}           & Real          & See Section~\ref{info:PRES}           &  m/s          &                        \\ \hline
 \end{longtable}
 
@@ -10676,12 +10737,16 @@ FDS 5 Parameter & Namelist  & FDS 6 Parameter & Namelist  & Notes \\
 FDS 5 Parameter & Namelist  & FDS 6 Parameter & Namelist  & Notes \\
 \hline
 \endhead
+{\ct BACKGROUND\_SPECIES}       & {\ct MISC}    & {\ct BACKGROUND=.TRUE.}                     &   {\ct SPEC}        & See Section~\ref{info:SPEC}                  \\ \hline
+{\ct HUMIDITY}                  & {\ct MISC}    & {\ct HUMIDITY}                              &   {\ct SPEC}        & See Section~\ref{info:SPEC}                  \\ \hline
+{\ct ISOTHERMAL}                & {\ct MISC}    & Eliminated                                  &                     &                                              \\ \hline
 {\ct MAXIMUM\_MASS\_FRACTION}   & {\ct CLIP}    & Eliminated                                  &                     &                                              \\ \hline
 {\ct MINIMUM\_MASS\_FRACTION}   & {\ct CLIP}    & Eliminated                                  &                     &                                              \\ \hline
 {\ct NU\_FUEL}                  & {\ct MATL}    & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
 {\ct NU\_GAS}                   & {\ct MATL}    & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
 {\ct NU\_RESIDUE}               & {\ct MATL}    & {\ct NU\_MATL}                              &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
 {\ct NU\_WATER}                 & {\ct MATL}    & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
+{\ct PRESSURE\_CORRECTION}      & {\ct MISC}    & Eliminated                                  &                     &                                              \\ \hline
 {\ct RADIATION}                 & {\ct MISC}    & {\ct RADIATION}                             &   {\ct RADI}        & Same functionality                           \\ \hline
 {\ct RESIDUE}                   & {\ct MATL}    & {\ct MATL\_ID}                              &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
 {\ct STATE\_FILE}               & {\ct DUMP}    & Eliminated                                  &                     &                                              \\ \hline
