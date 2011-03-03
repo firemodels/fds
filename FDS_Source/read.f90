@@ -1420,23 +1420,22 @@ END SUBROUTINE READ_MULT
 SUBROUTINE READ_MISC
 USE PHYSICAL_FUNCTIONS, ONLY : AMBIENT_WATER_VAPOR
 USE MATH_FUNCTIONS, ONLY: GET_RAMP_INDEX
-REAL(EB) :: C_HORIZONTAL,C_VERTICAL,FORCE_VECTOR(3)=0._EB,H_FIXED
+REAL(EB) :: C_HORIZONTAL,C_VERTICAL,FORCE_VECTOR(3)=0._EB
 CHARACTER(30) :: RAMP_GX,RAMP_GY,RAMP_GZ
-LOGICAL :: PRESSURE_CORRECTION=.FALSE.
-NAMELIST /MISC/ PR,SC,TMPA,GVEC,PRESSURE_RELAX_FACTOR,RELAXATION_FACTOR,FYI, &
+NAMELIST /MISC/ PR,SC,TMPA,GVEC,FYI, &
                 CSMAG,RAMP_GX,RAMP_GY,RAMP_GZ,BAROCLINIC, &
                 LAPSE_RATE, &
                 P_INF,SURF_DEFAULT,EVAC_SURF_DEFAULT, &
-                C_FORCED,C_FORCED_CYLINDER,C_FORCED_SPHERE,C_VERTICAL,C_HORIZONTAL,H_FIXED, &
+                C_FORCED,C_FORCED_CYLINDER,C_FORCED_SPHERE,C_VERTICAL,C_HORIZONTAL, &
                 RESTART,ASSUMED_GAS_TEMPERATURE, &
-                LES,DNS,NOISE, CONVECTION,GAMMA,BNDF_DEFAULT, &
+                LES,DNS,NOISE,GAMMA,BNDF_DEFAULT, &
                 U0,V0,W0, ALLOW_SURFACE_DROPLETS,&
                 ALLOW_UNDERSIDE_DROPLETS,POROUS_FLOOR, &
                 TEXTURE_ORIGIN,NSTRATA, &
                 THICKEN_OBSTRUCTIONS,PARTICLE_CFL_MAX, &
                 EVAC_PRESSURE_ITERATIONS,EVAC_TIME_ITERATIONS,EVACUATION_MC_MODE, &
                 EVACUATION_DRILL, NO_EVACUATION, &
-                PRESSURE_CORRECTION,CHECK_POISSON,STRATIFICATION,RESTART_CHID,PARTICLE_CFL, &
+                STRATIFICATION,RESTART_CHID,PARTICLE_CFL, &
                 CFL_MAX,CFL_MIN,VN_MAX,VN_MIN,SOLID_PHASE_ONLY,SMOKE_ALBEDO,GROUND_LEVEL, &
                 AL2O3,SHARED_FILE_SYSTEM, &
                 FLUX_LIMITER,FREEZE_VELOCITY,CFL_VELOCITY_NORM,PERIODIC_TEST, &
@@ -1463,7 +1462,6 @@ PR_AIR       = 0.7_EB
 K_AIR_0      = MU_AIR_0*CP_AIR_0/PR_AIR                            ! Thermal Conductivity of Air at 20 C (W/m/K)
 MW_AIR       = 1._EB/(Y_O2_INFTY/32._EB+(1._EB-Y_O2_INFTY)/28._EB) ! g/mol
 RHO_SOOT     = 1850._EB                                            ! Density of soot particle (kg/m3)
-SMOKE_ALBEDO = 0.3                                                 ! Albedo of smoke
 
 ! Empirical heat transfer constants
  
@@ -1473,8 +1471,6 @@ C_FORCED          = 0.037_EB ! Forced convection coefficient for plates
 C_FORCED_CYLINDER = 0.664_EB ! Forced convection coefficient for cylinders
 C_FORCED_SPHERE   = 0.6_EB   ! Forced convection coefficient for spheres
 PR_ONTH           = PR_AIR**ONTH
-
-H_FIXED                 = -1.      ! obsolete, moved to SURF
 ASSUMED_GAS_TEMPERATURE = -1000.   ! Assumed gas temperature, used for diagnostics
  
 ! Background parameters
@@ -1489,7 +1485,6 @@ RESTART_CHID   = CHID
 RESTART        = .FALSE.
 RADIATION      = .TRUE.
 CO_PRODUCTION  = .FALSE.
-CHECK_POISSON  = .FALSE.
 NOISE          = .TRUE.
 LES            = .TRUE.
 DNS            = .FALSE.
@@ -1525,7 +1520,6 @@ GVEC(1)              = 0._EB        ! x-component of gravity
 GVEC(2)              = 0._EB        ! y-component of gravity 
 GVEC(3)              = -GRAV        ! z-component of gravity 
 LAPSE_RATE           = 0._EB       
-RELAXATION_FACTOR    = 1.00_EB      ! Relaxation factor for no-flux
 NSTRATA              = 7            ! Number bins for drop dist.
 RUN_AVG_FAC          = 0.5
 THICKEN_OBSTRUCTIONS = .FALSE.
@@ -1560,8 +1554,6 @@ ENDIF
 BAROCLINIC=.TRUE.
 CHECK_VN=.TRUE.
 CHECK_GR=.TRUE.
-!!CLIP_MASS_FRACTION=.TRUE.
-!!RESTRICT_TIME_STEP=.FALSE.
 CP_FTMP=.TRUE.
 EXTINCTION2=.TRUE.
 SUPPRESSION_SEARCH=.FALSE. ! tied to EXTINCTION2=T
@@ -1621,16 +1613,6 @@ IF (RESTART) NOISE  = .FALSE.
  
 ! Min and Max values of species
  
-IF (H_FIXED>=0._EB) THEN
-   WRITE(MESSAGE,'(A)')  'ERROR: H_FIXED moved to SURF line'
-   CALL SHUTDOWN(MESSAGE)
-ENDIF 
-
-IF (PRESSURE_CORRECTION) THEN
-   WRITE(MESSAGE,'(A)')  'ERROR: PRESSURE_CORRECTION is a deprecated feature'
-   CALL SHUTDOWN(MESSAGE)
-ENDIF 
-
 IF (FLUX_LIMITER<0 .OR. FLUX_LIMITER>4) THEN
    WRITE(MESSAGE,'(A)')  'ERROR: Permissible values for FLUX_LIMITER=0,1,2,3,4'
    CALL SHUTDOWN(MESSAGE)
@@ -6010,7 +5992,8 @@ USE SCARC_SOLVER, ONLY: SCARC_METHOD   , SCARC_DEBUG     , SCARC_CASE , &
                         SCARC_MG_OMEGA , SCARC_CG_OMEGA  , SCARC_BICG_OMEGA  , SCARC_SM_OMEGA  , SCARC_CO_OMEGA  , &
                         SCARC_MG_NLDIFF
 
-NAMELIST /PRES/ VELOCITY_TOLERANCE,MAX_PRESSURE_ITERATIONS,PRESSIT_ACCELERATOR,PRESSIT_SCALE_FACTOR, &
+NAMELIST /PRES/ CHECK_POISSON,VELOCITY_TOLERANCE,MAX_PRESSURE_ITERATIONS,PRESSIT_ACCELERATOR,PRESSIT_SCALE_FACTOR, &
+                PRESSURE_RELAX_FACTOR,RELAXATION_FACTOR, &
                 SCARC_METHOD   , SCARC_DEBUG     , SCARC_CASE , &
                 SCARC_EPS_REL  , SCARC_EPS_DIVG  , SCARC_BREL , &
                 SCARC_MG_NIT   , SCARC_CG_NIT    , SCARC_BICG_NIT    , SCARC_SM_NIT    , SCARC_CO_NIT    , &

@@ -1477,13 +1477,6 @@ REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP=>NULL()
 TYPE(SURFACE_TYPE), POINTER :: SF
 REAL(EB) :: DUMMY,NU,DN,RE=0._EB
 
-! If convective heat transfer is turned off, just return
-
-IF (.NOT.CONVECTION) THEN
-   HEAT_TRANSFER_COEFFICIENT = 0._EB
-   RETURN
-ENDIF
-
 ! If the user wants a specified HTC, set it and return
 
 IF (H_FIXED >= 0._EB) THEN
