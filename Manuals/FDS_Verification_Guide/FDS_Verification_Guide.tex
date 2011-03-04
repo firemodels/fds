@@ -2267,27 +2267,34 @@ F & 150 & 1600 \tabularnewline
 
 \clearpage
 
-\section{Water Droplet Evaporation (\texorpdfstring{{\bf water\_evaporation}}{water\_evaporation}) }
+
+
+
+\section{Water Droplet Evaporation (\texorpdfstring{{\textbf{water\_evaporation}}}{water\_evaporation}) }
 \label{water_evaporation}
 
-The test cases called {\bf water\_evaporation\_x} involve stationary water droplets in a box with dimensions of 1~m on a side. The walls of the box are
-assumed adiabatic, meaning that there are no leaks or heat losses. The air within the box is stirred to maintain uniform conditions. 
+The three test cases called {\bf water\_evaporation\_x} involve stationary water droplets in a cubic box
+The walls of the box are
+assumed adiabatic, meaning that there are no leaks or heat losses. The air within the box is stirred to maintain uniform conditions. In each case, the numerical solutions are compared to analytical solutions.
 
-There are several different test cases. In the first case, the initial
+In the first case, the dimensions of the box are 1~m on a side, the initial
 air temperature is 200~$^\circ$C, the median volumetric diameter of the droplets is 200~$\mu$m, the water temperature is 20~$^\circ$C, and the total
 mass of water droplets is 0.01~kg. The initial mass fraction of water vapor is 0. 
-It is expected that the droplets will all evaporate within about 10~s. Figure~\ref{water_evaporation_1_plots} displays
-the average enthalpy, humidity, density, pressure, temperature and mass of water vapor of the gas within the box. The solid horizontal lines denote the expected
-steady-state values. The plot of enthalpy displays the change in enthalpy of both the droplets and the gas. 
-The change in the enthalpy of the water droplets should equal the change in the enthalpy of the gas minus the work
+It is expected that the droplets will all evaporate within about 10~s.
+
+Figures~\ref{water_evaporation_1_plots} to~\ref{water_evaporation_3_plots}  displays
+the average enthalpy, humidity, density, pressure, temperature and mass of water vapor of the gas within the box. 
+For the two last cases, the liquid water concentration is also plotted. The solid horizontal lines denote the expected steady-state values.
+
+In the first case, the analytical solution for the stationary state derives from the first principle of thermodynamics. The plot of enthalpy in~\ref{water_evaporation_1_plots} displays the change in enthalpy of both the droplets and the gas. The change in the enthalpy of the water droplets should equal the change in the enthalpy of the gas minus the work
 performed due to pressure. It is the internal energy of the system that is conserved. The internal energy can be expressed in terms of the
 enthalpy, pressure and density:
-\be e = h - \frac{p}{\rho} \ee
+\begin{equation} e = h - \frac{p}{\rho} \end{equation}
 In differential form:
-\be de = dh - \frac{1}{\rho} \; dp - p \; d \left(\frac{1}{\rho}
-\right) = dh - v \; dp - p \; dv \ee
+\begin{equation} de = dh - \frac{1}{\rho} \; dp - p \; d \left(\frac{1}{\rho}
+\right) = dh - v \; dp - p \; dv \end{equation}
 Multiplying by mass and noting that the volume, $V$, is constant yields:
-\be dE = dH - V \; dp \ee
+\begin{equation} dE = dH - V \; dp \end{equation}
 The enthalpy
 decrease of the liquid water droplets is equal to the enthalpy gain of the gas (both expressed in kJ) minus the
 pressure increase times the volume in
@@ -2306,6 +2313,44 @@ units of kPa and m$^3$, respectively.
 \caption[Sample case {\bf water\_evaporation\_1}.]{Output of the test case called {\bf water\_evaporation\_1}.}
 \label{water_evaporation_1_plots}
 \end{figure}
+
+In the second case, the dimensions of the box are 40~cm on a side, the initial
+air temperature is 500~$^\circ$C. There is only one water droplet in the box whose diameter is equal to 100000~$\mu$m and temperature  is 20~$^\circ$C. The initial mass fraction of water vapor is 0. It is expected to reach the saturation state. The analytical solution for the stationary state derives from the first principle of thermodynamics and the Clausius-Clapeyron equation by assuming that the liquid water temperature is equal to air temperature at the stationary state.
+
+\begin{figure}[ht]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_2_humidity} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_2_density}\\ 
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_2_temperature} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_2_pressure}\\ 
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_2_W_density}&
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_2_W_temperature} 
+\end{tabular*}
+\caption[Sample case {\bf water\_evaporation\_2}.]{Output of the test case called {\bf water\_evaporation\_2}.}
+\label{water_evaporation_2_plots}
+\end{figure}
+
+In the third case, the dimensions of the box are 1~m on a side, the initial
+air temperature is 500~$^\circ$C, the  initial diameter of all the droplets is 200~$\mu$m, the water temperature is 20~$^\circ$C, and the total mass of water droplets is 0.1~kg. The initial mass fraction of water vapor is 0. It is expected to reach the saturation state. As in the second case, the analytical solution for the stationary state derives from the first principle of thermodynamics and the Clausius-Clapeyron equation by assuming that the liquid water temperature is equal to air temperature at the stationary state. 
+
+\begin{figure}[ht]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_3_humidity} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_3_density}\\ 
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_3_temperature} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_3_pressure}\\ 
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_3_W_density}&
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_3_W_temperature} 
+\end{tabular*}
+\caption[Sample case {\bf water\_evaporation\_3}.]{Output of the test case called {\bf water\_evaporation\_3}.}
+\label{water_evaporation_3_plots}
+\end{figure}
+
+
+
+
 
 
 \chapter{Heating, Ventilating, and Air Conditioning (HVAC)}
