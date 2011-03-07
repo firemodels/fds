@@ -1512,7 +1512,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
          CYCLE PART_CLASS_LOOP
       ENDIF
 
-      ! Check to see of the particles/droplets evaporate
+      ! Check to see if the particles/droplets evaporate
       
       IF (.NOT.PC%EVAPORATE) CYCLE PART_CLASS_LOOP
       IF (PC%EVAP_INDEX/=EVAP_INDEX) CYCLE PART_CLASS_LOOP
