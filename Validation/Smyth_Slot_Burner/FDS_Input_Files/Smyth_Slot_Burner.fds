@@ -2,7 +2,7 @@
 
 &MESH XB=0.0,0.032,0.0,0.032,-0.003,0.045, IJK=64,64,96 / 
 
-&TIME TWFIN=4. /
+&TIME T_END=4. /
 
 &MISC TMPA=25., DNS=.TRUE. /
 
