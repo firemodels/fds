@@ -4,7 +4,7 @@ test device that uses IF, GE and AND operators
 
 &MESH IJK=8,8,16, XB=0.0,6.4,0.0,1.6,0.0,1.6/
 
-&TIME TWFIN=0.0/
+&TIME T_END=0.0/
 
 &PART ID='tracers',MASSLESS=.TRUE., SAMPLING_FACTOR=1 /  
 

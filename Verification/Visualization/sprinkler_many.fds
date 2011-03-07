@@ -3,7 +3,7 @@
 test of video cards ability to display many (15*15*31=6975 to be exact) sprinklers
   (and fds's ability to handle many devices)
 
-  run case with TWFIN=0.0
+  run case with T_END=0.0
 
 &MESH IJK=32,32,64, XB=0.0,1.6,0.0,1.6,0.0,3.2 /
 

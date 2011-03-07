@@ -8,7 +8,7 @@ This input file is for use with the fuel element model.
 cTRNZ IDERIV=1,CC=0.,PC=0.5 /
 cTRNZ IDERIV=2,CC=0.,PC=0.0 /
 
-&TIME TWFIN=0. /
+&TIME T_END=0. /
 
 &MISC BAROCLINIC=.TRUE.,TERRAIN_CASE=.FALSE.,WIND_ONLY=.FALSE. /
 

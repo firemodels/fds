@@ -1,5 +1,5 @@
 &HEAD CHID='capecod'  /
-&TIME TWFIN=0. /
+&TIME T_END=0. /
 &MISC / 
 &DUMP RENDER_FILE='Capecod.GE1' / 
 

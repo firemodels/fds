@@ -8,7 +8,7 @@
 &TRNZ IDERIV=2,CC=0.,PC=0.0 /
 
 -- Duration of simulation
-&TIME TWFIN=60. /
+&TIME T_END=60. /
 
 &MISC BAROCLINIC=.TRUE. /
 

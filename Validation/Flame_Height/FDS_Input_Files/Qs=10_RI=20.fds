@@ -1,7 +1,7 @@
 &HEAD CHID='Qs=10_RI=20', TITLE='Flame Height Test, Q*=10' /
 
 &MESH IJK=64,64,160, XB=-4.54,4.54,-4.54,4.54,-1.42,21.3 /
-&TIME TWFIN=50. /
+&TIME T_END=50. /
 &REAC C=3., H=8., SOOT_YIELD=0.015 /
 
 &SURF ID='burner', HRRPUA=15127., COLOR='RED' /  

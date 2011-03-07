@@ -7,7 +7,7 @@
       GVEC = 0.0, 0.0, 0.0 /
 &PRES VELOCITY_TOLERANCE=0.00001 /
 
-&TIME TWFIN = 2.0
+&TIME T_END = 2.0
       DT    = 1.0E-1 /
 
 &DUMP DT_PL3D=1E10 /

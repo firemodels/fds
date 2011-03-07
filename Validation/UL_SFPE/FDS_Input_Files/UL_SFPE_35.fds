@@ -3,7 +3,7 @@
 &MESH IJK= 100, 100, 106, XB=10.25,20.25,10.25,20.25,0.0,10.6 /
 &MESH IJK= 100, 100, 106, XB=10.25,20.25,20.25,30.25,0.0,10.6 / 
 
-&TIME TWFIN=300. / 
+&TIME T_END=300. / 
 
 &MATL ID                 = 'CEILING TILE'
       FYI                = 'Data as provided by UL'

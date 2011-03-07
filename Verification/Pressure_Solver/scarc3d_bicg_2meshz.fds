@@ -6,7 +6,7 @@
 &MISC NOISE=.FALSE.
       GVEC = 0.0, 0.0, 0.0 /
 
-&TIME TWFIN = 2.0
+&TIME T_END = 2.0
       DT    = 1.0E-1 /
 
 &PRES SCARC_METHOD      = 'BICG'

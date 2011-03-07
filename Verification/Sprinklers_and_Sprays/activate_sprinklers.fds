@@ -4,7 +4,7 @@
 &MESH IJK=21,10,10, XB=0.0,2.1,0.0,1.0,0.0,1.0 /
 
 * initial time step = 0.05 s, time when finished = 20 s
-&TIME DT=0.05, TWFIN=20. /
+&TIME DT=0.05, T_END=20. /
 
 * defines properties of sprinkler and nozzle, particles are individually identified for each, flow rate defined as 151.4 L/min, spray pattern defined in table1
 &PROP ID='Spr1', QUANTITY='SPRINKLER LINK TEMPERATURE', FLOW_RATE=151.4, PART_ID='water_drops', SPRAY_PATTERN_TABLE='TABLE2', /
