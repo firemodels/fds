@@ -9,7 +9,7 @@
 
 &INIT XB=0.2,1.4,0.2,1.4,0.5,2.2  TEMPERATURE=600.0 /
 
-&TIME TWFIN=40. /  Total simulation time
+&TIME T_END=40. /  Total simulation time
 
 &MATL ID                    = 'FABRIC'
       FYI                   = 'Properties completely fabricated'

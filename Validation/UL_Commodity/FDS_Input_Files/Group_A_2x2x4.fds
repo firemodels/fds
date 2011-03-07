@@ -1,7 +1,7 @@
 &HEAD CHID='Group_A_2x2x4', TITLE='UL Group A Plastic Calorimetry Test' /
 
 &MESH IJK=35,35,80, XB=-1.50,3.75,-1.50,3.75,0.00,12.00 /
-&TIME TWFIN=300. /
+&TIME T_END=300. /
 
 &RADI RADIATIVE_FRACTION=0.5 /
 

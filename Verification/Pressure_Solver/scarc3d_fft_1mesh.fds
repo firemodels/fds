@@ -5,7 +5,7 @@
 &MISC NOISE=.FALSE.
       GVEC = 0.0, 0.0, 0.0 /
 
-&TIME TWFIN = 2.0/
+&TIME T_END = 2.0/
 
 &DUMP DT_PL3D=1E10 /
 

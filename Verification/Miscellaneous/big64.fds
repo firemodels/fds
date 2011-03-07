@@ -7,7 +7,7 @@
 
 &DUMP NFRAMES=4000 /
 
-&TIME TWFIN=5. /  Total simulation time
+&TIME T_END=5. /  Total simulation time
 
 &MATL ID                    = 'FABRIC'
       FYI                   = 'Properties completely fabricated'

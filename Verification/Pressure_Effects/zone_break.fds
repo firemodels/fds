@@ -5,7 +5,7 @@ Each time a ZONE is opened, the pressure of the two connected ZONEs quickly equi
 
 &MESH IJK=50,50,12, XB=0.0,10.0,0.0,10.0,0.0,2.4 /
 
-&TIME TWFIN=30. / 
+&TIME T_END=30. / 
 
 &SURF ID='BLOW', MASS_FLUX(0)=1., COLOR='RED', RAMP_MF(0)='flow' / 
 &RAMP ID='flow', T= 0.0, F=0. /

@@ -8,7 +8,7 @@ xxxMESH IJK=160,30,60, XB=-4,12,-3,0,0,6 /
 &MESH IJK=40,30,60, XB= 8.0,12.0,-3.0,0.0,0.0,6.0 / 
 
 -- Duration of simulation
-&TIME TWFIN=100. /
+&TIME T_END=100. /
 
 &MISC BAROCLINIC=.TRUE. /
 
