@@ -53,11 +53,11 @@ USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY
 USE TURBULENCE, ONLY: VARDEN_DYNSMAG
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,SS,S12,S13,S23,DELTA,CS,YY_GET(1:N_GAS_SPECIES), &
-            DAMPING_FACTOR,MU_WALL,YPLUS,TMP_WGT,AA,A_IJ(3,3),BB,B_IJ(3,3),NU_EDDY,RHOT,RHOB,DRHODZ,DELTA_G
+            DAMPING_FACTOR,MU_WALL,YPLUS,TMP_WGT
 INTEGER :: I,J,K,ITMP,IIG,JJG,KKG,II,JJ,KK,IW
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),RHOP=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP=>NULL()
-REAL(EB), PARAMETER :: APLUS=26._EB,C_EDDY=0.07_EB,C_GRAV=1._EB
+REAL(EB), PARAMETER :: APLUS=26._EB
  
 CALL POINT_TO_MESH(NM)
  
@@ -143,65 +143,16 @@ IF (LES .OR. EVACUATION_ONLY(NM)) THEN
             DWDX = 0.25_EB*RDX(I)*(WW(I+1,J,K)-WW(I-1,J,K)+WW(I+1,J,K-1)-WW(I-1,J,K-1))
             DWDY = 0.25_EB*RDY(J)*(WW(I,J+1,K)-WW(I,J-1,K)+WW(I,J+1,K-1)-WW(I,J-1,K-1))
 
-            VREMAN_IF: IF (VREMAN_EDDY_VISCOSITY) THEN
-
-               ! A. W. Vreman. An eddy-viscosity subgrid-scale model for
-               ! turbulent shear flow: Algebraic theory and applications. Phys.
-               ! Fluids, 16(10):3670-3681, 2004.
-               
-               ! Vreman, Eq. (6)
-               A_IJ(1,1)=DUDX; A_IJ(2,1)=DUDY; A_IJ(3,1)=DUDZ
-               A_IJ(1,2)=DVDX; A_IJ(2,2)=DVDY; A_IJ(3,2)=DVDZ
-               A_IJ(1,3)=DWDX; A_IJ(2,3)=DWDY; A_IJ(3,3)=DWDZ
-
-               AA=1.E-10_EB
-               DO JJ=1,3
-                  DO II=1,3
-                     AA = AA + A_IJ(II,JJ)*A_IJ(II,JJ)
-                  ENDDO
-               ENDDO
-               
-               ! Vreman, Eq. (7)
-               B_IJ(1,1)=(DX(I)*A_IJ(1,1))**2 + (DY(J)*A_IJ(2,1))**2 + (DZ(K)*A_IJ(3,1))**2
-               B_IJ(2,2)=(DX(I)*A_IJ(1,2))**2 + (DY(J)*A_IJ(2,2))**2 + (DZ(K)*A_IJ(3,2))**2
-               B_IJ(3,3)=(DX(I)*A_IJ(1,3))**2 + (DY(J)*A_IJ(2,3))**2 + (DZ(K)*A_IJ(3,3))**2
-
-               B_IJ(1,2)=DX(I)**2*A_IJ(1,1)*A_IJ(1,2) + DY(J)**2*A_IJ(2,1)*A_IJ(2,2) + DZ(K)**2*A_IJ(3,1)*A_IJ(3,2)
-               B_IJ(1,3)=DX(I)**2*A_IJ(1,1)*A_IJ(1,3) + DY(J)**2*A_IJ(2,1)*A_IJ(2,3) + DZ(K)**2*A_IJ(3,1)*A_IJ(3,3)
-               B_IJ(2,3)=DX(I)**2*A_IJ(1,2)*A_IJ(1,3) + DY(J)**2*A_IJ(2,2)*A_IJ(2,3) + DZ(K)**2*A_IJ(3,2)*A_IJ(3,3)
-
-               BB = B_IJ(1,1)*B_IJ(2,2) - B_IJ(1,2)**2 &
-                  + B_IJ(1,1)*B_IJ(3,3) - B_IJ(1,3)**2 &
-                  + B_IJ(2,2)*B_IJ(3,3) - B_IJ(2,3)**2    ! Vreman, Eq. (8)
- 
-               NU_EDDY = C_EDDY*SQRT(BB/AA)  ! Vreman, Eq. (5)
-    
-               MU(I,J,K) = MU(I,J,K) + RHOP(I,J,K)*NU_EDDY
+            S12 = 0.5_EB*(DUDY+DVDX)
+            S13 = 0.5_EB*(DUDZ+DWDX)
+            S23 = 0.5_EB*(DVDZ+DWDY)
+            SS = SQRT(2._EB*(DUDX**2 + DVDY**2 + DWDZ**2 + 2._EB*(S12**2 + S13**2 + S23**2)))
             
-            ELSE VREMAN_IF
-
-               S12 = 0.5_EB*(DUDY+DVDX)
-               S13 = 0.5_EB*(DUDZ+DWDX)
-               S23 = 0.5_EB*(DVDZ+DWDY)
-               SS = SQRT(2._EB*(DUDX**2 + DVDY**2 + DWDZ**2 + 2._EB*(S12**2 + S13**2 + S23**2)))
-            
-               IF (DYNSMAG .AND. .NOT.EVACUATION_ONLY(NM)) THEN
-                  MU(I,J,K) = MU(I,J,K) + RHOP(I,J,K)*CSD2_DYNSMAG(I,J,K)*SS
-               ELSE
-                  MU(I,J,K) = MU(I,J,K) + RHOP(I,J,K)*(CS*DELTA)**2*SS
-               ENDIF
-
-            ENDIF VREMAN_IF
-
-            BUOYANCY_IF: IF (BUOYANCY_PRODUCTION .AND. GRAV>0._EB) THEN
-               RHOT=RHOP(I,J,K)
-               RHOB=RHOP(I,J,K)
-               IF (.NOT.SOLID(CELL_INDEX(I,J,K+1))) RHOT=0.5_EB*(RHOP(I,J,K)+RHOP(I,J,K+1))
-               IF (.NOT.SOLID(CELL_INDEX(I,J,K-1))) RHOB=0.5_EB*(RHOP(I,J,K)+RHOP(I,J,K-1))
-               DRHODZ = MAX(1.E-10_EB,RDZ(K)*(RHOT-RHOB))
-               DELTA_G = 2._EB/GRAV*(PR*CS**2*RHOP(I,J,K)*SS/DRHODZ/C_GRAV)**2
-               IF (DELTA > DELTA_G) MU(I,J,K) = C_GRAV*DELTA**3/PR*SQRT(GRAV/(2._EB*DELTA))*DRHODZ
-            ENDIF BUOYANCY_IF
+            IF (DYNSMAG .AND. .NOT.EVACUATION_ONLY(NM)) THEN
+               MU(I,J,K) = MU(I,J,K) + RHOP(I,J,K)*CSD2_DYNSMAG(I,J,K)*SS
+            ELSE
+               MU(I,J,K) = MU(I,J,K) + RHOP(I,J,K)*(CS*DELTA)**2*SS
+            ENDIF
 
          ENDDO
       ENDDO
