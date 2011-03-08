@@ -2591,7 +2591,7 @@ it is convenient to create a door or window using a {\ct HOLE}. For example, sup
 defined to fill this hole (presumably to be removed or colored differently or whatever) so
 long as the phrase {\ct PERMIT\_HOLE=.FALSE.} is included on the {\ct OBST} line. In general,
 any {\ct OBST}ruction can be made impenetrable to a {\ct HOLE} using this phrase. By default,
-{\ct PERMIT\_HOLE=.TRUE.}, meaning that an {\ct OBST}ruction is assumed to be penetrable unless otherwise directed. Note that if an penetrable  {\ct OBST}ruction 
+{\ct PERMIT\_HOLE=.TRUE.}, meaning that an {\ct OBST}ruction is assumed to be penetrable unless otherwise directed. Note that if an penetrable  {\ct OBST}ruction
 and an impenetrable  {\ct OBST}ruction overlap, the {\ct OBST}ruction with {\ct PERMIT\_HOLE=.FALSE.} should be listed first.
 \item If the obstruction is not to be removed or rejected for any reason, set {\ct REMOVABLE=.FALSE.} This is sometimes needed to stop
 FDS from removing the obstruction if it is embedded within another, like a door within a wall.
@@ -3148,12 +3148,13 @@ model to ensure that the phenomena of interest are being captured.
 
 
 \section{Basics}
+\label{info:SURF_MATL_Basics}
 
 By default, the outer boundary of the computational domain is assumed
 to be a solid boundary that is maintained at ambient temperature. The
 same is true for any obstructions that are added to the scene. To
 specify the properties of solids, use the namelist group {\ct SURF}
-(Section~\ref{info:SURF}). Starting in FDS~5, solids are assumed to
+(Section~\ref{info:SURF}). Solids are assumed to
 consist of layers which can be made of different materials.  The
 properties of each material required are designated via the {\ct MATL}
 namelist group (Section~\ref{info:MATL}).  These properties indicate how
@@ -3543,6 +3544,8 @@ layers for other surfaces.
 
 \subsection{Special Topic: Non-Planar Walls and Targets}
 
+\label{info:GEOMETRY}
+
 All obstructions in FDS are assumed to conform to the rectilinear
 mesh, and all bounding surfaces are assumed to be flat
 planes. However, many objects, like cables, pipes, and ducts, are not
@@ -3618,6 +3621,8 @@ words, you use these parameters to {\em specify} the burning rate.
 Note that all pyrolysis models in FDS require the user to explicitly define the gas phase reaction. See Chapter~\ref{chap:combustion} for details.
 
 \subsection{A Gas Burner with a Specified Heat Release Rate}
+
+\label{info:gas_burner}
 
 Solids and liquid fuels can be modeled by specifying their relevant
 properties via the {\ct MATL} namelist group. However, if you simply
@@ -3699,6 +3704,8 @@ expected.
 
 
 \subsection{Solid Fuels that Burn at a Specified Rate}
+
+\label{info:specified_burning}
 
 Real objects, like furnishings, office equipment, and so on, are
 often difficult to describe via the {\ct SURF} and {\ct MATL}
@@ -4449,7 +4456,8 @@ the solid phase calculation. Since there is no gas phase calculation
 that will limit the time step, it is best to control this yourself.
 \item Put {\ct H\_FIXED=0.} on the {\ct SURF} line. This turns off the
 convective heat flux from gas to surface and vis verse. The heat flux
-to the solid is specified via {\ct EXTERNAL\_FLUX} (kW/m$^2$) on the
+to the solid is specified via {\ct EXTERNAL\_FLUX}\footnote{You can control {\ct EXTERNAL\_FLUX} using
+either {\ct TAU\_EF} or {\ct RAMP\_EF}. See Section~\ref{info:RAMP} for more details.} (kW/m$^2$) on the
 {\ct SURF} line that is assigned to the solid surface. If you want to specify a particular
 convective heat flux to the solid surface, you can set {\ct ASSUMED\_GAS\_TEMPERATURE} on the
 {\ct MISC} line, along with a non-zero value of {\ct H\_FIXED} on {\ct SURF} in units of W/m$^2$/K.
@@ -4803,6 +4811,8 @@ are ejected at a velocity computed by FDS.
 
 \subsection{Total Mass Flux}
 
+\label{info:MASS_FLUX_TOTAL}
+
 Most often, you specify a simple supply or exhaust vent by setting either a normal velocity or volume flux at
 a solid surface. However, you may wish to control the mass flow rate (kg/s), as opposed to the volume flow
 rate (m$^3$/s), via the parameter {\ct MASS\_FLUX\_TOTAL}.
@@ -4813,6 +4823,8 @@ for an outflow is adjusted based on the local density.
 
 
 \subsection{Louvered Vents}
+
+\label{info:louvers}
 
 Most real supply vents are covered with some sort of grill or louvers which act to redirect, or {\em diffuse}, the
 incoming air stream.
@@ -4867,6 +4879,8 @@ applied to a {\ct VENT}.
 \clearpage
 
 \section{Species and Species Mass Flux Boundary Conditions}
+
+\label{info:MASS_FLUX}
 
 There are two species boundary conditions that can be specified
 (see Section~\ref{info:SPEC} for details on inputting and using species).
@@ -5412,6 +5426,8 @@ dependent variables (such as a sprinkler flow rate and droplet speed).
 
 \section{Time-Dependent Functions}
 
+\label{info:RAMP_Time}
+
 At the start of any calculation, the temperature is ambient
 everywhere, the flow velocity is zero everywhere, nothing is burning,
 and the mass fractions of all species are uniform.  When the
@@ -5532,6 +5548,8 @@ Gravity             & {\ct MISC}        & {\ct GVEC(3)}                         
 \newpage
 
 \section{Temperature-Dependent Functions}
+
+\label{info:RAMP_Temperature}
 
 Thermal properties like conductivity and specific heat can vary significantly with temperature. In such cases, use
 the {\ct RAMP} function like this:
@@ -6320,14 +6338,11 @@ absorb radiation, {\em etc.}
 {\ct PART} is the namelist group that is used to prescribe
 parameters associated with Lagrangian particles.
 
-\begin{warning}
-All Lagrangian particles must be explicitly defined via the {\ct PART} namelist group. In versions of FDS prior to 5, water droplets and
-smoke particles were implicitly defined. Shortcuts for defining water droplets and smoke particles are possible, via parameters like
-{\ct WATER=.TRUE.} and {\ct MASSLESS=.TRUE.}
-\end{warning}
 
 
 \section{Basics}
+
+\label{info:PART_Basics}
 
 Properties of different types of
 Lagrangian particles are designated via the {\ct PART} namelist group.
@@ -6356,24 +6371,23 @@ the properties of the droplets ejected by a sprinkler or nozzle, for example
 
 \footnotesize
 \begin{verbatim}
-&PROP ID='Acme Spk-123', QUANTITY='SPRINKLER LINK TEMPERATURE', PART_ID='my water', ... /
+&PROP ID='Acme 123', QUANTITY='SPRINKLER LINK TEMPERATURE', PART_ID='my water', ... /
 \end{verbatim}
 \normalsize
 
 
+
+\clearpage
+
 \section{Particle and Droplet Insertion}
 \label{info:controlling_droplets}
 
-There are three ways of introducing droplets or particles into a simulation. The first is to define a sprinkler or
-nozzle using a {\ct PROP} line that includes a {\ct PART\_ID} that specifies the droplet parameters. The second way to
-introduce particles or droplets is to
+There are three ways of introducing droplets or particles into a simulation. The first way is to define a sprinkler or
+nozzle using a {\ct PROP} line that includes a {\ct PART\_ID} that specifies the droplet parameters. The second way is to
 add a {\ct PART\_ID} to a {\ct SURF} line, in which case particles or droplets will be ejected from that surface. Note that
-this only works if the surface has a normal velocity pointing into the flow domain. The third way to introduce droplets or
-particles is via an {\ct INIT} that defines a volume within the computational domain in which the particles/droplets are
+this only works if the surface has a normal velocity pointing into the flow domain. The third way to introduce particles or
+droplets is via an {\ct INIT} line that defines a volume within the computational domain in which the particles/droplets are
 to be introduced initially and/or periodically in time.
-
-
-
 
 
 \subsection{Particles Introduced at a Solid Surface}
@@ -6386,10 +6400,10 @@ value of {\ct NPPC} is 1. As an example, the following set of input lines:
 
 \footnotesize
 \begin{verbatim}
-&PART ID='drops', QUANTITIES(1:3)='DROPLET_DIAMETER','DROPLET_TEMPERATURE','DROPLET_AGE',
+&PART ID='drops', QUANTITIES(1:2)='DROPLET_DIAMETER','DROPLET_TEMPERATURE',
       DIAMETER=750., SAMPLING_FACTOR=1, COLOR='RED', EVAPORATE=.FALSE. /
-&SURF ID='HOLE', PART_ID='drops', VEL=-5., PARTICLE_MASS_FLUX=0.1, COLOR='RED' /
-&OBST XB=-0.2,0.2,-0.2,0.2,4.0,4.4, SURF_IDS='INERT','HOLE','INERT' /
+&SURF ID='SLOT', PART_ID='drops', VEL=-5., PARTICLE_MASS_FLUX=0.1, COLOR='RED' /
+&OBST XB=-0.2,0.2,-0.2,0.2,4.0,4.4, SURF_IDS='INERT','SLOT','INERT' /
 \end{verbatim} \normalsize
 
 \noindent
@@ -6410,6 +6424,8 @@ information on devices and controls, see Sections~\ref{info:basic_control}~and~\
 
 
 \subsection{Droplets Introduced at a Sprinkler or Nozzle}
+
+\label{info:sprinkler_droplets}
 
 {\ct DROPLETS\_PER\_SECOND} is the  number of droplets inserted every
 second per active sprinkler or nozzle (Default 5000). It is listed on the {\ct PROP} line that includes other properties of
@@ -6467,8 +6483,8 @@ parameters for controlling their number:
 The number per ``batch'' depends on how they are introduced.
 If more particles are desired, lower the input value of this parameter. The default value is 0.01~s. Note that this
 parameter should be specified on the {\ct SURF}, {\ct PROP}, or {\ct INIT} line, depending on whether the particles/droplets
-originate at a surface, a sprinkler or nozzle, or a volume. Versions prior to FDS~5.5 had this parameter listed on the
-{\ct PART} line. Note that if you introduce particles or droplets via an {\ct INIT} line, you must specify a value for {\ct DT\_INSERT}. Otherwise, particles or
+originate at a surface, a sprinkler or nozzle, or a volume. Note that if you introduce particles or droplets via an {\ct INIT} line, 
+you must specify a value for {\ct DT\_INSERT}. Otherwise, particles or
 droplets will only be introduced initially.
 \item[{\ct SAMPLING\_FACTOR}]     Sampling factor for the output
 file {\bf CHID.prt5}. This parameter can be used to reduce the size
@@ -6479,7 +6495,7 @@ trying to reduce the number of droplets or particles in a simulation.
 \end{description}
 
 
-
+\clearpage
 
 \section{Particle and Droplet Properties}
 
@@ -6494,7 +6510,9 @@ a particular type of particle or droplet.
 
 For Lagrangian particles that are not {\ct MASSLESS}, the following parameters should be
 included on the {\ct PART} line to indicate how they heat up and possibly evaporate. It is assumed by default that non-massless particles are
-liquid droplets, but you can specify {\ct EVAPORATE=.FALSE.} to change this.
+liquid droplets, but you can specify {\ct EVAPORATE=.FALSE.} to indicate that the droplets do not evaporate. If the droplets do evaporate, then
+provide a {\ct SPEC\_ID} of the gaseous species. If the liquid properties of the {\ct SPEC\_ID} are included in Table~\ref{tab:gasspecies},
+then only the {\ct DENSITY} of the liquid droplet needs to be provided. Otherwise, you must provide all of the following properties of the liquid:
 \begin{description}
 \item[{\ct DENSITY}] The density of the liquid or solid droplet/particle.
 (Default 1000~kg/m$^3$)
@@ -6504,9 +6522,8 @@ liquid droplets, but you can specify {\ct EVAPORATE=.FALSE.} to change this.
 \item[{\ct INITIAL\_TEMPERATURE}] Initial temperature of liquid droplet.
 \item[{\ct HEAT\_OF\_VAPORIZATION}] Latent heat of vaporization of liquid droplet.
 \item[{\ct H\_V\_REFERENCE\_TEMPERATURE}] The temperature corresponding to the provided {\ct HEAT\_OF\_VAPORIZATION}.
-
 \end{description}
-Notice that the default {\ct DENSITY} is that of water.  If the drops are specified as {\ct WATER} or the drops are specified asL {\ct FUEL} and the {\ct FUEL} species is shown as a liquid in Table~\ref{tab:gasspecies}, then only the {\ct DENSITY} needs to be provided.
+Notice that the default {\ct DENSITY} is that of water. 
 
 \subsection{Size Distribution}
 
@@ -6598,6 +6615,8 @@ Smokeview will display particles with a single color.  To select this color spec
 
 
 
+\clearpage
+
 \section{Special Types of Particles and Droplets}
 \label{part_type}
 
@@ -6639,14 +6658,20 @@ as obstructions or clutter. Setting {\ct STATIC=.TRUE.} only makes sense in conj
 
 \subsection{Water Droplets}
 
-If the droplets are defined with {\ct SPEC\_ID='WATER VAPOR'}, then the particles will be assigned the thermophysical properties of water, the radiation absorption properties of water, and will be colored blue in Smokeview.
+If the droplets are defined with {\ct SPEC\_ID='WATER VAPOR'}, then the particles will be assigned the thermo-physical properties of water, 
+the radiation absorption properties of water, and will be colored blue in Smokeview.
 
 If the liquid droplets are to evaporate into some other gaseous species, you must explicitly define the species via the {\ct SPEC} namelist group (see Section~\ref{info:SPEC}), and then
 designate the appropriate {\ct SPEC\_ID} on the {\ct PART} line.
 
 \subsection{Fuel Droplets}
 
-If the droplets evaporate into the {\ct FUEL} identified on {\ct REAC} then they will be colored yellow by default in Smokeview and any resulting fuel vapor will burn according to the combustion model specified on the {\ct REAC} line.  The droplets evaporate into an equivalent amount of fuel vapor such that the resulting heat release rate (assuming complete combustion) is equal to the evaporation rate multiplied by the {\ct HEAT\_OF\_COMBUSTION}.
+If the droplets evaporate into the {\ct FUEL} identified on the {\ct REAC} line, they will be colored yellow by default in Smokeview and any resulting 
+fuel vapor will burn according to the combustion model specified on the {\ct REAC} line.  
+The droplets evaporate into an equivalent amount of fuel vapor such that the resulting heat release rate 
+(assuming complete combustion) is equal to the evaporation rate multiplied by the {\ct HEAT\_OF\_COMBUSTION}, also specified on the {\ct PART} line. Note that the
+burning rate will be adjusted to account for the difference between the heats of combustion of the droplets and the other fuels in the model.
+
 If a spray nozzle is used to generate the fuel droplets, its characteristics are specified
 in the same way as those for a sprinkler.  If the fuel species is present in the liquid properties table as a fuel, then the droplets will be given fuel radiation absorption properties.
 
@@ -6722,8 +6747,41 @@ of which are contained in the FDS Technical Reference Guide~\cite{FDS_Math_Guide
 However, for arbitrary particles or droplets, there is no assumed radiative absorption.
 
 
+\subsection{Assigning Complex Properties to Particles}
+\label{info:PART_SURF}
 
-\section{Special Topic: Suppression by Water (Mixing-Controlled Combustion Model Only)}
+Typically, droplets are assumed to be relatively small, thermally-thin spheres. However, it is possible to assign arbitrary surface properties to 
+``particles'' that represent subgrid-scale objects, like office clutter or vegetation. To do this, you add a {\ct SURF\_ID} to the {\ct PART} line. The
+{\ct SURF} properties then over-ride the default properties assigned to particles and droplets. For example, the following input lines create a collection
+of hot spheres:
+
+\footnotesize
+\begin{verbatim}
+&SURF ID='HOT', TMP_FRONT=500., RADIUS=0.005, GEOMETRY='SPHERICAL' /
+&PART ID='spheres', SURF_ID='HOT', QUANTITIES='DROPLET TEMPERATURE', PROP_ID='ball' /
+&PROP ID='ball', SMOKEVIEW_ID='SPHERE', SMOKEVIEW_PARAMETERS(1)='D=0.01' /
+&INIT PART_ID='spheres', XB=0.25,0.75,0.25,0.75,0.25,0.75, NUMBER_INITIAL_DROPLETS=10 /
+\end{verbatim}
+\normalsize
+
+\noindent
+The {\ct SURF} line establishes that the particles are hot spheres with a radius of 0.005~m and constant temperature of 500~$^\circ$C. The {\ct PART}
+line establishes a class of particles with the properties of given by the {\ct SURF} line whose {\ct ID='HOT'}. The {\ct PROP} line is used just
+to tell Smokeview that the particles are to be drawn as the appropriate sized spheres. The {\ct INIT} line randomly fills the given volume with
+10 of these hot spheres.
+
+The {\ct SURF} line establishes the particle {\ct GEOMETRY}. Options are {\ct 'SPHERICAL'}, {\ct 'CYLINDRICAL'}, or {\ct 'CARTESIAN'}. If 
+{\ct 'SPHERICAL'}, provide the {\ct RADIUS}. If {\ct 'CYLINDRICAL'}, provide the {\ct RADIUS} and the {\ct LENGTH}. If {\ct 'CARTESIAN'}, provide
+the {\ct LENGTH}, {\ct WIDTH}, and {\ct THICKNESS} of the plate. Note that the heat conduction calculation will be done in the appropriate coordinate
+system. 
+
+
+
+
+
+\clearpage
+
+\section{Special Topic: Suppression by Water}
 \label{info:suppression}
 
 Modeling suppression of a fire by a water spray is challenging because
@@ -10516,67 +10574,74 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CELL\_SIZE\_FACTOR}              & Real            & See Section~\ref{info:solid_phase_stability}  &                     & 1.0                     \\ \hline
 {\ct COLOR    }                       & Character       & See Section~\ref{info:colors}                 &                     &                         \\ \hline
 {\ct CONVECTIVE\_HEAT\_FLUX}          & Real            & See Section~\ref{info:convection}             & kW/m$^2$            & 0.                      \\ \hline
+{\ct DT\_INSERT}                      & Real            & See Section~\ref{info:particle_flux}          & s                   & 0.01                    \\ \hline
 {\ct DUCT\_PATH}                      & Int.~Pair       & See Section~\ref{info:Fan_Curves}             &                     & 0,0                     \\ \hline
 {\ct E\_COEFFICIENT}                  & Real            & See Section~\ref{info:suppression}            & m$^2$/kg/s          & 0.                      \\ \hline
 {\ct EMISSIVITY}                      & Real            & See Section~\ref{info:convection}             &                     & 0.9                     \\ \hline
 {\ct EMISSIVITY\_BACK}                & Real            & See Section~\ref{info:BACKING}                &                     &                         \\ \hline
-{\ct EXTERNAL\_FLUX}                  & Real            & Heat flux to surface              & kW/m$^2$            & 0.                      \\ \hline
-{\ct FREE\_SLIP}                      & Logical         & See Section~\ref{info:WALL_MODEL} &                     & {\ct .FALSE.}           \\ \hline
-{\ct GEOMETRY}                        & Character       & Geometry type                     &                     & {\ct 'CARTESIAN'}       \\ \hline
-{\ct H\_FIXED}                        & Real            & See Section~\ref{info:convection} & W/m$^2$/K           &                         \\ \hline
-{\ct HEAT\_OF\_VAPORIZATION }         & Real            & For specified HRR only            & kJ/kg               & 0.                      \\ \hline
-{\ct HRRPUA }                         & Real            & HRR Per Unit Area                 & kW/m$^2$            & 0.                      \\ \hline
-{\ct ID     }                         & Character       & IDentifier                        &                     &                         \\ \hline
-{\ct IGNITION\_TEMPERATURE}           & Real            & Ignition temperature              & $^\circ$C           & 5000.                   \\ \hline
-{\ct LAYER\_DIVIDE}                   & Real            & See Section~\ref{info:EXPOSED}    &                     & 0.5 $\times$ n.of.layers\\ \hline
-{\ct LEAK\_PATH}                      & Int.~Pair       & Pressure Zones for leakage        &                     &                         \\ \hline
-{\ct MASS\_FLUX(I)}                   & Real Array      & For species {\ct I}               & kg/m$^2$ s          & 0.                      \\ \hline
-{\ct MASS\_FLUX\_TOTAL}               & Real            & Total Mass Flux                   & kg/m$^2$ s          &                         \\ \hline
-{\ct MASS\_FRACTION(I)}               & Real Array      & For species {\ct I}               &                     &                         \\ \hline
-{\ct MATL\_ID}                        & Char.~Array     & (Layer,Component)                 &                     &                         \\ \hline
-{\ct MATL\_MASS\_FRACTION}            & Real Array      & (Layer,Component)                 &                     &                         \\ \hline
-{\ct MAX\_PRESSURE }                  & Real            & Max over-pressure for fan         & Pa                  & 1.E12                   \\ \hline
-{\ct MLRPUA }                         & Real            & Mass loss rate per unit area      & kg/m$^2$s           & 0.                      \\ \hline
-{\ct NET\_HEAT\_FLUX}                 & Real            & Net flux at surface               & kW/m$^2$            & 0.                      \\ \hline
-{\ct NO\_SLIP}                        & Logical         & See Section~\ref{info:WALL_MODEL} &                     & {\ct .FALSE.}           \\ \hline
-{\ct NPPC}                            & Integer         & Number of particles per cell      &                     & 1                       \\ \hline
-{\ct PARTICLE\_MASS\_FLUX}            & Real            & See Section~\ref{info:particle_flux} & kg/m$^2$ s       & 0.                      \\ \hline
-{\ct PART\_ID}                        & Character       & Lagrangian Particle ID            &                     &                         \\ \hline
-{\ct POROUS}                          & Logical         & See Section~\ref{info:Velocity_BC}&                     & {\ct .FALSE.}           \\ \hline
-{\ct PLE}                             & Real            & Atmospheric profile exp.          &                     & 0.3                     \\ \hline
-{\ct PROFILE}                         & Character       & Name of velocity profile          &                     &                         \\ \hline
-{\ct RAMP\_EF}                        & Character       & Ramp {\ct ID} for external flux   &                     &                         \\ \hline
-{\ct RAMP\_MF(I)}                     & Character       & Ramp {\ct ID} for species {\ct I} &                     &                         \\ \hline
-{\ct RAMP\_Q}                         & Character       & Ramp ID for HRR                   &                     &                         \\ \hline
-{\ct RAMP\_T}                         & Character       & Ramp ID for temp.                 &                     &                         \\ \hline
-{\ct RAMP\_V}                         & Character       & Ramp ID for velocity              &                     &                         \\ \hline
-{\ct RGB(3)}                          & Int.~Triplet    & Color indices (0-255)             &                     & \small 255,204,102      \\ \hline
-{\ct ROUGHNESS}                       & Real            & Wall roughness height             & m                   & 0.                      \\ \hline
-{\ct SPEC\_ID}                        & Character       & Species Identifier                &                     &                         \\ \hline
-{\ct SPREAD\_RATE}                    & Real            & See Section~\ref{info:spread}     & m/s                 & 0.0                     \\ \hline
-{\ct STRETCH\_FACTOR    }             & Real            & See Section~\ref{info:solid_phase_stability}      &     & 2.0                     \\ \hline
-{\ct SURFACE\_DENSITY}                & Real            & See Section~\ref{info:BURN_AWAY}  & kg/m$^2$            & 0.0                     \\ \hline
-{\ct TAU\_EF}                         & Real            & Ramp time for external flux       & s                   & 1.                      \\ \hline
-{\ct TAU\_MF(I)}                      & Real            & Ramp time for species {\ct I}     & s                   & 1.                      \\ \hline
-{\ct TAU\_Q}                          & Real            & Ramp time for HRR                 & s                   & 1.                      \\ \hline
-{\ct TAU\_T}                          & Real            & Ramp time for temp.               & s                   & 1.                      \\ \hline
-{\ct TAU\_V}                          & Real            & Ramp time for velocity            & s                   & 1.                      \\ \hline
-{\ct TEXTURE\_HEIGHT}                 & Real            & Height of texture image           & m                   & 1.                      \\ \hline
-{\ct TEXTURE\_MAP}                    & Character       & Name of texture map file          &                     &                         \\ \hline
-{\ct TEXTURE\_WIDTH}                  & Real            & Width of texture image            & m                   & 1.                      \\ \hline
-{\ct THICKNESS(IL)}                   & Real Array      & Thickness of Layer {\ct IL}       & m                   & 0.                      \\ \hline
-{\ct TMP\_BACK}                       & Real            & Back surface temperature BC       & $^\circ$C           & 20.                     \\ \hline
-{\ct TMP\_FRONT}                      & Real            & Front surface temperature         & $^\circ$C           & 20.                     \\ \hline
-{\ct TMP\_INNER(IL)}                  & Real Array      & Initial temperature of layer {\ct IL}& $^\circ$C        & 20.                     \\ \hline
-{\ct TRANSPARENCY}                    & Real            & Transparency of obstruction       &    1                &                         \\ \hline
-{\ct VEL    }                         & Real            & Normal velocity                   & m/s                 & 0.                      \\ \hline
-{\ct VEL\_T }                         & Real Pair       & Tangential velocity comps.        & m/s                 & 0.                      \\ \hline
-{\ct VOLUME\_FLUX}                    & Real            & Normal velocity x vent area       & m$^3$/s             & 0.                      \\ \hline
-{\ct XYZ(3)}                          & Real Triplet    & See Section~\ref{info:spread}     &  m                  &                         \\ \hline
-{\ct Z0 }                             & Real            & Atmospheric profile origin        &  m                  & 10.                     \\ \hline
+{\ct EXTERNAL\_FLUX}                  & Real            & See Section~\ref{solid_phase_verification}    & kW/m$^2$            & 0.                      \\ \hline
+{\ct FREE\_SLIP}                      & Logical         & See Section~\ref{info:WALL_MODEL}             &                     & {\ct .FALSE.}           \\ \hline
+{\ct GEOMETRY}                        & Character       & See Section~\ref{info:GEOMETRY}               &                     & {\ct 'CARTESIAN'}       \\ \hline
+{\ct H\_FIXED}                        & Real            & See Section~\ref{info:convection}             & W/m$^2$/K           &                         \\ \hline
+{\ct HEAT\_OF\_VAPORIZATION }         & Real            & See Section~\ref{info:specified_burning}      & kJ/kg               & 0.                      \\ \hline
+{\ct HRRPUA }                         & Real            & See Section~\ref{info:gas_burner}             & kW/m$^2$            & 0.                      \\ \hline
+{\ct ID     }                         & Character       & See Section~\ref{info:SURF}                   &                     &                         \\ \hline
+{\ct IGNITION\_TEMPERATURE}           & Real            & See Section~\ref{info:specified_burning}      & $^\circ$C           & 5000.                   \\ \hline
+{\ct LAYER\_DIVIDE}                   & Real            & See Section~\ref{info:EXPOSED}                &                     & {\ct N\_LAYERS}/2       \\ \hline
+{\ct LEAK\_PATH}                      & Int.~Pair       & See Section~\ref{info:Leaks}                  &                     &                         \\ \hline
+{\ct LENGTH}                          & Real            & See Section~\ref{info:PART_SURF}              & m                   &                         \\ \hline
+{\ct MASS\_FLUX(:)}                   & Real Array      & See Section~\ref{info:MASS_FLUX}              & kg/m$^2$ s          & 0.                      \\ \hline
+{\ct MASS\_FLUX\_TOTAL}               & Real            & See Section~\ref{info:MASS_FLUX_TOTAL}        & kg/m$^2$ s          &                         \\ \hline
+{\ct MASS\_FRACTION(:)}               & Real Array      & See Section~\ref{info:MASS_FLUX}              &                     &                         \\ \hline
+{\ct MATL\_ID(NL,NC)}                 & Char.~Array     & See Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
+{\ct MATL\_MASS\_FRACTION(NL,NC)}     & Real Array      & See Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
+{\ct MAX\_PRESSURE }                  & Real            & See Section~\ref{info:Fan_Curves}             & Pa                  & 1.E12                   \\ \hline
+{\ct MLRPUA }                         & Real            & See Section~\ref{info:gas_burner}             & kg/m$^2$s           & 0.                      \\ \hline
+{\ct NET\_HEAT\_FLUX}                 & Real            & See Section~\ref{info:convection}             & kW/m$^2$            & 0.                      \\ \hline
+{\ct NO\_SLIP}                        & Logical         & See Section~\ref{info:WALL_MODEL}             &                     & {\ct .FALSE.}           \\ \hline
+{\ct NPPC}                            & Integer         & See Section~\ref{info:particle_flux}          &                     & 1                       \\ \hline
+{\ct PARTICLE\_MASS\_FLUX}            & Real            & See Section~\ref{info:particle_flux}          & kg/m$^2$ s          & 0.                      \\ \hline
+{\ct PART\_ID}                        & Character       & See Section~\ref{info:particle_flux}          &                     &                         \\ \hline
+{\ct POROUS}                          & Logical         & See Section~\ref{info:Velocity_BC}            &                     & {\ct .FALSE.}           \\ \hline
+{\ct PLE}                             & Real            & See Section~\ref{info:stratification}         &                     & 0.3                     \\ \hline
+{\ct PROFILE}                         & Character       & See Section~\ref{info:stratification}         &                     &                         \\ \hline
+{\ct RADIUS}                          & Real            & See Section~\ref{info:PART_SURF}              & m                   &                         \\ \hline
+{\ct RAMP\_EF}                        & Character       & See Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
+{\ct RAMP\_MF(:)}                     & Character       & See Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
+{\ct RAMP\_PART}                      & Character       & See Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
+{\ct RAMP\_Q}                         & Character       & See Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
+{\ct RAMP\_T}                         & Character       & See Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
+{\ct RAMP\_V}                         & Character       & See Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
+{\ct RGB(3)}                          & Int.~Triplet    & See Section~\ref{info:colors}                 &                     & \small 255,204,102      \\ \hline
+{\ct ROUGHNESS}                       & Real            & See Section~\ref{info:WALL_MODEL}             & m                   & 0.                      \\ \hline
+{\ct SPEC\_ID}                        & Character       & See Section~\ref{info:MASS_FLUX}              &                     &                         \\ \hline
+{\ct SPREAD\_RATE}                    & Real            & See Section~\ref{info:spread}                 & m/s                 & 0.                      \\ \hline
+{\ct STRETCH\_FACTOR    }             & Real            & See Section~\ref{info:solid_phase_stability}  &                     & 2.                      \\ \hline
+{\ct SURFACE\_DENSITY}                & Real            & See Section~\ref{info:BURN_AWAY}              & kg/m$^2$            & 0.                      \\ \hline
+{\ct TAU\_EF}                         & Real            & See Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
+{\ct TAU\_MF(:)}                      & Real            & See Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
+{\ct TAU\_PART}                       & Real            & See Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
+{\ct TAU\_Q}                          & Real            & See Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
+{\ct TAU\_T}                          & Real            & See Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
+{\ct TAU\_V}                          & Real            & See Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
+{\ct TEXTURE\_HEIGHT}                 & Real            & See Section~\ref{info:texture_map}            & m                   & 1.                      \\ \hline
+{\ct TEXTURE\_MAP}                    & Character       & See Section~\ref{info:texture_map}            &                     &                         \\ \hline
+{\ct TEXTURE\_WIDTH}                  & Real            & See Section~\ref{info:texture_map}            & m                   & 1.                      \\ \hline
+{\ct THICKNESS(NL)}                   & Real Array      & See Section~\ref{info:SURF_MATL_Basics}       & m                   & 0.                      \\ \hline
+{\ct TMP\_BACK}                       & Real            & See Section~\ref{info:TMP_INNER}              & $^\circ$C           & 20.                     \\ \hline
+{\ct TMP\_FRONT}                      & Real            & See Section~\ref{info:specified_temperature}  & $^\circ$C           & 20.                     \\ \hline
+{\ct TMP\_INNER(:)}                   & Real Array      & See Section~\ref{info:TMP_INNER}              & $^\circ$C           & 20.                     \\ \hline
+{\ct TRANSPARENCY}                    & Real            & See Section~\ref{info:colors}                 &                     & 1.                      \\ \hline
+{\ct VEL    }                         & Real            & See Section~\ref{info:Velocity_BC}            & m/s                 & 0.                      \\ \hline
+{\ct VEL\_T }                         & Real Pair       & See Section~\ref{info:louvers}                & m/s                 & 0.                      \\ \hline
+{\ct VOLUME\_FLUX}                    & Real            & See Section~\ref{info:Velocity_BC}            & m$^3$/s             & 0.                      \\ \hline
+{\ct WIDTH}                           & Real            & See Section~\ref{info:PART_SURF}              & m                   &                         \\ \hline
+{\ct XYZ(3)}                          & Real Triplet    & See Section~\ref{info:spread}                 & m                   &                         \\ \hline
+{\ct Z0 }                             & Real            & See Section~\ref{info:stratification}         & m                   & 10.                     \\ \hline
 \end{longtable}
 
-% Undocumented:  VEGETATION,VEGETATION_CDRAG,VEGETATION_CHAR_FRACTION,VEGETATION_ELEMENT_DENSITY,VEGETATION_HEIGHT, &
+% Undocumented:  SHRINK, REGRID_FACTOR
+%                VEGETATION,VEGETATION_CDRAG,VEGETATION_CHAR_FRACTION,VEGETATION_ELEMENT_DENSITY,VEGETATION_HEIGHT, &
 %                VEGETATION_INITIAL_TEMP,VEGETATION_LSET_IGNITE_TIME,VEGETATION_LOAD,VEGETATION_MOISTURE, &
 %                VEGETATION_NO_BURN,VEGETATION_SVRATIO,VEGETATION_LAYERS,CONVECTION_LENGTH_SCALE, &
 %                FIRELINE_MLR_MAX,VEGETATION_GROUND_TEMP,VEGETATION_LINEAR_DEGRAD,VEGETATION_ARRHENIUS_DEGRAD, &
