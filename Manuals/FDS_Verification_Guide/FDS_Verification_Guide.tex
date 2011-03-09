@@ -1580,43 +1580,119 @@ In the test case, we inject propane into a cube with 1 m$^2$ vents on all six fa
 \label{fig_low_flux_hot_gas_filling}
 \end{figure}
 
-\section{Fractional Effective Dose (\texorpdfstring{{\bf FED\_Device}}{FED\_Device}) }
 
-The Fractional Effective Dose index (FED), developed by Purser~\cite{SFPE:Purser}, is a commonly used measure of human incapasitation
-due to the combustion gases.  The present version of FDS uses only the concentrations of the gases CO, CO${}_2$, and O${}_2$ to
-calculate the FED value as
+\section{Fractional Effective Dose (FED) and Fractional Irritant Concentration (FIC) (\texorpdfstring{{\bf FED\_FIC}}{FED\_FIC}) }
+\label{FED_FIC}
+
+The Fractional Effective Dose index (FED), developed by Purser~\cite{SFPE:Purser}, is a commonly used measure of human incapacitation
+due to the combustion gases. The FED value is calculated as
 \be
-\mathrm{FED}_\mathrm{tot} = \mathrm{FED}_\mathrm{CO} \times \mathrm{HV}_\mathrm{CO_2} + \mathrm{FED}_\mathrm{O_2}
+\mathrm{FED}_\mathrm{tot} = (\mathrm{FED}_\mathrm{CO} + \mathrm{FED}_\mathrm{CN} + \mathrm{FED}_\mathrm{NO_x} + \mathrm{FLD}_\mathrm{irr}) \times \mathrm{HV}_\mathrm{CO_2} + \mathrm{FED}_\mathrm{O_2}
 \ee
 The fraction of an incapacitating dose of CO is calculated as
 \be
-\mathrm{FED}_\mathrm{CO} = 4.607 \times 10^{-7} \, (C_\mathrm{CO})^{1.036} \ t
+\mathrm{FED}_\mathrm{CO} = \int_0^t 2.764 \times 10^{-5} \, (C_\mathrm{CO}(t))^{1.036} \, dt
 \ee
-where $t$ is time in seconds and $C_\mathrm{CO}$ is the CO concentration (ppm).  The fraction of an incapacitating dose of low
-O${}_2$ hypoxia is calculated as
+where $t$ is time in minutes and $C_\mathrm{CO}$ is the CO concentration (ppm). The fraction of an incapacitating dose of CN is calculated as
 \be
-\mathrm{FED}_\mathrm{O_2} =  \frac{t}{60 \exp \left [ 8.13 - 0.54 \, (20.9 - C_\mathrm{O_2}) \right ] }
+\mathrm{FED}_\mathrm{CN} = \int_0^t \left( \frac{\exp\left( \frac{C_\mathrm{CN}(t)}{43} \right)}{220} - 0.0045 \right) \, dt
 \ee
-where $C_\mathrm{O_2}$ is the O${}_2$ concentration (volume per cent).  The hyperventilation factor induced by carbon dioxide
-is calculated as
+where $t$ is time in minutes and $C_\mathrm{CN}$ is the concentration (ppm) of HCN corrected for the protective effect of NO$_\mathrm{2}$. $C_\mathrm{CN}$ is calculated as 
 \be
-\mathrm{HV}_\mathrm{CO_2} = \frac{ \exp( 0.1930 \, C_\mathrm{CO_2} +  2.0004 ) }{7.1}
+C_\mathrm{CN} = C_\mathrm{HCN} - C_\mathrm{NO_2}
 \ee
-where $C_\mathrm{CO_2}$ is the CO${}_2$ concentration (percent).
+The fraction of an incapacitating dose of NO$_x$ is calculated as
+\be
+\mathrm{FED}_\mathrm{NO_x} = \int_0^t \frac{C_\mathrm{NO_x}(t)}{1500} \, dt
+\ee
+where $t$ is time in minutes and $C_\mathrm{NO_x}$ is the sum of NO and NO$_\mathrm{2}$ concentrations (ppm). 
+The Fractional Lethal Dose (FLD) of irritants is calculated as
+\be
+\mathrm{FLD}_\mathrm{irr} = \int_0^t \left(
+	\frac{C_\mathrm{HCl}(t)}    {F_\mathrm{FLD,HCl}} + 
+	\frac{C_\mathrm{HBr}(t)}    {F_\mathrm{FLD,HBr}} + 
+	\frac{C_\mathrm{HF}(t)}     {F_\mathrm{FLD,HF}} + 
+	\frac{C_\mathrm{SO_2}(t)}   {F_\mathrm{FLD,SO_2}} + 
+	\frac{C_\mathrm{NO_2}(t)}   {F_\mathrm{FLD,NO_2}} + 
+	\frac{C_\mathrm{C_3H_4O}(t)}{F_\mathrm{FLD,C_3H_4O}} + 
+	\frac{C_\mathrm{CH_2O}(t)}  {F_\mathrm{FLD,CH_2O}} 
+	\right) \, dt
+\ee
+where $t$ is time in minutes, the nominators are the instantaneous concentrations (ppm) of each irritant and 
+the denominators the exposure doses of respective irritants predicted to be lethal to half the population. 
+The lethal exposure doses~\cite{SFPE:Purser} are given in the table below.
+\begin{center}
+\begin{tabular}{|l|l|l|l|l|l|l|l|}
+\hline & HCl & HBr & HF & $\mathrm{SO_2}$ & $\mathrm{NO_2}$ & $\mathrm{C_3H_4O}$ & $\mathrm{CH_2O}$  \\ \hline \hline
+F${}_\mathrm{FLD}$ (ppm $\times$ min) & 114000 & 114000 & 87000 & 12000 & 1900 & 4500 & 22500 \\ 
+F${}_\mathrm{FIC}$ (ppm) & 900 & 900 & 900 & 120 & 350 & 20 & 30 \\ \hline
+\end{tabular}
+\end{center}
+The fraction of an incapacitating dose of low O${}_2$ hypoxia is calculated as
+\be
+\mathrm{FED}_\mathrm{O_2} =  \int_0^t \frac{dt}{60 \exp \left [ 8.13 - 0.54 \, (20.9 - C_\mathrm{O_2}(t)) \right ] }
+\ee
+where $t$ is time in minutes and $C_\mathrm{O_2}$ is the O${}_2$ concentration (volume per cent). 
+The hyperventilation factor induced by carbon dioxide is calculated as
+\be
+\mathrm{HV}_\mathrm{CO_2} = \frac{ \exp( 0.1930 \, C_\mathrm{CO_2}(t) +  2.0004 ) }{7.1} \label{co2hyp}
+\ee
+where $t$ is time in minutes and $C_\mathrm{CO_2}$ is the CO${}_2$ concentration (percent).
 
-The FED values were computed from specified constant gas concentrations using an external spreadsheet. The gas concentrations are listed in the
-following table and the FDS and spreadsheet predictions of FED values are compared in the figures below.
+The Fractional Irritant Concentration (FIC), also developed by Purser~\cite{SFPE:Purser}, represents the toxic effect which 
+depends upon the immediate concentrations of irritants. The overall irritant concentration FIC is calculated as 
+\be
+\mathrm{FIC}_\mathrm{irr} = 
+	\frac{C_\mathrm{HCl}(t)}    {F_\mathrm{FIC,HCl}} + 
+	\frac{C_\mathrm{HBr}(t)}    {F_\mathrm{FIC,HBr}} + 
+	\frac{C_\mathrm{HF}(t)}     {F_\mathrm{FIC,HF}} + 
+	\frac{C_\mathrm{SO_2}(t)}   {F_\mathrm{FIC,SO_2}} + 
+	\frac{C_\mathrm{NO_2}(t)}   {F_\mathrm{FIC,NO_2}} + 
+	\frac{C_\mathrm{C_3H_4O}(t)}{F_\mathrm{FIC,C_3H_4O}} + 
+	\frac{C_\mathrm{CH_2O}(t)}  {F_\mathrm{FIC,CH_2O}}
+\ee
+where the nominators are the instantaneous concentrations of each irritant and the denominators the concentrations of respective irritants 
+expected to cause incapacitation in half the population. The incapacitating concentrations~\cite{SFPE:Purser} are given in the table above.
+
+The FED and FIC values were computed from specified constant gas concentrations for four cases using an external script. 
+The gas concentrations are listed in the table below. The concentrations are in ppm.
+\begin{center}
+\begin{tabular}{|l|l|l|l|l|}
+\hline Case ID & O2, CO2, CO & Asphyxiants & Irritants & All Gases \\ \hline \hline
+$\mathrm{O_2}$ & 97727 & 90218 & 209000 & 103055 \\ \hline
+$\mathrm{CO_2}$ & 343066 & 19189 & 0 & 7463 \\ \hline
+$\mathrm{CO}$ & 3242 & 2456 & 0 & 1660 \\ \hline
+$\mathrm{NO}$ & 0 & 134.9 & 0 & 89.34 \\ \hline
+$\mathrm{NO_2}$ & 0 & 0 & 1.139 & 0.569 \\ \hline
+$\mathrm{HCN}$ & 0 & 265.3 & 0 & 204.0 \\ \hline
+$\mathrm{HCl}$ & 0 & 0 & 68.33 & 34.17 \\ \hline
+$\mathrm{HBr}$ & 0 & 0 & 68.33 & 34.17 \\ \hline
+$\mathrm{HF}$ & 0 & 0 & 52.15 & 26.07 \\ \hline
+$\mathrm{SO_2}$ & 0 & 0 & 7.193 & 3.596 \\ \hline
+$\mathrm{C_3H_4O}$ & 0 & 0 & 2.697 & 1.349 \\ \hline
+$\mathrm{CH_2O}$ & 0 & 0 & 13.49 & 6.743  \\ \hline
+\end{tabular}
+\end{center}
+
+The FDS predictions and the expected FED and FIC values are compared in the figures below.
+
 \begin{figure}[ht]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/FED_Device_O2} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/FED_Device_CO} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/FED_Device_CO2_CO} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/FED_Device_All}
+\includegraphics[width=3.in]{SCRIPT_FIGURES/FED_O2_CO2_CO} &
+\includegraphics[width=3.in]{SCRIPT_FIGURES/FED_Asphyxiants} \\
+\includegraphics[width=3.in]{SCRIPT_FIGURES/FED_Irritants} &
+\includegraphics[width=3.in]{SCRIPT_FIGURES/FED_All_Gases} \\
+\includegraphics[width=3.in]{SCRIPT_FIGURES/FIC_O2_CO2_CO} &
+\includegraphics[width=3.in]{SCRIPT_FIGURES/FIC_Asphyxiants} \\
+\includegraphics[width=3.in]{SCRIPT_FIGURES/FIC_Irritants} &
+\includegraphics[width=3.in]{SCRIPT_FIGURES/FIC_All_Gases}
 \end{tabular*}
-\caption[The {\bf FED\_Device} test cases.]{Comparison of FED index predictions with spreadsheet computations.}
-\label{FED_Device}
+\caption[The FED and FIC values in {\bf FED\_FIC} test cases.]{Comparison of FED and FIC predictions with expected values.}
+\label{FED_FIC_plot}
 \end{figure}
+
+
 
 
 
