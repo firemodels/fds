@@ -6714,7 +6714,7 @@ CONTAINS
 
     IF (L_USE_FED) THEN  ! Update at this time step (do this at DT_SAVE intervals) 
        IF (L_FED_SAVE) THEN
-          ALLOCATE(YY_GET(1:MAX(1,N_GAS_SPECIES)),STAT=IZERO)
+          ALLOCATE(YY_GET(1:MAX(1,N_TRACKED_SPECIES)),STAT=IZERO)
           CALL CHKMEMERR('EVAC_MESH_EXCHANGE', 'YY_GET',IZERO) 
           WRITE (LU_EVACFED) REAL(T,FB), REAL(DT_SAVE,FB)
        ELSE
@@ -14172,7 +14172,7 @@ CONTAINS
     ! Passed variables
     INTEGER, INTENT(IN) :: I, J, K, NOM
     REAL(EB), INTENT(OUT) :: fed_indx, soot_dens, gas_temp, rad_flux
-    REAL(EB), INTENT(INOUT) :: YY_GET(1:N_GAS_SPECIES)
+    REAL(EB), INTENT(INOUT) :: YY_GET(1:N_TRACKED_SPECIES)
     !
     ! Local variables
     REAL(EB) :: Y_MF_INT
