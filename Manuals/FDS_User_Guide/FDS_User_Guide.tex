@@ -8861,6 +8861,7 @@ The fraction of an incapacitating dose of NO$_x$ is calculated as
 \mathrm{FED}_\mathrm{NO_x} = \int_0^t \frac{C_\mathrm{NO_x}(t)}{1500} \, dt
 \ee
 where $t$ is time in minutes and $C_\mathrm{NO_x}$ is the sum of NO and NO$_\mathrm{2}$ concentrations (ppm). 
+
 The Fractional Lethal Dose (FLD) of irritants is calculated as
 \be
 \mathrm{FLD}_\mathrm{irr} = \int_0^t \left(
@@ -8875,7 +8876,8 @@ The Fractional Lethal Dose (FLD) of irritants is calculated as
 \ee
 where $t$ is time in minutes, the nominators are the instantaneous concentrations (ppm) of each irritant and 
 the denominators the exposure doses of respective irritants predicted to be lethal to half the population. 
-The lethal exposure doses~\cite{SFPE:Purser} are given in the table~\ref{tbl:FIC}.
+The lethal exposure doses~\cite{SFPE:Purser} are given in the table~\ref{tbl:FIC}. To include the effect of an irritant gas not listed in the table, 
+the user should specify $\mathrm{F_{FLD}}$ in ppm$\times$min using the {\ct FLD\_LETHAL\_DOSE} property of the corresponding {\ct SPEC} line.
 \begin{table}[ht]
 \caption{Coefficients used for the computation of irritant effects of gases.}
 \label{tbl:FIC}
@@ -8913,6 +8915,8 @@ depends upon the immediate concentrations of irritants. The overall irritant con
 \ee
 where the nominators are the instantaneous concentrations of each irritant and the denominators the concentrations of respective irritants 
 expected to cause incapacitation in half the population. The incapacitating concentrations~\cite{SFPE:Purser} are given in the table~\ref{tbl:FIC}.
+To include the irritant effect of a gas not listed in the table, the user should specify $\mathrm{F_{FIC}}$ in ppm using the {\ct FIC\_CONCENTRATION} 
+property on the corresponding {\ct SPEC} line.
 
 Note that the spatial integration features (Section~\ref{info:statistics}) cannot be used with FED output because FED makes
 use of the {\ct TIME INTEGRAL} (Section~\ref{info:time_integral}). For the same reason, FED output is only available as a point
@@ -10563,6 +10567,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CONDUCTIVITY}                  & Real        & Conductivity, $k$                           & W/m/K             &               \\ \hline
 {\ct DIFFUSIVITY}                   & Real        & Diffusivity,  $D$                           & m$^2$/s           &               \\ \hline
 {\ct EPSILONKLJ}                    & Real        & Leonard-Jones Parameter                     &                   & 0             \\ \hline
+{\ct FIC\_CONCENTRATION}            & Real        & Lethal concentration, Section~\ref{info:FED}& ppm               & 0.            \\ \hline
+{\ct FLD\_LETHAL\_DOSE}             & Real        & Lethal dose, Section~\ref{info:FED}         & ppm$\times$min    & 0.            \\ \hline
 {\ct FORMULA }                      & Character   & Smokeview label                             &                   &               \\ \hline
 {\ct HUMIDITY}                      & Real        & Relative Humidity                           & \%                & 40.           \\ \hline
 {\ct ID }                           & Character   & Name of species                             &                   &               \\ \hline
