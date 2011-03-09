@@ -1290,38 +1290,96 @@ REAL(EB) FUNCTION FED(Y_IN,RSUM)
 ! Returns the integrand of FED (Fractional Effective Dose) calculation.
 
 REAL(EB), INTENT(IN) :: Y_IN(1:N_GAS_SPECIES),RSUM
-REAL(EB) Y_MF_INT, TMP_1
+INTEGER  :: INDEX
+REAL(EB) :: Y_MF_INT, TMP_1
 
-! This is the part depending on gaseous compounds CO2, CO, O2
-! Note: Purser uses minutes, here dt is in seconds
-!       fed_dose = fed_lco*fed_vco2 + fed_lo
+! All equations from D.A. Purser, SFPE Handbook, 4th Ed.
+! Note: Purser uses minutes, here dt is in seconds.
+! Total FED dose:
+! FED_dose = (FED_LCO + FED_LCN + FED_LNOx + FLD_irr)*FED_VCO2 + FED_LO2;
 
-! Next is for CO (ppm)
-! CO:  (3.317E-5*RMV*t)/D
-!      [RMV]=ltr/min, D=30% COHb concentration at incapacitation
+
+! Carbon monoxide (CO)
+! FED_LCO = (3.317E-5 * (C_CO)^1.036 * RMV * (dt/60)) / D;
+!	with RMV=25 [l/min], D=30 [%] COHb concentration at incapacitation and C_CO in ppm
 IF (CO_INDEX > 0) THEN
    Call GET_MASS_FRACTION(Y_IN,CO_INDEX,Y_MF_INT)
    TMP_1 = SPECIES(CO_INDEX)%RCON*Y_MF_INT*1.E6_EB/RSUM
    FED   = 3.317E-5_EB*25.0_EB* TMP_1**(1.036_EB)/(30.0_EB*60.0_EB)
 ENDIF
-! Next is for CO2
-! VCO2: CO2-induced hyperventilation
-!      exp(0.1903*c_CO2(%) + 2.0004)
+
+! Nitrogen oxides (NOx, here NO + NO2)
+! FED_LNOx = C_NOx/1500 * (dt/60);
+!   with C_NOx = C_NO + C_NO2, all in ppm
+TMP_1 = 0
+IF (NO_INDEX > 0) THEN
+   Call GET_MASS_FRACTION(Y_IN,NO_INDEX,Y_MF_INT)
+   TMP_1 = SPECIES(NO_INDEX)%RCON*Y_MF_INT/RSUM
+ENDIF
+IF (NO2_INDEX > 0) THEN
+   Call GET_MASS_FRACTION(Y_IN,NO2_INDEX,Y_MF_INT)
+   TMP_1 = TMP_1 + SPECIES(NO2_INDEX)%RCON*Y_MF_INT/RSUM
+ENDIF
+IF (TMP_1 > 0) FED = FED + TMP_1/(0.001500_EB*60.0_EB)
+
+! Cyanide
+! FED_LCN = (exp(C_CN/43)/220 - 0.0045) * (dt/60);
+!	with C_CN = C_HCN - C_NOx, all in ppm
+IF (HCN_INDEX > 0) THEN
+   Call GET_MASS_FRACTION(Y_IN,HCN_INDEX,Y_MF_INT)
+   TMP_1 = SPECIES(HCN_INDEX)%RCON*Y_MF_INT/RSUM - TMP_1
+   IF (TMP_1 > 0) FED = FED + (Exp(TMP_1/0.000043_EB)/220.0_EB-0.00454545_EB)/60.0_EB
+ENDIF
+
+! Irritants
+! FLD_irr = (C_HCl/F_HCl + C_HBr/F_HBr + C_HF/F_HF + C_SO2/F_SO2 + C_NO2/F_NO2 + C_C3H4O/F_C3H4O + C_CH2O/F_CH2O) * (dt/60);
+!	all in ppm
+TMP_1 = 0
+DO INDEX=1,N_SPECIES
+   IF (SPECIES(INDEX)%FLD_CONCENTRATION /= 0) THEN
+      Call GET_MASS_FRACTION(Y_IN,INDEX,Y_MF_INT)
+      TMP_1 = TMP_1 + SPECIES(INDEX)%RCON*Y_MF_INT/RSUM / SPECIES(INDEX)%FLD_CONCENTRATION
+   ENDIF
+ENDDO
+FED = FED + TMP_1/60.0_EB
+
+! Carbon dioxide (CO2) induced hyperventilation:
+! FED_VCO2 = exp(0.1903*C_CO2/1E4 + 2.0004)/7.1;
+!   C_CO2 in ppm
 IF (CO2_INDEX > 0) THEN
    Call GET_MASS_FRACTION(Y_IN,CO2_INDEX,Y_MF_INT)
    TMP_1 = SPECIES(CO2_INDEX)%RCON*Y_MF_INT/RSUM
-   FED = FED * Exp( 0.1903_EB*TMP_1*100.0_EB + 2.0004_EB )/7.1_EB
+   If ( TMP_1 > 0.0_EB ) FED = FED * Exp( 0.1903_EB*TMP_1*100.0_EB + 2.0004_EB )/7.1_EB
 ENDIF
-! Next is for O2
-! LO: low oxygen
-! t_Io = exp(8.13-0.54(20.9-%O2)), time in minutes
-! F_Io = dt/t_Io
+
+! Low oxygen (O2)
+! FED_LO2 = 1/exp(8.13 - 0.54*(0.209 - C_O2/1E6)) * (dt/60);
+!   C_O2 in ppm
 IF (O2_INDEX > 0) THEN
    Call GET_MASS_FRACTION(Y_IN,O2_INDEX,Y_MF_INT)
    TMP_1 = SPECIES(O2_INDEX)%RCON*Y_MF_INT/RSUM
    If ( TMP_1 < 0.20_EB ) FED = FED + 1.0_EB  / (60.0_EB*Exp(8.13_EB-0.54_EB*(20.9_EB-100.0_EB*TMP_1)) )
 ENDIF
+
 END FUNCTION FED
+
+
+REAL(EB) FUNCTION FIC(Y_IN,RSUM)
+! Returns FIC (Fractional Incapacitating Concentration)
+
+REAL(EB), INTENT(IN) :: Y_IN(1:N_GAS_SPECIES),RSUM
+REAL(EB) :: Y_MF_INT
+INTEGER  :: INDEX
+
+FIC = 0
+DO INDEX=1,N_SPECIES
+   IF (SPECIES(INDEX)%FIC_CONCENTRATION /= 0) THEN
+      Call GET_MASS_FRACTION(Y_IN,INDEX,Y_MF_INT)
+      FIC = FIC + SPECIES(INDEX)%RCON*Y_MF_INT/RSUM / SPECIES(INDEX)%FIC_CONCENTRATION
+   ENDIF
+ENDDO
+
+END FUNCTION FIC
 
 
 REAL (EB) FUNCTION AMBIENT_WATER_VAPOR(HUMIDITY,TEMP)

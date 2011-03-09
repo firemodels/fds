@@ -40,6 +40,9 @@ INTEGER, PARAMETER :: OLD=1,NEW=2,GUESS=3,PREVIOUS=4                            
 INTEGER :: FUEL_INDEX=0,O2_INDEX=0,N2_INDEX=0,H2O_INDEX=0,CO2_INDEX=0,CO_INDEX=0,H2_INDEX=0, &
            SOOT_INDEX=0,OTHER_INDEX=0,SM_FUEL_INDEX = 0                                        ! Lumped Species Sub-species
 
+! Species components used in FED calculations
+INTEGER :: HCN_INDEX=0,NO_INDEX=0,NO2_INDEX=0
+
 ! Program Status Code
 
 INTEGER :: PROCESS_STOP_STATUS=NO_STOP
