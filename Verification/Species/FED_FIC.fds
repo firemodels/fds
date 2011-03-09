@@ -1,31 +1,46 @@
-! TOTAL FED DOSE:
-! FED_DOSE = (FED_LCO + FED_LCN + FED_LNOX + FLD_IRR)*FED_VCO2 + FED_LO2;
-! 
-! TIME (T) IN SECONDS, CONCENTRATIONS (C_X) IN PPM
-! ASPHYXIANTS:
-! 
-! CARBON MONOXIDE:
-! FED_LCO = (3.317E-5 * (C_CO)^1.036 * RMV * (T/60)) / D;
-!	WITH RMV=25 [L/MIN] AND D=30 [%] COHB CONCENTRATION AT INCAPACITATION
-! 
-! CYANIDE:
-! FED_LCN = (EXP(C_CN/43)/220 - 0.0045) * (T/60);
-!	WHERE C_CN = C_HCN - C_NO - C_NO2
-!	
-! NO2 + NO:
-! FED_LNOX = C_NOX/1500 * (T/60);
-!   WHERE C_NOX = C_NO + C_NO2 
-!
-! CO2-INDUCED HYPERVENTILATION:
-! FED_VCO2 = EXP(0.1903*C_CO2/1E4 + 2.0004)/7.1;
-! 
-! LOW OXYGEN:
-! FED_LO2 = 1/EXP(8.13 - 0.54*(0.209 - C_O2/1E6)) * (T/60);
-!	
-! IRRITANTS:
-! FIC_IRR = C_HCL/114000 + C_HBR/114000 + C_HF/87000 + C_SO2/12000 + C_NO2/1900 + C_CH2CHO/4500 + C_HCHO/22500;
+&HEAD CHID='FED_FIC', TITLE='Verification of FED and FIC outputs, SVN $Revision: 3324 $'/
+
+ All material properties etc. are completely fabricated.
+
+ This is a verifiaction test case for the gas phase DEVC output
+ quantity FED, which calculates the Fractional Effective Dose 
+ (FED) index, and gas phase output quantity FIC, which calculates the 
+ Fractional Irritant Concentration.
+
+
+ Total FED dose:
+ FED_DOSE = (FED_LCO + FED_LCN + FED_LNOX + FLD_IRR)*FED_VCO2 + FED_LO2;
  
-&HEAD CHID='FED_FIC', TITLE='VERIFICATION OF FED AND FIC DEVICES, SVN $REVISION: 3324 $'/
+ Time (T) in s, concentration (C_X) in ppm.
+ 
+ ASPHYXIANTS:
+ 
+ CARBON MONOXIDE:
+ FED_LCO = (3.317E-5 * (C_CO)^1.036 * RMV * (T/60)) / D;
+ with RMV=25 [l/min] and D=30 [%] COHB concentration at incapasitation.
+ 
+ CYANIDE:
+ FED_LCN = (EXP(C_CN/43)/220 - 0.0045) * (T/60);
+	WHERE C_CN = C_HCN - C_NO - C_NO2
+	
+ NO2 + NO:
+ FED_LNOX = C_NOX/1500 * (T/60);
+   WHERE C_NOX = C_NO + C_NO2 
+
+ CO2-induced hyperventilation
+ FED_VCO2 = EXP(0.1903*C_CO2/1E4 + 2.0004)/7.1;
+
+ Note that the present version only inlcudes the hyperventilation factor
+ of CO2, not its toxic effects.  CO2 starts to be an asphyxiant at
+ consentrations of approx. 5 percent.
+ 
+ LOW OXYGEN:
+ FED_LO2 = 1/EXP(8.13 - 0.54*(0.209 - C_O2/1E6)) * (T/60);
+	
+ IRRITANTS:
+ FIC_IRR = C_HCL/114000 + C_HBR/114000 + C_HF/87000 + 
+   C_SO2/12000 + C_NO2/1900 + C_CH2CHO/4500 + C_HCHO/22500;
+ 
 
 &MESH IJK= 20,5,5, XB= 0.0,8.0, 0.0,2.0, 0.0,2.0 /
 
