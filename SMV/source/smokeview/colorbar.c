@@ -481,6 +481,8 @@ void initdefaultcolorbars(void){
 
   // black->orange
 
+  fire_colorbar_index=cbi-colorbarinfo;
+  fire_colorbar=cbi;
   levelset_colorbar=cbi-colorbarinfo;
   strcpy(cbi->label,"black->orange");
   cbi->label_ptr=cbi->label;

@@ -311,7 +311,7 @@ EXTERNCPP void makeshellmenus(int menuid,int flag);
 EXTERNCPP void destroyshellmenus(void);
 EXTERNCPP float cputime(void);
 EXTERNCPP void update_smoke3dflags(void);
-EXTERNCPP void mergesmoke3dcolors(void);
+EXTERNCPP void mergesmoke3dcolors(smoke3d *smoke3dset);
 EXTERNCPP void setsmokecolorflags(void);
 EXTERNCPP void sort_transparent_faces(float *mm);
 EXTERNCPP void getsmokedir(float *mm);

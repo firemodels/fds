@@ -369,6 +369,19 @@ void LightingMenu(int value){
     glutPostRedisplay();
 }
 
+
+/* ------------------ ColorBarMenu ------------------------ */
+
+void SmokeColorBarMenu(int value){
+  if(value==-999)return;
+  updatemenu=1;
+  glutPostRedisplay();
+
+  fire_colorbar_index=value;
+  fire_colorbar = colorbarinfo + value;
+  updatecolors(-1);
+}
+
 /* ------------------ ColorBarMenu ------------------------ */
 
 void ColorBarMenu(int value){
@@ -4039,7 +4052,7 @@ void InitMenus(int unload){
   int ntextures_used;
   int multiprop;
 
-static int titlemenu=0, labelmenu=0, colorbarmenu=0, lightingmenu=0, showhidemenu=0;
+static int titlemenu=0, labelmenu=0, colorbarmenu=0, smokecolorbarmenu=0, lightingmenu=0, showhidemenu=0;
 static int optionmenu=0, rotatetypemenu=0;
 static int resetmenu=0, frameratemenu=0, rendermenu=0, smokeviewinimenu=0, inisubmenu=0;
 #ifdef pp_COMPRESS
@@ -5514,6 +5527,32 @@ updatemenu=0;
 
   }
 
+
+/* -------------------------------- colorbarmenu -------------------------- */
+  
+  if(nsmoke3d_files>0&&Read3DSmoke3DFile==1){
+    colorbardata *cbi;
+    char ccolorbarmenu[256];
+
+    CREATEMENU(smokecolorbarmenu,SmokeColorBarMenu);
+
+    glutAddMenuEntry("Smoke Map:",-999);
+    for(i=0;i<ncolorbars;i++){
+      cbi = colorbarinfo + i;
+
+      strcpy(ccolorbarmenu,"  ");
+      if(fire_colorbar_index==i){
+        strcat(ccolorbarmenu,"*");
+        strcat(ccolorbarmenu,cbi->label);
+      }
+      else{
+        strcat(ccolorbarmenu,cbi->label);
+      }
+      glutAddMenuEntry(ccolorbarmenu,i);
+    }
+  }
+
+
   /* --------------------------------smoke3d showmenu -------------------------- */
   if(nsmoke3d_files>0&&Read3DSmoke3DFile==1){
     {
@@ -5529,6 +5568,7 @@ updatemenu=0;
           strcat(menulabel,smoke3di->menulabel);
           glutAddMenuEntry(menulabel,i);
         }
+        glutAddSubMenu("Smoke color map",smokecolorbarmenu);
         if(nsmoke3d_files>1){
           glutAddMenuEntry("-",-999);
           glutAddMenuEntry("Show All",SHOW_ALL);

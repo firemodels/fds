@@ -67,8 +67,10 @@ SVEXTERN int have_setpixelcount,update_initcullplane;
 #ifdef pp_GPU
 SVEXTERN int usegpu,gpuactive;
 SVEXTERN int GPU_aspectratio;
-SVEXTERN int GPU_smoke3d_rthick, GPU_skip, GPU_hrrcutoff, GPU_hrr;
-SVEXTERN int GPU_firecolor, GPU_is_smoke, GPU_colormap;
+SVEXTERN int GPU_smoke3d_rthick, GPU_skip, GPU_hrrcutoff, GPU_hrr, GPU_hrrpuv_max_smv, GPU_hrrpuv_cutoff;
+SVEXTERN int GPU_firecolor, GPU_is_smoke, GPU_smokecolormap, GPU_fire_alpha;
+SVEXTERN int fire_colorbar_index;
+SVEXTERN colorbardata *fire_colorbar;
 SVEXTERN int GPU_smokeshade,GPU_smokealpha;
 SVEXTERN int GPU_blank;
 SVEXTERN int GPU_adjustalphaflag;
@@ -192,11 +194,13 @@ SVEXTERN int visgridloc;
 
 SVEXTERN int valindex;
 
+SVEXTERN int fire_colorbar_index;
+SVEXTERN colorbardata *fire_colorbar;
 SVEXTERN float *rgb2_ini;
 SVEXTERN float rgb_full[MAXRGB][4];
 SVEXTERN float rgb_full2[MAXRGB][4];
 SVEXTERN float rgb_slice[4*MAXRGB];
-SVEXTERN float rgb_3dsmoke[4*MAXRGB];
+SVEXTERN float rgb_smokecolormap[4*MAXRGB];
 SVEXTERN float rgb_iso[4*MAXRGB];
 SVEXTERN float rgb_patch[4*MAXRGB];
 SVEXTERN float rgb_plot3d[4*MAXRGB];
@@ -894,7 +898,7 @@ SVEXTERN int ntotalfaces;
 SVEXTERN colordata *firstcolor;
 SVEXTERN texture *textureinfo, *terrain_texture;
 SVEXTERN GLuint texture_colorbar_id, texture_slice_colorbar_id, texture_patch_colorbar_id, texture_plot3d_colorbar_id, texture_iso_colorbar_id;
-SVEXTERN GLuint texture_3dsmoke_colorbar_id;
+SVEXTERN GLuint smokecolormap_id;
 SVEXTERN float mscale[3];
 SVEXTERN float xclip_min, yclip_min, zclip_min;
 SVEXTERN float xclip_max, yclip_max, zclip_max;

@@ -1901,7 +1901,7 @@ void Display(void){
     makeiblank_smoke3d();
   }
 #ifdef pp_CULL
-    if(update_initcull==1)initcull(cullsmoke);
+    if(1==0&&update_initcull==1)initcull(cullsmoke);  //xxx turn off until GPU smoke is sorted out
 #endif
 //   if(update_initcullgeom==1)initcullgeom(cullgeom);
    if(update_streaks==1&&ReadPartFile==1){
@@ -2317,7 +2317,7 @@ void update_framenumber(int changetime){
           updatesmoke3d(smoke3di);
         }
       }
-      if(nsmoke3d_files>0)mergesmoke3dcolors();
+      if(nsmoke3d_files>0)mergesmoke3dcolors(NULL);
     }
     if(showpatch==1){
       for(i=0;i<nmeshes;i++){

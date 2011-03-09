@@ -3,6 +3,9 @@
 // $Author$
 
 #include "options.h"
+#ifdef pp_GPU
+#include <GL/glew.h>
+#endif
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -3168,6 +3171,7 @@ typedef struct {
 
   printf("      Loading colorbar texture: ");
 
+  glActiveTexture(GL_TEXTURE0);
   glGenTextures(1,&texture_colorbar_id);
   glBindTexture(GL_TEXTURE_1D,texture_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_full);
@@ -3178,13 +3182,6 @@ typedef struct {
   glGenTextures(1,&texture_slice_colorbar_id);
   glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_slice);
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-
-  glGenTextures(1,&texture_3dsmoke_colorbar_id);
-  glBindTexture(GL_TEXTURE_1D,texture_3dsmoke_colorbar_id);
-  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_3dsmoke);
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -3210,6 +3207,13 @@ typedef struct {
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 
+  //glActiveTexture(GL_TEXTURE2);
+  glGenTextures(1,&smokecolormap_id);
+  glBindTexture(GL_TEXTURE_1D,smokecolormap_id);
+  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_smokecolormap);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
   CheckMemory;
 
   printf(" - completed\n");

@@ -1992,9 +1992,6 @@ void update_texturebar(void){
   glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_slice);
 
-  glBindTexture(GL_TEXTURE_1D,texture_3dsmoke_colorbar_id);
-  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_3dsmoke);
-
   glBindTexture(GL_TEXTURE_1D,texture_patch_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_patch);
 
@@ -2003,6 +2000,9 @@ void update_texturebar(void){
 
   glBindTexture(GL_TEXTURE_1D,texture_iso_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_iso);
+
+  glBindTexture(GL_TEXTURE_1D,smokecolormap_id);
+  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_smokecolormap);
 }
 
 /* ------------------ initrgb ------------------------ */
@@ -2076,19 +2076,31 @@ void updatecolors(int changecolorindex){
   if(colorbarinfo!=NULL){
     int tflag=0;
     unsigned char *alpha;
+    colorbardata *cbi;
+
+    cbi = colorbarinfo + colorbartype;
 
     alpha = colorbarinfo[colorbartype].alpha;
     for(n=0;n<nrgb_full;n++){
       float rgb_cb[3],graylevel;
 
-      rgb_full[n][0]=colorbarinfo[colorbartype].colorbar[3*n];
-      rgb_full[n][1]=colorbarinfo[colorbartype].colorbar[3*n+1];
-      rgb_full[n][2]=colorbarinfo[colorbartype].colorbar[3*n+2];
+      rgb_full[n][0]=cbi->colorbar[3*n];
+      rgb_full[n][1]=cbi->colorbar[3*n+1];
+      rgb_full[n][2]=cbi->colorbar[3*n+2];
       if(alpha[n]==0){
         rgb_full[n][3]=0.0;
       }
       else{
         rgb_full[n][3]=transparentlevel_local;
+      }
+      rgb_smokecolormap[4*n+0]=fire_colorbar->colorbar[3*n];
+      rgb_smokecolormap[4*n+1]=fire_colorbar->colorbar[3*n+1];
+      rgb_smokecolormap[4*n+2]=fire_colorbar->colorbar[3*n+2];
+      if(alpha[n]==0){
+        rgb_smokecolormap[4*n+3]=0.0;
+      }
+      else{
+        rgb_smokecolormap[4*n+3]=transparentlevel_local;
       }
     } 
   }
@@ -2285,16 +2297,6 @@ void updatechopcolors(void){
     }
     else{
       rgb_iso[4*i+3]=0.0;
-    }
-
-    rgb_3dsmoke[4*i+0]=rgb_full[i][0];
-    rgb_3dsmoke[4*i+1]=rgb_full[i][1];
-    rgb_3dsmoke[4*i+2]=rgb_full[i][2];
-    if(rgb_full[i][3]>0.001){
-      rgb_3dsmoke[4*i+3]=transparentlevel_local;
-    }
-    else{
-      rgb_3dsmoke[4*i+3]=0.0;
     }
 
     rgb_slice[4*i+0]=rgb_full[i][0];

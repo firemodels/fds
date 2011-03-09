@@ -1486,8 +1486,8 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
     }
 #endif
 #ifdef pp_CULL
-    if(usegpu==1&&cullsmoke==1){
-        drawsmoke3dCULL();
+    if(1==0&&usegpu==1&&cullsmoke==1){ //xxx skip over this case until we get new GPU smoke drawing sorted out
+      drawsmoke3dCULL();
     }
     else{
       int i;
