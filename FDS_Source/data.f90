@@ -1913,7 +1913,7 @@ SELECT CASE (SPEC_ID)
       T_BOIL = 77.35_EB !K
    CASE('NITRIC OXIDE')
       T = MIN(122._EB,MAX(110._EB,REAL(I_TMP,EB)))
-      CP = = 54.38_EB*T - 3926.9_EB!J/kg/K
+      CP =  54.38_EB*T - 3926.9_EB!J/kg/K
       H_L = -665258.19847!J/kg
       H_V = 460000._EB !J/kg
       T_REF = 110._EB !K
