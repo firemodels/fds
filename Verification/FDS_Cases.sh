@@ -134,7 +134,7 @@ $RUNFDS Radiation thermocouples
 $RUNFDS Radiation TC_heating
 $RUNFDS Radiation TC_view_factor
 $RUNFDS Radiation wall_internal_radiation
-$RUNFDS Species FED_Device
+$RUNFDS Species FED_FIC
 $RUNFDS Sprinklers_and_Sprays activate_sprinklers
 $RUNFDS Sprinklers_and_Sprays bucket_test_2
 $RUNFDS Sprinklers_and_Sprays bucket_test
