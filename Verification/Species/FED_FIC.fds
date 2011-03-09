@@ -34,14 +34,13 @@
  of CO2, not its toxic effects.  CO2 starts to be an asphyxiant at
  consentrations of approx. 5 percent.
  
- LOW OXYGEN:
+ Low oxygen:
  FED_LO2 = 1/EXP(8.13 - 0.54*(0.209 - C_O2/1E6)) * (T/60);
 	
  IRRITANTS:
  FIC_IRR = C_HCL/114000 + C_HBR/114000 + C_HF/87000 + 
    C_SO2/12000 + C_NO2/1900 + C_CH2CHO/4500 + C_HCHO/22500;
  
-
 &MESH IJK= 20,5,5, XB= 0.0,8.0, 0.0,2.0, 0.0,2.0 /
 
 &TIME T_END=100.0, DT=0.1 /
@@ -62,14 +61,14 @@
 &SPEC ID='CARBON DIOXIDE' /
 &SPEC ID='CARBON MONOXIDE' /
 &SPEC ID='NITROGEN', BACKGROUND=.TRUE. /
-&SPEC ID='NITRIC MONOXIDE', MW=30. /
+&SPEC ID='NITRIC OXIDE' /
 &SPEC ID='NITROGEN DIOXIDE' /
 &SPEC ID='HYDROGEN CYANIDE' /
 &SPEC ID='HYDROGEN CHLORIDE' /
 &SPEC ID='HYDROGEN BROMIDE' /
 &SPEC ID='HYDROGEN FLUORIDE' /
 &SPEC ID='SULFUR DIOXIDE' /
-&SPEC ID='ACROLEIN', MW=56./
+&SPEC ID='ACROLEIN' /
 &SPEC ID='FORMALDEHYDE' /
 
 &OBST XB = 2,2.4,0,2,0,2 /
@@ -91,7 +90,7 @@
                         MASS_FRACTION(3)=0.00313658
                         SPEC_ID='OXYGEN','CARBON DIOXIDE','CARBON MONOXIDE' /
 
-! Asphyxiants
+! Aphyxiants
 ! Concentrations & mass fractions for this test case:
 !   gas    mol/mol     g/g
 !   O2       0.09021848  0.10070468
@@ -106,7 +105,7 @@
                         MASS_FRACTION(3)=0.00239861
                         MASS_FRACTION(4)=0.00014113
                         MASS_FRACTION(5)=0.00024989
-                        SPEC_ID='OXYGEN','CARBON DIOXIDE','CARBON MONOXIDE','NITRIC MONOXIDE','HYDROGEN CYANIDE' /
+                        SPEC_ID='OXYGEN','CARBON DIOXIDE','CARBON MONOXIDE','NITRIC OXIDE','HYDROGEN CYANIDE' /
 
 ! Irritants
 ! Concentrations & mass fractions for this test case:
@@ -160,7 +159,7 @@
                         MASS_FRACTION(10)=0.00000807
                         MASS_FRACTION(11)=0.00000265
                         MASS_FRACTION(12)=0.00000709
-                        SPEC_ID='OXYGEN','CARBON DIOXIDE','CARBON MONOXIDE','NITRIC MONOXIDE','NITROGEN DIOXIDE','HYDROGEN CYANIDE','HYDROGEN CHLORIDE','HYDROGEN BROMIDE','HYDROGEN FLUORIDE','SULFUR DIOXIDE','ACROLEIN','FORMALDEHYDE' /
+                        SPEC_ID='OXYGEN','CARBON DIOXIDE','CARBON MONOXIDE','NITRIC OXIDE','NITROGEN DIOXIDE','HYDROGEN CYANIDE','HYDROGEN CHLORIDE','HYDROGEN BROMIDE','HYDROGEN FLUORIDE','SULFUR DIOXIDE','ACROLEIN','FORMALDEHYDE' /
 
 						
 
