@@ -3997,8 +3997,9 @@ void drawsmoke3dCULL(void){
   xyzindex2[5]=3;
 
   glUniform1i(GPU_adjustalphaflag,adjustalphaflag);
-  glUniform1f(GPU_smokeshade,(float)smoke_shade);
+  glUniform1i(GPU_smokecolormap,0);
   glUniform1f(GPU_smoke3d_rthick,smoke3d_rthick);
+  glUniform1f(GPU_hrrpuv_max_smv,hrrpuv_max_smv);
 
   CheckMemory;
   sniffErrors("in drawsmoke3dcull 1");
@@ -4070,7 +4071,6 @@ void drawsmoke3dCULL(void){
         if(i_hrrcutoff<0)i_hrrcutoff=0;
         if(i_hrrcutoff>254)i_hrrcutoff=254;
       }
-      glUniform1f(GPU_hrrcutoff,(float)i_hrrcutoff);
       switch (meshi->smokedir){
         case 1:
         case -1:
@@ -4115,7 +4115,16 @@ void drawsmoke3dCULL(void){
         else{
           is_smoke=0;
         }
+        if(fire_halfdepth<=0.0){
+          fire_alpha=1.0;
+        }
+        else{
+          fire_alpha=(1.0-pow(0.5,meshi->dx/fire_halfdepth));
+       }
 	    }
+      glUniform1f(GPU_hrrcutoff,(float)i_hrrcutoff);
+      glUniform1f(GPU_hrrpuv_cutoff,meshi->hrrpuv_cutoff);
+      glUniform1f(GPU_fire_alpha,fire_alpha);
       glUniform1f(GPU_aspectratio,aspectratio);
       glUniform1i(GPU_is_smoke,is_smoke);
       glBegin(GL_TRIANGLES);

@@ -1901,7 +1901,7 @@ void Display(void){
     makeiblank_smoke3d();
   }
 #ifdef pp_CULL
-    if(1==0&&update_initcull==1)initcull(cullsmoke);  //xxx turn off until GPU smoke is sorted out
+    if(update_initcull==1)initcull(cullsmoke);
 #endif
 //   if(update_initcullgeom==1)initcullgeom(cullgeom);
    if(update_streaks==1&&ReadPartFile==1){
