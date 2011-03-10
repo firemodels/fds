@@ -207,47 +207,6 @@ else{\
     glVertex3f(XX,YY,ZZ);                                \
   }
 
-#define DRAWVERTEXGPU2(XX,YY,ZZ) \
-  value[0]=alphaf_in[n11];\
-  value[1]=alphaf_in[n12];\
-  value[2]=alphaf_in[n22];\
-  value[3]=alphaf_in[n21];\
-  if(value[0]==0&&value[1]==0&&value[2]==0&&value[3]==0)continue;\
-  SETBVALS \
-  if((adjustalphaflag==2||adjustalphaflag==3)&&iblank_smoke3d!=NULL){\
-    if(iblank_smoke3d[n11]==0)value[0]=0;\
-    if(iblank_smoke3d[n12]==0)value[1]=0;\
-    if(iblank_smoke3d[n22]==0)value[2]=0;\
-    if(iblank_smoke3d[n21]==0)value[3]=0;\
-  }\
-  if(value[0]==0&&value[1]==0&&value[2]==0&&value[3]==0)continue;\
-  if(abs(value[0]-value[2])<abs(value[1]-value[3])){     \
-    xyzindex=xyzindex1;                                  \
-  }                                                      \
-  else{                                                  \
-    xyzindex=xyzindex2;                                  \
-}                                                        \
-  if(firecolor==NULL){\
-    for(node=0;node<6;node++){                             \
-      mm = xyzindex[node];                                 \
-      GPU_BLANK \
-      glVertexAttrib1f(GPU_smokealpha,(float)value[mm]); \
-      glVertex3f(XX,YY,ZZ);                                \
-    }\
-  }\
-  else{\
-    fvalue[0]=firecolor[n11];\
-    fvalue[1]=firecolor[n12];\
-    fvalue[2]=firecolor[n22];\
-    fvalue[3]=firecolor[n21];\
-    for(node=0;node<6;node++){                             \
-      mm = xyzindex[node];                                 \
-      GPU_BLANK \
-      glVertexAttrib1f(GPU_smokealpha,(float)value[mm]);\
-      glVertexAttrib1f(GPU_hrr,(float)fvalue[mm]);\
-      glVertex3f(XX,YY,ZZ);                                \
-    }\
-}
 #define DRAWVERTEXGPUTERRAIN(XX,YY,ZZ) \
   z_offset[0]=znode_offset[m11];\
   z_offset[1]=znode_offset[m12];\
@@ -836,9 +795,7 @@ void updatesmoke3d(smoke3d *smoke3di){
 void mergesmoke3dcolors(smoke3d *smoke3dset){
   int i,j;
   smoke3d *smoke3di,*smoke3dref;
-  unsigned char smoke[3]; //{0,0,0};
-  unsigned char fire[3]; //{255,128,0};
-  unsigned char water[3]={205,205,255};
+  float *smoke, *fire;
 
   unsigned char *firecolor,*sootcolor,*firesmoke;
   unsigned char *mergecolor,*mergealpha;
@@ -849,12 +806,6 @@ void mergesmoke3dcolors(smoke3d *smoke3dset){
 
   mesh *meshi;
 
-  smoke[0]=smoke_shade;
-  smoke[1]=smoke_shade;
-  smoke[2]=smoke_shade;
-  fire[0]=fire_red;
-  fire[1]=fire_green;
-  fire[2]=fire_blue;
   i_hrrpuv_cutoff=254*hrrpuv_cutoff/hrrpuv_max_smv;
 
 #ifdef pp_CULL
@@ -943,14 +894,26 @@ void mergesmoke3dcolors(smoke3d *smoke3dset){
       if(firecolor!=NULL){
         for(j=0;j<smoke3di->nchars_uncompressed;j++){
           if(firecolor[j]>i_hrrpuv_cutoff){
-            *mergecolor++=fire[0];
-            *mergecolor++=fire[1];
-            *mergecolor++=fire[2];
+            int index;
+
+            index = 129+128*(float)(firecolor[j]-i_hrrpuv_cutoff)/(float)(255-i_hrrpuv_cutoff);
+            if(index<129)index=129;
+            if(index>255)index=255;
+            fire=rgb_smokecolormap+4*index;
+            *mergecolor++=255*fire[0];
+            *mergecolor++=255*fire[1];
+            *mergecolor++=255*fire[2];
           }
           else{
-            *mergecolor++=smoke[0];
-            *mergecolor++=smoke[1];
-            *mergecolor++=smoke[2];
+            int index;
+
+            index = 128*(float)(firecolor[j]-i_hrrpuv_cutoff)/(float)(255-i_hrrpuv_cutoff);
+            if(index<0)index=0;
+            if(index>128)index=128;
+            smoke=rgb_smokecolormap+4*index;
+            *mergecolor++=255*smoke[0];
+            *mergecolor++=255*smoke[1];
+            *mergecolor++=255*smoke[2];
           }
           mergecolor++;
           *mergealpha++=sootcolor[j]>>smoke3d_thick;
@@ -958,10 +921,11 @@ void mergesmoke3dcolors(smoke3d *smoke3dset){
         continue;
       }
       else{
+        smoke=rgb_smokecolormap;
         for(j=0;j<smoke3di->nchars_uncompressed;j++){
-          *mergecolor++=smoke[0];
-          *mergecolor++=smoke[1];
-          *mergecolor++=smoke[2];
+          *mergecolor++=255*smoke[0];
+          *mergecolor++=255*smoke[1];
+          *mergecolor++=255*smoke[2];
           mergecolor++;
           *mergealpha++=sootcolor[j]>>smoke3d_thick;
         }
@@ -972,9 +936,15 @@ void mergesmoke3dcolors(smoke3d *smoke3dset){
       if(firecolor!=NULL){
         for(j=0;j<smoke3di->nchars_uncompressed;j++){
           if(firecolor[j]>i_hrrpuv_cutoff){
-            *mergecolor++=fire[0];
-            *mergecolor++=fire[1];
-            *mergecolor++=fire[2];
+            int index;
+
+            index = 129+128*(float)(firecolor[j]-i_hrrpuv_cutoff)/(float)(255-i_hrrpuv_cutoff);
+            if(index<129)index=129;
+            if(index>255)index=255;
+            fire=rgb_smokecolormap+4*index;
+            *mergecolor++=255*fire[0];
+            *mergecolor++=255*fire[1];
+            *mergecolor++=255*fire[2];
              mergecolor++;
             *mergealpha++=fire_alpha;
           }
