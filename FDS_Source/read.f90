@@ -2003,7 +2003,7 @@ READ_SMIX_LOOP: DO N=1,N_MIX_SPECIES
    ENDIF
 
    IF (BACKGROUND) THEN
-      IF (N_MIX_SPECIES > 1) THEN
+      IF (N > 1) THEN
          WRITE(MESSAGE,'(A)') 'ERROR: Background mixture must be defined first'
          CALL SHUTDOWN(MESSAGE)
       ELSEIF (I_BACKGROUND <= N_SPEC_READ) THEN
@@ -2029,7 +2029,7 @@ READ_SMIX_LOOP: DO N=1,N_MIX_SPECIES
    SM%N_SUB_SPECIES = 0
    SM%ID = ID
    
-   SM => SPECIES_MIXTURE(N)
+!   SM => SPECIES_MIXTURE(N)
    COUNT_SPEC: DO NS = 1,MAX_SPECIES
       IF (TRIM(SPEC_ID(NS)) /= 'null') THEN
          SM%N_SUB_SPECIES = SM%N_SUB_SPECIES + 1
@@ -2051,12 +2051,13 @@ READ_SMIX_LOOP: DO N=1,N_MIX_SPECIES
          WRITE(MESSAGE,'(A,I2,A,I2)') 'ERROR: Problem with Species MIXture number ',N,'--Unspecified FRACTION for subspecies ',NS
          CALL SHUTDOWN(MESSAGE)
       ENDIF
-      FIND_SPEC_ID: DO NS2 = 1,N_SPECIES-N_MIX_SPECIES
+      FIND_SPEC_ID: DO NS2 = 1,N_SPECIES !-N_MIX_SPECIES
          IF (TRIM(SPECIES(NS2)%ID) == TRIM(SPEC_ID(NS))) THEN
             SM%SPEC_INDEX(NS) = NS2
             EXIT FIND_SPEC_ID
          ENDIF
-         IF(NS2==N_SPECIES-N_MIX_SPECIES) THEN
+!         IF(NS2==N_SPECIES-N_MIX_SPECIES) THEN
+         IF(NS2==N_SPECIES) THEN
             WRITE(MESSAGE,'(A,I2,A,A)') 'ERROR: Problem with Species MIXture number ',N,'--Could not find SPEC:',SPEC_ID(NS)
             CALL SHUTDOWN(MESSAGE)
          ENDIF
@@ -8333,7 +8334,7 @@ INIT_LOOP: DO N=1,N_INIT_READ
             IF (HRRPUV > ZERO_P) INIT_HRRPUV = .TRUE.
             IF (DENSITY     > 0._EB) RHOMAX = MAX(RHOMAX,IN%DENSITY)
 
-            SPEC_INIT_IF:IF (N_TRACKED_SPECIES > 0._EB .AND. ANY(MASS_FRACTION > ZERO_P)) THEN
+            SPEC_INIT_IF:IF (N_TRACKED_SPECIES > 0 .AND. ANY(MASS_FRACTION > ZERO_P)) THEN
                IF (SPEC_ID(1)=='null') THEN
                   WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR: Problem with INIT number ',N,'. SPEC_ID must be used with MASS_FRACTION'
                   CALL SHUTDOWN(MESSAGE)
@@ -8349,7 +8350,7 @@ INIT_LOOP: DO N=1,N_INIT_READ
                      DO NS2=1,N_SPECIES
                         IF (TRIM(SPEC_ID(NS))==TRIM(SPECIES(NS2)%ID)) THEN
                            IF(SPECIES(NS2)%Y_INDEX<=0) THEN
-                              WRITE(MESSAGE,'(A,I3,A,A)') 'ERROR: Problem with INIT number ',N,' SPEC ',&
+                              WRITE(MESSAGE,'(A,I3,A,A,A)') 'ERROR: Problem with INIT number ',N,' SPEC ',&
                               TRIM(SPECIES(NS2)%ID),' is not a tracked species'
                               CALL SHUTDOWN(MESSAGE)
                            ENDIF
