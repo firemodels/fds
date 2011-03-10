@@ -1,11 +1,11 @@
 &HEAD CHID='Ulster_SBI_45_kW', TITLE='University of Ulster SBI heat flux measurements' /
 
-&MESH IJK=25,25,100, XB=0.00,0.50,0.00,0.50,0.00,2.00 /
+&MESH IJK=30,30,100, XB=0.00,0.60,0.00,0.60,0.00,2.00 /
 
-&TIME T_END=100. /
+&TIME T_END=60. /
 
 &MISC SURF_DEFAULT='FIBER BOARD' /
-&REAC C=3., H=8., SOOT_YIELD=0.05 /
+&REAC C=3., H=8., SOOT_YIELD=0.05 FUEL = 'PROPANE' /
 &RADI RADIATIVE_FRACTION=0. /
 
 &SURF ID='burner', HRRPUA=1340., TMP_FRONT=200., COLOR='TAN' /
@@ -19,9 +19,9 @@
 
 &MATL ID            = 'FIBER MATERIAL'
       FYI           = 'Only a guess'
-      CONDUCTIVITY  = 0.1
-      SPECIFIC_HEAT = 1.0
-      DENSITY       = 1500. /
+      CONDUCTIVITY  = 0.045
+      SPECIFIC_HEAT = 2.0
+      DENSITY       = 250. /
 
 &MATL ID            = 'CONCRETE'
       FYI           = 'Drysdale, Intro to Fire Dynamics'
@@ -40,8 +40,8 @@
       COLOR      = 'ANTIQUE WHITE'
       THICKNESS  = 0.025 /
 
-&VENT MB='XMAX', SURF_ID='OPEN' /
-&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT XB = 0.5,0.6,0.0,0.6,0.0,0.0 SURF_ID = 'OPEN' /
+&VENT XB = 0.0,0.5,0.5,0.6,0.0,0.0 SURF_ID = 'OPEN' /
 &VENT MB='ZMIN', SURF_ID='FLOOR' /
 &VENT MB='ZMAX', SURF_ID='OPEN' /
 
