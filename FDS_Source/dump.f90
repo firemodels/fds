@@ -2224,8 +2224,12 @@ END SUBROUTINE WRITE_STATUS_FILES
 SUBROUTINE INITIALIZE_DIAGNOSTIC_FILE
 USE RADCONS, ONLY: NRT,RSA,NRP,TIME_STEP_INCREMENT,PATH_LENGTH
 USE MATH_FUNCTIONS, ONLY : EVALUATE_RAMP 
-USE SCARC_SOLVER, ONLY: SCARC_METHOD,SCARC_CG_PRECON,SCARC_BICG_PRECON, SCARC_SM_PRECON,SCARC_CG_EPS,&
-                        SCARC_BICG_EPS,SCARC_MG_EPS,SCARC_CG_NIT,SCARC_BICG_NIT,SCARC_MG_NIT
+USE SCRC, ONLY: SCARC_METHOD, SCARC_KRYLOV , SCARC_MULTIGRID, SCARC_SMOOTH, SCARC_PRECON, &
+                SCARC_COARSE, SCARC_STORAGE, SCARC_ACCURACY , &
+                SCARC_MULTIGRID_CYCLE, SCARC_MULTIGRID_LEVEL, SCARC_MULTIGRID_COARSENING, &
+                SCARC_MULTIGRID_ITERATIONS  , SCARC_MULTIGRID_ACCURACY  , &
+                SCARC_KRYLOV_ITERATIONS     , SCARC_KRYLOV_ACCURACY
+
 
 INTEGER :: NM,I,NN,N,NR,NL,NS
 REAL(EB) :: SD
@@ -2738,31 +2742,32 @@ ENDIF WRITE_RADIATION
  
 ! Write out SCARC info
 
-WRITE_SCARC: IF (PRES_METHOD=='SCARC') THEN
+WRITE_SCARC: IF (TRIM(PRES_METHOD)=='SCARC') THEN
    WRITE(LU_OUTPUT,'(//A/)')   ' ScaRC Information'
-   WRITE(LU_OUTPUT,'(A,A10)')   '   global solver:     ', SCARC_METHOD
-   SELECT CASE(SCARC_METHOD)
-      CASE('CG')
-         WRITE(LU_OUTPUT,'(A,A10)')  '   preconditioner:    ', SCARC_CG_PRECON
-         IF (SCARC_CG_PRECON=='MG') THEN
-            WRITE(LU_OUTPUT,'(A,A10)') '   MG-smoother:       ', SCARC_SM_PRECON
+   WRITE(LU_OUTPUT,'(3X,A20,A10)') 'Global solver       ', TRIM(SCARC_METHOD)
+   SELECT CASE(TRIM(SCARC_METHOD))
+      CASE('KRYLOV')
+         WRITE(LU_OUTPUT,'(3X,A20,A10)') 'Krylov variant      ', TRIM(SCARC_KRYLOV)
+         IF (TRIM(SCARC_PRECON)=='MG') THEN
+            WRITE(LU_OUTPUT,'(3X,A20,A10,A,A10)') 'Preconditioner      ', TRIM(SCARC_SMOOTH),'-',TRIM(SCARC_PRECON)
+         ELSE
+            WRITE(LU_OUTPUT,'(3X,A20,A10)')       'Preconditioner      ', TRIM(SCARC_PRECON)
          ENDIF
-         WRITE(LU_OUTPUT,'(A,I10)')   '   max iterations:    ', SCARC_CG_NIT
-         WRITE(LU_OUTPUT,'(A,E10.2)') '   stopping accuracy: ', SCARC_CG_EPS
-      CASE('BICG')
-         WRITE(LU_OUTPUT,'(A,A10)')  '   preconditioner:    ', SCARC_BICG_PRECON
-         IF (SCARC_BICG_PRECON=='MG') THEN
-            WRITE(LU_OUTPUT,'(A,A10)') '   MG-smoother:       ', SCARC_SM_PRECON
+         WRITE(LU_OUTPUT,'(3X,A20,I10)')   'Max iterations      ', SCARC_KRYLOV_ITERATIONS
+         WRITE(LU_OUTPUT,'(3X,A20,E10.2)') 'Stopping accuracy   ', SCARC_KRYLOV_ACCURACY
+      CASE('MULTIGRID')
+         WRITE(LU_OUTPUT,'(3X,A20,A10)') 'Smoother            ', TRIM(SCARC_SMOOTH)
+         IF (TRIM(SCARC_MULTIGRID)=='ALGEBRAIC') THEN
+            WRITE(LU_OUTPUT,'(3X,A20,I10)')   'Coarsening strategy ', TRIM(SCARC_MULTIGRID_COARSENING)
          ENDIF
-         WRITE(LU_OUTPUT,'(A,I10)')   '   max iterations:    ', SCARC_BICG_NIT
-         WRITE(LU_OUTPUT,'(A,E10.2)') '   stopping accuracy: ', SCARC_BICG_EPS
-      CASE('MG')
-         WRITE(LU_OUTPUT,'(A,A10)')  '   preconditioner:    ', SCARC_SM_PRECON
-         WRITE(LU_OUTPUT,'(A,I10)')   '   max iterations:    ', SCARC_MG_NIT
-         WRITE(LU_OUTPUT,'(A,E10.2)') '   stopping accuracy: ', SCARC_MG_EPS
+         WRITE(LU_OUTPUT,'(3X,A20,A10)')   'Coarse grid solver  ', TRIM(SCARC_COARSE)
+         WRITE(LU_OUTPUT,'(3X,A20,A10)')   'Cycle type          ', TRIM(SCARC_MULTIGRID_CYCLE)
+         WRITE(LU_OUTPUT,'(3X,A20,I10)')   'Max iterations      ', SCARC_MULTIGRID_ITERATIONS
+         WRITE(LU_OUTPUT,'(3X,A20,E10.2)') 'Stopping accuracy   ', SCARC_MULTIGRID_ACCURACY
    END SELECT
+   WRITE(LU_OUTPUT,'(3X,A20,A10)') 'Accuracy type       ', TRIM(SCARC_ACCURACY)
+   WRITE(LU_OUTPUT,'(3X,A20,A10)') 'Storage technique   ', TRIM(SCARC_STORAGE)
 ENDIF WRITE_SCARC
-
 
 WRITE(LU_OUTPUT,*)
 WRITE(LU_OUTPUT,*)
@@ -3052,7 +3057,7 @@ SUBROUTINE WRITE_DIAGNOSTICS(T)
 ! current time for the physical system, and current number of
 ! particles in the system.
 
-USE SCARC_SOLVER, ONLY: SCARC_METHOD, SCARC_CAPPA, SCARC_NIT, SCARC_RES
+USE SCRC, ONLY: SCARC_METHOD, SCARC_CAPPA, SCARC_ITERATIONS, SCARC_RESIDUAL
 REAL(EB), INTENT(IN) :: T(NMESHES)
 INTEGER :: NM,DATE_TIME(8),II,JJ,KK
 CHARACTER(10) :: BIG_BEN(3),MONTH
@@ -3102,8 +3107,8 @@ IF (ITERATE_PRESSURE) THEN
                                                ' on Mesh ',NM,' at (',II,JJ,KK,')'
 ENDIF
 IF (PRES_METHOD=='SCARC') THEN
-   WRITE(LU_OUTPUT,'(7X,A,i6,A,e9.2,A,e9.2)') 'ScaRC: iterations', SCARC_NIT, &
-                                              ', residual ',SCARC_RES,&
+   WRITE(LU_OUTPUT,'(7X,A,i6,A,e9.2,A,e9.2)') 'ScaRC: iterations', SCARC_ITERATIONS, &
+                                              ', residual ',SCARC_RESIDUAL,&
                                               ', convergence rate  ',SCARC_CAPPA
 ENDIF
 WRITE(LU_OUTPUT,'(7X,A)') '----------------------------------------------'
