@@ -35,6 +35,8 @@ char *textFileRead(char *fn);
 
 //              alphaf_out[n]=adjustalpha(ALPHAIN, xyzeyeorig, xp, ASPECTRATIO, NORM, NORMTYPE);
 
+// -------------------------- ADJUSTALPHA ----------------------------------
+
 #define ADJUSTALPHA(ALPHAIN,ASPECTRATIO,NORM,NORMTYPE) \
             alphaf_out[n]=0;\
             if(ALPHAIN==0)continue;\
@@ -45,6 +47,8 @@ char *textFileRead(char *fn);
             else{\
               alphaf_out[n]=adjustalpha(ALPHAIN, ASPECTRATIO);\
             }
+
+// -------------------------- DRAWVERTEX ----------------------------------
 
 #define DRAWVERTEX(XX,YY,ZZ)        \
 if(show_smoketest==0){\
@@ -89,13 +93,15 @@ if(show_smoketest==0){\
     glVertex3f(XX,YY,ZZ);                                \
   }\
 }\
-    else{\
-      for(node=0;node<6;node++){                             \
-        mm = xyzindex1[node];                                 \
-        glColor4ub(0,0,0,(unsigned char)smoke_alpha);\
-        glVertex3f(XX,YY,ZZ);                                \
-}\
-  }
+else{\
+  for(node=0;node<6;node++){                             \
+    mm = xyzindex1[node];                                 \
+    glColor4ub(0,0,0,(unsigned char)smoke_alpha);\
+    glVertex3f(XX,YY,ZZ);                                \
+  }\
+}
+
+// -------------------------- DRAWVERTEXTERRAIN ----------------------------------
 
 #define DRAWVERTEXTERRAIN(XX,YY,ZZ)        \
 if(show_smoketest==0){\
@@ -156,6 +162,8 @@ else{\
   }\
 }
 
+// -------------------------- DRAWVERTEXGPU ----------------------------------
+
 #define DRAWVERTEXGPU(XX,YY,ZZ) \
   value[0]=alphaf_in[n11];\
   value[1]=alphaf_in[n12];\
@@ -194,6 +202,8 @@ else{\
     glVertex3f(XX,YY,ZZ);                                \
   }
 
+// -------------------------- DRAWVERTEXGPUTERRAIN ----------------------------------
+
 #define DRAWVERTEXGPUTERRAIN(XX,YY,ZZ) \
   z_offset[0]=znode_offset[m11];\
   z_offset[1]=znode_offset[m12];\
@@ -215,26 +225,25 @@ else{\
   }                                                      \
   else{                                                  \
     xyzindex=xyzindex2;                                  \
-}                                                        \
-  if(firecolor==NULL){\
-    for(node=0;node<6;node++){                             \
-      mm = xyzindex[node];                                 \
-      glVertexAttrib1f(GPU_smokealpha,(float)value[mm]); \
-      glVertex3f(XX,YY,ZZ+z_offset[mm]);                                \
-    }\
-  }\
-  else{\
+  }                                                        \
+  if(firecolor!=NULL){\
     fvalue[0]=firecolor[n11];\
     fvalue[1]=firecolor[n12];\
     fvalue[2]=firecolor[n22];\
     fvalue[3]=firecolor[n21];\
-    for(node=0;node<6;node++){                             \
-      mm = xyzindex[node];                                 \
-      glVertexAttrib1f(GPU_smokealpha,(float)value[mm]);\
-      glVertexAttrib1f(GPU_hrr,(float)fvalue[mm]);\
-      glVertex3f(XX,YY,ZZ+z_offset[mm]);                                \
-    }\
-}
+  }\
+  else{\
+    fvalue[0]=0.0;\
+    fvalue[1]=0.0;\
+    fvalue[2]=0.0;\
+    fvalue[3]=0.0;\
+  }\
+  for(node=0;node<6;node++){                             \
+    mm = xyzindex[node];                                 \
+    glVertexAttrib1f(GPU_smokealpha,(float)value[mm]);\
+    glVertexAttrib1f(GPU_hrr,(float)fvalue[mm]);\
+    glVertex3f(XX,YY,ZZ+z_offset[mm]);                                \
+  }
 
 /* ------------------ readsmoke3d ------------------------ */
 
