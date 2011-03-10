@@ -1674,7 +1674,10 @@ $\mathrm{CH_2O}$ & 0 & 0 & 13.49 & 6.743  \\ \hline
 \end{tabular}
 \end{center}
 
-The FDS predictions and the expected FED and FIC values are compared in the figures below.
+Two versions of the simulations are performed. In the first simulation, the species were defined as individual tracked species. 
+The FDS predictions and the expected FED and FIC values are compared in the figures below. In the second simulation, each specie was defined as 
+a lumped specie, being part of the mixture using {\ct SMIX}. Four different mixtures were defined. The results for this test are shown in 
+Figure~\ref{FED_FIC_SMIX_plot}.
 
 \begin{figure}[ht]
 \noindent
@@ -1690,6 +1693,22 @@ The FDS predictions and the expected FED and FIC values are compared in the figu
 \end{tabular*}
 \caption[The FED and FIC values in {\bf FED\_FIC} test cases.]{Comparison of FED and FIC predictions with expected values.}
 \label{FED_FIC_plot}
+\end{figure}
+
+\begin{figure}[ht]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.in]{SCRIPT_FIGURES/FED_SMIX_O2_CO2_CO} &
+\includegraphics[width=3.in]{SCRIPT_FIGURES/FED_SMIX_Asphyxiants} \\
+\includegraphics[width=3.in]{SCRIPT_FIGURES/FED_SMIX_Irritants} &
+\includegraphics[width=3.in]{SCRIPT_FIGURES/FED_SMIX_All_Gases} \\
+\includegraphics[width=3.in]{SCRIPT_FIGURES/FIC_SMIX_O2_CO2_CO} &
+\includegraphics[width=3.in]{SCRIPT_FIGURES/FIC_SMIX_Asphyxiants} \\
+\includegraphics[width=3.in]{SCRIPT_FIGURES/FIC_SMIX_Irritants} &
+\includegraphics[width=3.in]{SCRIPT_FIGURES/FIC_SMIX_All_Gases}
+\end{tabular*}
+\caption[The FED and FIC values in {\bf FED\_FIC\_SMIX} test cases.]{Comparison of FED and FIC predictions with expected values using {\ct SMIX}.}
+\label{FED_FIC_SMIX_plot}
 \end{figure}
 
 
