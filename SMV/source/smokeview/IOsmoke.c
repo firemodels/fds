@@ -156,24 +156,12 @@ else{\
   }\
 }
 
-#ifdef pp_GPU_BLANK
-#define GPU_BLANK glVertexAttrib1f(GPU_blank,(float)[mm]);
-#define SETBVALS bvalue[0]=(float)iblank_smoke3d[n11];\
-  bvalue[1]=(float)iblank_smoke3d[n12];\
-  bvalue[2]=(float)iblank_smoke3d[n22];\
-  bvalue[3]=(float)iblank_smoke3d[n21];
-#else
-#define GPU_BLANK
-#define SETBVALS
-#endif
-
 #define DRAWVERTEXGPU(XX,YY,ZZ) \
   value[0]=alphaf_in[n11];\
   value[1]=alphaf_in[n12];\
   value[2]=alphaf_in[n22];\
   value[3]=alphaf_in[n21];\
   if(value[0]==0&&value[1]==0&&value[2]==0&&value[3]==0)continue;\
-  SETBVALS \
   if((adjustalphaflag==2||adjustalphaflag==3)&&iblank_smoke3d!=NULL){\
     if(iblank_smoke3d[n11]==0)value[0]=0;\
     if(iblank_smoke3d[n12]==0)value[1]=0;\
@@ -201,7 +189,6 @@ else{\
   }\
   for(node=0;node<6;node++){                             \
     mm = xyzindex[node];                                 \
-    GPU_BLANK \
     glVertexAttrib1f(GPU_hrr,fvalue[mm]);\
     glVertexAttrib1f(GPU_smokealpha,value[mm]); \
     glVertex3f(XX,YY,ZZ);                                \
@@ -216,7 +203,6 @@ else{\
   value[1]=alphaf_in[n12];\
   value[2]=alphaf_in[n22];\
   value[3]=alphaf_in[n21];\
-  SETBVALS \
   if((adjustalphaflag==2||adjustalphaflag==3)&&iblank_smoke3d!=NULL){\
     if(iblank_smoke3d[n11]==0)value[0]=0;\
     if(iblank_smoke3d[n12]==0)value[1]=0;\
@@ -233,7 +219,6 @@ else{\
   if(firecolor==NULL){\
     for(node=0;node<6;node++){                             \
       mm = xyzindex[node];                                 \
-      GPU_BLANK \
       glVertexAttrib1f(GPU_smokealpha,(float)value[mm]); \
       glVertex3f(XX,YY,ZZ+z_offset[mm]);                                \
     }\
@@ -245,7 +230,6 @@ else{\
     fvalue[3]=firecolor[n21];\
     for(node=0;node<6;node++){                             \
       mm = xyzindex[node];                                 \
-      GPU_BLANK \
       glVertexAttrib1f(GPU_smokealpha,(float)value[mm]);\
       glVertexAttrib1f(GPU_hrr,(float)fvalue[mm]);\
       glVertex3f(XX,YY,ZZ+z_offset[mm]);                                \
@@ -3960,9 +3944,6 @@ void drawsmoke3dCULL(void){
   int is_smoke;
 
   unsigned char value[4];
-#ifdef pp_GPU_BLANK
-  unsigned char bvalue[4];
-#endif
   unsigned char fvalue[4];
 
   mesh *mesh_old;

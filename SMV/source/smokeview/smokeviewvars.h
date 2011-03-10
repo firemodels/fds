@@ -72,7 +72,6 @@ SVEXTERN int GPU_firecolor, GPU_is_smoke, GPU_smokecolormap, GPU_fire_alpha;
 SVEXTERN int fire_colorbar_index;
 SVEXTERN colorbardata *fire_colorbar;
 SVEXTERN int GPU_smokeshade,GPU_smokealpha;
-SVEXTERN int GPU_blank;
 SVEXTERN int GPU_adjustalphaflag;
 SVEXTERN unsigned int GPU_depthtexture;
 SVEXTERN int i_hrrcutoff;

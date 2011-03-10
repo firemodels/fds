@@ -51,7 +51,6 @@
 #include "pragmas.h"
 #define pp_GPU
 #define pp_CULL
-// #define pp_GPU_BLANK
 #ifdef pp_BETA
 #define pp_OPEN
 #endif
