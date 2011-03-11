@@ -197,7 +197,7 @@ int setSmokeShaders() {
     "    alpha=smoke_alpha/255.0;"
 //    f(alpha) = 1 - (1-alpha)^r = f(0) + f'(0)alpha + f''(0)alpha^2/2 + f'''(0)alpha^3/6 + ...
 //             f(0) = 0, f'(0) = r, f''(0) = -r(r-1), f'''(0) = r(r-1)(r-2), f''''(0)=-r(r-1)(r-2)(r-3)
-    "    if(adjustalphaflag==1||adjustalphaflag==2){"
+    "    if(adjustalphaflag==1||adjustalphaflag==3){"
     "      r=aspectratio;"
     "      term1 = alpha*r;"
     "      term2 = -term1*alpha*(r-1.0)/2.0;"

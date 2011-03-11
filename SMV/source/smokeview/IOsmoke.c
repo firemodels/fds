@@ -40,8 +40,8 @@ char *textFileRead(char *fn);
 #define ADJUSTALPHA(ALPHAIN,ASPECTRATIO,NORM,NORMTYPE) \
             alphaf_out[n]=0;\
             if(ALPHAIN==0)continue;\
-            if(adjustalphaflag==2&&iblank_smoke3d!=NULL&&iblank_smoke3d[n]==0)continue;\
-            if(adjustalphaflag==3){\
+            if(adjustalphaflag==3&&iblank_smoke3d!=NULL&&iblank_smoke3d[n]==0)continue;\
+            if(adjustalphaflag==2){\
               alphaf_out[n]=ALPHAIN;\
             }\
             else{\
@@ -2819,10 +2819,6 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
   value[1]=255;
   value[2]=255;
   value[3]=255;
-  smoke_shade4[0]=smoke_shade/255.0;
-  smoke_shade4[1]=smoke_shade/255.0;
-  smoke_shade4[2]=smoke_shade/255.0;
-  smoke_shade4[3]=1.0;
 
   if(nterraininfo>0){
     znode_offset = meshi->terrain->znode_offset;
@@ -3967,10 +3963,6 @@ void drawsmoke3dCULL(void){
   value[1]=255;
   value[2]=255;
   value[3]=255;
-  smoke_shade4[0]=smoke_shade/255.0;
-  smoke_shade4[1]=smoke_shade/255.0;
-  smoke_shade4[2]=smoke_shade/255.0;
-  smoke_shade4[3]=1.0;
 
   xyzindex1[0]=0;
   xyzindex1[1]=1;

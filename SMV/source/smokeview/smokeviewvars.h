@@ -33,6 +33,8 @@ SVEXTERN propdata *propinfo;
 SVEXTERN float right_green, right_blue;
 
 SVEXTERN int levelset_colorbar, wallthickness_colorbar;
+SVEXTERN int fire_colorbar_index;
+SVEXTERN colorbardata *fire_colorbar, *fire_custom_colorbar;
 SVEXTERN float glui_time;
 SVEXTERN int show_mode;
 SVEXTERN int SVDECL(cellcenter_interp,0), SVDECL(cellcenter_slice_active,0), SVDECL(cellcenter_bound_active,0);
@@ -69,8 +71,6 @@ SVEXTERN int usegpu,gpuactive;
 SVEXTERN int GPU_aspectratio;
 SVEXTERN int GPU_smoke3d_rthick, GPU_skip, GPU_hrrcutoff, GPU_hrr, GPU_hrrpuv_max_smv, GPU_hrrpuv_cutoff;
 SVEXTERN int GPU_firecolor, GPU_is_smoke, GPU_smokecolormap, GPU_fire_alpha;
-SVEXTERN int fire_colorbar_index;
-SVEXTERN colorbardata *fire_colorbar;
 SVEXTERN int GPU_smokeshade,GPU_smokealpha;
 SVEXTERN int GPU_adjustalphaflag;
 SVEXTERN unsigned int GPU_depthtexture;
@@ -950,11 +950,12 @@ SVEXTERN float p3min_temp, p3max_temp;
 SVEXTERN int smoke3d_external;
 
 SVEXTERN smoke3d *smoke3dinfo;
-SVEXTERN int smoke_shade, fire_red, fire_green, fire_blue;
-SVEXTERN float smoke_shade4[4];
+SVEXTERN int fire_red, fire_green, fire_blue;
+SVEXTERN float SVDECL(smoke_shade,0.3);
 SVEXTERN float fire_halfdepth;
 SVEXTERN float hrrpuv_cutoff, global_hrrpuv_cutoff;
 
+SVEXTERN int SVDECL(use_firesmokemap,0);
 SVEXTERN int smokecullflag;
 SVEXTERN int smokedrawtest,smokedrawtest2;
 SVEXTERN int visMAINmenus;

@@ -22,6 +22,7 @@
 // svn revision character string
 extern "C" char glui_3dsmoke_revision[]="$Revision$";
 
+extern "C" void SmokeColorBarMenu(int fire_colorbar_index);
 extern "C" void update2_glui_smoke3dframestep(void);
 extern GLUI_Rollout *panel_smoke3d;
 extern GLUI *glui_bounds;
@@ -40,6 +41,8 @@ void update_alpha(void);
 #define FIRE_CUTOFF 6
 #define GLOBAL_FIRE_CUTOFF 15
 #define SMOKE_SHADE 7
+#define SMOKE_COLORBAR_LIST 16
+#define USE_FIRESMOKEMAP 17
 #ifdef pp_GPU
 #define SMOKE_RTHICK 8
 #else
@@ -56,10 +59,12 @@ void update_alpha(void);
 #define GPU_SMOKE 13
 #endif
 
+GLUI_Listbox *LISTBOX_smoke_colorbar=NULL;
 #ifdef pp_CULL
 GLUI_Spinner *SPINNER_cull_portsize=NULL;
 GLUI_Checkbox *CHECKBOX_show_cullports=NULL;
 #endif
+GLUI_Checkbox *CHECKBOX_use_firesmokemap=NULL;
 GLUI_Checkbox *CHECKBOX_smokecullflag=NULL;
 GLUI *glui_3dsmoke=NULL;
 GLUI_RadioGroup *alphagroup=NULL,*skipframes,*radio_smokesensors=NULL;
@@ -87,12 +92,12 @@ GLUI_Spinner *SPINNER_smoke3d_fire_blue=NULL;
 GLUI_Spinner *SPINNER_smoke3d_hrrpuv_cutoff=NULL;
 GLUI_Spinner *SPINNER_smoke3d_fire_halfdepth=NULL;
 GLUI_Spinner **SPINNER_smoke3d_hrrpuv_cutoffptr=NULL;
-GLUI_Panel *panel_overall=NULL,*panel_fire=NULL,*panel_absorption=NULL,*panel_smokesensor=NULL;
-GLUI_Panel *panel_slices=NULL,*panel_smoke=NULL,*panel_testsmoke=NULL;
+GLUI_Panel *panel_overall=NULL,*panel_colormap=NULL,*panel_absorption=NULL,*panel_smokesensor=NULL;
+GLUI_Panel *panel_slices=NULL,*panel_testsmoke=NULL;
 GLUI_Spinner *SPINNER_extinct=NULL;
 GLUI_Spinner *SPINNER_smokedens=NULL;
 GLUI_Spinner *SPINNER_pathlength=NULL;
-GLUI_StaticText *TEXT_smokealpha=NULL;
+GLUI_StaticText *TEXT_smokealpha=NULL,*STATIC_hrrpuvcolor=NULL;
 GLUI_StaticText *TEXT_smokedepth=NULL;
 GLUI_Checkbox *CHECKBOX_show_smoketest=NULL;
 
@@ -131,13 +136,6 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   SPINNER_smoke3d_hrrpuv_cutoffptr=(GLUI_Spinner **)malloc((nmeshes+1)*sizeof(GLUI_Spinner *));
   
   glui_3dsmoke=glui_bounds;
-  panel_absorption = glui_3dsmoke->add_panel_to_panel(panel_smoke3d,"Absorption Adjustments");
-  panel_absorption->set_alignment(GLUI_ALIGN_LEFT);
-  alphagroup = glui_3dsmoke->add_radiogroup_to_panel(panel_absorption,&adjustalphaflag);
-  glui_3dsmoke->add_radiobutton_to_group(alphagroup,"none");
-  glui_3dsmoke->add_radiobutton_to_group(alphagroup,"adjust off-center");
-  glui_3dsmoke->add_radiobutton_to_group(alphagroup,"adjust off-center & zero at boundaries");
-  glui_3dsmoke->add_radiobutton_to_group(alphagroup,"zero at boundaries");
 
   if(smoketest==1){
     panel_testsmoke = glui_3dsmoke->add_panel_to_panel(panel_smoke3d,"Test Smoke");
@@ -173,16 +171,37 @@ extern "C" void glui_3dsmoke_setup(int main_window){
 #endif
   }
 
-  panel_fire = glui_3dsmoke->add_panel_to_panel(panel_overall,"Fire");
-  panel_fire->set_alignment(GLUI_ALIGN_LEFT);
-  SPINNER_smoke3d_fire_red=glui_3dsmoke->add_spinner_to_panel(panel_fire,"red",GLUI_SPINNER_INT,&fire_red,FIRE_RED,SMOKE_3D_CB);
+  panel_colormap = glui_3dsmoke->add_panel_to_panel(panel_overall,"Fire/Smoke Display");
+
+  CHECKBOX_use_firesmokemap=glui_3dsmoke->add_checkbox_to_panel(panel_colormap,"Use colormap",&use_firesmokemap,USE_FIRESMOKEMAP,SMOKE_3D_CB);
+  if(ncolorbars>0){
+    LISTBOX_smoke_colorbar=glui_3dsmoke->add_listbox_to_panel(panel_colormap,"colormap:",&fire_colorbar_index,SMOKE_COLORBAR_LIST,SMOKE_3D_CB);
+
+    for(i=0;i<ncolorbars;i++){
+      colorbardata *cbi;
+
+      cbi = colorbarinfo + i;
+      cbi->label_ptr=cbi->label;
+      LISTBOX_smoke_colorbar->add_item(i,cbi->label_ptr);
+    }
+    LISTBOX_smoke_colorbar->set_int_val(fire_colorbar_index);
+  }
+
+  STATIC_hrrpuvcolor=glui_3dsmoke->add_statictext_to_panel(panel_colormap,"fire color:");
+  SPINNER_smoke3d_fire_red=glui_3dsmoke->add_spinner_to_panel(panel_colormap,"red",GLUI_SPINNER_INT,&fire_red,FIRE_RED,SMOKE_3D_CB);
   SPINNER_smoke3d_fire_red->set_int_limits(0,255);
-  SPINNER_smoke3d_fire_green=glui_3dsmoke->add_spinner_to_panel(panel_fire,"green",GLUI_SPINNER_INT,&fire_green,FIRE_GREEN,SMOKE_3D_CB);
+  SPINNER_smoke3d_fire_green=glui_3dsmoke->add_spinner_to_panel(panel_colormap,"green",GLUI_SPINNER_INT,&fire_green,FIRE_GREEN,SMOKE_3D_CB);
   SPINNER_smoke3d_fire_green->set_int_limits(0,255);
-  SPINNER_smoke3d_fire_blue=glui_3dsmoke->add_spinner_to_panel(panel_fire,"blue",GLUI_SPINNER_INT,&fire_blue,FIRE_BLUE,SMOKE_3D_CB);
+  SPINNER_smoke3d_fire_blue=glui_3dsmoke->add_spinner_to_panel(panel_colormap,"blue",GLUI_SPINNER_INT,&fire_blue,FIRE_BLUE,SMOKE_3D_CB);
   SPINNER_smoke3d_fire_blue->set_int_limits(0,255);
-  SPINNER_smoke3d_fire_halfdepth=glui_3dsmoke->add_spinner_to_panel(panel_fire,"50% flame depth (m)",GLUI_SPINNER_FLOAT,&fire_halfdepth,FIRE_HALFDEPTH,SMOKE_3D_CB);
+  SPINNER_smoke3d_fire_halfdepth=glui_3dsmoke->add_spinner_to_panel(panel_colormap,"50% fire depth (m)",GLUI_SPINNER_FLOAT,&fire_halfdepth,FIRE_HALFDEPTH,SMOKE_3D_CB);
   SPINNER_smoke3d_fire_halfdepth->set_float_limits(0.0,10.0);
+
+
+  SPINNER_smoke3d_smoke_shade=glui_3dsmoke->add_spinner_to_panel(panel_colormap,"smoke albedo",GLUI_SPINNER_FLOAT,&smoke_shade,SMOKE_SHADE,SMOKE_3D_CB);
+  SPINNER_smoke3d_smoke_shade->set_float_limits(0.0,1.0);
+
+  glui_3dsmoke->add_separator_to_panel(panel_colormap);
 
 
   {
@@ -190,11 +209,11 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     
 #define HRRPUV_CUTOFF_MAX (hrrpuv_max_smv-0.01)
 
-    glui_3dsmoke->add_statictext_to_panel(panel_fire,"HRRPUV cutoff (kW/m3):");
+    glui_3dsmoke->add_statictext_to_panel(panel_colormap,"HRRPUV cutoff (kW/m3):");
 
     if(nmeshes>1){
       SPINNER_smoke3d_hrrpuv_cutoffptr[nmeshes]=glui_3dsmoke->add_spinner_to_panel
-        (panel_fire,"All meshes",GLUI_SPINNER_FLOAT,&global_hrrpuv_cutoff,GLOBAL_FIRE_CUTOFF,SMOKE_3D_CB);
+        (panel_colormap,"All meshes",GLUI_SPINNER_FLOAT,&global_hrrpuv_cutoff,GLOBAL_FIRE_CUTOFF,SMOKE_3D_CB);
       SPINNER_smoke3d_hrrpuv_cutoffptr[nmeshes]->set_float_limits(0.0,HRRPUV_CUTOFF_MAX);
     }
     else{
@@ -204,32 +223,38 @@ extern "C" void glui_3dsmoke_setup(int main_window){
       meshi = meshinfo + i;
       if(meshi->hrrpuv_cutoff>HRRPUV_CUTOFF_MAX)meshi->hrrpuv_cutoff=HRRPUV_CUTOFF_MAX;
       SPINNER_smoke3d_hrrpuv_cutoffptr[i]=glui_3dsmoke->add_spinner_to_panel
-        (panel_fire,meshi->label,GLUI_SPINNER_FLOAT,&meshi->hrrpuv_cutoff,FIRE_CUTOFF,SMOKE_3D_CB);
+        (panel_colormap,meshi->label,GLUI_SPINNER_FLOAT,&meshi->hrrpuv_cutoff,FIRE_CUTOFF,SMOKE_3D_CB);
       SPINNER_smoke3d_hrrpuv_cutoffptr[i]->set_float_limits(0.0,HRRPUV_CUTOFF_MAX);
     }
   }
 
-  glui_3dsmoke->add_column_to_panel(panel_overall,false);
-
-  panel_smoke = glui_3dsmoke->add_panel_to_panel(panel_overall,"Smoke");
-  panel_smoke->set_alignment(GLUI_ALIGN_LEFT);
-  SPINNER_smoke3d_smoke_shade=glui_3dsmoke->add_spinner_to_panel(panel_smoke,"Grey Level",GLUI_SPINNER_INT,&smoke_shade,SMOKE_SHADE,SMOKE_3D_CB);
-  SPINNER_smoke3d_smoke_shade->set_int_limits(0,255);
-#ifdef pp_GPU
-  SPINNER_smoke3d_rthick=glui_3dsmoke->add_spinner_to_panel(panel_smoke,"Thickness",
+  #ifdef pp_GPU
+  SPINNER_smoke3d_rthick=glui_3dsmoke->add_spinner_to_panel(panel_colormap,"Thickness",
     GLUI_SPINNER_FLOAT,&smoke3d_rthick,SMOKE_RTHICK,SMOKE_3D_CB);
   SPINNER_smoke3d_rthick->set_float_limits(1.0,255.0);
   smoke3d_thick = log_base2(smoke3d_rthick);
 #else
-  SPINNER_smoke3d_thick=glui_3dsmoke->add_spinner_to_panel(panel_smoke,"Thickness",
+  SPINNER_smoke3d_thick=glui_3dsmoke->add_spinner_to_panel(panel_colormap,"Thickness",
     GLUI_SPINNER_INT,&smoke3d_thick,SMOKE_THICK,SMOKE_3D_CB);
   SPINNER_smoke3d_thick->set_int_limits(0,7);
 #endif
 #ifdef _DEBUG
-  CHECKBOX_smoke3d_external=glui_3dsmoke->add_checkbox_to_panel(panel_smoke,"View smoke externally (ONLY)",&smoke3d_external);
+  CHECKBOX_smoke3d_external=glui_3dsmoke->add_checkbox_to_panel(panel_colormap,"View smoke externally (ONLY)",&smoke3d_external);
 #endif
+  SMOKE_3D_CB(USE_FIRESMOKEMAP);
+
+  glui_3dsmoke->add_column_to_panel(panel_overall,false);
 
 
+
+
+  panel_absorption = glui_3dsmoke->add_panel_to_panel(panel_overall,"Absorption Adjustments");
+  panel_absorption->set_alignment(GLUI_ALIGN_LEFT);
+  alphagroup = glui_3dsmoke->add_radiogroup_to_panel(panel_absorption,&adjustalphaflag);
+  glui_3dsmoke->add_radiobutton_to_group(alphagroup,"none");
+  glui_3dsmoke->add_radiobutton_to_group(alphagroup,"adjust off-center");
+  glui_3dsmoke->add_radiobutton_to_group(alphagroup,"zero at boundaries");
+  glui_3dsmoke->add_radiobutton_to_group(alphagroup,"both");
 
   panel_slices = glui_3dsmoke->add_panel_to_panel(panel_overall,"Slices");
   panel_slices->set_alignment(GLUI_ALIGN_LEFT);
@@ -346,6 +371,32 @@ void SMOKE_3D_CB(int var){
   int i;
 
   switch (var){
+  case USE_FIRESMOKEMAP:
+    if(use_firesmokemap==1){
+      LISTBOX_smoke_colorbar->enable();
+      SPINNER_smoke3d_fire_red->disable();
+      SPINNER_smoke3d_fire_green->disable();
+      SPINNER_smoke3d_fire_blue->disable();
+      SPINNER_smoke3d_fire_halfdepth->disable();
+      SPINNER_smoke3d_smoke_shade->disable();
+      STATIC_hrrpuvcolor->disable();
+      SmokeColorBarMenu(fire_colorbar_index);
+    }
+    else{
+      LISTBOX_smoke_colorbar->disable();
+      SPINNER_smoke3d_fire_red->enable();
+      SPINNER_smoke3d_fire_green->enable();
+      SPINNER_smoke3d_fire_blue->enable();
+      SPINNER_smoke3d_fire_halfdepth->enable();
+      SPINNER_smoke3d_smoke_shade->enable();
+      STATIC_hrrpuvcolor->enable();
+      SmokeColorBarMenu(fire_custom_colorbar-colorbarinfo);
+    }
+    break;
+  case SMOKE_COLORBAR_LIST:
+    SmokeColorBarMenu(fire_colorbar_index);
+    updatemenu=1;
+    break;
   case SMOKETEST:
     update_alpha();
     break;
@@ -371,10 +422,33 @@ void SMOKE_3D_CB(int var){
   case FIRE_RED:
   case FIRE_GREEN:
   case FIRE_BLUE:
+  case SMOKE_SHADE:
+    glutPostRedisplay();
+    if(fire_custom_colorbar!=NULL){
+      unsigned char *rgb_node;
+
+      rgb_node=fire_custom_colorbar->rgb_node;
+      rgb_node[0]=smoke_shade*255;
+      rgb_node[1]=smoke_shade*255;
+      rgb_node[2]=smoke_shade*255;
+      rgb_node[3]=smoke_shade*255;
+      rgb_node[4]=smoke_shade*255;
+      rgb_node[5]=smoke_shade*255;
+      rgb_node[6]=fire_red;
+      rgb_node[7]=fire_green;
+      rgb_node[8]=fire_blue;
+      rgb_node[9]=fire_red;
+      rgb_node[10]=fire_green;
+      rgb_node[11]=fire_blue;
+      remapcolorbar(fire_custom_colorbar);
+      updatecolors(-1);
+    }
+    force_redisplay=1;
+    IDLE();
+    break;
   case FIRE_HALFDEPTH:
   case FIRE_CUTOFF:
   case FIRE_ALPHA:
-  case SMOKE_SHADE:
     glutPostRedisplay();
     force_redisplay=1;
     IDLE();

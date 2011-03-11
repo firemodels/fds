@@ -1624,7 +1624,7 @@ void initvars1(void){
 
   direction_angleINI0=0.0;
 
-  adjustalphaflag=2;
+  adjustalphaflag=3;
   colorband=1;
   show_extremedata=0;
 
@@ -1745,7 +1745,7 @@ void initvars1(void){
   showfiles=0;
   smoke3d_external=0;
  
-  smoke_shade=0, fire_red=255, fire_green=128, fire_blue=0;
+  fire_red=255, fire_green=128, fire_blue=0;
   fire_halfdepth=2.0;
   hrrpuv_cutoff=600.0;
   global_hrrpuv_cutoff=hrrpuv_cutoff;

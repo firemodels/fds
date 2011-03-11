@@ -1347,6 +1347,11 @@ int readsmv(char *file, char *file2){
       smokediff=1;
       continue;
     }
+    if(match(buffer,"ALBEDO",6) == 1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f",&smoke_shade);
+      continue;
+    }
     if(match(buffer,"AVATAR_COLOR",12) == 1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&navatar_colors);
@@ -9231,9 +9236,9 @@ int readini2(char *inifile, int localfile){
         sscanf(buffer,"%i",&smokeskipm1);
         continue;
       }
-      if(match(buffer,"SMOKESHADE",10)==1){
+      if(match(buffer,"SMOKEALBEDO",11)==1){
         if(fgets(buffer,255,stream)==NULL)break;
-        sscanf(buffer,"%i",&smoke_shade);
+        sscanf(buffer,"%f",&smoke_shade);
         continue;
       }
       if(match(buffer,"SMOKETHICK",10)==1){
@@ -10507,8 +10512,8 @@ void writeini(int flag){
 #endif
   fprintf(fileout,"SMOKESKIP\n");
   fprintf(fileout," %i\n",smokeskipm1);
-  fprintf(fileout,"SMOKESHADE\n");
-  fprintf(fileout," %i\n",smoke_shade);
+  fprintf(fileout,"SMOKEALBEDO\n");
+  fprintf(fileout," %f\n",smoke_shade);
 #ifdef pp_GPU
   fprintf(fileout,"SMOKERTHICK\n");
   fprintf(fileout," %f\n",smoke3d_rthick);
