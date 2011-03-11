@@ -2754,6 +2754,11 @@ void drawsmoke3d(smoke3d *smoke3di){
 
 }
 #ifdef pp_GPU
+/* ------------------ drawsmoke3dGPUVOL ------------------------ */
+
+void drawsmoke3dGPUVOL(smoke3d *smoke3di){
+}
+
 /* ------------------ drawsmoke3dGPU ------------------------ */
 
 void drawsmoke3dGPU(smoke3d *smoke3di){

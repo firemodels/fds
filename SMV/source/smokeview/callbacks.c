@@ -647,7 +647,10 @@ void keyboard_2(unsigned char key, int x, int y){
 
   glutPostRedisplay();
   key2 = (char)key;
-  if(key2!='L'&&key2!='H'&&key2!='N'&&key2!='R'&&key2!='P'&&key2!='T'&&key2!='G'&&key2!='S'&&key2!='A'
+  if(key2!='L'&&key2!='H'&&key2!='N'&&key2!='R'&&key2!='P'&&key2!='T'&&key2!='S'&&key2!='A'
+#ifdef pp_GPU
+    &&key2!='G'&&key2!='V'
+#endif
 #ifdef pp_CULL
     &&key2!='C'
 #endif
@@ -767,6 +770,12 @@ void keyboard_2(unsigned char key, int x, int y){
     if(nsmoke3d_files>0){
       update_smoke3dflags();
     }
+    print_gpu_cull_state();
+    return;    
+  }
+  if((nsmoke3d_files>0)&&strncmp((const char *)&key2,"V",1)==0){
+    if(gpuactive==1)use_volume_shader=1-use_volume_shader;
+    update_smoke3dflags();
     print_gpu_cull_state();
     return;    
   }

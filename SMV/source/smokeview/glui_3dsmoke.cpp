@@ -71,7 +71,7 @@ GLUI_RadioGroup *alphagroup=NULL,*skipframes,*radio_smokesensors=NULL;
 GLUI_Spinner *SPINNER_cvis=NULL;
 GLUI_Checkbox *CHECKBOX_test_smokesensors=NULL;
 #ifdef pp_GPU
-GLUI_Checkbox *CHECKBOX_smokeGPU=NULL;
+GLUI_Checkbox *CHECKBOX_smokeGPU=NULL,*CHECKBOX_smokeVOLGPU=NULL;
 #endif
 GLUI_Checkbox *CHECKBOX_smokedrawtest=NULL;
 GLUI_Checkbox *CHECKBOX_smokedrawtest2=NULL;
@@ -107,6 +107,7 @@ extern "C" void update_smoke3dflags(void){
   alphagroup->set_int_val(adjustalphaflag);
 #ifdef pp_GPU
   if(CHECKBOX_smokeGPU!=NULL)CHECKBOX_smokeGPU->set_int_val(usegpu);
+  if(CHECKBOX_smokeVOLGPU!=NULL)CHECKBOX_smokeVOLGPU->set_int_val(use_volume_shader);
 #endif
 #ifdef pp_CULL
   CHECKBOX_smokecullflag->set_int_val(cullsmoke);
@@ -260,6 +261,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   panel_slices->set_alignment(GLUI_ALIGN_LEFT);
 #ifdef pp_GPU
   CHECKBOX_smokeGPU=glui_3dsmoke->add_checkbox_to_panel(panel_slices,"Use GPU",&usegpu,GPU_SMOKE,SMOKE_3D_CB);
+  CHECKBOX_smokeVOLGPU=glui_3dsmoke->add_checkbox_to_panel(panel_slices,"Use full volume rendering",&use_volume_shader,GPU_SMOKE,SMOKE_3D_CB);
   if(gpuactive==0){
     usegpu=0;
     CHECKBOX_smokeGPU->disable();
@@ -479,6 +481,12 @@ void SMOKE_3D_CB(int var){
 #ifdef pp_GPU
   case GPU_SMOKE:
     if(usegpu==1){
+      CHECKBOX_smokeVOLGPU->enable();
+    }
+    else{
+      CHECKBOX_smokeVOLGPU->disable();
+    }
+    if(usegpu==1&&use_volume_shader==0){
       skipframes->set_int_val(0);
       skipframes->disable();
 #ifdef pp_CULL
@@ -490,7 +498,12 @@ void SMOKE_3D_CB(int var){
 #endif
     }
     else{
-      skipframes->enable();
+      if(use_volume_shader==1){
+        skipframes->disable();
+      }
+      else{
+        skipframes->enable();
+      }
 #ifdef pp_CULL
       CHECKBOX_smokecullflag->disable();
       SPINNER_cull_portsize->disable();

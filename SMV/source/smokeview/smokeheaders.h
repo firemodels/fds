@@ -108,9 +108,9 @@ void getDepthTexture( void );
 void createDepthTexture( void );
 EXTERNCPP int init_shaders(void);
 EXTERNCPP void LoadSmokeShaders(void);
-EXTERNCPP void UnloadSmokeShaders(void);
 EXTERNCPP void LoadZoneSmokeShaders(void);
-EXTERNCPP void UnloadZoneSmokeShaders(void);
+EXTERNCPP void LoadVolSmokeShaders(void);
+EXTERNCPP void UnloadShaders(void);
 #endif
 EXTERNCPP void initspheresegs(int nlat, int nlong);
 EXTERNCPP mesh *getmesh(float *xyz);
@@ -329,6 +329,7 @@ EXTERNCPP void drawsmoke3d(smoke3d *smoke3di);
 EXTERNCPP void TRANSLATE_CB(int var);
 #ifdef pp_GPU
 EXTERNCPP void drawsmoke3dGPU(smoke3d *smoke3di);
+EXTERNCPP void drawsmoke3dGPUVOL(smoke3d *smoke3di);
 #endif
 #ifdef pp_CULL
 EXTERNCPP void drawsmoke3dCULL(void);

@@ -14,7 +14,7 @@ char shaders_revision[]="$Revision$";
 #include "flowfiles.h"
 #include "smokeviewvars.h"
 
-GLhandleARB v,f,p_smoke, p_zonesmoke;
+GLhandleARB v,f,p_smoke, p_zonesmoke, p_volsmoke;
 char *textFileRead(char *fn);
 void printInfoLog(GLhandleARB obj);
 
@@ -103,16 +103,16 @@ int setZoneSmokeShaders() {
     "  fragpos=gl_Vertex;"
     "  gl_Position = ftransform();"
     "}"
-};
+  };
 
   v = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
   f = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
 
-    glShaderSource(v,1, VertexShaderSource,NULL);
-    glCompileShaderARB(v);
+  glShaderSource(v,1, VertexShaderSource,NULL);
+  glCompileShaderARB(v);
 
-    glShaderSource(f, 1, FragmentShaderSource,NULL);
-    glCompileShaderARB(f);
+  glShaderSource(f, 1, FragmentShaderSource,NULL);
+  glCompileShaderARB(f);
 
 #ifdef _DEBUG
   printInfoLog(v);
@@ -147,7 +147,7 @@ int setZoneSmokeShaders() {
     printf(" unknown error\n");
     break;
   }
-  printInfoLog(p_smoke);
+  printInfoLog(p_zonesmoke);
 #endif
   GPU_zoneinside = glGetUniformLocation(p_zonesmoke,"zoneinside");
   GPU_zonedir = glGetUniformLocation(p_zonesmoke,"zonedir");
@@ -158,6 +158,152 @@ int setZoneSmokeShaders() {
   GPU_zlay = glGetUniformLocation(p_zonesmoke,"zlay");
   GPU_odl = glGetUniformLocation(p_zonesmoke,"odl");
   GPU_odu = glGetUniformLocation(p_zonesmoke,"odu");
+
+  if(error_code!=1)return error_code;
+  return error_code;
+
+}
+
+/* ------------------ setVolSmokeShaders ------------------------ */
+
+int setVolSmokeShaders() {
+  GLint error_code;
+  const GLchar *FragmentShaderSource[]={
+    "uniform int zonedir,zoneinside;"
+    "uniform float xyzmaxdiff,zlay,odl,odu;"
+    "uniform vec3 eyepos,boxmin, boxmax;"
+    "varying vec3 fragpos;"
+    
+    "void main(){"
+    "  float L,opacity,alpha,alpha_min,alpha_zlay;"
+    "  float factor_U, factor_L;"
+    
+    "  vec3 dalphamin,dalphamax;"
+    "  L=distance(fragpos,eyepos)*xyzmaxdiff;"
+    "  alpha_min=1000000.0;"
+    "  dalphamin=-(boxmin-fragpos)/(eyepos-fragpos);"
+    "  dalphamax=-(boxmax-fragpos)/(eyepos-fragpos);"
+    "  alpha_zlay = -(zlay-fragpos.z)/(eyepos.z-fragpos.z);"
+    "  if(zoneinside==0){"
+    "    if(zonedir!=-1&&dalphamin.x>0.0&&dalphamin.x<alpha_min)alpha_min=dalphamin.x;"
+    "    if(zonedir!=1 &&dalphamax.x>0.0&&dalphamax.x<alpha_min)alpha_min=dalphamax.x;"
+    "    if(zonedir!=-2&&dalphamin.y>0.0&&dalphamin.y<alpha_min)alpha_min=dalphamin.y;"
+    "    if(zonedir!=2 &&dalphamax.y>0.0&&dalphamax.y<alpha_min)alpha_min=dalphamax.y;"
+    "    if(zonedir!=-3&&dalphamin.z>0.0&&dalphamin.z<alpha_min)alpha_min=dalphamin.z;"
+    "    if(zonedir!=3 &&dalphamax.z>0.0&&dalphamax.z<alpha_min)alpha_min=dalphamax.z;"
+    "    if(eyepos.z>zlay&&fragpos.z>zlay){"
+    "      if(alpha_zlay>0.0&&alpha_zlay<alpha_min){"
+    "        factor_U=alpha_zlay/odu;"
+    "        factor_L=(alpha_min-alpha_zlay)/odl;"
+    "      }"
+    "      else{"
+    "        factor_U=alpha_min/odu;"
+    "        factor_L=0.0;"
+    "      }"
+    "    }"
+    "    else if(eyepos.z>zlay&&fragpos.z<=zlay){"
+    "      factor_U=0.0;"
+    "      factor_L=alpha_min/odl;"
+    "    }"
+    "    else if(eyepos.z<=zlay&&fragpos.z>zlay){"
+    "      factor_U=alpha_min/odu;"
+    "      factor_L=0.0;"
+    "    }"
+    "    else if(eyepos.z<=zlay&&fragpos.z<=zlay){"
+    "      if(alpha_zlay>0.0&&alpha_zlay<alpha_min){"
+    "        factor_U=(alpha_min-alpha_zlay)/odu;"
+    "        factor_L=alpha_zlay/odl;"
+    "      }"
+    "      else{"
+    "        factor_U=0.0;"
+    "        factor_L=alpha_min/odl;"
+    "      }"
+    "    }"
+    "  }" // end inside=0
+    "  if(zoneinside==1){"
+    "    if(eyepos.z>zlay&&fragpos.z>zlay){"
+    "      factor_U=1.0/odu;"
+    "      factor_L=0.0;"
+    "    }"
+    "    else if(eyepos.z>zlay&&fragpos.z<=zlay){"
+    "      factor_U=(1.0+alpha_zlay)/odu;"
+    "      factor_L=-alpha_zlay/odl;"
+    "    }"
+    "    else if(eyepos.z<=zlay&&fragpos.z>zlay){"
+    "      factor_U=-alpha_zlay/odu;"
+    "      factor_L=(1.0+alpha_zlay)/odl;"
+    "    }"
+    "    else if(eyepos.z<=zlay&&fragpos.z<=zlay){"
+    "      factor_U=0.0;"
+    "      factor_L=1.0/odl;"
+    "    }"
+    "  }" // end inside=1
+    "  opacity = 1.0-exp(-(factor_L+factor_U)*L);"
+    "  gl_FragColor = vec4(0.3,0.3,0.3,opacity);"
+    "}" // end of main
+  };
+
+  const GLchar *VertexShaderSource[]={
+    "varying vec3 fragpos;"
+    "void main(){"
+    "  fragpos=gl_Vertex;"
+    "  gl_Position = ftransform();"
+    "}"
+  };
+
+  v = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
+  f = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
+
+  glShaderSource(v,1, VertexShaderSource,NULL);
+  glCompileShaderARB(v);
+
+  glShaderSource(f, 1, FragmentShaderSource,NULL);
+  glCompileShaderARB(f);
+
+#ifdef _DEBUG
+  printInfoLog(v);
+  printInfoLog(f);
+#endif
+
+  p_volsmoke = glCreateProgramObjectARB();
+  glAttachObjectARB(p_volsmoke,v);
+  glAttachObjectARB(p_volsmoke,f);
+
+  glLinkProgram(p_volsmoke);
+  glGetObjectParameterivARB(p_volsmoke,GL_OBJECT_LINK_STATUS_ARB,&error_code);
+#ifdef _DEBUG
+  printf("  Zone Smoke shader completion code:");
+  switch (error_code){
+  case GL_INVALID_VALUE:
+    printf(" INVALID VALUE\n");
+    break;
+  case GL_INVALID_OPERATION:
+    printf(" INVALID OPERATION\n");
+    break;
+  case GL_INVALID_ENUM:
+    printf(" INVALID ENUM\n");
+    break;
+  case 0:
+    printf(" Link failed\n");
+    break;
+  case 1:
+    printf(" Link succeeded\n");
+    break;
+  default:
+    printf(" unknown error\n");
+    break;
+  }
+  printInfoLog(p_volsmoke);
+#endif
+  GPU_zoneinside = glGetUniformLocation(p_volsmoke,"zoneinside");
+  GPU_zonedir = glGetUniformLocation(p_volsmoke,"zonedir");
+  GPU_eyepos = glGetUniformLocation(p_volsmoke,"eyepos");
+  GPU_xyzmaxdiff = glGetUniformLocation(p_volsmoke,"xyzmaxdiff");
+  GPU_boxmin = glGetUniformLocation(p_volsmoke,"boxmin");
+  GPU_boxmax = glGetUniformLocation(p_volsmoke,"boxmax");
+  GPU_zlay = glGetUniformLocation(p_volsmoke,"zlay");
+  GPU_odl = glGetUniformLocation(p_volsmoke,"odl");
+  GPU_odu = glGetUniformLocation(p_volsmoke,"odu");
 
   if(error_code!=1)return error_code;
   return error_code;
@@ -293,21 +439,21 @@ void LoadZoneSmokeShaders(void){
   glUseProgramObjectARB(p_zonesmoke);
 }
 
-/* ------------------ UnloadZoneSmokeShaders ------------------------ */
-
-void UnloadZoneSmokeShaders(void){
-  glUseProgramObjectARB(0);
-}
-
 /* ------------------ LoadSmokeShaders ------------------------ */
 
 void LoadSmokeShaders(void){
   glUseProgramObjectARB(p_smoke);
 }
 
-/* ------------------ UnloadSmokeShaders ------------------------ */
+/* ------------------ LoadVolSmokeShaders ------------------------ */
 
-void UnloadSmokeShaders(void){
+void LoadVolSmokeShaders(void){
+  glUseProgramObjectARB(p_volsmoke);
+}
+
+/* ------------------ UnloadShaders ------------------------ */
+
+void UnloadShaders(void){
   glUseProgramObjectARB(0);
 }
 
@@ -351,6 +497,18 @@ int init_shaders(void){
     if(setSmokeShaders()==1){
 #ifdef _DEBUG
   		printf("   GPU smoke shader successfully compiled, linked and loaded.\n");
+#endif
+      gpuactive=1;
+      err=0;
+    }
+    else{
+      printf("   *** GPU smoke shader failed to load.\n");
+      usegpu=0;
+      err=1;
+    }
+    if(setVolSmokeShaders()==1){
+#ifdef _DEBUG
+  		printf("   GPU smoke Volume shader successfully compiled, linked and loaded.\n");
 #endif
       gpuactive=1;
       err=0;

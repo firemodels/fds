@@ -1482,11 +1482,16 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
     CheckMemory;
 #ifdef pp_GPU
     if(usegpu==1){
-      LoadSmokeShaders();
+      if(use_volume_shader==1){
+        LoadVolSmokeShaders();
+      }
+      else{
+        LoadSmokeShaders();
+      }
     }
 #endif
 #ifdef pp_CULL
-    if(usegpu==1&&cullsmoke==1){
+    if(usegpu==1&&cullsmoke==1&&use_volume_shader==0){
       drawsmoke3dCULL();
     }
     else{
@@ -1501,7 +1506,12 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
         if(smoke3di->smoke_state_list[smoke3di->iframe]==0)continue;
 
         if(usegpu==1){
-          drawsmoke3dGPU(smoke3di);
+          if(use_volume_shader==1){
+            drawsmoke3dGPU(smoke3di);
+          }
+          else{
+            drawsmoke3dGPUVOL(smoke3di);
+          }
         }
         else{
           drawsmoke3d(smoke3di);
@@ -1534,7 +1544,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 #endif
 #ifdef pp_GPU
     if(usegpu==1){
-      UnloadSmokeShaders();
+      UnloadShaders();
     }
 #endif
 #ifdef pp_CULL

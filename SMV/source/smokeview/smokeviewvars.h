@@ -68,6 +68,7 @@ SVEXTERN int have_setpixelcount,update_initcullplane;
 #endif
 #ifdef pp_GPU
 SVEXTERN int usegpu,gpuactive;
+SVEXTERN int SVDECL(use_volume_shader,0);
 SVEXTERN int GPU_aspectratio;
 SVEXTERN int GPU_smoke3d_rthick, GPU_skip, GPU_hrrcutoff, GPU_hrr, GPU_hrrpuv_max_smv, GPU_hrrpuv_cutoff;
 SVEXTERN int GPU_firecolor, GPU_is_smoke, GPU_smokecolormap, GPU_fire_alpha;
