@@ -126,7 +126,7 @@ CHARACTER(10) :: SCARC_COARSE_PRECON     = 'SSOR'          ! preconditioner
 !!! debugging parameters
 CHARACTER(10) :: SCARC_DEBUG = 'NONE'                      ! debugging level (NONE/LESS/MEDIUM/MUCH)
 CHARACTER(40) :: SCARC_FN                                  ! file name for ScaRC debug messages
-INTEGER       :: SCARC_LU                                  ! unit number for Scarc debug file
+INTEGER       :: SCARC_LU                                  ! unit number for ScaRC debug file
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -180,16 +180,17 @@ INTEGER, PARAMETER :: NSCARC_PRECON_NONE           = -1, &
                       NSCARC_PRECON_FFT            =  4, &      ! preconditioning by FFT-method
                       NSCARC_PRECON_MG             =  5         ! preconditioning by MG-method
 
-INTEGER, PARAMETER :: NSCARC_PRESMOOTHING          =  1, &      ! presmoothing
-                      NSCARC_POSTSMOOTHING         =  2         ! postsmoothing
-
 INTEGER, PARAMETER :: NSCARC_CYCLE_NONE            = -1, &
-                      NSCARC_CYCLE_F               =  1, &      ! F-cycle for mg-method
-                      NSCARC_CYCLE_V               =  2, &      ! V-cycle for mg-method
-                      NSCARC_CYCLE_W               =  3, &      ! W-cycle for mg-method
-                      NSCARC_CYCLE_INIT            =  4, &      ! initialize cycle counts
-                      NSCARC_CYCLE_RESET           =  5, &      ! reset cycle counts
-                      NSCARC_CYCLE_STATE           =  6         ! control cycle counts
+                      NSCARC_CYCLE_F               =  0, &      ! F-cycle for mg-method
+                      NSCARC_CYCLE_V               =  1, &      ! V-cycle for mg-method
+                      NSCARC_CYCLE_W               =  2, &      ! W-cycle for mg-method
+                      NSCARC_CYCLE_INIT            =  3, &      ! initialize cycle counts
+                      NSCARC_CYCLE_RESET           =  4, &      ! reset cycle counts
+                      NSCARC_CYCLE_PROCEED         =  5, &      ! proceed cycle counts
+                      NSCARC_CYCLE_PRESMOOTH       =  6, &      ! presmoothing cycle
+                      NSCARC_CYCLE_POSTSMOOTH      =  7, &      ! postsmoothing cycle
+                      NSCARC_CYCLE_NEXT            =  8, &      ! perform next cycling loop
+                      NSCARC_CYCLE_EXIT            =  9         ! exit cycling loop
 
 INTEGER, PARAMETER :: NSCARC_LOOP_PROCEED          =  0, &      ! no convergence and no divergence
                       NSCARC_LOOP_CONV             =  1, &      ! convergence
@@ -364,7 +365,7 @@ END TYPE OSCARC_TYPE_LEVEL
  
 
 !!!----------------------------------------------------------------------------------------------------
-!!! General Scarc type on own mesh with communication vectors, MG-cycling information and
+!!! General ScaRC type on own mesh with communication vectors, MG-cycling information and
 !!!! neighboring ScaRC-structures
 !!!----------------------------------------------------------------------------------------------------
 TYPE SCARC_TYPE
@@ -379,7 +380,7 @@ END TYPE SCARC_TYPE
 
 
 !!!----------------------------------------------------------------------------------------------------
-!!! General Scarc type on other mesh with communication vectors and original communication 
+!!! General ScaRC type on other mesh with communication vectors and original communication 
 !!! information from main 
 !!!----------------------------------------------------------------------------------------------------
 TYPE OSCARC_TYPE
@@ -460,22 +461,6 @@ INTERFACE SCARC_PRECONDITIONER
    MODULE PROCEDURE SCARC_PRECONDITIONER_BANDWISE, SCARC_PRECONDITIONER_COMPACT
 END INTERFACE SCARC_PRECONDITIONER
 
-INTERFACE SCARC_JACOBI
-   MODULE PROCEDURE SCARC_JACOBI_BANDWISE, SCARC_JACOBI_COMPACT
-END INTERFACE SCARC_JACOBI
-
-INTERFACE SCARC_SSOR
-   MODULE PROCEDURE SCARC_SSOR_BANDWISE, SCARC_SSOR_COMPACT
-END INTERFACE SCARC_SSOR
-
-INTERFACE SCARC_GSTRIX
-   MODULE PROCEDURE SCARC_GSTRIX_BANDWISE, SCARC_GSTRIX_COMPACT
-END INTERFACE SCARC_GSTRIX
-
-INTERFACE SCARC_FFT
-   MODULE PROCEDURE SCARC_FFT_BANDWISE, SCARC_FFT_COMPACT
-END INTERFACE SCARC_FFT
-
 INTERFACE SCARC_SMOOTHER
    MODULE PROCEDURE SCARC_SMOOTHER_BANDWISE, SCARC_SMOOTHER_COMPACT
 END INTERFACE SCARC_SMOOTHER
@@ -492,7 +477,7 @@ CONTAINS
  
  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!! SCARC_SETUP : Initialize Scarc structures 
+!!! SCARC_SETUP : Initialize ScaRC structures 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_SETUP
 
@@ -600,13 +585,13 @@ SELECT CASE (TRIM(SCARC_METHOD))
       END SELECT 
 
       !!! set type of smoother (JACOBI/SSOR/GSTRIX)
-      SELECT CASE(TRIM(SCARC_SMOOTH))
+      SELECT CASE(TRIM(SCARC_SMOOTH))                          ! use same parameters as for preconditioner
          CASE ('JACOBI')
-            TYPE_SMOOTH = NSCARC_SMOOTH_JACOBI
+            TYPE_PRECON = NSCARC_PRECON_JACOBI
          CASE ('SSOR')
-            TYPE_SMOOTH = NSCARC_SMOOTH_SSOR
+            TYPE_PRECON = NSCARC_PRECON_SSOR
          CASE ('GSTRIX')
-            TYPE_SMOOTH = NSCARC_SMOOTH_GSTRIX
+            TYPE_PRECON = NSCARC_PRECON_GSTRIX
          CASE DEFAULT
             WRITE(CMESSAGE,1003) 'smoother',TRIM(SCARC_SMOOTH),'multigrid','JACOBI','SSOR','GSTRIX'
             CALL SCARC_SHUTDOWN(CMESSAGE)
@@ -1790,7 +1775,7 @@ SELECT_STORAGE: SELECT CASE(TYPE_STORAGE)
       
                ENDIF
       
-               IF (TYPE_SMOOTH == NSCARC_SMOOTH_FFT) THEN
+               IF (TYPE_PRECON == NSCARC_PRECON_FFT) THEN
                   ALLOCATE (SL%FFT(1:IBP1, 1:JBP1, 1:KBP1), STAT=IERR)
                   CALL CHKMEMERR ('SCARC', 'FFT', IERR)
                   SL%FFT = 0.0_EB
@@ -1912,7 +1897,7 @@ SELECT_STORAGE: SELECT CASE(TYPE_STORAGE)
       
                ENDIF
       
-               IF (TYPE_SMOOTH == NSCARC_SMOOTH_FFT) THEN
+               IF (TYPE_PRECON == NSCARC_PRECON_FFT) THEN
                   ALLOCATE (SL%FFT(1:SL%IBAR+1, 1:SL%JBAR+1, 1:SL%KBAR+1), STAT=IERR)
                   CALL CHKMEMERR ('SCARC', 'FFT', IERR)
                   SL%FFT = 0.0_EB
@@ -2001,7 +1986,6 @@ IERR = 0
 !!! Exchange information about lengths of abutting faces
 !!!
 IF (NMESHES>1) THEN
-   WRITE(SCARC_LU,*) 'NCOM_SCARC=',NCOM_SCARC
    ALLOCATE (REQ_SCARC(NCOM_SCARC*40))
    CALL CHKMEMERR ('SCARC_SETUP_GLOBAL', 'REQ_SCARC', IERR)
    REQ_SCARC = MPI_REQUEST_NULL
@@ -3377,7 +3361,7 @@ ELSE
    NL = NLEVEL_MIN
 ENDIF
 
-!!! Point to all needed vectors of corresponding level NL and
+!!! Point to all needed vectors of corresponding level NL 
 IF (BFIRST) THEN
 
    ALLOCATE(P(NMESHES_MIN:NMESHES_MAX, NL:NL), STAT=IERR)
@@ -3434,7 +3418,6 @@ DO NM = NMESHES_MIN, NMESHES_MAX
 ENDDO
 CALL SCARC_GLOBAL_MATVEC(NSCARC_VECTOR_X, NSCARC_VECTOR_R, NL)
 
-
 !!! Calculate initial residual R := B - D and get its global L2-norm 
 DO NM = NMESHES_MIN, NMESHES_MAX
    P(NM,NL)%R  = -P(NM,NL)%F + P(NM,NL)%R
@@ -3447,18 +3430,17 @@ RESIN = SCARC_GLOBAL_L2NORM(NL)
 CALL SCARC_CONVERGENCE_INFO(RESIN, ITE, NL, CROUTINE)
    
 !!! Perform initial preconditioning
+DO NM = NMESHES_MIN, NMESHES_MAX
+   P(NM,NL)%G = P(NM,NL)%R
+ENDDO
+
 IF (TYPE_PRECON == NSCARC_PRECON_MG) THEN
-   DO NM = NMESHES_MIN, NMESHES_MAX
-      P(NM,NL)%G = P(NM,NL)%R
-   ENDDO
    CALL SCARC_MULTIGRID_BANDWISE (NSCARC_SCOPE_PRECON, NSCARC_VECTOR_G)
 ELSE
    DO NM = NMESHES_MIN, NMESHES_MAX
-      P(NM,NL)%G = P(NM,NL)%R
       CALL SCARC_PRECONDITIONER(P(NM,NL)%A, P(NM,NL)%R, P(NM,NL)%G, P(NM,NL)%NX, P(NM,NL)%NY, P(NM,NL)%NZ, NM) 
    ENDDO
 ENDIF
-
 
 !!! get initial scaling factor and direction
 DO NM = NMESHES_MIN, NMESHES_MAX
@@ -3501,14 +3483,14 @@ CG_LOOP: DO ITE = 1, NIT
    IF (ISTATE /= NSCARC_LOOP_PROCEED) EXIT CG_LOOP
  
    !!! Perform preconditioning
+   DO NM = NMESHES_MIN, NMESHES_MAX
+      P(NM, NL)%G = P(NM, NL)%R
+   ENDDO
+
    IF (TYPE_PRECON == NSCARC_PRECON_MG) THEN
-      DO NM = NMESHES_MIN, NMESHES_MAX
-         P(NM, NL)%G = P(NM, NL)%R
-      ENDDO
       CALL SCARC_MULTIGRID_BANDWISE (NSCARC_SCOPE_PRECON, NSCARC_VECTOR_G)
    ELSE
       DO NM = NMESHES_MIN, NMESHES_MAX
-         P(NM, NL)%G = P(NM, NL)%R
          CALL SCARC_PRECONDITIONER(P(NM,NL)%A, P(NM,NL)%R, P(NM,NL)%G, P(NM,NL)%NX, P(NM,NL)%NY, P(NM,NL)%NZ, NM) 
       ENDDO
    ENDIF
@@ -3650,16 +3632,16 @@ RESIN = SCARC_GLOBAL_L2NORM(NL)
 CALL SCARC_CONVERGENCE_INFO(RESIN, ITE, NL, CROUTINE)
    
 !!! Perform initial preconditioning
+DO NM = NMESHES_MIN, NMESHES_MAX
+   P(NM,NL)%G = P(NM,NL)%R
+ENDDO
+
 IF (TYPE_PRECON == NSCARC_PRECON_MG) THEN
-   DO NM = NMESHES_MIN, NMESHES_MAX
-      P(NM,NL)%G = P(NM,NL)%R
-   ENDDO
    CALL SCARC_MULTIGRID_COMPACT (NSCARC_SCOPE_PRECON, NSCARC_VECTOR_G)
 ELSE
    DO NM = NMESHES_MIN, NMESHES_MAX
-      P(NM,NL)%G = P(NM,NL)%R
       CALL SCARC_PRECONDITIONER(P(NM,NL)%A, P(NM,NL)%ROW, P(NM,NL)%COL, P(NM,NL)%R, P(NM,NL)%G, &
-                                 P(NM,NL)%NX, P(NM,NL)%NY, P(NM,NL)%NZ, NM) 
+                                P(NM,NL)%NX, P(NM,NL)%NY, P(NM,NL)%NZ, NM) 
    ENDDO
 ENDIF
 
@@ -3706,16 +3688,16 @@ CG_LOOP: DO ITE = 1, NIT
    IF (ISTATE /= NSCARC_LOOP_PROCEED) EXIT CG_LOOP
  
    !!! Perform preconditioning
+   DO NM = NMESHES_MIN, NMESHES_MAX
+      P(NM, NL)%G = P(NM, NL)%R
+   ENDDO
+
    IF (TYPE_PRECON == NSCARC_PRECON_MG) THEN
-      DO NM = NMESHES_MIN, NMESHES_MAX
-         P(NM, NL)%G = P(NM, NL)%R
-      ENDDO
       CALL SCARC_MULTIGRID_COMPACT (NSCARC_SCOPE_PRECON, NSCARC_VECTOR_G)
    ELSE
       DO NM = NMESHES_MIN, NMESHES_MAX
-         P(NM, NL)%G = P(NM, NL)%R
-         CALL SCARC_PRECONDITIONER(P(NM,NL)%A, P(NM,NL)%ROW, P(NM,NL)%COL, P(NM,NL)%R, P(NM,NL)%G, &
-                                    P(NM,NL)%NX, P(NM,NL)%NY, P(NM,NL)%NZ, NM) 
+         CALL SCARC_PRECONDITIONER(P(NM,NL)%A , P(NM,NL)%ROW, P(NM,NL)%COL, P(NM,NL)%R, P(NM,NL)%G, &
+                                   P(NM,NL)%NX, P(NM,NL)%NY , P(NM,NL)%NZ , NM) 
       ENDDO
    ENDIF
 
@@ -3844,14 +3826,14 @@ DTHETA = 1.0_EB
 !!! Compute initial defect and perform initial preconditioning
 !!!----------------------------------------------------------------------------------------------------
 !!! Perform first initial preconditioning R := PRECON(F)
+DO NM = NMESHES_MIN, NMESHES_MAX
+   P(NM,NL)%R = P(NM,NL)%F
+ENDDO
+
 IF (TYPE_PRECON == NSCARC_PRECON_MG) THEN
-   DO NM = NMESHES_MIN, NMESHES_MAX
-      P(NM,NL)%R = P(NM,NL)%F
-   ENDDO
    CALL SCARC_MULTIGRID_BANDWISE (NSCARC_SCOPE_PRECON, NSCARC_VECTOR_R)
 ELSE
    DO NM = NMESHES_MIN, NMESHES_MAX
-      P(NM,NL)%R = P(NM,NL)%F
       CALL SCARC_PRECONDITIONER(P(NM,NL)%A, P(NM,NL)%R, P(NM,NL)%R, P(NM,NL)%NX, P(NM,NL)%NY, P(NM,NL)%NZ, NM)
    ENDDO
 ENDIF
@@ -3862,18 +3844,17 @@ DO NM = NMESHES_MIN, NMESHES_MAX
 ENDDO
 CALL SCARC_GLOBAL_MATVEC(NSCARC_VECTOR_X, NSCARC_VECTOR_R, NL)
 
-
 !!! Perform second initial preconditioning R := PRECON(F)
+DO NM = NMESHES_MIN, NMESHES_MAX
+   P(NM,NL)%R = P(NM,NL)%F - P(NM,NL)%R
+ENDDO
+
 IF (TYPE_PRECON == NSCARC_PRECON_MG) THEN
-   DO NM = NMESHES_MIN, NMESHES_MAX
-      P(NM,NL)%R = P(NM,NL)%F - P(NM,NL)%R
-   ENDDO
    CALL SCARC_MULTIGRID_BANDWISE (NSCARC_SCOPE_PRECON, NSCARC_VECTOR_R)
 ELSE
    DO NM = NMESHES_MIN, NMESHES_MAX
-      P(NM,NL)%R = P(NM,NL)%F - P(NM,NL)%R
-      CALL SCARC_PRECONDITIONER(P(NM,NL)%A, P(NM,NL)%R, P(NM,NL)%R, &
-                                 P(NM,NL)%NX, P(NM,NL)%NY, P(NM,NL)%NZ, NM)
+      CALL SCARC_PRECONDITIONER(P(NM,NL)%A , P(NM,NL)%R , P(NM,NL)%R , &
+                                P(NM,NL)%NX, P(NM,NL)%NY, P(NM,NL)%NZ, NM)
    ENDDO
 ENDIF
 
@@ -3916,7 +3897,7 @@ BICG_LOOP: DO ITE = 1, NIT
       CALL SCARC_MULTIGRID_BANDWISE (NSCARC_SCOPE_PRECON, NSCARC_VECTOR_Y)
    ELSE
       DO NM = NMESHES_MIN, NMESHES_MAX
-         CALL SCARC_PRECONDITIONER(P(NM,NL)%A, P(NM,NL)%Y, P(NM,NL)%Y, &
+         CALL SCARC_PRECONDITIONER(P(NM,NL)%A , P(NM,NL)%Y , P(NM,NL)%Y , &
                                    P(NM,NL)%NX, P(NM,NL)%NY, P(NM,NL)%NZ, NM)
       ENDDO
    ENDIF
@@ -3939,7 +3920,7 @@ BICG_LOOP: DO ITE = 1, NIT
       CALL SCARC_MULTIGRID_BANDWISE (NSCARC_SCOPE_PRECON, NSCARC_VECTOR_D)
    ELSE
       DO NM = NMESHES_MIN, NMESHES_MAX
-         CALL SCARC_PRECONDITIONER(P(NM,NL)%A, P(NM,NL)%D, P(NM,NL)%D, &
+         CALL SCARC_PRECONDITIONER(P(NM,NL)%A , P(NM,NL)%D , P(NM,NL)%D , &
                                    P(NM,NL)%NX, P(NM,NL)%NY, P(NM,NL)%NZ, NM)
       ENDDO
    ENDIF
@@ -4083,16 +4064,16 @@ DTHETA = 1.0_EB
 !!! Compute initial defect and perform initial preconditioning
 !!!----------------------------------------------------------------------------------------------------
 !!! Perform first initial preconditioning R := PRECON(F)
+DO NM = NMESHES_MIN, NMESHES_MAX
+   P(NM,NL)%R = P(NM,NL)%F
+ENDDO
+
 IF (TYPE_PRECON == NSCARC_PRECON_MG) THEN
-   DO NM = NMESHES_MIN, NMESHES_MAX
-      P(NM,NL)%R = P(NM,NL)%F
-   ENDDO
    CALL SCARC_MULTIGRID_BANDWISE (NSCARC_SCOPE_PRECON, NSCARC_VECTOR_R)
 ELSE
    DO NM = NMESHES_MIN, NMESHES_MAX
-      P(NM,NL)%R = P(NM,NL)%F
-      CALL SCARC_PRECONDITIONER(P(NM,NL)%A, P(NM,NL)%ROW, P(NM,NL)%COL, P(NM,NL)%R, P(NM,NL)%R, &
-                                P(NM,NL)%NX, P(NM,NL)%NY, P(NM,NL)%NZ, NM)
+      CALL SCARC_PRECONDITIONER(P(NM,NL)%A , P(NM,NL)%ROW, P(NM,NL)%COL, P(NM,NL)%R, P(NM,NL)%R, &
+                                P(NM,NL)%NX, P(NM,NL)%NY , P(NM,NL)%NZ , NM)
    ENDDO
 ENDIF
 
@@ -4105,14 +4086,14 @@ CALL SCARC_GLOBAL_MATVEC(NSCARC_VECTOR_X, NSCARC_VECTOR_R, NL)
 
 
 !!! Perform second initial preconditioning R := PRECON(F)
+DO NM = NMESHES_MIN, NMESHES_MAX
+   P(NM,NL)%R = P(NM,NL)%F - P(NM,NL)%R
+ENDDO
+
 IF (TYPE_PRECON == NSCARC_PRECON_MG) THEN
-   DO NM = NMESHES_MIN, NMESHES_MAX
-      P(NM,NL)%R = P(NM,NL)%F - P(NM,NL)%R
-   ENDDO
    CALL SCARC_MULTIGRID_BANDWISE (NSCARC_SCOPE_PRECON, NSCARC_VECTOR_R)
 ELSE
    DO NM = NMESHES_MIN, NMESHES_MAX
-      P(NM,NL)%R = P(NM,NL)%F - P(NM,NL)%R
       CALL SCARC_PRECONDITIONER(P(NM,NL)%A, P(NM,NL)%ROW, P(NM,NL)%COL, P(NM,NL)%R, P(NM,NL)%R, &
                                 P(NM,NL)%NX, P(NM,NL)%NY, P(NM,NL)%NZ, NM)
    ENDDO
@@ -4158,8 +4139,8 @@ BICG_LOOP: DO ITE = 1, NIT
       CALL SCARC_MULTIGRID_BANDWISE (NSCARC_SCOPE_PRECON, NSCARC_VECTOR_Y)
    ELSE
       DO NM = NMESHES_MIN, NMESHES_MAX
-         CALL SCARC_PRECONDITIONER(P(NM,NL)%A, P(NM,NL)%ROW, P(NM,NL)%COL, P(NM,NL)%Y, P(NM,NL)%Y, &
-                                   P(NM,NL)%NX, P(NM,NL)%NY, P(NM,NL)%NZ, NM)
+         CALL SCARC_PRECONDITIONER(P(NM,NL)%A , P(NM,NL)%ROW, P(NM,NL)%COL, P(NM,NL)%Y, P(NM,NL)%Y, &
+                                   P(NM,NL)%NX, P(NM,NL)%NY , P(NM,NL)%NZ , NM)
       ENDDO
    ENDIF
 
@@ -4351,7 +4332,7 @@ ONLY_ONE_LEVEL_IF: IF (SCARC_MULTIGRID_LEVEL==1) THEN
 ELSE
 
    !!! initialize cycle counts for MG-iteration
-   CALL SCARC_CYCLE_STATE(ICYCLE, NSCARC_CYCLE_INIT, NLEVEL_MAX)
+   ICYCLE = SCARC_CYCLE_STATE(NSCARC_CYCLE_INIT, NLEVEL_MAX)
 
    !!! perform initial matrix-vector product on finest level
    NL = NLEVEL_MAX
@@ -4374,25 +4355,24 @@ ELSE
    !!!-------------------------------------------------------------------------------------------------
    !!! start MG-iteration
    !!!-------------------------------------------------------------------------------------------------
-   MG_LOOP: DO ITE = 1, NIT
+   MULTIGRID_LOOP: DO ITE = 1, NIT
     
-      !!! reset cycling-information at beginning of each single mg-loop
+      !!! reset cycling-information at beginning of each single mg-loop, start cycling in finest level
       NL = NLEVEL_MAX
-      CALL SCARC_CYCLE_STATE(ICYCLE, NSCARC_CYCLE_RESET, NL)
+      ICYCLE = SCARC_CYCLE_STATE(NSCARC_CYCLE_RESET, NL)
 
-      !!! start MG-cycling on finest level
-      CYCLE_LOOP: DO 
+      CYCLE_LOOP: DO WHILE (ICYCLE /= NSCARC_CYCLE_EXIT)
    
          !!!-------------------------------------------------------------------------------------------
          !!!  Presmoothing
          !!!-------------------------------------------------------------------------------------------
-         MG_PRESMOOTHING_LOOP: DO WHILE (NL > NLEVEL_MIN)
+         PRESMOOTH_LOOP: DO WHILE (NL > NLEVEL_MIN)
    
             !!! perform presmoothing on level NL
             DO NM = NMESHES_MIN, NMESHES_MAX
-               CALL SCARC_SMOOTHER(P(NM,NL)%A , P(NM,NL)%X , P(NM,NL)%D, P(NM,NL)%F, &
+               CALL SCARC_SMOOTHER(P(NM,NL)%A , P(NM,NL)%X , P(NM,NL)%D,  P(NM,NL)%F, &
                                    P(NM,NL)%NX, P(NM,NL)%NY, P(NM,NL)%NZ, &
-                                   NSCARC_PRESMOOTHING, NL)
+                                   NSCARC_CYCLE_PRESMOOTH, NL)
             ENDDO
 
             !!! perform restriction to coarser level NL-1,   F:=restriction(D)
@@ -4401,7 +4381,7 @@ ELSE
                CALL SCARC_RESTRICTION(P(NM,NL)%F, P(NM,NL+1)%D, P(NM,NL)%NX, P(NM,NL)%NY, P(NM,NL)%NZ)
             ENDDO
 
-         ENDDO MG_PRESMOOTHING_LOOP
+         ENDDO PRESMOOTH_LOOP
    
          !!!-------------------------------------------------------------------------------------------
          !!! Coarse grid solver (either by CG or Gaussian elimination)
@@ -4416,7 +4396,7 @@ ELSE
          !!!-------------------------------------------------------------------------------------------
          !!! Postsmoothing
          !!!-------------------------------------------------------------------------------------------
-         MG_POSTSMOOTHING_LOOP: DO WHILE (NL < NLEVEL_MAX) 
+         POSTSMOOTH_LOOP: DO WHILE (NL < NLEVEL_MAX) 
        
             !!! perform prolongation to finer grid: D:=prolongation(X)
             DO NM = NMESHES_MIN, NMESHES_MAX
@@ -4429,18 +4409,14 @@ ELSE
                P(NM,NL)%X = P(NM,NL)%D + P(NM,NL)%X
                CALL SCARC_SMOOTHER(P(NM,NL)%A , P(NM,NL)%X , P(NM,NL)%D, P(NM,NL)%F, &
                                    P(NM,NL)%NX, P(NM,NL)%NY, P(NM,NL)%NZ,&
-                                   NSCARC_POSTSMOOTHING, NL)
+                                   NSCARC_CYCLE_POSTSMOOTH, NL)
             ENDDO
    
             !!! determine how to proceed with cycling depending on chosen cycle-type (F/V/W)
-            CALL SCARC_CYCLE_STATE(ICYCLE, NSCARC_CYCLE_STATE, NL)
-            IF (ICYCLE == NSCARC_POSTSMOOTHING) THEN
-               CYCLE MG_POSTSMOOTHING_LOOP
-            ELSE
-               CYCLE CYCLE_LOOP
-            ENDIF
+            ICYCLE = SCARC_CYCLE_STATE(NSCARC_CYCLE_PROCEED, NL)
+            IF (ICYCLE /= NSCARC_CYCLE_POSTSMOOTH) CYCLE CYCLE_LOOP
 
-         ENDDO MG_POSTSMOOTHING_LOOP
+         ENDDO POSTSMOOTH_LOOP
 
       ENDDO CYCLE_LOOP
 
@@ -4465,9 +4441,9 @@ ELSE
       RES = SCARC_GLOBAL_L2NORM(NL)
 
       ISTATE = SCARC_CONVERGENCE_STATE(RESIN, RES, EPS, ITE, NL, CROUTINE)
-      IF (ISTATE /= NSCARC_LOOP_PROCEED) EXIT MG_LOOP
+      IF (ISTATE /= NSCARC_LOOP_PROCEED) EXIT MULTIGRID_LOOP
  
-   ENDDO MG_LOOP
+   ENDDO MULTIGRID_LOOP
 
    !!!-------------------------------------------------------------------------------------------------
    !!! Determine convergence rate and print corresponding information
@@ -4614,7 +4590,7 @@ ONLY_ONE_LEVEL_IF: IF (SCARC_MULTIGRID_LEVEL==1) THEN
 ELSE
 
    !!! initialize cycle counts for MG-iteration
-   CALL SCARC_CYCLE_STATE(ICYCLE, NSCARC_CYCLE_INIT, NLEVEL_MAX)
+   ICYCLE = SCARC_CYCLE_STATE(NSCARC_CYCLE_INIT, NLEVEL_MAX)
 
    !!! perform initial matrix-vector product on finest level
    NL = NLEVEL_MAX
@@ -4638,26 +4614,25 @@ ELSE
    !!!-------------------------------------------------------------------------------------------------
    !!! start MG-iteration
    !!!-------------------------------------------------------------------------------------------------
-   MG_LOOP: DO ITE = 1, NIT
+   MULTIGRID_LOOP: DO ITE = 1, NIT
     
-      !!! reset cycling-information at beginning of each single MG-loop 
+      !!! reset cycling-information at beginning of each single mg-loop, start cycling in finest level
       NL = NLEVEL_MAX
-      CALL SCARC_CYCLE_STATE(ICYCLE, NSCARC_CYCLE_RESET, NL)
+      ICYCLE = SCARC_CYCLE_STATE(NSCARC_CYCLE_RESET, NL)
 
-      !!! start MG-cycling on finest level
-      CYCLE_LOOP: DO 
+      CYCLE_LOOP: DO WHILE (ICYCLE /= NSCARC_CYCLE_EXIT)
    
          !!!-------------------------------------------------------------------------------------------
          !!!  Presmoothing
          !!!-------------------------------------------------------------------------------------------
-         MG_PRESMOOTHING_LOOP: DO WHILE (NL > NLEVEL_MIN)
+         PRESMOOTH_LOOP: DO WHILE (NL > NLEVEL_MIN)
    
             !!! perform presmoothing on level NL
             DO NM = NMESHES_MIN, NMESHES_MAX
                CALL SCARC_SMOOTHER(P(NM,NL)%A , P(NM,NL)%ROW, P(NM,NL)%COL, &
                                    P(NM,NL)%X , P(NM,NL)%D  , P(NM,NL)%F  , &
                                    P(NM,NL)%NX, P(NM,NL)%NY , P(NM,NL)%NZ , &
-                                   NSCARC_PRESMOOTHING, NL)
+                                   NSCARC_CYCLE_PRESMOOTH, NL)
             ENDDO
 
             !!! perform restriction to coarser level NL-1,   F:=restriction(D)
@@ -4666,7 +4641,7 @@ ELSE
                CALL SCARC_RESTRICTION(P(NM,NL)%F , P(NM,NL+1)%D, P(NM,NL)%NX, P(NM,NL)%NY , P(NM,NL)%NZ)
             ENDDO
 
-         ENDDO MG_PRESMOOTHING_LOOP
+         ENDDO PRESMOOTH_LOOP
    
          !!!-------------------------------------------------------------------------------------------
          !!! Coarse grid solver (either by CG or Gaussian elimination)
@@ -4681,7 +4656,7 @@ ELSE
          !!!-------------------------------------------------------------------------------------------
          !!! Postsmoothing
          !!!-------------------------------------------------------------------------------------------
-         MG_POSTSMOOTHING_LOOP: DO WHILE (NL < NLEVEL_MAX) 
+         POSTSMOOTH_LOOP: DO WHILE (NL < NLEVEL_MAX) 
        
             !!! perform prolongation to finer grid: D:=prolongation(X)
             DO NM = NMESHES_MIN, NMESHES_MAX
@@ -4695,18 +4670,19 @@ ELSE
                CALL SCARC_SMOOTHER(P(NM,NL)%A , P(NM,NL)%ROW, P(NM,NL)%COL, &
                                    P(NM,NL)%X , P(NM,NL)%D  , P(NM,NL)%F  , &
                                    P(NM,NL)%NX, P(NM,NL)%NY , P(NM,NL)%NZ ,&
-                                   NSCARC_POSTSMOOTHING, NL)
+                                   NSCARC_CYCLE_POSTSMOOTH, NL)
             ENDDO
    
             !!! determine how to proceed with cycling depending on chosen cycle-type (F/V/W)
-            CALL SCARC_CYCLE_STATE(ICYCLE, NSCARC_CYCLE_STATE, NL)
-            IF (ICYCLE == NSCARC_POSTSMOOTHING) THEN
-               CYCLE MG_POSTSMOOTHING_LOOP
-            ELSE
-               CYCLE CYCLE_LOOP
-            ENDIF
+            ICYCLE = SCARC_CYCLE_STATE(NSCARC_CYCLE_PROCEED, NL)
+            SELECT CASE(ICYCLE)
+               CASE (NSCARC_CYCLE_POSTSMOOTH)
+                  CYCLE POSTSMOOTH_LOOP
+               CASE DEFAULT
+                  CYCLE CYCLE_LOOP
+            END SELECT
    
-         ENDDO MG_POSTSMOOTHING_LOOP
+         ENDDO POSTSMOOTH_LOOP
 
       ENDDO CYCLE_LOOP
 
@@ -4733,9 +4709,9 @@ ELSE
       RES = SCARC_GLOBAL_L2NORM(NL)
 
       ISTATE = SCARC_CONVERGENCE_STATE(RESIN, RES, EPS, ITE, NL, CROUTINE)
-      IF (ISTATE /= NSCARC_LOOP_PROCEED) EXIT MG_LOOP
+      IF (ISTATE /= NSCARC_LOOP_PROCEED) EXIT MULTIGRID_LOOP
  
-   ENDDO MG_LOOP
+   ENDDO MULTIGRID_LOOP
 
    !!!-------------------------------------------------------------------------------------------------
    !!! Determine convergence rate and print corresponding information
@@ -4766,12 +4742,11 @@ END SUBROUTINE SCARC_MULTIGRID_COMPACT
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! Control multigrid cycling (F/V/W)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-SUBROUTINE SCARC_CYCLE_STATE(ICYCLE, TYPE, NL)
-INTEGER, INTENT(OUT):: ICYCLE
-INTEGER, INTENT(IN) :: TYPE, NL
-INTEGER :: NM, NL0
+INTEGER FUNCTION SCARC_CYCLE_STATE(NTYPE, NL)
+INTEGER, INTENT(IN) :: NTYPE, NL
+INTEGER :: NM, NL0, ICYCLE
 
-SELECT CASE(TYPE)
+SELECT CASE(NTYPE)
 
    !!!-------------------------------------------------------------------------------------------------
    !!! initialize cycle counts at beginning of multigrid method
@@ -4788,7 +4763,7 @@ SELECT CASE(TYPE)
             ENDIF
          ENDDO
       ENDDO
-      ICYCLE = NSCARC_DUMMY
+      ICYCLE = NSCARC_CYCLE_NEXT
       
    !!!-------------------------------------------------------------------------------------------------
    !!! reset cycle counts at beginning of each new multigrid iteration
@@ -4800,12 +4775,12 @@ SELECT CASE(TYPE)
             SCARC(NM)%CYCLE_COUNT(1,NL0)=SCARC(NM)%CYCLE_COUNT(2,NL0)
          ENDDO
       ENDDO
-      ICYCLE = NSCARC_DUMMY
+      ICYCLE = NSCARC_CYCLE_NEXT
 
    !!!-------------------------------------------------------------------------------------------------
-   !!! determine state of cycling, i.e. where to proceed 
+   !!! determine where to proceed with cycling
    !!!-------------------------------------------------------------------------------------------------
-   CASE (NSCARC_CYCLE_STATE)
+   CASE (NSCARC_CYCLE_PROCEED)
 
       DO NM = NMESHES_MIN, NMESHES_MAX
 
@@ -4817,24 +4792,35 @@ SELECT CASE(TYPE)
             ELSE
                SCARC(NM)%CYCLE_COUNT(1,NL)=SCARC(NM)%CYCLE_COUNT(2,NL)
             ENDIF
-            ICYCLE = NSCARC_POSTSMOOTHING
+            IF (NL == NLEVEL_MAX) THEN
+               ICYCLE = NSCARC_CYCLE_EXIT
+            ELSE
+               ICYCLE = NSCARC_CYCLE_POSTSMOOTH
+            ENDIF
          ELSE
-            ICYCLE = NSCARC_PRESMOOTHING
+            IF (NL == NLEVEL_MAX) THEN
+               ICYCLE = NSCARC_CYCLE_EXIT
+            ELSE
+               ICYCLE = NSCARC_CYCLE_NEXT
+            ENDIF
          ENDIF
       ENDDO
 
 END SELECT
 
-END SUBROUTINE SCARC_CYCLE_STATE
+SCARC_CYCLE_STATE = ICYCLE
+RETURN
+
+END FUNCTION SCARC_CYCLE_STATE
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! Perform smoothing - bandwise storage technique
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-SUBROUTINE SCARC_SMOOTHER_BANDWISE(A, X, D, F, NX, NY, NZ, TYPE_SMOOTH, NL)
+SUBROUTINE SCARC_SMOOTHER_BANDWISE(A, X, D, F, NX, NY, NZ, NTYPE, NL)
 REAL(EB), POINTER, DIMENSION(:, :),    INTENT(INOUT) :: A
 REAL(EB), POINTER, DIMENSION(:, :, :), INTENT(INOUT) :: X, D, F
-INTEGER, INTENT(IN) :: TYPE_SMOOTH, NL
+INTEGER, INTENT(IN) :: NTYPE, NL
 INTEGER, POINTER, INTENT(IN) :: NX, NY, NZ
 INTEGER :: NM, ITE, NIT, ISTATE
 REAL(EB):: RES, RESIN, EPS, OMEGA
@@ -4855,7 +4841,7 @@ RESIN    = 1.0_EB
 CROUTINE = 'SCARC_SMOOTHER_BANDWISE'
 BL2NORM  = .TRUE.
 BMATVEC  = .TRUE.
-IF (TYPE_SMOOTH == NSCARC_PRESMOOTHING .AND. NL == NLEVEL_MAX) BMATVEC = .FALSE.
+IF (NTYPE == NSCARC_CYCLE_PRESMOOTH .AND. NL == NLEVEL_MAX) BMATVEC = .FALSE.
 
 !!! Calculate initial defect on level NL (only if BMATVEC = .TRUE.)
 !!! Because initial vector is set to zero, this defect corresponds to F
@@ -4877,14 +4863,19 @@ IF (BMATVEC) THEN
 
 ENDIF
 
+
 !!!----------------------------------------------------------------------------------------------------
 !!! Smoothing loop
 !!!----------------------------------------------------------------------------------------------------
 SMOOTH_LOOP: DO ITE=1, NIT
  
-   !!! Perform preconditioning, get new iterate and compute matrix-vector product
+   !!! Perform preconditioning
    DO NM = NMESHES_MIN, NMESHES_MAX
-       CALL SCARC_PRECONDITIONER(A, D, D, NX, NY, NZ, NM)
+      CALL SCARC_PRECONDITIONER(A, D, D, NX, NY, NZ, NM)
+   ENDDO
+
+   !!! get new iterate and compute matrix-vector product
+   DO NM = NMESHES_MIN, NMESHES_MAX
       X = X + OMEGA * D 
       CALL SCARC_LOCAL_MATVEC (A, X, D, NX, NY, NZ, NM)
    ENDDO
@@ -4916,11 +4907,11 @@ END SUBROUTINE SCARC_SMOOTHER_BANDWISE
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! Perform smoothing - bandwise storage technique
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-SUBROUTINE SCARC_SMOOTHER_COMPACT(A, ROW, COL, X, D, F, NX, NY, NZ, TYPE_SMOOTH, NL)
+SUBROUTINE SCARC_SMOOTHER_COMPACT(A, ROW, COL, X, D, F, NX, NY, NZ, NTYPE, NL)
 INTEGER,  POINTER, DIMENSION(:), INTENT(IN)    :: ROW, COL
 REAL(EB), POINTER, DIMENSION(:), INTENT(IN)    :: A
 REAL(EB), POINTER, DIMENSION(:), INTENT(INOUT) :: X, D, F
-INTEGER, INTENT(IN) :: TYPE_SMOOTH, NL
+INTEGER, INTENT(IN) :: NTYPE, NL
 INTEGER, POINTER, INTENT(IN) :: NX, NY, NZ
 INTEGER :: NM, ITE, NIT, ISTATE
 REAL(EB):: RES, RESIN, EPS, OMEGA
@@ -4941,7 +4932,7 @@ RESIN    = 1.0_EB
 CROUTINE = 'SCARC_SMOOTHER_COMPACT'
 BL2NORM  = .TRUE.
 BMATVEC  = .TRUE.
-IF (TYPE_SMOOTH == NSCARC_PRESMOOTHING .AND. NL == NLEVEL_MAX) BMATVEC = .FALSE.
+IF (NTYPE == NSCARC_CYCLE_PRESMOOTH .AND. NL == NLEVEL_MAX) BMATVEC = .FALSE.
 
 !!! Calculate initial defect on level NL (only if BMATVEC = .TRUE.)
 !!! Because initial vector is set to zero, this defect corresponds to F
@@ -4968,9 +4959,13 @@ ENDIF
 !!!----------------------------------------------------------------------------------------------------
 SMOOTH_LOOP: DO ITE=1, NIT
  
-   !!! Perform preconditioning, get new iterate and perform matrix-vector product
+   !!! Perform preconditioning
    DO NM = NMESHES_MIN, NMESHES_MAX
        CALL SCARC_PRECONDITIONER(A, ROW, COL, D, D, NX, NY, NZ, NM)
+   ENDDO
+
+   !!! get new iterate and perform matrix-vector product
+   DO NM = NMESHES_MIN, NMESHES_MAX
       X = X + OMEGA * D 
       CALL SCARC_LOCAL_MATVEC (A, ROW, COL, X, D, NX, NY, NZ, NM)
    ENDDO
@@ -6018,6 +6013,11 @@ INTEGER :: I, J, K, IC
 REAL (EB):: TNOW_LOCAL_MATVEC
 TNOW_LOCAL_MATVEC = SECOND()
  
+IF (TYPE_DEBUG >= NSCARC_DEBUG_MEDIUM) THEN
+CALL SCARC_SHOW_LEVEL (X, NX, NY, NZ, 'MATVEC', 'X matvec ')
+CALL SCARC_SHOW_LEVEL (Y, NX, NY, NZ, 'MATVEC', 'Y matvec ')
+ENDIF
+
 IF (TWO_D) THEN
    DO K = 1, NZ
       DO I = 1, NX
@@ -6045,6 +6045,10 @@ ELSE
       ENDDO
    ENDDO
 ENDIF 
+
+IF (TYPE_DEBUG >= NSCARC_DEBUG_MEDIUM) THEN
+CALL SCARC_SHOW_LEVEL (Y, NX, NY, NZ, 'MATVEC', 'Y matvec2 ')
+ENDIF
 
 TUSED_SCARC(NSCARC_TIME_LOCAL_MATVEC,NM)=TUSED_SCARC(NSCARC_TIME_LOCAL_MATVEC,NM)+SECOND()-TNOW_LOCAL_MATVEC
 TUSED_SCARC(NSCARC_TIME_COMPLETE    ,NM)=TUSED_SCARC(NSCARC_TIME_COMPLETE    ,NM)+SECOND()-TNOW_LOCAL_MATVEC
