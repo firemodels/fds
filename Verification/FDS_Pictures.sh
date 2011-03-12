@@ -17,7 +17,7 @@ $RUNSMV NS_Analytical_Solution ns2d_64
 $RUNSMV Pressure_Effects pressure_boundary
 
 $RUNSMV Scalar_Analytical_Solution  move_slug
-$RUNSMV Scalar_Analytical_Solution  move_slug_f11
+$RUNSMV Scalar_Analytical_Solution  move_slug_fl1
 
 $RUNSMV Sprinklers_and_Sprays cascade
 
