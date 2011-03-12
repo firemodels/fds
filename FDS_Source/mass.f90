@@ -32,7 +32,7 @@ INTEGER, INTENT(IN) :: NM
 REAL(EB) :: TNOW,ZZ(4),UN,RHO_D_DYDN
 INTEGER  :: I,J,K,N,II,JJ,KK,IIG,JJG,KKG,IW,IOR,IBC
 REAL(EB), POINTER, DIMENSION(:) :: UWP
-REAL(EB), POINTER, DIMENSION(:,:,:) :: FX=>NULL(),FY=>NULL(),FZ=>NULL(),MASS_COR=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: FX=>NULL(),FY=>NULL(),FZ=>NULL()
  
 IF (EVACUATION_ONLY(NM) .OR. SOLID_PHASE_ONLY) RETURN
 
@@ -61,8 +61,6 @@ ENDIF
 FX=>WORK4
 FY=>WORK5
 FZ=>WORK6
-MASS_COR=>WORK7
-MASS_COR=0._EB
 !$OMP END SINGLE
 
 !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ZZ)
@@ -168,27 +166,12 @@ WLOOP_FL: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       CASE(-3)
          UN = WW(II,JJ,KK-1)
    END SELECT
+
+   ! In case of interpolated boundary, use the original velocity, not the averaged value
+
    IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
    
-   MASS_COR_IF: IF (SURFACE(IBC)%SPECIES_BC_INDEX==NO_MASS_FLUX) THEN
-      UN=0._EB
-      SELECT CASE(IOR)
-         CASE( 1)
-            MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) + RHO_F(IW)*(UU(II,JJ,KK)-UN)*RDX(IIG)
-         CASE(-1)
-            MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) - RHO_F(IW)*(UU(II-1,JJ,KK)-UN)*RDX(IIG)
-         CASE( 2)
-            MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) + RHO_F(IW)*(VV(II,JJ,KK)-UN)*RDY(JJG)
-         CASE(-2)
-            MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) - RHO_F(IW)*(VV(II,JJ-1,KK)-UN)*RDY(JJG)
-         CASE( 3)
-            MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) + RHO_F(IW)*(WW(II,JJ,KK)-UN)*RDZ(KKG)
-         CASE(-3)
-            MASS_COR(IIG,JJG,KKG) = MASS_COR(IIG,JJG,KKG) - RHO_F(IW)*(WW(II,JJ,KK-1)-UN)*RDZ(KKG)
-      END SELECT
-   ENDIF MASS_COR_IF
-   
-   ! compute flux on the face of the wall cell
+   ! Compute flux on the face of the wall cell
 
    SELECT CASE(IOR)
       CASE( 1)
@@ -220,8 +203,7 @@ DO K=1,KBAR
          IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
          FRHO(I,J,K) = (FX(I,J,K)-FX(I-1,J,K))*RDX(I)*RRN(I) &
                      + (FY(I,J,K)-FY(I,J-1,K))*RDY(J)        &
-                     + (FZ(I,J,K)-FZ(I,J,K-1))*RDZ(K)        &
-                     - MASS_COR(I,J,K)
+                     + (FZ(I,J,K)-FZ(I,J,K-1))*RDZ(K) 
       ENDDO
    ENDDO
 ENDDO
@@ -334,7 +316,8 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
                ENDIF
          END SELECT OFF_WALL_SELECT_2
 
-         
+         ! Get the normal components of velocity at the wall
+
          SELECT CASE(IOR)
             CASE( 1)
                UN = UU(II,JJ,KK)
@@ -349,15 +332,22 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
             CASE(-3)
                UN = WW(II,JJ,KK-1)
          END SELECT
+
          IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
+
+         ! At forced flow boundaries, use the specified normal component of velocity 
+
          IF ((SURFACE(IBC)%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .OR. &
              (SURFACE(IBC)%SPECIES_BC_INDEX==HVAC_BOUNDARY       .OR. &
               ANY(SURFACE(IBC)%LEAK_PATH>0._EB)) .AND. UWS(IW)<0._EB) .AND. YY_F(IW,N)>0._EB) THEN
             ! recreate diffusive flux from divg b/c UWP based on old RHODW
             RHO_D_DYDN = 2._EB*RHODW(IW,N)*(YYP(IIG,JJG,KKG,N)-YY_F(IW,N))*RDN(IW)
             UN = SIGN(1._EB,REAL(IOR,EB))*(MASSFLUX(IW,N) + RHO_D_DYDN)/(RHO_F(IW)*YY_F(IW,N))
+         !  UN = -SIGN(1._EB,REAL(IOR,EB))*UWP(IW)
          ENDIF
-         ! compute flux on the face of the wall cell
+
+         ! Compute species mass flux on the face of the wall cell
+
          SELECT CASE(IOR)
             CASE( 1)
                FX(II,JJ,KK)   = UN*RHO_F(IW)*YY_F(IW,N)*R(II)

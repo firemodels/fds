@@ -5189,7 +5189,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
             DO NNN=0,N_SPECIES
                IF (TRIM(SPECIES(NNN)%ID)==TRIM(SPEC_ID(NN))) THEN
                   IF (SPECIES(NNN)%Y_INDEX<=0) THEN
-                     WRITE(MESSAGE,'(A,A,A,A)') 'ERROR: SPEC: ',TRIM(SPEC_ID(NN)),'is not a tracked species for SURF: ',TRIM(SF%ID)
+                     WRITE(MESSAGE,'(A,A,A,A)') 'ERROR: SPEC ',TRIM(SPEC_ID(NN)),' is not a tracked species for SURF ',TRIM(SF%ID)
                      CALL SHUTDOWN(MESSAGE)
                   ENDIF
                   SF%MASS_FLUX(SPECIES(NNN)%Y_INDEX)    = MASS_FLUX(NN)
