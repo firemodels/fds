@@ -4,7 +4,7 @@
 
 &TIME T_END=60. /
 
-&DUMP DT_PL3D=1.E10, MASS_FILE=.TRUE. /
+&DUMP MASS_FILE=.TRUE. /
 
 &MISC SURF_DEFAULT='adiabatic wall' /
 
