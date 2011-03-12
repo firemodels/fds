@@ -6081,7 +6081,7 @@ The background species can be specified as NU(0).
 The addition of the {\ct SMIX} namelist group means that there are three ways in which a simple, mixing controlled reaction could be defined.
 The following three sets of inputs are equivalent:
 
-Simple chemsitry:
+Simple chemistry:
 
 \footnotesize
 \begin{verbatim}
@@ -6478,6 +6478,7 @@ introduced per second.
 
 
 \subsection{Controlling the Number of Particles and Droplets}
+\label{info:particle_number}
 
 Regardless of how the particles or droplets are introduced into the computational domain, the following are important
 parameters for controlling their number:
@@ -6486,7 +6487,7 @@ parameters for controlling their number:
 The number per ``batch'' depends on how they are introduced.
 If more particles are desired, lower the input value of this parameter. The default value is 0.01~s. Note that this
 parameter should be specified on the {\ct SURF}, {\ct PROP}, or {\ct INIT} line, depending on whether the particles/droplets
-originate at a surface, a sprinkler or nozzle, or a volume. Note that if you introduce particles or droplets via an {\ct INIT} line, 
+originate at a surface, a sprinkler or nozzle, or a volume. Note that if you introduce particles or droplets via an {\ct INIT} line,
 you must specify a value for {\ct DT\_INSERT}. Otherwise, particles or
 droplets will only be introduced initially.
 \item[{\ct SAMPLING\_FACTOR}]     Sampling factor for the output
@@ -6525,10 +6526,14 @@ then only the {\ct DENSITY} of the liquid droplet needs to be provided. Otherwis
 \item[{\ct INITIAL\_TEMPERATURE}] Initial temperature of liquid droplet.
 \item[{\ct HEAT\_OF\_VAPORIZATION}] Latent heat of vaporization of liquid droplet.
 \item[{\ct H\_V\_REFERENCE\_TEMPERATURE}] The temperature corresponding to the provided {\ct HEAT\_OF\_VAPORIZATION}.
+\item[{\ct GAMMA}] Ratio of specific heats. Normally, FDS derives gas properties using look-up tables for known gases. However, if the
+gas species identified by {\ct SPEC\_ID} has no known properties, FDS uses this parameter to estimate the specific heat and other properties. The default is
+1.4, based on an assumption of a perfect diatomic molecule like nitrogen.
 \end{description}
-Notice that the default {\ct DENSITY} is that of water. 
+Notice that the default {\ct DENSITY} is that of water.
 
 \subsection{Size Distribution}
+\label{info:particle_size}
 
 The {\ct DIAMETER} is the median volumetric diameter of the droplets or particles, with the
 distribution assumed to be a combination of Rosin-Rammler and log-normal (Default 500~$\mu$m). The
@@ -6554,6 +6559,7 @@ To prevent FDS from generating a distribution of droplets/particles altogether, 
 same {\ct DIAMETER}.
 
 \subsection{Drag}
+\label{info:particle_drag}
 
 For massive particles the default drag law (i.e., the drag coefficient correlation as a function of Reynolds number [based on particle diameter]) is that of a sphere.
 To invoke the cylinder drag law set {\ct DRAG\_LAW$=$`CYLINDER'} on the {\ct PART} line.  If neither of these options is applicable,
@@ -6603,6 +6609,7 @@ of water droplets impinging on the top of a box followed by the cascading of wat
 
 
 \subsection{Color}
+\label{info:particle_quantities}
 
 The parameter {\ct QUANTITIES} is an array of character strings indicating which
 scalar quantities should be used to color the particles or droplets when viewed as an
@@ -6629,6 +6636,7 @@ ask yourself what is the basic information that {\em must} be conveyed to the pr
 point in declaring thermal properties because they are only to be used a flow tracers in Smokeview.
 
 \subsection{Massless Particles}
+\label{info:MASSLESS}
 
 The simplest use of Lagrangian particles is for visualization, in which case the
 particles are considered massless tracers. In this case, the particles are
@@ -6641,10 +6649,8 @@ defined via the line
 \normalsize
 
 \noindent
-Note that if the
-particles are {\ct MASSLESS}, it is not appropriate to color them according to any particular property.
-Unlike early versions of FDS, particles are no longer
-colored by gas phase quantities, but rather by properties of the particle itself. For example,
+Note that if the particles are {\ct MASSLESS}, it is not appropriate to color them according to any particular property.
+Particles are not colored by gas phase quantities, but rather by properties of the particle itself. For example,
 {\ct 'DROPLET\_TEMPERATURE'} for a non-massless particle refers to the temperature of the particle itself
 rather than the local gas temperature.
 
@@ -6653,6 +6659,7 @@ since {\ct MASSLESS} particles are for visualization only.
 
 
 \subsection{Static Particles or Droplets}
+\label{info:STATIC}
 
 {\ct STATIC} is a logical parameter indicating whether particles move or just serve
 as obstructions or clutter. Setting {\ct STATIC=.TRUE.} only makes sense in conjunction with a non-zero value of
@@ -6661,17 +6668,18 @@ as obstructions or clutter. Setting {\ct STATIC=.TRUE.} only makes sense in conj
 
 \subsection{Water Droplets}
 
-If the droplets are defined with {\ct SPEC\_ID='WATER VAPOR'}, then the particles will be assigned the thermo-physical properties of water, 
+If the droplets are defined with {\ct SPEC\_ID='WATER VAPOR'}, then the particles will be assigned the thermo-physical properties of water,
 the radiation absorption properties of water, and will be colored blue in Smokeview.
 
 If the liquid droplets are to evaporate into some other gaseous species, you must explicitly define the species via the {\ct SPEC} namelist group (see Section~\ref{info:SPEC}), and then
 designate the appropriate {\ct SPEC\_ID} on the {\ct PART} line.
 
 \subsection{Fuel Droplets}
+\label{info:fuel_droplets}
 
-If the droplets evaporate into the {\ct FUEL} identified on the {\ct REAC} line, they will be colored yellow by default in Smokeview and any resulting 
-fuel vapor will burn according to the combustion model specified on the {\ct REAC} line.  
-The droplets evaporate into an equivalent amount of fuel vapor such that the resulting heat release rate 
+If the droplets evaporate into the {\ct FUEL} identified on the {\ct REAC} line, they will be colored yellow by default in Smokeview and any resulting
+fuel vapor will burn according to the combustion model specified on the {\ct REAC} line.
+The droplets evaporate into an equivalent amount of fuel vapor such that the resulting heat release rate
 (assuming complete combustion) is equal to the evaporation rate multiplied by the {\ct HEAT\_OF\_COMBUSTION}, also specified on the {\ct PART} line. Note that the
 burning rate will be adjusted to account for the difference between the heats of combustion of the droplets and the other fuels in the model.
 
@@ -6753,7 +6761,7 @@ However, for arbitrary particles or droplets, there is no assumed radiative abso
 \subsection{Assigning Complex Properties to Particles}
 \label{info:PART_SURF}
 
-Typically, droplets are assumed to be relatively small, thermally-thin spheres. However, it is possible to assign arbitrary surface properties to 
+Typically, droplets are assumed to be relatively small, thermally-thin spheres. However, it is possible to assign arbitrary surface properties to
 ``particles'' that represent subgrid-scale objects, like office clutter or vegetation. To do this, you add a {\ct SURF\_ID} to the {\ct PART} line. The
 {\ct SURF} properties then over-ride the default properties assigned to particles and droplets. For example, the following input lines create a collection
 of hot spheres:
@@ -6773,10 +6781,10 @@ line establishes a class of particles with the properties of given by the {\ct S
 to tell Smokeview that the particles are to be drawn as the appropriate sized spheres. The {\ct INIT} line randomly fills the given volume with
 10 of these hot spheres.
 
-The {\ct SURF} line establishes the particle {\ct GEOMETRY}. Options are {\ct 'SPHERICAL'}, {\ct 'CYLINDRICAL'}, or {\ct 'CARTESIAN'}. If 
+The {\ct SURF} line establishes the particle {\ct GEOMETRY}. Options are {\ct 'SPHERICAL'}, {\ct 'CYLINDRICAL'}, or {\ct 'CARTESIAN'}. If
 {\ct 'SPHERICAL'}, provide the {\ct RADIUS}. If {\ct 'CYLINDRICAL'}, provide the {\ct RADIUS} and the {\ct LENGTH}. If {\ct 'CARTESIAN'}, provide
 the {\ct LENGTH}, {\ct WIDTH}, and {\ct THICKNESS} of the plate. Note that the heat conduction calculation will be done in the appropriate coordinate
-system. 
+system.
 
 
 
@@ -8854,7 +8862,7 @@ where $t$ is time in minutes and $C_\mathrm{CO}$ is the CO concentration (ppm). 
 \be
 \mathrm{FED}_\mathrm{CN} = \int_0^t \left( \frac{\exp\left( \frac{C_\mathrm{CN}(t)}{43} \right)}{220} - 0.0045 \right) \, dt
 \ee
-where $t$ is time in minutes and $C_\mathrm{CN}$ is the concentration (ppm) of HCN corrected for the protective effect of NO$_\mathrm{2}$. $C_\mathrm{CN}$ is calculated as 
+where $t$ is time in minutes and $C_\mathrm{CN}$ is the concentration (ppm) of HCN corrected for the protective effect of NO$_\mathrm{2}$. $C_\mathrm{CN}$ is calculated as
 \be
 C_\mathrm{CN} = C_\mathrm{HCN} - C_\mathrm{NO_2}
 \ee
@@ -8862,23 +8870,23 @@ The fraction of an incapacitating dose of NO$_x$ is calculated as
 \be
 \mathrm{FED}_\mathrm{NO_x} = \int_0^t \frac{C_\mathrm{NO_x}(t)}{1500} \, dt
 \ee
-where $t$ is time in minutes and $C_\mathrm{NO_x}$ is the sum of NO and NO$_\mathrm{2}$ concentrations (ppm). 
+where $t$ is time in minutes and $C_\mathrm{NO_x}$ is the sum of NO and NO$_\mathrm{2}$ concentrations (ppm).
 
 The Fractional Lethal Dose (FLD) of irritants is calculated as
 \be
 \mathrm{FLD}_\mathrm{irr} = \int_0^t \left(
-	\frac{C_\mathrm{HCl}(t)}    {F_\mathrm{FLD,HCl}} + 
-	\frac{C_\mathrm{HBr}(t)}    {F_\mathrm{FLD,HBr}} + 
-	\frac{C_\mathrm{HF}(t)}     {F_\mathrm{FLD,HF}} + 
-	\frac{C_\mathrm{SO_2}(t)}   {F_\mathrm{FLD,SO_2}} + 
-	\frac{C_\mathrm{NO_2}(t)}   {F_\mathrm{FLD,NO_2}} + 
-	\frac{C_\mathrm{C_3H_4O}(t)}{F_\mathrm{FLD,C_3H_4O}} + 
-	\frac{C_\mathrm{CH_2O}(t)}  {F_\mathrm{FLD,CH_2O}} 
-	\right) \, dt
+    \frac{C_\mathrm{HCl}(t)}    {F_\mathrm{FLD,HCl}} +
+    \frac{C_\mathrm{HBr}(t)}    {F_\mathrm{FLD,HBr}} +
+    \frac{C_\mathrm{HF}(t)}     {F_\mathrm{FLD,HF}} +
+    \frac{C_\mathrm{SO_2}(t)}   {F_\mathrm{FLD,SO_2}} +
+    \frac{C_\mathrm{NO_2}(t)}   {F_\mathrm{FLD,NO_2}} +
+    \frac{C_\mathrm{C_3H_4O}(t)}{F_\mathrm{FLD,C_3H_4O}} +
+    \frac{C_\mathrm{CH_2O}(t)}  {F_\mathrm{FLD,CH_2O}}
+    \right) \, dt
 \ee
-where $t$ is time in minutes, the nominators are the instantaneous concentrations (ppm) of each irritant and 
-the denominators the exposure doses of respective irritants predicted to be lethal to half the population. 
-The lethal exposure doses~\cite{SFPE:Purser} are given in the table~\ref{tbl:FIC}. To include the effect of an irritant gas not listed in the table, 
+where $t$ is time in minutes, the nominators are the instantaneous concentrations (ppm) of each irritant and
+the denominators the exposure doses of respective irritants predicted to be lethal to half the population.
+The lethal exposure doses~\cite{SFPE:Purser} are given in the table~\ref{tbl:FIC}. To include the effect of an irritant gas not listed in the table,
 the user should specify $\mathrm{F_{FLD}}$ in ppm$\times$min using the {\ct FLD\_LETHAL\_DOSE} property of the corresponding {\ct SPEC} line.
 \begin{table}[ht]
 \caption{Coefficients used for the computation of irritant effects of gases.}
@@ -8886,7 +8894,7 @@ the user should specify $\mathrm{F_{FLD}}$ in ppm$\times$min using the {\ct FLD\
 \begin{center}
 \begin{tabular}{|l|l|l|l|l|l|l|l|}
 \hline & HCl & HBr & HF & $\mathrm{SO_2}$ & $\mathrm{NO_2}$ & $\mathrm{C_3H_4O}$ & $\mathrm{CH_2O}$  \\ \hline \hline
-F${}_\mathrm{FLD}$ (ppm $\times$ min) & 114000 & 114000 & 87000 & 12000 & 1900 & 4500 & 22500 \\ 
+F${}_\mathrm{FLD}$ (ppm $\times$ min) & 114000 & 114000 & 87000 & 12000 & 1900 & 4500 & 22500 \\
 F${}_\mathrm{FIC}$ (ppm) & 900 & 900 & 900 & 120 & 350 & 20 & 30 \\ \hline
 \end{tabular}
 \end{center}
@@ -8896,28 +8904,28 @@ The fraction of an incapacitating dose of low O${}_2$ hypoxia is calculated as
 \be
 \mathrm{FED}_\mathrm{O_2} =  \int_0^t \frac{dt}{60 \exp \left [ 8.13 - 0.54 \, (20.9 - C_\mathrm{O_2}(t)) \right ] }
 \ee
-where $t$ is time in minutes and $C_\mathrm{O_2}$ is the O${}_2$ concentration (volume per cent). 
+where $t$ is time in minutes and $C_\mathrm{O_2}$ is the O${}_2$ concentration (volume per cent).
 The hyperventilation factor induced by carbon dioxide is calculated as
 \be
 \mathrm{HV}_\mathrm{CO_2} = \frac{ \exp( 0.1930 \, C_\mathrm{CO_2}(t) +  2.0004 ) }{7.1} \label{co2hyp}
 \ee
 where $t$ is time in minutes and $C_\mathrm{CO_2}$ is the CO${}_2$ concentration (percent).
 
-The Fractional Irritant Concentration (FIC), also developed by Purser~\cite{SFPE:Purser}, represents the toxic effect which 
-depends upon the immediate concentrations of irritants. The overall irritant concentration FIC is calculated as 
+The Fractional Irritant Concentration (FIC), also developed by Purser~\cite{SFPE:Purser}, represents the toxic effect which
+depends upon the immediate concentrations of irritants. The overall irritant concentration FIC is calculated as
 \be
-\mathrm{FIC}_\mathrm{irr} = 
-	\frac{C_\mathrm{HCl}(t)}    {F_\mathrm{FIC,HCl}} + 
-	\frac{C_\mathrm{HBr}(t)}    {F_\mathrm{FIC,HBr}} + 
-	\frac{C_\mathrm{HF}(t)}     {F_\mathrm{FIC,HF}} + 
-	\frac{C_\mathrm{SO_2}(t)}   {F_\mathrm{FIC,SO_2}} + 
-	\frac{C_\mathrm{NO_2}(t)}   {F_\mathrm{FIC,NO_2}} + 
-	\frac{C_\mathrm{C_3H_4O}(t)}{F_\mathrm{FIC,C_3H_4O}} + 
-	\frac{C_\mathrm{CH_2O}(t)}  {F_\mathrm{FIC,CH_2O}}
+\mathrm{FIC}_\mathrm{irr} =
+    \frac{C_\mathrm{HCl}(t)}    {F_\mathrm{FIC,HCl}} +
+    \frac{C_\mathrm{HBr}(t)}    {F_\mathrm{FIC,HBr}} +
+    \frac{C_\mathrm{HF}(t)}     {F_\mathrm{FIC,HF}} +
+    \frac{C_\mathrm{SO_2}(t)}   {F_\mathrm{FIC,SO_2}} +
+    \frac{C_\mathrm{NO_2}(t)}   {F_\mathrm{FIC,NO_2}} +
+    \frac{C_\mathrm{C_3H_4O}(t)}{F_\mathrm{FIC,C_3H_4O}} +
+    \frac{C_\mathrm{CH_2O}(t)}  {F_\mathrm{FIC,CH_2O}}
 \ee
-where the nominators are the instantaneous concentrations of each irritant and the denominators the concentrations of respective irritants 
+where the nominators are the instantaneous concentrations of each irritant and the denominators the concentrations of respective irritants
 expected to cause incapacitation in half the population. The incapacitating concentrations~\cite{SFPE:Purser} are given in the table~\ref{tbl:FIC}.
-To include the irritant effect of a gas not listed in the table, the user should specify $\mathrm{F_{FIC}}$ in ppm using the {\ct FIC\_CONCENTRATION} 
+To include the irritant effect of a gas not listed in the table, the user should specify $\mathrm{F_{FIC}}$ in ppm using the {\ct FIC\_CONCENTRATION}
 property on the corresponding {\ct SPEC} line.
 
 Note that the spatial integration features (Section~\ref{info:statistics}) cannot be used with FED output because FED makes
@@ -10220,7 +10228,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-\caption[Lagrangian Particles/Droplets]{For more information see Section~\ref{info:PART}.}
+\caption[Lagrangian Particles/Droplets]{For more information see Chapter~\ref{info:PART}.}
 \label{tbl:PART} \\
 \hline
 \multicolumn{5}{|c|}{{\ct PART} (Lagrangian Particles/Droplets)} \\
@@ -10231,39 +10239,47 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct PART} (Lagrangian Particles/Droplets)} \\
 \hline \hline
 \endhead
-{\ct AGE}                           & Real            & Droplet lifetime                        & s         & 100000.       \\ \hline
-{\ct COLOR}                         & Character       & Default color of droplets               &           & {\ct 'BLACK'} \\ \hline
-{\ct CTRL\_ID}                      & Character       & Name of controller                      &           &               \\ \hline
-{\ct DENSITY}                       & Real            & Droplet density                         & kg/m$^3$  & 1000.         \\ \hline
-{\ct DEVC\_ID}                      & Character       & Name of controlling device              &           &               \\ \hline
-{\ct DIAMETER}                      & Real            & Median Volumetric Diameter              & $\mu$m    & 500.          \\ \hline
-{\ct DRAG\_LAW}                     & Character       & Geometry for drag correlation           &           & {\ct 'SPHERE'}\\ \hline
-{\ct EVAPORATE}                     & Logical         & Assume liquid evaporation               &           & {\ct .TRUE.}  \\ \hline
-%{\ct GAMMA}                         & Real            & Specific heat ratio for vapor           &           & 1.4           \\ \hline
-{\ct GAMMA\_D}                      & Real            & Size distribution parameter             &           & 2.4           \\ \hline
-{\ct HEAT\_OF\_COMBUSTION}          & Real            & Heat of Combustion                      & kJ/kg     &               \\ \hline
-{\ct HEAT\_OF\_VAPORIZATION}        & Real            & Latent Heat of Vaporization             & kJ/kg     &               \\ \hline
-{\ct H\_V\_REFERENCE\_TEMPERATURE}  & Real            & See Section~\ref{thermal_part_props}    & $^\circ$C &               \\ \hline
-{\ct HORIZONTAL\_VELOCITY}          & Real            & Droplet speed, horizontal               & m/s       &  0.2          \\ \hline
-{\ct ID}                            & Character       & Identifier                              &           &               \\ \hline
-{\ct INITIAL\_TEMPERATURE}          & Real            & Initial Temperature                     & $^\circ$C & {\ct TMPA}    \\ \hline
-{\ct MASSLESS}                      & Logical         & Massless tracers                        &           & {\ct .FALSE.} \\ \hline
-{\ct MAXIMUM\_DIAMETER}             & Real            & Break-up bound                          & $\mu$m    & $\infty$      \\ \hline
-{\ct MINIMUM\_DIAMETER}             & Real            & Evaporation bound                       & $\mu$m    & 20.           \\ \hline
-{\ct MELTING\_TEMPERATURE}          & Real            & Melting Temperature                     & $^\circ$C &               \\ \hline
-{\ct MONODISPERSE}                  & Logical         & Uniform droplet size                    &           & {\ct .FALSE.} \\ \hline
-{\ct PROP\_ID}                      & Character       & Name of Property line                   &           &               \\ \hline
-{\ct QUANTITIES(10)}                & Character       & Quantities for coloring                 &           &               \\ \hline
-{\ct RGB(3)}                        & Integers        & Color indices (0-255)                   &           &               \\ \hline
-{\ct SAMPLING\_FACTOR}              & Integer         & Filter for output file                  &           & 1             \\ \hline
-{\ct SIGMA\_D}                      & Real            & Size distribution parameter             &           &               \\ \hline
-{\ct SPEC\_ID}                      & Character       & Name of gas species                     &           &               \\ \hline
-{\ct SPECIFIC\_HEAT}                & Real            & Droplet specific heat                   & kJ/kg/K   &               \\ \hline
-{\ct STATIC}                        & Logical         & Stationary Particles                    &           & {\ct .FALSE.} \\ \hline
-%{\ct TREE}                          & Logical         & Particles are leaves                    &           & {\ct .FALSE.} \\ \hline
-{\ct USER\_DRAG\_COEFFICIENT}       & Real            & Constant drag coefficient               &           & -1.           \\ \hline
-{\ct VERTICAL\_VELOCITY}            & Real            & Droplet speed, vertical                 & m/s       &  0.5          \\ \hline
+{\ct AGE}                           & Real            & See Section~\ref{info:particle_number}      & s         & 100000.       \\ \hline
+{\ct COLOR}                         & Character       & See Section~\ref{info:particle_quantities}  &           & {\ct 'BLACK'} \\ \hline
+{\ct CTRL\_ID}                      & Character       & See Section~\ref{info:particle_flux}        &           &               \\ \hline
+{\ct DENSITY}                       & Real            & See Section~\ref{thermal_part_props}        & kg/m$^3$  & 1000.         \\ \hline
+{\ct DEVC\_ID}                      & Character       & See Section~\ref{info:particle_flux}        &           &               \\ \hline
+{\ct DIAMETER}                      & Real            & See Section~\ref{info:particle_size}        & $\mu$m    & 500.          \\ \hline
+{\ct DRAG\_LAW}                     & Character       & See Section~\ref{info:particle_drag}        &           & {\ct 'SPHERE'}\\ \hline
+{\ct EVAPORATE}                     & Logical         & See Section~\ref{thermal_part_props}        &           & {\ct .TRUE.}  \\ \hline
+{\ct GAMMA}                         & Real            & See Section~\ref{thermal_part_props}        &           & 1.4           \\ \hline
+{\ct GAMMA\_D}                      & Real            & See Section~\ref{info:particle_size}        &           & 2.4           \\ \hline
+{\ct HEAT\_OF\_COMBUSTION}          & Real            & See Section~\ref{info:fuel_droplets}        & kJ/kg     &               \\ \hline
+{\ct HEAT\_OF\_VAPORIZATION}        & Real            & See Section~\ref{thermal_part_props}        & kJ/kg     &               \\ \hline
+{\ct H\_V\_REFERENCE\_TEMPERATURE}  & Real            & See Section~\ref{thermal_part_props}        & $^\circ$C &               \\ \hline
+{\ct HORIZONTAL\_VELOCITY}          & Real            & See Section~\ref{info:surface_droplets}     & m/s       &  0.2          \\ \hline
+{\ct ID}                            & Character       & See Section~\ref{info:PART_Basics}          &           &               \\ \hline
+{\ct INITIAL\_TEMPERATURE}          & Real            & See Section~\ref{thermal_part_props}        & $^\circ$C & {\ct TMPA}    \\ \hline
+{\ct MASSLESS}                      & Logical         & See Section~\ref{info:MASSLESS}             &           & {\ct .FALSE.} \\ \hline
+{\ct MAXIMUM\_DIAMETER}             & Real            & See Section~\ref{info:particle_size}        & $\mu$m    & $\infty$      \\ \hline
+{\ct MINIMUM\_DIAMETER}             & Real            & See Section~\ref{info:particle_size}        & $\mu$m    & 20.           \\ \hline
+{\ct MELTING\_TEMPERATURE}          & Real            & See Section~\ref{thermal_part_props}        & $^\circ$C &               \\ \hline
+{\ct MONODISPERSE}                  & Logical         & See Section~\ref{info:particle_size}        &           & {\ct .FALSE.} \\ \hline
+{\ct PROP\_ID}                      & Character       & See Section~\ref{info:PART_Basics}          &           &               \\ \hline
+{\ct QUANTITIES(10)}                & Character       & See Section~\ref{info:particle_quantities}  &           &               \\ \hline
+{\ct RGB(3)}                        & Integers        & See Section~\ref{info:particle_quantities}  &           &               \\ \hline
+{\ct SAMPLING\_FACTOR}              & Integer         & See Section~\ref{info:particle_number}      &           & 1             \\ \hline
+{\ct SIGMA\_D}                      & Real            & See Section~\ref{info:particle_size}        &           &               \\ \hline
+{\ct SPEC\_ID}                      & Character       & See Section~\ref{thermal_part_props}        &           &               \\ \hline
+{\ct SPECIFIC\_HEAT}                & Real            & See Section~\ref{thermal_part_props}        & kJ/kg/K   &               \\ \hline
+{\ct STATIC}                        & Logical         & See Section~\ref{info:STATIC}               &           & {\ct .FALSE.} \\ \hline
+{\ct SURF\_ID}                      & Character       & See Section~\ref{info:PART_SURF}            &           &               \\ \hline
+{\ct USER\_DRAG\_COEFFICIENT}       & Real            & See Section~\ref{info:particle_drag}        &           & -1.           \\ \hline
+{\ct VAPORIZATION\_TEMPERATURE}     & Real            & See Section~\ref{thermal_part_props}        & $^\circ$C &               \\ \hline
+{\ct VERTICAL\_VELOCITY}            & Real            & See Section~\ref{info:surface_droplets}     & m/s       &  0.5          \\ \hline
 \end{longtable}
+
+% Undocumented: TREE,VEG_SV,VEG_MOISTURE,VEG_CHAR_FRACTION,VEG_DRAG_COEFFICIENT,VEG_DENSITY,VEG_BULK_DENSITY,
+%               VEG_BURNING_RATE_MAX,VEG_DEHYDRATION_RATE_MAX,VEG_INITIAL_TEMPERATURE,VEG_FUEL_MPV_MIN,
+%               VEG_MOIST_MPV_MIN,VEG_REMOVE_CHARRED,VEG_STEM,VEG_DEGRADATION,VEG_CHAR_OXIDATION
+
+% Undocumented: SURFACE_TENSION,BREAKUP,BREAKUP_CHILD_DIAMETER,BREAKUP_CHILD_GAMMA_D,BREAKUP_CHILD_SIGMA_D,
+%               DENSE_VOLUME_FRACTION,NUMBER_RADIATION_ANGLES,ORIENTATION
 
 
 \vspace{\baselineskip}
@@ -10889,12 +10905,14 @@ FDS 5 Parameter & Namelist  & FDS 6 Parameter & Namelist  & Notes \\
 {\ct BACKGROUND\_SPECIES}       & {\ct MISC}    & {\ct BACKGROUND=.TRUE.}                     &   {\ct SPEC}        & See Section~\ref{info:SPEC}                  \\ \hline
 {\ct CONDUCTIVITY}              & {\ct MISC}    & {\ct CONDUCTIVITY}                          &   {\ct SPEC}        & See Section~\ref{info:SPEC}                  \\ \hline
 {\ct CO\_PRODUCTION}            & {\ct MISC}    & {\ct CO\_PRODUCTION}                        &   {\ct REAC}        & See Section~\ref{info:CO}                    \\ \hline
+{\ct DROPLETS\_PER\_SECOND}     & {\ct PART}    & {\ct DROPLETS\_PER\_SECOND}                 &   {\ct PROP}        & See Section~\ref{info:sprinkler_droplets}    \\ \hline
 {\ct HUMIDITY}                  & {\ct MISC}    & {\ct HUMIDITY}                              &   {\ct SPEC}        & See Section~\ref{info:SPEC}                  \\ \hline
 {\ct ISOTHERMAL}                & {\ct MISC}    & Eliminated                                  &                     &                                              \\ \hline
 {\ct MASS\_FRACTION}            & {\ct VENT}    & Eliminated                                  &                     &                                              \\ \hline
 {\ct MAXIMUM\_MASS\_FRACTION}   & {\ct CLIP}    & Eliminated                                  &                     &                                              \\ \hline
 {\ct MINIMUM\_MASS\_FRACTION}   & {\ct CLIP}    & Eliminated                                  &                     &                                              \\ \hline
 {\ct MW}                        & {\ct MISC}    & {\ct MW}                                    &   {\ct SPEC}        & See Section~\ref{info:SPEC}                  \\ \hline
+{\ct NUMBER\_INITIAL\_DROPLETS} & {\ct PART}    & {\ct NUMBER\_INITIAL\_DROPLETS}             &   {\ct PROP}        & See Section~\ref{info:initial_droplets}      \\ \hline
 {\ct NU\_FUEL}                  & {\ct MATL}    & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
 {\ct NU\_GAS}                   & {\ct MATL}    & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
 {\ct NU\_RESIDUE}               & {\ct MATL}    & {\ct NU\_MATL}                              &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
