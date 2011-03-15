@@ -6926,6 +6926,8 @@ This file can be imported into most spread sheet software packages.
 If the number of {\ct DEVC} lines exceeds 256, the limit of some spreadsheet
 applications, the output file will be split into appropriately sized smaller
 files. To prevent the file splitting, specify {\ct COLUMN\_DUMP\_LIMIT=.FALSE.} on the {\ct DUMP} line.
+Use {\ct DEVC\_COLUMN\_LIMIT} and {\ct CTRL\_COLUMN\_LIMIT} to indicate the limit of columns in the
+device and control output files. Their default values are 254.
 
 By default, the {\ct DEVC} output is written to a file every {\ct DT\_DEVC} seconds.
 This time increment is specified on the {\ct DUMP} line. Also, by default,
@@ -7684,6 +7686,8 @@ smoke detector alarming. {\ct LATCH=.TRUE.} by default for both devices and cont
 \subsection{Control Functions: \texorpdfstring{{\tt ANY}}{ANY}, \texorpdfstring{{\tt ALL}}{ALL}, \texorpdfstring{{\tt ONLY}}{ONLY}, and
 \texorpdfstring{{\tt AT\_LEAST}}{AT\_LEAST}}
 
+\label{info:FUNCTION_TYPE}
+
 Suppose you want an obstruction to be removed (a door is opened, for example) after any
 of four smoke detectors in a room has activated. Use input lines of the form:
 
@@ -7743,6 +7747,8 @@ and \underline{only} 3, detectors activate.
 
 \subsection{Control Function: \texorpdfstring{{\tt TIME\_DELAY}}{TIME\_DELAY}}
 
+\label{info:TIME_DELAY}
+
 There is often a time delay between when a device activates and when some other action occurs, like in a dry pipe sprinkler system.
 
 \footnotesize
@@ -7762,6 +7768,7 @@ before water can flow out of the head.
 
 
 \subsection{Control Function: \texorpdfstring{{\tt DEADBAND}}{DEADBAND}}
+\label{info:DEADBAND}
 
 This control function behaves like an HVAC thermostat.  It can operate in one of two modes analagous to heating or cooling.
 The function is provided with an {\ct INPUT\_ID} which is the {\ct DEVC} whose value is used by the function,
@@ -7917,6 +7924,7 @@ specified with {\ct QUANTITY='CONTROL'}.
 \normalsize
 
 \subsection{Combining Control Functions: A Dry Pipe Sprinkler System}
+\label{info:dry_pipe}
 
 For a dry-pipe sprinkler system, the normally
 dry sprinkler pipes are pressurized with gas.  When a link activates in a sprinkler head, the pressure drop allows
@@ -9122,6 +9130,20 @@ of 1, 2 or 3 to indicate that the velocity ought to have the same sign as $u$, $
 with measurements. For Plot3D files, add {\ct PLOT3D\_VELO\_INDEX(N)=...} to the {\ct DUMP} line, where {\ct N} refers to the Plot3D quantity 1, 2, 3, 4 or 5.
 
 
+\subsection{Computer Performance}
+\label{info:TIMING}
+
+There are a variety of ways to test the performance of your computer in running an FDS simulation. In no particular order, here is a list inputs and/or outputs to help:
+\begin{description}
+\item[{\ct DEBUG}]  If set to {\ct .TRUE.} on the {\ct DUMP} line, this parameter will cause FDS to print out debugging information concerning the progress of an MPI
+calculation.
+\item[{\ct TIMING}] If set to {\ct .TRUE.} on the {\ct DUMP} line, this parameter will cause FDS to print out timing information concerning the data exchanges in an MPI
+calculation.
+\item[{\ct VELOCITY\_ERROR\_FILE}] If set to {\ct .TRUE.} on the {\ct DUMP} line, this parameter will cause FDS to create a file with a time history of the maximum error
+associated with the normal component of velocity at solid or interpolated boundaries.
+\end{description}
+
+
 \subsection{\emph{A Posteriori} Mesh Quality Metrics}
 \label{info:meshquality}
 The quality of a particular simulation is most directly tied to grid resolution.  Three slice file output quantities are suggested here for measuring errors in the velocity and scalar fields:
@@ -9582,12 +9604,12 @@ Note that you may use the character string {\ct FYI} on any namelist line to mak
 \multicolumn{5}{|c|}{{\ct BNDF} (Boundary File Parameters)} \\
 \hline \hline
 \endhead
-{\ct CELL\_CENTERED}    & Logical     & Do not do corner averaging              &           & {\ct .FALSE.}   \\ \hline
-{\ct PART\_ID}          & Character   & Particle identifier (if needed)         &           &                 \\ \hline
-{\ct PROP\_ID}          & Character   & Property identifier (if needed)         &           &                 \\ \hline
-{\ct RECOUNT\_DRIP}     & Logical     & See Section \ref{info:part_output}      &           & {\ct .FALSE.}   \\ \hline
-{\ct QUANTITY}          & Character   & Quantity to visualize                   &           &                 \\ \hline
-{\ct SPEC\_ID}          & Character   & Species identifier (if needed)          &           &                 \\ \hline
+{\ct CELL\_CENTERED}    & Logical     & See Section \ref{info:BNDF}                 &           & {\ct .FALSE.}   \\ \hline
+{\ct PART\_ID}          & Character   & See Section \ref{info:outputquantities}     &           &                 \\ \hline
+{\ct PROP\_ID}          & Character   & See Section \ref{info:BNDF}                 &           &                 \\ \hline
+{\ct RECOUNT\_DRIP}     & Logical     & See Section \ref{info:heat_flux}            &           & {\ct .FALSE.}   \\ \hline
+{\ct QUANTITY}          & Character   & See Section \ref{info:outputquantities}     &           &                 \\ \hline
+{\ct SPEC\_ID}          & Character   & See Section \ref{info:outputquantities}     &           &                 \\ \hline
 \end{longtable}
 
 
@@ -9611,10 +9633,10 @@ Note that you may use the character string {\ct FYI} on any namelist line to mak
 \multicolumn{5}{|c|}{{\ct CLIP} (Specified Upper and Lower Limits)} \\
 \hline \hline
 \endhead
-{\ct MAXIMUM\_DENSITY}              & Real           & Maximum Gas Density              & kg/m$^3$   &     \\ \hline
-{\ct MAXIMUM\_TEMPERATURE}          & Real           & Maximum Gas Temperature          & $^\circ$C  &     \\ \hline
-{\ct MINIMUM\_DENSITY}              & Real           & Minimum Gas Density              & kg/m$^3$   &     \\ \hline
-{\ct MINIMUM\_TEMPERATURE}          & Real           & Maximum Gas Temperature          & $^\circ$C  &     \\ \hline
+{\ct MAXIMUM\_DENSITY}              & Real           & See Section~\ref{info:CLIP}      & kg/m$^3$   &     \\ \hline
+{\ct MAXIMUM\_TEMPERATURE}          & Real           & See Section~\ref{info:CLIP}      & $^\circ$C  &     \\ \hline
+{\ct MINIMUM\_DENSITY}              & Real           & See Section~\ref{info:CLIP}      & kg/m$^3$   &     \\ \hline
+{\ct MINIMUM\_TEMPERATURE}          & Real           & See Section~\ref{info:CLIP}      & $^\circ$C  &     \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
@@ -9638,16 +9660,16 @@ Note that you may use the character string {\ct FYI} on any namelist line to mak
 \endhead
 %{\ct CYCLE\_TIME}    & Real         & Periodicity                                 & s  &                           \\ \hline
 %{\ct CYCLES}         & Integer      & Number of times to cycle output             &    &                           \\ \hline
-{\ct DELAY}          & Real         & Time delay                                  & s  &  0.                       \\ \hline
-{\ct FUNCTION\_TYPE} & Character    & Type of control function                    &    &                           \\ \hline
-{\ct ID}             & Character    & IDentifier                                  &    &                           \\ \hline
-{\ct INITIAL\_STATE} & Logical      & Initial state of control function           &    & {\ct .FALSE.}             \\ \hline
-{\ct INPUT\_ID}      & Char.~Array  & DEVC and/or CTRL input {\ct ID}s            &    &                           \\ \hline
-{\ct LATCH}          & Logical      & Control function changes state only once    &    & {\ct .TRUE.}              \\ \hline
-{\ct N}              & Integer      & Number of .TRUE. {\ct INPUT}s               &    &   1                       \\ \hline
-{\ct ON\_BOUND}      & Character    & Active edge of a {\ct DEADBAND}             &    & {\ct LOWER}               \\ \hline
-{\ct RAMP\_ID}       & Character    & {\ct ID} for a {\ct CUSTOM} ramp controller &    &                           \\ \hline
-{\ct SETPOINT(2)}    & Real         & Lower and upper bound of a {\ct DEADBAND}   &    &                           \\ \hline
+{\ct DELAY}          & Real         & See Section~\ref{info:dry_pipe}             & s  &  0.                       \\ \hline
+{\ct FUNCTION\_TYPE} & Character    & See Section~\ref{info:basic_control}        &    &                           \\ \hline
+{\ct ID}             & Character    & See Section~\ref{info:CTRL}                 &    &                           \\ \hline
+{\ct INITIAL\_STATE} & Logical      & See Section~\ref{info:basic_control}        &    & {\ct .FALSE.}             \\ \hline
+{\ct INPUT\_ID}      & Char.~Array  & See Section~\ref{info:CTRL}                 &    &                           \\ \hline
+{\ct LATCH}          & Logical      & See Section~\ref{info:basic_control}        &    & {\ct .TRUE.}              \\ \hline
+{\ct N}              & Integer      & See Section~\ref{info:CTRL}                 &    &   1                       \\ \hline
+{\ct ON\_BOUND}      & Character    & See Section~\ref{info:DEADBAND}             &    & {\ct LOWER}               \\ \hline
+{\ct RAMP\_ID}       & Character    & See Section~\ref{info:CUSTOM}               &    &                           \\ \hline
+{\ct SETPOINT(2)}    & Real         & See Section~\ref{info:basic_control}        &    &                           \\ \hline
 \end{longtable}
 
 
@@ -9674,40 +9696,40 @@ Note that you may use the character string {\ct FYI} on any namelist line to mak
 \endhead
 {\ct BYPASS\_FLOWRATE}      & Real            & See Section~\ref{info:aspiration_detector}                       & kg/s  & 0             \\ \hline
 {\ct CONVERSION\_FACTOR}    & Real            & See Section~\ref{info:out:DEVC}                                  &       & 1             \\ \hline
-{\ct CTRL\_ID}              & Character       & Associated {\ct CTRL} line                                       &       &               \\ \hline
+{\ct CTRL\_ID}              & Character       & See Section~\ref{info:DEVC}                                      &       &               \\ \hline
 {\ct DELAY}                 & Real            & See Section~\ref{info:aspiration_detector}                       & s     & 0             \\ \hline
-{\ct DEPTH}                 & Real            & Depth into surface for internal wall temp                        & m     & 0             \\ \hline
+{\ct DEPTH}                 & Real            & See Section~\ref{info:material_components}                       & m     & 0             \\ \hline
 {\ct DEVC\_ID}              & Character       & See Section~\ref{info:aspiration_detector}                       &       &               \\ \hline
 {\ct DRY}                   & Logical         & See Section~\ref{info:dry}                                       &       & {\ct .FALSE.} \\ \hline
 {\ct DUCT\_ID}              & Character       & See Section~\ref{info:HVAC}                                      &       &               \\ \hline
 {\ct FLOWRATE}              & Real            & See Section~\ref{info:aspiration_detector}                       & kg/s  & 0             \\ \hline
 {\ct HIDE\_COORDINATES}     & Logical         & See Section~\ref{info:line_file}                                 &       & {\ct .FALSE.} \\ \hline
-{\ct IOR}                   & Integer         & Index of Orientation ($\pm$1,$\pm$2,$\pm$3)                      &       &               \\ \hline
-{\ct ID}                    & Character       & Identifying label for output                                     &       &               \\ \hline
-{\ct INITIAL\_STATE}        & Logical         & Initial state of device                                          &       & {\ct .FALSE.} \\ \hline
-{\ct LATCH}                 & Logical         & Device cannot change state multiple times                        &       & {\ct .TRUE.}  \\ \hline
-{\ct MATL\_ID}              & Character       & Material identifier (if needed)                                  &       &               \\ \hline
+{\ct IOR}                   & Integer         & See Section~\ref{info:DEVC}                                      &       &               \\ \hline
+{\ct ID}                    & Character       & See Section~\ref{info:DEVC}                                      &       &               \\ \hline
+{\ct INITIAL\_STATE}        & Logical         & See Section~\ref{info:basic_control}                             &       & {\ct .FALSE.} \\ \hline
+{\ct LATCH}                 & Logical         & See Section~\ref{info:basic_control}                             &       & {\ct .TRUE.}  \\ \hline
+{\ct MATL\_ID}              & Character       & See Section~\ref{info:material_components}                       &       &               \\ \hline
 {\ct NODE\_ID}              & Character(2)    & See Section~\ref{info:HVAC}                                      &       &               \\ \hline
-{\ct ORIENTATION}           & Real Triplet    & Direction vector                                                 &       & 0,0,-1        \\ \hline
-{\ct PART\_ID}              & Character       & Particle identifier (if needed)                                  &       &               \\ \hline
+{\ct ORIENTATION}           & Real Triplet    & See Section~\ref{info:DEVC}                                      &       & 0,0,-1        \\ \hline
+{\ct PART\_ID}              & Character       & See Section~\ref{info:outputquantities}                          &       &               \\ \hline
 {\ct POINTS}                & Integer         & See Section~\ref{info:line_file}                                 &       & 1             \\ \hline
-{\ct PROP\_ID}              & Character       & Associated {\ct PROP}erty line                                   &       &               \\ \hline
-{\ct QUANTITY}              & Character       & Name of Quantity to output                                       &       &               \\ \hline
+{\ct PROP\_ID}              & Character       & See Section~\ref{info:DEVC}                                      &       &               \\ \hline
+{\ct QUANTITY}              & Character       & See Section~\ref{info:DEVC}                                      &       &               \\ \hline
 {\ct RELATIVE}              & Logical         & See Section~\ref{info:out:DEVC}                                  &       & {\ct .FALSE.} \\ \hline
-{\ct ROTATION}              & Real Triplet    & Rotation Angle                                                   & deg   & 0             \\ \hline
-{\ct SETPOINT}              & Real            & Value at which device changes state                              &       &               \\ \hline
-{\ct SPEC\_ID}              & Character       & Species identifier (if needed)                                   &       &               \\ \hline
+{\ct ROTATION}              & Real Triplet    & See Section~\ref{info:DEVC}                                      & deg.  & 0             \\ \hline
+{\ct SETPOINT}              & Real            & See Section~\ref{info:basic_control}                             &       &               \\ \hline
+{\ct SPEC\_ID}              & Character       & See Section~\ref{info:outputquantities}                          &       &               \\ \hline
 {\ct STATISTICS}            & Character       & See Section~\ref{info:statistics}                                &       &               \\ \hline
 {\ct SURF\_ID}              & Character       & See Section~\ref{info:statistics}                                &       &               \\ \hline
 {\ct TIME\_AVERAGED}        & Logical         & See Section~\ref{info:out:DEVC}                                  &       &  {\ct .TRUE.} \\ \hline
-{\ct TRIP\_DIRECTION}       & Integer         & Sign of derivative at first state change                         &       &  1            \\ \hline
+{\ct TRIP\_DIRECTION}       & Integer         & See Section~\ref{info:basic_control}                             &       &  1            \\ \hline
 {\ct UNITS}                 & Character       & See Section~\ref{info:out:DEVC}                                  &       &               \\ \hline
 {\ct VELO\_INDEX}           & Integer         & See Section~\ref{info:velocity}                                  &       &  0            \\ \hline
-{\ct XB(6)}                 & Real Sextuplet  & Coordinates of non-point measurement                             & m     &               \\ \hline
+{\ct XB(6)}                 & Real Sextuplet  & See Section~\ref{info:statistics}                                & m     &               \\ \hline
 {\ct X\_ID}                 & Character       & See Section~\ref{info:line_file}                                 &       &  {\ct ID-x}   \\ \hline
 {\ct Y\_ID}                 & Character       & See Section~\ref{info:line_file}                                 &       &  {\ct ID-y}   \\ \hline
 {\ct Z\_ID}                 & Character       & See Section~\ref{info:line_file}                                 &       &  {\ct ID-z}   \\ \hline
-{\ct XYZ(3)}                & Real Triplet    & Physical coordinates                                             & m     &               \\ \hline
+{\ct XYZ(3)}                & Real Triplet    & See Section~\ref{info:DEVC}                                      & m     &               \\ \hline
 \end{longtable}
 
 
@@ -9731,46 +9753,46 @@ Note that you may use the character string {\ct FYI} on any namelist line to mak
 \multicolumn{5}{|c|}{{\ct DUMP} (Output Parameters)} \\
 \hline \hline
 \endhead
-{\ct COLUMN\_DUMP\_LIMIT}           & Logical      & Limit text output to 255 columns  &           & {\ct .TRUE.}                   \\ \hline
-{\ct CTRL\_COLUMN\_LIMIT}           & Integer      & No.~columns in {\ct CTRL} file    &           & 254                            \\ \hline
-{\ct DEVC\_COLUMN\_LIMIT}           & Integer      & No.~columns in {\ct DEVC} file    &           & 254                            \\ \hline
-{\ct DEBUG}                         & Logical      & Flag to monitor MPI calls         &           & {\ct .FALSE.}                  \\ \hline
-{\ct DT\_BNDF}                      & Real         & Boundary dump interval            &  s        & $2\,\Delta t${\ct /NFRAMES}    \\ \hline
-{\ct DT\_CTRL}                      & Real         & Control status dump interval      &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct DT\_DEVC}                      & Real         & Device output dump interval       &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct COLUMN\_DUMP\_LIMIT}           & Logical      & See Section~\ref{info:out:DEVC}   &           & {\ct .TRUE.}                   \\ \hline
+{\ct CTRL\_COLUMN\_LIMIT}           & Integer      & See Section~\ref{info:out:DEVC}   &           & 254                            \\ \hline
+{\ct DEVC\_COLUMN\_LIMIT}           & Integer      & See Section~\ref{info:out:DEVC}   &           & 254                            \\ \hline
+{\ct DEBUG}                         & Logical      & See Section~\ref{info:TIMING}     &           & {\ct .FALSE.}                  \\ \hline
+{\ct DT\_BNDF}                      & Real         & See Section~\ref{info:DUMP}       &  s        & $2\,\Delta t${\ct /NFRAMES}    \\ \hline
+{\ct DT\_CTRL}                      & Real         & See Section~\ref{info:DUMP}       &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_DEVC}                      & Real         & See Section~\ref{info:DUMP}       &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct DT\_DEVC\_LINE}                & Real         & See Section~\ref{info:line_file}  &           & 1                              \\ \hline
 {\ct DT\_FLUSH}                     & Real         & See Section~\ref{info:DUMP}       &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct DT\_HRR}                       & Real         & Heat release dump interval        &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct DT\_ISOF}                      & Real         & Iso-surface dump interval         &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct DT\_MASS}                      & Real         & Mass diagnostic dump interval     &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct DT\_PART}                      & Real         & Particle dump interval            &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct DT\_PL3D}                      & Real         & PLOT3D dump interval              &  s        & $\Delta t${\ct /5}             \\ \hline
-{\ct DT\_PROF}                      & Real         & Profile dump interval             &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct DT\_RESTART}                   & Real         & Restart core dump interval        &  s        & 1000000.                       \\ \hline
-{\ct DT\_SLCF}                      & Real         & 2-D slice dump interval           &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct DT\_SL3D}                      & Real         & 3-D slice dump interval           &  s        & $\Delta t${\ct /5}             \\ \hline
-{\ct DT\_VEG}                       & Real         & Vegetation dump interval          &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_HRR}                       & Real         & See Section~\ref{info:DUMP}       &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_ISOF}                      & Real         & See Section~\ref{info:DUMP}       &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_MASS}                      & Real         & See Section~\ref{info:DUMP}       &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_PART}                      & Real         & See Section~\ref{info:DUMP}       &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_PL3D}                      & Real         & See Section~\ref{info:DUMP}       &  s        & $\Delta t${\ct /5}             \\ \hline
+{\ct DT\_PROF}                      & Real         & See Section~\ref{info:DUMP}       &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_RESTART}                   & Real         & See Section~\ref{info:DUMP}       &  s        & 1000000.                       \\ \hline
+{\ct DT\_SLCF}                      & Real         & See Section~\ref{info:DUMP}       &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_SL3D}                      & Real         & See Section~\ref{info:DUMP}       &  s        & $\Delta t${\ct /5}             \\ \hline
 {\ct FLUSH\_FILE\_BUFFERS}          & Logical      & See Section~\ref{info:DUMP}       &           & {\ct .TRUE.}                   \\ \hline
-{\ct MASS\_FILE}                    & Logical      & Flag for species {\ct MASS} file  &           & {\ct .FALSE.}                  \\ \hline
-{\ct MAXIMUM\_DROPLETS}             & Integer      & Max particles per mesh            &           & 500000                         \\ \hline
-{\ct NFRAMES}                       & Integer      & Number of Frames of output data   &           & 1000                           \\ \hline
+{\ct MASS\_FILE}                    & Logical      & See Section~\ref{info:DUMP}       &           & {\ct .FALSE.}                  \\ \hline
+{\ct MAXIMUM\_DROPLETS}             & Integer      & See Section~\ref{info:DUMP}       &           & 500000                         \\ \hline
+{\ct NFRAMES}                       & Integer      & See Section~\ref{info:DUMP}       &           & 1000                           \\ \hline
 {\ct PLOT3D\_QUANTITY(5)}           & Char.~Quint  & See Section~\ref{info:PL3D}       &           &                                \\ \hline
 {\ct PLOT3D\_PART\_ID(5)}           & Char.~Quint  & See Section~\ref{info:PL3D}       &           &                                \\ \hline
 {\ct PLOT3D\_SPEC\_ID(5)}           & Char.~Quint  & See Section~\ref{info:PL3D}       &           &                                \\ \hline
 {\ct PLOT3D\_VELO\_INDEX}           & Int.~Quint   & See Section~\ref{info:velocity}   &           &  0                             \\ \hline
 {\ct RENDER\_FILE}                  & Character    & See Smokeview User's Guide        &           &                                \\ \hline
-{\ct SMOKE3D}                       & Logical      & Flag for 3D Smoke Visualization   &           & {\ct .TRUE.}                   \\ \hline
+{\ct SMOKE3D}                       & Logical      & See Section~\ref{info:SMOKE3D}    &           & {\ct .TRUE.}                   \\ \hline
 {\ct SMOKE3D\_QUANTITY}             & Character    & See Section~\ref{info:SMOKE3D}    &           &                                \\ \hline
 {\ct SMOKE3D\_SPEC\_ID}             & Character    & See Section~\ref{info:SMOKE3D}    &           &                                \\ \hline
-{\ct STATUS\_FILES}                 & Logical      & Flag for status (notready) file   &           & {\ct .FALSE.}                  \\ \hline
-{\ct TIMING}                        & Logical      & Flag for timing MPI exchanges     &           & {\ct .FALSE.}                  \\ \hline
-{\ct VELOCITY\_ERROR\_FILE}         & Logical      & Diagnostic file for pressure      &           & {\ct .FALSE.}                  \\ \hline
-{\ct WRITE\_XYZ}                    & Logical      & Flag for writing PLOT3D .xyz file &           & {\ct .FALSE.}                  \\ \hline
+{\ct STATUS\_FILES}                 & Logical      & See Section~\ref{info:DUMP}       &           & {\ct .FALSE.}                  \\ \hline
+{\ct TIMING}                        & Logical      & See Section~\ref{info:TIMING}     &           & {\ct .FALSE.}                  \\ \hline
+{\ct VELOCITY\_ERROR\_FILE}         & Logical      & See Section~\ref{info:TIMING}     &           & {\ct .FALSE.}                  \\ \hline
+{\ct WRITE\_XYZ}                    & Logical      & See Section~\ref{info:PL3D}       &           & {\ct .FALSE.}                  \\ \hline
 \end{longtable}
 
 \noindent
 $\Delta t$={\ct T\_END-T\_BEGIN}
 
+% Undocumented: DT_VEG
 
 \vspace{\baselineskip}
 
@@ -9792,8 +9814,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct HEAD} (Header Parameters)} \\
 \hline \hline
 \endhead
-{\ct CHID}      & Character   & Job Identification String      &           & {\ct 'output'} \\ \hline
-{\ct TITLE}     & Character   & Title for job                  &           &                            \\ \hline
+{\ct CHID}      & Character   & See Section~\ref{info:HEAD}     &           & {\ct 'output'}    \\ \hline
+{\ct TITLE}     & Character   & See Section~\ref{info:PL3D}     &           &                   \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
@@ -9817,15 +9839,15 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct HOLE} (Obstruction Cutout Parameters)} \\
 \hline \hline
 \endhead
-{\ct COLOR    }    & Character         & Color name of obstruction color                           &       &           \\ \hline
-{\ct CTRL\_ID}     & Character         & {\ct ID} of {\ct ConTRoL} to control hole's existence     &       &           \\ \hline
-{\ct DEVC\_ID}     & Character         & {\ct ID} of {\ct DEViCe} to control hole's existence      &       &           \\ \hline
+{\ct COLOR    }    & Character         & See Section~\ref{info:colors}                             &       &           \\ \hline
+{\ct CTRL\_ID}     & Character         & See Section~\ref{info:HOLE}                               &       &           \\ \hline
+{\ct DEVC\_ID}     & Character         & See Section~\ref{info:HOLE}                               &       &           \\ \hline
 {\ct EVACUATION}   & Logical           & See FDS+Evac User's Guide                                 &       &           \\ \hline
 {\ct MESH\_ID }    & Character         & See FDS+Evac User's Guide                                 &       &           \\ \hline
 {\ct MULT\_ID }    & Character         & See Section~\ref{info:MULT}                               &       &           \\ \hline
-{\ct RGB(3)   }    & Integer Triplet   & Color indices (0 - 255) for resulting obstruction(s)      &       &           \\ \hline
-{\ct TRANSPARENCY} & Real              & Transparency of obstruction                               &       &           \\ \hline
-{\ct XB(6)    }    & Real Sextuplet    & Physical coordinates                                      & m     &           \\ \hline
+{\ct RGB(3)   }    & Integer Triplet   & See Section~\ref{info:colors}                             &       &           \\ \hline
+{\ct TRANSPARENCY} & Real              & See Section~\ref{info:HOLE}                               &       &           \\ \hline
+{\ct XB(6)    }    & Real Sextuplet    & See Section~\ref{info:MULT}                               & m     &           \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
@@ -9864,8 +9886,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct NODE\_ID}                  & Character Doublet & Name of nodes connected to a duct                 &               &                       \\ \hline
 {\ct RAMP\_ID}                  & Character         & Name of {\ct RAMP} containing a fan curve         &               &  {\ct 'null'}         \\ \hline
 {\ct ROUGHNESS}                 & Real              & Absolute roughness of a duct                      &  m            &                       \\ \hline
-{\ct TAU\_FAN}                  & Real              & Ramp time for a fan               & s                   & 1.                      \\ \hline
-{\ct TAU\_VF}                   & Real              & Ramp time for {\ct VOLUME\_FLOW}               & s                   & 1.                      \\ \hline
+{\ct TAU\_FAN}                  & Real              & Ramp time for a fan                               & s             & 1.                      \\ \hline
+{\ct TAU\_VF}                   & Real              & Ramp time for {\ct VOLUME\_FLOW}                  & s             & 1.                      \\ \hline
 {\ct TYPE\_ID}                  & Character         & Type of component                                 &               &                       \\ \hline
 {\ct VENT\_ID}                  & Character         & Name of the {\ct VENT} the node is connected to   &               &  {\ct 'null'}         \\ \hline
 {\ct VOLUME\_FLOW}              & Real              & Fixed volumetric flow of a duct                   &  m$^3$/s      &                       \\ \hline
@@ -9906,7 +9928,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SHAPE}                     & Character         & See Section~\ref{info:initial_droplets}           &               & {\ct 'BLOCK'} \\ \hline
 {\ct SPEC\_ID(N)}               & Character Array   & See Section~\ref{info:INIT}                       &               &               \\ \hline
 {\ct TEMPERATURE}               & Real              & See Section~\ref{info:INIT}                       & $^\circ$C     & {\ct TMPA}    \\ \hline
-{\ct XB(6)}                     & Real Sextuplet    & Rectangular block coordinates                     & m             &               \\ \hline
+{\ct XB(6)}                     & Real Sextuplet    & See Section~\ref{info:INIT}                       & m             &               \\ \hline
 \end{longtable}
 
 % Undocumented: PROF_ID, ORIGIN, XYZ, UVW, DIAMETER
@@ -9936,7 +9958,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct COLOR\_QUANTITY}       & Character     & See Section~\ref{info:ISOF}           &       &         \\ \hline
 {\ct COLOR\_SPEC\_ID}       & Character     & See Section~\ref{info:ISOF}           &       &         \\ \hline
 {\ct QUANTITY}              & Character     & See Section~\ref{info:ISOF}           &       &         \\ \hline
-{\ct REDUCE\_TRIANGLES}     & Integer       & Sampling parameter to reduce size     &       & 1       \\ \hline
+{\ct REDUCE\_TRIANGLES}     & Integer       & See Smokeview User's Guide            &       & 1       \\ \hline
 {\ct SPEC\_ID}              & Character     & See Section~\ref{info:ISOF}           &       &         \\ \hline
 {\ct VALUE(I)}              & Real Array    & See Section~\ref{info:ISOF}           &       &         \\ \hline
 {\ct VELO\_INDEX}           & Integer       & See Section~\ref{info:velocity}       &       &  0      \\ \hline
@@ -9977,7 +9999,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HEAT\_OF\_COMBUSTION(:)}       & Real array    & See Section~\ref{info:solid_pyrolysis}    & kJ/kg             &        \\ \hline
 {\ct HEAT\_OF\_REACTION(:)}         & Real array    & See Section~\ref{info:solid_pyrolysis}    & kJ/kg             & 0.     \\ \hline
 {\ct INITIAL\_VAPOR\_FLUX}          & Real          & See Section~\ref{info:liquid_fuels}       & m/s               & 0.0005 \\ \hline
-{\ct ID     }                       & Character     & Identification tag                        &                   &        \\ \hline
+{\ct ID     }                       & Character     & See Section~\ref{info:SURF_MATL_Basics}   &                   &        \\ \hline
 {\ct MATL\_ID(:,:)}                 & Character     & See Section~\ref{info:solid_pyrolysis}    &                   &        \\ \hline
 {\ct N\_REACTIONS}                  & Character     & See Section~\ref{info:solid_pyrolysis}    &                   & 0      \\ \hline
 {\ct N\_S(:)}                       & Real array    & See Section~\ref{info:solid_pyrolysis}    &                   & 1.     \\ \hline
@@ -10021,7 +10043,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct EVAC\_HUMANS}      & Logical                       & See FDS+Evac User's Guide                     &    & {\ct .FALSE.}    \\ \hline
 {\ct EVACUATION}        & Logical                       & See FDS+Evac User's Guide                     &    & {\ct .FALSE.}    \\ \hline
 {\ct EVAC\_Z\_OFFSET}   & Real                          & See FDS+Evac User's Guide                     & m  & 1                \\ \hline
-{\ct ID}                & Character                     & Identification tag                            &    &                  \\ \hline
+{\ct ID}                & Character                     & See FDS+Evac User's Guide                     &    &                  \\ \hline
 {\ct IJK}               & Integer Triplet               & See Section~\ref{info:MESH_Basics}            &    & 10,10,10         \\ \hline
 {\ct LEVEL}             & Integer                       & For future use                                &    & 0                \\ \hline
 {\ct MPI\_PROCESS}      & Integer                       & See Section~\ref{info:multimesh}              &    &                  \\ \hline
@@ -10328,10 +10350,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct PROF} (Wall Profile Parameters)} \\
 \hline \hline
 \endhead
-{\ct IOR}      & Real             & Orientation of wall surface      &            &     \\ \hline
-{\ct ID}       & Character        & Identifier                       &            &     \\ \hline
-{\ct QUANTITY} & Character        & Name of output quantity          &            &     \\ \hline
-{\ct XYZ}      & Real Triplet     & Coordinates of wall surface      & m          &     \\ \hline
+{\ct IOR}      & Real             & See Section~\ref{info:PROF}      &            &     \\ \hline
+{\ct ID}       & Character        & See Section~\ref{info:PROF}      &            &     \\ \hline
+{\ct QUANTITY} & Character        & See Section~\ref{info:PROF}      &            &     \\ \hline
+{\ct XYZ}      & Real Triplet     & See Section~\ref{info:PROF}      & m          &     \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
@@ -10541,7 +10563,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct SLCF} (Slice File Parameters)} \\
 \hline \hline
 \endhead
-{\ct CELL\_CENTERED}    & Logical           & Show raw data with no averaging        &           & {\ct .FALSE.}    \\ \hline
+{\ct CELL\_CENTERED}    & Logical           & See Section~\ref{info:SLCF}            &           & {\ct .FALSE.}    \\ \hline
 %{\ct MAXIMUM\_VALUE}    & Real              & See Section~\ref{info:SLCF}            &           &     \\ \hline
 %{\ct MINIMUM\_VALUE}    & Real              & See Section~\ref{info:SLCF}            &           &     \\ \hline
 {\ct MESH\_NUMBER}      & Integer           & Save only slices in this mesh          &           &     \\ \hline
