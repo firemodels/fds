@@ -12,6 +12,7 @@
 }
 
 \section{Visualizing FDS Devices Using Smokeview Objects}
+
 Smokeview generates visual representations of FDS devices using instructions found in a data file named
 {\tt objects.svo}.  These instructions correspond to OpenGL library calls, the same type of calls Smokeview
 uses to visualize FDS cases.  New objects may be designed and drawn without modifying Smokeview and more
@@ -29,6 +30,7 @@ diameter and an image used to cover the sphere (known as a texture map) is speci
 
 
 \subsection{Static Smokeview Objects}
+\label{info:SMOKEVIEW_ID}
 
 Smokeview objects consist of one or more frames or views.  Smokeview then displays FDS devices in a normal/inactive
 state or in an active state.  A sprinkler, for example, is drawn differently depending on whether it has activated
@@ -86,9 +88,10 @@ sprinkler\_pendent  & \incgraphics{"SCRIPT_FIGURES/sprinkler_pendent_0"} & \incg
 
 \end{longtable}
 
-%
-%  sub-section on dynamic objects
+
 \subsection{Dynamic Smokeview Objects - Customized Using \&PROP Parameters}
+\label{info:SMOKEVIEW_PARAMETERS}
+
 The appearance of several Smokeview objects may be modified using data specified on the {\tt \&PROP}\ namelist statement in an FDS input
 file.  Objects may also be customized using data stored in a particle file.  This is discussed in the next section.
 
