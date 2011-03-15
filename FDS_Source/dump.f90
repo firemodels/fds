@@ -527,7 +527,7 @@ IF (N_DEVC_TIME>0) THEN
             WRITE(TCFORM,'(A,I4.4,A)') "(",MIN(DEVC_COLUMN_LIMIT, N_DEVC_TIME - DEVC_COLUMN_LIMIT * (I - 1)),"(A,','),A)"
             WRITE(LU_DEVC(I),TCFORM) 's',(TRIM(TIME_DEVC_UNITS(N)),N=DEVC_COLUMN_LIMIT*(I-1)+1,MIN(N_DEVC_TIME,I*DEVC_COLUMN_LIMIT))
             WRITE(TCFORM,'(A,I4.4,A)') "(A,",MIN(DEVC_COLUMN_LIMIT, N_DEVC_TIME - DEVC_COLUMN_LIMIT * (I - 1)),"(',',3A))"
-            WRITE(LU_DEVC(I),TCFORM) 'FDS Time',('"',TRIM(TIME_DEVC_LABEL(N)),'"', &
+            WRITE(LU_DEVC(I),TCFORM) 'Time',('"',TRIM(TIME_DEVC_LABEL(N)),'"', &
                                              N=DEVC_COLUMN_LIMIT * (I - 1) + 1,MIN(N_DEVC_TIME, I * DEVC_COLUMN_LIMIT))
          ENDIF
       ENDDO
@@ -539,7 +539,7 @@ IF (N_DEVC_TIME>0) THEN
          WRITE(TCFORM,'(A,I4.4,A)') "(",N_DEVC_TIME,"(A,','),A)"
          WRITE(LU_DEVC(1),TCFORM) 's',(TRIM(TIME_DEVC_UNITS(N)),N=1,N_DEVC_TIME)
          WRITE(TCFORM,'(A,I4.4,A)') "(A,",N_DEVC_TIME,"(',',3A))"
-         WRITE(LU_DEVC(1),TCFORM) 'FDS Time',('"',TRIM(TIME_DEVC_LABEL(N)),'"',N=1,N_DEVC_TIME)
+         WRITE(LU_DEVC(1),TCFORM) 'Time',('"',TRIM(TIME_DEVC_LABEL(N)),'"',N=1,N_DEVC_TIME)
       ENDIF
    ENDIF
 
@@ -601,7 +601,7 @@ IF (N_CTRL>0) THEN
             WRITE(TCFORM,'(A,I4.4,A)') "(",MIN(CTRL_COLUMN_LIMIT, N_CTRL - CTRL_COLUMN_LIMIT * (I - 1)),"(A,','),A)"
             WRITE(LU_CTRL(I),TCFORM) 's',('status',N=CTRL_COLUMN_LIMIT * (I - 1) + 1,MIN(N_CTRL, I * CTRL_COLUMN_LIMIT))
             WRITE(TCFORM,'(A,I4.4,A)') "(A,",MIN(CTRL_COLUMN_LIMIT, N_CTRL - CTRL_COLUMN_LIMIT * (I - 1)),"(',',3A))"
-            WRITE(LU_CTRL(I),TCFORM) 'FDS Time',('"',TRIM(CONTROL(N)%ID),'"', &
+            WRITE(LU_CTRL(I),TCFORM) 'Time',('"',TRIM(CONTROL(N)%ID),'"', &
                                       N=CTRL_COLUMN_LIMIT * (I - 1) + 1,MIN(N_CTRL, I * CTRL_COLUMN_LIMIT))
          ENDIF
       ENDDO
@@ -613,7 +613,7 @@ IF (N_CTRL>0) THEN
          WRITE(TCFORM,'(A,I4.4,A)') "(",N_CTRL,"(A,','),A)"
          WRITE(LU_CTRL(1),TCFORM) 's',('status',N=1,N_CTRL)
             WRITE(TCFORM,'(A,I4.4,A)') "(A,",N_CTRL,"(',',3A))"
-            WRITE(LU_CTRL(1),TCFORM) 'FDS Time',('"',TRIM(CONTROL(N)%ID),'"',N=1,N_CTRL)
+            WRITE(LU_CTRL(1),TCFORM) 'Time',('"',TRIM(CONTROL(N)%ID),'"',N=1,N_CTRL)
       ENDIF
    ENDIF
 ENDIF
@@ -626,7 +626,7 @@ ELSE
    OPEN(LU_HRR,FILE=FN_HRR,FORM='FORMATTED',STATUS='REPLACE')
    WRITE(TCFORM,'(A,I4.4,A)') "(",5+N_ZONE,"(A,','),A)"
    WRITE(LU_HRR,TCFORM) 's','kW','kW','kW','kW','kg/s',('Pa',N=1,N_ZONE) 
-   WRITE(LU_HRR,TCFORM) 'FDS_HRR_Time','HRR','RAD_LOSS','CONV_LOSS','COND_LOSS','BURN_RATE',(TRIM(P_ZONE(N)%ID),N=1,N_ZONE) 
+   WRITE(LU_HRR,TCFORM) 'Time','HRR','RAD_LOSS','CONV_LOSS','COND_LOSS','BURN_RATE',(TRIM(P_ZONE(N)%ID),N=1,N_ZONE) 
 ENDIF
 
 
@@ -638,7 +638,7 @@ DO N=1,N_TREES_OUT
  ELSE
     OPEN(LU_VEG_OUT(N),FILE=FN_VEG_OUT(N),FORM='FORMATTED',STATUS='REPLACE')
     WRITE(LU_VEG_OUT(N),'(A,A,A,A,A)')'s,','kg,','kg, ','kW, ','kW' 
-    WRITE(LU_VEG_OUT(N),'(A,A,A,A,A)')'FDS_Vegout_Time,','Total_Tree_Dry_Mass,','Total_Tree_Moist_Mass, ', &
+    WRITE(LU_VEG_OUT(N),'(A,A,A,A,A)')'Time,','Total_Tree_Dry_Mass,','Total_Tree_Moist_Mass, ', &
                                          'total_int_div(qveg_conv)dVe, ','total_int_div(qveg_rad)dVe'
  ENDIF
 ENDDO
