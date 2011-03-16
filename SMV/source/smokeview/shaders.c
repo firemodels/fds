@@ -149,15 +149,15 @@ int setZoneSmokeShaders() {
   }
   printInfoLog(p_zonesmoke);
 #endif
-  GPU_zoneinside = glGetUniformLocation(p_zonesmoke,"zoneinside");
-  GPU_zonedir = glGetUniformLocation(p_zonesmoke,"zonedir");
-  GPU_eyepos = glGetUniformLocation(p_zonesmoke,"eyepos");
-  GPU_xyzmaxdiff = glGetUniformLocation(p_zonesmoke,"xyzmaxdiff");
-  GPU_boxmin = glGetUniformLocation(p_zonesmoke,"boxmin");
-  GPU_boxmax = glGetUniformLocation(p_zonesmoke,"boxmax");
-  GPU_zlay = glGetUniformLocation(p_zonesmoke,"zlay");
-  GPU_odl = glGetUniformLocation(p_zonesmoke,"odl");
-  GPU_odu = glGetUniformLocation(p_zonesmoke,"odu");
+  GPUzone_zoneinside = glGetUniformLocation(p_zonesmoke,"zoneinside");
+  GPUzone_zonedir = glGetUniformLocation(p_zonesmoke,"zonedir");
+  GPUzone_eyepos = glGetUniformLocation(p_zonesmoke,"eyepos");
+  GPUzone_xyzmaxdiff = glGetUniformLocation(p_zonesmoke,"xyzmaxdiff");
+  GPUzone_boxmin = glGetUniformLocation(p_zonesmoke,"boxmin");
+  GPUzone_boxmax = glGetUniformLocation(p_zonesmoke,"boxmax");
+  GPUzone_zlay = glGetUniformLocation(p_zonesmoke,"zlay");
+  GPUzone_odl = glGetUniformLocation(p_zonesmoke,"odl");
+  GPUzone_odu = glGetUniformLocation(p_zonesmoke,"odu");
 
   if(error_code!=1)return error_code;
   return error_code;
@@ -169,76 +169,30 @@ int setZoneSmokeShaders() {
 int setVolSmokeShaders() {
   GLint error_code;
   const GLchar *FragmentShaderSource[]={
-    "uniform int zonedir,zoneinside;"
-    "uniform float xyzmaxdiff,zlay,odl,odu;"
+    "uniform int dir,inside;"
+    "uniform float xyzmaxdiff;"
     "uniform vec3 eyepos,boxmin, boxmax;"
     "varying vec3 fragpos;"
     
     "void main(){"
-    "  float L,opacity,alpha,alpha_min,alpha_zlay;"
-    "  float factor_U, factor_L;"
+    "  float L,opacity,alpha,alpha_min;"
     
     "  vec3 dalphamin,dalphamax;"
     "  L=distance(fragpos,eyepos)*xyzmaxdiff;"
     "  alpha_min=1000000.0;"
     "  dalphamin=-(boxmin-fragpos)/(eyepos-fragpos);"
     "  dalphamax=-(boxmax-fragpos)/(eyepos-fragpos);"
-    "  alpha_zlay = -(zlay-fragpos.z)/(eyepos.z-fragpos.z);"
-    "  if(zoneinside==0){"
-    "    if(zonedir!=-1&&dalphamin.x>0.0&&dalphamin.x<alpha_min)alpha_min=dalphamin.x;"
-    "    if(zonedir!=1 &&dalphamax.x>0.0&&dalphamax.x<alpha_min)alpha_min=dalphamax.x;"
-    "    if(zonedir!=-2&&dalphamin.y>0.0&&dalphamin.y<alpha_min)alpha_min=dalphamin.y;"
-    "    if(zonedir!=2 &&dalphamax.y>0.0&&dalphamax.y<alpha_min)alpha_min=dalphamax.y;"
-    "    if(zonedir!=-3&&dalphamin.z>0.0&&dalphamin.z<alpha_min)alpha_min=dalphamin.z;"
-    "    if(zonedir!=3 &&dalphamax.z>0.0&&dalphamax.z<alpha_min)alpha_min=dalphamax.z;"
-    "    if(eyepos.z>zlay&&fragpos.z>zlay){"
-    "      if(alpha_zlay>0.0&&alpha_zlay<alpha_min){"
-    "        factor_U=alpha_zlay/odu;"
-    "        factor_L=(alpha_min-alpha_zlay)/odl;"
-    "      }"
-    "      else{"
-    "        factor_U=alpha_min/odu;"
-    "        factor_L=0.0;"
-    "      }"
-    "    }"
-    "    else if(eyepos.z>zlay&&fragpos.z<=zlay){"
-    "      factor_U=0.0;"
-    "      factor_L=alpha_min/odl;"
-    "    }"
-    "    else if(eyepos.z<=zlay&&fragpos.z>zlay){"
-    "      factor_U=alpha_min/odu;"
-    "      factor_L=0.0;"
-    "    }"
-    "    else if(eyepos.z<=zlay&&fragpos.z<=zlay){"
-    "      if(alpha_zlay>0.0&&alpha_zlay<alpha_min){"
-    "        factor_U=(alpha_min-alpha_zlay)/odu;"
-    "        factor_L=alpha_zlay/odl;"
-    "      }"
-    "      else{"
-    "        factor_U=0.0;"
-    "        factor_L=alpha_min/odl;"
-    "      }"
-    "    }"
+    "  if(inside==0){"
+    "    if(dir!=-1&&dalphamin.x>0.0&&dalphamin.x<alpha_min)alpha_min=dalphamin.x;"
+    "    if(dir!=1 &&dalphamax.x>0.0&&dalphamax.x<alpha_min)alpha_min=dalphamax.x;"
+    "    if(dir!=-2&&dalphamin.y>0.0&&dalphamin.y<alpha_min)alpha_min=dalphamin.y;"
+    "    if(dir!=2 &&dalphamax.y>0.0&&dalphamax.y<alpha_min)alpha_min=dalphamax.y;"
+    "    if(dir!=-3&&dalphamin.z>0.0&&dalphamin.z<alpha_min)alpha_min=dalphamin.z;"
+    "    if(dir!=3 &&dalphamax.z>0.0&&dalphamax.z<alpha_min)alpha_min=dalphamax.z;"
     "  }" // end inside=0
-    "  if(zoneinside==1){"
-    "    if(eyepos.z>zlay&&fragpos.z>zlay){"
-    "      factor_U=1.0/odu;"
-    "      factor_L=0.0;"
-    "    }"
-    "    else if(eyepos.z>zlay&&fragpos.z<=zlay){"
-    "      factor_U=(1.0+alpha_zlay)/odu;"
-    "      factor_L=-alpha_zlay/odl;"
-    "    }"
-    "    else if(eyepos.z<=zlay&&fragpos.z>zlay){"
-    "      factor_U=-alpha_zlay/odu;"
-    "      factor_L=(1.0+alpha_zlay)/odl;"
-    "    }"
-    "    else if(eyepos.z<=zlay&&fragpos.z<=zlay){"
-    "      factor_U=0.0;"
-    "      factor_L=1.0/odl;"
-    "    }"
+    "  if(inside==1){"
     "  }" // end inside=1
-    "  opacity = 1.0-exp(-(factor_L+factor_U)*L);"
+    "  opacity = 1.0;"
     "  gl_FragColor = vec4(0.3,0.3,0.3,opacity);"
     "}" // end of main
   };
@@ -295,15 +249,12 @@ int setVolSmokeShaders() {
   }
   printInfoLog(p_volsmoke);
 #endif
-  GPU_zoneinside = glGetUniformLocation(p_volsmoke,"zoneinside");
-  GPU_zonedir = glGetUniformLocation(p_volsmoke,"zonedir");
-  GPU_eyepos = glGetUniformLocation(p_volsmoke,"eyepos");
-  GPU_xyzmaxdiff = glGetUniformLocation(p_volsmoke,"xyzmaxdiff");
-  GPU_boxmin = glGetUniformLocation(p_volsmoke,"boxmin");
-  GPU_boxmax = glGetUniformLocation(p_volsmoke,"boxmax");
-  GPU_zlay = glGetUniformLocation(p_volsmoke,"zlay");
-  GPU_odl = glGetUniformLocation(p_volsmoke,"odl");
-  GPU_odu = glGetUniformLocation(p_volsmoke,"odu");
+  GPUvol_inside = glGetUniformLocation(p_volsmoke,"inside");
+  GPUvol_dir    = glGetUniformLocation(p_volsmoke,"dir");
+  GPUvol_eyepos = glGetUniformLocation(p_volsmoke,"eyepos");
+  GPUvol_xyzmaxdiff = glGetUniformLocation(p_volsmoke,"xyzmaxdiff");
+  GPUvol_boxmin = glGetUniformLocation(p_volsmoke,"boxmin");
+  GPUvol_boxmax = glGetUniformLocation(p_volsmoke,"boxmax");
 
   if(error_code!=1)return error_code;
   return error_code;
@@ -339,6 +290,7 @@ int setSmokeShaders() {
     "  float colorindex;"
     "  float hrrlocal;"
 
+    "  alpha=0.0;"
     "  if(is_smoke==1){"
     "    alpha=smoke_alpha/255.0;"
 //    f(alpha) = 1 - (1-alpha)^r = f(0) + f'(0)alpha + f''(0)alpha^2/2 + f'''(0)alpha^3/6 + ...
@@ -357,16 +309,11 @@ int setSmokeShaders() {
     "  if(hrrlocal>hrrpuv_cutoff){"
     "    colorindex=0.51+(hrrlocal-hrrpuv_cutoff)/(hrrpuv_max_smv-hrrpuv_cutoff);"
     "    colorindex=clamp(colorindex,0.5,1.0);"
-    "    if(is_smoke==0){"
-    "      alpha=fire_alpha;"
-    "    }"
+    "    alpha*=3.0;"
     "  }"
     "  else{"
     "    colorindex=hrrlocal/hrrpuv_cutoff;"
     "    colorindex=clamp(colorindex,0.0,0.49);"
-    "    if(is_smoke==0){"
-    "      alpha=0.0;"
-    "    }"
     "  }"
     "  hrrcolor = texture1D(smokecolormap,colorindex);"
     "  newcolor=vec4(vec3(hrrcolor),alpha);"

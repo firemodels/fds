@@ -377,6 +377,8 @@ void SmokeColorBarMenu(int value){
   updatemenu=1;
   glutPostRedisplay();
 
+  if(value<0)value=0;
+  if(value>ncolorbars-1)value=ncolorbars-1;
   fire_colorbar_index=value;
   fire_colorbar = colorbarinfo + value;
   updatecolors(-1);

@@ -408,6 +408,10 @@ typedef struct mesh_ {
   float cellsize;
   float *xplt, *yplt, *zplt;
   float *xplt_orig, *yplt_orig, *zplt_orig;
+  float x0, x1, y0, y1, z0, z1;
+  float dx01, dy01, dz01;
+  int drawsides[7];
+  int inside;
   float boxmin[3], boxmax[3];
   float *zcell;
   float xbar0, xbar, ybar0, ybar, zbar0, zbar;

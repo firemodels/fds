@@ -896,6 +896,7 @@ void mergesmoke3dcolors(smoke3d *smoke3dset){
             *mergecolor++=255*fire[0];
             *mergecolor++=255*fire[1];
             *mergecolor++=255*fire[2];
+            *mergealpha++=3*(sootcolor[j]>>smoke3d_thick);
           }
           else{
             int index;
@@ -907,9 +908,9 @@ void mergesmoke3dcolors(smoke3d *smoke3dset){
             *mergecolor++=255*smoke[0];
             *mergecolor++=255*smoke[1];
             *mergecolor++=255*smoke[2];
+            *mergealpha++=(sootcolor[j]>>smoke3d_thick);
           }
           mergecolor++;
-          *mergealpha++=sootcolor[j]>>smoke3d_thick;
         }
         continue;
       }
@@ -2753,10 +2754,265 @@ void drawsmoke3d(smoke3d *smoke3di){
 
 
 }
+
+/* ------------------ getvolsmokedir ------------------------ */
+
+void getvolsmokedir(float *mm){
+    /*
+      ( m0 m4 m8  m12 ) (x)    (0)
+      ( m1 m5 m9  m13 ) (y)    (0)
+      ( m2 m6 m10 m14 ) (z)  = (0)
+      ( m3 m7 m11 m15 ) (1)    (1)
+
+       ( m0 m4  m8 )      (m12)
+   Q=  ( m1 m5  m9 )  u = (m13)
+       ( m2 m6 m10 )      (m14)
+      
+      (Q   u) (x)     (0)      
+      (v^T 1) (y)   = (1)
+       
+      m3=m7=m11=0, v^T=0, y=1   Qx+u=0 => x=-Q^Tu
+    */
+  int i,ii,j;
+  float norm[3];
+  float pi;
+  float eyedir[3];
+  float cosdir;
+  float angles[7];
+
+  pi=4.0*atan(1.0);
+
+  xyzeyeorig[0] = -(mm[0]*mm[12]+mm[1]*mm[13]+ mm[2]*mm[14])/mscale[0];
+  xyzeyeorig[1] = -(mm[4]*mm[12]+mm[5]*mm[13]+ mm[6]*mm[14])/mscale[1];
+  xyzeyeorig[2] = -(mm[8]*mm[12]+mm[9]*mm[13]+mm[10]*mm[14])/mscale[2];
+  
+  for(j=0;j<nmeshes;j++){
+    mesh *meshj;
+    
+    meshj = meshinfo + j;
+
+    meshj->inside=0;
+    if(
+      xyzeyeorig[0]>meshj->x0&&xyzeyeorig[0]<meshj->x1&&
+      xyzeyeorig[1]>meshj->y0&&xyzeyeorig[1]<meshj->y1&&
+      xyzeyeorig[2]>meshj->z0&&xyzeyeorig[2]<meshj->z1
+      ){
+      for(i=-3;i<=3;i++){
+        if(i==0)continue;
+        meshj->drawsides[i+3]=1;
+      }
+      meshj->inside=1;
+      continue;
+    }
+
+    for(i=-3;i<=3;i++){
+      if(i==0)continue;
+      ii = i;
+      if(i<0)ii=-i;
+      norm[0]=0.0;
+      norm[1]=0.0;
+      norm[2]=0.0;
+      switch (ii){
+      case 1:
+        if(i<0){
+          norm[0]=-1.0;
+          eyedir[0]=meshj->x0;
+        }
+        else{
+          norm[0]=1.0;
+          eyedir[0]=meshj->x1;
+        }
+        eyedir[1]=meshj->ycen;
+        eyedir[2]=meshj->zcen;
+        break;
+      case 2:
+        eyedir[0]=meshj->xcen;
+        if(i<0){
+          norm[1]=-1.0;
+          eyedir[1]=meshj->y0;
+        }
+        else{
+          norm[1]=1.0;
+          eyedir[1]=meshj->y1;
+        }
+        eyedir[2]=meshj->zcen;
+        break;
+      case 3:
+        eyedir[0]=meshj->xcen;
+        eyedir[1]=meshj->ycen;
+        if(i<0){
+          norm[2]=-1.0;
+          eyedir[2]=meshj->z0;
+        }
+        else{
+          norm[2]=1.0;
+          eyedir[2]=meshj->z1;
+        }
+        break;
+      default:
+        ASSERT(FFALSE);
+        break;
+      }
+      eyedir[0]=xyzeyeorig[0]-eyedir[0];
+      eyedir[1]=xyzeyeorig[1]-eyedir[1];
+      eyedir[2]=xyzeyeorig[2]-eyedir[2];
+      normalize(eyedir,3);
+      cosdir = (eyedir[0]*norm[0]+eyedir[1]*norm[1]+eyedir[2]*norm[2]);
+      if(cosdir>1.0)cosdir=1.0;
+      if(cosdir<-1.0)cosdir=-1.0;
+      cosdir=acos(cosdir)*180.0/pi;
+      if(cosdir<0.0)cosdir=-cosdir;
+      angles[3+i]=cosdir;
+    }
+    for(i=-3;i<=3;i++){
+      if(i==0)continue;
+      if(angles[i+3]<90.0){
+        meshj->drawsides[i+3]=1;
+      }
+      else{
+        meshj->drawsides[i+3]=0;
+      }
+    }
+  }
+}
+
 #ifdef pp_GPU
 /* ------------------ drawsmoke3dGPUVOL ------------------------ */
 
 void drawsmoke3dGPUVOL(smoke3d *smoke3di){
+
+#define NROWS_GPU 2
+#define NCOLS_GPU 2
+  int iwall;
+  float xyz[3];
+  float dx, dy, dz;
+  mesh *meshi;
+
+  meshi = meshinfo + smoke3di->blocknumber;
+  
+  glUniform3f(GPUvol_eyepos,xyzeyeorig[0],xyzeyeorig[1],xyzeyeorig[2]);
+  glUniform1i(GPUvol_inside,meshi->inside);
+  glUniform1f(GPUvol_xyzmaxdiff,xyzmaxdiff);
+  glUniform3f(GPUvol_boxmin,meshi->x0,meshi->y0,meshi->z0);
+  glUniform3f(GPUvol_boxmax,meshi->x1,meshi->y1,meshi->z1);
+
+  for(iwall=-3;iwall<=3;iwall++){
+    int i,j;
+    float x1, x2, y1, y2, z1, z2;
+
+    if(iwall==0||meshi->drawsides[iwall+3]==0)continue;
+
+    glUniform1i(GPUvol_dir,iwall);
+    glBegin(GL_TRIANGLES);
+
+    switch (iwall){
+      case 1:
+      case -1:
+        dy = meshi->dy01/(NCOLS_GPU-1);
+        dz = meshi->dz01/(NROWS_GPU-1);
+        if(iwall<0){
+          x1 = meshi->x0;
+        }
+        else{
+          x1=meshi->x1;
+        }
+        for(i=0;i<NCOLS_GPU-1;i++){
+          y1 = meshi->y0 + i*dy;
+          y2 = y1 + dy;
+          for(j=0;j<NROWS_GPU-1;j++){
+            z1 = meshi->z0 + j*dz;
+            z2 = z1 + dz;
+
+            glVertex3f(x1,y1,z1);
+            glVertex3f(x1,y2,z1);
+            glVertex3f(x1,y2,z2);
+
+            glVertex3f(x1,y1,z1);
+            glVertex3f(x1,y2,z2);
+            glVertex3f(x1,y1,z2);
+          }
+        }
+        break;
+      case 2:
+      case -2:
+        dx = meshi->dx01/(NCOLS_GPU-1);
+        dz = meshi->dz01/(NROWS_GPU-1);
+        if(iwall<0){
+          y1=meshi->y0;
+        }
+        else{
+          y1=meshi->y1;
+        }
+        for(i=0;i<NCOLS_GPU-1;i++){
+          x1 = meshi->x0 + i*dx;
+          x2 = x1 + dx;
+          for(j=0;j<NROWS_GPU-1;j++){
+            z1 = meshi->z0 + j*dz;
+            z2 = z1 + dz;
+
+            if(meshi->inside==0){
+            glVertex3f(x1,y1,z1);
+            glVertex3f(x2,y1,z1);
+            glVertex3f(x2,y1,z2);
+
+            glVertex3f(x1,y1,z1);
+            glVertex3f(x2,y1,z2);
+            glVertex3f(x1,y1,z2);
+            }
+            else{
+            glVertex3f(x1,y1,z1);
+            glVertex3f(x2,y1,z2);
+            glVertex3f(x2,y1,z1);
+
+            glVertex3f(x1,y1,z1);
+            glVertex3f(x1,y1,z2);
+            glVertex3f(x2,y1,z2);
+            }
+          }
+        }
+        break;
+      case 3:
+      case -3:
+        dx = meshi->dx01/(NCOLS_GPU-1);
+        dy = meshi->dy01/(NROWS_GPU-1);
+        if(iwall<0){
+          z1=meshi->z0;
+        }
+        else{
+          z1=meshi->z1;
+        }
+        for(i=0;i<NCOLS_GPU-1;i++){
+          x1 = meshi->x0 + i*dx;
+          x2 = x1 + dx;
+          for(j=0;j<NROWS_GPU-1;j++){
+            y1 = meshi->y0 + j*dy;
+            y2 = y1 + dy;
+
+            if(meshi->inside==0){
+            glVertex3f(x1,y1,z1);
+            glVertex3f(x2,y1,z1);
+            glVertex3f(x2,y2,z1);
+
+            glVertex3f(x1,y1,z1);
+            glVertex3f(x2,y2,z1);
+            glVertex3f(x1,y2,z1);
+            }
+            else{
+            glVertex3f(x1,y1,z1);
+            glVertex3f(x2,y2,z1);
+            glVertex3f(x2,y1,z1);
+
+            glVertex3f(x1,y1,z1);
+            glVertex3f(x1,y2,z1);
+            glVertex3f(x2,y2,z1);
+            }
+          }
+        }
+        break;
+    }
+    glEnd();
+  }
+
 }
 
 /* ------------------ drawsmoke3dGPU ------------------------ */

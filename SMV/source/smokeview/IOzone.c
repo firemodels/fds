@@ -1039,14 +1039,14 @@ void drawzonesmokeGPU(roomdata *roomi){
   float xyz[3];
   float dx, dy, dz;
   
-  glUniform3f(GPU_eyepos,xyzeyeorig[0],xyzeyeorig[1],xyzeyeorig[2]);
-  glUniform1i(GPU_zoneinside,roomi->zoneinside);
-  glUniform1f(GPU_xyzmaxdiff,xyzmaxdiff);
-  glUniform3f(GPU_boxmin,roomi->x0,roomi->y0,roomi->z0);
-  glUniform3f(GPU_boxmax,roomi->x1,roomi->y1,roomi->z1);
-  glUniform1f(GPU_zlay,roomi->z0+roomi->ylay);
-  glUniform1f(GPU_odl,roomi->od_L);
-  glUniform1f(GPU_odu,roomi->od_U);
+  glUniform3f(GPUzone_eyepos,xyzeyeorig[0],xyzeyeorig[1],xyzeyeorig[2]);
+  glUniform1i(GPUzone_zoneinside,roomi->zoneinside);
+  glUniform1f(GPUzone_xyzmaxdiff,xyzmaxdiff);
+  glUniform3f(GPUzone_boxmin,roomi->x0,roomi->y0,roomi->z0);
+  glUniform3f(GPUzone_boxmax,roomi->x1,roomi->y1,roomi->z1);
+  glUniform1f(GPUzone_zlay,roomi->z0+roomi->ylay);
+  glUniform1f(GPUzone_odl,roomi->od_L);
+  glUniform1f(GPUzone_odu,roomi->od_U);
 
   for(iwall=-3;iwall<=3;iwall++){
     int i,j;
@@ -1054,7 +1054,7 @@ void drawzonesmokeGPU(roomdata *roomi){
 
     if(iwall==0||roomi->drawsides[iwall+3]==0)continue;
 
-    glUniform1i(GPU_zonedir,iwall);
+    glUniform1i(GPUzone_zonedir,iwall);
     glBegin(GL_TRIANGLES);
 
     switch (iwall){

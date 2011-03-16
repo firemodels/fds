@@ -896,6 +896,9 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     }
     if(nsmoke3d_files>0&&show3dsmoke==1){
       getsmokedir(modelview_scratch);
+      if(use_volume_shader==1){
+        getvolsmokedir(modelview_scratch);
+      }
       sniffErrors("after getsmokedir");
 #ifdef pp_CULL
       if(showstereo==0){
@@ -1507,10 +1510,10 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
         if(usegpu==1){
           if(use_volume_shader==1){
-            drawsmoke3dGPU(smoke3di);
+            drawsmoke3dGPUVOL(smoke3di);
           }
           else{
-            drawsmoke3dGPUVOL(smoke3di);
+            drawsmoke3dGPU(smoke3di);
           }
         }
         else{

@@ -33,7 +33,6 @@ SVEXTERN propdata *propinfo;
 SVEXTERN float right_green, right_blue;
 
 SVEXTERN int levelset_colorbar, wallthickness_colorbar;
-SVEXTERN int fire_colorbar_index;
 SVEXTERN colorbardata *fire_colorbar, *fire_custom_colorbar;
 SVEXTERN float glui_time;
 SVEXTERN int show_mode;
@@ -77,13 +76,17 @@ SVEXTERN int GPU_adjustalphaflag;
 SVEXTERN unsigned int GPU_depthtexture;
 SVEXTERN int i_hrrcutoff;
 
-SVEXTERN int GPU_zonedir;
-SVEXTERN int GPU_zoneinside;
-SVEXTERN int GPU_eyepos;
-SVEXTERN int GPU_xyzmaxdiff;
-SVEXTERN int GPU_boxmin, GPU_boxmax;
-SVEXTERN int GPU_zlay;
-SVEXTERN int GPU_odl, GPU_odu;
+SVEXTERN int GPUzone_zonedir;
+SVEXTERN int GPUzone_zoneinside;
+SVEXTERN int GPUzone_eyepos;
+SVEXTERN int GPUzone_xyzmaxdiff;
+SVEXTERN int GPUzone_boxmin, GPUzone_boxmax;
+SVEXTERN int GPUzone_zlay;
+SVEXTERN int GPUzone_odl, GPUzone_odu;
+
+SVEXTERN int GPUvol_inside, GPUvol_dir, GPUvol_eyepos, GPUvol_xyzmaxdiff;
+SVEXTERN int GPUvol_boxmin, GPUvol_boxmax;
+
 #endif
 
 SVEXTERN float partfacedir[3];
@@ -194,7 +197,7 @@ SVEXTERN int visgridloc;
 
 SVEXTERN int valindex;
 
-SVEXTERN int fire_colorbar_index;
+SVEXTERN int fire_colorbar_index,SVDECL(fire_colorbar_index_save,-1);
 SVEXTERN colorbardata *fire_colorbar;
 SVEXTERN float *rgb2_ini;
 SVEXTERN float rgb_full[MAXRGB][4];

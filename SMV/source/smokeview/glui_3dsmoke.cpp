@@ -195,9 +195,6 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   SPINNER_smoke3d_fire_green->set_int_limits(0,255);
   SPINNER_smoke3d_fire_blue=glui_3dsmoke->add_spinner_to_panel(panel_colormap,"blue",GLUI_SPINNER_INT,&fire_blue,FIRE_BLUE,SMOKE_3D_CB);
   SPINNER_smoke3d_fire_blue->set_int_limits(0,255);
-  SPINNER_smoke3d_fire_halfdepth=glui_3dsmoke->add_spinner_to_panel(panel_colormap,"50% fire depth (m)",GLUI_SPINNER_FLOAT,&fire_halfdepth,FIRE_HALFDEPTH,SMOKE_3D_CB);
-  SPINNER_smoke3d_fire_halfdepth->set_float_limits(0.0,10.0);
-
 
   SPINNER_smoke3d_smoke_shade=glui_3dsmoke->add_spinner_to_panel(panel_colormap,"smoke albedo",GLUI_SPINNER_FLOAT,&smoke_shade,SMOKE_SHADE,SMOKE_3D_CB);
   SPINNER_smoke3d_smoke_shade->set_float_limits(0.0,1.0);
@@ -212,6 +209,8 @@ extern "C" void glui_3dsmoke_setup(int main_window){
 
     glui_3dsmoke->add_statictext_to_panel(panel_colormap,"HRRPUV cutoff (kW/m3):");
 
+//    SPINNER_smoke3d_fire_halfdepth=glui_3dsmoke->add_spinner_to_panel(panel_colormap,"50% fire depth (m)",GLUI_SPINNER_FLOAT,&fire_halfdepth,FIRE_HALFDEPTH,SMOKE_3D_CB);
+//    SPINNER_smoke3d_fire_halfdepth->set_float_limits(0.0,10.0);
     if(nmeshes>1){
       SPINNER_smoke3d_hrrpuv_cutoffptr[nmeshes]=glui_3dsmoke->add_spinner_to_panel
         (panel_colormap,"All meshes",GLUI_SPINNER_FLOAT,&global_hrrpuv_cutoff,GLOBAL_FIRE_CUTOFF,SMOKE_3D_CB);
@@ -362,12 +361,9 @@ void update_alpha(void){
   if(panel_testsmoke!=NULL){
     TEXT_smokedepth->set_text(label);
   }
-
-
 }
 
 /* ------------------ 3dsmoke_CB ------------------------ */
-
 
 void SMOKE_3D_CB(int var){
   int i;
@@ -379,20 +375,27 @@ void SMOKE_3D_CB(int var){
       SPINNER_smoke3d_fire_red->disable();
       SPINNER_smoke3d_fire_green->disable();
       SPINNER_smoke3d_fire_blue->disable();
-      SPINNER_smoke3d_fire_halfdepth->disable();
       SPINNER_smoke3d_smoke_shade->disable();
       STATIC_hrrpuvcolor->disable();
-      SmokeColorBarMenu(fire_colorbar_index);
+      if(fire_colorbar_index_save!=-1){
+        SmokeColorBarMenu(fire_colorbar_index_save);
+      }
+      else{
+        SmokeColorBarMenu(fire_colorbar_index);
+      }
     }
     else{
       LISTBOX_smoke_colorbar->disable();
       SPINNER_smoke3d_fire_red->enable();
       SPINNER_smoke3d_fire_green->enable();
       SPINNER_smoke3d_fire_blue->enable();
-      SPINNER_smoke3d_fire_halfdepth->enable();
       SPINNER_smoke3d_smoke_shade->enable();
       STATIC_hrrpuvcolor->enable();
+      fire_colorbar_index_save=fire_colorbar_index;
       SmokeColorBarMenu(fire_custom_colorbar-colorbarinfo);
+    }
+    if(LISTBOX_smoke_colorbar->get_int_val()!=fire_colorbar_index){
+      LISTBOX_smoke_colorbar->set_int_val(fire_colorbar_index);
     }
     break;
   case SMOKE_COLORBAR_LIST:

@@ -41,6 +41,7 @@ int GeometryMenu(int var);
 propdata *get_prop_id(char *prop_id);
 void init_evac_prop(void);
 void init_prop(propdata *propi, int nsmokeview_ids, char *label);
+void SmokeColorBarMenu(int val);
 
 /* ------------------ init_default_prop ------------------------ */
 
@@ -5697,7 +5698,9 @@ typedef struct {
     mesh *meshi;
 
     meshi=meshinfo+igrid;
-    ibartemp=meshi->ibar; jbartemp=meshi->jbar; kbartemp=meshi->kbar;
+    ibartemp=meshi->ibar; 
+    jbartemp=meshi->jbar; 
+    kbartemp=meshi->kbar;
     xplt_origtemp = meshi->xplt_orig;
     yplt_origtemp = meshi->yplt_orig;
     zplt_origtemp = meshi->zplt_orig;
@@ -5724,6 +5727,15 @@ typedef struct {
     meshi->boxmax[0]=xplt_origtemp[ibartemp];
     meshi->boxmax[1]=yplt_origtemp[jbartemp];
     meshi->boxmax[2]=zplt_origtemp[kbartemp];
+    meshi->x0 = (       xplttemp[0]-xbar0)/xyzmaxdiff;
+    meshi->x1 = (xplttemp[ibartemp]-xbar0)/xyzmaxdiff;
+    meshi->y0 = (       yplttemp[0]-ybar0)/xyzmaxdiff;
+    meshi->y1 = (yplttemp[jbartemp]-ybar0)/xyzmaxdiff;
+    meshi->z0 = (       zplttemp[0]-zbar0)/xyzmaxdiff;
+    meshi->z1 = (zplttemp[kbartemp]-zbar0)/xyzmaxdiff;
+    meshi->dx01=meshi->x1-meshi->x0;
+    meshi->dy01=meshi->y1-meshi->y0;
+    meshi->dz01=meshi->z1-meshi->z0;
 
   }
 
@@ -7638,6 +7650,12 @@ int readini2(char *inifile, int localfile){
       if(colorbartype!=colorbartype_default){
         colorbartype_ini=colorbartype;
       }
+      continue;
+    }
+    if(match(buffer,"FIRECOLORMAP",12)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i %i",&use_firesmokemap,&fire_colorbar_index);
+      SmokeColorBarMenu(fire_colorbar_index);
       continue;
     }
     if(match(buffer,"SHOWEXTREMEDATA",15)==1){
@@ -10530,6 +10548,8 @@ void writeini(int flag){
     fprintf(fileout,"COLORBARTYPE\n");
     fprintf(fileout," %i\n",colorbartype);
   }
+  fprintf(fileout,"FIRECOLORMAP\n");
+  fprintf(fileout," %i %i\n",use_firesmokemap,fire_colorbar_index);
   fprintf(fileout,"SHOWEXTREMEDATA\n");
   fprintf(fileout," %i\n",show_extremedata);
   {
