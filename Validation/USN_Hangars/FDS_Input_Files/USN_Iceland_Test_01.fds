@@ -1,0 +1,70 @@
+&HEAD CHID='USN_Iceland_Test_01', TITLE='Keflavik, Iceland USN Hangar Test 1' /
+
+&MESH ID='PLUME', COLOR='RED',  IJK=48,48,112,  XB= 18.0, 27.6, 32.0, 41.6, 0.0, 22.4 /
+
+&MESH ID='NORTH', COLOR='GREEN', IJK=24,80,56,  XB= 18.0, 27.6, 41.6, 73.6, 0.0, 22.4 /
+
+&MESH ID='SOUTH', COLOR='GREEN', IJK=24,80,56,  XB= 18.0, 27.6, 0.0, 32.0, 0.0, 22.4 /
+
+&MESH ID='WEST1',  COLOR='BLUE', IJK=28,184,47,  XB= 6.8, 18.0, 0.0, 73.6, 0.0, 18.8 /
+
+&MESH ID='EAST1', COLOR='BLUE',  IJK=28,184,47,  XB= 27.6, 38.8, 0.0, 73.6, 0.0, 18.8 / 
+
+&MESH ID='WEST2', COLOR='GREEN', IJK=17,184,35,   XB= 0.0, 6.8, 0.0, 73.6, 0.0, 14.0 /
+
+&MESH ID='EAST2', COLOR='GREEN',  IJK=17,184,35, XB= 38.8, 45.6, 0.0, 73.6, 0.0, 14.0 /
+
+&TIME T_END=0.0/
+
+&MISC TMPA=27., SURF_DEFAULT='CONCRETE WALL' / 
+
+&REAC FUEL= 'JP-5'
+      C=12
+      H=26
+      SOOT_YIELD=0.04
+      HEAT_OF_COMBUSTION=44100. /
+
+&MATL ID            = 'GYPSUM'
+      FYI           = 'NBSIR 88-3752'
+      CONDUCTIVITY  = 0.17
+      SPECIFIC_HEAT = 1.09
+      DENSITY       =  930. /
+\
+&MATL ID            = 'STEEL'
+      EMISSIVITY    = 0.95
+      SPECIFIC_HEAT = 0.48
+      CONDUCTIVITY  = 60.0
+      DENSITY       = 7850. /
+
+&MATL ID             = 'CONCRETE'
+      SPECIFIC_HEAT  = 0.750
+      CONDUCTIVITY   = 1.6
+      DENSITY        = 2400. /
+
+&SURF ID             = 'CONCRETE WALL'
+      COLOR          = 'GRAY 65'
+      MATL_ID        = 'CONCRETE'
+      THICKNESS      = 0.2 /
+
+&SURF ID        = 'CANVAS'
+      MATL_ID   = 'GYPSUM'
+      COLOR     = 'BEIGE'
+      THICKNESS = 0.013 /
+
+&SURF ID        = 'STEEL'
+      MATL_ID   = 'STEEL'
+      COLOR     = 'BLACK'
+      THICKNESS = 0.05 /
+
+&SURF ID= 'BURNER'
+      COLOR= 'RED'
+      TAU_Q= 120,
+      HRRPUA=1111. /
+
+
+Draft Curtain
+&OBST XB=0.0,45.6,14.8,14.8,13.4,22.4, SURF_ID='STEEL', MULT_ID='DRAFT CURTAIN' /
+&MULT ID='DRAFT CURTAIN', DY=14.8, J_UPPER=3 /
+
+&TAIL /
+
