@@ -7074,7 +7074,6 @@ ISVPS = IS + L
 !                               DEFINE A,B,C,D,S ARRAYS IN ARRAY SAVE.
 !                               S ARRAY IS SYMMETRIZER FOR SING. CASES
 
-!DIR$ IVDEP
 DO  I = 1,L
   RI = RS + (I-.5_EB)*DR
   SAVE(ID+I) = DZSQR
