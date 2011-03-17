@@ -434,11 +434,11 @@ TYPE (OMESH_TYPE), POINTER ::   OM
 !!!  Interface definitions
 !!!----------------------------------------------------------------------------------------------------
 INTERFACE SCARC_INITIALIZE_SOLUTION
-   MODULE PROCEDURE SCARC_INITIALIZE_SOLUTION_BANDWISE, SCARC_INITIALIZE_SOLUTION_COMPACT
+   MODULE PROCEDURE SCARC_INITIALIZE_SOLUTION_BAND, SCARC_INITIALIZE_SOLUTION_COMP
 END INTERFACE SCARC_INITIALIZE_SOLUTION
 
 INTERFACE SCARC_TRANSFER_DATA
-   MODULE PROCEDURE SCARC_TRANSFER_SOLUTION_BANDWISE, SCARC_TRANSFER_SOLUTION_COMPACT
+   MODULE PROCEDURE SCARC_TRANSFER_SOLUTION_BAND, SCARC_TRANSFER_SOLUTION_COMPACT
 END INTERFACE SCARC_TRANSFER_DATA
 
 INTERFACE SCARC_LOCAL_MATVEC
@@ -1261,10 +1261,10 @@ END SUBROUTINE SCARC_SETUP_WALLCELLS
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_SETUP_IJKW(IJKW_LO, IJKW_HI, PBCI_LO, PBCI_HI, &
                             IW_LO, IOR0, IOFFSET, IREFINE, IP, JP, KP, ILEN_HI)
-INTEGER, POINTER, DIMENSION(:,:), INTENT(OUT) :: IJKW_LO
-INTEGER, POINTER, DIMENSION(:,:), INTENT(IN)  :: IJKW_HI
-INTEGER, POINTER, DIMENSION(:),   INTENT(OUT) :: PBCI_LO
-INTEGER, POINTER, DIMENSION(:),   INTENT(IN)  :: PBCI_HI
+INTEGER, DIMENSION(:,:), INTENT(OUT) :: IJKW_LO
+INTEGER, DIMENSION(:,:), INTENT(IN)  :: IJKW_HI
+INTEGER, DIMENSION(:),   INTENT(OUT) :: PBCI_LO
+INTEGER, DIMENSION(:),   INTENT(IN)  :: PBCI_HI
 INTEGER, INTENT(INOUT) :: IW_LO
 INTEGER, INTENT(IN) :: IOR0, IOFFSET, IREFINE
 INTEGER, INTENT(IN) :: IP, JP, KP, ILEN_HI
@@ -1543,7 +1543,7 @@ END SUBROUTINE SCARC_SETUP_IJKW
 !!! First part: Set correct IJKW-values in SCARC_INIT_NEIGHBOURS
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_SETUP_IJKW1(IJKW0, IW0, IOR0, IMIN, JMIN, KMIN, IMAX, JMAX, KMAX)
-INTEGER, POINTER, DIMENSION(:,:), INTENT(OUT) :: IJKW0
+INTEGER, DIMENSION(:,:), INTENT(OUT) :: IJKW0
 INTEGER, INTENT(IN) :: IW0, IOR0
 INTEGER, INTENT(IN) :: IMIN, JMIN, KMIN, IMAX, JMAX, KMAX
 
@@ -1563,7 +1563,7 @@ END SUBROUTINE SCARC_SETUP_IJKW1
 !!! Second part: Set correct IJKW-values in SCARC_INIT_NEIGHBOURS
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_SETUP_IJKW2(IJKW0,IW0, IMIN, JMIN, KMIN, IMAX, JMAX, KMAX)
-INTEGER, POINTER, DIMENSION(:,:), INTENT(OUT) :: IJKW0
+INTEGER, DIMENSION(:,:), INTENT(OUT) :: IJKW0
 INTEGER, INTENT(IN) :: IW0, IMIN, JMIN, KMIN, IMAX, JMAX, KMAX
 
 IJKW0(10,IW0)=IMIN
@@ -4818,10 +4818,10 @@ END FUNCTION SCARC_CYCLE_STATE
 !!! Perform smoothing - bandwise storage technique
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_SMOOTHER_BANDWISE(A, X, D, F, NX, NY, NZ, NTYPE, NL)
-REAL(EB), POINTER, DIMENSION(:, :),    INTENT(INOUT) :: A
-REAL(EB), POINTER, DIMENSION(:, :, :), INTENT(INOUT) :: X, D, F
+REAL(EB), DIMENSION(:, :),    INTENT(INOUT) :: A
+REAL(EB), DIMENSION(:, :, :), INTENT(INOUT) :: X, D, F
 INTEGER, INTENT(IN) :: NTYPE, NL
-INTEGER, POINTER, INTENT(IN) :: NX, NY, NZ
+INTEGER, INTENT(IN) :: NX, NY, NZ
 INTEGER :: NM, ITE, NIT, ISTATE
 REAL(EB):: RES, RESIN, EPS, OMEGA
 REAL(EB):: TNOW_SMOOTH
@@ -4908,11 +4908,11 @@ END SUBROUTINE SCARC_SMOOTHER_BANDWISE
 !!! Perform smoothing - bandwise storage technique
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_SMOOTHER_COMPACT(A, ROW, COL, X, D, F, NX, NY, NZ, NTYPE, NL)
-INTEGER,  POINTER, DIMENSION(:), INTENT(IN)    :: ROW, COL
-REAL(EB), POINTER, DIMENSION(:), INTENT(IN)    :: A
-REAL(EB), POINTER, DIMENSION(:), INTENT(INOUT) :: X, D, F
+INTEGER,  DIMENSION(:), INTENT(IN)    :: ROW, COL
+REAL(EB), DIMENSION(:), INTENT(IN)    :: A
+REAL(EB), DIMENSION(:), INTENT(INOUT) :: X, D, F
 INTEGER, INTENT(IN) :: NTYPE, NL
-INTEGER, POINTER, INTENT(IN) :: NX, NY, NZ
+INTEGER, INTENT(IN) :: NX, NY, NZ
 INTEGER :: NM, ITE, NIT, ISTATE
 REAL(EB):: RES, RESIN, EPS, OMEGA
 REAL(EB):: TNOW_SMOOTH
@@ -5023,10 +5023,10 @@ END SUBROUTINE SCARC_GE_COMPACT
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_PRECONDITIONER_BANDWISE(A, R, G, NX, NY, NZ, NM)
 INTEGER  , INTENT(IN) :: NM
-INTEGER  , POINTER, INTENT(IN) :: NX, NY, NZ
-REAL (EB), POINTER, DIMENSION (:, :),    INTENT(IN)    :: A
-REAL (EB), POINTER, DIMENSION (:, :, :), INTENT(IN)    :: R
-REAL (EB), POINTER, DIMENSION (:, :, :), INTENT(INOUT) :: G
+INTEGER  , INTENT(IN) :: NX, NY, NZ
+REAL (EB), DIMENSION (:, :),    INTENT(IN)    :: A
+REAL (EB), DIMENSION (:, :, :), INTENT(IN)    :: R
+REAL (EB), DIMENSION (:, :, :), INTENT(INOUT) :: G
 REAL(EB):: TNOW_PRECON
 
 TNOW_PRECON = SECOND()
@@ -5052,11 +5052,11 @@ END SUBROUTINE SCARC_PRECONDITIONER_BANDWISE
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_PRECONDITIONER_COMPACT(A, ROW, COL, R, G, NX, NY, NZ, NM)
 INTEGER  , INTENT(IN) :: NM
-INTEGER  , POINTER, INTENT(IN) :: NX, NY, NZ
-REAL (EB), POINTER, DIMENSION (:), INTENT(IN)    :: A
-INTEGER  , POINTER, DIMENSION (:), INTENT(IN)    :: ROW, COL
-REAL (EB), POINTER, DIMENSION (:), INTENT(IN)    :: R
-REAL (EB), POINTER, DIMENSION (:), INTENT(INOUT) :: G
+INTEGER  , INTENT(IN) :: NX, NY, NZ
+REAL (EB), DIMENSION (:), INTENT(IN)    :: A
+INTEGER  , DIMENSION (:), INTENT(IN)    :: ROW, COL
+REAL (EB), DIMENSION (:), INTENT(IN)    :: R
+REAL (EB), DIMENSION (:), INTENT(INOUT) :: G
 REAL(EB):: TNOW_PRECON
 
 TNOW_PRECON = SECOND()
@@ -5081,9 +5081,9 @@ END SUBROUTINE SCARC_PRECONDITIONER_COMPACT
 !!! Jacobi preconditioner/smoother - bandwise storage technique
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_JACOBI_BANDWISE(A, G, NX, NY, NZ)
-REAL (EB), POINTER, DIMENSION (:, :),    INTENT(IN)    :: A
-REAL (EB), POINTER, DIMENSION (:, :, :), INTENT(INOUT) :: G
-INTEGER  , POINTER, INTENT(IN) :: NX, NY, NZ
+REAL (EB), DIMENSION (:, :),    INTENT(IN)    :: A
+REAL (EB), DIMENSION (:, :, :), INTENT(INOUT) :: G
+INTEGER  , INTENT(IN) :: NX, NY, NZ
 INTEGER :: I, J, K, IC
 DO K = 1, NZ
    DO J = 1, NY
@@ -5100,10 +5100,10 @@ END SUBROUTINE SCARC_JACOBI_BANDWISE
 !!! Jacobi preconditioner/smoother - compact storage technique
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_JACOBI_COMPACT(A, ROW, G, NX, NY, NZ)
-REAL (EB), POINTER, DIMENSION (:), INTENT(IN)    :: A
-INTEGER  , POINTER, DIMENSION (:), INTENT(IN)    :: ROW
-REAL (EB), POINTER, DIMENSION (:), INTENT(INOUT) :: G
-INTEGER  , POINTER, INTENT(IN) :: NX, NY, NZ
+REAL (EB), DIMENSION (:), INTENT(IN)    :: A
+INTEGER  , DIMENSION (:), INTENT(IN)    :: ROW
+REAL (EB), DIMENSION (:), INTENT(INOUT) :: G
+INTEGER  , INTENT(IN) :: NX, NY, NZ
 INTEGER :: I, J, K, IC
 DO K = 1, NZ
    DO J = 1, NY
@@ -5120,9 +5120,9 @@ END SUBROUTINE SCARC_JACOBI_COMPACT
 !!! SSOR preconditioner/smoother - bandwise storage technique
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_SSOR_BANDWISE(A, G, NX, NY, NZ)
-REAL (EB), POINTER, DIMENSION (:, :),    INTENT(IN)    :: A
-REAL (EB), POINTER, DIMENSION (:, :, :), INTENT(INOUT) :: G
-INTEGER  , POINTER, INTENT(IN) :: NX, NY, NZ
+REAL (EB), DIMENSION (:, :),    INTENT(IN)    :: A
+REAL (EB), DIMENSION (:, :, :), INTENT(INOUT) :: G
+INTEGER  , INTENT(IN) :: NX, NY, NZ
 INTEGER :: I, J, K, IC
 REAL (EB) :: AUX, OMEGA=1.5_EB
 
@@ -5174,10 +5174,10 @@ END SUBROUTINE SCARC_SSOR_BANDWISE
 !!! SSOR preconditioner/smoother - compact storage technique
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_SSOR_COMPACT(A, ROW, COL, G, NX, NY, NZ)
-REAL (EB), POINTER, DIMENSION (:), INTENT(IN)    :: A
-INTEGER  , POINTER, DIMENSION (:), INTENT(IN)    :: ROW, COL
-REAL (EB), POINTER, DIMENSION (:), INTENT(INOUT) :: G
-INTEGER  , POINTER, INTENT(IN) :: NX, NY, NZ
+REAL (EB), DIMENSION (:), INTENT(IN)    :: A
+INTEGER  , DIMENSION (:), INTENT(IN)    :: ROW, COL
+REAL (EB), DIMENSION (:), INTENT(INOUT) :: G
+INTEGER  , INTENT(IN) :: NX, NY, NZ
 INTEGER :: IC, ICOL, NC
 REAL (EB) :: AUX, OMEGA=1.5_EB
 
@@ -5217,9 +5217,9 @@ END SUBROUTINE SCARC_SSOR_COMPACT
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_FFT_BANDWISE (R, G, NX, NY, NZ, NM)
 USE POIS, ONLY: H3CZSS, H2CZSS
-REAL (EB), POINTER, DIMENSION (:, :, :), INTENT(IN)    :: R
-REAL (EB), POINTER, DIMENSION (:, :, :), INTENT(INOUT) :: G
-INTEGER  , POINTER, INTENT(IN) :: NX, NY, NZ
+REAL (EB), DIMENSION (:, :, :), INTENT(IN)    :: R
+REAL (EB), DIMENSION (:, :, :), INTENT(INOUT) :: G
+INTEGER  , INTENT(IN) :: NX, NY, NZ
 INTEGER  , INTENT(IN) :: NM
 
 M  => MESHES(NM)
@@ -5243,9 +5243,9 @@ END SUBROUTINE SCARC_FFT_BANDWISE
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_FFT_COMPACT (R, G, NX, NY, NZ, NM)
 USE POIS, ONLY: H3CZSS, H2CZSS
-REAL (EB), POINTER, DIMENSION (:), INTENT(IN)    :: R
-REAL (EB), POINTER, DIMENSION (:), INTENT(INOUT) :: G
-INTEGER  , POINTER, INTENT(IN) :: NX, NY, NZ
+REAL (EB), DIMENSION (:), INTENT(IN)    :: R
+REAL (EB), DIMENSION (:), INTENT(INOUT) :: G
+INTEGER  , INTENT(IN) :: NX, NY, NZ
 INTEGER  , INTENT(IN) :: NM
 INTEGER :: I, J, K, IC
 
@@ -5285,7 +5285,7 @@ END SUBROUTINE SCARC_FFT_COMPACT
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! Initialize GSTRIX preconditioner/smoother
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-SUBROUTINE SCARC_PRECONDITIONER_INIT_GSTRIX(NM, NL)
+SUBROUTINE SCARC_PRECOND_INIT_GSTRIX(NM, NL)
 INTEGER, INTENT(IN) :: NM, NL
 INTEGER :: IC, NC, IERR
 
@@ -5403,15 +5403,15 @@ ELSE
    
 ENDIF DIMENSION_IF
 
-END SUBROUTINE SCARC_PRECONDITIONER_INIT_GSTRIX
+END SUBROUTINE SCARC_PRECOND_INIT_GSTRIX
  
  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! GSTRIX preconditioner/smoother
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_GSTRIX_BANDWISE (G, NX, NY, NZ, NM)
-REAL (EB), POINTER, DIMENSION (:, :, :), INTENT(INOUT) :: G
-INTEGER, POINTER, INTENT(IN) :: NX, NY, NZ
+REAL (EB), DIMENSION (:, :, :), INTENT(INOUT) :: G
+INTEGER, INTENT(IN) :: NX, NY, NZ
 INTEGER, INTENT(IN) :: NM
 INTEGER :: I, J, K, IC
 
@@ -5513,8 +5513,8 @@ END SUBROUTINE SCARC_GSTRIX_BANDWISE
 !!! GSTRIX preconditioner/smoother
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_GSTRIX_COMPACT (G, NX, NY, NZ, NM)
-REAL(EB), POINTER, DIMENSION (:), INTENT(INOUT) :: G
-INTEGER , POINTER, INTENT(IN) :: NX, NY, NZ
+REAL(EB), DIMENSION (:), INTENT(INOUT) :: G
+INTEGER , INTENT(IN) :: NX, NY, NZ
 INTEGER , INTENT(IN) :: NM
 INTEGER :: I, J, K, IC, JC
 
@@ -5617,7 +5617,7 @@ END SUBROUTINE SCARC_GSTRIX_COMPACT
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! Set initial solution corresponding to H and HS 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-SUBROUTINE SCARC_INITIALIZE_SOLUTION_BANDWISE(X, F, NL)
+SUBROUTINE SCARC_INITIALIZE_SOLUTION_BAND(X, F, NL)
 INTEGER, INTENT(IN) :: NL
 REAL(EB), POINTER, DIMENSION(:,:,:) :: X, F
 INTEGER :: NM, IW, IOR0, I, J, K
@@ -5755,13 +5755,13 @@ ELSE
    ENDDO MESH_LOOP_BANDWISE3D
 ENDIF DIMENSION_BANDWISE_IF
 
-END SUBROUTINE SCARC_INITIALIZE_SOLUTION_BANDWISE
+END SUBROUTINE SCARC_INITIALIZE_SOLUTION_BAND
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! Set initial solution corresponding to H and HS 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-SUBROUTINE SCARC_INITIALIZE_SOLUTION_COMPACT(X, F, NL)
+SUBROUTINE SCARC_INITIALIZE_SOLUTION_COMP(X, F, NL)
 INTEGER, INTENT(IN) :: NL
 REAL(EB), POINTER, DIMENSION(:) :: X, F
 INTEGER :: NM, IW, IOR0, I, J, K, IC
@@ -5911,7 +5911,7 @@ ELSE
    ENDDO MESH_LOOP_COMPACT3D
 ENDIF DIMENSION_COMPACT_IF
 
-END SUBROUTINE SCARC_INITIALIZE_SOLUTION_COMPACT
+END SUBROUTINE SCARC_INITIALIZE_SOLUTION_COMP
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -6004,10 +6004,10 @@ END SUBROUTINE SCARC_CONVERGENCE_RATE
 !!! Perform matrix-vector multiplication Y = A*X  - bandwise storage technique
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_LOCAL_MATVEC_BANDWISE (A, X, Y, NX, NY, NZ, NM)
-REAL (EB), POINTER, DIMENSION (:, :),    INTENT(IN)    :: A
-REAL (EB), POINTER, DIMENSION (:, :, :), INTENT(IN)    :: X
-REAL (EB), POINTER, DIMENSION (:, :, :), INTENT(INOUT) :: Y
-INTEGER,   POINTER, INTENT(IN) :: NX, NY, NZ
+REAL (EB), DIMENSION (:, :),    INTENT(IN)    :: A
+REAL (EB), DIMENSION (:, :, :), INTENT(IN)    :: X
+REAL (EB), DIMENSION (:, :, :), INTENT(INOUT) :: Y
+INTEGER,   INTENT(IN) :: NX, NY, NZ
 INTEGER,   INTENT(IN) :: NM
 INTEGER :: I, J, K, IC
 REAL (EB):: TNOW_LOCAL_MATVEC
@@ -6060,11 +6060,11 @@ END SUBROUTINE SCARC_LOCAL_MATVEC_BANDWISE
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_LOCAL_MATVEC_COMPACT (A, ROW, COL, X, Y, NX, NY, NZ, NM)
 
-REAL (EB), POINTER, DIMENSION (:), INTENT(IN)    :: A
-INTEGER,   POINTER, DIMENSION (:), INTENT(IN)    :: ROW, COL
-REAL (EB), POINTER, DIMENSION (:), INTENT(IN)    :: X
-REAL (EB), POINTER, DIMENSION (:), INTENT(INOUT) :: Y
-INTEGER,   POINTER, INTENT(IN) :: NX, NY, NZ
+REAL (EB), DIMENSION (:), INTENT(IN)    :: A
+INTEGER,   DIMENSION (:), INTENT(IN)    :: ROW, COL
+REAL (EB), DIMENSION (:), INTENT(IN)    :: X
+REAL (EB), DIMENSION (:), INTENT(INOUT) :: Y
+INTEGER,   INTENT(IN) :: NX, NY, NZ
 INTEGER,   INTENT(IN) :: NM
 INTEGER :: I, J, K, IC, ICOL
 REAL (EB):: TNOW_LOCAL_MATVEC
@@ -6138,8 +6138,8 @@ END SUBROUTINE SCARC_EXCHANGE_BDRY
 !!! - bandwise storage technique
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_LOCAL_SCALPROD_BANDWISE (X, Y, NX, NY, NZ, NM)
-REAL (EB), POINTER, DIMENSION (:, :, :), INTENT(IN) :: X, Y
-INTEGER, POINTER, INTENT(IN) :: NX, NY, NZ
+REAL (EB), DIMENSION (:, :, :), INTENT(IN) :: X, Y
+INTEGER, INTENT(IN) :: NX, NY, NZ
 INTEGER, INTENT(IN) :: NM
 INTEGER :: I, J, K
 REAL(EB):: TNOW_LOCAL_SCALPROD
@@ -6165,8 +6165,8 @@ END SUBROUTINE SCARC_LOCAL_SCALPROD_BANDWISE
 !!! - compact storage technique
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_LOCAL_SCALPROD_COMPACT (X, Y, NX, NY, NZ, NM)
-REAL (EB), POINTER, DIMENSION (:), INTENT(IN) :: X, Y
-INTEGER, POINTER, INTENT(IN) :: NX, NY, NZ
+REAL (EB), DIMENSION (:), INTENT(IN) :: X, Y
+INTEGER, INTENT(IN) :: NX, NY, NZ
 INTEGER, INTENT(IN) :: NM
 INTEGER :: I, J, K, IC
 REAL(EB):: TNOW_LOCAL_SCALPROD
@@ -6250,8 +6250,8 @@ END FUNCTION SCARC_GLOBAL_L2NORM
 !!! Restrict vector X from level NL to vector Y on level NL-1
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_RESTRICTION_BANDWISE (F_LO, D_HI, NX_LO, NY_LO, NZ_LO)
-REAL(EB), POINTER, DIMENSION(:, :, :), INTENT(IN)  :: D_HI
-REAL(EB), POINTER, DIMENSION(:, :, :), INTENT(OUT) :: F_LO
+REAL(EB), DIMENSION(:, :, :), INTENT(IN)  :: D_HI
+REAL(EB), DIMENSION(:, :, :), INTENT(OUT) :: F_LO
 INTEGER, INTENT(IN) :: NX_LO, NY_LO, NZ_LO
 INTEGER :: NM
 INTEGER :: IX_HI, IY_HI, IZ_HI
@@ -6317,8 +6317,8 @@ END SUBROUTINE SCARC_RESTRICTION_BANDWISE
 !!! Restrict vector X from level NL to vector Y on level NL-1
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_RESTRICTION_COMPACT (F_LO, D_HI, NX_LO, NY_LO, NZ_LO)
-REAL(EB), POINTER, DIMENSION(:), INTENT(IN)  :: D_HI
-REAL(EB), POINTER, DIMENSION(:), INTENT(OUT) :: F_LO
+REAL(EB), DIMENSION(:), INTENT(IN)  :: D_HI
+REAL(EB), DIMENSION(:), INTENT(OUT) :: F_LO
 INTEGER, INTENT(IN) :: NX_LO, NY_LO, NZ_LO
 INTEGER :: NM, IC_LO, IC_HI(8)
 INTEGER :: NX_HI, NY_HI, NZ_HI
@@ -6407,8 +6407,8 @@ END SUBROUTINE SCARC_RESTRICTION_COMPACT
 !!! Restrict vector X from level NL to vector Y on level NL-1
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_PROLONGATION_BANDWISE (X_LO, D_HI, NX_LO, NY_LO, NZ_LO)
-REAL(EB), POINTER, DIMENSION(:, :, :), INTENT(IN) :: X_LO
-REAL(EB), POINTER, DIMENSION(:, :, :), INTENT(OUT):: D_HI
+REAL(EB), DIMENSION(:, :, :), INTENT(IN) :: X_LO
+REAL(EB), DIMENSION(:, :, :), INTENT(OUT):: D_HI
 INTEGER, INTENT(IN) :: NX_LO, NY_LO, NZ_LO
 INTEGER :: NM
 INTEGER :: IX_LO, IY_LO, IZ_LO
@@ -6473,8 +6473,8 @@ END SUBROUTINE SCARC_PROLONGATION_BANDWISE
 !!! Restrict vector X from level NL to vector Y on level NL-1
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_PROLONGATION_COMPACT (X_LO, D_HI, NX_LO, NY_LO, NZ_LO)
-REAL(EB), POINTER, DIMENSION(:), INTENT(IN) :: X_LO
-REAL(EB), POINTER, DIMENSION(:), INTENT(OUT):: D_HI
+REAL(EB), DIMENSION(:), INTENT(IN) :: X_LO
+REAL(EB), DIMENSION(:), INTENT(OUT):: D_HI
 INTEGER,  INTENT(IN) :: NX_LO, NY_LO, NZ_LO
 INTEGER :: NM, IC_LO, IC_HI(8)
 INTEGER :: NX_HI, NY_HI, NZ_HI
@@ -6564,8 +6564,8 @@ END SUBROUTINE SCARC_PROLONGATION_COMPACT
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! Finalize data - bandwise storage technique
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-SUBROUTINE SCARC_TRANSFER_SOLUTION_BANDWISE(X, NM)
-REAL(EB), POINTER, DIMENSION(:, :, :), INTENT(IN):: X
+SUBROUTINE SCARC_TRANSFER_SOLUTION_BAND(X, NM)
+REAL(EB), DIMENSION(:, :, :), INTENT(IN):: X
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: HP=>NULL()
 
@@ -6581,14 +6581,14 @@ ENDIF
 !!! Overwrite internal values of H or HS by corresponding data of X
 HP(1:M%IBAR, 1:M%JBAR, 1:M%KBAR) = X(1:M%IBAR, 1:M%JBAR, 1:M%KBAR)
 
-END SUBROUTINE SCARC_TRANSFER_SOLUTION_BANDWISE
+END SUBROUTINE SCARC_TRANSFER_SOLUTION_BAND
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! Finalize data - compact storage technique
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_TRANSFER_SOLUTION_COMPACT(X, NM)
-REAL(EB), POINTER, DIMENSION(:), INTENT(IN):: X
+REAL(EB), DIMENSION(:), INTENT(IN):: X
 INTEGER, INTENT(IN) :: NM
 INTEGER :: I, J, K, IC
 REAL(EB), POINTER, DIMENSION(:,:,:) :: HP=>NULL()
@@ -6762,7 +6762,7 @@ END SUBROUTINE SCARC_RECEIVE
 !!! Pack send buffer
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_PACK_SEND_BUF (X0, SEND_BUF0, IJKW0, NEWC0, NLEN0, NM)
-REAL (EB), POINTER, DIMENSION (:), INTENT(OUT) :: SEND_BUF0
+REAL (EB), DIMENSION (:), INTENT(OUT) :: SEND_BUF0
 REAL (EB), POINTER, DIMENSION (:,:,:) :: X0
 INTEGER  , POINTER, DIMENSION (:,:)   :: IJKW0
 INTEGER, POINTER     :: NEWC0
@@ -6796,9 +6796,9 @@ END SUBROUTINE SCARC_PACK_SEND_BUF
 !!! Unpack receive buffer for matrix-vector multiplication
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_UNPACK_RECV_BUF1 (X0,RECV_BUF0,IJKW0,ASUB)
-REAL (EB), POINTER, DIMENSION (:,:,:), INTENT(OUT) :: X0
-REAL (EB), POINTER, DIMENSION (:)    , INTENT(IN)  :: RECV_BUF0
-INTEGER  , POINTER, DIMENSION (:,:)  , INTENT(IN)  :: IJKW0
+REAL (EB), DIMENSION (:,:,:), INTENT(OUT) :: X0
+REAL (EB), DIMENSION (:)    , INTENT(IN)  :: RECV_BUF0
+INTEGER  , DIMENSION (:,:)  , INTENT(IN)  :: IJKW0
 REAL (EB), INTENT(IN) :: ASUB(3)
 REAL (EB):: ZSUM
 INTEGER IW, LL, ISUM, I, J, K, II, JJ, KK
@@ -6836,9 +6836,9 @@ END SUBROUTINE SCARC_UNPACK_RECV_BUF1
 !!! Unpack receive buffer for internal update
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_UNPACK_RECV_BUF2 (X0,RECV_BUF0,IJKW0)
-REAL (EB), POINTER, DIMENSION (:,:,:), INTENT(OUT) :: X0
-REAL (EB), POINTER, DIMENSION (:)    , INTENT(IN)  :: RECV_BUF0
-INTEGER  , POINTER, DIMENSION (:,:)  , INTENT(IN)  :: IJKW0
+REAL (EB), DIMENSION (:,:,:), INTENT(OUT) :: X0
+REAL (EB), DIMENSION (:)    , INTENT(IN)  :: RECV_BUF0
+INTEGER  , DIMENSION (:,:)  , INTENT(IN)  :: IJKW0
 REAL (EB):: ZSUM
 INTEGER IW, LL, ISUM, I, J, K, II, JJ, KK
 
@@ -7091,7 +7091,7 @@ END FUNCTION MATCH
 !!! Only for debugging reasons: print out vector information on level NL 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_SHOW_BANDWISE (X, CROUTINE, CNAME, NM)
-REAL (EB), POINTER, DIMENSION (:, :, :), INTENT(IN) :: X
+REAL (EB), DIMENSION (:, :, :), INTENT(IN) :: X
 INTEGER, INTENT(IN):: NM
 REAL (EB):: VALUES(10)
 INTEGER :: II, JJ, KK, IBAR8,JBAR8,KBAR8
@@ -7152,7 +7152,7 @@ END SUBROUTINE SCARC_SHOW_BANDWISE
 !!! Only for debugging reasons: print out vector information on level NL 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_SHOW_COMPACT (X, CROUTINE, CNAME, NM)
-REAL (EB), POINTER, DIMENSION (:), INTENT(IN) :: X
+REAL (EB), DIMENSION (:), INTENT(IN) :: X
 INTEGER, INTENT(IN):: NM
 REAL (EB):: VALUES(8)
 INTEGER :: II, JJ, KK, IBAR8,JBAR8,KBAR8, IC
@@ -7215,7 +7215,7 @@ END SUBROUTINE SCARC_SHOW_COMPACT
 !!! Only for debugging reasons: print out vector information on level NL 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_SHOW_LEVEL_BANDWISE (X, NX, NY, NZ, CROUTINE, CNAME)
-REAL (EB), POINTER, DIMENSION (:, :, :), INTENT(IN) :: X
+REAL (EB), DIMENSION (:, :, :), INTENT(IN) :: X
 INTEGER, INTENT(IN):: NX, NY, NZ
 REAL (EB):: VALUES(10)
 INTEGER :: II, JJ, KK, IBAR8,JBAR8,KBAR8
@@ -7276,7 +7276,7 @@ END SUBROUTINE SCARC_SHOW_LEVEL_BANDWISE
 !!! Only for debugging reasons: print out vector information on level NL 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_SHOW_LEVEL_COMPACT (X, NX, NY, NZ, CROUTINE, CNAME)
-REAL (EB), POINTER, DIMENSION (:), INTENT(IN) :: X
+REAL (EB), DIMENSION (:), INTENT(IN) :: X
 INTEGER, INTENT(IN):: NX, NY, NZ
 REAL (EB):: VALUES(8)
 INTEGER :: II, JJ, KK, IBAR8,JBAR8,KBAR8, IC
@@ -7431,8 +7431,8 @@ END SUBROUTINE SCARC_SHUTDOWN
 !!! Compute current revision number
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE GET_REV_SCRC(MODULE_REV,MODULE_DATE)
-INTEGER,INTENT(INOUT) :: MODULE_REV
-CHARACTER(255),INTENT(INOUT) :: MODULE_DATE
+INTEGER, INTENT(INOUT) :: MODULE_REV
+CHARACTER(255), INTENT(INOUT) :: MODULE_DATE
 
 WRITE(MODULE_DATE,'(A)') SCRCREV(INDEX(SCRCREV,':')+1:LEN_TRIM(SCRCREV)-2)
 READ (MODULE_DATE,'(I5)') MODULE_REV
