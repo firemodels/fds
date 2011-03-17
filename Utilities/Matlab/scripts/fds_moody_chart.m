@@ -64,35 +64,36 @@ loglog(Re_fds,f_fds,'k*')
 
 % gather FDS results (turbulent)
 mu = 1.84e-5;
+rho = 1.18;
 
-dpdx = -.01;
+dpdx = -.01/rho;
 [f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-0p01_N8_devc.csv'],mu);loglog(Re,f,'ksq')
 [f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-0p01_N16_devc.csv'],mu);loglog(Re,f,'k^')
 [f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-0p01_N32_devc.csv'],mu);loglog(Re,f,'ko')
 
-dpdx = -1;
+dpdx = -1/rho;
 [f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-1_N8_devc.csv'],mu);loglog(Re,f,'ksq')
 [f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-1_N16_devc.csv'],mu);loglog(Re,f,'k^')
 [f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-1_N32_devc.csv'],mu);loglog(Re,f,'ko')
 
-dpdx = -100;
+dpdx = -100/rho;
 [f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-100_N8_devc.csv'],mu);H(1)=loglog(Re,f,'ksq');
 [f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-100_N16_devc.csv'],mu);H(2)=loglog(Re,f,'k^');
 [f,Re] = friction_factor_calc(dpdx,L,[repository,'moody_dpdx=-100_N32_devc.csv'],mu);H(3)=loglog(Re,f,'ko');
 
-dpdx = -.0001;
+dpdx = -.0001/rho;
 [f,Re] = friction_factor_calc(dpdx,L,[repository,'z0=p0001_dpdx=-p0001_N8_devc.csv'],mu);loglog(Re,f,'bsq')
 [f,Re] = friction_factor_calc(dpdx,L,[repository,'z0=p001_dpdx=-p0001_N8_devc.csv'],mu);loglog(Re,f,'rsq')
 [f,Re] = friction_factor_calc(dpdx,L,[repository,'z0=p01_dpdx=-p0001_N8_devc.csv'],mu);loglog(Re,f,'gsq')
 [f,Re] = friction_factor_calc(dpdx,L,[repository,'z0=p1_dpdx=-p0001_N8_devc.csv'],mu);loglog(Re,f,'msq')
 
-dpdx = -.01;
+dpdx = -.01/rho;
 [f,Re] = friction_factor_calc(dpdx,L,[repository,'z0=p0001_dpdx=-p01_N8_devc.csv'],mu);loglog(Re,f,'bsq')
 [f,Re] = friction_factor_calc(dpdx,L,[repository,'z0=p001_dpdx=-p01_N8_devc.csv'],mu);loglog(Re,f,'rsq')
 [f,Re] = friction_factor_calc(dpdx,L,[repository,'z0=p01_dpdx=-p01_N8_devc.csv'],mu);loglog(Re,f,'gsq')
 [f,Re] = friction_factor_calc(dpdx,L,[repository,'z0=p1_dpdx=-p01_N8_devc.csv'],mu);loglog(Re,f,'msq')
 
-dpdx = -1;
+dpdx = -1/rho;
 [f,Re] = friction_factor_calc(dpdx,L,[repository,'z0=p0001_dpdx=-1_N8_devc.csv'],mu);loglog(Re,f,'bsq')
 [f,Re] = friction_factor_calc(dpdx,L,[repository,'z0=p001_dpdx=-1_N8_devc.csv'],mu);loglog(Re,f,'rsq')
 [f,Re] = friction_factor_calc(dpdx,L,[repository,'z0=p01_dpdx=-1_N8_devc.csv'],mu);loglog(Re,f,'gsq')
@@ -102,7 +103,7 @@ dpdx = -1;
 [f,Re] = friction_factor_calc(dpdx,L,[repository,'z0=p01_dpdx=-1_N16_devc.csv'],mu);loglog(Re,f,'g^')
 [f,Re] = friction_factor_calc(dpdx,2*L,[repository,'z0=p02_dpdx=-1_N16_devc.csv'],mu);H(4)=loglog(Re,f,'k>');loglog(Re,f,'g>');
 
-dpdx = -100;
+dpdx = -100/rho;
 [f,Re] = friction_factor_calc(dpdx,L,[repository,'z0=p0001_dpdx=-100_N8_devc.csv'],mu);loglog(Re,f,'bsq')
 [f,Re] = friction_factor_calc(dpdx,L,[repository,'z0=p001_dpdx=-100_N8_devc.csv'],mu);loglog(Re,f,'rsq')
 [f,Re] = friction_factor_calc(dpdx,L,[repository,'z0=p01_dpdx=-100_N8_devc.csv'],mu);loglog(Re,f,'gsq')
@@ -123,8 +124,8 @@ set(h,'Interpreter','LaTeX')
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
-set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'PaperSize',[1.1*Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 1.1*Paper_Width Paper_Height]);
 print(gcf,'-dpdf','../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/fds_moody_chart')
 
 
