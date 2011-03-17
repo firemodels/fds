@@ -18,9 +18,9 @@ N = [8,16,32,64];
 
 dz = L./N;
 error = abs(f-24./Re);
-H(1)=loglog(dz,error,'b*-','Linewidth',1.5); hold on
-H(2)=loglog(dz,dz,'k--','Linewidth',1.5);
-H(3)=loglog(dz,dz.^2,'k-','Linewidth',1.5);
+H(1)=loglog(dz,error,'b*-','Linewidth',1.); hold on
+H(2)=loglog(dz,dz,'k--','Linewidth',1.);
+H(3)=loglog(dz,dz.^2,'k-','Linewidth',1.);
 
 plot_style
 set(gca,'Units',Plot_Units)
