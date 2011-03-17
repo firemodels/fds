@@ -518,6 +518,26 @@ void draw_devices_val(void){
   glPopMatrix();
 }
 
+/* ----------------------- get_devices_val ----------------------------- */
+
+void get_vdevice_vel(float time, vdevice *vdevicei, float *vel){
+  float uvel=0.0, vvel=0.0, wvel=0.0;
+  device *udev, *vdev, *wdev;
+
+  udev = vdevicei->udev;
+  vdev = vdevicei->vdev;
+  wdev = vdevicei->wdev;
+
+  if(udev!=NULL)uvel=get_device_val(time,udev);
+  if(vdev!=NULL)vvel=get_device_val(time,vdev);
+  if(wdev!=NULL)wvel=get_device_val(time,wdev);
+  vel[0]=uvel;
+  vel[1]=vvel;
+  vel[2]=wvel;
+}
+
+/* ----------------------- get_devices_val ----------------------------- */
+
 #define IN_INTERVAL(IVAL) \
   if(time>=devicei->times[IVAL]&&time<=devicei->times[IVAL+1]){\
     if(time-devicei->times[IVAL]<devicei->times[IVAL+1]-time){\
@@ -529,8 +549,6 @@ void draw_devices_val(void){
     devicei->ival=IVAL;\
     return devicei->val;\
   }
-
-/* ----------------------- get_devices_val ----------------------------- */
 
 float get_device_val(float time, device *devicei){
   int nvals;
@@ -560,9 +578,8 @@ float get_device_val(float time, device *devicei){
 
     low = 0;
     high = nvals-1;
-    mid = (low+high)/2;
 
-    while (high>low){
+    while (high-low>1){
       mid = (low+high)/2;
       if(time>devicei->times[mid]){
         low=mid;
@@ -572,12 +589,7 @@ float get_device_val(float time, device *devicei){
       }
     }
     devicei->ival=low;
-    if(time-devicei->times[low]<devicei->times[low+1]-time){
-      devicei->val=devicei->vals[low];
-    }
-    else{
-      devicei->val=devicei->vals[low+1];
-    }
+    devicei->val=devicei->vals[low];
   }
 
   return devicei->val;
@@ -704,12 +716,12 @@ void draw_devices(void){
         prop->vars_indep_index[j]=j;
       }
     }
+    if(showtime==1&&itimes>=0&&itimes<ntimes&&showdeviceval==1){
+      output_device_val(devicei);
+    }
     if(showtime==1&&itimes>=0&&itimes<ntimes&&devicei->showstatelist!=NULL){
       int state;
 
-      if(showdeviceval==1){
-        output_device_val(devicei);
-      }
       state=devicei->showstatelist[itimes];
       draw_SVOBJECT(devicei->object,state,prop,0);
     }
@@ -4371,6 +4383,114 @@ void read_device_data(char *file, int loadstatus){
       devicei->vals[irow-2]=vals[icol];
     }
   }
+
+#define EPSDEV 0.01
+
+  FREEMEMORY(vdeviceinfo);
+  NewMemory((void **)&vdeviceinfo,ndeviceinfo*sizeof(vdevice));
+  nvdeviceinfo=0;
+  for(i=0;i<ndeviceinfo;i++){
+    vdevice *vdevi;
+    device *devi;
+    float *xyzval;
+    int j;
+
+    devi = deviceinfo + i;
+    xyzval=devi->xyz;
+
+    vdevi = vdeviceinfo + nvdeviceinfo;
+    vdevi->valdev = devi;
+    vdevi->udev=NULL;
+    vdevi->vdev=NULL;
+    vdevi->wdev=NULL;
+    vdevi->unique=1;
+    for(j=0;j<ndeviceinfo;j++){
+      device *devj;
+      float *xyz;
+
+      devj = deviceinfo + j;
+      xyz = devj->xyz;
+      if(strcmp(devj->label,"U-VELOCITY")!=0)continue;
+      if(fabs(xyz[0]-xyzval[0])>EPSDEV)continue;
+      if(fabs(xyz[1]-xyzval[1])>EPSDEV)continue;
+      if(fabs(xyz[2]-xyzval[2])>EPSDEV)continue;
+      vdevi->udev=devj;
+      break;
+    }
+    for(j=0;j<ndeviceinfo;j++){
+      device *devj;
+      float *xyz;
+
+      devj = deviceinfo + j;
+      xyz = devj->xyz;
+      if(strcmp(devj->label,"V-VELOCITY")!=0)continue;
+      if(fabs(xyz[0]-xyzval[0])>EPSDEV)continue;
+      if(fabs(xyz[1]-xyzval[1])>EPSDEV)continue;
+      if(fabs(xyz[2]-xyzval[2])>EPSDEV)continue;
+      vdevi->vdev=devj;
+      break;
+    }
+    for(j=0;j<ndeviceinfo;j++){
+      device *devj;
+      float *xyz;
+
+      devj = deviceinfo + j;
+      xyz = devj->xyz;
+      if(strcmp(devj->label,"W-VELOCITY")!=0)continue;
+      if(fabs(xyz[0]-xyzval[0])>EPSDEV)continue;
+      if(fabs(xyz[1]-xyzval[1])>EPSDEV)continue;
+      if(fabs(xyz[2]-xyzval[2])>EPSDEV)continue;
+      vdevi->wdev=devj;
+      break;
+    }
+    if(vdevi->udev!=NULL||vdevi->vdev!=NULL||vdevi->wdev!=NULL){
+      nvdeviceinfo++;
+    }
+  }
+  for(i=0;i<nvdeviceinfo;i++){
+    vdevice *vdevi;
+    int j;
+    float *xyzi;
+
+    vdevi = vdeviceinfo + i;
+    xyzi = vdevi->valdev->xyz;
+    for(j=i+1;j<nvdeviceinfo;j++){
+      vdevice *vdevj;
+      float *xyzj;
+
+      vdevj = vdeviceinfo + j;
+      if(vdevj->unique==0)continue;
+      xyzj = vdevj->valdev->xyz;
+      if(fabs(xyzi[0]-xyzj[0])>EPSDEV)continue;
+      if(fabs(xyzi[1]-xyzj[1])>EPSDEV)continue;
+      if(fabs(xyzi[2]-xyzj[2])>EPSDEV)continue;
+      vdevj->unique=0;
+    }
+
+  }
+  max_dev_vel=-1.0;
+  for(i=0;i<nvdeviceinfo;i++){
+    vdevice *vdevi;
+    device *devval,*udev,*vdev,*wdev;
+    int j;
+
+    vdevi = vdeviceinfo + i;
+    devval = vdevi->valdev;
+    udev=vdevi->udev;
+    vdev=vdevi->vdev;
+    wdev=vdevi->wdev;
+    for(j=0;j<devval->nvals;j++){
+      float uvel=0.0, vvel=0.0, wvel=0.0;
+      float speed;
+
+      if(udev!=NULL)uvel=udev->vals[j];
+      if(vdev!=NULL)vvel=vdev->vals[j];
+      if(wdev!=NULL)wvel=wdev->vals[j];
+      speed = sqrt(uvel*uvel+vvel*vvel+wvel*wvel);
+      if(speed>max_dev_vel)max_dev_vel=speed;
+    }
+  }
+
 
   FREEMEMORY(vals);
   FREEMEMORY(devcunits);

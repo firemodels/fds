@@ -315,6 +315,8 @@ EXTERNCPP void mergesmoke3dcolors(smoke3d *smoke3dset);
 EXTERNCPP void setsmokecolorflags(void);
 EXTERNCPP void sort_transparent_faces(float *mm);
 EXTERNCPP void getsmokedir(float *mm);
+EXTERNCPP void get_vdevice_vel(float time, vdevice *devicei, float *vel);
+EXTERNCPP float get_device_val(float time, device *devicei);
 EXTERNCPP void getvolsmokedir(float *mm);
 EXTERNCPP void getzonesmokedir(float *mm);
 EXTERNCPP void get_world_eyepos(float *mm, float user_eyepos[3], float scaled_eyepos[3]);

@@ -683,6 +683,13 @@ typedef struct _device{
   int type;
 } device;
 
+/* --------------------------  vdevice ------------------------------------ */
+
+typedef struct {
+  int unique;
+  device *udev,*vdev,*wdev,*valdev;
+} vdevice;
+
 /* --------------------------  camviewdata ------------------------------------ */
 
 typedef struct {
