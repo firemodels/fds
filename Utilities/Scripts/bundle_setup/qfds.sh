@@ -6,7 +6,7 @@ then
   echo "Usage: qfds.sh fds_command casename.fds"
   echo ""
   echo "Runs a serial FDS case on a Linux cluster using the "
-  echo "PBS/SGE qsub batch queuing command"
+  echo "PBS/SGE qsub batch queuing command (SVN $Revision$')"
   echo ""
   echo "  fds_command - full path to fds command name"
   echo " casename.fds - fds case"
