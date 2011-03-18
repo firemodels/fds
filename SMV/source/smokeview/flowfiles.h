@@ -659,7 +659,7 @@ typedef struct _device{
   char label[30], *labelptr;
   char quantity[30], unit[30];
   float *times, *vals;
-  int ival,nvals;
+  int ival,nvals,dup;
   mesh *device_mesh;
   texture  *textureinfo;
   char *texturefile;
