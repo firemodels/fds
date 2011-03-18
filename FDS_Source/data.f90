@@ -2188,7 +2188,7 @@ SELECT CASE(GAS_NAME)
       SIGMA=4.112_EB
       EPSOK=335.4_EB 
       MW=64._EB
-      FORMULA='SF6'             
+      FORMULA='SO2'             
    CASE('SULFUR HEXAFLUORIDE')
       SIGMA=5.128_EB
       EPSOK=222.1_EB 
