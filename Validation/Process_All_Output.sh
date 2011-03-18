@@ -8,10 +8,10 @@ $VDIR/Beyler_Hood/FDS_Output_Files/Process_Output.csh
 $VDIR/BRE_Spray/FDS_Output_Files/Process_Output.csh
 $VDIR/Bryant_Doorway/FDS_Output_Files/Process_Output.csh
 $VDIR/CAROLFIRE/FDS_Output_Files/Process_Output.csh
-$VDIR/Flame_Height/FDS_Output_Files/Process_Output.csh
 $VDIR/FM_Parallel_Panels/FDS_Output_Files/Process_Output.csh
 $VDIR/FM_SNL/FDS_Output_Files/Process_Output.csh
 $VDIR/Hamins_CH4/FDS_Output_Files/Process_Output.csh
+$VDIR/Heskestad_Flame_Height/FDS_Output_Files/Process_Output.csh
 $VDIR/LLNL_Enclosure/FDS_Output_Files/Process_Output.csh
 $VDIR/McCaffrey_Plume/FDS_Output_Files/Process_Output.csh
 $VDIR/Moody_Chart/FDS_Output_Files/Process_Output.csh
