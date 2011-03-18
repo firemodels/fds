@@ -8420,9 +8420,8 @@ INIT_LOOP: DO N=1,N_INIT_READ
                CALL SHUTDOWN(MESSAGE)
             ENDIF
             
-            IF (DT_INSERT<0._EB) THEN
-               IN%DT_INSERT = T_END-T_BEGIN+10.
-            ELSE
+            IF (DT_INSERT>0._EB) THEN
+               IN%SINGLE_INSERTION = .FALSE.
                IN%DT_INSERT = DT_INSERT
             ENDIF
 
@@ -9425,6 +9424,15 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
          
       CASE ('VELOCITY PATCH') ! error statements to come
          PATCH_VELOCITY = .TRUE.
+         ALLOCATE(DV%DEVC_INDEX(1),STAT=IZERO)
+         DV%DEVC_INDEX(1) = 0
+         DO NN=1,N_DEVC
+            IF (DEVICE(NN)%ID==DV%DEVC_ID) DV%DEVC_INDEX(1) = NN
+         ENDDO
+         IF (DV%DEVC_INDEX(1)==0) THEN
+            WRITE(MESSAGE,'(A)') 'ERROR: A VELOCITY PATCH DEVC line needs a DEVC_ID to control it'
+            CALL SHUTDOWN(MESSAGE)
+         ENDIF
 
    END SELECT SPECIAL_QUANTITIES
 

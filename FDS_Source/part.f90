@@ -542,11 +542,34 @@ OVERALL_INSERT_LOOP: DO
 
       IN => INITIALIZATION(IB)
 
+      ! Determine if the INITIALIZATION type involves particles or droplets. If not, cycle.
+
       IPC = IN%PART_INDEX
       IF (IPC<1) CYCLE VOLUME_INSERT_LOOP
+      IF (IN%SINGLE_INSERTION .AND. IN%ALREADY_INSERTED) CYCLE VOLUME_INSERT_LOOP
+
+      ! Determine if the particles/droplets are controlled by devices
+
       PC => PARTICLE_CLASS(IPC)
+      IF (PC%DEVC_INDEX>0) THEN
+         IF (.NOT.DEVICE(PC%DEVC_INDEX)%CURRENT_STATE) THEN
+            IN%PARTICLE_INSERT_CLOCK(NM) = T
+            CYCLE VOLUME_INSERT_LOOP
+         ENDIF
+      ENDIF
+      IF (PC%CTRL_INDEX>0) THEN
+         IF (.NOT.CONTROL(PC%CTRL_INDEX)%CURRENT_STATE) THEN
+            IN%PARTICLE_INSERT_CLOCK(NM) = T
+            CYCLE VOLUME_INSERT_LOOP
+         ENDIF
+      ENDIF
+
+      ! If it is not time to insert particles/droplets for this INITIALIZATION block, cycle.
+
       IF (T < IN%PARTICLE_INSERT_CLOCK(NM)) CYCLE VOLUME_INSERT_LOOP
- 
+
+      ! Start processing the INITIALIZATION info
+
       N_INITIAL = IN%NUMBER_INITIAL_DROPLETS
       IF (N_INITIAL==0) CYCLE VOLUME_INSERT_LOOP
 
@@ -571,6 +594,7 @@ OVERALL_INSERT_LOOP: DO
    
       ! Assign properties to the initial droplets/particles
    
+      IN%ALREADY_INSERTED = .TRUE.
       MASS_SUM = 0._EB
       INSERT_PARTICLE_LOOP: DO I=1,N_INITIAL
          NLP = NLP + 1
@@ -692,6 +716,7 @@ OVERALL_INSERT_LOOP: DO
  
    DO N=1,N_INIT
       IN => INITIALIZATION(N)
+      IF (IN%SINGLE_INSERTION) CYCLE
       IF (T >= IN%PARTICLE_INSERT_CLOCK(NM)) IN%PARTICLE_INSERT_CLOCK(NM) = IN%PARTICLE_INSERT_CLOCK(NM) + IN%DT_INSERT
       IF (T >= IN%PARTICLE_INSERT_CLOCK(NM)) INSERT_ANOTHER_BATCH = .TRUE.
    ENDDO
