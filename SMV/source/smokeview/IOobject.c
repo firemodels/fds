@@ -747,8 +747,14 @@ void draw_devices(void){
         prop->vars_indep_index[j]=j;
       }
     }
-    if(showtime==1&&itimes>=0&&itimes<ntimes&&showdeviceval==1&&devicei->dup==0){
-      output_device_val(devicei);
+    if(showtime==1&&itimes>=0&&itimes<ntimes&&showdeviceval==1&&ndevicetypes>0){
+      int type,vistype=0;
+
+      type=devicei->type2;
+      if(type>=0&&type<ndevicetypes)vistype=devicetypes[type]->type2vis;
+      if(vistype==1){
+        output_device_val(devicei);
+      }
     }
     if(showtime==1&&itimes>=0&&itimes<ntimes&&devicei->showstatelist!=NULL){
       int state;
@@ -4417,33 +4423,6 @@ void read_device_data(char *file, int loadstatus){
 
 #define EPSDEV 0.01
 
-  for(i=0;i<ndeviceinfo;i++){
-    device *devi;
-
-    devi = deviceinfo + i;
-    devi->dup=0;
-  }
-  for(i=0;i<ndeviceinfo;i++){
-    int j;
-    device *devi;
-    float *xyzi;
-
-    devi = deviceinfo + i;
-
-    if(devi->dup==1)continue;
-    xyzi = devi->xyz;
-    for(j=i+1;j<ndeviceinfo;j++){
-      device *devj;
-      float *xyzj;
-
-      devj = deviceinfo + j;
-      if(devj->dup==1)continue;
-      xyzj = devj->xyz;
-      if(fabs(xyzi[0]-xyzj[0])<EPSDEV&&fabs(xyzi[1]-xyzj[1])<EPSDEV&&fabs(xyzi[2]-xyzj[2])<EPSDEV){
-        devj->dup=1;
-      }
-    }
-  }
   FREEMEMORY(vdeviceinfo);
   NewMemory((void **)&vdeviceinfo,ndeviceinfo*sizeof(vdevice));
   nvdeviceinfo=0;
@@ -4549,6 +4528,33 @@ void read_device_data(char *file, int loadstatus){
     }
   }
 
+  if(ndeviceinfo>0){
+    FREEMEMORY(devicetypes);
+    NewMemory((void **)&devicetypes,ndeviceinfo*sizeof(device *));
+    for(i=0;i<ndeviceinfo;i++){
+      device *devi;
+
+      devi = deviceinfo + i;
+      devi->type2=-1;
+    }
+    for(i=0;i<ndeviceinfo;i++){
+      int j;
+      device *devi;
+
+      devi = deviceinfo + i;
+      if(devi->type2>=0)continue;
+      devi->type2=ndevicetypes;
+      devi->type2vis=0;
+      devicetypes[ndevicetypes++]=devi;
+      for(j=i+1;j<ndeviceinfo;j++){
+        device *devj;
+
+        devj = deviceinfo + j;
+        if(devj->type2<0&&strcmp(devi->quantity,devj->quantity)==0)devj->type2=devi->type2;
+      }
+    }
+    devicetypes[0]->type2vis=1;
+  }
 
   FREEMEMORY(vals);
   FREEMEMORY(devcunits);

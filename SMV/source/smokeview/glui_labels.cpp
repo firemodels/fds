@@ -37,9 +37,11 @@ GLUI_Spinner *SPINNER_tick_xmax=NULL;
 GLUI_Spinner *SPINNER_tick_ymax=NULL;
 GLUI_Spinner *SPINNER_tick_zmax=NULL;
 
+GLUI_Rollout *panel_objects=NULL;
 GLUI_Rollout *panel_user_tick=NULL;
 GLUI_Rollout *panel_label1=NULL;
 GLUI_Panel *panel_label2=NULL;
+GLUI_Panel *panel_devicevis=NULL;
 GLUI_Panel *panel_tick1;
 GLUI_Panel *panel_tick1a;
 GLUI_Panel *panel_tick1b;
@@ -122,6 +124,7 @@ GLUI_Panel *panel_showhide=NULL;
 #define LABELS_BENCHMARK 17
 #define LABELS_HMS 18
 #define SAVE_SETTINGS 99
+#define SHOWDEVICEVALS 26
 
 /* ------------------ glui_labels_setup ------------------------ */
 
@@ -162,8 +165,6 @@ extern "C" void glui_labels_setup(int main_window){
 //    LABELS_drawface,Labels_CB);
 //  SPINNER_cullgeom_portsize->set_int_limits(3,100,GLUI_LIMIT_CLAMP);
   glui_labels->add_checkbox_to_panel(panel_label1,"Sort transparent faces",&sorttransparentfaces,LABELS_drawface,Labels_CB);
-  glui_labels->add_checkbox_to_panel(panel_label1,"Show device values",&showdeviceval);
-  glui_labels->add_checkbox_to_panel(panel_label1,"Show device vel vectors",&showvdeviceval);
   glui_labels->add_button_to_panel(panel_label1,"Show All",LABELS_showall,Labels_CB);
   glui_labels->add_button_to_panel(panel_label1,"Hide All",LABELS_hideall,Labels_CB);
 
@@ -188,7 +189,21 @@ extern "C" void glui_labels_setup(int main_window){
   glui_labels->add_radiobutton_to_group(RADIO_fontsize,"small font");
   glui_labels->add_radiobutton_to_group(RADIO_fontsize,"large font");
 
-  SPINNER_sensorrelsize=glui_labels->add_spinner_to_panel(panel_label1,"Sensor Scaling",GLUI_SPINNER_FLOAT,&sensorrelsize,LABELS_sensorsize,Labels_CB);
+
+  panel_objects = glui_labels->add_rollout("Devices/Objects",false);
+  if(ndevicetypes>0){
+    int i;
+    
+    SPINNER_sensorrelsize=glui_labels->add_spinner_to_panel(panel_objects,"Scaling",GLUI_SPINNER_FLOAT,&sensorrelsize,LABELS_sensorsize,Labels_CB);
+    glui_labels->add_checkbox_to_panel(panel_objects,"Show velocity vectors",&showvdeviceval);
+    glui_labels->add_checkbox_to_panel(panel_objects,"Show values",&showdeviceval,SHOWDEVICEVALS,Labels_CB);
+    panel_devicevis=glui_labels->add_panel_to_panel(panel_objects,"",false);
+    for(i=0;i<ndevicetypes;i++){
+      glui_labels->add_checkbox_to_panel(panel_devicevis,devicetypes[i]->quantity,&devicetypes[i]->type2vis);
+    }
+    Labels_CB(SHOWDEVICEVALS);
+
+  }
 
   panel_user_tick = glui_labels->add_rollout("User Tick Settings",false);
 
@@ -437,6 +452,17 @@ extern "C" void show_glui_labels(void){
 void Labels_CB(int var){
   updatemenu=1;
   switch (var){
+  case SHOWDEVICEVALS:
+    if(panel_devicevis!=NULL){
+      if(showdeviceval==1){
+        panel_devicevis->enable();
+      }
+      else{
+        panel_devicevis->disable();
+      }
+    }
+
+  break;
 #ifdef pp_BETA
   case LABELS_drawface:
     /*
