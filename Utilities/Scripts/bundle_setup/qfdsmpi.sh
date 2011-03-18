@@ -6,7 +6,7 @@ then
   echo "Usage: qfdsmpi.sh nthreads platform fds_command casename.fds"
   echo ""
   echo "Runs a parallel FDS case on a Linux cluster using the "
-  echo "PBS/SGE qsub batch queuing command"
+  echo "PBS/SGE qsub batch queuing command (SVN $Revision$')"
   echo ""
   echo "    nthreads - number of threads (usually number of &mesh lines)"
   echo "    platform - ia32 or intel64"
