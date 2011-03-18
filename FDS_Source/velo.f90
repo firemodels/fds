@@ -2849,14 +2849,16 @@ END SUBROUTINE IBM_VELOCITY_FLUX
 
 SUBROUTINE PATCH_VELOCITY_FLUX
 
-! If PATCH_VELOCITY=T on MISC, the user may specify a polynomial profile using the PROF line
-! and assign this profile to a region using INIT.  This routine specifies the source term in
-! the momentum equation to drive the local velocity toward this user-specified value, in much
-! the same way as the immersed boundary method (see IBM_VELOCITY_FLUX).
+! The user may specify a polynomial profile using the PROP and DEVC lines. This routine 
+! specifies the source term in the momentum equation to drive the local velocity toward
+! this user-specified value, in much the same way as the immersed boundary method
+! (see IBM_VELOCITY_FLUX).
 
-TYPE(INITIALIZATION_TYPE), POINTER :: IN
-TYPE(PROFILE_TYPE), POINTER :: PF
-INTEGER :: N,I,J,K
+USE DEVICE_VARIABLES, ONLY: DEVICE_TYPE,PROPERTY_TYPE,N_DEVC,DEVICE,PROPERTY
+
+TYPE(DEVICE_TYPE), POINTER :: DV=>NULL()
+TYPE(PROPERTY_TYPE), POINTER :: PY=>NULL()
+INTEGER :: N,I,J,K,IC1,IC2
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),HP=>NULL()
 REAL(EB) :: VELP,DX0,DY0,DZ0
 
@@ -2872,82 +2874,96 @@ ELSE
    HP => HS
 ENDIF
 
-INIT_LOOP: DO N=1,N_INIT
-   IN=>INITIALIZATION(N)
-   IF (IN%PROF_INDEX<1) CYCLE INIT_LOOP
-   PF=>PROFILE(IN%PROF_INDEX)
+DEVC_LOOP: DO N=1,N_DEVC
 
-   QUANTITY_SELECT: SELECT CASE(TRIM(PF%QUANTITY))
+   DV=>DEVICE(N)
+   IF (DV%PROP_INDEX<1)       CYCLE DEVC_LOOP
+   IF (.NOT.DV%CURRENT_STATE) CYCLE DEVC_LOOP
+   PY=>PROPERTY(DV%PROP_INDEX)
+
+   I_VEL_SELECT: SELECT CASE(PY%I_VEL)
    
-      CASE('U-VELOCITY') QUANTITY_SELECT
+      CASE(1) I_VEL_SELECT
       
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=0,IBAR
                
-                  IF ( X(I)<IN%X1 .OR.  X(I)>IN%X2) CYCLE ! Inefficient but simple
-                  IF (YC(J)<IN%Y1 .OR. YC(J)>IN%Y2) CYCLE
-                  IF (ZC(K)<IN%Z1 .OR. ZC(K)>IN%Z2) CYCLE
+                  IC1 = CELL_INDEX(I,J,K)
+                  IC2 = CELL_INDEX(I+1,J,K)
+                  IF (SOLID(IC1) .OR. SOLID(IC2)) CYCLE
                
-                  DX0 =  X(I)-IN%X0
-                  DY0 = YC(J)-IN%Y0
-                  DZ0 = ZC(K)-IN%Z0
-                  VELP = PF%P0 + DX0*PF%PX(1) + 0.5_EB*(DX0*DX0*PF%PXX(1,1)+DX0*DY0*PF%PXX(1,2)+DX0*DZ0*PF%PXX(1,3)) &
-                               + DY0*PF%PX(2) + 0.5_EB*(DY0*DX0*PF%PXX(2,1)+DY0*DY0*PF%PXX(2,2)+DY0*DZ0*PF%PXX(2,3)) &
-                               + DZ0*PF%PX(3) + 0.5_EB*(DZ0*DX0*PF%PXX(3,1)+DZ0*DY0*PF%PXX(3,2)+DZ0*DZ0*PF%PXX(3,3))
+                  IF ( X(I)<DV%X1 .OR.  X(I)>DV%X2) CYCLE ! Inefficient but simple
+                  IF (YC(J)<DV%Y1 .OR. YC(J)>DV%Y2) CYCLE
+                  IF (ZC(K)<DV%Z1 .OR. ZC(K)>DV%Z2) CYCLE
+               
+                  DX0 =  X(I)-DV%X
+                  DY0 = YC(J)-DV%Y
+                  DZ0 = ZC(K)-DV%Z
+                  VELP = PY%P0 + DX0*PY%PX(1) + 0.5_EB*(DX0*DX0*PY%PXX(1,1)+DX0*DY0*PY%PXX(1,2)+DX0*DZ0*PY%PXX(1,3)) &
+                               + DY0*PY%PX(2) + 0.5_EB*(DY0*DX0*PY%PXX(2,1)+DY0*DY0*PY%PXX(2,2)+DY0*DZ0*PY%PXX(2,3)) &
+                               + DZ0*PY%PX(3) + 0.5_EB*(DZ0*DX0*PY%PXX(3,1)+DZ0*DY0*PY%PXX(3,2)+DZ0*DZ0*PY%PXX(3,3))
         
                   FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - (VELP-UU(I,J,K))/DT
                ENDDO
             ENDDO
          ENDDO
      
-      CASE('V-VELOCITY') QUANTITY_SELECT
+      CASE(2) I_VEL_SELECT
      
          DO K=1,KBAR
             DO J=0,JBAR
                DO I=1,IBAR
                
-                  IF (XC(I)<IN%X1 .OR. XC(I)>IN%X2) CYCLE
-                  IF ( Y(J)<IN%Y1 .OR.  Y(J)>IN%Y2) CYCLE
-                  IF (ZC(K)<IN%Z1 .OR. ZC(K)>IN%Z2) CYCLE
+                  IC1 = CELL_INDEX(I,J,K)
+                  IC2 = CELL_INDEX(I,J+1,K)
+                  IF (SOLID(IC1) .OR. SOLID(IC2)) CYCLE
+               
+                  IF (XC(I)<DV%X1 .OR. XC(I)>DV%X2) CYCLE
+                  IF ( Y(J)<DV%Y1 .OR.  Y(J)>DV%Y2) CYCLE
+                  IF (ZC(K)<DV%Z1 .OR. ZC(K)>DV%Z2) CYCLE
                   
-                  DX0 = XC(I)-IN%X0
-                  DY0 =  Y(J)-IN%Y0
-                  DZ0 = ZC(K)-IN%Z0
-                  VELP = PF%P0 + DX0*PF%PX(1) + 0.5_EB*(DX0*DX0*PF%PXX(1,1)+DX0*DY0*PF%PXX(1,2)+DX0*DZ0*PF%PXX(1,3)) &
-                               + DY0*PF%PX(2) + 0.5_EB*(DY0*DX0*PF%PXX(2,1)+DY0*DY0*PF%PXX(2,2)+DY0*DZ0*PF%PXX(2,3)) &
-                               + DZ0*PF%PX(3) + 0.5_EB*(DZ0*DX0*PF%PXX(3,1)+DZ0*DY0*PF%PXX(3,2)+DZ0*DZ0*PF%PXX(3,3))
+                  DX0 = XC(I)-DV%X
+                  DY0 =  Y(J)-DV%Y
+                  DZ0 = ZC(K)-DV%Z
+                  VELP = PY%P0 + DX0*PY%PX(1) + 0.5_EB*(DX0*DX0*PY%PXX(1,1)+DX0*DY0*PY%PXX(1,2)+DX0*DZ0*PY%PXX(1,3)) &
+                               + DY0*PY%PX(2) + 0.5_EB*(DY0*DX0*PY%PXX(2,1)+DY0*DY0*PY%PXX(2,2)+DY0*DZ0*PY%PXX(2,3)) &
+                               + DZ0*PY%PX(3) + 0.5_EB*(DZ0*DX0*PY%PXX(3,1)+DZ0*DY0*PY%PXX(3,2)+DZ0*DZ0*PY%PXX(3,3))
         
                   FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - (VELP-VV(I,J,K))/DT
                ENDDO
             ENDDO
          ENDDO
      
-      CASE('W-VELOCITY') QUANTITY_SELECT
+      CASE(3) I_VEL_SELECT
      
          DO K=0,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
                
-                  IF (XC(I)<IN%X1 .OR. XC(I)>IN%X2) CYCLE
-                  IF (YC(J)<IN%Y1 .OR. YC(J)>IN%Y2) CYCLE
-                  IF ( Z(K)<IN%Z1 .OR.  Z(K)>IN%Z2) CYCLE
+                  IC1 = CELL_INDEX(I,J,K)
+                  IC2 = CELL_INDEX(I,J,K+1)
+                  IF (SOLID(IC1) .OR. SOLID(IC2)) CYCLE
                
-                  DX0 = XC(I)-IN%X0
-                  DY0 = YC(J)-IN%Y0
-                  DZ0 =  Z(K)-IN%Z0
-                  VELP = PF%P0 + DX0*PF%PX(1) + 0.5_EB*(DX0*DX0*PF%PXX(1,1)+DX0*DY0*PF%PXX(1,2)+DX0*DZ0*PF%PXX(1,3)) &
-                               + DY0*PF%PX(2) + 0.5_EB*(DY0*DX0*PF%PXX(2,1)+DY0*DY0*PF%PXX(2,2)+DY0*DZ0*PF%PXX(2,3)) &
-                               + DZ0*PF%PX(3) + 0.5_EB*(DZ0*DX0*PF%PXX(3,1)+DZ0*DY0*PF%PXX(3,2)+DZ0*DZ0*PF%PXX(3,3))
+                  IF (XC(I)<DV%X1 .OR. XC(I)>DV%X2) CYCLE
+                  IF (YC(J)<DV%Y1 .OR. YC(J)>DV%Y2) CYCLE
+                  IF ( Z(K)<DV%Z1 .OR.  Z(K)>DV%Z2) CYCLE
+               
+                  DX0 = XC(I)-DV%X
+                  DY0 = YC(J)-DV%Y
+                  DZ0 =  Z(K)-DV%Z
+                  VELP = PY%P0 + DX0*PY%PX(1) + 0.5_EB*(DX0*DX0*PY%PXX(1,1)+DX0*DY0*PY%PXX(1,2)+DX0*DZ0*PY%PXX(1,3)) &
+                               + DY0*PY%PX(2) + 0.5_EB*(DY0*DX0*PY%PXX(2,1)+DY0*DY0*PY%PXX(2,2)+DY0*DZ0*PY%PXX(2,3)) &
+                               + DZ0*PY%PX(3) + 0.5_EB*(DZ0*DX0*PY%PXX(3,1)+DZ0*DY0*PY%PXX(3,2)+DZ0*DZ0*PY%PXX(3,3))
         
                   FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K)-HP(I,J,K+1)) - (VELP-WW(I,J,K))/DT
                ENDDO
             ENDDO
          ENDDO
      
-   END SELECT QUANTITY_SELECT
+   END SELECT I_VEL_SELECT
 
-ENDDO INIT_LOOP
+ENDDO DEVC_LOOP
 
 END SUBROUTINE PATCH_VELOCITY_FLUX
 
