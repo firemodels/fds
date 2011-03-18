@@ -1452,7 +1452,7 @@ NAMELIST /MISC/ PR,SC,TMPA,GVEC,FYI, &
                 VAN_DRIEST,HRRPUVCUT_MAX,RUN_AVG_FAC,THERMOPHORETIC_DEPOSITION,TURBULENT_DEPOSITION, &
                 VEG_LEVEL_SET,CP_FTMP,HRRPUV_MAX_SMV,TERRAIN_IMAGE,NEW_EVAP, &
                 SCALAR_ENERGY_TOLERANCE,TKE_TOLERANCE,MEAN_FORCING,RFAC_FORCING,USE_MAX_FILTER_WIDTH, &
-                WFDS,PATCH_VELOCITY,OVERWRITE,UVW_FILE
+                WFDS,OVERWRITE,UVW_FILE
  
 ! Physical constants
  
@@ -4054,8 +4054,10 @@ REAL(EB) :: ACTIVATION_OBSCURATION,ACTIVATION_TEMPERATURE,ALPHA_C,ALPHA_E,BETA_C
             CABLE_JACKET_THICKNESS,CABLE_FAILURE_TEMPERATURE, &
             C_FACTOR,CHARACTERISTIC_VELOCITY,DT_INSERT,ORIFICE_DIAMETER, &
             DROPLET_VELOCITY,FLOW_RATE,FLOW_TAU,GAUGE_TEMPERATURE,INITIAL_TEMPERATURE,K_FACTOR,LENGTH,SPRAY_ANGLE(2), &
-            OFFSET,OPERATING_PRESSURE,RTI,PDPA_START,PDPA_END,PDPA_RADIUS
-INTEGER :: I,N,NN,PDPA_M,PDPA_N,DROPLETS_PER_SECOND
+            OFFSET,OPERATING_PRESSURE,RTI,PDPA_START,PDPA_END,PDPA_RADIUS, &
+            P0=0._EB,PX(3)=0._EB,PXX(3,3)=0._EB
+
+INTEGER :: I,N,NN,PDPA_M,PDPA_N,DROPLETS_PER_SECOND,VELOCITY_COMPONENT=0
 LOGICAL :: PDPA_INTEGRATE,PDPA_NORMALIZE
 EQUIVALENCE(LENGTH,ALPHA_C)
 CHARACTER(30) :: SMOKEVIEW_ID(SMOKEVIEW_OBJECTS_DIMENSION),QUANTITY='null',PART_ID='null',FLOW_RAMP='null', &
@@ -4070,8 +4072,9 @@ NAMELIST /PROP/ ACTIVATION_OBSCURATION,ACTIVATION_TEMPERATURE,ALPHA_C,ALPHA_E,BE
                 C_FACTOR,CHARACTERISTIC_VELOCITY,DROPLETS_PER_SECOND,DT_INSERT,ORIFICE_DIAMETER, &
                 DROPLET_VELOCITY,FLOW_RATE,FLOW_RAMP,FLOW_TAU,ID,GAUGE_TEMPERATURE,INITIAL_TEMPERATURE,K_FACTOR,LENGTH,OFFSET, &
                 OPERATING_PRESSURE,PART_ID,QUANTITY,RTI,SPRAY_ANGLE,SMOKEVIEW_ID,SPEC_ID,SPRAY_PATTERN_TABLE,PRESSURE_RAMP, &
-                PDPA_START,PDPA_END,PDPA_RADIUS,PDPA_M,PDPA_N,PDPA_INTEGRATE,PDPA_NORMALIZE,SMOKEVIEW_PARAMETERS
-
+                PDPA_START,PDPA_END,PDPA_RADIUS,PDPA_M,PDPA_N,PDPA_INTEGRATE,PDPA_NORMALIZE,SMOKEVIEW_PARAMETERS, &
+                P0,PX,PXX,VELOCITY_COMPONENT
+                
 ! Count the PROP lines in the input file. Note how many of these are cables.
 
 N_PROP=0
@@ -4214,6 +4217,19 @@ READ_PROP_LOOP: DO N=0,N_PROP
       PY%PDPA_M        = 3
       PY%PDPA_N        = 0
    ENDIF
+   
+   ! Velocity Patch
+   
+   PATCH_VELOCITY_IF: IF (VELOCITY_COMPONENT>0) THEN
+      PY%I_VEL = VELOCITY_COMPONENT
+      PY%P0 = P0  ! value at origin of Taylor expansion
+      DO J=1,3
+         PY%PX(J) = PX(J)  ! first derivative of P evaluated at origin
+         DO I=1,3
+            PY%PXX(I,J) = PXX(I,J)  ! second derivative of P evaluated at origin
+         ENDDO
+      ENDDO
+   ENDIF PATCH_VELOCITY_IF
 
    ! Set flow variables
 
@@ -8433,25 +8449,6 @@ INIT_LOOP: DO N=1,N_INIT_READ
                IN%NUMBER_INITIAL_DROPLETS = NUMBER_INITIAL_DROPLETS*PARTICLE_CLASS(IN%PART_INDEX)%N_SPLIT
             ENDIF
             
-            ! Special case: INIT is used to patch a velocity profile
-
-            PATCH_VELOCITY_IF: IF (PATCH_VELOCITY) THEN
-               SELECT CASE(ORIGIN)
-                  CASE('CENTER')
-                     IN%X0 = 0.5_EB*(IN%X1+IN%X2)
-                     IN%Y0 = 0.5_EB*(IN%Y1+IN%Y2)
-                     IN%Z0 = 0.5_EB*(IN%Z1+IN%Z2)
-                  CASE('CORNER')
-                     IN%X0 = IN%X1
-                     IN%Y0 = IN%Y1
-                     IN%Z0 = IN%Z1
-                  CASE DEFAULT
-                     WRITE(MESSAGE,'(A)') 'ERROR: ORIGIN specified incorrectly on INIT'
-                     CALL SHUTDOWN(MESSAGE)
-               END SELECT
-               IN%PROF_ID = PROF_ID
-            ENDIF PATCH_VELOCITY_IF
-            
             ! Special case: POINTWISE_DROPLET_INIT
 
             POINTWISE_DROPLET_IF: IF (ANY(XYZ>-1000._EB)) THEN
@@ -9425,6 +9422,9 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
             CALL SHUTDOWN(MESSAGE)
          ENDIF
          DV%STATISTICS = 'TIME INTEGRAL'
+         
+      CASE ('VELOCITY PATCH') ! error statements to come
+         PATCH_VELOCITY = .TRUE.
 
    END SELECT SPECIAL_QUANTITIES
 
@@ -9449,10 +9449,10 @@ END SUBROUTINE PROC_DEVC
 SUBROUTINE READ_PROF
  
 INTEGER :: N,NM,MESH_NUMBER,NN,N_PROFO,IOR
-REAL(EB) :: XYZ(3),P0=0._EB,PX(3)=0._EB,PXX(3,3)=0._EB
+REAL(EB) :: XYZ(3)
 CHARACTER(30) :: QUANTITY
 TYPE (PROFILE_TYPE), POINTER :: PF=>NULL()
-NAMELIST /PROF/ XYZ,QUANTITY,IOR,ID,FYI,P0,PX,PXX
+NAMELIST /PROF/ XYZ,QUANTITY,IOR,ID,FYI
  
 N_PROF = 0
 REWIND(LU_INPUT)
@@ -9496,62 +9496,43 @@ PROF_LOOP: DO NN=1,N_PROFO
    IF (IOS==1) EXIT PROF_LOOP
    READ(LU_INPUT,PROF) 
    
-   NOT_PATCH_PROFILE_IF: IF (.NOT.PATCH_VELOCITY) THEN
- 
-      ! Check for bad PROF quantities or coordinates
+   ! Check for bad PROF quantities or coordinates
 
-      IF (IOR==0) THEN
-         WRITE(MESSAGE,'(A,I4,A)') 'ERROR: Specify orientation of PROF ' ,NN,' using the parameter IOR'
-         CALL SHUTDOWN(MESSAGE)
-      ENDIF
+   IF (IOR==0) THEN
+      WRITE(MESSAGE,'(A,I4,A)') 'ERROR: Specify orientation of PROF ' ,NN,' using the parameter IOR'
+      CALL SHUTDOWN(MESSAGE)
+   ENDIF
 
-      BAD = .FALSE.
+   BAD = .FALSE.
  
-      MESH_LOOP: DO NM=1,NMESHES
-         IF (.NOT.EVACUATION_ONLY(NM)) THEN      
-            M=>MESHES(NM)
-            IF (XYZ(1)>=M%XS .AND. XYZ(1)<=M%XF .AND. XYZ(2)>=M%YS .AND. XYZ(2)<=M%YF .AND. XYZ(3)>=M%ZS .AND. XYZ(3)<=M%ZF) THEN
-               MESH_NUMBER = NM
-               EXIT MESH_LOOP
-            ENDIF
+   MESH_LOOP: DO NM=1,NMESHES
+      IF (.NOT.EVACUATION_ONLY(NM)) THEN      
+         M=>MESHES(NM)
+         IF (XYZ(1)>=M%XS .AND. XYZ(1)<=M%XF .AND. XYZ(2)>=M%YS .AND. XYZ(2)<=M%YF .AND. XYZ(3)>=M%ZS .AND. XYZ(3)<=M%ZF) THEN
+            MESH_NUMBER = NM
+            EXIT MESH_LOOP
          ENDIF
-         IF (NM==NMESHES) BAD = .TRUE.
-      ENDDO MESH_LOOP
- 
-      IF (BAD) THEN
-         N      = N-1
-         N_PROF = N_PROF-1
-         CYCLE PROF_LOOP
       ENDIF
-   
-      ! Assign parameters to the PROFILE array
+      IF (NM==NMESHES) BAD = .TRUE.
+   ENDDO MESH_LOOP
  
-      PF => PROFILE(N)
-      PF%ORDINAL = NN
-      PF%MESH    = MESH_NUMBER
-      PF%ID   = ID
-      PF%QUANTITY = QUANTITY
-      PF%X       = XYZ(1)
-      PF%Y       = XYZ(2)
-      PF%Z       = XYZ(3)
-      PF%IOR     = IOR
+   IF (BAD) THEN
+      N      = N-1
+      N_PROF = N_PROF-1
+      CYCLE PROF_LOOP
+   ENDIF
    
-   ELSE NOT_PATCH_PROFILE_IF
-   
-      ! Experimental patch velocity profile
-      
-      PF => PROFILE(N)
-      PF%P0 = P0   ! value at origin of Taylor expansion
-      DO J=1,3
-         PF%PX(J) = PX(J)          ! first derivative of P evaluated at origin
-         DO I=1,3
-            PF%PXX(I,J) = PXX(I,J) ! second derivative of P evaluated at origin
-         ENDDO
-      ENDDO
-      PF%ID  = ID
-      PF%QUANTITY = QUANTITY
-      
-   ENDIF NOT_PATCH_PROFILE_IF
+   ! Assign parameters to the PROFILE array
+
+   PF => PROFILE(N)
+   PF%ORDINAL = NN
+   PF%MESH    = MESH_NUMBER
+   PF%ID   = ID
+   PF%QUANTITY = QUANTITY
+   PF%X       = XYZ(1)
+   PF%Y       = XYZ(2)
+   PF%Z       = XYZ(3)
+   PF%IOR     = IOR
  
 ENDDO PROF_LOOP
 REWIND(LU_INPUT)
