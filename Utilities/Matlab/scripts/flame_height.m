@@ -10,7 +10,7 @@
 close all
 clear all
 
-addpath('../../Validation/Flame_Height/FDS_Output_Files/');
+addpath('../../Validation/Heskestad_Flame_Height/FDS_Output_Files/');
 
 % list of line files
 filename = {'Qs=p1_RI=05_line.csv',    'Qs=p1_RI=10_line.csv',    'Qs=p1_RI=20_line.csv';   ...
@@ -69,7 +69,7 @@ end % hrr loop
 fclose('all');
 
 header1 = {'Q*','L/D (RI=5)','L/D (RI=10)','L/D (RI=20)'};
-filename1 = '../../Validation/Flame_Height/FDS_Output_Files/FDS_Flame_Height.csv';
+filename1 = '../../Validation/Heskestad_Flame_Height/FDS_Output_Files/FDS_Flame_Height.csv';
 fid = fopen(filename1,'wt');
 fprintf(fid,'%s, %s, %s, %s\n',header1{:});
 for i=1:16
@@ -78,7 +78,7 @@ end
 fclose(fid);
   
 header2 = {'Q*','L/D'};
-filename2 = '../../Validation/Flame_Height/Experimental_Data/Heskestad_Correlation.csv';
+filename2 = '../../Validation/Heskestad_Flame_Height/Experimental_Data/Heskestad_Correlation.csv';
 fid = fopen(filename2,'wt');
 fprintf(fid,'%s, %s\n',header2{:});
 for i=1:16
