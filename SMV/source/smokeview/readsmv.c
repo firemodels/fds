@@ -5408,7 +5408,7 @@ typedef struct {
   }
   CheckMemory;
 
-  remove_dup_blockages();
+  //remove_dup_blockages(); //xxx remove_dup
   initcullgeom(cullgeom);
   init_evac_prop();
 

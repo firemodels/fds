@@ -5194,6 +5194,8 @@ void remove_dup_blockages(void){
       
         bc = bclist[j];
         bcm1 = bclist[j-1];
+        if(bc->nshowtime>0)continue;
+        if(bcm1->nshowtime>0)continue;
         ijk1=bcm1->ijk;
         ijk2=bc->ijk;
         if(ijk1[1]-ijk1[0]>1)continue; // only consider removing one cell blockages
@@ -5208,8 +5210,7 @@ void remove_dup_blockages(void){
       }
       jj=0;
       for(j=0;j<meshi->nbptrs;j++){
-        blockagedata *bc, *bcm1;
-        int *ijk1, *ijk2;
+        blockagedata *bc;
       
         bc=bclist[j];
         if(bc->dup==1)continue;
@@ -5218,6 +5219,7 @@ void remove_dup_blockages(void){
       meshi->nbptrs=jj;
     }
   }
+  updatefacelists=1;
 }
   
 
