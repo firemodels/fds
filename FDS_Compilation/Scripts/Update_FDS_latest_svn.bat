@@ -32,7 +32,7 @@ echo Updating %linux_fdsdir% in the Linux repository on acrux to the latest revi
 plink %svn_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_fdsdir% acrux.cfr.nist.gov
 
 echo.
-echo Updating %linux_fdsdir% in the OSX repository on %OSXHOST% to the latest revision
-plink %svn_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_fdsdir% %OSXHOST%
+echo Updating %linux_fdsdir% in the OSX repository on %osx_hostname% to the latest revision
+plink %svn_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_fdsdir% %osx_hostname%
 
 pause
