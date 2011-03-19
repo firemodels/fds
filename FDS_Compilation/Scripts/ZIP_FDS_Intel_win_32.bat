@@ -25,8 +25,8 @@ set togoogle=%svn_root%\FDS_Compilation\to_google\%fdsroot%
 IF EXIST %togoogle% rmdir /S /Q %togoogle%
 mkdir %togoogle%
 
-copy intel_Win_32\fds_win_32.exe %togoogle%\fds6.exe
-copy mpi_intel_Win_32\fds_win_mpi_32.exe %togoogle%\fds6_mpi.exe
+copy intel_Win_32\fds_win_32.exe %togoogle%\.
+copy mpi_intel_Win_32\fds_win_mpi_32.exe %togoogle%\.
 
 echo.
 echo winzipping distribution directory
@@ -37,7 +37,7 @@ cd ..
 echo.
 echo creating self-extracting archive
 if exist %fdsroot%.exe erase %fdsroot%.exe
-wzipse32 %fdsroot%.zip -runasadmin -d "C:\Program Files\fds6\bin"
+wzipse32 %fdsroot%.zip -runasadmin -d "C:\Program Files\FDS\%fds_edition%\bin"
 
 echo %fdsroot%.exe located in %cd%
 pause

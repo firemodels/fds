@@ -79,7 +79,7 @@ wzzip -a -r -P %zipbase%.zip *
 
 echo
 echo creating self-extracting archive
-wzipse32 %zipbase%.zip -runasadmin -d "c:\program files\fds\fds6\bin"
+wzipse32 %zipbase%.zip -runasadmin -d "c:\program files\%win_fds_root%\bin"
 copy %zipbase%.exe ..\.
 
 echo win%platform% Smokeview bundle built

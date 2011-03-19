@@ -1,6 +1,6 @@
 @echo off
 
-set fdsversion=FDS6
+set fdsversion=%fds_edition%
 
 set fdsdir=%svn_root%\FDS_Compilation\intel_win_%platform%
 set fdsmpidir=%svn_root%\FDS_Compilation\mpi_intel_win_%platform%
