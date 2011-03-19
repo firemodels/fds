@@ -1,10 +1,11 @@
 @echo off
 Rem ------ FDS/Smokeview version and revision numbers ---------
 
-set smv_version=5.6
-set smv_revision=7032
-set fds_version=5.5.3
-set fds_revision=7031
+set smv_version=5.6.3a
+set smv_revision=7457
+set fds_version=fds6_test
+set fds_revision=7687
+set fds_edition=FDS6
 
 Rem ---------- FDS-Smokeview repository settings ------------
 
@@ -14,12 +15,12 @@ set linux_svn_root=FDS-SMV
 
 Rem ---------- User/Host names -----------------
 
-set LINUXHOST=acrux.cfr.nist.gov
+set linux_hostname=acrux.cfr.nist.gov
 set OSXHOST=bluesky.cfr.nist.gov
 set LINUXCOMPILE=fire79
 
 set linux_username=%username%
-set svn_logon=%linux_username%@%LINUXHOST%
+set svn_logon=%linux_username%@%linux_hostname%
 
 Rem ----------- for uploading to Google Code -----------------
 
