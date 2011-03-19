@@ -190,18 +190,20 @@ extern "C" void glui_labels_setup(int main_window){
   glui_labels->add_radiobutton_to_group(RADIO_fontsize,"large font");
 
 
-  panel_objects = glui_labels->add_rollout("Devices/Objects",false);
-  if(ndevicetypes>0){
+  if(ndeviceinfo>0){
     int i;
     
+    panel_objects = glui_labels->add_rollout("Devices/Objects",false);
     SPINNER_sensorrelsize=glui_labels->add_spinner_to_panel(panel_objects,"Scaling",GLUI_SPINNER_FLOAT,&sensorrelsize,LABELS_sensorsize,Labels_CB);
-    glui_labels->add_checkbox_to_panel(panel_objects,"Show velocity vectors",&showvdeviceval);
-    glui_labels->add_checkbox_to_panel(panel_objects,"Show values",&showdeviceval,SHOWDEVICEVALS,Labels_CB);
-    panel_devicevis=glui_labels->add_panel_to_panel(panel_objects,"",false);
-    for(i=0;i<ndevicetypes;i++){
-      glui_labels->add_checkbox_to_panel(panel_devicevis,devicetypes[i]->quantity,&devicetypes[i]->type2vis);
+    if(ndevicetypes>0){
+      glui_labels->add_checkbox_to_panel(panel_objects,"Show velocity vectors",&showvdeviceval);
+      glui_labels->add_checkbox_to_panel(panel_objects,"Show values",&showdeviceval,SHOWDEVICEVALS,Labels_CB);
+      panel_devicevis=glui_labels->add_panel_to_panel(panel_objects,"",false);
+      for(i=0;i<ndevicetypes;i++){
+        glui_labels->add_checkbox_to_panel(panel_devicevis,devicetypes[i]->quantity,&devicetypes[i]->type2vis);
+      }
+      Labels_CB(SHOWDEVICEVALS);
     }
-    Labels_CB(SHOWDEVICEVALS);
 
   }
 

@@ -4542,7 +4542,7 @@ void read_device_data(char *file, int loadstatus){
       device *devi;
 
       devi = deviceinfo + i;
-      if(devi->type2>=0)continue;
+      if(devi->type2>=0||strlen(devi->quantity)==0)continue;
       devi->type2=ndevicetypes;
       devi->type2vis=0;
       devicetypes[ndevicetypes++]=devi;
@@ -4553,7 +4553,7 @@ void read_device_data(char *file, int loadstatus){
         if(devj->type2<0&&strcmp(devi->quantity,devj->quantity)==0)devj->type2=devi->type2;
       }
     }
-    devicetypes[0]->type2vis=1;
+    if(ndevicetypes>0)devicetypes[0]->type2vis=1;
   }
 
   FREEMEMORY(vals);
