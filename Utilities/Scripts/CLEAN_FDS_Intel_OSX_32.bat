@@ -23,10 +23,10 @@ set scriptdir=%linux_svn_root%/Utilities/Scripts
 
 set target=intel_osx_32
 set fdsdir=%linux_svn_root%/Utilities/Makefile/Intel_OSX_32
-plink %svn_logon% %scriptdir%/MAKE_fds_onhost.csh %target% %fdsdir% %OSXHOST% clean
+plink %svn_logon% %scriptdir%/MAKE_fds_onhost.csh %target% %fdsdir% %osx_hostname% clean
 
 set target=mpi_intel_osx_32
 set fdsdir=%linux_svn_root%/Utilities/Makefile/Mpi_Intel_OSX_32
-plink %svn_logon% %scriptdir%/MAKE_fds_onhost.csh %target% %fdsdir% %OSXHOST% clean
+plink %svn_logon% %scriptdir%/MAKE_fds_onhost.csh %target% %fdsdir% %osx_hostname% clean
 
 pause

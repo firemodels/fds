@@ -23,6 +23,6 @@ set target=intel_osx_64
 set fdsdir=%linux_svn_root%/Utilities/Makefile/Intel_OSX_64
 set scriptdir=%linux_svn_root%/Utilities/Scripts
 
-plink %svn_logon% %scriptdir%/MAKE_fds_onhost.csh %target% %fdsdir% %OSXHOST%
+plink %svn_logon% %scriptdir%/MAKE_fds_onhost.csh %target% %fdsdir% %osx_hostname%
 
 pause
