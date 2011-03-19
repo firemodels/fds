@@ -30,7 +30,7 @@ echo Updating the directory %linux_smvdir% in the Linux repository to the SVN re
 plink %svn_logon% %scriptdir%/UPDATE_smv_onhost.csh  %linux_smvdir% %smv_revision% %LINUXHOST%
 
 echo.
-echo Updating the directory %linux_smvdir% in the the OSX repository on %OSXHOST% to the SVN revision: %smv_revision%
-plink %svn_logon% %scriptdir%/UPDATE_smv_onhost.csh  %linux_smvdir% %smv_revision% %OSXHOST%
+echo Updating the directory %linux_smvdir% in the the OSX repository on %osx_hostname% to the SVN revision: %smv_revision%
+plink %svn_logon% %scriptdir%/UPDATE_smv_onhost.csh  %linux_smvdir% %smv_revision% %osx_hostname%
 
 pause

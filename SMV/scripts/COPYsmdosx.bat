@@ -23,7 +23,7 @@ cd %svn_root%\smv\scripts
 
 set scriptdir=FDS-SMV/SMV/scripts
 
-plink %svn_logon% %scriptdir%/ssh_command.csh %OSXHOST% %scriptdir% COPYsmdosx.csh
+plink %svn_logon% %scriptdir%/ssh_command.csh %osx_hostname% %scriptdir% COPYsmdosx.csh
 
 echo.
 echo copy complete

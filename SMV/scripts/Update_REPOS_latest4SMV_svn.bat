@@ -29,7 +29,7 @@ echo Updating the Linux repository, %linux_svn_root%, to the latest revision
 plink %svn_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_svn_root% acrux.cfr.nist.gov
 
 echo.
-echo Updating the %OSXHOST% OSX repository, %linux_svn_root%, to the latest revision
-plink %svn_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_svn_root% %OSXHOST%
+echo Updating the %osx_hostname% OSX repository, %linux_svn_root%, to the latest revision
+plink %svn_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_svn_root% %osx_hostname%
 
 pause
