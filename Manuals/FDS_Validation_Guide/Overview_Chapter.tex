@@ -2,8 +2,8 @@
 \chapter{What is Model Validation?}
 
 Although there are various definitions of model validation, for example those contained in
-ASTM E 1355~\cite{ASTM:E1355}, most define it as the process of determining how well the mathematical model predicts the actual physical phenomena of
-interest.
+ASTM E 1355~\cite{ASTM:E1355}, most define it as the process of determining how well the mathematical model
+predicts the actual physical phenomena of interest.
 Validation typically involves (1) comparing model predictions with experimental measurements, (2) quantifying the differences in light of uncertainties in
 both the measurements and the model inputs, and (3) deciding if the model is appropriate for the given application. This Guide only does (1) and (2). Number (3) is
 the responsibility of the model user.
@@ -20,137 +20,87 @@ any quantity of interest, but the prediction may not be accurate because of limi
 information about the fuels, geometry, and so on.
 
 
+\section{How to Use this Guide}
 
-\section{Model Scenarios}
-
-When doing a validation study, the first question to ask is, ``What is the application?'' There are countless fire scenarios to consider, but from the
-point of view of validation it is useful to divide them into two classes -- those for which the fire is {\em specified} as an input to the model and those for which the fire
-is {\em predicted} by the model. The former is often the case for a design application, the latter for a forensic reconstruction. Consider each in turn.
-
-Design  applications  typically  involve  an existing  building  or  a
-building  under  design. A  so-called  ``design  fire'' is  specified
-either by  a regulatory authority  or by the engineers  performing the
-analysis. Because the  fire's heat release rate is  specified, the role of
-the model is to predict  the transport of heat and combustion products
-throughout  the room or  rooms of  interest. Ventilation  equipment is
-often included  in the simulation, like fans,  blowers, exhaust hoods,
-HVAC ducts,  smoke management systems,  {\em etc.} Sprinkler  and heat
-and smoke detector activation are also of interest.  The effect of the
-sprinkler spray on the fire is usually less of interest since the heat release rate of the fire
-is  specified rather  than  predicted. Detailed  descriptions of  the
-contents of the building are usually not necessary because these items
-are assumed to not contribute to the fire,  and even if they are, the burning rate
-will be specified, not predicted.  Sometimes, it is necessary  to predict
-the heat  flux from the fire  to a nearby ``target,''  and even though
-the target  may heat up  to some specified ignition  temperature, the
-subsequent spread  of the  fire usually goes  beyond the scope  of the
-analysis because of the uncertainty  inherent in object to object fire
-spread.
-
-Forensic reconstructions require the  model to simulate an actual fire
-based on  information that is collected  after the event,  such as eye
-witness accounts, unburned materials,  burn signatures, {\em etc.} The
-purpose  of  the simulation  is  to  connect  a sequence  of  discrete
-observations  with  a continuous  description  of  the fire  dynamics.
-Usually,  reconstructions  involve  more gas/solid  phase  interaction
-because  virtually  all  objects  in  a  given  room  are  potentially
-ignitable, especially when flashover  occurs. Thus, there is much more
-emphasis on  such phenomena as  heat transfer to  surfaces, pyrolysis,
-flame  spread, and suppression.  In general,  forensic reconstructions
-are more challenging simulations  to perform because they require more
-detailed  information  about the  room  contents,  and  there is  much
-greater uncertainty in the total heat release rate as the fire spreads
-from object to object.
-
-Validation  studies  of FDS  to  date  have  focussed more  on  design
-applications   than  reconstructions.  The   reason  is   that  design
-applications usually involve specified  fires and demand a minimum of
-thermophysical properties  of real materials.  Transport  of smoke and
-heat  is  the  primary  focus,  and measurements  can  be  limited  to
-well-placed thermocouples, a few  heat flux gauges, gas samplers, {\em
-etc.} Phenomena of importance in forensic reconstructions, like second
-item  ignition, flame  spread, vitiation  effects and  extinction, are
-more   difficult  to   model  and   more  difficult   to   study  with
-well-controlled experiments. Uncertainties  in material properties and
-measurements, as  well as simplifying assumptions in  the model, often
-force the  comparison between model and measurement  to be qualitative
-at best.  Nevertheless, current validation  efforts are moving  in the
-direction of these more difficult issues.
-
-
-
-
-\section{Model Outputs}
-
-For a given fire scenario, there are a number of different quantities that the model predicts, like gas temperature, heat flux, and so on. A typical
-fire experiment can produce hundreds of time histories of point measurements, each of which can be reproduced by the model to some level of accuracy.
-It is a challenge to sort out all the plots and graphs of all the different quantities and come to some general conclusion. For this reason, this Guide
-is organized by output quantity, not by individual experiment or fire scenario. In this way, it is possible to assess, over a range of different experiments
-and scenarios, the performance of the model in predicting a given quantity. Overall trends and biases become much more clear when the data is organized this way.
-
-Keep in mind that for any fire experiment, FDS might predict a particular quantity accurately (within the experimental uncertainty bounds, for example), but another quantity less
-accurately. For example, in the a series of 15 full-scale fire experiments conducted at NIST in 2003, sponsored by the U.S.~Nuclear Regulatory Commission, the
-average hot gas layer (HGL) temperature predictions were within the accuracy of the experiments themselves, yet the smoke concentration predictions differed from the
-measurements by as much as a factor of 3. Why? Consider the following issues associated with various types of measurements:
-\begin{itemize}
-\item Is the measurement taken at a single point, or averaged over many points? In the example above, the HGL temperature is an average of many
-thermocouple measurements, whereas the smoke concentration is based on the extinction of laser light over a short length span. Model error tends to be
-reduced by the averaging process, plus most fire models, including FDS, are based on global mass and energy conservation laws that are expressed as
-spatial averages.
-\item Is the measured quantity time-averaged or instantaneous? For example, a surface temperature prediction is less prone to error in comparison to a
-heat flux prediction because the former is, in some sense, a time-integral of the latter.
-\item In the case of a point measurement, how close to the fire is it? The terms ``near-field'' and ``far-field'' are used throughout this Guide to describe
-the relative distance from the fire. In general, predictions of near-field phenomena are more prone to error than far-field. There are exceptions, however. For example,
-a prediction of the temperature directly within the flaming region may be more accurate than that made just a fire diameter away because of the fact that temperatures
-tend to stabilize at about 1000~$^\circ$C within the fire itself, but then rapidly decrease away from the flames. Less accurate predictions typically occur in regions
-of steep gradients (rapid changes, both in space and time).
-\end{itemize}
-
-
-
-
-\section{Model Accuracy}
-
-The desired accuracy for each predicted quantity depends on the  technical  issues  associated with  the
-analysis.  You must ask the question: How accurate does  the analysis have to
-be  to  answer  the  technical  question posed?
-Returning   to    the   earlier   definitions    of   ``design''   and
-``reconstruction,''  design applications  typically are  more accurate
-because the heat release rate is typically specified rather than predicted, and
-the    initial    and    boundary    conditions   are    better
-characterized -- at least in the analysis. Mathematically, a design calculation is an example of a
-``well-posed''  problem  in  which   the  solution  of  the  governing
-equations is  advanced in  time starting from  a known set  of initial
-conditions and constrained by a known set of boundary conditions.  The
-accuracy of the results is a function of the fidelity of the numerical
-solution, which is  mainly dependent on the size  of the computational
-grid.
-
-A reconstruction is an example of an ``ill-posed'' problem because the
-outcome  is known  whereas  the initial  and  boundary conditions  are usually
-not. There is  no single, unique solution to the  problem, that is, it
-is possible to simulate numerous fires that produce the same general outcome.
-There is no right or wrong answer, but rather a small set of plausible
-fire scenarios that are  consistent with the collected evidence. These
-simulations are then used to demonstrate to fire service personnel why
-the fire behaved as it did  based on the current understanding of fire
-physics  incorporated in  the model.  Most  often, the  result of  the
-analysis is only  qualitative. If there is any  quantification at all,
-it could be in the time to reach critical events, like a roof collapse
-or room flashover.
-
-
-\section{How to Use the Guide}
-
-This Guide is merely a repository of calculation results. As FDS develops, it will expand to include new experimental measurements of newly modeled
-physical phenomena. With each minor release of FDS (version 5.2 to 5.3, for example), the plots and graphs will all be redone to ensure that changes to
-the model have not decreased the accuracy of a previous version. If you are embarking on a validation study, you might want to consider the following steps:
+This Guide is merely a repository of calculation results. As FDS develops, it will expand to include new experimental
+measurements of newly modeled physical phenomena. With each minor release of FDS (version 5.2 to 5.3, for example),
+the plots and graphs will all be redone to ensure that changes to the model have not decreased the accuracy of a
+previous version. If you are embarking on a validation study, you might want to consider the following steps:
 \begin{enumerate}
-\item Survey Chapter~\ref{Survey_Chapter} to learn about past efforts by others to validate the model for applications similar to yours
-\item Identify in Chapter~\ref{Experiments_Chapter} experimental data sets appropriate for your application
-\item Read the specific chapters for the quantities of interest
+\item Survey Chapter~\ref{Survey_Chapter} to learn about past efforts by others to validate the model for
+applications similar to yours. Keep in mind that most of the referenced validation exercises have been performed with
+older versions of FDS, and you may want to obtain the experimental data and the old FDS input files and redo the
+simulations with the version of FDS that you plan to use.
+\item Identify in Chapter~\ref{Experiments_Chapter} experimental data sets appropriate for your application. In particular,
+the summary of the experiments found in Section~\ref{experiment_summary} contains a table listing various non-dimensional
+quantities that characterize the parameters of the experiments. For example, the equivalence ratio of a compartment fire
+experiment indicates the degree to which the fire was over or under-ventilated.
+To say that the results of a given experiment are relevant to
+your scenario, you need to demonstrate that its parameters ``fit'' within the parameter space outlined in
+Table~\ref{Test_Parameters}.
+\item Search the Table of Contents to find comparisons of FDS simulations with the relevant experiments.
+For a given experiment, there may be numerous measurements of quantities like the gas temperature,
+heat flux, and so on.
+It is a challenge to sort out all the plots and graphs of all the different quantities and come to some general conclusion.
+For this reason, this Guide is organized by output quantity, not by individual experiment or fire scenario.
+In this way, it is possible to assess, over a range of
+different experiments and scenarios, the performance of the model in predicting a given quantity.
+Overall trends and biases become much more clear when the data is organized this way.
 \end{enumerate}
-The experimental data sets and FDS input/output files are all managed via the on-line project archiving system. You might want to re-run examples of interest
-to better understand how the calculations were designed, and how changes in the various parameters might affect the results. This is known as a {\em sensitivity study},
-and it is difficult to document all the parameter variations of the calculations described in this report. Thus, it is a good idea to determine which of the input
-parameters are particularly important.
+
+The experimental data sets and FDS input/output files described in this Guide are all managed via the on-line project archiving system.
+You might want to re-run examples of interest
+to better understand how the calculations were designed, and how changes in the various parameters might affect the results.
+This is known as a {\em sensitivity study},
+and it is difficult to document all the parameter variations of the calculations described in this report.
+Thus, it is a good idea to determine which of the input parameters are particularly important.
+
+
+
+\section{Blind, Specified, and Open Validation Experiments}
+
+ASTM E 1355~\cite{ASTM:E1355} describes three basic types of validation calculations -- {\em Blind}, {\em Specified}, and
+{\em Open}.
+\begin{description}
+\item [Blind Calculation:] The model user is provided with
+a basic description of the scenario to be modeled. For this
+application, the problem description is not exact; the model
+user is responsible for developing appropriate model inputs
+from the problem description, including additional details of
+the geometry, material properties, and fire description, as
+appropriate. Additional details necessary to simulate the scenario
+with a specific model are left to the judgement of the
+model user. In addition to illustrating the comparability of
+models in actual end-use conditions, this will test the ability of
+those who use the model to develop appropriate input data for
+the models.
+\item [Specified Calculation:] The model user is provided
+with a complete detailed description of model inputs, including
+geometry, material properties, and fire description. As a
+follow-on to the blind calculation, this test provides a more
+careful comparison of the underlying physics in the models
+with a more completely specified scenario.
+\item [Open Calculation:] The model user is provided with
+the most complete information about the scenario, including
+geometry, material properties, fire description, and the results
+of experimental tests or benchmark model runs which were
+used in the evaluation of the blind or specified calculations of
+the scenario. Deficiencies in available input (used for the blind
+calculation) should become most apparent with comparison of
+the open and blind calculation.
+\end{description}
+The calculations presented in this Guide all fall into the {\em Open} category. There are several reasons for this, the first
+being the most practical:
+\begin{itemize}
+\item All of the calculations presented in this Guide are re-run with each minor release of FDS ({\em i.e.} 5.3 to 5.4). The
+fact that the experiments have already been performed and the results are known automatically qualify these
+calculations as {\em Open}.
+\item Some of the calculations described in this Guide did originally fall into the {\em Specified} category because they
+were first performed before the experiments were conducted. However, in almost every case, the experiment was not conducted
+exactly as specified, and the calculation results were not particulary useful in determining the accuracy of the model.
+\item None of the calculations were truly {\em Blind}, even those performed prior to the experiments. The purpose of a
+{\em Blind} calculation is to assess the degree to which the choice of input parameters affects the outcome. However,
+in such cases it is impossible to discern the uncertainty associated from the choice of input parameters from that associated
+with the model itself. The primary purpose of this Guide is to quantify the uncertainty of the model itself, in which
+case {\em Blind} calculations are of little value.
+\end{itemize}
