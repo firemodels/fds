@@ -6476,6 +6476,9 @@ indicating the time increment (s) for insertion. The parameter {\ct NUMBER\_INIT
 {\ct DT\_INSERT} seconds. If the droplets/particles have mass, use {\ct MASS\_PER\_TIME} (kg/s) instead of {\ct MASS\_PER\_VOLUME} to indicate how much mass is to be
 introduced per second.
 
+If you want to delay the insertion of droplets, you can use either a {\ct DEVC\_ID} or a {\ct CTRL\_ID} on the {\ct INIT} line to name the controlling device.
+See Section~\ref{info:basic_control} for more information on controlling devices.
+
 
 \subsection{Controlling the Number of Particles and Droplets}
 \label{info:particle_number}
@@ -9916,7 +9919,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct INIT} (Initial Conditions)} \\
 \hline \hline
 \endhead
+{\ct CTRL\_ID}                  & Character         & See Section~\ref{info:initial_droplets}           &               &               \\ \hline
 {\ct DENSITY}                   & Real              & See Section~\ref{info:INIT}                       & kg/m$^3$      & Ambient       \\ \hline
+{\ct DEVC\_ID}                  & Character         & See Section~\ref{info:initial_droplets}           &               &               \\ \hline
 {\ct DT\_INSERT}                & Real              & See Section~\ref{info:initial_droplets}           & s             &               \\ \hline
 {\ct HRRPUV}                    & Real              & See Section~\ref{info:INIT}                       & kW/m$^3$      &               \\ \hline
 {\ct MASS\_FRACTION(N)}         & Real Array        & See Section~\ref{info:INIT}                       & kg/kg         & Ambient       \\ \hline
@@ -10330,13 +10335,13 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct VELOCITY\_TOLERANCE}           & Real          & See Section~\ref{info:PRES}           &  m/s          &                        \\ \hline
 \end{longtable}
 
-% Undocumented: SCARC_METHOD , SCARC_KRYLOV , SCARC_MULTIGRID, SCARC_SMOOTH  , SCARC_PRECON, 
-%               SCARC_COARSE , SCARC_INITIAL, SCARC_STORAGE  , SCARC_ACCURACY, SCARC_DEBUG , 
-%               SCARC_MULTIGRID_CYCLE, SCARC_MULTIGRID_LEVEL , SCARC_MULTIGRID_COARSENING  , 
-%               SCARC_MULTIGRID_ITERATIONS  , SCARC_MULTIGRID_ACCURACY   , 
-%               SCARC_KRYLOV_ITERATIONS     , SCARC_KRYLOV_ACCURACY      , 
-%               SCARC_SMOOTH_ITERATIONS     , SCARC_SMOOTH_ACCURACY      , SCARC_SMOOTH_OMEGA, 
-%               SCARC_PRECON_ITERATIONS     , SCARC_PRECON_ACCURACY      , SCARC_PRECON_OMEGA, 
+% Undocumented: SCARC_METHOD , SCARC_KRYLOV , SCARC_MULTIGRID, SCARC_SMOOTH  , SCARC_PRECON,
+%               SCARC_COARSE , SCARC_INITIAL, SCARC_STORAGE  , SCARC_ACCURACY, SCARC_DEBUG ,
+%               SCARC_MULTIGRID_CYCLE, SCARC_MULTIGRID_LEVEL , SCARC_MULTIGRID_COARSENING  ,
+%               SCARC_MULTIGRID_ITERATIONS  , SCARC_MULTIGRID_ACCURACY   ,
+%               SCARC_KRYLOV_ITERATIONS     , SCARC_KRYLOV_ACCURACY      ,
+%               SCARC_SMOOTH_ITERATIONS     , SCARC_SMOOTH_ACCURACY      , SCARC_SMOOTH_OMEGA,
+%               SCARC_PRECON_ITERATIONS     , SCARC_PRECON_ACCURACY      , SCARC_PRECON_OMEGA,
 %               SCARC_COARSE_ITERATIONS     , SCARC_COARSE_ACCURACY
 
 \vspace{\baselineskip}
