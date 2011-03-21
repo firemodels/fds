@@ -4226,7 +4226,8 @@ READ_PROP_LOOP: DO N=0,N_PROP
       DO J=1,3
          PY%PX(J) = PX(J)  ! first derivative of P evaluated at origin
          DO I=1,3
-            PY%PXX(I,J) = PXX(I,J)  ! second derivative of P evaluated at origin
+            IF (I>J) PXX(I,J)=PXX(J,I) ! make symmetric
+            PY%PXX(I,J) = PXX(I,J) ! second derivative of P evaluated at origin
          ENDDO
       ENDDO
    ENDIF PATCH_VELOCITY_IF
