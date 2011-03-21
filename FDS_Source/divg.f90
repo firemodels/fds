@@ -18,7 +18,7 @@ CONTAINS
 SUBROUTINE DIVERGENCE_PART_1(T,NM)
 USE COMP_FUNCTIONS, ONLY: SECOND 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
-USE PHYSICAL_FUNCTIONS, ONLY: GET_DIFFUSIVITY,GET_CONDUCTIVITY,GET_SPECIFIC_HEAT,GET_AVERAGE_SPECIFIC_HEAT_DIFF, &
+USE PHYSICAL_FUNCTIONS, ONLY: GET_CONDUCTIVITY,GET_SPECIFIC_HEAT,GET_AVERAGE_SPECIFIC_HEAT_DIFF, &
                               GET_AVERAGE_SPECIFIC_HEAT,GET_CONDUCTIVITY_BG,GET_SPECIFIC_HEAT_BG,GET_AVERAGE_SPECIFIC_HEAT_BG
 USE EVAC, ONLY: EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, EMESH_NFIELDS, EVAC_FDS6
 USE TURBULENCE, ONLY: WANNIER_FLOW 
@@ -27,10 +27,10 @@ USE TURBULENCE, ONLY: WANNIER_FLOW
  
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX,KDTDY,KDTDZ,DP,KP, &
-          RHO_D_DYDX,RHO_D_DYDY,RHO_D_DYDZ,RHO_D,RHOP,H_RHO_D_DYDX,H_RHO_D_DYDY,H_RHO_D_DYDZ,RTRM
-REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP
-REAL(EB) :: DELKDELT,VC,DTDX,DTDY,DTDZ,TNOW, YSUM,YY_GET(1:N_TRACKED_SPECIES),ZZ_GET(1:I_Z_MAX- I_Z_MIN + 1), &
-            HDIFF,DYDX,DYDY,DYDZ,T,RDT,RHO_D_DYDN,TSI,TIME_RAMP_FACTOR,ZONE_VOLUME,DELTA_P,PRES_RAMP_FACTOR,&
+          RHO_D_DZDX,RHO_D_DZDY,RHO_D_DZDZ,RHO_D,RHOP,H_RHO_D_DZDX,H_RHO_D_DZDY,H_RHO_D_DZDZ,RTRM
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
+REAL(EB) :: DELKDELT,VC,DTDX,DTDY,DTDZ,TNOW, YSUM,ZZ_GET(1:N_TRACKED_SPECIES), &
+            HDIFF,DYDX,DYDY,DYDZ,T,RDT,RHO_D_DZDN,TSI,TIME_RAMP_FACTOR,ZONE_VOLUME,DELTA_P,PRES_RAMP_FACTOR,&
             CP,CPBAR_DIFF,TMP_G,TMP_WGT
 TYPE(SURFACE_TYPE), POINTER :: SF
 INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,IBC,I,J,K,IPZ,IOPZ
@@ -93,15 +93,15 @@ ENDDO
 ! Compute species-related finite difference terms
 
 IF (N_TRACKED_SPECIES > 0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
-   RHO_D_DYDX  => WORK1
-   RHO_D_DYDY  => WORK2
-   RHO_D_DYDZ  => WORK3
+   RHO_D_DZDX  => WORK1
+   RHO_D_DZDY  => WORK2
+   RHO_D_DZDZ  => WORK3
      
    SELECT CASE(PREDICTOR)
       CASE(.TRUE.)  
-         YYP => YYS 
+         ZZP => ZZS 
       CASE(.FALSE.) 
-         YYP => YY  
+         ZZP => ZZ  
    END SELECT
 ENDIF
 
@@ -113,7 +113,7 @@ DP  = 0._EB
 !$OMP END WORKSHARE
 IF (N_TRACKED_SPECIES > 0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
    !$OMP WORKSHARE
-   DEL_RHO_D_DEL_Y = 0._EB
+   DEL_RHO_D_DEL_Z = 0._EB
    !$OMP END WORKSHARE
 ENDIF
 !$OMP END PARALLEL
@@ -135,7 +135,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
  
 
    !$OMP PARALLEL SHARED(RHO_D) 
-   IF (DNS .AND. SPECIES(Y2SPEC(N))%MODE/=LUMPED_SPECIES) THEN
+   IF (DNS) THEN
       !$OMP WORKSHARE
       RHO_D = 0._EB
       !$OMP END WORKSHARE
@@ -145,44 +145,25 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
             DO I=1,IBAR
                ITMP = MIN(4999,INT(TMP(I,J,K)))
                TMP_WGT = TMP(I,J,K) - ITMP
-               RHO_D(I,J,K) = &
-                  RHOP(I,J,K)*(SPECIES(Y2SPEC(N))%D(ITMP)+TMP_WGT*(SPECIES(Y2SPEC(N))%D(ITMP+1)-SPECIES(Y2SPEC(N))%D(ITMP)))
+               RHO_D(I,J,K) = RHOP(I,J,K)*(Z2D(ITMP,N)+TMP_WGT*(Z2D(ITMP+1,N)-Z2D(ITMP,N)))
             ENDDO 
          ENDDO
       ENDDO
       !$OMP END DO
    ENDIF
-    
-   IF (DNS .AND. SPECIES(Y2SPEC(N))%MODE==LUMPED_SPECIES) THEN
-      !$OMP WORKSHARE
-      RHO_D = 0._EB
-      !$OMP END WORKSHARE
-      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,YSUM,ZZ_GET)
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               YSUM = SUM(YYP(I,J,K,:)) - SUM(YYP(I,J,K,I_Z_MIN:I_Z_MAX))
-               ZZ_GET = YYP(I,J,K,I_Z_MIN:I_Z_MAX)
-               CALL GET_DIFFUSIVITY(ZZ_GET,YSUM,RHO_D(I,J,K),TMP(I,J,K)) !INTENT: IN,IN,OUT,IN
-               RHO_D(I,J,K) = RHOP(I,J,K)*RHO_D(I,J,K)
-            ENDDO
-         ENDDO
-      ENDDO
-      !$OMP END DO
-   ENDIF
-   
+     
    ! Compute rho*D del Y
 
    !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,DYDX,DYDY,DYDZ)
    DO K=0,KBAR
       DO J=0,JBAR
          DO I=0,IBAR
-            DYDX = (YYP(I+1,J,K,N)-YYP(I,J,K,N))*RDXN(I)
-            RHO_D_DYDX(I,J,K) = .5_EB*(RHO_D(I+1,J,K)+RHO_D(I,J,K))*DYDX
-            DYDY = (YYP(I,J+1,K,N)-YYP(I,J,K,N))*RDYN(J)
-            RHO_D_DYDY(I,J,K) = .5_EB*(RHO_D(I,J+1,K)+RHO_D(I,J,K))*DYDY
-            DYDZ = (YYP(I,J,K+1,N)-YYP(I,J,K,N))*RDZN(K)
-            RHO_D_DYDZ(I,J,K) = .5_EB*(RHO_D(I,J,K+1)+RHO_D(I,J,K))*DYDZ
+            DYDX = (ZZP(I+1,J,K,N)-ZZP(I,J,K,N))*RDXN(I)
+            RHO_D_DZDX(I,J,K) = .5_EB*(RHO_D(I+1,J,K)+RHO_D(I,J,K))*DYDX
+            DYDY = (ZZP(I,J+1,K,N)-ZZP(I,J,K,N))*RDYN(J)
+            RHO_D_DZDY(I,J,K) = .5_EB*(RHO_D(I,J+1,K)+RHO_D(I,J,K))*DYDY
+            DYDZ = (ZZP(I,J,K+1,N)-ZZP(I,J,K,N))*RDZN(K)
+            RHO_D_DZDZ(I,J,K) = .5_EB*(RHO_D(I,J,K+1)+RHO_D(I,J,K))*DYDZ
          ENDDO
       ENDDO
    ENDDO
@@ -190,8 +171,8 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
    ! Correct rho*D del Y at boundaries and store rho*D at boundaries
 
-   !$OMP SINGLE PRIVATE(IW,IIG,JJG,KKG,RHO_D_DYDN,IOR)
-   !!$OMP DO PRIVATE(IW,IIG,JJG,KKG,RHO_D_DYDN,IOR)
+   !$OMP SINGLE PRIVATE(IW,IIG,JJG,KKG,RHO_D_DZDN,IOR)
+   !!$OMP DO PRIVATE(IW,IIG,JJG,KKG,RHO_D_DZDN,IOR)
    WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY .OR. &
           BOUNDARY_TYPE(IW)==OPEN_BOUNDARY .OR. BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP
@@ -200,21 +181,21 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       JJG = IJKW(7,IW) 
       KKG = IJKW(8,IW) 
       RHODW(IW,N) = RHO_D(IIG,JJG,KKG)
-      RHO_D_DYDN  = 2._EB*RHODW(IW,N)*(YYP(IIG,JJG,KKG,N)-YY_F(IW,N))*RDN(IW)
+      RHO_D_DZDN  = 2._EB*RHODW(IW,N)*(ZZP(IIG,JJG,KKG,N)-ZZ_F(IW,N))*RDN(IW)
       IOR = IJKW(4,IW)
       SELECT CASE(IOR) 
          CASE( 1)
-            RHO_D_DYDX(IIG-1,JJG,KKG) =  RHO_D_DYDN
+            RHO_D_DZDX(IIG-1,JJG,KKG) =  RHO_D_DZDN
          CASE(-1)
-            RHO_D_DYDX(IIG,JJG,KKG)   = -RHO_D_DYDN
+            RHO_D_DZDX(IIG,JJG,KKG)   = -RHO_D_DZDN
          CASE( 2)
-            RHO_D_DYDY(IIG,JJG-1,KKG) =  RHO_D_DYDN
+            RHO_D_DZDY(IIG,JJG-1,KKG) =  RHO_D_DZDN
          CASE(-2)
-            RHO_D_DYDY(IIG,JJG,KKG)   = -RHO_D_DYDN
+            RHO_D_DZDY(IIG,JJG,KKG)   = -RHO_D_DZDN
          CASE( 3)
-            RHO_D_DYDZ(IIG,JJG,KKG-1) =  RHO_D_DYDN
+            RHO_D_DZDZ(IIG,JJG,KKG-1) =  RHO_D_DZDN
          CASE(-3)
-            RHO_D_DYDZ(IIG,JJG,KKG)   = -RHO_D_DYDN
+            RHO_D_DZDZ(IIG,JJG,KKG)   = -RHO_D_DZDN
       END SELECT
       
    ENDDO WALL_LOOP
@@ -222,41 +203,41 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
    !$OMP END SINGLE
 
    ! Compute del dot h_n*rho*D del Y_n (part of del dot qdot")
-   SPECIES_DIFFUSION: IF (SPECIES(Y2SPEC(N))%MODE/=LUMPED_SPECIES) THEN 
+
    !$OMP SINGLE
-   H_RHO_D_DYDX => WORK5
-   H_RHO_D_DYDY => WORK6
-   H_RHO_D_DYDZ => WORK7
+   H_RHO_D_DZDX => WORK5
+   H_RHO_D_DZDY => WORK6
+   H_RHO_D_DZDZ => WORK7
    !$OMP END SINGLE
 
    !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,TMP_G,CPBAR_DIFF,HDIFF)
    DO K=0,KBAR
       DO J=0,JBAR
          DO I=0,IBAR
-            ! H_RHO_D_DYDX
+            ! H_RHO_D_DZDX
             TMP_G = .5_EB*(TMP(I+1,J,K)+TMP(I,J,K))
             CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(N,CPBAR_DIFF,TMP_G) !INTENT: IN,OUT,IN              
             HDIFF = CPBAR_DIFF*TMP_G
-            H_RHO_D_DYDX(I,J,K) = HDIFF*RHO_D_DYDX(I,J,K)
+            H_RHO_D_DZDX(I,J,K) = HDIFF*RHO_D_DZDX(I,J,K)
             
-            ! H_RHO_D_DYDY
+            ! H_RHO_D_DZDY
             TMP_G = .5_EB*(TMP(I,J+1,K)+TMP(I,J,K))
             CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(N,CPBAR_DIFF,TMP_G) !INTENT: IN,OUT,IN              
             HDIFF = CPBAR_DIFF*TMP_G
-            H_RHO_D_DYDY(I,J,K) = HDIFF*RHO_D_DYDY(I,J,K)
+            H_RHO_D_DZDY(I,J,K) = HDIFF*RHO_D_DZDY(I,J,K)
             
-            ! H_RHO_D_DYDZ
+            ! H_RHO_D_DZDZ
             TMP_G = .5_EB*(TMP(I,J,K+1)+TMP(I,J,K))               
             CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(N,CPBAR_DIFF,TMP_G) !INTENT: IN,OUT,IN
             HDIFF = CPBAR_DIFF*TMP_G
-            H_RHO_D_DYDZ(I,J,K) = HDIFF*RHO_D_DYDZ(I,J,K)
+            H_RHO_D_DZDZ(I,J,K) = HDIFF*RHO_D_DZDZ(I,J,K)
          ENDDO
       ENDDO
    ENDDO
    !$OMP END DO
 
-   !$OMP SINGLE PRIVATE(IW,IIG,JJG,KKG,IOR,TMP_G,CPBAR_DIFF,HDIFF,RHO_D_DYDN)
-   !!$OMP DO PRIVATE(IW,IIG,JJG,KKG,IOR,TMP_G,CPBAR_DIFF,HDIFF,RHO_D_DYDN)
+   !$OMP SINGLE PRIVATE(IW,IIG,JJG,KKG,IOR,TMP_G,CPBAR_DIFF,HDIFF,RHO_D_DZDN)
+   !!$OMP DO PRIVATE(IW,IIG,JJG,KKG,IOR,TMP_G,CPBAR_DIFF,HDIFF,RHO_D_DZDN)
    WALL_LOOP2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       !!$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_06'
       IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY .OR. &
@@ -268,20 +249,20 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       TMP_G = TMP_F(IW)!0.5_EB*(TMP(IIG,JJG,KKG)+TMP_F(IW))      
       CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(N,CPBAR_DIFF,TMP_G) !INTENT: IN,OUT,IN
       HDIFF = CPBAR_DIFF*TMP_G
-      RHO_D_DYDN = 2._EB*RHODW(IW,N)*(YYP(IIG,JJG,KKG,N)-YY_F(IW,N))*RDN(IW)
+      RHO_D_DZDN = 2._EB*RHODW(IW,N)*(ZZP(IIG,JJG,KKG,N)-ZZ_F(IW,N))*RDN(IW)
       SELECT CASE(IOR)
          CASE( 1) 
-            H_RHO_D_DYDX(IIG-1,JJG,KKG) =  HDIFF*RHO_D_DYDN
+            H_RHO_D_DZDX(IIG-1,JJG,KKG) =  HDIFF*RHO_D_DZDN
          CASE(-1) 
-            H_RHO_D_DYDX(IIG,JJG,KKG)   = -HDIFF*RHO_D_DYDN
+            H_RHO_D_DZDX(IIG,JJG,KKG)   = -HDIFF*RHO_D_DZDN
          CASE( 2) 
-            H_RHO_D_DYDY(IIG,JJG-1,KKG) =  HDIFF*RHO_D_DYDN
+            H_RHO_D_DZDY(IIG,JJG-1,KKG) =  HDIFF*RHO_D_DZDN
          CASE(-2) 
-            H_RHO_D_DYDY(IIG,JJG,KKG)   = -HDIFF*RHO_D_DYDN
+            H_RHO_D_DZDY(IIG,JJG,KKG)   = -HDIFF*RHO_D_DZDN
          CASE( 3) 
-            H_RHO_D_DYDZ(IIG,JJG,KKG-1) =  HDIFF*RHO_D_DYDN
+            H_RHO_D_DZDZ(IIG,JJG,KKG-1) =  HDIFF*RHO_D_DZDN
          CASE(-3) 
-            H_RHO_D_DYDZ(IIG,JJG,KKG)   = -HDIFF*RHO_D_DYDN
+            H_RHO_D_DZDZ(IIG,JJG,KKG)   = -HDIFF*RHO_D_DZDN
       END SELECT
    ENDDO WALL_LOOP2
    !!$OMP END DO
@@ -293,9 +274,9 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
-                  DP(I,J,K) = DP(I,J,K) + (H_RHO_D_DYDX(I,J,K)-H_RHO_D_DYDX(I-1,J,K))*RDX(I) + &
-                                          (H_RHO_D_DYDY(I,J,K)-H_RHO_D_DYDY(I,J-1,K))*RDY(J) + &
-                                          (H_RHO_D_DYDZ(I,J,K)-H_RHO_D_DYDZ(I,J,K-1))*RDZ(K)
+                  DP(I,J,K) = DP(I,J,K) + (H_RHO_D_DZDX(I,J,K)-H_RHO_D_DZDX(I-1,J,K))*RDX(I) + &
+                                          (H_RHO_D_DZDY(I,J,K)-H_RHO_D_DZDY(I,J-1,K))*RDY(J) + &
+                                          (H_RHO_D_DZDZ(I,J,K)-H_RHO_D_DZDZ(I,J,K-1))*RDZ(K)
                ENDDO
             ENDDO
          ENDDO
@@ -308,13 +289,12 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          !$OMP DO COLLAPSE(2) PRIVATE(K,I)
          DO K=1,KBAR
             DO I=1,IBAR
-               DP(I,J,K) = DP(I,J,K) + (R(I)*H_RHO_D_DYDX(I,J,K)-R(I-1)*H_RHO_D_DYDX(I-1,J,K))*RDX(I)*RRN(I) + &
-                                       (     H_RHO_D_DYDZ(I,J,K)-       H_RHO_D_DYDZ(I,J,K-1))*RDZ(K)
+               DP(I,J,K) = DP(I,J,K) + (R(I)*H_RHO_D_DZDX(I,J,K)-R(I-1)*H_RHO_D_DZDX(I-1,J,K))*RDX(I)*RRN(I) + &
+                                       (     H_RHO_D_DZDZ(I,J,K)-       H_RHO_D_DZDZ(I,J,K-1))*RDZ(K)
             ENDDO
          ENDDO
          !$OMP END DO
    END SELECT CYLINDER
-   ENDIF SPECIES_DIFFUSION
    
    ! Compute del dot rho*D del Y_n
  
@@ -324,9 +304,9 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
-                  DEL_RHO_D_DEL_Y(I,J,K,N) = (RHO_D_DYDX(I,J,K)-RHO_D_DYDX(I-1,J,K))*RDX(I) + &
-                                             (RHO_D_DYDY(I,J,K)-RHO_D_DYDY(I,J-1,K))*RDY(J) + &
-                                             (RHO_D_DYDZ(I,J,K)-RHO_D_DYDZ(I,J,K-1))*RDZ(K)
+                  DEL_RHO_D_DEL_Z(I,J,K,N) = (RHO_D_DZDX(I,J,K)-RHO_D_DZDX(I-1,J,K))*RDX(I) + &
+                                             (RHO_D_DZDY(I,J,K)-RHO_D_DZDY(I,J-1,K))*RDY(J) + &
+                                             (RHO_D_DZDZ(I,J,K)-RHO_D_DZDZ(I,J,K-1))*RDZ(K)
                ENDDO
             ENDDO
          ENDDO
@@ -338,28 +318,26 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          !$OMP DO COLLAPSE(2) PRIVATE(K,I)
          DO K=1,KBAR
             DO I=1,IBAR
-               DEL_RHO_D_DEL_Y(I,J,K,N) = (R(I)*RHO_D_DYDX(I,J,K)-R(I-1)*RHO_D_DYDX(I-1,J,K))*RDX(I)*RRN(I) + &
-                                          (     RHO_D_DYDZ(I,J,K)-       RHO_D_DYDZ(I,J,K-1))*RDZ(K)
+               DEL_RHO_D_DEL_Z(I,J,K,N) = (R(I)*RHO_D_DZDX(I,J,K)-R(I-1)*RHO_D_DZDX(I-1,J,K))*RDX(I)*RRN(I) + &
+                                          (     RHO_D_DZDZ(I,J,K)-       RHO_D_DZDZ(I,J,K-1))*RDZ(K)
             ENDDO
          ENDDO
          !$OMP END DO
    END SELECT CYLINDER2
 
    ! Compute -Sum h_n del dot rho*D del Y_n
- 
-   SPECIES_DIFFUSION_2: IF (SPECIES(Y2SPEC(N))%MODE/=LUMPED_SPECIES) THEN
+   
       !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,CPBAR_DIFF,HDIFF)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
                CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(N,CPBAR_DIFF,TMP(I,J,K)) !INTENT: IN,OUT,IN
                HDIFF = CPBAR_DIFF*TMP(I,J,K)
-               DP(I,J,K) = DP(I,J,K) - HDIFF*DEL_RHO_D_DEL_Y(I,J,K,N)
+               DP(I,J,K) = DP(I,J,K) - HDIFF*DEL_RHO_D_DEL_Z(I,J,K,N)
             ENDDO
          ENDDO
       ENDDO
       !$OMP END DO NOWAIT
-   ENDIF SPECIES_DIFFUSION_2
    !$OMP END PARALLEL
 ENDDO SPECIES_LOOP
 
@@ -375,20 +353,20 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
    !$OMP PARALLEL SHARED(KP)
    
    !$OMP WORKSHARE
-   KP = Y2K_C(NINT(TMPA))*SPECIES(0)%MW
+   KP = Z2K_C(NINT(TMPA))*SPECIES_MIXTURE(0)%MW
    !$OMP END WORKSHARE
    
    ! Compute thermal conductivity k (KP)
  
    K_DNS_OR_LES: IF (DNS .AND. .NOT.EVACUATION_ONLY(NM)) THEN
       IF (N_TRACKED_SPECIES > 0 ) THEN
-         !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,YY_GET) 
+         !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ZZ_GET) 
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-                  YY_GET(:) = YYP(I,J,K,:)
-                  CALL GET_CONDUCTIVITY(YY_GET,KP(I,J,K),TMP(I,J,K)) !INTENT: INOUT,OUT,IN
+                  ZZ_GET(:) = ZZP(I,J,K,:)
+                  CALL GET_CONDUCTIVITY(ZZ_GET,KP(I,J,K),TMP(I,J,K)) !INTENT: INOUT,OUT,IN
                ENDDO
             ENDDO
          ENDDO
@@ -422,13 +400,13 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
     
       CP_FTMP_IF: IF (CP_FTMP) THEN
          IF (N_TRACKED_SPECIES > 0) THEN
-            !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,YY_GET,CP)
+            !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ZZ_GET,CP)
             DO K=1,KBAR
                DO J=1,JBAR
                   DO I=1,IBAR
                      IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-                     YY_GET(:) = YYP(I,J,K,:)
-                     CALL GET_SPECIFIC_HEAT(YY_GET,CP,TMP(I,J,K)) !INTENT: IN,OUT,IN
+                     ZZ_GET(:) = ZZP(I,J,K,:)
+                     CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,TMP(I,J,K)) !INTENT: IN,OUT,IN
                      KP(I,J,K) = MU(I,J,K)*CP*RPR  
                   ENDDO
                ENDDO
@@ -573,13 +551,13 @@ IF (N_TRACKED_SPECIES==0 .OR. EVACUATION_ONLY(NM)) THEN
    ENDDO
    !$OMP END PARALLEL DO
 ELSE
-   !$OMP PARALLEL DO PRIVATE(K,J,I,YY_GET,CP)
+   !$OMP PARALLEL DO PRIVATE(K,J,I,ZZ_GET,CP)
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            YY_GET(:) = YYP(I,J,K,:)
-            CALL GET_SPECIFIC_HEAT(YY_GET,CP,TMP(I,J,K)) !INTENT: IN,OUT,IN
+            ZZ_GET(:) = ZZP(I,J,K,:)
+            CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,TMP(I,J,K)) !INTENT: IN,OUT,IN
             RTRM(I,J,K) = R_PBAR(K,PRESSURE_ZONE(I,J,K))*RSUM(I,J,K)/CP
             DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
          ENDDO
@@ -592,12 +570,12 @@ ENDIF
 
 DO N=1,N_TRACKED_SPECIES
    IF (EVACUATION_ONLY(NM)) CYCLE
-   IF (SPECIES(Y2SPEC(N))%MODE == LUMPED_SPECIES) CYCLE
    !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I)
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            DP(I,J,K) = DP(I,J,K) + (SPECIES(Y2SPEC(N))%RCON-SPECIES(0)%RCON)/(RSUM(I,J,K)*RHOP(I,J,K))*DEL_RHO_D_DEL_Y(I,J,K,N)
+            DP(I,J,K) = DP(I,J,K) + (SPECIES_MIXTURE(N)%RCON-SPECIES_MIXTURE(0)%RCON)/(RSUM(I,J,K)*RHOP(I,J,K))*&
+                                    DEL_RHO_D_DEL_Z(I,J,K,N)
          ENDDO
       ENDDO
    ENDDO

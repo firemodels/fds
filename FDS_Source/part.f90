@@ -567,10 +567,11 @@ OVERALL_INSERT_LOOP: DO
       ! If it is not time to insert particles/droplets for this INITIALIZATION block, cycle.
 
       IF (T < IN%PARTICLE_INSERT_CLOCK(NM)) CYCLE VOLUME_INSERT_LOOP
-
+ 
       ! Start processing the INITIALIZATION info
 
       N_INITIAL = IN%NUMBER_INITIAL_DROPLETS
+
       IF (N_INITIAL==0) CYCLE VOLUME_INSERT_LOOP
 
       MASS_PER_VOLUME = IN%MASS_PER_VOLUME
@@ -716,7 +717,7 @@ OVERALL_INSERT_LOOP: DO
  
    DO N=1,N_INIT
       IN => INITIALIZATION(N)
-      IF (IN%SINGLE_INSERTION) CYCLE
+      IF (IN%SINGLE_INSERTION) CYCLE      
       IF (T >= IN%PARTICLE_INSERT_CLOCK(NM)) IN%PARTICLE_INSERT_CLOCK(NM) = IN%PARTICLE_INSERT_CLOCK(NM) + IN%DT_INSERT
       IF (T >= IN%PARTICLE_INSERT_CLOCK(NM)) INSERT_ANOTHER_BATCH = .TRUE.
    ENDDO
@@ -811,7 +812,7 @@ SUBROUTINE MOVE_PARTICLES(T,NM)
  
 USE COMP_FUNCTIONS, ONLY : SECOND  
 USE MATH_FUNCTIONS, ONLY : EVALUATE_RAMP, AFILL2
-USE PHYSICAL_FUNCTIONS, ONLY : DRAG, GET_VISCOSITY
+USE PHYSICAL_FUNCTIONS, ONLY : DRAG, GET_VISCOSITY, GET_VISCOSITY_BG
  
 REAL(EB) :: RHO_G,RVC,RDS,RDC,QREL,UREL,VREL,WREL,TMP_G,RN,THETA_RN, &
             RD,T,C_DRAG,XI,YJ,ZK,MU_AIR,WE_G,DROP_VOL_FRAC,DROP_DEN, &
@@ -820,7 +821,7 @@ REAL(EB) :: RHO_G,RVC,RDS,RDC,QREL,UREL,VREL,WREL,TMP_G,RN,THETA_RN, &
             T_BU_BAG,T_BU_STRIP,B_1,THROHALF,P_UVWMAX,UVWMAX, &
             ALPHA,BETA,DR_MASS,FP_MASS,OBDT,OPA,BDTOA,U_OLD,V_OLD,W_OLD,MPOM,RDT,&
             WAKE_VEL,RE_WAKE
-REAL(EB) :: CHILD_RADIUS(0:NDC),TMP_WGT,YY_GET(1:N_TRACKED_SPECIES)
+REAL(EB) :: CHILD_RADIUS(0:NDC),TMP_WGT,ZZ_GET(1:N_TRACKED_SPECIES)
 LOGICAL :: HIT_SOLID
 INTEGER :: ICN,I,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ,IW,IWP1,IWM1,IWP2,IWM2,IWP3,IWM3,IOR_OLD,IC,IOR_FIRST,IML,ITMP
 INTEGER, INTENT(IN) :: NM
@@ -942,12 +943,10 @@ DROPLET_LOOP: DO I=1,NLP
    TMP_G  = MAX(TMPMIN,TMP(II,JJ,KK))
    RHO_G  = RHO(II,JJ,KK)
    IF (N_TRACKED_SPECIES > 0) THEN
-      YY_GET = YY(II,JJ,KK,:)
-      CALL GET_VISCOSITY(YY_GET,MU_AIR,TMP_G)
+      ZZ_GET = ZZ(II,JJ,KK,:)
+      CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP_G)
    ELSE
-      ITMP = MIN(4999,NINT(TMP_G))
-      TMP_WGT = TMP_G - REAL(ITMP,EB)
-      MU_AIR = Y2MU_C(ITMP)+TMP_WGT*(Y2MU_C(ITMP+1)-Y2MU_C(ITMP))
+      CALL GET_VISCOSITY_BG(MU_AIR,TMP_G)
    ENDIF
    DR%RE  = RHO_G*QREL*2._EB*RD/MU_AIR
 
@@ -1455,12 +1454,12 @@ REAL(EB), POINTER, DIMENSION(:) :: FILM_THICKNESS=>NULL()
 REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V,H_V_REF, H_L,&
             RVC,WGT,Q_CON_GAS,Q_CON_WALL,Q_RAD,H_HEAT,H_MASS,SH_FAC_GAS,SH_FAC_WALL,NU_FAC_GAS,NU_FAC_WALL, &
             T,PR_AIR,M_VAP,M_VAP_MAX,XI,YJ,ZK,RDT,MU_AIR,H_SOLID,Q_DOT_RAD,DEN_ADD,AREA_ADD, &
-            Y_DROP,Y_GAS,LENGTH,U2,V2,W2,VEL,DENOM,DY_DTMP_DROP,TMP_DROP_NEW,TMP_WALL,H_WALL, &
+            Z_DROP,Z_GAS,LENGTH,U2,V2,W2,VEL,DENOM,DZ_DTMP_DROP,TMP_DROP_NEW,TMP_WALL,H_WALL, &
             SC_AIR,D_AIR,DHOR,SHERWOOD,X_DROP,M_DROP,RHO_G,MW_RATIO,MW_DROP,FTPR,&
             C_DROP,M_GAS,A_DROP,TMP_G,TMP_DROP,TMP_MELT,TMP_BOIL,MINIMUM_FILM_THICKNESS,RE_L,OMRAF,Q_FRAC,Q_TOT,DT_SUBSTEP, &
-            CP,H_NEW,YY_GET(1:N_TRACKED_SPECIES),YY_GET2(1:N_TRACKED_SPECIES),M_GAS_NEW,MW_GAS,CP2, &
-            VEL_REL,DELTA_H_G,TMP_G_I,H_G_OLD,H_L_REF,TMP_G_NEW,DT_SUM,DCPDT,TMP_WGT,X_EQUIL,Y_EQUIL
-INTEGER :: I,II,JJ,KK,IW,IGAS,N_PC,EVAP_INDEX,N_SUBSTEPS,ITMP,IBC,ITCOUNT
+            CP,H_NEW,ZZ_GET(1:N_TRACKED_SPECIES),ZZ_GET2(1:N_TRACKED_SPECIES),M_GAS_NEW,MW_GAS,CP2,VEL_REL,DELTA_H_G,TMP_G_I,H_G_OLD,&
+            H_L_REF,TMP_G_NEW,DT_SUM,DCPDT,TMP_WGT,X_EQUIL,Z_EQUIL
+INTEGER :: I,II,JJ,KK,IW,N_PC,EVAP_INDEX,N_SUBSTEPS,ITMP,IBC,ITCOUNT
 INTEGER, INTENT(IN) :: NM
 LOGICAL :: TEMPITER
 TYPE (DROPLET_TYPE), POINTER :: DR=>NULL()
@@ -1537,7 +1536,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
          CYCLE PART_CLASS_LOOP
       ENDIF
 
-      ! Check to see if the particles/droplets evaporate
+      ! Check to see of the particles/droplets evaporate
       
       IF (.NOT.PC%EVAPORATE) CYCLE PART_CLASS_LOOP
       IF (PC%EVAP_INDEX/=EVAP_INDEX) CYCLE PART_CLASS_LOOP
@@ -1548,8 +1547,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
       FTPR     = PC%FTPR
       TMP_MELT = PC%TMP_MELT
       TMP_BOIL = PC%TMP_V
-      IGAS     = PC%Y_INDEX
-      MW_DROP  = SPECIES(IGAS)%MW
+      MW_DROP  = SPECIES_MIXTURE(PC%Z_INDEX)%MW
       H_V_REF  = PC%H_V(NINT(PC%H_V_REFERENCE_TEMPERATURE))
       H_L_REF  = PC%C_P_BAR(NINT(TMP_MELT))*TMP_MELT
 
@@ -1602,10 +1600,10 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
          TIME_ITERATION_LOOP: DO WHILE (DT_SUM < DT)
 
             IF (N_TRACKED_SPECIES==0) THEN
-               MW_GAS = SPECIES(0)%MW
+               MW_GAS = SPECIES_MIXTURE(0)%MW
             ELSE
-               YY_GET = YY(II,JJ,KK,:)
-               CALL GET_MOLECULAR_WEIGHT(YY_GET,MW_GAS)
+               ZZ_GET = ZZ(II,JJ,KK,:)
+               CALL GET_MOLECULAR_WEIGHT(ZZ_GET,MW_GAS)
             ENDIF
             MW_RATIO = MW_GAS/MW_DROP
 
@@ -1626,19 +1624,18 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
 
             TMP_G  = TMP(II,JJ,KK)
             RHO_G  = RHO(II,JJ,KK)
-            MU_AIR = Y2MU_C(MIN(5000,NINT(TMP_G)))*SPECIES(0)%MW
+            MU_AIR = Z2MU_C(MIN(5000,NINT(TMP_G)))*SPECIES_MIXTURE(0)%MW
             M_GAS  = RHO_G/RVC        
             M_VAP_MAX = (0.33_EB * M_GAS - MVAP_TOT(II,JJ,KK)) / WGT ! limit to avoid diveregence errors
             K_AIR  = CPOPR*MU_AIR
-            IF (IGAS>0) THEN
-               IF (PC%SPEC_INDEX > N_SPECIES-N_MIX_SPECIES) THEN
-                  Y_GAS = YY(II,JJ,KK,IGAS)
-               ELSE
-                  YY_GET = YY(II,JJ,KK,:)
-                  CALL GET_MASS_FRACTION(YY_GET,PC%SPEC_INDEX,Y_GAS)
+            IF (PC%Z_INDEX>=0) THEN
+               IF (PC%Z_INDEX > 0) THEN
+                  Z_GAS = ZZ(II,JJ,KK,PC%Z_INDEX)
+               ELSEIF (PC%Z_INDEX == 0) THEN
+                  Z_GAS = 1._EB - SUM(ZZ(II,JJ,KK,:))
                ENDIF
             ELSE
-               Y_GAS = 0._EB
+               Z_GAS = 0._EB
             ENDIF
             U2 = 0.5_EB*(U(II,JJ,KK)+U(II-1,JJ,KK))
             V2 = 0.5_EB*(V(II,JJ,KK)+V(II,JJ-1,KK))
@@ -1693,27 +1690,27 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
 
             ENDIF SOLID_OR_GAS_PHASE
          
-            ! Compute equilibrium droplet vapor mass fraction, Y_DROP, and its derivative w.r.t. droplet temperature
+            ! Compute equilibrium droplet vapor mass fraction, Z_DROP, and its derivative w.r.t. droplet temperature
     
             IF (PC%EVAPORATE) THEN
                X_DROP  = MIN(1._EB,EXP(DHOR*(1._EB/TMP_BOIL-1._EB/TMP_DROP)))
-               Y_DROP  = X_DROP/(MW_RATIO + (1._EB-MW_RATIO)*X_DROP)
+               Z_DROP  = X_DROP/(MW_RATIO + (1._EB-MW_RATIO)*X_DROP)
                IF (TMP_DROP < TMP_BOIL) THEN
-                  DY_DTMP_DROP = (MW_RATIO/(X_DROP*(1._EB-MW_RATIO)+MW_RATIO)**2)*DHOR*X_DROP/TMP_DROP**2
+                  DZ_DTMP_DROP = (MW_RATIO/(X_DROP*(1._EB-MW_RATIO)+MW_RATIO)**2)*DHOR*X_DROP/TMP_DROP**2
                ELSE
-                  DY_DTMP_DROP = 0._EB
+                  DZ_DTMP_DROP = 0._EB
                ENDIF
-               IF (Y_DROP<=Y_GAS) H_MASS = 0._EB
+               IF (Z_DROP<=Z_GAS) H_MASS = 0._EB
             ELSE
-               DY_DTMP_DROP = 0._EB
-               Y_DROP       = 0._EB
+               DZ_DTMP_DROP = 0._EB
+               Z_DROP       = 0._EB
             ENDIF
             ! Update the droplet temperature semi_implicitly
     
-            DENOM = 1._EB + (H_HEAT + H_WALL + H_MASS*RHO_G*H_V*DY_DTMP_DROP)*DT_SUBSTEP*A_DROP/(2._EB*M_DROP*C_DROP) 
+            DENOM = 1._EB + (H_HEAT + H_WALL + H_MASS*RHO_G*H_V*DZ_DTMP_DROP)*DT_SUBSTEP*A_DROP/(2._EB*M_DROP*C_DROP) 
             TMP_DROP_NEW = ( TMP_DROP + DT_SUBSTEP*( Q_DOT_RAD + &
                              A_DROP*(H_HEAT*(TMP_G   -0.5_EB*TMP_DROP) + H_WALL*(TMP_WALL-0.5_EB*TMP_DROP) -  &
-                             H_MASS*RHO_G*H_V*(Y_DROP-0.5_EB*DY_DTMP_DROP*TMP_DROP-Y_GAS))/(M_DROP*C_DROP)) ) / DENOM
+                             H_MASS*RHO_G*H_V*(Z_DROP-0.5_EB*DZ_DTMP_DROP*TMP_DROP-Z_GAS))/(M_DROP*C_DROP)) ) / DENOM
 
             ! Compute the total amount of heat extracted from the gas, wall and radiative fields
 
@@ -1724,7 +1721,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
 
             ! Compute the total amount of liquid evaporated
 
-            M_VAP = DT_SUBSTEP*A_DROP*H_MASS*RHO_G*(Y_DROP+0.5_EB*DY_DTMP_DROP*(TMP_DROP_NEW-TMP_DROP)-Y_GAS) 
+            M_VAP = DT_SUBSTEP*A_DROP*H_MASS*RHO_G*(Z_DROP+0.5_EB*DZ_DTMP_DROP*(TMP_DROP_NEW-TMP_DROP)-Z_GAS) 
             M_VAP = MAX(0._EB,MIN(M_VAP,M_DROP,M_VAP_MAX))
             
             ! Evaporate completely small droplets
@@ -1770,32 +1767,32 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
             ! Add fuel evaporation rate to running counter and adjust mass of evaporated fuel to account for different 
             ! Heat of Combustion between fuel droplet and gas
 
-            IF (IGAS>0 .AND. IGAS==I_FUEL) THEN
+            IF (PC%Z_INDEX==I_FUEL) THEN
                FUEL_DROPLET_MLR(NM) = FUEL_DROPLET_MLR(NM) + WGT*M_VAP/DT_SUBSTEP
                M_VAP = PC%ADJUST_EVAPORATION*M_VAP
             ENDIF
 
             ! Update gas temperature and determine new subtimestep
             DELTA_H_G = -Q_CON_GAS+M_VAP*(H_V )!- 2011649.919_EB)
-            CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP,TMP_G)            
+            CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP,TMP_G)            
             H_G_OLD = M_GAS*CP*TMP_G
             M_GAS_NEW = M_GAS + WGT*M_VAP
             TMP_G_NEW = TMP_G
             H_NEW = H_G_OLD + DELTA_H_G*WGT!(DELTA_H_G * M_VAP - Q_CON_GAS) * WGT 
             IF (H_NEW > 0._EB) THEN
-               YY_GET2 = YY_GET * M_GAS/M_GAS_NEW               
-               YY_GET2(IGAS) = YY_GET2(IGAS) + WGT*M_VAP/M_GAS_NEW
+               ZZ_GET2 = ZZ_GET * M_GAS/M_GAS_NEW               
+               IF (PC%Z_INDEX>0) ZZ_GET2(PC%Z_INDEX) = ZZ_GET2(PC%Z_INDEX) + WGT*M_VAP/M_GAS_NEW
                TMP_G_I = TMP_G
                TEMPITER = .TRUE.
                ITCOUNT = 0
                ITERATE_TEMP: DO WHILE (TEMPITER)
                   TEMPITER=.FALSE.
-                  CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET2,CP2,TMP_G_I)
+                  CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET2,CP2,TMP_G_I)
                   IF (TMP_G_I < 4999._EB) THEN
-                     CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET2,CP,TMP_G_I-1._EB)
+                     CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET2,CP,TMP_G_I-1._EB)
                      DCPDT = CP-CP2                     
                   ELSE
-                     CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET2,CP,TMP_G_I-1._EB)                  
+                     CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET2,CP,TMP_G_I-1._EB)                  
                      DCPDT = CP2-CP
                   ENDIF
                   ! Compute approximation of d(cp)/dT                  
@@ -1819,15 +1816,15 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
             H_V      = PC%H_V(ITMP)+TMP_WGT*(PC%H_V(ITMP+1)-PC%H_V(ITMP))
             DHOR     = H_V*MW_DROP/R0 
             X_EQUIL  = MIN(1._EB,EXP(DHOR*(1._EB/TMP_BOIL-1._EB/MIN(TMP_DROP_NEW,TMP_BOIL))))
-            Y_EQUIL = X_EQUIL/(MW_RATIO + (1._EB-MW_RATIO)*X_EQUIL)
+            Z_EQUIL = X_EQUIL/(MW_RATIO + (1._EB-MW_RATIO)*X_EQUIL)
             !Limit supersaturation
-            IF (Y_GAS < Y_EQUIL) THEN
-               IF (PC%SPEC_INDEX > N_SPECIES-N_MIX_SPECIES) THEN
-                  Y_GAS = YY_GET2(IGAS)
+            IF (Z_GAS < Z_EQUIL) THEN
+               IF (PC%Z_INDEX == 0) THEN
+                  Z_GAS = MAX(0._EB,1._EB - ZZ_GET2(PC%Z_INDEX))
                ELSE
-                  CALL GET_MASS_FRACTION(YY_GET2,PC%SPEC_INDEX,Y_GAS)
+                  Z_GAS = ZZ_GET2(PC%Z_INDEX)
                ENDIF
-               IF (Y_GAS/Y_EQUIL > 1.02_EB) THEN
+               IF (Z_GAS/Z_EQUIL > 1.02_EB) THEN
                   DT_SUBSTEP = DT_SUBSTEP * 0.5_EB            
                   N_SUBSTEPS = NINT(DT/DT_SUBSTEP)
                   IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
@@ -1850,17 +1847,17 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
 
             RHO(II,JJ,KK) = M_GAS_NEW*RVC
 
-            YY(II,JJ,KK,:) = YY_GET2(:)
-            CALL GET_SPECIFIC_GAS_CONSTANT(YY_GET2,RSUM(II,JJ,KK))
+            ZZ(II,JJ,KK,:) = ZZ_GET2(:)
+            CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET2,RSUM(II,JJ,KK))
             TMP(II,JJ,KK) = MIN(TMPMAX,MAX(TMPMIN,TMP_G_NEW))
 
             ! Compute change in enthalpy between gas and liquid
-            CALL GET_SPECIFIC_HEAT(YY_GET,CP,TMP_G)
+            CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,TMP_G)
             H_G_OLD = CP * TMP_G * M_GAS
-            YY_GET = 0._EB
-            YY_GET(IGAS) = 1._EB
+            ZZ_GET = 0._EB
+            IF (PC%Z_INDEX>0) ZZ_GET(PC%Z_INDEX) = 1._EB
             DELTA_H_G = H_L + H_V
-            CALL GET_AVERAGE_SPECIFIC_HEAT(YY_GET,CP2,TMP_G)
+            CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP2,TMP_G)
             DELTA_H_G = DELTA_H_G - CP2 * TMP_G     
             ! Compute contribution to the divergence
 
@@ -1968,7 +1965,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
    AVG_DROP_TMP(:,:,:,EVAP_INDEX ) = MAX(TMPM,AVG_DROP_TMP(:,:,:,EVAP_INDEX ))
    AVG_DROP_DEN(:,:,:,EVAP_INDEX ) = RUN_AVG_FAC*AVG_DROP_DEN(:,:,:,EVAP_INDEX ) + OMRAF*DROP_DEN
    AVG_DROP_AREA(:,:,:,EVAP_INDEX) = RUN_AVG_FAC*AVG_DROP_AREA(:,:,:,EVAP_INDEX) + OMRAF*DROP_AREA
-   WHERE (AVG_DROP_DEN(:,:,:,EVAP_INDEX )<0.0001_EB .AND. DROP_DEN==0._EB) AVG_DROP_DEN(:,:,:,EVAP_INDEX ) = 0.0_EB
+   WHERE (AVG_DROP_DEN(:,:,:,EVAP_INDEX )<0.0001_EB .AND. ABS(DROP_DEN)<ZERO_P) AVG_DROP_DEN(:,:,:,EVAP_INDEX ) = 0.0_EB
 
 ENDDO EVAP_INDEX_LOOP
 

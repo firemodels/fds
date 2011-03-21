@@ -45,7 +45,7 @@ Sample Output Types
 
 SLCF PBY=0.0,QUANTITY='VELOCITY' /
 SLCF PBX=0.0,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
-BNDF QUANTITY='HEAT_FLUX' /
+BNDF QUANTITY='HEAT FLUX' /
 
 ******************************************
 Obstruction Surface Types

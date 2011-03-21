@@ -19,10 +19,9 @@
 &TIME T_END=10.0, DT=0.05 / 
       defaults: EVAC_DT_FLOWFIELD=0.01, EVAC_DT_STEADY_STATE=0.05,
 
-&MISC SURF_DEFAULT='WALL', NO_EVACUATION=.FALSE.,
+&MISC NO_EVACUATION=.FALSE.,
       EVAC_PRESSURE_ITERATIONS=15, EVAC_TIME_ITERATIONS=50,
-      EVACUATION_MC_MODE=.FALSE., EVACUATION_DRILL=.FALSE. 
-      EVAC_SURF_DEFAULT= 'EVAC_WALL', /
+      EVACUATION_MC_MODE=.FALSE., EVACUATION_DRILL=.FALSE./
                 EVACUATION_MC_MODE=.FALSE., EVACUATION_DRILL=.FALSE. 
       defaults: EVAC_PRESSURE_ITERATIONS=50, EVAC_TIME_ITERATIONS=50,
 
@@ -55,7 +54,9 @@
 &SURF ID             = 'WALL'
       RGB            = 100,100,100
       MATL_ID        = 'GYPSUM PLASTER'
-      THICKNESS      = 0.012 /
+      THICKNESS      = 0.012
+      EVAC_DEFAULT   = .TRUE.
+      DEFAULT        = .TRUE.  /
 
  Default material for evacuation meshes is INERT and its color
  can not be changed esily in Smokeview. Thus, an evacuation 

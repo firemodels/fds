@@ -52,7 +52,7 @@ Test various devices and actions upon activation.
 &DEVC XYZ=3.50,0.50,0.90, QUANTITY='TEMPERATURE', ID='Overlap Temp' /
 &DEVC XYZ=3.50,2.50,0.90, QUANTITY='TEMPERATURE', ID='Grid 2 Temp' /
 
-&DEVC XB=0.0,2.0,0.0,1.0,0.0,1.0,QUANTITY='path obscuration', SETPOINT=50, ID='beam' /
+&DEVC XB=0.0,2.0,0.0,1.0,0.0,1.0,QUANTITY='PATH OBSCURATION', SETPOINT=50, ID='beam' /
 
 &DEVC XYZ=0.,0.,0., QUANTITY='ACTUATED SPRINKLERS', ID='n_act' /
 
