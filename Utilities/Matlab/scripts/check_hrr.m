@@ -13,7 +13,7 @@ set(gca,'FontName',Font_Name)
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
-DDIR = '../../Validation/Flame_Height/FDS_Output_Files/';
+DDIR = '../../Validation/Heskestad_Flame_Height/FDS_Output_Files/';
 
 M = csvread([DDIR,'box_height.csv'],1,0);
 Qs = M(:,1);
