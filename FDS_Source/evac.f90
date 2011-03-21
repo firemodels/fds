@@ -6634,7 +6634,7 @@ CONTAINS
     REAL(FB) TMPOUT1, TMPOUT2, TMPOUT3, TMPOUT4, T_TMP, DT_TMP
     REAL(FB) TMPOUT5, TMPOUT6, TMPOUT7, TMPOUT8
     CHARACTER(30) DEVC_ID
-    REAL(EB), ALLOCATABLE, DIMENSION(:) :: YY_GET
+    REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_GET
     TYPE (DEVICE_TYPE), POINTER :: DV =>NULL()
     TYPE (CONTROL_TYPE), POINTER :: CV =>NULL()
     TYPE (EVAC_EDEV_TYPE), POINTER :: EDV=>NULL()
@@ -6714,8 +6714,8 @@ CONTAINS
 
     IF (L_USE_FED) THEN  ! Update at this time step (do this at DT_SAVE intervals) 
        IF (L_FED_SAVE) THEN
-          ALLOCATE(YY_GET(1:MAX(1,N_TRACKED_SPECIES)),STAT=IZERO)
-          CALL CHKMEMERR('EVAC_MESH_EXCHANGE', 'YY_GET',IZERO) 
+          ALLOCATE(ZZ_GET(1:MAX(1,N_TRACKED_SPECIES)),STAT=IZERO)
+          CALL CHKMEMERR('EVAC_MESH_EXCHANGE', 'ZZ_GET',IZERO) 
           WRITE (LU_EVACFED) REAL(T,FB), REAL(DT_SAVE,FB)
        ELSE
           READ (LU_EVACFED,END=324,IOSTAT=IOS) T_TMP, DT_TMP
@@ -6761,7 +6761,7 @@ CONTAINS
                       NOM = ABS(HUMAN_GRID(I,J)%IMESH)
                       CALL GET_FIRE_CONDITIONS(NOM,I1,J1,K1,&
                            HUMAN_GRID(I,J)%FED_CO_CO2_O2,HUMAN_GRID(I,J)%SOOT_DENS,&
-                           HUMAN_GRID(I,J)%TMP_G, HUMAN_GRID(I,J)%RADFLUX, YY_GET)
+                           HUMAN_GRID(I,J)%TMP_G, HUMAN_GRID(I,J)%RADFLUX, ZZ_GET)
                    END IF
                    ! Save FED, SOOT, TEMP(C), and RADFLUX
                    WRITE (LU_EVACFED) &
@@ -6803,7 +6803,7 @@ CONTAINS
                 NOM = EVAC_CORRS(I)%FED_MESH
                 CALL GET_FIRE_CONDITIONS(NOM,I1,J1,K1,&
                      EVAC_CORRS(I)%FED_CO_CO2_O2(1),EVAC_CORRS(I)%SOOT_DENS(1),&
-                     EVAC_CORRS(I)%TMP_G(1), EVAC_CORRS(I)%RADFLUX(1), YY_GET)
+                     EVAC_CORRS(I)%TMP_G(1), EVAC_CORRS(I)%RADFLUX(1), ZZ_GET)
              ELSE
                 ! No FED_MESH found
                 EVAC_CORRS(I)%FED_CO_CO2_O2(1) = 0.0_EB
@@ -6819,7 +6819,7 @@ CONTAINS
                 NOM = EVAC_CORRS(I)%FED_MESH2
                 CALL GET_FIRE_CONDITIONS(NOM,I1,J1,K1,&
                      EVAC_CORRS(I)%FED_CO_CO2_O2(2),EVAC_CORRS(I)%SOOT_DENS(2),&
-                     EVAC_CORRS(I)%TMP_G(2), EVAC_CORRS(I)%RADFLUX(2), YY_GET)
+                     EVAC_CORRS(I)%TMP_G(2), EVAC_CORRS(I)%RADFLUX(2), ZZ_GET)
              ELSE
                 ! No FED_MESH2 found
                 EVAC_CORRS(I)%FED_CO_CO2_O2(2) = 0.0_EB
@@ -6869,7 +6869,7 @@ CONTAINS
                    NOM = EVAC_DOORS(I)%FED_MESH
                    CALL GET_FIRE_CONDITIONS(NOM,I1,J1,K1,&
                         EVAC_DOORS(I)%FED_CO_CO2_O2,EVAC_DOORS(I)%SOOT_DENS,&
-                        EVAC_DOORS(I)%TMP_G, EVAC_DOORS(I)%RADFLUX, YY_GET)
+                        EVAC_DOORS(I)%TMP_G, EVAC_DOORS(I)%RADFLUX, ZZ_GET)
                 ELSE
                    ! No FED_MESH found
                    EVAC_DOORS(I)%FED_CO_CO2_O2 = 0.0_EB
@@ -6911,7 +6911,7 @@ CONTAINS
                    NOM = EVAC_EXITS(I)%FED_MESH
                    CALL GET_FIRE_CONDITIONS(NOM,I1,J1,K1,&
                         EVAC_EXITS(I)%FED_CO_CO2_O2,EVAC_EXITS(I)%SOOT_DENS,&
-                        EVAC_EXITS(I)%TMP_G, EVAC_EXITS(I)%RADFLUX, YY_GET)
+                        EVAC_EXITS(I)%TMP_G, EVAC_EXITS(I)%RADFLUX, ZZ_GET)
                 ELSE
                    ! No FED_MESH found
                    EVAC_EXITS(I)%FED_CO_CO2_O2 = 0.0_EB
@@ -7024,7 +7024,7 @@ CONTAINS
           END IF EDEV_FED_SAVE
        END IF EDEVICES_IN_FED
 
-       IF (L_FED_SAVE) DEALLOCATE(YY_GET)
+       IF (L_FED_SAVE) DEALLOCATE(ZZ_GET)
 
     END IF                    ! L_USE_FED
 
@@ -14166,28 +14166,28 @@ CONTAINS
     RETURN
   END SUBROUTINE Find_walls
 
-  SUBROUTINE GET_FIRE_CONDITIONS(NOM,I,J,K,fed_indx,soot_dens,gas_temp,rad_flux, YY_GET)
+  SUBROUTINE GET_FIRE_CONDITIONS(NOM,I,J,K,fed_indx,soot_dens,gas_temp,rad_flux, ZZ_GET)
     IMPLICIT NONE
     !
     ! Passed variables
     INTEGER, INTENT(IN) :: I, J, K, NOM
     REAL(EB), INTENT(OUT) :: fed_indx, soot_dens, gas_temp, rad_flux
-    REAL(EB), INTENT(INOUT) :: YY_GET(1:N_TRACKED_SPECIES)
+    REAL(EB), INTENT(INOUT) :: ZZ_GET(1:N_TRACKED_SPECIES)
     !
     ! Local variables
     REAL(EB) :: Y_MF_INT
 
     ! Mass fraction array ==> soot density (mg/m3)
     ! Next is for soot (mg/m3)
-    YY_GET(:) = MESHES(nom)%YY(I,J,K,:)
+    ZZ_GET(:) = MESHES(nom)%ZZ(I,J,K,:)
     IF (SOOT_INDEX > 0) THEN
-       CALL GET_MASS_FRACTION(YY_GET,SOOT_INDEX,Y_MF_INT)
+       CALL GET_MASS_FRACTION(ZZ_GET,SOOT_INDEX,Y_MF_INT)
        soot_dens = Y_MF_INT*MESHES(nom)%RHO(I,J,K)*1.E6_EB
     ELSE
        soot_dens = 0._EB
     ENDIF
     ! Calculate Purser's fractional effective dose (FED)
-    fed_indx = FED(YY_GET,MESHES(nom)%RSUM(I,J,K))
+    fed_indx = FED(ZZ_GET,MESHES(nom)%RSUM(I,J,K))
     ! Gas temperature, ind=5, C
     gas_temp  = MESHES(nom)%TMP(I,J,K)
     ! Rad flux, ind=18, kW/m2 (no -sigma*Tamb^4 term)
