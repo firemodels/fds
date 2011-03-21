@@ -307,41 +307,41 @@ MAKE_KAPPA_ARRAYS: IF (SOOT_INDEX /= 0 .OR. CO_INDEX /= 0 .OR. FUEL_INDEX /= 0 .
       IF (CO_INDEX /= 0) N_KAPPA_ARRAY = N_KAPPA_ARRAY + 1
       IF (H2O_INDEX /= 0 .OR. I_WATER /= 0) N_KAPPA_ARRAY = N_KAPPA_ARRAY + 1
       IF (SOOT_INDEX /= 0) N_KAPPA_ARRAY = N_KAPPA_ARRAY + 1
-   Y2KAPPA_T = 42
-   Y2KAPPA_M = 50
+   Z2KAPPA_T = 42
+   Z2KAPPA_M = 50
    NS = 0
-   ALLOCATE (Y2KAPPA_M4(N_KAPPA_ARRAY),STAT=IZERO)
-   CALL ChkMemErr('RADI','Y2KAPPA_M4',IZERO)
+   ALLOCATE (Z2KAPPA_M4(N_KAPPA_ARRAY),STAT=IZERO)
+   CALL ChkMemErr('RADI','Z2KAPPA_M4',IZERO)
    ALLOCATE (KAPPA_INDEX(N_KAPPA_ARRAY),STAT=IZERO)
    CALL ChkMemErr('RADI','KAPPA_INDEX',IZERO)
    IF (FUEL_INDEX > 0) THEN
       NS = NS + 1
-      Y2KAPPA_M4(NS) = REAL(Y2KAPPA_M,EB)**4/MW_FUEL
+      Z2KAPPA_M4(NS) = REAL(Z2KAPPA_M,EB)**4/MW_FUEL
       KAPPA_INDEX(NS) = FUEL_INDEX
    ENDIF
    IF (CO2_INDEX > 0) THEN
       NS = NS + 1
-      Y2KAPPA_M4(NS) = REAL(Y2KAPPA_M,EB)**4/MW_CO2
+      Z2KAPPA_M4(NS) = REAL(Z2KAPPA_M,EB)**4/MW_CO2
       KAPPA_INDEX(NS) = CO2_INDEX
    ENDIF
    IF (CO_INDEX > 0) THEN
       NS = NS + 1
-      Y2KAPPA_M4(NS) = REAL(Y2KAPPA_M,EB)**4/MW_CO
+      Z2KAPPA_M4(NS) = REAL(Z2KAPPA_M,EB)**4/MW_CO
       KAPPA_INDEX(NS) = CO_INDEX
    ENDIF      
    IF (H2O_INDEX > 0) THEN
       NS = NS + 1
-      Y2KAPPA_M4(NS) = REAL(Y2KAPPA_M,EB)**4/MW_H2O
+      Z2KAPPA_M4(NS) = REAL(Z2KAPPA_M,EB)**4/MW_H2O
       KAPPA_INDEX(NS) = H2O_INDEX
    ENDIF      
    IF (SOOT_INDEX > 0) THEN
       NS = NS + 1
-      Y2KAPPA_M4(NS) = REAL(Y2KAPPA_M,EB)**4*5._EB
+      Z2KAPPA_M4(NS) = REAL(Z2KAPPA_M,EB)**4*5._EB
       KAPPA_INDEX(NS) = SOOT_INDEX
    ENDIF
-   ALLOCATE (Y2KAPPA(N_KAPPA_ARRAY,0:Y2KAPPA_M,0:Y2KAPPA_T,NSB),STAT=IZERO)
-   CALL ChkMemErr('RADI','Y2KAPPA',IZERO)
-   Y2KAPPA = 0._EB
+   ALLOCATE (Z2KAPPA(N_KAPPA_ARRAY,0:Z2KAPPA_M,0:Z2KAPPA_T,NSB),STAT=IZERO)
+   CALL ChkMemErr('RADI','Z2KAPPA',IZERO)
+   Z2KAPPA = 0._EB
    BBF = 1._EB
    OMMIN = 50._EB
    OMMAX = 10000._EB
@@ -351,11 +351,11 @@ MAKE_KAPPA_ARRAYS: IF (SOOT_INDEX /= 0 .OR. CO_INDEX /= 0 .OR. FUEL_INDEX /= 0 .
          OMMAX = REAL(NINT(1.E4_EB/WL_LOW(IBND)),EB)
       ENDIF
       CALL INIT_RADCAL 
-      T_LOOP_Z: DO K = 0,Y2KAPPA_T
-         RCT = RTMPMIN + K*(RTMPMAX-RTMPMIN)/Y2KAPPA_T         
+      T_LOOP_Z: DO K = 0,Z2KAPPA_T
+         RCT = RTMPMIN + K*(RTMPMAX-RTMPMIN)/Z2KAPPA_T         
          IF (NSB>1) BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),RCT)
-         Y_LOOP_Z: DO J=0,Y2KAPPA_M
-            YY = (REAL(J,EB)/REAL(Y2KAPPA_M,EB))**4
+         Y_LOOP_Z: DO J=0,Z2KAPPA_M
+            YY = (REAL(J,EB)/REAL(Z2KAPPA_M,EB))**4
             N = 0
             KAPPA_SPECIES: DO NS = 1, 5
                SELECT CASE(NS)
@@ -370,9 +370,9 @@ MAKE_KAPPA_ARRAYS: IF (SOOT_INDEX /= 0 .OR. CO_INDEX /= 0 .OR. FUEL_INDEX /= 0 .
                         P(6)      = (1._EB-YY)
                         CALL RADCAL(AMEAN,AP0)
                         IF (NSB==1 .AND. PATH_LENGTH > 0.0_EB) THEN
-                           Y2KAPPA(N,J,K,IBND) = MIN(AMEAN,AP0)
+                           Z2KAPPA(N,J,K,IBND) = MIN(AMEAN,AP0)
                         ELSE
-                           Y2KAPPA(N,J,K,IBND) = AP0/BBF
+                           Z2KAPPA(N,J,K,IBND) = AP0/BBF
                         ENDIF
                      ENDIF
                   CASE(2) ! CO2
@@ -386,9 +386,9 @@ MAKE_KAPPA_ARRAYS: IF (SOOT_INDEX /= 0 .OR. CO_INDEX /= 0 .OR. FUEL_INDEX /= 0 .
                         P(6)      = (1._EB-YY)
                         CALL RADCAL(AMEAN,AP0)
                         IF (NSB==1 .AND. PATH_LENGTH > 0.0_EB) THEN
-                           Y2KAPPA(N,J,K,IBND) = MIN(AMEAN,AP0)
+                           Z2KAPPA(N,J,K,IBND) = MIN(AMEAN,AP0)
                         ELSE
-                           Y2KAPPA(N,J,K,IBND) = AP0/BBF
+                           Z2KAPPA(N,J,K,IBND) = AP0/BBF
                         ENDIF
                      ENDIF
                   CASE(3) ! CO
@@ -402,9 +402,9 @@ MAKE_KAPPA_ARRAYS: IF (SOOT_INDEX /= 0 .OR. CO_INDEX /= 0 .OR. FUEL_INDEX /= 0 .
                         P(6)      = (1._EB-YY)
                         CALL RADCAL(AMEAN,AP0)
                         IF (NSB==1 .AND. PATH_LENGTH > 0.0_EB) THEN
-                           Y2KAPPA(N,J,K,IBND) = MIN(AMEAN,AP0)
+                           Z2KAPPA(N,J,K,IBND) = MIN(AMEAN,AP0)
                         ELSE
-                           Y2KAPPA(N,J,K,IBND) = AP0/BBF
+                           Z2KAPPA(N,J,K,IBND) = AP0/BBF
                         ENDIF
                      ENDIF
                   CASE(4) ! H2O
@@ -418,9 +418,9 @@ MAKE_KAPPA_ARRAYS: IF (SOOT_INDEX /= 0 .OR. CO_INDEX /= 0 .OR. FUEL_INDEX /= 0 .
                         P(6)      = (1._EB-YY)
                         CALL RADCAL(AMEAN,AP0)
                         IF (NSB==1 .AND. PATH_LENGTH > 0.0_EB) THEN
-                           Y2KAPPA(N,J,K,IBND) = MIN(AMEAN,AP0)
+                           Z2KAPPA(N,J,K,IBND) = MIN(AMEAN,AP0)
                         ELSE
-                           Y2KAPPA(N,J,K,IBND) = AP0/BBF
+                           Z2KAPPA(N,J,K,IBND) = AP0/BBF
                         ENDIF
                      ENDIF
                   CASE(5) !Soot
@@ -435,9 +435,9 @@ MAKE_KAPPA_ARRAYS: IF (SOOT_INDEX /= 0 .OR. CO_INDEX /= 0 .OR. FUEL_INDEX /= 0 .
                         SVF = YY*RCRHO/RHO_SOOT
                         CALL RADCAL(AMEAN,AP0)                        
                         IF (NSB==1 .AND. PATH_LENGTH > 0.0_EB) THEN
-                           Y2KAPPA(N,J,K,IBND) = MIN(AMEAN,AP0)
+                           Z2KAPPA(N,J,K,IBND) = MIN(AMEAN,AP0)
                         ELSE
-                           Y2KAPPA(N,J,K,IBND) = AP0/BBF
+                           Z2KAPPA(N,J,K,IBND) = AP0/BBF
                         ENDIF
                      ENDIF
                END SELECT
@@ -522,7 +522,7 @@ INTEGER  :: N, NN,IIG,JJG,KKG,I,J,K,IW,II,JJ,KK,IOR,IC,IWUP,IWDOWN, &
             ISTART, IEND, ISTEP, JSTART, JEND, JSTEP, &
             KSTART, KEND, KSTEP, NSTART, NEND, NSTEP, &
             I_UIID, N_UPDATES, IBND, TYY, NOM, IBC,EVAP_INDEX,NRA, I_DROP
-REAL(EB) :: XID,YJD,ZKD,YY_GET(1:N_TRACKED_SPECIES),KAPPA_PART,SURFACE_AREA
+REAL(EB) :: XID,YJD,ZKD,ZZ_GET(1:N_TRACKED_SPECIES),KAPPA_PART,SURFACE_AREA
 INTEGER :: IPC,IID,JJD,KKD,ID
 LOGICAL :: UPDATE_INTENSITY
 REAL(EB), POINTER, DIMENSION(:,:,:) :: KFST4=>NULL(), IL=>NULL(), UIIOLD=>NULL(), KAPPAW=>NULL(), &
@@ -601,7 +601,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                      IF (PC%TREE .OR. PC%SURF_INDEX>0) CYCLE PC_LOOP
                      EVAP_INDEX = PC%EVAP_INDEX
                      IF (EVAP_INDEX==0) CYCLE PC_LOOP
-                     IF (AVG_DROP_DEN(I,J,K,EVAP_INDEX)==0._EB) CYCLE PC_LOOP
+                     IF (ABS(AVG_DROP_DEN(I,J,K,EVAP_INDEX))<ZERO_P) CYCLE PC_LOOP
 !                     NCSDROP = THFO*AVG_DROP_DEN(I,J,K,EVAP_INDEX)/ (PC%DENSITY*AVG_DROP_RAD(I,J,K,EVAP_INDEX))
                      NCSDROP = AVG_DROP_AREA(I,J,K,EVAP_INDEX)
                      ! Absorption and scattering efficiency
@@ -676,14 +676,14 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
    KAPPA = KAPPA0
 
    IF (KAPPA_ARRAY) THEN
-      TYY_FAC = Y2KAPPA_T / (RTMPMAX-RTMPMIN)
+      TYY_FAC = Z2KAPPA_T / (RTMPMAX-RTMPMIN)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               TYY = MAX(0 , MIN(Y2KAPPA_T,INT((TMP(I,J,K) - RTMPMIN) * TYY_FAC)))
-               YY_GET = YY(I,J,K,:)
-               KAPPA(I,J,K) = KAPPA(I,J,K) + GET_KAPPA(YY_GET,TYY,IBND)
+               TYY = MAX(0 , MIN(Z2KAPPA_T,INT((TMP(I,J,K) - RTMPMIN) * TYY_FAC)))
+               ZZ_GET = ZZ(I,J,K,:)
+               KAPPA(I,J,K) = KAPPA(I,J,K) + GET_KAPPA(ZZ_GET,TYY,IBND)
             ENDDO
          ENDDO
       ENDDO
@@ -1192,32 +1192,32 @@ END FUNCTION BLACKBODY_FRACTION
 
 
 
-FUNCTION GET_KAPPA(Y_IN,TYY,IBND)
+FUNCTION GET_KAPPA(Z_IN,TYY,IBND)
 
 ! Returns the radiative absorption
 
 USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION_ALL,GET_MOLECULAR_WEIGHT
-REAL(EB), INTENT(INOUT) :: Y_IN(1:N_TRACKED_SPECIES)
-REAL(EB) :: KAPPA_TEMP,INT_FAC,GET_KAPPA,Y_MF(1:N_Y_ARRAY),MWA
+REAL(EB), INTENT(INOUT) :: Z_IN(1:N_TRACKED_SPECIES)
+REAL(EB) :: KAPPA_TEMP,INT_FAC,GET_KAPPA,Y_MF(1:N_SPECIES),MWA
 INTEGER, INTENT(IN) :: IBND,TYY
 INTEGER :: LBND,UBND,N
 
-CALL GET_MASS_FRACTION_ALL(Y_IN,Y_MF)
-CALL GET_MOLECULAR_WEIGHT(Y_IN,MWA)
+CALL GET_MASS_FRACTION_ALL(Z_IN,Y_MF)
+CALL GET_MOLECULAR_WEIGHT(Z_IN,MWA)
 GET_KAPPA = 0._EB
 DO N = 1, N_KAPPA_ARRAY
    IF ((SIMPLE_CHEMISTRY .AND. KAPPA_INDEX(N)==SOOT_INDEX) .OR. &
        (.NOT. SIMPLE_CHEMISTRY .AND. KAPPA_INDEX(N)==I_SOOT)) THEN
-      INT_FAC = MAX(0._EB,(Y_MF(KAPPA_INDEX(N))*Y2KAPPA_M4(N)))**0.25_EB
+      INT_FAC = MAX(0._EB,(Y_MF(KAPPA_INDEX(N))*Z2KAPPA_M4(N)))**0.25_EB
    ELSE
-      INT_FAC = MAX(0._EB,(Y_MF(KAPPA_INDEX(N))*MWA*Y2KAPPA_M4(N)))**0.25_EB
+      INT_FAC = MAX(0._EB,(Y_MF(KAPPA_INDEX(N))*MWA*Z2KAPPA_M4(N)))**0.25_EB
    ENDIF
    LBND = INT(INT_FAC)
    INT_FAC = INT_FAC - LBND   
-   LBND = MIN(LBND,Y2KAPPA_M)
-   UBND = MIN(LBND+1,Y2KAPPA_M)
-   KAPPA_TEMP = Y2KAPPA(N,LBND,TYY,IBND)
-   GET_KAPPA = GET_KAPPA + KAPPA_TEMP + INT_FAC*(Y2KAPPA(N,UBND,TYY,IBND)-KAPPA_TEMP)
+   LBND = MIN(LBND,Z2KAPPA_M)
+   UBND = MIN(LBND+1,Z2KAPPA_M)
+   KAPPA_TEMP = Z2KAPPA(N,LBND,TYY,IBND)
+   GET_KAPPA = GET_KAPPA + KAPPA_TEMP + INT_FAC*(Z2KAPPA(N,UBND,TYY,IBND)-KAPPA_TEMP)
 ENDDO
 
 END FUNCTION GET_KAPPA 

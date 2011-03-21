@@ -7,7 +7,7 @@ set SVNROOT=%BASEDIR%\..\
 Rem Choose one of the following four FDS "definitions" by commenting all lines but one.
 
 Rem set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_32\fds5_win_32
-set FDSEXE=fds5
+set FDSEXE=%BASEDIR%\fds6
 Rem set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_64\fds5_win_64
 Rem set FDSEXE=fds5_win_64
 

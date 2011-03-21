@@ -1491,7 +1491,7 @@ END MODULE TURBULENCE
 !           NRX,NRY,NRZ, II_LO,JJ_LO,KK_LO,INDEX_LIST(12),IERROR
 !REAL(EB) :: DV1,DV2,DVRAT,VOLUME_LIST(3)
 !REAL(EB), POINTER, DIMENSION(:,:,:) :: RHO1,RHO2
-!REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YY1,YY2
+!REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZ1,ZZ2
 !
 !CALL LOCATE_MESH(INDEX_LIST,VOLUME_LIST,NM1,NM2,IERROR)
 !SELECT CASE (IERROR)
@@ -1521,13 +1521,13 @@ END MODULE TURBULENCE
 !IF (PREDICTOR) THEN
 !   RHO1 => M1%RHOS
 !   RHO2 => M2%RHOS
-!   IF (N_TRACKED_SPECIES>0) YY1  => M1%YYS
-!   IF (N_TRACKED_SPECIES>0) YY2  => M2%YYS
+!   IF (N_TRACKED_SPECIES>0) ZZ1  => M1%ZZS
+!   IF (N_TRACKED_SPECIES>0) ZZ2  => M2%ZZS
 !ELSEIF (CORRECTOR) THEN
 !   RHO1 => M1%RHO
 !   RHO2 => M2%RHO
-!   IF (N_TRACKED_SPECIES>0) YY1  => M1%YY
-!   IF (N_TRACKED_SPECIES>0) YY2  => M2%YY
+!   IF (N_TRACKED_SPECIES>0) ZZ1  => M1%ZZ
+!   IF (N_TRACKED_SPECIES>0) ZZ2  => M2%ZZ
 !ENDIF
 !
 !DO K = K_LO,K_HI
@@ -1564,19 +1564,19 @@ END MODULE TURBULENCE
 !            DO I = I_LO,I_HI
 !               II_0 = II_LO + (I-I_LO)*NRX
 !            
-!               YY1(I,J,K,N) = 0._EB
+!               ZZ1(I,J,K,N) = 0._EB
 !         
 !               DO KK = KK_0+1,KK_0+NRZ
 !                  DO JJ = JJ_0+1,JJ_0+NRY
 !                     DO II = II_0+1,II_0+NRX
 !                 
-!                        YY1(I,J,K,N) = YY1(I,J,K,N) + RHO2(II,JJ,KK)*YY2(II,JJ,KK,N)*DV2
+!                        ZZ1(I,J,K,N) = ZZ1(I,J,K,N) + RHO2(II,JJ,KK)*ZZ2(II,JJ,KK,N)*DV2
 !                     
 !                     ENDDO
 !                  ENDDO
 !               ENDDO
 !               
-!               YY1(I,J,K,N) = YY1(I,J,K,N)/(RHO1(I,J,K)*DV1)
+!               ZZ1(I,J,K,N) = ZZ1(I,J,K,N)/(RHO1(I,J,K)*DV1)
 !      
 !            ENDDO
 !         ENDDO
@@ -2015,7 +2015,7 @@ END MODULE TURBULENCE
 !           NRX,NRY,NRZ,II_LO,JJ_LO,KK_LO,INDEX_LIST(12),IERROR,IW
 !REAL(EB) :: VOLUME_LIST(3)
 !REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP1,RHOP2,TMP1,TMP2,HH1,HH2
-!REAL(EB), POINTER, DIMENSION(:,:,:,:) :: YYP1,YYP2
+!REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP1,ZZP2
 !
 !CALL LOCATE_MESH(INDEX_LIST,VOLUME_LIST,NM1,NM2,IERROR)
 !SELECT CASE (IERROR)
@@ -2041,19 +2041,19 @@ END MODULE TURBULENCE
 !
 !IF (PREDICTOR) THEN
 !   RHOP1 => M1%RHOS
-!   YYP1  => M1%YYS
+!   ZZP1  => M1%ZZS
 !   HH1   => M1%H
 !   
 !   RHOP2 => M2%RHOS
-!   YYP2  => M2%YYS
+!   ZZP2  => M2%ZZS
 !   HH2   => M2%H
 !ELSEIF (CORRECTOR) THEN
 !   RHOP1 => M1%RHO
-!   YYP1  => M1%YY
+!   ZZP1  => M1%ZZ
 !   HH1   => M1%HS
 !   
 !   RHOP2 => M2%RHO
-!   YYP2  => M2%YY
+!   ZZP2  => M2%ZZ
 !   HH2   => M2%HS
 !ENDIF
 !TMP1 => M1%TMP
@@ -2080,7 +2080,7 @@ END MODULE TURBULENCE
 !                  RHOP2(II_0,JJ,KK) = RHOP1(I,J,K)
 !                  TMP2(II_0,JJ,KK) = TMP1(I,J,K)
 !                  HH2(II_0,JJ,KK) = HH1(I,J,K)
-!                  IF (N_TRACKED_SPECIES>0) YYP2(II_0,JJ,KK,N) = YYP1(I,J,K,N)
+!                  IF (N_TRACKED_SPECIES>0) ZZP2(II_0,JJ,KK,N) = ZZP1(I,J,K,N)
 !               ENDDO
 !            ENDDO
 !         ENDIF
@@ -2094,7 +2094,7 @@ END MODULE TURBULENCE
 !                  RHOP2(II_0,JJ,KK) = RHOP1(I,J,K)
 !                  TMP2(II_0,JJ,KK) = TMP1(I,J,K)
 !                  HH2(II_0,JJ,KK) = HH1(I,J,K)
-!                  IF (N_TRACKED_SPECIES>0) YYP2(II_0,JJ,KK,N) = YYP1(I,J,K,N)
+!                  IF (N_TRACKED_SPECIES>0) ZZP2(II_0,JJ,KK,N) = ZZP1(I,J,K,N)
 !               ENDDO
 !            ENDDO
 !         ENDIF
@@ -2116,7 +2116,7 @@ END MODULE TURBULENCE
 !                  RHOP2(II,JJ_0,KK) = RHOP1(I,J,K)
 !                  TMP2(II,JJ_0,KK) = TMP1(I,J,K)
 !                  HH2(II,JJ_0,KK) = HH1(I,J,K)
-!                  IF (N_TRACKED_SPECIES>0) YYP2(II,JJ_0,KK,N) = YYP1(I,J,K,N)
+!                  IF (N_TRACKED_SPECIES>0) ZZP2(II,JJ_0,KK,N) = ZZP1(I,J,K,N)
 !               ENDDO
 !            ENDDO
 !         ENDIF
@@ -2130,7 +2130,7 @@ END MODULE TURBULENCE
 !                  RHOP2(II,JJ_0,KK) = RHOP1(I,J,K)
 !                  TMP2(II,JJ_0,KK) = TMP1(I,J,K)
 !                  HH2(II,JJ_0,KK) = HH1(I,J,K)
-!                  IF (N_TRACKED_SPECIES>0) YYP2(II,JJ_0,KK,N) = YYP1(I,J,K,N)
+!                  IF (N_TRACKED_SPECIES>0) ZZP2(II,JJ_0,KK,N) = ZZP1(I,J,K,N)
 !               ENDDO
 !            ENDDO
 !         ENDIF
@@ -2152,7 +2152,7 @@ END MODULE TURBULENCE
 !                  RHOP2(II,JJ,KK_0) = RHOP1(I,J,K)
 !                  TMP2(II,JJ,KK_0) = TMP1(I,J,K)
 !                  HH2(II,JJ,KK_0) = HH1(I,J,K)
-!                  IF (N_TRACKED_SPECIES>0) YYP2(II,JJ,KK_0,N) = YYP1(I,J,K,N)
+!                  IF (N_TRACKED_SPECIES>0) ZZP2(II,JJ,KK_0,N) = ZZP1(I,J,K,N)
 !               ENDDO
 !            ENDDO
 !         ENDIF
@@ -2166,7 +2166,7 @@ END MODULE TURBULENCE
 !                  RHOP2(II,JJ,KK_0) = RHOP1(I,J,K)
 !                  TMP2(II,JJ,KK_0) = TMP1(I,J,K)
 !                  HH2(II,JJ,KK_0) = HH1(I,J,K)
-!                  IF (N_TRACKED_SPECIES>0) YYP2(II,JJ,KK_0,N) = YYP1(I,J,K,N)
+!                  IF (N_TRACKED_SPECIES>0) ZZP2(II,JJ,KK_0,N) = ZZP1(I,J,K,N)
 !               ENDDO
 !            ENDDO
 !         ENDIF
@@ -2180,7 +2180,7 @@ END MODULE TURBULENCE
 !      JJ = M2%IJKW(2,IW)
 !      KK = M2%IJKW(3,IW)
 !      M2%RHO_F(IW)  = RHOP2(II,JJ,KK) 
-!      M2%YY_F(IW,N) = YYP2(II,JJ,KK,N)
+!      M2%ZZ_F(IW,N) = ZZP2(II,JJ,KK,N)
 !   ENDDO WALL_LOOP
 !
 !ENDDO SPECIES_LOOP
