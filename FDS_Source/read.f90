@@ -94,7 +94,7 @@ CALL READ_DEAD    ! Scan input file looking for old NAMELIST groups, and stop th
 CALL READ_HEAD
 CALL READ_MISC
 CALL READ_MULT
-CALL READ_EVAC(1)    ! Read some evacuation input from the main evacuation meshes
+CALL READ_EVAC(1) ! Read some evacuation input from the main evacuation meshes
 CALL READ_MESH
 CALL READ_TRAN
 CALL READ_TIME
@@ -103,7 +103,7 @@ CALL READ_REAC(1)
 CALL READ_SPEC
 CALL READ_SMIX
 CALL READ_REAC(2)
-CALL PROC_SMIX  ! Extend SPECIES_MIXTURE array for primitive species + set thermophysical properties and other species data
+CALL PROC_SMIX ! Extend SPECIES_MIXTURE array for primitive species + set thermophysical properties and other species data
 CALL READ_RADI
 CALL READ_PROP
 CALL READ_PART
@@ -121,7 +121,7 @@ CALL READ_HVAC
 CALL PROC_PART    ! Set up various PARTicle constructs
 CALL PROC_SURF_1  ! Set up SURFace constructs for species
 CALL READ_RAMP    ! Read in all RAMPs, assuming they have all been identified previously
-CALL READ_TABL   ! Read in all TABLs, assuming they have all been identified previously
+CALL READ_TABL    ! Read in all TABLs, assuming they have all been identified previously
 CALL PROC_MATL    ! Set up various MATeriaL constructs
 CALL PROC_SURF_2  ! Set up remaining SURFace constructs
 CALL READ_DUMP
@@ -1441,7 +1441,7 @@ NAMELIST /MISC/ PR,SC,TMPA,GVEC,FYI, &
                 FLUX_LIMITER,FREEZE_VELOCITY,CFL_VELOCITY_NORM,PERIODIC_TEST, &
                 WIND_ONLY,TERRAIN_CASE,COMPUTE_VISCOSITY_TWICE, &
                 CONSTANT_PROPERTIES,DYNSMAG,DSMAG_FREQ, &
-                CHECK_KINETIC_ENERGY,PROJECTION,FISHPAK_BC,FORCE_VECTOR,DEBUG_OPENMP, &
+                PROJECTION,FISHPAK_BC,FORCE_VECTOR,DEBUG_OPENMP, &
                 CLIP_MASS_FRACTION,STORE_MU_DNS,CHECK_VN,CHECK_GR, &
                 IMMERSED_BOUNDARY_METHOD, &
                 H_EDDY,H_LOGLAW,H_CHILTON_COLBURN,LIMITING_DT_RATIO, &
@@ -9392,6 +9392,9 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
             CALL SHUTDOWN(MESSAGE)
          ENDIF
          
+      CASE ('TURBULENCE RESOLUTION')
+         CHECK_KINETIC_ENERGY=.TRUE.
+         
    END SELECT SPECIAL_QUANTITIES
 
    IF (DV%STATISTICS/='null') CALL CHANGE_UNITS(DV%QUANTITY,DV%UNITS,DV%STATISTICS,MYID,LU_ERR)
@@ -9571,6 +9574,8 @@ READ_ISOF_LOOP: DO N=1,N_ISOF
          IS%VALUE(I) = VALUE(I)
       ENDDO VALUE_LOOP
   ENDIF
+  
+  IF (QUANTITY=='TURBULENCE RESOLUTION') CHECK_KINETIC_ENERGY=.TRUE.
  
 ENDDO READ_ISOF_LOOP
 REWIND(LU_INPUT)
@@ -9766,6 +9771,10 @@ MESH_LOOP: DO NM=1,NMESHES
              CELL_CENTERED = .FALSE.
          ENDIF
          SL%CELL_CENTERED = CELL_CENTERED
+         
+         ! Measure of Turbulence Resolution
+         
+         IF (QUANTITY=='TURBULENCE RESOLUTION') CHECK_KINETIC_ENERGY=.TRUE.
          
       ENDDO VECTORLOOP
   
