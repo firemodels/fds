@@ -5,7 +5,6 @@
 &TIME T_END=61. /
 &DUMP NFRAMES=610 DT_PL3D=12.2/
 
-&MISC SURF_DEFAULT='GYPSUM BOARD' /
 &SURF ID='BURNER', HRRPUA=3000., PART_ID='smoke' /
 &REAC C=3,H=8,SOOT_YIELD=0.01,FUEL='PROPANE'/
 &VENT XB=0.0,6.4,3.60,8.00,0.0,0.0,SURF_ID='CARPET' /
@@ -126,6 +125,7 @@ The product of Reaction 2
       SPECIFIC_HEAT    = 1.1 /
 
 &SURF ID             = 'GYPSUM BOARD'
+      DEFAULT        = .TRUE.
       RGB            = 200,200,200
       MATL_ID        = 'GYPSUM PLASTER'
       THICKNESS      = 0.012 /

@@ -6,7 +6,7 @@ The RADIATIVE HEAT FLUX should be 81.8 kW/m2.
 
 &TIME T_END=.01 DT = 0.001 / 
 
-&MISC SURF_DEFAULT = 'COLD'  GVEC = 0,0,0 /
+&MISC GVEC=0,0,0 /
 
 &DUMP NFRAMES=1000, DT_PL3D=10000. /
 
@@ -19,6 +19,7 @@ The RADIATIVE HEAT FLUX should be 81.8 kW/m2.
       TAU_T = 0.0 /
 
 &SURF ID='COLD'
+      DEFAULT = .TRUE.
       H_FIXED = 0.
       TMP_FRONT = -273.14
       EMISSIVITY = 1.

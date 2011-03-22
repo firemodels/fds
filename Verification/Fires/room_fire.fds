@@ -7,8 +7,6 @@ All material properties are completely fabricated.
 
 &TIME T_END=900.0 / 
 
-&MISC SURF_DEFAULT='WALL' / 
-
 &REAC ID         = 'POLYURETHANE'
       FYI        = 'C_6.3 H_7.1 N O_2.1, NFPA Handbook, Babrauskas'
       SOOT_YIELD = 0.10
@@ -66,6 +64,7 @@ All material properties are completely fabricated.
       THICKNESS(1:2) = 0.002,0.1 /
 
 &SURF ID             = 'WALL'
+      DEFAULT        = .TRUE.
       RGB            = 200,200,200
       MATL_ID        = 'GYPSUM PLASTER'
       THICKNESS      = 0.012 /

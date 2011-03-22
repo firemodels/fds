@@ -19,10 +19,7 @@ value of dT should be equal to the time averaged Q_abs.
 
 &TIME T_END=.01 DT = 0.00001 / 
 
-&MISC 	SURF_DEFAULT = 'HOT' 
-	GVEC = 0,0,0 
-        PR = 100.
-	RUN_AVG_FAC = 0. /
+&MISC GVEC=0,0,0, PR = 100., RUN_AVG_FAC=0. /
 
 &DUMP NFRAMES=100, DT_PL3D=10000. /
 
@@ -34,6 +31,7 @@ value of dT should be equal to the time averaged Q_abs.
       ANGLE_INCREMENT=1 /
 
 &SURF ID='HOT'
+      DEFAULT=.TRUE.
       EMISSIVITY = 1.
       TMP_FRONT = 1000.
       TAU_T = 0.0 /
