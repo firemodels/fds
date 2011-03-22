@@ -57,12 +57,12 @@ MODULE EVAC
      REAL(EB) :: X1=0._EB,X2=0._EB,Y1=0._EB,Y2=0._EB,Z1=0._EB,Z2=0._EB,T_START=0._EB, Angle=0._EB
      REAL(EB) :: Tpre_mean=0._EB, Tpre_para=0._EB, Tpre_para2=0._EB, Tpre_low=0._EB, Tpre_high=0._EB
      REAL(EB) :: Tdet_mean=0._EB, Tdet_para=0._EB, Tdet_para2=0._EB, Tdet_low=0._EB, Tdet_high=0._EB
-     REAL(EB) :: TIME_FALL_DOWN=0._EB
+     REAL(EB) :: TIME_FALL_DOWN=0._EB, TARGET_X=0._EB, TARGET_Y=0._EB
      CHARACTER(60) :: CLASS_NAME='null', ID='null', AVATAR_TYPE_NAME='null'
      CHARACTER(30) :: GRID_NAME='null', PROP_ID='null'
      LOGICAL :: EVACFILE=.FALSE., After_Tpre=.FALSE., No_Persons=.FALSE., SHOW=.TRUE.
      INTEGER :: N_INITIAL=0,SAMPLING=0, IPC=0, IMESH=0, AVATAR_TYPE_INDEX=0
-     INTEGER :: I_PRE_DIST=0, I_DET_DIST=0
+     INTEGER :: I_PRE_DIST=0, I_DET_DIST=0, GUARD_MEN=0
      INTEGER :: GN_MIN=0, GN_MAX=0
      INTEGER :: N_VENT_FFIELDS=0, Avatar_Color_Index=0, I_AGENT_TYPE=2
      INTEGER, DIMENSION(3) :: RGB=-1, AVATAR_RGB=-1
@@ -75,7 +75,7 @@ MODULE EVAC
   ! This makes the &EVAC lines easier to define.
   ! (&EVHO lines)
   TYPE EVAC_HOLE_TYPE
-     REAL(EB) :: X1=0._EB,X2=0._EB,Y1=0._EB,Y2=0._EB,Z1=0._EB,Z2=0._EB
+     REAL(EB) :: X1=0._EB,X2=0._EB,Y1=0._EB,Y2=0._EB,Z1=0._EB,Z2=0._EB, TIME_FALL_DOWN=-1.0_EB
      CHARACTER(60) :: ID='null', PERS_ID='null', EVAC_ID='null'
      CHARACTER(30) :: GRID_NAME='null'
      INTEGER, DIMENSION(3) :: RGB=-1
@@ -380,7 +380,7 @@ MODULE EVAC
   INTEGER, DIMENSION(:), ALLOCATABLE :: NTT_Evac
   !
   !
-  LOGICAL :: NOT_RANDOM, EVAC_FDS6=.FALSE.
+  LOGICAL :: NOT_RANDOM, EVAC_FDS6=.TRUE.
   INTEGER :: I_FRIC_SW, COLOR_METHOD, COLOR_METHOD_TMP, I_AVATAR_COLOR, MAX_HUMANS_DIM
   REAL(EB) :: EVAC_MASS_EXTINCTION_COEFF
   REAL(EB) ::  FAC_A_WALL, FAC_B_WALL, LAMBDA_WALL, &
@@ -394,8 +394,8 @@ MODULE EVAC
        CF_MIN_A, CF_FAC_A_WALL, CF_MIN_TAU, CF_MIN_TAU_INER, CF_FAC_TAUS, FAC_DOOR_QUEUE, FAC_DOOR_ALPHA,&
        FAC_DOOR_WAIT, CF_MIN_B, FAC_DOOR_OLD, FAC_DOOR_OLD2, R_HERDING, W0_HERDING, WR_HERDING, I_HERDING_TYPE, &
        DOT_HERDING, EVAC_DELTA_SEE, C_HAWK, R_HAWK_DOVE, A_HAWK_T_FACTOR, HERDING_TAU_FACTOR, &
-       ALPHA_HAWK, DELTA_HAWK, EPSILON_HAWK, THETA_HAWK, &
-       F_MIN_FALL, F_MAX_FALL, D_OVERLAP_FALL, TAU_FALL_DOWN, A_FAC_FALLEN, TIME_FALL_DOWN
+       ALPHA_HAWK, DELTA_HAWK, EPSILON_HAWK, THETA_HAWK, A_HAWK_T_START, T_STOP_HD_GAME, &
+       F_MIN_FALL, F_MAX_FALL, D_OVERLAP_FALL, TAU_FALL_DOWN, A_FAC_FALLEN, TIME_FALL_DOWN, PROB_FALL_DOWN
   INTEGER, DIMENSION(3) :: DEAD_RGB
   !
   REAL(EB), DIMENSION(:), ALLOCATABLE :: Tsteps
@@ -461,14 +461,14 @@ CONTAINS
     CHARACTER(30) QUANTITY, MAX_HUMANS_RAMP, INPUT_ID(40)
     CHARACTER(60) FYI,ID,PERS_ID,TO_NODE,EVAC_ID, DEFAULT_PROPERTIES, AVATAR_TYPE
     CHARACTER(30) FLOW_FIELD_ID
-    INTEGER :: DIAMETER_DIST,VELOCITY_DIST,PRE_EVAC_DIST,DET_EVAC_DIST,TAU_EVAC_DIST
+    INTEGER :: DIAMETER_DIST,VELOCITY_DIST,PRE_EVAC_DIST,DET_EVAC_DIST,TAU_EVAC_DIST, GUARD_MEN_IN
     REAL(EB) :: VEL_MEAN,VEL_PARA,VEL_PARA2,VEL_LOW,VEL_HIGH, &
          DIA_MEAN,DIA_PARA,DIA_PARA2,DIA_LOW,DIA_HIGH, &
          PRE_MEAN,PRE_PARA,PRE_PARA2,PRE_LOW,PRE_HIGH, &
          DET_MEAN,DET_PARA,DET_PARA2,DET_LOW,DET_HIGH, &
          TAU_MEAN,TAU_PARA,TAU_PARA2,TAU_LOW,TAU_HIGH, &
          FCONST_A,FCONST_B,L_NON_SP,C_YOUNG,GAMMA,KAPPA,ANGLE, &
-         D_TORSO_MEAN,D_SHOULDER_MEAN, TAU_ROT, M_INERTIA
+         D_TORSO_MEAN,D_SHOULDER_MEAN, TAU_ROT, M_INERTIA, TARGET_X, TARGET_Y
     INTEGER :: MAX_HUMANS_INSIDE, n_max_in_corrs, COLOR_INDEX, MAX_HUMANS, AGENT_TYPE
     REAL(EB) :: MAX_FLOW, WIDTH, TIME_START, TIME_STOP, WIDTH1, &
          WIDTH2, EFF_WIDTH, EFF_LENGTH, FAC_SPEED, TIME_OPEN, TIME_CLOSE
@@ -534,8 +534,9 @@ CONTAINS
          COLOR_INDEX, EVAC_MESH, RGB, COLOR, &
          AVATAR_COLOR, AVATAR_RGB, SHOW, PRE_EVAC_DIST, DET_EVAC_DIST, &
          PRE_MEAN,PRE_PARA,PRE_PARA2,PRE_LOW,PRE_HIGH, &
-         DET_MEAN,DET_PARA,DET_PARA2,DET_LOW,DET_HIGH, AGENT_TYPE, AVATAR_TYPE, PROP_ID, TIME_FALL_DOWN
-    NAMELIST /EVHO/ FYI, ID, XB, EVAC_ID, PERS_ID, MESH_ID, EVAC_MESH, RGB, COLOR, SHOW
+         DET_MEAN,DET_PARA,DET_PARA2,DET_LOW,DET_HIGH, AGENT_TYPE, AVATAR_TYPE, PROP_ID, TIME_FALL_DOWN, &
+         GUARD_MEN_IN, TARGET_X, TARGET_Y
+    NAMELIST /EVHO/ FYI, ID, XB, EVAC_ID, PERS_ID, MESH_ID, EVAC_MESH, RGB, COLOR, SHOW, TIME_FALL_DOWN
 
     NAMELIST /EVSS/ FYI, ID, XB, MESH_ID, HEIGHT, HEIGHT0, IOR, &
          FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, ESC_SPEED, EVAC_MESH, RGB, COLOR, &
@@ -568,8 +569,8 @@ CONTAINS
          FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, FAC_DOOR_OLD, FAC_DOOR_OLD2, &
          R_HERDING, W0_HERDING, WR_HERDING, I_HERDING_TYPE, DOT_HERDING, EVAC_FDS6, EVAC_DELTA_SEE, &
          MAX_HUMANS_DIM, C_HAWK, R_HAWK_DOVE, A_HAWK_T_FACTOR, HERDING_TAU_FACTOR, &
-         ALPHA_HAWK, DELTA_HAWK, EPSILON_HAWK, THETA_HAWK, &
-         F_MIN_FALL, F_MAX_FALL, D_OVERLAP_FALL, TAU_FALL_DOWN, A_FAC_FALLEN
+         ALPHA_HAWK, DELTA_HAWK, EPSILON_HAWK, THETA_HAWK, T_STOP_HD_GAME, A_HAWK_T_START, &
+         F_MIN_FALL, F_MAX_FALL, D_OVERLAP_FALL, TAU_FALL_DOWN, A_FAC_FALLEN, PROB_FALL_DOWN
     !
     NAMELIST /EDEV/ FYI, ID, TIME_DELAY, GLOBAL, EVAC_ID, PERS_ID, MESH_ID, INPUT_ID, &
          PRE_EVAC_DIST, PRE_MEAN, PRE_PARA, PRE_PARA2, PRE_LOW, PRE_HIGH, PROB
@@ -1475,7 +1476,7 @@ CONTAINS
       NOISETH     = 0.01_EB
       NOISECM     = 3.0_EB
       NOT_RANDOM  = .FALSE.
-      EVAC_FDS6   = .FALSE.
+      EVAC_FDS6   = .TRUE.
       I_FRIC_SW   = 1
       V_MAX             = 20.0_EB ! m/s
       V_ANGULAR_MAX     = 8.0_EB  ! rps
@@ -1548,13 +1549,17 @@ CONTAINS
       THETA_HAWK   =  1.0_EB ! random force factor for hawks: Gaussian theta = theta*theta_hawk
       R_HAWK_DOVE  =  0.5_EB ! cut-off radius, play against the agents which are inside the skin-skin distance
       A_HAWK_T_FACTOR=0.0_EB ! linear growth factor of the alpha parameter (the threath parameter)
-                             ! alpha = alpha_0*(1+A_HAWK_T_FACTOR*simulation_time)
+                             ! alpha = alpha_0*(1+A_HAWK_T_FACTOR*(t-t_start))
+      A_HAWK_T_START=T_BEGIN ! linear growth factor of the alpha parameter (the threath parameter)
+                             ! alpha is constant upto this time, then a=a0*(1+a_fac*(t-t_start))
+      T_STOP_HD_GAME = T_END ! Do not play after the given time
       ! Paramters of the fall down algorithm
       F_MIN_FALL           = 2000.0_EB
       F_MAX_FALL           = 9000.0_EB
       D_OVERLAP_FALL       = 0.05_EB
       TAU_FALL_DOWN        = 1.0_EB
       A_FAC_FALLEN         = 1.0_EB
+      PROB_FALL_DOWN       = -1.0_EB
 
       OUTPUT_SPEED         = .FALSE.
       OUTPUT_DENSITY       = .FALSE.
@@ -4049,6 +4054,9 @@ CONTAINS
          DET_HIGH      = HUGE(PRE_HIGH)
          PRE_MEAN      = 10.0_EB
          DET_MEAN      = T_BEGIN
+         GUARD_MEN_IN  = 0
+         TARGET_X      = 0.0_EB
+         TARGET_Y      = 0.0_EB
 
          KNOWN_DOOR_NAMES         = 'null'
          KNOWN_DOOR_PROBS         = 1.0_EB
@@ -4239,6 +4247,9 @@ CONTAINS
          HPT%Tdet_high   = DET_HIGH
          HPT%Tdet_para   = DET_PARA
          HPT%Tdet_para2  = DET_PARA2
+         HPT%GUARD_MEN   = GUARD_MEN_IN
+         HPT%TARGET_X    = TARGET_X
+         HPT%TARGET_Y    = TARGET_Y
 
          L_TMP=.FALSE.
          DO i = 1, NMESHES
@@ -4468,6 +4479,7 @@ CONTAINS
          MESH_ID       = 'null'
          EVAC_MESH     = 'null'
          SHOW          = .TRUE.
+         TIME_FALL_DOWN = -1.0_EB
          !
          CALL CHECKREAD('EVHO',LU_INPUT,IOS)
          IF (IOS == 1) THEN
@@ -4499,6 +4511,7 @@ CONTAINS
          EHX%EVAC_ID   = EVAC_ID
          EHX%PERS_ID   = PERS_ID
          EHX%SHOW      = SHOW
+         EHX%TIME_FALL_DOWN = TIME_FALL_DOWN
          ! 
          ! Check which evacuation floor
          ii = 0
@@ -5082,16 +5095,20 @@ CONTAINS
        WRITE(LU_EVACOUT,FMT='(A,F14.8,A)') ' FDS+Evac Vis_Door_Crit   :', ABS(FED_DOOR_CRIT), ' m'
     END IF
     IF (NOT_RANDOM ) WRITE(LU_EVACOUT,FMT='(A)') ' FDS+Evac Random seed is not used.'
+    CALL RANDOM_SEED(size=size_rnd)
+    ALLOCATE(seed_rnd(size_rnd),STAT=IZERO)
+    CALL ChkMemErr('READ_EVAC','seed_rnd',IZERO)
     IF (.NOT. NOT_RANDOM) THEN    ! Initialize the generator randomly
-       CALL RANDOM_SEED(size=size_rnd)
-       ALLOCATE(seed_rnd(size_rnd),STAT=IZERO)
-       CALL ChkMemErr('READ_EVAC','seed_rnd',IZERO)
        CALL DATE_AND_TIME(values = t_rnd)
        seed_rnd = 100.0_EB*t_rnd(7) + t_rnd(8)/10.0_EB
-       CALL RANDOM_SEED(put=seed_rnd)
-       DEALLOCATE(seed_rnd)
+    ELSE
+       ! Do not use a random seed, use a constant seed
+       ! Timo: MPI and random numbers and FDS noise is problem.
+       seed_rnd = 2819.381_EB
     END IF
-      ! Fds uses a constant key to initialize the generator, but it is better for humans to use a random key.
+    CALL RANDOM_SEED(put=seed_rnd)
+    DEALLOCATE(seed_rnd)
+    ! Fds uses a constant key to initialize the generator, but it is better for humans to use a random key.
     IF (Fed_Door_Crit < 0) THEN
        ! Visibility S = 3/K, K is extinction coeff.
        FED_DOOR_CRIT = 3.0_EB/FED_DOOR_CRIT ! Extinction coeff (1/m)
@@ -6096,6 +6113,8 @@ CONTAINS
              ! HR%T_FallenDown = HUGE(HR%T_FallenDown)
              HR%Angle_FallenDown = 0.0_EB
              HR%SizeFac_FallenDown = 0.0_EB
+             CALL RANDOM_NUMBER(RN)
+             HR%T_CheckFallDown = T_BEGIN + RN
 
              !
              BLK_LOOP:  DO
@@ -6162,6 +6181,7 @@ CONTAINS
                 ELSE
                    d_max = 1.0_EB*HR%B
                 END IF
+                IF (DENS_INIT > 10.0_EB) d_max = -0.1_EB
                 dens_fac = MAX(1.0_EB,DENS_INIT)
 
                 IF (i_endless_loop >= 10*INT(dens_fac*(16.0_EB*MAX(1.0_EB,LOG10(2.5_EB*VOL2))) / &
@@ -6576,7 +6596,7 @@ CONTAINS
           HR => M%HUMAN(I)
           IF (C_HAWK >= 0.0_EB) THEN
              ! Hawk - Dove game counters, initial values
-             ! (1,emesh) hawks; (2,emesh) doves; (3,emesh) dummy hawks; (4,emesh) dymmy doves
+             ! (1,emesh) hawks; (2,emesh) doves; (3,emesh) dummy hawks; (4,emesh) dummy doves
              IF (HR%A <= 500.0_EB .AND. HR%I_DoorAlgo==1) N_HawkDoveCount(1,I_EGRID) = N_HawkDoveCount(1,I_EGRID) + 1
              IF (HR%A >  500.0_EB .AND. HR%I_DoorAlgo==1) N_HawkDoveCount(2,I_EGRID) = N_HawkDoveCount(2,I_EGRID) + 1
              IF (HR%A <= 500.0_EB .AND. HR%I_DoorAlgo==2) N_HawkDoveCount(3,I_EGRID) = N_HawkDoveCount(3,I_EGRID) + 1
@@ -7150,7 +7170,7 @@ CONTAINS
     !
     ! Local variables
     INTEGER, PARAMETER :: N_SECTORS = 2
-    REAL(EB) DTSP,UBAR,VBAR,X1,Y1,XI,YJ,ZK
+    REAL(EB) DTSP,UBAR,VBAR,X1,Y1,XI,YJ,ZK, WSPA, WSPB
     INTEGER ICN,I,J,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ,ICX, ICY, N, J1, I_OBST, I_OBSTX, I_OBSTY
     INTEGER  IE, TIM_IC, TIM_IW, TIM_IWX, TIM_IWY, TIM_IW2, TIM_IC2, IBC, NM_SEE
     REAL(EB) :: P2P_DIST, P2P_DIST_MAX, P2P_U, P2P_V, EVEL, TIM_DIST, EVEL2
@@ -7169,9 +7189,9 @@ CONTAINS
     REAL(EB) :: COS_X, COS_Y, SPEED_XM, SPEED_XP, SPEED_YM, SPEED_YP, HR_Z, HR_A, HR_B, HR_TAU, HR_TAU_INER
     !
     REAL(EB) :: RN, RNCF
-    REAL(EB) :: GAME, GATH, GACM
+    REAL(EB) :: GAME, GATH, GACM, TARGET_X, TARGET_Y
     !
-    INTEGER :: I_OLD_FFIELD, IZERO, IMODE_OLD, I_STRS_DOOR, NM_STRS_INDEX
+    INTEGER :: I_OLD_FFIELD, IZERO, IMODE_OLD, I_STRS_DOOR, NM_STRS_INDEX, GUARD_MEN
     CHARACTER(30) :: NAME_OLD_FFIELD
     !
     REAL(EB) :: P2P_TORQUE, FC_X, FC_Y, OMEGA_NEW, ANGLE, A1, TC_Z, FC_X1, FC_Y1
@@ -7200,9 +7220,9 @@ CONTAINS
          ANGLE_HR, V_HR, V_HRE, P2P_SUUNTA_MAX, ANGLE_OLD, HR_X, HR_Y, D_NEW, D_SHIFT, COMMITMENT
     INTEGER :: I_SUUNTA_MAX, N_SUUNTA_BACK, N_SUUNTA_BACKCF, I_COUNT_DENSITY, I_COUNT_DENSITYR, I_COUNT_DENSITYL
     INTEGER, DIMENSION(N_SECTORS+1) :: N_SUUNTA, N_SUUNTACF
-    REAL(EB) :: U_i_Hawk, U_I_Dove, x_o, y_o, T_tmp, T_tmp1, Width, p_i
+    REAL(EB) :: U_i_Hawk, U_I_Dove, x_o, y_o, T_tmp, T_tmp1, Width, p_i, HR_GAMMA, HR_KAPPA
     INTEGER :: N_queue, N_i_Hawk, N_I_Dove, N_i_Hawk2, N_I_Dove2
-    LOGICAL :: L_DO_GAME, L_FALLEN_DOWN, L_HRE_FALLEN_DOWN
+    LOGICAL :: L_DO_GAME, L_FALLEN_DOWN, L_HRE_FALLEN_DOWN, L_FALLDOWN_THIS_TIME_STEP
 
     TYPE (MESH_TYPE),        POINTER :: MFF=>NULL()
     TYPE (EVAC_STRS_TYPE),   POINTER :: STRP=>NULL()
@@ -7211,6 +7231,7 @@ CONTAINS
     TYPE (EVACUATION_TYPE),  POINTER :: HPT =>NULL()
     TYPE (EVAC_ENTR_TYPE),   POINTER :: PNX =>NULL()
     TYPE (EVAC_EDEV_TYPE),   POINTER :: EDV=>NULL()
+    TYPE (EVAC_HOLE_TYPE),   POINTER :: EHX=>NULL()
     !
     LOGICAL, INTRINSIC :: BTEST
     !
@@ -7834,12 +7855,10 @@ CONTAINS
        ! Move loop: The first step of the VV algorithm
        ! ========================================================
        ! ========================================================
-       ! Step 1: Here the humans are moved to the new positions using the 
-       ! present velocities.  
-       ! After the first step the forces at the new postitions 
-       ! are calculated and the velocities are updated.  
-       ! (The 'dissipative' self-driving force contribution to the velocities 
-       ! is updated self-consistently, but the other terms are not.)
+       ! Step 1: Here the humans are moved to the new positions using the present velocities.  
+       ! After the first step the forces at the new postitions are calculated and the velocities are updated.  
+       ! (The 'dissipative' self-driving force contribution to the velocities is updated self-consistently, 
+       ! but the other terms are not.)
        ! ========================================================
        TNOW15=SECOND()
        D_HUMANS_MIN = HUGE(D_HUMANS_MIN)
@@ -7848,6 +7867,18 @@ CONTAINS
 
        EVAC_MOVE_LOOP: DO I=1, N_HUMANS
           HR=>HUMAN(I)
+          IF (HR%IEL > 0) THEN  
+             ! The agent is from some evac line
+             GUARD_MEN = EVAC_EVACS(HR%IEL)%GUARD_MEN
+             TARGET_X = EVAC_EVACS(HR%IEL)%TARGET_X
+             TARGET_Y = EVAC_EVACS(HR%IEL)%TARGET_Y
+          ELSE
+             ! The agent is from some entr line, not yet as an input
+             ! GUARD_MEN = EVAC_ENTRYS(ABS(HR%IEL))%GUARD_MEN
+             GUARD_MEN = 0
+             TARGET_X = 0.5_EB*(XS+XF)
+             TARGET_Y = 0.5_EB*(YS+YF)
+          END IF
           ! HR%Z is the real z-coordinate of the agent (inclines, stairs,etc),
           ! HR_Z is z-coordinate of the main evac mesh
           HR_Z = 0.5_EB*(ZS+ZF)
@@ -7864,6 +7895,20 @@ CONTAINS
              GATH = 0.0_EB
              A_WALL = 0.0_EB
           END IF
+          HoleFallLoop: DO J = 1, N_HOLES
+             EHX => EVAC_HOLES(J)
+             IF (EHX%TIME_FALL_DOWN<0.0_EB .OR. EHX%IMESH/=NM) CYCLE HoleFallLoop
+             IF (EHX%TIME_FALL_DOWN<T .AND. &
+                  EHX%X1<=HR%X .AND. EHX%X2>=HR%X .AND. EHX%Y1<=HR%Y .AND. EHX%Y2>=HR%Y) THEN
+                L_FALLEN_DOWN = .TRUE.
+                HR%T_FallenDown = T
+                GATH = 0.0_EB
+                A_WALL = 0.0_EB
+                EHX%TIME_FALL_DOWN = -1.0_EB
+                write(lu_err,*)'**** EHX: time agent falls down ',T,I
+                CYCLE HoleFallLoop
+             END IF
+          END DO HoleFallLoop
           L_DEAD  = .FALSE.
           IF ( HR%INTDOSE >= 1.0_EB  ) THEN
              IF (.NOT. L_FALLEN_DOWN) THEN
@@ -7887,15 +7932,23 @@ CONTAINS
              FED_MAX_ALIVE = MAX(FED_MAX_ALIVE,HR%INTDOSE)
           END IF
           IF (L_FALLEN_DOWN) HR%COLOR_INDEX = EVAC_AVATAR_NCOLOR
-          FED_MAX = MAX(FED_MAX,HR%INTDOSE)  ! DEAD OR ALIVE
+          FED_MAX = MAX(FED_MAX,HR%INTDOSE)  ! Dead or alive
           HR_TAU      = HR%TAU
           HR_TAU_INER = HR%TAU_INER
+          ! MAX(0,HR%GROUP_ID)  Group index
+          IF (MAX(0,HR%GROUP_ID)==0) THEN
+             TPRE = HR%TPRE + HR%TDET ! Lonely agent
+          ELSE
+             TPRE = HR%TDET ! Member of a group
+          END IF
+          IF (T < T_BEGIN .OR. T < TPRE) THEN
+             HR_TAU = MAX(CF_MIN_TAU, 0.1_EB*HR%TAU)
+             HR_TAU_INER = MAX(CF_MIN_TAU_INER, 0.1_EB*HR%TAU_INER)
+          END IF
           ! Counterflow: Increase motivation to go ahead
-          IF (HR%COMMITMENT > 0.01_EB) THEN
-             HR_TAU      = MAX(CF_MIN_TAU, &
-                  HR%COMMITMENT*CF_FAC_TAUS*HR_TAU + (1.0_EB-HR%COMMITMENT)*HR_TAU)
-             HR_TAU_INER = MAX(CF_MIN_TAU_INER, &
-                  HR%COMMITMENT*CF_FAC_TAUS*HR_TAU_INER + (1.0_EB-HR%COMMITMENT)*HR_TAU_INER)
+          IF (HR%COMMITMENT > 0.01_EB .AND. T > T_BEGIN) THEN
+             HR_TAU      = MAX(CF_MIN_TAU, HR%COMMITMENT*CF_FAC_TAUS*HR_TAU + (1.0_EB-HR%COMMITMENT)*HR_TAU)
+             HR_TAU_INER = MAX(CF_MIN_TAU_INER, HR%COMMITMENT*CF_FAC_TAUS*HR_TAU_INER + (1.0_EB-HR%COMMITMENT)*HR_TAU_INER)
           END IF
           IF (C_HAWK >= 0.0_EB)THEN
              IF (HR%A <= 500.0_EB) THEN
@@ -7924,6 +7977,7 @@ CONTAINS
           IIX = FLOOR(XI+0.5_EB)
           JJY = FLOOR(YJ+0.5_EB)
           KKZ = FLOOR(ZK+0.5_EB)
+          !
           HR%W = 0.0_EB
           SMOKE_SPEED_FAC = 1.0_EB
           IF (.NOT.L_DEAD .AND. T >= HR%TDET) HR%DETECT1 = IBSET(HR%DETECT1,0)  ! Detected by the T_det distribution, bit 0
@@ -8000,8 +8054,16 @@ CONTAINS
              UBAR = HR%UBAR; VBAR = HR%VBAR
           ELSE
              ! Update v0 on every time step, no collision avoidance.
-             CALL FIND_PREFERRED_DIRECTION(I, N, T, T_BEGIN, L_DEAD, NM_STRS_MESH, &
-                  II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR)
+             IF(GUARD_MEN == 1) THEN
+                CALL GUARD(NM, XI, YJ, WSPA, WSPB, TARGET_X, TARGET_Y)
+                UBAR = WSPA 
+                VBAR = WSPB
+                EVEL = SQRT(UBAR**2 + VBAR**2)
+                UBAR = UBAR/EVEL ; VBAR = VBAR/EVEL
+             ELSE
+                CALL FIND_PREFERRED_DIRECTION(I, N, T, T_BEGIN, L_DEAD, NM_STRS_MESH, &
+                     II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR)
+             END IF
           END IF
           ! ========================================================
           ! Prefered walking direction V0 is now (UBAR,VBAR)
@@ -8312,8 +8374,6 @@ CONTAINS
              HR%X = X1
              HR%Y = Y1
           END IF
-          HR%X = X1
-          HR%Y = Y1
           HR%ANGLE = A1
           !
        END DO EVAC_MOVE_LOOP
@@ -8457,6 +8517,18 @@ CONTAINS
        TNOW13=SECOND()
        EVAC_FORCE_LOOP: DO I=1,N_HUMANS  
           HR => HUMAN(I)
+          IF (HR%IEL > 0) THEN  
+             ! The agent is from some evac line
+             GUARD_MEN = EVAC_EVACS(HR%IEL)%GUARD_MEN
+             TARGET_X = EVAC_EVACS(HR%IEL)%TARGET_X
+             TARGET_Y = EVAC_EVACS(HR%IEL)%TARGET_Y
+          ELSE
+             ! The agent is from some entr line, not yet as an input
+             ! GUARD_MEN = EVAC_ENTRYS(ABS(HR%IEL))%GUARD_MEN
+             GUARD_MEN = 0
+             TARGET_X = 0.5_EB*(XS+XF)
+             TARGET_Y = 0.5_EB*(YS+YF)
+          END IF
           J  =  MAX(0,HR%GROUP_ID)   ! Group index
           J1 = -MIN(0,HR%GROUP_ID)   ! Lonely agent index
           ! HR%Z is the real z-coordinate of the agent (inclines, stairs,etc),
@@ -8525,6 +8597,15 @@ CONTAINS
           IF (L_FALLEN_DOWN) HR%COLOR_INDEX = EVAC_AVATAR_NCOLOR
           HR_TAU = HR%TAU
           HR_TAU_INER = HR%TAU_INER
+          IF (MAX(0,HR%GROUP_ID)==0) THEN
+             TPRE = HR%TPRE + HR%TDET ! Lonely agent
+          ELSE
+             TPRE = HR%TDET ! Member of a group
+          END IF
+          IF (T < T_BEGIN .OR. T < TPRE) THEN
+             HR_TAU = MAX(CF_MIN_TAU, 0.1_EB*HR%TAU)
+             HR_TAU_INER = MAX(CF_MIN_TAU_INER, 0.1_EB*HR%TAU_INER)
+          END IF
           ! =======================================================
           ! Speed dependent social force
           ! =======================================================
@@ -8549,6 +8630,14 @@ CONTAINS
           ! Hawk - dove game: more random noise for hawks
           IF (C_HAWK >= 0.0_EB .AND. HR%I_DoorAlgo==1 .AND. HR%A <= 500.0_EB) THEN
              GATH = GATH*THETA_HAWK
+          END IF
+          L_FALLDOWN_THIS_TIME_STEP = .FALSE.
+          IF (.NOT. L_FALLEN_DOWN .AND. TAU_FALL_DOWN >= 0.0_EB .AND. T-HR%T_CheckFallDown > 0.1_EB) THEN
+             ! Check later if this agent falls down, do not do it at every time step
+             HR%T_CheckFallDown = T ! Do the check at this time step, save the check time
+             CALL RANDOM_NUMBER(RN)
+             ! P[falls down during Delta_t] = 1 - exp(-lambda*Delta_t), now Delta_t = 0.1 s
+             IF (1.0_EB - EXP(-PROB_FALL_DOWN*0.1_EB) > RN) L_FALLDOWN_THIS_TIME_STEP = .TRUE.
           END IF
 
           ! Psychological force: Cut-off when acceleration below 0.0001 m/s**2
@@ -8582,8 +8671,17 @@ CONTAINS
           ! Calculate persons prefered walking direction
           ! ========================================================
           N = NM_STRS_INDEX
-          CALL FIND_PREFERRED_DIRECTION(I, N, T+DTSP_NEW, T_BEGIN, L_DEAD, NM_STRS_MESH, &
-               IIN, JJN, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR)
+          IF(GUARD_MEN == 1) THEN
+             CALL GUARD(NM, XI, YJ, WSPA, WSPB, TARGET_X, TARGET_Y)
+             UBAR = WSPA 
+             VBAR = WSPB
+             EVEL = SQRT(UBAR**2 + VBAR**2)
+             UBAR = UBAR/EVEL ; VBAR = VBAR/EVEL
+             !write(lu_err,*)'*** force t, v0 ',T,UBAR,VBAR
+          ELSE
+             CALL FIND_PREFERRED_DIRECTION(I, N, T+DTSP_NEW, T_BEGIN, L_DEAD, NM_STRS_MESH, &
+                  IIN, JJN, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR)
+          END IF
           EVEL = UBAR**2 + VBAR**2
 
 
@@ -8621,7 +8719,7 @@ CONTAINS
           Hawk_Dove_Game: IF (C_HAWK >= 0.0_EB .AND. T > HR%TPRE+HR%TDET .AND. HR%I_Target>0 .AND. HR%I_DoorAlgo==1) THEN
              ! Hawk - Dove game, only for visible target doors/exits (i_target>0)
              CALL RANDOM_NUMBER(RN)
-             IF (L_DEAD .OR. L_FALLEN_DOWN) RN = -1.0_EB ! Do not play
+             IF (L_DEAD .OR. L_FALLEN_DOWN .OR. T > T_STOP_HD_GAME) RN = -1.0_EB ! Do not play
              Play_This_Time_Step: IF (RN > EXP(-DTSP/DT_GROUP_DOOR)) THEN
                 L_DO_GAME = .TRUE.
                 I_TMP = ABS(HR%I_TARGET)
@@ -8997,7 +9095,7 @@ CONTAINS
                 ! Use the closest circles to calculate the psychological force
                 DO III = 1, 3
                    DO JJJ = 4, 6
-                      TIM_DIST = SQRT((X_TMP(III)-X_TMP(JJJ))**2 + (Y_TMP(III)-Y_TMP(JJJ))**2)
+                      TIM_DIST = MAX(0.001_EB,SQRT((X_TMP(III)-X_TMP(JJJ))**2 + (Y_TMP(III)-Y_TMP(JJJ))**2))
                       ! Next is |vector1|*|vector2|
                       EVEL = SQRT((X_TMP(JJJ)-X_TMP(III))**2+(Y_TMP(JJJ)-Y_TMP(III))**2)* SQRT(U_TMP(III)**2+V_TMP(III)**2)
                       IF (EVEL > 0.0_EB) EVEL = ((X_TMP(JJJ)-X_TMP(III))*U_TMP(III) + &
@@ -9006,6 +9104,16 @@ CONTAINS
                          D_HUMANS = MIN( (TIM_DIST-(R_TMP(III)+R_TMP(JJJ))) /EVEL, D_HUMANS)
                       ELSE
                          D_HUMANS = MIN( (TIM_DIST-(R_TMP(III)+R_TMP(JJJ))) /0.01_EB , D_HUMANS)
+                      END IF
+                      IF (TAU_FALL_DOWN >= 0.0_EB .AND. TIM_DIST <= R_TMP(III)+R_TMP(JJJ)-D_OVERLAP_FALL) THEN
+                         ! Circles are touching each others more than D_OVERLAP_FALL => Fall down
+                         IF (L_HRE_FALLEN_DOWN) COSPHIFAC = 0.0_EB ! On top of a fallen agent, no social force anymore
+                         IF (T > HR%TDET .AND. L_FALLDOWN_THIS_TIME_STEP .AND. L_HRE_FALLEN_DOWN) THEN
+                            L_FALLEN_DOWN = .TRUE.
+                            HR%T_FallenDown = T
+                            HR%Angle_FallenDown = HR%angle
+                            HR%SizeFac_FallenDown = 0.0_EB
+                         END IF
                       END IF
 
                       FC_X1 = (X_TMP(III)-X_TMP(JJJ))*HR_A*COSPHIFAC* &
@@ -9018,6 +9126,13 @@ CONTAINS
                       END IF
                    END DO
                 END DO
+                IF (L_HRE_FALLEN_DOWN) THEN ! Maximum force is skin-skin value, i.e., the pre-exp factor
+                   EVEL = SQRT(FC_X**2+FC_Y**2)
+                   IF (EVEL > HR_A*COSPHIFAC ) THEN
+                      FC_X = HR_A*COSPHIFAC * FC_X/EVEL
+                      FC_Y = HR_A*COSPHIFAC * FC_Y/EVEL
+                   END IF
+                END IF
                 P2P_U = P2P_U + FC_X
                 P2P_V = P2P_V + FC_Y
                 SOCIAL_F = SOCIAL_F + SQRT(FC_X**2 + FC_Y**2)
@@ -9050,6 +9165,11 @@ CONTAINS
              ! Add contact force terms
              ! ========================================================
              ! No contact forces for fallen down agent due to other agents (wall contact forces are calculated)
+             HR_KAPPA = HR%KAPPA
+             HR_GAMMA = HR%GAMMA
+             IF (T <= T_BEGIN) THEN
+                HR_KAPPA = 0.0_EB ; HR_GAMMA = 0.0_EB
+             END IF
              IF ( (P2P_DIST <= (HR%RADIUS+HRE%RADIUS)) .AND. .NOT.L_FALLEN_DOWN) THEN
                 ! Calculate the velocities of the shoulder cirles
                 V_TMP(4) = HRE%V + SIN(HRE%ANGLE)*HRE%OMEGA*HRE%D_SHOULDER
@@ -9071,13 +9191,16 @@ CONTAINS
                       ELSE
                          D_HUMANS = MIN( (TIM_DIST-(R_TMP(III)+R_TMP(JJJ))) /0.01_EB , D_HUMANS)
                       END IF
-                      IF (TAU_FALL_DOWN >= 0.0_EB .AND. TIM_DIST <= R_TMP(III)+R_TMP(JJJ)-D_OVERLAP_FALL) THEN
-                         ! Circles are touching each others more than D_OVERLAP_FALL => Fall down
-                         L_FALLEN_DOWN = .TRUE.
-                         HR%T_FallenDown = T
-                         HR%Angle_FallenDown = HR%angle
-                         HR%SizeFac_FallenDown = 0.0_EB
-                      END IF
+!!$                      IF (TAU_FALL_DOWN >= 0.0_EB .AND. TIM_DIST <= R_TMP(III)+R_TMP(JJJ)-D_OVERLAP_FALL) THEN
+!!$                         ! Circles are touching each others more than D_OVERLAP_FALL => Fall down
+!!$                         !P_FallDownNow = HR%T_CheckFallDown, pers-rivin inputti PROB_FALL_DOWN
+!!$                         IF (T > HR%TDET .AND. L_FALLDOWN_THIS_TIME_STEP .AND. L_HRE_FALLEN_DOWN) THEN
+!!$                            L_FALLEN_DOWN = .TRUE.
+!!$                            HR%T_FallenDown = T
+!!$                            HR%Angle_FallenDown = HR%angle
+!!$                            HR%SizeFac_FallenDown = 0.0_EB
+!!$                         END IF
+!!$                      END IF
                       ! No contact forces for standing-fallen down
                       IF (TIM_DIST <= R_TMP(III)+R_TMP(JJJ) .AND. .NOT.L_HRE_FALLEN_DOWN) THEN
                          ! Circles are touching each others
@@ -9094,9 +9217,9 @@ CONTAINS
                          SCAL_PROD_OVER_RSQR = ((Y_TMP(III)-Y_TMP(JJJ))*(U_TMP(III)-U_TMP(JJJ)) - &
                               (X_TMP(III)-X_TMP(JJJ))*(V_TMP(III)-V_TMP(JJJ))) / (TIM_DIST**2)
                          IF (I_FRIC_SW >= 1 ) THEN  ! This is the default
-                            FC_X = - HR%KAPPA*((R_TMP(III)+R_TMP(JJJ))-TIM_DIST)* &
+                            FC_X = - HR_KAPPA*((R_TMP(III)+R_TMP(JJJ))-TIM_DIST)* &
                                  ( (Y_TMP(III)-Y_TMP(JJJ)) * SCAL_PROD_OVER_RSQR )
-                            FC_Y = - HR%KAPPA*((R_TMP(III)+R_TMP(JJJ))-TIM_DIST)* &
+                            FC_Y = - HR_KAPPA*((R_TMP(III)+R_TMP(JJJ))-TIM_DIST)* &
                                  (-(X_TMP(III)-X_TMP(JJJ)) * SCAL_PROD_OVER_RSQR )
                             P2P_U = P2P_U + FC_X
                             P2P_V = P2P_V + FC_Y
@@ -9105,8 +9228,8 @@ CONTAINS
                             P2P_TORQUE = P2P_TORQUE - FC_X*( (Y_TMP(III) + &
                                  (R_TMP(III)/R_TMP(JJJ))*(Y_TMP(JJJ)-Y_TMP(III)) ) - HR%Y ) 
                          ELSE
-                            FC_X = -HR%GAMMA*( (Y_TMP(III)-Y_TMP(JJJ))*SCAL_PROD_OVER_RSQR)
-                            FC_Y = -HR%GAMMA*(-(X_TMP(III)-X_TMP(JJJ))*SCAL_PROD_OVER_RSQR)
+                            FC_X = -HR_GAMMA*( (Y_TMP(III)-Y_TMP(JJJ))*SCAL_PROD_OVER_RSQR)
+                            FC_Y = -HR_GAMMA*(-(X_TMP(III)-X_TMP(JJJ))*SCAL_PROD_OVER_RSQR)
                             P2P_U = P2P_U + FC_X
                             P2P_V = P2P_V + FC_Y
                             P2P_TORQUE = P2P_TORQUE + FC_Y*( (X_TMP(III) + &
@@ -9141,11 +9264,11 @@ CONTAINS
                 ! Time dependent (linearly growing) threath parameter alpha, in the final version
                 ! the threath is estimated from the smoke consentration etc, but for the development
                 ! of the game, a simple linear function is introduced.
-                U_i_Hawk = p_i*C_Hawk/(2.0_EB*Delta_Hawk*Alpha_Hawk*(1.0_EB+A_HAWK_T_FACTOR*(T-T_BEGIN))* &
-                     T_tmp) - (1.0_EB-p_i)
+                U_i_Hawk = p_i*C_Hawk/(2.0_EB*Delta_Hawk*Alpha_Hawk*(1.0_EB + &
+                     A_HAWK_T_FACTOR*MAX(0.0_EB,T-A_HAWK_T_START))*T_tmp) - (1.0_EB-p_i)
                 U_i_Dove = p_i
-                IF (HR%A <= 500.0_EB .AND. (U_i_Dove < U_i_Hawk .OR. &
-                     2.0_EB*Alpha_Hawk*Delta_Hawk*T_tmp < Epsilon_Hawk)) THEN   ! Was a hawk
+                IF (HR%A <= 500.0_EB .AND. (U_i_Dove < U_i_Hawk .OR. 2.0_EB*Delta_Hawk*Alpha_Hawk* &
+                     (1.0_EB+A_HAWK_T_FACTOR*MAX(0.0_EB,T-A_HAWK_T_START))*T_tmp < Epsilon_Hawk)) THEN   ! Was a hawk
                    ! DoseCrit1 = hr%a   modified, no sharp transition
                    ! DoseCrit2 = hr%tau modified, now sharp transition
                    HR%DoseCrit1 = MAX(HR%A,  HR%DoseCrit1) ! Starting value for hawk => dove transition
@@ -9153,8 +9276,8 @@ CONTAINS
                    HR%A = 10.0_EB*HR%A ; HR%TAU = 2.0_EB*HR%TAU
                    HR%DoseCrit2 = HR%TAU ! sharp transition
                 END IF
-                IF (HR%A >  500.0_EB .AND. U_i_Hawk < U_i_Dove .AND. &
-                    2.0_EB*Alpha_Hawk*Delta_Hawk*T_tmp >= Epsilon_Hawk ) THEN   ! Was a dove
+                IF (HR%A >  500.0_EB .AND. U_i_Hawk < U_i_Dove .AND. 2.0_EB*Delta_Hawk*Alpha_Hawk* &
+                     (1.0_EB+A_HAWK_T_FACTOR*MAX(0.0_EB,T-A_HAWK_T_START))*T_tmp >= Epsilon_Hawk) THEN   ! Was a dove
                    ! DoseCrit1 = hr%a   modified, no sharp transition
                    ! DoseCrit2 = hr%tau modified, now sharp transition
                    HR%DoseCrit1 = MIN(HR%A,  HR%DoseCrit1) ! Starting value for hawk => dove transition
@@ -9562,7 +9685,7 @@ CONTAINS
           HR%TORQUE = P2P_TORQUE
 
           ! Fall down algorithm: Check the resultant contact force
-          IF (TAU_FALL_DOWN >= 0.0_EB) THEN
+          IF (TAU_FALL_DOWN >= 0.0_EB .AND. T > HR%TDET) THEN
              IF (.NOT.L_FALLEN_DOWN .AND. SQRT(CONTACT_FX**2+CONTACT_FY**2) > HR%F_FallDown) THEN
                 L_FALLEN_DOWN = .TRUE.
                 HR%T_FallenDown = T
@@ -9600,6 +9723,7 @@ CONTAINS
           ! Add self-propelling force terms, self-consistent VV 
           ! (First time step towards the exit door)
           IF ( T <= TPRE ) THEN
+             HR_TAU = MAX(CF_MIN_TAU, 0.1_EB*HR%TAU)
              IF ( (T+DTSP_NEW) > TPRE) THEN
                 EVEL = SQRT(UBAR**2 + VBAR**2)
                 IF (EVEL > 0.0_EB) THEN
@@ -9739,9 +9863,17 @@ CONTAINS
              DTSP_NEW = MAX(DTSP_NEW, EVAC_DT_MIN)
              DTSP_NEW = MIN(DTSP_NEW, EVAC_DT_MAX)
           ELSE  ! Initialization phase
-             HR%U     = 0.0_EB
-             HR%V     = 0.0_EB
-             HR%OMEGA = 0.0_EB
+             HR%U = 0.5_EB*HR%U ; HR%V = 0.5_EB*HR%V
+             EVEL = SQRT(HR%U**2 + HR%V**2)
+             IF ( EVEL > 0.1_EB*VMAX_TIMO ) THEN
+                HR%U = HR%U*(0.1_EB*VMAX_TIMO/EVEL)
+                HR%V = HR%V*(0.1_EB*VMAX_TIMO/EVEL)
+             END IF
+             DTSP_NEW = MAX(DTSP_NEW, EVAC_DT_MIN)
+             DTSP_NEW = MIN(DTSP_NEW, EVAC_DT_MAX)
+             IF (ICYC==0) THEN
+                HR%U = 0.0_EB; HR%V = 0.0_EB; HR%OMEGA = 0.0_EB
+             END IF
           END IF
 
        END DO EVAC_FORCE_LOOP
@@ -9768,6 +9900,436 @@ CONTAINS
     TUSED(12,NM)=TUSED(12,NM)+SECOND()-TNOW
 
   CONTAINS
+
+    SUBROUTINE GUARD (NM, XI, YJ, WSPA, WSPB, TARGET_X, TARGET_Y)
+      ! Dane potrzebne na wejściu:
+      !   mapWidth - szerokość siatki
+      !   mapHeight - wysokość siatki 
+      !   tileSize - rozmiar komórki
+      !   numberPeople - ilość ludzi
+      !   startX,Y
+      !   targetX,Y
+      !   walkability - zajętość siatki
+      IMPLICIT NONE
+      INTEGER, INTENT(IN) :: NM
+      REAL(EB), INTENT(IN) :: XI, YJ, TARGET_X, TARGET_Y
+      REAL(EB), INTENT(OUT) :: WSPA, WSPB
+      INTEGER :: ic, iw, xt, yt
+      TYPE (MESH_TYPE), POINTER :: M =>NULL()
+
+      INTEGER :: mapWidth, mapHeight, tileSize, numberPeople = 2, &
+           onClosedList = 10, &
+           notfinished = 0, notStarted = 0, &
+           found = 1, nonexistent = 2, &
+           walkable = 0, unwalkable = 1
+      ! Create needed arrays
+      INTEGER, DIMENSION(:,:), ALLOCATABLE :: walkability, pathBank
+      INTEGER, DIMENSION(:), ALLOCATABLE :: openList, openX, openY, Fcost, &
+           Hcost, pathLength, pathLocation, pathStatus, xPath, yPath
+      INTEGER, DIMENSION(:,:), ALLOCATABLE :: whichList, parentX, parentY, &
+           Gcost
+
+      ! Local pathfinding
+      INTEGER :: onOpenList=0, parentXval=0, parentYval=0, a=0, b=0, n=0, &
+           u=0, v=0, temp=0, corner=0, numberOfOpenListItems=0, addedGCost=0, &
+           tempGcost=0, path=0, tempx, pathX, pathY, cellPosition, newOpenListItemID=0
+      INTEGER :: startX, startY, x, y
+      INTEGER :: startingX, startingY, targetX, targetY, pathfinderID ! in 
+
+      M => MESHES(NM)
+
+      mapWidth = (M%XF - M%XS)*100
+      mapHeight = (M%YF - M%YS)*100
+      tileSize = mapWidth/M%IBAR
+
+      ALLOCATE(walkability(0:M%IBAR,0:M%JBAR)) ! Dimensions of mesh
+      ALLOCATE(openList(0:mapWidth*mapHeight+2))
+      ALLOCATE(whichList(0:mapWidth+1,0:mapHeight+1))
+      ALLOCATE(openX(0:mapWidth*mapHeight+2))
+      ALLOCATE(openY(0:mapWidth*mapHeight+2))
+      ALLOCATE(parentX(0:mapWidth+1,0:mapHeight+1))
+      ALLOCATE(parentY(0:mapWidth+1,0:mapHeight+1))
+      ALLOCATE(Fcost(0:mapWidth*mapHeight+2))
+      ALLOCATE(Gcost(0:mapWidth+1,0:mapHeight+1))
+      ALLOCATE(Hcost(0:mapWidth*mapHeight+2))
+      ALLOCATE(pathLength(0:numberPeople+1))
+      ALLOCATE(pathLocation(0:numberPeople+1))
+
+      ! Path reading variables
+      ALLOCATE(pathStatus(0:numberPeople+1))
+      ALLOCATE(xPath(0:numberPeople+1))
+      ALLOCATE(yPath(0:numberPeople+1))
+
+      ! Mam już wymiar mapy
+      ! WRITE(LU_ERR,*) M%XS
+      ! WRITE(LU_ERR,*) M%XF
+      ! WRITE(LU_ERR,*) M%YS
+      ! WRITE(LU_ERR,*) M%YF
+
+      ! Oraz na ile jest podzielona elementów
+      ! WRITE(LU_ERR,*) M%IBAR
+      ! WRITE(LU_ERR,*) M%JBAR
+
+      ! Teraz podzielę ją na komórki i sprawdzę czy są przeszkody 
+      ! Ewidentnie robimy tylko raz
+      DO xt = 1, M%IBAR
+         DO yt = 1, M%JBAR
+            ic  = M%CELL_INDEX(xt,yt,1)
+            iw  = M%OBST_INDEX_C(ic) 
+            walkability(xt-1,yt-1) = iw
+!!$            IF(iw>0) THEN
+!!$               WRITE(LU_ERR,*) xt-1
+!!$               WRITE(LU_ERR,*) yt-1
+!!$            END IF
+         END DO
+      END DO
+
+      ! 1. Convert location data (in pixels) to coordinates in the walkability array.
+      !startX = startingX/tileSize
+      !startY = startingY/tileSize
+      !targetX = targetX/tileSize
+      !targetY = targetY/tileSize
+      startX = FLOOR(XI)
+      startY = FLOOR(YJ)
+
+      targetX = FLOOR(M%CELLSI(FLOOR((TARGET_X-M%XS)*M%RDXINT))+1.0_EB)
+      targetY = FLOOR(M%CELLSJ(FLOOR((TARGET_Y-M%YS)*M%RDYINT))+1.0_EB)
+      !write(lu_err,*)'**** targetX, targetY ',targetX, targetY,target_X, target_Y
+      !targetX = 19
+      !targetY = 19
+
+      ! 2.Quick Path Checks: Under the some circumstances no path needs to
+      ! be generated ...
+      ! If starting location and target are in the same location...
+      IF((startX==targetX .AND. startY==targetY .AND. pathLocation(pathfinderID)>0) .OR.(startX==targetX .AND. &
+           startY==targetY .AND. pathLocation(pathfinderID)==0)) THEN
+         !path = found
+      ELSE
+         !IF(startX==targetX .AND. startY==targetY .AND. pathLocation(pathfinderID)==0) THEN
+         !path = nonexistent
+         !END IF 
+
+         ! If target square is unwalkable, return that it's a nonexistent path.
+         !if (walkability[targetX][targetY] == unwalkable)
+         !goto noPath;
+
+         ! 3.Reset some variables that need to be cleared
+         IF(onClosedList>1000000) THEN ! reset whichList occasionally
+            DO x=0, mapWidth-1
+               DO y=0, mapHeight-1
+                  whichList(x,y) = 0
+               END DO
+            END DO
+            onClosedList = 10
+         END IF
+         ! changing the values of onOpenList and onClosed list is faster than redimming whichList() array
+         onClosedList = onClosedList+2 
+         onOpenList = onClosedList-1
+         pathLength(pathfinderID) = notStarted ! i.e, = 0
+         pathLocation(pathfinderID) = notStarted ! i.e, = 0
+         Gcost(startX,startY) = 0 ! reset starting square's G value to 0
+
+         ! 4.Add the starting location to the open list of squares to be checked.
+         numberOfOpenListItems = 1
+         ! assign it as the top (and currently only) item in the open list, which is maintained as a binary heap (explained below)
+         openList(1) = 1 
+         openX(1) = startX
+         openY(1) = startY
+
+         ! 5.Do the following until a path is found or deemed nonexistent.
+         DO 
+
+            ! 6.If the open list is not empty, take the first cell off of the list.
+            ! This is the lowest F cost cell on the open list.
+            IF(numberOfOpenListItems /= 0) THEN
+
+               ! 7. Pop the first item off the open list.
+               parentXval = openX(openList(1))
+               parentYval = openY(openList(1)) ! record cell coordinates of the item
+               whichList(parentXval,parentYval) = onClosedList ! add the item to the closed list
+
+               ! Open List = Binary Heap: Delete this item from the open list, which
+               ! is maintained as a binary heap. For more information on binary heaps, see:
+               ! http://www.policyalmanac.org/games/binaryHeaps.htm
+               numberOfOpenListItems = numberOfOpenListItems - 1 ! reduce number of open list items by 1	
+
+               ! Delete the top item in binary heap and reorder the heap, with the lowest F cost item rising to the top.
+               openList(1) = openList(numberOfOpenListItems+1) ! move the last item in the heap up to slot #1
+               v = 1
+
+               ! Repeat the following until the new item in slot #1 sinks to its proper spot in the heap.
+               DO
+                  u = v
+                  IF(2*u+1<=numberOfOpenListItems) THEN ! if both children exist
+                     ! Check if the F cost of the parent is greater than each child.
+                     ! Select the lowest of the two children.
+                     IF(Fcost(openList(u)) >= Fcost(openList(2*u))) THEN 
+                        v = 2*u;
+                     END IF
+                     IF(Fcost(openList(v)) >= Fcost(openList(2*u+1))) THEN
+                        v = 2*u+1
+                     END IF
+                  ELSE
+                     IF(2*u<=numberOfOpenListItems) THEN ! if only child #1 exists
+                        ! Check if the F cost of the parent is greater than child #1	
+                        IF(Fcost(openList(u)) >= Fcost(openList(2*u))) THEN
+                           v = 2*u;
+                        END IF
+                     END IF
+                  END IF
+
+                  IF(u /= v) THEN ! if parent's F is > one of its children, swap them
+                     temp = openList(u)
+                     openList(u) = openList(v)
+                     openList(v) = temp
+                  ELSE
+                     EXIT ! otherwise, exit loop
+                  END IF
+               END DO
+               !while (!KeyDown(27))//reorder the binary heap
+
+               ! 7.Check the adjacent squares. (Its "children" -- these path children
+               ! are similar, conceptually, to the binary heap children mentioned
+               ! above, but don't confuse them. They are different. Path children
+               ! are portrayed in Demo 1 with grey pointers pointing toward
+               ! their parents.) Add these adjacent child squares to the open list
+               ! for later consideration if appropriate (see various if statements
+               ! below).
+               DO b=parentYval-1, parentYval+1
+                  DO a=parentXval-1, parentXval+1
+                     ! If not off the map (do this first to avoid array out-of-bounds errors)
+                     IF(a /= -1 .AND. b /= -1 .AND. a /= mapWidth/tileSize .AND. b /= mapHeight/tileSize) THEN
+                        ! If not already on the closed list (items on the closed list have
+                        ! already been considered and can now be ignored).			
+                        IF(whichList(a,b) /= onClosedList) THEN
+                           ! If not a wall/obstacle square.
+                           IF(walkability(a,b) < unwalkable) THEN 
+                              ! Don't cut across corners
+                              corner = walkable
+                              IF(a==parentXval-1) THEN
+                                 IF(b == parentYval-1) THEN
+                                    IF(walkability(parentXval-1,parentYval) >= unwalkable .OR. &
+                                         walkability(parentXval,parentYval-1) >= unwalkable) THEN 
+                                       corner = unwalkable
+                                    END IF
+                                 ELSE IF(b == parentYval+1) THEN
+                                    IF(walkability(parentXval,parentYval+1) >= unwalkable .OR. &
+                                         walkability(parentXval-1,parentYval) >= unwalkable) THEN
+                                       corner = unwalkable 
+                                    END IF
+                                 END IF
+                              ELSE IF(a == parentXval+1) THEN
+                                 IF(b == parentYval-1) THEN
+                                    IF(walkability(parentXval,parentYval-1) >= unwalkable .OR. &
+                                         walkability(parentXval+1,parentYval) >= unwalkable) THEN 
+                                       corner = unwalkable
+                                    END IF
+                                 ELSE IF(b == parentYval+1) THEN
+                                    IF(walkability(parentXval+1,parentYval) >= unwalkable .OR. &
+                                         walkability(parentXval,parentYval+1) >= unwalkable) THEN
+                                       corner = unwalkable 
+                                    END IF
+                                 END IF
+                              END IF
+                              IF(corner == walkable) THEN
+                                 ! If not already on the open list, add it to the open list.			
+                                 IF(whichList(a,b) /= onOpenList) THEN 
+                                    ! Create a new open list item in the binary heap.
+                                    newOpenListItemID = newOpenListItemID + 1 ! each new item has a unique ID #
+                                    n = numberOfOpenListItems+1
+                                    ! place the new open list item (actually, its ID#) at the bottom of the heap
+                                    openList(n) = newOpenListItemID 
+                                    openX(newOpenListItemID) = a
+                                    openY(newOpenListItemID) = b ! record the x and y coordinates of the new item
+
+                                    ! Figure out its G cost
+                                    IF(abs(a-parentXval) == 1 .AND. abs(b-parentYval) == 1) THEN
+                                       addedGCost = 14 ! cost of going to diagonal squares	
+                                    ELSE
+                                       addedGCost = 10 !cost of going to non-diagonal squares				
+                                    END IF
+                                    Gcost(a,b) = Gcost(parentXval,parentYval) + addedGCost
+                                    ! Figure out its H and F costs and parent
+                                    Hcost(openList(n)) = 10*(abs(a - targetX) + abs(b - targetY))
+                                    Fcost(openList(n)) = Gcost(a,b) + Hcost(openList(n))
+                                    parentX(a,b) = parentXval 
+                                    parentY(a,b) = parentYval
+                                    ! Move the new open list item to the proper place in the binary heap.
+                                    ! Starting at the bottom, successively compare to parent items,
+                                    ! swapping as needed until the item finds its place in the heap
+                                    ! or bubbles all the way to the top (if it has the lowest F cost).
+                                    DO WHILE(n /= 1) ! While item hasn't bubbled to the top (n=1)	
+                                       ! Check if child's F cost is < parent's F cost. If so, swap them.	
+                                       IF(Fcost(openList(n)) <= Fcost(openList(n/2))) THEN
+                                          temp = openList(n/2)
+                                          openList(n/2) = openList(n)
+                                          openList(n) = temp
+                                          n = n/2
+                                       ELSE
+                                          EXIT
+                                       END IF
+                                    END DO
+                                    numberOfOpenListItems = numberOfOpenListItems+1 ! add one to the number of items in the heap
+                                    ! Change whichList to show that the new item is on the open list.
+                                    whichList(a,b) = onOpenList
+
+                                    ! 8.If adjacent cell is already on the open list, check to see if this 
+                                    ! path to that cell from the starting location is a better one. 
+                                    ! If so, change the parent of the cell and its G and F costs.	
+                                 ELSE ! If whichList(a,b) = onOpenList
+                                    ! Figure out the G cost of this possible new path
+                                    IF(abs(a-parentXval) == 1 .AND. abs(b-parentYval) == 1) THEN
+                                       addedGCost = 14 ! cost of going to diagonal tiles	
+                                    ELSE 
+                                       addedGCost = 10 ! cost of going to non-diagonal tiles				
+                                    END IF
+                                    tempGcost = Gcost(parentXval,parentYval) + addedGCost
+                                    ! If this path is shorter (G cost is lower) then change
+                                    ! the parent cell, G cost and F cost. 		
+                                    IF(tempGcost < Gcost(a,b)) THEN ! if G cost is less,
+                                       parentX(a,b) = parentXval ! change the square's parent
+                                       parentY(a,b) = parentYval
+                                       Gcost(a,b) = tempGcost ! change the G cost			
+                                       ! Because changing the G cost also changes the F cost, if
+                                       ! the item is on the open list we need to change the item's
+                                       ! recorded F cost and its position on the open list to make
+                                       ! sure that we maintain a properly ordered open list.
+                                       DO x = 1, numberOfOpenListItems !//look for the item in the heap
+                                          IF(openX(openList(x)) == a .AND. openY(openList(x)) == b) THEN ! item found
+                                             Fcost(openList(x)) = Gcost(a,b) + Hcost(openList(x)) ! change the F cost
+                                             ! See if changing the F score bubbles the item up from it's current location 
+                                             ! in the heap
+                                             n = x;
+                                             DO WHILE (n /= 1) ! While item hasn't bubbled to the top (n=1)	
+                                                ! Check if child is < parent. If so, swap them.	
+                                                IF(Fcost(openList(n)) < Fcost(openList(n/2))) THEN
+                                                   temp = openList(n/2)
+                                                   openList(n/2) = openList(n)
+                                                   openList(n) = temp
+                                                   n = n/2
+                                                ELSE
+                                                   EXIT
+                                                END IF
+                                             END DO
+                                             EXIT ! exit for x = loop
+                                          END IF ! If openX(openList(x)) = a
+                                       END DO ! For x = 1 To numberOfOpenListItems
+                                    END IF ! If tempGcost < Gcost(a,b)
+                                 END IF ! else If whichList(a,b) = onOpenList	
+                              END IF ! If not cutting a corner
+                           END IF ! If not a wall/obstacle square.
+                        END IF ! If not already on the closed list 
+                     END IF ! If not off the map
+                  END DO ! for (a = parentXval-1; a <= parentXval+1; a++){
+               END DO ! for (b = parentYval-1; b <= parentYval+1; b++){
+            ELSE ! if (numberOfOpenListItems != 0)
+               ! 9.If open list is empty then there is no path.	
+               path = nonexistent
+               EXIT
+            END IF
+            ! If target is added to open list then path has been found.
+            IF(whichList(targetX,targetY) == onOpenList) THEN
+               path = found 
+               EXIT 
+            END IF
+         END DO
+
+         ! 10.Save the path if it exists.
+         IF(path == found) THEN
+            ! a.Working backwards from the target to the starting location by checking
+            ! each cell's parent, figure out the length of the path.
+            pathX = targetX
+            pathY = targetY
+            DO WHILE(pathX /= startX .OR. pathY /= startY)
+               ! Look up the parent of the current cell.	
+               tempx = parentX(pathX,pathY)
+               pathY = parentY(pathX,pathY)
+               pathX = tempx
+               ! Figure out the path length
+               pathLength(pathfinderID) = pathLength(pathfinderID) + 1;
+            END DO
+            !b.Resize the data bank to the right size in bytes
+            ALLOCATE(pathBank(0:pathLength(pathfinderID),0:1))
+
+            !c. Now copy the path information over to the databank. Since we are
+            ! working backwards from the target to the start location, we copy
+            ! the information to the data bank in reverse order. The result is
+            ! a properly ordered set of path data, from the first step to the
+            ! last.
+            pathX = targetX  
+            pathY = targetY
+            pathBank(0,0) = startX
+            pathBank(0,1) = startY
+            !cellPosition = pathLength(pathfinderID)*2 ! start at the end	
+            DO WHILE(pathX /= startX .OR. pathY /= startY)
+               !cellPosition = cellPosition - 2 ! work backwards 2 integers
+               !pathBank(pathfinderID,cellPosition) = pathX
+               !pathBank(pathfinderID,cellPosition+1) = pathY
+               ! d.Look up the parent of the current cell.	
+               tempx = parentX(pathX,pathY)
+               pathY = parentY(pathX,pathY)
+               pathX = tempx
+               pathBank(pathLength(pathfinderID),0) = pathX
+               pathBank(pathLength(pathfinderID),1) = pathY
+               pathLength(pathfinderID) = pathLength(pathfinderID) - 1
+               ! WRITE(LU_ERR,*) 'pathX=',pathX
+               ! WRITE(LU_ERR,*) 'pathY=',pathY
+               ! e.If we have reached the starting square, exit the loop.	
+            END DO
+            ! WRITE(LU_ERR,*) 'koniec----------'
+
+            ! 11.Read the first path step into xPath/yPath arrays
+            !ReadPath(pathfinderID,startingX,startingY,1);
+         END IF
+         !return path;
+
+
+
+         ! 13.If there is no path to the selected target, set the pathfinder's
+         ! xPath and yPath equal to its current location and return that the
+         ! path is nonexistent.
+         ! noPath:
+         ! xPath[pathfinderID] = startingX;
+         ! yPath[pathfinderID] = startingY;
+         ! return nonexistent;
+
+         ! Rysowanie wektorów odbywa się za pomocą x2 - x1, y2 - y1
+         ! mogłaby powstać tablica, która będzie zawierać te wartości
+         ! mam tablicę pathBank, która zawiera wszystkie współrzędne ścieżki
+         !WRITE(LU_ERR,*) 'Xend=',pathBank(2,0)
+         !WRITE(LU_ERR,*) 'Xsta=',startX
+         !WRITE(LU_ERR,*) 'Yend=',pathBank(2,1)
+         !WRITE(LU_ERR,*) 'Ysta=',startY
+         !WRITE(LU_ERR,*) '====================='
+
+         WSPA = pathBank(2,0) - startX
+         WSPB = pathBank(2,1) - startY
+
+         IF(path == found) THEN
+            DEALLOCATE(pathBank)
+         END IF
+
+      END IF ! if startX==targetX
+
+      DEALLOCATE(walkability) 
+      DEALLOCATE(openList)
+      DEALLOCATE(whichList)
+      DEALLOCATE(openX)
+      DEALLOCATE(openY)
+      DEALLOCATE(parentX)
+      DEALLOCATE(parentY)
+      DEALLOCATE(Fcost)
+      DEALLOCATE(Gcost)
+      DEALLOCATE(Hcost)
+      DEALLOCATE(pathLength)
+      DEALLOCATE(pathLocation)
+
+      ! Path reading variables
+      DEALLOCATE(pathStatus)
+      DEALLOCATE(xPath)
+      DEALLOCATE(yPath)
+
+    END SUBROUTINE GUARD
 
     SUBROUTINE FIND_PREFERRED_DIRECTION(I, NOUT, T, T_BEGIN, L_DEAD, NM_STRS_MESH, &
          II, JJ, IIX, JJY, XI, YJ, ZK, UBAR, VBAR, HR_TAU, TPRE, NM, I_STRS_DOOR)
@@ -11961,6 +12523,7 @@ CONTAINS
       HR%T_FallenDown = HUGE(HR%T_FallenDown)
       HR%Angle_FallenDown = 0.0_EB
       HR%SizeFac_FallenDown = 0.0_EB
+      HR%T_CheckFallDown = Tin
       !
       IF (ABS(ior) == 1) irnmax = INT(PNX%Width*4.0_EB)
       IF (ABS(ior) == 2) irnmax = INT(PNX%Width*4.0_EB)
