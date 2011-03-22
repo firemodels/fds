@@ -5,8 +5,6 @@
 &TIME T_END=10.0 / 
 &DUMP NFRAMES=40 /
 
-&MISC SURF_DEFAULT='WALL' / 
-
 &REAC ID         = 'POLYURETHANE'
       FYI        = 'C_6.3 H_7.1 N O_2.1, NFPA Handbook, Babrauskas'
       SOOT_YIELD = 0.10
@@ -23,6 +21,7 @@
       DENSITY       = 1440. /
 
 &SURF ID             = 'WALL'
+      DEFAULT        = .TRUE.
       RGB            = 200,200,200
       MATL_ID        = 'GYPSUM PLASTER'
       THICKNESS      = 0.012 /

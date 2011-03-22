@@ -6,11 +6,9 @@
 
 &DUMP MASS_FILE=.TRUE. /
 
-&MISC SURF_DEFAULT='adiabatic wall' /
-
 &SPEC ID='PROPANE' /
 
-&SURF ID='adiabatic wall', ADIABATIC=.TRUE./
+&SURF ID='adiabatic wall', ADIABATIC=.TRUE., DEFAULT=.TRUE. /
 &SURF ID='burner', MASS_FLUX(1)=0.0001, SPEC_ID(1)='PROPANE', TMP_FRONT=500. / use low flux to test diffusion effect
 
 &VENT XB=-0.5, 0.5,-0.5, 0.5,0.0,0.0,  SURF_ID='burner', COLOR='RED' / 

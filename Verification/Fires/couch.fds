@@ -7,8 +7,6 @@ The case is meant as a teaching tool and to test functionality.
 
 &TIME T_END=900. /
 
-&MISC SURF_DEFAULT='WALL' /
-
 &SURF ID='BURNER', HRRPUA=1000., PART_ID='smoke' /
 &REAC C=3,H=8,SOOT_YIELD=0.01,FUEL='PROPANE'/
 &MATL ID                    = 'FABRIC'
@@ -49,6 +47,7 @@ The case is meant as a teaching tool and to test functionality.
       PART_ID        = 'smoke' /
 
 &SURF ID             = 'WALL'
+      DEFAULT        = .TRUE.
       RGB            = 200,200,200
       MATL_ID        = 'GYPSUM PLASTER'
       THICKNESS      = 0.012 /
