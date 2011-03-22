@@ -9208,7 +9208,7 @@ For the canonical case of isotropic turbulence Pope actually defines LES such th
 
 \subsubsection{Measure of Scalar Resolution}
 \label{mtr}
-The \emph{measure of turbulence resolution} is defined locally as
+The \emph{measure of scalar resolution} is defined locally as
 \begin{eqnarray}
 \mbox{MSR}(\mathbf{x},t) = \frac{T_{sgs}}{T_{res} + T_{sgs}}
 \end{eqnarray}
@@ -9252,7 +9252,7 @@ where $a$ is as the \emph{average} coefficient and $c$ is as the \emph{wavelet} 
 
 The decomposition of the signal shown in (\ref{eqn_wavelet_decomp}) may be repeated at ever coarser resolutions.  The result is a \emph{wavelet transform}. The procedure is entirely analogous to the Fourier transform, but with compact support.  If we look at a 1D signal with $2^m$ points, the repeated application of (\ref{eqn_wavelet_decomp}) results in an $m \times m$ matrix of averages $\mathbf{a}$ with components $a_{ij}$ and an $m \times m$ wavelet coefficient matrix $\mathbf{c}$ with components $c_{ij}$.  Each row $i$ of $\mathbf{a}$ may be reconstructed from the $i+1$ row of $\mathbf{a}$ and $\mathbf{c}$.  Because of this and because small values of the wavelet coefficient matrix may be discarded, dramatic compression of the signal may be obtained.
 
-Here we are interested in using the wavelet analysis to say something about the local level of error in grid resolution.  Very simply, we ask what can be discerned from a sample of four data points along a line.  Roughly speaking we might expect to see one of the four scenarios depicted in Figure \ref{fig_wavelet_transforms}.  Within each plot window we also show the results of a Haar wavelet transform for that signal.  Looking first at the two top plots, on the left we have a step function and on the right we have a straight line.  Intuitively, we expect large error for the step function and small error for the line.  The following error measure achieves this goal:
+Here we are interested in using the wavelet analysis to say something about the local level of error due to grid resolution.  Very simply, we ask what can be discerned from a sample of four data points along a line.  Roughly speaking we might expect to see one of the four scenarios depicted in Figure \ref{fig_wavelet_transforms}.  Within each plot window we also show the results of a Haar wavelet transform for that signal.  Looking first at the two top plots, on the left we have a step function and on the right we have a straight line.  Intuitively, we expect large error for the step function and small error for the line.  The following error measure achieves this goal:
 \vskip-.6cm
 \begin{eqnarray}
 \mbox{WEM}(\mathbf{x},t) = \max_{x,y,z}\left( \frac{|c_{11} + c_{12}| - |c_{21}|}{|a_{21}|} \right)
@@ -10102,10 +10102,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct BNDF\_DEFAULT}             & Logical       & See Section~\ref{info:BNDF}                               &               & {\ct .TRUE.}      \\ \hline
 {\ct CFL\_MAX}                  & Real          & See Section~\ref{info:CFL}                                &               & 1.0               \\ \hline
 {\ct CFL\_MIN}                  & Real          & See Section~\ref{info:CFL}                                &               & 0.8               \\ \hline
-%{\ct CFL\_VELOCITY\_NORM}       & Integer       & Select velocity norm used in CFL calculation              &               & 0                \\ \hline
-%{\ct CHECK\_KINETIC\_ENERGY}    & Logical       & Estimate unresolved (subgrid) kinetic energy              &               & {\ct .FALSE.}     \\ \hline
-%{\ct CHECK\_GR}                 & Logical       &                                                           &               & {\ct .FALSE.}     \\ \hline
-%{\ct CHECK\_VN}                 & Logical       &                                                           &               & {\ct .FALSE.}     \\ \hline
+%{\ct CFL\_VELOCITY\_NORM}       & Integer       & Select velocity norm used in CFL calculation              &               & 1                \\ \hline
+%{\ct CHECK\_GR}                 & Logical       &                                                           &               & {\ct .TRUE.}     \\ \hline
+%{\ct CHECK\_VN}                 & Logical       &                                                           &               & {\ct .TRUE.}     \\ \hline
 {\ct C\_FORCED}                 & Real          & See Section~\ref{info:convection}                         &               & 0.037             \\ \hline
 {\ct C\_FORCED\_CYLINDER}       & Real          & See Section~\ref{info:convection}                         &               & 0.664             \\ \hline
 {\ct C\_FORCED\_SPHERE }        & Real          & See Section~\ref{info:convection}                         &               & 0.600             \\ \hline
