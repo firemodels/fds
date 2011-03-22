@@ -2367,7 +2367,7 @@ DO N=0,N_TRACKED_SPECIES
       WRITE(LU_OUTPUT,'(A,ES9.2)')  '                         1000 C: ',Z2CP_C(1273)+Z2CP(1273,N)
       WRITE(LU_OUTPUT,'(A,ES9.2)')  '                         1500 C: ',Z2CP_C(1773)+Z2CP(1773,N)
    ENDIF
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Diff. Coeff. (m^2/s) Ambient: ',Z2D(TMPA,N)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Diff. Coeff. (m^2/s) Ambient: ',Z2D(NINT(TMPA),N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                          500 C: ',Z2D( 773,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                         1000 C: ',Z2D(1273,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                         1500 C: ',Z2D(1773,N)               
@@ -4293,7 +4293,7 @@ SELECT CASE(IND)
          ITMP    = INT(TMP(II,JJ,KK))
          TMP_WGT = TMP(II,JJ,KK) - AINT(TMP(II,JJ,KK))
          DHOR    = PARTICLE_CLASS(WATER_PART_INDEX)%H_V(ITMP)+&
-                      TMP_WGT*(PARTICLE_CLASS(WATER_PART_INDEX)%H_V(ITMP+1)-PARTICLE_CLASS(WATER_PART_INDEX)%H_V(ITMP))                      
+                      TMP_WGT*(PARTICLE_CLASS(WATER_PART_INDEX)%H_V(ITMP+1)-PARTICLE_CLASS(WATER_PART_INDEX)%H_V(ITMP))
          DHOR    = DHOR*MW_H2O/R0
       ELSE
          DHOR = (3023410.8_EB-MAX(MIN(TMP(II,JJ,KK),TMP_BOIL),273.15_EB)*2334.894_EB)*MW_H2O/R0 !linear fit of JANAF table
