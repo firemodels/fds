@@ -94,7 +94,7 @@ CALL READ_DEAD    ! Scan input file looking for old NAMELIST groups, and stop th
 CALL READ_HEAD
 CALL READ_MISC
 CALL READ_MULT
-CALL READ_EVAC(1) ! Read some evacuation input from the main evacuation meshes
+CALL READ_EVAC(1)    ! Read some evacuation input from the main evacuation meshes
 CALL READ_MESH
 CALL READ_TRAN
 CALL READ_TIME
@@ -103,7 +103,7 @@ CALL READ_REAC(1)
 CALL READ_SPEC
 CALL READ_SMIX
 CALL READ_REAC(2)
-CALL PROC_SMIX ! Extend SPECIES_MIXTURE array for primitive species + set thermophysical properties and other species data
+CALL PROC_SMIX  ! Extend SPECIES_MIXTURE array for primitive species + set thermophysical properties and other species data
 CALL READ_RADI
 CALL READ_PROP
 CALL READ_PART
@@ -121,7 +121,7 @@ CALL READ_HVAC
 CALL PROC_PART    ! Set up various PARTicle constructs
 CALL PROC_SURF_1  ! Set up SURFace constructs for species
 CALL READ_RAMP    ! Read in all RAMPs, assuming they have all been identified previously
-CALL READ_TABL    ! Read in all TABLs, assuming they have all been identified previously
+CALL READ_TABL   ! Read in all TABLs, assuming they have all been identified previously
 CALL PROC_MATL    ! Set up various MATeriaL constructs
 CALL PROC_SURF_2  ! Set up remaining SURFace constructs
 CALL READ_DUMP
@@ -1448,7 +1448,7 @@ NAMELIST /MISC/ PR,SC,TMPA,GVEC,FYI, &
                 VAN_DRIEST,HRRPUVCUT_MAX,RUN_AVG_FAC,THERMOPHORETIC_DEPOSITION,TURBULENT_DEPOSITION, &
                 VEG_LEVEL_SET,CP_FTMP,HRRPUV_MAX_SMV,TERRAIN_IMAGE,NEW_EVAP, &
                 SCALAR_ENERGY_TOLERANCE,TKE_TOLERANCE,MEAN_FORCING,RFAC_FORCING,USE_MAX_FILTER_WIDTH, &
-                WFDS,MAXIMUM_VISIBILITY,VISIBILITY_FACTOR
+                WFDS,OVERWRITE,UVW_FILE,MAXIMUM_VISIBILITY,VISIBILITY_FACTOR
  
 ! Physical constants
  
@@ -4895,8 +4895,8 @@ READ_SURF_LOOP: DO N=0,N_SURF
       EXIT READ_LOOP
    ENDDO READ_LOOP
 
-   IF (DEFAULT) SURF_DEFAULT =TRIM(ID)
-   IF (EVAC_DEFAULT) EVAC_SURF_DEFAULT =TRIM(ID)
+   IF (DEFAULT) SURF_DEFAULT = TRIM(ID)
+   IF (EVAC_DEFAULT) EVAC_SURF_DEFAULT = TRIM(ID)
 
    ! Provide SURF properties for CABLEs (THIEF Model)
 
@@ -9253,10 +9253,10 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
          DV%K1 = MAX(1     ,DV%K1)
          DV%K2 = MIN(M%KBAR,DV%K2)
 
-      CASE ('path obscuration','PATH OBSCURATION')
+      CASE ('PATH OBSCURATION')
 
          IF (DV%PROP_INDEX>0) THEN
-            IF (PROPERTY(DV%PROP_INDEX)%Y_INDEX==0 .AND. .NOT.SIMPLE_CHEMISTRY) THEN
+            IF (PROPERTY(DV%PROP_INDEX)%Y_INDEX==0 .AND. PROPERTY(DV%PROP_INDEX)%Z_INDEX==0 .AND. .NOT.SIMPLE_CHEMISTRY) THEN
                WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),' is a smoke detector and requires a fire or smoke source'
                CALL SHUTDOWN(MESSAGE)
             ENDIF
@@ -9391,9 +9391,10 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
             WRITE(MESSAGE,'(A)') 'ERROR: A VELOCITY PATCH DEVC line needs a DEVC_ID to control it'
             CALL SHUTDOWN(MESSAGE)
          ENDIF
-         
+
       CASE ('TURBULENCE RESOLUTION')
          CHECK_KINETIC_ENERGY=.TRUE.
+        
          
    END SELECT SPECIAL_QUANTITIES
 
@@ -9574,7 +9575,7 @@ READ_ISOF_LOOP: DO N=1,N_ISOF
          IS%VALUE(I) = VALUE(I)
       ENDDO VALUE_LOOP
   ENDIF
-  
+
   IF (QUANTITY=='TURBULENCE RESOLUTION') CHECK_KINETIC_ENERGY=.TRUE.
  
 ENDDO READ_ISOF_LOOP
@@ -9771,7 +9772,7 @@ MESH_LOOP: DO NM=1,NMESHES
              CELL_CENTERED = .FALSE.
          ENDIF
          SL%CELL_CENTERED = CELL_CENTERED
-         
+
          ! Measure of Turbulence Resolution
          
          IF (QUANTITY=='TURBULENCE RESOLUTION') CHECK_KINETIC_ENERGY=.TRUE.
