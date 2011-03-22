@@ -1,20 +1,22 @@
 #!/bin/bash
-EXPECTED_ARGS=2
+EXPECTED_ARGS=3
 
 if [ $# -ne $EXPECTED_ARGS ]
 then
-  echo "Usage: make_installer.sh FORTLIB FDS_TAR INSTALLER"
+  echo "Usage: make_installer.sh platform FDS_TAR.tar.gz INSTALLER.sh"
   echo ""
   echo "Creates an FDS/Smokeview installer sh script. "
   echo ""
-  echo "  FDS_TAR - compressed tar file contining distribution"
-  echo "  INSTALLER - .sh script containing self-extracting installer"
+  echo "  platform - default platform (ia32, intel64 or ib64)"
+  echo "  FDS.tar.gz - compressed tar file containing FDS distribution"
+  echo "  INSTALLER.sh - .sh script containing self-extracting installer"
   echo
   exit
 fi
 
-FDS_TAR=$1
-INSTALLER=$2
+platform=$1
+FDS_TAR=$2
+INSTALLER=$3
 
 cat << EOF > $INSTALLER
 #!/bin/bash
@@ -193,13 +195,13 @@ echo
 echo Creating .bashrc_fds and .cshrc_fds startup files.
 if [ -e ~/.cshrc_fds ]
 then
-echo Backing up .cshrc_fds to .cshrc_fds.BAK_\$\$
+echo Backing up .cshrc_fds
 cp ~/.cshrc_fds ~/.cshrc_fds.BAK_\$\$
 fi
 
 if [ -e ~/.bashrc_fds ]
 then
-echo Backing up .bashrc_fds to .bashrc_fds.BAK_\$\$
+echo Backing up .bashrc_fds
 cp ~/.bashrc_fds ~/.bashrc_fds.BAK_\$\$
 fi
 
@@ -210,14 +212,18 @@ cp \$CSHFDS ~/.cshrc_fds
 rm \$CSHFDS
 
 cd \$THISDIR
-echo ""
-echo "Add the following line to the startup file .cshrc"
-echo "source ~/.cshrc_fds"
-echo "if you use the csh or tcsh shell"
-echo ""
-echo "Add the following line to the startup file .bashrc"
-echo "source ~/.bash_fds"
-echo "if you use the bash or sh shell."
+nlines=\$(grep bashrc_fds ~/.bashrc | wc -l)
+if [ \$nlines -eq 0 ]
+then
+echo Updating .bashrc
+echo source .bashrc_fds \$platform >> ~/.bashrc
+fi
+nlines=\$(grep cshrc_fds ~/.cshrc | wc -l)
+if [ \$nlines -eq 0 ]
+then
+echo Updating .cshrc
+echo source .cshrc_fds \$platform >> ~/.cshrc
+fi
 echo ""
 echo "Installation complete."
 exit 0
