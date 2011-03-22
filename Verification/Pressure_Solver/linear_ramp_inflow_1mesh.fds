@@ -8,11 +8,11 @@
 
 &MISC DNS = .TRUE.
       STRATIFICATION =.FALSE. 
-      NOISE = .FALSE.
-      SURF_DEFAULT = 'WAND' /
+      NOISE = .FALSE. /
 &RADI RADIATION = .FALSE./
 
 &SURF ID        = 'WAND'
+      DEFAULT   = .TRUE.
       ADIABATIC = .TRUE.
       FREE_SLIP = .TRUE./
 
