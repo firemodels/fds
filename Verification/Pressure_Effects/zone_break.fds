@@ -7,7 +7,7 @@ Each time a ZONE is opened, the pressure of the two connected ZONEs quickly equi
 
 &TIME T_END=30. / 
 
-&SURF ID='BLOW', MASS_FLUX(0)=1., COLOR='RED', RAMP_MF(0)='flow' / 
+&SURF ID='BLOW', SPEC_ID='AIR',MASS_FLUX(1)=1., COLOR='RED', RAMP_MF(1)='flow' / 
 &RAMP ID='flow', T= 0.0, F=0. /
 &RAMP ID='flow', T= 0.1, F=1. /
 &RAMP ID='flow', T= 5.0, F=1. /
