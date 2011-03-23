@@ -8,17 +8,31 @@
 <p><hr size="1">
 <p><a href="http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Utilities/Scripts/bundle_setup/README_LINUX.html">Latest version of these notes</a>
 
-<p>These notes are for an experimental installer used for the upcoming version 6 of FDS and Smokeview.
+<p>These are preliminary installation notes for the upcoming Linux version 6 release of FDS and Smokeview.
 
-<p>The FDS/Smokeview installer creates two files, <tt>.cshrc_fds</tt> and <tt>.bashrc_fds</tt>.
-These files add entries to the <tt>PATH</tt> and <tt>LD_LIBRARY_PATH</tt> environment variables
-allowing one to run FDS and smokeview from the command line.
-
-<p>To activate the statements found in <tt>.cshrc_fds</tt> and <tt>.bashrc_fds</tt> add
+<p>The new release uses an installer.  In addtion to copying release files to the user specified location,
+the installer adds the following lines
 <ul>
-<li><tt>source ~/.cshrc_fds</tt> to <tt>.cshrc</tt>  (if you use the csh or tcsh shell)
-<li><tt>source ~/.bashrc_fds</tt> to <tt>.bashrc</tt> (if you use the sh or bash shell)
+<li><tt>source .cshrc_fds</tt>
+<li><tt>source .bashrc_fds</tt>
 </ul>
+to the <tt>.cshrc</tt> and <tt>.bashrc</tt> startup files respectively.
+This is done in order to update
+the <tt>PATH</tt> and <tt>LD_LIBRARY_PATH</tt> environment variables
+allowing one to run FDS and Smokeview from the command line.
+
+<P>To use the parallel version of FDS (fds_mpi_linux_64 or fds_mpi_linux_32), OpenMPI libaries must be installed.
+To install:
+<ul>
+<li>Download the 32 or 64 bit (or both) Openmpi libraries using the following links.
+<ul>
+<li><a href="http://code.google.com/p/fds-smv/downloads/detail?name=openmpi32_linux_1.4.3.tar.gz&can=4&q=1.4.3">OpenMPI 1.4.3 32 bit Linux</a>
+<li><a href="http://code.google.com/p/fds-smv/downloads/detail?name=openmpi64_linux_1.4.3.tar.gz&can=4&q=1.4.3">OpenMPI 1.4.3 64 bit Linux</a>
+</ul>
+<li>Uncompress and untar the downloaded  library archive placing the library contents /shared/openmpi_32 or /shared/openmpi_64<br>
+(as root cd to /shared and type tar xvf openmpi32_linux_1.4.3.tar.gz or tar xvf openmpi64_linux_1.4.3.tar.gz )
+</ul>
+
 
 
 
