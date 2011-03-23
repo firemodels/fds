@@ -8,7 +8,7 @@
 
 &TIME T_END=900. /
 
-&MISC TMPA=21., SURF_DEFAULT='WALL BOARD' /
+&MISC TMPA=21. /
 
 &RADI RADIATIVE_FRACTION=0.4 /
 &REAC ID         = 'PROPENE'
@@ -33,6 +33,7 @@
       DENSITY        = 1000. /
 
 &SURF ID         = 'WALL BOARD'
+      DEFAULT    = .TRUE.
       MATL_ID    = 'MARINITE'
       COLOR      = 'WHEAT 4'
       THICKNESS  = 0.025 /

@@ -4,7 +4,7 @@
 
 &TIME T_END=1800., TIME_SHRINK_FACTOR=10. /
 
-&MISC TMPA=21.5, SURF_DEFAULT='GYPSUM BOARD' /
+&MISC TMPA=21.5 /
 
 &REAC ID='METHANE'                                            
       FYI='Methane, C H_4'                                    
@@ -26,7 +26,7 @@
       SPECIFIC_HEAT = 0.8
       DENSITY       = 8000.  /
 
-&SURF ID            = 'GYPSUM BOARD'
+&SURF ID            = 'GYPSUM BOARD', DEFAULT=.TRUE.
       COLOR         = 'BEIGE'
       MATL_ID       = 'GYPSUM'
       THICKNESS     = 0.0254 /

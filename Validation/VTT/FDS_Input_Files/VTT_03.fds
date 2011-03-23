@@ -7,7 +7,7 @@
 &MESH IJK= 36,37, 72, XB=18.0,27.0, 0.00, 9.25, 0.0,19.0 /
 
 &TIME T_END=600. /
-&MISC TMPA=25.,SURF_DEFAULT='STEEL WALL' /
+&MISC TMPA=25. /
 &DUMP DT_DEVC=30., DT_HRR=30. /
 
 &SURF ID='SUCK', VOLUME_FLUX=11.0, COLOR='BLACK' /
@@ -32,6 +32,7 @@
       COLOR      = 'GRAY' /
 
 &SURF ID         = 'STEEL WALL'
+      DEFAULT    = .TRUE.
       MATL_ID    = 'STEEL'
       THICKNESS  = 0.001
       COLOR      = 'DARK OLIVE GREEN' /

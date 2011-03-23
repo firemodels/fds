@@ -1,7 +1,7 @@
 &HEAD CHID= 'LLNL_49', TITLE= '1986 LLNL Enclosure Fire Test 49'/
 &MESH IJK=30,20,30, XB=0,6,0,4,0,4.5 /
 &TIME T_BEGIN=-20., T_END=500. /
-&MISC TMPA=26. SURF_DEFAULT='Wall' /Fire
+&MISC TMPA=26. /Fire
 &RADI RADIATIVE_FRACTION=0.20 /
 
 &REAC ID= 'Methane'
@@ -51,7 +51,7 @@ SURF_IDS='BURNER','Duct','Duct' / Construction
 	COLOR= 'GRAY'
 	THICKNESS=0.019 /
 
-&SURF ID= 'Wall',
+&SURF ID= 'Wall', DEFAULT=.TRUE.
      MATL_ID= 'Wall Aluminum Silicate'
      COLOR = 'BEIGE'
      THICKNESS=0.1 /
