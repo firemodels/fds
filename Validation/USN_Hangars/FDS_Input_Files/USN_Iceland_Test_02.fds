@@ -1,4 +1,4 @@
-&HEAD CHID='USN_Iceland_Test_01', TITLE='Keflavik, Iceland USN Hangar Test 1' /
+&HEAD CHID='USN_Iceland_Test_02', TITLE='Keflavik, Iceland USN Hangar Test 2' /
 
 &MESH  ID='PLUME', COLOR='RED', IJK=62,62,110, XB=-6.2,6.2,-6.2,6.2,0.0,22.0 /
 &MESH  ID='NORTH', COLOR='BLUE', IJK=31,42,55, XB=-6.2,6.2,6.2,23.0,0.0,22.0 /
@@ -51,7 +51,7 @@
 
 &SURF ID= 'BURNER'
       COLOR= 'RED'
-      TAU_Q= 120,
+      TAU_Q= 150,
       HRRPUA=1111. /
 
 Burner
