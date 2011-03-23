@@ -4,9 +4,9 @@
 
 &TIME DT=0.2, T_END=2000.0 / 
 
-&MISC TMPA=30., SURF_DEFAULT='HOT' /
+&MISC TMPA=30. /
 
-&SURF ID='HOT', TMP_FRONT=1030., COLOR='GRAY', RAMP_T='shroud' / 
+&SURF ID='HOT', DEFAULT=.TRUE., TMP_FRONT=1030., COLOR='GRAY', RAMP_T='shroud' / 
 &RAMP ID='shroud',T=   0.,F=0. /
 &RAMP ID='shroud',T=  30.,F=0.001 /
 &RAMP ID='shroud',T=  65.,F=0.014 /
