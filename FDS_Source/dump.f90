@@ -4305,7 +4305,7 @@ SELECT CASE(IND)
       ZZ_GET(:) = ZZ(II,JJ,KK,:)
       CALL GET_MASS_FRACTION(ZZ_GET,H2O_INDEX,Y_MF_INT)
       CALL GET_MOLECULAR_WEIGHT(ZZ_GET,MW_RATIO)
-      MW_RATIO = MW_RATIO/MW_H2O
+      MW_RATIO = MW_RATIO/MW_H2O      
       Y_EQUIL = X_EQUIL/(MW_RATIO + (1._EB-MW_RATIO)*X_EQUIL)
       GAS_PHASE_OUTPUT = Y_MF_INT/Y_EQUIL * 100._EB      
       
@@ -4377,13 +4377,13 @@ SELECT CASE(IND)
       ELSE
          IF (CP_FTMP) THEN
             IF (N_TRACKED_SPECIES > 0) THEN
-               CALL GET_SPECIFIC_HEAT(ZZ_G,CP,TMP(I,J,K))
+               CALL GET_SPECIFIC_HEAT(ZZ_G,CP,TMP(II,JJ,KK))
             ELSE
-               CALL GET_SPECIFIC_HEAT_BG(CP,TMP(I,J,K))
+               CALL GET_SPECIFIC_HEAT_BG(CP,TMP(II,JJ,KK))
             ENDIF
-            GAS_PHASE_OUTPUT = MU(I,J,K)*CP*RPR                       
+            GAS_PHASE_OUTPUT = MU(II,JJ,KK)*CP*RPR                       
          ELSE
-            GAS_PHASE_OUTPUT = MU(I,J,K)*CPOPR
+            GAS_PHASE_OUTPUT = MU(II,JJ,KK)*CPOPR
          ENDIF
       ENDIF
             
