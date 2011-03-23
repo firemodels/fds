@@ -8,7 +8,7 @@
 
 &TIME T_END=600.0/
 &DUMP DT_DEVC=10., DT_HRR=10. /
-&MISC TMPA=11., SURF_DEFAULT='CONCRETE WALL' / 
+&MISC TMPA=11. / 
 
 &REAC FUEL= 'JP-5'
       C=12
@@ -34,7 +34,7 @@
       CONDUCTIVITY   = 1.6
       DENSITY        = 2400. /
 
-&SURF ID             = 'CONCRETE WALL'
+&SURF ID             = 'CONCRETE WALL', DEFAULT=.TRUE.
       COLOR          = 'GRAY 65'
       MATL_ID        = 'CONCRETE'
       THICKNESS      = 0.2 /

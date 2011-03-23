@@ -1,7 +1,7 @@
 &HEAD CHID= 'LLNL_06', TITLE= '1986 LLNL Enclosure Fire Test 06' /
 &MESH IJK=30,20,30, XB=0,6,0,4,0,4.5 /
 &TIME T_BEGIN=-20., T_END=1200. /
-&MISC TMPA=28., SURF_DEFAULT='Wall' /
+&MISC TMPA=28. /
 
 Fire
 
@@ -54,7 +54,7 @@ Construction
 	COLOR= 'GRAY'
 	THICKNESS=0.019 /
 
-&SURF ID= 'Wall',
+&SURF ID= 'Wall', DEFAULT=.TRUE.
      MATL_ID= 'Wall Aluminum Silicate'
      COLOR = 'BEIGE'
      THICKNESS=0.1 /

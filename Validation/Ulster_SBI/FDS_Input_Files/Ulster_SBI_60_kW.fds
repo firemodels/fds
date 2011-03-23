@@ -4,7 +4,6 @@
 
 &TIME T_END=60. /
 
-&MISC SURF_DEFAULT='FIBER BOARD' /
 &REAC C=3., H=8., SOOT_YIELD=0.05 FUEL = 'PROPANE' /
 &RADI RADIATIVE_FRACTION=0. /
 
@@ -36,6 +35,7 @@
       COLOR      = 'GRAY' /
 
 &SURF ID         = 'FIBER BOARD'
+      DEFAULT    = .TRUE.
       MATL_ID    = 'FIBER MATERIAL'
       COLOR      = 'ANTIQUE WHITE'
       THICKNESS  = 0.025 /
