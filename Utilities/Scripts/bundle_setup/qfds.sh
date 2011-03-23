@@ -34,11 +34,11 @@ if [ -e $stopfile ]; then
 fi
 scriptfile=/tmp/script.$$
 if ! [ -e $fulldir/$in ]; then
-  echo "The fds input file, $fulldir/$in, does not exit. Run aborted."
+  echo "The fds input file, $fulldir/$in, does not exist. Run aborted."
   exit
 fi
 if ! [ -e $fds ]; then
-  echo "The FDS program name, $fds, does not exit. Run aborted."
+  echo "The FDS program name, $fds, does not exist. Run aborted."
   exit
 fi
 if [ -e $outlog ]; then
