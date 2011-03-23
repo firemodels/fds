@@ -636,7 +636,7 @@ the Finite Volume Method (FVM).  Using approximately 100 discrete
 angles, the finite volume solver requires about 20~\% of the total CPU
 time of a calculation, a modest cost given the complexity of radiation
 heat transfer. The absorption coefficients of the gas-soot mixtures
-are computed using RADCAL narrow-band model.  Liquid droplets can
+are computed using the RadCal narrow-band model.  Liquid droplets can
 absorb and scatter thermal radiation. This is important in cases
 involving mist sprinklers, but also plays a role in all sprinkler
 cases.  The absorption and scattering coefficients are based on Mie
@@ -1355,10 +1355,10 @@ Validation Suite} removed for clarity.
 &HEAD CHID='WTC_05', TITLE='WTC Phase 1, Test 5' /
 &MESH IJK=90,36,38, XB=-1.0,8.0,-1.8,1.8,0.0,3.82 /
 &TIME T_END=5400. /
-&MISC SURF_DEFAULT='MARINITE BOARD', TMPA=20., POROUS_FLOOR=.FALSE. /
+&MISC TMPA=20. /
 &DUMP NFRAMES=1800, DT_HRR=10., DT_DEVC=10., DT_PROF=30. /
 
-&REAC ID         = 'HEPTANE TO CO2'
+&REAC FUEL       = 'HEPTANE'
       FYI        = 'Heptane, C_7 H_16'
       C          = 7.
       H          = 16.
@@ -1373,7 +1373,7 @@ Validation Suite} removed for clarity.
       BACKING   = 'EXPOSED'
       THICKNESS = 0.0063 /
 ...
-&VENT MB='XMIN',SURF_ID='OPEN' /
+&VENT MB='XMIN', SURF_ID='OPEN' /
 ...
 &SLCF PBY=0.0, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
 ...
@@ -2018,14 +2018,12 @@ Only one {\ct MISC} line should be entered in the data file. For example, the in
 
 \footnotesize
 \begin{verbatim}
-&MISC SURF_DEFAULT='CONCRETE', TMPA=25. /
+&MISC TMPA=25. /
 \end{verbatim}
 \normalsize
 
 \noindent
-establishes that all bounding surfaces are to be made of {\ct CONCRETE} unless
-otherwise specified, and that
-the ambient temperature is 25 $^\circ$C.
+sets the ambient temperature at 25 $^\circ$C.
 
 The {\ct MISC} parameters vary in scope and degree of importance. Here is a partial list of {\ct MISC}ellaneous parameters. Others are described where necessary throughout this
 guide.
@@ -2044,9 +2042,6 @@ and initial conditions are perfectly symmetric. To turn this off, set {\ct NOISE
 \item[{\ct OVERWRITE}] If {\ct .FALSE.} FDS checks for the existence of  {\ct CHID.out} and stops execution if it exists.
 \item[{\ct P\_INF}] Background pressure (at the ground) in Pa. The default is 101325 Pa.
 \item[{\ct SUPPRESSION}] A logical parameter indicating whether FDS should include gas phase flame extinction. The default is {\ct .TRUE.}
-\item[{\ct SURF\_DEFAULT}] The {\ct SURF} line that is to be applied to all boundaries, unless otherwise specified.
-The default is {\ct 'INERT'}, a non-reacting solid boundary whose temperature is fixed at {\ct TMPA}.
-You do not need to define {\ct 'INERT'} via a {\ct SURF} line.
 \item[{\ct TMPA}] Ambient temperature, the temperature of everything at the start of the simulation. The default is 20~$^\circ$C.
 \item[{\ct U0, V0, W0}] Initial values of the gas velocity in each of the coordinate directions. Normally, these are all 0~m/s, but there are a few applications where it is
 convenient to start the flow immediately, like in an outdoor simulation involving wind.
@@ -2498,7 +2493,7 @@ allow references to it by an obstruction or vent. Thus, on each
 indicates the {\ct ID} of the {\ct SURF} line containing the desired boundary
 condition parameters. If a particular {\ct SURF} line is to be applied
 as the default boundary condition, {\ct CONCRETE} for example,
-set {\ct SURF\_DEFAULT='CONCRETE'} on the {\ct MISC} line.
+set {\ct DEFAULT=.TRUE.} on the {\ct SURF} line.
 
 
 
@@ -5422,6 +5417,10 @@ to specify a function with one independent variable (such as time) is mapped to 
 {\ct TABL} allows for the specification of a mapping from multiple independent variables (such as a solid angle) to multiple
 dependent variables (such as a sprinkler flow rate and droplet speed).
 
+By default, FDS uses a simple linear interpolation routine to find time or temperature-dependent values between user-specified points.
+The default number of interpolation points is 5000, more than enough for most applications. However, you can change this value
+by specifying {\ct NUMBER\_INTERPOLATION\_POINTS} on any {\ct RAMP} line.
+
 \section{Time-Dependent Functions}
 
 \label{info:RAMP_Time}
@@ -5654,6 +5653,8 @@ ideal gases.
 
 \subsection{Basics}
 
+\label{info:SPEC_Basics}
+
 The namelist group {\ct SPEC} is used to specify each additional
 gas species. Each {\ct SPEC} line should include at the very least
 the name of the species via a character string called ({\ct ID}).
@@ -5664,7 +5665,7 @@ Table~\ref{tab:gasspecies}. Here is an example:
 
 \footnotesize
 \begin{verbatim}
-&SPEC ID='ARGON',MASS_FRACTION_0=0.1,MW=40. /
+&SPEC ID='ARGON', MASS_FRACTION_0=0.1, MW=40. /
 \end{verbatim}
 \normalsize
 
@@ -5740,7 +5741,7 @@ desired or if a finite rate reaction(s) is being specified (see Section~\ref{inf
 specify that the background gas species be something other than air. For a gas mixture comprised of
 $n$ species, FDS only solves transport equations for $n-1$ because it also solves an equation for
 total mass conservation. To set the properties of the background species, use the
-{\ct SPEC} line with the {\ct BACKGROUND\_SPECIES} and if needed {\ct BACKGROUND\_SPECIES\_ONLY} keywords.
+{\ct SPEC} or {\ct SMIX} line with {\ct BACKGROUND=.TRUE.} specified.
 If this species is not listed in Table~\ref{tab:gasspecies}, specify its molecular weight, {\ct MW},
 and (optionally) its {\ct VISCOSITY}; {\ct CONDUCTIVITY}; and {\ct SPECIFIC\_HEAT},
 {\ct SPECIFIC\_ENTHALPY}, and {\ct REFERENCE\_TEMPERATURE}.
@@ -5802,10 +5803,13 @@ Species &   Mol.~Wgt.           & Formual          & $\sigma$ & $\epsilon/k$   &
 
 Recognized species that are emissive will been defined as {\ct ABSORBING} and radiative absorption for those species
 will be computed.  The keyword {\ct ABSORBING} can be specified on the {\ct SPEC} line as well.  If {\ct .TRUE.} and the
-species is not in the recognized list, then it will be assumed to be a fuel when invoking RADCAL to compute its
+species is not in the recognized list, then it will be assumed to be a fuel when invoking RadCal to compute its
 absorptivity.
 
 The optional parameter {\ct HUMIDITY} can be specified with the species {\ct WATER VAPOR}.  {\ct HUMIDITY} is the relative humidity of water vapor in \% and is 40 \% by default.
+
+If you want to attach a shortened name to the gas species for use in Smokeview, use the character string {\ct FORMULA}. For example, {\ct FORMULA='CH4'} could be used
+to indicate {\ct 'METHANE'} in the Smokeview label. {\ct FORMULA} has no other use but for presentation of the output.
 
 
 \clearpage
@@ -6276,6 +6280,8 @@ radiation transport. This feature is used mainly for diagnostic purposes.
 
 \subsection{Spatial and Temporal Resolution of the Radiation Transport Equation}
 
+\label{info:RADI_Resolution}
+
 There are several ways to improve the performance of the Finite Volume
 Method in solving the radiation transport equation (RTE), most of which
 increase the computation time. The solver has two modes of
@@ -6293,6 +6299,8 @@ time step, but the cost of the calculation increases significantly.
 
 \subsection{Radiative Absorption by Droplets}
 
+\label{info:RADI_Absorption}
+
 A few parameters affecting the absorption of radiation by water
 droplets are as follows: {\ct RADTMP} is the assumed radiative source temperature.
 It is used in the computation of the mean scattering
@@ -6309,6 +6317,8 @@ possible to use a constant absorption coefficient by specifying {\ct KAPPA0} on 
 
 \subsection{Wide Band Model}
 
+\label{info:RADI_Wide_Band}
+
 If the optional six band model is desired,
 set {\ct WIDE\_BAND\_MODEL=.TRUE.}. It is recommended that this option
 only be used when the fuel is relatively non-sooting because it
@@ -6318,6 +6328,11 @@ Reference Guide for more details. Note also that when
 {\ct WIDE\_BAND\_MODEL=.TRUE.}, the {\ct ABSORPTION\_COEFFICIENT}
 output quantity becomes practically useless, because it then
 corresponds to one individual band of the spectrum.
+
+Note that by default FDS employs a gray gas model for the absorption coefficient, which are
+tabulated in a look-up table using the routines found in RadCal. The effective absorption coefficient, a function
+of gas composition and temperature, also requires an effective {\ct PATH\_LENGTH}. Its default value is 
+5 times the width of a single grid cell.
 
 
 
@@ -7998,13 +8013,13 @@ This is similar functionality to the {\ct CUSTOM} control function, but it allow
 
 \footnotesize
 \begin{verbatim}
-&SURF ID='BLOWER',VEL=-2,RAMP_V='BLOWER RAMP'/
-&DEVC XYZ=2,3,3, QUANTITY='TEMPERATURE',ID='TEMP DEVC'/
-&RAMP ID='BLOWER RAMP', T=20,F=0,DEVC_ID='TEMP DEVC'/
-&RAMP ID='BLOWER RAMP', T=100,F=0/
-&RAMP ID='BLOWER RAMP', T=101,F=1/
-&RAMP ID='BLOWER RAMP', T=200,F=1/
-&RAMP ID='BLOWER RAMP', T=201,F=0/
+&SURF ID='BLOWER', VEL=-2, RAMP_V='BLOWER RAMP' /
+&DEVC XYZ=2,3,3, QUANTITY='TEMPERATURE', ID='TEMP DEVC' /
+&RAMP ID='BLOWER RAMP', T= 20,F=0, DEVC_ID='TEMP DEVC' /
+&RAMP ID='BLOWER RAMP', T=100,F=0 /
+&RAMP ID='BLOWER RAMP', T=101,F=1 /
+&RAMP ID='BLOWER RAMP', T=200,F=1 /
+&RAMP ID='BLOWER RAMP', T=201,F=0 /
 \end{verbatim}
 \normalsize
 
@@ -10187,7 +10202,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endfirsthead
 \caption[]{Continued} \\
 \hline
-\multicolumn{5}{|c|}{{\ct CTRL} (Multiplier Function Parameters)} \\
+\multicolumn{5}{|c|}{{\ct MULT} (Multiplier Function Parameters)} \\
 \hline \hline
 \endhead
 {\ct DXB}            & Real Sextuplet   & Spacing for all 6 coordinates               & m  & 0.                         \\ \hline
@@ -10434,7 +10449,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct OFFSET}                            & Real          & See Section~\ref{info:sprinklers}             & m                     & 0.05      \\ \hline
 {\ct OPERATING\_PRESSURE}               & Real          & See Section~\ref{info:sprinklers}             & bar                   & 1.        \\ \hline
 {\ct ORIFICE\_DIAMETER}                 & Real          & See Section~\ref{info:sprinklers}             & m                     & 0.       \\ \hline
-{\ct P0,PX(3),PXX(3,3)}                          & Real     & See Section~\ref{info:velocity_patch}       & m/s                  &  0.         \\ \hline
+{\ct P0,PX(3),PXX(3,3)}                 & Real          & See Section~\ref{info:velocity_patch}         & m/s                   &  0.         \\ \hline
 {\ct PART\_ID}                          & Character     & See Section~\ref{info:sprinklers}             &                       &           \\ \hline
 {\ct PDPA\_END}                         & Real          & See Section~\ref{PDPA}                        & s                     & {\ct T\_END} \\ \hline
 {\ct PDPA\_M}                           & Integer       & See Section~\ref{PDPA}                        &                       & 0         \\ \hline
@@ -10449,7 +10464,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SPEC\_ID}                          & Character     & See Section~\ref{info:alternative_smoke}      &                       &           \\ \hline
 {\ct SPRAY\_ANGLE(2)}                   & Real          & See Section~\ref{info:sprinklers}             & deg.                  & 60.,75.   \\ \hline
 {\ct SPRAY\_PATTERN\_TABLE}             & Character     & See Section~\ref{info:sprinklers}             &                       &           \\ \hline
-{\ct VELOCITY\_COMPONENT}             & Integer     & See Section~\ref{info:velocity_patch}             &                       &           \\ \hline
+{\ct VELOCITY\_COMPONENT}               & Integer       & See Section~\ref{info:velocity_patch}         &                       &           \\ \hline
 \end{longtable}
 
 
@@ -10472,18 +10487,20 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct RADI} (Radiation Parameters)} \\
 \hline \hline
 \endhead
-{\ct ANGLE\_INCREMENT}          & Integer  & Number of angles skipped per update &                   & 5             \\ \hline
-{\ct CH4\_BANDS          }      & Logical  & Include extra fuel bands            &                   & {\ct .FALSE.} \\ \hline
-{\ct KAPPA0                   } & Real     & Constant absorption coefficient     & 1/m               & 0             \\ \hline
-{\ct NMIEANG                  } & Integer  & Number of polar angles              &                   & 15            \\ \hline
-{\ct NUMBER\_RADIATION\_ANGLES} & Integer  & Number of solid angles              &                   & 104           \\ \hline
-{\ct PATH\_LENGTH }             & Real     & Path length for radiation calc.     &   m               &               \\ \hline
-{\ct RADIATION}                 & Logical  & Radiation calculation flag          &                   & {\ct .TRUE.}      \\ \hline
-{\ct RADIATIVE\_FRACTION}       & Real     & Radiative Loss Fraction             &                   & 0.35          \\ \hline
-{\ct RADTMP                   } & Real     & Assumed radiative source temp.      & $^\circ$C         & 900           \\ \hline
-{\ct TIME\_STEP\_INCREMENT}     & Integer  & Number time steps skipped           &                   & 3             \\ \hline
-{\ct WIDE\_BAND\_MODEL    }     & Logical  & Non-gray gas assumption             &                   & {\ct .FALSE.} \\ \hline
+{\ct ANGLE\_INCREMENT}              & Integer   & See Section~\ref{info:RADI_Resolution}        &                   & 5             \\ \hline
+{\ct CH4\_BANDS          }          & Logical   & See Section~\ref{info:RADI_Wide_Band}         &                   & {\ct .FALSE.} \\ \hline
+{\ct KAPPA0                   }     & Real      & See Section~\ref{info:RADI_Absorption}        & 1/m               & 0             \\ \hline
+{\ct NMIEANG                  }     & Integer   & See Section~\ref{info:RADI_Absorption}        &                   & 15            \\ \hline
+{\ct NUMBER\_RADIATION\_ANGLES}     & Integer   & See Section~\ref{info:RADI_Resolution}        &                   & 104           \\ \hline
+{\ct PATH\_LENGTH }                 & Real      & See Section~\ref{info:RADI_Wide_Band}         &   m               &               \\ \hline
+{\ct RADIATION}                     & Logical   & See Section~\ref{info:RADI}                   &                   & {\ct .TRUE.}      \\ \hline
+{\ct RADIATIVE\_FRACTION}           & Real      & See Section~\ref{info:RADI}                   &                   & 0.35          \\ \hline
+{\ct RADTMP                   }     & Real      & See Section~\ref{info:RADI_Absorption}        & $^\circ$C         & 900           \\ \hline
+{\ct TIME\_STEP\_INCREMENT}         & Integer   & See Section~\ref{info:RADI_Resolution}        &                   & 3             \\ \hline
+{\ct WIDE\_BAND\_MODEL    }         & Logical   & See Section~\ref{info:RADI_Wide_Band}         &                   & {\ct .FALSE.} \\ \hline
 \end{longtable}
+
+% Undocumented: RADCAL_FUEL
 
 \vspace{\baselineskip}
 
@@ -10494,7 +10511,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-\caption[Ramp Function Parameters]{For more information see Section~\ref{info:RAMP}.}
+\caption[Ramp Function Parameters]{For more information see Chapter~\ref{info:RAMP}.}
 \label{tbl:RAMP} \\
 \hline
 \multicolumn{5}{|c|}{{\ct RAMP} (Ramp Function Parameters)} \\
@@ -10505,13 +10522,13 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct RAMP} (Ramp Function Parameters)} \\
 \hline \hline
 \endhead
-%{\ct CTRL\_ID}                      & Character     & See Section~\ref{info:CTRL}       &                       &     \\ \hline
-{\ct DEVC\_ID}                      & Character     & See Section~\ref{info:RAMPDEVC}       &                       &     \\ \hline
-{\ct F}                             & Real          & Function value                    &                       &     \\ \hline
-%{\ct NUMBER\_INTERPOLATION\_POINTS} & Integer       & Points in interpolation function  &                       &  5000   \\ \hline
-{\ct ID}                            & Character     & Identifier                        &                       &     \\ \hline
-{\ct T}                             & Real          & Time (or Temperature)             & s (or $^\circ$C)      &     \\ \hline
-{\ct X}                             & Real          & $x$-coordinate (gravity only)     & m                     &     \\ \hline
+%{\ct CTRL\_ID}                      & Character     & See Section~\ref{info:CTRL}       &                       &           \\ \hline
+{\ct DEVC\_ID}                      & Character     & See Section~\ref{info:RAMPDEVC}   &                       &           \\ \hline
+{\ct F}                             & Real          & See Chapter~\ref{info:RAMP}       &                       &           \\ \hline
+{\ct NUMBER\_INTERPOLATION\_POINTS} & Integer       & See Chapter~\ref{info:RAMP}       &                       &  5000     \\ \hline
+{\ct ID}                            & Character     & See Chapter~\ref{info:RAMP}       &                       &           \\ \hline
+{\ct T}                             & Real          & See Chapter~\ref{info:RAMP}       & s (or $^\circ$C)      &           \\ \hline
+{\ct X}                             & Real          & See Section~\ref{info:GVEC}       & m                     &           \\ \hline
 \end{longtable}
 
 
@@ -10590,23 +10607,20 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct SLCF} (Slice File Parameters)} \\
 \hline \hline
 \endhead
-{\ct CELL\_CENTERED}    & Logical           & See Section~\ref{info:SLCF}            &           & {\ct .FALSE.}    \\ \hline
-%{\ct MAXIMUM\_VALUE}    & Real              & See Section~\ref{info:SLCF}            &           &     \\ \hline
-%{\ct MINIMUM\_VALUE}    & Real              & See Section~\ref{info:SLCF}            &           &     \\ \hline
-{\ct MESH\_NUMBER}      & Integer           & Save only slices in this mesh          &           &     \\ \hline
-{\ct PART\_ID}          & Character         & Particle identifier (if needed)        &           &     \\ \hline
-{\ct PBX     }          & Real              & $x$-plane to save slice file           &           &     \\ \hline
-{\ct PBY     }          & Real              & $y$-plane to save slice file           &           &     \\ \hline
-{\ct PBZ     }          & Real              & $z$-plane to save slice file           &           &     \\ \hline
-{\ct QUANTITY}          & Character         & Name of Quantity to display            &           &     \\ \hline
-%{\ct RLE    }           & Logical           & Run Length Encoding                    &           & {\ct .FALSE.}    \\ \hline
-{\ct SPEC\_ID}          & Character         & Species identifier (if needed)         &           &     \\ \hline
-%{\ct TWO\_BYTE    }     & Logical           & Save as 2 byte real                    &           & {\ct .FALSE.}    \\ \hline
-{\ct VECTOR    }        & Logical           & Include flow vectors                   &           & {\ct .FALSE.}    \\ \hline
-{\ct VELO\_INDEX}       & Integer           & See Section~\ref{info:velocity}        &           &  0      \\ \hline
-{\ct XB(6)}             & Real Sextuplet    & Min/Max coordinates of region to save  & m         &     \\ \hline
+{\ct CELL\_CENTERED}    & Logical           & See Section~\ref{info:SLCF}               &           & {\ct .FALSE.}     \\ \hline
+{\ct MAXIMUM\_VALUE}    & Real              & See Smokeview User's Guide                &           &                   \\ \hline
+{\ct MINIMUM\_VALUE}    & Real              & See Smokeview User's Guide                &           &                   \\ \hline
+{\ct MESH\_NUMBER}      & Integer           & See Section~\ref{info:SLCF}               &           &                   \\ \hline
+{\ct PART\_ID}          & Character         & See Section~\ref{info:outputquantities}   &           &                   \\ \hline
+{\ct PBX, PBY, PBZ}     & Real              & See Section~\ref{info:SLCF}               &           &                   \\ \hline
+{\ct QUANTITY}          & Character         & See Section~\ref{info:outputquantities}   &           &                   \\ \hline
+{\ct SPEC\_ID}          & Character         & See Section~\ref{info:outputquantities}   &           &                   \\ \hline
+{\ct VECTOR    }        & Logical           & See Section~\ref{info:SLCF}               &           & {\ct .FALSE.}     \\ \hline
+{\ct VELO\_INDEX}       & Integer           & See Section~\ref{info:velocity}           &           &  0                \\ \hline
+{\ct XB(6)}             & Real Sextuplet    & See Section~\ref{info:SLCF}               & m         &                   \\ \hline
 \end{longtable}
 
+%Undocumented: AGL_SLICE,FIRE_LINE,EVACUATION,LEVEL_SET_FIRE_LINE,QUANTITY2,RLE,TWO_BYTE
 
 \vspace{\baselineskip}
 
@@ -10628,25 +10642,25 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct SPEC} (Species Parameters)} \\
 \hline \hline
 \endhead
-{\ct ABSORBING}                     & Logical     & Absorbs radiation                           &                   & {\ct .FALSE.} \\ \hline
-{\ct BACKGROUND}                    & Logical     & Background species                          &                   & {\ct .FALSE.} \\ \hline
-{\ct CONDUCTIVITY}                  & Real        & Conductivity, $k$                           & W/m/K             &               \\ \hline
-{\ct DIFFUSIVITY}                   & Real        & Diffusivity,  $D$                           & m$^2$/s           &               \\ \hline
-{\ct EPSILONKLJ}                    & Real        & Leonard-Jones Parameter                     &                   & 0             \\ \hline
-{\ct FIC\_CONCENTRATION}            & Real        & Lethal concentration, Section~\ref{info:FED}& ppm               & 0.            \\ \hline
-{\ct FLD\_LETHAL\_DOSE}             & Real        & Lethal dose, Section~\ref{info:FED}         & ppm$\times$min    & 0.            \\ \hline
-{\ct FORMULA }                      & Character   & Smokeview label                             &                   &               \\ \hline
-{\ct HUMIDITY}                      & Real        & Relative Humidity                           & \%                & 40.           \\ \hline
-{\ct ID }                           & Character   & Name of species                             &                   &               \\ \hline
+{\ct ABSORBING}                     & Logical     & See Section~\ref{gas_species_props}         &                   & {\ct .FALSE.} \\ \hline
+{\ct BACKGROUND}                    & Logical     & See Section~\ref{info:SPEC}                 &                   & {\ct .FALSE.} \\ \hline
+{\ct CONDUCTIVITY}                  & Real        & See Section~\ref{gas_species_props}         & W/m/K             &               \\ \hline
+{\ct DIFFUSIVITY}                   & Real        & See Section~\ref{gas_species_props}         & m$^2$/s           &               \\ \hline
+{\ct EPSILONKLJ}                    & Real        & See Section~\ref{gas_species_props}         &                   & 0             \\ \hline
+{\ct FIC\_CONCENTRATION}            & Real        & See Section~\ref{info:FED}                  & ppm               & 0.            \\ \hline
+{\ct FLD\_LETHAL\_DOSE}             & Real        & See Section~\ref{info:FED}                  & ppm$\times$min    & 0.            \\ \hline
+{\ct FORMULA }                      & Character   & See Section~\ref{gas_species_props}         &                   &               \\ \hline
+{\ct HUMIDITY}                      & Real        & See Section~\ref{gas_species_props}         & \%                & 40.           \\ \hline
+{\ct ID }                           & Character   & See Section~\ref{info:SPEC_Basics}          &                   &               \\ \hline
 {\ct MASS\_EXTINCTION\_COEFFICIENT} & Real        & See Section~\ref{info:alternative_smoke}    &                   & 0             \\ \hline
-{\ct MASS\_FRACTION\_0}             & Real        & Initial mass fraction                       &                   & 0             \\ \hline
-{\ct MW}                            & Real        & Molecular Weight                            & g/mol             & 29.           \\ \hline
+{\ct MASS\_FRACTION\_0}             & Real        & See Section~\ref{info:SPEC_Basics}          &                   & 0             \\ \hline
+{\ct MW}                            & Real        & See Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
 {\ct REFERENCE\_TEMPERATURE}        & Real        & See Section~\ref{gas_species_props}         & $^\circ$C         & 25.           \\ \hline
+{\ct SIGMALJ}                       & Real        & See Section~\ref{gas_species_props}         &                   & 0             \\ \hline
 {\ct SMIX\_COMPONENT\_ONLY}         & Logical     & See Section~\ref{info:SMIX}                 &                   & {\ct .FALSE.} \\ \hline
-{\ct SPECIFIC\_ENTHALPY}            & Real        & Specific Enthalpy                           & kJ/kg             &               \\ \hline
-{\ct SPECIFIC\_HEAT}                & Real        & Specific Heat                               & kJ/kg/K           &               \\ \hline
-{\ct SIGMALJ}                       & Real        & Leonard-Jones Parameter                     &                   & 0             \\ \hline
-{\ct VISCOSITY}                     & Real        & Dynamic Viscosity, $\mu$                    & kg/m/s            &               \\ \hline
+{\ct SPECIFIC\_ENTHALPY}            & Real        & See Section~\ref{gas_species_props}         & kJ/kg             &               \\ \hline
+{\ct SPECIFIC\_HEAT}                & Real        & See Section~\ref{gas_species_props}         & kJ/kg/K           &               \\ \hline
+{\ct VISCOSITY}                     & Real        & See Section~\ref{gas_species_props}         & kg/m/s            &               \\ \hline
 \end{longtable}
 
 
@@ -10702,7 +10716,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CELL\_SIZE\_FACTOR}              & Real            & See Section~\ref{info:solid_phase_stability}  &                     & 1.0                     \\ \hline
 {\ct COLOR    }                       & Character       & See Section~\ref{info:colors}                 &                     &                         \\ \hline
 {\ct CONVECTIVE\_HEAT\_FLUX}          & Real            & See Section~\ref{info:convection}             & kW/m$^2$            & 0.                      \\ \hline
-{\ct DEFAULT}                         & Logical         & Denotes default surface type                     &               & {\ct .FALSE.}           \\ \hline
+{\ct DEFAULT}                         & Logical         & See Section~\ref{info:SURF}                   &                     & {\ct .FALSE.}           \\ \hline
 {\ct DT\_INSERT}                      & Real            & See Section~\ref{info:particle_flux}          & s                   & 0.01                    \\ \hline
 {\ct DUCT\_PATH}                      & Int.~Pair       & See Section~\ref{info:Fan_Curves}             &                     & 0,0                     \\ \hline
 {\ct E\_COEFFICIENT}                  & Real            & See Section~\ref{info:suppression}            & m$^2$/kg/s          & 0.                      \\ \hline
@@ -10884,7 +10898,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DEVC\_ID }             & Character         & See Section~\ref{info:activate_deactivate}                    &               &                     \\ \hline
 {\ct DYNAMIC\_PRESSURE}     & Real              & See Section~\ref{info:pressure_boundary}                      & Pa            &  0.0                \\ \hline
 {\ct EVACUATION    }        & Logical           & See FDS+Evac User's Guide                                     &               &  {\ct .FALSE.}      \\ \hline
-{\ct ID }                   & Character         & Identification tag                                            &               &                     \\ \hline
+{\ct ID }                   & Character         & See Section~\ref{info:VENT_Basics}                            &               &                     \\ \hline
 {\ct IOR}                   & Integer           & See Section~\ref{info:VENT_Trouble}                           &               &                     \\ \hline
 {\ct MB    }                & Character         & See Section~\ref{info:VENT_Basics}                            &               &                     \\ \hline
 {\ct MESH\_ID    }          & Character         & See FDS+Evac User's Guide                                     &               &                     \\ \hline
@@ -10923,7 +10937,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct ZONE} (Pressure Zone Parameters)} \\
 \hline \hline
 \endhead
-{\ct ID}                    & Character         & Identification tag                     &        &               \\ \hline
+{\ct ID}                    & Character         & See Section~\ref{info:ZONE_Basics}     &        &               \\ \hline
 {\ct LEAK\_AREA(N)}         & Real              & See Section~\ref{info:Leaks}           & m$^2$  & 0             \\ \hline
 {\ct XB(6)}                 & Real Sextuplet    & See Section~\ref{info:ZONE_Basics}     & m      &               \\ \hline
 \end{longtable}
