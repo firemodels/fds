@@ -10119,7 +10119,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DYNSMAG}                   & Logical       & See Section~\ref{info:LES}                                &               & {\ct .FALSE.}     \\ \hline
 {\ct DSMAG\_FREQ}               & Integer       & See Section~\ref{info:LES}                                &               & 1                 \\ \hline
 {\ct EVAC\_PRESSURE\_ITERATIONS}& Character     & See FDS+Evac User's Guide                                 &               &                   \\ \hline
-{\ct EVAC\_SURF\_DEFAULT}       & Character     & See FDS+Evac User's Guide                                 &               & {\ct 'INERT'}     \\ \hline
 {\ct EVAC\_TIME\_ITERATIONS}    & Character     & See FDS+Evac User's Guide                                 &               &                   \\ \hline
 {\ct EVACUATION\_DRILL}         & Logical       & See FDS+Evac User's Guide                                 &               & {\ct .FALSE.}     \\ \hline
 {\ct EVACUATION\_MC\_MODE}      & Logical       & See FDS+Evac User's Guide                                 &               & {\ct .FALSE.}     \\ \hline
@@ -10134,6 +10133,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct IMMERSED\_BOUNDARY\_METHOD} & Logical       &                                                           &               & {\ct .FALSE.}     \\ \hline
 {\ct LAPSE\_RATE}               & Real          & See Section~\ref{info:stratification}                     &  $^\circ$C/m  & 0                 \\ \hline
 {\ct LES}                       & Logical       & See Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
+{\ct MAXIMUM\_VISIBILITY}                 & Real        & Visibility parameter                          &  m            &  30               \\ \hline
 {\ct NOISE}                     & Logical       & See Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
 {\ct NO\_EVACUATION}            & Logical       & See FDS+Evac User's Guide                                 &               & {\ct .FALSE.}     \\ \hline
 %{\ct NSTRATA}                   & Logical       & No. bins for droplet distribution                         &               & 7                 \\ \hline
@@ -10156,12 +10156,12 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SMOKE\_ALBEDO}             & Real          & See Smokeview User's Guide                                &               & 0.3               \\ \hline
 %{\ct STORE\_MU\_DNS}            & Logical       &                                                           &               & {\ct .FALSE.}      \\ \hline
 {\ct STRATIFICATION}            & Logical       & See Section~\ref{info:stratification}                     &               & {\ct .TRUE.}      \\ \hline
-{\ct SURF\_DEFAULT}             & Character     & See Section~\ref{info:MISC_Basics}                        &               & {\ct 'INERT'}     \\ \hline
 {\ct TERRAIN\_CASE}             & Logical       & See Wildland Fire User's Guide                            &               & {\ct .FALSE.}     \\ \hline
 {\ct TEXTURE\_ORIGIN(3)}        & Char.~Triplet & See Section~\ref{info:texture_map}                        & m             & (0.,0.,0.)        \\ \hline
 {\ct THICKEN\_OBSTRUCTIONS}     & Logical       & See Section~\ref{info:OBST_Basics}                        &               & {\ct .FALSE.}     \\ \hline
 {\ct TMPA}                      & Real          & See Section~\ref{info:MISC_Basics}                         & $^\circ$C     & 20.               \\ \hline
 {\ct U0,V0,W0}                  & Reals         & See Section~\ref{info:MISC_Basics}                        & m/s           & 0.                \\ \hline
+{\ct VISIBILITY\_FACTOR}                  & Real        & Visibility parameter                          &               &   3               \\ \hline
 {\ct VN\_MAX}                   & Real          & See Section~\ref{info:CFL}                                &               & 1.0               \\ \hline
 {\ct VN\_MIN}                   & Real          & See Section~\ref{info:CFL}                                &               & 0.8               \\ \hline
 {\ct WIND\_ONLY}                & Logical       & See Wildland Fire User's Guide                            &               & {\ct .FALSE.}     \\ \hline
@@ -10554,7 +10554,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ID}                                  & Character   & Identifier                                    &                   &     \\ \hline
 {\ct IDEAL}                               & Logical     & Adjust for minor product yields               &                   & {\ct .FALSE.}    \\ \hline
 {\ct \tiny MASS\_EXTINCTION\_COEFFICIENT} & Real        & Visibility parameter                          &  m$^2$/kg         & 8700.    \\ \hline
-{\ct MAXIMUM\_VISIBILITY}                 & Real        & Visibility parameter                          &  m                &     30   \\ \hline
 {\ct N}                                   & Real        & Nitrogen atoms in the fuel                    &                   & 0    \\ \hline
 {\ct N\_S(N)}                             & Real        & Arrhenius Exponents (Finite Rate)             &                   &     \\ \hline
 {\ct NU(N)}                               & Real        & Reaction stoichiometry (Finite Rate)          &                   &     \\ \hline
@@ -10563,7 +10562,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SOOT\_YIELD}                         & Real        & Fraction of soot from the fuel                & kg/kg             & 0.01    \\ \hline
 {\ct SOOT\_H\_FRACTION}                   & Real        & Atom fraction of hydrogen in soot             &                   & 0.1    \\ \hline
 {\ct SUPPRESSION}                         & Logical     & See Section~\ref{info:extinction}             &                   & {\ct .TRUE.}      \\ \hline
-{\ct VISIBILITY\_FACTOR}                  & Real        & Visibility parameter                          &                   &     3   \\ \hline
 {\ct X\_O2\_LL}                           & Real        & Lower Oxygen Limit                            &  mol/mol          & 0.15    \\ \hline
 {\ct Y\_CO2\_INFTY}                       & Real        & Ambient carbon dioxide mass fraction          &  kg/kg            & 0.0058 \\ \hline
 {\ct Y\_F\_INLET}                         & Real        & Mass Frac. of Fuel in Burner                  &  kg/kg            & 1.0     \\ \hline
@@ -10632,7 +10630,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endhead
 {\ct ABSORBING}                     & Logical     & Absorbs radiation                           &                   & {\ct .FALSE.} \\ \hline
 {\ct BACKGROUND}                    & Logical     & Background species                          &                   & {\ct .FALSE.} \\ \hline
-{\ct BACKGROUND\_ONLY}              & Logical     & Species is only background                  &                   & {\ct .FALSE.} \\ \hline
 {\ct CONDUCTIVITY}                  & Real        & Conductivity, $k$                           & W/m/K             &               \\ \hline
 {\ct DIFFUSIVITY}                   & Real        & Diffusivity,  $D$                           & m$^2$/s           &               \\ \hline
 {\ct EPSILONKLJ}                    & Real        & Leonard-Jones Parameter                     &                   & 0             \\ \hline
@@ -10676,6 +10673,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ID}                            & Character         & Name of species                                       &                   &               \\ \hline
 {\ct SPEC\_ID(:)}                   & Character Array   & IDs of {\ct SPEC}ies that make up the mixture         &                   &               \\ \hline
 {\ct MASS\_FRACTION(:)}             & Real Array        & Mass fraction of mixture components                   &                   & 0             \\ \hline
+{\ct MASS\_FRACTION\_0}             & Real              & Initial mass fraction of mixture                    &                   & 0             \\ \hline
 {\ct VOLUME\_FRACTION(:)}           & Real Array        & Volume fraction of mixture components                 &                   &               \\ \hline
 \end{longtable}
 
@@ -10704,11 +10702,13 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CELL\_SIZE\_FACTOR}              & Real            & See Section~\ref{info:solid_phase_stability}  &                     & 1.0                     \\ \hline
 {\ct COLOR    }                       & Character       & See Section~\ref{info:colors}                 &                     &                         \\ \hline
 {\ct CONVECTIVE\_HEAT\_FLUX}          & Real            & See Section~\ref{info:convection}             & kW/m$^2$            & 0.                      \\ \hline
+{\ct DEFAULT}                         & Logical         & Denotes default surface type                     &               & {\ct .FALSE.}           \\ \hline
 {\ct DT\_INSERT}                      & Real            & See Section~\ref{info:particle_flux}          & s                   & 0.01                    \\ \hline
 {\ct DUCT\_PATH}                      & Int.~Pair       & See Section~\ref{info:Fan_Curves}             &                     & 0,0                     \\ \hline
 {\ct E\_COEFFICIENT}                  & Real            & See Section~\ref{info:suppression}            & m$^2$/kg/s          & 0.                      \\ \hline
 {\ct EMISSIVITY}                      & Real            & See Section~\ref{info:convection}             &                     & 0.9                     \\ \hline
 {\ct EMISSIVITY\_BACK}                & Real            & See Section~\ref{info:BACKING}                &                     &                         \\ \hline
+{\ct EVAC\_DEFAULT}                   & Logical         & See FDS+Evac User's Guide                                 &               & {\ct .FALSE.}           \\ \hline
 {\ct EXTERNAL\_FLUX}                  & Real            & See Section~\ref{solid_phase_verification}    & kW/m$^2$            & 0.                      \\ \hline
 {\ct FREE\_SLIP}                      & Logical         & See Section~\ref{info:WALL_MODEL}             &                     & {\ct .FALSE.}           \\ \hline
 {\ct GEOMETRY}                        & Character       & See Section~\ref{info:GEOMETRY}               &                     & {\ct 'CARTESIAN'}       \\ \hline
@@ -10945,36 +10945,40 @@ FDS~5 that have changed. Note that this table does not list new parameters in FD
 \caption[List of changes to input parameters for FDS 6]{Changes to input parameters, FDS version 5 to 6.}
 \label{tbl:Changes} \\
 \hline
-FDS 5 Parameter & Namelist  & FDS 6 Parameter & Namelist  & Notes \\
+Namelist  & FDS 5 Parameter & Namelist  & FDS 6 Parameter & Notes \\
 \hline
 \endfirsthead
 \caption[]{Continued} \\
 \hline
-FDS 5 Parameter & Namelist  & FDS 6 Parameter & Namelist  & Notes \\
+Namelist  & FDS 5 Parameter & Namelist  & FDS 6 Parameter & Notes \\
 \hline
 \endhead
-{\ct BACKGROUND\_SPECIES}       & {\ct MISC}    & {\ct BACKGROUND=.TRUE.}                     &   {\ct SPEC}        & See Section~\ref{info:SPEC}                  \\ \hline
-{\ct CONDUCTIVITY}              & {\ct MISC}    & {\ct CONDUCTIVITY}                          &   {\ct SPEC}        & See Section~\ref{info:SPEC}                  \\ \hline
-{\ct CO\_PRODUCTION}            & {\ct MISC}    & {\ct CO\_PRODUCTION}                        &   {\ct REAC}        & See Section~\ref{info:CO}                    \\ \hline
-{\ct DROPLETS\_PER\_SECOND}     & {\ct PART}    & {\ct DROPLETS\_PER\_SECOND}                 &   {\ct PROP}        & See Section~\ref{info:sprinkler_droplets}    \\ \hline
-{\ct HUMIDITY}                  & {\ct MISC}    & {\ct HUMIDITY}                              &   {\ct SPEC}        & See Section~\ref{info:SPEC}                  \\ \hline
-{\ct ISOTHERMAL}                & {\ct MISC}    & Eliminated                                  &                     &                                              \\ \hline
-{\ct MASS\_FRACTION}            & {\ct VENT}    & Eliminated                                  &                     &                                              \\ \hline
-{\ct MAXIMUM\_MASS\_FRACTION}   & {\ct CLIP}    & Eliminated                                  &                     &                                              \\ \hline
-{\ct MINIMUM\_MASS\_FRACTION}   & {\ct CLIP}    & Eliminated                                  &                     &                                              \\ \hline
-{\ct MW}                        & {\ct MISC}    & {\ct MW}                                    &   {\ct SPEC}        & See Section~\ref{info:SPEC}                  \\ \hline
-{\ct NUMBER\_INITIAL\_DROPLETS} & {\ct PART}    & {\ct NUMBER\_INITIAL\_DROPLETS}             &   {\ct PROP}        & See Section~\ref{info:initial_droplets}      \\ \hline
-{\ct NU\_FUEL}                  & {\ct MATL}    & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
-{\ct NU\_GAS}                   & {\ct MATL}    & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
-{\ct NU\_RESIDUE}               & {\ct MATL}    & {\ct NU\_MATL}                              &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
-{\ct NU\_WATER}                 & {\ct MATL}    & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
-{\ct PRESSURE\_CORRECTION}      & {\ct MISC}    & Eliminated                                  &                     &                                              \\ \hline
-{\ct RADIATION}                 & {\ct MISC}    & {\ct RADIATION}                             &   {\ct RADI}        & Same functionality                           \\ \hline
-{\ct RESIDUE}                   & {\ct MATL}    & {\ct MATL\_ID}                              &   {\ct MATL}        & See Section~\ref{info:solid_pyrolysis}       \\ \hline
-{\ct STATE\_FILE}               & {\ct DUMP}    & Eliminated                                  &                     &                                              \\ \hline
-{\ct SUPPRESSION}               & {\ct MISC}    & {\ct SUPPRESSION}                           &   {\ct REAC}        & See Section~\ref{info:extinction}            \\ \hline
-{\ct TWFIN}                     & {\ct TIME}    & {\ct T\_END}                                &   {\ct TIME}        & See Section~\ref{info:TIME}                  \\ \hline
-{\ct VISCOSITY}                 & {\ct MISC}    & {\ct VISCOSITY}                             &   {\ct SPEC}        & See Section~\ref{info:SPEC}                  \\ \hline
+{\ct CLIP}    & {\ct MAXIMUM\_MASS\_FRACTION}   &                     & Eliminated                                  &                                              \\ \hline
+{\ct CLIP}    & {\ct MINIMUM\_MASS\_FRACTION}   &                     & Eliminated                                  &                                              \\ \hline
+{\ct DUMP}    & {\ct STATE\_FILE}               &                     & Eliminated                                  &                                              \\ \hline
+{\ct MATL}    & {\ct NU\_FUEL}                  &  {\ct MATL}        & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            & See Section~\ref{info:solid_pyrolysis}       \\ \hline
+{\ct MATL}    & {\ct NU\_GAS}                   &  {\ct MATL}        & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            & See Section~\ref{info:solid_pyrolysis}       \\ \hline
+{\ct MATL}    & {\ct NU\_RESIDUE}               &  {\ct MATL}        & {\ct NU\_MATL}                              & See Section~\ref{info:solid_pyrolysis}       \\ \hline
+{\ct MATL}    & {\ct NU\_WATER}                 &  {\ct MATL}        & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            & See Section~\ref{info:solid_pyrolysis}       \\ \hline
+{\ct MATL}    & {\ct RESIDUE}                   &  {\ct MATL}        & {\ct MATL\_ID}                              & See Section~\ref{info:solid_pyrolysis}       \\ \hline
+{\ct MISC}    & {\ct BACKGROUND\_SPECIES}       &  {\ct SPEC}        & {\ct BACKGROUND=.TRUE.}                     & See Section~\ref{info:SPEC}                  \\ \hline
+{\ct MISC}    & {\ct CONDUCTIVITY}              &  {\ct SPEC}        & {\ct CONDUCTIVITY}                          & See Section~\ref{info:SPEC}                  \\ \hline
+{\ct MISC}    & {\ct CO\_PRODUCTION}            &  {\ct REAC}        & {\ct CO\_PRODUCTION}                        & See Section~\ref{info:CO}                    \\ \hline
+{\ct MISC}    & {\ct HUMIDITY}                  &  {\ct SPEC}        & {\ct HUMIDITY}                              & See Section~\ref{info:SPEC}                  \\ \hline
+{\ct MISC}    & {\ct ISOTHERMAL}                &                     & Eliminated                                  &                                              \\ \hline
+{\ct MISC}    & {\ct MW}                        &  {\ct SPEC}        & {\ct MW}                                    & See Section~\ref{info:SPEC}                  \\ \hline
+{\ct MISC}    &{\ct PRESSURE\_CORRECTION}       &                    &  Eliminated                                  &                                              \\ \hline
+{\ct MISC}    & {\ct RADIATION}                 &  {\ct RADI}        & {\ct RADIATION}                             & Same functionality                           \\ \hline
+{\ct MISC}    & {\ct EVAC\_SURF\_DEFAULT}       &  {\ct SURF}        & {\ct EVAC\_DEFAULT}                             & See Section~\ref{info:SURF}                  \\ \hline
+{\ct MISC}    & {\ct SURF\_DEFAULT}             &  {\ct SURF}        & {\ct DEFAULT}                             & See Section~\ref{info:SURF}                  \\ \hline
+{\ct MISC}    & {\ct SUPPRESSION}               &  {\ct REAC}        & {\ct SUPPRESSION}                           & See Section~\ref{info:extinction}            \\ \hline
+{\ct MISC}    & {\ct VISCOSITY}                 &  {\ct SPEC}        &  {\ct VISCOSITY}                             & See Section~\ref{info:SPEC}                  \\ \hline
+{\ct PART}    & {\ct DROPLETS\_PER\_SECOND}     &  {\ct PROP}        & {\ct DROPLETS\_PER\_SECOND}                 & See Section~\ref{info:sprinkler_droplets}    \\ \hline
+{\ct PART}    & {\ct NUMBER\_INITIAL\_DROPLETS} &  {\ct PROP}        & {\ct NUMBER\_INITIAL\_DROPLETS}             & See Section~\ref{info:initial_droplets}      \\ \hline
+{\ct REAC}    & {\ct MAXIMUM\_VISIBILITY}       &  {\ct MISC}        &  {\ct MAXIMUM\_VISIBILITY}                             & Same functionality                  \\ \hline
+{\ct REAC}    & {\ct VISIBILITY\_FACTOR}        &  {\ct MISC}        &  {\ct MAXIMUM\_VISIBILITY}                             & Same functionality                  \\ \hline
+{\ct TIME}    & {\ct TWFIN}                     &  {\ct TIME}        & {\ct T\_END}                                & See Section~\ref{info:TIME}                  \\ \hline
+{\ct VENT}    & {\ct MASS\_FRACTION}            &                     & Eliminated                                  &                                              \\ \hline
 \end{longtable}
 
 
@@ -11076,34 +11080,35 @@ necessary organizations who have developed free MPI libraries.
 \hline
 File Name  & Description  \\ \hline \hline
 isob.c     & C Routine for computing isosurfaces and 3D smoke \\ \hline \hline
-prec.f90   & Specification of numerical precision \\ \hline
-smvv.f90   & Interfaces for C routines used for Smokeview output \\ \hline
-devc.f90   & Derived type definitions and constants for devices' \\ \hline
-type.f90   & Derived type definitions \\ \hline
-mesh.f90   & Arrays and constants associated with each mesh \\ \hline
 cons.f90   & Global arrays and constants \\ \hline
-func.f90   & Global functions and subroutines \\ \hline
-irad.f90   & Functions needed for radiation solver, including RadCal \\ \hline
-ieva.f90   & Support routines for evac.f90 \\ \hline
-evac.f90   & Egress computations (future capability) \\ \hline
-pois.f90   & Poisson (pressure) solver \\ \hline
-radi.f90   & Radiation solver  \\ \hline
-part.f90   & Lagrangian particle transport and sprinkler activation \\ \hline
 ctrl.f90   & Definitions and routines for control functions \\ \hline
-dump.f90   & Output data dumps into files \\ \hline
-read.f90   & Read input parameters \\ \hline
-mass.f90   & Mass equation(s) and thermal boundary conditions \\ \hline
-wall.f90   & Wall boundary conditions \\ \hline
-fire.f90   & Combustion routines \\ \hline
-pres.f90   & Spatial discretization of pressure (Poisson) equation \\ \hline
+data.f90   & Data for output quantities and thermophysical properties\\ \hline
+devc.f90   & Derived type definitions and constants for devices \\ \hline
 divg.f90   & Compute the flow divergence \\ \hline
+dump.f90   & Output data dumps into files \\ \hline
+evac.f90   & Egress computations (future capability) \\ \hline
+fire.f90   & Combustion routines \\ \hline
+func.f90   & Global functions and subroutines \\ \hline
+ieva.f90   & Support routines for evac.f90 \\ \hline
 init.f90   & Initialize variables and Poisson solver \\ \hline
-turb.f90   & Experimental routines, mostly involving the turbulence model \\ \hline
-velo.f90   & Momentum equations \\ \hline
-vege.f90   & Experimental vegetation model \\ \hline
-mpis.f90   & "Dummy" Fortran/MPI bindings for non-MPI compilation \\ \hline
-mpip.f90   & MPI "include" statement for MPI compilation \\ \hline
+irad.f90   & Functions needed for radiation solver, including RadCal \\ \hline
 main.f90   & Main program for both serial and parallel versions \\ \hline
+mass.f90   & Mass equation(s) and thermal boundary conditions \\ \hline
+mesh.f90   & Arrays and constants associated with each mesh \\ \hline
+mpip.f90   & MPI "include" statement for MPI compilation \\ \hline
+mpis.f90   & "Dummy" Fortran/MPI bindings for non-MPI compilation \\ \hline
+part.f90   & Lagrangian particle transport and sprinkler activation \\ \hline
+pois.f90   & Poisson (pressure) solver \\ \hline
+prec.f90   & Specification of numerical precision \\ \hline
+pres.f90   & Spatial discretization of pressure (Poisson) equation \\ \hline
+radi.f90   & Radiation solver  \\ \hline
+read.f90   & Read input parameters \\ \hline
+smvv.f90   & Interfaces for C routines used for Smokeview output \\ \hline
+turb.f90   & Experimental routines, mostly involving the turbulence model \\ \hline
+type.f90   & Derived type definitions \\ \hline
+vege.f90   & Experimental vegetation model \\ \hline
+velo.f90   & Momentum equations \\ \hline
+wall.f90   & Wall boundary conditions \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
