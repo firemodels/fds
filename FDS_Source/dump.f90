@@ -2544,9 +2544,9 @@ SURFLOOP: DO N=0,N_SURF
    IF (ABS(SF%VOLUME_FLUX)>ZERO_P)     WRITE(LU_OUTPUT,'(A,F8.3)') '     Volume Flux (m**3/s)        ', SF%VOLUME_FLUX
    IF (N_TRACKED_SPECIES>0 .AND. .NOT.SIMPLE_CHEMISTRY) THEN
       DO NN=1,N_TRACKED_SPECIES
-         IF (SF%MASS_FRACTION(NN)>=0._EB) WRITE(LU_OUTPUT,'(A,I1,A,8X,F6.3)') &
+         IF (SF%MASS_FRACTION(NN)>=0._EB) WRITE(LU_OUTPUT,'(A,I2,A,8X,F6.3)') &
                   '     Species ',NN,' Mass Fraction',SF%MASS_FRACTION(NN)
-         IF (ABS(SF%MASS_FLUX(NN))>ZERO_P) WRITE(LU_OUTPUT,'(A,I1,A,2X,F6.3)') &
+         IF (ABS(SF%MASS_FLUX(NN))>ZERO_P) WRITE(LU_OUTPUT,'(A,I2,A,2X,F6.3)') &
                   '     Species ',NN,' Mass Flux (kg/s/m2)',SF%MASS_FLUX(NN)
       ENDDO
    ENDIF
@@ -2562,9 +2562,9 @@ SURFLOOP: DO N=0,N_SURF
                      SF%MASS_FLUX(NN)*REACTION(1)%HEAT_OF_COMBUSTION* REACTION(1)%Y_F_INLET*0.001_EB
             ENDIF
          ELSE
-            IF (SF%MASS_FRACTION(NN)>=0._EB) WRITE(LU_OUTPUT,'(A,I1,A,8X,F6.3)') &
+            IF (SF%MASS_FRACTION(NN)>=0._EB) WRITE(LU_OUTPUT,'(A,I2,A,8X,F6.3)') &
                      '     Species ',NN,' Mass Fraction',SF%MASS_FRACTION(NN)
-            IF (ABS(SF%MASS_FLUX(NN))>ZERO_P) WRITE(LU_OUTPUT,'(A,I1,A,2X,F6.3)') &
+            IF (ABS(SF%MASS_FLUX(NN))>ZERO_P) WRITE(LU_OUTPUT,'(A,I2,A,2X,F6.3)') &
                      '     Species ',NN,' Mass Flux (kg/s/m2)',SF%MASS_FLUX(NN)
          ENDIF
       ENDDO
