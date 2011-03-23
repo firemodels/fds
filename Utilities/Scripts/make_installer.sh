@@ -14,7 +14,7 @@ then
   exit
 fi
 
-platform=$1
+platformin=$1
 FDS_TAR=$2
 INSTALLER=$3
 
@@ -216,13 +216,14 @@ nlines=\$(grep bashrc_fds ~/.bashrc | wc -l)
 if [ \$nlines -eq 0 ]
 then
 echo Updating .bashrc
-echo source .bashrc_fds \$platform >> ~/.bashrc
+echo source .bashrc_fds $platformin
+echo source .bashrc_fds $platformin >> ~/.bashrc
 fi
 nlines=\$(grep cshrc_fds ~/.cshrc | wc -l)
 if [ \$nlines -eq 0 ]
 then
 echo Updating .cshrc
-echo source .cshrc_fds \$platform >> ~/.cshrc
+echo source .cshrc_fds $platformin >> ~/.cshrc
 fi
 echo ""
 echo "Installation complete."
