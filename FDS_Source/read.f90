@@ -2260,8 +2260,11 @@ REWIND (LU_INPUT)
 END SUBROUTINE READ_SMIX
 
 
+
 SUBROUTINE PROC_SMIX
+
 !Extend SMIX array for additional primitive species and set thermophysical properties
+
 USE PHYSICAL_FUNCTIONS, ONLY : GET_MOLECULAR_WEIGHT, GET_SPECIFIC_GAS_CONSTANT
 USE PROPERTY_DATA, ONLY: JANAF_TABLE, CALC_GAS_PROPS, GAS_PROPS
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: MU_TMP,CP_TMP,K_TMP,H_TMP,D_TMP,ZZZ
@@ -2272,8 +2275,9 @@ TYPE(SPECIES_TYPE), POINTER, DIMENSION(:) :: SPEC_ALLOC
 TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM=>NULL()
 TYPE(SPECIES_MIXTURE_TYPE), POINTER, DIMENSION(:) :: SMIX_ALLOC
 
-!Check to see if a background species has been set.  If not, then either add the species AIR, of if AIR has been defined set it
-!to the background species
+! Check to see if a background species has been set.  If not, then either add the species AIR, of if AIR has been defined set it
+! to the background species
+
 SET_BACKGROUND = .FALSE.
 N = 0
 IF (I_BACKGROUND<=0) THEN
@@ -2308,7 +2312,6 @@ IF (I_BACKGROUND<=0) THEN
       ENDIF
    ENDIF
    IF (SET_BACKGROUND) THEN
-      WRITE(*,*) 'background',N
       SS =>SPECIES(N)
       I_BACKGROUND = N
       SS%ABSORBING                   = .FALSE.
