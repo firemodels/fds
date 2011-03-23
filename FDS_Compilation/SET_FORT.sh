@@ -3,7 +3,10 @@
 if [ x$IFORT_COMPILER == "x" ]
 then
   echo The environment variable \$IFORT_COMPILER is not defined or
-  echo is not pointing to a valid compiler location.
+  echo is not pointing to a valid location. Define \$IFORT_COMPILER
+  echo in your startup .bashrc file.
+  echo Example: 
+  echo export IFORT_COMPILER=/opt/intel/composerxe-2011.1.107
   echo Script aborted.
   exit 
 fi
