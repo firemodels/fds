@@ -31,6 +31,7 @@ setenv fds2ascii fds2ascii_linux_64
 setenv fds2asciidir intel_linux_64
 
 setenv PLATFORM LINUX64
+setenv platform intel64
 
 $fds_smvroot/Utilities/Scripts/bundle_generic.csh
 

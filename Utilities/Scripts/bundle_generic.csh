@@ -68,21 +68,21 @@ scp -q $fdshost\:$fdsroot/$fdsmpidir/$fdsmpi $bundledir/bin/$fdsmpiout
 
 # qfds scripts
 
-if ($PLATFORM == "LINUX32" || $PLATFORM == "LINUX64") then
+if ($PLATFORM == "LINUX32xxx" || $PLATFORM == "LINUX64xxx") then
 echo copying qfds.sh to $bundledir/bin
 cp $bundle_setup/qfds.sh $bundledir/bin/.
 echo copying qfdsmpi.sh to $bundledir/bin
 cp $bundle_setup/qfdsmpi.sh $bundledir/bin/.
 endif
 
-if ($PLATFORM == "LINUX32") then
+if ($PLATFORM == "LINUX32xxx") then
 echo copying qfds_linux_32 to $bundledir/bin
 cp $bundle_setup/qfds_linux_32 $bundledir/bin/.
 echo copying qfds_mpi_linux_32 to $bundledir/bin
 cp $bundle_setup/qfds_mpi_linux_32 $bundledir/bin/.
 endif
 
-if ($PLATFORM == "LINUX64") then
+if ($PLATFORM == "LINUX64xxx") then
 echo copying qfds_linux_64 to $bundledir/bin
 cp $bundle_setup/qfds_linux_64 $bundledir/bin/.
 echo copying qfds_mpi_linux_64 to $bundledir/bin
@@ -187,4 +187,4 @@ echo Compressing archive
 gzip    ../$bundlebase.tar
 echo Creating installer
 cd ..
-$makeinstaller $bundlebase.tar.gz $bundlebase.sh
+$makeinstaller $platform $bundlebase.tar.gz $bundlebase.sh

@@ -31,6 +31,7 @@ setenv fds2ascii fds2ascii_linux_32
 setenv fds2asciidir intel_linux_32
 
 setenv PLATFORM LINUX32
+setenv platform ia32
 
 $fds_smvroot/Utilities/Scripts/bundle_generic.csh
 
