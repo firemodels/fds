@@ -3,7 +3,7 @@ platform=intel64
 dir=`pwd`
 target=${dir##*/}
 
-source ../SET_MYFDSENV.sh $platform build
+source ../SET_FORT.sh $platform
 #source /exports/intel/itt/tcheck/bin/32/tcheckvars.csh
 
 echo Building $target

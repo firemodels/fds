@@ -77,8 +77,6 @@ cd $fulldir
 echo Time: \`date\`
 echo Running $infile on \`hostname\`
 echo Directory: \`pwd\`
-export LD_LIBRARY_PATH=$MPIDIST/lib:$FORTLIB:$LD_LIBRARY_PATH
-$MPIDIST/bin/mpirun -np $nthreads $FDSMPI $in 
 EOF
 chmod +x $scriptfile
 echo Running $in 
