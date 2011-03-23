@@ -1,11 +1,10 @@
-#!/bin/csh -f
+#!/bin/bash
 
 #  This script compiles a few utility programs.
  
-set platform=intel64
-setenv SVNROOT ~/FDS-SMV
-source $SVNROOT/FDS_Compilation/Scripts/set_fort.csh $platform
-if ($status == 1) exit
+platform=intel64
+#source ../../FDS_Compilation/SET_FORT.sh $platform
+source ~/.bashrc_setfort $platform
 
 ifort -o Beyler_Hood Beyler_Hood.f90
 ifort -o fds2ascii fds2ascii.f90
