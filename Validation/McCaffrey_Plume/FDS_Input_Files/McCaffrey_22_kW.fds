@@ -7,7 +7,7 @@
 &SURF ID='burner', HRRPUA=241., TMP_FRONT=100., COLOR='RED' /
 &OBST XB=-.15,0.15,-.15,0.15,-.10,0.00,SURF_IDS='burner','INERT','INERT' /
 
-&REAC ID='NATURAL GAS'
+&REAC FUEL='METHANE'
       C=1.
       H=4.
       CO_YIELD=0.0
