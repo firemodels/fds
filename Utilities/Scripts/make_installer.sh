@@ -3,12 +3,12 @@ EXPECTED_ARGS=4
 
 if [ $# -ne $EXPECTED_ARGS ]
 then
-  echo "Usage: make_installer.sh platform FDS_TAR.tar.gz INSTALLER.sh"
+  echo "Usage: make_installer.sh ostype ossize FDS_TAR.tar.gz INSTALLER.sh"
   echo ""
   echo "Creates an FDS/Smokeview installer sh script. "
   echo ""
   echo "  ostype - OSX or LINUX"
-  echo "  platform - default platform (ia32, intel64 or ib64)"
+  echo "  ossize - ia32, intel64 or ib64"
   echo "  FDS.tar.gz - compressed tar file containing FDS distribution"
   echo "  INSTALLER.sh - .sh script containing self-extracting installer"
   echo
@@ -16,14 +16,16 @@ then
 fi
 
 ostype=$1
-platformin=$2
+ossize=$2
 FDS_TAR=$3
 INSTALLER=$4
 
 LDLIBPATH=LD_LIBRARY_PATH
+BASHRC=.bash_profile
 if [ "$ostype" == "OSX" ]
 then
 LDLIBPATH=DYLD_LIBRARY_PATH
+BASHRC=.bash_profile
 fi
 
 cat << EOF > $INSTALLER
@@ -224,14 +226,14 @@ nlines=\$(grep bashrc_fds ~/.bashrc | wc -l)
 if [ \$nlines -eq 0 ]
 then
 echo Updating .bashrc
-echo source .bashrc_fds $platformin
-echo source .bashrc_fds $platformin >> ~/.bashrc
+echo source .bashrc_fds $ossize
+echo source .bashrc_fds $ossize >> ~/$BASHRC
 fi
 nlines=\$(grep cshrc_fds ~/.cshrc | wc -l)
 if [ \$nlines -eq 0 ]
 then
 echo Updating .cshrc
-echo source .cshrc_fds $platformin >> ~/.cshrc
+echo source .cshrc_fds $ossize >> ~/.cshrc
 fi
 echo ""
 echo "Installation complete."
