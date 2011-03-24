@@ -1144,11 +1144,12 @@ REAL(EB), INTENT(IN) :: RE
 SELECT CASE(DRAG_LAW)
 
    CASE(SPHERE_DRAG)
-      IF (RE<=1._EB) THEN
+      IF (RE<=ZERO_P) THEN
+         DRAG = 0._EB
+      ELSEIF (RE<=1._EB) THEN
          DRAG = 24._EB/RE
-      ELSEIF (RE>1._EB .AND. RE<1000._EB) THEN
-         !!DRAG = 24._EB*(1._EB+0.15_EB*RE**0.687_EB)/RE
-         DRAG = 24._EB*(0.85_EB+0.15_EB*RE**0.687_EB)/RE ! smoother curve (RJM)
+      ELSEIF (RE<1000._EB) THEN
+         DRAG = 24._EB*(0.85_EB+0.15_EB*RE**0.687_EB)/RE 
       ELSEIF (RE>=1000._EB) THEN
          DRAG = 0.44_EB
       ENDIF

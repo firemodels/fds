@@ -8428,11 +8428,8 @@ INIT_LOOP: DO N=1,N_INIT_READ
                CALL SHUTDOWN(MESSAGE)
             ENDIF
             
-            IF (DT_INSERT>0._EB) THEN
-               IN%SINGLE_INSERTION = .FALSE.
-            ELSE
-               IN%DT_INSERT = DT_INSERT
-            ENDIF
+            IN%DT_INSERT = DT_INSERT
+            IF (DT_INSERT>0._EB) IN%SINGLE_INSERTION = .FALSE.
 
             ! Set up a clock to keep track of particle insertions
 
