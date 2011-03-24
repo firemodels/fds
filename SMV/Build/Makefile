@@ -224,8 +224,8 @@ intel_osx_test_32 : $(obj)
 
 intel_osx_32 : IMAGELIBDIR = $(LIB_DIR)/lib_osx_intel_32
 intel_osx_32 : FORTLIBDIR  = $(OSX32FORTLIBDIR)
-intel_osx_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_OSX -mmaccosx-version-min=10.4
-intel_osx_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_OSX -mmaccosx-version-min=10.4
+intel_osx_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_OSX
+intel_osx_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_OSX
 intel_osx_32 : LFLAGS    = -static-intel -mmacosx-version-min=10.4 -framework OpenGL -framework GLUT
 intel_osx_32 : CC        = icc 
 intel_osx_32 : CPP       = icpc
