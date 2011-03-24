@@ -14,6 +14,8 @@
 
 //*** turn on options that set version names
 
+#define pp_BETA
+
 #ifdef pp_BETA
 #define SMVVERSION "Test"
 #undef pp_release
