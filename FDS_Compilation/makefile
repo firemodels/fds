@@ -233,8 +233,8 @@ intel_osx_32 : setup $(obj_serial)
 
 mpi_intel_osx_32 : FFLAGS  = -O2 -m32 -heap-arrays -vec_report0
 mpi_intel_osx_32 : CFLAGS  = -O2 -m32 -Dpp_noappend -Dpp_OSX -vec_report0
-mpi_intel_osx_32 : LFLAGS  = -L$(MPIDIST32)/lib -static-intel
-mpi_intel_osx_32 : FCOMPL  = $(MPIDIST32)/bin/mpif77
+mpi_intel_osx_32 : LFLAGS  = -L$(MPIDIST)/lib -static-intel
+mpi_intel_osx_32 : FCOMPL  = mpif77
 mpi_intel_osx_32 : CCOMPL  = icc
 mpi_intel_osx_32 : obj = fds_mpi_intel_osx_32
 mpi_intel_osx_32 : setup $(obj_mpi)
@@ -248,13 +248,14 @@ intel_osx_32_db : obj = fds_intel_osx_32_db
 intel_osx_32_db : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
-intel_osx_mpi_32_db : FFLAGS  = -check -warn unused -O0 -m32 -g -traceback -fpe:0 -vec_report0
-intel_osx_mpi_32_db : CFLAGS  = -O0 -m32 -g -traceback -Dpp_noappend -Dpp_OSX
-intel_osx_mpi_32_db : FCOMPL  = /opt/openmpi32/bin/mpif77
-intel_osx_mpi_32_db : CCOMPL  = icc
-intel_osx_mpi_32_db : obj = fds_mpi_intel_osx_32_db
-intel_osx_mpi_32_db : setup $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
+mpi_intel_osx_32_db : FFLAGS  = -check -warn unused -O0 -m32 -g -traceback -fpe:0 -vec_report0
+mpi_intel_osx_32_db : CFLAGS  = -O0 -m32 -g -traceback -Dpp_noappend -Dpp_OSX
+mpi_intel_osx_32_db : LFLAGS  = -L$(MPIDIST)/lib -static-intel
+mpi_intel_osx_32_db : FCOMPL  = mpif77
+mpi_intel_osx_32_db : CCOMPL  = icc
+mpi_intel_osx_32_db : obj = fds_mpi_intel_osx_32_db
+mpi_intel_osx_32_db : setup $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_mpi)
 
 # 64 bit
 # temporary fix for 64 bit osx build problem
@@ -271,8 +272,8 @@ intel_osx_64 : setup $(obj_serial)
 
 mpi_intel_osx_64 : FFLAGS  = -O2 -m64 -heap-arrays -vec_report0
 mpi_intel_osx_64 : CFLAGS  = -O2 -m64 -Dpp_noappend -Dpp_OSX -vec_report0
-mpi_intel_osx_64 : LFLAGS  = -L$(MPIDIST64)/lib -static-intel
-mpi_intel_osx_64 : FCOMPL  = $(MPIDIST64)/bin/mpif77
+mpi_intel_osx_64 : LFLAGS  = -L$(MPIDIST)/lib -static-intel
+mpi_intel_osx_64 : FCOMPL  = mpif77
 mpi_intel_osx_64 : CCOMPL  = icc
 mpi_intel_osx_64 : obj = fds_mpi_intel_osx_64
 mpi_intel_osx_64 : setup $(obj_mpi)
