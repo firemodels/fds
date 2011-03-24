@@ -66,6 +66,13 @@ scp -q $fdshost\:$fdsroot/$fdsdir/$fds $bundledir/bin/$fdsout
 echo copying $fdsmpi from $fdsdir on $fdshost
 scp -q $fdshost\:$fdsroot/$fdsmpidir/$fdsmpi $bundledir/bin/$fdsmpiout
 
+if ($PLATFORM == "LINUX32" || $PLATFORM == "LINUX64") then
+set platform=LINUX
+endif
+if ($PLATFORM == "OSX32" || $PLATFORM == "OSX64") then
+set platform=OSX
+endif
+
 # qfds scripts
 
 if ($PLATFORM == "LINUX32xxx" || $PLATFORM == "LINUX64xxx") then
@@ -187,4 +194,4 @@ echo Compressing archive
 gzip    ../$bundlebase.tar
 echo Creating installer
 cd ..
-$makeinstaller $platform $bundlebase.tar.gz $bundlebase.sh
+$makeinstaller $ostype $platform $bundlebase.tar.gz $bundlebase.sh

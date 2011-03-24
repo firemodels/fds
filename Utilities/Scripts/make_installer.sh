@@ -1,5 +1,5 @@
 #!/bin/bash
-EXPECTED_ARGS=3
+EXPECTED_ARGS=4
 
 if [ $# -ne $EXPECTED_ARGS ]
 then
@@ -7,6 +7,7 @@ then
   echo ""
   echo "Creates an FDS/Smokeview installer sh script. "
   echo ""
+  echo "  ostype - OSX or LINUX"
   echo "  platform - default platform (ia32, intel64 or ib64)"
   echo "  FDS.tar.gz - compressed tar file containing FDS distribution"
   echo "  INSTALLER.sh - .sh script containing self-extracting installer"
@@ -14,9 +15,16 @@ then
   exit
 fi
 
-platformin=$1
-FDS_TAR=$2
-INSTALLER=$3
+ostype=$1
+platformin=$2
+FDS_TAR=$3
+INSTALLER=$4
+
+LDLIBPATH=LD_LIBRARY_PATH
+if [ "$ostype" == "OSX" ]
+then
+LDLIBPATH=DYLD_LIBRARY_PATH
+fi
 
 cat << EOF > $INSTALLER
 #!/bin/bash
@@ -131,11 +139,11 @@ set platform=\\\$1
 # variables for use by FDS
 setenv FDSBINDIR \`pwd\`/bin
 if ( "\\\$platform" == "intel64" ) then
-setenv LD_LIBRARY_PATH \\\`pwd\\\`/bin/LIB64
+setenv $LDLIBPATH \\\`pwd\\\`/bin/LIB64
 endif
 
 if ( "\\\$platform" == "ia32" ) then
-setenv LD_LIBRARY_PATH \\\`pwd\\\`/bin/LIB32
+setenv $LDLIBPATH \\\`pwd\\\`/bin/LIB32
 endif
 
 # add FDS bin to path
@@ -186,7 +194,7 @@ fi
 
 # Update LD_LIBRARY_PATH and PATH variables
 
-export LD_LIBRARY_PATH=\\\$MPIDIST/lib:\\\$FORTLIB
+export $LDLIBPATH=\\\$MPIDIST/lib:\\\$FORTLIB
 export PATH=\\\$FDSBINDIR:\\\$MPIDIST/bin:\\\$PATH
 
 BASH
