@@ -9,7 +9,6 @@ setenv fdshost bluesky.cfr.nist.gov
 setenv smvhost bluesky.cfr.nist.gov
 setenv OSXBUNDLE
 setenv PLATFORM OSX32
-setenv platform ia32
 
 setenv manifest manifest_osx_32.html
 
