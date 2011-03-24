@@ -13,7 +13,7 @@
 #endif
 
 //*** turn on options that set version names
-
+#undef pp_BETA
 #define pp_BETA
 
 #ifdef pp_BETA
