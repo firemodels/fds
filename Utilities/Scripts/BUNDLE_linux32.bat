@@ -29,7 +29,7 @@ pscp %svn_logon%:manifest_linux_32.html %manifest%
 start explorer %manifest%
 
 echo Downloading compressed archive to:
-echo   %svn_root%\Utilities\to_google\%bundledir%.tar.gz
-pscp %svn_logon%:%linux_svn_root%/Utilities/to_google/%bundledir%.tar.gz %svn_root%/Utilities/to_google/.
+echo   %svn_root%\Utilities\to_google\%bundledir%.sh
+pscp %svn_logon%:%linux_svn_root%/Utilities/to_google/%bundledir%.sh %svn_root%/Utilities/to_google/.
 
 pause
