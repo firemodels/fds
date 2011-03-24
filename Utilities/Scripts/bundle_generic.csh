@@ -34,7 +34,7 @@ echo Copying program files
 if $?INTELLIB then
 cp $bundle_setup/README_LINUX.html $bundledir/bin/.
 cp -r $INTELLIB $bundledir/bin/.
-set SETLDPATH="setenv LD_LIBRARY_PATH $INTELLIB;" 
+set SETLDPATH="LD_LIBRARY_PATH=$INTELLIB;" 
 else
 set SETLDPATH=
 endif
@@ -67,10 +67,16 @@ echo copying $fdsmpi from $fdsdir on $fdshost
 scp -q $fdshost\:$fdsroot/$fdsmpidir/$fdsmpi $bundledir/bin/$fdsmpiout
 
 if ($PLATFORM == "LINUX32" || $PLATFORM == "LINUX64") then
-set platform=LINUX
+set ostype=LINUX
 endif
 if ($PLATFORM == "OSX32" || $PLATFORM == "OSX64") then
-set platform=OSX
+set ostype=OSX
+endif
+if ($PLATFORM == "LINUX32" || $PLATFORM == "OSX32") then
+set ossize=ia32
+endif
+if ($PLATFORM == "LINUX64" || $PLATFORM == "OSX64") then
+set ossize=intel64
 endif
 
 # qfds scripts
@@ -111,7 +117,6 @@ date >> $fullmanifest
 echo  >> $fullmanifest
 echo Versions:>> $fullmanifest
 echo  >> $fullmanifest
-
 echo ------fds-------------------- >> $fullmanifest
 ssh -q $runhost " echo 0 | $fdsroot/$fdsdir/$fds" >>& $fullmanifest
 
@@ -194,4 +199,4 @@ echo Compressing archive
 gzip    ../$bundlebase.tar
 echo Creating installer
 cd ..
-$makeinstaller $ostype $platform $bundlebase.tar.gz $bundlebase.sh
+$makeinstaller $ostype $ossize $bundlebase.tar.gz $bundlebase.sh
