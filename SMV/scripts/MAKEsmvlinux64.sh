@@ -1,6 +1,6 @@
-#!/bin/csh -f
-set SVNROOT=~/FDS-SMV
-set rev=$1
+#!/bin/bash
+SVNROOT=~/FDS-SMV
+rev=$1
 
 cd $SVNROOT/SMV/source/smokeview
 svn -r $rev update
