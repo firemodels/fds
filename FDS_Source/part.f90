@@ -247,12 +247,9 @@ OVERALL_INSERT_LOOP: DO
                   DROPLET_SPEED = TA%TABLE_DATA(II,5)
                ENDIF
             ELSE PICK_PATTERN !Use conical spray
-               CALL RANDOM_NUMBER(RN)
+               !CALL RANDOM_NUMBER(RN)
                !THETA_RN = PY%SPRAY_ANGLE(1) + RN*(PY%SPRAY_ANGLE(2)-PY%SPRAY_ANGLE(1))
-               ETA_MAX=0.5_EB*(COS(PY%SPRAY_ANGLE(1))+1._EB)
-               ETA_MIN=0.5_EB*(COS(PY%SPRAY_ANGLE(2))+1._EB)
-               ETA=ETA_MIN+(ETA_MAX-ETA_MIN)*RN
-               THETA_RN=ACOS(2._EB*ETA-1._EB)
+               CALL RANDOM_CHOICE(PY%SPRAY_ANGLE_CDF(:),PY%SPRAY_ANGLE_CDF_THETA,NDC,THETA_RN)
                CALL RANDOM_NUMBER(RN)
                PHI_RN = RN*TWOPI
                IF (PY%PRESSURE_RAMP_INDEX>0) THEN
