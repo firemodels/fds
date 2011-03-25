@@ -40,7 +40,7 @@ H(1)=loglog(f,pave(k),spectrum_style); hold on
 k_fds = find(pave(k)==max(pave(k)));
 f(k_fds)
 
-loglog(f(kk),slope_scale*f(kk).^(-5/3),'k-','LineWidth',1.5)
+loglog(f(kk),slope_scale*f(kk).^(-5/3),'k-','LineWidth',1)
 loglog([f_puff,f_puff],[min(pave(k)),max(pave(k))],'k--');
 loglog([1/dt,1/dt],[min(pave(k)),1e-3*max(pave(k))],nyquist_style);
 
