@@ -21,11 +21,9 @@ FDS_TAR=$3
 INSTALLER=$4
 
 LDLIBPATH=LD_LIBRARY_PATH
-BASHRC=.bash_profile
 if [ "$ostype" == "OSX" ]
 then
 LDLIBPATH=DYLD_LIBRARY_PATH
-BASHRC=.bash_profile
 fi
 
 cat << EOF > $INSTALLER
@@ -137,9 +135,39 @@ cat << CSHRC > \$CSHFDS
 #/bin/csh -f
 set platform=\\\$1
 
-# Setting PATH and LD_LIBRARY_PATH environment
-# variables for use by FDS
+# define FDS bin directory location
+
 setenv FDSBINDIR \`pwd\`/bin
+
+# define openmpi library locations:
+#   32/64 bit gigabit ethernet
+#   64 bit infiniband
+
+set MPIDIST32=/shared/openmpi_32
+set MPIDIST64=/shared/openmpi_64
+set MPIDIST64IB=/shared/openmpi_64ib
+
+# environment for 64 bit gigabit ethernet
+
+if ( "\\\$platform" == "intel64" ) then
+setenv MPIDIST \\\$MPIDIST64
+set FORTLIB=\\\$FDSBINDIR/LIB64
+endif
+
+# environment for 64 bit Infiniband
+
+if ( "\\\$platform" == "ib64" ) then
+setenv MPIDIST \\\$MPIDIST64IB
+set FORTLIB=\\\$FDSBINDIR/LIB64
+endif
+
+# environment for 32 bit gigabit ethernet
+
+if ( "\\\$platform" == "ia32" ) then
+setenv MPIDIST \\\$MPIDIST32
+set FORTLIB=\\\$FDSBINDIR/LIB32
+endif
+
 if ( "\\\$platform" == "intel64" ) then
 setenv $LDLIBPATH \\\`pwd\\\`/bin/LIB64
 endif
@@ -148,14 +176,37 @@ if ( "\\\$platform" == "ia32" ) then
 setenv $LDLIBPATH \\\`pwd\\\`/bin/LIB32
 endif
 
-# add FDS bin to path
+# Update LD_LIBRARY_PATH and PATH variables
 
-set path=(\$FDSBINDIR \\\$path)
+setenv $LDLIBPATH \\\$MPIDIST/lib:\\\${FORTLIB}:\\\$$LDLIBPATH
+set path=(\\\$FDSBINDIR \\\$MPIDIST/bin \\\$path)
+
+# if compilers are present then pre-define environment for their use
+
+if ( \\\$?IFORT_COMPILER ) then
+
+if ( -e \\\$IFORT_COMPILER/bin/ifortvars.csh ) then
+
+if ( "\\\$platform" == "ib64" ) then
+source \\\$IFORT_COMPILER/bin/ifortvars.csh intel64
+endif
+
+if ( "\\\$platform" == "intel64" ) then
+source \\\$IFORT_COMPILER/bin/ifortvars.csh intel64
+endif
+
+if ( "\\\$platform" == "ia32" ) then
+source \\\$IFORT_COMPILER/bin/ifortvars.csh ia32
+endif
+
+endif
+endif
 
 CSHRC
 
 cat << BASH > \$BASHFDS
 #/bin/bash
+
 platform=\\\$1
 
 # define FDS bin directory location
@@ -196,8 +247,30 @@ fi
 
 # Update LD_LIBRARY_PATH and PATH variables
 
-export $LDLIBPATH=\\\$MPIDIST/lib:\\\$FORTLIB
+export $LDLIBPATH=\\\$MPIDIST/lib:\\\$FORTLIB:\\\$$LDLIBPATH
 export PATH=\\\$FDSBINDIR:\\\$MPIDIST/bin:\\\$PATH
+
+# if compilers are present then pre-define environment for their use
+
+if [ ! -e "\\\$IFORT_COMPILER/bin/ifortvars.sh" ]
+then
+return
+fi
+
+if [ "\\\$platform" == "ib64" ]
+then
+source \\\$IFORT_COMPILER/bin/ifortvars.sh intel64
+fi
+
+if [ "\\\$platform" == "intel64" ]
+then
+source \\\$IFORT_COMPILER/bin/ifortvars.sh intel64
+fi
+
+if [ "\\\$platform" == "ia32" ]
+then
+source \\\$IFORT_COMPILER/bin/ifortvars.sh ia32
+fi
 
 BASH
 
@@ -222,12 +295,12 @@ cp \$CSHFDS ~/.cshrc_fds
 rm \$CSHFDS
 
 cd \$THISDIR
-nlines=\$(grep bashrc_fds ~/.bashrc | wc -l)
+nlines=\$(grep bashrc_fds ~/.bash_profile | wc -l)
 if [ \$nlines -eq 0 ]
 then
-echo Updating .bashrc
+echo Updating .bash_profile
 echo source .bashrc_fds $ossize
-echo source .bashrc_fds $ossize >> ~/$BASHRC
+echo source .bashrc_fds $ossize >> ~/.bash_profile
 fi
 nlines=\$(grep cshrc_fds ~/.cshrc | wc -l)
 if [ \$nlines -eq 0 ]
