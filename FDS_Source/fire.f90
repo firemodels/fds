@@ -250,6 +250,7 @@ DO K=1,KBAR
             SS2 = 2._EB*(DUDX**2 + DVDY**2 + DWDZ**2 + 2._EB*(S12**2 + S13**2 + S23**2))
             
             ! ke dissipation rate, assumes production=dissipation
+
             EPSK = MU(I,J,K)*(SS2-TWTH*(DUDX+DVDY+DWDZ)**2)/RHO(I,J,K)
 
             KSGS = 2.25_EB*(EPSK*DELTA/PI)**TWTH  ! estimate of subgrid ke, from Kolmogorov spectrum
