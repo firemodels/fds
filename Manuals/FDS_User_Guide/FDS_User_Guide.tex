@@ -6574,6 +6574,11 @@ To prevent FDS from generating a distribution of droplets/particles altogether, 
 {\ct MONODISPERSE=.TRUE.} on the {\ct PART} line, in which case every droplet or particle will be assigned the
 same {\ct DIAMETER}.
 
+\subsection{Secondary breakup}
+\label{info:secondary_breakup}
+If {\ct BREAKUP=.TRUE.} is set on the {\ct PART} line, particles may undergo secondary breakup. In this case the user shoul also specify {\ct SURFACE\_TENSION} of the liquid and breakup distribution parameters {\ct BREAKUP\_CHILD\_DIAMETER} and {\ct BREAKUP\_CHILD\_GAMMA\_D}.
+
+
 \subsection{Drag}
 \label{info:particle_drag}
 
@@ -7031,7 +7036,10 @@ The angles outline a conical spray pattern relative to the
 south pole of the sphere centered at the sprinkler with radius {\ct OFFSET}.
 For example, {\ct SPRAY\_ANGLE=30.,80.} directs the water droplets to leave
 the sprinkler through a band between 60$^\circ$ and 10$^\circ$ south latitude, assuming the orientation of
-the sprinkler is (0,0,-1), the default. The droplets are uniformly distributed within this belt.
+the sprinkler is (0,0,-1), the default. 
+\item[{\ct SPRAY\_PATTERN\_SHAPE}] determines how the droplets are distributed within this band. 
+Choices are {\ct 'UNIFORM'} for uniform distribution and {\ct 'GAUSSIAN'}. Parameter {\ct SPRAY\_PATTERN\_MU} controls the latitude of 
+maximum density of droplets for the {\ct 'GAUSSIAN'} distribution. Width of the distribution is controlled by parameter {\ct SPRAY\_PATTERN\_BETA}. 
 \item[{\ct SPRAY\_PATTERN\_TABLE}] Name of a set of {\ct TABL} lines containing the description of the spray pattern.
 \item[{\ct PART\_ID}] The name of the {\ct PART} line containing properties of the droplets.
 See Chapter~\ref{info:PART} for additional details.
@@ -10295,6 +10303,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct AGE}                           & Real            & See Section~\ref{info:particle_number}      & s         & 100000.       \\ \hline
+{\ct BREAKUP}                       & Logical         & See Section~\ref{info:secondary_breakup}    &           & {\ct .FALSE.} \\ \hline
+{\ct BREAKUP\_CHILD\_DIAMETER}      & Real            & See Section~\ref{info:secondary_breakup}    &           & $\frac{3}{7}$ \\ \hline
+{\ct BREAKUP\_CHILD\_GAMMA\_D}      & Real            & See Section~\ref{info:secondary_breakup}    &           & 2.56          \\ \hline
 {\ct COLOR}                         & Character       & See Section~\ref{info:particle_quantities}  &           & {\ct 'BLACK'} \\ \hline
 {\ct CTRL\_ID}                      & Character       & See Section~\ref{info:particle_flux}        &           &               \\ \hline
 {\ct DENSITY}                       & Real            & See Section~\ref{thermal_part_props}        & kg/m$^3$  & 1000.         \\ \hline
@@ -10324,6 +10335,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SPECIFIC\_HEAT}                & Real            & See Section~\ref{thermal_part_props}        & kJ/kg/K   &               \\ \hline
 {\ct STATIC}                        & Logical         & See Section~\ref{info:STATIC}               &           & {\ct .FALSE.} \\ \hline
 {\ct SURF\_ID}                      & Character       & See Section~\ref{info:PART_SURF}            &           &               \\ \hline
+{\ct SURFACE\_TENSION}              & Real            & See Section~\ref{info:secondary_breakup}    &   N/m     & 72.8$\cdot 10^3$  \\ \hline
 {\ct USER\_DRAG\_COEFFICIENT}       & Real            & See Section~\ref{info:particle_drag}        &           & -1.           \\ \hline
 {\ct VAPORIZATION\_TEMPERATURE}     & Real            & See Section~\ref{thermal_part_props}        & $^\circ$C &               \\ \hline
 {\ct VERTICAL\_VELOCITY}            & Real            & See Section~\ref{info:surface_droplets}     & m/s       &  0.5          \\ \hline
@@ -10463,6 +10475,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SMOKEVIEW\_PARAMETERS}             & Char.~Array   & See Section~\ref{info:SMOKEVIEW_PARAMETERS}   &                       &           \\ \hline
 {\ct SPEC\_ID}                          & Character     & See Section~\ref{info:alternative_smoke}      &                       &           \\ \hline
 {\ct SPRAY\_ANGLE(2)}                   & Real          & See Section~\ref{info:sprinklers}             & deg.                  & 60.,75.   \\ \hline
+{\ct SPRAY\_PATTERN\_SHAPE}             & Character     & See Section~\ref{info:sprinklers}             &                       & {\ct 'GAUSSIAN'}  \\ \hline
+{\ct SPRAY\_PATTERN\_MU}                & Integer       & See Section~\ref{info:sprinklers}             & deg.                  & 0          \\ \hline
+{\ct SPRAY\_PATTERN\_BETA}              & Integer       & See Section~\ref{info:sprinklers}             & deg.                  & 5          \\ \hline
 {\ct SPRAY\_PATTERN\_TABLE}             & Character     & See Section~\ref{info:sprinklers}             &                       &           \\ \hline
 {\ct VELOCITY\_COMPONENT}               & Integer       & See Section~\ref{info:velocity_patch}         &                       &           \\ \hline
 \end{longtable}
