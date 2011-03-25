@@ -3,7 +3,8 @@ platform=ib64
 dir=`pwd`
 target=${dir##*/}
 
-source ../SET_FORT.sh $platform
+source $IFORT_COMPILER/bin/ifortvars.sh intel64
+source ~/.bashrc_fds $platform
 
 echo Building $target 
 make -j4 VPATH="../../FDS_Source" -f ../makefile $target
