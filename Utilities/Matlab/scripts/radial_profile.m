@@ -93,7 +93,7 @@ if (error>0)
         e = error*ones(1,length(w)/length(error));
     end 
     
-    e(2:2:length(e)) = 0;  % remove every other error bar for clarity
+    e(2:2:length(e)) = 0; % remove every other error bar for clarity
     H(1)=errorbar(r,w,-e,+e,exp_format);
 else
     H(1)=plot(r,w,exp_format);
@@ -106,15 +106,27 @@ if nfds>=1
     if strcmp(data_format,'row')
         R = rmin:dr:rmax;
         W = M(3,devc_col);
-    elseif strcmp(data_format,'mean')
-        R = rmin:dr:rmax;
-        T = find(M(:,1)>=tmin);
-        W = mean(M(T,devc_col));
     elseif strcmp(data_format,'col')
         R = M(:,1);
         W = M(:,devc_col);
+    elseif strcmp(data_format,'mean')
+        R = rmin:dr:rmax;
+        T = find(M(:,1)>=tmin);
+        W = mean(M(T,devc_col),1);
+    elseif strcmp(data_format,'rms')
+        R = rmin:dr:rmax;
+        T = find(M(:,1)>=tmin);
+        W = std(M(T,devc_col),1);
+    elseif strcmp(data_format,'tke')
+        R = rmin:dr:rmax;
+        T = find(M(:,1)>=tmin);
+        urange = devc_col(1):devc_col(2);
+        vrange = devc_col(3):devc_col(4);
+        u = M(T,urange)-ones(length(T),1)*mean(M(T,urange),1);
+        v = M(T,vrange)-ones(length(T),1)*mean(M(T,vrange),1);
+        W = mean(0.5*u.*u+v.*v,1);
     end
-    H(2)=plot(R,W,fds_format1,'LineWidth',2);
+    H(2)=plot(R,W,fds_format1,'LineWidth',1);
     hold off
 end
 if nfds>=2
@@ -123,15 +135,27 @@ if nfds>=2
     if strcmp(data_format,'row')
         R = rmin:dr:rmax;
         W = M(3,devc_col);
-    elseif strcmp(data_format,'mean')
-        R = rmin:dr:rmax;
-        T = find(M(:,1)>=tmin);
-        W = mean(M(T,devc_col));
     elseif strcmp(data_format,'col')
         R = M(:,1);
         W = M(:,devc_col);
+    elseif strcmp(data_format,'mean')
+        R = rmin:dr:rmax;
+        T = find(M(:,1)>=tmin);
+        W = mean(M(T,devc_col),1);
+    elseif strcmp(data_format,'rms')
+        R = rmin:dr:rmax;
+        T = find(M(:,1)>=tmin);
+        W = std(M(T,devc_col),1);
+    elseif strcmp(data_format,'tke')
+        R = rmin:dr:rmax;
+        T = find(M(:,1)>=tmin);
+        urange = devc_col(1):devc_col(2);
+        vrange = devc_col(3):devc_col(4);
+        u = M(T,urange)-ones(length(T),1)*mean(M(T,urange),1);
+        v = M(T,vrange)-ones(length(T),1)*mean(M(T,vrange),1);
+        W = mean(0.5*u.*u+v.*v,1);
     end
-    H(3)=plot(R,W,fds_format2,'LineWidth',2);
+    H(3)=plot(R,W,fds_format2,'LineWidth',1);
     hold off
 end
 if nfds>=3
@@ -140,15 +164,27 @@ if nfds>=3
     if strcmp(data_format,'row')
         R = rmin:dr:rmax;
         W = M(3,devc_col);
-    elseif strcmp(data_format,'mean')
-        R = rmin:dr:rmax;
-        T = find(M(:,1)>=tmin);
-        W = mean(M(T,devc_col));
     elseif strcmp(data_format,'col')
         R = M(:,1);
         W = M(:,devc_col);
+    elseif strcmp(data_format,'mean')
+        R = rmin:dr:rmax;
+        T = find(M(:,1)>=tmin);
+        W = mean(M(T,devc_col),1);
+    elseif strcmp(data_format,'rms')
+        R = rmin:dr:rmax;
+        T = find(M(:,1)>=tmin);
+        W = std(M(T,devc_col),1);
+    elseif strcmp(data_format,'tke')
+        R = rmin:dr:rmax;
+        T = find(M(:,1)>=tmin);
+        urange = devc_col(1):devc_col(2);
+        vrange = devc_col(3):devc_col(4);
+        u = M(T,urange)-ones(length(T),1)*mean(M(T,urange),1);
+        v = M(T,vrange)-ones(length(T),1)*mean(M(T,vrange),1); 
+        W = mean(0.5*u.*u+v.*v,1);
     end
-    H(4)=plot(R,W,fds_format3,'LineWidth',2);
+    H(4)=plot(R,W,fds_format3,'LineWidth',1);
     hold off
 end
 if nfds>=4
@@ -157,15 +193,27 @@ if nfds>=4
     if strcmp(data_format,'row')
         R = rmin:dr:rmax;
         W = M(3,devc_col);
-    elseif strcmp(data_format,'mean')
-        R = rmin:dr:rmax;
-        T = find(M(:,1)>=tmin);
-        W = mean(M(T,devc_col));
     elseif strcmp(data_format,'col')
         R = M(:,1);
         W = M(:,devc_col);
+    elseif strcmp(data_format,'mean')
+        R = rmin:dr:rmax;
+        T = find(M(:,1)>=tmin);
+        W = mean(M(T,devc_col),1);
+    elseif strcmp(data_format,'rms')
+        R = rmin:dr:rmax;
+        T = find(M(:,1)>=tmin);
+        W = std(M(T,devc_col),1);
+    elseif strcmp(data_format,'tke')
+        R = rmin:dr:rmax;
+        T = find(M(:,1)>=tmin);
+        urange = devc_col(1):devc_col(2);
+        vrange = devc_col(3):devc_col(4);
+        u = M(T,urange)-ones(length(T),1)*mean(M(T,urange),1);
+        v = M(T,vrange)-ones(length(T),1)*mean(M(T,vrange),1);
+        W = mean(0.5*u.*u+v.*v,1);
     end
-    H(5)=plot(R,W,fds_format4,'LineWidth',2);
+    H(5)=plot(R,W,fds_format4,'LineWidth',1);
     hold off
 end
 if nfds>=5
@@ -174,15 +222,27 @@ if nfds>=5
     if strcmp(data_format,'row')
         R = rmin:dr:rmax;
         W = M(3,devc_col);
-    elseif strcmp(data_format,'mean')
-        R = rmin:dr:rmax;
-        T = find(M(:,1)>=tmin);
-        W = mean(M(T,devc_col));
     elseif strcmp(data_format,'col')
         R = M(:,1);
         W = M(:,devc_col);
+    elseif strcmp(data_format,'mean')
+        R = rmin:dr:rmax;
+        T = find(M(:,1)>=tmin);
+        W = mean(M(T,devc_col),1);
+    elseif strcmp(data_format,'rms')
+        R = rmin:dr:rmax;
+        T = find(M(:,1)>=tmin);
+        W = std(M(T,devc_col),1);
+    elseif strcmp(data_format,'tke')
+        R = rmin:dr:rmax;
+        T = find(M(:,1)>=tmin);
+        urange = devc_col(1):devc_col(2);
+        vrange = devc_col(3):devc_col(4);
+        u = M(T,urange)-ones(length(T),1)*mean(M(T,urange),1);
+        v = M(T,vrange)-ones(length(T),1)*mean(M(T,vrange),1); 
+        W = mean(0.5*u.*u+v.*v,1);
     end
-    H(6)=plot(R,W,fds_format5,'LineWidth',2);
+    H(6)=plot(R,W,fds_format5,'LineWidth',1);
     hold off
 end
 
