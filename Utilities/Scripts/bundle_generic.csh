@@ -126,13 +126,13 @@ ssh -q $runhost $fds2asciiroot/$fds2asciidir/$fds2ascii -v >> $fullmanifest
 
 echo  >> $fullmanifest
 echo ------smokeview-------------------- >> $fullmanifest
-ssh -q $runhost \( $SETLDPATH  $smvbindir/$smokeview -v \) >> $fullmanifest
+ssh -q $runhost $smvbindir/$smokeview -v  >> $fullmanifest
 echo  >> $fullmanifest
 echo ------smokediff-------------------- >> $fullmanifest
-ssh -q $runhost \( $SETLDPATH  $smokediffroot/$smokediffdir/$smokediff -v \) >> $fullmanifest
+ssh -q $runhost $smokediffroot/$smokediffdir/$smokediff -v >> $fullmanifest
 echo  >> $fullmanifest
 echo ------smokezip-------------------- >> $fullmanifest
-ssh -q $runhost \( $SETLDPATH  $smokeziproot/$smokezipdir/$smokezip -v \) >> $fullmanifest
+ssh -q $runhost $smokeziproot/$smokezipdir/$smokezip -v >> $fullmanifest
 
 if ($?OSXBUNDLE) then
 echo copying OSX launcher script
