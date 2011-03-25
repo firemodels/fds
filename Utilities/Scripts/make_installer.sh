@@ -75,9 +75,15 @@ fi
 # get FDS root directory
 #
 echo ""
-echo "*** FDS 6 Installer ***"
+#echo "*** FDS Smokeview 6 Installer ***"
+echo "*** This is a test of the script that installs FDS and Smokeview on a "
+echo "    Linux or OSX computer system."
 echo ""
-echo "Enter FDS installation directory (default: \$FDS_root)"
+echo ""   This script copies files and updates the PATH and LD_LIBRARY_PATH"
+echo ""   variables (DYLD_LIBRARY_PATH on the Mac) so that FDS and Smokeview"
+echo ""   may be used from the command line."
+echo ""
+echo "Where whould you like to install FDS (default: \$FDS_root)"
 read answer
 if [ "\$answer" != "" ]; then
 FDS_root=\$answer
@@ -295,6 +301,7 @@ cp \$CSHFDS ~/.cshrc_fds
 rm \$CSHFDS
 
 cd \$THISDIR
+touch ~/.bash_profile
 nlines=\$(grep bashrc_fds ~/.bash_profile | wc -l)
 if [ \$nlines -eq 0 ]
 then
@@ -302,6 +309,7 @@ echo Updating .bash_profile
 echo source .bashrc_fds $ossize
 echo source .bashrc_fds $ossize >> ~/.bash_profile
 fi
+touch ~/.cshrc
 nlines=\$(grep cshrc_fds ~/.cshrc | wc -l)
 if [ \$nlines -eq 0 ]
 then
