@@ -2,9 +2,8 @@
 
 #  This script compiles a few utility programs.
  
-platform=intel64
-#source ../../FDS_Compilation/SET_FORT.sh $platform
-source ~/.bashrc_setfort $platform
+#source $IFORT_COMPILER/bin/ifortvars.sh ia32
+source $IFORT_COMPILER/bin/ifortvars.sh intel64
 
 ifort -o Beyler_Hood Beyler_Hood.f90
 ifort -o fds2ascii fds2ascii.f90
