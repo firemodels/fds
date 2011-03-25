@@ -2531,8 +2531,8 @@ DO J = 1,5000
          Z2CPBAR(0,N) = SUM(Z2Y(:,N) * H_TMP(:))
          Z2CPBAR(J,N) = Z2CPBAR(0,N) + Z2CP(J,N)
       ENDIF
-      Z2MU(J,N)    = SUM(Z2Y(:,N) * MU_TMP(:)) - Z2MU_C(J)
-      Z2K(J,N)     = SUM(Z2Y(:,N) * K_TMP(:)) - Z2K_C(J)
+      Z2MU(J,N)    = SUM((Z2Y_C(:)+Z2Y(:,N)) * MU_TMP(:)) - Z2MU_C(J)
+      Z2K(J,N)     = SUM((Z2Y_C(:)+Z2Y(:,N)) * K_TMP(:)) - Z2K_C(J)
    END DO
 ENDDO
 
