@@ -1,6 +1,6 @@
 &HEAD CHID='Vettori_Sloped_24OFC', TITLE='Sloped 24 Degrees Obstructed Fast Corner' /
 
-&MESH IJK = 73,55,99, XB = 0.0,7.3,0.0,5.5,0.0,4.95
+&MESH IJK = 73,55,50, XB = 0.0,7.3,0.0,5.5,0.0,4.95
 
 &TIME T_END=120/
 
@@ -27,12 +27,12 @@
 	H = 4 /
 
 %%Sloped Roof
-&OBST XB=0.0,7.3,5.4,5.5,2.45,2.5, SURF_ID='GYPSUM_BOARD', MULT_ID = 'ROOF' /
+&OBST XB=0.0,7.3,5.4,5.5,2.5,2.6, SURF_ID='GYPSUM_BOARD', MULT_ID = 'ROOF' /
 &MULT ID ='ROOF', DXB=0.0, 0.0, -.1, -.1, .04545, .04545, N_UPPER=55 /
 
 %%Beams along Ceiling
-&OBST XB=2.3,2.5,5.4,5.5,2.2,2.45,  MULT_ID = 'BEAM'  SURF_ID= 'WOOD BEAM'/
-&OBST XB=4.8,5.0,5.4,5.5,2.2,2.45, , MULT_ID = 'BEAM' SURF_ID= 'WOOD BEAM'/
+&OBST XB=2.3,2.5,5.4,5.5,2.2,2.5,  MULT_ID = 'BEAM'  SURF_ID= 'WOOD BEAM'/
+&OBST XB=4.8,5.0,5.4,5.5,2.2,2.5, , MULT_ID = 'BEAM' SURF_ID= 'WOOD BEAM'/
 &MULT ID ='BEAM', DXB=0.0, 0.0, -.1, -.1, .04545, .04545, N_UPPER=55 /
 
 

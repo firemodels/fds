@@ -1,6 +1,6 @@
 &HEAD CHID='Vettori_Sloped_FSSW', TITLE='Flat Smooth Slow Wall' /
 
-&MESH IJK = 73,55,49, XB = 0.0,7.3,0.0,5.5,0.0,2.45
+&MESH IJK = 73,55,25, XB = 0.0,7.3,0.0,5.5,0.0,2.45
 
 &TIME T_END=300/
 
