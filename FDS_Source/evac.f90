@@ -14735,14 +14735,14 @@ CONTAINS
     ! Passed variables
     INTEGER, INTENT(IN) :: I, J, K, NOM
     REAL(EB), INTENT(OUT) :: fed_indx, soot_dens, gas_temp, rad_flux
-    REAL(EB), INTENT(INOUT) :: ZZ_GET(1:N_TRACKED_SPECIES)
+    REAL(EB), INTENT(INOUT) :: ZZ_GET(0:N_TRACKED_SPECIES)
     !
     ! Local variables
     REAL(EB) :: Y_MF_INT
 
     ! Mass fraction array ==> soot density (mg/m3)
     ! Next is for soot (mg/m3)
-    ZZ_GET(:) = MESHES(nom)%ZZ(I,J,K,:)
+    ZZ_GET(1:N_TRACKED_SPECIES) = MESHES(nom)%ZZ(I,J,K,1:N_TRACKED_SPECIES)
     IF (SOOT_INDEX > 0) THEN
        CALL GET_MASS_FRACTION(ZZ_GET,SOOT_INDEX,Y_MF_INT)
        soot_dens = Y_MF_INT*MESHES(nom)%RHO(I,J,K)*1.E6_EB

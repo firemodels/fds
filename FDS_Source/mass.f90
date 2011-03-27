@@ -398,8 +398,8 @@ USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_GAS_CONSTANT
 USE GLOBAL_CONSTANTS, ONLY: N_TRACKED_SPECIES,CO_PRODUCTION,I_PROG_F,I_PROG_CO,I_FUEL,TMPMAX,TMPMIN,EVACUATION_ONLY, &
                             PREDICTOR,CORRECTOR,CHANGE_TIME_STEP,TMPA,N_ZONE, &
                             GAS_SPECIES, R0,SOLID_PHASE_ONLY,TUSED, &
-                            RSUM0,DEBUG_OPENMP,CLIP_MASS_FRACTION
-REAL(EB) :: DTRATIO,OMDTRATIO,TNOW,ZZ_GET(1:N_TRACKED_SPECIES)
+                            DEBUG_OPENMP,CLIP_MASS_FRACTION
+REAL(EB) :: DTRATIO,OMDTRATIO,TNOW,ZZ_GET(0:N_TRACKED_SPECIES)
 INTEGER  :: I,J,K,N
 INTEGER, INTENT(IN) :: NM
  
@@ -505,8 +505,8 @@ CASE(.TRUE.) PREDICTOR_STEP
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR   
-               ZZ_GET(:) = ZZS(I,J,K,:)
-               CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM(I,J,K)) !INTENT: IN,OUT
+               ZZ_GET(1:N_TRACKED_SPECIES) = ZZS(I,J,K,1:N_TRACKED_SPECIES)
+               CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM(I,J,K))
             ENDDO
          ENDDO
       ENDDO
@@ -515,27 +515,16 @@ CASE(.TRUE.) PREDICTOR_STEP
 
    ! Extract predicted temperature at next time step from Equation of State
    
-   IF (N_TRACKED_SPECIES==0) THEN
-      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
-      DO K=0,KBP1
-         DO J=0,JBP1
-            DO I=0,IBP1
-               TMP(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(RSUM0*RHOS(I,J,K))
-            ENDDO
+   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
+   DO K=0,KBP1
+      DO J=0,JBP1
+         DO I=0,IBP1
+            TMP(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHOS(I,J,K))
          ENDDO
       ENDDO
-      !$OMP END DO
-   ELSE
-      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
-      DO K=0,KBP1
-         DO J=0,JBP1
-            DO I=0,IBP1
-               TMP(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHOS(I,J,K))
-            ENDDO
-         ENDDO
-      ENDDO
-      !$OMP END DO
-   ENDIF
+   ENDDO
+   !$OMP END DO
+
    !$OMP WORKSHARE
    TMP = MAX(TMPMIN,MIN(TMPMAX,TMP))
    !$OMP END WORKSHARE
@@ -614,8 +603,8 @@ CASE(.FALSE.) PREDICTOR_STEP
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR   
-               ZZ_GET(:) = ZZ(I,J,K,:)
-               CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM(I,J,K)) !INTENT: IN,OUT
+               ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)
+               CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM(I,J,K)) 
             ENDDO
          ENDDO
       ENDDO
@@ -624,27 +613,15 @@ CASE(.FALSE.) PREDICTOR_STEP
 
    ! Extract predicted temperature at next time step from Equation of State
 
-   IF (N_TRACKED_SPECIES==0) THEN
-      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
-      DO K=0,KBP1
-         DO J=0,JBP1
-            DO I=0,IBP1
-               TMP(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(RSUM0*RHO(I,J,K))
-            ENDDO
+   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
+   DO K=0,KBP1
+      DO J=0,JBP1
+         DO I=0,IBP1
+            TMP(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHO(I,J,K))
          ENDDO
       ENDDO
-      !$OMP END DO
-   ELSE
-      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
-      DO K=0,KBP1
-         DO J=0,JBP1
-            DO I=0,IBP1
-               TMP(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHO(I,J,K))
-            ENDDO
-         ENDDO
-      ENDDO
-      !$OMP END DO
-   ENDIF
+   ENDDO
+   !$OMP END DO
 
    !$OMP WORKSHARE
    TMP = MAX(TMPMIN,MIN(TMPMAX,TMP))
