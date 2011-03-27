@@ -1,6 +1,6 @@
 &HEAD CHID='Vettori_Sloped_13SSC', TITLE='Sloped 13 Degrees, Smooth, Slow, Corner' /
 
-&MESH IJK = 73,55,74, XB = 0.0,7.3,0.0,5.5,0.0,3.7
+&MESH IJK = 73,55,36, XB = 0.0,7.3,0.0,5.5,0.0,3.7
 
 &TIME T_END=300/
 
@@ -25,7 +25,7 @@
 	H = 4 /
 
 %%Sloped Roof
-&OBST XB=0.0,7.3,5.4,5.5,2.45,2.5, SURF_ID='GYPSUM_BOARD', MULT_ID = 'ROOF' /
+&OBST XB=0.0,7.3,5.4,5.5,2.5,2.6, SURF_ID='GYPSUM_BOARD', MULT_ID = 'ROOF' /
 &MULT ID ='ROOF', DXB=0.0, 0.0, -.1, -.1, .0227, .0227, N_UPPER=55 /
 
 
