@@ -2368,6 +2368,9 @@ F & 150 & 1600 \tabularnewline
 \section{Water Droplet Evaporation (\texorpdfstring{{\textbf{water\_evaporation}}}{water\_evaporation}) }
 \label{water_evaporation}
 
+\subsection{Stationary state}
+
+
 The three test cases called {\bf water\_evaporation\_x} involve stationary water droplets in a cubic box
 The walls of the box are
 assumed adiabatic, meaning that there are no leaks or heat losses. The air within the box is stirred to maintain uniform conditions. In each case, the numerical solutions are compared to analytical solutions.
@@ -2444,9 +2447,17 @@ air temperature is 500~$^\circ$C, the  initial diameter of all the droplets is 2
 \end{figure}
 
 
+\subsection{Rate of evaporation}
 
+The test consists in one single evaporating water droplet in an ambient air. The computational results are evaluated upon the 
+the rate of evaporation and more precisely the droplet diameter versus time. The comparison is done with measurements extracted from the reference~\cite{Ranz}.
 
-
+\begin{figure}[ht]
+\noindent
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/rate_of_evaporation_diameter}
+\caption[Sample case {\bf rate_of_evaporation}.]{Droplet diameter versus time}
+\label{fig_rate_of_evaporation}
+\end{figure}
 
 \chapter{Heating, Ventilating, and Air Conditioning (HVAC)}
 
