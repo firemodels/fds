@@ -6331,7 +6331,7 @@ corresponds to one individual band of the spectrum.
 
 Note that by default FDS employs a gray gas model for the absorption coefficient, which are
 tabulated in a look-up table using the routines found in RadCal. The effective absorption coefficient, a function
-of gas composition and temperature, also requires an effective {\ct PATH\_LENGTH}. Its default value is 
+of gas composition and temperature, also requires an effective {\ct PATH\_LENGTH}. Its default value is
 5 times the width of a single grid cell.
 
 
@@ -7033,10 +7033,10 @@ The angles outline a conical spray pattern relative to the
 south pole of the sphere centered at the sprinkler with radius {\ct OFFSET}.
 For example, {\ct SPRAY\_ANGLE=30.,80.} directs the water droplets to leave
 the sprinkler through a band between 60$^\circ$ and 10$^\circ$ south latitude, assuming the orientation of
-the sprinkler is (0,0,-1), the default. 
-\item[{\ct SPRAY\_PATTERN\_SHAPE}] determines how the droplets are distributed within this band. 
-Choices are {\ct 'UNIFORM'} for uniform distribution and {\ct 'GAUSSIAN'}. Parameter {\ct SPRAY\_PATTERN\_MU} controls the latitude of 
-maximum density of droplets for the {\ct 'GAUSSIAN'} distribution. Width of the distribution is controlled by parameter {\ct SPRAY\_PATTERN\_BETA}. 
+the sprinkler is (0,0,-1), the default.
+\item[{\ct SPRAY\_PATTERN\_SHAPE}] determines how the droplets are distributed within this band.
+Choices are {\ct 'UNIFORM'} for uniform distribution and {\ct 'GAUSSIAN'}. Parameter {\ct SPRAY\_PATTERN\_MU} controls the latitude of
+maximum density of droplets for the {\ct 'GAUSSIAN'} distribution. Width of the distribution is controlled by parameter {\ct SPRAY\_PATTERN\_BETA}.
 \item[{\ct SPRAY\_PATTERN\_TABLE}] Name of a set of {\ct TABL} lines containing the description of the spray pattern.
 \item[{\ct PART\_ID}] The name of the {\ct PART} line containing properties of the droplets.
 See Chapter~\ref{info:PART} for additional details.
@@ -8783,28 +8783,28 @@ of the mass flux of droplets in the $x$, $y$, and $z$ directions, respectively, 
 \subsubsection{Local Spray Properties}
 \label{PDPA}
 
-Detailed experimental measurements of sprays are often performed using \underline{P}hase \underline{D}oppler \underline{P}article
-\underline{A}nalysis (PDPA) which can be used to obtain information on the droplet size distribution, speed and concentration.
-Special device type has been defined to simulate the PDPA measurement. The actual quantity to measure, and the details of the
-measurement are defined using an associated {\ct PROP}erty. Note that in FDS, the PDPA device cannot produce complete droplet size
+Detailed experimental measurements of sprays using \underline{P}hase \underline{D}oppler \underline{P}article
+\underline{A}nalysis (PDPA) provide information on the droplet size distribution, speed and concentration.
+A special device type is defined via a {\ct DEVC} line to simulate the PDPA measurement. The actual quantity to measure, and the details of the
+measurement are defined using an associated {\ct PROP} line. Note that in FDS, the PDPA device cannot produce complete droplet size
 distributions, but only various mean properties.
 
-By default, the PDPA device output at time $t$ is computed as as a time integral
+By default, the PDPA device output at time $t$ is computed as a time integral
 \be
-F(t) = \frac{1}{\min(t,t_e)-t_s} \int_{t_s}^{\min(t,t_e)} f(t) dt
+F(t) = \frac{1}{\min(t,t_e)-t_s} \int_{t_s}^{\min(t,t_e)} f(t) \, dt
 \ee
-but instantaneous values can be obtained by setting {\ct PDPA\_INTEGRATE = .FALSE.} on the corresponding {\ct PROP} line. In this case
+but instantaneous values can be obtained by setting {\ct PDPA\_INTEGRATE = .FALSE.} on the corresponding {\ct PROP} line, in which case
 \be
 F(t) = f(t)
 \ee
-The function $f(t)$ has two forms: 
+The function $f(t)$ has two forms:
 \be
-f_1(t) =  \frac{\sum_i n_i d_i^m x}{\sum_i n_i d_i^n}; \;\;
-f_2(t) = \frac{\sum_i n_i x}{V}
+f_1(t) =  \frac{\sum_i n_i d_i^m \, x}{\sum_i n_i d_i^n}  \quad ; \quad
+f_2(t) = \frac{\sum_i n_i \, x}{V}
 \ee
-where $n_i$ is the number of real particles repsented by the individual computational particle, $d_i$ 
-is the particle diameter and $x$ is the quantity to be measured. In each case, the summation goes over all the particles within a sphere 
-with radius {\ct PDPA\_RADIUS} and centered at the location given by the device {\ct XYZ}. 
+where $n_i$ is the number of real particles represented by the single simulated particle, $d_i$
+is the particle diameter, and $x$ is the quantity to be measured. In each case, the summation goes over all the particles within a sphere
+with radius {\ct PDPA\_RADIUS} and centered at the location given by the device {\ct XYZ}.
 
 The first form $f_1(t)$ is used for the computation of various mean diameters, with
 associated properties defined using the following keywords on the {\ct PROP} line:
@@ -8812,18 +8812,17 @@ associated properties defined using the following keywords on the {\ct PROP} lin
 \item[{\ct PDPA\_M}] $m$, exponent $m$ of diameter.
 \item[{\ct PDPA\_N}] $n$, exponent $n$ of diameter. In case $m=n$, the exponent $1/(m-n)$ is removed from the formula.
 \end{description}
-
-The second form ($f_2(t)$) is used for the computation of mass and energy -related variables that do not include diameter weightings.
-The concentrations are based on the sampling volume $V$, defined by {\ct PDPA\_RADIUS}.
-The quantity used for $x$ can be chosen with the keyword {\ct QUANTITY}. 
-A summary of the available PDPA quantities is shown in Table~\ref{tbl:pdpa}. 
+\noindent The second form ($f_2(t)$) is used for the computation of mass and energy related variables that do not include the diameter weighting.
+The concentrations are based on the sampling volume, $V$, defined by {\ct PDPA\_RADIUS}.
+The quantity used for $x$ can be chosen with the keyword {\ct QUANTITY}.
+A summary of the available PDPA quantities is shown in Table~\ref{tbl:pdpa}.
 
 \begin{table}[!ht]
 \caption{Output quantities available for PDPA output.}
 \label{tbl:pdpa}
 \begin{center}
 \begin{tabular}{|l|l|l|l|}
-\hline 
+\hline
 {\ct QUANTITY} 	        & $x$   			& $f(x)$ & Unit \\ \hline
 {\ct 'DIAMETER'} (default) & 1                          & $f_1$	 & $\mu$m \\
 {\ct 'ENTHALPY'} 	& $(4/3)\rho_i r_i^3 \left(c_{p,i}(T_i)T_i-c_{p,i}(T_m)T_m \right)$	& $f_2$	 & kJ/m$^3$ \\
@@ -8852,11 +8851,11 @@ As the spray simulation may contain some initial transient phase, it may be usef
 \item[{\ct PDPA\_INTEGRATE}] A logical parameter for choosing between time integrated or instantaneous values. {\ct .TRUE.} by default.
 \item[{\ct PDPA\_RADIUS}] Radius (m) of the sphere, centered at the device location, inside which the particles are monitored.
 \item[{\ct PDPA\_NORMALIZE}] Can be set {\ct .FALSE.} to force $V = 1$ in the formula for $f_2(t)$.
-\item[{\ct QUANTITY}] Specified on {\ct PROP} line for choosing the variable $x$. 
+\item[{\ct QUANTITY}] Specified on {\ct PROP} line for choosing the variable $x$.
 \end{description}
 
-The following example is used to measure the Sauter mean diameter $D_{32}$ of the particle type {\ct 'water drops'}, starting from
-time 5.0 s.
+\noindent The following example is used to measure the Sauter mean diameter, $D_{32}$, of the particle type {\ct 'water drops'}, starting from
+time 5~s.
 \footnotesize
 \begin{verbatim}
 &PROP ID='pdpa_d32'
@@ -8864,12 +8863,12 @@ time 5.0 s.
       PDPA_M=3
       PDPA_N=2
       PDPA_RADIUS=0.01
-      PDPA_START=5.0 /
+      PDPA_START=5. /
 &DEVC XYZ=0.0,0.0,1.0, QUANTITY='PDPA', PROP_ID='pdpa_d32' /
 \end{verbatim}
 
 \normalsize
-\noindent
+
 
 
 \subsection{Interfacing with Structural Models}
@@ -10500,8 +10499,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct P0,PX(3),PXX(3,3)}                 & Real          & See Section~\ref{info:velocity_patch}         & m/s                   &  0.         \\ \hline
 {\ct PART\_ID}                          & Character     & See Section~\ref{info:sprinklers}             &                       &           \\ \hline
 {\ct PDPA\_END}                         & Real          & See Section~\ref{PDPA}                        & s                     & {\ct T\_END} \\ \hline
+{\ct PDPA\_INTEGRATE}                   & Logical       & See Section~\ref{PDPA}                        &                       & {\ct .TRUE.}         \\ \hline
 {\ct PDPA\_M}                           & Integer       & See Section~\ref{PDPA}                        &                       & 0         \\ \hline
-{\ct PDPA\_M}                           & Integer       & See Section~\ref{PDPA}                        &                       & 0         \\ \hline
+{\ct PDPA\_N}                           & Integer       & See Section~\ref{PDPA}                        &                       & 0         \\ \hline
+{\ct PDPA\_NORMALIZE}                   & Logical       & See Section~\ref{PDPA}                        &                       & {\ct .TRUE.}         \\ \hline
 {\ct PDPA\_RADIUS}                      & Real          & See Section~\ref{PDPA}                        & m                     & 0.        \\ \hline
 {\ct PDPA\_START}                       & Real          & See Section~\ref{PDPA}                        & s                     & 0.        \\ \hline
 {\ct PRESSURE\_RAMP}                    & Character     & See Section~\ref{info:sprinklers}             &                       &           \\ \hline
