@@ -8789,27 +8789,74 @@ Special device type has been defined to simulate the PDPA measurement. The actua
 measurement are defined using an associated {\ct PROP}erty. Note that in FDS, the PDPA device cannot produce complete droplet size
 distributions, but only various mean properties.
 
-The PDPA device output at time $t$ is computed as
+By default, the PDPA device output at time $t$ is computed as as a time integral
 \be
-f(t) = \frac{1}{\min(t,t_e)-t_s} \int_{t_s}^{\min(t,t_e)} \left( \frac{\sum_i n_i d_i^m x}{\sum_i n_i d_i^n}\right)^{1/(m-n)}  dt
+F(t) = \frac{1}{\min(t,t_e)-t_s} \int_{t_s}^{\min(t,t_e)} f(t) dt
 \ee
-where $x$ is the quantity to be measured, or just one in case of mean diameters.
-The summation goes over all the particles within a sphere with radius {\ct PDPA\_RADIUS} and centered at
-the location given by the device {\ct XYZ}. The properties of the PDPA device are defined using the following keywords on the {\ct PROP} line:
+but instantaneous values can be obtained by setting {\ct PDPA\_INTEGRATE = .FALSE.} on the corresponding {\ct PROP} line. In this case
+\be
+F(t) = f(t)
+\ee
+The function $f(t)$ has two forms: 
+\be
+f_1(t) =  \frac{\sum_i n_i d_i^m x}{\sum_i n_i d_i^n}; \;\;
+f_2(t) = \frac{\sum_i n_i x}{V}
+\ee
+where $n_i$ is the number of real particles repsented by the individual computational particle, $d_i$ 
+is the particle diameter and $x$ is the quantity to be measured. In each case, the summation goes over all the particles within a sphere 
+with radius {\ct PDPA\_RADIUS} and centered at the location given by the device {\ct XYZ}. 
+
+The first form $f_1(t)$ is used for the computation of various mean diameters, with
+associated properties defined using the following keywords on the {\ct PROP} line:
+\begin{description}
+\item[{\ct PDPA\_M}] $m$, exponent $m$ of diameter.
+\item[{\ct PDPA\_N}] $n$, exponent $n$ of diameter. In case $m=n$, the exponent $1/(m-n)$ is removed from the formula.
+\end{description}
+
+The second form ($f_2(t)$) is used for the computation of mass and energy -related variables that do not include diameter weightings.
+The concentrations are based on the sampling volume $V$, defined by {\ct PDPA\_RADIUS}.
+The quantity used for $x$ can be chosen with the keyword {\ct QUANTITY}. 
+A summary of the available PDPA quantities is shown in Table~\ref{tbl:pdpa}. 
+
+\begin{table}[!ht]
+\caption{Output quantities available for PDPA output.}
+\label{tbl:pdpa}
+\begin{center}
+\begin{tabular}{|l|l|l|l|}
+\hline 
+{\ct QUANTITY} 	        & $x$   			& $f(x)$ & Unit \\ \hline
+{\ct 'DIAMETER'} (default) & 1                          & $f_1$	 & $\mu$m \\
+{\ct 'ENTHALPY'} 	& $(4/3)\rho_i r_i^3 \left(c_{p,i}(T_i)T_i-c_{p,i}(T_m)T_m \right)$	& $f_2$	 & kJ/m$^3$ \\
+{\ct 'DROPLET FLUX X'} 	& $(4/3)\rho_i r_i^3 u_i$ 	& $f_2$	 & kg/m$^2$s \\
+{\ct 'DROPLET FLUX Y'} 	& $(4/3)\rho_i r_i^3 v_i$ 	& $f_2$	 & kg/m$^2$s \\
+{\ct 'DROPLET FLUX Z'} 	& $(4/3)\rho_i r_i^3 w_i$ 	& $f_2$	 & kg/m$^2$s \\
+{\ct 'U-VELOCITY'} 	& $u_i$ 			& $f_1$	 & m/s \\
+{\ct 'V-VELOCITY'} 	& $v_i$ 			& $f_1$	 & m/s \\
+{\ct 'W-VELOCITY'}	& $w_i$ 			& $f_1$	 & m/s \\
+{\ct 'VELOCITY'} 	& $(u_i^2+v_i^2+w_i^2)^{1/2}$ 	& $f_1$	 & m/s \\
+{\ct 'TEMPERATURE'} 	& $T_i$				& $f_1$  & ${}^\circ$C \\
+{\ct 'MASS CONCENTRATION'} & $(4/3)\rho r_i^3 $         & $f_2$  & kg/m$^3$ \\
+{\ct 'NUMBER CONCENTRATION'} & 1                        & $f_2$  & \\
+ \hline
+\end{tabular}
+\end{center}
+${}^*$ $T_m$ is the melting temperature of the associated species.
+\end{table}
+
+The properties of the PDPA device are defined using the following keywords on the {\ct PROP} line:
 \begin{description}
 \item[{\ct PART\_ID}] Name of the particle group to limit the computation to. Do not specify to account for all particles.
 \item[{\ct PDPA\_START}] $t_s$, starting time of time integration in seconds. PDPA output is always a running average over time.
 As the spray simulation may contain some initial transient phase, it may be useful to specify the starting time of data collection.
 \item[{\ct PDPA\_END}] $t_e$, ending time of time integration in seconds.
-\item[{\ct PDPA\_M}] $m$, exponent of diameter.
-\item[{\ct PDPA\_N}] $n$, exponent of diameter. In case $m=n$, the exponent $1/(m-n)$ is removed from the formula.
+\item[{\ct PDPA\_INTEGRATE}] A logical parameter for choosing between time integrated or instantaneous values. {\ct .TRUE.} by default.
 \item[{\ct PDPA\_RADIUS}] Radius (m) of the sphere, centered at the device location, inside which the particles are monitored.
-\item[{\ct QUANTITY}] Particle property that is used for variable $x$. Possible variables are {\ct 'VELOCITY'},{\ct 'U-VELOCITY'},
-{\ct 'V-VELOCITY'},{\ct 'W-VELOCITY'},{\ct 'TEMPERATURE'} and {\ct 'NUMBER CONCENTRATION'}. Leave unspecified to compute mean diameters.
+\item[{\ct PDPA\_NORMALIZE}] Can be set {\ct .FALSE.} to force $V = 1$ in the formula for $f_2(t)$.
+\item[{\ct QUANTITY}] Specified on {\ct PROP} line for choosing the variable $x$. 
 \end{description}
+
 The following example is used to measure the Sauter mean diameter $D_{32}$ of the particle type {\ct 'water drops'}, starting from
 time 5.0 s.
-
 \footnotesize
 \begin{verbatim}
 &PROP ID='pdpa_d32'
