@@ -6734,7 +6734,7 @@ CONTAINS
 
     IF (L_USE_FED) THEN  ! Update at this time step (do this at DT_SAVE intervals) 
        IF (L_FED_SAVE) THEN
-          ALLOCATE(ZZ_GET(1:MAX(1,N_TRACKED_SPECIES)),STAT=IZERO)
+          ALLOCATE(ZZ_GET(0:MAX(1,N_TRACKED_SPECIES)),STAT=IZERO)
           CALL CHKMEMERR('EVAC_MESH_EXCHANGE', 'ZZ_GET',IZERO) 
           WRITE (LU_EVACFED) REAL(T,FB), REAL(DT_SAVE,FB)
        ELSE
@@ -8374,6 +8374,8 @@ CONTAINS
              HR%X = X1
              HR%Y = Y1
           END IF
+          HR%X = X1
+          HR%Y = Y1
           HR%ANGLE = A1
           !
        END DO EVAC_MOVE_LOOP
