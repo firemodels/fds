@@ -23,11 +23,4 @@ echo Cleaning INTEL_WIN_32
 
 erase *.obj 
 
-echo.
-echo cleaning MPI_INTEL_WIN_32
-cd %svn_root%\SMV\Build\MPI_INTEL_WIN_32
-echo Cleaning MPI_INTEL_WIN_32
-
-erase *.obj 
-
 pause

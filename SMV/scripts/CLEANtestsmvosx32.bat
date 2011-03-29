@@ -1,5 +1,5 @@
 @echo off
-Title Cleaning Smokeview for 64 bit Windows 
+Title Cleaning Smokeview for 32 bit OSX
 
 set envfile="%homedrive%\%homepath%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
@@ -13,14 +13,13 @@ goto:eof
 
 :endif_envexist
 
+Rem location of batch files used to set up Intel compilation environment
+
 call %envfile%
 
-%svn_drive%
-echo.
-echo cleaning INTEL_WIN_64
-cd %svn_root%\SMV\Build\INTEL_WIN_64
-echo Cleaning INTEL_WIN_64
+set scriptdir=%linux_svn_root%/SMV/scripts
+set smvdir=%linux_svn_root%/SMV/Build/
 
-erase *.obj 
+plink %svn_logon% %scriptdir%/CLEAN_smv_onhost.csh %smvdir%/INTEL_OSX_TEST_32 %osx_hostname% clean
 
 pause
