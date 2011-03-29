@@ -120,6 +120,7 @@ for i=drange
                 K(j) = loglog(X,Y,char(style(j))); hold on
             end
         end
+        
         % plot the FDS or model data (d2)
        
         [H M] = dvcread(d2_Filename,d2_Col_Name_Row);
@@ -185,8 +186,15 @@ for i=drange
                 Plot_Title,'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter','LaTeX')
         end
         if size(Key_Position)>0
-            legend(K,[parse(d1_Key),parse(d2_Key)],'Location',Key_Position,'Interpreter','LaTeX','FontSize',Key_Font_Size)
-            legend boxon
+            legend_handle = legend(K,[parse(d1_Key),parse(d2_Key)],'Location',Key_Position);
+            set(legend_handle,'Interpreter','LaTeX');
+            set(legend_handle,'Fontsize',Key_Font_Size);
+            set(legend_handle,'Box','on');
+            if strcmp(parse(d1_Key),'Heskestad Correlation')
+                set(gca,'XTick',[1e-1 1e0 1e1 1e2 1e3 1e4])
+                legend_position=[3.53 0.88 2.57 1.00]; % [X Y Width Height]
+                set(legend_handle,'Position',legend_position)
+            end
         end
         
         % print to pdf
