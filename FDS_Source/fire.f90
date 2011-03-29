@@ -59,9 +59,9 @@ SUBROUTINE COMBUSTION_SIMPLE_CHEMISTRY
 USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION,GET_SPECIFIC_GAS_CONSTANT,GET_AVERAGE_SPECIFIC_HEAT,GET_CONDUCTIVITY,&
                                GET_MOLECULAR_WEIGHT,GET_SPECIFIC_HEAT,GET_MASS_FRACTION_ALL
 REAL(EB) :: Y_FU_0,Y_P_0,Y_LIMITER,A,ETRM,Y_O2_0,Y_CO_0,DYF,DX_FDT,HFAC_F,DTT,DELTA, & 
-            Y_O2_MAX,TMP_MIN,Y_O2_CORR,Q_NEW,Q_OLD,DELTAH_CO,DYCO,HFAC_CO,RHOX, &
-            X_FU,X_O2,X_FU_0,X_O2_0,X_FU_S,X_O2_S,X_FU_N,X_O2_N,CO_TO_O2,CRIT_FLAME_TMPA, O2_F_RATIO,Y_CO_FAC,&
-            Y_FU_MAX,TMP_F_MIN,Y_F_CORR,Q_BOUND_1,Q_BOUND_2,ZZ_GET(0:N_TRACKED_SPECIES), &
+            Y_O2_CORR,Q_NEW,Q_OLD,DELTAH_CO,DYCO,HFAC_CO,RHOX, &
+            X_FU,X_O2,X_FU_0,X_O2_0,X_FU_S,X_O2_S,X_FU_N,X_O2_N,CO_TO_O2,O2_F_RATIO,Y_CO_FAC,&
+            Y_F_CORR,Q_BOUND_1,Q_BOUND_2,ZZ_GET(0:N_TRACKED_SPECIES), &
             DYAIR,DELTAH_F,TAU_D,TAU_U,TAU_G,EPSK,KSGS,CPBAR_F_0,CPBAR_F_N,CPBAR_G_0,CPBAR_G_N,&
             DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,SS2,S12,S13,S23, &
             Y_SPECIES_OLD(1:N_SPECIES),Y_SPECIES_DIFF(1:N_SPECIES),MW, &
@@ -118,8 +118,8 @@ WW => WS
 
 !$OMP END SINGLE
 
-!$OMP DO COLLAPSE(3) PRIVATE(K,J,I,IC,Y_FU_0,Y_O2_0,Y_P_0,Y_LIMITER,Y_O2_MAX,Y_FU_MAX,TMP_MIN,TMP_F_MIN,IOR,II,JJ,KK,IW) &
-!$OMP PRIVATE(Y_O2_CORR,Y_F_CORR,DYF,DELTA,Q_BOUND_1,Q_BOUND_2,Q_NEW,CRIT_FLAME_TMPA,ZZ_GET,DYAIR,ZZ_SUM) &
+!$OMP DO COLLAPSE(3) PRIVATE(K,J,I,IC,Y_FU_0,Y_O2_0,Y_P_0,Y_LIMITER,IOR,II,JJ,KK,IW) &
+!$OMP PRIVATE(Y_O2_CORR,Y_F_CORR,DYF,DELTA,Q_BOUND_1,Q_BOUND_2,Q_NEW,ZZ_GET,DYAIR,ZZ_SUM) &
 !$OMP PRIVATE(TAU_D,TAU_G,TAU_U,DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,SS2,S12,S13,S23,EPSK,KSGS) &
 !$OMP PRIVATE(CPBAR_F_0,CPBAR_F_N,CPBAR_G_0,CPBAR_G_N) SCHEDULE(DYNAMIC)
 DO K=1,KBAR
@@ -147,75 +147,25 @@ DO K=1,KBAR
          ENDIF
 
          Y_P_0 = MAX(Y_P_MIN_EDC,Y_P_0)
-         IF_SUPPRESSION: IF (SUPPRESSION) THEN  ! Get maximum O2 in the current and neighboring cells to see if flame viable
 
-            Y_O2_MAX  = 0._EB
-            Y_FU_MAX  = 0._EB
-            TMP_MIN   = TMPA
-            TMP_F_MIN = TMPA
-            CRIT_FLAME_TMPA = 20._EB + TMPM
-
-            ! Get O2 and temperature in nearest neighbor cells
-
-            IF (SUPPRESSION_SEARCH) THEN
-
-               SEARCH_LOOP: DO IOR=-3,3
-
-                  II = I
-                  JJ = J
-                  KK = K
-                  SELECT CASE(IOR)
-                     CASE(-1)
-                        II = I-1
-                     CASE( 1)
-                        II = I+1
-                     CASE(-2)
-                        JJ = J-1
-                     CASE( 2)
-                        JJ = J+1
-                     CASE(-3)
-                        KK = K-1
-                     CASE( 3)
-                        KK = K+1
-                  END SELECT
-   
-                  IW = WALL_INDEX(IC,IOR)
-                  IF (IW==0 .OR. BOUNDARY_TYPE(IW)==OPEN_BOUNDARY .OR. BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
-                     IF (Y_O2(II,JJ,KK)>Y_O2_MAX) THEN
-                        Y_O2_MAX = Y_O2(II,JJ,KK)
-                        TMP_MIN  = TMP(II,JJ,KK)
-                     ENDIF
-                     IF (ZZ(II,JJ,KK,I_FUEL)>Y_FU_MAX) THEN
-                        Y_FU_MAX   = ZZ(II,JJ,KK,I_FUEL)
-                        TMP_F_MIN = TMP(II,JJ,KK)
-                     ENDIF
-                  ENDIF
-
-               ENDDO SEARCH_LOOP
-
-            ENDIF
+         IF_SUPPRESSION: IF (SUPPRESSION) THEN
 
             ! Evaluate empirical extinction criteria
-            IF (EXTINCTION2) THEN
-               IF (TMP(I,J,K) < RN%AUTO_IGNITION_TEMPERATURE) CYCLE
-               DYF = MIN(Y_FU_0,Y_O2_0/O2_F_RATIO) 
-               ZZ_GET = 0._EB
-               ZZ_GET(I_FUEL) = 1._EB
-               CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR_F_0,TMP(I,J,K)) 
-               CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR_F_N,RN%CRIT_FLAME_TMP)
-               ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)
-               ZZ_GET(I_FUEL) = 0._EB
-               ZZ_GET = ZZ_GET / (1._EB - Y_FU_0)
-               CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR_G_0,TMP(I,J,K)) 
-               CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR_G_N,RN%CRIT_FLAME_TMP) 
-               DYAIR = DYF * (1._EB - Y_FU_0) / Y_O2_0 * O2_F_RATIO
-               IF ( (DYF*CPBAR_F_0 + DYAIR*CPBAR_G_0)*TMP(I,J,K) + DYF*DELTAH_F < &
-                  (DYF*CPBAR_F_N + DYAIR*CPBAR_G_N)*RN%CRIT_FLAME_TMP) CYCLE
-            ELSE
-               Y_O2_CORR = RN%Y_O2_LL*(RN%CRIT_FLAME_TMP-TMP_MIN)/(RN%CRIT_FLAME_TMP-CRIT_FLAME_TMPA)
-               Y_F_CORR  = RN%Y_F_LFL*(RN%CRIT_FLAME_TMP-TMP_F_MIN)/(RN%CRIT_FLAME_TMP-CRIT_FLAME_TMPA)
-               IF (Y_O2_MAX < Y_O2_CORR .OR. Y_FU_MAX < Y_F_CORR) CYCLE
-            ENDIF
+
+            IF (TMP(I,J,K) < RN%AUTO_IGNITION_TEMPERATURE) CYCLE
+            DYF = MIN(Y_FU_0,Y_O2_0/O2_F_RATIO) 
+            ZZ_GET = 0._EB
+            ZZ_GET(I_FUEL) = 1._EB
+            CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR_F_0,TMP(I,J,K)) 
+            CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR_F_N,RN%CRIT_FLAME_TMP)
+            ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)
+            ZZ_GET(I_FUEL) = 0._EB
+            ZZ_GET = ZZ_GET / (1._EB - Y_FU_0)
+            CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR_G_0,TMP(I,J,K)) 
+            CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR_G_N,RN%CRIT_FLAME_TMP) 
+            DYAIR = DYF * (1._EB - Y_FU_0) / Y_O2_0 * O2_F_RATIO
+            IF ( (DYF*CPBAR_F_0 + DYAIR*CPBAR_G_0)*TMP(I,J,K) + DYF*DELTAH_F < &
+                 (DYF*CPBAR_F_N + DYAIR*CPBAR_G_N)*RN%CRIT_FLAME_TMP) CYCLE
 
          ENDIF IF_SUPPRESSION
 
