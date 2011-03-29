@@ -4,6 +4,7 @@ dir=`pwd`
 target=${dir##*/}
 
 source $IFORT_COMPILER/bin/ifortvars.sh $platform
+source ~/.bashrc_fds ia32
 
 
 echo Building $target
