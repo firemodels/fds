@@ -30,10 +30,10 @@ axis([tmin tmax vmin vmax ])
 
 xt = tmin + .05*(tmax-tmin);
 yt = vmin + .92*(vmax-vmin);
-text(xt,yt,title_label,'FontSize',14,'Interpreter','LaTeX')
+text(xt,yt,title_label,'FontSize',16,'Interpreter','LaTeX')
 xt = tmin + .05*(tmax-tmin);
 yt = vmin + .84*(vmax-vmin);
-text(xt,yt,text_label,'FontSize',14,'Interpreter','LaTeX')
+text(xt,yt,text_label,'FontSize',16,'Interpreter','LaTeX')
 
 set(gca,'YTick',vmin:1:vmax)
 %set(gca,'YMinorTick','on')
