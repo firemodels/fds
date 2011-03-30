@@ -19,7 +19,6 @@ call %envfile%
 echo.
 echo cleaning INTEL_WIN_32
 cd %svn_root%\SMV\Build\INTEL_WIN_32
-echo Cleaning INTEL_WIN_32
 
 erase *.obj 
 
