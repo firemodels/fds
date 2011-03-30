@@ -6,4 +6,4 @@ set target=$3
 
 echo Removing smokeview files in $directory on $host
 echo
-ssh $host \( cd \~/$directory \; make -f ../Makefile $target \)
+ssh -q $host \( cd \~/$directory \; make -f ../Makefile $target \)

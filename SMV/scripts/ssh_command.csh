@@ -3,4 +3,4 @@ set host=$1
 set dir=$2
 set command=$3
 set arg=$4
-ssh $host $dir/$command $arg
+ssh -q $host $dir/$command $arg
