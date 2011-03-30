@@ -403,4 +403,4 @@ intel_linux_64_profile : $(obj)
 
 .PHONY : clean
 clean:
-	rm *.o
+	rm -f *.o
