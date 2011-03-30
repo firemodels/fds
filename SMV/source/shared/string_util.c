@@ -235,7 +235,7 @@ char *lastname(char *argi){
 #else
 #define CHDIR chdir
 #define GETCWD getcwd
-#define SEP '//'
+#define SEP '/'
 #endif
 
   filename=argi;
