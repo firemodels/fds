@@ -17,9 +17,6 @@ goto:eof
 :endif_envexist
 
 call %envfile%
-echo Using the environment variables:
-echo.
-echo Using SVN revision %smv_revision% to build a 32 bit test OSX Smokeview
 
 %svn_drive%
 cd %svn_root%\smv\scripts
@@ -29,7 +26,7 @@ set scriptdir=FDS-SMV/SMV/scripts
 set bundledir=FDS-SMV/SMV/for_bundle
 set bindir=FDS-SMV/SMV/bin
 
-plink %svn_logon% %scriptdir%/ssh_command.csh %osx_hostname% %scriptdir% MAKEtestsmvosx32.csh %smv_revision%
+plink %svn_logon% %scriptdir%/ssh_command.csh %osx_hostname% %scriptdir% MAKEtestsmvosx32.sh
 
 echo.
 echo compilation complete
