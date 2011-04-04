@@ -13,7 +13,7 @@ cTRNZ IDERIV=2,CC=0.,PC=0.0 /
 &MISC BAROCLINIC=.TRUE.,TERRAIN_CASE=.FALSE.,WIND_ONLY=.FALSE. /
 
 - Specify parameters for combustion of fuel gases from pyrolysis of the solid fuel(s)
-&REAC ID='WOOD'
+&REAC FUEL='WOOD'
       FYI='Ritchie, et al., 5th IAFSS, C_3.4 H_6.2 O_2.5'
       SOOT_YIELD = 0.02
       O          = 2.5

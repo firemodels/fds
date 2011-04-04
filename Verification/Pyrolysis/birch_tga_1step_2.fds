@@ -7,7 +7,7 @@
 &MISC SOLID_PHASE_ONLY=.TRUE. /
 
 &RADI NUMBER_RADIATION_ANGLES = 20 /
-&REAC FUEL='NO REACTION', C=1, X_O2_LL=1.0 /  No gas phase reaction
+&REAC FUEL='METHANE', C=1., H=4., X_O2_LL=1.0 /  No gas phase reaction
 
 &SPEC ID='WATER VAPOR' /
 
@@ -50,7 +50,7 @@
 	A		= 2.75E12
 	E 		= 1.75E5
 	N_S		= 1.0
-        SPEC_ID         = 'FUEL'
+        SPEC_ID         = 'METHANE'
 	NU_SPEC 	= 0.828381
 	MATL_ID		= 'CHAR'
         NU_MATL         = 0.171619

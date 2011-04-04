@@ -9,7 +9,7 @@
 &MISC TMPA=18. /
 &DUMP DT_DEVC=5., DT_HRR=5. /
 
-&REAC ID='HEPTANE'
+&REAC FUEL='HEPTANE'
       FUEL='N-HEPTANE'
       FYI='Heptane, C_7 H_16'
       C=7.

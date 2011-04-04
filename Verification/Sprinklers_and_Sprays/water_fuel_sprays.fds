@@ -6,7 +6,7 @@ This example tests the combination of water and fuel droplets in the same simula
 
 &TIME T_END=120. /
 
-&REAC ID='HEPTANE'
+&REAC FUEL='HEPTANE'
       FUEL='N-HEPTANE'
       FYI='Heptane, C_7 H_16'
       C=7.

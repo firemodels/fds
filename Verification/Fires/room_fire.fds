@@ -7,7 +7,7 @@ All material properties are completely fabricated.
 
 &TIME T_END=900.0 / 
 
-&REAC ID         = 'POLYURETHANE'
+&REAC FUEL       = 'POLYURETHANE'
       FYI        = 'C_6.3 H_7.1 N O_2.1, NFPA Handbook, Babrauskas'
       SOOT_YIELD = 0.10
       N          = 1.0
@@ -23,7 +23,8 @@ All material properties are completely fabricated.
       CONDUCTIVITY          = 0.1
       DENSITY               = 100.0
       N_REACTIONS           = 1
-      NU_SPEC=1., SPEC_ID='FUEL'
+      NU_SPEC               = 1.
+      SPEC_ID               = 'POLYURETHANE'
       REFERENCE_TEMPERATURE = 350.
       HEAT_OF_REACTION      = 3000.
       HEAT_OF_COMBUSTION    = 15000. /
@@ -34,7 +35,8 @@ All material properties are completely fabricated.
       CONDUCTIVITY          = 0.05
       DENSITY               = 40.0
       N_REACTIONS           = 1
-      NU_SPEC=1., SPEC_ID='FUEL'
+      NU_SPEC               = 1.
+      SPEC_ID               = 'POLYURETHANE'
       REFERENCE_TEMPERATURE = 350.
       HEAT_OF_REACTION      = 1500.
       HEAT_OF_COMBUSTION    = 30000. /
@@ -51,7 +53,8 @@ All material properties are completely fabricated.
       SPECIFIC_HEAT         = 2.0
       DENSITY               = 750.
       N_REACTIONS           = 1
-      NU_SPEC=1., SPEC_ID='FUEL'
+      NU_SPEC               = 1. 
+      SPEC_ID               = 'POLYURETHANE'
       REFERENCE_TEMPERATURE = 290.
       HEAT_OF_COMBUSTION    = 22300.
       HEAT_OF_REACTION      = 2000. /

@@ -13,7 +13,7 @@
 &VENT XB=2.0, 2.0, 0.0, 0.0, 0.0, 2.0 SURF_ID='OPEN' /
 &VENT XB=0.0, 2.0, 0.0, 1.0, 2.0, 2.0 SURF_ID='OPEN' /
 
-&REAC ID='WOOD'
+&REAC FUEL='WOOD'
       FYI='Ritchie, et al., 5th IAFSS, C_3.4 H_6.2 O_2.5, dHc = 15MW/kg'
       SOOT_YIELD = 0.02
       O          = 2.5
@@ -21,22 +21,16 @@
       H          = 6.2
       HEAT_OF_COMBUSTION = 17700 /
 
-
-- Ignitor fire
- 
 &PART ID='fire_red',MASSLESS=.TRUE.,RGB=255,0,0 / Lagrangian particles
 &SURF ID='IGN FIRE',HRRPUA=1000.,RGB=255,0,0,PART_ID='fire_red' /
 &VENT XB=0.0,0.75,0.25,0.75,0.0,0.0,SURF_ID='IGN FIRE' /
 
-- Input tracers from floor
 &PART ID='floor_black',MASSLESS=.TRUE.,RGB=0,0,0 / Lagrangian particles
 &SURF ID='TRACER_INJECT_FROM_FLOOR',VEL=-0.2,PART_ID='floor_black' /
 &VENT XB=1.25,1.75,0.25,0.75,0.0,0.0,SURF_ID='TRACER_INJECT_FROM_FLOOR' /
 
-- Outputs for visualization with Smokeview
 &DUMP DT_SLCF=0.1 /
 &SLCF PBY=0.5, QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
 &SLCF PBZ=0.5, QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
 
-- End of file
 &TAIL /

@@ -14,8 +14,7 @@
 	H		=6.2
 	O 		=2.5
 	HEAT_OF_COMBUSTION = 12000.
-	Y_O2_INFTY	=0.01
-	IDEAL 		=.TRUE. /
+	Y_O2_INFTY	=0.01 /
 
 &SURF ID                        = 'Wood'
       COLOR                     = 'IVORY BLACK'
