@@ -37,7 +37,7 @@
       DENSITY=7800.
       EMISSIVITY=0.9 /
 
-&REAC ID='HEPTANE'
+&REAC FUEL='HEPTANE'
       SOOT_YIELD = 0.01
       FUEL='N-HEPTANE'
       C = 7

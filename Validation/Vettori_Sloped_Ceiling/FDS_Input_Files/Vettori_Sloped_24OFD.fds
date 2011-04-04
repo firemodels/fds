@@ -22,7 +22,7 @@
 &RADI RADIATIVE_FRACTION=0.15/
 
 %%Reactant: Methane
-&REAC ID='METHANE'
+&REAC FUEL='METHANE'
       SOOT_YIELD=0.01 
 	C = 1
 	H = 4 /

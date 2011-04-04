@@ -6,7 +6,7 @@
 
 &MISC TMPA=21.5 /
 
-&REAC ID='METHANE'                                            
+&REAC FUEL='METHANE'                                            
       FYI='Methane, C H_4'                                    
       C=1.                                                
       H=4.                                               

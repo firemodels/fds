@@ -34,7 +34,7 @@
       DT_PL3D=1000.0,
       DT_ISOF=1000.0 /
 
-&REAC ID         = 'POLYURETHANE'
+&REAC FUEL         = 'POLYURETHANE'
       FYI        = 'C_6.3 H_7.1 N O_2.1, NFPA Handbook, Babrauskas'
       SOOT_YIELD = 0.10
       CO_YIELD   = 0.05

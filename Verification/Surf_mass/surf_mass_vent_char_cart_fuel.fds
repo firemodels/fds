@@ -6,15 +6,14 @@
 &TIME T_END=200., DT = 0.01, WALL_INCREMENT = 1 / 
 &DUMP DT_HRR = 0.1, DT_DEVC = 0.1 DT_PL3D = 10000 DT_SLCF = 10000 /
 
-&REAC ID = 'WOOD'
+&REAC FUEL = 'WOOD'
 	SOOT_YIELD 	= 0.0
 	CO_YIELD	= 0.0
 	C 		= 3.4
 	H		=6.2
 	O 		=2.5
 	HEAT_OF_COMBUSTION = 12000.
-	Y_O2_INFTY	=0.01
-	IDEAL 		=.TRUE. /
+	Y_O2_INFTY	=0.01 /
 
 
 &SURF ID                        = 'Wood'
@@ -35,7 +34,7 @@
 	N_S		= 1
 	NU_MATL   	= 0.5
 	NU_SPEC		= 0.5
-        SPEC_ID         = 'FUEL'
+        SPEC_ID         = 'WOOD'
 	HEAT_OF_REACTION= 1000
 	MATL_ID 	= 'CHAR'
 	HEAT_OF_COMBUSTION(1) = 12000/
@@ -52,7 +51,7 @@
 	QUANTITY = 'DENSITY', 
 	ID = 'density', 
 	STATISTICS = 'VOLUME INTEGRAL', 
-	SPEC_ID='FUEL' /
+	SPEC_ID='WOOD' /
 
 &DEVC 	XYZ = 0.0,0.0,0.0,IOR = 3, 
 	QUANTITY = 'SURFACE DENSITY', 

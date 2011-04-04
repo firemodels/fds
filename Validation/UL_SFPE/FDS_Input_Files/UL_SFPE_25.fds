@@ -17,7 +17,7 @@
       THICKNESS          = 0.0158 
       BACKING            = 'EXPOSED' /
 
-&REAC ID='HEPTANE'
+&REAC FUEL='HEPTANE'
       FUEL='N-HEPTANE'
       FYI='Heptane, C_7 H_16'
       C=7.
