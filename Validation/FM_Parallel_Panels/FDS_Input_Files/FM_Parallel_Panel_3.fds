@@ -6,7 +6,7 @@
 
 &RADI RADIATIVE_FRACTION = 0.37 /
 
-&REAC ID                 = 'PROPYLENE'			
+&REAC FUEL                 = 'PROPYLENE'			
       FYI                = 'C3H6'
       C                  = 3.0
       H                  = 6.0 

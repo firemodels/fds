@@ -4,7 +4,7 @@
 &MISC TMPA=18. /Fire
 &RADI RADIATIVE_FRACTION=0.20 /
 
-&REAC ID= 'Methane'
+&REAC FUEL='METHANE'
       FYI= 'C_1 H_4'
       SOOT_YIELD=0
       C=1

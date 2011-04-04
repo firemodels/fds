@@ -5,7 +5,7 @@
 
 &RADI RADIATIVE_FRACTION=0.5 /
 
-&REAC ID         = 'POLYSTYRENE'
+&REAC FUEL         = 'POLYSTYRENE'
       FYI        = 'Styrene, C_8 H_8'
       H          = 8.
       C          = 8.

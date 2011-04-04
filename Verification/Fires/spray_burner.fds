@@ -7,13 +7,14 @@ A model of a liquid fuel spray burner used for fire tests at NIST.
 
 &MISC POROUS_FLOOR=.FALSE. /
 
-&REAC ID='HEPTANE TO CO2'
-      FUEL='N-HEPTANE'
-      FYI='Heptane, C_7 H_16'
+&REAC FUEL='N-HEPTANE'
       HEAT_OF_COMBUSTION=44000.
       C=7.
       H=16. 
-      CO_YIELD=0.008  
+      HUMIDITY=0.
+      Y_CO2_INFTY=0.
+      CO_YIELD=0.0
+      SOOT_H_FRACTION=0.1
       SOOT_YIELD=0.015 /
 
 &MATL ID                 = 'STEEL'

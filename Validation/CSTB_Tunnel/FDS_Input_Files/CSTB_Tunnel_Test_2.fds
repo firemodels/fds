@@ -20,7 +20,7 @@
 &VENT MB='YMAX', SURF_ID='OPEN' /
 &VENT MB='ZMAX', SURF_ID='OPEN' /
 
-&REAC ID='HEPTANE'
+&REAC FUEL='HEPTANE'
       C = 7
       H = 16
       CO_YIELD=0.006  

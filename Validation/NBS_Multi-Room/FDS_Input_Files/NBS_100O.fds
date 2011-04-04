@@ -7,7 +7,7 @@
 &MISC TMPA=21. /
 &DUMP NFRAMES=2400, DT_DEVC=10., DT_HRR=10. /
 
-&REAC ID='METHANE'                       
+&REAC FUEL='METHANE'                       
       FYI='Methane, C H_4'               
       C=1.                          
       H=4.                          

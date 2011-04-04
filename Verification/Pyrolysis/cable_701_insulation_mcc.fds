@@ -7,7 +7,7 @@
 &MISC SOLID_PHASE_ONLY=.TRUE. /
 
 &RADI NUMBER_RADIATION_ANGLES=20 /
-&REAC FUEL='NO REACTION', C=1, X_O2_LL=1.0 /  No gas phase reaction
+&REAC FUEL='METHANE', C=1., H=4., X_O2_LL=1.0 /  No gas phase reaction
 
 &VENT MB='XMIN', SURF_ID='HOT' /
 &VENT MB='XMAX', SURF_ID='HOT' /
@@ -37,7 +37,7 @@
       NU_MATL               = 0.28
       MATL_ID               = 'char'
       NU_SPEC               = 0.72
-      SPEC_ID               = 'FUEL'
+      SPEC_ID               = 'METHANE'
       HEAT_OF_COMBUSTION    = 17508.
       HEAT_OF_REACTION      = 3000. /
 
@@ -53,7 +53,7 @@
       NU_MATL               = 0.28
       MATL_ID               = 'char'
       NU_SPEC               = 0.72
-      SPEC_ID               = 'FUEL'
+      SPEC_ID               = 'METHANE'
       HEAT_OF_COMBUSTION    = 17508.
       HEAT_OF_REACTION      = 3000. /
 

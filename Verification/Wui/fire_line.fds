@@ -5,7 +5,7 @@
 &MISC U0=1, TERRAIN_CASE=.TRUE., TERRAIN_IMAGE='BT10m_2000x2000m.jpg' /
 &TIME T_END=30. / 
 
-&REAC ID='WOOD'
+&REAC FUEL='WOOD'
       FYI='Ritchie, et al., 5th IAFSS, C_3.4 H_6.2 O_2.5, dHc = 15MW/kg'
       SOOT_YIELD = 0.02
       O          = 2.5

@@ -14,7 +14,7 @@ representative of any particular type of wood.
 
 &TIME T_END=600., WALL_INCREMENT = 1, DT = 0.01 /  Force FDS to do solid phase calc every time step
 
-&REAC ID='NO REACTION', C=1, X_O2_LL=1.0 /  No gas phase reaction
+&REAC FUEL='METHANE', C=1., H=4., X_O2_LL=1.0 /  No gas phase reaction
 
 &SPEC ID='WATER VAPOR' /
 
@@ -58,7 +58,7 @@ Reaction 3: "ACTIVE" solid is converted FUEL gases
       NU_MATL(1,1)          = 0.35
       MATL_ID(1,1)          = 'CHAR'
       NU_SPEC(1,1:2)        = 0.65,    1.0
-      SPEC_ID(1,1:2)        = 'FUEL', 'FUEL' / 
+      SPEC_ID(1,1:2)        = 'METHANE', 'METHANE' / 
 
 Water evaporation from original wood
 
