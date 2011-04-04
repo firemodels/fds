@@ -367,15 +367,14 @@ int setSmokeShaders() {
 #endif
   if(error_code!=1)return error_code;
   GPU_hrrpuv_max_smv = glGetUniformLocation(p_smoke,"hrrpuv_max_smv");
-  GPU_hrrpuv_cutoff = glGetUniformLocation(p_smoke,"hrrpuv_cutoff");
-  GPU_fire_alpha = glGetUniformLocation(p_smoke,"fire_alpha");
-  GPU_smokecolormap = glGetUniformLocation(p_smoke,"smokecolormap");
-  GPU_hrr = glGetAttribLocation(p_smoke,"hrr");
-  GPU_smokealpha = glGetAttribLocation(p_smoke,"smoke_alpha");
+  GPU_hrrpuv_cutoff =  glGetUniformLocation(p_smoke,"hrrpuv_cutoff");
+  GPU_smokecolormap =  glGetUniformLocation(p_smoke,"smokecolormap");
   GPU_smoke3d_rthick = glGetUniformLocation(p_smoke,"smoke3d_rthick");
-  GPU_is_smoke = glGetUniformLocation(p_smoke,"is_smoke");
-  GPU_aspectratio = glGetUniformLocation(p_smoke,"aspectratio");
-  GPU_adjustalphaflag = glGetUniformLocation(p_smoke,"adjustalphaflag");
+  GPU_is_smoke =       glGetUniformLocation(p_smoke,"is_smoke");
+  GPU_aspectratio =    glGetUniformLocation(p_smoke,"aspectratio");
+  GPU_adjustalphaflag =glGetUniformLocation(p_smoke,"adjustalphaflag");
+  GPU_hrr =            glGetAttribLocation(p_smoke,"hrr");
+  GPU_smokealpha =     glGetAttribLocation(p_smoke,"smoke_alpha");
   return error_code;
 
 }
