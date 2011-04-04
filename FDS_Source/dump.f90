@@ -1713,10 +1713,10 @@ DO N=1,N_GEOM
       !   WRITE(LU_SMV,'(6F12.5,2I5)') G%X,G%Y,G%Z,0._EB,0._EB,1._EB,0,7
       !   WRITE(LU_SMV,'(5F12.5,I5)') REAL(G%RGB,EB)/255._EB,2._EB*G%RADIUS,2._EB*G%HL(2),-90
       !   WRITE(LU_SMV,'(F12.5)') 0._EB
-      !CASE(IPLANE)
-      !   WRITE(LU_SMV,'(A)') 'plane'
-      !   WRITE(LU_SMV,'(6F12.5,2I5)') G%X,G%Y,G%Z,(/G%XOR-G%X,G%YOR-G%Y,G%ZOR-G%Z/),0,4
-      !   WRITE(LU_SMV,'(4F12.5)') REAL(G%RGB,EB)/255._EB,G%PIXELS
+      CASE(IPLANE)
+         WRITE(LU_SMV,'(A)') 'plane'
+         WRITE(LU_SMV,'(6F12.5,2I5)') G%X,G%Y,G%Z,(/G%XOR-G%X,G%YOR-G%Y,G%ZOR-G%Z/),0,4
+         WRITE(LU_SMV,'(4F12.5)') REAL(G%RGB,EB)/255._EB,G%PIXELS
       !CASE DEFAULT
       !   WRITE(LU_SMV,'(A)') G%SHAPE
       !   WRITE(LU_SMV,'(6F12.5,2I5)') G%X,G%Y,G%Z,(/G%XOR-G%X,G%YOR-G%Y,G%ZOR-G%Z/),0,4

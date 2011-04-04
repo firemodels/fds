@@ -2416,15 +2416,15 @@ GEOM_LOOP: DO NG=1,N_GEOM
       DO J=G%MIN_J(NM),G%MAX_J(NM)
          DO I=G%MIN_I(NM),G%MAX_I(NM)
          
-            ! this will not work for overlapping geometry, but use for now
-            M%U_MASK(I,J,K)=1
-            M%V_MASK(I,J,K)=1
-            M%W_MASK(I,J,K)=1
-            M%P_MASK(I,J,K)=1
-         
             MASK_SHAPE: SELECT CASE(G%ISHAPE)
             
                CASE(IBOX) MASK_SHAPE
+               
+                  ! this will not work for overlapping geometry, but use for now
+                  M%U_MASK(I,J,K)=1
+                  M%V_MASK(I,J,K)=1
+                  M%W_MASK(I,J,K)=1
+                  M%P_MASK(I,J,K)=1
                   
                   ! see if the point is inside geometry
                   IF (ABS( M%X(I)-G%X)<G%HL(1) .AND. &
@@ -2450,6 +2450,11 @@ GEOM_LOOP: DO NG=1,N_GEOM
                   
                CASE(ISPHERE) MASK_SHAPE
                
+                  M%U_MASK(I,J,K)=1
+                  M%V_MASK(I,J,K)=1
+                  M%W_MASK(I,J,K)=1
+                  M%P_MASK(I,J,K)=1
+               
                   RP = SQRT( (M%X(I)-G%X)**2+(M%YC(J)-G%Y)**2+(M%ZC(K)-G%Z)**2 )
                   IF (RP-G%RADIUS < DELTA) M%U_MASK(I,J,K) = 0
                   IF (RP-G%RADIUS < 0._EB) M%U_MASK(I,J,K) = -1
@@ -2467,6 +2472,11 @@ GEOM_LOOP: DO NG=1,N_GEOM
                   IF (RP-G%RADIUS < 0._EB) M%P_MASK(I,J,K) = -1
                   
                CASE(ICYLINDER) MASK_SHAPE
+               
+                  M%U_MASK(I,J,K)=1
+                  M%V_MASK(I,J,K)=1
+                  M%W_MASK(I,J,K)=1
+                  M%P_MASK(I,J,K)=1
                
                   CYLINDER_Y: IF (G%YOR==1) THEN
                      RP = SQRT( (M%X(I)-G%X)**2+(M%ZC(K)-G%Z)**2 )
@@ -2508,6 +2518,11 @@ GEOM_LOOP: DO NG=1,N_GEOM
                   
                CASE(IPLANE) MASK_SHAPE
                
+                  !M%U_MASK(I,J,K)=1
+                  !M%V_MASK(I,J,K)=1
+                  !M%W_MASK(I,J,K)=1
+                  !M%P_MASK(I,J,K)=1
+               
                   ! see Section 10.3 Schneider and Eberly
                   
                   XU = (/M%X(I),M%YC(J),M%ZC(K)/)        ! point of interest
@@ -2517,7 +2532,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
                      DP = DOT_PRODUCT(G%NN,XU-PP)        ! signed distance to plane
                   ENDIF
                   IF (DP<DELTA) M%U_MASK(I,J,K) = 0
-                  IF (DP<TOL)   M%U_MASK(I,J,K) = -1
+                  IF (DP<0._EB) M%U_MASK(I,J,K) = -1
                   
                   XU = (/M%XC(I),M%Y(J),M%ZC(K)/)
                   IF (G%TWO_SIDED) THEN
@@ -2526,7 +2541,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
                      DP = DOT_PRODUCT(G%NN,XU-PP)
                   ENDIF
                   IF (DP<DELTA) M%V_MASK(I,J,K) = 0
-                  IF (DP<TOL)   M%V_MASK(I,J,K) = -1
+                  IF (DP<0._EB) M%V_MASK(I,J,K) = -1
                   
                   XU = (/M%XC(I),M%YC(J),M%Z(K)/)
                   IF (G%TWO_SIDED) THEN
@@ -2535,7 +2550,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
                      DP = DOT_PRODUCT(G%NN,XU-PP)
                   ENDIF
                   IF (DP<DELTA) M%W_MASK(I,J,K) = 0
-                  IF (DP<TOL)   M%W_MASK(I,J,K) = -1
+                  IF (DP<0._EB) M%W_MASK(I,J,K) = -1
                   
             END SELECT MASK_SHAPE
       
