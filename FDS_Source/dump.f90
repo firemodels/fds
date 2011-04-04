@@ -22,7 +22,7 @@ CHARACTER(50), DIMENSION(:), ALLOCATABLE :: FNDUMP
 INTEGER, PARAMETER :: ONE_INTEGER=1,ZERO_INTEGER=0
 INTEGER, DIMENSION(:), ALLOCATABLE :: LUDUMP
 REAL(EB), POINTER, DIMENSION(:,:,:) :: WFX,WFY,WFZ
-INTEGER :: N_DEVC_FILES,N_MASS_SPECIES
+INTEGER :: N_DEVC_FILES
 CHARACTER(50) :: TCFORM
 LOGICAL :: EX,DRY
 CHARACTER(255), PARAMETER :: dumpid='$Id$'
@@ -648,32 +648,15 @@ ENDDO
 IF_DUMP_SPECIES_INFO: IF (MASS_FILE) THEN
    IF (APPEND) THEN
       OPEN(LU_MASS,FILE=FN_MASS,FORM='FORMATTED',STATUS='OLD',POSITION='APPEND')
-      IF (N_TRACKED_SPECIES>0) THEN
-         N_MASS_SPECIES = N_SPECIES
-         DO I=0,N_TRACKED_SPECIES
-            IF (SPECIES_MIXTURE(I)%N_SUB_SPECIES > 1) N_MASS_SPECIES = N_MASS_SPECIES + 1
-         ENDDO
-      ENDIF
    ELSE
-      N_MASS_SPECIES = 0
       OPEN(LU_MASS,FILE=FN_MASS,FORM='FORMATTED',STATUS='REPLACE')
       LABEL(1) = 'Time'
       LABEL(2) = 'Total'
       NN=2
-      IF (N_TRACKED_SPECIES>0) THEN
-         LABEL(3:3+N_SPECIES-1) = SPECIES(1:N_SPECIES)%ID
-         NN = NN + N_SPECIES
-         DO I=0,N_TRACKED_SPECIES
-            IF (SPECIES_MIXTURE(I)%N_SUB_SPECIES > 1) THEN
-               NN = NN + 1
-               LABEL(NN) = SPECIES_MIXTURE(I)%ID
-            ENDIF
-         ENDDO
-      ENDIF
-      WRITE(TCFORM,'(A,I4.4,A)') "(",NN-1,"(A,','),A)"
-      WRITE(LU_MASS,TCFORM) 's',('kg',N=1,NN-1)
-      WRITE(LU_MASS,TCFORM) (TRIM(LABEL(N)),N=1,NN)
-      N_MASS_SPECIES = NN - 2
+      LABEL(3:3+N_SPECIES-1) = SPECIES(1:N_SPECIES)%ID
+      WRITE(TCFORM,'(A,I4.4,A)') "(",N_SPECIES+1,"(A,','),A)"
+      WRITE(LU_MASS,TCFORM) 's',('kg',N=1,N_SPECIES+1)
+      WRITE(LU_MASS,TCFORM) (TRIM(LABEL(N)),N=1,N_SPECIES+2)
    ENDIF
 ENDIF IF_DUMP_SPECIES_INFO
 
@@ -2308,7 +2291,16 @@ IF (LES) THEN
 ENDIF
 WRITE(LU_OUTPUT,'(A,F8.2)')   '   Ambient Temperature (C)       ',TMPA-TMPM
  
+! Write out the transformation matrix that converts species mixtures to primitive species
+
+WRITE(LU_OUTPUT,'(//A/)') ' Transformation Matrix to Convert Species Mixtures to Primitive Species'
+
+DO NN=1,N_SPECIES
+   write(LU_OUTPUT,'(15F7.3)') (Z2Y(NN,N),N=0,N_TRACKED_SPECIES)
+ENDDO
+
 ! Print out information about species
+
 WRITE(LU_OUTPUT,'(//A)') ' Primitive Species Information'
 SPEC_LOOP: DO N=1,N_SPECIES
    SS => SPECIES(N)
@@ -2335,13 +2327,13 @@ DO N=0,N_TRACKED_SPECIES
    IF (SM%MW <  1000._EB) WRITE(LU_OUTPUT,'(A,F8.2)')   '   Molecular Weight (g/mol)      ',SM%MW
    IF (SM%MW >= 1000._EB) WRITE(LU_OUTPUT,'(A,F8.2)')   '   Density (kg/m^3)              ',SM%MW*P_INF/(TMPA*R0)
    WRITE(LU_OUTPUT,'(A,F8.3)')   '   Initial Mass Fraction         ',SM%ZZ0
-   IF (SM%N_SUB_SPECIES > 1) THEN
-      WRITE(LU_OUTPUT,'(/3X,A)') 'Sub Species                    Mass Fraction     Mole Fraction'
-      DO NN = 1, SM%N_SUB_SPECIES
-         WRITE(LU_OUTPUT,'( 3X,A30,A,ES11.4,8X,ES11.4)') SM%SPEC_ID(NN),' ',SM%MASS_FRACTION(NN),SM%VOLUME_FRACTION(NN)
-      ENDDO
-   ENDIF      
+   WRITE(LU_OUTPUT,'(/3X,A)') 'Sub Species                    Mass Fraction     Mole Fraction'
+   DO NN = 1,N_SPECIES
+      IF (SM%SPEC_ID(NN)/='null') WRITE(LU_OUTPUT,'( 3X,A30,A,ES11.4,8X,ES11.4)') &
+         SM%SPEC_ID(NN),' ',SM%MASS_FRACTION(NN),SM%VOLUME_FRACTION(NN)
+   ENDDO
    ITMP = NINT(TMPA)
+   WRITE(LU_OUTPUT,'(A)') ' '
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Viscosity (kg/m/s)   Ambient: ',MU_Z(ITMP,N)*SM%MW
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                          500 C: ',MU_Z( 773,N)*SM%MW
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                         1000 C: ',MU_Z(1273,N)*SM%MW
@@ -2367,16 +2359,16 @@ IF (N_REACTIONS>0) WRITE(LU_OUTPUT,'(//A)') ' Gas Phase Reaction Information'
 REACTION_LOOP: DO N=1,N_REACTIONS
    RN => REACTION(N)
    IF (RN%FYI/='null') WRITE(LU_OUTPUT,'(/3X,A)') RN%FYI
-   IF (RN%NAME/='null') WRITE(LU_OUTPUT,'(/3X,A)') RN%NAME
+   IF (RN%ID/='null')  WRITE(LU_OUTPUT,'(/3X,A)') RN%ID
    
    SELECT CASE(RN%MODE)
       CASE(FINITE_RATE)
-         WRITE(LU_OUTPUT,'(3X,A)')  'Finte Rate Reaction'
+         WRITE(LU_OUTPUT,'(3X,A)')  'Finite Rate Reaction'
          WRITE(LU_OUTPUT,'(/3X,A)') 'Tracked Species'
          WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'         
-         DO NN=1,RN%N_SPECIES
+         DO NN=0,N_TRACKED_SPECIES
             IF (ABS(RN%NU(NN)) <=ZERO_P) CYCLE
-            WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') SPECIES_MIXTURE(RN%SPECIES(NN))%ID,RN%NU(NN) 
+            WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') SPECIES_MIXTURE(NN)%ID,RN%NU(NN) 
          ENDDO
          WRITE(LU_OUTPUT,'(/3X,A)') 'Detailed Species'
          WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'
@@ -2384,9 +2376,9 @@ REACTION_LOOP: DO N=1,N_REACTIONS
             IF (ABS(RN%NU_SPECIES(NN))>=ZERO_P) WRITE(LU_OUTPUT,'(3X,A,1X,F9.4)') SPECIES(NN)%ID,RN%NU_SPECIES(NN)
          ENDDO
          WRITE(LU_OUTPUT,'(/A)') '   Species ID                     Rate Exponent'
-         DO NN=1,RN%N_SPECIES
-            IF (RN%N(NN) <=-999._EB) CYCLE
-            WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') SPECIES_MIXTURE(RN%SPECIES(NN))%ID,RN%N(NN) 
+         DO NN=0,N_TRACKED_SPECIES
+            IF (RN%N_S(NN) <=-999._EB) CYCLE
+            WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') SPECIES_MIXTURE(NN)%ID,RN%N_S(NN) 
          ENDDO
          WRITE(LU_OUTPUT,'(/A)') '   Fuel                           Heat of Combustion (kJ/kg)'    
          WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') RN%FUEL,RN%HEAT_OF_COMBUSTION/1000._EB
@@ -2394,8 +2386,8 @@ REACTION_LOOP: DO N=1,N_REACTIONS
          WRITE(LU_OUTPUT,'(3X,A)')  'Mixing Controlled Reaction'
          WRITE(LU_OUTPUT,'(//3X,A)') 'Tracked Species'
          WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'
-         DO NN=1,RN%N_SPECIES
-            IF (ABS(RN%NU(NN)) >ZERO_P) WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') SPECIES_MIXTURE(RN%SPECIES(NN))%ID,RN%NU(NN) 
+         DO NN=0,N_TRACKED_SPECIES
+            IF (ABS(RN%NU(NN))>ZERO_P) WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') SPECIES_MIXTURE(NN)%ID,RN%NU(NN) 
          ENDDO        
          WRITE(LU_OUTPUT,'(//3X,A)') 'Detailed Species'
          WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'
@@ -2403,16 +2395,8 @@ REACTION_LOOP: DO N=1,N_REACTIONS
             IF (ABS(RN%NU_SPECIES(NN))>ZERO_P) WRITE(LU_OUTPUT,'(3X,A,1X,F9.4)') SPECIES(NN)%ID,RN%NU_SPECIES(NN)
          ENDDO
          WRITE(LU_OUTPUT,'(A,F12.3)')  '   Heat of Combustion (kJ/kg)  ',RN%HEAT_OF_COMBUSTION/1000._EB        
-      CASE (MIXED)          
-         WRITE(LU_OUTPUT,'(3X,A)')  'Combined Mixing Controlled + Finite Rate Reaction'
    END SELECT
 ENDDO REACTION_LOOP
-
-IF (SIMPLE_CHEMISTRY .AND. CO_PRODUCTION) THEN
-   WRITE(LU_OUTPUT,'(//A,F8.0)')  '   Complete Heat of Combustion (kJ/kg)    ',REACTION(1)%HEAT_OF_COMBUSTION/1000._EB + &
-      REACTION(2)%HEAT_OF_COMBUSTION*MW_CO/MW_FUEL*(REACTION(1)%NU(3)*SPECIES_MIXTURE(2)%VOLUME_FRACTION(CO_INDEX) - &
-                                      REACTION(1)%NU(3)*REACTION(2)%NU(3)*SPECIES_MIXTURE(3)%VOLUME_FRACTION(CO_INDEX))/1.E3_EB
-ENDIF
 
 ! Print out information about materials
  
@@ -2531,29 +2515,16 @@ SURFLOOP: DO N=0,N_SURF
    IF (ABS(SF%VEL)>ZERO_P)             WRITE(LU_OUTPUT,'(A,F8.3)') '     Normal Velocity (m/s)       ', SF%VEL
    IF (ABS(SF%MASS_FLUX_TOTAL)>ZERO_P) WRITE(LU_OUTPUT,'(A,F8.3)') '     Total Mass Flux (kg/m^2/s)  ', SF%MASS_FLUX_TOTAL
    IF (ABS(SF%VOLUME_FLUX)>ZERO_P)     WRITE(LU_OUTPUT,'(A,F8.3)') '     Volume Flux (m**3/s)        ', SF%VOLUME_FLUX
-   IF (N_TRACKED_SPECIES>0 .AND. .NOT.SIMPLE_CHEMISTRY) THEN
-      DO NN=1,N_TRACKED_SPECIES
-         IF (SF%MASS_FRACTION(NN)>=0._EB) WRITE(LU_OUTPUT,'(A,I2,A,8X,F6.3)') &
-                  '     Species ',NN,' Mass Fraction',SF%MASS_FRACTION(NN)
-         IF (ABS(SF%MASS_FLUX(NN))>ZERO_P) WRITE(LU_OUTPUT,'(A,I2,A,2X,F6.3)') &
-                  '     Species ',NN,' Mass Flux (kg/s/m2)',SF%MASS_FLUX(NN)
-      ENDDO
-   ENDIF
  
    DO NN=1,N_TRACKED_SPECIES
-      IF (SIMPLE_CHEMISTRY .AND. NN==I_FUEL) THEN
-         IF (CO_PRODUCTION) THEN
-            IF (SF%MASS_FLUX(NN)>0._EB) WRITE(LU_OUTPUT,'(A,E8.1)') '     HRR Per Unit Area (kW/m2)     ', &
-                  SF%MASS_FLUX(NN)*REACTION(2)%HEAT_OF_COMBUSTION* REACTION(2)%Y_F_INLET*0.001_EB
-         ELSE
-            IF (SF%MASS_FLUX(NN)>0._EB) WRITE(LU_OUTPUT,'(A,E8.1)') '     HRR Per Unit Area (kW/m2)     ', &
-                  SF%MASS_FLUX(NN)*REACTION(1)%HEAT_OF_COMBUSTION* REACTION(1)%Y_F_INLET*0.001_EB
-         ENDIF
+      IF (NN==I_FUEL) THEN
+         IF (SF%MASS_FLUX(NN)>0._EB) WRITE(LU_OUTPUT,'(A,F12.1)') '     HRR Per Unit Area (kW/m2) ', &
+             SF%MASS_FLUX(NN)*REACTION(1)%HEAT_OF_COMBUSTION*0.001_EB
       ELSE
-         IF (SF%MASS_FRACTION(NN)>=0._EB) WRITE(LU_OUTPUT,'(A,I2,A,8X,F6.3)') &
-                  '     Species ',NN,' Mass Fraction',SF%MASS_FRACTION(NN)
+         IF (SF%MASS_FRACTION(NN)>ZERO_P) WRITE(LU_OUTPUT,'(A,I2,A,8X,F6.3)') &
+                  '     Mixture ',NN,' Mass Fraction',SF%MASS_FRACTION(NN)
          IF (ABS(SF%MASS_FLUX(NN))>ZERO_P) WRITE(LU_OUTPUT,'(A,I2,A,2X,F6.3)') &
-                  '     Species ',NN,' Mass Flux (kg/s/m2)',SF%MASS_FLUX(NN)
+                  '     Mixture ',NN,' Mass Flux (kg/s/m2)',SF%MASS_FLUX(NN)
       ENDIF
    ENDDO
    
@@ -2696,12 +2667,8 @@ WRITE_RADIATION: IF (RADIATION) THEN
    IF (NUMBER_SPECTRAL_BANDS>1) THEN
       WRITE(LU_OUTPUT,'(A,I4)')  '   Number of spectral bands is ', NUMBER_SPECTRAL_BANDS
    ELSE
-      IF (SIMPLE_CHEMISTRY) THEN
-         WRITE(LU_OUTPUT,'(A,I4)')  '   Using gray gas absorption.'
-         WRITE(LU_OUTPUT,'(A,F6.3,A)')'   Mean beam length ',PATH_LENGTH,' m'
-      ELSE
-         WRITE(LU_OUTPUT,'(A,F6.2,A)')'   Constant absorption coeff. ',KAPPA0
-      ENDIF
+      WRITE(LU_OUTPUT,'(A,I4)')  '   Using gray gas absorption.'
+      WRITE(LU_OUTPUT,'(A,F6.3,A)')'   Mean beam length ',PATH_LENGTH,' m'
    ENDIF
 ENDIF WRITE_RADIATION
  
@@ -3359,8 +3326,9 @@ IF (SMOKE3D_Y_INDEX > 0) THEN
 ELSEIF (SMOKE3D_Z_INDEX >= 0) THEN
    MASS_EXT_COEF = SPECIES_MIXTURE(SMOKE3D_Z_INDEX)%MASS_EXTINCTION_COEFFICIENT
 ELSE
-   IF (SIMPLE_CHEMISTRY) MASS_EXT_COEF = SPECIES(SOOT_INDEX)%MASS_EXTINCTION_COEFFICIENT
+   MASS_EXT_COEF = SPECIES(SOOT_INDEX)%MASS_EXTINCTION_COEFFICIENT
 ENDIF
+
 ! Write out 1 or 2 data files. The first usually contains the transparent "smoke", the second usually the fire.
 
 DATA_FILE_LOOP: DO DATA_FILE_FLAG=1,2
@@ -4616,12 +4584,12 @@ SELECT CASE(IND)
       
    CASE(155) ! PATH OBSCURATION  *********
       EXT_COEF = 0._EB
-      IF (PY%Y_INDEX > 0) THEN
+      IF (PY%Y_INDEX>0) THEN
          MASS_EXT_COEF = SPECIES(PY%Y_INDEX)%MASS_EXTINCTION_COEFFICIENT
-      ELSEIF(PY%Z_INDEX>=0) THEN
+      ELSEIF (PY%Z_INDEX>=0) THEN
          MASS_EXT_COEF = SPECIES_MIXTURE(PY%Z_INDEX)%MASS_EXTINCTION_COEFFICIENT     
       ELSE
-         IF (SIMPLE_CHEMISTRY) MASS_EXT_COEF = SPECIES(SOOT_INDEX)%MASS_EXTINCTION_COEFFICIENT 
+         IF (SOOT_INDEX>0) MASS_EXT_COEF = SPECIES(SOOT_INDEX)%MASS_EXTINCTION_COEFFICIENT 
       ENDIF
       DO NN=1,DV%N_PATH
          I = DV%I_PATH(NN)
@@ -4630,15 +4598,13 @@ SELECT CASE(IND)
          IF (PY%Y_INDEX>0) THEN
             ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)
             CALL GET_MASS_FRACTION(ZZ_GET,PY%Y_INDEX,Y_MF_INT)
-         ELSEIF(PY%Z_INDEX>0) THEN
+         ELSEIF (PY%Z_INDEX>0) THEN
             Y_MF_INT = ZZ(I,J,K,PY%Z_INDEX)
-         ELSEIF(PY%Z_INDEX==0) THEN
+         ELSEIF (PY%Z_INDEX==0) THEN
             Y_MF_INT = MAX(0._EB,1.0_EB-SUM(ZZ(I,J,K,:)))
          ELSE
-            IF (SIMPLE_CHEMISTRY) THEN
-               ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)
-               CALL GET_MASS_FRACTION(ZZ_GET,SOOT_INDEX,Y_MF_INT)
-            ENDIF
+            ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)
+            CALL GET_MASS_FRACTION(ZZ_GET,SOOT_INDEX,Y_MF_INT)
          ENDIF
          EXT_COEF = EXT_COEF + Y_MF_INT*RHO(I,J,K)*DV%D_PATH(NN)
       ENDDO
@@ -4678,7 +4644,7 @@ SELECT CASE(IND)
       ELSEIF(Z_INDEX>=0) THEN
          MASS_EXT_COEF = SPECIES_MIXTURE(Z_INDEX)%MASS_EXTINCTION_COEFFICIENT     
       ELSE
-         IF (SIMPLE_CHEMISTRY) MASS_EXT_COEF = SPECIES(SOOT_INDEX)%MASS_EXTINCTION_COEFFICIENT 
+         MASS_EXT_COEF = SPECIES(SOOT_INDEX)%MASS_EXTINCTION_COEFFICIENT 
       ENDIF
       I = DV%I
       J = DV%J
@@ -4741,7 +4707,7 @@ SELECT CASE(IND)
       ELSEIF(DV2%Z_INDEX>=0) THEN
          MASS_EXT_COEF = SPECIES_MIXTURE(DV2%Z_INDEX)%MASS_EXTINCTION_COEFFICIENT     
       ELSE
-         IF (SIMPLE_CHEMISTRY) MASS_EXT_COEF = SPECIES(SOOT_INDEX)%MASS_EXTINCTION_COEFFICIENT 
+         MASS_EXT_COEF = SPECIES(SOOT_INDEX)%MASS_EXTINCTION_COEFFICIENT 
       ENDIF      
       GAS_PHASE_OUTPUT = (1._EB-EXP(-MASS_EXT_COEF*GAS_PHASE_OUTPUT))*100._EB  ! Obscuration
 
@@ -5704,7 +5670,7 @@ SUBROUTINE UPDATE_MASS(NM)
 USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION_ALL
 REAL(EB) :: VC,Y_MF_INT(1:N_SPECIES),ZZ_GET(0:N_TRACKED_SPECIES)
 INTEGER, INTENT(IN) :: NM
-INTEGER :: I,J,K,N,NN
+INTEGER :: I,J,K
  
 IF (.NOT.MASS_FILE) RETURN
 
@@ -5721,22 +5687,9 @@ DO K=1,KBAR
          ENDIF
          VC = DX(I)*RC(I)*DY(J)*DZ(K)
          MINT(0,NM) = MINT(0,NM) + VC*RHO(I,J,K)
-         IF (N_TRACKED_SPECIES>0) THEN
-            ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)
-            CALL GET_MASS_FRACTION_ALL(ZZ_GET,Y_MF_INT)            
-            MINT(1:N_SPECIES,NM) = MINT(1:N_SPECIES,NM) + RHO(I,J,K)*Y_MF_INT(1:N_SPECIES)*VC
-            NN = 0
-            DO N=0,N_TRACKED_SPECIES
-               IF (SPECIES_MIXTURE(N)%N_SUB_SPECIES > 1) THEN
-                  NN = NN + 1
-                  IF (N==0) THEN
-                     MINT(1:N_SPECIES+NN,NM) = MINT(1:N_SPECIES+NN,NM) + RHO(I,J,K)*(1._EB-SUM(ZZ_GET))*VC
-                  ELSE
-                     MINT(1:N_SPECIES+NN,NM) = MINT(1:N_SPECIES+NN,NM) + RHO(I,J,K)*ZZ_GET(N)*VC
-                  ENDIF
-               ENDIF
-            ENDDO            
-         ENDIF
+         IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)
+         CALL GET_MASS_FRACTION_ALL(ZZ_GET,Y_MF_INT)            
+         MINT(1:N_SPECIES,NM) = MINT(1:N_SPECIES,NM) + RHO(I,J,K)*Y_MF_INT(1:N_SPECIES)*VC
       ENDDO
    ENDDO
 ENDDO
@@ -5751,7 +5704,7 @@ SUBROUTINE DUMP_MASS(T)
 
 REAL(EB), INTENT(IN) :: T
 REAL(FB) :: STIME
-REAL(EB) :: MINT_TOTAL(0:N_MASS_SPECIES)
+REAL(EB) :: MINT_TOTAL(0:N_SPECIES)
 INTEGER :: NM,N
  
 IF (.NOT.MASS_FILE) RETURN
@@ -5759,15 +5712,15 @@ IF (.NOT.MASS_FILE) RETURN
 STIME = T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR
 MINT_TOTAL(:) = 0._EB
 DO NM=1,NMESHES
-   IF (MINT_TIME_INTERVAL(NM)>0._EB) MINT_TOTAL(0:N_MASS_SPECIES) = MINT_TOTAL(0:N_MASS_SPECIES) + &
-                                                                    MINT_SUM(0:N_MASS_SPECIES,NM)/MINT_TIME_INTERVAL(NM)
+   IF (MINT_TIME_INTERVAL(NM)>0._EB) &
+      MINT_TOTAL(0:N_SPECIES) = MINT_TOTAL(0:N_SPECIES) + MINT_SUM(0:N_SPECIES,NM)/MINT_TIME_INTERVAL(NM)
 ENDDO
 IF (N_TRACKED_SPECIES==0) THEN
    WRITE(TCFORM,'(A)') "(ES15.7E3,',',ES15.7E3)"
    WRITE(LU_MASS,TCFORM) STIME,MINT_TOTAL(0)
 ELSE
-   WRITE(TCFORM,'(A,I4.4,A)') "(",N_MASS_SPECIES+1,"(ES15.7E3,','),ES15.7E3)"
-   WRITE(LU_MASS,TCFORM) STIME,(MINT_TOTAL(N),N=0,N_MASS_SPECIES)
+   WRITE(TCFORM,'(A,I4.4,A)') "(",N_SPECIES+1,"(ES15.7E3,','),ES15.7E3)"
+   WRITE(LU_MASS,TCFORM) STIME,(MINT_TOTAL(N),N=0,N_SPECIES)
 ENDIF 
  
 END SUBROUTINE DUMP_MASS
