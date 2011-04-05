@@ -5746,7 +5746,7 @@ specify that the background gas species be something other than air. For a gas m
 $n$ species, FDS only solves transport equations for $n-1$ because it also solves an equation for
 total mass conservation. To set the properties of the background species, use the
 {\ct SPEC} or {\ct SMIX} line with {\ct BACKGROUND=.TRUE.} specified.
-If this species is not listed in Table~\ref{tab:gasspecies}, specify its molecular weight, {\ct MW},
+If this species is not listed in Table~\ref{tab:gasspecies}, specify its molecular weight, {\ct MW}, or its {\ct FORMULA},
 and (optionally) its {\ct VISCOSITY}; {\ct CONDUCTIVITY}; and {\ct SPECIFIC\_HEAT},
 {\ct SPECIFIC\_ENTHALPY}, and {\ct REFERENCE\_TEMPERATURE}.
 If either {\ct SPECIFIC\_HEAT} or {\ct ENTHALPY} is specified, then both must be specified.
@@ -5812,8 +5812,14 @@ absorptivity.
 
 The optional parameter {\ct HUMIDITY} can be specified with the species {\ct WATER VAPOR}.  {\ct HUMIDITY} is the relative humidity of water vapor in \% and is 40 \% by default.
 
-If you want to attach a shortened name to the gas species for use in Smokeview, use the character string {\ct FORMULA}. For example, {\ct FORMULA='CH4'} could be used
-to indicate {\ct 'METHANE'} in the Smokeview label. {\ct FORMULA} has no other use but for presentation of the output.
+If you want to FDS to compute the molecular weight of the gas species, you can input a {\ct FORMULA} rather than the {\ct MW}.  This will also be used as the label of the gas species for use in Smokeview.  A {\ct FORMULA} is given as a character string consisting of an element followed by its atom count.  Subgroups bracketed by () can also be given.  The element name is given by its standard, case-sensitive, IUPAC abbreviation (e.g. C for carbon, He for helium).  A {\ct FORMULA} can only contain A - Z, a - z, 0 - 9, (, and ).  The following would all be equivalent:
+
+\footnotesize
+\begin{verbatim}
+&SPEC ID='EHTHYLENE GLYCOL', FORMULA='C2H6O2'/
+&SPEC ID='EHTHYLENE GLYCOL', FORMULA='OHC2H4OH'/
+&SPEC ID='EHTHYLENE GLYCOL', FORMULA='C2H4(OH)2'/
+\end{verbatim} \normalsize
 
 
 \clearpage
@@ -5932,13 +5938,14 @@ Note that the various {\ct YIELD}s are for well-ventilated, post-flame condition
 predict various species yields in under-ventilated fire scenarios, but these special models still require
 the post-flame yields for CO, soot and any other species listed below.
 \begin{description}
+\item[{\ct FORMULA}] A character string that identities the chemical formula of the fuel species for the reaction.  This input only has meaning when simple chemistry is being used and the formula can only contain C,H,O, or N.  Specifying a formula means the invidual inputs of C,H,O, and N do not need to be specified. See ~\ref{gas_species_props} for a description on how to input a {\ct FORMULA}.
 \item[{\ct FUEL}] A character string that identifies fuel species for the reaction. When using simple chemistry, specifying {\ct FUEL} will
 cause FDS to use the built-in thermo-physical properties for that species when computing quantities such as specific heat or viscosity.
-This parameter is independent of the inputs for the fuel chemistry, i.e. {\ct C, H, O, N, OTHER}. Table~\ref{tab:gasspecies} provides a listing of the available species.
+This parameter is independent of the inputs for the fuel chemistry, i.e. {\ct C, H, O, N}. Table~\ref{tab:gasspecies} provides a listing of the available species.  If the {\ct FUEL} is in the table, then FDS will use the built-in formula to obtain the values of C,H,O, and N.
 By default, FDS uses the gas thermophysical properties of {\ct ETHYLENE} for the fuel.
 \item[{\ct ID}] A character string that identifies the reaction. Normally, this label is not used by FDS, but it is useful to
 label the {\ct REAC} line to more easily identify the fuel species.
-\item[{\ct C, H, O, N}] The fuel chemical formula. All numbers are positive.  One of either C or H must be specified.
+\item[{\ct C, H, O, N}] The fuel chemical formula. All numbers are positive.  One of either C or H must be specified.  This input is not needed if {\ct FORMULA} is specified or if the {\ct FUEL} is in Table~\ref{tab:gasspecies}.
 \item[{\ct Y\_O2\_INFTY}] Ambient mass fraction of oxygen (Default 0.232428)
 \item[{\ct Y\_CO2\_INFTY}] Ambient mass fraction of carbon dioxide (Default 0.0058)
 \item[{\ct Y\_F\_INLET}] Mass fraction of fuel in fuel stream (Default 1.0)
@@ -5957,36 +5964,37 @@ specified, it is assumed to be
 \item[{\ct EPUMO2}] The amount of energy released per unit mass of oxygen consumed. (kJ/kg)
 Default is 13,100 kJ/kg.  Note that if both {\ct EPUMO2} and {\ct HEAT\_OF\_COMBUSTION} are
 specified that FDS will ignore the value for {\ct EPUMO2}.
-\item[{\ct IDEAL}] Logical value indicating whether or not the {\ct EPUMO2} or {\ct  HEAT\_OF\_COMBUSTION}
-values represent values for complete combustion ({\ct .TRUE.}) or for incomplete combustion ({\ct .FALSE.}),
-i.e. the values account for the specified $y_{CO}$, $y_{H_2}$, and $y_s$.  If {\ct IDEAL=.TRUE.}, then
-FDS will internally adjust $\Delta H$ to account for products of incomplete combustion. The default value is {\ct .FALSE.}
+\item[{\ct IDEAL}]  The heat of combustion for a material can be determined in a couple of ways.  One approach is to take the difference in the heats of formation for the products (assuming complete combustion) and the reactants.  This is typically how values are tabulated for pure fuels (e.g. one species) in handbooks.  This {\ct IDEAL} heat of combustion does not account for the  {\ct SOOT\_YIELD} or  {\ct CO\_YIELD} that occurs in a real fire.  Carbon and hydrogen that go to soot and CO rather than CO$_2$ and H$_2$O result in a lower effective heat of combustion.  Setting {\ct IDEAL=.TRUE.} will reduce the {\ct HEAT\_OF\_COMBUSTION} based upon the inputs for {\ct SOOT\_YIELD} and {\ct CO\_YIELD}. If {\ct EPUMO2} is specified instead of {\ct HEAT\_OF\_COMBUSTION}, then the {\ct EPUMO2} will not be changed.  The second approach to determining the heat of combustion is to burn a known mass of the material in a calorimeter and divide the heat release rate by the mass loss rate (known as the effective heat of combustion).  In this approach, represented by {\ct IDEAL=.FALSE.}, the measured value of the heat release rate includes the effects of any CO or soot that is produced and no adjustment is needed.  The default value is {\ct .FALSE.}
 \item[{\ct AUTO\_IGNITION\_TEMPERATURE}] The temperature below which combustion will not occur.
 Note that if this parameter is used, then some form of ignition source must be present in order for combustion to begin.
 \item[{\ct HUMIDITY}] Relative humidity of the background air species, in units of \%. (Default 40~\%).
 \end{description}
 
 \noindent
-A few sample {\ct REAC} lines are given here. The values are for demonstration only.
+A few sample {\ct REAC} lines are given here. The values are for demonstration only (note the last three inputs will result in the stoichiometry).
 
 
 \footnotesize
 \begin{verbatim}
-&REAC ID         = 'METHANE'
+&REAC FUEL       = 'METHANE'
       C          = 1.
       H          = 4. /
 
-&REAC ID                 = 'PROPANE'
+&REAC FUEL               = 'myPROPANE1'
       SOOT_YIELD         = 0.01
       C                  = 3.
       H                  = 8.
       HEAT_OF_COMBUSTION = 46460.
       IDEAL              = .TRUE. /
 
-&REAC ID                 = 'PROPANE'
+&REAC FUEL               = 'PROPANE'
       SOOT_YIELD         = 0.01
-      C                  = 3.
-      H                  = 8.
+      HEAT_OF_COMBUSTION = 46460.
+      IDEAL              = .TRUE. /
+
+&REAC FUEL               = 'myPROPANE2'
+      SOOT_YIELD         = 0.01
+      FORMULA            = 'C3H8'
       HEAT_OF_COMBUSTION = 46124.
       IDEAL              = .FALSE. /
 \end{verbatim}
@@ -10617,7 +10625,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct \tiny CRITICAL\_FLAME\_TEMPERATURE}  & Real        & Suppression criterion                         &   $^\circ$C       & 1427    \\ \hline
 {\ct E}                                   & Real        & Activation Energy (Finite Rate)               &   kJ/kmol         &     \\ \hline
 {\ct EPUMO2}                              & Real        & Energy per Unit Mass Oxygen                   &   kJ/kg           & 13100    \\ \hline
-{\ct FUEL}                                & Character   & Name of Fuel (Finite Rate)                    &                   & {\ct ETHYLENE}\\ \hline
+{\ct FORMULA}                             & Character   & Chemical formula of fuel (Simple Chemistry)          &                   & {\ct ETHYLENE}\\ \hline
+{\ct FUEL}                                & Character   & Name of Fuel                    &                   & {\ct ETHYLENE}\\ \hline
 {\ct H}                                   & Real        & Hydrogen atoms in fuel                        &                   & 8    \\ \hline
 {\ct H2\_YIELD}                           & Real        & Fraction of H$_2$ from the fuel               & kg/kg             & 0        \\ \hline
 {\ct HEAT\_OF\_COMBUSTION}                & Real        & Energy per Unit Mass Fuel                     & kJ/kg             &         \\ \hline
