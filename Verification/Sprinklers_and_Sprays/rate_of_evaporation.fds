@@ -10,7 +10,7 @@ from Ranz and Marshall "Evaporation from drops - Part II" Chemical Engineering P
 
 &RADI RADIATION=.FALSE. /
 
-&MISC TMPA = 20, P_INF = 98791.9/
+&MISC TMPA = 24.9, P_INF = 98791.9/
 
 &SPEC ID ='WATER VAPOR', HUMIDITY= 0 /
 
