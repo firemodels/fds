@@ -2136,6 +2136,7 @@ void LoadUnloadMenu(int value){
   }
   if(value==RELOADALL){
     LOCK_COMPRESS
+    readsmv_dynamic(smvfilename);
     if(hrrfilename!=NULL){
       readhrr(LOAD, &errorcode);
     }
@@ -2189,7 +2190,6 @@ void LoadUnloadMenu(int value){
       if(isoi->loaded==0)continue;
       readiso(isoi->file,i,LOAD,&errorcode);
     }
-    readsmv_dynamic(smvfilename);
     UNLOCK_COMPRESS
   //  plotstate=DYNAMIC_PLOTS;
   //  visSmoke=1;
