@@ -4803,7 +4803,8 @@ SELECT CASE(IND)
                   ITMP = INT(SPECIES(PC%Y_INDEX)%TMP_MELT)
                   TMP_WGT = SPECIES(PC%Y_INDEX)%TMP_MELT - AINT(SPECIES(PC%Y_INDEX)%TMP_MELT)
                   VEL = VEL - (SPECIES(PC%Y_INDEX)%C_P_L_BAR(ITMP)+TMP_WGT*&
-                              (SPECIES(PC%Y_INDEX)%C_P_L_BAR(ITMP+1)-SPECIES(PC%Y_INDEX)%C_P_L_BAR(ITMP)))*SPECIES(PC%Y_INDEX)%TMP_MELT
+                              (SPECIES(PC%Y_INDEX)%C_P_L_BAR(ITMP+1)-SPECIES(PC%Y_INDEX)%C_P_L_BAR(ITMP)))*&
+                               SPECIES(PC%Y_INDEX)%TMP_MELT
                   VEL = 0.001_EB*PC%FTPR*VEL
                CASE DEFAULT
                   VEL = 1.0_EB
