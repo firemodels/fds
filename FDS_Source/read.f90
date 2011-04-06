@@ -1536,6 +1536,7 @@ MISC_LOOP: DO
 ENDDO MISC_LOOP
 23 REWIND(LU_INPUT)
 
+! FDS 6 options
 CFL_VELOCITY_NORM=1
 IF (DNS) THEN
    FLUX_LIMITER=4
@@ -1547,6 +1548,7 @@ ELSE
 ENDIF
 CHECK_VN=.TRUE.
 CHECK_GR=.TRUE.
+CHECK_HT=.TRUE.
 CP_FTMP=.TRUE.
 
 ! reread the line to pick up any user-specified options
