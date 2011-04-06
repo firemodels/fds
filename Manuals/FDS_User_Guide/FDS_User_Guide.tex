@@ -6568,24 +6568,21 @@ a particular type of particle or droplet.
 \label{thermal_part_props}
 
 For Lagrangian particles that are not {\ct MASSLESS}, the following parameters should be
-included on the {\ct PART} line to indicate how they heat up and possibly evaporate. It is assumed by default that non-massless particles are
+included on the {\ct SPEC} line to indicate how they heat up and possibly evaporate. It is assumed by default that non-massless particles are
 liquid droplets, but you can specify {\ct EVAPORATE=.FALSE.} to indicate that the droplets do not evaporate. If the droplets do evaporate, then
 provide a {\ct SPEC\_ID} of the gaseous species. If the liquid properties of the {\ct SPEC\_ID} are included in Table~\ref{tab:gasspecies},
-then only the {\ct DENSITY} of the liquid droplet needs to be provided. Otherwise, you must provide all of the following properties of the liquid:
+then no further inputs are required. Otherwise, you must provide all of the following properties of the liquid:
 \begin{description}
-\item[{\ct DENSITY}] The density of the liquid or solid droplet/particle.
-(Default 1000~kg/m$^3$)
-\item[{\ct SPECIFIC\_HEAT}] Specific heat of liquid or solid droplet/particle.
+\item[{\ct DENSITY\_LIQUID}] The density of the liquid or solid droplet/particle.
+\item[{\ct SPECIFIC\_HEAT\_LIQUID}] Specific heat of liquid or solid droplet/particle.
 \item[{\ct VAPORIZATION\_TEMPERATURE}] Boiling temperature of liquid droplet.
 \item[{\ct MELTING\_TEMPERATURE}] Melting (solidification) temperature of liquid droplet.
 \item[{\ct INITIAL\_TEMPERATURE}] Initial temperature of liquid droplet.
 \item[{\ct HEAT\_OF\_VAPORIZATION}] Latent heat of vaporization of liquid droplet.
 \item[{\ct H\_V\_REFERENCE\_TEMPERATURE}] The temperature corresponding to the provided {\ct HEAT\_OF\_VAPORIZATION}.
-\item[{\ct GAMMA}] Ratio of specific heats. Normally, FDS derives gas properties using look-up tables for known gases. However, if the
-gas species identified by {\ct SPEC\_ID} has no known properties, FDS uses this parameter to estimate the specific heat and other properties. The default is
-1.4, based on an assumption of a perfect diatomic molecule like nitrogen.
 \end{description}
-Notice that the default {\ct DENSITY} is that of water.
+
+Note that if a particle is to have mass but not evaporate, just the parameter {\ct DENSITY} can be provided on the {\ct PART} line.
 
 \subsection{Size Distribution}
 \label{info:particle_size}
@@ -6763,8 +6760,7 @@ parameters are given here:
 &DEVC ID='nozzle_1', XYZ=4.0,-.3,0.5, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=0. /
 &DEVC ID='nozzle_2', XYZ=4.0,0.3,0.5, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=0. /
 
-&PART ID='heptane droplets', SPEC_ID='N-HEPTANE',VAPORIZATION_TEMPERATURE=98.,
-      HEAT_OF_VAPORIZATION=316., SPECIFIC_HEAT=2.25, DENSITY=688.,
+&PART ID='heptane droplets', SPEC_ID='N-HEPTANE',
       QUANTITIES(1:2)='DIAMETER','DROPLET_TEMPERATURE',
       DIAMETER=1000., HEAT_OF_COMBUSTION=44500., SAMPLING_FACTOR=1 /
 
@@ -10395,15 +10391,12 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct GAMMA}                         & Real            & See Section~\ref{thermal_part_props}        &           & 1.4           \\ \hline
 {\ct GAMMA\_D}                      & Real            & See Section~\ref{info:particle_size}        &           & 2.4           \\ \hline
 {\ct HEAT\_OF\_COMBUSTION}          & Real            & See Section~\ref{info:fuel_droplets}        & kJ/kg     &               \\ \hline
-{\ct HEAT\_OF\_VAPORIZATION}        & Real            & See Section~\ref{thermal_part_props}        & kJ/kg     &               \\ \hline
-{\ct H\_V\_REFERENCE\_TEMPERATURE}  & Real            & See Section~\ref{thermal_part_props}        & $^\circ$C &               \\ \hline
 {\ct HORIZONTAL\_VELOCITY}          & Real            & See Section~\ref{info:surface_droplets}     & m/s       &  0.2          \\ \hline
 {\ct ID}                            & Character       & See Section~\ref{info:PART_Basics}          &           &               \\ \hline
 {\ct INITIAL\_TEMPERATURE}          & Real            & See Section~\ref{thermal_part_props}        & $^\circ$C & {\ct TMPA}    \\ \hline
 {\ct MASSLESS}                      & Logical         & See Section~\ref{info:MASSLESS}             &           & {\ct .FALSE.} \\ \hline
 {\ct MAXIMUM\_DIAMETER}             & Real            & See Section~\ref{info:particle_size}        & $\mu$m    & $\infty$      \\ \hline
 {\ct MINIMUM\_DIAMETER}             & Real            & See Section~\ref{info:particle_size}        & $\mu$m    & 20.           \\ \hline
-{\ct MELTING\_TEMPERATURE}          & Real            & See Section~\ref{thermal_part_props}        & $^\circ$C &               \\ \hline
 {\ct MONODISPERSE}                  & Logical         & See Section~\ref{info:particle_size}        &           & {\ct .FALSE.} \\ \hline
 {\ct PROP\_ID}                      & Character       & See Section~\ref{info:PART_Basics}          &           &               \\ \hline
 {\ct QUANTITIES(10)}                & Character       & See Section~\ref{info:particle_quantities}  &           &               \\ \hline
@@ -10411,7 +10404,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SAMPLING\_FACTOR}              & Integer         & See Section~\ref{info:particle_number}      &           & 1             \\ \hline
 {\ct SIGMA\_D}                      & Real            & See Section~\ref{info:particle_size}        &           &               \\ \hline
 {\ct SPEC\_ID}                      & Character       & See Section~\ref{thermal_part_props}        &           &               \\ \hline
-{\ct SPECIFIC\_HEAT}                & Real            & See Section~\ref{thermal_part_props}        & kJ/kg/K   &               \\ \hline
 {\ct STATIC}                        & Logical         & See Section~\ref{info:STATIC}               &           & {\ct .FALSE.} \\ \hline
 {\ct SURF\_ID}                      & Character       & See Section~\ref{info:PART_SURF}            &           &               \\ \hline
 {\ct SURFACE\_TENSION}              & Real            & See Section~\ref{info:secondary_breakup}    &   N/m     & 72.8$\cdot 10^3$  \\ \hline
@@ -10746,16 +10738,25 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct FIC\_CONCENTRATION}            & Real        & See Section~\ref{info:FED}                  & ppm               & 0.            \\ \hline
 {\ct FLD\_LETHAL\_DOSE}             & Real        & See Section~\ref{info:FED}                  & ppm$\times$min    & 0.            \\ \hline
 {\ct FORMULA }                      & Character   & See Section~\ref{gas_species_props}         &                   &               \\ \hline
+{\ct HEAT\_OF\_VAPORIZATION}        & Real        & See Section~\ref{thermal_part_props}        & kJ/kg     &               \\ \hline
 {\ct HUMIDITY}                      & Real        & See Section~\ref{gas_species_props}         & \%                & 40.           \\ \hline
+{\ct H\_V\_REFERENCE\_TEMPERATURE}  & Real        & See Section~\ref{thermal_part_props}        & $^\circ$C &               \\ \hline
 {\ct ID }                           & Character   & See Section~\ref{info:SPEC_Basics}          &                   &               \\ \hline
 {\ct MASS\_EXTINCTION\_COEFFICIENT} & Real        & See Section~\ref{info:alternative_smoke}    &                   & 0             \\ \hline
 {\ct MASS\_FRACTION\_0}             & Real        & See Section~\ref{info:SPEC_Basics}          &                   & 0             \\ \hline
+{\ct MELTING\_TEMPERATURE}          & Real        & See Section~\ref{thermal_part_props}        & $^\circ$C &               \\ \hline
 {\ct MW}                            & Real        & See Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
+{\ct RAMP\_CP}                       & Character   & See Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
+{\ct RAMP\_CP\_L}                     & Character   & See Section~\ref{thermal_part_props}         & g/mol             & 29.           \\ \hline
+{\ct RAMP\_D}                        & Character   & See Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
+{\ct RAMP\_K}                        & Character   & See Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
+{\ct RAMP\_MU}                       & Character   & See Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
 {\ct REFERENCE\_TEMPERATURE}        & Real        & See Section~\ref{gas_species_props}         & $^\circ$C         & 25.           \\ \hline
 {\ct SIGMALJ}                       & Real        & See Section~\ref{gas_species_props}         &                   & 0             \\ \hline
 {\ct SMIX\_COMPONENT\_ONLY}         & Logical     & See Section~\ref{info:SMIX}                 &                   & {\ct .FALSE.} \\ \hline
 {\ct SPECIFIC\_ENTHALPY}            & Real        & See Section~\ref{gas_species_props}         & kJ/kg             &               \\ \hline
 {\ct SPECIFIC\_HEAT}                & Real        & See Section~\ref{gas_species_props}         & kJ/kg/K           &               \\ \hline
+{\ct SPECIFIC\_HEAT\_LIQUID}        & Real            & See Section~\ref{thermal_part_props}        & kJ/kg/K   &               \\ \hline
 {\ct VISCOSITY}                     & Real        & See Section~\ref{gas_species_props}         & kg/m/s            &               \\ \hline
 \end{longtable}
 
@@ -11084,7 +11085,12 @@ Namelist  & FDS 5 Parameter & Namelist  & FDS 6 Parameter & Notes \\
 {\ct MISC}    & {\ct SUPPRESSION}               &  {\ct REAC}        & {\ct SUPPRESSION}                           & See Section~\ref{info:extinction}            \\ \hline
 {\ct MISC}    & {\ct VISCOSITY}                 &  {\ct SPEC}        &  {\ct VISCOSITY}                             & See Section~\ref{info:SPEC}                  \\ \hline
 {\ct PART}    & {\ct DROPLETS\_PER\_SECOND}     &  {\ct PROP}        & {\ct DROPLETS\_PER\_SECOND}                 & See Section~\ref{info:sprinkler_droplets}    \\ \hline
+{\ct PART}    & {\ct HEAT\_OF\_VAPORIZARTION}     &  {\ct SPEC}        &  {\ct HEAT\_OF\_VAPORIZARTION}                 & See Section~\ref{thermal_part_props}    \\ \hline
+{\ct PART}    & {\ct H\_V\_REFERENCE\_TEMPERATURE} &  {\ct SPEC}        &   {\ct H\_V\_REFERENCE\_TEMPERATURE}          & See Section~\ref{thermal_part_props}    \\ \hline
+{\ct PART}    & {\ct MELTING\_TEMPERATURE}        &  {\ct SPEC}        & {\ct MELTING\_TEMPERATURE}                  & See Section~\ref{thermal_part_props}    \\ \hline
 {\ct PART}    & {\ct NUMBER\_INITIAL\_DROPLETS} &  {\ct PROP}        & {\ct NUMBER\_INITIAL\_DROPLETS}             & See Section~\ref{info:initial_droplets}      \\ \hline
+{\ct PART}    & {\ct SPECIFIC\_HEAT}    &  {\ct SPEC}        & {\ct SPECIFIC\_HEAT\_LIQUID}                & See Section~\ref{thermal_part_props}    \\ \hline
+{\ct PART}    & {\ct VAPORIZATION\_TEMPERATURE}  &  {\ct SPEC}        & {\ct VAPORIZATION\_TEMPERATURE}              & See Section~\ref{thermal_part_props}    \\ \hline
 {\ct REAC}    & {\ct MAXIMUM\_VISIBILITY}       &  {\ct MISC}        &  {\ct MAXIMUM\_VISIBILITY}                             & Same functionality                  \\ \hline
 {\ct REAC}    & {\ct VISIBILITY\_FACTOR}        &  {\ct MISC}        &  {\ct MAXIMUM\_VISIBILITY}                             & Same functionality                  \\ \hline
 {\ct TIME}    & {\ct TWFIN}                     &  {\ct TIME}        & {\ct T\_END}                                & See Section~\ref{info:TIME}                  \\ \hline
