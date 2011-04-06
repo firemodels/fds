@@ -1728,13 +1728,13 @@ END SELECT
 
 END SUBROUTINE JANAF_TABLE
 
-SUBROUTINE JANAF_TABLE_LIQUID (I_TMP,CP,H_V,H_L,T_REF,T_MELT,T_BOIL,SPEC_ID,FUEL)
+SUBROUTINE JANAF_TABLE_LIQUID (I_TMP,CP,H_V,H_L,T_REF,T_MELT,T_BOIL,SPEC_ID,FUEL,DENSITY)
 !CP data in this subroutine is taken from 4th Edition of the NIST-JANAF Thermochemical Tables
 !The tabulated data in the tables have been curve fit
 !For each species CP is first computed in kJ/mol/K and then converted to J/kg/K
 CHARACTER(30), INTENT(IN) ::SPEC_ID
 INTEGER, INTENT(IN) :: I_TMP
-REAL(EB), INTENT(INOUT) :: CP,H_V,H_L,T_REF,T_MELT,T_BOIL
+REAL(EB), INTENT(INOUT) :: CP,H_V,H_L,T_REF,T_MELT,T_BOIL,DENSITY
 REAL(EB) :: T
 LOGICAL,INTENT(OUT) :: FUEL
 
@@ -1748,7 +1748,8 @@ SELECT CASE (SPEC_ID)
       H_V = 663470.8757_EB !J/kg
       T_REF = 186.15_EB !K
       T_MELT = 186.15_EB !K
-      T_BOIL = 330._EB !K       
+      T_BOIL = 330._EB !K   
+      DENSITY = 846._EB !kg/m^3      
    CASE('ARGON')
       CP = 1110._EB !J/kg/K
       H_L = -93018._EB !J/kg
@@ -1756,6 +1757,7 @@ SELECT CASE (SPEC_ID)
       T_REF = 83.8_EB !K
       T_MELT = 83.8_EB !K
       T_BOIL = 87.29_EB !K  
+      DENSITY = 1430._EB !kg/m^3   
    CASE('BUTANE')
       T = MIN(240._EB,MAX(100._EB,REAL(I_TMP,EB)))
       CP = 1.00177E-04_EB*T**3 - 5.23290E-02_EB*T**2 + 1.08908E+01_EB*T + 1.17542E+03_EB!J/kg/K
@@ -1763,7 +1765,8 @@ SELECT CASE (SPEC_ID)
       H_V = 440269.1313_EB !J/kg
       T_REF = 136._EB !K
       T_MELT = 136._EB !K
-      T_BOIL = 272.66_EB !K      
+      T_BOIL = 272.66_EB !K   
+      DENSITY = 600._EB !kg/m^3   
       FUEL = .TRUE.
    !CASE('CARBON DIOXIDE') sublimation
    CASE('CARBON MONOXIDE')
@@ -1774,6 +1777,7 @@ SELECT CASE (SPEC_ID)
       T_REF = 67.95_EB !K
       T_MELT = 67.95_EB !K
       T_BOIL = 81.63_EB !K 
+      DENSITY = 788.6_EB !kg/m^3   
    CASE('ETHANE')
       T = MIN(240._EB,MAX(100._EB,REAL(I_TMP,EB)))
       CP = 1.08053E-04_EB*T**3 - 2.27232E-02_EB*T**2 + 1.55254E+00_EB*T + 2.24672E+03_EB !J/kg/K
@@ -1782,6 +1786,7 @@ SELECT CASE (SPEC_ID)
       T_REF = 100._EB !K
       T_MELT = 100._EB !K
       T_BOIL = 184.32_EB !K      
+      DENSITY = 546._EB !kg/m^3   
       FUEL = .TRUE.       
    CASE('ETHANOL')
       T = MIN(380._EB,MAX(159._EB,REAL(I_TMP,EB)))
@@ -1792,6 +1797,7 @@ SELECT CASE (SPEC_ID)
       T_REF = 158.8_EB !K
       T_MELT = 158.8_EB !K
       T_BOIL = 358.8_EB !K
+      DENSITY = 790._EB !kg/m^3   
       FUEL = .TRUE.
    CASE('ETHYLENE')
       T = MIN(170._EB,MAX(110._EB,REAL(I_TMP,EB)))
@@ -1801,6 +1807,7 @@ SELECT CASE (SPEC_ID)
       T_REF = 103.8_EB !K
       T_MELT = 103.8_EB !K
       T_BOIL = 169.38_EB !K  
+      DENSITY = 569._EB !kg/m^3   
       FUEL = .TRUE.
    CASE('FORMALDEHYDE')
       CP = 1180._EB !J/kg/K
@@ -1809,6 +1816,7 @@ SELECT CASE (SPEC_ID)
       T_REF = 181._EB !K
       T_MELT = 181._EB !K
       T_BOIL = 254._EB !K      
+      DENSITY = 812._EB !kg/m^3         
    CASE('HELIUM')
       T = MIN(4.22_EB,MAX(1.4_EB,REAL(I_TMP,EB)))
       CP = 5.62684E-01_EB*T**3 - 4.40229E+00_EB*T**2 + 1.17485E+01_EB*T - 8.45057E+00_EB!kJ/kg/K
@@ -1818,6 +1826,7 @@ SELECT CASE (SPEC_ID)
       T_REF = 0._EB !K
       T_MELT = 0._EB !K
       T_BOIL = 4.22_EB !K  
+      DENSITY = 125._EB !kg/m^3   
    CASE('HYDROGEN')
       T = MIN(21._EB,MAX(14._EB,REAL(I_TMP,EB)))
       CP = 445._EB*T+405._EB !J/kg/K
@@ -1825,7 +1834,8 @@ SELECT CASE (SPEC_ID)
       H_V = 404754.6321_EB !J/kg
       T_REF = 14._EB !K
       T_MELT = 14._EB !K
-      T_BOIL = 20.28_EB !K        
+      T_BOIL = 20.28_EB !K    
+      DENSITY = 71._EB !kg/m^3             
    CASE('HYDROGEN BROMIDE')
       T = MIN(205._EB,MAX(190._EB,REAL(I_TMP,EB)))
       CP = 0.52_EB*T+635.3!J/kg/K
@@ -1834,6 +1844,7 @@ SELECT CASE (SPEC_ID)
       T_REF = 186.1_EB !K
       T_MELT = 186.1_EB !K
       T_BOIL = 206.35_EB !K  
+      DENSITY = 2140._EB !kg/m^3         
    CASE('HYDROGEN CHLORIDE')
       T = MIN(185._EB,MAX(160._EB,REAL(I_TMP,EB)))
       CP = 0.925714_EB*T+1442.65!J/kg/K
@@ -1842,6 +1853,7 @@ SELECT CASE (SPEC_ID)
       T_REF = 161.15_EB !K
       T_MELT = 161.15_EB !K
       T_BOIL = 188.05_EB !K  
+      DENSITY = 1191._EB !kg/m^3         
    CASE('HYDROGEN CYANIDE')
       T = MIN(85._EB,MAX(70._EB,REAL(I_TMP,EB)))
       CP = 2.94_EB*T+1931.9_EB!J/kg/K
@@ -1850,6 +1862,7 @@ SELECT CASE (SPEC_ID)
       T_REF = 260._EB !K
       T_MELT = 260._EB !K
       T_BOIL = 298.85_EB !K  
+      DENSITY = 689._EB !kg/m^3   
    CASE('HYDROGEN FLUORIDE')
       T = MIN(290._EB,MAX(200._EB,REAL(I_TMP,EB)))
       CP = -6.21601E-06_EB*T**3 + 3.62354E-02_EB*T**2 - 1.23566E+01_EB*T + 3.22662E+03_EB!J/kg/K
@@ -1858,6 +1871,7 @@ SELECT CASE (SPEC_ID)
       T_REF = 190._EB !K
       T_MELT = 190._EB !K
       T_BOIL = 292.5_EB !K  
+      DENSITY = 991._EB !kg/m^3   
    CASE('ISOPROPANOL')
       T = MIN(430._EB,MAX(190._EB,REAL(I_TMP,EB)))
       CP = -2.34629E-04_EB*T**3 + 2.35666E-01_EB*T**2 - 6.55874E+01_EB*T + 7.42454E+03_EB!J/kg/K
@@ -1866,6 +1880,7 @@ SELECT CASE (SPEC_ID)
       T_REF = 185._EB !K
       T_MELT = 185._EB !K
       T_BOIL = 370.57_EB !K      
+      DENSITY = 785._EB !kg/m^3   
       FUEL = .TRUE.
    CASE('METHANE')
       T = MIN(140._EB,MAX(100._EB,REAL(I_TMP,EB)))
@@ -1875,6 +1890,7 @@ SELECT CASE (SPEC_ID)
       T_REF = 90.6_EB !K
       T_MELT = 90.6_EB !K
       T_BOIL = 111.63_EB !K 
+      DENSITY = 422._EB !kg/m^3         
    CASE('METHANOL')
       T = MIN(460._EB,MAX(177._EB,REAL(I_TMP,EB)))
       CP =   0.0008750616_EB*T**2 - 0.3274918_EB*T + 101.2359_EB !kJ/mol/K
@@ -1884,6 +1900,7 @@ SELECT CASE (SPEC_ID)
       T_REF = 176.6_EB !K
       T_MELT = 176.6_EB !K
       T_BOIL = 337.7_EB !K
+      DENSITY = 792._EB !kg/m^3   
       FUEL = .TRUE.
    CASE('N-HEPTANE')
       T = MIN(480._EB,MAX(183._EB,REAL(I_TMP,EB)))
@@ -1894,6 +1911,7 @@ SELECT CASE (SPEC_ID)
       T_REF = 182.55_EB !K
       T_MELT = 182.55_EB !K
       T_BOIL = 371.53_EB !K
+      DENSITY = 684._EB !kg/m^3         
       FUEL = .TRUE.
    CASE('N-HEXANE')
       T = MIN(420._EB,MAX(180._EB,REAL(I_TMP,EB)))
@@ -1903,6 +1921,7 @@ SELECT CASE (SPEC_ID)
       T_REF = 178.1_EB !K
       T_MELT = 178.1_EB !K
       T_BOIL = 342.44_EB !K      
+      DENSITY = 659._EB !kg/m^3   
       FUEL = .TRUE.
    CASE('N-OCTANE')
       T = MIN(460._EB,MAX(220._EB,REAL(I_TMP,EB)))
@@ -1911,7 +1930,8 @@ SELECT CASE (SPEC_ID)
       H_V = 402857.828_EB !J/kg
       T_REF = 216.3_EB !K
       T_MELT = 216.3_EB !K
-      T_BOIL = 398.44_EB !K      
+      T_BOIL = 398.44_EB !K    
+      DENSITY = 703._EB !kg/m^3           
       FUEL = .TRUE.
    CASE('NITROGEN')
       T = MIN(90._EB,MAX(65._EB,REAL(I_TMP,EB)))
@@ -1921,6 +1941,7 @@ SELECT CASE (SPEC_ID)
       T_REF = 63.3_EB !K
       T_MELT = 63.3_EB !K
       T_BOIL = 77.35_EB !K
+      DENSITY = 807._EB !kg/m^3         
    CASE('NITRIC OXIDE')
       T = MIN(122._EB,MAX(110._EB,REAL(I_TMP,EB)))
       CP =  54.38_EB*T - 3926.9_EB!J/kg/K
@@ -1929,6 +1950,7 @@ SELECT CASE (SPEC_ID)
       T_REF = 110._EB !K
       T_MELT = 110._EB !K
       T_BOIL = 122._EB !K        
+      DENSITY = 1270._EB !kg/m^3   
    CASE('NITROGEN DIOXIDE')
       T = MIN(340._EB,MAX(290._EB,REAL(I_TMP,EB)))
       CP = 3.16667E-02_EB*T**2 - 1.12464E+01_EB*T + 3.13744E+03_EB!J/kg/K
@@ -1937,6 +1959,7 @@ SELECT CASE (SPEC_ID)
       T_REF = 262._EB !K
       T_MELT = 262._EB !K
       T_BOIL = 294.15_EB !K        
+      DENSITY = 1448._EB !kg/m^3   
    CASE('NITROUS OXIDE')
       T = MIN(184.67_EB,MAX(182.29_EB,REAL(I_TMP,EB)))
       CP = 187.7_EB+8.5_EB*T !J/kg/K
@@ -1945,6 +1968,7 @@ SELECT CASE (SPEC_ID)
       T_REF = 182.29_EB !K
       T_MELT = 182.29_EB !K
       T_BOIL = 184.67_EB !K                       
+      DENSITY = 1266._EB !kg/m^3   
    CASE('OXYGEN')
       T = MIN(100._EB,MAX(60._EB,REAL(I_TMP,EB)))
       CP = 8.33333E-04_EB*T**3 - 1.42143E-01_EB*T**2 + 8.10952E+00_EB*T + 1.50911E+03_EB!J/kg/K
@@ -1953,6 +1977,7 @@ SELECT CASE (SPEC_ID)
       T_REF = 54.8_EB !K
       T_MELT = 54.8_EB !K
       T_BOIL = 90.19_EB !K 
+      DENSITY = 1140._EB !kg/m^3   
    CASE('PROPANE')
       T = MIN(270._EB,MAX(90._EB,REAL(I_TMP,EB)))
       CP = 7.05233E-05_EB*T**3 - 2.26153E-02_EB*T**2 + 3.85475E+00_EB*T + 1.69008E+03_EB!J/kg/K
@@ -1961,6 +1986,7 @@ SELECT CASE (SPEC_ID)
       T_REF = 86._EB !K
       T_MELT = 86._EB !K
       T_BOIL = 231.25_EB !K      
+      DENSITY = 590._EB !kg/m^3   
       FUEL = .TRUE.
    CASE('PROPYLENE')
       T = MIN(280._EB,MAX(90._EB,REAL(I_TMP,EB)))
@@ -1970,6 +1996,7 @@ SELECT CASE (SPEC_ID)
       T_REF = 88._EB !K
       T_MELT = 88._EB !K
       T_BOIL = 225.41_EB !K      
+      DENSITY = 609._EB !kg/m^3   
       FUEL = .TRUE.
    CASE('SULFUR DIOXIDE')
       CP = 1359.14286_EB !J/kg/K
@@ -1978,6 +2005,7 @@ SELECT CASE (SPEC_ID)
       T_REF = 197.15_EB !K
       T_MELT = 197.15_EB !K
       T_BOIL = 263.05_EB !K       
+      DENSITY = 1434._EB !kg/m^3         
    !CASE('SULFUR HEXAFLUORIDE') sublimation
    CASE('TOLUENE')
       T = MIN(430._EB,MAX(178._EB,REAL(I_TMP,EB)))
@@ -1988,6 +2016,7 @@ SELECT CASE (SPEC_ID)
       T_REF = 178.1_EB !K
       T_MELT = 178.1_EB !K
       T_BOIL = 383.8_EB !K      
+      DENSITY = 867._EB !kg/m^3   
       FUEL = .TRUE.
    CASE('WATER VAPOR')
       T = MIN(500._EB,MAX(273._EB,REAL(I_TMP,EB)))
@@ -1998,11 +2027,13 @@ SELECT CASE (SPEC_ID)
       T_REF = 273.15_EB !K
       T_MELT = 273.15_EB !K
       T_BOIL = 373.15_EB !K
+      DENSITY = 1000._EB !kg/m^3   
    CASE DEFAULT
       CP = -1._EB
       H_L = -1._EB
       H_V = -1._EB
       T_REF = -1._EB
+      DENSITY=-1._EB
 END SELECT    
 
 END SUBROUTINE JANAF_TABLE_LIQUID
