@@ -383,19 +383,6 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       !$OMP END DO
       !$OMP END PARALLEL
       
-      !IF (IBM_COMBUSTION .AND. N==1) THEN
-      !   DO K=1,KBAR
-      !      DO J=1,JBAR
-      !         DO I=1,IBAR
-      !            IF (P_MASK(I,J,K)==0) THEN
-      !               DEL_RHO_D_DEL_Y(I,J,K,N) = DEL_RHO_D_DEL_Y(I,J,K,N) &
-      !                                        - IBM_HRRPUV*1000._EB/REACTION(1)%HEAT_OF_COMBUSTION
-      !            ENDIF
-      !         ENDDO
-      !      ENDDO
-      !   ENDDO
-      !ENDIF
-   
 ENDDO SPECIES_LOOP
  
 TUSED(3,NM)=TUSED(3,NM)+SECOND()-TNOW
