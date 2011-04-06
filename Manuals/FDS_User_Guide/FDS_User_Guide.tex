@@ -2051,6 +2051,30 @@ and initial conditions are perfectly symmetric. To turn this off, set {\ct NOISE
 convenient to start the flow immediately, like in an outdoor simulation involving wind.
 \end{description}
 
+\subsection{Special Topic: Mean Forcing and Data Assimilation}
+\label{info:mean_forcing}
+
+A situation that occurs often in atmospheric flows is that initial and boundary conditions are not well defined.  Usually, one knows only that the mean wind is 10 m/s in the northeast direction, for example.  More generally, there may be weather stations located at specific locations within the domain which continuously gather wind speed and direction.  The process of steering the solution of the mass, momentum, and energy equations to match the statistics of the data gathered at the weather stations is known as \emph{data assimilation}.  This branch of modeling is early in its development, but very sophisticated (translation: \emph{complicated}) methods already exist \cite{Kalnay:2003} and are employed in operational weather forecasting models.
+
+In FDS, the user may invoke the most rudimentary of data assilimation techniques, a method called \emph{nudging}.  In brief, we add a mean forcing term to the momentum equation to nudge the solution toward a desired result.  Currently, FDS can only affect the mean flow velocities.  To turn on this capability, set the logical {\ct MEAN\_FORCING(1:3)=.TRUE.} on {\ct MISC}.  When this is set, FDS will drive the mean velocity toward the value of {\ct U0}, {\ct V0}, or {\ct W0} (also set on {\ct MISC}).  For example, to set a northeast wind at 10 m/s use
+
+\footnotesize
+\begin{verbatim}
+&MISC MEAN_FORCING(1:2)=.TRUE.,.TRUE., U0=7.07, V0=7.07 /
+\end{verbatim}
+\normalsize
+
+\noindent For an outdoor flow, all other boundaries (except the ground ) should be set to {\ct OPEN}.
+
+\subsection{Special Topic: Specified Force Field}
+\label{info:force_vector}
+
+Similar to the {\ct MEAN\_FORCING} feature, the user may specify a constant and uniform force per unit volume by setting {\ct FORCE\_VECTOR(1:3)} on {\ct MISC}.  This is useful, for example, in specifying a mean pressure drop in a duct.  In the abscense of other forces, the force vector $F_i$ affects the momentum equation by
+
+\begin{equation}
+\frac{\partial u_i}{\partial t} = F_i/\rho
+\end{equation}
+
 \subsection{Special Topic: Stopping and Restarting Calculations}
 \label{info:restart}
 
@@ -2919,20 +2943,13 @@ Section~\ref{info:colors} and Table \ref{tab:colors}. Also, the parameter {\ct O
 There are two reserved {\ct SURF\_ID}'s that may be applied to a {\ct VENT} -- {\ct 'OPEN'} and {\ct 'MIRROR'}. The term {\em reserved} means that these two
 {\ct SURF\_ID}s should not be explicitly defined by you. Their properties are predefined.
 
-\subsubsection{An \texorpdfstring{{\tt OPEN}}{OPEN} \texorpdfstring{{\tt VENT}}{VENT}}
+\subsubsection{\texorpdfstring{{\tt OPEN}}{OPEN} \texorpdfstring{{\tt VENT}}{VENT}}
 
-The first special {\ct VENT} is invoked by the parameter {\ct SURF\_ID='OPEN'}. This is used only if the {\ct VENT}
-is applied to the exterior boundary of the computational domain, where
-it denotes a passive opening to the outside. By default, FDS assumes that the exterior boundary of the computational domain (the {\ct XB}s on the {\ct MESH} line) is a solid wall. To
-change this, use an {\ct OPEN} vent as if it were an open door or window. To create a totally or partially open domain, use {\ct OPEN} vents on the exterior mesh boundaries ({\ct MB}s).
+The first special {\ct VENT} is invoked by the parameter {\ct SURF\_ID='OPEN'}. This is used only if the {\ct VENT} is applied to the exterior boundary of the computational domain, where it denotes a passive opening to the outside. By default, FDS assumes that the exterior boundary of the computational domain (the {\ct XB}s on the {\ct MESH} line) is a solid wall. To change this, use an {\ct OPEN} vent as if it were an open door or window. To create a totally or partially open domain, use {\ct OPEN} vents on the exterior mesh boundaries ({\ct MB}s).
 
-By default, it is assumed that ambient conditions exist beyond the
-{\ct 'OPEN'} vent. However, in some cases, you may want to alter this assumption, for example, the temperature. If you assume a temperature other than
-ambient, specify {\ct TMP\_EXTERIOR} along with {\ct SURF\_ID='OPEN'}. Use this option cautiously -- in many situations if you want to describe the exterior of a building, it is better
-to include the exterior explicitly in your calculation because the flow in and out of the doors and windows will be more naturally captured. See Section~\ref{info:stackeffect} for more
-details.
+By default, it is assumed that ambient conditions exist beyond the {\ct 'OPEN'} vent. However, in some cases, you may want to alter this assumption, for example, the temperature. If you assume a temperature other than ambient, specify {\ct TMP\_EXTERIOR} along with {\ct SURF\_ID='OPEN'}. Use this option cautiously -- in many situations if you want to describe the exterior of a building, it is better to include the exterior explicitly in your calculation because the flow in and out of the doors and windows will be more naturally captured. See Section~\ref{info:stackeffect} for more details. If you want to specify a non-ambient pressure at the {\ct OPEN} boundary, see Section~\ref{info:pressure_boundary}.
 
-If you want to specify a non-ambient pressure at the {\ct OPEN} boundary, see Section~\ref{info:pressure_boundary}.
+The user should also be aware that the {\ct OPEN} pressure boundary condition is most stable for flows that are predominantly normal  to the vent, either mostly in or mostly out.  The reason is that the prescribed pressure at this boundary has a strong discontinuity if the flow is parallel to the vent.  Suppose for a moment that the flow is 10 m/s in the $x$ direction and $\pm .001$ m/s in the $z$ direction for an {\ct OPEN} top boundary in an outdoor flow.  The kinetic energy of this flow is roughtly $k=50$ m$^2$/s$^2$.  When the vertical velocity is positive (+0.001 m/s) then the prescibed boundary condition for the stagnation pressure is set to ${\cal H} = k = 50$ m$^2$/s$^2$.  But when the vertical velocity is negative (-0.001 m/s) then ${\cal H} = 0$ (see \cite{FDS_Tech_Guide}).  For this reason, {\ct OPEN} vents are not recommended for the top boundary in an outdoor flow.  See Section \ref{info:mean_forcing} for a better alternative.
 
 \begin{warning}
 Starting with FDS 5.3.0, vents to the outside of the computational domain ({\ct OPEN} vents)
@@ -2940,7 +2957,7 @@ Starting with FDS 5.3.0, vents to the outside of the computational domain ({\ct 
 See Section~\ref{info:activate_deactivate} for details.
 \end{warning}
 
-\subsubsection{A \texorpdfstring{{\tt MIRROR}}{MIRROR} \texorpdfstring{{\tt VENT}}{VENT}}
+\subsubsection{\texorpdfstring{{\tt MIRROR}}{MIRROR} \texorpdfstring{{\tt VENT}}{VENT}}
 
 A {\ct VENT} with {\ct SURF\_ID='MIRROR'} denotes a symmetry plane.
 Usually, a {\ct MIRROR} spans an entire face of the computational
@@ -10222,7 +10239,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct EVACUATION\_MC\_MODE}      & Logical       & See FDS+Evac User's Guide                                 &               & {\ct .FALSE.}     \\ \hline
 %{\ct FISHPAK\_BC(3)}            & Integer       & Override FFT solver boundary conditions                   &               & -1                \\ \hline
 %{\ct FLUX\_LIMITER}             & Integer       & Scalar transport scheme                                   &               & -1                \\ \hline
-%{\ct FORCE\_VECTOR(3)}          & Real          & Uniform volumetric momentum source vector                 &               & 0.                \\ \hline
+{\ct FORCE\_VECTOR(3)}          & Real          & See Section~\ref{info:force_vector}                        &               & 0.                \\ \hline
 %{\ct FREEZE\_VELOCITY}          & Logical       & Do not update momentum equation                           &               & {\ct .FALSE.}     \\ \hline
 {\ct GAMMA}                     & Real          & See Section~\ref{info:MISC_Basics}                        &               & 1.4               \\ \hline
 {\ct GROUND\_LEVEL}             & Real          & See Section~\ref{info:stratification}                     & m             & 0.                  \\ \hline
@@ -10232,6 +10249,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct LAPSE\_RATE}               & Real          & See Section~\ref{info:stratification}                     &  $^\circ$C/m  & 0                 \\ \hline
 {\ct LES}                       & Logical       & See Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
 {\ct MAXIMUM\_VISIBILITY}                 & Real        & Visibility parameter                          &  m            &  30               \\ \hline
+{\ct MEAN\_FORCING(3)}          & Logical       & See Section~\ref{info:mean_forcing}                       &               & {\ct .FALSE.}     \\ \hline
 {\ct NOISE}                     & Logical       & See Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
 {\ct NO\_EVACUATION}            & Logical       & See FDS+Evac User's Guide                                 &               & {\ct .FALSE.}     \\ \hline
 %{\ct NSTRATA}                   & Logical       & No. bins for droplet distribution                         &               & 7                 \\ \hline
