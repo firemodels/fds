@@ -13,8 +13,7 @@
 &ZONE LEAK_AREA(0)=0.0833 /
 
 &RADI RADIATIVE_FRACTION=0.44 /
-&REAC FUEL         = 'HEPTANE'
-      FUEL='N-HEPTANE'
+&REAC FUEL       = 'N-HEPTANE'
       FYI        = 'Heptane, C_7 H_16'
       C          = 7.
       H          = 16.
