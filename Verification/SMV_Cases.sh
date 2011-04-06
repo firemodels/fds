@@ -14,7 +14,7 @@ $RUNSMV Visualization sillytexture
 $RUNSMV Visualization smoke_sensor
 $RUNSMV Visualization smoke_test
 $RUNSMV Visualization smoke_test2
-$RUnSMV Visualization thouse5
+$RUNSMV Visualization thouse5
 $RUNSMV Visualization script_test
 $RUNSMV Visualization transparency
 $RUNSMV Visualization sprinkler_many
