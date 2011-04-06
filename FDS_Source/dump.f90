@@ -2275,7 +2275,7 @@ MESH_LOOP: DO NM=1,NMESHES
    WRITE(LU_OUTPUT,'(A,F9.3)')   '   Length (m)                    ',M%XF-M%XS
    WRITE(LU_OUTPUT,'(A,F9.3)')   '   Width  (m)                    ',M%YF-M%YS
    WRITE(LU_OUTPUT,'(A,F9.3)')   '   Height (m)                    ',M%ZF-M%ZS
-   WRITE(LU_OUTPUT,'(A,F8.3)')   '   Initial Time Step (s)         ',M%DT
+   WRITE(LU_OUTPUT,'(A,F9.3)')   '   Initial Time Step (s)         ',M%DT
 ENDDO MESH_LOOP
 WRITE(LU_OUTPUT,'(//A/)')     ' Miscellaneous Parameters'
 IF (ABS(TIME_SHRINK_FACTOR -1._EB)>ZERO_P) &
@@ -2293,10 +2293,11 @@ WRITE(LU_OUTPUT,'(A,F8.2)')   '   Ambient Temperature (C)       ',TMPA-TMPM
  
 ! Write out the transformation matrix that converts species mixtures to primitive species
 
-WRITE(LU_OUTPUT,'(//A/)') ' Transformation Matrix to Convert Species Mixtures to Primitive Species'
+WRITE(LU_OUTPUT,'(//A/)') ' Mass Fraction Transformation Matrix to Convert Species Mixtures (Columns) to Primitive Species (Rows)'
 
+WRITE(LU_OUTPUT,'(25X,100(A8,2X))') (SPECIES_MIXTURE(N)%ID,N=0,N_TRACKED_SPECIES)
 DO NN=1,N_SPECIES
-   write(LU_OUTPUT,'(15F7.3)') (Z2Y(NN,N),N=0,N_TRACKED_SPECIES)
+   WRITE(LU_OUTPUT,'(3X,A20,100F10.6)') SPECIES(NN)%ID,(Z2Y(NN,N),N=0,N_TRACKED_SPECIES)
 ENDDO
 
 ! Print out information about species
