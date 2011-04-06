@@ -19,7 +19,7 @@ if ! [ -e $fulldir/$in.smv ]; then
 fi
 
 disp=`id -u`
-Xvfb :$disp &
+Xvfb :$disp -screen 0 1024x768x16 &
 rxs=$!
 
 sleep 8
