@@ -1460,6 +1460,7 @@ LOGICAL :: TEMPITER
 TYPE (DROPLET_TYPE), POINTER :: DR=>NULL()
 TYPE (PARTICLE_CLASS_TYPE), POINTER :: PC=>NULL()
 TYPE (SURFACE_TYPE), POINTER :: SF=>NULL()
+TYPE (SPECIES_TYPE), POINTER :: SS=>NULL()
 
 ! Initializations
 
@@ -1533,18 +1534,18 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
 
       ! Check to see if the particles/droplets evaporate
       
-      IF (.NOT.PC%EVAPORATE) CYCLE PART_CLASS_LOOP
+      IF (.NOT.PC%EVAPORATE) CYCLE PART_CLASS_LOOP      
       IF (PC%EVAP_INDEX/=EVAP_INDEX) CYCLE PART_CLASS_LOOP
       IF (PC%TREE) CYCLE PART_CLASS_LOOP
 
       ! Initialize quantities common to the PARTICLE_CLASS 
-
+      SS => SPECIES(PC%Y_INDEX)
       FTPR     = PC%FTPR
-      TMP_MELT = PC%TMP_MELT
-      TMP_BOIL = PC%TMP_V
-      MW_DROP  = SPECIES_MIXTURE(PC%Z_INDEX)%MW
-      H_V_REF  = PC%H_V(NINT(PC%H_V_REFERENCE_TEMPERATURE))
-      H_L_REF  = PC%C_P_BAR(NINT(TMP_MELT))*TMP_MELT
+      TMP_MELT = SS%TMP_MELT
+      TMP_BOIL = SS%TMP_V
+      MW_DROP  = SS%MW
+      H_V_REF  = SS%H_V(NINT(SS%H_V_REFERENCE_TEMPERATURE))
+      H_L_REF  = SS%C_P_L_BAR(NINT(TMP_MELT))*TMP_MELT
 
       ! Loop through all droplets in the class and determine the depth of the liquid film on each surface cell
 
@@ -1599,9 +1600,9 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
             TMP_DROP = DR%TMP
             ITMP     = INT(TMP_DROP)
             TMP_WGT  = TMP_DROP - AINT(TMP_DROP)
-            H_V      = PC%H_V(ITMP)+TMP_WGT*(PC%H_V(ITMP+1)-PC%H_V(ITMP))
-            C_DROP   = PC%C_P(ITMP)+TMP_WGT*(PC%C_P(ITMP+1)-PC%C_P(ITMP))
-            H_L      = (PC%C_P_BAR(ITMP)+TMP_WGT*(PC%C_P_BAR(ITMP+1)-PC%C_P_BAR(ITMP)))*TMP_DROP-H_L_REF
+            H_V      = SS%H_V(ITMP)+TMP_WGT*(SS%H_V(ITMP+1)-SS%H_V(ITMP))
+            C_DROP   = SS%C_P_L(ITMP)+TMP_WGT*(SS%C_P_L(ITMP+1)-SS%C_P_L(ITMP))
+            H_L      = (SS%C_P_L_BAR(ITMP)+TMP_WGT*(SS%C_P_L_BAR(ITMP+1)-SS%C_P_L_BAR(ITMP)))*TMP_DROP-H_L_REF
             WGT      = DR%PWT
             DHOR     = H_V*MW_DROP/R0   
 
@@ -1799,7 +1800,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
             ENDIF
             ITMP     = INT(TMP_DROP_NEW)
             TMP_WGT  = TMP_DROP_NEW - AINT(TMP_DROP_NEW)
-            H_V      = PC%H_V(ITMP)+TMP_WGT*(PC%H_V(ITMP+1)-PC%H_V(ITMP))
+            H_V      = SS%H_V(ITMP)+TMP_WGT*(SS%H_V(ITMP+1)-SS%H_V(ITMP))
             DHOR     = H_V*MW_DROP/R0 
             X_EQUIL  = MIN(1._EB,EXP(DHOR*(1._EB/TMP_BOIL-1._EB/MIN(TMP_DROP_NEW,TMP_BOIL))))
             Z_EQUIL = X_EQUIL/(MW_RATIO + (1._EB-MW_RATIO)*X_EQUIL)
