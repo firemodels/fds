@@ -234,7 +234,7 @@ TYPE VENTS_TYPE
    CHARACTER(30) :: DEVC_ID='null',CTRL_ID='null',ID='null'
    ! turbulent inflow (experimental)
    INTEGER :: N_EDDY=0
-   REAL(EB) :: R_IJ(3,3)=0._EB,A_IJ(3,3),L_EDDY=0._EB,EDDY_BOX_VOLUME=0._EB, &
+   REAL(EB) :: R_IJ(3,3)=0._EB,A_IJ(3,3),SIGMA_IJ(3,3),EDDY_BOX_VOLUME=0._EB, &
                X_EDDY_MIN=0._EB,X_EDDY_MAX=0._EB, &
                Y_EDDY_MIN=0._EB,Y_EDDY_MAX=0._EB, &
                Z_EDDY_MIN=0._EB,Z_EDDY_MAX=0._EB
