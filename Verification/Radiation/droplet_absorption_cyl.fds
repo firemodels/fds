@@ -23,8 +23,6 @@ value of dT should be equal to the time averaged Q_abs.
 
 &DUMP NFRAMES=100, DT_PL3D=10000. /
 
-&SPEC ID='WATER VAPOR'/
-
 &RADI RADTMP=1000.
       NUMBER_RADIATION_ANGLES = 40
       TIME_STEP_INCREMENT=1 
@@ -36,14 +34,17 @@ value of dT should be equal to the time averaged Q_abs.
       TMP_FRONT = 1000.
       TAU_T = 0.0 /
 
+&SPEC ID='WATER VAPOR'
+      VAPORIZATION_TEMPERATURE = 1000.
+      MELTING_TEMPERATURE = -273.15
+      HEAT_OF_VAPORIZATION = 0.01
+      SPECIFIC_HEAT_LIQUID = 1.0
+      /
+
 &PART ID='drops'
       STATIC = .TRUE.
       SPEC_ID='WATER VAPOR'
       INITIAL_TEMPERATURE = 0.
-      VAPORIZATION_TEMPERATURE = 1000.
-      MELTING_TEMPERATURE = -273.15
-      HEAT_OF_VAPORIZATION = 0.01
-      SPECIFIC_HEAT = 1.0
       DIAMETER=1000.
       MINIMUM_DIAMETER=10.
       SAMPLING_FACTOR=1 /
