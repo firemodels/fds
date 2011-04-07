@@ -2949,7 +2949,7 @@ The first special {\ct VENT} is invoked by the parameter {\ct SURF\_ID='OPEN'}. 
 
 By default, it is assumed that ambient conditions exist beyond the {\ct 'OPEN'} vent. However, in some cases, you may want to alter this assumption, for example, the temperature. If you assume a temperature other than ambient, specify {\ct TMP\_EXTERIOR} along with {\ct SURF\_ID='OPEN'}. Use this option cautiously -- in many situations if you want to describe the exterior of a building, it is better to include the exterior explicitly in your calculation because the flow in and out of the doors and windows will be more naturally captured. See Section~\ref{info:stackeffect} for more details. If you want to specify a non-ambient pressure at the {\ct OPEN} boundary, see Section~\ref{info:pressure_boundary}.
 
-The user should also be aware that the {\ct OPEN} pressure boundary condition is most stable for flows that are predominantly normal  to the vent, either mostly in or mostly out.  The reason is that the prescribed pressure at this boundary has a strong discontinuity if the flow is parallel to the vent.  Suppose for a moment that the flow is 10 m/s in the $x$ direction and $\pm .001$ m/s in the $z$ direction for an {\ct OPEN} top boundary in an outdoor flow.  The kinetic energy of this flow is roughtly $k=50$ m$^2$/s$^2$.  When the vertical velocity is positive (+0.001 m/s) then the prescibed boundary condition for the stagnation pressure is set to ${\cal H} = k = 50$ m$^2$/s$^2$.  But when the vertical velocity is negative (-0.001 m/s) then ${\cal H} = 0$ (see \cite{FDS_Tech_Guide}).  For this reason, {\ct OPEN} vents are not recommended for the top boundary in an outdoor flow.  See Section \ref{info:mean_forcing} for a better alternative.
+The user should also be aware that the {\ct OPEN} pressure boundary condition is most stable for flows that are predominantly normal  to the vent, either mostly in or mostly out.  This is because the prescribed pressure at an {\ct OPEN} boundary is ill-conditioned (a small perturbation to the input may lead to large change in the output) if the flow is parallel to the vent.  Suppose, for example, that an outdoor flow is 10 m/s in the $x$ direction and $\pm 0.001$ m/s in the $z$ direction with an {\ct OPEN} top boundary.  The kinetic energy of this flow is roughly $k=50$ m$^2$/s$^2$.  When the vertical velocity is positive (+0.001 m/s) then the prescibed boundary condition for the stagnation pressure is set to ${\cal H} = k = 50$ m$^2$/s$^2$.  But when the vertical velocity is negative (-0.001 m/s) then ${\cal H} = 0$ (see \cite{FDS_Tech_Guide}).  For this reason, {\ct OPEN} vents are not recommended for the top or side boundaries in an outdoor flow.  See Section \ref{info:mean_forcing} for a better alternative.
 
 \begin{warning}
 Starting with FDS 5.3.0, vents to the outside of the computational domain ({\ct OPEN} vents)
@@ -2959,17 +2959,10 @@ See Section~\ref{info:activate_deactivate} for details.
 
 \subsubsection{\texorpdfstring{{\tt MIRROR}}{MIRROR} \texorpdfstring{{\tt VENT}}{VENT}}
 
-A {\ct VENT} with {\ct SURF\_ID='MIRROR'} denotes a symmetry plane.
-Usually, a {\ct MIRROR} spans an entire face of the computational
-domain, essentially doubling the size of the domain with the {\ct MIRROR}
-acting as a plane of symmetry. The flow on the opposite side of the
-{\ct MIRROR} is exactly reversed. From a numerical point of view,
-a {\ct MIRROR} is a no-flux, free-slip boundary.
-As with {\ct OPEN}, a {\ct MIRROR} can only be prescribed at an
-exterior boundary of the computational domain.
-Often, {\ct OPEN} or {\ct MIRROR} {\ct VENT}s are prescribed along an
-entire side of the computational domain, in which case the ``{\ct MB}''
-notation is handy.
+A {\ct VENT} with {\ct SURF\_ID='MIRROR'} denotes a symmetry plane. Usually, a {\ct MIRROR} spans an entire face of the computational
+domain, essentially doubling the size of the domain with the {\ct MIRROR} acting as a plane of symmetry. The flow on the opposite side of the
+{\ct MIRROR} is exactly reversed. From a numerical point of view, a {\ct MIRROR} is a no-flux, free-slip boundary. As with {\ct OPEN}, a {\ct MIRROR} can only be prescribed at an exterior boundary of the computational domain. Often, {\ct OPEN} or {\ct MIRROR} {\ct VENT}s are prescribed along an
+entire side of the computational domain, in which case the ``{\ct MB}'' notation is handy.
 
 \begin{warning}
 \noindent
@@ -2977,21 +2970,39 @@ Note that the mirror image of a scene is {\bf not} shown in Smokeview.
 \end{warning}
 
 \noindent
-A word of warning about {\ct MIRROR} boundaries in FDS. In conventional RANS (Reynolds-Averaged Navier-Stokes) models, symmetry boundaries are often used as a way of
-saving on computation time. However, because FDS is an LES (Large Eddy Simulation) model, the use of symmetry boundaries should be considered carefully. The reason for this is that
-an LES model does not compute a time-averaged solution of the N-S equations. In other words, for a RANS model, a fire plume is represented as an axially-symmetric flow field because
-that is what you would expect if you time-averaged the actual flow field over a sufficient amount of time. Thus, for a RANS model, a symmetry boundary along the plume centerline is
-appropriate. In an LES model, however, there is no time-averaging built into the equations, and there is no time-averaged, symmetric solution. Putting a {\ct MIRROR} boundary
-along the centerline of a fire plume will change its dynamics entirely. It will produce something very much like the flow field of a fire that is adjacent to a vertical wall. For this
-reason, a {\ct MIRROR} boundary condition is not recommended along the centerline of a turbulent fire plume. If the fire or burner is very small, and the flow is laminar, then the
-{\ct MIRROR} boundary condition makes sense. In fact, in 2-D calculations, {\ct MIRROR} boundary conditions are employed in the third coordinate direction (this is done automatically, you
-need not specify it explicitly).
+A word of warning about {\ct MIRROR} boundaries in FDS. In conventional RANS (Reynolds-Averaged Navier-Stokes) models, symmetry boundaries are often used as a way of saving on computation time. However, because FDS is an LES (Large Eddy Simulation) model, the use of symmetry boundaries should be considered carefully. The reason for this is that an LES model does not compute a time-averaged solution of the N-S equations. In other words, for a RANS model, a fire plume is represented as an axially-symmetric flow field because that is what you would expect if you time-averaged the actual flow field over a sufficient amount of time. Thus, for a RANS model, a symmetry boundary along the plume centerline is appropriate. In an LES model, however, there is no time-averaging built into the equations, and there is no time-averaged, symmetric solution. Putting a {\ct MIRROR} boundary along the centerline of a fire plume will change its dynamics entirely. It will produce something very much like the flow field of a fire that is adjacent to a vertical wall. For this reason, a {\ct MIRROR} boundary condition is not recommended along the centerline of a turbulent fire plume. If the fire or burner is very small, and the flow is laminar, then the {\ct MIRROR} boundary condition makes sense. In fact, in 2-D calculations, {\ct MIRROR} boundary conditions are employed in the third coordinate direction (this is done automatically, you need not specify it explicitly).
+
+\subsection{\texorpdfstring{{Adding Synthetic Turbulence to {\tt VENT}s}}{Adding Synthetic Turbulence to VENTs}}
+\label{info:synthetic_turbulence}
+
+Real flows of low-viscosity fluids like air are rarely perfectly stationary in time or uniform in space---they are turbulent (to some degree).  Of course, the turbulence characteristics of the flow may have a significant impact on mixing and other behaviors so the specification of nominally constant and uniform boundary conditions may be insufficient.  To address this issue, FDS employs a synthetic eddy method (SEM).  Refer to Jarrin \cite{Jarrin:2008} for a detailed description.  In brief, ``eddies'' are injected into the flow at random positions on the boundary and advect with the mean flow over a short distance near the boundary equivalent to the maximum eddy length scale.  Once the eddy passes through this region it is recycled at the inlet of the boundary with a new random position and length scale.  The eddies are idealized as velocity perturbations over a spherical region in space with a diameter (eddy length scale) selected from a uniform random distribution.  The selection procedures guarantee that prescribed first and second-order statistics (including Reynolds stresses) are satisfied.
+
+Synthetic turbulence is invoked by setting the number of eddies, {\ct N\_EDDY}, the characteristic eddy length scale, {\ct L\_EDDY}, and either the root mean square (RMS) velocity fluctuation, {\ct VEL\_RMS}, or the Reynolds stress tensor components, {\ct REYNOLDS\_STRESS(3,3)} on the {\ct VENT} line.  Note that the Reynolds stress is symmetric and only the lower triangular part needs to be specified.  The RMS velocity fluctuation is isotropic (equivalent for each component).  Thus, {\ct VEL\_RMS} $\equiv \sqrt{2k/3}$, where $k\equiv \langle\frac{1}{2}u_i^\prime u_i^\prime\rangle$ is the turbulent kinetic energy per unit mass. If the fluctuations are not isotropic, then the Reynolds stresses must be specified componentwise.
+
+\vskip\baselineskip
+\noindent Example:
+
+\footnotesize
+\begin{verbatim}
+&SURF ID='inlet', VEL=-10. /
+&VENT MB='XMIN', SURF_ID='inlet', N_EDDY=100, L_EDDY=0.5, VEL_RMS=1. /
+\end{verbatim} \normalsize
+
+\noindent Note that if {\ct VEL\_RMS} is specified, this is equivelant to
+
+\footnotesize
+\begin{verbatim}
+REYNOLDS_STRESS(1,1) = VEL_RMS**2
+REYNOLDS_STRESS(2,2) = VEL_RMS**2
+REYNOLDS_STRESS(3,3) = VEL_RMS**2
+\end{verbatim} \normalsize
+
+\noindent and all other components of {\ct REYNOLDS\_STRESS} are zero.
 
 \subsection{\texorpdfstring{{Controlling {\tt VENT}s}}{Controlling VENTs}}
 
 {\ct VENT} functionality can be controlled in some cases using ``devices'' and ``controls,'' specified via a {\ct DEVC\_ID} or a {\ct CTRL\_ID}.
 See Section~\ref{info:activate_deactivate} for details.
-
 
 \subsection{\texorpdfstring{{Trouble-Shooting {\tt VENT}s}}{Trouble-Shooting VENTs}}
 \label{info:VENT_Trouble}
@@ -11013,26 +11024,28 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct COLOR    }             & Character         & See Section~\ref{info:colors}                                 &               &                     \\ \hline
 {\ct CTRL\_ID }             & Character         & See Section~\ref{info:activate_deactivate}                    &               &                     \\ \hline
 {\ct DEVC\_ID }             & Character         & See Section~\ref{info:activate_deactivate}                    &               &                     \\ \hline
-{\ct DYNAMIC\_PRESSURE}     & Real              & See Section~\ref{info:pressure_boundary}                      & Pa            &  0.0                \\ \hline
+{\ct DYNAMIC\_PRESSURE}     & Real              & See Section~\ref{info:pressure_boundary}                      & Pa            & 0.               \\ \hline
 {\ct EVACUATION    }        & Logical           & See FDS+Evac User's Guide                                     &               &  {\ct .FALSE.}      \\ \hline
 {\ct ID }                   & Character         & See Section~\ref{info:VENT_Basics}                            &               &                     \\ \hline
 {\ct IOR}                   & Integer           & See Section~\ref{info:VENT_Trouble}                           &               &                     \\ \hline
+{\ct L\_EDDY}               & Real              & See Section~\ref{info:synthetic_turbulence}                   & m             & 0.                    \\ \hline
 {\ct MB    }                & Character         & See Section~\ref{info:VENT_Basics}                            &               &                     \\ \hline
 {\ct MESH\_ID    }          & Character         & See FDS+Evac User's Guide                                     &               &                     \\ \hline
+{\ct N\_EDDY}               & Integer           & See Section~\ref{info:synthetic_turbulence}                   &               & 0                    \\ \hline
 {\ct OUTLINE}               & Logical           & See Section~\ref{info:VENT_Basics}                            & {\ct .FALSE.} &                     \\ \hline
 {\ct PBX, PBY, PBZ  }       & Real              & See Section~\ref{info:VENT_Basics}                            &               &                     \\ \hline
 {\ct PRESSURE\_RAMP}        & Character         & See Section~\ref{info:pressure_boundary}                      &               &                     \\ \hline
+{\ct REYNOLDS\_STRESS(3,3)} & Real Array        & See Section~\ref{info:synthetic_turbulence}                   & m$^2$/s$^2$    & 0.                    \\ \hline
 {\ct RGB(3)   }             & Integer Triplet   & See Section~\ref{info:colors}                                 &               &                     \\ \hline
 {\ct SPREAD\_RATE}          & Real              & See Section~\ref{info:spread}                                 & m/s           &  0.0                \\ \hline
 {\ct SURF\_ID}              & Character         & See Section~\ref{info:VENT_Basics}                            &               &  {\ct 'INERT'}      \\ \hline
 {\ct TEXTURE\_ORIGIN(3)}    & Real Triplet      & See Section~\ref{info:texture_map}                            & m             & (0.,0.,0.)          \\ \hline
 {\ct TMP\_EXTERIOR}         & Real              & See Section~\ref{info:Special_VENTS}                          & $^\circ$C     &                     \\ \hline
 {\ct TRANSPARENCY}          & Real              & See Section~\ref{info:colors}                                 &               &   1.0               \\ \hline
+{\ct VEL\_RMS}              & Real              & See Section~\ref{info:synthetic_turbulence}                   & m/s           & 0.                     \\ \hline
 {\ct XB(6) }                & Real Sextuplet    & See Section~\ref{info:VENT_Basics}                            & m             &                     \\ \hline
 {\ct XYZ(3) }               & Real Triplet      & See Section~\ref{info:spread}                                 & m             &                     \\ \hline
 \end{longtable}
-
-%Undocumented: REYNOLDS_STRESS, L_EDDY, N_EDDY, VEL_RMS
 
 
 \section{\texorpdfstring{{\tt ZONE}}{ZONE} (Pressure Zone Parameters)}
