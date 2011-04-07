@@ -2999,6 +2999,19 @@ REYNOLDS_STRESS(3,3) = VEL_RMS**2
 
 \noindent and all other components of {\ct REYNOLDS\_STRESS} are zero.
 
+In Chapter 7 of Jarrin's thesis \cite{Jarrin:2008}, he introduces the Modified Synthetic Eddy Method in which the eddy length scales are anisotropic.  This allows more realistic charaterization of streamwise vorticies in a turbulent boundary layer.  To specify the length scales corrosponding to the $\sigma_{ij}$ values in Jarrin's Eq.~(7.1) use {\ct L\_EDDY\_IJ(3,3)}.  For example,
+
+\footnotesize
+\begin{verbatim}
+&VENT XB=... , SURF_ID='WIND', N_EDDY=500,
+      L_EDDY_IJ(1,1)=21.,  L_EDDY_IJ(1,2)=6.22, L_EDDY_IJ(1,3)=4.23
+      L_EDDY_IJ(2,1)=2.35, L_EDDY_IJ(2,2)=5.66, L_EDDY_IJ(2,3)=2.50
+      L_EDDY_IJ(3,1)=5.42, L_EDDY_IJ(3,2)=0.78, L_EDDY_IJ(3,3)=1.01
+      REYNOLDS_STRESS(1,1)=2.16,  REYNOLDS_STRESS(1,2)=0.,   REYNOLDS_STRESS(1,3)=-0.47
+      REYNOLDS_STRESS(2,1)=0.,    REYNOLDS_STRESS(2,2)=1.53, REYNOLDS_STRESS(2,3)=0.
+      REYNOLDS_STRESS(3,1)=-0.47, REYNOLDS_STRESS(3,2)=0.,   REYNOLDS_STRESS(3,3)=4.259 /
+\end{verbatim} \normalsize
+
 \subsection{\texorpdfstring{{Controlling {\tt VENT}s}}{Controlling VENTs}}
 
 {\ct VENT} functionality can be controlled in some cases using ``devices'' and ``controls,'' specified via a {\ct DEVC\_ID} or a {\ct CTRL\_ID}.
@@ -11029,6 +11042,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ID }                   & Character         & See Section~\ref{info:VENT_Basics}                            &               &                     \\ \hline
 {\ct IOR}                   & Integer           & See Section~\ref{info:VENT_Trouble}                           &               &                     \\ \hline
 {\ct L\_EDDY}               & Real              & See Section~\ref{info:synthetic_turbulence}                   & m             & 0.                    \\ \hline
+{\ct L\_EDDY\_IJ(3,3)}      & Real Array        & See Section~\ref{info:synthetic_turbulence}                   & m             & 0.                    \\ \hline
 {\ct MB    }                & Character         & See Section~\ref{info:VENT_Basics}                            &               &                     \\ \hline
 {\ct MESH\_ID    }          & Character         & See FDS+Evac User's Guide                                     &               &                     \\ \hline
 {\ct N\_EDDY}               & Integer           & See Section~\ref{info:synthetic_turbulence}                   &               & 0                    \\ \hline
