@@ -1086,11 +1086,13 @@ VENT_LOOP: DO NV=1,MESHES(NM)%N_VENT
                   XX = (MESHES(NM)%XC(II) - VT%X_EDDY(NE))/VT%SIGMA_IJ(2,1)
                   YY = (        VT%Y1     - VT%Y_EDDY(NE))/VT%SIGMA_IJ(2,2)
                   ZZ = (MESHES(NM)%ZC(KK) - VT%Z_EDDY(NE))/VT%SIGMA_IJ(2,3)
+                  SHAPE_FACTOR = SHAPE_FUNCTION(XX,1)*SHAPE_FUNCTION(YY,1)*SHAPE_FUNCTION(ZZ,1)
                   VT%V_EDDY(II,KK) = VT%V_EDDY(II,KK) + VT%CV_EDDY(NE)*SHAPE_FACTOR
                   
                   XX = (MESHES(NM)%XC(II) - VT%X_EDDY(NE))/VT%SIGMA_IJ(3,1)
                   YY = (        VT%Y1     - VT%Y_EDDY(NE))/VT%SIGMA_IJ(3,2)
                   ZZ = (MESHES(NM)%ZC(KK) - VT%Z_EDDY(NE))/VT%SIGMA_IJ(3,3)
+                  SHAPE_FACTOR = SHAPE_FUNCTION(XX,1)*SHAPE_FUNCTION(YY,1)*SHAPE_FUNCTION(ZZ,1)
                   VT%W_EDDY(II,KK) = VT%W_EDDY(II,KK) + VT%CW_EDDY(NE)*SHAPE_FACTOR 
                ENDDO
             ENDDO  
@@ -1113,11 +1115,13 @@ VENT_LOOP: DO NV=1,MESHES(NM)%N_VENT
                   XX = (MESHES(NM)%XC(II) - VT%X_EDDY(NE))/VT%SIGMA_IJ(2,1)
                   YY = (MESHES(NM)%YC(JJ) - VT%Y_EDDY(NE))/VT%SIGMA_IJ(2,2)
                   ZZ = (        VT%Z1     - VT%Z_EDDY(NE))/VT%SIGMA_IJ(2,3)
+                  SHAPE_FACTOR = SHAPE_FUNCTION(XX,1)*SHAPE_FUNCTION(YY,1)*SHAPE_FUNCTION(ZZ,1)
                   VT%V_EDDY(II,JJ) = VT%V_EDDY(II,JJ) + VT%CV_EDDY(NE)*SHAPE_FACTOR
                   
                   XX = (MESHES(NM)%XC(II) - VT%X_EDDY(NE))/VT%SIGMA_IJ(3,1)
                   YY = (MESHES(NM)%YC(JJ) - VT%Y_EDDY(NE))/VT%SIGMA_IJ(3,2)
                   ZZ = (        VT%Z1     - VT%Z_EDDY(NE))/VT%SIGMA_IJ(3,3)
+                  SHAPE_FACTOR = SHAPE_FUNCTION(XX,1)*SHAPE_FUNCTION(YY,1)*SHAPE_FUNCTION(ZZ,1)
                   VT%W_EDDY(II,JJ) = VT%W_EDDY(II,JJ) + VT%CW_EDDY(NE)*SHAPE_FACTOR 
                ENDDO
             ENDDO  
