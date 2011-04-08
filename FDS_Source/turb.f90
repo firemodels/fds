@@ -1053,7 +1053,17 @@ VENT_LOOP: DO NV=1,MESHES(NM)%N_VENT
                   ZZ = (MESHES(NM)%ZC(KK) - VT%Z_EDDY(NE))/VT%SIGMA_IJ(1,3)
                   SHAPE_FACTOR = SHAPE_FUNCTION(XX,1)*SHAPE_FUNCTION(YY,1)*SHAPE_FUNCTION(ZZ,1)
                   VT%U_EDDY(JJ,KK) = VT%U_EDDY(JJ,KK) + VT%CU_EDDY(NE)*SHAPE_FACTOR
+                  
+                  XX = (        VT%X1     - VT%X_EDDY(NE))/VT%SIGMA_IJ(2,1)
+                  YY = (MESHES(NM)%YC(JJ) - VT%Y_EDDY(NE))/VT%SIGMA_IJ(2,2)
+                  ZZ = (MESHES(NM)%ZC(KK) - VT%Z_EDDY(NE))/VT%SIGMA_IJ(2,3)
+                  SHAPE_FACTOR = SHAPE_FUNCTION(XX,1)*SHAPE_FUNCTION(YY,1)*SHAPE_FUNCTION(ZZ,1)
                   VT%V_EDDY(JJ,KK) = VT%V_EDDY(JJ,KK) + VT%CV_EDDY(NE)*SHAPE_FACTOR
+                  
+                  XX = (        VT%X1     - VT%X_EDDY(NE))/VT%SIGMA_IJ(3,1)
+                  YY = (MESHES(NM)%YC(JJ) - VT%Y_EDDY(NE))/VT%SIGMA_IJ(3,2)
+                  ZZ = (MESHES(NM)%ZC(KK) - VT%Z_EDDY(NE))/VT%SIGMA_IJ(3,3)
+                  SHAPE_FACTOR = SHAPE_FUNCTION(XX,1)*SHAPE_FUNCTION(YY,1)*SHAPE_FUNCTION(ZZ,1)
                   VT%W_EDDY(JJ,KK) = VT%W_EDDY(JJ,KK) + VT%CW_EDDY(NE)*SHAPE_FACTOR
                ENDDO
             ENDDO
@@ -1067,12 +1077,20 @@ VENT_LOOP: DO NV=1,MESHES(NM)%N_VENT
             IF (IERROR==1) CALL EDDY_AMPLITUDE(NE,NV,NM)
             DO KK=VT%K1+1,VT%K2
                DO II=VT%I1+1,VT%I2
+                  XX = (MESHES(NM)%XC(II) - VT%X_EDDY(NE))/VT%SIGMA_IJ(1,1)
+                  YY = (        VT%Y1     - VT%Y_EDDY(NE))/VT%SIGMA_IJ(1,2)
+                  ZZ = (MESHES(NM)%ZC(KK) - VT%Z_EDDY(NE))/VT%SIGMA_IJ(1,3)
+                  SHAPE_FACTOR = SHAPE_FUNCTION(XX,1)*SHAPE_FUNCTION(YY,1)*SHAPE_FUNCTION(ZZ,1)
+                  VT%U_EDDY(II,KK) = VT%U_EDDY(II,KK) + VT%CU_EDDY(NE)*SHAPE_FACTOR
+                  
                   XX = (MESHES(NM)%XC(II) - VT%X_EDDY(NE))/VT%SIGMA_IJ(2,1)
                   YY = (        VT%Y1     - VT%Y_EDDY(NE))/VT%SIGMA_IJ(2,2)
                   ZZ = (MESHES(NM)%ZC(KK) - VT%Z_EDDY(NE))/VT%SIGMA_IJ(2,3)
-                  SHAPE_FACTOR = SHAPE_FUNCTION(XX,1)*SHAPE_FUNCTION(YY,1)*SHAPE_FUNCTION(ZZ,1)
-                  VT%U_EDDY(II,KK) = VT%U_EDDY(II,KK) + VT%CU_EDDY(NE)*SHAPE_FACTOR
                   VT%V_EDDY(II,KK) = VT%V_EDDY(II,KK) + VT%CV_EDDY(NE)*SHAPE_FACTOR
+                  
+                  XX = (MESHES(NM)%XC(II) - VT%X_EDDY(NE))/VT%SIGMA_IJ(3,1)
+                  YY = (        VT%Y1     - VT%Y_EDDY(NE))/VT%SIGMA_IJ(3,2)
+                  ZZ = (MESHES(NM)%ZC(KK) - VT%Z_EDDY(NE))/VT%SIGMA_IJ(3,3)
                   VT%W_EDDY(II,KK) = VT%W_EDDY(II,KK) + VT%CW_EDDY(NE)*SHAPE_FACTOR 
                ENDDO
             ENDDO  
@@ -1086,12 +1104,20 @@ VENT_LOOP: DO NV=1,MESHES(NM)%N_VENT
             IF (IERROR==1) CALL EDDY_AMPLITUDE(NE,NV,NM)
             DO JJ=VT%J1+1,VT%J2
                DO II=VT%I1+1,VT%I2
+                  XX = (MESHES(NM)%XC(II) - VT%X_EDDY(NE))/VT%SIGMA_IJ(1,1)
+                  YY = (MESHES(NM)%YC(JJ) - VT%Y_EDDY(NE))/VT%SIGMA_IJ(1,2)
+                  ZZ = (        VT%Z1     - VT%Z_EDDY(NE))/VT%SIGMA_IJ(1,3)
+                  SHAPE_FACTOR = SHAPE_FUNCTION(XX,1)*SHAPE_FUNCTION(YY,1)*SHAPE_FUNCTION(ZZ,1)
+                  VT%U_EDDY(II,JJ) = VT%U_EDDY(II,JJ) + VT%CU_EDDY(NE)*SHAPE_FACTOR
+                  
+                  XX = (MESHES(NM)%XC(II) - VT%X_EDDY(NE))/VT%SIGMA_IJ(2,1)
+                  YY = (MESHES(NM)%YC(JJ) - VT%Y_EDDY(NE))/VT%SIGMA_IJ(2,2)
+                  ZZ = (        VT%Z1     - VT%Z_EDDY(NE))/VT%SIGMA_IJ(2,3)
+                  VT%V_EDDY(II,JJ) = VT%V_EDDY(II,JJ) + VT%CV_EDDY(NE)*SHAPE_FACTOR
+                  
                   XX = (MESHES(NM)%XC(II) - VT%X_EDDY(NE))/VT%SIGMA_IJ(3,1)
                   YY = (MESHES(NM)%YC(JJ) - VT%Y_EDDY(NE))/VT%SIGMA_IJ(3,2)
                   ZZ = (        VT%Z1     - VT%Z_EDDY(NE))/VT%SIGMA_IJ(3,3)
-                  SHAPE_FACTOR = SHAPE_FUNCTION(XX,1)*SHAPE_FUNCTION(YY,1)*SHAPE_FUNCTION(ZZ,1)
-                  VT%U_EDDY(II,JJ) = VT%U_EDDY(II,JJ) + VT%CU_EDDY(NE)*SHAPE_FACTOR
-                  VT%V_EDDY(II,JJ) = VT%V_EDDY(II,JJ) + VT%CV_EDDY(NE)*SHAPE_FACTOR
                   VT%W_EDDY(II,JJ) = VT%W_EDDY(II,JJ) + VT%CW_EDDY(NE)*SHAPE_FACTOR 
                ENDDO
             ENDDO  
