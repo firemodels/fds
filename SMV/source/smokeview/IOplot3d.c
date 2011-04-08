@@ -334,7 +334,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
     for(n=0;n<MAXRGB;n++){
       (*(colorlabelp3+nn))[n]=NULL;
       (*(colorlabeliso+nn))[n]=NULL;
-}
+    }
 
     if(NewMemory((void **)&p3levels[nn],(nrgb+1)*sizeof(float))==0||
        NewMemory((void **)&p3levels256[nn],256*sizeof(float))==0){

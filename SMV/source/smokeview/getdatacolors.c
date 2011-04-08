@@ -1629,8 +1629,12 @@ void drawColorBars(void){
     outputBarText(right[leftpatch],bottom[3],color1,patchi->scale);
   }
   if(showplot3d==1){
-    strcpy(unitlabel,unitp3label[plotn-1]);
-    getunitinfo(unitp3label[plotn-1],&plot3dunitclass,&plot3dunittype);
+    char *p3label;
+    char *up3label;
+
+    up3label = plot3dinfo[0].label[plotn-1].unit;
+    strcpy(unitlabel,up3label);
+    getunitinfo(up3label,&plot3dunitclass,&plot3dunittype);
     if(plot3dunitclass>=0&&plot3dunitclass<nunitclasses){
       if(plot3dunittype>0){
         plot3dflag=1;
@@ -1638,8 +1642,9 @@ void drawColorBars(void){
         strcpy(unitlabel,unitclasses[plot3dunitclass].units[plot3dunittype].unit);
       }
     }
+    p3label = plot3dinfo[0].label[plotn-1].shortlabel;
     outputBarText(right[0],bottom[0],color1,"Plot3d");
-    outputBarText(right[0],bottom[1],color1,shortp3label[plotn-1]);
+    outputBarText(right[0],bottom[1],color1,p3label);
     outputBarText(right[0],bottom[2],color1,unitlabel);
     outputBarText(right[0],bottom[3],color1,scalep3[plotn-1]);
   }

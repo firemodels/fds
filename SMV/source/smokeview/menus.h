@@ -4048,8 +4048,7 @@ void InitMenus(int unload){
   multislice *mslicei;
   multivslice *mvslicei;
   mesh *cmesh;
-  char a_menulabel[1000];
-  char *menulabel;
+  char menulabel[1024];
   int j;
   int ntextures_used;
   int multiprop;
@@ -4107,7 +4106,6 @@ updatemenu=0;
   glutPostRedisplay();
   cmesh=current_mesh;
 
-  menulabel = a_menulabel;
   nsmoke3dloaded=0;
   nsliceloaded=0;
   nvsliceloaded=0;
@@ -4533,13 +4531,16 @@ updatemenu=0;
   if(nplot3d_files>0){
     CREATEMENU(staticvariablemenu,StaticVariableMenu);
     for(n=0;n<numplot3dvars;n++){
+      char *p3label;
+
+      p3label = plot3dinfo[0].label[n].shortlabel;
       if(plotn-1==n){
         STRCPY(menulabel,"*");
-        STRCAT(menulabel,shortp3label[n]);
+        STRCAT(menulabel,p3label);
         glutAddMenuEntry(menulabel,n+1);
       }
       else{
-        glutAddMenuEntry(shortp3label[n],n+1);
+        glutAddMenuEntry(p3label,n+1);
       }
     }
   }
@@ -4549,13 +4550,16 @@ updatemenu=0;
   if(nplot3d_files>0){
     CREATEMENU(isovariablemenu,IsoVariableMenu);
     for(n=0;n<numplot3dvars;n++){
+      char *p3label;
+
+      p3label = plot3dinfo[0].label[n].shortlabel;
       if(plotn-1==n&&visiso==1){
         STRCPY(menulabel,"*");
-        STRCAT(menulabel,shortp3label[n]);
+        STRCAT(menulabel,p3label);
         glutAddMenuEntry(menulabel,n+1);
       }
       else{
-        glutAddMenuEntry(shortp3label[n],n+1);
+        glutAddMenuEntry(p3label,n+1);
       }
     }
   }

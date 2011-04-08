@@ -230,6 +230,9 @@ void readsmv_dynamic(char *file){
   int i,j;
   int nn_plot3d=0,iplot3d=0;
   int do_pass2=0, do_pass3=0, minmaxpl3d=0;
+  int nplot3d_files_old;
+
+  nplot3d_files_old=nplot3d_files;
 
   updatefacelists=1;
   updatemenu=1;
@@ -246,7 +249,7 @@ void readsmv_dynamic(char *file){
       FREEMEMORY(plot3di->reg_file);
       FREEMEMORY(plot3di->comp_file);
     }
-    FREEMEMORY(plot3dinfo);
+//    FREEMEMORY(plot3dinfo);
   }
   nplot3d_files=0;
 
@@ -399,7 +402,7 @@ void readsmv_dynamic(char *file){
 
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++++++ DEVICE_ACT ++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ DEVICE_ACT +++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"DEVICE_ACT",10) == 1){
@@ -422,7 +425,7 @@ void readsmv_dynamic(char *file){
     }
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++++++ HEAT_ACT ++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ HEAT_ACT +++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"HEAT_ACT",8) == 1){
@@ -569,7 +572,12 @@ void readsmv_dynamic(char *file){
     meshi->nsmoothblockages_list++;
   }
   if(nplot3d_files>0){
-    if(NewMemory((void **)&plot3dinfo,nplot3d_files*sizeof(plot3d))==0)return;
+    if(plot3dinfo==NULL){
+      NewMemory((void **)&plot3dinfo,nplot3d_files*sizeof(plot3d));
+    }
+    else{
+      ResizeMemory((void **)&plot3dinfo,nplot3d_files*sizeof(plot3d));
+    }
   }
   for(i=0;i<ndeviceinfo;i++){
     device *devicei;
@@ -637,8 +645,10 @@ void readsmv_dynamic(char *file){
       plot3di->seq_id=nn_plot3d;
       plot3di->autoload=0;
       plot3di->time=time;
-      plot3di->loaded=0;
-      plot3di->display=0;
+      if(plot3di>plot3dinfo+nplot3d_files_old-1){
+        plot3di->loaded=0;
+        plot3di->display=0;
+      }
 
       NewMemory((void **)&plot3di->reg_file,(unsigned int)(len+1));
       STRCPY(plot3di->reg_file,bufptr);

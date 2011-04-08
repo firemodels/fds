@@ -4420,6 +4420,8 @@ void read_device_data(char *file, int loadstatus){
       devicei->vals[irow-2]=vals[icol];
     }
   }
+  fclose(stream);
+  stream=NULL;
 
 #define EPSDEV 0.01
 
@@ -4529,6 +4531,7 @@ void read_device_data(char *file, int loadstatus){
   }
 
   if(ndeviceinfo>0){
+    ndevicetypes=0;
     FREEMEMORY(devicetypes);
     NewMemory((void **)&devicetypes,ndeviceinfo*sizeof(device *));
     for(i=0;i<ndeviceinfo;i++){
@@ -4550,7 +4553,9 @@ void read_device_data(char *file, int loadstatus){
         device *devj;
 
         devj = deviceinfo + j;
-        if(devj->type2<0&&strcmp(devi->quantity,devj->quantity)==0)devj->type2=devi->type2;
+        if(devj->type2<0&&strcmp(devi->quantity,devj->quantity)==0){
+          devj->type2=devi->type2;
+        }
       }
     }
     if(ndevicetypes>0)devicetypes[0]->type2vis=1;
