@@ -6535,7 +6535,6 @@ second per active sprinkler or nozzle (Default 5000). It is listed on the {\ct P
 the sprinkler or nozzle. Note that this parameter only affects sprinklers and nozzles.
 Changing this parameter does {\em not} change the flow rate, but rather the number
 of droplets used to represent the flow.
-Also note that the number of droplets introduced per ``batch'' is {\ct DROPLETS\_PER\_SECOND} times {\ct DT\_INSERT}.
 
 \begin{warning}
 Note that {\ct DROPLETS\_PER\_SECOND} can be a very important parameter. In some simulations, it is a good idea to increase this number so that the
@@ -6583,13 +6582,11 @@ See Section~\ref{info:basic_control} for more information on controlling devices
 Regardless of how the particles or droplets are introduced into the computational domain, the following are important
 parameters for controlling their number:
 \begin{description}
-\item[{\ct DT\_INSERT}] Time increment in seconds between the introduction of a ``batch'' of particles or droplets.
-The number per ``batch'' depends on how they are introduced.
-If more particles are desired, lower the input value of this parameter. The default value is 0.01~s. Note that this
-parameter should be specified on the {\ct SURF}, {\ct PROP}, or {\ct INIT} line, depending on whether the particles/droplets
-originate at a surface, a sprinkler or nozzle, or a volume. Note that if you introduce particles or droplets via an {\ct INIT} line,
-you must specify a value for {\ct DT\_INSERT}. Otherwise, particles or
-droplets will only be introduced initially.
+\item[{\ct DT\_INSERT}] Time increment in seconds between the introduction of a ``batch'' of particles or droplets from {\ct SURF}
+or {\ct INIT}. The number per ``batch'' depends on how they are introduced. The default value is 0.01~s. Note that this
+parameter should be specified on the {\ct SURF} or {\ct INIT} line, depending on whether the particles/droplets
+originate at a surface or a volume. Note that if you introduce particles or droplets via an {\ct INIT} line,
+you must specify a value for {\ct DT\_INSERT}. Otherwise, particles or droplets will only be introduced initially.
 \item[{\ct SAMPLING\_FACTOR}]     Sampling factor for the output
 file {\bf CHID.prt5}. This parameter can be used to reduce the size
 of the particle output file used to animate the simulation. The default value is 1 for {\ct MASSLESS} particles, meaning that every particle or droplet will be shown in Smokeview. The default
@@ -10565,7 +10562,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CHARACTERISTIC\_VELOCITY}          & Real          & See Section~\ref{info:wind}                   & m/s                   & 1.       \\ \hline
 {\ct DROPLET\_VELOCITY}                 & Real          & See Section~\ref{info:sprinklers}             & m/s                   & 0.       \\ \hline
 {\ct DROPLETS\_PER\_SECOND}             & Integer       & See Section~\ref{info:sprinklers}             &                       & 5000      \\ \hline
-{\ct DT\_INSERT}                        & Real          & See Section~\ref{info:sprinklers}             & s                     & 0.01      \\ \hline
 {\ct FLOW\_RATE}                        & Real          & See Section~\ref{info:sprinklers}             & L/min                 &           \\ \hline
 {\ct FLOW\_RAMP}                        & Character     & See Section~\ref{info:sprinklers}             &                       &           \\ \hline
 {\ct FLOW\_TAU}                         & Real          & See Section~\ref{info:sprinklers}             &                       & 0.       \\ \hline
@@ -11113,37 +11109,38 @@ Namelist  & FDS 5 Parameter & Namelist  & FDS 6 Parameter & Notes \\
 Namelist  & FDS 5 Parameter & Namelist  & FDS 6 Parameter & Notes \\
 \hline
 \endhead
-{\ct CLIP}    & {\ct MAXIMUM\_MASS\_FRACTION}   &                     & Eliminated                                  &                                              \\ \hline
-{\ct CLIP}    & {\ct MINIMUM\_MASS\_FRACTION}   &                     & Eliminated                                  &                                              \\ \hline
-{\ct DUMP}    & {\ct STATE\_FILE}               &                     & Eliminated                                  &                                              \\ \hline
-{\ct MATL}    & {\ct NU\_FUEL}                  &  {\ct MATL}        & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            & See Section~\ref{info:solid_pyrolysis}       \\ \hline
-{\ct MATL}    & {\ct NU\_GAS}                   &  {\ct MATL}        & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            & See Section~\ref{info:solid_pyrolysis}       \\ \hline
-{\ct MATL}    & {\ct NU\_RESIDUE}               &  {\ct MATL}        & {\ct NU\_MATL}                              & See Section~\ref{info:solid_pyrolysis}       \\ \hline
-{\ct MATL}    & {\ct NU\_WATER}                 &  {\ct MATL}        & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            & See Section~\ref{info:solid_pyrolysis}       \\ \hline
-{\ct MATL}    & {\ct RESIDUE}                   &  {\ct MATL}        & {\ct MATL\_ID}                              & See Section~\ref{info:solid_pyrolysis}       \\ \hline
-{\ct MISC}    & {\ct BACKGROUND\_SPECIES}       &  {\ct SPEC}        & {\ct BACKGROUND=.TRUE.}                     & See Section~\ref{info:SPEC}                  \\ \hline
-{\ct MISC}    & {\ct CONDUCTIVITY}              &  {\ct SPEC}        & {\ct CONDUCTIVITY}                          & See Section~\ref{info:SPEC}                  \\ \hline
-{\ct MISC}    & {\ct CO\_PRODUCTION}            &  {\ct REAC}        & {\ct CO\_PRODUCTION}                        & See Section~\ref{info:CO}                    \\ \hline
-{\ct MISC}    & {\ct HUMIDITY}                  &  {\ct SPEC}        & {\ct HUMIDITY}                              & See Section~\ref{info:SPEC}                  \\ \hline
-{\ct MISC}    & {\ct ISOTHERMAL}                &                     & Eliminated                                  &                                              \\ \hline
-{\ct MISC}    & {\ct MW}                        &  {\ct SPEC}        & {\ct MW}                                    & See Section~\ref{info:SPEC}                  \\ \hline
-{\ct MISC}    &{\ct PRESSURE\_CORRECTION}       &                    &  Eliminated                                  &                                              \\ \hline
-{\ct MISC}    & {\ct RADIATION}                 &  {\ct RADI}        & {\ct RADIATION}                             & Same functionality                           \\ \hline
-{\ct MISC}    & {\ct EVAC\_SURF\_DEFAULT}       &  {\ct SURF}        & {\ct EVAC\_DEFAULT}                             & See Section~\ref{info:SURF}                  \\ \hline
-{\ct MISC}    & {\ct SURF\_DEFAULT}             &  {\ct SURF}        & {\ct DEFAULT}                             & See Section~\ref{info:SURF}                  \\ \hline
-{\ct MISC}    & {\ct SUPPRESSION}               &  {\ct REAC}        & {\ct SUPPRESSION}                           & See Section~\ref{info:extinction}            \\ \hline
-{\ct MISC}    & {\ct VISCOSITY}                 &  {\ct SPEC}        &  {\ct VISCOSITY}                             & See Section~\ref{info:SPEC}                  \\ \hline
-{\ct PART}    & {\ct DROPLETS\_PER\_SECOND}     &  {\ct PROP}        & {\ct DROPLETS\_PER\_SECOND}                 & See Section~\ref{info:sprinkler_droplets}    \\ \hline
-{\ct PART}    & {\ct HEAT\_OF\_VAPORIZARTION}     &  {\ct SPEC}        &  {\ct HEAT\_OF\_VAPORIZARTION}                 & See Section~\ref{thermal_part_props}    \\ \hline
-{\ct PART}    & {\ct H\_V\_REFERENCE\_TEMPERATURE} &  {\ct SPEC}        &   {\ct H\_V\_REFERENCE\_TEMPERATURE}          & See Section~\ref{thermal_part_props}    \\ \hline
-{\ct PART}    & {\ct MELTING\_TEMPERATURE}        &  {\ct SPEC}        & {\ct MELTING\_TEMPERATURE}                  & See Section~\ref{thermal_part_props}    \\ \hline
-{\ct PART}    & {\ct NUMBER\_INITIAL\_DROPLETS} &  {\ct PROP}        & {\ct NUMBER\_INITIAL\_DROPLETS}             & See Section~\ref{info:initial_droplets}      \\ \hline
-{\ct PART}    & {\ct SPECIFIC\_HEAT}    &  {\ct SPEC}        & {\ct SPECIFIC\_HEAT\_LIQUID}                & See Section~\ref{thermal_part_props}    \\ \hline
-{\ct PART}    & {\ct VAPORIZATION\_TEMPERATURE}  &  {\ct SPEC}        & {\ct VAPORIZATION\_TEMPERATURE}              & See Section~\ref{thermal_part_props}    \\ \hline
-{\ct REAC}    & {\ct MAXIMUM\_VISIBILITY}       &  {\ct MISC}        &  {\ct MAXIMUM\_VISIBILITY}                             & Same functionality                  \\ \hline
-{\ct REAC}    & {\ct VISIBILITY\_FACTOR}        &  {\ct MISC}        &  {\ct MAXIMUM\_VISIBILITY}                             & Same functionality                  \\ \hline
-{\ct TIME}    & {\ct TWFIN}                     &  {\ct TIME}        & {\ct T\_END}                                & See Section~\ref{info:TIME}                  \\ \hline
-{\ct VENT}    & {\ct MASS\_FRACTION}            &                     & Eliminated                                  &                                              \\ \hline
+{\ct CLIP}    & {\ct MAXIMUM\_MASS\_FRACTION}   &              & Eliminated                                  &                                              \\ \hline
+{\ct CLIP}    & {\ct MINIMUM\_MASS\_FRACTION}   &              & Eliminated                                  &                                              \\ \hline
+{\ct DUMP}    & {\ct STATE\_FILE}               &              & Eliminated                                  &                                              \\ \hline
+{\ct MATL}    & {\ct NU\_FUEL}                  &  {\ct MATL}  & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            & See Section~\ref{info:solid_pyrolysis}       \\ \hline
+{\ct MATL}    & {\ct NU\_GAS}                   &  {\ct MATL}  & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            & See Section~\ref{info:solid_pyrolysis}       \\ \hline
+{\ct MATL}    & {\ct NU\_RESIDUE}               &  {\ct MATL}  & {\ct NU\_MATL}                              & See Section~\ref{info:solid_pyrolysis}       \\ \hline
+{\ct MATL}    & {\ct NU\_WATER}                 &  {\ct MATL}  & {\ct NU\_SPEC} +  {\ct SPEC\_ID}            & See Section~\ref{info:solid_pyrolysis}       \\ \hline
+{\ct MATL}    & {\ct RESIDUE}                   &  {\ct MATL}  & {\ct MATL\_ID}                              & See Section~\ref{info:solid_pyrolysis}       \\ \hline
+{\ct MISC}    & {\ct BACKGROUND\_SPECIES}       &  {\ct SPEC}  & {\ct BACKGROUND=.TRUE.}                     & See Section~\ref{info:SPEC}                  \\ \hline
+{\ct MISC}    & {\ct CONDUCTIVITY}              &  {\ct SPEC}  & {\ct CONDUCTIVITY}                          & See Section~\ref{info:SPEC}                  \\ \hline
+{\ct MISC}    & {\ct CO\_PRODUCTION}            &  {\ct REAC}  & {\ct CO\_PRODUCTION}                        & See Section~\ref{info:CO}                    \\ \hline
+{\ct MISC}    & {\ct HUMIDITY}                  &  {\ct SPEC}  & {\ct HUMIDITY}                              & See Section~\ref{info:SPEC}                  \\ \hline
+{\ct MISC}    & {\ct ISOTHERMAL}                &              & Eliminated                                  &                                              \\ \hline
+{\ct MISC}    & {\ct MW}                        &  {\ct SPEC}  & {\ct MW}                                    & See Section~\ref{info:SPEC}                  \\ \hline
+{\ct MISC}    &{\ct PRESSURE\_CORRECTION}       &              &  Eliminated                                  &                                              \\ \hline
+{\ct MISC}    & {\ct RADIATION}                 &  {\ct RADI}  & {\ct RADIATION}                             & Same functionality                           \\ \hline
+{\ct MISC}    & {\ct EVAC\_SURF\_DEFAULT}       &  {\ct SURF}  & {\ct EVAC\_DEFAULT}                             & See Section~\ref{info:SURF}                  \\ \hline
+{\ct MISC}    & {\ct SURF\_DEFAULT}             &  {\ct SURF}  & {\ct DEFAULT}                             & See Section~\ref{info:SURF}                  \\ \hline
+{\ct MISC}    & {\ct SUPPRESSION}               &  {\ct REAC}  & {\ct SUPPRESSION}                           & See Section~\ref{info:extinction}            \\ \hline
+{\ct MISC}    & {\ct VISCOSITY}                 &  {\ct SPEC}  &  {\ct VISCOSITY}                             & See Section~\ref{info:SPEC}                  \\ \hline
+{\ct PART}    & {\ct DROPLETS\_PER\_SECOND}     &  {\ct PROP}  & {\ct DROPLETS\_PER\_SECOND}                 & See Section~\ref{info:sprinkler_droplets}    \\ \hline
+{\ct PART}    & {\ct HEAT\_OF\_VAPORIZARTION}   &  {\ct SPEC}  &  {\ct HEAT\_OF\_VAPORIZARTION}                 & See Section~\ref{thermal_part_props}    \\ \hline
+{\ct PART}    & {\ct H\_V\_REFERENCE\_TEMPERATURE} &  {\ct SPEC} &   {\ct H\_V\_REFERENCE\_TEMPERATURE}          & See Section~\ref{thermal_part_props}    \\ \hline
+{\ct PART}    & {\ct MELTING\_TEMPERATURE}        &  {\ct SPEC}  & {\ct MELTING\_TEMPERATURE}                  & See Section~\ref{thermal_part_props}    \\ \hline
+{\ct PART}    & {\ct NUMBER\_INITIAL\_DROPLETS} &  {\ct PROP}  & {\ct NUMBER\_INITIAL\_DROPLETS}             & See Section~\ref{info:initial_droplets}      \\ \hline
+{\ct PART}    & {\ct SPECIFIC\_HEAT}    &  {\ct SPEC}          & {\ct SPECIFIC\_HEAT\_LIQUID}                & See Section~\ref{thermal_part_props}    \\ \hline
+{\ct PART}    & {\ct VAPORIZATION\_TEMPERATURE}  &  {\ct SPEC} & {\ct VAPORIZATION\_TEMPERATURE}              & See Section~\ref{thermal_part_props}    \\ \hline
+{\ct PROP}    & {\ct DT\_INSERT}                &              & Eliminated                                   &                               \\ \hline
+{\ct REAC}    & {\ct MAXIMUM\_VISIBILITY}       &  {\ct MISC}  &  {\ct MAXIMUM\_VISIBILITY}                             & Same functionality                  \\ \hline
+{\ct REAC}    & {\ct VISIBILITY\_FACTOR}        &  {\ct MISC}  &  {\ct MAXIMUM\_VISIBILITY}                             & Same functionality                  \\ \hline
+{\ct TIME}    & {\ct TWFIN}                     &  {\ct TIME}  & {\ct T\_END}                                & See Section~\ref{info:TIME}                  \\ \hline
+{\ct VENT}    & {\ct MASS\_FRACTION}            &              & Eliminated                                  &                                              \\ \hline
 \end{longtable}
 
 

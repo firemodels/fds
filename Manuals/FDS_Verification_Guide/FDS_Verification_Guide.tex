@@ -1581,6 +1581,23 @@ In the test case, we inject propane into a cube with 1 m$^2$ vents on all six fa
 \label{fig_low_flux_hot_gas_filling}
 \end{figure}
 
+\section{Yield of combustion products from a Methane flame (Methane\_flame)}
+
+A simple methane flame with 10 \% CO yield is burned inside a closed cavity for 5 seconds. 
+The total mass of CO$_2$, H$_2$O and CO is measured. 
+The same simulations is performed using the three alternative ways 
+to define the combustion reaction: simple chemistry, primitive species and lumped species. The
+same amount of species should be produced in each case. The following two figures compare the 
+mass of three combustion products. First figure shows the comparison simple vs. primitive and the second for simple vs. lumped.
+\begin{figure}[h]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/Methane_flame_simple_primitive}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/Methane_flame_simple_lumped}
+\end{tabular*}
+\caption[Yield of combustion products using three alternative definitions of the same chemistry.]{The cumulation of combustion product mass using three alternative definitions of the combustion chemistry. (Left) Simple chemistry vs. primitive species. (Right) Simple chemistry vs. lumped spcies. }
+\label{fig_methane_flame_yields}
+\end{figure}
+
 
 \section{Fractional Effective Dose (FED) and Fractional Irritant Concentration (FIC) (\texorpdfstring{{\bf FED\_FIC}}{FED\_FIC}) }
 \label{FED_FIC}
