@@ -11,7 +11,7 @@ USE MEMORY_FUNCTIONS, ONLY: ChkMemErr
 USE COMP_FUNCTIONS, ONLY: GET_INPUT_FILE
 USE MISC_FUNCTIONS, ONLY: SEARCH_CONTROLLER
 USE EVAC, ONLY: READ_EVAC
-USE HVAC_ROUTINES, ONLY: READ_HVAC
+USE HVAC_ROUTINES, ONLY: READ_HVAC,PROC_HVAC
  
 IMPLICIT NONE
 PRIVATE
@@ -116,11 +116,12 @@ CALL READ_OBST
 CALL READ_VENT
 CALL READ_ZONE
 CALL READ_EVAC(2)
+CALL READ_HVAC
 CALL PROC_SURF_1  ! Set up SURFace constructs for species
 CALL READ_RAMP    ! Read in all RAMPs, assuming they have all been identified previously
 CALL PROC_SMIX
+CALL PROC_HVAC
 CALL PROC_PART    ! Set up various PARTicle constructs
-CALL READ_HVAC
 CALL READ_TABL   ! Read in all TABLs, assuming they have all been identified previously
 CALL PROC_MATL    ! Set up various MATeriaL constructs
 CALL PROC_SURF_2  ! Set up remaining SURFace constructs
