@@ -33,25 +33,19 @@ echo filling distribution directory
 IF EXIST %smvdir% rmdir /S /Q %smvdir%
 mkdir %smvdir%
 
-echo copying smv5_win_test_%platform%.exe
-copy ..\bin\smv5_win_test_%platform%.exe %smvdir%\smokeview.exe
+echo copying smokeview_win_test_%platform%.exe
+copy ..\Build\INTEL_WIN_TEST_%platform%\smokeview_win_test_%platform%.exe %smvdir%\smokeview.exe
+Rem Use following line (and delete above line) after FDS6 is released
+Rem copy ..\Build\INTEL_WIN_TEST_%platform%\smokeview_win_test_%platform%.exe %smvdir%\smokeview_win_%platform%.exe
 
-if "%platform%"=="32" echo copying smokediff.exe
-if "%platform%"=="32" copy ..\..\Utilities\smokediff\INTEL_WIN_%platform%\smokediff.exe %smvdir%\smokediff.exe
-if "%platform%"=="64" echo copying smokediff_win_64.exe
-if "%platform%"=="64" copy ..\..\Utilities\smokediff\INTEL_WIN_%platform%\smokediff_win_64.exe %smvdir%\smokediff.exe
-Rem if "%platform%"=="64" copy ..\..\Utilities\smokediff\INTEL_WIN_%platform%\smokediff_win_64.exe %smvdir%\smokediff_win_64.exe
+echo copying smokediff_win_%platform%.exe
+copy ..\..\Utilities\smokediff\INTEL_WIN_%platform%\smokediff_win_%platform%.exe %smvdir%\smokediff_win_%platform%.exe
 
-if "%platform%"=="32" echo copying smokezip.exe
-if "%platform%"=="32" copy ..\..\Utilities\smokezip\INTEL_WIN_%platform%\smokezip.exe %smvdir%\smokezip.exe
-if "%platform%"=="64" echo copying smokezip_win_64.exe
-if "%platform%"=="64" copy ..\..\Utilities\smokezip\INTEL_WIN_%platform%\smokezip_win_64.exe %smvdir%\smokezip.exe
-Rem if "%platform%"=="64" copy ..\..\Utilities\smokezip\INTEL_WIN_%platform%\smokezip_win_64.exe %smvdir%\smokezip_win_64.exe
+echo copying smokezip_win_%platform%.exe
+copy ..\..\Utilities\smokezip\INTEL_WIN_%platform%\smokezip_win_%platform%.exe %smvdir%\smokezip_win_%platform%.exe
 
-if "%platform%"=="32" echo copying background.exe
-if "%platform%"=="32" copy ..\..\Utilities\background\INTEL_WIN_32\background.exe %smvdir%\background.exe
-if "%platform%"=="64" echo copying background.exe
-if "%platform%"=="64" copy ..\..\Utilities\background\INTEL_WIN_64\background.exe %smvdir%\background.exe
+echo copying background.exe
+copy ..\..\Utilities\background\INTEL_WIN_%platform%\background.exe %smvdir%\background.exe
 
 echo copying objects.svo
 copy objects.svo %smvdir%\.
