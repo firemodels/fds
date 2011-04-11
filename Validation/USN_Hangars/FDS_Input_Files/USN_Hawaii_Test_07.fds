@@ -51,7 +51,7 @@
 &SURF ID= 'BURNER'
       COLOR= 'RED'
       TAU_Q= 180,
-      HRRPUA=1780. /
+      TMP_FRONT=1000., HRRPUA=1780. /
 
 
 I-Beam
