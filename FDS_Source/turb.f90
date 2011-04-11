@@ -1141,6 +1141,18 @@ VENT_LOOP: DO NV=1,MESHES(NM)%N_VENT
    VT%U_EDDY = VT%U_EDDY*VOLUME_WEIGHTING_FACTOR(1)
    VT%V_EDDY = VT%V_EDDY*VOLUME_WEIGHTING_FACTOR(2)
    VT%W_EDDY = VT%W_EDDY*VOLUME_WEIGHTING_FACTOR(3)
+   
+   ! subtract mean from normal components so that fluctuations do not affect global volume flow
+   
+   SELECT CASE (ABS(VT%IOR))
+      CASE(1)
+         VT%U_EDDY = VT%U_EDDY - SUM(VT%U_EDDY)/SIZE(VT%U_EDDY)
+      CASE(2)
+         VT%V_EDDY = VT%V_EDDY - SUM(VT%V_EDDY)/SIZE(VT%V_EDDY)
+      CASE(3)
+         VT%W_EDDY = VT%W_EDDY - SUM(VT%W_EDDY)/SIZE(VT%W_EDDY)
+   END SELECT
+
 
 ENDDO VENT_LOOP
 
