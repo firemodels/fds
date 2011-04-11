@@ -3,7 +3,7 @@ Title Cleaning FDS for 32 bit Windows
 
 Rem Batch file used to clean 32 and 64 bit FDS build directories
 
-set envfile="%homedrive%\%homepath%"\fds_smv_env.bat
+set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
 echo ***Fatal error.  The environment setup file %envfile% does not exist. 
 echo Create a file named %envfile% and use SMV/scripts/fds_smv_env_template.bat
