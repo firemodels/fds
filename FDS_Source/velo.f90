@@ -1475,9 +1475,8 @@ EDGE_LOOP: DO IE=1,N_EDGES
                PROFILE_FACTOR = 1._EB
                IF (SF%PROFILE==ATMOSPHERIC) PROFILE_FACTOR = (MAX(0._EB,ZC(KK)-GROUND_LEVEL)/SF%Z0)**SF%PLE
                RAMP_T = EVALUATE_RAMP(TSI,SF%TAU(TIME_VELO),SF%RAMP_INDEX(TIME_VELO))
-               IF (IEC==1 .OR. (IEC==2 .AND. ICD==2)) VEL_T = SF%VEL_T(2) + VEL_EDDY
-               IF (IEC==3 .OR. (IEC==2 .AND. ICD==1)) VEL_T = SF%VEL_T(1) + VEL_EDDY
-               VEL_T = PROFILE_FACTOR*RAMP_T*VEL_T
+               IF (IEC==1 .OR. (IEC==2 .AND. ICD==2)) VEL_T = RAMP_T*(PROFILE_FACTOR*SF%VEL_T(2) + VEL_EDDY)
+               IF (IEC==3 .OR. (IEC==2 .AND. ICD==1)) VEL_T = RAMP_T*(PROFILE_FACTOR*SF%VEL_T(1) + VEL_EDDY)
             ENDIF VEL_T_IF
  
             ! Choose the appropriate boundary condition to apply
