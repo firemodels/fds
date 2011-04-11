@@ -6,12 +6,12 @@ echo.
 echo Press any key to begin test.
 pause >NUL
 
-set envfile="%homedrive%\%homepath%"\fds_smv_env.bat
+set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
 echo The file fds_smv_env.bat was not found in your
-echo home directory: %homedrive%\%homepath%
+echo home directory: %userprofile%
 echo.
-echo 1.  Copy it from SMV\for_bundle in the repository to %homedrive%\%homepath%
+echo 1.  Copy it from SMV\for_bundle in the repository to %userprofile%
 echo 2.  Then edit it to match your configuration.
 echo 3.  Then repeat this test.
 echo. Press any key to continue.

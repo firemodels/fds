@@ -2,7 +2,7 @@
 
 Rem Batch file used to create a self-extracting archive containing FDS
 
-set envfile="%homedrive%\%homepath%"\fds_smv_env.bat
+set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
 echo ***Fatal error.  The environment setup file %envfile% does not exist. 
 echo Create a file named %envfile% and use SMV/scripts/fds_smv_env_template.bat

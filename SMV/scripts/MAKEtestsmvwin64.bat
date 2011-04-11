@@ -4,7 +4,7 @@ Rem  Windows batch file to build a test Smokeview for Windows 64
 
 Rem setup environment variables (defining where repository resides etc) 
 
-set envfile="%homedrive%\%homepath%"\fds_smv_env.bat
+set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
 echo ***Fatal error.  The environment setup file %envfile% does not exist. 
 echo Create a file named %envfile% and use SMV/scripts/fds_smv_env_template.bat
@@ -25,7 +25,6 @@ echo Using SVN revision %smv_revision% to build a test 64 bit Windows Smokeview
 cd %svn_root%\smv\source\smokeview
 
 cd %svn_root%\smv\Build\INTEL_WIN_TEST_64
-erase *.obj
 call make_smv
 copy %svn_root%\smv\bin\smv5_win_test_64.exe %svn_root%\smv\for_bundle\smokeview64_test.exe
 
