@@ -53,7 +53,7 @@ Note: Below TAU_Q is a guess, data is unavailible due to the scale of the fire.
 &SURF ID= 'BURNER'
       COLOR= 'RED'
       TAU_Q= 120,
-      HRRPUA=1559 /
+      TMP_FRONT=1000., HRRPUA=1559 /
 
 Burner
 &OBST XB=-2.3,2.3,-2.3,2.3,0.0,0.2, SURF_IDS='BURNER','STEEL','STEEL'/

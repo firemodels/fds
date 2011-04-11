@@ -52,7 +52,7 @@
 &SURF ID= 'BURNER'
       COLOR= 'RED'
       TAU_Q= 120,
-      HRRPUA=2500. /
+      TMP_FRONT=1000., HRRPUA=2500. /
 
 Burner
 &OBST XB=-0.3,0.3,-0.3,0.3,0.0,0.2, SURF_IDS='BURNER','STEEL','STEEL'/
