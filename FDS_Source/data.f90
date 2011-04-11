@@ -2131,11 +2131,11 @@ SELECT CASE(GAS_NAME)
    CASE('HYDROGEN BROMIDE')   
       SIGMA=3.353_EB
       EPSOK=449._EB
-      FORMULA='HBR'  
+      FORMULA='HBr'  
    CASE('HYDROGEN CHLORIDE')   
       SIGMA=3.339_EB
       EPSOK=344.7_EB
-      FORMULA='HCL'  
+      FORMULA='HCl'  
    CASE('HYDROGEN CYANIDE')   
       SIGMA=3.63_EB
       EPSOK=569.1_EB
@@ -2505,12 +2505,14 @@ DO WHILE (I <= LEN1)
       I=J
    ELSE SUBUNIT_SEARCH 
       ELEMENT_NAME = '   '
-      IF(IACHAR(FORMULA(I+2:I+2))<=IACHAR('z') .AND. IACHAR(FORMULA(I+2:I+2))>=IACHAR('a')) THEN
-         WRITE(ELEMENT_NAME,'(A)') FORMULA(I:I+2)
-         I=I+3
-      ELSEIF(IACHAR(FORMULA(I+1:I+1))<=IACHAR('z') .AND. IACHAR(FORMULA(I+1:I+1))>=IACHAR('a')) THEN
-         WRITE(ELEMENT_NAME,'(A)') FORMULA(I:I+1)
-         I=I+2
+      IF(IACHAR(FORMULA(I+1:I+1))<=IACHAR('z') .AND. IACHAR(FORMULA(I+1:I+1))>=IACHAR('a')) THEN
+         IF(IACHAR(FORMULA(I+2:I+2))<=IACHAR('z') .AND. IACHAR(FORMULA(I+2:I+2))>=IACHAR('a')) THEN
+            WRITE(ELEMENT_NAME,'(A)') FORMULA(I:I+2)
+            I=I+3
+         ELSE
+            WRITE(ELEMENT_NAME,'(A)') FORMULA(I:I+1)
+            I=I+2
+         ENDIF
       ELSE
          WRITE(ELEMENT_NAME,'(A)') FORMULA(I:I)
          I=I+1
