@@ -2713,12 +2713,15 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       IF (RN%NU(NS) < -ZERO_P) MASS_REACTANT = MASS_REACTANT + RN%NU(NS)*SPECIES_MIXTURE(NS)%MW
       IF (RN%NU(NS) >  ZERO_P) MASS_PRODUCT  = MASS_PRODUCT  + RN%NU(NS)*SPECIES_MIXTURE(NS)%MW
    ENDDO  
-   IF (MASS_PRODUCT > ZERO_P .AND. MASS_REACTANT < -ZERO_P) THEN
-      IF ((MASS_PRODUCT+MASS_REACTANT)/MASS_PRODUCT > 1.E-4_EB) THEN
-         WRITE(MESSAGE,'(A,I3,A,F8.3,A,F8.3)') 'ERROR: Problem with REAC ',NR,'. Mass of products, ',MASS_PRODUCT, &
-            ', does not equal mass of reactants,',-MASS_REACTANT
-         CALL SHUTDOWN(MESSAGE)
-      ENDIF
+   IF (ABS(MASS_PRODUCT) < ZERO_P .OR. ABS(MASS_REACTANT) < ZERO_P) THEN
+      IF (ABS(MASS_PRODUCT) <ZERO_P) WRITE(MESSAGE,'(A,I3,A)') 'ERROR: Problem with REAC ',NR,'. Products not specified.'
+      IF (ABS(MASS_REACTANT)<ZERO_P) WRITE(MESSAGE,'(A,I3,A)') 'ERROR: Problem with REAC ',NR,'. Reactants not specified.'
+      CALL SHUTDOWN(MESSAGE)
+   ENDIF
+   IF (ABS(MASS_PRODUCT+MASS_REACTANT)/ABS(MASS_PRODUCT) > 1.E-4_EB) THEN
+      WRITE(MESSAGE,'(A,I3,A,F8.3,A,F8.3)') 'ERROR: Problem with REAC ',NR,'. Mass of products, ',MASS_PRODUCT, &
+         ', does not equal mass of reactants,',-MASS_REACTANT
+      CALL SHUTDOWN(MESSAGE)
    ENDIF
 
    ! Compute the primitive species reaction coefficients
@@ -8089,14 +8092,18 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
    CALL SET_DEVC_DEFAULTS
    READ(LU_INPUT,DEVC) 
 
-   ! Error statement of POINTS>1 and XB not specified
+   ! Error statement involving POINTS
 
    IF (POINTS>1 .AND. ANY(XB<-1.E5_EB)) THEN
       WRITE(MESSAGE,'(A,A,A)')  'ERROR: DEVC ',TRIM(ID),' must have coordinates given in terms of XB'
       CALL SHUTDOWN(MESSAGE)
    ENDIF
-   IF (POINTS>1 .AND. STATISTICS/='null') THEN
+   IF (POINTS>1 .AND. STATISTICS/='null' .AND. STATISTICS/='RMS') THEN
       WRITE(MESSAGE,'(A,A,A)')  'ERROR: DEVC ',TRIM(ID),' cannot use POINTS>1 and STATISTICS at the same time'
+      CALL SHUTDOWN(MESSAGE)
+   ENDIF
+   IF (POINTS<2 .AND. STATISTICS=='RMS') THEN
+      WRITE(MESSAGE,'(A,A,A)')  'ERROR: DEVC ',TRIM(ID),' cannot compute RMS STATISTICS. Set POINTS>1.'
       CALL SHUTDOWN(MESSAGE)
    ENDIF
 
@@ -8175,7 +8182,6 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
       DV%CONVERSION_FACTOR= CONVERSION_FACTOR
       DV%DEPTH            = DEPTH
       DV%IOR              = IOR
-      IF (ID=='null') WRITE(ID,'(A7,I4.4)') 'Device_',N_DEVC
       DV%ID               = ID
       IF (POINTS>1)DV%LINE= N_DEVC_LINE
       DV%POINT            = I_POINT
@@ -8535,6 +8541,7 @@ END SUBROUTINE PROC_OBST
 SUBROUTINE PROC_DEVC
 
 ! Process the DEViCes
+
 USE COMP_FUNCTIONS, ONLY : CHANGE_UNITS
 USE CONTROL_VARIABLES
 USE DEVICE_VARIABLES, ONLY : DEVICE_TYPE, DEVICE, N_DEVC, PROPERTY, PROPERTY_TYPE, N_PROP, &
@@ -8557,6 +8564,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
    DV => DEVICE(N)
    
    ! Check for HVAC outputs with no HVAC inputs
+
    IF ((DV%DUCT_ID/='null' .OR. DV%NODE_ID(1)/='null') .AND. .NOT. HVAC_SOLVE) THEN
       WRITE(MESSAGE,'(A)')  'ERROR: HVAC outputs specified with no HVAC inputs'
       CALL SHUTDOWN(MESSAGE)
@@ -8615,7 +8623,8 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
          CALL SHUTDOWN(MESSAGE)
       ENDIF
 
-      IF (QUANTITY_INDEX > 0 .AND. DV%STATISTICS/='null' .AND. DV%STATISTICS/='TIME INTEGRAL' .AND. DV%I1<0) THEN
+      IF (QUANTITY_INDEX > 0 .AND. DV%STATISTICS/='null' .AND. DV%STATISTICS/='TIME INTEGRAL' .AND. &
+          DV%STATISTICS/='RMS' .AND. DV%I1<0) THEN
          WRITE(MESSAGE,'(A,A)') 'ERROR: XB required when geometrical STATISTICS specified for gas DEVC ',TRIM(DV%ID)
          CALL SHUTDOWN(MESSAGE)
       ENDIF
