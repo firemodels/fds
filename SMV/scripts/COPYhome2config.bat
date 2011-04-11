@@ -18,9 +18,9 @@ goto:eof
 
 call %envfile%
 echo.
-echo copy %HOMEDRIVE%%HOMEPATH%\fds_smv_env.bat to %svn_root%\SMV\scripts\fds_smv_env.bat
+echo copy %userprofile%\fds_smv_env.bat to %svn_root%\SMV\scripts\fds_smv_env.bat
 pause
-copy %HOMEDRIVE%%HOMEPATH%\fds_smv_env.bat %svn_root%\SMV\scripts\fds_smv_env.bat
+copy %userprofile%\fds_smv_env.bat %svn_root%\SMV\scripts\fds_smv_env.bat
 echo.
 echo copy complete
 pause
