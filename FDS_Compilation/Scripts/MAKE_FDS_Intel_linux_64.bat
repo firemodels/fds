@@ -3,7 +3,7 @@ Title Building FDS for 64 bit Linux
 
 Rem Batch file used to build a 64 bit version of FDS
 
-set envfile="%homedrive%\%homepath%"\fds_smv_env.bat
+set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
 echo ***Fatal error.  The environment setup file %envfile% does not exist. 
 echo Create a file named %envfile% and use SMV/scripts/fds_smv_env_template.bat
