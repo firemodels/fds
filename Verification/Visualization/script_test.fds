@@ -14,7 +14,7 @@
       CONDUCTIVITY          = 0.1
       DENSITY               = 100.0
       N_REACTIONS           = 1
-      NU_SPEC=1., SPEC_ID='FUEL'
+      NU_SPEC=1., SPEC_ID='PROPANE'
       REFERENCE_TEMPERATURE = 350.
       HEAT_OF_REACTION      = 3000.
       HEAT_OF_COMBUSTION    = 15000. /
@@ -25,7 +25,7 @@
       CONDUCTIVITY          = 0.05
       DENSITY               = 40.0
       N_REACTIONS           = 1
-      NU_SPEC=1., SPEC_ID='FUEL'
+      NU_SPEC=1., SPEC_ID='PROPANE'
       REFERENCE_TEMPERATURE = 350.
       HEAT_OF_REACTION      = 1500.
       HEAT_OF_COMBUSTION    = 30000. /
@@ -73,6 +73,6 @@
 &SLCF PBZ=1.6,QUANTITY='TEMPERATURE',CELL_CENTERED=.TRUE. /
 &SLCF PBZ=3.2,QUANTITY='TEMPERATURE',CELL_CENTERED=.TRUE. /
 
-&BNDF QUANTITY='GAUGE_HEAT_FLUX' /   Common surface quantities. Good for monitoring fire spread.
+&BNDF QUANTITY='GAUGE HEAT FLUX' /   Common surface quantities. Good for monitoring fire spread.
 &BNDF QUANTITY='BURNING_RATE' /
-&BNDF QUANTITY='WALL_TEMPERATURE' /
+&BNDF QUANTITY='WALL TEMPERATURE' /

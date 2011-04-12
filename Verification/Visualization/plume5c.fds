@@ -19,7 +19,8 @@
       CONDUCTIVITY          = 0.1
       DENSITY               = 100.0
       N_REACTIONS           = 1
-      NU_SPEC=1., SPEC_ID='FUEL'
+      NU_SPEC               = 1.
+      SPEC_ID               = 'PROPANE'
       REFERENCE_TEMPERATURE = 350.
       HEAT_OF_REACTION      = 3000.
       HEAT_OF_COMBUSTION    = 15000. /
@@ -30,7 +31,8 @@
       CONDUCTIVITY          = 0.05
       DENSITY               = 40.0
       N_REACTIONS           = 1
-      NU_SPEC=1., SPEC_ID='FUEL'
+      NU_SPEC               = 1.
+      SPEC_ID               = 'PROPANE'
       REFERENCE_TEMPERATURE = 350.
       HEAT_OF_REACTION      = 1500.
       HEAT_OF_COMBUSTION    = 30000. /

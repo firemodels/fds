@@ -25,7 +25,7 @@
       DENSITY               = 100.0
       N_REACTIONS           = 1
       NU_SPEC               = 1.
-      SPEC_ID               = 'FUEL'
+      SPEC_ID               = 'PROPANE'
       REFERENCE_TEMPERATURE = 350.
       HEAT_OF_REACTION      = 3000.
       HEAT_OF_COMBUSTION    = 15000. /
@@ -37,7 +37,7 @@
       DENSITY               = 40.0
       N_REACTIONS           = 1
       NU_SPEC               = 1.
-      SPEC_ID               = 'FUEL'
+      SPEC_ID               = 'PROPANE'
       REFERENCE_TEMPERATURE = 350.
       HEAT_OF_REACTION      = 1500.
       HEAT_OF_COMBUSTION    = 30000. /
@@ -92,7 +92,7 @@ Reaction 3: "ACTIVE" solid is converted FUEL gases
       E(1:2)                = 1.505E5, 1.965E5
       HEAT_OF_REACTION(1:2) = 418.,    418.
       NU_SPEC(1,1:2)        = 0.65,    1.0
-      SPEC_ID(1,1:2)        = 'FUEL',  'FUEL'
+      SPEC_ID(1,1:2)        = 'PROPANE',  'PROPANE'
       NU_MATL               = 0.35
       MATL_ID               = 'CHAR' /  
 
@@ -214,11 +214,11 @@ Conductivity ramps
 &SLCF PBX=4.4,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
 &SLCF PBX=5.8,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
 
-&BNDF QUANTITY='HEAT FLUX' /
+&BNDF QUANTITY='NET HEAT FLUX' /
 &BNDF QUANTITY='BURNING RATE' /
 &BNDF QUANTITY='WALL TEMPERATURE' /
 
-&BNDF QUANTITY='HEAT FLUX' CELL_CENTERED=.TRUE. /
+&BNDF QUANTITY='NET HEAT FLUX' CELL_CENTERED=.TRUE. /
 &BNDF QUANTITY='BURNING RATE' CELL_CENTERED=.TRUE. /
 &BNDF QUANTITY='WALL TEMPERATURE' CELL_CENTERED=.TRUE. /
 
