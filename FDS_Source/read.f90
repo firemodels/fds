@@ -2697,7 +2697,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
    DO NS2=0,N_TRACKED_SPECIES
       IF (RN%NU(NS2)>0._EB) I_PRODUCTS = NS2
       DO NSPEC=1,N_SPECIES
-         IF (SPECIES_MIXTURE(NS2)%SPEC_ID(NSPEC)==RN%FUEL) THEN
+         IF (SPECIES_MIXTURE(NS2)%SPEC_ID(NSPEC)==RN%FUEL .OR. SPECIES_MIXTURE(NS2)%ID==RN%FUEL) THEN
             I_FUEL = NS2
             RN%FUEL_SMIX_INDEX = NS2
             RN%NU = -RN%NU/RN%NU(NS2)
@@ -2705,6 +2705,11 @@ REAC_LOOP: DO NR=1,N_REACTIONS
          ENDIF
       ENDDO
    ENDDO
+
+   IF (RN%FUEL/='null' .AND. I_FUEL<1) THEN
+      WRITE(MESSAGE,'(A,I3,A,F8.3,A,F8.3)') 'ERROR: Problem with REAC ',NR,'. Fuel ',TRIM(RN%FUEL),' not found.'
+      CALL SHUTDOWN(MESSAGE)
+   ENDIF
 
    ! Check the mass balance of the reaction
 
