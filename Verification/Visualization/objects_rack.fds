@@ -67,7 +67,7 @@ cable rack made with particles
       REFERENCE_TEMPERATURE = 450.
       MATL_ID               = 'CHAR'
       NU_MATL               = 0.40
-      SPEC_ID               = 'FUEL'
+      SPEC_ID               = 'PROPANE'
       NU_SPEC               = 0.60 /
 
 &MATL ID                    = 'CHAR'
