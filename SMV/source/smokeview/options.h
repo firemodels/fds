@@ -2,7 +2,7 @@
 // $Revision$
 // $Author$
 
-// build Smokeview as a standard release unless the pp_ALPHA or pp_BETA directives are defined
+// build Smokeview as a standard release unless the pp_BETA directive is defined
 
 #define pp_release
 
@@ -12,23 +12,22 @@
 #include "lint.h"
 #endif
 
-//*** turn on options that set version names
-#undef pp_BETA
-#define pp_BETA
+//*** uncomment the following two lines to force all versions to be beta
+//#undef pp_BETA
+//#define pp_BETA
 
 #ifdef pp_BETA
 #define SMVVERSION "Test"
 #undef pp_release
 #endif
 
-
 //*** turn on options that are being tested
 
 #ifdef pp_BETA
 // #define pp_GPU_VOLRENDER
+// #define pp_BENCHMARK
 #define pp_SLICECONTOURS
 #define pp_SHOWLIGHT
-// #define pp_BENCHMARK
 #endif
 
 #ifdef _DEBUG  // comment out following line if debugging REALLY large cases (to avoid memory checks)
@@ -38,7 +37,6 @@
 #ifdef pp_release
 #define SMVVERSION "5.6.3"
 #endif
-
 
 #define _CRT_SECURE_NO_DEPRECATE
 
