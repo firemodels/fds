@@ -11,7 +11,7 @@ export BASEDIR=`pwd`
 # uncomment following line to stop all cases
 #export STOPFDS=1
 
-scripts/SMV_Cases.csh
+scripts/SMV_Cases.sh
 
 echo FDS cases submitted
 
