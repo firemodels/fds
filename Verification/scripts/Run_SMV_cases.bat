@@ -1,5 +1,5 @@
 @echo off
-set svn_drive=d:
+set svn_drive=c:
 
 set SCRIPT_DIR=%CD%
 set BASEDIR=%CD%\..
@@ -7,9 +7,9 @@ set SVNROOT=%BASEDIR%\..\
 
 Rem Choose one of the following four FDS "definitions" by commenting all lines but one.
 
-Rem set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_32\fds5_win_32
-set FDSEXE=fds5
-Rem set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_64\fds5_win_64
+Rem set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_32\fds_win_32
+Rem set FDSEXE=fds_win_32
+set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_64\fds_win_64
 Rem set FDSEXE=fds5_win_64
 
 Rem Choose one of the following run options by commenting the line you don't want to use.
@@ -24,8 +24,8 @@ set RUNFDS=call %SVNROOT%\Utilities\Scripts\runfds_win32.bat
 echo You are about to run the Smokeview Verification Test Suite.
 pause > Nul
 
-echo creating FDS case list from SMV_Cases.csh
-..\..\Utilities\Data_Processing\csh2bat SMV_Cases.csh SMV_Cases.bat
+echo creating FDS case list from SMV_Cases.sh
+..\..\Utilities\Data_Processing\sh2bat SMV_Cases.sh SMV_Cases.bat
 
 cd %BASEDIR%
 

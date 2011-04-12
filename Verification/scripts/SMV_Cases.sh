@@ -1,4 +1,4 @@
-#!/bin/csh -f
+#!/bin/bash
 
 $RUNFDS Visualization capecod
 $RUNFDS Visualization colorbar
