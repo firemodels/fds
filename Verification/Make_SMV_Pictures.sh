@@ -1,9 +1,13 @@
-#!/bin/bash -f
+#!/bin/bash
 
+#PLATFORM=32
+#IPLATFORM=ia32
+PLATFORM=64
+IPLATFORM=intel64
 export SVNROOT=`pwd`/..
-export SMV=$SVNROOT/SMV/Build/INTEL_LINUX_64/smokeview_linux_64
-export SMOKEZIP=$SVNROOT/Utilities/smokezip/INTEL_LINUX_64/smokezip_linux_64
-export SMOKEDIFF=$SVNROOT/Utilities/smokediff/INTEL_LINUX_64/smokediff_linux_64
+export SMV=$SVNROOT/SMV/Build/INTEL_LINUX_$PLATFORM/smokeview_linux_$PLATFORM
+export SMOKEZIP=$SVNROOT/Utilities/smokezip/INTEL_LINUX_$PLATFORM/smokezip_linux_$PLATFORM
+export SMOKEDIFF=$SVNROOT/Utilities/smokediff/INTEL_LINUX_$PLATFORM/smokediff_linux_$PLATFORM
 export BACKGROUND=$SVNROOT/Utilities/background/INTEL_LINUX_32/background
 export RUNSMV=$SVNROOT/Utilities/Scripts/runsmv.sh
 export BASEDIR=`pwd`
@@ -29,23 +33,23 @@ if ! [ -e $BACKGROUND ]; then
 fi
 
 
-cd $SMVUG
-rm SCRIPT_FIGURES/*.png
-rm SCRIPT_FIGURES/*.help
-rm SCRIPT_FIGURES/*.version
-source ~/.bashrc_fds intel64
-$SMV -help > SCRIPT_FIGURES\smokeview.help
-$SMV -version > SCRIPT_FIGURES\smokeview.version
-$SMOKEZIP -help > SCRIPT_FIGURES\smokezip.help
-$SMOKEDIFF -help > SCRIPT_FIGURES\smokediff.help
-$SMOKEDIFF -v > SCRIPT_FIGURES\smokediff.version
-$BACKGROUND -help > SCRIPT_FIGURES\background.help
-$BACKGROUND -version > SCRIPT_FIGURES\background.version
+cd $SMVUG/SCRIPT_FIGURES
+rm -f *.png
+rm -f *.help
+rm -f *.version
+source ~/.bashrc_fds $IPLATFORM
+$SMV -help > smokeview.help
+$SMV -version > smokeview.version
+$SMOKEZIP -help > smokezip.help
+$SMOKEDIFF -help > smokediff.help
+$SMOKEDIFF -v > smokediff.version
+$BACKGROUND -help > background.help
+$BACKGROUND -version > background.version
 
-cd $SMVVG
-rm SCRIPT_FIGURES\*.version
-rm SCRIPT_FIGURES\*.png
-$SMV -version > SCRIPT_FIGURES\smokeview.version
+cd $SMVVG/SCRIPT_FIGURES
+rm -f *.version
+rm -f *.png
+$SMV -version > smokeview.version
 
 cd $SVNROOT/Verification
 ./SMV_Cases.sh
