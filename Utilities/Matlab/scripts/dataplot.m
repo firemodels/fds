@@ -208,8 +208,8 @@ for i=drange
                legend_position=get(legend_handle,'Position');
                if Legend_XYWidthHeight(1)>0; legend_position(1)=Legend_XYWidthHeight(1); end % X
                if Legend_XYWidthHeight(2)>0; legend_position(2)=Legend_XYWidthHeight(2); end % Y
-               legend_position(3)=Legend_XYWidthHeight(3); % Width
-               legend_position(4)=Legend_XYWidthHeight(4); % Height
+               if Legend_XYWidthHeight(3)>0; legend_position(3)=Legend_XYWidthHeight(3); end % Width
+               if Legend_XYWidthHeight(4)>0; legend_position(4)=Legend_XYWidthHeight(4); end % Height
                set(legend_handle,'Position',legend_position)
             end
         end
