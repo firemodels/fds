@@ -1,0 +1,81 @@
+Solid phase heat conduction and reaction calculation of a 0.9 cm thick 
+slab of plastic pyrolyzing under a heat flux of 50 kW/m2. 
+The calculation is purely for the solid phase. There is no gas phase 
+coupling -- just a fixed external heat flux of 50 kW/m2.
+
+WARNING: The material properties contained in this file are for 
+demonstration purposes only!  They may or may not be 
+representative of any particular material.
+
+
+&HEAD CHID='p22', TITLE='BLACKPMMA at 50 kW/m2, No Gas Phase Reaction' /
+
+&MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /  Mesh is just to make FDS run
+
+&TIME TWFIN=600., WALL_INCREMENT=1, DT=0.01 /  Force FDS to do solid phase calc every time step
+
+&MISC H_FIXED=0.0 /  No convective heat transfer
+
+&REAC ID='NO REACTION', Y_O2_INFTY=0.01 /  No gas phase reaction with 1% O2 concentration
+
+&DUMP DT_PL3D=10000000. /  No Plot3D output
+
+The plastic properties and surface designation
+
+comment       REFERENCE_RATE=0.10 REFERENCE_TEMPERATURE=375.
+comment      A(1) = 1.E8 E(1) = 0.
+comment ABSORPTION_COEFFICIENT=960.5      THRESHOLD_TEMPERATURE(1) = 330 N_T(1) = 0. 
+comment STRETCH_FACTOR = 2.0 CELL_SIZE_FACTOR = 0.01
+
+&MATL ID='BLACKPMMA'
+      ABSORPTION_COEFFICIENT=2700.
+      A(1) = 8.5E12
+      E(1) = 188000
+      EMISSIVITY=0.95
+      DENSITY=1190.
+      N_REACTIONS=1
+      NU_FUEL=1.
+      HEAT_OF_REACTION=868.
+      HEAT_OF_COMBUSTION=25200.
+      CONDUCTIVITY = 0.235
+      SPECIFIC_HEAT = 2.22
+
+&SURF ID='PMMA SLAB'
+      COLOR='BLACK'
+      BACKING='INSULATED'
+      MATL_ID='BLACKPMMA'
+      STRETCH_FACTOR = 2.0 
+      CELL_SIZE_FACTOR = 0.06
+      REGRID_FACTOR=1.0
+      THICKNESS=0.009 
+      EXTERNAL_FLUX=50 /  External Flux is ONLY for this simple demo exercise
+
+The actual designation of the material in the FDS domain
+
+&VENT XB=-0.05,0.05,-0.05,0.05,0.0,0.0, SURF_ID = 'PMMA SLAB' /
+
+Open up the domain on all sides except the bottom (ZMIN)
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+Output
+
+&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='CONVECTIVE_FLUX',  ID='cflux(net)' /
+&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='RADIATIVE_FLUX',   ID='rflux(net)' /
+&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='HEAT_FLUX',        ID='c+rflux(net)' /
+&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='WALL_TEMPERATURE', ID='temp' /
+&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='BURNING_RATE',     ID='burn' /
+&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='GAUGE_HEAT_FLUX',  ID='gauge' /
+&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='WALL_THICKNESS',   ID='thick' /
+
+&PROF XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='TEMPERATURE',      ID='Temperature' / 
+&PROF XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='DENSITY',          ID='Density' /
+
+
+&TAIL / 
+
+
