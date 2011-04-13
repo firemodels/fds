@@ -198,10 +198,19 @@ for i=drange
             set(legend_handle,'Interpreter','LaTeX');
             set(legend_handle,'Fontsize',Key_Font_Size);
             set(legend_handle,'Box','on');
-            if strcmp(parse(d1_Key),'Heskestad Correlation')
-                set(gca,'XTick',[1e-1 1e0 1e1 1e2 1e3 1e4])
-                legend_position=[3.53 0.88 2.57 1.00]; % [X Y Width Height]
-                set(legend_handle,'Position',legend_position)
+            if size(d1_Tick)>0
+               set(gca,'XTick',d1_Tick)
+            end
+            if size(d2_Tick)>0
+               set(gca,'YTick',d2_Tick)
+            end
+            if size(Legend_XYWidthHeight)>0
+               legend_position=get(legend_handle,'Position');
+               if Legend_XYWidthHeight(1)>0; legend_position(1)=Legend_XYWidthHeight(1); end % X
+               if Legend_XYWidthHeight(2)>0; legend_position(2)=Legend_XYWidthHeight(2); end % Y
+               legend_position(3)=Legend_XYWidthHeight(3); % Width
+               legend_position(4)=Legend_XYWidthHeight(4); % Height
+               set(legend_handle,'Position',legend_position)
             end
         end
         
