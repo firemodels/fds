@@ -1,7 +1,7 @@
-set intelbin="%IFORT_COMPILER11%\bin"
+@echo off
 
-call %intelbin%\ifortvars ia32
-if exist "%VS_COMPILER%\..\..\bin\vcvars32.bat" call "%VS_COMPILER%\..\..\bin\vcvars32.bat"
+call "%IFORT_COMPILER11%\bin\iclvars" intel64 vs2008
+call "%IFORT_COMPILER11%\bin\iclvars" ia32 vs2008
 
 icl -o sh2bat sh2bat.c
 pause
