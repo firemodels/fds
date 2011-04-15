@@ -7,9 +7,10 @@ IF "%SETUP_IFORT_COMPILER_IA32%"=="1" GOTO envexist
 set SETUP_IFORT_COMPILER_IA32=1
 
 echo Setting up compiler environment
+call "%IFORT_COMPILER11%\bin\ifortvars" intel64 vs2008
+call "%IFORT_COMPILER11%\bin\iclvars" intel64 vs2008
 call "%IFORT_COMPILER11%\bin\ifortvars" ia32 vs2008
 call "%IFORT_COMPILER11%\bin\iclvars" ia32 vs2008
-Rem if exist "%VS_COMPILER%\vcvars32x86_amd64.bat" call "%VS_COMPILER%\vcvars32x86_amd64"
 :envexist
 make -f ..\Makefile intel_win_32
 pause
