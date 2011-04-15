@@ -16,7 +16,7 @@ Yields       kg/kg fuel   kg
 &TIME T_END=10.0, DT=0.01 /
 
 &OBST XB = 0.3,0.7,0.3,0.7,0.0,0.10 SURF_IDS = 'BURNER','INERT','INERT' /
-&SURF ID = 'BURNER', SPEC_ID='METHANE',MASS_FLUX(1)=0.0125, RAMP_MF = 'HRR' / 
+&SURF ID = 'BURNER', HRRPUA=625., RAMP_Q = 'HRR' / 
 &RAMP ID = 'HRR' T = 0, F = 1 /
 &RAMP ID = 'HRR' T = 5, F = 1 /
 &RAMP ID = 'HRR' T = 5.01, F = 0 /
