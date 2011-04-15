@@ -2219,7 +2219,6 @@ READ_SMIX_LOOP: DO N=0,N_TRACKED_SPECIES
       SM%MW = SM%MW + SM%VOLUME_FRACTION(NS) * SPECIES(NS)%MW     
       SM%ATOMS = SM%ATOMS + SM%VOLUME_FRACTION(NS)*SPECIES(NS)%ATOMS 
    ENDDO     
-
    SM%RCON = R0/SM%MW
 
 ENDDO READ_SMIX_LOOP
@@ -2264,11 +2263,6 @@ IF (SIMPLE_CHEMISTRY .AND. N<=2) THEN
          FORMULA          = 'Z1'
          SPEC_ID(1)       = RN%FUEL
          MASS_FRACTION(1) = 1._EB
-         SPECIES_MIXTURE(1)%ATOMS = 0._EB
-         SPECIES_MIXTURE(1)%ATOMS(1) = RN%H
-         SPECIES_MIXTURE(1)%ATOMS(6) = RN%C
-         SPECIES_MIXTURE(1)%ATOMS(7) = RN%N
-         SPECIES_MIXTURE(1)%ATOMS(8) = RN%O
       CASE(2)
          ID                 = 'PRODUCTS'
          FORMULA            = 'Z2'
@@ -2769,14 +2763,16 @@ REAC_LOOP: DO NR=1,N_REACTIONS
    ENDIF
 
    ! Check atom balance of the reaction
-   REACTION_BALANCE = 0._EB
-   DO NS=0,N_TRACKED_SPECIES
-      REACTION_BALANCE = REACTION_BALANCE + RN%NU(NS)*SPECIES_MIXTURE(NS)%ATOMS
-   ENDDO
-   IF (ANY(ABS(REACTION_BALANCE)>1.E-5_EB)) THEN
-         WRITE(MESSAGE,'(A,I3,A)') 'ERROR: Problem with REAC ',NR,'. Unbalanced stoichiometry.'
-         CALL SHUTDOWN(MESSAGE)
-   ENDIF   
+   IF (.NOT. SIMPLE_CHEMISTRY) THEN
+      REACTION_BALANCE = 0._EB
+      DO NS=0,N_TRACKED_SPECIES
+         REACTION_BALANCE = REACTION_BALANCE + RN%NU(NS)*SPECIES_MIXTURE(NS)%ATOMS
+      ENDDO
+      IF (ANY(ABS(REACTION_BALANCE)>1.E-5_EB)) THEN
+            WRITE(MESSAGE,'(A,I3,A)') 'ERROR: Problem with REAC ',NR,'. Unbalanced stoichiometry.'
+            CALL SHUTDOWN(MESSAGE)
+      ENDIF   
+   ENDIF
 
    ! Check the mass balance of the reaction
 
