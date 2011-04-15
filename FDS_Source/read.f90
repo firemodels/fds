@@ -5232,8 +5232,8 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
       ENDDO   
    ENDIF
    IF (SF%HRRPUA>0._EB .OR. SF%MLRPUA>0._EB) THEN
-      IF (.NOT. SIMPLE_CHEMISTRY) THEN
-         WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' has HRRPUA or MLRPUA set and there is no simple chemistry REAC'
+      IF (N_REACTIONS > 1) THEN
+         WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' has HRRPUA or MLRPUA set and there is more than one reaction'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
       BURNING = .TRUE.
