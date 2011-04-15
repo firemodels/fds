@@ -5830,6 +5830,22 @@ of {\ct SPECIFIC\_ENTHALPY}.  In the absence of any of these parameters, the app
 values of {\ct 'AIR'} are assumed.  If the species listed in Table~\ref{tab:gasspecies}, is indicated as a liquid, that means that liquid thermo-physical
 properties do not need to be given for those species.
 
+The user is remdined of the following definitions:
+
+\begin{description}
+\item[{\ct SPECIFIC\_ENTHALPHY}] $h(T)=h(T_{ref})+\int_{T_ref}^T c_p(T)dT$
+\item[{\ct SPECIFIC\_HEAT}] $c_p(T)=\frac{dh(T)}{dT}$
+\item[average specific heat] $\bar{c_p(T)}=frac{h(T)}{T}$
+\end{description}
+
+Therefore, if the user wishes both the {\ct SPECIFIC\_HEAT} and the average specific heat to be a constant, then:
+
+\be \bar{c_p(T)}=frac{h(T)}{T} = \frac{h(T_{ref})+\int_{T_ref}^T c_p(T)dT}{T}=frac{h(T_{ref})-c_p T_{ref}}{T}+c_p \ee
+
+which means that the following must be true for {\ct SPECIFIC\_ENTHALPY}, and {\ct REFERENCE\_TEMPERATURE}:
+
+\be c_p T_{ref} = h(T_{ref}) \ee
+
 \begin{table}[ht]
 \begin{center}
 \caption[Optional Gas Species]{\bf Optional Gas Species~\cite{Reid:1}}

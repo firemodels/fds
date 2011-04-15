@@ -1447,7 +1447,7 @@ NAMELIST /MISC/ PR,SC,TMPA,GVEC,FYI, &
                 HRRPUVCUT_MAX,RUN_AVG_FAC,THERMOPHORETIC_DEPOSITION,TURBULENT_DEPOSITION, &
                 VEG_LEVEL_SET,CP_FTMP,HRRPUV_MAX_SMV,TERRAIN_IMAGE,NEW_EVAP, &
                 SCALAR_ENERGY_TOLERANCE,TKE_TOLERANCE,MEAN_FORCING,RFAC_FORCING,USE_MAX_FILTER_WIDTH, &
-                WFDS,OVERWRITE,UVW_FILE,MAXIMUM_VISIBILITY,VISIBILITY_FACTOR
+                WFDS,OVERWRITE,UVW_FILE,MAXIMUM_VISIBILITY,VISIBILITY_FACTOR,NEW_COMBUSTION
  
 ! Physical constants
  
@@ -1924,7 +1924,7 @@ SPEC_READ_LOOP: DO N=1,N_SPECIES
       WRITE(MESSAGE,'(A,I2,A)') 'ERROR: SPECies ',N,': Specify both RAMP_CP and SPECIFIC_ENTHALPY'
       CALL SHUTDOWN(MESSAGE)
    ENDIF
-   CALL GAS_PROPS(SS%ID,SS%SIG,SS%EPSK,SS%MW,SS%ABSORBING,SS%FORMULA,SS%LISTED,ATOM_COUNTS)  
+   CALL GAS_PROPS(SS%ID,SS%SIG,SS%EPSK,SS%MW,SS%ABSORBING,SS%FORMULA,SS%LISTED,SS%ATOMS)  
    CALL FED_PROPS(SS%ID,SS%FLD_LETHAL_DOSE,SS%FIC_CONCENTRATION)         
 
    IF (TRIM(SS%FORMULA)=='null') WRITE(SS%FORMULA,'(A,I2)') 'SPEC_',N
@@ -1997,7 +1997,6 @@ SPEC_READ_LOOP: DO N=1,N_SPECIES
    
 
 ENDDO SPEC_READ_LOOP      
-    
 
 CONTAINS
 
@@ -2179,12 +2178,12 @@ READ_SMIX_LOOP: DO N=0,N_TRACKED_SPECIES
    SM%MASS_FRACTION   = 0._EB
 
    Y_INDEX = -1
-
    DO NS = 1,N_SUB_SPECIES
       FIND_SPEC_ID: DO NS2 = 1,N_SPECIES
          IF (TRIM(SPECIES(NS2)%ID) == TRIM(SPEC_ID(NS))) THEN
             SM%SPEC_ID(NS2) = SPEC_ID(NS)
             Y_INDEX(NS)  = NS2
+            IF (N_SUB_SPECIES==1) SM%FORMULA = SPECIES(NS2)%FORMULA
             EXIT FIND_SPEC_ID
          ENDIF
       ENDDO FIND_SPEC_ID
@@ -2217,7 +2216,8 @@ READ_SMIX_LOOP: DO N=0,N_TRACKED_SPECIES
    SM%MW = 0._EB
    DO NS = 1,N_SPECIES
       SM%MASS_EXTINCTION_COEFFICIENT = SM%MASS_FRACTION(NS) * SPECIES(NS)%MASS_EXTINCTION_COEFFICIENT
-      SM%MW = SM%MW + SM%VOLUME_FRACTION(NS) * SPECIES(NS)%MW
+      SM%MW = SM%MW + SM%VOLUME_FRACTION(NS) * SPECIES(NS)%MW     
+      SM%ATOMS = SM%ATOMS + SM%VOLUME_FRACTION(NS)*SPECIES(NS)%ATOMS 
    ENDDO     
 
    SM%RCON = R0/SM%MW
@@ -2450,26 +2450,25 @@ SUBROUTINE READ_REAC
 USE PHYSICAL_FUNCTIONS, ONLY : AMBIENT_WATER_VAPOR
 USE PROPERTY_DATA, ONLY : ELEMENT,GET_FORMULA_WEIGHT,MAKE_PERIODIC_TABLE,SIMPLE_SPECIES_MW,GAS_PROPS
 CHARACTER(30) :: FUEL,FORMULA
-CHARACTER(30), TARGET  :: SMIX_ID(MAX_SPECIES)
-CHARACTER(30), POINTER, DIMENSION(:) :: SPEC_ID
+CHARACTER(30), TARGET  :: SMIX_ID(MAX_SPECIES),SPEC_ID(MAX_SPECIES)
+CHARACTER(255) :: EQUATION
 INTEGER :: NR,NS,NS2
-REAL(EB) :: SOOT_YIELD,CO_YIELD,Y_F_LFL,X_O2_LL,EPUMO2,BOF, &
+REAL(EB) :: SOOT_YIELD,CO_YIELD,Y_F_LFL,X_O2_LL,EPUMO2,A, &
             CRITICAL_FLAME_TEMPERATURE,HEAT_OF_COMBUSTION,NU(MAX_SPECIES),E,N_S(MAX_SPECIES),C,H,N,O, &
             AUTO_IGNITION_TEMPERATURE,THRESHOLD_TEMPERATURE,HUMIDITY,SOOT_H_FRACTION
 REAL(EB) :: E_TMP,S_TMP,ATOM_COUNTS(118),MW_FUEL=0._EB
 LOGICAL :: A_TMP,L_TMP
-NAMELIST /REAC/ E,BOF,HEAT_OF_COMBUSTION,FYI,FUEL,EPUMO2,ID, N_S, &
+NAMELIST /REAC/ E,A,HEAT_OF_COMBUSTION,FYI,FUEL,EPUMO2,ID, N_S, &
                 Y_O2_INFTY,CO_PRODUCTION,SOOT_DEPOSITION,SUPPRESSION, &
                 SOOT_YIELD,CO_YIELD,Y_F_LFL,X_O2_LL,CRITICAL_FLAME_TEMPERATURE,NU,SOOT_H_FRACTION, &
                 C,H,N,O,IDEAL, FORMULA,&
                 BETA_EDC,Y_P_MIN_EDC,HRRPUA_SHEET,HRRPUV_AVERAGE,FIXED_MIX_TIME, &
                 TAU_CHEM,TAU_FLAME,AUTO_IGNITION_TEMPERATURE, &
-                SMIX_ID,THRESHOLD_TEMPERATURE,Y_CO2_INFTY,HUMIDITY
+                SPEC_ID,SMIX_ID,THRESHOLD_TEMPERATURE,Y_CO2_INFTY,HUMIDITY,EQUATION
 
 CALL MAKE_PERIODIC_TABLE
 CALL SIMPLE_SPECIES_MW
 ATOM_COUNTS = 0._EB
-SPEC_ID => SMIX_ID
 N_REACTIONS = 0
 REWIND(LU_INPUT)
  
@@ -2479,25 +2478,9 @@ COUNT_REAC_LOOP: DO
    CALL SET_REAC_DEFAULTS
    READ(LU_INPUT,REAC,END=435,ERR=434,IOSTAT=IOS)
    N_REACTIONS = N_REACTIONS + 1
-   IF (BOF < 0._EB .AND. E < 0._EB .AND. TRIM(SMIX_ID(1))=='null') SIMPLE_CHEMISTRY = .TRUE.
-   IF ((BOF > 0._EB .OR. E > 0._EB) .AND. (C>ZERO_P .OR. H>ZERO_P)) THEN
-      WRITE(MESSAGE,'(A)') 'ERROR: cannot use both finite rate REAC and simple chemistry'
-      CALL SHUTDOWN(MESSAGE)
-   ENDIF
-   IF (TRIM(FUEL)=='null') THEN
-      WRITE(MESSAGE,'(A,I3,A)') 'ERROR: Problem with REAC ',N_REACTIONS,'. FUEL must be defined'
-      CALL SHUTDOWN(MESSAGE)
-   ENDIF
-   IF (SIMPLE_CHEMISTRY .AND. N_REACTIONS > 1) THEN
-      WRITE(MESSAGE,'(A)') 'ERROR: can not have more than one reaction when using simple chemistry'
-      CALL SHUTDOWN(MESSAGE)
-   ENDIF
-   IF (.NOT. SIMPLE_CHEMISTRY .AND. HEAT_OF_COMBUSTION <-1.E10_EB) THEN
-      WRITE(MESSAGE,'(A,I3,A)') 'ERROR: Problem with REAC ',NR,'. HEAT_OF_COMBUSTION not set.'
-      CALL SHUTDOWN(MESSAGE)
-   ENDIF   
-   IF (.NOT.SIMPLE_CHEMISTRY .AND. TRIM(SMIX_ID(1))=='null') THEN
-      WRITE(MESSAGE,'(A,I3,A)') 'ERROR: Problem with REAC ',NR,'. SMIX_ID and NU arrays must be defined'
+   IF (A < 0._EB .AND. E < 0._EB .AND. TRIM(SMIX_ID(1))=='null' .AND. TRIM(EQUATION)=='null') SIMPLE_CHEMISTRY = .TRUE.
+   IF (.NOT.SIMPLE_CHEMISTRY .AND. TRIM(SMIX_ID(1))=='null' .AND. TRIM(EQUATION)=='null') THEN
+      WRITE(MESSAGE,'(A,I3,A)') 'ERROR: Problem with REAC ',N_REACTIONS,'. SMIX_ID and NU arrays or EQUATION must be defined'
       CALL SHUTDOWN(MESSAGE)
    ENDIF
    434 IF (IOS>0) THEN
@@ -2544,12 +2527,13 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
       ENDIF
    ENDIF
    
+   RN%A                         = A
    RN%AUTO_IGNITION_TEMPERATURE = AUTO_IGNITION_TEMPERATURE + TMPM
-   RN%BOF                       = BOF
    RN%C                         = C
    RN%CO_YIELD                  = CO_YIELD
    RN%CRIT_FLAME_TMP            = CRITICAL_FLAME_TEMPERATURE + TMPM
    RN%E                         = E*1000._EB
+   RN%EQUATION                  = EQUATION
    RN%EPUMO2                    = EPUMO2*1000._EB
    RN%FUEL                      = FUEL
    RN%FYI                       = FYI
@@ -2572,7 +2556,7 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
 
    ! Determine the type of reaction
 
-   IF (BOF > 0._EB) THEN 
+   IF (A > 0._EB) THEN 
      RN%MODE = FINITE_RATE
    ELSE
      RN%MODE = MIXING_CONTROLLED
@@ -2590,14 +2574,28 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
          ENDIF
       ENDDO
       RN%N_SMIX = NS2
+      NS2 = 0
+      IF(TRIM(RN%EQUATION)/='null') RN%N_SMIX = MAX_SPECIES
+      DO NS=1,MAX_SPECIES
+         IF (TRIM(SPEC_ID(NS))/='null') THEN
+            NS2=NS2+1
+         ELSE
+            EXIT
+         ENDIF
+      ENDDO
+      RN%N_SPEC = NS2
    ELSE
       RN%N_SMIX = 3
+      RN%N_SPEC = 0
    ENDIF
 
    ! Store the "read in" values of N_S, NU, and SMIX_ID for use in PROC_REAC.
-
-   ALLOCATE(RN%N_S_READ(RN%N_SMIX))
-   RN%N_S_READ(1:RN%N_SMIX) = N_S(1:RN%N_SMIX)
+   IF (RN%N_SPEC > 0) THEN
+      ALLOCATE(RN%N_S_READ(RN%N_SPEC))
+      RN%N_S_READ(1:RN%N_SPEC) = N_S(1:RN%N_SPEC)
+      ALLOCATE(RN%SPEC_ID_READ(RN%N_SPEC))
+      RN%SPEC_ID_READ(1:RN%N_SPEC)=SPEC_ID(1:RN%N_SPEC)
+   ENDIF
 
    ALLOCATE(RN%NU_READ(RN%N_SMIX))
    RN%NU_READ(1:RN%N_SMIX) = NU(1:RN%N_SMIX)
@@ -2613,12 +2611,13 @@ CONTAINS
 SUBROUTINE SET_REAC_DEFAULTS
 
 AUTO_IGNITION_TEMPERATURE   = -TMPM
-BOF                         = -1._EB     ! cm**3/mol-s
+A                         = -1._EB     ! cm**3/mol-s
 C                           = 0._EB
 CO_YIELD                    = 0._EB
 CRITICAL_FLAME_TEMPERATURE  = 1427._EB   ! C
 E                           = -1._EB     ! kJ/kmol
 EPUMO2                      = 13100._EB  ! kJ/kg
+EQUATION                    = 'null'
 FORMULA                     = 'null'
 FUEL                        = 'null'
 FYI                         = 'null'
@@ -2635,6 +2634,7 @@ O                           = 0._EB
 SOOT_H_FRACTION             = 0.1_EB
 SOOT_YIELD                  = 0.0_EB
 SMIX_ID                     = 'null'
+SPEC_ID                     = 'null'
 THRESHOLD_TEMPERATURE       = 300._EB   ! For SIMPLE_CHEMSITRY w/ CO_PRODUCTION 
 X_O2_LL                     = 0.15_EB   
 Y_F_LFL                     = 0.0_EB 
@@ -2646,12 +2646,26 @@ END SUBROUTINE READ_REAC
 
 
 SUBROUTINE PROC_REAC
-   
-REAL(EB) :: MASS_PRODUCT,MASS_REACTANT
+USE PROPERTY_DATA, ONLY : PARSE_EQUATION   
+REAL(EB) :: MASS_PRODUCT,MASS_REACTANT,REACTION_BALANCE(118)
 INTEGER :: NS,NS2,NR,NSPEC
 TYPE (SPECIES_MIXTURE_TYPE), POINTER :: SM
 
 IF (N_REACTIONS <=0) RETURN
+
+!Basic input error checking
+IF ((RN%A > 0._EB .OR. RN%E > 0._EB) .AND. (RN%C>ZERO_P .OR. RN%H>ZERO_P)) THEN
+   WRITE(MESSAGE,'(A)') 'ERROR: cannot use both finite rate REAC and simple chemistry'
+   CALL SHUTDOWN(MESSAGE)
+ENDIF
+IF (SIMPLE_CHEMISTRY .AND. N_REACTIONS > 1) THEN
+   WRITE(MESSAGE,'(A)') 'ERROR: can not have more than one reaction when using simple chemistry'
+   CALL SHUTDOWN(MESSAGE)
+ENDIF
+IF (.NOT. SIMPLE_CHEMISTRY .AND. RN%HEAT_OF_COMBUSTION <-1.E10_EB) THEN
+   WRITE(MESSAGE,'(A,I3,A)') 'ERROR: Problem with REAC ',NR,'. HEAT_OF_COMBUSTION not set.'
+   CALL SHUTDOWN(MESSAGE)
+ENDIF 
 
 ! The following information is what the user would have entered into the input file in the more general case
 
@@ -2669,33 +2683,67 @@ ENDIF
 REAC_LOOP: DO NR=1,N_REACTIONS
 
    RN => REACTION(NR)
+   IF (TRIM(RN%EQUATION)/='null') THEN
+      IF(ANY(ABS(RN%NU_READ)>ZERO_P)) THEN
+         WRITE(MESSAGE,'(A,I3,A)') 'ERROR: Problem with REAC ',NR,'. Cannot set NUs if an EQUATION is specified.'
+         CALL SHUTDOWN(MESSAGE)
+      ENDIF
+      CALL PARSE_EQUATION(NR)
+      DO NS=1,N_TRACKED_SPECIES
+         IF(ABS(RN%NU_READ(NS))>ZERO_P) THEN
+            RN%N_SMIX = RN%N_SMIX+1
+         ENDIF
+      ENDDO
+   ENDIF
 
+   IF (TRIM(RN%FUEL)=='null') THEN
+      WRITE(MESSAGE,'(A,I3,A)') 'ERROR: Problem with REAC ',N_REACTIONS,'. FUEL must be defined'
+      CALL SHUTDOWN(MESSAGE)
+   ENDIF  
    ! Allocate the arrays that are going to carry the mixture stoichiometry to the rest of the code
 
    ALLOCATE(RN%SMIX_ID(0:N_TRACKED_SPECIES))
    ALLOCATE(RN%NU(0:N_TRACKED_SPECIES))
-   ALLOCATE(RN%N_S(0:N_TRACKED_SPECIES))
+   ALLOCATE(RN%N_S(0:N_SPECIES))
    RN%SMIX_ID = 'null'
    RN%NU      = 0._EB
    RN%N_S     = 0._EB
 
-   ! Transfer SMIX_ID, NU, and N_S that were indexed by the order they were read in to now be indexed by the SMIX index
-
+   ! Transfer SMIX_ID, SPEC_ID, NU, and N_S that were indexed by the order they were read in
+   ! to now be indexed by the SMIX or SPEC index
    DO NS=1,RN%N_SMIX
       DO NS2=0,N_TRACKED_SPECIES
          IF (TRIM(RN%SMIX_ID_READ(NS))==TRIM(SPECIES_MIXTURE(NS2)%ID)) THEN
             RN%SMIX_ID(NS2) = RN%SMIX_ID_READ(NS)
             RN%NU(NS2)      = RN%NU_READ(NS)
+            EXIT
+         ENDIF
+         IF (TRIM(RN%EQUATION)/='null') THEN
+            IF (TRIM(RN%SMIX_ID_READ(NS))==TRIM(SPECIES_MIXTURE(NS2)%FORMULA)) THEN
+               RN%SMIX_ID(NS2) = SPECIES_MIXTURE(NS2)%ID
+               RN%NU(NS2)      = RN%NU_READ(NS)
+               EXIT
+            ENDIF
+         ENDIF
+      ENDDO
+   ENDDO
+
+   RN%RHO_EXPONENT = 0._EB
+   DO NS=1,RN%N_SPEC
+      DO NS2=0,N_SPECIES
+         IF (TRIM(RN%SPEC_ID_READ(NS))==TRIM(SPECIES(NS2)%ID)) THEN
+            RN%SPEC_ID(NS2) = RN%SPEC_ID_READ(NS)
             RN%N_S(NS2)     = RN%N_S_READ(NS)
+            RN%A            = RN%A * (1000._EB*SPECIES(NS2)%MW)**(-RN%N_S(NS2))
+            RN%RHO_EXPONENT = RN%RHO_EXPONENT + RN%N_S(NS2)
             EXIT
          ENDIF
       ENDDO
    ENDDO
 
    ! Look for indices of fuels, oxidizers, and products. Normalize the stoichiometric coefficients by that of the fuel.
-
    DO NS2=0,N_TRACKED_SPECIES
-      IF (RN%NU(NS2)>0._EB) I_PRODUCTS = NS2
+      IF (RN%NU(NS2)>ZERO_P) I_PRODUCTS = NS2
       DO NSPEC=1,N_SPECIES
          IF (SPECIES_MIXTURE(NS2)%SPEC_ID(NSPEC)==RN%FUEL .OR. SPECIES_MIXTURE(NS2)%ID==RN%FUEL) THEN
             I_FUEL = NS2
@@ -2709,6 +2757,16 @@ REAC_LOOP: DO NR=1,N_REACTIONS
    IF (RN%FUEL/='null' .AND. I_FUEL<1) THEN
       WRITE(MESSAGE,'(A,I3,A,F8.3,A,F8.3)') 'ERROR: Problem with REAC ',NR,'. Fuel ',TRIM(RN%FUEL),' not found.'
       CALL SHUTDOWN(MESSAGE)
+   ENDIF
+
+   ! Check atom balance of the reaction
+   REACTION_BALANCE = 0._EB
+   DO NS=0,N_TRACKED_SPECIES
+      REACTION_BALANCE = REACTION_BALANCE + RN%NU(NS)*SPECIES_MIXTURE(NS)%ATOMS
+   ENDDO   
+   IF (ANY(ABS(REACTION_BALANCE)>1.E-6_EB)) THEN
+         WRITE(MESSAGE,'(A,I3,A)') 'ERROR: Problem with REAC ',NR,'. Unbalanced stoichiometry.'
+         CALL SHUTDOWN(MESSAGE)
    ENDIF
 
    ! Check the mass balance of the reaction
@@ -2762,8 +2820,14 @@ REAC_LOOP: DO NR=1,N_REACTIONS
    ENDIF
 
    IF (NR==1) REACTION%HOC_COMPLETE = RN%HEAT_OF_COMBUSTION 
-
+ 
 ENDDO REAC_LOOP
+
+IF (N_REACTIONS ==1 .AND. REACTION(1)%MODE==MIXING_CONTROLLED) THEN
+   COMBUSTION_ODE = SINGLE_EXACT
+ELSE
+   COMBUSTION_ODE = EXPLICIT_EULER
+ENDIF
     
 ! Change units of combustion quantities
 
@@ -4092,8 +4156,6 @@ READ_MATL_LOOP: DO N=1,N_MATL
    IF (BOILING_TEMPERATURE<5000._EB) THEN
       ML%PYROLYSIS_MODEL = PYROLYSIS_LIQUID
       ML%N_REACTIONS = 1
-      ML%NU_SPEC(1,1) = 1._EB
-      ML%SPEC_ID(1,1) = REACTION(1)%FUEL
    ELSE
       ML%PYROLYSIS_MODEL = PYROLYSIS_SOLID
       IF (N_REACTIONS==0) ML%PYROLYSIS_MODEL = PYROLYSIS_NONE
@@ -4216,13 +4278,16 @@ PROC_MATL_LOOP: DO N=1,N_MATL
    Z_INDEX = -1
    DO NR=1,ML%N_REACTIONS
       DO NS=1,MAX_SPECIES
-
+         
          IF (TRIM(ML%SPEC_ID(NS,NR))/='null' .NEQV. ML%NU_SPEC(NS,NR)>ZERO_P) THEN
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: MATL ',TRIM(MATL_NAME(N)),' requires both a SPEC_ID and NU_SPEC'
             CALL SHUTDOWN(MESSAGE)                  
          ENDIF
          IF (TRIM(ML%SPEC_ID(NS,NR))=='null') EXIT
-
+         IF (NS==2 .AND. ML%PYROLYSIS_MODEL==PYROLYSIS_LIQUID) THEN
+            WRITE(MESSAGE,'(A,A,A)') 'ERROR: MATL ',TRIM(MATL_NAME(N)),' can only specify one SPEC_ID for a liquid'
+            CALL SHUTDOWN(MESSAGE)                  
+         ENDIF
          DO NS2=0,N_TRACKED_SPECIES
             IF (TRIM(ML%SPEC_ID(NS,NR))==TRIM(SPECIES_MIXTURE(NS2)%ID)) THEN
                Z_INDEX(NS,NR) = NS2
@@ -5147,6 +5212,10 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
       ENDDO   
    ENDIF
    IF (SF%HRRPUA>0._EB .OR. SF%MLRPUA>0._EB) THEN
+      IF (.NOT. SIMPLE_CHEMISTRY) THEN
+         WRITE(MESSAGE,'(A)') 'ERROR: SURF '//TRIM(SF%ID)//' has HRRPUA or MLRPUA set and there is no simple chemistry REAC'
+         CALL SHUTDOWN(MESSAGE)
+      ENDIF
       BURNING = .TRUE.
       SF%PYROLYSIS_MODEL = PYROLYSIS_SPECIFIED
    ENDIF
@@ -5175,9 +5244,12 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
    BURNING_IF: IF (BURNING .AND. .NOT.ALL(EVACUATION_ONLY)) THEN
       IF (SF%HRRPUA>0._EB) THEN
          RN => REACTION(1)
-         SF%MASS_FLUX(I_FUEL) = SF%HRRPUA/RN%HOC_COMPLETE
+         SF%MASS_FLUX(RN%FUEL_SMIX_INDEX) = SF%HRRPUA/RN%HOC_COMPLETE
       ENDIF
-      IF (SF%MLRPUA>0._EB) SF%MASS_FLUX(I_FUEL) = SF%MLRPUA
+      IF (SF%MLRPUA>0._EB) THEN
+         RN => REACTION(1)
+         SF%MASS_FLUX(RN%FUEL_SMIX_INDEX) = SF%MLRPUA
+      ENDIF
       ! Adjust burning rate according to the difference of heats of combustion
       IF (SF%N_LAYERS > 0) THEN
          ML => MATERIAL(SF%MATL_INDEX(1))
