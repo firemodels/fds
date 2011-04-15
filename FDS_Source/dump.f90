@@ -2301,7 +2301,6 @@ DO NN=1,N_SPECIES
 ENDDO
 
 ! Print out information about species
-
 WRITE(LU_OUTPUT,'(//A)') ' Primitive Species Information'
 SPEC_LOOP: DO N=1,N_SPECIES
    SS => SPECIES(N)
@@ -2313,8 +2312,8 @@ SPEC_LOOP: DO N=1,N_SPECIES
          WRITE(LU_OUTPUT,'( 3X,A)') 'Aerosol'
    END SELECT
    IF (SS%SMIX_COMPONENT_ONLY) WRITE(LU_OUTPUT,'( 3X,A)') 'Lumped species component only'
-   IF (SS%MW <  1000._EB) WRITE(LU_OUTPUT,'(A,F8.2)')   '   Molecular Weight (g/mol)      ',SS%MW
-   IF (SS%MW >= 1000._EB) WRITE(LU_OUTPUT,'(A,F8.2)')   '   Density (kg/m^3)              ',SS%MW*P_INF/(TMPA*R0)
+   WRITE(LU_OUTPUT,'(A,F11.5)')   '   Molecular Weight (g/mol)    ',SS%MW
+   WRITE(LU_OUTPUT,'(A,F7.3)')    '   Ambient Density (kg/m^3)    ',SS%MW*P_INF/(TMPA*R0)
 ENDDO SPEC_LOOP
 
 ! Write lumped species summary
@@ -2325,9 +2324,9 @@ DO N=0,N_TRACKED_SPECIES
    SM=>SPECIES_MIXTURE(N)
    WRITE(LU_OUTPUT,'(/3X,A)') SM%ID
    IF(N==0) WRITE(LU_OUTPUT,'( 3X,A)') 'Background Species'
-   IF (SM%MW <  1000._EB) WRITE(LU_OUTPUT,'(A,F8.2)')   '   Molecular Weight (g/mol)      ',SM%MW
-   IF (SM%MW >= 1000._EB) WRITE(LU_OUTPUT,'(A,F8.2)')   '   Density (kg/m^3)              ',SM%MW*P_INF/(TMPA*R0)
-   WRITE(LU_OUTPUT,'(A,F8.3)')   '   Initial Mass Fraction         ',SM%ZZ0
+   WRITE(LU_OUTPUT,'(A,F11.5)')   '   Molecular Weight (g/mol)    ',SM%MW
+   WRITE(LU_OUTPUT,'(A,F7.3)')    '   Ambient Density (kg/m^3)    ',SM%MW*P_INF/(TMPA*R0)
+   WRITE(LU_OUTPUT,'(A,F8.3)')    '   Initial Mass Fraction       ',SM%ZZ0
    WRITE(LU_OUTPUT,'(/3X,A)') 'Sub Species                    Mass Fraction     Mole Fraction'
    DO NN = 1,N_SPECIES
       IF (SM%SPEC_ID(NN)/='null') WRITE(LU_OUTPUT,'( 3X,A30,A,ES11.4,8X,ES11.4)') &
@@ -2517,16 +2516,12 @@ SURFLOOP: DO N=0,N_SURF
    IF (ABS(SF%MASS_FLUX_TOTAL)>ZERO_P) WRITE(LU_OUTPUT,'(A,F8.3)') '     Total Mass Flux (kg/m^2/s)  ', SF%MASS_FLUX_TOTAL
    IF (ABS(SF%VOLUME_FLUX)>ZERO_P)     WRITE(LU_OUTPUT,'(A,F8.3)') '     Volume Flux (m**3/s)        ', SF%VOLUME_FLUX
  
-   DO NN=1,N_TRACKED_SPECIES
-      IF (NN==I_FUEL) THEN
-         IF (SF%MASS_FLUX(NN)>0._EB) WRITE(LU_OUTPUT,'(A,F12.1)') '     HRR Per Unit Area (kW/m2) ', &
-             SF%MASS_FLUX(NN)*REACTION(1)%HEAT_OF_COMBUSTION*0.001_EB
-      ELSE
-         IF (SF%MASS_FRACTION(NN)>ZERO_P) WRITE(LU_OUTPUT,'(A,I2,A,8X,F6.3)') &
-                  '     Mixture ',NN,' Mass Fraction',SF%MASS_FRACTION(NN)
-         IF (ABS(SF%MASS_FLUX(NN))>ZERO_P) WRITE(LU_OUTPUT,'(A,I2,A,2X,F6.3)') &
-                  '     Mixture ',NN,' Mass Flux (kg/s/m2)',SF%MASS_FLUX(NN)
-      ENDIF
+   IF (SF%HRRPUA > 0._EB) WRITE(LU_OUTPUT,'(A,F12.1)') '     HRR Per Unit Area (kW/m2) ', SF%HRRPUA/1000._EB
+   DO NN=0,N_TRACKED_SPECIES
+      IF (SF%MASS_FRACTION(NN)>ZERO_P) WRITE(LU_OUTPUT,'(A,I2,A,8X,F6.3)') &
+               '     Mixture ',NN,' Mass Fraction',SF%MASS_FRACTION(NN)
+      IF (ABS(SF%MASS_FLUX(NN))>ZERO_P) WRITE(LU_OUTPUT,'(A,I2,A,2X,F6.3)') &
+               '     Mixture ',NN,' Mass Flux (kg/s/m2)',SF%MASS_FLUX(NN)
    ENDDO
    
    IF (ABS(SF%CONV_LENGTH - 1._EB)>ZERO_P) WRITE(LU_OUTPUT,'(A,ES9.2)') '     Convection length scale (m) ', SF%CONV_LENGTH
