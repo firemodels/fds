@@ -2396,7 +2396,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
          G%HL(2) = 0.5_EB*(G%Y2-G%Y1)
          G%HL(3) = 0.5_EB*(G%Z2-G%Z1)
          
-         IF (G%XOR==1) THEN ! cylinder aligned with x axis
+         IF (ABS(G%XOR-1._EB)<ZERO_P) THEN ! cylinder aligned with x axis
             X_MIN = G%X-G%HL(1)
             Y_MIN = G%Y-G%RADIUS
             Z_MIN = G%Z-G%RADIUS
@@ -2405,7 +2405,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
             Z_MAX = G%Z+G%RADIUS
          ENDIF
          
-         IF (G%YOR==1) THEN ! cylinder aligned with y axis
+         IF (ABS(G%YOR-1._EB)<ZERO_P) THEN ! cylinder aligned with y axis
             X_MIN = G%X-G%RADIUS
             Y_MIN = G%Y-G%HL(2)
             Z_MIN = G%Z-G%RADIUS
@@ -2414,7 +2414,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
             Z_MAX = G%Z+G%RADIUS
          ENDIF
          
-         IF (G%ZOR==1) THEN ! cylinder aligned with z axis
+         IF (ABS(G%ZOR-1._EB)<ZERO_P) THEN ! cylinder aligned with z axis
             X_MIN = G%X-G%RADIUS
             Y_MIN = G%Y-G%RADIUS
             Z_MIN = G%Z-G%HL(3)
@@ -2528,7 +2528,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
                   M%W_MASK(I,J,K)=1
                   M%P_MASK(I,J,K)=1
                
-                  CYLINDER_Y: IF (G%YOR==1) THEN
+                  CYLINDER_Y: IF (ABS(G%YOR-1._EB)<ZERO_P) THEN
                      RP = SQRT( (M%X(I)-G%X)**2+(M%ZC(K)-G%Z)**2 )
                      IF (RP-G%RADIUS < DELTA) M%U_MASK(I,J,K) = 0
                      IF (RP-G%RADIUS < 0._EB) M%U_MASK(I,J,K) = -1
@@ -2546,7 +2546,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
                      IF (RP-G%RADIUS < 0._EB) M%P_MASK(I,J,K) = -1
                   ENDIF CYLINDER_Y
                   
-                  CYLINDER_Z: IF (G%ZOR==1) THEN
+                  CYLINDER_Z: IF (ABS(G%ZOR-1._EB)<ZERO_P) THEN
                      RP = SQRT( (M%X(I)-G%X)**2+(M%YC(J)-G%Y)**2 )
                      IF (RP-G%RADIUS < DELTA) M%U_MASK(I,J,K) = 0
                      IF (RP-G%RADIUS < 0._EB) M%U_MASK(I,J,K) = -1
@@ -2680,9 +2680,9 @@ SELECT CASE(G%ISHAPE)
       XI     = XU + DR*RU/RUMAG
    CASE(ICYLINDER)
       ! at the moment, cylinder must be aligned with an axis
-      IF (G%XOR==1) RU = (/0._EB,XU(2),XU(3)/)-(/0._EB,G%Y,G%Z/)
-      IF (G%YOR==1) RU = (/XU(1),0._EB,XU(3)/)-(/G%X,0._EB,G%Z/)
-      IF (G%ZOR==1) RU = (/XU(1),XU(2),0._EB/)-(/G%X,G%Y,0._EB/)
+      IF (ABS(G%XOR-1._EB)<ZERO_P) RU = (/0._EB,XU(2),XU(3)/)-(/0._EB,G%Y,G%Z/)
+      IF (ABS(G%YOR-1._EB)<ZERO_P) RU = (/XU(1),0._EB,XU(3)/)-(/G%X,0._EB,G%Z/)
+      IF (ABS(G%ZOR-1._EB)<ZERO_P) RU = (/XU(1),XU(2),0._EB/)-(/G%X,G%Y,0._EB/)
       RUMAG  = SQRT(DOT_PRODUCT(RU,RU))
       DR     = RUMAG-G%RADIUS
       XI     = XU + DR*RU/RUMAG
