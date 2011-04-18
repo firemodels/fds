@@ -2459,7 +2459,6 @@ CONTAINS
                PEX%Y = PEX%Y - IOR*0.10_EB
             END SELECT
          END IF
-         PEX%XYZ_Z = PEX%Z
          ! 
          ! Check which evacuation floor.  Now there may be overlapping meshes.
          ii  = 0
@@ -2499,6 +2498,7 @@ CONTAINS
 
          ! PEX%Z is used to plot the door on the correct height in Smokeview.
          PEX%Z = PEX%Z + 0.5_EB*PEX%Height - EVACUATION_Z_OFFSET(PEX%IMESH)
+         PEX%XYZ_Z = PEX%Z
 
          IF (XYZ_SMOKE(1) < HUGE(XYZ_SMOKE)) THEN
             PEX%Xsmoke = XYZ_SMOKE(1)
@@ -2920,7 +2920,6 @@ CONTAINS
                PDX%Y = PDX%Y - IOR*0.10_EB
             END SELECT
          END IF
-         PDX%XYZ_Z = PDX%Z
          !
          ! Check which evacuation floor
          ii = 0
@@ -2960,6 +2959,7 @@ CONTAINS
 
          ! PDX%Z is used to plot the door on the correct height in Smokeview.
          PDX%Z = PDX%Z + 0.5_EB*PDX%Height - EVACUATION_Z_OFFSET(PDX%IMESH)
+         PDX%XYZ_Z = PDX%Z
 
          IF (XYZ_SMOKE(1) < HUGE(XYZ_SMOKE)) THEN
             PDX%Xsmoke = XYZ_SMOKE(1)
