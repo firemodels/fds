@@ -750,12 +750,12 @@ CONTAINS
           LEVEL = 0
           EVACUATION = .TRUE.
           EVAC_HUMANS = .TRUE.
+          EVAC_Z_OFFSET = EMESH_STAIRS(N)%EVAC_Z_OFFSET
 
           ! Increase the MESH counter by 1
 
           NM = NM + 1
           EMESH_STAIRS(N)%IMESH = NM
-          !EMESH_STAIRS(N)%EMESH = NM
 
           ! Fill in MESH related variables
        
