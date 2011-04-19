@@ -6900,6 +6900,18 @@ The {\ct SURF} line establishes the particle {\ct GEOMETRY}. Options are {\ct 'S
 the {\ct LENGTH}, {\ct WIDTH}, and {\ct THICKNESS} of the plate. Note that the heat conduction calculation will be done in the appropriate coordinate
 system.
 
+If you want to monitor the properties of a given particle, you can use Smokeview to visualize the {\ct QUANTITIES} on the {\ct PART} line, or you can use a device as follows:
+
+\footnotesize
+\begin{verbatim}
+&DEVC ID='temp', XYZ=0.1,0.1,0.1, QUANTITY='WALL TEMPERATURE', VIRTUAL_INDEX=1 /
+\end{verbatim}
+\normalsize
+
+\noindent
+This line tells FDS to look for the first particle within the mesh that contains the point {\ct XYZ} and record its surface temperature in the device output file. More on 
+pointwise output can be found in Section~\ref{info:DEVC}.
+
 
 
 
@@ -8317,12 +8329,12 @@ either {\ct -x}, {\ct -y}, or {\ct -z}. To change these labels, use {\ct X\_ID},
 {\ct HIDE\_COORDINATES=.TRUE.} to the {\ct DEVC} line. This is convenient if you have multiple arrays of data that use the same coordinates.
 
 Typically, a {\em line} of devices records a steady-state profile of a particular quantity. For example, the velocity profile in a doorway or the average concentration of
-a particular scalar quantity spanning the width of a buoyant plume are convenient means to compare model and experiment. In addition, if you set 
+a particular scalar quantity spanning the width of a buoyant plume are convenient means to compare model and experiment. In addition, if you set
 {\ct STATISTICS='RMS'} on the {\ct DEVC} line, the output will be the {\em root mean square} value of the quantity rather than its mean, $\overline{\phi}$:
 \be
    \phi_{\hbox{rms}} = \sqrt{ \frac{ \sum_{i=1}^n (\phi_i - \overline{\phi})^2 }{n} }
 \ee
-Note that the {\ct 'RMS'} statistic is only appropriate for a line of devices. It is not meant to be used with single devices that record a time history of a given 
+Note that the {\ct 'RMS'} statistic is only appropriate for a line of devices. It is not meant to be used with single devices that record a time history of a given
 quantity. The {\em root mean square} is only meaningful in terms of a steady-state output quantity.
 
 
@@ -9903,6 +9915,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct TRIP\_DIRECTION}       & Integer         & See Section~\ref{info:basic_control}                             &       &  1            \\ \hline
 {\ct UNITS}                 & Character       & See Section~\ref{info:out:DEVC}                                  &       &               \\ \hline
 {\ct VELO\_INDEX}           & Integer         & See Section~\ref{info:velocity}                                  &       &  0            \\ \hline
+{\ct VIRTUAL\_INDEX}        & Integer         & See Section~\ref{info:PART_SURF}                                 &       &               \\ \hline
 {\ct XB(6)}                 & Real Sextuplet  & See Section~\ref{info:statistics}                                & m     &               \\ \hline
 {\ct X\_ID}                 & Character       & See Section~\ref{info:line_file}                                 &       &  {\ct ID-x}   \\ \hline
 {\ct Y\_ID}                 & Character       & See Section~\ref{info:line_file}                                 &       &  {\ct ID-y}   \\ \hline
