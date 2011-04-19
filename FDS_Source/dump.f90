@@ -1372,9 +1372,9 @@ XLOOP1: DO NX=1,2*NMESHES
             ENDIF
          DO I=1,N
             SEG=>SEGMENT(I)
-            IF (ABS(XX-SEG%X1)<=ZERO_P .AND. ABS(XX-SEG%X2)<=ZERO_P .AND. &
-                ABS(YY-SEG%Y1)<=ZERO_P .AND. ABS(YY-SEG%Y2)<=ZERO_P .AND. &
-                ABS(Z1-SEG%Z1)<=ZERO_P .AND. ABS(ZZ-SEG%Z2)<=ZERO_P) THEN
+            IF (ABS(XX-SEG%X1)<=SPACING(SEG%X1) .AND. ABS(XX-SEG%X2)<=SPACING(SEG%X2) .AND. &
+                ABS(YY-SEG%Y1)<=SPACING(SEG%Y1) .AND. ABS(YY-SEG%Y2)<=SPACING(SEG%Y2) .AND. &
+                ABS(Z1-SEG%Z1)<=SPACING(SEG%Z1) .AND. ABS(ZZ-SEG%Z2)<=SPACING(SEG%Z2)) THEN
                Z1 = ZZ
                CYCLE ZLOOP1
             ENDIF
@@ -1422,9 +1422,9 @@ XLOOP2: DO NX=1,2*NMESHES
             ENDIF
          DO I=1,N
             SEG=>SEGMENT(I)
-            IF (ABS(XX-SEG%X1)<=ZERO_P .AND. ABS(XX-SEG%X2)<=ZERO_P .AND. &
-                ABS(YY-SEG%Y1)<=ZERO_P .AND. ABS(YY-SEG%Y2)<=ZERO_P .AND. &
-                ABS(Z1-SEG%Z1)<=ZERO_P .AND. ABS(ZZ-SEG%Z2)<=ZERO_P) THEN
+            IF (ABS(XX-SEG%X1)<=SPACING(SEG%X1) .AND. ABS(XX-SEG%X2)<=SPACING(SEG%X2) .AND. &
+                ABS(YY-SEG%Y1)<=SPACING(SEG%Y1) .AND. ABS(YY-SEG%Y2)<=SPACING(SEG%Y2) .AND. &
+                ABS(Z1-SEG%Z1)<=SPACING(SEG%Z1) .AND. ABS(ZZ-SEG%Z2)<=SPACING(SEG%Z2)) THEN
                Y1 = YY
                CYCLE YLOOP2
             ENDIF
@@ -1472,9 +1472,9 @@ ZLOOP3: DO NZ=1,2*NMESHES
             ENDIF
          DO I=1,N
             SEG=>SEGMENT(I)
-            IF (ABS(XX-SEG%X1)<=ZERO_P .AND. ABS(XX-SEG%X2)<=ZERO_P .AND. &
-                ABS(YY-SEG%Y1)<=ZERO_P .AND. ABS(YY-SEG%Y2)<=ZERO_P .AND. &
-                ABS(Z1-SEG%Z1)<=ZERO_P .AND. ABS(ZZ-SEG%Z2)<=ZERO_P) THEN
+            IF (ABS(XX-SEG%X1)<=SPACING(SEG%X1) .AND. ABS(XX-SEG%X2)<=SPACING(SEG%X2) .AND. &
+                ABS(YY-SEG%Y1)<=SPACING(SEG%Y1) .AND. ABS(YY-SEG%Y2)<=SPACING(SEG%Y2) .AND. &
+                ABS(Z1-SEG%Z1)<=SPACING(SEG%Z1) .AND. ABS(ZZ-SEG%Z2)<=SPACING(SEG%Z2)) THEN
                X1 = XX
                CYCLE XLOOP3
             ENDIF
@@ -2278,7 +2278,7 @@ MESH_LOOP: DO NM=1,NMESHES
    WRITE(LU_OUTPUT,'(A,F9.3)')   '   Initial Time Step (s)         ',M%DT
 ENDDO MESH_LOOP
 WRITE(LU_OUTPUT,'(//A/)')     ' Miscellaneous Parameters'
-IF (ABS(TIME_SHRINK_FACTOR -1._EB)>ZERO_P) &
+IF (ABS(TIME_SHRINK_FACTOR -1._EB)>SPACING(1._EB)) &
 WRITE(LU_OUTPUT,'(A,F8.1)')   '   Time Shrink Factor (s/s)      ',TIME_SHRINK_FACTOR
 WRITE(LU_OUTPUT,'(A,F8.1)')   '   Simulation Start Time (s)     ',T_BEGIN
 WRITE(LU_OUTPUT,'(A,F8.1)')   '   Simulation End Time (s)       ',(T_END-T_BEGIN) * TIME_SHRINK_FACTOR + T_BEGIN
@@ -2524,7 +2524,7 @@ SURFLOOP: DO N=0,N_SURF
                '     Mixture ',NN,' Mass Flux (kg/s/m2)',SF%MASS_FLUX(NN)
    ENDDO
    
-   IF (ABS(SF%CONV_LENGTH - 1._EB)>ZERO_P) WRITE(LU_OUTPUT,'(A,ES9.2)') '     Convection length scale (m) ', SF%CONV_LENGTH
+   IF (ABS(SF%CONV_LENGTH - 1._EB)>SPACING(1._EB)) WRITE(LU_OUTPUT,'(A,ES9.2)') '     Convection length scale (m) ', SF%CONV_LENGTH
  
 ENDDO SURFLOOP
  
@@ -4070,7 +4070,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
 !Write initial state of DEViCes to the Smokeview file
 
-   IF (ABS(T-T_BEGIN)<ZERO_P .AND. .NOT. DV%CURRENT_STATE) THEN
+   IF (ABS(T-T_BEGIN)<SPACING(T) .AND. .NOT. DV%CURRENT_STATE) THEN
       M=>MESHES(NM)
       IF (M%N_STRINGS+2>M%N_STRINGS_MAX) THEN
          CALL RE_ALLOCATE_STRINGS(NM)
@@ -4707,7 +4707,7 @@ SELECT CASE(IND)
       DO N = 1, DV%N_INPUTS
          ! Update soot density array
          DV2 => DEVICE(DV%DEVC_INDEX(N))
-         IF (ABS(DV%T - T - DV%DT)<=ZERO_P) THEN
+         IF (ABS(DV%T - T - DV%DT)<=SPACING(DV%T)) THEN
             DV%YY_SOOT(N,100) = DV2%INSTANT_VALUE
          ELSE
             DV%YY_SOOT(N,100) = (DV%YY_SOOT(N,100) * (T - DV%TIME_ARRAY(99) - DT) +  DT * DV2%INSTANT_VALUE) / &
