@@ -1785,7 +1785,7 @@ ELSEIF (XI >= X(UX)) THEN
   ANS = Y(UX)
 ELSE
   L1: DO I=LX,UX-1
-    IF (ABS(XI -X(I)) <= ZERO_P) THEN
+    IF (ABS(XI -X(I)) <= SPACING(X(I))) THEN
       ANS = Y(I)
       EXIT L1
     ELSEIF (X(I+1)>XI) THEN
