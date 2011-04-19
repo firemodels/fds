@@ -485,7 +485,7 @@ USE PHYSICAL_FUNCTIONS, ONLY: GET_MASS_FRACTION_ALL,GET_MOLECULAR_WEIGHT
 USE CONTROL_VARIABLES
 REAL(EB) :: TNOW
 INTEGER :: NN,I,N
-CHARACTER(30), DIMENSION(40) :: LABEL='null'
+CHARACTER(30), DIMENSION(42) :: LABEL='null'
 !CHARACTER(100) :: MESSAGE
 
 TNOW=SECOND() 
@@ -2329,7 +2329,7 @@ DO N=0,N_TRACKED_SPECIES
    WRITE(LU_OUTPUT,'(A,F8.3)')    '   Initial Mass Fraction       ',SM%ZZ0
    WRITE(LU_OUTPUT,'(/3X,A)') 'Sub Species                    Mass Fraction     Mole Fraction'
    DO NN = 1,N_SPECIES
-      IF (SM%SPEC_ID(NN)/='null') WRITE(LU_OUTPUT,'( 3X,A30,A,ES11.4,8X,ES11.4)') &
+      IF (SM%SPEC_ID(NN)/='null') WRITE(LU_OUTPUT,'( 3X,A29,A,ES13.6,5X,ES13.6)') &
          SM%SPEC_ID(NN),' ',SM%MASS_FRACTION(NN),SM%VOLUME_FRACTION(NN)
    ENDDO
    ITMP = NINT(TMPA)
@@ -2368,7 +2368,7 @@ REACTION_LOOP: DO N=1,N_REACTIONS
          WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'         
          DO NN=0,N_TRACKED_SPECIES
             IF (ABS(RN%NU(NN)) <=ZERO_P) CYCLE
-            WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') SPECIES_MIXTURE(NN)%ID,RN%NU(NN) 
+            WRITE(LU_OUTPUT,'(3X,A,1X,F12.6)') SPECIES_MIXTURE(NN)%ID,RN%NU(NN) 
          ENDDO
          WRITE(LU_OUTPUT,'(/3X,A)') 'Detailed Species'
          WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'
@@ -2376,10 +2376,13 @@ REACTION_LOOP: DO N=1,N_REACTIONS
             IF (ABS(RN%NU_SPECIES(NN))>=ZERO_P) WRITE(LU_OUTPUT,'(3X,A,1X,F9.4)') SPECIES(NN)%ID,RN%NU_SPECIES(NN)
          ENDDO
          WRITE(LU_OUTPUT,'(/A)') '   Species ID                     Rate Exponent'
-         DO NN=0,N_TRACKED_SPECIES
-            IF (RN%N_S(NN) <=-999._EB) CYCLE
-            WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') SPECIES_MIXTURE(NN)%ID,RN%N_S(NN) 
+         DO NN=1,N_SPECIES
+            IF (RN%N_S(NN) <=-998._EB) CYCLE
+            WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') SPECIES(NN)%ID,RN%N_S(NN) 
          ENDDO
+         WRITE(LU_OUTPUT,'(/A)') '   Arrhenius Constants'
+         WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Pre-exponential:  ',RN%A_IN
+         WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Activation Energy:',RN%E_IN
          WRITE(LU_OUTPUT,'(/A)') '   Fuel                           Heat of Combustion (kJ/kg)'    
          WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') RN%FUEL,RN%HEAT_OF_COMBUSTION/1000._EB
       CASE (MIXING_CONTROLLED)
