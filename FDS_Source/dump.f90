@@ -3079,10 +3079,12 @@ WRITE(LU_OUTPUT,*)
 END SUBROUTINE WRITE_DIAGNOSTICS
 
 
+
 SUBROUTINE DUMP_PART(T,NM)
-USE MEMORY_FUNCTIONS, ONLY:CHKMEMERR 
+
 ! Dump Lagrangian particle data to CHID.prt5
  
+USE MEMORY_FUNCTIONS, ONLY:CHKMEMERR 
 INTEGER, INTENT(IN)  :: NM
 REAL(EB), INTENT(IN) :: T
 REAL(FB) :: STIME
@@ -3110,6 +3112,7 @@ PARTICLE_CLASS_LOOP: DO N=1,N_PART
    ENDDO
    
    ! Allocate some temporary 4 byte arrays just to hold the data that is to be dumped to the file
+
    ALLOCATE(TA(NPLIM),STAT=IZERO)
    CALL ChkMemErr('DUMP','TA',IZERO) 
    ALLOCATE(XP(NPLIM),STAT=IZERO)
@@ -3142,23 +3145,24 @@ PARTICLE_CLASS_LOOP: DO N=1,N_PART
                QP(NPP,NN) = DR%V
             CASE( 8)  ! W-VELOCITY
                QP(NPP,NN) = DR%W
-            CASE(34)  ! DROPLET_DIAMETER
+            CASE(34)  ! DROPLET DIAMETER
                QP(NPP,NN) = 2.E6*DR%R
-            CASE(35)  ! DROPLET_VELOCITY
+            CASE(35)  ! DROPLET VELOCITY
                QP(NPP,NN) = SQRT(DR%U**2+DR%V**2+DR%W**2)
-            CASE(36)  ! DROPLET_PHASE
+            CASE(36)  ! DROPLET PHASE
                QP(NPP,NN) = DR%IOR
-            CASE(37)  ! DROPLET_TEMPERATURE
+            CASE(37)  ! DROPLET TEMPERATURE
                QP(NPP,NN) = DR%TMP - TMPM
-            CASE(38)  ! DROPLET_MASS
+            CASE(38)  ! DROPLET MASS
                QP(NPP,NN) = 1.E9_EB*PC%FTPR*DR%R**3
-            CASE(39)  ! DROPLET_AGE
+            CASE(39)  ! DROPLET AGE
                QP(NPP,NN) = T-DR%T
          END SELECT
       ENDDO
    ENDDO LOAD_LOOP
  
    ! Dump particle data into the .prt5 file
+
    WRITE(LU_PART(NM)) NPLIM
    WRITE(LU_PART(NM)) (XP(I),I=1,NPLIM),(YP(I),I=1,NPLIM),(ZP(I),I=1,NPLIM)
    WRITE(LU_PART(NM)) (TA(I),I=1,NPLIM)
@@ -3832,6 +3836,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
    ! Select either gas or solid phase output quantity
 
    GAS_OR_SOLID_PHASE: IF (DV%OUTPUT_INDEX>0) THEN 
+
       GAS_OR_HVAC: IF (DV%OUTPUT_INDEX >= 300) THEN
       
          VALUE = HVAC_OUTPUT(DV%OUTPUT_INDEX,DV%Y_INDEX,DV%Z_INDEX,DV%DUCT_INDEX,DV%NODE_INDEX)
