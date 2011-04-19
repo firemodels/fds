@@ -30,6 +30,7 @@ USE GLOBAL_CONSTANTS, ONLY: N_TRACKED_SPECIES,NULL_BOUNDARY,POROUS_BOUNDARY,OPEN
                             NO_MASS_FLUX,SPECIFIED_MASS_FLUX,HVAC_BOUNDARY
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: TNOW,ZZZ(4),UN
+REAL(EB) :: RHO_D_DZDN
 INTEGER  :: I,J,K,N,II,JJ,KK,IIG,JJG,KKG,IW,IOR,IBC
 REAL(EB), POINTER, DIMENSION(:) :: UWP
 REAL(EB), POINTER, DIMENSION(:,:,:) :: FX=>NULL(),FY=>NULL(),FZ=>NULL()
@@ -342,6 +343,17 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          END SELECT
 
          IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
+
+         ! At forced flow boundaries, use the specified normal component of velocity
+
+         IF ((SURFACE(IBC)%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .OR. &
+             (SURFACE(IBC)%SPECIES_BC_INDEX==HVAC_BOUNDARY       .OR. &
+              ANY(SURFACE(IBC)%LEAK_PATH>0._EB)) .AND. UWS(IW)<0._EB) .AND. ZZ_F(IW,N)>0._EB) THEN
+            ! recreate diffusive flux from divg b/c UWP based on old RHODW
+            RHO_D_DZDN = 2._EB*RHODW(IW,N)*(ZZP(IIG,JJG,KKG,N)-ZZ_F(IW,N))*RDN(IW)
+            UN = SIGN(1._EB,REAL(IOR,EB))*(MASSFLUX(IW,N) + RHO_D_DZDN)/(RHO_F(IW)*ZZ_F(IW,N))
+ !!         UN = -SIGN(1._EB,REAL(IOR,EB))*UWP(IW)
+         ENDIF
 
          ! Compute species mass flux on the face of the wall cell
 
