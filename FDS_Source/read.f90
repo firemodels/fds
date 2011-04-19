@@ -2776,7 +2776,8 @@ REAC_LOOP: DO NR=1,N_REACTIONS
          ENDIF
       ENDDO
       IF (.NOT. NAME_FOUND) THEN
-         WRITE(MESSAGE,'(A,I3,A,A,A)') 'ERROR: Problem with REAC ',NR,'. Primitive species ',TRIM(RN%SPEC_ID_READ(NS)),' not found.'
+         WRITE(MESSAGE,'(A,I3,A,A,A)') 'ERROR: Problem with REAC ',NR,'. Primitive species ', &
+                                       TRIM(RN%SPEC_ID_READ(NS)),' not found.'
          CALL SHUTDOWN(MESSAGE)      
       ENDIF     
    ENDDO
