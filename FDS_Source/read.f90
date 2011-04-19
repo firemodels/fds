@@ -456,7 +456,7 @@ MESH_LOOP: DO N=1,NMESHES_READ
                WRITE(MESSAGE,'(A,I2)') 'ERROR: ZMIN > ZMAX on MESH ', NM
                CALL SHUTDOWN(MESSAGE)
             ENDIF
-            IF (EVACUATION .AND. ABS(XB5 - XB6) <= ZERO_P) THEN
+            IF (EVACUATION .AND. ABS(XB5 - XB6) <= SPACING(XB(6))) THEN
                WRITE(MESSAGE,'(A,I2)') 'ERROR: ZMIN = ZMAX on evacuation MESH ', NM
                CALL SHUTDOWN(MESSAGE)
             ENDIF
@@ -751,7 +751,7 @@ CONTAINS
           EVACUATION = .TRUE.
           EVAC_HUMANS = .TRUE.
           EVAC_Z_OFFSET = EMESH_STAIRS(N)%EVAC_Z_OFFSET
-
+          
           ! Increase the MESH counter by 1
 
           NM = NM + 1
@@ -1742,7 +1742,7 @@ USE PHYSICAL_FUNCTIONS, ONLY : AMBIENT_WATER_VAPOR
 USE MATH_FUNCTIONS, ONLY : GET_RAMP_INDEX
 USE PROPERTY_DATA, ONLY: GAS_PROPS,FED_PROPS
 REAL(EB) :: MASS_FRACTION_0,MW,SIGMALJ,EPSILONKLJ,VISCOSITY,CONDUCTIVITY,DIFFUSIVITY,MASS_EXTINCTION_COEFFICIENT, &
-            SPECIFIC_HEAT,SPECIFIC_ENTHALPY,REFERENCE_TEMPERATURE,FIC_CONCENTRATION,FLD_LETHAL_DOSE,HUMIDITY, &
+            SPECIFIC_HEAT,SPECIFIC_ENTHALPY,REFERENCE_TEMPERATURE,FIC_CONCENTRATION,FLD_LETHAL_DOSE,HUMIDITY,&
             SPECIFIC_HEAT_LIQUID,DENSITY_LIQUID,VAPORIZATION_TEMPERATURE,HEAT_OF_VAPORIZATION,MELTING_TEMPERATURE,&
             H_V_REFERENCE_TEMPERATURE
 INTEGER  :: N_SPEC_READ,N,NN,NR
@@ -1835,7 +1835,6 @@ ENDDO COUNT_SPEC_LOOP
 29 REWIND(LU_INPUT)      
 
 ! If no background species has been declared, assume it is AIR.
-
 IF (.NOT. SIMPLE_CHEMISTRY .AND. BACKGROUND_SPEC_INDEX<1 .AND. .NOT.BACKGROUND_DECLARED) THEN
    N_SPECIES = N_SPECIES + 1
    PREDEFINED(1)         = .TRUE.
@@ -2530,11 +2529,13 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
    ENDIF
    
    RN%A                         = A
+   RN%A_IN                      = A
    RN%AUTO_IGNITION_TEMPERATURE = AUTO_IGNITION_TEMPERATURE + TMPM
    RN%C                         = C
    RN%CO_YIELD                  = CO_YIELD
    RN%CRIT_FLAME_TMP            = CRITICAL_FLAME_TEMPERATURE + TMPM
    RN%E                         = E*1000._EB
+   RN%E_IN                      = E
    RN%EQUATION                  = EQUATION
    RN%EPUMO2                    = EPUMO2*1000._EB
    RN%FUEL                      = FUEL
@@ -2596,6 +2597,7 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
       ALLOCATE(RN%N_S_READ(RN%N_SPEC))
       RN%N_S_READ(1:RN%N_SPEC) = N_S(1:RN%N_SPEC)
       ALLOCATE(RN%SPEC_ID_READ(RN%N_SPEC))
+      RN%SPEC_ID_READ = 'null'
       RN%SPEC_ID_READ(1:RN%N_SPEC)=SPEC_ID(1:RN%N_SPEC)
    ENDIF
 
@@ -2603,6 +2605,7 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
    RN%NU_READ(1:RN%N_SMIX) = NU(1:RN%N_SMIX)
 
    ALLOCATE(RN%SMIX_ID_READ(RN%N_SMIX))
+   RN%SMIX_ID_READ = 'null'   
    RN%SMIX_ID_READ(1:RN%N_SMIX)=SMIX_ID(1:RN%N_SMIX)
 
 END DO REAC_READ_LOOP
@@ -2652,6 +2655,7 @@ SUBROUTINE PROC_REAC
 USE PROPERTY_DATA, ONLY : PARSE_EQUATION   
 REAL(EB) :: MASS_PRODUCT,MASS_REACTANT,REACTION_BALANCE(118)
 INTEGER :: NS,NS2,NR,NSPEC
+LOGICAL :: NAME_FOUND
 TYPE (SPECIES_MIXTURE_TYPE), POINTER :: SM
 
 IF (N_REACTIONS <=0) RETURN
@@ -2692,7 +2696,8 @@ REAC_LOOP: DO NR=1,N_REACTIONS
          CALL SHUTDOWN(MESSAGE)
       ENDIF
       CALL PARSE_EQUATION(NR)
-      DO NS=1,N_TRACKED_SPECIES
+      RN%N_SMIX = 0
+      DO NS=1,N_TRACKED_SPECIES+1
          IF(ABS(RN%NU_READ(NS))>ZERO_P) THEN
             RN%N_SMIX = RN%N_SMIX+1
          ENDIF
@@ -2707,41 +2712,38 @@ REAC_LOOP: DO NR=1,N_REACTIONS
 
    ALLOCATE(RN%SMIX_ID(0:N_TRACKED_SPECIES))
    ALLOCATE(RN%NU(0:N_TRACKED_SPECIES))
-   ALLOCATE(RN%N_S(0:N_SPECIES))
+   ALLOCATE(RN%SPEC_ID(1:N_SPECIES))
+   ALLOCATE(RN%N_S(1:N_SPECIES))
    RN%SMIX_ID = 'null'
+   RN%SPEC_ID = 'null'
    RN%NU      = 0._EB
-   RN%N_S     = 0._EB
+   RN%N_S     = -999._EB
 
    ! Transfer SMIX_ID, SPEC_ID, NU, and N_S that were indexed by the order they were read in
    ! to now be indexed by the SMIX or SPEC index
    DO NS=1,RN%N_SMIX
+      IF (TRIM(RN%SMIX_ID_READ(NS))=='null') CYCLE   
+      NAME_FOUND = .FALSE.
       DO NS2=0,N_TRACKED_SPECIES
          IF (TRIM(RN%SMIX_ID_READ(NS))==TRIM(SPECIES_MIXTURE(NS2)%ID)) THEN
             RN%SMIX_ID(NS2) = RN%SMIX_ID_READ(NS)
             RN%NU(NS2)      = RN%NU_READ(NS)
+            NAME_FOUND = .TRUE.
             EXIT
          ENDIF
          IF (TRIM(RN%EQUATION)/='null') THEN
             IF (TRIM(RN%SMIX_ID_READ(NS))==TRIM(SPECIES_MIXTURE(NS2)%FORMULA)) THEN
                RN%SMIX_ID(NS2) = SPECIES_MIXTURE(NS2)%ID
                RN%NU(NS2)      = RN%NU_READ(NS)
+               NAME_FOUND = .TRUE.
                EXIT
             ENDIF
          ENDIF
       ENDDO
-   ENDDO
-
-   RN%RHO_EXPONENT = 0._EB
-   DO NS=1,RN%N_SPEC
-      DO NS2=0,N_SPECIES
-         IF (TRIM(RN%SPEC_ID_READ(NS))==TRIM(SPECIES(NS2)%ID)) THEN
-            RN%SPEC_ID(NS2) = RN%SPEC_ID_READ(NS)
-            RN%N_S(NS2)     = RN%N_S_READ(NS)
-            RN%A            = RN%A * (1000._EB*SPECIES(NS2)%MW)**(-RN%N_S(NS2))
-            RN%RHO_EXPONENT = RN%RHO_EXPONENT + RN%N_S(NS2)
-            EXIT
-         ENDIF
-      ENDDO
+      IF (.NOT. NAME_FOUND) THEN
+         WRITE(MESSAGE,'(A,I3,A,A,A)') 'ERROR: Problem with REAC ',NR,'. Tracked species ',TRIM(RN%SMIX_ID_READ(NS)),' not found.'
+         CALL SHUTDOWN(MESSAGE)      
+      ENDIF
    ENDDO
 
    ! Look for indices of fuels, oxidizers, and products. Normalize the stoichiometric coefficients by that of the fuel.
@@ -2757,8 +2759,33 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       ENDDO
    ENDDO
 
+
+   ! Adjust mol/cm^3/s based rate to kg/m^3/s rate
+   RN%RHO_EXPONENT = 0._EB
+   DO NS=1,RN%N_SPEC
+      IF (TRIM(RN%SPEC_ID_READ(NS))=='null') CYCLE
+      NAME_FOUND = .FALSE.
+      DO NS2=0,N_SPECIES
+         IF (TRIM(RN%SPEC_ID_READ(NS))==TRIM(SPECIES(NS2)%ID)) THEN
+            RN%SPEC_ID(NS2) = RN%SPEC_ID_READ(NS)
+            RN%N_S(NS2)     = RN%N_S_READ(NS)
+            RN%A            = RN%A * (1000._EB*SPECIES(NS2)%MW)**(-RN%N_S(NS2))
+            RN%RHO_EXPONENT = RN%RHO_EXPONENT + RN%N_S(NS2)
+            NAME_FOUND = .TRUE.
+            EXIT
+         ENDIF
+      ENDDO
+      IF (.NOT. NAME_FOUND) THEN
+         WRITE(MESSAGE,'(A,I3,A,A,A)') 'ERROR: Problem with REAC ',NR,'. Primitive species ',TRIM(RN%SPEC_ID_READ(NS)),' not found.'
+         CALL SHUTDOWN(MESSAGE)      
+      ENDIF     
+   ENDDO
+   
+   RN%RHO_EXPONENT = RN%RHO_EXPONENT - 1._EB
+   RN%A = RN%A *1000._EB*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
+
    IF (RN%FUEL/='null' .AND. I_FUEL<1) THEN
-      WRITE(MESSAGE,'(A,I3,A,F8.3,A,F8.3)') 'ERROR: Problem with REAC ',NR,'. Fuel ',TRIM(RN%FUEL),' not found.'
+      WRITE(MESSAGE,'(A,I3,A,A,A)') 'ERROR: Problem with REAC ',NR,'. Fuel ',TRIM(RN%FUEL),' not found.'
       CALL SHUTDOWN(MESSAGE)
    ENDIF
 
@@ -2834,6 +2861,10 @@ IF (TRIM(ODE_SOLVER)/='null') THEN
          COMBUSTION_ODE = SINGLE_EXACT      
       CASE ('EXPLICIT EULER')
          COMBUSTION_ODE = EXPLICIT_EULER
+      !CASE ('RUNGE-KUTTA 2')
+      !   COMBUSTION_ODE = RUNGE_KUTTA_2
+      !CASE ('RUNGE-KUTTA 4')
+      !   COMBUSTION_ODE = RUNGE_KUTTA_4
       CASE DEFAULT
          COMBUSTION_ODE = EXPLICIT_EULER
    END SELECT
@@ -7307,13 +7338,13 @@ MESH_LOOP_1: DO NM=1,NMESHES
  
       IF (MESH_ID/='null' .AND. MESH_ID/=MESH_NAME(NM))  REJECT_VENT = .TRUE.
  
-      IF (ABS(XB(3)-XB(4))<=ZERO_P  .AND. TWO_D .AND. NN<NVO-1) THEN
+      IF (ABS(XB(3)-XB(4))<=SPACING(XB(4))  .AND. TWO_D .AND. NN<NVO-1) THEN
          IF (ID=='null')WRITE(MESSAGE,'(A,I4,A)')'ERROR: VENT ',NN,      ' cannot be specified on a y boundary in a 2D calculation'
          IF (ID/='null')WRITE(MESSAGE,'(A,A,A)') 'ERROR: VENT ',TRIM(ID),' cannot be specified on a y boundary in a 2D calculation'
          CALL SHUTDOWN(MESSAGE)
       ENDIF
  
-      IF (ABS(XB(1)-XB(2))>ZERO_P  .AND. ABS(XB(3)-XB(4))>ZERO_P  .AND.ABS(XB(5)-XB(6))>ZERO_P ) THEN
+      IF (ABS(XB(1)-XB(2))>SPACING(XB(2))  .AND. ABS(XB(3)-XB(4))>SPACING(XB(4))  .AND.ABS(XB(5)-XB(6))>SPACING(XB(6)) ) THEN
          IF (ID=='null') WRITE(MESSAGE,'(A,I4,A)') 'ERROR: VENT ',NN,      ' must be a plane'
          IF (ID/='null') WRITE(MESSAGE,'(A,A,A)')  'ERROR: VENT ',TRIM(ID),' must be a plane'
          CALL SHUTDOWN(MESSAGE)
@@ -7328,9 +7359,9 @@ MESH_LOOP_1: DO NM=1,NMESHES
       
       VT=>VENTS(N)
       
-      IF (ABS(XB(1)-XB(2))<=ZERO_P ) VT%TOTAL_INPUT_AREA = (XB(4)-XB(3))*(XB(6)-XB(5))
-      IF (ABS(XB(3)-XB(4))<=ZERO_P ) VT%TOTAL_INPUT_AREA = (XB(2)-XB(1))*(XB(6)-XB(5))
-      IF (ABS(XB(5)-XB(6))<=ZERO_P ) VT%TOTAL_INPUT_AREA = (XB(2)-XB(1))*(XB(4)-XB(3))
+      IF (ABS(XB(1)-XB(2))<=SPACING(XB(2)) ) VT%TOTAL_INPUT_AREA = (XB(4)-XB(3))*(XB(6)-XB(5))
+      IF (ABS(XB(3)-XB(4))<=SPACING(XB(4)) ) VT%TOTAL_INPUT_AREA = (XB(2)-XB(1))*(XB(6)-XB(5))
+      IF (ABS(XB(5)-XB(6))<=SPACING(XB(6)) ) VT%TOTAL_INPUT_AREA = (XB(2)-XB(1))*(XB(4)-XB(3))
 
       XB(1) = MAX(XB(1),XS-DX(0))
       XB(2) = MIN(XB(2),XF+DX(IBP1))
@@ -7357,22 +7388,22 @@ MESH_LOOP_1: DO NM=1,NMESHES
          VT%K2 = KBAR
          XB(5) = ZS
          XB(6) = ZF
-         IF (ABS(XB(1)-XB(2))>ZERO_P  .AND. ABS(XB(3)-XB(4))>ZERO_P ) THEN
+         IF (ABS(XB(1)-XB(2))>SPACING(XB(2))  .AND. ABS(XB(3)-XB(4))>SPACING(XB(4)) ) THEN
             IF (ID=='null') WRITE(MESSAGE,'(A,I4,A)') 'ERROR: Evacuation VENT ',NN,      ' must be a vertical plane'
             IF (ID/='null') WRITE(MESSAGE,'(A,A,A)')  'ERROR: Evacuation VENT ',TRIM(ID),' must be a vertical plane'
             CALL SHUTDOWN(MESSAGE)
          ENDIF
       ENDIF
 
-      IF (ABS(XB(1)-XB(2))<=ZERO_P ) THEN
+      IF (ABS(XB(1)-XB(2))<=SPACING(XB(2)) ) THEN
          IF (VT%J1==VT%J2 .OR. VT%K1==VT%K2) REJECT_VENT=.TRUE.
          IF (VT%I1>IBAR .OR. VT%I2<0)        REJECT_VENT=.TRUE.
       ENDIF
-      IF (ABS(XB(3)-XB(4))<=ZERO_P ) THEN
+      IF (ABS(XB(3)-XB(4))<=SPACING(XB(4)) ) THEN
          IF (VT%I1==VT%I2 .OR. VT%K1==VT%K2) REJECT_VENT=.TRUE.
          IF (VT%J1>JBAR .OR. VT%J2<0)        REJECT_VENT=.TRUE.
       ENDIF
-      IF (ABS(XB(5)-XB(6))<=ZERO_P ) THEN
+      IF (ABS(XB(5)-XB(6))<=SPACING(XB(6)) ) THEN
          IF (VT%I1==VT%I2 .OR. VT%J1==VT%J2) REJECT_VENT=.TRUE.
          IF (VT%K1>KBAR .OR. VT%K2<0)        REJECT_VENT=.TRUE.
       ENDIF
@@ -7404,9 +7435,9 @@ MESH_LOOP_1: DO NM=1,NMESHES
       VT%Z1 = XB(5)
       VT%Z2 = XB(6)
  
-      IF (ABS(XB(1)-XB(2))<=ZERO_P ) VT%INPUT_AREA = (XB(4)-XB(3))*(XB(6)-XB(5))
-      IF (ABS(XB(3)-XB(4))<=ZERO_P ) VT%INPUT_AREA = (XB(2)-XB(1))*(XB(6)-XB(5))
-      IF (ABS(XB(5)-XB(6))<=ZERO_P ) VT%INPUT_AREA = (XB(2)-XB(1))*(XB(4)-XB(3))
+      IF (ABS(XB(1)-XB(2))<=SPACING(XB(2)) ) VT%INPUT_AREA = (XB(4)-XB(3))*(XB(6)-XB(5))
+      IF (ABS(XB(3)-XB(4))<=SPACING(XB(4)) ) VT%INPUT_AREA = (XB(2)-XB(1))*(XB(6)-XB(5))
+      IF (ABS(XB(5)-XB(6))<=SPACING(XB(6)) ) VT%INPUT_AREA = (XB(2)-XB(1))*(XB(4)-XB(3))
  
       ! Check the SURF_ID against the list of SURF's
 
@@ -8334,12 +8365,18 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
 
       IF (POINTS > 1) THEN
          IF (.NOT.HIDE_COORDINATES) THEN
-            IF (ABS(XB(1)-XB(2))> ZERO_P .AND. ABS(XB(3)-XB(4))<=ZERO_P .AND. ABS(XB(5)-XB(6))<=ZERO_P) DV%LINE_COORD_CODE = 1
-            IF (ABS(XB(1)-XB(2))<=ZERO_P .AND. ABS(XB(3)-XB(4))> ZERO_P .AND. ABS(XB(5)-XB(6))<=ZERO_P) DV%LINE_COORD_CODE = 2
-            IF (ABS(XB(1)-XB(2))<=ZERO_P .AND. ABS(XB(3)-XB(4))<=ZERO_P .AND. ABS(XB(5)-XB(6))> ZERO_P) DV%LINE_COORD_CODE = 3
-            IF (ABS(XB(1)-XB(2))> ZERO_P .AND. ABS(XB(3)-XB(4))> ZERO_P .AND. ABS(XB(5)-XB(6))<=ZERO_P) DV%LINE_COORD_CODE = 12
-            IF (ABS(XB(1)-XB(2))> ZERO_P .AND. ABS(XB(3)-XB(4))<=ZERO_P .AND. ABS(XB(5)-XB(6))> ZERO_P) DV%LINE_COORD_CODE = 13
-            IF (ABS(XB(1)-XB(2))<=ZERO_P .AND. ABS(XB(3)-XB(4))> ZERO_P .AND. ABS(XB(5)-XB(6))> ZERO_P) DV%LINE_COORD_CODE = 23
+            IF (ABS(XB(1)-XB(2))> SPACING(XB(2)) .AND. ABS(XB(3)-XB(4))<=SPACING(XB(4)) .AND. &
+               ABS(XB(5)-XB(6))<=SPACING(XB(6))) DV%LINE_COORD_CODE = 1
+            IF (ABS(XB(1)-XB(2))<=SPACING(XB(2)) .AND. ABS(XB(3)-XB(4))> SPACING(XB(4)) .AND. &
+               ABS(XB(5)-XB(6))<=SPACING(XB(6))) DV%LINE_COORD_CODE = 2
+            IF (ABS(XB(1)-XB(2))<=SPACING(XB(2)) .AND. ABS(XB(3)-XB(4))<=SPACING(XB(4)) .AND. &
+               ABS(XB(5)-XB(6))> SPACING(XB(6))) DV%LINE_COORD_CODE = 3
+            IF (ABS(XB(1)-XB(2))> SPACING(XB(2)) .AND. ABS(XB(3)-XB(4))> SPACING(XB(4)) .AND. &
+               ABS(XB(5)-XB(6))<=SPACING(XB(6))) DV%LINE_COORD_CODE = 12
+            IF (ABS(XB(1)-XB(2))> SPACING(XB(2)) .AND. ABS(XB(3)-XB(4))<=SPACING(XB(4)) .AND. &
+               ABS(XB(5)-XB(6))> SPACING(XB(6))) DV%LINE_COORD_CODE = 13
+            IF (ABS(XB(1)-XB(2))<=SPACING(XB(2)) .AND. ABS(XB(3)-XB(4))> SPACING(XB(4)) .AND. &
+               ABS(XB(5)-XB(6))> SPACING(XB(6))) DV%LINE_COORD_CODE = 23
          ELSE
             DV%LINE_COORD_CODE = 0
          ENDIF
@@ -8373,9 +8410,9 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
       IF (DV%I1<DV%I2) DV%I1 = DV%I1 + 1
       IF (DV%J1<DV%J2) DV%J1 = DV%J1 + 1
       IF (DV%K1<DV%K2) DV%K1 = DV%K1 + 1
-      IF (ABS(XB(1)-XB(2))<=ZERO_P .AND. IOR==0) DV%IOR = 1
-      IF (ABS(XB(3)-XB(4))<=ZERO_P .AND. IOR==0) DV%IOR = 2
-      IF (ABS(XB(5)-XB(6))<=ZERO_P .AND. IOR==0) DV%IOR = 3
+      IF (ABS(XB(1)-XB(2))<=SPACING(XB(2)) .AND. IOR==0) DV%IOR = 1
+      IF (ABS(XB(3)-XB(4))<=SPACING(XB(4)) .AND. IOR==0) DV%IOR = 2
+      IF (ABS(XB(5)-XB(6))<=SPACING(XB(6)) .AND. IOR==0) DV%IOR = 3
    ENDIF
    
 ENDDO READ_DEVC_LOOP
