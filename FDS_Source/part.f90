@@ -1758,9 +1758,11 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
             ! Add fuel evaporation rate to running counter and adjust mass of evaporated fuel to account for different 
             ! Heat of Combustion between fuel droplet and gas
 
-            IF (PC%Z_INDEX==I_FUEL) THEN
-               FUEL_DROPLET_MLR(NM) = FUEL_DROPLET_MLR(NM) + WGT*M_VAP/DT_SUBSTEP
-               M_VAP = PC%ADJUST_EVAPORATION*M_VAP
+            IF (N_REACTIONS>0) THEN
+               IF (PC%Z_INDEX==REACTION(1)%FUEL_SMIX_INDEX) THEN
+                  FUEL_DROPLET_MLR(NM) = FUEL_DROPLET_MLR(NM) + WGT*M_VAP/DT_SUBSTEP
+                  M_VAP = PC%ADJUST_EVAPORATION*M_VAP
+               ENDIF
             ENDIF
 
             ! Update gas temperature and determine new subtimestep
