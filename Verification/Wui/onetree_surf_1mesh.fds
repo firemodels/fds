@@ -11,9 +11,6 @@
 - Duration of simulation in seconds
 &TIME T_END=60 / 
 
-- Miscellaneous parameters
-&MISC BAROCLINIC=.TRUE. /
-
 - Gaseous combustion parameters
 &REAC FUEL='WOOD'
       FYI='Ritchie, et al., 5th IAFSS, C_3.4 H_6.2 O_2.5, dHc = 15MW/kg'
@@ -29,7 +26,7 @@
 -Tree crown vegetation based on NIST Douglas fir tree burn experiments. 
  The bulk density is higher than normally found in most trees in the field
 
-&PART ID='TREE VEG',TREE=.TRUE.,QUANTITIES='VEG_TEMPERATURE',
+&PART ID='TREE VEG',TREE=.TRUE.,QUANTITIES='DROPLET TEMPERATURE',
           VEG_INITIAL_TEMPERATURE=20.,
           VEG_SV=3900.,VEG_MOISTURE=1.00,VEG_CHAR_FRACTION=0.25,
           VEG_DRAG_COEFFICIENT=0.375,VEG_DENSITY=514.,VEG_BULK_DENSITY=2.76,
@@ -42,7 +39,7 @@
 -Surface vegetation. Pinus Ponderosa pine needles. 
  Uses Catchepole CST, 131, pp. 1-37, 1998 values of case PPMC59
 
-&PART ID='GROUND VEG',TREE=.TRUE.,QUANTITIES='VEG_TEMPERATURE',
+&PART ID='GROUND VEG',TREE=.TRUE.,QUANTITIES='DROPLET TEMPERATURE',
           VEG_INITIAL_TEMPERATURE=20.,
           VEG_SV=5710.,VEG_MOISTURE=0.07,VEG_CHAR_FRACTION=0.25,
           VEG_DRAG_COEFFICIENT=0.375,VEG_DENSITY=510.,VEG_BULK_DENSITY=10,
