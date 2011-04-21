@@ -858,7 +858,8 @@ CP_H2O    = 4190._EB !J/kg/K specific heat of water
 H_VAP_H2O = 2259._EB*1000._EB !J/kg/K heat of vaporization of water
 DT_BC     = T - VEG_CLOCK_BC
 RDT_BC    = 1.0_EB/DT_BC
-I_FUEL    = REACTION(1)%FUEL_SMIX_INDEX
+
+IF (N_REACTIONS>0) I_FUEL = REACTION(1)%FUEL_SMIX_INDEX
 
 ! Thermal degradation approach parameters
 ! VEG_DEGRADATION_LINEAR    = .TRUE.
