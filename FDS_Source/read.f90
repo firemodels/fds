@@ -2465,7 +2465,8 @@ NAMELIST /REAC/ E,A,HEAT_OF_COMBUSTION,FYI,FUEL,EPUMO2,ID, N_S, &
                 C,H,N,O,IDEAL, FORMULA,&
                 BETA_EDC,Y_P_MIN_EDC,HRRPUA_SHEET,HRRPUV_AVERAGE,FIXED_MIX_TIME, &
                 TAU_CHEM,TAU_FLAME,AUTO_IGNITION_TEMPERATURE, &
-                SPEC_ID,SMIX_ID,THRESHOLD_TEMPERATURE,Y_CO2_INFTY,HUMIDITY,EQUATION,ODE_SOLVER
+                SPEC_ID,SMIX_ID,THRESHOLD_TEMPERATURE,Y_CO2_INFTY,HUMIDITY,EQUATION,ODE_SOLVER, &
+                N_T
 
 CALL MAKE_PERIODIC_TABLE
 CALL SIMPLE_SPECIES_MW
@@ -2546,6 +2547,7 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
    RN%MW_FUEL                   = MW_FUEL
    RN%MW_SOOT                   = ELEMENT(6)%MASS * (1._EB-SOOT_H_FRACTION) + ELEMENT(1)%MASS*SOOT_H_FRACTION
    RN%N                         = N
+   RN%N_T                       = N_T
    RN%O                         = O
    RN%SOOT_H_FRACTION           = SOOT_H_FRACTION
    RN%SOOT_YIELD                = SOOT_YIELD
@@ -2635,6 +2637,7 @@ ID                          = 'null'
 N                           = 0._EB
 NU                          = 0._EB
 N_S                         = -999._EB
+N_T                         = 0._EB
 O                           = 0._EB
 ODE_SOLVER                  = 'null'
 SOOT_H_FRACTION             = 0.1_EB
