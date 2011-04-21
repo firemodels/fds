@@ -3288,6 +3288,7 @@ PART_LOOP: DO N=1,N_PART
    SS => SPECIES(PC%Y_INDEX)
    ALLOCATE(SS%C_P_L(0:5000),STAT=IZERO)
    CALL ChkMemErr('PROC_PART','SS%C_P_L',IZERO)
+   SS%C_P_L=SS%SPECIFIC_HEAT_LIQUID
    ALLOCATE(SS%C_P_L_BAR(0:5000),STAT=IZERO)
    CALL ChkMemErr('PROC_PART','SS%C_P_L_BAR',IZERO)
    ALLOCATE(SS%H_L(0:5000),STAT=IZERO)
@@ -3302,6 +3303,21 @@ PART_LOOP: DO N=1,N_PART
    DO J = 1, 5000
       IF (SS%C_P_L(J) > 0._EB) THEN
          SS%H_L(J) = (REAL(J,EB)-SS%TMP_MELT)*SS%C_P_L(J)
+         IF (J==1) THEN
+            CALL JANAF_TABLE_LIQUID (J,CPBAR,H_V,H_L,TMP_REF,TMP_MELT,TMP_V,SS%ID,PC%FUEL,DENSITY)
+            IF (SS%H_V_REFERENCE_TEMPERATURE < 0._EB) SS%H_V_REFERENCE_TEMPERATURE=TMP_REF
+            IF (SS%TMP_V < 0._EB) SS%TMP_V = TMP_V
+            IF (PC%DENSITY < 0._EB) THEN
+               SS%DENSITY_LIQUID = DENSITY
+               PC%DENSITY = DENSITY
+               PC%FTPR = FOTH*PI*DENSITY               
+               IF (PC%DENSITY < 0._EB) THEN
+                  WRITE(MESSAGE,'(A,A,A)') 'ERROR: PARTicle class ',TRIM(SS%ID),' requires a density'
+                  CALL SHUTDOWN(MESSAGE)
+               ENDIF
+            ENDIF   
+            IF (SS%TMP_MELT < 0._EB) SS%TMP_MELT = TMP_MELT
+         ENDIF
       ELSE
          CALL JANAF_TABLE_LIQUID (J,SS%C_P_L(J),H_V,H_L,TMP_REF,TMP_MELT,TMP_V,SS%ID,PC%FUEL,DENSITY)
          IF (J==1) THEN         
