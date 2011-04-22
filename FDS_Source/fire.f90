@@ -539,24 +539,30 @@ IF (TMP(I,J,K) < RN%AUTO_IGNITION_TEMPERATURE) THEN
 ELSE
    DZF = 1._EB
    DZAIR = 0._EB
+   !Search reactants to find limiting reactant and express it as fuel mass.  This is the amount of fuel
+   !that can burn
    DO NS = 0,N_TRACKED_SPECIES
       IF (RN%NU(NS)<-ZERO_P) &
          DZF = MIN(DZF,-ZZ_IN(NS)*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW/(RN%NU(NS)*SPECIES_MIXTURE(NS)%MW))
    ENDDO
+   !Get the specific heat for the fuel at the current and critical flame temperatures
    ZZ_GET = 0._EB
    ZZ_GET(RN%FUEL_SMIX_INDEX) = 1._EB
    CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR_F_0,TMP(I,J,K)) 
    CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR_F_N,RN%CRIT_FLAME_TMP)
    ZZ_GET = ZZ_IN
+   !Remove the burnable fuel from the local mixture and renormalize.  The remainder is "air"
    ZZ_GET(RN%FUEL_SMIX_INDEX) = ZZ_GET(RN%FUEL_SMIX_INDEX) - DZF
    ZZ_GET = ZZ_GET/SUM(ZZ_GET)     
+   !Get the specific heat for the "air"
    CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR_G_0,TMP(I,J,K)) 
    CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR_G_N,RN%CRIT_FLAME_TMP) 
-
+   !Loop over non-fuel reactants and find the mininum.  Determine how much "air" is needed to provide that reactant
    DO NS = 0,N_TRACKED_SPECIES   
             IF (RN%NU(NS)<-ZERO_P .AND. NS/=RN%FUEL_SMIX_INDEX) &
               DZAIR = MAX(DZAIR, -DZF*RN%NU(NS)*SPECIES_MIXTURE(NS)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW/ZZ_GET(NS))
    ENDDO
+   !See if enough energy is released to raise the fuel and required "air" temperatures above the critical flame temp
    IF ( (DZF*CPBAR_F_0 + DZAIR*CPBAR_G_0)*TMP(I,J,K) + DZF*RN%HEAT_OF_COMBUSTION < &
          (DZF*CPBAR_F_N + DZAIR*CPBAR_G_N)*RN%CRIT_FLAME_TMP) EXTINCTION = .TRUE.
 ENDIF
