@@ -5265,12 +5265,14 @@ PROCESS_SURF_LOOP: DO N=0,N_SURF
    IF (SF%N_LAYERS > 0) THEN
       DO NN=1,SF%N_MATL
          ML => MATERIAL(SF%MATL_INDEX(NN))
-         IF (N_REACTIONS>0 .AND. ML%PYROLYSIS_MODEL/=PYROLYSIS_NONE) THEN
+         IF (ML%PYROLYSIS_MODEL/=PYROLYSIS_NONE) THEN
             SF%PYROLYSIS_MODEL = PYROLYSIS_MATERIAL
-            IF (REACTION(1)%FUEL_SMIX_INDEX>=0) THEN
-               IF (ANY(ML%NU_SPEC(REACTION(1)%FUEL_SMIX_INDEX,:)>0._EB))  THEN
-                  BURNING = .TRUE.
-                  SF%TAU(TIME_HEAT) = 0._EB
+            IF (N_REACTIONS>0) THEN
+               IF (REACTION(1)%FUEL_SMIX_INDEX>=0) THEN
+                  IF (ANY(ML%NU_SPEC(REACTION(1)%FUEL_SMIX_INDEX,:)>0._EB))  THEN
+                     BURNING = .TRUE.
+                     SF%TAU(TIME_HEAT) = 0._EB
+                  ENDIF
                ENDIF
             ENDIF
          ENDIF
