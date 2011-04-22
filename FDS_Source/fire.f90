@@ -237,11 +237,10 @@ Q_EXISTS = .FALSE.
 DO K=1,KBAR
    DO J=1,JBAR
       ILOOP: DO I=1,IBAR
+         !Check to see if a reaction is possible
          IF (SOLID(CELL_INDEX(I,J,K))) CYCLE ILOOP
          ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)
          ZZ_GET(0) = 1._EB - MIN(1._EB,SUM(ZZ_GET(1:N_TRACKED_SPECIES)))
-         !IF(I==12 .AND. K==10) WRITE(*,*) 'IN fire ',TMP(I,J,K),RHO(I,J,K),DT
-         !IF(I==12 .AND. K==10) WRITE(*,'(1X,6(E12.5,1X))') ZZ_GET
          DO_REACTION = .FALSE.
          DO NR=1,N_REACTIONS
             RN=>REACTION(NR)
@@ -263,12 +262,11 @@ DO K=1,KBAR
             CASE(EXPLICIT_EULER)
                CALL ODE_EXPLICIT_EULER(I,J,K,ZZ_GET,Q(I,J,K))
          END SELECT        
-         
+
+         !Update RSUM and ZZ         
          IF (Q(I,J,K) > 0._EB) THEN
             Q_EXISTS = .TRUE.
             CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM(I,J,K)) 
-            !IF(I==12 .AND. K==10) WRITE(*,*) 'OUT fire ',Q(I,J,K)
-            !IF(I==12 .AND. K==10) WRITE(*,'(1X,6(E12.5,1X))') ZZ_GET            
             ZZ(I,J,K,1:N_TRACKED_SPECIES) = ZZ_GET(1:N_TRACKED_SPECIES)
             ! Divergence term would be inserted here
          ENDIF
@@ -310,7 +308,7 @@ IF(RATE_CONSTANT < ZERO_P) RETURN
 Z_LIMITER = RATE_CONSTANT*MIX_TIME(I,J,K)
 
 DZF = -1._EB
-!Check for reactant limited
+!Check for reactant (i.e. fuel or oxidizer) limited combustion
 MIN_FOUND = .FALSE.
 REACTANT_MIN=1._EB
 DO NS=0,N_TRACKED_SPECIES
@@ -323,7 +321,8 @@ DO NS=0,N_TRACKED_SPECIES
    ENDIF
 ENDDO
 
-!For product limited find time of switch from product to reactant (if it occurs) and do two step exact solution
+!For product limited combsiton find time of switch from product limited to reactant limited (if it occurs)
+!and do two step exact solution
 IF (.NOT. MIN_FOUND) THEN
    DT2 = MIX_TIME(I,J,K)*LOG((Z_LIMITER+REACTANT_MIN)/(2._EB*Z_LIMITER))
    IF (DT2 < DT) THEN
@@ -527,9 +526,19 @@ RETURN
 CONTAINS
 
 LOGICAL FUNCTION EXTINCTION(I,J,K,ZZ_IN)
+!This routine determines if local extinction occurs for a mixing controlled reaction.
+!This is determined as follows:
+!1) Determine how much fuel can burn (DZ_FUEL) by finding the limiting reactant and expressing it in terms of fuel mass
+!2) Remove that amount of fuel form the local mixture, everything else is "air"  
+!   (i.e. if we are fuel rich, excess fuel acts as a diluent)
+!3) Search to find the minimum reactant other than fuel.  
+!   Using the reaction stoichiometry, determine how much "air" (DZ_AIR) is needed to burn the fuel.
+!4) GET_AVERAGE_SPECIFIC_HEAT for the fuel and the "air" at the current temp and the critical flame temp
+!5) Check to see if the heat released from burning DZ_FUEL can raise the current temperature of DZ_FUEL and DZ_AIR
+!   above the critical flame temp.
 USE PHYSICAL_FUNCTIONS,ONLY:GET_AVERAGE_SPECIFIC_HEAT
 REAL(EB),INTENT(IN)::ZZ_IN(0:N_TRACKED_SPECIES)
-REAL(EB):: DZAIR,DZF,CPBAR_F_0,CPBAR_F_N,CPBAR_G_0,CPBAR_G_N,ZZ_GET(0:N_TRACKED_SPECIES)
+REAL(EB):: DZ_AIR,DZ_FUEL,CPBAR_F_0,CPBAR_F_N,CPBAR_G_0,CPBAR_G_N,ZZ_GET(0:N_TRACKED_SPECIES)
 INTEGER, INTENT(IN) :: I,J,K
 INTEGER :: NS
 
@@ -537,13 +546,13 @@ EXTINCTION = .FALSE.
 IF (TMP(I,J,K) < RN%AUTO_IGNITION_TEMPERATURE) THEN
    EXTINCTION = .TRUE.
 ELSE
-   DZF = 1._EB
-   DZAIR = 0._EB
+   DZ_FUEL = 1._EB
+   DZ_AIR = 0._EB
    !Search reactants to find limiting reactant and express it as fuel mass.  This is the amount of fuel
    !that can burn
    DO NS = 0,N_TRACKED_SPECIES
       IF (RN%NU(NS)<-ZERO_P) &
-         DZF = MIN(DZF,-ZZ_IN(NS)*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW/(RN%NU(NS)*SPECIES_MIXTURE(NS)%MW))
+         DZ_FUEL = MIN(DZ_FUEL,-ZZ_IN(NS)*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW/(RN%NU(NS)*SPECIES_MIXTURE(NS)%MW))
    ENDDO
    !Get the specific heat for the fuel at the current and critical flame temperatures
    ZZ_GET = 0._EB
@@ -552,19 +561,19 @@ ELSE
    CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR_F_N,RN%CRIT_FLAME_TMP)
    ZZ_GET = ZZ_IN
    !Remove the burnable fuel from the local mixture and renormalize.  The remainder is "air"
-   ZZ_GET(RN%FUEL_SMIX_INDEX) = ZZ_GET(RN%FUEL_SMIX_INDEX) - DZF
+   ZZ_GET(RN%FUEL_SMIX_INDEX) = ZZ_GET(RN%FUEL_SMIX_INDEX) - DZ_FUEL
    ZZ_GET = ZZ_GET/SUM(ZZ_GET)     
    !Get the specific heat for the "air"
    CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR_G_0,TMP(I,J,K)) 
    CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR_G_N,RN%CRIT_FLAME_TMP) 
-   !Loop over non-fuel reactants and find the mininum.  Determine how much "air" is needed to provide that reactant
+   !Loop over non-fuel reactants and find the mininum.  Determine how much "air" is needed to provide the limting reactant
    DO NS = 0,N_TRACKED_SPECIES   
             IF (RN%NU(NS)<-ZERO_P .AND. NS/=RN%FUEL_SMIX_INDEX) &
-              DZAIR = MAX(DZAIR, -DZF*RN%NU(NS)*SPECIES_MIXTURE(NS)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW/ZZ_GET(NS))
+              DZ_AIR = MAX(DZ_AIR, -DZ_FUEL*RN%NU(NS)*SPECIES_MIXTURE(NS)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW/ZZ_GET(NS))
    ENDDO
    !See if enough energy is released to raise the fuel and required "air" temperatures above the critical flame temp
-   IF ( (DZF*CPBAR_F_0 + DZAIR*CPBAR_G_0)*TMP(I,J,K) + DZF*RN%HEAT_OF_COMBUSTION < &
-         (DZF*CPBAR_F_N + DZAIR*CPBAR_G_N)*RN%CRIT_FLAME_TMP) EXTINCTION = .TRUE.
+   IF ( (DZ_FUEL*CPBAR_F_0 + DZ_AIR*CPBAR_G_0)*TMP(I,J,K) + DZ_FUEL*RN%HEAT_OF_COMBUSTION < &
+         (DZ_FUEL*CPBAR_F_N + DZ_AIR*CPBAR_G_N)*RN%CRIT_FLAME_TMP) EXTINCTION = .TRUE.
 ENDIF
 
 END FUNCTION EXTINCTION

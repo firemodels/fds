@@ -2682,4 +2682,37 @@ ENDDO
 END SUBROUTINE CHECK_REACTION_CHARACTERS
 
 
+SUBROUTINE SHUTDOWN_ATOM(ATOM_COUNT,NR)  
+
+! Stops the code gracefully after writing a message
+
+USE GLOBAL_CONSTANTS, ONLY: LU_ERR,FN_OUTPUT,LU_OUTPUT,CHID
+INTEGER, INTENT(IN) :: NR
+INTEGER :: I
+REAL(EB), INTENT(IN) :: ATOM_COUNT(118)
+LOGICAL :: EX
+
+WRITE(LU_ERR,'(/A,I3,A)') 'ERROR: Problem with REAC ',NR,'. Unbalanced stoichiometry.'
+WRITE(LU_ERR,'(/A)') 'The following elements are unblanced:'
+WRITE(LU_ERR,'(/A)') 'Element  Error'
+DO I=1,118
+   IF (ABS(ATOM_COUNT(118)) > 1.E-5_EB) WRITE(LU_ERR,'(2X,A,4X,E10.3)') ELEMENT(I)%ABBREVIATION,ATOM_COUNT(I)
+ENDDO
+! For those running FDS on a PC, ensure that error message gets written to the .out file, too.
+
+INQUIRE(FILE=FN_OUTPUT,EXIST=EX)
+IF (.NOT.EX) OPEN(LU_OUTPUT,FILE=TRIM(CHID)//'.out',STATUS='REPLACE',FORM='FORMATTED')
+
+WRITE(LU_OUTPUT,'(/A,I3,A)') 'ERROR: Problem with REAC ',NR,'. Unbalanced stoichiometry.'
+WRITE(LU_OUTPUT,'(/A)') 'The following elements are unblanced:'
+WRITE(LU_OUTPUT,'(/A)') 'Element  Error'
+DO I=1,118
+   IF (ABS(ATOM_COUNT(118)) > 1.E-5_EB) WRITE(LU_OUTPUT,'(2X,A,4X,E10.3)') ELEMENT(I)%ABBREVIATION,ATOM_COUNT(I)
+ENDDO
+
+STOP
+
+END SUBROUTINE SHUTDOWN_ATOM
+
+
 END MODULE PROPERTY_DATA
