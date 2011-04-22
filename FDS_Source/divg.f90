@@ -335,7 +335,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            ZZ_GET = ZZ(I,J,K,:)
+            ZZ_GET = ZZP(I,J,K,:)
             CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(ZZ_GET,CPBAR,TMP(I,J,K)) 
             HDIFF = CPBAR*TMP(I,J,K)
             DP(I,J,K) = DP(I,J,K) - HDIFF*DEL_RHO_D_DEL_Z(I,J,K,N)
