@@ -18,7 +18,7 @@ CONTAINS
 SUBROUTINE DIVERGENCE_PART_1(T,NM)
 USE COMP_FUNCTIONS, ONLY: SECOND 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
-USE PHYSICAL_FUNCTIONS, ONLY: GET_CONDUCTIVITY,GET_SPECIFIC_HEAT,GET_AVERAGE_SPECIFIC_HEAT
+USE PHYSICAL_FUNCTIONS, ONLY: GET_CONDUCTIVITY,GET_SPECIFIC_HEAT,GET_AVERAGE_SPECIFIC_HEAT,GET_AVERAGE_SPECIFIC_HEAT_DIFF
 USE EVAC, ONLY: EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, EMESH_NFIELDS, EVAC_FDS6
 USE TURBULENCE, ONLY: WANNIER_FLOW 
 
@@ -29,7 +29,7 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX,KDTDY,KDTDZ,DP,KP, &
           RHO_D_DZDX,RHO_D_DZDY,RHO_D_DZDZ,RHO_D,RHOP,H_RHO_D_DZDX,H_RHO_D_DZDY,H_RHO_D_DZDZ,RTRM
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
 REAL(EB) :: DELKDELT,VC,DTDX,DTDY,DTDZ,TNOW,ZZ_GET(0:N_TRACKED_SPECIES), &
-            HDIFF,DYDX,DYDY,DYDZ,T,RDT,RHO_D_DZDN,TSI,TIME_RAMP_FACTOR,ZONE_VOLUME,DELTA_P,PRES_RAMP_FACTOR,&
+            HDIFF,DZDX,DZDY,DZDZ,T,RDT,RHO_D_DZDN,TSI,TIME_RAMP_FACTOR,ZONE_VOLUME,DELTA_P,PRES_RAMP_FACTOR,&
             CP,CPBAR,TMP_G,TMP_WGT
 TYPE(SURFACE_TYPE), POINTER :: SF
 INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,IBC,I,J,K,IPZ,IOPZ
@@ -153,24 +153,24 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       !$OMP END DO
    ENDIF
 
-   ! Compute rho*D del Y
+   ! Compute rho*D del Z
 
-   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,DYDX,DYDY,DYDZ)
+   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,DZDX,DZDY,DZDZ)
    DO K=0,KBAR
       DO J=0,JBAR
          DO I=0,IBAR
-            DYDX = (ZZP(I+1,J,K,N)-ZZP(I,J,K,N))*RDXN(I)
-            RHO_D_DZDX(I,J,K) = .5_EB*(RHO_D(I+1,J,K)+RHO_D(I,J,K))*DYDX
-            DYDY = (ZZP(I,J+1,K,N)-ZZP(I,J,K,N))*RDYN(J)
-            RHO_D_DZDY(I,J,K) = .5_EB*(RHO_D(I,J+1,K)+RHO_D(I,J,K))*DYDY
-            DYDZ = (ZZP(I,J,K+1,N)-ZZP(I,J,K,N))*RDZN(K)
-            RHO_D_DZDZ(I,J,K) = .5_EB*(RHO_D(I,J,K+1)+RHO_D(I,J,K))*DYDZ
+            DZDX = (ZZP(I+1,J,K,N)-ZZP(I,J,K,N))*RDXN(I)
+            RHO_D_DZDX(I,J,K) = .5_EB*(RHO_D(I+1,J,K)+RHO_D(I,J,K))*DZDX
+            DZDY = (ZZP(I,J+1,K,N)-ZZP(I,J,K,N))*RDYN(J)
+            RHO_D_DZDY(I,J,K) = .5_EB*(RHO_D(I,J+1,K)+RHO_D(I,J,K))*DZDY
+            DZDZ = (ZZP(I,J,K+1,N)-ZZP(I,J,K,N))*RDZN(K)
+            RHO_D_DZDZ(I,J,K) = .5_EB*(RHO_D(I,J,K+1)+RHO_D(I,J,K))*DZDZ
          ENDDO
       ENDDO
    ENDDO
    !$OMP END DO
 
-   ! Correct rho*D del Y at boundaries and store rho*D at boundaries
+   ! Correct rho*D del Z at boundaries and store rho*D at boundaries
 
    !$OMP SINGLE PRIVATE(IW,IIG,JJG,KKG,RHO_D_DZDN,IOR)
    !!$OMP DO PRIVATE(IW,IIG,JJG,KKG,RHO_D_DZDN,IOR)
@@ -202,7 +202,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
    !!$OMP END DO
    !$OMP END SINGLE
 
-   ! Compute del dot h_n*rho*D del Y_n (part of del dot qdot")
+   ! Compute del dot h_n*rho*D del Z_n (part of del dot qdot")
 
    !$OMP SINGLE
    H_RHO_D_DZDX => WORK5
@@ -216,20 +216,23 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          DO I=0,IBAR
             ! H_RHO_D_DZDX
             TMP_G = .5_EB*(TMP(I+1,J,K)+TMP(I,J,K))
-            CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR,TMP_G) 
-            HDIFF = CPBAR*TMP_G-CPBAR_Z(MIN(NINT(TMP_G),5000),0)*TMP_G
+            ZZ_GET = .5_EB*(ZZP(I+1,J,K,:)+ZZP(I,J,K,:))
+            CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(ZZ_GET,CPBAR,TMP_G) 
+            HDIFF = CPBAR*TMP_G
             H_RHO_D_DZDX(I,J,K) = HDIFF*RHO_D_DZDX(I,J,K)
             
             ! H_RHO_D_DZDY
             TMP_G = .5_EB*(TMP(I,J+1,K)+TMP(I,J,K))
-            CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR,TMP_G)              
-            HDIFF = CPBAR*TMP_G-CPBAR_Z(MIN(NINT(TMP_G),5000),0)*TMP_G
+            ZZ_GET = .5_EB*(ZZP(I,J+1,K,:)+ZZP(I,J,K,:))
+            CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(ZZ_GET,CPBAR,TMP_G) 
+            HDIFF = CPBAR*TMP_G
             H_RHO_D_DZDY(I,J,K) = HDIFF*RHO_D_DZDY(I,J,K)
             
             ! H_RHO_D_DZDZ
             TMP_G = .5_EB*(TMP(I,J,K+1)+TMP(I,J,K))               
-            CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR,TMP_G)
-            HDIFF = CPBAR*TMP_G-CPBAR_Z(MIN(NINT(TMP_G),5000),0)*TMP_G
+            ZZ_GET = .5_EB*(ZZP(I,J,K+1,:)+ZZP(I,J,K,:))
+            CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(ZZ_GET,CPBAR,TMP_G) 
+            HDIFF = CPBAR*TMP_G
             H_RHO_D_DZDZ(I,J,K) = HDIFF*RHO_D_DZDZ(I,J,K)
          ENDDO
       ENDDO
@@ -246,9 +249,10 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       JJG = IJKW(7,IW)
       KKG = IJKW(8,IW)
       IOR  = IJKW(4,IW)
-      TMP_G = TMP_F(IW)!0.5_EB*(TMP(IIG,JJG,KKG)+TMP_F(IW))      
-      CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR,TMP_G) 
-      HDIFF = CPBAR*TMP_G-CPBAR_Z(MIN(NINT(TMP_G),5000),0)*TMP_G
+      TMP_G = TMP_F(IW)!0.5_EB*(TMP(IIG,JJG,KKG)+TMP_F(IW)) 
+      ZZ_GET = ZZ_F(IW,:)    
+      CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(ZZ_GET,CPBAR,TMP_G) 
+      HDIFF = CPBAR*TMP_G
 
       RHO_D_DZDN = 2._EB*RHO_D(IIG,JJG,KKG)*(ZZP(IIG,JJG,KKG,N)-ZZ_F(IW,N))*RDN(IW)
       SELECT CASE(IOR)
@@ -296,7 +300,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          ENDDO
          !$OMP END DO
    END SELECT CYLINDER
-   ! Compute del dot rho*D del Y_n
+   ! Compute del dot rho*D del Z_n
 
    CYLINDER2: SELECT CASE(CYLINDRICAL)
       CASE(.FALSE.) CYLINDER2  ! 3D or 2D Cartesian Coords
@@ -325,14 +329,15 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          !$OMP END DO
    END SELECT CYLINDER2
 
-   ! Compute -Sum h_n del dot rho*D del Y_n
+   ! Compute -Sum h_n del dot rho*D del Z_n
    
    !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,CPBAR,HDIFF,ZZ_GET)
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR,TMP(I,J,K)) 
-            HDIFF = CPBAR*TMP(I,J,K)-CPBAR_Z(MIN(NINT(TMP(I,J,K)),5000),0)*TMP(I,J,K)
+            ZZ_GET = ZZ(I,J,K,:)
+            CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(ZZ_GET,CPBAR,TMP(I,J,K)) 
+            HDIFF = CPBAR*TMP(I,J,K)
             DP(I,J,K) = DP(I,J,K) - HDIFF*DEL_RHO_D_DEL_Z(I,J,K,N)
          ENDDO
       ENDDO
@@ -514,7 +519,7 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
  
 ENDIF ENERGY
 
-! Compute RTRM = R*sum(Y_i/M_i)/(PBAR*C_P) and multiply it by divergence terms already summed up
+! Compute RTRM = R*sum(Z_i/M_i)/(PBAR*C_P) and multiply it by divergence terms already summed up
  
 RTRM => WORK1
 
@@ -532,7 +537,7 @@ DO K=1,KBAR
 ENDDO
 !$OMP END PARALLEL DO
 
-! Compute (Wbar/rho) Sum (1/W_n) del dot rho*D del Y_n
+! Compute (Wbar/rho) Sum (1/W_n) del dot rho*D del Z_n
 
 DO N=1,N_TRACKED_SPECIES
    IF (EVACUATION_ONLY(NM)) CYCLE
