@@ -216,21 +216,21 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          DO I=0,IBAR
             ! H_RHO_D_DZDX
             TMP_G = .5_EB*(TMP(I+1,J,K)+TMP(I,J,K))
-            ZZ_GET = .5_EB*(ZZP(I+1,J,K,:)+ZZP(I,J,K,:))
+            ZZ_GET(1:N_TRACKED_SPECIES) = .5_EB*(ZZP(I+1,J,K,:)+ZZP(I,J,K,:))
             CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(ZZ_GET,CPBAR,TMP_G) 
             HDIFF = CPBAR*TMP_G
             H_RHO_D_DZDX(I,J,K) = HDIFF*RHO_D_DZDX(I,J,K)
             
             ! H_RHO_D_DZDY
             TMP_G = .5_EB*(TMP(I,J+1,K)+TMP(I,J,K))
-            ZZ_GET = .5_EB*(ZZP(I,J+1,K,:)+ZZP(I,J,K,:))
+            ZZ_GET(1:N_TRACKED_SPECIES) = .5_EB*(ZZP(I,J+1,K,1:N_TRACKED_SPECIES)+ZZP(I,J,K,1:N_TRACKED_SPECIES))
             CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(ZZ_GET,CPBAR,TMP_G) 
             HDIFF = CPBAR*TMP_G
             H_RHO_D_DZDY(I,J,K) = HDIFF*RHO_D_DZDY(I,J,K)
             
             ! H_RHO_D_DZDZ
             TMP_G = .5_EB*(TMP(I,J,K+1)+TMP(I,J,K))               
-            ZZ_GET = .5_EB*(ZZP(I,J,K+1,:)+ZZP(I,J,K,:))
+            ZZ_GET(1:N_TRACKED_SPECIES) = .5_EB*(ZZP(I,J,K+1,1:N_TRACKED_SPECIES)+ZZP(I,J,K,1:N_TRACKED_SPECIES))
             CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(ZZ_GET,CPBAR,TMP_G) 
             HDIFF = CPBAR*TMP_G
             H_RHO_D_DZDZ(I,J,K) = HDIFF*RHO_D_DZDZ(I,J,K)
@@ -250,7 +250,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       KKG = IJKW(8,IW)
       IOR  = IJKW(4,IW)
       TMP_G = TMP_F(IW)!0.5_EB*(TMP(IIG,JJG,KKG)+TMP_F(IW)) 
-      ZZ_GET = ZZ_F(IW,:)    
+      ZZ_GET(1:N_TRACKED_SPECIES) = ZZ_F(IW,1:N_TRACKED_SPECIES)    
       CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(ZZ_GET,CPBAR,TMP_G) 
       HDIFF = CPBAR*TMP_G
 
@@ -335,7 +335,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            ZZ_GET = ZZP(I,J,K,:)
+            ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
             CALL GET_AVERAGE_SPECIFIC_HEAT_DIFF(ZZ_GET,CPBAR,TMP(I,J,K)) 
             HDIFF = CPBAR*TMP(I,J,K)
             DP(I,J,K) = DP(I,J,K) - HDIFF*DEL_RHO_D_DEL_Z(I,J,K,N)
