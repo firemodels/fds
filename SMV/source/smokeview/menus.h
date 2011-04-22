@@ -2594,6 +2594,7 @@ void ParticlePropShowMenu(int value){
     propi = part5propinfo + iprop;
     last_prop_display=iprop;
     propi->display=1;
+    part5colorindex=iprop;
 
     if(scriptoutstream!=NULL){
       fprintf(scriptoutstream,"PARTCLASSCOLOR\n");
