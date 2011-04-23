@@ -21,7 +21,7 @@ value of dT should be equal to the time averaged Q_abs.
 
 &MISC GVEC=0,0,0, PR = 100., RUN_AVG_FAC=0. /
 
-&DUMP NFRAMES=100, DT_PL3D=10000. /
+&DUMP NFRAMES=100 /
 
 &RADI RADTMP=1000.
       NUMBER_RADIATION_ANGLES = 40
