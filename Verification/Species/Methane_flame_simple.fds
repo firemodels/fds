@@ -6,17 +6,7 @@ All material properties etc. are completely fabricated.
 
 &TIME T_END=10.0 DT = 0.01 /
 
-&DUMP SMOKE3D=.FALSE.,
-      NFRAMES=1000,
-      DT_DEVC=1.0,
-      DT_SLCF=0.1,
-      DT_HRR =0.1,
-      DT_PART=1000000.0,
-      DT_BNDF=1000000.0,
-      DT_PL3D=1000000.0,
-      DT_ISOF=1000000.0 /
-
-&MISC TMPA=20.0 /
+&DUMP DT_DEVC=1.0, DT_SLCF=0.1, DT_HRR=0.1 /
 
 Fire
 HRR = 100 kW 
