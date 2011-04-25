@@ -3,7 +3,7 @@ slab of plastic pyrolyzing under a heat flux of 50 kW/m2.
 The calculation is purely for the solid phase. There is no gas phase 
 coupling -- just a fixed external heat flux of 50 kW/m2.
 
-&HEAD CHID='FAA_Polymers_PMMA', TITLE='Black PMMA at 50 kW/m2, No Gas Phase Reaction' /
+&HEAD CHID='FAA_Polymers_HIPS', TITLE='HIPS at 50 kW/m2, No Gas Phase Reaction' /
 
 &MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /  Mesh is just to make FDS run
 
@@ -11,29 +11,29 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
 
 &REAC FUEL='METHANE', Y_O2_INFTY=0.01 /  No gas phase reaction with 1% O2 concentration
 
-&MATL ID='BLACKPMMA'
+&MATL ID='HIPS'
       ABSORPTION_COEFFICIENT=2700.
       N_REACTIONS=1
-      A(1) = 8.5E12
-      E(1) = 188000
-      EMISSIVITY=0.85
-      DENSITY=1100.
+      A(1) = 1.2E16
+      E(1) = 247000
+      EMISSIVITY=0.86
+      DENSITY=950.
       SPEC_ID='METHANE'
       NU_SPEC=1.
-      HEAT_OF_REACTION=870.
+      HEAT_OF_REACTION=1000.
       HEAT_OF_COMBUSTION=25200.
-      CONDUCTIVITY = 0.20
-      SPECIFIC_HEAT = 2.2
+      CONDUCTIVITY = 0.22
+      SPECIFIC_HEAT = 2.0 
 
-&SURF ID='PMMA SLAB'
+&SURF ID='HIPS SLAB'
       COLOR='BLACK'
       BACKING='INSULATED'
-      MATL_ID='BLACKPMMA'
-      THICKNESS=0.0085
+      MATL_ID='HIPS'
+      THICKNESS=0.009 
       H_FIXED=0.
       EXTERNAL_FLUX=52 /  External Flux is ONLY for this simple demo exercise
 
-&VENT XB=-0.05,0.05,-0.05,0.05,0.0,0.0, SURF_ID = 'PMMA SLAB' /
+&VENT XB=-0.05,0.05,-0.05,0.05,0.0,0.0, SURF_ID = 'HIPS SLAB' /
 
 &VENT MB='XMIN', SURF_ID='OPEN' /
 &VENT MB='XMAX', SURF_ID='OPEN' /
