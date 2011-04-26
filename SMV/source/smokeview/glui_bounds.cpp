@@ -493,7 +493,7 @@ extern "C" void glui_bounds_setup(int main_window){
     CHECKBOX_constant_coloring=glui_bounds->add_checkbox_to_panel(panel_evac_direction,"Constant coloring",&constant_evac_coloring,SHOW_EVAC_SLICES,Slice_CB);
     CHECKBOX_data_coloring=glui_bounds->add_checkbox_to_panel(panel_evac_direction,"Data coloring",&data_evac_coloring,DATA_EVAC_COLORING,Slice_CB);
     CHECKBOX_show_evac_color=glui_bounds->add_checkbox_to_panel(panel_evac_direction,"Show colorbar (when data coloring)",&show_evac_colorbar,SHOW_EVAC_SLICES,Slice_CB);
-   // glui_bounds->add_checkbox_to_panel(panel_evac,"View from selected Avatar",&view_from_selected_avatar);
+    glui_bounds->add_checkbox_to_panel(panel_evac,"View from selected Avatar",&view_from_selected_avatar);
   }
 
   /* Plot3D file bounds */
