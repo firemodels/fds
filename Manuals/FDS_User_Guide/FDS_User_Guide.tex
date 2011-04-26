@@ -5823,17 +5823,16 @@ total mass conservation. To set the properties of the background species, use th
 {\ct SPEC} or {\ct SMIX} line with {\ct BACKGROUND=.TRUE.} specified.
 If this species is not listed in Table~\ref{tab:gasspecies}, specify its molecular weight, {\ct MW}, or its {\ct FORMULA} (preferred method),
 and (optionally) its {\ct VISCOSITY}; {\ct CONDUCTIVITY}; and {\ct SPECIFIC\_HEAT},
-{\ct SPECIFIC\_ENTHALPY}, and {\ct REFERENCE\_TEMPERATURE}.
-If either {\ct SPECIFIC\_HEAT} or {\ct ENTHALPY} is specified, then both must be specified.
+{\ct REFERENCE\_ENTHALPY}, and {\ct REFERENCE\_TEMPERATURE}.
 The {\ct REFERENCE\_TEMPERATURE} is the temperature that corresponds to the specified value
-of {\ct SPECIFIC\_ENTHALPY}.  In the absence of any of these parameters, the appropriate
+of {\ct REFERENCE\_ENTHALPY}.  If {\ct SPECIFIC\_HEAT} is specified and the {\ct REFERENCE\_ENTHALPY} is not, the {\ct REFERENCE\_ENTHALPY} will be set to $h(T_{ref})=c_p T_{ref}$.  In the absence of any of these parameters, the appropriate
 values of {\ct 'AIR'} are assumed.  If the species listed in Table~\ref{tab:gasspecies}, is indicated as a liquid, that means that liquid thermo-physical
 properties do not need to be given for those species.
 
 The user is reminded of the following definitions:
 
 \begin{description}
-\item[{\ct SPECIFIC\_ENTHALPHY}] $h(T)=h(T_{ref})+\int_{T_{ref}}^T c_p(T)dT$
+\item[{\ct REFERENCE\_ENTHALPHY}] $h(T)=h(T_{ref})+\int_{T_{ref}}^T c_p(T)dT$
 \item[{\ct SPECIFIC\_HEAT}] $c_p(T)=\frac{dh(T)}{dT}$
 \item[average specific heat] $\bar{c_p}(T)=\frac{h(T)}{T}$
 \end{description}
@@ -5842,7 +5841,7 @@ Therefore, if the user wishes both the {\ct SPECIFIC\_HEAT} and the average spec
 
 \be \bar{c_p}(T)=\frac{h(T)}{T} = \frac{h(T_{ref})+\int_{T_ref}^T c_p(T)dT}{T}=frac{h(T_{ref})-c_p T_{ref}}{T}+c_p \ee
 
-which means that the following must be true for {\ct SPECIFIC\_ENTHALPY}, and {\ct REFERENCE\_TEMPERATURE}:
+which means that the following must be true for {\ct REFERENCE\_ENTHALPY}, and {\ct REFERENCE\_TEMPERATURE}:
 
 \be c_p T_{ref} = h(T_{ref}) \ee
 
@@ -10855,10 +10854,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RAMP\_D}                        & Character   & See Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
 {\ct RAMP\_K}                        & Character   & See Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
 {\ct RAMP\_MU}                       & Character   & See Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
+{\ct REFERENCE\_ENTHALPY}            & Real        & See Section~\ref{gas_species_props}         & kJ/kg             &               \\ \hline
 {\ct REFERENCE\_TEMPERATURE}        & Real        & See Section~\ref{gas_species_props}         & $^\circ$C         & 25.           \\ \hline
 {\ct SIGMALJ}                       & Real        & See Section~\ref{gas_species_props}         &                   & 0             \\ \hline
 {\ct SMIX\_COMPONENT\_ONLY}         & Logical     & See Section~\ref{info:SMIX}                 &                   & {\ct .FALSE.} \\ \hline
-{\ct SPECIFIC\_ENTHALPY}            & Real        & See Section~\ref{gas_species_props}         & kJ/kg             &               \\ \hline
 {\ct SPECIFIC\_HEAT}                & Real        & See Section~\ref{gas_species_props}         & kJ/kg/K           &               \\ \hline
 {\ct SPECIFIC\_HEAT\_LIQUID}        & Real            & See Section~\ref{thermal_part_props}        & kJ/kg/K   &               \\ \hline
 {\ct VISCOSITY}                     & Real        & See Section~\ref{gas_species_props}         & kg/m/s            &               \\ \hline
