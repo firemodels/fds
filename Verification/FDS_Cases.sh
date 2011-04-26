@@ -68,12 +68,10 @@ $RUNFDS Pyrolysis cable_23_jacket_mcc
 $RUNFDS Pyrolysis cable_701_jacket_mcc
 $RUNFDS Pyrolysis birch_tga_1step_2
 $RUNFDS Pyrolysis birch_tga_1step_20
-$RUNFDS Pyrolysis charring_solid
 $RUNFDS Pyrolysis enthalpy
 $RUNFDS Pyrolysis pyrolysis_1
 $RUNFDS Pyrolysis pyrolysis_2
 $RUNFDS Pyrolysis specified_hrr
-$RUNFDS Pyrolysis thermoplastic
 $RUNFDS Pyrolysis two_step_solid_reaction
 $RUNFDS Pyrolysis water_ice_water
 $RUNFDS Pyrolysis pcm_slab

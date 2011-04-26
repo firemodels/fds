@@ -4550,8 +4550,7 @@ faces.
 like {\ct 'WALL TEMPERATURE'}, {\ct 'NET HEAT FLUX'}, {\ct 'BURNING RATE'},
 {\ct 'GAUGE HEAT FLUX'}, and {\ct 'WALL THICKNESS'} (assuming the solid
 is to burn away). Use these to track the condition of the solid as a
-function of time. In particular, make sure that the {\ct
-'BURNING RATE'} is appropriate for the particular external heat flux
+function of time. In particular, make sure that the {\ct 'BURNING RATE'} is appropriate for the particular external heat flux
 applied. Make sure that the {\ct 'WALL TEMPERATURE'} is
 appropriate. Compare your results to measurements made in a
 bench-scale device, like the cone calorimeter. Keep in mind, however,
@@ -4561,165 +4560,61 @@ related to convection, combustion, and apparatus-specific phenomena.
 \end{enumerate}
 
 
+\noindent Below is a short FDS input file that demonstrates how you can test a candidate pyrolysis model by running very short calculations. The simulation only
+involves the solid phase model. Essentially, the gas phase calculation is 
+shut off except for the imposition of a 52~kW/m$^2$ ``external'' heat flux. The solid in this example is a 8.5~mm thick slab of PMMA. For more
+details, see the FDS Validation Guide under the heading ``FAA Polymers.''
 
-
-
-
-
-
-\subsubsection{Example Case: {\bf thermoplastic}}
-
-The term ``thermoplastic'' is often used to describe materials that essentially heat up and gasify without leaving any solid residue. The
-term is used here merely to indicate the class of materials for which the pyrolysis can be modeled with a single reaction that converts
-solid to gaseous fuel.
-
-The purpose of this example is to demonstrate how the solid phase pyrolysis model works in FDS. Essentially, the gas phase calculation is shut off except for the imposition of a 50~kW/m$^2$ ``external'' heat flux. The solid in this example is a slab of plastic, similar in composition to PMMA. The solid is described by the following {\ct SURF} line:
 
 \scriptsize
 \begin{verbatim}
+&HEAD CHID='FAA_Polymers_PMMA', TITLE='Black PMMA at 50 kW/m2, No Gas Phase Reaction' /
+
+&MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /
+  
+&TIME T_END=600., WALL_INCREMENT=1, DT=0.01 /
+ 
+&REAC FUEL='METHANE', Y_O2_INFTY=0.01 /  
+
+&MATL ID='BLACKPMMA'
+      ABSORPTION_COEFFICIENT=2700.
+      N_REACTIONS=1
+      A(1) = 8.5E12
+      E(1) = 188000
+      EMISSIVITY=0.85
+      DENSITY=1100.
+      SPEC_ID='METHANE'
+      NU_SPEC=1.
+      HEAT_OF_REACTION=870.
+      HEAT_OF_COMBUSTION=25200.
+      CONDUCTIVITY = 0.20
+      SPECIFIC_HEAT = 2.2
+
 &SURF ID='PMMA SLAB'
       COLOR='BLACK'
-      MATL_ID='PMMA'
-      THICKNESS=0.025
-      EXTERNAL_FLUX=50. /  External Flux is ONLY for this simple demo exercise
+      BACKING='INSULATED'
+      MATL_ID='BLACKPMMA'
+      THICKNESS=0.0085
+      H_FIXED=0.
+      EXTERNAL_FLUX=52 /  External Flux is ONLY for this simple demo exercise
+
+&VENT XB=-0.05,0.05,-0.05,0.05,0.0,0.0, SURF_ID = 'PMMA SLAB' /
+
+&DUMP DT_DEVC=5. /
+
+&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='WALL TEMPERATURE',     ID='temp' /
+&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='BURNING RATE',         ID='MLR' /
+&DEVC XYZ=0.0,0.0,0.0, IOR=3, QUANTITY='WALL THICKNESS',       ID='thick' /
+
+&TAIL /
 \end{verbatim} \normalsize
 
-\noindent
-The {\ct COLOR} is meaningless except to distinguish it in
-Smokeview. The {\ct EXTERNAL\_FLUX} is a virtual heat source that is
-only used for these types of diagnostic exercises. The properties of
-the material are conveyed via the {\ct MATL} line:
 
-\scriptsize
-\begin{verbatim}
-&MATL ID='PMMA'
-      CONDUCTIVITY=0.21
-      SPECIFIC_HEAT=1.5
-      DENSITY=1190.
-      EMISSIVITY = 1.0
-      N_REACTIONS=1
-      SPEC_ID='FUEL'
-      NU_SPEC=1.0
-      HEAT_OF_REACTION=1500.
-      HEAT_OF_COMBUSTION=25000.
-      REFERENCE_TEMPERATURE=330. /
-\end{verbatim} \normalsize
+\clearpage
 
-\noindent
-Notice that in addition to $k$, $\rho$, $c$ and $\epsilon$, there is one reaction specified, the {\em yield} of which is 100~\% fuel gas ({\ct NU\_SPEC=1.}).
-The phase change from solid to gas {\em consumes} energy at a rate of 1,500~kJ/kg. Although not relevant in this example, the burning of these fuel gases
-would {\em produce} energy at a rate of 25,000~kJ/kg. The reaction nominally takes place at 330~$^\circ$C, a necessary parameter for the pyrolysis model described above.
+\section{Full-Scale Examples: Furniture}
 
-The plots shown in Fig.~\ref{thermoplastic} contain the results of the FDS simulation along with
-what is referred to as ``simple theory.'' By this, we mean that if all of the external heat flux were
-used to raise the solid temperature to 330~$^\circ$C and then convert the solid to fuel gas,
-the results would be as shown by the ``simple theory.'' Of course, the simple theory neglects heat losses
-through the solid and losses via radiation from the surface. Because it neglects these losses, the
-simple theory should be regarded as producing an upper bound on the burning rate. Note that the small discontinuities in the FDS burning rate
-and temperature curves are numerical rather than physical.
-
-Because there is no solid residue produced by the single reaction, the sample thickness will gradually
-decrease to zero. Note that this does not necessarily mean that the solid obstruction should disappear entirely from
-the computational domain, but rather that the fuel should be consumed. The parameter {\ct BURN\_AWAY}
-is used to indicate that the solid ought to be completely removed, but because in this simple test case the
-sample is aligned with the external boundary of the computational domain, the parameter {\ct BURN\_AWAY}
-would have no effect.
-The slab is originally 0.025~m thick, with a density of 1190~kg/m$^3$.
-This means there is 29.75~kg/m$^2$ of fuel present, which if divided by the
-burning rate (about 0.018~kg/m$^2$/s) yields a burning time of about 1700~s.
-After this, the fuel is consumed.
-
-
-\begin{figure}[ht]
-\begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/thermoplastic_temperature} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/thermoplastic_heat_flux} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/thermoplastic_burn_rate} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/thermoplastic_thickness}
-\end{tabular*}
-\caption[Output of {\bf thermoplastic} test case.]{Output of {\bf thermoplastic} test case.}
-\label{thermoplastic}
-\end{figure}
-
-\newpage
-
-\subsubsection{Example Case: {\bf charring\_solid}}
-
-This example just uses the solid phase algorithm.
-Essentially, the gas phase is shut off except for the imposition
-of a 50~kW/m$^2$ ``external'' heat flux. The reaction mechanism is
-fairly complicated, as it includes various solids like cellulose,
-char, and water. The sample itself is described via a single {\ct SURF} line:
-
-\scriptsize
-\begin{verbatim}
-&SURF ID='SPRUCE'
-      STRETCH_FACTOR = 1.
-      CELL_SIZE_FACTOR = 0.5
-      MATL_ID(1,1:3) = 'CELLULOSE','WATER','LIGNIN'
-      MATL_MASS_FRACTION(1,1:3) = 0.70,0.1,0.20
-      MATL_ID(2,1) = 'CASI'
-      THICKNESS(1:2)  =  0.01,0.01
-      EXTERNAL_FLUX = 50. /
-\end{verbatim} \normalsize
-
-\noindent
-The sample consists of two layers. The first is a combination of cellulose, water and lignin. There
-are {\ct MATL} lines for each. Both cellulose and water have reaction parameters. Cellulose undergoes
-an endothermic reaction to form an ``active'' solid, and water evaporates. Lignin does not change form, at least
-not in this model. The second layer of the sample is a non-reacting slab of calcium silicate board. Note the
-two parameters on the {\ct SURF} line called {\ct STRETCH\_FACTOR} and {\ct CELL\_SIZE\_FACTOR}. The former
-tells FDS not to stretch the solid phase nodes used to solve the heat conduction equation. The latter tells FDS
-to use cells half the size of what it would use by default, based on the thermal properties. The intent of these
-two parameters is to increase the spatial resolution of the solid phase mesh to increase the accuracy of the
-calculation. These kinds of parameters are typically not specified by the user,
-but a sensitivity analysis might indicate that
-they ought to be, especially when the reaction sequence is complicated as it is here.
-
-Upon conversion of the virgin cellulose to its ``active'' component, this latter solid material undergoes
-two reactions that occur at two different temperatures. The following {\ct MATL} line describes what is to
-happen:
-
-\scriptsize
-\begin{verbatim}
-&MATL ID                    = 'ACTIVE'
-      EMISSIVITY            = 1.0
-      CONDUCTIVITY_RAMP     = 'k_cell'
-      SPECIFIC_HEAT         = 2.3
-      DENSITY               = 400.
-      N_REACTIONS           = 2
-      A(1:2)                = 1.3E10,  3.23E14
-      E(1:2)                = 1.505E5, 1.965E5
-      HEAT_OF_REACTION(1:2) = 418.,    418.
-      MATL_ID(1,1)          = 'CHAR'
-      NU_MATL(1,1)          = 0.35
-      SPEC_ID(1,1:2)        = 'FUEL', 'FUEL'
-      NU_SPEC(1,1:2)        = 0.65,    1.0 /
-\end{verbatim} \normalsize
-
-\noindent Notice that the reaction parameters are arrays containing the appropriate information for each reaction,
-referred to by the numbers 1 and 2. The first reaction converts 35~\% (by mass) of the ``active'' solid to
-char, and 65~\% to fuel gases. The second reaction converts all the mass to fuel gases.
-
-Figure~\ref{charring_solid} shows the surface temperature and burning rate of the sample
-under the 50~kW/m$^2$ external heat flux. The burning rate peaks
-at the start of the simulation, decreases throughout the burning
-phase, and then increases again at the end due to presence of an external
-backing material. The initial peak is typical of char-forming solids.
-
-\begin{figure}[ht]
-\begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/charring_solid_temperature} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/charring_solid_burn_rate}
-\end{tabular*}
-\caption[Output of {\bf charring\_solid} test case.]{Output of {\bf charring\_solid} test case.}
-\label{charring_solid}
-\end{figure}
-
-
-
-\subsubsection{Example Case: couch and room\_fire}
-
+The example input files called {\bf couch.fds} and {\bf room\_fire.fds} demonstrate how to model furniture.
 In residential fires, upholstered furniture makes up a significant
 fraction of the combustible load. A single couch can generate several
 megawatts of energy and sometimes lead to compartment flashover. Modeling
@@ -6296,12 +6191,12 @@ The inputs to use the Arrhenius-rate model are given below:
 \item[{\ct E}] Activation energy for in units of kJ/kmol.
 \item[{\ct EQUATION}] Character string defining the reaction stoichiometry.  Can be used instead of specifying {\ct SMIX\_ID} and {\ct NU}.  See~\ref{info:EQUATION}.
 \item[{\ct NU}] Array containing the stoichiometry of the chemical reaction for each {\ct SMIX} where negative values indicate reactants and positive values indicate products.
-\item[{\ct N\_S}] Array containing the exponents for the finite rate equation for each {\ct SPEC}. 
-\item[{\ct N\_T}] The temperature exponent for the rate (Default is 0 or no temperature dependence). 
-\item[{\ct SMIX\_ID}] Array containing the names of the tracked species that participate in the reaction.  These entries correspond to the inputs on {\ct NU}. 
+\item[{\ct N\_S}] Array containing the exponents for the finite rate equation for each {\ct SPEC}.
+\item[{\ct N\_T}] The temperature exponent for the rate (Default is 0 or no temperature dependence).
+\item[{\ct SMIX\_ID}] Array containing the names of the tracked species that participate in the reaction.  These entries correspond to the inputs on {\ct NU}.
 \item[{\ct SPEC\_ID}] Array containing the names of the species in the rate equation for the reaction. Note that it is possible that a given {\ct SPEC} can
 contribute to the rate but not be a reactant or product. In other words,
-the rate equation can be dependent on a species that does not participate directly in the reaction. These entries correspond to the inputs on {\ct N\_S}. 
+the rate equation can be dependent on a species that does not participate directly in the reaction. These entries correspond to the inputs on {\ct N\_S}.
 \item[{\ct HEAT\_OF\_COMBUSTION}] The effective heat of combustion of the {\ct FUEL} in chemical reaction in units of kJ/kg. (No default)
 \end{description}
 
@@ -6345,7 +6240,7 @@ The input parameter {\ct EQUATION} allow the specification of the chemical react
 \item The reactants and products are seperated by an =.
 \end{itemize}
 
-For example if the reaction defines the complete combustion of methane using primitive species the following would be equivalent: 
+For example if the reaction defines the complete combustion of methane using primitive species the following would be equivalent:
 
 \footnotesize
 \begin{verbatim}
@@ -6929,7 +6824,7 @@ If you want to monitor the properties of a given particle, you can use Smokeview
 \normalsize
 
 \noindent
-This line tells FDS to look for the first particle within the mesh that contains the point {\ct XYZ} and record its surface temperature in the device output file. More on 
+This line tells FDS to look for the first particle within the mesh that contains the point {\ct XYZ} and record its surface temperature in the device output file. More on
 pointwise output can be found in Section~\ref{info:DEVC}.
 
 
