@@ -218,7 +218,7 @@ o FDS+Evac version: FDS 6.0.0, Evac 2.4.0
 &SLCF PBZ= 1.5, QUANTITY='VELOCITY', VECTOR=.TRUE., EVACUATION=.TRUE. / 
 
  Next lines are ordianry Fds fire output
-&SLCF PBZ= 1.500, QUANTITY='visibility' / 
+&SLCF PBZ= 1.500, QUANTITY='VISIBILITY' / 
  SLCF PBZ= 1.500, QUANTITY='extinction coefficient' / 
  SLCF PBZ= 1.500, QUANTITY='soot volume fraction' / 
  SLCF PBZ= 1.500, QUANTITY='soot density' / 
