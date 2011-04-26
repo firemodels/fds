@@ -2,7 +2,7 @@
 
 \label{combustionsection}
 
-There are two approaches to modeling a chemical reaction within FDS.  The first approach is a mixing-controlled combustion model.  In this approach, the reaction rate is computed based on the local mixing.  That is fuel and air react inifintely fast at the rate that the underlying gas transport mixes them together.  For the second model, individual gas species react according to
+There are two approaches to modeling a chemical reaction within FDS.  The first approach is a mixing-controlled combustion model.  In this approach, the reaction rate is computed based on the local mixing.  That is the reactants (e.g. fuel and air) react inifintely fast at the rate that the underlying gas transport mixes them together.  For the second model, individual gas species react according to
 specified Arrhenius reaction parameters. This latter model is most often used in a
 direct numerical simulation (DNS) where the diffusion of fuel and oxygen can be
 modeled directly.
@@ -50,8 +50,23 @@ extinction is still an area of active research in the combustion
 community.
 
 Simple empirical rules can be used to predict local
-extinction based on the species and temperature present in the flame sheet.  The FDS extinction model consists of two steps. The first step, checks to see if the local temperature is above an auto-ignition temperature for the fuel.  If the temperature is too low, then combustion will not occur.  Note that this temperature is by default set to absolute zero so that typical users do not need to specify an ignition source.  The second step uses the concept of a limiting flame temperature.  If the local combustion cannot raise the local temperature above the limiting flame temperature, then combustion will not occur.  This is done by computing the enthalpy of the local gas mixture at both the local temperature and at the limiting flame temperature.  If the local heat release is less than the enthalpy difference between the limiting flame temperature and the local temperature, then combustion will not occur.
+extinction based on the species and temperature present in the flame sheet.  The FDS extinction model consists of two parts. The first part, checks to see if the local temperature is above an auto-ignition temperature for the fuel.  If the temperature is too low, then combustion will not occur.  Note that this temperature is by default set to absolute zero so that typical users do not need to specify an ignition source.  The second part uses the concept of a limiting flame temperature.  If the local combustion cannot raise the local temperature above the limiting flame temperature, then combustion will not occur.  This is done in the following steps:
 
+\begin{enumerate}
+\item Search over all reactant species to find the limiting species and express that species in terms of the reaction's fuel:
+
+\be \Delta Z_\F = \min_{i \; = \; reactant} \left(\frac{Z_i W_\F}{W_i \nu_i} \right) \ee
+\item Remove that amount of fuel from the local gas, the resulting gas is the "air" for the reaction.
+\item Search over all the non-fuel reactant species in the "air" to determine the limiting reactant.  This defines how much air is required to burn the fuel:
+
+\be \Delta Z_{Air} = \min_{i \; = \; non-fuel \; reactant} \left(\frac{\Delta Z_\F W_i \nu_i}{Z_i W_\F} \right) \ee
+
+\item Compute the enthalpy for the fuel and the air at both the current temperature and the limiting flame temperature.
+\item Combustion is allowed if 
+
+\be \Delta Z_{Air} h_{air}(T)+\Delta Z_F \left( h_\F(T)+\Delta H_\F \right) > \Delta Z_{Air} h_{air}(T_{LFT})+ \Delta Z_\F h_\F(T_{LFT}) \ee
+
+\end{enumerate}
 
 \subsection{Simplified Chemistry}
 
@@ -92,8 +107,7 @@ Y_{\HTWOO}(Z_0) & = & Y_\HTWOO^\infty
 \end{eqnarray}
 $Z_1$: Fuel
 \begin{eqnarray}
-Y_{\NTWO}(Z_1) & = & Y_\NTWO^I\\*[.1in]
-Y_{\F}(Z_1) & = & Y_\F^I
+Y_{\F}(Z_1) & = & Y_\F
 \end{eqnarray}
 $Z_2$: Products
 \begin{eqnarray}
@@ -120,7 +134,7 @@ The stoichiometric coefficients in the $Z_2$ species yields are:
                   \nu_\So    &=& \frac{W_\F}{W_\So} \; y_\So
 \end{eqnarray} }
 Remember that x is the number of carbon atoms, y is the number of hydrogen atoms, z is the number of oxygen atoms, and a is the number of nitrogen atoms in the fuel molecule.
-It is important to note that the definitions of $Z_0$,$Z_1$, and $Z_2$ do not imply anything regarding the rate of combustion, only that the combustion occurs in a single step.
+It is important to note that the definitions of $Z_0$, $Z_1$, and $Z_2$ do not imply anything regarding the rate of combustion, only that the combustion occurs in a single step.
 
 
 \subsection{CO Production (Two-Step Reaction with Extinction)}
@@ -174,8 +188,7 @@ Y_{\HTWOO}(Z_0) & = & Y_\HTWOO^\infty
 $Z_1$: Fuel
 
 \begin{eqnarray}
-Y_{\NTWO}(Z_1) & = & Y_\NTWO^I\\*[.1in]
-Y_{\F}(Z_1) & = & Y_\F^I
+Y_{\F}(Z_1) & = & Y_\F
 \end{eqnarray}
 
 $Z_2$: Products of Incomplete Combustion
@@ -267,16 +280,24 @@ reaction is still limited by $\dq_{\max}'''$.  Once $\dq'''_{\CO}$ is computed t
 
 In a DNS calculation, the fine grid resolution enables the direct modeling of the diffusion of chemical species (fuel,
 oxygen, and combustion products).  Since the flame is being resolved in a DNS calculation, the local gas
-temperatures can be used to determine the reaction kinetics.  Thus, it is possible to implement a relatively simple
+temperatures can be used to determine the reaction kinetics.  The general form of the rate expression is
+
+\be \frac{d[X_\F]}{dt}    = -A \; \prod \left([X_i]^{a_i} \right) T^n \; e^{-E/RT_{ijk}} \label{Arrheniusrateeqn} \ee
+
+note that the rate expression can be dependent on temperature and that the rate can be dependent upon species that do not directly participate in the reaction.  Since FDS solves for mass fractions rather than mole fractions, to reduce the computational expense the relation $[X_i]=\frac{Y_i \rho}{W_i}$ is used to obtain a modified rate equation:
+
+\be \frac{dY_\F}{dt}    = -A_{mod} \rho^{\sum (a_i) -1} \; \prod \left(Y_i^{a_i} \right) T^n \; e^{-E/RT_{ijk}} \;\;\; A_{mod} = A \prod \left(W_i^{-a_i} \right) \label{Arrheniusratemode} \ee
+
+Thus, it is possible to implement a relatively simple
 set of one or more chemical reactions to model the combustion. Consider the reaction of oxygen and a hydrocarbon
 fuel
 \be  \mathrm{ C_xH_y + \nu_{O_2}  \, O_2 \longrightarrow
      \nu_{CO_2}  \,  CO_2 +
      \nu_{H_2 O}  \, H_2O }   \ee
 If this were modeled as a single-step reaction, the reaction rate would be given by the expression
-\be \frac{d[\mathrm{C_xH_y}]}{dt} = -B \, [\mathrm{C_xH_y}]^a \, [\mathrm{O_2}]^b \, e^{-E/RT}
+\be \frac{d[\mathrm{C_xH_y}]}{dt} = -A \, [\mathrm{C_xH_y}]^a \, [\mathrm{O_2}]^b \, e^{-E/RT}
    \label{reaction} \ee
-Suggested values of $B$, $E$, $a$ and $b$ for various hydrocarbon
+Suggested values of $A$, $E$, $a$ and $b$ for various hydrocarbon
 fuels are given
 in Refs.~\cite{Puri:1,Westbrook:1}. It should be understood that the
 implementation of any of these one-step reaction schemes is still very
@@ -295,7 +316,7 @@ $Y_{C_x H_y,ijk}^n \rho_{ijk}/ W_F       \equiv X_\F(t^n)$ and
 $Y_{\OTWO,ijk}^n   \rho_{ijk}/ W_\OTWO \equiv X_\OTWO(t^n)$,
 the following set of ODEs is solved numerically with a second-order Runge-Kutta scheme
 \begin{eqnarray}
-\frac{dX_\F}{dt}    &=& -B \; X_\F(t)^a \, X_\OTWO(t)^b \; e^{-E/RT_{ijk}} \label{finitefuel} \\
+\frac{dX_\F}{dt}    &=& -A \; X_\F(t)^a \, X_\OTWO(t)^b \; e^{-E/RT_{ijk}} \label{finitefuel} \\
 \frac{dX_\OTWO}{dt} &=& -\frac{\nu_\OTWO}{\nu_\F} \; \frac{dX_\F}{dt} \label{finiteoxidizer}
 \end{eqnarray}
 The temperature $T_{ijk}$ and density $\rho_{ijk}$ are fixed at
