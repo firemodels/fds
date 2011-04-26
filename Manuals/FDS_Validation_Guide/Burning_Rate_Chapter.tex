@@ -1,0 +1,55 @@
+
+\chapter{Burning Rate}
+
+This chapter looks at validation exercises where the aim is to {\em predict} the burning rate of the fuel. Most of the simulations included in the previous chapters involved
+a {\em specified} burning or heat release rate. 
+
+
+\section{FAA Polymers}
+
+A non-charring polymer is considered one of the easier solids to model because it typically involves only a single reaction that converts solid plastic to fuel vapor. Table~\ref{FAA_Properties}
+lists nine parameters for each polymer studied. These values have been input directly into FDS, and the predicted burning rates are compared with measured values from the NIST 
+Gasification Apparatus, a device that pyrolyzes the solid in a nitrogen environment to prevent combustion of fuel gases. The results are shown in Fig.~\ref{FAA_Polymers}. The exposing
+heat flux was 52~kW/m$^2$.
+
+\begin{table}[h!]
+\caption[FAA Polymer Properties]{Input parameters for FAA Polymers non-charring examples. Courtesy Mark McKinnon, University of Maryland.}
+\begin{tabular}{|l|c|c|c|c|l|l|}
+\hline
+Property                    & Units         & HDPE                  & HIPS                  & PMMA                  & Method                &  Reference                \\ \hline \hline
+Density                     & kg/m$^3$      & 860                   & 950                   & 1100                  & Direct                &  \cite{Stoliarov:CF2009}  \\ \hline
+Thermal Conductivity        & W/m/K         & 0.29                  & 0.22                  & 0.20                  & Thermoflixer          &  \cite{Stoliarov:CF2009}  \\ \hline
+Specific Heat               & kJ/kg/K       & 3.5                   & 2.0                   & 2.2                   & DSC                   &  \cite{Stoliarov:PDS2008, Stoliarov:CF2009}  \\ \hline
+Emissivity                  &               & 0.92                  & 0.86                  & 0.85                  & Sphere                &  \cite{Tsilingiris:ECM2003, Hallman:PES1974}  \\ \hline
+Absorption Coefficient      & m$^{-1}$      & 1300                  & 2700                  & 2700                  & FTIR                  &  \cite{Tsilingiris:ECM2003, Hallman:PES1974}  \\ \hline
+Pre-Exponential Factor      & s$^{-1}$      & $4.8 \times 10^{22}$  & $1.2 \times 10^{16}$  & $8.5 \times 10^{12}$  & TGA                   &  \cite{Stoliarov:PDS2008}  \\ \hline
+Activation Energy           & kJ/kmol       & $3.49 \times 10^{5}$  & $2.47 \times 10^{5}$  & $1.88 \times 10^{5}$  & TGA                   &  \cite{Stoliarov:PDS2008}  \\ \hline
+Heat of Reaction            & kJ/kg         & 920                   & 1000                  & 870                   & DSC                   &  \cite{Stoliarov:PDS2008}  \\ \hline
+\end{tabular}
+\label{FAA_Properties}
+\end{table}
+
+\begin{tabbing}
+Direct  \hspace{0.5in}     \= Direct measurement of mass and volume \\
+Thermoflixer               \> Transient line source method \\
+DSC                        \> Differential Scanning Calorimetry \\
+Sphere                     \> Integrating sphere \\
+FTIR                       \> Fourier Transform Infrared Spectroscopy \\
+TGA                        \> Thermogravimetric Analysis
+\end{tabbing}
+
+\newpage
+
+\begin{figure}[p]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_HDPE} \\
+\includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_HIPS} \\
+\includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_PMMA} 
+\end{tabular}
+\end{center}
+\caption[Results of FAA Polymers comparison]{Comparison of predicted and measured mass loss rates for three non-charring polymers exposed to a heat flux of 52~kW/m$^2$ in a
+nitrogen environment.}
+\label{FAA_Polymers}
+\end{figure}
+
