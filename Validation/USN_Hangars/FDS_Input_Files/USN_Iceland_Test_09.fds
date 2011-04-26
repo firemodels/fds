@@ -6,7 +6,7 @@
 &MESH  ID='WEST', COLOR='BLUE', IJK=77,115,55, XB=-37.0,-6.2,-23.0,23.0,0.0,22.0 /
 &MESH  ID='EAST', COLOR='BLUE', IJK=77,115,55, XB=6.2,37.0,-23.0,23.0,0.0,22.0 /
 
-&TIME T_END=600.0/
+&TIME T_END=620.0/
 &DUMP DT_DEVC=12., DT_HRR=12. /
 &MISC TMPA=09. / 
 
@@ -51,8 +51,16 @@
 
 &SURF ID= 'BURNER'
       COLOR= 'RED'
-      TAU_Q= 120,
+      RAMP_Q= 'FIRE',
       TMP_FRONT=1000., HRRPUA=2222. /
+&RAMP ID='FIRE' T=   0.0 F= 0.0/
+&RAMP ID='FIRE' T=  30.0 F= 0.0625/
+&RAMP ID='FIRE' T=  60.0 F= 0.25/
+&RAMP ID='FIRE' T=  90.0 F= 0.56/
+&RAMP ID='FIRE' T= 120.0 F= 1.0/
+&RAMP ID='FIRE' T= 450.0 F= 1.0/
+&RAMP ID='FIRE' T= 451.0 F= 0.0/
+
 
 Burner
 &OBST XB=-0.15,0.15,-0.15,0.15,0.0,0.2, SURF_IDS='BURNER','STEEL','STEEL'/
@@ -242,6 +250,96 @@ DEVC XYZ=0.0, 15.2, 17.29 , ID='E5Je',  QUANTITY='THERMOCOUPLE' /
 &DEVC XYZ=0.0, -21.6, 15.9 , ID='S7d',  QUANTITY='THERMOCOUPLE'/
 &DEVC XYZ=0.0, 3.0, 22.0 , ID='N1',  QUANTITY='THERMOCOUPLE' /
 &DEVC XYZ=0.0, 6.1, 22.0 , ID='N2',  QUANTITY='THERMOCOUPLE' /
+
+Sprinklers
+&PROP ID='A', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=35., FLOW_RATE=0.0, ACTIVATION_TEMPERATURE=141. /
+&PROP ID='B', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=35., FLOW_RATE=0.0, ACTIVATION_TEMPERATURE=79. /
+&PROP ID='C', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=188., FLOW_RATE=0.0, ACTIVATION_TEMPERATURE=141. /
+&PROP ID='D', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=95., FLOW_RATE=0.0, ACTIVATION_TEMPERATURE=141. /
+&PROP ID='E', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=35., FLOW_RATE=0.0, ACTIVATION_TEMPERATURE=141. /
+&PROP ID='F', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=35., FLOW_RATE=0.0, ACTIVATION_TEMPERATURE=79. /
+&PROP ID='G', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=35., FLOW_RATE=0.0, ACTIVATION_TEMPERATURE=93. /
+&PROP ID='H', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=188., FLOW_RATE=0.0, ACTIVATION_TEMPERATURE=79. /
+&PROP ID='I', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=188., FLOW_RATE=0.0, ACTIVATION_TEMPERATURE=182. /
+
+&DEVC ID='1', XYZ= 0.0,0.0,21.4, PROP_ID='A'/ Sprinkler Tree C, Type A
+&DEVC ID='2', XYZ= 0.0,0.0,21.4, PROP_ID='B'/ Sprinkler Tree C, Type B
+&DEVC ID='3', XYZ= 0.0,0.0,21.4, PROP_ID='C'/ Sprinkler Tree C, Type C
+&DEVC ID='4', XYZ= 0.0,0.0,21.4, PROP_ID='D'/ Sprinkler Tree C, Type D
+&DEVC ID='5', XYZ= 0.0,0.0,21.4, PROP_ID='E'/ Sprinkler Tree C, Type E
+&DEVC ID='6', XYZ= 0.0,0.0,21.4, PROP_ID='F'/ Sprinkler Tree C, Type F
+&DEVC ID='7', XYZ= 0.0,0.0,21.4, PROP_ID='G'/ Sprinkler Tree C, Type G
+&DEVC ID='8', XYZ= 0.0,0.0,21.4, PROP_ID='H'/ Sprinkler Tree C, Type H
+&DEVC ID='11', XYZ= 0.0,3.0,21.7, PROP_ID='A'/ Sprinkler Tree N1, Type A
+&DEVC ID='12', XYZ= 0.0,3.0,21.7, PROP_ID='B'/ Sprinkler Tree N1, Type B
+&DEVC ID='13', XYZ= 0.0,3.0,21.7, PROP_ID='C'/ Sprinkler Tree N1, Type C
+&DEVC ID='14', XYZ= 0.0,3.0,21.7, PROP_ID='D'/ Sprinkler Tree N1, Type D
+&DEVC ID='15', XYZ= 0.0,3.0,21.7, PROP_ID='E'/ Sprinkler Tree N1, Type E
+&DEVC ID='16', XYZ= 0.0,3.0,21.7, PROP_ID='F'/ Sprinkler Tree N1, Type F
+&DEVC ID='17', XYZ= 0.0,6.1,21.3, PROP_ID='A'/ Sprinkler Tree N2, Type A
+&DEVC ID='18', XYZ= 0.0,6.1,21.3, PROP_ID='B'/ Sprinkler Tree N2, Type B
+&DEVC ID='19', XYZ= 0.0,6.1,21.3, PROP_ID='C'/ Sprinkler Tree N2, Type C
+&DEVC ID='20', XYZ= 0.0,6.1,21.3, PROP_ID='D'/ Sprinkler Tree N2, Type D
+&DEVC ID='21', XYZ= 0.0,-3.0,21.7, PROP_ID='A'/ Sprinkler Tree S1, Type A
+&DEVC ID='22', XYZ= 0.0,-3.0,21.7, PROP_ID='B'/ Sprinkler Tree S1, Type B
+&DEVC ID='23', XYZ= 0.0,-3.0,21.7, PROP_ID='C'/ Sprinkler Tree S1, Type C
+&DEVC ID='24', XYZ= 0.0,-3.0,21.7, PROP_ID='D'/ Sprinkler Tree S1, Type D
+&DEVC ID='25', XYZ= 0.0,-3.0,21.7, PROP_ID='E'/ Sprinkler Tree S1, Type E
+&DEVC ID='26', XYZ= 0.0,-3.0,21.7, PROP_ID='F'/ Sprinkler Tree S1, Type F
+&DEVC ID='27', XYZ= 0.0,-6.1,21.3, PROP_ID='A'/ Sprinkler Tree S3, Type A
+&DEVC ID='28', XYZ= 0.0,-6.1,21.3, PROP_ID='B'/ Sprinkler Tree S3, Type B
+&DEVC ID='29', XYZ= 0.0,-6.1,21.3, PROP_ID='C'/ Sprinkler Tree S3, Type C
+&DEVC ID='30', XYZ= 0.0,-6.1,21.3, PROP_ID='D'/ Sprinkler Tree S3, Type D
+&DEVC ID='31', XYZ= 3.1,0.0,21.4, PROP_ID='A'/ Sprinkler Tree E1, Type A
+&DEVC ID='32', XYZ= 3.1,0.0,21.4, PROP_ID='B'/ Sprinkler Tree E1, Type B
+&DEVC ID='33', XYZ= 3.1,0.0,21.4, PROP_ID='C'/ Sprinkler Tree E1, Type C
+&DEVC ID='34', XYZ= 3.1,0.0,21.4, PROP_ID='D'/ Sprinkler Tree E1, Type D
+&DEVC ID='35', XYZ= 3.1,0.0,21.4, PROP_ID='E'/ Sprinkler Tree E1, Type E
+&DEVC ID='36', XYZ= 3.1,0.0,21.4, PROP_ID='F'/ Sprinkler Tree E1, Type F
+&DEVC ID='37', XYZ= 6.1,0.0,21.4, PROP_ID='A'/ Sprinkler Tree E2, Type A
+&DEVC ID='38', XYZ= 6.1,0.0,21.4, PROP_ID='B'/ Sprinkler Tree E2, Type B
+&DEVC ID='39', XYZ= 6.1,0.0,21.4, PROP_ID='C'/ Sprinkler Tree E2, Type C
+&DEVC ID='40', XYZ= 6.1,0.0,21.4, PROP_ID='D'/ Sprinkler Tree E2, Type D
+&DEVC ID='41', XYZ= 9.1,0.0,21.4, PROP_ID='A'/ Sprinkler Tree E3, Type A
+&DEVC ID='42', XYZ= 9.1,0.0,21.4, PROP_ID='B'/ Sprinkler Tree E3, Type B
+&DEVC ID='43', XYZ= 12.2,0.0,21.5, PROP_ID='A'/ Sprinkler Tree E4, Type A
+&DEVC ID='44', XYZ= 12.2,0.0,21.5, PROP_ID='B'/ Sprinkler Tree E4, Type B
+&DEVC ID='45', XYZ= 15.2,0.0,21.4, PROP_ID='A'/ Sprinkler Tree E5, Type A
+&DEVC ID='46', XYZ= 15.2,0.0,21.4, PROP_ID='B'/ Sprinkler Tree E5, Type B
+&DEVC ID='31', XYZ= 3.1,0.0,21.4, PROP_ID='A'/ Sprinkler Tree E1, Type A
+&DEVC ID='32', XYZ= 3.1,0.0,21.4, PROP_ID='B'/ Sprinkler Tree E1, Type B
+&DEVC ID='33', XYZ= 3.1,0.0,21.4, PROP_ID='C'/ Sprinkler Tree E1, Type C
+&DEVC ID='34', XYZ= 3.1,0.0,21.4, PROP_ID='D'/ Sprinkler Tree E1, Type D
+&DEVC ID='35', XYZ= 3.1,0.0,21.4, PROP_ID='E'/ Sprinkler Tree E1, Type E
+&DEVC ID='36', XYZ= 3.1,0.0,21.4, PROP_ID='F'/ Sprinkler Tree E1, Type F
+&DEVC ID='37', XYZ= 6.1,0.0,21.4, PROP_ID='A'/ Sprinkler Tree E2, Type A
+&DEVC ID='38', XYZ= 6.1,0.0,21.4, PROP_ID='B'/ Sprinkler Tree E2, Type B
+&DEVC ID='39', XYZ= 6.1,0.0,21.4, PROP_ID='C'/ Sprinkler Tree E2, Type C
+&DEVC ID='40', XYZ= 6.1,0.0,21.4, PROP_ID='D'/ Sprinkler Tree E2, Type D
+&DEVC ID='41', XYZ= 9.1,0.0,21.4, PROP_ID='A'/ Sprinkler Tree E3, Type A
+&DEVC ID='42', XYZ= 9.1,0.0,21.4, PROP_ID='B'/ Sprinkler Tree E3, Type B
+&DEVC ID='43', XYZ= 12.2,0.0,21.5, PROP_ID='A'/ Sprinkler Tree E4, Type A
+&DEVC ID='44', XYZ= 12.2,0.0,21.5, PROP_ID='B'/ Sprinkler Tree E4, Type B
+&DEVC ID='45', XYZ= 15.2,0.0,21.4, PROP_ID='A'/ Sprinkler Tree E5, Type A
+&DEVC ID='46', XYZ= 15.2,0.0,21.4, PROP_ID='B'/ Sprinkler Tree E5, Type B
+&DEVC ID='48', XYZ= -3.1,0.0,21.4, PROP_ID='A'/ Sprinkler Tree W1, Type A
+&DEVC ID='49', XYZ= -3.1,0.0,21.4, PROP_ID='B'/ Sprinkler Tree W1, Type B
+&DEVC ID='50', XYZ= -3.1,0.0,21.4, PROP_ID='C'/ Sprinkler Tree W1, Type C
+&DEVC ID='51', XYZ= -3.1,0.0,21.4, PROP_ID='D'/ Sprinkler Tree W1, Type D
+&DEVC ID='52', XYZ= -3.1,0.0,21.4, PROP_ID='E'/ Sprinkler Tree W1, Type E
+&DEVC ID='53', XYZ= -3.1,0.0,21.4, PROP_ID='F'/ Sprinkler Tree W1, Type F
+&DEVC ID='54', XYZ= -6.1,0.0,21.4, PROP_ID='A'/ Sprinkler Tree W2, Type A
+&DEVC ID='55', XYZ= -6.1,0.0,21.4, PROP_ID='B'/ Sprinkler Tree W2, Type B
+&DEVC ID='56', XYZ= -6.1,0.0,21.4, PROP_ID='C'/ Sprinkler Tree W2, Type C
+&DEVC ID='57', XYZ= -6.1,0.0,21.4, PROP_ID='D'/ Sprinkler Tree W2, Type D
+&DEVC ID='58', XYZ= -9.1,0.0,21.4, PROP_ID='A'/ Sprinkler Tree W3, Type A
+&DEVC ID='59', XYZ= -9.1,0.0,21.4, PROP_ID='B'/ Sprinkler Tree W3, Type B
+&DEVC ID='60', XYZ= -12.2,0.0,21.5, PROP_ID='A'/ Sprinkler Tree W4, Type A
+&DEVC ID='61', XYZ= -12.2,0.0,21.5, PROP_ID='B'/ Sprinkler Tree W4, Type B
+&DEVC ID='62', XYZ= -15.2,0.0,21.4, PROP_ID='A'/ Sprinkler Tree W5, Type A
+&DEVC ID='63', XYZ= -15.2,0.0,21.4, PROP_ID='B'/ Sprinkler Tree W5, Type B
+
+&DEVC ID='Acts', XYZ=1.0,1.0,1.0, QUANTITY='ACTUATED SPRINKLERS' / 
 
 &SLCF PBY=40., QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
 
