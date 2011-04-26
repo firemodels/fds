@@ -5869,7 +5869,7 @@ Species &   Mol.~Wgt.           & Formula          & $\sigma$ & $\epsilon/k$   &
 {\ct CARBON MONOXIDE}    & 28   & CO               & 3.690    & 91.7            &    Y   \\ \hline
 {\ct ETHANE}             & 30   & C$_2$H$_6$       & 4.443    & 215.7           &    Y   \\ \hline
 {\ct ETHANOL}            & 46   & C$_2$H$_5$OH     & 4.530    & 362.6           &    Y   \\ \hline
-{\ct ETHYLENE}           & 28   & C$_2$H$_4$ 	   & 4.163    & 224.7           &    Y   \\ \hline
+{\ct ETHYLENE}           & 28   & C$_2$H$_4$       & 4.163    & 224.7           &    Y   \\ \hline
 {\ct FORMALDEHYDE}       & 30   & CH$_2$O          & 3.626    & 481.8           &    Y   \\ \hline
 {\ct HELIUM}             & 4    & He               & 2.551    & 10.22           &    Y   \\ \hline
 {\ct HYDROGEN}           & 2    & H$_2$            & 2.827    & 59.7            &    Y   \\ \hline
@@ -8962,17 +8962,17 @@ A summary of the available PDPA quantities is shown in Table~\ref{tbl:pdpa}.
 \begin{center}
 \begin{tabular}{|l|l|l|l|}
 \hline
-{\ct QUANTITY} 	        & $x$   			& $f(x)$ & Unit \\ \hline
-{\ct 'DIAMETER'} (default) & 1                          & $f_1$	 & $\mu$m \\
-{\ct 'ENTHALPY'} 	& $(4/3)\rho_i r_i^3 \left(c_{p,i}(T_i)T_i-c_{p,i}(T_m)T_m \right)$	& $f_2$	 & kJ/m$^3$ \\
-{\ct 'DROPLET FLUX X'} 	& $(4/3)\rho_i r_i^3 u_i$ 	& $f_2$	 & kg/m$^2$s \\
-{\ct 'DROPLET FLUX Y'} 	& $(4/3)\rho_i r_i^3 v_i$ 	& $f_2$	 & kg/m$^2$s \\
-{\ct 'DROPLET FLUX Z'} 	& $(4/3)\rho_i r_i^3 w_i$ 	& $f_2$	 & kg/m$^2$s \\
-{\ct 'U-VELOCITY'} 	& $u_i$ 			& $f_1$	 & m/s \\
-{\ct 'V-VELOCITY'} 	& $v_i$ 			& $f_1$	 & m/s \\
-{\ct 'W-VELOCITY'}	& $w_i$ 			& $f_1$	 & m/s \\
-{\ct 'VELOCITY'} 	& $(u_i^2+v_i^2+w_i^2)^{1/2}$ 	& $f_1$	 & m/s \\
-{\ct 'TEMPERATURE'} 	& $T_i$				& $f_1$  & ${}^\circ$C \\
+{\ct QUANTITY}          & $x$                           & $f(x)$ & Unit \\ \hline
+{\ct 'DIAMETER'} (default) & 1                          & $f_1$  & $\mu$m \\
+{\ct 'ENTHALPY'}        & $(4/3)\rho_i r_i^3 \left(c_{p,i}(T_i)T_i-c_{p,i}(T_m)T_m \right)$     & $f_2$  & kJ/m$^3$ \\
+{\ct 'DROPLET FLUX X'}  & $(4/3)\rho_i r_i^3 u_i$       & $f_2$  & kg/m$^2$s \\
+{\ct 'DROPLET FLUX Y'}  & $(4/3)\rho_i r_i^3 v_i$       & $f_2$  & kg/m$^2$s \\
+{\ct 'DROPLET FLUX Z'}  & $(4/3)\rho_i r_i^3 w_i$       & $f_2$  & kg/m$^2$s \\
+{\ct 'U-VELOCITY'}      & $u_i$                         & $f_1$  & m/s \\
+{\ct 'V-VELOCITY'}      & $v_i$                         & $f_1$  & m/s \\
+{\ct 'W-VELOCITY'}      & $w_i$                         & $f_1$  & m/s \\
+{\ct 'VELOCITY'}        & $(u_i^2+v_i^2+w_i^2)^{1/2}$   & $f_1$  & m/s \\
+{\ct 'TEMPERATURE'}     & $T_i$                         & $f_1$  & ${}^\circ$C \\
 {\ct 'MASS CONCENTRATION'} & $(4/3)\rho r_i^3 $         & $f_2$  & kg/m$^3$ \\
 {\ct 'NUMBER CONCENTRATION'} & 1                        & $f_2$  & \\
  \hline
@@ -9873,6 +9873,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 %{\ct CYCLES}         & Integer      & Number of times to cycle output             &    &                           \\ \hline
 {\ct DELAY}          & Real         & See Section~\ref{info:dry_pipe}             & s  &  0.                       \\ \hline
 {\ct FUNCTION\_TYPE} & Character    & See Section~\ref{info:basic_control}        &    &                           \\ \hline
+{\ct EVACUATION}     & Logical     & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide} &    & {\ct .FALSE.}    \\ \hline
 {\ct ID}             & Character    & See Section~\ref{info:CTRL}                 &    &                           \\ \hline
 {\ct INITIAL\_STATE} & Logical      & See Section~\ref{info:basic_control}        &    & {\ct .FALSE.}             \\ \hline
 {\ct INPUT\_ID}      & Char.~Array  & See Section~\ref{info:CTRL}                 &    &                           \\ \hline
@@ -9913,6 +9914,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct DEVC\_ID}              & Character       & See Section~\ref{info:aspiration_detector}                       &       &               \\ \hline
 {\ct DRY}                   & Logical         & See Section~\ref{info:dry}                                       &       & {\ct .FALSE.} \\ \hline
 {\ct DUCT\_ID}              & Character       & See Section~\ref{info:HVAC}                                      &       &               \\ \hline
+{\ct EVACUATION}            & Logical         & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide}            &    & {\ct .FALSE.}    \\ \hline
 {\ct FLOWRATE}              & Real            & See Section~\ref{info:aspiration_detector}                       & kg/s  & 0             \\ \hline
 {\ct HIDE\_COORDINATES}     & Logical         & See Section~\ref{info:line_file}                                 &       & {\ct .FALSE.} \\ \hline
 {\ct IOR}                   & Integer         & See Section~\ref{info:DEVC}                                      &       &               \\ \hline
@@ -10055,8 +10057,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct COLOR    }    & Character         & See Section~\ref{info:colors}                             &       &           \\ \hline
 {\ct CTRL\_ID}     & Character         & See Section~\ref{info:HOLE}                               &       &           \\ \hline
 {\ct DEVC\_ID}     & Character         & See Section~\ref{info:HOLE}                               &       &           \\ \hline
-{\ct EVACUATION}   & Logical           & See FDS+Evac User's Guide                                 &       &           \\ \hline
-{\ct MESH\_ID }    & Character         & See FDS+Evac User's Guide                                 &       &           \\ \hline
+{\ct EVACUATION}   & Logical           & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide}     &       &           \\ \hline
+{\ct MESH\_ID }    & Character         & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide}     &       &           \\ \hline
 {\ct MULT\_ID }    & Character         & See Section~\ref{info:MULT}                               &       &           \\ \hline
 {\ct RGB(3)   }    & Integer Triplet   & See Section~\ref{info:colors}                             &       &           \\ \hline
 {\ct TRANSPARENCY} & Real              & See Section~\ref{info:HOLE}                               &       &           \\ \hline
@@ -10258,10 +10260,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endhead
 {\ct COLOR}             & Character                     & See Section~\ref{info:multimesh}              &    & {\ct 'BLACK'}    \\ \hline
 {\ct CYLINDRICAL}       & Logical                       & See Section~\ref{info:2D}                     &    & {\ct .FALSE.}    \\ \hline
-{\ct EVAC\_HUMANS}      & Logical                       & See FDS+Evac User's Guide                     &    & {\ct .FALSE.}    \\ \hline
-{\ct EVACUATION}        & Logical                       & See FDS+Evac User's Guide                     &    & {\ct .FALSE.}    \\ \hline
-{\ct EVAC\_Z\_OFFSET}   & Real                          & See FDS+Evac User's Guide                     & m  & 1                \\ \hline
-{\ct ID}                & Character                     & See FDS+Evac User's Guide                     &    &                  \\ \hline
+{\ct EVAC\_HUMANS}      & Logical                       & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide} &    & {\ct .FALSE.}    \\ \hline
+{\ct EVACUATION}        & Logical                       & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide} &    & {\ct .FALSE.}    \\ \hline
+{\ct EVAC\_Z\_OFFSET}   & Real                          & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide} & m  & 1                \\ \hline
+{\ct ID}                & Character                     & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide} &    &                  \\ \hline
 {\ct IJK}               & Integer Triplet               & See Section~\ref{info:MESH_Basics}            &    & 10,10,10         \\ \hline
 {\ct LEVEL}             & Integer                       & For future use                                &    & 0                \\ \hline
 {\ct MPI\_PROCESS}      & Integer                       & See Section~\ref{info:multimesh}              &    &                  \\ \hline
@@ -10318,10 +10320,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DNS}                       & Logical       & See Section~\ref{info:MISC_Basics}                        &               & {\ct .FALSE.}     \\ \hline
 {\ct DYNSMAG}                   & Logical       & See Section~\ref{info:LES}                                &               & {\ct .FALSE.}     \\ \hline
 {\ct DSMAG\_FREQ}               & Integer       & See Section~\ref{info:LES}                                &               & 1                 \\ \hline
-{\ct EVAC\_PRESSURE\_ITERATIONS}& Character     & See FDS+Evac User's Guide                                 &               &                   \\ \hline
-{\ct EVAC\_TIME\_ITERATIONS}    & Character     & See FDS+Evac User's Guide                                 &               &                   \\ \hline
-{\ct EVACUATION\_DRILL}         & Logical       & See FDS+Evac User's Guide                                 &               & {\ct .FALSE.}     \\ \hline
-{\ct EVACUATION\_MC\_MODE}      & Logical       & See FDS+Evac User's Guide                                 &               & {\ct .FALSE.}     \\ \hline
+{\ct EVAC\_PRESSURE\_ITERATIONS}& Integer       & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide}     &               & 50                \\ \hline
+{\ct EVAC\_TIME\_ITERATIONS}    & Integer       & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide}     &               & 50                \\ \hline
+{\ct EVACUATION\_DRILL}         & Logical       & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide}     &               & {\ct .FALSE.}     \\ \hline
+{\ct EVACUATION\_MC\_MODE}      & Logical       & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide}     &               & {\ct .FALSE.}     \\ \hline
 %{\ct FISHPAK\_BC(3)}            & Integer       & Override FFT solver boundary conditions                   &               & -1                \\ \hline
 %{\ct FLUX\_LIMITER}             & Integer       & Scalar transport scheme                                   &               & -1                \\ \hline
 {\ct FORCE\_VECTOR(3)}          & Real          & See Section~\ref{info:force_vector}                        &               & 0.                \\ \hline
@@ -10336,7 +10338,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MAXIMUM\_VISIBILITY}                 & Real        & Visibility parameter                          &  m            &  30               \\ \hline
 {\ct MEAN\_FORCING(3)}          & Logical       & See Section~\ref{info:mean_forcing}                       &               & {\ct .FALSE.}     \\ \hline
 {\ct NOISE}                     & Logical       & See Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
-{\ct NO\_EVACUATION}            & Logical       & See FDS+Evac User's Guide                                 &               & {\ct .FALSE.}     \\ \hline
+{\ct NO\_EVACUATION}            & Logical       & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide}     &               & {\ct .FALSE.}     \\ \hline
 %{\ct NSTRATA}                   & Logical       & No. bins for droplet distribution                         &               & 7                 \\ \hline
 {\ct OVERWRITE}                 & Logical       & See Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
 %{\ct PARTICLE\_CFL}             & Logical       &                                                           &               & {\ct .FALSE.}    \\ \hline
@@ -10438,9 +10440,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct COLOR    }           & Character           & See Section~\ref{info:OBST_Basics}            &           &               \\ \hline
 {\ct CTRL\_ID }           & Character           & See Section~\ref{info:activate_deactivate}    &           &               \\ \hline
 {\ct DEVC\_ID }           & Character           & See Section~\ref{info:activate_deactivate}    &           &               \\ \hline
-{\ct EVACUATION}          & Logical             & See FDS+Evac User's Guide                     &           & {\ct .FALSE.} \\ \hline
+{\ct EVACUATION}          & Logical             & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide} &           & {\ct .FALSE.} \\ \hline
 {\ct ID }                 & Character           & See Section~\ref{info:OBST_Basics}            &           &               \\ \hline
-{\ct MESH\_ID}            & Character           & See FDS+Evac User's Guide                     &           &               \\ \hline
+{\ct MESH\_ID}            & Character           & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide} &           &               \\ \hline
 {\ct MULT\_ID }           & Character           & See Section~\ref{info:MULT}                   &           &               \\ \hline
 {\ct NOTERRAIN}           & Logical             & See Wildland Fire User's Guide                &           & {\ct .FALSE.} \\ \hline
 {\ct OUTLINE}             & Logical             & See Section~\ref{info:OBST_Basics}            &           & {\ct .FALSE.} \\ \hline
@@ -10797,6 +10799,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct CELL\_CENTERED}    & Logical           & See Section~\ref{info:SLCF}               &           & {\ct .FALSE.}     \\ \hline
+{\ct EVACUATION}        & Logical           & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide} &    & {\ct .FALSE.}\\ \hline
 {\ct MAXIMUM\_VALUE}    & Real              & See Smokeview User's Guide                &           &                   \\ \hline
 {\ct MINIMUM\_VALUE}    & Real              & See Smokeview User's Guide                &           &                   \\ \hline
 {\ct MESH\_NUMBER}      & Integer           & See Section~\ref{info:SLCF}               &           &                   \\ \hline
@@ -10922,7 +10925,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct E\_COEFFICIENT}                  & Real            & See Section~\ref{info:suppression}            & m$^2$/kg/s          & 0.                      \\ \hline
 {\ct EMISSIVITY}                      & Real            & See Section~\ref{info:convection}             &                     & 0.9                     \\ \hline
 {\ct EMISSIVITY\_BACK}                & Real            & See Section~\ref{info:BACKING}                &                     &                         \\ \hline
-{\ct EVAC\_DEFAULT}                   & Logical         & See FDS+Evac User's Guide                                 &               & {\ct .FALSE.}           \\ \hline
+{\ct EVAC\_DEFAULT}                   & Logical         & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide} &             & {\ct .FALSE.}           \\ \hline
 {\ct EXTERNAL\_FLUX}                  & Real            & See Section~\ref{solid_phase_verification}    & kW/m$^2$            & 0.                      \\ \hline
 {\ct FREE\_SLIP}                      & Logical         & See Section~\ref{info:WALL_MODEL}             &                     & {\ct .FALSE.}           \\ \hline
 {\ct GEOMETRY}                        & Character       & See Section~\ref{info:GEOMETRY}               &                     & {\ct 'CARTESIAN'}       \\ \hline
@@ -11037,8 +11040,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct DT}                        & Real       & See Section~\ref{info:TIME_Control}           & s           &                 \\ \hline
-{\ct EVAC\_DT\_FLOWFIELD}       & Real       & See FDS+Evac User's Guide                     & s           &  0.01           \\ \hline
-{\ct EVAC\_DT\_STEADY\_STATE}   & Real       & See FDS+Evac User's Guide                     & s           &  0.05           \\ \hline
+{\ct EVAC\_DT\_FLOWFIELD}       & Real       & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide} & s   &  0.01           \\ \hline
+{\ct EVAC\_DT\_STEADY\_STATE}   & Real       & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide} & s   &  0.05           \\ \hline
 {\ct LOCK\_TIME\_STEP}          & Logical    & See Section~\ref{info:TIME_Control}           &             & {\ct .FALSE.}   \\ \hline
 {\ct RESTRICT\_TIME\_STEP}      & Logical    & See Section~\ref{info:TIME_Control}           &             & {\ct .TRUE.}    \\ \hline
 {\ct SYNCHRONIZE}               & Logical    & See Section~\ref{info:TIME_Control}           &             & {\ct .TRUE.}    \\ \hline
@@ -11097,13 +11100,13 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CTRL\_ID }             & Character         & See Section~\ref{info:activate_deactivate}                    &               &                     \\ \hline
 {\ct DEVC\_ID }             & Character         & See Section~\ref{info:activate_deactivate}                    &               &                     \\ \hline
 {\ct DYNAMIC\_PRESSURE}     & Real              & See Section~\ref{info:pressure_boundary}                      & Pa            & 0.               \\ \hline
-{\ct EVACUATION    }        & Logical           & See FDS+Evac User's Guide                                     &               &  {\ct .FALSE.}      \\ \hline
+{\ct EVACUATION    }        & Logical           & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide}         &               &  {\ct .FALSE.}   \\ \hline
 {\ct ID }                   & Character         & See Section~\ref{info:VENT_Basics}                            &               &                     \\ \hline
 {\ct IOR}                   & Integer           & See Section~\ref{info:VENT_Trouble}                           &               &                     \\ \hline
 {\ct L\_EDDY}               & Real              & See Section~\ref{info:synthetic_turbulence}                   & m             & 0.                    \\ \hline
 {\ct L\_EDDY\_IJ(3,3)}      & Real Array        & See Section~\ref{info:synthetic_turbulence}                   & m             & 0.                    \\ \hline
 {\ct MB    }                & Character         & See Section~\ref{info:VENT_Basics}                            &               &                     \\ \hline
-{\ct MESH\_ID    }          & Character         & See FDS+Evac User's Guide                                     &               &                     \\ \hline
+{\ct MESH\_ID    }          & Character         & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide}         &               &                     \\ \hline
 {\ct N\_EDDY}               & Integer           & See Section~\ref{info:synthetic_turbulence}                   &               & 0                    \\ \hline
 {\ct OUTLINE}               & Logical           & See Section~\ref{info:VENT_Basics}                            & {\ct .FALSE.} &                     \\ \hline
 {\ct PBX, PBY, PBZ  }       & Real              & See Section~\ref{info:VENT_Basics}                            &               &                     \\ \hline
