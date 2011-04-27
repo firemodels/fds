@@ -1557,7 +1557,7 @@ CONTAINS
       F_MIN_FALL           = 2000.0_EB
       F_MAX_FALL           = 9000.0_EB
       D_OVERLAP_FALL       = 0.05_EB
-      TAU_FALL_DOWN        = 1.0_EB
+      TAU_FALL_DOWN        = -1.0_EB
       A_FAC_FALLEN         = 1.0_EB
       PROB_FALL_DOWN       = -1.0_EB
 
