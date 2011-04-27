@@ -4984,7 +4984,6 @@ void initcullgeom(int cullgeomflag){
   culldata *culli;
   int imesh;
 
-  printf("initcullgeom\n");
   update_initcullgeom=0;
   updatefacelists=1;
   for(imesh=0;imesh<nmeshes;imesh++){
