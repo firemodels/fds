@@ -18,9 +18,8 @@ fi
 
 cd $SVNROOT/Verification
 
-#$RUNSMV Visualization plume5c
+$RUNSMV Visualization plume5c
 cd $SVNROOT/Verification/Visualization
-source ~/.bashrc_fds ia32
-$MAKEMOVIE plume5c_tslice plume5c_tslice
+$MAKEMOVIE plume5c_tslice_ plume5c_tslice
 
 cd $SVNROOT/Verification
