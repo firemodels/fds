@@ -6,8 +6,11 @@
 
 typedef struct {
   int ibar, jbar, kbar;
-  float *data, xbar0, xbar, ybar0, ybar, zbar0, zbar;
+  unsigned char *lightmap, *opacity;
+  float *flightmap;
+  float xbar0, xbar, ybar0, ybar, zbar0, zbar;
   float dx, dy, dz, dxyzmin;
-} xyzdata;
+} lightdata;
 
-float interp3d(xyzdata *xyzinfo, float xyz[3]);
+void create_lightmap(lightdata *lightinfo);
+unsigned char interp3d(lightdata *lightinfo, float xyz[3]);

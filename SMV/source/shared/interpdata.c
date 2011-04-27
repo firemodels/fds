@@ -11,52 +11,59 @@
 // svn revision character string
 char interpdata_revision[]="$Revision: 8021 $";
 
-/* ----------------------- integrate3d ----------------------------- */
+/* ----------------------- create_lightmap ----------------------------- */
 
-float getalpha(xyzdata *xyzinfo, float ksoot, float xyz0[3], float xyz1[3]){
-  float lpath, dlpath, xyz[3];
-  float dx, dy, dz;
-  int i, nl;
-  float xnl;
-  float sum=0.0;
-  float val;
-  float alpha;
+#define IJK(i,j,k) (i) + ny*(j) + nxy*(k)
 
-  dx = xyz1[0]-xyz0[0];
-  dy = xyz1[1]-xyz0[1];
-  dz = xyz1[2]-xyz0[2];
+void create_lightmap(lightdata *lightinfo){
+  int i, j, k, nx, ny, nz, nxy;
+  float *flightmap;
+  unsigned char *lightmap, *opacity;
 
-  lpath = (float)sqrt(dx*dx+dy*dy+dz*dz);
-  dlpath = lpath/xyzinfo->dxyzmin;
-  nl = lpath/dlpath+1;
-  xnl = (float)nl;
-  dlpath=lpath/(float)nl;
-  for(i=0;i<nl;i++){
-    float ii;
+  nx = lightinfo->ibar+1;
+  ny = lightinfo->jbar+1;
+  nz = lightinfo->kbar+1;
+  nxy = nx*ny;
+  lightmap = lightinfo->lightmap;
+  flightmap = lightinfo->flightmap;
+  opacity = lightinfo->opacity;
 
-    ii = (float)i + (float)0.5;
-    xyz[0] = (xyz0[0]*(xnl-ii) + ii*xyz1[0])/xnl;
-    xyz[1] = (xyz0[1]*(xnl-ii) + ii*xyz1[1])/xnl;
-    xyz[2] = (xyz0[2]*(xnl-ii) + ii*xyz1[2])/xnl;
-    val = interp3d(xyzinfo,xyz);
-    sum+=val;
+  i=0;
+  for(k=0;k<nz;k++){
+  for(j=0;j<ny;j++){
+    flightmap[IJK(i,j,k)]=1.0;
   }
-  sum*=ksoot/xnl;
-  alpha = (float)exp(-sum);
-  return val;
+  }
+
+  for(k=0;k<nz;k++){
+  for(j=0;j<ny;j++){
+  for(i=1;i<nx;i++){
+    int ijk,im1jk;
+
+    ijk=IJK(i,j,k);
+    im1jk=ijk-1;
+    flightmap[ijk]=(float)(flightmap[im1jk]*(float)(opacity[im1jk])/255.0);
+  }
+  }
+  }
+
+  for(i=0;i<nx*ny*nz;i++){
+    lightmap[i]=(unsigned char)(flightmap[i]*255.0);
+  }
+
 }
 
 /* ----------------------- interp3d ----------------------------- */
 
-float interp3d(xyzdata *xyzinfo, float xyz[3]){
+unsigned char interp3d(lightdata *lightinfo, float xyz[3]){
   int i, j, k;
   int ijk;
 
-  i = (xyz[0]-xyzinfo->xbar0)/xyzinfo->dx;
-  j = (xyz[1]-xyzinfo->ybar0)/xyzinfo->dy;
-  k = (xyz[2]-xyzinfo->zbar0)/xyzinfo->dz;
+  i = (xyz[0]-lightinfo->xbar0)/lightinfo->dx;
+  j = (xyz[1]-lightinfo->ybar0)/lightinfo->dy;
+  k = (xyz[2]-lightinfo->zbar0)/lightinfo->dz;
 
-  ijk = i + j*xyzinfo->ibar + k*xyzinfo->ibar*xyzinfo->jbar;
+  ijk = i + j*lightinfo->ibar + k*lightinfo->ibar*lightinfo->jbar;
 
-  return xyzinfo->data[ijk];
+  return lightinfo->opacity[ijk];
 }
