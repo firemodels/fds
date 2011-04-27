@@ -21,14 +21,14 @@ fi
 disp=`id -u`
 Xvfb :$disp -screen 0 1280x1024x24 &
 rxs=$!
-
+echo pausing for 8 seconds
 sleep 8
 
 export DISPLAY=:$disp
 source ~/.bashrc_fds intel64
 cd $fulldir
 $SMV -runscript $in
-
+echo pausing for 8 seconds
 sleep 8
 
 kill $rxs

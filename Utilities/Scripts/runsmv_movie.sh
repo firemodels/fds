@@ -22,7 +22,7 @@ fi
 disp=`id -u`
 Xvfb :$disp -screen 0 1280x1024x24 &
 rxs=$!
-
+echo pausing for 8 seconds
 sleep 8
 
 export DISPLAY=:$disp
@@ -31,7 +31,7 @@ cd $fulldir
 echo fulldir=$fulldir
 echo 
 $SMV -script $smvscript $in
-
+echo pausing for 8 seconds
 sleep 8
 
 kill $rxs
