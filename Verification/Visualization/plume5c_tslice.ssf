@@ -1,0 +1,7 @@
+RENDERDIR
+ .
+LOADFILE
+ plume5c_05.sf
+RENDERALL
+ 1
+plume5c_tslice
