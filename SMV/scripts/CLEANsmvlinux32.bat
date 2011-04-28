@@ -1,6 +1,6 @@
 @echo off
 Title Cleaning FDS for 32 bit Linux
-
+Ren dummy change
 set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
 echo ***Fatal error.  The environment setup file %envfile% does not exist. 
