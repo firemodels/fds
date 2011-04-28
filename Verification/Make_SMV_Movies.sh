@@ -15,11 +15,21 @@ if ! [ -e $SMV ]; then
   exit
 fi
 
+underscore=_
+mov=.m1v
+
 
 cd $SVNROOT/Verification
 
+# This script assume that a smokeview scriptfile 
+# named casename_movies.ssf exists for each 
+
+# plume5c movies
+
 $RUNSMV Visualization plume5c
 cd $SVNROOT/Verification/Visualization
-$MAKEMOVIE plume5c_tslice_ plume5c_tslice
+movie=plume5c_tslice
+$MAKEMOVIE $movie$underscore $movie
+mv $movie$mov ../../Manuals/Movies/.
 
 cd $SVNROOT/Verification
