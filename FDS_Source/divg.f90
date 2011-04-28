@@ -106,25 +106,19 @@ ENDIF
 
 ! Zero out divergence to start
 
-!$OMP PARALLEL
-!$OMP WORKSHARE 
+
 DP  = 0._EB
-!$OMP END WORKSHARE
+
 IF (N_TRACKED_SPECIES > 0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
-   !$OMP WORKSHARE
    DEL_RHO_D_DEL_Z = 0._EB
-   !$OMP END WORKSHARE
 ENDIF
-!$OMP END PARALLEL
 
 ! Add species diffusion terms to divergence expression and compute diffusion term for species equations
  
 IF (N_TRACKED_SPECIES > 0) THEN
    RHO_D => WORK4
    IF (LES) THEN
-      !$OMP PARALLEL WORKSHARE
       RHO_D = MU*RSC
-      !$OMP END PARALLEL WORKSHARE
    ENDIF
 ENDIF
 
@@ -132,12 +126,8 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
    IF (EVACUATION_ONLY(NM)) Cycle SPECIES_LOOP
 
-   !$OMP PARALLEL SHARED(RHO_D) 
    IF (DNS) THEN
-      !$OMP WORKSHARE
       RHO_D = 0._EB
-      !$OMP END WORKSHARE
-      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ITMP,TMP_WGT)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -147,12 +137,10 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
             ENDDO 
          ENDDO
       ENDDO
-      !$OMP END DO
    ENDIF
 
    ! Compute rho*D del Z
 
-   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,DZDX,DZDY,DZDZ)
    DO K=0,KBAR
       DO J=0,JBAR
          DO I=0,IBAR
@@ -165,16 +153,12 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          ENDDO
       ENDDO
    ENDDO
-   !$OMP END DO
 
    ! Correct rho*D del Z at boundaries and store rho*D at boundaries
 
-   !$OMP SINGLE PRIVATE(IW,IIG,JJG,KKG,RHO_D_DZDN,IOR)
-   !!$OMP DO PRIVATE(IW,IIG,JJG,KKG,RHO_D_DZDN,IOR)
    WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY .OR. &
           BOUNDARY_TYPE(IW)==OPEN_BOUNDARY .OR. BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP
-      !!$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_04'
       IIG = IJKW(6,IW) 
       JJG = IJKW(7,IW) 
       KKG = IJKW(8,IW) 
@@ -196,21 +180,16 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       END SELECT
       
    ENDDO WALL_LOOP
-   !!$OMP END DO
-   !$OMP END SINGLE
 
    ! Compute del dot h_n*rho*D del Z_n (part of del dot qdot")
 
-   !$OMP SINGLE
    H_RHO_D_DZDX => WORK5
    H_RHO_D_DZDY => WORK6
    H_RHO_D_DZDZ => WORK7
-   !$OMP END SINGLE
 
    ZZ_GET    = 0._EB
    ZZ_GET(N) = 1._EB
 
-   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,TMP_G,CPBAR,HDIFF,ZZ_GET)
    DO K=0,KBAR
       DO J=0,JBAR
          DO I=0,IBAR
@@ -234,12 +213,8 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          ENDDO
       ENDDO
    ENDDO
-   !$OMP END DO
 
-   !$OMP SINGLE PRIVATE(IW,IIG,JJG,KKG,IOR,TMP_G,CPBAR,HDIFF,RHO_D_DZDN,ZZ_GET)
-   !!$OMP DO PRIVATE(IW,IIG,JJG,KKG,IOR,TMP_G,CPBAR,HDIFF,RHO_D_DZDN,ZZ_GET)
    WALL_LOOP2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-      !!$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_06'
       IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY .OR. &
           BOUNDARY_TYPE(IW)==OPEN_BOUNDARY .OR. BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP2
       IIG = IJKW(6,IW)
@@ -266,12 +241,9 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
             H_RHO_D_DZDZ(IIG,JJG,KKG)   = -HDIFF*RHO_D_DZDN
       END SELECT
    ENDDO WALL_LOOP2
-   !!$OMP END DO
-   !$OMP END SINGLE
 
    CYLINDER: SELECT CASE(CYLINDRICAL)
       CASE(.FALSE.) CYLINDER  ! 3D or 2D Cartesian Coords
-         !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
@@ -281,26 +253,20 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
                ENDDO
             ENDDO
          ENDDO
-         !$OMP END DO
 
       CASE(.TRUE.) CYLINDER  ! 2D Cylindrical Coords
-         !$OMP SINGLE
          J = 1
-         !$OMP END SINGLE
-         !$OMP DO COLLAPSE(2) PRIVATE(K,I)
          DO K=1,KBAR
             DO I=1,IBAR
                DP(I,J,K) = DP(I,J,K) + (R(I)*H_RHO_D_DZDX(I,J,K)-R(I-1)*H_RHO_D_DZDX(I-1,J,K))*RDX(I)*RRN(I) + &
                                        (     H_RHO_D_DZDZ(I,J,K)-       H_RHO_D_DZDZ(I,J,K-1))*RDZ(K)
             ENDDO
          ENDDO
-         !$OMP END DO
    END SELECT CYLINDER
    ! Compute del dot rho*D del Z_n
 
    CYLINDER2: SELECT CASE(CYLINDRICAL)
       CASE(.FALSE.) CYLINDER2  ! 3D or 2D Cartesian Coords
-         !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
@@ -310,24 +276,18 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
                ENDDO
             ENDDO
          ENDDO
-         !$OMP END DO
       CASE(.TRUE.) CYLINDER2  ! 2D Cylindrical Coords
-         !$OMP SINGLE
          J=1
-         !$OMP END SINGLE
-         !$OMP DO COLLAPSE(2) PRIVATE(K,I)
          DO K=1,KBAR
             DO I=1,IBAR
                DEL_RHO_D_DEL_Z(I,J,K,N) = (R(I)*RHO_D_DZDX(I,J,K)-R(I-1)*RHO_D_DZDX(I-1,J,K))*RDX(I)*RRN(I) + &
                                           (     RHO_D_DZDZ(I,J,K)-       RHO_D_DZDZ(I,J,K-1))*RDZ(K)
             ENDDO
          ENDDO
-         !$OMP END DO
    END SELECT CYLINDER2
 
    ! Compute -Sum h_n del dot rho*D del Z_n
    
-   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,CPBAR,HDIFF,ZZ_GET)
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -337,9 +297,6 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          ENDDO
       ENDDO
    ENDDO
-   !$OMP END DO NOWAIT
-
-   !$OMP END PARALLEL
 
 ENDDO SPECIES_LOOP
 
@@ -352,17 +309,12 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
    KDTDZ => WORK3
    KP    => WORK4
    
-   !$OMP PARALLEL SHARED(KP)
-   
-   !$OMP WORKSHARE
    KP = K_Z(NINT(TMPA),0)*SPECIES_MIXTURE(0)%MW
-   !$OMP END WORKSHARE
    
    ! Compute thermal conductivity k (KP)
  
    K_DNS_OR_LES: IF (DNS .AND. .NOT.EVACUATION_ONLY(NM)) THEN
 
-      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ZZ_GET) 
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -372,10 +324,7 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
             ENDDO
          ENDDO
       ENDDO
-      !$OMP END DO
 
-      !$OMP SINGLE PRIVATE(IW,II,JJ,KK,IIG,JJG,KKG)
-      !!$OMP DO PRIVATE(IW,II,JJ,KK,IIG,JJG,KKG)
       BOUNDARY_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
          II  = IJKW(1,IW)
          JJ  = IJKW(2,IW)
@@ -385,15 +334,12 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
          KKG = IJKW(8,IW)
          KP(II,JJ,KK) = KP(IIG,JJG,KKG)
       ENDDO BOUNDARY_LOOP
-      !!$OMP END DO
-      !$OMP END SINGLE
 
    ELSE K_DNS_OR_LES
     
       CP_FTMP_IF: IF (CP_FTMP) THEN
 
-         !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,ZZ_GET,CP)
-         DO K=1,KBAR
+          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
@@ -403,10 +349,7 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
                ENDDO
             ENDDO
          ENDDO
-         !$OMP END DO
-         
-         !$OMP SINGLE PRIVATE(IW,II,JJ,KK,IIG,JJG,KKG)
-         !!$OMP DO PRIVATE(IW,II,JJ,KK,IIG,JJG,KKG)
+
          BOUNDARY_LOOP2: DO IW=1,N_EXTERNAL_WALL_CELLS
             II  = IJKW(1,IW)
             JJ  = IJKW(2,IW)
@@ -416,22 +359,17 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
             KKG = IJKW(8,IW)
             KP(II,JJ,KK) = KP(IIG,JJG,KKG)
          ENDDO BOUNDARY_LOOP2
-         !!$OMP END DO
-         !$OMP END SINGLE
 
       ELSE CP_FTMP_IF
 
-         !$OMP WORKSHARE
          KP = MU*CPOPR
-         !$OMP END WORKSHARE   
 
       ENDIF CP_FTMP_IF
       
    ENDIF K_DNS_OR_LES
 
    ! Compute k*dT/dx, etc
-
-   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,DTDX,DTDY,DTDZ)
+   
    DO K=0,KBAR
       DO J=0,JBAR
          DO I=0,IBAR
@@ -444,12 +382,9 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
          ENDDO
       ENDDO
    ENDDO
-   !$OMP END DO
 
    ! Correct thermal gradient (k dT/dn) at boundaries
 
-   !$OMP SINGLE PRIVATE(IW,II,JJ,KK,IIG,JJG,KKG,IOR)
-   !!$OMP DO PRIVATE(IW,II,JJ,KK,IIG,JJG,KKG,IOR)
    CORRECTION_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY .OR. &
           BOUNDARY_TYPE(IW)==OPEN_BOUNDARY .OR. BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) CYCLE CORRECTION_LOOP
@@ -477,14 +412,11 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
       END SELECT
       DP(IIG,JJG,KKG) = DP(IIG,JJG,KKG) - QCONF(IW)*RDN(IW)
    ENDDO CORRECTION_LOOP
-   !!$OMP END DO
-   !$OMP END SINGLE
 
    ! Compute (q + del dot k del T) and add to the divergence
  
    CYLINDER3: SELECT CASE(CYLINDRICAL)
       CASE(.FALSE.) CYLINDER3   ! 3D or 2D Cartesian
-         !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,DELKDELT)
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
@@ -495,9 +427,7 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
                ENDDO 
             ENDDO
          ENDDO
-         !$OMP END DO
       CASE(.TRUE.) CYLINDER3   ! 2D Cylindrical
-         !$OMP DO COLLAPSE(3) PRIVATE(K,J,I,DELKDELT)
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
@@ -508,9 +438,7 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
                ENDDO 
             ENDDO
          ENDDO
-         !$OMP END DO
    END SELECT CYLINDER3
-   !$OMP END PARALLEL
  
 ENDIF ENERGY
 
@@ -518,7 +446,6 @@ ENDIF ENERGY
  
 RTRM => WORK1
 
-!$OMP PARALLEL DO PRIVATE(K,J,I,ZZ_GET,CP)
 IF (N_TRACKED_SPECIES>0 .AND. EVACUATION_ONLY(NM)) ZZ_GET(1:N_TRACKED_SPECIES) = 0._EB
 DO K=1,KBAR
    DO J=1,JBAR
@@ -531,13 +458,11 @@ DO K=1,KBAR
       ENDDO
    ENDDO 
 ENDDO
-!$OMP END PARALLEL DO
 
 ! Compute (Wbar/rho) Sum (1/W_n) del dot rho*D del Z_n
 
 DO N=1,N_TRACKED_SPECIES
    IF (EVACUATION_ONLY(NM)) CYCLE
-   !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I)
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -546,14 +471,11 @@ DO N=1,N_TRACKED_SPECIES
          ENDDO
       ENDDO
    ENDDO
-   !$OMP END PARALLEL DO
 ENDDO
 
 ! Add contribution of reactions
  
-!$OMP PARALLEL
 IF (N_REACTIONS > 0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
-   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -561,14 +483,12 @@ IF (N_REACTIONS > 0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
          ENDDO
       ENDDO
    ENDDO
-   !$OMP END DO
 ENDIF
 
 
 ! Add contribution of evaporating droplets
 
 IF (NLP>0 .AND. N_EVAP_INDICES > 0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
-   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -576,13 +496,11 @@ IF (NLP>0 .AND. N_EVAP_INDICES > 0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
          ENDDO
       ENDDO
    ENDDO
-   !$OMP END DO
 ENDIF
  
 ! Atmospheric Stratification Term
 
 IF (STRATIFICATION .AND. .NOT.EVACUATION_ONLY(NM)) THEN
-   !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -591,20 +509,16 @@ IF (STRATIFICATION .AND. .NOT.EVACUATION_ONLY(NM)) THEN
          ENDDO
       ENDDO
    ENDDO
-   !$OMP END DO
 ENDIF
 
 ! Compute normal component of velocity at boundaries, UWS
 
 PREDICT_NORMALS: IF (PREDICTOR) THEN
  
-   !!$OMP WORKSHARE
    !FDS_LEAK_AREA(:,:,NM) = 0._EB
-   !!$OMP END WORKSHARE
 
-   !$OMP DO PRIVATE(IW,IOR,IBC,SF,TSI,TIME_RAMP_FACTOR,DELTA_P,PRES_RAMP_FACTOR,II,JJ,KK,VT) 
    WALL_LOOP3: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-      !!$ IF ((IW == 1) .AND. DEBUG_OPENMP) WRITE(*,*) 'OpenMP_DIVG_22'
+
       IOR = IJKW(4,IW)
       
       WALL_CELL_TYPE: SELECT CASE (BOUNDARY_TYPE(IW))
@@ -623,7 +537,6 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
             !   ELSE
             !      IOPZ = SF%LEAK_PATH(2)
             !   ENDIF
-            !   !$OMP ATOMIC
             !   FDS_LEAK_AREA(IPZ,IOPZ,NM) = FDS_LEAK_AREA(IPZ,IOPZ,NM) + AW(IW)
             !ENDIF
             ENDIF EVAC_IF_NOT
@@ -721,22 +634,15 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
 
       END SELECT WALL_CELL_TYPE
    ENDDO WALL_LOOP3
-   !$OMP END DO
 
-   !$OMP WORKSHARE
    DUWDT(1:N_EXTERNAL_WALL_CELLS) = RDT*(UWS(1:N_EXTERNAL_WALL_CELLS)-UW(1:N_EXTERNAL_WALL_CELLS))
-   !$OMP END WORKSHARE
    
 ELSE PREDICT_NORMALS
    
-   !$OMP WORKSHARE
    UW = UWS
-   !$OMP END WORKSHARE
 
 ENDIF PREDICT_NORMALS
 
-!$OMP END PARALLEL
- 
 ! Calculate pressure rise in each of the pressure zones by summing divergence expression over each zone
 
 PRESSURE_ZONE_LOOP: DO IPZ=1,N_ZONE
@@ -747,8 +653,7 @@ PRESSURE_ZONE_LOOP: DO IPZ=1,N_ZONE
    ZONE_VOLUME  = 0._EB
 
    IF (EVACUATION_ONLY(NM)) CYCLE PRESSURE_ZONE_LOOP
- 
-   !!$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I,VC) REDUCTION(+:ZONE_VOLUME,DSUM,PSUM)
+
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -761,7 +666,6 @@ PRESSURE_ZONE_LOOP: DO IPZ=1,N_ZONE
          ENDDO
       ENDDO
    ENDDO
-   !!$OMP END PARALLEL DO
 
    ! Calculate the volume flux to the boundary of the pressure zone (int u dot dA)
 
@@ -871,7 +775,6 @@ PRESSURE_ZONE_LOOP: DO IPZ=1,N_ZONE
 
    ! Add pressure derivative to divergence
 
-   !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(K,J,I)
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -881,14 +784,11 @@ PRESSURE_ZONE_LOOP: DO IPZ=1,N_ZONE
          ENDDO
       ENDDO
    ENDDO
-   !$OMP END PARALLEL DO
 
 ENDDO PRESSURE_ZONE_LOOP
 
 ! Zero out divergence in solid cells
 
-!$OMP PARALLEL 
-!$OMP DO PRIVATE(IC,I,J,K) 
 SOLID_LOOP: DO IC=1,CELL_COUNT
    IF (.NOT.SOLID(IC)) CYCLE SOLID_LOOP
    I = I_CELL(IC)
@@ -896,11 +796,9 @@ SOLID_LOOP: DO IC=1,CELL_COUNT
    K = K_CELL(IC)
    DP(I,J,K) = 0._EB
 ENDDO SOLID_LOOP
-!$OMP END DO
 
 ! Specify divergence in boundary cells to account for volume being generated at the walls
 
-!$OMP DO PRIVATE(IW,II,JJ,KK,IOR,IIG,JJG,KKG) 
 BC_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE BC_LOOP
    II = IJKW(1,IW)
@@ -931,18 +829,14 @@ BC_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          DP(II,JJ,KK) = DP(IIG,JJG,KKG)
    END SELECT
 ENDDO BC_LOOP
-!$OMP END DO
-
 
 ! Compute time derivative of the divergence, dD/dt
 
 TRUE_PROJECTION: IF (PROJECTION) THEN
 
-   !$OMP SINGLE
    DIV=>WORK1
-   !$OMP END SINGLE
+
    IF (PREDICTOR) THEN
-      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
       DO K = 1,KBAR
          DO J = 1,JBAR
             DO I = 1,IBAR
@@ -951,12 +845,8 @@ TRUE_PROJECTION: IF (PROJECTION) THEN
             ENDDO
          ENDDO
       ENDDO
-      !$OMP END DO
-      !$OMP WORKSHARE
       DDDT = (DP-DIV)*RDT
-      !$OMP END WORKSHARE
    ELSEIF (CORRECTOR) THEN
-      !$OMP DO COLLAPSE(3) PRIVATE(K,J,I)
       DO K = 1,KBAR
          DO J = 1,JBAR
             DO I = 1,IBAR
@@ -967,35 +857,24 @@ TRUE_PROJECTION: IF (PROJECTION) THEN
             ENDDO
          ENDDO
       ENDDO
-      !$OMP END DO
-      !$OMP WORKSHARE
       D = DDDT
       DDDT = (2._EB*DP-DIV)*RDT
-      !$OMP END WORKSHARE
    ENDIF
    
 ELSE TRUE_PROJECTION
 
    IF (PREDICTOR) THEN
-      !$OMP WORKSHARE
       DDDT = (DS-D)*RDT
-      !$OMP END WORKSHARE
    ELSE
-      !$OMP SINGLE
       D_NEW => WORK1
-      !$OMP END SINGLE
-      !$OMP WORKSHARE
       D_NEW = DP
       DDDT  = (2._EB*D_NEW-DS-D)*RDT
       D     = D_NEW
-      !$OMP END WORKSHARE
    ENDIF
    
    ! Adjust dD/dt to correct error in divergence due to velocity matching at interpolated boundaries
    
    NO_SCARC_IF: IF (PRES_METHOD /='SCARC') THEN
-      !$OMP SINGLE PRIVATE(IW,IIG,JJG,KKG)
-      !!$OMP DO PRIVATE(IW,IIG,JJG,KKG)
       DO IW=1,N_EXTERNAL_WALL_CELLS
          IF (IJKW(9,IW)==0) CYCLE
          IIG = IJKW(6,IW)
@@ -1004,12 +883,9 @@ ELSE TRUE_PROJECTION
          IF (PREDICTOR) DDDT(IIG,JJG,KKG) = DDDT(IIG,JJG,KKG) + DS_CORR(IW)*RDT
          IF (CORRECTOR) DDDT(IIG,JJG,KKG) = DDDT(IIG,JJG,KKG) + (2._EB*D_CORR(IW)-DS_CORR(IW))*RDT
       ENDDO
-      !!$OMP END DO
-      !$OMP END SINGLE
    ENDIF NO_SCARC_IF
 
 ENDIF TRUE_PROJECTION
-!$OMP END PARALLEL
    
 TUSED(2,NM)=TUSED(2,NM)+SECOND()-TNOW
 END SUBROUTINE DIVERGENCE_PART_2
