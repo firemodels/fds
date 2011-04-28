@@ -23,7 +23,6 @@
 &REAC FUEL='METHANE'
       SOOT_YIELD = 0.0
       CO_YIELD=0.0
-      FUEL='METHANE'
       C = 1
       H = 4
       AUTO_IGNITION_TEMPERATURE = 540.
