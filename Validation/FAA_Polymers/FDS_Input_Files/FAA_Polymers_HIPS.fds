@@ -7,7 +7,7 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
 
 &MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /  Mesh is just to make FDS run
 
-&TIME T_END=600., WALL_INCREMENT=1, DT=0.01 /  Force FDS to do solid phase calc every time step
+&TIME T_END=800., WALL_INCREMENT=1, DT=0.01 /  Force FDS to do solid phase calc every time step
 
 &REAC FUEL='METHANE', Y_O2_INFTY=0.01 /  No gas phase reaction with 1% O2 concentration
 
@@ -23,13 +23,17 @@ coupling -- just a fixed external heat flux of 50 kW/m2.
       HEAT_OF_REACTION=1000.
       HEAT_OF_COMBUSTION=25200.
       CONDUCTIVITY = 0.22
-      SPECIFIC_HEAT = 2.0 
+      SPECIFIC_HEAT = 2.0 /
+
+&MATL ID='FOAMGLAS'
+      CONDUCTIVITY = 0.08
+      SPECIFIC_HEAT = 0.84
+      DENSITY = 120. /
 
 &SURF ID='HIPS SLAB'
       COLOR='BLACK'
-      BACKING='INSULATED'
-      MATL_ID='HIPS'
-      THICKNESS=0.009 
+      MATL_ID='HIPS','FOAMGLAS'
+      THICKNESS=0.009,0.01
       H_FIXED=0.
       EXTERNAL_FLUX=52 /  External Flux is ONLY for this simple demo exercise
 
