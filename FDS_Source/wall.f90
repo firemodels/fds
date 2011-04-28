@@ -993,6 +993,12 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS+N_VIRTUAL_WA
 
    PYROLYSIS_MATERIAL_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_MATERIAL) THEN
 
+      ! Store the mass flux from the previous time step. It may be needed by liquid routine
+
+      IF (N_REACTIONS>0) MFLUX = MASSFLUX_ACTUAL(IW,REACTION(1)%FUEL_SMIX_INDEX)
+
+      ! Set mass fluxes to 0 and SHRINK to false.
+
       MASSFLUX(IW,:)       = 0._EB
       MASSFLUX_ACTUAL(IW,:)= 0._EB
       POINT_SHRINK         = .FALSE.
