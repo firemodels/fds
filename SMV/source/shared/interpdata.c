@@ -7,31 +7,44 @@
 #include <stdlib.h>
 #include <math.h>
 #include "interpdata.h"
+#include "MALLOC.h"
 
 // svn revision character string
 char interpdata_revision[]="$Revision: 8021 $";
 
-/* ----------------------- create_lightmap ----------------------------- */
+/* ----------------------- setup_radiancemap ----------------------------- */
 
-#define IJK(i,j,k) (i) + ny*(j) + nxy*(k)
+void setup_radiancemap(radiancedata *radianceinfo, int ijkbar[3], float xyzbar0[3], float xyzbar[3], float dxyz[3], unsigned char *radiance, unsigned char *opacity){
+  radianceinfo->ijkbar=ijkbar;
+  radianceinfo->xyzbar0=xyzbar0;
+  radianceinfo->xyzbar =xyzbar;
+  radianceinfo->radiance=radiance;
+  radianceinfo->opacity=opacity;
+  radianceinfo->dxyz=dxyz;
+}
 
-void create_lightmap(lightdata *lightinfo){
+/* ----------------------- build_radiancemap ----------------------------- */
+
+#define IJKRAD(i,j,k) (i) + ny*(j) + nxy*(k)
+
+void build_radiancemap(radiancedata *radianceinfo){
   int i, j, k, nx, ny, nz, nxy;
-  float *flightmap;
-  unsigned char *lightmap, *opacity;
+  float *fradiance;
+  unsigned char *radiance, *opacity;
 
-  nx = lightinfo->ibar+1;
-  ny = lightinfo->jbar+1;
-  nz = lightinfo->kbar+1;
+  nx = radianceinfo->ijkbar[0]+1;
+  ny = radianceinfo->ijkbar[1]+1;
+  nz = radianceinfo->ijkbar[2]+1;
   nxy = nx*ny;
-  lightmap = lightinfo->lightmap;
-  flightmap = lightinfo->flightmap;
-  opacity = lightinfo->opacity;
+  NewMemory((void **)&fradiance,nx*ny*nz*sizeof(float));
+
+  radiance = radianceinfo->radiance;
+  opacity = radianceinfo->opacity;
 
   i=0;
   for(k=0;k<nz;k++){
   for(j=0;j<ny;j++){
-    flightmap[IJK(i,j,k)]=1.0;
+    fradiance[IJKRAD(i,j,k)]=1.0;
   }
   }
 
@@ -40,30 +53,30 @@ void create_lightmap(lightdata *lightinfo){
   for(i=1;i<nx;i++){
     int ijk,im1jk;
 
-    ijk=IJK(i,j,k);
+    ijk=IJKRAD(i,j,k);
     im1jk=ijk-1;
-    flightmap[ijk]=(float)(flightmap[im1jk]*(float)(opacity[im1jk])/255.0);
+    fradiance[ijk]=(float)(fradiance[im1jk]*(float)(opacity[im1jk])/255.0);
   }
   }
   }
 
   for(i=0;i<nx*ny*nz;i++){
-    lightmap[i]=(unsigned char)(flightmap[i]*255.0);
+    radiance[i]=(unsigned char)(fradiance[i]*255.0);
   }
-
+  FREEMEMORY(fradiance);
 }
 
 /* ----------------------- interp3d ----------------------------- */
 
-unsigned char interp3d(lightdata *lightinfo, float xyz[3]){
+unsigned char get_opacity(radiancedata *radianceinfo, float xyz[3]){
   int i, j, k;
   int ijk;
 
-  i = (xyz[0]-lightinfo->xbar0)/lightinfo->dx;
-  j = (xyz[1]-lightinfo->ybar0)/lightinfo->dy;
-  k = (xyz[2]-lightinfo->zbar0)/lightinfo->dz;
+  i = (xyz[0]-radianceinfo->xyzbar0[0])/radianceinfo->dxyz[0];
+  j = (xyz[1]-radianceinfo->xyzbar0[1])/radianceinfo->dxyz[1];
+  k = (xyz[2]-radianceinfo->xyzbar0[2])/radianceinfo->dxyz[2];
 
-  ijk = i + j*lightinfo->ibar + k*lightinfo->ibar*lightinfo->jbar;
+  ijk = i + j*radianceinfo->ijkbar[0] + k*radianceinfo->ijkbar[0]*radianceinfo->ijkbar[1];
 
-  return lightinfo->opacity[ijk];
+  return radianceinfo->opacity[ijk];
 }

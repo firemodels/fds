@@ -5,12 +5,13 @@
 /* --------------------------  xyzdata ------------------------------------ */
 
 typedef struct {
-  int ibar, jbar, kbar;
-  unsigned char *lightmap, *opacity;
-  float *flightmap;
-  float xbar0, xbar, ybar0, ybar, zbar0, zbar;
-  float dx, dy, dz, dxyzmin;
-} lightdata;
+  int *ijkbar;
+  unsigned char *radiance, *opacity;
+  float *xyzbar0, *xyzbar;
+  float *dxyz;
+} radiancedata;
 
-void create_lightmap(lightdata *lightinfo);
-unsigned char interp3d(lightdata *lightinfo, float xyz[3]);
+void setup_radiancemap(radiancedata *radianceinfo, int ijkbar[3], float xyzbar0[3], float xyzbar[3], float dxyz[3], 
+                       unsigned char *radiance, unsigned char *opacity);
+void build_radiancemap(radiancedata *radianceinfo);
+unsigned char interp3d(radiancedata *radianceinfo, float xyz[3]);

@@ -145,6 +145,7 @@ typedef struct {
   int inuse;
   int seq_id, autozip;
   int nx, ny, nz, filesize;
+  mesh *smokemesh;
   unsigned char *compressed_lightingbuffer;
   uLongf ncompressed_lighting_zlib;
 } smoke3d;

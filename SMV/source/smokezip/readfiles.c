@@ -18,6 +18,7 @@ char readfiles_revision[]="$Revision$";
 int readsmv(char *smvfile){
   
   FILE *streamsmv;
+  int ioffset;
   int unit_start=15;
   int igrid,ipdim;
   int ipatch,ipatch_seq;
@@ -247,6 +248,7 @@ int readsmv(char *smvfile){
   
   // read in smv file a second time to compress files
 
+  ioffset=0;
   ipatch=0;
   ipatch_seq=0;
 #ifdef pp_PART
@@ -367,6 +369,19 @@ int readsmv(char *smvfile){
     }
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ OFFSET ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"OFFSET",6) == 1){
+      float dummy;
+
+      ioffset++;
+      fgets(buffer,255,streamsmv);
+      sscanf(buffer,"%f %f %f",&dummy,&dummy,&dummy);
+      continue;
+    }
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ SMOKE3D ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
@@ -383,6 +398,7 @@ int readsmv(char *smvfile){
       smoke3di->autozip = 0;
       smoke3di->inuse=0;
       smoke3di->compressed=0;
+      smoke3di->smokemesh=meshinfo + ioffset - 1;
 
       if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
       trim(buffer);

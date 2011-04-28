@@ -10,6 +10,7 @@
 #include "zlib.h"
 #include "egz_stdio.h"
 #include "svzip.h"
+#include "interpdata.h"
 #include "MALLOC.h"
 
 // svn revision character string
@@ -45,7 +46,11 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
   long data_loc;
   char *smoke3dfile;
   float time_max;
- 
+  radiancedata radianceinfo;
+  float xyzbar0[3], xyzbar[3], dxyz[3];
+  int ijkbar[3];
+  unsigned char *radiance, *opacity;
+
   smoke3dfile=smoke3di->file;
   smoke3di->compressed=0;
 
@@ -179,8 +184,25 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
 
   full_alphabuffer=NULL;
   NewMemory((void **)&full_alphabuffer,buffersize);
+  NewMemory((void **)&radiance,buffersize);
+  opacity=full_alphabuffer;
   compressed_alphabuffer=NULL;
   NewMemory((void **)&compressed_alphabuffer,buffersize);
+
+  ijkbar[0]=nx;
+  ijkbar[1]=ny;
+  ijkbar[2]=nz;
+  xyzbar0[0]=smoke3di->smokemesh->xbar0;
+  xyzbar0[1]=smoke3di->smokemesh->ybar0;
+  xyzbar0[2]=smoke3di->smokemesh->zbar0;
+   xyzbar[0]=smoke3di->smokemesh->xbar;
+   xyzbar[1]=smoke3di->smokemesh->ybar;
+   xyzbar[2]=smoke3di->smokemesh->zbar;
+   dxyz[0]=smoke3di->smokemesh->dx;
+   dxyz[1]=smoke3di->smokemesh->dy;
+   dxyz[2]=smoke3di->smokemesh->dz;
+
+  setup_radiancemap(&radianceinfo,ijkbar,xyzbar0,xyzbar,dxyz,radiance,opacity);
 
   count=-1;
   sizebefore=8;
@@ -286,6 +308,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
   fclose(smoke3dstream);
   fclose(smoke3dsizestream);
   FREEMEMORY(full_alphabuffer);
+  FREEMEMORY(radiance);
   FREEMEMORY(compressed_alphabuffer);
 }
 
