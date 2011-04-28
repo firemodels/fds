@@ -7,7 +7,8 @@ a {\em specified} burning or heat release rate.
 
 \section{FAA Polymers}
 
-A non-charring polymer is considered one of the easier solids to model because it typically involves only a single reaction that converts solid plastic to fuel vapor. Table~\ref{FAA_Properties}
+A non-charring polymer is considered one of the easier solids to model because it typically involves only a single, first order reaction that converts solid plastic to fuel vapor. 
+No residue is formed and the plastic is completely pyrolyzed. Table~\ref{FAA_Properties}
 lists nine parameters for each polymer studied. These values have been input directly into FDS, and the predicted burning rates are compared with measured values from the NIST
 Gasification Apparatus, a device that pyrolyzes the solid in a nitrogen environment to prevent combustion of fuel gases. The results are shown in Fig.~\ref{FAA_Polymers}. The exposing
 heat flux was 52~kW/m$^2$. A 1~cm layer of insulation was placed under the sample. Its properties are given in Ref.~\cite{Stoliarov:CF2009}.
@@ -15,7 +16,7 @@ heat flux was 52~kW/m$^2$. A 1~cm layer of insulation was placed under the sampl
 \begin{table}[h!]
 \caption[FAA Polymer Properties]{Input parameters for FAA Polymers non-charring examples. Courtesy S.~Stoliarov, M.~McKinnon and J.~Li, University of Maryland.}
 \begin{tabular}{|l|c|c|c|c|c|l|l|}
-\hline 
+\hline
 Property                    & Units         & HDPE                  & HIPS                  & PMMA                  & Unc. (\%)  & Method                &  Ref.                    \\ \hline \hline
 Density                     & kg/m$^3$      & 860                   & 950                   & 1100                  & 5     & Direct                &  \cite{Stoliarov:CF2009}  \\ \hline
 Conductivity                & W/m/K         & 0.29                  & 0.22                  & 0.20                  & 15    & Thermoflixer          &  \cite{Stoliarov:CF2009}  \\ \hline
@@ -27,7 +28,7 @@ Activation Energy           & kJ/kmol       & $3.49 \times 10^{5}$  & $2.47 \tim
 Heat of Reaction            & kJ/kg         & 920                   & 1000                  & 870                   & 15    & DSC                   &  \cite{Stoliarov:PDS2008}  \\ \hline
 \end{tabular}
 \label{FAA_Properties}
-\end{table} 
+\end{table}
 
 \begin{tabbing}
 Direct  \hspace{0.5in}     \= Direct measurement of mass and volume \\
