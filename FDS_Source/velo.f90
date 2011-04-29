@@ -633,7 +633,7 @@ ENDIF MEAN_FORCING_Z
 
 ! Surface vegetation drag 
 
-WFDS_IF: IF (WFDS) THEN
+WFDS_BNDRYFUEL_IF: IF (WFDS_BNDRYFUEL) THEN
    VEG_DRAG(0,:) = VEG_DRAG(1,:)
    K=1
    DO J=1,JBAR
@@ -657,7 +657,7 @@ WFDS_IF: IF (WFDS) THEN
          FVZ(I,J,K) = FVZ(I,J,K) + VEG_DRAG(I,J)*VEG_UMAG*WW(I,J,K)
       ENDDO
    ENDDO
-ENDIF WFDS_IF
+ENDIF WFDS_BNDRYFUEL_IF
 
 ! Baroclinic torque correction
  
