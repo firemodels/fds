@@ -3,8 +3,8 @@
 #PLATFORM=32
 PLATFORM=64
 export SVNROOT=`pwd`/..
-#export SMV=$SVNROOT/SMV/Build/INTEL_LINUX_$PLATFORM/smokeview_linux_$PLATFORM
-export SMV=~/FDS/FDS6/bin/smokeview_linux_$PLATFORM
+export SMV=$SVNROOT/SMV/Build/INTEL_LINUX_$PLATFORM/smokeview_linux_$PLATFORM
+#export SMV=~/FDS/FDS6/bin/smokeview_linux_$PLATFORM
 export RUNSMV=$SVNROOT/Utilities/Scripts/runsmv_movie.sh
 export MAKEMOVIE=$SVNROOT/Utilities/Scripts/makemovie.sh
 export BASEDIR=`pwd`
