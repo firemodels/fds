@@ -3003,7 +3003,7 @@ READ_PART_LOOP: DO N=1,N_PART
    ! Miscellaneous consequences of input parameters
 
    IF (TREE)                                    STATIC                  = .TRUE.
-   IF (TREE)                                    WFDS                    = .TRUE.
+   IF (TREE)                                    WFDS_FE                 = .TRUE.
    IF (TRIM(SURF_ID)/='null')                   STATIC                  = .TRUE.
    IF (MASSLESS)                                DIAMETER                = 0._EB
    IF (TRIM(SPEC_ID)=='WATER VAPOR') THEN
@@ -3272,7 +3272,7 @@ PART_LOOP: DO N=1,N_PART
 
    ! Only process particles or droplets that have mass and evaporate
 
-   IF (.NOT.PC%EVAPORATE .OR. PC%MASSLESS .OR. PC%SURF_ID/='null') CYCLE PART_LOOP
+   IF (.NOT.PC%EVAPORATE .OR. PC%MASSLESS .OR. PC%SURF_ID/='null' .OR. WFDS_FE) CYCLE PART_LOOP
    IF (SPECIES_COMPUTED(PC%Y_INDEX)) THEN
       PC%DENSITY=SS%DENSITY_LIQUID
       CYCLE PART_LOOP
@@ -4559,7 +4559,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
    ENDIF
 
    ! Vegetation parameters
-   IF(VEGETATION) WFDS = .TRUE.
+   IF(VEGETATION) WFDS_BNDRYFUEL = .TRUE.
    
    ! Level set vegetation fire spread specific
    SF%VEG_LSET_SPREAD    = VEG_LEVEL_SET_SPREAD

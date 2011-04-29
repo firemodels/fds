@@ -88,6 +88,7 @@ TREE_LOOP: DO NCT=1,N_TREES
           DROPLET=>MESHES(NM)%DROPLET
          ENDIF
          DR=>DROPLET(NLP)
+         DR%VEG_VOLFRACTION = 1._EB
          DR%TAG = PARTICLE_TAG
          DR%X = REAL(NXB,EB)
          DR%Y = REAL(NYB,EB)
@@ -134,6 +135,7 @@ TREE_LOOP: DO NCT=1,N_TREES
           DROPLET=>MESHES(NM)%DROPLET
          ENDIF
          DR=>DROPLET(NLP)
+         DR%VEG_VOLFRACTION = 1._EB
          DR%TAG = PARTICLE_TAG
          DR%X = REAL(NXB,EB)
          DR%Y = REAL(NYB,EB)
@@ -174,6 +176,7 @@ TREE_LOOP: DO NCT=1,N_TREES
           DROPLET=>MESHES(NM)%DROPLET
          ENDIF
          DR=>DROPLET(NLP)
+         DR%VEG_VOLFRACTION = 1._EB
          DR%TAG = PARTICLE_TAG
          DR%X = REAL(NXB,EB)
          DR%Y = REAL(NYB,EB)
@@ -273,6 +276,7 @@ TREE_LOOP: DO NCT=1,N_TREES
           DROPLET=>MESHES(NM)%DROPLET
          ENDIF
          DR=>DROPLET(NLP)
+         DR%VEG_VOLFRACTION = 1._EB
          DR%TAG = PARTICLE_TAG
          DR%X = REAL(NXB,EB)
          DR%Y = REAL(NYB,EB)
@@ -344,6 +348,7 @@ TREE_LOOP: DO NCT=1,N_TREES
 !print*,'in vege 1'
 !print*,'in vege 1, NCT, N_TREE_OUT(NCT)',nct,n_tree_out(nct)
          DR%VEG_N_TREE_OUTPUT = N_TREE_OUT(NCT)
+         DR%IOR = 0 !airborne static droplet
 !        TREE_MESH_OUT(NM) = .TRUE.
         ENDIF
         CYCLE REP_VEG_ELEMS
@@ -461,7 +466,7 @@ H_VAP_H2O    = 2259._EB*1000._EB !J/kg/K heat of vaporization of water
 !PR_AIR = 0.7_EB     
 
 ! Working arrays
-TREE_OUTPUT_DATA(:,:,NM) = 0._EB !for output of veg data
+IF(N_TREES_OUT > 0) TREE_OUTPUT_DATA(:,:,NM) = 0._EB !for output of veg data
 !DMPVDT_FM_VEG  = 0.0_EB
 
 !Clear arrays and scalars
@@ -758,7 +763,7 @@ DROPLET_LOOP: DO I=1,NLP
 
 ! Add water vapor mass from drying to water vapor mass fraction
 
- IF (I_WATER /= 0) THEN 
+ IF (I_WATER > 0) THEN 
 ! ZZ(II,JJ,KK,I_WATER) = (MPV_MOIST_LOSS + ZZ(II,JJ,KK,I_WATER)*RHO_GAS)/(MPV_MOIST_LOSS + RHO_GAS)
 ! ZZ(II,JJ,KK,I_WATER) = ZZ(II,JJ,KK,I_WATER) +  MPV_MOIST_LOSS*RRHO_GAS_NEW
   ZZ(II,JJ,KK,I_WATER) = ZZ(II,JJ,KK,I_WATER) + (MPV_MOIST_LOSS - MPV_ADDED*ZZ(II,JJ,KK,I_WATER))*RRHO_GAS_NEW
@@ -1297,13 +1302,14 @@ SUBROUTINE LEVEL_SET_FIRESPREAD(NM)
 !
 ! Level set based modeling of fire spread across terrain. Currently, no computation of the wind field 
 ! is needed. Instead, U0 and V0 which are specified on the MISC line of the input file, are used for 
-! the wind field. Does use the extent of the vegetation as defined in the fds input file. Spread rate 
-! is dependent on the terrain slope according to McArthur's rules. Head, flank, and back fire ROS
-! are currently hard coded below.
+! the wind field direction. Does use the extent of the vegetation as defined in the fds input file. 
+! Level ground spread rates for the head, flank, and back fires are user defined.
+! Spread rate dependence on slope is according to McArthur's rules. 
 !
 ! Issues:
 ! 1) Need to make level set computation mesh dependent so the the LS slice file
 !    is created only where fire is expected
+! 2) Need to use multiprocessors
 !
 !
 INTEGER, INTENT(IN) :: NM
@@ -1319,7 +1325,7 @@ REAL(EB) :: DT_OUTPUT
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: X0_FIRE,Y0_FIRE,X_LS,Y_LS
 LOGICAL :: HEAD_WIDTH_DEPENDENCE
 !
-REAL(FB) :: TIME_LS_OUT
+REAL(FB) :: TIME_LS_OUT,MAG_SR
 REAL(FB), ALLOCATABLE, DIMENSION(:,:) :: PHI_OUT
 CHARACTER(30) :: SMOKEVIEW_LABEL,SMOKEVIEW_BAR_LABEL,UNITS
 
@@ -1421,6 +1427,7 @@ WIND_EXP  = 1.0_EB
 !print*,'surface ros',surface%veg_lset_ros_head
 !print*,'surface wind_exp',surface%veg_lset_wind_exp
 
+print*,'before assign ROS'
 ROS_WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
   IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY) CYCLE ROS_WALL_CELL_LOOP
@@ -1467,7 +1474,7 @@ LIMITER_LS = 1 !MINMOD
 !LIMITER_LS = 3 !First order upwinding
 !
 ! -- Output file
-DT_OUTPUT  = 1._EB
+DT_OUTPUT  = 0.5_EB
 TIME_LS    = 0._EB
 LU_SLCF_LS = 9999
 SMOKEVIEW_LABEL = 'phifield'
@@ -1488,7 +1495,7 @@ ALLOCATE(V_LS(NX_LS,NY_LS)) ; CALL ChkMemErr('VEGE:LEVEL SET','V_LS',IZERO) ; V_
 ALLOCATE(PHI_LS(NX_LS,NY_LS)) ; CALL ChkMemErr('VEGE:LEVEL SET','PHI_LS',IZERO)
 ALLOCATE(PHI0_LS(NX_LS,NY_LS)); CALL ChkMemErr('VEGE:LEVEL SET','PHI0_LS',IZERO)
 ALLOCATE(PHI1_LS(NX_LS,NY_LS)); CALL ChkMemErr('VEGE:LEVEL SET','PHI1_LS',IZERO)
-ALLOCATE(PHI_OUT(NX_LS,NY_LS)) ; CALL ChkMemErr('VEGE:LEVEL SET','PHI_OUT',IZERO)
+ALLOCATE(PHI_OUT(NX_LS,NY_LS)) ; CALL ChkMemErr('VEGE:LEVEL SET','PHI_OUT',IZERO) ; PHI_OUT = 0.0
 ALLOCATE(SR_X_LS(NX_LS,NY_LS)) ; CALL ChkMemErr('VEGE:LEVEL SET','SR_X_LS',IZERO)
 ALLOCATE(SR_Y_LS(NX_LS,NY_LS)) ; CALL ChkMemErr('VEGE:LEVEL SET','SR_Y_LS',IZERO)
 ALLOCATE(FLUX0_LS(NX_LS,NY_LS)); CALL ChkMemErr('VEGE:LEVEL SET','FLUX0_LS',IZERO)
@@ -1496,6 +1503,7 @@ ALLOCATE(FLUX1_LS(NX_LS,NY_LS)); CALL ChkMemErr('VEGE:LEVEL SET','FLUX1_LS',IZER
 ALLOCATE(DZTDX(NX_LS,NY_LS)); CALL ChkMemErr('VEGE:LEVEL SET','DZDTX',IZERO)
 ALLOCATE(DZTDY(NX_LS,NY_LS)); CALL ChkMemErr('VEGE:LEVEL SET','DZDTY',IZERO)
 ALLOCATE(MAG_ZT(NX_LS,NY_LS)); CALL ChkMemErr('VEGE:LEVEL SET','MAG_ZT',IZERO)
+ALLOCATE(MAG_SR_OUT(NX_LS,NY_LS)); CALL ChkMemErr('VEGE:LEVEL SET','MAG_SR_OUT',IZERO)
 !
 !-- Computational grid
 ALLOCATE(X_LS(NX_LS))   ; CALL ChkMemErr('VEGE:LEVEL SET','X_LS',IZERO)
@@ -1721,6 +1729,7 @@ ENDDO IGNITOR_WALL_CELL_LOOP
 
 !--- RK Stage2
  RK2_PREDICTOR_LS = .FALSE.
+ MAG_SR_OUT       = 0.0
  CALL LEVEL_SET_SPREAD_RATE
  CALL LEVEL_SET_ADVECT_FLUX
  PHI_LS = PHI_LS - 0.5_EB*DT_LS*(FLUX0_LS + FLUX1_LS)
@@ -1736,7 +1745,22 @@ ENDDO IGNITOR_WALL_CELL_LOOP
   WRITE(LU_SLCF_LS) TIME_LS_OUT
 !negative for consistency with wall thicknes output from wfds
   WRITE(LU_SLCF_LS) ((-PHI_OUT(I,J),I=1,NX_LS),J=1,NY_LS) 
-! WRITE(LU_SLCF_LS) ((1.,I=1,NX_LS),J=1,NY_LS)
+
+! output magnitude of spread rate
+!MAG_SR_OUT = 0.0
+!DO I = 1,NX_LS
+! DO J = 1,NY_LS
+!!   MAG_SR = SQRT(SR_X_LS(I,J)**2 + SR_Y_LS(I,J)**2)
+!!   IF(MAG_SR  > PHI_OUT(I,J)) PHI_OUT(I,J) = MAG_SR
+!!   PHI_OUT(I,J) = MAG_SR
+!  IF(PHI_LS(I,J) <= 0.2_EB .AND. PHI_LS(I,J) >= -0.2) MAG_SR_OUT(I,J) =-FLUX1_LS(I,J)
+!  IF(PHI_OUT(I,J) < MAG_SR_OUT(I,J)) PHI_OUT(I,J) = MAG_SR_OUT(I,J)
+! ENDDO
+!ENDDO
+!! WRITE(LU_SLCF_LS) ((PHI_OUT(I,J),I=1,NX_LS),J=1,NY_LS) 
+!! PHI_OUT = SR_X_LS + SR_Y_LS
+! WRITE(LU_SLCF_LS) ((MAG_SR_OUT(I,J),I=1,NX_LS),J=1,NY_LS) 
+
  ENDIF
 !
 ENDDO TIMESTEP
@@ -1866,6 +1890,7 @@ FLUX_ILOOP: DO I = 1,NX_LS
 !  MAG_SR = R_FLANK + ROS_HEAD*WIND_DOT_NORMAL_FIRELINE !magnitude of spread rate
    SR_X_LS(I,J) = MAG_SR*NORMAL_FIRELINE(1) !spread rate components
    SR_Y_LS(I,J) = MAG_SR*NORMAL_FIRELINE(2) 
+!  MAG_SR_OUT(I,J) = MAG_SR
      
   ENDDO
 
@@ -1961,6 +1986,7 @@ FLUX_ILOOP: DO I = 1,NX_LS
 !  MAG_SR = R_FLANK + ROS_HEAD*WIND_DOT_NORMAL_FIRELINE !magnitude of spread rate
    SR_X_LS(I,J) = MAG_SR*NORMAL_FIRELINE(1) 
    SR_Y_LS(I,J) = MAG_SR*NORMAL_FIRELINE(2) 
+!  MAG_SR_OUT(I,J) = MAG_SR
         
   ENDDO
 
@@ -2055,6 +2081,7 @@ FLUX_ILOOP: DO I = 1,NX_LS
 !  MAG_SR = R_FLANK + ROS_HEAD*WIND_DOT_NORMAL_FIRELINE !magnitude of spread rate
    SR_X_LS(I,J) = MAG_SR*NORMAL_FIRELINE(1) 
    SR_Y_LS(I,J) = MAG_SR*NORMAL_FIRELINE(2) 
+!  MAG_SR_OUT(I,J) = MAG_SR
         
  ENDDO
 ENDDO FLUX_ILOOP
@@ -2072,6 +2099,7 @@ INTEGER :: I,IM1,IM2,IP1,IP2,J,JM1,JM2,JP1,JP2
 REAL(EB), DIMENSION(:) :: Z(4)
 REAL(EB), DIMENSION(:,:) :: FLUX_LS(NX_LS,NY_LS)
 REAL(EB) :: DPHIDX,DPHIDY,F_EAST,F_WEST,F_NORTH,F_SOUTH
+REAL(EB) :: PHIMAG
 
 IF (RK2_PREDICTOR_LS) PHI0_LS = PHI_LS
 IF (.NOT. RK2_PREDICTOR_LS) PHI0_LS = PHI1_LS
@@ -2121,6 +2149,10 @@ ILOOP: DO I = 1,NX_LS
    DPHIDX = (F_EAST-F_WEST)/DX_LS
    DPHIDY = (F_NORTH-F_SOUTH)/DY_LS
    FLUX_LS(I,J) = SR_X_LS(I,J)*DPHIDX + SR_Y_LS(I,J)*DPHIDY
+   
+   PHIMAG          = SQRT(DPHIDX**2 + DPHIDY**2)
+   MAG_SR_OUT(I,J) = 0.0_EB
+   IF(PHIMAG > 0.0_EB) MAG_SR_OUT(I,J) = FLUX_LS(I,J)/PHIMAG
         
 !  fx = (f_east-f_west)/dx
 !  fy = (f_north-f_south)/dy
@@ -2182,6 +2214,10 @@ ILOOP: DO I = 1,NX_LS
    DPHIDX = (F_EAST-F_WEST)/DX_LS
    DPHIDY = (F_NORTH-F_SOUTH)/DY_LS
    FLUX_LS(I,J) = SR_X_LS(I,J)*DPHIDX + SR_Y_LS(I,J)*DPHIDY
+   
+   PHIMAG          = SQRT(DPHIDX**2 + DPHIDY**2)
+   MAG_SR_OUT(I,J) = 0.0_EB
+   IF(PHIMAG > 0.0_EB) MAG_SR_OUT(I,J) = FLUX_LS(I,J)/PHIMAG
         
 !   phi(i,j) = phi0(i,j) - dt*[Fx(i,j) Fy(i,j)]*[fx fy]
  ENDDO
@@ -2242,6 +2278,10 @@ ILOOP: DO I = 1,NX_LS
    DPHIDX = (F_EAST-F_WEST)/DX_LS
    DPHIDY = (F_NORTH-F_SOUTH)/DY_LS
    FLUX_LS(I,J) = SR_X_LS(I,J)*DPHIDX + SR_Y_LS(I,J)*DPHIDY
+   
+   PHIMAG          = SQRT(DPHIDX**2 + DPHIDY**2)
+   MAG_SR_OUT(I,J) = 0.0_EB
+   IF(PHIMAG > 0.0_EB) MAG_SR_OUT(I,J) = FLUX_LS(I,J)/PHIMAG
 
 !       fx = (f_east-f_west)/dx
 !       fy = (f_north-f_south)/dy
@@ -2325,8 +2365,7 @@ ENDIF
 SCALAR_FACE_VALUE = ZUP + 0.5*B*( ZDWN - ZUP )
 
 END FUNCTION SCALAR_FACE_VALUE
- 
-
+!
 
 SUBROUTINE GET_REV_vege(MODULE_REV,MODULE_DATE)
 INTEGER,INTENT(INOUT) :: MODULE_REV
