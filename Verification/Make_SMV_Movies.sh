@@ -17,9 +17,13 @@ fi
 
 underscore=_
 mov=.m1v
+VDIR=$SVNROOT/Verification
+INDIR=$SVNROOT/Verification/Visualization/frames
+OUTDIR=$SVNROOT/Manuals/SMV_Animations
 
-
-cd $SVNROOT/Verification
+rm -f $INDIR/*.png
+rm -f $OUTDIR/*.m1v
+cd $VDIR
 
 # This script assume that a smokeview scriptfile 
 # named casename_movies.ssf exists for each 
@@ -27,9 +31,15 @@ cd $SVNROOT/Verification
 # plume5c movies
 
 $RUNSMV Visualization plume5c
-cd $SVNROOT/Verification/Visualization
+cd $INDIR
+
 movie=plume5c_tslice
 $MAKEMOVIE $movie$underscore $movie
-mv $movie$mov ../../Manuals/Movies/.
+mv $movie$mov $OUTDIR/.
 
-cd $SVNROOT/Verification
+movie=plume5c_3dsmoke
+$MAKEMOVIE $movie$underscore $movie
+mv $movie$mov $OUTDIR/.
+
+
+cd $VDIR
