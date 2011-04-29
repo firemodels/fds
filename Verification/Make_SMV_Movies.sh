@@ -18,7 +18,7 @@ underscore=_
 mov=.m1v
 VDIR=$SVNROOT/Verification
 INDIR=$SVNROOT/Verification/Visualization/frames
-OUTDIR=$SVNROOT/Manuals/SMV_Animations
+export OUTDIR=$SVNROOT/Manuals/SMV_Animations
 
 rm -f $INDIR/*.png
 rm -f $OUTDIR/*.m1v
@@ -32,13 +32,11 @@ cd $VDIR
 $RUNSMV Visualization plume5c
 cd $INDIR
 
-movie=plume5c_tslice
-$MAKEMOVIE $movie$underscore $movie
-mv $movie$mov $OUTDIR/.
-
-movie=plume5c_3dsmoke
-$MAKEMOVIE $movie$underscore $movie
-mv $movie$mov $OUTDIR/.
-
+$MAKEMOVIE plume5c_tslice $OUTDIR
+$MAKEMOVIE plume5c_3dsmoke $OUTDIR
+$MAKEMOVIE plume5c_vtslice $OUTDIR
+$MAKEMOVIE plume5c_iso $OUTDIR
+$MAKEMOVIE plume5c_tbound $OUTDIR
+$MAKEMOVIE plume5c_part $OUTDIR
 
 cd $VDIR
