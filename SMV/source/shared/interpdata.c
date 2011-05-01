@@ -25,37 +25,38 @@ void setup_radiancemap(radiancedata *radianceinfo, int ijkbar[3], float xyzbar0[
 
 /* ----------------------- build_radiancemap ----------------------------- */
 
-#define IJKRAD(i,j,k) (i) + ny*(j) + nxy*(k)
+#define IJKRAD(i,j,k) (i) + nx*(j) + nxy*(k)
 
 void build_radiancemap(radiancedata *radianceinfo){
   int i, j, k, nx, ny, nz, nxy;
   float *fradiance;
   unsigned char *radiance, *opacity;
 
-  nx = radianceinfo->ijkbar[0]+1;
-  ny = radianceinfo->ijkbar[1]+1;
-  nz = radianceinfo->ijkbar[2]+1;
-  nxy = nx*ny;
-  NewMemory((void **)&fradiance,nx*ny*nz*sizeof(float));
+  nx = radianceinfo->ijkbar[0];
+  ny = radianceinfo->ijkbar[1];
+  nz = radianceinfo->ijkbar[2];
 
   radiance = radianceinfo->radiance;
   opacity = radianceinfo->opacity;
 
+  nxy = nx*ny;
+  NewMemory((void **)&fradiance,nx*ny*nz*sizeof(float));
+
   i=0;
-  for(k=0;k<nz;k++){
   for(j=0;j<ny;j++){
+  for(k=0;k<nz;k++){
     fradiance[IJKRAD(i,j,k)]=1.0;
   }
   }
 
-  for(k=0;k<nz;k++){
-  for(j=0;j<ny;j++){
   for(i=1;i<nx;i++){
+  for(j=0;j<ny;j++){
+  for(k=0;k<nz;k++){
     int ijk,im1jk;
 
     ijk=IJKRAD(i,j,k);
     im1jk=ijk-1;
-    fradiance[ijk]=(float)(fradiance[im1jk]*(float)(opacity[im1jk])/255.0);
+    fradiance[ijk]=(float)(fradiance[im1jk]*(float)(255-opacity[im1jk])/255.0);
   }
   }
   }

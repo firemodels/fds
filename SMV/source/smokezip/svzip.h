@@ -396,4 +396,5 @@ EXTERN int partfile2iso;
 #endif
 EXTERN char smvisofile[1024];
 EXTERN threaddata *threadinfo;
+EXTERN int doit_lighting;
 

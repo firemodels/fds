@@ -22,11 +22,10 @@ char CNV3dsmoke_revision[]="$Revision$";
 /* ------------------ convert_3dsmoke ------------------------ */
 
 void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
-  unsigned char *compressed_alphabuffer;
+  unsigned char *full_alphabuffer=NULL, *compressed_alphabuffer=NULL;
   FILE *smoke3dstream=NULL,*smoke3dsizestream=NULL;
   EGZ_FILE *SMOKE3DFILE=NULL;
   char smoke3dfile_svz[1024], smoke3dsizefile_svz[1024];
-  unsigned char *full_alphabuffer;
   int nxyz[9];
   int nx, ny, nz;
   int version;
@@ -35,7 +34,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
   int count;
   float time;
   int nchars[2];
-  int nfull,nfull2;
+  int nfull_file,nfull_data;
   int ncompressed_rle;
   uLongf ncompressed_zlib;
   int returncode;
@@ -47,8 +46,6 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
   char *smoke3dfile;
   float time_max;
   radiancedata radianceinfo;
-  float xyzbar0[3], xyzbar[3], dxyz[3];
-  int ijkbar[3];
   unsigned char *radiance, *opacity;
 
   smoke3dfile=smoke3di->file;
@@ -70,8 +67,6 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
 
   strcpy(pp,"%");
   strcpy(xxx,"X");
-  full_alphabuffer=NULL;
-  compressed_alphabuffer=NULL;
   
   if(getfileinfo(smoke3dfile,NULL,NULL)!=0){
     printf("  %s does not exist\n",smoke3dfile);
@@ -176,44 +171,49 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
   nx = nxyz[3]-nxyz[2]+1;
   ny = nxyz[5]-nxyz[4]+1;
   nz = nxyz[7]-nxyz[6]+1;
-  buffersize=1.01*nx*ny*nz+600;
+  buffersize=2*(1.01*nx*ny*nz+600);
   smoke3di->nx=nx;
   smoke3di->ny=ny;
   smoke3di->nz=nz;
   smoke3di->ncompressed_lighting_zlib=buffersize;
 
-  full_alphabuffer=NULL;
   NewMemory((void **)&full_alphabuffer,buffersize);
-  NewMemory((void **)&radiance,buffersize);
-  opacity=full_alphabuffer;
-  compressed_alphabuffer=NULL;
   NewMemory((void **)&compressed_alphabuffer,buffersize);
 
-  ijkbar[0]=nx;
-  ijkbar[1]=ny;
-  ijkbar[2]=nz;
-  xyzbar0[0]=smoke3di->smokemesh->xbar0;
-  xyzbar0[1]=smoke3di->smokemesh->ybar0;
-  xyzbar0[2]=smoke3di->smokemesh->zbar0;
-   xyzbar[0]=smoke3di->smokemesh->xbar;
-   xyzbar[1]=smoke3di->smokemesh->ybar;
-   xyzbar[2]=smoke3di->smokemesh->zbar;
-   dxyz[0]=smoke3di->smokemesh->dx;
-   dxyz[1]=smoke3di->smokemesh->dy;
-   dxyz[2]=smoke3di->smokemesh->dz;
+  {
+    float xyzbar0[3], xyzbar[3], dxyz[3];
+    int ijkbar[3];
+    
+    opacity=full_alphabuffer;
+    radiance = opacity + nx*ny*nz;
 
-  setup_radiancemap(&radianceinfo,ijkbar,xyzbar0,xyzbar,dxyz,radiance,opacity);
+    ijkbar[0]=nx;
+    ijkbar[1]=ny;
+    ijkbar[2]=nz;
+    xyzbar0[0]=smoke3di->smokemesh->xbar0;
+    xyzbar0[1]=smoke3di->smokemesh->ybar0;
+    xyzbar0[2]=smoke3di->smokemesh->zbar0;
+    xyzbar[0]=smoke3di->smokemesh->xbar;
+    xyzbar[1]=smoke3di->smokemesh->ybar;
+    xyzbar[2]=smoke3di->smokemesh->zbar;
+    dxyz[0]=smoke3di->smokemesh->dx;
+    dxyz[1]=smoke3di->smokemesh->dy;
+    dxyz[2]=smoke3di->smokemesh->dz;
+    setup_radiancemap(&radianceinfo,ijkbar,xyzbar0,xyzbar,dxyz,radiance,opacity);
+  }
 
   count=-1;
   sizebefore=8;
   sizeafter=8;
   time_max=-1000000.0;
   for(;;){
+    int nlight_data;
+    
     EGZ_FREAD(&time,4,1,SMOKE3DFILE);
     if(EGZ_FEOF(SMOKE3DFILE)!=0)break;
 
     EGZ_FREAD(nchars,4,2,SMOKE3DFILE);
-    nfull=nchars[0];
+    nfull_file=nchars[0];
     ncompressed_rle=nchars[1];
 
     // read compressed frame
@@ -230,16 +230,21 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
 
     // uncompress frame data (from RLE format)
 
-    nfull2=irle(compressed_alphabuffer, ncompressed_rle, full_alphabuffer);
+    nfull_data=irle(compressed_alphabuffer, ncompressed_rle, full_alphabuffer);
     CheckMemory;
-    if(nfull!=nfull2){
-      printf("  ***warning frame size expected=%i frame size found=%i\n",nfull,nfull2);
+    if(nfull_file!=nfull_data){
+      printf("  ***warning frame size expected=%i frame size found=%i\n",nfull_file,nfull_data);
+    }
+
+    if(doit_lighting==1){
+      build_radiancemap(&radianceinfo);
+      nfull_data+=nx*ny*nz;
     }
 
     // compress frame data (into ZLIB format)
 
     ncompressed_zlib=buffersize;
-    returncode=compress(compressed_alphabuffer, &ncompressed_zlib, full_alphabuffer, nfull2);
+    returncode=compress(compressed_alphabuffer, &ncompressed_zlib, full_alphabuffer, nfull_data);
     CheckMemory;
     if(returncode!=0){
       printf("  ***warning zlib compressor failed - frame %f\n",time);
@@ -265,14 +270,22 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
 
     // write out new entries in the size (sz) file
 
-    nchars[0]=nfull2;
-    nchars[1]=ncompressed_zlib;
+    nchars[0]=nfull_data;
+    if(doit_lighting==1){
+      nchars[1]=-ncompressed_zlib;
+    }
+    else{
+      nchars[1]=ncompressed_zlib;
+    }
     fwrite(&time,4,1,smoke3dstream);
     fwrite(nchars,4,2,smoke3dstream);
     if(ncompressed_zlib>0)fwrite(compressed_alphabuffer,1,ncompressed_zlib,smoke3dstream);
     sizeafter+=12+ncompressed_zlib;
 
-    fprintf(smoke3dsizestream,"%f %i %i %i\n",time,nfull,ncompressed_rle,(int)ncompressed_zlib);
+// time, nframeboth, ncompressed_rle, ncompressed_zlib, nlightdata
+    nlight_data=nfull_data-nfull_file;
+    if(doit_lighting==1)nlight_data=-nlight_data;
+    fprintf(smoke3dsizestream,"%f %i %i %i %i\n",time,nfull_data,ncompressed_rle,(int)ncompressed_zlib,nlight_data);
   }
 #ifdef pp_THREAD
   {
@@ -308,7 +321,6 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
   fclose(smoke3dstream);
   fclose(smoke3dsizestream);
   FREEMEMORY(full_alphabuffer);
-  FREEMEMORY(radiance);
   FREEMEMORY(compressed_alphabuffer);
 }
 

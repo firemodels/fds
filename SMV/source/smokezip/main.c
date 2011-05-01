@@ -46,6 +46,7 @@ int main(int argc, char **argv){
   int endian_info;
 
   initMM();
+  doit_lighting=0;
   doit_smoke3d=1;
   doit_boundary=1;
   doit_slice=1;
@@ -179,6 +180,9 @@ int main(int argc, char **argv){
         }
         break;
 #endif
+      case 'l':
+        doit_lighting=1;
+        break;
       case 'n':
         if(strcmp(arg,"-n3")==0){
           doit_smoke3d=0;
