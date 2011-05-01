@@ -2564,6 +2564,7 @@ typedef struct {
         if(NewMemory((void **)&smoke3di->reg_file,(unsigned int)(len+1))==0)return 2;
         STRCPY(smoke3di->reg_file,bufptr);
 
+        smoke3di->is_zlib;
         smoke3di->seq_id=nn_smoke3d;
         smoke3di->autoload=0;
         smoke3di->version=-1;
@@ -2600,6 +2601,7 @@ typedef struct {
 
         if(STAT(smoke3di->comp_file,&statbuffer)==0){
           smoke3di->file=smoke3di->comp_file;
+          smoke3di->is_zlib=1;
         }
         else{
           smoke3di->file=smoke3di->reg_file;
@@ -2615,7 +2617,8 @@ typedef struct {
           if(readlabels(&smoke3di->label,stream)==2)return 2;
           nsmoke3d_files--;
         }
-        smoke3di->version=getsmoke3dversion(smoke3di);
+        smoke3di->version=getsmoke3d_version(smoke3di);
+        if(smoke3di->have_light==1)have_lighting=1;
         if(strncmp(smoke3di->label.shortlabel,"soot",4)==0){
           smoke3di->type=1;
         }

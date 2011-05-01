@@ -3827,11 +3827,20 @@ void usage(char **argv){
 #ifdef pp_GPU
     strcat(label,", pp_GPU");
 #endif
+#ifdef pp_GPU_VOLRENDER
+    strcat(label,", pp_GPU_VOLRENDER");
+#endif
 #ifdef ISO_DEBUG
     strcat(label,", ISO_DEBUG");
 #endif
 #ifdef pp_JPEG
     strcat(label,", pp_JPEG");
+#endif
+#ifdef pp_LIGHT
+    strcat(label,", pp_LIGHT");
+#endif
+#ifdef pp_LINUX64
+    strcat(label,", pp_LINUX64");
 #endif
 #ifdef pp_memstatus
     strcat(label,", pp_memstatus");
@@ -3841,6 +3850,9 @@ void usage(char **argv){
 #endif
 #ifdef pp_OPEN
     strcat(label,", pp_OPEN");
+#endif
+#ifdef pp_OSX64
+    strcat(label,", pp_OSX64");
 #endif
 #ifdef pp_noappend
     strcat(label,", pp_noappend");
@@ -3856,6 +3868,9 @@ void usage(char **argv){
 #endif
 #ifdef pp_SHOWLIGHT
     strcat(label,", pp_SHOWLIGHT");
+#endif
+#ifdef pp_SLICECONTOURS
+    strcat(label,", pp_SLICECONTOURS");
 #endif
 #ifdef pp_SMOKETEST
     strcat(label,", pp_SMOKETEST");

@@ -14,6 +14,7 @@
 #include "threader.h"
 #include "string_util.h"
 
+SVEXTERN int SVDECL(show_smoke_lighting,0),SVDECL(have_lighting,0);
 SVEXTERN int SVDECL(showdeviceval,0),SVDECL(showvdeviceval,0);
 SVEXTERN device SVDECL(**devicetypes,NULL);
 SVEXTERN int SVDECL(ndevicetypes,0);

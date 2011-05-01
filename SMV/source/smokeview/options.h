@@ -103,6 +103,7 @@
 
 //#define pp_HIDEMULTI
 //#define pp_GEOMPRINT
+#define pp_LIGHT
 #define pp_MESSAGE
 #define pp_DRAWISO
 #define EGZ

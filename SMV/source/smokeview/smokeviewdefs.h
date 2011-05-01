@@ -211,6 +211,7 @@ void _sniffErrors(char *whereat);
 #define MAX_SOLID 3
 #define HIDE_ALL -1
 #define SHOW_ALL -2
+#define HAVE_LIGHT -3
 #define SHOWALL_SLICE SHOW_ALL
 #define SHOWALL_SMOKE3D SHOW_ALL
 #define HIDEALL_SLICE HIDE_ALL

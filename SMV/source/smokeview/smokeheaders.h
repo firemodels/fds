@@ -292,7 +292,7 @@ EXTERNCPP void getpatchdata_zlib(patch *patchi,unsigned char *data,int ndata,
 EXTERNCPP void getpatchsizeinfo(patch *patchi, int *nframes, int *buffersize);
 EXTERNCPP void getpatchheader2(char *file, int *version, int *i1, int *i2, int *j1, int *j2, int *k1, int *k2, int *patchdir);
 EXTERNCPP void getpatchheader(char *file,int *npatches,float *valmin, float *valmax);
-EXTERNCPP int getsmoke3dversion(smoke3d *smoke3di);
+EXTERNCPP int getsmoke3d_version(smoke3d *smoke3di);
 EXTERNCPP void update_cadtextcoords(cadquad *quadi);
 EXTERNCPP void open_smokepanel(void);
 EXTERNCPP void open_smokezippanel(void);
@@ -722,7 +722,7 @@ EXTERNCPP int getsmoke3d_sizes(char *smokefile, int version,
                       int *nchars_uncompressed, 
                       int **nchars_compressed,
                       int **nchars_compressed_full,
-                      int *nframes, int *nframes_full);
+                      int *nframes, int *nframes_full,int *have_light);
 EXTERNCPP void readslice(char *file, int ifile, int flag, int *errorcode);
 EXTERNCPP void readtarget(const char *file, int ifile, int flag, int *errorcode);
 EXTERNCPP void update_smooth_blockages(void);
