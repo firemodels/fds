@@ -4561,7 +4561,7 @@ related to convection, combustion, and apparatus-specific phenomena.
 
 
 \noindent Below is a short FDS input file that demonstrates how you can test a candidate pyrolysis model by running very short calculations. The simulation only
-involves the solid phase model. Essentially, the gas phase calculation is 
+involves the solid phase model. Essentially, the gas phase calculation is
 shut off except for the imposition of a 52~kW/m$^2$ ``external'' heat flux. The solid in this example is a 8.5~mm thick slab of PMMA. For more
 details, see the FDS Validation Guide under the heading ``FAA Polymers.''
 
@@ -4571,10 +4571,10 @@ details, see the FDS Validation Guide under the heading ``FAA Polymers.''
 &HEAD CHID='FAA_Polymers_PMMA', TITLE='Black PMMA at 50 kW/m2, No Gas Phase Reaction' /
 
 &MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /
-  
+
 &TIME T_END=600., WALL_INCREMENT=1, DT=0.01 /
- 
-&REAC FUEL='METHANE', Y_O2_INFTY=0.01 /  
+
+&REAC FUEL='METHANE', Y_O2_INFTY=0.01 /
 
 &MATL ID='BLACKPMMA'
       ABSORPTION_COEFFICIENT=2700.
@@ -9260,6 +9260,22 @@ associated with the normal component of velocity at solid or interpolated bounda
 \end{description}
 
 
+\subsection{Output File Precision}
+\label{info:SIG_FIGS}
+
+There are several different output files that have the format of a comma-delimited spreadsheet (.csv). These files consist of real numbers in columns separated by
+commas. By default, the real numbers are formatted
+
+\begin{verbatim}
+-1.2345678E+123
+\end{verbatim}
+
+\noindent
+To change the precision of the numbers, use {\ct SIG\_FIGS} on the {\ct DUMP} line to indicate the number of significant figures in the mantissa (default is 8). Use
+{\ct SIG\_FIGS\_EXP} to change the number of digits in the exponent (default is 3). Keep in mind that the precision of real numbers used internally in an FDS calculation
+is approximately 12, equivalent to 8 byte or double precision following conventional Fortran rules.
+
+
 \subsection{\emph{A Posteriori} Mesh Quality Metrics}
 \label{info:meshquality}
 The quality of a particular simulation is most directly tied to grid resolution.  Three slice file output quantities are suggested here for measuring errors in the velocity and scalar fields:
@@ -9888,6 +9904,8 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct PLOT3D\_SPEC\_ID(5)}           & Char.~Quint  & See Section~\ref{info:PL3D}       &           &                                \\ \hline
 {\ct PLOT3D\_VELO\_INDEX}           & Int.~Quint   & See Section~\ref{info:velocity}   &           &  0                             \\ \hline
 {\ct RENDER\_FILE}                  & Character    & See Smokeview User's Guide        &           &                                \\ \hline
+{\ct SIG\_FIGS}                     & Integer      & See Section~\ref{info:SIG_FIGS}   &           & 8                              \\ \hline
+{\ct SIG\_FIGS\_EXP}                & Integer      & See Section~\ref{info:SIG_FIGS}   &           & 3                              \\ \hline
 {\ct SMOKE3D}                       & Logical      & See Section~\ref{info:SMOKE3D}    &           & {\ct .TRUE.}                   \\ \hline
 {\ct SMOKE3D\_QUANTITY}             & Character    & See Section~\ref{info:SMOKE3D}    &           &                                \\ \hline
 {\ct SMOKE3D\_SPEC\_ID}             & Character    & See Section~\ref{info:SMOKE3D}    &           &                                \\ \hline
