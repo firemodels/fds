@@ -142,7 +142,7 @@ typedef struct {
   int unit_start;
   char summary[1024];
   int compressed;
-  int inuse;
+  int inuse,is_soot;
   int seq_id, autozip;
   int nx, ny, nz, filesize;
   mesh *smokemesh;

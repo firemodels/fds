@@ -409,6 +409,8 @@ int readsmv(char *smvfile){
       }
       if(filelen<=0)break;
       if(getfileinfo(buffer2,sourcedir,&filesize)==0){
+        char *buffer2;
+
         NewMemory((void **)&smoke3di->file,(unsigned int)(filelen+lensourcedir+1));
         NewMemory((void **)&smoke3di->filebase,(unsigned int)(filelen+1));
         STRCPY(smoke3di->filebase,buffer2);
@@ -420,6 +422,15 @@ int readsmv(char *smvfile){
           STRCPY(smoke3di->file,buffer2);
         }
         smoke3di->filesize=filesize;
+        if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
+        buffer2 = trim_front(buffer);
+        trim(buffer2);
+        if(strcmp(buffer2,"HRRPUV")==0){
+          smoke3di->is_soot=0;
+        }
+        else{
+          smoke3di->is_soot=1;
+        }
         ismoke3d++;
       }
       else{

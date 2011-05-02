@@ -236,7 +236,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
       printf("  ***warning frame size expected=%i frame size found=%i\n",nfull_file,nfull_data);
     }
 
-    if(doit_lighting==1){
+    if(doit_lighting==1&&smoke3di->is_soot==1){
       build_radiancemap(&radianceinfo);
       nfull_data+=nx*ny*nz;
     }
@@ -271,7 +271,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
     // write out new entries in the size (sz) file
 
     nchars[0]=nfull_data;
-    if(doit_lighting==1){
+    if(doit_lighting==1&&smoke3di->is_soot==1){
       nchars[1]=-ncompressed_zlib;
     }
     else{
@@ -284,7 +284,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
 
 // time, nframeboth, ncompressed_rle, ncompressed_zlib, nlightdata
     nlight_data=nfull_data-nfull_file;
-    if(doit_lighting==1)nlight_data=-nlight_data;
+    if(doit_lighting==1&&smoke3di->is_soot==1)nlight_data=-nlight_data;
     fprintf(smoke3dsizestream,"%f %i %i %i %i\n",time,nfull_data,ncompressed_rle,(int)ncompressed_zlib,nlight_data);
   }
 #ifdef pp_THREAD
