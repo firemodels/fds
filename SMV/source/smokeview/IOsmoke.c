@@ -53,10 +53,10 @@ char *textFileRead(char *fn);
 #define DRAWVERTEX(XX,YY,ZZ)        \
 if(show_smoketest==0){\
   if(show_smoke_lighting==1&&have_light==1){\
-    light_value[0]=light_in[n11]; \
-    light_value[1]=light_in[n12]; \
-    light_value[2]=light_in[n22]; \
-    light_value[3]=light_in[n21]; \
+    light_value[0]=light_in[n11]*smoke_shade; \
+    light_value[1]=light_in[n12]*smoke_shade; \
+    light_value[2]=light_in[n22]*smoke_shade; \
+    light_value[3]=light_in[n21]*smoke_shade; \
   }\
   value[0]=alphaf_ptr[n11]; \
   value[1]=alphaf_ptr[n12]; \
