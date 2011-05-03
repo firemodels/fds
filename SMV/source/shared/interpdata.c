@@ -26,7 +26,7 @@ void setup_radiancemap(radiancedata *radianceinfo, int ijkbar[3], float xyzbar0[
 /* ----------------------- build_radiancemap ----------------------------- */
 
 #define IJKRAD(i,j,k) (i) + nx*(j) + nxy*(k)
-#define IJKRAD2(i,j,k) ((i)+1) + (nx+1)*((j)+1) + (nx+1)*(ny+1)*((k)+1)
+#define IJKRAD2(i,j,k) ((i)+1) + (nx+2)*((j)+1) + (nx+2)*(ny+2)*((k)+1)
 
 void build_radiancemap2(radiancedata *radianceinfo){
   int i, j, k, nx, ny, nz, nxy;
