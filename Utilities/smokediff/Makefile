@@ -14,7 +14,7 @@ OSX64FORTLIBDIR = /opt/intel/Compiler/11.1/080/lib
 
 # Definition of the object variables
 
-obj = main.o dmalloc.o assert.o utilities.o readsmv.o IOdboundary.o IOdslice.o IOdplot.o histogram.o getsizes.o getdata.o 
+obj = assert.o dmalloc.o histogram.o IOdboundary.o IOdplot.o IOdslice.o main.o readsmv.o utilities.o getsizes.o getdata.o 
 objwin = $(obj:.o=.obj)
 
 #*** General Purpose Rules ***
