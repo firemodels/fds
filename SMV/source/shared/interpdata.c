@@ -157,7 +157,7 @@ void build_radiancemap(radiancedata *radianceinfo){
 
     ijk=IJKRAD(i,j,k);
     fijk=IJKRAD2(i,j,k);
-    fijm1k=ijk-(nx+1);
+    fijm1k=ijk-(nx+2);
     fradiance[fijk]=(float)(fradiance[fijm1k]*(float)(255-opacity[ijk])/255.0);
   }
   }
@@ -176,7 +176,7 @@ void build_radiancemap(radiancedata *radianceinfo){
 
     ijk=IJKRAD(i,j,k);
     fijk=IJKRAD2(i,j,k);
-    fijp1k=ijk+(nx+1);
+    fijp1k=ijk+(nx+2);
     fradiance[fijk]=(float)(fradiance[fijp1k]*(float)(255-opacity[ijk])/255.0);
   }
   }
@@ -195,7 +195,7 @@ void build_radiancemap(radiancedata *radianceinfo){
 
     ijk=IJKRAD(i,j,k);
     fijk=IJKRAD2(i,j,k);
-    fijkp1=ijk+(nx+1)*(ny+1);
+    fijkp1=ijk+(nx+2)*(ny+2);
     fradiance[fijk]=(float)(fradiance[fijkp1]*(float)(255-opacity[ijk])/255.0);
   }
   }
