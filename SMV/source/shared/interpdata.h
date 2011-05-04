@@ -14,4 +14,4 @@ typedef struct {
 void setup_radiancemap(radiancedata *radianceinfo, int ijkbar[3], float xyzbar0[3], float xyzbar[3], float dxyz[3], 
                        unsigned char *radiance, unsigned char *opacity);
 void build_radiancemap(radiancedata *radianceinfo);
-unsigned char interp3d(radiancedata *radianceinfo, float xyz[3]);
+float interp3d(float *xplt, float *yplt, float *zplt, int ibar, int jbar, int kbar, float *vals, float xyz[3]);
