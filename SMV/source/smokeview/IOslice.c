@@ -620,8 +620,8 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       switch (sd->idir){
       case 1:
         ii=0;
-        for(j=sd->js1;j<sd->js2;j++){
-          for(k=sd->ks1;k<sd->ks2;k++){
+        for(k=sd->ks1;k<sd->ks2;k++){
+          for(j=sd->js1;j<sd->js2;j++){
             for(i=sd->is1;i<sd->is1+sd->nslicei;i++){
               sd->c_iblank[ii++]=meshi->c_iblank_x[ijk(i,j,k)];
             }
@@ -630,9 +630,9 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
         break;
       case 2:
         ii=0;
-        for(i=sd->is1;i<sd->is2;i++){
-          for(k=sd->ks1;k<sd->ks2;k++){
-            for(j=sd->js1;j<sd->js1+sd->nslicej;j++){
+        for(k=sd->ks1;k<sd->ks2;k++){
+          for(j=sd->js1;j<sd->js1+sd->nslicej;j++){
+            for(i=sd->is1;i<sd->is2;i++){
               sd->c_iblank[ii++]=meshi->c_iblank_y[ijk(i,j,k)];
             }
           }
@@ -640,9 +640,9 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
         break;
       case 3:
         ii=0;
-        for(i=sd->is1;i<sd->is2;i++){
+        for(k=sd->ks1;k<sd->ks1+sd->nslicek;k++){
           for(j=sd->js1;j<sd->js2;j++){
-            for(k=sd->ks1;k<sd->ks1+sd->nslicek;k++){
+            for(i=sd->is1;i<sd->is2;i++){
               sd->c_iblank[ii++]=meshi->c_iblank_z[ijk(i,j,k)];
             }
           }
