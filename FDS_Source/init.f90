@@ -325,6 +325,7 @@ IF (EVACUATION_ONLY(NM)) THEN
    M%VS      = 0._EB
    M%WS      = 0._EB
    M%H       = 0._EB
+   M%HS      = 0._EB
 ENDIF
 IF (N_TRACKED_SPECIES > 0 .AND. .NOT.EVACUATION_ONLY(NM)) M%DEL_RHO_D_DEL_Z = 0._EB
 
@@ -991,8 +992,8 @@ ENDDO OBST_LOOP_2
 
 IF (N_ZONE > 0) THEN
    N_ZONE_LOOP: DO IPZ = 1,N_ZONE
-      IF (EVACUATION_ONLY(NM)) EXIT N_ZONE_LOOP
       PSUM(IPZ,NM) = 0._EB
+      IF (EVACUATION_ONLY(NM)) EXIT N_ZONE_LOOP
       DO K=1,M%KBAR
          DO J=1,M%JBAR
             DO I=1,M%IBAR
@@ -3028,6 +3029,7 @@ IF (EVACUATION_ONLY(NM)) RETURN
 ! Waste a few calls to RANDOM_NUMBER to avoid generating the exact same sequence on each mesh
 
 DO I=1,NM
+   IF (EVACUATION_ONLY(NM)) CYCLE
    CALL RANDOM_NUMBER(RN)
 ENDDO
 
