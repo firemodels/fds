@@ -1225,12 +1225,11 @@ RETURN
 END SUBROUTINE CHECK_MASS_FRACTION
 
 
+
 REAL(EB) FUNCTION SCALAR_FACE_VALUE(A,U,LIMITER)
 
 REAL(EB), INTENT(IN) :: A,U(4)
 INTEGER, INTENT(IN) :: LIMITER
-
-! local
 REAL(EB) :: R,B,DU_UP,DU_LOC
 
 ! This function computes the scalar value on a face.
@@ -1266,15 +1265,15 @@ WIND_DIRECTION_IF: IF (A>0._EB) THEN
       CASE(1) ! first-order upwinding
          SCALAR_FACE_VALUE = U(2)
       CASE(2) ! SUPERBEE, Roe (1986)
-         IF (ABS(DU_LOC)>0._EB) R = DU_UP/DU_LOC
+         IF (ABS(DU_LOC)>ZERO_P) R = DU_UP/DU_LOC
          B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
          SCALAR_FACE_VALUE = U(2) + 0.5_EB*B*DU_LOC
       CASE(3) ! MINMOD
-         IF (ABS(DU_LOC)>0._EB) R = DU_UP/DU_LOC
+         IF (ABS(DU_LOC)>ZERO_P) R = DU_UP/DU_LOC
          B = MAX(0._EB,MIN(1._EB,R))
          SCALAR_FACE_VALUE = U(2) + 0.5_EB*B*DU_LOC
       CASE(4) ! CHARM
-         IF (ABS(DU_UP)>0._EB) R = DU_LOC/DU_UP
+         IF (ABS(DU_UP)>ZERO_P) R = DU_LOC/DU_UP
          IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
          SCALAR_FACE_VALUE = U(2) + 0.5_EB*B*DU_UP
    END SELECT
@@ -1294,15 +1293,15 @@ ELSE WIND_DIRECTION_IF
       CASE(1) ! first-order upwinding
          SCALAR_FACE_VALUE = U(3)
       CASE(2) ! SUPERBEE, Roe (1986)
-         IF (ABS(DU_LOC)>0._EB) R = DU_UP/DU_LOC
+         IF (ABS(DU_LOC)>ZERO_P) R = DU_UP/DU_LOC
          B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
          SCALAR_FACE_VALUE = U(3) - 0.5_EB*B*DU_LOC
       CASE(3) ! MINMOD
-         IF (ABS(DU_LOC)>0._EB) R = DU_UP/DU_LOC
+         IF (ABS(DU_LOC)>ZERO_P) R = DU_UP/DU_LOC
          B = MAX(0._EB,MIN(1._EB,R))
          SCALAR_FACE_VALUE = U(3) - 0.5_EB*B*DU_LOC
       CASE(4) ! CHARM
-         IF (ABS(DU_UP)>0._EB) R = DU_LOC/DU_UP
+         IF (ABS(DU_UP)>ZERO_P) R = DU_LOC/DU_UP
          IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
          SCALAR_FACE_VALUE = U(3) - 0.5_EB*B*DU_UP
     END SELECT
