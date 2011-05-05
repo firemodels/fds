@@ -2673,10 +2673,10 @@ WRITE_SCARC: IF (TRIM(PRES_METHOD)=='SCARC') THEN
       CASE('MULTIGRID')
          WRITE(LU_OUTPUT,'(3X,A20,A10)') 'Smoother            ', TRIM(SCARC_SMOOTH)
          IF (TRIM(SCARC_MULTIGRID)=='ALGEBRAIC') THEN
-            WRITE(LU_OUTPUT,'(3X,A20,I10)')   'Coarsening strategy ', TRIM(SCARC_MULTIGRID_COARSENING)
+            WRITE(LU_OUTPUT,'(3X,A20,A10)')   'Coarsening strategy ', TRIM(SCARC_MULTIGRID_COARSENING)
          ENDIF
          WRITE(LU_OUTPUT,'(3X,A20,A10)')   'Coarse grid solver  ', TRIM(SCARC_COARSE)
-         WRITE(LU_OUTPUT,'(3X,A20,A10)')   'Cycle type          ', TRIM(SCARC_MULTIGRID_CYCLE)
+         WRITE(LU_OUTPUT,'(3X,A20,A1)')   'Cycle type          ', TRIM(SCARC_MULTIGRID_CYCLE)
          WRITE(LU_OUTPUT,'(3X,A20,I10)')   'Max iterations      ', SCARC_MULTIGRID_ITERATIONS
          WRITE(LU_OUTPUT,'(3X,A20,E10.2)') 'Stopping accuracy   ', SCARC_MULTIGRID_ACCURACY
    END SELECT
