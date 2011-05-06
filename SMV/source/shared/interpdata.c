@@ -220,8 +220,8 @@ void build_radiancemap(radiancedata *radianceinfo){
 }
 
 /* ----------------------- interp3d ----------------------------- */
-#define INTERP1D(f0,f1,dx) (float)((f0) + ((f1)-(f0))*(dx))
 
+#define INTERP1D(f0,f1,dx) (float)((f0) + ((f1)-(f0))*(dx))
 float interp3d(float *xplt, float *yplt, float *zplt, int ibar, int jbar, int kbar, float *vals, float xyz[3]){
   int i, j, k;
   int ijk;
@@ -272,3 +272,115 @@ float interp3d(float *xplt, float *yplt, float *zplt, int ibar, int jbar, int kb
   return val;
 }
 
+/*
+typedef struct {
+  float x, y, z;
+} point;
+
+typedef struct _kd_data {
+  struct _kd_data *left, *right;
+  point *median;
+} kd_data;
+*/
+
+/* ----------------------- compare_pointx ----------------------------- */
+
+int compare_pointx( const void *arg1, const void *arg2 ){
+  point *pointi, *pointj;
+
+  pointi = *(point **)arg1;
+  pointj = *(point **)arg2;
+
+  if(pointi->x<pointj->x)return -1;
+  if(pointi->x>pointj->x)return 1;
+  return 0;
+}
+
+/* ----------------------- compare_pointy ----------------------------- */
+
+int compare_pointy( const void *arg1, const void *arg2 ){
+  point *pointi, *pointj;
+
+  pointi = *(point **)arg1;
+  pointj = *(point **)arg2;
+
+  if(pointi->y<pointj->y)return -1;
+  if(pointi->y>pointj->y)return 1;
+  return 0;
+}
+
+/* ----------------------- compare_pointz ----------------------------- */
+
+int compare_pointz( const void *arg1, const void *arg2 ){
+  point *pointi, *pointj;
+
+  pointi = *(point **)arg1;
+  pointj = *(point **)arg2;
+
+  if(pointi->z<pointj->z)return -1;
+  if(pointi->z>pointj->z)return 1;
+  return 0;
+}
+
+/* ----------------------- setup_kdtree ----------------------------- */
+
+kd_data *setup_kdtree(point *points, int npoints, kd_data *parent){
+  int axis;
+  kd_data *kdptr;
+  int median,nleft,nright;
+  float xmin, ymin, zmin, xmax, ymax, zmax;
+  float dx, dy, dz;
+  int i;
+
+  if(npoints<=0)return NULL;
+  NewMemory((void **)&kdptr,sizeof(kd_data));
+  xmin=points[0].x;
+  xmax=xmin;
+  ymin=points[1].x;
+  ymax=ymin;
+  zmin=points[2].x;
+  zmax=zmin;
+  for(i=1;i<npoints;i++){
+    if(points[i].x<xmin)xmin=points[i].x;
+    if(points[i].x>xmax)xmax=points[i].x;
+    if(points[i].y<ymin)ymin=points[i].y;
+    if(points[i].y>ymax)ymax=points[i].y;
+    if(points[i].z<zmin)zmin=points[i].z;
+    if(points[i].z>zmax)zmax=points[i].z;
+  }
+  dx = xmax - xmin;
+  dy = ymax - ymin;
+  dz = zmax - zmin;
+
+  if(dx>=dy&&dx>=dy)axis = 0;
+  if(dy>=dx&&dy>=dz)axis = 1;
+  if(dz>=dy&&dz>=dx)axis = 2;
+
+  switch (axis) {
+    case 0:
+      qsort((point *)points,npoints,sizeof(kd_data),compare_pointx);
+      break;
+    case 1:
+      qsort((point *)points,npoints,sizeof(kd_data),compare_pointy);
+      break;
+    case 2:
+      qsort((point *)points,npoints,sizeof(kd_data),compare_pointz);
+      break;
+  }
+  median = npoints/2;
+  kdptr->median=points + median;
+  nleft = median;
+  nright = npoints - median - 1;
+  kdptr->parent=parent;
+  kdptr->left=setup_kdtree(points,nleft,kdptr);
+  kdptr->right=setup_kdtree(points+median+1,nright,kdptr);
+  return kdptr;
+}
+
+/* ----------------------- free_kdtree ----------------------------- */
+
+void free_kdtree(kd_data *kdtree){
+  if(kdtree->left!=NULL)free_kdtree(kdtree->left);
+  if(kdtree->right!=NULL)free_kdtree(kdtree->right);
+  FREEMEMORY(kdtree);
+}
