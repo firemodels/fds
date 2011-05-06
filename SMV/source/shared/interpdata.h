@@ -12,11 +12,12 @@ typedef struct {
 } radiancedata;
 
 typedef struct {
-  float x, y, z;
+  float xyz[3];
 } point;
 
 typedef struct _kd_data {
   struct _kd_data *left, *right, *parent;
+  int axis;
   point *median;
 } kd_data;
 

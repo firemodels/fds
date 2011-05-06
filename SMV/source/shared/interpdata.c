@@ -291,8 +291,8 @@ int compare_pointx( const void *arg1, const void *arg2 ){
   pointi = *(point **)arg1;
   pointj = *(point **)arg2;
 
-  if(pointi->x<pointj->x)return -1;
-  if(pointi->x>pointj->x)return 1;
+  if(pointi->xyz[0]<pointj->xyz[0])return -1;
+  if(pointi->xyz[0]>pointj->xyz[0])return 1;
   return 0;
 }
 
@@ -304,8 +304,8 @@ int compare_pointy( const void *arg1, const void *arg2 ){
   pointi = *(point **)arg1;
   pointj = *(point **)arg2;
 
-  if(pointi->y<pointj->y)return -1;
-  if(pointi->y>pointj->y)return 1;
+  if(pointi->xyz[1]<pointj->xyz[1])return -1;
+  if(pointi->xyz[1]>pointj->xyz[1])return 1;
   return 0;
 }
 
@@ -317,9 +317,29 @@ int compare_pointz( const void *arg1, const void *arg2 ){
   pointi = *(point **)arg1;
   pointj = *(point **)arg2;
 
-  if(pointi->z<pointj->z)return -1;
-  if(pointi->z>pointj->z)return 1;
+  if(pointi->xyz[2]<pointj->xyz[2])return -1;
+  if(pointi->xyz[2]>pointj->xyz[2])return 1;
   return 0;
+}
+
+/* ----------------------- closest_point ----------------------------- */
+
+point *closest_point(kd_data *kdtree, float *xyz){
+  kd_data *kptr;
+  point *closest;
+
+  kptr = kdtree;
+  while(kptr->left!=NULL&&kptr->right!=NULL){
+    if(kptr->right==NULL||xyz[kptr->axis]<kptr->median->xyz[kptr->axis]){
+      kptr=kptr->left;
+    }
+    else{
+      kptr=kptr->right;
+    }
+  }
+  closest=kptr->median;
+
+  return closest;
 }
 
 /* ----------------------- setup_kdtree ----------------------------- */
@@ -334,19 +354,19 @@ kd_data *setup_kdtree(point *points, int npoints, kd_data *parent){
 
   if(npoints<=0)return NULL;
   NewMemory((void **)&kdptr,sizeof(kd_data));
-  xmin=points[0].x;
+  xmin=points[0].xyz[0];
   xmax=xmin;
-  ymin=points[1].x;
+  ymin=points[0].xyz[1];
   ymax=ymin;
-  zmin=points[2].x;
+  zmin=points[1].xyz[2];
   zmax=zmin;
   for(i=1;i<npoints;i++){
-    if(points[i].x<xmin)xmin=points[i].x;
-    if(points[i].x>xmax)xmax=points[i].x;
-    if(points[i].y<ymin)ymin=points[i].y;
-    if(points[i].y>ymax)ymax=points[i].y;
-    if(points[i].z<zmin)zmin=points[i].z;
-    if(points[i].z>zmax)zmax=points[i].z;
+    if(points[i].xyz[0]<xmin)xmin=points[i].xyz[0];
+    if(points[i].xyz[0]>xmax)xmax=points[i].xyz[0];
+    if(points[i].xyz[1]<ymin)ymin=points[i].xyz[1];
+    if(points[i].xyz[1]>ymax)ymax=points[i].xyz[1];
+    if(points[i].xyz[2]<zmin)zmin=points[i].xyz[2];
+    if(points[i].xyz[2]>zmax)zmax=points[i].xyz[2];
   }
   dx = xmax - xmin;
   dy = ymax - ymin;
@@ -368,6 +388,7 @@ kd_data *setup_kdtree(point *points, int npoints, kd_data *parent){
       break;
   }
   median = npoints/2;
+  kdptr->axis=axis;
   kdptr->median=points + median;
   nleft = median;
   nright = npoints - median - 1;
