@@ -1,6 +1,6 @@
-// $Date: 2011-03-30 12:04:57 -0400 (Wed, 30 Mar 2011) $ 
-// $Revision: 8021 $
-// $Author: gforney $
+// $Date$ 
+// $Revision$
+// $Author$
 
 #include <stdio.h>  
 #include <string.h>
@@ -10,7 +10,7 @@
 #include "MALLOC.h"
 
 // svn revision character string
-char interpdata_revision[]="$Revision: 8021 $";
+char interpdata_revision[]="$Revision$";
 
 /* ----------------------- setup_radiancemap ----------------------------- */
 
