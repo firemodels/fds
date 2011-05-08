@@ -322,24 +322,96 @@ int compare_pointz( const void *arg1, const void *arg2 ){
   return 0;
 }
 
-/* ----------------------- closest_point ----------------------------- */
+#define DIST2(result,xyz1,xyz2) \
+  dx = xyz1[0]-xyz2[0];\
+  dy = xyz1[1]-xyz2[1];\
+  dz = xyz1[2]-xyz2[2];\
+  result = dx*dx+dy*dy+dz*dz
 
-point *closest_point(kd_data *kdtree, float *xyz){
-  kd_data *kptr;
-  point *closest;
+/* ----------------------- closest_node_candidate ----------------------------- */
 
-  kptr = kdtree;
-  while(kptr->left!=NULL&&kptr->right!=NULL){
-    if(kptr->right==NULL||xyz[kptr->axis]<kptr->median->xyz[kptr->axis]){
-      kptr=kptr->left;
+kd_data *closest_node_candidate(kd_data *kdtree, float *xyz, float *dist2){
+  kd_data *cn;
+  float dx, dy, dz;
+
+  cn = kdtree;
+  while(cn->left!=NULL&&cn->right!=NULL){
+    int axis;
+
+    axis = cn->axis;
+    if(cn->right==NULL||xyz[axis]<cn->median->xyz[axis]){
+      cn=cn->left;
     }
     else{
-      kptr=kptr->right;
+      cn=cn->right;
     }
   }
-  closest=kptr->median;
+  DIST2(*dist2,cn->median->xyz,xyz);
+  return cn;
+}
 
-  return closest;
+/*
+function kdsearchnn( here, point, best )
+ 
+    if here == nil then
+        return best
+    end
+ 
+    if best == nil then
+        best = here
+    end
+ 
+    -- consider the current node --
+    if distance(here,point) < distance(best,point) then
+        best = here
+    end
+ 
+    -- search the near branch --
+    child = child_near(here,point)
+    best = kdsearchnn( child, point, best )
+ 
+    -- search the away branch - maybe --
+    -- (note that the following test should be <= if you let points equal to the median lie on either side --
+    -- when the tree was being built) --
+    if distance_axis(here,point) < distance(best,point) then
+        child = child_away(here,point)
+        best = kdsearchnn( child, point, best )
+    end
+ 
+    return best
+ 
+end*/
+/* ----------------------- closest_node ----------------------------- */
+
+kd_data *closest_node(kd_data *kdtree, float *xyz){
+  kd_data *node,*current_best,*parent, *other,*other_best;
+  float current_distance2, other_distance2, split_dist2;
+
+  current_best = closest_node_candidate(kdtree, xyz, &current_distance2);
+
+  node = current_best;
+  while(node->parent!=NULL){
+    float node_dist2;
+    float dx,dy,dz;
+
+    DIST2(node_dist2,node->median->xyz,xyz);
+    if(node_dist2<current_distance2){
+      current_distance2 = node_dist2;
+      current_best = node;
+    }
+    //difference between the splitting coordinate of the search point and current node 
+    // is less than 
+    // the distance (overall coordinates) from the search point to the current best.
+    split_dist2 = node->median[node->axis]-xyz[node->axis];
+    split_dist2 *= split_dist2;
+
+
+    node = node->parent;
+  }
+
+
+  other_best = closest_node_candidate(other,xyz,&other_distance2);
+  return current_best;
 }
 
 /* ----------------------- setup_kdtree ----------------------------- */
@@ -347,30 +419,33 @@ point *closest_point(kd_data *kdtree, float *xyz){
 kd_data *setup_kdtree(point *points, int npoints, kd_data *parent){
   int axis;
   kd_data *kdptr;
-  int median,nleft,nright;
-  float xmin, ymin, zmin, xmax, ymax, zmax;
+  int median_index,nleft,nright;
+  float xyzmin[3], xyzmax[3];
   float dx, dy, dz;
   int i;
 
   if(npoints<=0)return NULL;
   NewMemory((void **)&kdptr,sizeof(kd_data));
-  xmin=points[0].xyz[0];
-  xmax=xmin;
-  ymin=points[0].xyz[1];
-  ymax=ymin;
-  zmin=points[1].xyz[2];
-  zmax=zmin;
+  xyzmin[0]=points[0].xyz[0];
+  xyzmax[0]=xyzmin[0];
+
+  xyzmin[1]=points[0].xyz[1];
+  xyzmax[1]=xyzmin[1];
+
+  xyzmin[2]=points[2].xyz[2];
+  xyzmax[2]=xyzmin[2];
+
   for(i=1;i<npoints;i++){
-    if(points[i].xyz[0]<xmin)xmin=points[i].xyz[0];
-    if(points[i].xyz[0]>xmax)xmax=points[i].xyz[0];
-    if(points[i].xyz[1]<ymin)ymin=points[i].xyz[1];
-    if(points[i].xyz[1]>ymax)ymax=points[i].xyz[1];
-    if(points[i].xyz[2]<zmin)zmin=points[i].xyz[2];
-    if(points[i].xyz[2]>zmax)zmax=points[i].xyz[2];
+    if(points[i].xyz[0]<xyzmin[0])xyzmin[0]=points[i].xyz[0];
+    if(points[i].xyz[0]>xyzmax[0])xyzmax[0]=points[i].xyz[0];
+    if(points[i].xyz[1]<xyzmin[1])xyzmin[1]=points[i].xyz[1];
+    if(points[i].xyz[1]>xyzmax[1])xyzmax[1]=points[i].xyz[1];
+    if(points[i].xyz[2]<xyzmin[2])xyzmin[2]=points[i].xyz[2];
+    if(points[i].xyz[2]>xyzmax[2])xyzmax[2]=points[i].xyz[2];
   }
-  dx = xmax - xmin;
-  dy = ymax - ymin;
-  dz = zmax - zmin;
+  dx = xyzmax[0] - xyzmin[0];
+  dy = xyzmax[1] - xyzmin[1];
+  dz = xyzmax[2] - xyzmin[2];
 
   if(dx>=dy&&dx>=dy)axis = 0;
   if(dy>=dx&&dy>=dz)axis = 1;
@@ -387,14 +462,14 @@ kd_data *setup_kdtree(point *points, int npoints, kd_data *parent){
       qsort((point *)points,npoints,sizeof(kd_data),compare_pointz);
       break;
   }
-  median = npoints/2;
+  median_index = npoints/2;
   kdptr->axis=axis;
-  kdptr->median=points + median;
-  nleft = median;
-  nright = npoints - median - 1;
+  kdptr->median=points + median_index;
+  nleft = median_index;
+  nright = npoints - median_index - 1;
   kdptr->parent=parent;
   kdptr->left=setup_kdtree(points,nleft,kdptr);
-  kdptr->right=setup_kdtree(points+median+1,nright,kdptr);
+  kdptr->right=setup_kdtree(points+median_index+1,nright,kdptr);
   return kdptr;
 }
 
