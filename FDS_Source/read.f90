@@ -3070,9 +3070,6 @@ READ_PART_LOOP: DO N=1,N_PART
       IF (SPECIES(PC%Y_INDEX)%DENSITY_LIQUID > 0._EB) DENSITY=SPECIES(PC%Y_INDEX)%DENSITY_LIQUID
    ENDIF
 
-   PC%DENSITY    = DENSITY
-   PC%QUANTITIES = QUANTITIES
-   
    ! Arrays for particle size distribution
 
    IF (DIAMETER > 0._EB) THEN
@@ -3087,6 +3084,9 @@ READ_PART_LOOP: DO N=1,N_PART
       ALLOCATE(PC%W_CDF(NSTRATA),STAT=IZERO)
       CALL ChkMemErr('READ','W_CDF',IZERO)
    ENDIF
+
+   ! Arrays related to particle break-up model
+
    IF (BREAKUP) THEN
       ALLOCATE(PC%CHILD_CDF(0:NDC),STAT=IZERO)
       CALL ChkMemErr('READ','CHILD_CDF',IZERO)
@@ -3107,6 +3107,7 @@ READ_PART_LOOP: DO N=1,N_PART
    END IF
    PC%CTRL_ID            = CTRL_ID
    PC%DENSE_VOLUME_FRACTION = DENSE_VOLUME_FRACTION
+   PC%DENSITY            = DENSITY
    PC%DEVC_ID            = DEVC_ID
    PC%TMP_INITIAL        = INITIAL_TEMPERATURE + TMPM
    PC%SAMPLING           = SAMPLING_FACTOR
@@ -3117,6 +3118,7 @@ READ_PART_LOOP: DO N=1,N_PART
    PC%KILL_RADIUS        = MINIMUM_DIAMETER*1.E-6_EB*0.25_EB
    PC%MONODISPERSE       = MONODISPERSE
    PC%PROP_ID            = PROP_ID
+   PC%QUANTITIES         = QUANTITIES
    PC%GAMMA              = GAMMA_D
    IF ( SIGMA_D > 0._EB ) THEN
       PC%SIGMA           = SIGMA_D
@@ -3154,7 +3156,7 @@ READ_PART_LOOP: DO N=1,N_PART
          CALL SHUTDOWN(MESSAGE)
    END SELECT
  
-   ! Vegetation propeties
+   ! Vegetation properties
 
    PC%VEG_SV                   = VEG_SV !1/m
    PC%VEG_MOISTURE             = VEG_MOISTURE
@@ -3173,6 +3175,7 @@ READ_PART_LOOP: DO N=1,N_PART
    PC%VEG_CHAR_OXIDATION       = VEG_CHAR_OXIDATION
 
    ! Set evaporation index
+
    IF (.NOT.PC%MASSLESS) THEN
       N_EVAP_INDICES = N_EVAP_INDICES + 1
       PC%EVAP_INDEX   = N_EVAP_INDICES
@@ -3283,6 +3286,7 @@ PART_LOOP: DO N=1,N_PART
    ! Only process particles or droplets that have mass and evaporate
 
    IF (.NOT.PC%EVAPORATE .OR. PC%MASSLESS .OR. PC%SURF_ID/='null' .OR. WFDS_FE) CYCLE PART_LOOP
+
    IF (SPECIES_COMPUTED(PC%Y_INDEX)) THEN
       PC%DENSITY=SS%DENSITY_LIQUID
       CYCLE PART_LOOP
