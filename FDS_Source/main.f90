@@ -709,6 +709,7 @@ MAIN_LOOP: DO
          IF (ANY(CHANGE_TIME_STEP)) THEN
             CHANGE_TIME_STEP = .TRUE.
             DO NM=1,NMESHES
+               IF (EVACUATION_ONLY(NM)) CHANGE_TIME_STEP(NM) = .FALSE.
                IF (PROCESS(NM)/=MYID) CYCLE
                DT_SYNC(NM)      = MESHES(NM)%DT
                DT_NEXT_SYNC(NM) = MESHES(NM)%DT_NEXT
@@ -723,7 +724,7 @@ MAIN_LOOP: DO
             ENDIF
             DO NM=1,NMESHES
                IF (PROCESS(NM)/=MYID) CYCLE
-               IF (EVACUATION_ONLY(NM)) CHANGE_TIME_STEP(NM) = .FALSE.
+               IF (EVACUATION_ONLY(NM)) CYCLE
                MESHES(NM)%DT_NEXT = MINVAL(DT_NEXT_SYNC,MASK=SYNC_TIME_STEP)
                MESHES(NM)%DT      = MINVAL(DT_SYNC,MASK=SYNC_TIME_STEP)
             ENDDO
