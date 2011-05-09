@@ -64,6 +64,7 @@
 #undef pp_release
 #define SMZVERSION "test"
 #define pp_PART2
+#define pp_KDTEST
 #endif
 
 #ifdef WIN32

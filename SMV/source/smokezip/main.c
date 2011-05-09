@@ -12,6 +12,7 @@
 #include "egz_stdio.h"
 #include "svzip.h"
 #include "MALLOC.h"
+#include "interpdata.h"
 
 #define MARK 255
 
@@ -59,6 +60,10 @@ int main(int argc, char **argv){
   doit_particle=0;
 #endif
 
+#ifdef pp_KDTEST
+  test_kd();
+  exit(0);
+#endif
   first_initsphere=1;
   first_slice=1;
   first_patch=1;
