@@ -43,7 +43,6 @@
 
 /* --------------------------  mesh ------------------------------------ */
 
-
 typedef struct {
   int ibar, jbar, kbar;
   float *xplt, *yplt, *zplt;
@@ -340,6 +339,8 @@ STDCALL FORTgetsliceframe(int *lu11,
 STDCALL FORTopenslice(char *slicefilename, int *unit, int *endian, 
                       int *is1, int *is2, int *js1, int *js2, int *ks1, int *ks2,
                       int *error, FILE_SIZE lenfile);
+
+
 
 //***********************
 //************* variables

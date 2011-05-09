@@ -11,8 +11,11 @@
 #include <math.h>
 #include "egz_stdio.h"
 #include "svzip.h"
+#ifdef pp_KDTESTD
+#include "lightsmoke.h"
+#endif
+#include "lightsmoke.h"
 #include "MALLOC.h"
-#include "interpdata.h"
 
 #define MARK 255
 

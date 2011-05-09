@@ -10,7 +10,7 @@
 #include "zlib.h"
 #include "egz_stdio.h"
 #include "svzip.h"
-#include "interpdata.h"
+#include "lightsmoke.h"
 #include "MALLOC.h"
 
 // svn revision character string
