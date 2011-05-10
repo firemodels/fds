@@ -6430,25 +6430,32 @@ to be introduced initially and/or periodically in time.
 If the particles have mass and are introduced from a solid surface, specify {\ct PARTICLE\_MASS\_FLUX} on the {\ct SURF} line.
 The number of particles inserted at each solid cell every
 {\ct DT\_INSERT} seconds is specified by {\ct NPPC} on the {\ct SURF} line defining the solid surface. The default
-value of {\ct NPPC} is 1. As an example, the following set of input lines:
+value of {\ct DT\_INSERT} is 0.01~s and {\ct NPPC} is 1. As an example, the following set of input lines:
 
 \footnotesize
 \begin{verbatim}
-&PART ID='drops', QUANTITIES(1:2)='DROPLET_DIAMETER','DROPLET_TEMPERATURE',
-      DIAMETER=750., SAMPLING_FACTOR=1, COLOR='RED', EVAPORATE=.FALSE. /
-&SURF ID='SLOT', PART_ID='drops', VEL=-5., PARTICLE_MASS_FLUX=0.1, COLOR='RED' /
+&PART ID='particles', DIAMETER=750., DENSITY=1000., EVAPORATE=.FALSE. /
+&SURF ID='SLOT', PART_ID='particles', VEL=-5., PARTICLE_MASS_FLUX=0.1 /
 &OBST XB=-0.2,0.2,-0.2,0.2,4.0,4.4, SURF_IDS='INERT','SLOT','INERT' /
 \end{verbatim} \normalsize
 
 \noindent
-creates an obstruction that ejects non-evaporating, red particles with a mean volumetric diameter of 750~$\mu m$ out of its sides at a rate
-of 0.1~kg/m$^2$/s. FDS will adjust the mass flux if the obstruction or vent dimensions are changed to conform to the numerical grid. Note that the
-{\ct ID}s have no meaning other than as identifiers. The particles are colored red in Smokeview, but can also be colored according to their
-diameter, temperature, or age.
-
-Note that a surface on which particles are specified must have a non-zero normal velocity directed into the
+creates an obstruction that ejects non-evaporating particles with a mean volumetric diameter of 750~$\mu$m and density of 1000~kg/m$^3$ out of its sides at a rate
+of 0.1~kg/m$^2$/s and a velocity of 5~m/s (the minus sign indicates the particles are ejected from the surface). 
+FDS will adjust the mass flux if the obstruction or vent dimensions are changed to conform to the numerical grid. The
+{\ct ID}s have no meaning other than as identifiers. The surface on which particles are specified must have a non-zero normal velocity directed into the
 computational domain. This happens automatically if the surface is burning, but must be specified
-if it is not.
+if it is not. There is a simple test case called {\bf particle\_flux.fds} that demonstrates how the above input lines can produce a stream of
+particles from a block. The total mass flux from the block is the product of the {\ct PARTICLE\_MASS\_FLUX} times the total area of the sides of the block,
+0.4~m $\times$ 0.4~m $\times$ 4. The expected accumulated mass of particles on the ground after 10~s is expected to be 0.64~kg, as shown in Fig.~\ref{particle_flux}.
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_flux}
+\end{center}
+\caption[Simple test of particle mass flux.]{Simple test case to demonstrate mass conservation of particles ejected from an obstruction.}
+\label{particle_flux}
+\end{figure}
 
 Note also that you can independently control particles that emanate from a solid surface. For example, a device might control the
 activation of a fan, but you can over-ride the device and control the particles separately. To do this, specify either
@@ -6585,7 +6592,8 @@ same {\ct DIAMETER}.
 
 \subsection{Secondary breakup}
 \label{info:secondary_breakup}
-If {\ct BREAKUP=.TRUE.} is set on the {\ct PART} line, particles may undergo secondary breakup. In this case the user shoul also specify {\ct SURFACE\_TENSION} of the liquid and breakup distribution parameters {\ct BREAKUP\_CHILD\_DIAMETER} and {\ct BREAKUP\_CHILD\_GAMMA\_D}.
+If {\ct BREAKUP=.TRUE.} is set on the {\ct PART} line, particles may undergo secondary breakup. 
+In this case the user should also specify {\ct SURFACE\_TENSION} of the liquid and breakup distribution parameters {\ct BREAKUP\_CHILD\_DIAMETER} and {\ct BREAKUP\_CHILD\_GAMMA\_D}.
 
 
 \subsection{Drag}
