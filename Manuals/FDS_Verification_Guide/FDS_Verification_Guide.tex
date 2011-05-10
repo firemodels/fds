@@ -284,8 +284,11 @@ the process of compiling this Guide.
 
 
 \tableofcontents
-%\listoffigures
-%\listoftables
+\clearpage
+\listoffigures
+\clearpage
+\listoftables
+
 
 \mainmatter
 
@@ -1583,11 +1586,11 @@ In the test case, we inject propane into a cube with 1 m$^2$ vents on all six fa
 
 \section{Yield of combustion products from a Methane flame (Methane\_flame)}
 
-A simple methane flame with 10 \% CO yield is burned inside a closed cavity for 5 seconds. 
-The total mass of CO$_2$, H$_2$O and CO is measured. 
-The same simulations is performed using the three alternative ways 
+A simple methane flame with 10 \% CO yield is burned inside a closed cavity for 5 seconds.
+The total mass of CO$_2$, H$_2$O and CO is measured.
+The same simulations is performed using the three alternative ways
 to define the combustion reaction: simple chemistry, primitive species and lumped species. The
-same amount of species should be produced in each case. The following two figures compare the 
+same amount of species should be produced in each case. The following two figures compare the
 mass of three combustion products. First figure shows the comparison simple vs. primitive and the second for simple vs. lumped.
 \begin{figure}[h]
 \begin{tabular*}{\textwidth}{lr}
@@ -1615,7 +1618,7 @@ where $t$ is time in minutes and $C_\mathrm{CO}$ is the CO concentration (ppm). 
 \be
 \mathrm{FED}_\mathrm{CN} = \int_0^t \left( \frac{\exp\left( \frac{C_\mathrm{CN}(t)}{43} \right)}{220} - 0.0045 \right) \, dt
 \ee
-where $t$ is time in minutes and $C_\mathrm{CN}$ is the concentration (ppm) of HCN corrected for the protective effect of NO$_\mathrm{2}$. $C_\mathrm{CN}$ is calculated as 
+where $t$ is time in minutes and $C_\mathrm{CN}$ is the concentration (ppm) of HCN corrected for the protective effect of NO$_\mathrm{2}$. $C_\mathrm{CN}$ is calculated as
 \be
 C_\mathrm{CN} = C_\mathrm{HCN} - C_\mathrm{NO_2}
 \ee
@@ -1623,26 +1626,26 @@ The fraction of an incapacitating dose of NO$_x$ is calculated as
 \be
 \mathrm{FED}_\mathrm{NO_x} = \int_0^t \frac{C_\mathrm{NO_x}(t)}{1500} \, dt
 \ee
-where $t$ is time in minutes and $C_\mathrm{NO_x}$ is the sum of NO and NO$_\mathrm{2}$ concentrations (ppm). 
+where $t$ is time in minutes and $C_\mathrm{NO_x}$ is the sum of NO and NO$_\mathrm{2}$ concentrations (ppm).
 The Fractional Lethal Dose (FLD) of irritants is calculated as
 \be
 \mathrm{FLD}_\mathrm{irr} = \int_0^t \left(
-	\frac{C_\mathrm{HCl}(t)}    {F_\mathrm{FLD,HCl}} + 
-	\frac{C_\mathrm{HBr}(t)}    {F_\mathrm{FLD,HBr}} + 
-	\frac{C_\mathrm{HF}(t)}     {F_\mathrm{FLD,HF}} + 
-	\frac{C_\mathrm{SO_2}(t)}   {F_\mathrm{FLD,SO_2}} + 
-	\frac{C_\mathrm{NO_2}(t)}   {F_\mathrm{FLD,NO_2}} + 
-	\frac{C_\mathrm{C_3H_4O}(t)}{F_\mathrm{FLD,C_3H_4O}} + 
-	\frac{C_\mathrm{CH_2O}(t)}  {F_\mathrm{FLD,CH_2O}} 
+	\frac{C_\mathrm{HCl}(t)}    {F_\mathrm{FLD,HCl}} +
+	\frac{C_\mathrm{HBr}(t)}    {F_\mathrm{FLD,HBr}} +
+	\frac{C_\mathrm{HF}(t)}     {F_\mathrm{FLD,HF}} +
+	\frac{C_\mathrm{SO_2}(t)}   {F_\mathrm{FLD,SO_2}} +
+	\frac{C_\mathrm{NO_2}(t)}   {F_\mathrm{FLD,NO_2}} +
+	\frac{C_\mathrm{C_3H_4O}(t)}{F_\mathrm{FLD,C_3H_4O}} +
+	\frac{C_\mathrm{CH_2O}(t)}  {F_\mathrm{FLD,CH_2O}}
 	\right) \, dt
 \ee
-where $t$ is time in minutes, the nominators are the instantaneous concentrations (ppm) of each irritant and 
-the denominators the exposure doses of respective irritants predicted to be lethal to half the population. 
+where $t$ is time in minutes, the nominators are the instantaneous concentrations (ppm) of each irritant and
+the denominators the exposure doses of respective irritants predicted to be lethal to half the population.
 The lethal exposure doses~\cite{SFPE:Purser} are given in the table below.
 \begin{center}
 \begin{tabular}{|l|l|l|l|l|l|l|l|}
 \hline & HCl & HBr & HF & $\mathrm{SO_2}$ & $\mathrm{NO_2}$ & $\mathrm{C_3H_4O}$ & $\mathrm{CH_2O}$  \\ \hline \hline
-F${}_\mathrm{FLD}$ (ppm $\times$ min) & 114000 & 114000 & 87000 & 12000 & 1900 & 4500 & 22500 \\ 
+F${}_\mathrm{FLD}$ (ppm $\times$ min) & 114000 & 114000 & 87000 & 12000 & 1900 & 4500 & 22500 \\
 F${}_\mathrm{FIC}$ (ppm) & 900 & 900 & 900 & 120 & 350 & 20 & 30 \\ \hline
 \end{tabular}
 \end{center}
@@ -1650,29 +1653,29 @@ The fraction of an incapacitating dose of low O${}_2$ hypoxia is calculated as
 \be
 \mathrm{FED}_\mathrm{O_2} =  \int_0^t \frac{dt}{60 \exp \left [ 8.13 - 0.54 \, (20.9 - C_\mathrm{O_2}(t)) \right ] }
 \ee
-where $t$ is time in minutes and $C_\mathrm{O_2}$ is the O${}_2$ concentration (volume per cent). 
+where $t$ is time in minutes and $C_\mathrm{O_2}$ is the O${}_2$ concentration (volume per cent).
 The hyperventilation factor induced by carbon dioxide is calculated as
 \be
 \mathrm{HV}_\mathrm{CO_2} = \frac{ \exp( 0.1930 \, C_\mathrm{CO_2}(t) +  2.0004 ) }{7.1} \label{co2hyp}
 \ee
 where $t$ is time in minutes and $C_\mathrm{CO_2}$ is the CO${}_2$ concentration (percent).
 
-The Fractional Irritant Concentration (FIC), also developed by Purser~\cite{SFPE:Purser}, represents the toxic effect which 
-depends upon the immediate concentrations of irritants. The overall irritant concentration FIC is calculated as 
+The Fractional Irritant Concentration (FIC), also developed by Purser~\cite{SFPE:Purser}, represents the toxic effect which
+depends upon the immediate concentrations of irritants. The overall irritant concentration FIC is calculated as
 \be
-\mathrm{FIC}_\mathrm{irr} = 
-	\frac{C_\mathrm{HCl}(t)}    {F_\mathrm{FIC,HCl}} + 
-	\frac{C_\mathrm{HBr}(t)}    {F_\mathrm{FIC,HBr}} + 
-	\frac{C_\mathrm{HF}(t)}     {F_\mathrm{FIC,HF}} + 
-	\frac{C_\mathrm{SO_2}(t)}   {F_\mathrm{FIC,SO_2}} + 
-	\frac{C_\mathrm{NO_2}(t)}   {F_\mathrm{FIC,NO_2}} + 
-	\frac{C_\mathrm{C_3H_4O}(t)}{F_\mathrm{FIC,C_3H_4O}} + 
+\mathrm{FIC}_\mathrm{irr} =
+	\frac{C_\mathrm{HCl}(t)}    {F_\mathrm{FIC,HCl}} +
+	\frac{C_\mathrm{HBr}(t)}    {F_\mathrm{FIC,HBr}} +
+	\frac{C_\mathrm{HF}(t)}     {F_\mathrm{FIC,HF}} +
+	\frac{C_\mathrm{SO_2}(t)}   {F_\mathrm{FIC,SO_2}} +
+	\frac{C_\mathrm{NO_2}(t)}   {F_\mathrm{FIC,NO_2}} +
+	\frac{C_\mathrm{C_3H_4O}(t)}{F_\mathrm{FIC,C_3H_4O}} +
 	\frac{C_\mathrm{CH_2O}(t)}  {F_\mathrm{FIC,CH_2O}}
 \ee
-where the nominators are the instantaneous concentrations of each irritant and the denominators the concentrations of respective irritants 
+where the nominators are the instantaneous concentrations of each irritant and the denominators the concentrations of respective irritants
 expected to cause incapacitation in half the population. The incapacitating concentrations~\cite{SFPE:Purser} are given in the table above.
 
-The FED and FIC values were computed from specified constant gas concentrations for four cases using an external script. 
+The FED and FIC values were computed from specified constant gas concentrations for four cases using an external script.
 The gas concentrations are listed in the table below. The concentrations are in ppm.
 \begin{center}
 \begin{tabular}{|l|l|l|l|l|}
@@ -1692,9 +1695,9 @@ $\mathrm{CH_2O}$ & 0 & 0 & 13.49 & 6.743  \\ \hline
 \end{tabular}
 \end{center}
 
-Two versions of the simulations are performed. In the first simulation, the species were defined as individual tracked species. 
-The FDS predictions and the expected FED and FIC values are compared in the figures below. In the second simulation, each specie was defined as 
-a lumped specie, being part of the mixture using {\ct SMIX}. Four different mixtures were defined. The results for this test are shown in 
+Two versions of the simulations are performed. In the first simulation, the species were defined as individual tracked species.
+The FDS predictions and the expected FED and FIC values are compared in the figures below. In the second simulation, each specie was defined as
+a lumped specie, being part of the mixture using {\ct SMIX}. Four different mixtures were defined. The results for this test are shown in
 Figure~\ref{FED_FIC_SMIX_plot}.
 
 \begin{figure}[ht]
@@ -2386,23 +2389,12 @@ F & 150 & 1600 \tabularnewline
 \section{Water Droplet Evaporation (\texorpdfstring{{\textbf{water\_evaporation}}}{water\_evaporation}) }
 \label{water_evaporation}
 
-\subsection{Stationary state}
+The cases called {\bf water\_evaporation\_x} test the water evaporation routine in FDS. The geometry consists either of 
+a sealed box or a tunnel with a cross flow. The walls are assumed adiabatic, meaning that there are no leaks or heat losses. 
+For the box cases, the air within the box is stirred to maintain uniform conditions. 
+In each case, the numerical solutions are compared to analytical solutions.
 
-
-The three test cases called {\bf water\_evaporation\_x} involve stationary water droplets in a cubic box
-The walls of the box are
-assumed adiabatic, meaning that there are no leaks or heat losses. The air within the box is stirred to maintain uniform conditions. In each case, the numerical solutions are compared to analytical solutions.
-
-In the first case, the dimensions of the box are 1~m on a side, the initial
-air temperature is 200~$^\circ$C, the median volumetric diameter of the droplets is 200~$\mu$m, the water temperature is 20~$^\circ$C, and the total
-mass of water droplets is 0.01~kg. The initial mass fraction of water vapor is 0.
-It is expected that the droplets will all evaporate within about 10~s.
-
-Figures~\ref{water_evaporation_1_plots} to~\ref{water_evaporation_3_plots}  displays
-the average enthalpy, humidity, density, pressure, temperature and mass of water vapor of the gas within the box.
-For the two last cases, the liquid water concentration is also plotted. The solid horizontal lines denote the expected steady-state values.
-
-In the first case, the analytical solution for the stationary state derives from the first principle of thermodynamics. The plot of enthalpy in~\ref{water_evaporation_1_plots} displays the change in enthalpy of both the droplets and the gas. The change in the enthalpy of the water droplets should equal the change in the enthalpy of the gas minus the work
+For Cases 1-3 where the water droplets are confined to a sealed box, the change in the enthalpy of the droplets should equal the change in the enthalpy of the gas minus the work
 performed due to pressure. It is the internal energy of the system that is conserved. The internal energy can be expressed in terms of the
 enthalpy, pressure and density:
 \begin{equation} e = h - \frac{p}{\rho} \end{equation}
@@ -2416,7 +2408,17 @@ decrease of the liquid water droplets is equal to the enthalpy gain of the gas (
 pressure increase times the volume in
 units of kPa and m$^3$, respectively.
 
-\begin{figure}[ht]
+\subsection{Case 1}
+
+In the first case, the dimensions of the box are 1~m on a side, the initial
+air temperature is 200~$^\circ$C, the median volumetric diameter of the droplets is 200~$\mu$m, the water temperature is 20~$^\circ$C, and the total
+mass of water droplets is 0.01~kg. The initial mass fraction of water vapor is 0.
+It is expected that the droplets will all evaporate within about 10~s.
+Figure~\ref{water_evaporation_1_plots} displays
+the average enthalpy, humidity, density, temperature, pressure, and mass of water vapor within the box.
+The solid horizontal lines denote the expected steady state values.
+
+\begin{figure}[p]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_1_enthalpy} &
@@ -2430,10 +2432,14 @@ units of kPa and m$^3$, respectively.
 \label{water_evaporation_1_plots}
 \end{figure}
 
-In the second case, the dimensions of the box are 40~cm on a side, the initial
-air temperature is 500~$^\circ$C. There is only one water droplet in the box whose diameter is equal to 100000~$\mu$m and temperature  is 20~$^\circ$C. The initial mass fraction of water vapor is 0. It is expected to reach the saturation state. The analytical solution for the stationary state derives from the first principle of thermodynamics and the Clausius-Clapeyron equation by assuming that the liquid water temperature is equal to air temperature at the stationary state.
+\subsection{Case 2}
 
-\begin{figure}[ht]
+In the second case, the dimensions of the box are 40~cm on a side, and the initial
+air temperature is 500~$^\circ$C. There is only one fictitiously large water droplet in the box whose diameter is 10~cm and whose temperature is 20~$^\circ$C. 
+The initial mass fraction of water vapor is 0. It is expected that the water will evaporate until the air in the box is saturated. The analytical solution for the stationary state is derived 
+from the first law of thermodynamics and the Clausius-Clapeyron equation by assuming that the liquid water temperature is equal to air temperature at the steady state.
+
+\begin{figure}[p]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_2_enthalpy} &
@@ -2441,45 +2447,69 @@ air temperature is 500~$^\circ$C. There is only one water droplet in the box who
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_2_density} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_2_temperature} \\
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_2_pressure} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_2_W_density} 
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_2_W_density}
 \end{tabular*}
 \caption[Sample case {\bf water\_evaporation\_2}.]{Output of the test case called {\bf water\_evaporation\_2}.}
 \label{water_evaporation_2_plots}
 \end{figure}
 
-In the third case, the dimensions of the box are 1~m on a side, the initial
-air temperature is 500~$^\circ$C, the  initial diameter of all the droplets is 200~$\mu$m, the water temperature is 20~$^\circ$C, and the total mass of water droplets is 0.1~kg. The initial mass fraction of water vapor is 0. It is expected to reach the saturation state. As in the second case, the analytical solution for the stationary state derives from the first principle of thermodynamics and the Clausius-Clapeyron equation by assuming that the liquid water temperature is equal to air temperature at the stationary state.
+\subsection{Case 3}
 
-\begin{figure}[ht]
+In the third case, the dimensions of the box are 1~m on a side, the initial
+air temperature is 500~$^\circ$C, the  initial diameter of all the droplets is 200~$\mu$m, the water temperature is 20~$^\circ$C, 
+and the total mass of water droplets is 0.1~kg. The initial mass fraction of water vapor is 0. It is expected to reach the saturation state. 
+As in the second case, the analytical solution for the stationary state derives from the first principle of thermodynamics and the Clausius-Clapeyron equation 
+by assuming that the liquid water temperature is equal to air temperature at the stationary state.
+
+\begin{figure}[p]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_3_humidity} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_3_density}\\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_3_temperature} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_3_pressure}\\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_3_W_density}&
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_3_W_temperature}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_3_enthalpy} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_3_humidity}\\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_3_density} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_3_temperature}\\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_3_pressure}&
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_3_W_density}
 \end{tabular*}
 \caption[Sample case {\bf water\_evaporation\_3}.]{Output of the test case called {\bf water\_evaporation\_3}.}
 \label{water_evaporation_3_plots}
 \end{figure}
 
-%\FloatBarrier
-
 \clearpage
 
-\subsection{Rate of evaporation}
+\subsection{Case 4}
 
-The test consists in one single evaporating water droplet in an ambient air. The computational results are evaluated upon the 
-the rate of evaporation and more precisely the droplet diameter versus time. The comparison is done with measurements extracted from the reference~\cite{Ranz}.
+In the fourth case, air at 500~$^\circ$C is forced through a 3~m long, 1~m wide, 1~m tall tunnel at 1~m/s. Water droplets with a median volumetric diameter of 20~$\mu$m are
+introduced in the middle of the tunnel at a rate of 0.05~kg/s, starting at 10~s. The water temperature is 20~$^\circ$C. 
+The mass fraction of water vapor in the hot air flowing into the tunnel is 0.
+The water evaporates at approximately the same rate at which it is introduced.
+Figure~\ref{water_evaporation_4_plots}, left, displays the time history of the enthalpy flow out of the tunnel. The dry hot air has an enthalpy (above ambient) of 228~kW, and this
+value drops to approximately 87~kW after about 20~s. The evaporation of the water droplets is extracting energy from the hot gas at a rate of
+\be \left( 4.184 \; \hbox{kJ/kg/K} \times 80 \; \hbox{K} + 2492 \; \hbox{kJ/kg} \right) \times 0.05 \; \hbox{kg/s} = 141.3 \; \hbox{kW} \ee
 
-\begin{figure}[ht]
-\begin{center}
-\includegraphics[height=3.00in]{SCRIPT_FIGURES/rate_of_evaporation_diameter}
-\caption[Sample case {\bf rate_of_evaporation}.]{Droplet diameter versus time}
-\end{center}
-\label{fig_rate_of_evaporation}
+\subsection{Case 5}
+
+This test involves a single evaporating water droplet in relatively dry air. The comparison is made with an actual measurement~\cite{Ranz} where a 1~mm water droplet
+shrinks to approximately 0.3~mm in approximately 10~min (see Fig.~\ref{water_evaporation_4_plots}, right). 
+As opposed to the other cases above, this case tests the predicted rate of evaporation, not the final steady state.
+
+\begin{figure}[h!]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_4_enthalpy} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_5_diameter}
+\end{tabular*}
+\caption[Sample cases {\bf water\_evaporation\_4} and {\bf water\_evaporation\_5}.]{Output of {\bf water\_evaporation} cases 4 and 5.}
+\label{water_evaporation_4_plots}
 \end{figure}
+
+
+
+
+
+
+
+
 
 \chapter{Heating, Ventilating, and Air Conditioning (HVAC)}
 
@@ -2532,6 +2562,8 @@ A 1~m by 1~m by 1~m box is divided into two equal compartments by a vertical wal
 
 
 
+\clearpage
+
 \section{Leakage: {\bf leak\_test} and {\bf leak\_test\_2}}
 
 In the following examples, both leaks and fans are demonstrated. A simple compartment (3.6~m by 2.4~m by 2.4~m) has a small fan at one end and
@@ -2567,7 +2599,15 @@ at ambient pressure. Now the fan flow rate ought to balance the sum of the flow 
 
 \section{Multiple zone leakage (leak\_test\_2)}
 
-Two compartments are defined: A 5 m x 4 m x 3. 2 m compartment containing a second 3.6 m x 2.4 m x 2.4 m compartment, see Figure~\ref{fig_HVAC_leak_fan}.  The interior compartment is connected to the exterior compartment both by a fan (quadratic fan curve with a maximum volumetric flow of 0.005 m$^3$/s and a maximum pressure of 1000 Pa) and by an 0.0001 m$^2$ leakage path.  The interior compartment is also connected to the ambient by an 0.0001 m$^2$ leakage path.  The fan is defined with a 1 s tanh ramp to reach full power.  When the simulation starts the fan will begin to remove air from the outer compartment and discharge it into the inner compartment.  As the pressure rises, the leakage flows will slowly increase until the leakage flow is equal to the flow from the fan.  Since some air from the interior compartment is being discharged to the ambient, the average pressure of the two compartments will decrease until the pressure of the interior compartment is equal to that of the ambient.  At this point in time, no more leakage flow will occur to the ambient and the fan flow will equal intra-compartment leakage flow.  Given the leakage area and the fan curve, this will occur when the pressure difference between the two compartments is 598 Pa.
+Two compartments are defined: A 5 m x 4 m x 3. 2 m compartment containing a second 3.6 m x 2.4 m x 2.4 m compartment, see Figure~\ref{fig_HVAC_leak_fan}.  
+The interior compartment is connected to the exterior compartment both by a fan (quadratic fan curve with a maximum volumetric flow of 0.005 m$^3$/s and a 
+maximum pressure of 1000 Pa) and by an 0.0001 m$^2$ leakage path.  The interior compartment is also connected to the ambient by an 0.0001 m$^2$ leakage path.  
+The fan is defined with a 1 s tanh ramp to reach full power.  When the simulation starts the fan will begin to remove air from the outer compartment and discharge it into the 
+inner compartment.  As the pressure rises, the leakage flows will slowly increase until the leakage flow is equal to the flow from the fan.  
+Since some air from the interior compartment is being discharged to the ambient, the average pressure of the two compartments will 
+decrease until the pressure of the interior compartment is equal to that of the ambient.  At this point in time, no more leakage flow will occur to the 
+ambient and the fan flow will equal intra-compartment leakage flow.  Given the leakage area and the fan curve, this will occur when the pressure difference between the 
+two compartments is 598~Pa.
 
 \begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -2578,6 +2618,10 @@ Two compartments are defined: A 5 m x 4 m x 3. 2 m compartment containing a seco
    \label{fig_HVAC_leak_fan}
 \end{figure}
 
+
+
+\clearpage
+
 \section{ASHRAE Sample Problem 7 (ashrae\_7\_fixed\_flow, ashrae\_7\_quadratic, and ashrae\_7\_table)}
 =======
 
@@ -2586,7 +2630,7 @@ ASRHAE sample problem 7 ~\cite{ASHRAE} is a simple HVAC system that represents a
 \begin{figure}[t]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
       \scalebox{1.0}{ \includegraphics[width=3.2in]{FIGURES/HVAC/ashrae_7.pdf} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{{FIGURES/HVAC/ASHRAE_7_pressure_drop.pdf}} }
+      %\scalebox{1.0}{ \includegraphics[width=3.2in]{{FIGURES/HVAC/ASHRAE_7_pressure_drop.pdf}} }
    \end{tabular*}
    \caption{Schematic of ASHRAE sample problem 7 (left) and the analytical vs. computed duct pressure drops (right)}
    \label{ASHRAE7_schematic}

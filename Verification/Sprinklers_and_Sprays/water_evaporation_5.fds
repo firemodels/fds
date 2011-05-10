@@ -2,7 +2,7 @@ A test for evaluating the rate of evaporation for one single droplet in an ambie
 Comparison of the droplet diameter versus time with experimental data extracted
 from Ranz and Marshall "Evaporation from drops - Part II" Chemical Engineering Progress, 48(4) :173–180 (1952)
  
-&HEAD CHID='rate_of_evaporation' /
+&HEAD CHID='water_evaporation_5' /
 
 &MESH IJK=4 4 4, XB=0. 1.0 0. 1.0 0.0 1.0 /
 
