@@ -880,7 +880,7 @@ typedef struct {
   int seq_id, autoload;
   char *file;
   char *size_file;
-  char *rle_file, *comp_file, *reg_file;
+  char *comp_file, *reg_file;
   int terrain, cellcenter, fire_line;
   int compression_type;
   int ncompressed;

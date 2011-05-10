@@ -412,16 +412,6 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
         return;
       }
     }
-    else if(sd->compression_type==2){
-      if(
-        getsliceheader(sd->rle_file,sd->size_file,sd->compression_type,
-                       sliceframestep,settmin_s,settmax_s,tmin_s,tmax_s,
-                       &sd->nslicei, &sd->nslicej, &sd->nslicek, &sd->nsteps, &sd->ncompressed, &sd->valmin, &sd->valmax)==0){
-        readslice("",ifile,UNLOAD,&error);
-        *errorcode=1;
-        return;
-      }
-    }
     if(sd->nslicei!=1&&sd->nslicej!=1&&sd->nslicek!=1){
       sd->volslice=1;
       ReadVolSlice=1;
@@ -445,7 +435,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     printf("Loading slice data: %s\n",file);
     MEMSTATUS(1,&availmemory,NULL,NULL);
     local_starttime = glutGet(GLUT_ELAPSED_TIME);
-    if(sd->compression_type==1||sd->compression_type==2){
+    if(sd->compression_type==1){
       char *datafile;
 
       if(NewMemory((void **)&sd->qslicedata_compressed,sd->ncompressed)==0||
@@ -456,12 +446,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
         readslice("",ifile,UNLOAD,&error);
         return;
       }
-      if(sd->compression_type==1){
-        datafile = sd->comp_file;
-      }
-      else{
-        datafile=sd->rle_file;
-      }
+      datafile = sd->comp_file;
       if(getslicecompresseddata(datafile,sd->compression_type,
         settmin_s,settmax_s,tmin_s,tmax_s,sd->ncompressed,sliceframestep,sd->nsteps,
         sd->slicetimes,sd->qslicedata_compressed,sd->compindex,&sd->globalmin,&sd->globalmax)==0){
@@ -1319,10 +1304,6 @@ void getsliceparams(void){
     else if(sd->compression_type==1){
       error=0;
       if(getsliceheader0(sd->comp_file,sd->size_file,sd->compression_type,&is1,&is2,&js1,&js2,&ks1,&ks2, &sd->volslice)==0)error=1;
-    }
-    else if(sd->compression_type==2){
-      error=0;
-      if(getsliceheader0(sd->rle_file,sd->size_file,sd->compression_type,&is1,&is2,&js1,&js2,&ks1,&ks2, &sd->volslice)==0)error=1;
     }
     if(error==0){
       sd->is1=is1;

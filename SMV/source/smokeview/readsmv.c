@@ -1198,7 +1198,6 @@ int readsmv(char *file, char *file2){
       freelabels(&sliceinfo[i].label);
       FREEMEMORY(sd->reg_file);
       FREEMEMORY(sd->comp_file);
-      FREEMEMORY(sd->rle_file);
       FREEMEMORY(sd->size_file);
     }
     FREEMEMORY(sliceorderindex);
@@ -4669,19 +4668,11 @@ typedef struct {
       STRCPY(sd->comp_file,bufptr);
       STRCAT(sd->comp_file,".svz");
 
-      NewMemory((void **)&sd->rle_file,(unsigned int)(len+4+1));
-      STRCPY(sd->rle_file,bufptr);
-      STRCAT(sd->rle_file,".rle");
-
       NewMemory((void **)&sd->size_file,(unsigned int)(len+3+1));
       STRCPY(sd->size_file,bufptr);
       STRCAT(sd->size_file,".sz");
 
       sd->compression_type=0;
-      if(STAT(sd->rle_file,&statbuffer)==0){
-        sd->compression_type=2;
-        sd->file=sd->rle_file;
-      }
       if(STAT(sd->comp_file,&statbuffer)==0){
         sd->compression_type=1;
         sd->file=sd->comp_file;
