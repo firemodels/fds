@@ -31,16 +31,13 @@ void WUI_CB(int var);
 int getslicezlibdata(char *file,
                             int set_tmin, int set_tmax, float tmin, float tmax, int ncompressed, int sliceskip, int nsliceframes,
                             float *times, unsigned char *compressed_data, compinfo *compindex, float *valmin, float *valmax);
-int getslicerledata(char *file,
-                            int set_tmin, int set_tmax, float tmin, float tmax, int ncompressed, int sliceskip, int nsliceframes,
-                            float *times, unsigned char *compressed_data, compinfo *compindex, float *valmin, float *valmax);
 int average_slice_data(float *data_out, float *data_in, int ndata, int data_per_timestep, float *times, int ntimes, float average_time);
 int auto_turbprop_slice_data(float *data_out, float *u, int ndata, int data_per_timestep, float *times, int ntimes, float average_time);
 int getsliceheader(char *comp_file, char *size_file, int compression_type, 
                    int framestep, int set_tmin, int set_tmax, float tmin, float tmax,
                    int *nx, int *ny, int *nz, int *nsteps, int *ntotal, float *valmin, float *valmax);
 int getsliceheader0(char *comp_file, char *size_file, int compression_type, int *i1, int *i2, int *j1, int *j2, int *k1, int *k2, int *slice3d);
-int getslicecompresseddata(char *file,int compression_type,
+int getslicecompresseddata(char *file,
                             int set_tmin, int set_tmax, float tmin, float tmax, int ncompressed, int sliceskip, int nsliceframes,
                             float *times, unsigned char *compressed_data, compinfo *compindex, float *valmin, float *valmax);
 
@@ -447,7 +444,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
         return;
       }
       datafile = sd->comp_file;
-      if(getslicecompresseddata(datafile,sd->compression_type,
+      if(getslicecompresseddata(datafile,
         settmin_s,settmax_s,tmin_s,tmax_s,sd->ncompressed,sliceframestep,sd->nsteps,
         sd->slicetimes,sd->qslicedata_compressed,sd->compindex,&sd->globalmin,&sd->globalmax)==0){
         readslice("",ifile,UNLOAD,&error);
@@ -5113,103 +5110,14 @@ int getsliceheader(char *comp_file, char *size_file, int compression_type,
 
 /* ------------------ getslicecompresseddata ------------------------ */
 
-int getslicecompresseddata(char *file, int compression_type,
+int getslicecompresseddata(char *file, 
                             int set_tmin, int set_tmax, float tmin, float tmax, int ncompressed, int sliceskip, int nsliceframes,
                             float *times, unsigned char *compressed_data, compinfo *compindex, float *valmin, float *valmax){
   int returnval;
 
-  if(compression_type==1){
-    returnval=getslicezlibdata(file,set_tmin,set_tmax,tmin,tmax,ncompressed,sliceskip,nsliceframes,
+  returnval=getslicezlibdata(file,set_tmin,set_tmax,tmin,tmax,ncompressed,sliceskip,nsliceframes,
                             times,compressed_data,compindex,valmin,valmax);
-  }
-  else{
-    returnval=getslicerledata(file,set_tmin,set_tmax,tmin,tmax,ncompressed,sliceskip,nsliceframes,
-                            times,compressed_data,compindex,valmin,valmax);
-  }
   return returnval;
-}
-
-/* ------------------ getslicerledata ------------------------ */
-
-int getslicerledata(char *file, 
-                            int set_tmin, int set_tmax, float tmin, float tmax, int ncompressed, int sliceskip, int nsliceframes,
-                            float *times, unsigned char *compressed_data, compinfo *compindex, float *valmin, float *valmax){
-  FILE *stream;
-  int count, ns;
-  unsigned char *cd;
-  float minmax[2];
-  int ijkbar[6];
-  int one;
-  int endianswitch;
-  FILE *RLESLICEFILE;
-  size_t returncode;
-
-  cd=compressed_data;
-  compindex[0].offset=0;
-
-  stream=fopen(file,"rb");
-  if(stream==NULL)return 0;
-  RLESLICEFILE=stream;
-  
-  // read header
-
-  //*** RLE format
-
-  //*** header
-  // endian
-  // fileversion, slice version 
-  // global min max (used to perform conversion)
-  // i1,i2,j1,j2,k1,k2
-
-
-  //*** frame
-  // time
-  // compressed frame size                        for each frame
-  // compressed buffer
-
-    fseek(stream,4,SEEK_CUR);fread(&one,4,1,stream);fseek(stream,4,SEEK_CUR);
-    
-    endianswitch=0;
-    if(one!=1)endianswitch=1;
-
-    fseek(stream,4*4,SEEK_CUR);
-    FORTRLESLICEREAD(minmax,2);
-    FORTRLESLICEREAD(ijkbar,6);
-
-
-  count=0;
-  ns=0;
-  while(!feof(stream)){
-    float ttime;
-    int nncomp;
-
-    FORTRLESLICEREAD(&ttime,1);
-    if(returncode==0)break;
-    FORTRLESLICEREAD(&nncomp,1);
-    if(returncode==0)break;
-    if(count++%sliceskip!=0||set_tmin==1&&ttime<tmin||set_tmax==1&&ttime>tmax){
-      fseek(stream,4+nncomp+4,SEEK_CUR);
-      continue;
-    }
-    times[ns++]=ttime;
-    compindex[ns].offset=compindex[ns-1].offset+nncomp;
-    compindex[ns-1].size=nncomp;
-
-    printf("slice time=%.2f\n",ttime);
-    returncode=fseek(stream,4,SEEK_CUR);
-    if(returncode!=0)break;
-
-    returncode=fread(cd,1,nncomp,stream);
-    if(returncode==0)break;
-
-    returncode=fseek(stream,4,SEEK_CUR);
-    if(returncode!=0)break;
-
-    cd+=nncomp;
-    if(ns>=nsliceframes||cd-compressed_data>=ncompressed)break;
-  }
-  fclose(stream);
-  return cd-compressed_data;
 }
 
 /* ------------------ getsliceczlibdata ------------------------ */
