@@ -670,8 +670,6 @@ int readsmv(char *smvfile){
       int len;
       int filesize;
       slice *slicei;
-      char buffer_rle[255];
-
 
       len=strlen(buffer);
       if(len>4){
@@ -696,33 +694,10 @@ int readsmv(char *smvfile){
       trim(buffer);
       buffer2=trim_front(buffer);
       if(strlen(buffer2)<=0)break;
-      strcpy(buffer_rle,buffer2);
-      strcat(buffer_rle,".rle");
-      slicei->rle=-1;
-      if(getfileinfo(buffer_rle,sourcedir,&filesize)==0){
-        NewMemory((void **)&slicei->file,(unsigned int)(strlen(buffer_rle)+lensourcedir+1));
-        NewMemory((void **)&slicei->filebase,(unsigned int)(strlen(buffer_rle)+1));
-        STRCPY(slicei->filebase,buffer_rle);
-        slicei->rle=1;
-        if(sourcedir!=NULL){
-          STRCPY(slicei->file,sourcedir);
-          STRCAT(slicei->file,buffer_rle);
-        }
-        else{
-          STRCPY(slicei->file,buffer_rle);
-        }
-        if(readlabels(&slicei->label,streamsmv)==2){
-          printf("*** Warning: problem reading SLCF entry\n");
-          break;
-        }
-        slicei->filesize=filesize;
-        islice++;
-      }
-      if(slicei->rle==-1&&getfileinfo(buffer2,sourcedir,&filesize)==0){
+      if(getfileinfo(buffer2,sourcedir,&filesize)==0){
         NewMemory((void **)&slicei->file,(unsigned int)(strlen(buffer2)+lensourcedir+1));
         NewMemory((void **)&slicei->filebase,(unsigned int)(strlen(buffer2)+1));
         STRCPY(slicei->filebase,buffer2);
-        slicei->rle=0;
         if(sourcedir!=NULL){
           STRCPY(slicei->file,sourcedir);
           STRCAT(slicei->file,buffer2);
@@ -737,7 +712,7 @@ int readsmv(char *smvfile){
         slicei->filesize=filesize;
         islice++;
       }
-      if(slicei->rle==-1){
+      else{
         printf("*** Warning: the file, %s, does not exist.\n",buffer2);
         if(readlabels(&sliceinfo[islice].label,streamsmv)==2)break;
         nslice_files--;

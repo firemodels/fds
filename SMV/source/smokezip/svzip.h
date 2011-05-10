@@ -98,7 +98,6 @@ typedef struct {
   histogramdata *histogram;
   flowlabels label;
   int dup;
-  int rle;
 } slice;
 
 /* --------------------------  bound ------------------------------------ */
