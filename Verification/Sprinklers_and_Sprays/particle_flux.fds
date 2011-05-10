@@ -1,0 +1,25 @@
+A test of the insertion of solid, non-evaporating particles.
+
+&HEAD CHID='particle_flux', TITLE='Simple test of particle mass flux from a surface, SVN $Revision$' /
+
+&MESH IJK=50,50,25, XB=-5.0,5.0,-5.0,5.0,0.0,5.0 /
+
+&TIME DT=0.1, T_END=20. /
+
+&PART ID='particles', QUANTITIES(1)='DROPLET DIAMETER', DENSITY=1000., DIAMETER=750., SAMPLING_FACTOR=1, EVAPORATE=.FALSE. /
+
+&SURF ID='HOLE', PART_ID='particles', VEL=-5., PARTICLE_MASS_FLUX=0.1, COLOR='RED' /
+
+&OBST XB=-0.2, 0.2,-0.2, 0.2, 4.0, 4.4, SURF_IDS='INERT','HOLE','INERT', DEVC_ID='clock' /
+
+&DEVC ID='clock', QUANTITY='TIME', SETPOINT=10., INITIAL_STATE=.TRUE., XYZ=0,0,0 /
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+
+&BNDF QUANTITY='AMPUA', PART_ID='particles'  /  Accumulated Mass Per Unit Area, i.e., the Buckets
+&DEVC QUANTITY='AMPUA', PART_ID='particles', STATISTICS='SURFACE INTEGRAL', ID='mass', XB=-5.0,5.0,-5.0,5.0,0.0,0.0  / 
+
+&TAIL /
