@@ -2625,15 +2625,19 @@ two compartments is 598~Pa.
 \section{ASHRAE Sample Problem 7 (ashrae\_7\_fixed\_flow, ashrae\_7\_quadratic, and ashrae\_7\_table)}
 =======
 
-ASRHAE sample problem 7 ~\cite{ASHRAE} is a simple HVAC system that represents a metal working exhaust system for a machine shop where particulates from three pieces of equipment are removed by a dust collector.  The network, shown in Figure~\ref{ASHRAE7_schematic} consists of three inlets, two tees, the dust collector, and a fan.  The lengths, diameters, and friction losses for all the components were defined as well as the fan flow rate.  Pressure drops and flow rates in the remaining components can be computed by hand.  Also shown in Figure~\ref{ASHRAE7_schematic} are the predict pressure drops using a fixed flow fan, a fan with a quadratic fan curve ({\ct MAX\_FLOW=2.4094, MAX\_PRESSURE=3000.}) that includes the fixed flow state (i.e. the flow rate of 1.45 m$^3$/s and pressure drop of 1913.5 Pa from the fixed flow simulation sits on the quadratic curve), and a fan using a {\ct RAMP} to define the same quadratic fan curve at 500 Pa intervals.  The hand calculations assume a constant density, whereas, the FDS computation will have slightly non uniform density in HVAC network due to presure drops and the equation of state.  It is expected that there will be small differences that will be more noticeable at higher pressure changes.  Additionally since inputting a fan curve as a table results in a piecewise linear approximation, it is expected that the user defined fan curve results will vary slightly from the quadratic and fixed flow results.
+ASRHAE sample problem 7 ~\cite{ASHRAE} is a simple HVAC system that represents a metal working exhaust system for a machine shop where particulates from three pieces of equipment are removed by a dust collector.  The network, shown in Figure~\ref{ASHRAE7} consists of three inlets, two tees, the dust collector, and a fan.  The lengths, diameters, and friction losses for all the components were defined as well as the fan flow rate.  Pressure drops and flow rates in the remaining components can be computed by hand.  Also shown in Figure~\ref{ASHRAE7} are the predict pressure drops using a fixed flow fan, a fan with a quadratic fan curve ({\ct MAX\_FLOW=2.4094, MAX\_PRESSURE=3000.}) that includes the fixed flow state (i.e. the flow rate of 1.45 m$^3$/s and pressure drop of 1913.5 Pa from the fixed flow simulation sits on the quadratic curve), and a fan using a {\ct RAMP} to define the same quadratic fan curve at 500 Pa intervals.  The hand calculations assume a constant density, whereas, the FDS computation will have slightly non uniform density in HVAC network due to presure drops and the equation of state.  It is expected that there will be small differences that will be more noticeable at higher pressure changes.  Additionally since inputting a fan curve as a table results in a piecewise linear approximation, it is expected that the user defined fan curve results will vary slightly from the quadratic and fixed flow results.
 
-\begin{figure}[t]
-   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{FIGURES/HVAC/ashrae_7.pdf} } &
-      %\scalebox{1.0}{ \includegraphics[width=3.2in]{{FIGURES/HVAC/ASHRAE_7_pressure_drop.pdf}} }
-   \end{tabular*}
-   \caption{Schematic of ASHRAE sample problem 7 (left) and the analytical vs. computed duct pressure drops (right)}
-   \label{ASHRAE7_schematic}
+
+\begin{figure}[ht]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.2in]{FIGURES/HVAC/ASHRAE_7_pressure_drop.pdf} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ashrae_7_dotplot_fixed.pdf} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ashrae_7_dotplot_quadratic.pdf} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ashrae_7_dotplot_table.pdf}
+\end{tabular*}
+\caption{Clockwise from top left: Schematic of ASHRAE sample problem 7, pressure drops for a fixed flow fan curve, pressure drops for a quadratic fan curve, pressure drops for a table defined fan curve}
+\label{ASHRAE7}
 \end{figure}
 
 \newpage
