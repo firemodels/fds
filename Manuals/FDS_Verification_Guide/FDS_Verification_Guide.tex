@@ -2564,7 +2564,7 @@ A 1~m by 1~m by 1~m box is divided into two equal compartments by a vertical wal
 
 \clearpage
 
-\section{Leakage: {\bf leak\_test} and {\bf leak\_test\_2}}
+\section{Single Zone Leakage: {\bf leak\_test}}
 
 In the following examples, both leaks and fans are demonstrated. A simple compartment (3.6~m by 2.4~m by 2.4~m) has a small fan at one end and
 one leak under the door at the other end. It is
@@ -2581,19 +2581,13 @@ p_{\hbox{\scriptsize max}}=1000$~Pa. The volume flow due to the leak is given by
 \sqrt{ \frac{ 2 \Delta p}{ \rho_\infty} } \ee where $A_{\hbox{\scriptsize leak}}=0.0001$~m$^2$ and $\rho_\infty=1.2$~kg/m$^3$. After 5~min the
 pressure difference is 938.2~Pa. The theoretical value, obtained by equating the fan and leak volume flow rates and solving for $\Delta_p$, is
 938.9~Pa. The slight difference is due to the fact that the solid boundaries within the interior of the computational domain admit a slight volume
-flux related to details of the numerical solver.
-
-Just for fun, we add another leak to the compartment, only this time the leak is to the exterior of the entire computational domain, an infinite void
-at ambient pressure. Now the fan flow rate ought to balance the sum of the flow rates from the two leaks. After 5~min, the pressure difference is
-935.2~Pa. The two cases are summarized in Fig.~\ref{leak_test}.
+flux related to details of the numerical solver.  The results are shown in Fig.~\ref{leak_test}.
 
 \begin{figure}[ht]
-\begin{tabular*}{\textwidth}{lr}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/leak_test} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/leak_test_2}
-\end{tabular*}
-\caption[Pressure rise in sealed compartment.]{Output of the leak test cases.}
-\label{leak_test}
+   \begin{center}
+      \includegraphics[height=3.00in]{SCRIPT_FIGURES/leak_test.pdf}
+     \caption{\label{leak_test} \small Pressure rise in sealed compartment with leakage.}
+   \end{center}
 \end{figure}
 
 
