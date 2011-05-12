@@ -1,14 +1,19 @@
-&HEAD CHID='scarc3d_fft_8mesh',TITLE='Simple 3D Scarc Test Case' /
+&HEAD CHID='scarc3d_cg_64mesh',TITLE='Simple 3D Scarc Test Case' /
 
-&MESH IJK=16,16,16, XB=0.0,0.4,0.0,0.4,0.0,0.4, MULT_ID='mesh' /
-&MULT ID='mesh', DX=0.4, DY=0.4, DZ=0.4, I_UPPER=1, J_UPPER=1, K_UPPER=1 /
+&MESH IJK=8,8,8, XB=0.0,0.2,0.0,0.2,0.0,0.2, MULT_ID='mesh' /
+&MULT ID='mesh', DX=0.2, DY=0.2, DZ=0.2, I_UPPER=3, J_UPPER=3, K_UPPER=3 /
 
 &MISC NOISE=.FALSE.
       GVEC = 0.0, 0.0, 0.0 /
 
 &TIME T_END = 2.0/
 
-&PRES VELOCITY_TOLERANCE=0.01 /
+&PRES SCARC_METHOD             = 'KRYLOV'
+      SCARC_KRYLOV             = 'CG'
+      SCARC_KRYLOV_ITERATIONS  =  1000
+      SCARC_PRECON             = 'JACOBI'
+      SCARC_DEBUG              = 'NONE'
+      SCARC_SYSTEM             = 'BANDED' /
 
 &DUMP DT_PL3D=1E10 /
 

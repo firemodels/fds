@@ -1,6 +1,6 @@
 &HEAD CHID='scarc3d_fft_1mesh',TITLE='Simple 3D Scarc Test Case' /
 
-&MESH IJK=64,64,64,  XB=0.0,0.8,0.0,0.8,0.0,0.8 /
+&MESH IJK=32,32,32,  XB=0.0,0.8,0.0,0.8,0.0,0.8 /
 
 &MISC NOISE=.FALSE.
       GVEC = 0.0, 0.0, 0.0 /
