@@ -3350,40 +3350,38 @@ PART_LOOP: DO N=1,N_PART
             SS%H_L(J) = SS%H_L(J-1) + 0.5_EB*(SS%C_P_L(J)+SS%C_P_L(J-1))
          ENDIF
       ENDIF
+   END DO
+
+   SS%C_P_L(0) = SS%C_P_L(1)
+   SS%H_L(0) = SS%H_L(1)
+   
+   !Adjust liquid H_L to force H_V at H_V_REFERENCE_TEMPERATURE
+   IF(SS%HEAT_OF_VAPORIZATION > 0._EB) H_V = SS%HEAT_OF_VAPORIZATION
+   ITMP = INT(SS%H_V_REFERENCE_TEMPERATURE)
+   TMP_WGT  = SS%H_V_REFERENCE_TEMPERATURE - REAL(ITMP,EB)
+   H_L_REF = SS%H_L(ITMP)+TMP_WGT*(SS%H_L(ITMP+1)-SS%H_L(ITMP))
+   H_G_S_REF=(CPBAR_Z(ITMP,PC%Z_INDEX)+TMP_WGT*(CPBAR_Z(ITMP+1,PC%Z_INDEX)-CPBAR_Z(ITMP,PC%Z_INDEX)))*SS%H_V_REFERENCE_TEMPERATURE
+   SS%H_L = SS%H_L + (H_G_S_REF - H_L_REF) - H_V
+
+   ! Determine the properties of the droplet
+   DO J=1,5000
+      H_G_S = CPBAR_Z(J,PC%Z_INDEX)*REAL(J,EB)
+      SS%H_V(J) = H_G_S - SS%H_L(J)         
       IF (J==1) THEN
          SS%C_P_L_BAR(J) =  SS%H_L(J)
       ELSE
          SS%C_P_L_BAR(J) = SS%H_L(J) / REAL(J,EB)
       ENDIF
-   ENDDO
-
-   SS%C_P_L(0) = SS%C_P_L(1)
-   SS%H_L(0) = SS%H_L(1)
-   SS%C_P_L_BAR(0) = SS%H_L(1)
-
-   ! Determine the properties of the droplet
-
-   IF (PC%Z_INDEX>0) THEN
-      IF(SS%H_V(1) > 0._EB) H_V = SS%H_V(1)
-      ITMP = INT(SS%H_V_REFERENCE_TEMPERATURE)
-      TMP_WGT  = SS%H_V_REFERENCE_TEMPERATURE - REAL(ITMP,EB)
-      H_L_REF = SS%H_L(ITMP)+TMP_WGT*(SS%H_L(ITMP+1)-SS%H_L(ITMP))
-      ZZ_GET = 0._EB
-      ZZ_GET(PC%Z_INDEX) = 1._EB
-      CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR,SS%H_V_REFERENCE_TEMPERATURE)      
-      H_G_S_REF = CPBAR*SS%H_V_REFERENCE_TEMPERATURE     
-      DO J=1,5000
-         CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR,REAL(J,EB))
-         H_G_S = CPBAR*REAL(J,EB)
-!         SS%H_V(J) = H_V + (H_G_S-H_G_S_REF) - (SS%H_L(J)-H_L_REF)
-         SS%H_V(J) = H_G_S - SS%H_L(J)
-      ENDDO
-   ENDIF
+   ENDDO         
+   
    SS%H_V(0) = SS%H_V(1)  
+   SS%C_P_L_BAR(0) = SS%H_L(1)
+   
 ENDDO PART_LOOP
 
-END SUBROUTINE PROC_PART
 
+
+END SUBROUTINE PROC_PART
  
  
 SUBROUTINE READ_TREE
