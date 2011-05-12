@@ -6285,6 +6285,10 @@ and the source term in the radiative transport equation is then based solely
 on the gas temperature and the chemical composition. By default, the {\ct RADIATIVE\_FRACTION} is
 0.35 for an LES calculation, and zero for DNS.
 
+The radiation properties of most common gases involved in combustion processes (water vapor, carbon dioxide, carbon monoxide, fuel) and 
+soot particles are automatically taken into account if the simulation involves combustion. In simulations with no combustion nor radiating species, it is
+possible to use a constant absorption coefficient by specifying {\ct KAPPA0} on the {\ct RADI} line.
+
 It is possible to turn off the radiation transport
 solver (saving roughly 20 \% in CPU time) by adding the statement
 {\ct RADIATION=.FALSE.} to the {\ct RADI} line.  If burning
@@ -6315,23 +6319,22 @@ Briefly, if {\ct TIME\_STEP\_INCREMENT} and {\ct ANGLE\_INCREMENT} are
 both set to 1, the radiation field is completely updated in a single
 time step, but the cost of the calculation increases significantly.
 
-\subsection{Radiative Absorption by Droplets}
+\subsection{Radiative Absorption and Scattering by Particles}
 
 \label{info:RADI_Absorption}
 
-A few parameters affecting the absorption of radiation by water
-droplets are as follows: {\ct RADTMP} is the assumed radiative source temperature.
-It is used in the computation of the mean scattering
-and absorption cross sections of water droplets. The default is 900~$^\circ$C.
+The absorption and scattering of thermal radiation by Lagrangian particles is included in the radiation transport equation. The radiative properties of 
+the water and fuel particles (droplets) are determined automatically. For fuel, the properties of Heptane are assumed. For other types of particles, the 
+radiative properties can be given by specifying the components of the material refractive index on the corresponding {\ct PART} line, using keywords
+{\ct REAL\_REFRACTIVE\_INDEX} and {\ct COMPLEX\_REFRACTIVE\_INDEX}. Alternatively, wavelength dependent values of these two quantities can be tabulated in a {\ct TABLE} and called using the {\ct RADIATIVE\_PROPERTY\_TABLE}. More details can be found in Section~\ref{radiative_part_props}.
+
+Other parameters affecting the computations of particle-radiation interaction are: {\ct RADTMP} is the assumed radiative source temperature.
+It is used in the spectral weighting during the computation of the mean scattering and absorption cross sections. The default is 900~$^\circ$C.
 {\ct NMIEANG} is the number of angles in the numerical integration of the Mie-phase function.
-Increasing {\ct NMIEANG} improves the accuracy
-of the radiative properties of water droplets. The cost
-of the better accuracy is seen in the initialization phase,
-not during the actual simulation. The default value for {\ct NMIEANG}
+Increasing {\ct NMIEANG} improves the accuracy of the radiative properties of water droplets. The cost
+of the better accuracy is seen in the initialization phase, not during the actual simulation. The default value for {\ct NMIEANG}
 is 15.
 
-In simulations with no combustion nor radiating species, it is
-possible to use a constant absorption coefficient by specifying {\ct KAPPA0} on the {\ct RADI} line.
 
 \subsection{Wide Band Model}
 
@@ -6563,6 +6566,29 @@ then no further inputs are required. Otherwise, you must provide all of the foll
 \end{description}
 
 Note that if a particle is to have mass but not evaporate, just the parameter {\ct DENSITY} can be provided on the {\ct PART} line.
+
+\subsection{Radiative properties}
+
+\label{radiative_part_props}
+
+The radiative properties of the water and fuel droplets are determined automatically. 
+For fuel, the properties of Heptane are assumed. For other types of particles, the 
+radiative properties can be given by specifying the components of the material refractive index on the corresponding {\ct PART} line, using keywords
+{\ct REAL\_REFRACTIVE\_INDEX} and {\ct COMPLEX\_REFRACTIVE\_INDEX}. Alternatively, wavelength dependent values of these two quantities can be specified using
+a spectral property {\ct TABLE} and specifying the {\ct ID} of that table is {\ct RADIATIVE\_PROPERTY\_TABLE} property on the {\ct PART} line.
+Each row of a spectral property table contains three real numbers: wavelength ($\mu$m), real and complex components of the refractive index.
+Below is an example of the use of spectral property table, listing the properties at wavelenghts 1, 5 and 10 $\mu$m.
+
+\footnotesize
+\begin{verbatim}
+&PART ID='particles', DIAMETER=750., DENSITY=1000., 
+      EVAPORATE=.FALSE., RADIATIVE_PROPERTY_TABLE = 'table' /
+&TABL ID = 'table' TABLE_DATA=  1.0,1.33,0.0001 /
+&TABL ID = 'table' TABLE_DATA=  5.0,1.33,0.002 /
+&TABL ID = 'table' TABLE_DATA= 10.0,1.33,0.001 /
+\end{verbatim} \normalsize
+\normalsize
+
 
 \subsection{Size Distribution}
 \label{info:particle_size}
