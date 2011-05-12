@@ -1,7 +1,7 @@
-&HEAD CHID='scarc3d_fft_8mesh',TITLE='Simple 3D Scarc Test Case' /
+&HEAD CHID='scarc3d_fft_64mesh',TITLE='Simple 3D Scarc Test Case' /
 
-&MESH IJK=16,16,16, XB=0.0,0.4,0.0,0.4,0.0,0.4, MULT_ID='mesh' /
-&MULT ID='mesh', DX=0.4, DY=0.4, DZ=0.4, I_UPPER=1, J_UPPER=1, K_UPPER=1 /
+&MESH IJK=8,8,8, XB=0.0,0.2,0.0,0.2,0.0,0.2, MULT_ID='mesh' /
+&MULT ID='mesh', DX=0.2, DY=0.2, DZ=0.2, I_UPPER=3, J_UPPER=3, K_UPPER=3 /
 
 &MISC NOISE=.FALSE.
       GVEC = 0.0, 0.0, 0.0 /
