@@ -493,31 +493,18 @@ CALL SCARC_INPUT_PARSER               ! parse input parameters (corresponding to
 !!! Setup different components of ScaRC 
 !!!----------------------------------------------------------------------------------------------------
 CALL SCARC_SETUP_DIMENSION            ! define dimension of underlying problem
-WRITE(*,*) '1 '
 CALL SCARC_SETUP_DEBUGGING            ! open debug file if requested
-WRITE(*,*) '2 '
 CALL SCARC_SETUP_PROCESSES            ! determine set of meshes which must be processed on MYID
-WRITE(*,*) '3 '
 CALL SCARC_SETUP_LEVELS               ! define number of necessary grid levels 
-WRITE(*,*) '4 '
 CALL SCARC_SETUP_TYPES                ! allocate requested ScaRC-types for all necessary grid levels
-WRITE(*,*) '5 '
 CALL SCARC_SETUP_MESHES               ! set mesh information
-WRITE(*,*) '6 '
 CALL SCARC_SETUP_WALLCELLS            ! set wall cell information
-WRITE(*,*) '7 '
 CALL SCARC_SETUP_EXCHANGE             ! set information for data exchange
-WRITE(*,*) '8 '
 CALL SCARC_SETUP_SYSTEM               ! assemble system matrix with boundary conditions and solver vectors
-WRITE(*,*) '9 '
 CALL SCARC_SETUP_COARSENING           ! perform coarsening on different grid levels if requested (AMG only)
-WRITE(*,*) '10 '
 CALL SCARC_SETUP_VECTORS              ! allocate solution and auxiliary vectors on all needed grid levels
-WRITE(*,*) '11 '
 CALL SCARC_SETUP_GLOBALS              ! define some global variables
-WRITE(*,*) '12 '
 CALL SCARC_SETUP_NEIGHBORS            ! compute information about abutting neighbors on coarser levels
-WRITE(*,*) '13 '
 
 
 !!!----------------------------------------------------------------------------------------------------
@@ -828,8 +815,6 @@ END SUBROUTINE SCARC_INPUT_PARSER
 SUBROUTINE SCARC_SETUP_DEBUGGING
 INTEGER:: NM
 
-WRITE(*,*) 'DEBUG : ',TYPE_DEBUG
-
 IF (TYPE_DEBUG /= NSCARC_DEBUG_NONE) THEN
    IF (USE_MPI) THEN
       DO NM=1,NMESHES
@@ -842,7 +827,6 @@ IF (TYPE_DEBUG /= NSCARC_DEBUG_NONE) THEN
       WRITE (SCARC_FN, '(A,A,i3.3)') TRIM(CHID),'.scarc',MYID+1
       SCARC_LU = GET_FILE_NUMBER()
       OPEN (SCARC_LU, FILE=SCARC_FN)
-WRITE(*,*) 'DEBUG : OPEN ',SCARC_FN
    ENDIF
 ENDIF
 
@@ -2289,8 +2273,6 @@ SUBROUTINE SCARC_SETUP_SYSTEM
 INTEGER :: NM, NL, IERR
 TYPE (SCARC_TYPE), POINTER :: S
 
-WRITE(SCARC_LU,*) 'SETUP_SYSTEM: NLEVEL_MIN=',NLEVEL_MIN
-WRITE(SCARC_LU,*) 'SETUP_SYSTEM: NLEVEL_MAX=',NLEVEL_MAX
 IERR = 0
  
 MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
@@ -2864,8 +2846,6 @@ REAL(EB) :: DBC
 TYPE (SCARC_BANDED_TYPE) , POINTER :: SB
 TYPE (SCARC_COMPACT_TYPE), POINTER :: SC
 
-
-WRITE(SCARC_LU,*) 'IN SETUP_BOUNDARY FOR ', NM, NL
 
 SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
 
@@ -7967,11 +7947,6 @@ EXCHANGE_SEND_LOOP2: DO NOM = NMESHES_MIN, NMESHES_MAX
       
                   CASE (NSCARC_EXCHANGE_MATRIX)
                      CALL SCARC_UNPACK_BMATRIX(BUFFER, IJKW, NSCARC_MATRIX_SYSTEM, NOM, NL)
-      
-                  CASE DEFAULT
-                     WRITE (*,*) 'BANDED2: TYPE_EXCHANGE =',TYPE_EXCHANGE,' NOT ALLOWED,/,STOPPING PROGRAM !'
-                     STOP
-
       
                 END SELECT SELECT_EXCHANGE_BANDED2
 
