@@ -1899,7 +1899,7 @@ SPEC_READ_LOOP: DO N=1,N_SPECIES
    SS%REFERENCE_ENTHALPY          = REFERENCE_ENTHALPY*1000._EB
    SS%YY0                         = MAX(0._EB,MASS_FRACTION_0)
 
-   SS%DENSITY_LIQUID              = -1._EB
+   SS%DENSITY_LIQUID              = DENSITY_LIQUID
 
    IF ((HEAT_OF_VAPORIZATION >  0._EB .AND. SPECIFIC_HEAT_LIQUID <= 0._EB) .OR. &
        (HEAT_OF_VAPORIZATION <= 0._EB .AND. SPECIFIC_HEAT_LIQUID >  0._EB)) THEN
@@ -2034,7 +2034,7 @@ SPECIFIC_HEAT               = -1._EB
 REFERENCE_ENTHALPY           = -2.E20_EB
 VISCOSITY                   = -1._EB
 
-DENSITY_LIQUID              = 1000._EB     ! kg/m3
+DENSITY_LIQUID              = -1._EB
 HEAT_OF_VAPORIZATION        = -1._EB     ! kJ/kg
 H_V_REFERENCE_TEMPERATURE   = -300._EB
 MELTING_TEMPERATURE         = -300.        ! C
@@ -3070,7 +3070,7 @@ READ_PART_LOOP: DO N=1,N_PART
             ENDIF
          ENDIF
       ENDDO
-      IF (SPECIES(PC%Y_INDEX)%DENSITY_LIQUID > 0._EB) DENSITY=SPECIES(PC%Y_INDEX)%DENSITY_LIQUID
+      IF (SPECIES(PC%Y_INDEX)%DENSITY_LIQUID > 0._EB .AND. DENSITY < 0._EB) DENSITY=SPECIES(PC%Y_INDEX)%DENSITY_LIQUID
    ENDIF
 
    ! Arrays for particle size distribution
@@ -3288,7 +3288,6 @@ TYPE(PARTICLE_CLASS_TYPE), POINTER :: PC=>NULL()
 TYPE(SPECIES_TYPE),POINTER:: SS=>NULL()
 
 IF (N_PART == 0) RETURN
-SPECIES_COMPUTED = .FALSE.
 PART_LOOP: DO N=1,N_PART
 
    PC => PARTICLE_CLASS(N)   
@@ -3301,12 +3300,6 @@ PART_LOOP: DO N=1,N_PART
 
    IF (.NOT.PC%EVAPORATE .OR. PC%MASSLESS .OR. PC%SURF_ID/='null' .OR. WFDS_FE) CYCLE PART_LOOP
 
-   IF (SPECIES_COMPUTED(PC%Y_INDEX)) THEN
-      PC%DENSITY=SS%DENSITY_LIQUID
-      CYCLE PART_LOOP
-   ENDIF
-   SPECIES_COMPUTED(PC%Y_INDEX)=.TRUE.
-   
    SS => SPECIES(PC%Y_INDEX)
    ALLOCATE(SS%C_P_L(0:5000),STAT=IZERO)
    CALL ChkMemErr('PROC_PART','SS%C_P_L',IZERO)
@@ -3318,7 +3311,6 @@ PART_LOOP: DO N=1,N_PART
    ALLOCATE(SS%H_V(0:5000),STAT=IZERO)
    CALL ChkMemErr('PROC_PART','SS%H_V',IZERO)
 
-   
    TMP_REF = -1._EB
    TMP_MELT = -1._EB
    TMP_V = -1._EB
@@ -3329,35 +3321,29 @@ PART_LOOP: DO N=1,N_PART
             CALL JANAF_TABLE_LIQUID (J,CPBAR,H_V,H_L,TMP_REF,TMP_MELT,TMP_V,SS%ID,PC%FUEL,DENSITY)
             IF (SS%H_V_REFERENCE_TEMPERATURE < 0._EB) SS%H_V_REFERENCE_TEMPERATURE=TMP_REF
             IF (SS%TMP_V < 0._EB) SS%TMP_V = TMP_V
+            IF (PC%DENSITY < 0._EB) PC%DENSITY = DENSITY
             IF (PC%DENSITY < 0._EB) THEN
-               SS%DENSITY_LIQUID = DENSITY
-               PC%DENSITY = DENSITY
-               PC%FTPR = FOTH*PI*DENSITY               
-               IF (PC%DENSITY < 0._EB) THEN
-                  WRITE(MESSAGE,'(A,A,A)') 'ERROR: PARTicle class ',TRIM(SS%ID),' requires a density'
-                  CALL SHUTDOWN(MESSAGE)
-               ENDIF
-            ENDIF   
+               WRITE(MESSAGE,'(A,A,A)') 'ERROR: PARTicle class ',TRIM(SS%ID),' requires a density'
+               CALL SHUTDOWN(MESSAGE)
+            ENDIF
+            PC%FTPR = FOTH*PI*PC%DENSITY               
             IF (SS%TMP_MELT < 0._EB) SS%TMP_MELT = TMP_MELT
          ENDIF
       ELSE
          CALL JANAF_TABLE_LIQUID (J,SS%C_P_L(J),H_V,H_L,TMP_REF,TMP_MELT,TMP_V,SS%ID,PC%FUEL,DENSITY)
          IF (J==1) THEN         
+            IF (PC%DENSITY < 0._EB) PC%DENSITY = DENSITY
+            IF (PC%DENSITY < 0._EB) THEN
+               WRITE(MESSAGE,'(A,A,A)') 'ERROR: PARTicle class ',TRIM(SS%ID),' requires a density'
+               CALL SHUTDOWN(MESSAGE)
+            ENDIF   
+            PC%FTPR = FOTH*PI*PC%DENSITY                                 
             IF (SS%C_P_L(J) < 0._EB .AND. .NOT.PC%TREE) THEN
                WRITE(MESSAGE,'(A,A,A)') 'ERROR: PARTicle class ',TRIM(SS%ID),' requires CP, H_V, TMP_MELT, TMP_V, and T_REF'
                CALL SHUTDOWN(MESSAGE)
             ENDIF
             IF (SS%H_V_REFERENCE_TEMPERATURE < 0._EB) SS%H_V_REFERENCE_TEMPERATURE=TMP_REF
             IF (SS%TMP_V < 0._EB) SS%TMP_V = TMP_V
-            IF (PC%DENSITY < 0._EB) THEN
-               SS%DENSITY_LIQUID = DENSITY
-               PC%DENSITY = DENSITY
-               PC%FTPR = FOTH*PI*DENSITY               
-               IF (PC%DENSITY < 0._EB) THEN
-                  WRITE(MESSAGE,'(A,A,A)') 'ERROR: PARTicle class ',TRIM(SS%ID),' requires a density'
-                  CALL SHUTDOWN(MESSAGE)
-               ENDIF
-            ENDIF   
             IF (SS%TMP_MELT < 0._EB) SS%TMP_MELT = TMP_MELT
             SS%H_L(J) = H_L + SS%C_P_L(J)
          ELSE
@@ -3389,12 +3375,12 @@ PART_LOOP: DO N=1,N_PART
       DO J=1,5000
          CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR,REAL(J,EB))
          H_G_S = CPBAR*REAL(J,EB)
-         SS%H_V(J) = H_V + (H_G_S-H_G_S_REF) - (SS%H_L(J)-H_L_REF)
+!         SS%H_V(J) = H_V + (H_G_S-H_G_S_REF) - (SS%H_L(J)-H_L_REF)
+         SS%H_V(J) = H_G_S - SS%H_L(J)
       ENDDO
    ENDIF
-   SS%H_V(0) = SS%H_V(1)
+   SS%H_V(0) = SS%H_V(1)  
 ENDDO PART_LOOP
-
 
 END SUBROUTINE PROC_PART
 
