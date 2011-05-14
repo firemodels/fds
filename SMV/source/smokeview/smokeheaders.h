@@ -567,6 +567,7 @@ EXTERNCPP void updatepatchtypes(void);
 EXTERNCPP void update_mesh_terrain(void);
 EXTERNCPP void update_terrain_options(void);
 EXTERNCPP void update_glui_cellcenter(void);
+EXTERNCPP void drawslices(void);
 EXTERNCPP void drawslice_cellcenter_interp(const slice *sd);
 EXTERNCPP void update_plot3dtitle(void);
 EXTERNCPP void LoadPlot3dMenu(int value);

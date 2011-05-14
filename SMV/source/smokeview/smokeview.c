@@ -1398,7 +1398,13 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
     }
   }
 
-/* ++++++++++++++++++++++++ draw boundary files +++++++++++++++++++++++++ */
+/* ++++++++++++++++++++++++ draw slice files +++++++++++++++++++++++++ */
+
+  if(showslice==1&&use_transparency_data==0){
+    drawslices();
+  } 
+
+  /* ++++++++++++++++++++++++ draw boundary files +++++++++++++++++++++++++ */
 
   if(showpatch==1){
     patch *patchi;
@@ -1581,86 +1587,9 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   }
 
 /* ++++++++++++++++++++++++ draw slice files +++++++++++++++++++++++++ */
-  
-  if(showslice==1){
-    int ii;
 
-    for(ii=0;ii<nslice_loaded;ii++){
-      slice *sd;
-      int i;
-
-      i=slice_loaded_list[ii];
-      sd = sliceinfo + i;
-      if(sd->display==0||sd->type!=islicetype)continue;
-      if(sd->slicetimes[0]>times[itimes])continue;
-      if(sd->compression_type==1||sd->compression_type==2){
-#ifdef USE_ZLIB
-        uncompress_slicedataframe(sd,sd->islice);
-#endif
-        sd->slicepoint=sd->slicecomplevel;
-      }
-      else{
-        sd->slicepoint = sd->slicelevel + sd->islice*sd->nsliceii;
-      }
-      sd->slicedata=NULL;
-      if(sd->compression_type==0){
-        ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicetotal));
-      }
-
-      if(sd->qslicedata!=NULL)sd->slicedata = sd->qslicedata + sd->islice*sd->nsliceii;
-#ifdef pp_SLICECONTOURS
-      if(vis_slice_contours==1&&sd->line_contours!=NULL){
-        DrawLineContours(sd->line_contours+sd->islice, 3.0);
-        continue;
-      }
-#endif            
-      if(usetexturebar!=0){
-        if(sd->volslice==1){
-          if(sd->terrain==1){
-            drawvolslice_terrain(sd);
-          }
-          else{
-            drawvolslice_texture(sd);
-          }
-        }
-        else{
-          if(sd->terrain==1){
-            drawslice_terrain(sd);
-          }
-          else{
-            drawslice_texture(sd);
-          }
-        }
-      }
-      else{
-        if(sd->volslice==1){
-          if(sd->cellcenter==1){
-            if(cellcenter_interp==1){
-              drawvolslice_cellcenter_interp(sd);
-            }
-            else{
-              drawvolslice_cellcenter(sd);
-            }
-          }
-          else{
-            drawvolslice(sd);
-          }
-        }
-        else{
-          if(sd->cellcenter==1){
-            if(cellcenter_interp==1){
-              drawslice_cellcenter_interp(sd);
-            }
-            else{
-              drawslice_cellcenter(sd);
-            }
-          }
-          else{
-            drawslice(sd);
-          }
-        }
-      }
-    }
+  if(showslice==1&&use_transparency_data==1){
+    drawslices();
   } 
   sniffErrors("after drawslice");
 //  draw_demo(20,20);

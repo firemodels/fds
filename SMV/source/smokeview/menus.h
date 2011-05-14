@@ -370,7 +370,7 @@ void LightingMenu(int value){
 }
 
 
-/* ------------------ ColorBarMenu ------------------------ */
+/* ------------------ SmokeColorBarMenu ------------------------ */
 
 void SmokeColorBarMenu(int value){
   if(value==-999)return;
