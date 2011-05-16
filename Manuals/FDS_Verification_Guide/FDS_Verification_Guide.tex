@@ -1490,6 +1490,29 @@ coordinate systems.
 
 \clearpage
 
+\section{Radiation Attenuation by Particles (\texorpdfstring{{\bf part\_attenuation}}{part\_attenuation}) }
+\label{part_attenuation}
+
+This test case is a qualitative assessment of the attenuation of thermal radiation by four different types of particles (droplets). In each case, the radiation is computed inside a one-meter cube with one hot and five cold walls. The radiative heat flux is monitored on the wall opposite to the hot wall. Five different cases are computed:
+\begin{description}
+\item[Reference] case with no particles.
+\item[Transparent] particles with refractive index m = 1.0+0$i$.
+\item[Water] droplets.
+\item[Fuel] (heptane) droplets.
+\item[(Relatively) Opaque] particles with refractive index m = 1.6+0.1$i$.
+\end{description}
+In each case, 10 grams of non-evaporating, monodisperse, 100~$\mu$m particles with 1000 kg/m$^3$ density are placed inside the cube.  The resulting heat
+fluxes are plotted in the figure below. The transparent particles do not attenuate the radiation, and the relative opaque particles 
+give the highest attenuation. The heat fluxes through water and fuel droplets are found between the two extremes.
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/part_attenuation} 
+\end{center}
+\caption[Radiation attenuation by Lagrangian particles.]{Attenuation of thermal radiation by four different classes of Lagrangian particles.}
+\label{part_attenuation_figure}
+\end{figure}
+
+
 
 \section{Transient Thermocouple Response (\texorpdfstring{{\bf TC\_heating}}{TC\_heating}) }
 \label{TC_heating}
