@@ -457,7 +457,7 @@ ENDIF MAKE_KAPPA_ARRAYS
 
 DROPLETS: IF (N_EVAP_INDICES>0) THEN
    GET_PC_RADI: DO J=1,N_PART
-      CALL MEAN_CROSS_SECTIONS(J)
+      IF (.NOT.PARTICLE_CLASS(J)%MASSLESS) CALL MEAN_CROSS_SECTIONS(J)
    ENDDO GET_PC_RADI
 ENDIF DROPLETS
  
@@ -586,15 +586,13 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                      IF (PC%TREE .OR. PC%SURF_INDEX>0) CYCLE PC_LOOP
                      EVAP_INDEX = PC%EVAP_INDEX
                      IF (EVAP_INDEX==0) CYCLE PC_LOOP
-                     IF (ABS(AVG_DROP_DEN(I,J,K,EVAP_INDEX))<ZERO_P) CYCLE PC_LOOP
+                     IF (ABS(AVG_DROP_AREA(I,J,K,EVAP_INDEX))<ZERO_P) CYCLE PC_LOOP
                      NCSDROP = AVG_DROP_AREA(I,J,K,EVAP_INDEX)
                      ! Absorption and scattering efficiency
                      CALL INTERPOLATE1D(PC%R50,PC%WQABS(:,IBND),AVG_DROP_RAD(I,J,K,EVAP_INDEX),QVAL) 
                      KAPPAW(I,J,K) = KAPPAW(I,J,K) + NCSDROP*QVAL
-                     IF (PC%WATER) THEN
-                        CALL INTERPOLATE1D(PC%R50,PC%WQSCA(:,IBND),AVG_DROP_RAD(I,J,K,EVAP_INDEX),QVAL)
-                        SCAEFF(I,J,K) = SCAEFF(I,J,K) + NCSDROP*QVAL
-                     ENDIF
+                     CALL INTERPOLATE1D(PC%R50,PC%WQSCA(:,IBND),AVG_DROP_RAD(I,J,K,EVAP_INDEX),QVAL)
+                     SCAEFF(I,J,K) = SCAEFF(I,J,K) + NCSDROP*QVAL
                      KFST4W(I,J,K) = KFST4W(I,J,K)+ BBF*KAPPAW(I,J,K)*FOUR_SIGMA*AVG_DROP_TMP(I,J,K,EVAP_INDEX)**4
                   ENDDO PC_LOOP
             ENDDO ZLOOPM

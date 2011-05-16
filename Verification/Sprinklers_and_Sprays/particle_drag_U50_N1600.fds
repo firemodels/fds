@@ -15,6 +15,7 @@
     /
 
 &DUMP DT_SLCF=10000 /
+&RADI RADIATION = .FALSE. /
 
 ! Environment
 
