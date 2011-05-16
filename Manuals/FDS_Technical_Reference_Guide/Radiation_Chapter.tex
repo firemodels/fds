@@ -423,51 +423,48 @@ The connection matrix associates one incoming direction $l'$ to each mirrored di
 
 \newpage
 
-\section{Absorption and Scattering of Thermal Radiation by Droplets}
+\section{Absorption and Scattering of Thermal Radiation by Droplets/Particles}
 \label{droplet-radiation}
 
-The attenuation of thermal radiation by liquid droplets is an
-important consideration, especially for water mist
-systems~\cite{Ravigururajan:1}.  Liquid droplets attenuate thermal
-radiation through a combination of scattering and
-absorption~\cite{Tuntomo:1}.  The radiation-droplet interaction must
-therefore be solved for both the accurate prediction of the radiation
-field and for the droplet energy balance.
+The attenuation of thermal radiation by liquid droplets and particles is an important consideration, especially for water mist
+systems~\cite{Ravigururajan:1}.  Droplets and particles attenuate thermal radiation through a combination of scattering and
+absorption~\cite{Tuntomo:1}.  The radiation-spray interaction must therefore be solved for both the accurate prediction of the radiation
+field and for the particle energy balance.
 
-If the gas phase absorption and emission in Eq.~(\ref{RTEbasic})
-are temporarily neglected for simplicity, the radiative transport
+If the gas phase absorption and emission in Eq.~(\ref{RTEbasic}) are temporarily neglected for simplicity, the radiative transport
 equation becomes
 \be \bs \cdot \nabla I_{\la}(\bx,\bs) = -\left[\kappa_d(\bx,\la) + \sigma_d(\bx,\la)\right]
 I_{\la}(\bx,\bs) +\kappa_d(\bx,\la) \; I_{b,d}(\bx,\la) +
 \frac{\sigma_d(\bx,\la)}{4\pi}
 \int_{4\pi}\Phi(\bs',\bs) \; I_{\la}(\bx,\bs') \; d\bs'
 \label{RTEspray} \ee
-where $\kappa_d$ is the droplet absorption coefficient, $\sigma_d$ is the
-droplet scattering coefficient and $I_{b,d}$ is the emission
-term of the droplets. $\Phi(\bs',\bs)$ is a scattering phase function
+where $\kappa_d$ is the particle absorption coefficient, $\sigma_d$ is the
+particle scattering coefficient and $I_{b,d}$ is the emission
+term of the particles. $\Phi(\bs',\bs)$ is a scattering phase function
 that gives the scattered intensity fraction from direction $\bs'$ to $\bs$.\\
 
 \subsection{Absorption and scattering coefficients}
 
-The local absorption and scattering coefficients are in theory calculated
+The local absorption and scattering coefficients within a spray/particle cloud can be calculated
 from the local droplet number density and size distribution
 \begin{align}
 \kappa_d(\bx,\la) &= \int_0^\infty n(r(\bx)) \; Q_a(r,\la) \; \pi r^2 \; dr \\ %N(\bx)\int_0^\infty f(r,d_m(\bx)) \; C_a(r,\la) \; dr \\
 \sigma_d(\bx,\la) &= \int_0^\infty n(r(\bx)) \; Q_s(r,\la) \; \pi r^2 \; dr%N(\bx)\int_0^\infty f(r,d_m(\bx)) \; C_s(r,\la) \; dr
 \end{align}
-where $r$ is the droplet radius and $Q_a$ and $Q_s$ are absorption and
-scattering efficiencies, respectively, given by Mie theory.
-Based on \cite{Collin} and \cite{Maruyama}, the water fog inside a grid cell is modeled for radiation transport as a mono-disperse fog
-whose diameter corresponds to the Sauter mean diameter of the poly-disperse spray.
+where $r$ is the particle radius and $Q_a$ and $Q_s$ are absorption and
+scattering efficiencies, respectively.  For the computation of the spray/particle cloud radiative properties, 
+spherical particles are assumed and the radiative properties of the individual particles
+are computed using Mie theory. 
+
+Based on \cite{Collin} and \cite{Maruyama}, the real particle size distribution inside a grid cell is modeled as a mono-disperse suspension
+whose diameter corresponds to the Sauter mean ($d_{32}$) diameter of the poly-disperse spray.
 This assumption leads to a simplified expression of the radiative coefficients
 \begin{align}
 \kappa_d(\bx,\la) &= A_d(\bx) \; Q_a(r_{32},\la) \\
 \sigma_d(\bx,\la) &= A_d(\bx) \; Q_s(r_{32},\la)
 \end{align}
-
-These expressions are function of the total cross sectional area per unit volume of the droplets $A_d$. $A_d$ is computed simply by summing the cross sectional areas of all the droplets within a cell and divided by the cell volume.
-For practical reasons, a relaxation factor of 0.5 is used to smooth slightly
-the temporal variation of $A_d$.\\
+These expressions are functions of the total cross sectional area per unit volume of the droplets $A_d$. $A_d$ is computed simply by summing the cross sectional areas of all the droplets within a cell and divided by the cell volume. For practical reasons, a relaxation factor of 0.5 is 
+used to smooth slightly the temporal variation of $A_d$.
 
 \subsection{In-scattering term}
 
@@ -502,8 +499,7 @@ into the same angle $\delta\Omega^l$.
 
 \subsection{Solution Procedure}
 
-Defining an effective
-scattering coefficient section
+Defining an effective scattering coefficient section
 \be
 \overline{\sigma_d}(\bx,\la) =
 \frac{4\pi N(\bx)}{4\pi-\delta\Omega^l}
@@ -527,21 +523,18 @@ becomes
 +\kappa_{d,n}(\bx) \; I_{b,d,n}(\bx)
 +\frac{\overline{\sigma_d}(\bx,\la)}{4\pi}U_n(\bx)
 \ee
-where the source function is based on the average droplet
-temperature within a cell.
+where the source function is based on the average particle temperature within a cell.
 
-Before the actual simulation, both $\kappa_d$ and
-$\overline{\sigma_d}$ are averaged over the possible droplet radii and
-wavelength.  A constant ``radiation'' temperature, $T_{rad}$, is used
-in the wavelength averaging.  $T_{rad}$ should be selected to
+Before the actual simulation, both $\kappa_d$ and $\overline{\sigma_d}$ are averaged over the 
+infrared wavelengths (1-200 $\mu$m).  A constant ``radiation'' temperature, $T_{rad}$, is used
+in the wavelength weighting.  $T_{rad}$ should be selected to
 represent a typical radiating flame temperature. A value of 1173~K is
 used by default.  The averaged quantities, now functions of the
 droplet mean diameter only, are stored in one-dimensional arrays.
 During the simulation, the local properties are found by table
-look-up using the local mean droplet diameter.
+look-up using the local Sauter mean droplet diameter.
 
-The computation of $\chi_f$ for a similar but simpler situation has
-been derived in Ref.~\cite{Yang:3}. It can be shown that here
+The computation of $\chi_f$ for a similar but simpler situation has been derived in Ref.~\cite{Yang:3}. It can be shown that here
 $\chi_f$ becomes
 \be
 \chi_f = \frac{1}{\delta\Omega^l}
@@ -556,8 +549,7 @@ $P_0(\theta_d)$ is a single droplet scattering phase function
 P_0(\theta_d) =
 \frac{\la^2\left(|S_1(\theta_d)|^2+|S_2(\theta_d)|^2\right)}{2 \, C_s(r,\la)}
 \ee
-$S_1(\theta_d)$ and $S_2(\theta_d)$ are the scattering amplitudes,
-given by
+$S_1(\theta_d)$ and $S_2(\theta_d)$ are the scattering amplitudes, given by
 Mie-theory. The integration limit $\mu^l$ is a cosine of the polar angle
 defining the boundary of the symmetric control angle $\delta\Omega^l$
 \be
@@ -568,7 +560,7 @@ The limits of the innermost integral are
 \mu_{d,0}   = \mu\mu' + \sqrt{1-\mu^2}\sqrt{1-\mu'^2}  \quad ; \quad
 \mu_{d,\pi} = \mu\mu' - \sqrt{1-\mu^2}\sqrt{1-\mu'^2}
 \ee
-When $\chi_f$ is integrated over the droplet size distribution to get
+When $\chi_f$ is integrated over the particle size distribution to get
 an averaged value, it is multiplied by $C_s(r,\la)$. It is therefore
 $|S_1|^2+|S_2|^2$, not $P_0(\theta_d)$, that is integrated. Physically,
 this means that intensities are added, not
@@ -576,12 +568,17 @@ probabilities~\cite{Wiscombe}.\\
 
 
 The absorption and scattering efficiencies and the scattering phase
-function are calculated using the MieV code developed by
-Wiscombe~\cite{Wiscombe}.  Currently, the spectral data is only
-included for water. The values of the imaginary part of the complex
-refractive index (related to absorption coefficient) are taken from
-Ref.~\cite{Hale:1}.  Value 1.33 is used for the real part (index of
-refraction).
+function are calculated using the MieV code developed by Wiscombe~\cite{Wiscombe}.  
+The spectral properties of the particles can be specified in terms of wavelength dependent complex refractive index. 
+Pre-compiled data are included for water and a generic hydrocarbon fuel based on diesel and heptane properties. 
+In case of water, the values of the imaginary part of the complex refractive index (related to absorption coefficient) are taken from
+Ref.~\cite{Hale:1}, and value 1.33 is used for the real part. 
+For fuel, the droplet spectral properties are taken from~\cite{Dombrovsky:1}, who measured the refractive index 
+of a diesel fuel and compared the values with those of heptane. The diesel properties are used for the real part of the refractive index. For the complex
+part, the heptane properties are used to avoid the uncertainty associated with different types of diesel oils. Usually, the radiative properties 
+of the particle cloud are much more sensitive to the particle size and concentration than to values of the refractive index. 
+
+
 
 
 \subsection{Heat absorbed by droplets}
