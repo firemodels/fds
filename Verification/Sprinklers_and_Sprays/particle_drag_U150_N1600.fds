@@ -15,6 +15,7 @@
     /
 
 &DUMP DT_PART=10000 /
+&RADI RADIATION = .FALSE. /
 
 ! Environment
 

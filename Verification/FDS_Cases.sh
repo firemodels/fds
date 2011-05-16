@@ -79,6 +79,7 @@ $RUNFDS Radiation droplet_absorption_cart
 $RUNFDS Radiation droplet_absorption_cyl
 $RUNFDS Radiation emissivity
 $RUNFDS Radiation hot_spheres
+$RUNFDS Radiation part_attenuation
 $RUNFDS Radiation plate_view_factor_2D_30
 $RUNFDS Radiation plate_view_factor_2D_60
 $RUNFDS Radiation plate_view_factor_2D_100

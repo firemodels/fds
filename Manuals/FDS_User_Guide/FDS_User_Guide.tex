@@ -6576,7 +6576,8 @@ For fuel, the properties of Heptane are assumed. For other types of particles, t
 radiative properties can be given by specifying the components of the material refractive index on the corresponding {\ct PART} line, using keywords
 {\ct REAL\_REFRACTIVE\_INDEX} and {\ct COMPLEX\_REFRACTIVE\_INDEX}. Alternatively, wavelength dependent values of these two quantities can be specified using
 a spectral property {\ct TABLE} and specifying the {\ct ID} of that table is {\ct RADIATIVE\_PROPERTY\_TABLE} property on the {\ct PART} line.
-Each row of a spectral property table contains three real numbers: wavelength ($\mu$m), real and complex components of the refractive index.
+Each row of a spectral property table contains three real numbers: wavelength ($\mu$m), real and complex components of the refractive index. 
+The real part of the refractive index should be a positive number. If it is greater than 10.0, the particles are treated as perfectly reflecting spheres. The complex part should be a non-negative number. Values less than 1.0E-6 are treated as non-absorbing.
 Below is an example of the use of spectral property table, listing the properties at wavelenghts 1, 5 and 10 $\mu$m.
 
 \footnotesize
@@ -10433,6 +10434,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct BREAKUP\_CHILD\_DIAMETER}      & Real            & See Section~\ref{info:secondary_breakup}    &           & $\frac{3}{7}$ \\ \hline
 {\ct BREAKUP\_CHILD\_GAMMA\_D}      & Real            & See Section~\ref{info:secondary_breakup}    &           & 2.56          \\ \hline
 {\ct COLOR}                         & Character       & See Section~\ref{info:particle_quantities}  &           & {\ct 'BLACK'} \\ \hline
+{\ct COMPLEX\_REFRACTIVE\_INDEX}    & Real            & See Section~\ref{radiative_part_props}      &           & 0.01          \\ \hline
 {\ct CTRL\_ID}                      & Character       & See Section~\ref{info:particle_flux}        &           &               \\ \hline
 {\ct DENSITY}                       & Real            & See Section~\ref{thermal_part_props}        & kg/m$^3$  & 1000.         \\ \hline
 {\ct DEVC\_ID}                      & Character       & See Section~\ref{info:particle_flux}        &           &               \\ \hline
@@ -10451,6 +10453,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MONODISPERSE}                  & Logical         & See Section~\ref{info:particle_size}        &           & {\ct .FALSE.} \\ \hline
 {\ct PROP\_ID}                      & Character       & See Section~\ref{info:PART_Basics}          &           &               \\ \hline
 {\ct QUANTITIES(10)}                & Character       & See Section~\ref{info:particle_quantities}  &           &               \\ \hline
+{\ct RADIATIVE\_PROPERTY\_TABLE}    & Real            & See Section~\ref{radiative_part_props}      &           &               \\ \hline
+{\ct REAL\_REFRACTIVE\_INDEX}       & Real            & See Section~\ref{radiative_part_props}      &           & 1.33          \\ \hline
 {\ct RGB(3)}                        & Integers        & See Section~\ref{info:particle_quantities}  &           &               \\ \hline
 {\ct SAMPLING\_FACTOR}              & Integer         & See Section~\ref{info:particle_number}      &           & 1             \\ \hline
 {\ct SIGMA\_D}                      & Real            & See Section~\ref{info:particle_size}        &           &               \\ \hline

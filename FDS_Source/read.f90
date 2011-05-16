@@ -2976,6 +2976,7 @@ READ_PART_LOOP: DO N=1,N_PART
    PROP_ID                  = 'null'
    ORIENTATION(1,:)         = (/0._EB,0._EB,1._EB/)
    QUANTITIES               = 'null'
+   RADIATIVE_PROPERTY_TABLE = 'null'
    RGB                      = -1
    SPEC_ID                  = 'null'
    SURF_ID                  = 'null'
@@ -3104,7 +3105,7 @@ READ_PART_LOOP: DO N=1,N_PART
    ELSE
       PC%RADIATIVE_PROPERTY_INDEX = 0
    ENDIF
-   
+
    ! Assign property data to PARTICLE_CLASS class
  
    PC%ID                 = ID
@@ -3139,8 +3140,8 @@ READ_PART_LOOP: DO N=1,N_PART
    PC%TMP_INITIAL        = INITIAL_TEMPERATURE + TMPM
    PC%REAL_REFRACTIVE_INDEX = REAL_REFRACTIVE_INDEX
    PC%COMPLEX_REFRACTIVE_INDEX = COMPLEX_REFRACTIVE_INDEX
-   IF (PC%REAL_REFRACTIVE_INDEX <= 0._EB .OR. PC%COMPLEX_REFRACTIVE_INDEX <= 0._EB) THEN
-      write(MESSAGE,'(A)') 'Zero refractive index on PART line not allowed.'
+   IF (PC%REAL_REFRACTIVE_INDEX <= 0._EB .OR. PC%COMPLEX_REFRACTIVE_INDEX < 0._EB) THEN
+      write(MESSAGE,'(A,A)') 'Bad refractive index on PART line ',PC%ID
       CALL SHUTDOWN(MESSAGE)
    ENDIF
    PC%HEAT_OF_COMBUSTION = HEAT_OF_COMBUSTION*1000._EB
@@ -3229,6 +3230,10 @@ DO N=1,N_PROP
          CALL SHUTDOWN(MESSAGE)
       ENDIF
       DROPLET_FILE=.TRUE.
+      IF (PY%FLOW_RATE > 0._EB .AND. .NOT.PC%EVAPORATE .AND. PC%DENSITY < 0._EB) THEN
+         WRITE(MESSAGE,'(A,A,A)') 'PROP ERROR: PARTicle class ',TRIM(PC%ID),' requires a density'
+         CALL SHUTDOWN(MESSAGE)
+      ENDIF
    ENDIF
 ENDDO
 
@@ -3774,17 +3779,17 @@ READ_PROP_LOOP: DO N=0,N_PROP
    IF(ANY(PY%SPRAY_ANGLE(1:2,2)<0)) PY%SPRAY_ANGLE(1:2,2)=PY%SPRAY_ANGLE(1:2,1)
    SPRAY_PATTERN_MU=SPRAY_PATTERN_MU*PI/180._EB
    IF (PART_ID/='null' .AND. SPRAY_PATTERN_TABLE == 'null' ) THEN
-           ALLOCATE(PY%SPRAY_LON_CDF(0:NDC2),PY%SPRAY_LON(0:NDC2),PY%SPRAY_LAT(0:NDC2),PY%SPRAY_LAT_CDF(0:NDC2,0:NDC2))
-           IF(SPRAY_PATTERN_MU<0._EB) THEN
-              IF(SPRAY_ANGLE(1,1)>0._EB) THEN
-                 SPRAY_PATTERN_MU=0.5_EB*SUM(PY%SPRAY_ANGLE(1:2,1))
-              ELSE
-                 SPRAY_PATTERN_MU=0._EB
-              ENDIF
-           ENDIF
-           CALL SPRAY_ANGLE_DISTRIBUTION(PY%SPRAY_LON,PY%SPRAY_LAT,PY%SPRAY_LON_CDF,PY%SPRAY_LAT_CDF, &
-                                         SPRAY_PATTERN_BETA,SPRAY_PATTERN_MU,PY%SPRAY_ANGLE &
-                                         ,SPRAY_PATTERN_SHAPE,NDC2)
+      ALLOCATE(PY%SPRAY_LON_CDF(0:NDC2),PY%SPRAY_LON(0:NDC2),PY%SPRAY_LAT(0:NDC2),PY%SPRAY_LAT_CDF(0:NDC2,0:NDC2))
+      IF(SPRAY_PATTERN_MU<0._EB) THEN
+         IF(SPRAY_ANGLE(1,1)>0._EB) THEN
+            SPRAY_PATTERN_MU=0.5_EB*SUM(PY%SPRAY_ANGLE(1:2,1))
+         ELSE
+            SPRAY_PATTERN_MU=0._EB
+         ENDIF
+      ENDIF
+      CALL SPRAY_ANGLE_DISTRIBUTION(PY%SPRAY_LON,PY%SPRAY_LAT,PY%SPRAY_LON_CDF,PY%SPRAY_LAT_CDF, &
+                                      SPRAY_PATTERN_BETA,SPRAY_PATTERN_MU,PY%SPRAY_ANGLE &
+                                      ,SPRAY_PATTERN_SHAPE,NDC2)
    ENDIF
 
    ! THIEF model
@@ -5899,27 +5904,27 @@ COUNT_TABLE_POINTS: DO N=1,N_TABLE
       SELECT CASE(TABLE_TYPE(N))
          CASE (SPRAY_PATTERN)
             MESSAGE='null'
-            IF (TABLE_DATA(1)<0. .OR.           TABLE_DATA(1)>180) THEN
+            IF (TABLE_DATA(1)<0._EB .OR.           TABLE_DATA(1)>180._EB) THEN
                WRITE(MESSAGE,'(A,I5,A,A,A)') 'ERROR: Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad 1st lattitude'
                CALL SHUTDOWN(MESSAGE)
             ENDIF
-            IF (TABLE_DATA(2)<TABLE_DATA(1).OR. TABLE_DATA(2)>180) THEN
+            IF (TABLE_DATA(2)<TABLE_DATA(1).OR. TABLE_DATA(2)>180._EB) THEN
                WRITE(MESSAGE,'(A,I5,A,A,A)') 'ERROR: Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad 2nd lattitude'
                CALL SHUTDOWN(MESSAGE)
             ENDIF
-            IF (TABLE_DATA(3)<-180. .OR.        TABLE_DATA(3)>360) THEN
+            IF (TABLE_DATA(3)<-180._EB .OR.        TABLE_DATA(3)>360._EB) THEN
                WRITE(MESSAGE,'(A,I5,A,A,A)') 'ERROR: Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad 1st longitude'
                CALL SHUTDOWN(MESSAGE)
             ENDIF
-            IF (TABLE_DATA(4)<TABLE_DATA(3).OR. TABLE_DATA(4)>360) THEN
+            IF (TABLE_DATA(4)<TABLE_DATA(3).OR. TABLE_DATA(4)>360._EB) THEN
                WRITE(MESSAGE,'(A,I5,A,A,A)') 'ERROR: Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad 2nd longitude'
                CALL SHUTDOWN(MESSAGE)
             ENDIF
-            IF (TABLE_DATA(5)<0) THEN
+            IF (TABLE_DATA(5)<0._EB) THEN
                WRITE(MESSAGE,'(A,I5,A,A,A)') 'ERROR: Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad velocity'
                CALL SHUTDOWN(MESSAGE)
             ENDIF
-            IF (TABLE_DATA(6)<0) THEN
+            IF (TABLE_DATA(6)<0._EB) THEN
                WRITE(MESSAGE,'(A,I5,A,A,A)') 'ERROR: Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad mass flow'
                CALL SHUTDOWN(MESSAGE)
             ENDIF
@@ -5933,7 +5938,7 @@ COUNT_TABLE_POINTS: DO N=1,N_TABLE
                WRITE(MESSAGE,'(A,I5,A,A,A)') 'ERROR: Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad real index'
                CALL SHUTDOWN(MESSAGE)
             ENDIF
-            IF (TABLE_DATA(3)<= 0.) THEN
+            IF (TABLE_DATA(3)< 0._EB) THEN
                WRITE(MESSAGE,'(A,I5,A,A,A)') 'ERROR: Row ',TA%NUMBER_ROWS,' of ',TRIM(TABLE_ID(N)),' has a bad complex index'
                CALL SHUTDOWN(MESSAGE)
             ENDIF
@@ -8076,6 +8081,13 @@ INIT_LOOP: DO N=1,N_INIT_READ
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
                IN%NUMBER_INITIAL_DROPLETS = NUMBER_INITIAL_DROPLETS*PARTICLE_CLASS(IN%PART_INDEX)%N_SPLIT
+               IF (IN%MASS_PER_TIME>0._EB .OR. IN%MASS_PER_VOLUME>0._EB) THEN
+                  IF (PARTICLE_CLASS(IN%PART_INDEX)%DENSITY < 0._EB) THEN
+                     WRITE(MESSAGE,'(A,A,A)') 'INIT ERROR: PARTicle class ',TRIM(PARTICLE_CLASS(IN%PART_INDEX)%ID), &
+                        ' requires a density'
+                     CALL SHUTDOWN(MESSAGE)
+                  ENDIF
+               ENDIF
             ENDIF
             
             ! Special case: POINTWISE_DROPLET_INIT
