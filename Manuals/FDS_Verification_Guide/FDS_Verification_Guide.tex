@@ -1493,26 +1493,29 @@ coordinate systems.
 \section{Radiation Attenuation by Particles (\texorpdfstring{{\bf part\_attenuation}}{part\_attenuation}) }
 \label{part_attenuation}
 
-This test case is a qualitative assessment of the attenuation of thermal radiation by four different types of particles (droplets). In each case, the radiation is computed inside a one-meter cube with one hot and five cold walls. The radiative heat flux is monitored on the wall opposite to the hot wall. Five different cases are computed:
+This test case is a qualitative assessment of the attenuation of thermal radiation by four different types of particles (droplets). 
+In each case, the radiation is computed inside a one meter cube with one hot and five cold walls. 
+The radiative heat flux is monitored on the wall that is opposite to the hot wall. Five different cases are computed:
 \begin{description}
 \item[Reference] case with no particles.
-\item[Transparent] particles with refractive index m = 1.0+0$i$.
+\item[Transparent] particles with refractive index $\hbox{m} = 1.0+0\,i$.
 \item[Water] droplets.
 \item[Fuel] (heptane) droplets.
-\item[(Relatively) Opaque] particles with refractive index m = 1.6+0.1$i$.
+\item[(Relatively) Opaque] particles with refractive index $\hbox{m} = 1.6+0.1 \,i$.
 \end{description}
-In each case, 10 grams of non-evaporating, monodisperse, 100~$\mu$m particles with 1000 kg/m$^3$ density are placed inside the cube.  The resulting heat
-fluxes are plotted in the figure below. The transparent particles do not attenuate the radiation, and the relative opaque particles 
-give the highest attenuation. The heat fluxes through water and fuel droplets are found between the two extremes.
+In each case, 10~g of non-evaporating, monodisperse, 100~$\mu$m particles with 1000~kg/m$^3$ density are placed inside the cube.  The resulting heat
+fluxes are plotted in the figure below. The transparent particles do not attenuate the radiation, and the relatively opaque particles
+give the highest attenuation. The heat fluxes through water and fuel droplets fall between the two extremes.
 \begin{figure}[h]
 \begin{center}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/part_attenuation} 
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/part_attenuation}
 \end{center}
 \caption[Radiation attenuation by Lagrangian particles.]{Attenuation of thermal radiation by four different classes of Lagrangian particles.}
 \label{part_attenuation_figure}
 \end{figure}
 
 
+\clearpage
 
 \section{Transient Thermocouple Response (\texorpdfstring{{\bf TC\_heating}}{TC\_heating}) }
 \label{TC_heating}
@@ -2412,9 +2415,9 @@ F & 150 & 1600 \tabularnewline
 \section{Water Droplet Evaporation (\texorpdfstring{{\textbf{water\_evaporation}}}{water\_evaporation}) }
 \label{water_evaporation}
 
-The cases called {\bf water\_evaporation\_x} test the water evaporation routine in FDS. The geometry consists either of 
-a sealed box or a tunnel with a cross flow. The walls are assumed adiabatic, meaning that there are no leaks or heat losses. 
-For the box cases, the air within the box is stirred to maintain uniform conditions. 
+The cases called {\bf water\_evaporation\_x} test the water evaporation routine in FDS. The geometry consists either of
+a sealed box or a tunnel with a cross flow. The walls are assumed adiabatic, meaning that there are no leaks or heat losses.
+For the box cases, the air within the box is stirred to maintain uniform conditions.
 In each case, the numerical solutions are compared to analytical solutions.
 
 For Cases 1-3 where the water droplets are confined to a sealed box, the change in the enthalpy of the droplets should equal the change in the enthalpy of the gas minus the work
@@ -2458,8 +2461,8 @@ The solid horizontal lines denote the expected steady state values.
 \subsection{Case 2}
 
 In the second case, the dimensions of the box are 40~cm on a side, and the initial
-air temperature is 500~$^\circ$C. There is only one fictitiously large water droplet in the box whose diameter is 10~cm and whose temperature is 20~$^\circ$C. 
-The initial mass fraction of water vapor is 0. It is expected that the water will evaporate until the air in the box is saturated. The analytical solution for the stationary state is derived 
+air temperature is 500~$^\circ$C. There is only one fictitiously large water droplet in the box whose diameter is 10~cm and whose temperature is 20~$^\circ$C.
+The initial mass fraction of water vapor is 0. It is expected that the water will evaporate until the air in the box is saturated. The analytical solution for the stationary state is derived
 from the first law of thermodynamics and the Clausius-Clapeyron equation by assuming that the liquid water temperature is equal to air temperature at the steady state.
 
 \begin{figure}[p]
@@ -2479,9 +2482,9 @@ from the first law of thermodynamics and the Clausius-Clapeyron equation by assu
 \subsection{Case 3}
 
 In the third case, the dimensions of the box are 1~m on a side, the initial
-air temperature is 500~$^\circ$C, the  initial diameter of all the droplets is 200~$\mu$m, the water temperature is 20~$^\circ$C, 
-and the total mass of water droplets is 0.1~kg. The initial mass fraction of water vapor is 0. It is expected to reach the saturation state. 
-As in the second case, the analytical solution for the stationary state derives from the first principle of thermodynamics and the Clausius-Clapeyron equation 
+air temperature is 500~$^\circ$C, the  initial diameter of all the droplets is 200~$\mu$m, the water temperature is 20~$^\circ$C,
+and the total mass of water droplets is 0.1~kg. The initial mass fraction of water vapor is 0. It is expected to reach the saturation state.
+As in the second case, the analytical solution for the stationary state derives from the first principle of thermodynamics and the Clausius-Clapeyron equation
 by assuming that the liquid water temperature is equal to air temperature at the stationary state.
 
 \begin{figure}[p]
@@ -2503,7 +2506,7 @@ by assuming that the liquid water temperature is equal to air temperature at the
 \subsection{Case 4}
 
 In the fourth case, air at 500~$^\circ$C is forced through a 3~m long, 1~m wide, 1~m tall tunnel at 1~m/s. Water droplets with a median volumetric diameter of 20~$\mu$m are
-introduced in the middle of the tunnel at a rate of 0.05~kg/s, starting at 10~s. The water temperature is 20~$^\circ$C. 
+introduced in the middle of the tunnel at a rate of 0.05~kg/s, starting at 10~s. The water temperature is 20~$^\circ$C.
 The mass fraction of water vapor in the hot air flowing into the tunnel is 0.
 The water evaporates at approximately the same rate at which it is introduced.
 Figure~\ref{water_evaporation_4_plots}, left, displays the time history of the enthalpy flow out of the tunnel. The dry hot air has an enthalpy (above ambient) of 228~kW, and this
@@ -2513,7 +2516,7 @@ value drops to approximately 87~kW after about 20~s. The evaporation of the wate
 \subsection{Case 5}
 
 This test involves a single evaporating water droplet in relatively dry air. The comparison is made with an actual measurement~\cite{Ranz} where a 1~mm water droplet
-shrinks to approximately 0.3~mm in approximately 10~min (see Fig.~\ref{water_evaporation_4_plots}, right). 
+shrinks to approximately 0.3~mm in approximately 10~min (see Fig.~\ref{water_evaporation_4_plots}, right).
 As opposed to the other cases above, this case tests the predicted rate of evaporation, not the final steady state.
 
 \begin{figure}[h!]
@@ -2616,14 +2619,14 @@ flux related to details of the numerical solver.  The results are shown in Fig.~
 
 \section{Multiple zone leakage (leak\_test\_2)}
 
-Two compartments are defined: A 5 m x 4 m x 3. 2 m compartment containing a second 3.6 m x 2.4 m x 2.4 m compartment, see Figure~\ref{fig_HVAC_leak_fan}.  
-The interior compartment is connected to the exterior compartment both by a fan (quadratic fan curve with a maximum volumetric flow of 0.005 m$^3$/s and a 
-maximum pressure of 1000 Pa) and by an 0.0001 m$^2$ leakage path.  The interior compartment is also connected to the ambient by an 0.0001 m$^2$ leakage path.  
-The fan is defined with a 1 s tanh ramp to reach full power.  When the simulation starts the fan will begin to remove air from the outer compartment and discharge it into the 
-inner compartment.  As the pressure rises, the leakage flows will slowly increase until the leakage flow is equal to the flow from the fan.  
-Since some air from the interior compartment is being discharged to the ambient, the average pressure of the two compartments will 
-decrease until the pressure of the interior compartment is equal to that of the ambient.  At this point in time, no more leakage flow will occur to the 
-ambient and the fan flow will equal intra-compartment leakage flow.  Given the leakage area and the fan curve, this will occur when the pressure difference between the 
+Two compartments are defined: A 5 m x 4 m x 3. 2 m compartment containing a second 3.6 m x 2.4 m x 2.4 m compartment, see Figure~\ref{fig_HVAC_leak_fan}.
+The interior compartment is connected to the exterior compartment both by a fan (quadratic fan curve with a maximum volumetric flow of 0.005 m$^3$/s and a
+maximum pressure of 1000 Pa) and by an 0.0001 m$^2$ leakage path.  The interior compartment is also connected to the ambient by an 0.0001 m$^2$ leakage path.
+The fan is defined with a 1 s tanh ramp to reach full power.  When the simulation starts the fan will begin to remove air from the outer compartment and discharge it into the
+inner compartment.  As the pressure rises, the leakage flows will slowly increase until the leakage flow is equal to the flow from the fan.
+Since some air from the interior compartment is being discharged to the ambient, the average pressure of the two compartments will
+decrease until the pressure of the interior compartment is equal to that of the ambient.  At this point in time, no more leakage flow will occur to the
+ambient and the fan flow will equal intra-compartment leakage flow.  Given the leakage area and the fan curve, this will occur when the pressure difference between the
 two compartments is 598~Pa.
 
 \begin{figure}[ht]
