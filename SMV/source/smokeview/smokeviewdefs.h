@@ -13,6 +13,12 @@ void _sniffErrors(char *whereat);
 
 #define TEPS 0.00
 
+#ifdef pp_LANG
+#define _(String) translate(String)
+#else
+#define _(String) (String)
+#endif
+
 #define PART_POINTS 1
 #define PART_SPHERES 2
 #define PART_LINES 3

@@ -28,6 +28,7 @@
 // #define pp_BENCHMARK
 #define pp_SLICECONTOURS
 #define pp_SHOWLIGHT
+#define pp_LANG
 #endif
 
 #ifdef _DEBUG  // comment out following line if debugging REALLY large cases (to avoid memory checks)

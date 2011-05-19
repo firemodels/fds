@@ -65,3 +65,4 @@ extern char string_util_revision[];
 extern char sv_api_revision[];
 extern char threader_revision[];
 extern char unit_revision[];
+extern char translate_revision[];

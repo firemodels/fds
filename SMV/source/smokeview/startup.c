@@ -2262,5 +2262,6 @@ int getmaxrevision(void){
   MAXREV(shaders_revision);
   MAXREV(threader_revision);
   MAXREV(unit_revision);
+  MAXREV(translate_revision);
   return max_revision;
 }

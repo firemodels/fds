@@ -3,7 +3,7 @@
 // $Author: gforney $
 
 #ifdef pp_WIN_INTEL
-#pragma warning (disable:1678)
+#pragma warning (disable:1786)
 #pragma warning (disable:177)		
 #pragma warning (disable:2557)		/* comparison between signed and unsigned operands */
 #pragma warning (disable:695)		/* calling convenetion if ignored for this type */

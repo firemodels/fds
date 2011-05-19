@@ -8050,24 +8050,24 @@ updatemenu=0;
 
     CREATEMENU(mainmenu,MainMenu);
     if(trainer_mode==0){
-      glutAddSubMenu("Load/Unload",loadunloadmenu);
-      glutAddSubMenu("Show/Hide",showhidemenu);
-      glutAddSubMenu("Options",optionmenu);
-      glutAddSubMenu("Dialogs",dialogmenu);
-      glutAddSubMenu("Tours",tourmenu);
-      glutAddSubMenu("View",resetmenu);
-      glutAddSubMenu("Help",helpmenu);
+      glutAddSubMenu(_("Load/Unload"),loadunloadmenu);
+      glutAddSubMenu(_("Show/Hide"),showhidemenu);
+      glutAddSubMenu(_("Options"),optionmenu);
+      glutAddSubMenu(_("Dialogs"),dialogmenu);
+      glutAddSubMenu(_("Tours"),tourmenu);
+      glutAddSubMenu(_("View"),resetmenu);
+      glutAddSubMenu(_("Help"),helpmenu);
     }
     if(trainer_active==1){
       if(trainer_mode==1){
-        glutAddMenuEntry("Smokeview Menus",997);
+        glutAddMenuEntry(_("Smokeview Menus"),997);
       }
       else{
-        glutAddMenuEntry("Trainer Menus",997);
+        glutAddMenuEntry(_("Trainer Menus"),997);
       }
     }
-  glutAddMenuEntry("Quit",3);
-  glutAddSubMenu("About Smokeview...",disclaimermenu);
+  glutAddMenuEntry(_("Quit"),3);
+  glutAddSubMenu(_("About Smokeview..."),disclaimermenu);
   updatemenu=0;
 #ifdef _DEBUG
   in_menu=0;
