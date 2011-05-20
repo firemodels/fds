@@ -7,8 +7,10 @@
 #include <string.h>
 #include <math.h>
 
-       
+     
+int add_msgstring=0;
 void usage(char *prog);
+void trim(char *line);
 
 /* ------------------ main ------------------------ */
 
@@ -26,6 +28,7 @@ int main(int argc, char **argv){
     if(arg[0]=='-'&&lenarg>1){
       switch(arg[1]){
       case 'a':
+        add_msgstring=1;
         break;
       default:
         usage(prog);
@@ -37,25 +40,58 @@ int main(int argc, char **argv){
       return 1;
     }
   }
-  while(!feof(stdin)){
-    char *beg,*end, *beg2;
+  if(add_msgstring==0){
+    while(!feof(stdin)){
+      char *beg,*end, *beg2;
 
-    fgets(buffer,sizeof(buffer),stdin);
-    beg=strstr(buffer,"_(\"");
-    if(beg==NULL)continue;
-    beg+=2;
-    for(beg2=beg+1;beg2<buffer+sizeof(buffer);beg2++){
-      if(*beg2==' '||*beg2=='*')continue;
-      beg=beg2-1;
-      *beg='"';
-      break;
+      fgets(buffer,sizeof(buffer),stdin);
+      beg=strstr(buffer,"_(\"");
+      if(beg==NULL)continue;
+      beg+=2;
+      for(beg2=beg+1;beg2<buffer+sizeof(buffer);beg2++){
+        if(*beg2==' '||*beg2=='*')continue;
+        beg=beg2-1;
+        *beg='"';
+        break;
+      }
+      for(end=beg+1;end<buffer+sizeof(buffer);end++){
+        if(*end=='\"')break;
+      }
+      *(end+1)=0;
+      printf("msgid %s\n",beg);
     }
-    for(end=beg+1;end<buffer+sizeof(buffer);end++){
-      if(*end=='\"')break;
-    }
-    *(end+1)=0;
-    printf("msgid %s\n",beg);
   }
+  else{
+    while(!feof(stdin)){
+      fgets(buffer,sizeof(buffer),stdin);
+      trim(buffer);
+      printf("\n");
+      printf("%s\n",buffer);
+      printf("msgstr \"\"\n");
+    }
+  }
+}
+
+
+/* ------------------ trim ------------------------ */
+
+void trim(char *line){
+  char *blank=" ";
+  const char *c;
+  const char *lf="\n", *cr="\r";
+  size_t len, i;
+  
+  len = strlen(line);
+  c = line+len-1;
+  for(i=0; i<len; i++){
+    if(strncmp(c,blank,1)!=0&&strncmp(c,lf,1)!=0&&strncmp(c,cr,1)!=0){
+      c++; 
+      line[c-line]='\0';
+      return;
+    }
+    c--;
+  }
+  *line='\0';
 }
 
 /* ------------------ usage ------------------------ */
