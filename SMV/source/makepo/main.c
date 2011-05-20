@@ -38,12 +38,18 @@ int main(int argc, char **argv){
     }
   }
   while(!feof(stdin)){
-    char *beg,*end;
+    char *beg,*end, *beg2;
 
     fgets(buffer,sizeof(buffer),stdin);
     beg=strstr(buffer,"_(\"");
     if(beg==NULL)continue;
     beg+=2;
+    for(beg2=beg+1;beg2<buffer+sizeof(buffer);beg2++){
+      if(*beg2==' '||*beg2=='*')continue;
+      beg=beg2-1;
+      *beg='"';
+      break;
+    }
     for(end=beg+1;end<buffer+sizeof(buffer);end++){
       if(*end=='\"')break;
     }
