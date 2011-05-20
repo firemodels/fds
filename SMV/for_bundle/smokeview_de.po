@@ -1,0 +1,33 @@
+
+msgid "Load/Unload"
+msgstr "Last/entladen"
+
+msgid "Show/Hide"
+msgstr "Einblenden/ausblenden"
+
+msgid "Options"
+msgstr "Optionen"
+
+msgid "Dialogs"
+msgstr "Dialoge"
+
+msgid "Tours"
+msgstr "Touren"
+
+msgid "View"
+msgstr "Anzeigen"
+
+msgid "Help"
+msgstr "Hilfe"
+
+msgid "Smokeview Menus"
+msgstr "Smokeview Menus"
+
+msgid "Trainer Menus"
+msgstr "Trainer Menus"
+
+msgid "Quit"
+msgstr "Beenden"
+
+msgid "About Smokeview..."
+msgstr "Uber Smokeview..."
