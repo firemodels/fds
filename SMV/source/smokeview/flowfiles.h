@@ -8,7 +8,6 @@
 #include "isodefs.h"
 #include "histogram.h"
 
-
 /* --------------------------  bounds ------------------------------------ */
 
 typedef struct {

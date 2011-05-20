@@ -12,10 +12,18 @@
 
 /* --------------------------  structs ------------------------------------ */
 
+typedef struct {
+  char *key, *value;
+} trdata;
+
 
 //************************** headers ****************************************
 
 char *translate(char *string);
+void init_translate(char *smokeviewbindir);
 
 TREXTERN char tr_string[1024];
 TREXTERN int TRDECL(tr_lang,0);
+TREXTERN char *smokeview_lang;
+TREXTERN trdata TRDECL(*trinfo,NULL);
+TREXTERN int TRDECL(ntrinfo,0);

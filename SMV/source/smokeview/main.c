@@ -15,6 +15,7 @@
 #include "MALLOC.h"
 #include "smokeviewvars.h"
 #include "smokeviewapi.h"
+#include "translate.h"
 
 // svn revision character string
 char main_revision[]="$Revision$";
@@ -25,7 +26,7 @@ char main_revision[]="$Revision$";
 
 int main(int argc, char **argv){
   char **argv_sv;
-  
+
   initMM();
   initvars0();
   initcolors();
@@ -105,6 +106,7 @@ int main(int argc, char **argv){
     printf("\n");
     if(smokezippath!=NULL)printf("Smokezip file: %s found\n",smokezippath);
     sv_startup_c(argc,argv_sv);
+    init_translate(smokeviewbindir);
     CheckMemory;
     startup_flag=initcase_c(argc,argv_sv);
     if(update_bounds==1){
