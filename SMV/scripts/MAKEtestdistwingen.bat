@@ -38,6 +38,9 @@ copy ..\Build\INTEL_WIN_TEST_%platform%\smokeview_win_test_%platform%.exe %smvdi
 Rem Use following line (and delete above line) after FDS6 is released
 Rem copy ..\Build\INTEL_WIN_TEST_%platform%\smokeview_win_test_%platform%.exe %smvdir%\smokeview_win_%platform%.exe
 
+echo copying .po files
+copy *.po %smvdir%\.
+
 echo copying smokediff_win_%platform%.exe
 copy ..\..\Utilities\smokediff\INTEL_WIN_%platform%\smokediff_win_%platform%.exe %smvdir%\smokediff_win_%platform%.exe
 

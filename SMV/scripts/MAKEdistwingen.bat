@@ -44,6 +44,9 @@ mkdir %smvdir%
 echo copying smokeview_win_%platform%.exe
 copy %smvbuild%\smokeview_win_%platform%.exe %smvdir%\.
 
+echo copying .po files
+copy *.po %smvdir%\.
+
 echo copying smokezip_win_%platform%.exe
 copy %svzipbuild%\smokezip_win_%platform%.exe %smvdir%\.
 
