@@ -349,7 +349,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
          IF ((SURFACE(IBC)%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .OR. &
              (SURFACE(IBC)%SPECIES_BC_INDEX==HVAC_BOUNDARY       .OR. &
-              ANY(SURFACE(IBC)%LEAK_PATH>0._EB)) .AND. UWS(IW)<0._EB) .AND. ZZ_F(IW,N)>0._EB) THEN
+              ANY(SURFACE(IBC)%LEAK_PATH>0._EB)) .AND. UWS(IW)<0._EB) .AND. ZZ_F(IW,N)>ZERO_P) THEN
             ! recreate diffusive flux from divg b/c UWP based on old RHODW
             RHO_D_DZDN = 2._EB*RHODW(IW,N)*(ZZP(IIG,JJG,KKG,N)-ZZ_F(IW,N))*RDN(IW)
             UN = SIGN(1._EB,REAL(IOR,EB))*(MASSFLUX(IW,N) + RHO_D_DZDN)/(RHO_F(IW)*ZZ_F(IW,N))
