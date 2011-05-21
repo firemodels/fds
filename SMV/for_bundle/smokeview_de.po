@@ -1,33 +1,829 @@
 
-msgid "Load/Unload"
-msgstr "Last/entladen"
+msgid "2D Contours"
+msgstr "2D-Konturen"
 
-msgid "Show/Hide"
-msgstr "Einblenden/ausblenden"
+msgid "2D lines"
+msgstr "2D-Linien"
 
-msgid "Options"
-msgstr "Optionen"
+msgid "2D smoke colored by:"
+msgstr "2D-Rauch durch farbige:"
+
+msgid "2D smoke drawn:"
+msgstr "2D-Rauch gezogen:"
+
+msgid "2D stepped"
+msgstr "2D trat"
+
+msgid "3D Contours"
+msgstr "3D-Konturen"
+
+msgid "3D smoke"
+msgstr "3D-Rauch"
+
+msgid "3D Smoke"
+msgstr "3D-Smoke"
+
+msgid "3D Smoke Parameters...  ALT+s"
+msgstr "3D-Smoke-Parameter ... ALT + S"
+
+msgid "3D surface"
+msgstr "3D-Oberfläche"
+
+msgid "About Smokeview..."
+msgstr "Über Smokeview ..."
+
+msgid "Actual"
+msgstr "Aktuelle"
+
+msgid "All"
+msgstr "Alle"
+
+msgid "All Frames"
+msgstr "Alle Frames"
+
+msgid "All Levels SOLID"
+msgstr "All Levels SOLID"
+
+msgid "All Levels Transparent"
+msgstr "Allen Ebenen transparent"
+
+msgid "All meshes"
+msgstr "Alle Maschen"
+
+msgid "All Terrains"
+msgstr "Alle Terrains"
+
+msgid "Animated Surface"
+msgstr "Animiertes Oberfläche"
+
+msgid "Animated Surfaces"
+msgstr "Animierte Oberflächen"
+
+msgid "Axis"
+msgstr "Axis"
+
+msgid "Back"
+msgstr "Zurück"
+
+msgid "Cad"
+msgstr "Cad"
+
+msgid "Cancel"
+msgstr "Abbrechen"
+
+msgid "Check for updates at http://code.google.com/p/fds-smv/downloads/"
+msgstr "Check for updates bei http://code.google.com/p/fds-smv/downloads/"
+
+msgid "Clip Geometry...  ALT+c"
+msgstr "Clip Geometrie ... ALT + c"
+
+msgid "Close All Dialogs  ALT+x"
+msgstr "Schließen Sie alle Dialoge ALT + x"
+
+msgid "Colorbar:"
+msgstr "Colorbar:"
+
+msgid "Color Bars"
+msgstr "Farbbalken"
+
+msgid "Color/*BW"
+msgstr "Farbe / * BW"
+
+msgid "Color/BW"
+msgstr "Farbe / SW"
+
+msgid "Compression"
+msgstr "Kompression"
+
+msgid "Compression Options"
+msgstr "Compression Options"
+
+msgid "Compression/Smokezip...  ALT+z"
+msgstr "Komprimierung / Smokezip ... Alt + Z"
+
+msgid "Compress now"
+msgstr "Compress jetzt"
+
+msgid "Compress only autoloaded files"
+msgstr "Komprimieren von Dateien automatisch geladen nur"
+
+msgid "Configuration files"
+msgstr "Konfigurationsdateien"
+
+msgid "Continuous Contours"
+msgstr "Kontinuierliche Contours"
+
+msgid "Crawl"
+msgstr "Kriechen"
+
+msgid "Create Script:"
+msgstr "Erstellen Script:"
+
+msgid "Customize Colorbar...  ALT+c"
+msgstr "Passen Colorbar ... ALT + c"
+
+msgid "Cycle colorbar"
+msgstr "Cycle colorbar"
+
+msgid "Default"
+msgstr "Default"
+
+msgid "Defined in Evac File"
+msgstr "Definiert in Evac Datei"
+
+msgid "Defined In Input File"
+msgstr "Definiert in Eingabedatei"
 
 msgid "Dialogs"
 msgstr "Dialoge"
 
-msgid "Tours"
-msgstr "Touren"
+msgid "Display...  ALT+d"
+msgstr "Anzeige ... Alt + D"
 
-msgid "View"
-msgstr "Anzeigen"
+msgid "Documentation"
+msgstr "Dokumentation"
+
+msgid "Down"
+msgstr "Down"
+
+msgid "Download documentation at  http://fire.nist.gov/fds/documentation.html"
+msgstr "Download Dokumentation http://fire.nist.gov/fds/documentation.html"
+
+msgid "Draw"
+msgstr "Zeichnen"
+
+msgid "Droplets"
+msgstr "Tröpfchen"
+
+msgid "Erase compressed files"
+msgstr "Erase komprimierten Dateien"
+
+msgid "error: steplabel not defined"
+msgstr "Fehler: steplabel nicht definiert"
+
+msgid "Evacuation"
+msgstr "Evakuierung"
+
+msgid "Every 10th Frame"
+msgstr "Jeder 10. Frame"
+
+msgid "Every 20th Frame"
+msgstr "Jeder 20. Frame"
+
+msgid "Every 2nd"
+msgstr "Jeden 2."
+
+msgid "Every 2nd Frame"
+msgstr "Jeden 2. Frame"
+
+msgid "Every 3rd"
+msgstr "Jeden 3."
+
+msgid "Every 3rd Frame"
+msgstr "Jeden 3. Frame"
+
+msgid "Every 4th"
+msgstr "Jeden 4."
+
+msgid "Every 4th Frame"
+msgstr "Jeden 4. Frame"
+
+msgid "Every 5th Frame"
+msgstr "Jeder 5. Rahmenprogramm"
+
+msgid "Examine Blockages...  ALT+e"
+msgstr "Untersuchen Blockaden ... ALT + E"
+
+msgid "Exterior"
+msgstr "Außenansicht"
+
+msgid "Eye Centered"
+msgstr "Eye Centered"
+
+msgid "Facets"
+msgstr "Facetten"
+
+msgid "FDS Generated Ticks"
+msgstr "FDS Erstellt Zecken"
+
+msgid "FDS/Smokeview Website"
+msgstr "FDS / Smokeview Website"
+
+msgid "FDS/Smokeview website: http://fire.nist.gov/fds"
+msgstr "FDS / Smokeview Website: http://fire.nist.gov/fds"
+
+msgid "File/Bound/Script Settings...  ALT+f"
+msgstr "Datei / Bound / Script-Einstellungen ... ALT + F"
+
+msgid "Fires"
+msgstr "Fires"
+
+msgid "Flip"
+msgstr "Flip"
+
+msgid "Flip background"
+msgstr "Flip Hintergrund"
+
+msgid "Flip colorbar"
+msgstr "Flip colorbar"
+
+msgid "Flow vectors"
+msgstr "Flußvektoren"
+
+msgid "Font Size"
+msgstr "Schriftgröße"
+
+msgid "Frame label"
+msgstr "Bildbezeichnung"
+
+msgid "Frame Rate"
+msgstr "Frame-Rate"
+
+msgid "Frequency:"
+msgstr "Frequenz:"
+
+msgid "Front"
+msgstr "Front"
+
+msgid "Geometry"
+msgstr "Geometrie"
+
+msgid "GPU activated. (Press G to deactivate)"
+msgstr "GPU aktiviert. (Presse-G zu deaktivieren)"
+
+msgid "GPU available but not in use. (Press G to activate)"
+msgstr "GPU verfügbar, aber nicht in Gebrauch ist. (Presse-G zu aktivieren)"
+
+msgid "GPU not available"
+msgstr "GPU nicht verfügbar"
+
+msgid "Grid Locations"
+msgstr "Grid Standorte"
+
+msgid "hazard"
+msgstr "Gefahr"
 
 msgid "Help"
 msgstr "Hilfe"
 
-msgid "Smokeview Menus"
-msgstr "Smokeview Menus"
+msgid "Hidden"
+msgstr "Hidden"
 
-msgid "Trainer Menus"
-msgstr "Trainer Menus"
+msgid "Hide"
+msgstr "Verbergen"
+
+msgid "Hide All"
+msgstr "Alle ausblenden"
+
+msgid "Hide All Levels"
+msgstr "Hide All Levels"
+
+msgid "Hide all planes in active mesh"
+msgstr "Blenden Sie alle Ebenen im aktiven Netz"
+
+msgid "Hide All PLOT3D Files"
+msgstr "Alle ausblenden PLOT3D Dateien"
+
+msgid "Hide All Tours"
+msgstr "Alle ausblenden Tours"
+
+msgid "Highlight extreme data"
+msgstr "Markieren extreme Daten"
+
+msgid "horizontally"
+msgstr "horizontal"
+
+msgid "HRR label"
+msgstr "HRR-Label"
+
+msgid "HRRPUV - All meshes"
+msgstr "HRRPUV - Alle Maschen"
+
+msgid "HRRPUV cutoff"
+msgstr "HRRPUV Cutoff"
+
+msgid "HRRPUV - Single mesh"
+msgstr "HRRPUV - Single Mesh"
+
+msgid "Humans"
+msgstr "Der Mensch"
+
+msgid "Humans - All meshes"
+msgstr "Humans - Alle Maschen"
+
+msgid "Image"
+msgstr "Image"
+
+msgid "Interior"
+msgstr "Raumausstatter"
+
+msgid "isosurfaces"
+msgstr "Isoflächen"
+
+msgid "Issue Tracker"
+msgstr "Issue Tracker"
+
+msgid "Labels"
+msgstr "Labels"
+
+msgid "Large"
+msgstr "Große"
+
+msgid "Layers"
+msgstr "Ebenen"
+
+msgid "Left"
+msgstr "Links"
+
+msgid "Levels"
+msgstr "Levels"
+
+msgid "Lighting"
+msgstr "Beleuchtung"
+
+msgid "Light smoke"
+msgstr "Light rauchen"
+
+msgid "lines"
+msgstr "Linien"
+
+msgid "Lines"
+msgstr "Lines"
+
+msgid "Load All"
+msgstr "Load All"
+
+msgid "Load All x"
+msgstr "Load All x"
+
+msgid "Load All y"
+msgstr "Load All y"
+
+msgid "Load All z"
+msgstr "Legen Sie alle z"
+
+msgid "Load/Unload"
+msgstr "Laden / Entladen"
+
+msgid "Locations:"
+msgstr "Standorte:"
+
+msgid "Manual"
+msgstr "Manuelle"
+
+msgid "Max Frame Rate"
+msgstr "Max Framerate"
+
+msgid "Maximum Level Solid"
+msgstr "Maximale Level Solid"
+
+msgid "Memory Load"
+msgstr "Speicher zu laden"
+
+msgid "Mesh label"
+msgstr "Mesh-Label"
+
+msgid "Minimum Level Solid"
+msgstr "Minimum Level Solid"
+
+msgid "Modify colorbar:"
+msgstr "Ändern colorbar:"
+
+msgid "Motion/View/Render...  ALT+m"
+msgstr "Motion / View / Render ... ALT + m"
+
+msgid "New..."
+msgstr "Neue ..."
+
+msgid "None"
+msgstr "Keine"
+
+msgid "Normal"
+msgstr "Normal"
+
+msgid "Objects"
+msgstr "Objects"
+
+msgid "Obstacles"
+msgstr "Hindernisse"
+
+msgid "Offset slice"
+msgstr "Offset Scheibe"
+
+msgid "Offset vector slice"
+msgstr "Offset-Vektor Scheibe"
+
+msgid "Offset Window"
+msgstr "Offset-Fenster"
+
+msgid "Open"
+msgstr "Open"
+
+msgid "OpenGL Lighting"
+msgstr "OpenGL Lighting"
+
+msgid "OpenGL Version:"
+msgstr "OpenGL Version:"
+
+msgid "Open Smokeview (.smv) file"
+msgstr "Open Smokeview (. SMV-Datei)"
+
+msgid "Open Vents As Outlines"
+msgstr "Open Vents als Konturen"
+
+msgid "Options"
+msgstr "Optionen"
+
+msgid "Other"
+msgstr "Andere"
+
+msgid "Outline"
+msgstr "Gliederung"
+
+msgid "Overview"
+msgstr "Übersicht"
+
+msgid "Overwrite compressed files"
+msgstr "Überschreiben Sie komprimierte Dateien"
+
+msgid "Oxygen"
+msgstr "Sauerstoff"
+
+msgid "Particle Head"
+msgstr "Particle Leiter"
+
+msgid "Particles"
+msgstr "Partikel"
+
+msgid "Particles (static)"
+msgstr "Partikel (statisch)"
+
+msgid "Particle Tracking..."
+msgstr "Particle Tracking ..."
+
+msgid "Planar terrain slice"
+msgstr "Planar Gelände Scheibe"
+
+msgid "points"
+msgstr "Punkte"
+
+msgid "Points"
+msgstr "Punkte"
+
+msgid "Press"
+msgstr "Drücken Sie"
 
 msgid "Quit"
 msgstr "Beenden"
 
-msgid "About Smokeview..."
-msgstr "Uber Smokeview..."
+msgid "Read ini files"
+msgstr "Lesen Sie ini-Dateien"
+
+msgid "Realistic"
+msgstr "Realistisch"
+
+msgid "Reload"
+msgstr "Reload"
+
+msgid "Reload Now"
+msgstr "Reload Jetzt"
+
+msgid "Render"
+msgstr "Machen"
+
+msgid "Report a problem at http://code.google.com/p/fds-smv/issues/"
+msgstr "Ein Problem bei http://code.google.com/p/fds-smv/issues/"
+
+msgid "Requested"
+msgstr "Angeforderte"
+
+msgid "Reset"
+msgstr "Reset"
+
+msgid "Right"
+msgstr "Right"
+
+msgid "Rotation"
+msgstr "Rotation"
+
+msgid "Run Script:"
+msgstr "Skript ausführen:"
+
+msgid "Save"
+msgstr "Speichern"
+
+msgid "Script Options"
+msgstr "Skript-Optionen"
+
+msgid "Segments"
+msgstr "Segmente"
+
+msgid "Select"
+msgstr "Wählen Sie"
+
+msgid "Set as Startup"
+msgstr "Als Startup"
+
+msgid "Shades:"
+msgstr "Farbtöne:"
+
+msgid "Show"
+msgstr "Show"
+
+msgid "Show All"
+msgstr "Alle"
+
+msgid "Show All Levels"
+msgstr "Alle Ebenen anzeigen"
+
+msgid "Show all planes in active mesh"
+msgstr "Alle Flugzeuge im aktiven Netz"
+
+msgid "Show All PLOT3D Files"
+msgstr "Alle Dateien PLOT3D"
+
+msgid "Show All Tours"
+msgstr "Alle Touren"
+
+msgid "Show All Vector Slice Entries"
+msgstr "Alle Vector Slice Einträge"
+
+msgid "Show Cad Textures"
+msgstr "Zeige Cad Texturen"
+
+msgid "Show File Names"
+msgstr "Show Dateinamen"
+
+msgid "Show/Hide"
+msgstr "Show / Hide"
+
+msgid "Show/Hide Blockage Types:"
+msgstr "Show / Hide Blockade Typen:"
+
+msgid "Show multi slice in blockage"
+msgstr "Zeige Multi-Slice in Verstopfung"
+
+msgid "Show normals"
+msgstr "Show Normalen"
+
+msgid "Show slice in blockage"
+msgstr "Show Scheibe in Verstopfung"
+
+msgid "Show tracers always"
+msgstr "Show Tracer immer"
+
+msgid "Show vector slice in blockage"
+msgstr "Show Vektor Scheibe in Verstopfung"
+
+msgid "Single mesh"
+msgstr "Single Mesh"
+
+msgid "Single Mesh"
+msgstr "Single Mesh"
+
+msgid "Slice Average"
+msgstr "Durchschnittliche Slice"
+
+msgid "slices"
+msgstr "Scheiben"
+
+msgid "Smoke culling activated. (Press C to deactivate)"
+msgstr "Smoke Keulung aktiviert. (C drücken, um zu deaktivieren)"
+
+msgid "Smoke culling available but not in use. ( To activate: "
+msgstr "Smoke Keulung verfügbar, aber nicht in Gebrauch ist. (Zum Aktivieren:"
+
+msgid "Smoke culling not available"
+msgstr "Smoke Keulung nicht verfügbar"
+
+msgid "Smoke Map:"
+msgstr "Smoke Map:"
+
+msgid "Smokeview Menus"
+msgstr "Smokeview Menüs"
+
+msgid "Smooth"
+msgstr "Glatt"
+
+msgid "Smooth blockages at startup"
+msgstr "Glatte Blockaden beim Start"
+
+msgid "Smooth blockages drawn opaque"
+msgstr "Glatte Blockaden gezogen undurchsichtig"
+
+msgid "Smooth Blockages Now"
+msgstr "Glatte Blockaden Jetzt"
+
+msgid "Solid"
+msgstr "Solid"
+
+msgid "Solid and Outline"
+msgstr "Solide und Gliederung"
+
+msgid "Solution Value"
+msgstr "Solution Value"
+
+msgid "Solution Variable"
+msgstr "Solution Variable"
+
+msgid "soot density - All meshes"
+msgstr "Rußdichte - Alle Maschen"
+
+msgid "soot MASS FRACTION - Single mesh"
+msgstr "Ruß Massenanteil - Single Mesh"
+
+msgid "spheres"
+msgstr "Sphären"
+
+msgid "Start Recording"
+msgstr "Start Recording"
+
+msgid "Stereo Parameters..."
+msgstr "Stereo-Parameter ..."
+
+msgid "Stop Recording"
+msgstr "Aufzeichnung beenden"
+
+msgid "Stop Rendering"
+msgstr "Stop-Rendering"
+
+msgid "Streaks"
+msgstr "Serien"
+
+msgid "Surfaces"
+msgstr "Oberflächen"
+
+msgid "Surface Type"
+msgstr "Oberflächenart"
+
+msgid "Switch to perspective view       ALT+v"
+msgstr "Wechseln Sie zu perspektivische Ansicht Alt + V"
+
+msgid "Switch to size preserving view   ALT+v"
+msgstr "Wechseln Sie zu Größe Erhaltung Ansicht Alt + V"
+
+msgid "temperature"
+msgstr "Temperatur"
+
+msgid "Temperature"
+msgstr "Temperatur"
+
+msgid "Terrain"
+msgstr "Gelände"
+
+msgid "Text Labels"
+msgstr "Beschriftungen"
+
+msgid "Time"
+msgstr "Time"
+
+msgid "Time Bars"
+msgstr "Zeitleisten"
+
+msgid "Time label"
+msgstr "Time-Label"
+
+msgid "Title"
+msgstr "Titel"
+
+msgid "Titles"
+msgstr "Titel"
+
+msgid "Tours"
+msgstr "Tours"
+
+msgid "Tours...  ALT+t"
+msgstr "Tours ... ALT + T"
+
+msgid "Trainer..."
+msgstr "Trainer ..."
+
+msgid "Trainer Menu"
+msgstr "Trainer Menü"
+
+msgid "Trainer Menus"
+msgstr "Trainer Menüs"
+
+msgid "Transparent"
+msgstr "Transparente"
+
+msgid "Transparent (data)"
+msgstr "Transparent (Daten)"
+
+msgid "Triangles"
+msgstr "Dreiecke"
+
+msgid "Two sided (exterior)"
+msgstr "Zweiseitig (zur Strasse)"
+
+msgid "Two sided (interior)"
+msgstr "Zweiseitig (innen)"
+
+msgid "Units"
+msgstr "Einheiten"
+
+msgid "Unload"
+msgstr "Entladen"
+
+msgid "Unload All"
+msgstr "Entladen Sie alle"
+
+msgid "Unload Last"
+msgstr "Unload Letzte"
+
+msgid "Unload Terrain"
+msgstr "Unload Terrain"
+
+msgid "Up"
+msgstr "Bis"
+
+msgid "Update bounds"
+msgstr "Update Grenzen"
+
+msgid "Updates"
+msgstr "Updates"
+
+msgid "Use colorbar lines"
+msgstr "Verwenden colorbar Linien"
+
+msgid "User Settable Ticks"
+msgstr "Benutzer einstellbare Zecken"
+
+msgid "User Title 1"
+msgstr "User Titel 1"
+
+msgid "User Title 2"
+msgstr "User Titel 2"
+
+msgid "using:"
+msgstr "Hilfe:"
+
+msgid "vector slices"
+msgstr "Vektor Scheiben"
+
+msgid "Vents"
+msgstr "Vents"
+
+msgid "vertically"
+msgstr "vertikal"
+
+msgid "View"
+msgstr "Anzeigen"
+
+msgid "Walk"
+msgstr "Walk"
+
+msgid "water - All meshes"
+msgstr "Wasser - Alle Maschen"
+
+msgid "Water - Single mesh"
+msgstr "Wasser - Single Mesh"
+
+msgid "Web Links"
+msgstr "Web-Links"
+
+msgid "Web Resources"
+msgstr "Web-Ressourcen"
+
+msgid "World Centered"
+msgstr "World Centered"
+
+msgid "World Centered, level rotation"
+msgstr "World kreuze Ebene Rotation"
+
+msgid "WUI Display... ALT+w..."
+msgstr "WUI anzeigen ... ALT + w. .."
+
+msgid "WUI Display... ALT+w"
+msgstr "WUI anzeigen ... ALT + W"
+
+msgid "xy plane"
+msgstr "xy-Ebene"
+
+msgid "xy plane (grid turned off)"
+msgstr "xy-Ebene (Raster ausgeschaltet)"
+
+msgid "xz  plane"
+msgstr "xz-Ebene"
+
+msgid "xz plane"
+msgstr "xz-Ebene"
+
+msgid "xz plane (grid turned off)"
+msgstr "xz-Ebene (Raster ausgeschaltet)"
+
+msgid "yz  plane"
+msgstr "yz-Ebene"
+
+msgid "yz plane"
+msgstr "yz-Ebene"
+
+msgid "yz plane (grid turned off)"
+msgstr "yz-Ebene (Raster ausgeschaltet)"
+
+msgid "Zoom"
+msgstr "Zoom"
+
+msgid "Zoom"
+msgstr "Zoom"
+
