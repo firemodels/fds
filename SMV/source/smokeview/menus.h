@@ -4644,10 +4644,10 @@ updatemenu=0;
     glutAddSubMenu("Solution Variable",staticvariablemenu);
     if(cmesh->visz==1)glutAddMenuEntry(_("*xy plane"),1);
     if(cmesh->visz==0)glutAddMenuEntry(_("xy plane"),1);
-    if(cmesh->visy==1)glutAddMenuEntry(_("*xz  plane"),2);
-    if(cmesh->visy==0)glutAddMenuEntry(_("xz  plane"),2);
-    if(cmesh->visx==1)glutAddMenuEntry(_("*yz  plane"),3);
-    if(cmesh->visx==0)glutAddMenuEntry(_("yz  plane"),3);
+    if(cmesh->visy==1)glutAddMenuEntry(_("*xz plane"),2);
+    if(cmesh->visy==0)glutAddMenuEntry(_("xz plane"),2);
+    if(cmesh->visx==1)glutAddMenuEntry(_("*yz plane"),3);
+    if(cmesh->visx==0)glutAddMenuEntry(_("yz plane"),3);
     if(vectorspresent==1)glutAddSubMenu(_("Flow vectors"),vectorskipmenu);
     if(p3cont2d==SHADED_CONTOURS){
       glutAddMenuEntry(_("*Continuous Contours"),4);
