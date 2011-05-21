@@ -11,6 +11,7 @@ $RUNFDS Detectors aspiration_detector
 $RUNFDS Detectors beam_detector
 $RUNFDS Energy_Budget energy_budget_adiabatic_walls
 $RUNFDS Energy_Budget energy_budget_cold_walls
+$RUNFDS Energy_Budget energy_budget_dns_100
 $RUNFDS Fires box_burn_away1
 $RUNFDS Fires box_burn_away2
 $RUNFDS Fires box_burn_away3
