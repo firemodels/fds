@@ -513,13 +513,13 @@ extern "C" void glui_bounds_setup(int main_window){
     panel_pan3 = glui_bounds->add_panel_to_panel(panel_plot3d,"",GLUI_PANEL_NONE);
     panel_contours = glui_bounds->add_panel_to_panel(panel_pan3,_("Contours"));
     plot3d_display=glui_bounds->add_radiogroup_to_panel(panel_contours,&p3cont2d,UPDATEPLOT,PLOT3D_CB);
-    glui_bounds->add_radiobutton_to_group(plot3d_display,_("Shaded Contours"));
-    glui_bounds->add_radiobutton_to_group(plot3d_display,_("Stepped Contours"));
-    glui_bounds->add_radiobutton_to_group(plot3d_display,_("Line Contours"));
+    glui_bounds->add_radiobutton_to_group(plot3d_display,_("Shaded contours"));
+    glui_bounds->add_radiobutton_to_group(plot3d_display,_("Stepped contours"));
+    glui_bounds->add_radiobutton_to_group(plot3d_display,_("Line contours"));
     
     //glui_bounds->add_column_to_panel(panel_pan3);
     panel_vector = glui_bounds->add_panel_to_panel(panel_pan3,_("Vector"));
-    glui_bounds->add_checkbox_to_panel(panel_vector,_("Show Vectors"),&visVector,UPDATEPLOT,PLOT3D_CB);
+    glui_bounds->add_checkbox_to_panel(panel_vector,_("Show vectors"),&visVector,UPDATEPLOT,PLOT3D_CB);
     SPINNER_plot3d_vectorpointsize=glui_bounds->add_spinner_to_panel(panel_vector,_("Point size"),GLUI_SPINNER_FLOAT,&vectorpointsize,UPDATE_VECTOR,PLOT3D_CB);
     SPINNER_plot3d_vectorpointsize->set_float_limits(1.0,10.0);
     SPINNER_plot3d_vectorlinewidth=glui_bounds->add_spinner_to_panel(panel_vector,_("Line width"),GLUI_SPINNER_FLOAT,&vectorlinewidth,UPDATE_VECTOR,PLOT3D_CB);
@@ -528,7 +528,7 @@ extern "C" void glui_bounds_setup(int main_window){
     panel_isosurface = glui_bounds->add_panel_to_panel(panel_plot3d,"Isosurface");
     panel_pan1 = glui_bounds->add_panel_to_panel(panel_isosurface,"",GLUI_PANEL_NONE);
 
-    glui_bounds->add_checkbox_to_panel(panel_pan1,"Show Isosurface",&visiso,PLOTISO,PLOT3D_CB);
+    glui_bounds->add_checkbox_to_panel(panel_pan1,"Show isosurface",&visiso,PLOTISO,PLOT3D_CB);
     SPINNER_plot3dpointsize=glui_bounds->add_spinner_to_panel(panel_pan1,_("Point size"),GLUI_SPINNER_FLOAT,
       &plot3dpointsize);
     SPINNER_plot3dpointsize->set_float_limits(1.0,10.0);
@@ -551,7 +551,7 @@ extern "C" void glui_bounds_setup(int main_window){
     p3chopmin_temp=p3chopmin[0];
     p3chopmax_temp=p3chopmax[0];
     glui_bounds->add_column_to_panel(panel_plot3d,false);
-    boundmenu(NULL,NULL,panel_plot3d,"Reload Plot3D File(s)",
+    boundmenu(NULL,NULL,panel_plot3d,"Reload Plot3D file(s)",
       &con_p3_min,&con_p3_max,&con_p3_setmin,&con_p3_setmax,
       &con_p3_setchopmin, &con_p3_setchopmax,
       &con_p3_chopmin, &con_p3_chopmax,
@@ -635,7 +635,7 @@ extern "C" void glui_bounds_setup(int main_window){
     slice_line_contour_num=1;
     SPINNER_line_contour_num=glui_bounds->add_spinner_to_panel(panel_line_contour,_("Number of contours"),GLUI_SPINNER_INT,
       &slice_line_contour_num,LINE_CONTOUR_VALUE,Slice_CB);
-    BUTTON_update_line_contour=glui_bounds->add_button_to_panel(panel_line_contour,_("Update Contours"),UPDATE_LINE_CONTOUR_VALUE,Slice_CB);
+    BUTTON_update_line_contour=glui_bounds->add_button_to_panel(panel_line_contour,_("Update contours"),UPDATE_LINE_CONTOUR_VALUE,Slice_CB);
     glui_bounds->add_checkbox_to_panel(panel_line_contour,_("Show contours"),&vis_slice_contours);
 #endif
 
@@ -658,7 +658,7 @@ extern "C" void glui_bounds_setup(int main_window){
   SPINNER_timebounds->set_float_limits(0.0,3600.0*24);
   BUTTON_SETTIME=glui_bounds->add_button_to_panel(panel_time1a,_("Set"),SET_TIME,Time_CB);
   
-  panel_time2 = glui_bounds->add_panel_to_panel(panel_time,_("Data Loading"),true);
+  panel_time2 = glui_bounds->add_panel_to_panel(panel_time,_("Data loading"),true);
 
   panel_time2a = glui_bounds->add_panel_to_panel(panel_time2,"",false);
   SPINNER_tload_begin=glui_bounds->add_spinner_to_panel(panel_time2a,"tmin",GLUI_SPINNER_FLOAT,&tload_begin,TBOUNDS,Time_CB);
@@ -680,7 +680,7 @@ extern "C" void glui_bounds_setup(int main_window){
 
   Time_CB(TBOUNDS_USE);
 
-  panel_colorbar = glui_bounds->add_rollout(_("Data Coloring/Transparency"),false);
+  panel_colorbar = glui_bounds->add_rollout(_("Data coloring/transparency"),false);
   if(ncolorbars>0){
     selectedcolorbar_index2=-1;
     LISTBOX_colorbar2=glui_bounds->add_listbox_to_panel(panel_colorbar,_("Colorbar:"),&selectedcolorbar_index2,COLORBAR_LIST2,Slice_CB);
@@ -745,9 +745,9 @@ extern "C" void glui_bounds_setup(int main_window){
   panel_script1 = glui_bounds->add_panel_to_panel(rollout_SCRIPT,"Script files",true);
 
   panel_script1a = glui_bounds->add_panel_to_panel(panel_script1,"",false);
-  BUTTON_script_start=glui_bounds->add_button_to_panel(panel_script1a,_("Start Recording"),SCRIPT_START,Script_CB);
+  BUTTON_script_start=glui_bounds->add_button_to_panel(panel_script1a,_("Start recording"),SCRIPT_START,Script_CB);
   glui_bounds->add_column_to_panel(panel_script1a,false);
-  BUTTON_script_stop=glui_bounds->add_button_to_panel(panel_script1a,_("Stop Recording"),SCRIPT_STOP,Script_CB);
+  BUTTON_script_stop=glui_bounds->add_button_to_panel(panel_script1a,_("Stop recording"),SCRIPT_STOP,Script_CB);
   BUTTON_script_stop->disable();
 
   panel_script1b = glui_bounds->add_panel_to_panel(panel_script1,"",false);
@@ -899,7 +899,7 @@ void boundmenu(GLUI_Rollout **bound_rollout,GLUI_Rollout **chop_rollout, GLUI_Pa
   }           
 
   if(con_chopmin!=NULL&&con_chopmax!=NULL&&con_setchopmin!=NULL&&con_setchopmax!=NULL){
-    panel_e = glui_bounds->add_rollout_to_panel(panel,_("Truncate Data"),false);
+    panel_e = glui_bounds->add_rollout_to_panel(panel,_("Truncate data"),false);
     if(chop_rollout!=NULL)*chop_rollout=panel_e;
     panel_f = glui_bounds->add_panel_to_panel(panel_e,"",GLUI_PANEL_NONE);
     *con_chopmin = glui_bounds->add_edittext_to_panel(panel_f,"",GLUI_EDITTEXT_FLOAT,chopminval,CHOPVALMIN,FILE_CB);

@@ -113,7 +113,7 @@ extern "C" void glui_tour_setup(int main_window){
   if(showgluitour==0)glui_tour->hide();
 
 
-  panel_settings = glui_tour->add_panel(_("Tour Settings"));
+  panel_settings = glui_tour->add_panel(_("Tour settings"));
   view_checkbox=glui_tour->add_checkbox_to_panel(panel_settings,_("View from tour path"),&viewtourfrompath,VIEWTOURFROMPATH,TOUR_CB);
   snap_checkbox=glui_tour->add_checkbox_to_panel(panel_settings,_("View from selected keyframe"),&keyframe_snap,VIEWSNAP,TOUR_CB);
   glui_tour->add_separator_to_panel(panel_settings);
@@ -124,7 +124,7 @@ extern "C" void glui_tour_setup(int main_window){
 
   glui_tour->add_separator_to_panel(panel_settings);
 
-  glui_tour->add_button_to_panel(panel_settings,_("New Tour"),TOUR_INSERT,TOUR_CB);
+  glui_tour->add_button_to_panel(panel_settings,_("New tour"),TOUR_INSERT,TOUR_CB);
   BUTTONnext_tour=glui_tour->add_button_to_panel(panel_settings,_("Next tour"),TOUR_NEXT,TOUR_CB);
   BUTTONprev_tour=glui_tour->add_button_to_panel(panel_settings,_("Previous tour"),TOUR_PREVIOUS,TOUR_CB);
   if(ntours>0){
@@ -142,8 +142,8 @@ extern "C" void glui_tour_setup(int main_window){
   }
   glui_tour->add_separator_to_panel(panel_settings);
 
-  glui_tour->add_button_to_panel(panel_settings,_("Update Tour Label"),TOUR_UPDATELABEL,TOUR_CB);
-  EDITlabel=glui_tour->add_edittext_to_panel(panel_settings,_("Tour Label"),GLUI_EDITTEXT_TEXT,tour_label,TOUR_LABEL,TOUR_CB);
+  glui_tour->add_button_to_panel(panel_settings,_("Update tour label"),TOUR_UPDATELABEL,TOUR_CB);
+  EDITlabel=glui_tour->add_edittext_to_panel(panel_settings,_("Tour label"),GLUI_EDITTEXT_TEXT,tour_label,TOUR_LABEL,TOUR_CB);
   EDITlabel->set_w(240);
   if(navatar_types>0){
     LISTBOX_avatar=glui_tour->add_listbox_to_panel(panel_settings,_("Avatar:"),&glui_avatar_index,TOUR_AVATAR,TOUR_CB);

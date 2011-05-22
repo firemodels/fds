@@ -111,10 +111,10 @@ extern "C" void show_shooter(void){
 
 extern "C" void glui_shooter_setup(int main_window){  
 
-  glui_shooter = GLUI_Master.create_glui(_("Particle Tracking"),0,0,0 );
+  glui_shooter = GLUI_Master.create_glui(_("Particle tracking"),0,0,0 );
   if(showshooterDLG==0)glui_shooter->hide();
 
-  panel_shooter_frame=glui_shooter->add_panel(_("Starting Locations/Velocities"));
+  panel_shooter_frame=glui_shooter->add_panel(_("Starting locations/velocities"));
 
   panel_shooter_frameE=glui_shooter->add_panel_to_panel(panel_shooter_frame,_("Positions"),false);
 

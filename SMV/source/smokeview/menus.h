@@ -4415,10 +4415,10 @@ updatemenu=0;
      glutAddMenuEntry(_("   Outline"),visBLOCKOutline);
    }
   if(visBlocks==visBLOCKSolidOutline){
-    glutAddMenuEntry(_("   *Solid and Outline"),visBLOCKSolidOutline);
+    glutAddMenuEntry(_("   *Solid and outline"),visBLOCKSolidOutline);
   }
    else{
-     glutAddMenuEntry(_("   Solid and Outline"),visBLOCKSolidOutline);
+     glutAddMenuEntry(_("   Solid and outline"),visBLOCKSolidOutline);
    }
   if(visBlocks==visBLOCKHide){
     glutAddMenuEntry(_("   *Hidden"),visBLOCKHide);
@@ -4591,9 +4591,9 @@ updatemenu=0;
     if(p3dsurfacetype!=3)glutAddMenuEntry(_("Points"),3);
 
     CREATEMENU(isosurfacemenu,IsoSurfaceMenu);
-    glutAddSubMenu(_("Solution Variable"),isovariablemenu);
-    glutAddSubMenu(_("Solution Value"),levelmenu);
-    glutAddSubMenu(_("Surface Type"),isosurfacetypemenu);
+    glutAddSubMenu(_("Solution variable"),isovariablemenu);
+    glutAddSubMenu(_("Solution value"),levelmenu);
+    glutAddSubMenu(_("Surface type"),isosurfacetypemenu);
     glutAddMenuEntry(_("Hide"),1);
   }
 
@@ -4652,10 +4652,10 @@ updatemenu=0;
     if(cmesh->visx==0)glutAddMenuEntry(_("yz plane"),3);
     if(vectorspresent==1)glutAddSubMenu(_("Flow vectors"),vectorskipmenu);
     if(p3cont2d==SHADED_CONTOURS){
-      glutAddMenuEntry(_("*Continuous Contours"),4);
+      glutAddMenuEntry(_("*Continuous contours"),4);
     }
     if(p3cont2d!=SHADED_CONTOURS){
-      glutAddMenuEntry(_("Continuous Contours"),4);
+      glutAddMenuEntry(_("Continuous contours"),4);
     }
     glutAddMenuEntry(_("Show all planes in active mesh"),5);
     glutAddMenuEntry(_("Hide all planes in active mesh"),6);
@@ -6168,7 +6168,7 @@ updatemenu=0;
       }
     }
   }
-  if(titlesafe_offset==0)glutAddMenuEntry(_("Offset sindow"),12);
+  if(titlesafe_offset==0)glutAddMenuEntry(_("Offset window"),12);
   if(titlesafe_offset!=0)glutAddMenuEntry(_("*Offset window"),12);
   if(ntextures_loaded_used>0){
     glutAddSubMenu("Textures",textureshowmenu);
@@ -6467,7 +6467,7 @@ updatemenu=0;
 #ifdef pp_BENCHMARK
   glutAddMenuEntry("Benchmark",1);
 #endif
-  if(trainer_active==1)glutAddMenuEntry(_("Trainer Menu"),2);
+  if(trainer_active==1)glutAddMenuEntry(_("Trainer menu"),2);
   
   /* --------------------------------reset menu -------------------------- */
 
@@ -6593,24 +6593,24 @@ updatemenu=0;
     int displayblank=0;
   CREATEMENU(helpmenu,HelpMenu);
 #ifdef WIN32
-  glutAddMenuEntry(_("Web Links"),1);
+  glutAddMenuEntry(_("Web links"),1);
   glutAddMenuEntry(_("  Documentation"),-3);
-  glutAddMenuEntry(_("  Issue Tracker"),-1);
+  glutAddMenuEntry(_("  Issue tracker"),-1);
   glutAddMenuEntry(_("  Updates"),-2);
-  glutAddMenuEntry(_("  FDS/Smokeview Website"),-4);
+  glutAddMenuEntry(_("  FDS/Smokeview website"),-4);
   glutAddMenuEntry("",1);
 #endif
 #ifdef pp_OSX
-  glutAddMenuEntry(_("Web Links"),1);
+  glutAddMenuEntry(_("Web links"),1);
   glutAddMenuEntry(_("  Documentation"),-3);
-  glutAddMenuEntry(_("  Issue Tracker"),-1);
+  glutAddMenuEntry(_("  Issue tracker"),-1);
   glutAddMenuEntry(_("  Updates"),-2);
-  glutAddMenuEntry(_("  FDS/Smokeview Website"),-4);
+  glutAddMenuEntry(_("  FDS/Smokeview website"),-4);
   glutAddMenuEntry("",1);
 #endif
 #ifndef WIN32
 #ifndef PP_OSX
-  glutAddMenuEntry(_("Web Resources"),1);
+  glutAddMenuEntry(_("Web resources"),1);
   glutAddMenuEntry(_("*** Download documentation at  http://fire.nist.gov/fds/documentation.html"),1);
   glutAddMenuEntry(_("*** Report a problem at http://code.google.com/p/fds-smv/issues/"),1);
   glutAddMenuEntry(_("*** Check for updates at http://code.google.com/p/fds-smv/downloads/"),1);
@@ -6675,13 +6675,13 @@ updatemenu=0;
   glutAddMenuEntry(_("  !: snap scene's view angles"),2);
   glutAddMenuEntry(_("  &: toggle line anti-aliasing (draw lines smoothly)"),2);
   glutAddMenuEntry("",1);
-  glutAddMenuEntry(_("Mouse Motion"),1);
+  glutAddMenuEntry(_("Mouse motion"),1);
   glutAddMenuEntry(_("      : rotate around z, x axis"),1);
   glutAddMenuEntry(_("  CTRL: translate along x, y axis"),1);
   glutAddMenuEntry(_("   ALT: translate along z axis"),1);
   if(eyeview==EYE_CENTERED){
     glutAddMenuEntry("",1);
-    glutAddMenuEntry(_("Keyboard Motion"),1);
+    glutAddMenuEntry(_("Keyboard motion"),1);
     glutAddMenuEntry(_("   left/right cursor: rotate left/right"),1);
     glutAddMenuEntry(_("      up/down cursor: move forward/backward"),1);
     glutAddMenuEntry(_(" CTRL:up/down cursor: move forward/backward 5 times slower"),1);
@@ -6722,7 +6722,7 @@ updatemenu=0;
         glutAddMenuEntry(menulabel,i);
       }
     }
-    glutAddMenuEntry("Unload All",-1);
+    glutAddMenuEntry("Unload all",-1);
 
     if(nmeshes==1){
       CREATEMENU(particlemenu,ParticleMenu);
@@ -6812,7 +6812,7 @@ updatemenu=0;
         glutAddMenuEntry(menulabel,i);
       }
     }
-    glutAddMenuEntry(_("Unload All"),-1);
+    glutAddMenuEntry(_("Unload all"),-1);
 
     CREATEMENU(evacmenu,EvacMenu);
     {
@@ -6828,7 +6828,7 @@ updatemenu=0;
         }
       }
       if(nevacs>1){
-        strcpy(menulabel,_("Humans - All meshes"));
+        strcpy(menulabel,_("Humans - all meshes"));
         glutAddMenuEntry(menulabel,-11);
         glutAddMenuEntry("-",-2);
       }
@@ -6865,7 +6865,7 @@ updatemenu=0;
           glutAddMenuEntry(mvslicei->menulabel2,i);
         }
       }
-      glutAddMenuEntry(_("Unload All"),-1);
+      glutAddMenuEntry(_("Unload all"),-1);
 
       nloadsubmvslicemenu=1;
       for(i=1;i<nmultivslices;i++){
@@ -6966,8 +6966,8 @@ updatemenu=0;
       glutAddMenuEntry(vd->menulabel2,i);
     }
     glutAddMenuEntry("-",-999);
-    //glutAddMenuEntry("Unload Last",-2);
-    glutAddMenuEntry(_("Unload All"),-1);
+    //glutAddMenuEntry("Unload last",-2);
+    glutAddMenuEntry(_("Unload all"),-1);
 
     if(nvslice0>0){
       vslice *vd, *vdim1,*vdip1;
@@ -7097,11 +7097,11 @@ updatemenu=0;
     }
     if(nterrainloaded>1){
         glutAddMenuEntry("-",-1);
-        glutAddMenuEntry(_("Unload All"),-10);
+        glutAddMenuEntry(_("Unload all"),-10);
     }
     CREATEMENU(loadterrainmenu,LoadTerrainMenu);
     if(nterraininfo>1){
-      glutAddMenuEntry(_("All Terrains"),-9);
+      glutAddMenuEntry(_("All terrains"),-9);
       glutAddMenuEntry("-",-1);
     }
     /*
@@ -7120,11 +7120,11 @@ updatemenu=0;
     */
     if(nterrainloaded==1){
       glutAddMenuEntry("-",-1);
-      glutAddMenuEntry(_("Unload Terrain"),-10);
+      glutAddMenuEntry(_("Unload terrain"),-10);
     }
     else if(nterrainloaded>1){
       glutAddMenuEntry("-",-1);
-      glutAddSubMenu(_("Unload Terrain"),unloadterrainmenu);
+      glutAddSubMenu(_("Unload terrain"),unloadterrainmenu);
     }
   }
     if(nslice_files>0){
@@ -7138,7 +7138,7 @@ updatemenu=0;
             glutAddMenuEntry(mslicei->menulabel2,i);
           }
         }
-        glutAddMenuEntry(_("Unload All"),-1);
+        glutAddMenuEntry(_("Unload all"),-1);
 
         nloadsubmslicemenu=1;
         for(i=1;i<nmultislices;i++){
@@ -7218,8 +7218,8 @@ updatemenu=0;
         }
       }
       glutAddMenuEntry("-",-999);
-      glutAddMenuEntry(_("Unload Last"),-2);
-      glutAddMenuEntry(_("Unload All"),-1);
+      glutAddMenuEntry(_("Unload last"),-2);
+      glutAddMenuEntry(_("Unload all"),-1);
 
 //*** this is where I would put the "sub-slice" menus ordered by type
       nloadsubslicemenu=1;
@@ -7452,7 +7452,7 @@ updatemenu=0;
         STRCPY(menulabel,plot3dinfo[i].menulabel);  
         glutAddMenuEntry(menulabel,i);
       }
-      glutAddMenuEntry("Unload All",-1);
+      glutAddMenuEntry("Unload all",-1);
 
 
       
@@ -7579,7 +7579,7 @@ updatemenu=0;
         STRCPY(menulabel,patchinfo[i].menulabel);
         glutAddMenuEntry(menulabel,i);
       }
-      glutAddMenuEntry(_("Unload All"),-1);
+      glutAddMenuEntry(_("Unload all"),-1);
 
       if(nmeshes>1&&loadpatchsubmenus==NULL){
         NewMemory((void **)&loadpatchsubmenus,npatch_files*sizeof(int));
@@ -7691,7 +7691,7 @@ updatemenu=0;
         STRCPY(menulabel,isoinfo[i].menulabel);  
         glutAddMenuEntry(menulabel,i);
       }
-      glutAddMenuEntry("Unload All",-1);
+      glutAddMenuEntry("Unload all",-1);
 
       if(niso_files>0){
         if(isosubmenus==NULL){
@@ -7949,8 +7949,8 @@ updatemenu=0;
 
     }
     glutAddMenuEntry(_("Create Script:"),-999);
-    if(script_recording==NULL)glutAddMenuEntry(_("  Start Recording"),START_RECORDING_SCRIPT);
-    glutAddMenuEntry(_("  Stop Recording"),STOP_RECORDING_SCRIPT);
+    if(script_recording==NULL)glutAddMenuEntry(_("  Start recording"),START_RECORDING_SCRIPT);
+    glutAddMenuEntry(_("  Stop recording"),STOP_RECORDING_SCRIPT);
 
   /* --------------------------------loadunload menu -------------------------- */
     {

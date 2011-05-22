@@ -309,10 +309,10 @@ extern "C" void glui_motion_setup(int main_window){
 #endif
 
 
-  panel_projection = glui_motion->add_rollout(_("Window Properties"),false);
+  panel_projection = glui_motion->add_rollout(_("Window properties"),false);
   projection_radio=glui_motion->add_radiogroup_to_panel(panel_projection,&projection_type,PROJECTION,TRANSLATE_CB);
   glui_motion->add_radiobutton_to_group(projection_radio,_("Perspective"));
-  glui_motion->add_radiobutton_to_group(projection_radio,_("Size Preserving"));
+  glui_motion->add_radiobutton_to_group(projection_radio,_("Size preserving"));
   SPINNER_zoom=glui_motion->add_spinner_to_panel(panel_projection,_("zoom"),GLUI_SPINNER_FLOAT,&zoom,
     ZOOM,TRANSLATE_CB);
   SPINNER_zoom->set_float_limits(0.10,10.0,GLUI_LIMIT_CLAMP);

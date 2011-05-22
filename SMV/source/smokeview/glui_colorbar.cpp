@@ -165,19 +165,19 @@ extern "C" void glui_colorbar_setup(int main_window){
     colorbar_label=NULL;
   }
   colorbar_label=(char *)malloc(sizeof(GLUI_String));
-  strcpy(colorbar_label,_("New Colorbar"));
+  strcpy(colorbar_label,_("New colorbar"));
 
   if(glui_colorbar!=NULL)glui_colorbar->close();
-  glui_colorbar = GLUI_Master.create_glui("Colorbar Editor",0,0,0);
+  glui_colorbar = GLUI_Master.create_glui(_("Colorbar editor"),0,0,0);
   if(showcolorbar==0)glui_colorbar->hide();
 
   panel_cb2R2 = glui_colorbar->add_panel("",GLUI_PANEL_NONE);
-  BUTTON_new=glui_colorbar->add_button_to_panel(panel_cb2R2,_("New Colorbar"),COLORBAR_NEW,COLORBAR_CB);
+  BUTTON_new=glui_colorbar->add_button_to_panel(panel_cb2R2,_("New colorbar"),COLORBAR_NEW,COLORBAR_CB);
   glui_colorbar->add_column_to_panel(panel_cb2R2,false);
-  BUTTON_delete=glui_colorbar->add_button_to_panel(panel_cb2R2,_("Delete Colorbar"),COLORBAR_DELETE,COLORBAR_CB);
+  BUTTON_delete=glui_colorbar->add_button_to_panel(panel_cb2R2,_("Delete colorbar"),COLORBAR_DELETE,COLORBAR_CB);
   glui_colorbar->add_column_to_panel(panel_cb2R2,false);
   cb_hidesv=1;
-  CHECKBOX_hidesv = glui_colorbar->add_checkbox_to_panel(panel_cb2R2,_("Hide Scene"),&cb_hidesv);
+  CHECKBOX_hidesv = glui_colorbar->add_checkbox_to_panel(panel_cb2R2,_("Hide scene"),&cb_hidesv);
 
   panel_cb1 = glui_colorbar->add_panel(_("Colorbar"));
   if(ncolorbars>0){

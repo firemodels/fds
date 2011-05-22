@@ -140,14 +140,14 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   glui_3dsmoke=glui_bounds;
 
   if(smoketest==1){
-    panel_testsmoke = glui_3dsmoke->add_panel_to_panel(panel_smoke3d,_("Test Smoke"));
+    panel_testsmoke = glui_3dsmoke->add_panel_to_panel(panel_smoke3d,_("Test smoke"));
     panel_testsmoke->set_alignment(GLUI_ALIGN_LEFT);
-    CHECKBOX_show_smoketest=glui_3dsmoke->add_checkbox_to_panel(panel_testsmoke,_("Show Test Smoke"),&show_smoketest);
-    SPINNER_extinct=glui_3dsmoke->add_spinner_to_panel(panel_testsmoke,_("Mass Extinction Coeff (m2/g)"),GLUI_SPINNER_FLOAT,&smoke_extinct,SMOKETEST,SMOKE_3D_CB);
+    CHECKBOX_show_smoketest=glui_3dsmoke->add_checkbox_to_panel(panel_testsmoke,_("Show test smoke"),&show_smoketest);
+    SPINNER_extinct=glui_3dsmoke->add_spinner_to_panel(panel_testsmoke,_("Mass extinction coeff (m2/g)"),GLUI_SPINNER_FLOAT,&smoke_extinct,SMOKETEST,SMOKE_3D_CB);
     SPINNER_extinct->set_float_limits(0.0,10.0);
-    SPINNER_smokedens=glui_3dsmoke->add_spinner_to_panel(panel_testsmoke,_("Smoke Density (g/m3)"),GLUI_SPINNER_FLOAT,&smoke_dens,SMOKETEST,SMOKE_3D_CB);
+    SPINNER_smokedens=glui_3dsmoke->add_spinner_to_panel(panel_testsmoke,_("Smoke density (g/m3)"),GLUI_SPINNER_FLOAT,&smoke_dens,SMOKETEST,SMOKE_3D_CB);
     SPINNER_smokedens->set_float_limits(0.0,1.0);
-    SPINNER_pathlength=glui_3dsmoke->add_spinner_to_panel(panel_testsmoke,_("Path Length (m)"),GLUI_SPINNER_FLOAT,&smoke_pathlength,SMOKETEST,SMOKE_3D_CB);
+    SPINNER_pathlength=glui_3dsmoke->add_spinner_to_panel(panel_testsmoke,_("Path length (m)"),GLUI_SPINNER_FLOAT,&smoke_pathlength,SMOKETEST,SMOKE_3D_CB);
     SPINNER_pathlength->set_float_limits(0.0,20.0);
     TEXT_smokealpha=glui_3dsmoke->add_statictext_to_panel(panel_testsmoke,_("Alpha"));
     TEXT_smokedepth=glui_3dsmoke->add_statictext_to_panel(panel_testsmoke,_("Depth"));
@@ -173,7 +173,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
 #endif
   }
 
-  panel_colormap = glui_3dsmoke->add_panel_to_panel(panel_overall,_("Fire/Smoke Display"));
+  panel_colormap = glui_3dsmoke->add_panel_to_panel(panel_overall,_("Fire/Smoke display"));
 
   CHECKBOX_use_firesmokemap=glui_3dsmoke->add_checkbox_to_panel(panel_colormap,_("Use colormap"),&use_firesmokemap,USE_FIRESMOKEMAP,SMOKE_3D_CB);
   if(ncolorbars>0){
