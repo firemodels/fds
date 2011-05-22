@@ -94,6 +94,7 @@ void trim(char *line){
   *line='\0';
 }
 
+
 /* ------------------ usage ------------------------ */
 
 void usage(char *prog){
