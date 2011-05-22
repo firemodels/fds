@@ -269,7 +269,7 @@ extern "C" void glui_labels_setup(int main_window){
     if(nvslice>0)Button_VSLICE=glui_labels->add_button_to_panel(panel_showhide,"Vector",LABELS_vsliceshow,Labels_CB);
     if(niso_files>0)Button_ISO=glui_labels->add_button_to_panel(panel_showhide,"Isosurface",LABELS_isosurfaceshow,Labels_CB);
     if(npatch_files>0)Button_BOUNDARY=glui_labels->add_button_to_panel(panel_showhide,"Boundary",LABELS_boundaryshow,Labels_CB);
-    if(nsmoke3d_files>0)Button_3DSMOKE=glui_labels->add_button_to_panel(panel_showhide,"3D Smoke",LABELS_3dsmokeshow,Labels_CB);
+    if(nsmoke3d_files>0)Button_3DSMOKE=glui_labels->add_button_to_panel(panel_showhide,"3D smoke",LABELS_3dsmokeshow,Labels_CB);
     if(nplot3d_files>0)Button_PLOT3D=glui_labels->add_button_to_panel(panel_showhide,"Plot3D",LABELS_PLOT3D,Labels_CB);
 
     update_showhidebuttons();

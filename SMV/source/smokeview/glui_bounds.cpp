@@ -334,7 +334,7 @@ extern "C" void glui_bounds_setup(int main_window){
   /*  3d smoke   */
 
   if(nsmoke3d_files>0){
-    panel_smoke3d = glui_bounds->add_rollout("3D Smoke",false);
+    panel_smoke3d = glui_bounds->add_rollout("3D smoke",false);
   }
 
   /*  Boundary File Bounds   */

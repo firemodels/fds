@@ -6061,7 +6061,7 @@ updatemenu=0;
     }
   }
   if(Read3DSmoke3DFile==1&&nsmoke3dloaded>0){
-      glutAddSubMenu(_("3D Smoke"),smoke3dshowmenu);
+      glutAddSubMenu(_("3D smoke"),smoke3dshowmenu);
   }
 
   nvslice0=0, nvslice1=0, nvslice2=0;
