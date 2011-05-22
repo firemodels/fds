@@ -20,7 +20,7 @@ typedef struct {
 //************************** headers ****************************************
 
 TREXTERN char *translate(char *string);
-void init_translate(char *smokeviewbindir);
+void init_translate(char *smokeviewbindir, char *tr_name);
 
 TREXTERN char tr_string[1024];
 TREXTERN int TRDECL(tr_lang,0);

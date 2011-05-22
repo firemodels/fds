@@ -15,6 +15,7 @@
 
 // svn revision character string
 char translate_revision[]="$Revision$";
+extern int tr_english;
 
 /* ------------------ isocompare ------------------------ */
 
@@ -126,10 +127,15 @@ int parse_lang(char *file){
 
 /* ------------------ init_translate ------------------------ */
 
-void init_translate(char *smokeviewbindir){
+void init_translate(char *smokeviewbindir, char *tr_name){
   char *LANG;
 
-  LANG=getenv("LANG");
+  if(tr_name!=NULL){
+    LANG=tr_name;
+  }
+  else{
+    LANG=getenv("LANG");
+  }
 
   tr_lang=0;
   if(LANG!=NULL&&strncmp(LANG,"en",2)!=0){
@@ -176,12 +182,12 @@ char *translate(char *string){
   char *valin,*valout;
   int i;
 
-  if(tr_lang!=0){
+  if(tr_lang!=0&&tr_english==0){
     int len;
 
     len = strlen(string);
     for(i=0;i<len;i++){
-      valin=string++;
+      valin=string+i;
       if(*valin!=' '&&*valin!='*')break;
       tr_string[i]=*valin;
     }

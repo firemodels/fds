@@ -1161,7 +1161,9 @@ void OptionMenu(int value){
       show_trainer();
     }
     FontMenu(1);
-    updatemenu=1;
+  }
+  if(value==3){
+    tr_english=1-tr_english;
   }
 }
 
@@ -6433,6 +6435,35 @@ updatemenu=0;
   glutAddSubMenu(_("Max Frame Rate"),frameratemenu);
   glutAddSubMenu(_("Render"),rendermenu);
   if(showfontmenu==1)glutAddSubMenu(_("Font Size"),fontmenu);
+  if(tr_lang==1){
+    if(tr_english==1){
+      char langmenu[128];
+
+      if(strcmp(tr_name,"de")==0){
+        strcpy(langmenu,_("Use German menus"));
+      }
+      else if(strcmp(tr_name,"de")==0){
+        strcpy(langmenu,_("Use French menus"));
+      }
+      else if(strcmp(tr_name,"it")==0){
+        strcpy(langmenu,_("Use Italian menus"));
+      }
+      else if(strcmp(tr_name,"es")==0){
+        strcpy(langmenu,_("Use Spanish menus"));
+      }
+      else{
+        strcpy(langmenu,"Use");
+        strcat(langmenu," ");
+        strcat(langmenu,tr_name);
+        strcat(langmenu," ");
+        strcat(langmenu,"menus");
+      }
+      glutAddMenuEntry(langmenu,3);
+    }
+    else{
+      glutAddMenuEntry(_("*Use English menus"),3);
+    }
+  }
 #ifdef pp_BENCHMARK
   glutAddMenuEntry("Benchmark",1);
 #endif
@@ -6588,76 +6619,76 @@ updatemenu=0;
 #endif
 #endif
   if(plotstate==DYNAMIC_PLOTS){
-    glutAddMenuEntry("Animation keyboard commands",1);
-    glutAddMenuEntry("  t: set/unset single time step mode",6);
-    glutAddMenuEntry("  o: reset animation to the initial time",6);
-    glutAddMenuEntry("  T: toggle method for interpolating data color ",6);
+    glutAddMenuEntry(_("Animation keyboard commands"),1);
+    glutAddMenuEntry(_("  t: set/unset single time step mode"),6);
+    glutAddMenuEntry(_("  o: reset animation to the initial time"),6);
+    glutAddMenuEntry(_("  T: toggle method for interpolating data color"),6);
     if(cellcenter_slice_active==1){
-      glutAddMenuEntry("     (also, toggles cell center display on/off)",6);
+      glutAddMenuEntry(_("     (also, toggles cell center display on/off)"),6);
     }
-    glutAddMenuEntry("  u: reload files",6);
-    glutAddMenuEntry("  L: unload last slice file loaded",6);
-    glutAddMenuEntry("1-9: number of frames to skip",6);
+    glutAddMenuEntry(_("  u: reload files"),6);
+    glutAddMenuEntry(_("  L: unload last slice file loaded"),6);
+    glutAddMenuEntry(_("1-9: number of frames to skip"),6);
     displayblank=1;
   }
   if(plotstate==STATIC_PLOTS){
     if(displayblank==1)glutAddMenuEntry("",1);
-    glutAddMenuEntry("Plot3D keyboard commands",1);
-    glutAddMenuEntry("  x,y,z: toggle contour plot visibility along x, y and z axis",3);
-    glutAddMenuEntry("  p: increment plot3d variable",2);
-    glutAddMenuEntry("  P: toggle cursor key mappings",2);
-    glutAddMenuEntry("  v: toggle flow vector visiblity",3);
-    glutAddMenuEntry("  a: change flow vector lengths",3);
-    glutAddMenuEntry("  s: change interval between adjacent vectors",3);
-    glutAddMenuEntry("  c: toggle between continuous and 2D stepped contours",3);
-    glutAddMenuEntry("  i: toggle iso-surface visibility",2);
+    glutAddMenuEntry(_("Plot3D keyboard commands"),1);
+    glutAddMenuEntry(_("  x,y,z: toggle contour plot visibility along x, y and z axis"),3);
+    glutAddMenuEntry(_("  p: increment plot3d variable"),2);
+    glutAddMenuEntry(_("  P: toggle cursor key mappings"),2);
+    glutAddMenuEntry(_("  v: toggle flow vector visiblity"),3);
+    glutAddMenuEntry(_("  a: change flow vector lengths"),3);
+    glutAddMenuEntry(_("  s: change interval between adjacent vectors"),3);
+    glutAddMenuEntry(_("  c: toggle between continuous and 2D stepped contours"),3);
+    glutAddMenuEntry(_("  i: toggle iso-surface visibility"),2);
     displayblank=1;
   }
   if(displayblank==1)glutAddMenuEntry("",1);
-  glutAddMenuEntry("Misc keyboard commands",1);
-  glutAddMenuEntry("  r: render the current scene to an image file",7);
-  glutAddMenuEntry("  R:   (same as r but at twice the resolution)",7);
+  glutAddMenuEntry(_("Misc keyboard commands"),1);
+  glutAddMenuEntry(_("  r: render the current scene to an image file"),7);
+  glutAddMenuEntry(_("  R:   (same as r but at twice the resolution)"),7);
   if(ntotal_blockages>0||isZoneFireModel==0){
-    glutAddMenuEntry("  g: toggle grid visibility",2);
+    glutAddMenuEntry(_("  g: toggle grid visibility"),2);
   }
-  glutAddMenuEntry("  e: toggle between eye, world and world/level rotation motion",7);
-  glutAddMenuEntry("  w: toggle clipping - use Options/Clip menu to specify clipping planes",7);
-  glutAddMenuEntry("  -: decrement time step, 2D contour planes, 3D contour levels",2);
-  glutAddMenuEntry("  space bar: increment time step, 2D contour planes, 3D contour levels",2);
+  glutAddMenuEntry(_("  e: toggle between eye, world and world/level rotation motion"),7);
+  glutAddMenuEntry(_("  w: toggle clipping - use Options/Clip menu to specify clipping planes"),7);
+  glutAddMenuEntry(_("  -: decrement time step, 2D contour planes, 3D contour levels"),2);
+  glutAddMenuEntry(_("  space bar: increment time step, 2D contour planes, 3D contour levels"),2);
   glutAddMenuEntry("",1);
-  glutAddMenuEntry("  ALT+v: toggle projection  method (between perspective and size preserving)",2);
+  glutAddMenuEntry(_("  ALT+v: toggle projection  method (between perspective and size preserving)"),2);
   if(n_embedded_meshes>0){
-    glutAddMenuEntry("  ALT+u: toggle coarse slice display in embedded mesh",2);
+    glutAddMenuEntry(_("  ALT+u: toggle coarse slice display in embedded mesh"),2);
   }
   if(cellcenter_slice_active==1){
-    glutAddMenuEntry("  ALT+y: if current slice is cell centered, toggle interpolation on/off",2);
+    glutAddMenuEntry(_("  ALT+y: if current slice is cell centered, toggle interpolation on/off"),2);
   }
   if(caseinifilename!=NULL&&strlen(caseinifilename)>0){
     char inilabel[512];
 
-    sprintf(inilabel,"  #: save settings to %s",caseinifilename);
+    sprintf(inilabel,_("  #: save settings to %s"),caseinifilename);
     glutAddMenuEntry(inilabel,2);
   }
   else{
-    glutAddMenuEntry("  #: save settings (create casename.ini file)",2);
+    glutAddMenuEntry(_("  #: save settings (create casename.ini file)"),2);
   }
-  glutAddMenuEntry("  !: snap scene's view angles",2);
-  glutAddMenuEntry("  &: toggle line anti-aliasing (draw lines smoothly)",2);
+  glutAddMenuEntry(_("  !: snap scene's view angles"),2);
+  glutAddMenuEntry(_("  &: toggle line anti-aliasing (draw lines smoothly)"),2);
   glutAddMenuEntry("",1);
-  glutAddMenuEntry("Mouse Motion",1);
-  glutAddMenuEntry("      : rotate around z, x axis",1);
-  glutAddMenuEntry("  CTRL: translate along x, y axis",1);
-  glutAddMenuEntry("   ALT: translate along z axis",1);
+  glutAddMenuEntry(_("Mouse Motion"),1);
+  glutAddMenuEntry(_("      : rotate around z, x axis"),1);
+  glutAddMenuEntry(_("  CTRL: translate along x, y axis"),1);
+  glutAddMenuEntry(_("   ALT: translate along z axis"),1);
   if(eyeview==EYE_CENTERED){
     glutAddMenuEntry("",1);
-    glutAddMenuEntry("Keyboard Motion",1);
-    glutAddMenuEntry("   left/right cursor: rotate left/right",1);
-    glutAddMenuEntry("      up/down cursor: move forward/backward",1);
-    glutAddMenuEntry(" CTRL:up/down cursor: move forward/backward 5 times slower",1);
-    glutAddMenuEntry(" SHIFT: left/right cursor: rotate 90 degrees",1);
-    glutAddMenuEntry("    ALT:left/right cursor: slide left/right",1);
-    glutAddMenuEntry("    ALT:   up/down cursor: slide up/down",1);
-    glutAddMenuEntry("     INSERT/HOME/PageUP: tilt down/reset/tilt up",1);
+    glutAddMenuEntry(_("Keyboard Motion"),1);
+    glutAddMenuEntry(_("   left/right cursor: rotate left/right"),1);
+    glutAddMenuEntry(_("      up/down cursor: move forward/backward"),1);
+    glutAddMenuEntry(_(" CTRL:up/down cursor: move forward/backward 5 times slower"),1);
+    glutAddMenuEntry(_(" SHIFT: left/right cursor: rotate 90 degrees"),1);
+    glutAddMenuEntry(_("    ALT:left/right cursor: slide left/right"),1);
+    glutAddMenuEntry(_("    ALT:   up/down cursor: slide up/down"),1);
+    glutAddMenuEntry(_("     INSERT/HOME/PageUP: tilt down/reset/tilt up"),1);
   }
   }
 
