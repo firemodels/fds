@@ -7816,7 +7816,7 @@ updatemenu=0;
 #ifdef pp_COMPRESS
   if(smokezippath!=NULL&&(npatch_files>0||nsmoke3d_files>0||nslice_files>0)){
     CREATEMENU(compressmenu,CompressMenu);
-    glutAddMenuEntry(_("Compression Options"),999);  // -c
+    glutAddMenuEntry(_("Compression options"),999);  // -c
     if(overwrite_all==1){
       glutAddMenuEntry(_("  *Overwrite compressed files"),2);  // -f
     }

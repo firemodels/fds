@@ -205,7 +205,7 @@ extern "C" void glui_shooter_setup(int main_window){
   glui_shooter->add_checkbox_to_panel(panel_shooter_frameG,_("Show only first frame"),&shooter_firstframe,SHOOTER_FIRSTFRAME,SHOOTER_CB);
   SPINNER_shooter_v_inf=glui_shooter->add_spinner_to_panel(panel_shooter_frameG,_("terminal velocity"),
     GLUI_SPINNER_FLOAT,&shooter_v_inf,SHOOTER_TERMINAL_VEL,SHOOTER_CB);
-  glui_shooter->add_button_to_panel(panel_shooter_frameG,_("Compute Tracks"),SHOOTER_APPLY,SHOOTER_CB);
+  glui_shooter->add_button_to_panel(panel_shooter_frameG,_("Compute tracks"),SHOOTER_APPLY,SHOOTER_CB);
 
   glui_shooter->add_spinner_to_panel(panel_shooter_frameH,_("particle size"),GLUI_SPINNER_FLOAT,&shooterpointsize);
   SPINNER_shooter_nparts=glui_shooter->add_spinner_to_panel(panel_shooter_frameH,_("number of particles"),
