@@ -21,16 +21,13 @@ char *trim_front(char *line);
 char *getstring(char *buffer);
 int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr);
 
-
-trdata *trinfo1, *trinfo2;
-int ntrinfo1, ntrinfo2;
-
 /* ------------------ main ------------------------ */
 
 int main(int argc, char **argv){
   int i;
-  char *arg,*prog, *file1=NULL, *file2=NULL;
+  char *arg,*prog, *file1=NULL, *file_template=NULL;
 
+  initMM();
   prog=argv[0];
   for(i=1;i<argc;i++){
     int lenarg;
@@ -51,29 +48,32 @@ int main(int argc, char **argv){
         file1=argv[i];
       }
       else{
-        file2=argv[i];
+        file_template=argv[i];
       }
     }
   }
-  if(file1!=NULL&&file2!=NULL){
+  if(file1!=NULL&&file_template!=NULL){
     int return1, return2;
-    trdata *trinfo1, *trinfo2;
-    int ntrinfo1, ntrinfo2;
+    trdata *trinfo1, *trinfo_template;
+    int ntrinfo1, ntrinfo_template;
 
     return1 = parse_lang(file1, &trinfo1, &ntrinfo1);
-    return2 = parse_lang(file2, &trinfo2, &ntrinfo2);
+    return2 = parse_lang(file_template, &trinfo_template, &ntrinfo_template);
     if(return1==1&&return2==1){
       int i;
 
-      for(i=0;i<ntrinfo2;i++){
+      for(i=0;i<ntrinfo_template;i++){
         trdata *tri, *trval;
 
-        tri = trinfo2 + i;
+        tri = trinfo_template + i;
         trval = bsearch(tri,trinfo1,ntrinfo1,sizeof(trdata),compare_trdata);
-        if(trval!=NULL&&trval->value!=NULL&&trval->key!=NULL){
-          printf("\n");
-          printf("msgid \"%s\"\n",trval->key);
+        printf("\n");
+        printf("msgid \"%s\"\n",tri->key);
+        if(trval!=NULL&&trval->value!=NULL){
           printf("msgstr \"%s\"\n",trval->value);
+        }
+        else{
+          printf("msgstr \"\"\n");
         }
       }
     }
