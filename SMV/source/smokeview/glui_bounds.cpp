@@ -605,9 +605,9 @@ extern "C" void glui_bounds_setup(int main_window){
 #endif
     SPINNER_transparentlevel=glui_bounds->add_spinner_to_panel(panel_slice,_("Transparent level"),GLUI_SPINNER_FLOAT,&transparentlevel,TRANSPARENTLEVEL,Slice_CB);
     SPINNER_transparentlevel->set_float_limits(0.0,1.0);
-    CHECKBOX_average_slice=glui_bounds->add_checkbox_to_panel(panel_slice,_("Averaged Slice Data"),&slice_average_flag,AVERAGE_DATA,Slice_CB);
+    CHECKBOX_average_slice=glui_bounds->add_checkbox_to_panel(panel_slice,_("Averaged slice data"),&slice_average_flag,AVERAGE_DATA,Slice_CB);
     //CHECKBOX_turb_slice=glui_bounds->add_checkbox_to_panel(panel_slice,"Turbulence Resolution",&slice_turbprop_flag,TURB_DATA,Slice_CB);
-    SPINNER_sliceaverage=glui_bounds->add_spinner_to_panel(panel_slice,_("Time Interval"),GLUI_SPINNER_FLOAT,&slice_average_interval);
+    SPINNER_sliceaverage=glui_bounds->add_spinner_to_panel(panel_slice,_("Time interval"),GLUI_SPINNER_FLOAT,&slice_average_interval);
     {
       float tttmax=120.0;
 
@@ -732,7 +732,7 @@ extern "C" void glui_bounds_setup(int main_window){
       SPINNER_smoke3dzipstep->set_int_limits(0,100);
     }
     if(npatch_files>0){
-      SPINNER_boundzipstep=glui_bounds->add_spinner_to_panel(rollout_compress,"Boundary File Frame Skip",
+      SPINNER_boundzipstep=glui_bounds->add_spinner_to_panel(rollout_compress,"Boundary file frame skip",
         GLUI_SPINNER_INT,&boundzipskip,FRAMELOADING,Bound_CB);
       SPINNER_boundzipstep->set_int_limits(0,100);
     }
@@ -864,7 +864,7 @@ void boundmenu(GLUI_Rollout **bound_rollout,GLUI_Rollout **chop_rollout, GLUI_Pa
   GLUI_Rollout *panel_e=NULL,*panel_g=NULL;
   GLUI_Panel *panel_f=NULL;
 
-  panel_g = glui_bounds->add_rollout_to_panel(panel,_("Bound Data"),false);
+  panel_g = glui_bounds->add_rollout_to_panel(panel,_("Bound data"),false);
   if(bound_rollout!=NULL)*bound_rollout=panel_g;
   panel_a = glui_bounds->add_panel_to_panel(panel_g,"",GLUI_PANEL_NONE);
 

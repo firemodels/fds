@@ -154,7 +154,7 @@ extern "C" void glui_shooter_setup(int main_window){
   SPINNER_shooter_w=glui_shooter->add_spinner_to_panel(panel_shooter_frameF,"w",
     GLUI_SPINNER_FLOAT,shooter_uvw+2,SHOOTER_UVW,SHOOTER_CB);
 
-  panel_shooter_velocity=glui_shooter->add_panel(_("Background Velocity Field"));
+  panel_shooter_velocity=glui_shooter->add_panel(_("Background velocity field"));
   
   RADIO_shooter_vel_type=glui_shooter->add_radiogroup_to_panel(panel_shooter_velocity,&shooter_vel_type,
     SHOOTER_VEL_TYPE,SHOOTER_CB);

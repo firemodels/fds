@@ -107,13 +107,13 @@ extern "C" void glui_clip_setup(int main_window){
   CHECKBOX_clip_zlower=glui_clip->add_checkbox_to_panel(panel_clipz,"",&clip_z,CLIP_zlower,CLIP_CB);
 
   radio_clip = glui_clip->add_radiogroup_to_panel(panel_clip,&xyz_clipplane,CLIP_all,CLIP_CB);
-  glui_clip->add_radiobutton_to_group(radio_clip,_("Clipping Disabled"));
-  glui_clip->add_radiobutton_to_group(radio_clip,_("Clip Blockages and Data"));
-  glui_clip->add_radiobutton_to_group(radio_clip,_("Clip Blockages"));
+  glui_clip->add_radiobutton_to_group(radio_clip,_("Clipping disabled"));
+  glui_clip->add_radiobutton_to_group(radio_clip,_("Clip blockages and data"));
+  glui_clip->add_radiobutton_to_group(radio_clip,_("Clip blockages"));
 
   glui_clip->add_column_to_panel(panel_clip,false);
 
-  panel_clip_upper = glui_clip->add_panel_to_panel(panel_clip,_("Clip Upper"));
+  panel_clip_upper = glui_clip->add_panel_to_panel(panel_clip,_("Clip upper"));
 
   panel_clipX = glui_clip->add_panel_to_panel(panel_clip_upper,"X",GLUI_PANEL_NONE);
   SPINNER_clip_xupper=glui_clip->add_spinner_to_panel(panel_clipX,"X",GLUI_SPINNER_FLOAT,&clip_X_val,

@@ -4493,10 +4493,10 @@ updatemenu=0;
       }
       if(showtexturemenu==1){
         if(visCadTextures==1){
-          glutAddMenuEntry(_(" *Show Cad Textures"),BLOCKtexture_cad);
+          glutAddMenuEntry(_(" *Show CAD textures"),BLOCKtexture_cad);
         }
         else{
-          glutAddMenuEntry(_(" Show Cad Textures"),BLOCKtexture_cad);
+          glutAddMenuEntry(_(" Show CAD textures"),BLOCKtexture_cad);
         }
       }
     }
@@ -6054,10 +6054,10 @@ updatemenu=0;
     }
 
     if(niso_loaded>1){
-     glutAddSubMenu(_("Animated Surfaces"),isoshowmenu);
+     glutAddSubMenu(_("Animated surfaces"),isoshowmenu);
     }
     else{
-     glutAddSubMenu(_("Animated Surface"),isoshowmenu);
+     glutAddSubMenu(_("Animated surface"),isoshowmenu);
     }
   }
   if(Read3DSmoke3DFile==1&&nsmoke3dloaded>0){
@@ -6279,13 +6279,13 @@ updatemenu=0;
   update_glui_render();
   if(RenderTime==1||touring==1){
    // if(render_double_state==0){
-    glutAddMenuEntry(_("All Frames"),1);
-    glutAddMenuEntry(_("Every 2nd Frame"),2);
-    glutAddMenuEntry(_("Every 3rd Frame"),3);
-    glutAddMenuEntry(_("Every 4th Frame"),4);
-    glutAddMenuEntry(_("Every 5th Frame"),5);
-    glutAddMenuEntry(_("Every 10th Frame"),10);
-    glutAddMenuEntry(_("Every 20th Frame"),20);
+    glutAddMenuEntry(_("All frames"),1);
+    glutAddMenuEntry(_("Every 2nd frame"),2);
+    glutAddMenuEntry(_("Every 3rd frame"),3);
+    glutAddMenuEntry(_("Every 4th frame"),4);
+    glutAddMenuEntry(_("Every 5th frame"),5);
+    glutAddMenuEntry(_("Every 10th frame"),10);
+    glutAddMenuEntry(_("Every 20th frame"),20);
     glutAddMenuEntry(_("Cancel"),RenderCancel);
    // }
   }
