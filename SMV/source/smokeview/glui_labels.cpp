@@ -172,7 +172,7 @@ extern "C" void glui_labels_setup(int main_window){
 
   glui_labels->add_column_to_panel(panel_label1,true);
 
-  CHECKBOX_labels_flip=glui_labels->add_checkbox_to_panel(panel_label1,_("Flip Background"),&background_flip,LABELS_flip,Labels_CB);
+  CHECKBOX_labels_flip=glui_labels->add_checkbox_to_panel(panel_label1,_("Flip background"),&background_flip,LABELS_flip,Labels_CB);
   CHECKBOX_labels_shade=glui_labels->add_checkbox_to_panel(panel_label1,_("Shades of grey"),&setbw,LABELS_shade,Labels_CB);
 
   if(nface_transparent>0){
