@@ -17,6 +17,7 @@
 #include "smokeviewdefs.h"
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
+#include "translate.h"
 
 // svn revision character string
 extern "C" char glui_motion_revision[]="$Revision$";
@@ -229,10 +230,10 @@ extern "C" void glui_motion_setup(int main_window){
   eye_xyz=camera_current->eye;
 
   if(glui_motion!=NULL)glui_motion->close();
-  glui_motion = GLUI_Master.create_glui("Motion/View/Render",0,0,0);
+  glui_motion = GLUI_Master.create_glui(_("Motion/View/Render"),0,0,0);
   if(showmotion==0)glui_motion->hide();
 
-  panel_motion = glui_motion->add_rollout("Motion");
+  panel_motion = glui_motion->add_rollout(_("Motion"));
 
   panel_translate2 = glui_motion->add_panel_to_panel(panel_motion,"",GLUI_PANEL_NONE);
   d_eye_xyz[0]=0.0;
@@ -242,42 +243,42 @@ extern "C" void glui_motion_setup(int main_window){
   dsave_eye_xyz[1]=0.0;
   dsave_eye_xyz[2]=0.0;
 
-  translate_xy=glui_motion->add_translation_to_panel(panel_translate2,"Horizontal",GLUI_TRANSLATION_XY,d_eye_xyz,TRANSLATE_XY,TRANSLATE_CB);
+  translate_xy=glui_motion->add_translation_to_panel(panel_translate2,_("Horizontal"),GLUI_TRANSLATION_XY,d_eye_xyz,TRANSLATE_XY,TRANSLATE_CB);
   translate_xy->set_speed(TRANSLATE_SPEED);
 
   glui_motion->add_column_to_panel(panel_translate2,false);
 
-  translate_z=glui_motion->add_translation_to_panel(panel_translate2,"Vertical",GLUI_TRANSLATION_Y,eye_xyz+2,GLUI_Z,TRANSLATE_CB);
+  translate_z=glui_motion->add_translation_to_panel(panel_translate2,_("Vertical"),GLUI_TRANSLATION_Y,eye_xyz+2,GLUI_Z,TRANSLATE_CB);
   translate_z->set_speed(TRANSLATE_SPEED);
 
 //  panel_rotate = glui_motion->add_panel_to_panel(panel_motion,"Rotate");
   panel_rotatebuttons = glui_motion->add_panel_to_panel(panel_motion,"",GLUI_PANEL_NONE);
 
-  rotate_zx=glui_motion->add_translation_to_panel(panel_rotatebuttons,"Rotate",GLUI_TRANSLATION_XY,motion_ab,ROTATE_ZX,TRANSLATE_CB);
+  rotate_zx=glui_motion->add_translation_to_panel(panel_rotatebuttons,_("Rotate"),GLUI_TRANSLATION_XY,motion_ab,ROTATE_ZX,TRANSLATE_CB);
   glui_motion->add_column_to_panel(panel_rotatebuttons,false);
 
-  eyerotate_z=glui_motion->add_translation_to_panel(panel_rotatebuttons,"first person",GLUI_TRANSLATION_X,
+  eyerotate_z=glui_motion->add_translation_to_panel(panel_rotatebuttons,_("first person"),GLUI_TRANSLATION_X,
     motion_dir,EYE_ROTATE,TRANSLATE_CB);
   eyerotate_z->set_speed(180.0/(float)screenWidth);
   eyerotate_z->disable();
  
   eyeview_radio=glui_motion->add_radiogroup_to_panel(panel_motion,&eyeview,0,EYEVIEW_CB);
-  glui_motion->add_radiobutton_to_group(eyeview_radio,"general rotations");
-  glui_motion->add_radiobutton_to_group(eyeview_radio,"first person movement");
-  glui_motion->add_radiobutton_to_group(eyeview_radio,"level rotations");
+  glui_motion->add_radiobutton_to_group(eyeview_radio,_("general rotations"));
+  glui_motion->add_radiobutton_to_group(eyeview_radio,_("first person movement"));
+  glui_motion->add_radiobutton_to_group(eyeview_radio,_("level rotations"));
 
   rotation_index=&camera_current->rotation_index;
   *rotation_index=nmeshes;
   rotation_index_OLD=nmeshes;
   if(nmeshes>1){
-    meshlist1 = glui_motion->add_listbox_to_panel(panel_motion,"Rotate about:",rotation_index,MESH_LIST,TRANSLATE_CB);
+    meshlist1 = glui_motion->add_listbox_to_panel(panel_motion,_("Rotate about:"),rotation_index,MESH_LIST,TRANSLATE_CB);
     for(i=0;i<nmeshes;i++){
       mesh *meshi;
 
       meshi = meshinfo + i;
       meshlist1->add_item(i,meshi->label);
     }
-    meshlist1->add_item(nmeshes,"world center");
+    meshlist1->add_item(nmeshes,_("world center"));
     meshlist1->set_int_val(*rotation_index);
   }
   panel_anglebuttons = glui_motion->add_panel_to_panel(panel_motion,"",GLUI_PANEL_NONE);
@@ -285,7 +286,7 @@ extern "C" void glui_motion_setup(int main_window){
   eyerotate90_z->disable();
   eyerotate90_z->set_alignment(GLUI_ALIGN_LEFT);
 //  glui_motion->add_column_to_panel(panel_anglebuttons,false);
-  button_snap=glui_motion->add_button_to_panel(panel_anglebuttons,"Snap",SNAPVIEW,TRANSLATE_CB);
+  button_snap=glui_motion->add_button_to_panel(panel_anglebuttons,_("Snap"),SNAPVIEW,TRANSLATE_CB);
 
   //glui_motion->add_column(false);
 
@@ -300,7 +301,7 @@ extern "C" void glui_motion_setup(int main_window){
   }
 
 #ifdef pp_BETA
-  panel_specify = glui_motion->add_rollout_to_panel(panel_motion,"Specify");
+  panel_specify = glui_motion->add_rollout_to_panel(panel_motion,_("Specify"));
 
   SPINNER_set_view_x=glui_motion->add_spinner_to_panel(panel_specify,"x:",GLUI_SPINNER_FLOAT,set_view_xyz+0,SET_VIEW_XYZ,TRANSLATE_CB);
   SPINNER_set_view_y=glui_motion->add_spinner_to_panel(panel_specify,"y:",GLUI_SPINNER_FLOAT,set_view_xyz+1,SET_VIEW_XYZ,TRANSLATE_CB);
@@ -308,20 +309,20 @@ extern "C" void glui_motion_setup(int main_window){
 #endif
 
 
-  panel_projection = glui_motion->add_rollout("Window Properties",false);
+  panel_projection = glui_motion->add_rollout(_("Window Properties"),false);
   projection_radio=glui_motion->add_radiogroup_to_panel(panel_projection,&projection_type,PROJECTION,TRANSLATE_CB);
-  glui_motion->add_radiobutton_to_group(projection_radio,"Perspective");
-  glui_motion->add_radiobutton_to_group(projection_radio,"Size Preserving");
-  SPINNER_zoom=glui_motion->add_spinner_to_panel(panel_projection,"zoom",GLUI_SPINNER_FLOAT,&zoom,
+  glui_motion->add_radiobutton_to_group(projection_radio,_("Perspective"));
+  glui_motion->add_radiobutton_to_group(projection_radio,_("Size Preserving"));
+  SPINNER_zoom=glui_motion->add_spinner_to_panel(panel_projection,_("zoom"),GLUI_SPINNER_FLOAT,&zoom,
     ZOOM,TRANSLATE_CB);
   SPINNER_zoom->set_float_limits(0.10,10.0,GLUI_LIMIT_CLAMP);
   aperture_glui=zoom2aperture(zoom);
-  SPINNER_aperture=glui_motion->add_spinner_to_panel(panel_projection,"aperture",GLUI_SPINNER_FLOAT,&aperture_glui,
+  SPINNER_aperture=glui_motion->add_spinner_to_panel(panel_projection,_("aperture"),GLUI_SPINNER_FLOAT,&aperture_glui,
     APERTURE,TRANSLATE_CB);
   glui_motion->add_separator_to_panel(panel_projection);
   
-  LIST_windowsize = glui_motion->add_listbox_to_panel(panel_projection,"Size:",&windowsize_pointer,WINDOWSIZE_LIST,TRANSLATE_CB);
-  LIST_windowsize->add_item(0,"Custom");
+  LIST_windowsize = glui_motion->add_listbox_to_panel(panel_projection,_("Size:"),&windowsize_pointer,WINDOWSIZE_LIST,TRANSLATE_CB);
+  LIST_windowsize->add_item(0,_("Custom"));
   LIST_windowsize->add_item(1,"-");
   LIST_windowsize->add_item(2, "320x240");
   LIST_windowsize->add_item(3, "640x480");
@@ -334,13 +335,13 @@ extern "C" void glui_motion_setup(int main_window){
   if(max_screenWidth>=1920&&max_screenHeight>=1080)  LIST_windowsize->add_item(8,"1920x1080");
   update_windowsizelist();
 
-  SPINNER_window_width = glui_motion->add_spinner_to_panel(panel_projection,"width",GLUI_SPINNER_INT,&glui_screenWidth);
+  SPINNER_window_width = glui_motion->add_spinner_to_panel(panel_projection,_("width"),GLUI_SPINNER_INT,&glui_screenWidth);
   SPINNER_window_width->set_int_limits(100,max_screenWidth);
-  SPINNER_window_height = glui_motion->add_spinner_to_panel(panel_projection,"height",GLUI_SPINNER_INT,&glui_screenHeight);
+  SPINNER_window_height = glui_motion->add_spinner_to_panel(panel_projection,_("height"),GLUI_SPINNER_INT,&glui_screenHeight);
   SPINNER_window_height->set_int_limits(100,max_screenHeight);
-  window_update=glui_motion->add_button_to_panel(panel_projection,"Apply",WINDOW_RESIZE,TRANSLATE_CB);
+  window_update=glui_motion->add_button_to_panel(panel_projection,_("Apply"),WINDOW_RESIZE,TRANSLATE_CB);
 
-  render_panel = glui_motion->add_rollout("Render",false);
+  render_panel = glui_motion->add_rollout(_("Render"),false);
   render_type_radio=glui_motion->add_radiogroup_to_panel(render_panel,&renderfiletype,RENDER_TYPE,RENDER_CB);
   glui_motion->add_radiobutton_to_group(render_type_radio,"PNG");
 #ifdef pp_JPEG
@@ -348,69 +349,69 @@ extern "C" void glui_motion_setup(int main_window){
 #endif
 
   render_size_index=RenderWindow; 
-  render_size_list = glui_motion->add_listbox_to_panel(render_panel,"Size:",&render_size_index,RENDER_SIZE_LIST,RENDER_CB);
+  render_size_list = glui_motion->add_listbox_to_panel(render_panel,_("Size:"),&render_size_index,RENDER_SIZE_LIST,RENDER_CB);
   render_size_list->add_item(Render320,"320x240");
   render_size_list->add_item(Render640,"640x480");
-  render_size_list->add_item(RenderWindow,"Current");
-  render_size_list->add_item(Render2Window,"2*Current");
+  render_size_list->add_item(RenderWindow,_("Current"));
+  render_size_list->add_item(Render2Window,_("2*Current"));
   render_size_list->set_int_val(render_size_index);
 
   render_skip_index=RenderOnce; 
-  render_skip_list = glui_motion->add_listbox_to_panel(render_panel,"Frames:",&render_skip_index,RENDER_SKIP_LIST,RENDER_CB);
-  render_skip_list->add_item(RenderOnce,"One");
-  render_skip_list->add_item(1,"All");
-  render_skip_list->add_item(2,"Every 2nd");
-  render_skip_list->add_item(3,"Every 3rd");
-  render_skip_list->add_item(4,"Every 4th");
-  render_skip_list->add_item(5,"Every 5th");
-  render_skip_list->add_item(10,"Every 10th");
-  render_skip_list->add_item(20,"Every 20th");
+  render_skip_list = glui_motion->add_listbox_to_panel(render_panel,_("Frames:"),&render_skip_index,RENDER_SKIP_LIST,RENDER_CB);
+  render_skip_list->add_item(RenderOnce,_("One"));
+  render_skip_list->add_item(1,_("All"));
+  render_skip_list->add_item(2,_("Every 2nd"));
+  render_skip_list->add_item(3,_("Every 3rd"));
+  render_skip_list->add_item(4,_("Every 4th"));
+  render_skip_list->add_item(5,_("Every 5th"));
+  render_skip_list->add_item(10,_("Every 10th"));
+  render_skip_list->add_item(20,_("Every 20th"));
 
-  render_start=glui_motion->add_button_to_panel(render_panel,"Start",RENDER_START,RENDER_CB);
-  render_stop=glui_motion->add_button_to_panel(render_panel,"Stop",RENDER_STOP,RENDER_CB);
+  render_start=glui_motion->add_button_to_panel(render_panel,_("Start"),RENDER_START,RENDER_CB);
+  render_stop=glui_motion->add_button_to_panel(render_panel,_("Stop"),RENDER_STOP,RENDER_CB);
   
-  reset_panel = glui_motion->add_rollout("Viewpoints",false);
+  reset_panel = glui_motion->add_rollout(_("Viewpoints"),false);
 
   reset_panel1 = glui_motion->add_panel_to_panel(reset_panel,"",false);
 
-  delete_view=glui_motion->add_button_to_panel(reset_panel1,"Delete",DELETE_LIST_VIEW,BUTTON_Reset_CB);
+  delete_view=glui_motion->add_button_to_panel(reset_panel1,_("Delete"),DELETE_LIST_VIEW,BUTTON_Reset_CB);
   delete_view_is_disabled=0;
-  startup_button=glui_motion->add_button_to_panel(reset_panel1,"view at startup",STARTUP,BUTTON_Reset_CB);
-  cycle_views_button=glui_motion->add_button_to_panel(reset_panel1,"Cycle",CYCLEVIEWS,BUTTON_Reset_CB);
-  view_lists = glui_motion->add_listbox_to_panel(reset_panel1,"Select",&i_view_list,LIST_VIEW,BUTTON_Reset_CB);
+  startup_button=glui_motion->add_button_to_panel(reset_panel1,_("view at startup"),STARTUP,BUTTON_Reset_CB);
+  cycle_views_button=glui_motion->add_button_to_panel(reset_panel1,_("Cycle"),CYCLEVIEWS,BUTTON_Reset_CB);
+  view_lists = glui_motion->add_listbox_to_panel(reset_panel1,_("Select"),&i_view_list,LIST_VIEW,BUTTON_Reset_CB);
   view_lists->add_item(-1,"-");
 
   glui_motion->add_column_to_panel(reset_panel,true);
   reset_panel2 = glui_motion->add_panel_to_panel(reset_panel,"",false);
 
-  replace_view=glui_motion->add_button_to_panel(reset_panel2,"Replace",SAVE_LIST_VIEW,BUTTON_Reset_CB);
-  add_view=glui_motion->add_button_to_panel(reset_panel2,"Add",ADD_LIST_VIEW,BUTTON_Reset_CB);
-  edit_view_label=glui_motion->add_edittext_to_panel(reset_panel2,"View name",GLUI_EDITTEXT_TEXT,camera_label,LABEL_VIEW,BUTTON_Reset_CB);
+  replace_view=glui_motion->add_button_to_panel(reset_panel2,_("Replace"),SAVE_LIST_VIEW,BUTTON_Reset_CB);
+  add_view=glui_motion->add_button_to_panel(reset_panel2,_("Add"),ADD_LIST_VIEW,BUTTON_Reset_CB);
+  edit_view_label=glui_motion->add_edittext_to_panel(reset_panel2,_("View name"),GLUI_EDITTEXT_TEXT,camera_label,LABEL_VIEW,BUTTON_Reset_CB);
 
-  panel_scale = glui_motion->add_rollout("Scaling/Depth Params",false);
-  SPINNER_scalex=glui_motion->add_spinner_to_panel(panel_scale,"Scale x",GLUI_SPINNER_FLOAT,mscale);
+  panel_scale = glui_motion->add_rollout(_("Scaling/Depth Params"),false);
+  SPINNER_scalex=glui_motion->add_spinner_to_panel(panel_scale,_("Scale x"),GLUI_SPINNER_FLOAT,mscale);
   SPINNER_scalex->set_float_limits(0.01,100.0,GLUI_LIMIT_CLAMP);
 
-  SPINNER_scaley=glui_motion->add_spinner_to_panel(panel_scale,"Scale y",GLUI_SPINNER_FLOAT,mscale+1);
+  SPINNER_scaley=glui_motion->add_spinner_to_panel(panel_scale,_("Scale y"),GLUI_SPINNER_FLOAT,mscale+1);
   SPINNER_scaley->set_float_limits(0.01,100.0,GLUI_LIMIT_CLAMP);
 
-  SPINNER_scalez=glui_motion->add_spinner_to_panel(panel_scale,"Scale z",GLUI_SPINNER_FLOAT,mscale+2);
+  SPINNER_scalez=glui_motion->add_spinner_to_panel(panel_scale,_("Scale z"),GLUI_SPINNER_FLOAT,mscale+2);
   SPINNER_scalez->set_float_limits(0.01,100.0,GLUI_LIMIT_CLAMP);
 
-  SPINNER_nearclip=glui_motion->add_spinner_to_panel(panel_scale,"Near depth",GLUI_SPINNER_FLOAT,&nearclip);
+  SPINNER_nearclip=glui_motion->add_spinner_to_panel(panel_scale,_("Near depth"),GLUI_SPINNER_FLOAT,&nearclip);
   SPINNER_nearclip->set_float_limits(0.001,10.0,GLUI_LIMIT_CLAMP);
 
-  SPINNER_farclip=glui_motion->add_spinner_to_panel(panel_scale,"Far depth",GLUI_SPINNER_FLOAT,&farclip);
+  SPINNER_farclip=glui_motion->add_spinner_to_panel(panel_scale,_("Far depth"),GLUI_SPINNER_FLOAT,&farclip);
   SPINNER_farclip->set_float_limits(0.001,10.0,GLUI_LIMIT_CLAMP);
 
-  cursor_checkbox=glui_motion->add_checkbox("Map cursor keys for Plot3D use",&cursorPlot3D,CURSOR,TRANSLATE_CB);
+  cursor_checkbox=glui_motion->add_checkbox(_("Map cursor keys for Plot3D use"),&cursorPlot3D,CURSOR,TRANSLATE_CB);
   panel_close = glui_motion->add_panel("",GLUI_PANEL_NONE);
 
-  glui_motion->add_button_to_panel(panel_close,"Save Settings",SAVE_SETTINGS,BUTTON_hide2_CB);
+  glui_motion->add_button_to_panel(panel_close,_("Save Settings"),SAVE_SETTINGS,BUTTON_hide2_CB);
 
   glui_motion->add_column_to_panel(panel_close,false);
 
-  glui_motion->add_button_to_panel(panel_close,"Close",1,BUTTON_hide2_CB);
+  glui_motion->add_button_to_panel(panel_close,_("Close"),1,BUTTON_hide2_CB);
 
   showhide_translate(eyeview);
   glui_motion->set_main_gfx_window( main_window );

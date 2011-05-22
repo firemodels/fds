@@ -17,6 +17,7 @@
 #include "smokeviewdefs.h"
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
+#include "translate.h"
 
 // svn revision character string
 extern "C" char glui_clip_revision[]="$Revision$";
@@ -82,7 +83,7 @@ extern "C" void glui_clip_setup(int main_window){
   if(showclip==0)glui_clip->hide();
 
   panel_clip = glui_clip->add_panel("",GLUI_PANEL_NONE);
-  panel_clip_lower = glui_clip->add_panel_to_panel(panel_clip,"Clip Lower");
+  panel_clip_lower = glui_clip->add_panel_to_panel(panel_clip,_("Clip Lower"));
 
   panel_clipx = glui_clip->add_panel_to_panel(panel_clip_lower,"X",GLUI_PANEL_NONE);
   SPINNER_clip_xlower=glui_clip->add_spinner_to_panel(panel_clipx,"X",GLUI_SPINNER_FLOAT,&clip_x_val,
@@ -106,13 +107,13 @@ extern "C" void glui_clip_setup(int main_window){
   CHECKBOX_clip_zlower=glui_clip->add_checkbox_to_panel(panel_clipz,"",&clip_z,CLIP_zlower,CLIP_CB);
 
   radio_clip = glui_clip->add_radiogroup_to_panel(panel_clip,&xyz_clipplane,CLIP_all,CLIP_CB);
-  glui_clip->add_radiobutton_to_group(radio_clip,"Clipping Disabled");
-  glui_clip->add_radiobutton_to_group(radio_clip,"Clip Blockages + Data");
-  glui_clip->add_radiobutton_to_group(radio_clip,"Clip Blockages");
+  glui_clip->add_radiobutton_to_group(radio_clip,_("Clipping Disabled"));
+  glui_clip->add_radiobutton_to_group(radio_clip,_("Clip Blockages and Data"));
+  glui_clip->add_radiobutton_to_group(radio_clip,_("Clip Blockages"));
 
   glui_clip->add_column_to_panel(panel_clip,false);
 
-  panel_clip_upper = glui_clip->add_panel_to_panel(panel_clip,"Clip Upper");
+  panel_clip_upper = glui_clip->add_panel_to_panel(panel_clip,_("Clip Upper"));
 
   panel_clipX = glui_clip->add_panel_to_panel(panel_clip_upper,"X",GLUI_PANEL_NONE);
   SPINNER_clip_xupper=glui_clip->add_spinner_to_panel(panel_clipX,"X",GLUI_SPINNER_FLOAT,&clip_X_val,
@@ -139,11 +140,11 @@ extern "C" void glui_clip_setup(int main_window){
 
   glui_clip->add_column_to_panel(panel_wrapup,false);
 
-  glui_clip->add_button_to_panel(panel_wrapup,"Save Settings",SAVE_SETTINGS,CLIP_CB);
+  glui_clip->add_button_to_panel(panel_wrapup,_("Save Settings"),SAVE_SETTINGS,CLIP_CB);
 
   glui_clip->add_column_to_panel(panel_wrapup,false);
 
-  glui_clip->add_button_to_panel(panel_wrapup,"Close",CLIP_CLOSE,CLIP_CB);
+  glui_clip->add_button_to_panel(panel_wrapup,_("Close"),CLIP_CLOSE,CLIP_CB);
 
   if(updateclipvals==1){
     set_clip_controls(INI_VALS);  // clip vals from ini file

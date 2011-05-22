@@ -18,6 +18,7 @@
 #include "smokeviewdefs.h"
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
+#include "translate.h"
 
 // svn revision character string
 extern "C" char glui_message_revision[]="$Revision$";
@@ -41,7 +42,7 @@ GLUI_StaticText *abort_text2=NULL;
 extern "C" void glui_message_setup(int main_window){
 
   if(glui_warning!=NULL)glui_warning->close();
-  glui_warning = GLUI_Master.create_glui("Warning:",0,0,0);
+  glui_warning = GLUI_Master.create_glui(_("Warning:"),0,0,0);
   glui_warning->add_statictext("");
   warning_text=glui_warning->add_statictext("");
   warning_text2=glui_warning->add_statictext("");
@@ -51,7 +52,7 @@ extern "C" void glui_message_setup(int main_window){
   glui_warning->hide();
 
   if(glui_error!=NULL)glui_error->close();
-  glui_error = GLUI_Master.create_glui("Error",0,0,0);
+  glui_error = GLUI_Master.create_glui(_("Error"),0,0,0);
   glui_error->add_statictext("");
   error_text=glui_error->add_statictext("");
   error_text2=glui_error->add_statictext("");
@@ -61,7 +62,7 @@ extern "C" void glui_message_setup(int main_window){
   glui_error->hide();
 
   if(glui_abort!=NULL)glui_abort->close();
-  glui_abort = GLUI_Master.create_glui("Abort",0,0,0);
+  glui_abort = GLUI_Master.create_glui(_("Abort"),0,0,0);
   glui_abort->add_statictext("");
   abort_text=glui_abort->add_statictext("");
   abort_text2=glui_abort->add_statictext("");
@@ -77,13 +78,13 @@ extern "C" void glui_message_setup(int main_window){
 extern "C" void warning_message(char *message){
   char message2[sizeof(GLUI_String)];
 
-  strcpy(message2,"*** Warning: ");
+  strcpy(message2,_("*** Warning: "));
   strcat(message2,message);
   printf("%s\n",message2);
   if(glui_warning==NULL)return;
 
   if(show_glui_warning==1){
-    warning_text2->set_name("*** Additional warnings have occurred.  See command shell for details.");
+    warning_text2->set_name(_("*** Additional warnings have occurred.  See command shell for details."));
   }
   else{
     warning_text->set_name(message2);
@@ -99,13 +100,13 @@ extern "C" void warning_message(char *message){
 extern "C" void error_message(char *message){
   char message2[sizeof(GLUI_String)];
 
-  strcpy(message2,"*** Error: ");
+  strcpy(message2,_("*** Error: "));
   strcat(message2,message);
   printf("%s\n",message2);
   if(glui_error==NULL)return;
 
   if(show_glui_error==1){
-    error_text2->set_name("*** Additional errors have occurred.  See command shell for details.");
+    error_text2->set_name(_("*** Additional errors have occurred.  See command shell for details."));
   }
   else{
     error_text->set_name(message2);
@@ -121,14 +122,14 @@ extern "C" void error_message(char *message){
 extern "C" void abort_message(char *message){
   char message2[sizeof(GLUI_String)];
 
-  strcpy(message2,"*** Fatal error: ");
+  strcpy(message2,_("*** Fatal error: "));
   strcat(message2,message);
   printf("%s\n",message2);
   if(glui_abort==NULL)return;
 
   if(show_glui_abort==0){
     abort_text->set_name(message2);
-    abort_text2->set_name("Press OK to terminate Smokeview");
+    abort_text2->set_name(_("Press OK to terminate Smokeview"));
   }
   show_glui_abort=1;
   glui_abort->show();

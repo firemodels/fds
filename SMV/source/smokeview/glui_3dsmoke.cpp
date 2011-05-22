@@ -18,6 +18,7 @@
 #include "smokeviewdefs.h"
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
+#include "translate.h"
 
 // svn revision character string
 extern "C" char glui_3dsmoke_revision[]="$Revision$";
@@ -139,17 +140,17 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   glui_3dsmoke=glui_bounds;
 
   if(smoketest==1){
-    panel_testsmoke = glui_3dsmoke->add_panel_to_panel(panel_smoke3d,"Test Smoke");
+    panel_testsmoke = glui_3dsmoke->add_panel_to_panel(panel_smoke3d,_("Test Smoke"));
     panel_testsmoke->set_alignment(GLUI_ALIGN_LEFT);
-    CHECKBOX_show_smoketest=glui_3dsmoke->add_checkbox_to_panel(panel_testsmoke,"Show Test Smoke",&show_smoketest);
-    SPINNER_extinct=glui_3dsmoke->add_spinner_to_panel(panel_testsmoke,"Mass Extinction Coeff (m2/g)",GLUI_SPINNER_FLOAT,&smoke_extinct,SMOKETEST,SMOKE_3D_CB);
+    CHECKBOX_show_smoketest=glui_3dsmoke->add_checkbox_to_panel(panel_testsmoke,_("Show Test Smoke"),&show_smoketest);
+    SPINNER_extinct=glui_3dsmoke->add_spinner_to_panel(panel_testsmoke,_("Mass Extinction Coeff (m2/g)"),GLUI_SPINNER_FLOAT,&smoke_extinct,SMOKETEST,SMOKE_3D_CB);
     SPINNER_extinct->set_float_limits(0.0,10.0);
-    SPINNER_smokedens=glui_3dsmoke->add_spinner_to_panel(panel_testsmoke,"Smoke Density (g/m3)",GLUI_SPINNER_FLOAT,&smoke_dens,SMOKETEST,SMOKE_3D_CB);
+    SPINNER_smokedens=glui_3dsmoke->add_spinner_to_panel(panel_testsmoke,_("Smoke Density (g/m3)"),GLUI_SPINNER_FLOAT,&smoke_dens,SMOKETEST,SMOKE_3D_CB);
     SPINNER_smokedens->set_float_limits(0.0,1.0);
-    SPINNER_pathlength=glui_3dsmoke->add_spinner_to_panel(panel_testsmoke,"Path Length (m)",GLUI_SPINNER_FLOAT,&smoke_pathlength,SMOKETEST,SMOKE_3D_CB);
+    SPINNER_pathlength=glui_3dsmoke->add_spinner_to_panel(panel_testsmoke,_("Path Length (m)"),GLUI_SPINNER_FLOAT,&smoke_pathlength,SMOKETEST,SMOKE_3D_CB);
     SPINNER_pathlength->set_float_limits(0.0,20.0);
-    TEXT_smokealpha=glui_3dsmoke->add_statictext_to_panel(panel_testsmoke,"Alpha");
-    TEXT_smokedepth=glui_3dsmoke->add_statictext_to_panel(panel_testsmoke,"Depth");
+    TEXT_smokealpha=glui_3dsmoke->add_statictext_to_panel(panel_testsmoke,_("Alpha"));
+    TEXT_smokedepth=glui_3dsmoke->add_statictext_to_panel(panel_testsmoke,_("Depth"));
     update_alpha();
   }
 
@@ -158,12 +159,12 @@ extern "C" void glui_3dsmoke_setup(int main_window){
 
   panel_overall = glui_3dsmoke->add_panel_to_panel(panel_smoke3d,"",GLUI_PANEL_NONE);
   if(active_smokesensors==1){
-    panel_smokesensor = glui_3dsmoke->add_panel_to_panel(panel_overall,"Visibility");
+    panel_smokesensor = glui_3dsmoke->add_panel_to_panel(panel_overall,_("Visibility"));
     radio_smokesensors = glui_3dsmoke->add_radiogroup_to_panel(panel_smokesensor,&show_smokesensors);
-    glui_3dsmoke->add_radiobutton_to_group(radio_smokesensors,"Hidden");
-    glui_3dsmoke->add_radiobutton_to_group(radio_smokesensors,"Grey (0-255)");
+    glui_3dsmoke->add_radiobutton_to_group(radio_smokesensors,_("Hidden"));
+    glui_3dsmoke->add_radiobutton_to_group(radio_smokesensors,_("Grey (0-255)"));
     glui_3dsmoke->add_radiobutton_to_group(radio_smokesensors,"I/I0 (0.0-1.0)");
-    glui_3dsmoke->add_radiobutton_to_group(radio_smokesensors,"Scaled optical depth (SCD)");
+    glui_3dsmoke->add_radiobutton_to_group(radio_smokesensors,_("Scaled optical depth (SCD)"));
     glui_3dsmoke->add_statictext_to_panel(panel_smokesensor,"SCD=C/K=C*L/Ln(I/I0) (0-Inf)");
     SPINNER_cvis=glui_3dsmoke->add_spinner_to_panel(panel_smokesensor,"C",GLUI_SPINNER_FLOAT,&smoke3d_cvis);
     SPINNER_cvis->set_float_limits(1.0,20.0);
@@ -172,11 +173,11 @@ extern "C" void glui_3dsmoke_setup(int main_window){
 #endif
   }
 
-  panel_colormap = glui_3dsmoke->add_panel_to_panel(panel_overall,"Fire/Smoke Display");
+  panel_colormap = glui_3dsmoke->add_panel_to_panel(panel_overall,_("Fire/Smoke Display"));
 
-  CHECKBOX_use_firesmokemap=glui_3dsmoke->add_checkbox_to_panel(panel_colormap,"Use colormap",&use_firesmokemap,USE_FIRESMOKEMAP,SMOKE_3D_CB);
+  CHECKBOX_use_firesmokemap=glui_3dsmoke->add_checkbox_to_panel(panel_colormap,_("Use colormap"),&use_firesmokemap,USE_FIRESMOKEMAP,SMOKE_3D_CB);
   if(ncolorbars>0){
-    LISTBOX_smoke_colorbar=glui_3dsmoke->add_listbox_to_panel(panel_colormap,"colormap:",&fire_colorbar_index,SMOKE_COLORBAR_LIST,SMOKE_3D_CB);
+    LISTBOX_smoke_colorbar=glui_3dsmoke->add_listbox_to_panel(panel_colormap,_("colormap:"),&fire_colorbar_index,SMOKE_COLORBAR_LIST,SMOKE_3D_CB);
 
     for(i=0;i<ncolorbars;i++){
       colorbardata *cbi;
@@ -188,15 +189,15 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     LISTBOX_smoke_colorbar->set_int_val(fire_colorbar_index);
   }
 
-  STATIC_hrrpuvcolor=glui_3dsmoke->add_statictext_to_panel(panel_colormap,"fire color:");
-  SPINNER_smoke3d_fire_red=glui_3dsmoke->add_spinner_to_panel(panel_colormap,"red",GLUI_SPINNER_INT,&fire_red,FIRE_RED,SMOKE_3D_CB);
+  STATIC_hrrpuvcolor=glui_3dsmoke->add_statictext_to_panel(panel_colormap,_("fire color:"));
+  SPINNER_smoke3d_fire_red=glui_3dsmoke->add_spinner_to_panel(panel_colormap,_("red"),GLUI_SPINNER_INT,&fire_red,FIRE_RED,SMOKE_3D_CB);
   SPINNER_smoke3d_fire_red->set_int_limits(0,255);
-  SPINNER_smoke3d_fire_green=glui_3dsmoke->add_spinner_to_panel(panel_colormap,"green",GLUI_SPINNER_INT,&fire_green,FIRE_GREEN,SMOKE_3D_CB);
+  SPINNER_smoke3d_fire_green=glui_3dsmoke->add_spinner_to_panel(panel_colormap,_("green"),GLUI_SPINNER_INT,&fire_green,FIRE_GREEN,SMOKE_3D_CB);
   SPINNER_smoke3d_fire_green->set_int_limits(0,255);
-  SPINNER_smoke3d_fire_blue=glui_3dsmoke->add_spinner_to_panel(panel_colormap,"blue",GLUI_SPINNER_INT,&fire_blue,FIRE_BLUE,SMOKE_3D_CB);
+  SPINNER_smoke3d_fire_blue=glui_3dsmoke->add_spinner_to_panel(panel_colormap,_("blue"),GLUI_SPINNER_INT,&fire_blue,FIRE_BLUE,SMOKE_3D_CB);
   SPINNER_smoke3d_fire_blue->set_int_limits(0,255);
 
-  SPINNER_smoke3d_smoke_shade=glui_3dsmoke->add_spinner_to_panel(panel_colormap,"smoke albedo",GLUI_SPINNER_FLOAT,&smoke_shade,SMOKE_SHADE,SMOKE_3D_CB);
+  SPINNER_smoke3d_smoke_shade=glui_3dsmoke->add_spinner_to_panel(panel_colormap,_("smoke albedo"),GLUI_SPINNER_FLOAT,&smoke_shade,SMOKE_SHADE,SMOKE_3D_CB);
   SPINNER_smoke3d_smoke_shade->set_float_limits(0.0,1.0);
 
   glui_3dsmoke->add_separator_to_panel(panel_colormap);
@@ -207,13 +208,13 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     
 #define HRRPUV_CUTOFF_MAX (hrrpuv_max_smv-0.01)
 
-    glui_3dsmoke->add_statictext_to_panel(panel_colormap,"HRRPUV cutoff (kW/m3):");
+    glui_3dsmoke->add_statictext_to_panel(panel_colormap,_("HRRPUV cutoff (kW/m3):"));
 
 //    SPINNER_smoke3d_fire_halfdepth=glui_3dsmoke->add_spinner_to_panel(panel_colormap,"50% fire depth (m)",GLUI_SPINNER_FLOAT,&fire_halfdepth,FIRE_HALFDEPTH,SMOKE_3D_CB);
 //    SPINNER_smoke3d_fire_halfdepth->set_float_limits(0.0,10.0);
     if(nmeshes>1){
       SPINNER_smoke3d_hrrpuv_cutoffptr[nmeshes]=glui_3dsmoke->add_spinner_to_panel
-        (panel_colormap,"All meshes",GLUI_SPINNER_FLOAT,&global_hrrpuv_cutoff,GLOBAL_FIRE_CUTOFF,SMOKE_3D_CB);
+        (panel_colormap,_("All meshes"),GLUI_SPINNER_FLOAT,&global_hrrpuv_cutoff,GLOBAL_FIRE_CUTOFF,SMOKE_3D_CB);
       SPINNER_smoke3d_hrrpuv_cutoffptr[nmeshes]->set_float_limits(0.0,HRRPUV_CUTOFF_MAX);
     }
     else{
@@ -229,7 +230,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   }
 
   #ifdef pp_GPU
-  SPINNER_smoke3d_rthick=glui_3dsmoke->add_spinner_to_panel(panel_colormap,"Thickness",
+  SPINNER_smoke3d_rthick=glui_3dsmoke->add_spinner_to_panel(panel_colormap,_("Thickness"),
     GLUI_SPINNER_FLOAT,&smoke3d_rthick,SMOKE_RTHICK,SMOKE_3D_CB);
   SPINNER_smoke3d_rthick->set_float_limits(1.0,255.0);
   smoke3d_thick = log_base2(smoke3d_rthick);
@@ -245,32 +246,32 @@ extern "C" void glui_3dsmoke_setup(int main_window){
 
   glui_3dsmoke->add_column_to_panel(panel_overall,false);
 
-  panel_absorption = glui_3dsmoke->add_panel_to_panel(panel_overall,"Absorption Adjustments");
+  panel_absorption = glui_3dsmoke->add_panel_to_panel(panel_overall,_("Absorption Adjustments"));
   panel_absorption->set_alignment(GLUI_ALIGN_LEFT);
   alphagroup = glui_3dsmoke->add_radiogroup_to_panel(panel_absorption,&adjustalphaflag);
-  glui_3dsmoke->add_radiobutton_to_group(alphagroup,"none");
-  glui_3dsmoke->add_radiobutton_to_group(alphagroup,"adjust off-center");
-  glui_3dsmoke->add_radiobutton_to_group(alphagroup,"zero at boundaries");
-  glui_3dsmoke->add_radiobutton_to_group(alphagroup,"both");
+  glui_3dsmoke->add_radiobutton_to_group(alphagroup,_("none"));
+  glui_3dsmoke->add_radiobutton_to_group(alphagroup,_("adjust off-center"));
+  glui_3dsmoke->add_radiobutton_to_group(alphagroup,_("zero at boundaries"));
+  glui_3dsmoke->add_radiobutton_to_group(alphagroup,_("both"));
 
   panel_slices = glui_3dsmoke->add_panel_to_panel(panel_overall,"Slices");
   panel_slices->set_alignment(GLUI_ALIGN_LEFT);
 #ifdef pp_GPU
-  CHECKBOX_smokeGPU=glui_3dsmoke->add_checkbox_to_panel(panel_slices,"Use GPU",&usegpu,GPU_SMOKE,SMOKE_3D_CB);
-  CHECKBOX_smokeVOLGPU=glui_3dsmoke->add_checkbox_to_panel(panel_slices,"Use full volume rendering",&use_volume_shader,GPU_SMOKE,SMOKE_3D_CB);
+  CHECKBOX_smokeGPU=glui_3dsmoke->add_checkbox_to_panel(panel_slices,_("Use GPU"),&usegpu,GPU_SMOKE,SMOKE_3D_CB);
+  CHECKBOX_smokeVOLGPU=glui_3dsmoke->add_checkbox_to_panel(panel_slices,_("Use full volume rendering"),&use_volume_shader,GPU_SMOKE,SMOKE_3D_CB);
   if(gpuactive==0){
     usegpu=0;
     CHECKBOX_smokeGPU->disable();
   }
 #endif
 #ifdef pp_CULL
-  CHECKBOX_smokecullflag=glui_3dsmoke->add_checkbox_to_panel(panel_slices,"Cull hidden slices",&cullsmoke,CULL_SMOKE,SMOKE_3D_CB);
+  CHECKBOX_smokecullflag=glui_3dsmoke->add_checkbox_to_panel(panel_slices,_("Cull hidden slices"),&cullsmoke,CULL_SMOKE,SMOKE_3D_CB);
   if(cullactive==0){
     cullsmoke=0;
     CHECKBOX_smokecullflag->disable();
   }
-  CHECKBOX_show_cullports=glui_3dsmoke->add_checkbox_to_panel(panel_slices,"Show cull ports",&show_cullports);
-  SPINNER_cull_portsize=glui_3dsmoke->add_spinner_to_panel(panel_slices,"Cull port size",GLUI_SPINNER_INT,&cull_portsize,CULL_PORTSIZE,SMOKE_3D_CB);
+  CHECKBOX_show_cullports=glui_3dsmoke->add_checkbox_to_panel(panel_slices,_("Show cull ports"),&show_cullports);
+  SPINNER_cull_portsize=glui_3dsmoke->add_spinner_to_panel(panel_slices,_("Cull port size"),GLUI_SPINNER_INT,&cull_portsize,CULL_PORTSIZE,SMOKE_3D_CB);
   {
     int ijk_max=0;
     for(i=0;i<nmeshes;i++){
@@ -298,9 +299,9 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   SPINNER_smokedrawtest_nummax->set_int_limits(1,ijkbarmax);
 #endif
   skipframes = glui_3dsmoke->add_radiogroup_to_panel(panel_slices,&smokeskipm1);
-  glui_3dsmoke->add_radiobutton_to_group(skipframes,"display all");
-  glui_3dsmoke->add_radiobutton_to_group(skipframes,"   ... every 2nd");
-  glui_3dsmoke->add_radiobutton_to_group(skipframes,"   ... every 3rd");
+  glui_3dsmoke->add_radiobutton_to_group(skipframes,_("display all"));
+  glui_3dsmoke->add_radiobutton_to_group(skipframes,_("   ... every 2nd"));
+  glui_3dsmoke->add_radiobutton_to_group(skipframes,_("   ... every 3rd"));
 
 #ifdef pp_GPU
   SMOKE_3D_CB(GPU_SMOKE);

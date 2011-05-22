@@ -17,6 +17,7 @@
 #include "smokeviewdefs.h"
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
+#include "translate.h"
 
 // svn revision character string
 extern "C" char glui_stereo_revision[]="$Revision$";
@@ -65,24 +66,24 @@ extern "C" void glui_stereo_setup(int main_window){
   glui_stereo = GLUI_Master.create_glui("stereo",0,0,0);
   if(showgluistereo==0)glui_stereo->hide();
   
-  panel_stereo_method = glui_stereo->add_panel("Stereo Method");
+  panel_stereo_method = glui_stereo->add_panel(_("Stereo Method"));
   RADIO_showstereo = glui_stereo->add_radiogroup_to_panel(panel_stereo_method,&showstereo,STEREO_SHOW,STEREO_CB);
-  glui_stereo->add_radiobutton_to_group(RADIO_showstereo,"Off");
-  RADIO_seq=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,"Sucessive frames");
+  glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Off"));
+  RADIO_seq=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Sucessive frames"));
   if(videoSTEREO==0)RADIO_seq->disable();
-  glui_stereo->add_radiobutton_to_group(RADIO_showstereo,"Left/Right");
-  glui_stereo->add_radiobutton_to_group(RADIO_showstereo,"Red/Blue");
-  glui_stereo->add_radiobutton_to_group(RADIO_showstereo,"Red/Cyan");
-  glui_stereo->add_radiobutton_to_group(RADIO_showstereo,"Red Custom Red/Custom Blue");
-  SPINNER_right_green2=glui_stereo->add_spinner_to_panel(panel_stereo_method,"green",GLUI_SPINNER_FLOAT,&right_green,
+  glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Left/Right"));
+  glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Red/Blue"));
+  glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Red/Cyan"));
+  glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Red Custom Red/Custom Blue"));
+  SPINNER_right_green2=glui_stereo->add_spinner_to_panel(panel_stereo_method,_("green"),GLUI_SPINNER_FLOAT,&right_green,
     STEREO_GREEN,STEREO_CB);
   SPINNER_right_green2->set_float_limits(0.0,1.0,GLUI_LIMIT_CLAMP);
-  SPINNER_right_blue2= glui_stereo->add_spinner_to_panel(panel_stereo_method, "blue",GLUI_SPINNER_FLOAT,&right_blue,
+  SPINNER_right_blue2= glui_stereo->add_spinner_to_panel(panel_stereo_method, _("blue"),GLUI_SPINNER_FLOAT,&right_blue,
     STEREO_BLUE,STEREO_CB);
   SPINNER_right_blue2->set_float_limits(0.0,1.0,GLUI_LIMIT_CLAMP);
 
   fzero*=xyzmaxdiff;
-  SPINNER_zero_parallax=glui_stereo->add_spinner("Distance to zero parallax plane (m)",GLUI_SPINNER_FLOAT,&fzero);
+  SPINNER_zero_parallax=glui_stereo->add_spinner(_("Distance to zero parallax plane (m)"),GLUI_SPINNER_FLOAT,&fzero);
 #ifdef _DEBUG
   glui_stereo->add_checkbox("Show stereo parallax",&show_parallax);
   RADIO_showstereo_frame = glui_stereo->add_radiogroup(&showstereo_frame);

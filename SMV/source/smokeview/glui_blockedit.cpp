@@ -16,6 +16,7 @@
 #include "smokeviewdefs.h"
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
+#include "translate.h"
 
 // svn revision character string
 extern "C" char glui_blockedit_revision[]="$Revision$";
@@ -80,7 +81,7 @@ extern "C" void glui_edit_setup(int main_window){
 
     glui_edit->add_statictext_to_panel(panel_surface,"");
 
-    surfacelists[NOT_USED] = glui_edit->add_listbox_to_panel(panel_surface,"Unused SURFs",
+    surfacelists[NOT_USED] = glui_edit->add_listbox_to_panel(panel_surface,_("Unused SURFs"),
       surface_indices+NOT_USED,UPDATE_LIST,OBJECT_CB);
     surfacelists[NOT_USED]->set_w(260);
     for(i=0;i<nsurfaces;i++){
@@ -103,13 +104,13 @@ extern "C" void glui_edit_setup(int main_window){
       }
     }
     else{
-      surfacelists[NOT_USED]->add_item(0,"none");
+      surfacelists[NOT_USED]->add_item(0,_("none"));
       surface_indices[NOT_USED]=0;
       surface_indices_bak[NOT_USED]=surface_indices[NOT_USED];
     }
     surfacelists[NOT_USED]->set_int_val(surface_indices[NOT_USED]);
 
-    surfacelists[DOWN_X] = glui_edit->add_listbox_to_panel(panel_surface,"Left",surface_indices+DOWN_X,UPDATE_LIST,OBJECT_CB);
+    surfacelists[DOWN_X] = glui_edit->add_listbox_to_panel(panel_surface,_("Left"),surface_indices+DOWN_X,UPDATE_LIST,OBJECT_CB);
     surfacelists[DOWN_X]->set_w(260);
     for(i=0;i<nsurfaces;i++){
       surfi = surfaceinfo + sorted_surfidlist[i];
@@ -119,7 +120,7 @@ extern "C" void glui_edit_setup(int main_window){
       surfacelists[DOWN_X]->add_item(i,surfacelabel);
     }
 
-    surfacelists[UP_X] = glui_edit->add_listbox_to_panel(panel_surface,"Right",surface_indices+UP_X,UPDATE_LIST,OBJECT_CB);
+    surfacelists[UP_X] = glui_edit->add_listbox_to_panel(panel_surface,_("Right"),surface_indices+UP_X,UPDATE_LIST,OBJECT_CB);
     surfacelists[UP_X]->set_w(260);
     for(i=0;i<nsurfaces;i++){
       surfi = surfaceinfo + sorted_surfidlist[i];
@@ -129,7 +130,7 @@ extern "C" void glui_edit_setup(int main_window){
       surfacelists[UP_X]->add_item(i,surfacelabel);
     }
 
-    surfacelists[DOWN_Y] = glui_edit->add_listbox_to_panel(panel_surface,"Front",surface_indices+DOWN_Y,UPDATE_LIST,OBJECT_CB);
+    surfacelists[DOWN_Y] = glui_edit->add_listbox_to_panel(panel_surface,_("Front"),surface_indices+DOWN_Y,UPDATE_LIST,OBJECT_CB);
     surfacelists[DOWN_Y]->set_w(260);
     for(i=0;i<nsurfaces;i++){
       surfi = surfaceinfo + sorted_surfidlist[i];
@@ -139,7 +140,7 @@ extern "C" void glui_edit_setup(int main_window){
       surfacelists[DOWN_Y]->add_item(i,surfacelabel);
     }
 
-    surfacelists[UP_Y] = glui_edit->add_listbox_to_panel(panel_surface,"Back",surface_indices+UP_Y,UPDATE_LIST,OBJECT_CB);
+    surfacelists[UP_Y] = glui_edit->add_listbox_to_panel(panel_surface,_("Back"),surface_indices+UP_Y,UPDATE_LIST,OBJECT_CB);
     surfacelists[UP_Y]->set_w(260);
     for(i=0;i<nsurfaces;i++){
       surfi = surfaceinfo + sorted_surfidlist[i];
@@ -149,7 +150,7 @@ extern "C" void glui_edit_setup(int main_window){
       surfacelists[UP_Y]->add_item(i,surfacelabel);
     }
 
-    surfacelists[DOWN_Z] = glui_edit->add_listbox_to_panel(panel_surface,"Down",surface_indices+DOWN_Z,UPDATE_LIST,OBJECT_CB);
+    surfacelists[DOWN_Z] = glui_edit->add_listbox_to_panel(panel_surface,_("Down"),surface_indices+DOWN_Z,UPDATE_LIST,OBJECT_CB);
     surfacelists[DOWN_Z]->set_w(260);
     for(i=0;i<nsurfaces;i++){
       surfi = surfaceinfo + sorted_surfidlist[i];
@@ -159,7 +160,7 @@ extern "C" void glui_edit_setup(int main_window){
       surfacelists[DOWN_Z]->add_item(i,surfacelabel);
     }
 
-    surfacelists[UP_Z] = glui_edit->add_listbox_to_panel(panel_surface,"Up",surface_indices+UP_Z,UPDATE_LIST,OBJECT_CB);
+    surfacelists[UP_Z] = glui_edit->add_listbox_to_panel(panel_surface,_("Up"),surface_indices+UP_Z,UPDATE_LIST,OBJECT_CB);
     surfacelists[UP_Z]->set_w(260);
     for(i=0;i<nsurfaces;i++){
       surfi = surfaceinfo + sorted_surfidlist[i];
@@ -179,7 +180,7 @@ extern "C" void glui_edit_setup(int main_window){
 
   panel_obj_stretch2 = glui_edit->add_panel("Coordinates");
 
-  blockage_checkbox=glui_edit->add_checkbox_to_panel(panel_obj_stretch2,"Dimensions snapped to grid",&blockage_snapped,
+  blockage_checkbox=glui_edit->add_checkbox_to_panel(panel_obj_stretch2,_("Dimensions snapped to grid"),&blockage_snapped,
     BLOCKAGE_AS_INPUT,OBJECT_CB);
   panel_obj_stretch3 = glui_edit->add_panel_to_panel(panel_obj_stretch2,"",GLUI_PANEL_NONE);
   edittext_xmin=glui_edit->add_edittext_to_panel(panel_obj_stretch3,"x",GLUI_EDITTEXT_FLOAT,&glui_block_xmin,XMIN_SPIN,OBJECT_CB);
@@ -212,14 +213,14 @@ extern "C" void glui_edit_setup(int main_window){
   if(nmeshes>1){
     char meshlabel[255];
 
-    strcpy(meshlabel,"Mesh label:");
+    strcpy(meshlabel,_("Mesh label:"));
     strcat(meshlabel,meshinfo->label);
     statictext_mesh_index=glui_edit->add_statictext_to_panel(panel_obj_stretch4,meshlabel);
   }
   statictext_blockage_index=glui_edit->add_statictext_to_panel(panel_obj_stretch4,"&OBST number: ");
   statictext_label=glui_edit->add_statictext_to_panel(panel_obj_stretch4,"&OBST label:");
   glui_edit->add_separator_to_panel(panel_obj_stretch4);
-  glui_edit->add_button_to_panel(panel_obj_stretch4,"Close",CLOSE_WINDOW,BUTTON_hide3_CB);
+  glui_edit->add_button_to_panel(panel_obj_stretch4,_("Close"),CLOSE_WINDOW,BUTTON_hide3_CB);
 
   glui_edit->set_main_gfx_window( main_window );
 }

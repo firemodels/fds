@@ -17,6 +17,7 @@
 #include "smokeviewdefs.h"
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
+#include "translate.h"
 
 // svn revision character string
 extern "C" char glui_wui_revision[]="$Revision: 1222 $";
@@ -76,26 +77,26 @@ extern "C" void update_glui_wui(void){
 extern "C" void glui_wui_setup(int main_window){
 
   if(glui_wui!=NULL)glui_wui->close();
-  glui_wui = GLUI_Master.create_glui("Terrain",0,0,0);
+  glui_wui = GLUI_Master.create_glui(_("Terrain"),0,0,0);
   if(showwui==0)glui_wui->hide();
 
   panel_terrain = glui_wui->add_panel("",GLUI_PANEL_NONE);
 
   if(nterraininfo>0){
-    panel_terrain_color=glui_wui->add_panel_to_panel(panel_terrain,"3D surface color");
+    panel_terrain_color=glui_wui->add_panel_to_panel(panel_terrain,_("3D surface color"));
 //  glui_labels->add_statictext_to_panel(panel_tick2,"                    x");
 //  glui_labels->add_column_to_panel(panel_tick2,false);
 
-    glui_wui->add_statictext_to_panel(panel_terrain_color,"                  min");
-    SPINNER_red_min=glui_wui->add_spinner_to_panel(panel_terrain_color,"red",GLUI_SPINNER_INT,
+    glui_wui->add_statictext_to_panel(panel_terrain_color,_("                  min"));
+    SPINNER_red_min=glui_wui->add_spinner_to_panel(panel_terrain_color,_("red"),GLUI_SPINNER_INT,
       terrain_rgba_zmin,TERRAIN_COLORS,WUI_CB);
-    SPINNER_green_min=glui_wui->add_spinner_to_panel(panel_terrain_color,"green",GLUI_SPINNER_INT,
+    SPINNER_green_min=glui_wui->add_spinner_to_panel(panel_terrain_color,_("green"),GLUI_SPINNER_INT,
       terrain_rgba_zmin+1,TERRAIN_COLORS,WUI_CB);
-    SPINNER_blue_min=glui_wui->add_spinner_to_panel(panel_terrain_color,"blue",GLUI_SPINNER_INT,
+    SPINNER_blue_min=glui_wui->add_spinner_to_panel(panel_terrain_color,_("blue"),GLUI_SPINNER_INT,
       terrain_rgba_zmin+2,TERRAIN_COLORS,WUI_CB);
     glui_wui->add_column_to_panel(panel_terrain_color,false);
 
-    glui_wui->add_statictext_to_panel(panel_terrain_color,"                  max");
+    glui_wui->add_statictext_to_panel(panel_terrain_color,_("                  max"));
     SPINNER_red_max=glui_wui->add_spinner_to_panel(panel_terrain_color,"",GLUI_SPINNER_INT,
       terrain_rgba_zmax,TERRAIN_COLORS,WUI_CB);
     SPINNER_green_max=glui_wui->add_spinner_to_panel(panel_terrain_color,"",GLUI_SPINNER_INT,
@@ -111,14 +112,14 @@ extern "C" void glui_wui_setup(int main_window){
      SPINNER_blue_max->set_int_limits(0,255,GLUI_LIMIT_CLAMP);
 
     panel_terrain_hidden1=glui_wui->add_panel_to_panel(panel_terrain,"",GLUI_PANEL_NONE);
-    panel_terrain_type=glui_wui->add_panel_to_panel(panel_terrain_hidden1,"Surface view");
+    panel_terrain_type=glui_wui->add_panel_to_panel(panel_terrain_hidden1,_("Surface view"));
     RADIO_terrain_type=glui_wui->add_radiogroup_to_panel(panel_terrain_type,&visTerrainType,
       TERRAIN_TYPE,WUI_CB);
-    glui_wui->add_radiobutton_to_group(RADIO_terrain_type,"3D surface");
-    glui_wui->add_radiobutton_to_group(RADIO_terrain_type,"2D stepped");
-    glui_wui->add_radiobutton_to_group(RADIO_terrain_type,"2D lines");
-    RADIO_texture=glui_wui->add_radiobutton_to_group(RADIO_terrain_type,"Image");
-    glui_wui->add_radiobutton_to_group(RADIO_terrain_type,"Hidden");
+    glui_wui->add_radiobutton_to_group(RADIO_terrain_type,_("3D surface"));
+    glui_wui->add_radiobutton_to_group(RADIO_terrain_type,_("2D stepped"));
+    glui_wui->add_radiobutton_to_group(RADIO_terrain_type,_("2D lines"));
+    RADIO_texture=glui_wui->add_radiobutton_to_group(RADIO_terrain_type,_("Image"));
+    glui_wui->add_radiobutton_to_group(RADIO_terrain_type,_("Hidden"));
 
     if(terrain_texture==NULL||terrain_texture->loaded==0){
       RADIO_texture->disable();
@@ -126,12 +127,12 @@ extern "C" void glui_wui_setup(int main_window){
 
     glui_wui->add_column_to_panel(panel_terrain_hidden1,false);
 
-    panel_fire_line=glui_wui->add_panel_to_panel(panel_terrain_hidden1,"Fire line");
+    panel_fire_line=glui_wui->add_panel_to_panel(panel_terrain_hidden1,_("Fire line"));
     SPINNER_fire_line_min=glui_wui->add_spinner_to_panel(panel_fire_line,
       "chop below:",GLUI_SPINNER_FLOAT,&fire_line_min,TERRAIN_MIN,WUI_CB);
     SPINNER_fire_line_max=glui_wui->add_spinner_to_panel(panel_fire_line,
       "color red above:",GLUI_SPINNER_FLOAT,&fire_line_max,TERRAIN_MAX,WUI_CB);
-    glui_wui->add_button_to_panel(panel_fire_line,"Update",TERRAIN_FIRE_LINE_UPDATE,WUI_CB);
+    glui_wui->add_button_to_panel(panel_fire_line,_("Update"),TERRAIN_FIRE_LINE_UPDATE,WUI_CB);
 
     SPINNER_vertical_factor=glui_wui->add_spinner_to_panel(panel_terrain_hidden1,
       "vertical exaggeration",GLUI_SPINNER_FLOAT,&vertical_factor,TERRAIN_VERT,WUI_CB);

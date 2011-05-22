@@ -17,6 +17,7 @@
 #include "smokeviewdefs.h"
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
+#include "translate.h"
 
 // svn revision character string
 extern "C" char glui_trainer_revision[]="$Revision$";
@@ -75,7 +76,7 @@ extern "C" void glui_alert_setup(int main_window){
   if(glui_alert!=NULL)glui_alert->close();
   glui_alert = GLUI_Master.create_glui("",0,screenWidth/2,screenHeight/2);
   glui_alert->hide();
-  STATIC_alert = glui_alert->add_statictext("Loading smoke and fire data");
+  STATIC_alert = glui_alert->add_statictext(_("Loading smoke and fire data"));
 }
 
 /* ------------------ hide_glui_trainer ------------------------ */
@@ -145,27 +146,27 @@ extern "C" void update_trainer_moves(void){
 extern "C" void glui_trainer_setup(int main_window){
 
   if(glui_trainer!=NULL)glui_trainer->close();
-  glui_trainer = GLUI_Master.create_glui("Demonstrator",0,screenWidth+12,0);
+  glui_trainer = GLUI_Master.create_glui(_("Demonstrator"),0,screenWidth+12,0);
   if(showgluitrainer==0)glui_trainer->hide();
   
   glui_trainer->set_main_gfx_window( main_window );
-  panel_smokeview = glui_trainer->add_panel("Data");
-  BUTTON_smoke3d = glui_trainer->add_button_to_panel(panel_smokeview,"Smoke/Fire",LOAD_SMOKE,TRAINER_CB);
+  panel_smokeview = glui_trainer->add_panel(_("Data"));
+  BUTTON_smoke3d = glui_trainer->add_button_to_panel(panel_smokeview,_("Smoke/Fire"),LOAD_SMOKE,TRAINER_CB);
   if(AnySmoke(NULL)==0)BUTTON_smoke3d->disable();
-  BUTTON_temp = glui_trainer->add_button_to_panel(panel_smokeview,"Temperature",LOAD_TEMP,TRAINER_CB);
+  BUTTON_temp = glui_trainer->add_button_to_panel(panel_smokeview,_("Temperature"),LOAD_TEMP,TRAINER_CB);
   if(AnySlices("TEMPERATURE")==0)BUTTON_temp->disable();
-  BUTTON_oxy = glui_trainer->add_button_to_panel(panel_smokeview,"Oxygen",LOAD_OXY,TRAINER_CB);
-  if(AnySlices("oxygen")==0&&AnySlices("oxygen VOLUME FRACTION")==0){
+  BUTTON_oxy = glui_trainer->add_button_to_panel(panel_smokeview,_("Oxygen"),LOAD_OXY,TRAINER_CB);
+  if(AnySlices("oxygen")==0&&AnySlices(_("oxygen VOLUME FRACTION"))==0){
     BUTTON_oxy->disable();
   }
   
   panel_explore = glui_trainer->add_panel("Explore",true);
 
   trainer_path=-1;
-  LIST_trainerpath = glui_trainer->add_listbox_to_panel(panel_explore,"Path:",&trainer_path,TRAINERPATH,TRAINER_CB);
+  LIST_trainerpath = glui_trainer->add_listbox_to_panel(panel_explore,_("Path:"),&trainer_path,TRAINERPATH,TRAINER_CB);
   {
     int i;
-    LIST_trainerpath->add_item(-1,"Manual");
+    LIST_trainerpath->add_item(-1,_("Manual"));
     LIST_trainerpath->add_item(-2,"-");
     for(i=0;i<ntours;i++){
       tourdata *touri;
@@ -175,7 +176,7 @@ extern "C" void glui_trainer_setup(int main_window){
     }
   }
 
-  LIST_viewpoint = glui_trainer->add_listbox_to_panel(panel_explore,"Viewpoint:",&trainer_viewpoints,TRAINERVIEWPOINTS,TRAINER_CB);
+  LIST_viewpoint = glui_trainer->add_listbox_to_panel(panel_explore,_("Viewpoint:"),&trainer_viewpoints,TRAINERVIEWPOINTS,TRAINER_CB);
   {
     camera *ca;
 
