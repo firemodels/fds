@@ -1,9 +1,9 @@
-SOURCE_DIR = ../../../SMV/source/
-INC_DIR = $(SOURCE_DIR)/mergepo
+SOURCE_DIR = ../../source/
+INC_DIR = -I $(SOURCE_DIR)/mergepo -I $(SOURCE_DIR)/shared
 FILTERC =
 FILTERF =
 
-VPATH = $(SOURCE_DIR)/makepo
+VPATH = $(SOURCE_DIR)/mergepo:$(SOURCE_DIR)/shared
 bin = .
 
 #LINUX32FORTLIBDIR = /opt/intel/fc/10.1.021/lib
@@ -14,7 +14,7 @@ OSX64FORTLIBDIR = /opt/intel/Compiler/11.1/080/lib
 
 # Definition of the object variables
 
-obj = main.o
+obj = main.o dmalloc.o assert.o
 objwin = $(obj:.o=.obj)
 
 #*** General Purpose Rules ***
