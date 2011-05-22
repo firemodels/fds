@@ -288,14 +288,14 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   CHECKBOX_smokecullflag=glui_3dsmoke->add_checkbox_to_panel(panel_slices,"Cull hidden slices",&smokecullflag);
 #endif
 #ifdef _DEBUG
-  CHECKBOX_smokedrawtest=glui_3dsmoke->add_checkbox_to_panel(panel_slices,"Show Only Back Slices",&smokedrawtest);
-  CHECKBOX_smokedrawtest2=glui_3dsmoke->add_checkbox_to_panel(panel_slices,"Show Only Dir X Slices",&smokedrawtest2);
+  CHECKBOX_smokedrawtest=glui_3dsmoke->add_checkbox_to_panel(panel_slices,"Show only back slices",&smokedrawtest);
+  CHECKBOX_smokedrawtest2=glui_3dsmoke->add_checkbox_to_panel(panel_slices,"Show only X slices",&smokedrawtest2);
 
 
-  SPINNER_smokedrawtest_nummin=glui_3dsmoke->add_spinner_to_panel(panel_slices,"Back Slice",GLUI_SPINNER_INT,&smokedrawtest_nummin);
+  SPINNER_smokedrawtest_nummin=glui_3dsmoke->add_spinner_to_panel(panel_slices,"Back slice",GLUI_SPINNER_INT,&smokedrawtest_nummin);
   SPINNER_smokedrawtest_nummin->set_int_limits(1,ijkbarmax);
 
-  SPINNER_smokedrawtest_nummax=glui_3dsmoke->add_spinner_to_panel(panel_slices,"Front Slice",GLUI_SPINNER_INT,&smokedrawtest_nummax);
+  SPINNER_smokedrawtest_nummax=glui_3dsmoke->add_spinner_to_panel(panel_slices,"Front slice",GLUI_SPINNER_INT,&smokedrawtest_nummax);
   SPINNER_smokedrawtest_nummax->set_int_limits(1,ijkbarmax);
 #endif
   skipframes = glui_3dsmoke->add_radiogroup_to_panel(panel_slices,&smokeskipm1);

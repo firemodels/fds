@@ -709,7 +709,7 @@ extern "C" void glui_bounds_setup(int main_window){
 #ifdef pp_COMPRESS
   if(smokezippath!=NULL&&(npatch_files>0||nsmoke3d_files>0||nslice_files>0)){
     glui_bounds->add_separator();
-    rollout_compress=glui_bounds->add_rollout(_("Compress Files (Smokezip)"),false);
+    rollout_compress=glui_bounds->add_rollout(_("Compress files (Smokezip)"),false);
     check_erase_all=glui_bounds->add_checkbox_to_panel(rollout_compress,_("Erase compressed files"),
       &erase_all,ERASE,Bound_CB);
     check_overwrite_all=glui_bounds->add_checkbox_to_panel(rollout_compress,_("Overwrite compressed files"),
@@ -717,32 +717,32 @@ extern "C" void glui_bounds_setup(int main_window){
     check_compress_autoloaded=glui_bounds->add_checkbox_to_panel(rollout_compress,_("Compress only autoloaded files"),
       &compress_autoloaded,COMPRESS_AUTOLOADED,Bound_CB);
     if(nslice_files>0){
-      SPINNER_slicezipstep=glui_bounds->add_spinner_to_panel(rollout_compress,"Slice Frame Skip",GLUI_SPINNER_INT,&slicezipskip,
+      SPINNER_slicezipstep=glui_bounds->add_spinner_to_panel(rollout_compress,_("Slice frame Skip"),GLUI_SPINNER_INT,&slicezipskip,
         FRAMELOADING,Slice_CB);
       SPINNER_slicezipstep->set_int_limits(0,100);
     }
     if(niso_files>0){
-      SPINNER_isozipstep=glui_bounds->add_spinner_to_panel(rollout_compress,"ISO Frame Skip",GLUI_SPINNER_INT,&isozipskip,
+      SPINNER_isozipstep=glui_bounds->add_spinner_to_panel(rollout_compress,_("ISO frame skip"),GLUI_SPINNER_INT,&isozipskip,
         FRAMELOADING,Iso_CB);
       SPINNER_isozipstep->set_int_limits(0,100);
     }
     if(nsmoke3d_files>0){
-      SPINNER_smoke3dzipstep=glui_bounds->add_spinner_to_panel(rollout_compress,"3D Smoke Frame Skip",GLUI_SPINNER_INT,&smoke3dzipskip,
+      SPINNER_smoke3dzipstep=glui_bounds->add_spinner_to_panel(rollout_compress,_("3D smoke frame skip"),GLUI_SPINNER_INT,&smoke3dzipskip,
         FRAMELOADING,Smoke3D_CB);
       SPINNER_smoke3dzipstep->set_int_limits(0,100);
     }
     if(npatch_files>0){
-      SPINNER_boundzipstep=glui_bounds->add_spinner_to_panel(rollout_compress,"Boundary file frame skip",
+      SPINNER_boundzipstep=glui_bounds->add_spinner_to_panel(rollout_compress,_("Boundary file frame skip"),
         GLUI_SPINNER_INT,&boundzipskip,FRAMELOADING,Bound_CB);
       SPINNER_boundzipstep->set_int_limits(0,100);
     }
-    BUTTON_compress=glui_bounds->add_button_to_panel(rollout_compress,"Run smokezip",COMPRESS_FILES,Bound_CB);
+    BUTTON_compress=glui_bounds->add_button_to_panel(rollout_compress,_("Run smokezip"),COMPRESS_FILES,Bound_CB);
   }
 #endif
 
   rollout_SCRIPT = glui_bounds->add_rollout("Scripts/Config",false);
 
-  panel_script1 = glui_bounds->add_panel_to_panel(rollout_SCRIPT,"Script files",true);
+  panel_script1 = glui_bounds->add_panel_to_panel(rollout_SCRIPT,_("Script files"),true);
 
   panel_script1a = glui_bounds->add_panel_to_panel(panel_script1,"",false);
   BUTTON_script_start=glui_bounds->add_button_to_panel(panel_script1a,_("Start recording"),SCRIPT_START,Script_CB);

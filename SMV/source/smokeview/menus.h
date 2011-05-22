@@ -4733,7 +4733,7 @@ updatemenu=0;
   else{
     glutAddMenuEntry(_("yz plane"),3);
   }
-  glutAddMenuEntry(_("Show All"),4);
+  glutAddMenuEntry(_("Show all"),4);
   if(visGrid==1)glutAddMenuEntry(_("Hide all"),5);
 
 /* --------------------------------vent menu -------------------------- */
@@ -4944,8 +4944,8 @@ updatemenu=0;
     }
     if(object_outlines==0)glutAddMenuEntry(_("Outline"),-4);
     if(object_outlines==1)glutAddMenuEntry(_("*Outline"),-4);
-    glutAddMenuEntry(_("Show All"),-1);
-    glutAddMenuEntry(_("Hide All"),-2);
+    glutAddMenuEntry(_("Show all"),-1);
+    glutAddMenuEntry(_("Hide all"),-2);
     glutAddMenuEntry("-",-999);
     glutAddSubMenu(_("Segments"),spheresegmentmenu);
 
@@ -5481,10 +5481,10 @@ updatemenu=0;
     }
     glutAddMenuEntry("-",999);
     if(showall==1){
-      glutAddMenuEntry(_("*Show All"),3);
+      glutAddMenuEntry(_("*Show all"),3);
     }
     else{
-      glutAddMenuEntry(_("Show All"),3);
+      glutAddMenuEntry(_("Show all"),3);
     }
     if(plotstate==DYNAMIC_PLOTS){
       hideall=1;
@@ -5547,7 +5547,7 @@ updatemenu=0;
 
     CREATEMENU(smokecolorbarmenu,SmokeColorBarMenu);
 
-    glutAddMenuEntry(_("Smoke Map:"),-999);
+    glutAddMenuEntry(_("Smoke map:"),-999);
     for(i=0;i<ncolorbars;i++){
       cbi = colorbarinfo + i;
 
@@ -5669,7 +5669,7 @@ updatemenu=0;
       }
       if(iso2!=NULL){
         glutAddMenuEntry("-",999);
-        STRCPY(menulabel,_("Show All"));
+        STRCPY(menulabel,_("Show all"));
         STRCPY(menulabel," ");
         STRCAT(menulabel,iso2->surface_label.longlabel);
         STRCAT(menulabel," ");
@@ -5872,13 +5872,13 @@ updatemenu=0;
     if(offset_slice==0)glutAddMenuEntry(_("Offset slice"),-12);
     if(nsliceloaded>0&&sd_shown!=NULL){
       glutAddMenuEntry("-",-10);
-      STRCPY(menulabel,_("Show All"));
+      STRCPY(menulabel,_("Show all"));
       STRCAT(menulabel," ");
       STRCAT(menulabel,sd_shown->label.longlabel);
       STRCAT(menulabel," ");
       STRCAT(menulabel,_("slices"));
       glutAddMenuEntry(menulabel,SHOW_ALL);
-      STRCPY(menulabel,_("Hide All"));
+      STRCPY(menulabel,_("Hide all"));
       STRCAT(menulabel," ");
       STRCAT(menulabel,sd_shown->label.longlabel);
       STRCAT(menulabel," ");
@@ -6336,7 +6336,7 @@ updatemenu=0;
     if(showtrainer==0)glutAddMenuEntry(_("Trainer..."),25);
   }
   glutAddMenuEntry("-",-1);
-  glutAddMenuEntry(_("Close All Dialogs  ALT+x"),-2);
+  glutAddMenuEntry(_("Close all dialogs  ALT+x"),-2);
 
   CREATEMENU(aperturemenu,ApertureMenu);
   if(apertureindex==0)glutAddMenuEntry("*30",0);
@@ -6432,9 +6432,9 @@ updatemenu=0;
   if(showlightmenu==1)glutAddSubMenu(_("Lighting"),lightingmenu);
 #endif
   glutAddSubMenu(_("Rotation"),rotatetypemenu);
-  glutAddSubMenu(_("Max Frame Rate"),frameratemenu);
+  glutAddSubMenu(_("Max frame rate"),frameratemenu);
   glutAddSubMenu(_("Render"),rendermenu);
-  if(showfontmenu==1)glutAddSubMenu(_("Font Size"),fontmenu);
+  if(showfontmenu==1)glutAddSubMenu(_("Font size"),fontmenu);
   if(tr_lang==1){
     if(tr_english==1){
       char langmenu[128];
@@ -6784,7 +6784,7 @@ updatemenu=0;
             }
             strcpy(menulabel,_("Particles"));
             strcat(menulabel," - ");
-            strcat(menulabel,_("Single Mesh"));
+            strcat(menulabel,_("Single mesh"));
             glutAddSubMenu(menulabel,particlesubmenu);
             if(atleastone==1)glutAddMenuEntry("-",-2);
           }
@@ -7948,7 +7948,7 @@ updatemenu=0;
       }
 
     }
-    glutAddMenuEntry(_("Create Script:"),-999);
+    glutAddMenuEntry(_("Create script:"),-999);
     if(script_recording==NULL)glutAddMenuEntry(_("  Start recording"),START_RECORDING_SCRIPT);
     glutAddMenuEntry(_("  Stop recording"),STOP_RECORDING_SCRIPT);
 
@@ -7963,7 +7963,7 @@ updatemenu=0;
 #endif
       strcpy(steplabel,_("error: steplabel not defined"));
       if(nsmoke3d_files>0){
-        strcpy(loadmenulabel,_("3D Smoke"));
+        strcpy(loadmenulabel,_("3D smoke"));
         if(smoke3dframeskip>0){
           sprintf(steplabel,"/Skip %i",smoke3dframeskip);
           strcat(loadmenulabel,steplabel);

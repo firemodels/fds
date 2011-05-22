@@ -109,7 +109,7 @@ extern "C" void glui_tour_setup(int main_window){
   int i;
 
   if(glui_tour!=NULL)glui_tour->close();
-  glui_tour = GLUI_Master.create_glui(_("Edit Tours"),0,0,0);
+  glui_tour = GLUI_Master.create_glui(_("Edit tours"),0,0,0);
   if(showgluitour==0)glui_tour->hide();
 
 
@@ -231,7 +231,7 @@ extern "C" void glui_advancedtour_setup(int main_window){
   glui_advancedtour->add_spinner_to_panel(panel_path,_("stop time:"),GLUI_SPINNER_FLOAT,&view_tstop, VIEW_times,TOUR_CB);
   glui_advancedtour->add_spinner_to_panel(panel_path,_("points"),    GLUI_SPINNER_INT,&view_ntimes,  VIEW_times,TOUR_CB);
 
-  panel_advancedkeyframe = glui_advancedtour->add_panel_to_panel(panel_advanced,_("Edit Keyframe's View/Tension"),true);
+  panel_advancedkeyframe = glui_advancedtour->add_panel_to_panel(panel_advanced,_("Edit keyframe's view/tension"),true);
 
   glui_advancedtour->add_button_to_panel(panel_advancedkeyframe,_("Next"),    KEYFRAME_NEXT,TOUR_CB);
   glui_advancedtour->add_button_to_panel(panel_advancedkeyframe,_("Previous"),KEYFRAME_PREVIOUS,TOUR_CB);
@@ -242,7 +242,7 @@ extern "C" void glui_advancedtour_setup(int main_window){
     GLUI_SPINNER_FLOAT,&tour_global_tension,GLOBAL_TENSION,TOUR_CB);
   SPINNER_globaltourtension->set_float_limits(-1.0,1.0,GLUI_LIMIT_CLAMP);
 
-  SPINNER_tourtension=glui_advancedtour->add_spinner_to_panel(panel_spline,_("Selected keyframeframe"),
+  SPINNER_tourtension=glui_advancedtour->add_spinner_to_panel(panel_spline,_("Selected keyframe"),
     GLUI_SPINNER_FLOAT,&tour_tension,KEYFRAME_tXYZ,TOUR_CB);
   SPINNER_tourtension->set_float_limits(-1.0,1.0,GLUI_LIMIT_CLAMP);
 
