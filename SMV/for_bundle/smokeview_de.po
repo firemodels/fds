@@ -1,4 +1,10 @@
 
+msgid "... every 2nd"
+msgstr "... jeden 2."
+
+msgid "... every 3rd"
+msgstr "... jeden 3."
+
 msgid "2*Current"
 msgstr "2 * Aktuelle"
 
@@ -35,9 +41,6 @@ msgstr "Weitere Fehler aufgetreten sind. Siehe Kommando-Shell faer weitere Detai
 msgid "Additional warnings have occurred.  See command shell for details."
 msgstr "Zusaetzliche Warnungen aufgetreten. Siehe Kommando-Shell faer weitere Details."
 
-msgid "adjust off-center"
-msgstr "Informationen dazu erhalten auaeermittig"
-
 msgid "Advanced Settings"
 msgstr "Erweiterte Einstellungen"
 
@@ -56,20 +59,17 @@ msgstr "Alpha"
 msgid "Always show tracers"
 msgstr "Always show Tracer"
 
-msgid "aperture"
-msgstr "Blende"
-
 msgid "Apply"
 msgstr "Bewerben"
 
 msgid "Auto Load"
 msgstr "Auto-Load-"
 
-msgid "Auto Load at Startup"
-msgstr "Auto-Load bei Start"
-
 msgid "Auto Load Now"
 msgstr "Auto-Load-Kaufen"
+
+msgid "Auto Load at Startup"
+msgstr "Auto-Load bei Start"
 
 msgid "Auto place (2D)"
 msgstr "Auto Platz (2D)"
@@ -104,12 +104,6 @@ msgstr "Unten angegebene min"
 msgid "Benchmark"
 msgstr "Benchmark"
 
-msgid "blue"
-msgstr "blau"
-
-msgid "both"
-msgstr "beide"
-
 msgid "Bound Data"
 msgstr "Gebundenen Daten"
 
@@ -125,26 +119,23 @@ msgstr "Clip Blockaden und Daten"
 msgid "Clip Lower"
 msgstr "Clip Niederaesterreich"
 
-msgid "Clipping Disabled"
-msgstr "Clipping faer Behinderte"
-
 msgid "Clip Upper"
 msgstr "Clip Oberaesterreich"
+
+msgid "Clipping Disabled"
+msgstr "Clipping faer Behinderte"
 
 msgid "Close"
 msgstr "Schlieaeen"
 
-msgid "Colorbar:"
-msgstr "Colorbar:"
+msgid "Color Bar"
+msgstr "Color Bar"
 
 msgid "Colorbar"
 msgstr "Colorbar"
 
-msgid "Color Bar"
-msgstr "Color Bar"
-
-msgid "colormap:"
-msgstr "Farbtabelle:"
+msgid "Colorbar:"
+msgstr "Colorbar:"
 
 msgid "Compress Files (Smokezip)"
 msgstr "Compress Files (Smokezip)"
@@ -158,11 +149,11 @@ msgstr "Berechnen Sie Tracks"
 msgid "Config files"
 msgstr "Config-Dateien"
 
-msgid "Constant coloring"
-msgstr "Constant Faerbung"
-
 msgid "Constant Speed"
 msgstr "Constant Speed"
+
+msgid "Constant coloring"
+msgstr "Constant Faerbung"
 
 msgid "Contours"
 msgstr "Contours"
@@ -185,17 +176,14 @@ msgstr "Cycle"
 msgid "Data"
 msgstr "Daten"
 
-msgid "Data coloring"
-msgstr "Data Färbung"
-
 msgid "Data Coloring/Transparency"
 msgstr "Data Coloring / Transparenz"
 
 msgid "Data Loading"
 msgstr "Daten werden geladen"
 
-msgid "decay, p"
-msgstr "Zerfall, p"
+msgid "Data coloring"
+msgstr "Data Färbung"
 
 msgid "Delete"
 msgstr "Loeschen"
@@ -218,9 +206,6 @@ msgstr "Richtungsvektoren"
 msgid "Display"
 msgstr "Anzeige"
 
-msgid "display all"
-msgstr "Anzeige aller"
-
 msgid "Distance to zero parallax plane (m)"
 msgstr "Entfernung zum Null-Parallaxe Ebene (m)"
 
@@ -229,9 +214,6 @@ msgstr "Down"
 
 msgid "Duration/Points (all tours)"
 msgstr "Dauer / Punkte (alle Touren)"
-
-msgid "duration (s)"
-msgstr "Dauer (s)"
 
 msgid "Edit Keyframe's View/Tension"
 msgstr "Bearbeiten von Keyframe&#39;s View / Tension"
@@ -248,11 +230,11 @@ msgstr "Meereshoehe:"
 msgid "Erase compressed files"
 msgstr "Erase komprimierten Dateien"
 
-msgid "Error: "
-msgstr "Fehler:"
-
 msgid "Error"
 msgstr "Fehler"
+
+msgid "Error: "
+msgstr "Fehler:"
 
 msgid "Every 10th"
 msgstr "Jeder 10."
@@ -260,14 +242,8 @@ msgstr "Jeder 10."
 msgid "Every 20th"
 msgstr "Jeder 20."
 
-msgid "... every 2nd"
-msgstr "... jeden 2."
-
 msgid "Every 2nd"
 msgstr "Jeden 2."
-
-msgid "... every 3rd"
-msgstr "... jeden 3."
 
 msgid "Every 3rd"
 msgstr "Jeden 3."
@@ -278,6 +254,9 @@ msgstr "Jeden 4."
 msgid "Every 5th"
 msgstr "Jeder 5."
 
+msgid "FDS Ticks"
+msgstr "FDS Zecken"
+
 msgid "Far depth"
 msgstr "Far Tiefe"
 
@@ -287,23 +266,11 @@ msgstr "Fast Blockade Zeichnung"
 msgid "Fatal error: "
 msgstr "Fatal error:"
 
-msgid "FDS Ticks"
-msgstr "FDS Zecken"
-
-msgid "fire color:"
-msgstr "Feuer Farbe:"
-
 msgid "Fire line"
 msgstr "Fire Linie"
 
 msgid "Fire/Smoke Display"
 msgstr "Feuer / Rauch Display"
-
-msgid "first person"
-msgstr "erste Person"
-
-msgid "first person movement"
-msgstr "erste Person Bewegung"
 
 msgid "Flip Background"
 msgstr "Flip Hintergrund"
@@ -317,20 +284,11 @@ msgstr "Frame-Rate"
 msgid "Frames:"
 msgstr "Frames:"
 
-msgid "frame skip"
-msgstr "Frame überspringen"
-
-msgid "frames per second"
-msgstr "Frames pro Sekunde"
-
 msgid "Free memory after coloring data"
 msgstr "Freier Speicher nach dem Färben Daten"
 
 msgid "Front"
 msgstr "Front"
-
-msgid "general rotations"
-msgstr "allgemeine Rotationen"
 
 msgid "Geometry Transparency"
 msgstr "Geometry Transparenz"
@@ -338,23 +296,20 @@ msgstr "Geometry Transparenz"
 msgid "Global"
 msgstr "Global"
 
-msgid "global max"
-msgstr "globale max"
-
-msgid "global min"
-msgstr "globalen min"
-
-msgid "green"
-msgstr "grün"
-
 msgid "Grey (0-255)"
 msgstr "Grey (0-255)"
 
 msgid "Grid Loc"
 msgstr "Grid Loc"
 
-msgid "height"
-msgstr "Höhe"
+msgid "HRR Label"
+msgstr "HRR Label"
+
+msgid "HRRPUV cutoff"
+msgstr "HRRPUV Cutoff"
+
+msgid "HRRPUV cutoff (kW/m3):"
+msgstr "HRRPUV Cutoff (kW/m3):"
 
 msgid "Hidden"
 msgstr "Hidden"
@@ -371,20 +326,8 @@ msgstr "Verstecken Szene"
 msgid "Highlight extreme data"
 msgstr "Markieren extreme Daten"
 
-msgid "hms time label"
-msgstr "hms Zeit Etikett"
-
 msgid "Horizontal"
 msgstr "Horizontal"
-
-msgid "HRR Label"
-msgstr "HRR Label"
-
-msgid "HRRPUV cutoff"
-msgstr "HRRPUV Cutoff"
-
-msgid "HRRPUV cutoff (kW/m3):"
-msgstr "HRRPUV Cutoff (kW/m3):"
 
 msgid "Image"
 msgstr "Image"
@@ -398,26 +341,20 @@ msgstr "Interpolieren Zelle zentriert Scheiben"
 msgid "Label"
 msgstr "Label"
 
-msgid "large font"
-msgstr "große Schrift"
-
 msgid "Left"
 msgstr "Links"
 
 msgid "Left/Right"
 msgstr "Links / Rechts"
 
-msgid "level rotations"
-msgstr "Ebene Drehungen"
-
 msgid "Line Contours"
 msgstr "Linienführung"
 
-msgid "Lines"
-msgstr "Lines"
-
 msgid "Line width"
 msgstr "Linienbreite"
+
+msgid "Lines"
+msgstr "Lines"
 
 msgid "Load"
 msgstr "Laden"
@@ -434,9 +371,6 @@ msgstr "Karte Cursor-Tasten für Plot3D verwenden"
 msgid "Mass Extinction Coeff (m2/g)"
 msgstr "Mass Extinction Koeffizient (m2 / g)"
 
-msgid "max"
-msgstr "max"
-
 msgid "Max"
 msgstr "Max"
 
@@ -445,9 +379,6 @@ msgstr "Speicher zu laden"
 
 msgid "Mesh label:"
 msgstr "Mesh-Label:"
-
-msgid "min"
-msgstr "min"
 
 msgid "Min"
 msgstr "Min."
@@ -473,26 +404,14 @@ msgstr "Weiter"
 msgid "Next Tour"
 msgstr "Nächste Tour"
 
-msgid "node index"
-msgstr "Knoten Index"
-
-msgid "none"
-msgstr "none"
-
 msgid "Number of contours"
 msgstr "Anzahl der Konturen"
-
-msgid "number of particles"
-msgstr "Zahl der Teilchen"
 
 msgid "Off"
 msgstr "Aus"
 
 msgid "One"
 msgstr "Ein"
-
-msgid "origin"
-msgstr "Herkunft"
 
 msgid "Outline"
 msgstr "Gliederung"
@@ -506,47 +425,32 @@ msgstr "Überschreiben Sie komprimierte Dateien"
 msgid "Oxygen"
 msgstr "Sauerstoff"
 
-msgid "oxygen VOLUME FRACTION"
-msgstr "Sauerstoff-Volumenanteil"
-
 msgid "Parameters"
 msgstr "Parameter"
-
-msgid "particle size"
-msgstr "Partikelgröße"
-
-msgid "Particle size"
-msgstr "Partikelgröße"
 
 msgid "Particle Tracking"
 msgstr "Particle Tracking"
 
-msgid "Path:"
-msgstr "Pfad:"
+msgid "Particle size"
+msgstr "Partikelgröße"
 
 msgid "Path Length (m)"
 msgstr "Weglänge (m)"
 
-msgid "percentile max"
-msgstr "Perzentil max"
-
-msgid "percentile min"
-msgstr "Perzentil min"
+msgid "Path:"
+msgstr "Pfad:"
 
 msgid "Perspective"
 msgstr "Vorausschau"
 
-msgid "points"
-msgstr "Punkte"
-
-msgid "Points"
-msgstr "Punkte"
+msgid "Point Skip"
+msgstr "Punkt überspringen"
 
 msgid "Point size"
 msgstr "Punktgröße"
 
-msgid "Point Skip"
-msgstr "Punkt überspringen"
+msgid "Points"
+msgstr "Punkte"
 
 msgid "Position"
 msgstr "Standpunkt"
@@ -566,32 +470,20 @@ msgstr "Zurück"
 msgid "Previous Tour"
 msgstr "Zurück Tour"
 
-msgid "red"
-msgstr "rot"
+msgid "Red Custom Red/Custom Blue"
+msgstr "Red Custom Red / Blue Custom"
 
 msgid "Red/Blue"
 msgstr "Rot / Blau"
 
-msgid "Red Custom Red/Custom Blue"
-msgstr "Red Custom Red / Blue Custom"
-
 msgid "Red/Cyan"
 msgstr "Rot / Cyan"
-
-msgid "reference elevation, Z0 (m)"
-msgstr "Bezugshöhe, Z0 (m)"
-
-msgid "reference velocity, U0 (m/s)"
-msgstr "Referenzgeschwindigkeit, U0 (m / s)"
 
 msgid "Reload"
 msgstr "Reload"
 
 msgid "Render"
 msgstr "Machen"
-
-msgid "render directory:"
-msgstr "render Verzeichnis:"
 
 msgid "Render images"
 msgstr "Render Bilder"
@@ -608,17 +500,14 @@ msgstr "Drehen"
 msgid "Rotate about:"
 msgstr "Drehen Sie über:"
 
-msgid "Save:"
-msgstr "Sie sparen"
-
 msgid "Save Auto Load File List"
 msgstr "Speichern Auto-Load-Dateiliste"
 
 msgid "Save Settings"
 msgstr "Einstellungen speichern"
 
-msgid "Scaled optical depth (SCD)"
-msgstr "Scaled optische Tiefe (SCD)"
+msgid "Save:"
+msgstr "Sie sparen"
 
 msgid "Scale x"
 msgstr "Scale x"
@@ -629,14 +518,14 @@ msgstr "Scale y"
 msgid "Scale z"
 msgstr "Spur Z"
 
+msgid "Scaled optical depth (SCD)"
+msgstr "Scaled optische Tiefe (SCD)"
+
 msgid "Scaling"
 msgstr "Skalierung"
 
 msgid "Scaling/Depth Params"
 msgstr "Scaling / Tiefe Params"
-
-msgid "Select:"
-msgstr "Wählen Sie:"
 
 msgid "Select"
 msgstr "Wählen Sie"
@@ -644,20 +533,17 @@ msgstr "Wählen Sie"
 msgid "Select Avatar"
 msgstr "Wählen Avatar"
 
-msgid "Selected keyframeframe"
-msgstr "Ausgewählte keyframeframe"
-
 msgid "Select Tour:"
 msgstr "Wählen Tour:"
 
+msgid "Select:"
+msgstr "Wählen Sie:"
+
+msgid "Selected keyframeframe"
+msgstr "Ausgewählte keyframeframe"
+
 msgid "Set"
 msgstr "Set"
-
-msgid "set max"
-msgstr "Set max"
-
-msgid "set min"
-msgstr "Set min"
 
 msgid "Shaded Contours"
 msgstr "Schattierten Konturen"
@@ -674,6 +560,21 @@ msgstr "Alle"
 msgid "Show Avatar"
 msgstr "Show Avatar"
 
+msgid "Show Intermediate Path Nodes"
+msgstr "Show Zwischenstrecke Nodes"
+
+msgid "Show Only"
+msgstr "Nur Anzeigen"
+
+msgid "Show Test Smoke"
+msgstr "Show Test Smoke"
+
+msgid "Show User Ticks"
+msgstr "Benutzerprofil Zecken"
+
+msgid "Show Vectors"
+msgstr "Show Vektoren"
+
 msgid "Show colorbar (when data coloring)"
 msgstr "Show colorbar (wenn Daten Färbung)"
 
@@ -682,12 +583,6 @@ msgstr "Show Konturen"
 
 msgid "Show cull ports"
 msgstr "Show cull Häfen"
-
-msgid "Show Intermediate Path Nodes"
-msgstr "Show Zwischenstrecke Nodes"
-
-msgid "Show Only"
-msgstr "Nur Anzeigen"
 
 msgid "Show only first frame"
 msgstr "Nur ersten Frame"
@@ -704,23 +599,11 @@ msgstr "Zeigen Partikel"
 msgid "Show temp threshold"
 msgstr "Show Übertemperaturschwelle"
 
-msgid "Show Test Smoke"
-msgstr "Show Test Smoke"
-
-msgid "Show User Ticks"
-msgstr "Benutzerprofil Zecken"
-
 msgid "Show values"
 msgstr "Werte anzeigen"
 
-msgid "Show Vectors"
-msgstr "Show Vektoren"
-
 msgid "Show velocity vectors"
 msgstr "Show Geschwindigkeitsvektoren"
-
-msgid "Size:"
-msgstr "Größe:"
 
 msgid "Size"
 msgstr "Größe"
@@ -728,14 +611,11 @@ msgstr "Größe"
 msgid "Size Preserving"
 msgstr "Größe bewahren"
 
+msgid "Size:"
+msgstr "Größe:"
+
 msgid "Skip coarse sub-slice"
 msgstr "Skip groben Sub-Scheibe"
-
-msgid "small font"
-msgstr "Kleine Schrift"
-
-msgid "smoke albedo"
-msgstr "Rauch Albedo"
 
 msgid "Smoke Density (g/m3)"
 msgstr "Rauch-Dichte (g/m3)"
@@ -764,17 +644,11 @@ msgstr "Geben Sie"
 msgid "Start"
 msgstr "Start"
 
-msgid "Starting Locations/Velocities"
-msgstr "Ab Standorte / Geschwindigkeiten"
-
 msgid "Start Recording"
 msgstr "Start Recording"
 
-msgid "start time"
-msgstr "Startzeit"
-
-msgid "step"
-msgstr "Schritt"
+msgid "Starting Locations/Velocities"
+msgstr "Ab Standorte / Geschwindigkeiten"
 
 msgid "Stepped Contours"
 msgstr "Gestufte Contours"
@@ -788,23 +662,14 @@ msgstr "Stop"
 msgid "Stop Recording"
 msgstr "Aufzeichnung beenden"
 
-msgid "stop time:"
-msgstr "Endzeit:"
-
 msgid "Streak Length (s)"
 msgstr "Streak Länge (n)"
 
 msgid "Streak line width"
 msgstr "Streak Linienbreite"
 
-msgid "sub-intervals"
-msgstr "Teilintervalle"
-
 msgid "Sucessive frames"
 msgstr "Aufeinander folgenden Frames"
-
-msgid "suffix:"
-msgstr "Suffix:"
 
 msgid "Surface view"
 msgstr "Surface Blick"
@@ -812,14 +677,8 @@ msgstr "Surface Blick"
 msgid "Temperature"
 msgstr "Temperatur"
 
-msgid "temp threshold (C)"
-msgstr "temp Schwelle (C)"
-
 msgid "Tension"
 msgstr "Spannung"
-
-msgid "terminal velocity"
-msgstr "Endgeschwindigkeit"
 
 msgid "Terrain"
 msgstr "Gelände"
@@ -832,9 +691,6 @@ msgstr "Textfelder"
 
 msgid "Thickness"
 msgstr "Dicke"
-
-msgid "time:"
-msgstr "Zeit:"
 
 msgid "Time Bar"
 msgstr "Time Bar"
@@ -854,9 +710,6 @@ msgstr "Tour Label"
 msgid "Tour Settings"
 msgstr "Tour-Einstellungen"
 
-msgid "transparency level"
-msgstr "Transparenz-Level"
-
 msgid "Transparent level"
 msgstr "Transparente Ebene"
 
@@ -872,26 +725,26 @@ msgstr "Bis"
 msgid "Update"
 msgstr "Update"
 
-msgid "Update continuously"
-msgstr "Update kontinuierlich"
-
 msgid "Update Contours"
 msgstr "Update Contours"
+
+msgid "Update Tour Label"
+msgstr "Update Tour Label"
+
+msgid "Update continuously"
+msgstr "Update kontinuierlich"
 
 msgid "Update label"
 msgstr "Update-Label"
 
-msgid "Update Tour Label"
-msgstr "Update Tour Label"
+msgid "Use GPU"
+msgstr "Verwenden GPU"
 
 msgid "Use colormap"
 msgstr "Verwenden Farbtabelle"
 
 msgid "Use full volume rendering"
 msgstr "Verwenden Sie vollständige Volumen-Rendering"
-
-msgid "Use GPU"
-msgstr "Verwenden GPU"
 
 msgid "Use level:"
 msgstr "Verwenden Sie Ebene:"
@@ -905,26 +758,20 @@ msgstr "Vector"
 msgid "Velocities"
 msgstr "Geschwindigkeiten"
 
-msgid "velocity direction (deg)"
-msgstr "Geschwindigkeit Richtung (deg)"
-
 msgid "Vertical"
 msgstr "Vertikale"
 
-msgid "view at startup"
-msgstr "Ansicht beim Start"
-
 msgid "View Direction"
 msgstr "Blick Richtung"
-
-msgid "View from selected Avatar"
-msgstr "Blick vom ausgewählten Avatar"
 
 msgid "View From Selected Keyframe"
 msgstr "View From ausgewählten Keyframe"
 
 msgid "View From Tour Path"
 msgstr "View From Tour Path"
+
+msgid "View from selected Avatar"
+msgstr "Blick vom ausgewählten Avatar"
 
 msgid "View name"
 msgstr "Ansicht Name"
@@ -938,17 +785,176 @@ msgstr "Aussichtspunkte"
 msgid "Visibility"
 msgstr "Sichtweite"
 
-msgid "Warning: "
-msgstr "Warnung:"
-
 msgid "Warning:"
 msgstr "Warnung:"
 
-msgid "width"
-msgstr "Breite"
+msgid "Warning: "
+msgstr "Warnung:"
 
 msgid "Window Properties"
 msgstr "Window-Eigenschaften"
+
+msgid "Zoom:"
+msgstr "Zoom:"
+
+msgid "Zoom:"
+msgstr "Zoom:"
+
+msgid "adjust off-center"
+msgstr "Informationen dazu erhalten auaeermittig"
+
+msgid "aperture"
+msgstr "Blende"
+
+msgid "blue"
+msgstr "blau"
+
+msgid "both"
+msgstr "beide"
+
+msgid "colormap:"
+msgstr "Farbtabelle:"
+
+msgid "decay, p"
+msgstr "Zerfall, p"
+
+msgid "display all"
+msgstr "Anzeige aller"
+
+msgid "duration (s)"
+msgstr "Dauer (s)"
+
+msgid "fire color:"
+msgstr "Feuer Farbe:"
+
+msgid "first person"
+msgstr "erste Person"
+
+msgid "first person movement"
+msgstr "erste Person Bewegung"
+
+msgid "frame skip"
+msgstr "Frame überspringen"
+
+msgid "frames per second"
+msgstr "Frames pro Sekunde"
+
+msgid "general rotations"
+msgstr "allgemeine Rotationen"
+
+msgid "global max"
+msgstr "globale max"
+
+msgid "global min"
+msgstr "globalen min"
+
+msgid "green"
+msgstr "grün"
+
+msgid "height"
+msgstr "Höhe"
+
+msgid "hms time label"
+msgstr "hms Zeit Etikett"
+
+msgid "large font"
+msgstr "große Schrift"
+
+msgid "level rotations"
+msgstr "Ebene Drehungen"
+
+msgid "max"
+msgstr "max"
+
+msgid "min"
+msgstr "min"
+
+msgid "node index"
+msgstr "Knoten Index"
+
+msgid "none"
+msgstr "none"
+
+msgid "number of particles"
+msgstr "Zahl der Teilchen"
+
+msgid "origin"
+msgstr "Herkunft"
+
+msgid "oxygen VOLUME FRACTION"
+msgstr "Sauerstoff-Volumenanteil"
+
+msgid "particle size"
+msgstr "Partikelgröße"
+
+msgid "percentile max"
+msgstr "Perzentil max"
+
+msgid "percentile min"
+msgstr "Perzentil min"
+
+msgid "points"
+msgstr "Punkte"
+
+msgid "red"
+msgstr "rot"
+
+msgid "reference elevation, Z0 (m)"
+msgstr "Bezugshöhe, Z0 (m)"
+
+msgid "reference velocity, U0 (m/s)"
+msgstr "Referenzgeschwindigkeit, U0 (m / s)"
+
+msgid "render directory:"
+msgstr "render Verzeichnis:"
+
+msgid "set max"
+msgstr "Set max"
+
+msgid "set min"
+msgstr "Set min"
+
+msgid "small font"
+msgstr "Kleine Schrift"
+
+msgid "smoke albedo"
+msgstr "Rauch Albedo"
+
+msgid "start time"
+msgstr "Startzeit"
+
+msgid "step"
+msgstr "Schritt"
+
+msgid "stop time:"
+msgstr "Endzeit:"
+
+msgid "sub-intervals"
+msgstr "Teilintervalle"
+
+msgid "suffix:"
+msgstr "Suffix:"
+
+msgid "temp threshold (C)"
+msgstr "temp Schwelle (C)"
+
+msgid "terminal velocity"
+msgstr "Endgeschwindigkeit"
+
+msgid "time:"
+msgstr "Zeit:"
+
+msgid "transparency level"
+msgstr "Transparenz-Level"
+
+msgid "velocity direction (deg)"
+msgstr "Geschwindigkeit Richtung (deg)"
+
+msgid "view at startup"
+msgstr "Ansicht beim Start"
+
+msgid "width"
+msgstr "Breite"
 
 msgid "world center"
 msgstr "Weltzentrum"
@@ -958,7 +964,3 @@ msgstr "Null an Grenzen"
 
 msgid "zoom"
 msgstr "Zoom"
-
-msgid "Zoom:"
-msgstr "Zoom:"
-

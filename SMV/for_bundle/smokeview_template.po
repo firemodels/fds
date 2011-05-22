@@ -961,3 +961,6 @@ msgstr ""
 
 msgid "Zoom:"
 msgstr ""
+
+msgid "Zoom:"
+msgstr ""
