@@ -388,7 +388,7 @@ extern "C" void glui_motion_setup(int main_window){
   add_view=glui_motion->add_button_to_panel(reset_panel2,_("Add"),ADD_LIST_VIEW,BUTTON_Reset_CB);
   edit_view_label=glui_motion->add_edittext_to_panel(reset_panel2,_("View name"),GLUI_EDITTEXT_TEXT,camera_label,LABEL_VIEW,BUTTON_Reset_CB);
 
-  panel_scale = glui_motion->add_rollout(_("Scaling/Depth Params"),false);
+  panel_scale = glui_motion->add_rollout(_("Scaling/Depth params"),false);
   SPINNER_scalex=glui_motion->add_spinner_to_panel(panel_scale,_("Scale x"),GLUI_SPINNER_FLOAT,mscale);
   SPINNER_scalex->set_float_limits(0.01,100.0,GLUI_LIMIT_CLAMP);
 
@@ -407,7 +407,7 @@ extern "C" void glui_motion_setup(int main_window){
   cursor_checkbox=glui_motion->add_checkbox(_("Map cursor keys for Plot3D use"),&cursorPlot3D,CURSOR,TRANSLATE_CB);
   panel_close = glui_motion->add_panel("",GLUI_PANEL_NONE);
 
-  glui_motion->add_button_to_panel(panel_close,_("Save Settings"),SAVE_SETTINGS,BUTTON_hide2_CB);
+  glui_motion->add_button_to_panel(panel_close,_("Save settings"),SAVE_SETTINGS,BUTTON_hide2_CB);
 
   glui_motion->add_column_to_panel(panel_close,false);
 

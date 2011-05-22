@@ -114,23 +114,23 @@ extern "C" void glui_tour_setup(int main_window){
 
 
   panel_settings = glui_tour->add_panel(_("Tour Settings"));
-  view_checkbox=glui_tour->add_checkbox_to_panel(panel_settings,_("View From Tour Path"),&viewtourfrompath,VIEWTOURFROMPATH,TOUR_CB);
-  snap_checkbox=glui_tour->add_checkbox_to_panel(panel_settings,_("View From Selected Keyframe"),&keyframe_snap,VIEWSNAP,TOUR_CB);
+  view_checkbox=glui_tour->add_checkbox_to_panel(panel_settings,_("View from tour path"),&viewtourfrompath,VIEWTOURFROMPATH,TOUR_CB);
+  snap_checkbox=glui_tour->add_checkbox_to_panel(panel_settings,_("View from selected keyframe"),&keyframe_snap,VIEWSNAP,TOUR_CB);
   glui_tour->add_separator_to_panel(panel_settings);
-  CHECKBOX_constantvel=glui_tour->add_checkbox_to_panel(panel_settings,_("Constant Speed"),&tour_constant_vel,CONSTANTTOURVEL,TOUR_CB);
-  showtourroute_checkbox=glui_tour->add_checkbox_to_panel(panel_settings,_("Edit Tour Path"),&edittour,SHOWTOURROUTE,TOUR_CB);
-  CHECKBOXshowtourlocus=glui_tour->add_checkbox_to_panel(panel_settings,_("Show Avatar"),&show_tourlocus);
-  CHECKBOXshowintermediate=glui_tour->add_checkbox_to_panel(panel_settings,_("Show Intermediate Path Nodes"),&show_path_knots);
+  CHECKBOX_constantvel=glui_tour->add_checkbox_to_panel(panel_settings,_("Constant speed"),&tour_constant_vel,CONSTANTTOURVEL,TOUR_CB);
+  showtourroute_checkbox=glui_tour->add_checkbox_to_panel(panel_settings,_("Edit tour path"),&edittour,SHOWTOURROUTE,TOUR_CB);
+  CHECKBOXshowtourlocus=glui_tour->add_checkbox_to_panel(panel_settings,_("Show avatar"),&show_tourlocus);
+  CHECKBOXshowintermediate=glui_tour->add_checkbox_to_panel(panel_settings,_("Show intermediate path nodes"),&show_path_knots);
 
   glui_tour->add_separator_to_panel(panel_settings);
 
   glui_tour->add_button_to_panel(panel_settings,_("New Tour"),TOUR_INSERT,TOUR_CB);
-  BUTTONnext_tour=glui_tour->add_button_to_panel(panel_settings,_("Next Tour"),TOUR_NEXT,TOUR_CB);
-  BUTTONprev_tour=glui_tour->add_button_to_panel(panel_settings,_("Previous Tour"),TOUR_PREVIOUS,TOUR_CB);
+  BUTTONnext_tour=glui_tour->add_button_to_panel(panel_settings,_("Next tour"),TOUR_NEXT,TOUR_CB);
+  BUTTONprev_tour=glui_tour->add_button_to_panel(panel_settings,_("Previous tour"),TOUR_PREVIOUS,TOUR_CB);
   if(ntours>0){
     selectedtour_index=-1;
     selectedtour_index_old=-1;
-    LISTBOX_tour=glui_tour->add_listbox_to_panel(panel_settings,_("Select Tour:"),&selectedtour_index,TOUR_LIST,TOUR_CB);
+    LISTBOX_tour=glui_tour->add_listbox_to_panel(panel_settings,_("Select tour:"),&selectedtour_index,TOUR_LIST,TOUR_CB);
 
     LISTBOX_tour->add_item(-1,_("Manual"));
     LISTBOX_tour->add_item(-999,"-");
@@ -203,9 +203,9 @@ extern "C" void glui_tour_setup(int main_window){
   glui_tour->add_separator();
 
   panel_tour2 = glui_tour->add_panel("",false);
-  glui_tour->add_button_to_panel(panel_tour2,_("Advanced Settings"),ADVANCEDTOUR_OPEN,TOUR_CB);
+  glui_tour->add_button_to_panel(panel_tour2,_("Advanced settings"),ADVANCEDTOUR_OPEN,TOUR_CB);
   glui_tour->add_column_to_panel(panel_tour2,false);
-  BUTTON_settings=glui_tour->add_button_to_panel(panel_tour2,_("Save Settings"),SAVE_SETTINGS,TOUR_CB);
+  BUTTON_settings=glui_tour->add_button_to_panel(panel_tour2,_("Save settings"),SAVE_SETTINGS,TOUR_CB);
 
   glui_tour->add_button("Close",TOUR_CLOSE,TOUR_CB);
 

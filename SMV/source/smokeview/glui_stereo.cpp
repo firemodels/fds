@@ -74,7 +74,7 @@ extern "C" void glui_stereo_setup(int main_window){
   glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Left/Right"));
   glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Red/Blue"));
   glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Red/Cyan"));
-  glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Red Custom Red/Custom Blue"));
+  glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Custom Red/Custom Blue"));
   SPINNER_right_green2=glui_stereo->add_spinner_to_panel(panel_stereo_method,_("green"),GLUI_SPINNER_FLOAT,&right_green,
     STEREO_GREEN,STEREO_CB);
   SPINNER_right_green2->set_float_limits(0.0,1.0,GLUI_LIMIT_CLAMP);
@@ -96,7 +96,7 @@ extern "C" void glui_stereo_setup(int main_window){
   update_glui_stereo();
 
   glui_stereo->add_button("Reset",STEREO_RESET,STEREO_CB);
-  glui_stereo->add_button("Save Settings",SAVE_SETTINGS,STEREO_CB);
+  glui_stereo->add_button("Save settings",SAVE_SETTINGS,STEREO_CB);
   glui_stereo->add_button("Close",STEREO_CLOSE,STEREO_CB);
   
   glui_stereo->set_main_gfx_window( main_window );

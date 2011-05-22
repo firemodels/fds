@@ -138,7 +138,7 @@ extern "C" void glui_wui_setup(int main_window){
       "vertical exaggeration",GLUI_SPINNER_FLOAT,&vertical_factor,TERRAIN_VERT,WUI_CB);
      SPINNER_vertical_factor->set_float_limits(0.25,4.0,GLUI_LIMIT_CLAMP);
 
-    glui_wui->add_button("Save Settings",SAVE_SETTINGS,WUI_CB);
+    glui_wui->add_button("Save settings",SAVE_SETTINGS,WUI_CB);
 
     glui_wui->add_button("Close",WUI_CLOSE,WUI_CB);
 

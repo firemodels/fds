@@ -4439,7 +4439,7 @@ updatemenu=0;
       char propmenulabel[255];
 
       glutAddMenuEntry("-",999);
-      glutAddMenuEntry(_("Show/Hide Blockage Types:"),999);
+      glutAddMenuEntry(_("Show/Hide blockage types:"),999);
       for(i=0;i<npropinfo;i++){
         propdata *propi;
 
@@ -5201,10 +5201,10 @@ updatemenu=0;
     }
     glutAddMenuEntry("-",-1);
     if(showstreakhead==1){
-      glutAddMenuEntry(_("*Particle Head"),-3);
+      glutAddMenuEntry(_("*Particle head"),-3);
     }
     else{
-      glutAddMenuEntry(_("Particle Head"),-3);
+      glutAddMenuEntry(_("Particle head"),-3);
     }
     glutAddMenuEntry(_("Hide"),-2);
 
@@ -5528,7 +5528,7 @@ updatemenu=0;
 
   if(showlightmenu==1){
     CREATEMENU(lightingmenu,LightingMenu);
-    glutAddMenuEntry(_("OpenGL Lighting"),-1);
+    glutAddMenuEntry(_("OpenGL lighting"),-1);
     if(visLIGHT0==1)glutAddMenuEntry(_("  *Right"),1);
     if(visLIGHT0==0)glutAddMenuEntry(_("  Right"),1);
     if(visLIGHT1==1)glutAddMenuEntry(_("  *Left"),2);
@@ -6155,21 +6155,21 @@ updatemenu=0;
       if(visSensor==1)glutAddMenuEntry("*Targets",9);
       if(visSensor==0)glutAddMenuEntry("Targets",9);
       if(hasSensorNorm==1){
-        if(visSensorNorm==1)glutAddMenuEntry("*Target Orientation",14);
-        if(visSensorNorm==0)glutAddMenuEntry("Target Orientation",14);
+        if(visSensorNorm==1)glutAddMenuEntry("*Target orientation",14);
+        if(visSensorNorm==0)glutAddMenuEntry("Target orientation",14);
       }
     }
     else{
       if(visSensor==1)glutAddMenuEntry("*Thermocouples",9);
       if(visSensor==0)glutAddMenuEntry("Thermocouples",9);
       if(hasSensorNorm==1){
-        if(visSensorNorm==1)glutAddMenuEntry("*Thermocouple Norms",14);
-        if(visSensorNorm==0)glutAddMenuEntry("Thermocouple Norms",14);
+        if(visSensorNorm==1)glutAddMenuEntry("*Thermocouple norms",14);
+        if(visSensorNorm==0)glutAddMenuEntry("Thermocouple norms",14);
       }
     }
   }
-  if(titlesafe_offset==0)glutAddMenuEntry(_("Offset Window"),12);
-  if(titlesafe_offset!=0)glutAddMenuEntry(_("*Offset Window"),12);
+  if(titlesafe_offset==0)glutAddMenuEntry(_("Offset sindow"),12);
+  if(titlesafe_offset!=0)glutAddMenuEntry(_("*Offset window"),12);
   if(ntextures_loaded_used>0){
     glutAddSubMenu("Textures",textureshowmenu);
   }
@@ -6296,39 +6296,39 @@ updatemenu=0;
 
   CREATEMENU(dialogmenu,DialogMenu);
   if(nterraininfo>0){
-    if(showwui==1)glutAddMenuEntry(_("*WUI Display... ALT+w"),26);
-    if(showwui==0)glutAddMenuEntry(_("WUI Display... ALT+w..."),26);
+    if(showwui==1)glutAddMenuEntry(_("*WUI display... ALT+w"),26);
+    if(showwui==0)glutAddMenuEntry(_("WUI display... ALT+w..."),26);
   }
-  if(showclip==1)glutAddMenuEntry(_("*Clip Geometry...  ALT+c"),18);
-  if(showclip==0)glutAddMenuEntry(_("Clip Geometry...  ALT+c"),18);
+  if(showclip==1)glutAddMenuEntry(_("*Clip geometry...  ALT+c"),18);
+  if(showclip==0)glutAddMenuEntry(_("Clip geometry...  ALT+c"),18);
 #ifdef pp_COMPRESS
   if(smokezippath!=NULL&&(npatch_files>0||nsmoke3d_files>0||nslice_files>0)){
     if(showbounds==1)glutAddMenuEntry(_("*Compression/Smokezip...  ALT+z"),24);
     if(showbounds==0)glutAddMenuEntry(_("Compression/Smokezip...  ALT+z"),24);
   }
 #endif
-  if(showcolorbar==1)glutAddMenuEntry(_("*Customize Colorbar...  ALT+c"),23);
-  if(showcolorbar==0)glutAddMenuEntry(_("Customize Colorbar...  ALT+c"),23);
+  if(showcolorbar==1)glutAddMenuEntry(_("*Customize colorbar...  ALT+c"),23);
+  if(showcolorbar==0)glutAddMenuEntry(_("Customize colorbar...  ALT+c"),23);
   if(showlabels==1)glutAddMenuEntry(_("*Display...  ALT+d"),22);
   if(showlabels==0)glutAddMenuEntry(_("Display...  ALT+d"),22);
   if(isZoneFireModel==0){
-    if(showedit==1)glutAddMenuEntry(_("*Examine Blockages...  ALT+e"),16);
-    if(showedit==0)glutAddMenuEntry(_("Examine Blockages...  ALT+e"),16);
+    if(showedit==1)glutAddMenuEntry(_("*Examine blockages...  ALT+e"),16);
+    if(showedit==0)glutAddMenuEntry(_("Examine blockages...  ALT+e"),16);
   }
-  if(showbounds==1)glutAddMenuEntry(_("*File/Bound/Script Settings...  ALT+f"),14);
-  if(showbounds==0)glutAddMenuEntry(_("File/Bound/Script Settings...  ALT+f"),14);
+  if(showbounds==1)glutAddMenuEntry(_("*File/Bound/Script settings...  ALT+f"),14);
+  if(showbounds==0)glutAddMenuEntry(_("File/Bound/Script settings...  ALT+f"),14);
   if(showmotion==1)glutAddMenuEntry(_("*Motion/View/Render...  ALT+m"),15);
   if(showmotion==0)glutAddMenuEntry(_("Motion/View/Render...  ALT+m"),15);
 #ifdef pp_SHOOTER
-  if(showshooterDLG==1)glutAddMenuEntry(_("*Particle Tracking..."),27);
-  if(showshooterDLG==0)glutAddMenuEntry(_("Particle Tracking..."),27);
+  if(showshooterDLG==1)glutAddMenuEntry(_("*Particle tracking..."),27);
+  if(showshooterDLG==0)glutAddMenuEntry(_("Particle tracking..."),27);
 #endif
   if(nsmoke3d_files>0){
-    if(showbounds==1)glutAddMenuEntry(_("*3D Smoke Parameters...  ALT+s"),20);
-    if(showbounds==0)glutAddMenuEntry(_("3D Smoke Parameters...  ALT+s"),20);
+    if(showbounds==1)glutAddMenuEntry(_("*3D smoke parameters...  ALT+s"),20);
+    if(showbounds==0)glutAddMenuEntry(_("3D smoke parameters...  ALT+s"),20);
   }
-  if(showgluistereo==1)glutAddMenuEntry(_("*Stereo Parameters..."),19);
-  if(showgluistereo==0)glutAddMenuEntry(_("Stereo Parameters..."),19);
+  if(showgluistereo==1)glutAddMenuEntry(_("*Stereo parameters..."),19);
+  if(showgluistereo==0)glutAddMenuEntry(_("Stereo parameters..."),19);
   if(showgluitour==1)glutAddMenuEntry(_("*Tours...  ALT+t"),21);
   if(showgluitour==0)glutAddMenuEntry(_("Tours...  ALT+t"),21);
   if(trainer_active==1){
@@ -6533,7 +6533,7 @@ updatemenu=0;
       glutAddMenuEntry(menulabel,1);
     }
 #ifdef pp_GPU
-    strcpy(version_label,_("  OpenGL Version:")); 
+    strcpy(version_label,_("  OpenGL version:")); 
     strcat(version_label," ");
     strcat(version_label,(char *)glGetString(GL_VERSION));
     glutAddMenuEntry(version_label,1);
@@ -6946,8 +6946,8 @@ updatemenu=0;
         }
       }
       if(nmultivslices>0)glutAddMenuEntry("-",-999);
-      if(showallslicevectors==0)glutAddMenuEntry(_("Show All Vector Slice Entries"),-20);
-      if(showallslicevectors==1)glutAddMenuEntry(_("*Show All Vector Slice Entries"),-20);
+      if(showallslicevectors==0)glutAddMenuEntry(_("Show all vector slice entries"),-20);
+      if(showallslicevectors==1)glutAddMenuEntry(_("*Show all vector slice entries"),-20);
       if(nmultisliceloaded>1){
         glutAddSubMenu(_("Unload"),unloadmultivslicemenu);
       }
@@ -7070,8 +7070,8 @@ updatemenu=0;
       }
     } 
     if(nvslice>0)glutAddMenuEntry("-",-999);
-    if(showallslicevectors==0)glutAddMenuEntry(_("Show All Vector Slice Entries"),-20);
-    if(showallslicevectors==1)glutAddMenuEntry(_("*Show All Vector Slice Entries"),-20);
+    if(showallslicevectors==0)glutAddMenuEntry(_("Show all vector slice entries"),-20);
+    if(showallslicevectors==1)glutAddMenuEntry(_("*Show all vector slice entries"),-20);
     if(nvsliceloaded>1){
       glutAddSubMenu(_("Unload"),unloadvslicemenu);
     }
@@ -7332,9 +7332,9 @@ updatemenu=0;
               break;
             }
           }
-          if(nsootloaded>1) glutAddMenuEntry(_("soot density - All meshes"),-1);
-          if(nhrrloaded>1)  glutAddMenuEntry(_("HRRPUV - All meshes"),-2);
-          if(nwaterloaded>1)glutAddMenuEntry(_("water - All meshes"),-3);
+          if(nsootloaded>1) glutAddMenuEntry(_("soot density - all meshes"),-1);
+          if(nhrrloaded>1)  glutAddMenuEntry(_("HRRPUV - all meshes"),-2);
+          if(nwaterloaded>1)glutAddMenuEntry(_("water - all meshes"),-3);
           if(nsootloaded>1||nhrrloaded>1||nwaterloaded>1)glutAddMenuEntry("-",999);
         }
         for(i=0;i<nsmoke3d_files;i++){
@@ -7422,9 +7422,9 @@ updatemenu=0;
             glutAddMenuEntry("-",-2);
           }
           if(nmeshes>1){
-            if(n_soot_menu>0)glutAddSubMenu(_("soot MASS FRACTION - Single mesh"),loadsmoke3dsootmenu);
-            if(n_hrr_menu>0)glutAddSubMenu(_("HRRPUV - Single mesh"),loadsmoke3dhrrmenu);
-            if(n_water_menu>0)glutAddSubMenu(_("Water - Single mesh"),loadsmoke3dwatermenu);
+            if(n_soot_menu>0)glutAddSubMenu(_("soot MASS FRACTION - single mesh"),loadsmoke3dsootmenu);
+            if(n_hrr_menu>0)glutAddSubMenu(_("HRRPUV - single mesh"),loadsmoke3dhrrmenu);
+            if(n_water_menu>0)glutAddSubMenu(_("Water - single mesh"),loadsmoke3dwatermenu);
           }
         }
         if(nsmoke3dloaded==1)glutAddMenuEntry(_("Unload"),-1);
@@ -7929,7 +7929,7 @@ updatemenu=0;
       }
 
       if(nscripts>0){
-        glutAddMenuEntry(_("Run Script:"),-999);
+        glutAddMenuEntry(_("Run script:"),-999);
         for(scriptfile=first_scriptfile.next;scriptfile->next!=NULL;scriptfile=scriptfile->next){
           char *file;
           int len;
@@ -8072,7 +8072,7 @@ updatemenu=0;
       }
 #endif
       glutAddSubMenu(_("Configuration files"),smokeviewinimenu);
-      glutAddSubMenu(_("Script Options"),scriptmenu);
+      glutAddSubMenu(_("Script options"),scriptmenu);
 #ifdef pp_COMPRESS
       if(smokezippath!=NULL&&(npatch_files>0||nsmoke3d_files>0||nslice_files>0)){
         glutAddSubMenu(_("Compression"),compressmenu);
@@ -8081,10 +8081,10 @@ updatemenu=0;
 #ifdef _DEBUG
       glutAddMenuEntry(smvmenufile,2);
 #endif
-      if(showfiles==1)glutAddMenuEntry(_("*Show File Names"),SHOWFILES);
-      if(showfiles==0)glutAddMenuEntry(_("Show File Names"),SHOWFILES);
+      if(showfiles==1)glutAddMenuEntry(_("*Show file names"),SHOWFILES);
+      if(showfiles==0)glutAddMenuEntry(_("Show file names"),SHOWFILES);
       glutAddSubMenu(_("Reload"),reloadmenu);
-      glutAddMenuEntry(_("Unload All"),UNLOADALL);
+      glutAddMenuEntry(_("Unload all"),UNLOADALL);
     }
 
 /* --------------------------------main menu -------------------------- */
@@ -8118,10 +8118,10 @@ updatemenu=0;
     }
     if(trainer_active==1){
       if(trainer_mode==1){
-        glutAddMenuEntry(_("Smokeview Menus"),997);
+        glutAddMenuEntry(_("Smokeview menus"),997);
       }
       else{
-        glutAddMenuEntry(_("Trainer Menus"),997);
+        glutAddMenuEntry(_("Trainer menus"),997);
       }
     }
   glutAddMenuEntry(_("Quit"),3);

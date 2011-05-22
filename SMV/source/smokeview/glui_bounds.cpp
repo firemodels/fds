@@ -465,7 +465,7 @@ extern "C" void glui_bounds_setup(int main_window){
         DONT_UPDATEBOUNDS,DONT_TRUNCATEBOUNDS,
         PART_CB);
         if(partinfo!=NULL&&partinfo->version==0){
-          SPINNER_partpointstep=glui_bounds->add_spinner_to_panel(panel_part,_("Point Skip"),GLUI_SPINNER_INT,
+          SPINNER_partpointstep=glui_bounds->add_spinner_to_panel(panel_part,_("Point skip"),GLUI_SPINNER_INT,
             &partpointskip,FRAMELOADING,PART_CB);
           SPINNER_partpointstep->set_int_limits(0,100);
         }
@@ -476,7 +476,7 @@ extern "C" void glui_bounds_setup(int main_window){
           &streaklinewidth);
         SPINNER_streaklinewidth->set_float_limits(1.0,10.0);
 
-        SPINNER_partstreaklength=glui_bounds->add_spinner_to_panel(panel_part,_("Streak Length (s)"),GLUI_SPINNER_FLOAT,
+        SPINNER_partstreaklength=glui_bounds->add_spinner_to_panel(panel_part,_("Streak length (s)"),GLUI_SPINNER_FLOAT,
           &float_streak5value,STREAKLENGTH,PART_CB);
         SPINNER_partstreaklength->set_float_limits(0.0,10.0);
         
@@ -488,9 +488,9 @@ extern "C" void glui_bounds_setup(int main_window){
   if(nevac>0){
     glui_active=1;
     panel_evac = glui_bounds->add_rollout("Evacuation",false);
-    glui_bounds->add_checkbox_to_panel(panel_evac,_("Select Avatar"),&select_avatar);
+    glui_bounds->add_checkbox_to_panel(panel_evac,_("Select avatar"),&select_avatar);
     CHECKBOX_show_evac_slices=glui_bounds->add_checkbox_to_panel(panel_evac,"Show slice menus",&show_evac_slices,SHOW_EVAC_SLICES,Slice_CB);
-    panel_evac_direction=glui_bounds->add_panel_to_panel(panel_evac,_("Direction Vectors"));
+    panel_evac_direction=glui_bounds->add_panel_to_panel(panel_evac,_("Direction vectors"));
     CHECKBOX_constant_coloring=glui_bounds->add_checkbox_to_panel(panel_evac_direction,_("Constant coloring"),&constant_evac_coloring,SHOW_EVAC_SLICES,Slice_CB);
     CHECKBOX_data_coloring=glui_bounds->add_checkbox_to_panel(panel_evac_direction,_("Data coloring"),&data_evac_coloring,DATA_EVAC_COLORING,Slice_CB);
     CHECKBOX_show_evac_color=glui_bounds->add_checkbox_to_panel(panel_evac_direction,_("Show colorbar (when data coloring)"),&show_evac_colorbar,SHOW_EVAC_SLICES,Slice_CB);
@@ -814,13 +814,13 @@ extern "C" void glui_bounds_setup(int main_window){
   glui_bounds->add_column_to_panel(panel_script2b,false);
   BUTTON_ini_load=glui_bounds->add_button_to_panel(panel_script2b,_("Load"),SCRIPT_LOADINI,Script_CB);
 
-  rollout_AUTOLOAD = glui_bounds->add_rollout(_("Auto Load"),false);
-  glui_bounds->add_checkbox_to_panel(rollout_AUTOLOAD,_("Auto Load at Startup"),
+  rollout_AUTOLOAD = glui_bounds->add_rollout(_("Auto load"),false);
+  glui_bounds->add_checkbox_to_panel(rollout_AUTOLOAD,_("Auto load at startup"),
     &loadfiles_at_startup,STARTUP,Bound_CB);
-  glui_bounds->add_button_to_panel(rollout_AUTOLOAD,_("Save Auto Load File List"),SAVE_FILE_LIST,Bound_CB);
-  glui_bounds->add_button_to_panel(rollout_AUTOLOAD,_("Auto Load Now"),LOAD_FILES,Bound_CB);
+  glui_bounds->add_button_to_panel(rollout_AUTOLOAD,_("Save auto load file list"),SAVE_FILE_LIST,Bound_CB);
+  glui_bounds->add_button_to_panel(rollout_AUTOLOAD,_("Auto load now"),LOAD_FILES,Bound_CB);
 
-  glui_bounds->add_button(_("Save Settings"),SAVE_SETTINGS,BUTTON_hide_CB);
+  glui_bounds->add_button(_("Save settings"),SAVE_SETTINGS,BUTTON_hide_CB);
 
   glui_bounds->add_button(_("Close"),CLOSE,BUTTON_hide_CB);
 

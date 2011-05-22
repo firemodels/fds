@@ -140,7 +140,7 @@ extern "C" void glui_clip_setup(int main_window){
 
   glui_clip->add_column_to_panel(panel_wrapup,false);
 
-  glui_clip->add_button_to_panel(panel_wrapup,_("Save Settings"),SAVE_SETTINGS,CLIP_CB);
+  glui_clip->add_button_to_panel(panel_wrapup,_("Save settings"),SAVE_SETTINGS,CLIP_CB);
 
   glui_clip->add_column_to_panel(panel_wrapup,false);
 

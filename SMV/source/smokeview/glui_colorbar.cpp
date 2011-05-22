@@ -238,7 +238,7 @@ extern "C" void glui_colorbar_setup(int main_window){
   colorbar_global2local();
 
   panel_cb8 = glui_colorbar->add_panel("",GLUI_PANEL_NONE);
-  glui_colorbar->add_button_to_panel(panel_cb8,_("Save Settings"),COLORBAR_SAVE,COLORBAR_CB);
+  glui_colorbar->add_button_to_panel(panel_cb8,_("Save settings"),COLORBAR_SAVE,COLORBAR_CB);
   glui_colorbar->add_column_to_panel(panel_cb8,false);
   glui_colorbar->add_button_to_panel(panel_cb8,_("Close"),COLORBAR_CLOSE,COLORBAR_CB);
 

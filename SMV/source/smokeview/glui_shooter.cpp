@@ -226,7 +226,7 @@ extern "C" void glui_shooter_setup(int main_window){
 
   panel_shooter_win=glui_shooter->add_panel("",GLUI_PANEL_NONE);
 
-  glui_shooter->add_button_to_panel(panel_shooter_win,_("Save Settings"),SAVE_SETTINGS,SHOOTER_CB);
+  glui_shooter->add_button_to_panel(panel_shooter_win,_("Save settings"),SAVE_SETTINGS,SHOOTER_CB);
   glui_shooter->add_column_to_panel(panel_shooter_win,false);
   glui_shooter->add_button_to_panel(panel_shooter_win,_("Close"),SHOOTER_CLOSE,SHOOTER_CB);
 

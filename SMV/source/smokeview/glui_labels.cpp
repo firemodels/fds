@@ -279,7 +279,7 @@ extern "C" void glui_labels_setup(int main_window){
   Button_BENCHMARK=glui_labels->add_button_to_panel(panel_label2,_("Benchmark"),LABELS_BENCHMARK,Labels_CB);
   glui_labels->add_column_to_panel(panel_label2,false);
 
-  glui_labels->add_button_to_panel(panel_label2,_("Save Settings"),SAVE_SETTINGS,Labels_CB);
+  glui_labels->add_button_to_panel(panel_label2,_("Save settings"),SAVE_SETTINGS,Labels_CB);
   glui_labels->add_column_to_panel(panel_label2,false);
 
   glui_labels->add_button_to_panel(panel_label2,_("Close"),LABELS_close,Labels_CB);
