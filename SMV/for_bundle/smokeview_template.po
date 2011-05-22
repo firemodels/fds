@@ -1,0 +1,963 @@
+
+msgid "2*Current"
+msgstr ""
+
+msgid "2D lines"
+msgstr ""
+
+msgid "2D stepped"
+msgstr ""
+
+msgid "3D surface"
+msgstr ""
+
+msgid "3D surface color"
+msgstr ""
+
+msgid "Abort"
+msgstr ""
+
+msgid "Above"
+msgstr ""
+
+msgid "Above specified max"
+msgstr ""
+
+msgid "Absorption Adjustments"
+msgstr ""
+
+msgid "Add"
+msgstr ""
+
+msgid "Additional errors have occurred.  See command shell for details."
+msgstr ""
+
+msgid "Additional warnings have occurred.  See command shell for details."
+msgstr ""
+
+msgid "adjust off-center"
+msgstr ""
+
+msgid "Advanced Settings"
+msgstr ""
+
+msgid "All"
+msgstr ""
+
+msgid "All keyframes"
+msgstr ""
+
+msgid "All meshes"
+msgstr ""
+
+msgid "Alpha"
+msgstr ""
+
+msgid "Always show tracers"
+msgstr ""
+
+msgid "aperture"
+msgstr ""
+
+msgid "Apply"
+msgstr ""
+
+msgid "Auto Load"
+msgstr ""
+
+msgid "Auto Load at Startup"
+msgstr ""
+
+msgid "Auto Load Now"
+msgstr ""
+
+msgid "Auto place (2D)"
+msgstr ""
+
+msgid "Avatar:"
+msgstr ""
+
+msgid "Average"
+msgstr ""
+
+msgid "Averaged Slice Data"
+msgstr ""
+
+msgid "Axis"
+msgstr ""
+
+msgid "Azimuth:"
+msgstr ""
+
+msgid "Back"
+msgstr ""
+
+msgid "Background Velocity Field"
+msgstr ""
+
+msgid "Below"
+msgstr ""
+
+msgid "Below specified min"
+msgstr ""
+
+msgid "Benchmark"
+msgstr ""
+
+msgid "blue"
+msgstr ""
+
+msgid "both"
+msgstr ""
+
+msgid "Bound Data"
+msgstr ""
+
+msgid "Center"
+msgstr ""
+
+msgid "Clip Blockages"
+msgstr ""
+
+msgid "Clip Blockages and Data"
+msgstr ""
+
+msgid "Clip Lower"
+msgstr ""
+
+msgid "Clipping Disabled"
+msgstr ""
+
+msgid "Clip Upper"
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
+msgid "Colorbar:"
+msgstr ""
+
+msgid "Colorbar"
+msgstr ""
+
+msgid "Color Bar"
+msgstr ""
+
+msgid "colormap:"
+msgstr ""
+
+msgid "Compress Files (Smokezip)"
+msgstr ""
+
+msgid "Compress only autoloaded files"
+msgstr ""
+
+msgid "Compute Tracks"
+msgstr ""
+
+msgid "Config files"
+msgstr ""
+
+msgid "Constant coloring"
+msgstr ""
+
+msgid "Constant Speed"
+msgstr ""
+
+msgid "Contours"
+msgstr ""
+
+msgid "Cull hidden slices"
+msgstr ""
+
+msgid "Cull port size"
+msgstr ""
+
+msgid "Current"
+msgstr ""
+
+msgid "Custom"
+msgstr ""
+
+msgid "Cycle"
+msgstr ""
+
+msgid "Data"
+msgstr ""
+
+msgid "Data coloring"
+msgstr ""
+
+msgid "Data Coloring/Transparency"
+msgstr ""
+
+msgid "Data Loading"
+msgstr ""
+
+msgid "decay, p"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "Delete Colorbar"
+msgstr ""
+
+msgid "Demonstrator"
+msgstr ""
+
+msgid "Depth"
+msgstr ""
+
+msgid "Dimensions snapped to grid"
+msgstr ""
+
+msgid "Direction Vectors"
+msgstr ""
+
+msgid "Display"
+msgstr ""
+
+msgid "display all"
+msgstr ""
+
+msgid "Distance to zero parallax plane (m)"
+msgstr ""
+
+msgid "Down"
+msgstr ""
+
+msgid "Duration/Points (all tours)"
+msgstr ""
+
+msgid "duration (s)"
+msgstr ""
+
+msgid "Edit Keyframe's View/Tension"
+msgstr ""
+
+msgid "Edit Tour Path"
+msgstr ""
+
+msgid "Edit Tours"
+msgstr ""
+
+msgid "Elevation:"
+msgstr ""
+
+msgid "Erase compressed files"
+msgstr ""
+
+msgid "Error: "
+msgstr ""
+
+msgid "Error"
+msgstr ""
+
+msgid "Every 10th"
+msgstr ""
+
+msgid "Every 20th"
+msgstr ""
+
+msgid "... every 2nd"
+msgstr ""
+
+msgid "Every 2nd"
+msgstr ""
+
+msgid "... every 3rd"
+msgstr ""
+
+msgid "Every 3rd"
+msgstr ""
+
+msgid "Every 4th"
+msgstr ""
+
+msgid "Every 5th"
+msgstr ""
+
+msgid "Far depth"
+msgstr ""
+
+msgid "Fast blockage drawing"
+msgstr ""
+
+msgid "Fatal error: "
+msgstr ""
+
+msgid "FDS Ticks"
+msgstr ""
+
+msgid "fire color:"
+msgstr ""
+
+msgid "Fire line"
+msgstr ""
+
+msgid "Fire/Smoke Display"
+msgstr ""
+
+msgid "first person"
+msgstr ""
+
+msgid "first person movement"
+msgstr ""
+
+msgid "Flip Background"
+msgstr ""
+
+msgid "Frame Label"
+msgstr ""
+
+msgid "Frame Rate"
+msgstr ""
+
+msgid "Frames:"
+msgstr ""
+
+msgid "frame skip"
+msgstr ""
+
+msgid "frames per second"
+msgstr ""
+
+msgid "Free memory after coloring data"
+msgstr ""
+
+msgid "Front"
+msgstr ""
+
+msgid "general rotations"
+msgstr ""
+
+msgid "Geometry Transparency"
+msgstr ""
+
+msgid "Global"
+msgstr ""
+
+msgid "global max"
+msgstr ""
+
+msgid "global min"
+msgstr ""
+
+msgid "green"
+msgstr ""
+
+msgid "Grey (0-255)"
+msgstr ""
+
+msgid "Grid Loc"
+msgstr ""
+
+msgid "height"
+msgstr ""
+
+msgid "Hidden"
+msgstr ""
+
+msgid "Hide"
+msgstr ""
+
+msgid "Hide All"
+msgstr ""
+
+msgid "Hide Scene"
+msgstr ""
+
+msgid "Highlight extreme data"
+msgstr ""
+
+msgid "hms time label"
+msgstr ""
+
+msgid "Horizontal"
+msgstr ""
+
+msgid "HRR Label"
+msgstr ""
+
+msgid "HRRPUV cutoff"
+msgstr ""
+
+msgid "HRRPUV cutoff (kW/m3):"
+msgstr ""
+
+msgid "Image"
+msgstr ""
+
+msgid "Insert"
+msgstr ""
+
+msgid "Interpolate cell centered slices"
+msgstr ""
+
+msgid "Label"
+msgstr ""
+
+msgid "large font"
+msgstr ""
+
+msgid "Left"
+msgstr ""
+
+msgid "Left/Right"
+msgstr ""
+
+msgid "level rotations"
+msgstr ""
+
+msgid "Line Contours"
+msgstr ""
+
+msgid "Lines"
+msgstr ""
+
+msgid "Line width"
+msgstr ""
+
+msgid "Load"
+msgstr ""
+
+msgid "Loading smoke and fire data"
+msgstr ""
+
+msgid "Manual"
+msgstr ""
+
+msgid "Map cursor keys for Plot3D use"
+msgstr ""
+
+msgid "Mass Extinction Coeff (m2/g)"
+msgstr ""
+
+msgid "max"
+msgstr ""
+
+msgid "Max"
+msgstr ""
+
+msgid "Memory Load"
+msgstr ""
+
+msgid "Mesh label:"
+msgstr ""
+
+msgid "min"
+msgstr ""
+
+msgid "Min"
+msgstr ""
+
+msgid "Motion"
+msgstr ""
+
+msgid "Motion/View/Render"
+msgstr ""
+
+msgid "Near depth"
+msgstr ""
+
+msgid "New Colorbar"
+msgstr ""
+
+msgid "New Tour"
+msgstr ""
+
+msgid "Next"
+msgstr ""
+
+msgid "Next Tour"
+msgstr ""
+
+msgid "node index"
+msgstr ""
+
+msgid "none"
+msgstr ""
+
+msgid "Number of contours"
+msgstr ""
+
+msgid "number of particles"
+msgstr ""
+
+msgid "Off"
+msgstr ""
+
+msgid "One"
+msgstr ""
+
+msgid "origin"
+msgstr ""
+
+msgid "Outline"
+msgstr ""
+
+msgid "Output data to file"
+msgstr ""
+
+msgid "Overwrite compressed files"
+msgstr ""
+
+msgid "Oxygen"
+msgstr ""
+
+msgid "oxygen VOLUME FRACTION"
+msgstr ""
+
+msgid "Parameters"
+msgstr ""
+
+msgid "particle size"
+msgstr ""
+
+msgid "Particle size"
+msgstr ""
+
+msgid "Particle Tracking"
+msgstr ""
+
+msgid "Path:"
+msgstr ""
+
+msgid "Path Length (m)"
+msgstr ""
+
+msgid "percentile max"
+msgstr ""
+
+msgid "percentile min"
+msgstr ""
+
+msgid "Perspective"
+msgstr ""
+
+msgid "points"
+msgstr ""
+
+msgid "Points"
+msgstr ""
+
+msgid "Point size"
+msgstr ""
+
+msgid "Point Skip"
+msgstr ""
+
+msgid "Position"
+msgstr ""
+
+msgid "Positions"
+msgstr ""
+
+msgid "Power law"
+msgstr ""
+
+msgid "Press OK to terminate Smokeview"
+msgstr ""
+
+msgid "Previous"
+msgstr ""
+
+msgid "Previous Tour"
+msgstr ""
+
+msgid "red"
+msgstr ""
+
+msgid "Red/Blue"
+msgstr ""
+
+msgid "Red Custom Red/Custom Blue"
+msgstr ""
+
+msgid "Red/Cyan"
+msgstr ""
+
+msgid "reference elevation, Z0 (m)"
+msgstr ""
+
+msgid "reference velocity, U0 (m/s)"
+msgstr ""
+
+msgid "Reload"
+msgstr ""
+
+msgid "Render"
+msgstr ""
+
+msgid "render directory:"
+msgstr ""
+
+msgid "Render images"
+msgstr ""
+
+msgid "Replace"
+msgstr ""
+
+msgid "Right"
+msgstr ""
+
+msgid "Rotate"
+msgstr ""
+
+msgid "Rotate about:"
+msgstr ""
+
+msgid "Save:"
+msgstr ""
+
+msgid "Save Auto Load File List"
+msgstr ""
+
+msgid "Save Settings"
+msgstr ""
+
+msgid "Scaled optical depth (SCD)"
+msgstr ""
+
+msgid "Scale x"
+msgstr ""
+
+msgid "Scale y"
+msgstr ""
+
+msgid "Scale z"
+msgstr ""
+
+msgid "Scaling"
+msgstr ""
+
+msgid "Scaling/Depth Params"
+msgstr ""
+
+msgid "Select:"
+msgstr ""
+
+msgid "Select"
+msgstr ""
+
+msgid "Select Avatar"
+msgstr ""
+
+msgid "Selected keyframeframe"
+msgstr ""
+
+msgid "Select Tour:"
+msgstr ""
+
+msgid "Set"
+msgstr ""
+
+msgid "set max"
+msgstr ""
+
+msgid "set min"
+msgstr ""
+
+msgid "Shaded Contours"
+msgstr ""
+
+msgid "Shades of Grey"
+msgstr ""
+
+msgid "Show"
+msgstr ""
+
+msgid "Show All"
+msgstr ""
+
+msgid "Show Avatar"
+msgstr ""
+
+msgid "Show colorbar (when data coloring)"
+msgstr ""
+
+msgid "Show contours"
+msgstr ""
+
+msgid "Show cull ports"
+msgstr ""
+
+msgid "Show Intermediate Path Nodes"
+msgstr ""
+
+msgid "Show Only"
+msgstr ""
+
+msgid "Show only first frame"
+msgstr ""
+
+msgid "Show only temp threshold"
+msgstr ""
+
+msgid "Show only threshold"
+msgstr ""
+
+msgid "Show particles"
+msgstr ""
+
+msgid "Show temp threshold"
+msgstr ""
+
+msgid "Show Test Smoke"
+msgstr ""
+
+msgid "Show User Ticks"
+msgstr ""
+
+msgid "Show values"
+msgstr ""
+
+msgid "Show Vectors"
+msgstr ""
+
+msgid "Show velocity vectors"
+msgstr ""
+
+msgid "Size:"
+msgstr ""
+
+msgid "Size"
+msgstr ""
+
+msgid "Size Preserving"
+msgstr ""
+
+msgid "Skip coarse sub-slice"
+msgstr ""
+
+msgid "small font"
+msgstr ""
+
+msgid "smoke albedo"
+msgstr ""
+
+msgid "Smoke Density (g/m3)"
+msgstr ""
+
+msgid "Smoke/Fire"
+msgstr ""
+
+msgid "Smooth colorbar labels"
+msgstr ""
+
+msgid "Snap"
+msgstr ""
+
+msgid "Solid"
+msgstr ""
+
+msgid "Sort transparent faces"
+msgstr ""
+
+msgid "Sort transparent surfaces:"
+msgstr ""
+
+msgid "Specify"
+msgstr ""
+
+msgid "Start"
+msgstr ""
+
+msgid "Starting Locations/Velocities"
+msgstr ""
+
+msgid "Start Recording"
+msgstr ""
+
+msgid "start time"
+msgstr ""
+
+msgid "step"
+msgstr ""
+
+msgid "Stepped Contours"
+msgstr ""
+
+msgid "Stereo Method"
+msgstr ""
+
+msgid "Stop"
+msgstr ""
+
+msgid "Stop Recording"
+msgstr ""
+
+msgid "stop time:"
+msgstr ""
+
+msgid "Streak Length (s)"
+msgstr ""
+
+msgid "Streak line width"
+msgstr ""
+
+msgid "sub-intervals"
+msgstr ""
+
+msgid "Sucessive frames"
+msgstr ""
+
+msgid "suffix:"
+msgstr ""
+
+msgid "Surface view"
+msgstr ""
+
+msgid "Temperature"
+msgstr ""
+
+msgid "temp threshold (C)"
+msgstr ""
+
+msgid "Tension"
+msgstr ""
+
+msgid "terminal velocity"
+msgstr ""
+
+msgid "Terrain"
+msgstr ""
+
+msgid "Test Smoke"
+msgstr ""
+
+msgid "Text labels"
+msgstr ""
+
+msgid "Thickness"
+msgstr ""
+
+msgid "time:"
+msgstr ""
+
+msgid "Time Bar"
+msgstr ""
+
+msgid "Time Interval"
+msgstr ""
+
+msgid "Time Label"
+msgstr ""
+
+msgid "Title"
+msgstr ""
+
+msgid "Tour Label"
+msgstr ""
+
+msgid "Tour Settings"
+msgstr ""
+
+msgid "transparency level"
+msgstr ""
+
+msgid "Transparent level"
+msgstr ""
+
+msgid "Truncate Data"
+msgstr ""
+
+msgid "Unused SURFs"
+msgstr ""
+
+msgid "Up"
+msgstr ""
+
+msgid "Update"
+msgstr ""
+
+msgid "Update continuously"
+msgstr ""
+
+msgid "Update Contours"
+msgstr ""
+
+msgid "Update label"
+msgstr ""
+
+msgid "Update Tour Label"
+msgstr ""
+
+msgid "Use colormap"
+msgstr ""
+
+msgid "Use full volume rendering"
+msgstr ""
+
+msgid "Use GPU"
+msgstr ""
+
+msgid "Use level:"
+msgstr ""
+
+msgid "Use transparency:"
+msgstr ""
+
+msgid "Vector"
+msgstr ""
+
+msgid "Velocities"
+msgstr ""
+
+msgid "velocity direction (deg)"
+msgstr ""
+
+msgid "Vertical"
+msgstr ""
+
+msgid "view at startup"
+msgstr ""
+
+msgid "View Direction"
+msgstr ""
+
+msgid "View from selected Avatar"
+msgstr ""
+
+msgid "View From Selected Keyframe"
+msgstr ""
+
+msgid "View From Tour Path"
+msgstr ""
+
+msgid "View name"
+msgstr ""
+
+msgid "Viewpoint:"
+msgstr ""
+
+msgid "Viewpoints"
+msgstr ""
+
+msgid "Visibility"
+msgstr ""
+
+msgid "Warning: "
+msgstr ""
+
+msgid "Warning:"
+msgstr ""
+
+msgid "width"
+msgstr ""
+
+msgid "Window Properties"
+msgstr ""
+
+msgid "world center"
+msgstr ""
+
+msgid "zero at boundaries"
+msgstr ""
+
+msgid "zoom"
+msgstr ""
+
+msgid "Zoom:"
+msgstr ""
