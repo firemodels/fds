@@ -7015,6 +7015,8 @@ the initial value of the {\ct QUANTITY} is to be output. This can be useful for 
 
 You can change the values of the output by multiplying by {\ct CONVERSION\_FACTOR} and changing the character string {\ct UNITS}.
 
+If you do not want the {\ct DEVC} {\ct QUANTITY} to be included in the output file, set {\ct OUTPUT=.FALSE.} on the {\ct DEVC} line. Sometimes, devices are just used as clocks or control devices. In these cases, you might want to prevent its output from cluttering the output file. If the {\ct DEVC} {\ct QUANTITY='TIME'}, then {\ct OUTPUT} is set to {\ct .FALSE.} automatically.
+
 
 \begin{warning}
 All devices must have a specified {\ct QUANTITY}.  Some special devices (Section~\ref{info:PROP}) have their {\ct QUANTITY}
@@ -9869,6 +9871,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct MATL\_ID}              & Character       & See Section~\ref{info:material_components}                       &       &               \\ \hline
 {\ct NODE\_ID}              & Character(2)    & See Section~\ref{info:HVAC}                                      &       &               \\ \hline
 {\ct ORIENTATION}           & Real Triplet    & See Section~\ref{info:DEVC}                                      &       & 0,0,-1        \\ \hline
+{\ct OUTPUT}                & Logical         & See Section~\ref{info:out:DEVC}                                  &       & {\ct .TRUE.}  \\ \hline
 {\ct PART\_ID}              & Character       & See Section~\ref{info:outputquantities}                          &       &               \\ \hline
 {\ct POINTS}                & Integer         & See Section~\ref{info:line_file}                                 &       & 1             \\ \hline
 {\ct PROP\_ID}              & Character       & See Section~\ref{info:DEVC}                                      &       &               \\ \hline
