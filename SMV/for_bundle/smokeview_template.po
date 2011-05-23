@@ -1,11 +1,35 @@
 
+msgid "1-9: number of frames to skip"
+msgstr ""
+
 msgid "2*Current"
+msgstr ""
+
+msgid "2D contours"
 msgstr ""
 
 msgid "2D lines"
 msgstr ""
 
+msgid "2D smoke colored by:"
+msgstr ""
+
+msgid "2D smoke drawn:"
+msgstr ""
+
 msgid "2D stepped"
+msgstr ""
+
+msgid "3D contours"
+msgstr ""
+
+msgid "3D smoke"
+msgstr ""
+
+msgid "3D smoke frame skip"
+msgstr ""
+
+msgid "3D smoke parameters...  ALT+s"
 msgstr ""
 
 msgid "3D surface"
@@ -17,13 +41,22 @@ msgstr ""
 msgid "Abort"
 msgstr ""
 
+msgid "About Smokeview..."
+msgstr ""
+
 msgid "Above"
 msgstr ""
 
 msgid "Above specified max"
 msgstr ""
 
-msgid "Absorption Adjustments"
+msgid "Absorption adjustments"
+msgstr ""
+
+msgid "a: change flow vector lengths"
+msgstr ""
+
+msgid "Actual"
 msgstr ""
 
 msgid "Add"
@@ -38,22 +71,64 @@ msgstr ""
 msgid "adjust off-center"
 msgstr ""
 
-msgid "Advanced Settings"
+msgid "Advanced settings"
 msgstr ""
 
 msgid "All"
 msgstr ""
 
+msgid "All frames"
+msgstr ""
+
 msgid "All keyframes"
+msgstr ""
+
+msgid "All levels solid"
+msgstr ""
+
+msgid "All levels transparent"
 msgstr ""
 
 msgid "All meshes"
 msgstr ""
 
+msgid "All terrains"
+msgstr ""
+
 msgid "Alpha"
 msgstr ""
 
+msgid "(also, toggles cell center display on/off)"
+msgstr ""
+
+msgid "ALT:left/right cursor: slide left/right"
+msgstr ""
+
+msgid "ALT: translate along z axis"
+msgstr ""
+
+msgid "ALT:   up/down cursor: slide up/down"
+msgstr ""
+
+msgid "ALT+u: toggle coarse slice display in embedded mesh"
+msgstr ""
+
+msgid "ALT+v: toggle projection  method (between perspective and size preserving)"
+msgstr ""
+
+msgid "ALT+y: if current slice is cell centered, toggle interpolation on/off"
+msgstr ""
+
 msgid "Always show tracers"
+msgstr ""
+
+msgid "Animated surface"
+msgstr ""
+
+msgid "Animated surfaces"
+msgstr ""
+
+msgid "Animation keyboard commands"
 msgstr ""
 
 msgid "aperture"
@@ -62,13 +137,13 @@ msgstr ""
 msgid "Apply"
 msgstr ""
 
-msgid "Auto Load"
+msgid "Auto load"
 msgstr ""
 
-msgid "Auto Load at Startup"
+msgid "Auto load at startup"
 msgstr ""
 
-msgid "Auto Load Now"
+msgid "Auto load now"
 msgstr ""
 
 msgid "Auto place (2D)"
@@ -80,7 +155,7 @@ msgstr ""
 msgid "Average"
 msgstr ""
 
-msgid "Averaged Slice Data"
+msgid "Averaged slice data"
 msgstr ""
 
 msgid "Axis"
@@ -92,7 +167,7 @@ msgstr ""
 msgid "Back"
 msgstr ""
 
-msgid "Background Velocity Field"
+msgid "Background velocity field"
 msgstr ""
 
 msgid "Below"
@@ -110,28 +185,55 @@ msgstr ""
 msgid "both"
 msgstr ""
 
-msgid "Bound Data"
+msgid "Boundary file frame skip"
+msgstr ""
+
+msgid "Bound data"
+msgstr ""
+
+msgid "-build         - show directives used in this build of Smokeview\n"
+msgstr ""
+
+msgid "Cad"
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid "casename       - project id (file names without the extension)\n"
 msgstr ""
 
 msgid "Center"
 msgstr ""
 
-msgid "Clip Blockages"
+msgid "Check for updates at http://code.google.com/p/fds-smv/downloads/"
 msgstr ""
 
-msgid "Clip Blockages and Data"
+msgid "Clip blockages"
+msgstr ""
+
+msgid "Clip blockages and data"
+msgstr ""
+
+msgid "Clip geometry...  ALT+c"
 msgstr ""
 
 msgid "Clip Lower"
 msgstr ""
 
-msgid "Clipping Disabled"
+msgid "Clipping disabled"
 msgstr ""
 
-msgid "Clip Upper"
+msgid "Clip upper"
 msgstr ""
 
 msgid "Close"
+msgstr ""
+
+msgid "Close all dialogs  ALT+x"
+msgstr ""
+
+msgid "Color bar"
 msgstr ""
 
 msgid "Colorbar:"
@@ -140,31 +242,73 @@ msgstr ""
 msgid "Colorbar"
 msgstr ""
 
-msgid "Color Bar"
+msgid "Colorbar editor"
+msgstr ""
+
+msgid "Color bars"
+msgstr ""
+
+msgid "Color/*BW"
+msgstr ""
+
+msgid "Color/BW"
 msgstr ""
 
 msgid "colormap:"
 msgstr ""
 
-msgid "Compress Files (Smokezip)"
+msgid "Compress files (Smokezip)"
+msgstr ""
+
+msgid "Compression"
+msgstr ""
+
+msgid "Compression options"
+msgstr ""
+
+msgid "Compression/Smokezip...  ALT+z"
+msgstr ""
+
+msgid "Compress now"
 msgstr ""
 
 msgid "Compress only autoloaded files"
 msgstr ""
 
-msgid "Compute Tracks"
+msgid "Compute tracks"
 msgstr ""
 
 msgid "Config files"
 msgstr ""
 
+msgid "Configuration files"
+msgstr ""
+
 msgid "Constant coloring"
 msgstr ""
 
-msgid "Constant Speed"
+msgid "Constant speed"
+msgstr ""
+
+msgid "Continuous contours"
 msgstr ""
 
 msgid "Contours"
+msgstr ""
+
+msgid "Crawl"
+msgstr ""
+
+msgid "Create script:"
+msgstr ""
+
+msgid "c: toggle between continuous and 2D stepped contours"
+msgstr ""
+
+msgid "CTRL: translate along x, y axis"
+msgstr ""
+
+msgid "CTRL:up/down cursor: move forward/backward 5 times slower"
 msgstr ""
 
 msgid "Cull hidden slices"
@@ -179,7 +323,16 @@ msgstr ""
 msgid "Custom"
 msgstr ""
 
+msgid "Customize colorbar...  ALT+c"
+msgstr ""
+
+msgid "Custom Red/Custom Blue"
+msgstr ""
+
 msgid "Cycle"
+msgstr ""
+
+msgid "Cycle colorbar"
 msgstr ""
 
 msgid "Data"
@@ -188,31 +341,49 @@ msgstr ""
 msgid "Data coloring"
 msgstr ""
 
-msgid "Data Coloring/Transparency"
+msgid "Data coloring/transparency"
 msgstr ""
 
-msgid "Data Loading"
+msgid "Data loading"
 msgstr ""
 
 msgid "decay, p"
 msgstr ""
 
+msgid "-: decrement time step, 2D contour planes, 3D contour levels"
+msgstr ""
+
+msgid "Default"
+msgstr ""
+
+msgid "Defined in evac file"
+msgstr ""
+
+msgid "Defined in input file"
+msgstr ""
+
 msgid "Delete"
 msgstr ""
 
-msgid "Delete Colorbar"
+msgid "Delete colorbar"
 msgstr ""
 
 msgid "Demonstrator"
 msgstr ""
 
+msgid "-demo          - use demonstrator mode of Smokeview\n"
+msgstr ""
+
 msgid "Depth"
+msgstr ""
+
+msgid "Dialogs"
 msgstr ""
 
 msgid "Dimensions snapped to grid"
 msgstr ""
 
-msgid "Direction Vectors"
+msgid "Direction vectors"
 msgstr ""
 
 msgid "Display"
@@ -221,10 +392,25 @@ msgstr ""
 msgid "display all"
 msgstr ""
 
+msgid "Display...  ALT+d"
+msgstr ""
+
 msgid "Distance to zero parallax plane (m)"
 msgstr ""
 
+msgid "Documentation"
+msgstr ""
+
 msgid "Down"
+msgstr ""
+
+msgid "Download documentation at  http://fire.nist.gov/fds/documentation.html"
+msgstr ""
+
+msgid "Draw"
+msgstr ""
+
+msgid "Droplets"
 msgstr ""
 
 msgid "Duration/Points (all tours)"
@@ -233,13 +419,13 @@ msgstr ""
 msgid "duration (s)"
 msgstr ""
 
-msgid "Edit Keyframe's View/Tension"
+msgid "Edit keyframe's view/tension"
 msgstr ""
 
-msgid "Edit Tour Path"
+msgid "Edit tour path"
 msgstr ""
 
-msgid "Edit Tours"
+msgid "Edit tours"
 msgstr ""
 
 msgid "Elevation:"
@@ -254,10 +440,25 @@ msgstr ""
 msgid "Error"
 msgstr ""
 
+msgid "error: steplabel not defined"
+msgstr ""
+
+msgid "e: toggle between eye, world and world/level rotation motion"
+msgstr ""
+
+msgid "Evacuation"
+msgstr ""
+
 msgid "Every 10th"
 msgstr ""
 
+msgid "Every 10th frame"
+msgstr ""
+
 msgid "Every 20th"
+msgstr ""
+
+msgid "Every 20th frame"
 msgstr ""
 
 msgid "... every 2nd"
@@ -266,16 +467,40 @@ msgstr ""
 msgid "Every 2nd"
 msgstr ""
 
+msgid "Every 2nd frame"
+msgstr ""
+
 msgid "... every 3rd"
 msgstr ""
 
 msgid "Every 3rd"
 msgstr ""
 
+msgid "Every 3rd frame"
+msgstr ""
+
 msgid "Every 4th"
 msgstr ""
 
+msgid "Every 4th frame"
+msgstr ""
+
 msgid "Every 5th"
+msgstr ""
+
+msgid "Every 5th frame"
+msgstr ""
+
+msgid "Examine blockages...  ALT+e"
+msgstr ""
+
+msgid "Exterior"
+msgstr ""
+
+msgid "Eye centered"
+msgstr ""
+
+msgid "Facets"
 msgstr ""
 
 msgid "Far depth"
@@ -287,7 +512,19 @@ msgstr ""
 msgid "Fatal error: "
 msgstr ""
 
+msgid "FDS generated ticks"
+msgstr ""
+
+msgid "FDS/Smokeview website"
+msgstr ""
+
+msgid "FDS/Smokeview website: http://fire.nist.gov/fds"
+msgstr ""
+
 msgid "FDS Ticks"
+msgstr ""
+
+msgid "File/Bound/Script settings...  ALT+f"
 msgstr ""
 
 msgid "fire color:"
@@ -296,7 +533,10 @@ msgstr ""
 msgid "Fire line"
 msgstr ""
 
-msgid "Fire/Smoke Display"
+msgid "Fires"
+msgstr ""
+
+msgid "Fire/Smoke display"
 msgstr ""
 
 msgid "first person"
@@ -305,13 +545,28 @@ msgstr ""
 msgid "first person movement"
 msgstr ""
 
-msgid "Flip Background"
+msgid "Flip"
 msgstr ""
 
-msgid "Frame Label"
+msgid "Flip background"
 msgstr ""
 
-msgid "Frame Rate"
+msgid "Flip colorbar"
+msgstr ""
+
+msgid "Flow vectors"
+msgstr ""
+
+msgid "Font size"
+msgstr ""
+
+msgid "Frame label"
+msgstr ""
+
+msgid "-frame nframes - maximum number of particle frames.  Default=%i\n"
+msgstr ""
+
+msgid "Frame rate"
 msgstr ""
 
 msgid "Frames:"
@@ -326,13 +581,19 @@ msgstr ""
 msgid "Free memory after coloring data"
 msgstr ""
 
+msgid "Frequency:"
+msgstr ""
+
 msgid "Front"
 msgstr ""
 
 msgid "general rotations"
 msgstr ""
 
-msgid "Geometry Transparency"
+msgid "Geometry"
+msgstr ""
+
+msgid "Geometry transparency"
 msgstr ""
 
 msgid "Global"
@@ -344,16 +605,40 @@ msgstr ""
 msgid "global min"
 msgstr ""
 
+msgid "GPU activated. (Press G to deactivate)"
+msgstr ""
+
+msgid "GPU available but not in use. (Press G to activate)"
+msgstr ""
+
+msgid "GPU not available"
+msgstr ""
+
 msgid "green"
 msgstr ""
 
 msgid "Grey (0-255)"
 msgstr ""
 
-msgid "Grid Loc"
+msgid "Grid loc"
+msgstr ""
+
+msgid "Grid locations"
+msgstr ""
+
+msgid "g: toggle grid visibility"
+msgstr ""
+
+msgid "hazard"
 msgstr ""
 
 msgid "height"
+msgstr ""
+
+msgid "Help"
+msgstr ""
+
+msgid "-help          - display this message\n"
 msgstr ""
 
 msgid "Hidden"
@@ -362,10 +647,22 @@ msgstr ""
 msgid "Hide"
 msgstr ""
 
-msgid "Hide All"
+msgid "Hide all"
 msgstr ""
 
-msgid "Hide Scene"
+msgid "Hide all levels"
+msgstr ""
+
+msgid "Hide all planes in active mesh"
+msgstr ""
+
+msgid "Hide all PLOT3D files"
+msgstr ""
+
+msgid "Hide all tours"
+msgstr ""
+
+msgid "Hide scene"
 msgstr ""
 
 msgid "Highlight extreme data"
@@ -377,7 +674,13 @@ msgstr ""
 msgid "Horizontal"
 msgstr ""
 
-msgid "HRR Label"
+msgid "horizontally"
+msgstr ""
+
+msgid "HRR label"
+msgstr ""
+
+msgid "HRRPUV - all meshes"
 msgstr ""
 
 msgid "HRRPUV cutoff"
@@ -386,19 +689,61 @@ msgstr ""
 msgid "HRRPUV cutoff (kW/m3):"
 msgstr ""
 
+msgid "HRRPUV - single mesh"
+msgstr ""
+
+msgid "Humans"
+msgstr ""
+
+msgid "Humans - all meshes"
+msgstr ""
+
 msgid "Image"
+msgstr ""
+
+msgid "-ini           - output default smokeview parameters to smokeview.ini\n"
 msgstr ""
 
 msgid "Insert"
 msgstr ""
 
+msgid "INSERT/HOME/PageUP: tilt down/reset/tilt up"
+msgstr ""
+
+msgid "Interior"
+msgstr ""
+
 msgid "Interpolate cell centered slices"
+msgstr ""
+
+msgid "ISO frame skip"
+msgstr ""
+
+msgid "isosurfaces"
+msgstr ""
+
+msgid "Issue tracker"
+msgstr ""
+
+msgid "i: toggle iso-surface visibility"
+msgstr ""
+
+msgid "Keyboard motion"
 msgstr ""
 
 msgid "Label"
 msgstr ""
 
+msgid "Labels"
+msgstr ""
+
+msgid "Large"
+msgstr ""
+
 msgid "large font"
+msgstr ""
+
+msgid "Layers"
 msgstr ""
 
 msgid "Left"
@@ -407,10 +752,28 @@ msgstr ""
 msgid "Left/Right"
 msgstr ""
 
+msgid "left/right cursor: rotate left/right"
+msgstr ""
+
 msgid "level rotations"
 msgstr ""
 
+msgid "Levels"
+msgstr ""
+
+msgid "Lighting"
+msgstr ""
+
+msgid "Light smoke"
+msgstr ""
+
+msgid "Line contours"
+msgstr ""
+
 msgid "Line Contours"
+msgstr ""
+
+msgid "lines"
 msgstr ""
 
 msgid "Lines"
@@ -422,7 +785,28 @@ msgstr ""
 msgid "Load"
 msgstr ""
 
+msgid "Load All"
+msgstr ""
+
+msgid "Load All x"
+msgstr ""
+
+msgid "Load All y"
+msgstr ""
+
+msgid "Load All z"
+msgstr ""
+
 msgid "Loading smoke and fire data"
+msgstr ""
+
+msgid "Load/Unload"
+msgstr ""
+
+msgid "Locations:"
+msgstr ""
+
+msgid "L: unload last slice file loaded"
 msgstr ""
 
 msgid "Manual"
@@ -431,7 +815,7 @@ msgstr ""
 msgid "Map cursor keys for Plot3D use"
 msgstr ""
 
-msgid "Mass Extinction Coeff (m2/g)"
+msgid "Mass extinction coeff (m2/g)"
 msgstr ""
 
 msgid "max"
@@ -440,10 +824,19 @@ msgstr ""
 msgid "Max"
 msgstr ""
 
-msgid "Memory Load"
+msgid "Max frame rate"
+msgstr ""
+
+msgid "Maximum level solid"
+msgstr ""
+
+msgid "Memory load"
 msgstr ""
 
 msgid "Mesh label:"
+msgstr ""
+
+msgid "Mesh label"
 msgstr ""
 
 msgid "min"
@@ -452,25 +845,46 @@ msgstr ""
 msgid "Min"
 msgstr ""
 
+msgid "Minimum level solid"
+msgstr ""
+
+msgid "Misc keyboard commands"
+msgstr ""
+
+msgid "Modify colorbar:"
+msgstr ""
+
 msgid "Motion"
 msgstr ""
 
 msgid "Motion/View/Render"
 msgstr ""
 
+msgid "Motion/View/Render...  ALT+m"
+msgstr ""
+
+msgid "Mouse motion"
+msgstr ""
+
 msgid "Near depth"
 msgstr ""
 
-msgid "New Colorbar"
+msgid "New..."
 msgstr ""
 
-msgid "New Tour"
+msgid "New colorbar"
+msgstr ""
+
+msgid "New tour"
 msgstr ""
 
 msgid "Next"
 msgstr ""
 
-msgid "Next Tour"
+msgid "Next tour"
+msgstr ""
+
+msgid "-ng_ini        - No graphics version of -ini.\n"
 msgstr ""
 
 msgid "node index"
@@ -479,25 +893,73 @@ msgstr ""
 msgid "none"
 msgstr ""
 
+msgid "None"
+msgstr ""
+
+msgid "Normal"
+msgstr ""
+
 msgid "Number of contours"
 msgstr ""
 
 msgid "number of particles"
 msgstr ""
 
+msgid "Objects"
+msgstr ""
+
+msgid "Obstacles"
+msgstr ""
+
 msgid "Off"
+msgstr ""
+
+msgid "Offset slice"
+msgstr ""
+
+msgid "Offset vector slice"
+msgstr ""
+
+msgid "Offset window"
 msgstr ""
 
 msgid "One"
 msgstr ""
 
+msgid "Open"
+msgstr ""
+
+msgid "OpenGL lighting"
+msgstr ""
+
+msgid "OpenGL version:"
+msgstr ""
+
+msgid "Open Smokeview (.smv) file"
+msgstr ""
+
+msgid "Open vents as outlines"
+msgstr ""
+
+msgid "Options"
+msgstr ""
+
+msgid "o: reset animation to the initial time"
+msgstr ""
+
 msgid "origin"
+msgstr ""
+
+msgid "Other"
 msgstr ""
 
 msgid "Outline"
 msgstr ""
 
 msgid "Output data to file"
+msgstr ""
+
+msgid "Overview"
 msgstr ""
 
 msgid "Overwrite compressed files"
@@ -512,19 +974,31 @@ msgstr ""
 msgid "Parameters"
 msgstr ""
 
+msgid "Particle head"
+msgstr ""
+
+msgid "Particles"
+msgstr ""
+
 msgid "particle size"
 msgstr ""
 
 msgid "Particle size"
 msgstr ""
 
-msgid "Particle Tracking"
+msgid "Particles (static)"
+msgstr ""
+
+msgid "Particle tracking..."
+msgstr ""
+
+msgid "Particle tracking"
 msgstr ""
 
 msgid "Path:"
 msgstr ""
 
-msgid "Path Length (m)"
+msgid "Path length (m)"
 msgstr ""
 
 msgid "percentile max"
@@ -536,6 +1010,15 @@ msgstr ""
 msgid "Perspective"
 msgstr ""
 
+msgid "p: increment plot3d variable"
+msgstr ""
+
+msgid "Planar terrain slice"
+msgstr ""
+
+msgid "Plot3D keyboard commands"
+msgstr ""
+
 msgid "points"
 msgstr ""
 
@@ -545,7 +1028,10 @@ msgstr ""
 msgid "Point size"
 msgstr ""
 
-msgid "Point Skip"
+msgid "Point skip"
+msgstr ""
+
+msgid "-points npoints - maximum number of particles.  Default=%i\n"
 msgstr ""
 
 msgid "Position"
@@ -557,22 +1043,34 @@ msgstr ""
 msgid "Power law"
 msgstr ""
 
+msgid "Press"
+msgstr ""
+
 msgid "Press OK to terminate Smokeview"
 msgstr ""
 
 msgid "Previous"
 msgstr ""
 
-msgid "Previous Tour"
+msgid "Previous tour"
+msgstr ""
+
+msgid "P: toggle cursor key mappings"
+msgstr ""
+
+msgid "Quit"
+msgstr ""
+
+msgid "Read ini files"
+msgstr ""
+
+msgid "Realistic"
 msgstr ""
 
 msgid "red"
 msgstr ""
 
 msgid "Red/Blue"
-msgstr ""
-
-msgid "Red Custom Red/Custom Blue"
 msgstr ""
 
 msgid "Red/Cyan"
@@ -587,6 +1085,9 @@ msgstr ""
 msgid "Reload"
 msgstr ""
 
+msgid "Reload Now"
+msgstr ""
+
 msgid "Render"
 msgstr ""
 
@@ -599,6 +1100,15 @@ msgstr ""
 msgid "Replace"
 msgstr ""
 
+msgid "Report a problem at http://code.google.com/p/fds-smv/issues/"
+msgstr ""
+
+msgid "Requested"
+msgstr ""
+
+msgid "Reset"
+msgstr ""
+
 msgid "Right"
 msgstr ""
 
@@ -608,13 +1118,43 @@ msgstr ""
 msgid "Rotate about:"
 msgstr ""
 
+msgid ": rotate around z, x axis"
+msgstr ""
+
+msgid "Rotation"
+msgstr ""
+
+msgid "r: render the current scene to an image file"
+msgstr ""
+
+msgid "R:   (same as r but at twice the resolution)"
+msgstr ""
+
+msgid "Run script:"
+msgstr ""
+
+msgid "-runscript     - run the script file casename.ssf\n"
+msgstr ""
+
+msgid "Run smokezip"
+msgstr ""
+
 msgid "Save:"
 msgstr ""
 
-msgid "Save Auto Load File List"
+msgid "Save"
 msgstr ""
 
-msgid "Save Settings"
+msgid "Save auto load file list"
+msgstr ""
+
+msgid "Save settings"
+msgstr ""
+
+msgid "#: save settings (create casename.ini file)"
+msgstr ""
+
+msgid "#: save settings to %s"
 msgstr ""
 
 msgid "Scaled optical depth (SCD)"
@@ -632,7 +1172,22 @@ msgstr ""
 msgid "Scaling"
 msgstr ""
 
-msgid "Scaling/Depth Params"
+msgid "Scaling/Depth params"
+msgstr ""
+
+msgid "s: change interval between adjacent vectors"
+msgstr ""
+
+msgid "Script files"
+msgstr ""
+
+msgid "Script options"
+msgstr ""
+
+msgid "-script scriptfile - run the script file scriptfile\n"
+msgstr ""
+
+msgid "Segments"
 msgstr ""
 
 msgid "Select:"
@@ -641,16 +1196,19 @@ msgstr ""
 msgid "Select"
 msgstr ""
 
-msgid "Select Avatar"
+msgid "Select avatar"
 msgstr ""
 
-msgid "Selected keyframeframe"
+msgid "Selected keyframe"
 msgstr ""
 
-msgid "Select Tour:"
+msgid "Select tour:"
 msgstr ""
 
 msgid "Set"
+msgstr ""
+
+msgid "Set as Startup"
 msgstr ""
 
 msgid "set max"
@@ -659,19 +1217,43 @@ msgstr ""
 msgid "set min"
 msgstr ""
 
-msgid "Shaded Contours"
+msgid "Shaded contours"
 msgstr ""
 
-msgid "Shades of Grey"
+msgid "Shades:"
+msgstr ""
+
+msgid "Shades of grey"
+msgstr ""
+
+msgid "SHIFT: left/right cursor: rotate 90 degrees"
 msgstr ""
 
 msgid "Show"
 msgstr ""
 
-msgid "Show All"
+msgid "Show all"
 msgstr ""
 
-msgid "Show Avatar"
+msgid "Show all levels"
+msgstr ""
+
+msgid "Show all planes in active mesh"
+msgstr ""
+
+msgid "Show all PLOT3D files"
+msgstr ""
+
+msgid "Show all tours"
+msgstr ""
+
+msgid "Show all vector slice entries"
+msgstr ""
+
+msgid "Show avatar"
+msgstr ""
+
+msgid "Show CAD textures"
 msgstr ""
 
 msgid "Show colorbar (when data coloring)"
@@ -683,7 +1265,22 @@ msgstr ""
 msgid "Show cull ports"
 msgstr ""
 
-msgid "Show Intermediate Path Nodes"
+msgid "Show file names"
+msgstr ""
+
+msgid "Show/Hide"
+msgstr ""
+
+msgid "Show/Hide blockage types:"
+msgstr ""
+
+msgid "Show intermediate path nodes"
+msgstr ""
+
+msgid "Show multi slice in blockage"
+msgstr ""
+
+msgid "Show normals"
 msgstr ""
 
 msgid "Show Only"
@@ -701,22 +1298,34 @@ msgstr ""
 msgid "Show particles"
 msgstr ""
 
+msgid "Show slice in blockage"
+msgstr ""
+
 msgid "Show temp threshold"
 msgstr ""
 
-msgid "Show Test Smoke"
+msgid "Show test smoke"
 msgstr ""
 
-msgid "Show User Ticks"
+msgid "Show tracers always"
+msgstr ""
+
+msgid "Show user ticks"
 msgstr ""
 
 msgid "Show values"
 msgstr ""
 
-msgid "Show Vectors"
+msgid "Show vectors"
+msgstr ""
+
+msgid "Show vector slice in blockage"
 msgstr ""
 
 msgid "Show velocity vectors"
+msgstr ""
+
+msgid "Single mesh"
 msgstr ""
 
 msgid "Size:"
@@ -725,10 +1334,19 @@ msgstr ""
 msgid "Size"
 msgstr ""
 
-msgid "Size Preserving"
+msgid "Size preserving"
 msgstr ""
 
 msgid "Skip coarse sub-slice"
+msgstr ""
+
+msgid "Slice average"
+msgstr ""
+
+msgid "Slice frame Skip"
+msgstr ""
+
+msgid "slices"
 msgstr ""
 
 msgid "small font"
@@ -737,10 +1355,40 @@ msgstr ""
 msgid "smoke albedo"
 msgstr ""
 
-msgid "Smoke Density (g/m3)"
+msgid "Smoke culling activated. (Press C to deactivate)"
+msgstr ""
+
+msgid "Smoke culling available but not in use. ( To activate: "
+msgstr ""
+
+msgid "Smoke culling not available"
+msgstr ""
+
+msgid "Smoke density (g/m3)"
 msgstr ""
 
 msgid "Smoke/Fire"
+msgstr ""
+
+msgid "Smoke map:"
+msgstr ""
+
+msgid "Smokeview menus"
+msgstr ""
+
+msgid "Smokeview was built with the following pre-processing directives set:\n\n"
+msgstr ""
+
+msgid "Smooth"
+msgstr ""
+
+msgid "Smooth blockages at startup"
+msgstr ""
+
+msgid "Smooth blockages drawn opaque"
+msgstr ""
+
+msgid "Smooth blockages now"
 msgstr ""
 
 msgid "Smooth colorbar labels"
@@ -749,7 +1397,25 @@ msgstr ""
 msgid "Snap"
 msgstr ""
 
+msgid "!: snap scene's view angles"
+msgstr ""
+
 msgid "Solid"
+msgstr ""
+
+msgid "Solid and outline"
+msgstr ""
+
+msgid "Solution value"
+msgstr ""
+
+msgid "Solution variable"
+msgstr ""
+
+msgid "soot density - all meshes"
+msgstr ""
+
+msgid "soot MASS FRACTION - single mesh"
 msgstr ""
 
 msgid "Sort transparent faces"
@@ -758,16 +1424,22 @@ msgstr ""
 msgid "Sort transparent surfaces:"
 msgstr ""
 
+msgid "space bar: increment time step, 2D contour planes, 3D contour levels"
+msgstr ""
+
 msgid "Specify"
+msgstr ""
+
+msgid "spheres"
 msgstr ""
 
 msgid "Start"
 msgstr ""
 
-msgid "Starting Locations/Velocities"
+msgid "Starting locations/velocities"
 msgstr ""
 
-msgid "Start Recording"
+msgid "Start recording"
 msgstr ""
 
 msgid "start time"
@@ -776,25 +1448,37 @@ msgstr ""
 msgid "step"
 msgstr ""
 
-msgid "Stepped Contours"
+msgid "Stepped contours"
+msgstr ""
+
+msgid "-stereo        - activate stereo mode\n"
 msgstr ""
 
 msgid "Stereo Method"
 msgstr ""
 
+msgid "Stereo parameters..."
+msgstr ""
+
 msgid "Stop"
 msgstr ""
 
-msgid "Stop Recording"
+msgid "Stop recording"
+msgstr ""
+
+msgid "Stop Rendering"
 msgstr ""
 
 msgid "stop time:"
 msgstr ""
 
-msgid "Streak Length (s)"
+msgid "Streak length (s)"
 msgstr ""
 
 msgid "Streak line width"
+msgstr ""
+
+msgid "Streaks"
 msgstr ""
 
 msgid "sub-intervals"
@@ -806,7 +1490,22 @@ msgstr ""
 msgid "suffix:"
 msgstr ""
 
+msgid "Surfaces"
+msgstr ""
+
+msgid "Surface type"
+msgstr ""
+
 msgid "Surface view"
+msgstr ""
+
+msgid "Switch to perspective view       ALT+v"
+msgstr ""
+
+msgid "Switch to size preserving view   ALT+v"
+msgstr ""
+
+msgid "temperature"
 msgstr ""
 
 msgid "Temperature"
@@ -824,7 +1523,7 @@ msgstr ""
 msgid "Terrain"
 msgstr ""
 
-msgid "Test Smoke"
+msgid "Test smoke"
 msgstr ""
 
 msgid "Text labels"
@@ -836,31 +1535,94 @@ msgstr ""
 msgid "time:"
 msgstr ""
 
-msgid "Time Bar"
+msgid "Time"
 msgstr ""
 
-msgid "Time Interval"
+msgid "Time bar"
 msgstr ""
 
-msgid "Time Label"
+msgid "Time bars"
+msgstr ""
+
+msgid "Time interval"
+msgstr ""
+
+msgid "Time label"
 msgstr ""
 
 msgid "Title"
 msgstr ""
 
-msgid "Tour Label"
+msgid "Titles"
 msgstr ""
 
-msgid "Tour Settings"
+msgid "&: toggle line anti-aliasing (draw lines smoothly)"
+msgstr ""
+
+msgid "Tour label"
+msgstr ""
+
+msgid "Tours"
+msgstr ""
+
+msgid "Tours...  ALT+t"
+msgstr ""
+
+msgid "Tour settings"
+msgstr ""
+
+msgid "Trainer..."
+msgstr ""
+
+msgid "Trainer menu"
+msgstr ""
+
+msgid "Trainer menus"
 msgstr ""
 
 msgid "transparency level"
 msgstr ""
 
+msgid "Transparent"
+msgstr ""
+
+msgid "Transparent (data)"
+msgstr ""
+
 msgid "Transparent level"
 msgstr ""
 
-msgid "Truncate Data"
+msgid "Triangles"
+msgstr ""
+
+msgid "Truncate data"
+msgstr ""
+
+msgid "t: set/unset single time step mode"
+msgstr ""
+
+msgid "T: toggle method for interpolating data color"
+msgstr ""
+
+msgid "Two sided (exterior)"
+msgstr ""
+
+msgid "Two sided (interior)"
+msgstr ""
+
+msgid "Units"
+msgstr ""
+
+msgid "Unload"
+msgstr ""
+
+msgid "Unload all"
+msgstr ""
+
+msgid "Unload last"
+msgstr ""
+
+msgid "Unload terrain"
 msgstr ""
 
 msgid "Unused SURFs"
@@ -872,34 +1634,85 @@ msgstr ""
 msgid "Update"
 msgstr ""
 
+msgid "Update bounds"
+msgstr ""
+
+msgid "-update_bounds - calculate boundary file bounds and save to casename.bini\n"
+msgstr ""
+
 msgid "Update continuously"
 msgstr ""
 
-msgid "Update Contours"
+msgid "Update contours"
 msgstr ""
 
 msgid "Update label"
 msgstr ""
 
-msgid "Update Tour Label"
+msgid "Updates"
+msgstr ""
+
+msgid "Update tour label"
+msgstr ""
+
+msgid "up/down cursor: move forward/backward"
+msgstr ""
+
+msgid "u: reload files"
+msgstr ""
+
+msgid "Usage: %s [options] casename\n\n"
+msgstr ""
+
+msgid "Use colorbar lines"
 msgstr ""
 
 msgid "Use colormap"
 msgstr ""
 
+msgid "Use English menus"
+msgstr ""
+
+msgid "Use French menus"
+msgstr ""
+
 msgid "Use full volume rendering"
+msgstr ""
+
+msgid "Use German menus"
 msgstr ""
 
 msgid "Use GPU"
 msgstr ""
 
+msgid "Use Italian menus"
+msgstr ""
+
 msgid "Use level:"
+msgstr ""
+
+msgid "User settable ticks"
+msgstr ""
+
+msgid "User title 1"
+msgstr ""
+
+msgid "User Title 2"
+msgstr ""
+
+msgid "Use Spanish menus"
 msgstr ""
 
 msgid "Use transparency:"
 msgstr ""
 
+msgid "using:"
+msgstr ""
+
 msgid "Vector"
+msgstr ""
+
+msgid "vector slices"
 msgstr ""
 
 msgid "Velocities"
@@ -908,7 +1721,19 @@ msgstr ""
 msgid "velocity direction (deg)"
 msgstr ""
 
+msgid "Vents"
+msgstr ""
+
+msgid "-version       - display version information\n"
+msgstr ""
+
 msgid "Vertical"
+msgstr ""
+
+msgid "vertically"
+msgstr ""
+
+msgid "View"
 msgstr ""
 
 msgid "view at startup"
@@ -920,10 +1745,10 @@ msgstr ""
 msgid "View from selected Avatar"
 msgstr ""
 
-msgid "View From Selected Keyframe"
+msgid "View from selected keyframe"
 msgstr ""
 
-msgid "View From Tour Path"
+msgid "View from tour path"
 msgstr ""
 
 msgid "View name"
@@ -938,19 +1763,79 @@ msgstr ""
 msgid "Visibility"
 msgstr ""
 
+msgid "Visualize fire/smoke flow simulations.\n\n"
+msgstr ""
+
+msgid "v: toggle flow vector visiblity"
+msgstr ""
+
+msgid "Walk"
+msgstr ""
+
 msgid "Warning: "
 msgstr ""
 
 msgid "Warning:"
 msgstr ""
 
+msgid "water - all meshes"
+msgstr ""
+
+msgid "Water - single mesh"
+msgstr ""
+
+msgid "Web links"
+msgstr ""
+
+msgid "Web resources"
+msgstr ""
+
+msgid "where \n\n"
+msgstr ""
+
 msgid "width"
 msgstr ""
 
-msgid "Window Properties"
+msgid "Window properties"
 msgstr ""
 
 msgid "world center"
+msgstr ""
+
+msgid "World centered"
+msgstr ""
+
+msgid "World centered, level rotation"
+msgstr ""
+
+msgid "w: toggle clipping - use Options/Clip menu to specify clipping planes"
+msgstr ""
+
+msgid "WUI display... ALT+w..."
+msgstr ""
+
+msgid "WUI display... ALT+w"
+msgstr ""
+
+msgid "xy plane"
+msgstr ""
+
+msgid "xy plane (grid turned off)"
+msgstr ""
+
+msgid "x,y,z: toggle contour plot visibility along x, y and z axis"
+msgstr ""
+
+msgid "xz plane"
+msgstr ""
+
+msgid "xz plane (grid turned off)"
+msgstr ""
+
+msgid "yz plane"
+msgstr ""
+
+msgid "yz plane (grid turned off)"
 msgstr ""
 
 msgid "zero at boundaries"
@@ -962,5 +1847,8 @@ msgstr ""
 msgid "Zoom:"
 msgstr ""
 
-msgid "Zoom:"
+msgid "Zoom"
+msgstr ""
+
+msgid "Zoom"
 msgstr ""
