@@ -106,7 +106,7 @@ int main(int argc, char **argv){
     printf("\n");
     if(smokezippath!=NULL)printf("Smokezip file: %s found\n",smokezippath);
     sv_startup_c(argc,argv_sv);
-    init_translate(smokeviewbindir,tr_name);
+    init_translate(smvprogdir,tr_name);
     CheckMemory;
     startup_flag=initcase_c(argc,argv_sv);
     if(update_bounds==1){

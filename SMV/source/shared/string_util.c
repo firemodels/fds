@@ -197,27 +197,26 @@ int is_file_newer(char *file1, char *file2){
 /* ------------------ rootdir ------------------------ */
 
 char *getdir(char *progname){
-  size_t i,nprogname;
-  char *c;
-  char *progpath;
+  char *progpath, *lastsep;
 
-  nprogname=strlen(progname);
-  c = progname+nprogname-1;
-  progpath=progname;
-  for(i=0;i<nprogname;i++){
-    if(strncmp(c,dirseparator,1)==0){
-      *(c+1)='\0';
-      NewMemory((void **)&progpath,(unsigned int)(strlen(progname)+2));
-      strcpy(progpath,progname);
-      return progpath;
-    }
-    c--;
+#ifdef WIN32
+  lastsep=strrchr(progname,'\\');
+#else
+  lastsep=strrchr(progname,'/');
+#endif
+  if(lastsep==NULL){
+    progpath = which(progname);
+    return progpath;
   }
-  progpath=which(progname);
-  if(progpath==NULL)return NULL;
+  else{
+    int lendir;
 
-  CheckMemory;
-  return progpath;
+    lendir=lastsep-progname;
+    NewMemory((void **)&progpath,(unsigned int)(lendir+2));
+    strncpy(progpath,progname,lendir+1);
+    progpath[lendir+1]=0;
+    return progpath;
+  }
 }
 
 /* ------------------ lastname ------------------------ */
@@ -587,7 +586,7 @@ int file_exists(char *filename){
   }
 }
 
-/* ------------------ array2string ------------------------ */
+/* ------------------ which ------------------------ */
 
 char *which(char *progname){
   char *pathlistptr, fullpath[4096], pathlist[4096], prog[4096];
@@ -632,7 +631,7 @@ char *which(char *progname){
       strcpy(returndir,dir);
       strcat(returndir,dirsep);
 #ifdef pp_BETA
-      printf("Using %s found in %s\n\n",prog,dir);
+      printf("Using %s in %s\n\n",prog,dir);
 #endif
       return returndir;
     }
