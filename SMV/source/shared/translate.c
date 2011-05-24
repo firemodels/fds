@@ -128,7 +128,7 @@ int parse_lang(char *file){
 
 /* ------------------ init_translate ------------------------ */
 
-void init_translate(char *smokeviewbindir, char *tr_name){
+void init_translate(char *bindir, char *tr_name){
   char *LANG;
 
   if(tr_name!=NULL){
@@ -147,9 +147,9 @@ void init_translate(char *smokeviewbindir, char *tr_name){
     lang[0]=tolower(LANG[0]);
     lang[1]=tolower(LANG[1]);
     lang[2]=0;
-    lensmokebindir=strlen(smokeviewbindir);
+    lensmokebindir=strlen(bindir);
     NewMemory((void **)&smokeview_lang,(unsigned int)(lensmokebindir+15+1));
-    STRCPY(smokeview_lang,smokeviewbindir);
+    STRCPY(smokeview_lang,bindir);
     STRCAT(smokeview_lang,"smokeview_");
     STRCAT(smokeview_lang,lang);
     STRCAT(smokeview_lang,".po");

@@ -200,22 +200,8 @@ void sv_startup_c(int argc, char **argv){
 
 // get smokeview bin directory from argv[0] which contains the full path of the smokeview binary
 
-  lensmokebindir = strlen(argv[0]);
-  NewMemory((void **)&smokeviewbindir, (unsigned int)(lensmokebindir+1));
-
-  strcpy(smokeviewbindir,argv[0]);
-  for(i=lensmokebindir-1;i>=0;i--){
-    char c;
-
-    c = smokeviewbindir[i];
-    if(strncmp(&c,dirseparator,1)==0){
-      smokeviewbindir[i+1]=0;
-      break;
-    }
-  }
-
-  NewMemory((void **)&smokeviewini,    (unsigned int)(lensmokebindir+14));
-  STRCPY(smokeviewini,smokeviewbindir);
+  NewMemory((void **)&smokeviewini,    (unsigned int)(strlen(smvprogdir)+14));
+  STRCPY(smokeviewini,smvprogdir);
   STRCAT(smokeviewini,"smokeview.ini");
   
   startup_pass=2;
@@ -2112,7 +2098,6 @@ void initvars0(void){
   selected_frame=NULL;
   selected_tour=NULL;
   unitclasses=NULL,unitclasses_default=NULL,unitclasses_ini=NULL;
-  smokeviewbindir=NULL;
   smokeviewtempdir=NULL;
   partshortlabel=NULL,partunitlabel=NULL;
   texturedir=NULL;

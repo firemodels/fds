@@ -15,7 +15,7 @@ EXTERNCPP char *which(char *progname);
 EXTERNCPP FILE_SIZE get_filesize(const char *filename);
 EXTERNCPP time_t file_modtime(char *filename);
 EXTERNCPP int is_file_newer(char *file1, char *file2);
-EXTERNCPP char *getdir(char *progname);
+EXTERNCPP char *getprogdir(char *progname);
 
 EXTERNCPP char *lastname(char *argi);
 EXTERNCPP void trim(char *line);

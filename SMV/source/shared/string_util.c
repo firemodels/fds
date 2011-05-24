@@ -196,25 +196,42 @@ int is_file_newer(char *file1, char *file2){
 
 /* ------------------ rootdir ------------------------ */
 
-char *getdir(char *progname){
+char *getprogdir(char *progname){
   char *progpath, *lastsep;
-
 #ifdef WIN32
-  lastsep=strrchr(progname,'\\');
+  char cdirsep='\\';
 #else
-  lastsep=strrchr(progname,'/');
+  char cdirsep='/';
 #endif
+
+  lastsep=strrchr(progname,cdirsep);
   if(lastsep==NULL){
-    progpath = which(progname);
+    char *dir;
+
+    dir = which(progname);
+    if(dir==NULL){
+      NewMemory((void **)&progpath,(unsigned int)3);
+      strcpy(progpath,".");
+      strcat(progpath,dirseparator);
+      return progpath;
+    }
+    else{
+      int lendir;
+
+      lendir=strlen(dir);
+      NewMemory((void **)&progpath,(unsigned int)(lendir+2));
+      strcpy(progpath,dir);
+      if(progpath[lendir-1]!=cdirsep)strcat(progpath,dirseparator);
+    }
     return progpath;
   }
   else{
     int lendir;
 
-    lendir=lastsep-progname;
-    NewMemory((void **)&progpath,(unsigned int)(lendir+2));
-    strncpy(progpath,progname,lendir+1);
-    progpath[lendir+1]=0;
+    lendir=lastsep-progname+1;
+    NewMemory((void **)&progpath,(unsigned int)(lendir+1));
+    strncpy(progpath,progname,lendir);
+    progpath[lendir]=0;
     return progpath;
   }
 }

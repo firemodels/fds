@@ -2700,8 +2700,8 @@ typedef struct {
         char texturebuffer[1024];
 
         found_texture=0;
-        if(smokeviewbindir!=NULL&&STAT(buffer3,&statbuffer)!=0){
-          STRCPY(texturebuffer,smokeviewbindir);
+        if(smvprogdir!=NULL&&STAT(buffer3,&statbuffer)!=0){
+          STRCPY(texturebuffer,smvprogdir);
           STRCAT(texturebuffer,buffer3);
           if(STAT(texturebuffer,&statbuffer)==0){
             if(NewMemory((void **)&surfi->texturefile,strlen(texturebuffer)+1)==0)return 2;
@@ -2717,7 +2717,7 @@ typedef struct {
         }
         if(texturebuffer!=NULL&&buffer3!=NULL&&found_texture==0&&strncmp(buffer3,"null",4)!=0){
           printf("*** Warning: The texture file: %s was not found in either \n",buffer3);
-          printf("             the current working directory or in %s\n",smokeviewbindir);
+          printf("             the current working directory or in %s\n",smvprogdir);
         }
       }
       nsurfaces++;

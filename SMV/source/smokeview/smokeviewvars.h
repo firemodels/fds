@@ -588,7 +588,6 @@ SVEXTERN float redcolor[4];
 
 SVEXTERN int loadfiles_at_startup;
 
-SVEXTERN char *smokeviewbindir;
 SVEXTERN char *smokeviewtempdir;
 
 SVEXTERN int nmenus;

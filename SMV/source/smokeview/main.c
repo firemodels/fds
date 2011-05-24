@@ -48,37 +48,7 @@ int main(int argc, char **argv){
     char *progname;
 
     progname=argv_sv[0];
-    len=strlen(progname);
-    if(len>2){
-      smvprogdir=getdir(progname);
-    }
-    else{
-      smvprogdir=NULL;
-    }
-    if(smvprogdir==NULL||strlen(smvprogdir)==0){
-      char *temp_smvbindir=NULL, SMVBINDIR[1024];
-
-      strcpy(SMVBINDIR,"");
-      FREEMEMORY(smvprogdir);
-      temp_smvbindir=getenv("SMVBINDIR");
-      if(temp_smvbindir==NULL)temp_smvbindir=getenv("smvbindir");
-      if(temp_smvbindir!=NULL)strcpy(SMVBINDIR,temp_smvbindir);
-#ifdef WIN32
-      if(strlen(SMVBINDIR)==0){
-        strcpy(SMVBINDIR,"c:\\program files\\fds\\fds5\\bin\\");
-      }
-#endif
-      if(strlen(SMVBINDIR)>0){
-        NewMemory((void **)&smvprogdir,strlen(SMVBINDIR)+2);
-        strcpy(smvprogdir,SMVBINDIR);
-      }
-    }
-    if(smvprogdir!=NULL){
-      len=strlen(smvprogdir);
-      if(smvprogdir[len-1]!=dirseparator[0]){
-        strcat(smvprogdir,dirseparator);
-      }
-    }
+    smvprogdir=getprogdir(progname);
     if(texturedir==NULL){
       char *texture_buffer;
       size_t texture_len;
