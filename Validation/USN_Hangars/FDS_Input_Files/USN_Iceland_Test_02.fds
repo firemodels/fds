@@ -49,16 +49,14 @@
       COLOR     = 'BLACK'
       THICKNESS = 0.05 /
 
-&SURF ID= 'BURNER'
-      COLOR= 'RED'
-      RAMP_Q= 'FIRE',
-      TMP_FRONT=1000., HRRPUA=1111. /
-&RAMP ID='FIRE' T=   0.0 F= 0.0/
-&RAMP ID='FIRE' T=  38.0 F= 0.0625/
-&RAMP ID='FIRE' T=  75.0 F= 0.25/
-&RAMP ID='FIRE' T= 113.0 F= 0.56/
-&RAMP ID='FIRE' T= 150.0 F= 1.0/
-&RAMP ID='FIRE' T= 600.0 F= 1.0/
+&SURF ID= 'BURNER',
+COLOR= 'RED',
+RAMP_Q= 'FIRE',
+TMP_FRONT=1000.,
+HRRPUA= 664. / 
+&RAMP ID='FIRE' T= 0.0 F= 0.0 /
+&RAMP ID='FIRE' T= 15.0 F= .5 /
+&RAMP ID='FIRE' T= 30.0 F= 1.0 /
 &RAMP ID='FIRE' T= 601.0 F= 0.0/
 
 Burner
