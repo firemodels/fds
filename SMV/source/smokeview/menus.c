@@ -1,6 +1,37 @@
 // $Date$ 
 // $Revision$
 // $Author$
+#include "options.h"
+#ifdef pp_GPU
+#include <GL/glew.h>
+#endif
+#include <stdio.h>  
+#include <string.h>
+#include <stdlib.h>
+#include <math.h>
+#include <time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#ifdef pp_OSX
+#include <GLUT/glut.h>
+#else
+#include <GL/glut.h>
+#endif
+#include "contourdefs.h"
+#include "isodefs.h"
+
+#include "flowfiles.h"
+#include "smokeviewapi.h"
+#include "MALLOC.h"
+#include "smokeviewvars.h"
+#include "translate.h"
+
+/* dummy change to bump revision number to 5.1.5 */
+
+#ifdef WIN32
+#include <Commdlg.h>
+#include <direct.h>
+#endif
 
 #define MENU_TIMEVIEW -103
 #define MENU_SAVEVIEW -101
