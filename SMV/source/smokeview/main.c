@@ -29,7 +29,6 @@ int main(int argc, char **argv){
   char **argv_sv;
 
   initMM();
-  init_string_util();
   initvars0();
   initcolors();
   initvars1();

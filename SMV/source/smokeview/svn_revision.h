@@ -13,7 +13,7 @@ extern char csphere_revision[];
 extern char dmalloc_revision[];
 extern char drawGeometry_revision[];
 extern char egz_stdio_revision[];
-extern char endian_revision[];
+extern char smv_endian_revision[];
 extern char getdatabounds_revision[];
 extern char getdatacolors_revision[];
 #ifdef pp_SHOOTER

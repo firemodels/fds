@@ -2188,7 +2188,7 @@ int getmaxrevision(void){
   MAXREV(dmalloc_revision);
   MAXREV(drawGeometry_revision);
   MAXREV(egz_stdio_revision);
-  MAXREV(endian_revision);
+  MAXREV(smv_endian_revision);
   MAXREV(getdatabounds_revision);
   MAXREV(getdatacolors_revision);
 #ifdef pp_SHOOTER
