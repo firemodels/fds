@@ -7,7 +7,7 @@
 
 // svn revision character string
 
-char endian_revision[]="$Revision$";
+char smv_endian_revision[]="$Revision$";
 
 /* ------------------ getendian ------------------------ */
 

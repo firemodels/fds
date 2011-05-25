@@ -18,14 +18,6 @@
 // svn revision character string
 char string_util_revision[]="$Revision$";
 
-void init_string_util(void){
-#ifdef WIN32
-    strcpy(dirseparator,"\\");
-#else
-    strcpy(dirseparator,"/");
-#endif
-}
-
 /* ----------------------- fparsecsv ----------------------------- */
 
 void fparsecsv(char *buffer, float *vals, int ncols, int *ntokens){
