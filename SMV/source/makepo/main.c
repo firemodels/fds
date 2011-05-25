@@ -2,11 +2,12 @@
 // $Revision$
 // $Author$
 
+#include "options.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-
+#include "string_util.h"
      
 int add_msgstring=0;
 void usage(char *prog);
@@ -19,6 +20,7 @@ int main(int argc, char **argv){
   int i;
   char *arg,*prog;
 
+  init_string_util();
   prog=argv[0];
   for(i=1;i<argc;i++){
     int lenarg;
@@ -71,29 +73,6 @@ int main(int argc, char **argv){
     }
   }
 }
-
-
-/* ------------------ trim ------------------------ */
-
-void trim(char *line){
-  char *blank=" ";
-  const char *c;
-  const char *lf="\n", *cr="\r";
-  size_t len, i;
-  
-  len = strlen(line);
-  c = line+len-1;
-  for(i=0; i<len; i++){
-    if(strncmp(c,blank,1)!=0&&strncmp(c,lf,1)!=0&&strncmp(c,cr,1)!=0){
-      c++; 
-      line[c-line]='\0';
-      return;
-    }
-    c--;
-  }
-  *line='\0';
-}
-
 
 /* ------------------ usage ------------------------ */
 
