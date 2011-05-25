@@ -14,7 +14,7 @@ OSX64FORTLIBDIR = /opt/intel/Compiler/11.1/080/lib
 
 # Definition of the object variables
 
-obj = main.o dmalloc.o assert.o
+obj = main.o dmalloc.o assert.o translate.o sring_util.o
 objwin = $(obj:.o=.obj)
 
 #*** General Purpose Rules ***
