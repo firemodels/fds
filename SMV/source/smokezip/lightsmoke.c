@@ -13,10 +13,10 @@
 #include "lightsmoke.h"
 #include "MALLOC.h"
 
+char lightsmoke_revision[]="$Revision$";
 
 #define IJKRAD(i,j,k) (i) + nx*(j) + nxy*(k)
 #define IJKRAD2(i,j,k) ((i)+1) + (nx+2)*((j)+1) + (nx+2)*(ny+2)*((k)+1)
-
 
 /* ----------------------- build_radiancemap ----------------------------- */
 

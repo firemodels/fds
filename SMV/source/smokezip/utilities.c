@@ -12,6 +12,7 @@
 #include "egz_stdio.h"
 #include "svzip.h"
 #include "MALLOC.h"
+#include "string_util.h"
 #include "svn_revision.h"
 
 // svn revision character string
@@ -28,42 +29,6 @@ int iseed=0;
 int match(const char *buffer, const char *key, unsigned int lenkey){
   if(strncmp(buffer,key,lenkey) == 0)return(1);
   return(0);
-}
-
-/* ------------------ trim_front ------------------------ */
-
-char *trim_front(char *line){
-  char *blank=" ";
-  const char *c;
-  unsigned int i,len;
-
-  c = line;
-  len=strlen(line);
-  for(i=0;i<len;i++){
-    if(strncmp(c++,blank,1)!=0)return line+i;
-  }
-  return line;
-}
-
-/* ------------------ trim ------------------------ */
-
-void trim(char *line){
-  char *blank=" ";
-  const char *c;
-  const char *lf="\n";
-  unsigned int len;
-  unsigned int i;
-  len = strlen(line);
-  c = line+len-1;
-  for(i=0; i<len; i++){
-    if(strncmp(c,blank,1)!=0&&strncmp(c,lf,1)!=0){
-      c++; 
-      line[c-line]='\0';
-      return;
-    }
-    c--;
-  }
-  *line='\0';
 }
 
 /* ------------------ irle ------------------------ */
@@ -154,30 +119,6 @@ void smoothlabel(float *a, float *b, int n){
   *a = factor*(int)(*a/factor+0.5f);
   *b = *a + (n-2)*delta;
 
-}
-
-  /* ------------------ trimzeros ------------------------ */
-
-void trimzeros(char *line){
-  unsigned int i;
-  unsigned int len;
-  char *c;
-
-  len = strlen(line);
-  c = line + len-1;
-  for(i=len-1;i>0;i--){
-    if(*c=='0'){
-      c--;
-      if(*c=='.'){
-        line[i+1]='\0';
-        return;
-      }
-      continue;
-    }
-    line[i+1]='\0';
-    return;
-  }
-  line[0]='\0';
 }
 
   /* ------------------ getfileinfo ------------------------ */
@@ -339,17 +280,21 @@ int getmaxrevision(void){
   MAXREV(CNV3dsmoke_revision);
   MAXREV(CNVboundary_revision);
   MAXREV(CNVpart_revision);
-  MAXREV(CNVslice_revision);
   MAXREV(CNVplot3d_revision);
+  MAXREV(CNVslice_revision);
   MAXREV(csphere_revision);
   MAXREV(dmalloc_revision);
   MAXREV(egz_stdio_revision);
-  MAXREV(endian_revision);
+  MAXREV(histogram_revision); //
+  MAXREV(isobox_revision); //
+  MAXREV(kdtree_revision); //
+  MAXREV(lightsmoke_revision); //
   MAXREV(main_revision);
   MAXREV(readfiles_revision);
-  MAXREV(utilities_revision);
+  MAXREV(smv_endian_revision);
+  MAXREV(string_util_revision);
   MAXREV(threader_revision);
-  MAXREV(kdtree_revision);
+  MAXREV(utilities_revision);
   return max_revision;
 }
 

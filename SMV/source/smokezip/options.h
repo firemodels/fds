@@ -2,6 +2,14 @@
 // $Revision$
 // $Author$
 
+#ifdef CPP
+#define CCC "C"
+#define EXTERNCPP extern "C"
+#else
+#define CCC
+#define EXTERNCPP
+#endif
+
 
  /* ------------------ options ------------------------ */
 #ifdef WIN32

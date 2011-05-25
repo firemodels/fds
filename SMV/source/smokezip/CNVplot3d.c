@@ -11,6 +11,7 @@
 #include "egz_stdio.h"
 #include "svzip.h"
 #include "MALLOC.h"
+#include "string_util.h"
 
 // svn revision character string
 char CNVplot3d_revision[]="$Revision$";

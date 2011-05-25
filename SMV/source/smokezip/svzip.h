@@ -249,7 +249,6 @@ int getfileinfo(char *filename, char *sourcedir, int *filesize);
 void filecopy(char *destdir, char *file, char *filebase);
 void copyfile(char *destfile, char *sourcefile);
 void makesvd(char *destdir, char *smvfile);
-void trimzeros(char *line);
 void usage(char *prog);
 void getpdf(float *vals, int nvals, pdfdata *pdf);
 void mergepdf(pdfdata *pdf1, pdfdata *pdf2, pdfdata *pdfmerge);
@@ -265,7 +264,6 @@ int convertable_part(part *parti);
 #endif
 void *compress_patches(void *arg);
 patch *getpatch(char *string);
-char *trim_front(char *line);
 int patchdup(patch *patchj, int ipatch);
 int readlabels(flowlabels *flowlabel, FILE *stream);
 void readini(char *file);
@@ -278,7 +276,6 @@ void Get_Part_Bounds(void);
 void convert_3dsmoke(smoke3d *smoke3di, int *thread_index);
 void *compress_smoke3ds(void *arg);
 int match(const char *buffer, const char *key, unsigned int lenkey);
-void trim(char *line);
 void Normal(unsigned short *v1, unsigned short *v2, unsigned short *v3, float *normal, float *area);
 float atan3(float y, float x);
 
