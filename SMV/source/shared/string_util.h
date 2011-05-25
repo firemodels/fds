@@ -2,6 +2,15 @@
 // $Revision$
 // $Author$
 
+#ifdef IN_STRING_UTIL
+#define STREXTERN
+#define STRDECL(var,val)  var=val
+#else
+#define STREXTERN extern CCC
+#define STRDECL(var,val)  var
+#endif
+
+
 EXTERNCPP char *get_zonefilename(char *buffer);
 EXTERNCPP void fparsecsv(char *buffer, float *vals, int ncols, int *ntokens);
 EXTERNCPP void parsecsv(char *buffer, char **tokens, int ncols, int *ntokens);
@@ -17,6 +26,7 @@ EXTERNCPP time_t file_modtime(char *filename);
 EXTERNCPP int is_file_newer(char *file1, char *file2);
 EXTERNCPP char *getprogdir(char *progname);
 
+EXTERNCPP void init_string_util(void);
 EXTERNCPP char *lastname(char *argi);
 EXTERNCPP void trim(char *line);
 EXTERNCPP char *trim_front(char *line);
@@ -37,7 +47,4 @@ EXTERNCPP float MIN(float x,float y);
 EXTERNCPP float MAX(float x,float y);
 EXTERNCPP float frexp10(float x, int *exp10);
 
-
-SVEXTERN char dirseparator[3];
-
-
+STREXTERN char dirseparator[3];

@@ -16,7 +16,25 @@
 
 // svn revision character string
 char translate_revision[]="$Revision$";
-extern int tr_english;
+
+
+/* ------------------ isocompare ------------------------ */
+
+int compare_trdata2( const void *arg1, const void *arg2 ){
+  trdata *tri, *trj;
+
+  // same as compare_trdata except puts untranslated strings at the beginning of list
+
+  tri = (trdata *)arg1;
+  trj = (trdata *)arg2;
+
+  if((tri->value==NULL&&trj->value==NULL)||
+     (tri->value!=NULL&&trj->value!=NULL)){
+    return strcmp(tri->key,trj->key);
+  }
+  if(tri->value==NULL&&trj->value!=NULL)return -1;
+  return 1;
+}
 
 /* ------------------ isocompare ------------------------ */
 
@@ -29,30 +47,21 @@ int compare_trdata( const void *arg1, const void *arg2 ){
   return strcmp(tri->key,trj->key);
 }
 
-
 /* ------------------ getstring ------------------------ */
 
 char *getstring(char *buffer){
-  char *begin=NULL;
-  int len,i;
-// look for a quoted string in buffer -  "la;kjsf;lkjaf"
-  
-  len=strlen(buffer);
+  char *begin,*end;
+  int i;
 
-  for(i=0;i<len;i++){
-    if(buffer[i]=='"'){
-      begin=buffer+i+1;
-      break;
-    }
-  }
+  // if buffer contains msgid "string"
+  // return a pointer to s in string
+
+  begin=strchr(buffer,'"');
   if(begin==NULL)return NULL;
-  for(i=begin-buffer+1;i<len;i++){
-    if(buffer[i]=='"'){
-      buffer[i]=0;
-      break;
-    }
-  }
-  if(i==len)buffer[i-1]=0;
+  begin++;
+  end=strrchr(begin,'"');
+  if(end==NULL)return NULL;
+  end[0]=0;
   for(i=0;i<strlen(begin);i++){
     if(begin[i]!=' ')return begin;
   }
@@ -61,15 +70,15 @@ char *getstring(char *buffer){
 
 /* ------------------ parse_lang ------------------------ */
 
-int parse_lang(char *file){
+int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr){
   FILE *stream;
   char buffer[1000];
   char *buf;
   char *key, *value;
-
+  trdata *trinfo;
+  int ntrinfo;
 
   ntrinfo=0;
-  FREEMEMORY(trinfo);
   stream=fopen(file,"r");
   if(stream==NULL)return 0;
 
@@ -159,7 +168,7 @@ void init_translate(char *bindir, char *tr_name){
       fclose(stream);
       tr_lang=1;
     }
-    tr_lang=parse_lang(smokeview_lang);
+    tr_lang=parse_lang(smokeview_lang,&trinfo,&ntrinfo);
   }
 }
 

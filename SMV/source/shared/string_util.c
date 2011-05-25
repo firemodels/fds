@@ -1,7 +1,7 @@
 // $Date$ 
 // $Revision$
 // $Author$
-
+#define IN_STRING_UTIL
 #include "options.h"
 #include <stdio.h>  
 #include <string.h>
@@ -17,6 +17,14 @@
 
 // svn revision character string
 char string_util_revision[]="$Revision$";
+
+void init_string_util(void){
+#ifdef WIN32
+    strcpy(dirseparator,"\\");
+#else
+    strcpy(dirseparator,"/");
+#endif
+}
 
 /* ----------------------- fparsecsv ----------------------------- */
 
@@ -153,13 +161,6 @@ int can_write_to_dir(char *dir){
   char full_name[1024];
   char file_name[1024], *file_name_ptr;
   FILE *stream;
-  char dirseparator[3];
-
-#ifdef WIN32
-  strcpy(dirseparator,"\\");
-#else
-  strcpy(dirseparator,"/");
-#endif
 
   file_name_ptr=randstr(file_name,20);
   if(file_name_ptr==NULL)return 0;
@@ -239,8 +240,6 @@ char *getprogdir(char *progname){
 /* ------------------ lastname ------------------------ */
 
 char *lastname(char *argi){
-  size_t i,nargi;
-  char *origargi;
   char *lastdirsep;
   char *dir, *filename, cwdpath[1000];
 
