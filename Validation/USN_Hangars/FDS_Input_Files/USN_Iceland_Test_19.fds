@@ -49,18 +49,14 @@
       COLOR     = 'BLACK'
       THICKNESS = 0.05 /
 
-&SURF ID= 'BURNER'
-      COLOR= 'RED'
+&SURF ID= 'BURNER',
+      COLOR= 'RED',
       RAMP_Q= 'FIRE',
-      TMP_FRONT=1000., HRRPUA=1857 /
-&RAMP ID='FIRE' T=   0.0 F= 0.0/
-&RAMP ID='FIRE' T=  30.0 F= 0.0625/
-&RAMP ID='FIRE' T=  60.0 F= 0.25/
-&RAMP ID='FIRE' T=  90.0 F= 0.56/
-&RAMP ID='FIRE' T= 120.0 F= 1.0/
-&RAMP ID='FIRE' T= 240.0 F= 1.0/
-&RAMP ID='FIRE' T= 241.0 F= 0.0/
-
+      TMP_FRONT=1000.,
+      HRRPUA= 1661. / 
+&RAMP ID='FIRE' T= 0.0 F= 0.0 /
+&RAMP ID='FIRE' T= 15.0 F= .5 /
+&RAMP ID='FIRE' T= 30.0 F= 1.0 /
 
 Burner
 &OBST XB=-1.1,1.1,-1.1,1.1,0.0,0.2, SURF_IDS='BURNER','STEEL','STEEL'/
