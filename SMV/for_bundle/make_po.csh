@@ -11,7 +11,7 @@ foreach lang (de fr it se)
 echo
 echo creating $lang translation
 set infile=smokeview_template.po
-set outfile=smokeview_$lang.po
+set outfile=smokeview_$lang_initial.po
 curl -F pofile=@$infile \
         -F language=$lang \
         -F output=pofile  \

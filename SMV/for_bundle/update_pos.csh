@@ -11,5 +11,5 @@ cat $SOURCEDIR/*.c $SOURCEDIR/*.cpp $SOURCEDIR/*.h | $MAKEPO | sort -u | $MAKEPO
 foreach pofile (smokeview_??.po)
 echo updating $pofile
 $MERGEPO $pofile smokeview_template.po > xxx.po
-mv xxx.po $pofile
+mv xxx.po $pofile.revised
 end
