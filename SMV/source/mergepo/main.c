@@ -22,7 +22,6 @@ int main(int argc, char **argv){
   char *arg,*prog, *file1=NULL, *file_template=NULL;
 
   initMM();
-  init_string_util();
   prog=argv[0];
   for(i=1;i<argc;i++){
     int lenarg;
