@@ -20,7 +20,6 @@ int main(int argc, char **argv){
   int i;
   char *arg,*prog;
 
-  init_string_util();
   prog=argv[0];
   for(i=1;i<argc;i++){
     int lenarg;
