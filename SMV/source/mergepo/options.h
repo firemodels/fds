@@ -38,6 +38,27 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
+#ifdef CPP
+#define CCC "C"
+#else
+#define CCC
+#endif
+
+#ifdef CPP
+#define EXTERNCPP extern "C"
+#else
+#define EXTERNCPP
+#endif
+
+#ifdef INMAIN
+#define SVEXTERN
+#define SVDECL(var,val)  var=val
+#else
+#define SVEXTERN extern CCC
+#define SVDECL(var,val)  var
+#endif
+
+
 #ifdef pp_LINUX64
 #define pp_LINUX
 #endif
