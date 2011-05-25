@@ -1761,12 +1761,6 @@ void initvars1(void){
   dwinHbase=60;
   dwinH=60;
 
-#ifdef WIN32
-  strcpy(dirseparator,"\\");
-#else
-  strcpy(dirseparator,"/");
-#endif
-
   {
     char version[100];
     char svn_version[100];

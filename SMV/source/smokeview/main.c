@@ -16,6 +16,7 @@
 #include "smokeviewvars.h"
 #include "smokeviewapi.h"
 #include "translate.h"
+#include "string_util.h"
 
 // svn revision character string
 char main_revision[]="$Revision$";
@@ -28,6 +29,7 @@ int main(int argc, char **argv){
   char **argv_sv;
 
   initMM();
+  init_string_util();
   initvars0();
   initcolors();
   initvars1();
