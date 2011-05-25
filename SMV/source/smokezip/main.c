@@ -15,6 +15,7 @@
 #include "lightsmoke.h"
 #endif
 #include "lightsmoke.h"
+#include "string_util.h"
 #include "MALLOC.h"
 
 #define MARK 255
@@ -106,11 +107,6 @@ int main(int argc, char **argv){
   boundzipstep=1;
   slicezipstep=1;
   filesremoved=0;
-#ifdef WIN32
-  strcpy(dirseparator,"\\");
-#else
-  strcpy(dirseparator,"/");
-#endif
 
   npatch_files=0;
   nsmoke3d_files=0;

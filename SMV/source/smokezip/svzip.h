@@ -377,7 +377,6 @@ EXTERN int endianswitch,overwrite_b,overwrite_s;
 EXTERN int cleanfiles;
 EXTERN char *destdir,*sourcedir;
 EXTERN int lensourcedir,lendestdir;
-EXTERN char dirseparator[3];
 EXTERN char pp[2];
 EXTERN int smoke3dzipstep, boundzipstep, slicezipstep;
 EXTERN int filesremoved;
