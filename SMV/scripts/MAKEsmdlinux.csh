@@ -3,7 +3,7 @@ set SVNROOT=~/FDS-SMV
 
 cd $SVNROOT/Utilities/smokediff/INTEL_LINUX_32
 make -f ../Makefile clean >& /dev/null
-./make_diff.csh
+./make_diff.sh
 cd $SVNROOT/Utilities/smokediff/INTEL_LINUX_64
 make -f ../Makefile clean >& /dev/null
-./make_diff.csh
+./make_diff.sh
