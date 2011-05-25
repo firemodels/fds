@@ -1,0 +1,49 @@
+// $Date: 2011-05-01 14:44:51 -0400 (Sun, 01 May 2011) $ 
+// $Revision: 8236 $
+// $Author: gforney $
+
+//***********************
+//************* #definess
+//***********************
+#ifdef INLIGHTSMOKE
+#define LIGHTEXTERN
+#else
+#define LIGHTEXTERN extern
+#endif
+
+//***********************
+//************* structures
+//***********************
+
+/* --------------------------  radiancedata ------------------------------------ */
+
+typedef struct {
+  int *ijkbar;
+  unsigned char *radiance, *opacity;
+  float *xyzbar0, *xyzbar;
+  float *dxyz;
+} radiancedata;
+
+
+
+//***********************
+//************* headers
+//***********************
+
+void setup_radiancemap(radiancedata *radianceinfo, int ijkbar[3], float xyzbar0[3], float xyzbar[3], float dxyz[3], 
+                               unsigned char *radiance, unsigned char *opacity);
+void build_radiancemap2(radiancedata *radianceinfo);
+void build_radiancemap(radiancedata *radianceinfo);
+#ifdef pp_KDTEST
+void test_kd(void);
+#endif
+
+//***********************
+//************* variables
+//***********************
+
+EXTERN int doit_smoke3d, doit_boundary, doit_slice, doit_plot3d;
+#ifdef pp_PART2
+EXTERN int doit_particle;
+#endif
+
