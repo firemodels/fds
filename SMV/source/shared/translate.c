@@ -92,6 +92,8 @@ int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr){
   if(ntrinfo==0)return 0;
 
   NewMemory((void **)&trinfo,sizeof(trdata)*ntrinfo);
+  *trinfoptr=trinfo;
+  *ntrinfoptr=ntrinfo;
 
   ntrinfo=0;
   rewind(stream);
