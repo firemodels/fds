@@ -3,15 +3,13 @@
 // $Author$
 
 #include "options.h"
+#include <stdlib.h>
 #ifdef pp_SHOOTER
 #include <string.h>
 #ifdef pp_OSX
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
-#endif
-#ifndef WIN32
-#include <openssl/rand.h>
 #endif
 #include <math.h>
 #include "flowfiles.h"
