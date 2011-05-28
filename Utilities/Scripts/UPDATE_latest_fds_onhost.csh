@@ -7,4 +7,4 @@ echo SVN updating using
 echo directory: $directory
 echo      host: $host
 echo
-ssh $host \( cd \~/$directory \; svn update \)
+ssh -q $host \( cd \~/$directory \; svn update \)
