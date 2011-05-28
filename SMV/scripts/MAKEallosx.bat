@@ -20,6 +20,6 @@ call %envfile%
 
 %svn_drive%
 
-call %svn_root%\SMV\scripts\MAKEsmdosux.bat
+call %svn_root%\SMV\scripts\MAKEsmdosx.bat
 call %svn_root%\SMV\scripts\MAKEsmzosx.bat
 call %svn_root%\SMV\scripts\MAKEf2aosx.bat
