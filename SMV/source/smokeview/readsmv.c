@@ -6196,7 +6196,6 @@ typedef struct {
   PrintMemoryInfo;
 #endif
 
-  
   return 0;
 }
 

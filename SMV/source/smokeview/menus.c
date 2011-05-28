@@ -6473,7 +6473,7 @@ updatemenu=0;
       if(strcmp(tr_name,"de")==0){
         strcpy(langmenu,_("Use German menus"));
       }
-      else if(strcmp(tr_name,"de")==0){
+      else if(strcmp(tr_name,"fr")==0){
         strcpy(langmenu,_("Use French menus"));
       }
       else if(strcmp(tr_name,"it")==0){

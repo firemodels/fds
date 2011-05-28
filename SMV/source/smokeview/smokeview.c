@@ -3609,11 +3609,8 @@ void Args(int argc, char **argv){
     else if(strncmp(argv[i],"-lang",5)==0){
       ++i;
       if(i<argc){
-        int lang_len;
-
-        lang_len=strlen(argv[i]);
         FREEMEMORY(tr_name);
-        NewMemory((void **)&tr_name,lang_len+1);
+        NewMemory((void **)&tr_name,strlen(argv[i])+48+1);
         strcpy(tr_name,argv[i]);
       }
     }

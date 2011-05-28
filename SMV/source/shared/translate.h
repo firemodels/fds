@@ -10,6 +10,12 @@
 #define TRDECL(var,val)  var
 #endif
 
+#ifdef pp_LANG
+#define _(String) translate(String)
+#else
+#define _(String) (String)
+#endif
+
 /* --------------------------  structs ------------------------------------ */
 
 typedef struct {
