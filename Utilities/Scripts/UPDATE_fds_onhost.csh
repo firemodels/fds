@@ -9,4 +9,4 @@ echo directory: $directory
 echo  revision: $revision
 echo      host: $host
 echo
-ssh $host \( cd \~/$directory \; svn -r $revision update \)
+ssh -q $host \( cd \~/$directory \; svn -r $revision update \)
