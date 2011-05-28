@@ -18,6 +18,7 @@ mkdir -p $OSXDIR/Documentation
 cp note.txt $OSXDIR/Documentation/.
 
 cp $FORBUNDLE/objects.svo $OSXDIR/.
+cp $FORBUNDLE/*.po $OSXDIR/.
 scp $OSXHOST\:$SMVDIR/smokeview_osx_test_64 $OSXDIR/.
 scp $OSXHOST\:$SMZDIR/smokezip_osx_64 $OSXDIR/.
 scp $OSXHOST\:$SMDDIR/smokediff_osx_64 $OSXDIR/.

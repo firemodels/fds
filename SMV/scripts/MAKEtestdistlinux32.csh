@@ -15,6 +15,7 @@ mkdir -p $LINUXDIR
 mkdir -p $LINUXDIR/Documentation
 cp note.txt $LINUXDIR/Documentation/.
 cp $FORBUNDLE/objects.svo $LINUXDIR/.
+cp $FORBUNDLE/*.po $LINUXDIR/.
 cp $SMVDIR/smokeview_linux_test_32 $LINUXDIR/.
 cp $SMZDIR/smokezip_linux_32 $LINUXDIR/.
 cp $SMDDIR/smokediff_linux_32 $LINUXDIR/.
