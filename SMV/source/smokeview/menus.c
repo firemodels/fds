@@ -4337,8 +4337,8 @@ updatemenu=0;
       glutAddMenuEntry("-",DUMMYwallmenu);
     }
     if(npatchloaded>1){
-      glutAddMenuEntry("Show all boundary files",SHOWALL_BOUNDARY);
-      glutAddMenuEntry("Hide all boundary files",HIDEALL_BOUNDARY);
+      glutAddMenuEntry(_("Show all boundary files"),SHOWALL_BOUNDARY);
+      glutAddMenuEntry(_("Hide all boundary files"),HIDEALL_BOUNDARY);
       glutAddMenuEntry("-",DUMMYwallmenu);
     }
     if(showexterior==1){
@@ -4402,7 +4402,7 @@ updatemenu=0;
     }
     glutAddMenuEntry(_("Smooth blockages now"),SMOOTH_BLOCKAGES);
   }
-  glutAddMenuEntry("View Method:",999);
+  glutAddMenuEntry(_("View Method:"),999);
   if(visBlocks==visBLOCKAsInput){
     glutAddMenuEntry(_("   *Defined in input file"),visBLOCKAsInput);
   }
@@ -4674,7 +4674,7 @@ updatemenu=0;
 /* --------------------------------static slice menu -------------------------- */
   if(nplot3d_files>0){
     CREATEMENU(staticslicemenu,Plot3DShowMenu);
-    glutAddSubMenu("Solution Variable",staticvariablemenu);
+    glutAddSubMenu(_("Solution Variable"),staticvariablemenu);
     if(cmesh->visz==1)glutAddMenuEntry(_("*xy plane"),1);
     if(cmesh->visz==0)glutAddMenuEntry(_("xy plane"),1);
     if(cmesh->visy==1)glutAddMenuEntry(_("*xz plane"),2);
@@ -5009,7 +5009,7 @@ updatemenu=0;
   }
  glutAddSubMenu(_("Surfaces"),ventmenu);
  if(ntotal_blockages>0||isZoneFireModel==0){
-    glutAddSubMenu("Grid",gridslicemenu);
+    glutAddSubMenu(_("Grid"),gridslicemenu);
   }
   if(isZoneFireModel==0){
     if(visFrame==1)glutAddMenuEntry(_("*Outline"),3);
@@ -5344,7 +5344,7 @@ updatemenu=0;
 
     CREATEMENU(particlepropshowmenu,ParticlePropShowMenu);
     if(npart5prop>=0){
-      glutAddMenuEntry("Color with:",-1);
+      glutAddMenuEntry(_("Color with:"),-1);
       for(i=0;i<npart5prop;i++){
         part5prop *propi;
 
@@ -5407,7 +5407,7 @@ updatemenu=0;
 
     CREATEMENU(humanpropshowmenu,ParticlePropShowMenu);
     if(npart5prop>=0){
-      glutAddMenuEntry("Color with:",-1);
+      glutAddMenuEntry(_("Color with:"),-1);
       for(i=0;i<npart5prop;i++){
         part5prop *propi;
 
@@ -5483,8 +5483,8 @@ updatemenu=0;
     }
     glutAddMenuEntry("-",999);
     if(plotstate==DYNAMIC_PLOTS&&visSmokePart!=0){
-      if(visSmokePart==2)glutAddMenuEntry("*Particles",1);
-      if(visSmokePart==1)glutAddMenuEntry("#Particles",1);
+      if(visSmokePart==2)glutAddMenuEntry(_("*Particles"),1);
+      if(visSmokePart==1)glutAddMenuEntry(_("#Particles"),1);
     }
     else{
       glutAddMenuEntry(_("Particles"),1);
@@ -5610,7 +5610,7 @@ updatemenu=0;
           strcat(menulabel,smoke3di->menulabel);
           glutAddMenuEntry(menulabel,i);
         }
-        glutAddSubMenu("Smoke color map",smokecolorbarmenu);
+        glutAddSubMenu(_("Smoke color map"),smokecolorbarmenu);
 #ifdef pp_LIGHT
         if(have_lighting==1){
           if(show_smoke_lighting==1)glutAddMenuEntry(_("*Light smoke"),HAVE_LIGHT);
@@ -5666,7 +5666,7 @@ updatemenu=0;
       if(transparent_state!=MAX_SOLID)glutAddMenuEntry(_("Maximum level solid"),97);
     }
     else{
-      glutAddMenuEntry("Show",99);
+      glutAddMenuEntry(_("Show"),99);
       if(visAIso==0)glutAddMenuEntry(_("*Hide"),98);
       if(visAIso!=0)glutAddMenuEntry(_("Hide"),98);
     }
@@ -6121,13 +6121,13 @@ updatemenu=0;
     }
   }
   if(nvsliceloaded0+nvsliceloaded1+nvsliceloaded2>0){
-    glutAddSubMenu("Animated Vector Slices",showvslicemenu);
+    glutAddSubMenu(_("Animated Vector Slices"),showvslicemenu);
   }
 
   if(nsliceloaded>0){
-    glutAddSubMenu("Animated Slices",showhideslicemenu);
+    glutAddSubMenu(_("Animated Slices"),showhideslicemenu);
     if(nmultislices<nslice_files){
-      glutAddSubMenu("Animated Multi-Slices",showmultislicemenu);
+      glutAddSubMenu(_("Animated Multi-Slices"),showmultislicemenu);
     }
   }
 
@@ -6139,8 +6139,8 @@ updatemenu=0;
   }
   if(nzone>0&&(ReadZoneFile==1||nzvents>0))glutAddSubMenu("Zone",zoneshowmenu);
   if(ReadTargFile==1){
-    if(showtarget==1)glutAddMenuEntry("*Targets",2);
-    if(showtarget==0)glutAddMenuEntry("Targets",2);
+    if(showtarget==1)glutAddMenuEntry(_("*Targets"),2);
+    if(showtarget==0)glutAddMenuEntry(_("Targets"),2);
   }
   if(nobject_defs>0){
     int num_activedevices=0;
@@ -6183,16 +6183,16 @@ updatemenu=0;
   }
   if(ntc_total>0){
     if(isZoneFireModel==1){
-      if(visSensor==1)glutAddMenuEntry("*Targets",9);
-      if(visSensor==0)glutAddMenuEntry("Targets",9);
+      if(visSensor==1)glutAddMenuEntry(_("*Targets"),9);
+      if(visSensor==0)glutAddMenuEntry(_("Targets"),9);
       if(hasSensorNorm==1){
-        if(visSensorNorm==1)glutAddMenuEntry("*Target orientation",14);
-        if(visSensorNorm==0)glutAddMenuEntry("Target orientation",14);
+        if(visSensorNorm==1)glutAddMenuEntry(_("*Target orientation"),14);
+        if(visSensorNorm==0)glutAddMenuEntry(_("Target orientation"),14);
       }
     }
     else{
-      if(visSensor==1)glutAddMenuEntry("*Thermocouples",9);
-      if(visSensor==0)glutAddMenuEntry("Thermocouples",9);
+      if(visSensor==1)glutAddMenuEntry(_("*Thermocouples"),9);
+      if(visSensor==0)glutAddMenuEntry(_("Thermocouples"),9);
       if(hasSensorNorm==1){
         if(visSensorNorm==1)glutAddMenuEntry("*Thermocouple norms",14);
         if(visSensorNorm==0)glutAddMenuEntry("Thermocouple norms",14);
@@ -6202,7 +6202,7 @@ updatemenu=0;
   if(titlesafe_offset==0)glutAddMenuEntry(_("Offset window"),12);
   if(titlesafe_offset!=0)glutAddMenuEntry(_("*Offset window"),12);
   if(ntextures_loaded_used>0){
-    glutAddSubMenu("Textures",textureshowmenu);
+    glutAddSubMenu(_("Textures"),textureshowmenu);
   }
 
 /* --------------------------------frame rate menu -------------------------- */
@@ -6222,16 +6222,16 @@ updatemenu=0;
   if(frameratevalue!=15)glutAddMenuEntry("15 FPS",15);
   if(frameratevalue==30)glutAddMenuEntry("*30 FPS",30);
   if(frameratevalue!=30)glutAddMenuEntry("30 FPS",30);
-  if(frameratevalue==2001)glutAddMenuEntry("*Real time",2001);
-  if(frameratevalue!=2001)glutAddMenuEntry("Real time",2001);
-  if(frameratevalue==2002)glutAddMenuEntry("*2 x Real time",2002);
-  if(frameratevalue!=2002)glutAddMenuEntry("2 x Real time",2002);
-  if(frameratevalue==2004)glutAddMenuEntry("*4 x Real time",2004);
-  if(frameratevalue!=2004)glutAddMenuEntry("4 x Real time",2004);
-  if(frameratevalue!=1000)glutAddMenuEntry("Unlimited",1000);
-  if(frameratevalue==1000)glutAddMenuEntry("*Unlimited",1000);
-  if(frameratevalue<0){glutAddMenuEntry("*Step",-1);}
-   else{glutAddMenuEntry("Step",-1);}
+  if(frameratevalue==2001)glutAddMenuEntry(_("*Real time"),2001);
+  if(frameratevalue!=2001)glutAddMenuEntry(_("Real time"),2001);
+  if(frameratevalue==2002)glutAddMenuEntry(_("*2 x Real time"),2002);
+  if(frameratevalue!=2002)glutAddMenuEntry(_("2 x Real time"),2002);
+  if(frameratevalue==2004)glutAddMenuEntry(_("*4 x Real time"),2004);
+  if(frameratevalue!=2004)glutAddMenuEntry(_("4 x Real time"),2004);
+  if(frameratevalue!=1000)glutAddMenuEntry(_("Unlimited"),1000);
+  if(frameratevalue==1000)glutAddMenuEntry(_("*Unlimited"),1000);
+  if(frameratevalue<0){glutAddMenuEntry(_("*Step"),-1);}
+   else{glutAddMenuEntry(_("Step"),-1);}
 
 /* --------------------------------render menu -------------------------- */
    {
@@ -6276,7 +6276,7 @@ updatemenu=0;
     glutAddMenuEntry(renderwindow3,Render2Window);
   }
   glutAddMenuEntry("-",10000);
-  glutAddMenuEntry("TYPE",10000);
+  glutAddMenuEntry(_("TYPE"),10000);
   if(renderfiletype==0){
     glutAddMenuEntry("*PNG",RenderPNG);
 #ifdef pp_JPEG
@@ -6305,8 +6305,8 @@ updatemenu=0;
 #endif
   }
   glutAddMenuEntry("-",10000);
-  glutAddMenuEntry("NUMBER",10000);
-  glutAddMenuEntry("One Frame",RenderOnce);
+  glutAddMenuEntry(_("NUMBER"),10000);
+  glutAddMenuEntry(_("One Frame"),RenderOnce);
   update_glui_render();
   if(RenderTime==1||touring==1){
    // if(render_double_state==0){
@@ -6449,15 +6449,15 @@ updatemenu=0;
       if(uci->visible==0)continue;
       glutAddSubMenu(uci->unitclass,uci->submenuid);
     }
-    if(vishmsTimelabel==0)glutAddMenuEntry("time (h:m:s)",-2);
-    if(vishmsTimelabel==1)glutAddMenuEntry("*time (h:m:s)",-2);
-    glutAddMenuEntry("Reset",-1);
+    if(vishmsTimelabel==0)glutAddMenuEntry(_("time (h:m:s)"),-2);
+    if(vishmsTimelabel==1)glutAddMenuEntry(_("*time (h:m:s)"),-2);
+    glutAddMenuEntry(_("Reset"),-1);
   }
 
 /* --------------------------------option menu -------------------------- */
 
   CREATEMENU(optionmenu,OptionMenu);
-  glutAddSubMenu("Colorbars/Shades",colorbarmenu);
+  glutAddSubMenu(_("Colorbars/Shades"),colorbarmenu);
   if(nunitclasses>0)glutAddSubMenu(_("Units"),unitsmenu);
 #ifdef pp_SHOWLIGHT
   if(showlightmenu==1)glutAddSubMenu(_("Lighting"),lightingmenu);
@@ -6735,7 +6735,7 @@ updatemenu=0;
       else{STRCPY(menulabel,targinfo[i].file);}
       glutAddMenuEntry(menulabel,i);
     }
-    glutAddMenuEntry("Unload",-1);
+    glutAddMenuEntry(_("Unload"),-1);
     CheckMemory;
   }
 
@@ -6753,7 +6753,7 @@ updatemenu=0;
         glutAddMenuEntry(menulabel,i);
       }
     }
-    glutAddMenuEntry("Unload all",-1);
+    glutAddMenuEntry(_("Unload all"),-1);
 
     if(nmeshes==1){
       CREATEMENU(particlemenu,ParticleMenu);
@@ -7811,10 +7811,10 @@ updatemenu=0;
      }
 
       if(nisoloaded>1){
-        glutAddSubMenu("Unload",unloadisomenu);
+        glutAddSubMenu(_("Unload"),unloadisomenu);
       }
       else{
-       glutAddMenuEntry("Unload",-1);
+       glutAddMenuEntry(_("Unload"),-1);
       }
     }
 
@@ -7918,24 +7918,24 @@ updatemenu=0;
 
     glutAddMenuEntry(WRITEINIfile,2);
 
-    STRCPY(caselabel,"Write ");
+    STRCPY(caselabel,_("Write "));
     STRCAT(caselabel,caseinifilename);
 
     glutAddMenuEntry(caselabel,3);
 
     if(ndeviceinfo>0){
       glutAddMenuEntry("-",999);
-      glutAddMenuEntry("Read .svo files",4);
+      glutAddMenuEntry(_("Read .svo files"),4);
     }
 
     CREATEMENU(reloadmenu,ReloadMenu);
     glutAddMenuEntry(_("Reload Now"),0);
-    if(periodic_value==1)glutAddMenuEntry("*Reload every 1 min",1);
-    if(periodic_value!=1)glutAddMenuEntry("Reload every 1 min",1);
-    if(periodic_value==5)glutAddMenuEntry("*Reload every 5 min",5);
-    if(periodic_value!=5)glutAddMenuEntry("Reload every 5 min",5);
-    if(periodic_value==10)glutAddMenuEntry("*Reload every 10 min",10);
-    if(periodic_value!=10)glutAddMenuEntry("Reload every 10 min",10);
+    if(periodic_value==1)glutAddMenuEntry(_("*Reload every 1 minute"),1);
+    if(periodic_value!=1)glutAddMenuEntry(_("Reload every 1 minute"),1);
+    if(periodic_value==5)glutAddMenuEntry(_("*Reload every 5 minutes"),5);
+    if(periodic_value!=5)glutAddMenuEntry(_("Reload every 5 minutes"),5);
+    if(periodic_value==10)glutAddMenuEntry(_("*Reload every 10 minutes"),10);
+    if(periodic_value!=10)glutAddMenuEntry(_("Reload every 10 minutes"),10);
     glutAddMenuEntry(_("Stop Rendering"),-1);
 
     CREATEMENU(scriptmenu,ScriptMenu);
@@ -8002,7 +8002,7 @@ updatemenu=0;
         glutAddSubMenu(loadmenulabel,loadsmoke3dmenu);
       }
       if(manual_terrain==1&&nterraininfo>0){
-        glutAddSubMenu("Terrain",loadterrainmenu);
+        glutAddSubMenu(_("Terrain"),loadterrainmenu);
       }
       if(nslice_files>0&&nmultislices<nslice_files){
         strcpy(loadmenulabel,"Multi-Slices");
@@ -8134,7 +8134,7 @@ updatemenu=0;
         if(trainerload==3)glutAddMenuEntry(_("*Oxygen"),3);
         if(trainerload!=3)glutAddMenuEntry(_("Oxygen"),3);
       }
-      glutAddMenuEntry("Clear",998);
+      glutAddMenuEntry(_("Clear"),998);
     }
 
     CREATEMENU(mainmenu,MainMenu);

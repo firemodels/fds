@@ -3420,7 +3420,9 @@ void Args(int argc, char **argv){
       if(
         strncmp(argv[1],"-points",7)==0||
         strncmp(argv[1],"-frames",7)==0||
+#ifdef pp_LANG        
         strncmp(argv[1],"-lang",5)==0||
+#endif        
         strncmp(argv[1],"-script",7)==0
         ){
         iarg++;
@@ -3606,14 +3608,21 @@ void Args(int argc, char **argv){
         mxframes=mxframes_comm;
       }
     }
+#ifdef pp_LANG
     else if(strncmp(argv[i],"-lang",5)==0){
       ++i;
       if(i<argc){
+        int langlen;
+        char *lang;
+
         FREEMEMORY(tr_name);
-        NewMemory((void **)&tr_name,strlen(argv[i])+48+1);
-        strcpy(tr_name,argv[i]);
+        lang=argv[i];
+        langlen=strlen(lang);
+        NewMemory((void **)&tr_name,langlen+48+1);
+        strcpy(tr_name,lang);
       }
     }
+#endif    
     else if(strncmp(argv[i],"-isotest",8)==0){
       isotest=1;
     }
