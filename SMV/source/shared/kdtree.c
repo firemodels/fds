@@ -29,9 +29,9 @@ void test_kd(void){
   int nbests, nwanted;
   int nkdpoints=NKDPOINTS;
 
-  points = malloc(NKDPOINTS*sizeof(kdpoint));
-  points2 = malloc(NKDPOINTS*sizeof(kdpoint));
-  pointers = malloc(NKDPOINTS*sizeof(kdpoint *));
+  NewMemory((void **)&points,NKDPOINTS*sizeof(kdpoint));
+  NewMemory((void **)&points2,NKDPOINTS*sizeof(kdpoint));
+  NewMemory((void **)&pointers,NKDPOINTS*sizeof(kdpoint *));
   for(i=0;i<NKDPOINTS;i++){
     points[i].xyz[0] = (float)rand()/RAND_MAX;
     points[i].xyz[1] = (float)rand()/RAND_MAX;
@@ -49,7 +49,7 @@ void test_kd(void){
   
   nwanted=10;
   nbests=0;
-  bests = malloc(nwanted*sizeof(kd_data *));
+  NewMemory((void **)&bests,nwanted*sizeof(kd_data *));
   get_closest_nodes(kdtree, xyztest, bests, &nbests, nwanted);
   sort_closest_nodes(bests, nbests, xyztest);
   get_closest_points(pointers, nkdpoints, xyztest);

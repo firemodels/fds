@@ -4837,8 +4837,12 @@ void free_object(sv_object *object){
     sv_object_frame *next_frame;
 
     next_frame=framei->next;
-    if(framei->nsymbols>0)FREEMEMORY(framei->symbols);
-    if(framei->ntokens>0)FREEMEMORY(framei->tokens);
+    if(framei->nsymbols>0){
+      FREEMEMORY(framei->symbols);
+    }
+    if(framei->ntokens>0){
+      FREEMEMORY(framei->tokens);
+    }
     FREEMEMORY(framei);
     framei=next_frame;
   }

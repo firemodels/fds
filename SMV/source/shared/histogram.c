@@ -10,6 +10,9 @@
 #include <string.h>
 #include <math.h>
 #include "histogram.h"
+#ifdef pp_CHECK
+#include "MALLOC.h"
+#endif
 
 // svn revision character string
 char histogram_revision[]="$Revision$";
@@ -182,7 +185,7 @@ void check_histogram(void){
   histogramdata histogram;
   float v01, v50, v99;
 
-  vals=malloc(NVALS*sizeof(float));
+  NewMemory((void **)&vals,NVALS*sizeof(float));
 
   for(i=0;i<NVALS;i++){
     vals[i]=10.0*rand()/(float)RAND_MAX;
@@ -191,7 +194,7 @@ void check_histogram(void){
   v01=get_histogram_value(&histogram, .01);
   v50=get_histogram_value(&histogram, .50);
   v99=get_histogram_value(&histogram, .99);
-  free(vals);
+  FREEMEMORY(vals);
 
 }
 #endif

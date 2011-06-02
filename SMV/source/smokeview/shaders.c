@@ -13,6 +13,7 @@ char shaders_revision[]="$Revision$";
 #include "MALLOC.h"
 #include "flowfiles.h"
 #include "smokeviewvars.h"
+#include "MALLOC.h"
 
 GLhandleARB v,f,p_smoke, p_zonesmoke, p_volsmoke;
 char *textFileRead(char *fn);
@@ -574,22 +575,18 @@ int printOglError(char *file, int line)
 
 /* ------------------ printfInfoLog ------------------------ */
 
-void printInfoLog(GLhandleARB obj)
-{
-    int infologLength = 0;
-    int charsWritten  = 0;
-    char *infoLog;
+void printInfoLog(GLhandleARB obj){
+  int infologLength = 0;
+  int charsWritten  = 0;
+  char *infoLog;
 
-	glGetObjectParameterivARB(obj, GL_OBJECT_INFO_LOG_LENGTH_ARB,
-                                         &infologLength);
-
-    if (infologLength > 0)
-    {
-        infoLog = (char *)malloc(infologLength);
-        glGetInfoLogARB(obj, infologLength, &charsWritten, infoLog);
-		printf("%s\n",infoLog);
-        free(infoLog);
-    }
+	glGetObjectParameterivARB(obj, GL_OBJECT_INFO_LOG_LENGTH_ARB,&infologLength);
+  if (infologLength > 0){
+    NewMemory((void **)&infoLog,infologLength);
+    glGetInfoLogARB(obj, infologLength, &charsWritten, infoLog);
+    printf("%s\n",infoLog);
+    FREEMEMORY(infoLog);
+  }
 }
 #endif
 

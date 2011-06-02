@@ -2727,7 +2727,9 @@ void updatetimes(void){
     for(n=0;n<ntimes;n++){
       render_frame[n]=0;
     }
-    if(ntimes==0)FREEMEMORY(times);
+    if(ntimes==0){
+      FREEMEMORY(times);
+    }
     if(ntimes>0)ResizeMemory((void **)&times,ntimes*sizeof(float));
   
   izone=0; itimes=0;

@@ -2129,10 +2129,18 @@ void Display(void){
 
           mergescreenbuffers(screenbuffers);
 
-          if(screenbuffers[0]!=NULL)free(screenbuffers[0]);
-          if(screenbuffers[1]!=NULL)free(screenbuffers[1]);
-          if(screenbuffers[2]!=NULL)free(screenbuffers[2]);
-          if(screenbuffers[3]!=NULL)free(screenbuffers[3]);
+          if(screenbuffers[0]!=NULL){
+            FREEMEMORY(screenbuffers[0]);
+          }
+          if(screenbuffers[1]!=NULL){
+            FREEMEMORY(screenbuffers[1]);
+          }
+          if(screenbuffers[2]!=NULL){
+            FREEMEMORY(screenbuffers[2]);
+          }
+          if(screenbuffers[3]!=NULL){
+            FREEMEMORY(screenbuffers[3]);
+          }
         }
         if(renderdoublenow==0||RenderOnceNow==1){
           ASSERT(RenderSkip>0);

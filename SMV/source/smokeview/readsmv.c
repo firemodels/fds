@@ -3183,7 +3183,9 @@ typedef struct {
   }
   
   CheckMemory;
-  if(ntextures==0)FREEMEMORY(textureinfo);
+  if(ntextures==0){
+    FREEMEMORY(textureinfo);
+  }
 
   // define colobar textures
 

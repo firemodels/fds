@@ -225,7 +225,7 @@ GLubyte *getscreenbuffer(void){
 
   int x=0, y=0;
 
-  OpenGLimage = (GLubyte *) malloc(screenWidth * screenHeight * sizeof(GLubyte) * 3);
+  NewMemory((void **)&OpenGLimage,screenWidth * screenHeight * sizeof(GLubyte) * 3);
 
   if(OpenGLimage==NULL)return NULL;
 
@@ -411,7 +411,7 @@ int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
 #endif
     return 1;
   }
-  OpenGLimage = (GLubyte *) malloc(width * height * sizeof(GLubyte) * 3);
+  NewMemory((void **)&OpenGLimage,width * height * sizeof(GLubyte) * 3);
   if(OpenGLimage == NULL){
     printf("error allocating render image:%s\n",RENDERfilename);                                                                
     pauseSV();
@@ -497,7 +497,7 @@ int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
   fclose(RENDERfile);
 
   gdImageDestroy(RENDERimage);
-  free(OpenGLimage);
+  FREEMEMORY(OpenGLimage);
   printf(" Completed.\n");
   return 0;
 }
@@ -773,7 +773,7 @@ static ImageRec *ImageOpen(const char *fileName)
         swapFlag = 0;
     }
 
-    image = (ImageRec *)malloc(sizeof(ImageRec));
+    NewMemory((void **)&image,sizeof(ImageRec));
     if (image == NULL) {
         fprintf(stderr, "Out of memory!\n");
         pauseSV();
@@ -791,10 +791,10 @@ static ImageRec *ImageOpen(const char *fileName)
         ConvertShort(&image->imagic, 6);
     }
 
-    image->tmp = (unsigned char *)malloc(image->xsize*256);
-    image->tmpR = (unsigned char *)malloc(image->xsize*256);
-    image->tmpG = (unsigned char *)malloc(image->xsize*256);
-    image->tmpB = (unsigned char *)malloc(image->xsize*256);
+    NewMemory((void **)&image->tmp,image->xsize*256);
+    NewMemory((void **)&image->tmpR,image->xsize*256);
+    NewMemory((void **)&image->tmpG,image->xsize*256);
+    NewMemory((void **)&image->tmpB,image->xsize*256);
     if (image->tmp == NULL || image->tmpR == NULL || image->tmpG == NULL ||
         image->tmpB == NULL) {
         fprintf(stderr, "Out of memory!\n");
@@ -804,8 +804,8 @@ static ImageRec *ImageOpen(const char *fileName)
 
     if ((image->type & 0xFF00) == 0x0100) {
         x = image->ysize * image->zsize * (int) sizeof(unsigned);
-        image->rowStart = (unsigned *)malloc((unsigned int)x);
-        image->rowSize = (int *)malloc((unsigned int)x);
+        NewMemory((void **)&image->rowStart,(unsigned int)x);
+        NewMemory((void **)&image->rowSize,(unsigned int)x);
         if (image->rowStart == NULL || image->rowSize == NULL) {
             fprintf(stderr, "Out of memory!\n");
             pauseSV();
@@ -827,11 +827,11 @@ static ImageRec *ImageOpen(const char *fileName)
 
 static void ImageClose(ImageRec *image) {
     fclose(image->file);
-    free(image->tmp);
-    free(image->tmpR);
-    free(image->tmpG);
-    free(image->tmpB);
-    free(image);
+    FREEMEMORY(image->tmp);
+    FREEMEMORY(image->tmpR);
+    FREEMEMORY(image->tmpG);
+    FREEMEMORY(image->tmpB);
+    FREEMEMORY(image);
 }
 
 /* ------------------ ImageGetRow ------------------------ */
@@ -893,21 +893,15 @@ unsigned char *readrgb(const char *name, int *width, int *height) {
     if(NewMemory((void **)&base,4*image->xsize*image->ysize*sizeof(unsigned char))==0){
       return NULL;
     }
-    rbuf = (unsigned char *)malloc(image->xsize*sizeof(unsigned char));
-    if(rbuf==NULL)return NULL;
-    gbuf = (unsigned char *)malloc(image->xsize*sizeof(unsigned char));
-    if(gbuf==NULL){
-      free(rbuf);
-      return NULL;
-    }
-    bbuf = (unsigned char *)malloc(image->xsize*sizeof(unsigned char));
-    if(bbuf==NULL){
-      free(rbuf);free(gbuf);
-      return NULL;
-    }
-    abuf = (unsigned char *)malloc(image->xsize*sizeof(unsigned char));
-    if(abuf==NULL){
-      free(rbuf);free(gbuf);free(bbuf);
+    NewMemory((void **)&rbuf,image->xsize*sizeof(unsigned char));
+    NewMemory((void **)&gbuf,image->xsize*sizeof(unsigned char));
+    NewMemory((void **)&bbuf,image->xsize*sizeof(unsigned char));
+    NewMemory((void **)&abuf,image->xsize*sizeof(unsigned char));
+    if(rbuf==NULL||gbuf==NULL||bbuf==NULL||abuf==NULL){
+      FREEMEMORY(rbuf);
+      FREEMEMORY(gbuf);
+      FREEMEMORY(bbuf);
+      FREEMEMORY(abuf);
       return NULL;
     }
     lptr = base;
@@ -931,10 +925,10 @@ unsigned char *readrgb(const char *name, int *width, int *height) {
             lptr += image->xsize;
         }
     }
-    free(abuf);
+    FREEMEMORY(abuf);
     ImageClose(image);
-    free(rbuf);
-    free(gbuf);
-    free(bbuf);
+    FREEMEMORY(rbuf);
+    FREEMEMORY(gbuf);
+    FREEMEMORY(bbuf);
     return (unsigned char *) base;
 }

@@ -1043,7 +1043,9 @@ void part2iso(part *parti, int *thread_index){
     FREEMEMORY(propi->partvals);
     FREEMEMORY(propi->partvals);
   }
-  if(npart5propinfo>0)FREEMEMORY(part5propinfo_copy);
+  if(npart5propinfo>0){
+    FREEMEMORY(part5propinfo_copy);
+  }
 }
 
 #endif

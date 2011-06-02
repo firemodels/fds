@@ -18,6 +18,7 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 #include "translate.h"
+#include "MALLOC.h"
 
 // svn revision character string
 extern "C" char glui_motion_revision[]="$Revision$";
@@ -221,10 +222,10 @@ extern "C" void glui_motion_setup(int main_window){
   float *eye_xyz;
 
   if(camera_label!=NULL){
-    free(camera_label);
-    camera_label=NULL;
+    FREEMEMORY(camera_label);
   }
-  camera_label=(char *)malloc(sizeof(GLUI_String));
+  NewMemory((void **)&camera_label,sizeof(GLUI_String));
+
   strcpy(camera_label,"current");
 
   eye_xyz=camera_current->eye;

@@ -18,6 +18,7 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 #include "translate.h"
+#include "MALLOC.h"
 
 // svn revision character string
 extern "C" char glui_colorbar_revision[]="$Revision$";
@@ -161,10 +162,9 @@ extern "C" void glui_colorbar_setup(int main_window){
   cb_colorindex=128;
 
   if(colorbar_label!=NULL){
-    free(colorbar_label);
-    colorbar_label=NULL;
+    FREEMEMORY(colorbar_label);
   }
-  colorbar_label=(char *)malloc(sizeof(GLUI_String));
+  NewMemory((void **)&colorbar_label,sizeof(GLUI_String));
   strcpy(colorbar_label,_("New colorbar"));
 
   if(glui_colorbar!=NULL)glui_colorbar->close();

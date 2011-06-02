@@ -107,12 +107,12 @@ mallocflag CreateBlockInfo(bbyte *pbNew, size_t sizeNew);
 void FreeBlockInfo(bbyte *pb);
 void UpdateBlockInfo(bbyte *pbOld, bbyte *pbNew, size_t sizeNew);
 size_t sizeofBlock(bbyte *pv);
-mallocflag __ResizeMemory(void **ppv, size_t sizeNew,char *varname, char *file, int linenumber);
-mallocflag __NewMemory(void **ppv, size_t size, char *varname, char *file,int linenumber);
+MMEXTERN mallocflag __ResizeMemory(void **ppv, size_t sizeNew,char *varname, char *file, int linenumber);
+MMEXTERN mallocflag __NewMemory(void **ppv, size_t size, char *varname, char *file,int linenumber);
 #endif
 mallocflag _ResizeMemory(void **ppv, size_t sizeNew);
 mallocflag _NewMemory(void **ppv, size_t size);
-void FreeMemory(void *pv);
+MMEXTERN void FreeMemory(void *pv);
 void initMM(void);
 void FreeAllMemory(void);
 mallocflag _ValidPointer(void *pv, size_t size);

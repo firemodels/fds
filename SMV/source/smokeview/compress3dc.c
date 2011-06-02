@@ -13,6 +13,7 @@
 #include "ASSERT.h"
 #include "smokeviewdefs.h"
 #include "smokeviewvars.h"
+#include "MALLOC.h"
 
 // svn revision character string
 char compress3dc_revision[]="$Revision$";
@@ -93,10 +94,10 @@ void CCsmoke3dtofile(char *file, float *time, float *dx, int *type, float *xyz, 
   nxyz=(*nx)*(*ny)*(*nz);
   if(nxyz<1)return;
 
-  buffer_in=malloc(nxyz);
+  NewMemory((void **)&buffer_in,nxyz);
   if(buffer_in==NULL)return;
 
-  buffer_out=malloc(nxyz);
+  NewMemory((void **)&buffer_out,nxyz);
   if(buffer_out==NULL){
     free(buffer_in);
     return;
@@ -153,8 +154,8 @@ void CCsmoke3dtofile(char *file, float *time, float *dx, int *type, float *xyz, 
   fwrite(nchars,4,2,binfile);
   if(nchars_out>0)fwrite(buffer_out,1,nchars_out,binfile);
 
-  free(buffer_in);
-  free(buffer_out);
+  FREEMEMORY(buffer_in);
+  FREEMEMORY(buffer_out);
   fclose(binfile);
 
   strcpy(textfilename,file);

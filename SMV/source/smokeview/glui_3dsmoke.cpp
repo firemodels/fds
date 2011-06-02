@@ -19,6 +19,7 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 #include "translate.h"
+#include "MALLOC.h"
 
 // svn revision character string
 extern "C" char glui_3dsmoke_revision[]="$Revision$";
@@ -135,7 +136,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
 
   
   if(nsmoke3d_files<=0)return;
-  SPINNER_smoke3d_hrrpuv_cutoffptr=(GLUI_Spinner **)malloc((nmeshes+1)*sizeof(GLUI_Spinner *));
+  NewMemory((void **)&SPINNER_smoke3d_hrrpuv_cutoffptr,(nmeshes+1)*sizeof(GLUI_Spinner *));
   
   glui_3dsmoke=glui_bounds;
 
