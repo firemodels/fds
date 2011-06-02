@@ -1963,7 +1963,7 @@ DATA ((CPLXREF_WATER(I,J), J = 1,2), I =181,NWATERK)  &
 ! Heptane properties from
 ! L.A. Dombrovsky, S.S. Sazhin, S.V. Mikhalovsky, R. Wood, M.R. Heikal
 ! Spectral properties of diesel fuel droplets
-! Fuel 82 (2003) 15–22
+! Fuel, Vol. 82, No. 1 (2003) pp. 15-22
 DATA (CPLXREF_FUEL( 1,J), J=1,3) / 0.7_EB,   1.47_EB, 1.55E-07_EB /
 DATA (CPLXREF_FUEL( 2,J), J=1,3) / 0.8_EB,   1.47_EB, 4.33E-07_EB /
 DATA (CPLXREF_FUEL( 3,J), J=1,3) / 0.9_EB,   1.47_EB, 9.39E-07_EB /
