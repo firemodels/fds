@@ -20,6 +20,9 @@ msgstr ""
 msgid "2D stepped"
 msgstr ""
 
+msgid "2 x Real time"
+msgstr ""
+
 msgid "3D contours"
 msgstr ""
 
@@ -36,6 +39,9 @@ msgid "3D surface"
 msgstr ""
 
 msgid "3D surface color"
+msgstr ""
+
+msgid "4 x Real time"
 msgstr ""
 
 msgid "Abort"
@@ -122,10 +128,19 @@ msgstr ""
 msgid "Always show tracers"
 msgstr ""
 
+msgid "Animated Multi-Slices"
+msgstr ""
+
+msgid "Animated Slices"
+msgstr ""
+
 msgid "Animated surface"
 msgstr ""
 
 msgid "Animated surfaces"
+msgstr ""
+
+msgid "Animated Vector Slices"
 msgstr ""
 
 msgid "Animation keyboard commands"
@@ -209,6 +224,9 @@ msgstr ""
 msgid "Check for updates at http://code.google.com/p/fds-smv/downloads/"
 msgstr ""
 
+msgid "Clear"
+msgstr ""
+
 msgid "Clip blockages"
 msgstr ""
 
@@ -248,6 +266,9 @@ msgstr ""
 msgid "Color bars"
 msgstr ""
 
+msgid "Colorbars/Shades"
+msgstr ""
+
 msgid "Color/*BW"
 msgstr ""
 
@@ -255,6 +276,9 @@ msgid "Color/BW"
 msgstr ""
 
 msgid "colormap:"
+msgstr ""
+
+msgid "Color with:"
 msgstr ""
 
 msgid "Compress files (Smokezip)"
@@ -620,6 +644,9 @@ msgstr ""
 msgid "Grey (0-255)"
 msgstr ""
 
+msgid "Grid"
+msgstr ""
+
 msgid "Grid loc"
 msgstr ""
 
@@ -648,6 +675,9 @@ msgid "Hide"
 msgstr ""
 
 msgid "Hide all"
+msgstr ""
+
+msgid "Hide all boundary files"
 msgstr ""
 
 msgid "Hide all levels"
@@ -899,6 +929,9 @@ msgstr ""
 msgid "Normal"
 msgstr ""
 
+msgid "NUMBER"
+msgstr ""
+
 msgid "Number of contours"
 msgstr ""
 
@@ -924,6 +957,9 @@ msgid "Offset window"
 msgstr ""
 
 msgid "One"
+msgstr ""
+
+msgid "One Frame"
 msgstr ""
 
 msgid "Open"
@@ -975,6 +1011,9 @@ msgid "Parameters"
 msgstr ""
 
 msgid "Particle head"
+msgstr ""
+
+msgid "#Particles"
 msgstr ""
 
 msgid "Particles"
@@ -1064,7 +1103,13 @@ msgstr ""
 msgid "Read ini files"
 msgstr ""
 
+msgid "Read .svo files"
+msgstr ""
+
 msgid "Realistic"
+msgstr ""
+
+msgid "Real time"
 msgstr ""
 
 msgid "red"
@@ -1083,6 +1128,15 @@ msgid "reference velocity, U0 (m/s)"
 msgstr ""
 
 msgid "Reload"
+msgstr ""
+
+msgid "Reload every 10 minutes"
+msgstr ""
+
+msgid "Reload every 1 minute"
+msgstr ""
+
+msgid "Reload every 5 minutes"
 msgstr ""
 
 msgid "Reload Now"
@@ -1235,6 +1289,9 @@ msgstr ""
 msgid "Show all"
 msgstr ""
 
+msgid "Show all boundary files"
+msgstr ""
+
 msgid "Show all levels"
 msgstr ""
 
@@ -1355,6 +1412,9 @@ msgstr ""
 msgid "smoke albedo"
 msgstr ""
 
+msgid "Smoke color map"
+msgstr ""
+
 msgid "Smoke culling activated. (Press C to deactivate)"
 msgstr ""
 
@@ -1412,6 +1472,9 @@ msgstr ""
 msgid "Solution variable"
 msgstr ""
 
+msgid "Solution Variable"
+msgstr ""
+
 msgid "soot density - all meshes"
 msgstr ""
 
@@ -1446,6 +1509,9 @@ msgid "start time"
 msgstr ""
 
 msgid "step"
+msgstr ""
+
+msgid "Step"
 msgstr ""
 
 msgid "Stepped contours"
@@ -1505,6 +1571,12 @@ msgstr ""
 msgid "Switch to size preserving view   ALT+v"
 msgstr ""
 
+msgid "Target orientation"
+msgstr ""
+
+msgid "Targets"
+msgstr ""
+
 msgid "temperature"
 msgstr ""
 
@@ -1529,6 +1601,12 @@ msgstr ""
 msgid "Text labels"
 msgstr ""
 
+msgid "Textures"
+msgstr ""
+
+msgid "Thermocouples"
+msgstr ""
+
 msgid "Thickness"
 msgstr ""
 
@@ -1542,6 +1620,9 @@ msgid "Time bar"
 msgstr ""
 
 msgid "Time bars"
+msgstr ""
+
+msgid "time (h:m:s)"
 msgstr ""
 
 msgid "Time interval"
@@ -1610,7 +1691,13 @@ msgstr ""
 msgid "Two sided (interior)"
 msgstr ""
 
+msgid "TYPE"
+msgstr ""
+
 msgid "Units"
+msgstr ""
+
+msgid "Unlimited"
 msgstr ""
 
 msgid "Unload"
@@ -1751,6 +1838,9 @@ msgstr ""
 msgid "View from tour path"
 msgstr ""
 
+msgid "View Method:"
+msgstr ""
+
 msgid "View name"
 msgstr ""
 
@@ -1806,6 +1896,9 @@ msgid "World centered"
 msgstr ""
 
 msgid "World centered, level rotation"
+msgstr ""
+
+msgid "Write "
 msgstr ""
 
 msgid "w: toggle clipping - use Options/Clip menu to specify clipping planes"
