@@ -53,11 +53,11 @@
 COLOR= 'RED',
 RAMP_Q= 'FIRE',
 TMP_FRONT=1000.,
-HRRPUA= 1621. / 
+HRRPUA= 1650. / 
 &RAMP ID='FIRE' T=   0.0 F= 0.0 /
 &RAMP ID='FIRE' T=  60.0 F= 1.0 /
-&RAMP ID='FIRE' T= 665.0 F= 1.0 /
-&RAMP ID='FIRE' T= 666.0 F= 0.0/
+&RAMP ID='FIRE' T= 540.0 F= 1.0 /
+&RAMP ID='FIRE' T= 541.0 F= 0.0/
 
 
 Burner
