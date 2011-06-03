@@ -929,7 +929,7 @@ msgstr ""
 msgid "Normal"
 msgstr ""
 
-msgid "NUMBER"
+msgid "Number"
 msgstr ""
 
 msgid "Number of contours"
@@ -1011,9 +1011,6 @@ msgid "Parameters"
 msgstr ""
 
 msgid "Particle head"
-msgstr ""
-
-msgid "#Particles"
 msgstr ""
 
 msgid "Particles"
@@ -1205,10 +1202,10 @@ msgstr ""
 msgid "Save settings"
 msgstr ""
 
-msgid "#: save settings (create casename.ini file)"
+msgid ": save settings (create casename.ini file)"
 msgstr ""
 
-msgid "#: save settings to %s"
+msgid ": save settings to %s"
 msgstr ""
 
 msgid "Scaled optical depth (SCD)"
@@ -1472,13 +1469,10 @@ msgstr ""
 msgid "Solution variable"
 msgstr ""
 
-msgid "Solution Variable"
-msgstr ""
-
 msgid "soot density - all meshes"
 msgstr ""
 
-msgid "soot MASS FRACTION - single mesh"
+msgid "soot Mass Fraction - single mesh"
 msgstr ""
 
 msgid "Sort transparent faces"
@@ -1691,7 +1685,7 @@ msgstr ""
 msgid "Two sided (interior)"
 msgstr ""
 
-msgid "TYPE"
+msgid "Type"
 msgstr ""
 
 msgid "Units"
