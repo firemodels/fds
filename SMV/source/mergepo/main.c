@@ -30,8 +30,6 @@ int main(int argc, char **argv){
     lenarg=strlen(arg);
     if(arg[0]=='-'&&lenarg>1){
       switch(arg[1]){
-      case 'a':
-        break;
       default:
         usage(prog);
         return 1;
@@ -45,6 +43,10 @@ int main(int argc, char **argv){
         file_template=argv[i];
       }
     }
+  }
+  if(file1==NULL||file_template==NULL){
+    usage(prog);
+    return 1;
   }
   if(file1!=NULL&&file_template!=NULL){
     int return1, return2;
@@ -68,7 +70,7 @@ int main(int argc, char **argv){
           tri->value=NULL;
         }
       }
-      qsort(trinfo_template,ntrinfo_template,sizeof(trdata),compare_trdata2);
+//      qsort(trinfo_template,ntrinfo_template,sizeof(trdata),compare_trdata2);
       for(i=0;i<ntrinfo_template;i++){
         trdata *tri;
 
@@ -84,12 +86,16 @@ int main(int argc, char **argv){
       }
       
     }
-
   }
 }
 
 /* ------------------ usage ------------------------ */
 
 void usage(char *prog){
+  printf("%s smokeview_template.po smokeview_xx.po\n",prog);
+  printf("Merge two .po files, typically smokeview_template.po with smokeview_xx.po\n");
+  printf("where xx is the language being translated.\n");
+  printf("\n");
+  printf("The updated .po files is output to stdout\n");
 }
 

@@ -76,5 +76,14 @@ int main(int argc, char **argv){
 /* ------------------ usage ------------------------ */
 
 void usage(char *prog){
+  printf("%s [-a] < stdin > stdout \n",prog);
+  printf("Create a .po file by parsing a collection of .c/.h/.cpp files\n");
+  printf("looking for strings of the form _(\"....\") , outputting each\n");
+  printf("string found as \n");
+  printf("MSGID \".....\"\n");
+  printf("If the -a option is  used then the string\n");
+  printf("MSGSTR \"\"\n");
+  printf("is also output\n");
 }
+
 
