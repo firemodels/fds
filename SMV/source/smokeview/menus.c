@@ -4674,7 +4674,7 @@ updatemenu=0;
 /* --------------------------------static slice menu -------------------------- */
   if(nplot3d_files>0){
     CREATEMENU(staticslicemenu,Plot3DShowMenu);
-    glutAddSubMenu(_("Solution Variable"),staticvariablemenu);
+    glutAddSubMenu(_("Solution variable"),staticvariablemenu);
     if(cmesh->visz==1)glutAddMenuEntry(_("*xy plane"),1);
     if(cmesh->visz==0)glutAddMenuEntry(_("xy plane"),1);
     if(cmesh->visy==1)glutAddMenuEntry(_("*xz plane"),2);
@@ -6276,7 +6276,7 @@ updatemenu=0;
     glutAddMenuEntry(renderwindow3,Render2Window);
   }
   glutAddMenuEntry("-",10000);
-  glutAddMenuEntry(_("TYPE"),10000);
+  glutAddMenuEntry(_("Type"),10000);
   if(renderfiletype==0){
     glutAddMenuEntry("*PNG",RenderPNG);
 #ifdef pp_JPEG
@@ -6305,7 +6305,7 @@ updatemenu=0;
 #endif
   }
   glutAddMenuEntry("-",10000);
-  glutAddMenuEntry(_("NUMBER"),10000);
+  glutAddMenuEntry(_("Number"),10000);
   glutAddMenuEntry(_("One Frame"),RenderOnce);
   update_glui_render();
   if(RenderTime==1||touring==1){
@@ -7453,7 +7453,7 @@ updatemenu=0;
             glutAddMenuEntry("-",-2);
           }
           if(nmeshes>1){
-            if(n_soot_menu>0)glutAddSubMenu(_("soot MASS FRACTION - single mesh"),loadsmoke3dsootmenu);
+            if(n_soot_menu>0)glutAddSubMenu(_("soot Mass Fraction - single mesh"),loadsmoke3dsootmenu);
             if(n_hrr_menu>0)glutAddSubMenu(_("HRRPUV - single mesh"),loadsmoke3dhrrmenu);
             if(n_water_menu>0)glutAddSubMenu(_("Water - single mesh"),loadsmoke3dwatermenu);
           }

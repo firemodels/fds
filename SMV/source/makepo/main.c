@@ -50,7 +50,7 @@ int main(int argc, char **argv){
       if(beg==NULL)continue;
       beg+=2;
       for(beg2=beg+1;beg2<buffer+sizeof(buffer);beg2++){
-        if(*beg2==' '||*beg2=='*')continue;
+        if(*beg2==' '||*beg2=='*'||*beg2=='#')continue;
         beg=beg2-1;
         *beg='"';
         break;
