@@ -23,6 +23,9 @@ char histogram_revision[]="$Revision$";
 /* ------------------ get_histogram_value ------------------------ */
 
 float get_histogram_value(histogramdata *histgram, float cdf){
+  /*! \fn float get_histogram_value(histogramdata *histgram, float cdf)
+      \brief get value of histogram for value cdf
+  */
   int cutoff, count;
   int i;
   float returnval;
@@ -48,12 +51,18 @@ float get_histogram_value(histogramdata *histgram, float cdf){
 /* ------------------ complete_histogram ------------------------ */
 
 void complete_histogram(histogramdata *histgram){
+  /*! \fn void complete_histogram(histogramdata *histgram)
+      \brief set variable indicating that histogram is complete
+  */
   histgram->complete=1;
 }
 
 /* ------------------ init_histogram ------------------------ */
 
 void init_histogram(histogramdata *histgram){
+  /*! \fn void init_histogram(histogramdata *histgram)
+      \brief initialize histogram data structures
+  */
   int i;
 
   for(i=0;i<NHIST_BUCKETS;i++){
@@ -69,6 +78,9 @@ void init_histogram(histogramdata *histgram){
 /* ------------------ copy_data2histogram ------------------------ */
 
 void copy_data2histogram(float *vals, int nvals, histogramdata *histgram){
+  /*! \fn void copy_data2histogram(float *vals, int nvals, histogramdata *histgram)
+      \brief copy nvals of the floating point array, vals, into the histogram histgram 
+  */
   int i;
   float valmin, valmax;
   float dbucket;
@@ -111,6 +123,9 @@ void copy_data2histogram(float *vals, int nvals, histogramdata *histgram){
 /* ------------------ update_histogram ------------------------ */
 
 void update_histogram(float *vals, int nvals, histogramdata *histgram){
+  /*! \fn void update_histogram(float *vals, int nvals, histogramdata *histgram)
+      \brief merge nvals of the floating point array, vals, into the histogram histgram 
+  */
   histogramdata histgramval;
 
   if(nvals<=0)return;
@@ -121,6 +136,9 @@ void update_histogram(float *vals, int nvals, histogramdata *histgram){
 /* ------------------ merge_histogram ------------------------ */
 
 void merge_histogram(histogramdata *histgram1, histogramdata *histgram2){
+  /*! \fn void merge_histogram(histogramdata *histgram1, histogramdata *histgram2)
+      \brief merge histogram histgram1 into histogram histgram2 
+  */
   
   // merge histogram histgram2 into histgram1
 

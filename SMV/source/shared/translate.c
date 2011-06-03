@@ -18,25 +18,7 @@
 char translate_revision[]="$Revision$";
 
 
-/* ------------------ isocompare ------------------------ */
-
-int compare_trdata2( const void *arg1, const void *arg2 ){
-  trdata *tri, *trj;
-
-  // same as compare_trdata except puts untranslated strings at the beginning of list
-
-  tri = (trdata *)arg1;
-  trj = (trdata *)arg2;
-
-  if((tri->value==NULL&&trj->value==NULL)||
-     (tri->value!=NULL&&trj->value!=NULL)){
-    return strcmp(tri->key,trj->key);
-  }
-  if(tri->value==NULL&&trj->value!=NULL)return -1;
-  return 1;
-}
-
-/* ------------------ isocompare ------------------------ */
+/* ------------------ compare_trdata ------------------------ */
 
 int compare_trdata( const void *arg1, const void *arg2 ){
   trdata *tri, *trj;
@@ -47,30 +29,13 @@ int compare_trdata( const void *arg1, const void *arg2 ){
   return strcmp(tri->key,trj->key);
 }
 
-/* ------------------ getstring ------------------------ */
-
-char *getstring(char *buffer){
-  char *begin,*end;
-  int i;
-
-  // if buffer contains msgid "string"
-  // return a pointer to s in string
-
-  begin=strchr(buffer,'"');
-  if(begin==NULL)return NULL;
-  begin++;
-  end=strrchr(begin,'"');
-  if(end==NULL)return NULL;
-  end[0]=0;
-  for(i=0;i<strlen(begin);i++){
-    if(begin[i]!=' ')return begin;
-  }
-  return NULL;
-}
-
 /* ------------------ parse_lang ------------------------ */
 
 int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr){
+  /*! \fn int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr)
+      \brief read a po file and put english/foreign language string pairs into
+             the trinfo data structure
+  */
   FILE *stream;
   char buffer[1000];
   char *buf;
@@ -140,6 +105,9 @@ int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr){
 /* ------------------ init_translate ------------------------ */
 
 void init_translate(char *bindir, char *tr_name){
+  /*! \fn void init_translate(char *bindir, char *tr_name)
+      \brief initialize po language translation data structures
+  */
   char *LANG;
 
   if(tr_name!=NULL){
@@ -198,6 +166,9 @@ char *translate2(char *string){
 /* ------------------ translate ------------------------ */
 
 char *translate(char *string){
+  /*! \fn char *translate(char *string)
+      \brief return the translation of string, return string if translation not found
+  */
   char *valin,*valout;
   int i;
 

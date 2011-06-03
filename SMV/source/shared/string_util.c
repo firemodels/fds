@@ -21,6 +21,10 @@ char string_util_revision[]="$Revision$";
 /* ----------------------- fparsecsv ----------------------------- */
 
 void fparsecsv(char *buffer, float *vals, int ncols, int *ntokens){
+  /*! \fn void fparsecsv(char *buffer, float *vals, int ncols, int *ntokens)
+      \brief copy comma delimited values from buffer into floating point array vals
+       returning number of values found in ntokens
+  */
   int nt=0;
   char *token;
 
@@ -35,6 +39,10 @@ void fparsecsv(char *buffer, float *vals, int ncols, int *ntokens){
 /* ----------------------- parsecsv ----------------------------- */
 
 void parsecsv(char *buffer, char **tokens, int ncols, int *ntokens){
+  /*! \fn void parsecsv(char *buffer, char **tokens, int ncols, int *ntokens)
+      \brief copy comma delimited values from buffer into character array tokens
+       returning number of values found in ntokens
+  */
   int nt=0;
   char *token;
 
@@ -49,6 +57,10 @@ void parsecsv(char *buffer, char **tokens, int ncols, int *ntokens){
 /* ------------------ getrowcols ------------------------ */
 
 void getrowcols(FILE *stream, int *nrows, int *ncols){
+  /*! \fn void getrowcols(FILE *stream, int *nrows, int *ncols)
+      \brief find number of rows (nrows) and number of columns (ncols) in
+       comma delimited file pointed to by stream
+  */
   char buffer[1024];
   int nnrows=0,nncols=0;
 
@@ -66,6 +78,9 @@ void getrowcols(FILE *stream, int *nrows, int *ncols){
 /* ------------------ getcols ------------------------ */
 
 int getcols(char *buffer){
+  /*! \fn int getcols(char *buffer)
+      \brief return the number of columns in the character string buffer
+  */
   char buffer2[1024];
   int ncols=0;
   char *comma;
@@ -84,6 +99,9 @@ int getcols(char *buffer){
 /* ------------------ stripquotes ------------------------ */
 
 void stripquotes(char *buffer){
+  /*! \fn void stripquotes(char *buffer)
+      \brief replaces quotes (") with blanks in the character string buffer
+  */
   int i;
   char *c;
 
@@ -95,6 +113,9 @@ void stripquotes(char *buffer){
 /* ------------------ stripcommas ------------------------ */
 
 void stripcommas(char *buffer){
+  /*! \fn void stripcommas(char *buffer)
+      \brief replaces commas (,) with blanks in the character string buffer
+  */
   int i;
   char *c;
 
@@ -107,6 +128,9 @@ void stripcommas(char *buffer){
 /* ------------------ file_modtime ------------------------ */
 
 time_t file_modtime(char *filename){
+  /*! \fn time_t file_modtime(char *filename)
+      \brief returns the modification time of the file named filename
+  */
   STRUCTSTAT statbuffer;
   time_t return_val;
   int statfile;
@@ -122,6 +146,9 @@ time_t file_modtime(char *filename){
 /* ------------------ randint ------------------------ */
 
 int randint(int min, int max){
+  /*! \fn int randint(int min, int max)
+      \brief returns a random integer inclusively between min and max 
+  */
   int return_val;
 
   if (min>max){
@@ -136,6 +163,9 @@ int randint(int min, int max){
 /* ------------------ randstr ------------------------ */
 
 char *randstr(char* str, int length){
+  /*! \fn char *randstr(char* str, int length)
+      \brief returns a random character string of length length
+  */
     int i;
 
     if (str==NULL||length<=0)return NULL;
@@ -150,6 +180,9 @@ char *randstr(char* str, int length){
 /* ------------------ can_write_to_dir ------------------------ */
 
 int can_write_to_dir(char *dir){
+  /*! \fn int can_write_to_dir(char *dir)
+      \brief returns 1 if the directory can be written to, 0 otherwise
+  */
   char full_name[1024];
   char file_name[1024], *file_name_ptr;
   FILE *stream;
@@ -174,6 +207,9 @@ int can_write_to_dir(char *dir){
 /* ------------------ is_file_newer ------------------------ */
 
 int is_file_newer(char *file1, char *file2){
+  /*! \fn int is_file_newer(char *file1, char *file2)
+      \brief returns 1 if file1 is newer than file2, 0 otherwise
+  */
   STRUCTSTAT statbuff1, statbuff2;
   int statfile1, statfile2;
 
@@ -190,6 +226,9 @@ int is_file_newer(char *file1, char *file2){
 /* ------------------ rootdir ------------------------ */
 
 char *getprogdir(char *progname){
+  /*! \fn char *getprogdir(char *progname)
+      \brief returns the directory containing the file progname
+  */
   char *progpath, *lastsep;
 #ifdef WIN32
   char cdirsep='\\';
@@ -232,6 +271,9 @@ char *getprogdir(char *progname){
 /* ------------------ lastname ------------------------ */
 
 char *lastname(char *argi){
+  /*! \fn char *lastname(char *argi)
+      \brief returns the file name contained in the full path name argi
+  */
   char *lastdirsep;
   char *dir, *filename, cwdpath[1000];
 
@@ -295,6 +337,9 @@ char *get_zonefilename(char *bufptr){
 /* ------------------ trim ------------------------ */
 
 void trim(char *line){
+  /*! \fn void trim(char *line)
+      \brief removes trailing white space from the character string line
+  */
   char *blank=" ";
   const char *c;
   const char *lf="\n", *cr="\r";
@@ -316,6 +361,9 @@ void trim(char *line){
 /* ------------------ trim_front ------------------------ */
 
 char *trim_front(char *line){
+  /*! \fn char *trim_front(char *line)
+      \brief returns a pointer to the first non-blank character in the character string line
+  */
   char *blank=" ";
   const char *c;
   size_t i,len;
@@ -332,6 +380,9 @@ char *trim_front(char *line){
 /* ------------------ trimzeros ------------------------ */
 
 void trimzeros(char *line){
+  /*! \fn void trimzeros(char *line)
+      \brief removes trailing zeros in the floating point number found in line
+  */
   size_t i,len;
   char *c;
 
@@ -355,6 +406,9 @@ void trimzeros(char *line){
 /* ------------------ trimmzeros ------------------------ */
 
 void trimmzeros(char *line){
+  /*! \fn void trimmzeros(char *line)
+      \brief removes trailing zeros in each floating point number found in line
+  */
   char linecopy[1024];
   char *token;
 
@@ -373,6 +427,9 @@ void trimmzeros(char *line){
 /* ------------------ STRSTR ------------------------ */
 
 char *STRSTR(char *c, const char *key){
+  /*! \fn char *STRSTR(char *c, const char *key)
+      \brief looks for first occurence of the string key found in c ignoring case
+  */
   char *C,*CCOPY,*CC,*cc,*result;
   char *KEY,*KEYCOPY,*KEY2;
   size_t i, len,len2;
@@ -482,6 +539,9 @@ void num2string(char *string, float tval,float range){
 /* ------------------ get_string ------------------------ */
 
 char *trim_string(char *buffer){
+  /*! \fn char *trim_string(char *buffer)
+      \brief removes trailing blanks from buffer and returns a pointer to the first non-blank character
+  */
   int len;
   char *bufptr;
 
@@ -496,6 +556,9 @@ char *trim_string(char *buffer){
 /* ------------------ STRCMP ------------------------ */
 
 int STRCMP(const char *s1, const char *s2){
+  /*! \fn int STRCMP(const char *s1, const char *s2)
+      \brief same as the standard function, strcmp, but ignores case
+  */
   while (toupper(*s1) == toupper(*s2++)){
 		if (*s1++ == 0)return (0);
   }
@@ -552,6 +615,9 @@ char *get_chid(char *file, char *buffer){
 /* ------------------ log_base2 ------------------------ */
 
 int log_base2(float xx){
+  /*! \fn int log_base2(float xx)
+      \brief returns the log base 2 of the floating point number xx
+  */
   int r = 0;
   int x;
   x=xx;
@@ -565,6 +631,9 @@ int log_base2(float xx){
 /* ------------------ array2string ------------------------ */
 
 void array2string(float *vals, int nvals, char *string){
+  /*! \fn void array2string(float *vals, int nvals, char *string)
+      \brief convert an array of floating point numbers to a character string
+  */
   char cval[30];
   int i;
 
@@ -584,6 +653,9 @@ void array2string(float *vals, int nvals, char *string){
   /* ------------------ getfileinfo ------------------------ */
 
 int file_exists(char *filename){
+  /*! \fn int file_exists(char *filename)
+      \brief returns 1 if the file filename exists, 0 otherwise
+  */
   STRUCTSTAT statbuffer;
 
   if(STAT(filename,&statbuffer)==0){
@@ -597,6 +669,9 @@ int file_exists(char *filename){
 /* ------------------ which ------------------------ */
 
 char *which(char *progname){
+  /*! \fn char *which(char *progname)
+      \brief returns the PATH directory containing the file progname
+  */
   char *pathlistptr, fullpath[4096], pathlist[4096], prog[4096];
   char *dir,*returndir;
   const char *ext;
@@ -654,6 +729,9 @@ char *which(char *progname){
 /* ------------------ MIN ------------------------ */
 
 float MIN(float x,float y){
+  /*! \fn float MIN(float x,float y)
+      \brief returns the minimum of x and y
+  */
   if(x<y){
     return x;
   }
@@ -665,6 +743,9 @@ float MIN(float x,float y){
 /* ------------------ MAX ------------------------ */
 
 float MAX(float x,float y){
+  /*! \fn float MAX(float x,float y)
+      \brief returns the maximum of x and y
+  */
   if(x>y){
     return x;
   }
@@ -690,4 +771,30 @@ float frexp10(float x, int *exp10){
   if(x<0)mantissa = -mantissa;
   return mantissa;
 }
+
+/* ------------------ getstring ------------------------ */
+
+char *getstring(char *buffer){
+  /*! \fn *getstring(char *buffer)
+      \brief return pointer to string contained between a pair of double quotes
+  */
+  char *begin,*end;
+  int i;
+
+  // if buffer contains msgid "string"
+  // return a pointer to s in string
+
+  begin=strchr(buffer,'"');
+  if(begin==NULL)return NULL;
+  begin++;
+  end=strrchr(begin,'"');
+  if(end==NULL)return NULL;
+  end[0]=0;
+  for(i=0;i<strlen(begin);i++){
+    if(begin[i]!=' ')return begin;
+  }
+  return NULL;
+}
+
+
 

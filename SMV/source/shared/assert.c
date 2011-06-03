@@ -8,6 +8,9 @@
 char assert_revision[]="$Revision$";
 
 void _Assert(char *filename, unsigned linenumber){
+  /*! \fn void _Assert(char *filename, unsigned linenumber)
+      \brief displays the filename and line number if an assert is thrown
+  */
   int dummy;
 #ifdef _DEBUG
   float x=0.0, y;
@@ -25,7 +28,9 @@ void _Assert(char *filename, unsigned linenumber){
 }
 
 void _WAssert(char *comment, char *filename, unsigned linenumber){
-
+  /*! \fn void _WAssert(char *comment, char *filename, unsigned linenumber)
+      \brief displays the filename and line number if an assert is thrown
+  */
   fflush(NULL);
   fprintf(stderr, "\nWarning: %s\nAssertion failed: %s, line %u\n",comment,filename, linenumber);
   fflush(stderr);

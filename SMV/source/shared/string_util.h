@@ -45,6 +45,8 @@ EXTERNCPP void array2string(float *vals, int nvals, char *string);
 EXTERNCPP float MIN(float x,float y);
 EXTERNCPP float MAX(float x,float y);
 EXTERNCPP float frexp10(float x, int *exp10);
+EXTERNCPP char *getstring(char *buffer);
+
 
 #ifdef WIN32
 STREXTERN char STRDECL(dirseparator[],"\\");
