@@ -44,31 +44,49 @@ int main(int argc, char **argv){
   if(add_msgstring==0){
     while(!feof(stdin)){
       char *beg,*end, *beg2;
+      int i,len;
 
       fgets(buffer,sizeof(buffer),stdin);
       beg=strstr(buffer,"_(\"");
       if(beg==NULL)continue;
       beg+=2;
       for(beg2=beg+1;beg2<buffer+sizeof(buffer);beg2++){
-        if(*beg2==' '||*beg2=='*'||*beg2=='#')continue;
+        char c;
+   
+        c = *beg2;
+        if((c<'a'||c>'z')&&(c<'A'||c>'Z'))continue;
         beg=beg2-1;
         *beg='"';
         break;
       }
-      for(end=beg+1;end<buffer+sizeof(buffer);end++){
-        if(*end=='\"')break;
+      end=strstr(beg+1,"\"");
+      if(end!=NULL){
+        end[1]=0;
+        len=strlen(beg);
+        for(i=len-2;i>=0;i++){
+          char c;
+   
+          c = beg[i];
+          if((c<'a'||c>'z')&&(c<'A'||c>'Z'))continue;
+          beg[i+1]='"';
+          beg[i+2]=0;
+        }
+        printf("msgid %s\n",beg);
       }
-      *(end+1)=0;
-      printf("msgid %s\n",beg);
     }
   }
   else{
     while(!feof(stdin)){
+      char *beg;
+
       fgets(buffer,sizeof(buffer),stdin);
       trim(buffer);
-      printf("\n");
-      printf("%s\n",buffer);
-      printf("msgstr \"\"\n");
+      beg=strstr(buffer,"msgid");
+      if(beg!=NULL&&beg==buffer){
+        printf("%s\n",buffer);
+        printf("msgstr \"\"\n");
+        printf("\n");
+      }
     }
   }
 }
