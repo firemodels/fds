@@ -152,42 +152,79 @@ void init_translate(char *bindir, char *tr_name){
   }
 }
 
-/* ------------------ translate2 ------------------------ */
-
-char *translate2(char *string){
-  char *value=NULL;
-  trdata *trval;
-  trdata trkey;
-
-  trkey.key=string;
-
-  trval = bsearch(&trkey,trinfo,ntrinfo,sizeof(trdata),compare_trdata);
-  if(trval!=NULL)value=trval->value;
-  return value;
-}
-
 /* ------------------ translate ------------------------ */
 
 char *translate(char *string){
   /*! \fn char *translate(char *string)
       \brief return the translation of string, return string if translation not found
   */
-  char *valin,*valout;
-  int i;
+  char c;
+  int i, len, nchars_before=0, nchars_in=0, nchars_after=0;
+  char *string_before, *string_in, *string_out, *string_after;
 
-  if(tr_lang!=0&&tr_english==0){
-    int len;
+  if(tr_lang==1||tr_english==1)return string;
 
-    len = strlen(string);
-    for(i=0;i<len;i++){
-      valin=string+i;
-      if(*valin!=' '&&*valin!='*')break;
-      tr_string[i]=*valin;
+
+  len = strlen(string);
+
+  // find leading non-alpha characters
+
+  for(i=0;i<len;i++){
+    c=string[i];
+    if((c>='a'&&c<='z')||(c>='A'&&c<='Z')){
+      nchars_before=i;
+      string_in=string+i;
+      if(nchars_before>0){
+        string_before=tr_string_before;
+        string_before[nchars_before]=0;
+      }
+      else{
+        string_before=NULL;
+      }
+      break;
     }
-    valout=translate2(valin);
-    if(valout==NULL)return string;
-    strcpy(tr_string+i,valout);
-    return tr_string;
+    tr_string_before[i]=c;
   }
-  return string;
+
+  // find trailing non-alpha characters
+
+  for(i=len-1;i>=nchars_before;i--){
+    c=string[i];
+    if((c>='a'&&c<='z')||(c>='A'&&c<='Z')){
+      nchars_after=len-1-i;
+      string_after=string+i+1;
+      if(nchars_after>0){
+        memcpy(tr_string_after,string_after,nchars_after);
+        tr_string_after[nchars_after]=0;
+        string_after=tr_string_after;
+      }
+      else{
+        string_after=NULL;
+      }
+      break;
+    }
+  }
+  nchars_in=len-nchars_before-nchars_after;
+  if(nchars_in==0)return string;
+  memcpy(tr_string_in,string_in,nchars_in);
+  tr_string_in[nchars_in]=0;
+  string_in=tr_string_in;
+
+  // translate string_in
+
+  {
+    trdata *tr_out, tr_in;
+
+    tr_in.key=string_in;
+
+    tr_out = bsearch(&tr_in,trinfo,ntrinfo,sizeof(trdata),compare_trdata);
+    if(tr_out==NULL||tr_out->value==NULL)return string;
+    string_out=tr_out->value;
+  }
+
+  strcpy(tr_string,"");
+  if(string_before!=NULL)strcat(tr_string,string_before);
+  strcat(tr_string,string_out);
+  if(string_after!=NULL)strcat(tr_string,string_after);
+  return tr_string;
 }

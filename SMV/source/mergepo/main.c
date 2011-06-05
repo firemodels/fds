@@ -19,7 +19,7 @@ void usage(char *prog);
 
 int main(int argc, char **argv){
   int i;
-  char *arg,*prog, *file1=NULL, *file_template=NULL;
+  char *arg,*prog, *file_lang=NULL, *file_template=NULL;
 
   initMM();
   prog=argv[0];
@@ -36,55 +36,50 @@ int main(int argc, char **argv){
       }
     }
     else{
-      if(file1==NULL){
-        file1=argv[i];
+      if(file_lang==NULL){
+        file_lang=argv[i];
       }
       else{
         file_template=argv[i];
       }
     }
   }
-  if(file1==NULL||file_template==NULL){
+  if(file_lang==NULL||file_template==NULL){
     usage(prog);
     return 1;
   }
-  if(file1!=NULL&&file_template!=NULL){
+  if(file_lang!=NULL&&file_template!=NULL){
     int return1, return2;
-    trdata *trinfo1, *trinfo_template;
-    int ntrinfo1, ntrinfo_template;
+    trdata *trinfo_lang, *trinfo_template;
+    int ntrinfo_lang, ntrinfo_template;
 
-    return1 = parse_lang(file1, &trinfo1, &ntrinfo1);
+    return1 = parse_lang(file_lang, &trinfo_lang, &ntrinfo_lang);
     return2 = parse_lang(file_template, &trinfo_template, &ntrinfo_template);
     if(return1==1&&return2==1){
       int i;
 
+      printf("\n");
       for(i=0;i<ntrinfo_template;i++){
-        trdata *tri, *trval;
+        trdata *tr_template_i, *tr_lang;
 
-        tri = trinfo_template + i;
-        trval = bsearch(tri,trinfo1,ntrinfo1,sizeof(trdata),compare_trdata);
-        if(trval!=NULL){
-          tri->value=trval->value;
+        tr_template_i = trinfo_template + i;
+        // foreach string in template look for a translation and store it in lang
+        tr_lang = bsearch(tr_template_i,trinfo_lang,ntrinfo_lang,sizeof(trdata),compare_trdata);
+        if(tr_lang!=NULL){
+          tr_template_i->value=tr_lang->value;
         }
         else{
-          tri->value=NULL;
+          tr_template_i->value=NULL;
         }
-      }
-//      qsort(trinfo_template,ntrinfo_template,sizeof(trdata),compare_trdata2);
-      for(i=0;i<ntrinfo_template;i++){
-        trdata *tri;
-
-        tri = trinfo_template + i;
-        printf("\n");
-        printf("msgid \"%s\"\n",tri->key);
-        if(tri->value!=NULL){
-          printf("msgstr \"%s\"\n",tri->value);
+        printf("msgid \"%s\"\n",tr_template_i->key);
+        if(tr_template_i->value!=NULL){
+          printf("msgstr \"%s\"\n",tr_template_i->value);
         }
         else{
           printf("msgstr \"\"\n");
         }
+        if(i!=ntrinfo_template-1)printf("\n");
       }
-      
     }
   }
 }
