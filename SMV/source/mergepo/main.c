@@ -64,7 +64,7 @@ int main(int argc, char **argv){
         tri = trinfo_template + i;
         trval = bsearch(tri,trinfo1,ntrinfo1,sizeof(trdata),compare_trdata);
         if(trval!=NULL){
-          tri->value=tri->value;
+          tri->value=trval->value;
         }
         else{
           tri->value=NULL;
