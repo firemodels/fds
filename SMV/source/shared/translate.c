@@ -26,7 +26,7 @@ int compare_trdata( const void *arg1, const void *arg2 ){
   tri = (trdata *)arg1;
   trj = (trdata *)arg2;
 
-  return strcmp(tri->key,trj->key);
+  return STRCMP(tri->key,trj->key);
 }
 
 /* ------------------ parse_lang ------------------------ */
