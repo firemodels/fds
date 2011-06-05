@@ -22,11 +22,14 @@ char translate_revision[]="$Revision$";
 
 int compare_trdata( const void *arg1, const void *arg2 ){
   trdata *tri, *trj;
+  int compval;
 
-  tri = (trdata *)arg1;
+  tri = (trdata *)arg1; 
   trj = (trdata *)arg2;
 
-  return STRCMP(tri->key,trj->key);
+  compval = STRCMP(tri->key,trj->key);
+  if(compval!=0)return compval;
+  return strcmp(tri->key,trj->key);
 }
 
 /* ------------------ parse_lang ------------------------ */
