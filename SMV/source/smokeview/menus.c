@@ -96,26 +96,26 @@ void TrainerViewMenu(int value){
   switch (value) {
   case 1:   // realistic
     HideAllSlices();
-    ShowAllSmoke();
     trainerload=1;
+    ShowAllSmoke();
+    trainerload_old=1;
     break;
   case 2:  // temperature slices
-//    LoadSmoke3DMenu(-1);
     HideAllSmoke();
-    ShowAllSlices("TEMPERATURE",NULL);
     trainerload=2;
+    ShowAllSlices("TEMPERATURE",NULL);
+    trainerload_old=2;
     break;
   case 3:  //  oxygen slices
-//    LoadSmoke3DMenu(-1);
     HideAllSmoke();
-    ShowAllSlices("OXYGEN","OXYGEN VOLUME FRACTION");
     trainerload=3;
+    ShowAllSlices("OXYGEN","OXYGEN VOLUME FRACTION");
+    trainerload_old=3;
     break;
   case 998: // unload
-//    LoadSmoke3DMenu(-1);
-//    UnloadSliceMenu(-1);
     LoadUnloadMenu(UNLOADALL);
     trainerload=0;
+    trainerload_old=0;
     break;
   default:
     ASSERT(FFALSE);
@@ -3187,16 +3187,46 @@ void ShowAllSlices(char *type1, char *type2){
   int i;
 
   glutSetCursor(GLUT_CURSOR_WAIT);
-  for(i=0;i<nslice_files;i++){
-    sliceinfo[i].display=0;
-    if(sliceinfo[i].loaded==0)continue;
-    if(
-      type1!=NULL&&STRCMP(sliceinfo[i].label.longlabel,type1)==0||
-      type2!=NULL&&STRCMP(sliceinfo[i].label.longlabel,type2)==0
-      ){
-      sliceinfo[i].display=1;
-      islicetype=sliceinfo[i].type;
+  if(trainer_showall_mslice==1){
+    for(i=0;i<nslice_files;i++){
+      sliceinfo[i].display=0;
+      if(sliceinfo[i].loaded==0)continue;
+      if(
+        type1!=NULL&&STRCMP(sliceinfo[i].label.longlabel,type1)==0||
+        type2!=NULL&&STRCMP(sliceinfo[i].label.longlabel,type2)==0
+        ){
+        sliceinfo[i].display=1;
+        islicetype=sliceinfo[i].type;
+      }
     }
+  }
+  else{
+    int msliceindex;
+  
+    if(trainerload==2){
+      int i;
+
+      if(trainerload==trainerload_old){
+        trainer_temp_index++;
+        if(trainer_temp_index>trainer_temp_n-1){
+          trainer_temp_index=0;
+        }
+      }
+      msliceindex=trainer_temp_indexes[trainer_temp_index];
+    }
+    else{ 
+      int i;
+
+      if(trainerload==trainerload_old){
+        trainer_oxy_index++;
+        if(trainer_oxy_index>trainer_oxy_n-1){
+          trainer_oxy_index=0;
+        }
+      }
+      msliceindex=trainer_oxy_indexes[trainer_oxy_index];
+    }
+    ShowMultiSliceMenu(HIDE_ALL);
+    ShowMultiSliceMenu(msliceindex);
   }
   updatemenu=1;  
   glutPostRedisplay();

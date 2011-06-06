@@ -42,6 +42,8 @@ propdata *get_prop_id(char *prop_id);
 void init_evac_prop(void);
 void init_prop(propdata *propi, int nsmokeview_ids, char *label);
 void SmokeColorBarMenu(int val);
+void getsliceparams(void);
+void getsliceparams2(void);
 
 /* ------------------ init_default_prop ------------------------ */
 
@@ -7261,6 +7263,7 @@ int readini(int scriptconfigfile){
     initdefaultcolorbars();
   }
   updatezoommenu=1;
+  getsliceparams2();
   return 0;
 }
 
@@ -7815,6 +7818,27 @@ int readini2(char *inifile, int localfile){
         fgets(buffer,255,stream);
         sscanf(buffer,"%i",&seq_id);
         get_startup_slice(seq_id);
+      }
+      update_load_startup=1;
+      continue;
+    }
+    if(match(buffer,"MSLICEAUTO",10)==1){
+      int n3dsmokes=0;
+      int seq_id;
+
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&n3dsmokes);
+      for(i=0;i<n3dsmokes;i++){
+
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%i",&seq_id);
+
+        if(seq_id>=0&&seq_id<nmultislices){
+          multislice *mslicei;
+  
+          mslicei = multisliceinfo + seq_id;
+          mslicei->autoload=1;
+        }
       }
       update_load_startup=1;
       continue;

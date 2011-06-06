@@ -1434,6 +1434,7 @@ void getsliceparams(void){
     for(i=1;i<nslice_files;i++){
       sdold = sliceinfo + sliceorderindex[i - 1];
       sd = sliceinfo + sliceorderindex[i];
+      mslicei->autoload=0;
       if(new_multi(sdold,sd)==1){
         nmultislices++;
         mslicei++;
@@ -1477,6 +1478,40 @@ void getsliceparams(void){
 #endif
   updateslicemenulabels();
   update_slicedir_count();
+}
+
+/* ------------------ getsliceparams2 ------------------------ */
+
+void getsliceparams2(void){
+  int i;
+  
+  trainer_temp_n=0;
+  trainer_oxy_n=0;
+  if(nmultislices>0){
+    FREEMEMORY(trainer_temp_indexes);
+    FREEMEMORY(trainer_oxy_indexes);
+    NewMemory((void **)&trainer_temp_indexes,nmultislices*sizeof(int));
+    NewMemory((void **)&trainer_oxy_indexes,nmultislices*sizeof(int));
+  }
+  for(i=0;i<nmultislices;i++){
+    multislice *mslicei;
+
+    mslicei = multisliceinfo + i;
+    if(mslicei->autoload==1){
+      slice *slicei;
+      char *longlabel;
+
+      slicei = sliceinfo + mslicei->islices[0];
+      longlabel = slicei->label.longlabel;
+
+      if(STRCMP(longlabel,"TEMPERATURE")==0){
+        trainer_temp_indexes[trainer_temp_n++]=i;
+      }
+      if(STRCMP(longlabel,"OXYGEN")==0||STRCMP(longlabel,"OXYGEN VOLUME FRACTION")==0){
+        trainer_oxy_indexes[trainer_oxy_n++]=i;
+      }
+    }
+  }
 }
 
 /* ------------------ updatevslices ------------------------ */
@@ -1889,6 +1924,7 @@ void setslicecolors(float smin, float smax,
   *errorcode=0;
   printf("computing slice color levels \n");
   scale=sb->scale;
+  if(sd->qslicedata==NULL)return;
   getSliceColors(sd->qslicedata,sd->nslicetotal,sd->slicelevel,
                 smin,smax,
                 nrgb_full,nrgb,

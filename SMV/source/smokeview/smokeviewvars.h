@@ -14,6 +14,10 @@
 #include "threader.h"
 #include "string_util.h"
 
+SVEXTERN int SVDECL(trainer_temp_index,0),SVDECL(trainer_oxy_index,0);
+SVEXTERN int SVDECL(*trainer_temp_indexes,NULL),SVDECL(*trainer_oxy_indexes,NULL);
+SVEXTERN int SVDECL(trainer_showall_mslice,0),SVDECL(trainer_cycle_mslice,1);
+SVEXTERN int SVDECL(trainer_temp_n,0),SVDECL(trainer_oxy_n,0);
 SVEXTERN char SVDECL(*tr_name,NULL);
 SVEXTERN int SVDECL(show_smoke_lighting,0),SVDECL(have_lighting,0);
 SVEXTERN int SVDECL(showdeviceval,0),SVDECL(showvdeviceval,0);
@@ -269,7 +273,7 @@ SVEXTERN int trainer_realtime;
 SVEXTERN int trainer_path;
 SVEXTERN float trainer_xzy[3],trainer_ab[2];
 SVEXTERN float motion_ab[2], motion_dir[2];
-SVEXTERN int trainerload;
+SVEXTERN int SVDECL(trainerload,0),SVDECL(trainerload_old,0);
 SVEXTERN int fontsize_save;
 SVEXTERN int showtrainer;
 SVEXTERN int trainer_mode;

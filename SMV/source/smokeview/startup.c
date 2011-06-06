@@ -680,6 +680,27 @@ void InitOpenGL(void){
      }
    }
 
+   // startup mslice
+
+   nstartup=0;
+   for(i=0;i<nmultislices;i++){
+      multislice *mslicei;
+
+      mslicei = multisliceinfo + i;
+
+      if(mslicei->loaded==1)nstartup++;
+   }
+   if(nstartup!=0){
+     fprintf(fileout,"MSLICEAUTO\n");
+     fprintf(fileout," %i \n",nstartup);
+     for(i=0;i<nmultislices;i++){
+        multislice *mslicei;
+
+        mslicei = multisliceinfo + i;
+        if(mslicei->loaded==1)fprintf(fileout," %i\n",i);
+     }
+   }   
+
    // startup smoke
 
    nstartup=0;
@@ -820,7 +841,6 @@ void InitOpenGL(void){
       }
     }
   }
-
 
  /* ------------------ get_startup_vslice ------------------------ */
 
@@ -1077,7 +1097,6 @@ void initvars1(void){
   motion_ab[1]=0.0;
   motion_dir[0]=0.0;
   motion_dir[1]=0.0;
-  trainerload=0;
   fontsize_save=0;
   showtrainer=0;
   trainer_mode=0;

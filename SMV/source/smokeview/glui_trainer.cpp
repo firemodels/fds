@@ -374,7 +374,7 @@ void TRAINER_CB(int var){
        setslicebounds(islicetype);
       }
     }
-    TrainerViewMenu(2);
+    //TrainerViewMenu(2);
     updatechopcolors();
     colorbarflip=1;
     ColorBarMenu(-2);
@@ -393,7 +393,7 @@ void TRAINER_CB(int var){
        setslicebounds(islicetype);
       }
     }
-    TrainerViewMenu(3);
+   // TrainerViewMenu(3);
     updatechopcolors();
     colorbarflip=0;
     ColorBarMenu(-2);
