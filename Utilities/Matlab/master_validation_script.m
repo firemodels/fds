@@ -34,7 +34,7 @@ beyler_hood
 check_hrr
 sandia_helium_plume
 sandia_methane_fire
-BRE_spray
+spray_attenuation
 Cup_burner
 vettori_flat
 vettori_sloped
