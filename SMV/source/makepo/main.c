@@ -19,7 +19,10 @@ int main(int argc, char **argv){
   char buffer[1024];
   int i;
   char *arg,*prog;
+  FILE *stream;
 
+  //stream=fopen("menus.c","r");
+  stream=stdin;
   prog=argv[0];
   for(i=1;i<argc;i++){
     int lenarg;
@@ -42,11 +45,11 @@ int main(int argc, char **argv){
     }
   }
   if(add_msgstring==0){
-    while(!feof(stdin)){
+    while(!feof(stream)){
       char *beg,*end, *beg2;
       int i,len;
 
-      fgets(buffer,sizeof(buffer),stdin);
+      fgets(buffer,sizeof(buffer),stream);
       beg=strstr(buffer,"_(\"");
       if(beg==NULL)continue;
       beg+=2;
@@ -63,23 +66,24 @@ int main(int argc, char **argv){
       if(end!=NULL){
         end[1]=0;
         len=strlen(beg);
-        for(i=len-2;i>=0;i++){
+        for(i=len-2;i>=0;i--){
           char c;
    
           c = beg[i];
           if((c<'a'||c>'z')&&(c<'A'||c>'Z'))continue;
           beg[i+1]='"';
           beg[i+2]=0;
+          break;
         }
         printf("msgid %s\n",beg);
       }
     }
   }
   else{
-    while(!feof(stdin)){
+    while(!feof(stream)){
       char *beg;
 
-      fgets(buffer,sizeof(buffer),stdin);
+      fgets(buffer,sizeof(buffer),stream);
       trim(buffer);
       beg=strstr(buffer,"msgid");
       if(beg!=NULL&&beg==buffer){
