@@ -257,7 +257,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
                   DP(I,J,K) = DP(I,J,K) + DIV_DIFF_HEAT_FLUX
                   
-                  IF (ENTHALPY_TRANSPORT) ENTHALPY_SOURCE(I,J,K) = DIV_DIFF_HEAT_FLUX
+                  IF (ENTHALPY_TRANSPORT) ENTHALPY_SOURCE(I,J,K) = ENTHALPY_SOURCE(I,J,K) + DIV_DIFF_HEAT_FLUX
                   
                ENDDO
             ENDDO
@@ -272,7 +272,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
             
                DP(I,J,K) = DP(I,J,K) + DIV_DIFF_HEAT_FLUX
                
-               IF (ENTHALPY_TRANSPORT) ENTHALPY_SOURCE(I,J,K) = DIV_DIFF_HEAT_FLUX
+               IF (ENTHALPY_TRANSPORT) ENTHALPY_SOURCE(I,J,K) = ENTHALPY_SOURCE(I,J,K) + DIV_DIFF_HEAT_FLUX
                
             ENDDO
          ENDDO
