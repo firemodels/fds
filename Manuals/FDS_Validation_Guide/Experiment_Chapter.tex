@@ -109,7 +109,7 @@ the cable is completely surrounded by the heat source.
 \item The cable is homogenous in composition. In reality, a cable is constructed of several
 different types of polymeric materials, cellulosic fillers, and a conducting metal, most
 often copper.
-\item The thermal properties – conductivity, specific heat, and density – of the assumed
+\item The thermal properties ï¿½ conductivity, specific heat, and density ï¿½ of the assumed
 homogenous cable are independent of temperature. In reality, both the thermal
 conductivity and specific heat of polymers are temperature-dependent, but this
 information is very difficult to obtain from manufacturers. More discussion of this
@@ -912,26 +912,43 @@ compartment height, $H$.
 \item[Relative Distance from the Fire, $r_t/D$,] indicates whether a ``target'' is near or far from the fire.
 \end{description}
 
-
+\newpage
+\thispagestyle{empty}
 \begin{sidewaystable}[p]
 \caption{Summary of the major experimental parameters. }
 \begin{center}
-\begin{tabular}{|l|c|c|c|c|c|c|c|c|}
+\begin{tabular}{|l|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
 \hline
-Test Series     & $\dot{Q}$     & $\dQ^*$   & $\phi$    & $D$       & $D^*$     & $H/D^*$   & $r_{cj}/H$    & $r_t/D$          \\
-                & (kW)          &           &           & (m)       & (m)       &           &               &                   \\ \hline \hline
-ATF Corridors   & 50-500        & 0.25-2.5  &  N/A      & 0.5       & 0.3-0.7   &  8.0-3.4  &   7           &  N/A              \\ \hline
-Bryant Doorway  & 500           & 0.6       &  0.04-0.4 & 0.9       & 1.0-1.3   &  8.4      &   1.2-1.6     &  N/A              \\ \hline
-FM/SNL          & 500           & 0.6       &  0.04-0.4 & 0.9       & 1.0-1.3   &  8.4      &   1.2-1.6     &  N/A              \\ \hline
-NBS Multi-Room  & 100           & 1.4       &  0.04     & 0.34      & 1.0-1.3   &  5.6      &   N/A         &  N/A              \\ \hline
-NIST/NRC        & 400-2300      & 0.4-2.1   &  0.1-0.6  & 1.0       & 1.0-1.3   &  2.9-5.7  &   1.3-1.7     &  2.2-5.7          \\ \hline
-NIST RSE        & 600           & 62        &  0.83     & 0.15      & 0.8       &  1.3      &   N/A         &  N/A              \\ \hline
-SP AST          & 600           & 62        &  0.83     & 0.15      & 0.8       &  1.3      &   N/A         &  N/A              \\ \hline
-Steckler        & 63            & 1.1       &  0.02     & 0.30      & 0.32      &  6.7      &   N/A         &  N/A              \\ \hline
-UL/NFPRF        & 4400          & 3.9       &  0.11     & 1.0       & 1.7       &  4.4      &   0.86        &  N/A              \\ \hline
-VTT Large Hall  & 1800-3600     & 1.0       &  0.10     & 1.2-1.6   & 1.0-1.3   &  12-16    &   N/A         &  N/A              \\ \hline
-WTC             & 3000          & 2.7       &  0.33     & 1.0       & 1.5       &  2.6      &   0.52        &  1.0              \\ \hline
+  Test Series   & $\dot{Q}$    & $D$   & $H$   & $L$   & $W$   & $Q^*$   & $D^*$   & $Lf/H$  & $\phi$   & $H/D^*$   & $W/H - L/H$   & $r_{cj}/H$   & $r_{rad}/D$    \\
+      & (kW)    & (m)   & (m)   & (m)   & (m)   &    & (m)   &   &    &    &    &    &     \\ \hline \hline
+Arup Tunnel  & 5344   & 1.6   & 7   & 8   & 300   & 1.4   & 1.8   & 0.8   & N/A   & 3.8   & 1.1-42.9   & 0-1.1   & N/A   \\ \hline 
+ATF Corridors  & 50-500   & 0.5   & 2.4   & 1.8   & 17   & 0.3-3.1   & 0.3-0.7   & 0.3-1   & 0.04-0.41   & 8.5-3.4   & 0.8-7.1   & 0.8-6   & N/A   \\ \hline 
+Bryant Doorway  & 34-511   & 0.3   & 2.4   & 2.4   & 5   & 0.4-6.4   & 0.2-0.7   & 0.3-1   & 0.1-2   & 9.9-3.4   & 1-2.1   & 0.6-0.8   & N/A   \\ \hline 
+CSTB Tunnel  & 1965-2484   & 0.8   & 1.9   & 2.4   & 54   & 2.9-3.7   & 1.2-1.3   & 2.1-2.4   & 0.06-0.08   & 1.5-1.4   & 1.3-28.4   & 1.6-12.6   & N/A   \\ \hline 
+FM/SNL  & 470-516   & 0.9   & 6.1   & 12   & 18   & 0.5-0.6   & 0.7   & 0.3   & 0   & 8.8-8.5   & 2-3   & 0.2-0.3   & N/A   \\ \hline 
+Hamins Burner   & 0.4-162   & 0.1-1   & N/A   & N/A   & N/A   & 0.1   & 0-0.5   & N/A   & N/A   & N/A   & N/A   & N/A   & N/A   \\ \hline 
+Heskestad   & 151-15127250   & 1.1   & N/A   & N/A   & N/A   & 0.1-9448.4   & 0.4-44   & N/A   & N/A   & N/A   & N/A   & N/A   & N/A   \\ \hline 
+LLNL Enclosure  & 50-400   & 0.6   & 4.5   & 4   & 6   & 0.2-1.4   & 0.3-0.6   & 0.1-0.4   & 0-Inf   & 15.9-6.9   & 0.9-1.3   & 0.3-1   & N/A   \\ \hline 
+McCaffrey Plume  & 14-57   & 0.3   & N/A   & N/A   & N/A   & 0.2-0.7   & 0.2-0.3   & N/A   & N/A   & N/A   & N/A   & N/A   & N/A   \\ \hline 
+NBS Multi-Room  & 110   & 0.3   & 2.4   & 2.3   & 2.3   & 1.4   & 0.4   & 0.5   & 0   & 6.2   & 1   & 0.5-0.7   & 0.9-2.4   \\ \hline 
+NIST RSE  & 50-600   & 0.2   & N/A   & 3   & 9   & 4.9-58.4   & 0.3-0.8   & N/A   & 0.83   & N/A   & N/A   & N/A   & N/A   \\ \hline 
+NIST/NRC   & 350-2200   & 1   & 4   & 7.1   & 21.7   & 0.3-1.9   & 0.6-1.3   & 0.4-1   & 0.1-0.6   & 6.5-3.1   & 1.8-5.4   & 0.3-2   & 0.5-1   \\ \hline 
+NRCC Facade  & 5000-10300   & 4.3   & 2.8   & 4.4   & 6   & 0.1-0.2   & 1.8-2.4   & 1-1.8   & 0.06-0.12   & 1.5-1.2   & 1.6-2.2   & N/A   & N/A   \\ \hline 
+NRL/HAI  & 50-520   & 0.3-0.7   & N/A   & N/A   & N/A   & 1-1.1   & 0.3-0.7   & N/A   & 0-Inf   & N/A   & N/A   & N/A   & N/A   \\ \hline 
+Sandia Plume  & 2025-5450   & 1   & N/A   & N/A   & N/A   & 1.7-4.6   & 1.2-1.8   & N/A   & N/A   & N/A   & N/A   & N/A   & N/A   \\ \hline 
+SP AST  & 450   & 0.3   & 2.4   & 2.4   & 3.6   & 5.7   & 0.7   & 1   & 1.7   & 3.5   & 1-1.5   & N/A   & N/A   \\ \hline 
+Steckler  & 31.6-158   & 0.3   & 2.1   & 2.8   & 2.8   & 0.7-3.5   & 0.2-0.4   & 0.3-0.7   & 0.02   & 9.1-4.8   & 1.3   & N/A   & N/A   \\ \hline 
+UL/NFPRF  & 4400   & 1   & 7.6   & 37   & 37   & 3.7   & 1.7   & 0.8   & 0.11   & 4.5   & 4.9   & 0.1   & N/A   \\ \hline 
+Ulster SBI  & 30-60   & 0.2   & N/A   & 0.6   & 0.6   & 1.4-2.8   & 0.2-0.3   & N/A   & 0   & N/A   & N/A   & N/A   & N/A   \\ \hline 
+USCG/HAI  & 250-1000   & 0.3   & 3   & 5   & 7   & 5.6-22.4   & 0.5-0.9   & 0.6-1.1   & 0-Inf   & 5.6-3.2   & 1.7-2.3   & 0-0.8   & 0.5-1.3   \\ \hline 
+USN Hawaii  & 100-7700   & 0.3-2.5   & 15   & 74   & 97.6   & 1.3-0.7   & 0.4-2.1   & 0.1-0.4   & 0-Inf   & 40.3-7.1   & 4.9-6.5   & 0-1.2   & N/A   \\ \hline 
+USN Iceland  & 100-15700   & 0.3-3.4   & 22   & 46   & 74   & 1.3-0.6   & 0.4-2.8   & 0.1-0.4   & 0-Inf   & 59-7.8   & 2.1-3.4   & 0-1   & N/A   \\ \hline 
+Vettori Flat  & 1055   & 0.7   & 2.6   & 5.6   & 9.2   & 2.3   & 1   & 1.2   & 448   & 2.8   & 2.1-3.5   & 0.8-2.9   & N/A   \\ \hline 
+Vettori Sloped  & 1055   & 0.7   & 2.5   & 5.5   & 7.3   & 2.3   & 1   & 1.2   & 0.5   & 2.6   & 2.2-2.9   & N/A   & N/A   \\ \hline 
+VTT Large Hall  & 1860-3640   & 1.4-1.8   & 19   & 19   & 27   & 0.7   & 1.2-1.6   & 0.2   & 0-0.1   & 15.8-12.1   & 1-1.4   & 0-0.6   & N/A   \\ \hline 
+WTC   & 965-1460   & 1   & 3.8   & 3.6   & 7   & 0.8-1.2   & 0.9-1.1   & 0.7-0.9   & 0.4-0.6   & 4.1-3.5   & 0.9-1.8   & 0.1   & 0.3   \\ \hline 
 \end{tabular}
 \end{center}
 \label{Test_Parameters}
+\nopagebreak
 \end{sidewaystable}
