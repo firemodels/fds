@@ -110,8 +110,8 @@ size_t sizeofBlock(bbyte *pv);
 MMEXTERN mallocflag __ResizeMemory(void **ppv, size_t sizeNew,char *varname, char *file, int linenumber);
 MMEXTERN mallocflag __NewMemory(void **ppv, size_t size, char *varname, char *file,int linenumber);
 #endif
-mallocflag _ResizeMemory(void **ppv, size_t sizeNew);
-mallocflag _NewMemory(void **ppv, size_t size);
+MMEXTERN mallocflag _ResizeMemory(void **ppv, size_t sizeNew);
+MMEXTERN mallocflag _NewMemory(void **ppv, size_t size);
 MMEXTERN void FreeMemory(void *pv);
 void initMM(void);
 void FreeAllMemory(void);
