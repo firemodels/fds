@@ -294,7 +294,7 @@ OUTPUT_QUANTITY(48)%SHORT_NAME = 'c_p_bar'
 
 OUTPUT_QUANTITY(49)%NAME = 'ENTHALPY ERROR'                       
 OUTPUT_QUANTITY(49)%UNITS = 'kJ/m3'                 
-OUTPUT_QUANTITY(49)%SHORT_NAME = 'H-rho*cp*T'
+OUTPUT_QUANTITY(49)%SHORT_NAME = 'H-rhocpT'
 
 ! Measures of turbulence resolution (diagnostics)
 
