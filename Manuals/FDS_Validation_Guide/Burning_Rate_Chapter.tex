@@ -1,20 +1,33 @@
 
 \chapter{Burning Rate}
 
-This chapter looks at validation exercises where the aim is to {\em predict} the burning rate of the fuel. Most of the simulations included in the previous chapters involved
-a {\em specified} burning or heat release rate.
+This chapter contains a series of validation exercises where the aim is to {\em predict} the burning rate of the fuel. Most of the simulations included in the previous chapters involved
+a {\em specified} burning or heat release rate. Here, the objective is to apply measured thermophysical properties of the material and predict its burning rate, either with a
+specified heat flux or as a free burn. 
 
 
 \section{FAA Polymers}
 
-A non-charring polymer is considered one of the easier solids to model because it typically involves only a single, first order reaction that converts solid plastic to fuel vapor. 
+This section presents predictions of the mass loss and/or burning rates of different types of polymers. Two types of experiments are considered. For the non-charring polymers, the
+mass loss rate of non-burning samples was measured in a nitrogen atmosphere. For the charring polymers, the heat release rate of burning samples was measured in a standard
+Cone Calorimeter~\cite{conecal}. When just the mass loss rate is predicted, FDS is run in ``solid phase only'' mode; that is, a 1-D heat conduction calculation is performed in a 
+single grid cell. The result is the predicted mass loss rate as a function of time. To simulate a cone calorimeter experiment, FDS simulates the burning of a 10~cm by 10~cm sample with
+a specified heat flux to represent the effect of the cone heater. The cone itself is not included in the simulation. As the sample burns, FDS predicts the additional radiative and
+convective heating of the sample as a result of the fire. 
+
+\newpage
+
+\subsection{Non-Charring Polymers in the Gasification Apparatus}
+
+A non-charring polymer is considered one of the easier solids to model because it typically involves only a single, first order reaction that converts solid plastic to fuel vapor.
 No residue is formed and the plastic is completely pyrolyzed. Table~\ref{FAA_Properties}
-lists nine parameters for each polymer studied. These values have been input directly into FDS, and the predicted burning rates are compared with measured values from the NIST
+lists nine parameters for each polymer studied. These values have been input directly into FDS, and the predicted mass loss rates are compared with measured values from the NIST
 Gasification Apparatus, a device that pyrolyzes the solid in a nitrogen environment to prevent combustion of fuel gases. The results are shown in Fig.~\ref{FAA_Polymers}. The exposing
 heat flux was 52~kW/m$^2$. A 1~cm layer of insulation was placed under the sample. Its properties are given in Ref.~\cite{Stoliarov:CF2009}.
 
+
 \begin{table}[h!]
-\caption[FAA Polymer Properties]{Input parameters for FAA Polymers non-charring examples. Courtesy S.~Stoliarov, M.~McKinnon and J.~Li, University of Maryland.}
+\caption[FAA non-charring polymer properties.]{Input parameters for FAA Polymers non-charring samples. Courtesy S.~Stoliarov, M.~McKinnon and J.~Li, University of Maryland.}
 \begin{tabular}{|l|c|c|c|c|c|l|l|}
 \hline
 Property                    & Units         & HDPE                  & HIPS                  & PMMA                  & Unc. (\%)  & Method                &  Ref.                    \\ \hline \hline
@@ -39,18 +52,69 @@ FTIR                       \> Fourier Transform Infrared Spectroscopy \\
 TGA                        \> Thermogravimetric Analysis
 \end{tabbing}
 
-\newpage
 
-\begin{figure}[p]
-\begin{center}
-\begin{tabular}{c}
-\includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_HDPE} \\
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_HDPE} &
 \includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_HIPS} \\
 \includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_PMMA}
-\end{tabular}
-\end{center}
-\caption[Results of FAA Polymers comparison]{Comparison of predicted and measured mass loss rates for three non-charring polymers exposed to a heat flux of 52~kW/m$^2$ in a
+\end{tabular*}
+\caption[Results of FAA Polymers, non-charring, comparison]{Comparison of predicted and measured mass loss rates for three non-charring polymers exposed to a heat flux of 52~kW/m$^2$ in a
 nitrogen environment.}
 \label{FAA_Polymers}
 \end{figure}
 
+\clearpage
+
+\subsection{Charring Polymers in the Cone Calorimeter}
+
+The burning rate of a charring polymer is more difficult to predict than a non-charring one, in general, because there are more parameters that need to be measured.
+Table~\ref{FAA_Properties_Charring}
+lists 15 parameters for each polymer studied. These values have been input directly into FDS, and the predicted heat release rates are compared with measured values from the Cone
+Calorimeter. The results for three different thicknesses are shown in Fig.~\ref{FAA_Polymers_Charring}.
+A 1~cm layer of Kaowool insulation was placed under the sample. Its properties are given in Ref.~\cite{Stoliarov:CF2010}.
+
+
+\begin{table}[h!]
+\caption[FAA charring polymer properties.]{Input parameters for FAA Polymers charring samples. Courtesy S.~Stoliarov, University of Maryland.}
+\begin{tabular}{|l|c|c|c|c|c|l|l|}
+\hline
+Property                    & Units         & Polycarbonate                     & PVC                   & Method                &  Ref.                    \\ \hline \hline
+Polymer Density             & kg/m$^3$      & 1180 $\pm$ 60                     &                       & Direct                &  \cite{Stoliarov:CF2010}  \\ \hline
+Polymer Conductivity        & W/m/K         & 0.22 $\pm$ 0.03                   &                       & Literature            &  \cite{Stoliarov:CF2010}  \\ \hline
+Polymer Specific Heat       & kJ/kg/K       & 1.9 $\pm$ 0.3                     &                       & DSC                   &  \cite{Stoliarov:PDS2008}  \\ \hline
+Polymer Emissivity          &               & 0.90 $\pm$ 0.05                   &                       & Sphere                &  \cite{Hallman:PES1974}  \\ \hline
+Polymer Absorption Coef.    & m$^{-1}$      & 1770 $\pm$ 590                    &                       & FTIR                  &  \cite{Tsilingiris:ECM2003}  \\ \hline
+Char Density                & kg/m$^3$      & 248                               &                       & Cone Calorimeter      &  \cite{Stoliarov:CF2010}  \\ \hline
+Char Conductivity           & W/m/K         & 0.37                              &                       & Cone Calorimeter      &  \cite{Stoliarov:CF2010}  \\ \hline
+Char Specific Heat          & kJ/kg/K       & 1.72 $\pm$ 0.17                   &                       & Pulsed Current        &  \cite{Stoliarov:CF2010,Matsumoto:1996}  \\ \hline
+Char Emissivity             &               & 0.85 $\pm$ 0.05                   &                       & Pulsed Current        &  \cite{Stoliarov:CF2010,Matsumoto:1996}  \\ \hline
+Char Absorption Coef.       & m$^{-1}$      & Opaque                            &                       & Assumption            &  \cite{Stoliarov:CF2010}  \\ \hline
+Pre-Exp.~Factor             & s$^{-1}$      & $(1.9 \pm 1.1) \times 10^{18}$    &                       & TGA                   &  \cite{Stoliarov:CF2010}  \\ \hline
+Activation Energy           & kJ/kmol       & $(2.95 \pm 0.06) \times 10^{5}$   &                       & TGA                   &  \cite{Stoliarov:CF2010}  \\ \hline
+Heat of Reaction            & kJ/kg         & 830 $\pm$ 140                     &                       & DSC                   &  \cite{Stoliarov:PDS2008}  \\ \hline
+Heat of Combustion          & kJ/kg         & 25600 $\pm$ 130                   &                       & MCC                   &  \cite{Stoliarov:CF2010}  \\ \hline
+Combustion Efficiency       &               & 0.84 $\pm$ 0.03                   &                       & Cone Calorimeter      &  \cite{Stoliarov:CF2010}  \\ \hline
+\end{tabular}
+\label{FAA_Properties_Charring}
+\end{table}
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_PC_6_75} &
+\end{tabular*}
+\caption[Results of FAA Polymers, charring, comparison]{Comparison of predicted and measured heat release rates for two charring polymers.}
+\label{FAA_Polymers_Charring}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_PC_6_92} &
+ \\
+\includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_PC_6_50} &
+ \\
+\includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_PC_3_75} &
+ \\
+\includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_PC_9_75} &
+\end{tabular*}
+\end{figure}
