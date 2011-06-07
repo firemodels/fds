@@ -14,5 +14,10 @@ export INDIR=Current_Results
 $RUNFDS $INDIR FAA_Polymers_HDPE
 $RUNFDS $INDIR FAA_Polymers_HIPS
 $RUNFDS $INDIR FAA_Polymers_PMMA
+$RUNFDS $INDIR FAA_Polymers_PC_3_75
+$RUNFDS $INDIR FAA_Polymers_PC_6_50
+$RUNFDS $INDIR FAA_Polymers_PC_6_75
+$RUNFDS $INDIR FAA_Polymers_PC_6_92
+$RUNFDS $INDIR FAA_Polymers_PC_9_75
 
 echo FDS cases submitted
