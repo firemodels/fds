@@ -12,7 +12,7 @@ set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
 filename = '../../../Verification/Flowfields/low_flux_hot_gas_filling_mass.csv';
-H = plot_mass(filename,.0001,6,2,3);
+H = plot_mass(filename,.0001,6,2,4);
 
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
