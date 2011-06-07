@@ -289,9 +289,8 @@ usually satisfy $\nu_s + \sum_\gamma \nu_{g,\gamma} = 1$, but smaller yields may
 also be used to take into account the gaseous products that are not
 explicitly included in the simulation.
 
-Consider material component $\alpha$ that undergoes $N_{r,\alpha}$
-separate reactions. We will use the index $\beta$ to represent one of
-these reactions:
+Consider material component $\alpha$ that undergoes $N_{r,\alpha}$ separate reactions. We will use the index $\beta$ to represent one of
+these reactions. For example:
 \be \hbox{Material}_\alpha \rightarrow \nu_{s,\alpha \beta} \;
     \hbox{Residue}_{\alpha \beta} + \nu_{g,\alpha \beta,w} \; \hbox{H$_2$O} + \nu_{g,\alpha \beta,f} \; \hbox{HC} \ee
 In this his particular reaction, condenced phase residue, water vapor
@@ -316,7 +315,7 @@ Arrhenius and power functions:
 r_{\alpha \beta} =
     \left( \frac{\rho_{s,\alpha}}{\rho_{s0}}\right)^{n_{s,\alpha\beta}}
     A_{\alpha \beta} \; \exp \left(-\frac{E_{\alpha\beta}}{RT_s}\right)
-    \; \max \big[0,S_{thr,\alpha,beta}(T_s-T_{thr,\alpha \beta}) \big]^{n_{t,\alpha\beta}}
+    \; \max \big[0,S_{thr,\alpha,\beta}(T_s-T_{thr,\alpha \beta}) \big]^{n_{t,\alpha\beta}}
 	\label{Arrhenius}
 \ee
 where $T_{thr,\alpha \beta}$ is a threshold temperature that can be
