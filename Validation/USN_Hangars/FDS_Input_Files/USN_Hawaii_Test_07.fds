@@ -6,7 +6,7 @@
 &MESH ID='SOUTH', COLOR='BLUE', IJK=180, 80,37, XB=25.6,97.6, 0.0,32.0,0.0,14.8 /
 &MESH ID='WEST',  COLOR='BLUE', IJK= 64,185,37, XB= 0.0,25.6, 0.0,74.0,0.0,14.8 /
 
-&TIME T_END=500.0/
+&TIME T_END=740.0/
 
 &MISC TMPA=30. / 
 
@@ -50,8 +50,15 @@
 
 &SURF ID= 'BURNER'
       COLOR= 'RED'
-      TAU_Q= 180,
+      RAMP_Q= 'FIRE',
       TMP_FRONT=1000., HRRPUA=1780. /
+
+&RAMP ID='FIRE' T=   0.0 F= 0.0 /
+&RAMP ID='FIRE' T=  90.0 F= 0.25 /
+&RAMP ID='FIRE' T= 120.0 F= 0.44 /
+&RAMP ID='FIRE' T= 180.0 F= 1.0 /
+&RAMP ID='FIRE' T= 720.0 F= 1.0 /
+&RAMP ID='FIRE' T= 721.0 F= 0.0/
 
 
 I-Beam
