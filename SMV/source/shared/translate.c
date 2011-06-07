@@ -120,7 +120,7 @@ void init_translate(char *bindir, char *tr_name){
     LANG=getenv("LANG");
   }
 
-  tr_lang=0;
+  tr_otherlang=0;
   if(LANG!=NULL&&strncmp(LANG,"en",2)!=0){
     FILE *stream;
     int lensmokebindir;
@@ -139,10 +139,10 @@ void init_translate(char *bindir, char *tr_name){
     stream=fopen(smokeview_lang,"r");
     if(stream!=NULL){
       fclose(stream);
-      tr_lang=1;
+      tr_otherlang=1;
     }
-    tr_lang=parse_lang(smokeview_lang,&trinfo,&ntrinfo);
-    if(tr_lang==1){
+    tr_otherlang=parse_lang(smokeview_lang,&trinfo,&ntrinfo);
+    if(tr_otherlang==1){
       printf(_("Using translation file: %s\n"),smokeview_lang);
     }
     else{
@@ -162,7 +162,7 @@ char *translate(char *string){
   int i, len, nchars_before=0, nchars_in=0, nchars_after=0;
   char *string_before, *string_in, *string_out, *string_after;
 
-  if(tr_lang==1||tr_english==1)return string;
+  if(tr_otherlang==0)return string;
 
 
   len = strlen(string);

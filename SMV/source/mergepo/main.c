@@ -60,13 +60,13 @@ int main(int argc, char **argv){
 
       printf("\n");
       for(i=0;i<ntrinfo_template;i++){
-        trdata *tr_template_i, *tr_lang;
+        trdata *tr_template_i, *tr_otherlang;
 
         tr_template_i = trinfo_template + i;
         // foreach string in template look for a translation and store it in lang
-        tr_lang = bsearch(tr_template_i,trinfo_lang,ntrinfo_lang,sizeof(trdata),compare_trdata);
-        if(tr_lang!=NULL){
-          tr_template_i->value=tr_lang->value;
+        tr_otherlang = bsearch(tr_template_i,trinfo_lang,ntrinfo_lang,sizeof(trdata),compare_trdata);
+        if(tr_otherlang!=NULL){
+          tr_template_i->value=tr_otherlang->value;
         }
         else{
           tr_template_i->value=NULL;

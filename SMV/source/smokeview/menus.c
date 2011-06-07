@@ -1193,9 +1193,6 @@ void OptionMenu(int value){
     }
     FontMenu(1);
   }
-  if(value==3){
-    tr_english=1-tr_english;
-  }
 }
 
 /* ------------------ ResetMenu ------------------------ */
@@ -6496,35 +6493,6 @@ updatemenu=0;
   glutAddSubMenu(_("Max frame rate"),frameratemenu);
   glutAddSubMenu(_("Render"),rendermenu);
   if(showfontmenu==1)glutAddSubMenu(_("Font size"),fontmenu);
-  if(tr_lang==1){
-    if(tr_english==1){
-      char langmenu[128];
-
-      if(strcmp(tr_name,"de")==0){
-        strcpy(langmenu,_("Use German menus"));
-      }
-      else if(strcmp(tr_name,"fr")==0){
-        strcpy(langmenu,_("Use French menus"));
-      }
-      else if(strcmp(tr_name,"it")==0){
-        strcpy(langmenu,_("Use Italian menus"));
-      }
-      else if(strcmp(tr_name,"es")==0){
-        strcpy(langmenu,_("Use Spanish menus"));
-      }
-      else{
-        strcpy(langmenu,"Use");
-        strcat(langmenu," ");
-        strcat(langmenu,tr_name);
-        strcat(langmenu," ");
-        strcat(langmenu,"menus");
-      }
-      glutAddMenuEntry(langmenu,3);
-    }
-    else{
-      glutAddMenuEntry(_("*Use English menus"),3);
-    }
-  }
 #ifdef pp_BENCHMARK
   glutAddMenuEntry("Benchmark",1);
 #endif
@@ -7948,7 +7916,8 @@ updatemenu=0;
 
     glutAddMenuEntry(WRITEINIfile,2);
 
-    STRCPY(caselabel,_("Write "));
+    STRCPY(caselabel,_("Write"));
+    STRCAT(caselabel," ");
     STRCAT(caselabel,caseinifilename);
 
     glutAddMenuEntry(caselabel,3);

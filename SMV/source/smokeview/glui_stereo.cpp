@@ -87,17 +87,17 @@ extern "C" void glui_stereo_setup(int main_window){
 #ifdef _DEBUG
   glui_stereo->add_checkbox("Show stereo parallax",&show_parallax);
   RADIO_showstereo_frame = glui_stereo->add_radiogroup(&showstereo_frame);
-  glui_stereo->add_radiobutton_to_group(RADIO_showstereo_frame,"Left eye");
-  glui_stereo->add_radiobutton_to_group(RADIO_showstereo_frame,"Right eye");
-  glui_stereo->add_radiobutton_to_group(RADIO_showstereo_frame,"Both eyes");
+  glui_stereo->add_radiobutton_to_group(RADIO_showstereo_frame,_("Left eye"));
+  glui_stereo->add_radiobutton_to_group(RADIO_showstereo_frame,_("Right eye"));
+  glui_stereo->add_radiobutton_to_group(RADIO_showstereo_frame,_("Both eyes"));
 #endif
   //SPINNER_zero_parallax->set_float_limits(0.1*xyzmaxdiff,2.0*xyzmaxdiff,GLUI_LIMIT_CLAMP);
   STEREO_CB(STEREO_SHOW);
   update_glui_stereo();
 
-  glui_stereo->add_button("Reset",STEREO_RESET,STEREO_CB);
-  glui_stereo->add_button("Save settings",SAVE_SETTINGS,STEREO_CB);
-  glui_stereo->add_button("Close",STEREO_CLOSE,STEREO_CB);
+  glui_stereo->add_button(_("Reset"),STEREO_RESET,STEREO_CB);
+  glui_stereo->add_button(_("Save settings"),SAVE_SETTINGS,STEREO_CB);
+  glui_stereo->add_button(_("Close"),STEREO_CLOSE,STEREO_CB);
   
   glui_stereo->set_main_gfx_window( main_window );
 }
