@@ -57,7 +57,7 @@ MODULE EVAC
      REAL(EB) :: X1=0._EB,X2=0._EB,Y1=0._EB,Y2=0._EB,Z1=0._EB,Z2=0._EB,T_START=0._EB, Angle=0._EB
      REAL(EB) :: Tpre_mean=0._EB, Tpre_para=0._EB, Tpre_para2=0._EB, Tpre_low=0._EB, Tpre_high=0._EB
      REAL(EB) :: Tdet_mean=0._EB, Tdet_para=0._EB, Tdet_para2=0._EB, Tdet_low=0._EB, Tdet_high=0._EB
-     REAL(EB) :: TIME_FALL_DOWN=0._EB, TARGET_X=0._EB, TARGET_Y=0._EB
+     REAL(EB) :: TIME_FALL_DOWN=0._EB, TARGET_X=0._EB, TARGET_Y=0._EB, DELTA_X=0._EB, DELTA_Y=0._EB
      CHARACTER(60) :: CLASS_NAME='null', ID='null', AVATAR_TYPE_NAME='null'
      CHARACTER(30) :: GRID_NAME='null', PROP_ID='null'
      LOGICAL :: EVACFILE=.FALSE., After_Tpre=.FALSE., No_Persons=.FALSE., SHOW=.TRUE.
@@ -380,7 +380,7 @@ MODULE EVAC
   INTEGER, DIMENSION(:), ALLOCATABLE :: NTT_Evac
   !
   !
-  LOGICAL :: NOT_RANDOM, EVAC_FDS6=.TRUE.
+  LOGICAL :: NOT_RANDOM, EVAC_FDS6=.TRUE., L_FALLING_MODEL=.FALSE.
   INTEGER :: I_FRIC_SW, COLOR_METHOD, COLOR_METHOD_TMP, I_AVATAR_COLOR, MAX_HUMANS_DIM
   REAL(EB) :: EVAC_MASS_EXTINCTION_COEFF
   REAL(EB) ::  FAC_A_WALL, FAC_B_WALL, LAMBDA_WALL, &
@@ -395,7 +395,8 @@ MODULE EVAC
        FAC_DOOR_WAIT, CF_MIN_B, FAC_DOOR_OLD, FAC_DOOR_OLD2, R_HERDING, W0_HERDING, WR_HERDING, I_HERDING_TYPE, &
        DOT_HERDING, EVAC_DELTA_SEE, C_HAWK, R_HAWK_DOVE, A_HAWK_T_FACTOR, HERDING_TAU_FACTOR, &
        ALPHA_HAWK, DELTA_HAWK, EPSILON_HAWK, THETA_HAWK, A_HAWK_T_START, T_STOP_HD_GAME, &
-       F_MIN_FALL, F_MAX_FALL, D_OVERLAP_FALL, TAU_FALL_DOWN, A_FAC_FALLEN, TIME_FALL_DOWN, PROB_FALL_DOWN
+       F_MIN_FALL, F_MAX_FALL, D_OVERLAP_FALL, TAU_FALL_DOWN, A_FAC_FALLEN, TIME_FALL_DOWN, PROB_FALL_DOWN, &
+       T_ASET_HAWK, T_0_HAWK, T_ASET_TFAC_HAWK
   INTEGER, DIMENSION(3) :: DEAD_RGB
   !
   REAL(EB), DIMENSION(:), ALLOCATABLE :: Tsteps
@@ -468,7 +469,8 @@ CONTAINS
          DET_MEAN,DET_PARA,DET_PARA2,DET_LOW,DET_HIGH, &
          TAU_MEAN,TAU_PARA,TAU_PARA2,TAU_LOW,TAU_HIGH, &
          FCONST_A,FCONST_B,L_NON_SP,C_YOUNG,GAMMA,KAPPA,ANGLE, &
-         D_TORSO_MEAN,D_SHOULDER_MEAN, TAU_ROT, M_INERTIA, TARGET_X, TARGET_Y
+         D_TORSO_MEAN,D_SHOULDER_MEAN, TAU_ROT, M_INERTIA, TARGET_X, TARGET_Y, &
+         DELTA_X, DELTA_Y
     INTEGER :: MAX_HUMANS_INSIDE, n_max_in_corrs, COLOR_INDEX, MAX_HUMANS, AGENT_TYPE
     REAL(EB) :: MAX_FLOW, WIDTH, TIME_START, TIME_STOP, WIDTH1, &
          WIDTH2, EFF_WIDTH, EFF_LENGTH, FAC_SPEED, TIME_OPEN, TIME_CLOSE
@@ -535,7 +537,7 @@ CONTAINS
          AVATAR_COLOR, AVATAR_RGB, SHOW, PRE_EVAC_DIST, DET_EVAC_DIST, &
          PRE_MEAN,PRE_PARA,PRE_PARA2,PRE_LOW,PRE_HIGH, &
          DET_MEAN,DET_PARA,DET_PARA2,DET_LOW,DET_HIGH, AGENT_TYPE, AVATAR_TYPE, PROP_ID, TIME_FALL_DOWN, &
-         GUARD_MEN_IN, TARGET_X, TARGET_Y
+         GUARD_MEN_IN, TARGET_X, TARGET_Y, DELTA_X, DELTA_Y
     NAMELIST /EVHO/ FYI, ID, XB, EVAC_ID, PERS_ID, MESH_ID, EVAC_MESH, RGB, COLOR, SHOW, TIME_FALL_DOWN
 
     NAMELIST /EVSS/ FYI, ID, XB, MESH_ID, HEIGHT, HEIGHT0, IOR, &
@@ -570,7 +572,8 @@ CONTAINS
          R_HERDING, W0_HERDING, WR_HERDING, I_HERDING_TYPE, DOT_HERDING, EVAC_FDS6, EVAC_DELTA_SEE, &
          MAX_HUMANS_DIM, C_HAWK, R_HAWK_DOVE, A_HAWK_T_FACTOR, HERDING_TAU_FACTOR, &
          ALPHA_HAWK, DELTA_HAWK, EPSILON_HAWK, THETA_HAWK, T_STOP_HD_GAME, A_HAWK_T_START, &
-         F_MIN_FALL, F_MAX_FALL, D_OVERLAP_FALL, TAU_FALL_DOWN, A_FAC_FALLEN, PROB_FALL_DOWN
+         F_MIN_FALL, F_MAX_FALL, D_OVERLAP_FALL, TAU_FALL_DOWN, A_FAC_FALLEN, PROB_FALL_DOWN, &
+         T_ASET_HAWK, T_0_HAWK, T_ASET_TFAC_HAWK
     !
     NAMELIST /EDEV/ FYI, ID, TIME_DELAY, GLOBAL, EVAC_ID, PERS_ID, MESH_ID, INPUT_ID, &
          PRE_EVAC_DIST, PRE_MEAN, PRE_PARA, PRE_PARA2, PRE_LOW, PRE_HIGH, PROB
@@ -1553,6 +1556,14 @@ CONTAINS
       A_HAWK_T_START=T_BEGIN ! linear growth factor of the alpha parameter (the threath parameter)
                              ! alpha is constant upto this time, then a=a0*(1+a_fac*(t-t_start))
       T_STOP_HD_GAME = T_END ! Do not play after the given time
+      ! New parameters for the Hawk-Dove game:
+      !    C_HAWK = T_0/(T_i-T_ASET+T_0), when T_i > T_ASET-T_0
+      !    C_HAWK = very large number,    when T_i =< T_ASET-T_0
+      !    If EPSILON_HAWK > 0 then
+      T_ASET_HAWK      = -1.0_EB ! seconds
+      T_0_HAWK         =  1.0_EB ! seconds, how much before T_ASET cost function starts to increase
+      T_ASET_TFAC_HAWK = 0.0_EB  ! seconds per seconds, how much T_ASET changes
+
       ! Paramters of the fall down algorithm
       F_MIN_FALL           = 2000.0_EB
       F_MAX_FALL           = 9000.0_EB
@@ -2037,6 +2048,15 @@ CONTAINS
       END DO READ_PERS_LOOP
 24    REWIND(LU_INPUT)
       COLOR_METHOD = COLOR_METHOD_TMP
+      ! Check if falling down model is used or not
+      IF (TAU_FALL_DOWN >= 0.0_EB) THEN
+         L_FALLING_MODEL=.TRUE.
+      ELSE
+         L_FALLING_MODEL=.FALSE.
+      END IF
+      IF (T_ASET_HAWK > 0.0_EB) THEN
+         C_HAWK = 1000000000000000.0_EB ! Default, all doves if t_i < t_aset-t_0
+      END IF
 
       R_HERDING = MAX(0.1_EB,R_HERDING)  ! Avoid divisions by zero
       IF (GROUP_DENS <= 0.01_EB) GROUP_DENS = 0.25_EB
@@ -4057,6 +4077,8 @@ CONTAINS
          GUARD_MEN_IN  = 0
          TARGET_X      = 0.0_EB
          TARGET_Y      = 0.0_EB
+         DELTA_X       = -1.0_EB ! By default no ordered input
+         DELTA_Y       = -1.0_EB ! By default no ordered input
 
          KNOWN_DOOR_NAMES         = 'null'
          KNOWN_DOOR_PROBS         = 1.0_EB
@@ -4250,6 +4272,11 @@ CONTAINS
          HPT%GUARD_MEN   = GUARD_MEN_IN
          HPT%TARGET_X    = TARGET_X
          HPT%TARGET_Y    = TARGET_Y
+         IF (DELTA_X>0.0_EB .AND. DELTA_Y>0.0_EB) THEN
+            HPT%DELTA_X = DELTA_X ; HPT%DELTA_Y = DELTA_Y
+         ELSE
+            HPT%DELTA_X = -1.0_EB ; HPT%DELTA_Y = -1.0_EB
+         END IF
 
          L_TMP=.FALSE.
          DO i = 1, NMESHES
@@ -5122,6 +5149,16 @@ CONTAINS
        EVAC_MASS_EXTINCTION_COEFF = 8700.0_EB  ! m2/kg
        WRITE(LU_EVACOUT,FMT='(A,f12.2)') ' FDS+Evac: Default mass extinction coeff is used: ',EVAC_MASS_EXTINCTION_COEFF
     END IF
+    ! Write information about the falling down algorithm
+    IF (L_FALLING_MODEL) THEN
+       WRITE(LU_EVACOUT,FMT='(A)') ' FDS+Evac: Fallind down algoritm is used'
+       WRITE(LU_EVACOUT,FMT='(A,f12.2)') '           TAU_FALL_DOWN  = ',TAU_FALL_DOWN
+       WRITE(LU_EVACOUT,FMT='(A,f12.2)') '           D_OVERLAP_FALL = ',D_OVERLAP_FALL
+       WRITE(LU_EVACOUT,FMT='(A,f12.2)') '           A_FAC_FALLEN   = ',A_FAC_FALLEN
+       WRITE(LU_EVACOUT,FMT='(A,f12.2)') '           PROB_FALL_DOWN = ',PROB_FALL_DOWN 
+       WRITE(LU_EVACOUT,FMT='(A,f12.2)') '           F_MIN_FALL     = ',F_MIN_FALL
+       WRITE(LU_EVACOUT,FMT='(A,f12.2)') '           F_MAX_FALL     = ',F_MAX_FALL
+    END IF
     !
     L_fed_read = BTEST(I_EVAC,3)
     L_fed_save = BTEST(I_EVAC,1)
@@ -5189,6 +5226,7 @@ CONTAINS
              DEVC_LOOP: DO I = 1, N_DEVC
                 DV => DEVICE(I)
                 IF (.NOT. DV%EVACUATION) CYCLE DEVC_LOOP
+                IF (TRIM(DV%QUANTITY)=='TIME' .AND. DV%SETPOINT<=T_BEGIN) CYCLE DEVC_LOOP
                 N_DEVC_EVAC = N_DEVC_EVAC + 1
                 EVAC_DEVICES(N_DEVC_EVAC)%DEVC_ID     = DV%ID
                 EVAC_DEVICES(N_DEVC_EVAC)%T_Change    = 0.0_EB
@@ -5200,7 +5238,7 @@ CONTAINS
              END DO DEVC_LOOP
              CTRL_LOOP: DO I = 1, N_CTRL
                 CV => CONTROL(I)
-                IF (.NOT. DV%EVACUATION) CYCLE CTRL_LOOP
+                IF (.NOT. CV%EVACUATION) CYCLE CTRL_LOOP
                 N_DEVC_EVAC = N_DEVC_EVAC + 1
                 EVAC_DEVICES(N_DEVC_EVAC)%DEVC_ID     = CV%ID
                 EVAC_DEVICES(N_DEVC_EVAC)%T_Change    = 0.0_EB
@@ -5460,6 +5498,7 @@ CONTAINS
              DEVC_LOOP_WRITE: DO I = 1, N_DEVC
                 DV => DEVICE(I)
                 IF (.NOT. DV%EVACUATION) CYCLE DEVC_LOOP_WRITE
+                IF (TRIM(DV%QUANTITY)=='TIME' .AND. DV%SETPOINT<=T_BEGIN) CYCLE DEVC_LOOP_WRITE
                 N_DEVC_EVAC = N_DEVC_EVAC + 1
              END DO DEVC_LOOP_WRITE
              CTRL_LOOP_WRITE: DO I = 1, N_CTRL
@@ -5476,6 +5515,7 @@ CONTAINS
              DEVC_LOOP_WRITE_2: DO I = 1, N_DEVC
                 DV => DEVICE(I)
                 IF (.NOT. DV%EVACUATION) CYCLE DEVC_LOOP_WRITE_2
+                IF (TRIM(DV%QUANTITY)=='TIME' .AND. DV%SETPOINT<=T_BEGIN) CYCLE DEVC_LOOP_WRITE_2
                 N_DEVC_EVAC = N_DEVC_EVAC + 1
                 EVAC_DEVICES(N_DEVC_EVAC)%DEVC_ID     = DV%ID
                 EVAC_DEVICES(N_DEVC_EVAC)%T_Change    = DV%T_CHANGE
@@ -5663,7 +5703,7 @@ CONTAINS
        END DO
        j_density = j
 
-       IF ( l_fed_read .OR. l_fed_save ) THEN
+       IF ( l_fed_read .OR. l_fed_save .OR. L_FALLING_MODEL) THEN
           ! Write the 'fed' columns
           n_dead = 0
           OPEN (LU_EVACCSV,file=FN_EVACCSV,form='formatted',status='replace')
@@ -5882,10 +5922,10 @@ CONTAINS
          dist, d_max, G_mean, G_sd, G_high, G_low, x1_old, y1_old
     INTEGER i,j,k,ii,jj,kk,ipc, izero, n_tmp, ie, nom, I_OBST, NM_SEE
     INTEGER i11, i22, group_size
-    LOGICAL pp_see_group, is_solid
+    LOGICAL pp_see_group, is_solid, HPT_ORDERED
     INTEGER jjj, iii, i44
     REAL(EB) x11, y11, group_x_sum, group_y_sum, group_x_center, group_y_center, dens_fac
-    INTEGER :: i_endless_loop, istat
+    INTEGER :: i_endless_loop, istat, I_DX, J_DY
     REAL(EB), DIMENSION(6) :: y_tmp, x_tmp, r_tmp
     REAL(EB), DIMENSION(4) :: d_xy
     LOGICAL, DIMENSION(4) :: FoundWall_xy
@@ -6037,6 +6077,12 @@ CONTAINS
           VOL2 = (HPT%X2 - HPT%X1) * (HPT%Y2 - HPT%Y1)
           VOL1 = (X2 - X1) * (Y2 - Y1) * (Z2 - Z1)
        END IF
+       
+       IF (HPT%DELTA_X>0.0_EB .AND. HPT%DELTA_Y>0.0_EB) THEN
+          HPT_ORDERED=.TRUE. ! Ordered input, delta_x, delta_y, XB-midpoint used
+       ELSE
+          HPT_ORDERED=.FALSE. ! Random placement
+       END IF
        ! 
        ! Check which evacuation floor node  (=1,...,n_egrids)
        n_tmp = 0
@@ -6061,7 +6107,8 @@ CONTAINS
        ! ilh: lonely human index
        !
        i11 = 0
-
+       I_DX = 0; J_DY = 0
+       
        INITIALIZATION_LOOP: DO I=1,HPT%N_INITIAL
           !
           CALL RANDOM_NUMBER(RN)
@@ -6073,6 +6120,9 @@ CONTAINS
           END IF
 
           IF (i11 >= HPT%N_INITIAL) THEN
+             EXIT INITIALIZATION_LOOP
+          END IF
+          IF (HPT_ORDERED .AND. I_DX < -0.5_EB*(X2-X1)/HPT%DELTA_X) THEN
              EXIT INITIALIZATION_LOOP
           END IF
 
@@ -6120,12 +6170,29 @@ CONTAINS
              BLK_LOOP:  DO
                 IF (i22 == 1) THEN
                    ! First member of the group
-                   CALL RANDOM_NUMBER(RN)
-                   HR%X = X1 + RN*(X2-X1)
-                   x1_old = HR%X
-                   CALL RANDOM_NUMBER(RN)
-                   HR%Y = Y1 + RN*(Y2-Y1)
-                   y1_old = HR%Y
+                   IF (HPT_ORDERED) THEN
+                      IF (I_DX < -FLOOR(0.5_EB*(X2-X1)/HPT%DELTA_X)) THEN
+                         N_HUMANS = N_HUMANS - 1
+                         CYCLE INITIALIZATION_LOOP
+                      END IF
+                      HR%X = I_DX*HPT%DELTA_X + 0.5*(X1+X2)
+                      HR%Y = J_DY*HPT%DELTA_Y + 0.5*(Y1+Y2)
+                      x1_old = HR%X ; y1_old = HR%Y
+                      J_DY = J_DY + SIGN(1,J_DY) ! if j_dy=0 => sign is positive
+                      IF (J_DY > 0.5_EB*(Y2-Y1)/HPT%DELTA_Y) J_DY = -1
+                      IF (J_DY < -0.5_EB*(Y2-Y1)/HPT%DELTA_Y) THEN
+                         J_DY = 0
+                         I_DX = I_DX + SIGN(1,I_DX)
+                      END IF
+                      IF (I_DX >  FLOOR(0.5_EB*(X2-X1)/HPT%DELTA_X)) I_DX = -1
+                   ELSE
+                      CALL RANDOM_NUMBER(RN)
+                      HR%X = X1 + RN*(X2-X1)
+                      x1_old = HR%X
+                      CALL RANDOM_NUMBER(RN)
+                      HR%Y = Y1 + RN*(Y2-Y1)
+                      y1_old = HR%Y
+                   END IF
                 ELSE
                    ! Next members of the group are put around the first member.
                    G_mean = 0.0_EB
@@ -6175,7 +6242,7 @@ CONTAINS
                 END DO EH_Loop
 
                 !Check, that a person is not put on top of some other person
-                IF (DENS_INIT > 2.0_EB) THEN
+                IF (DENS_INIT > 2.0_EB .OR. HPT_ORDERED) THEN
                    ! High density is wanted
                    d_max = 0.0_EB
                 ELSE
@@ -6711,6 +6778,7 @@ CONTAINS
        DEVC_LOOP_0: DO I = 1, N_DEVC
           DV => DEVICE(I)
           IF (.NOT. DV%EVACUATION) CYCLE DEVC_LOOP_0
+          IF (TRIM(DV%QUANTITY)=='TIME' .AND. DV%SETPOINT<=T_BEGIN) CYCLE DEVC_LOOP_0
           N_DEVC_WRITE = N_DEVC_WRITE + 1
           IF (DV%CURRENT_STATE .NEQV. DV%PRIOR_STATE) THEN
              EVAC_DEVICES(N_DEVC_WRITE)%T_Change = DV%T_CHANGE
@@ -6863,7 +6931,7 @@ CONTAINS
              READ (LU_EVACFED,IOSTAT=IOS) TMPOUT1, TMPOUT2, TMPOUT3, TMPOUT4, TMPOUT5, TMPOUT6, TMPOUT7, TMPOUT8
              IF (IOS/=0) THEN
                 WRITE(MESSAGE,'(A)') 'ERROR: EVAC_MESH_EXCHANGE: FED read error'
-                CLOSE (LU_EVACEFF)
+                CLOSE (LU_EVACFED)
                 CALL SHUTDOWN(MESSAGE)
              END IF
              EVAC_CORRS(I)%FED_CO_CO2_O2(1) = TMPOUT1
@@ -7209,7 +7277,7 @@ CONTAINS
     INTEGER, DIMENSION(10) :: HERDING_LIST_IHUMAN
     REAL(EB), DIMENSION(10) :: HERDING_LIST_P2PDIST
     INTEGER :: HERDING_LIST_N
-    REAL(EB) :: HERDING_LIST_P2PMAX
+    REAL(EB) :: HERDING_LIST_P2PMAX, R_HERD_HR, DOT_HERD_HR
     !
     REAL(EB) :: D_HUMANS_MIN, D_WALLS_MIN
     REAL(EB) :: TNOW, TNOW13, TNOW14, TNOW15
@@ -7599,14 +7667,15 @@ CONTAINS
                    ! agents around this agent.  The five (or less) nearest neighbor agents are used.
                    ! I_HERDING_TYPE 0: default herding, 1: keep the first choice, 2: do not move, 
                    !                3: do not move + keep the first choice
-                   Herding_Type_Agent: IF (HR%I_DoorAlgo==3 .OR. (HR%I_Target==0 .AND. HR%I_DoorAlgo>0)) THEN
+                   Herding_Type_Agent: IF (HR%I_DoorAlgo>=3 .OR. (HR%I_Target==0 .AND. HR%I_DoorAlgo>0)) THEN
                       IF (HR%I_DoorAlgo==3 .AND. HR%I_Target/=0 .AND. (I_HERDING_TYPE==1 .OR. I_HERDING_TYPE==3)) THEN
                          ! These herding agents keep the first choise
                          I_TARGET = I_TARGET_OLD
                          IF (ABS(I_TARGET) > 0) HR%I_Door_Mode = 1
                          IF (ABS(I_TARGET) > 0 .AND. Is_BeeLine_Door(MAX(1,ABS(I_TARGET)),1)) HR%I_Door_Mode = 2
                          IF (ABS(I_TARGET) > 0 .AND. Is_BeeLineXB_Door(MAX(1,ABS(I_TARGET)),1)) HR%I_Door_Mode = HR%I_Door_Mode + 2
-                         IF (HR%D_Walls <= 4.0_EB .AND. HR%DENSITY >= 2.0_EB) HR%I_Door_Mode = 1
+                         IF (HR%D_Walls <= 4.0_EB .OR. HR%DENSITY >= 2.0_EB) HR%I_Door_Mode = 1
+                         ! IF (HR%D_Walls <= 4.0_EB .AND. HR%DENSITY >= 2.0_EB) HR%I_Door_Mode = 1
                       ELSE
                          HERDING_LIST_DOORS = 0.0_EB    ! Real array, weights by the p2p distance (linear function)
                          HERDING_LIST_IHUMAN = 0        ! indices of the ten closest other agents
@@ -7616,12 +7685,18 @@ CONTAINS
                          HERDING_LIST_N = 0 ! number of neighbors (max 10, see dimension)
                          HERDING_LIST_P2PMAX = HUGE(HERDING_LIST_P2PMAX)
                          TIM_DIST = HUGE(TIM_DIST)
+                         R_HERD_HR = R_HERDING
+                         DOT_HERD_HR = DOT_HERDING
+                         IF (HR%I_DoorAlgo == 4) THEN
+                            R_HERD_HR = MIN(2.5_EB, R_HERDING)
+                            DOT_HERD_HR = 0.2_EB
+                         END IF
                          Other_Agent_Loop: DO IE = 1, N_HUMANS
                             IF (I==IE) CYCLE Other_Agent_Loop
                             HRE => HUMAN(IE)
                             P2P_DIST = (HRE%X-HR%X)**2 + (HRE%Y-HR%Y)**2
-                            IF (P2P_DIST > R_HERDING**2 .AND. HRE%I_Target==0) CYCLE Other_Agent_Loop
-                            IF (P2P_DIST > R_HERDING**2 .AND. HRE%I_Door_Mode <= 0) CYCLE Other_Agent_Loop
+                            IF (P2P_DIST > R_HERD_HR**2 .AND. HRE%I_Target==0) CYCLE Other_Agent_Loop
+                            IF (P2P_DIST > R_HERD_HR**2 .AND. HRE%I_Door_Mode <= 0) CYCLE Other_Agent_Loop
                             ! Check, that the persons are seeing each other, i.e., there are no walls between.
                             PP_SEE_EACH = SEE_EACH_OTHER(NM_SEE, HR%X, HR%Y, HRE%X, HRE%Y)
                             IF (.NOT. PP_SEE_EACH) CYCLE Other_Agent_Loop
@@ -7652,7 +7727,7 @@ CONTAINS
                                   IF (.NOT.PP_SEE_DOOR) HR%I_Target2 = -ABS(HRE%I_Target)
                                END IF
                             END IF
-                            IF (P2P_DIST > R_HERDING**2) CYCLE Other_Agent_Loop
+                            IF (P2P_DIST > R_HERD_HR**2) CYCLE Other_Agent_Loop
                             ! If not yet moving phase, do not follow others
                             IF (J == 0 .AND. T < HR%TPRE+HR%TDET) CYCLE Other_Agent_Loop
                             IF (J > 0 .AND. T < GROUP_LIST(J)%TPRE + GROUP_LIST(J)%TDOOR) CYCLE Other_Agent_Loop
@@ -7683,7 +7758,7 @@ CONTAINS
                             ! Linear weight function
                             P2P_DIST = SQRT((HRE%X-HR%X)**2 + (HRE%Y-HR%Y)**2)
                             HERDING_LIST_DOORS(ABS(HRE%I_Target)) = HERDING_LIST_DOORS(ABS(HRE%I_Target)) + &
-                                 W0_HERDING -((W0_HERDING-WR_HERDING)/R_HERDING)*P2P_DIST
+                                 W0_HERDING -((W0_HERDING-WR_HERDING)/R_HERD_HR)*P2P_DIST
                          END DO Other_Agent_Loop_2
                          DO II = 1, N_DOORS+N_EXITS
                             IF (HERDING_LIST_DOORS(II)>0.0_EB) THEN
@@ -7710,6 +7785,21 @@ CONTAINS
                             HR%TPRE = DT_GROUP_DOOR
                             HR%TDET = MIN(T,HR%TDET)
                          END IF
+                         IF (HR%I_DoorAlgo == 4) THEN
+                            ! These agents follow others if that door is better than their own choice.
+                            ! How: the i_target2 is set to this new door, where others are going and
+                            ! it is set as a known door in the door selection subroutine.
+                            IF (I_TMP /= 0) THEN
+                               HR%I_Target2 = I_TMP ! Follow others, make the door known in door selection
+                               IF (I_TARGET /= 0) I_TMP = I_TARGET ! No door, follow others right now
+                            END IF
+                            IF (I_TMP == 0 .AND. I_TARGET /= 0) THEN
+                               ! If there is no one to follow, use the normal door.
+                               ! If no door at all, use the i_target2 method
+                               I_TMP = I_TARGET
+                               HR%I_Target2 = 0
+                            END IF
+                         END IF
                          IF (I_TARGET_OLD==0 .AND. I_TMP==0 .AND. ABS(HR%I_Target2) > 0 .AND. T > HR%TPRE+HR%TDET) THEN
                             CALL RANDOM_NUMBER(RN)
                             IF (RN <= HERDING_TAU_FACTOR) I_TMP = HR%I_Target2
@@ -7726,7 +7816,8 @@ CONTAINS
                             HR%I_Door_Mode = 1
                             IF (Is_BeeLine_Door(ABS(I_TMP),1)) HR%I_Door_Mode = 2
                             IF (Is_BeeLineXB_Door(ABS(I_TMP),1)) HR%I_Door_Mode = HR%I_Door_Mode + 2
-                            IF (HR%D_Walls <= 4.0_EB .AND. HR%DENSITY >= 2.0_EB) HR%I_Door_Mode = 1
+                            IF (HR%D_Walls <= 4.0_EB .OR. HR%DENSITY >= 2.0_EB) HR%I_Door_Mode = 1
+                            ! IF (HR%D_Walls <= 4.0_EB .AND. HR%DENSITY >= 2.0_EB) HR%I_Door_Mode = 1
                          ELSE
                             IF (ABS(I_TARGET_OLD)>0) THEN  ! Go to the old target door
                                I_TARGET = I_TARGET_OLD
@@ -7734,7 +7825,8 @@ CONTAINS
                                HR%I_Door_Mode = 1
                                IF (Is_BeeLine_Door(ABS(I_TARGET),1)) HR%I_Door_Mode = 2
                                IF (Is_BeeLineXB_Door(ABS(I_TARGET),1)) HR%I_Door_Mode = HR%I_Door_Mode + 2
-                               IF (HR%D_Walls <= 4.0_EB .AND. HR%DENSITY >= 2.0_EB) HR%I_Door_Mode = 1
+                               IF (HR%D_Walls <= 4.0_EB .OR. HR%DENSITY >= 2.0_EB) HR%I_Door_Mode = 1
+                               ! IF (HR%D_Walls <= 4.0_EB .AND. HR%DENSITY >= 2.0_EB) HR%I_Door_Mode = 1
                             ELSE  ! no target door set, set the default flow field
                                I_TARGET = 0
                                IF (HR%IEL > 0) THEN  
@@ -7793,6 +7885,7 @@ CONTAINS
                                  COLOR_INDEX = EVAC_EXITS(ABS(I_TARGET)-N_DOORS)%Avatar_Color_Index
                          END IF
                          IF (COLOR_METHOD == 5) COLOR_INDEX = EVAC_AVATAR_NCOLOR ! default, cyan
+                         IF (COLOR_METHOD == 5 .AND. I_TARGET /= 0) COLOR_INDEX = HR%COLOR_INDEX
                          HR%I_TARGET = I_TARGET 
                          HR%COLOR_INDEX = COLOR_INDEX
                          I_TARGET_OLD = I_TARGET  ! No Nash iterations
@@ -7891,6 +7984,7 @@ CONTAINS
           EVEL = SQRT(HR%U**2 + HR%V**2)
           L_FALLEN_DOWN = .FALSE.
           IF (HR%T_FallenDown < T) THEN
+             ! This agent has already fallen down
              L_FALLEN_DOWN = .TRUE.
              GATH = 0.0_EB
              A_WALL = 0.0_EB
@@ -7901,29 +7995,30 @@ CONTAINS
              IF (EHX%TIME_FALL_DOWN<T .AND. &
                   EHX%X1<=HR%X .AND. EHX%X2>=HR%X .AND. EHX%Y1<=HR%Y .AND. EHX%Y2>=HR%Y) THEN
                 L_FALLEN_DOWN = .TRUE.
+                N_DEAD = N_DEAD+1
                 HR%T_FallenDown = T
                 GATH = 0.0_EB
                 A_WALL = 0.0_EB
                 EHX%TIME_FALL_DOWN = -1.0_EB
-                write(lu_err,*)'**** EHX: time agent falls down ',T,I
                 CYCLE HoleFallLoop
              END IF
           END DO HoleFallLoop
           L_DEAD  = .FALSE.
           IF ( HR%INTDOSE >= 1.0_EB  ) THEN
-             IF (.NOT. L_FALLEN_DOWN) THEN
-                HR%T_FallenDown = T
-                L_FALLEN_DOWN = .TRUE.
-             END IF
              L_DEAD = .TRUE.
              ! No random force for a dead person.
              GATH = 0.0_EB
              ! No psychological force terms for a dead person.
              A_WALL = 0.0_EB
              IF (HR%TPRE /= HUGE(HR%TPRE)) THEN
+                IF (L_FALLEN_DOWN) N_DEAD = N_DEAD-1 ! Do not duoble count
                 N_DEAD = N_DEAD+1
                 WRITE (LU_EVACOUT,FMT='(A,I6,A,F8.2,A,I6)') ' EVAC: Agent n:o', &
                      HR%ILABEL, ' dead at ', T, ' s, number of casualties ', N_DEAD
+             END IF
+             IF (.NOT. L_FALLEN_DOWN) THEN
+                HR%T_FallenDown = T
+                L_FALLEN_DOWN = .TRUE.
              END IF
              HR%TPRE = HUGE(HR%TPRE)
              HR%TDET = HUGE(HR%TDET)
@@ -8337,6 +8432,7 @@ CONTAINS
                    IF (SURFACE(IBC)%VEL> 0.0_EB .OR. BOUNDARY_TYPE(TIM_IW)==OPEN_BOUNDARY) THEN
                       HR%X = X1 
                       HR%Y = HR%Y
+                      Y1 = HR%Y
                    END IF
                 ELSE
                    TIM_IC = CELL_INDEX(IIN,JJN,KK)
@@ -8345,6 +8441,7 @@ CONTAINS
                    IF (SURFACE(IBC)%VEL> 0.0_EB .OR. BOUNDARY_TYPE(TIM_IW)==OPEN_BOUNDARY) THEN
                       HR%X = X1 
                       HR%Y = HR%Y
+                      Y1 = HR%Y
                    END IF
                 END IF
              ELSE IF ( (SOLID(ICY).AND. .NOT.OBSTRUCTION(I_OBSTY)%HIDDEN) .AND. .NOT. &
@@ -8355,6 +8452,7 @@ CONTAINS
                    IBC = IJKW(5,TIM_IW)
                    IF (SURFACE(IBC)%VEL> 0.0_EB .OR. BOUNDARY_TYPE(TIM_IW)==OPEN_BOUNDARY) THEN
                       HR%X = HR%X
+                      X1 = HR%X
                       HR%Y = Y1
                    END IF
                 ELSE
@@ -8363,6 +8461,7 @@ CONTAINS
                    IBC = IJKW(5,TIM_IW)
                    IF (SURFACE(IBC)%VEL> 0.0_EB .OR. BOUNDARY_TYPE(TIM_IW)==OPEN_BOUNDARY) THEN
                       HR%X = HR%X
+                      X1 = HR%X
                       HR%Y = Y1 
                    END IF
                 END IF
@@ -8571,26 +8670,27 @@ CONTAINS
           D_HUMANS = HUGE(D_HUMANS)
           D_WALLS  = HUGE(D_WALLS)
           L_FALLEN_DOWN = .FALSE.
-          IF (HR%T_FallenDown < T) THEN
+          IF (HR%T_FallenDown <= T) THEN
              L_FALLEN_DOWN = .TRUE.
              GATH = 0.0_EB
              A_WALL = 0.0_EB
           END IF
           L_DEAD  = .FALSE.
           IF (HR%INTDOSE >= 1.0_EB) THEN
-             IF (.NOT. L_FALLEN_DOWN) THEN
-                HR%T_FallenDown = T
-                L_FALLEN_DOWN = .TRUE.
-             END IF
              L_DEAD = .TRUE.
              ! No random force for a dead person.
              GATH = 0.0_EB
              ! No psychological force terms for a dead person.
              A_WALL = 0.0_EB
              IF (HR%TPRE /= HUGE(HR%TPRE)) THEN
+                IF (L_FALLEN_DOWN) N_DEAD = N_DEAD-1 ! Do not duoble count
                 N_DEAD = N_DEAD+1
                 WRITE (LU_EVACOUT,FMT='(A,I6,A,F8.2,A,I6)') ' EVAC: Agent n:o', HR%ILABEL, &
                      ' dead at ', T, ' s, number of casualties ', N_DEAD
+             END IF
+             IF (.NOT. L_FALLEN_DOWN) THEN
+                HR%T_FallenDown = T
+                L_FALLEN_DOWN = .TRUE.
              END IF
              HR%TDET = HUGE(HR%TDET)
              HR%TPRE = HUGE(HR%TPRE)
@@ -9110,11 +9210,12 @@ CONTAINS
                       IF (TAU_FALL_DOWN >= 0.0_EB .AND. TIM_DIST <= R_TMP(III)+R_TMP(JJJ)-D_OVERLAP_FALL) THEN
                          ! Circles are touching each others more than D_OVERLAP_FALL => Fall down
                          IF (L_HRE_FALLEN_DOWN) COSPHIFAC = 0.0_EB ! On top of a fallen agent, no social force anymore
-                         IF (T > HR%TDET .AND. L_FALLDOWN_THIS_TIME_STEP .AND. L_HRE_FALLEN_DOWN) THEN
+                         IF (T > HR%TDET .AND. L_FALLDOWN_THIS_TIME_STEP .AND. L_HRE_FALLEN_DOWN .AND. .NOT.L_FALLEN_DOWN) THEN
                             L_FALLEN_DOWN = .TRUE.
                             HR%T_FallenDown = T
                             HR%Angle_FallenDown = HR%angle
                             HR%SizeFac_FallenDown = 0.0_EB
+                            N_DEAD = N_DEAD+1
                          END IF
                       END IF
 
@@ -9266,11 +9367,22 @@ CONTAINS
                 ! Time dependent (linearly growing) threath parameter alpha, in the final version
                 ! the threath is estimated from the smoke consentration etc, but for the development
                 ! of the game, a simple linear function is introduced.
-                U_i_Hawk = p_i*C_Hawk/(2.0_EB*Delta_Hawk*Alpha_Hawk*(1.0_EB + &
-                     A_HAWK_T_FACTOR*MAX(0.0_EB,T-A_HAWK_T_START))*T_tmp) - (1.0_EB-p_i)
+                ! New Hawk-Dove game parameters:
+                IF (T_Tmp > (T_ASET_HAWK+T_ASET_TFAC_HAWK*MAX(0.0_EB,T-A_HAWK_T_START))-T_0_HAWK) THEN
+                   !U_i_Hawk = p_i * T_0_HAWK/(T_tmp-T_ASET_HAWK+T_0_HAWK) - (1.0_EB-p_i)
+                   U_i_Hawk = p_i * T_0_HAWK/(T_tmp-(T_ASET_HAWK+T_ASET_TFAC_HAWK*MAX(0.0_EB,T-A_HAWK_T_START))+T_0_HAWK)&
+                        - (1.0_EB-p_i)
+                ELSE
+                   IF (EPSILON_HAWK <= 0.0_EB) THEN
+                      U_i_Hawk = 10000000000000.0_EB ! all doves close to the door
+                   ELSE
+                      U_i_Hawk = p_i*EPSILON_HAWK - (1.0_EB-p_i)
+                   END IF
+                END IF
                 U_i_Dove = p_i
-                IF (HR%A <= 500.0_EB .AND. (U_i_Dove < U_i_Hawk .OR. 2.0_EB*Delta_Hawk*Alpha_Hawk* &
-                     (1.0_EB+A_HAWK_T_FACTOR*MAX(0.0_EB,T-A_HAWK_T_START))*T_tmp < Epsilon_Hawk)) THEN   ! Was a hawk
+!!$                IF (HR%A <= 500.0_EB .AND. (U_i_Dove < U_i_Hawk .OR. 2.0_EB*Delta_Hawk*Alpha_Hawk* &
+!!$                     (1.0_EB+A_HAWK_T_FACTOR*MAX(0.0_EB,T-A_HAWK_T_START))*T_tmp < Epsilon_Hawk)) THEN   ! Was a hawk
+                IF (HR%A <= 500.0_EB .AND. (U_i_Dove < U_i_Hawk)) THEN   ! Was a hawk
                    ! DoseCrit1 = hr%a   modified, no sharp transition
                    ! DoseCrit2 = hr%tau modified, now sharp transition
                    HR%DoseCrit1 = MAX(HR%A,  HR%DoseCrit1) ! Starting value for hawk => dove transition
@@ -9278,8 +9390,9 @@ CONTAINS
                    HR%A = 10.0_EB*HR%A ; HR%TAU = 2.0_EB*HR%TAU
                    HR%DoseCrit2 = HR%TAU ! sharp transition
                 END IF
-                IF (HR%A >  500.0_EB .AND. U_i_Hawk < U_i_Dove .AND. 2.0_EB*Delta_Hawk*Alpha_Hawk* &
-                     (1.0_EB+A_HAWK_T_FACTOR*MAX(0.0_EB,T-A_HAWK_T_START))*T_tmp >= Epsilon_Hawk) THEN   ! Was a dove
+!!$                IF (HR%A >  500.0_EB .AND. U_i_Hawk < U_i_Dove .AND. 2.0_EB*Delta_Hawk*Alpha_Hawk* &
+!!$                     (1.0_EB+A_HAWK_T_FACTOR*MAX(0.0_EB,T-A_HAWK_T_START))*T_tmp >= Epsilon_Hawk) THEN   ! Was a dove
+                IF (HR%A >  500.0_EB .AND. (U_i_Hawk < U_i_Dove) ) THEN   ! Was a dove
                    ! DoseCrit1 = hr%a   modified, no sharp transition
                    ! DoseCrit2 = hr%tau modified, now sharp transition
                    HR%DoseCrit1 = MIN(HR%A,  HR%DoseCrit1) ! Starting value for hawk => dove transition
@@ -9690,6 +9803,7 @@ CONTAINS
           IF (TAU_FALL_DOWN >= 0.0_EB .AND. T > HR%TDET) THEN
              IF (.NOT.L_FALLEN_DOWN .AND. SQRT(CONTACT_FX**2+CONTACT_FY**2) > HR%F_FallDown) THEN
                 L_FALLEN_DOWN = .TRUE.
+                N_DEAD = N_DEAD+1
                 HR%T_FallenDown = T
                 HR%Angle_FallenDown = HR%angle
                 HR%SizeFac_FallenDown = 0.0_EB
@@ -9904,14 +10018,14 @@ CONTAINS
   CONTAINS
 
     SUBROUTINE GUARD (NM, XI, YJ, WSPA, WSPB, TARGET_X, TARGET_Y)
-      ! Dane potrzebne na wejściu:
-      !   mapWidth - szerokość siatki
-      !   mapHeight - wysokość siatki 
-      !   tileSize - rozmiar komórki
-      !   numberPeople - ilość ludzi
+      ! Dane potrzebne na wejxxciu:
+      !   mapWidth
+      !   mapHeight
+      !   tileSize
+      !   numberPeopl
       !   startX,Y
       !   targetX,Y
-      !   walkability - zajętość siatki
+      !   walkability
       IMPLICIT NONE
       INTEGER, INTENT(IN) :: NM
       REAL(EB), INTENT(IN) :: XI, YJ, TARGET_X, TARGET_Y
@@ -9962,17 +10076,17 @@ CONTAINS
       ALLOCATE(xPath(0:numberPeople+1))
       ALLOCATE(yPath(0:numberPeople+1))
 
-      ! Mam już wymiar mapy
+      ! Mam juxx wymiar mapy
       ! WRITE(LU_ERR,*) M%XS
       ! WRITE(LU_ERR,*) M%XF
       ! WRITE(LU_ERR,*) M%YS
       ! WRITE(LU_ERR,*) M%YF
 
-      ! Oraz na ile jest podzielona elementów
+      ! Oraz na ile jest podzielona elementxxw
       ! WRITE(LU_ERR,*) M%IBAR
       ! WRITE(LU_ERR,*) M%JBAR
 
-      ! Teraz podzielę ją na komórki i sprawdzę czy są przeszkody 
+      ! Teraz podzielxx jxx na komxxrki i sprawdzxx czy sxx przeszkody 
       ! Ewidentnie robimy tylko raz
       DO xt = 1, M%IBAR
          DO yt = 1, M%JBAR
@@ -10295,9 +10409,6 @@ CONTAINS
          ! yPath[pathfinderID] = startingY;
          ! return nonexistent;
 
-         ! Rysowanie wektorów odbywa się za pomocą x2 - x1, y2 - y1
-         ! mogłaby powstać tablica, która będzie zawierać te wartości
-         ! mam tablicę pathBank, która zawiera wszystkie współrzędne ścieżki
          !WRITE(LU_ERR,*) 'Xend=',pathBank(2,0)
          !WRITE(LU_ERR,*) 'Xsta=',startX
          !WRITE(LU_ERR,*) 'Yend=',pathBank(2,1)
@@ -10668,13 +10779,13 @@ CONTAINS
                   N = N - N_DOORS  ! The exit line number including also count only exits
                   JJ_NOW = EVAC_EXITS(N)%I_EMESH_EXITS
                   IF (TRIM(EVAC_EXITS(N)%ID) /= TRIM(EMESH_EXITS(JJ_NOW)%ID)) THEN
-                     write(lu_err,*)'*** ERROR IN FINE_PREFERRED_DIRECTION' 
+                     write(lu_err,*)'*** ERROR IN FIND_PREFERRED_DIRECTION' 
                      write(lu_err,*)'*** ',TRIM(EVAC_DOORS(N)%ID), ' is not ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
                   END IF
                ELSE
                   JJ_NOW = EVAC_DOORS(N)%I_EMESH_EXITS
                   IF (TRIM(EVAC_DOORS(N)%ID) /= TRIM(EMESH_EXITS(JJ_NOW)%ID)) THEN
-                     write(lu_err,*)'*** ERROR IN FINE_PREFERRED_DIRECTION' 
+                     write(lu_err,*)'*** ERROR IN FIND_PREFERRED_DIRECTION' 
                      write(lu_err,*)'*** ',TRIM(EVAC_DOORS(N)%ID), ' is not ',TRIM(EMESH_EXITS(JJ_NOW)%ID)
                   END IF
                END IF
@@ -12235,7 +12346,6 @@ CONTAINS
                CALL Change_Target_Door(imesh2, imesh2, 1, j, j1, 0, 2, xx, yy, I_Target, color_index, new_ffield_i, HR)
 
                new_ffield_name = TRIM(MESH_NAME(new_ffield_i))
-               !TImo: parempi ilisi olla muuttamatta mit��n, jos ei ovea l�ydy.
                IF ( j > 0 ) THEN
                   Group_List(j)%GROUP_I_FFIELDS(i_tmp) = new_ffield_i
                END IF
@@ -15022,6 +15132,10 @@ CONTAINS
        Is_BeeLine_Door   = .FALSE.
        Is_BeeLineXB_Door = .FALSE.
     END IF
+    ! Agent type 4 follow others if they can and find the door to better than their own choise
+    IF (I_Agent_Type == 4 .AND. HR%I_Target2 /= 0) THEN  
+       IF (Is_Visible_Door(ABS(HR%I_Target2))) Is_Known_Door(ABS(HR%I_Target2)) = .TRUE.
+    END IF
 
     DO i = 1, N_DOORS
        IF (ABS(EVAC_DOORS(I)%IMODE)==2 .AND. .NOT.EVAC_DOORS(I)%TARGET_WHEN_CLOSED) THEN
@@ -15125,6 +15239,8 @@ CONTAINS
           IF (I_Agent_Type==1 .AND. Is_Visible_Door(i)) Is_Known_Door(i) = .TRUE.
           ! Herding agents do not use visible doors if they are not known doors
           IF (I_Agent_Type==3 .AND. .NOT.Is_Known_Door(i)) Is_Visible_Door(i) = .FALSE.
+          ! I_Agent_Type==4: These agents follow others, but if there is nobody to follow
+          ! then they behave like the agents I_Agent_Type==2, i.e., normal door choise.
        END IF ! correct main evac mesh
     END DO ! all doors and exits
 
@@ -15359,9 +15475,9 @@ CONTAINS
                          ELSE
                             l2_tmp = (ABS(x1_old-x_o)+ABS(y1_old-y_o))*0.5_EB/(3.0_EB/K_ave_Door(i))
                          END IF
-                         IF (L2_tmp >= 1.0_EB) Is_Visible_Door(i) = .FALSE.  ! Too much smoke
-                         IF (L2_tmp >= 1.0_EB) Is_Known_Door(i)   = .FALSE.  ! Too much smoke
                       END IF
+                      IF (L2_tmp >= 1.0_EB) Is_Visible_Door(i) = .FALSE.  ! Too much smoke
+                      IF (L2_tmp >= 1.0_EB) Is_Known_Door(i)   = .FALSE.  ! Too much smoke
                       IF (i_o == i_old_ffield) L2_tmp = FAC_DOOR_OLD2*L2_tmp
                       IF (L2_tmp < L2_min) THEN
                          L2_min = L2_tmp
