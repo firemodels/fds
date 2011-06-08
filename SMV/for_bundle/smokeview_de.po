@@ -174,7 +174,7 @@ msgid "Cancel"
 msgstr "Abbrechen"
 
 msgid "casename       - project id (file names without the extension)\n"
-msgstr "casename - Projekt-ID (Dateinamen ohne die Erweiterung)"
+msgstr "casename - Projekt-ID (Dateinamen ohne die Erweiterung)\n"
 
 msgid "Center"
 msgstr "Mittig"
@@ -567,7 +567,7 @@ msgid "Frame label"
 msgstr "Bildbeschriftung"
 
 msgid "frame nframes - maximum number of particle frames.  Default=%i\n"
-msgstr "frame n_Frames - maximale Anzahl von Partikelframes. Standard=%i"
+msgstr "frame n_Frames - maximale Anzahl von Partikelframes. Standard=%i\n"
 
 msgid "Frame rate"
 msgstr "Bildfrequenz"
@@ -891,7 +891,7 @@ msgid "Next tour"
 msgstr "Naechste Tour"
 
 msgid "ng_ini        - No graphics version of -ini.\n"
-msgstr "ng_ini        - Keine Grafikversion von -ini"
+msgstr "ng_ini        - Keine Grafikversion von -ini\n"
 
 msgid "node index"
 msgstr "Knotenindex"
@@ -1401,7 +1401,7 @@ msgid "Smokeview menus"
 msgstr "Smokeview Menues"
 
 msgid "Smokeview was built with the following pre-processing directives set:\n\n"
-msgstr "Smokeview basiert auf den folgenden Pre-Processing-Richtlinien:"
+msgstr "Smokeview basiert auf den folgenden Pre-Processing-Richtlinien:\n\n"
 
 msgid "Smooth"
 msgstr "glatt"
@@ -1479,7 +1479,7 @@ msgid "Stepped contours"
 msgstr "Gestufte Konturen"
 
 msgid "stereo        - activate stereo mode\n"
-msgstr "stereo       - Stereo-Modus aktivieren"
+msgstr "stereo       - Stereo-Modus aktivieren\n"
 
 msgid "Stereo Method"
 msgstr "Stereo-Methode"
@@ -1710,7 +1710,7 @@ msgid "update_bounds - calculate boundary file bounds and save to casename.bini\
 msgstr "update_bounds - berechne Schranken der Randdatei und speichere als casename.bini\n"
 
 msgid "Usage: %s [options] casename\n\n"
-msgstr "Anwendung: %s [Optionen] casename"
+msgstr "Anwendung: %s [Optionen] casename\n\n"
 
 msgid "Use colorbar lines"
 msgstr "Verwende Farbbalken-Linien"
@@ -1818,7 +1818,7 @@ msgid "Visibility"
 msgstr "Sichtweite"
 
 msgid "Visualize fire/smoke flow simulations.\n\n"
-msgstr "Visualisiere Feuer/Rauch-Stroemungssimulationen."
+msgstr "Visualisiere Feuer/Rauch-Stroemungssimulationen.\n\n"
 
 msgid "w: toggle clipping - use Options/Clip menu to specify clipping planes"
 msgstr "w: schalte Schnittebenen um - benutze Optionen/Clip-Menue, um die Schnittebenen anzugeben"
@@ -1842,7 +1842,7 @@ msgid "Web resources"
 msgstr "Web-Ressourcen"
 
 msgid "where \n\n"
-msgstr "wo"
+msgstr "wo\n\n"
 
 msgid "width"
 msgstr "Breite"
