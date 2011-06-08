@@ -1176,7 +1176,7 @@ SUBROUTINE VELOCITY_BC(T,NM)
 ! Assert tangential velocity boundary conditions
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
-USE TURBULENCE, ONLY: WERNER_WENGLE_WALL_MODEL,WANNIER_FLOW
+USE TURBULENCE, ONLY: WERNER_WENGLE_WALL_MODEL
 REAL(EB), INTENT(IN) :: T
 REAL(EB) :: MUA,TSI,WGT,TNOW,RAMP_T,OMW,MU_WALL,RHO_WALL,SLIP_COEF,VEL_T, &
             UUP(2),UUM(2),DXX(2),MU_DUIDXJ(-2:2),DUIDXJ(-2:2),MU_DUIDXJ_0(2),DUIDXJ_0(2),PROFILE_FACTOR,VEL_GAS,VEL_GHOST, &
@@ -1489,18 +1489,6 @@ EDGE_LOOP: DO IE=1,N_EDGES
                CASE (FREE_SLIP_BC) BOUNDARY_CONDITION
 
                   VEL_GHOST = VEL_GAS
-
-                  WANNIER_BC: IF (PERIODIC_TEST==5) THEN
-                     SELECT CASE(IOR)
-                        CASE( 1)
-                           VEL_GHOST = 2._EB*WANNIER_FLOW(X(II),Z(KK),2) - VEL_GAS
-                        CASE(-1)
-                           VEL_GHOST = 2._EB*WANNIER_FLOW(X(II),Z(KK),2) - VEL_GAS
-                        CASE(-3)
-                           VEL_GHOST = 2._EB*WANNIER_FLOW(X(II),Z(KK),1) - VEL_GAS
-                     END SELECT
-                  ENDIF WANNIER_BC
-
                   DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
                   MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
                   ALTERED_GRADIENT(ICD_SGN) = .TRUE.
