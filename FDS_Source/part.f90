@@ -797,7 +797,10 @@ CALL POINT_TO_MESH(NM)
 
 ! Zero out the contribution by lagrangian particles to divergence
 
-IF (N_EVAP_INDICES>0 .AND. .NOT.EVACUATION_ONLY(NM) .AND. CORRECTOR) D_LAGRANGIAN = 0._EB
+IF (N_EVAP_INDICES>0 .AND. .NOT.EVACUATION_ONLY(NM) .AND. CORRECTOR) THEN
+   D_LAGRANGIAN = 0._EB
+   IF (ENTHALPY_TRANSPORT) ENTHALPY_SOURCE_LAGRANGIAN = 0._EB
+ENDIF
 
 ! Move the droplets/particles, then compute mass and energy transfer, then add droplet momentum to gas
 
@@ -1633,6 +1636,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
             V2 = 0.5_EB*(V(II,JJ,KK)+V(II,JJ-1,KK))
             W2 = 0.5_EB*(W(II,JJ,KK)+W(II,JJ,KK-1))
             VEL_REL = SQRT((U2-DR%U)**2+(V2-DR%V)**2+(W2-DR%W)**2)
+            
             ! Set variables for heat transfer on solid
 
             SOLID_OR_GAS_PHASE: IF (DR%IOR/=0 .AND. DR%WALL_INDEX>0) THEN
@@ -1856,7 +1860,10 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
             ! Compute contribution to the divergence
 
             D_LAGRANGIAN(II,JJ,KK) =  D_LAGRANGIAN(II,JJ,KK) + (MW_RATIO *M_VAP /M_GAS + &
-                                      (M_VAP*DELTA_H_G - Q_CON_GAS)/H_G_OLD) * WGT / DT_SUBSTEP 
+                                      (M_VAP*DELTA_H_G - Q_CON_GAS)/H_G_OLD) * WGT / DT_SUBSTEP
+                                      
+            IF (ENTHALPY_TRANSPORT) ENTHALPY_SOURCE_LAGRANGIAN(II,JJ,KK) = ENTHALPY_SOURCE_LAGRANGIAN(II,JJ,KK) + &
+                                    (M_VAP*DELTA_H_G - Q_CON_GAS) * WGT / DT_SUBSTEP
 
             ! Keep track of total mass evaporated in cell
 

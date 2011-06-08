@@ -20,7 +20,6 @@ USE COMP_FUNCTIONS, ONLY: SECOND
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 USE PHYSICAL_FUNCTIONS, ONLY: GET_CONDUCTIVITY,GET_SPECIFIC_HEAT,GET_AVERAGE_SPECIFIC_HEAT,GET_AVERAGE_SPECIFIC_HEAT_DIFF
 USE EVAC, ONLY: EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, EMESH_NFIELDS, EVAC_FDS6
-USE TURBULENCE, ONLY: WANNIER_FLOW 
 
 ! Compute contributions to the divergence term
  
@@ -530,6 +529,8 @@ IF (NLP>0 .AND. N_EVAP_INDICES > 0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
       DO J=1,JBAR
          DO I=1,IBAR
             DP(I,J,K) = DP(I,J,K) + D_LAGRANGIAN(I,J,K)
+            IF (ENTHALPY_TRANSPORT) ENTHALPY_SOURCE(I,J,K) = ENTHALPY_SOURCE(I,J,K) + &
+                                                             ENTHALPY_SOURCE_LAGRANGIAN(I,J,K)
          ENDDO
       ENDDO
    ENDDO
@@ -659,17 +660,6 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                CASE(-3)
                   UWS(IW) =  W(II,JJ,KK-1)
             END SELECT
-            WANNIER_BC: IF (PERIODIC_TEST==5) THEN
-               SELECT CASE(IOR)
-                  CASE( 1)
-                     UWS(IW) = -WANNIER_FLOW(X(II),ZC(KK),1)
-                  CASE(-1)
-                     UWS(IW) =  WANNIER_FLOW(X(II-1),ZC(KK),1)
-                  CASE(-3)
-                     UWS(IW) =  WANNIER_FLOW(XC(II),Z(KK-1),2)
-               END SELECT
-            ENDIF WANNIER_BC
-
       END SELECT WALL_CELL_TYPE
    ENDDO WALL_LOOP3
 
