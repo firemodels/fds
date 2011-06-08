@@ -1623,8 +1623,43 @@ This is essentially what is plotted in Fig.~\ref{TC_view_factor_plot}, compared 
 \label{TC_view_factor_plot}
 \end{figure}
 
+\clearpage
+
+\section{Radiation Shield (\texorpdfstring{{\bf radiation\_shield}}{radiation\_shield}) }
+\label{radiation_shield}
+
+A lead radiation shield with a thickness of 1 mm is placed in between a ceiling set to 500~$^\circ$C and a floor set to 20~$^\circ$C. The box has dimensions of 10 m x 0.1 m x 1 m. The emissivity, $\varepsilon_{3}$, of the lead shield is 0.48 on both sides.  
+
+Using the following formula, we determined an analytical solution for the steady state heat flux at the floor of the box:
+\be
+   q_{12}' = \frac{\sigma(T_{1}^{4}-T_{2}^{4})}{\frac{1}{\varepsilon_1}+\frac{1}{\varepsilon_2}+2(\frac{1-\varepsilon_3}{\varepsilon_3})}
+\ee
+where $\sigma$ is the Stefan-Boltzmann constant, $T_{1}$ and $T_{2}$ are the respective temperatures of the ceiling and floor, and $\varepsilon_1$, $\varepsilon_2$, and $\varepsilon_3$ are the emissivities for the ceiling, floor, and lead shield, respectively. If we remove the possibility of heat conduction and let the emissivity of the ceiling and floor be 1, our analytical solution states that the steady state heat flux should be $q_{12}' =$ 4.76 kW/m$^2$.  As shown in Fig.~\ref{radiation_shield_plot_flux}, FDS gives us a slightly higher steady state heat flux at the floor of the box, which is approximately 5.13 kW/m$^2$.  This gives us a percent difference of approximately 6.89$\%$.  
+\noindent
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/radiation_shield_flux}
+\end{center}
+\caption[Radiation Shield Test Case]{Incident Heat Flux at the floor of the box from a ceiling at a temperature of 500~$^\circ$C and a floor at 20~$^\circ$C with a lead radiation shield in between.}
+\label{radiation_shield_plot_flux}
+\end{figure}
+
+We can also confirm that FDS determines the correct steady state temperature of the lead shield. From the knowledge of $q_{12}'$ and the fact that the heat flux from the ceiling to the shield is equal to the heat flux from the ceiling to the floor, we can determine the steady state temperature of the shield, $T_3$, using the following formula~\cite{Incropera:1}:
+\be
+   q_{12}' = q_{13}' = \frac{\sigma(T_{1}^{4}-T_{3}^{4})}{\frac{1}{\varepsilon_1}+\frac{1}{\varepsilon_3}-1}
+\ee
+We can use algebra to solve for $T_3$, which gives us 380.3~$^\circ$C. From Fig.~\ref{radiation_shield_plot_temp}, we can see that FDS properly determines the steady state temperature of the lead shield after about 350 seconds.  $T_3$ stays at around 378.8~$^\circ$C, which has a percent difference of 0.40$\%$ from the analytical solution.
+\noindent
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/radiation_shield_temp}
+\end{center}
+\caption[Radiation Shield Test Case]{Temperature of the lead shield with the ceiling at a temperature of 500~$^\circ$C and a floor at 20~$^\circ$C.}
+\label{radiation_shield_plot_temp}
+\end{figure}
 
 
+  
 \chapter{Species and Combustion}
 
 This chapter contains examples that test the computations related to species concentrations, gas properties and combustion.
