@@ -14,7 +14,7 @@ msgid "Absorption adjustments"
 msgstr "Wch?anianie korekty"
 
 msgid "a: change flow vector lengths"
-msgstr ": zmiana d?ugo?ci wektora przep?ywu"
+msgstr "a: zmiana d?ugo?ci wektora przep?ywu"
 
 msgid "Actual"
 msgstr "Rzeczywistego"
@@ -161,7 +161,7 @@ msgid "Bound data"
 msgstr "danych Bound"
 
 msgid "build         - show directives used in this build of Smokeview\n"
-msgstr "build - poka? dyrektyw u?yte w tym budowa Smokeview"
+msgstr "build         - poka? dyrektyw u?yte w tym budowa Smokeview\n"
 
 msgid "Cad"
 msgstr "CAD"
@@ -170,7 +170,7 @@ msgid "Cancel"
 msgstr "Anuluj"
 
 msgid "casename       - project id (file names without the extension)\n"
-msgstr "casename - id projektu (nazwy plików bez rozszerzenia)"
+msgstr "casename       - id projektu (nazwy plików bez rozszerzenia)\n"
 
 msgid "Center"
 msgstr "Centrum"
@@ -350,7 +350,7 @@ msgid "Demonstrator"
 msgstr "Demonstrator"
 
 msgid "demo          - use demonstrator mode of Smokeview\n"
-msgstr "Tryb demonstracyjny wykorzystania Smokeview - demo"
+msgstr "demo          - Tryb demonstracyjny wykorzystania Smokeview"
 
 msgid "Depth"
 msgstr "G??boko??"
@@ -566,7 +566,7 @@ msgid "Frame label"
 msgstr "etykieta Frame"
 
 msgid "frame nframes - maximum number of particle frames.  Default=%i\n"
-msgstr "nframes ramki - maksymalna liczba klatek cz?stek. Default =% i"
+msgstr "nframes ramki - maksymalna liczba klatek cz?stek. Default =%i\n"
 
 msgid "Frame rate"
 msgstr "Liczba klatek na sekund?"
@@ -644,7 +644,7 @@ msgid "Help"
 msgstr "Pomoc"
 
 msgid "help          - display this message\n"
-msgstr "Pomoc - wy?wietlenie tego komunikatu"
+msgstr "help          - wy?wietlenie tego komunikatu\n"
 
 msgid "Hidden"
 msgstr "Ukryty"
@@ -710,7 +710,7 @@ msgid "Image"
 msgstr "Obraz"
 
 msgid "ini           - output default smokeview parameters to smokeview.ini\n"
-msgstr "ini - parametrów wyj?ciowych smokeview domy?lnie smokeview.ini"
+msgstr "ini           - parametrów wyj?ciowych smokeview domy?lnie smokeview.ini\n"
 
 msgid "Insert"
 msgstr "Wstaw"
@@ -890,7 +890,7 @@ msgid "Next tour"
 msgstr "Nast?pna wycieczka"
 
 msgid "ng_ini        - No graphics version of -ini.\n"
-msgstr "ng_ini - nr wersji graficznej-ini."
+msgstr "ng_ini        - nr wersji graficznej-ini.\n"
 
 msgid "node index"
 msgstr "w?ze? indeksu"
@@ -1043,7 +1043,7 @@ msgid "Point skip"
 msgstr "Point pomin??"
 
 msgid "points npoints - maximum number of particles.  Default=%i\n"
-msgstr "punktów npoints - maksymalna liczba cz?stek. Default =% i"
+msgstr "punktów npoints - maksymalna liczba cz?stek. Default =%i\n"
 
 msgid "Position"
 msgstr "Stanowisko"
@@ -1160,7 +1160,7 @@ msgid "Run script"
 msgstr "W skrypcie"
 
 msgid "runscript     - run the script file casename.ssf\n"
-msgstr "runscript - uruchamia skrypt casename.ssf"
+msgstr "runscript     - uruchamia skrypt casename.ssf\n"
 
 msgid "Run smokezip"
 msgstr "smokezip Run"
@@ -1208,7 +1208,7 @@ msgid "Script options"
 msgstr "Opcje skryptu"
 
 msgid "script scriptfile - run the script file scriptfile\n"
-msgstr "SKRYPTU skryptu - uruchom skrypt SKRYPTU"
+msgstr "script skryptu    - uruchom skrypt\n"
 
 msgid "Segments"
 msgstr "Segmenty"
@@ -1400,7 +1400,7 @@ msgid "Smokeview menus"
 msgstr "menu Smokeview"
 
 msgid "Smokeview was built with the following pre-processing directives set:\n\n"
-msgstr "Smokeview zosta? zbudowany z nast?puj?cych dyrektyw okre?lonych obróbki wst?pnej:"
+msgstr "Smokeview zosta? zbudowany z nast?puj?cych dyrektyw okre?lonych obróbki wst?pnej:\n\n"
 
 msgid "Smooth"
 msgstr "G?adki"
@@ -1478,7 +1478,7 @@ msgid "Stepped contours"
 msgstr "Stepped kontury"
 
 msgid "stereo        - activate stereo mode\n"
-msgstr "stereo - uaktywni? tryb stereo"
+msgstr "stereo        - uaktywni? tryb stereo\n"
 
 msgid "Stereo Method"
 msgstr "Metoda Stereo"
@@ -1685,7 +1685,7 @@ msgid "Update bounds"
 msgstr "Update granic"
 
 msgid "update_bounds - calculate boundary file bounds and save to casename.bini\n"
-msgstr "update_bounds - oblicz granice plik i zapisa? na granicy casename.bini"
+msgstr "update_bounds - oblicz granice plik i zapisa? na granicy casename.bini\n"
 
 msgid "Update continuously"
 msgstr "Update stale"
@@ -1709,7 +1709,7 @@ msgid "u: reload files"
 msgstr "u: za?adowa? pliki"
 
 msgid "Usage: %s [options] casename\n\n"
-msgstr "U?ycie:%s [opcje] casename"
+msgstr "U?ycie:%s [opcje] casename\n\n"
 
 msgid "Use colorbar lines"
 msgstr "U?ywaj linii ColorBar"
@@ -1772,7 +1772,7 @@ msgid "Vents"
 msgstr "Vents"
 
 msgid "version       - display version information\n"
-msgstr "wersja - version wy?wietlenie informacji"
+msgstr "version       - version wy?wietlenie informacji"
 
 msgid "Vertical"
 msgstr "Pionowy"
@@ -1814,7 +1814,7 @@ msgid "Visibility"
 msgstr "Widoczno??"
 
 msgid "Visualize fire/smoke flow simulations.\n\n"
-msgstr "Wizualizacja ognia / symulacji przep?ywu dymu."
+msgstr "Wizualizacja ognia / symulacji przep?ywu dymu.\n\n"
 
 msgid "v: toggle flow vector visiblity"
 msgstr "v: tryb visiblity wektora przep?ywu"
@@ -1838,7 +1838,7 @@ msgid "Web resources"
 msgstr "zasoby sieci"
 
 msgid "where \n\n"
-msgstr "gdzie"
+msgstr "gdzie\n\n"
 
 msgid "width"
 msgstr "szeroko??"
