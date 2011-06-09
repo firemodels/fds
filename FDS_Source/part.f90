@@ -1606,6 +1606,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
                MW_GAS = (1._EB-Y_ALL(PC%Y_INDEX))/MW_GAS
             ENDIF
             MW_RATIO = MW_GAS/MW_DROP
+            
             ! Initialize droplet thermophysical data
 
             R_DROP   = DR%R
@@ -1772,12 +1773,12 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
 
             ! Update gas temperature and determine new subtimestep
 
-            DELTA_H_G = -Q_CON_GAS+M_VAP*(H_V )!- 2011649.919_EB)
+            DELTA_H_G = -Q_CON_GAS+M_VAP*(H_V ) !- 2011649.919_EB)
             CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP,TMP_G)            
             H_G_OLD = M_GAS*CP*TMP_G
             M_GAS_NEW = M_GAS + WGT*M_VAP
             TMP_G_NEW = TMP_G
-            H_NEW = H_G_OLD + DELTA_H_G*WGT!(DELTA_H_G * M_VAP - Q_CON_GAS) * WGT 
+            H_NEW = H_G_OLD + DELTA_H_G*WGT !(DELTA_H_G * M_VAP - Q_CON_GAS) * WGT 
             IF (H_NEW > 0._EB) THEN
                ZZ_GET2 = ZZ_GET * M_GAS/M_GAS_NEW               
                IF (PC%Z_INDEX>0) ZZ_GET2(PC%Z_INDEX) = ZZ_GET2(PC%Z_INDEX) + WGT*M_VAP/M_GAS_NEW
@@ -1830,6 +1831,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
             ENDIF
             
             !Limit gas temperature change
+            
             IF (ABS(TMP_G_NEW/TMP_G - 1._EB) > 0.05_EB) THEN
                DT_SUBSTEP = DT_SUBSTEP * 0.5_EB            
                N_SUBSTEPS = NINT(DT/DT_SUBSTEP)
@@ -1863,11 +1865,12 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
                                       (M_VAP*DELTA_H_G - Q_CON_GAS)/H_G_OLD) * WGT / DT_SUBSTEP
                                       
             IF (ENTHALPY_TRANSPORT) ENTHALPY_SOURCE_LAGRANGIAN(II,JJ,KK) = ENTHALPY_SOURCE_LAGRANGIAN(II,JJ,KK) + &
-                                    (M_VAP*DELTA_H_G - Q_CON_GAS) * WGT / DT_SUBSTEP
+                                    (M_VAP*(H_L+H_V) - Q_TOT) * RVC * WGT / DT_SUBSTEP
 
             ! Keep track of total mass evaporated in cell
 
             MVAP_TOT(II,JJ,KK) = MVAP_TOT(II,JJ,KK) + WGT*M_VAP
+            
             ! Update droplet quantities
 
             DR%R   = (M_DROP/FTPR)**ONTH
