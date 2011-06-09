@@ -2047,15 +2047,11 @@ void ScriptMenu(int value){
       else{
         script_recording->recording=0;
         script_recording=NULL;
-#ifdef pp_MESSAGE
         {
           char message[256];
-          sprintf(message,"*** warning: The script file %s could not be opened for writing\n",newscriptfilename);
+          sprintf(message,_("The script file %s could not be opened for writing."),newscriptfilename);
           warning_message(message);
         }
-#else
-        printf("*** warning: The script file %s could not be opened for writing\n",newscriptfilename);
-#endif
       }
       break;
     case STOP_RECORDING_SCRIPT:

@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "smokeviewvars.h"
+#include "translate.h"
 
 #ifdef pp_OSX
 #include <GLUT/glut.h>
@@ -304,16 +305,12 @@ int mergescreenbuffers(GLubyte *screenbuffers[4]){
   printf("Rendering to: %s .",renderfile);
   RENDERfile = fopen(renderfile, "wb");
   if (RENDERfile == NULL) {
-#ifdef pp_MESSAGE
     {
       char message[256];
 
-      sprintf(message,"*** warning: unable to write to %s\n",renderfile);
+      sprintf(message,"unable to write to %s",renderfile);
       warning_message(message);
     }
-#else
-    printf("*** warning: unable to write to %s\n",renderfile);
-#endif
     return 1;
   }
   RENDERimage = gdImageCreateTrueColor(2*screenWidth,2*screenHeight);
@@ -399,21 +396,22 @@ int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
 
   RENDERfile = fopen(RENDERfilename, "wb");
   if (RENDERfile == NULL) {
-#ifdef pp_MESSAGE
     {
-      char message[256];
+      char message[1024];
 
-      sprintf(message,"*** warning: unable to write to %s\n",RENDERfilename);
+      strcpy(message,_("unable to write to "));
+      strcat(message,RENDERfilename);
       warning_message(message);
     }
-#else
-    printf("*** warning:  unable to write to %s\n",RENDERfilename);
-#endif
     return 1;
   }
   NewMemory((void **)&OpenGLimage,width * height * sizeof(GLubyte) * 3);
   if(OpenGLimage == NULL){
-    printf("error allocating render image:%s\n",RENDERfilename);                                                                
+    char message[1024];
+    
+    strcpy(message,_("error allocating render image: "));
+    strcat(message,RENDERfilename);
+    error_message(message);
     pauseSV();
     exit(1);
   }

@@ -5392,9 +5392,6 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type){
     while(!feof(stream)){
       FORTRLESLICEREAD(&time,1);
       if(returncode==0)break;
-      if(time>299.0){
-        printf("xxx\n");
-      }
       FORTRLESLICEREAD(&ncompressed,1);
       if(returncode==0)break;
       returncode=fseek(stream,8+ncompressed,SEEK_CUR);

@@ -17,6 +17,7 @@
 #include "MALLOC.h"
 #include "smokeviewvars.h"
 #include "svn_revision.h"
+#include "translate.h"
 
 // svn revision character string
 char startup_revision[]="$Revision$";
@@ -97,29 +98,27 @@ int initcase_c(int argc, char **argv){
   readsmv_dynamic(input_file);
   switch (return_code){
     case 1:
-#ifdef pp_MESSAGE
       {
         char message[256];
 
-        sprintf(message,"Input file %s not found.\n",input_file);
+        strcpy(message,_("Input file "));
+        strcat(message,input_file);
+        strcat(message,_(" not found"));
+#ifdef pp_MESSAGE
         warning_message(message);
-      }
 #else
-      printf("Input file %s not found.\n",input_file);
+        printf("%s\n",message);
 #endif
+      }
       pauseSV();
       return 1;
     case 2:
-#ifdef pp_MESSAGE
       {
         char message[256];
 
-        sprintf(message,"*** Fatal error: unable to allocate necessary memory\n");
+        strcpy(message,_("memory allocation error"));
         abort_message(message);
       }
-#else
-      printf("*** Fatal error: unable to allocate necessary memory\n");
-#endif
       pauseSV();
       return 2;
     case 0:
@@ -218,11 +217,12 @@ void sv_startup_c(int argc, char **argv){
       if(strncmp(smokeviewtempdir+lensmoketempdir-1,dirseparator,1)!=0){
         STRCAT(smokeviewtempdir,dirseparator);
       }
-      printf("Scratch directory: %s\n",smokeviewtempdir);
+      printf(_("Scratch directory:"));
+      printf(" %s\n",smokeviewtempdir);
     }
   }
 #ifdef pp_BETA
-  printf("*** This version of Smokeview is intended for review and testing ONLY. ***\n");
+  printf(_("*** This version of Smokeview is intended for review and testing ONLY. ***"));
   printf("\n");
 #endif
 
@@ -230,9 +230,11 @@ void sv_startup_c(int argc, char **argv){
   getcwd(workingdir,1000);
 #endif
   if(use_graphics==1){
-    printf("\nInitializing Glut - ");
+    printf("\n");
+    printf(_("Initializing Glut - "));
     glutInit(&argc, argv);
-    printf("initialized\n");
+    printf(_("initialized"));
+    printf("\n");
   }
 #ifdef pp_OSX
   chdir(workingdir);
@@ -242,11 +244,12 @@ void sv_startup_c(int argc, char **argv){
   mxframes=mxframes_orig;
   if(use_graphics==1){
 #ifdef _DEBUG
-    printf("Initializing Smokeview graphics window - ");
+    printf(_("Initializing Smokeview graphics window - "));
 #endif
     glutInitWindowSize(screenWidth, screenHeight);
 #ifdef _DEBUG
-    printf("initialized\n");
+    printf(_("initialized"));
+    printf("\n");
 #endif
 
     max_screenWidth = glutGet(GLUT_SCREEN_WIDTH);
@@ -287,7 +290,7 @@ void InitOpenGL(void){
   int type;
   int err;
 
-  printf("Initializing OpenGL - ");
+  printf(_("Initializing OpenGL - "));
   
   type = GLUT_RGB|GLUT_DEPTH;
   if(buffertype==GLUT_DOUBLE){
@@ -305,32 +308,35 @@ void InitOpenGL(void){
     }
     else{
       videoSTEREO=0;
-      printf("***warning: video hardware does not support stereo\n");
+      warning_message(_("video hardware does not support stereo"));
     }
   }
 
 #ifdef _DEBUG
-  printf("   Initializing Glut display mode - ");
+  printf(_("   Initializing Glut display mode - "));
 #endif
   glutInitDisplayMode(type);
 #ifdef _DEBUG
-  printf("initialized\n");
+  printf(_("initialized"));
+  printf("\n");
 #endif
 
   CheckMemory;
 #ifdef _DEBUG
-  printf("   creating window\n");
+  printf(_("   creating window"));
+  printf("\n");
 #endif
   mainwindow_id=glutCreateWindow("");
 #ifdef _DEBUG
-  printf("   window created\n");
+  printf(_("   window created"));
+  printf("\n");
 #endif
 
 #ifdef pp_MESSAGE
   glui_message_setup(mainwindow_id);
 #endif
 #ifdef _DEBUG
-  printf("   Initializing callbacks - ");
+  printf(_("   Initializing callbacks - "));
 #endif
   glutSpecialUpFunc(specialkeyboard_up);
   glutKeyboardUpFunc(keyboard_up);
@@ -343,41 +349,44 @@ void InitOpenGL(void){
   glutVisibilityFunc(NULL);
   glutMenuStatusFunc(MenuStatus);
 #ifdef _DEBUG
-  printf("initialized\n");
+  printf(_("initialized"));
+  printf("\n");
 #endif
 //  glutWindowStatusFunc(WindowStatus);
   err=0;
 
 #ifdef pp_GPU
 #ifdef _DEBUG
-  printf("   Initializing GPU shaders\n");
+  printf(_("   Initializing GPU shaders"));
+  printf("\n");
 #endif
   err=init_shaders();
   if(err==0){
 #ifdef _DEBUG
-    printf("   GPU shaders initialization successfully completed\n");
+    printf(_("   GPU shaders initialization successfully completed"));
+    printf("\n");
 #endif
   }
 #endif
 #ifdef pp_CULL
   if(err==0){
 #ifdef _DEBUG
-    printf("   Initializing OpenGL culling extensions - ");
+    printf(_("   Initializing OpenGL culling extensions - "));
 #endif
     err=init_cull_exts();
     if(err==0){
 #ifdef _DEBUG
-      printf("initialized\n");
+      printf(_("initialized"));
+      printf("\n");
 #endif
     }
   }
   else{
-    printf("*** warning: OpenGL culling initialization not attempted since\n");
-    printf("             the GPU shader initialization failed\n");
+    warning_message(_("OpenGL culling initialization not attempted since the GPU shader initialization failed."));
   }
 #endif
   if(err!=0){
-    printf("*** warning: unable to initialize GPU shaders and/or OpenGL culling extensions\n");
+    warning_message(_("unable to initialize GPU shaders and/or OpenGL culling extensions."));
   }
 
   light_position0[0]=1.0f;
@@ -407,7 +416,7 @@ void InitOpenGL(void){
     if(nblueshift<0)nblueshift=0;
   }
   opengldefined=1;
-  printf("initialized\n");
+  printf(_("initialized"));
 }
 
 /* ------------------ set_3dsmoke_startup ------------------------ */

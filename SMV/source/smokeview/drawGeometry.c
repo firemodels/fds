@@ -15,6 +15,7 @@
 #include "flowfiles.h"
 #include "MALLOC.h"
 #include "smokeviewvars.h"
+#include "translate.h"
 
 // svn revision character string
 char drawGeometry_revision[]="$Revision$";
@@ -3092,7 +3093,7 @@ void allocate_faces(){
       printf("%i bytes of memory\n",mem_sum);
       printf("                  for %i blockage faces.\n",nfaces_temp);
     }
-    abortSV("*** Smokeview aborting - what we've got here is a failure to allocate.");
+    abortSV(_("memory allocation error."));
   }
   printf("\n");
 }

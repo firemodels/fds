@@ -4,7 +4,6 @@
 
 #define CPP
 #include "options.h"
-#ifdef pp_MESSAGE
 #include <string.h>
 #ifdef pp_OSX
 #include <GLUT/glut.h>
@@ -22,6 +21,8 @@
 
 // svn revision character string
 extern "C" char glui_message_revision[]="$Revision$";
+
+#ifdef pp_MESSAGE
 
 #define warning_OK 1
 #define error_OK 2
@@ -73,68 +74,6 @@ extern "C" void glui_message_setup(int main_window){
 
 }
 
-/* ------------------ warning_message ------------------------ */
-
-extern "C" void warning_message(char *message){
-  char message2[sizeof(GLUI_String)];
-
-  strcpy(message2,_("*** Warning: "));
-  strcat(message2,message);
-  printf("%s\n",message2);
-  if(glui_warning==NULL)return;
-
-  if(show_glui_warning==1){
-    warning_text2->set_name(_("*** Additional warnings have occurred.  See command shell for details."));
-  }
-  else{
-    warning_text->set_name(message2);
-    warning_text2->set_name("");
-  }
-  show_glui_warning=1;
-  glui_warning->show();
-}
-
-
-/* ------------------ error_message ------------------------ */
-
-extern "C" void error_message(char *message){
-  char message2[sizeof(GLUI_String)];
-
-  strcpy(message2,_("*** Error: "));
-  strcat(message2,message);
-  printf("%s\n",message2);
-  if(glui_error==NULL)return;
-
-  if(show_glui_error==1){
-    error_text2->set_name(_("*** Additional errors have occurred.  See command shell for details."));
-  }
-  else{
-    error_text->set_name(message2);
-    error_text2->set_name("");
-  }
-  show_glui_error=1;
-  glui_error->show();
-}
-
-
-/* ------------------ abort_message ------------------------ */
-
-extern "C" void abort_message(char *message){
-  char message2[sizeof(GLUI_String)];
-
-  strcpy(message2,_("*** Fatal error: "));
-  strcat(message2,message);
-  printf("%s\n",message2);
-  if(glui_abort==NULL)return;
-
-  if(show_glui_abort==0){
-    abort_text->set_name(message2);
-    abort_text2->set_name(_("Press OK to terminate Smokeview"));
-  }
-  show_glui_abort=1;
-  glui_abort->show();
-}
-
 /* ------------------ MESSAGE_CB ------------------------ */
 
 void Message_CB(int var){
@@ -157,3 +96,108 @@ void Message_CB(int var){
 
 
 #endif
+
+
+/* ------------------ wrap_line ------------------------ */
+
+#define LINE_LENGTH 60
+
+void wrap_line(char *message2){
+  int i, offset=0;
+  
+  for(i=0;i<strlen(message2);i++){
+    if(message2[i]=='\n'){
+      offset=i;
+      continue;
+    }
+    if(message2[i]==' '&&i>offset+LINE_LENGTH){
+      message2[i]='\n';
+      offset=i;
+    }
+  }
+}
+
+/* ------------------ warning_message ------------------------ */
+
+extern "C" void warning_message(char *message){
+  char message2[sizeof(GLUI_String)];
+  int i,offset=0;
+
+  strcpy(message2,_("*** Warning: "));
+  strcat(message2,message);
+  wrap_line(message2);
+  printf("%s\n",message2);
+#ifdef pp_MESSAGE
+  if(glui_warning==NULL)return;
+
+  if(show_glui_warning==1){
+    warning_text2->set_name(_("*** Additional warnings have occurred.  See command shell for details."));
+  }
+  else{
+    warning_text->set_name(message2);
+    warning_text2->set_name("");
+  }
+  show_glui_warning=1;
+  glui_warning->show();
+#endif
+}
+
+
+/* ------------------ error_message ------------------------ */
+
+extern "C" void error_message(char *message){
+  char message2[sizeof(GLUI_String)];
+  int i, offset=0;
+
+  strcpy(message2,_("*** Error: "));
+  strcat(message2,message);
+  wrap_line(message2);
+  printf("%s\n",message2);
+#ifdef pp_MESSAGE
+  if(glui_error==NULL)return;
+
+  if(show_glui_error==1){
+    error_text2->set_name(_("*** Additional errors have occurred.  See command shell for details."));
+  }
+  else{
+    error_text->set_name(message2);
+    error_text2->set_name("");
+  }
+  show_glui_error=1;
+  glui_error->show();
+#endif
+}
+
+/* ------------------ abort_message ------------------------ */
+
+extern "C" void abort_message(char *message){
+  char message2[sizeof(GLUI_String)];
+  int i, offset=0;
+
+  strcpy(message2,_("*** Fatal error: "));
+  strcat(message2,message);
+  wrap_line(message2);
+  printf("%s\n",message2);
+#ifdef pp_MESSAGE
+  if(glui_abort==NULL)return;
+
+  if(show_glui_abort==0){
+    abort_text->set_name(message2);
+    abort_text2->set_name(_("Press OK to terminate Smokeview"));
+  }
+  show_glui_abort=1;
+  glui_abort->show();
+#endif
+}
+
+/* ------------------ message ------------------------ */
+
+extern "C" void message_message(char *message){
+  char message2[sizeof(GLUI_String)];
+  int i, offset=0;
+
+  strcpy(message2,message);
+  wrap_line(message2);
+  printf("%s\n",message2);
+}
+

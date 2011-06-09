@@ -24,6 +24,7 @@
 #include <pthread.h>
 #include "csphere.h"
 #include "smv_endian.h"
+#include "translate.h"
 
 #include "smokeviewvars.h"
 
@@ -1319,7 +1320,8 @@ int readsmv(char *file, char *file2){
 
   smv_modtime=file_modtime(file);
   
-  printf("\nReading: %s\n",file);
+  printf(_("reading: "));
+  printf("%s\n",file);
 
 /* 
    ************************************************************************
@@ -1334,8 +1336,10 @@ int readsmv(char *file, char *file2){
 
   nvents=0; igrid=0; ioffset=0;
   ntc_total=0, nspr_total=0, nheat_total=0;
-  printf("reading input file\n");
-  printf("   pass 1\n");
+  printf(_("reading input file"));
+  printf("\n");
+  printf(_("   pass 1"));
+  printf("\n");
   for(;;){
     if(feof(stream)!=0){
       BREAK;
@@ -1922,8 +1926,11 @@ int readsmv(char *file, char *file2){
   rewind(stream1);
   if(stream2!=NULL)rewind(stream2);
   stream=stream1;
-  printf("   pass 1 completed\n");
-  printf("   pass 2\n");
+  printf(_("   pass 1"));
+  printf(_(" completed"));
+  printf("\n");
+  printf(_("   pass 2"));
+  printf("\n");
   for(;;){
     if(feof(stream)!=0){
       BREAK;
@@ -2490,13 +2497,16 @@ typedef struct {
       if(STAT(bufptr,&statbuffer)==0){
         if(NewMemory((void **)&cadgeominfo[ncadgeom].file,(unsigned int)(len+1))==0)return 2;
         STRCPY(cadgeominfo[ncadgeom].file,bufptr);
-        printf("   reading cad file: %s\n",bufptr);
+        printf(_("   reading cad file: "),bufptr);
+        printf("%s\n",bufptr);
         readcadgeom(cadgeominfo+ncadgeom);
-        printf("   completed\n");
+        printf(_("   completed"));
+        printf("\n");
         ncadgeom++;
       }
       else{
-        printf("   CAD geometry file: %s could not be opened\n",bufptr);
+        printf(_("   CAD geometry file: %s could not be opened"),bufptr);
+        printf("\n");
       }
       continue;
     }
@@ -2718,8 +2728,13 @@ typedef struct {
           found_texture=1;
         }
         if(texturebuffer!=NULL&&buffer3!=NULL&&found_texture==0&&strncmp(buffer3,"null",4)!=0){
-          printf("*** Warning: The texture file: %s was not found in either \n",buffer3);
-          printf("             the current working directory or in %s\n",smvprogdir);
+          char message[1024];
+
+          strcpy(message,_("The texture file: "));
+          strcat(message,buffer3);
+          strcat(message,_("was not found in either the current working directory or in "));
+          strcat(message,smvprogdir);
+          warning_message(message);
         }
       }
       nsurfaces++;
@@ -3140,7 +3155,7 @@ typedef struct {
     texti = textureinfo + i;
     texti->loaded=0;
     if(texti->file!=NULL){
-      printf("      Loading textures: ");
+      printf(_("      Loading textures: "));
     }
     else{
       continue;
@@ -3165,13 +3180,15 @@ typedef struct {
       glBindTexture(GL_TEXTURE_2D,texti->name);
       floortex=readpicture(texti->file,&texwid,&texht);
       if(floortex==NULL){
-         printf(" - failed\n");
+         printf(_(" - failed"));
+         printf("\n");
          continue;
       }
       errorcode=gluBuild2DMipmaps(GL_TEXTURE_2D,4, texwid, texht, GL_RGBA, GL_UNSIGNED_BYTE, floortex);
       if(errorcode!=0){
         FREEMEMORY(floortex);
-        printf(" - failed\n");
+         printf(_(" - failed"));
+         printf("\n");
         continue;
       }
       FREEMEMORY(floortex);
@@ -3180,7 +3197,8 @@ typedef struct {
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
       texti->loaded=1;
-      printf(" - completed\n");
+         printf(_(" - completed"));
+         printf("\n");
     }
   }
   
@@ -3191,7 +3209,7 @@ typedef struct {
 
   // define colobar textures
 
-  printf("      Loading colorbar texture: ");
+  printf(_("      Loading colorbar texture: "));
 
   glActiveTexture(GL_TEXTURE0);
   glGenTextures(1,&texture_colorbar_id);
@@ -3238,7 +3256,8 @@ typedef struct {
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
   CheckMemory;
 
-  printf(" - completed\n");
+  printf(_(" - completed"));
+  printf("\n");
 #ifdef pp_GPU
   if(use_graphics==1){
     createDepthTexture();
@@ -3250,7 +3269,7 @@ typedef struct {
     unsigned char *floortex;
     int texwid, texht;
 
-    printf("      Loading terrain texture: ");
+    printf(_("      Loading terrain texture: "));
     tt = terrain_texture;
     tt->loaded=0;
     tt->used=0;
@@ -3267,7 +3286,8 @@ typedef struct {
       errorcode=gluBuild2DMipmaps(GL_TEXTURE_2D,4, texwid, texht, GL_RGBA, GL_UNSIGNED_BYTE, floortex);
     }
     if(errorcode!=0){
-      printf(" - failed\n");
+      printf(_(" - failed"));
+      printf("\n");
     }
     FREEMEMORY(floortex);
     if(errorcode==0&&use_graphics==1){
@@ -3276,7 +3296,8 @@ typedef struct {
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
       tt->loaded=1;
-      printf(" - completed\n");
+      printf(_(" - completed"));
+      printf("\n");
     }
   }
 
@@ -3326,8 +3347,11 @@ typedef struct {
   rewind(stream1);
   if(stream2!=NULL)rewind(stream2);
   stream=stream1;
-  printf("   pass 2 completed\n");
-  printf("   pass 3\n");
+  printf(_("   pass 2 "));
+  printf(_("completed"));
+  printf("\n");
+  printf(_("   pass 3"));
+  printf("\n");
   startpass=1;
 
   for(;;){
@@ -4823,7 +4847,14 @@ typedef struct {
         ipatch++;
       }
       else{
-        if(trainer_mode==0)printf("*** Warning: the file, %s, does not exist.\n",buffer);
+        if(trainer_mode==0){
+          char message[1024];
+
+          strcpy(message,_("the file, "));
+          strcat(message,buffer);
+          strcat(message,_(" does not exist"));
+          warning_message(message);
+        }
         if(readlabels(&patchi->label,stream)==2)return 2;
         npatch_files--;
       }
@@ -4905,7 +4936,15 @@ typedef struct {
       }
       else{
         get_isolevels=0;
-        if(trainer_mode==0)printf("*** Warning: the file, %s, does not exist.\n",buffer);
+        if(trainer_mode==0){
+          char message[1024];
+
+          strcpy(message,_("the file, "));
+          strcat(message,buffer);
+          strcat(message,_(" does not exist"));
+          warning_message(message);
+        }
+
         if(readlabels(&isoi->surface_label,stream)==2)return 2;
         if(dataflag==1){
           if(readlabels(&isoi->color_label,stream)==2)return 2;
@@ -5272,8 +5311,13 @@ typedef struct {
   rewind(stream1);
   if(stream2!=NULL)rewind(stream2);
   stream=stream1;
-  printf("   pass 3 completed\n");
-  if(do_pass4==1||autoterrain==1)printf("   pass 4\n");
+  printf(_("   pass 3 "));
+  printf(_("completed"));
+  printf("\n");
+  if(do_pass4==1||autoterrain==1){
+    printf(_("   pass 4"));
+    printf("\n");
+  }
 
   while((autoterrain==1||do_pass4==1)){
     if(feof(stream)!=0){
@@ -5391,10 +5435,16 @@ typedef struct {
     }
   }
 
-  if(do_pass4==1)printf("   pass 4 completed\n");
+  if(do_pass4==1){
+    printf(_("   pass 4 "));
+    printf(_("completed"));
+    printf("\n");
+  }
 
-  printf("reading input file completed\n");
-  printf("beginning wrap up - \n");
+  printf(_("reading input file completed"));
+  printf("\n");
+  printf(_("beginning wrap up - "));
+  printf("\n");
 #ifdef _DEBUG
   PrintMemoryInfo;
 #endif
@@ -6195,14 +6245,14 @@ typedef struct {
   update_mesh_terrain();
 
 
-  printf("wrap up completed\n");
+  printf(_("wrap up completed"));
+  printf("\n");
 #ifdef _DEBUG
   PrintMemoryInfo;
 #endif
 
   return 0;
 }
-
 
 /* ------------------ parsedatabase ------------------------ */
 
@@ -7283,7 +7333,8 @@ void readboundini(void){
   strcat(fullfilename,boundinifilename);
   stream=fopen(fullfilename,"r");
   if(stream==NULL)return;
-  printf("reading: %s\n",fullfilename);
+  printf(_("reading: "));
+  printf("%s\n",fullfilename);
 
   while(!feof(stream)){
     char buffer[255], buffer2[255];
@@ -7411,7 +7462,8 @@ int readini2(char *inifile, int localfile){
     update_inilist();
   }
 
-  printf("reading: %s\n",inifile);
+  printf(_("reading: "));
+  printf("%s\n",inifile);
   if(localfile==1){
     update_selectedtour_index=0;
   }
