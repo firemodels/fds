@@ -3731,26 +3731,42 @@ void version(void){
 
 void usage(char **argv){
   printf("%s\n",TITLERELEASE);
-  printf(_("Visualize fire/smoke flow simulations.\n\n"));
-  printf(_("Usage: %s [options] casename\n\n"),argv[0]);
-  printf(_("where \n\n"));
-  printf(_(" casename       - project id (file names without the extension)\n"));
-  printf(_(" -build         - show directives used in this build of Smokeview\n"));
-  printf(_(" -demo          - use demonstrator mode of Smokeview\n"));
+  printf(_("Visualize fire/smoke flow simulations."));
+  printf("\n\n");
+  printf(_("Usage: %s [options] casename"),argv[0]);
+  printf("\n\n");
+  printf(_("where "));
+  printf("\n\n");
+  printf(_(" casename       - project id (file names without the extension)"));
+  printf("\n");
+  printf(_(" -build         - show directives used in this build of Smokeview"));
+  printf("\n");
+  printf(_(" -demo          - use demonstrator mode of Smokeview"));
+  printf("\n");
 #ifdef pp_DEPRECATED
-  printf(_(" -frame nframes - maximum number of particle frames.  Default=%i\n",MAXFRAMES));
+  printf(_(" -frame nframes - maximum number of particle frames.  Default=%i",MAXFRAMES));
+  printf("\n");
 #endif
-  printf(_(" -help          - display this message\n"));
-  printf(_(" -ini           - output default smokeview parameters to smokeview.ini\n"));
-  printf(_(" -ng_ini        - No graphics version of -ini.\n"));
+  printf(_(" -help          - display this message"));
+  printf("\n");
+  printf(_(" -ini           - output default smokeview parameters to smokeview.ini"));
+  printf("\n");
+  printf(_(" -ng_ini        - No graphics version of -ini."));
+  printf("\n");
 #ifdef pp_DEPRECATED
-  printf(_(" -points npoints - maximum number of particles.  Default=%i\n"),MAXPOINTS);
+  printf(_(" -points npoints - maximum number of particles.  Default=%i"),MAXPOINTS);
+  printf("\n");
 #endif
-  printf(_(" -runscript     - run the script file casename.ssf\n"));
-  printf(_(" -script scriptfile - run the script file scriptfile\n"));
-  printf(_(" -stereo        - activate stereo mode\n"));
-  printf(_(" -update_bounds - calculate boundary file bounds and save to casename.bini\n"));
-  printf(_(" -version       - display version information\n"));
+  printf(_(" -runscript     - run the script file casename.ssf"));
+  printf("\n");
+  printf(_(" -script scriptfile - run the script file scriptfile"));
+  printf("\n");
+  printf(_(" -stereo        - activate stereo mode"));
+  printf("\n");
+  printf(_(" -update_bounds - calculate boundary file bounds and save to casename.bini"));
+  printf("\n");
+  printf(_(" -version       - display version information"));
+  printf("\n");
 
   if(showbuild==1){
     char label[1024],*labelptr;
@@ -3839,7 +3855,8 @@ void usage(char **argv){
     strcat(label,", WIN32");
 #endif
     printf("  \n");
-    printf(_("  Smokeview was built with the following pre-processing directives set:\n\n"));
+    printf(_("  Smokeview was built with the following pre-processing directives set:"));
+    printf("\n\n");
     printf("%s \n",labelptr);
   }
 }

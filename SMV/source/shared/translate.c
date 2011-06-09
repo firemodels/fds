@@ -143,11 +143,14 @@ void init_translate(char *bindir, char *tr_name){
     }
     tr_otherlang=parse_lang(smokeview_lang,&trinfo,&ntrinfo);
     if(tr_otherlang==1){
-      printf(_("Using translation file: %s\n"),smokeview_lang);
+      printf(_("Using translation file: %s"),smokeview_lang);
+      printf("\n");
     }
     else{
-      printf(_("Failed to parse translation file: %s\n"),smokeview_lang);
-      printf(_("Menus will be in English\n"));
+      printf(_("Failed to parse translation file: %s"),smokeview_lang);
+      printf("\n");
+      printf(_("Menus will be in English"));
+      printf("\n");
     }
   }
 }
