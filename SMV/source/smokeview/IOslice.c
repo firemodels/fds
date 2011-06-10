@@ -1286,6 +1286,7 @@ void getsliceparams(void){
   FILE_SIZE  lenfile;
   float position;
   int is1, is2, js1, js2, ks1, ks2;
+  int ni, nj, nk;
   int iblock;
   mesh *meshi;
   multislice *mslicei;
@@ -1296,7 +1297,7 @@ void getsliceparams(void){
     lenfile = strlen(file);
     if(sd->compression_type==0){
       FORTgetsliceparms(file,&endian,
-        &is1,&is2,&js1,&js2,&ks1,&ks2,&sd->volslice,&error,lenfile);
+        &is1,&is2,&js1,&js2,&ks1,&ks2,&ni,&nj,&nk,&sd->volslice,&error,lenfile);
     }
     else if(sd->compression_type==1){
       error=0;
@@ -1309,6 +1310,9 @@ void getsliceparams(void){
       sd->js2=js2;
       sd->ks1=ks1;
       sd->ks2=ks2;
+      sd->nslicei=ni;
+      sd->nslicej=nj;
+      sd->nslicek=nk;
       sd->idir=-1;
       iblock = sd->blocknumber;
       meshi = meshinfo + iblock;

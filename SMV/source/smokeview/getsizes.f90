@@ -632,11 +632,11 @@ end subroutine getsizes2
 
 !  ------------------ getsliceparms ------------------------ 
 
-subroutine getsliceparms(slicefilename, endian, ip1, ip2, jp1, jp2, kp1, kp2, slice3d, error)
+subroutine getsliceparms(slicefilename, endian, ip1, ip2, jp1, jp2, kp1, kp2, ni, nj, nk, slice3d, error)
 
 #ifdef pp_cvf
 #ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getsliceparms@44' :: getsliceparms
+!DEC$ ATTRIBUTES ALIAS:'_getsliceparms@56' :: getsliceparms
 #endif
 #endif
 
@@ -645,7 +645,7 @@ implicit none
 character(len=*) :: slicefilename
 logical :: exists
 
-integer, intent(out) :: ip1, ip2, jp1, jp2, kp1, kp2, slice3d, error
+integer, intent(out) :: ip1, ip2, jp1, jp2, kp1, kp2, ni, nj, nk, slice3d, error
 integer, intent(in) :: endian
 integer :: idir, joff, koff
 logical :: connected
@@ -685,7 +685,9 @@ read(lu11,iostat=error)shortlbl
 read(lu11,iostat=error)unitlbl
 
 read(lu11,iostat=error)ip1, ip2, jp1, jp2, kp1, kp2
-
+ni = ip2 + 1 - ip1
+nj = jp2 + 1 - jp1
+nk = kp2 + 1 - kp1
 if(ip1.eq.ip2.or.jp1.eq.jp2.or.kp1.eq.kp2)then
   slice3d=0
  else
