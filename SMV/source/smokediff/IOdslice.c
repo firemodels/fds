@@ -22,7 +22,7 @@ void setup_slice(FILE *stream_out){
   case1 = caseinfo;
   case2 = caseinfo + 1;
 
-  for(i=0;i<case1->nslice_files;i++){
+  for(i=0;i<case1->nsliceinfo;i++){
     slice *slicei;
 
     slicei = case1->sliceinfo + i;
@@ -52,7 +52,7 @@ slice *getslice(slice *slicein, casedata *case2){
   if(strlen(type_label)>0&&strcmp(type_label,slicein->label.shortlabel)!=0){
     return NULL;
   }
-  for(i=0;i<case2->nslice_files;i++){
+  for(i=0;i<case2->nsliceinfo;i++){
     slice *sliceout;
 
     sliceout = case2->sliceinfo + i;
@@ -75,7 +75,7 @@ slice *getslice(slice *slicein, casedata *case2){
 void diff_slices(FILE *stream_out){
   int j;
 
-  for(j=0;j<caseinfo->nslice_files;j++){
+  for(j=0;j<caseinfo->nsliceinfo;j++){
     float valmin, valmax;
     char *file1, *file2;
     char fullfile1[1024], fullfile2[1024], outfile[1024],  outfile2[1024];

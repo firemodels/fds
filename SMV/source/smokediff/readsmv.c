@@ -24,13 +24,13 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
   slice *sliceinfo;
   boundary *boundaryinfo;
   plot3d *plot3dinfo;
-  int nmeshes, nslice_files, nplot3d_files, nboundary_files;
+  int nmeshes, nsliceinfo, nplot3d_files, nboundary_files;
   int itrnx, itrny, itrnz;
 
   igrid=0;
   ipdim=0;
   nmeshes=0;
-  nslice_files=0;
+  nsliceinfo=0;
   nplot3d_files=0;
   nboundary_files=0;
   itrnx=0;
@@ -48,7 +48,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       match(buffer,"SLFL",4) == 1||
       match(buffer,"SLCT",4) == 1
       ){
-      nslice_files++;
+      nsliceinfo++;
       continue;
     }
     if(match(buffer,"BNDF",4) == 1||
@@ -88,14 +88,14 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
 
   // allocate memory for slice file info
 
-  if(nslice_files>0){
+  if(nsliceinfo>0){
     slice *slicei;
     int i;
 
-    NewMemory((void **)&sliceinfo,nslice_files*sizeof(slice));
-    smvcase->nslice_files=nslice_files;
+    NewMemory((void **)&sliceinfo,nsliceinfo*sizeof(slice));
+    smvcase->nsliceinfo=nsliceinfo;
     smvcase->sliceinfo=sliceinfo;
-    for(i=0;i<nslice_files;i++){
+    for(i=0;i<nsliceinfo;i++){
       slicei = sliceinfo + i;
       slicei->file=NULL;
     }
@@ -501,8 +501,8 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       else{
         printf("*** Warning: the file, %s, does not exist.\n",buffer);
         if(readlabels(&sliceinfo[islice].label,streamsmv)==2)break;
-        nslice_files--;
-        smvcase->nslice_files=nslice_files;
+        nsliceinfo--;
+        smvcase->nsliceinfo=nsliceinfo;
       }
       continue;
     }
