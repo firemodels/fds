@@ -69,7 +69,7 @@ void compress_parts(void *arg){
 
   thread_index=(int *)arg;
 
-  for(i=0;i<npart_files;i++){
+  for(i=0;i<npartinfo;i++){
     part *parti;
 
     parti = partinfo + i;
@@ -93,7 +93,7 @@ void compress_parts(void *arg){
     Get_Part_Bounds();
   }
 
-  for(i=0;i<npart_files;i++){
+  for(i=0;i<npartinfo;i++){
     part *parti;
 
     parti = partinfo + i;
@@ -127,7 +127,7 @@ void *convert_parts2iso(void *arg){
         filesremoved++;
         UNLOCK_COMPRESS;
       }
-      for(j=0;j<npart_files;j++){
+      for(j=0;j<npartinfo;j++){
         part *parti;
 
         parti = partinfo + j;
@@ -164,7 +164,7 @@ void *convert_parts2iso(void *arg){
   if(cleanfiles==1)return NULL;
 
   if(partfile2iso==1){
-    for(i=0;i<npart_files;i++){
+    for(i=0;i<npartinfo;i++){
       part *parti;
 
       parti = partinfo + i;
@@ -581,7 +581,7 @@ void Get_Part_Bounds(void){
   NewMemory((void **)&pdata,1000000*sizeof(float));
   NewMemory((void **)&tagdata,1000000*sizeof(int));
 
-  for(i=0;i<npart_files;i++){
+  for(i=0;i<npartinfo;i++){
     part *parti;
     FILE_SIZE lenfile;
     int unit;

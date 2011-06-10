@@ -333,7 +333,7 @@ void *compress_smoke3ds(void *arg){
 
   thread_index = (int *)arg;
 
-  for(i=0;i<nsmoke3d_files;i++){
+  for(i=0;i<nsmoke3dinfo;i++){
     smoke3di = smoke3dinfo + i;
     if(autozip==1&&smoke3di->autozip==0)continue;
     LOCK_SMOKE;

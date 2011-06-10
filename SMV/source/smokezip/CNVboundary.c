@@ -461,7 +461,7 @@ patch *getpatch(char *string){
   int i;
   patch *patchi;
 
-  for(i=0;i<npatch_files;i++){
+  for(i=0;i<npatchinfo;i++){
     patchi = patchinfo + i;
     if(patchi->dup==1)continue;
     if(strcmp(patchi->label.shortlabel,string)==0)return patchi;
@@ -479,20 +479,20 @@ void *compress_patches(void *arg){
 
   thread_index = (int *)arg;
 
-  if(npatch_files<=0)return NULL;
+  if(npatchinfo<=0)return NULL;
   LOCK_PATCH;
   if(first_patch==1){
     first_patch=0;
 
     if(cleanfiles==1){
-      for(i=0;i<npatch_files;i++){
+      for(i=0;i<npatchinfo;i++){
         patchi = patchinfo + i;
         clean_boundary(patchi);
       }
       UNLOCK_PATCH;
       return NULL;
     }
-    for(i=0;i<npatch_files;i++){
+    for(i=0;i<npatchinfo;i++){
       patchi = patchinfo + i;
       if(autozip==1&&patchi->autozip==0)continue;
 
@@ -514,7 +514,7 @@ void *compress_patches(void *arg){
     if(get_boundary_bounds==1){
       Get_Boundary_Bounds();
     }
-    for(i=0;i<npatch_files;i++){
+    for(i=0;i<npatchinfo;i++){
       patchi = patchinfo + i;
       if(patchi->setvalmin==1&&patchi->setvalmax==1){
         patchi->doit=1;
@@ -530,7 +530,7 @@ void *compress_patches(void *arg){
 
   // convert and compress files
 
-  for(i=0;i<npatch_files;i++){
+  for(i=0;i<npatchinfo;i++){
     patchi = patchinfo + i;
     if(autozip==1&&patchi->autozip==0)continue;
 
@@ -562,7 +562,7 @@ void update_patch_hist(void){
   endiandata=getendian();
   if(endianswitch==1)endiandata=1-endiandata;
 
-  for(i=0;i<npatch_files;i++){
+  for(i=0;i<npatchinfo;i++){
     patch *patchi;
     int unit1;
     FILE_SIZE lenfile;
@@ -656,7 +656,7 @@ void Get_Boundary_Bounds(void){
   if(endianswitch==1)endiandata=1-endiandata;
 
   printf("Determining boundary file bounds\n");
-  for(i=0;i<npatch_files;i++){
+  for(i=0;i<npatchinfo;i++){
     patch *patchi;
 
     patchi = patchinfo + i;
@@ -667,13 +667,13 @@ void Get_Boundary_Bounds(void){
 #else
   update_patch_hist();
 #endif
-  for(i=0;i<npatch_files;i++){
+  for(i=0;i<npatchinfo;i++){
     patch *patchi;
     int j;
 
     patchi = patchinfo + i;
     if(patchi->dup==1)continue;
-    for(j=i+1;j<npatch_files;j++){
+    for(j=i+1;j<npatchinfo;j++){
       patch *patchj;
 
       patchj = patchinfo + j;
@@ -684,7 +684,7 @@ void Get_Boundary_Bounds(void){
     patchi->valmin=get_histogram_value(patchi->histogram,0.01);
     patchi->setvalmax=1;
     patchi->setvalmin=1;
-    for(j=i+1;j<npatch_files;j++){
+    for(j=i+1;j<npatchinfo;j++){
       patch *patchj;
 
       patchj = patchinfo + j;
@@ -695,7 +695,7 @@ void Get_Boundary_Bounds(void){
       patchj->setvalmin=1;
     }
   }
-  for(i=0;i<npatch_files;i++){
+  for(i=0;i<npatchinfo;i++){
     patch *patchi;
 
     patchi = patchinfo + i;

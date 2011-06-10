@@ -108,10 +108,10 @@ int main(int argc, char **argv){
   slicezipstep=1;
   filesremoved=0;
 
-  npatch_files=0;
-  nsmoke3d_files=0;
+  npatchinfo=0;
+  nsmoke3dinfo=0;
 #ifdef pp_PART
-  npart_files=0;
+  npartinfo=0;
   npartclassinfo=0;
   partinfo=NULL;
   partclassinfo=NULL;
@@ -388,9 +388,9 @@ int main(int argc, char **argv){
   if(readsmv(smvfile)!=0)return 1;
 
 #ifdef pp_PLOT3D
-  if(nplot3d_files>0){
+  if(nplot3dinfo>0){
     plot3dinfo[0].dup=0;
-    for(i=1;i<nplot3d_files;i++){
+    for(i=1;i<nplot3dinfo;i++){
       plot3d *plot3di; 
 
       plot3di = plot3dinfo + i;
@@ -400,9 +400,9 @@ int main(int argc, char **argv){
     }
   }
 #endif
-  if(npatch_files>0){
+  if(npatchinfo>0){
     patchinfo[0].dup=0;
-    for(i=1;i<npatch_files;i++){
+    for(i=1;i<npatchinfo;i++){
       patch *patchi; 
 
       patchi = patchinfo + i;
@@ -746,14 +746,14 @@ void print_summary(void){
   }
 
   nsum=0;
-  for(i=0;i<nsmoke3d_files;i++){
+  for(i=0;i<nsmoke3dinfo;i++){
     smoke3d *smoke3di;
 
     smoke3di = smoke3dinfo + i;
     if(smoke3di->compressed==1)nsum++;
   }
   if(nsum>0){
-    for(i=0;i<nsmoke3d_files;i++){
+    for(i=0;i<nsmoke3dinfo;i++){
       smoke3d *smoke3di;
 
       smoke3di = smoke3dinfo + i;
@@ -763,14 +763,14 @@ void print_summary(void){
   }
 
   nsum=0;
-  for(i=0;i<npatch_files;i++){
+  for(i=0;i<npatchinfo;i++){
     patch *patchi;
 
     patchi = patchinfo + i;
     if(patchi->compressed==1)nsum++;
   }
   if(nsum>0){
-    for(i=0;i<npatch_files;i++){
+    for(i=0;i<npatchinfo;i++){
       patch *patchi;
       flowlabels *label;
 
@@ -783,14 +783,14 @@ void print_summary(void){
   }
 
   nsum=0;
-  for(i=0;i<npart_files;i++){
+  for(i=0;i<npartinfo;i++){
     part *parti;
 
     parti = partinfo + i;
     if(parti->compressed2==1)nsum++;
   }
   if(nsum>0){
-    for(i=0;i<npart_files;i++){
+    for(i=0;i<npartinfo;i++){
       int j;
       part *parti;
 

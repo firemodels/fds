@@ -353,9 +353,9 @@ EXTERN int no_chop;
 EXTERN patch *patchinfo;
 EXTERN mesh *meshinfo;
 EXTERN smoke3d *smoke3dinfo;
-EXTERN int npatch_files;
+EXTERN int npatchinfo;
 
-EXTERN int nsliceinfo, nplot3d_files;
+EXTERN int nsliceinfo, nplot3dinfo;
 
 EXTERN slice *sliceinfo;
 EXTERN plot3d *plot3dinfo;
@@ -366,13 +366,13 @@ EXTERN int overwrite_plot3d;
 #ifdef pp_PART
 EXTERN int overwrite_part;
 EXTERN part *partinfo;
-EXTERN int npart_files;
+EXTERN int npartinfo;
 EXTERN int npartclassinfo;
 EXTERN part5class *partclassinfo;
 EXTERN part5prop *part5propinfo;
 EXTERN int maxpart5propinfo, npart5propinfo;
 #endif
-EXTERN int nsmoke3d_files;
+EXTERN int nsmoke3dinfo;
 EXTERN int endianswitch,overwrite_b,overwrite_s;
 EXTERN int cleanfiles;
 EXTERN char *destdir,*sourcedir;

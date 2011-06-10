@@ -51,7 +51,7 @@ int readsmv(char *smvfile){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"SMOKE3D",7) == 1){
-      nsmoke3d_files++;
+      nsmoke3dinfo++;
       continue;
     }
   /*
@@ -60,7 +60,7 @@ int readsmv(char *smvfile){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"BNDF",4) == 1){
-      npatch_files++;
+      npatchinfo++;
       continue;
     }
   /*
@@ -69,7 +69,7 @@ int readsmv(char *smvfile){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"PL3D",4) == 1){
-      nplot3d_files++;
+      nplot3dinfo++;
       continue;
     }
 #ifdef pp_PART
@@ -98,7 +98,7 @@ int readsmv(char *smvfile){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"PRT5",4) == 1){
-      npart_files++;
+      npartinfo++;
       continue;
     }
 #endif
@@ -138,12 +138,12 @@ int readsmv(char *smvfile){
 
   // allocate memory for smoke3d file info
 
-  if(nsmoke3d_files>0){
+  if(nsmoke3dinfo>0){
     smoke3d *smoke3di;
     int i;
 
-    NewMemory((void **)&smoke3dinfo,nsmoke3d_files*sizeof(smoke3d));
-    for(i=0;i<nsmoke3d_files;i++){
+    NewMemory((void **)&smoke3dinfo,nsmoke3dinfo*sizeof(smoke3d));
+    for(i=0;i<nsmoke3dinfo;i++){
       smoke3di = smoke3dinfo + i;
       smoke3di->file=NULL;
       smoke3di->filebase=NULL;
@@ -152,12 +152,12 @@ int readsmv(char *smvfile){
 
   // allocate memory for boundary file info
 
-  if(npatch_files>0){
+  if(npatchinfo>0){
     patch *patchi;
     int i;
 
-    NewMemory((void **)&patchinfo,npatch_files*sizeof(patch));
-    for(i=0;i<npatch_files;i++){
+    NewMemory((void **)&patchinfo,npatchinfo*sizeof(patch));
+    for(i=0;i<npatchinfo;i++){
       patchi = patchinfo + i;
       patchi->file=NULL;
       patchi->filebase=NULL;
@@ -170,11 +170,11 @@ int readsmv(char *smvfile){
 
   // allocate memory for plot3d file info
 
-  if(nplot3d_files>0){
+  if(nplot3dinfo>0){
     int i;
 
-    NewMemory((void **)&plot3dinfo,nplot3d_files*sizeof(plot3d));
-    for(i=0;i<nplot3d_files;i++){
+    NewMemory((void **)&plot3dinfo,nplot3dinfo*sizeof(plot3d));
+    for(i=0;i<nplot3dinfo;i++){
       int j;
       plot3d *plot3di;
 
@@ -224,12 +224,12 @@ int readsmv(char *smvfile){
   // allocate memory for particle file info
 
 #ifdef pp_PART
-  if(npart_files>0){
+  if(npartinfo>0){
     part *parti;
     int i;
 
-    NewMemory((void **)&partinfo,npart_files*sizeof(part));
-    for(i=0;i<npart_files;i++){
+    NewMemory((void **)&partinfo,npartinfo*sizeof(part));
+    for(i=0;i<npartinfo;i++){
       parti = partinfo + i;
       parti->file=NULL;
       parti->filebase=NULL;
@@ -256,7 +256,7 @@ int readsmv(char *smvfile){
   ipart_seq=0;
   npartclassinfo=0;
   npart5propinfo=0;
-  npart_files=0;
+  npartinfo=0;
 #endif
   iplot3d=0;
   iplot3d_seq=0;
@@ -434,7 +434,7 @@ int readsmv(char *smvfile){
       }
       else{
         printf("*** Warning: the file, %s, does not exist.\n",buffer);
-        nsmoke3d_files--;
+        nsmoke3dinfo--;
       }
       continue;
     }
@@ -513,7 +513,7 @@ int readsmv(char *smvfile){
 
       }
 
-      parti = partinfo + npart_files;
+      parti = partinfo + npartinfo;
       parti->unit_start=unit_start++;
       parti->partmesh = meshinfo + meshindex;
       ipart_seq++;
@@ -540,7 +540,7 @@ int readsmv(char *smvfile){
           STRCPY(parti->file,buffer2);
         }
         parti->filesize=filesize;
-        npart_files++;
+        npartinfo++;
       }
       else{
         printf("*** Warning: the file, %s, does not exist.\n",buffer2);
@@ -651,7 +651,7 @@ int readsmv(char *smvfile){
       else{
         printf("*** Warning: the file, %s, does not exist.\n",buffer);
         if(readlabels(&patchinfo[ipatch].label,streamsmv)==2)break;
-        npatch_files--;
+        npatchinfo--;
       }
       continue;
     }
@@ -794,7 +794,7 @@ int readsmv(char *smvfile){
         if(readlabels(&plot3dinfo[iplot3d].labels[2],streamsmv)==2)break;
         if(readlabels(&plot3dinfo[iplot3d].labels[3],streamsmv)==2)break;
         if(readlabels(&plot3dinfo[iplot3d].labels[4],streamsmv)==2)break;
-        nplot3d_files--;
+        nplot3dinfo--;
       }
       continue;
     }
@@ -1095,7 +1095,7 @@ void readini2(char *inifile){
 
   void get_startup_patch(int seq_id){
     int i;
-    for(i=0;i<npatch_files;i++){
+    for(i=0;i<npatchinfo;i++){
       patch *patchi;
 
       patchi = patchinfo + i;
@@ -1110,7 +1110,7 @@ void readini2(char *inifile){
 
   void get_startup_smoke(int seq_id){
     int i;
-    for(i=0;i<nsmoke3d_files;i++){
+    for(i=0;i<nsmoke3dinfo;i++){
       smoke3d *smoke3di;
 
       smoke3di = smoke3dinfo + i;

@@ -247,7 +247,7 @@ plot3d *getplot3d(char *string){
   int i;
   plot3d *plot3di;
 
-  for(i=0;i<nplot3d_files;i++){
+  for(i=0;i<nplot3dinfo;i++){
     plot3di = plot3dinfo + i;
     if(plot3di->dup==1)continue;
     if(strcmp(plot3di->labels[0].shortlabel,string)==0)return plot3di;
@@ -264,12 +264,12 @@ void *compress_plot3ds(void *arg){
   LOCK_PLOT3D;
   if(first_plot3d==1){
     first_plot3d=0;
-    for(i=0;i<nplot3d_files;i++){
+    for(i=0;i<nplot3dinfo;i++){
       plot3di = plot3dinfo + i;
       if(autozip==1&&plot3di->autozip==0)continue;
       plot3di->count=0;
     }
-    for(i=0;i<nplot3d_files;i++){
+    for(i=0;i<nplot3dinfo;i++){
       plot3di = plot3dinfo + i;
       if(autozip==1&&plot3di->autozip==0)continue;
       plot3di->doit=1;
@@ -288,7 +288,7 @@ void *compress_plot3ds(void *arg){
 
   // convert and compress files
 
-  for(i=0;i<nplot3d_files;i++){
+  for(i=0;i<nplot3dinfo;i++){
     plot3di = plot3dinfo + i;
     if(autozip==1&&plot3di->autozip==0)continue;
     LOCK_PLOT3D;
