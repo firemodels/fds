@@ -77,7 +77,7 @@ STDCALL FORTfcreate_part5sizefile(char *part5file, char *part5sizefile, int *ang
                                   FILE_SIZE lenpart5file, FILE_SIZE lenpart5sizefile);
 
 STDCALL FORTgetsliceparms(char *file,int *endian,
-                          int *is1,int *is2,int *js1,int *js2,int *ks1, int *ks2,int *slice3d, int *error,FILE_SIZE lenfile);
+                          int *is1,int *is2,int *js1,int *js2,int *ks1, int *ks2,int *ni, int *nj, int *nk, int *slice3d, int *error,FILE_SIZE lenfile);
 STDCALL FORTgetzonesize(char *zonefilename, int *nzonet, int *nrooms, int *nfires, int *endian, int *error, FILE_SIZE len);
 STDCALL FORTgetzonedata(char *zonefilename, int *nzonet, int *nrooms, int *nfires, 
                         float *zonet, float *zoneqfire, float *zonepr, float *zoneylay,float *zonetl,float *zonetu, int *endian,
