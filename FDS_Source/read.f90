@@ -1551,7 +1551,6 @@ ENDIF
 CHECK_VN=.TRUE.
 CHECK_GR=.TRUE.
 CHECK_HT=.TRUE.
-CP_FTMP=.TRUE.
 
 ! reread the line to pick up any user-specified options
 
