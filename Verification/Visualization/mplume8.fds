@@ -84,3 +84,6 @@
                                                              solid surface with the PART_ID='tracers'
 
 &SLCF PBY=0.8,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
+&SLCF XB=0.0,1.6,0.0,1.6,0.0,3.2, QUANTITY='TEMPERATURE',VECTOR=.TRUE. / 3D slice
+&SLCF XB=0.0,1.6,0.0,1.6,0.0,3.2, QUANTITY='VOLUME FRACTION' SPEC_ID='SOOT' / 3D slice
+&SLCF XB=0.0,1.6,0.0,1.6,0.0,3.2, QUANTITY='SCALAR RESOLUTION', QUANTITY2='TEMPERATURE', CELL_CENTERED=.TRUE. /
