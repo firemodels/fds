@@ -1173,7 +1173,7 @@ this test case confirms that relatively low levels of diffusion are incurred at 
 \section{Energy Conservation (\texorpdfstring{{\bf energy\_budget}}{energy\_budget})}
 
 Because FDS employs a low Mach number assumption, it does not explicitly solve the energy conservation equation. Instead, mass transport equations are solved for the
-density and the $n-1$ gas species. Source terms from the energy equation are incorporated in the divergence, $\nabla \cdot \bu$, which arises in the 
+density and the $n-1$ gas species. Source terms from the energy equation are incorporated in the divergence, $\nabla \cdot \bu$, which arises in the
 mass transport equations, {\em i.e.}
 \be \dod{\rho}{t} + \bu \cdot \nabla \rho + \rho \, \nabla \cdot \bu = 0 \ee
 The divergence is a fairly complicated expression, and it is important that it is computed properly to ensure global energy conservation.
@@ -1271,18 +1271,18 @@ For a mixture of non-reacting gases, the expression for the divergence can be re
   \frac{1}{\rho \, c_p \, T} \left( \nabla \cdot k \nabla T +
    \sum_\alpha \nabla \cdot h_{s,\alpha} \, \rho D_\alpha \nabla Y_\alpha
  - \sum_\alpha h_{s,\alpha} \nabla \cdot \rho D_\alpha \nabla Y_\alpha  \right) \label{div1} \ee
-If the conductivity, $k$, is set to zero, and the gases all have the same molecular weight, the first two terms are identically zero. The remaining two terms account for the 
+If the conductivity, $k$, is set to zero, and the gases all have the same molecular weight, the first two terms are identically zero. The remaining two terms account for the
 mixing of gases with different temperatures and specific heats, but the same molecular weight.
 
-In this example, two fictitious gases are forced through tiny ducts (1~mm by 1~mm) that meet at a T-joint. The area of all ducts is the same. 
+In this example, two fictitious gases are forced through tiny ducts (1~mm by 1~mm) that meet at a T-joint. The area of all ducts is the same.
 Gas~1 has an initial temperature of 606.3~$^\circ$C and a
 constant specific heat of 1~kJ/kg/K. Gas~2 has an initial temperature of 20~$^\circ$C and a
 constant specific heat of 10~kJ/kg/K. Both gases have a molecular weight of 29~g/mol and a mass flow of $1 \times 10^{-8}$~kg/s. Note that typically gases of the same
-molecular weight have comparable, but not necessarily the same, specific heats. This is an extreme case. It is expected that the enthalpy flow at the outlet will be equal to the sum of the 
+molecular weight have comparable, but not necessarily the same, specific heats. This is an extreme case. It is expected that the enthalpy flow at the outlet will be equal to the sum of the
 enthalpy flows at the inlets. The enthalpy flow in this case is defined:
 \be \int h_s \, \rho \bu \cdot d\bS \equiv \int c_p \, (T-T_\infty) \, \rho \bu \cdot d\bS \ee
 With this definition, the specific enthalpy flow is $6.063 \times 10^{-6}$~kW at Inlet~1 and 0 at Inlet~2. Because of the large difference in specific heats, the average velocity
-of the gas mixture flowing out, $U_3$, is not simply the sum of the velocities at the two inlets, $U_1+U_2$. 
+of the gas mixture flowing out, $U_3$, is not simply the sum of the velocities at the two inlets, $U_1+U_2$.
 In fact, in order to have the proper enthalpy flow at the outlet, the volume integral
 of the divergence should be:
 \be \int \nabla \cdot \bu \; dV \equiv -A \, (U_1 + U_2 - U_3) = -A \, \frac{ (U_1-U_2) \, (c_{p,2}-c_{p,1}) }{ c_{p,1}+c_{p,2} } = -1.357 \times 10^{-8} \; \hbox{m}^3/\hbox{s} \label{div2} \ee
@@ -1291,7 +1291,7 @@ The plots in Fig.~\ref{energy_budget_dns} show the resulting enthalpy flow (left
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/energy_budget_dns_heat} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/energy_budget_dns_div} 
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/energy_budget_dns_div}
 \end{tabular*}
 \caption[Energy conservation for a DNS case.]{Inlet and outlet enthalpy flow for a simple DNS gas mixing case.}
 \label{energy_budget_dns}
@@ -1300,7 +1300,7 @@ The plots in Fig.~\ref{energy_budget_dns} show the resulting enthalpy flow (left
 \noindent
 It is interesting to note how the definition of the divergence in Eq.~(\ref{div1}) could lead to the formulae for the integrated divergence in Eq.~(\ref{div2}). Assuming that the
 diffusivity of the two gases is the same, the last two terms of Eq.~(\ref{div1}) can be combined as follows:
-\be \nabla \cdot \bu = \frac{1}{\rho \, c_p \, T} 
+\be \nabla \cdot \bu = \frac{1}{\rho \, c_p \, T}
    \sum_\alpha \nabla h_{s,\alpha} \cdot \rho D_\alpha \nabla Y_\alpha = \frac{c_{p,1}-c_{p,2}}{\rho \, c_p \, T} \, \nabla T \cdot \rho D \nabla Y_1
   \label{div3} \ee
 Note that in this case, $\rho T = p_0 \, W/\cal R$, a constant.
@@ -1628,41 +1628,36 @@ This is essentially what is plotted in Fig.~\ref{TC_view_factor_plot}, compared 
 \section{Radiation Shield (\texorpdfstring{{\bf radiation\_shield}}{radiation\_shield}) }
 \label{radiation_shield}
 
-A lead radiation shield with a thickness of 1 mm is placed in between a ceiling set to 500~$^\circ$C and a floor set to 20~$^\circ$C. The box has dimensions of 10 m x 0.1 m x 1 m. The emissivity, $\varepsilon_{3}$, of the lead shield is 0.48 on both sides.  At t = 400 s, the shield will be removed to exihibit how the heat flux acts correctly without the shield. 
-
-Using the following formula, we determined an analytical solution for the steady state heat flux at the floor of the box:
+A lead radiation shield with a thickness of 0.1~mm is placed between two infinitely wide parallel plates at 500~$^\circ$C and 20~$^\circ$C. 
+The computational domain has dimensions of 10~m by 0.1~m by 1~m. The sides of the domain are assumed to be symmetry planes.
+The emissivity, $\varepsilon_{3}$, of the lead shield is 0.48 on both sides.  At 400~s, the shield is removed.
+Assuming that there is no convective heat transfer and that the emissivity of the hot and cold plates is 1,
+the steady state heat flux to the cold plate should be~\cite{Incropera:1}:
 \be
-   q_{12}' = \frac{\sigma(T_{1}^{4}-T_{2}^{4})}{\frac{1}{\varepsilon_1}+\frac{1}{\varepsilon_2}+2(\frac{1-\varepsilon_3}{\varepsilon_3})}
+   \dq_{12}'' = \frac{\sigma(T_{1}^{4}-T_{2}^{4})}{\frac{1}{\varepsilon_1}+\frac{1}{\varepsilon_2}+2 \left(\frac{1-\varepsilon_3}{\varepsilon_3} \right)} = 4.76 \; \hbox{kW/m}^2
 \ee
-where $\sigma$ is the Stefan-Boltzmann constant, $T_{1}$ and $T_{2}$ are the respective temperatures of the ceiling and floor, and $\varepsilon_1$, $\varepsilon_2$, and $\varepsilon_3$ are the emissivities for the ceiling, floor, and lead shield, respectively. If we remove the possibility of heat conduction and let the emissivity of the ceiling and floor be 1, our analytical solution states that the steady state heat flux should be $q_{12}' =$ 4.76 kW/m$^2$.  As shown in Fig.~\ref{radiation_shield_plot_flux}, the steady state heat flux at the floor of the box given by FDS, which is approximately 4.71 kW/m$^2$, agrees very well with the ideal heat flux.  This gives us a percent difference of approximately 0.96$\%$.  
+where $T_{1}$ and $T_{2}$ are the hot and cold plate temperatures, respectively, and $\varepsilon_1$, $\varepsilon_2$, and $\varepsilon_3$ are the 
+emissivity values for the hot plate, cold plate, and lead shield, respectively. When the shield is removed at 400~s, the heat flux should increase to 20.6~kW/m$^2$. 
+The predicted heat flux is given in Fig.~\ref{radiation_shield_plot}.
 \noindent
 \begin{figure}[h]
-\begin{center}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/radiation_shield_flux}
-\end{center}
-\caption[Radiation Shield Test Case]{Incident Heat Flux at the floor of the box from a ceiling at a temperature of 500~$^\circ$C and a floor at 20~$^\circ$C with a lead radiation shield in between.}
-\label{radiation_shield_plot_flux}
-\end{figure}
-
-When the shield was removed at t = 400 s, the heat flux jumped to and stayed at a constant 19.8 kW/m$^2$.  This is very close to the analytical solution of the heat flux without the shield, which is 20.6 kW/$^2$.  There is a 4.1$\%$ difference between the two values. 
-
-We can also confirm that FDS determines the correct steady state temperature of the lead shield. From the knowledge of $q_{12}'$ and the fact that the heat flux from the ceiling to the shield is equal to the heat flux from the ceiling to the floor, we can determine the steady state temperature of the shield, $T_3$, using the following formula~\cite{Incropera:1}:
-\be
-   q_{12}' = q_{13}' = \frac{\sigma(T_{1}^{4}-T_{3}^{4})}{\frac{1}{\varepsilon_1}+\frac{1}{\varepsilon_3}-1}
-\ee
-We can use algebra to solve for $T_3$, which gives us 380.3~$^\circ$C. From Fig.~\ref{radiation_shield_plot_temp}, we can see that FDS properly determines the steady state temperature of the lead shield after about 350 seconds.  $T_3$ stays at around 378.8~$^\circ$C, which has a percent difference of 0.40$\%$ from the analytical solution.
-\noindent
-\begin{figure}[h]
-\begin{center}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/radiation_shield_temp}
-\end{center}
-\caption[Radiation Shield Test Case]{Temperature of the lead shield with the ceiling at a temperature of 500~$^\circ$C and a floor at 20~$^\circ$C.}
-\label{radiation_shield_plot_temp}
+\caption[Radiation Shield Test Case]{(Left) Heat flux to a cold plate separated from a hot plate by a heat shield. At 400~s, the shield is removed. (Right)
+Temperature of a the heat shield.}
+\label{radiation_shield_plot}
 \end{figure}
+ 
+Because the heat flux from the hot plate to the shield is equal to the heat flux from the hot plate to the cold plate, 
+the shield temperature can be found from the following formula~\cite{Incropera:1}:
+\be
+   \dq_{12}'' = \dq_{13}'' = \frac{\sigma(T_{1}^{4}-T_{3}^{4})}{\frac{1}{\varepsilon_1}+\frac{1}{\varepsilon_3}-1} \quad ; \quad T_3=380.4 \; ^\circ\hbox{C}
+\ee
+The predicted shield temperature is plotted in Fig.~\ref{radiation_shield_plot}.
 
-Clearly, at t = 400 s, the temperature of the shield dropped to zero because the shield was no longer present in the box.  
 
-  
+
+
 \chapter{Species and Combustion}
 
 This chapter contains examples that test the computations related to species concentrations, gas properties and combustion.
