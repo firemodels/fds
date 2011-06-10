@@ -351,7 +351,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
     setsmokecolorflags();
 
     hrrpuv_loaded=0;
-    for(j=0;j<nsmoke3d_files;j++){
+    for(j=0;j<nsmoke3dinfo;j++){
       smoke3dj = smoke3dinfo + j;
       if(smoke3dj->loaded==1){
         Read3DSmoke3DFile=1;
@@ -554,14 +554,14 @@ void setsmokecolorflags(void){
   int i,j;
   smoke3d *smoke3dj,*smoke3di;
 
-  for(i=0;i<nsmoke3d_files;i++){
+  for(i=0;i<nsmoke3dinfo;i++){
     smoke3di = smoke3dinfo + i;
     smoke3di->soot_loaded=0;
     smoke3di->water_loaded=0;
     smoke3di->hrrpuv_loaded=0;
   }
   
-  for(i=0;i<nsmoke3d_files;i++){
+  for(i=0;i<nsmoke3dinfo;i++){
     smoke3di=smoke3dinfo + i;
     smoke3di->water_color=NULL;
     smoke3di->hrrpuv_color=NULL;
@@ -589,7 +589,7 @@ void setsmokecolorflags(void){
       break;
     }
 
-    for(j=0;j<nsmoke3d_files;j++){
+    for(j=0;j<nsmoke3dinfo;j++){
       if(i==j)continue;
       smoke3dj = smoke3dinfo + j;
       if(smoke3dj->loaded==0)continue;
@@ -903,7 +903,7 @@ void mergesmoke3dcolors(smoke3d *smoke3dset){
   }
 #endif
 
-  for(i=0;i<nsmoke3d_files;i++){
+  for(i=0;i<nsmoke3dinfo;i++){
     smoke3di=smoke3dinfo + i;
     if(smoke3dset!=NULL&&smoke3dset!=smoke3di)continue;
     smoke3di->d_display=0;
@@ -930,7 +930,7 @@ void mergesmoke3dcolors(smoke3d *smoke3dset){
     }
   }
 
-  for(i=0;i<nsmoke3d_files;i++){
+  for(i=0;i<nsmoke3dinfo;i++){
     smoke3di = smoke3dinfo + i;
     if(smoke3dset!=NULL&&smoke3dset!=smoke3di)continue;
     if(smoke3di->loaded==0||smoke3di->d_display==0)continue;
@@ -4987,7 +4987,7 @@ void updatesmoke3dmenulabels(void){
   smoke3d *smoke3di;
   char meshlabel[128];
 
-  for(i=0;i<nsmoke3d_files;i++){
+  for(i=0;i<nsmoke3dinfo;i++){
     smoke3di = smoke3dinfo + i;
     STRCPY(smoke3di->menulabel,smoke3di->label.longlabel);
     smoke3di->version=getsmoke3d_version(smoke3di);
@@ -5385,7 +5385,7 @@ void makeiblank_smoke3d(void){
     smokemesh = meshinfo + i;
     smokemesh->smokeloaded=0;
   }
-  for(i=0;i<nsmoke3d_files;i++){
+  for(i=0;i<nsmoke3dinfo;i++){
     smoke3di = smoke3dinfo + i;
     smokemesh = meshinfo + smoke3di->blocknumber;
 
@@ -6341,7 +6341,7 @@ void setPixelCount(void){
 
     meshi->culldefined=0;
   }
-  for(n=0;n<nsmoke3d_files;n++){
+  for(n=0;n<nsmoke3dinfo;n++){
     mesh *meshi;
     smoke3d *smoke3di;
 

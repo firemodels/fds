@@ -14,6 +14,8 @@
 #include "threader.h"
 #include "string_util.h"
 
+SVEXTERN int SVDECL(n_volrenderinfo,0);
+SVEXTERN volrenderdata SVDECL(*volrenderinfo,NULL);
 SVEXTERN int SVDECL(trainer_temp_index,0),SVDECL(trainer_oxy_index,0);
 SVEXTERN int SVDECL(*trainer_temp_indexes,NULL),SVDECL(*trainer_oxy_indexes,NULL);
 SVEXTERN int SVDECL(trainer_showall_mslice,0),SVDECL(trainer_cycle_mslice,1);
@@ -432,15 +434,15 @@ SVEXTERN float pref,pamb,tamb;
 SVEXTERN int ntc_total, nspr_total, nheat_total;
 SVEXTERN int n_devices;
 
-SVEXTERN int npart_files, nslice_files, nvslice, nslice2, npatch2, nplot3d_files, npatch_files;
+SVEXTERN int npartinfo, nsliceinfo, nvslice, nslice2, npatch2, nplot3dinfo, npatchinfo;
 SVEXTERN int nevac;
 SVEXTERN int current_particle_type,last_particle_type;
-SVEXTERN int nsmoke3d_files;
-SVEXTERN int niso_files, niso_bounds;
+SVEXTERN int nsmoke3dinfo;
+SVEXTERN int nisoinfo, niso_bounds;
 SVEXTERN int ntrnx, ntrny, ntrnz,npdim,nmeshes,clip_mesh;
 SVEXTERN int nobst,nvent,noffset;
 SVEXTERN int nlabels,visLabels,nlabelssmv;
-SVEXTERN int ntarg_files;
+SVEXTERN int ntarginfo;
 SVEXTERN int showallslicevectors;
 SVEXTERN float framerate;
 SVEXTERN int ntimes, itimes, itime_save, itimeold, seqnum,RenderTime,RenderTimeOld;

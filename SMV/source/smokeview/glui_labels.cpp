@@ -146,7 +146,7 @@ extern "C" void glui_labels_setup(int main_window){
   if(ntotal_blockages>0||isZoneFireModel==0){
     CHECKBOX_labels_gridloc=glui_labels->add_checkbox_to_panel(panel_label1,_("Grid loc"),&visgridloc,LABELS_label,Labels_CB);
   }
-  if(nslice_files>0)CHECKBOX_labels_average=glui_labels->add_checkbox_to_panel(panel_label1,_("Average"),&vis_slice_average,LABELS_label,Labels_CB);
+  if(nsliceinfo>0)CHECKBOX_labels_average=glui_labels->add_checkbox_to_panel(panel_label1,_("Average"),&vis_slice_average,LABELS_label,Labels_CB);
   glui_labels->add_column_to_panel(panel_label1,false);
 
 
@@ -252,7 +252,7 @@ extern "C" void glui_labels_setup(int main_window){
   SPINNER_tick_zmax=glui_labels->add_spinner_to_panel(panel_tick2,"",GLUI_SPINNER_FLOAT,user_tick_max+2);
   SPINNER_tick_dz0=glui_labels->add_spinner_to_panel(panel_tick2,"",GLUI_SPINNER_FLOAT,user_tick_step+2);
   
-  if((npart_files>0)||nslice_files>0||nvslice>0||niso_files>0||npatch_files||nsmoke3d_files>0||nplot3d_files>0){
+  if((npartinfo>0)||nsliceinfo>0||nvslice>0||nisoinfo>0||npatchinfo||nsmoke3dinfo>0||nplot3dinfo>0){
     panel_showhide = glui_labels->add_rollout("Show/Hide Loaded Files",false);
 
     RADIO_showhide = glui_labels->add_radiogroup_to_panel(panel_showhide,&showhide_option);
@@ -263,14 +263,14 @@ extern "C" void glui_labels_setup(int main_window){
     glui_labels->add_column_to_panel(panel_showhide,false);
 
     if(nevac>0){}
-    if(npart_files>0&&nevac!=npart_files)Button_PART=glui_labels->add_button_to_panel(panel_showhide,"Particle",LABELS_particleshow,Labels_CB);
+    if(npartinfo>0&&nevac!=npartinfo)Button_PART=glui_labels->add_button_to_panel(panel_showhide,"Particle",LABELS_particleshow,Labels_CB);
     if(nevac>0)Button_EVAC=glui_labels->add_button_to_panel(panel_showhide,"Evacuation",LABELS_evacshow,Labels_CB);
-    if(nslice_files>0)Button_SLICE=glui_labels->add_button_to_panel(panel_showhide,"Slice",LABELS_sliceshow,Labels_CB);
+    if(nsliceinfo>0)Button_SLICE=glui_labels->add_button_to_panel(panel_showhide,"Slice",LABELS_sliceshow,Labels_CB);
     if(nvslice>0)Button_VSLICE=glui_labels->add_button_to_panel(panel_showhide,"Vector",LABELS_vsliceshow,Labels_CB);
-    if(niso_files>0)Button_ISO=glui_labels->add_button_to_panel(panel_showhide,"Isosurface",LABELS_isosurfaceshow,Labels_CB);
-    if(npatch_files>0)Button_BOUNDARY=glui_labels->add_button_to_panel(panel_showhide,"Boundary",LABELS_boundaryshow,Labels_CB);
-    if(nsmoke3d_files>0)Button_3DSMOKE=glui_labels->add_button_to_panel(panel_showhide,"3D smoke",LABELS_3dsmokeshow,Labels_CB);
-    if(nplot3d_files>0)Button_PLOT3D=glui_labels->add_button_to_panel(panel_showhide,"Plot3D",LABELS_PLOT3D,Labels_CB);
+    if(nisoinfo>0)Button_ISO=glui_labels->add_button_to_panel(panel_showhide,"Isosurface",LABELS_isosurfaceshow,Labels_CB);
+    if(npatchinfo>0)Button_BOUNDARY=glui_labels->add_button_to_panel(panel_showhide,"Boundary",LABELS_boundaryshow,Labels_CB);
+    if(nsmoke3dinfo>0)Button_3DSMOKE=glui_labels->add_button_to_panel(panel_showhide,"3D smoke",LABELS_3dsmokeshow,Labels_CB);
+    if(nplot3dinfo>0)Button_PLOT3D=glui_labels->add_button_to_panel(panel_showhide,"Plot3D",LABELS_PLOT3D,Labels_CB);
 
     update_showhidebuttons();
   }
@@ -301,7 +301,7 @@ extern "C" void update_fileload(void){
 
   npartloaded=0;
   nevacloaded=0;
-  for(i=0;i<npart_files;i++){
+  for(i=0;i<npartinfo;i++){
     parti = partinfo+i;
     if(parti->loaded==1&&parti->evac==0){
       npartloaded++;
@@ -312,7 +312,7 @@ extern "C" void update_fileload(void){
   }
 
   nsliceloaded=0;
-  for(i=0;i<nslice_files;i++){
+  for(i=0;i<nsliceinfo;i++){
     slicei = sliceinfo+i;
     if(slicei->loaded==1){
       nsliceloaded++;
@@ -328,7 +328,7 @@ extern "C" void update_fileload(void){
   }
 
   nisoloaded=0;
-  for(i=0;i<niso_files;i++){
+  for(i=0;i<nisoinfo;i++){
     isoi = isoinfo+i;
     if(isoi->loaded==1){
       nisoloaded++;
@@ -336,7 +336,7 @@ extern "C" void update_fileload(void){
   }
 
   npatchloaded=0;
-  for(i=0;i<npatch_files;i++){
+  for(i=0;i<npatchinfo;i++){
     patchi = patchinfo+i;
     if(patchi->loaded==1){
       npatchloaded++;
@@ -344,7 +344,7 @@ extern "C" void update_fileload(void){
   }
 
   nsmoke3dloaded=0;
-  for(i=0;i<nsmoke3d_files;i++){
+  for(i=0;i<nsmoke3dinfo;i++){
     smoke3di = smoke3dinfo+i;
     if(smoke3di->loaded==1){
       nsmoke3dloaded++;
@@ -352,7 +352,7 @@ extern "C" void update_fileload(void){
   }
 
   nplot3dloaded=0;
-  for(i=0;i<nplot3d_files;i++){
+  for(i=0;i<nplot3dinfo;i++){
     plot3di = plot3dinfo+i;
     if(plot3di->loaded==1){
       nplot3dloaded++;

@@ -843,7 +843,7 @@ void script_loadparticles(scriptdata *scripti){
   printf("Script: loading particles files");
   printf("\n");
 
-  for(i=0;i<npart_files;i++){
+  for(i=0;i<npartinfo;i++){
     particle *parti;
 
     parti = partinfo + i;
@@ -866,7 +866,7 @@ void script_loadiso(scriptdata *scripti){
   printf("Script: loading isosurface files of type: %s",scripti->cval);
   printf("\n");
 
-  for(i=0;i<niso_files;i++){
+  for(i=0;i<nisoinfo;i++){
     iso *isoi;
     int len;
     int imatch;
@@ -892,7 +892,7 @@ void script_load3dsmoke(scriptdata *scripti){
   printf("Script: loading smoke3d files of type: %s",scripti->cval);
   printf("\n");
 
-  for(i=0;i<nsmoke3d_files;i++){
+  for(i=0;i<nsmoke3dinfo;i++){
     smoke3d *smoke3di;
 
     smoke3di = smoke3dinfo + i;
@@ -1001,7 +1001,7 @@ void script_loadboundary(scriptdata *scripti){
   printf("Script: loading boundary files of type: %s",scripti->cval);
   printf("\n");
 
-  for(i=0;i<npatch_files;i++){
+  for(i=0;i<npatchinfo;i++){
     patch *patchi;
 
     patchi = patchinfo + i;
@@ -1179,7 +1179,7 @@ void script_loadfile(scriptdata *scripti){
 
   printf("Script: loading file %s",scripti->cval);
   printf("\n");
-  for(i=0;i<nslice_files;i++){
+  for(i=0;i<nsliceinfo;i++){
     slice *sd;
 
     sd = sliceinfo + i;
@@ -1189,7 +1189,7 @@ void script_loadfile(scriptdata *scripti){
     }
 
   }
-  for(i=0;i<npatch_files;i++){
+  for(i=0;i<npatchinfo;i++){
     patch *patchi;
 
     patchi = patchinfo + i;
@@ -1198,7 +1198,7 @@ void script_loadfile(scriptdata *scripti){
       return;
     }
   }
-  for(i=0;i<npart_files;i++){
+  for(i=0;i<npartinfo;i++){
     particle *parti;
 
     parti = partinfo + i;
@@ -1207,7 +1207,7 @@ void script_loadfile(scriptdata *scripti){
       return;
     }
   }
-  for(i=0;i<niso_files;i++){
+  for(i=0;i<nisoinfo;i++){
     iso *isoi;
 
     isoi = isoinfo + i;
@@ -1216,7 +1216,7 @@ void script_loadfile(scriptdata *scripti){
       return;
     }
   }
-  for(i=0;i<nsmoke3d_files;i++){
+  for(i=0;i<nsmoke3dinfo;i++){
     smoke3d *smoke3di;
 
     smoke3di = smoke3dinfo + i;
@@ -1235,7 +1235,7 @@ void script_loadfile(scriptdata *scripti){
       return;
     }
   }
-  for(i=0;i<nplot3d_files;i++){
+  for(i=0;i<nplot3dinfo;i++){
     plot3d *plot3di;
 
     plot3di = plot3dinfo + i;
@@ -1262,7 +1262,7 @@ void script_loadplot3d(scriptdata *scripti){
   time = scripti->fval;
   blocknum = scripti->ival-1;
 
-  for(i=0;i<nplot3d_files;i++){
+  for(i=0;i<nplot3dinfo;i++){
     plot3d *plot3di;
 
     plot3di = plot3dinfo + i;

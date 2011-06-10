@@ -83,7 +83,7 @@ void readpatch(int ifile, int flag, int *errorcode){
   meshi = meshinfo+blocknumber;
   update_current_mesh(meshi);
   filenum = meshi->patchfilenum;
-  if(filenum>=0&&filenum<npatch_files){
+  if(filenum>=0&&filenum<npatchinfo){
     patchinfo[filenum].loaded=0;
     patchinfo[filenum].display=0;
   }
@@ -141,7 +141,7 @@ void readpatch(int ifile, int flag, int *errorcode){
     {
       int enableflag=1;
 
-      for(i=0;i<npatch_files;i++){
+      for(i=0;i<npatchinfo;i++){
         patch *patchii;
 
         patchii = patchinfo + i;
@@ -159,7 +159,7 @@ void readpatch(int ifile, int flag, int *errorcode){
 #endif
     return;
   }
-  if(ifile>=0&&ifile<npatch_files){
+  if(ifile>=0&&ifile<npatchinfo){
     global2localpatchbounds(patchinfo[ifile].label.shortlabel);
   }
 
@@ -876,7 +876,7 @@ void readpatch(int ifile, int flag, int *errorcode){
   npatchloaded=0;
   patchinfo[ifile].loaded=1;
   ipatchtype=getpatchtype(patchinfo+ifile);
-  for(i=0;i<npatch_files;i++){
+  for(i=0;i<npatchinfo;i++){
     if(patchinfo[i].loaded==1&&patchinfo[i].type==ipatchtype)npatchloaded++;
   }
   switch(loadpatchbysteps){
@@ -1210,7 +1210,7 @@ int ispatchtype(int type){
 void local2globalpatchbounds(const char *key){
   int i;
   
-  for(i=0;i<npatch_files;i++){
+  for(i=0;i<npatchinfo;i++){
     if(strcmp(patchinfo[i].label.shortlabel,key)==0){
       patchinfo[i].valmin=patchmin;
       patchinfo[i].valmax=patchmax;
@@ -1231,7 +1231,7 @@ void local2globalpatchbounds(const char *key){
 void global2localpatchbounds(const char *key){
   int i;
   
-  for(i=0;i<npatch_files;i++){
+  for(i=0;i<npatchinfo;i++){
     if(strcmp(patchinfo[i].label.shortlabel,key)==0){
       patchmin=patchinfo[i].valmin;
       patchmax=patchinfo[i].valmax;
@@ -3236,11 +3236,11 @@ void updatepatchtypes(void){
   patch *patchi;
 
   npatchtypes = 0;
-  for(i=0;i<npatch_files;i++){
+  for(i=0;i<npatchinfo;i++){
     patchi = patchinfo+i;
     if(getpatchindex(patchi)==-1)patchtypes[npatchtypes++]=i;
   }
-  for(i=0;i<npatch_files;i++){
+  for(i=0;i<npatchinfo;i++){
     patchi = patchinfo+i;
     patchi->type=getpatchtype(patchi);
   }
@@ -3278,12 +3278,12 @@ void update_patchtype(){
   int i;
   patch *patchi;
 
-  for(i=0;i<npatch_files;i++){
+  for(i=0;i<npatchinfo;i++){
     patchi = patchinfo + i;
     if(patchi->loaded==1&&patchi->display==1&&patchi->type==ipatchtype)return;
   }
 
-  for(i=0;i<npatch_files;i++){
+  for(i=0;i<npatchinfo;i++){
     patchi = patchinfo + i;
     if(patchi->loaded==1&&patchi->display==1){
       ipatchtype = getpatchindex(patchi);
@@ -3291,7 +3291,7 @@ void update_patchtype(){
     }
   }
   /*
-  for(i=0;i<npatch_files;i++){
+  for(i=0;i<npatchinfo;i++){
     patchi = patchinfo + i;
     if(patchi->loaded==1){
       ipatchtype = getpatchindex(patchi);
@@ -3328,15 +3328,15 @@ void updatepatchmenulabels(void){
   char label[128];
   STRUCTSTAT statbuffer;
 
-  if(npatch_files>0){
+  if(npatchinfo>0){
     FREEMEMORY(patchorderindex);
-    NewMemory((void **)&patchorderindex,sizeof(int)*npatch_files);
-    for(i=0;i<npatch_files;i++){
+    NewMemory((void **)&patchorderindex,sizeof(int)*npatchinfo);
+    for(i=0;i<npatchinfo;i++){
       patchorderindex[i]=i;
     }
-    qsort( (int *)patchorderindex, (size_t)npatch_files, sizeof(int), patchcompare );
+    qsort( (int *)patchorderindex, (size_t)npatchinfo, sizeof(int), patchcompare );
 
-    for(i=0;i<npatch_files;i++){
+    for(i=0;i<npatchinfo;i++){
       patchi = patchinfo + i;
       STRCPY(patchi->menulabel,patchi->label.longlabel);
       if(nmeshes>1){
@@ -3690,7 +3690,7 @@ void Update_All_Patch_Bounds_st(void){
   int total=0;
 
   LOCK_COMPRESS;
-  for(i=0;i<npatch_files;i++){
+  for(i=0;i<npatchinfo;i++){
     patch *patchi;
 
     patchi = patchinfo + i;
@@ -3717,7 +3717,7 @@ int update_patch_hist(patch *patchj){
   if(patchj->setvalmax==SET_MAX&&patchj->setvalmin==SET_MIN)return 0;
   endiandata=getendian();
 
-  for(i=0;i<npatch_files;i++){
+  for(i=0;i<npatchinfo;i++){
     int endian, npatches, error, boundaryunitnumber;
     patch *patchi;
     int unit1;

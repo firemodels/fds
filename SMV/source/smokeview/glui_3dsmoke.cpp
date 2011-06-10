@@ -135,7 +135,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   int i;
 
   
-  if(nsmoke3d_files<=0)return;
+  if(nsmoke3dinfo<=0)return;
   NewMemory((void **)&SPINNER_smoke3d_hrrpuv_cutoffptr,(nmeshes+1)*sizeof(GLUI_Spinner *));
   
   glui_3dsmoke=glui_bounds;

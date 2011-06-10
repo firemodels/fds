@@ -222,7 +222,7 @@ void update_patch_bounds(patch *patchi){
   if(boundi->defined==1)return;
   init_histogram(&full_histogram);
 
-  for(j=0;j<npatch_files;j++){
+  for(j=0;j<npatchinfo;j++){
     patch *patchj;
 
     patchj=patchinfo+j;
@@ -236,7 +236,7 @@ void update_patch_bounds(patch *patchi){
   boundi->percentile_max = get_histogram_value(&full_histogram, 1.0-percentile_level);
   boundi->defined=1;
 
-  for(j=0;j<npatch_files;j++){
+  for(j=0;j<npatchinfo;j++){
     bounddata *boundj;
     patch *patchj;
 
@@ -419,7 +419,7 @@ void updatePart5extremes(void){
   }
 
 
-  for(ii=0;ii<npart_files;ii++){
+  for(ii=0;ii<npartinfo;ii++){
     particle *parti;
 
     parti = partinfo + ii;
@@ -931,7 +931,7 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
   tmax2=-1000000000.;
   *extreme_min=0;
   *extreme_max=0;
-  for(i=0;i<nplot3d_files;i++){
+  for(i=0;i<nplot3dinfo;i++){
     p = plot3dinfo+i;
     if(p->loaded==0||p->display==0)continue;
     meshi = meshinfo+p->blocknumber;
@@ -987,7 +987,7 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
     factor = 0.0f;
   }
 
-  for(i=0;i<nplot3d_files;i++){
+  for(i=0;i<nplot3dinfo;i++){
     p = plot3dinfo+i;
     if(p->loaded==0||p->display==0)continue;
     meshi = meshinfo+p->blocknumber;
@@ -1057,7 +1057,7 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
     tlevels[n]=tminorig+(float)n*dtorig;
   }
 
-  for(i=0;i<nplot3d_files;i++){
+  for(i=0;i<nplot3dinfo;i++){
     p = plot3dinfo+i;
     if(p->loaded==0||p->display==0)continue;
     meshi = meshinfo+p->blocknumber;

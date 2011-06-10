@@ -203,25 +203,25 @@ void svWINAPI sv_unload(void){
     for(i=0;i<nterraininfo;i++){
       readterrain("",i,UNLOAD,&errorcode);
     }
-    for(i=0;i<nslice_files;i++){
+    for(i=0;i<nsliceinfo;i++){
       readslice("",i,UNLOAD,&errorcode);
     }
-    for(i=0;i<nplot3d_files;i++){
+    for(i=0;i<nplot3dinfo;i++){
       readplot3d("",i,UNLOAD,&errorcode);
     }
-    for(i=0;i<npatch_files;i++){
+    for(i=0;i<npatchinfo;i++){
       readpatch(i,UNLOAD,&errorcode);
     }
-    for(i=0;i<npart_files;i++){
+    for(i=0;i<npartinfo;i++){
       readpart("",i,UNLOAD,&errorcode);
     }
-    for(i=0;i<niso_files;i++){
+    for(i=0;i<nisoinfo;i++){
       readiso("",i,UNLOAD,&errorcode);
     }
     for(i=0;i<nzone;i++){
       readzone(i,UNLOAD,&errorcode);
     }
-    for(i=0;i<nsmoke3d_files;i++){
+    for(i=0;i<nsmoke3dinfo;i++){
       readsmoke3d(i,UNLOAD,&errorcode);
     }
     InitMenus(UNLOAD);

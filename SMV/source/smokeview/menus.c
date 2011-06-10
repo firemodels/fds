@@ -528,13 +528,13 @@ void Smoke3DShowMenu(int value){
     switch (value){
     case SHOW_ALL:
       plotstate=DYNAMIC_PLOTS;
-      for(i=0;i<nsmoke3d_files;i++){
+      for(i=0;i<nsmoke3dinfo;i++){
         smoke3di = smoke3dinfo + i;
         if(smoke3di->loaded==1)smoke3di->display=1;
       }
       break;
     case HIDE_ALL:
-      for(i=0;i<nsmoke3d_files;i++){
+      for(i=0;i<nsmoke3dinfo;i++){
         smoke3di = smoke3dinfo + i;
         if(smoke3di->loaded==1)smoke3di->display=0;
       }
@@ -642,12 +642,12 @@ void IsoShowMenu(int value){
     else if(value>=10001){
       if(value==10001){
         plotstate=DYNAMIC_PLOTS;
-        for(i=0;i<niso_files;i++){
+        for(i=0;i<nisoinfo;i++){
           isoinfo[i].display=1;
         }
       }
       else if(value==10002){
-        for(i=0;i<niso_files;i++){
+        for(i=0;i<nisoinfo;i++){
           isoinfo[i].display=0;
         }
       }
@@ -743,13 +743,13 @@ void ShowHideSliceMenu(int value){
   if(value<0){
     switch (value){
     case SHOW_ALL:
-      for(i=0;i<nslice_files;i++){
+      for(i=0;i<nsliceinfo;i++){
         sliceinfo[i].display=1;
       }
       show_all_slices=1;
       break;
     case HIDE_ALL:
-      for(i=0;i<nslice_files;i++){
+      for(i=0;i<nsliceinfo;i++){
         sliceinfo[i].display=0;
       }
       show_all_slices=0;
@@ -1358,7 +1358,7 @@ void RenderMenu(int value){
     }
     RenderState(1);
     itimes=0;
-    for(i=0;i<nslice_files;i++){
+    for(i=0;i<nsliceinfo;i++){
       sd=sliceinfo+i;
       sd->islice=0;
     }
@@ -1405,7 +1405,7 @@ void EvacShowMenu(int value){
     switch (value){
     case 3:
       visEvac=1;
-      for(i=0;i<npart_files;i++){
+      for(i=0;i<npartinfo;i++){
         parti = partinfo + i;
         if(parti->loaded==0||parti->evac==0)continue;
         parti->display=1;
@@ -1413,7 +1413,7 @@ void EvacShowMenu(int value){
       break;
     case 4:
       visEvac=0;
-      for(i=0;i<npart_files;i++){
+      for(i=0;i<npartinfo;i++){
         parti = partinfo + i;
         if(parti->loaded==0||parti->evac==0)continue;
         parti->display=0;
@@ -1428,7 +1428,7 @@ void EvacShowMenu(int value){
     switch (value){
     case 3:
       visEvac=1;
-      for(i=0;i<npart_files;i++){
+      for(i=0;i<npartinfo;i++){
         parti = partinfo + i;
         if(parti->loaded==0||parti->evac==0)continue;
         parti->display=1;
@@ -1451,7 +1451,7 @@ void ParticleShowMenu(int value){
   particle *parti;
   int i;
 
-  if(npart_files==0)return;
+  if(npartinfo==0)return;
   if(value==999)return;
   ASSERTFLAG(visSmoke);
   ASSERTFLAG(visEvac);
@@ -1485,7 +1485,7 @@ void ParticleShowMenu(int value){
         visSprinkPart=1; 
         visSmokePart=2; 
         visStaticSmoke=1; 
-        for(i=0;i<npart_files;i++){
+        for(i=0;i<npartinfo;i++){
           parti = partinfo + i;
           if(parti->loaded==0||parti->evac==1)continue;
           parti->display=1;
@@ -1498,7 +1498,7 @@ void ParticleShowMenu(int value){
         visSprinkPart=0; 
         visSmokePart=0; 
         visStaticSmoke=0;
-        for(i=0;i<npart_files;i++){
+        for(i=0;i<npartinfo;i++){
           parti = partinfo + i;
           if(parti->loaded==0||parti->evac==1)continue;
           parti->display=0;
@@ -1509,7 +1509,7 @@ void ParticleShowMenu(int value){
         break;
     }
     /*
-    for(i=0;i<npart_files;i++){
+    for(i=0;i<npartinfo;i++){
       parti = partinfo + i;
       if(parti->loaded==0||parti->evac==1)continue;
       parti->display_droplet=0;
@@ -1539,7 +1539,7 @@ void ParticleShowMenu(int value){
         visSprinkPart=1; 
         visSmokePart=2; 
         visStaticSmoke=1; 
-        for(i=0;i<npart_files;i++){
+        for(i=0;i<npartinfo;i++){
           parti = partinfo + i;
           if(parti->loaded==0)continue;
           parti->display=1;
@@ -1553,7 +1553,7 @@ void ParticleShowMenu(int value){
         break;
     }
     /*
-    for(i=0;i<npart_files;i++){
+    for(i=0;i<npartinfo;i++){
       parti = partinfo + i;
       if(parti->loaded==0||parti->evac==1)continue;
       parti->display_droplet=0;
@@ -1841,13 +1841,13 @@ void Plot3DShowMenu(int value){
     if(vectorspresent==0)visVector=0;
     break;
    case HIDEALL_PLOT3D:
-     for(i=0;i<nplot3d_files;i++){
+     for(i=0;i<nplot3dinfo;i++){
        if(plot3dinfo[i].loaded==1)plot3dinfo[i].display=0;
      }
 
      break;
    case SHOWALL_PLOT3D:
-     for(i=0;i<nplot3d_files;i++){
+     for(i=0;i<nplot3dinfo;i++){
        if(plot3dinfo[i].loaded==1)plot3dinfo[i].display=1;
      }
      break;
@@ -2137,25 +2137,25 @@ void LoadUnloadMenu(int value){
     if(devcfilename!=NULL){
       read_device_data(devcfilename,UNLOAD);
     }
-    for(i=0;i<nslice_files;i++){
+    for(i=0;i<nsliceinfo;i++){
       readslice("",i,UNLOAD,&errorcode);
     }
-    for(i=0;i<nplot3d_files;i++){
+    for(i=0;i<nplot3dinfo;i++){
       readplot3d("",i,UNLOAD,&errorcode);
     }
-    for(i=0;i<npatch_files;i++){
+    for(i=0;i<npatchinfo;i++){
       readpatch(i,UNLOAD,&errorcode);
     }
-    for(i=0;i<npart_files;i++){
+    for(i=0;i<npartinfo;i++){
       readpart("",i,UNLOAD,&errorcode);
     }
-    for(i=0;i<niso_files;i++){
+    for(i=0;i<nisoinfo;i++){
       readiso("",i,UNLOAD,&errorcode);
     }
     for(i=0;i<nzone;i++){
       readzone(i,UNLOAD,&errorcode);
     }
-    for(i=0;i<nsmoke3d_files;i++){
+    for(i=0;i<nsmoke3dinfo;i++){
       readsmoke3d(i,UNLOAD,&errorcode);
     }
     //plotstate=DYNAMIC_PLOTS;
@@ -2173,7 +2173,7 @@ void LoadUnloadMenu(int value){
       read_device_data(devcfilename,LOAD);
     }
     islicetype_save=islicetype;
-    for(i=0;i<nslice_files;i++){
+    for(i=0;i<nsliceinfo;i++){
       sliceinfo[i].reload=1;
     }
     for(i=0;i<nterraininfo;i++){
@@ -2193,7 +2193,7 @@ void LoadUnloadMenu(int value){
       }
     }
     islicetype=islicetype_save;
-    for(i=0;i<nplot3d_files;i++){
+    for(i=0;i<nplot3dinfo;i++){
       if(plot3dinfo[i].loaded==1){
         readplot3d(plot3dinfo[i].file,i,LOAD,&errorcode);
       }
@@ -2202,17 +2202,17 @@ void LoadUnloadMenu(int value){
       i = patch_loaded_list[ii];
       readpatch(i,LOAD,&errorcode);
     }
-    for(i=0;i<nsmoke3d_files;i++){
+    for(i=0;i<nsmoke3dinfo;i++){
       if(smoke3dinfo[i].loaded==1){
         readsmoke3d(i,LOAD,&errorcode);
       }
     }
-    for(i=0;i<npart_files;i++){
+    for(i=0;i<npartinfo;i++){
       if(partinfo[i].loaded==1){
         readpart(partinfo[i].file,i,LOAD,&errorcode);
       }
     }
-    for(i=0;i<niso_files;i++){
+    for(i=0;i<nisoinfo;i++){
       iso *isoi;
 
       isoi = isoinfo + i;
@@ -2479,7 +2479,7 @@ void TargetMenu(int value){
   }
   else{
     if(value==-1){
-      for(i=0;i<ntarg_files;i++){
+      for(i=0;i<ntarginfo;i++){
         readtarget("",i,UNLOAD,&errorcode);
       }
     }
@@ -2496,7 +2496,7 @@ void EvacMenu(int value){
   if(value==-11){
     int i;
 
-    for(i=0;i<npart_files;i++){
+    for(i=0;i<npartinfo;i++){
       particle *parti;
 
       parti=partinfo + i;
@@ -2523,7 +2523,7 @@ void EvacMenu(int value){
     if(value==-1){
       int i;
 
-      for(i=0;i<npart_files;i++){
+      for(i=0;i<npartinfo;i++){
         if(partinfo[i].evac==0)continue;
         readpart("",i,UNLOAD,&errorcode);
       }
@@ -2553,7 +2553,7 @@ void update_streakvalue(float value){
       break;
     }
   }
-  for(i=0;i<npart_files;i++){
+  for(i=0;i<npartinfo;i++){
     parti = partinfo + i;
     if(parti->loaded==1)break;
   }
@@ -2746,7 +2746,7 @@ void ParticleMenu(int value){
   }
   else{
     if(value==-1){
-      for(i=0;i<npart_files;i++){
+      for(i=0;i<npartinfo;i++){
         if(partinfo[i].evac==1)continue;
         readpart("",i,UNLOAD,&errorcode);
       }
@@ -2758,7 +2758,7 @@ void ParticleMenu(int value){
       if(scriptoutstream!=NULL){
         fprintf(scriptoutstream,"LOADPARTICLES\n");
       }
-      for(i=0;i<npart_files;i++){
+      for(i=0;i<npartinfo;i++){
         parti = partinfo + i;
         if(parti->evac==1)continue;
         if(parti->version==1||strcmp(parti->label.longlabel,partj->label.longlabel)==0){
@@ -2833,7 +2833,7 @@ void UnloadPatchMenu(int value){
     readpatch(value,UNLOAD,&errorcode);
   }
   else{
-    for(i=0;i<npatch_files;i++){
+    for(i=0;i<npatchinfo;i++){
       readpatch(i,UNLOAD,&errorcode);
     }
   }
@@ -2850,7 +2850,7 @@ void UnloadIsoMenu(int value){
     readiso("",value,UNLOAD,&errorcode);
   }
   else{
-    for(i=0;i<niso_files;i++){
+    for(i=0;i<nisoinfo;i++){
       readiso("",i,UNLOAD,&errorcode);
     }
   }
@@ -2867,7 +2867,7 @@ void UnloadPlot3dMenu(int value){
     readplot3d("",value,UNLOAD,&errorcode);
   }
   else{
-    for(i=0;i<nplot3d_files;i++){
+    for(i=0;i<nplot3dinfo;i++){
       readplot3d("",i,UNLOAD,&errorcode);
     }
   }
@@ -2884,7 +2884,7 @@ void UnloadEvacMenu(int value){
     readpart("",value,UNLOAD,&errorcode);
   }
   else{
-    for(i=0;i<npart_files;i++){
+    for(i=0;i<npartinfo;i++){
       if(partinfo[i].evac==0)continue;
       readpart("",i,UNLOAD,&errorcode);
     }
@@ -2902,7 +2902,7 @@ void UnloadPartMenu(int value){
     readpart("",value,UNLOAD,&errorcode);
   }
   else{
-    for(i=0;i<npart_files;i++){
+    for(i=0;i<npartinfo;i++){
       if(partinfo[i].evac==1)continue;
       readpart("",i,UNLOAD,&errorcode);
     }
@@ -2984,7 +2984,7 @@ void UnloadSliceMenu(int value){
   }
   else{
     if(value==-1){
-      for(i=0;i<nslice_files;i++){
+      for(i=0;i<nsliceinfo;i++){
         readslice("",i,UNLOAD,&errorcode);
       }
     }
@@ -2992,7 +2992,7 @@ void UnloadSliceMenu(int value){
       int unload_index;
 
       unload_index=last_slice_loadstack();
-      if(unload_index>=0&&unload_index<nslice_files){
+      if(unload_index>=0&&unload_index<nsliceinfo){
         readslice("",unload_index,UNLOAD,&errorcode);
       }
     }
@@ -3045,7 +3045,7 @@ void UnLoadSmoke3DMenu(int value){
   updatemenu=1;
   if(value<0){
     value= -value;
-    for(i=0;i<nsmoke3d_files;i++){
+    for(i=0;i<nsmoke3dinfo;i++){
       smoke3di = smoke3dinfo + i;
       if(smoke3di->loaded==1&&smoke3di->type==value){
         readsmoke3d(i,UNLOAD,&errorcode);
@@ -3075,12 +3075,12 @@ void LoadSmoke3DMenu(int value){
     readsmoke3d(value,LOAD,&errorcode);
   }
   else if(value==-1){
-    for(i=0;i<nsmoke3d_files;i++){
+    for(i=0;i<nsmoke3dinfo;i++){
       readsmoke3d(i,UNLOAD,&errorcode);
     }
   }
   if(value==-9){
-    for(i=0;i<nsmoke3d_files;i++){
+    for(i=0;i<nsmoke3dinfo;i++){
       smoke3di = smoke3dinfo + i;
       if(smoke3di->loaded==1)continue;
       readsmoke3d(i,LOAD,&errorcode);
@@ -3093,7 +3093,7 @@ void LoadSmoke3DMenu(int value){
       fprintf(scriptoutstream,"LOAD3DSMOKE\n");
       fprintf(scriptoutstream," %s\n",smoke3dj->label.longlabel);
     }
-    for(i=0;i<nsmoke3d_files;i++){
+    for(i=0;i<nsmoke3dinfo;i++){
       smoke3di = smoke3dinfo + i;
       if(strcmp(smoke3di->label.shortlabel,smoke3dj->label.shortlabel)==0){
         readsmoke3d(i,LOAD,&errorcode);
@@ -3109,7 +3109,7 @@ void LoadSmoke3DMenu(int value){
 
 int AnySmoke(char *type){
 
-  if(nsmoke3d_files>0)return 1;
+  if(nsmoke3dinfo>0)return 1;
   return 0;
 }
 
@@ -3118,7 +3118,7 @@ int AnySmoke(char *type){
 int AnySlices(char *type){
   int i;
 
-  for(i=0;i<nslice_files;i++){
+  for(i=0;i<nsliceinfo;i++){
     if(STRCMP(sliceinfo[i].label.longlabel,type)==0)return 1;
   }
   return 0;
@@ -3130,7 +3130,7 @@ void HideAllSlices(void){
   int i;
 
   glutSetCursor(GLUT_CURSOR_WAIT);
-  for(i=0;i<nslice_files;i++){
+  for(i=0;i<nsliceinfo;i++){
     sliceinfo[i].display=0;
   }
   updatemenu=1;  
@@ -3142,13 +3142,13 @@ void HideAllSlices(void){
 
 void ShowAllSmoke(void){
   int i;
-  for(i=0;i<nsmoke3d_files;i++){
+  for(i=0;i<nsmoke3dinfo;i++){
     smoke3d *smoke3di;
 
     smoke3di = smoke3dinfo + i;
     if(smoke3di->loaded==1)smoke3di->display=1;
   }
-  for(i=0;i<niso_files;i++){
+  for(i=0;i<nisoinfo;i++){
     iso *isoi;
 
     isoi = isoinfo + i;
@@ -3160,13 +3160,13 @@ void ShowAllSmoke(void){
 
 void HideAllSmoke(void){
   int i;
-  for(i=0;i<nsmoke3d_files;i++){
+  for(i=0;i<nsmoke3dinfo;i++){
     smoke3d *smoke3di;
 
     smoke3di = smoke3dinfo + i;
     if(smoke3di->loaded==1)smoke3di->display=0;
   }
-  for(i=0;i<niso_files;i++){
+  for(i=0;i<nisoinfo;i++){
     iso *isoi;
 
     isoi = isoinfo + i;
@@ -3181,7 +3181,7 @@ void ShowAllSlices(char *type1, char *type2){
 
   glutSetCursor(GLUT_CURSOR_WAIT);
   if(trainer_showall_mslice==1){
-    for(i=0;i<nslice_files;i++){
+    for(i=0;i<nsliceinfo;i++){
       sliceinfo[i].display=0;
       if(sliceinfo[i].loaded==0)continue;
       if(
@@ -3291,7 +3291,7 @@ void LoadSliceMenu(int value){
   }
   else{
     if(value==-1){
-      for(i=0;i<nslice_files;i++){
+      for(i=0;i<nsliceinfo;i++){
         readslice("",i,UNLOAD,&errorcode);
       }
     }
@@ -3307,7 +3307,7 @@ void LoadSliceMenu(int value){
       submenutype=subslice_menuindex[submenutype];
       slicei = sliceinfo + submenutype;
       submenulabel = slicei->label.longlabel;
-      for(i=0;i<nslice_files;i++){
+      for(i=0;i<nsliceinfo;i++){
         char *longlabel;
         int errorcode;
 
@@ -3403,7 +3403,7 @@ void Plot3DListMenu(int value){
     fprintf(scriptoutstream,"LOADPLOT3D\n");
     fprintf(scriptoutstream," %f\n",plot3dtimelist[value]);
   }
-  for(i=0;i<nplot3d_files;i++){
+  for(i=0;i<nplot3dinfo;i++){
     plot3di = plot3dinfo + i;
     if(fabs(plot3di->time-plot3dtimelist[value])<0.5){
       LoadPlot3dMenu(i);
@@ -3440,7 +3440,7 @@ void LoadPlot3dMenu(int value){
     readplot3d(plot3dfile,value,LOAD,&errorcode);
   }
   else if(value==-1){
-    for(i=0;i<nplot3d_files;i++){
+    for(i=0;i<nplot3dinfo;i++){
       readplot3d("",i,UNLOAD,&errorcode);
     }
   }
@@ -3477,7 +3477,7 @@ void LoadIsoMenu(int value){
     readiso(file,value,LOAD,&errorcode);
   }
   if(value==-1){
-    for(i=0;i<niso_files;i++){
+    for(i=0;i<nisoinfo;i++){
       isoii = isoinfo + i;
       if(isoii->loaded==1)readiso("",i,UNLOAD,&errorcode);
     }
@@ -3490,7 +3490,7 @@ void LoadIsoMenu(int value){
       fprintf(scriptoutstream,"LOADISO\n");
       fprintf(scriptoutstream," %s\n",isoii->surface_label.longlabel);
     }
-    for(i=0;i<niso_files;i++){
+    for(i=0;i<nisoinfo;i++){
       isoi = isoinfo + i;
       if(isoii->type!=isoi->type)continue;
       LoadIsoMenu(i);
@@ -3540,7 +3540,7 @@ void LoadPatchMenu(int value){
       fprintf(scriptoutstream,"LOADBOUNDARY\n");
       fprintf(scriptoutstream," %s\n",patchj->label.longlabel);
     }
-    for(i=0;i<npatch_files;i++){
+    for(i=0;i<npatchinfo;i++){
       patchi = patchinfo + i;
       if(strcmp(patchi->label.shortlabel,patchj->label.shortlabel)==0&&patchi->cellcenter==patchj->cellcenter){
         LOCK_COMPRESS
@@ -3555,7 +3555,7 @@ void LoadPatchMenu(int value){
     Update_All_Patch_Bounds();
   }
   else{
-    for(i=0;i<npatch_files;i++){
+    for(i=0;i<npatchinfo;i++){
       readpatch(i,UNLOAD,&errorcode);
     }
   }
@@ -4169,13 +4169,13 @@ updatemenu=0;
   nsmoke3dloaded=0;
   nsliceloaded=0;
   nvsliceloaded=0;
-  for(i=0;i<nslice_files;i++){
+  for(i=0;i<nsliceinfo;i++){
     slice *sd;
 
     sd = sliceinfo + i;
     if(sd->loaded==1)nsliceloaded++;
   }
-  for(i=0;i<nsmoke3d_files;i++){
+  for(i=0;i<nsmoke3dinfo;i++){
     smoke3d *smoke3di;
 
     smoke3di=smoke3dinfo+i;
@@ -4242,7 +4242,7 @@ updatemenu=0;
   npart4loaded=0;
   npartloaded=0;
   nevacloaded=0;
-  for(i=0;i<npart_files;i++){
+  for(i=0;i<npartinfo;i++){
     particle *parti;
 
     parti = partinfo+i;
@@ -4255,7 +4255,7 @@ updatemenu=0;
   }
 
   nplot3dloaded=0;
-  for(i=0;i<nplot3d_files;i++){
+  for(i=0;i<nplot3dinfo;i++){
     plot3d *plot3di;
 
     plot3di = plot3dinfo + i;
@@ -4263,7 +4263,7 @@ updatemenu=0;
   }
 
   nisoloaded=0;
-  for(i=0;i<niso_files;i++){
+  for(i=0;i<nisoinfo;i++){
     iso *isoi;
 
     isoi = isoinfo + i;
@@ -4271,7 +4271,7 @@ updatemenu=0;
   }
 
   npatchloaded=0;
-  for(i=0;i<npatch_files;i++){
+  for(i=0;i<npatchinfo;i++){
     patch *patchi;
 
     patchi = patchinfo + i;
@@ -4319,13 +4319,13 @@ updatemenu=0;
 
 
 /* --------------------------------patch menu -------------------------- */
-  if(npatch_files>0){
+  if(npatchinfo>0){
     CREATEMENU(showpatchmenu,ShowPatchMenu);
     npatchloaded=0;
     {
       int local_do_threshold=0;
 
-      for(ii=0;ii<npatch_files;ii++){
+      for(ii=0;ii<npatchinfo;ii++){
         patch *patchi;
 
         i = patchorderindex[ii];
@@ -4559,7 +4559,7 @@ updatemenu=0;
 
 /* --------------------------------level menu -------------------------- */
 
-  if(nplot3d_files>0){
+  if(nplot3dinfo>0){
     CREATEMENU(levelmenu,LevelMenu);
     for(i=1;i<nrgb-1;i++){
       if(colorlabeliso!=NULL){
@@ -4588,7 +4588,7 @@ updatemenu=0;
 
 /* --------------------------------static variable menu -------------------------- */
 
-  if(nplot3d_files>0){
+  if(nplot3dinfo>0){
     CREATEMENU(staticvariablemenu,StaticVariableMenu);
     for(n=0;n<numplot3dvars;n++){
       char *p3label;
@@ -4607,7 +4607,7 @@ updatemenu=0;
 
 /* --------------------------------iso variable menu -------------------------- */
 
-  if(nplot3d_files>0){
+  if(nplot3dinfo>0){
     CREATEMENU(isovariablemenu,IsoVariableMenu);
     for(n=0;n<numplot3dvars;n++){
       char *p3label;
@@ -4625,7 +4625,7 @@ updatemenu=0;
   }
 
 /* --------------------------------iso surface menu -------------------------- */
-  if(nplot3d_files>0){
+  if(nplot3dinfo>0){
     CREATEMENU(isosurfacetypemenu,IsoSurfaceTypeMenu);
     if(p3dsurfacesmooth==1&&p3dsurfacetype==1){
       glutAddMenuEntry(_("*Smooth"),0);
@@ -4653,7 +4653,7 @@ updatemenu=0;
 
 /* --------------------------------vector skip menu -------------------------- */
 
-  if(nplot3d_files>0){
+  if(nplot3dinfo>0){
     CREATEMENU(vectorskipmenu,VectorSkipMenu);
     if(visVector==1)glutAddMenuEntry(_("*Show"),-2);
     if(visVector!=1)glutAddMenuEntry(_("Show"),-2);
@@ -4695,7 +4695,7 @@ updatemenu=0;
   }
 
 /* --------------------------------static slice menu -------------------------- */
-  if(nplot3d_files>0){
+  if(nplot3dinfo>0){
     CREATEMENU(staticslicemenu,Plot3DShowMenu);
     glutAddSubMenu(_("Solution variable"),staticvariablemenu);
     if(cmesh->visz==1)glutAddMenuEntry(_("*xy plane"),1);
@@ -4716,7 +4716,7 @@ updatemenu=0;
 
     CREATEMENU(plot3dshowmenu,Plot3DShowMenu);
     if(nplot3dloaded>0){
-      for(ii=0;ii<nplot3d_files;ii++){
+      for(ii=0;ii<nplot3dinfo;ii++){
         plot3d *plot3di;
 
         i=plot3dorderindex[ii];
@@ -5490,9 +5490,9 @@ updatemenu=0;
 
 /* --------------------------------particle show menu -------------------------- */
 
-  if(npart_files>0&&nevac!=npart_files){
+  if(npartinfo>0&&nevac!=npartinfo){
     CREATEMENU(particleshowmenu,ParticleShowMenu);
-    for(ii=0;ii<npart_files;ii++){
+    for(ii=0;ii<npartinfo;ii++){
       particle *parti;
 
       i = partorderindex[ii];
@@ -5559,7 +5559,7 @@ updatemenu=0;
 
   if(nevac>0){
     CREATEMENU(evacshowmenu,EvacShowMenu);
-    for(ii=0;ii<npart_files;ii++){
+    for(ii=0;ii<npartinfo;ii++){
       particle *parti;
 
       i = partorderindex[ii];
@@ -5595,7 +5595,7 @@ updatemenu=0;
 
 /* -------------------------------- colorbarmenu -------------------------- */
   
-  if(nsmoke3d_files>0&&Read3DSmoke3DFile==1){
+  if(nsmoke3dinfo>0&&Read3DSmoke3DFile==1){
     colorbardata *cbi;
     char ccolorbarmenu[256];
 
@@ -5619,11 +5619,11 @@ updatemenu=0;
 
 
   /* --------------------------------smoke3d showmenu -------------------------- */
-  if(nsmoke3d_files>0&&Read3DSmoke3DFile==1){
+  if(nsmoke3dinfo>0&&Read3DSmoke3DFile==1){
     {
       if(nsmoke3dloaded>0){
         CREATEMENU(smoke3dshowmenu,Smoke3DShowMenu);
-        for(i=0;i<nsmoke3d_files;i++){
+        for(i=0;i<nsmoke3dinfo;i++){
           smoke3d *smoke3di;
 
           smoke3di = smoke3dinfo + i;
@@ -5640,7 +5640,7 @@ updatemenu=0;
           if(show_smoke_lighting==0)glutAddMenuEntry(_("Light smoke"),HAVE_LIGHT);
         }
 #endif
-        if(nsmoke3d_files>1){
+        if(nsmoke3dinfo>1){
           glutAddMenuEntry("-",-999);
           glutAddMenuEntry(_("Show all"),SHOW_ALL);
           glutAddMenuEntry(_("Hide all"),HIDE_ALL);
@@ -5651,7 +5651,7 @@ updatemenu=0;
 
 /* --------------------------------iso level menu -------------------------- */
 
-  if(loaded_isomesh!=NULL&&niso_files>0&&ReadIsoFile==1){
+  if(loaded_isomesh!=NULL&&nisoinfo>0&&ReadIsoFile==1){
     CREATEMENU(isolevelmenu,IsoShowMenu);
     if(loaded_isomesh->nisolevels>0&&loaded_isomesh->showlevels!=NULL){
       showflag=1;
@@ -5696,13 +5696,13 @@ updatemenu=0;
 
 /* --------------------------------iso show menu -------------------------- */
 
-    if(niso_files>0&&ReadIsoFile==1){
+    if(nisoinfo>0&&ReadIsoFile==1){
       mesh *hmesh;
       iso *iso2;
 
       CREATEMENU(isoshowmenu,IsoShowMenu);
       iso2=NULL;
-      for(ii=0;ii<niso_files;ii++){
+      for(ii=0;ii<nisoinfo;ii++){
         iso *isoi;
 
         i = isoorderindex[ii];
@@ -5865,7 +5865,7 @@ updatemenu=0;
       glutAddMenuEntry(menulabel,HIDE_ALL);
     }
   }
-  if(nslice_files>0&&nmultislices<nslice_files){
+  if(nsliceinfo>0&&nmultislices<nsliceinfo){
     CREATEMENU(showmultislicemenu,ShowMultiSliceMenu);
     for(i=0;i<nmultislices;i++){
       mslicei = multisliceinfo + i;
@@ -5895,7 +5895,7 @@ updatemenu=0;
   if(nsliceloaded==0){
     sd_shown=NULL;
   }
-  if(nslice_files>0&&nsliceloaded>0){
+  if(nsliceinfo>0&&nsliceloaded>0){
     CREATEMENU(showhideslicemenu,ShowHideSliceMenu);
     for(ii=0;ii<nslice_loaded;ii++){
       slice *sd;
@@ -6058,7 +6058,7 @@ updatemenu=0;
     int particle_present=0;
 
     if(npart5loaded>0){
-      for(ii=0;ii<npart_files;ii++){
+      for(ii=0;ii<npartinfo;ii++){
         particle *parti;
 
         parti = partinfo + ii;
@@ -6100,7 +6100,7 @@ updatemenu=0;
   }
   if(ReadIsoFile==1){
     int niso_loaded=0;
-    for(i=0;i<niso_files;i++){
+    for(i=0;i<nisoinfo;i++){
       iso *isoi;
 
       isoi = isoinfo + i;
@@ -6149,7 +6149,7 @@ updatemenu=0;
 
   if(nsliceloaded>0){
     glutAddSubMenu(_("Animated Slices"),showhideslicemenu);
-    if(nmultislices<nslice_files){
+    if(nmultislices<nsliceinfo){
       glutAddSubMenu(_("Animated Multi-Slices"),showmultislicemenu);
     }
   }
@@ -6356,7 +6356,7 @@ updatemenu=0;
   if(showclip==1)glutAddMenuEntry(_("*Clip geometry...  ALT+c"),18);
   if(showclip==0)glutAddMenuEntry(_("Clip geometry...  ALT+c"),18);
 #ifdef pp_COMPRESS
-  if(smokezippath!=NULL&&(npatch_files>0||nsmoke3d_files>0||nslice_files>0)){
+  if(smokezippath!=NULL&&(npatchinfo>0||nsmoke3dinfo>0||nsliceinfo>0)){
     if(showbounds==1)glutAddMenuEntry(_("*Compression/Smokezip...  ALT+z"),24);
     if(showbounds==0)glutAddMenuEntry(_("Compression/Smokezip...  ALT+z"),24);
   }
@@ -6377,7 +6377,7 @@ updatemenu=0;
   if(showshooterDLG==1)glutAddMenuEntry(_("*Particle tracking..."),27);
   if(showshooterDLG==0)glutAddMenuEntry(_("Particle tracking..."),27);
 #endif
-  if(nsmoke3d_files>0){
+  if(nsmoke3dinfo>0){
     if(showbounds==1)glutAddMenuEntry(_("*3D smoke parameters...  ALT+s"),20);
     if(showbounds==0)glutAddMenuEntry(_("3D smoke parameters...  ALT+s"),20);
   }
@@ -6719,9 +6719,9 @@ updatemenu=0;
 
   /* -------------------------------- target menu -------------------------- */
 
-  if(ntarg_files>0){
+  if(ntarginfo>0){
     CREATEMENU(targetmenu,TargetMenu);
-    for(i=0;i<ntarg_files;i++){
+    for(i=0;i<ntarginfo;i++){
       if(targfilenum==i){
         STRCPY(menulabel,check);
         STRCAT(menulabel,targinfo[i].file);  
@@ -6735,9 +6735,9 @@ updatemenu=0;
 
   /* --------------------------------particle menu -------------------------- */
 
-  if(npart_files>0&&nevac!=npart_files){
+  if(npartinfo>0&&nevac!=npartinfo){
     CREATEMENU(unloadpartmenu,UnloadPartMenu);
-    for(ii=0;ii<npart_files;ii++){
+    for(ii=0;ii<npartinfo;ii++){
       particle *parti;
 
       i = partorderindex[ii];
@@ -6755,7 +6755,7 @@ updatemenu=0;
     else{
       CREATEMENU(particlesubmenu,ParticleMenu);
     }
-    for(ii=0;ii<npart_files;ii++){
+    for(ii=0;ii<npartinfo;ii++){
       i = partorderindex[ii];
       if(partinfo[i].evac==1)continue;
       if(partinfo[i].loaded==1){
@@ -6774,7 +6774,7 @@ updatemenu=0;
 
       if(nmeshes>1){
         CREATEMENU(particlemenu,ParticleMenu);
-        if(npart_files>0){
+        if(npartinfo>0){
           if(partinfo->version==1){
             strcpy(menulabel,_("Particles"));
             strcat(menulabel," - ");
@@ -6787,7 +6787,7 @@ updatemenu=0;
             glutAddMenuEntry("-",-2);
           }
           else{
-            for(i=0;i<npart_files;i++){
+            for(i=0;i<npartinfo;i++){
               useitem=i;
               parti = partinfo + i;
               if(parti->evac==1)continue;
@@ -6827,7 +6827,7 @@ updatemenu=0;
 
   if(nevac>0){
     CREATEMENU(unloadevacmenu,UnloadEvacMenu);
-    for(ii=0;ii<npart_files;ii++){
+    for(ii=0;ii<npartinfo;ii++){
       particle *parti;
 
       i = partorderindex[ii];
@@ -6843,7 +6843,7 @@ updatemenu=0;
     {
       int nevacs=0,nevacloaded2=0;
 
-      for(ii=0;ii<npart_files;ii++){
+      for(ii=0;ii<npartinfo;ii++){
         particle *parti;
 
         parti = partinfo + ii;
@@ -6857,7 +6857,7 @@ updatemenu=0;
         glutAddMenuEntry(menulabel,-11);
         glutAddMenuEntry("-",-2);
       }
-      for(ii=0;ii<npart_files;ii++){
+      for(ii=0;ii<npartinfo;ii++){
         i = partorderindex[ii];
         if(partinfo[i].evac==0)continue;
         if(partinfo[i].loaded==1){
@@ -7152,9 +7152,9 @@ updatemenu=0;
       glutAddSubMenu(_("Unload terrain"),unloadterrainmenu);
     }
   }
-    if(nslice_files>0){
+    if(nsliceinfo>0){
 
-      if(nmultislices<nslice_files){
+      if(nmultislices<nsliceinfo){
         CREATEMENU(unloadmultislicemenu,UnloadMultiSliceMenu);
         nmultisliceloaded=0;
         for(i=0;i<nmultislices;i++){
@@ -7233,7 +7233,7 @@ updatemenu=0;
 
       }
       CREATEMENU(unloadslicemenu,UnloadSliceMenu);
-      for(i=0;i<nslice_files;i++){
+      for(i=0;i<nsliceinfo;i++){
         slice *sd;
 
         sd = sliceinfo + sliceorderindex[i];
@@ -7248,7 +7248,7 @@ updatemenu=0;
 
 //*** this is where I would put the "sub-slice" menus ordered by type
       nloadsubslicemenu=1;
-      for(i=1;i<nslice_files;i++){
+      for(i=1;i<nsliceinfo;i++){
         slice *sd,*sdim1;
 
         sd = sliceinfo + sliceorderindex[i];
@@ -7260,12 +7260,12 @@ updatemenu=0;
         loadsubslicemenu[i]=0;
       }
       iloadsubslicemenu=0;
-      for(i=0;i<nslice_files;i++){
+      for(i=0;i<nsliceinfo;i++){
         slice *sd,*sdim1,*sdip1;
 
         if(i!=0)sdim1 = sliceinfo + sliceorderindex[i-1];
         sd = sliceinfo + sliceorderindex[i];
-        if(i!=nslice_files-1)sdip1 = sliceinfo + sliceorderindex[i+1];
+        if(i!=nsliceinfo-1)sdip1 = sliceinfo + sliceorderindex[i+1];
 
         if(i==0||strcmp(sd->label.longlabel,sdim1->label.longlabel)!=0){
           CREATEMENU(loadsubslicemenu[iloadsubslicemenu],LoadSliceMenu);
@@ -7278,7 +7278,7 @@ updatemenu=0;
           STRCPY(menulabel,sd->menulabel);
         }
         if(sd->menu_show==1)glutAddMenuEntry(menulabel,sliceorderindex[i]);
-        if(i==nslice_files-1||strcmp(sd->label.longlabel,sdip1->label.longlabel)!=0){
+        if(i==nsliceinfo-1||strcmp(sd->label.longlabel,sdip1->label.longlabel)!=0){
           subslice_menuindex[iloadsubslicemenu]=sliceorderindex[i];
 		  if(sd->ndirxyz[1]+sd->ndirxyz[2]+sd->ndirxyz[3]>1){
             glutAddMenuEntry("-",-999);
@@ -7302,7 +7302,7 @@ updatemenu=0;
       }
       CREATEMENU(loadslicemenu,LoadSliceMenu);
       iloadsubslicemenu=0;
-      for(i=0;i<nslice_files;i++){
+      for(i=0;i<nsliceinfo;i++){
         slice *sd,*sdim1;
 
         sd = sliceinfo + sliceorderindex[i];
@@ -7339,7 +7339,7 @@ updatemenu=0;
         {
           int nsootloaded=0,nhrrloaded=0,nwaterloaded=0;
 
-          for(i=0;i<nsmoke3d_files;i++){
+          for(i=0;i<nsmoke3dinfo;i++){
             smoke3di=smoke3dinfo + i;
             if(smoke3di->loaded==0)continue;
             switch (smoke3di->type){
@@ -7362,7 +7362,7 @@ updatemenu=0;
           if(nwaterloaded>1)glutAddMenuEntry(_("water - all meshes"),-3);
           if(nsootloaded>1||nhrrloaded>1||nwaterloaded>1)glutAddMenuEntry("-",999);
         }
-        for(i=0;i<nsmoke3d_files;i++){
+        for(i=0;i<nsmoke3dinfo;i++){
           smoke3di=smoke3dinfo+i;
           if(smoke3di->loaded==0)continue;
           glutAddMenuEntry(smoke3di->menulabel,i);
@@ -7373,14 +7373,14 @@ updatemenu=0;
       smoke3d *smoke3di;
       int n_soot_menu=0, n_hrr_menu=0, n_water_menu=0;
 
-      if(nsmoke3d_files>0){
+      if(nsmoke3dinfo>0){
         if(nmeshes==1){
           CREATEMENU(loadsmoke3dmenu,LoadSmoke3DMenu);
         }
         if(nmeshes>1){
           CREATEMENU(loadsmoke3dsootmenu,LoadSmoke3DMenu);
         }
-        for(i=0;i<nsmoke3d_files;i++){
+        for(i=0;i<nsmoke3dinfo;i++){
           smoke3di = smoke3dinfo + i;
           if(smoke3di->type!=1)continue;
           n_soot_menu++;
@@ -7394,7 +7394,7 @@ updatemenu=0;
         if(nmeshes>1){
           CREATEMENU(loadsmoke3dhrrmenu,LoadSmoke3DMenu);
         }
-        for(i=0;i<nsmoke3d_files;i++){
+        for(i=0;i<nsmoke3dinfo;i++){
           smoke3di = smoke3dinfo + i;
           if(smoke3di->type!=2)continue;
           n_hrr_menu++;
@@ -7408,7 +7408,7 @@ updatemenu=0;
         if(nmeshes>1){
           CREATEMENU(loadsmoke3dwatermenu,LoadSmoke3DMenu);
         }
-        for(i=0;i<nsmoke3d_files;i++){
+        for(i=0;i<nsmoke3dinfo;i++){
           smoke3di = smoke3dinfo + i;
           if(smoke3di->type!=3)continue;
           n_water_menu++;
@@ -7427,7 +7427,7 @@ updatemenu=0;
           smoke3d *smoke3dj;
 
           if(nmeshes>1){
-            for(i=0;i<nsmoke3d_files;i++){
+            for(i=0;i<nsmoke3dinfo;i++){
               useitem=i;
               smoke3di=smoke3dinfo + i;
               for(j=0;j<i;j++){
@@ -7459,11 +7459,11 @@ updatemenu=0;
 
 /* --------------------------------plot3d menu -------------------------- */
 
-    if(nplot3d_files>0){
+    if(nplot3dinfo>0){
       plot3d *plot3dim1, *plot3di;
 
       CREATEMENU(unloadplot3dmenu,UnloadPlot3dMenu);
-      for(ii=0;ii<nplot3d_files;ii++){
+      for(ii=0;ii<nplot3dinfo;ii++){
         i=plot3dorderindex[ii];
         plot3di = plot3dinfo + i;
         if(ii==0){
@@ -7482,7 +7482,7 @@ updatemenu=0;
 
       
       nloadsubplot3dmenu=1;
-      for(ii=1;ii<nplot3d_files;ii++){
+      for(ii=1;ii<nplot3dinfo;ii++){
         int im1;
 
         i = plot3dorderindex[ii];
@@ -7508,7 +7508,7 @@ updatemenu=0;
       glutAddMenuEntry(menulabel,i);
       nloadsubplot3dmenu++;
 
-      for(ii=1;ii<nplot3d_files;ii++){
+      for(ii=1;ii<nplot3dinfo;ii++){
         int im1;
 
         i = plot3dorderindex[ii];
@@ -7531,7 +7531,7 @@ updatemenu=0;
 
       nloadsubplot3dmenu=0;
       CREATEMENU(loadplot3dmenu,LoadPlot3dMenu);
-      for(ii=0;ii<nplot3d_files;ii++){
+      for(ii=0;ii<nplot3dinfo;ii++){
         int im1;
 
         i = plot3dorderindex[ii];
@@ -7592,10 +7592,10 @@ updatemenu=0;
 
 /* --------------------------------load patch menu -------------------------- */
 
-    if(npatch_files>0){
+    if(npatchinfo>0){
       nloadpatchsubmenus=0;
       CREATEMENU(unloadpatchmenu,UnloadPatchMenu);
-      for(ii=0;ii<npatch_files;ii++){
+      for(ii=0;ii<npatchinfo;ii++){
         patch *patchi;
 
         i = patchorderindex[ii];
@@ -7607,7 +7607,7 @@ updatemenu=0;
       glutAddMenuEntry(_("Unload all"),-1);
 
       if(nmeshes>1&&loadpatchsubmenus==NULL){
-        NewMemory((void **)&loadpatchsubmenus,npatch_files*sizeof(int));
+        NewMemory((void **)&loadpatchsubmenus,npatchinfo*sizeof(int));
       }
 
       if(nmeshes>1){
@@ -7618,7 +7618,7 @@ updatemenu=0;
         CREATEMENU(loadpatchmenu,LoadPatchMenu);
       }
 
-      for(ii=0;ii<npatch_files;ii++){
+      for(ii=0;ii<npatchinfo;ii++){
         patch *patch1, *patch2;
 
         i = patchorderindex[ii];
@@ -7650,7 +7650,7 @@ updatemenu=0;
         patch *patchi, *patchj;
 
         if(nmeshes>1){
-          for(i=0;i<npatch_files;i++){
+          for(i=0;i<npatchinfo;i++){
             useitem=i;
             patchi = patchinfo + i;
             for(j=0;j<i;j++){
@@ -7668,7 +7668,7 @@ updatemenu=0;
             }
           }
           glutAddMenuEntry("-",-2);
-          for(ii=0;ii<npatch_files;ii++){
+          for(ii=0;ii<npatchinfo;ii++){
             patch *patch1, *patch2;
 
             i = patchorderindex[ii];
@@ -7705,9 +7705,9 @@ updatemenu=0;
 
 /* --------------------------------load iso menu -------------------------- */
 
-    if(niso_files>0){
+    if(nisoinfo>0){
       CREATEMENU(unloadisomenu,UnloadIsoMenu);
-      for(ii=0;ii<niso_files;ii++){
+      for(ii=0;ii<nisoinfo;ii++){
         iso *isoi;
 
         i = isoorderindex[ii];
@@ -7718,9 +7718,9 @@ updatemenu=0;
       }
       glutAddMenuEntry("Unload all",-1);
 
-      if(niso_files>0){
+      if(nisoinfo>0){
         if(isosubmenus==NULL){
-          NewMemory((void **)&isosubmenus,niso_files*sizeof(int));
+          NewMemory((void **)&isosubmenus,nisoinfo*sizeof(int));
         }
         nisosubmenus=0;
 
@@ -7731,7 +7731,7 @@ updatemenu=0;
       if(nmeshes==1){
         CREATEMENU(loadisomenu,LoadIsoMenu);
       }
-      for(ii=0;ii<niso_files;ii++){
+      for(ii=0;ii<nisoinfo;ii++){
         iso *iso1, *iso2;
 
         i = isoorderindex[ii];
@@ -7759,7 +7759,7 @@ updatemenu=0;
 
         if(nmeshes>1){
          CREATEMENU(loadisomenu,LoadIsoMenu);
-          for(i=0;i<niso_files;i++){
+          for(i=0;i<nisoinfo;i++){
             useitem=i;
             isoi = isoinfo + i;
             for(j=0;j<i;j++){
@@ -7778,7 +7778,7 @@ updatemenu=0;
           }
           glutAddMenuEntry("-",-2);
 
-          for(ii=0;ii<niso_files;ii++){
+          for(ii=0;ii<nisoinfo;ii++){
             iso *iso1, *iso2;
 
             i = isoorderindex[ii];
@@ -7839,7 +7839,7 @@ updatemenu=0;
 /* -------------------------------- compress menu -------------------------- */
 
 #ifdef pp_COMPRESS
-  if(smokezippath!=NULL&&(npatch_files>0||nsmoke3d_files>0||nslice_files>0)){
+  if(smokezippath!=NULL&&(npatchinfo>0||nsmoke3dinfo>0||nsliceinfo>0)){
     CREATEMENU(compressmenu,CompressMenu);
     glutAddMenuEntry(_("Compression options"),999);  // -c
     if(overwrite_all==1){
@@ -7988,7 +7988,7 @@ updatemenu=0;
       glutAddMenuEntry(_("Open Smokeview (.smv) file"),3);
 #endif
       strcpy(steplabel,_("error: steplabel not defined"));
-      if(nsmoke3d_files>0){
+      if(nsmoke3dinfo>0){
         strcpy(loadmenulabel,_("3D smoke"));
         if(smoke3dframeskip>0){
           sprintf(steplabel,"/Skip %i",smoke3dframeskip);
@@ -7999,7 +7999,7 @@ updatemenu=0;
       if(manual_terrain==1&&nterraininfo>0){
         glutAddSubMenu(_("Terrain"),loadterrainmenu);
       }
-      if(nslice_files>0&&nmultislices<nslice_files){
+      if(nsliceinfo>0&&nmultislices<nsliceinfo){
         strcpy(loadmenulabel,"Multi-Slices");
         if(sliceframeskip>0){
           sprintf(steplabel,"/Skip %i",sliceframeskip);
@@ -8015,7 +8015,7 @@ updatemenu=0;
         }
         glutAddSubMenu(loadmenulabel,loadmultivslicemenu);
       }
-      if(nslice_files>0){
+      if(nsliceinfo>0){
         strcpy(loadmenulabel,"Slice file");
         if(sliceframeskip>0){
           sprintf(steplabel,"/Skip %i",sliceframeskip);
@@ -8031,7 +8031,7 @@ updatemenu=0;
         }
         glutAddSubMenu(loadmenulabel,vslicemenu);
       }
-      if(niso_files>0){
+      if(nisoinfo>0){
         strcpy(loadmenulabel,"Isosurface file");
         if(isoframeskip>0){
           sprintf(steplabel,"/Skip %i",isoframeskip);
@@ -8039,7 +8039,7 @@ updatemenu=0;
         }
         glutAddSubMenu(loadmenulabel,loadisomenu);
       }
-      if(npatch_files>0){
+      if(npatchinfo>0){
         strcpy(loadmenulabel,"Boundary file");
         if(boundframeskip>0){
           sprintf(steplabel,"/Skip %i",boundframeskip);
@@ -8047,8 +8047,8 @@ updatemenu=0;
         }
         glutAddSubMenu(loadmenulabel,loadpatchmenu);
       }
-      if(npart_files>0){
-        if(nevac!=npart_files){
+      if(npartinfo>0){
+        if(nevac!=npartinfo){
           strcpy(loadmenulabel,"Particle file");
           if(partframeskip>0||partpointskip>0){
             if(partframeskip>0&&partpointskip>0){
@@ -8081,8 +8081,8 @@ updatemenu=0;
           glutAddSubMenu(loadmenulabel,evacmenu);
         }
       }
-      if(nplot3d_files>0)glutAddSubMenu("Plot3d file",loadplot3dmenu);
-      if(ntarg_files>0){
+      if(nplot3dinfo>0)glutAddSubMenu("Plot3d file",loadplot3dmenu);
+      if(ntarginfo>0){
         strcpy(loadmenulabel,"Target file");
         glutAddSubMenu(loadmenulabel,targetmenu);
       }
@@ -8100,7 +8100,7 @@ updatemenu=0;
       glutAddSubMenu(_("Configuration files"),smokeviewinimenu);
       glutAddSubMenu(_("Script options"),scriptmenu);
 #ifdef pp_COMPRESS
-      if(smokezippath!=NULL&&(npatch_files>0||nsmoke3d_files>0||nslice_files>0)){
+      if(smokezippath!=NULL&&(npatchinfo>0||nsmoke3dinfo>0||nsliceinfo>0)){
         glutAddSubMenu(_("Compression"),compressmenu);
       }
 #endif

@@ -333,23 +333,23 @@ extern "C" void glui_bounds_setup(int main_window){
 
   /*  3d smoke   */
 
-  if(nsmoke3d_files>0){
+  if(nsmoke3dinfo>0){
     panel_smoke3d = glui_bounds->add_rollout("3D smoke",false);
   }
 
   /*  Boundary File Bounds   */
 
-  if(npatch_files>0){
+  if(npatchinfo>0){
     glui_active=1;
     panel_bound = glui_bounds->add_rollout("Boundary",false);
 
     bf_rlist = glui_bounds->add_radiogroup_to_panel(panel_bound,&list_patch_index,FILETYPEINDEX,Bound_CB);
     nradio=0;
-    for(i=0;i<npatch_files;i++){
+    for(i=0;i<npatchinfo;i++){
       if(patchinfo[i].firstshort==1)nradio++;
     }
     if(nradio>1){
-      for(i=0;i<npatch_files;i++){
+      for(i=0;i<npatchinfo;i++){
         if(patchinfo[i].firstshort==1)glui_bounds->add_radiobutton_to_group(bf_rlist,patchinfo[i].label.shortlabel);
       }
       if(activate_threshold==1){
@@ -387,7 +387,7 @@ extern "C" void glui_bounds_setup(int main_window){
 
   /*  Iso File Load Bounds   */
 
-  if(niso_files>0){
+  if(nisoinfo>0){
     panel_iso = glui_bounds->add_rollout("Isosurface",false);
     
     SPINNER_isopointsize=glui_bounds->add_spinner_to_panel(panel_iso,_("Point size"),GLUI_SPINNER_FLOAT,
@@ -412,7 +412,7 @@ extern "C" void glui_bounds_setup(int main_window){
 //SVEXTERN part5prop *part5propinfo;
 //SVEXTERN int npart5prop;
 
-  if(npart_files>0&&nevac!=npart_files){
+  if(npartinfo>0&&nevac!=npartinfo){
     glui_active=1;
     panel_part = glui_bounds->add_rollout("Particle",false);
     if(npart5prop>0){
@@ -499,7 +499,7 @@ extern "C" void glui_bounds_setup(int main_window){
 
   /* Plot3D file bounds */
 
-  if(nplot3d_files>0){
+  if(nplot3dinfo>0){
     glui_active=1;
     panel_plot3d = glui_bounds->add_rollout("Plot3D",false);
 
@@ -564,7 +564,7 @@ extern "C" void glui_bounds_setup(int main_window){
 
   /*  Slice File Bounds   */
 
-  if(nslice_files>0){
+  if(nsliceinfo>0){
     int index;
 
     glui_active=1;
@@ -573,7 +573,7 @@ extern "C" void glui_bounds_setup(int main_window){
     slice_rlist = glui_bounds->add_radiogroup_to_panel(panel_slice,&list_slice_index,FILETYPEINDEX,Slice_CB);
 
     index=0;
-    for(i=0;i<nslice_files;i++){
+    for(i=0;i<nsliceinfo;i++){
       if(sliceinfo[i].firstshort==1){
         GLUI_RadioButton *RADIO_slicetype;
 
@@ -707,7 +707,7 @@ extern "C" void glui_bounds_setup(int main_window){
   SPINNER_labels_transparency_data->set_float_limits(0.0,1.0,GLUI_LIMIT_CLAMP);
 
 #ifdef pp_COMPRESS
-  if(smokezippath!=NULL&&(npatch_files>0||nsmoke3d_files>0||nslice_files>0)){
+  if(smokezippath!=NULL&&(npatchinfo>0||nsmoke3dinfo>0||nsliceinfo>0)){
     glui_bounds->add_separator();
     rollout_compress=glui_bounds->add_rollout(_("Compress files (Smokezip)"),false);
     check_erase_all=glui_bounds->add_checkbox_to_panel(rollout_compress,_("Erase compressed files"),
@@ -716,22 +716,22 @@ extern "C" void glui_bounds_setup(int main_window){
       &overwrite_all,OVERWRITE,Bound_CB);
     check_compress_autoloaded=glui_bounds->add_checkbox_to_panel(rollout_compress,_("Compress only autoloaded files"),
       &compress_autoloaded,COMPRESS_AUTOLOADED,Bound_CB);
-    if(nslice_files>0){
+    if(nsliceinfo>0){
       SPINNER_slicezipstep=glui_bounds->add_spinner_to_panel(rollout_compress,_("Slice frame Skip"),GLUI_SPINNER_INT,&slicezipskip,
         FRAMELOADING,Slice_CB);
       SPINNER_slicezipstep->set_int_limits(0,100);
     }
-    if(niso_files>0){
+    if(nisoinfo>0){
       SPINNER_isozipstep=glui_bounds->add_spinner_to_panel(rollout_compress,_("ISO frame skip"),GLUI_SPINNER_INT,&isozipskip,
         FRAMELOADING,Iso_CB);
       SPINNER_isozipstep->set_int_limits(0,100);
     }
-    if(nsmoke3d_files>0){
+    if(nsmoke3dinfo>0){
       SPINNER_smoke3dzipstep=glui_bounds->add_spinner_to_panel(rollout_compress,_("3D smoke frame skip"),GLUI_SPINNER_INT,&smoke3dzipskip,
         FRAMELOADING,Smoke3D_CB);
       SPINNER_smoke3dzipstep->set_int_limits(0,100);
     }
-    if(npatch_files>0){
+    if(npatchinfo>0){
       SPINNER_boundzipstep=glui_bounds->add_spinner_to_panel(rollout_compress,_("Boundary file frame skip"),
         GLUI_SPINNER_INT,&boundzipskip,FRAMELOADING,Bound_CB);
       SPINNER_boundzipstep->set_int_limits(0,100);
@@ -1079,7 +1079,7 @@ void PLOT3D_CB(int var){
    break;
   case FILERELOAD:
    PLOT3D_CB(FILEUPDATE);
-   for(i=0;i<nplot3d_files;i++){
+   for(i=0;i<nplot3dinfo;i++){
      if(plot3dinfo[i].loaded==0)continue;
      LoadPlot3dMenu(i);
    }
@@ -1155,7 +1155,7 @@ extern "C" void updateplot3dlistindex(void){
   p3chopmax_temp = p3chopmax[i];
   setp3chopmin_temp = setp3chopmin[i];
   setp3chopmax_temp = setp3chopmax[i];
-  if(nplot3d_files>0){
+  if(nplot3dinfo>0){
     PLOT3D_CB(SETVALMIN);
     PLOT3D_CB(SETVALMAX);
     PLOT3D_CB(SETCHOPMINVAL);
@@ -1508,7 +1508,7 @@ void Bound_CB(int var){
     break;
   case FILERELOAD:
     Bound_CB(FILEUPDATE);
-    for(i=0;i<npatch_files;i++){
+    for(i=0;i<npatchinfo;i++){
       pi=patchinfo+i;
       if(pi->loaded==0)continue;
       LoadPatchMenu(i);
@@ -2088,7 +2088,7 @@ extern "C" void Slice_CB(int var){
     break;
   case FILERELOAD:
     Slice_CB(FILEUPDATE);
-    if(slicefilenum>=0&&slicefilenum<nslice_files){
+    if(slicefilenum>=0&&slicefilenum<nsliceinfo){
       LoadSliceMenu(slicefilenum);
     }
     else{
@@ -2179,7 +2179,7 @@ void BUTTON_hide_CB(int var){
 
 extern "C" void show_glui_bounds(void){
   int islice, ipatch;
-  if(nslice_files>0){
+  if(nsliceinfo>0){
     islice=slice_rlist->get_int_val();
     setslicebounds(islice);
     Slice_CB(SETVALMIN);
@@ -2187,22 +2187,22 @@ extern "C" void show_glui_bounds(void){
     Slice_CB(VALMIN);
     Slice_CB(VALMAX);
   }
-  if(npatch_files>0){
+  if(npatchinfo>0){
     ipatch=bf_rlist->get_int_val();
     global2localpatchbounds(patchlabellist[ipatch]);
     Bound_CB(SETVALMIN);
     Bound_CB(SETVALMAX);
   }
-  if(npart_files>0&&npart_files!=nevac){
+  if(npartinfo>0&&npartinfo!=nevac){
     PART_CB(SETVALMIN);
     PART_CB(SETVALMAX);
   }
-  if(nplot3d_files>0){
+  if(nplot3dinfo>0){
     PLOT3D_CB(SETVALMIN);
     PLOT3D_CB(SETVALMAX);
   }
 
-  if(nslice_files>0||npatch_files>0)updateglui();
+  if(nsliceinfo>0||npatchinfo>0)updateglui();
 
   updatechar();
   glui_bounds->show();

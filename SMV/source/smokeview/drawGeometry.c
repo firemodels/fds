@@ -1876,7 +1876,7 @@ void update_facelists(void){
     local_showpatch=0;
     loadpatch=0;
     patchfilenum=meshi->patchfilenum;
-    if(hidepatchsurface==1&&patchfilenum>=0&&patchfilenum<npatch_files){
+    if(hidepatchsurface==1&&patchfilenum>=0&&patchfilenum<npatchinfo){
       patchi = patchinfo + patchfilenum;
       if(patchi->loaded==1)loadpatch=1;
       if(patchi->display==1)local_showpatch=1;

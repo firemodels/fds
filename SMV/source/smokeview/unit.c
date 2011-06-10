@@ -65,7 +65,7 @@ void set_unit_vis(void){
     uci = unitclasses + i;
     uci->visible=0;
 
-    for(j=0;j<nslice_files;j++){
+    for(j=0;j<nsliceinfo;j++){
       slice *slicej;
 
       slicej = sliceinfo + j;
@@ -76,7 +76,7 @@ void set_unit_vis(void){
     }
     if(uci->visible==1)continue;
   
-    for(j=0;j<npatch_files;j++){
+    for(j=0;j<npatchinfo;j++){
       patch *patchj;
       
       patchj = patchinfo + j;
@@ -87,7 +87,7 @@ void set_unit_vis(void){
     }
     if(uci->visible==1)continue;
 
-    for(j=0;j<nplot3d_files;j++){
+    for(j=0;j<nplot3dinfo;j++){
       plot3d *plot3dj;
       int n;
       
@@ -158,7 +158,7 @@ void init_unit_defs(void){
     nunitclasses=nunitclasses_default;
   }
   if(smokediff==0)return;
-  for(j=0;j<nslice_files;j++){
+  for(j=0;j<nsliceinfo;j++){
     slice *slicej;
       
     slicej = sliceinfo + j;
@@ -167,7 +167,7 @@ void init_unit_defs(void){
       add_unit_class(&slicej->label);
     }
   }
-  for(j=0;j<npatch_files;j++){
+  for(j=0;j<npatchinfo;j++){
     patch *patchj;
       
     patchj = patchinfo + j;
@@ -176,7 +176,7 @@ void init_unit_defs(void){
       add_unit_class(&patchj->label);
     }
   }
-  for(j=0;j<nplot3d_files;j++){
+  for(j=0;j<nplot3dinfo;j++){
     plot3d *plot3dj;
     int n;
       
@@ -202,7 +202,7 @@ void update_unit_defs(void){
     int firstslice, firstpatch, firstplot3d, diff_index;
 
     firstpatch=1;
-    for(j=0;j<npatch_files;j++){
+    for(j=0;j<npatchinfo;j++){
       patch *patchj;
       
       patchj = patchinfo + j;
@@ -220,7 +220,7 @@ void update_unit_defs(void){
     }
 
     firstslice=1;
-    for(j=0;j<nslice_files;j++){
+    for(j=0;j<nsliceinfo;j++){
       slice *slicej;
       
       slicej = sliceinfo + j;
@@ -238,7 +238,7 @@ void update_unit_defs(void){
     }
 
     firstplot3d=1;
-    for(j=0;j<nplot3d_files;j++){
+    for(j=0;j<nplot3dinfo;j++){
       plot3d *plot3dj;
       int n;
       

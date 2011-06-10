@@ -895,7 +895,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     if(nrooms>0){
       getzonesmokedir(modelview_scratch);
     }
-    if(nsmoke3d_files>0&&show3dsmoke==1){
+    if(nsmoke3dinfo>0&&show3dsmoke==1){
       getsmokedir(modelview_scratch);
 #ifdef pp_GPU
       if(use_volume_shader==1){
@@ -1170,7 +1170,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
       if(staticframe0==0||iframe!=0){
         int i;
 
-        for(i=0;i<npart_files;i++){
+        for(i=0;i<npartinfo;i++){
           parti = partinfo + i;
           if(parti->loaded==0||parti->display==0)continue;
           if(parti->evac==1){
@@ -1186,7 +1186,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
       if(visStaticSmoke==1&&staticframe0==1){
         int i;
 
-        for(i=0;i<npart_files;i++){
+        for(i=0;i<npartinfo;i++){
           parti = partinfo + i;
           if(parti->loaded==0||parti->display==0)continue;
           drawStaticPart(parti);
@@ -1200,7 +1200,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
     if(showevac==1){
       int i;
 
-      for(i=0;i<npart_files;i++){
+      for(i=0;i<npartinfo;i++){
         particle *parti;
 
         parti = partinfo + i;
@@ -1509,7 +1509,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
     else{
       int i;
 
-      for(i=0;i<nsmoke3d_files;i++){
+      for(i=0;i<nsmoke3dinfo;i++){
         smoke3d *smoke3di;
 
         smoke3di = smoke3dinfo + i;
@@ -1533,7 +1533,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 #else
     {
     int i;
-    for(i=0;i<nsmoke3d_files;i++){
+    for(i=0;i<nsmoke3dinfo;i++){
       smoke3d *smoke3di;
 
       smoke3di = smoke3dinfo + i;
@@ -1991,7 +1991,7 @@ void updateShow(void){
   {
     smoke3d *smoke3di;
 
-    for(ii=0;ii<nsmoke3d_files;ii++){
+    for(ii=0;ii<nsmoke3dinfo;ii++){
       smoke3di = smoke3dinfo + ii;
       if(smoke3di->loaded==1&&smoke3di->display==1){
         smoke3dflag=1;
@@ -2051,7 +2051,7 @@ void updateShow(void){
   isoflag=0;
   tisoflag=0;
   if(visTimeIso==1){
-    for(i=0;i<niso_files;i++){
+    for(i=0;i<nisoinfo;i++){
       isoi = isoinfo+i;
       if(isoi->loaded==0)continue;
       if(isoi->display==1&&isoi->type==iisotype){
@@ -2118,7 +2118,7 @@ void updateShow(void){
   }
   partflag=0;
   if(visSmoke==1&&visTimeSmoke==1){
-    for(i=0;i<npart_files;i++){
+    for(i=0;i<npartinfo;i++){
       parti = partinfo + i;
       if(parti->evac==1)continue;
       if(parti->loaded==0||parti->display==0)continue;
@@ -2134,7 +2134,7 @@ void updateShow(void){
   }
   evacflag=0;
   if(visEvac==1&&visTimeEvac==1){
-    for(i=0;i<npart_files;i++){
+    for(i=0;i<npartinfo;i++){
       parti = partinfo + i;
       if(parti->evac==0)continue;
       if(parti->loaded==0||parti->display==0)continue;
@@ -2394,12 +2394,12 @@ void updatetimes(void){
     if(touri->display==0)continue;
     ntimes += touri->npath;
   }
-  for(i=0;i<npart_files;i++){
+  for(i=0;i<npartinfo;i++){
     parti = partinfo + i;
     if(parti->loaded==0)continue;
     ntimes += parti->nframes;
   }
-  for(i=0;i<nslice_files;i++){
+  for(i=0;i<nsliceinfo;i++){
     sd=sliceinfo+i;
     if(sd->loaded==1||sd->vloaded==1){
       ntimes+=sd->nsteps;
@@ -2434,7 +2434,7 @@ void updatetimes(void){
     smoke3d *smoke3di;
 
     if(Read3DSmoke3DFile==1&&vis3DSmoke3D==1){
-      for(i=0;i<nsmoke3d_files;i++){
+      for(i=0;i<nsmoke3dinfo;i++){
         smoke3di = smoke3dinfo + i;
         if(smoke3di->loaded==0)continue;
         ntimes += smoke3di->n_times;
@@ -2494,7 +2494,7 @@ void updatetimes(void){
     }
   }
 
-  for(i=0;i<npart_files;i++){
+  for(i=0;i<npartinfo;i++){
     parti = partinfo + i;
     if(parti->loaded==0)continue;
     for(n=0;n<parti->nframes;n++){
@@ -2508,7 +2508,7 @@ void updatetimes(void){
     }
   }
 
-  for(i=0;i<nslice_files;i++){
+  for(i=0;i<nsliceinfo;i++){
     sd = sliceinfo + i;
     if(sd->loaded==1||sd->vloaded==1){
       for(n=0;n<sd->nsteps;n++){
@@ -2565,7 +2565,7 @@ void updatetimes(void){
     }
   }
   if(ReadIsoFile==1&&visAIso!=0){
-    for(i=0;i<niso_files;i++){
+    for(i=0;i<nisoinfo;i++){
       ib = isoinfo+i;
       if(ib->loaded==0)continue;
       meshi=meshinfo + ib->blocknumber;
@@ -2584,7 +2584,7 @@ void updatetimes(void){
     smoke3d *smoke3di;
 
     if(Read3DSmoke3DFile==1&&vis3DSmoke3D==1){
-      for(i=0;i<nsmoke3d_files;i++){
+      for(i=0;i<nsmoke3dinfo;i++){
         smoke3di = smoke3dinfo + i;
         if(smoke3di->loaded==0)continue;
         for(n=0;n<smoke3di->n_times;n++){
@@ -2614,7 +2614,7 @@ void updatetimes(void){
   ntimes=ntimes2;
   FREEMEMORY(render_frame);
     if(ntimes>0)NewMemory((void **)&render_frame,ntimes*sizeof(int));
-    for(i=0;i<npart_files;i++){
+    for(i=0;i<npartinfo;i++){
       parti=partinfo+i;
       FREEMEMORY(parti->ptimeslist);
       if(ntimes>0)NewMemory((void **)&parti->ptimeslist,ntimes*sizeof(int));
@@ -2681,7 +2681,7 @@ void updatetimes(void){
     }
 #endif
 
-    for(i=0;i<nslice_files;i++){
+    for(i=0;i<nsliceinfo;i++){
       sd = sliceinfo + i;
       FREEMEMORY(sd->slicetimeslist);
       if(ntimes>0)NewMemory((void **)&sd->slicetimeslist,ntimes*sizeof(int));
@@ -2689,7 +2689,7 @@ void updatetimes(void){
     {
       smoke3d *smoke3di;
 
-      for(i=0;i<nsmoke3d_files;i++){
+      for(i=0;i<nsmoke3dinfo;i++){
         smoke3di = smoke3dinfo + i;
         FREEMEMORY(smoke3di->timeslist);
         if(ntimes>0)NewMemory((void **)&smoke3di->timeslist,ntimes*sizeof(int));
@@ -2737,7 +2737,7 @@ void updatetimes(void){
     meshi=meshinfo+i;
     meshi->ipatch=0;
   }
-  for(i=0;i<nslice_files;i++){
+  for(i=0;i<nsliceinfo;i++){
     sd = sliceinfo + i;
     sd->islice=0; 
   }
@@ -2747,7 +2747,7 @@ void updatetimes(void){
     if(meshi->isotimes==NULL)continue;
     meshi->iiso=0;
   }
-  for(i=0;i<npart_files;i++){
+  for(i=0;i<npartinfo;i++){
     parti = partinfo + i;
     parti->iframe=0;
   }
@@ -2827,7 +2827,7 @@ void updatetimes(void){
   }
   show_slice_terrain=0;
   if(visTerrainType==3){
-    for(i=0;i<nslice_files;i++){
+    for(i=0;i<nsliceinfo;i++){
       sd = sliceinfo + i;
       if(sd->loaded==0||sd->display==0||sd->terrain==0)continue;
       show_slice_terrain=1;
@@ -3201,7 +3201,7 @@ void synctimes(void){
 
   /* synchronize particle times */
 
-    for(j=0;j<npart_files;j++){
+    for(j=0;j<npartinfo;j++){
       parti=partinfo+j;
       if(parti->loaded==0)continue;
       if(n==0){
@@ -3221,7 +3221,7 @@ void synctimes(void){
     }
        /* synchronize target times */
 
-    if(ntarg_files>0){
+    if(ntarginfo>0){
       if(n==0){
         istart=0;
       }
@@ -3283,7 +3283,7 @@ void synctimes(void){
     {
       smoke3d *smoke3di;
 
-      for(jj=0;jj<nsmoke3d_files;jj++){
+      for(jj=0;jj<nsmoke3dinfo;jj++){
         smoke3di = smoke3dinfo + jj;
         if(smoke3di->loaded==0)continue;
          if(n==0){
@@ -3872,7 +3872,7 @@ void checktimebound(void){
 
   if(timedrag==0&&itimes>ntimes-1||timedrag==1&&itimes<0){
     izone=0;itimes=0;iframe=iframebeg;
-    for(i=0;i<nslice_files;i++){
+    for(i=0;i<nsliceinfo;i++){
       sd=sliceinfo+i;
       sd->islice=0;
     }
@@ -3888,11 +3888,11 @@ void checktimebound(void){
   }
   if(timedrag==0&&itimes<0||timedrag==1&&itimes>ntimes-1){
     izone=nzonet-1;itimes=ntimes-1;
-    for(i=0;i<npart_files;i++){
+    for(i=0;i<npartinfo;i++){
       parti=partinfo+i;
       parti->iframe=parti->nframes-1;
     }
-    for(i=0;i<nslice_files;i++){
+    for(i=0;i<nsliceinfo;i++){
       sd=sliceinfo+i;
       sd->islice=sd->nsteps-1;
     }
@@ -3983,12 +3983,12 @@ int getplotstate(int choice){
         if(patchi->display==0||patchi->type!=ipatchtype)continue;
         return DYNAMIC_PLOTS;
       }
-      for(i=0;i<npart_files;i++){
+      for(i=0;i<npartinfo;i++){
         parti = partinfo + i;
         if(parti->loaded==0||parti->display==0)continue;
         return DYNAMIC_PLOTS;
       }
-      for(i=0;i<niso_files;i++){
+      for(i=0;i<nisoinfo;i++){
         isoi = isoinfo + i;
         if(isoi->loaded==0)continue;
         if(isoi->display==0)continue;
@@ -3999,7 +3999,7 @@ int getplotstate(int choice){
         if(zonei->loaded==0||zonei->display==0)continue;
         return DYNAMIC_PLOTS;
       }
-      for(i=0;i<ntarg_files;i++){
+      for(i=0;i<ntarginfo;i++){
         targi = targinfo + i;
         if(targi->loaded==0||targi->display==0)continue;
         return DYNAMIC_PLOTS;
@@ -4009,7 +4009,7 @@ int getplotstate(int choice){
         if(touri->display==0)continue;
         return DYNAMIC_PLOTS;
       }
-      for(i=0;i<nsmoke3d_files;i++){
+      for(i=0;i<nsmoke3dinfo;i++){
         smoke3di = smoke3dinfo + i;
         if(smoke3di->loaded==0||smoke3di->display==0)continue;
         return DYNAMIC_PLOTS;

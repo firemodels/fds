@@ -233,16 +233,16 @@ void readsmv_dynamic(char *file){
   int i,j;
   int nn_plot3d=0,iplot3d=0;
   int do_pass2=0, do_pass3=0, minmaxpl3d=0;
-  int nplot3d_files_old;
+  int nplot3dinfo_old;
 
-  nplot3d_files_old=nplot3d_files;
+  nplot3dinfo_old=nplot3dinfo;
 
   updatefacelists=1;
   updatemenu=1;
-  if(nplot3d_files>0){
+  if(nplot3dinfo>0){
     int n;
 
-    for(i=0;i<nplot3d_files;i++){
+    for(i=0;i<nplot3dinfo;i++){
       plot3d *plot3di;
 
       plot3di = plot3dinfo + i;
@@ -254,7 +254,7 @@ void readsmv_dynamic(char *file){
     }
 //    FREEMEMORY(plot3dinfo);
   }
-  nplot3d_files=0;
+  nplot3dinfo=0;
 
   stream=fopen(file,"r");
   if(stream==NULL)return;
@@ -316,7 +316,7 @@ void readsmv_dynamic(char *file){
 
     if(match(buffer,"PL3D",4) == 1){
       do_pass2=1;
-      nplot3d_files++;
+      nplot3dinfo++;
       continue;
    
     }
@@ -574,12 +574,12 @@ void readsmv_dynamic(char *file){
     meshi->smoothblockages_list[0].time=-1.0;
     meshi->nsmoothblockages_list++;
   }
-  if(nplot3d_files>0){
+  if(nplot3dinfo>0){
     if(plot3dinfo==NULL){
-      NewMemory((void **)&plot3dinfo,nplot3d_files*sizeof(plot3d));
+      NewMemory((void **)&plot3dinfo,nplot3dinfo*sizeof(plot3d));
     }
     else{
-      ResizeMemory((void **)&plot3dinfo,nplot3d_files*sizeof(plot3d));
+      ResizeMemory((void **)&plot3dinfo,nplot3dinfo*sizeof(plot3d));
     }
   }
   for(i=0;i<ndeviceinfo;i++){
@@ -637,7 +637,7 @@ void readsmv_dynamic(char *file){
         time=-1.0;
       }
       if(fgets(buffer,255,stream)==NULL){
-        nplot3d_files--;
+        nplot3dinfo--;
         break;
       }
       bufptr=trim_string(buffer);
@@ -648,7 +648,7 @@ void readsmv_dynamic(char *file){
       plot3di->seq_id=nn_plot3d;
       plot3di->autoload=0;
       plot3di->time=time;
-      if(plot3di>plot3dinfo+nplot3d_files_old-1){
+      if(plot3di>plot3dinfo+nplot3dinfo_old-1){
         plot3di->loaded=0;
         plot3di->display=0;
       }
@@ -678,7 +678,7 @@ void readsmv_dynamic(char *file){
         for(n=0;n<5;n++){
           if(readlabels(&plot3di->label[n],stream)==2)return;
         }
-        nplot3d_files--;
+        nplot3dinfo--;
       }
       else{
         int n;
@@ -918,7 +918,7 @@ void readsmv_dynamic(char *file){
         sscanf(buffer,"%f %f %f %f",valmin +i,valmax+i, percentile_min+i,percentile_max+i);
       }
 
-      for(i=0;i<nplot3d_files;i++){
+      for(i=0;i<nplot3dinfo;i++){
         plot3d *plot3di;
 
         plot3di = plot3dinfo + i;
@@ -1160,23 +1160,23 @@ int readsmv(char *file, char *file2){
   }
   nzone=0;
 
-  if(nsmoke3d_files>0){
+  if(nsmoke3dinfo>0){
     {
       smoke3d *smoke3di;
 
-      for(i=0;i<nsmoke3d_files;i++){
+      for(i=0;i<nsmoke3dinfo;i++){
         smoke3di = smoke3dinfo + i;
         freesmoke3d(smoke3di);
         FREEMEMORY(smoke3di->comp_file);
         FREEMEMORY(smoke3di->reg_file);
       }
       FREEMEMORY(smoke3dinfo);
-      nsmoke3d_files=0;
+      nsmoke3dinfo=0;
     }
   }
 
-  if(npart_files>0){
-    for(i=0;i<npart_files;i++){
+  if(npartinfo>0){
+    for(i=0;i<npartinfo;i++){
       freelabels(&partinfo[i].label);
       FREEMEMORY(partinfo[i].partclassptr);
       FREEMEMORY(partinfo[i].reg_file);
@@ -1185,17 +1185,17 @@ int readsmv(char *file, char *file2){
     }
     FREEMEMORY(partinfo);
   }
-  npart_files=0;
+  npartinfo=0;
 
-  ntarg_files=0;
+  ntarginfo=0;
 
   FREEMEMORY(surfaceinfo);
 
 
   //*** free slice data
 
-  if(nslice_files>0){
-    for(i=0;i<nslice_files;i++){
+  if(nsliceinfo>0){
+    for(i=0;i<nsliceinfo;i++){
       slice *sd;
       sd = sliceinfo + i;
       freelabels(&sliceinfo[i].label);
@@ -1214,7 +1214,7 @@ int readsmv(char *file, char *file2){
     nmultislices=0;
     FREEMEMORY(sliceinfo);
   }
-  nslice_files=0;
+  nsliceinfo=0;
 
   //*** free multi-vector slice data
 
@@ -1230,8 +1230,8 @@ int readsmv(char *file, char *file2){
     nmultivslices=0;
   }
 
-  if(npatch_files>0){
-    for(i=0;i<npatch_files;i++){
+  if(npatchinfo>0){
+    for(i=0;i<npatchinfo;i++){
       freelabels(&patchinfo[i].label);
       FREEMEMORY(patchinfo[i].reg_file);
       FREEMEMORY(patchinfo[i].comp_file);
@@ -1239,16 +1239,16 @@ int readsmv(char *file, char *file2){
     }
     FREEMEMORY(patchinfo);
   }
-  npatch_files=0;
+  npatchinfo=0;
   
-  if(niso_files>0){
-    for(i=0;i<niso_files;i++){
+  if(nisoinfo>0){
+    for(i=0;i<nisoinfo;i++){
       freelabels(&isoinfo[i].surface_label);
       FREEMEMORY(isoinfo[i].file);
     }
     FREEMEMORY(isoinfo);
   }
-  niso_files=0;
+  nisoinfo=0;
 
   freecadinfo();
 
@@ -1586,7 +1586,7 @@ int readsmv(char *file, char *file2){
     if(match(buffer,"PART",4) == 1||match(buffer,"EVAC",4)==1
       ||match(buffer,"PRT5",4)==1||match(buffer,"EVA5",4)==1
       ){
-      npart_files++;
+      npartinfo++;
       continue;
     }
     if( (match(buffer,"SLCF",4) == 1)||
@@ -1594,12 +1594,12 @@ int readsmv(char *file, char *file2){
         (match(buffer,"SLFL",4) == 1)||
         (match(buffer,"SLCT",4) == 1)
       ){
-      nslice_files++;
+      nsliceinfo++;
       continue;
     }
     if(match(buffer,"SMOKE3D",7) == 1||
        match(buffer,"VSMOKE3D",8) == 1){
-      nsmoke3d_files++;
+      nsmoke3dinfo++;
       continue;
     }
     if(
@@ -1611,11 +1611,11 @@ int readsmv(char *file, char *file2){
       continue;
     }
     if(match(buffer,"BNDF",4) == 1|| match(buffer,"BNDC",4) == 1){
-      npatch_files++;
+      npatchinfo++;
       continue;
     }
     if(match(buffer,"ISOF",4) == 1||match(buffer,"TISOF",5)==1){
-      niso_files++;
+      nisoinfo++;
       continue;
     }
     if(match(buffer,"ROOM",4) == 1){
@@ -1635,7 +1635,7 @@ int readsmv(char *file, char *file2){
       match(buffer,"TARG",4) ==1||
       match(buffer,"FTARG",5)==1
       ){
-      ntarg_files++;
+      ntarginfo++;
       continue;
     }
     if(match(buffer,"VENTGEOM",8) == 1||match(buffer,"VFLOWGEOM",9)==1){
@@ -1777,44 +1777,44 @@ int readsmv(char *file, char *file2){
   // define labels and memory for default colorbars
 
   FREEMEMORY(partinfo);
-  if(npart_files!=0){
-    if(NewMemory((void **)&partinfo,npart_files*sizeof(particle))==0)return 2;
+  if(npartinfo!=0){
+    if(NewMemory((void **)&partinfo,npartinfo*sizeof(particle))==0)return 2;
   }
 
   FREEMEMORY(targinfo);
-  if(ntarg_files!=0){
-    if(NewMemory((void **)&targinfo,ntarg_files*sizeof(targ))==0)return 2;
+  if(ntarginfo!=0){
+    if(NewMemory((void **)&targinfo,ntarginfo*sizeof(targ))==0)return 2;
   }
 
   FREEMEMORY(vsliceinfo);
   FREEMEMORY(sliceinfo);
   FREEMEMORY(slicetypes);
   FREEMEMORY(vslicetypes);
-  if(nslice_files>0){
-    if(NewMemory( (void **)&vsliceinfo, 3*nslice_files*sizeof(vslice) )==0||
-       NewMemory( (void **)&sliceinfo,  nslice_files*sizeof(slice)    )==0||
-       NewMemory( (void **)&slicetypes, nslice_files*sizeof(int)      )==0||
-       NewMemory( (void **)&slice_loadstack, nslice_files*sizeof(int)      )==0||
-       NewMemory( (void **)&vslice_loadstack, nslice_files*sizeof(int)      )==0||
-       NewMemory( (void **)&subslice_menuindex, nslice_files*sizeof(int)      )==0||
-       NewMemory( (void **)&subvslice_menuindex, nslice_files*sizeof(int)      )==0||
-       NewMemory( (void **)&mslice_loadstack, nslice_files*sizeof(int)      )==0||
-       NewMemory( (void **)&mvslice_loadstack, nslice_files*sizeof(int)      )==0||
-       NewMemory( (void **)&vslicetypes,3*nslice_files*sizeof(int)    )==0){
+  if(nsliceinfo>0){
+    if(NewMemory( (void **)&vsliceinfo, 3*nsliceinfo*sizeof(vslice) )==0||
+       NewMemory( (void **)&sliceinfo,  nsliceinfo*sizeof(slice)    )==0||
+       NewMemory( (void **)&slicetypes, nsliceinfo*sizeof(int)      )==0||
+       NewMemory( (void **)&slice_loadstack, nsliceinfo*sizeof(int)      )==0||
+       NewMemory( (void **)&vslice_loadstack, nsliceinfo*sizeof(int)      )==0||
+       NewMemory( (void **)&subslice_menuindex, nsliceinfo*sizeof(int)      )==0||
+       NewMemory( (void **)&subvslice_menuindex, nsliceinfo*sizeof(int)      )==0||
+       NewMemory( (void **)&mslice_loadstack, nsliceinfo*sizeof(int)      )==0||
+       NewMemory( (void **)&mvslice_loadstack, nsliceinfo*sizeof(int)      )==0||
+       NewMemory( (void **)&vslicetypes,3*nsliceinfo*sizeof(int)    )==0){
        return 2;
     }
-    nslice_loadstack=nslice_files;
+    nslice_loadstack=nsliceinfo;
     islice_loadstack=0;
-    nvslice_loadstack=nslice_files;
+    nvslice_loadstack=nsliceinfo;
     ivslice_loadstack=0;
-    nmslice_loadstack=nslice_files;
+    nmslice_loadstack=nsliceinfo;
     imslice_loadstack=0;
-    nmvslice_loadstack=nslice_files;
+    nmvslice_loadstack=nsliceinfo;
     imvslice_loadstack=0;
        
   }
-  if(nsmoke3d_files>0){
-    if(NewMemory( (void **)&smoke3dinfo, nsmoke3d_files*sizeof(smoke3d))==0)return 2;
+  if(nsmoke3dinfo>0){
+    if(NewMemory( (void **)&smoke3dinfo, nsmoke3dinfo*sizeof(smoke3d))==0)return 2;
   }
 
 #ifndef pp_OSX
@@ -1823,9 +1823,9 @@ int readsmv(char *file, char *file2){
 
   FREEMEMORY(patchinfo);
   FREEMEMORY(patchtypes);
-  if(npatch_files!=0){
-    if(NewMemory((void **)&patchinfo,npatch_files*sizeof(patch))==0)return 2;
-    for(i=0;i<npatch_files;i++){
+  if(npatchinfo!=0){
+    if(NewMemory((void **)&patchinfo,npatchinfo*sizeof(patch))==0)return 2;
+    for(i=0;i<npatchinfo;i++){
       patch *patchi;
 
       patchi = patchinfo + i;
@@ -1834,13 +1834,13 @@ int readsmv(char *file, char *file2){
       patchi->file=NULL;
       patchi->size_file=NULL;
     }
-    if(NewMemory((void **)&patchtypes,npatch_files*sizeof(int))==0)return 2;
+    if(NewMemory((void **)&patchtypes,npatchinfo*sizeof(int))==0)return 2;
   }
   FREEMEMORY(isoinfo);
   FREEMEMORY(isotypes);
-  if(niso_files>0){
-    if(NewMemory((void **)&isoinfo,niso_files*sizeof(iso))==0)return 2;
-    if(NewMemory((void **)&isotypes,niso_files*sizeof(int))==0)return 2;
+  if(nisoinfo>0){
+    if(NewMemory((void **)&isoinfo,nisoinfo*sizeof(iso))==0)return 2;
+    if(NewMemory((void **)&isotypes,nisoinfo*sizeof(int))==0)return 2;
   }
   FREEMEMORY(roominfo);
   if(nrooms>0){
@@ -2561,7 +2561,7 @@ typedef struct {
         blocknumber--;
       }
       if(fgets(buffer,255,stream)==NULL){
-        nsmoke3d_files--;
+        nsmoke3dinfo--;
         BREAK;
       }
       bufptr=trim_string(buffer);
@@ -2626,7 +2626,7 @@ typedef struct {
         }
         else{
           if(readlabels(&smoke3di->label,stream)==2)return 2;
-          nsmoke3d_files--;
+          nsmoke3dinfo--;
         }
         smoke3di->version=getsmoke3d_version(smoke3di);
         if(smoke3di->have_light==1)have_lighting=1;
@@ -4348,7 +4348,7 @@ typedef struct {
       parti->seq_id=nn_part;
       parti->autoload=0;
       if(fgets(buffer,255,stream)==NULL){
-        npart_files--;
+        npartinfo--;
         BREAK;
       }
 
@@ -4447,7 +4447,7 @@ typedef struct {
             parti->partclassptr[i]=partclassinfo + parti->nclasses;
         }
         if(parti->file==NULL||STAT(parti->file,&statbuffer)!=0){
-          npart_files--;
+          npartinfo--;
         }
         else{
           ipart++;
@@ -4460,7 +4460,7 @@ typedef struct {
         }
         else{
           if(readlabels(&parti->label,stream)==2)return 2;
-          npart_files--;
+          npartinfo--;
         }
       }
       continue;
@@ -4478,7 +4478,7 @@ typedef struct {
       if(match(buffer,"FTARG",5)==1)targinfo[itarg].type=2;
 
       if(fgets(buffer,255,stream)==NULL){
-        ntarg_files--;
+        ntarginfo--;
         BREAK;
       }
       len=strlen(buffer);
@@ -4498,7 +4498,7 @@ typedef struct {
         itarg++;
       }
       else{
-        ntarg_files--;
+        ntarginfo--;
       }
       continue;
     }
@@ -4678,7 +4678,7 @@ typedef struct {
         blocknumber--;
       }
       if(fgets(buffer,255,stream)==NULL){
-        nslice_files--;
+        nsliceinfo--;
         BREAK;
       }
 
@@ -4754,7 +4754,7 @@ typedef struct {
       }
       else{
         if(readlabels(&sd->label,stream)==2)return 2;
-        nslice_files--;
+        nsliceinfo--;
       }
       continue;
     }
@@ -4796,7 +4796,7 @@ typedef struct {
       }
 
       if(fgets(buffer,255,stream)==NULL){
-        npatch_files--;
+        npatchinfo--;
         BREAK;
       }
 
@@ -4856,7 +4856,7 @@ typedef struct {
           warning_message(message);
         }
         if(readlabels(&patchi->label,stream)==2)return 2;
-        npatch_files--;
+        npatchinfo--;
       }
       continue;
     }
@@ -4895,7 +4895,7 @@ typedef struct {
         blocknumber--;
       }
       if(fgets(buffer,255,stream)==NULL){
-        niso_files--;
+        nisoinfo--;
         BREAK;
       }
 
@@ -4949,7 +4949,7 @@ typedef struct {
         if(dataflag==1){
           if(readlabels(&isoi->color_label,stream)==2)return 2;
         }
-        niso_files--;
+        nisoinfo--;
       }
       if(get_isolevels==1){
         int len_clevels;
@@ -5343,7 +5343,7 @@ typedef struct {
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f %f %f",&valmin,&valmax,&percentile_min,&percentile_max);
 
-      for(i=0;i<npatch_files;i++){
+      for(i=0;i<npatchinfo;i++){
         patch *patchi;
 
         patchi = patchinfo + i;
@@ -5369,7 +5369,7 @@ typedef struct {
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f %f %f",&valmin,&valmax,&percentile_min,&percentile_max);
 
-      for(i=0;i<nslice_files;i++){
+      for(i=0;i<nsliceinfo;i++){
         slice *slicei;
 
         slicei = sliceinfo + i;
@@ -5508,12 +5508,12 @@ typedef struct {
   */
 
   FREEMEMORY(slice_loaded_list);
-  if(nslice_files>0){
-    NewMemory((void **)&slice_loaded_list,nslice_files*sizeof(int));
+  if(nsliceinfo>0){
+    NewMemory((void **)&slice_loaded_list,nsliceinfo*sizeof(int));
   }
   FREEMEMORY(patch_loaded_list);
-  if(npatch_files>0){
-    NewMemory((void **)&patch_loaded_list,npatch_files*sizeof(int));
+  if(npatchinfo>0){
+    NewMemory((void **)&patch_loaded_list,npatchinfo*sizeof(int));
   }
   update_loaded_lists();
 
@@ -6039,13 +6039,13 @@ typedef struct {
     endian = endian_data;
   }
 
-  if(niso_files>0){
+  if(nisoinfo>0){
     FREEMEMORY(isoindex);
     FREEMEMORY(isobounds);
-    if(NewMemory((void*)&isoindex,niso_files*sizeof(int))==0)return 2;
-    if(NewMemory((void*)&isobounds,niso_files*sizeof(databounds))==0)return 2;
+    if(NewMemory((void*)&isoindex,nisoinfo*sizeof(int))==0)return 2;
+    if(NewMemory((void*)&isobounds,nisoinfo*sizeof(databounds))==0)return 2;
     niso_bounds=0;
-    for(i=0;i<niso_files;i++){
+    for(i=0;i<nisoinfo;i++){
       iso *isoi;
 
       isoi = isoinfo + i;
@@ -6081,13 +6081,13 @@ typedef struct {
     }
   }
 
-  if(nslice_files>0){
+  if(nsliceinfo>0){
     FREEMEMORY(sliceindex);
     FREEMEMORY(slicebounds);
-    if(NewMemory((void*)&sliceindex,nslice_files*sizeof(int))==0)return 2;
-    if(NewMemory((void*)&slicebounds,nslice_files*sizeof(databounds))==0)return 2;
+    if(NewMemory((void*)&sliceindex,nsliceinfo*sizeof(int))==0)return 2;
+    if(NewMemory((void*)&slicebounds,nsliceinfo*sizeof(databounds))==0)return 2;
     nslice2=0;
-    for(i=0;i<nslice_files;i++){
+    for(i=0;i<nsliceinfo;i++){
       slice *slicei;
 
       slicei = sliceinfo + i;
@@ -6125,13 +6125,13 @@ typedef struct {
     }
   }
   canshow_threshold=0;
-  if(npatch_files>0){
+  if(npatchinfo>0){
     npatch2=0;
     FREEMEMORY(patchlabellist);
     FREEMEMORY(patchlabellist_index);
-    if(NewMemory((void **)&patchlabellist,npatch_files*sizeof(char *))==0||
-       NewMemory((void **)&patchlabellist_index,npatch_files*sizeof(int))==0)return 2;
-    for(i=0;i<npatch_files;i++){
+    if(NewMemory((void **)&patchlabellist,npatchinfo*sizeof(char *))==0||
+       NewMemory((void **)&patchlabellist_index,npatchinfo*sizeof(int))==0)return 2;
+    for(i=0;i<npatchinfo;i++){
       patchinfo[i].firstshort=1;
       patchinfo[i].valmin=1.0;
       patchinfo[i].valmax=0.0;
@@ -6236,6 +6236,9 @@ typedef struct {
     }
     nchanged_idlist=ntotal;
   }
+
+  init_volrender();
+
 #ifdef pp_CULL
 
   // define data structures used to speed up 3d smoke drawing (by culling non-visible smoke planes)
@@ -6252,6 +6255,20 @@ typedef struct {
 #endif
 
   return 0;
+}
+
+/* ------------------ init_volrender ------------------------ */
+
+void init_volrender(void){
+  int i;
+
+  if(n_volrenderinfo>0){
+    n_volrenderinfo=0;
+    FREEMEMORY(volrenderinfo);
+  }
+  for(i=i;i<nsliceinfo;i++){
+  }
+
 }
 
 /* ------------------ parsedatabase ------------------------ */
@@ -7356,7 +7373,7 @@ void readboundini(void){
       trim(buffer2);
       buffer2ptr=trim_front(buffer2);
       lenbuffer2=strlen(buffer2ptr);
-      for(i=0;i<npatch_files;i++){
+      for(i=0;i<npatchinfo;i++){
         patch *patchi;
 
         patchi = patchinfo +i;
@@ -7394,7 +7411,7 @@ void writeboundini(void){
   strcat(fullfilename,boundinifilename);
 
   if(boundinifilename==NULL)return;
-  for(i=0;i<npatch_files;i++){
+  for(i=0;i<npatchinfo;i++){
     int ii;
     bounddata *boundi;
     patch *patchi;
@@ -8191,7 +8208,7 @@ int readini2(char *inifile, int localfile){
       trim(buffer2);
       buffer2ptr=trim_front(buffer2);
       lenbuffer2=strlen(buffer2ptr);
-      for(i=0;i<npatch_files;i++){
+      for(i=0;i<npatchinfo;i++){
         if(lenbuffer2==0||strcmp(patchinfo[i].label.shortlabel,buffer2ptr)==0){
           patchinfo[i].chopmin=valmin;
           patchinfo[i].chopmax=valmax;
@@ -10062,7 +10079,7 @@ void writeini(int flag){
         );
     }
   }
-  for(i=0;i<npatch_files;i++){
+  for(i=0;i<npatchinfo;i++){
     if(patchinfo[i].firstshort==1){
       fprintf(fileout,"V_BOUNDARY\n");
       fprintf(fileout," %i %f %i %f %s\n",
@@ -10873,7 +10890,7 @@ void update_loaded_lists(void){
   patch *patchi;
 
   nslice_loaded=0;
-  for(i=0;i<nslice_files;i++){
+  for(i=0;i<nsliceinfo;i++){
     slicei = sliceinfo + i;
     if(slicei->loaded==1){
       slice_loaded_list[nslice_loaded]=i;
@@ -10882,7 +10899,7 @@ void update_loaded_lists(void){
   }
 
   npatch_loaded=0;
-  for(i=0;i<npatch_files;i++){
+  for(i=0;i<npatchinfo;i++){
     patchi = patchinfo + i;
     if(patchi->loaded==1){
       patch_loaded_list[npatch_loaded]=i;

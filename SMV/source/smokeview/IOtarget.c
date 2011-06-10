@@ -365,7 +365,7 @@ void drawTargets(void){
 
   time_val=0.0;
   if(times!=NULL)time_val = times[itimes];
-  for(j=0;j<ntarg_files;j++){
+  for(j=0;j<ntarginfo;j++){
     if(targinfo[j].loaded==0||targinfo[j].display==0)continue;
     switch (targinfo[j].type){
      case 1:

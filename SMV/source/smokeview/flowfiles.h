@@ -1032,6 +1032,13 @@ typedef struct _smoke3d {
 
 } smoke3d;
 
+
+/* --------------------------  volrenderdata ------------------------------------ */
+
+typedef struct _volrenderdata {
+  slice *smoke, fire;
+} volrenderdata;
+
 /* --------------------------  patch ------------------------------------ */
 
 typedef struct {
