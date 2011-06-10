@@ -223,12 +223,6 @@ ENDDO
 
 
 ! Compute the species equation differences
-
-!Pointer settings now at the beginning of this subroutine 
-!IF (N_TRACKED_SPECIES > 0) THEN
-!   IF (PREDICTOR) ZZP => ZZ
-!   IF (CORRECTOR) ZZP => ZZS
-!ENDIF
  
 SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
@@ -480,14 +474,7 @@ ENTHALPY_IF: IF (ENTHALPY_TRANSPORT) THEN
 
       IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
       
-      !! At forced flow boundaries, use the specified normal component of velocity
-      !
-      !IF (SURFACE(IBC)%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .OR. &
-      !    SURFACE(IBC)%SPECIES_BC_INDEX==HVAC_BOUNDARY) THEN
-      !   UN = -SIGN(1._EB,REAL(IOR,EB))*UWP(IW)
-      !ENDIF
-      
-      ! boundary value of enthalpy
+      ! Boundary value of enthalpy
       
       IF (UN*REAL(IOR,EB)>ZERO_P) THEN
          ! inflow
@@ -785,7 +772,7 @@ CASE(.FALSE.) PREDICTOR_STEP
          DO J=1,JBAR
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               ZZ(I,J,K,N) = .5_EB*(RHO(I,J,K)*ZZ(I,J,K,N) + RHOS(I,J,K)*ZZS(I,J,K,N) - DT*DEL_RHO_D_DEL_Z(I,J,K,N) ) 
+               ZZ(I,J,K,N) = .5_EB*(RHO(I,J,K)*ZZ(I,J,K,N) + RHOS(I,J,K)*ZZS(I,J,K,N) - DT*DEL_RHO_D_DEL_Z(I,J,K,N)) 
             ENDDO
          ENDDO
       ENDDO
