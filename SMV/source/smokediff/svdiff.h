@@ -199,6 +199,7 @@ STDCALL FORTgetsliceframe(int *lu11,
                           float *time,float *qframe,int *slicetest, int *error);
 STDCALL FORTgetsliceparms(char *file,int *endian,
                           int *is1,int *is2,int *js1,int *js2,int *ks1, int *ks2,
+                          int *ni, int *nj, int *nk,
                           int *slice3d, int *error,FILE_SIZE lenfile);
 STDCALL FORTopenslice(char *slicefilename, int *unit, int *endian, 
                       int *is1, int *is2, int *js1, int *js2, int *ks1, int *ks2,

@@ -464,6 +464,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       fullfile(full_file,smvcase->dir,buffer);
       if(getfileinfo(full_file,NULL,&filesize)==0){
         int is1, is2, js1, js2, ks1, ks2;
+        int ni, nj, nk;
         int error, lenfile;
         int endian;
         float *xplt, *yplt, *zplt;
@@ -478,7 +479,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         }
         slicei->filesize=filesize;
         lenfile=strlen(full_file);
-        FORTgetsliceparms(full_file,&endian,&is1,&is2,&js1,&js2,&ks1,&ks2,&slicei->volslice,&error,lenfile);
+        FORTgetsliceparms(full_file,&endian,&is1,&is2,&js1,&js2,&ks1,&ks2,&ni,&nj,&nk,&slicei->volslice,&error,lenfile);
         slicei->is1=is1;
         slicei->is2=is2;
         slicei->js1=js1;
