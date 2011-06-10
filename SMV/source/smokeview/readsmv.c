@@ -6237,7 +6237,7 @@ typedef struct {
     nchanged_idlist=ntotal;
   }
 
-  init_volrender();
+  nvolrender=init_volrender();
 
 #ifdef pp_CULL
 
@@ -6259,16 +6259,51 @@ typedef struct {
 
 /* ------------------ init_volrender ------------------------ */
 
-void init_volrender(void){
-  int i;
+int init_volrender(void){
+  int i, nvr;
 
-  if(n_volrenderinfo>0){
-    n_volrenderinfo=0;
-    FREEMEMORY(volrenderinfo);
-  }
-  for(i=i;i<nsliceinfo;i++){
-  }
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    volrenderdata *vr;
 
+    meshi = meshinfo + i;
+    vr = &(meshi->volrenderinfo);
+    vr->fire=NULL;
+    vr->smoke=NULL;
+  }
+  nvr=0;
+  for(i=0;i<nsliceinfo;i++){
+    slice *slicei;
+    char *shortlabel;
+    int blocknumber;
+    mesh *meshi;
+    volrenderdata *vr;
+
+    slicei = sliceinfo + i;
+    blocknumber = slicei->blocknumber;
+    if(blocknumber<0||blocknumber>=nmeshes)continue;
+    meshi = meshinfo + blocknumber;
+    if(slicei->nslicei!=meshi->ibar+1||slicei->nslicej!=meshi->jbar+1||slicei->nslicek!=meshi->kbar+1)continue;
+    vr = &(meshi->volrenderinfo);
+    shortlabel = slicei->label.shortlabel;
+    if(STRCMP(shortlabel,"temp")==0){
+      vr->fire=slicei;
+      continue;
+    }
+    if(STRCMP(shortlabel,"X_Soot")==0){
+      vr->smoke=slicei;
+      continue;
+    }
+  }
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    volrenderdata *vr;
+
+    meshi = meshinfo + i;
+    vr = &(meshi->volrenderinfo);
+    if(vr->fire!=NULL||vr->smoke!=NULL)nvr++;
+  }
+  return nvr;
 }
 
 /* ------------------ parsedatabase ------------------------ */

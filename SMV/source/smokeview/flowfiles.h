@@ -391,6 +391,12 @@ typedef struct {
   float time;
 } smoothblockage;
 
+/* --------------------------  volrenderdata ------------------------------------ */
+
+typedef struct _volrenderdata {
+  struct _slice *smoke, *fire;
+} volrenderdata;
+
 /* --------------------------  mesh ------------------------------------ */
 
 typedef struct mesh_ {
@@ -536,6 +542,8 @@ typedef struct mesh_ {
   int culldefined;
   struct _smoke3d *cull_smoke3d;
 #endif
+
+  volrenderdata volrenderinfo;
 
 } mesh;
 
@@ -874,7 +882,7 @@ typedef struct {
 
 /* --------------------------  slice ------------------------------------ */
 
-typedef struct {
+typedef struct _slice {
   int mesh_type;
   int seq_id, autoload;
   char *file;
@@ -1031,13 +1039,6 @@ typedef struct _smoke3d {
   int dir;
 
 } smoke3d;
-
-
-/* --------------------------  volrenderdata ------------------------------------ */
-
-typedef struct _volrenderdata {
-  slice *smoke, fire;
-} volrenderdata;
 
 /* --------------------------  patch ------------------------------------ */
 
