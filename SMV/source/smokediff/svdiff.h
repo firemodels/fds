@@ -109,7 +109,7 @@ typedef struct {
   char *dir;
   int endian;
   int nmeshes;
-  int nsliceinfo, nplot3d_files, nboundary_files;
+  int nsliceinfo, nplot3dinfo, nboundary_files;
 } casedata;
 
 //************************** headers ****************************************

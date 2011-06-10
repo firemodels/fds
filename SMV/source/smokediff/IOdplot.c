@@ -22,7 +22,7 @@ void setup_plot3d(FILE *stream_out){
   case1 = caseinfo;
   case2 = caseinfo + 1;
 
-  for(i=0;i<case1->nplot3d_files;i++){
+  for(i=0;i<case1->nplot3dinfo;i++){
     plot3d *plot3di;
 
     plot3di = case1->plot3dinfo + i;
@@ -58,7 +58,7 @@ plot3d *getplot3d(plot3d *plot3din, casedata *case2){
   dy = meshin->dy/2.0;
   dz = meshin->dz/2.0;
 
-  for(i=0;i<case2->nplot3d_files;i++){
+  for(i=0;i<case2->nplot3dinfo;i++){
     plot3d *plot3dout;
     mesh *meshout;
 
@@ -89,7 +89,7 @@ void diff_plot3ds(FILE *stream_out){
   char fullfile1[1024], fullfile2[1024], outfile[1024], outfile2[1024];
   float valmin, valmax;
 
-  for(j=0;j<caseinfo->nplot3d_files;j++){
+  for(j=0;j<caseinfo->nplot3dinfo;j++){
     plot3d *plot3di, *plot3d1, *plot3d2;
     float *qframe1, *qframe2, *qout;
     mesh *plot3dmesh;

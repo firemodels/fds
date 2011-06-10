@@ -24,14 +24,14 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
   slice *sliceinfo;
   boundary *boundaryinfo;
   plot3d *plot3dinfo;
-  int nmeshes, nsliceinfo, nplot3d_files, nboundary_files;
+  int nmeshes, nsliceinfo, nplot3dinfo, nboundary_files;
   int itrnx, itrny, itrnz;
 
   igrid=0;
   ipdim=0;
   nmeshes=0;
   nsliceinfo=0;
-  nplot3d_files=0;
+  nplot3dinfo=0;
   nboundary_files=0;
   itrnx=0;
   itrny=0;
@@ -59,7 +59,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     }
     if(
       match(buffer,"PL3D",4) == 1){
-      nplot3d_files++;
+      nplot3dinfo++;
       continue;
     }
     if(match(buffer,"GRID",4) == 1){
@@ -118,9 +118,9 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
 
   // allocate memory for plot3d file info
 
-  if(nplot3d_files>0){
-    NewMemory((void **)&plot3dinfo,nplot3d_files*sizeof(plot3d));
-    smvcase->nplot3d_files=nplot3d_files;
+  if(nplot3dinfo>0){
+    NewMemory((void **)&plot3dinfo,nplot3dinfo*sizeof(plot3d));
+    smvcase->nplot3dinfo=nplot3dinfo;
     smvcase->plot3dinfo=plot3dinfo;
   }
 
@@ -405,8 +405,8 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         if(readlabels(plot3di->labels+2,streamsmv)==2)break;
         if(readlabels(plot3di->labels+3,streamsmv)==2)break;
         if(readlabels(plot3di->labels+4,streamsmv)==2)break;
-        nplot3d_files--;
-        smvcase->nplot3d_files=nplot3d_files;
+        nplot3dinfo--;
+        smvcase->nplot3dinfo=nplot3dinfo;
       }
       continue;
     }
