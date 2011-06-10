@@ -494,7 +494,7 @@ slice *getslice(char *string){
   int i;
   slice *slicei;
 
-  for(i=0;i<nslice_files;i++){
+  for(i=0;i<nsliceinfo;i++){
     slicei = sliceinfo + i;
     if(slicei->dup==1)continue;
     if(strcmp(slicei->label.shortlabel,string)==0)return slicei;
@@ -512,19 +512,19 @@ void *compress_slices(void *arg){
   thread_index = (int *)arg;
 
 
-  if(nslice_files<=0)return NULL;
+  if(nsliceinfo<=0)return NULL;
   LOCK_SLICE;
   if(first_slice==1){
     first_slice=0;
     if(cleanfiles==1){
-      for(i=0;i<nslice_files;i++){
+      for(i=0;i<nsliceinfo;i++){
         slicei = sliceinfo + i;
         convert_slice(slicei,thread_index);
       }
       UNLOCK_SLICE;
       return NULL;
     }
-    for(i=0;i<nslice_files;i++){
+    for(i=0;i<nsliceinfo;i++){
       slicei = sliceinfo + i;
       if(autozip==1&&slicei->autozip==0)continue;
       slicei->count=0;
@@ -532,7 +532,7 @@ void *compress_slices(void *arg){
     if(get_slice_bounds==1){
       Get_Slice_Bounds();
     }
-    for(i=0;i<nslice_files;i++){
+    for(i=0;i<nsliceinfo;i++){
       char *label;
 
       slicei = sliceinfo + i;
@@ -572,7 +572,7 @@ void *compress_slices(void *arg){
 
   // convert and compress files
 
-  for(i=0;i<nslice_files;i++){
+  for(i=0;i<nsliceinfo;i++){
     slicei = sliceinfo + i;
     if(autozip==1&&slicei->autozip==0)continue;
     LOCK_SLICE;
@@ -619,7 +619,7 @@ void update_slice_hist(void){
   int endiandata;
 
   endiandata=getendian();
-  for(i=0;i<nslice_files;i++){
+  for(i=0;i<nsliceinfo;i++){
     slice *slicei;
     int unit1;
     FILE_SIZE lenfile;
@@ -700,7 +700,7 @@ void Get_Slice_Bounds(void){
   if(endianswitch==1)endiandata=1-endiandata;
 
   printf("Determining slice file bounds\n");
-  for(i=0;i<nslice_files;i++){
+  for(i=0;i<nsliceinfo;i++){
     slice *slicei;
 
     slicei = sliceinfo + i;
@@ -711,13 +711,13 @@ void Get_Slice_Bounds(void){
 #else
   update_slice_hist();
 #endif
-  for(i=0;i<nslice_files;i++){
+  for(i=0;i<nsliceinfo;i++){
     slice *slicei;
     int j;
 
     slicei = sliceinfo + i;
     if(slicei->dup==1)continue;
-    for(j=i+1;j<nslice_files;j++){
+    for(j=i+1;j<nsliceinfo;j++){
       slice *slicej;
 
       slicej = sliceinfo + j;
@@ -728,7 +728,7 @@ void Get_Slice_Bounds(void){
     slicei->valmin=get_histogram_value(slicei->histogram,0.01);
     slicei->setvalmax=1;
     slicei->setvalmin=1;
-    for(j=i+1;j<nslice_files;j++){
+    for(j=i+1;j<nsliceinfo;j++){
       slice *slicej;
 
       slicej = sliceinfo + j;
@@ -739,7 +739,7 @@ void Get_Slice_Bounds(void){
       slicej->setvalmin=1;
     }
   }
-  for(i=0;i<nslice_files;i++){
+  for(i=0;i<nsliceinfo;i++){
     slice *slicei;
 
     slicei = sliceinfo + i;

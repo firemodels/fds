@@ -118,7 +118,7 @@ int main(int argc, char **argv){
   maxpart5propinfo=0;
   npart5propinfo=0;
 #endif
-  nslice_files=0;
+  nsliceinfo=0;
   sliceinfo=NULL;
   nmeshes=0;
 
@@ -411,9 +411,9 @@ int main(int argc, char **argv){
       patchdup(patchi,i);
     }
   }
-  if(nslice_files>0){
+  if(nsliceinfo>0){
     sliceinfo[0].dup=0;
-    for(i=1;i<nslice_files;i++){
+    for(i=1;i<nsliceinfo;i++){
       slice *slicei; 
 
       slicei = sliceinfo + i;
@@ -726,14 +726,14 @@ void print_summary(void){
 
   printf("\n");
   nsum=0;
-  for(i=0;i<nslice_files;i++){
+  for(i=0;i<nsliceinfo;i++){
     slice *slicei;
 
     slicei = sliceinfo + i;
     if(slicei->compressed==1)nsum++;
   }
   if(nsum>0){
-    for(i=0;i<nslice_files;i++){
+    for(i=0;i<nsliceinfo;i++){
       slice *slicei;
       flowlabels *label;
 

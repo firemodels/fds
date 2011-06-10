@@ -355,7 +355,7 @@ EXTERN mesh *meshinfo;
 EXTERN smoke3d *smoke3dinfo;
 EXTERN int npatch_files;
 
-EXTERN int nslice_files, nplot3d_files;
+EXTERN int nsliceinfo, nplot3d_files;
 
 EXTERN slice *sliceinfo;
 EXTERN plot3d *plot3dinfo;

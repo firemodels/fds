@@ -113,7 +113,7 @@ int readsmv(char *smvfile){
       match(buffer,"SLFL",4) == 1||
       match(buffer,"SLCT",4) == 1
       ){
-      nslice_files++;
+      nsliceinfo++;
       continue;
     }
   /*
@@ -197,12 +197,12 @@ int readsmv(char *smvfile){
   }
   // allocate memory for slice file info
 
-  if(nslice_files>0){
+  if(nsliceinfo>0){
     slice *slicei;
     int i;
 
-    NewMemory((void **)&sliceinfo,nslice_files*sizeof(slice));
-    for(i=0;i<nslice_files;i++){
+    NewMemory((void **)&sliceinfo,nsliceinfo*sizeof(slice));
+    for(i=0;i<nsliceinfo;i++){
       slicei = sliceinfo + i;
       slicei->file=NULL;
       slicei->filebase=NULL;
@@ -716,7 +716,7 @@ int readsmv(char *smvfile){
       else{
         printf("*** Warning: the file, %s, does not exist.\n",buffer2);
         if(readlabels(&sliceinfo[islice].label,streamsmv)==2)break;
-        nslice_files--;
+        nsliceinfo--;
       }
       continue;
     }
@@ -1126,7 +1126,7 @@ void readini2(char *inifile){
 
   void get_startup_slice(int seq_id){
     int i;
-    for(i=0;i<nslice_files;i++){
+    for(i=0;i<nsliceinfo;i++){
       slice *slicei;
 
       slicei = sliceinfo + i;
