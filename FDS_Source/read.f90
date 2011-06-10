@@ -2433,6 +2433,7 @@ DO J = 1,5000
       IF (SS%RAMP_K_INDEX>0)  K_TMP(N) = EVALUATE_RAMP(REAL(J,EB),1._EB,SS%RAMP_K_INDEX)/SS%MW
       IF (SS%RAMP_MU_INDEX>0) MU_TMP(N) = EVALUATE_RAMP(REAL(J,EB),1._EB,SS%RAMP_MU_INDEX)/SS%MW
    ENDDO
+   
    ! For each tracked species, store the mass-weighted property values
 
    DO N=0,N_TRACKED_SPECIES
