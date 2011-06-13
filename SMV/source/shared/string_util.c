@@ -56,44 +56,32 @@ void parsecsv(char *buffer, char **tokens, int ncols, int *ntokens){
 
 /* ------------------ getrowcols ------------------------ */
 
-void getrowcols(FILE *stream, int *nrows, int *ncols){
-  /*! \fn void getrowcols(FILE *stream, int *nrows, int *ncols)
+int getrowcols(FILE *stream, int *nrows, int *ncols){
+  /*! \fn int getrowcols(FILE *stream, int *nrows, int *ncols)
       \brief find number of rows (nrows) and number of columns (ncols) in
-       comma delimited file pointed to by stream
+       comma delimited file pointed to by stream and returns the length
+       of the longest line
   */
-  char buffer[1024];
-  int nnrows=0,nncols=0;
+  int nnrows=0,nncols=1,maxcols=0,linelength=0,maxlinelength=0;
 
   while(!feof(stream)){
-    if(fgets(buffer,1024,stream)==NULL)break;
-    if(nnrows==0){
-      nncols=getcols(buffer);
+    char ch;
+
+    ch = getc(stream);
+    linelength++;
+    if(ch == ',')nncols++;
+    if(ch=='\n'){
+      if(linelength>maxlinelength)maxlinelength=linelength;
+      if(nncols>maxcols)maxcols=nncols;
+      linelength=0;
+      nncols=1;
+      nnrows++;
     }
-    nnrows++;
   }
   *nrows=nnrows;
-  *ncols=nncols;
-}
-
-/* ------------------ getcols ------------------------ */
-
-int getcols(char *buffer){
-  /*! \fn int getcols(char *buffer)
-      \brief return the number of columns in the character string buffer
-  */
-  char buffer2[1024];
-  int ncols=0;
-  char *comma;
-
-  strcpy(buffer2,buffer);
-  trim(buffer2);
-  comma=strtok(buffer2,",");
-
-  while(comma!=NULL){
-    ncols++;
-    comma=strtok(NULL,",");
-  }
-  return ncols;
+  *ncols=maxcols;
+  rewind(stream);
+  return maxlinelength;
 }
 
 /* ------------------ stripquotes ------------------------ */

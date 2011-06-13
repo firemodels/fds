@@ -4326,10 +4326,11 @@ void read_device_data(char *file, int loadstatus){
   int irow, icol;
   float *vals;
   int i;
-  char buffer[1024],buffer2[1024];
+  char *buffer, *buffer2;
   char **devcunits, **devclabels;
   device **devices;
   int ntokens;
+  int max_line_length,buffer_len;
 
 // unload data
 
@@ -4351,13 +4352,16 @@ void read_device_data(char *file, int loadstatus){
 
   stream=fopen(file,"r");
   if(stream==NULL)return;
-  getrowcols(stream,&nrows,&ncols);
-  if(nrows<=0||ncols<=0){
+  buffer_len=getrowcols(stream,&nrows,&ncols);
+  if(nrows<=0||ncols<=0||buffer_len<=0){
     fclose(stream);
     return;
   }
+  buffer_len+=10;
   rewind(stream);
 
+  NewMemory((void **)&buffer,buffer_len);
+  NewMemory((void **)&buffer2,buffer_len);
   NewMemory((void **)&vals,ncols*sizeof(float));
   NewMemory((void **)&devcunits,ncols*sizeof(char *));
   NewMemory((void **)&devclabels,ncols*sizeof(char *));
@@ -4376,14 +4380,14 @@ void read_device_data(char *file, int loadstatus){
     NewMemory((void **)&devicei->vals,nrows*sizeof(float));
   }
 
-  fgets(buffer,1024,stream);
+  fgets(buffer,buffer_len,stream);
   parsecsv(buffer,devcunits,ncols,&ntokens);
   for(i=0;i<ntokens;i++){
     trim(devcunits[i]);
     devcunits[i]=trim_front(devcunits[i]);
   }
 
-  fgets(buffer2,1024,stream);
+  fgets(buffer2,buffer_len,stream);
   stripquotes(buffer2);
   parsecsv(buffer2,devclabels,ncols,&ntokens);
   for(i=0;i<ntokens;i++){
@@ -4397,19 +4401,15 @@ void read_device_data(char *file, int loadstatus){
 
     devicei = getdevice(devclabels[i]);
     devices[i]=devicei;
-    if(devicei!=NULL){
-      strcpy(devicei->unit,devcunits[i]);
-      devicei->nvals=nrows-2;
-    }
-    else{
-      devicei->nvals=0;
-    }
+    if(devicei==NULL)continue;
+    strcpy(devicei->unit,devcunits[i]);
+    devicei->nvals=nrows-2;
   }
 
   for(irow=2;irow<nrows;irow++){
     int icol=0;
 
-    fgets(buffer,1024,stream);
+    fgets(buffer,buffer_len,stream);
     fparsecsv(buffer,vals,ncols,&ntokens);
     deviceinfo->times[irow-2]=vals[icol];
     for(icol=1;icol<ncols;icol++){
@@ -4420,6 +4420,8 @@ void read_device_data(char *file, int loadstatus){
       devicei->vals[irow-2]=vals[icol];
     }
   }
+  FREEMEMORY(buffer);
+  FREEMEMORY(buffer2);
   fclose(stream);
   stream=NULL;
 
