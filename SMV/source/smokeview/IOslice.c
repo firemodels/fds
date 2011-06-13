@@ -382,7 +382,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       printf("After slice unload: ");
       PrintMemoryInfo;
       GetMemoryInfo(num_memblocks_unload,num_memblocks_load);
-      WASSERT(num_memblocks_unload+sd->num_memblocks==0,"Possible Memory Leak");
+   //xxx bug   WASSERT(num_memblocks_unload+sd->num_memblocks==0,"Possible Memory Leak");
 #endif
       remove_slice_loadstack(slicefilenumber);
       return;
