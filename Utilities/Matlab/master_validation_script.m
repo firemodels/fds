@@ -11,13 +11,21 @@
 % want to process only some of these plots, comment out the other 
 % scripts and change the data plot line as follows:
 %
-% [saved_data,drange] = dataplot('validation',[a:b]);
+% [saved_data,drange] = dataplot(cfil,vdir,plotdir,[a:b]);
 %
 % where a and b are the lines in the .csv file you want to process.
+% Alternatively, you can specify the "Dataname" you want:
+%
+% [saved_data,drange] = dataplot(cfil,vdir,plotdir,'WTC');
+%
+% In this case, all the WTC results will be plotted. 
 
 close all
 clear all
 addpath 'scripts'
+
+% Name of dataplot input file, directory where data is located, and 
+% directory to put the plots
 
 cfil = [pwd,'/validation_data_config_matlab.csv'];
 vdir = [pwd,'/../../Validation/'];
