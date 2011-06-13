@@ -18,7 +18,11 @@ clear all
 
 addpath 'scripts'
 
-[saved_data,drange] = dataplot('verification');
+cfil = [pwd,'/verification_data_config_matlab.csv'];
+vdir = [pwd,'/../../Verification/'];
+plotdir = [pwd,'/../../Manuals/'];
+
+[saved_data,drange] = dataplot(cfil,vdir,plotdir);
 
 run scripts/turb_model
 run scripts/wall_model
