@@ -1388,7 +1388,7 @@ void drawroomdata(void){
   }
 #ifdef pp_GPU
   if(usegpu==1){
-    UnloadShaders();
+    UnLoadShaders();
   }
 #endif
 

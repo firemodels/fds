@@ -897,11 +897,9 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     }
     if(nsmoke3dinfo>0&&show3dsmoke==1){
       getsmokedir(modelview_scratch);
-#ifdef pp_GPU
-      if(use_volume_shader==1){
+      if(use_volume_render==1){
         getvolsmokedir(modelview_scratch);
       }
-#endif
       sniffErrors("after getsmokedir");
 #ifdef pp_CULL
       if(showstereo==0){
@@ -1491,80 +1489,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 /* ++++++++++++++++++++++++ draw 3D smoke +++++++++++++++++++++++++ */
 
   if(show3dsmoke==1){
-    CheckMemory;
-#ifdef pp_GPU
-    if(usegpu==1){
-      if(use_volume_shader==1){
-        LoadVolSmokeShaders();
-      }
-      else{
-        LoadSmokeShaders();
-      }
-    }
-#endif
-#ifdef pp_CULL
-    if(usegpu==1&&cullsmoke==1&&use_volume_shader==0){
-      drawsmoke3dCULL();
-    }
-    else{
-      int i;
-
-      for(i=0;i<nsmoke3dinfo;i++){
-        smoke3d *smoke3di;
-
-        smoke3di = smoke3dinfo + i;
-        if(smoke3di->loaded==0||smoke3di->display==0)continue;
-        if(smoke3di->d_display==0)continue;
-        if(smoke3di->smoke_state_list[smoke3di->iframe]==0)continue;
-
-        if(usegpu==1){
-          if(use_volume_shader==1){
-            drawsmoke3dGPUVOL(smoke3di);
-          }
-          else{
-            drawsmoke3dGPU(smoke3di);
-          }
-        }
-        else{
-          drawsmoke3d(smoke3di);
-        }
-      }
-    }
-#else
-    {
-    int i;
-    for(i=0;i<nsmoke3dinfo;i++){
-      smoke3d *smoke3di;
-
-      smoke3di = smoke3dinfo + i;
-      if(smoke3di->loaded==0||smoke3di->display==0)continue;
-      if(smoke3di->d_display==0)continue;
-
-#ifdef pp_GPU
-      if(usegpu==1){
-      //    getDepthTexture();
-        drawsmoke3dGPU(smoke3di);
-      }
-      else{
-        drawsmoke3d(smoke3di);
-      }
-#else
-      drawsmoke3d(smoke3di);
-#endif
-    }
-    }
-#endif
-#ifdef pp_GPU
-    if(usegpu==1){
-      UnloadShaders();
-    }
-#endif
-#ifdef pp_CULL
-    if(cullsmoke==1&&showstereo==0){
-      setPixelCount();
-    }
-#endif
-    sniffErrors("after drawsmoke");
+    drawsmoke_frame();
   }
 
   if(active_smokesensors==1&&show_smokesensors!=0){

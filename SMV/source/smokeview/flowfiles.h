@@ -185,7 +185,7 @@ typedef struct {
   unsigned char *uc_znormal;
   float *times;
   terraincell *tcell;
-  struct mesh_ *terrain_mesh;
+  struct _mesh *terrain_mesh;
   int ntimes;
 } terraindata;
 
@@ -394,13 +394,14 @@ typedef struct {
 /* --------------------------  volrenderdata ------------------------------------ */
 
 typedef struct _volrenderdata {
+  struct _mesh *rendermesh;
   struct _slice *smoke, *fire;
   int loaded, show;
 } volrenderdata;
 
 /* --------------------------  mesh ------------------------------------ */
 
-typedef struct mesh_ {
+typedef struct _mesh {
   terraindata *terrain;
   int mesh_type;
   int is_bottom;
@@ -487,7 +488,7 @@ typedef struct mesh_ {
   int *pi1, *pi2, *pj1, *pj2, *pk1, *pk2;
   contour **patch_contours;
   int *blockonpatch;
-  struct mesh_ **meshonpatch;
+  struct _mesh **meshonpatch;
   int *ptype;
   int *patchrow, *patchcol, *blockstart;
   unsigned int *zipoffset, *zipsize;

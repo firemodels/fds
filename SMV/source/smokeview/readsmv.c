@@ -6269,6 +6269,7 @@ void init_volrender(void){
 
     meshi = meshinfo + i;
     vr = &(meshi->volrenderinfo);
+    vr->rendermesh=meshi;
     vr->fire=NULL;
     vr->smoke=NULL;
     vr->loaded=0;

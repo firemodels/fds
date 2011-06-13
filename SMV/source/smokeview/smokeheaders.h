@@ -110,7 +110,7 @@ EXTERNCPP int init_shaders(void);
 EXTERNCPP void LoadSmokeShaders(void);
 EXTERNCPP void LoadZoneSmokeShaders(void);
 EXTERNCPP void LoadVolSmokeShaders(void);
-EXTERNCPP void UnloadShaders(void);
+EXTERNCPP void UnLoadShaders(void);
 #endif
 EXTERNCPP void initspheresegs(int nlat, int nlong);
 EXTERNCPP mesh *getmesh(float *xyz);
@@ -330,11 +330,13 @@ EXTERNCPP unsigned char adjustalpha(unsigned char alpha, float factor);
 EXTERNCPP unsigned int irle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer_out);
 EXTERNCPP void updatesmoke3d(smoke3d *smoke3di);
 EXTERNCPP void drawsmoke3d(smoke3d *smoke3di);
+EXTERNCPP void drawsmoke_frame(void);
 EXTERNCPP void TRANSLATE_CB(int var);
 #ifdef pp_GPU
 EXTERNCPP void drawsmoke3dGPU(smoke3d *smoke3di);
-EXTERNCPP void drawsmoke3dGPUVOL(smoke3d *smoke3di);
+EXTERNCPP void drawsmoke3dGPUVOL(volrenderdata *vr);
 #endif
+EXTERNCPP void drawsmoke3dVOL(volrenderdata *vr);
 #ifdef pp_CULL
 EXTERNCPP void drawsmoke3dCULL(void);
 #endif

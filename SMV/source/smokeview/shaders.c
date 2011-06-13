@@ -400,7 +400,7 @@ void LoadVolSmokeShaders(void){
 
 /* ------------------ UnloadShaders ------------------------ */
 
-void UnloadShaders(void){
+void UnLoadShaders(void){
   glUseProgramObjectARB(0);
 }
 

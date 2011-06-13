@@ -73,7 +73,7 @@ GLUI_RadioGroup *alphagroup=NULL,*skipframes,*radio_smokesensors=NULL;
 GLUI_Spinner *SPINNER_cvis=NULL;
 GLUI_Checkbox *CHECKBOX_test_smokesensors=NULL;
 #ifdef pp_GPU
-GLUI_Checkbox *CHECKBOX_smokeGPU=NULL,*CHECKBOX_smokeVOLGPU=NULL;
+GLUI_Checkbox *CHECKBOX_smokeGPU=NULL,*CHECKBOX_volume_render=NULL;
 #endif
 GLUI_Checkbox *CHECKBOX_smokedrawtest=NULL;
 GLUI_Checkbox *CHECKBOX_smokedrawtest2=NULL;
@@ -109,8 +109,8 @@ extern "C" void update_smoke3dflags(void){
   alphagroup->set_int_val(adjustalphaflag);
 #ifdef pp_GPU
   if(CHECKBOX_smokeGPU!=NULL)CHECKBOX_smokeGPU->set_int_val(usegpu);
-  if(CHECKBOX_smokeVOLGPU!=NULL)CHECKBOX_smokeVOLGPU->set_int_val(use_volume_shader);
 #endif
+  if(CHECKBOX_volume_render!=NULL)CHECKBOX_volume_render->set_int_val(use_volume_render);
 #ifdef pp_CULL
   CHECKBOX_smokecullflag->set_int_val(cullsmoke);
 #else
@@ -259,7 +259,9 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   panel_slices->set_alignment(GLUI_ALIGN_LEFT);
 #ifdef pp_GPU
   CHECKBOX_smokeGPU=glui_3dsmoke->add_checkbox_to_panel(panel_slices,_("Use GPU"),&usegpu,GPU_SMOKE,SMOKE_3D_CB);
-  CHECKBOX_smokeVOLGPU=glui_3dsmoke->add_checkbox_to_panel(panel_slices,_("Use full volume rendering"),&use_volume_shader,GPU_SMOKE,SMOKE_3D_CB);
+#endif
+  CHECKBOX_volume_render=glui_3dsmoke->add_checkbox_to_panel(panel_slices,_("Use full volume rendering"),&use_volume_render,GPU_SMOKE,SMOKE_3D_CB);
+#ifdef pp_GPU
   if(gpuactive==0){
     usegpu=0;
     CHECKBOX_smokeGPU->disable();
@@ -480,15 +482,9 @@ void SMOKE_3D_CB(int var){
     initcull(cullsmoke);
     break;
 #endif
-#ifdef pp_GPU
   case GPU_SMOKE:
-    if(usegpu==1){
-      CHECKBOX_smokeVOLGPU->enable();
-    }
-    else{
-      CHECKBOX_smokeVOLGPU->disable();
-    }
-    if(usegpu==1&&use_volume_shader==0){
+#ifdef pp_GPU
+    if(usegpu==1&&use_volume_render==0){
       skipframes->set_int_val(0);
       skipframes->disable();
 #ifdef pp_CULL
@@ -500,7 +496,7 @@ void SMOKE_3D_CB(int var){
 #endif
     }
     else{
-      if(use_volume_shader==1){
+      if(use_volume_render==1){
         skipframes->disable();
       }
       else{
@@ -513,7 +509,15 @@ void SMOKE_3D_CB(int var){
 #endif
     }
     break;
+#else
+    if(use_volume_render==1){
+      skipframes->disable();
+    }
+    else{
+      skipframes->enable();
+    }
 #endif
+    break;
   default:
 #ifdef _DEBUG
     abort();

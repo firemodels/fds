@@ -773,13 +773,15 @@ void keyboard_2(unsigned char key, int x, int y){
     print_gpu_cull_state();
     return;    
   }
-  if((nsmoke3dinfo>0)&&strncmp((const char *)&key2,"V",1)==0){
-    if(gpuactive==1)use_volume_shader=1-use_volume_shader;
+#endif
+  if((nvolrenderinfo>0)&&strncmp((const char *)&key2,"V",1)==0){
+    use_volume_render=1-use_volume_render;
     update_smoke3dflags();
+#ifdef pp_GPU
     print_gpu_cull_state();
+#endif
     return;    
   }
-#endif
   if(strncmp((const char *)&key2,"t",1)==0){
     int state;
 
