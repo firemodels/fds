@@ -2,7 +2,7 @@
 % 7-06-2009
 % dataplot.m
 %
-% [saved_data,drange] = dataplot(data_type,[drange])
+% [saved_data,drange] = dataplot(cfil,vdir,plotdir,[drange])
 %
 % Output:
 %    saved_data - cell array containing data needed in scatplot.m
@@ -11,12 +11,19 @@
 %    saved_data
 %
 % Input:
-%    data_type - a character string with one of two options:
-%    'verification' or 'validation'; this argument is just used to simplify
-%    the path for the output files and configuration files.
+%
+%    cfil - base configuration file (set in master script)
+%
+%    vfil - base input file directory (set in master)
+%
+%    plotdir - base plot directory (set in master)
 %
 %    [optional] drange - a vector for the 'd' lines you want to read from the
 %    config file.  For example, [2:5,7:8,10,12].
+%    drange may also be a text string matching the 'Dataname' column in the
+%    configuration file.  For example, [currently] the 'WTC' text string
+%    identifies drange = [13:18], but is much easier to remember if you
+%    happen to work with this set of validation cases frequently.
 %
 % Dependencies:
 %    ../scripts/define_drow_variables.m
@@ -25,30 +32,23 @@
 %
 % Example: From the command line within the Matlab/functions/ directory,
 %    type
-%    >> [saved_data,drange] = dataplot('validation',[2:4,6:8]);
+%
+%    >> [saved_data,drange] = dataplot(cfil,vdir,plotdir,[2:4,6:8]);
+%
+%    >> [saved_data,drange] = dataplot(cfil,vdir,plotdir,'WTC');
 
 function [saved_data,drange] = dataplot(varargin)
 
-if nargin<1||nargin>2; 
+if nargin<3||nargin>4; 
     display('Error in argument list')
 end
-if nargin>=1
-    if strcmp(varargin{1},'verification')||strcmp(varargin{1},'Verification')
-        cfil = [pwd,'/verification_data_config_matlab.csv'];
-        vdir = [pwd,'/../../Verification/'];
-        plotdir = [pwd,'/../../Manuals/'];
-    elseif strcmp(varargin{1},'validation')||strcmp(varargin{1},'Validation')
-        cfil = [pwd,'/validation_data_config_matlab.csv'];
-        vdir = [pwd,'/../../Validation/'];
-        plotdir = [pwd,'/../../Manuals/'];
-    elseif strcmp(varargin{1},'training')
-        cfil = [pwd,'/training_data_config_matlab.csv'];
-        vdir = [pwd,'/../../Training/'];
-        plotdir = [pwd,'/../../Manuals/FDS_SMV_Training_Guide/datafigures/'];
-    end
+if nargin>=3
+    cfil = varargin{1}
+    vdir = varargin{2}
+    plotdir = varargin{3}
 end
-if nargin==2
-    drange = varargin{2};
+if nargin==4
+    drange = varargin{4};
 else
     drange = 2:2000;
 end
@@ -69,15 +69,41 @@ A = importdata(cfil);
 H = textscan(A{1},'%q','delimiter',',');
 headers = H{:}'; clear H
 
+if ~isnumeric(drange)
+    dataname_col = find(strcmp(headers,'Dataname'));
+    dstring = drange;
+    drange_index = 0;
+    clear drange
+else
+    dstring = 'null';
+end
+
 % process the "d" lines one by one
 
-for i=drange
+for i=2:2000
+    
     if i>length(A); break; end
     
     P = textscan(A{i},'%q','delimiter',',');
     parameters = P{:}';
     
-    if strcmp(parameters(find(strcmp(headers,'switch_id'))),'d')
+    % check for shortname specification instead of numeric drange
+    
+    if strcmp(dstring,'null')
+        itest = ismember(i,drange);
+    else
+        itest = strcmp(parameters(dataname_col),dstring);
+        if itest
+            drange_index = drange_index + 1;
+            drange(drange_index) = i;
+        end
+    end
+    
+    % check to see if d line has been activated in configuration file
+    
+    dtest = strcmp(parameters(find(strcmp(headers,'switch_id'))),'d');
+    
+    if itest & dtest
         
         define_drow_variables
         

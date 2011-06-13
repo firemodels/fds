@@ -18,8 +18,12 @@ clear all
 
 addpath 'scripts'
 
+cfil = [pwd,'/training_data_config_matlab.csv'];
+vdir = [pwd,'/../../Training/'];
+plotdir = [pwd,'/../../Manuals/FDS_SMV_Training_Guide/datafigures/'];
+
 set(gcf,'DefaultLineLineWidth',2.0)
 
-[saved_data,drange] = dataplot('training');
+[saved_data,drange] = dataplot(cfil,vdir,plotdir);
 
 display('training scripts completed successfully!')
