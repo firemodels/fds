@@ -144,6 +144,8 @@ IF (LES .OR. EVACUATION_ONLY(NM)) THEN
             ELSE
                MU(I,J,K) = MU(I,J,K) + RHOP(I,J,K)*(CS*DELTA)**2*SS
             ENDIF
+            
+            IF (DISSIPATION_SOURCE) Q_DISSIPATION(I,J,K) = 2._EB*MU(I,J,K)*(SS**2 - ONTH*(DUDX+DVDY+DWDZ)**2)
 
          ENDDO
       ENDDO
