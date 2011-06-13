@@ -6237,7 +6237,7 @@ typedef struct {
     nchanged_idlist=ntotal;
   }
 
-  nvolrender=init_volrender();
+  init_volrender();
 
 #ifdef pp_CULL
 
@@ -6259,9 +6259,10 @@ typedef struct {
 
 /* ------------------ init_volrender ------------------------ */
 
-int init_volrender(void){
-  int i, nvr;
+void init_volrender(void){
+  int i;
 
+  nvolrenderinfo=0;
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
     volrenderdata *vr;
@@ -6270,8 +6271,9 @@ int init_volrender(void){
     vr = &(meshi->volrenderinfo);
     vr->fire=NULL;
     vr->smoke=NULL;
+    vr->loaded=0;
+    vr->show=0;
   }
-  nvr=0;
   for(i=0;i<nsliceinfo;i++){
     slice *slicei;
     char *shortlabel;
@@ -6301,9 +6303,8 @@ int init_volrender(void){
 
     meshi = meshinfo + i;
     vr = &(meshi->volrenderinfo);
-    if(vr->fire!=NULL||vr->smoke!=NULL)nvr++;
+    if(vr->fire!=NULL||vr->smoke!=NULL)nvolrenderinfo++;
   }
-  return nvr;
 }
 
 /* ------------------ parsedatabase ------------------------ */
