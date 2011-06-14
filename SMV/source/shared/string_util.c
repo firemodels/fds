@@ -171,12 +171,19 @@ int can_write_to_dir(char *dir){
   /*! \fn int can_write_to_dir(char *dir)
       \brief returns 1 if the directory can be written to, 0 otherwise
   */
-  char full_name[1024];
-  char file_name[1024], *file_name_ptr;
+  char *full_name;
+  char file_name[256], *file_name_ptr;
   FILE *stream;
+  int len;
 
   file_name_ptr=randstr(file_name,20);
   if(file_name_ptr==NULL)return 0;
+
+  len = 20 + 1 + 1;
+  if(dir!=NULL)len+=strlen(dir);
+
+  NewMemory((void **)&full_name,len);
+
   strcpy(full_name,"");
   if(dir!=NULL&&strcmp(dir,".")!=0&&strlen(dir)>0){
     strcat(full_name,dir);
@@ -186,6 +193,7 @@ int can_write_to_dir(char *dir){
   strcat(full_name,file_name_ptr);
   
   stream=fopen(full_name,"wb");
+  FREEMEMORY(full_name);
   if(stream==NULL)return 0;
   fclose(stream);
   remove(full_name);
