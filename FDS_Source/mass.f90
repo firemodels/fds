@@ -591,7 +591,7 @@ CASE(.TRUE.) PREDICTOR_STEP
    
    ! NOTE: This IF statement is required because the source terms for species and enthalpy are zeroed out at
    !       the beginning of DIVERGENCE_PART_1, but the array also stores the divergence of the advective
-   !       flux which computed once in MASS_FINITE_DIFFERNENCES above (outside) the CHANGE_TIME_STEP loop.
+   !       flux which is computed once in MASS_FINITE_DIFFERNENCES above, outside the CHANGE_TIME_STEP loop.
    !       DIVERGENCE_PART_1 is inside the loop.  The source terms are then applied to the next substep in
    !       MASS_FINITE_DIFFERENCES.
 
@@ -772,7 +772,7 @@ CASE(.FALSE.) PREDICTOR_STEP
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               E(I,J,K) = .5_EB*(E(I,J,K)+ES(I,J,K)-DT*ENTHALPY_SOURCE(I,J,K))
+               E(I,J,K) = ES(I,J,K) !.5_EB*(E(I,J,K)+ES(I,J,K)-DT*ENTHALPY_SOURCE(I,J,K))
             ENDDO
          ENDDO
       ENDDO
