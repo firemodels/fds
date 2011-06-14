@@ -6076,6 +6076,9 @@ then some form of ignition source must be present in order for combustion to beg
 The background species can be specified as NU(0).
 \item[{\ct SMIX\_ID}] Array containing the names of the species that participate in the reaction.  The background species should not be specified in the array.
 \item[{\ct HEAT\_OF\_COMBUSTION}] The effective heat of combustion of the {\ct FUEL} in chemical reaction in units of kJ/kg. (No default)
+\item[{\ct CHECK\_ATOM\_BALANCE}] If chemical formulas are provide for all {\ct SPEC} that participate in a reaction, then FDS will check the stoichometry to ensure that atoms are conserved.  Setting this flag to {\ct .FALSE.} will bypass this check.  (default is {\ct .TRUE.})
+\item{\ct REAC\_ATOM\_ERROR} This is the error tolerance in atoms for the reaction stoichiometry check.  (default is 1.E-5)
+\item{\ct REAC\_MASS\_ERROR} This is the relative error tolerance computed as (mass of products - mass of reactants)/(mass of products) for the reaction stoichiometry mass blance check.  (default is 1.E-4)
 \end{description}
 
 The addition of the {\ct SMIX} namelist group means that there are three ways in which a simple, mixing controlled reaction could be defined.
@@ -6198,6 +6201,9 @@ The inputs to use the Arrhenius-rate model are given below:
 contribute to the rate but not be a reactant or product. In other words,
 the rate equation can be dependent on a species that does not participate directly in the reaction. These entries correspond to the inputs on {\ct N\_S}.
 \item[{\ct HEAT\_OF\_COMBUSTION}] The effective heat of combustion of the {\ct FUEL} in chemical reaction in units of kJ/kg. (No default)
+\item[{\ct CHECK\_ATOM\_BALANCE}] If chemical formulas are provide for all {\ct SPEC} that participate in a reaction, then FDS will check the stoichometry to ensure that atoms are conserved.  Setting this flag to {\ct .FALSE.} will bypass this check.  (default is {\ct .TRUE.})
+\item{\ct REAC\_ATOM\_ERROR} This is the error tolerance in atoms for the reaction stoichiometry check.  (default is 1.E-5)
+\item{\ct REAC\_MASS\_ERROR} This is the relative error tolerance computed as (mass of products - mass of reactants)/(mass of products) for the reaction stoichiometry mass blance check.  (default is 1.E-4)
 \end{description}
 
 
@@ -6226,6 +6232,9 @@ can be assigned a value of {\ct N\_S} greater than zero and a value of {\ct NU} 
 the rate equation can be dependent on a species that does not participate directly in the reaction.
 \item[{\ct HEAT\_OF\_COMBUSTION}] The effective heat of combustion of the {\ct FUEL} in chemical reaction in units of kJ/kg. (No default)
 \item[{\ct THRESHOLD\_TEMPERATURE}] The temperature at which finite-rate combustion will be computed when there is no heat release from other reactions.
+\item[{\ct CHECK\_ATOM\_BALANCE}] If chemical formulas are provide for all {\ct SPEC} that participate in a reaction, then FDS will check the stoichometry to ensure that atoms are conserved.  Setting this flag to {\ct .FALSE.} will bypass this check.  (default is {\ct .TRUE.})
+\item{\ct REAC\_ATOM\_ERROR} This is the error tolerance in atoms for the reaction stoichiometry check.  (default is 1.E-5)
+\item{\ct REAC\_MASS\_ERROR} This is the relative error tolerance computed as (mass of products - mass of reactants)/(mass of products) for the reaction stoichiometry mass blance check.  (default is 1.E-4)
 \end{description}
 
 
@@ -10700,6 +10709,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct \tiny AUTO\_IGNITION\_TEMPERATURE}   & Real        & Auto ignition temperature                     &   K               &  0  \\ \hline
 {\ct BETA\_EDC}                           & Real        & See Section~\ref{info:turbulent_combustion}   &                   & 1.0    \\ \hline
 {\ct C}                                   & Real        & Carbon atoms in fuel                          &                   & 3    \\ \hline
+{\ct CHECK\_ATOM\_BALANCE} & Logical        & Check reaction stoichiometry for atom conservation  &                   & {\ct .TRUE.}    \\ \hline
 {\ct CO\_PRODUCTION}                      & Logical     & See Section~\ref{info:CO}                     &                   & {\ct .FALSE.}     \\ \hline
 {\ct CO\_YIELD}                           & Real        & Fraction of CO from the fuel                  & kg/kg             & 0        \\ \hline
 {\ct \tiny CRITICAL\_FLAME\_TEMPERATURE}  & Real        & Suppression criterion                         &   $^\circ$C       & 1427    \\ \hline
@@ -10722,6 +10732,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct N\_T}                                & Real        & Arrhenius temperature exponent (Finite Rate)             &                   &     \\ \hline
 {\ct NU(N)}                               & Real        & Reaction stoichiometry (Finite Rate)          &                   &     \\ \hline
 {\ct O}                                   & Real        & Oxygen atoms in the fuel                      &                   & 0    \\ \hline
+{\ct REAC\_ATOM\_ERROR}                   & Real        & Atom conservation error allowed in reaction stoichiometry & atoms             & 1.E-5    \\ \hline
+{\ct REAC\_MASS\_ERROR}                   & Real        & Mass conservation error allowed in reaction stoichiometry & kg/kg             & 1.E-4    \\ \hline
 {\ct SOOT\_YIELD}                         & Real        & Fraction of soot from the fuel                & kg/kg             & 0.01    \\ \hline
 {\ct SOOT\_H\_FRACTION}                   & Real        & Atom fraction of hydrogen in soot             &                   & 0.1    \\ \hline
 {\ct SUPPRESSION}                         & Logical     & See Section~\ref{info:extinction}             &                   & {\ct .TRUE.}      \\ \hline
