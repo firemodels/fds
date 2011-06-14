@@ -106,7 +106,7 @@ IF (STORE_MU_DNS) THEN
 ENDIF
 
 ! Compute eddy viscosity using Smagorinsky model
-
+IF (DISSIPATION_SOURCE) Q_DISSIPATION = 0._EB
 IF (LES .OR. EVACUATION_ONLY(NM)) THEN
    CS = CSMAG
    IF (EVACUATION_ONLY(NM)) CS = 0.9_EB
