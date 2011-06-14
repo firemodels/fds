@@ -6275,6 +6275,9 @@ void init_volrender(void){
     vr->loaded=0;
     vr->show=0;
   }
+#ifndef pp_VOLRENDER
+  return;
+#endif
   for(i=0;i<nsliceinfo;i++){
     slice *slicei;
     char *shortlabel;
