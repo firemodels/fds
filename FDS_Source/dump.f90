@@ -242,6 +242,10 @@ FILE_COUNTER = 10
 
 FN_END = TRIM(CHID)//'.end'
 
+! SVN ID file
+
+FN_SVN = TRIM(CHID)//'_svn.txt'
+
 ! Smokeview File
 
 FN_SMV = TRIM(CHID)//'.smv'
@@ -1134,6 +1138,12 @@ ENDIF
  
 WRITE(LU_SMV,'(/A)') 'VERSION'
 WRITE(LU_SMV,'(F5.1,2X,A)') VERSION_NUMBER,TRIM(VERSION_STRING)
+
+! Write out the SVN number to a file
+
+OPEN(LU_SVN,FILE=FN_SVN,FORM='FORMATTED',STATUS='REPLACE')
+WRITE(LU_SVN,'(I5)') SVN_REVISION_NUMBER
+CLOSE(LU_SVN)
 
 ! Indicate the "endian-ness" of the output files
  
