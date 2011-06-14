@@ -4577,13 +4577,6 @@ typedef struct {
         fds_filein=NULL;
       }
 
-      if(fds_filein!=NULL){
-        {
-          int returnval;
-          returnval=getnewfilename();
-          if(returnval!=0)return returnval;
-        }
-      }
       if(chidfilebase==NULL){
         char *chidptr=NULL;
         char buffer_chid[1024];
@@ -4601,8 +4594,7 @@ typedef struct {
         if(STAT(hrrfilename,&statbuffer)!=0){
           FREEMEMORY(hrrfilename);
         }
-      }
-      if(chidfilebase!=NULL){
+        
         NewMemory((void **)&devcfilename,(unsigned int)(strlen(chidfilebase)+9+1));
         STRCPY(devcfilename,chidfilebase);
         STRCAT(devcfilename,"_devc.csv");
@@ -6754,81 +6746,6 @@ void setsurfaceindex(blockagedata *bc){
   bc->walltype=WALL_6;
   bc->walltypeORIG=WALL_6;
   
-}
-
-/* ------------------ getnewfilename ------------------------ */
-
-int getnewfilename(void){
-  size_t len;
-  int incnumber;
-  char *c,*base,*index,*ext;
-  char buffer[1025];
-  char buffer2[1025];
-  int numbers;
-
-  if(fds_filein==NULL)return 2;
-  len=strlen(fds_filein);
-  if(len==0||len>1023)return 2;
-  strcpy(buffer,fds_filein);
-  base=buffer;
-
-  ext=strrchr(fds_filein,'.');
-  if(ext==NULL)return 2;
-  base[ext-fds_filein]='\0';
-
-  index=strrchr(base,'_');
-  numbers=0;
-  if(index!=NULL){
-    numbers=1;
-    for(c=index+1;*c!='\0';c++){
-      if(isdigit(*c)==0){
-        numbers=0;
-        break;
-      }
-    }
-  }
-  if(numbers==1&&index!=NULL){
-    base[index-base]='\0';
-    index++;
-    sscanf(index,"%i",&incnumber);
-    sprintf(buffer2,"_%.3i",incnumber+1);
-  }
-  else{
-    index=NULL;
-    strcpy(buffer2,"_001");
-  }
-  len=strlen(base)+strlen(buffer2)+strlen(ext);
-  FREEMEMORY(fds_fileout);
-  FREEMEMORY(fds_fileout2);
-  if(NewMemory((void **)&fds_fileout,(unsigned int)(len+1))==0||
-    NewMemory((void **)&fds_fileout2,(unsigned int)(len+5))==0){
-    FREEMEMORY(fds_fileout);
-    FREEMEMORY(fds_fileout2);
-    return 2;
-  }
-  STRCPY(fds_fileout,base);
-  STRCAT(fds_fileout,buffer2);
-  STRCAT(fds_fileout,ext);
-  STRCPY(fds_fileout2,fds_fileout);
-  STRCAT(fds_fileout2,"_chg");
-
-
-/*
-  len=strlen(fds_filein);
-  FREEMEMORY(fds_fileout);
-  FREEMEMORY(fds_fileout2);
-  if(NewMemory((void **)&fds_fileout,(unsigned int)(len+5))==0||
-    NewMemory((void **)&fds_fileout2,(unsigned int)(len+5))==0){
-    FREEMEMORY(fds_fileout);
-    FREEMEMORY(fds_fileout2);
-    return 2;
-  }
-  STRCPY(fds_fileout,fds_filein);
-  STRCAT(fds_fileout,"_new");
-  STRCPY(fds_fileout2,fds_filein);
-  STRCAT(fds_fileout2,"_chg");
-  */
-  return 0;
 }
 
 /* ------------------ initobst ------------------------ */

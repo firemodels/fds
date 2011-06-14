@@ -389,7 +389,6 @@ EXTERNCPP int get_interval(float val, float *array, int n);
 EXTERNCPP void set_unit_vis(void);
 EXTERNCPP int getrevision(char *svn);
 EXTERNCPP void memorystatus(void);
-EXTERNCPP int getnewfilename(void);
 EXTERNCPP void showhide_translate(int var);
 EXTERNCPP void updateallplotslices(void);
 EXTERNCPP int makeiblank(void);

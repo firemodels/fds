@@ -739,7 +739,7 @@ SVEXTERN char *flushfile, *chidfilebase;
 SVEXTERN char *hrrfilename,*devcfilename;
 SVEXTERN hrrdata *hrrinfo;
 SVEXTERN char *smokezippath;
-SVEXTERN char *INI_fds_filein, *fds_filein, *fds_fileout,*fds_fileout2;
+SVEXTERN char SVDECL(*INI_fds_filein,NULL), SVDECL(*fds_filein,NULL);
 SVEXTERN char SVDECL(*caseinifilename,NULL),SVDECL(*boundinifilename,NULL);
 SVEXTERN char *zonelonglabels, *zoneshortlabels, *zoneunits;
 SVEXTERN char *smokeviewini;

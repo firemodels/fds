@@ -2168,7 +2168,6 @@ void initvars0(void){
   hrrfilename=NULL;
   hrrinfo=NULL;
   smokezippath=NULL;
-  INI_fds_filein=NULL, fds_filein=NULL, fds_fileout=NULL,fds_fileout2=NULL;
   scriptinifilename2=NULL;
   zonelonglabels=NULL, zoneshortlabels=NULL, zoneunits=NULL;
   smokeviewini=NULL;

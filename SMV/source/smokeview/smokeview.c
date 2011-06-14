@@ -3453,9 +3453,6 @@ void Args(int argc, char **argv){
     if(STAT(fds_filein,&statbuffer)!=0){
       FREEMEMORY(fds_filein);
     }
-    if(fds_filein!=NULL){
-      getnewfilename();
-    }
   }
 
   // if smokezip created part2iso files then concatenate .smv entries found in the .isosmv file 
@@ -3769,6 +3766,9 @@ void usage(char **argv){
 #endif
 #ifdef pp_THREAD
     strcat(label,", pp_THREAD");
+#endif
+#ifdef pp_VOLRENDER
+    strcat(label,", pp_VOLRENDER");
 #endif
 #ifdef X64
     strcat(label,", X64");
