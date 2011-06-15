@@ -57,9 +57,7 @@ void update_alpha(void);
 #define CULL_SMOKE 12
 #define CULL_PORTSIZE 14
 #endif
-#ifdef pp_GPU
-#define GPU_SMOKE 13
-#endif
+#define VOL_SMOKE 13
 
 GLUI_Listbox *LISTBOX_smoke_colorbar=NULL;
 #ifdef pp_CULL
@@ -72,9 +70,7 @@ GLUI *glui_3dsmoke=NULL;
 GLUI_RadioGroup *alphagroup=NULL,*skipframes,*radio_smokesensors=NULL;
 GLUI_Spinner *SPINNER_cvis=NULL;
 GLUI_Checkbox *CHECKBOX_test_smokesensors=NULL;
-#ifdef pp_GPU
 GLUI_Checkbox *CHECKBOX_smokeGPU=NULL,*CHECKBOX_volume_render=NULL;
-#endif
 GLUI_Checkbox *CHECKBOX_smokedrawtest=NULL;
 GLUI_Checkbox *CHECKBOX_smokedrawtest2=NULL;
 GLUI_Checkbox *CHECKBOX_smoke3d_external=NULL;
@@ -119,9 +115,7 @@ extern "C" void update_smoke3dflags(void){
   if(CHECKBOX_smokedrawtest!=NULL)CHECKBOX_smokedrawtest->set_int_val(smokedrawtest);
   if(CHECKBOX_smokedrawtest2!=NULL)CHECKBOX_smokedrawtest2->set_int_val(smokedrawtest2);
   skipframes->set_int_val(smokeskipm1);
-#ifdef pp_GPU
-  SMOKE_3D_CB(GPU_SMOKE);
-#endif
+  SMOKE_3D_CB(VOL_SMOKE);
 #ifdef pp_CULL
   SMOKE_3D_CB(CULL_SMOKE);
 #endif
@@ -258,9 +252,9 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   panel_slices = glui_3dsmoke->add_panel_to_panel(panel_overall,"Slices");
   panel_slices->set_alignment(GLUI_ALIGN_LEFT);
 #ifdef pp_GPU
-  CHECKBOX_smokeGPU=glui_3dsmoke->add_checkbox_to_panel(panel_slices,_("Use GPU"),&usegpu,GPU_SMOKE,SMOKE_3D_CB);
+  CHECKBOX_smokeGPU=glui_3dsmoke->add_checkbox_to_panel(panel_slices,_("Use GPU"),&usegpu,VOL_SMOKE,SMOKE_3D_CB);
 #endif
-  CHECKBOX_volume_render=glui_3dsmoke->add_checkbox_to_panel(panel_slices,_("Use full volume rendering"),&use_volume_render,GPU_SMOKE,SMOKE_3D_CB);
+  CHECKBOX_volume_render=glui_3dsmoke->add_checkbox_to_panel(panel_slices,_("Use full volume rendering"),&use_volume_render,VOL_SMOKE,SMOKE_3D_CB);
 #ifdef pp_GPU
   if(gpuactive==0){
     usegpu=0;
@@ -307,7 +301,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   glui_3dsmoke->add_radiobutton_to_group(skipframes,_("   ... every 3rd"));
 
 #ifdef pp_GPU
-  SMOKE_3D_CB(GPU_SMOKE);
+  SMOKE_3D_CB(VOL_SMOKE);
 #endif
 }
 
@@ -482,7 +476,7 @@ void SMOKE_3D_CB(int var){
     initcull(cullsmoke);
     break;
 #endif
-  case GPU_SMOKE:
+  case VOL_SMOKE:
 #ifdef pp_GPU
     if(usegpu==1&&use_volume_render==0){
       skipframes->set_int_val(0);
