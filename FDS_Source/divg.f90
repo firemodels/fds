@@ -439,12 +439,8 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
                              (KDTDZ(I,J,K)-KDTDZ(I,J,K-1))*RDZ(K)
                   DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + QR(I,J,K)
                   
-                  IF (DISSIPATION_SOURCE) DP(I,J,K) = DP(I,J,K) + Q_DISSIPATION(I,J,K)
-                  
-                  IF (ENTHALPY_TRANSPORT) THEN
-                                             ENTHALPY_SOURCE(I,J,K) = ENTHALPY_SOURCE(I,J,K) + DELKDELT + Q(I,J,K) + QR(I,J,K)
-                     IF (DISSIPATION_SOURCE) ENTHALPY_SOURCE(I,J,K) = ENTHALPY_SOURCE(I,J,K) + Q_DISSIPATION(I,J,K)
-                  ENDIF
+                  ! add divergence of heat flux vector (heat release added in fire)
+                  IF (ENTHALPY_TRANSPORT) ENTHALPY_SOURCE(I,J,K) = ENTHALPY_SOURCE(I,J,K) + DELKDELT + QR(I,J,K)
                   
                ENDDO 
             ENDDO
@@ -457,7 +453,10 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
                   (R(I)*KDTDX(I,J,K)-R(I-1)*KDTDX(I-1,J,K))*RDX(I)*RRN(I) + &
                        (KDTDZ(I,J,K)-       KDTDZ(I,J,K-1))*RDZ(K)
                   DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + QR(I,J,K)
-                  IF (ENTHALPY_TRANSPORT) ENTHALPY_SOURCE(I,J,K) = ENTHALPY_SOURCE(I,J,K) + DELKDELT + Q(I,J,K) + QR(I,J,K)
+                  
+                  ! add divergence of heat flux vector (heat release added in fire)
+                  IF (ENTHALPY_TRANSPORT) ENTHALPY_SOURCE(I,J,K) = ENTHALPY_SOURCE(I,J,K) + DELKDELT + QR(I,J,K)
+                   
                ENDDO 
             ENDDO
          ENDDO
@@ -535,8 +534,6 @@ IF (NLP>0 .AND. N_EVAP_INDICES > 0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
       DO J=1,JBAR
          DO I=1,IBAR
             DP(I,J,K) = DP(I,J,K) + D_LAGRANGIAN(I,J,K)
-            IF (ENTHALPY_TRANSPORT) ENTHALPY_SOURCE(I,J,K) = ENTHALPY_SOURCE(I,J,K) + &
-                                                             ENTHALPY_SOURCE_LAGRANGIAN(I,J,K)
          ENDDO
       ENDDO
    ENDDO
