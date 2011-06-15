@@ -1948,17 +1948,6 @@ int getindex(float key, const float *list, int nlist){
   return 0;
 }
 
-/* ------------------ compare ------------------------ */
-
-int compare( const void *arg1, const void *arg2 ){
-  float x, y;
-  x=*(float *)arg1;
-  y=*(float *)arg2;
-  if( x< y)return -1;
-  if( x==y)return 0;
-  return 1;
-}
-
 /* ------------------ drawTimeBar ------------------------ */
 
 void drawTimeBar(void){
@@ -2754,117 +2743,6 @@ void checktimebound(void){
       bc->show=bc->showtimelist[itimes];
     }
   }
-}
-
-/* ------------------ getplotstate ------------------------ */
-
-int getplotstate(int choice){
-  int i;
-  mesh *meshi;
-  plot3d *ploti;
-  slice *slicei;
-  vslice *vslicei;
-  patch *patchi;
-  particle *parti;
-  targ *targi;
-  iso *isoi;
-  zonedata *zonei;
-  smoke3d *smoke3di;
-  tourdata *touri;
-  int ii;
-
-  update_loaded_lists();
-  switch (choice){
-    case STATIC_PLOTS:
-    case STATIC_PLOTS_NORECURSE:
-      stept = 0;
-      for(i=0;i<nmeshes;i++){
-        meshi=meshinfo + i;
-        if(meshi->plot3dfilenum==-1)continue;
-        ploti = plot3dinfo + meshi->plot3dfilenum;
-        if(ploti->loaded==0||ploti->display==0)continue;
-        if(meshi->visx==0&&meshi->visy==0&&meshi->visz==0&&visiso==0)continue;
-        return STATIC_PLOTS;
-      }
-      if(choice!=STATIC_PLOTS_NORECURSE){
-        return getplotstate(DYNAMIC_PLOTS_NORECURSE);
-      }
-      break;
-    case DYNAMIC_PLOTS:
-    case DYNAMIC_PLOTS_NORECURSE:
-      for(ii=0;ii<nslice_loaded;ii++){
-        i = slice_loaded_list[ii];
-        slicei = sliceinfo + i;
-        if(slicei->display==0||slicei->type!=islicetype)continue;
-        if(slicei->volslice==0&&visGrid==0)stept = 1; 
-        return DYNAMIC_PLOTS;
-      }
-      if(visGrid==0)stept = 1;
-      if(visTerrainType!=4){
-        for(i=0;i<nterraininfo;i++){
-          terraindata *terri;
-
-          terri = terraininfo + i;
-          if(terri->loaded==1){
-            return DYNAMIC_PLOTS;
-          }
-        }
-      }
-      for(i=0;i<nvslice;i++){
-        vslicei = vsliceinfo + i;
-        if(vslicei->display==0||vslicei->type!=islicetype)continue;
-        return DYNAMIC_PLOTS;
-      }
-      for(ii=0;ii<npatch_loaded;ii++){
-        i = patch_loaded_list[ii];
-        patchi = patchinfo + i;
-        if(patchi->display==0||patchi->type!=ipatchtype)continue;
-        return DYNAMIC_PLOTS;
-      }
-      for(i=0;i<npartinfo;i++){
-        parti = partinfo + i;
-        if(parti->loaded==0||parti->display==0)continue;
-        return DYNAMIC_PLOTS;
-      }
-      for(i=0;i<nisoinfo;i++){
-        isoi = isoinfo + i;
-        if(isoi->loaded==0)continue;
-        if(isoi->display==0)continue;
-        return DYNAMIC_PLOTS;
-      }
-      for(i=0;i<nzone;i++){
-        zonei = zoneinfo + i;
-        if(zonei->loaded==0||zonei->display==0)continue;
-        return DYNAMIC_PLOTS;
-      }
-      for(i=0;i<ntarginfo;i++){
-        targi = targinfo + i;
-        if(targi->loaded==0||targi->display==0)continue;
-        return DYNAMIC_PLOTS;
-      }
-      for(i=0;i<ntours;i++){
-        touri = tourinfo + i;
-        if(touri->display==0)continue;
-        return DYNAMIC_PLOTS;
-      }
-      for(i=0;i<nsmoke3dinfo;i++){
-        smoke3di = smoke3dinfo + i;
-        if(smoke3di->loaded==0||smoke3di->display==0)continue;
-        return DYNAMIC_PLOTS;
-      }
-#ifdef pp_SHOOTER
-      if(visShooter!=0&&shooter_active==1){
-        return DYNAMIC_PLOTS;
-      }
-#endif
-      if(choice!=DYNAMIC_PLOTS_NORECURSE)return getplotstate(STATIC_PLOTS_NORECURSE);
-      break;
-    default:
-      ASSERT(FFALSE);
-      break;
-  }
-  stept = 0;
-  return NO_PLOTS;
 }
 
 /* ------------------ ExtractFrustum ------------------------ */

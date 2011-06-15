@@ -6266,6 +6266,7 @@ void init_volrender(void){
     vr->smoke=NULL;
     vr->loaded=0;
     vr->show=0;
+    vr->timeslist=NULL;
   }
 #ifndef pp_VOLRENDER
   return;

@@ -29,6 +29,122 @@
 // svn revision character string
 char update_revision[]="$Revision$";
 
+/* ------------------ compare ------------------------ */
+
+int compare_float( const void *arg1, const void *arg2 ){
+  float x, y;
+  x=*(float *)arg1;
+  y=*(float *)arg2;
+  if( x< y)return -1;
+  if( x==y)return 0;
+  return 1;
+}
+
+/* ------------------ update_framenumber ------------------------ */
+
+void update_framenumber(int changetime){
+  int i,ii;
+//  int redisplay;
+
+  if(force_redisplay==1||(itimeold!=itimes&&changetime==1)){
+    force_redisplay=0;
+    itimeold=itimes;
+//    redisplay=1;
+    if(showsmoke==1||showevac==1){
+      for(i=0;i<npartinfo;i++){
+        particle *parti;
+
+        parti = partinfo+i;
+        if(parti->loaded==1){
+          if(parti->ptimeslist==NULL)continue;
+          parti->iframe=parti->ptimeslist[itimes];
+        }
+      }
+    }
+    if(hrrinfo!=NULL&&hrrinfo->loaded==1&&hrrinfo->display==1&&hrrinfo->timeslist!=NULL){
+      hrrinfo->itime=hrrinfo->timeslist[itimes];
+    }
+    if(showslice==1||showvslice==1){
+      for(ii=0;ii<nslice_loaded;ii++){
+        slice *sd;
+
+        i = slice_loaded_list[ii];
+        sd = sliceinfo+i;
+        if(sd->slicetimeslist==NULL)continue;
+        sd->islice=sd->slicetimeslist[itimes];
+      }
+    }
+    if(show3dsmoke==1){
+      for(i=0;i<nsmoke3dinfo;i++){
+        smoke3d *smoke3di;
+
+        smoke3di = smoke3dinfo + i;
+        if(smoke3di->loaded==0||smoke3di->display==0)continue;
+        smoke3di->iframe=smoke3di->timeslist[itimes];
+        if(smoke3di->iframe!=smoke3di->lastiframe){
+          smoke3di->lastiframe=smoke3di->iframe;
+          updatesmoke3d(smoke3di);
+        }
+      }
+      if(nsmoke3dinfo>0)mergesmoke3dcolors(NULL);
+    }
+    if(showpatch==1){
+      for(i=0;i<nmeshes;i++){
+        patch *patchi;
+        mesh *meshi;
+
+        meshi = meshinfo+i;
+        patchi=patchinfo + meshi->patchfilenum;
+        if(meshi->patchtimes==NULL)continue;
+        if(meshi->patchtimeslist==NULL)continue;
+        meshi->ipatch=meshi->patchtimeslist[itimes];
+        if(patchi->compression_type==0){
+          meshi->ipqqi = meshi->ipqq + meshi->ipatch*meshi->npatchsize;
+        }
+        else{
+#ifdef USE_ZLIB
+          uncompress_patchdataframe(meshi,meshi->ipatch);
+#endif
+        }
+      }
+    }
+    if(showiso==1){
+      iso *isoi;
+      mesh *meshi;
+
+      CheckMemory;
+      for(i=0;i<nisoinfo;i++){
+        isoi = isoinfo + i;
+        if(isoi->loaded==0)continue;
+        meshi = meshinfo + isoi->blocknumber;
+
+        if(meshi->isotimes==NULL)continue;
+        if(meshi->isotimeslist==NULL)continue;
+        meshi->iiso=meshi->isotimeslist[itimes];
+      }
+    }
+    if(ntotal_smooth_blockages>0){
+      for(i=0;i<nmeshes;i++){
+        smoothblockage *sb;
+        mesh *meshi;
+
+        meshi = meshinfo+i;
+        if(meshi->showsmoothtimelist!=NULL){
+          sb=meshi->showsmoothtimelist[itimes];
+          if(sb==NULL)continue;
+          meshi->nsmoothblockagecolors=sb->nsmoothblockagecolors;
+          meshi->smoothblockagecolors=sb->smoothblockagecolors;
+          meshi->blockagesurfaces=sb->smoothblockagesurfaces;
+        }
+      }
+    }
+    if(showzone==1){
+      izone=zonetlist[itimes];
+    }
+  }
+
+}
+
 /* ------------------ updateShow ------------------------ */
 
 void updateShow(void){
@@ -46,7 +162,7 @@ void updateShow(void){
   patch *patchi;
   particle *parti;
   showtime=0; showtime2=0; showplot3d=0; showpatch=0; 
-  showslice=0; showvslice=0; showsmoke=0; showzone=0; showiso=0;
+  showslice=0; showvslice=0; showsmoke=0; showzone=0; showiso=0, showvolrender=0;
   show_extreme_below=0;
   show_extreme_above=0;
 #ifdef pp_SHOOTER
@@ -120,6 +236,19 @@ void updateShow(void){
         smoke3dflag=1;
         break;
       }
+    }
+  }
+  if(nvolrenderinfo>0){
+    for(i=0;i<nmeshes;i++){
+      mesh *meshi;
+      volrenderdata *vr;
+
+      meshi = meshinfo + i;
+      vr = &(meshi->volrenderinfo);
+      if(vr->fire==NULL&&vr->smoke==NULL)continue;
+      if(vr->loaded==0||vr->show==0)continue;
+      showvolrender=1;
+      break;
     }
   }
   sliceflag=0;
@@ -280,7 +409,7 @@ void updateShow(void){
     smoke3dflag==1|| showtour==1 || evacflag==1||
     (ReadZoneFile==1&&visZone==1&&visTimeZone==1)||
     (ReadTargFile==1&&visTarg==1)
-    ||showterrain==1
+    ||showterrain==1||showvolrender==1
     )
     )showtime=1;
     if(plotstate==DYNAMIC_PLOTS&&ReadIsoFile==1&&visAIso!=0&&isoflag==1)showtime2=1;
@@ -321,7 +450,7 @@ void updateShow(void){
 #endif    
   }
   if(showsmoke==1||showevac==1||showpatch==1||showslice==1||showvslice==1||showzone==1||showiso==1||showevac==1)RenderTime=1;
-  if(showtour==1||show3dsmoke==1||touring==1)RenderTime=1;
+  if(showtour==1||show3dsmoke==1||touring==1||showvolrender==1)RenderTime=1;
 #ifdef pp_SHOOTER
   if(showshooter==1)RenderTime=1;
 #endif
@@ -878,8 +1007,9 @@ void updatetimes(void){
     }
   }
 
-  if(ntimes>0)qsort( (float *)times, (size_t)ntimes, sizeof( float ), compare );
-  n2=1;ntimes2=ntimes;
+  if(ntimes>0)qsort( (float *)times, (size_t)ntimes, sizeof( float ), compare_float );
+  n2=1;
+  ntimes2=ntimes;
   for(n=1;n<ntimes;n++){
     if(fabs(times[n]-times[n-1])>dt_MIN/10.0){
       times[n2]=times[n];
@@ -963,6 +1093,18 @@ void updatetimes(void){
       sd = sliceinfo + i;
       FREEMEMORY(sd->slicetimeslist);
       if(ntimes>0)NewMemory((void **)&sd->slicetimeslist,ntimes*sizeof(int));
+    }
+    if(nvolrenderinfo>0){
+      for(i=0;i<nmeshes;i++){
+        mesh *meshi;
+        volrenderdata *vr;
+
+        meshi = meshinfo + i;
+        vr = &(meshi->volrenderinfo);
+        if(vr->fire==NULL&&vr->smoke==NULL)continue;
+        if(vr->fire!=NULL)vr->timeslist=vr->fire->slicetimeslist;
+        if(vr->fire==NULL&&vr->smoke!=NULL)vr->timeslist=vr->smoke->slicetimeslist;
+      }
     }
     {
       smoke3d *smoke3di;
@@ -1113,3 +1255,127 @@ void updatetimes(void){
     }
   }
 }
+
+/* ------------------ getplotstate ------------------------ */
+
+int getplotstate(int choice){
+  int i;
+  mesh *meshi;
+  plot3d *ploti;
+  slice *slicei;
+  vslice *vslicei;
+  patch *patchi;
+  particle *parti;
+  targ *targi;
+  iso *isoi;
+  zonedata *zonei;
+  smoke3d *smoke3di;
+  tourdata *touri;
+  int ii;
+
+  update_loaded_lists();
+  switch (choice){
+    case STATIC_PLOTS:
+    case STATIC_PLOTS_NORECURSE:
+      stept = 0;
+      for(i=0;i<nmeshes;i++){
+        meshi=meshinfo + i;
+        if(meshi->plot3dfilenum==-1)continue;
+        ploti = plot3dinfo + meshi->plot3dfilenum;
+        if(ploti->loaded==0||ploti->display==0)continue;
+        if(meshi->visx==0&&meshi->visy==0&&meshi->visz==0&&visiso==0)continue;
+        return STATIC_PLOTS;
+      }
+      if(choice!=STATIC_PLOTS_NORECURSE){
+        return getplotstate(DYNAMIC_PLOTS_NORECURSE);
+      }
+      break;
+    case DYNAMIC_PLOTS:
+    case DYNAMIC_PLOTS_NORECURSE:
+      for(ii=0;ii<nslice_loaded;ii++){
+        i = slice_loaded_list[ii];
+        slicei = sliceinfo + i;
+        if(slicei->display==0||slicei->type!=islicetype)continue;
+        if(slicei->volslice==0&&visGrid==0)stept = 1; 
+        return DYNAMIC_PLOTS;
+      }
+      if(visGrid==0)stept = 1;
+      if(visTerrainType!=4){
+        for(i=0;i<nterraininfo;i++){
+          terraindata *terri;
+
+          terri = terraininfo + i;
+          if(terri->loaded==1){
+            return DYNAMIC_PLOTS;
+          }
+        }
+      }
+      for(i=0;i<nvslice;i++){
+        vslicei = vsliceinfo + i;
+        if(vslicei->display==0||vslicei->type!=islicetype)continue;
+        return DYNAMIC_PLOTS;
+      }
+      for(ii=0;ii<npatch_loaded;ii++){
+        i = patch_loaded_list[ii];
+        patchi = patchinfo + i;
+        if(patchi->display==0||patchi->type!=ipatchtype)continue;
+        return DYNAMIC_PLOTS;
+      }
+      for(i=0;i<npartinfo;i++){
+        parti = partinfo + i;
+        if(parti->loaded==0||parti->display==0)continue;
+        return DYNAMIC_PLOTS;
+      }
+      for(i=0;i<nisoinfo;i++){
+        isoi = isoinfo + i;
+        if(isoi->loaded==0)continue;
+        if(isoi->display==0)continue;
+        return DYNAMIC_PLOTS;
+      }
+      for(i=0;i<nzone;i++){
+        zonei = zoneinfo + i;
+        if(zonei->loaded==0||zonei->display==0)continue;
+        return DYNAMIC_PLOTS;
+      }
+      for(i=0;i<ntarginfo;i++){
+        targi = targinfo + i;
+        if(targi->loaded==0||targi->display==0)continue;
+        return DYNAMIC_PLOTS;
+      }
+      for(i=0;i<ntours;i++){
+        touri = tourinfo + i;
+        if(touri->display==0)continue;
+        return DYNAMIC_PLOTS;
+      }
+      for(i=0;i<nsmoke3dinfo;i++){
+        smoke3di = smoke3dinfo + i;
+        if(smoke3di->loaded==0||smoke3di->display==0)continue;
+        return DYNAMIC_PLOTS;
+      }
+      if(nvolrenderinfo>0){
+        for(i=0;i<nmeshes;i++){
+          mesh *meshi;
+          volrenderdata *vr;
+
+          meshi = meshinfo + i;
+          vr = &(meshi->volrenderinfo);
+          if(vr->fire==NULL&&vr->smoke==NULL)continue;
+          if(vr->loaded==0||vr->show==0)continue;
+          return DYNAMIC_PLOTS;
+        }
+      }
+#ifdef pp_SHOOTER
+      if(visShooter!=0&&shooter_active==1){
+        return DYNAMIC_PLOTS;
+      }
+#endif
+      if(choice!=DYNAMIC_PLOTS_NORECURSE)return getplotstate(STATIC_PLOTS_NORECURSE);
+      break;
+    default:
+      ASSERT(FFALSE);
+      break;
+  }
+  stept = 0;
+  return NO_PLOTS;
+}
+

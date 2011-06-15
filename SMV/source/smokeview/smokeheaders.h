@@ -535,7 +535,7 @@ EXTERNCPP void updateclipbounds(int set_i0, int *i0, int set_i1, int *i1, int ma
 EXTERNCPP void ClearBuffers(int mode);
 EXTERNCPP void updatetimes(void);
 EXTERNCPP void synctimes(void);
-EXTERNCPP int compare( const void *arg1, const void *arg2 );
+EXTERNCPP int compare_float( const void *arg1, const void *arg2 );
 EXTERNCPP void updateplotslice(int slicedir);
 EXTERNCPP void drawpatch(const mesh *gb);
 EXTERNCPP void drawpatch_cellcenter(const mesh *gb);

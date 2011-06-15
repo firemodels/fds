@@ -396,6 +396,7 @@ typedef struct {
 typedef struct _volrenderdata {
   struct _mesh *rendermesh;
   struct _slice *smoke, *fire;
+  int *timeslist;
   int loaded, show;
 } volrenderdata;
 
