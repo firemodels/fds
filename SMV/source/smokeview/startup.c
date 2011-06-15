@@ -2204,7 +2204,6 @@ int imax(int a, int b){
 int getmaxrevision(void){
   int max_revision=0;
 
-  MAXREV(menu_revision);
   MAXREV(assert_revision);
   MAXREV(blockage_test_revision);
   MAXREV(callbacks_revision);
@@ -2215,37 +2214,38 @@ int getmaxrevision(void){
   MAXREV(dmalloc_revision);
   MAXREV(drawGeometry_revision);
   MAXREV(egz_stdio_revision);
-  MAXREV(smv_endian_revision);
+  MAXREV(geometry_revision);
   MAXREV(getdatabounds_revision);
   MAXREV(getdatacolors_revision);
-#ifdef pp_SHOOTER
-  MAXREV(glui_shooter_revision);
-#endif
-#ifdef pp_MESSAGE
-  MAXREV(glui_message_revision);
-#endif
   MAXREV(glui_3dsmoke_revision);
   MAXREV(glui_blockedit_revision);
   MAXREV(glui_bounds_revision);
   MAXREV(glui_clip_revision);
-  MAXREV(glui_wui_revision);
   MAXREV(glui_colorbar_revision);
   MAXREV(glui_labels_revision);
+#ifdef pp_MESSAGE
+  MAXREV(glui_message_revision);
+#endif
   MAXREV(glui_motion_revision);
+#ifdef pp_SHOOTER
+  MAXREV(glui_shooter_revision);
+#endif
   MAXREV(glui_stereo_revision);
   MAXREV(glui_tour_revision);
   MAXREV(glui_trainer_revision);
+  MAXREV(glui_wui_revision);
+
   MAXREV(IOboundary_revision);
   MAXREV(IOhrr_revision);
   MAXREV(IOiso_revision);
   MAXREV(IOobject_revision);
   MAXREV(IOpart_revision);
   MAXREV(IOplot3d_revision);
+  MAXREV(IOscript_revision);
 #ifdef pp_SHOOTER
   MAXREV(IOshooter_revision);
 #endif
   MAXREV(IOslice_revision);
-  MAXREV(IOscript_revision);
   MAXREV(IOsmoke_revision);
   MAXREV(IOtarget_revision);
   MAXREV(IOtour_revision);
@@ -2253,6 +2253,7 @@ int getmaxrevision(void){
   MAXREV(IOzone_revision);
   MAXREV(isobox_revision);
   MAXREV(main_revision);
+  MAXREV(menu_revision);
   MAXREV(output_revision);
   MAXREV(parseobst_revision);
   MAXREV(readsmv_revision);
@@ -2260,15 +2261,18 @@ int getmaxrevision(void){
   MAXREV(scontour2d_revision);
   MAXREV(segtri_revision);
   MAXREV(skybox_revision);
+  MAXREV(shaders_revision);
+  MAXREV(showscene_revision);
   MAXREV(smokeview_revision);
   MAXREV(smoothlabel_revision);
+  MAXREV(smv_endian_revision);
   MAXREV(startup_revision);
   MAXREV(string_util_revision);
   MAXREV(sv_api_revision);
-  MAXREV(shaders_revision);
   MAXREV(threader_revision);
   MAXREV(unit_revision);
   MAXREV(translate_revision);
   MAXREV(update_revision);
+  MAXREV(viewports_revision);
   return max_revision;
 }

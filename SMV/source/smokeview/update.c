@@ -1379,3 +1379,17 @@ int getplotstate(int choice){
   return NO_PLOTS;
 }
 
+/* ------------------ getindex ------------------------ */
+
+int getindex(float key, const float *list, int nlist){
+  int i;
+  if(nlist==1)return 0;
+  if(key<list[1])return 0;
+  if(key>=list[nlist-1])return nlist-1;
+  for(i=1;i<nlist-1;i++){
+    if(list[i]<=key&&key<list[i+1])return i;
+  }
+  return 0;
+}
+
+
