@@ -863,6 +863,25 @@ void drawplot3d_texture(mesh *meshi){
 
 }
 
+/* ------------------ drawplot3d_frame ------------------------ */
+
+void drawplot3d_frame(void){
+  mesh *meshi;
+  int i;
+
+  for(i=0;i<nmeshes;i++){
+    meshi=meshinfo+i;
+    if(meshi->plot3dfilenum==-1)continue;
+    if(plot3dinfo[meshi->plot3dfilenum].display==0)continue;
+    if(usetexturebar!=0){
+      drawplot3d_texture(meshi);
+    }
+    else{
+      drawplot3d(meshi);
+    }
+  }
+}
+
 /* ------------------ drawplot3d ------------------------ */
 
 void drawplot3d(mesh *meshi){

@@ -163,52 +163,16 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
       sniffErrors("after drawtrees");
     }
 
-/* ++++++++++++++++++++++++ draw smoke +++++++++++++++++++++++++ */
+/* ++++++++++++++++++++++++ draw particles +++++++++++++++++++++++++ */
 
     if(showsmoke==1){
-      particle *parti;
-
-      if(staticframe0==0||iframe!=0){
-        int i;
-
-        for(i=0;i<npartinfo;i++){
-          parti = partinfo + i;
-          if(parti->loaded==0||parti->display==0)continue;
-          if(parti->evac==1){
-            drawEvac(parti);
-            sniffErrors("after drawEvac");
-          }
-          else{
-            drawPart(parti);
-            sniffErrors("after drawPart");
-          }
-        }
-      }
-      if(visStaticSmoke==1&&staticframe0==1){
-        int i;
-
-        for(i=0;i<npartinfo;i++){
-          parti = partinfo + i;
-          if(parti->loaded==0||parti->display==0)continue;
-          drawStaticPart(parti);
-          sniffErrors("after drawStaticPart");
-        }
-      }
+      drawpart_frame();
     }
 
 /* ++++++++++++++++++++++++ draw evacuation +++++++++++++++++++++++++ */
 
     if(showevac==1){
-      int i;
-
-      for(i=0;i<npartinfo;i++){
-        particle *parti;
-
-        parti = partinfo + i;
-        if(parti->loaded==0||parti->display==0||parti->evac==0)continue;
-        drawEvac(parti);
-      }
-      sniffErrors("after drawEvac 2");
+      drawevac_frame();
     }
 
 /* ++++++++++++++++++++++++ draw targets +++++++++++++++++++++++++ */
@@ -403,55 +367,13 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 /* ++++++++++++++++++++++++ draw slice files +++++++++++++++++++++++++ */
 
   if(showslice==1&&use_transparency_data==0){
-    drawslices();
+    drawslice_frame();
   } 
 
   /* ++++++++++++++++++++++++ draw boundary files +++++++++++++++++++++++++ */
 
   if(showpatch==1){
-    patch *patchi;
-    mesh *meshi;
-    int i;
-
-    for(i=0;i<nmeshes;i++){
-      meshi=meshinfo+i;
-      if(meshi->npatches>0){
-        int filenum;
-
-        filenum=meshi->patchfilenum;
-        if(filenum!=-1){
-          patchi = patchinfo + filenum;
-          if(patchi->loaded==0||patchi->display==0||patchi->type!=ipatchtype)continue;
-          if(usetexturebar!=0){
-            if(vis_threshold==1&&do_threshold==1){
-              if(patchi->cellcenter==1){
-                drawpatch_threshold_cellcenter(meshi);
-              }
-              else{
-                drawpatch_texture_threshold(meshi);
-              }
-            }
-            else{
-              if(patchi->cellcenter==1){
-                drawpatch_cellcenter(meshi);
-              }
-              else{
-                drawpatch_texture(meshi);
-              }
-            }
-          }
-          else{
-            if(patchi->cellcenter==1){
-              drawpatch_cellcenter(meshi);
-            }
-            else{
-              drawpatch(meshi);
-            }
-          }
-          if(vis_threshold==1&&vis_onlythreshold==1&&do_threshold==1)drawonlythreshold(meshi);
-        }
-      }
-    }
+    drawpatch_frame();
   }
 
 /* ++++++++++++++++++++++++ draw labels +++++++++++++++++++++++++ */
@@ -464,18 +386,20 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
     //if(isoinfo!=NULL)drawspherepoints(sphereinfo);
   if(showiso==1){
-    iso *isoi;
-    mesh *meshi;
-    int i;
-
-    meshi=loaded_isomesh;
-    isoi = isoinfo + meshi->isofilenum;
-
     drawiso(DRAW_SOLID);
+  }
 
-    //  nothing transparent should be drawn before this portion of the code
-    //    (ie draw all opaque objects first then draw transparent objects
 
+//**********************************************************************************
+//**********************************************************************************
+//**********************************************************************************
+//    nothing transparent should be drawn before this portion of the code
+//    (ie draw all opaque objects first then draw transparent objects
+//**********************************************************************************
+//**********************************************************************************
+//**********************************************************************************
+
+  if(showiso==1){
     drawiso(DRAW_TRANSPARENT);
   }
 
@@ -518,9 +442,12 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 /* ++++++++++++++++++++++++ draw slice files +++++++++++++++++++++++++ */
 
   if(showslice==1&&use_transparency_data==1){
-    drawslices();
+    drawslice_frame();
   } 
   sniffErrors("after drawslice");
+
+/* ++++++++++++++++++++++++ draw transparent blockages +++++++++++++++++++++++++ */
+
 //  draw_demo(20,20);
 //  draw_demo2(1);
   drawBlockages(mode,DRAW_TRANSPARENT);
@@ -529,116 +456,14 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 /* ++++++++++++++++++++++++ draw vector slice files +++++++++++++++++++++++++ */
 
   if(showvslice==1){
-    int i;
-
-    for(i=0;i<nvslice;i++){
-      vslice *vd;
-      slice *u, *v, *w, *val;
-
-      vd = vsliceinfo + i;
-      if(vd->loaded==0||vd->display==0||sliceinfo[vd->ival].type!=islicetype)continue;
-      val = vd->val;
-      if(val==NULL)continue;
-      u = vd->u;
-      v = vd->v;
-      w = vd->w;
-      if(u==NULL&&v==NULL&&w==NULL)continue;
-      if(sliceinfo[vd->ival].slicetimes[0]>times[itimes])continue;
-#define VAL val
-      if(VAL->compression_type==1){
-#ifdef USE_ZLIB
-        uncompress_slicedataframe(VAL,VAL->islice);
-#endif
-        VAL->slicepoint=VAL->slicecomplevel;
-      }
-      else{
-        if(VAL!=NULL)VAL->slicepoint = VAL->slicelevel + VAL->islice*VAL->nsliceii;
-      }
-#undef VAL
-#define VAL u
-      if(VAL!=NULL){
-        if(VAL->compression_type==1){
-#ifdef USE_ZLIB
-          uncompress_slicedataframe(VAL,VAL->islice);
-#endif
-          VAL->slicepoint=VAL->slicecomplevel;
-        }
-        else{
-          if(VAL!=NULL)VAL->slicepoint = VAL->slicelevel + VAL->islice*VAL->nsliceii;
-        }
-      }
-#undef VAL
-#define VAL v
-      if(VAL!=NULL){
-        if(VAL->compression_type==1){
-#ifdef USE_ZLIB
-          uncompress_slicedataframe(VAL,VAL->islice);
-#endif
-          VAL->slicepoint=VAL->slicecomplevel;
-        }
-        else{
-          if(VAL!=NULL)VAL->slicepoint = VAL->slicelevel + VAL->islice*VAL->nsliceii;
-        }
-      }
-#undef VAL
-#define VAL w
-      if(VAL!=NULL){
-        if(VAL->compression_type==1){
-#ifdef USE_ZLIB
-          uncompress_slicedataframe(VAL,VAL->islice);
-#endif
-          VAL->slicepoint=VAL->slicecomplevel;
-        }
-        else{
-          if(VAL!=NULL)VAL->slicepoint = VAL->slicelevel + VAL->islice*VAL->nsliceii;
-        }
-      }
-      if(u!=NULL&&u->compression_type==0){
-        u->qslice = u->qslicedata + u->islice*u->nsliceii;
-      }
-      if(v!=NULL&&v->compression_type==0){
-        v->qslice = v->qslicedata + v->islice*v->nsliceii;
-      }
-      if(w!=NULL&&w->compression_type==0){
-        w->qslice = w->qslicedata + w->islice*w->nsliceii;
-      }
-      if(vd->volslice==1){
-        if(val->terrain==1){
-          drawvvolslice_terrain(vd);
-        }
-        else{
-          drawvvolslice(vd);
-        }
-      }
-      else{
-        if(val->terrain==1){
-          drawvslice_terrain(vd);
-        }
-        else{
-          drawvslice(vd);
-        }
-      }
-    }
+    drawvslice_frame();
   }
   sniffErrors("after drawvslice");
 
 /* ++++++++++++++++++++++++ draw plot3d files +++++++++++++++++++++++++ */
 
   if(showplot3d==1){
-    mesh *meshi;
-    int i;
-
-    for(i=0;i<nmeshes;i++){
-      meshi=meshinfo+i;
-      if(meshi->plot3dfilenum==-1)continue;
-      if(plot3dinfo[meshi->plot3dfilenum].display==0)continue;
-      if(usetexturebar!=0){
-        drawplot3d_texture(meshi);
-      }
-      else{
-        drawplot3d(meshi);
-      }
-    }
+    drawplot3d_frame();
   }
   sniffErrors("after drawplot3d");
 

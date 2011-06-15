@@ -2074,6 +2074,54 @@ void drawpatch_threshold_cellcenter(const mesh *meshi){
   glEnd();
 }
 
+/* ------------------ drawpatch_frame ------------------------ */
+
+void drawpatch_frame(void){
+  patch *patchi;
+  mesh *meshi;
+  int i;
+
+  for(i=0;i<nmeshes;i++){
+    meshi=meshinfo+i;
+    if(meshi->npatches>0){
+      int filenum;
+
+      filenum=meshi->patchfilenum;
+      if(filenum!=-1){
+        patchi = patchinfo + filenum;
+        if(patchi->loaded==0||patchi->display==0||patchi->type!=ipatchtype)continue;
+        if(usetexturebar!=0){
+          if(vis_threshold==1&&do_threshold==1){
+            if(patchi->cellcenter==1){
+              drawpatch_threshold_cellcenter(meshi);
+            }
+            else{
+              drawpatch_texture_threshold(meshi);
+            }
+          }
+          else{
+            if(patchi->cellcenter==1){
+              drawpatch_cellcenter(meshi);
+            }
+            else{
+              drawpatch_texture(meshi);
+            }
+          }
+        }
+        else{
+          if(patchi->cellcenter==1){
+            drawpatch_cellcenter(meshi);
+          }
+          else{
+            drawpatch(meshi);
+          }
+        }
+        if(vis_threshold==1&&vis_onlythreshold==1&&do_threshold==1)drawonlythreshold(meshi);
+      }
+    }
+  }
+}
+
 /* ------------------ drawpatch ------------------------ */
 
 void drawpatch(const mesh *meshi){

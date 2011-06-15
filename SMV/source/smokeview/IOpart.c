@@ -56,7 +56,53 @@ if(returncode==READPASS){\
   if(ferror(PART5FILE)==1||feof(PART5FILE)==1)returncode=READFAIL;\
 }
 
+/* ------------------ drawpart_frame ------------------------ */
 
+void drawpart_frame(void){
+  particle *parti;
+
+  if(staticframe0==0||iframe!=0){
+    int i;
+
+    for(i=0;i<npartinfo;i++){
+      parti = partinfo + i;
+      if(parti->loaded==0||parti->display==0)continue;
+      if(parti->evac==1){
+        drawEvac(parti);
+        sniffErrors("after drawEvac");
+      }
+      else{
+        drawPart(parti);
+        sniffErrors("after drawPart");
+      }
+    }
+  }
+  if(visStaticSmoke==1&&staticframe0==1){
+    int i;
+
+    for(i=0;i<npartinfo;i++){
+      parti = partinfo + i;
+      if(parti->loaded==0||parti->display==0)continue;
+      drawStaticPart(parti);
+      sniffErrors("after drawStaticPart");
+    }
+  }
+}
+
+/* ------------------ drawevac_frame ------------------------ */
+
+void drawevac_frame(void){
+  int i;
+
+  for(i=0;i<npartinfo;i++){
+    particle *parti;
+
+    parti = partinfo + i;
+    if(parti->loaded==0||parti->display==0||parti->evac==0)continue;
+    drawEvac(parti);
+  }
+  sniffErrors("after drawEvac 2");
+}
 
 /* ------------------ freepart5data ------------------------ */
 

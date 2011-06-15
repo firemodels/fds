@@ -886,11 +886,14 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     if(nrooms>0){
       getzonesmokedir(modelview_scratch);
     }
-    if(nsmoke3dinfo>0&&show3dsmoke==1){
-      getsmokedir(modelview_scratch);
+    if(nvolrenderinfo>0&&showvolrender==1){
       if(use_volume_render==1){
+        getsmokedir(modelview_scratch);
         getvolsmokedir(modelview_scratch);
       }
+    }
+    if(nsmoke3dinfo>0&&show3dsmoke==1){
+      getsmokedir(modelview_scratch);
       sniffErrors("after getsmokedir");
 #ifdef pp_CULL
       if(showstereo==0){

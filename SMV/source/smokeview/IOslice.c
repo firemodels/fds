@@ -2082,7 +2082,9 @@ void adjustslicebounds(const slice *sd, float *pmin, float *pmax){
 
 }
 
-void drawslices(){
+/* ------------------ drawslice_frame ------------------------ */
+
+void drawslice_frame(){
     int ii;
 
     for(ii=0;ii<nslice_loaded;ii++){
@@ -2162,6 +2164,102 @@ void drawslices(){
       }
     }
   }
+
+/* ------------------ drawvslice_frame ------------------------ */
+
+void drawvslice_frame(void){
+  int i;
+
+  for(i=0;i<nvslice;i++){
+    vslice *vd;
+    slice *u, *v, *w, *val;
+
+    vd = vsliceinfo + i;
+    if(vd->loaded==0||vd->display==0||sliceinfo[vd->ival].type!=islicetype)continue;
+    val = vd->val;
+    if(val==NULL)continue;
+    u = vd->u;
+    v = vd->v;
+    w = vd->w;
+    if(u==NULL&&v==NULL&&w==NULL)continue;
+    if(sliceinfo[vd->ival].slicetimes[0]>times[itimes])continue;
+#define VAL val
+    if(VAL->compression_type==1){
+#ifdef USE_ZLIB
+      uncompress_slicedataframe(VAL,VAL->islice);
+#endif
+      VAL->slicepoint=VAL->slicecomplevel;
+    }
+    else{
+      if(VAL!=NULL)VAL->slicepoint = VAL->slicelevel + VAL->islice*VAL->nsliceii;
+    }
+#undef VAL
+#define VAL u
+    if(VAL!=NULL){
+      if(VAL->compression_type==1){
+#ifdef USE_ZLIB
+        uncompress_slicedataframe(VAL,VAL->islice);
+#endif
+        VAL->slicepoint=VAL->slicecomplevel;
+      }
+      else{
+        if(VAL!=NULL)VAL->slicepoint = VAL->slicelevel + VAL->islice*VAL->nsliceii;
+      }
+    }
+#undef VAL
+#define VAL v
+    if(VAL!=NULL){
+      if(VAL->compression_type==1){
+#ifdef USE_ZLIB
+        uncompress_slicedataframe(VAL,VAL->islice);
+#endif
+        VAL->slicepoint=VAL->slicecomplevel;
+      }
+      else{
+        if(VAL!=NULL)VAL->slicepoint = VAL->slicelevel + VAL->islice*VAL->nsliceii;
+      }
+    }
+#undef VAL
+#define VAL w
+    if(VAL!=NULL){
+      if(VAL->compression_type==1){
+#ifdef USE_ZLIB
+        uncompress_slicedataframe(VAL,VAL->islice);
+#endif
+        VAL->slicepoint=VAL->slicecomplevel;
+      }
+      else{
+        if(VAL!=NULL)VAL->slicepoint = VAL->slicelevel + VAL->islice*VAL->nsliceii;
+      }
+    }
+    if(u!=NULL&&u->compression_type==0){
+      u->qslice = u->qslicedata + u->islice*u->nsliceii;
+    }
+    if(v!=NULL&&v->compression_type==0){
+      v->qslice = v->qslicedata + v->islice*v->nsliceii;
+    }
+    if(w!=NULL&&w->compression_type==0){
+      w->qslice = w->qslicedata + w->islice*w->nsliceii;
+    }
+    if(vd->volslice==1){
+      if(val->terrain==1){
+        drawvvolslice_terrain(vd);
+      }
+      else{
+        drawvvolslice(vd);
+      }
+    }
+    else{
+      if(val->terrain==1){
+        drawvslice_terrain(vd);
+      }
+      else{
+        drawvslice(vd);
+      }
+    }
+  }
+}
+
 /* ------------------ drawslice ------------------------ */
 
 void drawslice(const slice *sd){

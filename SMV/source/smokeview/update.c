@@ -51,7 +51,6 @@ void update_framenumber(int changetime){
   if(force_redisplay==1||(itimeold!=itimes&&changetime==1)){
     force_redisplay=0;
     itimeold=itimes;
-//    redisplay=1;
     if(showsmoke==1||showevac==1){
       for(i=0;i<npartinfo;i++){
         particle *parti;
@@ -65,6 +64,32 @@ void update_framenumber(int changetime){
     }
     if(hrrinfo!=NULL&&hrrinfo->loaded==1&&hrrinfo->display==1&&hrrinfo->timeslist!=NULL){
       hrrinfo->itime=hrrinfo->timeslist[itimes];
+    }
+    if(showvolrender==1){
+      for(i=0;i<nmeshes;i++){
+        mesh *meshi;
+        volrenderdata *vr;
+        slice *fire, *smoke;
+
+        meshi = meshinfo + i;
+        vr = &(meshi->volrenderinfo);
+        fire=vr->fire;
+        smoke=vr->smoke;
+        if(fire==NULL&&smoke==NULL)continue;
+        vr->iframe = vr->timeslist[itimes];
+        if(fire!=NULL&&fire->qslicedata!=NULL){
+          vr->firedata = fire->qslicedata + vr->iframe*fire->nsliceii;
+        }
+        else{
+          vr->firedata=NULL;
+        }
+        if(smoke!=NULL&&smoke->qslicedata!=NULL){
+           vr->smokedata = smoke->qslicedata + vr->iframe*smoke->nsliceii;
+         }
+         else{
+           vr->smokedata = NULL;
+         }
+      }
     }
     if(showslice==1||showvslice==1){
       for(ii=0;ii<nslice_loaded;ii++){
@@ -144,7 +169,6 @@ void update_framenumber(int changetime){
       izone=zonetlist[itimes];
     }
   }
-
 }
 
 /* ------------------ updateShow ------------------------ */

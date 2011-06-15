@@ -331,6 +331,12 @@ EXTERNCPP unsigned int irle(unsigned char *buffer_in, int nchars_in, unsigned ch
 EXTERNCPP void updatesmoke3d(smoke3d *smoke3di);
 EXTERNCPP void drawsmoke3d(smoke3d *smoke3di);
 EXTERNCPP void drawsmoke_frame(void);
+EXTERNCPP void drawpart_frame(void);
+EXTERNCPP void drawevac_frame(void);
+EXTERNCPP void drawplot3d_frame(void);
+EXTERNCPP void drawvslice_frame(void);
+EXTERNCPP void drawslice_frame(void);
+EXTERNCPP void drawpatch_frame(void);
 EXTERNCPP void TRANSLATE_CB(int var);
 #ifdef pp_GPU
 EXTERNCPP void drawsmoke3dGPU(smoke3d *smoke3di);
@@ -562,7 +568,6 @@ EXTERNCPP void updatepatchtypes(void);
 EXTERNCPP void update_mesh_terrain(void);
 EXTERNCPP void update_terrain_options(void);
 EXTERNCPP void update_glui_cellcenter(void);
-EXTERNCPP void drawslices(void);
 EXTERNCPP void drawslice_cellcenter_interp(const slice *sd);
 EXTERNCPP void update_plot3dtitle(void);
 EXTERNCPP void LoadPlot3dMenu(int value);
