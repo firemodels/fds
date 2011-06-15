@@ -540,7 +540,7 @@ ENTHALPY_IF: IF (ENTHALPY_TRANSPORT) THEN
       DO J=1,JBAR
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            ENTHALPY_SOURCE(I,J,K) = -ENTHALPY_SOURCE(I,J,K) &
+            ENTHALPY_SOURCE(I,J,K) = -ENTHALPY_SOURCE(I,J,K)               &
                                    + (FX(I,J,K)-FX(I-1,J,K))*RDX(I)*RRN(I) &
                                    + (FY(I,J,K)-FY(I,J-1,K))*RDY(J)        &
                                    + (FZ(I,J,K)-FZ(I,J,K-1))*RDZ(K) 
@@ -772,7 +772,7 @@ CASE(.FALSE.) PREDICTOR_STEP
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
-               E(I,J,K) = ES(I,J,K) !.5_EB*(E(I,J,K)+ES(I,J,K)-DT*ENTHALPY_SOURCE(I,J,K))
+               E(I,J,K) = .5_EB*(E(I,J,K)+ES(I,J,K)-DT*ENTHALPY_SOURCE(I,J,K))
             ENDDO
          ENDDO
       ENDDO

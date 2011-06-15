@@ -799,7 +799,6 @@ CALL POINT_TO_MESH(NM)
 
 IF (N_EVAP_INDICES>0 .AND. .NOT.EVACUATION_ONLY(NM) .AND. CORRECTOR) THEN
    D_LAGRANGIAN = 0._EB
-   IF (ENTHALPY_TRANSPORT) ENTHALPY_SOURCE_LAGRANGIAN = 0._EB
 ENDIF
 
 ! Move the droplets/particles, then compute mass and energy transfer, then add droplet momentum to gas
@@ -1864,8 +1863,7 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
             D_LAGRANGIAN(II,JJ,KK) =  D_LAGRANGIAN(II,JJ,KK) + (MW_RATIO *M_VAP /M_GAS + &
                                       (M_VAP*DELTA_H_G - Q_CON_GAS)/H_G_OLD) * WGT / DT_SUBSTEP
                                       
-            IF (ENTHALPY_TRANSPORT) ENTHALPY_SOURCE_LAGRANGIAN(II,JJ,KK) = ENTHALPY_SOURCE_LAGRANGIAN(II,JJ,KK) + &
-                                    (M_VAP*(H_L+H_V) - Q_CON_GAS) * RVC * WGT / DT_SUBSTEP
+            IF (ENTHALPY_TRANSPORT) E(II,JJ,KK) = E(II,JJ,KK) + (M_VAP*(H_L+H_V)-Q_CON_GAS)*RVC*WGT
 
             ! Keep track of total mass evaporated in cell
 

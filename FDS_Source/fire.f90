@@ -264,11 +264,12 @@ DO K=1,KBAR
                CALL ODE_EXPLICIT_EULER(I,J,K,ZZ_GET,Q(I,J,K))
          END SELECT        
 
-         !Update RSUM and ZZ         
+         ! Update RSUM and ZZ         
          IF (Q(I,J,K) > 0._EB) THEN
             Q_EXISTS = .TRUE.
             CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM(I,J,K)) 
             ZZ(I,J,K,1:N_TRACKED_SPECIES) = ZZ_GET(1:N_TRACKED_SPECIES)
+            IF (ENTHALPY_TRANSPORT) E(I,J,K) = E(I,J,K) + DT*Q(I,J,K)
             ! Divergence term would be inserted here
             DZ(1:N_TRACKED_SPECIES) = DZ(1:N_TRACKED_SPECIES) - ZZ_GET(1:N_TRACKED_SPECIES)
             DZ(0) = -SUM(DZ(1:N_TRACKED_SPECIES))
