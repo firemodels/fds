@@ -415,7 +415,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
 /* ++++++++++++++++++++++++ draw 3D smoke +++++++++++++++++++++++++ */
 
-  if(show3dsmoke==1){
+  if(show3dsmoke==1||showvolrender==1){
     drawsmoke_frame();
   }
 

@@ -315,8 +315,10 @@ void drawsmoke_frame(void){
   CheckMemory;
 #ifdef pp_GPU
   if(usegpu==1){
-    if(use_volume_render==1){
+    if(usevolrender==1){
+#ifdef pp_GPU_VOLRENDER
       LoadVolSmokeShaders();
+#endif
     }
     else{
       LoadSmokeShaders();
@@ -324,7 +326,7 @@ void drawsmoke_frame(void){
   }
 #endif
 #ifdef pp_CULL
-  if(usegpu==1&&cullsmoke==1&&use_volume_render==0){
+  if(usegpu==1&&cullsmoke==1&&usevolrender==0){
     drawsmoke3dCULL();
   }
   else{
@@ -333,7 +335,7 @@ void drawsmoke_frame(void){
 #endif
     int i;
 
-    if(use_volume_render==0){
+    if(usevolrender==0){
       for(i=0;i<nsmoke3dinfo;i++){
         smoke3d *smoke3di;
 
@@ -354,7 +356,7 @@ void drawsmoke_frame(void){
 #endif
       }
     }
-    if(use_volume_render==1){
+    if(usevolrender==1){
       for(i=0;i<nmeshes;i++){
         mesh *meshi;
         volrenderdata *vr;
@@ -364,7 +366,7 @@ void drawsmoke_frame(void){
         if(vr->fire==NULL&&vr->smoke==NULL)continue;
         if(vr->loaded==0||vr->show==0)continue;
 
-#ifdef pp_GPU
+#ifdef pp_GPU_VOLRENDER
         if(usegpu==1){
           drawsmoke3dGPUVOL(vr);
         }
@@ -379,7 +381,14 @@ void drawsmoke_frame(void){
   }
 #ifdef pp_GPU
   if(usegpu==1){
-    UnLoadShaders();
+    if(usevolrender==1){
+#ifdef pp_GPU_VOLRENDER
+      UnLoadShaders();
+#endif
+    }
+    else{
+      UnLoadShaders();
+    }
   }
 #endif
 #ifdef pp_CULL
@@ -2950,49 +2959,46 @@ void drawsmoke3dVOL(volrenderdata *vr){
 //  glUniform1f(GPUvol_xyzmaxdiff,xyzmaxdiff);
 //  glUniform3f(GPUvol_boxmin,meshi->x0,meshi->y0,meshi->z0);
 //  glUniform3f(GPUvol_boxmax,meshi->x1,meshi->y1,meshi->z1);
-
   for(iwall=-3;iwall<=3;iwall++){
     int i,j;
-    float x1, x2, y1, y2, z1, z2;
+    float xx, yy, zz;
+    float *x, *y, *z;
 
     if(iwall==0||meshi->drawsides[iwall+3]==0)continue;
 
-  //  glUniform1i(GPUvol_dir,iwall);
-    glBegin(GL_TRIANGLES);
-
+    glBegin(GL_LINES);
+    glColor3f(0.0,0.0,0.0);
     switch (iwall){
       case 1:
       case -1:
         if(iwall<0){
-          x1 = meshi->x0;
+          xx = meshi->x0;
         }
         else{
-          x1=meshi->x1;
+          xx=meshi->x1;
         }
         for(i=0;i<meshi->jbar;i++){
-          y1 = meshi->yplt[i];
-          y2 = meshi->yplt[i+1];
+          y = meshi->yplt+i;
           for(j=0;j<meshi->kbar;j++){
-            z1 = meshi->zplt[j];
-            z2 = meshi->zplt[j+1];
+            z = meshi->zplt+j;
             
             if(meshi->inside==0){
-              glVertex3f(x1,y1,z1);
-              glVertex3f(x1,y2,z1);
-              glVertex3f(x1,y2,z2);
+              glVertex3f(xx,y[0],z[0]);
+              glVertex3f(xx,y[1],z[0]);
+              glVertex3f(xx,y[1],z[1]);
 
-              glVertex3f(x1,y1,z1);
-              glVertex3f(x1,y2,z2);
-              glVertex3f(x1,y1,z2);
+              glVertex3f(xx,y[0],z[0]);
+              glVertex3f(xx,y[1],z[1]);
+              glVertex3f(xx,y[0],z[1]);
             }
             else{
-              glVertex3f(x1,y1,z1);
-              glVertex3f(x1,y2,z2);
-              glVertex3f(x1,y2,z1);
+              glVertex3f(xx,y[0],z[0]);
+              glVertex3f(xx,y[1],z[1]);
+              glVertex3f(xx,y[1],z[0]);
 
-              glVertex3f(x1,y1,z1);
-              glVertex3f(x1,y1,z2);
-              glVertex3f(x1,y2,z2);
+              glVertex3f(xx,y[0],z[0]);
+              glVertex3f(xx,y[0],z[1]);
+              glVertex3f(xx,y[1],z[1]);
             }
           }
         }
@@ -3000,35 +3006,32 @@ void drawsmoke3dVOL(volrenderdata *vr){
       case 2:
       case -2:
         if(iwall<0){
-          y1=meshi->y0;
+          yy=meshi->y0;
         }
         else{
-          y1=meshi->y1;
+          yy=meshi->y1;
         }
         for(i=0;i<meshi->ibar;i++){
-          x1 = meshi->xplt[i];
-          x2 = meshi->xplt[i+1];
-          for(j=0;j<meshi->jbar;j++){
-            z1 = meshi->zplt[j];
-            z2 = meshi->zplt[j+1];
-
+          x = meshi->xplt+i;
+          for(j=0;j<meshi->kbar;j++){
+            z = meshi->zplt+j;
             if(meshi->inside==0){
-              glVertex3f(x1,y1,z1);
-              glVertex3f(x2,y1,z1);
-              glVertex3f(x2,y1,z2);
+              glVertex3f(x[0],yy,z[0]);
+              glVertex3f(x[1],yy,z[0]);
+              glVertex3f(x[1],yy,z[1]);
 
-              glVertex3f(x1,y1,z1);
-              glVertex3f(x2,y1,z2);
-              glVertex3f(x1,y1,z2);
+              glVertex3f(x[0],yy,z[0]);
+              glVertex3f(x[1],yy,z[1]);
+              glVertex3f(x[0],yy,z[1]);
             }
             else{
-              glVertex3f(x1,y1,z1);
-              glVertex3f(x2,y1,z2);
-              glVertex3f(x2,y1,z1);
+              glVertex3f(x[0],yy,z[0]);
+              glVertex3f(x[1],yy,z[1]);
+              glVertex3f(x[1],yy,z[0]);
 
-              glVertex3f(x1,y1,z1);
-              glVertex3f(x1,y1,z2);
-              glVertex3f(x2,y1,z2);
+              glVertex3f(x[0],yy,z[0]);
+              glVertex3f(x[0],yy,z[1]);
+              glVertex3f(x[1],yy,z[1]);
             }
           }
         }
@@ -3036,35 +3039,32 @@ void drawsmoke3dVOL(volrenderdata *vr){
       case 3:
       case -3:
         if(iwall<0){
-          z1=meshi->z0;
+          zz=meshi->z0;
         }
         else{
-          z1=meshi->z1;
+          zz=meshi->z1;
         }
         for(i=0;i<meshi->ibar;i++){
-          x1 = meshi->xplt[i];
-          x2 = meshi->xplt[i+1];
+          x = meshi->xplt+i;
           for(j=0;j<meshi->jbar;j++){
-            y1 = meshi->yplt[j];
-            y2 = meshi->yplt[j+1];
-
+            y = meshi->yplt+j;
             if(meshi->inside==0){
-              glVertex3f(x1,y1,z1);
-              glVertex3f(x2,y1,z1);
-              glVertex3f(x2,y2,z1);
+              glVertex3f(x[0],y[0],zz);
+              glVertex3f(x[1],y[0],zz);
+              glVertex3f(x[1],y[1],zz);
 
-              glVertex3f(x1,y1,z1);
-              glVertex3f(x2,y2,z1);
-              glVertex3f(x1,y2,z1);
+              glVertex3f(x[0],y[0],zz);
+              glVertex3f(x[1],y[1],zz);
+              glVertex3f(x[0],y[1],zz);
             }
             else{
-              glVertex3f(x1,y1,z1);
-              glVertex3f(x2,y2,z1);
-              glVertex3f(x2,y1,z1);
+              glVertex3f(x[0],y[0],zz);
+              glVertex3f(x[1],y[1],zz);
+              glVertex3f(x[1],y[0],zz);
 
-              glVertex3f(x1,y1,z1);
-              glVertex3f(x1,y2,z1);
-              glVertex3f(x2,y2,z1);
+              glVertex3f(x[0],y[0],zz);
+              glVertex3f(x[0],y[1],zz);
+              glVertex3f(x[1],y[1],zz);
             }
           }
         }

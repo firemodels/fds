@@ -776,7 +776,7 @@ void keyboard_2(unsigned char key, int x, int y){
   }
 #endif
   if((nvolrenderinfo>0)&&strncmp((const char *)&key2,"V",1)==0){
-    use_volume_render=1-use_volume_render;
+    usevolrender=1-usevolrender;
     update_smoke3dflags();
 #ifdef pp_GPU
     print_gpu_cull_state();

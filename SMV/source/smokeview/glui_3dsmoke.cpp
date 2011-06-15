@@ -70,7 +70,7 @@ GLUI *glui_3dsmoke=NULL;
 GLUI_RadioGroup *alphagroup=NULL,*skipframes,*radio_smokesensors=NULL;
 GLUI_Spinner *SPINNER_cvis=NULL;
 GLUI_Checkbox *CHECKBOX_test_smokesensors=NULL;
-GLUI_Checkbox *CHECKBOX_smokeGPU=NULL,*CHECKBOX_volume_render=NULL;
+GLUI_Checkbox *CHECKBOX_smokeGPU=NULL,*CHECKBOX_usevolrender=NULL;
 GLUI_Checkbox *CHECKBOX_smokedrawtest=NULL;
 GLUI_Checkbox *CHECKBOX_smokedrawtest2=NULL;
 GLUI_Checkbox *CHECKBOX_smoke3d_external=NULL;
@@ -106,7 +106,7 @@ extern "C" void update_smoke3dflags(void){
 #ifdef pp_GPU
   if(CHECKBOX_smokeGPU!=NULL)CHECKBOX_smokeGPU->set_int_val(usegpu);
 #endif
-  if(CHECKBOX_volume_render!=NULL)CHECKBOX_volume_render->set_int_val(use_volume_render);
+  if(CHECKBOX_usevolrender!=NULL)CHECKBOX_usevolrender->set_int_val(usevolrender);
 #ifdef pp_CULL
   CHECKBOX_smokecullflag->set_int_val(cullsmoke);
 #else
@@ -254,7 +254,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
 #ifdef pp_GPU
   CHECKBOX_smokeGPU=glui_3dsmoke->add_checkbox_to_panel(panel_slices,_("Use GPU"),&usegpu,VOL_SMOKE,SMOKE_3D_CB);
 #endif
-  CHECKBOX_volume_render=glui_3dsmoke->add_checkbox_to_panel(panel_slices,_("Use full volume rendering"),&use_volume_render,VOL_SMOKE,SMOKE_3D_CB);
+  CHECKBOX_usevolrender=glui_3dsmoke->add_checkbox_to_panel(panel_slices,_("Use full volume rendering"),&usevolrender,VOL_SMOKE,SMOKE_3D_CB);
 #ifdef pp_GPU
   if(gpuactive==0){
     usegpu=0;
@@ -478,7 +478,7 @@ void SMOKE_3D_CB(int var){
 #endif
   case VOL_SMOKE:
 #ifdef pp_GPU
-    if(usegpu==1&&use_volume_render==0){
+    if(usegpu==1&&usevolrender==0){
       skipframes->set_int_val(0);
       skipframes->disable();
 #ifdef pp_CULL
@@ -490,7 +490,7 @@ void SMOKE_3D_CB(int var){
 #endif
     }
     else{
-      if(use_volume_render==1){
+      if(usevolrender==1){
         skipframes->disable();
       }
       else{
@@ -504,7 +504,7 @@ void SMOKE_3D_CB(int var){
     }
     break;
 #else
-    if(use_volume_render==1){
+    if(usevolrender==1){
       skipframes->disable();
     }
     else{

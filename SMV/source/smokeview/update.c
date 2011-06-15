@@ -264,7 +264,7 @@ void updateShow(void){
       }
     }
   }
-  if(nvolrenderinfo>0){
+  if(nvolrenderinfo>0&&usevolrender==1){
     for(i=0;i<nmeshes;i++){
       mesh *meshi;
       volrenderdata *vr;

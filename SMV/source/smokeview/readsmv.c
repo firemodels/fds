@@ -5777,16 +5777,15 @@ typedef struct {
     meshi->boxmax[0]=xplt_origtemp[ibartemp];
     meshi->boxmax[1]=yplt_origtemp[jbartemp];
     meshi->boxmax[2]=zplt_origtemp[kbartemp];
-    meshi->x0 = (       xplttemp[0]-xbar0)/xyzmaxdiff;
-    meshi->x1 = (xplttemp[ibartemp]-xbar0)/xyzmaxdiff;
-    meshi->y0 = (       yplttemp[0]-ybar0)/xyzmaxdiff;
-    meshi->y1 = (yplttemp[jbartemp]-ybar0)/xyzmaxdiff;
-    meshi->z0 = (       zplttemp[0]-zbar0)/xyzmaxdiff;
-    meshi->z1 = (zplttemp[kbartemp]-zbar0)/xyzmaxdiff;
+    meshi->x0 = xplttemp[0];
+    meshi->x1 = xplttemp[ibartemp];
+    meshi->y0 = yplttemp[0];
+    meshi->y1 = yplttemp[jbartemp];
+    meshi->z0 = zplttemp[0];
+    meshi->z1 = zplttemp[kbartemp];
     meshi->dx01=meshi->x1-meshi->x0;
     meshi->dy01=meshi->y1-meshi->y0;
     meshi->dz01=meshi->z1-meshi->z0;
-
   }
 
   active_smokesensors=0;

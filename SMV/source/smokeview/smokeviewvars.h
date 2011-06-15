@@ -74,7 +74,7 @@ SVEXTERN cullplanedata *cullplaneinfo;
 SVEXTERN cullplanedata **sort_cullplaneinfo;
 SVEXTERN int have_setpixelcount,update_initcullplane;
 #endif
-SVEXTERN int SVDECL(use_volume_render,0);
+SVEXTERN int SVDECL(usevolrender,1);
 #ifdef pp_GPU
 SVEXTERN int usegpu,gpuactive;
 SVEXTERN int GPU_aspectratio;

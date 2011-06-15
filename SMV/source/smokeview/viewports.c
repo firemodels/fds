@@ -872,10 +872,10 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     glMultMatrixf(modelview_rotate);
     
     glTranslatef(xcen,ycen,zcen);
-      if(eyeview==WORLD_CENTERED){
-        glRotatef(angleyzINI,vecyz[0],vecyz[1],vecyz[2]);  /* rotate about the transformed x axis */
-      }
-      glRotatef(anglexyINI,0.0,0.0,1.0);                   /* rotate about z axis */
+    if(eyeview==WORLD_CENTERED){
+      glRotatef(angleyzINI,vecyz[0],vecyz[1],vecyz[2]);  /* rotate about the transformed x axis */
+    }
+    glRotatef(anglexyINI,0.0,0.0,1.0);                   /* rotate about z axis */
     glTranslatef(-xcen,-ycen,-zcen);
 
     glGetFloatv(GL_MODELVIEW_MATRIX,modelview_scratch);
@@ -887,9 +887,9 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
       getzonesmokedir(modelview_scratch);
     }
     if(nvolrenderinfo>0&&showvolrender==1){
-      if(use_volume_render==1){
-        getsmokedir(modelview_scratch);
+      if(usevolrender==1){
         getvolsmokedir(modelview_scratch);
+        sniffErrors("after getvolsmokedir");
       }
     }
     if(nsmoke3dinfo>0&&show3dsmoke==1){

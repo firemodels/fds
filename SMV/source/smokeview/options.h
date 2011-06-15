@@ -26,7 +26,7 @@
 #ifdef pp_BETA
 // #define pp_GPU_VOLRENDER
 // #define pp_BENCHMARK
-//#define pp_VOLRENDER
+#define pp_VOLRENDER
 #define pp_SLICECONTOURS
 #define pp_SHOWLIGHT
 #define pp_LANG
