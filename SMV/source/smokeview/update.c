@@ -2,6 +2,7 @@
 // $Revision$
 // $Author$
 
+#define IN_UPDATE
 #include "options.h"
 #ifdef pp_GPU
 #include <GL/glew.h>
@@ -25,6 +26,7 @@
 #include "smokeviewapi.h"
 #include "MALLOC.h"
 #include "smokeviewvars.h"
+#include "update.h"
 
 // svn revision character string
 char update_revision[]="$Revision$";
@@ -1391,5 +1393,38 @@ int getindex(float key, const float *list, int nlist){
   }
   return 0;
 }
+
+/* ------------------ isearch ------------------------ */
+
+int isearch(float *list, int nlist, float key, int guess){
+  /* 
+     find val such that list[val]<=key<list[val+1] 
+     start with val=guess
+  */
+
+  int low, mid, high;
+
+  if(nlist<=2||key<list[0])return 0;
+  if(key>=list[nlist-2])return nlist-2;
+  if(guess<0)guess=0;
+  if(guess>nlist-2)guess=nlist-2;
+  if(list[guess]<=key&&key<list[guess+1])return guess;
+
+  low = 0;
+  high = nlist - 1;
+  while(high-low>1){
+    mid = (low+high)/2;
+    if(list[mid]>key){
+      high=mid;
+    }
+    else{
+      low=mid;
+    }
+  }
+  if(list[high]==key)return high;
+  return low;
+}
+
+
 
 

@@ -16,6 +16,7 @@
 #endif
 #include "MALLOC.h"
 #include "smokeviewvars.h"
+#include "update.h"
 
 // svn revision character string
 char IOscript_revision[]="$Revision$";

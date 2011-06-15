@@ -19,6 +19,7 @@
 #include "smokeviewapi.h"
 #include "MALLOC.h"
 #include "smokeviewvars.h"
+#include "update.h"
 
 #define KEY_ALT 0
 #define KEY_CTRL 1
@@ -2245,7 +2246,7 @@ void Idle(void){
             ){
             elapsed_time = gmod(elapsed_time,times[ntimes-1]-times[0])+times[0];
           }
-          itimes = interval_search(times,ntimes,elapsed_time,itimes);
+          itimes = isearch(times,ntimes,elapsed_time,itimes);
         }
         else{
           if(script_render_flag==0){
@@ -2292,38 +2293,8 @@ void Idle(void){
   }
 }
 
-/* ------------------ interval_search ------------------------ */
+/* ------------------ update_camera_ypos ------------------------ */
 
-int interval_search(float *list, int nlist, float key, int guess){
-  /* 
-     find val such that list[val]<=key<list[val+1] 
-     start with val=guess
-  */
-
-  int low, mid, high;
-
-  if(nlist<=2||key<list[0])return 0;
-  if(key>=list[nlist-2])return nlist-2;
-  if(guess<0)guess=0;
-  if(guess>nlist-2)guess=nlist-2;
-  if(list[guess]<=key&&key<list[guess+1])return guess;
-
-  low = 0;
-  high = nlist - 1;
-  while(high-low>1){
-    mid = (low+high)/2;
-    if(list[mid]>key){
-      high=mid;
-    }
-    else{
-      low=mid;
-    }
-  }
-  if(list[high]==key)return high;
-  return low;
-}
-
-/* ------------------ Reshape ------------------------ */
 void update_camera_ypos(camera *camera_data);
 
 void Reshape(int width, int height){

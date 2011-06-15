@@ -18,6 +18,7 @@
 #include "smokeviewvars.h"
 #include "svn_revision.h"
 #include "translate.h"
+#include "update.h"
 
 // svn revision character string
 char startup_revision[]="$Revision$";

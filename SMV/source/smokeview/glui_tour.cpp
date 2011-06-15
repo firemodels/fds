@@ -18,6 +18,7 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 #include "translate.h"
+#include "update.h"
 
 // svn revision character string
 extern "C" char glui_tour_revision[]="$Revision$";

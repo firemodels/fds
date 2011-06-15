@@ -21,6 +21,7 @@
 #include "egz_stdio.h"
 #include "MALLOC.h"
 #include "smokeviewvars.h"
+#include "update.h"
 
 int cull_count=0;
 

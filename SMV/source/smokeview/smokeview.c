@@ -26,6 +26,7 @@
 #include "MALLOC.h"
 #include "smokeviewvars.h"
 #include "translate.h"
+#include "update.h"
 
 /* dummy change to bump revision number to 5.1.5 */
 

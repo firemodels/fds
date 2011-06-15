@@ -15,6 +15,7 @@
 #endif
 #include "MALLOC.h"
 #include "smokeviewvars.h"
+#include "update.h"
 
 // svn revision character string
 char IOtour_revision[]="$Revision$";
@@ -635,7 +636,7 @@ void createtourpaths(void){
       f1 = (view_ntimes-1-j)/(float)(view_ntimes-1);
       f2 = 1-f1;
       vtime = view_tstart*f1 + view_tstop*f2;
-      iframe = interval_search(touri->keyframe_times,touri->nkeyframes,vtime,iframe);
+      iframe = isearch(touri->keyframe_times,touri->nkeyframes,vtime,iframe);
       kf1 = touri->keyframe_list[iframe];
       kf2 = touri->keyframe_list[iframe+1];
       pj->keysnap=&kf1->nodeval;
@@ -776,7 +777,7 @@ void createtourpaths(void){
     vdt = (tour_tstop - tour_tstart)/(float)(view_ntimes-1);
     for(j=1;j<view_ntimes;j++){
       vdist = tour_dist2[j];
-      iframe = interval_search(tour_dist,view_ntimes,vdist,iframe);
+      iframe = isearch(tour_dist,view_ntimes,vdist,iframe);
       f1 = (vdist-tour_dist[iframe])/(tour_dist[iframe+1]-tour_dist[iframe]);
       f2 = 1 - f1;
       tour_t2[j] = f2*tour_t[iframe] + f1*tour_t[iframe+1] ;
@@ -786,7 +787,7 @@ void createtourpaths(void){
       pj = touri->pathnodes + j;
       vtime = tour_t2[j];
       vtime2 = touri->keyframe_list[0]->nodeval.time + j*vdt;
-      iframe_new = interval_search(touri->keyframe_times,touri->nkeyframes,vtime,iframe_old);
+      iframe_new = isearch(touri->keyframe_times,touri->nkeyframes,vtime,iframe_old);
       kf1 = touri->keyframe_list[iframe_new];
       kf2 = touri->keyframe_list[iframe_new+1];
       dt = kf2->nodeval.time - kf1->nodeval.time;

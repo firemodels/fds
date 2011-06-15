@@ -25,7 +25,7 @@
 #include "csphere.h"
 #include "smv_endian.h"
 #include "translate.h"
-
+#include "update.h"
 #include "smokeviewvars.h"
 
 // svn revision character string

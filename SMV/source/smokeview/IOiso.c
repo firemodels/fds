@@ -16,6 +16,7 @@
 #include "egz_stdio.h"
 #include "MALLOC.h"
 #include "smokeviewvars.h"
+#include "update.h"
 
 // svn revision character string
 char IOiso_revision[]="$Revision$";

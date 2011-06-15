@@ -19,6 +19,7 @@
 #include "smokeviewvars.h"
 #include "contourdefs.h"
 #include "smv_endian.h"
+#include "update.h"
 
 // svn revision character string
 char IOslice_revision[]="$Revision$";

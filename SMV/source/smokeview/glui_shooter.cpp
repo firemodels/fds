@@ -19,6 +19,7 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 #include "translate.h"
+#include "update.h"
 
 GLUI *glui_shooter=NULL;
 
