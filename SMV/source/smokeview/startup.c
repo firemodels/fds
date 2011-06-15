@@ -2269,5 +2269,6 @@ int getmaxrevision(void){
   MAXREV(threader_revision);
   MAXREV(unit_revision);
   MAXREV(translate_revision);
+  MAXREV(update_revision);
   return max_revision;
 }
