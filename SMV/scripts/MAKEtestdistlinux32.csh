@@ -2,9 +2,9 @@
 set revision=$1
 set SVNROOT=~/FDS-SMV
 
-set SMVDIR=$SVNROOT/SMV/Build/INTEL_LINUX_TEST_32
-set SMZDIR=$SVNROOT/Utilities/smokezip/INTEL_LINUX_32
-set SMDDIR=$SVNROOT/Utilities/smokediff/INTEL_LINUX_32
+set SMVDIR=$SVNROOT/SMV/Build/intel_linux_test_32
+set SMZDIR=$SVNROOT/Utilities/smokezip/intel_linux_32
+set SMDDIR=$SVNROOT/Utilities/smokediff/intel_linux_32
 set FORBUNDLE=$SVNROOT/SMV/for_bundle
 set LINUXDIR=smv_test\_$revision\_linux
 

@@ -4,9 +4,9 @@ set SVNROOT=~/FDS-SMV
 set REMOTESVNROOT=FDS-SMV
 set OSXHOST=$2
 
-set SMVDIR=$REMOTESVNROOT/SMV/Build/INTEL_OSX_TEST_64
-set SMZDIR=$REMOTESVNROOT/Utilities/smokezip/INTEL_OSX_64
-set SMDDIR=$REMOTESVNROOT/Utilities/smokediff/INTEL_OSX_64
+set SMVDIR=$REMOTESVNROOT/SMV/Build/intel_osx_test_64
+set SMZDIR=$REMOTESVNROOT/Utilities/smokezip/intel_osx_64
+set SMDDIR=$REMOTESVNROOT/Utilities/smokediff/intel_osx_64
 set FORBUNDLE=$SVNROOT/SMV/for_bundle
 set OSXDIR=smv_test\_$revision\_osx_64
 

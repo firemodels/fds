@@ -22,6 +22,6 @@ call %envfile%
 set scriptdir=%linux_svn_root%/SMV/scripts
 set smvdir=%linux_svn_root%/SMV/Build/
 
-plink %svn_logon% %scriptdir%/CLEAN_smv_onhost.csh %smvdir%/INTEL_LINUX_TEST_64 %linux_hostname% clean
+plink %svn_logon% %scriptdir%/CLEAN_smv_onhost.csh %smvdir%/intel_linux_test_64 %linux_hostname% clean
 
 pause

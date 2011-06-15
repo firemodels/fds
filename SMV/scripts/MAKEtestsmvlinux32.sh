@@ -1,5 +1,5 @@
 #!/bin/bash
 SVNROOT=~/FDS-SMV
 
-cd $SVNROOT/SMV/Build/INTEL_LINUX_TEST_32
+cd $SVNROOT/SMV/Build/intel_linux_test_32
 ./make_smv.sh

@@ -5,8 +5,8 @@ set revision=$2
 set SVNROOT=~/FDS-SMV
 
 set SMOKEVIEWDIR=$SVNROOT/SMV/bin
-set SMOKEZIPDIR=$SVNROOT/Utilities/smokezip/INTEL_LINUX_32
-set SMOKEDIFFDIR=$SVNROOT/Utilities/smokediff/INTEL_LINUX_32
+set SMOKEZIPDIR=$SVNROOT/Utilities/smokezip/intel_linux_32
+set SMOKEDIFFDIR=$SVNROOT/Utilities/smokediff/intel_linux_32
 set FORBUNDLE=$SVNROOT/SMV/for_bundle
 set LINUXDIR=smv_$version\_linux32
 

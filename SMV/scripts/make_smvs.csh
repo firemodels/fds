@@ -7,8 +7,7 @@ set LINUX64HOST=fire70
 
 echo
 echo building 32 bit Linux Smokeview
-#cd $SVNROOT/SMV/INTEL/sv5p0
-cd $SVNROOT/SMV/Build/INTEL_LINUX_32
+cd $SVNROOT/SMV/Build/intel_linux_32
 make -f ../Makefile clean
 ./make_smv.csh
 cd $SVNROOT/SMV/bin

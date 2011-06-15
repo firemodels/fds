@@ -5,8 +5,8 @@ set SVNROOT=FDS-SMV
 set OSXHOST=$3
 
 set SMOKEVIEWDIR=$SVNROOT/SMV/bin
-set SMOKEZIPDIR=$SVNROOT/Utilities/smokezip/INTEL_OSX_64
-set SMOKEDIFFDIR=$SVNROOT/Utilities/smokediff/INTEL_OSX_64
+set SMOKEZIPDIR=$SVNROOT/Utilities/smokezip/intel_osx_64
+set SMOKEDIFFDIR=$SVNROOT/Utilities/smokediff/intel_osx_64
 set FORBUNDLE=~/$SVNROOT/SMV/for_bundle
 set OSXDIR=smv_$version\_osx64
 
