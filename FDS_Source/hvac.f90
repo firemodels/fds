@@ -1105,8 +1105,8 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
                CASE DEFAULT
                   P_AVE = PBARP(KK,PRESSURE_ZONE(II,JJ,KK))
             END SELECT
-            P_SUM = P_SUM + (P_AVE+RHO(II,JJ,KK)*(HP(II,JJ,KK)-KRES(II,JJ,KK)))*AREA
-            AREA_SUM = AREA_SUM + AREA
+            P_SUM = P_SUM + (P_AVE+RHO(II,JJ,KK)*(HP(II,JJ,KK)-KRES(II,JJ,KK)))*AREA      
+            AREA_SUM = AREA_SUM + AREA                  
          ENDDO
       ENDDO
    ENDDO VENT_LOOP
@@ -1768,7 +1768,7 @@ DO NN=1,N_DUCTNODES
       ENDIF
       IF (IZ1 == 0 .AND. ALL(LEAK_RHO(IZ1,IZ2,:) <= ZERO_P)) CYCLE
       IF (PREDICTOR) DN%P = 0.5_EB*(PBAR(0,IZ1)+PBAR(1,IZ1))
-      IF (CORRECTOR) DN%P = 0.5_EB*(PBAR(0,IZ1)+PBAR(1,IZ1))
+      IF (CORRECTOR) DN%P = 0.5_EB*(PBAR_S(0,IZ1)+PBAR_S(1,IZ1))
       DN%TMP_V = 0._EB
       DN%RHO_V = 0._EB
       DN%CP_V = 0._EB
@@ -1889,10 +1889,10 @@ DO NZ1 = 0, N_ZONE
          DN1%DUCT_INDEX = I_DUCT
          DN1%LEAKAGE = .TRUE.
          DN1%ZONE_INDEX=NZ1
-         DN1%MESH_INDEX = 1
+         DN1%MESH_INDEX = 1         
          DN1%N_DUCTS = 1
          DN1%RSUM = RSUM0
-         DN1%TMP = TMPA
+         DN1%TMP = TMPA                
          DN1%XYZ = (/0._EB,0._EB,0._EB/)
          WRITE(DN1%ID,'(A,1X,I0,1X,I0)') 'LEAK',NZ1,NZ2
          I_DUCTNODE = I_DUCTNODE + 1
