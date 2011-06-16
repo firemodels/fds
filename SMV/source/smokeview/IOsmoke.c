@@ -2944,6 +2944,85 @@ void drawsmoke3d(smoke3d *smoke3di){
 
 }
 
+/* ------------------ compute_volvals ------------------------ */
+
+void compute_volvals(void){
+  int ii;
+
+  for(ii=0;ii<nmeshes;ii++){
+    mesh *meshi;
+    volrenderdata *vr;
+    int iwall;
+    float *alpha;
+
+    meshi = meshinfo + ii;
+    vr = &(meshi->volrenderinfo);
+    if(vr->smoke==NULL)continue;
+    for(iwall=-3;iwall<=3;iwall++){
+      float xyz[3];
+      int i, j;
+
+      if(iwall==0||meshi->drawsides[iwall+3]==0)continue;
+      switch (iwall){
+        case 1:
+        case -1:
+          if(iwall<0){
+            alpha=vr->alpha_yz0;
+            xyz[0] = meshi->x0;
+          }
+          else{
+            alpha=vr->alpha_yz1;
+            xyz[0] = meshi->x1;
+          }
+          for(i=0;i<=meshi->jbar;i++){
+            xyz[1] = meshi->yplt[i];
+            for(j=0;j<=meshi->kbar;j++){
+              xyz[2] = meshi->zplt[j];
+              *alpha++=0.0;
+            }
+          }
+          break;
+        case 2:
+        case -2:
+          if(iwall<0){
+            alpha=vr->alpha_xz0;
+            xyz[1]=meshi->y0;
+          }
+          else{
+            alpha=vr->alpha_xz1;
+            xyz[1]=meshi->y1;
+          }
+          for(i=0;i<=meshi->ibar;i++){
+            xyz[0] = meshi->xplt[i];
+            for(j=0;j<=meshi->kbar;j++){
+              xyz[2] = meshi->zplt[j];
+              *alpha++=0.0;
+            }
+          }
+          break;
+        case 3:
+        case -3:
+          if(iwall<0){
+            alpha=vr->alpha_xy0;
+            xyz[2]=meshi->z0;
+          }
+          else{
+            alpha=vr->alpha_xy1;
+            xyz[2]=meshi->z1;
+          }
+          for(i=0;i<=meshi->ibar;i++){
+            xyz[0] = meshi->xplt[i];
+            for(j=0;j<=meshi->jbar;j++){
+              xyz[1] = meshi->yplt[j];
+              *alpha++=0.0;
+            }
+          }
+          break;
+      }
+    }
+  }
+}
+
 /* ------------------ drawsmoke3dVOL ------------------------ */
 
 void drawsmoke3dVOL(volrenderdata *vr){
@@ -2963,107 +3042,164 @@ void drawsmoke3dVOL(volrenderdata *vr){
     int i,j;
     float xx, yy, zz;
     float *x, *y, *z;
+    float *alpha;
+    int n00, n01, n10, n11;
 
     if(iwall==0||meshi->drawsides[iwall+3]==0)continue;
 
-    glBegin(GL_LINES);
+    glBegin(GL_TRIANGLES);
     glColor3f(0.0,0.0,0.0);
     switch (iwall){
       case 1:
       case -1:
         if(iwall<0){
           xx = meshi->x0;
+          alpha = vr->alpha_yz0;
         }
         else{
+          alpha = vr->alpha_yz1;
           xx=meshi->x1;
         }
+        n00 = 0;
+        n10 = 1;
+        n01 = meshi->kbar+1;
+        n11 = 1 + meshi->kbar+1;
         for(i=0;i<meshi->jbar;i++){
           y = meshi->yplt+i;
           for(j=0;j<meshi->kbar;j++){
             z = meshi->zplt+j;
             
-            if(meshi->inside==0){
+            if(meshi->inside==0&&iwall>0||meshi->inside!=0&&iwall<0){
+              glColor4f(0.5,0.5,0.5,alpha[n00]);
               glVertex3f(xx,y[0],z[0]);
+              glColor4f(0.5,0.5,0.5,alpha[n10]);
               glVertex3f(xx,y[1],z[0]);
+              glColor4f(0.5,0.5,0.5,alpha[n11]);
               glVertex3f(xx,y[1],z[1]);
 
+              glColor4f(0.5,0.5,0.5,alpha[0]);
               glVertex3f(xx,y[0],z[0]);
+              glColor4f(0.5,0.5,0.5,alpha[n11]);
               glVertex3f(xx,y[1],z[1]);
+              glColor4f(0.5,0.5,0.5,alpha[n01]);
               glVertex3f(xx,y[0],z[1]);
             }
             else{
+              glColor4f(0.5,0.5,0.5,alpha[0]);
               glVertex3f(xx,y[0],z[0]);
+              glColor4f(0.5,0.5,0.5,alpha[n11]);
               glVertex3f(xx,y[1],z[1]);
+              glColor4f(0.5,0.5,0.5,alpha[n10]);
               glVertex3f(xx,y[1],z[0]);
 
+              glColor4f(0.5,0.5,0.5,alpha[0]);
               glVertex3f(xx,y[0],z[0]);
+              glColor4f(0.5,0.5,0.5,alpha[n01]);
               glVertex3f(xx,y[0],z[1]);
+              glColor4f(0.5,0.5,0.5,alpha[n11]);
               glVertex3f(xx,y[1],z[1]);
             }
+            alpha++;
           }
         }
         break;
       case 2:
       case -2:
+        n00 = 0;
+        n10 = 1;
+        n01 = meshi->kbar+1;
+        n11 = 1 + meshi->kbar+1;
         if(iwall<0){
+          alpha = vr->alpha_xz0;
           yy=meshi->y0;
         }
         else{
+          alpha = vr->alpha_xz1;
           yy=meshi->y1;
         }
         for(i=0;i<meshi->ibar;i++){
           x = meshi->xplt+i;
           for(j=0;j<meshi->kbar;j++){
             z = meshi->zplt+j;
-            if(meshi->inside==0){
+            if(meshi->inside==0&&iwall>0||meshi->inside!=0&&iwall<0){
+              glColor4f(0.5,0.5,0.5,alpha[n00]);
               glVertex3f(x[0],yy,z[0]);
+              glColor4f(0.5,0.5,0.5,alpha[n11]);
+              glVertex3f(x[1],yy,z[1]);
+              glColor4f(0.5,0.5,0.5,alpha[n10]);
               glVertex3f(x[1],yy,z[0]);
-              glVertex3f(x[1],yy,z[1]);
 
+              glColor4f(0.5,0.5,0.5,alpha[n00]);
               glVertex3f(x[0],yy,z[0]);
-              glVertex3f(x[1],yy,z[1]);
+              glColor4f(0.5,0.5,0.5,alpha[n01]);
               glVertex3f(x[0],yy,z[1]);
+              glColor4f(0.5,0.5,0.5,alpha[n11]);
+              glVertex3f(x[1],yy,z[1]);
             }
             else{
+              glColor4f(0.5,0.5,0.5,alpha[n00]);
               glVertex3f(x[0],yy,z[0]);
-              glVertex3f(x[1],yy,z[1]);
+              glColor4f(0.5,0.5,0.5,alpha[n10]);
               glVertex3f(x[1],yy,z[0]);
-
-              glVertex3f(x[0],yy,z[0]);
-              glVertex3f(x[0],yy,z[1]);
+              glColor4f(0.5,0.5,0.5,alpha[n11]);
               glVertex3f(x[1],yy,z[1]);
+
+              glColor4f(0.5,0.5,0.5,alpha[n00]);
+              glVertex3f(x[0],yy,z[0]);
+              glColor4f(0.5,0.5,0.5,alpha[n11]);
+              glVertex3f(x[1],yy,z[1]);
+              glColor4f(0.5,0.5,0.5,alpha[n01]);
+              glVertex3f(x[0],yy,z[1]);
             }
           }
         }
         break;
       case 3:
       case -3:
-        if(iwall<0){
+        n00 = 0;
+        n10 = 1;
+        n01 = meshi->jbar+1;
+        n11 = 1 + meshi->jbar+1;
+       if(iwall<0){
+          alpha = vr->alpha_xy0;
           zz=meshi->z0;
         }
         else{
+          alpha = vr->alpha_xy1;
           zz=meshi->z1;
         }
         for(i=0;i<meshi->ibar;i++){
           x = meshi->xplt+i;
           for(j=0;j<meshi->jbar;j++){
             y = meshi->yplt+j;
-            if(meshi->inside==0){
+            if(meshi->inside==0&&iwall>0||meshi->inside!=0&&iwall<0){
+              glColor4f(0.5,0.5,0.5,alpha[n00]);
               glVertex3f(x[0],y[0],zz);
+              glColor4f(0.5,0.5,0.5,alpha[n10]);
               glVertex3f(x[1],y[0],zz);
+              glColor4f(0.5,0.5,0.5,alpha[n11]);
               glVertex3f(x[1],y[1],zz);
 
+              glColor4f(0.5,0.5,0.5,alpha[n00]);
               glVertex3f(x[0],y[0],zz);
+              glColor4f(0.5,0.5,0.5,alpha[n11]);
               glVertex3f(x[1],y[1],zz);
+              glColor4f(0.5,0.5,0.5,alpha[n01]);
               glVertex3f(x[0],y[1],zz);
             }
             else{
+              glColor4f(0.5,0.5,0.5,alpha[n00]);
               glVertex3f(x[0],y[0],zz);
+              glColor4f(0.5,0.5,0.5,alpha[n11]);
               glVertex3f(x[1],y[1],zz);
+              glColor4f(0.5,0.5,0.5,alpha[n10]);
               glVertex3f(x[1],y[0],zz);
 
+              glColor4f(0.5,0.5,0.5,alpha[n00]);
               glVertex3f(x[0],y[0],zz);
+              glColor4f(0.5,0.5,0.5,alpha[n01]);
               glVertex3f(x[0],y[1],zz);
+              glColor4f(0.5,0.5,0.5,alpha[n11]);
               glVertex3f(x[1],y[1],zz);
             }
           }

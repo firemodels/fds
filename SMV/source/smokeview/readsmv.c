@@ -6299,7 +6299,28 @@ void init_volrender(void){
 
     meshi = meshinfo + i;
     vr = &(meshi->volrenderinfo);
-    if(vr->fire!=NULL||vr->smoke!=NULL)nvolrenderinfo++;
+    if(vr->fire!=NULL||vr->smoke!=NULL){
+      int nx, ny, nz;
+
+      nvolrenderinfo++;
+      nx = meshi->ibar+1;
+      ny = meshi->jbar+1;
+      nz = meshi->kbar+1;
+      NewMemory((void **)&vr->alpha_yz0,ny*nz*sizeof(float));
+      NewMemory((void **)&vr->alpha_yz1,ny*nz*sizeof(float));
+      NewMemory((void **)&vr->alpha_xz0,nx*nz*sizeof(float));
+      NewMemory((void **)&vr->alpha_xz1,nx*nz*sizeof(float));
+      NewMemory((void **)&vr->alpha_xy0,nx*ny*sizeof(float));
+      NewMemory((void **)&vr->alpha_xy1,nx*ny*sizeof(float));
+    }
+    else{
+      vr->alpha_yz0=NULL;
+      vr->alpha_yz1=NULL;
+      vr->alpha_xz0=NULL;
+      vr->alpha_xz1=NULL;
+      vr->alpha_xy0=NULL;
+      vr->alpha_xy1=NULL;
+    }
   }
 }
 

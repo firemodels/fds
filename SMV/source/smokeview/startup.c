@@ -2252,6 +2252,7 @@ int getmaxrevision(void){
   MAXREV(IOtour_revision);
   MAXREV(IOwui_revision);
   MAXREV(IOzone_revision);
+  MAXREV(interp_revision);
   MAXREV(isobox_revision);
   MAXREV(main_revision);
   MAXREV(menu_revision);

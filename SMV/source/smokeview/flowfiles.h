@@ -397,6 +397,8 @@ typedef struct _volrenderdata {
   struct _mesh *rendermesh;
   struct _slice *smoke, *fire;
   float *smokedata, *firedata;
+  float *alpha_yz0, *alpha_xz0, *alpha_xy0;
+  float *alpha_yz1, *alpha_xz1, *alpha_xy1;
   int *timeslist;
   int iframe;
   int loaded, show;

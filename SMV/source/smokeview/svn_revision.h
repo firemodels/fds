@@ -33,6 +33,7 @@ extern char glui_motion_revision[];
 extern char glui_stereo_revision[];
 extern char glui_tour_revision[];
 extern char glui_trainer_revision[];
+extern char interp_revision[];
 extern char IOboundary_revision[];
 extern char IOhrr_revision[];
 extern char IOiso_revision[];
