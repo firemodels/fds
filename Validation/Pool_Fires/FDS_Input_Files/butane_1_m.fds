@@ -1,0 +1,69 @@
+&HEAD CHID='butane_1_m', TITLE='Single pan of burning butane' /
+
+&MESH IJK=32,32,96, XB=-0.8,0.8,-0.8,0.8,0.0,4.8 /
+
+&MISC NEW_EVAP=.TRUE. TMPA=-1 /
+
+&TIME T_END=300. / 
+
+&REAC FUEL               = 'BUTANE VAPOR'
+      FYI                = 'Butane, C_4 H_10'
+      HEAT_OF_COMBUSTION = 45700.
+      O                  = 0.
+      C                  = 4.
+      H                  = 10.
+      SOOT_YIELD         = 0.029 /
+
+&MATL ID                     = 'BUTANE LIQUID'
+      EMISSIVITY             = 1.
+      NU_SPEC                = 1.
+      SPEC_ID                = 'BUTANE VAPOR'
+      HEAT_OF_REACTION       = 385.22
+      CONDUCTIVITY           = 0.124
+      SPECIFIC_HEAT          = 2.2784
+      DENSITY                = 584.
+      ABSORPTION_COEFFICIENT = 40.
+      BOILING_TEMPERATURE    = 0. /
+	  
+&MATL ID            = 'STEEL'
+      EMISSIVITY    = 1.0
+      DENSITY       = 7850.
+      CONDUCTIVITY  = 45.8
+      SPECIFIC_HEAT = 0.46 /
+
+&SURF ID        = 'BUTANE POOL'
+      COLOR     = 'YELLOW'
+      MATL_ID   = 'BUTANE LIQUID'
+      THICKNESS = 0.1 /
+
+&SURF ID        = 'STEEL SHEET'
+      COLOR     = 'BLACK'
+      MATL_ID   = 'STEEL'
+      BACKING   = 'EXPOSED'
+      THICKNESS = 0.003 /
+
+&VENT MB='XMIN', SURF_ID = 'OPEN' /
+&VENT MB='XMAX', SURF_ID = 'OPEN' /
+&VENT MB='YMIN', SURF_ID = 'OPEN' /
+&VENT MB='YMAX', SURF_ID = 'OPEN' /
+&VENT MB='ZMAX', SURF_ID = 'OPEN' /
+
+&OBST XB=-.50,0.50,-.50,0.50,0.00,0.05, SURF_IDS='BUTANE POOL','STEEL SHEET','STEEL SHEET' /
+&OBST XB=-.50,-.50,-.50,0.50,0.00,0.10, SURF_ID='STEEL SHEET' /
+&OBST XB=0.50,0.50,-.50,0.50,0.00,0.10, SURF_ID='STEEL SHEET' /
+&OBST XB=-.50,0.50,-.50,-.50,0.00,0.10, SURF_ID='STEEL SHEET' /
+&OBST XB=-.50,0.50,0.50,0.50,0.00,0.10, SURF_ID='STEEL SHEET' /
+
+&DUMP DT_HRR=1., SIG_FIGS=4, SIG_FIGS_EXP=2 /
+
+&SLCF PBY=0.0, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
+&SLCF PBY=0.0, QUANTITY='HRRPUV' /
+&SLCF PBY=0.0, QUANTITY='MASS FRACTION', SPEC_ID='BUTANE VAPOR'/
+
+&BNDF QUANTITY='BURNING RATE' /
+&BNDF QUANTITY='GAUGE HEAT FLUX' /
+&BNDF QUANTITY='WALL TEMPERATURE' /
+
+&TAIL /
+
+

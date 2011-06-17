@@ -1,4 +1,4 @@
-&HEAD CHID='ethanol_1_m', TITLE='Single pan of burning ethanol' /
+&HEAD CHID='benzene_1_m', TITLE='Single pan of burning benzene' /
 
 &MESH IJK=32,32,96, XB=-0.8,0.8,-0.8,0.8,0.0,4.8 /
 
@@ -6,24 +6,24 @@
 
 &TIME T_END=300. / 
 
-&REAC FUEL               = 'ETHANOL VAPOR'
-      FYI                = 'Ethanol, C_2 H_6 O_1'
-      HEAT_OF_COMBUSTION = 26780.
-      O                  = 1.
-      C                  = 2.
+&REAC FUEL               = 'BENZENE VAPOR'
+      FYI                = 'Benzene, C_6 H_6'
+      HEAT_OF_COMBUSTION = 39900.
+      O                  = 0.
+      C                  = 6.
       H                  = 6.
-      SOOT_YIELD         = 0.008 /
+      SOOT_YIELD         = 0.181 /
 
-&MATL ID                     = 'ETHANOL LIQUID'
+&MATL ID                     = 'BENZENE LIQUID'
       EMISSIVITY             = 1.
       NU_SPEC                = 1.
-      SPEC_ID                = 'ETHANOL VAPOR'
-      HEAT_OF_REACTION       = 836.98
-      CONDUCTIVITY           = 0.17
-      SPECIFIC_HEAT          = 2.4398
-      DENSITY                = 789.
+      SPEC_ID                = 'BENZENE VAPOR'
+      HEAT_OF_REACTION       = 393.29
+      CONDUCTIVITY           = 0.167
+      SPECIFIC_HEAT          = 1.7372
+      DENSITY                = 876.5
       ABSORPTION_COEFFICIENT = 40.
-      BOILING_TEMPERATURE    = 78.5 /
+      BOILING_TEMPERATURE    = 80.3 /
 	  
 &MATL ID            = 'STEEL'
       EMISSIVITY    = 1.0
@@ -31,9 +31,9 @@
       CONDUCTIVITY  = 45.8
       SPECIFIC_HEAT = 0.46 /
 
-&SURF ID        = 'ETHANOL POOL'
+&SURF ID        = 'BENZENE POOL'
       COLOR     = 'YELLOW'
-      MATL_ID   = 'ETHANOL LIQUID'
+      MATL_ID   = 'BENZENE LIQUID'
       THICKNESS = 0.1 /
 
 &SURF ID        = 'STEEL SHEET'
@@ -48,7 +48,7 @@
 &VENT MB='YMAX', SURF_ID = 'OPEN' /
 &VENT MB='ZMAX', SURF_ID = 'OPEN' /
 
-&OBST XB=-.50,0.50,-.50,0.50,0.00,0.05, SURF_IDS='ETHANOL POOL','STEEL SHEET','STEEL SHEET' /
+&OBST XB=-.50,0.50,-.50,0.50,0.00,0.05, SURF_IDS='BENZENE POOL','STEEL SHEET','STEEL SHEET' /
 &OBST XB=-.50,-.50,-.50,0.50,0.00,0.10, SURF_ID='STEEL SHEET' /
 &OBST XB=0.50,0.50,-.50,0.50,0.00,0.10, SURF_ID='STEEL SHEET' /
 &OBST XB=-.50,0.50,-.50,-.50,0.00,0.10, SURF_ID='STEEL SHEET' /
