@@ -1941,6 +1941,16 @@ SPEC_READ_LOOP: DO N=1,N_SPECIES
 
    IF (TRIM(SS%FORMULA)=='null') WRITE(SS%FORMULA,'(A,I0)') 'SPEC_',N
 
+   ! For simple chemistry Determine if the species is the one specified on the REAC line(s)
+
+   IF (SIMPLE_CHEMISTRY) THEN
+      IF (TRIM(ID)==TRIM(REACTION(1)%FUEL)) THEN
+         FUEL_INDEX = N
+         SS%MW = REACTION(1)%MW_FUEL
+      ENDIF
+      IF (TRIM(ID)=='SOOT') SS%MW = REACTION(1)%MW_SOOT
+   ENDIF
+
    SS%RCON = R0/SS%MW
    SS%MODE = GAS_SPECIES
 
@@ -1975,16 +1985,6 @@ SPEC_READ_LOOP: DO N=1,N_SPECIES
          IF (MASS_EXTINCTION_COEFFICIENT < 0._EB) SS%MASS_EXTINCTION_COEFFICIENT = 8700._EB
          IF (.NOT. SIMPLE_CHEMISTRY .AND. TRIM(SS%FORMULA)=='Soot') SS%ATOMS(6) = 1._EB
    END SELECT
-
-   ! Determine if the species is the one specified on the REAC line(s)
-
-   IF (N_REACTIONS>0) THEN
-      IF (TRIM(ID)==TRIM(REACTION(1)%FUEL)) THEN
-         FUEL_INDEX = N
-         IF (.NOT.SS%LISTED .AND. REACTION(1)%MW_FUEL>0._EB) SS%MW = REACTION(1)%MW_FUEL
-      ENDIF
-      IF (TRIM(ID)=='SOOT') SS%MW = REACTION(1)%MW_SOOT
-   ENDIF
 
    ! Get ramps
    IF (SS%RAMP_CP/='null') THEN
@@ -2438,7 +2438,6 @@ DO J = 1,5000
       IF (SS%RAMP_K_INDEX>0)  K_TMP(N) = EVALUATE_RAMP(REAL(J,EB),1._EB,SS%RAMP_K_INDEX)/SS%MW
       IF (SS%RAMP_MU_INDEX>0) MU_TMP(N) = EVALUATE_RAMP(REAL(J,EB),1._EB,SS%RAMP_MU_INDEX)/SS%MW
    ENDDO
-   
    ! For each tracked species, store the mass-weighted property values
 
    DO N=0,N_TRACKED_SPECIES
@@ -2454,6 +2453,7 @@ DO J = 1,5000
       ENDIF
    ENDDO
 ENDDO
+
 DEALLOCATE(D_TMP)
 DEALLOCATE(MU_TMP)
 DEALLOCATE(CP_TMP)
@@ -2544,10 +2544,9 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
             CALL SHUTDOWN(MESSAGE)
          ENDIF
       ELSE
-         MW_FUEL = ELEMENT(6)%MASS*C+ELEMENT(1)%MASS*H+ELEMENT(8)%MASS*O+ELEMENT(7)%MASS*N         
+         MW_FUEL = ELEMENT(6)%MASS*C+ELEMENT(1)%MASS*H+ELEMENT(8)%MASS*O+ELEMENT(7)%MASS*N   
       ENDIF
    ENDIF
-   
    RN%A                         = A
    RN%A_IN                      = A
    RN%AUTO_IGNITION_TEMPERATURE = AUTO_IGNITION_TEMPERATURE + TMPM
