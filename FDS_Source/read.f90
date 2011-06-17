@@ -1973,6 +1973,7 @@ SPEC_READ_LOOP: DO N=1,N_SPECIES
          SOOT_INDEX = N
          SS%MODE = AEROSOL_SPECIES
          IF (MASS_EXTINCTION_COEFFICIENT < 0._EB) SS%MASS_EXTINCTION_COEFFICIENT = 8700._EB
+         IF (.NOT. SIMPLE_CHEMISTRY .AND. TRIM(SS%FORMULA)=='Soot') SS%ATOMS(6) = 1._EB
    END SELECT
 
    ! Determine if the species is the one specified on the REAC line(s)
