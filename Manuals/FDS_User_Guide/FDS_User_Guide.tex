@@ -495,82 +495,6 @@ water droplet transport on solid objects.\\
 \\
 \noindent Elizabeth Marie-France Blanchard, also of CSTB France, has worked on improvements to the droplet evaporation model.\\
 \\
-\noindent Finally, on the following pages is a list of individuals and organizations who have volunteered their time and effort to
-``beta test'' FDS and Smokeview prior to its official release. Their contribution is invaluable because there is simply no other way
-to test all of the various features of the model.
-
-\newpage
-
-\begin{longtable}{|l|l|}
-\hline
-\multicolumn{2}{|c|}{\bf FDS 5 Beta Testers} \\ \hline \hline
-Nick Agnew                              & Maunsell, Australia                  \\ \hline
-Camille Azzi                            & Universities of Glasgow and Strathclyde, Scotland                  \\ \hline
-Matthew Bilson                          & Maunsell, Australia                  \\ \hline
-George Braga                            & Federal District Fire Department, Brazil                  \\ \hline
-Keith Calder                            & Senez Reed Calder Engineering, Canada                  \\ \hline
-Steven Chi Heng Lam                     & Hoare Lea Fire Engineering, UK                  \\ \hline
-Doo Chan Choi                           & Rolf Jensen \& Associates, Inc., USA                  \\ \hline
-Marco Cigolini                          & Italferr spa, Italy                  \\ \hline
-John Cutonilli                          & Hughes Associates, Inc., USA \\ \hline
-Sylvain Desanghere                      & CTICM (Centre Technique Industriel de la Construction M\'{e}tallique), France                  \\ \hline
-Montu L. Das                            & Gage-Babcock \& Associates, USA and Canada                  \\ \hline
-Franck Didieux                          & Laboratoire National de M\'{e}trologie et d'Essais (LNE), France                  \\ \hline
-Johannes Dimyadi                        & AstraVision-Solutions, New Zealand                  \\ \hline
-Bill Ferrante                           & Roosevelt Fire District, USA                  \\ \hline
-Paul Fuss                               & NIST, USA    \\ \hline
-Ralf Galster                            & Ing.~B\"{u}ro f\"{u}r Brandschutz Riesener, Germany                  \\ \hline
-Andreas Gerndt                          & University of Louisiana, USA                  \\ \hline
-Emanuele Gissi                          & Corpo Nazionale dei Vigili del Fuoco, Comando Prov. di Genova, Italy                  \\ \hline
-Simon J. Ham                            & Fire Safety Engineering Consultants Ltd., UK                  \\ \hline
-Paul Hart                               & Swiss Re, GAP Services, USA                  \\ \hline
-Hsiao, Li Kai (Gary)                    & Fire Bureau, Taipei, Taiwan                  \\ \hline
-Hu Zhi-Xin                              & University of Maryland, USA                                            \\ \hline
-Ilya N. Karkin                          & SITIS Ltd., Russia                  \\ \hline
-Susanne Kilian                          & hhpberlin, Fire Safety Engineers, Germany                  \\ \hline
-Sung Chan Kim                           & School of Mechanical Engineering, Chung Ang University, Korea                  \\ \hline
-Pierre-Louis Lamballais                 & Flashover-Backdraft, France                                                                  \\ \hline
-A.~Leonardi                             & StIL (Studio di Ingegneria Leonardi), Italy                         \\ \hline
-Davy Leroy                              & Arup Fire, UK                 \\ \hline
-Yunlong Liu                             & Parsons Brinckerhof, Australia                   \\ \hline
-Timothy Liu                             & Locke Carey Fire Consultants, UK                  \\ \hline
-Dave McGill                             & Seneca College, Ontario, Canada                  \\ \hline
-Ken Miller                              & Las Vegas Fire \& Rescue, USA                  \\ \hline
-Stephan B. Miller                       & Mr.~3D Computer Graphics and the University of Houston Downtown, USA                  \\ \hline
-Pete Muir                               & Safe Consulting, UK                  \\ \hline
-Stephen Olenick                         & Combustion Science \& Engineering, Inc., USA                  \\ \hline
-Kristopher Overholt                     & University of Texas, USA                  \\ \hline
-PENG Wei                                & State Key Labortory of Fire Science, China                  \\ \hline
-Andrew Purchase                         & Maunsell, Australia                  \\ \hline
-Christian Rogsch                        & Independent Consultant, Wuppertal University, Germany                  \\ \hline
-Michael Roth                            & RWDI, Canada                  \\ \hline
-Ahmed Salem                             & Alexandria University, Egypt                                             \\ \hline
-Robert Schmidt                          & Combustion Science \& Engineering, Inc., USA                  \\ \hline
-Joe Skaggs                              & CASE Forensics, USA                  \\ \hline
-Piotr Smardz                            & Ahearne Fire Engineering Consultants, Ireland                  \\ \hline
-Jamie Stern-Gottfried                   & Arup Fire, UK                 \\ \hline
-Boris Stock                             & BFT Cognos GmbH, Germany                  \\ \hline
-Blair Stratton                          & Beca, New Zealand                   \\ \hline
-Csaba Szilagyi                          & Szolnok Fire Department, Hungary                  \\ \hline
-Mahmood Tabaddor                        & Underwriters Laboratories, USA                  \\ \hline
-Charlie Thornton                        & Thunderhead Engineering, USA                  \\ \hline
-Sebastian Ukleja                        & University of Ulster, Northern Ireland                  \\ \hline
-Giacomo Villi                           & Dipartimento Fisica Tecnica (DfT) UNIPd, Italy                  \\ \hline
-Andreas Vischer                         & RWTH Aachen University, Germany                  \\ \hline
-Karl Wallasch                           & Hoare Lea Fire Engineering, UK                  \\ \hline
-Kaoru Wakatsuki                         & National Research Institute of Fire and Disaster, Japan                  \\ \hline
-Joachim Wollst\"{a}dt                   & Ing.~B\"{u}ro f\"{u}r Brandschutz Riesener, Germany                  \\ \hline
-Yang Shan-You                           & State Key Laboratory of Fire Science, China                  \\ \hline
-Matthias Z\"{a}hringer                  & Ing.~B\"{u}ro f\"{u}r Brandschutz Riesener, Germany                  \\ \hline
-Robin Zevotek                           & C\&S Engineers, Life Safety Services, Syracuse, New York, USA                  \\ \hline
-
-                                        & GIDAI, University of Cantabria, Spain                  \\ \hline
-%\end{tabular*}
-\end{longtable}
-
-
-
-
 
 
 
@@ -5889,10 +5813,11 @@ practical for large-scale fire applications. This chapter describes both methods
 commonly used mixing-controlled model. The {\ct REAC} namelist group contains the parameters for both modes of combustion.
 
 
-\section{Mixing Controlled Reactions with Simple Chemistry}
+\section{Mixing-Controlled Combustion}
+
 
 This approach to combustion considers a single fuel species that is composed primarily of C,H,O, and N that reacts with
-oxygen in one or two mixing-controlled steps to form H$_2$O, CO$_2$, soot, and CO.
+oxygen in one or more mixing-controlled steps to form H$_2$O, CO$_2$, soot, and CO.
 For the default simple chemistry model, only a single {\ct REAC} line is needed.
 
 \begin{warning}
@@ -5902,16 +5827,16 @@ you {\em must} specify a {\ct REAC} line to model a fire.
 You are responsible for defining the basic fuel chemistry and the post-combustion yields of CO and soot.
 \end{warning}
 
-\noindent
-Using the simple chemistry model, each reaction is assumed to be of the form:
+\subsection{Simple Chemistry Inputs}
+\label{info:simple_chemistry}
+
+For the simple chemistry model, each reaction is assumed to be of the form:
 \be \mathrm{C_xH_yO_zN_v + \nu_{O_2} \; O_2 \rightarrow
     \nu_{CO_2} \; CO_2 + \nu_{H_2O} \; H_2O +
     \nu_{CO}   \; CO   + \nu_{soot} \; Soot + \nu_{N_2} \; N_2} \ee
 You need only specify the chemical formula of the fuel along with
-the yields of CO, soot, and H$_2$, and the amount of hydrogen in the soot, H$_{frac}$.
-For completeness you can specify the N$_2$ content of
-the fuel. FDS will use that information internally to
-determine the amount of combustion products that are formed:
+the yields of CO and soot, and the amount of hydrogen in the soot, $\mathrm{H_{frac}}$.
+FDS will use that information internally to determine the amount of combustion products that are formed:
 \begin{eqnarray*}
 \mathrm{ \nu_{O_2}  }    &=& \mathrm{ \nu_{CO_2} + \frac{\nu_{CO}}{2} + \frac{\nu_{H_2O}}{2} - \frac{\hbox{z}}{2}  } \\
 \mathrm{ \nu_{CO_2} }    &=& \mathrm{ \hbox{x} - \nu_{CO} - (1-H_{frac}) \nu_{soot} }  \\
@@ -5921,84 +5846,86 @@ determine the amount of combustion products that are formed:
 \mathrm{ \nu_{N_2}  }    &=& \mathrm{ \frac{\hbox{v}}{2} } \\
 \mathrm{ W_s        }    &=& \mathrm{ H_{frac} \, W_H + (1-H_{frac}) \, W_C }
 \end{eqnarray*}
-The following parameters may be prescribed on the {\ct REAC} line when using simple chemistry with mixing-controlled reactions.
+
+\noindent The following parameters may be prescribed on the {\ct REAC} line when using the simple chemistry model.
 Note that the various {\ct YIELD}s are for well-ventilated, post-flame conditions. There are options to
 predict various species yields in under-ventilated fire scenarios, but these special models still require
 the post-flame yields for CO, soot and any other species listed below.
 \begin{description}
-\item[{\ct FORMULA}] A character string that identities the chemical formula of the fuel species for the reaction.  This input only has meaning when simple chemistry is being used and the formula can only contain C,H,O, or N.  Specifying a formula means the invidual inputs of C,H,O, and N do not need to be specified. See ~\ref{gas_species_props} for a description on how to input a {\ct FORMULA}.
-\item[{\ct FUEL}] A character string that identifies fuel species for the reaction. When using simple chemistry, specifying {\ct FUEL} will
-cause FDS to use the built-in thermo-physical properties for that species when computing quantities such as specific heat or viscosity.
-This parameter is independent of the inputs for the fuel chemistry, i.e. {\ct C, H, O, N}. Table~\ref{tab:gasspecies} provides a listing of the available species.  If the {\ct FUEL} is in the table, then FDS will use the built-in formula to obtain the values of C,H,O, and N.
-By default, FDS uses the gas thermophysical properties of {\ct ETHYLENE} for the fuel.
+\item[{\ct FUEL}] (Required) A character string that identifies fuel species for the reaction. When using simple chemistry, specifying {\ct FUEL} will
+cause FDS to use the built-in thermophysical properties for that species when computing quantities such as specific heat or viscosity.
+This parameter is independent of the inputs for the fuel chemistry, i.e. {\ct C, H, O, N}. Table~\ref{tab:gasspecies} provides a listing of the available species.
+If the {\ct FUEL} is in the table, then FDS will use the built-in formula to obtain the values of C,H,O, and N.
+By default, FDS uses the gas thermophysical properties of {\ct ETHYLENE} for the fuel. 
+\item[{\ct FORMULA}] A character string that identities the chemical formula of the fuel species for the reaction.  
+This input only has meaning when simple chemistry is being used and the formula can only contain C,H,O, or N.  
+Specifying a formula means the individual inputs of C,H,O, and N do not need to be specified. See ~\ref{gas_species_props} for a description on how to input a {\ct FORMULA}.
 \item[{\ct ID}] A character string that identifies the reaction. Normally, this label is not used by FDS, but it is useful to
-label the {\ct REAC} line to more easily identify the fuel species.
-\item[{\ct C, H, O, N}] The fuel chemical formula. All numbers are positive.  One of either C or H must be specified.  This input is not needed if {\ct FORMULA} is specified or if the {\ct FUEL} is in Table~\ref{tab:gasspecies}.
+label the {\ct REAC} line if more than one reactions are specified.
+\item[{\ct C, H, O, N}] The fuel chemical formula. All numbers are positive.  One of either C or H must be specified.  
+This input is not needed if {\ct FORMULA} is specified or if the {\ct FUEL} is in Table~\ref{tab:gasspecies}.
 \item[{\ct Y\_O2\_INFTY}] Ambient mass fraction of oxygen (Default 0.232428)
 \item[{\ct Y\_CO2\_INFTY}] Ambient mass fraction of carbon dioxide (Default 0.0058)
-\item[{\ct Y\_F\_INLET}] Mass fraction of fuel in fuel stream (Default 1.0)
+\item[{\ct HUMIDITY}] Relative humidity of the background air species, in units of \%. (Default 40~\%).
+\item[{\ct CO\_YIELD}] The fraction of fuel mass converted into carbon
+monoxide, $y_{CO}$. (Default 0.0)
 \item[{\ct SOOT\_YIELD}] The fraction of fuel mass converted into smoke particulate, $y_s$.
 Note that this parameter does not apply to the processes of soot growth and oxidation,
 but rather to the net production of the smoke particulate from the fire.  (Default is 0.0)
-\item[{\ct SOOT\_H\_FRACTION}] The fraction of the atoms in the soot that are hydrogen.  Note that this input only applies to simple chemistry {\ct REAC} inputs.  For all other types of {\ct REAC} inputs the species {\ct SOOT} is assumed to be pure carbon unless a {\ct FORMULA} is provided. (default 0.1 - equivalent to the input {\ct FORMULA='C0.9H0.1'} for other {\ct REAC} types)
-\item[{\ct CO\_YIELD}] The fraction of fuel mass converted into carbon
-monoxide, $y_{CO}$. (Default 0.0)
-\item[{\ct HEAT\_OF\_COMBUSTION}] $\Delta H$ (kJ/kg). The amount of
-energy released per unit mass of fuel consumed. Note that if the heat of combustion is not
-specified, it is assumed to be
-\be \Delta H \approx \frac{\nu_{O_2} \; W_{O_2} } { \nu_{f} \; W_{f} } \; \; \hbox{\ct EPUMO2}  \quad \quad \hbox{kJ/kg}  \label{EPUMO2} \ee
-\item[{\ct EPUMO2}] The amount of energy released per unit mass of oxygen consumed. (kJ/kg)
-Default is 13,100 kJ/kg.  Note that if both {\ct EPUMO2} and {\ct HEAT\_OF\_COMBUSTION} are
-specified that FDS will ignore the value for {\ct EPUMO2}.
-\item[{\ct IDEAL}]  The heat of combustion for a material can be determined in a couple of ways.  One approach is to take the difference in the heats of formation for the products (assuming complete combustion) and the reactants.  This is typically how values are tabulated for pure fuels (e.g. one species) in handbooks.  This {\ct IDEAL} heat of combustion does not account for the  {\ct SOOT\_YIELD} or  {\ct CO\_YIELD} that occurs in a real fire.  Carbon and hydrogen that go to soot and CO rather than CO$_2$ and H$_2$O result in a lower effective heat of combustion.  Setting {\ct IDEAL=.TRUE.} will reduce the {\ct HEAT\_OF\_COMBUSTION} based upon the inputs for {\ct SOOT\_YIELD} and {\ct CO\_YIELD}. If {\ct EPUMO2} is specified instead of {\ct HEAT\_OF\_COMBUSTION}, then the {\ct EPUMO2} will not be changed.  The second approach to determining the heat of combustion is to burn a known mass of the material in a calorimeter and divide the heat release rate by the mass loss rate (known as the effective heat of combustion).  In this approach, represented by {\ct IDEAL=.FALSE.}, the measured value of the heat release rate includes the effects of any CO or soot that is produced and no adjustment is needed.  The default value is {\ct .FALSE.}
-\item[{\ct AUTO\_IGNITION\_TEMPERATURE}] The temperature below which combustion will not occur.
-Note that if this parameter is used, then some form of ignition source must be present in order for combustion to begin.
-\item[{\ct CRITICAL\_FLAME\_TEMPERATURE}] Used by the extinction model.  If combustion can not raise the temperature of the products above this value, local extinction will occur.  See ~\ref{info:extinction}
-\item[{\ct HUMIDITY}] Relative humidity of the background air species, in units of \%. (Default 40~\%).
+\item[{\ct SOOT\_H\_FRACTION}] The fraction of the atoms in the soot that are hydrogen.  Note that this input only applies to simple chemistry {\ct REAC} inputs.  
+For all other types of {\ct REAC} inputs the species {\ct SOOT} is assumed to be pure carbon unless a {\ct FORMULA} is provided. 
+(Default 0.1 - equivalent to the input {\ct FORMULA='C0.9H0.1'} for other {\ct REAC} types)
 \end{description}
 
 \noindent
-A few sample {\ct REAC} lines are given here. The values are for demonstration only (note the last three inputs will result in the same stoichiometry).
-
+A few sample {\ct REAC} lines are given here. 
 
 \footnotesize
 \begin{verbatim}
-&REAC FUEL       = 'METHANE'
-      C          = 1.
-      H          = 4. /
-
-&REAC FUEL               = 'myPROPANE1'
-      SOOT_YIELD         = 0.01
-      C                  = 3.
-      H                  = 8.
-      HEAT_OF_COMBUSTION = 46460.
-      IDEAL              = .TRUE. /
-
-&REAC FUEL               = 'PROPANE'
-      SOOT_YIELD         = 0.01
-      HEAT_OF_COMBUSTION = 46460.
-      IDEAL              = .TRUE. /
-
-&REAC FUEL               = 'myPROPANE2'
-      SOOT_YIELD         = 0.01
-      FORMULA            = 'C3H8'
-      HEAT_OF_COMBUSTION = 46124.
-      IDEAL              = .FALSE. /
+&REAC FUEL = 'METHANE' /
 \end{verbatim}
 \normalsize
+\noindent Here, there is no need for a {\ct FORMULA} or atom count because the {\ct FUEL} is listed in Table~\ref{tab:gasspecies}. It is also assumed that the soot and CO 
+yields are zero.
+
+\footnotesize
+\begin{verbatim}
+&REAC FUEL               = 'PROPANE'
+      SOOT_YIELD         = 0.01
+      CO_YIELD           = 0.02
+      HEAT_OF_COMBUSTION = 46460. /
+\end{verbatim}
+\normalsize
+\noindent Here, the {\ct FORMULA} is known, but the product yields are not. Also, the user prefers to specify the {\ct HEAT\_OF\_COMBUSTION} rather than have it calculated. See
+Section~\ref{info:heat_of_combustion} for more details on the heat of combustion.
+
+\footnotesize
+\begin{verbatim}
+&REAC FUEL               = 'MY FUEL'
+      SOOT_YIELD         = 0.05
+      FORMULA            = 'C3H8O3N4'
+      HEAT_OF_COMBUSTION = 46124. /
+\end{verbatim}
+\normalsize
+\noindent Here, nothing is known or assumed.
 
 
 
 
-\subsection{Special Topic: Heat of Combustion}
+\subsection{Heat of Combustion}
 \label{info:heat_of_combustion}
 
-By default, the Energy Per Unit Mass of Oxygen, {\ct EPUMO2}, is used to compute the heat of combustion according to
-Eq.~(\ref{EPUMO2}).  Specifying the
-{\ct HEAT\_OF\_COMBUSTION} will override this computation.
-However, if heats of reaction have been specified on the
-{\ct MATL} line and
-the heat of combustion of the material differs from that specified by
+The {\ct HEAT\_OF\_COMBUSTION} (kJ/kg) is the amount of
+energy released per unit mass of fuel consumed. Note that if the heat of combustion is not
+specified, it is assumed to be
+\be \Delta H \approx \frac{\nu_{O_2} \; W_{O_2} } { \nu_{f} \; W_{f} } \; \; \hbox{\ct EPUMO2}  \quad \quad \hbox{kJ/kg}  \label{EPUMO2} \ee
+The quantity {\ct EPUMO2} (kJ/kg) is the amount of energy released per unit mass of oxygen consumed. 
+Its default is 13,100~kJ/kg.  Note that if both {\ct EPUMO2} and {\ct HEAT\_OF\_COMBUSTION} are
+specified that FDS will ignore the value for {\ct EPUMO2}.
+
+If heats of reaction have been specified on the
+{\ct MATL} lines and
+the heats of combustion of the materials differ from that specified by
 the governing gas phase reaction, then add a
 {\ct HEAT\_OF\_COMBUSTION} (kJ/kg) to the {\ct MATL} line.
 With the simple chemistry combustion
@@ -6010,6 +5937,35 @@ namelist group. If the stoichiometry of the burning material
 differs from the global reaction, the {\ct HEAT\_OF\_COMBUSTION} is
 used to ensure that an equivalent amount of fuel is injected into the
 flow domain from the burning object.
+
+The heat of combustion can be determined in a couple of ways.
+One approach is to take the difference in the heats of formation for the products (assuming complete combustion) and the reactants.
+This is typically how values are tabulated for pure fuels (e.g. one species) in handbooks.
+This ideal heat of combustion does not account for the  {\ct SOOT\_YIELD} or  {\ct CO\_YIELD} that occurs in a real fire.
+Carbon and hydrogen that go to soot and CO rather than CO$_2$ and H$_2$O result in a lower effective heat of combustion.
+Setting {\ct IDEAL=.TRUE.} will reduce the {\ct HEAT\_OF\_COMBUSTION} based upon the inputs for {\ct SOOT\_YIELD} and {\ct CO\_YIELD}.
+If {\ct EPUMO2} is specified instead of {\ct HEAT\_OF\_COMBUSTION}, then the {\ct EPUMO2} will not be changed.
+The second approach to determining the heat of combustion is to burn a known mass of the material in a calorimeter and divide the heat release
+rate by the mass loss rate (known as the effective heat of combustion).  In this approach, represented by {\ct IDEAL=.FALSE.},
+the measured value of the heat release rate includes the effects of any CO or soot that is produced and no adjustment is needed.  The default value is {\ct IDEAL=.FALSE.}
+
+\subsection{Special Topic: Turbulent Combustion}
+
+\label{info:turbulent_combustion}
+
+Unless you are performing a Direct Numerical Simulation (DNS), the reaction rate of fuel and oxygen is not based on the diffusion of
+fuel and oxygen at a well-resolved flame sheet. Instead, semi-empirical rules are invoked by FDS to determine the rate of mixing of fuel and oxygen within
+a given mesh cell at a given time step. This section provides a brief explanation of these rules and the parameters that control them.
+
+In an LES simulation, the consumption rate of gaseous fuel is given by the expression:
+\be \dm_f''' = -\rho \min \left( Y_\F , \frac{Y_\OTWO}{s}, \beta \frac{Y_{\hbox{\tiny P}}}{1+s} \right) \; \left( 1 - e^{-\dt/\tau} \right)   \quad ; \quad
+   s=\frac{W_\F}{\nu_{\OTWO} W_{\OTWO} }  \ee
+Here, $\tau$ is a mixing time scale and $\beta$ is an empirical parameter equal to 1. You can change the value of $\beta$ by specifying {\ct BETA\_EDC}. Its default value
+is 2. There is a minimum value of $Y_{\hbox{\tiny P}}$ required to allow for a reaction to occur before any products have accumulated. It is specified with
+{\ct Y\_P\_MIN\_EDC}, and its default value is 0.01. 
+
+
+
 
 \subsection{Special Topic: Flame Extinction}
 
@@ -6029,6 +5985,10 @@ The default value is 1427~$^\circ$C.
 To eliminate any gas phase suppression, set  {\ct CRITICAL\_FLAME\_TEMPERATURE} to -273.15 ~$^\circ$C, or turn off suppression completely
 by setting {\ct SUPPRESSION=.FALSE.} on the {\ct REAC} line. This latter approach saves on computing time because it
 prevents FDS from entering the suppression algorithm altogether.
+
+If the mixing-controlled combustion model is used and flame extinction occurs, the unburned fuel gas will re-ignite when it mixes with oxygen somewhere
+else in the domain. To prevent this from happening, you can set the {\ct AUTO\_IGNITION\_TEMPERATURE} ($^\circ$C) below which combustion will not occur.  
+Note that if this parameter is used, then some form of heat/ignition source must be present in order for combustion to begin.
 
 \subsubsection{Example Case: door\_crack}
 
@@ -6060,37 +6020,20 @@ present.
 \end{itemize}
 
 
-\subsection{Additional Parameters for Mixing Controlled Combustion}
-\label{info:mixing}
+\subsection{More Complicated Stoichiometry}
+\label{info:SMIX}
 
-In a typical simulation the mixing controlled combustion model is used in conjunction with simple chemistry as described in Section~\ref{info:REAC}.
-The mixing controlled combustion model can also be used with user defined species.  The inputs for the mixing controlled combustion model are:
-
-\begin{description}
-\item[{\ct AUTO\_IGNITION\_TEMPERATURE}] The temperature below which combustion will not occur.  Note that if this parameter is used,
-then some form of ignition source must be present in order for combustion to begin.
-\item[{\ct EQUATION}] Character string defining the reaction stoichiometry.  Can be used instead of specifying {\ct SMIX\_ID} and {\ct NU}.  See~\ref{info:EQUATION}.
-\item[{\ct FUEL}] Character string indicating which of the listed gas species is the fuel.
-\item[{\ct NU}] Array containing the stoichiometry of the chemical reaction for each {\ct SPEC} where negative values indicate reactants and positive values indicate products.
-The background species can be specified as NU(0).
-\item[{\ct SMIX\_ID}] Array containing the names of the species that participate in the reaction.  The background species should not be specified in the array.
-\item[{\ct HEAT\_OF\_COMBUSTION}] The effective heat of combustion of the {\ct FUEL} in chemical reaction in units of kJ/kg. (No default)
-\item[{\ct CHECK\_ATOM\_BALANCE}] If chemical formulas are provide for all {\ct SPEC} that participate in a reaction, then FDS will check the stoichometry to ensure that atoms are conserved.  Setting this flag to {\ct .FALSE.} will bypass this check.  (default is {\ct .TRUE.})
-\item{\ct REAC\_ATOM\_ERROR} This is the error tolerance in atoms for the reaction stoichiometry check.  (default is 1.E-5)
-\item{\ct REAC\_MASS\_ERROR} This is the relative error tolerance computed as (mass of products - mass of reactants)/(mass of products) for the reaction stoichiometry mass blance check.  (default is 1.E-4)
-\end{description}
-
-The addition of the {\ct SMIX} namelist group means that there are three ways in which a simple, mixing controlled reaction could be defined.
-The following three sets of inputs are equivalent:
-
-Simple chemistry:
+The ``simple chemistry''  inputs described above can only be used when there is a single mixing-controlled reaction and the fuel molecule contains only C, O, H, and N.
+For any other situation, you must specify the reaction stoichiometry in greater detail. This means that you must explicitly specify the gas species, or species mixtures, along with
+the stoichiometry of the reaction. The easiest way to explain this is by way of example. Consider a single reaction involving methane. As seen above, the {\ct REAC} line could be
+specified simply by:
 
 \footnotesize
 \begin{verbatim}
-&REAC FUEL='METHANE', C=1, H=4, HEAT_OF_COMBUSTION=50000. /
+&REAC FUEL = 'METHANE' /
 \end{verbatim} \normalsize
 
-Primitive species:
+\noindent But, you could also explicitly list the individual gas species (and track them too in the calculation):
 
 \footnotesize
 \begin{verbatim}
@@ -6103,14 +6046,13 @@ Primitive species:
       NU=-1,-2,1,2, HEAT_OF_COMBUSTION=50000. /
 \end{verbatim} \normalsize
 
-
-User defined lumped species:
+\noindent If you do not want to waste CPU time tracking all those gas species, you can lump them together as follows:
 
 \footnotesize
 \begin{verbatim}
-&SPEC ID='NITROGEN', SMIX_COMPONENT_ONLY=.TRUE. /
-&SPEC ID='OXYGEN', SMIX_COMPONENT_ONLY=.TRUE./
-&SPEC ID='WATER VAPOR', SMIX_COMPONENT_ONLY=.TRUE. /
+&SPEC ID='NITROGEN',       SMIX_COMPONENT_ONLY=.TRUE. /
+&SPEC ID='OXYGEN',         SMIX_COMPONENT_ONLY=.TRUE. /
+&SPEC ID='WATER VAPOR',    SMIX_COMPONENT_ONLY=.TRUE. /
 &SPEC ID='CARBON DIOXIDE', SMIX_COMPONENT_ONLY=.TRUE. /
 &SPEC ID='METHANE' /
 &SMIX ID='AIR', SPEC_ID='NITROGEN','OXYGEN','CARBON DIOXIDE','WATER VAPOR',
@@ -6123,50 +6065,41 @@ User defined lumped species:
 
 \noindent
 Note the stoichiometry for the last case.  It is based upon moles of the lumped species and not moles of the primitive species.
-Since the lumped species for {\ct AIR} is 21 \% oxygen, taking 21 \% of the 9.60825 moles of {\ct AIR} results in 2 moles of oxygen.
+Since the lumped species for {\ct AIR} is 21 \% oxygen, taking 21 \% of the 9.60825 moles of {\ct AIR} results in 2 moles of oxygen. 
+
+Obviously, for this example, the first {\ct REAC} line above is preferable. However, there are many situations where you cannot use the simple chemistry model and
+must resort to either of the alternatives. For a mixing-controlled reaction(s), the lumped species approach is preferable. For a finite-rate reaction(s), the primitive
+species approach is preferable because the reaction rates are typically tabulated in terms of individual species, not mixtures.
 
 
-\subsection{Special Topic: CO Production}
+%\subsection{Special Topic: CO Production}
+%
+%\label{info:CO}
+%
+%An algorithm has been implemented that computes the combustion as a two step reaction that
+%predicts the formation and destruction of CO.  The Technical Reference Guide~\cite{FDS_Math_Guide}
+%contains more details about how the mechanism works. This algorithm is used when
+%{\ct CO\_PRODUCTION} is set to {\ct .TRUE.} on the {\ct MISC} line. Even though the algorithm predicts
+%CO formation and its eventual oxidation at elevated temperature, it cannot predict the post-flame
+%yield of CO. For example, within a flashed over compartment, the algorithm predicts the elevated
+%CO levels, but it cannot predict the CO concentration of the exhaust gases that exit the flaming region.
+%Thus, even if using this model, you must specify the {\ct CO\_YIELD} that is expected of a well-ventilated fire.
+%
+%\begin{warning}
+%\noindent
+%Note that when active, this algorithm requires the use of three lumped species compared to the default two and will therefore
+%increase run times and memory usage accordingly.  If the simulation you are
+%performing will not result in an under-ventilated fire, then there will be of
+%little if any benefit to enabling the CO production algorithm.
+%\end{warning}
 
-\label{info:CO}
-
-An algorithm has been implemented that computes the combustion as a two step reaction that
-predicts the formation and destruction of CO.  The Technical Reference Guide~\cite{FDS_Math_Guide}
-contains more details about how the mechanism works. This algorithm is used when
-{\ct CO\_PRODUCTION} is set to {\ct .TRUE.} on the {\ct MISC} line. Even though the algorithm predicts
-CO formation and its eventual oxidation at elevated temperature, it cannot predict the post-flame
-yield of CO. For example, within a flashed over compartment, the algorithm predicts the elevated
-CO levels, but it cannot predict the CO concentration of the exhaust gases that exit the flaming region.
-Thus, even if using this model, you must specify the {\ct CO\_YIELD} that is expected of a well-ventilated fire.
-
-\begin{warning}
-\noindent
-Note that when active, this algorithm requires the use of three lumped species compared to the default two and will therefore
-increase run times and memory usage accordingly.  If the simulation you are
-performing will not result in an under-ventilated fire, then there will be of
-little if any benefit to enabling the CO production algorithm.
-\end{warning}
-
-
-\subsection{Special Topic: Turbulent Combustion}
-
-\label{info:turbulent_combustion}
-
-Unless you are performing a Direct Numerical Simulation (DNS), the reaction rate of fuel and oxygen is not based on the diffusion of
-fuel and oxygen at a well-resolved flame sheet. Instead, semi-empirical rules are invoked by FDS to determine the rate of mixing of fuel and oxygen within
-a given mesh cell at a given time step. This section provides a brief explanation of these rules and the parameters that control them.
-
-In an LES simulation, the consumption rate of gaseous fuel is given by the expression:
-\be \dm_f''' = -\rho \min \left( Y_\F , \frac{Y_\OTWO}{s}, \beta \frac{Y_{\hbox{\tiny P}}}{1+s} \right) \; \left( 1 - e^{-\dt/\tau} \right)   \quad ; \quad
-   s=\frac{W_\F}{\nu_{\OTWO} W_{\OTWO} }  \ee
-Here, $\tau$ is a mixing time scale and $\beta$ is an empirical parameter equal to 1.
 
 
 
 \newpage
 
 
-\section{Arrhenius Rate Combustion}
+\section{Finite Rate Combustion}
 \label{info:finite}
 
 Usually, FDS uses a mixing controlled combustion model. However, FDS can also compute reaction rates constants using an Arrhenius model. This section describes how to do this.
@@ -6200,9 +6133,6 @@ The inputs to use the Arrhenius-rate model are given below:
 contribute to the rate but not be a reactant or product. In other words,
 the rate equation can be dependent on a species that does not participate directly in the reaction. These entries correspond to the inputs on {\ct N\_S}.
 \item[{\ct HEAT\_OF\_COMBUSTION}] The effective heat of combustion of the {\ct FUEL} in chemical reaction in units of kJ/kg. (No default)
-\item[{\ct CHECK\_ATOM\_BALANCE}] If chemical formulas are provide for all {\ct SPEC} that participate in a reaction, then FDS will check the stoichometry to ensure that atoms are conserved.  Setting this flag to {\ct .FALSE.} will bypass this check.  (default is {\ct .TRUE.})
-\item{\ct REAC\_ATOM\_ERROR} This is the error tolerance in atoms for the reaction stoichiometry check.  (default is 1.E-5)
-\item{\ct REAC\_MASS\_ERROR} This is the relative error tolerance computed as (mass of products - mass of reactants)/(mass of products) for the reaction stoichiometry mass blance check.  (default is 1.E-4)
 \end{description}
 
 
@@ -6214,27 +6144,14 @@ In a typical simulation, flame temperatures are not likely to be resolved well e
 However, the temperatures in a layer environment are likely to support a finite rate reaction for slow reactions ({\em e.g.} carbon monoxide oxidation in a hot layer).
 A mixed-mode combustion model can be used for this situation.  To enable this model, specify the finite-rate reaction inputs described in the previous section
 as well as the input parameter {\ct THRESHOLD\_TEMPERATURE}.  During a simulation, if there is heat release from other reactions,
-then a mixed-mode reaction will be evaluated as mixing-controlled reaction.  If there is no heat release from other reactions and the local
+then a mixed-mode reaction will be evaluated as a mixing-controlled reaction.  If there is no heat release from other reactions and the local
 temperature exceeds the {\ct THRESHOLD\_TEMPERATURE}, then the mixed-mode reaction will be evaluated as a finite-rate reaction.
 
-\begin{description}
-\item[{\ct AUTO\_IGNITION\_TEMPERATURE}] The temperature below which combustion will not occur.
-Note that if this parameter is used, then some form of ignition source must be present in order for combustion to begin.
-\item[{\ct BOF}] Pre-exponential factor in one-step chemical reaction in
-units of cm$^3$/mole/s.
-\item[{\ct E}] Activation energy for one-step chemical reaction in
-units of kJ/kmol.
-\item[{\ct NU}] Array containing the stoichiometry of the chemical reaction for each {\ct SPEC} where negative values indicate reactants and positive values indicate products.
-\item[{\ct N\_S}] Array containing the exponents for the finite rate equation for each {\ct SPEC}.
-\item[{\ct SPEC\_ID}] Array containing the names of the species that participate in the reaction. Note that it is possible that a given {\ct SPEC}
-can be assigned a value of {\ct N\_S} greater than zero and a value of {\ct NU} equal to zero. In other words,
-the rate equation can be dependent on a species that does not participate directly in the reaction.
-\item[{\ct HEAT\_OF\_COMBUSTION}] The effective heat of combustion of the {\ct FUEL} in chemical reaction in units of kJ/kg. (No default)
-\item[{\ct THRESHOLD\_TEMPERATURE}] The temperature at which finite-rate combustion will be computed when there is no heat release from other reactions.
-\item[{\ct CHECK\_ATOM\_BALANCE}] If chemical formulas are provide for all {\ct SPEC} that participate in a reaction, then FDS will check the stoichometry to ensure that atoms are conserved.  Setting this flag to {\ct .FALSE.} will bypass this check.  (default is {\ct .TRUE.})
-\item{\ct REAC\_ATOM\_ERROR} This is the error tolerance in atoms for the reaction stoichiometry check.  (default is 1.E-5)
-\item{\ct REAC\_MASS\_ERROR} This is the relative error tolerance computed as (mass of products - mass of reactants)/(mass of products) for the reaction stoichiometry mass blance check.  (default is 1.E-4)
-\end{description}
+
+
+\newpage
+
+\section{Other Reaction Parameters}
 
 
 \subsection{Special Topic: Using the {\ct EQUATION} input parameter}
@@ -6244,15 +6161,15 @@ The input parameter {\ct EQUATION} allow the specification of the chemical react
 
 \begin{itemize}
 \item Species can be given as either their chemical formula (which must match the formula defined on {\ct SPEC} or by the {\ct ID} of the species.  Only tracked species can be listed.
-\item The stoichiometry is given before each species and is seperated by a *.  Real numbers are allowed but not exponential notation (i.e. {\ct 201.1} but not {\ct 2.011E2}).
-\item The reactants and products are seperated by an =.
+\item The stoichiometry is given before each species and is separated by a *.  Real numbers are allowed but not exponential notation (i.e. {\ct 201.1} but not {\ct 2.011E2}).
+\item The reactants and products are separated by an =.
 \end{itemize}
 
 For example if the reaction defines the complete combustion of methane using primitive species the following would be equivalent:
 
 \footnotesize
 \begin{verbatim}
-&REAC FUEL='METHANE', EQUATION ='METHANE+2*OXYGEN=CARBON DIXIODE+2*WATER VAPOR',
+&REAC FUEL='METHANE', EQUATION ='METHANE+2*OXYGEN=CARBON DIOXIDE+2*WATER VAPOR',
 HEAT_OF_COMBUSTION=50000. /
 
 &REAC FUEL='METHANE', EQUATION ='CH4+2*O2=CO2+2*H2O',
@@ -6261,6 +6178,29 @@ HEAT_OF_COMBUSTION=50000. /
 &REAC FUEL='METHANE', EQUATION ='METHANE+2*O2=CO2+2*H2O',
 HEAT_OF_COMBUSTION=50000. /
 \end{verbatim} \normalsize
+
+
+\subsection{Reaction Rate Limiters}
+\label{info:REAC_Limiters}
+
+At certain critical points in a calculation, like the moment of ignition, the local reaction rate can be very large due to limitations in the models, long time
+steps, or both. To prevent fictitiously high values of the reaction rate that can lead to numerical instabilities, a limiting value of the heat release rate
+per unit volume is used:
+\be \dq'''_{\hbox{\tiny max}} = \frac{ \hbox{\ct HRRPUA\_SHEET} }{\dx} + \hbox{\ct HRRPUV\_AVERAGE} \ee
+
+\subsection{Diagnostic Parameters}
+\label{info:REAC_Diagnostics}
+
+\begin{description}
+\item[{\ct CHECK\_ATOM\_BALANCE}] If chemical formulas are provide for all {\ct SPEC} that participate in a reaction, then FDS will 
+check the stoichiometry to ensure that atoms are conserved.  Setting this flag to {\ct .FALSE.} will bypass this check.  (default is {\ct .TRUE.})
+\item{\ct REAC\_ATOM\_ERROR} This is the error tolerance in atoms for the reaction stoichiometry check.  (default is 1.E-5)
+\item{\ct REAC\_MASS\_ERROR} This is the relative error tolerance computed as (mass of products - mass of reactants)/(mass of products) 
+for the reaction stoichiometry mass balance check.  (default is 1.E-4)
+\end{description}
+
+
+
 
 
 \chapter{Radiation}
@@ -6293,7 +6233,7 @@ and the source term in the radiative transport equation is then based solely
 on the gas temperature and the chemical composition. By default, the {\ct RADIATIVE\_FRACTION} is
 0.35 for an LES calculation, and zero for DNS.
 
-The radiation properties of most common gases involved in combustion processes (water vapor, carbon dioxide, carbon monoxide, fuel) and 
+The radiation properties of most common gases involved in combustion processes (water vapor, carbon dioxide, carbon monoxide, fuel) and
 soot particles are automatically taken into account if the simulation involves combustion. In simulations with no combustion nor radiating species, it is
 possible to use a constant absorption coefficient by specifying {\ct KAPPA0} on the {\ct RADI} line.
 
@@ -6331,8 +6271,8 @@ time step, but the cost of the calculation increases significantly.
 
 \label{info:RADI_Absorption}
 
-The absorption and scattering of thermal radiation by Lagrangian particles is included in the radiation transport equation. The radiative properties of 
-the water and fuel particles (droplets) are determined automatically. For fuel, the properties of Heptane are assumed. For other types of particles, the 
+The absorption and scattering of thermal radiation by Lagrangian particles is included in the radiation transport equation. The radiative properties of
+the water and fuel particles (droplets) are determined automatically. For fuel, the properties of Heptane are assumed. For other types of particles, the
 radiative properties can be given by specifying the components of the material refractive index on the corresponding {\ct PART} line, using keywords
 {\ct REAL\_REFRACTIVE\_INDEX} and {\ct COMPLEX\_REFRACTIVE\_INDEX}. Alternatively, wavelength dependent values of these two quantities can be tabulated in a {\ct TABLE} and called using the {\ct RADIATIVE\_PROPERTY\_TABLE}. More details can be found in Section~\ref{radiative_part_props}.
 
@@ -6452,7 +6392,7 @@ value of {\ct DT\_INSERT} is 0.01~s and {\ct NPPC} is 1. As an example, the foll
 
 \noindent
 creates an obstruction that ejects non-evaporating particles with a mean volumetric diameter of 750~$\mu$m and density of 1000~kg/m$^3$ out of its sides at a rate
-of 0.1~kg/m$^2$/s and a velocity of 5~m/s (the minus sign indicates the particles are ejected from the surface). 
+of 0.1~kg/m$^2$/s and a velocity of 5~m/s (the minus sign indicates the particles are ejected from the surface).
 FDS will adjust the mass flux if the obstruction or vent dimensions are changed to conform to the numerical grid. The
 {\ct ID}s have no meaning other than as identifiers. The surface on which particles are specified must have a non-zero normal velocity directed into the
 computational domain. This happens automatically if the surface is burning, but must be specified
@@ -6579,18 +6519,18 @@ Note that if a particle is to have mass but not evaporate, just the parameter {\
 
 \label{radiative_part_props}
 
-The radiative properties of the water and fuel droplets are determined automatically. 
-For fuel, the properties of Heptane are assumed. For other types of particles, the 
+The radiative properties of the water and fuel droplets are determined automatically.
+For fuel, the properties of Heptane are assumed. For other types of particles, the
 radiative properties can be given by specifying the components of the material refractive index on the corresponding {\ct PART} line, using keywords
 {\ct REAL\_REFRACTIVE\_INDEX} and {\ct COMPLEX\_REFRACTIVE\_INDEX}. Alternatively, wavelength dependent values of these two quantities can be specified using
 a spectral property {\ct TABLE} and specifying the {\ct ID} of that table is {\ct RADIATIVE\_PROPERTY\_TABLE} property on the {\ct PART} line.
-Each row of a spectral property table contains three real numbers: wavelength ($\mu$m), real and complex components of the refractive index. 
+Each row of a spectral property table contains three real numbers: wavelength ($\mu$m), real and complex components of the refractive index.
 The real part of the refractive index should be a positive number. If it is greater than 10.0, the particles are treated as perfectly reflecting spheres. The complex part should be a non-negative number. Values less than 1.0E-6 are treated as non-absorbing.
 Below is an example of the use of spectral property table, listing the properties at wavelenghts 1, 5 and 10 $\mu$m.
 
 \footnotesize
 \begin{verbatim}
-&PART ID='particles', DIAMETER=750., DENSITY=1000., 
+&PART ID='particles', DIAMETER=750., DENSITY=1000.,
       EVAPORATE=.FALSE., RADIATIVE_PROPERTY_TABLE = 'table' /
 &TABL ID = 'table' TABLE_DATA=  1.0,1.33,0.0001 /
 &TABL ID = 'table' TABLE_DATA=  5.0,1.33,0.002 /
@@ -6627,7 +6567,7 @@ same {\ct DIAMETER}.
 
 \subsection{Secondary breakup}
 \label{info:secondary_breakup}
-If {\ct BREAKUP=.TRUE.} is set on the {\ct PART} line, particles may undergo secondary breakup. 
+If {\ct BREAKUP=.TRUE.} is set on the {\ct PART} line, particles may undergo secondary breakup.
 In this case the user should also specify {\ct SURFACE\_TENSION} of the liquid and breakup distribution parameters {\ct BREAKUP\_CHILD\_DIAMETER} and {\ct BREAKUP\_CHILD\_GAMMA\_D}.
 
 
@@ -10704,43 +10644,45 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct REAC} (Reaction Parameters)} \\
 \hline \hline
 \endhead
-{\ct A}                                   & Real        & Arrhenius pre-exponential factor (Finite Rate)       &   cm$^3$/mol/s    &     \\ \hline
-{\ct \tiny AUTO\_IGNITION\_TEMPERATURE}   & Real        & Auto ignition temperature                     &   K               &  0  \\ \hline
+{\ct A}                                   & Real        & See Section~\ref{info:finite}                 &   cm$^3$/mol/s    &     \\ \hline
+{\ct AUTO\_IGNITION\_TEMPERATURE}         & Real        & See Section~\ref{info:extinction}             &   K               &  0  \\ \hline
 {\ct BETA\_EDC}                           & Real        & See Section~\ref{info:turbulent_combustion}   &                   & 1.0    \\ \hline
-{\ct C}                                   & Real        & Carbon atoms in fuel                          &                   & 3    \\ \hline
-{\ct CHECK\_ATOM\_BALANCE} & Logical        & Check reaction stoichiometry for atom conservation  &                   & {\ct .TRUE.}    \\ \hline
-{\ct CO\_PRODUCTION}                      & Logical     & See Section~\ref{info:CO}                     &                   & {\ct .FALSE.}     \\ \hline
-{\ct CO\_YIELD}                           & Real        & Fraction of CO from the fuel                  & kg/kg             & 0        \\ \hline
-{\ct \tiny CRITICAL\_FLAME\_TEMPERATURE}  & Real        & Suppression criterion                         &   $^\circ$C       & 1427    \\ \hline
-{\ct E}                                   & Real        & Activation energy (Finite Rate)               &   kJ/kmol         &     \\ \hline
-{\ct EPUMO2}                              & Real        & Energy per Unit Mass Oxygen                   &   kJ/kg           & 13100    \\ \hline
-{\ct EQUATION}                            & Character   & See Section~\ref{info:EQUATION}                  &                   &          \\ \hline
-{\ct FORMULA}                             & Character   & Chemical formula of fuel (Simple Chemistry)          &                   &  \\ \hline
-{\ct FUEL}                                & Character   & Name of Fuel                    &                   &   \\ \hline
-{\ct H}                                   & Real        & Hydrogen atoms in fuel                        &                   & 8    \\ \hline
-{\ct H2\_YIELD}                           & Real        & Fraction of H$_2$ from the fuel               & kg/kg             & 0        \\ \hline
-{\ct HEAT\_OF\_COMBUSTION}                & Real        & Energy per unit mass fuel                     & kJ/kg             &         \\ \hline
-{\ct HRRPUA\_SHEET}                       & Real        & See Section~\ref{info:turbulent_combustion}   & kW/m$^2$          &         \\ \hline
-{\ct HRRPUV\_AVERAGE}                     & Real        & See Section~\ref{info:turbulent_combustion}   & kW/m$^3$          &         \\ \hline
-{\ct HUMIDITY}                            & Real        & Relative Humidity                             & \%                & 40.               \\ \hline
-{\ct ID}                                  & Character   & Identifier                                    &                   &     \\ \hline
-{\ct IDEAL}                               & Logical     & Adjust for minor product yields               &                   & {\ct .FALSE.}    \\ \hline
-{\ct \tiny MASS\_EXTINCTION\_COEFFICIENT} & Real        & Visibility parameter                          &  m$^2$/kg         & 8700.    \\ \hline
-{\ct N}                                   & Real        & Nitrogen atoms in the fuel                    &                   & 0    \\ \hline
-{\ct N\_S(N)}                             & Real        & Arrhenius exponents (Finite Rate)             &                   &     \\ \hline
-{\ct N\_T}                                & Real        & Arrhenius temperature exponent (Finite Rate)             &                   &     \\ \hline
-{\ct NU(N)}                               & Real        & Reaction stoichiometry (Finite Rate)          &                   &     \\ \hline
-{\ct O}                                   & Real        & Oxygen atoms in the fuel                      &                   & 0    \\ \hline
-{\ct REAC\_ATOM\_ERROR}                   & Real        & Atom conservation error allowed in reaction stoichiometry & atoms             & 1.E-5    \\ \hline
-{\ct REAC\_MASS\_ERROR}                   & Real        & Mass conservation error allowed in reaction stoichiometry & kg/kg             & 1.E-4    \\ \hline
-{\ct SOOT\_YIELD}                         & Real        & Fraction of soot from the fuel                & kg/kg             & 0.01    \\ \hline
-{\ct SOOT\_H\_FRACTION}                   & Real        & Atom fraction of hydrogen in soot             &                   & 0.1    \\ \hline
+{\ct C}                                   & Real        & See Section~\ref{info:simple_chemistry}       &                   & 3    \\ \hline
+{\ct CHECK\_ATOM\_BALANCE}                & Logical     & See Section~\ref{info:REAC_Diagnostics}       &                   & {\ct .TRUE.}    \\ \hline
+%{\ct CO\_PRODUCTION}                      & Logical     & See Section~\ref{info:CO}                     &                   & {\ct .FALSE.}     \\ \hline
+{\ct CO\_YIELD}                           & Real        & See Section~\ref{info:simple_chemistry}       & kg/kg             & 0        \\ \hline
+{\ct CRITICAL\_FLAME\_TEMPERATURE}        & Real        & See Section~\ref{info:extinction}             &   $^\circ$C       & 1427    \\ \hline
+{\ct E}                                   & Real        & See Section~\ref{info:finite}                 &   kJ/kmol         &     \\ \hline
+{\ct EPUMO2}                              & Real        & See Section~\ref{info:heat_of_combustion}     &   kJ/kg           & 13100    \\ \hline
+{\ct EQUATION}                            & Character   & See Section~\ref{info:EQUATION}               &                   &          \\ \hline
+{\ct FORMULA}                             & Character   & See Section~\ref{info:simple_chemistry}       &                   &  \\ \hline
+{\ct FUEL}                                & Character   & See Section~\ref{info:simple_chemistry}       &                   &   \\ \hline
+{\ct H}                                   & Real        & See Section~\ref{info:simple_chemistry}       &                   & 8    \\ \hline
+{\ct HEAT\_OF\_COMBUSTION}                & Real        & See Section~\ref{info:heat_of_combustion}     & kJ/kg             &         \\ \hline
+{\ct HRRPUA\_SHEET}                       & Real        & See Section~\ref{info:REAC_Limiters}          & kW/m$^2$          &         \\ \hline
+{\ct HRRPUV\_AVERAGE}                     & Real        & See Section~\ref{info:REAC_Limiters}          & kW/m$^3$          &         \\ \hline
+{\ct HUMIDITY}                            & Real        & See Section~\ref{info:simple_chemistry}       & \%                & 40.               \\ \hline
+{\ct ID}                                  & Character   & See Section~\ref{info:simple_chemistry}       &                   &     \\ \hline
+{\ct IDEAL}                               & Logical     & See Section~\ref{info:simple_chemistry}       &                   & {\ct .FALSE.}    \\ \hline
+{\ct N}                                   & Real        & See Section~\ref{info:simple_chemistry}       &                   & 0    \\ \hline
+{\ct N\_S(:)}                             & Real Array  & See Section~\ref{info:finite}                 &                   &     \\ \hline
+{\ct N\_T}                                & Real        & See Section~\ref{info:finite}                 &                   &     \\ \hline
+{\ct NU(:)}                               & Real Array  & See Section~\ref{info:finite}                 &                   &     \\ \hline
+{\ct O}                                   & Real        & See Section~\ref{info:simple_chemistry}       &                   & 0    \\ \hline
+{\ct REAC\_ATOM\_ERROR}                   & Real        & See Section~\ref{info:REAC_Diagnostics}       & atoms             & 1.E-5    \\ \hline
+{\ct REAC\_MASS\_ERROR}                   & Real        & See Section~\ref{info:REAC_Diagnostics}       & kg/kg             & 1.E-4    \\ \hline
+{\ct SMIX\_ID(:)}                         & Char.~Array & See Section~\ref{info:SMIX}                   &                   &     \\ \hline
+{\ct SPEC\_ID(:)}                         & Char.~Array & See Section~\ref{info:SMIX}                   &                   &     \\ \hline
+{\ct SOOT\_YIELD}                         & Real        & See Section~\ref{info:simple_chemistry}       & kg/kg             & 0.01    \\ \hline
+{\ct SOOT\_H\_FRACTION}                   & Real        & See Section~\ref{info:simple_chemistry}       &                   & 0.1    \\ \hline
 {\ct SUPPRESSION}                         & Logical     & See Section~\ref{info:extinction}             &                   & {\ct .TRUE.}      \\ \hline
-{\ct Y\_CO2\_INFTY}                       & Real        & Ambient carbon dioxide mass fraction          &  kg/kg            & 0.0058 \\ \hline
-{\ct Y\_F\_INLET}                         & Real        & Mass Frac. of Fuel in Burner                  &  kg/kg            & 1.0     \\ \hline
-{\ct Y\_O2\_INFTY}                        & Real        & Ambient oxygen mass fraction                  &  kg/kg            & 0.232428\\ \hline
+{\ct THRESHOLD\_TEMPERATURE}              & Real        & See Section~\ref{info:mixedmode}              &   $^\circ$C       & 1427    \\ \hline
+{\ct Y\_CO2\_INFTY}                       & Real        & See Section~\ref{info:simple_chemistry}       &  kg/kg            & 0.0058 \\ \hline
+{\ct Y\_O2\_INFTY}                        & Real        & See Section~\ref{info:simple_chemistry}       &  kg/kg            & 0.232428\\ \hline
 {\ct Y\_P\_MIN\_EDC}                      & Real        & See Section~\ref{info:turbulent_combustion}   &  kg/kg            & 0.0001    \\ \hline
 \end{longtable}
+
+% Not listed: SOOT_DEPOSITION, FIXED_MIX_TIME, TAU_CHEM, TAU_FLAME, ODE_SOLVER
 
 
 \vspace{\baselineskip}
@@ -11164,6 +11106,7 @@ Namelist  & FDS 5 Parameter & Namelist  & FDS 6 Parameter & Notes \\
 {\ct PART}    & {\ct VAPORIZATION\_TEMPERATURE}  &  {\ct SPEC} & {\ct VAPORIZATION\_TEMPERATURE}              & See Section~\ref{thermal_part_props}    \\ \hline
 {\ct PROP}    & {\ct DT\_INSERT}                &              & Eliminated                                   &                               \\ \hline
 {\ct REAC}    & {\ct BOF}               &  {\ct REAC}    &  {\ct A}                             & Same functionality                  \\ \hline
+{\ct REAC}    & {\ct MASS\_EXTINCTION\_COEFFICIENT}       &  {\ct SPEC}  &  {\ct MASS\_EXTINCTION\_COEFFICIENT}                             & Same functionality                  \\ \hline
 {\ct REAC}    & {\ct MAXIMUM\_VISIBILITY}       &  {\ct MISC}  &  {\ct MAXIMUM\_VISIBILITY}                             & Same functionality                  \\ \hline
 {\ct REAC}    & {\ct OXIDIZER}                  &              & Eliminated                                  &                                              \\ \hline
 {\ct REAC}    & {\ct VISIBILITY\_FACTOR}        &  {\ct MISC}  &  {\ct MAXIMUM\_VISIBILITY}                             & Same functionality                  \\ \hline
