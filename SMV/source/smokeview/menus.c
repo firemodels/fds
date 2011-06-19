@@ -48,6 +48,7 @@ void add_scriptlist(char *file, int id);
 void update_glui_render();
 void PropMenu(int value);
 void initcircle(unsigned int nsegs);
+void UnLoadVolSmoke3DMenu(int value);
 
 
 #ifdef WIN32
@@ -2138,6 +2139,9 @@ void LoadUnloadMenu(int value){
     if(devcfilename!=NULL){
       read_device_data(devcfilename,UNLOAD);
     }
+    if(nvolrenderinfo>0){
+      UnLoadVolSmoke3DMenu(UNLOAD_ALL);
+    }
     for(i=0;i<nsliceinfo;i++){
       readslice("",i,UNLOAD,&errorcode);
     }
@@ -3122,7 +3126,6 @@ void UnLoadVolSmoke3DMenu(int value){
     fire = vr->fire;
     smoke = vr->smoke;
     if(fire!=NULL||smoke!=NULL){
-      // put in code to unload volume render smoke data
       if(fire!=NULL){
         int ifile;
         int errorcode;
@@ -3184,6 +3187,7 @@ void LoadVolSmoke3DMenu(int value){
         ifile=smoke-sliceinfo;
         readslice(file,ifile,LOAD,&errorcode);
         smoke->display=0;
+        vr->smokedata = smoke->qslicedata;  //*** hack
       }
       vr->loaded=1;
       vr->show=1;
@@ -3207,6 +3211,7 @@ void LoadVolSmoke3DMenu(int value){
     }
   }
   updatemenu=1;  
+  Idle();
   glutPostRedisplay();
   glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 }

@@ -2286,7 +2286,6 @@ void Idle(void){
     checktimebound();
     UpdateTimeLabels();
   }
-
   update_framenumber(changetime);
   if(redisplay==1){
     glutPostRedisplay();

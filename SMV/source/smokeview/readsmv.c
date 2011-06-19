@@ -5777,6 +5777,12 @@ typedef struct {
     meshi->boxmax[0]=xplt_origtemp[ibartemp];
     meshi->boxmax[1]=yplt_origtemp[jbartemp];
     meshi->boxmax[2]=zplt_origtemp[kbartemp];
+    meshi->boxmin_scaled[0] = (meshi->boxmin[0]-xbar0)/xyzmaxdiff;
+    meshi->boxmin_scaled[1] = (meshi->boxmin[1]-ybar0)/xyzmaxdiff;
+    meshi->boxmin_scaled[2] = (meshi->boxmin[2]-zbar0)/xyzmaxdiff;
+    meshi->boxmax_scaled[0] = (meshi->boxmax[0]-xbar0)/xyzmaxdiff;
+    meshi->boxmax_scaled[1] = (meshi->boxmax[1]-ybar0)/xyzmaxdiff;
+    meshi->boxmax_scaled[2] = (meshi->boxmax[2]-zbar0)/xyzmaxdiff;
     meshi->x0 = xplttemp[0];
     meshi->x1 = xplttemp[ibartemp];
     meshi->y0 = yplttemp[0];

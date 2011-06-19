@@ -41,8 +41,6 @@ EXTERNCPP char *get_chid(char *file, char *buffer);
 EXTERNCPP int log_base2(float xx);
 #endif
 EXTERNCPP void array2string(float *vals, int nvals, char *string);
-EXTERNCPP float MIN(float x,float y);
-EXTERNCPP float MAX(float x,float y);
 EXTERNCPP float frexp10(float x, int *exp10);
 EXTERNCPP char *getstring(char *buffer);
 

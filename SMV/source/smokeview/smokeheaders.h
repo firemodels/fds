@@ -159,7 +159,6 @@ EXTERNCPP void drawcolorbarpath(void);
 EXTERNCPP void update_colorbar_splits(colorbardata *cbi);
 EXTERNCPP void remapcolorbar(colorbardata *cbi);
 EXTERNCPP void adjust_colorbar_splits(colorbardata *cbi);
-EXTERNCPP void interpcolor(float *col1, float *col2,float *rgb,int npoints_seg, int jumpflag);
 EXTERNCPP void freecolorbars(void);
 EXTERNCPP void update_glui_stereo(void);
 EXTERNCPP void escape_blanks(char *dirfrom, int maxlen);
@@ -228,6 +227,8 @@ EXTERNCPP void update_trainer_outline(void);
 EXTERNCPP void update_trainer_moves(void);
 
 EXTERNCPP void compute_volvals(void);
+EXTERNCPP float optical_depth(float *xyz, float dstep, mesh *meshi, int iwall);
+
 EXTERNCPP void init_volrender(void);
 #ifdef pp_MESSAGE
 EXTERNCPP void message_message(char *message);
@@ -585,8 +586,6 @@ EXTERNCPP void setisocolors(float isomin, float isomax, iso *sd, int *errorcode)
 EXTERNCPP void drawslice(const slice *sd);
 EXTERNCPP void drawslice_cellcenter(const slice *sd);
 EXTERNCPP void drawslice_texture(const slice *sd);
-EXTERNCPP float MIN(float x, float y);
-EXTERNCPP float MAX(float x, float y);
 EXTERNCPP void drawslice_terrain(const slice *sd);
 EXTERNCPP void drawvolslice_terrain(const slice *sd);
 EXTERNCPP void drawvolslice_texture(const slice *sd);

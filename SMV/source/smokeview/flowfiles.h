@@ -425,6 +425,7 @@ typedef struct _mesh {
   int drawsides[7];
   int inside;
   float boxmin[3], boxmax[3];
+  float boxmin_scaled[3], boxmax_scaled[3];
   float *zcell;
   float xbar0, xbar, ybar0, ybar, zbar0, zbar;
   float xcen, ycen, zcen;

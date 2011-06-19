@@ -187,8 +187,16 @@ void updateShow(void){
   mesh *meshi;
   patch *patchi;
   particle *parti;
-  showtime=0; showtime2=0; showplot3d=0; showpatch=0; 
-  showslice=0; showvslice=0; showsmoke=0; showzone=0; showiso=0, showvolrender=0;
+  showtime=0; 
+  showtime2=0; 
+  showplot3d=0; 
+  showpatch=0; 
+  showslice=0; 
+  showvslice=0; 
+  showsmoke=0; 
+  showzone=0; 
+  showiso=0;
+  showvolrender=0;
   show_extreme_below=0;
   show_extreme_above=0;
 #ifdef pp_SHOOTER

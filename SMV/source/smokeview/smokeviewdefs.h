@@ -292,5 +292,22 @@ void _sniffErrors(char *whereat);
 #define DRAW_SOLID 0
 #define DRAW_TRANSPARENT 1
 
+#ifndef MAX
+#define MAX(a,b)  ((a)>(b) ? (a) : (b))
+#define MIN(a,b)  ((a)<(b) ? (a) : (b))
+#endif
+
+#ifndef ABS
+#define ABS(a) ((a)>=0 ? (a) : (-(a)))
+#endif
+
+#ifndef CLAMP
+#define CLAMP(x,lo,hi)  MIN(MAX((x),(lo)),(hi))
+#endif
+
+#ifndef GETINDEX
+#define GETINDEX(ival,xval,xmin,dx,nx) ival = ((xval)-(xmin))/(dx); CLAMP(ival,0,(nx)-1)
+#endif
+
 #endif
 

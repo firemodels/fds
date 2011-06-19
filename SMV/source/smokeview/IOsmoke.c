@@ -18,10 +18,12 @@
 #else
 #include <GL/glut.h>
 #endif
+#include <float.h>
 #include "egz_stdio.h"
 #include "MALLOC.h"
 #include "smokeviewvars.h"
 #include "update.h"
+#include "interp.h"
 
 int cull_count=0;
 
@@ -335,7 +337,7 @@ void drawsmoke_frame(void){
 #endif
     int i;
 
-    if(usevolrender==0){
+    if(showvolrender==0){
       for(i=0;i<nsmoke3dinfo;i++){
         smoke3d *smoke3di;
 
@@ -356,7 +358,7 @@ void drawsmoke_frame(void){
 #endif
       }
     }
-    if(usevolrender==1){
+    if(showvolrender==1){
       for(i=0;i<nmeshes;i++){
         mesh *meshi;
         volrenderdata *vr;
@@ -2944,6 +2946,159 @@ void drawsmoke3d(smoke3d *smoke3di){
 
 }
 
+//  glUniform3f(GPUvol_eyepos,xyzeyeorig[0],xyzeyeorig[1],xyzeyeorig[2]);
+//  glUniform1i(GPUvol_inside,meshi->inside);
+//  glUniform1f(GPUvol_xyzmaxdiff,xyzmaxdiff);
+//  glUniform3f(GPUvol_boxmin,meshi->x0,meshi->y0,meshi->z0);
+//  glUniform3f(GPUvol_boxmax,meshi->x1,meshi->y1,meshi->z1);
+
+/* ------------------ optical_depth ------------------------ */
+
+float optical_depth(float *xyzvert, float dstep, mesh *meshi, int iwall){
+  float t_intersect, t_intersect_min=FLT_MAX, *boxmin, *boxmax;
+  float tmin, tmax;
+  int i;
+  int nsteps;
+  float dist, dx, dy, dz;
+  float distseg, dxseg, dyseg, dzseg;
+  float xyz[3];
+  float *xplt, *yplt, *zplt;
+  int ibar, jbar, kbar;
+  float sootdensum;
+  float opacity;
+  float kfactor=8700.0;
+  float *vert_beg, *vert_end;
+  int iwall_min=0;
+  float xyzvals[3];
+
+  boxmin = meshi->boxmin_scaled;
+  boxmax = meshi->boxmax_scaled;
+  xplt = meshi->xplt;
+  yplt = meshi->yplt;
+  zplt = meshi->zplt;
+  ibar = meshi->ibar;
+  jbar = meshi->jbar;
+  kbar = meshi->kbar;
+
+  // xyz(t) = xyzvert + t*(xyzvert - xyzeyeorig )
+  // integrate from t=0 to t=t_intersect_min  (if outside mesh)
+  //     ie from vertex to nearest wall along a line from the eye position
+  //        intersecting the vertex position
+  // integrate from t=-1 to t=0 (if inside mesh)
+  //     ie from the eye position to the vertex position
+
+  if(meshi->inside==1){
+    vert_beg=xyzeyeorig;
+    vert_end=xyzvert;
+  }
+  else{
+    vert_beg=xyzvert;
+    vert_end=xyzvals;
+
+    dx = xyzvert[0] - xyzeyeorig[0];
+    dy = xyzvert[1] - xyzeyeorig[1];
+    dz = xyzvert[2] - xyzeyeorig[2];
+    for(i=1;i<4;i++){
+      int ii;
+      float diffmin,diffmax,denom;
+
+      ii=i-1;
+      diffmin = boxmin[ii]-xyzvert[ii];
+      diffmax = boxmax[ii]-xyzvert[ii];
+      denom = xyzvert[ii]-xyzeyeorig[ii];
+      if(iwall!=-i&&denom<0.0){
+        t_intersect = diffmin/denom;
+        if(t_intersect<t_intersect_min){
+          t_intersect_min=t_intersect;
+          iwall_min=-i;
+        }
+      }
+      if(iwall!=i&&denom>0.0){
+        t_intersect = diffmax/denom;
+        if(t_intersect<t_intersect_min){
+          t_intersect_min=t_intersect;
+          iwall_min=i;
+        }
+      }
+    }
+    switch (iwall_min){
+      case -1:
+        vert_end[0] = boxmin[0];
+        vert_end[1] = CLAMP(xyzvert[1] + t_intersect_min*dy,boxmin[1],boxmax[1]);
+        vert_end[2] = CLAMP(xyzvert[2] + t_intersect_min*dz,boxmin[2],boxmax[2]);
+        break;
+      case 1:
+        vert_end[0] = boxmax[0];
+        vert_end[1] = CLAMP(xyzvert[1] + t_intersect_min*dy,boxmin[1],boxmax[1]);
+        vert_end[2] = CLAMP(xyzvert[2] + t_intersect_min*dz,boxmin[2],boxmax[2]);
+        break;
+      case -2:
+        vert_end[0] = CLAMP(xyzvert[0] + t_intersect_min*dx,boxmin[0],boxmax[0]);
+        vert_end[1] = boxmin[1];
+        vert_end[2] = CLAMP(xyzvert[2] + t_intersect_min*dz,boxmin[2],boxmax[2]);
+        break;
+      case 2:
+        vert_end[0] = CLAMP(xyzvert[0] + t_intersect_min*dx,boxmin[0],boxmax[0]);
+        vert_end[1] = boxmax[1];
+        vert_end[2] = CLAMP(xyzvert[2] + t_intersect_min*dz,boxmin[2],boxmax[2]);
+        break;
+      case -3:
+        vert_end[0] = CLAMP(xyzvert[0] + t_intersect_min*dx,boxmin[0],boxmax[0]);
+        vert_end[1] = CLAMP(xyzvert[1] + t_intersect_min*dy,boxmin[1],boxmax[1]);
+        vert_end[2] = boxmin[2];
+        break;
+      case 3:
+        vert_end[0] = CLAMP(xyzvert[0] + t_intersect_min*dx,boxmin[0],boxmax[0]);
+        vert_end[1] = CLAMP(xyzvert[1] + t_intersect_min*dy,boxmin[1],boxmax[1]);
+        vert_end[2] = boxmax[2];
+        break;
+    }
+  }
+
+  dxseg = vert_end[0] - vert_beg[0];
+  dyseg = vert_end[1] - vert_beg[1];
+  dzseg = vert_end[2] - vert_beg[2];
+  distseg = sqrt(dxseg*dxseg+dyseg*dyseg+dzseg*dzseg);
+  if(distseg<0.001)return 0.0;
+
+  nsteps = distseg/dstep;
+  if(nsteps<1){
+    nsteps=1;
+  }
+  sootdensum=0.0;
+  for(i=0;i<nsteps;i++){
+    float sootden;
+    float ddx, ddy, ddz;
+    float errdist;
+    float factor;
+
+    factor = (0.5 + (float)i)/(float)nsteps;
+
+    xyz[0] = (1.0-factor)*vert_beg[0] + factor*vert_end[0];
+    xyz[1] = (1.0-factor)*vert_beg[1] + factor*vert_end[1];
+    xyz[2] = (1.0-factor)*vert_beg[2] + factor*vert_end[2];
+    /* debug code
+    ddx = xyz[0]-0.8/xyzmaxdiff;
+    ddy = xyz[1]-0.8/xyzmaxdiff;
+    ddz = xyz[2]-0.8/xyzmaxdiff;
+    errdist=sqrt(ddx*ddx+ddy*ddy+ddz*ddz);
+    sootden=0.0;
+    if(xyz[0]>1.0/xyzmaxdiff&&xyz[0]<1.6/xyzmaxdiff&&xyz[2]<3.2/xyzmaxdiff&&xyz[2]>2.0/xyzmaxdiff){
+      sootden=1.0;
+    }
+    if(errdist<0.2){
+      sootden=2.0;
+    }
+    */
+    sootden = interp3d(xyz, meshi->volrenderinfo.smokedata, xplt, yplt, zplt, ibar, jbar, kbar);
+    sootdensum += sootden;
+  }
+  sootdensum*=(distseg/(float)nsteps)*xyzmaxdiff;
+  //opacity = 1.0 - exp(-sootdensum);
+  opacity = 1.0 - exp(-kfactor*1850.0*sootdensum/1000.0);
+  return opacity;
+}
+
 /* ------------------ compute_volvals ------------------------ */
 
 void compute_volvals(void){
@@ -2954,14 +3109,28 @@ void compute_volvals(void){
     volrenderdata *vr;
     int iwall;
     float *alpha;
+    float dstep;
+    float dx, dy, dz;
+    float *x, *y, *z; 
+    int i, j, k;
+    int count=0;
 
     meshi = meshinfo + ii;
+    x = meshi->xplt;
+    y = meshi->yplt;
+    z = meshi->zplt;
+    dx = x[1]-x[0];
+    dy = y[1]-y[0];
+    dz = z[1]-z[0];
+    dstep = sqrt(dx*dx+dy*dy+dz*dz);
+    
     vr = &(meshi->volrenderinfo);
     if(vr->smoke==NULL)continue;
     for(iwall=-3;iwall<=3;iwall++){
-      float xyz[3];
+      float *xyz,xyzarray[3];
       int i, j;
 
+      xyz = xyzarray;
       if(iwall==0||meshi->drawsides[iwall+3]==0)continue;
       switch (iwall){
         case 1:
@@ -2978,7 +3147,8 @@ void compute_volvals(void){
             xyz[1] = meshi->yplt[i];
             for(j=0;j<=meshi->kbar;j++){
               xyz[2] = meshi->zplt[j];
-              *alpha++=0.0;
+              *alpha=optical_depth(xyz,dstep,meshi,iwall);
+              alpha++;
             }
           }
           break;
@@ -2986,17 +3156,18 @@ void compute_volvals(void){
         case -2:
           if(iwall<0){
             alpha=vr->alpha_xz0;
-            xyz[1]=meshi->y0;
+            xyz[1] = meshi->y0;
           }
           else{
             alpha=vr->alpha_xz1;
-            xyz[1]=meshi->y1;
+            xyz[1] = meshi->y1;
           }
           for(i=0;i<=meshi->ibar;i++){
             xyz[0] = meshi->xplt[i];
             for(j=0;j<=meshi->kbar;j++){
               xyz[2] = meshi->zplt[j];
-              *alpha++=0.0;
+              *alpha=optical_depth(xyz,dstep,meshi,iwall);
+              alpha++;
             }
           }
           break;
@@ -3014,7 +3185,8 @@ void compute_volvals(void){
             xyz[0] = meshi->xplt[i];
             for(j=0;j<=meshi->jbar;j++){
               xyz[1] = meshi->yplt[j];
-              *alpha++=0.0;
+              *alpha=optical_depth(xyz,dstep,meshi,iwall);
+              alpha++;
             }
           }
           break;
@@ -3033,11 +3205,48 @@ void drawsmoke3dVOL(volrenderdata *vr){
 
   meshi = vr->rendermesh;
   
-//  glUniform3f(GPUvol_eyepos,xyzeyeorig[0],xyzeyeorig[1],xyzeyeorig[2]);
-//  glUniform1i(GPUvol_inside,meshi->inside);
-//  glUniform1f(GPUvol_xyzmaxdiff,xyzmaxdiff);
-//  glUniform3f(GPUvol_boxmin,meshi->x0,meshi->y0,meshi->z0);
-//  glUniform3f(GPUvol_boxmax,meshi->x1,meshi->y1,meshi->z1);
+  if(use_transparency_data==1)transparenton();
+/* debug code
+  {
+    float xmin=1.0, xmax=1.6, ymin=0.0, ymax=1.6, zmin=2.0, zmax=3.2;
+  xmin/=xyzmaxdiff;
+  xmax/=xyzmaxdiff;
+  ymin/=xyzmaxdiff;
+  ymax/=xyzmaxdiff;
+  zmin/=xyzmaxdiff;
+  zmax/=xyzmaxdiff;
+  glColor3f(0.0,0.0,0.0);
+  glBegin(GL_LINES);
+  glVertex3f(xmin,ymin,zmin);
+  glVertex3f(xmax,ymin,zmin);
+  glVertex3f(xmin,ymin,zmax);
+  glVertex3f(xmax,ymin,zmax);
+  glVertex3f(xmin,ymax,zmin);
+  glVertex3f(xmax,ymax,zmin);
+  glVertex3f(xmin,ymax,zmax);
+  glVertex3f(xmax,ymax,zmax);
+
+  glVertex3f(xmin,ymin,zmin);
+  glVertex3f(xmin,ymax,zmin);
+  glVertex3f(xmax,ymin,zmin);
+  glVertex3f(xmax,ymax,zmin);
+  glVertex3f(xmin,ymin,zmax);
+  glVertex3f(xmin,ymax,zmax);
+  glVertex3f(xmax,ymin,zmax);
+  glVertex3f(xmax,ymax,zmax);
+
+  glVertex3f(xmin,ymin,zmin);
+  glVertex3f(xmin,ymin,zmax);
+  glVertex3f(xmax,ymin,zmin);
+  glVertex3f(xmax,ymin,zmax);
+  glVertex3f(xmin,ymax,zmin);
+  glVertex3f(xmin,ymax,zmax);
+  glVertex3f(xmax,ymax,zmin);
+  glVertex3f(xmax,ymax,zmax);
+  glEnd();
+  }
+*/
+
   for(iwall=-3;iwall<=3;iwall++){
     int i,j;
     float xx, yy, zz;
@@ -3048,7 +3257,6 @@ void drawsmoke3dVOL(volrenderdata *vr){
     if(iwall==0||meshi->drawsides[iwall+3]==0)continue;
 
     glBegin(GL_TRIANGLES);
-    glColor3f(0.0,0.0,0.0);
     switch (iwall){
       case 1:
       case -1:
@@ -3057,18 +3265,19 @@ void drawsmoke3dVOL(volrenderdata *vr){
           alpha = vr->alpha_yz0;
         }
         else{
-          alpha = vr->alpha_yz1;
           xx=meshi->x1;
+          alpha = vr->alpha_yz1;
         }
         n00 = 0;
-        n10 = 1;
-        n01 = meshi->kbar+1;
+        n01 = 1;
+        n10 = meshi->kbar+1;
         n11 = 1 + meshi->kbar+1;
         for(i=0;i<meshi->jbar;i++){
           y = meshi->yplt+i;
           for(j=0;j<meshi->kbar;j++){
             z = meshi->zplt+j;
-            
+
+        
             if(meshi->inside==0&&iwall>0||meshi->inside!=0&&iwall<0){
               glColor4f(0.5,0.5,0.5,alpha[n00]);
               glVertex3f(xx,y[0],z[0]);
@@ -3077,7 +3286,7 @@ void drawsmoke3dVOL(volrenderdata *vr){
               glColor4f(0.5,0.5,0.5,alpha[n11]);
               glVertex3f(xx,y[1],z[1]);
 
-              glColor4f(0.5,0.5,0.5,alpha[0]);
+              glColor4f(0.5,0.5,0.5,alpha[n00]);
               glVertex3f(xx,y[0],z[0]);
               glColor4f(0.5,0.5,0.5,alpha[n11]);
               glVertex3f(xx,y[1],z[1]);
@@ -3085,14 +3294,14 @@ void drawsmoke3dVOL(volrenderdata *vr){
               glVertex3f(xx,y[0],z[1]);
             }
             else{
-              glColor4f(0.5,0.5,0.5,alpha[0]);
+              glColor4f(0.5,0.5,0.5,alpha[n00]);
               glVertex3f(xx,y[0],z[0]);
               glColor4f(0.5,0.5,0.5,alpha[n11]);
               glVertex3f(xx,y[1],z[1]);
               glColor4f(0.5,0.5,0.5,alpha[n10]);
               glVertex3f(xx,y[1],z[0]);
 
-              glColor4f(0.5,0.5,0.5,alpha[0]);
+              glColor4f(0.5,0.5,0.5,alpha[n00]);
               glVertex3f(xx,y[0],z[0]);
               glColor4f(0.5,0.5,0.5,alpha[n01]);
               glVertex3f(xx,y[0],z[1]);
@@ -3101,13 +3310,14 @@ void drawsmoke3dVOL(volrenderdata *vr){
             }
             alpha++;
           }
+          alpha++;
         }
         break;
       case 2:
       case -2:
         n00 = 0;
-        n10 = 1;
-        n01 = meshi->kbar+1;
+        n01 = 1;
+        n10 = meshi->kbar+1;
         n11 = 1 + meshi->kbar+1;
         if(iwall<0){
           alpha = vr->alpha_xz0;
@@ -3151,14 +3361,16 @@ void drawsmoke3dVOL(volrenderdata *vr){
               glColor4f(0.5,0.5,0.5,alpha[n01]);
               glVertex3f(x[0],yy,z[1]);
             }
+            alpha++;
           }
+          alpha++;
         }
         break;
       case 3:
       case -3:
         n00 = 0;
-        n10 = 1;
-        n01 = meshi->jbar+1;
+        n01 = 1;
+        n10 = meshi->jbar+1;
         n11 = 1 + meshi->jbar+1;
        if(iwall<0){
           alpha = vr->alpha_xy0;
@@ -3202,12 +3414,15 @@ void drawsmoke3dVOL(volrenderdata *vr){
               glColor4f(0.5,0.5,0.5,alpha[n11]);
               glVertex3f(x[1],y[1],zz);
             }
+            alpha++;
           }
+          alpha++;
         }
         break;
     }
     glEnd();
   }
+  if(use_transparency_data==1)transparentoff();
 }
 
 #ifdef pp_GPU

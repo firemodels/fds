@@ -722,34 +722,6 @@ char *which(char *progname){
   return NULL;
 }
 
-/* ------------------ MIN ------------------------ */
-
-float MIN(float x,float y){
-  /*! \fn float MIN(float x,float y)
-      \brief returns the minimum of x and y
-  */
-  if(x<y){
-    return x;
-  }
-  else{
-    return y;
-  }
-}
-
-/* ------------------ MAX ------------------------ */
-
-float MAX(float x,float y){
-  /*! \fn float MAX(float x,float y)
-      \brief returns the maximum of x and y
-  */
-  if(x>y){
-    return x;
-  }
-  else{
-    return y;
-  }
-}
-
 /* ------------------ frexp10 ------------------------ */
 
 float frexp10(float x, int *exp10){

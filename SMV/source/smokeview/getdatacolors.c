@@ -569,7 +569,6 @@ void getPart5Colors(particle *parti, int nlevel){
           dsz[m] =         sin(elev)*length/2.0;
         }
       }
-#define MAX(a, b) (a > b ? a : b)
       if(u_vel_data!=NULL&&v_vel_data!=NULL&&w_vel_data!=NULL){
         float denom;
 
