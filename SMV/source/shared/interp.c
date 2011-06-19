@@ -23,7 +23,7 @@ float interp3d(float xyz[3], float *vals, float *xplt, float *yplt, float *zplt,
   float val001,val101,val011,val111;
   float val00,val01,val10,val11;
   float val0, val1, val;
-  int nx, ny, nz, nxy;
+  int nx, ny, nz, nyz;
   float dx, dy, dz;
   float dxbar, dybar, dzbar;
   float *vv;
@@ -35,29 +35,27 @@ float interp3d(float xyz[3], float *vals, float *xplt, float *yplt, float *zplt,
   nx = ibar + 1;
   ny = jbar + 1;
   nz = kbar + 1;
-  nxy = nx*ny;
+  nyz = ny*nz;
 
   GETINDEX(i,xyz[0],xplt[0],dxbar,ibar);
   GETINDEX(j,xyz[1],yplt[0],dybar,jbar);
   GETINDEX(k,xyz[2],zplt[0],dzbar,kbar);
 
-  //ijk = i + j*nx + k*nxy;
-  ijk = k + (j + i*ny)*nz; 
+  ijk = k + j*nz + i*nyz; 
 
-  return vals[ijk];
-  /*
+  vv = vals + ijk;
+
   dx = (xyz[0] - i*dxbar)/dxbar;
   dy = (xyz[1] - j*dybar)/dybar;
   dz = (xyz[2] - k*dzbar)/dzbar;
   val000 = vv[0];
-  val100 = vv[1];
-  val010 = vv[nx];
-  val110 = vv[1+nx];
-  vv += nxy;
-  val001 = vv[0];
-  val101 = vv[1];
-  val011 = vv[nx];
-  val111 = vv[1+nx];
+  val100 = vv[nyz];
+  val010 = vv[nz];
+  val110 = vv[nyz+nz];
+  val001 = vv[1];
+  val101 = vv[nyz+1];
+  val011 = vv[nz+1];
+  val111 = vv[nyz+nz+1];
   val00 = INTERP1D(val000,val100,dx);
   val10 = INTERP1D(val010,val110,dx);
   val01 = INTERP1D(val001,val101,dx);
@@ -67,7 +65,6 @@ float interp3d(float xyz[3], float *vals, float *xplt, float *yplt, float *zplt,
     val = INTERP1D(  val0,  val1,dz);
 
   return val;
-  */
 }
 
 /* ------------------ get_z_interp_factors ------------------------ */

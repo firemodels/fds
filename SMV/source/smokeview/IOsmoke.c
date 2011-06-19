@@ -3104,14 +3104,18 @@ void compute_volvals(void){
     float *x, *y, *z; 
     int i, j, k;
     int count=0;
+    int ibar, jbar, kbar;
 
     meshi = meshinfo + ii;
     x = meshi->xplt;
     y = meshi->yplt;
     z = meshi->zplt;
-    dx = x[1]-x[0];
-    dy = y[1]-y[0];
-    dz = z[1]-z[0];
+    ibar = meshi->ibar;
+    jbar = meshi->jbar;
+    kbar = meshi->kbar;
+    dx = (x[ibar]-x[0])/(float)nvolxpm;
+    dy = (y[jbar]-y[0])/(float)nvolypm;
+    dz = (z[kbar]-z[0])/(float)nvolzpm;
     dstep = sqrt(dx*dx+dy*dy+dz*dz);
     
     vr = &(meshi->volrenderinfo);
@@ -3133,10 +3137,10 @@ void compute_volvals(void){
             alpha=vr->alpha_yz1;
             xyz[0] = meshi->x1;
           }
-          for(i=0;i<=meshi->jbar;i++){
-            xyz[1] = meshi->yplt[i];
-            for(j=0;j<=meshi->kbar;j++){
-              xyz[2] = meshi->zplt[j];
+          for(i=0;i<=nvolypm;i++){
+            xyz[1] = meshi->yplt[0]+(float)i*dy;
+            for(j=0;j<=nvolzpm;j++){
+              xyz[2] = meshi->zplt[0]+(float)j*dz;
               *alpha=optical_depth(xyz,dstep,meshi,iwall);
               alpha++;
             }
@@ -3152,10 +3156,10 @@ void compute_volvals(void){
             alpha=vr->alpha_xz1;
             xyz[1] = meshi->y1;
           }
-          for(i=0;i<=meshi->ibar;i++){
-            xyz[0] = meshi->xplt[i];
-            for(j=0;j<=meshi->kbar;j++){
-              xyz[2] = meshi->zplt[j];
+          for(i=0;i<=nvolxpm;i++){
+            xyz[0] = meshi->xplt[0]+(float)i*dx;
+            for(j=0;j<=nvolzpm;j++){
+              xyz[2] = meshi->zplt[0]+(float)j*dz;
               *alpha=optical_depth(xyz,dstep,meshi,iwall);
               alpha++;
             }
@@ -3171,10 +3175,10 @@ void compute_volvals(void){
             alpha=vr->alpha_xy1;
             xyz[2]=meshi->z1;
           }
-          for(i=0;i<=meshi->ibar;i++){
-            xyz[0] = meshi->xplt[i];
-            for(j=0;j<=meshi->jbar;j++){
-              xyz[1] = meshi->yplt[j];
+          for(i=0;i<=nvolxpm;i++){
+            xyz[0] = meshi->xplt[0]+(float)i*dx;
+            for(j=0;j<=nvolypm;j++){
+              xyz[1] = meshi->yplt[0]+(float)j*dy;
               *alpha=optical_depth(xyz,dstep,meshi,iwall);
               alpha++;
             }
@@ -3192,7 +3196,7 @@ void drawsmoke3dVOL(void){
   float xyz[3];
   float dx, dy, dz;
   int ii;
-  
+
   if(use_transparency_data==1)transparenton();
   for(ii=0;ii<nvolfacelistinfo;ii++){
     volfacelistdata *vi;
@@ -3200,7 +3204,7 @@ void drawsmoke3dVOL(void){
     volrenderdata *vr;
     int i,j;
     float xx, yy, zz;
-    float *x, *y, *z;
+    float x[2], y[2], z[2];
     float *alpha;
     int n00, n01, n10, n11;
 
@@ -3211,6 +3215,9 @@ void drawsmoke3dVOL(void){
 
     if(iwall==0||meshi->drawsides[iwall+3]==0)continue;
 
+    dx = (meshi->xplt[meshi->ibar]-meshi->xplt[0])/nvolxpm;
+    dy = (meshi->yplt[meshi->jbar]-meshi->yplt[0])/nvolypm;
+    dz = (meshi->zplt[meshi->kbar]-meshi->zplt[0])/nvolzpm;
     glBegin(GL_TRIANGLES);
     switch (iwall){
       case 1:
@@ -3227,12 +3234,13 @@ void drawsmoke3dVOL(void){
         n01 = 1;
         n10 = meshi->kbar+1;
         n11 = 1 + meshi->kbar+1;
-        for(i=0;i<meshi->jbar;i++){
-          y = meshi->yplt+i;
-          for(j=0;j<meshi->kbar;j++){
-            z = meshi->zplt+j;
+        for(i=0;i<nvolypm;i++){
+          y[0] = meshi->yplt[0]+(float)i*dy;
+          y[1] = y[0]+dy;
+          for(j=0;j<nvolzpm;j++){
+            z[0] = meshi->zplt[0]+(float)j*dz;
+            z[1] = z[0]+dz;
 
-        
             if(meshi->inside==0&&iwall>0||meshi->inside!=0&&iwall<0){
               glColor4f(0.5,0.5,0.5,alpha[n00]);
               glVertex3f(xx,y[0],z[0]);
@@ -3282,10 +3290,12 @@ void drawsmoke3dVOL(void){
           alpha = vr->alpha_xz1;
           yy=meshi->y1;
         }
-        for(i=0;i<meshi->ibar;i++){
-          x = meshi->xplt+i;
-          for(j=0;j<meshi->kbar;j++){
-            z = meshi->zplt+j;
+        for(i=0;i<nvolxpm;i++){
+          x[0] = meshi->xplt[0]+(float)i*dx;
+          x[1] = x[0]+dx;
+          for(j=0;j<nvolzpm;j++){
+            z[0] = meshi->zplt[0]+(float)j*dz;
+            z[1] = z[0]+dz;
             if(meshi->inside==0&&iwall>0||meshi->inside!=0&&iwall<0){
               glColor4f(0.5,0.5,0.5,alpha[n00]);
               glVertex3f(x[0],yy,z[0]);
@@ -3335,10 +3345,12 @@ void drawsmoke3dVOL(void){
           alpha = vr->alpha_xy1;
           zz=meshi->z1;
         }
-        for(i=0;i<meshi->ibar;i++){
-          x = meshi->xplt+i;
-          for(j=0;j<meshi->jbar;j++){
-            y = meshi->yplt+j;
+        for(i=0;i<nvolxpm;i++){
+          x[0] = meshi->xplt[0]+(float)i*dx;
+          x[1] = x[0]+dx;
+          for(j=0;j<nvolypm;j++){
+            y[0] = meshi->yplt[0]+(float)j*dy;
+            y[1] = y[0]+dy;
             if(meshi->inside==0&&iwall>0||meshi->inside!=0&&iwall<0){
               glColor4f(0.5,0.5,0.5,alpha[n00]);
               glVertex3f(x[0],y[0],zz);

@@ -6315,6 +6315,20 @@ void init_volrender(void){
       continue;
     }
   }
+  ibarmax=0;
+  jbarmax=0;
+  kbarmax=0;
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+
+    meshi = meshinfo + i;
+    if(meshi->ibar>ibarmax)ibarmax=meshi->ibar;
+    if(meshi->jbar>jbarmax)jbarmax=meshi->jbar;
+    if(meshi->kbar>kbarmax)kbarmax=meshi->kbar;
+  }
+  ibarmax=10*(ibarmax+1);
+  jbarmax=10*(jbarmax+1);
+  kbarmax=10*(kbarmax+1);
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
     volrenderdata *vr;
@@ -6325,9 +6339,9 @@ void init_volrender(void){
       int nx, ny, nz;
 
       nvolrenderinfo++;
-      nx = meshi->ibar+1;
-      ny = meshi->jbar+1;
-      nz = meshi->kbar+1;
+      nx = ibarmax;
+      ny = jbarmax;
+      nz = kbarmax;
       NewMemory((void **)&vr->alpha_yz0,ny*nz*sizeof(float));
       NewMemory((void **)&vr->alpha_yz1,ny*nz*sizeof(float));
       NewMemory((void **)&vr->alpha_xz0,nx*nz*sizeof(float));

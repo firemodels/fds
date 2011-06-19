@@ -58,6 +58,7 @@ void update_alpha(void);
 #define CULL_PORTSIZE 14
 #endif
 #define VOL_SMOKE 13
+#define VOL_NGRID 18
 
 GLUI_Listbox *LISTBOX_smoke_colorbar=NULL;
 #ifdef pp_CULL
@@ -71,6 +72,9 @@ GLUI_RadioGroup *alphagroup=NULL,*skipframes,*radio_smokesensors=NULL;
 GLUI_Spinner *SPINNER_cvis=NULL;
 GLUI_Checkbox *CHECKBOX_test_smokesensors=NULL;
 GLUI_Checkbox *CHECKBOX_smokeGPU=NULL,*CHECKBOX_usevolrender=NULL;
+GLUI_Spinner *SPINNER_nvolxpm=NULL;
+GLUI_Spinner *SPINNER_nvolypm=NULL;
+GLUI_Spinner *SPINNER_nvolzpm=NULL;
 GLUI_Checkbox *CHECKBOX_smokedrawtest=NULL;
 GLUI_Checkbox *CHECKBOX_smokedrawtest2=NULL;
 GLUI_Checkbox *CHECKBOX_smoke3d_external=NULL;
@@ -255,6 +259,18 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   CHECKBOX_smokeGPU=glui_3dsmoke->add_checkbox_to_panel(panel_slices,_("Use GPU"),&usegpu,VOL_SMOKE,SMOKE_3D_CB);
 #endif
   CHECKBOX_usevolrender=glui_3dsmoke->add_checkbox_to_panel(panel_slices,_("Use full volume rendering"),&usevolrender,VOL_SMOKE,SMOKE_3D_CB);
+
+  nvolxpm=meshinfo[0].ibar;
+  nvolypm=meshinfo[0].jbar;
+  nvolzpm=meshinfo[0].kbar;
+
+  SPINNER_nvolxpm=glui_3dsmoke->add_spinner_to_panel(panel_slices,"x nodes",GLUI_SPINNER_INT,&nvolxpm,VOL_NGRID,SMOKE_3D_CB);
+  SPINNER_nvolypm=glui_3dsmoke->add_spinner_to_panel(panel_slices,"y nodes",GLUI_SPINNER_INT,&nvolypm,VOL_NGRID,SMOKE_3D_CB);
+  SPINNER_nvolzpm=glui_3dsmoke->add_spinner_to_panel(panel_slices,"z nodes",GLUI_SPINNER_INT,&nvolzpm,VOL_NGRID,SMOKE_3D_CB);
+  SPINNER_nvolxpm->set_int_limits(3,ibarmax);
+  SPINNER_nvolypm->set_int_limits(3,jbarmax);
+  SPINNER_nvolzpm->set_int_limits(3,kbarmax);
+  
 #ifdef pp_GPU
   if(gpuactive==0){
     usegpu=0;
@@ -476,6 +492,9 @@ void SMOKE_3D_CB(int var){
     initcull(cullsmoke);
     break;
 #endif
+  case VOL_NGRID:
+    glutPostRedisplay();
+    break;
   case VOL_SMOKE:
 #ifdef pp_GPU
     if(usegpu==1&&usevolrender==0){
