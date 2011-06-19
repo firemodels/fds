@@ -231,6 +231,18 @@ void getinverse(float *m, float *mi){
   vi[2]=-(mi[2+4*0]*v[0]+mi[2+4*1]*v[1]+mi[2+4*2]*v[2])*vi[3];
 }
 
+/* ------------------ compareisonodes ------------------------ */
+
+int compare_volfacelistdata( const void *arg1, const void *arg2 ){
+  volfacelistdata *vi, *vj;
+
+  vi = *(volfacelistdata **)arg1;
+  vj = *(volfacelistdata **)arg2;
+
+  if(vi->dist2<vj->dist2)return 1;
+  if(vi->dist2>vj->dist2)return -1;
+  return 0;
+}
 
 /* ------------------ getvolsmokedir ------------------------ */
 
@@ -256,6 +268,8 @@ void getvolsmokedir(float *mm){
   float eyedir[3];
   float cosdir;
   float angles[7];
+
+  volfacelistdata *vi;
 
   pi=4.0*atan(1.0);
 
@@ -351,6 +365,39 @@ void getvolsmokedir(float *mm){
       }
     }
   }
+
+  vi = volfacelistinfo;
+  nvolfacelistinfo=0;
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    int facemap[7]={12,6,0,0,3,9,15};
+
+    meshi = meshinfo + i;
+    for(j=-3;j<=3;j++){
+      float dx, dy, dz;
+      float *xyz;
+
+      if(j==0)continue;
+      if(meshi->drawsides[j+3]==0)continue;
+      vi->facemesh=meshi;
+      vi->iwall=j;
+      xyz=meshi->face_centers+facemap[j+3];
+      dx = xyz[0]-xyzeyeorig[0];
+      dy = xyz[1]-xyzeyeorig[1];
+      dz = xyz[2]-xyzeyeorig[2];
+      vi->dist2=dx*dx+dy*dy+dz*dz;
+      vi->xyz=xyz;
+      vi++;
+      nvolfacelistinfo++;
+    }
+  }
+  if(nvolfacelistinfo>0){
+    for(i=0;i<nvolfacelistinfo;i++){
+      volfacelistinfoptrs[i]=volfacelistinfo + i;
+    }
+    qsort((volfacelistdata *)volfacelistinfoptrs,nvolfacelistinfo,sizeof(volfacelistdata *),compare_volfacelistdata);
+  }
+
 }
 
 /* ------------------ getsmokedir ------------------------ */

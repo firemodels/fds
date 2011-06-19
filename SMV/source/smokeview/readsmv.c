@@ -5746,6 +5746,7 @@ typedef struct {
 
   for(igrid=0;igrid<nmeshes;igrid++){
     mesh *meshi;
+    float *face_centers;
 
     meshi=meshinfo+igrid;
     ibartemp=meshi->ibar; 
@@ -5792,6 +5793,21 @@ typedef struct {
     meshi->dx01=meshi->x1-meshi->x0;
     meshi->dy01=meshi->y1-meshi->y0;
     meshi->dz01=meshi->z1-meshi->z0;
+
+    face_centers = meshi->face_centers;
+    for(j=0;j<6;j++){
+      face_centers[0]=meshi->xcen;
+      face_centers[1]=meshi->ycen;
+      face_centers[2]=meshi->zcen;
+      face_centers+=3;
+    }
+    face_centers = meshi->face_centers;
+    face_centers[0]=meshi->boxmin_scaled[0];
+    face_centers[3]=meshi->boxmax_scaled[0];
+    face_centers[7]=meshi->boxmin_scaled[1];
+    face_centers[10]=meshi->boxmax_scaled[1];
+    face_centers[14]=meshi->boxmin_scaled[2];
+    face_centers[17]=meshi->boxmax_scaled[2];
   }
 
   active_smokesensors=0;
@@ -6327,6 +6343,10 @@ void init_volrender(void){
       vr->alpha_xy0=NULL;
       vr->alpha_xy1=NULL;
     }
+  }
+  if(nvolrenderinfo>0){
+    NewMemory((void **)&volfacelistinfo,6*nmeshes*sizeof(volfacelistdata));
+    NewMemory((void **)&volfacelistinfoptrs,6*nmeshes*sizeof(volfacelistdata *));
   }
 }
 

@@ -359,26 +359,16 @@ void drawsmoke_frame(void){
       }
     }
     if(showvolrender==1){
-      for(i=0;i<nmeshes;i++){
-        mesh *meshi;
-        volrenderdata *vr;
-
-        meshi = meshinfo + i;
-        vr = &(meshi->volrenderinfo);
-        if(vr->fire==NULL&&vr->smoke==NULL)continue;
-        if(vr->loaded==0||vr->show==0)continue;
-
 #ifdef pp_GPU_VOLRENDER
-        if(usegpu==1){
-          drawsmoke3dGPUVOL(vr);
-        }
-        else{
-          drawsmoke3dVOL(vr);
-        }
-#else
-        drawsmoke3dVOL(vr);
-#endif
+      if(usegpu==1){
+        drawsmoke3dGPUVOL();
       }
+      else{
+        drawsmoke3dVOL();
+      }
+#else
+      drawsmoke3dVOL();
+#endif
     }
   }
 #ifdef pp_GPU
@@ -3197,62 +3187,28 @@ void compute_volvals(void){
 
 /* ------------------ drawsmoke3dVOL ------------------------ */
 
-void drawsmoke3dVOL(volrenderdata *vr){
+void drawsmoke3dVOL(void){
   int iwall;
   float xyz[3];
   float dx, dy, dz;
-  mesh *meshi;
-
-  meshi = vr->rendermesh;
+  int ii;
   
   if(use_transparency_data==1)transparenton();
-/* debug code
-  {
-    float xmin=1.0, xmax=1.6, ymin=0.0, ymax=1.6, zmin=2.0, zmax=3.2;
-  xmin/=xyzmaxdiff;
-  xmax/=xyzmaxdiff;
-  ymin/=xyzmaxdiff;
-  ymax/=xyzmaxdiff;
-  zmin/=xyzmaxdiff;
-  zmax/=xyzmaxdiff;
-  glColor3f(0.0,0.0,0.0);
-  glBegin(GL_LINES);
-  glVertex3f(xmin,ymin,zmin);
-  glVertex3f(xmax,ymin,zmin);
-  glVertex3f(xmin,ymin,zmax);
-  glVertex3f(xmax,ymin,zmax);
-  glVertex3f(xmin,ymax,zmin);
-  glVertex3f(xmax,ymax,zmin);
-  glVertex3f(xmin,ymax,zmax);
-  glVertex3f(xmax,ymax,zmax);
-
-  glVertex3f(xmin,ymin,zmin);
-  glVertex3f(xmin,ymax,zmin);
-  glVertex3f(xmax,ymin,zmin);
-  glVertex3f(xmax,ymax,zmin);
-  glVertex3f(xmin,ymin,zmax);
-  glVertex3f(xmin,ymax,zmax);
-  glVertex3f(xmax,ymin,zmax);
-  glVertex3f(xmax,ymax,zmax);
-
-  glVertex3f(xmin,ymin,zmin);
-  glVertex3f(xmin,ymin,zmax);
-  glVertex3f(xmax,ymin,zmin);
-  glVertex3f(xmax,ymin,zmax);
-  glVertex3f(xmin,ymax,zmin);
-  glVertex3f(xmin,ymax,zmax);
-  glVertex3f(xmax,ymax,zmin);
-  glVertex3f(xmax,ymax,zmax);
-  glEnd();
-  }
-*/
-
-  for(iwall=-3;iwall<=3;iwall++){
+  printf(" %i: ",nvolfacelistinfo);
+  for(ii=0;ii<nvolfacelistinfo;ii++){
+    volfacelistdata *vi;
+    mesh *meshi;
+    volrenderdata *vr;
     int i,j;
     float xx, yy, zz;
     float *x, *y, *z;
     float *alpha;
     int n00, n01, n10, n11;
+
+    vi = volfacelistinfoptrs[ii];
+    iwall=vi->iwall;
+    meshi = vi->facemesh;
+    vr = &(meshi->volrenderinfo);
 
     if(iwall==0||meshi->drawsides[iwall+3]==0)continue;
 

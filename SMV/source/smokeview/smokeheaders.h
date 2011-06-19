@@ -344,7 +344,7 @@ EXTERNCPP void TRANSLATE_CB(int var);
 EXTERNCPP void drawsmoke3dGPU(smoke3d *smoke3di);
 EXTERNCPP void drawsmoke3dGPUVOL(volrenderdata *vr);
 #endif
-EXTERNCPP void drawsmoke3dVOL(volrenderdata *vr);
+EXTERNCPP void drawsmoke3dVOL(void);
 #ifdef pp_CULL
 EXTERNCPP void drawsmoke3dCULL(void);
 #endif

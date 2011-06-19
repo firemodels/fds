@@ -429,6 +429,7 @@ typedef struct _mesh {
   float *zcell;
   float xbar0, xbar, ybar0, ybar, zbar0, zbar;
   float xcen, ycen, zcen;
+  float face_centers[18];
   float offset[3];
   float xyzmaxdiff;
   float boxoffset;
@@ -555,6 +556,13 @@ typedef struct _mesh {
 
 } mesh;
 
+/* --------------------------  volfacelistdata ------------------------------------ */
+
+typedef struct {
+  float *xyz,dist2;
+  int iwall;
+  mesh *facemesh;
+} volfacelistdata;
 
 /* --------------------------  culldata ------------------------------------ */
 
