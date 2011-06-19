@@ -29,6 +29,15 @@
 #define rgb_black 19
 #endif
 
+#ifndef CLAMP
+#define CLAMP(x,lo,hi)  {if ((x) < (lo)) {(x)=(lo);} else if((x) > (hi)) {(x)=(hi);}}
+#endif
+
+#ifndef GETINDEX
+#define GETINDEX(ival,xval,xmin,dx,nx) ival = ((xval)-(xmin))/(dx); CLAMP(ival,0,(nx)-1);
+#endif
+
+
 #ifdef X64
 #define STRUCTSTAT struct __stat64
 #define STAT _stat64

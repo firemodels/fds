@@ -674,11 +674,6 @@ void Get_Part_Bounds(void){
   }
 }
 
-#define GETINDEX(ival,xval,xmin,dx,nx) \
-          ival = ((xval)-(xmin))/(dx);\
-          if(ival<0)ival=0;\
-          if(ival>(nx)-1)ival=(nx)-1;
-
 #define IJKVAL(ix,iy,iz) (ix) + (iy)*nx2 + (iz)*nx2*ny2
 
   /* ------------------ part2iso ------------------------ */
