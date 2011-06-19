@@ -3194,7 +3194,6 @@ void drawsmoke3dVOL(void){
   int ii;
   
   if(use_transparency_data==1)transparenton();
-  printf(" %i: ",nvolfacelistinfo);
   for(ii=0;ii<nvolfacelistinfo;ii++){
     volfacelistdata *vi;
     mesh *meshi;
