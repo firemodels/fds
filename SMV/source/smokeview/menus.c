@@ -3191,6 +3191,7 @@ void LoadVolSmoke3DMenu(int value){
       }
       vr->loaded=1;
       vr->show=1;
+      stept=1;
       printf("loading %s\n",meshi->label);      
     }
   }

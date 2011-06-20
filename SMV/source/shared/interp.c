@@ -16,7 +16,7 @@ char interp_revision[]="$Revision$";
 /* ----------------------- interp3d ----------------------------- */
 
 #define INTERP1D(f0,f1,dx) (float)((f0) + ((f1)-(f0))*(dx))
-float interp3d(float xyz[3], float *vals, float *xplt, float *yplt, float *zplt, int ibar, int jbar, int kbar){
+float interp3d(float xyz[3], float *vals, float *xplt, float *yplt, float *zplt, int ibar, int jbar, int kbar, int *inobst, char *blank){
   int i, j, k;
   int ijk;
   float val000,val100,val010,val110;
@@ -27,6 +27,7 @@ float interp3d(float xyz[3], float *vals, float *xplt, float *yplt, float *zplt,
   float dx, dy, dz;
   float dxbar, dybar, dzbar;
   float *vv;
+  int ijkcell;
 
   dxbar = xplt[1]-xplt[0];
   dybar = yplt[1]-yplt[0];
@@ -40,6 +41,14 @@ float interp3d(float xyz[3], float *vals, float *xplt, float *yplt, float *zplt,
   GETINDEX(i,xyz[0],xplt[0],dxbar,ibar);
   GETINDEX(j,xyz[1],yplt[0],dybar,jbar);
   GETINDEX(k,xyz[2],zplt[0],dzbar,kbar);
+
+  if(blank!=NULL){
+    ijkcell=IJKCELL(i,j,k);
+    if(blank[ijkcell]==0){
+      *inobst=1;
+      return 0.0;
+    }
+  }
 
   ijk = k + j*nz + i*nyz; 
 

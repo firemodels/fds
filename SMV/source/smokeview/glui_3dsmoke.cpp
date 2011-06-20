@@ -264,6 +264,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   nvolypm=meshinfo[0].jbar;
   nvolzpm=meshinfo[0].kbar;
 
+  glui_3dsmoke->add_checkbox_to_panel(panel_slices,"block smoke",&block_volsmoke);
   SPINNER_nvolxpm=glui_3dsmoke->add_spinner_to_panel(panel_slices,"x nodes",GLUI_SPINNER_INT,&nvolxpm,VOL_NGRID,SMOKE_3D_CB);
   SPINNER_nvolypm=glui_3dsmoke->add_spinner_to_panel(panel_slices,"y nodes",GLUI_SPINNER_INT,&nvolypm,VOL_NGRID,SMOKE_3D_CB);
   SPINNER_nvolzpm=glui_3dsmoke->add_spinner_to_panel(panel_slices,"z nodes",GLUI_SPINNER_INT,&nvolzpm,VOL_NGRID,SMOKE_3D_CB);

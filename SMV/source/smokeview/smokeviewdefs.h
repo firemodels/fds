@@ -309,5 +309,13 @@ void _sniffErrors(char *whereat);
 #define GETINDEX(ival,xval,xmin,dx,nx) ival = ((xval)-(xmin))/(dx); CLAMP(ival,0,(nx)-1)
 #endif
 
+#ifndef IJKNODE
+#define IJKNODE(i,j,k) ((i)+(j)*nx+(k)*nxy)
+#endif
+
+#ifndef IJKCELL
+#define IJKCELL(i,j,k) ((i)+ (j)*ibar+(k)*ibar*jbar)
+#endif
+
 #endif
 

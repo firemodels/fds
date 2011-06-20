@@ -6310,7 +6310,7 @@ void init_volrender(void){
       vr->fire=slicei;
       continue;
     }
-    if(STRCMP(shortlabel,"X_Soot")==0){
+    if(STRCMP(shortlabel,"rho_Soot")==0){
       vr->smoke=slicei;
       continue;
     }

@@ -2960,6 +2960,8 @@ float optical_depth(float *xyzvert, float dstep, mesh *meshi, int iwall){
   float *vert_beg, *vert_end;
   int iwall_min=0;
   float xyzvals[3];
+  int isteps;
+  char *blank;
 
   boxmin = meshi->boxmin_scaled;
   boxmax = meshi->boxmax_scaled;
@@ -3056,36 +3058,33 @@ float optical_depth(float *xyzvert, float dstep, mesh *meshi, int iwall){
     nsteps=1;
   }
   sootdensum=0.0;
+  isteps=0;
+  if(block_volsmoke==1){
+    blank=meshi->c_iblank_cell;
+  }
+  else{
+    blank=NULL;
+  }
   for(i=0;i<nsteps;i++){
-    float sootden;
-    float ddx, ddy, ddz;
-    float errdist;
-    float factor;
+    float sootden, factor;
+    int icell, jcell, kcell;
+    int inobst;
 
     factor = (0.5 + (float)i)/(float)nsteps;
 
     xyz[0] = (1.0-factor)*vert_beg[0] + factor*vert_end[0];
     xyz[1] = (1.0-factor)*vert_beg[1] + factor*vert_end[1];
     xyz[2] = (1.0-factor)*vert_beg[2] + factor*vert_end[2];
-    /* debug code
-    ddx = xyz[0]-0.8/xyzmaxdiff;
-    ddy = xyz[1]-0.8/xyzmaxdiff;
-    ddz = xyz[2]-0.8/xyzmaxdiff;
-    errdist=sqrt(ddx*ddx+ddy*ddy+ddz*ddz);
-    sootden=0.0;
-    if(xyz[0]>1.0/xyzmaxdiff&&xyz[0]<1.6/xyzmaxdiff&&xyz[2]<3.2/xyzmaxdiff&&xyz[2]>2.0/xyzmaxdiff){
-      sootden=1.0;
-    }
-    if(errdist<0.2){
-      sootden=2.0;
-    }
-    */
-    sootden = interp3d(xyz, meshi->volrenderinfo.smokedata, xplt, yplt, zplt, ibar, jbar, kbar);
+
+    sootden = interp3d(xyz, meshi->volrenderinfo.smokedata, xplt, yplt, zplt, ibar, jbar, kbar, &inobst, blank);
+    if(blank!=NULL&&inobst==1)break;
+    isteps++;
     sootdensum += sootden;
   }
-  sootdensum*=(distseg/(float)nsteps)*xyzmaxdiff;
+  if(isteps!=nsteps)distseg*=(float)isteps/(float)nsteps;
+  sootdensum*=xyzmaxdiff*distseg/(float)nsteps;
   //opacity = 1.0 - exp(-sootdensum);
-  opacity = 1.0 - exp(-kfactor*1850.0*sootdensum/1000.0);
+  opacity = 1.0 - exp(-kfactor*sootdensum);
   return opacity;
 }
 
@@ -3236,10 +3235,10 @@ void drawsmoke3dVOL(void){
         n11 = 1 + meshi->kbar+1;
         for(i=0;i<nvolypm;i++){
           y[0] = meshi->yplt[0]+(float)i*dy;
-          y[1] = y[0]+dy;
+          y[1] = meshi->yplt[0]+(float)(i+1)*dy;
           for(j=0;j<nvolzpm;j++){
             z[0] = meshi->zplt[0]+(float)j*dz;
-            z[1] = z[0]+dz;
+            z[1] = meshi->zplt[0]+(float)(j+1)*dz;
 
             if(meshi->inside==0&&iwall>0||meshi->inside!=0&&iwall<0){
               glColor4f(0.5,0.5,0.5,alpha[n00]);
@@ -3292,10 +3291,10 @@ void drawsmoke3dVOL(void){
         }
         for(i=0;i<nvolxpm;i++){
           x[0] = meshi->xplt[0]+(float)i*dx;
-          x[1] = x[0]+dx;
+          x[1] = meshi->xplt[0]+(float)(i+1)*dx;
           for(j=0;j<nvolzpm;j++){
             z[0] = meshi->zplt[0]+(float)j*dz;
-            z[1] = z[0]+dz;
+            z[1] = meshi->zplt[0]+(float)(j+1)*dz;
             if(meshi->inside==0&&iwall>0||meshi->inside!=0&&iwall<0){
               glColor4f(0.5,0.5,0.5,alpha[n00]);
               glVertex3f(x[0],yy,z[0]);
@@ -3347,10 +3346,10 @@ void drawsmoke3dVOL(void){
         }
         for(i=0;i<nvolxpm;i++){
           x[0] = meshi->xplt[0]+(float)i*dx;
-          x[1] = x[0]+dx;
+          x[1] = meshi->xplt[0]+(float)(i+1)*dx;
           for(j=0;j<nvolypm;j++){
             y[0] = meshi->yplt[0]+(float)j*dy;
-            y[1] = y[0]+dy;
+            y[1] = meshi->yplt[0]+(float)(j+1)*dy;
             if(meshi->inside==0&&iwall>0||meshi->inside!=0&&iwall<0){
               glColor4f(0.5,0.5,0.5,alpha[n00]);
               glVertex3f(x[0],y[0],zz);

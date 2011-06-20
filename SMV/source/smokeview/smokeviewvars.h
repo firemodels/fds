@@ -485,6 +485,7 @@ SVEXTERN int visHRRlabel;
 SVEXTERN int visAvailmemory;
 #endif
 SVEXTERN int ibarmax, jbarmax, kbarmax;
+SVEXTERN int SVDECL(block_volsmoke,0);
 SVEXTERN slice *sd_shown;
 SVEXTERN vslice *vd_shown;
 SVEXTERN int show_all_slices;

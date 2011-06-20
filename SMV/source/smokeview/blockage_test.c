@@ -36,8 +36,6 @@ int seg_in_rect(float *p1, float *p2,
                 float ymin, float ymax, 
                 float zmin, float zmax,
                 int checkbounds);
-#define IJKNODE(i,j,k) ((i)+(j)*nx+(k)*nxy)
-#define IJKCELL(i,j,k) ((i)+ (j)*ibar+(k)*ibar*jbar)
 
 /* ------------------ get_interval ------------------------ */
 

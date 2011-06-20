@@ -29,7 +29,6 @@ void free_terraincell(terraindata *terri);
 #define ijcell2(i,j) nxcell*(j) + (i)
 #define ijnode2(i,j) ((nxcell+1)*(j) + (i))
 #define ijnode3(i,j) ((nycell+1)*(i) + (j))
-#define IJKCELL(i,j,k) ((i)+ (j)*ibar+(k)*ibar*jbar)
 #define FORTWUIREAD(var,size) fseek(WUIFILE,4,SEEK_CUR);\
                            returncode=fread(var,4,size,WUIFILE);\
                            if(endianswitch==1)endian_switch(var,size);\
