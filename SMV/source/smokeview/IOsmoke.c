@@ -3112,9 +3112,9 @@ void compute_volvals(void){
     ibar = meshi->ibar;
     jbar = meshi->jbar;
     kbar = meshi->kbar;
-    dx = (x[ibar]-x[0])/(float)nvolxpm;
-    dy = (y[jbar]-y[0])/(float)nvolypm;
-    dz = (z[kbar]-z[0])/(float)nvolzpm;
+    dx = x[1] - x[0];
+    dy = y[1] - y[0];
+    dz = z[1] - z[0];
     dstep = sqrt(dx*dx+dy*dy+dz*dz);
     
     vr = &(meshi->volrenderinfo);
@@ -3136,10 +3136,10 @@ void compute_volvals(void){
             alpha=vr->alpha_yz1;
             xyz[0] = meshi->x1;
           }
-          for(i=0;i<=nvolypm;i++){
-            xyz[1] = meshi->yplt[0]+(float)i*dy;
-            for(j=0;j<=nvolzpm;j++){
-              xyz[2] = meshi->zplt[0]+(float)j*dz;
+          for(i=0;i<=jbar;i++){
+            xyz[1] = y[i];
+            for(j=0;j<=kbar;j++){
+              xyz[2] = z[j];
               *alpha=optical_depth(xyz,dstep,meshi,iwall);
               alpha++;
             }
@@ -3155,10 +3155,10 @@ void compute_volvals(void){
             alpha=vr->alpha_xz1;
             xyz[1] = meshi->y1;
           }
-          for(i=0;i<=nvolxpm;i++){
-            xyz[0] = meshi->xplt[0]+(float)i*dx;
-            for(j=0;j<=nvolzpm;j++){
-              xyz[2] = meshi->zplt[0]+(float)j*dz;
+          for(i=0;i<=ibar;i++){
+            xyz[0] = x[i];
+            for(j=0;j<=kbar;j++){
+              xyz[2] = z[j];
               *alpha=optical_depth(xyz,dstep,meshi,iwall);
               alpha++;
             }
@@ -3174,10 +3174,10 @@ void compute_volvals(void){
             alpha=vr->alpha_xy1;
             xyz[2]=meshi->z1;
           }
-          for(i=0;i<=nvolxpm;i++){
-            xyz[0] = meshi->xplt[0]+(float)i*dx;
-            for(j=0;j<=nvolypm;j++){
-              xyz[1] = meshi->yplt[0]+(float)j*dy;
+          for(i=0;i<=ibar;i++){
+            xyz[0] = x[i];
+            for(j=0;j<=jbar;j++){
+              xyz[1] = y[j];
               *alpha=optical_depth(xyz,dstep,meshi,iwall);
               alpha++;
             }
@@ -3196,6 +3196,179 @@ void drawsmoke3dVOL(void){
   float dx, dy, dz;
   int ii;
 
+
+  for(ii=0;ii<nvolfacelistinfo;ii++){
+    volfacelistdata *vi;
+    mesh *meshi;
+    volrenderdata *vr;
+    int i,j;
+    float x[2], y[2], z[2];
+    float *xplt, *yplt, *zplt;
+    int ibar, jbar, kbar;
+    char label[256];
+
+    sprintf(label,"*** %i ***",ii);
+
+    vi = volfacelistinfoptrs[ii];
+    iwall=vi->iwall;
+    meshi = vi->facemesh;
+    xplt = meshi->xplt;
+    yplt = meshi->yplt;
+    zplt = meshi->zplt;
+    ibar = meshi->ibar;
+    jbar = meshi->jbar;
+    kbar = meshi->kbar;
+    vr = &(meshi->volrenderinfo);
+
+    if(iwall==0||meshi->drawsides[iwall+3]==0)continue;
+    switch (iwall){
+      case 1:
+      case -1:
+        if(iwall<0){
+          x[0] = meshi->x0;
+          x[1] = x[0];
+        }
+        else{
+          x[0]=meshi->x1;
+          x[1]=x[0];
+        }
+        y[0] = yplt[0];
+        y[1] = yplt[jbar];
+        z[0] = zplt[0];
+        z[1] = zplt[kbar];
+        output3Text(foregroundcolor, (x[0]+x[1])/2.0,(y[0]+y[1])/2.0,(z[0]+z[1])/2.0, label);
+        break;
+      case 2:
+      case -2:
+        if(iwall<0){
+          y[0] = meshi->y0;
+          y[1] = y[0];
+        }
+        else{
+          y[0] = meshi->y1;
+          y[1] = y[0];
+        }
+        x[0] = xplt[0];
+        x[1] = xplt[ibar];
+        z[0] = zplt[0];
+        z[1] = zplt[kbar];
+        output3Text(foregroundcolor, (x[0]+x[1])/2.0,(y[0]+y[1])/2.0,(z[0]+z[1])/2.0, label);
+        break;
+      case 3:
+      case -3:
+        if(iwall<0){
+          z[0] = meshi->z0;
+          z[1] = z[0];
+        }
+        else{
+          z[0] = meshi->z1;
+          z[1] = z[0];
+        }
+        x[0] = xplt[0];
+        x[1] = xplt[ibar];
+        y[0] = yplt[0];
+        y[1] = yplt[jbar];
+        output3Text(foregroundcolor, (x[0]+x[1])/2.0,(y[0]+y[1])/2.0,(z[0]+z[1])/2.0, label);
+        break;
+    }
+  }
+  glBegin(GL_LINES);
+  for(ii=0;ii<nvolfacelistinfo;ii++){
+    volfacelistdata *vi;
+    mesh *meshi;
+    volrenderdata *vr;
+    int i,j;
+    float x[2], y[2], z[2];
+    float *xplt, *yplt, *zplt;
+    int ibar, jbar, kbar;
+    char label[256];
+
+    sprintf(label,"*** %i %%%",ii);
+
+    vi = volfacelistinfoptrs[ii];
+    iwall=vi->iwall;
+    meshi = vi->facemesh;
+    xplt = meshi->xplt;
+    yplt = meshi->yplt;
+    zplt = meshi->zplt;
+    ibar = meshi->ibar;
+    jbar = meshi->jbar;
+    kbar = meshi->kbar;
+    vr = &(meshi->volrenderinfo);
+
+    if(iwall==0||meshi->drawsides[iwall+3]==0)continue;
+    switch (iwall){
+      case 1:
+      case -1:
+        if(iwall<0){
+          x[0] = meshi->x0;
+          x[1] = x[0];
+          glColor3f(1.0,0.0,0.0);
+        }
+        else{
+          x[0]=meshi->x1;
+          x[1]=x[0];
+          glColor3f(0.0,0.0,1.0);
+        }
+        y[0] = yplt[0];
+        y[1] = yplt[jbar];
+        z[0] = zplt[0];
+        z[1] = zplt[kbar];
+      //  output3Text(foregroundcolor, (x[0]+x[1])/2.0,(y[0]+y[1])/2.0,(z[0]+z[1])/2.0, label);
+        glVertex3f(x[0],y[0],z[0]);
+        glVertex3f(x[0],y[1],z[1]);
+        glVertex3f(x[0],y[1],z[0]);
+        glVertex3f(x[0],y[0],z[1]);
+        break;
+      case 2:
+      case -2:
+        if(iwall<0){
+          y[0] = meshi->y0;
+          y[1] = y[0];
+          glColor3f(1.0,0.0,0.0);
+        }
+        else{
+          y[0] = meshi->y1;
+          y[1] = y[0];
+          glColor3f(0.0,0.0,1.0);
+        }
+        x[0] = xplt[0];
+        x[1] = xplt[ibar];
+        z[0] = zplt[0];
+        z[1] = zplt[kbar];
+      //  output3Text(foregroundcolor, (x[0]+x[1])/2.0,(y[0]+y[1])/2.0,(z[0]+z[1])/2.0, label);
+        glVertex3f(x[0],y[0],z[0]);
+        glVertex3f(x[1],y[0],z[1]);
+        glVertex3f(x[0],y[0],z[1]);
+        glVertex3f(x[1],y[0],z[0]);
+        break;
+      case 3:
+      case -3:
+        if(iwall<0){
+          z[0] = meshi->z0;
+          z[1] = z[0];
+          glColor3f(1.0,0.0,0.0);
+        }
+        else{
+          z[0] = meshi->z1;
+          z[1] = z[0];
+          glColor3f(0.0,0.0,1.0);
+        }
+        x[0] = xplt[0];
+        x[1] = xplt[ibar];
+        y[0] = yplt[0];
+        y[1] = yplt[jbar];
+      //  output3Text(foregroundcolor, (x[0]+x[1])/2.0,(y[0]+y[1])/2.0,(z[0]+z[1])/2.0, label);
+        glVertex3f(x[0],y[0],z[0]);
+        glVertex3f(x[1],y[1],z[0]);
+        glVertex3f(x[0],y[1],z[0]);
+        glVertex3f(x[1],y[0],z[0]);
+        break;
+        break;
+    }
+  }
+  glEnd();
+
   if(use_transparency_data==1)transparenton();
   for(ii=0;ii<nvolfacelistinfo;ii++){
     volfacelistdata *vi;
@@ -3206,17 +3379,22 @@ void drawsmoke3dVOL(void){
     float x[2], y[2], z[2];
     float *alpha;
     int n00, n01, n10, n11;
+    float *xplt, *yplt, *zplt;
+    int ibar, jbar, kbar;
 
     vi = volfacelistinfoptrs[ii];
     iwall=vi->iwall;
     meshi = vi->facemesh;
+    xplt = meshi->xplt;
+    yplt = meshi->yplt;
+    zplt = meshi->zplt;
+    ibar = meshi->ibar;
+    jbar = meshi->jbar;
+    kbar = meshi->kbar;
     vr = &(meshi->volrenderinfo);
 
     if(iwall==0||meshi->drawsides[iwall+3]==0)continue;
 
-    dx = (meshi->xplt[meshi->ibar]-meshi->xplt[0])/nvolxpm;
-    dy = (meshi->yplt[meshi->jbar]-meshi->yplt[0])/nvolypm;
-    dz = (meshi->zplt[meshi->kbar]-meshi->zplt[0])/nvolzpm;
     glBegin(GL_TRIANGLES);
     switch (iwall){
       case 1:
@@ -3231,14 +3409,14 @@ void drawsmoke3dVOL(void){
         }
         n00 = 0;
         n01 = 1;
-        n10 = meshi->kbar+1;
-        n11 = 1 + meshi->kbar+1;
-        for(i=0;i<nvolypm;i++){
-          y[0] = meshi->yplt[0]+(float)i*dy;
-          y[1] = meshi->yplt[0]+(float)(i+1)*dy;
-          for(j=0;j<nvolzpm;j++){
-            z[0] = meshi->zplt[0]+(float)j*dz;
-            z[1] = meshi->zplt[0]+(float)(j+1)*dz;
+        n10 = kbar+1;
+        n11 = 1 + kbar+1;
+        for(i=0;i<jbar;i++){
+          y[0] = yplt[i];
+          y[1] = yplt[i+1];
+          for(j=0;j<kbar;j++){
+            z[0] = zplt[j];
+            z[1] = zplt[j+1];
 
             if(meshi->inside==0&&iwall>0||meshi->inside!=0&&iwall<0){
               glColor4f(0.5,0.5,0.5,alpha[n00]);
@@ -3279,8 +3457,8 @@ void drawsmoke3dVOL(void){
       case -2:
         n00 = 0;
         n01 = 1;
-        n10 = meshi->kbar+1;
-        n11 = 1 + meshi->kbar+1;
+        n10 = kbar+1;
+        n11 = 1 + kbar+1;
         if(iwall<0){
           alpha = vr->alpha_xz0;
           yy=meshi->y0;
@@ -3289,12 +3467,12 @@ void drawsmoke3dVOL(void){
           alpha = vr->alpha_xz1;
           yy=meshi->y1;
         }
-        for(i=0;i<nvolxpm;i++){
-          x[0] = meshi->xplt[0]+(float)i*dx;
-          x[1] = meshi->xplt[0]+(float)(i+1)*dx;
-          for(j=0;j<nvolzpm;j++){
-            z[0] = meshi->zplt[0]+(float)j*dz;
-            z[1] = meshi->zplt[0]+(float)(j+1)*dz;
+        for(i=0;i<ibar;i++){
+          x[0] = xplt[i];
+          x[1] = xplt[i+1];
+          for(j=0;j<kbar;j++){
+            z[0] = zplt[j];
+            z[1] = zplt[j+1];
             if(meshi->inside==0&&iwall>0||meshi->inside!=0&&iwall<0){
               glColor4f(0.5,0.5,0.5,alpha[n00]);
               glVertex3f(x[0],yy,z[0]);
@@ -3334,8 +3512,8 @@ void drawsmoke3dVOL(void){
       case -3:
         n00 = 0;
         n01 = 1;
-        n10 = meshi->jbar+1;
-        n11 = 1 + meshi->jbar+1;
+        n10 = jbar+1;
+        n11 = 1 + jbar+1;
        if(iwall<0){
           alpha = vr->alpha_xy0;
           zz=meshi->z0;
@@ -3344,12 +3522,12 @@ void drawsmoke3dVOL(void){
           alpha = vr->alpha_xy1;
           zz=meshi->z1;
         }
-        for(i=0;i<nvolxpm;i++){
-          x[0] = meshi->xplt[0]+(float)i*dx;
-          x[1] = meshi->xplt[0]+(float)(i+1)*dx;
-          for(j=0;j<nvolypm;j++){
-            y[0] = meshi->yplt[0]+(float)j*dy;
-            y[1] = meshi->yplt[0]+(float)(j+1)*dy;
+        for(i=0;i<ibar;i++){
+          x[0] = xplt[i];
+          x[1] = xplt[i+1];
+          for(j=0;j<jbar;j++){
+            y[0] = yplt[j];
+            y[1] = yplt[j+1];
             if(meshi->inside==0&&iwall>0||meshi->inside!=0&&iwall<0){
               glColor4f(0.5,0.5,0.5,alpha[n00]);
               glVertex3f(x[0],y[0],zz);

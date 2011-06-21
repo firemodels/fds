@@ -471,7 +471,6 @@ SVEXTERN int slicefilenum;
 SVEXTERN int partfilenum,zonefilenum;
 SVEXTERN int targfilenum;
 
-SVEXTERN int nvolxpm, nvolypm, nvolzpm;
 SVEXTERN volfacelistdata SVDECL(*volfacelistinfo,NULL),SVDECL(**volfacelistinfoptrs,NULL);
 SVEXTERN int SVDECL(nvolfacelistinfo,0);
 SVEXTERN int update_makeiblank_smoke3d, SVDECL(update_initcull,0);
@@ -484,7 +483,6 @@ SVEXTERN int visHRRlabel;
 #ifdef pp_memstatus
 SVEXTERN int visAvailmemory;
 #endif
-SVEXTERN int ibarmax, jbarmax, kbarmax;
 SVEXTERN int SVDECL(block_volsmoke,0);
 SVEXTERN slice *sd_shown;
 SVEXTERN vslice *vd_shown;

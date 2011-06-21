@@ -6274,6 +6274,7 @@ typedef struct {
 
 void init_volrender(void){
   int i;
+  int ijkbarmax;
 
   nvolrenderinfo=0;
   for(i=0;i<nmeshes;i++){
@@ -6315,20 +6316,15 @@ void init_volrender(void){
       continue;
     }
   }
-  ibarmax=0;
-  jbarmax=0;
-  kbarmax=0;
+  ijkbarmax=0;
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
 
     meshi = meshinfo + i;
-    if(meshi->ibar>ibarmax)ibarmax=meshi->ibar;
-    if(meshi->jbar>jbarmax)jbarmax=meshi->jbar;
-    if(meshi->kbar>kbarmax)kbarmax=meshi->kbar;
+    if(meshi->ibar>ijkbarmax)ijkbarmax=meshi->ibar;
+    if(meshi->jbar>ijkbarmax)ijkbarmax=meshi->jbar;
+    if(meshi->kbar>ijkbarmax)ijkbarmax=meshi->kbar;
   }
-  ibarmax=10*(ibarmax+1);
-  jbarmax=10*(jbarmax+1);
-  kbarmax=10*(kbarmax+1);
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
     volrenderdata *vr;
@@ -6339,9 +6335,9 @@ void init_volrender(void){
       int nx, ny, nz;
 
       nvolrenderinfo++;
-      nx = ibarmax;
-      ny = jbarmax;
-      nz = kbarmax;
+      nx = ijkbarmax+1;
+      ny = ijkbarmax+1;
+      nz = ijkbarmax+1;
       NewMemory((void **)&vr->alpha_yz0,ny*nz*sizeof(float));
       NewMemory((void **)&vr->alpha_yz1,ny*nz*sizeof(float));
       NewMemory((void **)&vr->alpha_xz0,nx*nz*sizeof(float));
