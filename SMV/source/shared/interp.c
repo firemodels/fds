@@ -54,9 +54,9 @@ float interp3d(float xyz[3], float *vals, float *xplt, float *yplt, float *zplt,
 
   vv = vals + ijk;
 
-  dx = (xyz[0] - i*dxbar)/dxbar;
-  dy = (xyz[1] - j*dybar)/dybar;
-  dz = (xyz[2] - k*dzbar)/dzbar;
+  dx = (xyz[0] - xplt[i])/dxbar;
+  dy = (xyz[1] - yplt[j])/dybar;
+  dz = (xyz[2] - zplt[k])/dzbar;
   val000 = vv[0];
   val100 = vv[nyz];
   val010 = vv[nz];

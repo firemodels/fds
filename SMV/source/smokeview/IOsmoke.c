@@ -3106,6 +3106,9 @@ void compute_volvals(void){
     int ibar, jbar, kbar;
 
     meshi = meshinfo + ii;
+    vr = &(meshi->volrenderinfo);
+    if(vr->loaded==0||vr->loaded==0)continue;
+
     x = meshi->xplt;
     y = meshi->yplt;
     z = meshi->zplt;
@@ -3117,7 +3120,6 @@ void compute_volvals(void){
     dz = z[1] - z[0];
     dstep = sqrt(dx*dx+dy*dy+dz*dz);
     
-    vr = &(meshi->volrenderinfo);
     if(vr->smoke==NULL)continue;
     for(iwall=-3;iwall<=3;iwall++){
       float *xyz,xyzarray[3];
@@ -3190,12 +3192,8 @@ void compute_volvals(void){
 
 /* ------------------ drawsmoke3dVOL ------------------------ */
 
-void drawsmoke3dVOL(void){
-  int iwall;
-  float xyz[3];
-  float dx, dy, dz;
+void drawsmoke3dVOLdebug(void){
   int ii;
-
 
   for(ii=0;ii<nvolfacelistinfo;ii++){
     volfacelistdata *vi;
@@ -3206,6 +3204,7 @@ void drawsmoke3dVOL(void){
     float *xplt, *yplt, *zplt;
     int ibar, jbar, kbar;
     char label[256];
+    int iwall;
 
     sprintf(label,"*** %i ***",ii);
 
@@ -3282,6 +3281,7 @@ void drawsmoke3dVOL(void){
     float *xplt, *yplt, *zplt;
     int ibar, jbar, kbar;
     char label[256];
+    int iwall;
 
     sprintf(label,"*** %i %%%",ii);
 
@@ -3368,6 +3368,20 @@ void drawsmoke3dVOL(void){
     }
   }
   glEnd();
+}
+
+/* ------------------ drawsmoke3dVOL ------------------------ */
+
+void drawsmoke3dVOL(void){
+  int iwall;
+  float xyz[3];
+  float dx, dy, dz;
+  int ii;
+
+
+  if(smoke3dVoldebug==1){
+    drawsmoke3dVOLdebug();
+  }
 
   if(use_transparency_data==1)transparenton();
   for(ii=0;ii<nvolfacelistinfo;ii++){
