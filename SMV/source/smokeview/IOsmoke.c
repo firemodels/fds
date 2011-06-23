@@ -2952,8 +2952,6 @@ float optical_depth(float *xyzvert, float dstep, mesh *meshi, int iwall){
   float dist, dx, dy, dz;
   float distseg, dxseg, dyseg, dzseg;
   float xyz[3];
-  float *xplt, *yplt, *zplt;
-  int ibar, jbar, kbar;
   float sootdensum;
   float opacity;
   float kfactor=8700.0;
@@ -2965,12 +2963,6 @@ float optical_depth(float *xyzvert, float dstep, mesh *meshi, int iwall){
 
   boxmin = meshi->boxmin_scaled;
   boxmax = meshi->boxmax_scaled;
-  xplt = meshi->xplt;
-  yplt = meshi->yplt;
-  zplt = meshi->zplt;
-  ibar = meshi->ibar;
-  jbar = meshi->jbar;
-  kbar = meshi->kbar;
 
   // xyz(t) = xyzvert + t*(xyzvert - xyzeyeorig )
   // integrate from t=0 to t=t_intersect_min  (if outside mesh)
@@ -3076,7 +3068,7 @@ float optical_depth(float *xyzvert, float dstep, mesh *meshi, int iwall){
     xyz[1] = (1.0-factor)*vert_beg[1] + factor*vert_end[1];
     xyz[2] = (1.0-factor)*vert_beg[2] + factor*vert_end[2];
 
-    sootden = interp3d(xyz, meshi->volrenderinfo.smokedata, xplt, yplt, zplt, ibar, jbar, kbar, &inobst, blank);
+    sootden = interp3d(xyz, meshi->volrenderinfo.smokedata, meshi, &inobst, blank);
     if(blank!=NULL&&inobst==1)break;
     isteps++;
     sootdensum += sootden;

@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include "flowfiles.h"
 #include "interp.h"
 #include "smokeviewdefs.h"
 
@@ -16,7 +17,7 @@ char interp_revision[]="$Revision$";
 /* ----------------------- interp3d ----------------------------- */
 
 #define INTERP1D(f0,f1,dx) (float)((f0) + ((f1)-(f0))*(dx))
-float interp3d(float xyz[3], float *vals, float *xplt, float *yplt, float *zplt, int ibar, int jbar, int kbar, int *inobst, char *blank){
+float interp3d(float xyz[3], float *vals, mesh *meshi, int *inobst, char *blank){
   int i, j, k;
   int ijk;
   float val000,val100,val010,val110;
@@ -28,6 +29,15 @@ float interp3d(float xyz[3], float *vals, float *xplt, float *yplt, float *zplt,
   float dxbar, dybar, dzbar;
   float *vv;
   int ijkcell;
+  float *xplt, *yplt, *zplt;
+  int ibar, jbar, kbar;
+
+  xplt = meshi->xplt_cen;
+  yplt = meshi->yplt_cen;
+  zplt = meshi->zplt_cen;
+  ibar = meshi->ibar;
+  jbar = meshi->jbar;
+  kbar = meshi->kbar;
 
   dxbar = xplt[1]-xplt[0];
   dybar = yplt[1]-yplt[0];
@@ -52,19 +62,29 @@ float interp3d(float xyz[3], float *vals, float *xplt, float *yplt, float *zplt,
 
   ijk = k + j*nz + i*nyz; 
 
-  vv = vals + ijk;
-
   dx = (xyz[0] - xplt[i])/dxbar;
+  dx = CLAMP(dx,0.0,1.0);
   dy = (xyz[1] - yplt[j])/dybar;
+  dy = CLAMP(dy,0.0,1.0);
   dz = (xyz[2] - zplt[k])/dzbar;
-  val000 = vv[0];
-  val100 = vv[nyz];
-  val010 = vv[nz];
-  val110 = vv[nyz+nz];
-  val001 = vv[1];
-  val101 = vv[nyz+1];
-  val011 = vv[nz+1];
-  val111 = vv[nyz+nz+1];
+  dz = CLAMP(dz,0.0,1.0);
+
+  vv = vals + ijk;
+  val000 = vv[0]; // i,j,k
+  val001 = vv[1]; // i,j,k+1
+
+  vv += nz;
+  val010 = vv[0]; // i,j+1,k
+  val011 = vv[1]; // i,j+1,k+1
+
+  vv += (nyz-nz); 
+  val100 = vv[0]; // i+1,j,k
+  val101 = vv[1]; // i+1,j,k+1
+
+  vv += nz;
+  val110 = vv[0]; // i+1,j+1,k
+  val111 = vv[1]; // i+1,j+1,k+1
+
   val00 = INTERP1D(val000,val100,dx);
   val10 = INTERP1D(val010,val110,dx);
   val01 = INTERP1D(val001,val101,dx);

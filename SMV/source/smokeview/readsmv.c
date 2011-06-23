@@ -970,9 +970,6 @@ int readsmv(char *file, char *file2){
   int iv1, iv2;
   int jv1, jv2;
   int kv1, kv2;
-  float *xp=NULL, *yp=NULL, *zp=NULL;
-  float *xp2=NULL, *yp2=NULL, *zp2=NULL;
-  float *xpltcopy, *ypltcopy, *zpltcopy;
   float dxbar, dybar, dzbar;
   float dxsbar, dysbar, dzsbar;
   int showobst;
@@ -2748,6 +2745,9 @@ typedef struct {
     if(match(buffer,"GRID",4) == 1){
       mesh *meshi;
       int mesh_type=0;
+      float *xp, *yp, *zp;
+      float *xp2, *yp2, *zp2;
+      float *xplt_cen, *yplt_cen,*zplt_cen;
 
 //      int lenbuffer;
 
@@ -2798,9 +2798,13 @@ typedef struct {
       if(kbartemp<1)kbartemp=1;
       xp=NULL; yp=NULL; zp=NULL;
       xp2=NULL; yp2=NULL; zp2=NULL;
-      if(NewMemory((void **)&xp,sizeof(float)*(ibartemp+1))==0||
+      if(
+         NewMemory((void **)&xp,sizeof(float)*(ibartemp+1))==0||
          NewMemory((void **)&yp,sizeof(float)*(jbartemp+1))==0||
          NewMemory((void **)&zp,sizeof(float)*(kbartemp+1))==0||
+         NewMemory((void **)&xplt_cen,sizeof(float)*ibartemp)==0||
+         NewMemory((void **)&yplt_cen,sizeof(float)*jbartemp)==0||
+         NewMemory((void **)&zplt_cen,sizeof(float)*kbartemp)==0||
          NewMemory((void **)&xp2,sizeof(float)*(ibartemp+1))==0||
          NewMemory((void **)&yp2,sizeof(float)*(jbartemp+1))==0||
          NewMemory((void **)&zp2,sizeof(float)*(kbartemp+1))==0
@@ -2810,6 +2814,9 @@ typedef struct {
         meshi->xplt=xp;
         meshi->yplt=yp;
         meshi->zplt=zp;
+        meshi->xplt_cen=xplt_cen;
+        meshi->yplt_cen=yplt_cen;
+        meshi->zplt_cen=zplt_cen;
         meshi->xplt_orig=xp2;
         meshi->yplt_orig=yp2;
         meshi->zplt_orig=zp2;
@@ -3056,12 +3063,19 @@ typedef struct {
 
   if(setGRID==0){
     mesh *meshi;
+    float *xp, *yp, *zp;
+    float *xp2, *yp2, *zp2;
+    float *xplt_cen, *yplt_cen, *zplt_cen;
 
     xp=NULL; yp=NULL; zp=NULL;
     xp2=NULL; yp2=NULL; zp2=NULL;
-    if(NewMemory((void **)&xp,sizeof(float)*(ibartemp+1))==0||
+    if(
+       NewMemory((void **)&xp,sizeof(float)*(ibartemp+1))==0||
        NewMemory((void **)&yp,sizeof(float)*(jbartemp+1))==0||
        NewMemory((void **)&zp,sizeof(float)*(kbartemp+1))==0||
+       NewMemory((void **)&xplt_cen,sizeof(float)*ibartemp)==0||
+       NewMemory((void **)&yplt_cen,sizeof(float)*jbartemp)==0||
+       NewMemory((void **)&zplt_cen,sizeof(float)*kbartemp)==0||
        NewMemory((void **)&xp2,sizeof(float)*(ibartemp+1))==0||
        NewMemory((void **)&yp2,sizeof(float)*(jbartemp+1))==0||
        NewMemory((void **)&zp2,sizeof(float)*(kbartemp+1))==0
@@ -3080,6 +3094,9 @@ typedef struct {
     meshi->xplt=xp;
     meshi->yplt=yp;
     meshi->zplt=zp;
+    meshi->xplt_cen=xplt_cen;
+    meshi->yplt_cen=yplt_cen;
+    meshi->zplt_cen=zplt_cen;
     meshi->xplt_orig=xp2;
     meshi->yplt_orig=yp2;
     meshi->zplt_orig=zp2;
@@ -3680,6 +3697,8 @@ typedef struct {
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"TRNX",4)==1){
+      float *xpltcopy;
+
       itrnx++;
       xpltcopy=meshinfo[itrnx-1].xplt;
       ibartemp=meshinfo[itrnx-1].ibar;
@@ -3700,6 +3719,8 @@ typedef struct {
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"TRNY",4) == 1){
+      float *ypltcopy;
+
       itrny++;
       ypltcopy=meshinfo[itrny-1].yplt;
       jbartemp=meshinfo[itrny-1].jbar;
@@ -3722,6 +3743,8 @@ typedef struct {
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"TRNZ",4) == 1){
+      float *zpltcopy;
+
       itrnz++;
       zpltcopy=meshinfo[itrnz-1].zplt;
       kbartemp=meshinfo[itrnz-1].kbar;
@@ -5747,6 +5770,7 @@ typedef struct {
   for(igrid=0;igrid<nmeshes;igrid++){
     mesh *meshi;
     float *face_centers;
+    float *xplt_cen, *yplt_cen, *zplt_cen;
 
     meshi=meshinfo+igrid;
     ibartemp=meshi->ibar; 
@@ -5758,6 +5782,10 @@ typedef struct {
     xplttemp = meshi->xplt;
     yplttemp = meshi->yplt;
     zplttemp = meshi->zplt;
+    xplt_cen = meshi->xplt_cen;
+    yplt_cen = meshi->yplt_cen;
+    zplt_cen = meshi->zplt_cen;
+
 
     for(i=0;i<ibartemp+1;i++){
       xplt_origtemp[i]=xplttemp[i];
@@ -5771,6 +5799,17 @@ typedef struct {
       zplt_origtemp[k]=zplttemp[k];
       zplttemp[k]=(zplttemp[k]-zbar0)/xyzmaxdiff;
     }
+
+    for(nn=0;nn<ibartemp;nn++){
+      xplt_cen[nn]=(xplttemp[nn]+xplttemp[nn+1])/2.0;
+    }
+    for(nn=0;nn<jbartemp;nn++){
+      yplt_cen[nn]=(yplttemp[nn]+yplttemp[nn+1])/2.0;
+    }
+    for(nn=0;nn<kbartemp;nn++){
+      zplt_cen[nn]=(zplttemp[nn]+zplttemp[nn+1])/2.0;
+    }
+
     meshi->boxoffset=-(zplttemp[1]-zplttemp[0])/10.0;
     meshi->boxmin[0]=xplt_origtemp[0];
     meshi->boxmin[1]=yplt_origtemp[0];
@@ -6926,6 +6965,9 @@ void initmesh(mesh *meshi){
   meshi->xplt=NULL;
   meshi->yplt=NULL;
   meshi->zplt=NULL;
+  meshi->xplt_cen=NULL;
+  meshi->yplt_cen=NULL;
+  meshi->zplt_cen=NULL;
   meshi->xplt_orig=NULL;
   meshi->yplt_orig=NULL;
   meshi->zplt_orig=NULL;

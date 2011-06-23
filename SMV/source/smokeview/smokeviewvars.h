@@ -483,7 +483,7 @@ SVEXTERN int visHRRlabel;
 #ifdef pp_memstatus
 SVEXTERN int visAvailmemory;
 #endif
-SVEXTERN int SVDECL(block_volsmoke,0),SVDECL(smoke3dVoldebug,0);
+SVEXTERN int SVDECL(block_volsmoke,1),SVDECL(smoke3dVoldebug,0);
 SVEXTERN slice *sd_shown;
 SVEXTERN vslice *vd_shown;
 SVEXTERN int show_all_slices;

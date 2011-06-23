@@ -34,7 +34,7 @@
 #endif
 
 #ifndef GETINDEX
-#define GETINDEX(ival,xval,xmin,dx,nx) ival = ((xval)-(xmin))/(dx); CLAMP(ival,0,(nx)-1);
+#define GETINDEX(ival,xval,xmin,dx,nx) ival = ((xval)-(xmin))/(dx); ival = CLAMP(ival,0,(nx)-1)
 #endif
 
 

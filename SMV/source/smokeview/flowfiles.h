@@ -419,6 +419,7 @@ typedef struct _mesh {
   int blockvis;
   float cellsize;
   float *xplt, *yplt, *zplt;
+  float *xplt_cen, *yplt_cen, *zplt_cen;
   float *xplt_orig, *yplt_orig, *zplt_orig;
   float x0, x1, y0, y1, z0, z1;
   float dx01, dy01, dz01;
