@@ -15,7 +15,6 @@
 #include "flowfiles.h"
 #include "MALLOC.h"
 #include "smokeviewvars.h"
-#include "datadefs.h"
 
 // svn revision character string
 char IOshooter_revision[]="$Revision$";

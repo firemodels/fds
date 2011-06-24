@@ -14,7 +14,6 @@
 #include "MALLOC.h"
 #include "smokeviewvars.h"
 #include "update.h"
-#include "datadefs.h"
 
 // svn revision character string
 char IOtarget_revision[]="$Revision$";
@@ -83,9 +82,12 @@ void readtarget(const char *file, int ifile, int flag, int *errorcode){
     sscanf(buffer,"%i %f %f %f",&colorindex,&r,&g,&b);
     sscanf(buffer,"%i ",&colorindex);
     if(colorindex<0){
-      r=CLAMP(r,0.0,1.0);
-      g=CLAMP(g,0.0,1.0);
-      b=CLAMP(b,0.0,1.0);
+      if(r<0.0)r=0.0;
+      if(r>1.0)r=1.0;
+      if(g<0.0)g=0.0;
+      if(g>1.0)g=1.0;
+      if(b<0.0)b=0.0;
+      if(b>1.0)b=1.0;
       target_positions[n].rgb[0]=r;
       target_positions[n].rgb[1]=g;
       target_positions[n].rgb[2]=b;
@@ -309,7 +311,8 @@ void readtarget2(const char *file, int ifile, int flag, int *errorcode){
     else{
       val = 0.5;
     }
-    val=CLAMP(val,0.0,1.0);
+    if(val<0.0)val=0.0;
+    if(val>1.0)val=1.0;
     color[i]=(unsigned char)(val*255);
   }
   ReadTargFile=1;

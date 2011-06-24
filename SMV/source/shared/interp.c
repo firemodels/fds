@@ -9,7 +9,7 @@
 #include <math.h>
 #include "flowfiles.h"
 #include "interp.h"
-#include "datadefs.h"
+#include "smokeviewdefs.h"
 
 char interp_revision[]="$Revision$";
 
@@ -105,7 +105,8 @@ void get_z_interp_factors(float *zplt, int nz, float z, int *k1, int *k2, float 
   dz = zplt[1] - zplt[0];
 
   ileft = (z-zplt[0])/dz;
-  ileft = CLAMP(ileft,0,nz-1);
+  if(ileft<0)ileft=0;
+  if(ileft>nz-1)ileft=nz-1;
   iright = ileft + 1;
 
   *k1 = ileft;
@@ -129,7 +130,8 @@ int interp3dsliceindex(unsigned char *data, float *zplt, int nz, int n0, float z
   dz = zplt[1] - zplt[0];
 
   k1 = (z-zplt[0])/dz;
-  k1 = CLAMP(k1,0,nz-1);
+  if(k1<0)k1=0;
+  if(k1>nz-1)k1=nz-1;
   k2 = k1 + 1;
 
   val1 = data[n0+k1];
@@ -137,7 +139,8 @@ int interp3dsliceindex(unsigned char *data, float *zplt, int nz, int n0, float z
   z1 = zplt[k1];
   z2 = zplt[k2];
   ival = ((z-z1)*val2 + (z2-z)*val1)/dz;
-  ival=CLAMP(ival,0,255);
+  if(ival<0)ival=0;
+  if(ival>255)ival=255;
   return ival;
 }
 

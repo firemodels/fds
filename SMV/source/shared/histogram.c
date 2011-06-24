@@ -13,7 +13,6 @@
 #ifdef pp_CHECK
 #include "MALLOC.h"
 #endif
-#include "datadefs.h"
 
 // svn revision character string
 char histogram_revision[]="$Revision$";
@@ -174,7 +173,8 @@ void merge_histogram(histogramdata *histgram1, histogramdata *histgram2){
         valmin_new=HMIN(valmin_new,val);
         valmax_new=HMAX(valmax_new,val);
         ival = (val-valmin_new)/dbucket_new;
-        ival=CLAMP(ival,0,NHIST_BUCKETS-1);
+        if(ival<0)ival=0;
+        if(ival>NHIST_BUCKETS-1)ival=NHIST_BUCKETS-1;
         histgram1->buckets[ival]+=bucket1copy[i];
       }
       if(histgram2->buckets[i]!=0){
@@ -182,7 +182,8 @@ void merge_histogram(histogramdata *histgram1, histogramdata *histgram2){
         valmin_new=HMIN(valmin_new,val);
         valmax_new=HMAX(valmax_new,val);
         ival = (val-valmin_new)/dbucket_new;
-        ival=CLAMP(ival,0,NHIST_BUCKETS-1);
+        if(ival<0)ival=0;
+        if(ival>NHIST_BUCKETS-1)ival=NHIST_BUCKETS-1;
         histgram1->buckets[ival]+=histgram2->buckets[i];
       }
     }

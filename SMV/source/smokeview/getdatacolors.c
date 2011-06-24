@@ -9,7 +9,6 @@
 #include "flowfiles.h"
 #include "MALLOC.h"
 #include "smokeviewvars.h"
-#include "datadefs.h"
 
 // svn revision character string
 char getdatacolors_revision[]="$Revision$";
@@ -77,7 +76,8 @@ void getBoundaryColors(float *t, int nt, unsigned char *it,
     else{
       itt=1+(int)(factor*(val-local_tmin));
     }
-    itt=CLAMP(itt,0,ndatalevel-1);
+    if(itt<0)itt=0;
+    if(itt>ndatalevel-1)itt=ndatalevel-1;
     *it=itt;
     it++;
     t++;
@@ -170,7 +170,8 @@ void getBoundaryColors2(float *t, int nt, unsigned char *it,
     else{
       itt=1+(int)(0.5+(factor*(*t-local_tmin)));
     }
-    itt=CLAMP(itt,0,ndatalevel-1);
+    if(itt<0)itt=0;
+    if(itt>ndatalevel-1)itt=ndatalevel-1;
     *it=itt;
     it++;
     t++;
@@ -316,7 +317,8 @@ void getBoundaryColors3(patch *patchi, float *t, int nt, unsigned char *it,
     else{
       itt=1+(int)(factor*(val-new_tmin));
     }
-    itt=CLAMP(itt,0,255);
+    if(itt<0)itt=0;
+    if(itt>255)itt=255;
     *it=itt;
     it++;
     t++;
@@ -489,7 +491,8 @@ void getPart5Colors(particle *parti, int nlevel){
 
             val=*rvals++;
             irval = val+0.5;
-            irval=CLAMP(irval,0,navatar_colors-1);
+            if(irval<0)irval=0;
+            if(irval>navatar_colors-1)irval=navatar_colors-1;
             *irvals++=irval;
           }
         }
@@ -513,7 +516,8 @@ void getPart5Colors(particle *parti, int nlevel){
             else{
               irval = 1+253*(val-valmin)/dval;
             }
-            irval=CLAMP(irval,0,255);
+            if(irval<0)irval=0;
+            if(irval>255)irval=255;
             *irvals++=irval;
           }
         }
@@ -760,7 +764,10 @@ void getPartColors(const float *t, int local_skip, int nt,
       else{
         itt=1+(int)(factor*(*t-local_tmin));
       }
-      itt=CLAMP(itt,0,255);
+      if(itt<0)itt=0;
+      if(itt>255){
+        itt=255;
+      }
       *it = itt;
     }
     if(droplet_type==0&&*isprink==1){
@@ -852,7 +859,8 @@ void getZoneColors(const float *t, int nt, unsigned char *it,
     else{
       itt=1+(int)(factor*(val-local_tmin));
     }
-    itt=CLAMP(itt,0,nlevel_full-1);
+    if(itt<0)itt=0;
+    if(itt>nlevel_full-1)itt=nlevel_full-1;
     *it=itt;
     it++;
     t++;
@@ -1002,7 +1010,8 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
         else{
           itt=1+(int)(factor*(val-local_tmin));
         }
-        itt=CLAMP(itt,0,ndatalevel-1);
+        if(itt<0)itt=0;
+        if(itt>ndatalevel-1)itt=ndatalevel-1;
         *iq++=itt;
         q++;
       }
@@ -1061,7 +1070,8 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
       for(n=0;n<ntotal;n++){
         qval=qvals[*iq];
         itt=(int)(factor*(qval-local_tmin));
-        itt=CLAMP(itt,0,ndatalevel-1);
+        if(itt<0)itt=0;
+        if(itt>ndatalevel-1)itt=ndatalevel-1;
         *iq++=itt;
       }
     }
@@ -1107,7 +1117,8 @@ void getSliceColors(const float *t, int nt, unsigned char *it,
     else{
       itt=1+(int)(factor*(val-local_tmin));
     }
-    itt=CLAMP(itt,0,ndatalevel-1);
+    if(itt<0)itt=0;
+    if(itt>ndatalevel-1)itt=ndatalevel-1;
     *it=itt;
     it++;
     t++;
@@ -2173,7 +2184,8 @@ void updatecolors(int changecolorindex){
   global_changecolorindex=changecolorindex;
   if(changecolorindex>=0){
     valindex = global_changecolorindex;
-    valindex=CLAMP(valindex,0,255);
+    if(valindex<0)valindex=0;
+    if(valindex>255)valindex=255;
     cci = changecolorindex;
     if(setbw==1){
       for(n=-colorband;n<colorband+1;n++){
@@ -2341,7 +2353,8 @@ void updatechopcolors(void){
 
     if(setpatchchopmin==1){
       ichopmin=nrgb_full*(patchchopmin-smin)/(smax-smin);
-      ichopmin=CLAMP(ichopmin,0,nrgb_full-1);
+      if(ichopmin<0)ichopmin=0;
+      if(ichopmin>nrgb_full-1)ichopmin=nrgb_full-1;
       for(i=0;i<ichopmin;i++){
         rgb_patch[4*i+3]=0.0;
       }
@@ -2355,7 +2368,8 @@ void updatechopcolors(void){
     }
     if(setpatchchopmax==1){
       ichopmax=nrgb_full*(patchchopmax - smin)/(smax-smin);
-      ichopmax=CLAMP(ichopmax,0,nrgb_full-1);
+      if(ichopmax<0)ichopmax=0;
+      if(ichopmax>nrgb_full-1)ichopmax=nrgb_full-1;
       for(i=ichopmax;i<nrgb_full;i++){
         rgb_patch[4*i+3]=0.0;
       }
@@ -2376,7 +2390,8 @@ void updatechopcolors(void){
  
     if(setslicechopmin==1){
       ichopmin=nrgb_full*(slicechopmin-smin)/(smax-smin);
-      ichopmin=CLAMP(ichopmin,0,nrgb_full-1);
+      if(ichopmin<0)ichopmin=0;
+      if(ichopmin>nrgb_full-1)ichopmin=nrgb_full-1;
       for(i=0;i<ichopmin;i++){
         rgb_slice[4*i+3]=0.0;
       }
@@ -2390,7 +2405,8 @@ void updatechopcolors(void){
     }
     if(setslicechopmax==1){
       ichopmax=nrgb_full*(slicechopmax - smin)/(smax-smin);
-      ichopmax=CLAMP(ichopmax,0,nrgb_full-1);
+      if(ichopmax<0)ichopmax=0;
+      if(ichopmax>nrgb_full-1)ichopmax=nrgb_full-1;
       for(i=ichopmax;i<nrgb_full;i++){
         rgb_slice[4*i+3]=0.0;
       }
@@ -2407,7 +2423,8 @@ void updatechopcolors(void){
   if(partmax>partmin){
     if(setpartchopmin==1){
       ichopmin=nrgb_full*(partchopmin-partmin)/(partmax-partmin);
-      ichopmin=CLAMP(ichopmin,0,nrgb_full-1);
+      if(ichopmin<0)ichopmin=0;
+      if(ichopmin>nrgb_full-1)ichopmin=nrgb_full-1;
       for(i=0;i<ichopmin;i++){
         rgb_part[4*i+3]=0.0;
       }
@@ -2421,7 +2438,8 @@ void updatechopcolors(void){
     }
     if(setpartchopmax==1){
       ichopmax=nrgb_full*(partchopmax - partmin)/(partmax-partmin);
-      ichopmax=CLAMP(ichopmax,0,nrgb_full-1);
+      if(ichopmax<0)ichopmax=0;
+      if(ichopmax>nrgb_full-1)ichopmax=nrgb_full-1;
       for(i=ichopmax;i<nrgb_full;i++){
         rgb_part[4*i+3]=0.0;
       }
@@ -2437,7 +2455,8 @@ void updatechopcolors(void){
   if(p3max_temp>p3min_temp){
     if(setp3chopmin_temp==1){
       ichopmin=nrgb_full*(p3chopmin_temp-p3min_temp)/(p3max_temp-p3min_temp);
-      ichopmin=CLAMP(ichopmin,0,nrgb_full-1);
+      if(ichopmin<0)ichopmin=0;
+      if(ichopmin>nrgb_full-1)ichopmin=nrgb_full-1;
       for(i=0;i<ichopmin;i++){
         rgb_plot3d[4*i+3]=0.0;
       }
@@ -2451,7 +2470,8 @@ void updatechopcolors(void){
     }
     if(setp3chopmax_temp==1){
       ichopmax=nrgb_full*(p3chopmax_temp - p3min_temp)/(p3max_temp-p3min_temp);
-      ichopmax=CLAMP(ichopmax,0,nrgb_full-1);
+      if(ichopmax<0)ichopmax=0;
+      if(ichopmax>nrgb_full-1)ichopmax=nrgb_full-1;
       for(i=ichopmax;i<nrgb_full;i++){
         rgb_plot3d[4*i+3]=0.0;
       }

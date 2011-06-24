@@ -21,7 +21,6 @@
 #include "smv_endian.h"
 #include "update.h"
 #include "interp.h"
-#include "datadefs.h"
 
 // svn revision character string
 char IOslice_revision[]="$Revision$";

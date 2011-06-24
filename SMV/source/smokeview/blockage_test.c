@@ -16,8 +16,6 @@
 #include "contourdefs.h"
 #include "MALLOC.h"
 #include "smokeviewvars.h"
-#include "datadefs.h"
-
 char blockage_test_revision[]="$Revision$";
 
 #define HIT 1

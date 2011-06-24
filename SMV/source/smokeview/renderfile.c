@@ -10,7 +10,6 @@
 #include <sys/stat.h>
 #include "smokeviewvars.h"
 #include "translate.h"
-#include "datadefs.h"
 
 #ifdef pp_OSX
 #include <GLUT/glut.h>
@@ -457,10 +456,12 @@ int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
           int irow, icol;
 
           irow = idev_row+row_offset;
-          irow=CLAMP(irow,0,width-1);
+          if(irow<0)irow=0;
+          if(irow>width-1)irow=width-1;
 
           icol = height - 1 - (idev_col+col_offset);
-          icol=CLAMP(icol,0,height-1);
+          if(icol<0)icol=0;
+          if(icol>height-1)icol=height-1;
 
           gdImageSetPixel(RENDERimage,irow,icol,red);
         }
