@@ -16,6 +16,7 @@
 #include "MALLOC.h"
 #include "smokeviewvars.h"
 #include "update.h"
+#include "datadefs.h"
 
 // svn revision character string
 char IOtour_revision[]="$Revision$";
@@ -642,8 +643,7 @@ void createtourpaths(void){
       pj->keysnap=&kf1->nodeval;
       dt = kf2->nodeval.time - kf1->nodeval.time;
       f1 = (vtime - kf1->nodeval.time)/dt;
-      if(f1<0.0)f1=0.0;
-      if(f1>1.0)f1=1.0;
+      f1=CLAMP(f1,0.0,1.0);
       f2 = 1 - f1;
       pj->time=vtime;
       touri->path_times[j]=vtime;
@@ -792,8 +792,7 @@ void createtourpaths(void){
       kf2 = touri->keyframe_list[iframe_new+1];
       dt = kf2->nodeval.time - kf1->nodeval.time;
       f1 = (vtime - kf1->nodeval.time)/dt;
-      if(f1<0.0)f1=0.0;
-      if(f1>1.0)f1=1.0;
+      f1=CLAMP(f1,0.0,1.0);
       f2 = 1 - f1;
       pj->time=vtime2;
       touri->path_times[j]=vtime2;

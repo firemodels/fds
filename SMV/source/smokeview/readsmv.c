@@ -27,6 +27,7 @@
 #include "translate.h"
 #include "update.h"
 #include "smokeviewvars.h"
+#include "datadefs.h"
 
 // svn revision character string
 char readsmv_revision[]="$Revision$";
@@ -8575,8 +8576,7 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"FONTSIZE",8)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i ",&fontindex);
-      if(fontindex<0)fontindex=0;
-      if(fontindex>1)fontindex=1;
+      fontindex=CLAMP(fontindex,0,1);
       FontMenu(fontindex);
       continue;
     }
@@ -8605,8 +8605,7 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"APERATURE",9)==1||match(buffer,"APERTURE",8)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i ",&apertureindex);
-      if(apertureindex<0)apertureindex=0;
-      if(apertureindex>4)apertureindex=4;
+      apertureindex=CLAMP(apertureindex,0,4);
       ApertureMenu(apertureindex);
       continue;
     }

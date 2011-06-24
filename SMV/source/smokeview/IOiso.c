@@ -17,6 +17,7 @@
 #include "MALLOC.h"
 #include "smokeviewvars.h"
 #include "update.h"
+#include "datadefs.h"
 
 // svn revision character string
 char IOiso_revision[]="$Revision$";
@@ -1629,8 +1630,7 @@ void sync_isobounds(int isottype){
         }
         for(kk=0;kk<asurface->nvertices;kk++){
           tcolor = tcolor0 + asurface->tvertices[kk]*tcolorfactor;
-          if(tcolor<0.0)tcolor=0.0;
-          if(tcolor>1.0)tcolor=1.0;
+          tcolor=CLAMP(tcolor,0.0,1.0);
           asurface->color8[kk] = (unsigned char)(tcolor*255);
         }
         asurface++;

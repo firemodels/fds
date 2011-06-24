@@ -7,8 +7,8 @@
 #include <stdlib.h>
 #include "MALLOC.h"
 #include "flowfiles.h"
-#include "smokeviewdefs.h"
 #include "smokeviewvars.h"
+#include "datadefs.h"
 
 // svn revision character string
 char getdatabounds_revision[]="$Revision$";
@@ -164,8 +164,7 @@ void adjustpart5bounds(particle *parti){
 
           val=*rvals++;
           ival = (val-*valmin)/dg;
-          if(ival<0)ival=0;
-          if(ival>NBUCKETS-1)ival=NBUCKETS-1;
+          ival=CLAMP(ival,0,NBUCKETS-1);
           buckets[ival]++;
         }
       }
@@ -287,12 +286,7 @@ void adjustpartbounds(const float *pdata, int particle_type, int droplet_type, c
           if(particle_type==0)continue;
         }
         if(dp!=0.0f)level = (int)((pdata[n] - *pmin)/dp);
-        if(level<0){
-          level=0;
-        }
-        if(level>NBUCKETS-1){
-          level=NBUCKETS-1;
-        }
+        level=CLAMP(level,0,NBUCKETS-1);
         ndata++;
         buckets[level]++;
       }
@@ -362,12 +356,7 @@ void adjustPlot3Dbounds(int plot3dvar, int setpmin, float *pmin, int setpmax, fl
           if(iblank==NULL||*iblank++==1){
             level=0;
             if(dp!=0.0f)level = (int)((q[n] - *pmin)/dp);
-            if(level<0){
-              level=0;
-            }
-            if(level>NBUCKETS-1){
-              level=NBUCKETS-1;
-            }
+            level=CLAMP(level,0,NBUCKETS-1);
             buckets[level]++;
           }
         }

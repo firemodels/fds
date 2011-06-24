@@ -26,6 +26,7 @@
 #include "smokeviewvars.h"
 #include "translate.h"
 #include "update.h"
+#include "datadefs.h"
 
 /* dummy change to bump revision number to 5.1.5 */
 
@@ -410,8 +411,7 @@ void SmokeColorBarMenu(int value){
   updatemenu=1;
   glutPostRedisplay();
 
-  if(value<0)value=0;
-  if(value>ncolorbars-1)value=ncolorbars-1;
+  value=CLAMP(value,0,ncolorbars-1);
   fire_colorbar_index=value;
   fire_colorbar = colorbarinfo + value;
   updatecolors(-1);

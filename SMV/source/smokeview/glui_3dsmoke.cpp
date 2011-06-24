@@ -20,6 +20,7 @@
 #include "smokeheaders.h"
 #include "translate.h"
 #include "MALLOC.h"
+#include "datadefs.h"
 
 // svn revision character string
 extern "C" char glui_3dsmoke_revision[]="$Revision$";
@@ -338,8 +339,7 @@ void update_alpha(void){
 
   factor = 1.0 - exp(-smoke_extinct*smoke_dens*smoke_pathlength);
   smoke_alpha = 255*factor;
-  if(smoke_alpha<0)smoke_alpha=0;
-  if(smoke_alpha>255)smoke_alpha=255;
+  smoke_alpha=CLAMP(smoke_alpha,0,255);
   sprintf(label1,"%f",smoke_extinct);
   trimzeros(label1);
   sprintf(label2,"%f",smoke_dens);

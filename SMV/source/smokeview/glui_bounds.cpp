@@ -18,6 +18,7 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 #include "translate.h"
+#include "datadefs.h"
 
 // svn revision character string
 extern "C" char glui_bounds_revision[]="$Revision$";
@@ -1143,8 +1144,7 @@ extern "C" void updateplot3dlistindex(void){
 
   i=plotn-1;
   list_p3_index_old=i;
-  if(i<0)i=0;
-  if(i>mxplot3dvars-1)i=mxplot3dvars-1;
+  i=CLAMP(i,0,mxplot3dvars-1);
   p3rlist->set_int_val(i);
   p3min_temp = p3min[i];
   p3max_temp = p3max[i];

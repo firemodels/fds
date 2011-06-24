@@ -8,27 +8,108 @@
 #endif
 #include <stdio.h>  
 #include <stdlib.h>
-#include <string.h>
 #include <math.h>
 #include "flowfiles.h"
-#include <sys/types.h>
-#include <sys/stat.h>
-#ifdef pp_OSX
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
 #include <float.h>
-#include "egz_stdio.h"
 #include "MALLOC.h"
 #include "smokeheaders.h"
 #include "smokeviewvars.h"
-#include "update.h"
 #include "interp.h"
+#include "datadefs.h"
 
 // svn revision character string
 char IOvolsmoke_revision[]="$Revision$";
 
+/* ------------------ init_volrender ------------------------ */
+
+void init_volrender(void){
+  int i;
+  int ijkbarmax;
+
+  nvolrenderinfo=0;
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    volrenderdata *vr;
+
+    meshi = meshinfo + i;
+    vr = &(meshi->volrenderinfo);
+    vr->rendermesh=meshi;
+    vr->fire=NULL;
+    vr->smoke=NULL;
+    vr->loaded=0;
+    vr->show=0;
+    vr->timeslist=NULL;
+  }
+#ifndef pp_VOLRENDER
+  return;
+#endif
+  for(i=0;i<nsliceinfo;i++){
+    slice *slicei;
+    char *shortlabel;
+    int blocknumber;
+    mesh *meshi;
+    volrenderdata *vr;
+
+    slicei = sliceinfo + i;
+    blocknumber = slicei->blocknumber;
+    if(blocknumber<0||blocknumber>=nmeshes)continue;
+    meshi = meshinfo + blocknumber;
+    if(slicei->nslicei!=meshi->ibar+1||slicei->nslicej!=meshi->jbar+1||slicei->nslicek!=meshi->kbar+1)continue;
+    vr = &(meshi->volrenderinfo);
+    shortlabel = slicei->label.shortlabel;
+
+    if(STRCMP(shortlabel,"temp")==0){  
+      vr->fire=slicei;
+      continue;
+    }
+    if(STRCMP(shortlabel,"rho_Soot")==0){
+      vr->smoke=slicei;
+      continue;
+    }
+  }
+  ijkbarmax=0;
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+
+    meshi = meshinfo + i;
+    if(meshi->ibar>ijkbarmax)ijkbarmax=meshi->ibar;
+    if(meshi->jbar>ijkbarmax)ijkbarmax=meshi->jbar;
+    if(meshi->kbar>ijkbarmax)ijkbarmax=meshi->kbar;
+  }
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    volrenderdata *vr;
+
+    meshi = meshinfo + i;
+    vr = &(meshi->volrenderinfo);
+    if(vr->fire!=NULL||vr->smoke!=NULL){
+      int nx, ny, nz;
+
+      nvolrenderinfo++;
+      nx = ijkbarmax+1;
+      ny = ijkbarmax+1;
+      nz = ijkbarmax+1;
+      NewMemory((void **)&vr->alpha_yz0,ny*nz*sizeof(float));
+      NewMemory((void **)&vr->alpha_yz1,ny*nz*sizeof(float));
+      NewMemory((void **)&vr->alpha_xz0,nx*nz*sizeof(float));
+      NewMemory((void **)&vr->alpha_xz1,nx*nz*sizeof(float));
+      NewMemory((void **)&vr->alpha_xy0,nx*ny*sizeof(float));
+      NewMemory((void **)&vr->alpha_xy1,nx*ny*sizeof(float));
+    }
+    else{
+      vr->alpha_yz0=NULL;
+      vr->alpha_yz1=NULL;
+      vr->alpha_xz0=NULL;
+      vr->alpha_xz1=NULL;
+      vr->alpha_xy0=NULL;
+      vr->alpha_xy1=NULL;
+    }
+  }
+  if(nvolrenderinfo>0){
+    NewMemory((void **)&volfacelistinfo,6*nmeshes*sizeof(volfacelistdata));
+    NewMemory((void **)&volfacelistinfoptrs,6*nmeshes*sizeof(volfacelistdata *));
+  }
+}
 
 /* ------------------ compute_volvals ------------------------ */
 
@@ -818,96 +899,4 @@ float optical_depth(float *xyzvert, float dstep, mesh *meshi, int iwall){
   //opacity = 1.0 - exp(-sootdensum);
   opacity = 1.0 - exp(-kfactor*sootdensum);
   return opacity;
-}
-
-
-/* ------------------ init_volrender ------------------------ */
-
-void init_volrender(void){
-  int i;
-  int ijkbarmax;
-
-  nvolrenderinfo=0;
-  for(i=0;i<nmeshes;i++){
-    mesh *meshi;
-    volrenderdata *vr;
-
-    meshi = meshinfo + i;
-    vr = &(meshi->volrenderinfo);
-    vr->rendermesh=meshi;
-    vr->fire=NULL;
-    vr->smoke=NULL;
-    vr->loaded=0;
-    vr->show=0;
-    vr->timeslist=NULL;
-  }
-#ifndef pp_VOLRENDER
-  return;
-#endif
-  for(i=0;i<nsliceinfo;i++){
-    slice *slicei;
-    char *shortlabel;
-    int blocknumber;
-    mesh *meshi;
-    volrenderdata *vr;
-
-    slicei = sliceinfo + i;
-    blocknumber = slicei->blocknumber;
-    if(blocknumber<0||blocknumber>=nmeshes)continue;
-    meshi = meshinfo + blocknumber;
-    if(slicei->nslicei!=meshi->ibar+1||slicei->nslicej!=meshi->jbar+1||slicei->nslicek!=meshi->kbar+1)continue;
-    vr = &(meshi->volrenderinfo);
-    shortlabel = slicei->label.shortlabel;
-   //*** turn off loading of 3d fire slice for now
-   // if(STRCMP(shortlabel,"temp")==0){  
-   //   vr->fire=slicei;
-   //   continue;
-   // }
-    if(STRCMP(shortlabel,"rho_Soot")==0){
-      vr->smoke=slicei;
-      continue;
-    }
-  }
-  ijkbarmax=0;
-  for(i=0;i<nmeshes;i++){
-    mesh *meshi;
-
-    meshi = meshinfo + i;
-    if(meshi->ibar>ijkbarmax)ijkbarmax=meshi->ibar;
-    if(meshi->jbar>ijkbarmax)ijkbarmax=meshi->jbar;
-    if(meshi->kbar>ijkbarmax)ijkbarmax=meshi->kbar;
-  }
-  for(i=0;i<nmeshes;i++){
-    mesh *meshi;
-    volrenderdata *vr;
-
-    meshi = meshinfo + i;
-    vr = &(meshi->volrenderinfo);
-    if(vr->fire!=NULL||vr->smoke!=NULL){
-      int nx, ny, nz;
-
-      nvolrenderinfo++;
-      nx = ijkbarmax+1;
-      ny = ijkbarmax+1;
-      nz = ijkbarmax+1;
-      NewMemory((void **)&vr->alpha_yz0,ny*nz*sizeof(float));
-      NewMemory((void **)&vr->alpha_yz1,ny*nz*sizeof(float));
-      NewMemory((void **)&vr->alpha_xz0,nx*nz*sizeof(float));
-      NewMemory((void **)&vr->alpha_xz1,nx*nz*sizeof(float));
-      NewMemory((void **)&vr->alpha_xy0,nx*ny*sizeof(float));
-      NewMemory((void **)&vr->alpha_xy1,nx*ny*sizeof(float));
-    }
-    else{
-      vr->alpha_yz0=NULL;
-      vr->alpha_yz1=NULL;
-      vr->alpha_xz0=NULL;
-      vr->alpha_xz1=NULL;
-      vr->alpha_xy0=NULL;
-      vr->alpha_xy1=NULL;
-    }
-  }
-  if(nvolrenderinfo>0){
-    NewMemory((void **)&volfacelistinfo,6*nmeshes*sizeof(volfacelistdata));
-    NewMemory((void **)&volfacelistinfoptrs,6*nmeshes*sizeof(volfacelistdata *));
-  }
 }
