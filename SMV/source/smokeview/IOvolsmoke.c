@@ -9,13 +9,11 @@
 #include <stdio.h>  
 #include <stdlib.h>
 #include <math.h>
-#include "flowfiles.h"
 #include <float.h>
+#include "flowfiles.h"
 #include "MALLOC.h"
-#include "smokeheaders.h"
 #include "smokeviewvars.h"
 #include "interp.h"
-#include "datadefs.h"
 
 // svn revision character string
 char IOvolsmoke_revision[]="$Revision$";
@@ -58,10 +56,10 @@ void init_volrender(void){
     vr = &(meshi->volrenderinfo);
     shortlabel = slicei->label.shortlabel;
 
-    if(STRCMP(shortlabel,"temp")==0){  
-      vr->fire=slicei;
-      continue;
-    }
+//    if(STRCMP(shortlabel,"temp")==0){  
+//      vr->fire=slicei;
+//     continue;
+//    }
     if(STRCMP(shortlabel,"rho_Soot")==0){
       vr->smoke=slicei;
       continue;
@@ -109,6 +107,151 @@ void init_volrender(void){
     NewMemory((void **)&volfacelistinfo,6*nmeshes*sizeof(volfacelistdata));
     NewMemory((void **)&volfacelistinfoptrs,6*nmeshes*sizeof(volfacelistdata *));
   }
+}
+
+
+//  glUniform3f(GPUvol_eyepos,xyzeyeorig[0],xyzeyeorig[1],xyzeyeorig[2]);
+//  glUniform1i(GPUvol_inside,meshi->inside);
+//  glUniform1f(GPUvol_xyzmaxdiff,xyzmaxdiff);
+//  glUniform3f(GPUvol_boxmin,meshi->x0,meshi->y0,meshi->z0);
+//  glUniform3f(GPUvol_boxmax,meshi->x1,meshi->y1,meshi->z1);
+
+/* ------------------ optical_depth ------------------------ */
+
+float optical_depth(float *xyzvert, float dstep, mesh *meshi, int iwall){
+  float t_intersect, t_intersect_min=FLT_MAX, *boxmin, *boxmax;
+  float tmin, tmax;
+  int i;
+  int nsteps;
+  float dist, dx, dy, dz;
+  float distseg, dxseg, dyseg, dzseg;
+  float xyz[3];
+  float sootdensum;
+  float opacity;
+  float kfactor=8700.0;
+  float *vert_beg, *vert_end;
+  int iwall_min=0;
+  float xyzvals[3];
+  int isteps;
+  char *blank;
+
+  boxmin = meshi->boxmin_scaled;
+  boxmax = meshi->boxmax_scaled;
+
+  // xyz(t) = xyzvert + t*(xyzvert - xyzeyeorig )
+  // integrate from t=0 to t=t_intersect_min  (if outside mesh)
+  //     ie from vertex to nearest wall along a line from the eye position
+  //        intersecting the vertex position
+  // integrate from t=-1 to t=0 (if inside mesh)
+  //     ie from the eye position to the vertex position
+
+  if(meshi->inside==1){
+    vert_beg=xyzeyeorig;
+    vert_end=xyzvert;
+  }
+  else{
+    vert_beg=xyzvert;
+    vert_end=xyzvals;
+
+    dx = xyzvert[0] - xyzeyeorig[0];
+    dy = xyzvert[1] - xyzeyeorig[1];
+    dz = xyzvert[2] - xyzeyeorig[2];
+    for(i=1;i<4;i++){
+      int ii;
+      float diffmin,diffmax,denom;
+
+      ii=i-1;
+      diffmin = boxmin[ii]-xyzvert[ii];
+      diffmax = boxmax[ii]-xyzvert[ii];
+      denom = xyzvert[ii]-xyzeyeorig[ii];
+      if(iwall!=-i&&denom<0.0){
+        t_intersect = diffmin/denom;
+        if(t_intersect<t_intersect_min){
+          t_intersect_min=t_intersect;
+          iwall_min=-i;
+        }
+      }
+      if(iwall!=i&&denom>0.0){
+        t_intersect = diffmax/denom;
+        if(t_intersect<t_intersect_min){
+          t_intersect_min=t_intersect;
+          iwall_min=i;
+        }
+      }
+    }
+    switch (iwall_min){
+      case -1:
+        vert_end[0] = boxmin[0];
+        vert_end[1] = CLAMP(xyzvert[1] + t_intersect_min*dy,boxmin[1],boxmax[1]);
+        vert_end[2] = CLAMP(xyzvert[2] + t_intersect_min*dz,boxmin[2],boxmax[2]);
+        break;
+      case 1:
+        vert_end[0] = boxmax[0];
+        vert_end[1] = CLAMP(xyzvert[1] + t_intersect_min*dy,boxmin[1],boxmax[1]);
+        vert_end[2] = CLAMP(xyzvert[2] + t_intersect_min*dz,boxmin[2],boxmax[2]);
+        break;
+      case -2:
+        vert_end[0] = CLAMP(xyzvert[0] + t_intersect_min*dx,boxmin[0],boxmax[0]);
+        vert_end[1] = boxmin[1];
+        vert_end[2] = CLAMP(xyzvert[2] + t_intersect_min*dz,boxmin[2],boxmax[2]);
+        break;
+      case 2:
+        vert_end[0] = CLAMP(xyzvert[0] + t_intersect_min*dx,boxmin[0],boxmax[0]);
+        vert_end[1] = boxmax[1];
+        vert_end[2] = CLAMP(xyzvert[2] + t_intersect_min*dz,boxmin[2],boxmax[2]);
+        break;
+      case -3:
+        vert_end[0] = CLAMP(xyzvert[0] + t_intersect_min*dx,boxmin[0],boxmax[0]);
+        vert_end[1] = CLAMP(xyzvert[1] + t_intersect_min*dy,boxmin[1],boxmax[1]);
+        vert_end[2] = boxmin[2];
+        break;
+      case 3:
+        vert_end[0] = CLAMP(xyzvert[0] + t_intersect_min*dx,boxmin[0],boxmax[0]);
+        vert_end[1] = CLAMP(xyzvert[1] + t_intersect_min*dy,boxmin[1],boxmax[1]);
+        vert_end[2] = boxmax[2];
+        break;
+    }
+  }
+
+  dxseg = vert_end[0] - vert_beg[0];
+  dyseg = vert_end[1] - vert_beg[1];
+  dzseg = vert_end[2] - vert_beg[2];
+  distseg = sqrt(dxseg*dxseg+dyseg*dyseg+dzseg*dzseg);
+  if(distseg<0.001)return 0.0;
+
+  nsteps = distseg/dstep;
+  if(nsteps<1){
+    nsteps=1;
+  }
+  sootdensum=0.0;
+  isteps=0;
+  if(block_volsmoke==1){
+    blank=meshi->c_iblank_cell;
+  }
+  else{
+    blank=NULL;
+  }
+  for(i=0;i<nsteps;i++){
+    float sootden, factor;
+    int icell, jcell, kcell;
+    int inobst;
+
+    factor = (0.5 + (float)i)/(float)nsteps;
+
+    xyz[0] = (1.0-factor)*vert_beg[0] + factor*vert_end[0];
+    xyz[1] = (1.0-factor)*vert_beg[1] + factor*vert_end[1];
+    xyz[2] = (1.0-factor)*vert_beg[2] + factor*vert_end[2];
+
+    sootden = interp3d(xyz, meshi->volrenderinfo.smokedata, meshi, &inobst, blank);
+    if(blank!=NULL&&inobst==1)break;
+    isteps++;
+    sootdensum += sootden;
+  }
+  if(isteps!=nsteps)distseg*=(float)isteps/(float)nsteps;
+  sootdensum*=xyzmaxdiff*distseg/(float)nsteps;
+  //opacity = 1.0 - exp(-sootdensum);
+  opacity = 1.0 - exp(-kfactor*sootdensum);
+  return opacity;
 }
 
 /* ------------------ compute_volvals ------------------------ */
@@ -753,150 +896,6 @@ void drawsmoke3dGPUVOL(volrenderdata *vr){
     }
     glEnd();
   }
-
 }
+
 #endif
-
-//  glUniform3f(GPUvol_eyepos,xyzeyeorig[0],xyzeyeorig[1],xyzeyeorig[2]);
-//  glUniform1i(GPUvol_inside,meshi->inside);
-//  glUniform1f(GPUvol_xyzmaxdiff,xyzmaxdiff);
-//  glUniform3f(GPUvol_boxmin,meshi->x0,meshi->y0,meshi->z0);
-//  glUniform3f(GPUvol_boxmax,meshi->x1,meshi->y1,meshi->z1);
-
-/* ------------------ optical_depth ------------------------ */
-
-float optical_depth(float *xyzvert, float dstep, mesh *meshi, int iwall){
-  float t_intersect, t_intersect_min=FLT_MAX, *boxmin, *boxmax;
-  float tmin, tmax;
-  int i;
-  int nsteps;
-  float dist, dx, dy, dz;
-  float distseg, dxseg, dyseg, dzseg;
-  float xyz[3];
-  float sootdensum;
-  float opacity;
-  float kfactor=8700.0;
-  float *vert_beg, *vert_end;
-  int iwall_min=0;
-  float xyzvals[3];
-  int isteps;
-  char *blank;
-
-  boxmin = meshi->boxmin_scaled;
-  boxmax = meshi->boxmax_scaled;
-
-  // xyz(t) = xyzvert + t*(xyzvert - xyzeyeorig )
-  // integrate from t=0 to t=t_intersect_min  (if outside mesh)
-  //     ie from vertex to nearest wall along a line from the eye position
-  //        intersecting the vertex position
-  // integrate from t=-1 to t=0 (if inside mesh)
-  //     ie from the eye position to the vertex position
-
-  if(meshi->inside==1){
-    vert_beg=xyzeyeorig;
-    vert_end=xyzvert;
-  }
-  else{
-    vert_beg=xyzvert;
-    vert_end=xyzvals;
-
-    dx = xyzvert[0] - xyzeyeorig[0];
-    dy = xyzvert[1] - xyzeyeorig[1];
-    dz = xyzvert[2] - xyzeyeorig[2];
-    for(i=1;i<4;i++){
-      int ii;
-      float diffmin,diffmax,denom;
-
-      ii=i-1;
-      diffmin = boxmin[ii]-xyzvert[ii];
-      diffmax = boxmax[ii]-xyzvert[ii];
-      denom = xyzvert[ii]-xyzeyeorig[ii];
-      if(iwall!=-i&&denom<0.0){
-        t_intersect = diffmin/denom;
-        if(t_intersect<t_intersect_min){
-          t_intersect_min=t_intersect;
-          iwall_min=-i;
-        }
-      }
-      if(iwall!=i&&denom>0.0){
-        t_intersect = diffmax/denom;
-        if(t_intersect<t_intersect_min){
-          t_intersect_min=t_intersect;
-          iwall_min=i;
-        }
-      }
-    }
-    switch (iwall_min){
-      case -1:
-        vert_end[0] = boxmin[0];
-        vert_end[1] = CLAMP(xyzvert[1] + t_intersect_min*dy,boxmin[1],boxmax[1]);
-        vert_end[2] = CLAMP(xyzvert[2] + t_intersect_min*dz,boxmin[2],boxmax[2]);
-        break;
-      case 1:
-        vert_end[0] = boxmax[0];
-        vert_end[1] = CLAMP(xyzvert[1] + t_intersect_min*dy,boxmin[1],boxmax[1]);
-        vert_end[2] = CLAMP(xyzvert[2] + t_intersect_min*dz,boxmin[2],boxmax[2]);
-        break;
-      case -2:
-        vert_end[0] = CLAMP(xyzvert[0] + t_intersect_min*dx,boxmin[0],boxmax[0]);
-        vert_end[1] = boxmin[1];
-        vert_end[2] = CLAMP(xyzvert[2] + t_intersect_min*dz,boxmin[2],boxmax[2]);
-        break;
-      case 2:
-        vert_end[0] = CLAMP(xyzvert[0] + t_intersect_min*dx,boxmin[0],boxmax[0]);
-        vert_end[1] = boxmax[1];
-        vert_end[2] = CLAMP(xyzvert[2] + t_intersect_min*dz,boxmin[2],boxmax[2]);
-        break;
-      case -3:
-        vert_end[0] = CLAMP(xyzvert[0] + t_intersect_min*dx,boxmin[0],boxmax[0]);
-        vert_end[1] = CLAMP(xyzvert[1] + t_intersect_min*dy,boxmin[1],boxmax[1]);
-        vert_end[2] = boxmin[2];
-        break;
-      case 3:
-        vert_end[0] = CLAMP(xyzvert[0] + t_intersect_min*dx,boxmin[0],boxmax[0]);
-        vert_end[1] = CLAMP(xyzvert[1] + t_intersect_min*dy,boxmin[1],boxmax[1]);
-        vert_end[2] = boxmax[2];
-        break;
-    }
-  }
-
-  dxseg = vert_end[0] - vert_beg[0];
-  dyseg = vert_end[1] - vert_beg[1];
-  dzseg = vert_end[2] - vert_beg[2];
-  distseg = sqrt(dxseg*dxseg+dyseg*dyseg+dzseg*dzseg);
-  if(distseg<0.001)return 0.0;
-
-  nsteps = distseg/dstep;
-  if(nsteps<1){
-    nsteps=1;
-  }
-  sootdensum=0.0;
-  isteps=0;
-  if(block_volsmoke==1){
-    blank=meshi->c_iblank_cell;
-  }
-  else{
-    blank=NULL;
-  }
-  for(i=0;i<nsteps;i++){
-    float sootden, factor;
-    int icell, jcell, kcell;
-    int inobst;
-
-    factor = (0.5 + (float)i)/(float)nsteps;
-
-    xyz[0] = (1.0-factor)*vert_beg[0] + factor*vert_end[0];
-    xyz[1] = (1.0-factor)*vert_beg[1] + factor*vert_end[1];
-    xyz[2] = (1.0-factor)*vert_beg[2] + factor*vert_end[2];
-
-    sootden = interp3d(xyz, meshi->volrenderinfo.smokedata, meshi, &inobst, blank);
-    if(blank!=NULL&&inobst==1)break;
-    isteps++;
-    sootdensum += sootden;
-  }
-  if(isteps!=nsteps)distseg*=(float)isteps/(float)nsteps;
-  sootdensum*=xyzmaxdiff*distseg/(float)nsteps;
-  //opacity = 1.0 - exp(-sootdensum);
-  opacity = 1.0 - exp(-kfactor*sootdensum);
-  return opacity;
-}

@@ -2248,6 +2248,7 @@ int getmaxrevision(void){
 #endif
   MAXREV(IOslice_revision);
   MAXREV(IOsmoke_revision);
+  MAXREV(IOvolsmoke_revision);
   MAXREV(IOtarget_revision);
   MAXREV(IOtour_revision);
   MAXREV(IOwui_revision);

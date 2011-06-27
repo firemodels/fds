@@ -58,6 +58,9 @@ float interp3d(float xyz[3], float *vals, mesh *meshi, int *inobst, char *blank)
       *inobst=1;
       return 0.0;
     }
+    else{
+      *inobst=0;
+    }
   }
 
   ijk = k + j*nz + i*nyz; 

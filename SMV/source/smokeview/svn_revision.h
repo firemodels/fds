@@ -43,6 +43,7 @@ extern char IOplot3d_revision[];
 extern char IOslice_revision[];
 extern char IOscript_revision[];
 extern char IOsmoke_revision[];
+extern char IOvolsmoke_revision[];
 #ifdef pp_SHOOTER
 extern char IOshooter_revision[];
 #endif
