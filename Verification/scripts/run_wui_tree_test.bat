@@ -4,7 +4,8 @@ set svn_drive=d:
 set SVNROOT=%CD%\..\..\
 set WUIDIR=%SVNROOT%\Verification\Wui
 
-set FDS=%SVNROOT%\FDS_Compilation\intel_win_32\fds5_win_32
+Rem set FDS=%SVNROOT%\FDS_Compilation\intel_win_32\fds_win_32
+set FDS=%SVNROOT%\FDS_Compilation\intel_win_64\fds_win_64
 
 echo %FDS%
 cd %WUIDIR%
