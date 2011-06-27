@@ -240,6 +240,16 @@ for i=2:2000
             end
         end
         
+        % add SVN if file is available
+        
+        if exist(SVN_Filename,'file')
+           SVN = importdata(SVN_Filename);
+           X_SVN_Position = Min_Ind+0.80*(Max_Ind-Min_Ind);
+           Y_SVN_Position = Min_Dep+1.05*(Max_Dep-Min_Dep);
+           text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
+               'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+        end
+        
         % print to pdf
         
         set(gcf,'Visible',Figure_Visibility);

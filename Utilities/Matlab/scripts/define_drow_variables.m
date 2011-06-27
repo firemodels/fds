@@ -13,6 +13,7 @@ Quantity          = parameters(find(strcmp(headers,'Quantity')));
 Group_Key_Label   = parameters(find(strcmp(headers,'Group_Key_Label')));
 Group_Style       = parameters(find(strcmp(headers,'Group_Style')));
 Fill_Color        = parameters(find(strcmp(headers,'Fill_Color')));
+SVN_Filename      = [vdir,char(parameters(find(strcmp(headers,'SVN_Filename'))))];
 d1_Filename       = [vdir,char(parameters(find(strcmp(headers,'d1_Filename'))))];
 d1_Col_Name_Row   = str2num(char(parameters(find(strcmp(headers,'d1_Col_Name_Row')))));
 d1_Ind_Col_Name   = char(parameters(find(strcmp(headers,'d1_Ind_Col_Name'))));
