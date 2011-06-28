@@ -21,6 +21,7 @@ addpath 'scripts'
 % scripts to run prior to dataplot
 
 radiation_box
+radiation_plane_layer
 
 cfil = [pwd,'/verification_data_config_matlab.csv'];
 vdir = [pwd,'/../../Verification/'];
