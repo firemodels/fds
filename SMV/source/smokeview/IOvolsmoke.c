@@ -18,6 +18,130 @@
 // svn revision character string
 char IOvolsmoke_revision[]="$Revision$";
 
+/* ----------------------- interp3d ----------------------------- */
+
+#define INTERP1D(f0,f1,dx) (float)((f0) + ((f1)-(f0))*(dx))
+void get_smokefire(float *smoke_tran, float **smoke_color, float dstep, float xyz[3], mesh *meshi, int *inobst, char *blank){
+  int i, j, k;
+  int ijk;
+  float val000,val100,val010,val110;
+  float val001,val101,val011,val111;
+  float val00,val01,val10,val11;
+  float val0, val1, val;
+  int nx, ny, nz, nyz;
+  float dx, dy, dz;
+  float dxbar, dybar, dzbar;
+  float *vv;
+  int ijkcell;
+  float *xplt, *yplt, *zplt;
+  int ibar, jbar, kbar;
+  float *smokedata, *firedata;
+  float kfactor=8700.0;
+  float soot_density, temperature;
+  int index;
+
+  smokedata = meshi->volrenderinfo.smokedata;
+  firedata = meshi->volrenderinfo.firedata;
+
+  xplt = meshi->xplt_cen;
+  yplt = meshi->yplt_cen;
+  zplt = meshi->zplt_cen;
+  ibar = meshi->ibar;
+  jbar = meshi->jbar;
+  kbar = meshi->kbar;
+
+  dxbar = xplt[1]-xplt[0];
+  dybar = yplt[1]-yplt[0];
+  dzbar = zplt[1]-zplt[0];
+
+  nx = ibar + 1;
+  ny = jbar + 1;
+  nz = kbar + 1;
+  nyz = ny*nz;
+
+  GETINDEX(i,xyz[0],xplt[0],dxbar,ibar);
+  GETINDEX(j,xyz[1],yplt[0],dybar,jbar);
+  GETINDEX(k,xyz[2],zplt[0],dzbar,kbar);
+
+  if(blank!=NULL){
+    ijkcell=IJKCELL(i,j,k);
+    if(blank[ijkcell]==0){
+      *inobst=1;
+      return;
+    }
+    else{
+      *inobst=0;
+    }
+  }
+
+  ijk = k + j*nz + i*nyz; 
+
+  dx = (xyz[0] - xplt[i])/dxbar;
+  dx = CLAMP(dx,0.0,1.0);
+  dy = (xyz[1] - yplt[j])/dybar;
+  dy = CLAMP(dy,0.0,1.0);
+  dz = (xyz[2] - zplt[k])/dzbar;
+  dz = CLAMP(dz,0.0,1.0);
+
+  if(firedata!=NULL){
+    float dtemp;
+
+    vv = firedata + ijk;
+    val000 = vv[0]; // i,j,k
+    val001 = vv[1]; // i,j,k+1
+
+    vv += nz;
+    val010 = vv[0]; // i,j+1,k
+    val011 = vv[1]; // i,j+1,k+1
+
+    vv += (nyz-nz); 
+    val100 = vv[0]; // i+1,j,k
+    val101 = vv[1]; // i+1,j,k+1
+
+    vv += nz;
+    val110 = vv[0]; // i+1,j+1,k
+    val111 = vv[1]; // i+1,j+1,k+1
+
+    val00 = INTERP1D(val000,val100,dx);
+    val10 = INTERP1D(val010,val110,dx);
+    val01 = INTERP1D(val001,val101,dx);
+    val11 = INTERP1D(val011,val111,dx);
+     val0 = INTERP1D( val00, val10,dy);
+     val1 = INTERP1D( val01, val11,dy);
+    temperature = INTERP1D(  val0,  val1,dz);
+    dtemp=(1200.0-20.0)/256;
+    GETINDEX(index,temperature,20.0,dtemp,256);
+    *smoke_color=rgb_smokecolormap+4*index;
+  }
+  if(smokedata!=NULL){
+    vv = smokedata + ijk;
+    val000 = vv[0]; // i,j,k
+    val001 = vv[1]; // i,j,k+1
+
+    vv += nz;
+    val010 = vv[0]; // i,j+1,k
+    val011 = vv[1]; // i,j+1,k+1
+
+    vv += (nyz-nz); 
+    val100 = vv[0]; // i+1,j,k
+    val101 = vv[1]; // i+1,j,k+1
+
+    vv += nz;
+    val110 = vv[0]; // i+1,j+1,k
+    val111 = vv[1]; // i+1,j+1,k+1
+
+    val00 = INTERP1D(val000,val100,dx);
+    val10 = INTERP1D(val010,val110,dx);
+    val01 = INTERP1D(val001,val101,dx);
+    val11 = INTERP1D(val011,val111,dx);
+     val0 = INTERP1D( val00, val10,dy);
+     val1 = INTERP1D( val01, val11,dy);
+     soot_density = INTERP1D(  val0,  val1,dz);
+     if(firedata!=NULL&&index>128)soot_density*=3.0;
+    *smoke_tran = exp(-kfactor*soot_density*dstep);
+  }
+}
+
 /* ------------------ init_volrender ------------------------ */
 
 void init_volrender(void){
@@ -56,10 +180,10 @@ void init_volrender(void){
     vr = &(meshi->volrenderinfo);
     shortlabel = slicei->label.shortlabel;
 
-//    if(STRCMP(shortlabel,"temp")==0){  
-//      vr->fire=slicei;
-//     continue;
-//    }
+    if(STRCMP(shortlabel,"temp")==0){  
+      vr->fire=slicei;
+     continue;
+    }
     if(STRCMP(shortlabel,"rho_Soot")==0){
       vr->smoke=slicei;
       continue;
@@ -87,20 +211,20 @@ void init_volrender(void){
       nx = ijkbarmax+1;
       ny = ijkbarmax+1;
       nz = ijkbarmax+1;
-      NewMemory((void **)&vr->alpha_yz0,ny*nz*sizeof(float));
-      NewMemory((void **)&vr->alpha_yz1,ny*nz*sizeof(float));
-      NewMemory((void **)&vr->alpha_xz0,nx*nz*sizeof(float));
-      NewMemory((void **)&vr->alpha_xz1,nx*nz*sizeof(float));
-      NewMemory((void **)&vr->alpha_xy0,nx*ny*sizeof(float));
-      NewMemory((void **)&vr->alpha_xy1,nx*ny*sizeof(float));
+      NewMemory((void **)&vr->smokecolor_yz0,4*ny*nz*sizeof(float));
+      NewMemory((void **)&vr->smokecolor_yz1,4*ny*nz*sizeof(float));
+      NewMemory((void **)&vr->smokecolor_xz0,4*nx*nz*sizeof(float));
+      NewMemory((void **)&vr->smokecolor_xz1,4*nx*nz*sizeof(float));
+      NewMemory((void **)&vr->smokecolor_xy0,4*nx*ny*sizeof(float));
+      NewMemory((void **)&vr->smokecolor_xy1,4*nx*ny*sizeof(float));
     }
     else{
-      vr->alpha_yz0=NULL;
-      vr->alpha_yz1=NULL;
-      vr->alpha_xz0=NULL;
-      vr->alpha_xz1=NULL;
-      vr->alpha_xy0=NULL;
-      vr->alpha_xy1=NULL;
+      vr->smokecolor_yz0=NULL;
+      vr->smokecolor_yz1=NULL;
+      vr->smokecolor_xz0=NULL;
+      vr->smokecolor_xz1=NULL;
+      vr->smokecolor_xy0=NULL;
+      vr->smokecolor_xy1=NULL;
     }
   }
   if(nvolrenderinfo>0){
@@ -116,9 +240,9 @@ void init_volrender(void){
 //  glUniform3f(GPUvol_boxmin,meshi->x0,meshi->y0,meshi->z0);
 //  glUniform3f(GPUvol_boxmax,meshi->x1,meshi->y1,meshi->z1);
 
-/* ------------------ optical_depth ------------------------ */
+/* ------------------ get_vol_smokecolor ------------------------ */
 
-float optical_depth(float *xyzvert, float dstep, mesh *meshi, int iwall){
+void get_vol_smokecolor(float *smokecolor, float *xyzvert, float dstep, mesh *meshi, int iwall){
   float t_intersect, t_intersect_min=FLT_MAX, *boxmin, *boxmax;
   float tmin, tmax;
   int i;
@@ -128,12 +252,13 @@ float optical_depth(float *xyzvert, float dstep, mesh *meshi, int iwall){
   float xyz[3];
   float sootdensum;
   float opacity;
-  float kfactor=8700.0;
   float *vert_beg, *vert_end;
   int iwall_min=0;
   float xyzvals[3];
   int isteps;
   char *blank;
+  float smoke_tran, *smoke_color;
+  float taui;
 
   boxmin = meshi->boxmin_scaled;
   boxmax = meshi->boxmax_scaled;
@@ -217,12 +342,20 @@ float optical_depth(float *xyzvert, float dstep, mesh *meshi, int iwall){
   dyseg = vert_end[1] - vert_beg[1];
   dzseg = vert_end[2] - vert_beg[2];
   distseg = sqrt(dxseg*dxseg+dyseg*dyseg+dzseg*dzseg);
-  if(distseg<0.001)return 0.0;
+  if(distseg<0.001){
+    smokecolor[0]=0.0;
+    smokecolor[1]=0.0;
+    smokecolor[2]=0.0;
+    smokecolor[3]=0.0;
+    return;
+  }
 
   nsteps = distseg/dstep;
   if(nsteps<1){
     nsteps=1;
   }
+  dstep=distseg/(float)nsteps;
+  dstep*=xyzmaxdiff;
   sootdensum=0.0;
   isteps=0;
   if(block_volsmoke==1){
@@ -231,6 +364,10 @@ float optical_depth(float *xyzvert, float dstep, mesh *meshi, int iwall){
   else{
     blank=NULL;
   }
+  taui = 1.0;
+  smokecolor[0]=0.0;
+  smokecolor[1]=0.0;
+  smokecolor[2]=0.0;
   for(i=0;i<nsteps;i++){
     float sootden, factor;
     int icell, jcell, kcell;
@@ -242,16 +379,15 @@ float optical_depth(float *xyzvert, float dstep, mesh *meshi, int iwall){
     xyz[1] = (1.0-factor)*vert_beg[1] + factor*vert_end[1];
     xyz[2] = (1.0-factor)*vert_beg[2] + factor*vert_end[2];
 
-    sootden = interp3d(xyz, meshi->volrenderinfo.smokedata, meshi, &inobst, blank);
+    get_smokefire(&smoke_tran,&smoke_color, dstep,xyz, meshi, &inobst, blank);
     if(blank!=NULL&&inobst==1)break;
-    isteps++;
-    sootdensum += sootden;
+
+    smokecolor[0]=smokecolor[0]*(1.0-taui)+smoke_color[0]*taui;
+    smokecolor[1]=smokecolor[1]*(1.0-taui)+smoke_color[1]*taui;
+    smokecolor[2]=smokecolor[2]*(1.0-taui)+smoke_color[2]*taui;
+    taui = taui*smoke_tran;
   }
-  if(isteps!=nsteps)distseg*=(float)isteps/(float)nsteps;
-  sootdensum*=xyzmaxdiff*distseg/(float)nsteps;
-  //opacity = 1.0 - exp(-sootdensum);
-  opacity = 1.0 - exp(-kfactor*sootdensum);
-  return opacity;
+  smokecolor[3]=1.0-taui;
 }
 
 /* ------------------ compute_volvals ------------------------ */
@@ -270,6 +406,7 @@ void compute_volvals(void){
     int i, j, k;
     int count=0;
     int ibar, jbar, kbar;
+    float *smokecolor;
 
     meshi = meshinfo + ii;
     vr = &(meshi->volrenderinfo);
@@ -297,57 +434,57 @@ void compute_volvals(void){
         case 1:
         case -1:
           if(iwall<0){
-            alpha=vr->alpha_yz0;
+            smokecolor=vr->smokecolor_yz0;
             xyz[0] = meshi->x0;
           }
           else{
-            alpha=vr->alpha_yz1;
+            smokecolor=vr->smokecolor_yz1;
             xyz[0] = meshi->x1;
           }
           for(i=0;i<=jbar;i++){
             xyz[1] = y[i];
             for(j=0;j<=kbar;j++){
               xyz[2] = z[j];
-              *alpha=optical_depth(xyz,dstep,meshi,iwall);
-              alpha++;
+              get_vol_smokecolor(smokecolor,xyz,dstep,meshi,iwall);
+              smokecolor+=4;
             }
           }
           break;
         case 2:
         case -2:
           if(iwall<0){
-            alpha=vr->alpha_xz0;
+            smokecolor=vr->smokecolor_xz0;
             xyz[1] = meshi->y0;
           }
           else{
-            alpha=vr->alpha_xz1;
+            smokecolor=vr->smokecolor_xz1;
             xyz[1] = meshi->y1;
           }
           for(i=0;i<=ibar;i++){
             xyz[0] = x[i];
             for(j=0;j<=kbar;j++){
               xyz[2] = z[j];
-              *alpha=optical_depth(xyz,dstep,meshi,iwall);
-              alpha++;
+              get_vol_smokecolor(smokecolor,xyz,dstep,meshi,iwall);
+              smokecolor+=4;
             }
           }
           break;
         case 3:
         case -3:
           if(iwall<0){
-            alpha=vr->alpha_xy0;
+            smokecolor=vr->smokecolor_xy0;
             xyz[2]=meshi->z0;
           }
           else{
-            alpha=vr->alpha_xy1;
+            smokecolor=vr->smokecolor_xy1;
             xyz[2]=meshi->z1;
           }
           for(i=0;i<=ibar;i++){
             xyz[0] = x[i];
             for(j=0;j<=jbar;j++){
               xyz[1] = y[j];
-              *alpha=optical_depth(xyz,dstep,meshi,iwall);
-              alpha++;
+              get_vol_smokecolor(smokecolor,xyz,dstep,meshi,iwall);
+              smokecolor+=4;
             }
           }
           break;
@@ -561,6 +698,7 @@ void drawsmoke3dVOL(void){
     int n00, n01, n10, n11;
     float *xplt, *yplt, *zplt;
     int ibar, jbar, kbar;
+    float *smokecolor;
 
     vi = volfacelistinfoptrs[ii];
     iwall=vi->iwall;
@@ -581,16 +719,16 @@ void drawsmoke3dVOL(void){
       case -1:
         if(iwall<0){
           xx = meshi->x0;
-          alpha = vr->alpha_yz0;
+          smokecolor = vr->smokecolor_yz0;
         }
         else{
           xx=meshi->x1;
-          alpha = vr->alpha_yz1;
+          smokecolor = vr->smokecolor_yz1;
         }
         n00 = 0;
-        n01 = 1;
-        n10 = kbar+1;
-        n11 = 1 + kbar+1;
+        n01 = 4;
+        n10 = 4*(kbar+1);
+        n11 = 4*(1 + kbar+1);
         for(i=0;i<jbar;i++){
           y[0] = yplt[i];
           y[1] = yplt[i+1];
@@ -599,52 +737,52 @@ void drawsmoke3dVOL(void){
             z[1] = zplt[j+1];
 
             if(meshi->inside==0&&iwall>0||meshi->inside!=0&&iwall<0){
-              glColor4f(0.5,0.5,0.5,alpha[n00]);
+              glColor4fv(smokecolor+n00);
               glVertex3f(xx,y[0],z[0]);
-              glColor4f(0.5,0.5,0.5,alpha[n10]);
+              glColor4fv(smokecolor+n10);
               glVertex3f(xx,y[1],z[0]);
-              glColor4f(0.5,0.5,0.5,alpha[n11]);
+              glColor4fv(smokecolor+n11);
               glVertex3f(xx,y[1],z[1]);
 
-              glColor4f(0.5,0.5,0.5,alpha[n00]);
+              glColor4fv(smokecolor+n00);
               glVertex3f(xx,y[0],z[0]);
-              glColor4f(0.5,0.5,0.5,alpha[n11]);
+              glColor4fv(smokecolor+n11);
               glVertex3f(xx,y[1],z[1]);
-              glColor4f(0.5,0.5,0.5,alpha[n01]);
+              glColor4fv(smokecolor+n01);
               glVertex3f(xx,y[0],z[1]);
             }
             else{
-              glColor4f(0.5,0.5,0.5,alpha[n00]);
+              glColor4fv(smokecolor+n00);
               glVertex3f(xx,y[0],z[0]);
-              glColor4f(0.5,0.5,0.5,alpha[n11]);
+              glColor4fv(smokecolor+n11);
               glVertex3f(xx,y[1],z[1]);
-              glColor4f(0.5,0.5,0.5,alpha[n10]);
+              glColor4fv(smokecolor+n10);
               glVertex3f(xx,y[1],z[0]);
 
-              glColor4f(0.5,0.5,0.5,alpha[n00]);
+              glColor4fv(smokecolor+n00);
               glVertex3f(xx,y[0],z[0]);
-              glColor4f(0.5,0.5,0.5,alpha[n01]);
+              glColor4fv(smokecolor+n01);
               glVertex3f(xx,y[0],z[1]);
-              glColor4f(0.5,0.5,0.5,alpha[n11]);
+              glColor4fv(smokecolor+n11);
               glVertex3f(xx,y[1],z[1]);
             }
-            alpha++;
+            smokecolor+=4;
           }
-          alpha++;
+         smokecolor+=4;
         }
         break;
       case 2:
       case -2:
         n00 = 0;
-        n01 = 1;
-        n10 = kbar+1;
-        n11 = 1 + kbar+1;
+        n01 = 4;
+        n10 = 4*(kbar+1);
+        n11 = 4*(1 + kbar+1);
         if(iwall<0){
-          alpha = vr->alpha_xz0;
+          smokecolor = vr->smokecolor_xz0;
           yy=meshi->y0;
         }
         else{
-          alpha = vr->alpha_xz1;
+          smokecolor = vr->smokecolor_xz1;
           yy=meshi->y1;
         }
         for(i=0;i<ibar;i++){
@@ -654,52 +792,52 @@ void drawsmoke3dVOL(void){
             z[0] = zplt[j];
             z[1] = zplt[j+1];
             if(meshi->inside==0&&iwall>0||meshi->inside!=0&&iwall<0){
-              glColor4f(0.5,0.5,0.5,alpha[n00]);
+              glColor4fv(smokecolor+n00);
               glVertex3f(x[0],yy,z[0]);
-              glColor4f(0.5,0.5,0.5,alpha[n11]);
+              glColor4fv(smokecolor+n11);
               glVertex3f(x[1],yy,z[1]);
-              glColor4f(0.5,0.5,0.5,alpha[n10]);
+              glColor4fv(smokecolor+n10);
               glVertex3f(x[1],yy,z[0]);
 
-              glColor4f(0.5,0.5,0.5,alpha[n00]);
+              glColor4fv(smokecolor+n00);
               glVertex3f(x[0],yy,z[0]);
-              glColor4f(0.5,0.5,0.5,alpha[n01]);
+              glColor4fv(smokecolor+n01);
               glVertex3f(x[0],yy,z[1]);
-              glColor4f(0.5,0.5,0.5,alpha[n11]);
+              glColor4fv(smokecolor+n11);
               glVertex3f(x[1],yy,z[1]);
             }
             else{
-              glColor4f(0.5,0.5,0.5,alpha[n00]);
+              glColor4fv(smokecolor+n00);
               glVertex3f(x[0],yy,z[0]);
-              glColor4f(0.5,0.5,0.5,alpha[n10]);
+              glColor4fv(smokecolor+n10);
               glVertex3f(x[1],yy,z[0]);
-              glColor4f(0.5,0.5,0.5,alpha[n11]);
+              glColor4fv(smokecolor+n11);
               glVertex3f(x[1],yy,z[1]);
 
-              glColor4f(0.5,0.5,0.5,alpha[n00]);
+              glColor4fv(smokecolor+n00);
               glVertex3f(x[0],yy,z[0]);
-              glColor4f(0.5,0.5,0.5,alpha[n11]);
+              glColor4fv(smokecolor+n11);
               glVertex3f(x[1],yy,z[1]);
-              glColor4f(0.5,0.5,0.5,alpha[n01]);
+              glColor4fv(smokecolor+n01);
               glVertex3f(x[0],yy,z[1]);
             }
-            alpha++;
+            smokecolor+=4;
           }
-          alpha++;
+          smokecolor+=4;
         }
         break;
       case 3:
       case -3:
         n00 = 0;
-        n01 = 1;
-        n10 = jbar+1;
-        n11 = 1 + jbar+1;
+        n01 = 4;
+        n10 = 4*(jbar+1);
+        n11 = 4*(1 + jbar+1);
        if(iwall<0){
-          alpha = vr->alpha_xy0;
+          smokecolor = vr->smokecolor_xy0;
           zz=meshi->z0;
         }
         else{
-          alpha = vr->alpha_xy1;
+          smokecolor = vr->smokecolor_xy1;
           zz=meshi->z1;
         }
         for(i=0;i<ibar;i++){
@@ -709,38 +847,38 @@ void drawsmoke3dVOL(void){
             y[0] = yplt[j];
             y[1] = yplt[j+1];
             if(meshi->inside==0&&iwall>0||meshi->inside!=0&&iwall<0){
-              glColor4f(0.5,0.5,0.5,alpha[n00]);
+              glColor4fv(smokecolor+n00);
               glVertex3f(x[0],y[0],zz);
-              glColor4f(0.5,0.5,0.5,alpha[n10]);
+              glColor4fv(smokecolor+n10);
               glVertex3f(x[1],y[0],zz);
-              glColor4f(0.5,0.5,0.5,alpha[n11]);
+              glColor4fv(smokecolor+n11);
               glVertex3f(x[1],y[1],zz);
 
-              glColor4f(0.5,0.5,0.5,alpha[n00]);
+              glColor4fv(smokecolor+n00);
               glVertex3f(x[0],y[0],zz);
-              glColor4f(0.5,0.5,0.5,alpha[n11]);
+              glColor4fv(smokecolor+n11);
               glVertex3f(x[1],y[1],zz);
-              glColor4f(0.5,0.5,0.5,alpha[n01]);
+              glColor4fv(smokecolor+n01);
               glVertex3f(x[0],y[1],zz);
             }
             else{
-              glColor4f(0.5,0.5,0.5,alpha[n00]);
+              glColor4fv(smokecolor+n00);
               glVertex3f(x[0],y[0],zz);
-              glColor4f(0.5,0.5,0.5,alpha[n11]);
+              glColor4fv(smokecolor+n11);
               glVertex3f(x[1],y[1],zz);
-              glColor4f(0.5,0.5,0.5,alpha[n10]);
+              glColor4fv(smokecolor+n10);
               glVertex3f(x[1],y[0],zz);
 
-              glColor4f(0.5,0.5,0.5,alpha[n00]);
+              glColor4fv(smokecolor+n00);
               glVertex3f(x[0],y[0],zz);
-              glColor4f(0.5,0.5,0.5,alpha[n01]);
+              glColor4fv(smokecolor+n01);
               glVertex3f(x[0],y[1],zz);
-              glColor4f(0.5,0.5,0.5,alpha[n11]);
+              glColor4fv(smokecolor+n11);
               glVertex3f(x[1],y[1],zz);
             }
-            alpha++;
+            smokecolor+=4;
           }
-          alpha++;
+          smokecolor+=4;
         }
         break;
     }

@@ -5795,7 +5795,7 @@ updatemenu=0;
 
 /* -------------------------------- colorbarmenu -------------------------- */
   
-  if(nsmoke3dinfo>0&&Read3DSmoke3DFile==1){
+  if(nsmoke3dinfo>0&&Read3DSmoke3DFile==1||nvolrenderinfo>0){
     colorbardata *cbi;
     char ccolorbarmenu[256];
 
@@ -6264,6 +6264,8 @@ updatemenu=0;
       strcat(menulabel,meshi->label);
       glutAddMenuEntry(menulabel,i);
     }
+    glutAddMenuEntry("-",-999);
+    glutAddSubMenu(_("Smoke color map"),smokecolorbarmenu);
   }
 
  /* --------------------------------showhide menu -------------------------- */

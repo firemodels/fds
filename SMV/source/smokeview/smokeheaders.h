@@ -227,7 +227,6 @@ EXTERNCPP void update_trainer_outline(void);
 EXTERNCPP void update_trainer_moves(void);
 
 EXTERNCPP void compute_volvals(void);
-EXTERNCPP float optical_depth(float *xyz, float dstep, mesh *meshi, int iwall);
 
 EXTERNCPP void init_volrender(void);
 #ifdef pp_MESSAGE
