@@ -226,7 +226,7 @@ EXTERNCPP void hide_load_alert(void);
 EXTERNCPP void update_trainer_outline(void);
 EXTERNCPP void update_trainer_moves(void);
 
-EXTERNCPP void compute_volvals(void);
+EXTERNCPP void compute_all_smokecolors(void);
 
 EXTERNCPP void init_volrender(void);
 #ifdef pp_MESSAGE

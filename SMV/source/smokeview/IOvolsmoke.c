@@ -21,7 +21,7 @@ char IOvolsmoke_revision[]="$Revision$";
 /* ----------------------- interp3d ----------------------------- */
 
 #define INTERP1D(f0,f1,dx) (float)((f0) + ((f1)-(f0))*(dx))
-void get_smokefire(float *smoke_tran, float **smoke_color, float dstep, float xyz[3], mesh *meshi, int *inobst, char *blank){
+void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, float xyz[3], mesh *meshi, int *inobst, char *blank){
   int i, j, k;
   int ijk;
   float val000,val100,val010,val110;
@@ -240,9 +240,9 @@ void init_volrender(void){
 //  glUniform3f(GPUvol_boxmin,meshi->x0,meshi->y0,meshi->z0);
 //  glUniform3f(GPUvol_boxmax,meshi->x1,meshi->y1,meshi->z1);
 
-/* ------------------ get_vol_smokecolor ------------------------ */
+/* ------------------ get_cum_smokecolor ------------------------ */
 
-void get_vol_smokecolor(float *smokecolor, float *xyzvert, float dstep, mesh *meshi, int iwall){
+void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, mesh *meshi, int iwall){
   float t_intersect, t_intersect_min=FLT_MAX, *boxmin, *boxmax;
   float tmin, tmax;
   int i;
@@ -257,8 +257,8 @@ void get_vol_smokecolor(float *smokecolor, float *xyzvert, float dstep, mesh *me
   float xyzvals[3];
   int isteps;
   char *blank;
-  float smoke_tran, *smoke_color;
-  float taui;
+  float pt_smoketran, *pt_smokecolor;
+  float cum_tran;
 
   boxmin = meshi->boxmin_scaled;
   boxmax = meshi->boxmax_scaled;
@@ -343,10 +343,10 @@ void get_vol_smokecolor(float *smokecolor, float *xyzvert, float dstep, mesh *me
   dzseg = vert_end[2] - vert_beg[2];
   distseg = sqrt(dxseg*dxseg+dyseg*dyseg+dzseg*dzseg);
   if(distseg<0.001){
-    smokecolor[0]=0.0;
-    smokecolor[1]=0.0;
-    smokecolor[2]=0.0;
-    smokecolor[3]=0.0;
+    cum_smokecolor[0]=0.0;
+    cum_smokecolor[1]=0.0;
+    cum_smokecolor[2]=0.0;
+    cum_smokecolor[3]=0.0;
     return;
   }
 
@@ -364,10 +364,10 @@ void get_vol_smokecolor(float *smokecolor, float *xyzvert, float dstep, mesh *me
   else{
     blank=NULL;
   }
-  taui = 1.0;
-  smokecolor[0]=0.0;
-  smokecolor[1]=0.0;
-  smokecolor[2]=0.0;
+  cum_tran = 1.0;
+  cum_smokecolor[0]=0.0;
+  cum_smokecolor[1]=0.0;
+  cum_smokecolor[2]=0.0;
   for(i=0;i<nsteps;i++){
     float sootden, factor;
     int icell, jcell, kcell;
@@ -379,20 +379,20 @@ void get_vol_smokecolor(float *smokecolor, float *xyzvert, float dstep, mesh *me
     xyz[1] = (1.0-factor)*vert_beg[1] + factor*vert_end[1];
     xyz[2] = (1.0-factor)*vert_beg[2] + factor*vert_end[2];
 
-    get_smokefire(&smoke_tran,&smoke_color, dstep,xyz, meshi, &inobst, blank);
+    get_pt_smokecolor(&pt_smoketran,&pt_smokecolor, dstep,xyz, meshi, &inobst, blank);
     if(blank!=NULL&&inobst==1)break;
 
-    smokecolor[0]=smokecolor[0]*(1.0-taui)+smoke_color[0]*taui;
-    smokecolor[1]=smokecolor[1]*(1.0-taui)+smoke_color[1]*taui;
-    smokecolor[2]=smokecolor[2]*(1.0-taui)+smoke_color[2]*taui;
-    taui = taui*smoke_tran;
+    cum_smokecolor[0]=cum_smokecolor[0]*(1.0-cum_tran)+pt_smokecolor[0]*cum_tran;
+    cum_smokecolor[1]=cum_smokecolor[1]*(1.0-cum_tran)+pt_smokecolor[1]*cum_tran;
+    cum_smokecolor[2]=cum_smokecolor[2]*(1.0-cum_tran)+pt_smokecolor[2]*cum_tran;
+    cum_tran *= pt_smoketran;
   }
-  smokecolor[3]=1.0-taui;
+  cum_smokecolor[3]=1.0-cum_tran;
 }
 
-/* ------------------ compute_volvals ------------------------ */
+/* ------------------ compute_all_smokecolors ------------------------ */
 
-void compute_volvals(void){
+void compute_all_smokecolors(void){
   int ii;
 
   for(ii=0;ii<nmeshes;ii++){
@@ -445,7 +445,7 @@ void compute_volvals(void){
             xyz[1] = y[i];
             for(j=0;j<=kbar;j++){
               xyz[2] = z[j];
-              get_vol_smokecolor(smokecolor,xyz,dstep,meshi,iwall);
+              get_cum_smokecolor(smokecolor,xyz,dstep,meshi,iwall);
               smokecolor+=4;
             }
           }
@@ -464,7 +464,7 @@ void compute_volvals(void){
             xyz[0] = x[i];
             for(j=0;j<=kbar;j++){
               xyz[2] = z[j];
-              get_vol_smokecolor(smokecolor,xyz,dstep,meshi,iwall);
+              get_cum_smokecolor(smokecolor,xyz,dstep,meshi,iwall);
               smokecolor+=4;
             }
           }
@@ -483,7 +483,7 @@ void compute_volvals(void){
             xyz[0] = x[i];
             for(j=0;j<=jbar;j++){
               xyz[1] = y[j];
-              get_vol_smokecolor(smokecolor,xyz,dstep,meshi,iwall);
+              get_cum_smokecolor(smokecolor,xyz,dstep,meshi,iwall);
               smokecolor+=4;
             }
           }
