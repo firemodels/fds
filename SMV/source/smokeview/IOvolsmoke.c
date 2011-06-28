@@ -137,7 +137,7 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
      val0 = INTERP1D( val00, val10,dy);
      val1 = INTERP1D( val01, val11,dy);
      soot_density = INTERP1D(  val0,  val1,dz);
-     if(firedata!=NULL&&index>128)soot_density*=3.0;
+     if(firedata!=NULL&&index>128)soot_density*=5.0;
     *smoke_tran = exp(-kfactor*soot_density*dstep);
   }
 }
@@ -259,6 +259,9 @@ void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, mesh
   char *blank;
   float pt_smoketran, *pt_smokecolor;
   float cum_tran;
+  float pt_smoketrans[10000], *pt_smokecolors[10000];
+  float *colori,alpha;
+  int nstepsmax;
 
   boxmin = meshi->boxmin_scaled;
   boxmax = meshi->boxmax_scaled;
@@ -368,11 +371,13 @@ void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, mesh
   cum_smokecolor[0]=0.0;
   cum_smokecolor[1]=0.0;
   cum_smokecolor[2]=0.0;
+  cum_smokecolor[3]=0.0;
   for(i=0;i<nsteps;i++){
     float sootden, factor;
     int icell, jcell, kcell;
     int inobst;
 
+    nstepsmax=i;
     factor = (0.5 + (float)i)/(float)nsteps;
 
     xyz[0] = (1.0-factor)*vert_beg[0] + factor*vert_end[0];
@@ -380,14 +385,32 @@ void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, mesh
     xyz[2] = (1.0-factor)*vert_beg[2] + factor*vert_end[2];
 
     get_pt_smokecolor(&pt_smoketran,&pt_smokecolor, dstep,xyz, meshi, &inobst, blank);
-    if(blank!=NULL&&inobst==1)break;
-
-    cum_smokecolor[0]=cum_smokecolor[0]*(1.0-cum_tran)+pt_smokecolor[0]*cum_tran;
-    cum_smokecolor[1]=cum_smokecolor[1]*(1.0-cum_tran)+pt_smokecolor[1]*cum_tran;
-    cum_smokecolor[2]=cum_smokecolor[2]*(1.0-cum_tran)+pt_smokecolor[2]*cum_tran;
-    cum_tran *= pt_smoketran;
+    if(blank!=NULL&&inobst==1){
+      pt_smoketrans[i]=0.0;
+      nstepsmax=i-1;
+      break;
+    }
+    else{
+      pt_smoketrans[i]=pt_smoketran;
+    }
+    if(i>0)pt_smoketrans[i]*=pt_smoketrans[i-1];
+    pt_smokecolors[i]=pt_smokecolor;
   }
-  cum_smokecolor[3]=1.0-cum_tran;
+  if(nstepsmax<=0)return;
+  colori=pt_smokecolors[nstepsmax-1];
+  alpha = 1.0 - pt_smoketrans[nstepsmax-1];
+  cum_smokecolor[0]=colori[0];
+  cum_smokecolor[1]=colori[1];
+  cum_smokecolor[2]=colori[2];
+  cum_smokecolor[3]=alpha;
+  for(i=nstepsmax-2;i>=0;i--){
+    colori = pt_smokecolors[i];
+    alpha = 1.0-pt_smoketrans[i];
+    cum_smokecolor[0] = alpha*colori[0] + (1.0-alpha)*cum_smokecolor[0];
+    cum_smokecolor[1] = alpha*colori[1] + (1.0-alpha)*cum_smokecolor[1];
+    cum_smokecolor[2] = alpha*colori[2] + (1.0-alpha)*cum_smokecolor[2];
+    cum_smokecolor[3] = alpha*alpha + (1.0-alpha)*cum_smokecolor[3];
+  }
 }
 
 /* ------------------ compute_all_smokecolors ------------------------ */
