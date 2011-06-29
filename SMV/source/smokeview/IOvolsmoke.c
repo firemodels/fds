@@ -905,9 +905,9 @@ void drawsmoke3dVOL(void){
   if(use_transparency_data==1)transparentoff();
 }
 
-#ifdef pp_GPU
 /* ------------------ drawsmoke3dGPUVOL ------------------------ */
 
+#ifdef pp_GPU
 void drawsmoke3dGPUVOL(volrenderdata *vr){
 
 #define NROWS_GPU 2
