@@ -4,6 +4,7 @@ set svn_drive=c:
 set SCRIPT_DIR=%CD%
 set BASEDIR=%CD%\..
 set SVNROOT=%BASEDIR%\..\
+set TIME_FILE=%SCRIPT_DIR%\smv_case_times.txt
 
 Rem Choose one of the following four FDS "definitions" by commenting all lines but one.
 
@@ -29,7 +30,9 @@ echo creating FDS case list from SMV_Cases.sh
 
 cd %BASEDIR%
 
-echo "smokeview test cases begin" > smokeview.begin
+echo "smokeview test cases begin" > %TIME_FILE%
+date /t >> %TIME_FILE%
+time /t >> %TIME_FILE%
 
 Rem create a text file containing the FDS5 version used to run these tests.
 Rem This file is included in the smokeview user's guide
@@ -45,6 +48,8 @@ cd %SCRIPT_DIR%
 call run_wui_tree_test
 
 cd %BASEDIR%
-echo "smokeview test cases end" > smokeview.end
+echo "smokeview test cases end" >> %TIME_FILE%
+date /t >> %TIME_FILE%
+time /t >> %TIME_FILE%
 
 pause
