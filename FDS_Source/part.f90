@@ -822,8 +822,8 @@ USE PHYSICAL_FUNCTIONS, ONLY : DRAG, GET_VISCOSITY
  
 REAL(EB) :: RHO_G,RVC,RDS,RDC,QREL,UREL,VREL,WREL,TMP_G,RN,THETA_RN, &
             RD,T,C_DRAG,XI,YJ,ZK,MU_AIR,WE_G,DROP_VOL_FRAC,DROP_DEN, &
-            UBAR,VBAR,WBAR,GRVT1,GRVT2,GRVT3, &
-            UVW,DUMMY=0._EB,X_OLD,Y_OLD,Z_OLD,STEP_FRACTION(-3:3),SURFACE_DROPLET_DIAMETER, &
+            UBAR,VBAR,WBAR, &
+            UVW,X_OLD,Y_OLD,Z_OLD,STEP_FRACTION(-3:3),SURFACE_DROPLET_DIAMETER, &
             T_BU_BAG,T_BU_STRIP,B_1,THROHALF,P_UVWMAX,UVWMAX, &
             ALPHA,BETA,DR_MASS,FP_MASS,OBDT,OPA,BDTOA,U_OLD,V_OLD,W_OLD,MPOM,RDT,&
             WAKE_VEL,RE_WAKE,SFAC
@@ -841,10 +841,6 @@ THROHALF = (0.5_EB)**(1./3.)
 B_1 =  1.7321_EB ! SQRT(3)
 
 RDT = 1._EB/DT
-
-GRVT1 = -EVALUATE_RAMP(T,DUMMY,I_RAMP_GX)*GVEC(1) 
-GRVT2 = -EVALUATE_RAMP(T,DUMMY,I_RAMP_GY)*GVEC(2) 
-GRVT3 = -EVALUATE_RAMP(T,DUMMY,I_RAMP_GZ)*GVEC(3) 
 
 UVWMAX = 0._EB
 P_UVWMAX = UVWMAX
@@ -959,7 +955,7 @@ DROPLET_LOOP: DO I=1,NLP
       IF (DROP_VOL_FRAC > PC%DENSE_VOLUME_FRACTION) CALL WAKE_REDUCTION(DROP_VOL_FRAC,DR%RE,C_DRAG,WAKE_VEL)
    ENDIF
 
-  ! Secondary break-up model
+   ! Secondary break-up model
 
    BREAKUP: IF (PC%BREAKUP) THEN
       ! Use undisturbed wake velocity for breakup calculations
@@ -1029,7 +1025,7 @@ DROPLET_LOOP: DO I=1,NLP
       DR%V = ( V_OLD + (V_OLD+ALPHA*VBAR)*BDTOA )/OBDT
       DR%W = ( W_OLD + (W_OLD+ALPHA*WBAR)*BDTOA )/OBDT
                
-      IF (BETA>=ZERO_P) THEN
+      IF (BETA>ZERO_P) THEN
          ! fluid momentum source term
          MPOM = DR%PWT*DR_MASS/(RHO_G/RVC)
          DR%A_X = MPOM*(U_OLD-DR%U)*RDT 
@@ -1040,17 +1036,17 @@ DROPLET_LOOP: DO I=1,NLP
          DR%V = DR%V + GVEC(2)*DT
          DR%W = DR%W + GVEC(3)*DT
          ! analytical solution for droplet position
-         DR%X = X_OLD + (U_OLD+ALPHA*UBAR)/OPA*DT + ALPHA/BETA*(U_OLD-UBAR)/OPA*LOG(OBDT) + GVEC(1)*DT*DT
-         DR%Y = Y_OLD + (V_OLD+ALPHA*VBAR)/OPA*DT + ALPHA/BETA*(V_OLD-VBAR)/OPA*LOG(OBDT) + GVEC(2)*DT*DT
-         DR%Z = Z_OLD + (W_OLD+ALPHA*WBAR)/OPA*DT + ALPHA/BETA*(W_OLD-WBAR)/OPA*LOG(OBDT) + GVEC(3)*DT*DT
+         DR%X = X_OLD + (U_OLD+ALPHA*UBAR)/OPA*DT + ALPHA/BETA*(U_OLD-UBAR)/OPA*LOG(OBDT) + 0.5_EB*GVEC(1)*DT*DT
+         DR%Y = Y_OLD + (V_OLD+ALPHA*VBAR)/OPA*DT + ALPHA/BETA*(V_OLD-VBAR)/OPA*LOG(OBDT) + 0.5_EB*GVEC(2)*DT*DT
+         DR%Z = Z_OLD + (W_OLD+ALPHA*WBAR)/OPA*DT + ALPHA/BETA*(W_OLD-WBAR)/OPA*LOG(OBDT) + 0.5_EB*GVEC(3)*DT*DT
       ELSE
          ! no drag
          DR%A_X  = 0._EB
          DR%A_Y  = 0._EB
          DR%A_Z  = 0._EB
-         DR%X = X_OLD + (U_OLD + GVEC(1)*DT)*DT
-         DR%Y = Y_OLD + (V_OLD + GVEC(2)*DT)*DT
-         DR%Z = Z_OLD + (W_OLD + GVEC(3)*DT)*DT
+         DR%X = X_OLD + (U_OLD + 0.5_EB*GVEC(1)*DT)*DT
+         DR%Y = Y_OLD + (V_OLD + 0.5_EB*GVEC(2)*DT)*DT
+         DR%Z = Z_OLD + (W_OLD + 0.5_EB*GVEC(3)*DT)*DT
       ENDIF
                
    ENDIF PARTICLE_NON_STATIC_IF 
