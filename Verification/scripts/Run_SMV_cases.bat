@@ -18,7 +18,7 @@ Rem Use the first "FDS" definition to run one case at a time in the forground.
 Rem Use the second "FDS" definition to execute more than one case at a time in the background
 
 Rem set FDS=%FDSEXE%
-set FDS=background -u 75 -d 10 %FDSEXE%
+set FDS=background -u 85 -d 5 %FDSEXE%
 
 set RUNFDS=call %SVNROOT%\Utilities\Scripts\runfds_win32.bat
 
@@ -51,5 +51,7 @@ cd %BASEDIR%
 echo "smokeview test cases end" >> %TIME_FILE%
 date /t >> %TIME_FILE%
 time /t >> %TIME_FILE%
+
+echo "FDS cases completed"
 
 pause
