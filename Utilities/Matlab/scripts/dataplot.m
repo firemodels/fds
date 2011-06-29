@@ -243,11 +243,18 @@ for i=2:2000
         % add SVN if file is available
         
         if exist(SVN_Filename,'file')
-           SVN = importdata(SVN_Filename);
-           X_SVN_Position = Min_Ind+0.80*(Max_Ind-Min_Ind);
-           Y_SVN_Position = Min_Dep+1.05*(Max_Dep-Min_Dep);
-           text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-               'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+            SVN = importdata(SVN_Filename);
+            x_lim = get(gca,'XLim');
+            y_lim = get(gca,'YLim');
+            if strcmp(Plot_Type,'loglog')
+                X_SVN_Position = x_lim(1)+SVN_Scale_X_loglog*(x_lim(2)-x_lim(1));
+                Y_SVN_Position = y_lim(1)+SVN_Scale_Y_loglog*(y_lim(2)-y_lim(1));
+            else
+                X_SVN_Position = x_lim(1)+SVN_Scale_X_linear*(x_lim(2)-x_lim(1));
+                Y_SVN_Position = y_lim(1)+SVN_Scale_Y_linear*(y_lim(2)-y_lim(1));
+            end
+            text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
+                'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
         end
         
         % print to pdf
