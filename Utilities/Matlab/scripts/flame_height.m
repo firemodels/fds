@@ -7,8 +7,8 @@
 % integrates HRRPUL(z) from *_line.csv file to determine L_f/D (normalized
 % flame height)
 
-close all
-clear all
+%close all
+%clear all
 
 addpath('../../Validation/Heskestad_Flame_Height/FDS_Output_Files/');
 
