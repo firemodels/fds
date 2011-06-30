@@ -6,5 +6,6 @@ set DDIR=$SVNROOT/Validation/Beyler_Hood/Current_Results
 cd $DDIR
 $PDIR/Beyler_Hood 
 cp Beyler_Hood_FDS.csv $WDIR
+cp *svn.txt $WDIR
 cd $WDIR
 

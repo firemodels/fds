@@ -4,4 +4,5 @@ set WDIR=$SVNROOT/Validation/Ulster_SBI/FDS_Output_Files
 set DDIR=$SVNROOT/Validation/Ulster_SBI/Current_Results
 cd $DDIR
 cp Ulster*line.csv $WDIR
+cp *svn.txt $WDIR
 

@@ -21,6 +21,7 @@ $PDIR/layer_height < $WDIR/NIST_NRC_17_HGL.input
 $PDIR/layer_height < $WDIR/NIST_NRC_18_HGL.input
 cp NIST*HGL.csv $WDIR
 cp NIST*devc.csv $WDIR
+cp *svn.txt $WDIR
 cd $WDIR
 
 

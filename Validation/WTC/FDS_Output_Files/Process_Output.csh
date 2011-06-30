@@ -12,6 +12,7 @@ $PDIR/layer_height < $WDIR/WTC_05_HGL.input
 $PDIR/layer_height < $WDIR/WTC_06_HGL.input
 cp WTC*HGL.csv $WDIR
 cp WTC*devc.csv $WDIR
+cp *svn.txt $WDIR
 cd $WDIR
 
 

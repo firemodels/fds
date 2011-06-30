@@ -4,6 +4,7 @@ set WDIR=$SVNROOT/Validation/NRL_HAI/FDS_Output_Files
 set DDIR=$SVNROOT/Validation/NRL_HAI/Current_Results
 cd $DDIR
 cp NRL*line.csv $WDIR
+cp *svn.txt $WDIR
 cd $WDIR
 
 

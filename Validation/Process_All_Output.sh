@@ -5,7 +5,7 @@ export VDIR=$SVNROOT/Validation
 
 $VDIR/Arup_Tunnel/FDS_Output_Files/Process_Output.csh
 $VDIR/ATF_Corridors/FDS_Output_Files/Process_Output.csh
-$VDIR/Beyler_Hood/FDS_Output_Files/Process_Output.csh
+#$VDIR/Beyler_Hood/FDS_Output_Files/Process_Output.csh
 $VDIR/BRE_Spray/FDS_Output_Files/Process_Output.csh
 $VDIR/Bryant_Doorway/FDS_Output_Files/Process_Output.csh
 $VDIR/CAROLFIRE/FDS_Output_Files/Process_Output.csh
@@ -21,12 +21,12 @@ $VDIR/McCaffrey_Plume/FDS_Output_Files/Process_Output.csh
 $VDIR/Moody_Chart/FDS_Output_Files/Process_Output.csh
 $VDIR/NBS_Multi-Room/FDS_Output_Files/Process_Output.csh
 $VDIR/NIST_NRC/FDS_Output_Files/Process_Output.csh
-$VDIR/NIST_RSE_1994/FDS_Output_Files/Process_Output.csh
+#$VDIR/NIST_RSE_1994/FDS_Output_Files/Process_Output.csh
 $VDIR/NRCC_Facade/FDS_Output_Files/Process_Output.csh
 $VDIR/NRL_HAI/FDS_Output_Files/Process_Output.csh
 $VDIR/PRISME/FDS_Output_Files/Process_Output.csh
 $VDIR/Restivo_Experiment/FDS_Output_Files/Process_Output.csh
-$VDIR/Sandia_Plumes/FDS_Output_Files/Process_Output.csh
+#$VDIR/Sandia_Plumes/FDS_Output_Files/Process_Output.csh
 $VDIR/Smyth_Slot_Burner/FDS_Output_Files/Process_Output.csh
 $VDIR/SP2009_AST/FDS_Output_Files/Process_Output.csh
 $VDIR/Steckler_Compartment/FDS_Output_Files/Process_Output.csh

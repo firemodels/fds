@@ -9,6 +9,7 @@ $PDIR/layer_height < $WDIR/FM_SNL_05.input
 $PDIR/layer_height < $WDIR/FM_SNL_21.input
 cp FM_SNL*HGL.csv $WDIR
 cp FM_SNL*devc.csv $WDIR
+cp *svn.txt $WDIR
 cd $WDIR
 
 

@@ -6,5 +6,6 @@ set DDIR=$SVNROOT/Validation/Hamins_CH4/Current_Results
 cd $DDIR
 $PDIR/Hamins_CH4_Average
 cp Hamins*devc_avg.csv $WDIR
+cp *svn.txt $WDIR
 cd $WDIR
 

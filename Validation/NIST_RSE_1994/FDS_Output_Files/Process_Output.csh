@@ -6,5 +6,6 @@ set DDIR=$SVNROOT/Validation/NIST_RSE_1994/Current_Results
 cd $DDIR
 $PDIR/NIST_RSE_1994 
 cp NIST_RSE_1994_FDS.csv $WDIR
+cp *svn.txt $WDIR
 cd $WDIR
 
