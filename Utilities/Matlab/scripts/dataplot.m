@@ -132,6 +132,8 @@ for i=2:2000
                 Save_Measured_Metric(i,j) = max(M(indices,d1_Dep_Col))-d1_Initial_Value;
             elseif strcmp(Metric,'min')
                 Save_Measured_Metric(i,j) = d1_Initial_Value-min(M(indices,d1_Dep_Col));
+            elseif strcmp(Metric,'mean')
+                Save_Measured_Metric(i,j) = mean(M(indices,d1_Dep_Col));
             else
                 Save_Measured_Metric(i,j) = 0;
             end
@@ -169,6 +171,8 @@ for i=2:2000
                 Save_Predicted_Metric(i,j) = max(M(indices,d2_Dep_Col))-d2_Initial_Value;
             elseif strcmp(Metric,'min')
                 Save_Predicted_Metric(i,j) = d2_Initial_Value-min(M(indices,d2_Dep_Col));
+            elseif strcmp(Metric,'mean')
+                Save_Predicted_Metric(i,j) = mean(M(indices,d2_Dep_Col));
             else
                 Save_Predicted_Metric(i,j) = 0;
             end
