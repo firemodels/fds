@@ -8,10 +8,8 @@
 % creates all the pdfs for the section on the Werner and Wengle wall
 % model.  Also, add your script to the master list below.
 %
-% To remain backward compatible with the PyroGraph script we have
-% included the script dataplot.m.  To utilize this script, add the
-% appropriate parameters to a 'd' line in
-% verification_data_config_matlab.csv.
+% The most important script is dataplot.m.  To utilize this script, add the
+% appropriate parameters to a 'd' line in verification_data_config_matlab.csv.
 
 close all
 clear all
@@ -22,13 +20,21 @@ addpath 'scripts'
 
 radiation_box
 radiation_plane_layer
+ns2d
+wall_internal_radiation
+ 
+% Directories where the data is stored, and where to write the output
 
 cfil = [pwd,'/verification_data_config_matlab.csv'];
 vdir = [pwd,'/../../Verification/'];
 plotdir = [pwd,'/../../Manuals/'];
 
+% The main plotting routine is dataplot
+ 
 [saved_data,drange] = dataplot(cfil,vdir,plotdir);
 
+% Special cases
+ 
 run scripts/turb_model
 run scripts/wall_model
 run scripts/pyrolysis

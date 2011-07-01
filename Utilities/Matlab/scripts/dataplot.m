@@ -43,9 +43,9 @@ if nargin<3||nargin>4;
     display('Error in argument list')
 end
 if nargin>=3
-    cfil = varargin{1}
-    vdir = varargin{2}
-    plotdir = varargin{3}
+    cfil = varargin{1};
+    vdir = varargin{2};
+    plotdir = varargin{3};
 end
 if nargin==4
     drange = varargin{4};
