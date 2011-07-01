@@ -1,8 +1,6 @@
 % Wang (SHIP) and McDermott
 % 6-28-11
 % radiation_plane_layer.m
-%
-% Based on radiation_plane_layer.f90 by K. McGrattan
 
 close all
 clear all
@@ -65,15 +63,15 @@ end
 filename = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/radiation_plane_layer.tex';
 fid = fopen(filename,'wt');
 
-fprintf(fid,'%s\n','\begin{center}')
-fprintf(fid,'%s\n','\begin{tabular}{|c|c|c|c|c|c|c|} \hline')
-fprintf(fid,'%s\n','$\tau$ & $S(\tau)$ & \multicolumn{2}{|c|}{FDS (I=20,J=20)} &')
-fprintf(fid,'%s\n','\multicolumn{2}{|c|}{FDS (I=20,J=1)} & FDS (I=150) \\ \cline{3-7}')
-fprintf(fid,'%s\n','(m$^{-1}$) & (kW/m$^2$) & 1 band & 6 bands & 1 band & 6 bands & 1 band \\ \hline\hline')
+fprintf(fid,'%s\n','\begin{center}');
+fprintf(fid,'%s\n','\begin{tabular}{|c|c|c|c|c|c|c|} \hline');
+fprintf(fid,'%s\n','$\tau$ & $S(\tau)$ & \multicolumn{2}{|c|}{FDS (I=20,J=20)} &');
+fprintf(fid,'%s\n','\multicolumn{2}{|c|}{FDS (I=20,J=1)} & FDS (I=150) \\ \cline{3-7}');
+fprintf(fid,'%s\n','(m$^{-1}$) & (kW/m$^2$) & 1 band & 6 bands & 1 band & 6 bands & 1 band \\ \hline\hline');
 for i=1:6
-   fprintf(fid,'%s & %9.4f & %9.4f & %9.4f & %9.4f & %9.4f & %9.4f %s\n',kappa{i},exact(i),flux(i,1:5),'\\')
+   fprintf(fid,'%s & %9.4f & %9.4f & %9.4f & %9.4f & %9.4f & %9.4f %s\n',kappa{i},exact(i),flux(i,1:5),'\\');
 end
-fprintf(fid,'%s\n','\hline')
-fprintf(fid,'%s\n','\end{tabular}')
-fprintf(fid,'%s\n','\end{center}')
+fprintf(fid,'%s\n','\hline');
+fprintf(fid,'%s\n','\end{tabular}');
+fprintf(fid,'%s\n','\end{center}');
 
