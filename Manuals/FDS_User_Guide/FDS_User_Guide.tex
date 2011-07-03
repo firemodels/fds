@@ -446,10 +446,10 @@ logic within FDS.
 
 \chapter{Acknowledgments}
 
-The Fire Dynamics Simulator, in various forms, has been under development for almost 25 years. However,
-the publicly released software has only existed since 2000. Since its first release, continued improvements
+The Fire Dynamics Simulator, in various forms, has been under development for almost 25 years. It was
+first released to the public in 2000. Since then, continued improvements
 have been made to the software based largely on feedback from its users.
-Included here are some who made important contributions.\\
+Included below are some who made important contributions related to the application of FDS. \\
 \\
 \noindent At NIST, thanks to Dan Madrzykowski, Doug Walton, Bob Vettori, Dave Stroup, Steve Kerber and Nelson Bryner,
 who have used FDS and Smokeview as part of several investigations of fire fighter line of duty deaths.
@@ -457,7 +457,7 @@ As part of these studies, they have provided valuable information on the model's
 when compared to large scale measurements made during fire reconstructions.\\
 \\
 \noindent Bryan Klein of Thunderhead Engineering assisted in adding cross-referencing functionality to this document, making it easier to
-view electronically.\\
+view electronically. He also designed the on-line services for revision control, bug reporting, and general discussion of topics related to FDS. \\
 \\
 \noindent At VTT, several people have contributed to the FDS development. Topi Sikanen has implemented new capabilities for
 the droplet computations. Joonas Ryyn\"{a}nen implemented and documented the new FED/FIC routine. Anna Matala has helped with the
@@ -465,7 +465,7 @@ material pyrolysis. Jukka Vaari helped to improve the gas-phase extinction calcu
 \\
 \noindent The US Nuclear Regulatory Commission has provided financial support for the maintenance and development of FDS,
 along with valuable insights into how fire models are used as part of probabilistic risk assessments of nuclear
-facilities. Special thanks to Mark Salley and Jason Dreisbach of NRC, and Francisco Joglar of SAIC.\\
+facilities. Special thanks to Mark Salley, Dave Stroup, and Jason Dreisbach of NRC, and Francisco Joglar of SAIC.\\
 \\
 \noindent The Society of Fire Protection Engineers (SFPE) sponsors a training course on the use of FDS and Smokeview.
 Chris Wood of ArupFire, Dave Sheppard of the US Bureau of Alcohol, Tobacco and Firearms (ATF), and
@@ -553,9 +553,12 @@ Numerical Simulation (DNS) if the underlying numerical mesh is fine
 enough. LES is the default mode of operation.
 
 \item[Combustion Model]
-For most applications, FDS uses a single step, mixing controlled chemical reaction which uses three lumped species (a species representing a group of species).  These lumped species are air, fuel, and products. By default the last two lumped species are explicitly
-computed. A two-step chemical reaction with an additional lumped species can also be used with the first step being oxidation of fuel to carbon monoxide and the second step the oxidation of carbon monoxide to carbon dioxide.
-The four lumped species for the two step reaction are air, fuel plus an optional diluent, and products of incomplete combustion (i.e. products of the first step), and prodcuts of complete combustion (i.e. products of the second step).  The mass fractions of all of the major
+For most applications, FDS uses a single step, mixing-controlled chemical reaction which uses three lumped species (a species representing a group of species).  
+These lumped species are air, fuel, and products. By default the last two lumped species are explicitly
+computed. A two-step chemical reaction with an additional lumped species can also be used with the first step being oxidation of fuel to 
+carbon monoxide and the second step the oxidation of carbon monoxide to carbon dioxide.
+The four lumped species for the two step reaction are air, fuel plus an optional diluent, and products of incomplete combustion 
+({\em i.e.} products of the first step), and products of complete combustion (i.e. products of the second step).  The mass fractions of all of the major
 reactants and products can be derived from the lumped species by means of
 ``state relations.''  Lastly, a multiple-step finite rate model is also available.
 
@@ -621,7 +624,7 @@ Detailed instructions on how to download executables, manuals, source-code and r
 can be found on the FDS-SMV Website
 \href{http://fire.nist.gov/fds}{{\ct http://fire.nist.gov/fds}}.
 The typical FDS/Smokeview distribution consists of an installation package or compressed archive,
-which is available for MS Windows, Mac OS X, and Linux.
+which is available for MS Windows, Mac~OS~X, and Linux.
 For other operating systems, consult the web site.
 
 \begin{warning}
@@ -725,8 +728,9 @@ file in serial mode to ensure that it is properly set up.
 
 Sample input files are provided with the program for new users who
 are encouraged to first run a sample calculation before attempting to
-write an input file. Assuming that an input file called {\bf job\_name.fds}
-exists in some directory, run the program either in a DOS or Unix command prompt as follows:
+write an input file. Input files are typically given names that help identify the particular case, followed by the
+suffix {\ct .fds}. Suppose you want to run an input file called {\bf job\_name.fds}.
+You can start FDS from a DOS or Linux/Unix command prompt as follows:
 
 
 \subsubsection{MS Windows}
@@ -749,7 +753,7 @@ Screen output can be redirected to a file via the alternative command
 fds_win_32 job_name.fds > job_name.err
 \end{verbatim}
 Note that it is also possible to associate the extention ``fds'' with the FDS executable directly, thereby making FDS run by
-double-clicking on the input file. If you do this, note that error messages will be written to the .out file. Also, if you
+double-clicking on the input file. If you do this, note that error messages will be written to the file called {\ct job\_name.out}. Also, if you
 associate the input file with the FDS executable, be careful not to accidently double-click on the input file when trying to edit it.
 This action will cause previously generated output files to be over-written.
 
@@ -785,7 +789,7 @@ to run jobs in the background so as to free the console for other uses.
 \label{info:parallelprocessing}
 
 Running FDS across a network using multiple processors and multiple
-banks of memory (RAM) is more difficult than running the single
+banks of memory (RAM) is more complicated than running the single
 processor version.  More is required of the user to make the
 connections between the machines as seamless as possible. This
 involves creating accounts for a given user on each machine, sharing
@@ -816,8 +820,8 @@ smaller meshes can be clustered together in a single {\em process} running on a 
 without the need for MPI message passing between themselves.
 
 Also note that FDS refers to its meshes by the numbers 1, 2, 3, and so on, whereas MPI refers to its processes by the numbers
-0, 1, 2, and so on. Thus, Mesh 1 is assigned to Process 0; Mesh 2 to Process 1, and so on.
-As a user, you never actually number the meshes or the processes yourself, but
+0, 1, 2, and so on. Thus, Mesh~1 is assigned to Process~0; Mesh~2 to Process~1, and so on.
+As a user, you do not explicitly number the meshes or the processes yourself, but
 error statements from FDS or from MPI might refer to the meshes or processes by number.
 As an example, if a five mesh FDS case is run in parallel, the first printout (usually to the screen unless
 otherwise directed) is:
@@ -838,15 +842,15 @@ Mesh   5 is assigned to Process   4
 This means that 5 processes (numbered 0 to 4) have started on the computers named fire61, fire62, {\em etc}., and that each mesh is being computed as an individual process on the
 individual computers. Each computer has its own memory (RAM), and MPI is the protocol by which information is passed from process to process during the calculation. Note that these
 computers may have multiple processors, and each processor may have multiple ``cores.'' You have control over how many processes get assigned to each computer, but you may or may not
-have control over how the processes are handled by a given computer. That depends on the operating system and the particular version of MPI. For example, fire62 happens to have
-two quad-core processors, and all five meshes could have been assigned to run as five processes all on fire62. Whether or not this is the best strategy is still a subject of
+have control over how the processes are handled by a given computer. That depends on the operating system and the particular version of MPI. For example, the computer named fire62 happens to have
+two quad-core processors, and all five meshes could have been assigned to run as five individual processes all on fire62. Whether or not this is the best strategy is still a subject of
 research and heavily dependent on the technical specifications of the OS and hardware.
 
 
 There are different implementations of MPI, much like there
 are different Fortran and C compilers. Each implementation is
 essentially a library of subroutines called from FDS that transfer
-data from one thread to another across a fast network. The format of
+data from one process to another across a fast network. The format of
 the subroutine calls has been widely accepted in the community,
 allowing different vendors and organizations the freedom to develop
 better software while working within an open framework.
@@ -894,18 +898,16 @@ systems of the various machines.
 \end{warning}
 
 
-\subsubsection{LAM-MPI}
+\subsubsection{Open MPI}
 
-On the Linux cluster in the Building and Fire Research Lab at NIST, LAM-MPI, a free implementation from Indiana University,
-is installed.\footnote{\href{http://www.lam-mpi.org}{{\ct http://www.lam-mpi.org}}}
-With LAM/MPI, the computers to be used are linked prior to the actual execution of FDS with a separate
-command called a ``lamboot.''
-FDS is then run using the command
+Both at VTT and NIST, we use Open MPI, an open source MPI-2 implementation that is developed and maintained by a consortium of academic, 
+research, and industry partners. 
+With Open~MPI, FDS is run using the command
 \begin{verbatim}
-mpirun -np 5 fds_mpi_linux_32 job_name.fds
+mpirun -np 5 fds_mpi_linux_64 job_name.fds
 \end{verbatim}
-where the 5 indicates that 5 processors are to be used. In this case, the executable {\bf fds\_mpi\_linux\_32} is located in the
-working directory. To make the process run in the background
+where the 5 indicates that 5 processors are to be used. In this case, the executable {\bf fds\_mpi\_linux\_64} is located in the
+working directory, but you can invoke it by its full path name. To make the process run in the background
 \begin{verbatim}
 mpirun -np 5 fds_mpi_linux_32 job_name.fds >& job_name.err &
 \end{verbatim}
@@ -951,9 +953,9 @@ control functions as described in Section~\ref{info:CTRL}.
 
 It is not unusual over the course of a
 project to run into various problems, some related to FDS, some related to your computer.
-FDS is not a typical PC application. It is a serious calculation that pushes your computer's
+FDS is not a typical PC application. It is an intensive calculation that can push your computer's
 processor and memory to its limits. In fact, there are no hardwired bounds within FDS that
-prevent you from starting a calculation that is too much for your hardware.
+prevent you from starting a calculation that is too large for your hardware.
 Even if your machine has adequate memory (RAM), you can still easily set up calculations that can require
 weeks or months to complete. It is difficult to predict at the start of a simulation just how long and
 how much memory will be required. Learn how to monitor the resource usage of your computer.
@@ -978,18 +980,15 @@ provide a list of error statements and suggestions on how to solve problems.
 
 If you encounter problems with FDS, it is crucial that you submit, along with a description of the problem, the FDS version number. Each release of
 FDS comes with a version number like 5.2.6, where the first number is the {\em major} release, the second is the {\em minor} release, and the
-third is the {\em maintenance} release. Major releases occur every few years, and as the name implies dramatically change the functionality of the model.
+third is the {\em maintenance} release. Major releases occur every few years, and as the name implies significantly change the functionality of the model.
 Minor releases occur every few months, and may cause minor changes in functionality. Release notes can help you decide whether the changes should effect the
 type of applications that you typically do. Maintenance releases are just bug fixes, and should not affect code functionality. To get the version number, just
-type the executable at the command prompt:
-\begin{verbatim}
-fds
-\end{verbatim}
-and the relevant information will appear, along with a date of compilation (useful to you) and a so-called SVN number (useful to us).  The SVN number refers to
+type the executable at the command prompt without an input file, and the relevant information will appear, 
+along with a date of compilation (useful to you) and a so-called SVN number (useful to us).  The SVN number refers to
 the Subversion repository number of the source code. It allows us to go back in time and recover the exact source code files
 that were used to build that executable.
 
-Simply get in the habit of checking the version number of your executable, periodically checking for new releases which
+Get in the habit of checking the version number of your executable, periodically checking for new releases which
 might already have addressed your problem, and telling us what version you are using if you report a problem.
 
 
@@ -1043,7 +1042,10 @@ somewhat on the size of the calculation so that the computer can comfortably run
 case. Trying to run with 90~\% to 100~\% of computer resources is risky.
 In fact, for a typical 32~bit Windows PC with 4 GB RAM, only 2 GB will be available to FDS, based on user feedback.
 If you want to run bigger cases, consider buying a computer with a 64~bit operating system or break up the
-calculation into multiple meshes and use parallel processing.
+calculation into multiple meshes and use parallel processing. If you are using a Linix/Unix machine, make sure that
+the stacksize is unlimited, which will allow FDS to access as much of the RAM as possible. Changing the stacksize
+limit differs with each shell type, so it is best to do an on-line search to find out how to ensure that your
+stacksize is unlimited. 
 
 \item[{\bf Run-Time Errors}:]
 An error occurs either within the computer operating system or the
@@ -1052,6 +1054,7 @@ the computer onto the screen or into the diagnostic output file. This
 message is most often unintelligible to most people, including the programmers,
 although occasionally one might get a small clue if there is mention of a specific problem,
 like ``stack overflow,'' ``divide by zero,'' or ``file write error, unit=...''
+Sometimes the error message simply refers to a ``Segmentation Fault.''
 These errors may be caused by a bug in FDS, for example if a number is divided by zero,
 or an array is used before it is allocated, or any number of other problems.
 Before reporting the error to the Issue Tracker, try to systematically simplify the
@@ -1149,8 +1152,8 @@ Solid Fuels     & Pyrolysis model of solid fuel  & Results in FDS 5.4 and beyond
 
 \section{Naming the Job}
 
-The operation of FDS is based on a single input text\footnote{ASCII -- American Standard Code
-for Information Interchange} file containing parameters organized into {\em namelist}
+The operation of FDS is based on a single ASCII\footnote{ASCII -- American Standard Code
+for Information Interchange. There are 256 characters that make up the standard ASCII text.} text file containing parameters organized into {\em namelist}
 \footnote{A {\em namelist} is a Fortran input record.} groups.
 The input file provides FDS  with all of the necessary information to
 describe the scenario.
@@ -1173,9 +1176,9 @@ not to overwrite a calculation that you want to keep.
 
 \noindent
 Parameters are specified within the input file by using {\em namelist} formatted records.
-Each namelist record begins with the ampersand character ``{\ct \&}'' followed
+Each namelist record begins with the ampersand character, {\ct \&}, followed
 immediately by the name of the namelist group, then a comma-delimited list of the input parameters, and
-finally a forward slash ``{\ct /}''. For example, the line
+finally a forward slash, {\ct /}. For example, the line
 
 \footnotesize
 \begin{verbatim}
@@ -1185,10 +1188,10 @@ finally a forward slash ``{\ct /}''. For example, the line
 \normalsize \noindent
 sets various values of parameters contained in the {\ct DUMP} namelist group. The meanings of these various parameters will
 be explained in subsequent chapters. The namelist records can span multiple lines in the input file, but just be sure to
-end the record with a ``/'' or else the data will not be understood. Do not add anything to a namelist line other than the
+end the record with a / or else the data will not be understood. Do not add anything to a namelist line other than the
 parameters and values appropriate for that group. Otherwise, FDS will stop immediately upon execution.
 
-Parameters within a namelist record can be separated by either commas, spaces, or line breaks. It is a good idea to use
+Parameters within a namelist record can be separated by either commas, spaces, or line breaks. It is recommended that you use
 commas or line breaks, and never use tab stops. Some machines do not recognize the spaces or the length of the tab stops.
 Comments and notes can be written into the file so long as nothing comes
 before the {\ct \&} except a space and nothing comes between the ampersand
@@ -1279,7 +1282,7 @@ Add comments liberally to the file, so long as
 these comments do not fall within the namelist records.
 
 The general structure of an input file is shown below, with many
-lines of the original validation input file\footnote{The actual input file, WTC\_05\_v5.fds, is part of the FDS
+lines of the original validation input file\footnote{The actual input file, WTC\_05.fds, is part of the FDS
 Validation Suite} removed for clarity.
 
 \footnotesize
@@ -1318,7 +1321,7 @@ Validation Suite} removed for clarity.
 \normalsize
 
 \noindent
-It is strongly recommended that when looking at a new scenario,
+It is recommended that when looking at a new scenario,
 first select a pre-written input file that resembles the case,
 make the necessary changes, then run the case at fairly low
 resolution to determine if the geometry is set up correctly.
@@ -1365,6 +1368,7 @@ Group Name  & Namelist Group Description& Reference Section & Parameter Table  \
 {\ct RAMP}  & Ramp Profile                 & \ref{info:RAMP} & \ref{tbl:RAMP}  \\ \hline
 {\ct REAC}  & Reactions                    & \ref{info:REAC} & \ref{tbl:REAC}  \\ \hline
 {\ct SLCF}  & Slice File Output            & \ref{info:SLCF} & \ref{tbl:SLCF}  \\ \hline
+{\ct SMIX}  & Species Mixtures             & \ref{info:SMIX} & \ref{tbl:SMIX}  \\ \hline
 {\ct SPEC}  & Species Parameters           & \ref{info:SPEC} & \ref{tbl:SPEC}  \\ \hline
 {\ct SURF}  & Surface Properties           & \ref{info:SURF} & \ref{tbl:SURF}  \\ \hline
 {\ct TABL}  & Tabulated Particle Data      & \ref{info:TABL} & \ref{tbl:TABL}  \\ \hline
@@ -1381,6 +1385,11 @@ Group Name  & Namelist Group Description& Reference Section & Parameter Table  \
 \clearpage
 
 \chapter{Setting the Bounds of Time and Space}
+
+This chapter describes global input parameters that affect the general scope of the simulation, like
+the simulation time and the size and extent of the computational domain. Essentially, these parameters
+establish the spatial and temporal coordinate systems that are used by all other components of the simulation, which is
+why these parameters are usually listed at the top of the input file and why they are described here first.
 
 
 \section{Naming the Job: The \texorpdfstring{{\tt HEAD}}{HEAD} Namelist Group (Table \ref{tbl:HEAD})}
@@ -1908,7 +1917,7 @@ A common question asked by new FDS users is, ``What should my grid spacing be?''
 The answer is not easy because it depends considerably on what you are trying
 to accomplish. In general, you should build an FDS input file using a relatively
 coarse mesh, and then gradually refine the mesh until you do not see
-appreciable differences in your results. Formally, this is referred to as a mesh sensitivity study.
+appreciable differences in your results. This is referred to as a mesh sensitivity study.
 
 For simulations involving buoyant plumes, a measure of how well the flow field is resolved is given by the
 non-dimensional expression $D^*/\dx$, where $D^*$ is a characteristic
@@ -1919,7 +1928,8 @@ fire diameter
 and $\dx$ is the nominal size of a mesh cell\footnote{The characteristic
 fire diameter is related to the characteristic fire size via the
 relation $Q^* = (D^*/D)^{5/2}$, where $D$ is the physical diameter of the
-fire.}. The quantity $D^*/\dx$ can be thought of as the number of computational cells
+fire.}. The quantity, $\dQ$, is the total heat release rate of the fire. If it changes over time, you should consider the
+corresponding change in resolution. The quantity $D^*/\dx$ can be thought of as the number of computational cells
 spanning the characteristic (not necessarily the physical) diameter of the fire.
 The more cells spanning the fire, the better the resolution of the
 calculation. It is better to assess the quality of the mesh in terms
@@ -1973,7 +1983,6 @@ development of a perfectly symmetric flow when the boundary
 and initial conditions are perfectly symmetric. To turn this off, set {\ct NOISE=.FALSE.}
 \item[{\ct OVERWRITE}] If {\ct .FALSE.} FDS checks for the existence of  {\ct CHID.out} and stops execution if it exists.
 \item[{\ct P\_INF}] Background pressure (at the ground) in Pa. The default is 101325 Pa.
-\item[{\ct SUPPRESSION}] A logical parameter indicating whether FDS should include gas phase flame extinction. The default is {\ct .TRUE.}
 \item[{\ct TMPA}] Ambient temperature, the temperature of everything at the start of the simulation. The default is 20~$^\circ$C.
 \item[{\ct U0, V0, W0}] Initial values of the gas velocity in each of the coordinate directions. Normally, these are all 0~m/s, but there are a few applications where it is
 convenient to start the flow immediately, like in an outdoor simulation involving wind.
@@ -2142,7 +2151,7 @@ For further discussion of its effect, see Ref.~\cite{Xin:JSS2005}.
 
 
 
-\subsubsection{Example Case: {\bf helium\_2d}}
+\subsubsection{Example Case: Flowfields/helium\_2d}
 
 This case demonstrates the use of baroclinic correction for an axially-symmetric helium plume.
 Note that the governing equations solved in FDS are written in terms of a
@@ -2197,7 +2206,7 @@ is important to capture the pressure and density decrease in the atmosphere base
 temperature {\ct LAPSE\_RATE} ($^\circ$C/m) that is entered on the {\ct MISC} line. Experiment with different meshing
 strategies before including any fire or HVAC functionality. Slowly build in complexity.
 
-\subsubsection{Example Case: stack\_effect}
+\subsubsection{Example Case: Atmospheric\_Effects/stack\_effect}
 
 If the interior temperature of a building is at a different temperature than the surrounding atmosphere, upward or
 downward air flows within shafts
@@ -2209,7 +2218,7 @@ temperature initialized to
 and 2.5~m below the roof of the building.
 The initial density stratification is defined by assuming a lapse rate of 0~$^\circ$C/m.
 \be
-   \rho_0(z) = \rho_\infty \, e^{ \frac{g W}{{\cal R}_0 T_0} z}
+   \rho_0(z) = \rho_\infty \, \exp \left( \frac{g W}{{\cal R}_0 T_0} z \right)
 \ee
 Applying this to the external and internal locations at the lower and upper vents results in densities of 1.2392, 1.1969, 1.1954, and
 1.1546~kg/m$^3$, respectively.  FDS computes the same values to within machine precision.  Since the openings in the building
@@ -2232,13 +2241,20 @@ in a velocity of 10.09~m/s through the vent.  FDS computes a peak velocity of 10
 In default mode, FDS uses the dynamic form of the Smagorinsky Large Eddy Simulation (LES) to model subgrid-scale turbulence. The turbulent viscosity modeled as
 \be \mu_{\hbox{\tiny LES}} = \rho \, (C_s\, \Delta)^2 \,
    \left(2 \; \overline{\bS}_{ij} : \overline{\bS}_{ij} - \frac{2}{3} (\nabla \cdot \overline{\bu})^2 \right)^\ha \ee
-where $C_s$ is a function of the local flow conditions and $\Delta$ is a length scale on the order of the size of a grid cell. The bar above the various quantities denotes that these are the resolved, or {\em filtered}, values, meaning that they are computed on a numerical grid. The other diffusive parameters, the thermal conductivity and material diffusivity, are related to the turbulent viscosity by
+where $C_s$ is a function of the local flow conditions and $\Delta$ is a length scale on the order of the size of a grid cell. 
+The bar above the various quantities denotes that these are the resolved, or {\em filtered}, values, meaning that they are computed on a numerical grid. 
+The other diffusive parameters, the thermal conductivity and material diffusivity, are related to the turbulent viscosity by
 \be k_{\hbox{\tiny LES}} = \frac{\mu_{\hbox{\tiny LES}} \, c_p}{\PR_t}
 \quad ; \quad
  (\rho D)_{\hbox{\tiny LES}} =\frac{\mu_{\hbox{\tiny LES}}}{\SC_t} \ee
-The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ are assumed to be constant for a given scenario. Although it is not recommended for most calculations, you can modify $\PR_t=0.5$, and $\SC_t=0.5$ via the parameters {\ct PR}, and {\ct SC} on the {\ct MISC} line. A more detailed discussion of these parameters is given in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
+The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ are assumed to be constant for a given scenario. 
+Although it is not recommended for most calculations, you can modify $\PR_t=0.5$, and $\SC_t=0.5$ via the parameters {\ct PR}, and {\ct SC} on the {\ct MISC} line. 
+A more detailed discussion of these parameters is given in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 
-The dynamic form of LES is more costly than the constant coefficient form. To save on CPU time, you can try setting {\ct COMPUTE\_VISCOSITY\_TWICE} equal to {\ct .FALSE.} to force FDS to compute the viscosity only once per time step. You can also reduce the number of times that the dynamic coefficient, $C_s$, is computed by setting {\ct DSMAG\_FREQ} equal to an integer greater than or equal to 1. A value of 3, for example, means that $C_s$ should be computed every third time that the viscosity is computed.
+The dynamic form of LES is more costly than the constant coefficient form. 
+To save on CPU time, you can try setting {\ct COMPUTE\_VISCOSITY\_TWICE} equal to {\ct .FALSE.} to force FDS to compute the viscosity only once per time step. 
+You can also reduce the number of times that the dynamic coefficient, $C_s$, is computed by setting {\ct DSMAG\_FREQ} equal to an integer greater than or equal to 1. 
+A value of 3, for example, means that $C_s$ should be computed every third time that the viscosity is computed.
 
 \begin{warning}
 \noindent
@@ -2250,7 +2266,8 @@ the empirical constant $C_s$ via {\ct CSMAG}. Its default value is 0.2.
 \subsection{Special Topic: Numerical Stability Parameters}
 \label{info:CFL}
 
-In FDS (which uses a explicit time advancement schemes), stability criteria may be understood in terms of using the time step to maintain physically realizable conditions.  Below we examine the necessary conditions for stability in the presence of advection, diffusion, and expansion of the velocity and scalar fields.
+In FDS (which uses a explicit time advancement schemes), stability criteria may be understood in terms of using the time step to maintain physically realizable conditions.  
+Below we examine the necessary conditions for stability in the presence of advection, diffusion, and expansion of the velocity and scalar fields.
 
 \subsubsection{The Courant-Friedrichs-Lewy (CFL) Constraint}
 
@@ -2258,9 +2275,16 @@ The well-known CFL constraint given by
 \begin{equation}
 \mbox{CFL} = \delta t \frac{\|\mathbf{u}\|}{\delta x} \approx 1
 \end{equation}
-places a restriction on the time step due to the advection velocity.  The limits for the CFL are set by {\ct CFL\_MIN} and {\ct CFL\_MAX} on {\ct MISC}. Physically, the constraint says that a fluid element should not traverse more than one cell within a time step. For LES, this constraint has the added advantage of keeping the implicit temporal and spatial filters consistent with each other.  In other words, in order to resolve an eddy of size $\delta x$, the time step needs to be in concert with the CFL.  If one were to employ an implicit scheme for purpose of taking time steps say 10 times larger than the CFL limit, the smallest resolvable turbulent motions would then be roughly 10 times the grid spacing, which would severely limit the benefit of the LES.  In most cases, if one wishes the simulation to run faster, a better strategy is to coarsen the grid resolution while keeping the CFL $\approx 1$.
+places a restriction on the time step due to the advection velocity.  The limits for the CFL are set by {\ct CFL\_MIN} and {\ct CFL\_MAX} on {\ct MISC}. 
+Physically, the constraint says that a fluid element should not traverse more than one cell within a time step. 
+For LES, this constraint has the added advantage of keeping the implicit temporal and spatial filters consistent with each other.  
+In other words, in order to resolve an eddy of size $\delta x$, the time step needs to be in concert with the CFL.  
+If one were to employ an implicit scheme for purpose of taking time steps say 10 times larger than the CFL limit, the smallest resolvable turbulent motions 
+would then be roughly 10 times the grid spacing, which would severely limit the benefit of the LES.  In most cases, if one wishes the simulation to run faster, 
+a better strategy is to coarsen the grid resolution while keeping the CFL $\approx 1$.
 
-The exact CFL needed to maintain stability depends on the order (as well as other properties) of the time integration scheme and the choice of velocity norm. Three choices for velocity norm are available in FDS (set on {\ct MISC}):
+The exact CFL needed to maintain stability depends on the order (as well as other properties) of the time integration scheme and the choice of velocity norm. 
+Three choices for velocity norm are available in FDS (set on {\ct MISC}):
 \vskip\baselineskip
 \noindent
 {\ct CFL\_VELOCITY\_NORM=0} (FDS 5 default, least restrictive, corresponds to $L_\infty$ norm of velocity vector)
@@ -2286,9 +2310,9 @@ The limits for VN may be adjusted using {\ct VN\_MIN} and {\ct VN\_MAX} on {\ct 
 
 We can also think of VN in terms of a total variation diminishing (TVD) constraint.  That is, if we have variation (curvature) in the scalar field, we do not want to create spurious oscillations that can lead to an instability by overshooting the smoothing step.  Consider the following explicit update of the heat equation for $u$ in 1D. Here subscripts indicate grid indices and $\nu$ is the diffusivity.
 \begin{equation}
-u_i^{n+1} = u_i^n + \frac{\delta t \nu}{\delta x^2} (u_{i-1}^n - 2u_i^n + u_{i+1}^n )
+u_i^{n+1} = u_i^n + \frac{\delta t \, \nu}{\delta x^2} (u_{i-1}^n - 2u_i^n + u_{i+1}^n )
 \end{equation}
-Very simply, notice that if $\delta t \nu/\delta x^2 = 1/2$ then $u_i^{n+1} = (u_{i-1}^n + u_{i+1}^n)/2$.  If the time step is any larger we overshoot the straight line connecting neighboring cell values.  Of course, this restriction is only guaranteed to be TVD if the $u$ field is ``smooth'', else the neighboring cell values may be shifting in the opposite direction.  Unfortunately, in LES there is no such guarantee and so the VN constraint can be particularly devilish in generating instabilities. For this reason, some practitioners like to employ implicit methods for the diffusive terms.
+Very simply, notice that if $\delta t \, \nu/\delta x^2 = 1/2$ then $u_i^{n+1} = (u_{i-1}^n + u_{i+1}^n)/2$.  If the time step is any larger we overshoot the straight line connecting neighboring cell values.  Of course, this restriction is only guaranteed to be TVD if the $u$ field is ``smooth'', else the neighboring cell values may be shifting in the opposite direction.  Unfortunately, in LES there is no such guarantee and so the VN constraint can be particularly devilish in generating instabilities. For this reason, some practitioners like to employ implicit methods for the diffusive terms.
 
 \subsubsection{Realizable Mass Density Constraint}
 
@@ -2298,26 +2322,36 @@ In an explicit Euler update of the continuity equation, if the time increment is
 \delta t < \frac{\rho^n}{\overline{\mathbf{u}}^n\cdot\nabla\rho^n + \rho^n \nabla\cdot\mathbf{u}^n}
 \end{equation}
 We can argue that the case we are most concerned with is when $\rho^n$ is near zero.  A reasonable approximation to (\ref{eqn_dtmassrestrict}) then becomes (time location suppressed)
-\begin{eqnarray}
+\be
 \label{eqn_divstability}
-\delta t &<& \frac{\rho}{\overline{u}_i \left(\frac{\rho-0}{\delta x_i}\right) + \rho \nabla\cdot\mathbf{u}} \nonumber\\
-&<& \left[ \frac{\overline{u}_i}{\delta x_i} + \nabla\cdot\mathbf{u} \right]^{-1}
-\end{eqnarray}
-Eq.~(\ref{eqn_divstability}) basically adds the effect of thermal expansion to the CFL constraint and provides a reason to prefer {\ct CFL\_VELOCITY\_NORM=1} as the basis for the time step restriction.
+\delta t < \frac{\rho}{\overline{u}_i \left(\frac{\rho-0}{\delta x_i}\right) + \rho \nabla\cdot\mathbf{u}} 
+  = \left[ \frac{\overline{u}_i}{\delta x_i} + \nabla\cdot\mathbf{u} \right]^{-1}
+\ee
+Eq.~(\ref{eqn_divstability}) basically adds the effect of thermal expansion to the CFL constraint and provides a reason to prefer {\ct CFL\_VELOCITY\_NORM=1} 
+as the basis for the time step restriction.
 
 \subsubsection{Heat Transfer Constraint}
 
-Note that the heat transfer coefficient, $h$, has units of W/(m$^2$\,K).  Thus, a velocity scale may be formed from $h/(\rho\, c_p)$.  Anytime we have a velocity scale to resolve we have a CFL-type stability restriction.  Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t \le \delta x \,\rho \,c_p/h$.  This check may be skipped by setting {\ct CHECK\_HT=.FALSE.} on {\ct MISC}.
+Note that the heat transfer coefficient, $h$, has units of W/(m$^2$\,K).  Thus, a velocity scale may be formed from $h/(\rho\, c_p)$.  
+Anytime we have a velocity scale to resolve we have a CFL-type stability restriction.  
+Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t \le \delta x \,\rho \,c_p/h$.  
+This check may be skipped by setting {\ct CHECK\_HT=.FALSE.} on {\ct MISC}.
 
 \subsubsection{Gravitational Constraint}
 
-A time scale restriction based on gravitational acceleration can be formed from $\delta t \le \sqrt{\delta z/g}$.  This check may be omitted by setting  {\ct CHECK\_GR=.FALSE.} on {\ct MISC}.
+A time scale restriction based on gravitational acceleration can be formed from $\delta t \le \sqrt{\delta z/g}$, where $\dz$ is the grid size in the
+direction of gravity.  
+This check may be omitted by setting  {\ct CHECK\_GR=.FALSE.} on {\ct MISC}.
 
-\subsection{Adjusting the Time Step} In the call to {\ct CHECK\_STABILITY} both the CFL and VN numbers are compared with {\ct CFL\_MAX [1.0]}, {\ct CFL\_MIN [0.8]}, {\ct VN\_MAX [0.5]}, and {\ct VN\_MIN [0.4]}, respectively (default values shown in brackets).  To be clear, the CFL constraint is now given by
+\subsection{Adjusting the Time Step} 
+
+In the call to {\ct CHECK\_STABILITY} both the CFL and VN numbers are compared with {\ct CFL\_MAX [1.0]}, {\ct CFL\_MIN [0.8]}, {\ct VN\_MAX [0.5]}, 
+and {\ct VN\_MIN [0.4]}, respectively (default values shown in brackets).  To be clear, the CFL constraint is now given by
 \begin{equation}
 \mbox{CFL} = \delta t \left( \frac{\|\mathbf{u}\|}{\delta x} + |\nabla\cdot\mathbf{u}| \right)
 \end{equation}
-If either the current CFL (augmented for both heat transfer and gravity) or VN is too large then the new time step is set to 90\% of the allowable value.  If both CFL and VN are below their minimum values then the current time step is increased by 10\%.
+If either the current CFL (augmented for both heat transfer and gravity) or VN is too large then the new time step is set to 90\% of the allowable value.  
+If both CFL and VN are below their minimum values then the current time step is increased by 10\%.
 
 \begin{warning}
 Resetting the stability parameters is not recommended except in very special circumstances, as they can lead to
@@ -2374,7 +2408,7 @@ parameter {\ct TMP\_INNER} on the {\ct SURF} line. An initial velocity
 can be prescribed via {\ct U0}, {\ct V0}, and {\ct W0} on the {\ct MISC} line.
 
 
-\section{Special Topic: Improving the Pressure Solver: The \texorpdfstring{{\tt PRES}}{PRES} Namelist Group (Table \ref{tbl:PRES})}
+\section{Special Topic: The Pressure Solver: The \texorpdfstring{{\tt PRES}}{PRES} Namelist Group (Table \ref{tbl:PRES})}
 \label{info:PRES}
 
 FDS uses a low-Mach number formulation of the Navier-Stokes equations. One of the consequences of this is that the speed of sound is
@@ -2396,7 +2430,8 @@ can reduce it by making more than the default number of calls to the pressure so
 To do so, specify {\ct VELOCITY\_TOLERANCE} on the {\ct PRES} line to be the maximum allowable normal velocity component on the solid
 boundary or the largest error at a mesh interface. It is in units of m/s.
 If you set this, experiment with different values, and monitor the number of pressure iterations required at each time step to achieve your
-desired tolerance. The number of iterations are written out to the file {\bf CHID.out}. If you use a value that is too small, the CPU time required might be prohibitive.
+desired tolerance. A good value to start with is $\dx/10$, where $\dx$ is the characteristic grid cell size.
+The number of iterations are written out to the file {\bf CHID.out}. If you use a value that is too small, the CPU time required might be prohibitive.
 The maximum number of iterations per time step is given by {\ct MAX\_PRESSURE\_ITERATIONS}, also on the {\ct PRES} line. Its default value is 10000.
 
 There are two parameters on the {\ct PRES} line that control iterative procedures related to the coupling of velocity and pressure. One is
@@ -2405,12 +2440,12 @@ parameter dictates that the correction be applied in 1 time step. If its value w
 parameter is called {\ct PRESSURE\_RELAX\_FACTOR}. It controls the rate at which the pressures in adjacent compartments are brought into equilibrium following a
 breach. Its value is 0.2, meaning that equilibrium is achieved in roughly 5 time steps.
 
-\subsubsection{Example Case: {\bf duct\_flow}}
+\subsubsection{Example Case: Pressure\_Solver/duct\_flow}
 
 To demonstrate how to improve the accuracy of the pressure solver, consider the flow of air through a square duct that crosses several meshes. In the
 case called {\bf duct\_flow}, air is pushed through a 1 m$^2$ duct at 1~m/s. With no thermal expansion, the volume flow into the duct ought to equal the volume flow out of the
 duct. Figure~\ref{duct_flow} displays the computed inflow and outflow as a function of time, and the number of pressure iterations required. The outflow does not match
-the inflow exactly because of inaccuracies at the solid and mesh boundaries. The {\ct VELOCITY\_TOLERANCE} has been set to 0.01~m/s.
+the inflow exactly because of inaccuracies at the solid and mesh boundaries. The {\ct VELOCITY\_TOLERANCE} has been set to 0.01~m/s and the grid cell size is 0.1~m.
 
 \begin{figure}[ht]
 \begin{center}
@@ -5856,13 +5891,13 @@ the post-flame yields for CO, soot and any other species listed below.
 cause FDS to use the built-in thermophysical properties for that species when computing quantities such as specific heat or viscosity.
 This parameter is independent of the inputs for the fuel chemistry, i.e. {\ct C, H, O, N}. Table~\ref{tab:gasspecies} provides a listing of the available species.
 If the {\ct FUEL} is in the table, then FDS will use the built-in formula to obtain the values of C,H,O, and N.
-By default, FDS uses the gas thermophysical properties of {\ct ETHYLENE} for the fuel. 
-\item[{\ct FORMULA}] A character string that identities the chemical formula of the fuel species for the reaction.  
-This input only has meaning when simple chemistry is being used and the formula can only contain C,H,O, or N.  
+By default, FDS uses the gas thermophysical properties of {\ct ETHYLENE} for the fuel.
+\item[{\ct FORMULA}] A character string that identities the chemical formula of the fuel species for the reaction.
+This input only has meaning when simple chemistry is being used and the formula can only contain C,H,O, or N.
 Specifying a formula means the individual inputs of C,H,O, and N do not need to be specified. See ~\ref{gas_species_props} for a description on how to input a {\ct FORMULA}.
 \item[{\ct ID}] A character string that identifies the reaction. Normally, this label is not used by FDS, but it is useful to
 label the {\ct REAC} line if more than one reactions are specified.
-\item[{\ct C, H, O, N}] The fuel chemical formula. All numbers are positive.  One of either C or H must be specified.  
+\item[{\ct C, H, O, N}] The fuel chemical formula. All numbers are positive.  One of either C or H must be specified.
 This input is not needed if {\ct FORMULA} is specified or if the {\ct FUEL} is in Table~\ref{tab:gasspecies}.
 \item[{\ct Y\_O2\_INFTY}] Ambient mass fraction of oxygen (Default 0.232428)
 \item[{\ct Y\_CO2\_INFTY}] Ambient mass fraction of carbon dioxide (Default 0.0058)
@@ -5872,20 +5907,20 @@ monoxide, $y_{CO}$. (Default 0.0)
 \item[{\ct SOOT\_YIELD}] The fraction of fuel mass converted into smoke particulate, $y_s$.
 Note that this parameter does not apply to the processes of soot growth and oxidation,
 but rather to the net production of the smoke particulate from the fire.  (Default is 0.0)
-\item[{\ct SOOT\_H\_FRACTION}] The fraction of the atoms in the soot that are hydrogen.  Note that this input only applies to simple chemistry {\ct REAC} inputs.  
-For all other types of {\ct REAC} inputs the species {\ct SOOT} is assumed to be pure carbon unless a {\ct FORMULA} is provided. 
+\item[{\ct SOOT\_H\_FRACTION}] The fraction of the atoms in the soot that are hydrogen.  Note that this input only applies to simple chemistry {\ct REAC} inputs.
+For all other types of {\ct REAC} inputs the species {\ct SOOT} is assumed to be pure carbon unless a {\ct FORMULA} is provided.
 (Default 0.1 - equivalent to the input {\ct FORMULA='C0.9H0.1'} for other {\ct REAC} types)
 \end{description}
 
 \noindent
-A few sample {\ct REAC} lines are given here. 
+A few sample {\ct REAC} lines are given here.
 
 \footnotesize
 \begin{verbatim}
 &REAC FUEL = 'METHANE' /
 \end{verbatim}
 \normalsize
-\noindent Here, there is no need for a {\ct FORMULA} or atom count because the {\ct FUEL} is listed in Table~\ref{tab:gasspecies}. It is also assumed that the soot and CO 
+\noindent Here, there is no need for a {\ct FORMULA} or atom count because the {\ct FUEL} is listed in Table~\ref{tab:gasspecies}. It is also assumed that the soot and CO
 yields are zero.
 
 \footnotesize
@@ -5919,7 +5954,7 @@ The {\ct HEAT\_OF\_COMBUSTION} (kJ/kg) is the amount of
 energy released per unit mass of fuel consumed. Note that if the heat of combustion is not
 specified, it is assumed to be
 \be \Delta H \approx \frac{\nu_{O_2} \; W_{O_2} } { \nu_{f} \; W_{f} } \; \; \hbox{\ct EPUMO2}  \quad \quad \hbox{kJ/kg}  \label{EPUMO2} \ee
-The quantity {\ct EPUMO2} (kJ/kg) is the amount of energy released per unit mass of oxygen consumed. 
+The quantity {\ct EPUMO2} (kJ/kg) is the amount of energy released per unit mass of oxygen consumed.
 Its default is 13,100~kJ/kg.  Note that if both {\ct EPUMO2} and {\ct HEAT\_OF\_COMBUSTION} are
 specified that FDS will ignore the value for {\ct EPUMO2}.
 
@@ -5962,7 +5997,7 @@ In an LES simulation, the consumption rate of gaseous fuel is given by the expre
    s=\frac{W_\F}{\nu_{\OTWO} W_{\OTWO} }  \ee
 Here, $\tau$ is a mixing time scale and $\beta$ is an empirical parameter equal to 1. You can change the value of $\beta$ by specifying {\ct BETA\_EDC}. Its default value
 is 2. There is a minimum value of $Y_{\hbox{\tiny P}}$ required to allow for a reaction to occur before any products have accumulated. It is specified with
-{\ct Y\_P\_MIN\_EDC}, and its default value is 0.01. 
+{\ct Y\_P\_MIN\_EDC}, and its default value is 0.01.
 
 
 
@@ -5987,7 +6022,7 @@ by setting {\ct SUPPRESSION=.FALSE.} on the {\ct REAC} line. This latter approac
 prevents FDS from entering the suppression algorithm altogether.
 
 If the mixing-controlled combustion model is used and flame extinction occurs, the unburned fuel gas will re-ignite when it mixes with oxygen somewhere
-else in the domain. To prevent this from happening, you can set the {\ct AUTO\_IGNITION\_TEMPERATURE} ($^\circ$C) below which combustion will not occur.  
+else in the domain. To prevent this from happening, you can set the {\ct AUTO\_IGNITION\_TEMPERATURE} ($^\circ$C) below which combustion will not occur.
 Note that if this parameter is used, then some form of heat/ignition source must be present in order for combustion to begin.
 
 \subsubsection{Example Case: door\_crack}
@@ -6065,7 +6100,7 @@ specified simply by:
 
 \noindent
 Note the stoichiometry for the last case.  It is based upon moles of the lumped species and not moles of the primitive species.
-Since the lumped species for {\ct AIR} is 21 \% oxygen, taking 21 \% of the 9.60825 moles of {\ct AIR} results in 2 moles of oxygen. 
+Since the lumped species for {\ct AIR} is 21 \% oxygen, taking 21 \% of the 9.60825 moles of {\ct AIR} results in 2 moles of oxygen.
 
 Obviously, for this example, the first {\ct REAC} line above is preferable. However, there are many situations where you cannot use the simple chemistry model and
 must resort to either of the alternatives. For a mixing-controlled reaction(s), the lumped species approach is preferable. For a finite-rate reaction(s), the primitive
@@ -6192,10 +6227,10 @@ per unit volume is used:
 \label{info:REAC_Diagnostics}
 
 \begin{description}
-\item[{\ct CHECK\_ATOM\_BALANCE}] If chemical formulas are provide for all {\ct SPEC} that participate in a reaction, then FDS will 
+\item[{\ct CHECK\_ATOM\_BALANCE}] If chemical formulas are provide for all {\ct SPEC} that participate in a reaction, then FDS will
 check the stoichiometry to ensure that atoms are conserved.  Setting this flag to {\ct .FALSE.} will bypass this check.  (default is {\ct .TRUE.})
 \item{\ct REAC\_ATOM\_ERROR} This is the error tolerance in atoms for the reaction stoichiometry check.  (default is 1.E-5)
-\item{\ct REAC\_MASS\_ERROR} This is the relative error tolerance computed as (mass of products - mass of reactants)/(mass of products) 
+\item{\ct REAC\_MASS\_ERROR} This is the relative error tolerance computed as (mass of products - mass of reactants)/(mass of products)
 for the reaction stoichiometry mass balance check.  (default is 1.E-4)
 \end{description}
 
