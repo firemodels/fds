@@ -9,7 +9,7 @@ addpath('../../Validation/Cup_Burner/Experimental_Data')
 addpath('../../Validation/Cup_Burner/FDS_Output_Files')
 
 % load experimental data and FDS prediction
-[exp_data] = csvread('Cup_Burner_Data.csv',2);
+[exp_data] = csvread('Cup_burner_data.csv',2);
 
 HRR_Limit = 1E-10;
 
@@ -52,8 +52,8 @@ for s = 1:N_Agents
    FDS_File = ['Cup_' Fuel{f} '_' Agent{s} '_devc.csv'];
    [fds_data] = csvread(FDS_File,2);
    n_fds = size(fds_data,1);
-   i_first = find(fds_data(1:n_fds,6)>HRR_Limit,1,'first');
-   i_last = find(fds_data(i_first:n_fds,6)<HRR_Limit,1,'first');
+   i_first = find(fds_data(1:n_fds,5)>HRR_Limit,1,'first');
+   i_last = find(fds_data(i_first:n_fds,5)<HRR_Limit,1,'first');
    if (isempty(i_last))
       % not yet extinguished
       i_last = 1;

@@ -22,6 +22,7 @@
 
 close all
 clear all
+
 addpath 'scripts'
 
 % Name of dataplot input file, directory where data is located, and 
