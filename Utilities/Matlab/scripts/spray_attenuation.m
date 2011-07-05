@@ -241,13 +241,13 @@ for p = 1:5
    
    % Collect data
    % initial flux between t = 1 and 10 s
-   i1 = find(fds_data(:,1)>1.0,1,'first')
-   i2 = find(fds_data(:,1)<=10.0,1,'last')
+   i1 = find(fds_data(:,1)>1.0,1,'first');
+   i2 = find(fds_data(:,1)<=10.0,1,'last');
    
-   FDS_Flux_0(n,p) = mean(fds_data(i1:i2,2))
+   FDS_Flux_0(n,p) = mean(fds_data(i1:i2,2));
    % Final flux as mean between t=10 and 15 s
-   i1 = find(fds_data(:,1)>10,1,'first')
-   i2 = find(fds_data(:,1)<=30,1,'last')-1
+   i1 = find(fds_data(:,1)>10,1,'first');
+   i2 = find(fds_data(:,1)<=30,1,'last')-1;
    FDS_Flux(n,p) = mean(fds_data(i1:i2,2));
    FDS_Attenuation(n,p) = 100*(FDS_Flux_0(n,p)-FDS_Flux(n,p))/FDS_Flux_0(n,p);
 
@@ -255,9 +255,9 @@ end
 
 % plot attenuation
 
-exp_data(exp_rows(n,:),2)
-FDS_Attenuation(n,:)
-exp_marker{n}
+exp_data(exp_rows(n,:),2);
+FDS_Attenuation(n,:);
+exp_marker{n};
 hf(4)=figure(4);
 ha(n,1) = plot(exp_data(exp_rows(n,:),2),FDS_Attenuation(n,:),exp_marker{n});
 set(ha(n,1),'MarkerFaceColor',exp_color{n});
