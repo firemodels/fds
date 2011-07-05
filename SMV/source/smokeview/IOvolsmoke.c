@@ -14,6 +14,7 @@
 #include "MALLOC.h"
 #include "smokeviewvars.h"
 #include "interp.h"
+#include "smv_endian.h"
 
 // svn revision character string
 char IOvolsmoke_revision[]="$Revision$";
@@ -204,7 +205,7 @@ void init_volrender(void){
 
     meshi = meshinfo + i;
     vr = &(meshi->volrenderinfo);
-    if(vr->fire!=NULL||vr->smoke!=NULL){
+    if(vr->smoke!=NULL){
       int nx, ny, nz;
 
       nvolrenderinfo++;
@@ -1055,3 +1056,46 @@ void drawsmoke3dGPUVOL(volrenderdata *vr){
 }
 
 #endif
+
+#define FORTSLICEREAD(var,size) fseek(SLICEFILE,4,SEEK_CUR);\
+                           returncode=fread(var,4,size,SLICEFILE);\
+                           if(endianswitch==1)endian_switch(var,size);\
+                           fseek(SLICEFILE,4,SEEK_CUR)
+/* ------------------ read_volsmoke_frame ------------------------ */
+
+void read_volsmoke_frame(volrenderdata *vr, int frame){
+	slice *fireslice, *smokeslice;
+  FILE *SLICEFILE;
+  int framesize,skip,returncode;
+  float time, *sliceframe_data;
+  int endianswitch=0;
+
+  smokeslice=vr->smoke;
+  fireslice=vr->fire;
+  framesize = smokeslice->is2+1-smokeslice->is1;
+  framesize *= (smokeslice->js2+1-smokeslice->js1);
+  framesize *= (smokeslice->ks2+1-smokeslice->ks1);
+
+  skip = 3*(4+30+4); // 3 30 byte labels
+  skip += (4+24+4);  // is1, is2, js1, js2, ks1, ks2
+  skip += frame*(4+4+4); // time
+  skip += frame*(4+4*framesize+4); // slice data
+
+  SLICEFILE=fopen(smokeslice->file,"rb");
+  returncode=fseek(SLICEFILE,skip,SEEK_SET); // skip from beginning of file
+
+  FORTSLICEREAD(&time,1);
+  NewMemory((void **)&sliceframe_data,framesize*sizeof(float));
+  FORTSLICEREAD(sliceframe_data,framesize);
+  fclose(SLICEFILE);
+
+  if(fireslice!=NULL){
+    SLICEFILE=fopen(fireslice->file,"rb");
+    returncode=fseek(SLICEFILE,skip,SEEK_SET); // skip from beginning of file
+
+    FORTSLICEREAD(&time,1);
+    NewMemory((void **)&sliceframe_data,framesize*sizeof(float));
+    FORTSLICEREAD(sliceframe_data,framesize);
+    fclose(SLICEFILE);
+  }
+}
