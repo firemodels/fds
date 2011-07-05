@@ -3167,28 +3167,27 @@ void LoadVolSmoke3DMenu(int value){
     vr = &(meshi->volrenderinfo);
     fire = vr->fire;
     smoke = vr->smoke;
-    if(fire!=NULL||smoke!=NULL){
+    if(smoke!=NULL){
+      char *file;
+      int ifile;
+      int errorcode;
+
+      read_volsmoke_allframes(vr);
+
+      file=smoke->file;
+      ifile=smoke-sliceinfo;
+      readslice(file,ifile,LOAD,&errorcode);
+      smoke->display=0;
+      vr->smokedata = smoke->qslicedata;  //*** hack
+
       if(fire!=NULL){
-        char *file;
-        int ifile;
-        int errorcode;
 
         file=fire->file;
         ifile=fire-sliceinfo;
         readslice(file,ifile,LOAD,&errorcode);
         fire->display=0;
       }
-      if(smoke!=NULL){
-        char *file;
-        int ifile;
-        int errorcode;
 
-        file=smoke->file;
-        ifile=smoke-sliceinfo;
-        readslice(file,ifile,LOAD,&errorcode);
-        smoke->display=0;
-        vr->smokedata = smoke->qslicedata;  //*** hack
-      }
       vr->loaded=1;
       vr->show=1;
       stept=1;

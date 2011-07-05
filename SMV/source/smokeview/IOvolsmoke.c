@@ -205,10 +205,12 @@ void init_volrender(void){
 
     meshi = meshinfo + i;
     vr = &(meshi->volrenderinfo);
+    vr->nframes=0;
     if(vr->smoke!=NULL){
-      int nx, ny, nz;
+      int nx, ny, nz, j;
 
       nvolrenderinfo++;
+      vr->nframes=get_volsmoke_nframes(vr);
       nx = ijkbarmax+1;
       ny = ijkbarmax+1;
       nz = ijkbarmax+1;
@@ -218,6 +220,15 @@ void init_volrender(void){
       NewMemory((void **)&vr->smokecolor_xz1,4*nx*nz*sizeof(float));
       NewMemory((void **)&vr->smokecolor_xy0,4*nx*ny*sizeof(float));
       NewMemory((void **)&vr->smokecolor_xy1,4*nx*ny*sizeof(float));
+      if(vr->nframes>0){
+        NewMemory((void **)&vr->times,vr->nframes*sizeof(float));
+        NewMemory((void **)&vr->firedataptrs,vr->nframes*sizeof(float *));
+        NewMemory((void **)&vr->smokedataptrs,vr->nframes*sizeof(float *));
+        for(j=0;j<vr->nframes;j++){
+          vr->firedataptrs[j]=NULL;
+          vr->smokedataptrs[j]=NULL;
+        }
+      }
     }
     else{
       vr->smokecolor_yz0=NULL;
@@ -1057,45 +1068,101 @@ void drawsmoke3dGPUVOL(volrenderdata *vr){
 
 #endif
 
-#define FORTSLICEREAD(var,size) fseek(SLICEFILE,4,SEEK_CUR);\
+#define HEADER_SIZE 4
+#define TRAILER_SIZE 4
+#define FORTSLICEREAD(var,size) fseek(SLICEFILE,HEADER_SIZE,SEEK_CUR);\
                            returncode=fread(var,4,size,SLICEFILE);\
                            if(endianswitch==1)endian_switch(var,size);\
-                           fseek(SLICEFILE,4,SEEK_CUR)
+                           fseek(SLICEFILE,TRAILER_SIZE,SEEK_CUR)
+
+/* ------------------ get_volsmoke_sizes ------------------------ */
+
+int get_volsmoke_nframes(volrenderdata *vr){
+	slice *fireslice, *smokeslice;
+  FILE *SLICEFILE;
+  int framesize,skip,returncode;
+  float time, *sliceframe_data;
+  int endianswitch=0;
+  int nf;
+  int nframes,filesize;
+
+  smokeslice=vr->smoke;
+  fireslice=vr->fire;
+  framesize = smokeslice->nslicei*smokeslice->nslicej*smokeslice->nslicek;
+  framesize *= 4; // convert to bytes
+  framesize += HEADER_SIZE + TRAILER_SIZE;
+
+  skip =           (HEADER_SIZE+30        +TRAILER_SIZE); // long label
+  skip +=          (HEADER_SIZE+30        +TRAILER_SIZE); // short label
+  skip +=          (HEADER_SIZE+30        +TRAILER_SIZE); // unit label
+  skip +=          (HEADER_SIZE+24        +TRAILER_SIZE); // is1, is2, js1, js2, ks1, ks2
+
+  // nframes = (totalsize - skip)/(12 + framesize);
+
+  nframes=0;
+  filesize=getfilesize(smokeslice->file);
+  if(filesize>0){
+    nframes = (filesize-skip)/(12 + framesize);
+  }
+  return nframes;
+}
+
 /* ------------------ read_volsmoke_frame ------------------------ */
 
-void read_volsmoke_frame(volrenderdata *vr, int frame){
+void read_volsmoke_frame(volrenderdata *vr, int framenum){
 	slice *fireslice, *smokeslice;
   FILE *SLICEFILE;
   int framesize,skip,returncode;
   float time, *sliceframe_data;
   int endianswitch=0;
 
+  if(framenum<0||framenum>=vr->nframes)return;
   smokeslice=vr->smoke;
   fireslice=vr->fire;
-  framesize = smokeslice->is2+1-smokeslice->is1;
-  framesize *= (smokeslice->js2+1-smokeslice->js1);
-  framesize *= (smokeslice->ks2+1-smokeslice->ks1);
+  framesize = smokeslice->nslicei*smokeslice->nslicej*smokeslice->nslicek;
 
-  skip = 3*(4+30+4); // 3 30 byte labels
-  skip += (4+24+4);  // is1, is2, js1, js2, ks1, ks2
-  skip += frame*(4+4+4); // time
-  skip += frame*(4+4*framesize+4); // slice data
+  skip =           (HEADER_SIZE+30        +TRAILER_SIZE); // long label
+  skip +=          (HEADER_SIZE+30        +TRAILER_SIZE); // short label
+  skip +=          (HEADER_SIZE+30        +TRAILER_SIZE); // unit label
+  skip +=          (HEADER_SIZE+24        +TRAILER_SIZE); // is1, is2, js1, js2, ks1, ks2
+  skip += framenum*(HEADER_SIZE +4        +TRAILER_SIZE); // framenum time's
+  skip += framenum*(HEADER_SIZE +4*framesize+TRAILER_SIZE); // framenum slice data's
 
   SLICEFILE=fopen(smokeslice->file,"rb");
-  returncode=fseek(SLICEFILE,skip,SEEK_SET); // skip from beginning of file
-
-  FORTSLICEREAD(&time,1);
-  NewMemory((void **)&sliceframe_data,framesize*sizeof(float));
-  FORTSLICEREAD(sliceframe_data,framesize);
-  fclose(SLICEFILE);
-
-  if(fireslice!=NULL){
-    SLICEFILE=fopen(fireslice->file,"rb");
+  if(SLICEFILE!=NULL){
     returncode=fseek(SLICEFILE,skip,SEEK_SET); // skip from beginning of file
 
     FORTSLICEREAD(&time,1);
+    vr->times[framenum]=time;
     NewMemory((void **)&sliceframe_data,framesize*sizeof(float));
+    vr->smokedataptrs[framenum]=sliceframe_data;
     FORTSLICEREAD(sliceframe_data,framesize);
     fclose(SLICEFILE);
+  }
+
+  if(fireslice!=NULL){
+    SLICEFILE=fopen(fireslice->file,"rb");
+    if(SLICEFILE!=NULL){
+      returncode=fseek(SLICEFILE,skip,SEEK_SET); // skip from beginning of file
+
+      FORTSLICEREAD(&time,1);
+      vr->times[framenum]=time;
+      NewMemory((void **)&sliceframe_data,framesize*sizeof(float));
+      vr->firedataptrs[framenum]=sliceframe_data;
+      FORTSLICEREAD(sliceframe_data,framesize);
+      fclose(SLICEFILE);
+    }
+  }
+}
+
+/* ------------------ read_volsmoke_allframes ------------------------ */
+
+void read_volsmoke_allframes(volrenderdata *vr){
+  int nframes;
+  int i;
+
+  nframes = vr->nframes;
+  for(i=0;i<nframes;i++){
+    read_volsmoke_frame(vr, i);
   }
 }
