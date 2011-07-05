@@ -19,6 +19,8 @@ EXTERNCPP void stripcommas(char *buffer);
 EXTERNCPP int getrowcols(FILE *stream, int *nrows, int *ncols);
 EXTERNCPP int can_write_to_dir(char *dir);
 EXTERNCPP int file_exists(char *filename);
+EXTERNCPP int getfilesize(char *filename);
+
 EXTERNCPP char *which(char *progname);
 EXTERNCPP FILE_SIZE get_filesize(const char *filename);
 EXTERNCPP time_t file_modtime(char *filename);

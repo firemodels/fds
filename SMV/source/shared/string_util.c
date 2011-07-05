@@ -646,7 +646,22 @@ void array2string(float *vals, int nvals, char *string){
   strcat(string,cval);
 }
 
-  /* ------------------ getfileinfo ------------------------ */
+  /* ------------------ getfilesize ------------------------ */
+
+int getfilesize(char *filename){
+  STRUCTSTAT statbuffer;
+  int statfile;
+  int filesize;
+
+
+  filesize=0;
+  statfile=STAT(filename,&statbuffer);
+  if(statfile!=0)return 0;
+  filesize=statbuffer.st_size;
+  return filesize;
+}
+
+  /* ------------------ file_exists ------------------------ */
 
 int file_exists(char *filename){
   /*! \fn int file_exists(char *filename)
