@@ -1049,7 +1049,7 @@ PROF_LOOP: DO N=1,N_PROF
    ELSE
       OPEN(LU_PROF(N),FILE=FN_PROF(N),FORM='FORMATTED',STATUS='REPLACE')
       WRITE(LU_PROF(N),'(A)') PROFILE(N)%ID
-      WRITE(LU_PROF(N),'(A)') "Time(s), Npoints, Npoints x Depth (mm), Npoints x Value"
+      WRITE(LU_PROF(N),'(A)') "Time(s), Npoints, Npoints x Depth (m), Npoints x Value"
       WRITE(LU_PROF(N),*) 
    ENDIF
 ENDDO PROF_LOOP
