@@ -372,7 +372,7 @@ f95_solaris11_mpi : obj = fds_mpi_solaris11
 f95_solaris11_mpi : $(obj_mpi) 
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi) 
 
-sun_linux_64 : FFLAGS   = -O3 -m64 -Bstatic -openmp
+sun_linux_64 : FFLAGS   = -O3 -m64 -Bstatic
 sun_linux_64 : CFLAGS   = -O2 -m64
 sun_linux_64 : FCOMPL   = /opt/oracle/solstudio12.2/bin/sunf95
 sun_linux_64 : CCOMPL   = /opt/oracle/solstudio12.2/bin/suncc
