@@ -10,6 +10,7 @@ $VDIR/BRE_Spray/FDS_Output_Files/Process_Output.csh
 $VDIR/Bryant_Doorway/FDS_Output_Files/Process_Output.csh
 $VDIR/CAROLFIRE/FDS_Output_Files/Process_Output.csh
 $VDIR/CSTB_Tunnel/FDS_Output_Files/Process_Output.csh
+$VDIR/Cup_Burner/FDS_Output_Files/Process_Output.csh
 $VDIR/FAA_Polymers/FDS_Output_Files/Process_Output.csh
 $VDIR/FM_Parallel_Panels/FDS_Output_Files/Process_Output.csh
 $VDIR/FM_SNL/FDS_Output_Files/Process_Output.csh
