@@ -16,6 +16,9 @@ clear all
 
 fid = fopen('terminal_velocity.prt5'); % modify this line
 
+% The DUMMY lines are 4 byte placeholders that apparently fortran puts at the
+% beginning and end of all lines.  I only knew of this thanks to Glenn.
+
 DUMMY       = fread(fid,1,'integer*4');
 ONE_INTEGER = fread(fid,1,'integer*4');
 DUMMY       = fread(fid,1,'integer*4');
@@ -28,9 +31,23 @@ DUMMY  = fread(fid,1,'integer*4');
 N_PART = fread(fid,1,'integer*4');
 DUMMY  = fread(fid,1,'integer*4');
 
-DUMMY = fread(fid,1,'integer*4');
-PC    = fread(fid,2,'integer*4');
-DUMMY = fread(fid,1,'integer*4');
+for NP=1:N_PART
+    
+    DUMMY = fread(fid,1,'integer*4');
+    PC    = fread(fid,2,'integer*4'); N_QUANTITIES(NP) = PC(1);
+    DUMMY = fread(fid,1,'integer*4');
+    
+    for NN=1:N_QUANTITIES(NP)
+        DUMMY               = fread(fid,1,'integer*4');
+        SMOKEVIEW_LABEL{NP} = fgets(fid,30);
+        DUMMY               = fread(fid,1,'integer*4');
+        
+        DUMMY     = fread(fid,1,'integer*4');
+        UNITS{NP} = fgets(fid,30);
+        DUMMY     = fread(fid,1,'integer*4');
+    end
+    
+end
 
 n = 0;
 while ~feof(fid)
@@ -46,22 +63,36 @@ while ~feof(fid)
         STIME(n) = stime_tmp;
     end
     
-    DUMMY = fread(fid,1,'integer*4');
-    NPLIM = fread(fid,1,'integer*4');
-    DUMMY = fread(fid,1,'integer*4');
+    for NP=1:N_PART
+        
+        DUMMY = fread(fid,1,'integer*4');
+        NPLIM = fread(fid,1,'integer*4');
+        DUMMY = fread(fid,1,'integer*4');
+        
+        DUMMY = fread(fid,1,'integer*4');
+        XP(n,NP) = fread(fid,NPLIM,'real*4');
+        YP(n,NP) = fread(fid,NPLIM,'real*4');
+        ZP(n,NP) = fread(fid,NPLIM,'real*4');
+        DUMMY = fread(fid,1,'integer*4');
+        
+        DUMMY = fread(fid,1,'integer*4');
+        TA    = fread(fid,NPLIM,'integer*4');
+        DUMMY = fread(fid,1,'integer*4');
+        
+        if N_QUANTITIES(NP)>0
+            DUMMY = fread(fid,1,'integer*4');
+            for NN=1:N_QUANTITIES(NP)
+                QP(1:NPLIM,NN,NP) = fread(fid,NPLIM,'real*4');
+            end
+            DUMMY = fread(fid,1,'integer*4');
+        end
+        
+    end
     
-    DUMMY = fread(fid,1,'integer*4');
-    XP(n) = fread(fid,NPLIM,'real*4');
-    YP(n) = fread(fid,NPLIM,'real*4');
-    ZP(n) = fread(fid,NPLIM,'real*4');
-    DUMMY = fread(fid,1,'integer*4');
-    
-    DUMMY = fread(fid,1,'integer*4');
-    TA    = fread(fid,NPLIM,'integer*4');
-    DUMMY = fread(fid,1,'integer*4');    
 end
 fclose(fid);
 
 display('Part file read successfully!')
 
-%plot(STIME,ZP)
+%plot(STIME,ZP(:,1))
+%plot(STIME,QP(:,1,1))
