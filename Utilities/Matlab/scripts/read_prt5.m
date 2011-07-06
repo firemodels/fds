@@ -1,20 +1,16 @@
-% McDermott and Trettel
+% Trettel and McDermott
 % 7-5-11
 % read_prt5.m
 %
-% This script reads the FDS 'part' file (*.prt5).
+% This function reads the FDS 'part' file (*.prt5).
 %
-% Currently, only works for reading the particle time and position.
-% This script will not work if any QUANTITIES are present in the part file.
-% The capability to read the QUANTITIES is coming soon.
+% Example:
 %
-% Usage: Copy this script to your working directory and modify the filename
-% on the fopen line.
+% >> read_prt5('terminal_velocity.prt5')
 
-close all
-clear all
+function [] = read_prt5(filename)
 
-fid = fopen('terminal_velocity.prt5'); % modify this line
+fid = fopen(filename);
 
 % The DUMMY lines are 4 byte placeholders that apparently fortran puts at the
 % beginning and end of all lines.  I only knew of this thanks to Glenn.
@@ -93,6 +89,8 @@ end
 fclose(fid);
 
 display('Part file read successfully!')
+
+% Examples for plotting position and quantities
 
 %plot(STIME,ZP(:,1))
 %plot(STIME,QP(:,1,1))
