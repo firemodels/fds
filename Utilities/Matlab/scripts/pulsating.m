@@ -85,6 +85,19 @@ set(legend_handle,'FontSize',Title_Font_Size,'Interpreter','LaTeX')
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 
+% add SVN if file is available
+
+SVN_Filename = [data_dir,'pulsating_FL2_16_svn.txt'];
+if exist(SVN_Filename,'file')
+    SVN = importdata(SVN_Filename);
+    x_lim = get(gca,'XLim');
+    y_lim = get(gca,'YLim');
+    X_SVN_Position = x_lim(1)+SVN_Scale_X_linear*(x_lim(2)-x_lim(1));
+    Y_SVN_Position = y_lim(1)+SVN_Scale_Y_linear*(y_lim(2)-y_lim(1));
+    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
+        'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+end
+
 % print to pdf
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
@@ -117,6 +130,19 @@ legend boxoff
 set(legend_handle,'FontSize',Title_Font_Size,'Interpreter','LaTeX')
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
+
+% add SVN if file is available
+
+SVN_Filename = [data_dir,'pulsating_FL2_16_svn.txt'];
+if exist(SVN_Filename,'file')
+    SVN = importdata(SVN_Filename);
+    x_lim = get(gca,'XLim');
+    y_lim = get(gca,'YLim');
+    X_SVN_Position = x_lim(1)+SVN_Scale_X_loglog*(x_lim(2)-x_lim(1));
+    Y_SVN_Position = y_lim(1)+SVN_Scale_Y_loglog*(y_lim(2)-y_lim(1));
+    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
+        'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+end
 
 % print to pdf
 set(gcf,'PaperUnits',Paper_Units);

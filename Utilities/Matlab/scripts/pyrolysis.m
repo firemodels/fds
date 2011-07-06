@@ -127,6 +127,25 @@ for i_plot=1:2
         line([T_p(i)-273 T_p(i)-273],[0.00 Y_0(i)*r_p(i)*(1-residue(i))*1000],'LineStyle','-','Color','black','LineWidth',1)
     end
     
+    % add SVN if file is available
+    
+    if i_plot==1
+        chid = 'pyrolysis_1';
+    else
+        chid = 'pyrolysis_2';
+    end
+    
+    SVN_Filename = [chid,'_svn.txt'];
+    if exist(SVN_Filename,'file')
+        SVN = importdata(SVN_Filename);
+        x_lim = get(gca,'XLim');
+        y_lim = get(gca,'YLim');
+        X_SVN_Position = x_lim(1)+SVN_Scale_X_linear*(x_lim(2)-x_lim(1));
+        Y_SVN_Position = y_lim(1)+SVN_Scale_Y_linear*(y_lim(2)-y_lim(1));
+        text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
+            'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+    end
+    
     % Create the PDF files
     
     set(gcf,'Visible',Figure_Visibility);

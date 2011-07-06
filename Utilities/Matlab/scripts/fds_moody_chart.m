@@ -121,6 +121,20 @@ text(1.3e8,3.85e-2,num2str(RR(4)),'Interpreter','LaTeX','FontSize',Key_Font_Size
 text(1.3e8,1.02e-1,num2str(RR(5)),'Interpreter','LaTeX','FontSize',Key_Font_Size,'Fontname','Times')
 h = legend(H,'$N_z=8, H=1$','$N_z=16, H=1$','$N_z=32, H=1$','$N_z=16, H=2$','Location','Southwest');
 set(h,'Interpreter','LaTeX')
+
+% add SVN if file is available
+
+SVN_Filename = [repository,'moody_dpdx=-0p01_N8_svn.txt'];
+if exist(SVN_Filename,'file')
+    SVN = importdata(SVN_Filename);
+    x_lim = get(gca,'XLim');
+    y_lim = get(gca,'YLim');
+    X_SVN_Position = x_lim(1)+0.10*(x_lim(2)-x_lim(1));
+    Y_SVN_Position = y_lim(1)+1.15*(y_lim(2)-y_lim(1));
+    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
+        'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+end
+
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);

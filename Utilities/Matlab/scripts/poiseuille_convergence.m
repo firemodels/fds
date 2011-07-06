@@ -9,10 +9,12 @@ dpdx = -1;
 L = 1;
 N = [8,16,32,64];
 
-[f(1),Re(1)] = friction_factor_calc(dpdx,L,'../../../Validation/Moody_Chart/FDS_Output_Files/poiseuille_N8_mu025_devc.csv');
-[f(2),Re(2)] = friction_factor_calc(dpdx,L,'../../../Validation/Moody_Chart/FDS_Output_Files/poiseuille_N16_mu025_devc.csv');
-[f(3),Re(3)] = friction_factor_calc(dpdx,L,'../../../Validation/Moody_Chart/FDS_Output_Files/poiseuille_N32_mu025_devc.csv');
-[f(4),Re(4)] = friction_factor_calc(dpdx,L,'../../../Validation/Moody_Chart/FDS_Output_Files/poiseuille_N64_mu025_devc.csv');
+dir = '../../../Validation/Moody_Chart/FDS_Output_Files/';
+
+[f(1),Re(1)] = friction_factor_calc(dpdx,L,[dir,'poiseuille_N8_mu025_devc.csv']);
+[f(2),Re(2)] = friction_factor_calc(dpdx,L,[dir,'poiseuille_N16_mu025_devc.csv']);
+[f(3),Re(3)] = friction_factor_calc(dpdx,L,[dir,'poiseuille_N32_mu025_devc.csv']);
+[f(4),Re(4)] = friction_factor_calc(dpdx,L,[dir,'poiseuille_N64_mu025_devc.csv']);
 
 % plot convergence for Poiseuille flow (mu = 0.025)
 
@@ -33,6 +35,19 @@ xlabel('Grid Spacing, $\delta \!z$ (m)','Interpreter','LaTeX')
 ylabel('Friction Factor Error')
 h = legend(H,'FDS','$O(\delta \!z)$','$O(\delta \!z^2)$','Location','Southeast');
 set(h,'Interpreter','LaTeX')
+
+% add SVN if file is available
+
+SVN_Filename = [dir,'poiseuille_N8_mu025_svn.txt'];
+if exist(SVN_Filename,'file')
+    SVN = importdata(SVN_Filename);
+    x_lim = get(gca,'XLim');
+    y_lim = get(gca,'YLim');
+    X_SVN_Position = x_lim(1)+0.50*(x_lim(2)-x_lim(1));
+    Y_SVN_Position = y_lim(1)+1.40*(y_lim(2)-y_lim(1));
+    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
+        'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+end
 
 % print to pdf
 set(gcf,'PaperUnits',Paper_Units);
