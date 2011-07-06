@@ -4,7 +4,7 @@
 
 function []=power_spectrum(spectrum_file,dt_puff,slope_scale,xaxis_title,yaxis_title,xmin,xmax,ymin,ymax, ...
                            devc_file,devc_col,tmin,tmax,dt,spectrum_style,nyquist_style, ...
-                           title1,title2)
+                           title1,title2,svn_file)
 
 plotdir = ['../../Manuals/FDS_Validation_Guide/FIGURES/'];
 
@@ -72,6 +72,18 @@ text(1e1,4e-2,'-5/3','FontSize',Label_Font_Size,'Interpreter','LaTeX')
 text(1e2,1.1e-3,'Nyquist','FontSize',Label_Font_Size,'Interpreter','LaTeX')
 text(1.4e2,.4e-3,'limit','FontSize',Label_Font_Size,'Interpreter','LaTeX')
 text(4e0,4e-6,'output resolution','FontSize',Label_Font_Size,'Interpreter','LaTeX')
+
+% add SVN if file is available
+
+if exist(svn_file,'file')
+    SVN = importdata(svn_file);
+    x_lim = get(gca,'XLim');
+    y_lim = get(gca,'YLim');
+    X_SVN_Position = x_lim(1)+0.10*(x_lim(2)-x_lim(1));
+    Y_SVN_Position = y_lim(1)+1.90*(y_lim(2)-y_lim(1));
+    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
+        'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+end
 
 % print to pdf
 set(gcf,'PaperUnits',Paper_Units);
