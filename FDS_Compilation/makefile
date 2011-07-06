@@ -380,6 +380,22 @@ sun_linux_64 : obj = fds_sun_linux_64
 sun_linux_64 : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
+
+#
+# to profile FDS using the sun compiler:
+# 1.  build FDS using sun_linux_64_profile target
+# 2.  run case as usual
+# 3.  type: 
+# /opt/oracle/solstudio12.2/bin/xprof_btoa fds_sun_linux_64_profile.profile profile_results.out
+
+sun_linux_64_profile : FFLAGS   = -O3 -m64 -Bstatic -xprofile=collect
+sun_linux_64_profile : CFLAGS   = -O2 -m64 -xprofile=collect
+sun_linux_64_profile : FCOMPL   = /opt/oracle/solstudio12.2/bin/sunf95
+sun_linux_64_profile : CCOMPL   = /opt/oracle/solstudio12.2/bin/suncc
+sun_linux_64_profile : obj = fds_sun_linux_64_profile
+sun_linux_64_profile : $(obj_serial)
+	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
+
 #*** Portland Group Compiler***
 
 # AMD Opteron 64Bit PC
