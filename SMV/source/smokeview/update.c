@@ -76,15 +76,16 @@ void update_framenumber(int changetime){
         fire=vr->fire;
         smoke=vr->smoke;
         if(fire==NULL&&smoke==NULL)continue;
+        if(vr->loaded==0||vr->show==0)continue;
         vr->iframe = vr->timeslist[itimes];
-        if(fire!=NULL&&fire->qslicedata!=NULL){
-          vr->firedata = fire->qslicedata + vr->iframe*fire->nsliceii;
+        if(fire!=NULL){
+          vr->firedata = vr->firedataptrs[vr->iframe];
         }
         else{
           vr->firedata=NULL;
         }
-        if(smoke!=NULL&&smoke->qslicedata!=NULL){
-           vr->smokedata = smoke->qslicedata + vr->iframe*smoke->nsliceii;
+        if(smoke!=NULL){
+           vr->smokedata = vr->smokedataptrs[vr->iframe];
          }
          else{
            vr->smokedata = NULL;
@@ -776,6 +777,33 @@ void synctimes(void){
       meshi->isotimeslist[n]=i;
     }
 
+  /* synchronize volume render times */
+
+    if(nvolrenderinfo>0){
+      for(igrid=0;igrid<nmeshes;igrid++){
+        volrenderdata *vr;
+
+        meshi=meshinfo+igrid;
+        vr = &meshi->volrenderinfo;
+        if(vr->smoke==NULL||vr->fire==NULL)continue;
+        if(vr->loaded==0||vr->show==0)continue;
+        if(vr->times==NULL)continue;
+        if(n==0){
+          istart=0;
+        }
+        else{
+          istart=vr->timeslist[n-1];
+        }
+        i=istart;
+        while(vr->times[i]<times[n]&&i<vr->nframes){
+          i++;
+        }
+        if(i>=vr->nframes){
+          i=vr->nframes-1;
+        }
+        vr->timeslist[n]=i;
+      }
+    }
     /* synchronize zone times */
 
     if(showzone==1){
@@ -869,6 +897,17 @@ void updatetimes(void){
       ib = isoinfo + meshi->isofilenum;
       if(ib->loaded==0)continue;
       ntimes+=meshi->nisosteps;
+    }
+  }
+  if(nvolrenderinfo>0){
+    for(i=0;i<nmeshes;i++){
+      volrenderdata *vr;
+
+      meshi=meshinfo+i;
+      vr = &meshi->volrenderinfo;
+      if(vr->fire==NULL||vr->smoke==NULL)continue;
+      if(vr->loaded==0||vr->show==0)continue;
+      ntimes+=vr->nframes;
     }
   }
   {
@@ -988,6 +1027,27 @@ void updatetimes(void){
           *timescopy++=meshi->patchtimes[n];
           t_diff = timescopy[-1]-timescopy[-2];
           if(n>0&&t_diff<dt_MIN&&t_diff>0.0){
+            dt_MIN=t_diff;
+          }
+        }
+      }
+    }
+  }
+  if(nvolrenderinfo>0){
+    for(i=0;i<nmeshes;i++){
+      volrenderdata *vr;
+
+      meshi=meshinfo + i;
+      vr = &meshi->volrenderinfo;
+      if(vr->smoke==NULL||vr->fire==NULL)continue;
+      if(vr->loaded==0||vr->show==0)continue;
+      for(n=0;n<vr->nframes;n++){
+        float t_diff;
+
+        *timescopy++=vr->times[n];
+        if(n>0){
+          t_diff = timescopy[-1]-timescopy[-2];
+          if(t_diff<dt_MIN&&t_diff>0.0){
             dt_MIN=t_diff;
           }
         }
@@ -1135,9 +1195,10 @@ void updatetimes(void){
 
         meshi = meshinfo + i;
         vr = &(meshi->volrenderinfo);
-        if(vr->fire==NULL&&vr->smoke==NULL)continue;
-        if(vr->fire!=NULL)vr->timeslist=vr->fire->slicetimeslist;
-        if(vr->fire==NULL&&vr->smoke!=NULL)vr->timeslist=vr->smoke->slicetimeslist;
+        if(vr->fire==NULL||vr->smoke==NULL)continue;
+        if(vr->loaded==0||vr->show==0)continue;
+        FREEMEMORY(vr->timeslist);
+        if(ntimes>0)NewMemory((void **)&vr->timeslist,ntimes*sizeof(int));
       }
     }
     {

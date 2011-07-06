@@ -15,6 +15,7 @@
 #include "smokeviewvars.h"
 #include "interp.h"
 #include "smv_endian.h"
+#include "update.h"
 
 // svn revision character string
 char IOvolsmoke_revision[]="$Revision$";
@@ -29,7 +30,7 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
   float val001,val101,val011,val111;
   float val00,val01,val10,val11;
   float val0, val1, val;
-  int nx, ny, nz, nyz;
+  int nx, ny, nz, nxy;
   float dx, dy, dz;
   float dxbar, dybar, dzbar;
   float *vv;
@@ -59,6 +60,7 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
   ny = jbar + 1;
   nz = kbar + 1;
   nyz = ny*nz;
+  nxy = nx*ny;
 
   GETINDEX(i,xyz[0],xplt[0],dxbar,ibar);
   GETINDEX(j,xyz[1],yplt[0],dybar,jbar);
@@ -75,7 +77,7 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
     }
   }
 
-  ijk = k + j*nz + i*nyz; 
+  ijk = i + j*nx + k*nxy;
 
   dx = (xyz[0] - xplt[i])/dxbar;
   dx = CLAMP(dx,0.0,1.0);
@@ -89,18 +91,18 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
 
     vv = firedata + ijk;
     val000 = vv[0]; // i,j,k
-    val001 = vv[1]; // i,j,k+1
+    val100 = vv[1]; // i+1,j,k
 
-    vv += nz;
+    vv += nx;
     val010 = vv[0]; // i,j+1,k
-    val011 = vv[1]; // i,j+1,k+1
+    val110 = vv[1]; // i+1,j+1,k
 
-    vv += (nyz-nz); 
-    val100 = vv[0]; // i+1,j,k
+    vv += (nxy-nx);
+    val001 = vv[0]; // i,j,k+1
     val101 = vv[1]; // i+1,j,k+1
 
-    vv += nz;
-    val110 = vv[0]; // i+1,j+1,k
+    vv += nx;
+    val011 = vv[0]; // i,j+1,k+1
     val111 = vv[1]; // i+1,j+1,k+1
 
     val00 = INTERP1D(val000,val100,dx);
@@ -117,18 +119,18 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
   if(smokedata!=NULL){
     vv = smokedata + ijk;
     val000 = vv[0]; // i,j,k
-    val001 = vv[1]; // i,j,k+1
+    val100 = vv[1]; // i+1,j,k
 
-    vv += nz;
+    vv += nx;
     val010 = vv[0]; // i,j+1,k
-    val011 = vv[1]; // i,j+1,k+1
+    val110 = vv[1]; // i+1,j+1,k
 
-    vv += (nyz-nz); 
-    val100 = vv[0]; // i+1,j,k
+    vv += (nxy-nx);
+    val001 = vv[0]; // i,j,k+1
     val101 = vv[1]; // i+1,j,k+1
 
-    vv += nz;
-    val110 = vv[0]; // i+1,j+1,k
+    vv += nx;
+    val011 = vv[0]; // i,j+1,k+1
     val111 = vv[1]; // i+1,j+1,k+1
 
     val00 = INTERP1D(val000,val100,dx);
@@ -1129,16 +1131,19 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum){
   skip += framenum*(HEADER_SIZE +4*framesize+TRAILER_SIZE); // framenum slice data's
 
   SLICEFILE=fopen(smokeslice->file,"rb");
-  if(SLICEFILE!=NULL){
-    returncode=fseek(SLICEFILE,skip,SEEK_SET); // skip from beginning of file
+  if(SLICEFILE==NULL)return;
 
-    FORTSLICEREAD(&time,1);
-    vr->times[framenum]=time;
-    NewMemory((void **)&sliceframe_data,framesize*sizeof(float));
-    vr->smokedataptrs[framenum]=sliceframe_data;
-    FORTSLICEREAD(sliceframe_data,framesize);
-    fclose(SLICEFILE);
-  }
+  returncode=fseek(SLICEFILE,skip,SEEK_SET); // skip from beginning of file
+
+  FORTSLICEREAD(&time,1);
+  printf("time=%.2f ",time);
+
+  vr->times[framenum]=time;
+  NewMemory((void **)&sliceframe_data,framesize*sizeof(float));
+  vr->smokedataptrs[framenum]=sliceframe_data;
+  FORTSLICEREAD(sliceframe_data,framesize);
+  printf("smoke");
+  fclose(SLICEFILE);
 
   if(fireslice!=NULL){
     SLICEFILE=fopen(fireslice->file,"rb");
@@ -1150,9 +1155,11 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum){
       NewMemory((void **)&sliceframe_data,framesize*sizeof(float));
       vr->firedataptrs[framenum]=sliceframe_data;
       FORTSLICEREAD(sliceframe_data,framesize);
+      printf(", fire");
       fclose(SLICEFILE);
     }
   }
+  printf("\n");
 }
 
 /* ------------------ read_volsmoke_allframes ------------------------ */
@@ -1165,4 +1172,11 @@ void read_volsmoke_allframes(volrenderdata *vr){
   for(i=0;i<nframes;i++){
     read_volsmoke_frame(vr, i);
   }
+  vr->smokedata = vr->smokedataptrs[0];  //*** hack
+  vr->firedata = vr->firedataptrs[0];
+  vr->loaded=1;
+  vr->show=1;
+  plotstate=getplotstate(DYNAMIC_PLOTS);
+  stept=1;
+  updatetimes();
 }
