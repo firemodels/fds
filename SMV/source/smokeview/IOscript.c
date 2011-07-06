@@ -73,6 +73,12 @@ void glui_script_disable(void);
 // LOAD3DSMOKE
 //  type (char)
 
+// LOADVOLSMOKE
+//  mesh number (-1 for all meshes) (int)  
+
+// LOADVOLSMOKEFRAME
+//  frame (int)  
+
 // LOADPARTICLES
 
 // PARTCLASSCOLOR
@@ -409,6 +415,14 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
+    if(match_upper(buffer,"LOADVOLSMOKE",12) == 1){
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"LOADVOLSMOKEFRAME",18) == 1){
+      nscriptinfo++;
+      continue;
+    }
     if(match_upper(buffer,"LOADSLICE",9) == 1){
       nscriptinfo++;
       continue;
@@ -713,6 +727,32 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
+    if(match_upper(buffer,"LOADVOLSMOKE",12) == 1){
+      int len;
+      int filetype;
+
+      scripti = scriptinfo + nscriptinfo;
+      init_scripti(scripti,SCRIPT_LOADVOLSMOKE);
+      if(fgets(buffer2,255,stream)==NULL)break;
+      cleanbuffer(buffer,buffer2);
+      sscanf(buffer,"%i",&scripti->ival);
+
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"LOADVOLSMOKEFRAME",17) == 1){
+      int len;
+      int filetype;
+
+      scripti = scriptinfo + nscriptinfo;
+      init_scripti(scripti,SCRIPT_LOADVOLSMOKE);
+      if(fgets(buffer2,255,stream)==NULL)break;
+      cleanbuffer(buffer,buffer2);
+      sscanf(buffer,"%i",&scripti->ival);
+
+      nscriptinfo++;
+      continue;
+    }
     if(match_upper(buffer,"LOADSLICE",9) == 1){
       int len;
       int filetype;
@@ -882,6 +922,35 @@ void script_loadiso(scriptdata *scripti){
   force_redisplay=1;
   updatemenu=1;
 
+}
+
+/* ------------------ script_loadvolsmoke ------------------------ */
+
+void script_loadvolsmoke(scriptdata *scripti){
+  int imesh;
+  int i;
+
+  imesh = scripti->ival;
+  if(imesh==-1){
+    read_volsmoke_allframes_allmeshes();
+  }
+  else if(imesh>=0&&imesh<nmeshes){
+    mesh *meshi;
+    volrenderdata *vr;
+
+    meshi = meshinfo + imesh;
+    vr = &meshi->volrenderinfo;
+    read_volsmoke_allframes(vr);
+  }
+}
+
+/* ------------------ script_loadvolsmoke ------------------------ */
+
+void script_loadvolsmokeframe(scriptdata *scripti){
+  int framenum;
+
+  framenum = scripti->ival;
+  read_volsmoke_frame_allmeshes(framenum);
 }
 
 /* ------------------ script_load3dsmoke ------------------------ */
@@ -1463,6 +1532,12 @@ int run_script(void){
       break;
     case SCRIPT_LOAD3DSMOKE:
       script_load3dsmoke(scripti);
+      break;
+    case SCRIPT_LOADVOLSMOKE:
+      script_loadvolsmoke(scripti);
+      break;
+    case SCRIPT_LOADVOLSMOKEFRAME:
+      script_loadvolsmokeframe(scripti);
       break;
     case SCRIPT_LOADPARTICLES:
       script_loadparticles(scripti);

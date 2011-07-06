@@ -3152,6 +3152,10 @@ void LoadVolSmoke3DMenu(int value){
     fire = vr->fire;
     smoke = vr->smoke;
     if(smoke!=NULL&&fire!=NULL){
+      if(scriptoutstream!=NULL){
+        fprintf(scriptoutstream,"LOADVOLSMOKE\n");
+        fprintf(scriptoutstream," %i\n",value);
+      }
       read_volsmoke_allframes(vr);
     }
   }
@@ -3159,6 +3163,10 @@ void LoadVolSmoke3DMenu(int value){
     UnLoadVolSmoke3DMenu(value);
   }
   else if(value==LOAD_ALL){  // load all
+    if(scriptoutstream!=NULL){
+      fprintf(scriptoutstream,"LOADVOLSMOKE\n");
+      fprintf(scriptoutstream," -1\n");
+    }
     read_volsmoke_allframes_allmeshes();
   }
   updatemenu=1;  
