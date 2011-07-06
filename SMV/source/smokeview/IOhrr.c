@@ -46,7 +46,7 @@ void printhrr(void){
 
 void readhrr(int flag, int *errorcode){
   FILE *HRRFILE;
-  int ntimes, nfirst;
+  int ntimeshrr, nfirst;
   char buffer[10240];
   float *hrrtime, *hrrval;
   int display=0;
@@ -85,39 +85,39 @@ void readhrr(int flag, int *errorcode){
 
 // size data
 
-  ntimes=0;
+  ntimeshrr=0;
   nfirst=-1;
   while(!feof(HRRFILE)){
     if(fgets(buffer,1024,HRRFILE)==NULL)break;
-    if(nfirst==-1&&strstr(buffer,".")!=NULL)nfirst=ntimes;
-    ntimes++;
+    if(nfirst==-1&&strstr(buffer,".")!=NULL)nfirst=ntimeshrr;
+    ntimeshrr++;
   }
-  ntimes_saved=ntimes;
-  ntimes-=nfirst;
+  ntimes_saved=ntimeshrr;
+  ntimeshrr-=nfirst;
 
   rewind(HRRFILE);
-  NewMemory((void **)&hrrinfo->times_csv,ntimes*sizeof(float));
-  NewMemory((void **)&hrrinfo->hrrval_csv,ntimes*sizeof(float));
+  NewMemory((void **)&hrrinfo->times_csv,ntimeshrr*sizeof(float));
+  NewMemory((void **)&hrrinfo->hrrval_csv,ntimeshrr*sizeof(float));
 
 // read data
   
   hrrtime=hrrinfo->times_csv;
   hrrval=hrrinfo->hrrval_csv;
-  ntimes=0;
+  ntimeshrr=0;
 
 // read no more than the number of lines found during first pass
 
-  while(ntimes<ntimes_saved&&!feof(HRRFILE)){
+  while(ntimeshrr<ntimes_saved&&!feof(HRRFILE)){
     if(fgets(buffer,10245,HRRFILE)==NULL)break;
-    if(ntimes<nfirst){
-      ntimes++;
+    if(ntimeshrr<nfirst){
+      ntimeshrr++;
       continue;
     }
     stripcommas(buffer);
     sscanf(buffer,"%f %f",hrrtime,hrrval);
     hrrtime++;
     hrrval++;
-    ntimes++;
+    ntimeshrr++;
   }
-  hrrinfo->ntimes_csv=ntimes-nfirst;
+  hrrinfo->ntimes_csv=ntimeshrr-nfirst;
 }

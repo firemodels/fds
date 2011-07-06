@@ -31,15 +31,13 @@ void init_multi_threading(void){
  /* ------------------ mt_compress_svzip ------------------------ */
 
 void *mt_compress_svzip(void *arg){
-
   LOCK_COMPRESS
   compress_svzip2();
   updatemenu=1;
   UNLOCK_COMPRESS
   pthread_exit(NULL);
   return NULL;
-
-   }
+}
 #endif
 
 /* ------------------ compress_svzip ------------------------ */

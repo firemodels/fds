@@ -445,7 +445,6 @@ void mouse(int button, int state, int x, int y){
   if(blockageSelect==1){
     Display();
   }
-
 }
 
 /* ------------------ motion ------------------------ */
@@ -519,7 +518,7 @@ void motion(int xm, int ym){
     return;
   }
   if(timedrag==1){
-	float xxleft;
+    float xxleft;
 
 	  xxleft = xtimeleft;
     if(fontindex==LARGE_FONT)xxleft=xtimeleft+0.11;
@@ -528,8 +527,7 @@ void motion(int xm, int ym){
       checktimebound();
       timedrag=1;
     }
-  IDLE();
-
+    IDLE();
     return;
   }
   screenWidth2 = screenWidth - dwinWW;
@@ -2172,7 +2170,6 @@ void Display(void){
     }
     glutPostRedisplay();
   }
-
 }
 
 /* ------------------ Idle ------------------------ */

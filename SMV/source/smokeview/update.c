@@ -75,8 +75,8 @@ void update_framenumber(int changetime){
         vr = &(meshi->volrenderinfo);
         fire=vr->fire;
         smoke=vr->smoke;
-        if(fire==NULL&&smoke==NULL)continue;
-        if(vr->loaded==0||vr->show==0)continue;
+        if(fire==NULL||smoke==NULL)continue;
+        if(vr->loaded==0||vr->display==0)continue;
         vr->iframe = vr->timeslist[itimes];
         if(fire!=NULL){
           vr->firedata = vr->firedataptrs[vr->iframe];
@@ -280,8 +280,8 @@ void updateShow(void){
 
       meshi = meshinfo + i;
       vr = &(meshi->volrenderinfo);
-      if(vr->fire==NULL&&vr->smoke==NULL)continue;
-      if(vr->loaded==0||vr->show==0)continue;
+      if(vr->fire==NULL||vr->smoke==NULL)continue;
+      if(vr->loaded==0||vr->display==0)continue;
       showvolrender=1;
       break;
     }
@@ -786,7 +786,7 @@ void synctimes(void){
         meshi=meshinfo+igrid;
         vr = &meshi->volrenderinfo;
         if(vr->smoke==NULL||vr->fire==NULL)continue;
-        if(vr->loaded==0||vr->show==0)continue;
+        if(vr->loaded==0||vr->display==0)continue;
         if(vr->times==NULL)continue;
         if(n==0){
           istart=0;
@@ -906,7 +906,7 @@ void updatetimes(void){
       meshi=meshinfo+i;
       vr = &meshi->volrenderinfo;
       if(vr->fire==NULL||vr->smoke==NULL)continue;
-      if(vr->loaded==0||vr->show==0)continue;
+      if(vr->loaded==0||vr->display==0)continue;
       ntimes+=vr->nframes;
     }
   }
@@ -1040,7 +1040,7 @@ void updatetimes(void){
       meshi=meshinfo + i;
       vr = &meshi->volrenderinfo;
       if(vr->smoke==NULL||vr->fire==NULL)continue;
-      if(vr->loaded==0||vr->show==0)continue;
+      if(vr->loaded==0||vr->display==0)continue;
       for(n=0;n<vr->nframes;n++){
         float t_diff;
 
@@ -1196,7 +1196,7 @@ void updatetimes(void){
         meshi = meshinfo + i;
         vr = &(meshi->volrenderinfo);
         if(vr->fire==NULL||vr->smoke==NULL)continue;
-        if(vr->loaded==0||vr->show==0)continue;
+        if(vr->loaded==0||vr->display==0)continue;
         FREEMEMORY(vr->timeslist);
         if(ntimes>0)NewMemory((void **)&vr->timeslist,ntimes*sizeof(int));
       }
@@ -1454,8 +1454,8 @@ int getplotstate(int choice){
 
           meshi = meshinfo + i;
           vr = &(meshi->volrenderinfo);
-          if(vr->fire==NULL&&vr->smoke==NULL)continue;
-          if(vr->loaded==0||vr->show==0)continue;
+          if(vr->fire==NULL||vr->smoke==NULL)continue;
+          if(vr->loaded==0||vr->display==0)continue;
           return DYNAMIC_PLOTS;
         }
       }

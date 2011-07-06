@@ -230,6 +230,9 @@ EXTERNCPP void compute_all_smokecolors(void);
 EXTERNCPP int get_volsmoke_nframes(volrenderdata *vr);
 EXTERNCPP void read_volsmoke_frame(volrenderdata *vr, int framenum);
 EXTERNCPP void read_volsmoke_allframes(volrenderdata *vr);
+EXTERNCPP void read_volsmoke_frame_allmeshes(int framenum);
+EXTERNCPP void read_volsmoke_allframes_allmeshes(void);
+EXTERNCPP void unload_volsmoke_allframes(volrenderdata *vr);
 
 EXTERNCPP void init_volrender(void);
 #ifdef pp_MESSAGE

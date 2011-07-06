@@ -561,9 +561,8 @@ void ResetView(int option){
 void UpdateTimeLabels(void){
   float time0;
   int hour, min, sec,sec10;
+ 
   time0 = timeoffset;
-
-
   if(times!=NULL)time0 = timeoffset + times[itimes];
   if(vishmsTimelabel==1){
     hour = time0/3600;
@@ -576,7 +575,12 @@ void UpdateTimeLabels(void){
   else{
     float dt;
 
-    dt=times[1]-times[0];
+    if(ntimes>1){
+      dt=times[1]-times[0];
+    }
+    else{
+      dt=0.0;
+    }
     if(dt<0.0)dt=-dt;
     if(dt<0.001){
       sprintf(timelabel,"Time: %4.4f",time0);

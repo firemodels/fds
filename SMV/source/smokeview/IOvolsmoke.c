@@ -59,7 +59,6 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
   nx = ibar + 1;
   ny = jbar + 1;
   nz = kbar + 1;
-  nyz = ny*nz;
   nxy = nx*ny;
 
   GETINDEX(i,xyz[0],xplt[0],dxbar,ibar);
@@ -162,7 +161,7 @@ void init_volrender(void){
     vr->fire=NULL;
     vr->smoke=NULL;
     vr->loaded=0;
-    vr->show=0;
+    vr->display=0;
     vr->timeslist=NULL;
   }
 #ifndef pp_VOLRENDER
@@ -1117,8 +1116,10 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum){
   int framesize,skip,returncode;
   float time, *sliceframe_data;
   int endianswitch=0;
+  char *meshlabel;
 
   if(framenum<0||framenum>=vr->nframes)return;
+  meshlabel=vr->rendermesh->label;
   smokeslice=vr->smoke;
   fireslice=vr->fire;
   framesize = smokeslice->nslicei*smokeslice->nslicej*smokeslice->nslicek;
@@ -1136,7 +1137,7 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum){
   returncode=fseek(SLICEFILE,skip,SEEK_SET); // skip from beginning of file
 
   FORTSLICEREAD(&time,1);
-  printf("time=%.2f ",time);
+  printf("time=%.2f %s: ",time,meshlabel);
 
   vr->times[framenum]=time;
   NewMemory((void **)&sliceframe_data,framesize*sizeof(float));
@@ -1162,6 +1163,23 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum){
   printf("\n");
 }
 
+/* ------------------ unload_volsmoke_allframes ------------------------ */
+
+void unload_volsmoke_allframes(volrenderdata *vr){
+  int i;
+
+  printf("Unloading smoke %s - ",vr->rendermesh->label);
+  for(i=0;i<vr->nframes;i++){
+    FREEMEMORY(vr->firedataptrs[i]);
+    FREEMEMORY(vr->smokedataptrs[i]);
+  }
+  vr->loaded=0;
+  vr->display=0;
+  plotstate = getplotstate(DYNAMIC_PLOTS);
+  updatetimes();
+  printf("completed\n");
+}
+
 /* ------------------ read_volsmoke_allframes ------------------------ */
 
 void read_volsmoke_allframes(volrenderdata *vr){
@@ -1175,8 +1193,66 @@ void read_volsmoke_allframes(volrenderdata *vr){
   vr->smokedata = vr->smokedataptrs[0];  //*** hack
   vr->firedata = vr->firedataptrs[0];
   vr->loaded=1;
-  vr->show=1;
+  vr->display=1;
   plotstate=getplotstate(DYNAMIC_PLOTS);
   stept=1;
   updatetimes();
+}
+
+/* ------------------ read_volsmoke_frame_allmeshes ------------------------ */
+
+void read_volsmoke_frame_allmeshes(int framenum){
+  int i;
+  float time_old;
+  int ntimes_old;
+
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    volrenderdata *vr;
+
+    meshi = meshinfo + i;
+    vr = &meshi->volrenderinfo;
+    if(vr->fire==NULL||vr->smoke==NULL)continue;
+    read_volsmoke_frame(vr,framenum);
+  }
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    volrenderdata *vr;
+
+    meshi = meshinfo + i;
+    vr = &meshi->volrenderinfo;
+    if(vr->fire==NULL||vr->smoke==NULL)continue;
+    if(framenum==0){
+      vr->smokedata = vr->smokedataptrs[0];  //*** hack
+      vr->firedata = vr->firedataptrs[0];
+    }
+    vr->loaded=1;
+    vr->display=1;
+  }
+  plotstate=getplotstate(DYNAMIC_PLOTS);
+  stept=1;
+  updatetimes();
+}
+
+/* ------------------ read_volsmoke_allframes_allmeshes ------------------------ */
+
+void read_volsmoke_allframes_allmeshes(void){
+    int nframes=0;
+    int i;
+
+    for(i=0;i<nmeshes;i++){
+      mesh *meshi;
+      volrenderdata *vr;
+
+      meshi = meshinfo + i;
+      vr = &meshi->volrenderinfo;
+      if(vr->fire==NULL||vr->smoke==NULL)continue;
+      if(vr->nframes>0){
+        nframes=vr->nframes;
+        break;
+      }
+    }
+    for(i=0;i<nframes;i++){
+      read_volsmoke_frame_allmeshes(i);
+    }
 }
