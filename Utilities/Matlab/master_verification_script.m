@@ -10,6 +10,10 @@
 %
 % The most important script is dataplot.m.  To utilize this script, add the
 % appropriate parameters to a 'd' line in verification_data_config_matlab.csv.
+%
+% If you create your own script (your plots are not generated with dataplot.m),
+% please do not forget to add the SVN number to the plot.  Examples for how
+% this is done can be found in any of the 'Special cases' scripts below dataplot.
 
 close all
 clear all

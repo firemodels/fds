@@ -5,13 +5,15 @@
 close all
 clear all
 
+addpath('../../../Verification/Flowfields')
+
 plot_style
 set(gcf,'DefaultLineLineWidth',Line_Width)
 set(gca,'FontName',Font_Name)
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
-filename = '../../../Verification/Flowfields/low_flux_hot_gas_filling_mass.csv';
+filename = 'low_flux_hot_gas_filling_mass.csv';
 H = plot_mass(filename,.0001,6,2,4);
 
 set(gca,'FontName',Font_Name)
@@ -24,6 +26,19 @@ text(5,.032,'Low Flux Hot Gas Filling','FontSize',Title_Font_Size,'FontName',Fon
 hh=legend(H,'Specified','FDS','Location','Southeast');
 legend boxon
 set(hh,'Interpreter','LaTeX','FontSize',Key_Font_Size)
+
+% add SVN if file is available
+
+SVN_Filename = 'low_flux_hot_gas_filling_svn.txt';
+if exist(SVN_Filename,'file')
+    SVN = importdata(SVN_Filename);
+    x_lim = get(gca,'XLim');
+    y_lim = get(gca,'YLim');
+    X_SVN_Position = x_lim(1)+SVN_Scale_X_linear*(x_lim(2)-x_lim(1));
+    Y_SVN_Position = y_lim(1)+SVN_Scale_Y_linear*(y_lim(2)-y_lim(1));
+    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
+        'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+end
 
 % print to pdf
 
