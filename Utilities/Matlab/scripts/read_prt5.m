@@ -27,19 +27,19 @@ DUMMY  = fread(fid,1,'integer*4');
 N_PART = fread(fid,1,'integer*4');
 DUMMY  = fread(fid,1,'integer*4');
 
-for NP=1:N_PART
+for NPC=1:N_PART
     
     DUMMY = fread(fid,1,'integer*4');
-    PC    = fread(fid,2,'integer*4'); N_QUANTITIES(NP) = PC(1);
+    PC    = fread(fid,2,'integer*4'); N_QUANTITIES(NPC) = PC(1);
     DUMMY = fread(fid,1,'integer*4');
     
-    for NN=1:N_QUANTITIES(NP)
+    for NQ=1:N_QUANTITIES(NPC)
         DUMMY               = fread(fid,1,'integer*4');
-        SMOKEVIEW_LABEL{NP} = fgets(fid,30);
+        SMOKEVIEW_LABEL{NQ} = fgets(fid,30);
         DUMMY               = fread(fid,1,'integer*4');
         
         DUMMY     = fread(fid,1,'integer*4');
-        UNITS{NP} = fgets(fid,30);
+        UNITS{NQ} = fgets(fid,30);
         DUMMY     = fread(fid,1,'integer*4');
     end
     
@@ -59,26 +59,37 @@ while ~feof(fid)
         STIME(n) = stime_tmp;
     end
     
-    for NP=1:N_PART
+    for NPC=1:N_PART
         
         DUMMY = fread(fid,1,'integer*4');
         NPLIM = fread(fid,1,'integer*4');
         DUMMY = fread(fid,1,'integer*4');
         
         DUMMY = fread(fid,1,'integer*4');
-        XP(n,NP) = fread(fid,NPLIM,'real*4');
-        YP(n,NP) = fread(fid,NPLIM,'real*4');
-        ZP(n,NP) = fread(fid,NPLIM,'real*4');
+        xp = fread(fid,NPLIM,'real*4');
+        yp = fread(fid,NPLIM,'real*4');
+        zp = fread(fid,NPLIM,'real*4');
         DUMMY = fread(fid,1,'integer*4');
+        
+        for NP=1:NPLIM
+            XP(n,NP,NPC) = xp(NP);
+            YP(n,NP,NPC) = yp(NP);
+            ZP(n,NP,NPC) = zp(NP);
+        end
+        %clear xp yp zp
         
         DUMMY = fread(fid,1,'integer*4');
         TA    = fread(fid,NPLIM,'integer*4');
         DUMMY = fread(fid,1,'integer*4');
         
-        if N_QUANTITIES(NP)>0
+        if N_QUANTITIES(NPC)>0
             DUMMY = fread(fid,1,'integer*4');
-            for NN=1:N_QUANTITIES(NP)
-                QP(1:NPLIM,NN,NP) = fread(fid,NPLIM,'real*4');
+            for NQ=1:N_QUANTITIES(NPC)
+                qp = fread(fid,NPLIM,'real*4');
+                for NP=1:NPLIM
+                    QP(n,NP,NPC,NQ) = qp(NP);
+                end
+                %clear qp
             end
             DUMMY = fread(fid,1,'integer*4');
         end
@@ -92,5 +103,5 @@ display('Part file read successfully!')
 
 % Examples for plotting position and quantities
 
-%plot(STIME,ZP(:,1))
-%plot(STIME,QP(:,1,1))
+%plot(STIME,ZP(:,1,1))   % XP(time step range, particle #, part class #)
+%plot(STIME,QP(:,1,1,1)) % QP(time step range, particle #, part class #, quantity #)
