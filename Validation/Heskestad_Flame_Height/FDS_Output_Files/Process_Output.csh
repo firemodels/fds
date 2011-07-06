@@ -8,6 +8,6 @@ cp Qs*line.csv $WDIR
 cp Qs*hrr.csv  $WDIR
 cp *svn.txt    $WDIR
 cd $WDIR
-$PDIR/flame_height > $WDIR/FDS_Flame_Height.csv
+#$PDIR/flame_height > $WDIR/FDS_Flame_Height.csv
 cd ./
 
