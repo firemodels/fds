@@ -8,7 +8,7 @@
 %
 % function []=radial_profile(plot_file,data_format,devc_col,error,error_type,tmin, ...
 %                            xaxis_label,yaxis_label,title_label,text_label,legend_pos, ...
-%                            rmin,rmax,dr,xmin,xmax,dx,ymin,ymax,dy, ...
+%                            rmin,rmax,dr,xmin,xmax,dx,ymin,ymax,dy,svn_file, ...
 %                            exp_file,exp_format,exp_label, ...
 %                            fds_file1,fds_format1,fds_label1, ...
 %                            fds_file2,fds_format2,fds_label2, ...
@@ -44,6 +44,7 @@ if nargin>=1
     ymin        = varargin{iarg}; iarg=iarg+1;
     ymax        = varargin{iarg}; iarg=iarg+1;
     dy          = varargin{iarg}; iarg=iarg+1;
+    svn_file    = varargin{iarg}; iarg=iarg+1;
     exp_file    = varargin{iarg}; iarg=iarg+1;
     exp_format  = varargin{iarg}; iarg=iarg+1;
     exp_label   = varargin{iarg}; iarg=iarg+1;
@@ -276,6 +277,18 @@ if nfds==4; h = legend(H,exp_label,fds_label1,fds_label2,fds_label3,fds_label4,'
 if nfds==5; h = legend(H,exp_label,fds_label1,fds_label2,fds_label3,fds_label4,fds_label5,'Location',legend_pos); end    
 set(h,'Interpreter','LaTeX')
 legend boxoff
+
+% add SVN if file is available
+
+if exist(svn_file,'file')
+    SVN = importdata(svn_file);
+    x_lim = get(gca,'XLim');
+    y_lim = get(gca,'YLim');
+    X_SVN_Position = x_lim(1)+SVN_Scale_X_linear*(x_lim(2)-x_lim(1));
+    Y_SVN_Position = y_lim(1)+SVN_Scale_Y_linear*(y_lim(2)-y_lim(1));
+    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
+        'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+end
 
 % print to pdf
 set(gcf,'PaperUnits',Paper_Units);
