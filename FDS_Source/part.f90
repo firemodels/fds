@@ -1031,10 +1031,6 @@ DROPLET_LOOP: DO I=1,NLP
          DR%A_X = MPOM*(U_OLD-DR%U)*RDT 
          DR%A_Y = MPOM*(V_OLD-DR%V)*RDT
          DR%A_Z = MPOM*(W_OLD-DR%W)*RDT
-         ! gravitational acceleration
-         DR%U = DR%U + GVEC(1)*DT
-         DR%V = DR%V + GVEC(2)*DT
-         DR%W = DR%W + GVEC(3)*DT
          ! analytical solution for droplet position
          DR%X = X_OLD + (U_OLD+ALPHA*UBAR)/OPA*DT + ALPHA/BETA*(U_OLD-UBAR)/OPA*LOG(OBDT) + 0.5_EB*GVEC(1)*DT*DT
          DR%Y = Y_OLD + (V_OLD+ALPHA*VBAR)/OPA*DT + ALPHA/BETA*(V_OLD-VBAR)/OPA*LOG(OBDT) + 0.5_EB*GVEC(2)*DT*DT
@@ -1048,6 +1044,11 @@ DROPLET_LOOP: DO I=1,NLP
          DR%Y = Y_OLD + (V_OLD + 0.5_EB*GVEC(2)*DT)*DT
          DR%Z = Z_OLD + (W_OLD + 0.5_EB*GVEC(3)*DT)*DT
       ENDIF
+      
+      ! gravitational acceleration
+      DR%U = DR%U + GVEC(1)*DT
+      DR%V = DR%V + GVEC(2)*DT
+      DR%W = DR%W + GVEC(3)*DT
                
    ENDIF PARTICLE_NON_STATIC_IF 
 
