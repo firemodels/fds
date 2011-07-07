@@ -1007,8 +1007,9 @@ DROPLET_LOOP: DO I=1,NLP
          
    PARTICLE_NON_STATIC_IF: IF (.NOT.PC%STATIC .AND. DR%IOR==0) THEN
 
-      FP_MASS = (RHO_G/RVC)/NDPC(II,JJ,KK) ! fluid parcel mass
       DR_MASS = PC%DENSITY*FOTH*PI*RDC     ! droplet mass
+      FP_MASS = (RHO_G/RVC)/NDPC(II,JJ,KK) ! fluid parcel mass
+      IF (FREEZE_VELOCITY) FP_MASS = HUGE(1._EB)
                
       BETA  = 0.5_EB*RHO_G*C_DRAG*PI*RDS*(1._EB/DR_MASS+1._EB/FP_MASS)*QREL
       OBDT  = 1._EB+BETA*DT
