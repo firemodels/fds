@@ -37,7 +37,5 @@ Paper_Height    = 4.5;
 Figure_Visibility = 'on';
 
 % svn text position
-SVN_Scale_X_loglog = 0.40;
-SVN_Scale_Y_loglog = 1.40;
-SVN_Scale_X_linear = 0.80;
-SVN_Scale_Y_linear = 1.05;
+SVN_Scale_X = 0.80;
+SVN_Scale_Y = 1.05;

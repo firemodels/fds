@@ -251,11 +251,11 @@ for i=2:2000
             x_lim = get(gca,'XLim');
             y_lim = get(gca,'YLim');
             if strcmp(Plot_Type,'loglog')
-                X_SVN_Position = x_lim(1)+SVN_Scale_X_loglog*(x_lim(2)-x_lim(1));
-                Y_SVN_Position = y_lim(1)+SVN_Scale_Y_loglog*(y_lim(2)-y_lim(1));
+                X_SVN_Position = x_lim(1)+10^(SVN_Scale_X*(log10(x_lim(2)-x_lim(1))));
+                Y_SVN_Position = y_lim(1)+10^(SVN_Scale_Y*(log10(y_lim(2)-y_lim(1))));
             else
-                X_SVN_Position = x_lim(1)+SVN_Scale_X_linear*(x_lim(2)-x_lim(1));
-                Y_SVN_Position = y_lim(1)+SVN_Scale_Y_linear*(y_lim(2)-y_lim(1));
+                X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
+                Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
             end
             text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
                 'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
