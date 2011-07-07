@@ -950,6 +950,7 @@ void script_loadvolsmokeframe(scriptdata *scripti){
   int framenum,index;
   volrenderdata *vr;
   mesh *meshi;
+  int first=1;
 
   index = scripti->ival;
   if(index<0)index=0;
@@ -957,7 +958,7 @@ void script_loadvolsmokeframe(scriptdata *scripti){
   meshi = meshinfo + index;
   vr = &meshi->volrenderinfo;
   framenum = scripti->ival2;
-  read_volsmoke_frame(vr,framenum);
+  read_volsmoke_frame(vr,framenum,&first);
   if(vr->times_defined==0){
     vr->times_defined=1;
     get_volsmoke_all_times(vr);

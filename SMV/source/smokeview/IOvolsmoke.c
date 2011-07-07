@@ -1191,7 +1191,7 @@ void get_volsmoke_all_times(volrenderdata *vr){
 
 /* ------------------ read_volsmoke_frame ------------------------ */
 
-void read_volsmoke_frame(volrenderdata *vr, int framenum){
+void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
 	slice *fireslice, *smokeslice;
   FILE *SLICEFILE;
   int framesize,skip,returncode;
@@ -1218,7 +1218,16 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum){
   returncode=fseek(SLICEFILE,skip,SEEK_SET); // skip from beginning of file
 
   FORTSLICEREAD(&time,1);
-  printf("time=%.2f %s: ",time,meshlabel);
+  if(*first==1){
+    *first=0;
+    printf("time=%.2f %s: ",time,meshlabel);
+  }
+  else{
+    if(time>=10.0)printf(" ");
+    if(time>=100.0)printf(" ");
+    if(time>=1000.0)printf(" ");
+    printf("          %s: ",meshlabel);
+  }
 
   vr->times[framenum]=time;
   NewMemory((void **)&sliceframe_data,framesize*sizeof(float));
@@ -1266,10 +1275,11 @@ void unload_volsmoke_allframes(volrenderdata *vr){
 void read_volsmoke_allframes(volrenderdata *vr){
   int nframes;
   int i;
+  int first=1;
 
   nframes = vr->nframes;
   for(i=0;i<nframes;i++){
-    read_volsmoke_frame(vr, i);
+    read_volsmoke_frame(vr, i, &first);
   }
   vr->smokedata = vr->smokedataptrs[0];  //*** hack
   vr->firedata = vr->firedataptrs[0];
@@ -1286,6 +1296,7 @@ void read_volsmoke_frame_allmeshes(int framenum){
   int i;
   float time_old;
   int ntimes_old;
+  int first=1;
 
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
@@ -1294,7 +1305,7 @@ void read_volsmoke_frame_allmeshes(int framenum){
     meshi = meshinfo + i;
     vr = &meshi->volrenderinfo;
     if(vr->fire==NULL||vr->smoke==NULL)continue;
-    read_volsmoke_frame(vr,framenum);
+    read_volsmoke_frame(vr,framenum,&first);
   }
   for(i=0;i<nmeshes;i++){
     mesh *meshi;

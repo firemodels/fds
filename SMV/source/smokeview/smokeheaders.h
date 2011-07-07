@@ -230,7 +230,7 @@ EXTERNCPP void get_volsmoke_all_times(volrenderdata *vr);
 EXTERNCPP float get_volsmoke_frame_time(volrenderdata *vr, int framenum);
 EXTERNCPP void compute_all_smokecolors(void);
 EXTERNCPP int get_volsmoke_nframes(volrenderdata *vr);
-EXTERNCPP void read_volsmoke_frame(volrenderdata *vr, int framenum);
+EXTERNCPP void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first);
 EXTERNCPP void read_volsmoke_allframes(volrenderdata *vr);
 EXTERNCPP void read_volsmoke_frame_allmeshes(int framenum);
 EXTERNCPP void read_volsmoke_allframes_allmeshes(void);
