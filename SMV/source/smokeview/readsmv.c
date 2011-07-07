@@ -9802,20 +9802,24 @@ void writeini(int flag){
   FILE *fileout;
   int i;
   int j;
+  char *outfilename=NULL;
 
   fileout=NULL;
   switch (flag) {
   case GLOBAL_INI:
     fileout=fopen(INIfile,"w");
+    outfilename=INIfile;
     break;
   case STDOUT_INI:
     fileout=stdout;
     break;
   case SCRIPT_INI:
     fileout=fopen(scriptinifilename,"w");
+    outfilename=scriptinifilename;
     break;
   case LOCAL_INI:
     fileout=fopen(caseinifilename,"w");
+    outfilename=caseinifilename;
     break;
   default:
     ASSERT(FFALSE);
@@ -9823,8 +9827,13 @@ void writeini(int flag){
   }
   if(flag==SCRIPT_INI)flag=LOCAL_INI;
   if(fileout==NULL){
-    printf("error: unable to open %s for writing\n",caseinifilename);
-    return;
+    if(outfilename!=NULL){
+      printf("error: unable to open %s for writing\n",outfilename);
+      return;
+    }
+    else{
+      printf("error: unable to open ini file for output\n");
+    }
   }
 
 

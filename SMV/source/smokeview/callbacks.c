@@ -1192,6 +1192,33 @@ void keyboard_2(unsigned char key, int x, int y){
         timeval=times[itimes];
         fprintf(scriptoutstream,"SETTIMEVAL\n");
         fprintf(scriptoutstream," %f\n",timeval);
+        if(nvolrenderinfo>0&&load_at_rendertimes==1){
+          for(i=0;i<nmeshes;i++){
+            mesh *meshi;
+            volrenderdata *vr;
+            int j;
+            int framenum;
+            float timediffmin;
+
+            meshi = meshinfo + i;
+            vr = &meshi->volrenderinfo;
+            if(vr->fire==NULL||vr->smoke==NULL)continue;
+            if(vr->loaded==0||vr->display==0)continue;
+            timediffmin = ABS(timeval-vr->times[0]);
+            framenum=0;
+            for(j=1;j<vr->nframes;j++){
+              float timediff;
+
+              timediff = ABS(vr->times[j]-timeval);
+              if(timediff<timediffmin){
+                timediffmin=timediff;
+                framenum=j;
+              }
+            }
+            fprintf(scriptoutstream,"LOADVOLSMOKEFRAME\n");
+            fprintf(scriptoutstream," %i %i\n",i,framenum);
+          }
+        }
       }
       else{
         int show_plot3dkeywords=0;

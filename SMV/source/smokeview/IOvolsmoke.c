@@ -163,6 +163,7 @@ void init_volrender(void){
     vr->loaded=0;
     vr->display=0;
     vr->timeslist=NULL;
+    vr->times_defined=0;
   }
 #ifndef pp_VOLRENDER
   return;
@@ -472,12 +473,25 @@ void compute_all_smokecolors(void){
             smokecolor=vr->smokecolor_yz1;
             xyz[0] = meshi->x1;
           }
-          for(i=0;i<=jbar;i++){
-            xyz[1] = y[i];
-            for(j=0;j<=kbar;j++){
-              xyz[2] = z[j];
-              get_cum_smokecolor(smokecolor,xyz,dstep,meshi,iwall);
-              smokecolor+=4;
+          if(vr->firedata==NULL||vr->smokedata==NULL){
+            for(i=0;i<=jbar;i++){
+              for(j=0;j<=kbar;j++){
+                smokecolor[0]=0.0;
+                smokecolor[1]=0.0;
+                smokecolor[2]=0.0;
+                smokecolor[3]=0.0;
+                smokecolor+=4;
+              }
+            }
+          }
+          else{
+            for(i=0;i<=jbar;i++){
+              xyz[1] = y[i];
+              for(j=0;j<=kbar;j++){
+                xyz[2] = z[j];
+                get_cum_smokecolor(smokecolor,xyz,dstep,meshi,iwall);
+                smokecolor+=4;
+              }
             }
           }
           break;
@@ -491,12 +505,25 @@ void compute_all_smokecolors(void){
             smokecolor=vr->smokecolor_xz1;
             xyz[1] = meshi->y1;
           }
-          for(i=0;i<=ibar;i++){
-            xyz[0] = x[i];
-            for(j=0;j<=kbar;j++){
-              xyz[2] = z[j];
-              get_cum_smokecolor(smokecolor,xyz,dstep,meshi,iwall);
-              smokecolor+=4;
+          if(vr->firedata==NULL||vr->smokedata==NULL){
+            for(i=0;i<=ibar;i++){
+              for(j=0;j<=kbar;j++){
+                smokecolor[0]=0.0;
+                smokecolor[1]=0.0;
+                smokecolor[2]=0.0;
+                smokecolor[3]=0.0;
+                smokecolor+=4;
+              }
+            }
+          }
+          else{
+            for(i=0;i<=ibar;i++){
+              xyz[0] = x[i];
+              for(j=0;j<=kbar;j++){
+                xyz[2] = z[j];
+                get_cum_smokecolor(smokecolor,xyz,dstep,meshi,iwall);
+                smokecolor+=4;
+              }
             }
           }
           break;
@@ -510,12 +537,25 @@ void compute_all_smokecolors(void){
             smokecolor=vr->smokecolor_xy1;
             xyz[2]=meshi->z1;
           }
-          for(i=0;i<=ibar;i++){
-            xyz[0] = x[i];
-            for(j=0;j<=jbar;j++){
-              xyz[1] = y[j];
-              get_cum_smokecolor(smokecolor,xyz,dstep,meshi,iwall);
-              smokecolor+=4;
+          if(vr->firedata==NULL||vr->smokedata==NULL){
+            for(i=0;i<=ibar;i++){
+              for(j=0;j<=jbar;j++){
+                smokecolor[0]=0.0;
+                smokecolor[1]=0.0;
+                smokecolor[2]=0.0;
+                smokecolor[3]=0.0;
+                smokecolor+=4;
+              }
+            }
+          }
+          else{
+            for(i=0;i<=ibar;i++){
+              xyz[0] = x[i];
+              for(j=0;j<=jbar;j++){
+                xyz[1] = y[j];
+                get_cum_smokecolor(smokecolor,xyz,dstep,meshi,iwall);
+                smokecolor+=4;
+              }
             }
           }
           break;
@@ -1106,6 +1146,47 @@ int get_volsmoke_nframes(volrenderdata *vr){
     nframes = (filesize-skip)/(12 + framesize);
   }
   return nframes;
+}
+
+/* ------------------ get_volsmoke_frame_time ------------------------ */
+
+float get_volsmoke_frame_time(volrenderdata *vr, int framenum){
+	slice *fireslice, *smokeslice;
+  FILE *SLICEFILE;
+  int framesize,skip,returncode;
+  float time=0.0, *sliceframe_data;
+  int endianswitch=0;
+  char *meshlabel;
+
+  if(framenum<0||framenum>=vr->nframes)return time;
+  smokeslice=vr->smoke;
+  framesize = smokeslice->nslicei*smokeslice->nslicej*smokeslice->nslicek;
+
+  skip =           (HEADER_SIZE+30        +TRAILER_SIZE); // long label
+  skip +=          (HEADER_SIZE+30        +TRAILER_SIZE); // short label
+  skip +=          (HEADER_SIZE+30        +TRAILER_SIZE); // unit label
+  skip +=          (HEADER_SIZE+24        +TRAILER_SIZE); // is1, is2, js1, js2, ks1, ks2
+  skip += framenum*(HEADER_SIZE +4        +TRAILER_SIZE); // framenum time's
+  skip += framenum*(HEADER_SIZE +4*framesize+TRAILER_SIZE); // framenum slice data's
+
+  SLICEFILE=fopen(smokeslice->file,"rb");
+  if(SLICEFILE==NULL)return time;
+
+  returncode=fseek(SLICEFILE,skip,SEEK_SET); // skip from beginning of file
+
+  FORTSLICEREAD(&time,1);
+  fclose(SLICEFILE);
+  return time;
+}
+
+/* ------------------ get_volsmoke_frame_time ------------------------ */
+
+void get_volsmoke_all_times(volrenderdata *vr){
+  int i;
+
+  for(i=0;i<vr->nframes;i++){
+    vr->times[i]=get_volsmoke_frame_time(vr,i);
+  }
 }
 
 /* ------------------ read_volsmoke_frame ------------------------ */

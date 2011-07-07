@@ -14,6 +14,7 @@
 #include "threader.h"
 #include "string_util.h"
 
+SVEXTERN int SVDECL(load_at_rendertimes,1);
 SVEXTERN int nvolrenderinfo;
 SVEXTERN int SVDECL(trainer_temp_index,0),SVDECL(trainer_oxy_index,0);
 SVEXTERN int SVDECL(*trainer_temp_indexes,NULL),SVDECL(*trainer_oxy_indexes,NULL);

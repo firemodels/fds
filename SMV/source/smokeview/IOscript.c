@@ -77,7 +77,7 @@ void glui_script_disable(void);
 //  mesh number (-1 for all meshes) (int)  
 
 // LOADVOLSMOKEFRAME
-//  frame (int)  
+//  mesh index, frame (int)  
 
 // LOADPARTICLES
 
@@ -419,7 +419,7 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"LOADVOLSMOKEFRAME",18) == 1){
+    if(match_upper(buffer,"LOADVOLSMOKEFRAME",17) == 1){
       nscriptinfo++;
       continue;
     }
@@ -745,10 +745,10 @@ int compile_script(char *scriptfile){
       int filetype;
 
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_LOADVOLSMOKE);
+      init_scripti(scripti,SCRIPT_LOADVOLSMOKEFRAME);
       if(fgets(buffer2,255,stream)==NULL)break;
       cleanbuffer(buffer,buffer2);
-      sscanf(buffer,"%i",&scripti->ival);
+      sscanf(buffer,"%i %i",&scripti->ival,&scripti->ival2);
 
       nscriptinfo++;
       continue;
@@ -944,13 +944,31 @@ void script_loadvolsmoke(scriptdata *scripti){
   }
 }
 
-/* ------------------ script_loadvolsmoke ------------------------ */
+/* ------------------ script_loadvolsmokeframe ------------------------ */
 
 void script_loadvolsmokeframe(scriptdata *scripti){
-  int framenum;
+  int framenum,index;
+  volrenderdata *vr;
+  mesh *meshi;
 
-  framenum = scripti->ival;
-  read_volsmoke_frame_allmeshes(framenum);
+  index = scripti->ival;
+  if(index<0)index=0;
+  if(index>nmeshes-1)index=nmeshes-1;
+  meshi = meshinfo + index;
+  vr = &meshi->volrenderinfo;
+  framenum = scripti->ival2;
+  read_volsmoke_frame(vr,framenum);
+  if(vr->times_defined==0){
+    vr->times_defined=1;
+    get_volsmoke_all_times(vr);
+  }
+  vr->loaded=1;
+  vr->display=1;
+  plotstate=getplotstate(DYNAMIC_PLOTS);
+  stept=1;
+  updatetimes();
+  force_redisplay=1;
+  update_framenumber(0);
 }
 
 /* ------------------ script_load3dsmoke ------------------------ */

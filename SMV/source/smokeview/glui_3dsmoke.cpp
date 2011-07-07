@@ -256,6 +256,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   CHECKBOX_smokeGPU=glui_3dsmoke->add_checkbox_to_panel(panel_slices,_("Use GPU"),&usegpu,VOL_SMOKE,SMOKE_3D_CB);
 #endif
   CHECKBOX_usevolrender=glui_3dsmoke->add_checkbox_to_panel(panel_slices,_("Use full volume rendering"),&usevolrender,VOL_SMOKE,SMOKE_3D_CB);
+  glui_3dsmoke->add_checkbox_to_panel(panel_slices,_("Load at render times"),&load_at_rendertimes);
 
   glui_3dsmoke->add_checkbox_to_panel(panel_slices,"block smoke",&block_volsmoke);
   glui_3dsmoke->add_checkbox_to_panel(panel_slices,"debug",&smoke3dVoldebug);

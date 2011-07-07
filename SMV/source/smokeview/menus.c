@@ -2026,6 +2026,7 @@ void ScriptMenu(int value){
   switch (value){
     case START_RECORDING_SCRIPT:
       get_newscriptfilename(newscriptfilename);
+//      strcpy(scriptinifilename,newscriptfilename);
       script_recording = insert_scriptfile(newscriptfilename);
       scriptoutstream=fopen(newscriptfilename,"w");
       if(scriptoutstream!=NULL){
@@ -2065,7 +2066,7 @@ void ScriptMenu(int value){
       if(scriptoutstream!=NULL){
         fclose(scriptoutstream);
         scriptoutstream=NULL;
-        writeini(SCRIPT_INI);
+        //writeini(SCRIPT_INI);
         printf("Script recorder off\n");
       }
       break;
