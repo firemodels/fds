@@ -939,13 +939,8 @@ DROPLET_LOOP: DO I=1,NLP
    IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(II,JJ,KK,1:N_TRACKED_SPECIES)
    CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP_G)
    DR%RE  = RHO_G*QREL*2._EB*RD/MU_AIR
-
-   IF (PC%DRAG_LAW==USER_DRAG) THEN
-      C_DRAG = PC%USER_DRAG_COEFFICIENT
-   ELSE
-      C_DRAG = DRAG(DR%RE,PC%DRAG_LAW)
-   ENDIF
-
+   C_DRAG = DRAG(DR%RE,PC%DRAG_LAW)
+   
    ! Drag reduction model, except for particles associated with a SURF line
 
    WAKE_VEL=1.0_EB
@@ -981,11 +976,7 @@ DROPLET_LOOP: DO I=1,NLP
             RD = MAX(RD,1.1_EB*PC%MINIMUM_DIAMETER/2._EB)
          ENDIF
          DR%RE    = RHO_G*QREL*2._EB*RD/MU_AIR
-         IF (PC%DRAG_LAW==USER_DRAG) THEN
-            C_DRAG = PC%USER_DRAG_COEFFICIENT
-         ELSE
-            C_DRAG = DRAG(DR%RE,PC%DRAG_LAW)
-         ENDIF
+         C_DRAG   = DRAG(DR%RE,PC%DRAG_LAW)
          DR%PWT   = DR%PWT*RDC/RD**3
          DR%T     = T
          DR%R     = RD
@@ -1007,6 +998,10 @@ DROPLET_LOOP: DO I=1,NLP
          C_DRAG   = SHAPE_DEFORMATION(RE_WAKE,WE_G,C_DRAG)
       ENDIF AGE_IF
    ENDIF BREAKUP
+   
+   ! Overwtite C_DRAG if user-specified
+   
+   IF (PC%DRAG_LAW==USER_DRAG) C_DRAG = PC%USER_DRAG_COEFFICIENT
 
    ! Move airborne, non-stationary particles
          
