@@ -251,8 +251,8 @@ for i=2:2000
             x_lim = get(gca,'XLim');
             y_lim = get(gca,'YLim');
             if strcmp(Plot_Type,'loglog')
-                X_SVN_Position = x_lim(1)+10^(SVN_Scale_X*(log10(x_lim(2)-x_lim(1))));
-                Y_SVN_Position = y_lim(1)+10^(SVN_Scale_Y*(log10(y_lim(2)-y_lim(1))));
+                X_SVN_Position = 10^( log10(x_lim(1))+ SVN_Scale_X*( log10(x_lim(2)) - log10(x_lim(1)) ) );
+                Y_SVN_Position = 10^( log10(y_lim(1))+ SVN_Scale_Y*( log10(y_lim(2)) - log10(y_lim(1)) ) );
             else
                 X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
                 Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
