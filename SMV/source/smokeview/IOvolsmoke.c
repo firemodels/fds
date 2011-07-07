@@ -16,6 +16,7 @@
 #include "interp.h"
 #include "smv_endian.h"
 #include "update.h"
+#include "IOvolsmoke.h"
 
 // svn revision character string
 char IOvolsmoke_revision[]="$Revision$";

@@ -25,6 +25,7 @@
 #include "smokeviewapi.h"
 #include "MALLOC.h"
 #include "smokeviewvars.h"
+#include "IOvolsmoke.h"
 
 
 // svn revision character string

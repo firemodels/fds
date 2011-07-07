@@ -1,0 +1,19 @@
+// $Date$ 
+// $Revision$
+// $Author$
+
+void compute_all_smokecolors(void);
+void drawsmoke3dGPUVOL(volrenderdata *vr);
+void drawsmoke3dVOL(void);
+void drawsmoke3dVOLdebug(void);
+void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, mesh *meshi, int iwall);
+void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, float xyz[3], mesh *meshi, int *inobst, char *blank);
+void get_volsmoke_all_times(volrenderdata *vr);
+float get_volsmoke_frame_time(volrenderdata *vr, int framenum);
+int get_volsmoke_nframes(volrenderdata *vr);
+void init_volrender(void);
+void read_volsmoke_allframes(volrenderdata *vr);
+void read_volsmoke_allframes_allmeshes(void);
+void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first);
+void read_volsmoke_frame_allmeshes(int framenum);
+void unload_volsmoke_allframes(volrenderdata *vr);
