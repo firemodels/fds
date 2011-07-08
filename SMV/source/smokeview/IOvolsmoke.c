@@ -581,9 +581,9 @@ void drawsmoke3dVOLdebug(void){
     char label[256];
     int iwall;
 
-    sprintf(label,"*** %i ***",ii);
 
     vi = volfacelistinfoptrs[ii];
+    sprintf(label,"*** %i %2.1f ***",ii,vi->dist2);
     iwall=vi->iwall;
     meshi = vi->facemesh;
     xplt = meshi->xplt;
