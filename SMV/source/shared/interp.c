@@ -7,9 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "flowfiles.h"
 #include "interp.h"
-#include "smokeviewdefs.h"
 
 char interp_revision[]="$Revision$";
 
@@ -37,10 +35,8 @@ void get_z_interp_factors(float *zplt, int nz, float z, int *k1, int *k2, float 
 
 int interp3dsliceindex(unsigned char *data, float *zplt, int nz, int n0, float z){
   int k1, k2;
-  int n1, n2;
   float dz;
   float val1, val2;
-  float dz1, dz2;
   float z1, z2;
   int ival;
 

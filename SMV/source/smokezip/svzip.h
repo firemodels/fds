@@ -29,8 +29,13 @@
 #define rgb_black 19
 #endif
 
+#ifndef MAX
+#define MAX(a,b)  ((a)>(b) ? (a) : (b))
+#define MIN(a,b)  ((a)<(b) ? (a) : (b))
+#endif
+
 #ifndef CLAMP
-#define CLAMP(x,lo,hi)  {if ((x) < (lo)) {(x)=(lo);} else if((x) > (hi)) {(x)=(hi);}}
+#define CLAMP(x,lo,hi)  MIN(MAX((x),(lo)),(hi))
 #endif
 
 #ifndef GETINDEX
