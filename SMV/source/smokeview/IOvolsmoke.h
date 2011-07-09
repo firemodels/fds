@@ -3,7 +3,7 @@
 // $Author$
 
 void compute_all_smokecolors(void);
-void drawsmoke3dGPUVOL(volrenderdata *vr);
+void drawsmoke3dGPUVOL(void);
 void drawsmoke3dVOL(void);
 void drawsmoke3dVOLdebug(void);
 void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, mesh *meshi, int iwall);

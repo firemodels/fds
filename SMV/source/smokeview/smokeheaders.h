@@ -338,7 +338,6 @@ EXTERNCPP void drawpatch_frame(void);
 EXTERNCPP void TRANSLATE_CB(int var);
 #ifdef pp_GPU
 EXTERNCPP void drawsmoke3dGPU(smoke3d *smoke3di);
-EXTERNCPP void drawsmoke3dGPUVOL(volrenderdata *vr);
 #endif
 EXTERNCPP void drawsmoke3dVOL(void);
 #ifdef pp_CULL

@@ -27,6 +27,7 @@
 #include "translate.h"
 #include "update.h"
 #include "smokeviewvars.h"
+#include "IOvolsmoke.h"
 
 // svn revision character string
 char readsmv_revision[]="$Revision$";

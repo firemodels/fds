@@ -962,7 +962,7 @@ void drawsmoke3dVOL(void){
 /* ------------------ drawsmoke3dGPUVOL ------------------------ */
 
 #ifdef pp_GPU
-void drawsmoke3dGPUVOL(volrenderdata *vr){
+void drawsmoke3dGPUVOL(void){
 
 #define NROWS_GPU 2
 #define NCOLS_GPU 2
@@ -970,21 +970,31 @@ void drawsmoke3dGPUVOL(volrenderdata *vr){
   float xyz[3];
   float dx, dy, dz;
   mesh *meshi;
+  int ii;
 
-  meshi = vr->rendermesh;
-  
   glUniform3f(GPUvol_eyepos,xyzeyeorig[0],xyzeyeorig[1],xyzeyeorig[2]);
-  glUniform1i(GPUvol_inside,meshi->inside);
   glUniform1f(GPUvol_xyzmaxdiff,xyzmaxdiff);
-  glUniform3f(GPUvol_boxmin,meshi->x0,meshi->y0,meshi->z0);
-  glUniform3f(GPUvol_boxmax,meshi->x1,meshi->y1,meshi->z1);
 
-  for(iwall=-3;iwall<=3;iwall++){
+  if(smoke3dVoldebug==1){
+    drawsmoke3dVOLdebug();
+  }
+
+  for(ii=0;ii<nvolfacelistinfo;ii++){
+    volrenderdata *vr;
+    volfacelistdata *vi;
+    mesh *meshi;
     int i,j;
     float x1, x2, y1, y2, z1, z2;
 
+    vi = volfacelistinfoptrs[ii];
+    iwall=vi->iwall;
+    meshi = vi->facemesh;
+
     if(iwall==0||meshi->drawsides[iwall+3]==0)continue;
 
+    glUniform1i(GPUvol_inside,meshi->inside);
+    glUniform3f(GPUvol_boxmin,meshi->x0,meshi->y0,meshi->z0);
+    glUniform3f(GPUvol_boxmax,meshi->x1,meshi->y1,meshi->z1);
     glUniform1i(GPUvol_dir,iwall);
     glBegin(GL_TRIANGLES);
 
