@@ -24,6 +24,10 @@
 #define UNLOCK_COMPRESS
 #endif
 
+#ifdef pp_THREAD
+void mt_read_volsmoke_allframes_allmeshes2(void);
+#endif
+
 // define mutex's and thread_ids
 
 #ifndef CPP
@@ -32,5 +36,6 @@ MT_EXTERN pthread_mutex_t mutexCOMPRESS;
 MT_EXTERN pthread_t smooth_block_thread_id;
 MT_EXTERN pthread_t compress_thread_id;
 MT_EXTERN pthread_t update_all_patch_bounds_id;
+MT_EXTERN pthread_t read_volsmoke_id;
 #endif
 #endif

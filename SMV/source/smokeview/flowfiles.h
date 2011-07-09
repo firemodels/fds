@@ -398,6 +398,7 @@ typedef struct _volrenderdata {
   struct _slice *smoke, *fire;
   float *smokedata, *firedata;
   float **smokedataptrs, **firedataptrs, *times;
+  int *dataready;
   int iframe, nframes, times_defined;
   int *timeslist;
   float *smokecolor_yz0, *smokecolor_xz0, *smokecolor_xy0;
@@ -1169,22 +1170,6 @@ typedef struct {
   int diff_index;
   f_unit *units;
 } f_units;
-
-/*
-smokeview.ini format
-
-UNIT
-nunit
-menulabel
-colorbarlabel
-scale[0] scale[1]
-.
-.
-.
-menulabel
-colorbarlabel
-scale[0] scale[1]   (nunit times)
-*/
 
 typedef struct {
   texture face[6];
