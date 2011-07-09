@@ -423,7 +423,6 @@ typedef struct _mesh {
   float *xplt_cen, *yplt_cen, *zplt_cen;
   float *xplt_orig, *yplt_orig, *zplt_orig;
   float x0, x1, y0, y1, z0, z1;
-  float dx01, dy01, dz01;
   int drawsides[7];
   int inside;
   float boxmin[3], boxmax[3];

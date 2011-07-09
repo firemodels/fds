@@ -24,6 +24,7 @@
 #include "smokeviewvars.h"
 #include "update.h"
 #include "interp.h"
+#include "IOvolsmoke.h"
 
 int cull_count=0;
 

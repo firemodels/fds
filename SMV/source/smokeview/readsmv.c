@@ -5830,9 +5830,6 @@ typedef struct {
     meshi->y1 = yplttemp[jbartemp];
     meshi->z0 = zplttemp[0];
     meshi->z1 = zplttemp[kbartemp];
-    meshi->dx01=meshi->x1-meshi->x0;
-    meshi->dy01=meshi->y1-meshi->y0;
-    meshi->dz01=meshi->z1-meshi->z0;
 
     face_centers = meshi->face_centers;
     for(j=0;j<6;j++){

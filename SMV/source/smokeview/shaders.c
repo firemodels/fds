@@ -193,8 +193,8 @@ int setVolSmokeShaders() {
     "  }" // end inside=0
     "  if(inside==1){"
     "  }" // end inside=1
-    "  opacity = 1.0;"
-    "  gl_FragColor = vec4(0.3,0.3,0.3,opacity);"
+    "  opacity = 0.2;"
+    "  gl_FragColor = vec4(1.0,0.3,0.3,opacity);"
     "}" // end of main
   };
 
