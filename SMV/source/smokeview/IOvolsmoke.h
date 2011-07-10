@@ -2,6 +2,11 @@
 // $Revision$
 // $Author$
 
+#ifdef pp_GPU_VOLRENDER
+void init_volsmoke_texture(mesh *meshi);
+void update_volsmoke_texture(mesh *meshi, float *data);
+void update_all_volsmoke_textures(void);
+#endif
 void compute_all_smokecolors(void);
 void drawsmoke3dGPUVOL(void);
 void drawsmoke3dVOL(void);

@@ -615,9 +615,6 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
   IDLE();
   local_stoptime0 = glutGet(GLUT_ELAPSED_TIME);
   delta_time0=(local_stoptime0-local_starttime0)/1000.0;
-#ifdef pp_GPU_VOLRENDER
-  init_3dsmoke_texture(meshi);
-#endif
 
   if(file_size!=0&&delta_time>0.0){
     float loadrate;
@@ -6036,35 +6033,3 @@ void getPixelCount(void){
 #endif
 }
 #endif
-#ifdef pp_GPU_VOLRENDER
-
-/* ------------------ init_3dsmoke_texture ------------------------ */
-
-void init_3dsmoke_texture(mesh *meshi){
-  int i;
-  int nmeshnodes;
-
-  printf("Setting up textures for 3D smoke rendering for mesh %s ...",meshi->label);
-
-  glBindBuffer(GL_TEXTURE_BUFFER,&meshi->smoke_texture_id);
-  nmeshnodes = (meshi->ibar+1)*(meshi->jbar+1)*(meshi->kbar+1);
-  glBufferData(GL_TEXTURE_BUFFER,nmeshnodes*sizeof(float),NULL,GL_STATIC_DRAW);
-
-  glActiveTexture(GL_TEXTURE1);
-  glBindTexture(GL_TEXTURE_3D,meshi->smoke_texture_id);
-  glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, meshi->smoke_texture_id);
-  printf("complete\n");
-}
-
-/* ------------------ update_3dsmoke_texture ------------------------ */
-
-void update_3dsmoke_texture(mesh *meshi, float *data){
-  int nmeshnodes;
-
-  nmeshnodes = (meshi->ibar+1)*(meshi->jbar+1)*(meshi->kbar+1);
-  glBufferSubData(GL_TEXTURE_BUFFER,0,nmeshnodes*sizeof(float), data);
-
-}
-
-#endif
-

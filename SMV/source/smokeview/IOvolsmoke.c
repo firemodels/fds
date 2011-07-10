@@ -1367,6 +1367,9 @@ void read_volsmoke_allframes_allmeshes(void){
     get_volsmoke_all_times(vr);
     vr->loaded=1;
     vr->display=1;
+#ifdef pp_GPU_VOLRENDER
+    init_volsmoke_texture(meshi);
+#endif
   }
   plotstate=getplotstate(DYNAMIC_PLOTS);
   stept=1;
@@ -1382,3 +1385,50 @@ void read_volsmoke_allframes_allmeshes(void){
   read_volsmoke_allframes_allmeshes2(NULL);
 #endif
 }
+#ifdef pp_GPU_VOLRENDER
+
+/* ------------------ init_volsmoke_texture ------------------------ */
+
+void init_volsmoke_texture(mesh *meshi){
+  int i;
+  int nmeshnodes;
+
+  printf("Setting up textures for 3D smoke rendering for mesh %s ...",meshi->label);
+
+  glBindBuffer(GL_TEXTURE_BUFFER,&meshi->smoke_texture_id);
+  nmeshnodes = (meshi->ibar+1)*(meshi->jbar+1)*(meshi->kbar+1);
+  glBufferData(GL_TEXTURE_BUFFER,nmeshnodes*sizeof(float),NULL,GL_STATIC_DRAW);
+
+  glActiveTexture(GL_TEXTURE1);
+  glBindTexture(GL_TEXTURE_3D,meshi->smoke_texture_id);
+  glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, meshi->smoke_texture_id);
+  printf("complete\n");
+}
+
+/* ------------------ update_3dsmoke_texture ------------------------ */
+
+void update_volsmoke_texture(mesh *meshi, float *data){
+  int nmeshnodes;
+
+  nmeshnodes = (meshi->ibar+1)*(meshi->jbar+1)*(meshi->kbar+1);
+  glBufferSubData(GL_TEXTURE_BUFFER,0,nmeshnodes*sizeof(float), data);
+
+}
+
+/* ------------------ update_all_volsmoke_textures ------------------------ */
+
+void update_all_volsmoke_textures(void){
+  int i;
+
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    volrenderdata *vr;
+
+    meshi = meshinfo + i;
+    vr = &meshi->volrenderinfo;
+    if(vr->fire==NULL||vr->smoke==NULL)continue;
+    if(vr->loaded==0||vr->display==0)continue;
+    update_volsmoke_texture(meshi, vr->smokedata);
+  }
+}
+#endif
