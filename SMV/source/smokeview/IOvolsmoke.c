@@ -738,7 +738,6 @@ void drawsmoke3dVOL(void){
   float dx, dy, dz;
   int ii;
 
-
   if(smoke3dVoldebug==1){
     drawsmoke3dVOLdebug();
   }
@@ -957,13 +956,12 @@ void drawsmoke3dGPUVOL(void){
   mesh *meshi, *meshold=NULL;
   int ii;
 
-  glUniform3f(GPUvol_eyepos,xyzeyeorig[0],xyzeyeorig[1],xyzeyeorig[2]);
-  glUniform1f(GPUvol_xyzmaxdiff,xyzmaxdiff);
-
   if(smoke3dVoldebug==1){
     drawsmoke3dVOLdebug();
   }
 
+  glUniform3f(GPUvol_eyepos,xyzeyeorig[0],xyzeyeorig[1],xyzeyeorig[2]);
+  glUniform1f(GPUvol_xyzmaxdiff,xyzmaxdiff);
   if(use_transparency_data==1)transparenton();
   for(ii=0;ii<nvolfacelistinfo;ii++){
     volrenderdata *vr;
@@ -975,10 +973,10 @@ void drawsmoke3dGPUVOL(void){
 
     vi = volfacelistinfoptrs[ii];
     iwall=vi->iwall;
+    meshi = vi->facemesh;
 
     if(iwall==0||meshi->drawsides[iwall+3]==0)continue;
 
-    meshi = vi->facemesh;
     vr = &meshi->volrenderinfo;
     
     if(meshi!=meshold){
@@ -1406,9 +1404,9 @@ void init_volsmoke_texture(mesh *meshi){
   glBindTexture(GL_TEXTURE_3D,meshi->smoke_texture_id);
   glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
   nx = meshi->ibar+1;
   ny = meshi->jbar+1;
   nz = meshi->kbar+1;
