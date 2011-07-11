@@ -4306,9 +4306,9 @@ SELECT CASE(IND)
       JJJ = MAX(1,MIN(JJ,JBAR))
       KKK = MAX(1,MIN(KK,KBAR))
       IF (TWO_D) THEN
-         DELTA = MAX(DX(I),DZ(K))
+         DELTA = MAX(DX(III),DZ(KKK))
       ELSE
-         DELTA = MAX(DX(I),DY(J),DZ(K))
+         DELTA = MAX(DX(III),DY(JJJ),DZ(KKK))
       ENDIF
       GAS_PHASE_OUTPUT = SQRT(CSD2_DYNSMAG(III,JJJ,KKK))/DELTA
       
