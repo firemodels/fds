@@ -1391,9 +1391,8 @@ void read_volsmoke_allframes_allmeshes(void){
 
 void init_volsmoke_texture(mesh *meshi){
   int i;
-  int nmeshnodes;
-  int border_size=0;
-  int nx, ny, nz;
+  GLint border_size=0;
+  GLsizei nx, ny, nz;
 
   printf("Setting up textures for 3D smoke rendering for mesh %s ...",meshi->label);
 
@@ -1416,9 +1415,9 @@ void init_volsmoke_texture(mesh *meshi){
       meshi->smoke_texture_buffer[i]=0.0;
     }
   }
- // glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32F, 
- //   nx, ny, nz, border_size, 
- //   GL_RGB, GL_FLOAT, meshi->smoke_texture_buffer);
+  glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 
+    nx, ny, nz, border_size, 
+    GL_RED, GL_FLOAT, meshi->smoke_texture_buffer);
 
   printf("complete\n");
 }
@@ -1426,14 +1425,16 @@ void init_volsmoke_texture(mesh *meshi){
 /* ------------------ update_3dsmoke_texture ------------------------ */
 
 void update_volsmoke_texture(mesh *meshi, float *data){
-  int level=0,xoffset=0,yoffset=0,zoffset=0;
+  GLint xoffset=0,yoffset=0,zoffset=0;
+  GLsizei nx, ny, nz;
 
-  printf("updating texture in mesh %s = ",meshi->label);
- // glTexSubImage3D(GL_TEXTURE_3D,level,
- //   xoffset,yoffset,zoffset,
- //   meshi->ibar+1,meshi->jbar+1,meshi->kbar+1,
- //   GL_RGBA, GL_FLOAT, data);
-  printf(" complete\n");
+  nx = meshi->ibar+1;
+  ny = meshi->jbar+1;
+  nz = meshi->kbar+1;
+  glTexSubImage3D(GL_TEXTURE_3D,0,
+    xoffset,yoffset,zoffset,
+    nx, ny, nz,
+    GL_RED, GL_FLOAT, data);
 }
 
 /* ------------------ update_all_volsmoke_textures ------------------------ */
