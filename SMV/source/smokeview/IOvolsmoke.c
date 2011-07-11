@@ -1392,27 +1392,48 @@ void read_volsmoke_allframes_allmeshes(void){
 void init_volsmoke_texture(mesh *meshi){
   int i;
   int nmeshnodes;
+  int border_size=0;
+  int nx, ny, nz;
 
   printf("Setting up textures for 3D smoke rendering for mesh %s ...",meshi->label);
 
-  glBindBuffer(GL_TEXTURE_BUFFER,&meshi->smoke_texture_id);
-  nmeshnodes = (meshi->ibar+1)*(meshi->jbar+1)*(meshi->kbar+1);
-  glBufferData(GL_TEXTURE_BUFFER,nmeshnodes*sizeof(float),NULL,GL_STATIC_DRAW);
-
-  glActiveTexture(GL_TEXTURE1);
+  glActiveTexture(GL_TEXTURE0);
+  glGenTextures(1,&meshi->smoke_texture_id);
   glBindTexture(GL_TEXTURE_3D,meshi->smoke_texture_id);
-  glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, meshi->smoke_texture_id);
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_LINEAR);
+  nx = meshi->ibar+1;
+  ny = meshi->jbar+1;
+  nz = meshi->kbar+1;
+  if(meshi->smoke_texture_buffer==NULL){
+    int i;
+
+    NewMemory((void **)&meshi->smoke_texture_buffer,nx*ny*nz*sizeof(float));
+    for(i=0;i<nx*ny*nz;i++){
+      meshi->smoke_texture_buffer[i]=0.0;
+    }
+  }
+ // glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA32F, 
+ //   nx, ny, nz, border_size, 
+ //   GL_RGB, GL_FLOAT, meshi->smoke_texture_buffer);
+
   printf("complete\n");
 }
 
 /* ------------------ update_3dsmoke_texture ------------------------ */
 
 void update_volsmoke_texture(mesh *meshi, float *data){
-  int nmeshnodes;
+  int level=0,xoffset=0,yoffset=0,zoffset=0;
 
-  nmeshnodes = (meshi->ibar+1)*(meshi->jbar+1)*(meshi->kbar+1);
-  glBufferSubData(GL_TEXTURE_BUFFER,0,nmeshnodes*sizeof(float), data);
-
+  printf("updating texture in mesh %s = ",meshi->label);
+ // glTexSubImage3D(GL_TEXTURE_3D,level,
+ //   xoffset,yoffset,zoffset,
+ //   meshi->ibar+1,meshi->jbar+1,meshi->kbar+1,
+ //   GL_RGBA, GL_FLOAT, data);
+  printf(" complete\n");
 }
 
 /* ------------------ update_all_volsmoke_textures ------------------------ */
