@@ -211,7 +211,7 @@ ELSE
       CORE_CLOCK(NM) = CORE_CLOCK(NM) + DT_RESTART
    ENDIF
    PT2_IF: IF (PERIODIC_TEST==2) THEN
-      IF (T>=UVW_CLOCK(IUVW)) THEN
+      IF (T>=UVW_CLOCK_CBC(IUVW)) THEN
          WRITE(FN_UVW,'(A,A,I3.3,A)') TRIM(CHID),'_uvw_',NINT(T*100._EB),'.csv'
          CALL DUMP_UVW(NM,FN_UVW)
          IUVW = IUVW + 1
@@ -4305,14 +4305,10 @@ SELECT CASE(IND)
       III = MAX(1,MIN(II,IBAR))
       JJJ = MAX(1,MIN(JJ,JBAR))
       KKK = MAX(1,MIN(KK,KBAR))
-      IF (USE_MAX_FILTER_WIDTH) THEN
-         DELTA=MAX(DX(III),DY(JJJ),DZ(KKK))
+      IF (TWO_D) THEN
+         DELTA = MAX(DX(I),DZ(K))
       ELSE
-         IF (.NOT.TWO_D) THEN
-            DELTA = (DX(III)*DY(JJJ)*DZ(KKK))**ONTH
-         ELSE
-            DELTA = SQRT(DX(III)*DZ(KKK))
-         ENDIF
+         DELTA = MAX(DX(I),DY(J),DZ(K))
       ENDIF
       GAS_PHASE_OUTPUT = SQRT(CSD2_DYNSMAG(III,JJJ,KKK))/DELTA
       

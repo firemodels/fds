@@ -999,7 +999,7 @@ DROPLET_LOOP: DO I=1,NLP
       ENDIF AGE_IF
    ENDIF BREAKUP
    
-   ! Overwtite C_DRAG if user-specified
+   ! Overwrite C_DRAG if user-specified
    
    IF (PC%DRAG_LAW==USER_DRAG) C_DRAG = PC%USER_DRAG_COEFFICIENT
 
