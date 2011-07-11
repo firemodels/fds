@@ -235,10 +235,10 @@ IMPLICIT NONE
 
 INTEGER, INTENT(IN) :: NM
 
-REAL(EB) :: TEMP_TERM,DUDY,DUDZ,DVDX,DVDZ,DWDX,DWDY
+REAL(EB) :: TEMP_TERM,DUDY,DUDZ,DVDX,DVDZ,DWDX,DWDY,ONTHDIV
 INTEGER :: I,J,K
 
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,UP,VP,WP,RHOP,RHOPHAT,DP
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,UP,VP,WP,RHOP,RHOPHAT
 REAL(EB), POINTER, DIMENSION(:,:,:) :: S11,S22,S33,S12,S13,S23,SS
 REAL(EB), POINTER, DIMENSION(:,:,:) :: SHAT11,SHAT22,SHAT33,SHAT12,SHAT13,SHAT23,SSHAT
 REAL(EB), POINTER, DIMENSION(:,:,:) :: BETA11,BETA22,BETA33,BETA12,BETA13,BETA23
@@ -277,13 +277,11 @@ IF (PREDICTOR) THEN
    VV=>V
    WW=>W
    RHOP=>RHO
-   DP=>D
 ELSE
    UU=>US
    VV=>VS
    WW=>WS
    RHOP=>RHOS
-   DP=>DS
 ENDIF
 
 UP => TURB_WORK1
@@ -306,9 +304,15 @@ DO K = 1,KBAR
          VP(I,J,K) = 0.5_EB*(VV(I,J,K) + VV(I,J-1,K))
          WP(I,J,K) = 0.5_EB*(WW(I,J,K) + WW(I,J,K-1))
          
-         S11(I,J,K) = RDX(I)*(UU(I,J,K)-UU(I-1,J,K)) - ONTH*DP(I,J,K)
-         S22(I,J,K) = RDY(J)*(VV(I,J,K)-VV(I,J-1,K)) - ONTH*DP(I,J,K)
-         S33(I,J,K) = RDZ(K)*(WW(I,J,K)-WW(I,J,K-1)) - ONTH*DP(I,J,K)
+         S11(I,J,K) = RDX(I)*(UU(I,J,K)-UU(I-1,J,K))
+         S22(I,J,K) = RDY(J)*(VV(I,J,K)-VV(I,J-1,K))
+         S33(I,J,K) = RDZ(K)*(WW(I,J,K)-WW(I,J,K-1))
+         
+         ONTHDIV = ONTH*(S11(I,J,K)+S22(I,J,K)+S33(I,J,K))
+         S11(I,J,K) = S11(I,J,K)-ONTHDIV
+         S22(I,J,K) = S22(I,J,K)-ONTHDIV
+         S33(I,J,K) = S33(I,J,K)-ONTHDIV
+         
          DUDY = 0.25_EB*RDY(J)*(UU(I,J+1,K)-UU(I,J-1,K)+UU(I-1,J+1,K)-UU(I-1,J-1,K))
          DUDZ = 0.25_EB*RDZ(K)*(UU(I,J,K+1)-UU(I,J,K-1)+UU(I-1,J,K+1)-UU(I-1,J,K-1)) 
          DVDX = 0.25_EB*RDX(I)*(VV(I+1,J,K)-VV(I-1,J,K)+VV(I+1,J-1,K)-VV(I-1,J-1,K))
@@ -321,12 +325,7 @@ DO K = 1,KBAR
          
          ! calculate magnitude of the grid strain rate
 
-         SS(I,J,K) = RHOP(I,J,K)*SQRT(2._EB*(S11(I,J,K)*S11(I,J,K) + &
-                                             S22(I,J,K)*S22(I,J,K) + &
-                                             S33(I,J,K)*S33(I,J,K) + &
-                                      2._EB*(S12(I,J,K)*S12(I,J,K) + &
-                                             S13(I,J,K)*S13(I,J,K) + &
-                                             S23(I,J,K)*S23(I,J,K)) ) )
+         SS(I,J,K) = RHOP(I,J,K)*STRAIN_RATE(I,J,K)
 
       ENDDO
    ENDDO
@@ -496,7 +495,7 @@ DO K = 1,KBAR
          ! calculate the effective viscosity
 
          ! handle the case where we divide by zero, note MMHAT is positive semi-definite
-         IF (ABS(MMHAT(I,J,K)) <=ZERO_P) THEN
+         IF (MMHAT(I,J,K)<=ZERO_P) THEN
             CSD2_DYNSMAG(I,J,K) = 0._EB
          ELSE
             CSD2_DYNSMAG(I,J,K) = MLHAT(I,J,K)/MMHAT(I,J,K) ! (Cs*Delta)**2

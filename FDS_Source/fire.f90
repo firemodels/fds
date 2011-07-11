@@ -76,7 +76,7 @@ WW => WS
 !$OMP SHARED(MIX_TIME,DT,Q,D_REACTION, &
 !$OMP        IBAR,KBAR,JBAR,CELL_INDEX,SOLID,RN,SPECIES_MIXTURE,FUEL_INDEX,O2_INDEX,ZZ,I_PRODUCTS, &
 !$OMP        Y_P_MIN_EDC,SUPPRESSION,TMP,O2_F_RATIO,N_TRACKED_SPECIES, &
-!$OMP        USE_MAX_FILTER_WIDTH,DX,DY,DZ,TWO_D,LES,SC,RHO,MU,RDX,RDY,RDZ,UU,VV,WW,PI,GRAV, &
+!$OMP        DX,DY,DZ,TWO_D,LES,SC,RHO,MU,RDX,RDY,RDZ,UU,VV,WW,PI,GRAV, &
 !$OMP        TAU_CHEM,TAU_FLAME,D_Z,FIXED_MIX_TIME,BETA_EDC,Q_UPPER,RSUM, &
 !$OMP        N_EXTERNAL_WALL_CELLS,BOUNDARY_TYPE,IJKW)
 
@@ -127,14 +127,10 @@ DO K=1,KBAR
 
          ENDIF IF_SUPPRESSION
 
-         IF (USE_MAX_FILTER_WIDTH) THEN
-            DELTA=MAX(DX(I),DY(J),DZ(K))
+         IF (TWO_D) THEN
+            DELTA = MAX(DX(I),DZ(K))
          ELSE
-            IF (.NOT.TWO_D) THEN
-               DELTA = (DX(I)*DY(J)*DZ(K))**ONTH
-            ELSE
-               DELTA = SQRT(DX(I)*DZ(K))
-            ENDIF
+            DELTA = MAX(DX(I),DY(J),DZ(K))
          ENDIF
 
          LES_IF: IF (LES) THEN
@@ -458,14 +454,10 @@ SELECT CASE (MODE)
             ENDIF
          ENDIF IF_SUPPRESSION
 
-         IF (USE_MAX_FILTER_WIDTH) THEN
-            DELTA=MAX(DX(I),DY(J),DZ(K))
+         IF (TWO_D) THEN
+            DELTA = MAX(DX(I),DZ(K))
          ELSE
-            IF (.NOT.TWO_D) THEN
-               DELTA = (DX(I)*DY(J)*DZ(K))**ONTH
-            ELSE
-               DELTA = SQRT(DX(I)*DZ(K))
-            ENDIF
+            DELTA = MAX(DX(I),DY(J),DZ(K))
          ENDIF
 
          LES_IF: IF (LES) THEN
@@ -515,7 +507,7 @@ SELECT CASE (MODE)
          ENDIF
          YY_F_LIM = MAX(YY_F_LIM,Y_F_MIN)
          IF (FIXED_MIX_TIME>0._EB) MIX_TIME(I,J,K)=FIXED_MIX_TIME      
-         RATE_CONSTANT =  YY_F_LIM/MIX_TIME(I,J,K)      
+         RATE_CONSTANT = YY_F_LIM/MIX_TIME(I,J,K)      
       
    CASE(FINITE_RATE)
       RATE_CONSTANT = 0._EB
@@ -593,27 +585,11 @@ END FUNCTION EXTINCTION
 
 REAL(EB) FUNCTION KSGS(I,J,K)
 INTEGER, INTENT(IN) :: I,J,K
-REAL(EB) :: DUDX,DVDY,DWDZ,DUDY,DUDZ,DVDX,DVDZ,DWDX,DWDY,S12,S13,S23,SS2,EPSK
-
-! compute local filtered strain
-
-DUDX = RDX(I)*(US(I,J,K)-US(I-1,J,K))
-DVDY = RDY(J)*(VS(I,J,K)-VS(I,J-1,K))
-DWDZ = RDZ(K)*(WS(I,J,K)-WS(I,J,K-1))
-DUDY = 0.25_EB*RDY(J)*(US(I,J+1,K)-US(I,J-1,K)+US(I-1,J+1,K)-US(I-1,J-1,K))
-DUDZ = 0.25_EB*RDZ(K)*(US(I,J,K+1)-US(I,J,K-1)+US(I-1,J,K+1)-US(I-1,J,K-1)) 
-DVDX = 0.25_EB*RDX(I)*(VS(I+1,J,K)-VS(I-1,J,K)+VS(I+1,J-1,K)-VS(I-1,J-1,K))
-DVDZ = 0.25_EB*RDZ(K)*(VS(I,J,K+1)-VS(I,J,K-1)+VS(I,J-1,K+1)-VS(I,J-1,K-1))
-DWDX = 0.25_EB*RDX(I)*(WS(I+1,J,K)-WS(I-1,J,K)+WS(I+1,J,K-1)-WS(I-1,J,K-1))
-DWDY = 0.25_EB*RDY(J)*(WS(I,J+1,K)-WS(I,J-1,K)+WS(I,J+1,K-1)-WS(I,J-1,K-1))
-S12 = 0.5_EB*(DUDY+DVDX)
-S13 = 0.5_EB*(DUDZ+DWDX)
-S23 = 0.5_EB*(DVDZ+DWDY)
-SS2 = 2._EB*(DUDX**2 + DVDY**2 + DWDZ**2 + 2._EB*(S12**2 + S13**2 + S23**2))
+REAL(EB) :: EPSK
 
 ! ke dissipation rate, assumes production=dissipation
 
-EPSK = MU(I,J,K)*(SS2-TWTH*(DUDX+DVDY+DWDZ)**2)/RHO(I,J,K)
+EPSK = MU(I,J,K)*STRAIN_RATE(I,J,K)**2/RHO(I,J,K)
 
 KSGS = 2.25_EB*(EPSK*DELTA/PI)**TWTH  ! estimate of subgrid ke, from Kolmogorov spectrum
 

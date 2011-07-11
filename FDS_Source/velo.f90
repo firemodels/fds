@@ -52,25 +52,17 @@ SUBROUTINE COMPUTE_VISCOSITY(NM)
 USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY
 USE TURBULENCE, ONLY: VARDEN_DYNSMAG
 INTEGER, INTENT(IN) :: NM
-REAL(EB) :: DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,SS,S12,S13,S23,DELTA,CS,ZZ_GET(0:N_TRACKED_SPECIES),MU_WALL
+REAL(EB) :: DELTA,CS,ZZ_GET(0:N_TRACKED_SPECIES),MU_WALL
 INTEGER :: I,J,K,IIG,JJG,KKG,II,JJ,KK,IW
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),RHOP=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
-REAL(EB), PARAMETER :: APLUS=26._EB
  
 CALL POINT_TO_MESH(NM)
  
 IF (PREDICTOR) THEN
-   UU => U
-   VV => V
-   WW => W
    RHOP => RHO
    IF (N_TRACKED_SPECIES > 0) ZZP => ZZ
-   IF ((DYNSMAG .AND. .NOT.EVACUATION_ONLY(NM)) .AND. (ICYC==1 .OR. MOD(ICYC,DSMAG_FREQ)==0)) CALL VARDEN_DYNSMAG(NM)
 ELSE
-   UU => US
-   VV => VS
-   WW => WS
    RHOP => RHOS
    IF (N_TRACKED_SPECIES > 0 .AND. .NOT.EVACUATION_ONLY(NM)) ZZP => ZZS
 ENDIF
@@ -108,41 +100,31 @@ ENDIF
 ! Compute eddy viscosity using Smagorinsky model
 
 IF (LES .OR. EVACUATION_ONLY(NM)) THEN
+
+   CALL COMPUTE_STRAIN_RATE(NM)
+   
    CS = CSMAG
    IF (EVACUATION_ONLY(NM)) CS = 0.9_EB
+   
+   IF (PREDICTOR .AND. DYNSMAG) CALL VARDEN_DYNSMAG(NM)
+   
    !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) &
-   !$OMP PRIVATE(K,J,I,DELTA,DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,S12,S13,S23,SS)
+   !$OMP PRIVATE(K,J,I,DELTA)
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
 
             IF (TWO_D) THEN
-               DELTA=SQRT(DX(I)*DZ(K))
+               DELTA=MAX(DX(I),DZ(K))
             ELSE
-               DELTA=(DX(I)*DY(J)*DZ(K))**ONTH
+               DELTA=MAX(DX(I),DY(J),DZ(K))
             ENDIF
-            IF (USE_MAX_FILTER_WIDTH) DELTA=MAX(DX(I),DY(J),DZ(K))
-            
-            DUDX = RDX(I)*(UU(I,J,K)-UU(I-1,J,K))
-            DVDY = RDY(J)*(VV(I,J,K)-VV(I,J-1,K))
-            DWDZ = RDZ(K)*(WW(I,J,K)-WW(I,J,K-1))
-            DUDY = 0.25_EB*RDY(J)*(UU(I,J+1,K)-UU(I,J-1,K)+UU(I-1,J+1,K)-UU(I-1,J-1,K))
-            DUDZ = 0.25_EB*RDZ(K)*(UU(I,J,K+1)-UU(I,J,K-1)+UU(I-1,J,K+1)-UU(I-1,J,K-1)) 
-            DVDX = 0.25_EB*RDX(I)*(VV(I+1,J,K)-VV(I-1,J,K)+VV(I+1,J-1,K)-VV(I-1,J-1,K))
-            DVDZ = 0.25_EB*RDZ(K)*(VV(I,J,K+1)-VV(I,J,K-1)+VV(I,J-1,K+1)-VV(I,J-1,K-1))
-            DWDX = 0.25_EB*RDX(I)*(WW(I+1,J,K)-WW(I-1,J,K)+WW(I+1,J,K-1)-WW(I-1,J,K-1))
-            DWDY = 0.25_EB*RDY(J)*(WW(I,J+1,K)-WW(I,J-1,K)+WW(I,J+1,K-1)-WW(I,J-1,K-1))
-
-            S12 = 0.5_EB*(DUDY+DVDX)
-            S13 = 0.5_EB*(DUDZ+DWDX)
-            S23 = 0.5_EB*(DVDZ+DWDY)
-            SS = SQRT(2._EB*(DUDX**2 + DVDY**2 + DWDZ**2 + 2._EB*(S12**2 + S13**2 + S23**2)))
             
             IF (DYNSMAG .AND. .NOT.EVACUATION_ONLY(NM)) THEN
-               MU(I,J,K) = MU(I,J,K) + RHOP(I,J,K)*CSD2_DYNSMAG(I,J,K)*SS
+               MU(I,J,K) = MU(I,J,K) + RHOP(I,J,K)*CSD2_DYNSMAG(I,J,K)*STRAIN_RATE(I,J,K)
             ELSE
-               MU(I,J,K) = MU(I,J,K) + RHOP(I,J,K)*(CS*DELTA)**2*SS
+               MU(I,J,K) = MU(I,J,K) + RHOP(I,J,K)*(CS*DELTA)**2*STRAIN_RATE(I,J,K)
             ENDIF
 
          ENDDO
@@ -215,6 +197,52 @@ ENDIF
 
 END SUBROUTINE COMPUTE_VISCOSITY
 
+
+SUBROUTINE COMPUTE_STRAIN_RATE(NM)
+
+INTEGER, INTENT(IN) :: NM
+REAL(EB) :: DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,S11,S22,S33,S12,S13,S23,ONTHDIV
+INTEGER :: I,J,K
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL()
+
+CALL POINT_TO_MESH(NM)
+
+IF (PREDICTOR) THEN
+   UU => U
+   VV => V
+   WW => W
+ELSE
+   UU => US
+   VV => VS
+   WW => WS
+ENDIF
+
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+         DUDX = RDX(I)*(UU(I,J,K)-UU(I-1,J,K))
+         DVDY = RDY(J)*(VV(I,J,K)-VV(I,J-1,K))
+         DWDZ = RDZ(K)*(WW(I,J,K)-WW(I,J,K-1))
+         DUDY = 0.25_EB*RDY(J)*(UU(I,J+1,K)-UU(I,J-1,K)+UU(I-1,J+1,K)-UU(I-1,J-1,K))
+         DUDZ = 0.25_EB*RDZ(K)*(UU(I,J,K+1)-UU(I,J,K-1)+UU(I-1,J,K+1)-UU(I-1,J,K-1)) 
+         DVDX = 0.25_EB*RDX(I)*(VV(I+1,J,K)-VV(I-1,J,K)+VV(I+1,J-1,K)-VV(I-1,J-1,K))
+         DVDZ = 0.25_EB*RDZ(K)*(VV(I,J,K+1)-VV(I,J,K-1)+VV(I,J-1,K+1)-VV(I,J-1,K-1))
+         DWDX = 0.25_EB*RDX(I)*(WW(I+1,J,K)-WW(I-1,J,K)+WW(I+1,J,K-1)-WW(I-1,J,K-1))
+         DWDY = 0.25_EB*RDY(J)*(WW(I,J+1,K)-WW(I,J-1,K)+WW(I,J+1,K-1)-WW(I,J-1,K-1))
+         ONTHDIV = ONTH*(DUDX+DVDY+DWDZ)
+         S11 = DUDX - ONTHDIV
+         S22 = DVDY - ONTHDIV
+         S33 = DWDZ - ONTHDIV
+         S12 = 0.5_EB*(DUDY+DVDX)
+         S13 = 0.5_EB*(DUDZ+DWDX)
+         S23 = 0.5_EB*(DVDZ+DWDY)
+         STRAIN_RATE(I,J,K) = SQRT(2._EB*(S11**2 + S22**2 + S33**2 + 2._EB*(S12**2 + S13**2 + S23**2)))
+      ENDDO
+   ENDDO
+ENDDO
+
+END SUBROUTINE COMPUTE_STRAIN_RATE
 
 
 SUBROUTINE VISCOSITY_BC(NM)
