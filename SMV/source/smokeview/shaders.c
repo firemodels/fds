@@ -174,11 +174,13 @@ int setVolSmokeShaders() {
     "uniform float xyzmaxdiff;"
     "uniform vec3 eyepos,boxmin, boxmax;"
     "varying vec3 fragpos;"
+    "uniform sampler3D soot_density;"
     
     "void main(){"
-    "  float L,opacity,alpha,alpha_min;"
+    "  float L,opacity,alpha,alpha_min,factor,cum_soot_val,pathdist,k;"
+    "  int i;"
     
-    "  vec3 dalphamin,dalphamax;"
+    "  vec3 dalphamin,dalphamax,fragmaxpos,posi;"
     "  L=distance(fragpos,eyepos)*xyzmaxdiff;"
     "  alpha_min=1000000.0;"
     "  dalphamin=-(boxmin-fragpos)/(eyepos-fragpos);"
@@ -193,8 +195,17 @@ int setVolSmokeShaders() {
     "  }" // end inside=0
     "  if(inside==1){"
     "  }" // end inside=1
-    "  opacity = 0.2;"
-    "  gl_FragColor = vec4(1.0,0.3,0.3,opacity);"
+    "  fragmaxpos=fragpos+alpha_min*(fragpos-eyepos);"
+    "  cum_soot_val=0.0;"
+    "  for(i=0;i<16;i++){"
+    "    factor = (0.5+i)/16.0;"
+    "    posi = ((1.0-factor)*fragpos + factor*fragmaxpos-boxmin)/(boxmax-boxmin);"
+    "    cum_soot_val += texture(soot_density,posi);"
+    "  }"
+    "  k=8700;"
+    "  pathdist=distance(fragmaxpos,fragpos)*xyzmaxdiff;"
+    "  opacity=1.0 - exp(-k*cum_soot_val*pathdist);"
+    "  gl_FragColor = vec4(0.0,0.0,0.0,opacity);"
     "}" // end of main
   };
 
@@ -256,6 +267,7 @@ int setVolSmokeShaders() {
   GPUvol_xyzmaxdiff = glGetUniformLocation(p_volsmoke,"xyzmaxdiff");
   GPUvol_boxmin = glGetUniformLocation(p_volsmoke,"boxmin");
   GPUvol_boxmax = glGetUniformLocation(p_volsmoke,"boxmax");
+  GPUvol_soot_density = glGetUniformLocation(p_volsmoke,"soot_density");
 
   if(error_code!=1)return error_code;
   return error_code;
@@ -461,7 +473,7 @@ int init_shaders(void){
       err=0;
     }
     else{
-      printf("   *** GPU smoke shader failed to load.\n");
+      printf("   *** GPU smoke volume shader failed to load.\n");
       usegpu=0;
       err=1;
     }

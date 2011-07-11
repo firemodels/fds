@@ -894,11 +894,6 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
         if(usegpu==0){
           compute_all_smokecolors();
         }
-#ifdef pp_GPU_VOLRENDER
-        else{
-          update_all_volsmoke_textures();
-        }
-#endif
       }
     }
     if(nsmoke3dinfo>0&&show3dsmoke==1){

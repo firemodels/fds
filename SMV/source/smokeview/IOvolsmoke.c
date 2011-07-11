@@ -964,6 +964,7 @@ void drawsmoke3dGPUVOL(void){
     drawsmoke3dVOLdebug();
   }
 
+  if(use_transparency_data==1)transparenton();
   for(ii=0;ii<nvolfacelistinfo;ii++){
     volrenderdata *vr;
     volfacelistdata *vi;
@@ -974,16 +975,19 @@ void drawsmoke3dGPUVOL(void){
 
     vi = volfacelistinfoptrs[ii];
     iwall=vi->iwall;
-    meshi = vi->facemesh;
 
     if(iwall==0||meshi->drawsides[iwall+3]==0)continue;
 
+    meshi = vi->facemesh;
+    vr = &meshi->volrenderinfo;
+    
     if(meshi!=meshold){
-      // load floating point textures for density and temperature
-      // glLoad3Dtexture.... vr->firedata, vr->smokedata
       glUniform1i(GPUvol_inside,meshi->inside);
       glUniform3f(GPUvol_boxmin,meshi->x0,meshi->y0,meshi->z0);
       glUniform3f(GPUvol_boxmax,meshi->x1,meshi->y1,meshi->z1);
+      update_volsmoke_texture(meshi, vr->smokedata);
+      glUniform1i(GPUvol_soot_density,0);
+
       meshold=meshi;
     }
     glUniform1i(GPUvol_dir,iwall);
@@ -1107,6 +1111,7 @@ void drawsmoke3dGPUVOL(void){
     }
     glEnd();
   }
+  if(use_transparency_data==1)transparentoff();
 }
 
 #endif
@@ -1435,22 +1440,5 @@ void update_volsmoke_texture(mesh *meshi, float *data){
     xoffset,yoffset,zoffset,
     nx, ny, nz,
     GL_RED, GL_FLOAT, data);
-}
-
-/* ------------------ update_all_volsmoke_textures ------------------------ */
-
-void update_all_volsmoke_textures(void){
-  int i;
-
-  for(i=0;i<nmeshes;i++){
-    mesh *meshi;
-    volrenderdata *vr;
-
-    meshi = meshinfo + i;
-    vr = &meshi->volrenderinfo;
-    if(vr->fire==NULL||vr->smoke==NULL)continue;
-    if(vr->loaded==0||vr->display==0)continue;
-    update_volsmoke_texture(meshi, vr->smokedata);
-  }
 }
 #endif
