@@ -767,6 +767,7 @@ void drawsmoke3dVOL(void){
     vr = &(meshi->volrenderinfo);
 
     if(iwall==0||meshi->drawsides[iwall+3]==0)continue;
+    if(vr->firedata==NULL&&vr->smokedata==NULL)continue;
 
     glBegin(GL_TRIANGLES);
     switch (iwall){
@@ -977,6 +978,7 @@ void drawsmoke3dGPUVOL(void){
     if(iwall==0||meshi->drawsides[iwall+3]==0)continue;
 
     vr = &meshi->volrenderinfo;
+    if(vr->firedata==NULL&&vr->smokedata==NULL)continue;
     
     if(meshi!=meshold){
       glUniform1i(GPUvol_inside,meshi->inside);
