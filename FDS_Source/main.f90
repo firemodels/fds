@@ -657,7 +657,7 @@ MAIN_LOOP: DO
          IF (ACTIVE_MESH(1)) CALL HVAC_CALC(T(1))
          IF (USE_MPI) CALL EXCHANGE_HVAC_SOLUTION
       ENDIF
-      
+
       COMPUTE_WALL_BC_LOOP_A: DO NM=1,NMESHES
          IF (PROCESS(NM)/=MYID .OR. .NOT.ACTIVE_MESH(NM)) CYCLE COMPUTE_WALL_BC_LOOP_A
          CALL WALL_BC(T(NM),NM)
@@ -785,7 +785,6 @@ MAIN_LOOP: DO
    T_MIN = MINVAL(T,MASK=.NOT.EVACUATION_ONLY)
    IF (ALL(EVACUATION_ONLY)) T_MAX = T_EVAC
    IF (ALL(EVACUATION_ONLY)) T_MIN = T_EVAC
- 
    !============================================================================================================================
    !                                          Start of Corrector part of time step
    !============================================================================================================================
@@ -817,15 +816,15 @@ MAIN_LOOP: DO
       CALL COMPUTE_VELOCITY_FLUX(T(NM),NM,2)
       CALL UPDATE_PARTICLES(T(NM),NM)
       IF(.NOT. WIND_ONLY) CALL RAISED_VEG_MASS_ENERGY_TRANSFER(T(NM),NM)
-      IF (HVAC_SOLVE) CALL HVAC_BC_IN(NM)
+!      IF (HVAC_SOLVE) CALL HVAC_BC_IN(NM)
       IF (N_REACTIONS > 0) CALL COMBUSTION (NM)
    ENDDO COMPUTE_DIVERGENCE_2
 
-   IF (HVAC_SOLVE) THEN
-      IF (USE_MPI) CALL EXCHANGE_HVAC_BC
+!   IF (HVAC_SOLVE) THEN
+!      IF (USE_MPI) CALL EXCHANGE_HVAC_BC
       IF (ACTIVE_MESH(1)) CALL HVAC_CALC(T(1))
-      IF (USE_MPI) CALL EXCHANGE_HVAC_SOLUTION
-   ENDIF
+!      IF (USE_MPI) CALL EXCHANGE_HVAC_SOLUTION
+!   ENDIF
  
    COMPUTE_WALL_BC_2A: DO NM=1,NMESHES
       IF (PROCESS(NM)/=MYID .OR. .NOT.ACTIVE_MESH(NM)) CYCLE COMPUTE_WALL_BC_2A
@@ -838,7 +837,7 @@ MAIN_LOOP: DO
    ! Exchange global pressure zone information
 
    IF (N_ZONE>0) CALL EXCHANGE_DIVERGENCE_INFO
-   
+
    ! Finish computing the divergence
 
    FINISH_DIVERGENCE_LOOP_2: DO NM=1,NMESHES
@@ -892,7 +891,7 @@ MAIN_LOOP: DO
       IF (PROCESS(NM)==MYID .AND. ACTIVE_MESH(NM)) CALL DUMP_MESH_OUTPUTS(T(NM),NM) 
    ENDDO
    CALL DUMP_GLOBAL_OUTPUTS(T_MIN)
- 
+
    ! Exchange EVAC information among meshes
 
    CALL EVAC_EXCHANGE
@@ -1111,7 +1110,7 @@ SUBROUTINE END_FDS
 
 ! End the calculation gracefully, even if there is an error
 
-CHARACTER(100) :: MESSAGE
+CHARACTER(255) :: MESSAGE
 
 IF (USE_MPI) THEN
    CALL MPI_REDUCE(PROCESS_STOP_STATUS,STOP_STATUS,1,MPI_INTEGER,MPI_MAX,0,MPI_COMM_WORLD,IERR)
