@@ -9721,21 +9721,38 @@ QUANTITY_INDEX_LOOP: DO ND=-N_OUTPUT_QUANTITIES,N_OUTPUT_QUANTITIES
       ENDIF
 
      IF (OUTPUT_QUANTITY(ND)%SPEC_ID_REQUIRED .AND. (Y_INDEX<1 .AND. Z_INDEX<0)) THEN
-        WRITE(MESSAGE,'(3A)')  'ERROR: Output QUANTITY ',TRIM(QUANTITY),' requires a SPEC_ID'
+        IF (SPEC_ID=='null') THEN
+           WRITE(MESSAGE,'(3A)')  'ERROR: Output QUANTITY ',TRIM(QUANTITY),' requires a SPEC_ID'
+        ELSE
+           WRITE(MESSAGE,'(5A)')  'ERROR: Output QUANTITY ',TRIM(QUANTITY),'. SPEC_ID ',TRIM(SPEC_ID),' not found.'
+        ENDIF
         CALL SHUTDOWN(MESSAGE)
      ENDIF
 
      IF (OUTPUT_QUANTITY(ND)%PART_ID_REQUIRED .AND. PART_INDEX<1) THEN
-        WRITE(MESSAGE,'(3A)')  'ERROR: Output QUANTITY ',TRIM(QUANTITY),' requires a PART_ID'
+        IF (PART_ID=='null') THEN
+           WRITE(MESSAGE,'(3A)')  'ERROR: Output QUANTITY ',TRIM(QUANTITY),' requires a PART_ID'
+        ELSE
+           WRITE(MESSAGE,'(5A)')  'ERROR: Output QUANTITY ',TRIM(QUANTITY),'. PART_ID ',TRIM(PART_ID),' not found.'
+        ENDIF
         CALL SHUTDOWN(MESSAGE)
      ENDIF
+     
      IF (OUTPUT_QUANTITY(ND)%DUCT_ID_REQUIRED .AND. DUCT_INDEX<1) THEN
-        WRITE(MESSAGE,'(3A)')  'ERROR: Output QUANTITY ',TRIM(QUANTITY),' requires a DUCT_ID'
+        IF (DUCT_ID=='null') THEN
+           WRITE(MESSAGE,'(3A)')  'ERROR: Output QUANTITY ',TRIM(QUANTITY),' requires a DUCT_ID'
+        ELSE
+           WRITE(MESSAGE,'(5A)')  'ERROR: Output QUANTITY ',TRIM(QUANTITY),'. DUCT_ID ',TRIM(DUCT_ID),' not found.'
+        ENDIF
         CALL SHUTDOWN(MESSAGE)
      ENDIF
 
      IF (OUTPUT_QUANTITY(ND)%NODE_ID_REQUIRED .AND. NODE_INDEX<1) THEN
-        WRITE(MESSAGE,'(3A)')  'ERROR: Output QUANTITY ',TRIM(QUANTITY),' requires a NODE_ID'
+        IF (NODE_ID=='null') THEN
+           WRITE(MESSAGE,'(3A)')  'ERROR: Output QUANTITY ',TRIM(QUANTITY),' requires a NODE_ID'
+        ELSE
+           WRITE(MESSAGE,'(5A)')  'ERROR: Output QUANTITY ',TRIM(QUANTITY),'. NODE_ID ',TRIM(NODE_ID),' not found.'
+        ENDIF
         CALL SHUTDOWN(MESSAGE)
      ENDIF
 
