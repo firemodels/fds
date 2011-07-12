@@ -553,11 +553,11 @@ Numerical Simulation (DNS) if the underlying numerical mesh is fine
 enough. LES is the default mode of operation.
 
 \item[Combustion Model]
-For most applications, FDS uses a single step, mixing-controlled chemical reaction which uses three lumped species (a species representing a group of species).  
+For most applications, FDS uses a single step, mixing-controlled chemical reaction which uses three lumped species (a species representing a group of species).
 These lumped species are air, fuel, and products. By default the last two lumped species are explicitly
-computed. A two-step chemical reaction with an additional lumped species can also be used with the first step being oxidation of fuel to 
+computed. A two-step chemical reaction with an additional lumped species can also be used with the first step being oxidation of fuel to
 carbon monoxide and the second step the oxidation of carbon monoxide to carbon dioxide.
-The four lumped species for the two step reaction are air, fuel plus an optional diluent, and products of incomplete combustion 
+The four lumped species for the two step reaction are air, fuel plus an optional diluent, and products of incomplete combustion
 ({\em i.e.} products of the first step), and products of complete combustion (i.e. products of the second step).  The mass fractions of all of the major
 reactants and products can be derived from the lumped species by means of
 ``state relations.''  Lastly, a multiple-step finite rate model is also available.
@@ -900,8 +900,8 @@ systems of the various machines.
 
 \subsubsection{Open MPI}
 
-Both at VTT and NIST, we use Open MPI, an open source MPI-2 implementation that is developed and maintained by a consortium of academic, 
-research, and industry partners. 
+Both at VTT and NIST, we use Open MPI, an open source MPI-2 implementation that is developed and maintained by a consortium of academic,
+research, and industry partners.
 With Open~MPI, FDS is run using the command
 \begin{verbatim}
 mpirun -np 5 fds_mpi_linux_64 job_name.fds
@@ -983,7 +983,7 @@ FDS comes with a version number like 5.2.6, where the first number is the {\em m
 third is the {\em maintenance} release. Major releases occur every few years, and as the name implies significantly change the functionality of the model.
 Minor releases occur every few months, and may cause minor changes in functionality. Release notes can help you decide whether the changes should effect the
 type of applications that you typically do. Maintenance releases are just bug fixes, and should not affect code functionality. To get the version number, just
-type the executable at the command prompt without an input file, and the relevant information will appear, 
+type the executable at the command prompt without an input file, and the relevant information will appear,
 along with a date of compilation (useful to you) and a so-called SVN number (useful to us).  The SVN number refers to
 the Subversion repository number of the source code. It allows us to go back in time and recover the exact source code files
 that were used to build that executable.
@@ -1045,7 +1045,7 @@ If you want to run bigger cases, consider buying a computer with a 64~bit operat
 calculation into multiple meshes and use parallel processing. If you are using a Linix/Unix machine, make sure that
 the stacksize is unlimited, which will allow FDS to access as much of the RAM as possible. Changing the stacksize
 limit differs with each shell type, so it is best to do an on-line search to find out how to ensure that your
-stacksize is unlimited. 
+stacksize is unlimited.
 
 \item[{\bf Run-Time Errors}:]
 An error occurs either within the computer operating system or the
@@ -2241,19 +2241,19 @@ in a velocity of 10.09~m/s through the vent.  FDS computes a peak velocity of 10
 In default mode, FDS uses the dynamic form of the Smagorinsky Large Eddy Simulation (LES) to model subgrid-scale turbulence. The turbulent viscosity modeled as
 \be \mu_{\hbox{\tiny LES}} = \rho \, (C_s\, \Delta)^2 \,
    \left(2 \; \overline{\bS}_{ij} : \overline{\bS}_{ij} - \frac{2}{3} (\nabla \cdot \overline{\bu})^2 \right)^\ha \ee
-where $C_s$ is a function of the local flow conditions and $\Delta$ is a length scale on the order of the size of a grid cell. 
-The bar above the various quantities denotes that these are the resolved, or {\em filtered}, values, meaning that they are computed on a numerical grid. 
+where $C_s$ is a function of the local flow conditions and $\Delta$ is a length scale on the order of the size of a grid cell.
+The bar above the various quantities denotes that these are the resolved, or {\em filtered}, values, meaning that they are computed on a numerical grid.
 The other diffusive parameters, the thermal conductivity and material diffusivity, are related to the turbulent viscosity by
 \be k_{\hbox{\tiny LES}} = \frac{\mu_{\hbox{\tiny LES}} \, c_p}{\PR_t}
 \quad ; \quad
  (\rho D)_{\hbox{\tiny LES}} =\frac{\mu_{\hbox{\tiny LES}}}{\SC_t} \ee
-The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ are assumed to be constant for a given scenario. 
-Although it is not recommended for most calculations, you can modify $\PR_t=0.5$, and $\SC_t=0.5$ via the parameters {\ct PR}, and {\ct SC} on the {\ct MISC} line. 
+The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ are assumed to be constant for a given scenario.
+Although it is not recommended for most calculations, you can modify $\PR_t=0.5$, and $\SC_t=0.5$ via the parameters {\ct PR}, and {\ct SC} on the {\ct MISC} line.
 A more detailed discussion of these parameters is given in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 
-The dynamic form of LES is more costly than the constant coefficient form. 
-To save on CPU time, you can try setting {\ct COMPUTE\_VISCOSITY\_TWICE} equal to {\ct .FALSE.} to force FDS to compute the viscosity only once per time step. 
-You can also reduce the number of times that the dynamic coefficient, $C_s$, is computed by setting {\ct DSMAG\_FREQ} equal to an integer greater than or equal to 1. 
+The dynamic form of LES is more costly than the constant coefficient form.
+To save on CPU time, you can try setting {\ct COMPUTE\_VISCOSITY\_TWICE} equal to {\ct .FALSE.} to force FDS to compute the viscosity only once per time step.
+You can also reduce the number of times that the dynamic coefficient, $C_s$, is computed by setting {\ct DSMAG\_FREQ} equal to an integer greater than or equal to 1.
 A value of 3, for example, means that $C_s$ should be computed every third time that the viscosity is computed.
 
 \begin{warning}
@@ -2266,7 +2266,7 @@ the empirical constant $C_s$ via {\ct CSMAG}. Its default value is 0.2.
 \subsection{Special Topic: Numerical Stability Parameters}
 \label{info:CFL}
 
-In FDS (which uses a explicit time advancement schemes), stability criteria may be understood in terms of using the time step to maintain physically realizable conditions.  
+In FDS (which uses a explicit time advancement schemes), stability criteria may be understood in terms of using the time step to maintain physically realizable conditions.
 Below we examine the necessary conditions for stability in the presence of advection, diffusion, and expansion of the velocity and scalar fields.
 
 \subsubsection{The Courant-Friedrichs-Lewy (CFL) Constraint}
@@ -2275,15 +2275,15 @@ The well-known CFL constraint given by
 \begin{equation}
 \mbox{CFL} = \delta t \frac{\|\mathbf{u}\|}{\delta x} \approx 1
 \end{equation}
-places a restriction on the time step due to the advection velocity.  The limits for the CFL are set by {\ct CFL\_MIN} and {\ct CFL\_MAX} on {\ct MISC}. 
-Physically, the constraint says that a fluid element should not traverse more than one cell within a time step. 
-For LES, this constraint has the added advantage of keeping the implicit temporal and spatial filters consistent with each other.  
-In other words, in order to resolve an eddy of size $\delta x$, the time step needs to be in concert with the CFL.  
-If one were to employ an implicit scheme for purpose of taking time steps say 10 times larger than the CFL limit, the smallest resolvable turbulent motions 
-would then be roughly 10 times the grid spacing, which would severely limit the benefit of the LES.  In most cases, if one wishes the simulation to run faster, 
+places a restriction on the time step due to the advection velocity.  The limits for the CFL are set by {\ct CFL\_MIN} and {\ct CFL\_MAX} on {\ct MISC}.
+Physically, the constraint says that a fluid element should not traverse more than one cell within a time step.
+For LES, this constraint has the added advantage of keeping the implicit temporal and spatial filters consistent with each other.
+In other words, in order to resolve an eddy of size $\delta x$, the time step needs to be in concert with the CFL.
+If one were to employ an implicit scheme for purpose of taking time steps say 10 times larger than the CFL limit, the smallest resolvable turbulent motions
+would then be roughly 10 times the grid spacing, which would severely limit the benefit of the LES.  In most cases, if one wishes the simulation to run faster,
 a better strategy is to coarsen the grid resolution while keeping the CFL $\approx 1$.
 
-The exact CFL needed to maintain stability depends on the order (as well as other properties) of the time integration scheme and the choice of velocity norm. 
+The exact CFL needed to maintain stability depends on the order (as well as other properties) of the time integration scheme and the choice of velocity norm.
 Three choices for velocity norm are available in FDS (set on {\ct MISC}):
 \vskip\baselineskip
 \noindent
@@ -2324,33 +2324,33 @@ In an explicit Euler update of the continuity equation, if the time increment is
 We can argue that the case we are most concerned with is when $\rho^n$ is near zero.  A reasonable approximation to (\ref{eqn_dtmassrestrict}) then becomes (time location suppressed)
 \be
 \label{eqn_divstability}
-\delta t < \frac{\rho}{\overline{u}_i \left(\frac{\rho-0}{\delta x_i}\right) + \rho \nabla\cdot\mathbf{u}} 
+\delta t < \frac{\rho}{\overline{u}_i \left(\frac{\rho-0}{\delta x_i}\right) + \rho \nabla\cdot\mathbf{u}}
   = \left[ \frac{\overline{u}_i}{\delta x_i} + \nabla\cdot\mathbf{u} \right]^{-1}
 \ee
-Eq.~(\ref{eqn_divstability}) basically adds the effect of thermal expansion to the CFL constraint and provides a reason to prefer {\ct CFL\_VELOCITY\_NORM=1} 
+Eq.~(\ref{eqn_divstability}) basically adds the effect of thermal expansion to the CFL constraint and provides a reason to prefer {\ct CFL\_VELOCITY\_NORM=1}
 as the basis for the time step restriction.
 
 \subsubsection{Heat Transfer Constraint}
 
-Note that the heat transfer coefficient, $h$, has units of W/(m$^2$\,K).  Thus, a velocity scale may be formed from $h/(\rho\, c_p)$.  
-Anytime we have a velocity scale to resolve we have a CFL-type stability restriction.  
-Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t \le \delta x \,\rho \,c_p/h$.  
+Note that the heat transfer coefficient, $h$, has units of W/(m$^2$\,K).  Thus, a velocity scale may be formed from $h/(\rho\, c_p)$.
+Anytime we have a velocity scale to resolve we have a CFL-type stability restriction.
+Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t \le \delta x \,\rho \,c_p/h$.
 This check may be skipped by setting {\ct CHECK\_HT=.FALSE.} on {\ct MISC}.
 
 \subsubsection{Gravitational Constraint}
 
 A time scale restriction based on gravitational acceleration can be formed from $\delta t \le \sqrt{\delta z/g}$, where $\dz$ is the grid size in the
-direction of gravity.  
+direction of gravity.
 This check may be omitted by setting  {\ct CHECK\_GR=.FALSE.} on {\ct MISC}.
 
-\subsection{Adjusting the Time Step} 
+\subsection{Adjusting the Time Step}
 
-In the call to {\ct CHECK\_STABILITY} both the CFL and VN numbers are compared with {\ct CFL\_MAX [1.0]}, {\ct CFL\_MIN [0.8]}, {\ct VN\_MAX [0.5]}, 
+In the call to {\ct CHECK\_STABILITY} both the CFL and VN numbers are compared with {\ct CFL\_MAX [1.0]}, {\ct CFL\_MIN [0.8]}, {\ct VN\_MAX [0.5]},
 and {\ct VN\_MIN [0.4]}, respectively (default values shown in brackets).  To be clear, the CFL constraint is now given by
 \begin{equation}
 \mbox{CFL} = \delta t \left( \frac{\|\mathbf{u}\|}{\delta x} + |\nabla\cdot\mathbf{u}| \right)
 \end{equation}
-If either the current CFL (augmented for both heat transfer and gravity) or VN is too large then the new time step is set to 90\% of the allowable value.  
+If either the current CFL (augmented for both heat transfer and gravity) or VN is too large then the new time step is set to 90\% of the allowable value.
 If both CFL and VN are below their minimum values then the current time step is increased by 10\%.
 
 \begin{warning}
@@ -2484,7 +2484,7 @@ unusual case, take a look at the calculation results to determine if a change in
 
 A considerable amount of work in setting up a calculation lies in specifying the
 geometry of the space to be modeled and applying boundary conditions
-to these objects. The geometry is described in terms
+to the solid surfaces. The geometry is described in terms
 of rectangular obstructions that can heat up, burn, conduct heat, {\em etc.};
 and vents from which air or fuel can be
 either injected into, or drawn from, the flow domain.
@@ -2513,7 +2513,7 @@ allow references to it by an obstruction or vent. Thus, on each
 {\ct OBST} and {\ct VENT} line that are to be described below, the character string {\ct SURF\_ID='...'}
 indicates the {\ct ID} of the {\ct SURF} line containing the desired boundary
 condition parameters. If a particular {\ct SURF} line is to be applied
-as the default boundary condition, {\ct CONCRETE} for example,
+as the default boundary condition,
 set {\ct DEFAULT=.TRUE.} on the {\ct SURF} line.
 
 
@@ -2548,8 +2548,8 @@ For example:
 
 \footnotesize
 \begin{verbatim}
-&SURF ID='FIRE',HRRPUA=1000.0 /
-&OBST XB=2.3,4.5,1.3,4.8,0.0,9.2,SURF_IDS='FIRE','INERT','INERT' /
+&SURF ID='FIRE', HRRPUA=1000.0 /
+&OBST XB=2.3,4.5,1.3,4.8,0.0,9.2, SURF_IDS='FIRE','INERT','INERT' /
 \end{verbatim}
 \normalsize
 
@@ -2589,7 +2589,7 @@ be at least one mesh cell thick. Thin sheet obstructions
 work fine as flow barriers, but other features are fragile and should be used with
 caution. To prevent FDS from allowing thin sheet obstructions, set {\ct THICKEN\_OBSTRUCTIONS=.TRUE.} on the
 {\ct MISC} line, or {\ct THICKEN=.TRUE.} on each {\ct OBST} line for which the thin sheet assumption is not allowed.
-\item Unlike earlier versions of FDS, obstructions that are
+\item Obstructions that are
 too small relative to the underlying numerical mesh are rejected.
 Be careful when testing cases on coarse meshes.
 \item Obstructions may be created or removed during a simulation. See
@@ -2738,7 +2738,7 @@ the air velocity on the bottom set of obstructions is not affected as much by th
 
 \begin{figure}[ht]
 \begin{center}
-\includegraphics[width=3in]{SCRIPT_FIGURES/sawtooth}
+\includegraphics[width=5in]{SCRIPT_FIGURES/sawtooth}
 \end{center}
 \caption[Simple example of {\ct SAWTOOTH=.FALSE.}]{Simple example of {\ct SAWTOOTH=.FALSE.}}
 \label{sawtooth}
@@ -2872,9 +2872,8 @@ conditions than those assumed for the obstruction. Note that the surface propert
 underlying obstruction.
 
 \begin{warning}
-Unlike previous versions of FDS, you can no longer specify a free-standing fan using the {\ct VENT}
-construct. A {\ct VENT} must always be attached to a solid obstruction. See
-Section~\ref{info:Velocity_BC} for instructions on specifying different types of fans.
+A {\ct VENT} must always be attached to a solid obstruction. See
+Section~\ref{info:Velocity_BC} for instructions on specifying different types of fans that allow gases to flow through.
 \end{warning}
 
 \noindent
@@ -2906,7 +2905,7 @@ Section~\ref{info:colors} and Table \ref{tab:colors}. Also, the parameter {\ct O
 There are two reserved {\ct SURF\_ID}'s that may be applied to a {\ct VENT} -- {\ct 'OPEN'} and {\ct 'MIRROR'}. The term {\em reserved} means that these two
 {\ct SURF\_ID}s should not be explicitly defined by you. Their properties are predefined.
 
-\subsubsection{\texorpdfstring{{\tt OPEN}}{OPEN} \texorpdfstring{{\tt VENT}}{VENT}}
+\subsubsection{Open Vents}
 
 The first special {\ct VENT} is invoked by the parameter {\ct SURF\_ID='OPEN'}. This is used only if the {\ct VENT} is applied to the exterior boundary of the computational domain, where it denotes a passive opening to the outside. By default, FDS assumes that the exterior boundary of the computational domain (the {\ct XB}s on the {\ct MESH} line) is a solid wall. To change this, use an {\ct OPEN} vent as if it were an open door or window. To create a totally or partially open domain, use {\ct OPEN} vents on the exterior mesh boundaries ({\ct MB}s).
 
@@ -2915,12 +2914,12 @@ By default, it is assumed that ambient conditions exist beyond the {\ct 'OPEN'} 
 The user should also be aware that the {\ct OPEN} pressure boundary condition is most stable for flows that are predominantly normal  to the vent, either mostly in or mostly out.  This is because the prescribed pressure at an {\ct OPEN} boundary is ill-conditioned (a small perturbation to the input may lead to large change in the output) if the flow is parallel to the vent.  Suppose, for example, that an outdoor flow is 10 m/s in the $x$ direction and $\pm 0.001$ m/s in the $z$ direction with an {\ct OPEN} top boundary.  The kinetic energy of this flow is roughly $k=50$ m$^2$/s$^2$.  When the vertical velocity is positive (+0.001 m/s) then the prescibed boundary condition for the stagnation pressure is set to ${\cal H} = k = 50$ m$^2$/s$^2$.  But when the vertical velocity is negative (-0.001 m/s) then ${\cal H} = 0$ (see \cite{FDS_Tech_Guide}).  For this reason, {\ct OPEN} vents are not recommended for the top or side boundaries in an outdoor flow.  See Section \ref{info:mean_forcing} for a better alternative.
 
 \begin{warning}
-Starting with FDS 5.3.0, vents to the outside of the computational domain ({\ct OPEN} vents)
+Vents to the outside of the computational domain ({\ct OPEN} vents)
 {\em  can} be opened or closed during a simulation. It is best done by creating or removing a thin obstruction that covers the {\ct OPEN VENT}.
 See Section~\ref{info:activate_deactivate} for details.
 \end{warning}
 
-\subsubsection{\texorpdfstring{{\tt MIRROR}}{MIRROR} \texorpdfstring{{\tt VENT}}{VENT}}
+\subsubsection{Mirror Vents}
 
 A {\ct VENT} with {\ct SURF\_ID='MIRROR'} denotes a symmetry plane. Usually, a {\ct MIRROR} spans an entire face of the computational
 domain, essentially doubling the size of the domain with the {\ct MIRROR} acting as a plane of symmetry. The flow on the opposite side of the
@@ -2935,45 +2934,7 @@ Note that the mirror image of a scene is {\bf not} shown in Smokeview.
 \noindent
 A word of warning about {\ct MIRROR} boundaries in FDS. In conventional RANS (Reynolds-Averaged Navier-Stokes) models, symmetry boundaries are often used as a way of saving on computation time. However, because FDS is an LES (Large Eddy Simulation) model, the use of symmetry boundaries should be considered carefully. The reason for this is that an LES model does not compute a time-averaged solution of the N-S equations. In other words, for a RANS model, a fire plume is represented as an axially-symmetric flow field because that is what you would expect if you time-averaged the actual flow field over a sufficient amount of time. Thus, for a RANS model, a symmetry boundary along the plume centerline is appropriate. In an LES model, however, there is no time-averaging built into the equations, and there is no time-averaged, symmetric solution. Putting a {\ct MIRROR} boundary along the centerline of a fire plume will change its dynamics entirely. It will produce something very much like the flow field of a fire that is adjacent to a vertical wall. For this reason, a {\ct MIRROR} boundary condition is not recommended along the centerline of a turbulent fire plume. If the fire or burner is very small, and the flow is laminar, then the {\ct MIRROR} boundary condition makes sense. In fact, in 2-D calculations, {\ct MIRROR} boundary conditions are employed in the third coordinate direction (this is done automatically, you need not specify it explicitly).
 
-\subsection{Synthetic Turbulence Inflow Boundary Conditions (Experimental)}
-\label{info:synthetic_turbulence}
 
-Real flows of low-viscosity fluids like air are rarely perfectly stationary in time or uniform in space---they are turbulent (to some degree).  Of course, the turbulence characteristics of the flow may have a significant impact on mixing and other behaviors so the specification of nominally constant and uniform boundary conditions may be insufficient.  To address this issue, FDS employs a synthetic eddy method (SEM).  Refer to Jarrin \cite{Jarrin:2008} for a detailed description.  In brief, ``eddies'' are injected into the flow at random positions on the boundary and advect with the mean flow over a short distance near the boundary equivalent to the maximum eddy length scale.  Once the eddy passes through this region it is recycled at the inlet of the boundary with a new random position and length scale.  The eddies are idealized as velocity perturbations over a spherical region in space with a diameter (eddy length scale) selected from a uniform random distribution.  The selection procedures guarantee that prescribed first and second-order statistics (including Reynolds stresses) are satisfied.
-
-Synthetic turbulence is invoked by setting the number of eddies, {\ct N\_EDDY}, the characteristic eddy length scale, {\ct L\_EDDY}, and either the root mean square (RMS) velocity fluctuation, {\ct VEL\_RMS}, or the Reynolds stress tensor components, {\ct REYNOLDS\_STRESS(3,3)} on the {\ct VENT} line.  Note that the Reynolds stress is symmetric and only the lower triangular part needs to be specified.  The RMS velocity fluctuation is isotropic (equivalent for each component).  Thus, {\ct VEL\_RMS} $\equiv \sqrt{2k/3}$, where $k\equiv \langle\frac{1}{2}u_i^\prime u_i^\prime\rangle$ is the turbulent kinetic energy per unit mass. If the fluctuations are not isotropic, then the Reynolds stresses must be specified componentwise.
-
-\vskip\baselineskip
-\noindent Example:
-
-\footnotesize
-\begin{verbatim}
-&SURF ID='inlet', VEL=-10. /
-&VENT MB='XMIN', SURF_ID='inlet', N_EDDY=100, L_EDDY=0.5, VEL_RMS=1. /
-\end{verbatim} \normalsize
-
-\noindent Note that if {\ct VEL\_RMS} is specified, this is equivelant to
-
-\footnotesize
-\begin{verbatim}
-REYNOLDS_STRESS(1,1) = VEL_RMS**2
-REYNOLDS_STRESS(2,2) = VEL_RMS**2
-REYNOLDS_STRESS(3,3) = VEL_RMS**2
-\end{verbatim} \normalsize
-
-\noindent and all other components of {\ct REYNOLDS\_STRESS} are zero.
-
-In Chapter 7 of Jarrin's thesis \cite{Jarrin:2008}, he introduces the Modified Synthetic Eddy Method in which the eddy length scales are anisotropic.  This allows more realistic charaterization of streamwise vorticies in a turbulent boundary layer.  To specify the length scales corrosponding to the $\sigma_{ij}$ values in Jarrin's Eq.~(7.1) use {\ct L\_EDDY\_IJ(3,3)}.  For example,
-
-\footnotesize
-\begin{verbatim}
-&VENT XB=... , SURF_ID='WIND', N_EDDY=500,
-      L_EDDY_IJ(1,1)=21.,  L_EDDY_IJ(1,2)=6.22, L_EDDY_IJ(1,3)=4.23
-      L_EDDY_IJ(2,1)=2.35, L_EDDY_IJ(2,2)=5.66, L_EDDY_IJ(2,3)=2.50
-      L_EDDY_IJ(3,1)=5.42, L_EDDY_IJ(3,2)=0.78, L_EDDY_IJ(3,3)=1.01
-      REYNOLDS_STRESS(1,1)=2.16,  REYNOLDS_STRESS(1,2)=0.,   REYNOLDS_STRESS(1,3)=-0.47
-      REYNOLDS_STRESS(2,1)=0.,    REYNOLDS_STRESS(2,2)=1.53, REYNOLDS_STRESS(2,3)=0.
-      REYNOLDS_STRESS(3,1)=-0.47, REYNOLDS_STRESS(3,2)=0.,   REYNOLDS_STRESS(3,3)=4.259 /
-\end{verbatim} \normalsize
 
 \subsection{\texorpdfstring{{Controlling {\tt VENT}s}}{Controlling VENTs}}
 
@@ -3012,7 +2973,53 @@ the problem, but it is more likely that if there is an error message about orien
 the {\ct VENT} is buried within a solid obstruction, in which case the program cannot determine
 the direction in which the {\ct VENT} is facing.
 
+\subsection{Special Topic: Synthetic Turbulence Inflow Boundary Conditions}
+\label{info:synthetic_turbulence}
 
+Real flows of low-viscosity fluids like air are rarely perfectly stationary in time or uniform in space---they are turbulent (to some degree).
+Of course, the turbulence characteristics of the flow may have a significant impact on mixing and other behaviors so the specification of nominally constant
+and uniform boundary conditions may be insufficient.  To address this issue, FDS employs a synthetic eddy method (SEM).  Refer to Jarrin \cite{Jarrin:2008} for a detailed description.
+In brief, ``eddies'' are injected into the flow at random positions on the boundary and advect with the mean flow over a short distance near the boundary
+equivalent to the maximum eddy length scale.  Once the eddy passes through this region it is recycled at the inlet of the boundary with a new random position and length scale.
+The eddies are idealized as velocity perturbations over a spherical region in space with a diameter (eddy length scale) selected from a uniform random distribution.
+The selection procedures guarantee that prescribed first and second-order statistics (including Reynolds stresses) are satisfied.
+
+Synthetic turbulence is invoked by setting the number of eddies, {\ct N\_EDDY}, the characteristic eddy length scale, {\ct L\_EDDY}, and either the root mean square (RMS)
+velocity fluctuation, {\ct VEL\_RMS}, or the Reynolds stress tensor components, {\ct REYNOLDS\_STRESS(3,3)} on the {\ct VENT} line.
+Note that the Reynolds stress is symmetric and only the lower triangular part needs to be specified.  The RMS velocity fluctuation is isotropic (equivalent for each component).
+Thus, {\ct VEL\_RMS} $\equiv \sqrt{2k/3}$, where $k\equiv \langle\frac{1}{2}u_i^\prime u_i^\prime\rangle$ is the turbulent kinetic energy per unit mass.
+If the fluctuations are not isotropic, then the Reynolds stresses must be specified componentwise.
+For example,
+
+\footnotesize
+\begin{verbatim}
+&SURF ID='inlet', VEL=-10. /
+&VENT MB='XMIN', SURF_ID='inlet', N_EDDY=100, L_EDDY=0.5, VEL_RMS=1. /
+\end{verbatim} \normalsize
+
+\noindent Note that if {\ct VEL\_RMS} is specified, this is equivelant to
+
+\footnotesize
+\begin{verbatim}
+REYNOLDS_STRESS(1,1) = VEL_RMS**2
+REYNOLDS_STRESS(2,2) = VEL_RMS**2
+REYNOLDS_STRESS(3,3) = VEL_RMS**2
+\end{verbatim} \normalsize
+
+\noindent and all other components of {\ct REYNOLDS\_STRESS} are zero.
+
+In Chapter 7 of Jarrin's thesis \cite{Jarrin:2008}, he introduces the Modified Synthetic Eddy Method in which the eddy length scales are anisotropic.  This allows more realistic charaterization of streamwise vorticies in a turbulent boundary layer.  To specify the length scales corrosponding to the $\sigma_{ij}$ values in Jarrin's Eq.~(7.1) use {\ct L\_EDDY\_IJ(3,3)}.  For example,
+
+\footnotesize
+\begin{verbatim}
+&VENT XB=... , SURF_ID='WIND', N_EDDY=500,
+      L_EDDY_IJ(1,1)=21.,  L_EDDY_IJ(1,2)=6.22, L_EDDY_IJ(1,3)=4.23
+      L_EDDY_IJ(2,1)=2.35, L_EDDY_IJ(2,2)=5.66, L_EDDY_IJ(2,3)=2.50
+      L_EDDY_IJ(3,1)=5.42, L_EDDY_IJ(3,2)=0.78, L_EDDY_IJ(3,3)=1.01
+      REYNOLDS_STRESS(1,1)=2.16,  REYNOLDS_STRESS(1,2)=0.,   REYNOLDS_STRESS(1,3)=-0.47
+      REYNOLDS_STRESS(2,1)=0.,    REYNOLDS_STRESS(2,2)=1.53, REYNOLDS_STRESS(2,3)=0.
+      REYNOLDS_STRESS(3,1)=-0.47, REYNOLDS_STRESS(3,2)=0.,   REYNOLDS_STRESS(3,3)=4.259 /
+\end{verbatim} \normalsize
 
 \clearpage
 
@@ -3023,8 +3030,8 @@ Colors for many items within FDS can be prescribed in two ways; a triplet of
 integers after keyword {\ct RGB} or one of many {\ct COLOR} name character strings.
 
 The three {\ct RGB} integer numbers range from 0 to 255, indicating the amount of Red, Green and Blue
-that make up the color. If you define the {\ct COLOR} by name, it is important that you type the name EXACTLY as it
-is listed in the color tables here in this document and on the FDS website.
+that make up the color. If you define the {\ct COLOR} by name, it is important that you type the name {\bf exactly} as it
+is listed in the color tables.
 
 Table~\ref{tab:colors} provides a small sampling of {\ct RGB} values and {\ct COLOR} names
 for a variety of colors. A complete listing of all 500+ colors that can be
@@ -3058,9 +3065,7 @@ the respective {\ct OBST} or {\ct VENT} line. Using {\ct 'INVISIBLE'}
 causes the vent or obstruction to not be drawn.
 
 Colors may also be specified using the integer triplet {\ct RGB} on an {\ct OBST} or {\ct VENT} line to gain
-a wider color palette. The use of {\ct RGB} is preferable, especially
-to create colors that do not clash with the pastel colors used to
-show temperatures, concentrations, {\em etc.} See Table \ref{tab:colors}
+a wider color palette. See Table~\ref{tab:colors}
 for a list of color names and RGB values.
 
 
@@ -3127,13 +3132,13 @@ paneling the text
 
 \footnotesize
 \begin{verbatim}
-&SURF ID='wood paneling',...,TEXTURE_MAP='paneling.jpg',TEXTURE_WIDTH=1.,
+&SURF ID='wood paneling',..., TEXTURE_MAP='paneling.jpg', TEXTURE_WIDTH=1.,
       TEXTURE_HEIGHT=2. /
 \end{verbatim}
 \normalsize
 Assuming that a JPEG file called {\bf paneling.jpg} exists in the
 working directory, Smokeview should read it and display the image
-wherever the paneling is used (SGI Users: use rgb files instead of jpg).
+wherever the paneling is used.
 Note that the image does not appear when Smokeview is first invoked. It is an option controlled by
 the {\ct Show/Hide} menu. The parameters {\ct TEXTURE\_WIDTH}
 and {\ct TEXTURE\_HEIGHT} are the physical dimensions of the image. In this case,
@@ -3149,8 +3154,7 @@ should be applied. For example,
 
 \footnotesize
 \begin{verbatim}
-&OBST XB=1.0,2.0,3.0,4.0,5.0,7.0,SURF_ID='wood paneling',
-      TEXTURE_ORIGIN=1.0,3.0,5.0 /
+&OBST XB=1.0,2.0,3.0,4.0,5.0,7.0, SURF_ID='wood paneling', TEXTURE_ORIGIN=1.0,3.0,5.0 /
 \end{verbatim}
 \normalsize
 applies paneling to an obstruction whose dimensions are 1 m by
@@ -3186,7 +3190,7 @@ to be a solid boundary that is maintained at ambient temperature. The
 same is true for any obstructions that are added to the scene. To
 specify the properties of solids, use the namelist group {\ct SURF}
 (Section~\ref{info:SURF}). Solids are assumed to
-consist of layers which can be made of different materials.  The
+consist of layers that can be made of different materials.  The
 properties of each material required are designated via the {\ct MATL}
 namelist group (Section~\ref{info:MATL}).  These properties indicate how
 rapidly the materials heat up, and how they burn.  Each {\ct MATL}
@@ -3292,7 +3296,7 @@ calculations. You can change the empirical coefficients using {\ct C\_HORIZONTAL
 
 \subsubsection{Changing the Convective Heat Transfer Coefficient}
 
-If you want to change the default convective heat transfer coefficient, you can set to a constant using
+If you want to change the default convective heat transfer coefficient, you can set it to a constant using
 {\ct H\_FIXED} on the {\ct SURF} line in units of W/m$^2$/K. Another option is to use a turbulent
 convective heat transfer model suggested by Moinuddin and Li of Victoria University, Australia, by setting
 {\ct H\_EDDY=.TRUE.} on the {\ct MISC} line \cite{Moinuddin:2010}.
@@ -3382,12 +3386,12 @@ When a {\ct SURF} is applied to the face of an {\ct OBST}, the first {\ct MATL\_
 other {\ct MATL\_ID}s being applied in succession with the final {\ct MATL\_ID} being applied on the opposite face of the {\ct OBST}.
 If in the example above, {\ct BRICK WALL} was applied to the entire {\ct OBST} using {\ct SURF\_ID}, then when doing a heat transfer calculation
 from the +x face to the -x face, FDS would consider the {\ct OBST} to be {\ct BRICK} followed by {\ct INSULATOR} and the same for a heat transfer
-calculation from the -x face to the +x face.  To avoid this the user would need to specify a second {\ct SURF} that has the reverse {\ct MATL\_ID}
+calculation from the -x face to the +x face.  To avoid this, specify a second {\ct SURF} that has the reverse {\ct MATL\_ID}
 and use {\ct SURF\_ID6} to apply the two {\ct SURF} definitions to opposite faces of the {\ct OBST}.
 \end{warning}
 
 
-Mixtures of solid materials within the same layer can be defined using
+\noindent Mixtures of solid materials within the same layer can be defined using
 the {\ct MATL\_MASS\_FRACTION} keyword. This parameter has the same
 two indices as the {\ct MATL\_ID} keyword. For example, if the
 brick layer contains some additional water, the input could look like this:
@@ -3467,11 +3471,9 @@ Notice that with temperature-dependent quantities, the {\ct RAMP} parameter
 the specific heat or conductivity. In this case, neither {\ct CONDUCTIVITY} nor {\ct SPECIFIC\_HEAT} is given on the
 {\ct MATL} line, but rather the {\ct RAMP} names.
 
-Prior to FDS5, the thermal radiation from the gas space was always
-absorbed at the surface of the solid material and the emission to the
-gas space took place on the surface. Starting in FDS5, the solid
+The solid
 material can be given an {\ct ABSORPTION\_COEFFICIENT} (1/m) that allows
-the radiation penetrate and absorb into the solid. Correspondingly,
+the radiation to penetrate and absorb into the solid. Correspondingly,
 the emission of the material is based on the internal temperatures,
 not just the surface.
 
@@ -3481,7 +3483,7 @@ not just the surface.
 \subsection{Back Side Boundary Conditions}
 \label{info:BACKING}
 
-The layers of a solid boundary are listed in the order from the surface to the interior. By default,
+The layers of a solid boundary are listed in order from the surface. By default,
 this innermost layer is assumed to back up to an air gap at ambient
 temperature. This is true even if the obstruction forms a wall in the model that backs up to another
 compartment. A good example of the default back side boundary condition is a sheet of gypsum board attached to wood studs.
@@ -3513,7 +3515,7 @@ emissivity will be calculated during the simulations as a mass-weighted sum of t
 
 By default, the initial temperature of the solid material is set to
 ambient ({\ct TMPA} on the {\ct MISC} line). Use {\ct TMP\_INNER} on the {\ct SURF} line to
-specify a different initial temperature. The layers of the surface can have different initial temperatures.
+specify a different initial temperature of the solid. The layers of the surface can have different initial temperatures.
 Also, the back side temperature boundary condition of a solid can be
 set using the parameter {\ct TMP\_BACK} on the {\ct SURF}
 line. {\ct TMP\_BACK} is not the actual back side surface temperature,
@@ -3620,7 +3622,7 @@ on the layer boundaries.
 The default parameters are usually appropriate for simple heat
 transfer calculations but sometimes the use of pyrolysis reactions
 makes the temperatures and burning rate fluctuate. The numerical
-stability of the solid phase solution may then be improved by making
+stability of the solid phase solution may be improved by making
 the mesh density more uniform inside the material and by making the
 mesh cells smaller. Adjustments may also be needed in case of
 extremely transient heat transfer situations. Use {\ct STRETCH\_FACTOR=1.}
@@ -3646,9 +3648,7 @@ See Section~\ref{solid_phase_verification} for ways to check and improve the acc
 \section{Pyrolysis Models}
 
 FDS has several approaches for describing the pyrolysis of solids and liquids. The approach to take depends largely
-on the availability of material properties and the appropriateness of the underlying pyrolysis model. This
-section provides a description of the parameters that describe a burning solid material when the burning rate is known. In other
-words, you use these parameters to {\em specify} the burning rate.
+on the availability of material properties and the appropriateness of the underlying pyrolysis model. 
 Note that all pyrolysis models in FDS require the user to explicitly define the gas phase reaction. See Chapter~\ref{chap:combustion} for details.
 
 \subsection{A Gas Burner with a Specified Heat Release Rate}
@@ -3666,14 +3666,14 @@ kW/m$^2$. For example
 
 \footnotesize
 \begin{verbatim}
-&SURF ID='FIRE',HRRPUA=500. /
+&SURF ID='FIRE', HRRPUA=500. /
 \end{verbatim}
 \normalsize
 
 \noindent
 applies 500~kW/m$^2$ to any surface with the attribute
 {\ct SURF\_ID='FIRE'}. See the discussion of {\bf Time Dependent Conditions}
-in Section~\ref{info:RAMP} to learn how to ramp the heat release rate up and down.
+in Chapter~\ref{info:RAMP} to learn how to ramp the heat release rate up and down.
 
 An alternative to {\ct HRRPUA} with the exact same functionality is
 {\ct MLRPUA}, except this parameter
@@ -3698,7 +3698,7 @@ to achieve this, you can alternatively use a {\ct VENT} or a {\ct SURF} line in 
 First, you need to add a {\ct SURF} line with
 a specified heat release rate, {\ct HRRPUA}, and an optional
 time history parameter, {\ct RAMP\_Q} or {\ct TAU\_Q}. Then, you can also specify {\ct XYZ} and {\ct SPREAD\_RATE} on either the {\ct VENT} or {\ct SURF} line.
-The fire is directed to start at the point {\ct XYZ} at the time designated by {\ct T\_BEGIN} and spread
+The fire is directed to start at the point {\ct XYZ} and spread
 radially at a rate of {\ct SPREAD\_RATE} (m/s). The optional ramp-up of the HRR begins at
 the time when the fire arrives at a given point.
 For example, the lines
@@ -3741,8 +3741,8 @@ expected.
 Real objects, like furnishings, office equipment, and so on, are
 often difficult to describe via the {\ct SURF} and {\ct MATL}
 parameters. Sometimes the only information about a given object is its
-bulk thermal properties, its ``ignition'' temperature, and what its
-subsequent burning rate is, as a function of time from ignition. For
+bulk thermal properties, its ``ignition'' temperature, and its
+subsequent burning rate as a function of time from ignition. For
 this situation, add lines similar to the following:
 
 \footnotesize
@@ -3772,11 +3772,11 @@ burn at a rate of 1000~kW/m$^2$ after a linear ramp-up of 10 s
 following its ``ignition'' when its surface temperature reaches
 500~$^\circ$C. Burning shall continue for 5~min, and then ramp-down
 in 10~s. Note that the time {\ct T} in the {\ct RAMP} means time from
-ignition. Note also that now the ''ignition temperature'' is a surface
+ignition, not the time from the beginning of the simulation. Note also that now the ``ignition temperature'' is a surface
 property, not material property.
 
 After the surface has ignited, the heat transfer into the solid is
-still being solved but there is no coupling between the burning rate
+still calculated, but there is no coupling between the burning rate
 and the surface temperature. As a result, the surface temperature may
 increase too much. To account for the energy loss due to the
 vaporization of the solid fuel, {\ct HEAT\_OF\_VAPORIZATION} can be
@@ -3822,10 +3822,10 @@ solid phase pyrolysis, for example ``Thermal Decomposition of Polymers,'' by Hir
 
 \subsubsection{The Reaction Mechanism}
 
-A solid surface in FDS can consist of multiple layers with multiple material
+A solid surface in FDS may consist of multiple layers with multiple material
 components per layer. The material components are described via {\ct MATL} lines and are specified on the {\ct SURF}
 line that describes the structure of the solid.  Each {\ct MATL} can undergo several reactions that may
-occur at different temperatures. It may not undergo any -- it may only just heat
+occur at different temperatures. It may not undergo any -- it may just heat
 up. However, if it is to change form via one or more reactions,
 designate the number of reactions with the integer {\ct N\_REACTIONS}. It is very important that you designate {\ct N\_REACTIONS}
 or else FDS will ignore all parameters associated with
@@ -3855,7 +3855,7 @@ For consistency, the {\ct HEAT\_OF\_COMBUSTION(j)} can also be specified for eac
 used only if the corresponding heats of combustion for the gaseous species are greater than zero.
 
 In the example below, the pyrolysis of wood is included within a simulation that uses
-a finite-rate reaction instead of the default mixting controlled model. Notice in this case that
+a finite-rate reaction instead of the default mixing-controlled model. Notice in this case that
 all of the gas species (except for the background nitrogen) are explicitly defined, and as a result, FDS
 needs to be told explicitly what gaseous species are produced by the solid phase reactions. In this case, 82~\% of the
 mass of wood is converted to gaseous {\ct 'PYROLYZATE'} and 18~\% is converted to solid {\ct 'CHAR'}.
@@ -3930,7 +3930,8 @@ backward compatibility with earlier versions of
 FDS.}  Note that the {\ct REFERENCE\_TEMPERATURE} is {\em not} the same as an ignition temperature, nor is it necessarily
 the surface temperature of the burning solid. Rather, it is simply the temperature at which the mass fraction of the material
 decreases at its maximum rate within the context of a TGA or similar experimental apparatus. The
-kinetic constants for the reaction are found from the formulae\footnote{These formulas have been derived from an analysis that considers a first-order reaction. When using the proposed method,
+kinetic constants for the reaction are found from the formulae\footnote{These formulas have been derived from an analysis that considers a first-order reaction. 
+When using the proposed method,
 do not specify non-unity value for the reaction order {\ct N\_S} on the {\ct MATL} line.}:
 \be
    E = \frac{e \, r_p}{Y_0} \, \frac{R \, T_p^2}{\dot{T}} \quad ; \quad
@@ -3996,7 +3997,7 @@ For the material decomposition shown in Fig.~\ref{pyrolysis}, the {\ct MATL} wou
 &MATL ID                       = 'My Fuel'
       ...
       N_REACTIONS              = 1
-      SPEC_ID(1,1)             = 'FUEL'
+      SPEC_ID(1,1)             = '...'
       NU_SPEC(1,1)             = 1.
       REFERENCE_TEMPERATURE(1) = 300.
       REFERENCE_RATE(1)        = 0.002
@@ -4012,7 +4013,7 @@ emphasize the fact that these parameters are stored in arrays of
 length equal to {\ct N\_REACTIONS}. If there is only one reaction, you
 need not include the {\ct (1)}, but it is a good habit to get into.
 Note also that if the default combustion model is used, you can denote that the reaction
-produces fuel gas using the name {\ct 'FUEL'}.
+produces fuel gas using the appropriate {\ct SPEC\_ID}.
 Note also that the {\ct HEAT\_OF\_COMBUSTION} is the energy released
 per unit mass of fuel gas that mixes with oxygen and combusts.  This
 has nothing to do with the pyrolysis process, so why is it specified
@@ -4036,7 +4037,7 @@ value of heat of combustion can be specified for each reaction, $j$, via the par
 
 \subsubsection{Multiple Solid Phase Reactions}
 
-The solid phase reaction represented by Fig.~\ref{pyrolysis} is very simple -- a single, homogenous material is
+The solid phase reaction represented by Fig.~\ref{pyrolysis} is fairly simple -- a single, homogenous material is
 heated and gasified completely.
 In general, real materials are not so simple. First, they consist of more than one material component, each of which can
 react over a particular
@@ -4172,8 +4173,8 @@ In FDS, the reaction rate expression in Eq.~(\ref{rr}) includes an optional term
 $T_{thr,ij}$ is an optional ``threshold'' temperature that
 allows the definition of non-Arrhenius pyrolysis functions and
 ignition criteria, and is prescribed by {\ct THRESHOLD\_TEMPERATURE(j)}.
-$S_{thr,ij}$ is the ''threshold direction'' that allows the triggering of reaction
-when temperature gets ''above '' $T_{thr,ij}$ ($S_{thr,ij}=+1$) or ''below'' $T_{thr,ij}$ ($S_{thr,ij}=-1$).n
+$S_{thr,ij}$ is the ``threshold direction'' that allows the triggering of reaction
+when temperature gets ''above '' $T_{thr,ij}$ ($S_{thr,ij}=+1$) or ''below'' $T_{thr,ij}$ ($S_{thr,ij}=-1$).
 $n_{t,j}$ is prescribed under the name {\ct N\_T(j)} and $S_{thr,ij}$ under {\ct THRESHOLD\_SIGN}.
 
 By default, $T_{thr,ij}$ is -273.15 degrees Celsius, $n_{t,j}$ is zero and $S_{thr,ij}=+1$;
@@ -4182,9 +4183,7 @@ The term can be used to describe a threshold temperature for the pyrolysis
 reaction by setting $T_{thr,ij}$ and $n_{t,j}$ = 0. Then the term
 is equal to 0 at temperatures below $T_{thr,ij}$ and 1 at temperatures above.
 
-\subsubsection{Special Topic: Simple Phase-Change Reactions}
-
-The threshold temperature described above can be used to simulate simple phase change reactions, such as melting and freezing.
+The threshold temperature can be used to simulate simple phase change reactions, such as melting and freezing.
 To make the reaction rate controlled by available energy, i.e. {\em not} kinetics, another optional term should be included
 in the reaction rate formula
 \be
@@ -4395,7 +4394,6 @@ If a burning object is to disappear from the calculation once it is consumed, se
 {\ct SURF} line. The solid object disappears from the calculation cell by cell, as the mass contained by each mesh cells is consumed
 either by the pyrolysis reactions or by the prescribed HRR.  The mass of each mesh cell is the cell face area multiplied by the
 surface density of the {\ct SURF} type.
-
 The following issues should be kept in mind when using {\ct BURN\_AWAY}:
 \begin{itemize}
 \item  For reacting surfaces, the surface density is computed as a sum of the layer densities multiplied by the layer thicknesses.
@@ -4418,16 +4416,16 @@ object. This parameter over-rides all other parameters from which a combustible 
 the {\bf known} species. If the sum of the gaseous yields is less than one, it will take longer to consume the mass.
 \end{itemize}
 
-\subsubsection{Example Case: box\_burn\_away}
+\subsubsection{Example Case: Fires/box\_burn\_away}
 
-This is a silly example of a solid block of ``foam'' that is pyrolyzed
+These are examples of a solid block of ``foam'' that is pyrolyzed
 until it is completely consumed. The heat flux is generated by placing
 hot surfaces around the box. There is no combustion.  In the first
-example (box\_burn\_away1), the released gas is fuel ('LUMPED SPECIES 1')
-and in the second example (box\_burn\_away2) it is an additional
-species called 'GAS'. In the third and fourth examples
-(box\_burn\_away3 and 4), the
-released gas is fuel but the pyrolysis rate is specified (HRRPUA).
+example, {\ct box\_burn\_away1}, the released gas is ({\ct 'METHANE'}),
+and in the second example, {\ct box\_burn\_away2}, it is an additional
+species called {\ct 'GAS'}. In the third and fourth examples
+{\ct box\_burn\_away3} and {\ct box\_burn\_away4}, the
+released gas is fuel but the pyrolysis rate is specified.
 In the fourth case, the heat of combustion for the foam material is set
 different from that of the gas, with ratio 0.75.
 The properties of the block of foam were chosen
@@ -4436,9 +4434,9 @@ check that the released mass and the integrated burning rate is
 consistent with the material properties of the block. The block is
 0.4~m on a side, with a density of 20~kg/m$^3$.  The integrated
 densities of the pyrolysis product gases (written to
-box\_burn\_away\#\_devc.csv), as well as
-the integrated burning rate (written to box\_burn\_away\#\_hrr.csv) in
-the end of the 30 s calculation ought to be:
+{\ct box\_burn\_away\#\_devc.csv}), as well as
+the integrated burning rate (written to {\ct box\_burn\_away\#\_hrr.csv}) at
+the end of the 30~s calculation ought to be:
 \be
 (0.4)^3 \; \hbox{m}^3 \times 20 \; \hbox{kg/m}^3 = 1.28 \; \hbox{kg}
 \ee
@@ -4454,7 +4452,7 @@ the ratio of heats of combustion
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away3} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/box_burn_away4}
 \end{tabular*}
-\caption[Output of {\bf box\_burn\_away} test cases.]{Output of {\bf box\_burn\_away} test cases.}
+\caption[Output of {\ct box\_burn\_away} test cases.]{Output of {\ct box\_burn\_away} test cases.}
 \label{box_burn_away}
 \end{figure}
 
@@ -4573,7 +4571,7 @@ details, see the FDS Validation Guide under the heading ``FAA Polymers.''
 
 \section{Full-Scale Examples: Furniture}
 
-The example input files called {\bf couch.fds} and {\bf room\_fire.fds} demonstrate how to model furniture.
+The example input files called {\ct Fires/couch.fds} and {\ct Fires/room\_fire.fds} demonstrate how to model furniture.
 In residential fires, upholstered furniture makes up a significant
 fraction of the combustible load. A single couch can generate several
 megawatts of energy and sometimes lead to compartment flashover. Modeling
