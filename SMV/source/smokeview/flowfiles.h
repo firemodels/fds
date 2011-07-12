@@ -413,8 +413,8 @@ typedef struct _mesh {
   int mesh_type;
   int is_bottom;
 #ifdef pp_GPU_VOLRENDER
-  GLuint smoke_texture_id,hrr_texture_id;
-  float *smoke_texture_buffer,*hrr_texture_buffer;
+  GLuint smoke_texture_id,fire_texture_id;
+  float *smoke_texture_buffer,*fire_texture_buffer;
 #endif
   float meshrgb[3], *meshrgb_ptr;
   float mesh_offset[3], *mesh_offset_ptr;

@@ -94,8 +94,8 @@ SVEXTERN int GPUzone_boxmin, GPUzone_boxmax;
 SVEXTERN int GPUzone_zlay;
 SVEXTERN int GPUzone_odl, GPUzone_odu;
 
-SVEXTERN int GPUvol_inside, GPUvol_dir, GPUvol_eyepos, GPUvol_xyzmaxdiff, GPUvol_soot_density;
-SVEXTERN int GPUvol_boxmin, GPUvol_boxmax;
+SVEXTERN int GPUvol_inside, GPUvol_dir, GPUvol_eyepos, GPUvol_xyzmaxdiff, GPUvol_soot_density, GPUvol_fire;
+SVEXTERN int GPUvol_boxmin, GPUvol_boxmax, GPUvol_smokecolormap;
 
 #endif
 
@@ -915,7 +915,7 @@ SVEXTERN int ntotalfaces;
 SVEXTERN colordata *firstcolor;
 SVEXTERN texture *textureinfo, *terrain_texture;
 SVEXTERN GLuint texture_colorbar_id, texture_slice_colorbar_id, texture_patch_colorbar_id, texture_plot3d_colorbar_id, texture_iso_colorbar_id;
-SVEXTERN GLuint smokecolormap_id;
+SVEXTERN GLuint smokecolormap_id,volsmokecolormap_id;
 SVEXTERN float mscale[3];
 SVEXTERN float xclip_min, yclip_min, zclip_min;
 SVEXTERN float xclip_max, yclip_max, zclip_max;

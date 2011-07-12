@@ -6825,7 +6825,6 @@ void initobst(blockagedata *bc, surface *surf,int index,int meshindex){
   len=strlen(blocklabel);
   NewMemory((void **)&bc->label,((unsigned int)(len+1))*sizeof(char));
   strcpy(bc->label,blocklabel);
-  
 }
 
 /* ------------------ initmesh ------------------------ */
@@ -6834,9 +6833,9 @@ void initmesh(mesh *meshi){
 
 #ifdef pp_GPU_VOLRENDER
   meshi->smoke_texture_buffer=NULL;
-  meshi->hrr_texture_buffer=NULL;
   meshi->smoke_texture_id=-1;
-  meshi->hrr_texture_id=-1;
+  meshi->fire_texture_buffer=NULL;
+  meshi->fire_texture_id=-1;
 #endif
   meshi->mesh_offset_ptr=NULL;
 #ifdef pp_CULL

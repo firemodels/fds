@@ -4,7 +4,7 @@
 
 #ifdef pp_GPU_VOLRENDER
 void init_volsmoke_texture(mesh *meshi);
-void update_volsmoke_texture(mesh *meshi, float *data);
+void update_volsmoke_texture(mesh *meshi, float *smokedata, float *firedata);
 #endif
 void compute_all_smokecolors(void);
 void drawsmoke3dGPUVOL(void);
