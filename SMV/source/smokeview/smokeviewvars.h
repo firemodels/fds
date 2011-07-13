@@ -95,7 +95,7 @@ SVEXTERN int GPUzone_zlay;
 SVEXTERN int GPUzone_odl, GPUzone_odu;
 
 SVEXTERN int GPUvol_inside, GPUvol_dir, GPUvol_eyepos, GPUvol_xyzmaxdiff, GPUvol_soot_density, GPUvol_fire;
-SVEXTERN int GPUvol_boxmin, GPUvol_boxmax, GPUvol_smokecolormap;
+SVEXTERN int GPUvol_boxmin, GPUvol_boxmax, GPUvol_smokecolormap, GPUvol_dcell;
 
 #endif
 

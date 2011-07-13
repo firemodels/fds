@@ -3,6 +3,9 @@
 // $Author$
 
 #include "options.h"
+#ifdef pp_GPU
+#include <GL/glew.h>
+#endif
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -2007,6 +2010,12 @@ void update_texturebar(void){
 
   glBindTexture(GL_TEXTURE_1D,smokecolormap_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_smokecolormap);
+
+  if(nvolrenderinfo>0){
+    glActiveTexture(GL_TEXTURE2);
+    glTexSubImage1D(GL_TEXTURE_1D,0,0,256,GL_RGBA,GL_FLOAT, rgb_smokecolormap);
+  }
+
 }
 
 /* ------------------ initrgb ------------------------ */
@@ -2278,6 +2287,9 @@ void updatecolors(int changecolorindex){
   updatechopcolors();
   initcadcolors();
   update_texturebar();
+  glActiveTexture(GL_TEXTURE2);
+  glTexSubImage1D(GL_TEXTURE_1D,0,0,256,GL_RGBA,GL_FLOAT, rgb_smokecolormap);
+
 }        
 
 /* ------------------ updatechopcolors ------------------------ */
@@ -2484,7 +2496,6 @@ void updatechopcolors(void){
       }
     } 
   }
-
   update_texturebar();
 }
 

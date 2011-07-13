@@ -981,6 +981,8 @@ void drawsmoke3dGPUVOL(void){
     if(vr->firedata==NULL&&vr->smokedata==NULL)continue;
     
     if(meshi!=meshold){
+      float dx, dy, dz, dcell;
+
       glUniform1i(GPUvol_inside,meshi->inside);
       glUniform3f(GPUvol_boxmin,meshi->x0,meshi->y0,meshi->z0);
       glUniform3f(GPUvol_boxmax,meshi->x1,meshi->y1,meshi->z1);
@@ -988,6 +990,11 @@ void drawsmoke3dGPUVOL(void){
       glUniform1i(GPUvol_soot_density,0);
       glUniform1i(GPUvol_fire,1);
       glUniform1i(GPUvol_smokecolormap,2);
+      dx = meshi->xplt[1]-meshi->xplt[0];
+      dy = meshi->yplt[1]-meshi->yplt[0];
+      dz = meshi->zplt[1]-meshi->zplt[0];
+      dcell = sqrt(dx*dx+dy*dy+dz*dz);
+      glUniform1f(GPUvol_dcell,dcell);
 
       meshold=meshi;
     }
@@ -1458,7 +1465,6 @@ void init_volsmoke_texture(mesh *meshi){
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
     glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_smokecolormap);
   }
-
   printf("complete\n");
 }
 

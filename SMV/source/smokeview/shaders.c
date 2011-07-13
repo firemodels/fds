@@ -173,21 +173,19 @@ int setVolSmokeShaders() {
     "uniform sampler1D smokecolormap;"
     "uniform sampler3D soot_density_texture,fire_texture;"
     "uniform int dir,inside;"
-    "uniform float xyzmaxdiff;"
+    "uniform float xyzmaxdiff,dcell;"
     "uniform vec3 eyepos,boxmin, boxmax;"
     "varying vec3 fragpos;"
     
     "void main(){"
-    "  float L,opacity,alpha,alpha_min,factor,pathdist,k;"
-    "  int i,n_iter;"
     "  vec3 dalphamin,dalphamax,fragmaxpos,posi;"
-    "  float colorindex;"
     "  vec3 pt_soot, pt_color,cum_color;"
+    "  float opacity,alpha_min,factor,pathdist,k;"
+    "  float colorindex;"
     "  float tauhat, alphahat, taui, tauterm;"
     "  float dstep;"
+    "  int i,n_iter;"
 
-    "  n_iter=16;"
-    "  L=distance(fragpos,eyepos)*xyzmaxdiff;"
     "  alpha_min=1000000.0;"
     "  dalphamin=-(boxmin-fragpos)/(eyepos-fragpos);"
     "  dalphamax=-(boxmax-fragpos)/(eyepos-fragpos);"
@@ -202,7 +200,9 @@ int setVolSmokeShaders() {
     "  if(inside==1){"
     "  }" // end inside=1
     "  fragmaxpos = mix(fragpos,eyepos,-alpha_min);"
-    "  dstep = distance(fragmaxpos,fragpos)*xyzmaxdiff/n_iter;"
+    "  pathdist = distance(fragpos,fragmaxpos);"
+    "  n_iter = max(1,int(pathdist/dcell+0.5));"
+    "  dstep = pathdist*xyzmaxdiff/n_iter;"
     "  tauhat=1.0;"
     "  alphahat=0.0;"
     "  cum_color=vec3(0.0,0.0,0.0);"
@@ -214,7 +214,7 @@ int setVolSmokeShaders() {
     "    pt_color = texture1D(smokecolormap,colorindex).rgb;"
     "    pt_soot = texture3D(soot_density_texture,posi);"
     "    if(colorindex>0.5){"
-    "      pt_soot *= 5.0;"
+    "      pt_soot *= 3.0;"
     "    };"
     "    taui = exp(-k*pt_soot*dstep);"
     "    tauterm = (1.0-taui)*tauhat;"
@@ -282,12 +282,13 @@ int setVolSmokeShaders() {
   GPUvol_inside = glGetUniformLocation(p_volsmoke,"inside");
   GPUvol_dir    = glGetUniformLocation(p_volsmoke,"dir");
   GPUvol_eyepos = glGetUniformLocation(p_volsmoke,"eyepos");
+  GPUvol_dcell = glGetUniformLocation(p_volsmoke,"dcell");
   GPUvol_xyzmaxdiff = glGetUniformLocation(p_volsmoke,"xyzmaxdiff");
   GPUvol_boxmin = glGetUniformLocation(p_volsmoke,"boxmin");
   GPUvol_boxmax = glGetUniformLocation(p_volsmoke,"boxmax");
   GPUvol_soot_density = glGetUniformLocation(p_volsmoke,"soot_density_texture");
   GPUvol_fire = glGetUniformLocation(p_volsmoke,"fire_texture");
-  GPUvol_smokecolormap =  glGetUniformLocation(p_volsmoke,"smokecolormap");
+  GPUvol_smokecolormap = glGetUniformLocation(p_volsmoke,"smokecolormap");
 
   if(error_code!=1)return error_code;
   return error_code;
