@@ -21,19 +21,19 @@ dir = '../../../Validation/Moody_Chart/FDS_Output_Files/';
 dz = L./N;
 error = abs(f-24./Re);
 H(1)=loglog(dz,error,'b*-','Linewidth',1.); hold on
-H(2)=loglog(dz,dz,'k--','Linewidth',1.);
-H(3)=loglog(dz,dz.^2,'k-','Linewidth',1.);
+H(2)=loglog(dz,.05*dz,'k--','Linewidth',1.);
+H(3)=loglog(dz,.4*dz.^2,'k-','Linewidth',1.);
 
 plot_style
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
-axis([0.01 0.2 0.00001 1])
+axis([0.01 0.2 0.00005 0.01])
 
 xlabel('Grid Spacing, $\delta \!z$ (m)','Interpreter','LaTeX')
 ylabel('Friction Factor Error')
-h = legend(H,'FDS','$O(\delta \!z)$','$O(\delta \!z^2)$','Location','Southeast');
+h = legend(H,'FDS','$\mathcal{O}(\delta \!z)$','$\mathcal{O}(\delta \!z^2)$','Location','Southeast');
 set(h,'Interpreter','LaTeX')
 
 % add SVN if file is available
