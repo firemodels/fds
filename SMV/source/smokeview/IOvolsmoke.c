@@ -943,7 +943,6 @@ void drawsmoke3dVOL(void){
 /* ------------------ drawsmoke3dGPUVOL ------------------------ */
 
 #ifdef pp_GPU
-#ifdef pp_GPU_VOLSMOKE_RENDER
 void drawsmoke3dGPUVOL(void){
 
 #define NROWS_GPU 2
@@ -1119,7 +1118,6 @@ void drawsmoke3dGPUVOL(void){
   }
   if(use_transparency_data==1)transparentoff();
 }
-#endif
 #endif
 
 #define HEADER_SIZE 4
