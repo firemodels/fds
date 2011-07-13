@@ -166,9 +166,6 @@ void init_volrender(void){
     vr->timeslist=NULL;
     vr->times_defined=0;
   }
-#ifndef pp_VOLRENDER
-  return;
-#endif
   for(i=0;i<nsliceinfo;i++){
     slice *slicei;
     char *shortlabel;
@@ -946,6 +943,7 @@ void drawsmoke3dVOL(void){
 /* ------------------ drawsmoke3dGPUVOL ------------------------ */
 
 #ifdef pp_GPU
+#ifdef pp_GPU_VOLSMOKE_RENDER
 void drawsmoke3dGPUVOL(void){
 
 #define NROWS_GPU 2
@@ -1121,7 +1119,7 @@ void drawsmoke3dGPUVOL(void){
   }
   if(use_transparency_data==1)transparentoff();
 }
-
+#endif
 #endif
 
 #define HEADER_SIZE 4
@@ -1380,7 +1378,7 @@ void read_volsmoke_allframes_allmeshes(void){
     get_volsmoke_all_times(vr);
     vr->loaded=1;
     vr->display=1;
-#ifdef pp_GPU_VOLRENDER
+#ifdef pp_GPU
     init_volsmoke_texture(meshi);
 #endif
   }
@@ -1398,7 +1396,7 @@ void read_volsmoke_allframes_allmeshes(void){
   read_volsmoke_allframes_allmeshes2(NULL);
 #endif
 }
-#ifdef pp_GPU_VOLRENDER
+#ifdef pp_GPU
 
 /* ------------------ init_volsmoke_texture ------------------------ */
 

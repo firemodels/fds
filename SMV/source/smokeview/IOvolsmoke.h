@@ -2,7 +2,7 @@
 // $Revision$
 // $Author$
 
-#ifdef pp_GPU_VOLRENDER
+#ifdef pp_GPU
 void init_volsmoke_texture(mesh *meshi);
 void update_volsmoke_texture(mesh *meshi, float *smokedata, float *firedata);
 #endif

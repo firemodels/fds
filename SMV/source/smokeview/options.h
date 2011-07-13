@@ -16,34 +16,48 @@
 //#undef pp_BETA
 //#define pp_BETA
 
+//VVVVVVVVVVVVVVVVVVVVVVVVVVVVV  define smokeview title VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 #ifdef pp_BETA
 #define SMVVERSION "Test"
 #undef pp_release
 #endif
+#ifdef pp_release
+#define SMVVERSION "5.6.3"
+#endif
 
-//*** turn on options that are being tested
+//VVVVVVVVVVVVVVVVVVVVVVVVVVVVV  turn on options available on all platforms VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+
+//#define pp_HIDEMULTI
+//#define pp_GEOMPRINT
+#define pp_GPU
+#define pp_CULL
+#define pp_LIGHT
+#define pp_MESSAGE
+#define pp_DRAWISO
+#define EGZ
+#define USE_ZLIB
+#define pp_THREAD
+#define _CRT_SECURE_NO_DEPRECATE
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+//VVVVVVVVVVVVVVVVVVVVVVVVVVVVV  turn on options that are being tested VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
 #ifdef pp_BETA
-#define pp_GPU_VOLRENDER
-#define pp_GPU
 // #define pp_BENCHMARK
-#define pp_VOLRENDER
 #define pp_SLICECONTOURS
 #define pp_SHOWLIGHT
 #define pp_LANG
+#define pp_SHOOTER
 #endif
+
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 #ifdef _DEBUG  // comment out following line if debugging REALLY large cases (to avoid memory checks)
 #define pp_MEMDEBUG
 #endif
 
-#ifdef pp_release
-#define SMVVERSION "5.6.3"
-#endif
-
-#define _CRT_SECURE_NO_DEPRECATE
-
-//*** turn on Windows only options
+//VVVVVVVVVVVVVVVVVVVVVVVVVVVVV  turn on windows only options VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
 #undef pp_OPEN
 #ifdef WIN32
@@ -52,14 +66,14 @@
 #define pp_COMPRESS
 #define pp_noappend
 #include "pragmas.h"
-#define pp_GPU
-#define pp_CULL
 #ifdef pp_BETA
 #define pp_OPEN
 #endif
-
-
 #endif
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+// VVVVVVVVVVVVVVVVVVVVVVVVV  set platform defines VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
 #ifdef pp_LINUX64
 #define pp_LINUX
@@ -102,24 +116,6 @@
 #define STAT stat
 #endif
 
-//*** turn on options available on all platforms
-
-//#define pp_HIDEMULTI
-//#define pp_GEOMPRINT
-#define pp_LIGHT
-#define pp_MESSAGE
-#define pp_DRAWISO
-#define EGZ
-#define USE_ZLIB
-#define pp_THREAD
-
-//*** turn on options available in test versions of smokeview 
-
-#ifdef pp_BETA
-#define pp_SHOOTER
-#define pp_TRANSFORMxxx
-#endif
-
 #ifdef pp_CULL
 #define pp_GPU
 #endif
@@ -128,6 +124,7 @@
 #define pp_JPEG
 #endif
 
+// VVVVVVVVVVVVVVVVVVVVVVVVV  set defines used by various headers VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 #ifdef CPP
 #define CCC "C"
 #else

@@ -1037,9 +1037,6 @@ void usage(char **argv){
 #ifdef pp_GPU
     strcat(label,", pp_GPU");
 #endif
-#ifdef pp_GPU_VOLRENDER
-    strcat(label,", pp_GPU_VOLRENDER");
-#endif
 #ifdef ISO_DEBUG
     strcat(label,", ISO_DEBUG");
 #endif
@@ -1087,9 +1084,6 @@ void usage(char **argv){
 #endif
 #ifdef pp_THREAD
     strcat(label,", pp_THREAD");
-#endif
-#ifdef pp_VOLRENDER
-    strcat(label,", pp_VOLRENDER");
 #endif
 #ifdef X64
     strcat(label,", X64");

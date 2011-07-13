@@ -137,9 +137,6 @@ GLUI_Rollout *rollout_slice_chop=NULL;
 #endif
 
 GLUI_Button *BUTTON_compress=NULL;
-#ifdef pp_TRANSFORM
-GLUI_Panel *panel_slice_transform=NULL;
-#endif
 GLUI_Panel *panel_evac_direction=NULL;
 GLUI_Spinner *SPINNER_labels_transparency_data=NULL;
 GLUI_Panel *panel_pan1=NULL;
@@ -598,11 +595,6 @@ extern "C" void glui_bounds_setup(int main_window){
       &slicechopmin, &slicechopmax,
       UPDATEBOUNDS,DONT_TRUNCATEBOUNDS,
       Slice_CB);
-#ifdef pp_TRANSFORM
-    panel_slice_transform=glui_bounds->add_rollout_to_panel(panel_slice,"Transform data",false);
-    glui_bounds->add_button_to_panel(panel_slice_transform,"Transform data",TRANSFORM_SLICE,Slice_CB);
-    glui_bounds->add_button_to_panel(panel_slice_transform,"Reset data",RESET_SLICE,Slice_CB);
-#endif
     SPINNER_transparentlevel=glui_bounds->add_spinner_to_panel(panel_slice,_("Transparent level"),GLUI_SPINNER_FLOAT,&transparentlevel,TRANSPARENTLEVEL,Slice_CB);
     SPINNER_transparentlevel->set_float_limits(0.0,1.0);
     CHECKBOX_average_slice=glui_bounds->add_checkbox_to_panel(panel_slice,_("Averaged slice data"),&slice_average_flag,AVERAGE_DATA,Slice_CB);

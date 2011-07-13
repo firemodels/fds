@@ -412,7 +412,7 @@ typedef struct _mesh {
   terraindata *terrain;
   int mesh_type;
   int is_bottom;
-#ifdef pp_GPU_VOLRENDER
+#ifdef pp_GPU
   GLuint smoke_texture_id,fire_texture_id;
   float *smoke_texture_buffer,*fire_texture_buffer;
 #endif

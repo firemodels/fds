@@ -319,9 +319,7 @@ void drawsmoke_frame(void){
 #ifdef pp_GPU
   if(usegpu==1){
     if(usevolrender==1){
-#ifdef pp_GPU_VOLRENDER
       LoadVolSmokeShaders();
-#endif
     }
     else{
       LoadSmokeShaders();
@@ -360,7 +358,7 @@ void drawsmoke_frame(void){
       }
     }
     if(showvolrender==1){
-#ifdef pp_GPU_VOLRENDER
+#ifdef pp_GPU
       if(usegpu==1){
         drawsmoke3dGPUVOL();
       }
@@ -375,9 +373,7 @@ void drawsmoke_frame(void){
 #ifdef pp_GPU
   if(usegpu==1){
     if(usevolrender==1){
-#ifdef pp_GPU_VOLRENDER
       UnLoadShaders();
-#endif
     }
     else{
       UnLoadShaders();

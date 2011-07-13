@@ -3229,7 +3229,7 @@ typedef struct {
 
   printf(_("      Loading colorbar texture: "));
 
-  glActiveTexture(GL_TEXTURE0);
+ // glActiveTexture(GL_TEXTURE0);
   glGenTextures(1,&texture_colorbar_id);
   glBindTexture(GL_TEXTURE_1D,texture_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_full);
@@ -6831,7 +6831,7 @@ void initobst(blockagedata *bc, surface *surf,int index,int meshindex){
 
 void initmesh(mesh *meshi){
 
-#ifdef pp_GPU_VOLRENDER
+#ifdef pp_GPU
   meshi->smoke_texture_buffer=NULL;
   meshi->smoke_texture_id=-1;
   meshi->fire_texture_buffer=NULL;

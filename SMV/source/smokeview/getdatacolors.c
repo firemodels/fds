@@ -2011,10 +2011,12 @@ void update_texturebar(void){
   glBindTexture(GL_TEXTURE_1D,smokecolormap_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_smokecolormap);
 
+#ifdef pp_GPU
   if(nvolrenderinfo>0){
     glActiveTexture(GL_TEXTURE2);
     glTexSubImage1D(GL_TEXTURE_1D,0,0,256,GL_RGBA,GL_FLOAT, rgb_smokecolormap);
   }
+#endif
 
 }
 
@@ -2287,8 +2289,10 @@ void updatecolors(int changecolorindex){
   updatechopcolors();
   initcadcolors();
   update_texturebar();
+#ifdef pp_GPU
   glActiveTexture(GL_TEXTURE2);
   glTexSubImage1D(GL_TEXTURE_1D,0,0,256,GL_RGBA,GL_FLOAT, rgb_smokecolormap);
+#endif
 
 }        
 

@@ -891,9 +891,13 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
       if(usevolrender==1){
         getvolsmokedir(modelview_scratch);
         sniffErrors("after getvolsmokedir");
+#ifdef pp_GPU
         if(usegpu==0){
           compute_all_smokecolors();
         }
+#else
+        compute_all_smokecolors();
+#endif
       }
     }
     if(nsmoke3dinfo>0&&show3dsmoke==1){
