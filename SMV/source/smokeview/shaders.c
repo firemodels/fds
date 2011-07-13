@@ -9,7 +9,7 @@ char shaders_revision[]="$Revision$";
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
-#include <GL/glew.h>
+#include "glew.h"
 #include "MALLOC.h"
 #include "flowfiles.h"
 #include "smokeviewvars.h"

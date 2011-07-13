@@ -8,7 +8,7 @@
 #include <string.h>
 #include <math.h>
 #ifdef pp_GPU
-#include <GL/glew.h>
+#include "glew.h"
 #endif
 #include "flowfiles.h"
 #include "MALLOC.h"
