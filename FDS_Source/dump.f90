@@ -1159,13 +1159,27 @@ WRITE(LU_SMV,'(1X,A)') TRIM(CHID)//'.end'
 WRITE(LU_SMV,'(/A)') 'INPF'
 WRITE(LU_SMV,'(1X,A)') TRIM(FN_INPUT)
 
-!Write out svn revision number
+! Write out svn revision number
+
 WRITE(LU_SMV,'(/A)') 'REVISION'
 WRITE(LU_SMV,'(I6)') SVN_REVISION_NUMBER
 
 ! Write out the CHID
+
 WRITE(LU_SMV,'(/A)') 'CHID'
 WRITE(LU_SMV,'(1X,A)') TRIM(CHID)
+
+! Write out the names of the spreadsheet files
+
+WRITE(LU_SMV,'(/A)') 'CSVF'
+WRITE(LU_SMV,'(1X,A)') 'hrr'
+WRITE(LU_SMV,'(1X,A)') TRIM(FN_HRR)
+
+DO I=1,N_DEVC_FILES
+   WRITE(LU_SMV,'(/A)') 'CSVF'
+   WRITE(LU_SMV,'(1X,A)') 'devc'
+   WRITE(LU_SMV,'(1X,A)') TRIM(FN_DEVC(I))
+ENDDO
 
 ! Number of meshes
  
