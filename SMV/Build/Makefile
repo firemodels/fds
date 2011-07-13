@@ -48,7 +48,7 @@ objwin = $(obj:.o=.obj)
 
 # include file directory locations (should be the same for all builds)
 
-INC = -I $(INC_DIR)/glut -I $(INC_DIR)/glui -I $(INC_DIR)/gd -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokeview
+INC = -I $(INC_DIR)/glut -I $(INC_DIR)/glui -I $(INC_DIR)/gd -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokeview -I $(SOURCE_DIR)/glew
 
 #*** General Purpose Rules ***
 
@@ -265,7 +265,7 @@ intel_linux_64 : $(obj)
 intel_linux_test_64 : IMAGELIBDIR = $(LIB_DIR)/lib_linux_intel_64
 intel_linux_test_64 : FORTLIBDIR  = $(LINUX64FORTLIBDIR)
 intel_linux_test_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_noappend
-intel_linux_test_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_LINUX64 -D pp_BETA  -I ../../source/glew
+intel_linux_test_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_LINUX64 -D pp_BETA 
 intel_linux_test_64 : CC        = icc 
 intel_linux_test_64 : CPP       = icpc
 intel_linux_test_64 : FC        = ifort
