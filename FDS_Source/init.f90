@@ -2392,6 +2392,7 @@ CALL POINT_TO_MESH(NM)
 ! Check to see if an obstacle is to be removed or created
 
 OBST_LOOP: DO N=1,N_OBST
+
    OB=>OBSTRUCTION(N)
    IF (.NOT. OB%REMOVABLE) CYCLE OBST_LOOP
    CREATE_OBST = .FALSE.
@@ -2445,11 +2446,13 @@ OBST_LOOP: DO N=1,N_OBST
 
    ! The evacuation flow field calculation is done before T_BEGIN
 
-   IF (EVACUATION_GRID(NM) .AND. DEVICE(OB%DEVC_INDEX)%QUANTITY=='TIME' .AND. DEVICE(OB%DEVC_INDEX)%SETPOINT<=T_BEGIN) THEN
-      T_TMP = T - EVAC_DT_FLOWFIELD*EVAC_TIME_ITERATIONS
-   ELSE
-      T_TMP = T
-   END IF
+   IF (OB%DEVC_INDEX>0) THEN
+      IF (EVACUATION_GRID(NM) .AND. DEVICE(OB%DEVC_INDEX)%QUANTITY=='TIME' .AND. DEVICE(OB%DEVC_INDEX)%SETPOINT<=T_BEGIN) THEN
+         T_TMP = T - EVAC_DT_FLOWFIELD*EVAC_TIME_ITERATIONS
+      ELSE
+         T_TMP = T
+      ENDIF
+   ENDIF
 
    ! Write a message to the Smokeview .smv file that the obstruction has been created or removed
 
