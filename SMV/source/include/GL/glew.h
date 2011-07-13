@@ -2535,6 +2535,21 @@ typedef void (GLAPIENTRY * PFNGLBLENDFUNCSEPARATEINDEXEDAMDPROC) (GLuint buf, GL
 
 #endif /* GL_AMD_draw_buffers_blend */
 
+/* ----------------------- GL_AMD_multi_draw_indirect ---------------------- */
+
+#ifndef GL_AMD_multi_draw_indirect
+#define GL_AMD_multi_draw_indirect 1
+
+typedef void (GLAPIENTRY * PFNGLMULTIDRAWARRAYSINDIRECTAMDPROC) (GLenum mode, const void* indirect, GLsizei primcount, GLsizei stride);
+typedef void (GLAPIENTRY * PFNGLMULTIDRAWELEMENTSINDIRECTAMDPROC) (GLenum mode, GLenum type, const void* indirect, GLsizei primcount, GLsizei stride);
+
+#define glMultiDrawArraysIndirectAMD GLEW_GET_FUN(__glewMultiDrawArraysIndirectAMD)
+#define glMultiDrawElementsIndirectAMD GLEW_GET_FUN(__glewMultiDrawElementsIndirectAMD)
+
+#define GLEW_AMD_multi_draw_indirect GLEW_GET_VAR(__GLEW_AMD_multi_draw_indirect)
+
+#endif /* GL_AMD_multi_draw_indirect */
+
 /* ------------------------- GL_AMD_name_gen_delete ------------------------ */
 
 #ifndef GL_AMD_name_gen_delete
@@ -7488,6 +7503,18 @@ typedef void (GLAPIENTRY * PFNGLRENDERBUFFERSTORAGEMULTISAMPLEEXTPROC) (GLenum t
 #define GLEW_EXT_framebuffer_multisample GLEW_GET_VAR(__GLEW_EXT_framebuffer_multisample)
 
 #endif /* GL_EXT_framebuffer_multisample */
+
+/* --------------- GL_EXT_framebuffer_multisample_blit_scaled -------------- */
+
+#ifndef GL_EXT_framebuffer_multisample_blit_scaled
+#define GL_EXT_framebuffer_multisample_blit_scaled 1
+
+#define GL_SCALED_RESOLVE_FASTEST_EXT 0x90BA
+#define GL_SCALED_RESOLVE_NICEST_EXT 0x90BB
+
+#define GLEW_EXT_framebuffer_multisample_blit_scaled GLEW_GET_VAR(__GLEW_EXT_framebuffer_multisample_blit_scaled)
+
+#endif /* GL_EXT_framebuffer_multisample_blit_scaled */
 
 /* ----------------------- GL_EXT_framebuffer_object ----------------------- */
 
@@ -13171,6 +13198,9 @@ GLEW_FUN_EXPORT PFNGLBLENDEQUATIONSEPARATEINDEXEDAMDPROC __glewBlendEquationSepa
 GLEW_FUN_EXPORT PFNGLBLENDFUNCINDEXEDAMDPROC __glewBlendFuncIndexedAMD;
 GLEW_FUN_EXPORT PFNGLBLENDFUNCSEPARATEINDEXEDAMDPROC __glewBlendFuncSeparateIndexedAMD;
 
+GLEW_FUN_EXPORT PFNGLMULTIDRAWARRAYSINDIRECTAMDPROC __glewMultiDrawArraysIndirectAMD;
+GLEW_FUN_EXPORT PFNGLMULTIDRAWELEMENTSINDIRECTAMDPROC __glewMultiDrawElementsIndirectAMD;
+
 GLEW_FUN_EXPORT PFNGLDELETENAMESAMDPROC __glewDeleteNamesAMD;
 GLEW_FUN_EXPORT PFNGLGENNAMESAMDPROC __glewGenNamesAMD;
 GLEW_FUN_EXPORT PFNGLISNAMEAMDPROC __glewIsNameAMD;
@@ -15030,6 +15060,7 @@ GLEW_VAR_EXPORT GLboolean __GLEW_AMD_conservative_depth;
 GLEW_VAR_EXPORT GLboolean __GLEW_AMD_debug_output;
 GLEW_VAR_EXPORT GLboolean __GLEW_AMD_depth_clamp_separate;
 GLEW_VAR_EXPORT GLboolean __GLEW_AMD_draw_buffers_blend;
+GLEW_VAR_EXPORT GLboolean __GLEW_AMD_multi_draw_indirect;
 GLEW_VAR_EXPORT GLboolean __GLEW_AMD_name_gen_delete;
 GLEW_VAR_EXPORT GLboolean __GLEW_AMD_performance_monitor;
 GLEW_VAR_EXPORT GLboolean __GLEW_AMD_sample_positions;
@@ -15198,6 +15229,7 @@ GLEW_VAR_EXPORT GLboolean __GLEW_EXT_fog_coord;
 GLEW_VAR_EXPORT GLboolean __GLEW_EXT_fragment_lighting;
 GLEW_VAR_EXPORT GLboolean __GLEW_EXT_framebuffer_blit;
 GLEW_VAR_EXPORT GLboolean __GLEW_EXT_framebuffer_multisample;
+GLEW_VAR_EXPORT GLboolean __GLEW_EXT_framebuffer_multisample_blit_scaled;
 GLEW_VAR_EXPORT GLboolean __GLEW_EXT_framebuffer_object;
 GLEW_VAR_EXPORT GLboolean __GLEW_EXT_framebuffer_sRGB;
 GLEW_VAR_EXPORT GLboolean __GLEW_EXT_geometry_shader4;
