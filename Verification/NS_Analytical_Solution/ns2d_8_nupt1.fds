@@ -9,7 +9,7 @@ Note that the time and space bounds are 2*pi.
 
 
 
-&MISC CONSTANT_PROPERTIES=.TRUE., DNS=.TRUE., 
+&MISC DNS=.TRUE., 
       STRATIFICATION=.FALSE., NOISE=.FALSE., CFL_MAX=0.25,
       PERIODIC_TEST=1, FISHPAK_BC(1)=0, FISHPAK_BC(3)=0 /
 
