@@ -172,7 +172,7 @@ int setVolSmokeShaders() {
   const GLchar *FragmentShaderSource[]={
     "uniform sampler1D smokecolormap;"
     "uniform sampler3D soot_density_texture,fire_texture;"
-    "uniform int dir,inside;"
+    "uniform int dir,inside,havefire;"
     "uniform float xyzmaxdiff,dcell;"
     "uniform vec3 eyepos,boxmin, boxmax;"
     "varying vec3 fragpos;"
@@ -210,12 +210,17 @@ int setVolSmokeShaders() {
     "  for(i=0;i<n_iter;i++){"
     "    factor = (0.5+i)/n_iter;"
     "    posi = (mix(fragpos,fragmaxpos,factor)-boxmin)/(boxmax-boxmin);"
-    "    colorindex = texture3D(fire_texture,posi)/1200.0;" 
-    "    pt_color = texture1D(smokecolormap,colorindex).rgb;"
     "    pt_soot = texture3D(soot_density_texture,posi);"
-    "    if(colorindex>0.5){"
-    "      pt_soot *= 3.0;"
-    "    };"
+    "    if(havefire==1){"
+    "      colorindex = texture3D(fire_texture,posi)/1200.0;" 
+    "      pt_color = texture1D(smokecolormap,colorindex).rgb;"
+    "      if(colorindex>0.5){"
+    "        pt_soot *= 3.0;"
+    "      };"
+    "    }"
+    "    else{"
+    "      pt_color = vec3(0.0,0.0,0.0);"
+    "    }"
     "    taui = exp(-k*pt_soot*dstep);"
     "    tauterm = (1.0-taui)*tauhat;"
     "    alphahat  += tauterm;"
@@ -288,6 +293,7 @@ int setVolSmokeShaders() {
   GPUvol_boxmax = glGetUniformLocation(p_volsmoke,"boxmax");
   GPUvol_soot_density = glGetUniformLocation(p_volsmoke,"soot_density_texture");
   GPUvol_fire = glGetUniformLocation(p_volsmoke,"fire_texture");
+  GPUvol_havefire = glGetUniformLocation(p_volsmoke,"havefire");
   GPUvol_smokecolormap = glGetUniformLocation(p_volsmoke,"smokecolormap");
 
   if(error_code!=1)return error_code;

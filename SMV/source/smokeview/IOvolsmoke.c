@@ -42,6 +42,7 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
   float kfactor=8700.0;
   float soot_density, temperature;
   int index;
+  float black[]={0.0,0.0,0.0,1.0};
 
   smokedata = meshi->volrenderinfo.smokedata;
   firedata = meshi->volrenderinfo.firedata;
@@ -115,6 +116,9 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
     dtemp=(1200.0-20.0)/256;
     GETINDEX(index,temperature,20.0,dtemp,256);
     *smoke_color=rgb_smokecolormap+4*index;
+  }
+  else{
+    *smoke_color=getcolorptr(black);
   }
   if(smokedata!=NULL){
     vv = smokedata + ijk;
@@ -984,6 +988,12 @@ void drawsmoke3dGPUVOL(void){
       glUniform3f(GPUvol_boxmin,meshi->x0,meshi->y0,meshi->z0);
       glUniform3f(GPUvol_boxmax,meshi->x1,meshi->y1,meshi->z1);
       update_volsmoke_texture(meshi, vr->smokedata,vr->firedata);
+      if(vr->firedata!=NULL){
+        glUniform1i(GPUvol_havefire,1);
+      }
+      else{
+        glUniform1i(GPUvol_havefire,0);
+      }
       glUniform1i(GPUvol_soot_density,0);
       glUniform1i(GPUvol_fire,1);
       glUniform1i(GPUvol_smokecolormap,2);
