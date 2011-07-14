@@ -4639,8 +4639,8 @@ and after 10~minutes, the flames can be seen flowing out.
 
 \chapter{Ventilation}
 
-This chapter explains how to model a ventilation system. There are two ways to do this. First, if you only want to specify air flow rates into and out of 
-compartments, read Section~\ref{info:Velocity_BC} for a description of simple velocity boundary conditions. However, if you want to 
+This chapter explains how to model a ventilation system. There are two ways to do this. First, if you only want to specify air flow rates into and out of
+compartments, read Section~\ref{info:Velocity_BC} for a description of simple velocity boundary conditions. However, if you want to
 model the interaction of the entire HVAC system with the fire, read Section~\ref{info:HVAC} for a description of the parameters that
 describe the components of the entire HVAC system.
 
@@ -4655,7 +4655,7 @@ surface. However, there are various other facets of velocity boundary conditions
 
 \subsection{Supply and Exhaust Vents}
 
-The easiest way to describe a supply or exhaust fan is to specify a {\ct VENT} on a solid surface, and designate 
+The easiest way to describe a supply or exhaust fan is to specify a {\ct VENT} on a solid surface, and designate
 a {\ct SURF\_ID} with some form of specified velocity or volume flow rate.
 The normal component of velocity is usually specified directly via the parameter
 {\ct VEL}. If {\ct VEL} is negative, the flow is directed {\em into} the
@@ -4950,7 +4950,7 @@ Also note that {\ct FAN} defines a class of fans rather than one specific fan. T
 \label{info:ZONE}
 
 FDS assumes pressure to be composed of a ``background'' component, $\bp(z,t)$, plus a perturbation pressure, $\tp(\bx,t)$. Most
-often, $\bp$ is just the hydrostatic pressure, and $\tp$ is the flow-induced spatially-resolved perturbation. 
+often, $\bp$ is just the hydrostatic pressure, and $\tp$ is the flow-induced spatially-resolved perturbation.
 You can specify any number of sealed compartments within the computational
 domain that can have their own ``background'' pressures, and these compartments, or ``pressure zones,'' can be connected via leakage and duct paths whose
 flow rates are tied to the pressure of the adjacent zones.
@@ -5410,8 +5410,8 @@ velocity can be independently controlled by assigning different
 Use {\ct TAU\_T} or {\ct RAMP\_T}
 to control the ramp-ups for surface temperature.
 The surface temperature will be computed as
-\be 
-   T(t) = T_0 + f(t) \left( T_f - T_0 \right) 
+\be
+   T(t) = T_0 + f(t) \left( T_f - T_0 \right)
 \ee
 where $T(t)$ is the desired surface temperature, $f(t)$ is the result of evaluating the
 {\ct RAMP\_T} at time $t$, $T_0$ is the ambient temperature, and $T_f$ is {\ct TMP\_FRONT}, specified on the same {\ct SURF} line as {\ct RAMP\_T}.
@@ -5636,12 +5636,7 @@ the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and
 $\epsilon/k$ ({\ct EPSILONKLJ}) should be specified; or
 the {\ct VISCOSITY} (kg/m/s), {\ct CONDUCTIVITY} (W/m/K), and
 {\ct DIFFUSIVITY} (m$^2$/s) between the given species
-and the background species should be specified. In the latter case, if you specify the gas properties directly, they will still
-be temperature dependent:
-\be \mu(T) = \mu_\infty \, \left( \frac{T}{T_\infty} \right)^{0.75} \quad ; \quad
-    k(T) = k_\infty \, \left( \frac{T}{T_\infty} \right)^{0.75} \quad ; \quad
-    D(T) = D_\infty \, \left( \frac{T}{T_\infty} \right)^{1.75}   \ee
-If you do not want to assume this temperature dependence, set {\ct CONSTANT\_PROPERTIES=.TRUE.} on the {\ct MISC} line.
+and the background species should be specified. 
 
 If the simulation does not involve the simple chemistry model -- either because no combustion is
 desired or if a finite rate reaction(s) is being specified (see Section~\ref{info:finite}) -- you can
@@ -5666,8 +5661,8 @@ The user is reminded of the following definitions:
 \end{description}
 
 Therefore, if the user wishes both the {\ct SPECIFIC\_HEAT} and the average specific heat to be a constant, then:
-\be 
-   \bar{c_p}(T)=\frac{h(T)}{T} = \frac{h(T_{ref})+\int_{T_ref}^T c_p(T)dT}{T}=\frac{h(T_{ref})-c_p T_{ref}}{T}+c_p 
+\be
+   \bar{c_p}(T)=\frac{h(T)}{T} = \frac{h(T_{ref})+\int_{T_ref}^T c_p(T)dT}{T}=\frac{h(T_{ref})-c_p T_{ref}}{T}+c_p
 \ee
 which means that the following must be true for {\ct REFERENCE\_ENTHALPY}, and {\ct REFERENCE\_TEMPERATURE}:
 
@@ -10220,7 +10215,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct C\_VERTICAL}               & Real          & See Section~\ref{info:convection}                         &               & 1.31             \\ \hline
 %{\ct CLIP\_MASS\_FRACTION}      & Logical       &                                                           &               & {\ct .FALSE.}     \\ \hline
 {\ct CSMAG}                     & Real          & See Section~\ref{info:LES}                                &               & 0.20              \\ \hline
-{\ct CONSTANT\_PROPERTIES}      & Logical       & See Section~\ref{gas_species_props}                       &               & {\ct .FALSE.}     \\ \hline
 %{\ct DEBUG\_OPENMP}             & Logical       & Debug flag for OpenMP                                     &               & {\ct .FALSE.}     \\ \hline
 {\ct DNS}                       & Logical       & See Section~\ref{info:MISC_Basics}                        &               & {\ct .FALSE.}     \\ \hline
 {\ct DYNSMAG}                   & Logical       & See Section~\ref{info:LES}                                &               & {\ct .FALSE.}     \\ \hline
