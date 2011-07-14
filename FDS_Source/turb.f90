@@ -497,9 +497,9 @@ DO K = 1,KBAR
 
          ! handle the case where we divide by zero, note MMHAT is positive semi-definite
          IF (MMHAT(I,J,K)<=ZERO_P) THEN
-            CSD2_DYNSMAG(I,J,K) = 0._EB
+            CSD2(I,J,K) = 0._EB
          ELSE
-            CSD2_DYNSMAG(I,J,K) = MLHAT(I,J,K)/MMHAT(I,J,K) ! (Cs*Delta)**2
+            CSD2(I,J,K) = MLHAT(I,J,K)/MMHAT(I,J,K) ! (Cs*Delta)**2
          ENDIF
          
       END DO
