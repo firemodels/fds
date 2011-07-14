@@ -1134,6 +1134,9 @@ SELECT CASE(DRAG_LAW)
          DRAG = 1._EB
       ENDIF
       
+   CASE(USER_DRAG)
+      DRAG = 1._EB ! PC%USER_DRAG_COEFFICIENT set elsewhere
+      
 END SELECT
  
 END FUNCTION DRAG
