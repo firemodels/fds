@@ -2238,23 +2238,14 @@ in a velocity of 10.09~m/s through the vent.  FDS computes a peak velocity of 10
 \subsection{Special Topic: Large Eddy Simulation Parameters}
 \label{info:LES}
 
-In default mode, FDS uses the dynamic form of the Smagorinsky Large Eddy Simulation (LES) to model subgrid-scale turbulence. The turbulent viscosity modeled as
+By default FDS uses the dynamic procedure \cite{Germano:1991} to compute the Smagorinsky constant in the turbulent viscosity, which is modeled as
 \be \mu_{\hbox{\tiny LES}} = \rho \, (C_s\, \Delta)^2 \,
    \left(2 \; \overline{\bS}_{ij} : \overline{\bS}_{ij} - \frac{2}{3} (\nabla \cdot \overline{\bu})^2 \right)^\ha \ee
-where $C_s$ is a function of the local flow conditions and $\Delta$ is a length scale on the order of the size of a grid cell.
-The bar above the various quantities denotes that these are the resolved, or {\em filtered}, values, meaning that they are computed on a numerical grid.
-The other diffusive parameters, the thermal conductivity and material diffusivity, are related to the turbulent viscosity by
+where $C_s$ is a function of the local flow conditions and $\Delta$ is a length scale on the order of the size of a grid cell.  FDS takes the local maximum cell dimension as the filter width, $\Delta = \max(\delta x, \delta y, \delta z)$. The bar above the various quantities denotes that these are the resolved, or {\em filtered}, values, meaning that they are computed on a numerical grid. The other diffusive parameters, the thermal conductivity and material diffusivity, are related to the turbulent viscosity by
 \be k_{\hbox{\tiny LES}} = \frac{\mu_{\hbox{\tiny LES}} \, c_p}{\PR_t}
 \quad ; \quad
  (\rho D)_{\hbox{\tiny LES}} =\frac{\mu_{\hbox{\tiny LES}}}{\SC_t} \ee
-The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ are assumed to be constant for a given scenario.
-Although it is not recommended for most calculations, you can modify $\PR_t=0.5$, and $\SC_t=0.5$ via the parameters {\ct PR}, and {\ct SC} on the {\ct MISC} line.
-A more detailed discussion of these parameters is given in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
-
-The dynamic form of LES is more costly than the constant coefficient form.
-To save on CPU time, you can try setting {\ct COMPUTE\_VISCOSITY\_TWICE} equal to {\ct .FALSE.} to force FDS to compute the viscosity only once per time step.
-You can also reduce the number of times that the dynamic coefficient, $C_s$, is computed by setting {\ct DSMAG\_FREQ} equal to an integer greater than or equal to 1.
-A value of 3, for example, means that $C_s$ should be computed every third time that the viscosity is computed.
+The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ are assumed to be constant for a given scenario. Although it is not recommended for most calculations, you can modify $\PR_t=0.5$, and $\SC_t=0.5$ via the parameters {\ct PR}, and {\ct SC} on the {\ct MISC} line. A more detailed discussion of these parameters is given in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 
 \begin{warning}
 \noindent
@@ -10229,12 +10220,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct C\_VERTICAL}               & Real          & See Section~\ref{info:convection}                         &               & 1.31             \\ \hline
 %{\ct CLIP\_MASS\_FRACTION}      & Logical       &                                                           &               & {\ct .FALSE.}     \\ \hline
 {\ct CSMAG}                     & Real          & See Section~\ref{info:LES}                                &               & 0.20              \\ \hline
-{\ct COMPUTE\_VISCOSITY\_TWICE} & Logical       & See Section~\ref{info:LES}                                &               & {\ct .TRUE.}     \\ \hline
 {\ct CONSTANT\_PROPERTIES}      & Logical       & See Section~\ref{gas_species_props}                       &               & {\ct .FALSE.}     \\ \hline
 %{\ct DEBUG\_OPENMP}             & Logical       & Debug flag for OpenMP                                     &               & {\ct .FALSE.}     \\ \hline
 {\ct DNS}                       & Logical       & See Section~\ref{info:MISC_Basics}                        &               & {\ct .FALSE.}     \\ \hline
 {\ct DYNSMAG}                   & Logical       & See Section~\ref{info:LES}                                &               & {\ct .FALSE.}     \\ \hline
-{\ct DSMAG\_FREQ}               & Integer       & See Section~\ref{info:LES}                                &               & 1                 \\ \hline
 {\ct EVAC\_PRESSURE\_ITERATIONS}& Integer       & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide}     &               & 50                \\ \hline
 {\ct EVAC\_TIME\_ITERATIONS}    & Integer       & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide}     &               & 50                \\ \hline
 {\ct EVACUATION\_DRILL}         & Logical       & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide}     &               & {\ct .FALSE.}     \\ \hline
