@@ -270,6 +270,7 @@ REAL(EB), PARAMETER :: ALPHA = 6.0_EB ! See Lund, 1997 CTR briefs.
 ! is important because we overwrite pointers several times to conserve memory.
 ! *****************************************************************************
 
+IF (EVACUATION_ONLY(NM)) RETURN
 CALL POINT_TO_MESH(NM)
  
 IF (PREDICTOR) THEN
@@ -915,6 +916,7 @@ TYPE(VENTS_TYPE), POINTER :: VT=>NULL()
 INTEGER :: NE,NV,IERROR
 REAL(EB), POINTER, DIMENSION(:,:) :: A_IJ=>NULL(),R_IJ=>NULL()
 
+IF (EVACUATION_ONLY(NM)) RETURN
 VENT_LOOP: DO NV=1,MESHES(NM)%N_VENT
    VT => MESHES(NM)%VENTS(NV)
    IF (VT%N_EDDY==0) CYCLE VENT_LOOP
@@ -965,6 +967,7 @@ REAL(EB) :: XX,YY,ZZ,SHAPE_FACTOR,VOLUME_WEIGHTING_FACTOR(3),EDDY_VOLUME(3)
 !
 ! See Chapter 4: The Synthetic Eddy Method
 
+IF (EVACUATION_ONLY(NM)) RETURN
 VENT_LOOP: DO NV=1,MESHES(NM)%N_VENT
    VT => MESHES(NM)%VENTS(NV)
    IF (VT%N_EDDY==0) CYCLE VENT_LOOP
