@@ -130,9 +130,11 @@ ELSE
 
    IF (T>=PART_CLOCK(NM).AND.DROPLET_FILE) THEN
       IF (SYNCHRONIZE) THEN
-         CALL DUMP_PART(T,NM)
+         IF (.NOT.EB_PART_FILE) CALL DUMP_PART(T,NM)
+         IF (     EB_PART_FILE) CALL DUMP_PART_EB(T,NM)
       ELSE
-         CALL DUMP_PART(PART_CLOCK(NM),NM)
+         IF (.NOT.EB_PART_FILE) CALL DUMP_PART(PART_CLOCK(NM),NM)
+         IF (     EB_PART_FILE) CALL DUMP_PART_EB(PART_CLOCK(NM),NM)
       ENDIF      
       DO
          PART_CLOCK(NM) = PART_CLOCK(NM) + DT_PART
@@ -3185,6 +3187,105 @@ PARTICLE_CLASS_LOOP: DO N=1,N_PART
 ENDDO PARTICLE_CLASS_LOOP
  
 END SUBROUTINE DUMP_PART
+
+
+SUBROUTINE DUMP_PART_EB(T,NM)
+
+! Dump Lagrangian particle data to CHID.prt5
+ 
+USE MEMORY_FUNCTIONS, ONLY:CHKMEMERR 
+INTEGER, INTENT(IN)  :: NM
+REAL(EB), INTENT(IN) :: T
+REAL(EB) :: STIME
+INTEGER  :: NPP,NPLIM,I,N,NN,IPC,IZERO
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: XP,YP,ZP
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: QP
+INTEGER, ALLOCATABLE, DIMENSION(:) :: TA
+ 
+IF (EVACUATION_ONLY(NM)) RETURN
+CALL POINT_TO_MESH(NM)
+ 
+! Write the current time to the prt5 file, then start looping through the particle classes
+
+STIME = T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR
+WRITE(LU_PART(NM)) STIME
+
+PARTICLE_CLASS_LOOP: DO N=1,N_PART
+   PC => PARTICLE_CLASS(N)
+   ! Count the number of particles to dump out
+   NPLIM = 0
+   DO I=1,NLP
+      DR=>DROPLET(I)
+      IPC = DR%CLASS
+      IF (DR%SHOW .AND. IPC==N) NPLIM = NPLIM + 1
+   ENDDO
+   
+   ! Allocate some temporary 4 byte arrays just to hold the data that is to be dumped to the file
+
+   ALLOCATE(TA(NPLIM),STAT=IZERO)
+   CALL ChkMemErr('DUMP','TA',IZERO) 
+   ALLOCATE(XP(NPLIM),STAT=IZERO)
+   CALL ChkMemErr('DUMP','XP',IZERO) 
+   ALLOCATE(YP(NPLIM),STAT=IZERO)
+   CALL ChkMemErr('DUMP','YP',IZERO) 
+   ALLOCATE(QP(NPLIM,PC%N_QUANTITIES),STAT=IZERO)
+   CALL ChkMemErr('DUMP','QP',IZERO) 
+   ALLOCATE(ZP(NPLIM),STAT=IZERO)
+   CALL ChkMemErr('DUMP','ZP',IZERO) 
+  
+   ! Load particle data into single precision arrays
+ 
+   NPP = 0
+   LOAD_LOOP: DO I=1,NLP
+      DR=>DROPLET(I)
+      IPC = DR%CLASS
+      IF (.NOT.DR%SHOW .OR. IPC/=N) CYCLE LOAD_LOOP
+      NPP = NPP + 1
+      IF (NPP > NPLIM) EXIT LOAD_LOOP
+      TA(NPP) = DR%TAG
+      XP(NPP) = DR%X
+      YP(NPP) = DR%Y
+      ZP(NPP) = DR%Z
+      DO NN=1,PC%N_QUANTITIES
+         SELECT CASE(PC%QUANTITIES_INDEX(NN))
+            CASE( 6)  ! U-VELOCITY
+               QP(NPP,NN) = DR%U
+            CASE( 7)  ! V-VELOCITY
+               QP(NPP,NN) = DR%V
+            CASE( 8)  ! W-VELOCITY
+               QP(NPP,NN) = DR%W
+            CASE(34)  ! DROPLET DIAMETER
+               QP(NPP,NN) = 2.E6*DR%R
+            CASE(35)  ! DROPLET VELOCITY
+               QP(NPP,NN) = SQRT(DR%U**2+DR%V**2+DR%W**2)
+            CASE(36)  ! DROPLET PHASE
+               QP(NPP,NN) = DR%IOR
+            CASE(37)  ! DROPLET TEMPERATURE
+               QP(NPP,NN) = DR%TMP - TMPM
+            CASE(38)  ! DROPLET MASS
+               QP(NPP,NN) = 1.E9_EB*PC%FTPR*DR%R**3
+            CASE(39)  ! DROPLET AGE
+               QP(NPP,NN) = T-DR%T
+         END SELECT
+      ENDDO
+   ENDDO LOAD_LOOP
+ 
+   ! Dump particle data into the .prt5 file
+
+   WRITE(LU_PART(NM)) NPLIM
+   WRITE(LU_PART(NM)) (XP(I),I=1,NPLIM),(YP(I),I=1,NPLIM),(ZP(I),I=1,NPLIM)
+   WRITE(LU_PART(NM)) (TA(I),I=1,NPLIM)
+   IF (PC%N_QUANTITIES > 0) WRITE(LU_PART(NM)) ((QP(I,NN),I=1,NPLIM),NN=1,PC%N_QUANTITIES)
+
+   DEALLOCATE(XP)
+   DEALLOCATE(YP)
+   DEALLOCATE(ZP)
+   DEALLOCATE(QP)
+   DEALLOCATE(TA)
+
+ENDDO PARTICLE_CLASS_LOOP
+ 
+END SUBROUTINE DUMP_PART_EB
 
 
 SUBROUTINE DUMP_ISOF(T,NM)
