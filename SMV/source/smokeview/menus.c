@@ -50,6 +50,7 @@ void update_glui_render();
 void PropMenu(int value);
 void initcircle(unsigned int nsegs);
 void UnLoadVolSmoke3DMenu(int value);
+void LoadVolSmoke3DMenu(int value);
 
 
 #ifdef WIN32
@@ -2142,7 +2143,7 @@ void LoadUnloadMenu(int value){
       read_device_data(devcfilename,UNLOAD);
     }
     if(nvolrenderinfo>0){
-      UnLoadVolSmoke3DMenu(UNLOAD_ALL);
+      LoadVolSmoke3DMenu(UNLOAD_ALL);
     }
     for(i=0;i<nsliceinfo;i++){
       readslice("",i,UNLOAD,&errorcode);
@@ -3158,6 +3159,7 @@ void LoadVolSmoke3DMenu(int value){
         fprintf(scriptoutstream,"LOADVOLSMOKE\n");
         fprintf(scriptoutstream," %i\n",value);
       }
+      LOCK_VOLLOAD;
       if(read_vol_mesh==-2){
         read_vol_mesh=value;
         read_volsmoke_allframes_allmeshes();
@@ -3166,11 +3168,16 @@ void LoadVolSmoke3DMenu(int value){
         printf("*** warning: 3D smoke is currently being loaded\n");
         printf("   Load data when this is complete.\n");
       }
+      UNLOCK_VOLLOAD;
     }
   }
   else if(value==UNLOAD_ALL){  // unload all
-    read_vol_mesh=-2;
-    UnLoadVolSmoke3DMenu(value);
+    LOCK_VOLLOAD;
+    if(read_vol_mesh!=-2){
+      read_vol_mesh=-2;
+      UnLoadVolSmoke3DMenu(value);
+    }
+    UNLOCK_VOLLOAD;
   }
   else if(value==LOAD_ALL){  // load all
     if(scriptoutstream!=NULL){

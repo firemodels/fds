@@ -1328,8 +1328,14 @@ void read_volsmoke_frame_allmeshes(int framenum){
     meshi = meshinfo + i;
     vr = &meshi->volrenderinfo;
     if(vr->fire==NULL||vr->smoke==NULL)continue;
+    LOCK_VOLLOAD;
+    if(read_vol_mesh==-2){
+      UNLOCK_VOLLOAD;
+      pthread_exit(NULL);
+    }
     if(read_vol_mesh!=i&&read_vol_mesh!=-1)continue;
     read_volsmoke_frame(vr,framenum,&first);
+    UNLOCK_VOLLOAD;
   }
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
@@ -1338,6 +1344,7 @@ void read_volsmoke_frame_allmeshes(int framenum){
     meshi = meshinfo + i;
     vr = &meshi->volrenderinfo;
     if(vr->fire==NULL||vr->smoke==NULL)continue;
+    LOCK_VOLLOAD;
     if(read_vol_mesh!=i&&read_vol_mesh!=-1)continue;
     if(framenum==0){
       vr->smokedata = vr->smokedataptrs[0];  //*** hack
@@ -1345,6 +1352,7 @@ void read_volsmoke_frame_allmeshes(int framenum){
     }
     vr->loaded=1;
     vr->display=1;
+    UNLOCK_VOLLOAD;
   }
 }
 
@@ -1386,6 +1394,11 @@ void read_volsmoke_allframes_allmeshes(void){
     meshi = meshinfo + i;
     vr = &meshi->volrenderinfo;
     if(vr->fire==NULL||vr->smoke==NULL)continue;
+    LOCK_VOLLOAD;
+    if(read_vol_mesh==-2){
+      UNLOCK_VOLLOAD;
+      pthread_exit(NULL);
+    }
     if(read_vol_mesh!=-1&&read_vol_mesh!=i)continue;
     get_volsmoke_all_times(vr);
     vr->loaded=1;
@@ -1393,6 +1406,7 @@ void read_volsmoke_allframes_allmeshes(void){
 #ifdef pp_GPU
     init_volsmoke_texture(meshi);
 #endif
+    UNLOCK_VOLLOAD;
   }
   plotstate=getplotstate(DYNAMIC_PLOTS);
   stept=1;
@@ -1417,7 +1431,9 @@ void init_volsmoke_texture(mesh *meshi){
   GLint border_size=0;
   GLsizei nx, ny, nz;
 
-  printf("Setting up textures for 3D smoke rendering for mesh %s ...",meshi->label);
+
+  printf("Setting 3D smoke rendering textures for mesh %s ...",meshi->label);
+  fflush(stdout);
 
   glActiveTexture(GL_TEXTURE0);
   glGenTextures(1,&meshi->smoke_texture_id);
@@ -1476,6 +1492,7 @@ void init_volsmoke_texture(mesh *meshi){
     glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_smokecolormap);
   }
   printf("complete\n");
+  fflush(stdout);
 }
 
 /* ------------------ update_3dsmoke_texture ------------------------ */

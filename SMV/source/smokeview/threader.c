@@ -23,6 +23,7 @@ void *read_volsmoke_allframes_allmeshes2(void *arg);
 void init_multi_threading(void){
 #ifdef pp_THREAD
   pthread_mutex_init(&mutexCOMPRESS,NULL);
+  pthread_mutex_init(&mutexVOLLOAD,NULL);
 #endif
 }
 
