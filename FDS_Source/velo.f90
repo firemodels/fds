@@ -69,7 +69,7 @@ ENDIF
 ! Compute viscosity for DNS using primitive species/mixture fraction
 
 !$OMP PARALLEL DEFAULT(NONE) &
-!$OMP SHARED(N_TRACKED_SPECIES,EVACUATION_ONLY,KBAR,JBAR,IBAR,SOLID,CELL_INDEX,ZZP,MU,TMP,STORE_MU_DNS,MU_DNS, &
+!$OMP SHARED(N_TRACKED_SPECIES,EVACUATION_ONLY,KBAR,JBAR,IBAR,SOLID,CELL_INDEX,ZZP,MU,TMP, &
 !$OMP        LES,NM,CSMAG,TWO_D,DX,DY,DZ,USE_MAX_FILTER_WIDTH,RDX,RDY,RDZ,UU,VV,WW,DYNSMAG,RHOP,CSD2_DYNSMAG, &
 !$OMP        N_EXTERNAL_WALL_CELLS,N_INTERNAL_WALL_CELLS,BOUNDARY_TYPE,IJKW,KRES, &
 !$OMP        IBP1,JBP1,KBP1,FISHPAK_BC) &
@@ -89,12 +89,6 @@ DO K=1,KBAR
    ENDDO
 ENDDO
 !$OMP END DO
-
-IF (STORE_MU_DNS) THEN
-   !$OMP WORKSHARE
-   MU_DNS = MU
-   !$OMP END WORKSHARE
-ENDIF
 
 ! Compute eddy viscosity using Smagorinsky model
 
@@ -2423,8 +2417,9 @@ REAL(EB) :: U_IBM,V_IBM,W_IBM,DN
 REAL(EB) :: U_ROT,V_ROT,W_ROT
 REAL(EB) :: PE,PW,PN,PS,PT,PB
 REAL(EB) :: U_DATA(0:1,0:1,0:1),XI(3),DXI(3),DXC(3),XVELO(3),XGEOM(3),XCELL(3),XEDGX(3),XEDGY(3),XEDGZ(3),XSURF(3)
-REAL(EB) :: U_VEC(3),U_GEOM(3),N_VEC(3),DIVU,GRADU(3,3),GRADP(3),TAU_IJ(3,3),RRHO,MUA,DUUDT,DVVDT,DWWDT,DELTA,WT
-INTEGER :: I,J,K,NG,IJK(3),I_VEL,IP1,IM1,JP1,JM1,KP1,KM1
+REAL(EB) :: U_VEC(3),U_GEOM(3),N_VEC(3),DIVU,GRADU(3,3),GRADP(3),TAU_IJ(3,3)
+REAL(EB) :: MU_WALL,RRHO,MUA,DUUDT,DVVDT,DWWDT,DELTA,WT
+INTEGER :: I,J,K,NG,IJK(3),I_VEL,IP1,IM1,JP1,JM1,KP1,KM1,ITMP
 TYPE(GEOMETRY_TYPE), POINTER :: G
 
 ! References:
@@ -2624,7 +2619,8 @@ GEOM_LOOP: DO NG=1,N_GEOM
                   
                         I_VEL = 1
 
-                        MUA = 0.5_EB*(MU_DNS(I,J,K)+MU_DNS(IP1,J,K))
+                        ITMP = MIN(5000,NINT(0.5_EB*(TMP(I,J,K)+TMP(IP1,J,K))))
+                        MU_WALL = MU_Z(ITMP,0)*SPECIES_MIXTURE(0)%MW
                         
                         !! use 2D for debug
                         !U_VEC(2)=U_VEC(3)
@@ -2649,7 +2645,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
                         
                         WT = MIN(1._EB,(DN/DELTA)**7._EB)
                         
-                        U_IBM = VELTAN3D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MUA,I_VEL,G%ROUGHNESS,U_IBM)
+                        U_IBM = VELTAN3D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MU_WALL,I_VEL,G%ROUGHNESS,U_IBM)
                         
                   END SELECT SELECT_METHOD1
             END SELECT
@@ -2760,11 +2756,12 @@ GEOM_LOOP: DO NG=1,N_GEOM
                   
                            I_VEL = 2
 
-                           MUA = 0.5_EB*(MU_DNS(I,J,K)+MU_DNS(I,JP1,K))
+                           ITMP = MIN(5000,NINT(0.5_EB*(TMP(I,J,K)+TMP(I,JP1,K))))
+                           MU_WALL = MU_Z(ITMP,0)*SPECIES_MIXTURE(0)%MW
                            
                            WT = MIN(1._EB,(DN/DELTA)**7._EB)
                            
-                           V_IBM = VELTAN3D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MUA,I_VEL,G%ROUGHNESS,V_IBM)
+                           V_IBM = VELTAN3D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MU_WALL,I_VEL,G%ROUGHNESS,V_IBM)
                            
                      END SELECT SELECT_METHOD2
                END SELECT
@@ -2875,7 +2872,8 @@ GEOM_LOOP: DO NG=1,N_GEOM
                   
                         I_VEL = 3 ! 2 only for debug
                   
-                        MUA = 0.5_EB*(MU_DNS(I,J,K)+MU_DNS(I,J,KP1))
+                        ITMP = MIN(5000,NINT(0.5_EB*(TMP(I,J,K)+TMP(I,J,KP1))))
+                        MU_WALL = MU_Z(ITMP,0)*SPECIES_MIXTURE(0)%MW
                         
                         !! use 2D for debug
                         !U_VEC(2)=U_VEC(3)
@@ -2900,7 +2898,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
                         
                         WT = MIN(1._EB,(DN/DELTA)**7._EB)
                         
-                        W_IBM = VELTAN3D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MUA,I_VEL,G%ROUGHNESS,W_IBM)
+                        W_IBM = VELTAN3D(U_VEC,U_GEOM,N_VEC,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MU_WALL,I_VEL,G%ROUGHNESS,W_IBM)
                         
                   END SELECT SELECT_METHOD3
             END SELECT
