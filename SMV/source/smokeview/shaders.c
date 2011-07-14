@@ -534,14 +534,12 @@ void createDepthTexture( void ){
 	}
 	
 	glGenTextures(1, &GPU_depthtexture);
-	sniffErrors("after createDepthTextures 1");
-	glBindTexture(GL_TEXTURE_RECTANGLE_EXT, GPU_depthtexture);
-	sniffErrors("after createDepthTextures 2");
-	glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	sniffErrors("after createDepthTextures 3");
-	glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_RECTANGLE_EXT, 0, GL_DEPTH_COMPONENT, screenWidth, screenHeight,
-				  0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);	
+	  glBindTexture(GL_TEXTURE_2D, GPU_depthtexture);
+	   glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, screenWidth, screenHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 					  	  
 	sniffErrors("after createDepthTextures 4");
 }
@@ -550,11 +548,9 @@ void createDepthTexture( void ){
 
 void getDepthTexture( void ){
 	if ( GPU_depthtexture==0 ) createDepthTexture();
-	glBindTexture(GL_TEXTURE_RECTANGLE_EXT, GPU_depthtexture);
-	glCopyTexSubImage2D(GL_TEXTURE_RECTANGLE_EXT, 0, 0,0,
-						 0, 0, screenWidth, screenHeight);
-	glBindTexture( GL_TEXTURE_RECTANGLE_EXT, 0);	
-	sniffErrors("after getDepthTexture");
+	glBindTexture(GL_TEXTURE_2D, GPU_depthtexture);
+	glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0,0, 0, 0, screenWidth, screenHeight);
+	glBindTexture( GL_TEXTURE_2D, 0);	
 }
 
 #define printOpenGLError() printOglError(__FILE__, __LINE__)
