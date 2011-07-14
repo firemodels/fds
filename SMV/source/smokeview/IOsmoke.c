@@ -35,8 +35,6 @@ int cullplane_compare( const void *arg1, const void *arg2 );
 // svn revision character string
 char IOsmoke_revision[]="$Revision$";
 
-char *textFileRead(char *fn);
-
 //              alphaf_out[n]=adjustalpha(ALPHAIN, xyzeyeorig, xp, ASPECTRATIO, NORM, NORMTYPE);
 
 // -------------------------- ADJUSTALPHA ----------------------------------

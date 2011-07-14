@@ -1328,6 +1328,7 @@ void read_volsmoke_frame_allmeshes(int framenum){
     meshi = meshinfo + i;
     vr = &meshi->volrenderinfo;
     if(vr->fire==NULL||vr->smoke==NULL)continue;
+    if(read_vol_mesh!=i&&read_vol_mesh!=-1)continue;
     read_volsmoke_frame(vr,framenum,&first);
   }
   for(i=0;i<nmeshes;i++){
@@ -1337,6 +1338,7 @@ void read_volsmoke_frame_allmeshes(int framenum){
     meshi = meshinfo + i;
     vr = &meshi->volrenderinfo;
     if(vr->fire==NULL||vr->smoke==NULL)continue;
+    if(read_vol_mesh!=i&&read_vol_mesh!=-1)continue;
     if(framenum==0){
       vr->smokedata = vr->smokedataptrs[0];  //*** hack
       vr->firedata = vr->firedataptrs[0];
@@ -1367,6 +1369,7 @@ void *read_volsmoke_allframes_allmeshes2(void *arg){
   for(i=0;i<nframes;i++){
     read_volsmoke_frame_allmeshes(i);
   }
+  read_vol_mesh = -2;
   return NULL;
 }
 
@@ -1383,6 +1386,7 @@ void read_volsmoke_allframes_allmeshes(void){
     meshi = meshinfo + i;
     vr = &meshi->volrenderinfo;
     if(vr->fire==NULL||vr->smoke==NULL)continue;
+    if(read_vol_mesh!=-1&&read_vol_mesh!=i)continue;
     get_volsmoke_all_times(vr);
     vr->loaded=1;
     vr->display=1;

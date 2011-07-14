@@ -3158,10 +3158,18 @@ void LoadVolSmoke3DMenu(int value){
         fprintf(scriptoutstream,"LOADVOLSMOKE\n");
         fprintf(scriptoutstream," %i\n",value);
       }
-      read_volsmoke_allframes(vr);
+      if(read_vol_mesh==-2){
+        read_vol_mesh=value;
+        read_volsmoke_allframes_allmeshes();
+      }
+      else{
+        printf("*** warning: 3D smoke is currently being loaded\n");
+        printf("   Load data when this is complete.\n");
+      }
     }
   }
   else if(value==UNLOAD_ALL){  // unload all
+    read_vol_mesh=-2;
     UnLoadVolSmoke3DMenu(value);
   }
   else if(value==LOAD_ALL){  // load all
@@ -3169,6 +3177,7 @@ void LoadVolSmoke3DMenu(int value){
       fprintf(scriptoutstream,"LOADVOLSMOKE\n");
       fprintf(scriptoutstream," -1\n");
     }
+    read_vol_mesh=-1;
     read_volsmoke_allframes_allmeshes();
   }
   updatemenu=1;  
