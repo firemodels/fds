@@ -96,11 +96,14 @@ SVEXTERN int GPUzone_odl, GPUzone_odu;
 
 SVEXTERN int GPUvol_inside, GPUvol_dir, GPUvol_eyepos, GPUvol_xyzmaxdiff, GPUvol_soot_density, GPUvol_fire;
 SVEXTERN int GPUvol_boxmin, GPUvol_boxmax, GPUvol_smokecolormap, GPUvol_dcell, GPUvol_havefire;
-SVEXTERN int GPUvol_depthtexture;
+#ifdef pp_GPUDEPTH
+SVEXTERN int GPUvol_depthtexture, GPUvol_screensize,GPUvol_nearfar;
 SVEXTERN GLuint SVDECL(depthtexture_id,0);
+#endif
 
 #endif
 
+SVEXTERN float fnear, ffar;
 SVEXTERN float partfacedir[3];
 SVEXTERN int demo_option;
 SVEXTERN int small_font_height, large_font_height;

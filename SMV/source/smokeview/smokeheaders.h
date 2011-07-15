@@ -100,8 +100,10 @@ EXTERNCPP void getPixelCount(void);
 EXTERNCPP int init_cull_exts(void);
 #endif
 #ifdef pp_GPU
-void getDepthTexture( void );
-void createDepthTexture( void );
+#ifdef pp_GPUDEPTH
+EXTERNCPP void getDepthTexture( void );
+EXTERNCPP void createDepthTexture( void );
+#endif
 EXTERNCPP int init_shaders(void);
 EXTERNCPP void LoadSmokeShaders(void);
 EXTERNCPP void LoadZoneSmokeShaders(void);

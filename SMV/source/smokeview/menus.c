@@ -3159,7 +3159,6 @@ void LoadVolSmoke3DMenu(int value){
         fprintf(scriptoutstream,"LOADVOLSMOKE\n");
         fprintf(scriptoutstream," %i\n",value);
       }
-      LOCK_VOLLOAD;
       if(read_vol_mesh==-2){
         read_vol_mesh=value;
         read_volsmoke_allframes_allmeshes();
@@ -3168,7 +3167,6 @@ void LoadVolSmoke3DMenu(int value){
         printf("*** warning: 3D smoke is currently being loaded\n");
         printf("   Load data when this is complete.\n");
       }
-      UNLOCK_VOLLOAD;
     }
   }
   else if(value==UNLOAD_ALL){  // unload all

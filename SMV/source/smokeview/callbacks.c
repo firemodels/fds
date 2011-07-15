@@ -2333,7 +2333,9 @@ void Reshape(int width, int height){
   update_camera_ypos(camera_external);
   update_windowsizelist();
 #ifdef pp_GPU
+#ifdef pp_GPUDEPTH
   createDepthTexture();
+#endif
 #endif
 }
 

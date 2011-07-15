@@ -3277,9 +3277,11 @@ typedef struct {
   printf(_(" - completed"));
   printf("\n");
 #ifdef pp_GPU
+#ifdef pp_GPUDEPTH
   if(use_graphics==1){
     createDepthTexture();
   }
+#endif
 #endif
 
   if(autoterrain==1&&use_graphics==1){

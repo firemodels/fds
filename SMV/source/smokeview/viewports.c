@@ -653,7 +653,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
 
   float up, down, left, right;
   float dh;
-  float fnear, ffar, fleft, fright, fup, fdown;
+  float fleft, fright, fup, fdown;
   float StereoCameraOffset,FrustumAsymmetry;
   float aperture_temp;
   float widthdiv2;
@@ -894,9 +894,6 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
 #ifdef pp_GPU
         if(usegpu==0){
           compute_all_smokecolors();
-        }
-        else{
-       //   getDepthTexture();
         }
 #else
         compute_all_smokecolors();
