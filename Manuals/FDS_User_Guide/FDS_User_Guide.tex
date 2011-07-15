@@ -10234,18 +10234,17 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct EVAC\_TIME\_ITERATIONS}    & Integer       & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide}     &               & 50                \\ \hline
 {\ct EVACUATION\_DRILL}         & Logical       & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide}     &               & {\ct .FALSE.}     \\ \hline
 {\ct EVACUATION\_MC\_MODE}      & Logical       & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide}     &               & {\ct .FALSE.}     \\ \hline
-%{\ct FISHPAK\_BC(3)}            & Integer       & Override FFT solver boundary conditions                   &               & -1                \\ \hline
-%{\ct FLUX\_LIMITER}             & Integer       & Scalar transport scheme                                   &               & -1                \\ \hline
-{\ct FORCE\_VECTOR(3)}          & Real          & See Section~\ref{info:force_vector}                        &               & 0.                \\ \hline
-%{\ct FREEZE\_VELOCITY}          & Logical       & Do not update momentum equation                           &               & {\ct .FALSE.}     \\ \hline
+{\ct FLUX\_LIMITER}             & Integer       & See FDS Tech Guide~\cite{FDS_Tech_Guide}                  &               & 4                 \\ \hline
+{\ct FORCE\_VECTOR(3)}          & Real          & See Section~\ref{info:force_vector}                       &               & 0.                \\ \hline
+{\ct FREEZE\_VELOCITY}          & Logical       & Constant velocity                                         &               & {\ct .FALSE.}     \\ \hline
 {\ct GAMMA}                     & Real          & See Section~\ref{info:MISC_Basics}                        &               & 1.4               \\ \hline
-{\ct GROUND\_LEVEL}             & Real          & See Section~\ref{info:stratification}                     & m             & 0.                  \\ \hline
+{\ct GROUND\_LEVEL}             & Real          & See Section~\ref{info:stratification}                     & m             & 0.                \\ \hline
 {\ct GVEC}                      & Real triplet  & See Section~\ref{info:GVEC}                               & m/s$^2$       & 0,0,-9.81         \\ \hline
 {\ct H\_EDDY}                   & Logical       & See Section~\ref{info:convection}                         &               & {\ct .FALSE.}     \\ \hline
 %{\ct IMMERSED\_BOUNDARY\_METHOD} & Logical       &                                                           &               & {\ct .FALSE.}     \\ \hline
 {\ct LAPSE\_RATE}               & Real          & See Section~\ref{info:stratification}                     &  $^\circ$C/m  & 0                 \\ \hline
 {\ct LES}                       & Logical       & See Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
-{\ct MAXIMUM\_VISIBILITY}                 & Real        & Visibility parameter                          &  m            &  30               \\ \hline
+{\ct MAXIMUM\_VISIBILITY}       & Real          & Visibility parameter                                      &  m            &  30               \\ \hline
 {\ct MEAN\_FORCING(3)}          & Logical       & See Section~\ref{info:mean_forcing}                       &               & {\ct .FALSE.}     \\ \hline
 {\ct NOISE}                     & Logical       & See Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
 {\ct NO\_EVACUATION}            & Logical       & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide}     &               & {\ct .FALSE.}     \\ \hline
@@ -10267,22 +10266,21 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SHARED\_FILE\_SYSTEM}      & Logical       & See Section~\ref{info:multimesh}                          &               & {\ct .TRUE.}      \\ \hline
 {\ct SOLID\_PHASE\_ONLY}        & Logical       & See Section~\ref{solid_phase_verification}                &               & {\ct .FALSE.}     \\ \hline
 {\ct SMOKE\_ALBEDO}             & Real          & See Smokeview User's Guide                                &               & 0.3               \\ \hline
-%{\ct STORE\_MU\_DNS}            & Logical       &                                                           &               & {\ct .FALSE.}      \\ \hline
 {\ct STRATIFICATION}            & Logical       & See Section~\ref{info:stratification}                     &               & {\ct .TRUE.}      \\ \hline
 {\ct TERRAIN\_CASE}             & Logical       & See Wildland Fire User's Guide                            &               & {\ct .FALSE.}     \\ \hline
 {\ct TEXTURE\_ORIGIN(3)}        & Char.~Triplet & See Section~\ref{info:texture_map}                        & m             & (0.,0.,0.)        \\ \hline
 {\ct THICKEN\_OBSTRUCTIONS}     & Logical       & See Section~\ref{info:OBST_Basics}                        &               & {\ct .FALSE.}     \\ \hline
-{\ct TMPA}                      & Real          & See Section~\ref{info:MISC_Basics}                         & $^\circ$C     & 20.               \\ \hline
+{\ct TMPA}                      & Real          & See Section~\ref{info:MISC_Basics}                        & $^\circ$C     & 20.               \\ \hline
 {\ct U0,V0,W0}                  & Reals         & See Section~\ref{info:MISC_Basics}                        & m/s           & 0.                \\ \hline
-{\ct VISIBILITY\_FACTOR}                  & Real        & Visibility parameter                          &               &   3               \\ \hline
+{\ct VISIBILITY\_FACTOR}        & Real          & Visibility parameter                                      &               & 3                 \\ \hline
 {\ct VN\_MAX}                   & Real          & See Section~\ref{info:CFL}                                &               & 1.0               \\ \hline
 {\ct VN\_MIN}                   & Real          & See Section~\ref{info:CFL}                                &               & 0.8               \\ \hline
 {\ct WIND\_ONLY}                & Logical       & See Wildland Fire User's Guide                            &               & {\ct .FALSE.}     \\ \hline
 \end{longtable}
 
-%Undocumented: H_LOGLAW, H_CHILTON_COLBURN, LIMITING_DT_RATIO, VAN_DRIEST, HRRPUVCUT_MAX, RUN_AVG_FAC, THERMOPHORETIC_DEPOSITION, TURBULENT_DEPOSITION,
-%               VEG_LEVEL_SET, CP_FTMP, HRRPUV_MAX_SMV, TERRAIN_IMAGE,N EW_EVAP, SCALAR_ENERGY_TOLERANCE, TKE_TOLERANCE, MEAN_FORCING, RFAC_FORCING, USE_MAX_FILTER_WIDTH,
-%               WFDS,PATCH_VELOCITY,UVW_FILE
+%Undocumented: H_LOGLAW, H_CHILTON_COLBURN, LIMITING_DT_RATIO, HRRPUVCUT_MAX, RUN_AVG_FAC, THERMOPHORETIC_DEPOSITION, TURBULENT_DEPOSITION,
+%               VEG_LEVEL_SET, CP_FTMP, HRRPUV_MAX_SMV, TERRAIN_IMAGE,N EW_EVAP, SCALAR_ENERGY_TOLERANCE, TKE_TOLERANCE, RFAC_FORCING,
+%               WFDS,UVW_FILE
 
 
 \vspace{\baselineskip}
