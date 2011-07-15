@@ -21,5 +21,8 @@ $RUNSMV Scalar_Analytical_Solution  move_slug_fl1
 
 $RUNSMV Sprinklers_and_Sprays cascade
 
+$RUNSMV Turbulence csmag_64
+$RUNSMV Turbulence dsmag_64
+
 $RUNSMV Visualization objects_static
 $RUNSMV Visualization objects_dynamic
