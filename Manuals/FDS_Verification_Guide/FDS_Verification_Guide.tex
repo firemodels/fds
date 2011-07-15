@@ -276,7 +276,7 @@ the process of compiling this Guide.
 \item Bryan Klein of NIST developed the source code version control system that is an essential part of the verification process.
 \item Anna Matala of VTT, Finland, designed the ``surf mass'' pyrolysis cases.
 \item Topi Sikanen of VTT, Finland, designed the ``particle drag'' tests cases.
-\item Joonas Ryynänen of VTT, Finland, designed and documented the FED/FIC test cases.
+\item Joonas Ryyn\"{a}nen of VTT, Finland, designed and documented the FED/FIC test cases.
 \item Craig Weinschenk, a student at the University of Texas, worked out the analytical solution to the TC heating case.
 \item Danielle Antonellis, a student at Worcester Polytechnic Institute and Summer Undergraduate Fellow at NIST, added the pulsating scalar verification test case.
 \end{itemize}
@@ -739,7 +739,7 @@ of velocity, $(x_{N/2},\bar{y}_{N/2})$, which is different in each case, $N =\{8
       \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/ns2d_32_nupt1} } &
       \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/ns2d_64_nupt1} }
    \end{tabular*}
-   \caption{Time history of the $u$-component of velocity half a grid cell below the center of the domain for a range of grid resolutions.
+   \caption[Velocity time history, qualitative convergence]{Time history of the $u$-component of velocity half a grid cell below the center of the domain for a range of grid resolutions.
    The domain is a square of side $L = 2\pi$ m.  The $N \times N$ grid is uniform.  Progressing from left to right and top to bottom we have resolutions $N =\{8,16,32,64\}$
    clearly showing convergence of the FDS numerical solution (open circles) to the analytical solution (solid line).
    The case is run with constant properties, $\rho=1$ kg/m$^3$ and $\mu = 0.1$ kg/m/s, and a CFL of 0.25.}
@@ -761,7 +761,7 @@ the corresponding location in space and time.  The figure confirms that the adve
       \scalebox{1}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/ns2d_error.pdf} } &
       \scalebox{1}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/ns2d_nupt1_error.pdf} }
    \end{tabular*}
-   \caption{(Left) Convergence rate for the $u$-component of velocity with $\nu = 0$ showing that the advective terms in the FDS code are second-order accurate.  The triangles represent the rms error in the $u$-component for grid spacings of $\delta x = L/N$ where $L = 2\pi$ m and $N = \{8,16,32,64\}$. The solid line represents first-order accuracy and the dashed line represents second-order accuracy. The simulation is run to a time of $t = 2\pi$~s with a CFL of $0.25$.  The $u$-component at the center of the domain is compared with the analytical solution at the same location.  (Right) Same case, except $\nu=0.1$, showing that the viscous terms in the FDS code are second-order accurate.}
+   \caption[Navier-Stokes convergence study]{(Left) Convergence rate for the $u$-component of velocity with $\nu = 0$ showing that the advective terms in the FDS code are second-order accurate.  The triangles represent the rms error in the $u$-component for grid spacings of $\delta x = L/N$ where $L = 2\pi$ m and $N = \{8,16,32,64\}$. The solid line represents first-order accuracy and the dashed line represents second-order accuracy. The simulation is run to a time of $t = 2\pi$~s with a CFL of $0.25$.  The $u$-component at the center of the domain is compared with the analytical solution at the same location.  (Right) Same case, except $\nu=0.1$, showing that the viscous terms in the FDS code are second-order accurate.}
    \label{fig_ns2d_convergence}
 \end{figure}
 
@@ -787,7 +787,7 @@ The decay curves for two grid resolutions are shown plotted on the left in Figur
       \scalebox{1.0}{ \includegraphics[width=3.2in]{FIGURES/cbc_0000.pdf} } &
       \scalebox{1.0}{ \includegraphics[width=3.2in]{FIGURES/cbc_0085.pdf} }
    \end{tabular*}
-   \caption{\label{fig_cbc_smv} \small Initial and final states of the isotropic turbulence field.}
+   \caption{\label{fig_cbc_smv} Initial and final states of the isotropic turbulence field.}
 \end{figure}
 
 To the right of each decay curve plot in Figure \ref{fig_cbc_energy} is the corresponding spectral data comparison.  The three black solid lines are the CBC spectral data for the points in time corresponding to dimensional times of $t = 0.00$, $0.28$, and $0.66$ seconds in our simulations.  As described above, the initial FDS velocity field (represented by the black dots) is specified to match the CBC data up to the grid Nyquist limit.  From there the spectral energy decays rapidly as discussed in \cite{McDermott:2005b}.  For each of the spectral plots on the right, the results of interest are the values of the red and blue dots and how well these match up with the corresponding CBC data.  For the $32^3$ case (top-right) the results are remarkably good.  Interestingly, the results for the more highly resolved $64^3$ case are not as good.  This is because the viscous scales are rather well-resolved at the later times in the experiment and, as mentioned, it is well-known that the constant coefficient Smagorinsky model is too dissipative under such conditions.
@@ -799,7 +799,7 @@ To the right of each decay curve plot in Figure \ref{fig_cbc_energy} is the corr
       \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_64_decay.pdf} } &
       \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_64_spectra.pdf} }
    \end{tabular*}
-   \caption{\label{fig_cbc_energy} \small (Left) Time histories of integrated kinetic energy corresponding to the grid resolutions on the right side of the figure.  In the $32^3$ case (top), the CBC data (open circles) are obtained by applying a filter to the CBC energy spectra at the Nyquist limit for an $N=32$ grid.  Similarly, for the $64^3$ case (bottom), the CBC data are obtained from filtered spectra for an $N=64$ grid.  Notice that the integrated FDS results for the $32^3$ case compare better with the filtered CBC data than the $64^3$ results.  This is a well-known limitation of the constant coefficient Smagorinsky model: namely, that the eddy viscosity does not converge to zero at the appropriate rate as the filter width (here equivalent to the grid spacing) is decreased. (Right) Energy spectra for the $32^3$ case (top) and the $64^3$ case (bottom).  The solid black lines are the spectral data of Comte-Bellot and Corrsin at three different points in time corresponding to downstream positions in the turbulent wind tunnel.  The initial condition for the velocity field (spectra shown as black dots) in the FDS simulation is prescribed such that the energy spectrum matches the initial CBC data.  The FDS energy spectra corresponding to the subsequent CBC data are shown by the red and blue dots. The vertical dashed line represents the wavenumber of the grid Nyquist limit. }
+   \caption[Integrated and spectral energy decay for Comte-Bellot Corrsin experiment using constant coefficient Smagorinsky.]{\label{fig_cbc_energy} \small (Left) Time histories of integrated kinetic energy corresponding to the grid resolutions on the right side of the figure.  In the $32^3$ case (top), the CBC data (open circles) are obtained by applying a filter to the CBC energy spectra at the Nyquist limit for an $N=32$ grid.  Similarly, for the $64^3$ case (bottom), the CBC data are obtained from filtered spectra for an $N=64$ grid.  Notice that the integrated FDS results for the $32^3$ case compare better with the filtered CBC data than the $64^3$ results.  This is a well-known limitation of the constant coefficient Smagorinsky model: namely, that the eddy viscosity does not converge to zero at the appropriate rate as the filter width (here equivalent to the grid spacing) is decreased. (Right) Energy spectra for the $32^3$ case (top) and the $64^3$ case (bottom).  The solid black lines are the spectral data of Comte-Bellot and Corrsin at three different points in time corresponding to downstream positions in the turbulent wind tunnel.  The initial condition for the velocity field (spectra shown as black dots) in the FDS simulation is prescribed such that the energy spectrum matches the initial CBC data.  The FDS energy spectra corresponding to the subsequent CBC data are shown by the red and blue dots. The vertical dashed line represents the wavenumber of the grid Nyquist limit. }
 \end{figure}
 
 Overall, the agreement between the FDS simulations and the CBC data is satisfactory and any discrepancies can be explained by limitations of the model.  Therefore, as a verification the results here are positive in that nothing points to coding errors.
@@ -819,7 +819,7 @@ The dynamic procedure for calculating the model coefficient (invoked by setting 
 \begin{figure}[t]
    \begin{center}
       \includegraphics[height=3.00in]{FIGURES/c_smag.pdf}
-      \caption{\label{fig_c_smag} \small Smagorinsky coefficient for a $64^3$ simulation of the CBC experiment.}
+      \caption{\label{fig_c_smag} Smagorinsky coefficient for a $64^3$ simulation of the CBC experiment.}
    \end{center}
 \end{figure}
 
@@ -832,7 +832,7 @@ Next, in Figure \ref{fig_dynsmag_cbc}, we show results for the dynamic model ana
       \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/dsmag_64_decay.pdf} } &
       \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/dsmag_64_spectra.pdf} }
    \end{tabular*}
-   \caption{\label{fig_dynsmag_cbc} \small Dynamic Smagorinsky model results (analogous to Figure \ref{fig_cbc_energy}) for integrated kinetic energy (left) and spectra (right).}
+   \caption[Integrated and spectral energy decay for Comte-Bellot Corrsin experiment using dynamic Smagorinsky.]{\label{fig_dynsmag_cbc} Dynamic Smagorinsky model results (analogous to Figure \ref{fig_cbc_energy}) for integrated kinetic energy (left) and spectra (right).}
 \end{figure}
 
 
@@ -888,7 +888,7 @@ is determined from the steady state mean velocity $\bar{u}$ which is output by F
 \begin{figure}
    \begin{center}
       \scalebox{.7}{\includegraphics{SCRIPT_FIGURES/poiseuille_convergence.pdf}}
-      \caption{\label{fig_poiseuille_convergence} \small FDS exhibits second-order convergence for laminar (Poiseuille) flow in a 2D channel.}
+      \caption[Convergence for laminar (Poiseuille) flow in a 2D channel]{\label{fig_poiseuille_convergence} FDS exhibits second-order convergence for laminar (Poiseuille) flow in a 2D channel.}
    \end{center}
 \end{figure}
 
@@ -926,7 +926,7 @@ $\mbox{d}p/\mbox{d}x$   & \multicolumn{3}{c|}{$z^+$} &  Re$_H$  & $f$ FDS  & $f$
 \begin{figure}
    \begin{center}
       \scalebox{0.6}{\includegraphics{FIGURES/channel_flow_setup.pdf}}
-      \caption{\label{fig_channel_flow_setup} \small LES of square channel flow with smooth walls and periodic streamwise boundaries using dynamic Smagorinsky and the Werner Wengle wall model.  For this image $N_z=32$ and the mean pressure drop is $\mbox{d}p/\mbox{d}x = -1$ Pa m$^{-1}$ resulting in Re$_H = 7.5\times 10^5$ and a friction factor of $f=0.0128$.}
+      \caption[LES of square duct flow]{\label{fig_channel_flow_setup} LES of square duct flow with smooth walls and periodic streamwise boundaries using dynamic Smagorinsky and the Werner Wengle wall model.  For this image $N_z=32$ and the mean pressure drop is $\mbox{d}p/\mbox{d}x = -1$ Pa m$^{-1}$ resulting in Re$_H = 7.5\times 10^5$ and a friction factor of $f=0.0128$.}
    \end{center}
 \end{figure}
 
@@ -936,7 +936,7 @@ With the same grid set up as described above the smooth walls, a series of cases
 \begin{figure}
    \begin{center}
       \scalebox{0.9}{\includegraphics{SCRIPT_FIGURES/fds_moody_chart.pdf}}
-      \caption{\label{fig_fds_moody_chart} \small The FDS Moody Chart: friction factor, $f$, versus Reynolds number, Re. The solid line for $\mbox{Re} < 2000$ is the analytical result for 2D Poiseuille flow, $f=24/\mbox{Re}$. The solid lines for $\mbox{Re}>2000$ (from the Colebrook equation (\ref{eqn_colebrook})) are for turbulent flow at various levels of relative roughness $z_0/H$ shown on the right axis.  Stars are DNS results from FDS at a single grid resolution ($N_z=64$). Symbols are FDS results for 3D LES with dynamic Smagorinsky.  Black symbols show results for the Werner Wengle wall model at three grid resolutions ($N_z=\{8,16,32\}$).  Colored symbols are FDS results for the rough wall cases at different grid resolutions and relative roughnesses as differentiated by the symbol shapes.}
+      \caption[FDS Moody chart]{\label{fig_fds_moody_chart} The FDS Moody chart: friction factor, $f$, versus Reynolds number, Re. The solid line for $\mbox{Re} < 2000$ is the analytical result for 2D Poiseuille flow, $f=24/\mbox{Re}$. The solid lines for $\mbox{Re}>2000$ (from the Colebrook equation (\ref{eqn_colebrook})) are for turbulent flow at various levels of relative roughness $z_0/H$ shown on the right axis.  Stars are DNS results from FDS at a single grid resolution ($N_z=64$). Symbols are FDS results for 3D LES with dynamic Smagorinsky.  Black symbols show results for the Werner Wengle wall model at three grid resolutions ($N_z=\{8,16,32\}$).  Colored symbols are FDS results for the rough wall cases at different grid resolutions and relative roughnesses as differentiated by the symbol shapes.}
    \end{center}
 \end{figure}
 
@@ -1046,7 +1046,7 @@ An example of the solution to (\ref{eqn_2dsoln}) is shown in Figure \ref{fig_pul
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/pulsating_time_series.pdf} &
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/pulsating_convergence.pdf}
    \end{tabular}
-         \caption{(Left) Time series of $\rho$ at the position $(x,y) = (3\pi/2, 3\pi/2)$ for several grid resolutions using the Superbee limiter. (Right) Convergence plot for central differencing, Superbee, and CHARM.  All schemes are second-order accurate.}
+         \caption[Pulsating wave convergence]{(Left) Time series of $\rho$ at the position $(x,y) = (3\pi/2, 3\pi/2)$ for several grid resolutions using the Superbee limiter. (Right) Convergence plot for central differencing, Superbee, and CHARM.  All schemes are second-order accurate.}
    \label{fig_pulsating 2D wave}
 \end{figure}
 
@@ -1131,7 +1131,7 @@ An example of the solution to (\ref{eqn_stat2d_soln}) is shown in Figure \ref{fi
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/compression_wave_time_series.pdf} &
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/compression_wave_convergence.pdf}
    \end{tabular}
-   \caption{(Left) Time series of $\rho$ at the position $(x,y) = (3\pi/2, 3\pi/2)$ for several grid resolutions using the CHARM flux limiter. (Right) Convergence plot for three different scalar transport schemes in FDS: central, Superbee, and CHARM.  All schemes are second-order accurate.  In addition, notice that Superbee gives the lowest error at the coarsest resolution while CHARM gives the lowest error at higher resolution.  This is one reason why Superbee is recommended for LES and CHARM is the default for DNS.}
+   \caption[Stationary compression wave convergence]{(Left) Time series of $\rho$ at the position $(x,y) = (3\pi/2, 3\pi/2)$ for several grid resolutions using the CHARM flux limiter. (Right) Convergence plot for three different scalar transport schemes in FDS: central, Superbee, and CHARM.  All schemes are second-order accurate.  In addition, notice that Superbee gives the lowest error at the coarsest resolution while CHARM gives the lowest error at higher resolution.  This is one reason why Superbee is recommended for LES and CHARM is the default for DNS.}
    \label{fig_compression_wave}
 \end{figure}
 
@@ -1163,7 +1163,7 @@ this test case confirms that relatively low levels of diffusion are incurred at 
       \includegraphics[width=3in]{SCRIPT_FIGURES/move_slug_FL2_tf.png} &
       \includegraphics[width=3in]{SCRIPT_FIGURES/move_slug_FL1_tf.png} \\
    \end{tabular}
-   \caption{(Upper left) Initial condition. (Upper right) Superbee solution after 0.175 seconds showing the scalar slug cleanly passing through the mesh interface. (Lower left) Final result for Superbee after one flow through time.  (Lower right) Result for first-order upwinding after one flow through time, illustrating the relatively low dissipation of the Superbee scheme.  Note that, though the first-order scheme is available as an option in FDS, it is presented here for comparison purposes only.  In practice, the higher order Superbee scheme is preferred for LES (FDS default).}
+   \caption[Multi-mesh square wave transport]{(Upper left) Initial condition. (Upper right) Superbee solution after 0.175 seconds showing the scalar slug cleanly passing through the mesh interface. (Lower left) Final result for Superbee after one flow through time.  (Lower right) Result for first-order upwinding after one flow through time, illustrating the relatively low dissipation of the Superbee scheme.  Note that, though the first-order scheme is available as an option in FDS, it is presented here for comparison purposes only.  In practice, the higher order Superbee scheme is preferred for LES (FDS default).}
    \label{fig_move_slug}
 \end{figure}
 
@@ -1322,7 +1322,7 @@ this off almost immediately.
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test.png} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test.pdf}
 \end{tabular*}
-\caption[The symmetry\_test case.]{Flow field (left) and velocity component plot (right) for the symmetry\_test case.}
+\caption[The {\bf symmetry\_test} case.]{Flow field (left) and velocity component plot (right) for the symmetry\_test case.}
 \label{symmetry_test}
 \end{figure}
 
@@ -2629,7 +2629,7 @@ where K is the loss coefficient for the duct and $\Delta P$ is the pressure drop
 \begin{figure}[ht]
    \begin{center}
       \includegraphics[height=3.00in]{SCRIPT_FIGURES/HVAC_flow_loss.pdf}
-     \caption{\label{fig_HVAC_loss} \small Duct velocities with varied duct flow loss.}
+     \caption{\label{fig_HVAC_loss} Duct velocities with varied duct flow loss.}
    \end{center}
 \end{figure}
 
@@ -2693,7 +2693,7 @@ flux related to details of the numerical solver.  The results are shown in Fig.~
 \begin{figure}[ht]
    \begin{center}
       \includegraphics[height=3.00in]{SCRIPT_FIGURES/leak_test.pdf}
-     \caption{\label{leak_test} \small Pressure rise in sealed compartment with leakage.}
+     \caption{\label{leak_test} Pressure rise in sealed compartment with leakage.}
    \end{center}
 \end{figure}
 
