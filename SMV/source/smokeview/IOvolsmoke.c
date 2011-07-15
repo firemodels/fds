@@ -438,7 +438,7 @@ void compute_all_smokecolors(void){
 
     meshi = meshinfo + ii;
     vr = &(meshi->volrenderinfo);
-    if(vr->loaded==0||vr->loaded==0)continue;
+    if(vr->loaded==0||vr->display==0)continue;
 
     x = meshi->xplt;
     y = meshi->yplt;
@@ -960,7 +960,8 @@ void drawsmoke3dGPUVOL(void){
   if(smoke3dVoldebug==1){
     drawsmoke3dVOLdebug();
   }
-
+  
+  glUniform1i(GPUvol_depthtexture,3);
   glUniform3f(GPUvol_eyepos,xyzeyeorig[0],xyzeyeorig[1],xyzeyeorig[2]);
   glUniform1f(GPUvol_xyzmaxdiff,xyzmaxdiff);
   if(use_transparency_data==1)transparenton();

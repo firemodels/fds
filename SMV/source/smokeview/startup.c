@@ -2001,10 +2001,6 @@ int getrevision(char *svn){
 void initvars0(void){
   int i;
 
-#ifdef pp_GPU
-  GPU_depthtexture=0;
-#endif
-
   for(i=0;i<256;i++){
     boundarylevels256[i]=(float)i/255.0;
   }

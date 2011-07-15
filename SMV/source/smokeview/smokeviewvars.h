@@ -85,7 +85,6 @@ SVEXTERN int GPU_smoke3d_rthick, GPU_skip, GPU_hrrcutoff, GPU_hrr, GPU_hrrpuv_ma
 SVEXTERN int GPU_firecolor, GPU_is_smoke, GPU_smokecolormap;
 SVEXTERN int GPU_smokeshade,GPU_smokealpha;
 SVEXTERN int GPU_adjustalphaflag;
-SVEXTERN unsigned int GPU_depthtexture;
 
 SVEXTERN int GPUzone_zonedir;
 SVEXTERN int GPUzone_zoneinside;
@@ -97,6 +96,8 @@ SVEXTERN int GPUzone_odl, GPUzone_odu;
 
 SVEXTERN int GPUvol_inside, GPUvol_dir, GPUvol_eyepos, GPUvol_xyzmaxdiff, GPUvol_soot_density, GPUvol_fire;
 SVEXTERN int GPUvol_boxmin, GPUvol_boxmax, GPUvol_smokecolormap, GPUvol_dcell, GPUvol_havefire;
+SVEXTERN int GPUvol_depthtexture;
+SVEXTERN GLuint SVDECL(depthtexture_id,0);
 
 #endif
 

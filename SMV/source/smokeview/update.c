@@ -785,7 +785,7 @@ void synctimes(void){
 
         meshi=meshinfo+igrid;
         vr = &meshi->volrenderinfo;
-        if(vr->smoke==NULL||vr->fire==NULL)continue;
+        if(vr->smoke==NULL)continue;
         if(vr->loaded==0||vr->display==0)continue;
         if(vr->times==NULL)continue;
         if(n==0){
@@ -1039,7 +1039,7 @@ void updatetimes(void){
 
       meshi=meshinfo + i;
       vr = &meshi->volrenderinfo;
-      if(vr->smoke==NULL||vr->fire==NULL)continue;
+      if(vr->smoke==NULL)continue;
       if(vr->loaded==0||vr->display==0)continue;
       for(n=0;n<vr->nframes;n++){
         float t_diff;

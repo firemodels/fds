@@ -170,13 +170,22 @@ int setVolSmokeShaders() {
   GLint error_code;
   const GLchar *FragmentShaderSource[]={
     "uniform sampler1D smokecolormap;"
+    "uniform sampler2D depthtexture;"
     "uniform sampler3D soot_density_texture,fire_texture;"
     "uniform int dir,inside,havefire;"
     "uniform float xyzmaxdiff,dcell;"
     "uniform vec3 eyepos,boxmin, boxmax;"
     "varying vec3 fragpos;"
     
+    "float LinearizeDepth(vec2 uv){"
+    "  float near = 0.001;"
+    "  float far = 3.0;"
+    "  float z = texture2D(depthtexture, uv).x;"
+    "  return (2.0 * near) / (far + near - z * (far - near));"
+    "}"
     "void main(){"
+//    "  vec2 uv = gl_TexCoord[0].xy;"
+    "  float d;"
     "  vec3 dalphamin,dalphamax,fragmaxpos,posi;"
     "  vec3 pt_soot, pt_color,cum_color;"
     "  float opacity,alpha_min,factor,pathdist,k;"
@@ -227,7 +236,9 @@ int setVolSmokeShaders() {
     "    tauhat *= taui;"
     "  }"
     "  cum_color /= alphahat;"
+//    "  d = LinearizeDepth(uv);"
     "  gl_FragColor = vec4(cum_color,alphahat);"
+//    "  gl_FragColor = vec4(d,d,d,1.0);"
     "}" // end of main
   };
 
@@ -286,6 +297,7 @@ int setVolSmokeShaders() {
   GPUvol_inside = glGetUniformLocation(p_volsmoke,"inside");
   GPUvol_dir    = glGetUniformLocation(p_volsmoke,"dir");
   GPUvol_eyepos = glGetUniformLocation(p_volsmoke,"eyepos");
+  GPUvol_depthtexture = glGetUniformLocation(p_volsmoke,"depthtexture");
   GPUvol_dcell = glGetUniformLocation(p_volsmoke,"dcell");
   GPUvol_xyzmaxdiff = glGetUniformLocation(p_volsmoke,"xyzmaxdiff");
   GPUvol_boxmin = glGetUniformLocation(p_volsmoke,"boxmin");
@@ -528,29 +540,28 @@ int init_shaders(void){
 /* ------------------ createDepthTexture ------------------------ */
 
 void createDepthTexture( void ){
-  if ( GPU_depthtexture!=0 ){
-		glDeleteTextures( 1, &GPU_depthtexture );
-		GPU_depthtexture = 0;
+  if ( depthtexture_id!=0 ){
+		glDeleteTextures( 1, &depthtexture_id );
+		depthtexture_id = 0;
 	}
 	
-	glGenTextures(1, &GPU_depthtexture);
-	  glBindTexture(GL_TEXTURE_2D, GPU_depthtexture);
+  glActiveTexture(GL_TEXTURE3);
+	glGenTextures(1, &depthtexture_id);
+	  glBindTexture(GL_TEXTURE_2D, depthtexture_id);
 	   glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, screenWidth, screenHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);	
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-					  	  
-	sniffErrors("after createDepthTextures 4");
 }
 
 /* ------------------ getDepthTexture ------------------------ */
 
 void getDepthTexture( void ){
-	if ( GPU_depthtexture==0 ) createDepthTexture();
-	glBindTexture(GL_TEXTURE_2D, GPU_depthtexture);
+	if ( depthtexture_id==0 ) createDepthTexture();
+    glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, depthtexture_id);
 	glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0,0, 0, 0, screenWidth, screenHeight);
-	glBindTexture( GL_TEXTURE_2D, 0);	
 }
 
 #define printOpenGLError() printOglError(__FILE__, __LINE__)
