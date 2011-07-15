@@ -784,8 +784,8 @@ To provide the reader with a qualitative sense of the flow, Figure \ref{fig_cbc_
 The decay curves for two grid resolutions are shown plotted on the left in Figure \ref{fig_cbc_energy}.  For an LES code such as FDS which uses a physically-based subgrid model, an important verification test is to run this periodic isotropic turbulence simulation in the absence of both molecular and turbulent viscosity.  For so-called ``energy-conserving'' explicit numerics the integrated energy will remain nearly constant in time.  This is demonstrated by the blue line in the top-left plot in Figure \ref{fig_cbc_energy}.  The deviations from identical energy conservation (to machine precision) are due solely to the time discretization (the spatial terms are conservative as discussed in \cite{Morinishi}) and converge to zero as the time step goes to the zero.  Note that strict energy conservation requires implicit time integration \cite{Ham,McDermott:2007b} and, as shown by the red curve on the same plot where only molecular viscosity is present in the simulation, this cost is unwarranted given that the molecular dissipation rate clearly overshadows the relatively insignificant amount of numerical dissipation caused by the explicit method.  The FDS result using the Smagorinsky eddy viscosity (the black solid line) matches the CBC data (red open circles) well for the $32^3$ case (top-left).  However, the FDS results are slightly too dissipative in the $64^3$ case (bottom-left).  This is due to a well-known limitation of the constant coefficient Smagorinsky model: namely, that the eddy viscosity does not converge to zero at the appropriate rate as the filter width (here equivalent to the grid spacing) is decreased.
 \begin{figure}[t]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{FIGURES/cbc_0000.pdf} } &
-      \scalebox{1.0}{ \includegraphics[width=3.2in]{FIGURES/cbc_0085.pdf} }
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_64_000} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/csmag_64_689} }
    \end{tabular*}
    \caption{\label{fig_cbc_smv} Initial and final states of the isotropic turbulence field.}
 \end{figure}
@@ -818,7 +818,7 @@ The dynamic procedure for calculating the model coefficient (invoked by setting 
 
 \begin{figure}[t]
    \begin{center}
-      \includegraphics[height=3.00in]{FIGURES/c_smag.pdf}
+      \includegraphics[height=3.00in]{SCRIPT_FIGURES/dsmag_64_300}
       \caption{\label{fig_c_smag} Smagorinsky coefficient for a $64^3$ simulation of the CBC experiment.}
    \end{center}
 \end{figure}
@@ -1628,7 +1628,7 @@ This is essentially what is plotted in Fig.~\ref{TC_view_factor_plot}, compared 
 \section{Radiation Shield (\texorpdfstring{{\bf radiation\_shield}}{radiation\_shield}) }
 \label{radiation_shield}
 
-A lead radiation shield with a thickness of 0.1~mm is placed between two infinitely wide parallel plates at 500~$^\circ$C and 20~$^\circ$C. 
+A lead radiation shield with a thickness of 0.1~mm is placed between two infinitely wide parallel plates at 500~$^\circ$C and 20~$^\circ$C.
 The computational domain has dimensions of 10~m by 0.1~m by 1~m. The sides of the domain are assumed to be symmetry planes.
 The emissivity, $\varepsilon_{3}$, of the lead shield is 0.48 on both sides.  At 400~s, the shield is removed.
 Assuming that there is no convective heat transfer and that the emissivity of the hot and cold plates is 1,
@@ -1636,8 +1636,8 @@ the steady state heat flux to the cold plate should be~\cite{Incropera:1}:
 \be
    \dq_{12}'' = \frac{\sigma(T_{1}^{4}-T_{2}^{4})}{\frac{1}{\varepsilon_1}+\frac{1}{\varepsilon_2}+2 \left(\frac{1-\varepsilon_3}{\varepsilon_3} \right)} = 4.76 \; \hbox{kW/m}^2
 \ee
-where $T_{1}$ and $T_{2}$ are the hot and cold plate temperatures, respectively, and $\varepsilon_1$, $\varepsilon_2$, and $\varepsilon_3$ are the 
-emissivity values for the hot plate, cold plate, and lead shield, respectively. When the shield is removed at 400~s, the heat flux should increase to 19.8~kW/m$^2$. 
+where $T_{1}$ and $T_{2}$ are the hot and cold plate temperatures, respectively, and $\varepsilon_1$, $\varepsilon_2$, and $\varepsilon_3$ are the
+emissivity values for the hot plate, cold plate, and lead shield, respectively. When the shield is removed at 400~s, the heat flux should increase to 19.8~kW/m$^2$.
 The predicted heat flux is given in Fig.~\ref{radiation_shield_plot}.
 \noindent
 \begin{figure}[h]
@@ -1647,8 +1647,8 @@ The predicted heat flux is given in Fig.~\ref{radiation_shield_plot}.
 Temperature of a the heat shield.}
 \label{radiation_shield_plot}
 \end{figure}
- 
-Because the heat flux from the hot plate to the shield is equal to the heat flux from the hot plate to the cold plate, 
+
+Because the heat flux from the hot plate to the shield is equal to the heat flux from the hot plate to the cold plate,
 the shield temperature can be found from the following formula~\cite{Incropera:1}:
 \be
    \dq_{12}'' = \dq_{13}'' = \frac{\sigma(T_{1}^{4}-T_{3}^{4})}{\frac{1}{\varepsilon_1}+\frac{1}{\varepsilon_3}-1} \quad ; \quad T_3=380.4 \; ^\circ\hbox{C}
