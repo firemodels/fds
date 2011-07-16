@@ -45,6 +45,8 @@ A model of a liquid fuel spray burner used for fire tests at NIST.
       MATL_ID   = 'GYPSUM'
       THICKNESS = 0.0254 /
 
+&DUMP DT_HRR=1. /
+
 &DEVC ID='nozzle_1', XYZ=4.0,-.3,0.5, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=0. /
 &DEVC ID='nozzle_2', XYZ=4.0,0.3,0.5, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=0. /
 
@@ -67,7 +69,6 @@ Median Droplet Diameter was estimated from Weber number correlation
 &RAMP ID='fuel', T=20.0, F=1.0 /
 &RAMP ID='fuel', T=40.0, F=1.0 /
 &RAMP ID='fuel', T=60.0, F=0.0 /
-
 
 &VENT MB='XMIN', SURF_ID='OPEN' /
 &VENT MB='XMAX', SURF_ID='OPEN' /
