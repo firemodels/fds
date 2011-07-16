@@ -6,6 +6,8 @@ An ISO 9701 compartment with a fan blowing into it, a small fire, and a crack un
 
 &TIME T_END=300.0 /
 
+&DUMP DT_DEVC=5., DT_HRR=5. /
+
 &SURF ID='DOOR CRACK', LEAK_PATH=1,0, POROUS=.TRUE. /
 &SURF ID='BURNER', COLOR='YELLOW', HRRPUA=1000. /
 &REAC C=3,H=8,SOOT_YIELD=0.01,FUEL='PROPANE'/
