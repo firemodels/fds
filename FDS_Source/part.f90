@@ -1017,6 +1017,8 @@ DROPLET_LOOP: DO I=1,NLP
       ALPHA = FP_MASS/DR_MASS
       OPA   = 1._EB+ALPHA
       BDTOA = BETA*DT/OPA
+	  ! second-order parallel correction term for the droplet velocities
+	  PARACOR = (UREL*GVEC(1) + VREL*GVEC(2) + WREL*GVEC(3))/(QREL*QREL + 1.E-10_EB)
                
       DR%U = ( U_OLD + (U_OLD+ALPHA*UBAR)*BDTOA )/OBDT
       DR%V = ( V_OLD + (V_OLD+ALPHA*VBAR)*BDTOA )/OBDT
@@ -1044,9 +1046,6 @@ DROPLET_LOOP: DO I=1,NLP
          DR%Y = Y_OLD + (V_OLD + 0.5_EB*GVEC(2)*DT)*DT
          DR%Z = Z_OLD + (W_OLD + 0.5_EB*GVEC(3)*DT)*DT
       ENDIF
-      
-	  ! second-order parallel correction term for the droplet velocities
-	  PARACOR = (UREL*GVEC(1) + VREL*GVEC(2) + WREL*GVEC(3))/(QREL*QREL + 1.E-10_EB)
 	  
       ! gravitational acceleration
       DR%U = DR%U + GVEC(1)*DT - 0.5_EB*ALPHA*BETA*DT*DT*(GVEC(1) + UREL*PARACOR)/OPA
