@@ -38,6 +38,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{upquote}
 %\usepackage{array,eqnarray}
+\usepackage{amsmath}
 \newcommand{\nopart}{\expandafter\def\csname Parent-1\endcsname{}} % To fix table of contents in pdf.
 \newcommand{\ct}{\tt\small}
 
@@ -271,7 +272,7 @@ The following individuals contributed to the verification process of FDS.
 \item Chris Lautenburger and Carlos Fernandez-Pello contributed the ``two-reaction'' test case.
 \item Matthias M\"{u}nch of the Freie Universit\"{a}t Berlin provided useful test cases for the basic flow solver.
 \item Susanne Kilian of hhpberlin (Germany) helped to debug the improved pressure solver.
-\item Clara Cruz, a student at the University of Puerto Rico and Summer Undergraduate Fellow at NIST, helped developed useful Matlab scripts to automate
+\item Clara Cruz, a student at the University of Puerto Rico and Summer Undergraduate Fellow at NIST, helped develop useful Matlab scripts to automate
 the process of compiling this Guide.
 \item Bryan Klein of NIST developed the source code version control system that is an essential part of the verification process.
 \item Anna Matala of VTT, Finland, designed the ``surf mass'' pyrolysis cases.
@@ -2608,6 +2609,91 @@ As opposed to the other cases above, this case tests the predicted rate of evapo
 \end{tabular*}
 \caption[Sample cases {\bf water\_evaporation\_4} and {\bf water\_evaporation\_5}.]{Output of {\bf water\_evaporation} cases 4 and 5.}
 \label{water_evaporation_4_plots}
+\end{figure}
+
+
+
+\section{Particles in 1D (terminal\_velocity)}
+If a single droplet having a constant drag coefficient falls through a stationary fluid, its velocity and trajectory can be found analytically. This is the ``terminal velocity'' case. The particle starts from rest and falls under the influence of gravity and drag in 1D. FDS runs until a steady-state solution is reached. The equation governing this motion is
+\[
+	\dot{u} = K u^2 - g \quad ; \quad K \equiv \frac{\rho_a C_d A}{2 m}
+\]
+$\rho_a$ is the ambient air density, $C_d$ is the drag coefficient of the droplet, $A$ is the cross-sectional area of the droplet, and $m$ is the mass of the droplet. Defining $\rho_d$ as the density of the droplet and $D_d$ as the diameter of the droplet and solving this ODE with zero ICs, the solution below and equivalent definition of $K$ for a droplet is found.
+% D = 10 mm
+% Cd = 1.0
+% g = -9.8 m/s^2
+\be
+	u = \frac{d x}{d t} = - \sqrt{\frac{g}{K}} \text{tanh}\left(\sqrt{g K} t\right) \quad ; \quad
+	x = - \frac{\text{ln}\left[\text{cosh}\left(\sqrt{g K} t \right)\right]}{K} \quad ; \quad
+	K \equiv \frac{3 \rho_a C_d}{4 \rho_d D_d}
+\ee
+FDS ran the terminal velocity case over several time steps. The precise configuration of the scenario is detailed in the table below. The error of this terminal velocity and the L$_\infty$ norm of position error are computed and plotted for each time step.
+\begin{center}
+\begin{tabular}{|r|c|l|}
+\hline
+Drag coefficient of droplet & $C_d$ & 1 \\
+Diameter of droplet & $D_d$ & 10~mm \\
+Gravitational acceleration & $g$ & 9.8~m/s$^2$ \\
+Droplet fluid density & $\rho_d$ & 1000~kg/m$^3$ \\
+\hline
+\end{tabular}
+\end{center}
+FDS demonstrated second-order convergence in the terminal velocity case for both the velocities and the positions. See figures \ref{fig_terminal_velocity_convergence} and \ref{fig_position_convergence}.
+\begin{figure}
+   \begin{center}
+      \scalebox{.7}{\includegraphics{SCRIPT_FIGURES/terminal_velocity_convergence}}
+      \caption{\label{fig_terminal_velocity_convergence} \small FDS exhibits second-order convergence for the particle velocity in the terminal velocity case.}
+   \end{center}
+\end{figure}
+\begin{figure}
+   \begin{center}
+      \scalebox{.7}{\includegraphics{SCRIPT_FIGURES/position_convergence}}
+      \caption{\label{fig_position_convergence} \small FDS exhibits second-order convergence for the particle position in the terminal velocity case.}
+   \end{center}
+\end{figure}
+\section{2D Flat Fire Trajectory (flat\_fire)}
+There are no known solutions of the drag equations in higher dimensions. However, ballisticians have developed an approximate solution useful for computing trajectories of projectiles when guns are shot within a certain range of angles. This solution makes use of the ``flat fire'' assumption. In short, if a particle is launched with its velocity in only the $x$-direction and its $y$-velocity is never very significant compared against the $x$-velocity, then throughout the entire trajectory $u$ is a good approximation for $|\mathbf{u}|$.
+
+
+%In 2D, this approximation decouples the $x$ equation of motion from the $y$ equation of motion and reduces the $y$ equation of motion to a linear ODE.
+%\begin{align*}
+%	\ddot{x} = -K \dot{x} \sqrt{\dot{x}^2 + \dot{y}^2} \quad &; \quad \ddot{y} = -K \dot{y} \sqrt{\dot{x}^2 + \dot{y^2}} - g \\
+%	&\Downarrow \\
+%	\ddot{x} = -K \dot{x}^2 \quad &; \quad \ddot{y} = -K \dot{y} \dot{x} - g
+%\end{align*}
+To ensure that the flat fire assumption is valid, the following ICs are used: $x(0) = 0$, $\dot{x}(0) = u(0) = V_0$, $y(0) = h$, $\dot{y}(0) = v(0) = 0$. The exact solution to this system is below.
+\be
+	x = \frac{\text{log}(V_0 K t + 1)}{K} \quad ; \quad
+	y = h + \frac{g \text{log}(V_0 K t + 1)}{2 (K V_0)^2} - \frac{g t^2}{4} - \frac{g t}{2 K V_0} \quad ; \quad
+	K \equiv \frac{3 \rho_a C_d}{4 \rho_d D_d}
+\ee
+\be
+	u = \frac{d x}{d t} = \frac{V_0}{V_0 K t + 1} \quad ; \quad v = \frac{d y}{d t} = \frac{g}{2 K V_0 (K V_0 t + 1)} - \frac{g t}{2} - \frac{g}{2 K V_0}
+\ee
+The following case was run in FDS and compared against the approximate solution:
+\begin{center}
+\begin{tabular}{|r|c|l|}
+\hline
+Drag coefficient of droplet & $C_d$ & 0.2 \\
+Diameter of droplet & $D_d$ & 5~mm \\
+Gravitational acceleration & $g$ & 9.8~m/s$^2$ \\
+Droplet fluid density & $\rho_d$ & 1000~kg/m$^3$ \\
+Starting $x$-velocity & $V_0$ & 400~m/s \\
+\hline
+\end{tabular}
+\end{center}
+As can be seen in figure \ref{flat_fire_plots}, FDS agrees well with this approximate solution. The flat fire solution should have slightly faster $v$-velocities at extended times because the speed of the particle is approximated with $u$, which is lower than the true speed at extended times. This ensures the drag force is lower than it should be, and consequently, the $v$-velocity is too fast. In the lower left plot in \ref{flat_fire_plots} the $v$-velocity from FDS is slightly slower than the flat fire solution.
+\begin{figure}[p]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/flat_fire_trajectory} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/flat_fire_x} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/flat_fire_z} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/flat_fire_u} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/flat_fire_w} &
+\end{tabular*}
+\caption{Output of the test case called {\bf flat\_fire}.}
+\label{flat_fire_plots}
 \end{figure}
 
 
