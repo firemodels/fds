@@ -49,5 +49,7 @@ run scripts/pulsating
 run scripts/compression_wave
 run scripts/plate_view_factor
 run scripts/low_flux_hot_gas_filling
+run scripts/terminal_velocity_convergence
+run scripts/flat_fire_comparison
 
 display('verification scripts completed successfully!')
