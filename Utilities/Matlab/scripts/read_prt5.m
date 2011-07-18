@@ -8,7 +8,7 @@
 %
 % >> read_prt5('terminal_velocity.prt5')
 
-function [] = read_prt5(filename)
+function [STIME, XP, YP, ZP, QP] = read_prt5(filename)
 
 fid = fopen(filename);
 
@@ -50,7 +50,7 @@ while ~feof(fid)
     n = n + 1;
     
     DUMMY = fread(fid,1,'integer*4');
-    stime_tmp = fread(fid,1,'real*4');
+    stime_tmp = fread(fid,1,'real*8');
     DUMMY = fread(fid,1,'integer*4');
     
     if size(stime_tmp,1)==0
@@ -66,9 +66,9 @@ while ~feof(fid)
         DUMMY = fread(fid,1,'integer*4');
         
         DUMMY = fread(fid,1,'integer*4');
-        xp = fread(fid,NPLIM,'real*4');
-        yp = fread(fid,NPLIM,'real*4');
-        zp = fread(fid,NPLIM,'real*4');
+        xp = fread(fid,NPLIM,'real*8');
+        yp = fread(fid,NPLIM,'real*8');
+        zp = fread(fid,NPLIM,'real*8');
         DUMMY = fread(fid,1,'integer*4');
         
         for NP=1:NPLIM
@@ -85,7 +85,7 @@ while ~feof(fid)
         if N_QUANTITIES(NPC)>0
             DUMMY = fread(fid,1,'integer*4');
             for NQ=1:N_QUANTITIES(NPC)
-                qp = fread(fid,NPLIM,'real*4');
+                qp = fread(fid,NPLIM,'real*8');
                 for NP=1:NPLIM
                     QP(n,NP,NPC,NQ) = qp(NP);
                 end
@@ -104,4 +104,7 @@ display('Part file read successfully!')
 % Examples for plotting position and quantities
 
 %plot(STIME,ZP(:,1,1))   % XP(time step range, particle #, part class #)
+%size(STIME)
+%size(QP(:, 1, 1, 1))
 %plot(STIME,QP(:,1,1,1)) % QP(time step range, particle #, part class #, quantity #)
+%min(QP(:,1,1,1))
