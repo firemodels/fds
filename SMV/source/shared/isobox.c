@@ -1604,3 +1604,108 @@ void CCisosurfacet2file(char *isofile, float *t, float *data, int *data2flag, fl
 }
 #endif
 
+/* ------------------ get_tri_area ------------------------ */
+
+float get_tri_area(int *edgelist, float *xyz){
+  float *v1, *v2, *v3;
+  float v22[3], v33[3], vcross[3];
+  int i;
+  float area;
+
+  v1 = xyz + 3*edgelist[0];
+  v2 = xyz + 3*edgelist[1];
+  v3 = xyz + 3*edgelist[2];
+  for(i=0;i<3;i++){
+    v22[i]=v2[i]-v1[i];
+    v33[i]=v3[i]-v1[i];
+  }
+//  i    j    k
+//  v220 v221 v222
+//  v330 v331 v332
+  vcross[0]= v22[1]*v33[2]-v33[1]*v22[2];
+  vcross[1]=-v22[0]*v33[2]+v33[0]*v22[2];
+  vcross[2]= v22[0]*v33[1]-v33[0]*v22[1];
+  area = 0.5*sqrt(vcross[0]*vcross[0]+vcross[1]*vcross[1]+vcross[2]*vcross[2]);
+  return area;
+}
+
+/* ------------------ get_iso_level_area_tetra ------------------------ */
+
+#define FACTOR(ii,v0,v1,x0,x1) \
+  if(v0*v1<0.0){\
+    factor2=-v0/(v1-v0);\
+    xyziso[0+3*ii]=(1.0-factor2)*(x0)[0]+factor2*(x1)[0];\
+    xyziso[1+3*ii]=(1.0-factor2)*(x0)[1]+factor2*(x1)[1];\
+    xyziso[2+3*ii]=(1.0-factor2)*(x0)[2]+factor2*(x1)[2];\
+  }
+float get_iso_level_area_tetra(float level, 
+                               float v0, float v1, float v2, float v3, 
+                               float *xyz0, float *xyz1, float *xyz2, float *xyz3){
+  float area, vals2[4],factor2,xyziso[18];
+  int i,factor,casenum;
+  int ntris;
+  int area_edges[16][7]={
+    {0},             // 0000 0
+    {1,2,4,5},       // 0001 1
+    {1,1,3,5},       // 0010 2
+    {2,1,3,4,1,4,2}, // 0011 3
+    {1,0,3,4},       // 0100 4
+    {2,0,2,3,2,3,5}, // 0101 5
+    {2,1,4,5,1,4,0}, // 0110 6
+    {1,0,1,2},       // 0111 7
+    {1,0,1,2},       // 1000 8
+    {2,0,1,4,1,4,5}, // 1001 9
+    {2,0,2,3,2,3,5}, // 1010 10
+    {1,0,3,4},       // 1011 11
+    {2,3,1,4,1,4,2}, // 1100 12
+    {1,1,3,5},       // 1101 13
+    {1,2,4,5},       // 1110 14
+    {0}              // 1111 15
+
+  };
+  area=0.0;
+  casenum=0;
+  factor=1;
+  vals2[0]=v0-level;
+  vals2[1]=v1-level;
+  vals2[2]=v2-level;
+  vals2[3]=v3-level;
+  for(i=0;i<4;i++){
+    if(vals2[i]>0.0)casenum+=factor;
+    factor*=2;
+    if(vals2[i]==0.0)return 0.0;
+  }
+  if(casenum==0||casenum==15)return 0.0;
+  FACTOR(0,vals2[0],vals2[1],xyz0,xyz1);
+  FACTOR(1,vals2[0],vals2[2],xyz0,xyz2);
+  FACTOR(2,vals2[0],vals2[3],xyz0,xyz3);
+  FACTOR(3,vals2[1],vals2[2],xyz1,xyz2);
+  FACTOR(4,vals2[1],vals2[3],xyz1,xyz3);
+  FACTOR(5,vals2[2],vals2[3],xyz2,xyz3);
+  ntris = area_edges[casenum][0];
+  for(i=0;i<ntris;i++){
+    int *edgelist;
+
+    edgelist = area_edges[casenum]+1+3*i;
+    area+=get_tri_area(edgelist,xyziso);
+  }
+
+  return area;
+}
+
+/* ------------------ get_iso_level_area_tetra ------------------------ */
+
+float get_iso_level_area_cube(float level, float *vals, float *xyz){
+  float area=0.0;
+
+  area += get_iso_level_area_tetra(level,vals[0],vals[1],vals[3],vals[4],xyz+3*0,xyz+3*1,xyz+3*3,xyz+3*4);
+  area += get_iso_level_area_tetra(level,vals[1],vals[2],vals[3],vals[6],xyz+3*1,xyz+3*2,xyz+3*3,xyz+3*6);
+  area += get_iso_level_area_tetra(level,vals[4],vals[5],vals[6],vals[1],xyz+3*4,xyz+3*5,xyz+3*6,xyz+3*1);
+  area += get_iso_level_area_tetra(level,vals[4],vals[6],vals[7],vals[3],xyz+3*4,xyz+3*6,xyz+3*7,xyz+3*3);
+  return area;
+}
+
+
+
+
+
