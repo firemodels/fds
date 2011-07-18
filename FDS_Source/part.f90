@@ -12,6 +12,7 @@ CHARACTER(255), PARAMETER :: partrev='$Revision$'
 CHARACTER(255), PARAMETER :: partdate='$Date$'
 REAL(EB) :: INSERT_RATE = 0._EB
 INTEGER :: INSERT_COUNT = 0
+REAL(EB) :: PARACOR = 0._EB
  
 CONTAINS
  
@@ -1041,10 +1042,13 @@ DROPLET_LOOP: DO I=1,NLP
          DR%Z = Z_OLD + (W_OLD + 0.5_EB*GVEC(3)*DT)*DT
       ENDIF
       
+	  ! second-order parallel correction term for the droplet velocities
+	  PARACOR = (UREL*GVEC(1) + VREL*GVEC(2) + WREL*GVEC(3))/(QREL*QREL + 1.E-10_EB)
+	  
       ! gravitational acceleration
-      DR%U = DR%U + GVEC(1)*DT
-      DR%V = DR%V + GVEC(2)*DT
-      DR%W = DR%W + GVEC(3)*DT
+      DR%U = DR%U + GVEC(1)*DT - 0.5_EB*ALPHA*BETA*DT*DT*(GVEC(1) + UREL*PARACOR)/OPA
+      DR%V = DR%V + GVEC(2)*DT - 0.5_EB*ALPHA*BETA*DT*DT*(GVEC(2) + VREL*PARACOR)/OPA
+      DR%W = DR%W + GVEC(3)*DT - 0.5_EB*ALPHA*BETA*DT*DT*(GVEC(3) + WREL*PARACOR)/OPA
                
    ENDIF PARTICLE_NON_STATIC_IF 
 
