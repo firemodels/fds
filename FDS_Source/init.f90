@@ -349,9 +349,9 @@ DO K=0,KBP1
    DO J=0,JBP1
       DO I=0,IBP1
          IF (TWO_D) THEN
-            DELTA = MAX(DX(I),DZ(K))
+            DELTA = MAX(M%DX(I),M%DZ(K))
          ELSE
-            DELTA = MAX(DX(I),DY(J),DZ(K))
+            DELTA = MAX(M%DX(I),M%DY(J),M%DZ(K))
          ENDIF
          M%CSD2(I,J,K) = (CS*DELTA)**2
       ENDDO
