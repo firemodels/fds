@@ -965,7 +965,7 @@ void drawsmoke3dGPUVOL(void){
   glUniform1i(GPUvol_depthtexture,3);
   glUniform2f(GPUvol_screensize,(float)screenWidth,(float)screenHeight);
   glUniform2f(GPUvol_nearfar,fnear,ffar);
-  printf("screenWidth=%i screenHeight=%i\n",screenWidth,screenHeight);
+//  printf("screenWidth=%i screenHeight=%i\n",screenWidth,screenHeight);
 #endif
   glUniform3f(GPUvol_eyepos,xyzeyeorig[0],xyzeyeorig[1],xyzeyeorig[2]);
   glUniform1f(GPUvol_xyzmaxdiff,xyzmaxdiff);
@@ -1438,7 +1438,7 @@ void init_volsmoke_texture(mesh *meshi){
   GLsizei nx, ny, nz;
 
 
-  printf("Setting 3D smoke rendering textures for mesh %s ...",meshi->label);
+  printf("Setting 3D smoke/fire textures for %s ...",meshi->label);
   fflush(stdout);
 
   glActiveTexture(GL_TEXTURE0);
