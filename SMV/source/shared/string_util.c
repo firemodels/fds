@@ -193,10 +193,16 @@ int can_write_to_dir(char *dir){
   strcat(full_name,file_name_ptr);
   
   stream=fopen(full_name,"wb");
-  FREEMEMORY(full_name);
-  if(stream==NULL)return 0;
-  fclose(stream);
-  remove(full_name);
+  if(stream==NULL){
+    unlink(full_name);
+    FREEMEMORY(full_name);
+    return 0;
+  }
+  else{
+    fclose(stream);
+    unlink(full_name);
+    FREEMEMORY(full_name);
+  }
   return 1;
 }
 
