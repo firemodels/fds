@@ -756,14 +756,14 @@ Note that this has a term parallel to the initial relative velocity and a term p
 Assembling all these terms, $\mathbf{u}_g$ can be found to be
 \begin{align}
 	\label{ug_second_order}
-	\mathbf{u}_g = \mathbf{g} t + \frac{\beta_p t^2}{2} \left[\mathbf{u}_{r,0} \left(\frac{\mathbf{u}_{r,0} \cdot \mathbf{g}}{|\mathbf{u}_{r,0}|^2}\right) + \mathbf{g}\right] + \mathcal{O}(t^3) \,.
+	\mathbf{u}_g = \mathbf{g} t - \frac{\beta_p t^2}{2} \left[\mathbf{u}_{r,0} \left(\frac{\mathbf{u}_{r,0} \cdot \mathbf{g}}{|\mathbf{u}_{r,0}|^2}\right) + \mathbf{g}\right] + \mathcal{O}(t^3) \,.
 \end{align}
 Assembling Eqs. (\ref{ud_exact}) and (\ref{ug_second_order}), the solution for $\mathbf{u}_r$ is
 \begin{align}
 	\label{ur_short}
-	\mathbf{u}_r &= \frac{\mathbf{u}_{r,0}}{1 + \beta_p t} + \mathbf{g} t + \frac{\beta_p t^2}{2} \left[\mathbf{u}_{r,0} \left(\frac{\mathbf{u}_{r,0} \cdot \mathbf{g}}{|\mathbf{u}_{r,0}|^2}\right) + \mathbf{g}\right] + \mathcal{O}(t^3) \quad ; \quad \beta_p \equiv K_p |\mathbf{u}_{r,0}| \,. %\\
+	\mathbf{u}_r &= \frac{\mathbf{u}_{r,0}}{1 + \beta_p t} + \mathbf{g} t - \frac{\beta_p t^2}{2} \left[\mathbf{u}_{r,0} \left(\frac{\mathbf{u}_{r,0} \cdot \mathbf{g}}{|\mathbf{u}_{r,0}|^2}\right) + \mathbf{g}\right] + \mathcal{O}(t^3) \quad ; \quad \beta_p \equiv K_p |\mathbf{u}_{r,0}| \,. %\\
 	%\label{ur_expanded}
-	%\mathbf{u}_p - \mathbf{U}_p &= \frac{\mathbf{u}_{p,0} - \mathbf{U}_{p,0}}{1 + \beta_p t} + \mathbf{g} t + \frac{\beta_p t^2}{2} \left[(\mathbf{u}_{p,0} - \mathbf{U}_{p,0}) \left(\frac{(\mathbf{u}_{p,0} - \mathbf{U}_{p,0}) \cdot \mathbf{g}}{|\mathbf{u}_{p,0} - \mathbf{U}_{p,0}|^2}\right) + \mathbf{g}\right] + \mathcal{O}(t^3) \quad ; \quad \beta_p \equiv K_p |\mathbf{u}_{p,0} - \mathbf{U}_{p,0}|
+	%\mathbf{u}_p - \mathbf{U}_p &= \frac{\mathbf{u}_{p,0} - \mathbf{U}_{p,0}}{1 + \beta_p t} + \mathbf{g} t - \frac{\beta_p t^2}{2} \left[(\mathbf{u}_{p,0} - \mathbf{U}_{p,0}) \left(\frac{(\mathbf{u}_{p,0} - \mathbf{U}_{p,0}) \cdot \mathbf{g}}{|\mathbf{u}_{p,0} - \mathbf{U}_{p,0}|^2}\right) + \mathbf{g}\right] + \mathcal{O}(t^3) \quad ; \quad \beta_p \equiv K_p |\mathbf{u}_{p,0} - \mathbf{U}_{p,0}|
 \end{align}
 \subsubsection{Particle velocities and positions}
 The results of the previous section are not directly useful unless $\mathbf{U}_p(t)$ is known. $\mathbf{U}_p(t)$ can be found via the conservation of momentum and this leads to a solution for the particle velocities and positions.
@@ -792,17 +792,17 @@ Eq. (\ref{mom_U_p}) can be substituted into Eq. (\ref{ur_short}) to get the solu
 \end{align*}
 \begin{align}
 	\label{mom_u_p_full}
-	\mathbf{u}_p = \frac{\mathbf{u}_{p,0}}{1 + \beta_p t} + \frac{(\mathbf{u}_{p,0} + \alpha_p \mathbf{U}_{p,0})\beta_p t}{(1 + \beta_p t)(1 + \alpha_p)} + \mathbf{g} t + \frac{\alpha_p \beta_p t^2}{2 (1 + \alpha_p)} \left[\mathbf{u}_{r,0} \left(\frac{\mathbf{u}_{r,0} \cdot \mathbf{g}}{|\mathbf{u}_{r,0}|^2}\right) + \mathbf{g}\right] + \mathcal{O}(t^3)
+	\mathbf{u}_p = \frac{\mathbf{u}_{p,0}}{1 + \beta_p t} + \frac{(\mathbf{u}_{p,0} + \alpha_p \mathbf{U}_{p,0})\beta_p t}{(1 + \beta_p t)(1 + \alpha_p)} + \mathbf{g} t - \frac{\alpha_p \beta_p t^2}{2 (1 + \alpha_p)} \left[\mathbf{u}_{r,0} \left(\frac{\mathbf{u}_{r,0} \cdot \mathbf{g}}{|\mathbf{u}_{r,0}|^2}\right) + \mathbf{g}\right] + \mathcal{O}(t^3)
 \end{align}
 Integrating Eq. (\ref{mom_u_p_full}) leads to an equation for the particle positions,
 \begin{align}
 	\label{mom_x_p_full}
-	\mathbf{x}_p = \mathbf{x}_{p,0} + \left(\frac{\mathbf{u}_{p,0} + \alpha_p \mathbf{U}_{p,0}}{1 + \alpha_p}\right) t + \frac{\alpha_p (\mathbf{u}_{p,0} - \mathbf{U}_{p,0})}{\beta_p (1 + \alpha_p)} \text{ln}(\beta_p t + 1) + \frac{\mathbf{g} t^2}{2} + \frac{\alpha_p \beta_p t^3}{6 (1 + \alpha_p)} \left[\mathbf{u}_{r,0} \left(\frac{\mathbf{u}_{r,0} \cdot \mathbf{g}}{|\mathbf{u}_{r,0}|^2}\right) + \mathbf{g}\right] + \mathcal{O}(t^4) \,.
+	\mathbf{x}_p = \mathbf{x}_{p,0} + \left(\frac{\mathbf{u}_{p,0} + \alpha_p \mathbf{U}_{p,0}}{1 + \alpha_p}\right) t - \frac{\alpha_p (\mathbf{u}_{p,0} - \mathbf{U}_{p,0})}{\beta_p (1 + \alpha_p)} \text{ln}(\beta_p t + 1) + \frac{\mathbf{g} t^2}{2} - \frac{\alpha_p \beta_p t^3}{6 (1 + \alpha_p)} \left[\mathbf{u}_{r,0} \left(\frac{\mathbf{u}_{r,0} \cdot \mathbf{g}}{|\mathbf{u}_{r,0}|^2}\right) + \mathbf{g}\right] + \mathcal{O}(t^4) \,.
 \end{align}
 \subsubsection{Implementation in FDS}
 The particle positions are computed in {\ct part.f90} in {\ct DROPLET\_LOOP}. The solutions are used to advance $\Delta t$ forward in time much like a normal finite-difference scheme. The exact solution is used for the case without drag.
 \begin{align}
-	\mathbf{u}_p^{n+1} &= \frac{\mathbf{u}_p^n}{1 + \beta_p \Delta t} + \frac{(\mathbf{u}_p^n + \alpha_p \mathbf{U}_p^n)\beta_p \Delta t}{(1 + \beta_p \Delta t)(1 + \alpha_p)} + \mathbf{g} \Delta t + \frac{\alpha_p \beta_p (\Delta t)^2}{2 (1 + \alpha_p)} \left[\mathbf{u}_r^n \left(\frac{\mathbf{u}_r^n \cdot \mathbf{g}}{|\mathbf{u}_r^n|^2}\right) + \mathbf{g}\right] \\[1cm]
-	\mathbf{x}_p^{n+1} &= \mathbf{x}_p^n + \left(\frac{\mathbf{u}_p^n + \alpha_p \mathbf{U}_p^n}{1 + \alpha_p}\right) \Delta t + \frac{\alpha_p (\mathbf{u}_p^n - \mathbf{U}_p^n)}{\beta_p (1 + \alpha_p)} \text{ln}(\beta_p \Delta t + 1) + \frac{\mathbf{g} (\Delta t)^2}{2} + \frac{\alpha_p \beta_p (\Delta t)^3}{6 (1 + \alpha_p)} \left[\mathbf{u}_p^n \left(\frac{\mathbf{u}_p^n \cdot \mathbf{g}}{|\mathbf{u}_p^n|^2}\right) + \mathbf{g}\right]
+	\mathbf{u}_p^{n+1} &= \frac{\mathbf{u}_p^n}{1 + \beta_p \Delta t} + \frac{(\mathbf{u}_p^n + \alpha_p \mathbf{U}_p^n)\beta_p \Delta t}{(1 + \beta_p \Delta t)(1 + \alpha_p)} + \mathbf{g} \Delta t - \frac{\alpha_p \beta_p (\Delta t)^2}{2 (1 + \alpha_p)} \left[\mathbf{u}_r^n \left(\frac{\mathbf{u}_r^n \cdot \mathbf{g}}{|\mathbf{u}_r^n|^2}\right) + \mathbf{g}\right] \\[1cm]
+	\mathbf{x}_p^{n+1} &= \mathbf{x}_p^n + \left(\frac{\mathbf{u}_p^n + \alpha_p \mathbf{U}_p^n}{1 + \alpha_p}\right) \Delta t + \frac{\alpha_p (\mathbf{u}_p^n - \mathbf{U}_p^n)}{\beta_p (1 + \alpha_p)} \text{ln}(\beta_p \Delta t + 1) + \frac{\mathbf{g} (\Delta t)^2}{2} - \frac{\alpha_p \beta_p (\Delta t)^3}{6 (1 + \alpha_p)} \left[\mathbf{u}_p^n \left(\frac{\mathbf{u}_p^n \cdot \mathbf{g}}{|\mathbf{u}_p^n|^2}\right) + \mathbf{g}\right]
 \end{align}
 %\subsubsection{Theoretical accuracy}
