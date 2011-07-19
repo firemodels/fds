@@ -13,7 +13,12 @@ CHARACTER(255), PARAMETER :: partdate='$Date$'
 REAL(EB) :: INSERT_RATE = 0._EB
 INTEGER :: INSERT_COUNT = 0
 REAL(EB) :: PARACOR = 0._EB
- 
+REAL(EB) :: DTDT = 0._EB
+REAL(EB) :: DTDTDT = 0._EB
+REAL(EB) :: AOPA = 0._EB
+REAL(EB) :: AOPALOGOBETA = 0._EB
+REAL(EB) :: AOPABETA = 0._EB
+
 CONTAINS
  
 
@@ -1011,14 +1016,20 @@ DROPLET_LOOP: DO I=1,NLP
       DR_MASS = PC%DENSITY*FOTH*PI*RDC     ! droplet mass
       FP_MASS = (RHO_G/RVC)/NDPC(II,JJ,KK) ! fluid parcel mass
       IF (FREEZE_VELOCITY) FP_MASS = 1.E10_EB
-               
+      
+      DTDT = DT*DT
+      DTDTDT = DTDT*DT
+      
       BETA  = 0.5_EB*RHO_G*C_DRAG*PI*RDS*(1._EB/DR_MASS+1._EB/FP_MASS)*QREL
       OBDT  = 1._EB+BETA*DT
       ALPHA = FP_MASS/DR_MASS
       OPA   = 1._EB+ALPHA
       BDTOA = BETA*DT/OPA
-	  ! second-order parallel correction term for the droplet velocities
-	  PARACOR = (UREL*GVEC(1) + VREL*GVEC(2) + WREL*GVEC(3))/(QREL*QREL + 1.E-10_EB)
+      ! second-order parallel correction term for the droplet velocities
+      PARACOR = (UREL*GVEC(1) + VREL*GVEC(2) + WREL*GVEC(3))/(QREL*QREL + 1.E-10_EB)
+      AOPA = ALPHA/OPA
+      AOPALOGOBETA = AOPA*LOG(OBDT)/BETA
+      AOPABETA = AOPA*BETA
                
       DR%U = ( U_OLD + (U_OLD+ALPHA*UBAR)*BDTOA )/OBDT
       DR%V = ( V_OLD + (V_OLD+ALPHA*VBAR)*BDTOA )/OBDT
@@ -1031,12 +1042,12 @@ DROPLET_LOOP: DO I=1,NLP
          DR%A_Y = MPOM*(V_OLD-DR%V)*RDT
          DR%A_Z = MPOM*(W_OLD-DR%W)*RDT
          ! analytical solution for droplet position
-         DR%X = X_OLD + (U_OLD+ALPHA*UBAR)/OPA*DT + ALPHA/BETA*(U_OLD-UBAR)/OPA*LOG(OBDT) + 0.5_EB*GVEC(1)*DT*DT &
-		     - ALPHA*BETA*DT*DT*DT*(GVEC(1) + UREL*PARACOR)/OPA/6._EB
-         DR%Y = Y_OLD + (V_OLD+ALPHA*VBAR)/OPA*DT + ALPHA/BETA*(V_OLD-VBAR)/OPA*LOG(OBDT) + 0.5_EB*GVEC(2)*DT*DT &
-		     - ALPHA*BETA*DT*DT*DT*(GVEC(2) + VREL*PARACOR)/OPA/6._EB
-         DR%Z = Z_OLD + (W_OLD+ALPHA*WBAR)/OPA*DT + ALPHA/BETA*(W_OLD-WBAR)/OPA*LOG(OBDT) + 0.5_EB*GVEC(3)*DT*DT &
-		     - ALPHA*BETA*DT*DT*DT*(GVEC(3) + WREL*PARACOR)/OPA/6._EB
+         DR%X = X_OLD + (U_OLD+ALPHA*UBAR)/OPA*DT + AOPALOGOBETA*(U_OLD-UBAR) + 0.5_EB*GVEC(1)*DTDT &
+            - AOPABETA*DTDTDT*(GVEC(1) + UREL*PARACOR)/6._EB
+         DR%Y = Y_OLD + (V_OLD+ALPHA*VBAR)/OPA*DT + AOPALOGOBETA*(V_OLD-VBAR) + 0.5_EB*GVEC(2)*DTDT &
+            - AOPABETA*DTDTDT*(GVEC(2) + VREL*PARACOR)/6._EB
+         DR%Z = Z_OLD + (W_OLD+ALPHA*WBAR)/OPA*DT + AOPALOGOBETA*(W_OLD-WBAR) + 0.5_EB*GVEC(3)*DTDT &
+            - AOPABETA*DTDTDT*(GVEC(3) + WREL*PARACOR)/6._EB
       ELSE
          ! no drag
          DR%A_X  = 0._EB
@@ -1046,13 +1057,13 @@ DROPLET_LOOP: DO I=1,NLP
          DR%Y = Y_OLD + (V_OLD + 0.5_EB*GVEC(2)*DT)*DT
          DR%Z = Z_OLD + (W_OLD + 0.5_EB*GVEC(3)*DT)*DT
       ENDIF
-	  
+      
       ! gravitational acceleration
-      DR%U = DR%U + GVEC(1)*DT - 0.5_EB*ALPHA*BETA*DT*DT*(GVEC(1) + UREL*PARACOR)/OPA
-      DR%V = DR%V + GVEC(2)*DT - 0.5_EB*ALPHA*BETA*DT*DT*(GVEC(2) + VREL*PARACOR)/OPA
-      DR%W = DR%W + GVEC(3)*DT - 0.5_EB*ALPHA*BETA*DT*DT*(GVEC(3) + WREL*PARACOR)/OPA
+      DR%U = DR%U + GVEC(1)*DT - 0.5_EB*AOPABETA*DTDT*(GVEC(1) + UREL*PARACOR)
+      DR%V = DR%V + GVEC(2)*DT - 0.5_EB*AOPABETA*DTDT*(GVEC(2) + VREL*PARACOR)
+      DR%W = DR%W + GVEC(3)*DT - 0.5_EB*AOPABETA*DTDT*(GVEC(3) + WREL*PARACOR)
                
-   ENDIF PARTICLE_NON_STATIC_IF 
+   ENDIF PARTICLE_NON_STATIC_IF
 
    ! Drag calculation for stationary, airborne particles
 
