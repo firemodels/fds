@@ -6541,7 +6541,7 @@ IMPLICIT NONE
 
 INTEGER, PARAMETER :: M=2 ! only need two level transform, but could be generalized
 REAL(EB), INTENT(IN) :: S(2*M)
-REAL(EB) :: A(M,M)=0._EB,C(M,M)=0._EB,C1,C2
+REAL(EB) :: SS(2*M),A(M,M)=0._EB,C(M,M)=0._EB,C1,C2,SMIN,SMAX,DS
 INTEGER :: I,J,K,N
 
 ! Comments: This function generates a normalized error measure WAVELET_ERROR based on coefficients
@@ -6561,16 +6561,27 @@ INTEGER :: I,J,K,N
 !                     |
 !             error computed here
 
+! normalize signal
+SMAX=MAXVAL(S)
+SMIN=MINVAL(S)
+DS=SMAX-SMIN
+IF (DS<1.E-6) THEN
+   WAVELET_ERROR = 0._EB
+   RETURN
+ELSE
+   SS=(S-SMIN)/DS
+ENDIF
+
 ! discrete Haar wavelet transform
 N=M
 DO I=1,M
    DO J=1,N
       K=2*J-1
       IF (I==1) THEN
-         A(I,J) = 0.5_EB*(S(K)+S(K+1))
+         !A(I,J) = 0.5_EB*(S(K)+S(K+1))
          C(I,J) = 0.5_EB*(S(K)-S(K+1))
       ELSE
-         A(I,J) = 0.5_EB*(A(I-1,K)+A(I-1,K+1))
+         !A(I,J) = 0.5_EB*(A(I-1,K)+A(I-1,K+1))
          C(I,J) = 0.5_EB*(A(I-1,K)-A(I-1,K+1))
       ENDIF
    ENDDO
@@ -6580,7 +6591,7 @@ ENDDO
 C1 = SUM(C(1,:))
 C2 = SUM(C(2,:))
 
-WAVELET_ERROR = 0.5_EB*ABS(C1-C2)/(ABS(A(2,1))+1.E-6_EB)
+WAVELET_ERROR = ABS(C1-C2)
 
 END FUNCTION WAVELET_ERROR
 
