@@ -37,7 +37,6 @@
 \usepackage{lastpage} % Automatic last page number reference.
 \usepackage[T1]{fontenc}
 \usepackage{upquote}
-%\usepackage{array,eqnarray}
 \usepackage{amsmath}
 \newcommand{\nopart}{\expandafter\def\csname Parent-1\endcsname{}} % To fix table of contents in pdf.
 \newcommand{\ct}{\tt\small}
@@ -2651,8 +2650,40 @@ FDS demonstrated second-order convergence in the terminal velocity case for both
       \caption{\label{fig_position_convergence} \small FDS exhibits second-order convergence for the particle position in the terminal velocity case.}
    \end{center}
 \end{figure}
+\section{Accuracy of Fluid-Particle Momentum Transfer}
+In Appendix G of the Technical Reference Guide the numerical scheme FDS uses to compute these trajectories is detailed. The equation for particle velocities is
+\begin{equation}
+	\mathbf{u}_p^{n+1} = \frac{\mathbf{u}_p^n}{1 + \beta_p \Delta t} + \frac{(\mathbf{u}_p^n + \alpha_p \mathbf{U}_p^n)\beta_p \Delta t}{(1 + \beta_p \Delta t)(1 + \alpha_p)} + \mathbf{g} \Delta t - \frac{\alpha_p \beta_p (\Delta t)^2}{2 (1 + \alpha_p)} \left[\mathbf{u}_r^n \left(\frac{\mathbf{u}_r^n \cdot \mathbf{g}}{|\mathbf{u}_r^n|^2}\right) + \mathbf{g}\right] \,.
+\end{equation}
+And the equation for particle positions is
+\begin{equation}
+	\mathbf{x}_p^{n+1} = \mathbf{x}_p^n + \left(\frac{\mathbf{u}_p^n + \alpha_p \mathbf{U}_p^n}{1 + \alpha_p}\right) \Delta t + \frac{\alpha_p (\mathbf{u}_p^n - \mathbf{U}_p^n)}{\beta_p (1 + \alpha_p)} \text{ln}(\beta_p \Delta t + 1) + \frac{\mathbf{g} (\Delta t)^2}{2} - \frac{\alpha_p \beta_p (\Delta t)^3}{6 (1 + \alpha_p)} \left[\mathbf{u}_p^n \left(\frac{\mathbf{u}_p^n \cdot \mathbf{g}}{|\mathbf{u}_p^n|^2}\right) + \mathbf{g}\right] \,.
+\end{equation}
+The particle velocities are second-order accurate in time. In other words, they are accurate to an order-of-magnitude of $\Delta t^2$. The error committed each time step as shown in Appendix G is
+\begin{equation}
+	\epsilon = \mathcal{O}(\Delta t^3) \,.
+\end{equation}
+This error is accumulated over many time steps. The allows us to define the total error $E \equiv n \epsilon$ where $n = T/\Delta T$ is the number of time steps and $T$ is the final time iterated out to. The total error can be found to be
+\begin{equation}
+	E = n \epsilon = \frac{T}{\Delta t} \mathcal{O}(\Delta t^3) = \mathcal{O}(\Delta t^2) \,.
+\end{equation}
+The particle velocities should be second-order accurate, as has been shown in FDS.
+
+
+The accuracy of the particle positions, $\mathbf{x}$ is less obvious and finding their accuracy requires knowledge of the accuracy of $\mathbf{u}$. The natural log term of the position equation reduces the order of accuracy. Note that
+\begin{equation}
+	\frac{\alpha_p (\mathbf{u}_p^n - \mathbf{U}_p^n)}{\beta_p (1 + \alpha_p)} \text{ln}(\beta_p \Delta t + 1) = \frac{\alpha_p (\mathbf{u}_p^n - \mathbf{U}_p^n)}{1 + \alpha_p} \left(\Delta t - \frac{\beta_p \Delta t^2}{2} + \cdots \right) \quad \text{ for } \beta_p t < 1 \,.
+\end{equation}
+Also note that $\mathbf{u}_p^n = \mathbf{u}_{p,\text{exact}}^n + \mathcal{O}(\Delta t^2)$ in general. This error propagates through the natural log term. If only the relevant parts of the term are extracted we can see that
+\begin{equation}
+	\frac{\mathbf{u}_p^n}{\beta_p} \text{ln}(\beta_p \Delta t + 1) = (\mathbf{u}_{p,\text{exact}}^n + \mathcal{O}(\Delta t^2)) \left(\Delta t - \frac{\beta_p \Delta t^2}{2} + \cdots \right) = \frac{\mathbf{u}_{p,\text{exact}}^n \text{ln}(\beta_p \Delta t + 1)}{\beta_p} + \mathcal{O}(\Delta t^3) \,.
+\end{equation}
+This third-order error per time step becomes an accumulated second-order error, and consequently the position scheme is only second-order accurate as has been shown numerically.
+
+
+Due to this error, the $\Delta t^3$ term of the position equation is dropped because it offers no improvements in accuracy but requires more computation.
 \section{2D Flat Fire Trajectory (flat\_fire)}
-There are no known solutions of the drag equations in higher dimensions. However, ballisticians have developed an approximate solution useful for computing trajectories of projectiles when guns are shot within a certain range of angles. This solution makes use of the ``flat fire'' assumption. In short, if a particle is launched with its velocity in only the $x$-direction and its $y$-velocity is never very significant compared against the $x$-velocity, then throughout the entire trajectory $u$ is a good approximation for $|\mathbf{u}|$.
+There are no known solutions of the drag equations in higher dimensions. However, ballisticians developed an approximate solution useful for computing trajectories of projectiles when guns are shot within a certain range of angles. This solution makes use of the ``flat fire'' assumption. In short, if a particle is launched with its velocity in only the $x$-direction and its $y$-velocity is never very significant compared against the $x$-velocity, then throughout the entire trajectory $u$ is a good approximation for $|\mathbf{u}|$.
 
 
 %In 2D, this approximation decouples the $x$ equation of motion from the $y$ equation of motion and reduces the $y$ equation of motion to a linear ODE.
