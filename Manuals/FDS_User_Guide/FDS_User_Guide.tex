@@ -4777,21 +4777,6 @@ To force a solid boundary to have a free-slip condition, set {\ct FREE\_SLIP=.TR
 In LES, to override the wall model and force a no-slip boundary condition, set {\ct NO\_SLIP=.TRUE.} on {\ct SURF}.
 
 
-\subsection{Jet Fans}
-
-Fans do not have to be mounted on a solid wall, like a supply or an exhaust fan.
-If you just want to blow gases in a particular direction, create an
-{\ct OBST}struction and apply to it {\ct VENT} lines that are
-associated with a simple HVAC system.
-This allows hot, smokey gases to pass through the
-obstruction, much like a free-standing fan.  See the example case {\ct jet\_fan.fds}.
-
-You may also want to construct a {\em shroud} around the fan using four flat plates arranged to form
-a short passageway that draws gases in one side and expels them out the other. The plate representing the
-fan itself can be positioned about halfway along the passage.
-
-
-
 \subsection{Species and Species Mass Flux Boundary Conditions}
 
 \label{info:MASS_FLUX}
@@ -4841,7 +4826,7 @@ If the ability to transport heat and combustion products through a duct network 
 due to a fire on the flows in a duct network is important, you can make use of a coupled HVAC network solver.  The solver computes the flows through a
 duct network described as a mapping of duct segments and nodes where a node is either the joining of two or more ducts or where a duct segment connects to the FDS computational domain.
 The current HVAC solver does not allow for mass storage in the duct network ({\em i.e.} what goes in during a time step, goes out during a time step).
-HVAC components such as fans and binary dampers (fully open or fully closed) can be included in the HVAC network and coupled to the FDS control function capability.  The
+HVAC components such as fans and binary dampers (fully open or fully closed) can be included in the HVAC network and are coupled to the FDS control function capability.  The
 user can select from three fan models.
 
 The HVAC solver is invoked if there is an {\ct HVAC} namelist group present in the input file.
@@ -4856,11 +4841,11 @@ Additionally you must define the locations where the HVAC network joins the comp
 
 \begin{description}
 \item[{\ct TYPE\_ID}] is a character string that indicates the type of component that the namelist group is defining.   {\ct TYPE\_ID} can be {\ct 'DUCT'}, {\ct 'NODE'}, or {\ct 'FAN'}.
-\item[{\ct ID}] is a character string giving a name to the component.  The name must be unique amongst all other components of that type.
+\item[{\ct ID}] is a character string giving a name to the component.  The name must be unique amongst all other components of that type; however, the same name can be given to components of different types ({\em i.e.} a duct and a node could have the same name but two ducts could not).
 \end{description}
 
 
-\subsubsection{HVAC Duct Parameters}
+\subsection{HVAC Duct Parameters}
 
 \footnotesize
 \begin{verbatim}
@@ -4871,15 +4856,16 @@ Additionally you must define the locations where the HVAC network joins the comp
 
 \begin{description}
 \item[{\ct AREA}] is the area of the duct in m$^2$. Either {\ct AREA} or {\ct DIAMETER} must be defined.
-\item[{\ct CTRL\_ID}] is the {\ct ID} of a {\ct CTRL} function for a damper or fan in the duct.  Only one of {\ct CTRL\_ID} or {\ct DEVC\_ID} can be defined.
+\item[{\ct CTRL\_ID}] is the {\ct ID} of a {\ct CTRL} function for a damper (open/closed) or fan (on/off) in the duct.  Only one of {\ct CTRL\_ID} or {\ct DEVC\_ID} can be defined.
 \item[{\ct DAMPER}] is a logical variable indicating the presence of a damper in the duct.  The state of the damper is controlled by
 function named by {\ct CTRL\_ID} or {\ct DEVC\_ID}.  Only one of either {\ct DAMPER} or {\ct FAN\_ID} can be specified for a single duct.
 \item[{\ct DEVC\_ID}]  is the {\ct ID} of a {\ct DEVC} for a damper or fan in the duct.  Only one of {\ct CTRL\_ID} or {\ct DEVC\_ID} can be defined.
 \item[{\ct DIAMETER}]  is the diameter (m) of the duct. Either {\ct AREA} or {\ct DIAMETER} must be defined.
-\item[{\ct FAN}] is the {\ct ID} of a fan located in the duct. Only one of either {\ct DAMPER} or {\ct FAN\_ID} can be specified for a single duct.
-\item[{\ct LOSS}] is a pair of real numbers giving the forward and reverse flow loss in the duct.
+\item[{\ct FAN\_ID}] is the {\ct ID} of a fan located in the duct. Only one of either {\ct DAMPER} or {\ct FAN\_ID} can be specified for a single duct.
+\item[{\ct LOSS}] is a pair of real numbers giving the forward and reverse flow loss in the duct.  Forward is flow from the first node listed in {\ct NODE\_ID} to the second node listed in {\ct NODE\_ID}.
 \item[{\ct NODE\_ID}] gives the {\ct ID}s of the nodes on either end of the duct segment.  Positive velocity in a duct is defined as flow from the first node to second node.
-\item[{\ct REVERSE}]  is a logical variable that when {\ct .TRUE.} indicates that the specified {\ct FAN\_ID} or {\ct VOLUME\_FLOW} is from the second node to the first node.
+\item[{\ct RAMP\_ID}] gives the {\ct ID} of a {\ct RAMP} giving a time-dependent multiplier to {\ct VOLUME\_FLOW}.
+\item[{\ct REVERSE}]  is a logical variable that when {\ct .TRUE.} indicates that the specified {\ct FAN\_ID} or {\ct VOLUME\_FLOW} blows from the second node to the first node.
 \item[{\ct ROUGHNESS}]  is the absolute roughness in m of the duct that is used to compute the friction factor for the duct.
 \item[{\ct TAU\_VF}]  defines a tanh ({\ct TAU\_VF} > 0) or t$^2$ ramp ({\ct TAU\_VF} < 0) for the {\ct VOLUME\_FLOW}.
 \item[{\ct VOLUME\_FLOW}] defines a fixed volumetric flow rate (m$^3$/s) in the duct.  {\ct VOLUME\_FLOW} cannot be used in conjunction with {\ct FAN\_ID}.
@@ -4887,7 +4873,7 @@ function named by {\ct CTRL\_ID} or {\ct DEVC\_ID}.  Only one of either {\ct DAM
 
 
 
-\subsubsection{HVAC Node Parameters}
+\subsection{HVAC Node Parameters}
 
 \footnotesize
 \begin{verbatim}
@@ -4898,15 +4884,15 @@ function named by {\ct CTRL\_ID} or {\ct DEVC\_ID}.  Only one of either {\ct DAM
 \begin{description}
 \item[{\ct AMBIENT}] is a logical value.  If {\ct .TRUE.}, then the node is connected to the ambient ({\em i.e.} it is equivalent to the {\ct OPEN} boundary condition on a {\ct SURF} line).
 \item[{\ct DUCT\_ID}] gives the {\ct ID}s of the ducts connected to the node.  Up to 10 ducts can be connected to a node.
-\item[{\ct LOSS}] is an $n$ by $n$ array of real numbers giving the flow losses for the node.  {\ct LOSS(I,J)} is the loss from duct {\ct I} to duct {\ct J}.
-\item[{\ct VENT\_ID}] is the name of the {\ct VENT} where the connection occurs if the node connects to the FDS computational domain.
+\item[{\ct LOSS}] is an $n$ by $n$ array of real numbers giving the flow losses for the node.  {\ct LOSS(I,J)} is the loss for flow from from duct {\ct I} to duct {\ct J}.  For a terminal node ({\em e.g.} a node connected to the ambient or to a {\ct VENT}) the {\ct LOSS} is entered as a pair of numbers representing loss for flow entering the HVAC system and for flow exiting the HVAC system.
+\item[{\ct VENT\_ID}] is the name of the {\ct VENT} where the node connects to the FDS computational domain.
 \item[{\ct XYZ}] is a triplet of real numbers giving the coordinates of the node.  This location is used to compute buoyancy heads.
 If the node is connected to the FDS domain, then do not specify {\ct XYZ}.  FDS will compute it as the centroid of the {\ct VENT}.
 \end{description}
 
 
 
-\subsubsection{HVAC Fan Parameters}
+\subsection{HVAC Fan Parameters}
 
 \footnotesize
 \begin{verbatim}
@@ -4928,13 +4914,106 @@ If the node is connected to the FDS domain, then do not specify {\ct XYZ}.  FDS 
 Note that only one set of fan model inputs ({\ct VOLUME\_FLOW}, {\ct RAMP\_ID}, or {\ct MAX\_FLOW + MAX\_PRESSURE}) should be specified.
 Also note that {\ct FAN} defines a class of fans rather than one specific fan. Therefore, more than one duct can reference a single {\ct FAN}.
 
+\subsubsection{Fan Curves}
+\label{info:Fan_Curves}
+
+In Section~\ref{info:Velocity_BC} there is a discussion of velocity boundary conditions,
+in which a fan is modeled simply as a solid boundary that blows or
+sucks air, regardless of the surrounding pressure field. In the HVAC model, this approach to modeling a fan occurs when the fan is specified with a {\ct VOLUME_FLOW}.  In reality, fans operate based on
+the pressure drop across the duct or manifold in which they are
+installed. A very simple ``fan curve'' is given by:
+\be \dot{V}_{\hbox{\footnotesize fan}} = \dot{V}_{\hbox{\footnotesize max}} \;
+   \hbox{sign} (\Delta p_{\hbox{\footnotesize max}}-\Delta p)
+   \sqrt{ \frac{ |\Delta p - \Delta p_{\hbox{\footnotesize max}}|}{\Delta p_{\hbox{\footnotesize max}} } }  \ee
+
+This simple ''fan curve'' is the ''quadratic'' fan model as the pressure is proportional to the square of the volume flow rate.
+
+The volume flow in the absence of a pressure difference, {\ct MAX\_FLOW}, is given $\dot{V}_{\hbox{\footnotesize max}}$.  The pressure difference, $\Delta p=p_1-p_2$, indicates the difference in
+pressure between the downstream compartment, or ``zone,'' and the upstream. The subscript 1 indicates downstream and 2 indicates upstream.
+The term, $\Delta p_{\hbox{\footnotesize max}}$, is the maximum
+pressure difference, {\ct MAX_PRESSURE}, the fan can operate upon, and it is assumed to be a positive number. The flow through a fan will decrease from $\dot{V}_{\hbox{\footnotesize max}}$ at zero pressure difference to 0 $m^3$/s at $\Delta p_{\hbox{\footnotesize max}}$.  If the pressure difference increases beyond this, air will be forced backwards through the fan.  Figure~\ref{fig:Fan_Curve} displays a typical fan curve.
+
+\begin{figure}[ht!]
+\begin{center}
+\includegraphics[width=3.5in]{FIGURES/Fan_Curve}
+\caption[Example of a fan curve.]{Fan curve corresponding to {\ct VOLUME\_FLUX=10} and {\ct MAX\_PRESSURE=500}.
+Note that a volume flux greater than
+10 is brought about by a negative pressure difference; that is, when the downstream pressure is less than the upstream. Note also that when
+the pressure difference is greater than 500~Pa, the volume flow becomes negative; that is, the flow reverses.}
+\label{fig:Fan_Curve}
+\end{center}
+\end{figure}
+
+More complicated fan curves can be specified by defining a {\ct RAMP}.
+
+\subsubsection{Example Case: {\bf fan\_test}}
+
+Here is an example how fans can be specified.  In it, two simple
+compartments share a common wall. Both compartments are considered as
+separate ``pressure zones.'' Two HVAC ducts are defined.  One is a quadratic fan with a maximum volumetric flow of 0.16 $m^3$/s and a stall pressure of 10 Pa.  The second is open duct with a flow loss of 10. The relevant input lines are:
+
+\footnotesize
+\begin{verbatim}
+&OBST XB= -0.15, 0.15,-1.0, 1.0, 0.0, 2.0 / Partition Wall
 
 
+&VENT XB=-0.15,-0.15,-0.2, 0.2, 0.4, 0.6, COLOR='RED', ID='BLOW LEFT 1',SURF_ID='HVAC',IOR=-1/ 
+&VENT XB= 0.15, 0.15,-0.2, 0.2, 0.4, 0.6, COLOR='GREEN', ID='BLOW LEFT 2',SURF_ID='HVAC',IOR=1/ 
+&VENT XB=-0.15,-0.15,-0.2, 0.2, 1.4, 1.6, COLOR='BLUE', ID='BLOW RIGHT 1',SURF_ID='HVAC',IOR=-1/ 
+&VENT XB= 0.15, 0.15,-0.2, 0.2, 1.4, 1.6, COLOR='YELLOW', ID='BLOW RIGHT 2',SURF_ID='HVAC',IOR=1/ 
 
+&HVAC ID='LEFT 1',TYPE_ID='NODE',DUCT_ID='LEFT',VENT_ID='BLOW LEFT 1'/
+&HVAC ID='LEFT 2',TYPE_ID='NODE',DUCT_ID='LEFT',VENT_ID='BLOW LEFT 2'/
+&HVAC ID='RIGHT 1',TYPE_ID='NODE',DUCT_ID='RIGHT',VENT_ID='BLOW RIGHT 1'/
+&HVAC ID='RIGHT 2',TYPE_ID='NODE',DUCT_ID='RIGHT',VENT_ID='BLOW RIGHT 2'/
 
+&HVAC ID='LEFT',TYPE_ID='DUCT',NODE_ID='LEFT 1','LEFT 2',LENGTH=1,AREA=0.04,FAN_ID='LEFT',REVERSE=.TRUE.,LOSS=0,0/
+&HVAC ID='RIGHT',TYPE_ID='DUCT',NODE_ID='RIGHT 1','RIGHT 2',LENGTH=1,AREA=0.04,LOSS=10,10/
 
+&HVAC ID='LEFT',TYPE_ID='FAN',MAX_FLOW=0.16,MAX_PRESSURE=10./
+\end{verbatim}
+\normalsize
+
+\noindent
+The volume flow through the fans is given by the expression:
+\be \dot{V}_{\hbox{\footnotesize fan}} = \dot{V}_{\hbox{\footnotesize max}} \;
+   \hbox{sign} (\Delta p_{\hbox{\footnotesize max}}-\Delta p)
+   \sqrt{ \frac{ |\Delta p - \Delta p_{\hbox{\footnotesize max}}|}{\Delta p_{\hbox{\footnotesize max}} } }  \ee
+where $\dot{V}_{\hbox{\footnotesize max}}$ is the maximum output of the fan ~(0.16~$m^3$/s from
+Zone~1 to Zone~2 and 0.2~m/s from Zone~2 to Zone~1), and $\Delta p_{\hbox{\footnotesize max}}$ is the maximum pressure difference the fan can operate
+upon (in this case 10~Pa).
+
+In steady state, the volume flow from compartment to compartment (or Zone to Zone) should be equal and opposite in sign.  This occurs when the positive pressure added by the fan equals the pressure drop due to the flow loss through the return duct.
+
+ \be  \sqrt{\frac {2 |p_2-p_1|}{ (1.2 \hbox{kg/$m^3$}) 10}} (0.4 \hbox{m/s}) = 
+   (0.16 \hbox{$m^3$/s})  \;
+   \sqrt{ \frac{ |p_1-p_2-10 \; \hbox{Pa}|}{10 \; \hbox{Pa}}  } \ee
+The solution is $p_2=4.5$~Pa and $p_1=-4.5$~Pa (see Fig.~\ref{fan_test}). Note that the sign of the Volume Flow of a duct in FDS has to do with whether the flow is moving from the first node to the second (postive) or the second node to the first (negative). This convention can make these types of calculations a bit tricky.
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.1in]{SCRIPT_FIGURES/fan_test_Pressure} &
+\includegraphics[width=3.1in]{SCRIPT_FIGURES/fan_test_Volume_Flow}
+\end{tabular*}
+\caption[Output of the {\bf fan\_test} example.]{Pressure and volume flow for the {\bf fan\_test}.}
+\label{fan_test}
+\end{figure}
+
+\subsubsection{Jet Fans}
+
+Fans do not have to be mounted on a solid wall, like a supply or an exhaust fan.
+If you just want to blow gases in a particular direction, create an
+{\ct OBST}struction and apply to it {\ct VENT} lines that are
+associated with a simple HVAC system.
+This allows hot, smokey gases to pass through the
+obstruction, much like a free-standing fan.  See the example case {\ct jet\_fan.fds}.
+
+You may also want to construct a {\em shroud} around the fan using four flat plates arranged to form
+a short passageway that draws gases in one side and expels them out the other. The plate representing the
+fan itself can be positioned about halfway along the passage.
 
 \clearpage
+
 
 \section{Pressure-Related Effects: The \texorpdfstring{{\tt ZONE}}{ZONE} Namelist Group (Table \ref{tbl:VENT})}
 \label{info:ZONE}
@@ -4978,52 +5057,6 @@ two adjacent cells belonging to two different zones have no solid obstruction be
 of the zone boundaries {\em into} the solid obstruction separating the two zones. That way, when the obstruction is removed, the newly created
 gas phase cells will be assigned to one or the other zone and it will become obvious that two adjacent gas phase cells are of two different zones, at
 which point the zones will merge and no longer have distinct background pressures.
-
-
-\subsection{Leaks}
-\label{info:Leaks}
-
-The volume flow, $\dot{V}$, through a leak of area $A_L$ is given by
-\be  \dot{V}_{\hbox{\footnotesize leak}} = A_L \; \hbox{sign} (\Delta p) \; \sqrt{2 \frac{ | \Delta p |}{\rho_\infty}} \ee
-where $\Delta p$ is the pressure difference between the adjacent compartments (in units of Pa) and
-$\rho_\infty$ is the ambient density (in units of kg/m$^3$). The discharge coefficient normally seen in this type of formula is assumed
-to be 1. Leakage is inherently a subgrid-scale phenomenon because the leakage area is usually very small. In other words, it is not possible to define a leak directly on the
-numerical mesh. It is sometimes possible to ``lump'' the leaks into a single mesh-resolvable hole, but this is problematic
-for two reasons. First, the leakage area rarely corresponds neatly to the area of a single mesh cell-sized hole. Second, the
-flow speeds through the hole can be large and cause numerical instabilities.
-
-A better way to handle leakage is by exploiting pressure zones. A pressure zone is a user-specified volume within the computational domain that is
-entirely surrounded by solid obstructions. For example, the interior of a closed room can be, and should be, declared a pressure zone. Leakage from one
-compartment to another is then designated on the input lines defining the individual pressure {\ct ZONE}s:
-
-\footnotesize
-\begin{verbatim}
-&ZONE XB=0.3,1.2,0.4,2.9,0.3,4.5, LEAK_AREA(0)=0.0001 /
-&ZONE XB=2.3,5.8,1.4,2.9,6.8,9.7, LEAK_AREA(1)=0.0002, LEAK_AREA(0)=0.0003 /
-\end{verbatim}
-\normalsize
-
-\noindent
-The first line designates a region of the computational domain to be Pressure Zone~1. Note that the order of the {\ct ZONE} lines is important; that is, the order
-implicitly defines Zone~1, Zone~2, {\em etc.}
-Zone 0 is by default the ambient pressure exterior.
-In this example, a leak exists between Zone 1 and the exterior Zone 0, and the area of the leak
-is 0.0001~m$^2$ (1 cm by 1 cm hole, for example). Zone 2 leaks to Zone 1 (and vis verse)
-with a leak area of 0.0002~m$^2$. Zone~2 also leaks to the outside with an area of 0.0003~m$^2$. Note that zones need not be connected for a leak to occur.
-At least one of the obstructions that form the walls of Zone 1 must have the attribute
-{\ct LEAK\_PATH=1,0}, meaning that the leak between Zones 1 and 0 is uniformly distributed
-over solids defined with:
-
-\footnotesize
-\begin{verbatim}
-&SURF ID='whatever',..., LEAK_PATH=1,0 /
-\end{verbatim}
-\normalsize
-
-\noindent
-Likewise, the boundaries of Zone 1 and Zone 2 must include solids whose {\ct SURF} properties include the parameter {\ct LEAK\_PATH=1,2}, but these solids need not form a boundary between the
-two zones. The {\ct SURF}aces with the {\ct LEAK\_PATH} attribute lump all of the
-leakage over these areas. The order of the two pressure zones designated by {\ct LEAK\_PATH} is unimportant.
 
 
 \subsubsection{Example Case: {\bf pressure\_rise}}
@@ -5081,107 +5114,57 @@ are very important in such analyses. The zone breaking functionality described i
 between compartments. Real buildings cannot withstand substantially larger pressures anyway.
 \end{warning}
 
+\subsection{Leaks}
+\label{info:Leaks}
 
+With a few notable exceptions, like containment buildings for nuclear power plants, real world construction is not air tight.  Small gaps occur along windows and doors and where walls abutt each other and the floors and ceilings.  As a comparment is pressurized by a fire, air will escape through these small gaps.  This is referred to as leakage.  
 
-\subsection{Fan Curves}
-\label{info:Fan_Curves}
+Leakage is inherently a subgrid-scale phenomenon because the leakage area is usually very small. In other words, it is not possible to define a leak directly on the
+numerical mesh. It is sometimes possible to ``lump'' the leaks into a single mesh-resolvable hole, but this is problematic
+for two reasons. First, the leakage area rarely corresponds neatly to the area of a single mesh cell-sized hole. Second, the
+flow speeds through the hole can be large and cause numerical instabilities.
 
-In Section~\ref{info:Velocity_BC} there is a discussion of velocity boundary conditions,
-in which a fan is modeled simply as a solid boundary that blows or
-sucks air, regardless of the surrounding pressure field. In reality, fans operate based on
-the pressure drop across the duct or manifold in which they are
-installed. A very simple ``fan curve'' is given by:
-\be \dot{V}_{\hbox{\footnotesize fan}} = A_{\hbox{\footnotesize duct}} U_{\hbox{\footnotesize max}} \;
-   \hbox{sign} (\Delta p_{\hbox{\footnotesize max}}-\Delta p)
-   \sqrt{ \frac{ |\Delta p - \Delta p_{\hbox{\footnotesize max}}|}{\Delta p_{\hbox{\footnotesize max}} } }  \ee
-The volume flow in the absence of a pressure difference is given by the area of the duct times the velocity of the air.
-$A_{\hbox{\footnotesize duct}}$ is the area of the duct~(m$^2$), and $U_{\hbox{\footnotesize max}}$ is
-the air velocity~(m/s) in the absence of a pressure difference. The pressure difference, $\Delta p=p_1-p_2$, indicates the difference in
-pressure between the downstream compartment, or ``zone,'' and the upstream. The subscript 1 indicates downstream and 2 indicates upstream.
-The term, $\Delta p_{\hbox{\footnotesize max}}$, is the maximum
-pressure difference the fan can operate upon, and it is assumed to be a positive number. Figure~\ref{fig:Fan_Curve} displays a typical fan curve.
-
-\begin{figure}[ht!]
-\begin{center}
-\includegraphics[width=3.5in]{FIGURES/Fan_Curve}
-\caption[Example of a fan curve.]{Fan curve corresponding to {\ct VOLUME\_FLUX=10} and {\ct MAX\_PRESSURE=500}.
-Note that a volume flux greater than
-10 is brought about by a negative pressure difference; that is, when the downstream pressure is less than the upstream. Note also that when
-the pressure difference is greater than 500~Pa, the volume flow becomes negative; that is, the flow reverses.}
-\label{fig:Fan_Curve}
-\end{center}
-\end{figure}
-
-The velocity of the fan in the absence of a pressure difference, $U_{\hbox{\footnotesize max}}$, is
-specified via the parameter {\ct VEL} on the appropriate {\ct SURF}
-line. Alternatively, the volume flow rate, $A_{\hbox{\footnotesize duct}} U_{\hbox{\footnotesize max}}$, can be specified using {\ct VOLUME\_FLUX}.
-Do not use both.  These parameters were already
-introduced in Section~\ref{info:SURF}. To simulate the behavior of a
-real fan, a few extra parameters need to be specified. To set $\Delta p_{\hbox{\footnotesize max}}$, the maximum operating over-pressure,
-add {\ct MAX\_PRESSURE} to the {\ct SURF} line. Note that {\ct MAX\_PRESSURE}
-should always be positive and in units of Pa.  If the pressure difference (downstream minus upstream)
-exceeds the specified {\ct MAX\_PRESSURE}, then there will be a backflow in the duct.
-
-\begin{warning}
-Note that the rules governing the sign of {\ct VEL} or {\ct VOLUME\_FLUX} remain in force for fans that are subject to pressure differences between
-compartments. Simply note that the sign of either {\ct VEL} or {\ct VOLUME\_FLUX}
-defines ``upstream'' and ``downstream.'' Thus, the zone into which air is blown in the absence
-of a pressure difference is the downstream zone.
-\end{warning}
-
-\subsubsection{Example Case: {\bf fan\_test}}
-
-Here is an example how fans can be specified.  In it, two simple
-compartments share a common wall. Both compartments are considered as
-separate ``pressure zones.'' Two HVAC ducts are defined.  One is a quadratic fan with a maximum volumetric flow of 0.16 $m^3$/s and a stall pressure of 10 Pa.  The second is open duct with a flow loss of 10. The relevant input lines are:
+A better way to handle leakage is by exploiting pressure zones. A pressure zone is a user-specified volume within the computational domain that is
+entirely surrounded by solid obstructions. For example, the interior of a closed room can be, and should be, declared a pressure zone. Leakage from one
+compartment to another is then designated on the input lines defining the individual pressure {\ct ZONE}s:
 
 \footnotesize
 \begin{verbatim}
-&OBST XB= -0.15, 0.15,-1.0, 1.0, 0.0, 2.0 / Partition Wall
-
-
-&VENT XB=-0.15,-0.15,-0.2, 0.2, 0.4, 0.6, COLOR='RED', ID='BLOW LEFT 1',SURF_ID='HVAC',IOR=-1/ 
-&VENT XB= 0.15, 0.15,-0.2, 0.2, 0.4, 0.6, COLOR='GREEN', ID='BLOW LEFT 2',SURF_ID='HVAC',IOR=1/ 
-&VENT XB=-0.15,-0.15,-0.2, 0.2, 1.4, 1.6, COLOR='BLUE', ID='BLOW RIGHT 1',SURF_ID='HVAC',IOR=-1/ 
-&VENT XB= 0.15, 0.15,-0.2, 0.2, 1.4, 1.6, COLOR='YELLOW', ID='BLOW RIGHT 2',SURF_ID='HVAC',IOR=1/ 
-
-&HVAC ID='LEFT 1',TYPE_ID='NODE',DUCT_ID='LEFT',VENT_ID='BLOW LEFT 1'/
-&HVAC ID='LEFT 2',TYPE_ID='NODE',DUCT_ID='LEFT',VENT_ID='BLOW LEFT 2'/
-&HVAC ID='RIGHT 1',TYPE_ID='NODE',DUCT_ID='RIGHT',VENT_ID='BLOW RIGHT 1'/
-&HVAC ID='RIGHT 2',TYPE_ID='NODE',DUCT_ID='RIGHT',VENT_ID='BLOW RIGHT 2'/
-
-&HVAC ID='LEFT',TYPE_ID='DUCT',NODE_ID='LEFT 1','LEFT 2',LENGTH=1,AREA=0.04,FAN_ID='LEFT',REVERSE=.TRUE.,LOSS=0,0/
-&HVAC ID='RIGHT',TYPE_ID='DUCT',NODE_ID='RIGHT 1','RIGHT 2',LENGTH=1,AREA=0.04,LOSS=10,10/
-
-&HVAC ID='LEFT',TYPE_ID='FAN',MAX_FLOW=0.16,MAX_PRESSURE=10./
+&ZONE XB=0.3,1.2,0.4,2.9,0.3,4.5, LEAK_AREA(0)=0.0001 /
+&ZONE XB=2.3,5.8,1.4,2.9,6.8,9.7, LEAK_AREA(1)=0.0002, LEAK_AREA(0)=0.0003 /
 \end{verbatim}
 \normalsize
 
 \noindent
-The volume flow through the fans is given by the expression:
-\be \dot{V}_{\hbox{\footnotesize fan}} = \dot{V}_{\hbox{\footnotesize max}} \;
-   \hbox{sign} (\Delta p_{\hbox{\footnotesize max}}-\Delta p)
-   \sqrt{ \frac{ |\Delta p - \Delta p_{\hbox{\footnotesize max}}|}{\Delta p_{\hbox{\footnotesize max}} } }  \ee
-where $\dot{V}_{\hbox{\footnotesize max}}$ is the maximum output of the fan ~(0.16~$m^3$/s from
-Zone~1 to Zone~2 and 0.2~m/s from Zone~2 to Zone~1), and $\Delta p_{\hbox{\footnotesize max}}$ is the maximum pressure difference the fan can operate
-upon (in this case 10~Pa).
+The first line designates a region of the computational domain to be Pressure Zone~1. Note that the order of the {\ct ZONE} lines is important; that is, the order
+implicitly defines Zone~1, Zone~2, {\em etc.}
+Zone 0 is by default the ambient pressure exterior.
 
-In steady state, the volume flow from compartment to compartment (or Zone to Zone) should be equal and opposite in sign.  This occurs when the positive pressure added by the fan equals the pressure drop due to the flow loss through the return duct.
 
- \be  \sqrt{\frac {2 |p_2-p_1|}{ (1.2 \hbox{kg/$m^3$}) 10}} (0.4 \hbox{m/s}) = 
-   (0.16 \hbox{$m^3$/s})  \;
-   \sqrt{ \frac{ |p_1-p_2-10 \; \hbox{Pa}|}{10 \; \hbox{Pa}}  } \ee
-The solution is $p_2=4.5$~Pa and $p_1=-4.5$~Pa (see Fig.~\ref{fan_test}). Note that the sign of the Volume Flow of a duct in FDS has to do with whether the flow is moving from the first node to the second (postive) or the second node to the first (negative). This convention can make these types of calculations a bit tricky.
+In this example, a leak exists between Zone 1 and the exterior Zone 0, and the area of the leak
+is 0.0001~m$^2$ (1 cm by 1 cm hole, for example). Zone 2 leaks to Zone 1 (and vis verse)
+with a leak area of 0.0002~m$^2$. Zone~2 also leaks to the outside with an area of 0.0003~m$^2$. Note that zones need not be physically connected for a leak to occur.
 
-\begin{figure}[ht]
-\begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.1in]{SCRIPT_FIGURES/fan_test_Pressure} &
-\includegraphics[width=3.1in]{SCRIPT_FIGURES/fan_test_Volume_Flow}
-\end{tabular*}
-\caption[Output of the {\bf fan\_test} example.]{Pressure and volume flow for the {\bf fan\_test}.}
-\label{fan_test}
-\end{figure}
+The volume flow, $\dot{V}$, through a leak of area $A_L$ is given by
+\be  \dot{V}_{\hbox{\footnotesize leak}} = A_L \; \hbox{sign} (\Delta p) \; \sqrt{2 \frac{ | \Delta p |}{\rho_\infty}} \ee
+where $\Delta p$ is the pressure difference between the adjacent compartments (in units of Pa) and
+$\rho_\infty$ is the ambient density (in units of kg/m$^3$). The discharge coefficient normally seen in this type of formula is assumed
+to be 1. 
 
+Within FDS, leakage flows are handled by the HVAC solver.  A leak between two zones is considered to be a pair of HVAC {\ct VENT}s connected by a duct with a loss coefficient of 1.  To specify a leak between two zones, a solid surface in each of the zones must be given the attribute {\ct LEAK\_PATH}.  Leakage is uniformly distributed over all of the solid surfaces assigned the {\ct LEAK\_PATH}.  In the above example, the leakage from Zone 1 to Zone o requires the attribute
+{\ct LEAK\_PATH=1,0}, meaning that the leak between Zones 1 and 0 is uniformly distributed
+over solids defined with:
+
+\footnotesize
+\begin{verbatim}
+&SURF ID='whatever',..., LEAK_PATH=1,0 /
+\end{verbatim}
+\normalsize
+
+\noindent
+Likewise, the boundaries of Zone 1 and Zone 2 must include solids whose {\ct SURF} properties include the parameter {\ct LEAK\_PATH=1,2}, but these solids need not form a boundary between the
+two zones. The {\ct SURF}aces with the {\ct LEAK\_PATH} attribute lump all of the
+leakage over these areas. The order of the two pressure zones designated by {\ct LEAK\_PATH} is unimportant.
 
 \clearpage
 
@@ -5979,14 +5962,8 @@ Note that if this parameter is used, then some form of heat/ignition source must
 
 \subsubsection{Example Case: door\_crack}
 
-This example uses the same simple compartment that was used to test leakage and fan curves. Now, we add a small (160~kW) fire, with the same
-fan and leak under the door. The compartment now opens to the atmosphere, not a sealed plenum. We expect a rapid pressure rise in the compartment due to the effect of the
-fire and the fan. Initially, the pressure rises due to the heat from the fire and the fan blowing air into the compartment:
-\be \frac{d \overline{p}_1}{dt} \approx (\gamma - 1) \; \frac{\dQ}{V} + \gamma \, \overline{p} \; \frac{ \dot{V} }{V} \approx 3200 \; \hbox{Pa/s}  \approx 0.03 \; \hbox{atm/s}   \ee
-where $\gamma \approx 1.4$, $\dot{Q}=160,000$~W, $V=20.7$~m$^3$, and $\dot{V}=0.016$~m$^3$/s. However, as heat is lost to the walls, and as the leak begins to relieve the
-pressure increase, the pressure rise slows, and then reverses at about 0.25~atm. In roughly 150~s, the fire
-is self-extinguished due to lack of oxygen. As the pressure rise decreases back to zero, and actually goes below zero, the fan, and the leak under the
-door, increase the oxygen supply, at least near these openings, and the fuel-rich gases in the compartment continue to burn.
+This example uses a compartment surrounded by the ambient that contains a fan in one wall and a closed door with leakage at its bottom in the opposite wall.  A small (160~kW) fire is added to the compartment. Initially, the pressure rises due to the heat from the fire and the fan blowing air into the compartment.  Eventually the the pressure rise inside the compartment exceeds the maximum pressure of the fan, at which point the compartment begins to exhaust from both the fan and the leakge.  Pressure will continue to rise due to the fire until the pressure relief due to leakage and backflow through the fan equals the pressure increase from the fire.  As heat is lost to the walls, and as pressure is relieved, the pressure rise slows, and eventually the pressure decreases which allows the fan to push air back into the compartment.   Eventually, the fire at the burner
+is self-extinguished due to lack of oxygen; however, the fuel-rich gases in the compartment will continue to burn where the fan is blowing fresh air into the compartment and at the leak where fuel rich gases exit the compartment.
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
@@ -6924,7 +6901,7 @@ If you were to specify
 the sprinkler would point in the positive $x$ direction.
 For other devices, the {\ct ORIENTATION} would only change the way the device is drawn by Smokeview.
 
-
+The delivered density to the floor from a sprinkler depends upon where the sprinkler arms are located.  Rather than redefining the spray pattern for every possible direction that the sprinkler can be attached to the pipe, the {\ct DEVC} can be given the parameter {\ct ROTATION}.  The default {\ct ROTATION} is 0 degrees, which for a downwards pointing sprinkler is the positive x-axis.  Positive {\ct ROTATION} will rotate the 0 degree point towards the positive y-axis.
 
 \section{Device Output}
 \label{info:out:DEVC}
@@ -9813,7 +9790,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct PROP\_ID}              & Character       & See Section~\ref{info:DEVC}                                      &       &               \\ \hline
 {\ct QUANTITY}              & Character       & See Section~\ref{info:DEVC}                                      &       &               \\ \hline
 {\ct RELATIVE}              & Logical         & See Section~\ref{info:out:DEVC}                                  &       & {\ct .FALSE.} \\ \hline
-{\ct ROTATION}              & Real Triplet    & See Section~\ref{info:DEVC}                                      & deg.  & 0             \\ \hline
+{\ct ROTATION}              & Real            & See Section~\ref{info:DEVC}                                      & deg.  & 0             \\ \hline
 {\ct SETPOINT}              & Real            & See Section~\ref{info:basic_control}                             &       &               \\ \hline
 {\ct SPEC\_ID}              & Character       & See Section~\ref{info:outputquantities}                          &       &               \\ \hline
 {\ct STATISTICS}            & Character       & See Section~\ref{info:statistics}                                &       &               \\ \hline
