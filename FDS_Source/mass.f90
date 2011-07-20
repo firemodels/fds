@@ -26,7 +26,7 @@ SUBROUTINE MASS_FINITE_DIFFERENCES(NM)
 
 USE COMP_FUNCTIONS, ONLY: SECOND
 USE PHYSICAL_FUNCTIONS, ONLY: GET_AVERAGE_SPECIFIC_HEAT
-USE GLOBAL_CONSTANTS, ONLY: N_TRACKED_SPECIES,NULL_BOUNDARY,POROUS_BOUNDARY,OPEN_BOUNDARY,INTERPOLATED_BOUNDARY, &
+USE GLOBAL_CONSTANTS, ONLY: N_TRACKED_SPECIES,NULL_BOUNDARY,OPEN_BOUNDARY,INTERPOLATED_BOUNDARY, &
                             PREDICTOR,CORRECTOR,EVACUATION_ONLY,SOLID_PHASE_ONLY,TUSED,DEBUG_OPENMP,SOLID_BOUNDARY, &
                             NO_MASS_FLUX,SPECIFIED_MASS_FLUX,HVAC_BOUNDARY,ENTHALPY_TRANSPORT
 INTEGER, INTENT(IN) :: NM
@@ -111,7 +111,7 @@ ENDDO
 !$OMP DO PRIVATE(IW,II,JJ,KK,IOR,IBC,IIG,JJG,KKG,ZZZ,UN)
 WLOOP_FL: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    
-   IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WLOOP_FL
+   IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY) CYCLE WLOOP_FL
        
    II  = IJKW(1,IW) 
    JJ  = IJKW(2,IW)
@@ -273,7 +273,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
      !$OMP PRIVATE(IW,II,JJ,KK,IOR,IBC,IIG,JJG,KKG,ZZZ,UN,RHO_D_DZDN)
       WLOOP2_FL: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
-         IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WLOOP2_FL
+         IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY) CYCLE WLOOP2_FL
              
          II  = IJKW(1,IW)
          JJ  = IJKW(2,IW)
@@ -432,7 +432,7 @@ ENTHALPY_IF: IF (ENTHALPY_TRANSPORT) THEN
    !$OMP DO PRIVATE(IW,II,JJ,KK,IOR,IBC,IIG,JJG,KKG,UN,ZZ_GET,CP,E_F,ZZZ)
    WLOOP3_FL: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    
-      IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WLOOP3_FL
+      IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY) CYCLE WLOOP3_FL
        
       II  = IJKW(1,IW) 
       JJ  = IJKW(2,IW)
@@ -1118,7 +1118,7 @@ SUBROUTINE CHECK_MASS_FRACTION
 
 ! Redistribute species mass from cells below or above the cut-off limits
 
-USE GLOBAL_CONSTANTS, ONLY : PREDICTOR, CORRECTOR, N_TRACKED_SPECIES,POROUS_BOUNDARY,DEBUG_OPENMP
+USE GLOBAL_CONSTANTS, ONLY : PREDICTOR, CORRECTOR, N_TRACKED_SPECIES,DEBUG_OPENMP
 REAL(EB) :: SUM,CONST,RHZMI,RHZPI,RHZMJ,RHZPJ,RHZMK,RHZPK,RHY0,ZMI,ZPI,ZMJ,ZPJ,ZMK,ZPK,Y00,ZMIN,ZMAX
 INTEGER  :: IC,N,ISUM, IW_A(-3:3),I,J,K
 LOGICAL  :: LC(-3:3)
@@ -1165,68 +1165,26 @@ SPECIESLOOP: DO N=1,N_TRACKED_SPECIES
             IF (IW_A(-1) == 0) THEN
                ZMI = ZZP(I-1,J,K,N)
                LC(-1) = .TRUE.
-            ELSE
-               IF (BOUNDARY_TYPE(IW_A(-1))==POROUS_BOUNDARY) THEN
-                 ZMI = ZZP(I-1,J,K,N)
-                 LC(-1) = .TRUE.
-               ELSE
-                 ZMI = ZZ_F(IW_A(-1),N)  
-               ENDIF
             ENDIF          
             IF (IW_A( 1) == 0) THEN
                ZPI = ZZP(I+1,J,K,N)
                LC( 1) = .TRUE.
-            ELSE
-               IF (BOUNDARY_TYPE(IW_A(1))==POROUS_BOUNDARY) THEN
-                 ZPI = ZZP(I+1,J,K,N)
-                 LC( 1) = .TRUE.
-               ELSE
-                 ZPI = ZZ_F(IW_A(1),N)  
-               ENDIF
             ENDIF           
             IF (IW_A(-2) == 0) THEN
                ZMJ = ZZP(I,J-1,K,N)
                LC(-2) = .TRUE.
-            ELSE
-               IF (BOUNDARY_TYPE(IW_A(-2))==POROUS_BOUNDARY) THEN
-                 ZMJ = ZZP(I,J-1,K,N)
-                 LC(-2) = .TRUE.
-               ELSE
-                 ZMJ = ZZ_F(IW_A(-2),N)  
-               ENDIF
             ENDIF         
             IF (IW_A( 2) == 0) THEN
                ZPJ = ZZP(I,J+1,K,N)
                LC( 2) = .TRUE.
-            ELSE
-               IF (BOUNDARY_TYPE(IW_A( 2))==POROUS_BOUNDARY) THEN
-                 ZPJ = ZZP(I,J+1,K,N)
-                 LC( 2) = .TRUE.
-               ELSE
-                 ZPJ = ZZ_F(IW_A( 2),N)  
-               ENDIF
             ENDIF         
             IF (IW_A(-3) == 0) THEN
                ZMK = ZZP(I,J,K-1,N)
                LC(-3) = .TRUE.
-            ELSE
-               IF (BOUNDARY_TYPE(IW_A(-3))==POROUS_BOUNDARY) THEN
-                 ZMK = ZZP(I,J,K-1,N)
-                 LC(-3) = .TRUE.
-               ELSE
-                 ZMK = ZZ_F(IW_A(-3),N)  
-               ENDIF
             ENDIF         
             IF (IW_A( 3) == 0) THEN
                ZPK = ZZP(I,J,K+1,N)
                LC( 3) = .TRUE.
-            ELSE
-               IF (BOUNDARY_TYPE(IW_A( 3))==POROUS_BOUNDARY) THEN
-                 ZPK = ZZP(I,J,K+1,N)
-                 LC( 3) = .TRUE.
-               ELSE
-                 ZPK = ZZ_F(IW_A( 3),N)  
-               ENDIF
             ENDIF           
             ZMIN = MIN(ZMI,ZPI,ZMJ,ZPJ,ZMK,ZPK)
             ZMIN = MAX(ZMIN,0._EB)
