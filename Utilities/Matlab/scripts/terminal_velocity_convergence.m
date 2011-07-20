@@ -92,7 +92,7 @@ figure(1)
 H(1) = loglog(dtvec, Linf, '-*k');
 hold on
 H(2) = loglog(dtvec, 50 * dtvec, '--k');
-H(3) = loglog(dtvec, 10 * dtvec.^2, '-k');
+H(3) = loglog(dtvec, 5 * dtvec.^2, '-k');
 hold off
 dto = dtvec((length(dtvec) - 1):length(dtvec));
 erro = Linf((length(Linf) - 1):length(Linf));

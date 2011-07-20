@@ -12,12 +12,6 @@ CHARACTER(255), PARAMETER :: partrev='$Revision$'
 CHARACTER(255), PARAMETER :: partdate='$Date$'
 REAL(EB) :: INSERT_RATE = 0._EB
 INTEGER :: INSERT_COUNT = 0
-REAL(EB) :: PARACOR = 0._EB
-REAL(EB) :: DTDT = 0._EB
-REAL(EB) :: DTDTDT = 0._EB
-REAL(EB) :: AOPA = 0._EB
-REAL(EB) :: AOPALOGOBETA = 0._EB
-REAL(EB) :: AOPABETA = 0._EB
 
 CONTAINS
  
@@ -832,7 +826,7 @@ REAL(EB) :: RHO_G,RVC,RDS,RDC,QREL,UREL,VREL,WREL,TMP_G,RN,THETA_RN, &
             UVW,X_OLD,Y_OLD,Z_OLD,STEP_FRACTION(-3:3),SURFACE_DROPLET_DIAMETER, &
             T_BU_BAG,T_BU_STRIP,B_1,THROHALF,P_UVWMAX,UVWMAX, &
             ALPHA,BETA,DR_MASS,FP_MASS,OBDT,OPA,BDTOA,U_OLD,V_OLD,W_OLD,MPOM,RDT,&
-            WAKE_VEL,RE_WAKE,SFAC
+            WAKE_VEL,RE_WAKE,SFAC,PARACOR,DT2,AOPA,ALB,HAB,DTO
 REAL(EB) :: CHILD_RADIUS(0:NDC),ZZ_GET(0:N_TRACKED_SPECIES)
 LOGICAL :: HIT_SOLID
 INTEGER :: ICN,I,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ,IW,IWP1,IWM1,IWP2,IWM2,IWP3,IWM3,IOR_OLD,IC,IOR_FIRST,IML
@@ -1017,19 +1011,18 @@ DROPLET_LOOP: DO I=1,NLP
       FP_MASS = (RHO_G/RVC)/NDPC(II,JJ,KK) ! fluid parcel mass
       IF (FREEZE_VELOCITY) FP_MASS = 1.E10_EB
       
-      DTDT = DT*DT
-      DTDTDT = DTDT*DT
-      
+      DT2 = 0.5_EB*DT*DT
       BETA  = 0.5_EB*RHO_G*C_DRAG*PI*RDS*(1._EB/DR_MASS+1._EB/FP_MASS)*QREL
       OBDT  = 1._EB+BETA*DT
       ALPHA = FP_MASS/DR_MASS
       OPA   = 1._EB+ALPHA
       BDTOA = BETA*DT/OPA
-      ! second-order parallel correction term for the droplet velocities
+      DTO = DT/OPA
+      AOPA = ALPHA*DT/OPA
+      ALB = ALPHA*LOG(OBDT)/BETA/OPA
+      HAB = ALPHA*BETA*DT2/OPA
+      ! 2nd-order term for the particle velocities that is parallel to the rel velocity
       PARACOR = (UREL*GVEC(1) + VREL*GVEC(2) + WREL*GVEC(3))/(QREL*QREL + 1.E-10_EB)
-      AOPA = ALPHA/OPA
-      AOPALOGOBETA = AOPA*LOG(OBDT)/BETA
-      AOPABETA = AOPA*BETA
                
       DR%U = ( U_OLD + (U_OLD+ALPHA*UBAR)*BDTOA )/OBDT
       DR%V = ( V_OLD + (V_OLD+ALPHA*VBAR)*BDTOA )/OBDT
@@ -1042,26 +1035,23 @@ DROPLET_LOOP: DO I=1,NLP
          DR%A_Y = MPOM*(V_OLD-DR%V)*RDT
          DR%A_Z = MPOM*(W_OLD-DR%W)*RDT
          ! analytical solution for droplet position
-         DR%X = X_OLD + (U_OLD+ALPHA*UBAR)/OPA*DT + AOPALOGOBETA*(U_OLD-UBAR) + 0.5_EB*GVEC(1)*DTDT &
-            - AOPABETA*DTDTDT*(GVEC(1) + UREL*PARACOR)/6._EB
-         DR%Y = Y_OLD + (V_OLD+ALPHA*VBAR)/OPA*DT + AOPALOGOBETA*(V_OLD-VBAR) + 0.5_EB*GVEC(2)*DTDT &
-            - AOPABETA*DTDTDT*(GVEC(2) + VREL*PARACOR)/6._EB
-         DR%Z = Z_OLD + (W_OLD+ALPHA*WBAR)/OPA*DT + AOPALOGOBETA*(W_OLD-WBAR) + 0.5_EB*GVEC(3)*DTDT &
-            - AOPABETA*DTDTDT*(GVEC(3) + WREL*PARACOR)/6._EB
+         DR%X = X_OLD + DTO*U_OLD + AOPA*UBAR + ALB*(U_OLD-UBAR) + GVEC(1)*DT2
+         DR%Y = Y_OLD + DTO*V_OLD + AOPA*VBAR + ALB*(V_OLD-VBAR) + GVEC(2)*DT2
+         DR%Z = Z_OLD + DTO*W_OLD + AOPA*WBAR + ALB*(W_OLD-WBAR) + GVEC(3)*DT2
       ELSE
          ! no drag
          DR%A_X  = 0._EB
          DR%A_Y  = 0._EB
          DR%A_Z  = 0._EB
-         DR%X = X_OLD + (U_OLD + 0.5_EB*GVEC(1)*DT)*DT
-         DR%Y = Y_OLD + (V_OLD + 0.5_EB*GVEC(2)*DT)*DT
-         DR%Z = Z_OLD + (W_OLD + 0.5_EB*GVEC(3)*DT)*DT
+         DR%X = X_OLD + DT*U_OLD + GVEC(1)*DT2
+         DR%Y = Y_OLD + DT*V_OLD + GVEC(2)*DT2
+         DR%Z = Z_OLD + DT*W_OLD + GVEC(3)*DT2
       ENDIF
       
       ! gravitational acceleration
-      DR%U = DR%U + GVEC(1)*DT - 0.5_EB*AOPABETA*DTDT*(GVEC(1) + UREL*PARACOR)
-      DR%V = DR%V + GVEC(2)*DT - 0.5_EB*AOPABETA*DTDT*(GVEC(2) + VREL*PARACOR)
-      DR%W = DR%W + GVEC(3)*DT - 0.5_EB*AOPABETA*DTDT*(GVEC(3) + WREL*PARACOR)
+      DR%U = DR%U + GVEC(1)*DT - HAB*(GVEC(1) + UREL*PARACOR)
+      DR%V = DR%V + GVEC(2)*DT - HAB*(GVEC(2) + VREL*PARACOR)
+      DR%W = DR%W + GVEC(3)*DT - HAB*(GVEC(3) + WREL*PARACOR)
                
    ENDIF PARTICLE_NON_STATIC_IF
 
