@@ -772,7 +772,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             ! Boundary conditions: Intensities leaving the boundaries.
             
             WALL_LOOP1: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-               IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY .OR. BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WALL_LOOP1
+               IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY) CYCLE WALL_LOOP1
                IOR = IJKW(4,IW)
                IF (DLN(IOR,N) < 0._EB) CYCLE WALL_LOOP1
                II  = IJKW(1,IW)
@@ -973,7 +973,6 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             WALL_LOOP2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
                IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY)   CYCLE WALL_LOOP2     
                IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY)   CYCLE WALL_LOOP2  
-               IF (BOUNDARY_TYPE(IW)==POROUS_BOUNDARY) CYCLE WALL_LOOP2  
                IOR = IJKW(4,IW)
                IF (TWO_D .AND. .NOT.CYLINDRICAL  .AND. ABS(IOR)==2) CYCLE WALL_LOOP2  ! 2-D non cylindrical
                IF (DLN(IOR,N)>=0._EB) CYCLE WALL_LOOP2     ! outgoing
