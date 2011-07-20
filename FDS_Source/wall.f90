@@ -759,6 +759,17 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
    ! Iterate to get the appropriate normal velocity and density
 
+   SPECIES_IF_1: IF (N_TRACKED_SPECIES==0) THEN
+      MASSFLUX(IW,0) = MFT
+   ELSE SPECIES_IF_1
+      IF (UN > 0._EB) THEN
+         MASSFLUX(IW,:) = 0._EB
+         MASSFLUX(IW,1:N_TRACKED_SPECIES) = -NODE_ZZ(DN,1:N_TRACKED_SPECIES,NM)*MFT
+         MASSFLUX(IW,0) = -MFT - SUM(MASSFLUX(IW,1:N_TRACKED_SPECIES))
+      ENDIF
+   ENDIF SPECIES_IF_1
+
+
    ITER = .TRUE.
 
    DO WHILE (ITER)
@@ -770,20 +781,12 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       UN    = -MFT/RHO_F(IW)
       IF (PREDICTOR) UWS(IW) = -UN
       SPECIES_IF: IF (N_TRACKED_SPECIES==0) THEN
-         MASSFLUX(IW,0) = MFT
          RSUM_F = RSUM0
       ELSE SPECIES_IF
          ZZ_ERR = 0._EB
-         IF (UN < 0._EB) THEN
+         IF (UN <= 0._EB) THEN
             ZZ_F(IW,:) = ZZ_G(:)
          ELSE
-            MASSFLUX(IW,:) = 0._EB
-            IF (VENT_INDEX(IW)>0) THEN
-               IF (VENTS(VENT_INDEX(IW))%NODE_INDEX > 0) THEN
-                  MASSFLUX(IW,1:N_TRACKED_SPECIES) = -NODE_ZZ(DN,1:N_TRACKED_SPECIES,NM)*MFT
-                  MASSFLUX(IW,0) = -MFT - SUM(MASSFLUX(IW,1:N_TRACKED_SPECIES))
-               ENDIF
-            ENDIF
             DO N=1,N_TRACKED_SPECIES
                DD = 2._EB*RHODW(IW,N)*RDN(IW)
                ZZ_F(IW,N) = ( MASSFLUX(IW,N) + DD*ZZ_G(N) ) / ( DD + UN*RHO_F(IW) )

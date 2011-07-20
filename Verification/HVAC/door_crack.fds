@@ -2,34 +2,35 @@ An ISO 9701 compartment with a fan blowing into it, a small fire, and a crack un
 
 &HEAD CHID='door_crack', TITLE='Test of smoke leaking under a door, SVN $Revision: 2066 $' /
 
-&MESH IJK=50,40,32, XB=-2.5, 2.5,-2.0, 2.0, 0.0, 3.2 /
+&MESH IJK=25,20,16, XB=-2.4, 2.6,-2.0, 2.0, 0.0, 3.2 /
 
-&TIME T_END=300.0 /
+&TIME T_END=1800.0 /
+
+&SURF ID='DOOR CRACK', LEAK_PATH=1,0/
 
 &DUMP DT_DEVC=5., DT_HRR=5. /
 
-&SURF ID='DOOR CRACK', LEAK_PATH=1,0, POROUS=.TRUE. /
 &SURF ID='BURNER', COLOR='YELLOW', HRRPUA=1000. /
 &REAC C=3,H=8,SOOT_YIELD=0.01,FUEL='PROPANE'/
-&ZONE XB=-1.80, 1.80,-1.20, 1.20, 0.00, 2.40, LEAK_AREA(0)=0.0001 /  
+&ZONE XB=-1.25, 1.45,-1.05, 1.05, 0.00, 2.05, LEAK_AREA(0)=0.002 /  
 
-&OBST XB=-1.90, 1.90,-1.30,-1.20, 0.00, 2.50 / Left Wall
-&OBST XB=-1.90, 1.90, 1.20, 1.30, 0.00, 2.50 / Right Wall
-&OBST XB=-1.90,-1.80,-1.20, 1.20, 0.00, 2.50 / Back Wall
-&OBST XB=-1.80, 1.80,-1.20, 1.20, 2.40, 2.50 / Ceiling
-&OBST XB= 1.80, 1.90,-1.20,-0.50, 0.00, 2.50 / Panel to Left of Door
-&OBST XB= 1.80, 1.90, 0.50, 1.20, 0.00, 2.50 / Panel to Right of Door
-&OBST XB= 1.80, 1.90,-0.50, 0.50, 2.00, 2.50 / Soffit
-&OBST XB= 1.80, 1.90,-0.50, 0.50, 0.10, 2.00, COLOR='GREEN' / Door
+&OBST XB=-1.40, 1.60,-1.20,-1.00, 0.00, 2.20 / Left Wall
+&OBST XB=-1.40, 1.60, 1.00, 1.20, 0.00, 2.20 / Right Wall
+&OBST XB=-1.40,-1.20,-1.00, 1.00, 0.00, 2.20 / Back Wall
+&OBST XB=-1.40, 1.60,-1.00, 1.00, 2.00, 2.20 / Ceiling
+&OBST XB= 1.40, 1.60,-1.00,-0.60, 0.00, 2.20 / Panel to Left of Door
+&OBST XB= 1.40, 1.60, 0.60, 1.00, 0.00, 2.20 / Panel to Right of Door
+&OBST XB= 1.40, 1.60,-0.60, 0.60, 0.20, 2.00, COLOR='GREEN' / Door
 
-&VENT XB=-1.90,-1.90,-0.20, 0.20, 0.80, 1.20, COLOR='RED',  SURF_ID='HVAC',ID='LEFT'/
-&VENT XB=-1.80,-1.80,-0.20, 0.20, 0.80, 1.20, COLOR='RED',  SURF_ID='HVAC',ID='RIGHT'/
-&HVAC ID='LEFT',TYPE_ID='NODE',DUCT_ID='DUCT',VENT_ID='LEFT'/
-&HVAC ID='RIGHT',TYPE_ID='NODE',DUCT_ID='DUCT',VENT_ID='RIGHT'/
-&HVAC ID='DUCT',TYPE_ID='DUCT',NODE_ID='LEFT','RIGHT',LENGTH=1,AREA=0.16,LOSS=0,0,FAN_ID='FAN'/,
-&HVAC ID='FAN',TYPE_ID='FAN',MAX_FLOW=0.016,MAX_PRESSURE=1000./
+&VENT XB=-1.40,-1.40,-0.20, 0.20, 0.20, 0.60, COLOR='PINK',  SURF_ID='HVAC',ID='IN' / 
+&VENT XB=-1.20,-1.20,-0.20, 0.20, 1.00, 1.40, COLOR='RED',   SURF_ID='HVAC',ID='OUT' / 
 
-&OBST XB= 1.80, 1.80,-0.50, 0.50, 0.00, 0.10, COLOR='BLUE', SURF_ID='DOOR CRACK' / 
+&HVAC ID='IN',TYPE_ID='NODE',DUCT_ID='DUCT1',VENT_ID='IN'/
+&HVAC ID='OUT',TYPE_ID='NODE',DUCT_ID='DUCT1',VENT_ID='OUT'/
+&HVAC ID='DUCT1',TYPE_ID='DUCT',NODE_ID='IN','OUT',LENGTH=0.1,AREA=0.1,LOSS=0.0,0.0,FAN_ID='FAN'/
+&HVAC ID='FAN',TYPE_ID='FAN',TAU_FAN=1.,MAX_FLOw=1.,MAX_PRESSURE=1000./
+
+&OBST XB= 1.40, 1.60,-0.60, 0.60, 0.00, 0.20, COLOR='BLUE', SURF_ID='DOOR CRACK' / 
 
 &VENT XB=-0.20, 0.20,-0.20, 0.20, 0.00, 0.00, SURF_ID='BURNER' / 
 &VENT MB='XMIN', SURF_ID='OPEN' / 
@@ -44,6 +45,10 @@ An ISO 9701 compartment with a fan blowing into it, a small fire, and a crack un
 &SLCF PBY=0.0,QUANTITY='PRESSURE' /
 
 &DEVC ID='Pressure', XYZ=0.0,0.0,0.5, QUANTITY='PRESSURE' /
+&DEVC ID='Velocity', QUANTITY='DUCT VELOCITY',DUCT_ID='DUCT1'/
+&DEVC ID='Pressure Ambient', QUANTITY='NODE PRESSURE',NODE_ID='IN'/
+&DEVC ID='Pressure Compartment', QUANTITY='NODE PRESSURE',NODE_ID='OUT'/
+
 
 &TAIL /
 
