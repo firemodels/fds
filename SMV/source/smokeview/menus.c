@@ -956,7 +956,6 @@ void DialogMenu(int value){
     if(showbounds==1)show_glui_bounds();
     if(showbounds==0){
       showglui3dsmoke=0;
-      showgluivol3dsmoke=0;
       showgluizip=0;
       hide_glui_bounds();
     }
@@ -979,16 +978,6 @@ void DialogMenu(int value){
     }
     else{
       close_smokezippanel();
-    }
-    break;
-  case 28:
-    showgluivol3dsmoke=1-showgluivol3dsmoke;
-    if(showgluivol3dsmoke==1){
-      if(showbounds==0)DialogMenu(14);
-      open_volsmokepanel();
-    }
-    else{
-      close_volsmokepanel();
     }
     break;
   case 15:
@@ -6604,13 +6593,9 @@ updatemenu=0;
   if(showshooterDLG==1)glutAddMenuEntry(_("*Particle tracking..."),27);
   if(showshooterDLG==0)glutAddMenuEntry(_("Particle tracking..."),27);
 #endif
-  if(nsmoke3dinfo>0){
-    if(showglui3dsmoke==1)glutAddMenuEntry(_("*3D smoke (slice rendered)...  ALT+s"),20);
-    if(showglui3dsmoke==0)glutAddMenuEntry(_("3D smoke (slice rendered)...  ALT+s"),20);
-  }
-  if(nvolrenderinfo>0){
-    if(showgluivol3dsmoke==1)glutAddMenuEntry(_("*3D smoke (volume rendered)"),28);
-    if(showgluivol3dsmoke==0)glutAddMenuEntry(_("3D smoke (volume rendered)"),28);
+  if(nsmoke3dinfo>0||nvolrenderinfo>0){
+    if(showglui3dsmoke==1)glutAddMenuEntry(_("*3D smoke...  ALT+s"),20);
+    if(showglui3dsmoke==0)glutAddMenuEntry(_("3D smoke...  ALT+s"),20);
   }
   if(showgluistereo==1)glutAddMenuEntry(_("*Stereo parameters..."),19);
   if(showgluistereo==0)glutAddMenuEntry(_("Stereo parameters..."),19);

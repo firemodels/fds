@@ -103,7 +103,7 @@ SVEXTERN GLuint SVDECL(depthtexture_id,0);
 #endif
 
 #endif
-
+SVEXTERN int smoke_render_option;
 SVEXTERN float fnear, ffar;
 SVEXTERN float partfacedir[3];
 SVEXTERN int demo_option;
@@ -979,7 +979,7 @@ SVEXTERN float SVDECL(smoke_shade,0.3);
 SVEXTERN float fire_halfdepth;
 SVEXTERN float hrrpuv_cutoff, global_hrrpuv_cutoff;
 
-SVEXTERN int SVDECL(use_firesmokemap,0);
+SVEXTERN int SVDECL(use_firesmokemap,0),SVDECL(use_firesmokemap_save,0);
 SVEXTERN int smokecullflag;
 SVEXTERN int smokedrawtest,smokedrawtest2;
 SVEXTERN int visMAINmenus;

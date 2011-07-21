@@ -331,11 +331,8 @@ extern "C" void glui_bounds_setup(int main_window){
 
   /*  3d smoke   */
 
-  if(nsmoke3dinfo>0){
-    panel_smoke3d = glui_bounds->add_rollout("3D smoke (slice rendered)",false);
-  }
-  if(nvolrenderinfo>0){
-    panel_volsmoke3d = glui_bounds->add_rollout("3D smoke (volume rendered)",false);
+  if(nsmoke3dinfo>0||nvolrenderinfo>0){
+    panel_smoke3d = glui_bounds->add_rollout("3D smoke",false);
   }
 
   /*  Boundary File Bounds   */

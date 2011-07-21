@@ -43,7 +43,6 @@ void glui_advancedtour_setup(int main_window);
 void glui_stereo_setup(int main_window);
 void glui_trainer_setup(int main_window);
 void glui_3dsmoke_setup(int main_window);
-void glui_vol3dsmoke_setup(int main_window);
 void RenderMenu(int value);
 void GeometryMenu(int val);
 //void InitOpenGL(void);
@@ -161,7 +160,6 @@ int initcase_c(int argc, char **argv){
   glui_advancedtour_setup(mainwindow_id);
   glui_stereo_setup(mainwindow_id);
   glui_3dsmoke_setup(mainwindow_id);
-  glui_vol3dsmoke_setup(mainwindow_id);
 
 
   if(UpdateLIGHTS==1)updateLights(0);
@@ -2216,7 +2214,6 @@ int getmaxrevision(void){
   MAXREV(getdatabounds_revision);
   MAXREV(getdatacolors_revision);
   MAXREV(glui_3dsmoke_revision);
-  MAXREV(glui_vol3dsmoke_revision);
   MAXREV(glui_blockedit_revision);
   MAXREV(glui_bounds_revision);
   MAXREV(glui_clip_revision);
