@@ -6578,10 +6578,10 @@ DO I=1,M
    DO J=1,N
       K=2*J-1
       IF (I==1) THEN
-         !A(I,J) = 0.5_EB*(S(K)+S(K+1))
-         C(I,J) = 0.5_EB*(S(K)-S(K+1))
+         A(I,J) = 0.5_EB*(SS(K)+SS(K+1))
+         C(I,J) = 0.5_EB*(SS(K)-SS(K+1))
       ELSE
-         !A(I,J) = 0.5_EB*(A(I-1,K)+A(I-1,K+1))
+         A(I,J) = 0.5_EB*(A(I-1,K)+A(I-1,K+1))
          C(I,J) = 0.5_EB*(A(I-1,K)-A(I-1,K+1))
       ENDIF
    ENDDO
