@@ -26,6 +26,7 @@ radiation_box
 radiation_plane_layer
 ns2d
 wall_internal_radiation
+ashrae_7
  
 % Directories where the data is stored, and where to write the output
 
@@ -37,7 +38,7 @@ plotdir = [pwd,'/../../Manuals/'];
  
 [saved_data,drange] = dataplot(cfil,vdir,plotdir);
 
-% Special cases
+%Special cases
  
 run scripts/turb_model
 run scripts/wall_model
