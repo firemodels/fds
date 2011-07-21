@@ -4669,8 +4669,17 @@ typedef struct {
       int terrain=0, cellcenter=0, fire_line=0;
       float above_ground_level=0.0;
       slice *sd;
+      char *slicelabelptr, slicelabel[256];
 
       nn_slice++;
+      slicelabelptr=strchr(buffer,'%');
+      if(slicelabelptr!=NULL){
+        *slicelabelptr=0;
+        slicelabelptr++;
+        trim(slicelabelptr);
+        slicelabelptr=trim_front(slicelabelptr);
+        strcpy(slicelabel,slicelabelptr);
+      }
       if(match(buffer,"SLCT",4) == 1){
         terrain=1;
       }
@@ -4725,6 +4734,14 @@ typedef struct {
       }
       if(sd->compression_type==0){
         sd->file=sd->reg_file;
+      }
+      sd->slicelabel=NULL;
+      if(slicelabelptr!=NULL){
+        int lenslicelabel;
+
+        lenslicelabel=strlen(slicelabel)+1;
+        NewMemory((void **)&sd->slicelabel,lenslicelabel);
+        strcpy(sd->slicelabel,lenslicelabel);
       }
       sd->fire_line=fire_line;
       sd->terrain=terrain;

@@ -1055,7 +1055,7 @@ void updateslicemenulabels(void){
       mesh *meshi;
       mesh *slicemesh;
       
-	  slicemesh = meshinfo + sd->blocknumber;
+      slicemesh = meshinfo + sd->blocknumber;
       sprintf(label,", %s",slicemesh->label);
       STRCAT(sd->menulabel,label);
       meshi = meshinfo + sd->blocknumber;
@@ -1105,9 +1105,9 @@ void updateslicemenulabels(void){
         }
       }
       if(nmeshes>1){
-	    mesh *slicemesh;
+        mesh *slicemesh;
 
-		slicemesh = meshinfo + sd->blocknumber;
+        slicemesh = meshinfo + sd->blocknumber;
         sprintf(label,", %s",slicemesh->label);
         STRCAT(sd->menulabel,label);
       }
