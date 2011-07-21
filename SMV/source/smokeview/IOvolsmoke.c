@@ -738,10 +738,6 @@ void drawsmoke3dVOL(void){
   float dx, dy, dz;
   int ii;
 
-  if(smoke3dVoldebug==1){
-    drawsmoke3dVOLdebug();
-  }
-
   if(use_transparency_data==1)transparenton();
   for(ii=0;ii<nvolfacelistinfo;ii++){
     volfacelistdata *vi;
@@ -957,15 +953,12 @@ void drawsmoke3dGPUVOL(void){
   mesh *meshi, *meshold=NULL;
   int ii;
 
-  if(smoke3dVoldebug==1){
-    drawsmoke3dVOLdebug();
-  }
+  if(mouse_down==1)return;
 #ifdef pp_GPUDEPTH
   getDepthTexture();
   glUniform1i(GPUvol_depthtexture,3);
   glUniform2f(GPUvol_screensize,(float)screenWidth,(float)screenHeight);
   glUniform2f(GPUvol_nearfar,fnear,ffar);
-//  printf("screenWidth=%i screenHeight=%i\n",screenWidth,screenHeight);
 #endif
   glUniform3f(GPUvol_eyepos,xyzeyeorig[0],xyzeyeorig[1],xyzeyeorig[2]);
   glUniform1f(GPUvol_xyzmaxdiff,xyzmaxdiff);

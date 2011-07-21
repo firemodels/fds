@@ -314,6 +314,9 @@ else{\
 
 void drawsmoke_frame(void){
   CheckMemory;
+  if(showvolrender==1&&smoke3dVoldebug==1){
+    drawsmoke3dVOLdebug();
+  }
 #ifdef pp_GPU
   if(usegpu==1){
     if(usevolrender==1){

@@ -292,7 +292,11 @@ EXTERNCPP void getpatchheader(char *file,int *npatches,float *valmin, float *val
 EXTERNCPP int getsmoke3d_version(smoke3d *smoke3di);
 EXTERNCPP void update_cadtextcoords(cadquad *quadi);
 EXTERNCPP void open_smokepanel(void);
+EXTERNCPP void open_volsmokepanel(void);
 EXTERNCPP void open_smokezippanel(void);
+EXTERNCPP void close_smokepanel(void);
+EXTERNCPP void close_volsmokepanel(void);
+EXTERNCPP void close_smokezippanel(void);
 EXTERNCPP void UpdateIndexColors(void);
 EXTERNCPP void adjusttourtimes(tourdata *touri);
 EXTERNCPP void update_tourindex(void);

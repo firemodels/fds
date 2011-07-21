@@ -315,6 +315,7 @@ void mouse(int button, int state, int x, int y){
   glui_move_mode=-1;
   glutPostRedisplay();
   if(state==GLUT_UP){
+    mouse_down=0;
     eye_xyz0[0]=eye_xyz[0];
     eye_xyz0[1]=eye_xyz[1];
     eye_xyz0[2]=eye_xyz[2];
@@ -326,6 +327,7 @@ void mouse(int button, int state, int x, int y){
     update_trainer_moves();
     return;
   }
+  mouse_down=1;
   if ((button == GLUT_LEFT_BUTTON || button == GLUT_MIDDLE_BUTTON || button == GLUT_RIGHT_BUTTON)&& state == GLUT_DOWN){
     glutSetCursor(GLUT_CURSOR_INFO);
 

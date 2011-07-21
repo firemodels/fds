@@ -14,6 +14,7 @@
 #include "threader.h"
 #include "string_util.h"
 
+SVEXTERN int SVDECL(mouse_down,0);
 SVEXTERN int SVDECL(use_multi_threading,1);
 SVEXTERN int SVDECL(load_at_rendertimes,1);
 SVEXTERN int nvolrenderinfo;
@@ -682,7 +683,7 @@ SVEXTERN float xtimeleft, xtimeright;
 SVEXTERN int showstereo, showstereoOLD, show_parallax, showstereo_frame;
 
 SVEXTERN int SVDECL(show_hrrcutoff,1), SVDECL(show_hrrcutoff_active,0),SVDECL(hrrpuv_loaded,0);
-SVEXTERN int showglui3dsmoke;
+SVEXTERN int SVDECL(showglui3dsmoke,0),SVDECL(showgluivol3dsmoke,0),SVDECL(showgluizip,0);
 SVEXTERN int showgluitour;
 SVEXTERN int showalert;
 SVEXTERN int trainerview;

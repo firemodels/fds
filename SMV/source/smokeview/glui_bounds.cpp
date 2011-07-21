@@ -181,7 +181,8 @@ GLUI_Rollout *rollout_BOUNDARY=NULL;
 GLUI_Rollout *rollout_AUTOLOAD=NULL;
 GLUI_Rollout *rollout_compress=NULL;
 GLUI *glui_bounds=NULL;
-GLUI_Rollout *panel_plot3d=NULL,*panel_evac=NULL,*panel_part=NULL,*panel_slice=NULL,*panel_bound=NULL,*panel_iso=NULL,*panel_smoke3d=NULL;
+GLUI_Rollout *panel_plot3d=NULL,*panel_evac=NULL,*panel_part=NULL,*panel_slice=NULL,*panel_bound=NULL,*panel_iso=NULL;
+GLUI_Rollout *panel_smoke3d=NULL,*panel_volsmoke3d=NULL;
 GLUI_Rollout *panel_time=NULL,*panel_colorbar=NULL;
 GLUI_Panel *panel_transparency2=NULL;
 
@@ -331,7 +332,10 @@ extern "C" void glui_bounds_setup(int main_window){
   /*  3d smoke   */
 
   if(nsmoke3dinfo>0){
-    panel_smoke3d = glui_bounds->add_rollout("3D smoke",false);
+    panel_smoke3d = glui_bounds->add_rollout("3D smoke (slice rendered)",false);
+  }
+  if(nvolrenderinfo>0){
+    panel_volsmoke3d = glui_bounds->add_rollout("3D smoke (volume rendered)",false);
   }
 
   /*  Boundary File Bounds   */
@@ -2237,11 +2241,36 @@ extern "C" void update_plot3d_display(void){
 extern "C" void update2_glui_smoke3dframestep(void){
 }
 
-/* ------------------ open_smokeplane ------------------------ */
+/* ------------------ open_volsmokeplane ------------------------ */
+
+extern "C" void open_volsmokepanel(void){
+  if(panel_volsmoke3d!=NULL){
+    panel_volsmoke3d->open();
+  }
+}
+
+
+/* ------------------ close_volsmokeplane ------------------------ */
+
+extern "C" void close_volsmokepanel(void){
+  if(panel_volsmoke3d!=NULL){
+    panel_volsmoke3d->close();
+  }
+}
+
+/* ------------------ open_smokepanel ------------------------ */
 
 extern "C" void open_smokepanel(void){
   if(panel_smoke3d!=NULL){
     panel_smoke3d->open();
+  }
+}
+
+/* ------------------ close_smokepanel ------------------------ */
+
+extern "C" void close_smokepanel(void){
+  if(panel_smoke3d!=NULL){
+    panel_smoke3d->close();
   }
 }
 
@@ -2253,6 +2282,14 @@ extern "C" void open_smokezippanel(void){
   }
 }
 
+
+/* ------------------ close_smokezippanel ------------------------ */
+
+extern "C" void close_smokezippanel(void){
+  if(rollout_compress!=NULL){
+    rollout_compress->close();
+  }
+}
 /* ------------------ updateGluiTimeBounds ------------------------ */
 
 extern "C" void updateGluiTimeBounds(float time_min, float time_max){

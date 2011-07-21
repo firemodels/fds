@@ -952,17 +952,43 @@ void DialogMenu(int value){
     if(showlabels==0)hide_glui_labels();
     break;
   case 14:
-  case 20:
-  case 24:
     showbounds=1-showbounds;
-    showglui3dsmoke=1-showglui3dsmoke;
     if(showbounds==1)show_glui_bounds();
-    if(showbounds==0)hide_glui_bounds();
-    if(value==20&&showbounds==1){
+    if(showbounds==0){
+      showglui3dsmoke=0;
+      showgluivol3dsmoke=0;
+      showgluizip=0;
+      hide_glui_bounds();
+    }
+    break;
+  case 20:
+    showglui3dsmoke=1-showglui3dsmoke;
+    if(showglui3dsmoke==1){
+      if(showbounds==0)DialogMenu(14);
       open_smokepanel();
     }
-    if(value==24&&showbounds==1){
+    else{
+      close_smokepanel();
+    }
+    break;
+  case 24:
+    showgluizip=1-showgluizip;
+    if(showgluizip==1){
+      if(showbounds==0)DialogMenu(14);
       open_smokezippanel();
+    }
+    else{
+      close_smokezippanel();
+    }
+    break;
+  case 28:
+    showgluivol3dsmoke=1-showgluivol3dsmoke;
+    if(showgluivol3dsmoke==1){
+      if(showbounds==0)DialogMenu(14);
+      open_volsmokepanel();
+    }
+    else{
+      close_volsmokepanel();
     }
     break;
   case 15:
@@ -1026,6 +1052,8 @@ void DialogMenu(int value){
     hide_glui_labels();
     showbounds=0;
     showglui3dsmoke=0;
+    showgluivol3dsmoke=0;
+    showgluizip=0;
     hide_glui_bounds();
     showmotion=0;
     hide_glui_motion();
@@ -6556,8 +6584,8 @@ updatemenu=0;
   if(showclip==0)glutAddMenuEntry(_("Clip geometry...  ALT+c"),18);
 #ifdef pp_COMPRESS
   if(smokezippath!=NULL&&(npatchinfo>0||nsmoke3dinfo>0||nsliceinfo>0)){
-    if(showbounds==1)glutAddMenuEntry(_("*Compression/Smokezip...  ALT+z"),24);
-    if(showbounds==0)glutAddMenuEntry(_("Compression/Smokezip...  ALT+z"),24);
+    if(showgluizip==1)glutAddMenuEntry(_("*Compression/Smokezip...  ALT+z"),24);
+    if(showgluizip==0)glutAddMenuEntry(_("Compression/Smokezip...  ALT+z"),24);
   }
 #endif
   if(showcolorbar==1)glutAddMenuEntry(_("*Customize colorbar...  ALT+c"),23);
@@ -6577,8 +6605,12 @@ updatemenu=0;
   if(showshooterDLG==0)glutAddMenuEntry(_("Particle tracking..."),27);
 #endif
   if(nsmoke3dinfo>0){
-    if(showbounds==1)glutAddMenuEntry(_("*3D smoke parameters...  ALT+s"),20);
-    if(showbounds==0)glutAddMenuEntry(_("3D smoke parameters...  ALT+s"),20);
+    if(showglui3dsmoke==1)glutAddMenuEntry(_("*3D smoke (slice rendered)...  ALT+s"),20);
+    if(showglui3dsmoke==0)glutAddMenuEntry(_("3D smoke (slice rendered)...  ALT+s"),20);
+  }
+  if(nvolrenderinfo>0){
+    if(showgluivol3dsmoke==1)glutAddMenuEntry(_("*3D smoke (volume rendered)"),28);
+    if(showgluivol3dsmoke==0)glutAddMenuEntry(_("3D smoke (volume rendered)"),28);
   }
   if(showgluistereo==1)glutAddMenuEntry(_("*Stereo parameters..."),19);
   if(showgluistereo==0)glutAddMenuEntry(_("Stereo parameters..."),19);

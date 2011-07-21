@@ -23,6 +23,7 @@ extern char glui_shooter_revision[];
 extern char glui_message_revision[];
 #endif
 extern char glui_3dsmoke_revision[];
+extern char glui_vol3dsmoke_revision[];
 extern char glui_blockedit_revision[];
 extern char glui_bounds_revision[];
 extern char glui_clip_revision[];
