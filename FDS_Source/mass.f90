@@ -1165,26 +1165,38 @@ SPECIESLOOP: DO N=1,N_TRACKED_SPECIES
             IF (IW_A(-1) == 0) THEN
                ZMI = ZZP(I-1,J,K,N)
                LC(-1) = .TRUE.
+            ELSE
+                ZMI = ZZ_F(IW_A(-1),N)
             ENDIF          
             IF (IW_A( 1) == 0) THEN
                ZPI = ZZP(I+1,J,K,N)
                LC( 1) = .TRUE.
+            ELSE
+               ZPI = ZZ_F(IW_A(1),N)
             ENDIF           
             IF (IW_A(-2) == 0) THEN
                ZMJ = ZZP(I,J-1,K,N)
                LC(-2) = .TRUE.
+            ELSE
+               ZMJ = ZZ_F(IW_A(-2),N)
             ENDIF         
             IF (IW_A( 2) == 0) THEN
                ZPJ = ZZP(I,J+1,K,N)
                LC( 2) = .TRUE.
+            ELSE
+               ZPJ = ZZ_F(IW_A( 2),N)
             ENDIF         
             IF (IW_A(-3) == 0) THEN
                ZMK = ZZP(I,J,K-1,N)
                LC(-3) = .TRUE.
+            ELSE
+               ZMK = ZZ_F(IW_A(-3),N)
             ENDIF         
             IF (IW_A( 3) == 0) THEN
                ZPK = ZZP(I,J,K+1,N)
                LC( 3) = .TRUE.
+            ELSE
+               ZPK = ZZ_F(IW_A( 3),N)
             ENDIF           
             ZMIN = MIN(ZMI,ZPI,ZMJ,ZPJ,ZMK,ZPK)
             ZMIN = MAX(ZMIN,0._EB)
