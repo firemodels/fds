@@ -4741,7 +4741,7 @@ typedef struct {
 
         lenslicelabel=strlen(slicelabel)+1;
         NewMemory((void **)&sd->slicelabel,lenslicelabel);
-        strcpy(sd->slicelabel,lenslicelabel);
+        strcpy(sd->slicelabel,slicelabelptr);
       }
       sd->fire_line=fire_line;
       sd->terrain=terrain;
