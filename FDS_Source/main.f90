@@ -2525,10 +2525,8 @@ IF_DUMP_DEVC: IF (T>=DEVC_CLOCK .AND. N_DEVC>0) THEN
       ENDIF
       DEVC_CLOCK = DEVC_CLOCK + DT_DEVC
       DO N=1,N_DEVC
-         IF (DEVICE(N)%LINE==0) THEN
-            DEVICE(N)%VALUE = 0._EB
-            DEVICE(N)%TIME_INTERVAL = 0._EB
-         ENDIF
+         DEVICE(N)%VALUE = 0._EB
+         DEVICE(N)%TIME_INTERVAL = 0._EB
       ENDDO
    ENDIF
 
