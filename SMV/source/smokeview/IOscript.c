@@ -1008,16 +1008,16 @@ void script_loadslice(scriptdata *scripti){
     multislice *mslicei;
     slice *slicei;
     int j;
-    float delta;
+    float delta_orig;
 
     mslicei = multisliceinfo + i;
     if(mslicei->nslices<=0)continue;
     slicei = sliceinfo + mslicei->islices[0];
     if(match_upper(slicei->label.longlabel,scripti->cval,strlen(scripti->cval))==0)continue;
     if(slicei->idir!=scripti->ival)continue;
-    delta = slicei->position - scripti->fval;
-    if(delta<0.0)delta = -delta;
-    if(delta>slicei->delta)continue;
+    delta_orig = slicei->position_orig - scripti->fval;
+    if(delta_orig<0.0)delta_orig = -delta_orig;
+    if(delta_orig>slicei->delta_orig)continue;
 
     for(j=0;j<mslicei->nslices;j++){
       LoadSliceMenu(mslicei->islices[j]);
@@ -1031,7 +1031,7 @@ void script_loadslice(scriptdata *scripti){
 void script_loadvslice(scriptdata *scripti){
   int i;
   int errorcode;
-  float delta;
+  float delta_orig;
 
   printf("Script: loading vector slice files of type: %s",scripti->cval);
   printf("\n");
@@ -1046,9 +1046,9 @@ void script_loadvslice(scriptdata *scripti){
     slicei = sliceinfo + mvslicei->ivslices[0];
     if(match_upper(slicei->label.longlabel,scripti->cval,strlen(scripti->cval))==0)continue;
     if(slicei->idir!=scripti->ival)continue;
-    delta = slicei->position - scripti->fval;
-    if(delta<0.0)delta = -delta;
-    if(delta>slicei->delta)continue;
+    delta_orig = slicei->position_orig - scripti->fval;
+    if(delta_orig<0.0)delta_orig = -delta_orig;
+    if(delta_orig>slicei->delta_orig)continue;
 
     for(j=0;j<mvslicei->nvslices;j++){
       LoadVSliceMenu(mvslicei->ivslices[j]);

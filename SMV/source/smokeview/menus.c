@@ -3520,7 +3520,7 @@ void LoadMultiVSliceMenu(int value){
         slicei = sliceinfo + mvslicei->ivslices[0];
         fprintf(scriptoutstream,"LOADVSLICE\n");
         fprintf(scriptoutstream," %s\n",slicei->label.longlabel);
-        fprintf(scriptoutstream," %i %f\n",slicei->idir,slicei->position);
+        fprintf(scriptoutstream," %i %f\n",slicei->idir,slicei->position_orig);
         script_multivslice=1;
       }
     }
@@ -3551,7 +3551,7 @@ void LoadMultiSliceMenu(int value){
         slicei = sliceinfo + mslicei->islices[0];
         fprintf(scriptoutstream,"LOADSLICE\n");
         fprintf(scriptoutstream," %s\n",slicei->label.longlabel);
-        fprintf(scriptoutstream," %i %f\n",slicei->idir,slicei->position);
+        fprintf(scriptoutstream," %i %f\n",slicei->idir,slicei->position_orig);
         script_multislice=1;
       }
     }

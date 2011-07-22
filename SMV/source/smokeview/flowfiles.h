@@ -917,7 +917,7 @@ typedef struct _slice {
   char slicedir[50];
   int loaded, display, benchvis;
   int num_memblocks;
-  float position;
+  float position_orig;
   char *c_iblank;
   int blocknumber;
   int firstshort;
@@ -956,7 +956,7 @@ typedef struct _slice {
   int type;
   int vloaded;
   int reload;
-  float delta;
+  float delta_orig;
   int extreme_min, extreme_max;
 } slice;
 

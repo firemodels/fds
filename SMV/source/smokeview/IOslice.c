@@ -917,7 +917,7 @@ void updateallslicecolors(int slicetype, int *errorcode){
 
 int slicecompare( const void *arg1, const void *arg2 ){
   slice *slicei, *slicej;
-  float delta;
+  float delta_orig;
 
   slicei = sliceinfo + *(int *)arg1;
   slicej = sliceinfo + *(int *)arg2;
@@ -929,8 +929,7 @@ int slicecompare( const void *arg1, const void *arg2 ){
   if(slicei->slicetype<slicej->slicetype)return -1;
   if(slicei->slicetype>slicej->slicetype)return 1;
 
-  delta = slicei->delta;
-  if(slicej->delta>delta)delta=slicej->delta;
+  delta_orig = MAX(slicei->delta_orig,slicej->delta_orig);
 
   if( strncmp(slicei->label.longlabel,"VE",2)==0){
     if(
@@ -955,8 +954,8 @@ int slicecompare( const void *arg1, const void *arg2 ){
 
   if(slicei->idir<slicej->idir)return -1;
   if(slicei->idir>slicej->idir)return 1;
-  if(slicei->position+delta<slicej->position)return -1;
-  if(slicei->position-delta>slicej->position)return 1;
+  if(slicei->position_orig+delta_orig<slicej->position_orig)return -1;
+  if(slicei->position_orig-delta_orig>slicej->position_orig)return 1;
   if(slicei->blocknumber<slicej->blocknumber)return -1;
   if(slicei->blocknumber>slicej->blocknumber)return 1;
   return 0;
@@ -967,13 +966,12 @@ int slicecompare( const void *arg1, const void *arg2 ){
 int vslicecompare( const void *arg1, const void *arg2 ){
   slice *slicei, *slicej;
   vslice *vslicei, *vslicej;
-  float delta;
+  float delta_orig;
 
   vslicei = vsliceinfo + *(int *)arg1;
   vslicej = vsliceinfo + *(int *)arg2;
   slicei = sliceinfo + vslicei->ival;
   slicej = sliceinfo + vslicej->ival;
-  delta = slicei->delta;
 
   if(slicei->mesh_type<slicej->mesh_type)return -1;
   if(slicei->mesh_type>slicej->mesh_type)return 1;
@@ -994,15 +992,15 @@ int vslicecompare( const void *arg1, const void *arg2 ){
       return 1;
     }
   }
-  if(slicej->delta>delta)delta=slicej->delta;
   if(strcmp(slicei->label.longlabel,slicej->label.longlabel)<0)return -1;
   if(strcmp(slicei->label.longlabel,slicej->label.longlabel)>0)return 1;
   if(slicei->volslice<slicej->volslice)return -1;
   if(slicei->volslice>slicej->volslice)return 1;
   if(slicei->idir<slicej->idir)return -1;
   if(slicei->idir>slicej->idir)return 1;
-  if(slicei->position+delta<slicej->position)return -1;
-  if(slicei->position-delta>slicej->position)return 1;
+  delta_orig = MAX(slicei->delta_orig,slicej->delta_orig);
+  if(slicei->position_orig+delta_orig<slicej->position_orig)return -1;
+  if(slicei->position_orig-delta_orig>slicej->position_orig)return 1;
   if(slicei->blocknumber<slicej->blocknumber)return -1;
   if(slicei->blocknumber>slicej->blocknumber)return 1;
   return 0;
@@ -1202,16 +1200,15 @@ void updatevslicemenulabels(void){
 /* ------------------ hide_slice ------------------------ */
 
 int hide_slice2(slice *sdi,slice *sdj){
-  float delta;
+  float delta_orig;
   float dx, dy, dz, aslice, aintersect;
 
   if(sdi->volslice==1||sdj->volslice==1)return 0;
-  delta = sdi->delta;
-  if(sdj->delta>delta)delta=sdj->delta;
+  delta_orig = MAX(sdi->delta_orig,sdj->delta_orig);
   if(strcmp(sdj->label.shortlabel,sdi->label.shortlabel)!=0
       ||sdj->idir!=sdi->idir
-      ||sdj->position+delta<sdi->position
-      ||sdj->position-delta>sdi->position
+      ||sdj->position_orig+delta_orig<sdi->position_orig
+      ||sdj->position_orig-delta_orig>sdi->position_orig
       ||sdj->mesh_type!=sdi->mesh_type
         ){
       return 0;
@@ -1243,12 +1240,14 @@ int new_multi(slice *sdold,slice *sd){
 
   if(sdold->volslice!=sd->volslice==1)return 1;
   if(sd->volslice==0){
+    float delta_orig;
     float delta;
 
   // sd->delta in physical units
   // sd->xmin/xmax etc are in scaled units
   // convert from physical to scaled units using xyzmaxdiff 
-    delta = MAX(sdold->delta,sd->delta)/xyzmaxdiff;
+    delta_orig = MAX(sdold->delta_orig,sd->delta_orig);
+    delta = delta_orig/xyzmaxdiff;
     if(fabs(sd->xmin-sdold->xmin)<delta&&fabs(sd->xmax-sdold->xmax)<delta // test whether two slices are identical
 	   &&fabs(sd->ymin-sdold->ymin)<delta&&fabs(sd->ymax-sdold->ymax)<delta
 	   &&fabs(sd->zmin-sdold->zmin)<delta&&fabs(sd->zmax-sdold->zmax)<delta
@@ -1258,8 +1257,7 @@ int new_multi(slice *sdold,slice *sd){
 	  
     if(strcmp(sd->label.shortlabel,sdold->label.shortlabel)!=0
       ||sd->idir!=sdold->idir
-      ||sd->position+delta<sdold->position
-      ||sd->position-delta>sdold->position
+      ||fabs(sd->position_orig-sdold->position_orig)>delta_orig
       ||sd->mesh_type!=sdold->mesh_type
         ){
       return 1;
@@ -1332,10 +1330,10 @@ void getsliceparams(void){
           position = (xp[is1]+xp[is2])/2.0;
         }
         if(is1>0){
-          sd->delta=(meshi->xplt_orig[is1]-meshi->xplt_orig[is1-1])/2.0;
+          sd->delta_orig=(meshi->xplt_orig[is1]-meshi->xplt_orig[is1-1])/2.0;
         }
         else{
-          sd->delta=(meshi->xplt_orig[is1+1]-meshi->xplt_orig[is1])/2.0;
+          sd->delta_orig=(meshi->xplt_orig[is1+1]-meshi->xplt_orig[is1])/2.0;
         }
         if(sd->volslice==0){
           sprintf(sd->slicedir,"X=%f",position);
@@ -1356,10 +1354,10 @@ void getsliceparams(void){
           position = (yp[js1]+yp[js2])/2.0;
         }
         if(js1>0){
-          sd->delta=(meshi->yplt_orig[js1]-meshi->yplt_orig[js1-1])/2.0;
+          sd->delta_orig=(meshi->yplt_orig[js1]-meshi->yplt_orig[js1-1])/2.0;
         }
         else{
-          sd->delta=(meshi->yplt_orig[js1+1]-meshi->yplt_orig[js1])/2.0;
+          sd->delta_orig=(meshi->yplt_orig[js1+1]-meshi->yplt_orig[js1])/2.0;
         }
         sprintf(sd->slicedir,"Y=%f",position);
       }
@@ -1375,10 +1373,10 @@ void getsliceparams(void){
           position = (zp[ks1]+zp[ks2])/2.0;
         }
         if(ks1>0){
-          sd->delta=(meshi->zplt_orig[ks1]-meshi->zplt_orig[ks1-1])/2.0;
+          sd->delta_orig=(meshi->zplt_orig[ks1]-meshi->zplt_orig[ks1-1])/2.0;
         }
         else{
-          sd->delta=(meshi->zplt_orig[ks1+1]-meshi->zplt_orig[ks1])/2.0;
+          sd->delta_orig=(meshi->zplt_orig[ks1+1]-meshi->zplt_orig[ks1])/2.0;
         }
         if(sd->terrain==1){
           position=sd->above_ground_level;
@@ -1388,7 +1386,7 @@ void getsliceparams(void){
           sprintf(sd->slicedir,"Z=%f",position);
         }
       }
-      sd->position=position;
+      sd->position_orig=position;
       trimzeros(sd->slicedir);
     }
     {
@@ -1526,7 +1524,6 @@ void updatevslices(void){
   vslice *vd;
   vslice *vsd, *vsdold;
   multivslice *mvslicei;
-  float delta;
 
 
 #ifdef _DEBUG
