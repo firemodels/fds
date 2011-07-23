@@ -6,6 +6,9 @@
 #include <stdio.h>  
 #include <stdlib.h>
 #include <string.h>
+#ifdef pp_GPU
+#include "glew.h"
+#endif
 #include "flowfiles.h"
 #ifdef pp_OSX
 #include <GLUT/glut.h>
@@ -49,11 +52,13 @@ void loadskytexture(char *filebase, texture *texti){
   FREEMEMORY(floortex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-#define GL_CLAMP_TO_EDGE 0x812F 
+  #ifdef pp_GPU
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-//  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-//  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+  #else
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+  #endif
   texti->file=filebuffer;
   texti->loaded=1;
   return;

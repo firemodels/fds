@@ -566,11 +566,10 @@ extern "C" void SMOKE_3D_CB(int var){
         CHECKBOX_show_cullports->disable();
 #endif
       }
-    }
-    break;
 #else
-    skipframes->enable();
+      skipframes->enable();
 #endif
+    }
     break;
   default:
 #ifdef _DEBUG
