@@ -328,6 +328,13 @@ void mouse(int button, int state, int x, int y){
     return;
   }
   mouse_down=1;
+#ifdef pp_GPU
+#ifdef pp_VOLRENDERTIME
+  if(nvolrenderinfo>0&&showvolrender==1&&usegpu==1){
+    volrendertime = glutGet(GLUT_ELAPSED_TIME);
+  }
+#endif
+#endif
   if ((button == GLUT_LEFT_BUTTON || button == GLUT_MIDDLE_BUTTON || button == GLUT_RIGHT_BUTTON)&& state == GLUT_DOWN){
     glutSetCursor(GLUT_CURSOR_INFO);
 

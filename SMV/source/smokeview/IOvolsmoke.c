@@ -10,6 +10,11 @@
 #include <stdlib.h>
 #include <math.h>
 #include <float.h>
+#ifdef pp_OSX
+#include <GLUT/glut.h>
+#else
+#include <GL/glut.h>
+#endif
 #include "flowfiles.h"
 #include "MALLOC.h"
 #include "smokeviewvars.h"
@@ -953,7 +958,18 @@ void drawsmoke3dGPUVOL(void){
   mesh *meshi, *meshold=NULL;
   int ii;
 
-  if(mouse_down==1)return;
+  
+  if(mouse_down==1){
+#ifdef pp_VOLRENDERTIME  
+    int current_time;
+    
+    current_time = glutGet(GLUT_ELAPSED_TIME);
+    if(current_time<volrendertime+100)return;
+    volrendertime=current_time;
+#else
+    return;
+#endif
+  }
 #ifdef pp_GPUDEPTH
   getDepthTexture();
   glUniform1i(GPUvol_depthtexture,3);
