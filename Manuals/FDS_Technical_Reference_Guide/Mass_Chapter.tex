@@ -260,8 +260,12 @@ The constant, $r$, is a relaxation factor of 0.2, a somewhat arbitrary value des
 \subsection{Enthalpy and Specific Heat}
 \label{HandCp}
 
-Enthalpy, $h$, and specific heat, $c_p$ are computed by doing a mass weighted average of the values for $h$ or $c_p$ for the individual species present.
-The species values are obtained by table lookup using the nearest integer to the local temperature.  Values for $h$ and $c_p$ were obtained from the NIST-JANAF tables~\cite{NIST_JANAF}.
+The sensible enthalpy is a function of the temperature:
+\be
+  h_s = \sum_\alpha Y_\alpha h_{s,\alpha} \quad ; \quad h_{s,\alpha}(T)=\int_{T_0}^T c_{p,\alpha}(T') \,\mbox{d}T'
+\ee
+The values for $h_{s,\alpha}$ and $c_{p,\alpha}$ are obtained by table lookup from the NIST-JANAF tables~\cite{NIST_JANAF}.
+The values are taken to the nearest degree Kelvin.
 
 
 \subsection{Coupling the Gas and Solid Phase}
@@ -366,4 +370,3 @@ from the gas phase values of Mesh 1 and Mesh 2:
 Rearranging terms in Eq.~(\ref{rhou}) and using the expression for the ghost cells from Eq.~(\ref{ghostrho}), we get:
 \be \rho_{0,j'k'}^{(2)} = -\rho_{1,j'k'}^{(2)} + \frac{1}{u_{0,j'k'}^{(2)} \dy^{(2)} \, \dz^{(2)} } \sum_{j,k}  u_{1,jk}^{(1)} \dy^{(1)} \, \dz^{(1)}
     \left[ 2 \, \rho_{I,jk}^{(1)} +  \frac{2 \, \dx^{(1)}}{\dx^{(1)}+\dx^{(2)}}  \left( \rho_{1,j'k'}^{(2)} - \rho_{I,jk}^{(1)} \right)  \right]  \ee
-
