@@ -4,24 +4,25 @@
 
 This chapter presents the governing equations of FDS and an outline of the general solution procedure. Details are included
 in subsequent chapters. The purpose of this chapter is to highlight aspects of the solution methodology that make it
-practical for thermally-driven flow simulations, in particular fire. Some of the major features of the model
+practical for thermally-driven flow simulations, in particular fire. Some of the major features of the model, in it's default operation,
 are:
 \begin{itemize}
 \item Low Mach number approximation
-\item Unform gridding and a very simple form of the Immersed Boundary Method
+\item Uniform gridding and a very simple form of the Immersed Boundary Method
 \item Transport equations for ``lumped species''
 \item Eddy Dissipation Concept for a single-step, mixing-controlled reaction of fuel and oxygen
 \item Decomposition of the pressure field into an average component unique to each compartment in the building and
 a spatially and temporally varying perturbation for which we solve directly the Poisson equation
 \item Gray gas assumption for the radiative transport equation
 \end{itemize}
-These approximations and assumptions characterize the default operation of the model. However, the model is not limited to
+
+The model, however, is not limited to
 these simpler algorithms. For example, the user may specify multiple reactions, finite-rate chemistry, a wide-band radiation model, and a variety
-of other special features. The more detailed physics incur increased computational cost, often with little increase in
-accuracy. So why include them? Because we cannot conclude that a more detailed physical algorithm is of little value until we
+of other special features. The more detailed physics incur increased computational cost, typically without a commensurate increase in
+accuracy. So why include them? We do so for two reasons.  One is that we cannot conclude that a more detailed physical algorithm is of little value until we
 include it in the model and test it against a wide variety of full-scale validation experiments. Even then, there may not be
 conclusive evidence to incorporate the algorithm as a default feature. By monitoring the model's use, we can better understand what
-features to keep, discard, or improve.
+features to keep, discard, or improve.  The second is that we recognize that there are limitations to the simpler algorithms, i.e. problems that are not adequately addressed with the simple algorithms but can be addressed with the more complex.
 
 The algorithm outlined below has evolved over roughly three decades. Initially, it was designed to study buoyant plumes in the
 Boussinesq limit; that is, the fluid was assumed incompressible but included a source term for buoyancy. This approach was based
