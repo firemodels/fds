@@ -81,11 +81,11 @@ particles that represent sprinkler and fuel sprays, vegetation, and any other ty
 objects are assumed to occupy no volume; thus are seen by the governing equations as point sources of mass, momentum and energy.
 In addition to the mass conservation equation, the model includes transport equations for all of the gaseous species minus the
 background air.
-\be \dod{ }{t}(\rho Y_\alpha) + \nabla\!\cdot (\rho Y_\alpha \bu) = \nabla\!\cdot (\rho D_\alpha \nabla Y_\alpha) + \dm_\alpha''' + \dm_{b,\alpha}''' \label{species} \ee
+\be \dod{ }{t}(\rho Z_\alpha) + \nabla\!\cdot (\rho Z_\alpha \bu) = \nabla\!\cdot (\rho D_\alpha \nabla Z_\alpha) + \dm_\alpha''' + \dm_{b,\alpha}''' \label{species} \ee
 Here $\dm_b'''=\sum_\alpha \dm_{b,\alpha}'''$ is the production rate of species by evaporating droplets or particles.
 Summing these equations over all species yields the original mass conservation equation because
-$\sum Y_\alpha=1$ and $\sum \dm_\alpha''' = 0$ and $\sum \dm_{b,\alpha}'''=\dm_b'''$, by definition, and because it is assumed
-that $\sum \rho D_\alpha \nabla Y_\alpha = 0$. This last assertion is not true, in general.
+$\sum Z_\alpha=1$ and $\sum \dm_\alpha''' = 0$ and $\sum \dm_{b,\alpha}'''=\dm_b'''$, by definition, and because it is assumed
+that $\sum \rho D_\alpha \nabla Z_\alpha = 0$. This last assertion is not true, in general.
 However, transport equations are solved for total
 mass and all but one of the species, implying that the diffusion coefficient of the implicit species is
 chosen so that the sum of all the diffusive fluxes is zero.
@@ -96,7 +96,7 @@ Rehm and Baum~\cite{Rehm:1} observed that for low speed applications like fire, 
 spatially and temporally resolved pressure, $p$, can be decomposed into a ``background'' pressure,
 $\bp(z,t)$, plus a perturbation, $\tp(x,y,z,t)$, such that only the background pressure need be retained in the
 equation of state:
-\be \bp = \rho T {\cal R} \sum_\alpha  \frac{Y_\alpha}{W_\alpha} \equiv \frac{\rho \R T}{\bW}  \label{basicstate1} \ee
+\be \bp = \rho T {\cal R} \sum_\alpha  \frac{Z_\alpha}{W_\alpha} \equiv \frac{\rho \R T}{\bW}  \label{basicstate1} \ee
 Note that $z$ is the spatial coordinate in the direction of gravity; thus, the stratification of the atmosphere is included in
 the background pressure. The perturbation, $\tp$, drives the fluid motion.
 This approximation has a number of consequences. First, building compartments connected via a heating, ventilation, and air
@@ -118,7 +118,7 @@ The term
 $\dq'''$ is the heat release rate per unit volume from a chemical reaction.
 The term $\dq_b'''$ is the energy transferred to subgrid-scale droplets and particles.
 The term $\dbq''$ represents the conductive and radiative heat fluxes:
-\be \dbq'' = -k \nabla T - \sum_\alpha h_{s,\alpha} \rho D_\alpha \nabla Y_\alpha + \dbq_r'' \ee
+\be \dbq'' = -k \nabla T - \sum_\alpha h_{s,\alpha} \rho D_\alpha \nabla Z_\alpha + \dbq_r'' \ee
 where $k$ is the thermal conductivity and $D_\alpha$ is the diffusivity of species $\alpha$.
 
 As mentioned above, we do not actually solve Eq.~(\ref{energy}). Instead, we form an expression for the divergence of
@@ -134,7 +134,7 @@ derivative of the equation of state (\ref{basicstate1}):
 Expanding the material derivatives on the right hand side of this equation produces a fairly complicated expression for
 the divergence that includes the source and diffusion terms from the mass, species and energy conservation equations.
 However, its importance to the overall algorithm is that it can be computed using only the
-thermodynamic variables $\rho$, $Y_\alpha$, and $\bp$. As will be shown below, the way to advance the flow velocity in time
+thermodynamic variables $\rho$, $Z_\alpha$, and $\bp$. As will be shown below, the way to advance the flow velocity in time
 is to first estimate the thermodynamic variables at the next time step, compute the divergence, and then solve an equation
 for the pressure that will guarantee that the divergence of the updated velocity is identical to that computed solely from
 the thermodynamic variables.
@@ -192,13 +192,12 @@ several optional schemes that are designed to predict the extent of combustion i
 
 For an infinitely-fast reaction, reactant species in a given grid cell are converted to product species at a rate determined by a
 characteristic mixing time.
-Instead, if any grid cell contains all the reactants of the the chemical reaction and the temperature of the grid cell meets
-certain criteria, the heat release rate per unit volume is given by the Eddy Dissipation Concept~\cite{Poinsot:TNC}
+Instead, if any grid cell contains all the reactants of the the chemical reaction and the mass fractions of reactants and products meet certain criteria, the heat release rate per unit volume is given by the Eddy Dissipation Concept~\cite{Poinsot:TNC}
 \be
    \dq''' \equiv -\dm_f''' \, \Delta H = -\rho \min \left( Y_\F , \frac{Y_\OTWO}{s}, \beta \frac{Y_{\hbox{\tiny P}}}{1+s} \right) \;
    \left( 1 - e^{-\dt/\tau} \right)  \; \Delta H \quad ; \quad
    s=\frac{W_\F}{\nu_{\OTWO} W_{\OTWO} }  \label{EDC1}
-\ee
+\ee  %Y rather than Z is correct in this equation 
 Here, $Y_\F$, $Y_\OTWO$, and $Y_{\hbox{\tiny P}}$ are the mass fractions of fuel, oxygen and products within a grid cell.
 $\tau$ is a mixing time scale and $\beta$ is an empirical parameter.
 
@@ -244,7 +243,7 @@ combustion energy.
 The radiation equation is solved using a technique similar to a finite
 volume method for convective transport, thus the name given to it is
 the Finite Volume Method (FVM). Using approximately 100 discrete
-angles, the finite volume solver requires about 20~\% of the total CPU
+angles which are updated over multiple time steps, the finite volume solver requires about 20~\% of the total CPU
 time of a calculation, a modest cost given the complexity of radiation
 heat transfer.  Water droplets can absorb and scatter thermal
 radiation. This is important in cases involving mist sprinklers, but
@@ -256,14 +255,14 @@ the gaseous species and soot is not included in the model.
 
 \section{Solution Procedure}
 
-In given grid cell at the $n$th time step, we have the density, $\rho^n$, species mass fractions, $Y_\alpha^n$, velocity
+In given grid cell at the $n$th time step, we have the density, $\rho^n$, lumped species mass fractions, $Z_\alpha^n$, velocity
 vector, $\bu^n$, and perturbation pressure term, $\cH^n$.
 In addition, for each compartment in the computational domain, we have a background pressure, $\bp^n$. The temperature is
 found from the equation of state. These variables are advanced in time using an explicit second-order Runge-Kutta scheme.
 The basic procedure is as follows:
 
 \begin{enumerate}
-\item Estimate $\rho$, $Y_\alpha$, and $\bp$ at the next time step with an explicit Euler step. For
+\item Estimate $\rho$, $Z_\alpha$, and $\bp$ at the next time step with an explicit Euler step. For
 example, the density is estimated by
 \be \frac{\rho^*-\rho^n}{\dt} + \nabla\!\cdot \rho^n \bu^n = \dm_b''' \ee
 The asterisk denotes a first order accurate estimate at the next time step.
@@ -300,7 +299,7 @@ This concludes the ``Predictor'' stage of the time step.  The ``Corrector'' stag
 \be
 \frac{\rho^{n+1} - \ha \left(\rho^n + \rho^* \right)}{\dt/2} +  \nabla\!\cdot \rho^* \bu^* = \dm_b'''
 \ee
-The species mass fractions and background pressure are corrected in a similar way.
+The lumped species mass fractions and background pressure are corrected in a similar way.
 
 \item Compute the divergence, $(\nabla\!\cdot \bu)^{n+1}$, from the corrected thermodynamic quantities.
 
