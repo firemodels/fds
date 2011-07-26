@@ -371,8 +371,12 @@ void getvolsmokedir(float *mm){
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
     int facemap[7]={12,6,0,0,3,9,15};
+    volrenderdata *vr;
 
     meshi = meshinfo + i;
+    vr = &(meshi->volrenderinfo);
+    if(vr->firedataptr==NULL&&vr->smokedataptr==NULL)continue;
+    if(vr->loaded==0||vr->display==0)continue;
     for(j=-3;j<=3;j++){
       float dx, dy, dz;
       float *xyz;

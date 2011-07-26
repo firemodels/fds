@@ -926,6 +926,7 @@ SVEXTERN colordata *firstcolor;
 SVEXTERN texture *textureinfo, *terrain_texture;
 SVEXTERN GLuint texture_colorbar_id, texture_slice_colorbar_id, texture_patch_colorbar_id, texture_plot3d_colorbar_id, texture_iso_colorbar_id;
 SVEXTERN GLuint smokecolormap_id,volsmokecolormap_id;
+SVEXTERN int SVDECL(volsmokecolormap_id_defined,-1);
 SVEXTERN float mscale[3];
 SVEXTERN float xclip_min, yclip_min, zclip_min;
 SVEXTERN float xclip_max, yclip_max, zclip_max;

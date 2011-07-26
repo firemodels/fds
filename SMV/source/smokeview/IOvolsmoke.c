@@ -1474,8 +1474,14 @@ void read_volsmoke_frame_allmeshes(int framenum){
     if(vr->fire==NULL||vr->smoke==NULL)continue;
     if(read_vol_mesh!=i&&read_vol_mesh!=-1)continue;
     if(framenum==0){
-      vr->smokedataptr = vr->smokedataptrs[0];  //*** hack
-      vr->firedataptr = vr->firedataptrs[0];
+      if(vr->is_compressed==1){
+        vr->smokedataptr = vr->smokedata_view;  //*** hack
+        vr->firedataptr = vr->firedata_view;  //*** hack
+      }
+      else{
+        vr->smokedataptr = vr->smokedataptrs[0];  //*** hack
+        vr->firedataptr = vr->firedataptrs[0];
+      }
     }
     vr->loaded=1;
     vr->display=1;
@@ -1603,7 +1609,8 @@ void init_volsmoke_texture(mesh *meshi){
     nx, ny, nz, border_size, 
     GL_RED, GL_FLOAT, meshi->fire_texture_buffer);
 
-  if(meshi==meshinfo){
+  if(volsmokecolormap_id_defined==-1){
+    volsmokecolormap_id_defined=1;
     glActiveTexture(GL_TEXTURE2);
     glGenTextures(1,&volsmokecolormap_id);
     glBindTexture(GL_TEXTURE_1D,volsmokecolormap_id);

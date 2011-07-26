@@ -76,6 +76,8 @@ void update_framenumber(int changetime){
         vr = &(meshi->volrenderinfo);
         fire=vr->fire;
         smoke=vr->smoke;
+        vr->smokedataptr=NULL;
+        vr->firedataptr=NULL;
         if(fire==NULL||smoke==NULL)continue;
         if(vr->loaded==0||vr->display==0)continue;
         vr->iframe = vr->timeslist[itimes];
@@ -108,9 +110,6 @@ void update_framenumber(int changetime){
           }
           CheckMemory;
         }
-        else{
-          vr->smokedataptr = NULL;
-        }
         if(fire!=NULL&&vr->iframe>=0){
           if(vr->is_compressed==1){
             unsigned char *c_firedata_compressed;
@@ -135,9 +134,6 @@ void update_framenumber(int changetime){
             vr->firedataptr = vr->firedataptrs[vr->iframe];
           }
           CheckMemory;
-        }
-        else{
-          vr->firedataptr=NULL;
         }
       }
     }
