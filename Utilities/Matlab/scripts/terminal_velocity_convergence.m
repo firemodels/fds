@@ -88,6 +88,8 @@ end
 
 print(gcf, '-dpdf', '../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/terminal_velocity_convergence');
 
+close all
+clear H
 figure(1)
 H(1) = loglog(dtvec, Linf, '-*k');
 hold on
@@ -139,7 +141,7 @@ print(gcf, '-dpdf', '../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/posi
 % H(3) = loglog(dtvec, 10 * dtvec.^2, '-k');
 % hold off
 % dto = dtvec((length(dtvec) - 1):length(dtvec));
-% erro = errtvec((length(Linf) - 1):length(Linf));
+% erro = errtvec((length(errtvec) - 1):length(errtvec));
 % [a, b] = polyfit(log(dto), log(erro), 1);
 % fprintf('order of accuracy: %f\n', a(1))
 % figure(1)
