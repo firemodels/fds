@@ -1293,9 +1293,9 @@ DROPLET_LOOP: DO I=1,NLP
 
          ! Move particle to where it almost hits solid
 
-         DR%X = X_OLD + MINVAL(STEP_FRACTION)*DT*DR%U
-         DR%Y = Y_OLD + MINVAL(STEP_FRACTION)*DT*DR%V
-         DR%Z = Z_OLD + MINVAL(STEP_FRACTION)*DT*DR%W
+         DR%X = X_OLD + MINVAL(STEP_FRACTION)*DT*(DR%U + HAB*(GVEC(1) + UREL*PARACOR))
+         DR%Y = Y_OLD + MINVAL(STEP_FRACTION)*DT*(DR%V + HAB*(GVEC(2) + VREL*PARACOR))
+         DR%Z = Z_OLD + MINVAL(STEP_FRACTION)*DT*(DR%W + HAB*(GVEC(3) + WREL*PARACOR))
          XI  = CELLSI(FLOOR((DR%X-XS)*RDXINT))
          YJ  = CELLSJ(FLOOR((DR%Y-YS)*RDYINT))
          ZK  = CELLSK(FLOOR((DR%Z-ZS)*RDZINT))
@@ -1305,7 +1305,7 @@ DROPLET_LOOP: DO I=1,NLP
          ICN = CELL_INDEX(IIN,JJN,KKN)
          IF (IOR_OLD==DR%IOR) CYCLE DROPLET_LOOP
 
-         ! Check if droplet has not found surface. Simply remove for now. Todo: search algorith
+         ! Check if droplet has not found surface. Simply remove for now. Todo: search algorithm
 
          IW = WALL_INDEX(ICN, -DR%IOR)
          IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY) THEN

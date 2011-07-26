@@ -64,6 +64,7 @@ if exist(SVN_Filename,'file')
 end
 print(gcf,'-dpdf','../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/flat_fire_trajectory')
 
+close all
 H(1) = plot(tvec, xexact, '-k');
 hold on
 H(2) = plot(STIME, XP, 'ok');
@@ -94,6 +95,7 @@ if exist(SVN_Filename,'file')
 end
 print(gcf,'-dpdf','../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/flat_fire_x')
 
+close all
 H(1) = plot(tvec, yexact, '-k');
 hold on
 H(2) = plot(STIME, ZP, 'ok');
@@ -124,6 +126,7 @@ if exist(SVN_Filename,'file')
 end
 print(gcf,'-dpdf','../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/flat_fire_z')
 
+close all
 H(1) = plot(tvec, uexact, '-k');
 hold on
 H(2) = plot(STIME, QP(:,:,1,1), 'ok');
@@ -154,6 +157,7 @@ if exist(SVN_Filename,'file')
 end
 print(gcf,'-dpdf','../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/flat_fire_u')
 
+close all
 H(1) = plot(tvec, vexact, '-k');
 hold on
 H(2) = plot(STIME, QP(:,:,1,2), 'ok');
