@@ -219,7 +219,9 @@ void init_volrender(void){
     vr->firedata_full=NULL;
     vr->smokedata_full=NULL;
     vr->c_firedata_full=NULL;
+    vr->c_firedata_view=NULL;
     vr->c_smokedata_full=NULL;
+    vr->c_smokedata_view=NULL;
     if(vr->smoke!=NULL){
       int nx, ny, nz, j;
 
@@ -1307,6 +1309,7 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
       NewMemory((void **)&vr->smokedata_full,framesize*sizeof(float));
       NewMemory((void **)&vr->smokedata_view,framesize*sizeof(float));
       NewMemory((void **)&vr->c_smokedata_full,framesize2);
+      NewMemory((void **)&vr->c_smokedata_view,framesize2);
     }
     smokeframe_data=vr->smokedata_full;
     if(fireslice!=NULL){
@@ -1315,6 +1318,7 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
         NewMemory((void **)&vr->firedata_full,framesize*sizeof(float));
         NewMemory((void **)&vr->firedata_view,framesize*sizeof(float));
         NewMemory((void **)&vr->c_firedata_full,framesize2);
+        NewMemory((void **)&vr->c_firedata_view,framesize2);
       }
       NewMemory((void **)&c_firedata_compressed,n_firedata_compressed);
       fireframe_data=vr->firedata_full;
