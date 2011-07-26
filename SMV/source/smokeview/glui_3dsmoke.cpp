@@ -232,8 +232,6 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     if(nsmoke3dinfo>0){
       panel_hrrcut = glui_3dsmoke->add_panel_to_panel(panel_overall,_("HRRPUV cutoff (kW/m3):"));
 
-//    SPINNER_smoke3d_fire_halfdepth=glui_3dsmoke->add_spinner_to_panel(panel_colormap,"50% fire depth (m)",GLUI_SPINNER_FLOAT,&fire_halfdepth,FIRE_HALFDEPTH,SMOKE_3D_CB);
-//    SPINNER_smoke3d_fire_halfdepth->set_float_limits(0.0,10.0);
       if(nmeshes>1){
         SPINNER_smoke3d_hrrpuv_cutoffptr[nmeshes]=glui_3dsmoke->add_spinner_to_panel
           (panel_hrrcut,_("All meshes"),GLUI_SPINNER_FLOAT,&global_hrrpuv_cutoff,GLOBAL_FIRE_CUTOFF,SMOKE_3D_CB);
@@ -264,6 +262,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
 #ifdef _DEBUG
     CHECKBOX_usevolrender=glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Use full volume rendering"),&usevolrender,VOL_SMOKE,SMOKE_3D_CB);
 #endif
+    glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Compress data"),&compress_volsmoke);
     glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Load data in background"),&use_multi_threading);
     glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Load data only at render times"),&load_at_rendertimes);
 #ifdef _DEBUG

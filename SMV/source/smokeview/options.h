@@ -29,7 +29,6 @@
 
 //#define pp_HIDEMULTI
 //#define pp_GEOMPRINT
-//#define pp_VOLRENDERTIME
 #define pp_GPU
 #define pp_CULL
 #define pp_LIGHT
@@ -47,6 +46,7 @@
 #ifdef pp_BETA
 // #define pp_BENCHMARK
 //#define pp_GPUDEPTH
+//#define pp_VOLRENDERTIME
 #define pp_SLICECONTOURS
 #define pp_SHOWLIGHT
 #define pp_LANG

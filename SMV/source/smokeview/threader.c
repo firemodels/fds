@@ -103,7 +103,7 @@ void Update_All_Patch_Bounds(void){
 }
 #endif
 
-/* ------------------ read_volsmoke_allframes_allmeshes2 ------------------------ */
+/* ------------------ mt_read_volsmoke_allframes_allmeshes2 ------------------------ */
 
 #ifdef pp_THREAD
 void mt_read_volsmoke_allframes_allmeshes2(void){

@@ -70,6 +70,7 @@ void update_framenumber(int changetime){
         mesh *meshi;
         volrenderdata *vr;
         slice *fire, *smoke;
+        int j;
 
         meshi = meshinfo + i;
         vr = &(meshi->volrenderinfo);
@@ -78,18 +79,66 @@ void update_framenumber(int changetime){
         if(fire==NULL||smoke==NULL)continue;
         if(vr->loaded==0||vr->display==0)continue;
         vr->iframe = vr->timeslist[itimes];
-        if(fire!=NULL){
-          vr->firedata = vr->firedataptrs[vr->iframe];
+        for(j=vr->iframe;j>=0;j--){
+          if(vr->dataready[j]==1)break;
+        }
+        vr->iframe=j;
+        if(smoke!=NULL&&vr->iframe>=0){
+          if(vr->is_compressed==1){
+            unsigned char *c_smokedata_compressed;
+            uLongf framesize,framesize2;
+            float dv,valmin, valmax;
+
+            c_smokedata_compressed = vr->smokedataptrs[vr->iframe];
+            framesize = smoke->nslicei*smoke->nslicej*smoke->nslicek;
+            framesize2 = framesize+8;
+            uncompress(vr->c_smokedata_full,&framesize2,
+              c_smokedata_compressed,vr->nsmokedata_compressed[vr->iframe]);
+            CheckMemory;
+            valmin=*(float *)vr->c_smokedata_full;
+            valmax=*(float *)(vr->c_smokedata_full+4);
+            dv=(valmax-valmin)/255;
+            for(i=0;i<framesize;i++){
+              vr->smokedata_view[i]=valmin+dv*vr->c_smokedata_full[i+8];
+            }
+            vr->smokedataptr = vr->smokedata_view;
+          }
+          else{
+            vr->smokedataptr = vr->smokedataptrs[vr->iframe];
+          }
+          CheckMemory;
         }
         else{
-          vr->firedata=NULL;
+          vr->smokedataptr = NULL;
         }
-        if(smoke!=NULL){
-           vr->smokedata = vr->smokedataptrs[vr->iframe];
-         }
-         else{
-           vr->smokedata = NULL;
-         }
+        if(fire!=NULL&&vr->iframe>=0){
+          if(vr->is_compressed==1){
+            unsigned char *c_firedata_compressed;
+            uLongf framesize,framesize2;
+            float dv,valmin, valmax;
+
+            c_firedata_compressed = vr->firedataptrs[vr->iframe];
+            framesize = fire->nslicei*fire->nslicej*fire->nslicek;
+            framesize2 = framesize+8;
+            uncompress(vr->c_firedata_full,&framesize2,
+              c_firedata_compressed,vr->nfiredata_compressed[vr->iframe]);
+            CheckMemory;
+            valmin=*(float *)vr->c_firedata_full;
+            valmax=*(float *)(vr->c_firedata_full+4);
+            dv=(valmax-valmin)/255;
+            for(i=0;i<framesize;i++){
+              vr->firedata_view[i]=valmin+dv*vr->c_firedata_full[i+8];
+            }
+            vr->firedataptr = vr->firedata_view;
+          }
+          else{
+            vr->firedataptr = vr->firedataptrs[vr->iframe];
+          }
+          CheckMemory;
+        }
+        else{
+          vr->firedataptr=NULL;
+        }
       }
     }
     if(showslice==1||showvslice==1){

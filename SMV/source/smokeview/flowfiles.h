@@ -127,15 +127,6 @@ typedef struct {
   float *x2, *y2, *z2;
 } outline;
 
-/* --------------------------  thread_args ------------------------------------ */
-
-typedef struct {
-  char *file;
-  int ifile;
-  int flag;
-  int errorcode;
-} thread_args;
-
 /* --------------------------  flowlabels ------------------------------------ */
 
 typedef struct {
@@ -396,8 +387,14 @@ typedef struct {
 typedef struct _volrenderdata {
   struct _mesh *rendermesh;
   struct _slice *smoke, *fire;
-  float *smokedata, *firedata;
-  float **smokedataptrs, **firedataptrs, *times;
+  int is_compressed;
+  unsigned char *c_smokedata_full, *c_firedata_full;
+  float *smokedata_full, *firedata_full;
+  float *smokedata_view, *firedata_view;
+  void *smokedataptr, *firedataptr;
+  void **smokedataptrs, **firedataptrs;
+  int *nsmokedata_compressed, *nfiredata_compressed;
+  float *times;
   int *dataready;
   int iframe, nframes, times_defined;
   int *timeslist;

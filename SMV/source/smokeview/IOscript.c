@@ -933,7 +933,8 @@ void script_loadvolsmoke(scriptdata *scripti){
 
   imesh = scripti->ival;
   if(imesh==-1){
-    read_volsmoke_allframes_allmeshes();
+    read_vol_mesh=-1;
+    read_volsmoke_allframes_allmeshes2(NULL);
   }
   else if(imesh>=0&&imesh<nmeshes){
     mesh *meshi;

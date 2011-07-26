@@ -2183,8 +2183,9 @@ void LoadUnloadMenu(int value){
     for(i=0;i<nsmoke3dinfo;i++){
       readsmoke3d(i,UNLOAD,&errorcode);
     }
-    //plotstate=DYNAMIC_PLOTS;
-    //visSmoke=1;
+    if(nvolrenderinfo>0){
+      UnLoadVolSmoke3DMenu(UNLOAD_ALL);
+    }
     updatemenu=1;  
     glutPostRedisplay();
   }
@@ -3120,6 +3121,7 @@ void UnLoadVolSmoke3DMenu(int value){
   int i;
 
   if(value==999)return;
+  read_vol_mesh=-2;
   updatemenu=1;
   if(value<0){
     if(value==UNLOAD_ALL){
@@ -3150,6 +3152,7 @@ void UnLoadVolSmoke3DMenu(int value){
     }
   }
   updatemenu=1;  
+  read_vol_mesh=-3;
   glutPostRedisplay();
 }
 
@@ -3176,7 +3179,7 @@ void LoadVolSmoke3DMenu(int value){
         fprintf(scriptoutstream,"LOADVOLSMOKE\n");
         fprintf(scriptoutstream," %i\n",value);
       }
-      if(read_vol_mesh==-2){
+      if(read_vol_mesh==-3){
         read_vol_mesh=value;
         read_volsmoke_allframes_allmeshes();
       }
@@ -3187,20 +3190,37 @@ void LoadVolSmoke3DMenu(int value){
     }
   }
   else if(value==UNLOAD_ALL){  // unload all
-    LOCK_VOLLOAD;
-    if(read_vol_mesh!=-2){
-      read_vol_mesh=-2;
+    if(read_vol_mesh==-3){
       UnLoadVolSmoke3DMenu(value);
     }
-    UNLOCK_VOLLOAD;
+      else{
+        if(read_vol_mesh==-2){
+          printf("*** warning: data is currently being unloaded\n");
+        }
+        else{
+          printf("*** warning: data is currently being loaded\n");
+        }
+        printf("    Continue when this is complete.\n");
+      }
   }
   else if(value==LOAD_ALL){  // load all
     if(scriptoutstream!=NULL){
       fprintf(scriptoutstream,"LOADVOLSMOKE\n");
       fprintf(scriptoutstream," -1\n");
     }
-    read_vol_mesh=-1;
-    read_volsmoke_allframes_allmeshes();
+    if(read_vol_mesh==-3){
+      read_vol_mesh=-1;
+      read_volsmoke_allframes_allmeshes();
+    }
+    else{
+      if(read_vol_mesh==-2){
+        printf("*** warning: data is currently being unloaded\n");
+      }
+      else{
+        printf("*** warning: data is currently being loaded\n");
+      }
+      printf("    Continue when this is complete.\n");
+    }
   }
   updatemenu=1;  
   Idle();

@@ -21,3 +21,4 @@ void read_volsmoke_allframes_allmeshes(void);
 void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first);
 void read_volsmoke_frame_allmeshes(int framenum);
 void unload_volsmoke_allframes(volrenderdata *vr);
+void *read_volsmoke_allframes_allmeshes2(void *arg);
