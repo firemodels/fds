@@ -2,33 +2,37 @@
 
 \label{basisformodel}
 
-This chapter presents the governing equations of FDS and an outline of the general solution procedure. Details are included
-in subsequent chapters. The purpose of this chapter is to highlight aspects of the solution methodology that make it
-practical for thermally-driven flow simulations, in particular fire. Some of the major features of the model, in it's default operation,
-are:
+This chapter presents the governing equations of FDS and an outline of the general solution procedure. Details are included in subsequent chapters. The purpose of this chapter is to highlight aspects of the solution methodology that make it practical for thermally-driven flow simulations, in particular fire. Some of the major features of the model, in its default operation, are:
 \begin{itemize}
-\item Low Mach number approximation
-\item Uniform gridding and a very simple form of the Immersed Boundary Method
-\item Transport equations for ``lumped species''
-\item Eddy Dissipation Concept for a single-step, mixing-controlled reaction of fuel and oxygen
-\item Decomposition of the pressure field into an average component unique to each compartment in the building and
-a spatially and temporally varying perturbation for which we solve directly the Poisson equation
-\item Gray gas assumption for the radiative transport equation
+\item Low Mach, large-eddy simulation (LES)
+\item Explicit, second-order, energy conserving numerics
+\item Structured, uniform, staggered grid
+\item Simple immersed boundary method for treatment of flow obstructions
+\item Generalized ``lumped species'' method (simplified reaction progress variable approach)
+\item Smagorinsky subgrid closure (constant or dynamic coefficient)
+\item Constant turbulent Schmidt and Prandtl numbers
+\item Eddy dissipation model (fast chemistry) for single-step reaction between fuel and oxidizer
+\item Gray gas radiation with finite volume solution to the radiation transport equation
 \end{itemize}
 
-The model, however, is not limited to
-these simpler algorithms. For example, the user may specify multiple reactions, finite-rate chemistry, a wide-band radiation model, and a variety
-of other special features. The more detailed physics incur increased computational cost, typically without a commensurate increase in
-accuracy. So why include them? We do so for two reasons.  One is that we cannot conclude that a more detailed physical algorithm is of little value until we
-include it in the model and test it against a wide variety of full-scale validation experiments. Even then, there may not be
-conclusive evidence to incorporate the algorithm as a default feature. By monitoring the model's use, we can better understand what
-features to keep, discard, or improve.  The second is that we recognize that there are limitations to the simpler algorithms, i.e. problems that are not adequately addressed with the simple algorithms but can be addressed with the more complex.
+The model, however, is not limited to these simple algorithms. For example, the user may specify multiple reactions, finite-rate chemistry, a wide-band radiation model, and a variety of other special features. The more detailed physics incur increased computational cost and it is incumbent on the user to justify the added expense in terms of improved accuracy.  The default model options have been selected based on results from a wide variety of full-scale validation experiments \cite{FDS_Validation_Guide}.
 
 The algorithm outlined below has evolved over roughly three decades. Initially, it was designed to study buoyant plumes in the
 Boussinesq limit; that is, the fluid was assumed incompressible but included a source term for buoyancy. This approach was based
 on a long tradition in fire research of modeling smoke movement using dyed salt water introduced into a tank filled with fresh
 water. Eventually, this approach proved too limiting, but some of the major features of the algorithm, like the low
 Mach number approximation, were retained.
+
+\section{LES Formalism}
+\label{filteredfields}
+
+The equations for large-eddy simulation (LES) are derived by applying a low-pass filter, parameterized by a width $\Delta$, to the transport equations for mass, momentum and energy.  For our purposes, it is sufficient to think of the filtered fields in the LES equations as cell means.  For example, in 1D the filtered density for a cell of width $\Delta$ is
+\begin{equation}
+\label{eqn_filtered_density}
+\bar{\rho}(x,t) = \frac{1}{\Delta}\int_{x-\Delta/2}^{x+\Delta/2} \rho(r,t) \,\mbox{d}r \mbox{.}
+\end{equation}
+
+In FDS, the filter width $\Delta$ is equivalent to the local cell size $\delta x$ and is a key parameter in the submodels for the turbulent viscosity and the reaction time scale discussed later.  The practice of taking $\Delta = \delta x$ is called implicit filtering.  In what follows, the filter formalism is relaxed (the overline notation is suppressed for clarity) since no explicit filtering operations are performed in the algorithm (except within the dynamic procedure).
 
 \section{Numerical Grid}
 \label{govequations}
@@ -42,14 +46,9 @@ most obvious and simplest numerical grid is rectilinear.
 In fact, because FDS is a large eddy simulation (LES) model, uniform meshing is
 preferred, and the only numerical parameters chosen by the end user are the three dimensions of the grid. Once established, it
 is relatively simple to define rectangular obstructions that define the geometry to the level of resolution determined by the
-grid. These obstructions ``snap'' to the underlying grid, a very elementary form of an Immersed Boundary Method (IBM).
+grid. These obstructions ``snap'' to the underlying grid, a very elementary form of an immersed boundary method (IBM).
 
-The governing equations are approximated using second-order accurate finite differences on a collection of uniformly
-spaced three-dimensional grids. Multiple meshes can be processed in parallel using Message Passing Interface (MPI) libraries.
-Scalar quantities are assigned to the center of each grid cell;
-vector components are assigned at the appropriate cell faces. This is what is commonly referred to as a staggered grid. Its
-benefit is that the divergence of the flow, a very important quantity in the model, is represented naturally on the
-staggered grid.
+The governing equations are approximated using second-order accurate finite differences on a collection of uniformly spaced three-dimensional grids. Multiple meshes can be processed in parallel using Message Passing Interface (MPI) libraries. Scalar quantities are assigned to the center of each grid cell; vector components are assigned at the appropriate cell faces. This is what is commonly referred to as a staggered grid \cite{Harlow:1}.  Its main purpose is to avoid numerical dispersion error (checker-boarding) in pressure-velocity coupling by naturally representing the pressure cell velocity divergence, a very important thermodynamic quantity in the model.
 
 \section{Mass and Species Transport}
 
@@ -103,27 +102,20 @@ chosen so that the sum of all the diffusive fluxes is zero.
 
 \section{Low Mach Number Approximation}
 
-Rehm and Baum~\cite{Rehm:1} observed that for low speed applications like fire, the
-spatially and temporally resolved pressure, $p$, can be decomposed into a ``background'' pressure,
-$\bp(z,t)$, plus a perturbation, $\tp(x,y,z,t)$, such that only the background pressure need be retained in the
-equation of state:
+Rehm and Baum~\cite{Rehm:1} observed that for low speed applications like fire, the spatially and temporally resolved pressure, $p$, can be decomposed into a ``background'' pressure, $\bp(z,t)$, plus a perturbation, $\tp(x,y,z,t)$, with only the background pressure retained in the equation of state:
 \be \bp = \rho T {\cal R} \sum_\alpha  \frac{Z_\alpha}{W_\alpha} \equiv \frac{\rho \R T}{\bW}  \label{basicstate1} \ee
-Note that $z$ is the spatial coordinate in the direction of gravity; thus, the stratification of the atmosphere is included in
-the background pressure. The perturbation, $\tp$, drives the fluid motion.
-This approximation has a number of consequences. First, building compartments connected via a heating, ventilation, and air
-conditioning system can each maintain individual background pressures. The air flows between compartments can be
-described in terms of the differences in the background pressures, eliminating the need to solve detailed flow
-equations within the ventilation ducts.
+Note that $z$ is the spatial coordinate in the direction of gravity; thus, the stratification of the atmosphere is included in the background pressure. The perturbation, $\tp$, drives the fluid motion. This approximation has a number of consequences. First, building compartments connected via a heating, ventilation, and air conditioning system can each maintain individual background pressures. The air flows between compartments can be
+described in terms of the differences in the background pressures, eliminating the need to solve detailed flow equations within the ventilation ducts.
 
 The second consequence of the low Mach number approximation is that it eliminates the need to solve the energy transport
 equation explicitly.
 The energy conservation equation is written in terms of the {\em sensible enthalpy}, $h_s$:
 \be \dod{ }{t}(\rho h_s) + \nabla\!\cdot (\rho h_s \bu) = \frac{\mbox{D}p}{\mbox{D}t}  + \dq''' - \dq_b'''
         - \nabla\!\cdot \dbq'' \label{energy} \ee
-Note that the material derivative is simplified because of the low Mach number approximation:
+Note that the material derivative of the thermodynamic pressure is simplified because of the low Mach number approximation:
 \be
    \frac{\mbox{D}p}{\mbox{D}t} \equiv \frac{\partial p}{\partial t} + \bu \cdot \nabla p \approx
-   \frac{\partial \bp}{\partial t} + w \dod{\tp}{z}
+   \frac{\partial \bp}{\partial t} + w \dod{\bp}{z}
 \ee
 The term
 $\dq'''$ is the heat release rate per unit volume from a chemical reaction.
@@ -154,33 +146,16 @@ the thermodynamic variables.
 
 \section{Momentum Transport}
 
-The momentum transport equation is written in non-conservative form:
-\be \rho \left( \dod{\bu}{t} + (\bu \cdot \nabla)\bu  \right) + \nabla \tp = (\rho-\rho_0) \bg + \bof_b + \nabla\!\cdot \btau  \ee
-The term, $\bof_b$, represents the drag force exerted by the subgrid-scale particles and droplets. The
-viscous stress term, $\btau$, is modeled either via the dynamic or constant coefficient form of large eddy simulation.
-
-The reason for writing the momentum equation in non-conservative form is to derive a separable equation for the
-pressure, $\tp$. The procedure is a follows:
-\begin{enumerate}
-\item Apply the vector identity: $(\bu \cdot \nabla) \bu = \nabla|\bu|^2/2 - \bu\times\bo $.
-\item Divide all terms by the density, $\rho$.
-\item Decompose the pressure term:
-   $$ \frac{\nabla \tp}{\rho}  = \nabla \left( \frac{\tp}{\rho}\right) - \tp \, \nabla \left(\frac{1}{\rho} \right)  $$
-\item Define ${\cal H} \equiv |\bu|^2/2 + \tp/\rho $
-\end{enumerate}
-Now the momentum equation can be written
+Noting the vector identity $(\bu \cdot \nabla) \bu = \nabla|\bu|^2/2 - \bu\times\bo $ and defining the stagnation energy per unit mass ${\cal H} \equiv |\bu|^2/2 + \tp/\rho$, the momentum equation can be written
 \be \dod{\bu}{t} - \bu\times\bo + \nabla {\cal H} - \tp \, \nabla \left( \frac{1}{\rho}\right) = \frac{1}{\rho} \Big[ (\rho-\rho_0) \bg
 + \bof_b + \nabla\!\cdot \btau \Big]  \label{momeq} \ee
+The term, $\bof_b$, represents the drag force exerted by the subgrid-scale particles and droplets. The viscous stress, $\btau$, is closed via gradient diffusion with the turbulent viscosity obtained from the Smagorinsky model (constant or dynamic coefficient) \cite{Germano:1991,Moin:1991,Smagorinsky:1}.
+
 It is convenient to write this equation in the form:
 \be \dod{\bu}{t} + \bF + \nabla \cH = 0 \label{simple_momentum_equation} \ee
 so that a Poisson equation for the pressure can be derived by taking its divergence:
 \be \nabla^2 {\cal H} = -\dod{ }{t} (\nabla\!\cdot \bu) - \nabla\!\cdot \bF    \label{simplephi2} \ee
-Note the appearance of the time derivative of the divergence. This is an important feature of the time marching scheme.
-Note also that the right hand side of the Poisson equation retains a term that includes the perturbation pressure,
-$\tp \, \nabla (1/\rho)$. This is the so-called baroclinic torque term.
-It is included on the right hand side of the Poisson equation by using its value from the previous time step. This
-approximation allows us to solve a separable form of the Poisson equation, for which there are fast, direct solvers that
-are optimized for uniform grids~\cite{Sweet:1}.
+Note the appearance of the time derivative of the divergence. This is an important feature of the time marching scheme. Note also that the right hand side of the Poisson equation retains a term that includes the perturbation pressure, $\tp \, \nabla (1/\rho)$. This term accounts for the baroclinic torque. It is included on the right hand side of the Poisson equation by using its value from the previous time step. This approximation allows us to solve a separable form of the Poisson equation, for which there are fast, direct solvers that are optimized for uniform grids~\cite{Sweet:1}.
 
 \section{Combustion and Radiation}
 
@@ -196,14 +171,13 @@ expression for the divergence.
 \subsection{Combustion}
 
 For most applications, FDS uses a combustion model based on the mixing-limited, infinitely fast reaction of lumped species.
-Lumped species are conserved scalar quantities that represent a mixture of species such as air which is a mixture of
+Lumped species are reacting scalar quantities that represent a mixture of species such as air which is a mixture of
 nitrogen, oxygen, water vapor, and carbon dioxide.  The reaction of fuel and oxygen is not necessarily instantaneous and
 complete, and there are
 several optional schemes that are designed to predict the extent of combustion in under-ventilated spaces.
 
 For an infinitely-fast reaction, reactant species in a given grid cell are converted to product species at a rate determined by a
-characteristic mixing time.
-Instead, if any grid cell contains all the reactants of the the chemical reaction and the mass fractions of reactants and products meet certain criteria, the heat release rate per unit volume is given by the Eddy Dissipation Concept~\cite{Poinsot:TNC}
+characteristic mixing time. If any grid cell contains all the reactants of the the chemical reaction and the mass fractions of reactants and products meet certain criteria, the heat release rate per unit volume is given by the eddy dissipation model~\cite{Poinsot:TNC}
 \be
    \dq''' \equiv -\dm_f''' \, \Delta H = -\rho \min \left( Y_\F , \frac{Y_\OTWO}{s}, \beta \frac{Y_{\hbox{\tiny P}}}{1+s} \right) \;
    \left( 1 - e^{-\dt/\tau} \right)  \; \Delta H \quad ; \quad
@@ -269,18 +243,19 @@ the gaseous species and soot is not included in the model.
 In given grid cell at the $n$th time step, we have the density, $\rho^n$, lumped species mass fractions, $Z_\alpha^n$, velocity
 vector, $\bu^n$, and perturbation pressure term, $\cH^n$.
 In addition, for each compartment in the computational domain, we have a background pressure, $\bp^n$. The temperature is
-found from the equation of state. These variables are advanced in time using an explicit second-order Runge-Kutta scheme.
+found from the equation of state. These variables are advanced in time using an explicit second-order predictor/corrector scheme.
 The basic procedure is as follows:
+
+\clearpage
+\paragraph{Predictor}
 
 \begin{enumerate}
 \item Estimate $\rho$, $Z_\alpha$, and $\bp$ at the next time step with an explicit Euler step. For
 example, the density is estimated by
-\be \frac{\rho^*-\rho^n}{\dt} + \nabla\!\cdot \rho^n \bu^n = \dm_b''' \ee
-The asterisk denotes a first order accurate estimate at the next time step.
+\be \frac{\rho^*-\rho^n}{\dt} + \nabla\!\cdot \rho^n \bu^n = 0 \ee
+The asterisk denotes a first order accurate estimate at the next time step.  Note that the source term is time-split, as discussed below.
 
-\item Compute the divergence, $(\nabla\!\cdot \bu)^*$, from Eq.~(\ref{eqn_simplediv1}) using the estimated thermodynamic quantities.
-Note that we use the parentheses to emphasize that an estimate of the
-velocity field, $\bu^*$, at the next time step has not been computed yet, only its divergence.
+\item \label{step_pred_div} Compute the divergence, $(\nabla\!\cdot \bu)^*$, from Eq.~(\ref{eqn_simplediv1}) using the estimated thermodynamic quantities. Note that we use the parentheses to emphasize that an estimate of the velocity field, $\bu^*$, at the next time step has not been computed yet, only its divergence.
 
 \item Solve the Poisson equation for the pressure term:
 \be \nabla^2 \cH^n = - \frac{ (\nabla\!\cdot \bu)^* - \nabla\!\cdot \bu^n }{\dt} - \nabla\!\cdot \bF^n  \ee
@@ -290,29 +265,33 @@ velocity field, $\bu^*$, at the next time step has not been computed yet, only i
 \frac{\bu^* - \bu^n}{\dt} +  \bF^n + \nabla {\cal H}^n = 0
 \ee
 Note that this procedure guarantees that the divergence of the estimated velocity field, $\nabla\!\cdot \bu^*$, is identically
-equal to the divergence that
-is derived from the estimated thermodynamic quantities, $(\nabla\!\cdot \bu)^*$.
+equal to the divergence that is derived from the estimated thermodynamic quantities, $(\nabla\!\cdot \bu)^*$, in Step \ref{step_pred_div}.
 
 \item Check that the time step, $\dt$, satisfies the CFL and Von Neumann stability conditions:
-\be \dt \; \hbox{max} \left( \frac{|u|}{\dx},\frac{|v|}{\dy},\frac{|w|}{\dz} \right) < 1 \quad ; \quad
-    2 \; \dt \; \nu \; \left(\frac{1}{\dx^2} + \frac{1}{\dy^2} + \frac{1}{\dz^2} \right) < 1 \ee
+\be \dt \; \left( \frac{|u|}{\dx} + \frac{|v|}{\dy} + \frac{|w|}{\dz} \right) < 1 \quad ; \quad
+    2 \; \dt \; \frac{\mu}{\rho} \; \left(\frac{1}{\dx^2} + \frac{1}{\dy^2} + \frac{1}{\dz^2} \right) < 1 \ee
 If the time step is too large, it is reduced so that it satisfies
 both constraints and the procedure returns to the beginning of the time step.
 If the time step satisfies the stability criteria, the procedure continues to the corrector step.
 \end{enumerate}
 
-\noindent
-This concludes the ``Predictor'' stage of the time step.  The ``Corrector'' stage is very similar:
+\paragraph{Corrector}
 
 \begin{enumerate}
 
 \item Correct the density at the next time step.
 \be
-\frac{\rho^{n+1} - \ha \left(\rho^n + \rho^* \right)}{\dt/2} +  \nabla\!\cdot \rho^* \bu^* = \dm_b'''
+\frac{\rho^{**} - \ha \left(\rho^n + \rho^* \right)}{\dt/2} +  \nabla\!\cdot \rho^* \bu^* = 0
 \ee
+
 The lumped species mass fractions and background pressure are corrected in a similar way.
 
-\item Compute the divergence, $(\nabla\!\cdot \bu)^{n+1}$, from the corrected thermodynamic quantities.
+\item \emph{Time splitting for mass source terms}. After the corrector step for the transport scheme, source terms are applied to the scalars.  The source terms are evaluated using the results from the corrected scalar transport scheme:
+\be
+\frac{(\rho Y_\alpha)_{ijk}^{n+1}-(\rho Y_\alpha)_{ijk}^{**}}{\dt} =  \dm_{\alpha,ijk}'''(\mathbf{Y}^{**},T^{**})
+\ee
+
+\item \label{step_cor_div} Compute the divergence, $(\nabla\!\cdot \bu)^{n+1}$, from the corrected thermodynamic quantities.
 
 \item Compute the pressure term using the estimated quantities.
 \be
@@ -325,7 +304,7 @@ The lumped species mass fractions and background pressure are corrected in a sim
 \be
 \frac{ \bu^{n+1} - \ha \left( \bu^* + \bu^n \right)}{\dt/2} + \mathbf{F}^* + \nabla {\cal H}^*  = 0
 \ee
-Note again that the divergence of the corrected velocity field is identically equal to the divergence that was computed earlier.
+Note again that the divergence of the corrected velocity field is identically equal to the divergence that was computed in Step \ref{step_cor_div}.
 
 
 \end{enumerate}
