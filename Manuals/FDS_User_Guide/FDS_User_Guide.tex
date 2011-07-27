@@ -9679,8 +9679,8 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct CELL\_CENTERED}    & Logical     & See Section \ref{info:BNDF}                 &           & {\ct .FALSE.}   \\ \hline
 {\ct PART\_ID}          & Character   & See Section \ref{info:outputquantities}     &           &                 \\ \hline
 {\ct PROP\_ID}          & Character   & See Section \ref{info:BNDF}                 &           &                 \\ \hline
-{\ct RECOUNT\_DRIP}     & Logical     & See Section \ref{info:heat_flux}            &           & {\ct .FALSE.}   \\ \hline
 {\ct QUANTITY}          & Character   & See Section \ref{info:outputquantities}     &           &                 \\ \hline
+{\ct RECOUNT\_DRIP}     & Logical     & See Section \ref{info:heat_flux}            &           & {\ct .FALSE.}   \\ \hline
 {\ct SPEC\_ID}          & Character   & See Section \ref{info:outputquantities}     &           &                 \\ \hline
 \end{longtable}
 
@@ -9733,8 +9733,8 @@ properties be specified as well. Simply prescribing as many properties as possib
 %{\ct CYCLE\_TIME}    & Real         & Periodicity                                 & s  &                           \\ \hline
 %{\ct CYCLES}         & Integer      & Number of times to cycle output             &    &                           \\ \hline
 {\ct DELAY}          & Real         & See Section~\ref{info:dry_pipe}             & s  &  0.                       \\ \hline
-{\ct FUNCTION\_TYPE} & Character    & See Section~\ref{info:basic_control}        &    &                           \\ \hline
 {\ct EVACUATION}     & Logical     & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide} &    & {\ct .FALSE.}    \\ \hline
+{\ct FUNCTION\_TYPE} & Character    & See Section~\ref{info:basic_control}        &    &                           \\ \hline
 {\ct ID}             & Character    & See Section~\ref{info:CTRL}                 &    &                           \\ \hline
 {\ct INITIAL\_STATE} & Logical      & See Section~\ref{info:basic_control}        &    & {\ct .FALSE.}             \\ \hline
 {\ct INPUT\_ID}      & Char.~Array  & See Section~\ref{info:CTRL}                 &    &                           \\ \hline
@@ -9778,9 +9778,9 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct EVACUATION}            & Logical         & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide}            &    & {\ct .FALSE.}    \\ \hline
 {\ct FLOWRATE}              & Real            & See Section~\ref{info:aspiration_detector}                       & kg/s  & 0             \\ \hline
 {\ct HIDE\_COORDINATES}     & Logical         & See Section~\ref{info:line_file}                                 &       & {\ct .FALSE.} \\ \hline
-{\ct IOR}                   & Integer         & See Section~\ref{info:DEVC}                                      &       &               \\ \hline
 {\ct ID}                    & Character       & See Section~\ref{info:DEVC}                                      &       &               \\ \hline
 {\ct INITIAL\_STATE}        & Logical         & See Section~\ref{info:basic_control}                             &       & {\ct .FALSE.} \\ \hline
+{\ct IOR}                   & Integer         & See Section~\ref{info:DEVC}                                      &       &               \\ \hline
 {\ct LATCH}                 & Logical         & See Section~\ref{info:basic_control}                             &       & {\ct .TRUE.}  \\ \hline
 {\ct MATL\_ID}              & Character       & See Section~\ref{info:material_components}                       &       &               \\ \hline
 {\ct NODE\_ID}              & Character(2)    & See Section~\ref{info:HVAC}                                      &       &               \\ \hline
@@ -9802,10 +9802,10 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct VELO\_INDEX}           & Integer         & See Section~\ref{info:velocity}                                  &       &  0            \\ \hline
 {\ct VIRTUAL\_INDEX}        & Integer         & See Section~\ref{info:PART_SURF}                                 &       &               \\ \hline
 {\ct XB(6)}                 & Real Sextuplet  & See Section~\ref{info:statistics}                                & m     &               \\ \hline
+{\ct XYZ(3)}                & Real Triplet    & See Section~\ref{info:DEVC}                                      & m     &               \\ \hline
 {\ct X\_ID}                 & Character       & See Section~\ref{info:line_file}                                 &       &  {\ct ID-x}   \\ \hline
 {\ct Y\_ID}                 & Character       & See Section~\ref{info:line_file}                                 &       &  {\ct ID-y}   \\ \hline
 {\ct Z\_ID}                 & Character       & See Section~\ref{info:line_file}                                 &       &  {\ct ID-z}   \\ \hline
-{\ct XYZ(3)}                & Real Triplet    & See Section~\ref{info:DEVC}                                      & m     &               \\ \hline
 \end{longtable}
 
 
@@ -9831,8 +9831,8 @@ properties be specified as well. Simply prescribing as many properties as possib
 \endhead
 {\ct COLUMN\_DUMP\_LIMIT}           & Logical      & See Section~\ref{info:out:DEVC}   &           & {\ct .TRUE.}                   \\ \hline
 {\ct CTRL\_COLUMN\_LIMIT}           & Integer      & See Section~\ref{info:out:DEVC}   &           & 254                            \\ \hline
-{\ct DEVC\_COLUMN\_LIMIT}           & Integer      & See Section~\ref{info:out:DEVC}   &           & 254                            \\ \hline
 {\ct DEBUG}                         & Logical      & See Section~\ref{info:TIMING}     &           & {\ct .FALSE.}                  \\ \hline
+{\ct DEVC\_COLUMN\_LIMIT}           & Integer      & See Section~\ref{info:out:DEVC}   &           & 254                            \\ \hline
 {\ct DT\_BNDF}                      & Real         & See Section~\ref{info:DUMP}       &  s        & $2\,\Delta t${\ct /NFRAMES}    \\ \hline
 {\ct DT\_CTRL}                      & Real         & See Section~\ref{info:DUMP}       &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct DT\_DEVC}                      & Real         & See Section~\ref{info:DUMP}       &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
@@ -9845,14 +9845,16 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct DT\_PL3D}                      & Real         & See Section~\ref{info:DUMP}       &  s        & $\Delta t${\ct /5}             \\ \hline
 {\ct DT\_PROF}                      & Real         & See Section~\ref{info:DUMP}       &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct DT\_RESTART}                   & Real         & See Section~\ref{info:DUMP}       &  s        & 1000000.                       \\ \hline
-{\ct DT\_SLCF}                      & Real         & See Section~\ref{info:DUMP}       &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct DT\_SL3D}                      & Real         & See Section~\ref{info:DUMP}       &  s        & $\Delta t${\ct /5}             \\ \hline
+{\ct DT\_SLCF}                      & Real         & See Section~\ref{info:DUMP}       &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct DT\_VEG}                       & Real         &                                   &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+{\ct EB\_PART\_FILE}                & Real         &                                   &           &                                \\ \hline
 {\ct FLUSH\_FILE\_BUFFERS}          & Logical      & See Section~\ref{info:DUMP}       &           & {\ct .TRUE.}                   \\ \hline
 {\ct MASS\_FILE}                    & Logical      & See Section~\ref{info:DUMP}       &           & {\ct .FALSE.}                  \\ \hline
 {\ct MAXIMUM\_DROPLETS}             & Integer      & See Section~\ref{info:DUMP}       &           & 500000                         \\ \hline
 {\ct NFRAMES}                       & Integer      & See Section~\ref{info:DUMP}       &           & 1000                           \\ \hline
-{\ct PLOT3D\_QUANTITY(5)}           & Char.~Quint  & See Section~\ref{info:PL3D}       &           &                                \\ \hline
 {\ct PLOT3D\_PART\_ID(5)}           & Char.~Quint  & See Section~\ref{info:PL3D}       &           &                                \\ \hline
+{\ct PLOT3D\_QUANTITY(5)}           & Char.~Quint  & See Section~\ref{info:PL3D}       &           &                                \\ \hline
 {\ct PLOT3D\_SPEC\_ID(5)}           & Char.~Quint  & See Section~\ref{info:PL3D}       &           &                                \\ \hline
 {\ct PLOT3D\_VELO\_INDEX}           & Int.~Quint   & See Section~\ref{info:velocity}   &           &  0                             \\ \hline
 {\ct RENDER\_FILE}                  & Character    & See Smokeview User's Guide        &           &                                \\ \hline
@@ -9954,8 +9956,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CTRL\_ID}                  & Character         & Name of {\ct CTRL} controlling a fan or damper    &               &  {\ct 'null'}         \\ \hline
 {\ct DAMPER}                    & Logical           & Damper is present in a duct                       &               &  {\ct .FALSE.}        \\ \hline
 {\ct DEVC\_ID}                  & Character         & Name of {\ct DEVC} controlling a fan or damper    &               &  {\ct 'null'}         \\ \hline
-{\ct DUCT\_ID}                  & Character Array   & Name of ducts connected to a node                 &               &                       \\ \hline
 {\ct DIAMETER}                  & Real              & Diameter of a duct                                &  m            &                       \\ \hline
+{\ct DUCT\_ID}                  & Character Array   & Name of ducts connected to a node                 &               &                       \\ \hline
 {\ct FAN\_ID}                   & Character         & Name of a fan in a duct                           &               &  {\ct 'null'}         \\ \hline
 {\ct ID}                        & Character         & Name of component                                 &               &                       \\ \hline
 {\ct LENGTH}                    & Real              & Length of a duct                                  &  m            &                       \\ \hline
@@ -9963,7 +9965,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MAX\_FLOW}                 & Real              & Maximum volumetric flow for a quadratic fan       &  m$^3$/s      &                       \\ \hline
 {\ct MAX\_PRESSURE}             & Real              & Stall pressure for a quadratic fan                &  Pa           &                       \\ \hline
 {\ct NODE\_ID}                  & Character Doublet & Name of nodes connected to a duct                 &               &                       \\ \hline
-{\ct RAMP\_ID}                  & Character         & Name of {\ct RAMP} containing a fan curve         &               &  {\ct 'null'}         \\ \hline
+{\ct RAMP\_ID}                  & Character         & Name of {\ct RAMP} containing a fan or volume flow curve &               &  {\ct 'null'}         \\ \hline
+{\ct REVERSE}                   & Logical           & Indicates fan or {\ct VOLUME\_FLOW} direction is from second node to first node &               &  {\ct 'null'}         \\ \hline
 {\ct ROUGHNESS}                 & Real              & Absolute roughness of a duct                      &  m            &                       \\ \hline
 {\ct TAU\_FAN}                  & Real              & Ramp time for a fan                               & s             & 1.                      \\ \hline
 {\ct TAU\_VF}                   & Real              & Ramp time for {\ct VOLUME\_FLOW}                  & s             & 1.                      \\ \hline
@@ -10015,7 +10018,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct XYZ(3)}                    & Real Triplet      & See Section~\ref{info:initial_droplets}           & m             &               \\ \hline
 \end{longtable}
 
-% Undocumented: PROF_ID, ORIGIN, XYZ, UVW, DIAMETER
+% Undocumented: PROF_ID, ORIGIN, XYZ, UVW, DIAMETER,UNIFORM
 
 
 \vspace{\baselineskip}
@@ -10082,21 +10085,21 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct HEATING\_RATE(:)}              & Real array    & See Section~\ref{info:solid_pyrolysis}    & $^\circ$C/min     & 5.     \\ \hline
 {\ct HEAT\_OF\_COMBUSTION(:)}       & Real array    & See Section~\ref{info:solid_pyrolysis}    & kJ/kg             &        \\ \hline
 {\ct HEAT\_OF\_REACTION(:)}         & Real array    & See Section~\ref{info:solid_pyrolysis}    & kJ/kg             & 0.     \\ \hline
-{\ct INITIAL\_VAPOR\_FLUX}          & Real          & See Section~\ref{info:liquid_fuels}       & m/s               & 0.0005 \\ \hline
 {\ct ID     }                       & Character     & See Section~\ref{info:SURF_MATL_Basics}   &                   &        \\ \hline
+{\ct INITIAL\_VAPOR\_FLUX}          & Real          & See Section~\ref{info:liquid_fuels}       & m/s               & 0.0005 \\ \hline
 {\ct MATL\_ID(:,:)}                 & Character     & See Section~\ref{info:solid_pyrolysis}    &                   &        \\ \hline
+{\ct NU\_MATL(:,:)}                 & Real array    & See Section~\ref{info:solid_pyrolysis}    & kg/kg             & 0.     \\ \hline
+{\ct NU\_SPEC(:,:)}                 & Real array    & See Section~\ref{info:solid_pyrolysis}    & kg/kg             & 0.     \\ \hline
 {\ct N\_REACTIONS}                  & Character     & See Section~\ref{info:solid_pyrolysis}    &                   & 0      \\ \hline
 {\ct N\_S(:)}                       & Real array    & See Section~\ref{info:solid_pyrolysis}    &                   & 1.     \\ \hline
 {\ct N\_T(:)}                       & Real array    & See Section~\ref{info:solid_pyrolysis}    &                   & 0.     \\ \hline
-{\ct NU\_MATL(:,:)}                 & Real array    & See Section~\ref{info:solid_pyrolysis}    & kg/kg             & 0.     \\ \hline
-{\ct NU\_SPEC(:,:)}                 & Real array    & See Section~\ref{info:solid_pyrolysis}    & kg/kg             & 0.     \\ \hline
 {\ct PCR(:)}                        & Logical array & See Section~\ref{info:solid_pyrolysis}    &                   & {\ct.FALSE.}\\ \hline
 {\ct PYROLYSIS\_RANGE(:)}           & Real array    & See Section~\ref{info:solid_pyrolysis}    & $^\circ$C         & 80.    \\ \hline
 {\ct REFERENCE\_RATE(:)}            & Real array    & See Section~\ref{info:solid_pyrolysis}    & 1/s               &        \\ \hline
 {\ct REFERENCE\_TEMPERATURE(:)}     & Real array    & See Section~\ref{info:solid_pyrolysis}    & $^\circ$C         &        \\ \hline
-{\ct SPEC\_ID(:,:)}                 & Character     & See Section~\ref{info:solid_pyrolysis}    &                   &        \\ \hline
 {\ct SPECIFIC\_HEAT}                & Real          & See Section~\ref{info:thermal_properties} & kJ/kg/K           & 0.     \\ \hline
 {\ct SPECIFIC\_HEAT\_RAMP}          & Character     & See Section~\ref{info:thermal_properties} &                   &        \\ \hline
+{\ct SPEC\_ID(:,:)}                 & Character     & See Section~\ref{info:solid_pyrolysis}    &                   &        \\ \hline
 {\ct THRESHOLD\_SIGN(:)}            & Real array    & See Section~\ref{info:solid_pyrolysis}    &                   & 1.0    \\ \hline
 {\ct THRESHOLD\_TEMPERATURE(:)}     & Real array    & See Section~\ref{info:solid_pyrolysis}    & $^\circ$C         & -273.15 \\ \hline
 \end{longtable}
@@ -10131,8 +10134,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct IJK}               & Integer Triplet               & See Section~\ref{info:MESH_Basics}            &    & 10,10,10         \\ \hline
 {\ct LEVEL}             & Integer                       & For future use                                &    & 0                \\ \hline
 {\ct MPI\_PROCESS}      & Integer                       & See Section~\ref{info:multimesh}              &    &                  \\ \hline
-{\ct RGB}               & Integer Triplet               & See Section~\ref{info:multimesh}              &    & 0,0,0            \\ \hline
 {\ct MULT\_ID }         & Character                     & See Section~\ref{info:MULT}                   &    &                  \\ \hline
+{\ct RGB}               & Integer Triplet               & See Section~\ref{info:multimesh}              &    & 0,0,0            \\ \hline
 {\ct SYNCHRONIZE}       & Logical                       & See Section~\ref{info:multimesh}              &    & {\ct .TRUE.}     \\ \hline
 {\ct XB(6)}             & Real Sextuplet                & See Section~\ref{info:MESH_Basics}            & m  & 0,1,0,1,0,1      \\ \hline
 \end{longtable}
@@ -10171,20 +10174,21 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CHECK\_GR}                 & Logical       & See Section~\ref{info:CFL}                                &               & {\ct .TRUE.}     \\ \hline
 {\ct CHECK\_HT}                 & Logical       & See Section~\ref{info:CFL}                                &               & {\ct .TRUE.}     \\ \hline
 {\ct CHECK\_VN}                 & Logical       & See Section~\ref{info:CFL}                                &               & {\ct .TRUE.}     \\ \hline
+%{\ct CLIP\_MASS\_FRACTION}      & Logical       &                                                           &               & {\ct .FALSE.}     \\ \hline
+%{\ct CP_FTMP}                  & Logical       &                                                           &               & {\ct .FALSE.}     \\ \hline
+{\ct CSMAG}                     & Real          & See Section~\ref{info:LES}                                &               & 0.20              \\ \hline
 {\ct C\_FORCED}                 & Real          & See Section~\ref{info:convection}                         &               & 0.037             \\ \hline
 {\ct C\_FORCED\_CYLINDER}       & Real          & See Section~\ref{info:convection}                         &               & 0.664             \\ \hline
 {\ct C\_FORCED\_SPHERE }        & Real          & See Section~\ref{info:convection}                         &               & 0.600             \\ \hline
 {\ct C\_HORIZONTAL}             & Real          & See Section~\ref{info:convection}                         &               & 1.52             \\ \hline
 {\ct C\_VERTICAL}               & Real          & See Section~\ref{info:convection}                         &               & 1.31             \\ \hline
-%{\ct CLIP\_MASS\_FRACTION}      & Logical       &                                                           &               & {\ct .FALSE.}     \\ \hline
-{\ct CSMAG}                     & Real          & See Section~\ref{info:LES}                                &               & 0.20              \\ \hline
 %{\ct DEBUG\_OPENMP}             & Logical       & Debug flag for OpenMP                                     &               & {\ct .FALSE.}     \\ \hline
 {\ct DNS}                       & Logical       & See Section~\ref{info:MISC_Basics}                        &               & {\ct .FALSE.}     \\ \hline
 {\ct DYNSMAG}                   & Logical       & See Section~\ref{info:LES}                                &               & {\ct .FALSE.}     \\ \hline
-{\ct EVAC\_PRESSURE\_ITERATIONS}& Integer       & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide}     &               & 50                \\ \hline
-{\ct EVAC\_TIME\_ITERATIONS}    & Integer       & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide}     &               & 50                \\ \hline
 {\ct EVACUATION\_DRILL}         & Logical       & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide}     &               & {\ct .FALSE.}     \\ \hline
 {\ct EVACUATION\_MC\_MODE}      & Logical       & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide}     &               & {\ct .FALSE.}     \\ \hline
+{\ct EVAC\_PRESSURE\_ITERATIONS}& Integer       & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide}     &               & 50                \\ \hline
+{\ct EVAC\_TIME\_ITERATIONS}    & Integer       & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide}     &               & 50                \\ \hline
 {\ct FLUX\_LIMITER}             & Integer       & See FDS Tech Guide~\cite{FDS_Tech_Guide}                  &               & 4                 \\ \hline
 {\ct FORCE\_VECTOR(3)}          & Real          & See Section~\ref{info:force_vector}                       &               & 0.                \\ \hline
 {\ct FREEZE\_VELOCITY}          & Logical       & Constant velocity                                         &               & {\ct .FALSE.}     \\ \hline
@@ -10251,12 +10255,12 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct MULT} (Multiplier Function Parameters)} \\
 \hline \hline
 \endhead
-{\ct DXB}            & Real Sextuplet   & Spacing for all 6 coordinates               & m  & 0.                         \\ \hline
 {\ct DX}             & Real             & Spacing in the $x$ direction                & m  & 0.                         \\ \hline
-{\ct DY}             & Real             & Spacing in the $y$ direction                & m  & 0.                         \\ \hline
-{\ct DZ}             & Real             & Spacing in the $z$ direction                & m  & 0.                         \\ \hline
+{\ct DXB}            & Real Sextuplet   & Spacing for all 6 coordinates               & m  & 0.                         \\ \hline
 {\ct DX0}            & Real             & Translation in the $x$ direction            & m  & 0.                         \\ \hline
+{\ct DY}             & Real             & Spacing in the $y$ direction                & m  & 0.                         \\ \hline
 {\ct DY0}            & Real             & Translation in the $y$ direction            & m  & 0.                         \\ \hline
+{\ct DZ}             & Real             & Spacing in the $z$ direction                & m  & 0.                         \\ \hline
 {\ct DZ0}            & Real             & Translation in the $z$ direction            & m  & 0.                         \\ \hline
 {\ct ID }            & Character        & Identification tag                          &    &                            \\ \hline
 {\ct I\_LOWER}       & Integer          & Lower array bound, $x$ direction            &    & 0                          \\ \hline
@@ -10310,10 +10314,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RGB(3)}              & Integer Triplet     & See Section~\ref{info:OBST_Basics}            &           &               \\ \hline
 {\ct SAWTOOTH}            & Logical             & See Section~\ref{info:SAWTOOTH}               &           & {\ct .TRUE.}  \\ \hline
 {\ct SURF\_ID}            & Character           & See Section~\ref{info:OBST_Basics}            &           &               \\ \hline
-{\ct SURF\_IDS(3)}        & Character Triplet   & See Section~\ref{info:OBST_Basics}            &           &               \\ \hline
 {\ct SURF\_ID6(6)}        & Character Sextuplet & See Section~\ref{info:OBST_Basics}            &           &               \\ \hline
-{\ct THICKEN}             & Logical             & See Section~\ref{info:OBST_Basics}            &           & {\ct .FALSE.} \\ \hline
+{\ct SURF\_IDS(3)}        & Character Triplet   & See Section~\ref{info:OBST_Basics}            &           &               \\ \hline
 {\ct TEXTURE\_ORIGIN(3)}  & Real Triplet        & See Section~\ref{info:texture_map}            & m         & (0.,0.,0.)    \\ \hline
+{\ct THICKEN}             & Logical             & See Section~\ref{info:OBST_Basics}            &           & {\ct .FALSE.} \\ \hline
 {\ct TRANSPARENCY}        & Real                & See Section~\ref{info:OBST_Basics}            &           &  1            \\ \hline
 {\ct XB(6) }              & Real Sextuplet      & See Section~\ref{info:OBST_Basics}            & m         &               \\ \hline
 \end{longtable}
@@ -10371,10 +10375,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SIGMA\_D}                      & Real            & See Section~\ref{info:particle_size}        &           &               \\ \hline
 {\ct SPEC\_ID}                      & Character       & See Section~\ref{thermal_part_props}        &           &               \\ \hline
 {\ct STATIC}                        & Logical         & See Section~\ref{info:STATIC}               &           & {\ct .FALSE.} \\ \hline
-{\ct SURF\_ID}                      & Character       & See Section~\ref{info:PART_SURF}            &           &               \\ \hline
 {\ct SURFACE\_TENSION}              & Real            & See Section~\ref{info:secondary_breakup}    &   N/m     & 72.8$\cdot 10^3$  \\ \hline
+{\ct SURF\_ID}                      & Character       & See Section~\ref{info:PART_SURF}            &           &               \\ \hline
 {\ct USER\_DRAG\_COEFFICIENT}       & Real            & See Section~\ref{info:particle_drag}        &           & -1.           \\ \hline
-{\ct VAPORIZATION\_TEMPERATURE}     & Real            & See Section~\ref{thermal_part_props}        & $^\circ$C &               \\ \hline
 {\ct VERTICAL\_VELOCITY}            & Real            & See Section~\ref{info:surface_droplets}     & m/s       &  0.5          \\ \hline
 \end{longtable}
 
@@ -10466,27 +10469,27 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct PROP} (Device Properties)} \\
 \hline \hline
 \endhead
-{\ct ACTIVATION\_TEMPERATURE}           & Real          & See Section~\ref{info:sprinklers}             & $^\circ$C             & 74.        \\ \hline
 {\ct ACTIVATION\_OBSCURATION}           & Real          & See Section~\ref{info:smoke_detector}         & \%/m                  & 3.28      \\ \hline
+{\ct ACTIVATION\_TEMPERATURE}           & Real          & See Section~\ref{info:sprinklers}             & $^\circ$C             & 74.        \\ \hline
 {\ct ALPHA\_C}                          & Real          & See Section~\ref{info:smoke_detector}         &                       & 1.8       \\ \hline
 {\ct ALPHA\_E}                          & Real          & See Section~\ref{info:smoke_detector}         &                       & 0.       \\ \hline
-{\ct BETA\_C}                           & Real          & See Section~\ref{info:smoke_detector}         &                       & 1.       \\ \hline
-{\ct BETA\_E}                           & Real          & See Section~\ref{info:smoke_detector}         &                       & 1.       \\ \hline
 {\ct BEAD\_DENSITY}                     & Real          & See Section~\ref{info:THERMOCOUPLE}           & kg/m$^3$              & 8908.     \\ \hline
 {\ct BEAD\_DIAMETER}                    & Real          & See Section~\ref{info:THERMOCOUPLE}           & m                     & 0.001     \\ \hline
 {\ct BEAD\_EMISSIVITY}                  & Real          & See Section~\ref{info:THERMOCOUPLE}           &                       & 0.85      \\ \hline
 {\ct BEAD\_H\_FIXED}                    & Real          & See Section~\ref{info:THERMOCOUPLE}           & W/m$^2$/K             &           \\ \hline
 {\ct BEAD\_SPECIFIC\_HEAT}              & Real          & See Section~\ref{info:THERMOCOUPLE}           & kJ/kg/K               & 0.44      \\ \hline
+{\ct BETA\_C}                           & Real          & See Section~\ref{info:smoke_detector}         &                       & 1.       \\ \hline
+{\ct BETA\_E}                           & Real          & See Section~\ref{info:smoke_detector}         &                       & 1.       \\ \hline
 {\ct CABLE\_DIAMETER}                   & Real          & See Section~\ref{info:THIEF}                  & m                     & 0.02      \\ \hline
 {\ct CABLE\_FAILURE\_TEMPERATURE}       & Real          & See Section~\ref{info:THIEF}                  & $^\circ$C             & 400       \\ \hline
 {\ct CABLE\_JACKET\_THICKNESS}          & Real          & See Section~\ref{info:THIEF}                  & m                     & 0.002     \\ \hline
 {\ct CABLE\_MASS\_PER\_LENGTH}          & Real          & See Section~\ref{info:THIEF}                  & kg/m                  & 0.5       \\ \hline
-{\ct C\_FACTOR}                         & Real          & See Section~\ref{info:sprinklers}             &                       & 0.        \\ \hline
 {\ct CHARACTERISTIC\_VELOCITY}          & Real          & See Section~\ref{info:wind}                   & m/s                   & 1.       \\ \hline
-{\ct DROPLET\_VELOCITY}                 & Real          & See Section~\ref{info:sprinklers}             & m/s                   & 0.       \\ \hline
+{\ct C\_FACTOR}                         & Real          & See Section~\ref{info:sprinklers}             &                       & 0.        \\ \hline
 {\ct DROPLETS\_PER\_SECOND}             & Integer       & See Section~\ref{info:sprinklers}             &                       & 5000      \\ \hline
-{\ct FLOW\_RATE}                        & Real          & See Section~\ref{info:sprinklers}             & L/min                 &           \\ \hline
+{\ct DROPLET\_VELOCITY}                 & Real          & See Section~\ref{info:sprinklers}             & m/s                   & 0.       \\ \hline
 {\ct FLOW\_RAMP}                        & Character     & See Section~\ref{info:sprinklers}             &                       &           \\ \hline
+{\ct FLOW\_RATE}                        & Real          & See Section~\ref{info:sprinklers}             & L/min                 &           \\ \hline
 {\ct FLOW\_TAU}                         & Real          & See Section~\ref{info:sprinklers}             &                       & 0.       \\ \hline
 {\ct GAUGE\_TEMPERATURE}                & Real          & See Section~\ref{info:heat_flux}              & $^\circ$C             & {\ct TMPA}\\ \hline
 {\ct ID}                                & Character     & See Section~\ref{info:PROP}                   &                       &           \\ \hline
@@ -10512,9 +10515,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SMOKEVIEW\_PARAMETERS}             & Char.~Array   & See Section~\ref{info:SMOKEVIEW_PARAMETERS}   &                       &           \\ \hline
 {\ct SPEC\_ID}                          & Character     & See Section~\ref{info:alternative_smoke}      &                       &           \\ \hline
 {\ct SPRAY\_ANGLE(2)}                   & Real          & See Section~\ref{info:sprinklers}             & deg.                  & 60.,75.   \\ \hline
-{\ct SPRAY\_PATTERN\_SHAPE}             & Character     & See Section~\ref{info:sprinklers}             &                       & {\ct 'GAUSSIAN'}  \\ \hline
-{\ct SPRAY\_PATTERN\_MU}                & Integer       & See Section~\ref{info:sprinklers}             & deg.                  & 0          \\ \hline
 {\ct SPRAY\_PATTERN\_BETA}              & Integer       & See Section~\ref{info:sprinklers}             & deg.                  & 5          \\ \hline
+{\ct SPRAY\_PATTERN\_MU}                & Integer       & See Section~\ref{info:sprinklers}             & deg.                  & 0          \\ \hline
+{\ct SPRAY\_PATTERN\_SHAPE}             & Character     & See Section~\ref{info:sprinklers}             &                       & {\ct 'GAUSSIAN'}  \\ \hline
 {\ct SPRAY\_PATTERN\_TABLE}             & Character     & See Section~\ref{info:sprinklers}             &                       &           \\ \hline
 {\ct VELOCITY\_COMPONENT}               & Integer       & See Section~\ref{info:velocity_patch}         &                       &           \\ \hline
 \end{longtable}
@@ -10577,8 +10580,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct CTRL\_ID}                      & Character     & See Section~\ref{info:CTRL}       &                       &           \\ \hline
 {\ct DEVC\_ID}                      & Character     & See Section~\ref{info:RAMPDEVC}   &                       &           \\ \hline
 {\ct F}                             & Real          & See Chapter~\ref{info:RAMP}       &                       &           \\ \hline
-{\ct NUMBER\_INTERPOLATION\_POINTS} & Integer       & See Chapter~\ref{info:RAMP}       &                       &  5000     \\ \hline
 {\ct ID}                            & Character     & See Chapter~\ref{info:RAMP}       &                       &           \\ \hline
+{\ct NUMBER\_INTERPOLATION\_POINTS} & Integer       & See Chapter~\ref{info:RAMP}       &                       &  5000     \\ \hline
 {\ct T}                             & Real          & See Chapter~\ref{info:RAMP}       & s (or $^\circ$C)      &           \\ \hline
 {\ct X}                             & Real          & See Section~\ref{info:GVEC}       & m                     &           \\ \hline
 \end{longtable}
@@ -10625,16 +10628,16 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ID}                                  & Character   & See Section~\ref{info:simple_chemistry}       &                   &     \\ \hline
 {\ct IDEAL}                               & Logical     & See Section~\ref{info:simple_chemistry}       &                   & {\ct .FALSE.}    \\ \hline
 {\ct N}                                   & Real        & See Section~\ref{info:simple_chemistry}       &                   & 0    \\ \hline
+{\ct NU(:)}                               & Real Array  & See Section~\ref{info:finite}                 &                   &     \\ \hline
 {\ct N\_S(:)}                             & Real Array  & See Section~\ref{info:finite}                 &                   &     \\ \hline
 {\ct N\_T}                                & Real        & See Section~\ref{info:finite}                 &                   &     \\ \hline
-{\ct NU(:)}                               & Real Array  & See Section~\ref{info:finite}                 &                   &     \\ \hline
 {\ct O}                                   & Real        & See Section~\ref{info:simple_chemistry}       &                   & 0    \\ \hline
 {\ct REAC\_ATOM\_ERROR}                   & Real        & See Section~\ref{info:REAC_Diagnostics}       & atoms             & 1.E-5    \\ \hline
 {\ct REAC\_MASS\_ERROR}                   & Real        & See Section~\ref{info:REAC_Diagnostics}       & kg/kg             & 1.E-4    \\ \hline
 {\ct SMIX\_ID(:)}                         & Char.~Array & See Section~\ref{info:SMIX}                   &                   &     \\ \hline
 {\ct SPEC\_ID(:)}                         & Char.~Array & See Section~\ref{info:SMIX}                   &                   &     \\ \hline
-{\ct SOOT\_YIELD}                         & Real        & See Section~\ref{info:simple_chemistry}       & kg/kg             & 0.01    \\ \hline
 {\ct SOOT\_H\_FRACTION}                   & Real        & See Section~\ref{info:simple_chemistry}       &                   & 0.1    \\ \hline
+{\ct SOOT\_YIELD}                         & Real        & See Section~\ref{info:simple_chemistry}       & kg/kg             & 0.01    \\ \hline
 {\ct SUPPRESSION}                         & Logical     & See Section~\ref{info:extinction}             &                   & {\ct .TRUE.}      \\ \hline
 {\ct THRESHOLD\_TEMPERATURE}              & Real        & See Section~\ref{info:mixedmode}              &   $^\circ$C       & 1427    \\ \hline
 {\ct Y\_CO2\_INFTY}                       & Real        & See Section~\ref{info:simple_chemistry}       &  kg/kg            & 0.0058 \\ \hline
@@ -10667,69 +10670,19 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CELL\_CENTERED}    & Logical           & See Section~\ref{info:SLCF}               &           & {\ct .FALSE.}     \\ \hline
 {\ct EVACUATION}        & Logical           & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide} &    & {\ct .FALSE.}\\ \hline
 {\ct MAXIMUM\_VALUE}    & Real              & See Smokeview User's Guide                &           &                   \\ \hline
-{\ct MINIMUM\_VALUE}    & Real              & See Smokeview User's Guide                &           &                   \\ \hline
 {\ct MESH\_NUMBER}      & Integer           & See Section~\ref{info:SLCF}               &           &                   \\ \hline
+{\ct MINIMUM\_VALUE}    & Real              & See Smokeview User's Guide                &           &                   \\ \hline
 {\ct PART\_ID}          & Character         & See Section~\ref{info:outputquantities}   &           &                   \\ \hline
 {\ct PBX, PBY, PBZ}     & Real              & See Section~\ref{info:SLCF}               &           &                   \\ \hline
 {\ct QUANTITY}          & Character         & See Section~\ref{info:outputquantities}   &           &                   \\ \hline
+{\ct QUANTITY2}         & Character         & See Section~\ref{info:outputquantities}   &           &                   \\ \hline
 {\ct SPEC\_ID}          & Character         & See Section~\ref{info:outputquantities}   &           &                   \\ \hline
 {\ct VECTOR    }        & Logical           & See Section~\ref{info:SLCF}               &           & {\ct .FALSE.}     \\ \hline
 {\ct VELO\_INDEX}       & Integer           & See Section~\ref{info:velocity}           &           &  0                \\ \hline
 {\ct XB(6)}             & Real Sextuplet    & See Section~\ref{info:SLCF}               & m         &                   \\ \hline
 \end{longtable}
 
-%Undocumented: AGL_SLICE,FIRE_LINE,EVACUATION,LEVEL_SET_FIRE_LINE,QUANTITY2
-
-\vspace{\baselineskip}
-
-
-\section{\texorpdfstring{{\tt SPEC}}{SPEC} (Species Parameters)}
-
-
-\setlength\LTleft{0pt}
-\setlength\LTright{0pt}
-\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
-\caption[Species Parameters]{For more information see Section~\ref{info:SPEC}.}
-\label{tbl:SPEC} \\
-\hline
-\multicolumn{5}{|c|}{{\ct SPEC} (Species Parameters)} \\
-\hline \hline
-\endfirsthead
-\caption[]{Continued} \\
-\hline
-\multicolumn{5}{|c|}{{\ct SPEC} (Species Parameters)} \\
-\hline \hline
-\endhead
-{\ct ABSORBING}                     & Logical     & See Section~\ref{gas_species_props}         &                   & {\ct .FALSE.} \\ \hline
-{\ct BACKGROUND}                    & Logical     & See Section~\ref{info:SPEC}                 &                   & {\ct .FALSE.} \\ \hline
-{\ct CONDUCTIVITY}                  & Real        & See Section~\ref{gas_species_props}         & W/m/K             &               \\ \hline
-{\ct DIFFUSIVITY}                   & Real        & See Section~\ref{gas_species_props}         & m$^2$/s           &               \\ \hline
-{\ct EPSILONKLJ}                    & Real        & See Section~\ref{gas_species_props}         &                   & 0             \\ \hline
-{\ct FIC\_CONCENTRATION}            & Real        & See Section~\ref{info:FED}                  & ppm               & 0.            \\ \hline
-{\ct FLD\_LETHAL\_DOSE}             & Real        & See Section~\ref{info:FED}                  & ppm$\times$min    & 0.            \\ \hline
-{\ct FORMULA }                      & Character   & See Section~\ref{gas_species_props}         &                   &               \\ \hline
-{\ct HEAT\_OF\_VAPORIZATION}        & Real        & See Section~\ref{thermal_part_props}        & kJ/kg     &               \\ \hline
-{\ct HUMIDITY}                      & Real        & See Section~\ref{info:SPEC_Basics}          & \%                & 40.           \\ \hline
-{\ct H\_V\_REFERENCE\_TEMPERATURE}  & Real        & See Section~\ref{thermal_part_props}        & $^\circ$C &               \\ \hline
-{\ct ID }                           & Character   & See Section~\ref{info:SPEC_Basics}          &                   &               \\ \hline
-{\ct MASS\_EXTINCTION\_COEFFICIENT} & Real        & See Section~\ref{info:alternative_smoke}    &                   & 0             \\ \hline
-{\ct MASS\_FRACTION\_0}             & Real        & See Section~\ref{info:SPEC_Basics}          &                   & 0             \\ \hline
-{\ct MELTING\_TEMPERATURE}          & Real        & See Section~\ref{thermal_part_props}        & $^\circ$C &               \\ \hline
-{\ct MW}                            & Real        & See Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
-{\ct RAMP\_CP}                       & Character   & See Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
-{\ct RAMP\_CP\_L}                     & Character   & See Section~\ref{thermal_part_props}         & g/mol             & 29.           \\ \hline
-{\ct RAMP\_D}                        & Character   & See Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
-{\ct RAMP\_K}                        & Character   & See Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
-{\ct RAMP\_MU}                       & Character   & See Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
-{\ct REFERENCE\_ENTHALPY}            & Real        & See Section~\ref{gas_species_props}         & kJ/kg             &               \\ \hline
-{\ct REFERENCE\_TEMPERATURE}        & Real        & See Section~\ref{gas_species_props}         & $^\circ$C         & 25.           \\ \hline
-{\ct SIGMALJ}                       & Real        & See Section~\ref{gas_species_props}         &                   & 0             \\ \hline
-{\ct SMIX\_COMPONENT\_ONLY}         & Logical     & See Section~\ref{info:SMIX}                 &                   & {\ct .FALSE.} \\ \hline
-{\ct SPECIFIC\_HEAT}                & Real        & See Section~\ref{gas_species_props}         & kJ/kg/K           &               \\ \hline
-{\ct SPECIFIC\_HEAT\_LIQUID}        & Real            & See Section~\ref{thermal_part_props}        & kJ/kg/K   &               \\ \hline
-{\ct VISCOSITY}                     & Real        & See Section~\ref{gas_species_props}         & kg/m/s            &               \\ \hline
-\end{longtable}
-
+%Undocumented: AGL_SLICE,FIRE_LINE,EVACUATION,LEVEL_SET_FIRE_LINE
 
 \vspace{\baselineskip}
 
@@ -10758,6 +10711,57 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct VOLUME\_FRACTION(:)}           & Real Array        & Volume fraction of mixture components                 &                   &               \\ \hline
 \end{longtable}
 
+\vspace{\baselineskip}
+
+
+\section{\texorpdfstring{{\tt SPEC}}{SPEC} (Species Parameters)}
+
+
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\caption[Species Parameters]{For more information see Section~\ref{info:SPEC}.}
+\label{tbl:SPEC} \\
+\hline
+\multicolumn{5}{|c|}{{\ct SPEC} (Species Parameters)} \\
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct SPEC} (Species Parameters)} \\
+\hline \hline
+\endhead
+{\ct ABSORBING}                     & Logical     & See Section~\ref{gas_species_props}         &                   & {\ct .FALSE.} \\ \hline
+{\ct BACKGROUND}                    & Logical     & See Section~\ref{info:SPEC}                 &                   & {\ct .FALSE.} \\ \hline
+{\ct CONDUCTIVITY}                  & Real        & See Section~\ref{gas_species_props}         & W/m/K             &               \\ \hline
+{\ct DENSITY\_LIQUID}               & Real        & See Section~\ref{thermal_part_props}         & kg/m$^3$          &               \\ \hline
+{\ct DIFFUSIVITY}                   & Real        & See Section~\ref{gas_species_props}         & m$^2$/s           &               \\ \hline
+{\ct EPSILONKLJ}                    & Real        & See Section~\ref{gas_species_props}         &                   & 0             \\ \hline
+{\ct FIC\_CONCENTRATION}            & Real        & See Section~\ref{info:FED}                  & ppm               & 0.            \\ \hline
+{\ct FLD\_LETHAL\_DOSE}             & Real        & See Section~\ref{info:FED}                  & ppm$\times$min    & 0.            \\ \hline
+{\ct FORMULA }                      & Character   & See Section~\ref{gas_species_props}         &                   &               \\ \hline
+{\ct HEAT\_OF\_VAPORIZATION}        & Real        & See Section~\ref{thermal_part_props}        & kJ/kg     &               \\ \hline
+{\ct HUMIDITY}                      & Real        & See Section~\ref{info:SPEC_Basics}          & \%                & 40.           \\ \hline
+{\ct H\_V\_REFERENCE\_TEMPERATURE}  & Real        & See Section~\ref{thermal_part_props}        & $^\circ$C &               \\ \hline
+{\ct ID }                           & Character   & See Section~\ref{info:SPEC_Basics}          &                   &               \\ \hline
+{\ct MASS\_EXTINCTION\_COEFFICIENT} & Real        & See Section~\ref{info:alternative_smoke}    &                   & 0             \\ \hline
+{\ct MASS\_FRACTION\_0}             & Real        & See Section~\ref{info:SPEC_Basics}          &                   & 0             \\ \hline
+{\ct MELTING\_TEMPERATURE}          & Real        & See Section~\ref{thermal_part_props}        & $^\circ$C &               \\ \hline
+{\ct MW}                            & Real        & See Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
+{\ct RAMP\_CP}                       & Character   & See Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
+{\ct RAMP\_CP\_L}                     & Character   & See Section~\ref{thermal_part_props}         & g/mol             & 29.           \\ \hline
+{\ct RAMP\_D}                        & Character   & See Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
+{\ct RAMP\_K}                        & Character   & See Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
+{\ct RAMP\_MU}                       & Character   & See Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
+{\ct REFERENCE\_ENTHALPY}            & Real        & See Section~\ref{gas_species_props}         & kJ/kg             &               \\ \hline
+{\ct REFERENCE\_TEMPERATURE}        & Real        & See Section~\ref{gas_species_props}         & $^\circ$C         & 25.           \\ \hline
+{\ct SIGMALJ}                       & Real        & See Section~\ref{gas_species_props}         &                   & 0             \\ \hline
+{\ct SMIX\_COMPONENT\_ONLY}         & Logical     & See Section~\ref{info:SMIX}                 &                   & {\ct .FALSE.} \\ \hline
+{\ct SPECIFIC\_HEAT}                & Real        & See Section~\ref{gas_species_props}         & kJ/kg/K           &               \\ \hline
+{\ct SPECIFIC\_HEAT\_LIQUID}        & Real            & See Section~\ref{thermal_part_props}        & kJ/kg/K   &               \\ \hline
+{\ct VAPORIZATION\_TEMPERATURE}     & Real            & See Section~\ref{thermal_part_props}        & K         &               \\ \hline
+{\ct VISCOSITY}                     & Real        & See Section~\ref{gas_species_props}         & kg/m/s            &               \\ \hline
+\end{longtable}
 
 \vspace{\baselineskip}
 
@@ -10788,16 +10792,16 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DEFAULT}                         & Logical         & See Section~\ref{info:SURF}                   &                     & {\ct .FALSE.}           \\ \hline
 {\ct DT\_INSERT}                      & Real            & See Section~\ref{info:particle_flux}          & s                   & 0.01                    \\ \hline
 {\ct DUCT\_PATH}                      & Int.~Pair       & See Section~\ref{info:Fan_Curves}             &                     & 0,0                     \\ \hline
-{\ct E\_COEFFICIENT}                  & Real            & See Section~\ref{info:suppression}            & m$^2$/kg/s          & 0.                      \\ \hline
 {\ct EMISSIVITY}                      & Real            & See Section~\ref{info:convection}             &                     & 0.9                     \\ \hline
 {\ct EMISSIVITY\_BACK}                & Real            & See Section~\ref{info:BACKING}                &                     &                         \\ \hline
 {\ct EVAC\_DEFAULT}                   & Logical         & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide} &             & {\ct .FALSE.}           \\ \hline
 {\ct EXTERNAL\_FLUX}                  & Real            & See Section~\ref{solid_phase_verification}    & kW/m$^2$            & 0.                      \\ \hline
+{\ct E\_COEFFICIENT}                  & Real            & See Section~\ref{info:suppression}            & m$^2$/kg/s          & 0.                      \\ \hline
 {\ct FREE\_SLIP}                      & Logical         & See Section~\ref{info:WALL_MODEL}             &                     & {\ct .FALSE.}           \\ \hline
 {\ct GEOMETRY}                        & Character       & See Section~\ref{info:GEOMETRY}               &                     & {\ct 'CARTESIAN'}       \\ \hline
-{\ct H\_FIXED}                        & Real            & See Section~\ref{info:convection}             & W/m$^2$/K           &                         \\ \hline
 {\ct HEAT\_OF\_VAPORIZATION }         & Real            & See Section~\ref{info:specified_burning}      & kJ/kg               & 0.                      \\ \hline
 {\ct HRRPUA }                         & Real            & See Section~\ref{info:gas_burner}             & kW/m$^2$            & 0.                      \\ \hline
+{\ct H\_FIXED}                        & Real            & See Section~\ref{info:convection}             & W/m$^2$/K           &                         \\ \hline
 {\ct ID     }                         & Character       & See Section~\ref{info:SURF}                   &                     &                         \\ \hline
 {\ct IGNITION\_TEMPERATURE}           & Real            & See Section~\ref{info:specified_burning}      & $^\circ$C           & 5000.                   \\ \hline
 {\ct LAYER\_DIVIDE}                   & Real            & See Section~\ref{info:EXPOSED}                &                     & {\ct N\_LAYERS}/2       \\ \hline
