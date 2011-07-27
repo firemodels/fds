@@ -85,6 +85,7 @@ void update_framenumber(int changetime){
           if(vr->dataready[j]==1)break;
         }
         vr->iframe=j;
+        printf("decompressed vr's\n");//xyz
         if(smoke!=NULL&&vr->iframe>=0){
           if(vr->is_compressed==1){
             unsigned char *c_smokedata_compressed;
@@ -102,6 +103,7 @@ void update_framenumber(int changetime){
             dv=(valmax-valmin)/255;
             for(i=0;i<framesize;i++){
               vr->smokedata_view[i]=valmin+dv*vr->c_smokedata_view[i+8];
+              vr->smokedata_view[i]=5.0;//xyz
             }
             vr->smokedataptr = vr->smokedata_view;
           }

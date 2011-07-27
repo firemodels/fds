@@ -439,6 +439,7 @@ void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, mesh
 void compute_all_smokecolors(void){
   int ii;
 
+  printf("computing colors (non GPU)\n");//xyz
   for(ii=0;ii<nmeshes;ii++){
     mesh *meshi;
     volrenderdata *vr;
@@ -754,6 +755,7 @@ void drawsmoke3dVOL(void){
   float dx, dy, dz;
   int ii;
 
+  printf("drawing smoke (nonGPU)\n");//xyz
   if(use_transparency_data==1)transparenton();
   for(ii=0;ii<nvolfacelistinfo;ii++){
     volfacelistdata *vi;
@@ -1009,10 +1011,24 @@ void drawsmoke3dGPUVOL(void){
     
     if(meshi!=meshold){
       float dx, dy, dz, dcell;
+      int imesh;//xyz
 
       glUniform1i(GPUvol_inside,meshi->inside);
       glUniform3f(GPUvol_boxmin,meshi->x0,meshi->y0,meshi->z0);
       glUniform3f(GPUvol_boxmax,meshi->x1,meshi->y1,meshi->z1);
+      imesh=meshi-meshinfo;//xyz ***BEGIN***
+      printf("mesh=%i\n",imesh);
+      if(vr->smokedataptr==vr->smokedata_view){
+        float *val;
+
+        val = vr->smokedataptr;
+        printf("smokedataptr==smokedata_view %f\n",val[0]);
+        if(meshi-meshinfo==3)printf("saveptrval=%f\n",smokedataptr_save[0]);
+      }
+      else{
+        printf("smokedataptr!=smokedata_view\n");
+      }
+      printf("updating 3D texture (GPU)\n");//xyz ***END***
       update_volsmoke_texture(meshi,vr->smokedataptr,vr->firedataptr);
       if(vr->firedataptr!=NULL){
         glUniform1i(GPUvol_havefire,1);
@@ -1438,8 +1454,17 @@ void read_volsmoke_allframes(volrenderdata *vr){
   for(i=0;i<nframes;i++){
     read_volsmoke_frame(vr, i, &first);
   }
-  vr->smokedataptr = vr->smokedataptrs[0];  //*** hack
-  vr->firedataptr = vr->firedataptrs[0];
+  if(vr->is_compressed==1){//xyz BEGIN
+    vr->smokedataptr = vr->smokedata_view;
+    vr->firedataptr = vr->firedata_view;
+    if(vr->rendermesh-meshinfo==3){
+      smokedataptr_save=vr->smokedataptr;
+    }
+  }
+  else{//xyz END
+    vr->smokedataptr = vr->smokedataptrs[0];  //*** hack
+    vr->firedataptr = vr->firedataptrs[0];
+  }//xyz
   vr->loaded=1;
   vr->display=1;
   plotstate=getplotstate(DYNAMIC_PLOTS);
@@ -1635,6 +1660,20 @@ void update_volsmoke_texture(mesh *meshi, float *smokedata, float *firedata){
   nx = meshi->ibar+1;
   ny = meshi->jbar+1;
   nz = meshi->kbar+1;
+  {//xyz BEGIN
+    int imesh;
+    int i;
+    float valmin,valmax;
+
+    imesh = meshi-meshinfo;
+    valmin=smokedata[0];
+    valmax=valmin;
+    for(i=1;i<nx*ny*nz;i++){
+      if(valmin<smokedata[i])valmin=smokedata[i];
+      if(valmax>smokedata[i])valmax=smokedata[i];
+    }
+    printf("mesh=%i valmin=%f valmax=%f\n",imesh,valmin,valmax);
+  }//xyz END
   glActiveTexture(GL_TEXTURE0);
   glTexSubImage3D(GL_TEXTURE_3D,0,
     xoffset,yoffset,zoffset,
