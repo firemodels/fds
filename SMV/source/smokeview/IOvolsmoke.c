@@ -1645,6 +1645,7 @@ void init_volsmoke_texture(mesh *meshi){
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_smokecolormap);
   }
+  glActiveTexture(GL_TEXTURE0);
   printf("complete\n");
   fflush(stdout);
 }
@@ -1686,6 +1687,7 @@ void update_volsmoke_texture(mesh *meshi, float *smokedata, float *firedata){
       xoffset,yoffset,zoffset,
       nx, ny, nz,
       GL_RED, GL_FLOAT, firedata);
+    glActiveTexture(GL_TEXTURE0);
   }
 }
 #endif

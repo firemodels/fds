@@ -569,24 +569,27 @@ void createDepthTexture( void ){
 		depthtexture_id = 0;
 	}
 	
-    glActiveTexture(GL_TEXTURE3);
-	glGenTextures(1, &depthtexture_id);
-    glBindTexture(GL_TEXTURE_2D, depthtexture_id);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, screenWidth, screenHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);	
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glActiveTexture(GL_TEXTURE3);
+  glGenTextures(1, &depthtexture_id);
+  glBindTexture(GL_TEXTURE_2D, depthtexture_id);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, screenWidth, screenHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);	
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glActiveTexture(GL_TEXTURE0);
+
 }
 
 /* ------------------ getDepthTexture ------------------------ */
 
 void getDepthTexture( void ){
-	if ( depthtexture_id==0 ) createDepthTexture();
-    glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, depthtexture_id);
-	glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0,0, 0, 0, screenWidth, screenHeight);
+  if ( depthtexture_id==0 ) createDepthTexture();
+  glActiveTexture(GL_TEXTURE3);
+  glBindTexture(GL_TEXTURE_2D, depthtexture_id);
+  glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0,0, 0, 0, screenWidth, screenHeight);
+  glActiveTexture(GL_TEXTURE0);
 }
 #endif
 

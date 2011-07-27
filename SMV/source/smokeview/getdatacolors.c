@@ -2015,6 +2015,7 @@ void update_texturebar(void){
   if(nvolrenderinfo>0){
     glActiveTexture(GL_TEXTURE2);
     glTexSubImage1D(GL_TEXTURE_1D,0,0,256,GL_RGBA,GL_FLOAT, rgb_smokecolormap);
+    glActiveTexture(GL_TEXTURE0);
   }
 #endif
 
@@ -2292,6 +2293,7 @@ void updatecolors(int changecolorindex){
 #ifdef pp_GPU
   glActiveTexture(GL_TEXTURE2);
   glTexSubImage1D(GL_TEXTURE_1D,0,0,256,GL_RGBA,GL_FLOAT, rgb_smokecolormap);
+  glActiveTexture(GL_TEXTURE0);
 #endif
 
 }        
