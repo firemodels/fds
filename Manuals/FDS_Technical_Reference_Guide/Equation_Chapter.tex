@@ -180,11 +180,21 @@ For an infinitely-fast reaction, reactant species in a given grid cell are conve
 characteristic mixing time. If any grid cell contains all the reactants of the the chemical reaction and the mass fractions of reactants and products meet certain criteria, the heat release rate per unit volume is given by the eddy dissipation model~\cite{Poinsot:TNC}
 \be
    \dq''' \equiv -\dm_f''' \, \Delta H = -\rho \min \left( Y_\F , \frac{Y_\OTWO}{s}, \beta \frac{Y_{\hbox{\tiny P}}}{1+s} \right) \;
-   \left( 1 - e^{-\dt/\tau} \right)  \; \Delta H \quad ; \quad
+   \left( 1 - e^{-\dt/\tau_{mix}} \right)  \; \Delta H \quad ; \quad
    s=\frac{W_\F}{\nu_{\OTWO} W_{\OTWO} }  \label{EDC1}
 \ee  %Y rather than Z is correct in this equation 
-Here, $Y_\F$, $Y_\OTWO$, and $Y_{\hbox{\tiny P}}$ are the mass fractions of fuel, oxygen and products within a grid cell.
-$\tau$ is a mixing time scale and $\beta$ is an empirical parameter.
+Here, $Y_\F$, $Y_\OTWO$, and $Y_{\hbox{\tiny P}}$ are the mass fractions of fuel, oxygen and products within a grid cell; $\beta$ is an empirical parameter.  The mixing time $\tau_{mix}$ is given by
+\begin{equation}
+\label{eqn_tau_mix}
+\tau_{mix} = \max(\tau_{chem},\min(\tau_d,\tau_u,\tau_g,\tau_{flame}))
+\end{equation}
+where
+\begin{equation}
+\tau_{d}= \frac{\mbox{Sc}_t\rho\Delta^2}{\mu} \,\mbox{;}\quad
+\tau_{u}= \frac{\Delta}{\sqrt{2k_{sgs}}} \,\mbox{;}\quad
+\tau_{g}= \sqrt{ 2\Delta/g }
+\end{equation}
+Note that $k_{sgs}$ is the subgrid kinetic energy per unit mass which is closed by integrating a model Kolmogorov spectrum . The acceleration time scale $\tau_{g}$ is the time required to travel a distance $\Delta$ starting from rest under a constant acceleration, $g=9.81$ m/s$^2$.
 
 
 \subsection{Radiation}
@@ -246,7 +256,6 @@ In addition, for each compartment in the computational domain, we have a backgro
 found from the equation of state. These variables are advanced in time using an explicit second-order predictor/corrector scheme.
 The basic procedure is as follows:
 
-\clearpage
 \paragraph{Predictor}
 
 \begin{enumerate}
