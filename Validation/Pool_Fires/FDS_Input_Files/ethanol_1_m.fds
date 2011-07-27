@@ -4,7 +4,7 @@
 
 &MISC NEW_EVAP=.TRUE. /
 
-&TIME T_END=300. / 
+&TIME T_END=600. / 
 
 &REAC FUEL               = 'ETHANOL VAPOR'
       FYI                = 'Ethanol, C_2 H_6 O_1'
@@ -22,8 +22,8 @@
       CONDUCTIVITY           = 0.17
       SPECIFIC_HEAT          = 2.4398
       DENSITY                = 789.
-      ABSORPTION_COEFFICIENT = 40.
-      BOILING_TEMPERATURE    = 78.5 /
+      BOILING_TEMPERATURE    = 78.5            
+      ABSORPTION_COEFFICIENT = 1534.3          
 	  
 &MATL ID            = 'STEEL'
       EMISSIVITY    = 1.0
