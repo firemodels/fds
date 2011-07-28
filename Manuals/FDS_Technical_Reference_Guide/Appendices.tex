@@ -856,7 +856,7 @@ Here we find the intensity for finite number of wavelength bands from Equation (
 
 \begin{equation}
 \label{eqn_totintens}
-     \ \bar{I}_S = \int_{0}^{\infty} I_{\eta,S} d\eta \mbox{.}
+     \ \bar{I}_S = \int_{0}^{\infty} I_{\lambda,S} d\lambda \mbox{.}
 \end{equation}
 
 The effective mean absorption coefficient is then found by minimizing the norm of error between the predicted radiation intensity at path lengths $S-_i$ and $\bar{I}_{S-_i}$, where $i=1,2,...,N$:
@@ -875,26 +875,6 @@ It can be easily seen that increasing the path-length leads to lower effective a
 \subsubsection{Absorption Coefficients of Selected Fuels}
 
 Absorption coefficients are determined from Eqn. \ref{eqn_effcoeff}. The data used in determining the coefficients is listed in Table \ref{tbl_wavnum}. When available, spectrally resolved absorption coefficients are used for determining the total transmitted fraction of radiation according to Eqns. \ref{eqn_beerslaw} and \ref{eqn_totintens}.  The transmission data in Suo-Anttila et al. 2009 \cite{Suo-Anttila:PCT2009} was used for JP-8, ethanol and toluene. The spectrally resolved absorption coefficients from Keefe et al. were used to calculate the total transmission for toluene, benzene, water and methanol. Complex refractive index spectra of diesel reported by Sazhin et al. 2004a \cite{Sazhin:JHT2004a} was used to calculate the transmission.
-
-\begin{table}[ht]
-\caption{Characterization of data sources used for determining absorption coefficients}
-\centering
-\begin{tabular}{l r}
-\hline\hline
-Liquid & Wavenumber Range $(cm^{-1})$ \\ [0.5ex]
-\hline
-JP-8 \cite{Suo-Anttila:PCT2009}                  &  - \\
-Ethanol-Toluene blend \cite{Suo-Anttila:PCT2009} &  - \\
-Ethanol \cite{Suo-Anttila:PCT2009}               &  - \\
-Toluene \cite{Suo-Anttila:PCT2009}               &  - \\
-Toluene \cite{Bertie:AS1994a}                    &  436-6500 \\
-Methanol \cite{Bertie:AS1993a}                   & 2-8000 \\
-Water \cite{Bertie:AS1996}                       & xxxx-xxxx \\
-Benzene \cite{Bertie:AS1993b}                    & xxxx-xxxx \\ 
-\hline
-\end{tabular}
-\label{tbl_wavnum}
-\end{table}
 
 Figure \ref{fig_trans2} and Figure \ref{fig_trans3} show the transmitted fraction of radiation predicted by the FDS radiation model with the absorption coefficients listed in Table \ref{tbl_abscoeff}, compared with the total transmission calculated from Eqn. \ref{eqn_beerslaw}. 
 
