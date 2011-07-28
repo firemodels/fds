@@ -969,18 +969,11 @@ void drawsmoke3dGPUVOL(void){
   mesh *meshi, *meshold=NULL;
   int ii;
 
-  
+#ifdef pp_MOUSEDOWN  
   if(mouse_down==1){
-#ifdef pp_VOLRENDERTIME  
-    int current_time;
-    
-    current_time = glutGet(GLUT_ELAPSED_TIME);
-    if(current_time<volrendertime+100)return;
-    volrendertime=current_time;
-#else
     return;
-#endif
   }
+#endif
 #ifdef pp_GPUDEPTH
   getDepthTexture();
   glUniform1i(GPUvol_depthtexture,3);

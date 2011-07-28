@@ -315,7 +315,9 @@ void mouse(int button, int state, int x, int y){
   glui_move_mode=-1;
   glutPostRedisplay();
   if(state==GLUT_UP){
+#ifdef pp_MOUSEDOWN
     mouse_down=0;
+#endif
     eye_xyz0[0]=eye_xyz[0];
     eye_xyz0[1]=eye_xyz[1];
     eye_xyz0[2]=eye_xyz[2];
@@ -327,13 +329,8 @@ void mouse(int button, int state, int x, int y){
     update_trainer_moves();
     return;
   }
+#ifdef pp_MOUSEDOWN
   mouse_down=1;
-#ifdef pp_GPU
-#ifdef pp_VOLRENDERTIME
-  if(nvolrenderinfo>0&&showvolrender==1&&usegpu==1){
-    volrendertime = glutGet(GLUT_ELAPSED_TIME);
-  }
-#endif
 #endif
   if ((button == GLUT_LEFT_BUTTON || button == GLUT_MIDDLE_BUTTON || button == GLUT_RIGHT_BUTTON)&& state == GLUT_DOWN){
     glutSetCursor(GLUT_CURSOR_INFO);

@@ -1037,6 +1037,9 @@ void usage(char **argv){
 #ifdef pp_GPU
     strcat(label,", pp_GPU");
 #endif
+#ifdef pp_GPUDEPTH
+    strcat(label,", pp_GPUDEPTH");
+#endif
 #ifdef ISO_DEBUG
     strcat(label,", ISO_DEBUG");
 #endif
@@ -1054,6 +1057,9 @@ void usage(char **argv){
 #endif
 #ifdef pp_MESSAGE
     strcat(label,", pp_MESSAGE");
+#endif
+#ifdef pp_MOUSEDOWN
+    strcat(label,", pp_MOUSEDOWN");
 #endif
 #ifdef pp_OPEN
     strcat(label,", pp_OPEN");

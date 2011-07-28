@@ -14,7 +14,9 @@
 #include "threader.h"
 #include "string_util.h"
 
+#ifdef pp_MOUSEDOWN
 SVEXTERN int SVDECL(mouse_down,0);
+#endif
 SVEXTERN int SVDECL(use_multi_threading,1);
 SVEXTERN int SVDECL(load_at_rendertimes,1);
 SVEXTERN int nvolrenderinfo;
@@ -800,9 +802,6 @@ SVEXTERN int touring;
 SVEXTERN int update_tourlist;
 SVEXTERN float desired_view_height;
 SVEXTERN int thistime, lasttime, resetclock,initialtime;
-#ifdef pp_VOLRENDERTIME
-SVEXTERN int volrendertime;
-#endif
 SVEXTERN int realtime_flag;
 SVEXTERN char timelabel[30];
 SVEXTERN char frameratelabel[30];
