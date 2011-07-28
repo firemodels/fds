@@ -11,6 +11,12 @@ export INDIR=Current_Results
 
 /bin/sh -c "cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR"
 
+$RUNFDS $INDIR acetone_1_m
 $RUNFDS $INDIR ethanol_1_m
+$RUNFDS $INDIR methanol_1_m
+$RUNFDS $INDIR butane_1_m
+$RUNFDS $INDIR benzene_1_m
+$RUNFDS $INDIR heptane_1_m
+
 
 echo FDS cases submitted
