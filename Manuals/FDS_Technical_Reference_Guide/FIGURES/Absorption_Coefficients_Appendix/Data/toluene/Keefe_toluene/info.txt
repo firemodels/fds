@@ -1,0 +1,13 @@
+Appl. Spec., 48, 127 (1994). 
+
+The files are in Galactic’s spc format and some are available in .y format (ASCII file with starting wavenumber, ending wavenumber, number of data points, y values).
+
+In the file names the following notation is used.
+
+dc - real dielectric constant
+dl - imaginary dielectric constant (dielectric loss)
+em - molar absorption coefficient (in 105 cm2 mol-1 or in L mol-1 cm-1)
+ip - imaginary molar polarizability (in cm3 /mol)
+k - imaginary refractive index (absorption index)
+n - real refractive index
+ram - Raman spectrum 
