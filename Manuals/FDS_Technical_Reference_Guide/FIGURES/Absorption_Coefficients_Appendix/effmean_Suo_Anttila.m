@@ -52,30 +52,30 @@ sigma=5.67040040*10^-8;
 
 qin=sigma*1450^4;
 
-% Lasketaan myös Keefe et al. datoista
+% Also calculated Keefe et al. datoista
 temp=importdata('Data\Toluene\Keefe_toluene\tlavgemf.y'); % in L /molcm
 vstart=temp(1)*10^2;
 vend=temp(2)*10^2;
 npt=temp(3);
 v=linspace(vstart,vend,npt);
-a=temp(4:end)*10*9339; % L/mol/cm=0.1 m^3/mol/m, Tolueenin tiheys 9339 mol/m^3
+a=temp(4:end)*10*9339; % L/mol/cm=0.1 m^3/mol/m, Tolueenin density 9339 mol/m^3
 Tau(:,5)=transmission(a,v,x,1450);
 
 
-% testataan myös metanoli
+% Also tested for methanol
 [a v]=readyspec('Data\Methanol\Bertie\CH3OH\MTHEM93.y');
 Tau(:,6)=transmission(a*2.4719e+004,v,x,1450);
 % molar mass 32.04 g mol?1 density 792 kg/m^3
 % => density = 2.4719e+004 mol/m^3
 
 
-% Vesi
+% Water
 [a v]=readyspec('Data\Water\Bertie\WTEREM95.y');
 Tau(:,7)=transmission(a*5.5556e+004,v,x,1450);
 % molar mass 18.0153 g/mol density 1000 kg/m^3
 % => density =5.5556e+004 mol/m^3
 
-% Bentseeni Data\Benzene\Keefe_benzene\bzh6emf2.y
+% Benzene Data\Benzene\Keefe_benzene\bzh6emf2.y
 [a v]=readyspec('Data\Benzene\Keefe_benzene\bzh6emf2.y');
 Tau(:,8)=transmission(a*100*11161,v,x,1450);
 % Density 11161 mol/m^3 at T=300K ja P = 1 atm
@@ -127,12 +127,10 @@ legend({'Jp-8','EthTol','Ethanol','Toluene(Suo-Anttila et al.)','Toluene (Keefe 
         set(gcf,'PaperSize',[Paper_Width Paper_Height]);
         set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
         display(['Printing plot ',num2str(i),'...'])
-        print(gcf,'-dpdf','../Suo_anttila_effective_FDS1')
+        %print(gcf,'-dpdf','../Suo_anttila_effective_FDS1')
 
-
-
-%exportfig(gcf,'Suo_anttila_effective_FDS1.png','Renderer','painters', 'width',14,'height',12 ,'fontsize',1.2,...
-%            'Color','bw','Format','png','Resolution',900);
+exportfig(gcf,'../Suo_anttila_effective_FDS1.pdf','Renderer','painters', 'width',6.5,'height',5 ,'fontsize',1.2,...
+            'Color','CMYK','Format','pdf','Resolution',900);
         figure;
 plot(x*1e3,Tau(:,6),'s');
 hold on;
@@ -150,10 +148,10 @@ legend('SouthEast',{'Methanol','Water','Benzene','Diesel'},'FontName',Font_Name)
         set(gcf,'PaperSize',[Paper_Width Paper_Height]);
         set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
         display(['Printing plot ',num2str(i),'...'])
-        print(gcf,'-dpdf','../Suo_anttila_effective_FDS2')
+        %print(gcf,'-dpdf','../Suo_anttila_effective_FDS2','Resolution',900)
 
-%exportfig(gcf,'Suo_anttila_effective_FDS2.png','Renderer','painters', 'width',14,'height',12 ,'fontsize',1.2,...
-%            'Color','bw','Format','png','Resolution',900);
+exportfig(gcf,'../Suo_anttila_effective_FDS2.pdf','Renderer','painters', 'width',6.5,'height',5 ,'fontsize',1.2,...
+            'Color','CMYK','Format','pdf','Resolution',900);
 
 function mse=targetfun(kappa,expx,expy,qin)
         [q,X] = irad_twoflux(max(expx),qin,kappa,20,20);

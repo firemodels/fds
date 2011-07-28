@@ -102,10 +102,10 @@ axis([0 5 0 2000]);
         set(gcf,'PaperSize',[Paper_Width Paper_Height]);
         set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
         display(['Printing plot ',num2str(j),'...'])
-        print(gcf,'-dpdf','../KAPPA_PATH_LENGTH')
+%        print(gcf,'-dpdf','../KAPPA_PATH_LENGTH')
 
-%exportfig(gcf,'KAPPA_VS_PATH_LENGTH.png','Renderer','painters', 'width',14,'height',12 ,'fontsize',1.2,...
-%            'Color','bw','Format','png','Resolution',900);
+exportfig(gcf,'../KAPPA_VS_PATH_LENGTH.pdf','Renderer','painters', 'width',6.5,'height',5 ,'fontsize',1.2,...
+            'Color','CMYK','Format','pdf','Resolution',900);
         
 clear i
 Temp=linspace(800,1500,length(x));
@@ -164,8 +164,8 @@ legend({'Toluene','Methanol','Water','Benzene','Diesel'},'FontSize',14,'FontName
         set(gcf,'PaperSize',[Paper_Width Paper_Height]);
         set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
         display(['Printing plot ',num2str(i),'...'])
-        print(gcf,'-dpdf','../KAPPA_TEMP')
-%exportfig(gcf,'KAPPA_VS_TEMP.png','Renderer','painters', 'width',14,'height',12 ,'fontsize',1.2,...
-%            'Color','bw','Format','png','Resolution',900);
+        %print(gcf,'-dpdf','../KAPPA_TEMP')
+exportfig(gcf,'../KAPPA_VS_TEMP.pdf','Renderer','painters', 'width',6.5,'height',4.8 ,'fontsize',1.2,...
+            'Color','CMYK','Format','pdf','Resolution',900);
         
 end
