@@ -127,7 +127,7 @@ legend({'Jp-8','EthTol','Ethanol','Toluene(Suo-Anttila et al.)','Toluene (Keefe 
         set(gcf,'PaperSize',[Paper_Width Paper_Height]);
         set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
         display(['Printing plot ',num2str(i),'...'])
-        print(gcf,'-dpdf',['Plots','Suo_anttila_effective_FDS1'])
+        print(gcf,'-dpdf','../Suo_anttila_effective_FDS1')
 
 
 
@@ -150,7 +150,7 @@ legend('SouthEast',{'Methanol','Water','Benzene','Diesel'},'FontName',Font_Name)
         set(gcf,'PaperSize',[Paper_Width Paper_Height]);
         set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
         display(['Printing plot ',num2str(i),'...'])
-        print(gcf,'-dpdf',['Plots','Suo_anttila_effective_FDS2'])
+        print(gcf,'-dpdf','../Suo_anttila_effective_FDS2')
 
 %exportfig(gcf,'Suo_anttila_effective_FDS2.png','Renderer','painters', 'width',14,'height',12 ,'fontsize',1.2,...
 %            'Color','bw','Format','png','Resolution',900);
