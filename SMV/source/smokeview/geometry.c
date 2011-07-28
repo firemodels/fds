@@ -401,8 +401,6 @@ void getvolsmokedir(float *mm){
     }
     qsort((volfacelistdata *)volfacelistinfoptrs,nvolfacelistinfo,sizeof(volfacelistdata *),compare_volfacelistdata);
   }
-  printf("sorted vr's\n");//xyz
-
 }
 
 /* ------------------ getsmokedir ------------------------ */

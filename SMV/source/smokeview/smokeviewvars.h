@@ -890,7 +890,6 @@ SVEXTERN int glui_avatar_index;
 SVEXTERN sv_object *avatar_defs_backup[2];
 SVEXTERN int device_sphere_segments;
 SVEXTERN int ntexturestack;
-SVEXTERN float SVDECL(*smokedataptr_save,NULL);//xyz
 
 SVEXTERN float tourrad_avatar;
 SVEXTERN int dirtycircletour;
