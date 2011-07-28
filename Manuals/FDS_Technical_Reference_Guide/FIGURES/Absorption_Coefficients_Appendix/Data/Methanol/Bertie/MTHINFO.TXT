@@ -1,0 +1,15 @@
+CH3OH files are MTH?93.SPC as reported in J.E.Bertie, S.L.Zhang, H.H.Eysel, S.Baluja 			and M.K.Ahmed, Applied Spectroscopy 47, 1100 - 1114 (1993)
+CH3OD files are MD1?93.SPC as reported in J. E. Bertie and S. L. Zhang, Applied 			Spectroscopy 48, 176 - 189 (1994) 
+CD3OH files are MD3?93.SPC as reported in J. E. Bertie and S. L. Zhang, J. Chem. 			Phys. 101, 8364 - 8379  (1994).
+CD3OD files are MD4?.SPC as reported in  J. E. Bertie and S. L. Zhang, J. Chem. 			Phys. 101, 8364 - 8379  (1994).
+where ? is 
+N for real refractive index, 
+K for imaginary refractive index
+DC is for real dielectric constant
+DL is for imaginary dielectric constant (i.e. dielectric loss)
+EM for (decadic) molar absorption coefficient
+            i.e. molar absorptivity in the units 10^5 cm^2 /mole
+These values of Em can be multiplied by 100 to convert them to the units L/(mole-cm)
+
+John Bertie
+4 May 1998

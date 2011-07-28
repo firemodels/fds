@@ -1,0 +1,3 @@
+These spectra of water were reported in Applied Spectroscopy 50, 1047 1996.
+The n and k files contain the spectra of the real and imaginary refractive index, respectively.
+DC, DL and Em files contain the real dielectric constant, imaginary dielectric constant or dielectric loss, and (decadic) molar absorption coefficient or molar absorptivity or Beer-Lambert absorption coefficient (units L /mole-cm), respectively
