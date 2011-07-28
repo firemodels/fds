@@ -1342,6 +1342,7 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
   returncode=fseek(SLICEFILE,skip,SEEK_SET); // skip from beginning of file
 
   FORTSLICEREAD(&time,1);
+  if(times!=NULL&&times[itimes]>time)restart_time=1;
   if(*first==1){
     *first=0;
     printf("time=%.2f %s: ",time,meshlabel);

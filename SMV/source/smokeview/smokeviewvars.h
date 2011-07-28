@@ -1018,6 +1018,7 @@ SVEXTERN int buffertype;
 SVEXTERN int benchmark;
 SVEXTERN int opengldefined;
 SVEXTERN float bench_starttime,bench_stoptime;
+SVEXTERN int SVDECL(restart_time,0);
 SVEXTERN int nslicetypes;
 SVEXTERN int nvslicetypes;
 SVEXTERN int nisotypes;
