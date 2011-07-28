@@ -824,8 +824,7 @@ Absorption coefficient measures attenuation of radiation in matter.  Intensity o
 \label{eqn_beerslaw}
 \ I_{S,\lambda} = I_{0,\lambda} exp\left( -\kappa_\lambda S \right) \,\mbox{,}
 \end{equation}
-
-where $\kappa_{\lambda} \mbox{ }(m^{-1})$ is the absorption coefficient for wavelength $\lambda \mbox{ } (m)$.  Absorption coefficient can be determined from experiment by measuring the transmittance $\tau_{S}=\frac{I_{S,\lambda}}{I_{0,\lambda}}$ for a path length $S$:
+where $\kappa_{\lambda}$ (m$^{-1}$) is the absorption coefficient for wavelength $\lambda$ (m).  Absorption coefficient can be determined from experiment by measuring the transmittance $\tau_{S}=\frac{I_{S,\lambda}}{I_{0,\lambda}}$ for a path length $S$:
 
 \begin{equation}
 \label{eqn_klambda}
@@ -902,20 +901,20 @@ Figure \ref{fig_trans2} and Figure \ref{fig_trans3} show the transmitted fractio
 The two-flux model of radiation transport predicts the attenuation of radiation well for toluene and methanol, both of which have rather low absorption coefficients. In the other extreme, the attenuation of radiation by water and ethanol is poorly replicated. Here only the exponential attenuation near the surface is reasonably replicated. 
 
 \begin{table}[ht]
-\caption{Effective absorption coefficients for selected liquids. Blackbody temperature 1450 K and path length 3 mm. Data from Suo-Anttila et al. 2009 \cite{Suo-Anttila:PCT2009}.}
+\caption{Characterization of data sources used for determining absorption coefficients and effective absorption coefficients for selected liquids. Blackbody temperature 1450 K and path length 3 mm. Data from Suo-Anttila et al. 2009 \cite{Suo-Anttila:PCT2009}.}
 \centering
-\begin{tabular}{l r}
+\begin{tabular}{l r r}
 \hline\hline
-Liquid & Effective Absorption Coefficient,$\kappa$ \\ [0.5ex]
+Liquid & Wavenumber Range (cm$^{-1}$) & Effective Absorption Coefficient,$\kappa$ \\ [0.5ex]
 \hline
-JP-8                                 & 301.4\\
-Ethanol-Toluene blend                & 680.1\\
-Ethanol                              & 1534.3 \\
-Toluene \cite{Suo-Anttila:PCT2009}   & 187.5 \\
-Toluene \cite{Bertie:AS1994a}        & 160.8 \\
-Methanol                             & 52 \\
-Water                                & 1578 \\
-Benzene                              & 123 \\ 
+JP-8                                 &  -          & 301.4   \\
+Ethanol-Toluene blend                &  -          & 680.1   \\
+Ethanol                              &  -          & 1534.3  \\
+Toluene \cite{Suo-Anttila:PCT2009}   &  -          & 187.5   \\
+Toluene \cite{Bertie:AS1994a}        &  436-6500   & 160.8   \\
+Methanol                             &  2-8000     & 52      \\
+Water                                &  xxxx-xxxx  & 1578    \\
+Benzene                              &  xxxx-xxxx  & 123     \\ 
 \hline
 \end{tabular}
 \label{tbl_abscoeff}
