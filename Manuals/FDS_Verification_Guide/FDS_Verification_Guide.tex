@@ -2695,11 +2695,11 @@ There are no known solutions of the drag equations in higher dimensions. However
 To ensure that the flat fire assumption is valid, the following ICs are used: $x(0) = 0$, $\dot{x}(0) = u(0) = V_0$, $y(0) = h$, $\dot{y}(0) = v(0) = 0$. The exact solution to this system is below.
 \be
 	x = \frac{\text{log}(V_0 K t + 1)}{K} \quad ; \quad
-	y = h + \frac{g \text{log}(V_0 K t + 1)}{2 (K V_0)^2} - \frac{g t^2}{4} - \frac{g t}{2 K V_0} \quad ; \quad
+	y = h + \frac{g \text{log}(V_0 K t + 1)}{2 (V_0 K)^2} - \frac{g t^2}{4} - \frac{g t}{2 V_0 K} \quad ; \quad
 	K \equiv \frac{3 \rho_a C_d}{4 \rho_d D_d}
 \ee
 \be
-	u = \frac{d x}{d t} = \frac{V_0}{V_0 K t + 1} \quad ; \quad v = \frac{d y}{d t} = \frac{g}{2 K V_0 (K V_0 t + 1)} - \frac{g t}{2} - \frac{g}{2 K V_0}
+	u = \frac{d x}{d t} = \frac{V_0}{V_0 K t + 1} \quad ; \quad v = \frac{d y}{d t} = \frac{g}{2 V_0 K (V_0 K t + 1)} - \frac{g t}{2} - \frac{g}{2 V_0 K}
 \ee
 The following case was run in FDS and compared against the approximate solution:
 \begin{center}
