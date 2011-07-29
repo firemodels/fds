@@ -64,6 +64,8 @@ void update_alpha(void);
 GLUI_Listbox *LISTBOX_smoke_colorbar=NULL;
 #ifdef pp_CULL
 GLUI_Spinner *SPINNER_cull_portsize=NULL;
+GLUI_Spinner *SPINNER_temperature_cutoff=NULL;
+GLUI_Spinner *SPINNER_opacity_factor=NULL;
 GLUI_Checkbox *CHECKBOX_show_cullports=NULL;
 GLUI_Checkbox *CHECKBOX_usevolrender=NULL;
 #endif
@@ -265,6 +267,11 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Compress data"),&compress_volsmoke);
     glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Load data in background"),&use_multi_threading);
     glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Load data only at render times"),&load_at_rendertimes);
+    glui_3dsmoke->add_checkbox_to_panel(panel_volume,"b/w",&volbw);
+    SPINNER_temperature_cutoff=glui_3dsmoke->add_spinner_to_panel(panel_volume,_("Temperature cutoff"),GLUI_SPINNER_FLOAT,&temperature_cutoff);
+    SPINNER_temperature_cutoff->set_float_limits(100.0,1199.0);
+    SPINNER_opacity_factor=glui_3dsmoke->add_spinner_to_panel(panel_volume,_("Soot density factor"),GLUI_SPINNER_FLOAT,&opacity_factor);
+    SPINNER_opacity_factor->set_float_limits(1.0,10.0);
 #ifdef _DEBUG
     glui_3dsmoke->add_checkbox_to_panel(panel_volume,"block smoke",&block_volsmoke);
     glui_3dsmoke->add_checkbox_to_panel(panel_volume,"debug",&smoke3dVoldebug);

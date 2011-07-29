@@ -99,6 +99,7 @@ SVEXTERN int GPUzone_zlay;
 SVEXTERN int GPUzone_odl, GPUzone_odu;
 
 SVEXTERN int GPUvol_inside, GPUvol_dir, GPUvol_eyepos, GPUvol_xyzmaxdiff, GPUvol_soot_density, GPUvol_fire;
+SVEXTERN int GPUvol_opacity_factor,GPUvol_temperature_cutoff,GPUvol_volbw;
 SVEXTERN int GPUvol_boxmin, GPUvol_boxmax, GPUvol_smokecolormap, GPUvol_dcell, GPUvol_havefire;
 #ifdef pp_GPUDEPTH
 SVEXTERN int GPUvol_depthtexture, GPUvol_screensize,GPUvol_nearfar;
@@ -890,6 +891,8 @@ SVEXTERN sv_object *avatar_defs_backup[2];
 SVEXTERN int device_sphere_segments;
 SVEXTERN int ntexturestack;
 
+SVEXTERN float SVDECL(opacity_factor,3.0),SVDECL(temperature_cutoff,700.0);
+SVEXTERN int SVDECL(volbw,0);
 SVEXTERN float tourrad_avatar;
 SVEXTERN int dirtycircletour;
 SVEXTERN float *tour_t, *tour_t2, *tour_dist, *tour_dist2, *tour_dist3;

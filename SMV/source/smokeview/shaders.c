@@ -176,8 +176,8 @@ int setVolSmokeShaders() {
     "uniform vec2 nearfar;"
 #endif
     "uniform sampler3D soot_density_texture,fire_texture;"
-    "uniform int dir,inside,havefire;"
-    "uniform float xyzmaxdiff,dcell;"
+    "uniform int dir,inside,havefire,volbw;"
+    "uniform float xyzmaxdiff,dcell,opacity_factor,temperature_cutoff;"
     "uniform vec3 eyepos,boxmin, boxmax;"
     "varying vec3 fragpos;"
     
@@ -204,7 +204,7 @@ int setVolSmokeShaders() {
     "  vec3 dalphamin,dalphamax,fragmaxpos,posi;"
     "  vec3 pt_soot, pt_color,cum_color;"
     "  float opacity,alpha_min,factor,pathdist,k;"
-    "  float colorindex;"
+    "  float colorindex,tempval,gray;"
     "  float tauhat, alphahat, taui, tauterm;"
     "  float dstep;"
     "  int i,n_iter;"
@@ -236,9 +236,16 @@ int setVolSmokeShaders() {
     "    pt_soot = texture3D(soot_density_texture,posi);"
     "    if(havefire==1){"
     "      colorindex = texture3D(fire_texture,posi)/1200.0;" 
+    "      tempval = 20.0 + (1200.0-20.0)*colorindex;"
+    "      if(tempval>temperature_cutoff){"
+    "        colorindex = 0.5+0.5*(tempval-temperature_cutoff)/(1200.0-temperature_cutoff);"
+    "      }"
+    "      else{"
+    "        colorindex = 0.5*tempval/temperature_cutoff;"
+    "      }"
     "      pt_color = texture1D(smokecolormap,colorindex).rgb;"
     "      if(colorindex>0.5){"
-    "        pt_soot *= 3.0;"
+    "        pt_soot *= opacity_factor;"
     "      };"
     "    }"
     "    else{"
@@ -251,6 +258,10 @@ int setVolSmokeShaders() {
     "    tauhat *= taui;"
     "  }"
     "  cum_color /= alphahat;"
+    "  if(volbw==1){"
+    "    gray=0.299*cum_color.r + 0.587*cum_color.g + 0.114*cum_color.b;"
+    "    cum_color=vec3(gray,gray,gray);"
+    "  }"
 #ifdef pp_GPUDEPTH
     "  d = LinearizeDepth(uv);"
     "  gl_FragColor = vec4(d,d,d,1.0);"
@@ -322,6 +333,9 @@ int setVolSmokeShaders() {
 #endif
   GPUvol_dcell = glGetUniformLocation(p_volsmoke,"dcell");
   GPUvol_xyzmaxdiff = glGetUniformLocation(p_volsmoke,"xyzmaxdiff");
+  GPUvol_opacity_factor = glGetUniformLocation(p_volsmoke,"opacity_factor");
+  GPUvol_volbw = glGetUniformLocation(p_volsmoke,"volbw");
+  GPUvol_temperature_cutoff = glGetUniformLocation(p_volsmoke,"temperature_cutoff");
   GPUvol_boxmin = glGetUniformLocation(p_volsmoke,"boxmin");
   GPUvol_boxmax = glGetUniformLocation(p_volsmoke,"boxmax");
   GPUvol_soot_density = glGetUniformLocation(p_volsmoke,"soot_density_texture");
