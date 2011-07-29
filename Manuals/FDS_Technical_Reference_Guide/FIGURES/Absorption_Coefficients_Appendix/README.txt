@@ -5,4 +5,4 @@ To modify the plots KAPPA_TEMP.pdf and KAPPA_PATH_LENGTH.pdf in Manuals/FDS_Tech
 use the Matlab script effmeans.m
 
 To modify the plot Absorption_spectra.pdf in Manuals/FDS_Technical_Reference_Guide/FIGURES, 
-use the Matlab script abscoeffs.m
+use the Matlab script plotspectra.m
