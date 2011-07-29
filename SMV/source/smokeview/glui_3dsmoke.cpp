@@ -69,6 +69,9 @@ GLUI_Spinner *SPINNER_opacity_factor=NULL;
 GLUI_Checkbox *CHECKBOX_show_cullports=NULL;
 GLUI_Checkbox *CHECKBOX_usevolrender=NULL;
 #endif
+#ifdef pp_MOUSEDOWN
+GLUI_Checkbox *CHECKBOX_hide_volsmoke=NULL;
+#endif
 GLUI_Checkbox *CHECKBOX_use_firesmokemap=NULL;
 GLUI_Checkbox *CHECKBOX_smokecullflag=NULL;
 GLUI *glui_3dsmoke=NULL;
@@ -268,6 +271,9 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Load data in background"),&use_multi_threading);
     glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Load data only at render times"),&load_at_rendertimes);
     glui_3dsmoke->add_checkbox_to_panel(panel_volume,"b/w",&volbw);
+#ifdef pp_MOUSEDOWN
+    glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Hide volsmoke while moving"),&hide_volsmoke);
+#endif
     SPINNER_temperature_cutoff=glui_3dsmoke->add_spinner_to_panel(panel_volume,_("Temperature cutoff"),GLUI_SPINNER_FLOAT,&temperature_cutoff);
     SPINNER_temperature_cutoff->set_float_limits(100.0,1199.0);
     SPINNER_opacity_factor=glui_3dsmoke->add_spinner_to_panel(panel_volume,_("Soot density factor"),GLUI_SPINNER_FLOAT,&opacity_factor);

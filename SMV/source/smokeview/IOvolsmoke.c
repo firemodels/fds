@@ -970,7 +970,7 @@ void drawsmoke3dGPUVOL(void){
   int ii;
 
 #ifdef pp_MOUSEDOWN  
-  if(mouse_down==1){
+  if(mouse_down==1&&hide_volsmoke==1){
     return;
   }
 #endif

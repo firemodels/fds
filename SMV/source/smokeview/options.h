@@ -29,6 +29,7 @@
 
 //#define pp_HIDEMULTI
 //#define pp_GEOMPRINT
+#define pp_MOUSEDOWN
 #define pp_GPU
 #define pp_CULL
 #define pp_LIGHT
