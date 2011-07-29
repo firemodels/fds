@@ -13,5 +13,8 @@ export BASEDIR=`pwd`
 
 scripts/SMV_Cases.sh
 
+cd $SVNROOT/Verification/Visualization
+./Run_vis.sh
+
 echo FDS cases submitted
 
