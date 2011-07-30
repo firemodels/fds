@@ -1,0 +1,13 @@
+RENDERDIR
+ frames
+LOADVOLSMOKE
+ -1
+RENDERALL
+ 1
+vis_test2_volsmoke
+SETTIMEVAL
+ 5.0
+RENDERONCE
+ vis_test2_volsmoke_20
+UNLOADALL
+EXIT
