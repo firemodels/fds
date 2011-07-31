@@ -1378,7 +1378,7 @@ void RenderMenu(int value){
       keyboard('t',0,0);
     }
     RenderState(1);
-    itimes=0;
+    reset_itimes0();
     for(i=0;i<nsliceinfo;i++){
       sd=sliceinfo+i;
       sd->islice=0;

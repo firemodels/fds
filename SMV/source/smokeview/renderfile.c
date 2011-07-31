@@ -10,6 +10,7 @@
 #include <sys/stat.h>
 #include "smokeviewvars.h"
 #include "translate.h"
+#include "IOvolsmoke.h"
 
 #ifdef pp_OSX
 #include <GLUT/glut.h>
@@ -34,6 +35,22 @@ char renderfile_revision[]="$Revision$";
 /* ------------------ Render ------------------------ */
 
 void Render(int view_mode){
+  int i;
+
+  if(current_script_command!=NULL&&current_script_command->command==SCRIPT_VOLSMOKERENDERALL){
+    if( (render_frame[itimes]>0&&showstereo==0)||(render_frame[itimes]>1&&showstereo!=0) ){
+      if(itimes==0){
+        current_script_command->remove_frame=itimes;
+        current_script_command->exit=1;
+        stept=0;
+        return;
+      }
+    }
+    render_frame[itimes]++;
+    if( (render_frame[itimes]>0&&showstereo==0)||(render_frame[itimes]>1&&showstereo!=0) ){
+      current_script_command->remove_frame=itimes;
+    }
+  }
   if(RenderOnceNow==0&&RenderGif !=0
     &&render_double==0
     ){
@@ -108,7 +125,10 @@ void RenderFrame(int view_mode){
   }
   else{
     if(
-      (current_script_command->command==SCRIPT_RENDERONCE||current_script_command->command==SCRIPT_RENDERALL)&&
+      (current_script_command->command==SCRIPT_RENDERONCE||
+       current_script_command->command==SCRIPT_RENDERALL||
+       current_script_command->command==SCRIPT_VOLSMOKERENDERALL
+       )&&
        current_script_command->cval!=NULL
        ){
         strcpy(renderfile_name,current_script_command->cval);
@@ -140,7 +160,10 @@ void RenderFrame(int view_mode){
 
   // filename suffix
 
-  if(use_scriptfile==0||(current_script_command!=NULL&&current_script_command->command==SCRIPT_RENDERALL)){
+  if(use_scriptfile==0||
+    (current_script_command!=NULL&&
+    (current_script_command->command==SCRIPT_RENDERALL||
+     current_script_command->command==SCRIPT_VOLSMOKERENDERALL))){
     int image_num;
     char suffix[20];
 

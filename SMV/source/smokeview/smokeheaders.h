@@ -59,6 +59,7 @@ EXTERNCPP void update_glui_set_view_xyz(float *xyz);
 EXTERNCPP void update_colorbar_list(void);
 EXTERNCPP void update_colorbar_list2(void);
 
+EXTERNCPP void script_loadvolsmokeframe2(void);
 EXTERNCPP void update_glui_plot3dtype(void);
 EXTERNCPP void update_glui_isotype(void);
 EXTERNCPP void init_device(device *devicei, float *xyz, float *xyzn, int state0,int nparams, float *params, char *labelptr);

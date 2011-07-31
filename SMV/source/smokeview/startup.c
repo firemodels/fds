@@ -1084,8 +1084,6 @@ void initvars1(void){
   show_bothsides_ext=0;
   show_slice_in_obst=0;
   skip_slice_in_embedded_mesh=0;
-  script_render_flag=0;
-  script_itime=0;
   offset_slice=0;
   updategluiview=1;
   trainer_pause=0;

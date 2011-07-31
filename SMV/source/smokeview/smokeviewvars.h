@@ -61,7 +61,7 @@ SVEXTERN int select_device, selected_device_tag;
 SVEXTERN float selected_avatar_pos[3], selected_avatar_angle;
 SVEXTERN unsigned char select_device_color[4], *select_device_color_ptr;
 SVEXTERN float *avatar_colors;
-SVEXTERN int script_render_flag, script_itime;
+SVEXTERN int SVDECL(script_render_flag,0), SVDECL(script_itime,0);
 
 SVEXTERN int show_slice_in_obst, offset_slice;
 SVEXTERN int skip_slice_in_embedded_mesh;
@@ -457,7 +457,7 @@ SVEXTERN int nlabels,visLabels,nlabelssmv;
 SVEXTERN int ntarginfo;
 SVEXTERN int showallslicevectors;
 SVEXTERN float framerate;
-SVEXTERN int ntimes, itimes, itime_save, itimeold, seqnum,RenderTime,RenderTimeOld;
+SVEXTERN int ntimes, SVDECL(ntimes_old,0), itimes, itime_save, itimeold, seqnum,RenderTime,RenderTimeOld;
 SVEXTERN int npqq, nopart;
 SVEXTERN int uindex, vindex, windex;
 

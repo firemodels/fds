@@ -1408,6 +1408,27 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
 
 /* ------------------ unload_volsmoke_allframes ------------------------ */
 
+void unload_volsmoke_frame_allmeshes(int framenum){
+  int i;
+
+  printf("Unloading smoke frame: %i\n",framenum);
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    volrenderdata *vr;
+
+    meshi = meshinfo + i;
+    vr = &meshi->volrenderinfo;
+    if(vr->smoke==NULL||vr->fire==NULL)continue;
+    if(vr->loaded==0)continue;
+    FREEMEMORY(vr->firedataptrs[framenum]);
+    FREEMEMORY(vr->smokedataptrs[framenum]);
+//    vr->loaded=0;
+//    vr->display=0;
+  }
+}
+
+/* ------------------ unload_volsmoke_allframes ------------------------ */
+
 void unload_volsmoke_allframes(volrenderdata *vr){
   int i;
 

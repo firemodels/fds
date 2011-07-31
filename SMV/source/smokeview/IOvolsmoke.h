@@ -6,6 +6,7 @@
 void init_volsmoke_texture(mesh *meshi);
 void update_volsmoke_texture(mesh *meshi, float *smokedata, float *firedata);
 #endif
+void unload_volsmoke_frame_allmeshes(int framenum);
 void compute_all_smokecolors(void);
 void drawsmoke3dGPUVOL(void);
 void drawsmoke3dVOL(void);

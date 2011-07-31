@@ -50,6 +50,10 @@ void glui_script_disable(void);
 //  skip (int)
 // file name base (char) (or blank to use smokeview default)
 
+// VOLSMOKERENDERALL 
+//  skip (int)
+// file name base (char) (or blank to use smokeview default)
+
 // ---------- loading, unloading files -----------
 //
 //  Use LOADFILE to load a particular file.  Smokeview will figure
@@ -372,6 +376,10 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
+    if(match_upper(buffer,"VOLSMOKERENDERALL",17) == 1){
+      nscriptinfo++;
+      continue;
+    }
     if(match_upper(buffer,"LOADFILE",8) == 1){
       nscriptinfo++;
       continue;
@@ -553,6 +561,31 @@ int compile_script(char *scriptfile){
       sscanf(buffer,"%i",&scripti->ival);
       if(scripti->ival<1)scripti->ival=1;
       if(scripti->ival>20)scripti->ival=20;
+
+      if(fgets(buffer2,255,stream)==NULL)break;
+      cleanbuffer(buffer,buffer2);
+      len = strlen(buffer);
+      if(len>0){
+        NewMemory((void **)&scripti->cval,len+1);
+        strcpy(scripti->cval,buffer);
+      }
+
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"VOLSMOKERENDERALL",17) == 1){
+      int len;
+
+      scripti = scriptinfo + nscriptinfo;
+      init_scripti(scripti,SCRIPT_VOLSMOKERENDERALL);
+      if(fgets(buffer2,255,stream)==NULL)break;
+      cleanbuffer(buffer,buffer2);
+      sscanf(buffer,"%i",&scripti->ival);
+      if(scripti->ival<1)scripti->ival=1;
+      if(scripti->ival>20)scripti->ival=20;
+      scripti->exit=0;
+      scripti->first=1;
+      scripti->remove_frame=-1;
 
       if(fgets(buffer2,255,stream)==NULL)break;
       cleanbuffer(buffer,buffer2);
@@ -876,6 +909,18 @@ void script_renderall(scriptdata *scripti){
   RenderMenu(skip);
 }
 
+/* ------------------ run_volsmokerenderall ------------------------ */
+
+void script_volsmokerenderall(scriptdata *scripti){
+  int skip;
+
+  script_loadvolsmokeframe2();
+  skip=scripti->ival;
+  if(skip<1)skip=1;
+  printf("Script: Rendering every %i frames\n",skip);
+  RenderMenu(skip);
+}
+
 /* ------------------ script_loadparticles ------------------------ */
 
 void script_loadparticles(scriptdata *scripti){
@@ -953,25 +998,47 @@ void script_loadvolsmokeframe(scriptdata *scripti){
   volrenderdata *vr;
   mesh *meshi;
   int first=1;
+  int i;
 
   index = scripti->ival;
-  if(index<0)index=0;
-  if(index>nmeshes-1)index=nmeshes-1;
-  meshi = meshinfo + index;
-  vr = &meshi->volrenderinfo;
   framenum = scripti->ival2;
-  read_volsmoke_frame(vr,framenum,&first);
-  if(vr->times_defined==0){
-    vr->times_defined=1;
-    get_volsmoke_all_times(vr);
+  if(index>nmeshes-1)index=nmeshes-1;
+  for(i=0;i<nmeshes;i++){
+    if(index==i||index<0){
+      meshi = meshinfo + i;
+      vr = &meshi->volrenderinfo;
+      read_volsmoke_frame(vr,framenum,&first);
+      if(vr->times_defined==0){
+        vr->times_defined=1;
+        get_volsmoke_all_times(vr);
+      }
+      vr->loaded=1;
+      vr->display=1;
+    }
   }
-  vr->loaded=1;
-  vr->display=1;
   plotstate=getplotstate(DYNAMIC_PLOTS);
   stept=1;
   updatetimes();
   force_redisplay=1;
+  update_framenumber(framenum);
+  i = framenum;
+  itimes=i;
+  script_itime=i;
+  stept=1;
+  force_redisplay=1;
   update_framenumber(0);
+  UpdateTimeLabels();
+  keyboard('r',0,0);
+}
+
+/* ------------------ script_loadvolsmokeframe2 ------------------------ */
+
+void script_loadvolsmokeframe2(void){
+  scriptdata scripti;
+
+  scripti.ival=-1;
+  scripti.ival2=itimes;
+  script_loadvolsmokeframe(&scripti);
 }
 
 /* ------------------ script_load3dsmoke ------------------------ */
@@ -1513,6 +1580,9 @@ int run_script(void){
     case SCRIPT_RENDERALL:
       script_renderall(scripti);
       break;
+    case SCRIPT_VOLSMOKERENDERALL:
+      script_volsmokerenderall(scripti);
+      break;
     case SCRIPT_LOADFILE:
       script_loadfile(scripti);
       break;
@@ -1559,6 +1629,7 @@ int run_script(void){
       break;
     case SCRIPT_LOADVOLSMOKEFRAME:
       script_loadvolsmokeframe(scripti);
+      returnval=1;
       break;
     case SCRIPT_LOADPARTICLES:
       script_loadparticles(scripti);

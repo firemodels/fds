@@ -78,6 +78,7 @@ typedef struct {
   int ival,ival2,ival3,ival4,ival5;
   char *cval;
   float fval;
+  int exit,first,remove_frame;
 } scriptdata;
 
 /* --------------------------  treedata ------------------------------------ */

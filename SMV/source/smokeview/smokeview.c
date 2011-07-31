@@ -1117,7 +1117,9 @@ void checktimebound(void){
   particle *parti;
 
   if(timedrag==0&&itimes>ntimes-1||timedrag==1&&itimes<0){
-    izone=0;itimes=0;iframe=iframebeg;
+    izone=0;
+    itimes=0;
+    iframe=iframebeg;
     for(i=0;i<nsliceinfo;i++){
       sd=sliceinfo+i;
       sd->islice=0;
@@ -1133,7 +1135,8 @@ void checktimebound(void){
     }
   }
   if(timedrag==0&&itimes<0||timedrag==1&&itimes>ntimes-1){
-    izone=nzonet-1;itimes=ntimes-1;
+    izone=nzonet-1;
+    itimes=ntimes-1;
     for(i=0;i<npartinfo;i++){
       parti=partinfo+i;
       parti->iframe=parti->nframes-1;

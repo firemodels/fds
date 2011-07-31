@@ -20,6 +20,7 @@
 #include "MALLOC.h"
 #include "smokeviewvars.h"
 #include "update.h"
+#include "IOvolsmoke.h"
 
 #define KEY_ALT 0
 #define KEY_CTRL 1
@@ -1917,6 +1918,16 @@ void Display(void){
   }
   script_render_flag=0;
   if(nscriptinfo>0&&current_script_command!=NULL){
+    if(current_script_command->command==SCRIPT_VOLSMOKERENDERALL){\
+      if(current_script_command->exit==0){
+        RenderState(1);
+      }
+      else{
+        RenderState(0);
+        current_script_command->first=1;
+        current_script_command->exit=0;
+      }
+    }
     if(RenderGif==0){  // don't advance command if Smokeview is executing a RENDERALL command
       current_script_command++;
       script_render_flag=run_script();
@@ -1925,6 +1936,18 @@ void Display(void){
       }
       if(current_script_command==NULL){
         glui_script_enable();
+      }
+    }
+    else{
+      if(current_script_command->command==SCRIPT_VOLSMOKERENDERALL){
+        int remove_frame;
+  
+        script_loadvolsmokeframe2();
+        remove_frame=current_script_command->remove_frame;
+        if(remove_frame>=0){
+          unload_volsmoke_frame_allmeshes(remove_frame);
+        }
+        glutPostRedisplay();
       }
     }
     glutPostRedisplay();
@@ -2303,7 +2326,7 @@ void Idle(void){
       }
 #ifdef pp_SHOOTER
       if(shooter_firstframe==1&&visShooter!=0&&shooter_active==1){
-        itimes=0;
+        reset_itimes0();
       }
 #endif
       checktimebound();

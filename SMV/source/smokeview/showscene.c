@@ -51,7 +51,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
   if(restart_time==1){
     restart_time=0;
-    itimes=0;
+    reset_itimes0();
   }
   if(loadfiles_at_startup&&update_load_startup==1){
     load_startup_smoke();

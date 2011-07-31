@@ -1161,140 +1161,154 @@ void updatetimes(void){
     }
   }
   ntimes=ntimes2;
-  FREEMEMORY(render_frame);
+  if(ntimes>ntimes_old){
+    ntimes_old=ntimes;
+    FREEMEMORY(render_frame);
     if(ntimes>0)NewMemory((void **)&render_frame,ntimes*sizeof(int));
-    for(i=0;i<npartinfo;i++){
-      parti=partinfo+i;
-      FREEMEMORY(parti->ptimeslist);
-      if(ntimes>0)NewMemory((void **)&parti->ptimeslist,ntimes*sizeof(int));
+  }
+  for(i=0;i<npartinfo;i++){
+    parti=partinfo+i;
+    FREEMEMORY(parti->ptimeslist);
+    if(ntimes>0)NewMemory((void **)&parti->ptimeslist,ntimes*sizeof(int));
+  }
+  for(i=0;i<ntours;i++){
+    touri=tourinfo + i;
+    if(touri->display==0)continue;
+    FREEMEMORY(touri->path_timeslist);
+    if(ntimes>0)NewMemory((void **)&touri->path_timeslist,ntimes*sizeof(int));
+  }
+  if(visTerrainType!=4){
+    for(i=0;i<nterraininfo;i++){
+      terraindata *terri;
+
+      terri = terraininfo + i;
+      if(terri->loaded==0)continue;
+      FREEMEMORY(terri->timeslist);
+      if(ntimes>0)NewMemory((void **)&terri->timeslist,ntimes*sizeof(int));
     }
-    for(i=0;i<ntours;i++){
-      touri=tourinfo + i;
-      if(touri->display==0)continue;
-      FREEMEMORY(touri->path_timeslist);
-      if(ntimes>0)NewMemory((void **)&touri->path_timeslist,ntimes*sizeof(int));
-    }
-    if(visTerrainType!=4){
-      for(i=0;i<nterraininfo;i++){
-        terraindata *terri;
+  }
+  if(hrrinfo!=NULL){
+    FREEMEMORY(hrrinfo->timeslist);
+    FREEMEMORY(hrrinfo->times);
+    FREEMEMORY(hrrinfo->hrrval);
+    if(hrrinfo->loaded==1&&hrrinfo->display==1&&ntimes>0){
+      int jstart=0;
 
-        terri = terraininfo + i;
-        if(terri->loaded==0)continue;
-        FREEMEMORY(terri->timeslist);
-        if(ntimes>0)NewMemory((void **)&terri->timeslist,ntimes*sizeof(int));
-      }
-    }
-    if(hrrinfo!=NULL){
-      FREEMEMORY(hrrinfo->timeslist);
-      FREEMEMORY(hrrinfo->times);
-      FREEMEMORY(hrrinfo->hrrval);
-      if(hrrinfo->loaded==1&&hrrinfo->display==1&&ntimes>0){
-        int jstart=0;
+      NewMemory((void **)&hrrinfo->timeslist,ntimes*sizeof(int));
+      NewMemory((void **)&hrrinfo->times,ntimes*sizeof(float));
+      NewMemory((void **)&hrrinfo->hrrval,ntimes*sizeof(float));
+      hrrinfo->ntimes=ntimes;
+      for(i=0;i<ntimes;i++){
+        int j, foundit;
 
-        NewMemory((void **)&hrrinfo->timeslist,ntimes*sizeof(int));
-        NewMemory((void **)&hrrinfo->times,ntimes*sizeof(float));
-        NewMemory((void **)&hrrinfo->hrrval,ntimes*sizeof(float));
-        hrrinfo->ntimes=ntimes;
-        for(i=0;i<ntimes;i++){
-          int j, foundit;
+        foundit=0;
+        hrrinfo->times[i]=times[i];
+        for(j=jstart;j<hrrinfo->ntimes_csv-1;j++){
+          if(hrrinfo->times_csv[j]<=times[i]&&times[i]<hrrinfo->times_csv[j+1]){
+            float f1, tbot;
 
-          foundit=0;
-          hrrinfo->times[i]=times[i];
-          for(j=jstart;j<hrrinfo->ntimes_csv-1;j++){
-            if(hrrinfo->times_csv[j]<=times[i]&&times[i]<hrrinfo->times_csv[j+1]){
-              float f1, tbot;
-
-              foundit=1;
-              tbot = hrrinfo->times_csv[j+1]-hrrinfo->times_csv[j];
-              if(tbot>0.0){
-                f1 = (times[i]-hrrinfo->times_csv[j])/tbot;
-              }
-              else{
-                f1=0.0;
-              }
-              hrrinfo->hrrval[i]=(1.0-f1)*hrrinfo->hrrval_csv[j]+f1*hrrinfo->hrrval_csv[j+1];
-              jstart=j;
-              break;
+            foundit=1;
+            tbot = hrrinfo->times_csv[j+1]-hrrinfo->times_csv[j];
+            if(tbot>0.0){
+              f1 = (times[i]-hrrinfo->times_csv[j])/tbot;
             }
+            else{
+              f1=0.0;
+            }
+            hrrinfo->hrrval[i]=(1.0-f1)*hrrinfo->hrrval_csv[j]+f1*hrrinfo->hrrval_csv[j+1];
+            jstart=j;
+            break;
           }
-          if(foundit==0){
-            hrrinfo->hrrval[i]=hrrinfo->hrrval_csv[hrrinfo->ntimes_csv-1];
-          }
+        }
+        if(foundit==0){
+          hrrinfo->hrrval[i]=hrrinfo->hrrval_csv[hrrinfo->ntimes_csv-1];
         }
       }
     }
+  }
 #ifdef pp_SHOOTER
-    FREEMEMORY(shooter_timeslist);
-    if(visShooter!=0&&shooter_active==1){
-      NewMemory((void **)&shooter_timeslist,nshooter_frames*sizeof(int));
-    }
+  FREEMEMORY(shooter_timeslist);
+  if(visShooter!=0&&shooter_active==1){
+    NewMemory((void **)&shooter_timeslist,nshooter_frames*sizeof(int));
+  }
 #endif
 
-    for(i=0;i<nsliceinfo;i++){
-      sd = sliceinfo + i;
-      FREEMEMORY(sd->slicetimeslist);
-      if(ntimes>0)NewMemory((void **)&sd->slicetimeslist,ntimes*sizeof(int));
-    }
-    if(nvolrenderinfo>0){
-      for(i=0;i<nmeshes;i++){
-        mesh *meshi;
-        volrenderdata *vr;
+  for(i=0;i<nsliceinfo;i++){
+    sd = sliceinfo + i;
+    FREEMEMORY(sd->slicetimeslist);
+    if(ntimes>0)NewMemory((void **)&sd->slicetimeslist,ntimes*sizeof(int));
+  }
+  if(nvolrenderinfo>0){
+    for(i=0;i<nmeshes;i++){
+      mesh *meshi;
+      volrenderdata *vr;
 
-        meshi = meshinfo + i;
-        vr = &(meshi->volrenderinfo);
-        if(vr->fire==NULL||vr->smoke==NULL)continue;
-        if(vr->loaded==0||vr->display==0)continue;
-        FREEMEMORY(vr->timeslist);
-        if(ntimes>0)NewMemory((void **)&vr->timeslist,ntimes*sizeof(int));
-      }
+      meshi = meshinfo + i;
+      vr = &(meshi->volrenderinfo);
+      if(vr->fire==NULL||vr->smoke==NULL)continue;
+      if(vr->loaded==0||vr->display==0)continue;
+      FREEMEMORY(vr->timeslist);
+      if(ntimes>0)NewMemory((void **)&vr->timeslist,ntimes*sizeof(int));
     }
-    {
-      smoke3d *smoke3di;
+  }
+  {
+    smoke3d *smoke3di;
 
-      for(i=0;i<nsmoke3dinfo;i++){
-        smoke3di = smoke3dinfo + i;
-        FREEMEMORY(smoke3di->timeslist);
-        if(ntimes>0)NewMemory((void **)&smoke3di->timeslist,ntimes*sizeof(int));
-      }
+    for(i=0;i<nsmoke3dinfo;i++){
+      smoke3di = smoke3dinfo + i;
+      FREEMEMORY(smoke3di->timeslist);
+      if(ntimes>0)NewMemory((void **)&smoke3di->timeslist,ntimes*sizeof(int));
     }
+  }
+  for(i=0;i<nmeshes;i++){
+    meshi=meshinfo+i;
+    if(meshi->isotimes==NULL)continue;
+    FREEMEMORY(meshi->isotimeslist);
+    if(ntimes>0)NewMemory((void **)&meshi->isotimeslist,  ntimes*sizeof(int));  
+  }
+
+  for(i=0;i<nmeshes;i++){
+    FREEMEMORY(meshinfo[i].patchtimeslist); 
+  }
+  for(i=0;i<nmeshes;i++){
+    if(meshinfo[i].patchtimes==NULL)continue;
+    if(ntimes>0)NewMemory((void **)&meshinfo[i].patchtimeslist,ntimes*sizeof(int));
+  }
+
+  FREEMEMORY(zonetlist); 
+  if(ntimes>0)NewMemory((void **)&zonetlist,     ntimes*sizeof(int));
+
+  FREEMEMORY(targtimeslist);
+  if(ntimes>0)NewMemory((void **)&targtimeslist,  ntimes*sizeof(int));
+
+  if(ntotal_smooth_blockages>0){
     for(i=0;i<nmeshes;i++){
       meshi=meshinfo+i;
-      if(meshi->isotimes==NULL)continue;
-      FREEMEMORY(meshi->isotimeslist);
-      if(ntimes>0)NewMemory((void **)&meshi->isotimeslist,  ntimes*sizeof(int));  
+      FREEMEMORY(meshi->showsmoothtimelist);
+      if(ntimes>0)NewMemory((void **)&meshi->showsmoothtimelist,ntimes*sizeof(smoothblockage *));
     }
+  }
 
-    for(i=0;i<nmeshes;i++){
-      FREEMEMORY(meshinfo[i].patchtimeslist); 
-    }
-    for(i=0;i<nmeshes;i++){
-      if(meshinfo[i].patchtimes==NULL)continue;
-      if(ntimes>0)NewMemory((void **)&meshinfo[i].patchtimeslist,ntimes*sizeof(int));
-    }
-
-    FREEMEMORY(zonetlist); 
-    if(ntimes>0)NewMemory((void **)&zonetlist,     ntimes*sizeof(int));
-
-    FREEMEMORY(targtimeslist);
-    if(ntimes>0)NewMemory((void **)&targtimeslist,  ntimes*sizeof(int));
-
-    if(ntotal_smooth_blockages>0){
-      for(i=0;i<nmeshes;i++){
-        meshi=meshinfo+i;
-        FREEMEMORY(meshi->showsmoothtimelist);
-        if(ntimes>0)NewMemory((void **)&meshi->showsmoothtimelist,ntimes*sizeof(smoothblockage *));
+  if(current_script_command!=NULL&&current_script_command->command==SCRIPT_VOLSMOKERENDERALL){
+    if(current_script_command->first==1){
+      for(n=0;n<ntimes;n++){
+        render_frame[n]=0;
       }
+      current_script_command->first=0;
     }
-
+  }
+  else{
     for(n=0;n<ntimes;n++){
       render_frame[n]=0;
     }
-    if(ntimes==0){
-      FREEMEMORY(times);
-    }
-    if(ntimes>0)ResizeMemory((void **)&times,ntimes*sizeof(float));
+  }
+  if(ntimes==0){
+    FREEMEMORY(times);
+  }
+  if(ntimes>0)ResizeMemory((void **)&times,ntimes*sizeof(float));
   
-  izone=0; itimes=0;
+  izone=0; 
+  reset_itimes0();
   for(i=0;i<nmeshes;i++){
     meshi=meshinfo+i;
     meshi->ipatch=0;
@@ -1563,6 +1577,14 @@ int isearch(float *list, int nlist, float key, int guess){
   }
   if(list[high]==key)return high;
   return low;
+}
+
+/* ------------------ isearch ------------------------ */
+
+void reset_itimes0(void){
+  if(current_script_command==NULL||current_script_command->command!=SCRIPT_VOLSMOKERENDERALL){
+    itimes=0;
+  }
 }
 
 
