@@ -38,12 +38,12 @@ flame_height
 
 % dataplot creates most of the plots for the Validation Guide. It must be run before scatplot, which makes the scatter plots.
 
- [saved_data,drange] = dataplot(cfil,vdir,plotdir);
- scatplot(saved_data,drange)
+[saved_data,drange] = dataplot(cfil,vdir,plotdir);
+scatplot(saved_data,drange)
 
 % Miscellaneous other scripts for special cases
+
 harrisonplumes
-spillplume
 beyler_hood
 check_hrr
 sandia_helium_plume
