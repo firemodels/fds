@@ -3,17 +3,17 @@
 
 This chapter contains a series of validation exercises where the aim is to {\em predict} the burning rate of the fuel. Most of the simulations included in the previous chapters involved
 a {\em specified} burning or heat release rate. Here, the objective is to apply measured thermophysical properties of the material and predict its burning rate, either with a
-specified heat flux or as a free burn. 
+specified heat flux or as a free burn.
 
 
 \section{FAA Polymers}
 
 This section presents predictions of the mass loss and/or burning rates of different types of polymers. Two types of experiments are considered. For the non-charring polymers, the
 mass loss rate of non-burning samples was measured in a nitrogen atmosphere. For the charring polymers, the heat release rate of burning samples was measured in a standard
-Cone Calorimeter~\cite{conecal}. When just the mass loss rate is predicted, FDS is run in ``solid phase only'' mode; that is, a 1-D heat conduction calculation is performed in a 
+Cone Calorimeter~\cite{conecal}. When just the mass loss rate is predicted, FDS is run in ``solid phase only'' mode; that is, a 1-D heat conduction calculation is performed in a
 single grid cell. The result is the predicted mass loss rate as a function of time. To simulate a cone calorimeter experiment, FDS simulates the burning of a 10~cm by 10~cm sample with
 a specified heat flux to represent the effect of the cone heater. The cone itself is not included in the simulation. As the sample burns, FDS predicts the additional radiative and
-convective heating of the sample as a result of the fire. 
+convective heating of the sample as a result of the fire.
 
 \newpage
 
@@ -102,6 +102,7 @@ Combustion Efficiency       &               & 0.84 $\pm$ 0.03                   
 \begin{figure}[h!]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_PC_6_75} &
+\includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_PVC_6_75}
 \end{tabular*}
 \caption[Results of FAA Polymers, charring, comparison]{Comparison of predicted and measured heat release rates for two charring polymers.}
 \label{FAA_Polymers_Charring}
@@ -110,11 +111,12 @@ Combustion Efficiency       &               & 0.84 $\pm$ 0.03                   
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_PC_6_92} &
- \\
+\includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_PVC_6_92}  \\
 \includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_PC_6_50} &
- \\
+\includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_PVC_6_50} \\
 \includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_PC_3_75} &
- \\
+\includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_PVC_3_75} \\
 \includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_PC_9_75} &
+\includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_PVC_9_75}
 \end{tabular*}
 \end{figure}
