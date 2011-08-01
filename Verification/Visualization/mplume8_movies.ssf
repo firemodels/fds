@@ -1,0 +1,7 @@
+RENDERDIR
+ frames
+VOLSMOKERENDERALL
+ 1
+ mplume8_volsmoke
+ UNLOADALL
+EXIT
