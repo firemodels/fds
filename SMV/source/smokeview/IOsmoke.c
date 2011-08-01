@@ -25,6 +25,7 @@
 #include "update.h"
 #include "interp.h"
 #include "IOvolsmoke.h"
+#include "compress.h"
 
 int cull_count=0;
 

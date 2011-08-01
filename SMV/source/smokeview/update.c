@@ -27,6 +27,7 @@
 #include "MALLOC.h"
 #include "smokeviewvars.h"
 #include "update.h"
+#include "compress.h"
 
 // svn revision character string
 char update_revision[]="$Revision$";
@@ -90,21 +91,15 @@ void update_framenumber(int changetime){
         if(smoke!=NULL&&vr->iframe>=0){
           if(vr->is_compressed==1){
             unsigned char *c_smokedata_compressed;
-            uLongf framesize,framesize2;
-            float dv,valmin, valmax;
+            uLongf framesize;
+            float timeval;
 
             c_smokedata_compressed = vr->smokedataptrs[vr->iframe];
             framesize = smoke->nslicei*smoke->nslicej*smoke->nslicek;
-            framesize2 = framesize+8;
-            uncompress(vr->c_smokedata_view,&framesize2,
-              c_smokedata_compressed,vr->nsmokedata_compressed[vr->iframe]);
-            CheckMemory;
-            valmin=*(float *)vr->c_smokedata_view;
-            valmax=*(float *)(vr->c_smokedata_view+4);
-            dv=(valmax-valmin)/255;
-            for(i=0;i<framesize;i++){
-              vr->smokedata_view[i]=valmin+dv*vr->c_smokedata_view[i+8];
-            }
+            uncompress_volsliceframe(c_smokedata_compressed,
+                           vr->smokedata_view, framesize, &timeval,
+                           vr->c_smokedata_view);
+
             vr->smokedataptr = vr->smokedata_view;
           }
           else{
@@ -115,22 +110,17 @@ void update_framenumber(int changetime){
         if(fire!=NULL&&vr->iframe>=0){
           if(vr->is_compressed==1){
             unsigned char *c_firedata_compressed;
-            uLongf framesize,framesize2;
-            float dv,valmin, valmax;
+            uLongf framesize;
+            float timeval;
 
             c_firedata_compressed = vr->firedataptrs[vr->iframe];
             framesize = fire->nslicei*fire->nslicej*fire->nslicek;
-            framesize2 = framesize+8;
-            uncompress(vr->c_firedata_view,&framesize2,
-              c_firedata_compressed,vr->nfiredata_compressed[vr->iframe]);
-            CheckMemory;
-            valmin=*(float *)vr->c_firedata_view;
-            valmax=*(float *)(vr->c_firedata_view+4);
-            dv=(valmax-valmin)/255;
-            for(i=0;i<framesize;i++){
-              vr->firedata_view[i]=valmin+dv*vr->c_firedata_view[i+8];
-            }
+            uncompress_volsliceframe(c_firedata_compressed,
+                           vr->firedata_view, framesize, &timeval,
+                           vr->c_firedata_view);
+
             vr->firedataptr = vr->firedata_view;
+            CheckMemory;
           }
           else{
             vr->firedataptr = vr->firedataptrs[vr->iframe];

@@ -9,6 +9,7 @@ extern char callbacks_revision[];
 extern char camera_revision[];
 extern char colorbar_revision[];
 extern char compress3dc_revision[];
+extern char compress_revision[];
 extern char csphere_revision[];
 extern char dmalloc_revision[];
 extern char drawGeometry_revision[];

@@ -2204,6 +2204,7 @@ int getmaxrevision(void){
   MAXREV(camera_revision);
   MAXREV(colorbar_revision);
   MAXREV(compress3dc_revision);
+  MAXREV(compress_revision);
   MAXREV(csphere_revision);
   MAXREV(dmalloc_revision);
   MAXREV(drawGeometry_revision);

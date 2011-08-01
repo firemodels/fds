@@ -328,7 +328,6 @@ EXTERNCPP void ExtractFrustum(void);
 EXTERNCPP int PointInFrustum( float x, float y, float z);
 EXTERNCPP int RectangleInFrustum( float *x11, float *x12, float *x22, float *x21);
 EXTERNCPP unsigned char adjustalpha(unsigned char alpha, float factor);
-EXTERNCPP unsigned int irle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer_out);
 EXTERNCPP void updatesmoke3d(smoke3d *smoke3di);
 EXTERNCPP void drawsmoke3d(smoke3d *smoke3di);
 EXTERNCPP void drawsmoke_frame(void);

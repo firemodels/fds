@@ -389,7 +389,6 @@ typedef struct _volrenderdata {
   struct _mesh *rendermesh;
   struct _slice *smoke, *fire;
   int is_compressed;
-  unsigned char *c_smokedata_full, *c_firedata_full;
   unsigned char *c_smokedata_view, *c_firedata_view;
   float *smokedata_full, *firedata_full;
   float *smokedata_view, *firedata_view;

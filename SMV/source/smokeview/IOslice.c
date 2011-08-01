@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <math.h>
 #include "flowfiles.h"
+#include "compress.h"
 
 #ifdef pp_OSX
 #include <GLUT/glut.h>

@@ -22,6 +22,7 @@
 #include "smv_endian.h"
 #include "update.h"
 #include "IOvolsmoke.h"
+#include "compress.h"
 
 // svn revision character string
 char IOvolsmoke_revision[]="$Revision$";
@@ -218,9 +219,7 @@ void init_volrender(void){
     vr->nframes=0;
     vr->firedata_full=NULL;
     vr->smokedata_full=NULL;
-    vr->c_firedata_full=NULL;
     vr->c_firedata_view=NULL;
-    vr->c_smokedata_full=NULL;
     vr->c_smokedata_view=NULL;
     if(vr->smoke!=NULL){
       int nx, ny, nz, j;
@@ -1232,49 +1231,8 @@ void get_volsmoke_all_times(volrenderdata *vr){
   }
 }
 
-/* ------------------ scale_data ------------------------ */
-
-void scale_data(float *data, int ndata, unsigned char *c_data, float *vmin, float *vmax){
-  float valmin, valmax;
-  int i;
-
-  if(vmin==NULL){
-    valmin=data[0];
-    for(i=1;i<ndata;i++){
-      if(data[i]<valmin)valmin=data[i];
-    }
-  }
-  else{
-    valmin=*vmin;
-  }
-  if(vmax==NULL){
-    valmax=data[0];
-    for(i=1;i<ndata;i++){
-      if(data[i]>valmax)valmax=data[i];
-    }
-  }
-  else{
-    valmax=*vmax;
-  }
-  if(valmax>valmin){
-    for(i=0;i<ndata;i++){
-      float scaled_val;
-      
-      scaled_val=(data[i]-valmin)/(valmax-valmin);
-      c_data[i+8]=255*scaled_val;
-    }
-  }
-  else{
-    for(i=0;i<ndata;i++){
-      c_data[i+8]=0;
-    }
-  }
-  memcpy(c_data,&valmin,4);
-  memcpy(c_data+4,&valmax,4);
-}
-
 /* ------------------ read_volsmoke_frame ------------------------ */
-
+#define VOL_OFFSET 32
 void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
 	slice *fireslice, *smokeslice;
   FILE *SLICEFILE;
@@ -1283,6 +1241,7 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
   int endianswitch=0;
   char *meshlabel;
   unsigned char *c_smokedata_compressed=NULL, *c_firedata_compressed=NULL;
+  unsigned char *c_smokedata_compressed2=NULL, *c_firedata_compressed2=NULL;
   uLongf n_smokedata_compressed, n_firedata_compressed;
   unsigned int size_before=0, size_after=0;
 
@@ -1291,7 +1250,7 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
   smokeslice=vr->smoke;
   fireslice=vr->fire;
   framesize = smokeslice->nslicei*smokeslice->nslicej*smokeslice->nslicek;
-  framesize2 = framesize+8;
+  framesize2 = framesize+VOL_OFFSET;
   if(compress_volsmoke==1){
     vr->is_compressed=1;
   }
@@ -1300,11 +1259,9 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
   }
   if(vr->is_compressed==1){
     n_smokedata_compressed=1.01*framesize2+600;
-    NewMemory((void **)&c_smokedata_compressed,n_smokedata_compressed);
     if(vr->smokedata_full==NULL){
       NewMemory((void **)&vr->smokedata_full,framesize*sizeof(float));
       NewMemory((void **)&vr->smokedata_view,framesize*sizeof(float));
-      NewMemory((void **)&vr->c_smokedata_full,framesize2);
       NewMemory((void **)&vr->c_smokedata_view,framesize2);
     }
     smokeframe_data=vr->smokedata_full;
@@ -1313,10 +1270,10 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
       if(vr->firedata_full==NULL){
         NewMemory((void **)&vr->firedata_full,framesize*sizeof(float));
         NewMemory((void **)&vr->firedata_view,framesize*sizeof(float));
-        NewMemory((void **)&vr->c_firedata_full,framesize2);
         NewMemory((void **)&vr->c_firedata_view,framesize2);
       }
       NewMemory((void **)&c_firedata_compressed,n_firedata_compressed);
+      NewMemory((void **)&c_firedata_compressed2,n_firedata_compressed);
       fireframe_data=vr->firedata_full;
     }
   }
@@ -1356,13 +1313,13 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
   size_before+=sizeof(float)*framesize;
   if(vr->is_compressed==1){
     float valmin=0.0;
-    
-    scale_data(smokeframe_data,framesize,vr->c_smokedata_full,&valmin,NULL);
-    compress(c_smokedata_compressed, &n_smokedata_compressed, vr->c_smokedata_full, framesize2);
-    size_after+=n_smokedata_compressed;
-    ResizeMemory((void **)&c_smokedata_compressed, n_smokedata_compressed);
+
+    // one,file version,ndata_compressed,nbytes 1/2/4,ndata_uncompressed,time,valmin,valmax,data ....
+    compress_volsliceframe(smokeframe_data, framesize,
+                time, &valmin, NULL,
+                &c_smokedata_compressed, &n_smokedata_compressed);
+    size_after+=n_smokedata_compressed+VOL_OFFSET;
     vr->smokedataptrs[framenum]=c_smokedata_compressed;
-    vr->nsmokedata_compressed[framenum]=n_smokedata_compressed;
   }
   else{
     vr->smokedataptrs[framenum]=smokeframe_data;
@@ -1384,10 +1341,10 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
       if(vr->is_compressed==1){
         float valmin=20.0, valmax=1400.0;
 
-        scale_data(fireframe_data,framesize,vr->c_firedata_full,&valmin,&valmax);
-        compress(c_firedata_compressed, &n_firedata_compressed, vr->c_firedata_full, framesize2);
-        size_after+=n_firedata_compressed;
-        ResizeMemory((void **)&c_firedata_compressed, n_firedata_compressed);
+        compress_volsliceframe(fireframe_data, framesize,
+                time, &valmin, &valmax,
+                &c_firedata_compressed, &n_firedata_compressed);
+        size_after+=n_firedata_compressed+VOL_OFFSET;
         vr->firedataptrs[framenum]=c_firedata_compressed;
         vr->nfiredata_compressed[framenum]=n_firedata_compressed;
       }
