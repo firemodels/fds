@@ -20,8 +20,6 @@ char utilities_revision[]="$Revision$";
 
 int iseed=0;
 
-#define MARK 255
-
 #define FORTREAD(read) fseek(BOUNDARYFILE,4,SEEK_CUR);returncode=read;fseek(BOUNDARYFILE,4,SEEK_CUR);
 
 /* ------------------ match ------------------------ */
@@ -29,35 +27,6 @@ int iseed=0;
 int match(const char *buffer, const char *key, unsigned int lenkey){
   if(strncmp(buffer,key,lenkey) == 0)return(1);
   return(0);
-}
-
-/* ------------------ irle ------------------------ */
-
-unsigned int irle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer_out){
-  int nrepeats,nn;
-  unsigned char thischar, *buffer_in_end;
-
-  nn=0;
-  buffer_in_end  = buffer_in  + nchars_in;
-  if(buffer_out==NULL)return 0;
-  while(buffer_in<buffer_in_end){
-    if(*buffer_in==MARK){
-      if(buffer_in+2>=buffer_in_end)break;
-      buffer_in++;
-      thischar=*buffer_in++;
-      nrepeats=*buffer_in++;
-      nn+=nrepeats;
-      memset(buffer_out,thischar,nrepeats);
-      buffer_out+=nrepeats;
-    }
-    else{
-      *buffer_out++=*buffer_in++;
-      nn++;
-    }
-
-
-  }
-  return nn;
 }
 
 /* ------------------ readlabels ------------------------ */

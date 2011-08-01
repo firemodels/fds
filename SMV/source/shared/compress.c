@@ -92,9 +92,9 @@ unsigned int irle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer
 
 /* ------------------ compress_volsliceframe ------------------------ */
 
-void compress_volsliceframe(float *data, int n_data, 
-                float timeval, float *vmin_in, float *vmax_in,
-                unsigned char **compressed_data, uLongf *ncompressed_data
+void compress_volsliceframe(float *data_in, int n_data_in, 
+                float timeval_in, float *vmin_in, float *vmax_in,
+                unsigned char **compressed_data_out, uLongf *ncompressed_data_out
                 ){
   float valmin, valmax;
   int i;
@@ -107,9 +107,9 @@ void compress_volsliceframe(float *data, int n_data,
   // determine bounds
 
   if(vmin_in==NULL){
-    valmin=data[0];
-    for(i=1;i<n_data;i++){
-      if(data[i]<valmin)valmin=data[i];
+    valmin=data_in[0];
+    for(i=1;i<n_data_in;i++){
+      if(data_in[i]<valmin)valmin=data_in[i];
     }
   }
   else{
@@ -117,9 +117,9 @@ void compress_volsliceframe(float *data, int n_data,
   }
 
   if(vmax_in==NULL){
-    valmax=data[0];
-    for(i=1;i<n_data;i++){
-      if(data[i]>valmax)valmax=data[i];
+    valmax=data_in[0];
+    for(i=1;i<n_data_in;i++){
+      if(data_in[i]>valmax)valmax=data_in[i];
     }
   }
   else{
@@ -128,37 +128,37 @@ void compress_volsliceframe(float *data, int n_data,
 
   // allocate buffers
 
-  NewMemory((void **)&c_data,n_data);
-  n_data_compressed2 = 1.01*(n_data+32) + 600;
+  NewMemory((void **)&c_data,n_data_in);
+  n_data_compressed2 = 1.01*(n_data_in+32) + 600;
   NewMemory((void **)&c_data_compressed1,n_data_compressed2);
   NewMemory((void **)&c_data_compressed2,n_data_compressed2);
 
   // scale data
 
   if(valmax>valmin){
-    for(i=0;i<n_data;i++){
+    for(i=0;i<n_data_in;i++){
       float scaled_val;
       
-      scaled_val=(data[i]-valmin)/(valmax-valmin);
+      scaled_val=(data_in[i]-valmin)/(valmax-valmin);
       c_data[i]=255*scaled_val;
     }
   }
   else{
-    for(i=0;i<n_data;i++){
+    for(i=0;i<n_data_in;i++){
       c_data[i]=0;
     }
   }
 
   //  compress data
 
-  compress(c_data_compressed2,&n_data_compressed2, c_data, n_data);
+  compress(c_data_compressed2,&n_data_compressed2, c_data, n_data_in);
 
   memcpy(c_data_compressed1+0,&one,4);
   memcpy(c_data_compressed1+4,&version,4);
   memcpy(c_data_compressed1+8,&n_data_compressed2,4);
   memcpy(c_data_compressed1+12,&nbytes,4);
-  memcpy(c_data_compressed1+16,&n_data,4);
-  memcpy(c_data_compressed1+20,&timeval,4);
+  memcpy(c_data_compressed1+16,&n_data_in,4);
+  memcpy(c_data_compressed1+20,&timeval_in,4);
   memcpy(c_data_compressed1+24,&valmin,4);
   memcpy(c_data_compressed1+28,&valmax,4);
   if(n_data_compressed2>0){
@@ -169,14 +169,14 @@ void compress_volsliceframe(float *data, int n_data,
   ResizeMemory((void **)&c_data_compressed1, n_data_compressed2+32);
   FREEMEMORY(c_data);
   FREEMEMORY(c_data_compressed2);
-  *compressed_data=c_data_compressed1;
-  *ncompressed_data=n_data_compressed2;
+  *compressed_data_out=c_data_compressed1;
+  *ncompressed_data_out=n_data_compressed2;
 }
 
 /* ------------------ uncompress_volsliceframe ------------------------ */
 
-int uncompress_volsliceframe(unsigned char *compressed_data,
-                           float *data, int n_data, float *timeval,
+int uncompress_volsliceframe(unsigned char *compressed_data_in,
+                           float *data_out, int n_data_in, float *timeval_out,
                            unsigned char *fullbuffer
                 ){
   float valmin, valmax;
@@ -184,17 +184,17 @@ int uncompress_volsliceframe(unsigned char *compressed_data,
   unsigned char *c_data, *c_data_compressed1, *c_data_compressed2;
   uLongf countin,countout;
   
-  valmin=*(float *)(compressed_data+24);
-  valmax=*(float *)(compressed_data+28);
-  *timeval=*(float *)(compressed_data+20);
-  countin = *(int *)(compressed_data+8);
-  ndatafile = *(int *)(compressed_data+16);
+  valmin=*(float *)(compressed_data_in+24);
+  valmax=*(float *)(compressed_data_in+28);
+  *timeval_out=*(float *)(compressed_data_in+20);
+  countin = *(int *)(compressed_data_in+8);
+  ndatafile = *(int *)(compressed_data_in+16);
 
-  uncompress(fullbuffer,&countout,compressed_data+32,countin);
+  uncompress(fullbuffer,&countout,compressed_data_in+32,countin);
 
-  if(countout==ndatafile&&n_data>=countout){
+  if(countout==ndatafile&&n_data_in>=countout){
     for(i=0;i<countout;i++){
-      data[i]=valmin+fullbuffer[i]*(valmax-valmin)/255.0;
+      data_out[i]=valmin+fullbuffer[i]*(valmax-valmin)/255.0;
     }
   }
   return countout;
