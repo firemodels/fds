@@ -12,6 +12,7 @@
 #include "svzip.h"
 #include "MALLOC.h"
 #include "string_util.h"
+#include "compress.h"
 
 // svn revision character string
 char CNVslice_revision[]="$Revision$";
@@ -24,6 +25,241 @@ void endian_switch(void *val, int nval);
                            returncode=fread(var,4,size,SLICEFILE);\
                            if(endianswitch==1)endian_switch(var,size);\
                            fseek(SLICEFILE,4,SEEK_CUR)
+
+/* ------------------ convert_volslice ------------------------ */
+
+int convert_volslice(slice *slicei, int *thread_index){
+  char slicefile_svz[1024];
+  int fileversion, one, zero;
+  char *slice_file;
+  int version;
+  char filetype[1024];
+  char *shortlabel;
+  int ijkbar[6];
+  uLong framesize;
+  float *sliceframe_data=NULL;
+  char pp[2];
+  char xxx[2];
+  int sizebefore, sizeafter;
+  int returncode;
+  float time;
+  long data_loc;
+  int percent_done;
+  int percent_next=10;
+#ifndef pp_THREAD
+  int count=0;
+#endif
+
+  FILE *SLICEFILE;
+  FILE *slicestream;
+
+#ifdef pp_THREAD
+  if(cleanfiles==0){
+    int fileindex;
+
+    fileindex = slicei + 1 - sliceinfo;
+    sprintf(threadinfo[*thread_index].label,"vsf %i",fileindex);
+  }
+#endif
+
+  slice_file=slicei->file;
+  version=slicei->version;
+
+  strcpy(pp,"%");
+  strcpy(xxx,"X");
+
+  fileversion = 1;
+  one = 1;
+  zero=0;
+
+  // check if slice file is accessible
+
+  strcpy(filetype,"");
+  shortlabel=slicei->label.shortlabel;
+  if(strlen(shortlabel)>0)strcat(filetype,shortlabel);
+  trim(filetype);
+
+  if(getfileinfo(slice_file,NULL,NULL)!=0){
+    printf("  %s does not exist\n",slice_file);
+    return 0;
+  }
+
+  SLICEFILE=fopen(slice_file,"rb");
+  if(SLICEFILE==NULL){
+    printf("  %s could not be opened\n",slice_file);
+    return 0;
+  }
+
+  // set up slice compressed file
+
+  if(destdir!=NULL){
+    strcpy(slicefile_svz,destdir);
+    strcat(slicefile_svz,slicei->filebase);
+  }
+  else{
+    strcpy(slicefile_svz,slicei->file);
+  }
+  {
+
+    char *ext;
+    int lensvz;
+
+    lensvz = strlen(slicefile_svz);
+
+    if(lensvz>4){
+      ext = slicefile_svz + lensvz - 4;
+      strcat(slicefile_svz,".svv");
+    }
+  }
+
+  if(cleanfiles==1){
+    slicestream=fopen(slicefile_svz,"rb");
+    if(slicestream!=NULL){
+      fclose(slicestream);
+      printf("  Removing %s.\n",slicefile_svz);
+      UNLINK(slicefile_svz);
+      LOCK_COMPRESS;
+      filesremoved++;
+      UNLOCK_COMPRESS;
+    }
+    return 0;
+  }
+
+  if(overwrite_slice==0){
+    slicestream=fopen(slicefile_svz,"rb");
+    if(slicestream!=NULL){
+      fclose(slicestream);
+      printf("  %s exists.\n",slicefile_svz);
+      printf("     Use the -f option to overwrite smokezip compressed files\n");
+      return 0;
+    }
+  }
+
+  slicestream=fopen(slicefile_svz,"wb");
+  if(slicestream==NULL){
+    printf("  %s could not be opened for writing\n",slicefile_svz);
+    return 0;
+  }
+
+  // read and write slice header
+
+#ifndef pp_THREAD
+  if(cleanfiles==0){
+    printf("Compressing %s (%s)\n",slice_file,filetype);
+  }
+#endif
+
+
+  {
+    int skip;
+
+    skip = 3*(4+30+4);  // skip over 3 records each containing a 30 byte FORTRAN character string
+    returncode=fseek(SLICEFILE,skip,SEEK_CUR);
+    sizebefore=skip;
+  }
+
+  FORTSLICEREAD(ijkbar,6);
+  sizebefore+=4+6*4+4;
+  sizeafter=0;
+  
+  {
+    int ni, nj, nk;
+
+    ni = ijkbar[1]+1-ijkbar[0];
+    nj = ijkbar[3]+1-ijkbar[2];
+    nk = ijkbar[5]+1-ijkbar[4];
+    framesize = ni*nj*nk;
+    NewMemory((void **)&sliceframe_data,framesize*sizeof(float));
+
+    for(;;){
+      float vmin, vmax;
+      float *valmin, *valmax;
+      unsigned char *compressed_data_out;
+      uLongf ncompressed_data_out;
+
+      FORTSLICEREAD(&time,1);
+      sizebefore+=12;
+      if(returncode==0)break;
+      FORTSLICEREAD(sliceframe_data,framesize);    //---------------
+      if(returncode==0)break;
+      sizebefore+=(4+framesize*sizeof(float)+4);
+
+      valmin=NULL;
+      valmax=NULL;
+      if(slicei->voltype==1){
+        vmin=0.0;
+        valmin=&vmin;
+      }
+      else if(slicei->voltype==2){
+        vmin=20.0;
+        valmin=&vmin;
+        vmax=1400.0;
+        valmax=&vmax;
+      }
+
+      compress_volsliceframe(sliceframe_data, framesize,
+                time, valmin, valmax,
+                &compressed_data_out, &ncompressed_data_out);
+      sizeafter+=ncompressed_data_out+32;
+      fwrite(compressed_data_out,1,ncompressed_data_out+32,slicestream);
+      FREEMEMORY(compressed_data_out);
+
+#ifndef pp_THREAD
+      count++;
+#endif
+   
+      data_loc=ftell(SLICEFILE);
+      percent_done=100.0*(float)data_loc/(float)slicei->filesize;
+#ifdef pp_THREAD
+      threadinfo[*thread_index].stat=percent_done;
+      if(percent_done>percent_next){
+        LOCK_PRINT;
+        print_thread_stats();
+        UNLOCK_PRINT;
+        percent_next+=10;
+      }
+#else
+      if(percent_done>percent_next){
+        printf(" %i%s",percent_next,pp);
+        fflush(stdout);
+        percent_next+=10;
+      }
+#endif
+
+    }
+    if(returncode!=0){
+      printf("*** error: compress returncode=%i\n",returncode);
+    }
+    FREEMEMORY(sliceframe_data);
+  }
+
+wrapup:
+#ifndef pp_THREAD
+    printf(" 100%s completed\n",pp);
+#endif
+
+  fclose(SLICEFILE);
+  fclose(slicestream);
+
+  {
+    char before_label[256],after_label[256];
+
+    getfilesizelabel(sizebefore,before_label);
+    getfilesizelabel(sizeafter,after_label);
+#ifdef pp_THREAD
+    slicei->compressed=1;
+    sprintf(slicei->summary,"compressed from %s to %s (%4.1f%s reduction)",before_label,after_label,(float)sizebefore/(float)sizeafter,xxx);
+    threadinfo[*thread_index].stat=-1;
+#else
+    printf("  records=%i, ",count);
+    printf("Sizes: original=%s, ",before_label);
+    printf("compressed=%s (%4.1f%s reduction)\n\n",after_label,(float)sizebefore/(float)sizeafter,xxx);
+#endif
+  }
+
+  return 1;
+
+}
 
 /* ------------------ convert_slice ------------------------ */
 
@@ -502,6 +738,40 @@ slice *getslice(char *string){
   return NULL;
 }
 
+
+/* ------------------ compress_volslices ------------------------ */
+
+void *compress_volslices(void *arg){
+  int *thread_index;
+  int i;
+
+  thread_index = (int *)arg;
+  if(nvolrenderinfo<=0)return NULL;
+
+  if(cleanfiles==1)return NULL;
+
+  // convert and compress files
+
+  for(i=0;i<nsliceinfo;i++){
+    slice *slicei;
+
+    slicei = sliceinfo + i;
+
+    if(slicei->isvolslice==0)continue;
+
+    LOCK_VOLSLICE;
+    if(slicei->involuse==1){
+      UNLOCK_VOLSLICE;
+      continue;
+    }
+    slicei->involuse=1;
+    UNLOCK_VOLSLICE;
+
+    convert_volslice(slicei,thread_index);
+  }
+  return NULL;
+}
+
 /* ------------------ compress_slices ------------------------ */
 
 void *compress_slices(void *arg){
@@ -746,4 +1016,29 @@ void Get_Slice_Bounds(void){
     FREEMEMORY(slicei->histogram);
   }
 
+}
+
+/* ------------------ Get_Slice_Bounds ------------------------ */
+
+void getsliceparms_c(char *file, int *ni, int *nj, int *nk){
+    int skip,ijkbar[6];
+    FILE *stream;
+
+    *ni=0;
+    *nj=0;
+    *nk=0;
+
+    stream=fopen(file,"rb");
+    if(stream==NULL)return;
+
+    skip = 3*(4+30+4);  // skip over 3 records each containing a 30 byte FORTRAN character string
+    fseek(stream,skip,SEEK_CUR);
+
+    skip=4;
+    fseek(stream,skip,SEEK_CUR);
+    fread(ijkbar,sizeof(int),6,stream);
+    *ni=ijkbar[1]+1-ijkbar[0];
+    *nj=ijkbar[3]+1-ijkbar[2];
+    *nk=ijkbar[5]+1-ijkbar[4];
+    fclose(stream);
 }

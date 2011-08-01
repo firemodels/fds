@@ -55,6 +55,7 @@ int main(int argc, char **argv){
   doit_smoke3d=1;
   doit_boundary=1;
   doit_slice=1;
+  doit_volslice=1;
 #ifdef pp_PLOT3D
   doit_plot3d=1;
 #else
@@ -100,6 +101,7 @@ int main(int argc, char **argv){
   partfile2iso=0;
 #endif
   overwrite_slice=0;
+  overwrite_volslice=0;
   overwrite_plot3d=0;
   endian_info=0;
   cleanfiles=0;
@@ -207,6 +209,9 @@ int main(int argc, char **argv){
         else if(strcmp(arg,"-ns")==0){
           doit_slice=0;
         }
+        else if(strcmp(arg,"-nvs")==0){
+          doit_volslice=0;
+        }
         else if(strcmp(arg,"-no_chop")==0){
           no_chop=1;
         }
@@ -215,6 +220,7 @@ int main(int argc, char **argv){
         overwrite_slice=1;
         break;
       case '3':
+        overwrite_volslice=1;
         overwrite_s=1;
         break;
 #ifdef  pp_PART2
@@ -236,6 +242,7 @@ int main(int argc, char **argv){
         overwrite_b=1;
         overwrite_s=1;
         overwrite_slice=1;
+        overwrite_volslice=1;
 #ifdef pp_PLOT3D
         overwrite_plot3d=1;
 #endif
@@ -513,6 +520,7 @@ void *compress_all(void *arg){
   thread_index=(int *)(arg);
   if(doit_boundary==1)compress_patches(thread_index);
   if(doit_slice==1)compress_slices(thread_index);
+  if(doit_volslice==1)compress_volslices(thread_index);
   if(doit_smoke3d==1)compress_smoke3ds(thread_index);
 #ifdef pp_PLOT3D
   if(doit_plot3d==1)compress_plot3ds(thread_index);

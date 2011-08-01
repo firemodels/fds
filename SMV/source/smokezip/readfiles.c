@@ -671,6 +671,7 @@ int readsmv(char *smvfile){
       int len;
       int filesize;
       slice *slicei;
+      int blocknumber;
 
       len=strlen(buffer);
       if(len>4){
@@ -678,13 +679,27 @@ int readsmv(char *smvfile){
         sscanf(buffer2,"%i %i",&dummy,&version);
       }
 
+      if(nmeshes>1){
+        blocknumber=ioffset-1;
+      }
+      else{
+        blocknumber=0;
+      }
+      if(len>5){
+        buffer2=buffer+4;
+        sscanf(buffer2,"%i",&blocknumber);
+        blocknumber--;
+      }
+
       islice_seq++;
       slicei = sliceinfo + islice;
+      slicei->blocknumber=blocknumber;
       slicei->unit_start=unit_start++;
       slicei->version=version;
       slicei->seq_id = islice_seq;
       slicei->autozip = 0;
       slicei->inuse=0;
+      slicei->involuse=0;
       slicei->compressed=0;
         
       if(get_slice_bounds==1){
@@ -869,6 +884,7 @@ int readsmv(char *smvfile){
 
     }
   }
+  init_volrender();
   return 0;
 }
 
@@ -1137,4 +1153,73 @@ void readini2(char *inifile){
       }
     }
   }
+
+
+/* ------------------ init_volrender ------------------------ */
+
+void init_volrender(void){
+  int i,endian;
+
+  endian=getendian();
+  nvolrenderinfo=0;
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    volrenderdata *vr;
+
+    meshi = meshinfo + i;
+    vr = &(meshi->volrenderinfo);
+    vr->rendermesh=meshi;
+    vr->fire=NULL;
+    vr->smoke=NULL;
+  }
+  for(i=0;i<nsliceinfo;i++){
+    slice *slicei;
+    char *shortlabel;
+    int blocknumber;
+    mesh *meshi;
+    volrenderdata *vr;
+    int lenfile;
+    int ni, nj, nk;
+
+    slicei = sliceinfo + i;
+    slicei->isvolslice=0;
+    slicei->voltype=0;
+    blocknumber = slicei->blocknumber;
+    if(blocknumber<0||blocknumber>=nmeshes)continue;
+    meshi = meshinfo + blocknumber;
+    lenfile=strlen(slicei->file);
+    getsliceparms_c(slicei->file,&ni,&nj,&nk);
+
+    if(ni!=meshi->ibar+1||nj!=meshi->jbar+1||nk!=meshi->kbar+1)continue;
+    vr = &(meshi->volrenderinfo);
+    shortlabel = slicei->label.shortlabel;
+
+    if(STRCMP(shortlabel,"temp")==0){  
+      vr->fire=slicei;
+     continue;
+    }
+    if(STRCMP(shortlabel,"rho_Soot")==0){
+      vr->smoke=slicei;
+      continue;
+    }
+  }
+  nvolrenderinfo=0;
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    volrenderdata *vr;
+
+    meshi = meshinfo + i;
+    vr = &(meshi->volrenderinfo);
+    if(vr->smoke!=NULL){
+      nvolrenderinfo++;
+      vr->smoke->isvolslice=1;
+      vr->smoke->voltype=1;
+      if(vr->fire!=NULL){
+        vr->fire->isvolslice=1;
+        vr->fire->voltype=2;
+      }
+    }
+  }
+}
+
 

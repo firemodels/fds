@@ -55,15 +55,24 @@
 //************* structures
 //***********************
 
-/* --------------------------  mesh ------------------------------------ */
+
+/* --------------------------  volrenderdata ------------------------------------ */
 
 typedef struct {
+  struct _mesh *rendermesh;
+  struct _slice *smoke, *fire;
+} volrenderdata;
+
+/* --------------------------  mesh ------------------------------------ */
+
+typedef struct _mesh {
   int ibar, jbar, kbar;
   float *xplt, *yplt, *zplt;
   float *xpltcell, *ypltcell, *zpltcell;
   float xbar0, xbar, ybar0, ybar, zbar0, zbar;
   float dx, dy, dz;
   float dxx, dyy, dzz;
+  volrenderdata volrenderinfo;
 } mesh;
 
 /* --------------------------  flowlabels ------------------------------------ */
@@ -95,12 +104,14 @@ typedef struct {
 
 /* --------------------------  slice ------------------------------------ */
 
-typedef struct {
+typedef struct _slice {
   char *file,*filebase;
+  int isvolslice,voltype;
   int unit_start;
+  int blocknumber;
   char summary[1024];
   int compressed;
-  int inuse,inuse_getbounds;
+  int inuse,involuse,inuse_getbounds;
   int filesize;
   int seq_id,autozip;
   int doit, done, count;
@@ -232,6 +243,7 @@ typedef struct {
 //************* headers
 //***********************
 
+void init_volrender(void);
 void print_summary(void);
 void *compress_all(void *arg);
 void mt_compress_all(void);
@@ -254,6 +266,7 @@ int getendian(void);
 int convert_slice(slice *slicei, int *thread_index);
 slice *getslice(char *string);
 void *compress_slices(void *arg);
+void *compress_volslices(void *arg);
 int plot3ddup(plot3d *plot3dj, int iplot3d);
 int slicedup(slice *slicej, int islice);
 void *compress_plot3ds(void *arg);
@@ -292,6 +305,9 @@ void *compress_smoke3ds(void *arg);
 int match(const char *buffer, const char *key, unsigned int lenkey);
 void Normal(unsigned short *v1, unsigned short *v2, unsigned short *v3, float *normal, float *area);
 float atan3(float y, float x);
+void initvolrender(void);
+void getsliceparms_c(char *file, int *ni, int *nj, int *nk);
+
 
 #ifdef pp_noappend
 #define FORTgetpartheader1 getpartheader1
@@ -356,7 +372,8 @@ STDCALL FORTopenslice(char *slicefilename, int *unit, int *endian,
 //************* variables
 //***********************
 
-EXTERN int doit_smoke3d, doit_boundary, doit_slice, doit_plot3d;
+EXTERN int nvolrenderinfo;
+EXTERN int doit_smoke3d, doit_boundary, doit_slice, doit_plot3d, doit_volslice;
 #ifdef pp_PART2
 EXTERN int doit_particle;
 #endif
@@ -376,6 +393,7 @@ EXTERN plot3d *plot3dinfo;
 
 EXTERN int nmeshes;
 EXTERN int overwrite_slice;
+EXTERN int overwrite_volslice;
 EXTERN int overwrite_plot3d;
 #ifdef pp_PART
 EXTERN int overwrite_part;

@@ -22,6 +22,7 @@ void init_pthread_mutexes(void){
   pthread_mutex_init(&mutexPATCH,NULL);
   pthread_mutex_init(&mutexPATCH_BOUND,NULL);
   pthread_mutex_init(&mutexSLICE,NULL);
+  pthread_mutex_init(&mutexVOLSLICE,NULL);
   pthread_mutex_init(&mutexSLICE_BOUND,NULL);
   pthread_mutex_init(&mutexISOS,NULL);
   pthread_mutex_init(&mutexSMOKE,NULL);

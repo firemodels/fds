@@ -181,7 +181,6 @@ int uncompress_volsliceframe(unsigned char *compressed_data_in,
                 ){
   float valmin, valmax;
   int i,ndatafile;
-  unsigned char *c_data, *c_data_compressed1, *c_data_compressed2;
   uLongf countin,countout;
   
   valmin=*(float *)(compressed_data_in+24);
