@@ -1020,19 +1020,19 @@ void readini2(char *inifile){
       }
       continue;
     }
-    if(frameskip<1&&match(buffer,"SLICEZIPSTEP",12)==1){
+    if(GLOBframeskip<1&&match(buffer,"SLICEZIPSTEP",12)==1){
 	    fgets(buffer,BUFFERSIZE,stream);
 	    sscanf(buffer,"%i",&slicezipstep);
 	    if(slicezipstep<1)slicezipstep=1;
       continue;
     }
-    if(frameskip<1&&match(buffer,"SMOKE3DZIPSTEP",14)==1){
+    if(GLOBframeskip<1&&match(buffer,"SMOKE3DZIPSTEP",14)==1){
 	    fgets(buffer,BUFFERSIZE,stream);
 	    sscanf(buffer,"%i",&smoke3dzipstep);
 	    if(smoke3dzipstep<1)smoke3dzipstep=1;
       continue;
     }
-    if(frameskip<1&&match(buffer,"BOUNDZIPSTEP",12)==1){
+    if(GLOBframeskip<1&&match(buffer,"BOUNDZIPSTEP",12)==1){
 	    fgets(buffer,BUFFERSIZE,stream);
 	    sscanf(buffer,"%i",&boundzipstep);
 	    if(boundzipstep<1)boundzipstep=1;
@@ -1161,7 +1161,7 @@ void readini2(char *inifile){
 void init_volrender(void){
   int i;
 
-  nvolrenderinfo=0;
+  GLOBnvolrenderinfo=0;
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
     volrenderdata *vr;
@@ -1201,7 +1201,7 @@ void init_volrender(void){
       continue;
     }
   }
-  nvolrenderinfo=0;
+  GLOBnvolrenderinfo=0;
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
     volrenderdata *vr;
@@ -1209,7 +1209,7 @@ void init_volrender(void){
     meshi = meshinfo + i;
     vr = &(meshi->volrenderinfo);
     if(vr->smoke!=NULL){
-      nvolrenderinfo++;
+      GLOBnvolrenderinfo++;
       vr->smoke->isvolslice=1;
       vr->smoke->voltype=1;
       if(vr->fire!=NULL){

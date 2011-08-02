@@ -98,8 +98,8 @@ void compress_volsliceframe(float *data_in, int n_data_in,
                 ){
   float valmin, valmax;
   int i;
-  uLongf n_data_compressed2;
-  unsigned char *c_data, *c_data_compressed1, *c_data_compressed2;
+  uLongf n_data_compressed,n_data_compressedm32;
+  unsigned char *c_data, *c_data_compressed;
   int one=1;
   int version=0;
   int nbytes=1;
@@ -133,53 +133,50 @@ void compress_volsliceframe(float *data_in, int n_data_in,
 
   // allocate buffers
 
+  n_data_compressed = 1.1*(n_data_in+32) + 600;
+  n_data_compressedm32=n_data_compressed-32;
   NewMemory((void **)&c_data,n_data_in);
-  n_data_compressed2 = 1.01*(n_data_in+32) + 600;
-  NewMemory((void **)&c_data_compressed1,n_data_compressed2);
-  NewMemory((void **)&c_data_compressed2,n_data_compressed2);
+  NewMemory((void **)&c_data_compressed,n_data_compressed*sizeof(unsigned char));
 
   // scale data
 
   if(valmax>valmin){
     for(i=0;i<n_data_in;i++){
-      float scaled_val;
-      
-      scaled_val=(data_in[i]-valmin)/(valmax-valmin);
-      c_data[i]=255*scaled_val;
+      c_data[i]=255*(data_in[i]-valmin)/(valmax-valmin);
     }
     CheckMemory;
   }
   else{
-    for(i=0;i<n_data_in;i++){
-      c_data[i]=0;
-    }
+    memset(c_data,0,n_data_in);
     CheckMemory;
   }
 
   //  compress data
 
-  compress(c_data_compressed2,&n_data_compressed2, c_data, n_data_in);
+  {
+    unsigned char *ctemp;
 
-  memcpy(c_data_compressed1+0,&one,4);
-  memcpy(c_data_compressed1+4,&version,4);
-  memcpy(c_data_compressed1+8,&n_data_compressed2,4);
-  memcpy(c_data_compressed1+12,&nbytes,4);
-  memcpy(c_data_compressed1+16,&n_data_in,4);
-  memcpy(c_data_compressed1+20,&timeval_in,4);
-  memcpy(c_data_compressed1+24,&valmin,4);
-  memcpy(c_data_compressed1+28,&valmax,4);
-  CheckMemory;
-  if(n_data_compressed2>0){
-    memcpy(c_data_compressed1+32,c_data_compressed2,n_data_compressed2);
+    ctemp = c_data_compressed+32;
+    compress(ctemp,&n_data_compressedm32, c_data, n_data_in);
   }
+  n_data_compressed=n_data_compressedm32+32;
+  CheckMemory;
+
+  memcpy(c_data_compressed+0,&one,4);
+  memcpy(c_data_compressed+4,&version,4);
+  memcpy(c_data_compressed+8,&n_data_compressedm32,4);
+  memcpy(c_data_compressed+12,&nbytes,4);
+  memcpy(c_data_compressed+16,&n_data_in,4);
+  memcpy(c_data_compressed+20,&timeval_in,4);
+  memcpy(c_data_compressed+24,&valmin,4);
+  memcpy(c_data_compressed+28,&valmax,4);
   CheckMemory;
 
   // resize and deallocate buffers
-  ResizeMemory((void **)&c_data_compressed1, n_data_compressed2+32);
+  ResizeMemory((void **)&c_data_compressed, n_data_compressed);
   FREEMEMORY(c_data);
-  FREEMEMORY(c_data_compressed2);
-  *compressed_data_out=c_data_compressed1;
-  *ncompressed_data_out=n_data_compressed2;
+  *compressed_data_out=c_data_compressed;
+  *ncompressed_data_out=n_data_compressedm32;
 }
 
 /* ------------------ uncompress_volsliceframe ------------------------ */

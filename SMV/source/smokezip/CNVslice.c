@@ -57,6 +57,13 @@ int convert_volslice(slice *slicei, int *thread_index){
   }
 #endif
 
+  {
+    int islice;
+
+    islice = slicei-sliceinfo;
+    printf("compressing slice %i\n",islice);
+  }
+
   slice_file=slicei->file;
 
   strcpy(pp,"%");
@@ -112,7 +119,7 @@ int convert_volslice(slice *slicei, int *thread_index){
     return 0;
   }
 
-  if(overwrite_slice==0){
+  if(GLOBoverwrite_slice==0){
     slicestream=fopen(slicefile_svz,"rb");
     if(slicestream!=NULL){
       fclose(slicestream);
@@ -404,7 +411,7 @@ int convert_slice(slice *slicei, int *thread_index){
     return 0;
   }
 
-  if(overwrite_slice==0){
+  if(GLOBoverwrite_slice==0){
     slicestream=fopen(slicefile_svz,"rb");
     if(slicestream!=NULL){
       fclose(slicestream);
@@ -739,7 +746,7 @@ void *compress_volslices(void *arg){
   int i;
 
   thread_index = (int *)arg;
-  if(nvolrenderinfo<=0)return NULL;
+  if(GLOBnvolrenderinfo<=0)return NULL;
 
   if(cleanfiles==1)return NULL;
 
@@ -777,8 +784,8 @@ void *compress_slices(void *arg){
 
   if(nsliceinfo<=0)return NULL;
   LOCK_SLICE;
-  if(first_slice==1){
-    first_slice=0;
+  if(GLOBfirst_slice==1){
+    GLOBfirst_slice=0;
     if(cleanfiles==1){
       for(i=0;i<nsliceinfo;i++){
         slicei = sliceinfo + i;

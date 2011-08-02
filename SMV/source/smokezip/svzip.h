@@ -373,14 +373,14 @@ STDCALL FORTopenslice(char *slicefilename, int *unit, int *endian,
 //************* variables
 //***********************
 
-EXTERN int nvolrenderinfo;
-EXTERN int doit_smoke3d, doit_boundary, doit_slice, doit_plot3d, doit_volslice;
+EXTERN int GLOBnvolrenderinfo;
+EXTERN int doit_smoke3d, doit_boundary, doit_slice, doit_plot3d, GLOBdoit_volslice;
 #ifdef pp_PART2
 EXTERN int doit_particle;
 #endif
 
-EXTERN int first_initsphere,first_slice,first_patch,first_plot3d,first_part2iso,first_part2iso_smvopen;
-EXTERN int frameskip;
+EXTERN int first_initsphere,GLOBfirst_slice,first_patch,first_plot3d,first_part2iso,first_part2iso_smvopen;
+EXTERN int GLOBframeskip;
 EXTERN int no_chop;
 EXTERN patch *patchinfo;
 EXTERN mesh *meshinfo;
@@ -393,8 +393,8 @@ EXTERN slice *sliceinfo;
 EXTERN plot3d *plot3dinfo;
 
 EXTERN int nmeshes;
-EXTERN int overwrite_slice;
-EXTERN int overwrite_volslice;
+EXTERN int GLOBoverwrite_slice;
+EXTERN int GLOBoverwrite_volslice;
 EXTERN int overwrite_plot3d;
 #ifdef pp_PART
 EXTERN int overwrite_part;

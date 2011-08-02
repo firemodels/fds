@@ -55,7 +55,7 @@ int main(int argc, char **argv){
   doit_smoke3d=1;
   doit_boundary=1;
   doit_slice=1;
-  doit_volslice=1;
+  GLOBdoit_volslice=1;
 #ifdef pp_PLOT3D
   doit_plot3d=1;
 #else
@@ -70,7 +70,7 @@ int main(int argc, char **argv){
   exit(0);
 #endif
   first_initsphere=1;
-  first_slice=1;
+  GLOBfirst_slice=1;
   first_patch=1;
   first_plot3d=1;
   first_part2iso=1;
@@ -78,7 +78,7 @@ int main(int argc, char **argv){
 #ifdef pp_THREAD
   mt_nthreads=2;
 #endif
-  frameskip=-1;
+  GLOBframeskip=-1;
   no_chop=0;
   autozip=0;
   make_demo=0;
@@ -100,8 +100,8 @@ int main(int argc, char **argv){
   get_part_bounds=0;
   partfile2iso=0;
 #endif
-  overwrite_slice=0;
-  overwrite_volslice=0;
+  GLOBoverwrite_slice=0;
+  GLOBoverwrite_volslice=0;
   overwrite_plot3d=0;
   endian_info=0;
   cleanfiles=0;
@@ -210,17 +210,17 @@ int main(int argc, char **argv){
           doit_slice=0;
         }
         else if(strcmp(arg,"-nvs")==0){
-          doit_volslice=0;
+          GLOBdoit_volslice=0;
         }
         else if(strcmp(arg,"-no_chop")==0){
           no_chop=1;
         }
         break;
       case '2':
-        overwrite_slice=1;
+        GLOBoverwrite_slice=1;
         break;
       case '3':
-        overwrite_volslice=1;
+        GLOBoverwrite_volslice=1;
         overwrite_s=1;
         break;
 #ifdef  pp_PART2
@@ -241,8 +241,8 @@ int main(int argc, char **argv){
       case 'f':
         overwrite_b=1;
         overwrite_s=1;
-        overwrite_slice=1;
-        overwrite_volslice=1;
+        GLOBoverwrite_slice=1;
+        GLOBoverwrite_volslice=1;
 #ifdef pp_PLOT3D
         overwrite_plot3d=1;
 #endif
@@ -273,13 +273,13 @@ int main(int argc, char **argv){
            i++;
         }
         else if(strcmp(arg,"-skip")==0){
-          frameskip=-1;
+          GLOBframeskip=-1;
           arg2=argv[i+1];
-          sscanf(arg2,"%i",&frameskip);
-          if(frameskip>0){
-            slicezipstep=frameskip;
-            smoke3dzipstep=frameskip;
-            boundzipstep=frameskip;
+          sscanf(arg2,"%i",&GLOBframeskip);
+          if(GLOBframeskip>0){
+            slicezipstep=GLOBframeskip;
+            smoke3dzipstep=GLOBframeskip;
+            boundzipstep=GLOBframeskip;
           }
           i++;
         }
@@ -522,7 +522,7 @@ void *compress_all(void *arg){
     if(doit_boundary==1)compress_patches(thread_index);
     if(doit_slice==1)compress_slices(thread_index);
 #endif
-  if(doit_volslice==1)compress_volslices(thread_index);
+  if(GLOBdoit_volslice==1)compress_volslices(thread_index);
 #ifndef pp_VOLTEST  
   if(doit_smoke3d==1)compress_smoke3ds(thread_index);
 #ifdef pp_PLOT3D
