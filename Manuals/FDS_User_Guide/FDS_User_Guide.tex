@@ -7548,6 +7548,14 @@ Anything associated with the device via the parameter, {\ct DEVC\_ID='my clock'}
 if the text were added to an {\ct OBST} line, that obstruction would change from its {\ct INITIAL\_STATE} of {\ct .FALSE.} to {\ct .TRUE.} after
 30~s. In other words, it would be created at 30~s instead of at the start of the simulation. This is a simple way to open a door or window.
 
+When using a {\ct DEVC} output to control FDS, the instanteneous value of the the {\ct DEVC} is used.  For some {\ct QUANTITY} types, such as {\ct TEMPERATURE}, this output can be very noisy.  To prevent a spurious spike from causing a state change of the {\ct DEVC} you can specify the parameter {\ct SMOOTHING\_FACTOR}.  This is a parameter that can vary between 0 and 1.  It performs an exponential smoothing of the {\ct DEVC} output as follows:
+
+\be
+\bar{x}^n=\bar{x}^{n-1} {\ct SMOOTHING\_FACTOR} + x (1-{\ct SMOOTHING\_FACTOR})
+\ee
+
+\noindent
+where n is the timestep, $x$ is the instanteneous device output and $\bar{x}$ is the smoothed output.  The {\ct SMOOTHING\_FACTOR} defaults to 0 which means no smoothing is being performed.
 
 \subsection{Creating and Removing Obstructions}
 \label{info:create_remove}
@@ -7987,19 +7995,17 @@ multiply-colored vents that activate at different times, depending on the partic
 \label{info:RAMPDEVC}
 
 For any user defined {\ct RAMP}, the normal independent variable, for example time for {\ct RAMP\_V}, can be replaced by the output of a {\ct DEVC}.
-This is done by specifying the input {\ct DEVC\_ID} one on of the {\ct RAMP} input lines.
-In the following example a blower is turned on when the temperature exceeds 100~$^\circ$C and is turned off when the temperature exceeds 200~$^\circ$C.
+This is done by specifying the input {\ct DEVC\_ID} one on of the {\ct RAMP} input lines.  When this is done, the current output of the {\ct DEVC} is used, see \ref{info:basic_control} as the independent variable for the {\ct RAMP}.
+In the following example a blower is ramped from 0~\% flow at 20~$^\circ$C, to 50~\% flow when the temperature exceeds 100~$^\circ$C, and to 100~\% flow when the temperature exceeds 200~$^\circ$C.
 This is similar functionality to the {\ct CUSTOM} control function, but it allows for variable response rather than just on or off.
 
 \footnotesize
 \begin{verbatim}
 &SURF ID='BLOWER', VEL=-2, RAMP_V='BLOWER RAMP' /
 &DEVC XYZ=2,3,3, QUANTITY='TEMPERATURE', ID='TEMP DEVC' /
-&RAMP ID='BLOWER RAMP', T= 20,F=0, DEVC_ID='TEMP DEVC' /
-&RAMP ID='BLOWER RAMP', T=100,F=0 /
-&RAMP ID='BLOWER RAMP', T=101,F=1 /
-&RAMP ID='BLOWER RAMP', T=200,F=1 /
-&RAMP ID='BLOWER RAMP', T=201,F=0 /
+&RAMP ID='BLOWER RAMP', T= 20,F=0.0, DEVC_ID='TEMP DEVC' /
+&RAMP ID='BLOWER RAMP', T=100,F=0.5 /
+&RAMP ID='BLOWER RAMP', T=200,F=1.0 /
 \end{verbatim}
 \normalsize
 
@@ -9795,6 +9801,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct RELATIVE}              & Logical         & See Section~\ref{info:out:DEVC}                                  &       & {\ct .FALSE.} \\ \hline
 {\ct ROTATION}              & Real            & See Section~\ref{info:DEVC}                                      & deg.  & 0             \\ \hline
 {\ct SETPOINT}              & Real            & See Section~\ref{info:basic_control}                             &       &               \\ \hline
+{\ct SMOOTHING\_FACTOR}     & Real            & See Section~\ref{info:basic_control}                             &       & 0             \\ \hline
 {\ct SPEC\_ID}              & Character       & See Section~\ref{info:outputquantities}                          &       &               \\ \hline
 {\ct STATISTICS}            & Character       & See Section~\ref{info:statistics}                                &       &               \\ \hline
 {\ct SURF\_ID}              & Character       & See Section~\ref{info:statistics}                                &       &               \\ \hline
