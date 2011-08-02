@@ -110,7 +110,8 @@ typedef struct _slice {
   int unit_start;
   int blocknumber;
   char summary[1024];
-  int compressed;
+  char volsummary[1024];
+  int compressed,vol_compressed;
   int inuse,involuse,inuse_getbounds;
   int filesize;
   int seq_id,autozip;

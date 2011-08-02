@@ -54,6 +54,7 @@
 #define pp_OSX
 #endif
 
+#define pp_VOLTEST
 #define EGZ
 #define USE_ZLIB
 #define pp_PART

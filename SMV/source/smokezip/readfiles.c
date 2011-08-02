@@ -701,6 +701,7 @@ int readsmv(char *smvfile){
       slicei->inuse=0;
       slicei->involuse=0;
       slicei->compressed=0;
+      slicei->vol_compressed=0;
         
       if(get_slice_bounds==1){
         NewMemory((void **)&slicei->histogram,sizeof(histogramdata));
@@ -1158,9 +1159,8 @@ void readini2(char *inifile){
 /* ------------------ init_volrender ------------------------ */
 
 void init_volrender(void){
-  int i,endian;
+  int i;
 
-  endian=getendian();
   nvolrenderinfo=0;
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
@@ -1178,7 +1178,6 @@ void init_volrender(void){
     int blocknumber;
     mesh *meshi;
     volrenderdata *vr;
-    int lenfile;
     int ni, nj, nk;
 
     slicei = sliceinfo + i;
@@ -1187,7 +1186,6 @@ void init_volrender(void){
     blocknumber = slicei->blocknumber;
     if(blocknumber<0||blocknumber>=nmeshes)continue;
     meshi = meshinfo + blocknumber;
-    lenfile=strlen(slicei->file);
     getsliceparms_c(slicei->file,&ni,&nj,&nk);
 
     if(ni!=meshi->ibar+1||nj!=meshi->jbar+1||nk!=meshi->kbar+1)continue;
@@ -1221,5 +1219,3 @@ void init_volrender(void){
     }
   }
 }
-
-

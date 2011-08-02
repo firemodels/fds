@@ -105,26 +105,31 @@ void compress_volsliceframe(float *data_in, int n_data_in,
   int nbytes=1;
 
   // determine bounds
-
+  CheckMemory;
   if(vmin_in==NULL){
     valmin=data_in[0];
     for(i=1;i<n_data_in;i++){
       if(data_in[i]<valmin)valmin=data_in[i];
     }
+    CheckMemory;
   }
   else{
     valmin=*vmin_in;
   }
+  CheckMemory;
 
   if(vmax_in==NULL){
     valmax=data_in[0];
     for(i=1;i<n_data_in;i++){
       if(data_in[i]>valmax)valmax=data_in[i];
     }
+    CheckMemory;
   }
   else{
     valmax=*vmax_in;
+    CheckMemory;
   }
+  CheckMemory;
 
   // allocate buffers
 
@@ -142,11 +147,13 @@ void compress_volsliceframe(float *data_in, int n_data_in,
       scaled_val=(data_in[i]-valmin)/(valmax-valmin);
       c_data[i]=255*scaled_val;
     }
+    CheckMemory;
   }
   else{
     for(i=0;i<n_data_in;i++){
       c_data[i]=0;
     }
+    CheckMemory;
   }
 
   //  compress data
@@ -161,9 +168,11 @@ void compress_volsliceframe(float *data_in, int n_data_in,
   memcpy(c_data_compressed1+20,&timeval_in,4);
   memcpy(c_data_compressed1+24,&valmin,4);
   memcpy(c_data_compressed1+28,&valmax,4);
+  CheckMemory;
   if(n_data_compressed2>0){
     memcpy(c_data_compressed1+32,c_data_compressed2,n_data_compressed2);
   }
+  CheckMemory;
 
   // resize and deallocate buffers
   ResizeMemory((void **)&c_data_compressed1, n_data_compressed2+32);

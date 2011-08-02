@@ -30,26 +30,21 @@ void endian_switch(void *val, int nval);
 
 int convert_volslice(slice *slicei, int *thread_index){
   char slicefile_svz[1024];
-  int fileversion, one, zero;
   char *slice_file;
-  int version;
   char filetype[1024];
   char *shortlabel;
   int ijkbar[6];
   uLong framesize;
   float *sliceframe_data=NULL;
-  char pp[2];
   char xxx[2];
   int sizebefore, sizeafter;
   int returncode;
-  float time;
   long data_loc;
   int percent_done;
   int percent_next=10;
 #ifndef pp_THREAD
   int count=0;
 #endif
-
   FILE *SLICEFILE;
   FILE *slicestream;
 
@@ -63,14 +58,9 @@ int convert_volslice(slice *slicei, int *thread_index){
 #endif
 
   slice_file=slicei->file;
-  version=slicei->version;
 
   strcpy(pp,"%");
   strcpy(xxx,"X");
-
-  fileversion = 1;
-  one = 1;
-  zero=0;
 
   // check if slice file is accessible
 
@@ -100,14 +90,11 @@ int convert_volslice(slice *slicei, int *thread_index){
     strcpy(slicefile_svz,slicei->file);
   }
   {
-
-    char *ext;
     int lensvz;
 
     lensvz = strlen(slicefile_svz);
 
     if(lensvz>4){
-      ext = slicefile_svz + lensvz - 4;
       strcat(slicefile_svz,".svv");
     }
   }
@@ -176,11 +163,13 @@ int convert_volslice(slice *slicei, int *thread_index){
       float *valmin, *valmax;
       unsigned char *compressed_data_out;
       uLongf ncompressed_data_out;
+      float time;
 
       FORTSLICEREAD(&time,1);
       sizebefore+=12;
       if(returncode==0)break;
       FORTSLICEREAD(sliceframe_data,framesize);    //---------------
+      CheckMemory;
       if(returncode==0)break;
       sizebefore+=(4+framesize*sizeof(float)+4);
 
@@ -196,12 +185,16 @@ int convert_volslice(slice *slicei, int *thread_index){
         vmax=1400.0;
         valmax=&vmax;
       }
-
+      CheckMemory;
       compress_volsliceframe(sliceframe_data, framesize,
                 time, valmin, valmax,
                 &compressed_data_out, &ncompressed_data_out);
+      CheckMemory;
       sizeafter+=ncompressed_data_out+32;
-      fwrite(compressed_data_out,1,ncompressed_data_out+32,slicestream);
+      if(ncompressed_data_out>0){
+        fwrite(compressed_data_out,1,ncompressed_data_out+32,slicestream);
+      }
+      CheckMemory;
       FREEMEMORY(compressed_data_out);
 
 #ifndef pp_THREAD
@@ -247,8 +240,8 @@ wrapup:
     getfilesizelabel(sizebefore,before_label);
     getfilesizelabel(sizeafter,after_label);
 #ifdef pp_THREAD
-    slicei->compressed=1;
-    sprintf(slicei->summary,"compressed from %s to %s (%4.1f%s reduction)",before_label,after_label,(float)sizebefore/(float)sizeafter,xxx);
+    slicei->vol_compressed=1;
+    sprintf(slicei->volsummary,"compressed from %s to %s (%4.1f%s reduction)",before_label,after_label,(float)sizebefore/(float)sizeafter,xxx);
     threadinfo[*thread_index].stat=-1;
 #else
     printf("  records=%i, ",count);

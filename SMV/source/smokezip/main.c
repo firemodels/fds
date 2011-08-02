@@ -518,9 +518,12 @@ void *compress_all(void *arg){
   int *thread_index;
 
   thread_index=(int *)(arg);
-  if(doit_boundary==1)compress_patches(thread_index);
-  if(doit_slice==1)compress_slices(thread_index);
+#ifndef pp_VOLTEST  
+    if(doit_boundary==1)compress_patches(thread_index);
+    if(doit_slice==1)compress_slices(thread_index);
+#endif
   if(doit_volslice==1)compress_volslices(thread_index);
+#ifndef pp_VOLTEST  
   if(doit_smoke3d==1)compress_smoke3ds(thread_index);
 #ifdef pp_PLOT3D
   if(doit_plot3d==1)compress_plot3ds(thread_index);
@@ -528,6 +531,7 @@ void *compress_all(void *arg){
   convert_parts2iso(thread_index);
 #ifdef pp_PART2
   if(doit_particle)compress_parts(NULL);
+#endif
 #endif
   return NULL;
 }
@@ -750,6 +754,25 @@ void print_summary(void){
       label=&slicei->label;
       printf("%s (%s)\n  %s\n",slicei->file,label->longlabel,slicei->summary);
       printf("  using: min=%f %s, max=%f %s \n\n",slicei->valmin,label->unit,slicei->valmax,label->unit);
+    }
+  }
+
+  nsum=0;
+  for(i=0;i<nsliceinfo;i++){
+    slice *slicei;
+
+    slicei = sliceinfo + i;
+    if(slicei->vol_compressed==1)nsum++;
+  }
+  if(nsum>0){
+    for(i=0;i<nsliceinfo;i++){
+      slice *slicei;
+      flowlabels *label;
+
+      slicei = sliceinfo + i;
+      if(slicei->vol_compressed==0)continue;
+      label=&slicei->label;
+      printf("%s (%s)\n  %s\n",slicei->file,label->longlabel,slicei->volsummary);
     }
   }
 
