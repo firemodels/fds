@@ -28,7 +28,8 @@ USE COMP_FUNCTIONS, ONLY: SECOND
 USE PHYSICAL_FUNCTIONS, ONLY: GET_AVERAGE_SPECIFIC_HEAT
 USE GLOBAL_CONSTANTS, ONLY: N_TRACKED_SPECIES,NULL_BOUNDARY,OPEN_BOUNDARY,INTERPOLATED_BOUNDARY, &
                             PREDICTOR,CORRECTOR,EVACUATION_ONLY,SOLID_PHASE_ONLY,TUSED,DEBUG_OPENMP,SOLID_BOUNDARY, &
-                            NO_MASS_FLUX,SPECIFIED_MASS_FLUX,HVAC_BOUNDARY,ENTHALPY_TRANSPORT
+                            NO_MASS_FLUX,SPECIFIED_MASS_FLUX,HVAC_BOUNDARY,ENTHALPY_TRANSPORT, &
+                            INCLUDE_NUMERICAL_DIFFUSION
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: TNOW,ZZZ(4),UN,CP,ZZ_GET(0:N_TRACKED_SPECIES),E_F
 INTEGER  :: I,J,K,N,II,JJ,KK,IIG,JJG,KKG,IW,IOR,IBC
@@ -228,6 +229,14 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       FX=0._EB
       FY=0._EB
       FZ=0._EB
+      
+      ! numerical diffusion (accounted for in divergence)
+      
+      IF (INCLUDE_NUMERICAL_DIFFUSION) THEN
+         DFX(:,:,:,N)=0._EB
+         DFY(:,:,:,N)=0._EB
+         DFZ(:,:,:,N)=0._EB
+      ENDIF
    
       !$OMP PARALLEL DEFAULT(NONE) &
       !$OMP SHARED(N,KBAR,JBAR,IBAR,KBM1,JBM1,IBM1,RHOP,ZZP,FX,FY,FZ,UU,VV,WW,FLUX_LIMITER,R, &
@@ -242,6 +251,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
             DO I=1,IBM1
                ZZZ(1:4) = RHOP(I-1:I+2,J,K)*ZZP(I-1:I+2,J,K,N)
                FX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZZ,FLUX_LIMITER)*R(I)
+               IF (INCLUDE_NUMERICAL_DIFFUSION) DFX(I,J,K,N) = FX(I,J,K) - 0.5_EB*(ZZZ(2)+ZZZ(3))*UU(I,J,K)
             ENDDO
          ENDDO
       ENDDO
@@ -253,6 +263,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
             DO I=1,IBAR
                ZZZ(1:4) = RHOP(I,J-1:J+2,K)*ZZP(I,J-1:J+2,K,N)
                FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZZ,FLUX_LIMITER)
+               IF (INCLUDE_NUMERICAL_DIFFUSION) DFY(I,J,K,N) = FY(I,J,K) - 0.5_EB*(ZZZ(2)+ZZZ(3))*VV(I,J,K)
             ENDDO
          ENDDO
       ENDDO
@@ -264,13 +275,14 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
             DO I=1,IBAR
                ZZZ(1:4) = RHOP(I,J,K-1:K+2)*ZZP(I,J,K-1:K+2,N)
                FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZZ,FLUX_LIMITER)
+               IF (INCLUDE_NUMERICAL_DIFFUSION) DFZ(I,J,K,N) = FZ(I,J,K) - 0.5_EB*(ZZZ(2)+ZZZ(3))*WW(I,J,K)
             ENDDO
          ENDDO
       ENDDO
       !$OMP END DO
 
-     !$OMP DO SCHEDULE(STATIC) &
-     !$OMP PRIVATE(IW,II,JJ,KK,IOR,IBC,IIG,JJG,KKG,ZZZ,UN,RHO_D_DZDN)
+      !$OMP DO SCHEDULE(STATIC) &
+      !$OMP PRIVATE(IW,II,JJ,KK,IOR,IBC,IIG,JJG,KKG,ZZZ,UN,RHO_D_DZDN)
       WLOOP2_FL: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
          IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY) CYCLE WLOOP2_FL
@@ -294,6 +306,8 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
                IF ((UU(II+1,JJ,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0)) THEN
                   ZZZ(1:3) = (/RHO_F(IW),RHOP(II+1:II+2,JJ,KK)/)*(/ZZ_F(IW,N),ZZP(II+1:II+2,JJ,KK,N)/)
                   FX(II+1,JJ,KK) = UU(II+1,JJ,KK)*SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZZ,FLUX_LIMITER)*R(II+1)
+                  IF (INCLUDE_NUMERICAL_DIFFUSION) &
+                     DFX(II+1,JJ,KK,N) = FX(II+1,JJ,KK) - 0.5_EB*(ZZZ(2)+ZZZ(3))*UU(II+1,JJ,KK)
                ENDIF
             CASE(-1) OFF_WALL_SELECT_2
                !            FX/UU(II-2)     ghost
@@ -302,26 +316,36 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
                IF ((UU(II-2,JJ,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0)) THEN
                   ZZZ(2:4) = (/RHOP(II-2:II-1,JJ,KK),RHO_F(IW)/)*(/ZZP(II-2:II-1,JJ,KK,N),ZZ_F(IW,N)/)
                   FX(II-2,JJ,KK) = UU(II-2,JJ,KK)*SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZZ,FLUX_LIMITER)*R(II-2)
+                  IF (INCLUDE_NUMERICAL_DIFFUSION) &
+                     DFX(II-2,JJ,KK,N) = FX(II-2,JJ,KK) - 0.5_EB*(ZZZ(2)+ZZZ(3))*UU(II-2,JJ,KK)
                ENDIF
             CASE( 2) OFF_WALL_SELECT_2
                IF ((VV(II,JJ+1,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0)) THEN
                   ZZZ(1:3) = (/RHO_F(IW),RHOP(II,JJ+1:JJ+2,KK)/)*(/ZZ_F(IW,N),ZZP(II,JJ+1:JJ+2,KK,N)/)
                   FY(II,JJ+1,KK) = VV(II,JJ+1,KK)*SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZZ,FLUX_LIMITER)
+                  IF (INCLUDE_NUMERICAL_DIFFUSION) &
+                     DFY(II,JJ+1,KK,N) = FY(II,JJ+1,KK) - 0.5_EB*(ZZZ(2)+ZZZ(3))*VV(II,JJ+1,KK)
                ENDIF
             CASE(-2) OFF_WALL_SELECT_2
                IF ((VV(II,JJ-2,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0)) THEN
                   ZZZ(2:4) = (/RHOP(II,JJ-2:JJ-1,KK),RHO_F(IW)/)*(/ZZP(II,JJ-2:JJ-1,KK,N),ZZ_F(IW,N)/)
                   FY(II,JJ-2,KK) = VV(II,JJ-2,KK)*SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZZ,FLUX_LIMITER)
+                  IF (INCLUDE_NUMERICAL_DIFFUSION) &
+                     DFY(II,JJ-2,KK,N) = FY(II,JJ-2,KK) - 0.5_EB*(ZZZ(2)+ZZZ(3))*VV(II,JJ-2,KK)
                ENDIF
             CASE( 3) OFF_WALL_SELECT_2
                IF ((WW(II,JJ,KK+1)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0)) THEN
                   ZZZ(1:3) = (/RHO_F(IW),RHOP(II,JJ,KK+1:KK+2)/)*(/ZZ_F(IW,N),ZZP(II,JJ,KK+1:KK+2,N)/)
                   FZ(II,JJ,KK+1) = WW(II,JJ,KK+1)*SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZZ,FLUX_LIMITER)
+                  IF (INCLUDE_NUMERICAL_DIFFUSION) &
+                     DFZ(II,JJ,KK+1,N) = FZ(II,JJ,KK+1) - 0.5_EB*(ZZZ(2)+ZZZ(3))*WW(II,JJ,KK+1)
                ENDIF
             CASE(-3) OFF_WALL_SELECT_2
                IF ((WW(II,JJ,KK-2)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0)) THEN
                   ZZZ(2:4) = (/RHOP(II,JJ,KK-2:KK-1),RHO_F(IW)/)*(/ZZP(II,JJ,KK-2:KK-1,N),ZZ_F(IW,N)/)
                   FZ(II,JJ,KK-2) = WW(II,JJ,KK-2)*SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ,FLUX_LIMITER)
+                  IF (INCLUDE_NUMERICAL_DIFFUSION) &
+                     DFZ(II,JJ,KK-2,N) = FZ(II,JJ,KK-2) - 0.5_EB*(ZZZ(2)+ZZZ(3))*WW(II,JJ,KK-2)
                ENDIF
          END SELECT OFF_WALL_SELECT_2
 
@@ -349,16 +373,22 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          SELECT CASE(IOR)
             CASE( 1)
                FX(II,JJ,KK)   = UN*RHO_F(IW)*ZZ_F(IW,N)*R(II)
+               IF (INCLUDE_NUMERICAL_DIFFUSION) DFX(II,JJ,KK,N)  = 0._EB
             CASE(-1)
                FX(II-1,JJ,KK) = UN*RHO_F(IW)*ZZ_F(IW,N)*R(II-1)
+               IF (INCLUDE_NUMERICAL_DIFFUSION) DFX(II-1,JJ,KK,N)= 0._EB
             CASE( 2)
                FY(II,JJ,KK)   = UN*RHO_F(IW)*ZZ_F(IW,N)
+               IF (INCLUDE_NUMERICAL_DIFFUSION) DFY(II,JJ,KK,N)  = 0._EB
             CASE(-2)
                FY(II,JJ-1,KK) = UN*RHO_F(IW)*ZZ_F(IW,N)
+               IF (INCLUDE_NUMERICAL_DIFFUSION) DFY(II,JJ-1,KK,N)= 0._EB
             CASE( 3) 
                FZ(II,JJ,KK)   = UN*RHO_F(IW)*ZZ_F(IW,N)
+               IF (INCLUDE_NUMERICAL_DIFFUSION) DFZ(II,JJ,KK,N)  = 0._EB
             CASE(-3) 
                FZ(II,JJ,KK-1) = UN*RHO_F(IW)*ZZ_F(IW,N)
+               IF (INCLUDE_NUMERICAL_DIFFUSION) DFZ(II,JJ,KK-1,N)= 0._EB
          END SELECT
 
       ENDDO WLOOP2_FL
