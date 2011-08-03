@@ -155,6 +155,14 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          ENDDO
       ENDDO
    ENDDO
+   
+   ! Numerical diffusion
+   
+   IF (INCLUDE_NUMERICAL_DIFFUSION) THEN
+      RHO_D_DZDX = RHO_D_DZDX - DFX(:,:,:,N)
+      RHO_D_DZDY = RHO_D_DZDY - DFY(:,:,:,N)
+      RHO_D_DZDZ = RHO_D_DZDZ - DFZ(:,:,:,N)
+   ENDIF
 
    ! Correct rho*D del Z at boundaries and store rho*D at boundaries
 
@@ -513,6 +521,23 @@ DO N=1,N_TRACKED_SPECIES
       ENDDO
    ENDDO
 ENDDO
+
+! Remove numerical diffusion before using DEL_RHO_D_DEL_Z in scalar transport
+
+NUMERICAL_DIFFUSION_IF: IF (INCLUDE_NUMERICAL_DIFFUSION) THEN
+   DO N=1,N_TRACKED_SPECIES
+      IF (EVACUATION_ONLY(NM)) CYCLE
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               DEL_RHO_D_DEL_Z(I,J,K,N) = DEL_RHO_D_DEL_Z(I,J,K,N) + (DFX(I,J,K,N)-DFX(I-1,J,K,N))*RDX(I) &
+                                                                   + (DFY(I,J,K,N)-DFY(I,J-1,K,N))*RDY(J) &
+                                                                   + (DFZ(I,J,K,N)-DFZ(I,J,K-1,N))*RDZ(K)
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDDO
+ENDIF NUMERICAL_DIFFUSION_IF
 
 ! Add contribution of reactions
  
