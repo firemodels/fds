@@ -56,13 +56,6 @@ int convert_volslice(slice *slicei, int *thread_index){
   }
 #endif
 
-  {
-    int islice;
-
-    islice = slicei-sliceinfo;
-    printf("compressing slice %i\n",islice);
-  }
-
   slice_file=slicei->file;
 
   // check if slice file is accessible
@@ -92,15 +85,8 @@ int convert_volslice(slice *slicei, int *thread_index){
   else{
     strcpy(slicefile_svz,slicei->file);
   }
-  {
-    int lensvz;
 
-    lensvz = strlen(slicefile_svz);
-
-    if(lensvz>4){
-      strcat(slicefile_svz,".svv");
-    }
-  }
+  if(strlen(slicefile_svz)>4)strcat(slicefile_svz,".svv");
 
   if(GLOBcleanfiles==1){
     slicestream=fopen(slicefile_svz,"rb");
@@ -151,6 +137,15 @@ int convert_volslice(slice *slicei, int *thread_index){
   FORTSLICEREAD(ijkbar,6);
   sizebefore+=4+6*4+4;
   sizeafter=0;
+
+  {
+    int one=1, version=0, completion=0;
+
+    fwrite(&one,4,1,slicestream);
+    fwrite(&version,4,1,slicestream);
+    fwrite(&completion,4,1,slicestream);
+  }
+
   
   {
     int ni, nj, nk;
@@ -194,7 +189,7 @@ int convert_volslice(slice *slicei, int *thread_index){
         ASSERT(0);
       }
       CheckMemory;
-      compress_volsliceframe(sliceframe_data, framesize,time, valmin, valmax,
+      compress_volsliceframe(sliceframe_data, framesize, time, valmin, valmax,
                 &compressed_data_out, &ncompressed_data_out);
       CheckMemory;
       sizeafter+=ncompressed_data_out;
@@ -238,6 +233,12 @@ wrapup:
     printf(" 100%s completed\n",GLOBpp);
 #endif
 
+  {
+    int completion=1;
+
+    fseek(slicestream,4,SEEK_SET);    
+    fwrite(&completion,4,1,slicestream);
+  }
   fclose(SLICEFILE);
   fclose(slicestream);
 
@@ -687,11 +688,11 @@ wrapup:
 #ifndef pp_THREAD
     printf(" 100%s completed\n",GLOBpp);
 #endif
-    FREEMEMORY(sliceframe_data);
-    FREEMEMORY(sliceframe_compressed);
-    FREEMEMORY(sliceframe_uncompressed);
-    FREEMEMORY(sliceframe_compressed_rle);
-    FREEMEMORY(sliceframe_uncompressed_rle);
+  FREEMEMORY(sliceframe_data);
+  FREEMEMORY(sliceframe_compressed);
+  FREEMEMORY(sliceframe_uncompressed);
+  FREEMEMORY(sliceframe_compressed_rle);
+  FREEMEMORY(sliceframe_uncompressed_rle);
 
   fclose(SLICEFILE);
   fseek(slicestream,4,SEEK_SET);
@@ -759,9 +760,9 @@ void *compress_volslices(void *arg){
       continue;
     }
     slicei->involuse=1;
+    UNLOCK_VOLSLICE;
 
     convert_volslice(slicei,thread_index);
-    UNLOCK_VOLSLICE;
   }
   return NULL;
 }
