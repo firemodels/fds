@@ -11,9 +11,6 @@
 #include <math.h>
 #include "egz_stdio.h"
 #include "svzip.h"
-#ifdef pp_KDTESTD
-#include "lightsmoke.h"
-#endif
 #include "lightsmoke.h"
 #include "string_util.h"
 #include "MALLOC.h"
@@ -51,64 +48,64 @@ int main(int argc, char **argv){
   int endian_info;
 
   initMM();
-  doit_lighting=0;
-  doit_smoke3d=1;
-  doit_boundary=1;
-  doit_slice=1;
+  GLOBdoit_lighting=0;
+  GLOBdoit_smoke3d=1;
+  GLOBdoit_boundary=1;
+  GLOBdoit_slice=1;
   GLOBdoit_volslice=1;
 #ifdef pp_PLOT3D
-  doit_plot3d=1;
+  GLOBdoit_plot3d=1;
 #else
-  doit_plot3d=0;
+  GLOBdoit_plot3d=0;
 #endif
 #ifdef pp_PART2
-  doit_particle=0;
+  GLOBdoit_particle=0;
 #endif
 
 #ifdef pp_KDTEST
   test_kd();
   exit(0);
 #endif
-  first_initsphere=1;
+  strcpy(GLOBpp,"%");
+  strcpy(GLOBx,"X");
+  GLOBfirst_initsphere=1;
   GLOBfirst_slice=1;
-  first_patch=1;
-  first_plot3d=1;
-  first_part2iso=1;
-  first_part2iso_smvopen=1;
+  GLOBfirst_patch=1;
+  GLOBfirst_plot3d=1;
+  GLOBfirst_part2iso=1;
+  GLOBfirst_part2iso_smvopen=1;
 #ifdef pp_THREAD
   mt_nthreads=2;
 #endif
   GLOBframeskip=-1;
-  no_chop=0;
-  autozip=0;
-  make_demo=0;
-  endf=0;
-  syst=0;
-  endianfile=NULL;
-  destdir=NULL;
-  sourcedir=NULL;
-  lensourcedir=0;
-  lendestdir=0;
+  GLOBno_chop=0;
+  GLOBautozip=0;
+  GLOBmake_demo=0;
+  GLOBendf=0;
+  GLOBsyst=0;
+  GLOBendianfile=NULL;
+  GLOBdestdir=NULL;
+  GLOBsourcedir=NULL;
   endianswitch=-1;
-  overwrite_b=0;
-  overwrite_s=0;
-  get_bounds=0;
-  get_slice_bounds=0;
-  get_plot3d_bounds=0;
-  get_boundary_bounds=0;
+  GLOBoverwrite_b=0;
+  GLOBoverwrite_s=0;
+  GLOBget_bounds=0;
+  GLOBget_slice_bounds=0;
+  GLOBget_plot3d_bounds=0;
+  GLOBget_boundary_bounds=0;
 #ifdef pp_PART
-  get_part_bounds=0;
-  partfile2iso=0;
+  GLOBget_part_bounds=0;
+  GLOBpartfile2iso=0;
 #endif
   GLOBoverwrite_slice=0;
   GLOBoverwrite_volslice=0;
-  overwrite_plot3d=0;
+  GLOBoverwrite_plot3d=0;
   endian_info=0;
-  cleanfiles=0;
-  smoke3dzipstep=1;
-  boundzipstep=1;
-  slicezipstep=1;
-  filesremoved=0;
+  GLOBcleanfiles=0;
+  GLOBsmoke3dzipstep=1;
+  GLOBboundzipstep=1;
+  GLOBslicezipstep=1;
+  GLOBfilesremoved=0;
 
   npatchinfo=0;
   nsmoke3dinfo=0;
@@ -126,7 +123,6 @@ int main(int argc, char **argv){
 
   patchinfo=NULL;
   smoke3dinfo=NULL;
-  strcpy(pp,"%");
 
   prog=argv[0];
   filebase=NULL;
@@ -145,75 +141,75 @@ int main(int argc, char **argv){
     if(arg[0]=='-'&&lenarg>1){
       switch(arg[1]){
       case 'a':
-        autozip=1;
+        GLOBautozip=1;
         break;
       case 'b':
         if(strcmp(arg,"-bounds")==0){
-          get_bounds=1;
-          get_slice_bounds=1;
+          GLOBget_bounds=1;
+          GLOBget_slice_bounds=1;
 #ifdef pp_PLOT3D
-          get_plot3d_bounds=1;
+          GLOBget_plot3d_bounds=1;
 #endif
-          get_boundary_bounds=1;
+          GLOBget_boundary_bounds=1;
 #ifdef pp_PART
-          get_part_bounds=1;
+          GLOBget_part_bounds=1;
 #endif
         }
         else if(strcmp(arg,"-bb")==0){
-          get_boundary_bounds=1;
+          GLOBget_boundary_bounds=1;
         }
         else if(strcmp(arg,"-bs")==0){
-          get_slice_bounds=1;
+          GLOBget_slice_bounds=1;
         }
 #ifdef pp_PLOT3D
         else if(strcmp(arg,"-bp")==0){
-          get_plot3d_bounds=1;
+          GLOBget_plot3d_bounds=1;
         }
 #endif
 #ifdef pp_PART2
         else if(strcmp(arg,"-bP")==0){
-          get_part_bounds=1;
+          GLOBget_part_bounds=1;
         }
 #endif
         else{
-          overwrite_b=1;
+          GLOBoverwrite_b=1;
         }
         break;
 #ifdef pp_PART2
       case 'y':
         if(strcmp(arg,"-yP")==0){
-          doit_particle=1;
+          GLOBdoit_particle=1;
         }
         break;
 #endif
       case 'l':
-        doit_lighting=1;
+        GLOBdoit_lighting=1;
         break;
       case 'n':
         if(strcmp(arg,"-n3")==0){
-          doit_smoke3d=0;
+          GLOBdoit_smoke3d=0;
         }
         else if(strcmp(arg,"-nb")==0){
-          doit_boundary=0;
+          GLOBdoit_boundary=0;
         }
 #ifdef pp_PLOT3D
         else if(strcmp(arg,"-np")==0){
-          doit_plot3d=0;
+          GLOBdoit_plot3d=0;
         }
 #endif
 #ifdef pp_PART2
         else if(strcmp(arg,"-nP")==0){
-          doit_particle=0;
+          GLOBdoit_particle=0;
         }
 #endif
         else if(strcmp(arg,"-ns")==0){
-          doit_slice=0;
+          GLOBdoit_slice=0;
         }
         else if(strcmp(arg,"-nvs")==0){
           GLOBdoit_volslice=0;
         }
         else if(strcmp(arg,"-no_chop")==0){
-          no_chop=1;
+          GLOBno_chop=1;
         }
         break;
       case '2':
@@ -221,37 +217,37 @@ int main(int argc, char **argv){
         break;
       case '3':
         GLOBoverwrite_volslice=1;
-        overwrite_s=1;
+        GLOBoverwrite_s=1;
         break;
 #ifdef  pp_PART2
       case 'P':
-        overwrite_part=1;
+        GLOBoverwrite_part=1;
         break;
 #endif
       case 'p':
         if(strcmp(arg,"-part2iso")==0){
-          partfile2iso=1;
+          GLOBpartfile2iso=1;
         }
 #ifdef pp_PLOT3D
         else{
-          overwrite_plot3d=1;
+          GLOBoverwrite_plot3d=1;
         }
 #endif
         break;
       case 'f':
-        overwrite_b=1;
-        overwrite_s=1;
+        GLOBoverwrite_b=1;
+        GLOBoverwrite_s=1;
         GLOBoverwrite_slice=1;
         GLOBoverwrite_volslice=1;
 #ifdef pp_PLOT3D
-        overwrite_plot3d=1;
+        GLOBoverwrite_plot3d=1;
 #endif
 #ifdef pp_PART2
-        overwrite_part=1;
+        GLOBoverwrite_part=1;
 #endif
         break;
       case 'c':
-        cleanfiles=1;
+        GLOBcleanfiles=1;
         break;
       case 'e':
         endian_info=1;
@@ -260,14 +256,13 @@ int main(int argc, char **argv){
         if(i+1>=argc)break;
         if(lenarg==2){
             lenarg2=strlen(argv[i+1]);
-            NewMemory((void **)&sourcedir,lenarg2+2);
-            strcpy(sourcedir,argv[i+1]);
-            if(sourcedir[lenarg2-1]!=dirseparator[0]){
-              strcat(sourcedir,dirseparator);
+            NewMemory((void **)&GLOBsourcedir,lenarg2+2);
+            strcpy(GLOBsourcedir,argv[i+1]);
+            if(GLOBsourcedir[lenarg2-1]!=dirseparator[0]){
+              strcat(GLOBsourcedir,dirseparator);
             }
-            lensourcedir=strlen(sourcedir);
-            if(getfileinfo(sourcedir,NULL,NULL)!=0){
-              printf("The source directory specified, %s, does not exist or cannot be accessed\n",sourcedir);
+            if(getfileinfo(GLOBsourcedir,NULL,NULL)!=0){
+              printf("The source directory specified, %s, does not exist or cannot be accessed\n",GLOBsourcedir);
               return 1;
             }
            i++;
@@ -277,29 +272,28 @@ int main(int argc, char **argv){
           arg2=argv[i+1];
           sscanf(arg2,"%i",&GLOBframeskip);
           if(GLOBframeskip>0){
-            slicezipstep=GLOBframeskip;
-            smoke3dzipstep=GLOBframeskip;
-            boundzipstep=GLOBframeskip;
+            GLOBslicezipstep=GLOBframeskip;
+            GLOBsmoke3dzipstep=GLOBframeskip;
+            GLOBboundzipstep=GLOBframeskip;
           }
           i++;
         }
         break;
       case 'd':
         if(strcmp(arg,"-demo")==0){
-          autozip=1;
-          make_demo=1;
+          GLOBautozip=1;
+          GLOBmake_demo=1;
           break;
         }
         if(i+1<argc){
           lenarg2=strlen(argv[i+1]);
-          NewMemory((void **)&destdir,lenarg2+2);
-          strcpy(destdir,argv[i+1]);
-          if(destdir[lenarg2-1]!=dirseparator[0]){
-            strcat(destdir,dirseparator);
+          NewMemory((void **)&GLOBdestdir,lenarg2+2);
+          strcpy(GLOBdestdir,argv[i+1]);
+          if(GLOBdestdir[lenarg2-1]!=dirseparator[0]){
+            strcat(GLOBdestdir,dirseparator);
           }
-          lendestdir=strlen(destdir);
- //         if(getfileinfo(destdir,NULL,NULL)!=0){
- //           printf("The destination directory %s does not exist or cannot be accessed\n",destdir);
+ //         if(getfileinfo(GLOBdestdir,NULL,NULL)!=0){
+ //           printf("The destination directory %s does not exist or cannot be accessed\n",GLOBdestdir);
  //           return 1;
  //         }
           i++;
@@ -338,7 +332,7 @@ int main(int argc, char **argv){
   }
 
 #ifdef pp_THREAD
-  if(cleanfiles==1)mt_nthreads=1;
+  if(GLOBcleanfiles==1)mt_nthreads=1;
 #endif
 
   // construct smv filename
@@ -358,17 +352,17 @@ int main(int argc, char **argv){
       filelen=strlen(filebase);
     }
   }
-  if(sourcedir==NULL){
+  if(GLOBsourcedir==NULL){
     strcpy(smvfile,filebase);
   }
   else{
-    strcpy(smvfile,sourcedir);
+    strcpy(smvfile,GLOBsourcedir);
     strcat(smvfile,filebase);
   }
   strcpy(smvfilebase,filebase);
-  if(partfile2iso==1||cleanfiles==1){
-    strcpy(smvisofile,smvfile);
-    strcat(smvisofile,".isosmv");
+  if(GLOBpartfile2iso==1||GLOBcleanfiles==1){
+    strcpy(GLOBsmvisofile,smvfile);
+    strcat(GLOBsmvisofile,".isosmv");
   }
 
   strcat(smvfile,".smv");
@@ -381,7 +375,7 @@ int main(int argc, char **argv){
   strcpy(inifilebase,filebase);
   strcat(inifilebase,".ini");
 
-  strcpy(endianfilebase,"");
+  strcpy(GLOBendianfilebase,"");
 
   // make sure smv file name exists
 
@@ -436,7 +430,7 @@ int main(int argc, char **argv){
   else{
       printf("Smokezip running on a little endian computer.\n");
   }
-  if(endf==0&&syst==0){
+  if(GLOBendf==0&&GLOBsyst==0){
     printf("Warning: casename.end file is missing.  Endianness of\n");
     printf("         FDS boundary file data is unknown.\n");
     if(getendian()==1){
@@ -469,17 +463,17 @@ int main(int argc, char **argv){
   compress_all(NULL);
 #endif
 
-  if(cleanfiles==0&&destdir!=NULL){
-    printf("Copying .smv, .ini and .end files to %s directory\n",destdir);
-    filecopy(destdir,smvfile,smvfilebase);
-    filecopy(destdir,inifile,inifilebase);
-    filecopy(destdir,endianfile,endianfilebase);
+  if(GLOBcleanfiles==0&&GLOBdestdir!=NULL){
+    printf("Copying .smv, .ini and .end files to %s directory\n",GLOBdestdir);
+    filecopy(GLOBdestdir,smvfile,smvfilebase);
+    filecopy(GLOBdestdir,inifile,inifilebase);
+    filecopy(GLOBdestdir,GLOBendianfile,GLOBendianfilebase);
   }
-  if(cleanfiles==1&&filesremoved==0){
+  if(GLOBcleanfiles==1&&GLOBfilesremoved==0){
     printf("No compressed files were removed\n");
   }
-  if(make_demo==1){
-    makesvd(destdir,smvfile);
+  if(GLOBmake_demo==1){
+    makesvd(GLOBdestdir,smvfile);
   }
   return 0;
 }
@@ -518,20 +512,16 @@ void *compress_all(void *arg){
   int *thread_index;
 
   thread_index=(int *)(arg);
-#ifndef pp_VOLTEST  
-    if(doit_boundary==1)compress_patches(thread_index);
-    if(doit_slice==1)compress_slices(thread_index);
-#endif
+  if(GLOBdoit_boundary==1)compress_patches(thread_index);
+  if(GLOBdoit_slice==1)compress_slices(thread_index);
   if(GLOBdoit_volslice==1)compress_volslices(thread_index);
-#ifndef pp_VOLTEST  
-  if(doit_smoke3d==1)compress_smoke3ds(thread_index);
+  if(GLOBdoit_smoke3d==1)compress_smoke3ds(thread_index);
 #ifdef pp_PLOT3D
-  if(doit_plot3d==1)compress_plot3ds(thread_index);
+  if(GLOBdoit_plot3d==1)compress_plot3ds(thread_index);
 #endif
   convert_parts2iso(thread_index);
 #ifdef pp_PART2
-  if(doit_particle)compress_parts(NULL);
-#endif
+  if(GLOBdoit_particle)compress_parts(NULL);
 #endif
   return NULL;
 }
@@ -660,14 +650,12 @@ void makesvd(char *destdir, char *smvfile){
 /* ------------------ usage ------------------------ */
 
 void usage(char *prog){
-  char pp[2];
   char smv_version[100];
   int svn_num;
 
   getSMZversion(smv_version);  // get Smokeview version (ie 5.x.z)
   svn_num=getmaxrevision();    // get svn revision number
 
-  strcpy(pp,"%");
   printf("\n");
   printf("  smokezip %s(%i) - %s\n\n",smv_version,svn_num,__DATE__);
   printf("  Compress FDS data files\n\n");
@@ -720,7 +708,7 @@ void usage(char *prog){
   printf("  -auto - compress only files that are auto-loaded by Smokeview\n");
   printf("  -d destdir - copies compressed files (and files needed by Smokeview\n");
   printf("        to view the case) to the directory destdir\n"); 
-  printf("  -s sourcedir - specifies directory containing source files\n");
+  printf("  -s GLOBsourcedir - specifies directory containing source files\n");
   printf("  -demo - Creates the files (compressed and .svd ) needed by the\n");
   printf("        Smokeview demonstrator mode.  Compresses files that are autoloaded, \n");
   printf("        uses (20.0,620.0) and (0.0,0.23) for temperature and oxygen bounds\n");

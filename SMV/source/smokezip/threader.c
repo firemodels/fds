@@ -48,15 +48,12 @@ void print_thread_stats(void){
     }
   }
   if(sum>0){
-    char pp[2];
-
-    strcpy(pp,"%");
     for(i=0;i<mt_nthreads;i++){
       threaddata *ti;
 
       ti = threadinfo+i;
       if(ti->stat>0){
-        printf(" %s(%i%s)",ti->label,ti->stat,pp);
+        printf(" %s(%i%s)",ti->label,ti->stat,GLOBpp);
         if(lastthread!=i)printf(",");
       }
     }

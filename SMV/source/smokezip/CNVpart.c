@@ -89,7 +89,7 @@ void compress_parts(void *arg){
     }
   }
 
-  if(convertable==1&&needbounds==1&&get_part_bounds==1){
+  if(convertable==1&&needbounds==1&&GLOBget_part_bounds==1){
     Get_Part_Bounds();
   }
 
@@ -97,7 +97,7 @@ void compress_parts(void *arg){
     part *parti;
 
     parti = partinfo + i;
-    if(autozip==1&&parti->autozip==0)continue;
+    if(GLOBautozip==1&&parti->autozip==0)continue;
     convert_part(parti,thread_index);
   }
 }
@@ -111,20 +111,20 @@ void *convert_parts2iso(void *arg){
   thread_index=(int *)arg;
   
   LOCK_PART2ISO;
-  if(first_part2iso==1){
-    first_part2iso=0;
+  if(GLOBfirst_part2iso==1){
+    GLOBfirst_part2iso=0;
   
-    if(cleanfiles==1){
+    if(GLOBcleanfiles==1){
       FILE *stream;
       int j;
 
-      stream=fopen(smvisofile,"rb");
+      stream=fopen(GLOBsmvisofile,"rb");
       if(stream!=NULL){
         fclose(stream);
-        printf("  Removing %s.\n",smvisofile);
-        UNLINK(smvisofile);
+        printf("  Removing %s.\n",GLOBsmvisofile);
+        UNLINK(GLOBsmvisofile);
         LOCK_COMPRESS;
-        filesremoved++;
+        GLOBfilesremoved++;
         UNLOCK_COMPRESS;
       }
       for(j=0;j<npartinfo;j++){
@@ -150,7 +150,7 @@ void *convert_parts2iso(void *arg){
             printf("  Removing %s.\n",isofilename);
             UNLINK(isofilename);
             LOCK_COMPRESS;
-            filesremoved++;
+            GLOBfilesremoved++;
             UNLOCK_COMPRESS;
           }
         }
@@ -161,9 +161,9 @@ void *convert_parts2iso(void *arg){
   }
   UNLOCK_PART2ISO;
 
-  if(cleanfiles==1)return NULL;
+  if(GLOBcleanfiles==1)return NULL;
 
-  if(partfile2iso==1){
+  if(GLOBpartfile2iso==1){
     for(i=0;i<npartinfo;i++){
       part *parti;
 
@@ -200,8 +200,8 @@ int convertable_part(part *parti){
   // set up compressed particle file
 
   strcpy(partfile_svz,"");
-  if(destdir!=NULL){
-    strcpy(partfile_svz,destdir);
+  if(GLOBdestdir!=NULL){
+    strcpy(partfile_svz,GLOBdestdir);
   }
   strcat(partfile_svz,partfile);
   strcat(partfile_svz,".svz");
@@ -306,8 +306,8 @@ void convert_part(part *parti, int *thread_index){
   // set up compressed particle file
 
   strcpy(partfile_svz,"");
-  if(destdir!=NULL){
-    strcpy(partfile_svz,destdir);
+  if(GLOBdestdir!=NULL){
+    strcpy(partfile_svz,GLOBdestdir);
   }
   strcat(partfile_svz,partfile);
   strcat(partfile_svz,".svz");
@@ -321,8 +321,8 @@ void convert_part(part *parti, int *thread_index){
   // set up compressed particle size file
 
   strcpy(partsizefile_svz,"");
-  if(destdir!=NULL){
-    strcpy(partsizefile_svz,destdir);
+  if(GLOBdestdir!=NULL){
+    strcpy(partsizefile_svz,GLOBdestdir);
   }
   strcpy(partsizefile_svz,partfile);
   strcat(partsizefile_svz,".szz");
@@ -335,14 +335,14 @@ void convert_part(part *parti, int *thread_index){
     return;
  }
 
-  if(cleanfiles==1){
+  if(GLOBcleanfiles==1){
     partstream=fopen(partfile_svz,"rb");
     if(partstream!=NULL){
       fclose(partstream);
       printf("  Removing %s.\n",partfile_svz);
       UNLINK(partfile_svz);
       LOCK_COMPRESS;
-      filesremoved++;
+      GLOBfilesremoved++;
       UNLOCK_COMPRESS;
     }
     partsizestream=fopen(partsizefile_svz,"rb");
@@ -351,13 +351,13 @@ void convert_part(part *parti, int *thread_index){
       printf("  Removing %s.\n",partsizefile_svz);
       UNLINK(partsizefile_svz);
       LOCK_COMPRESS;
-      filesremoved++;
+      GLOBfilesremoved++;
       UNLOCK_COMPRESS;
     }
     return;
   }
 
-  if(overwrite_part==0){
+  if(GLOBoverwrite_part==0){
     partstream=fopen(partfile_svz,"rb");
     if(partstream!=NULL){
       fclose(partstream);
@@ -517,7 +517,7 @@ void convert_part(part *parti, int *thread_index){
     data_loc=sizebefore;
     percent_done=100.0*(float)data_loc/(float)parti->filesize;
     if(percent_done>percent_next){
-      printf(" %i%s",percent_next,pp);
+      printf(" %i%s",percent_next,GLOBpp);
       LOCK_COMPRESS;
       fflush(stdout);
       UNLOCK_COMPRESS;
@@ -526,7 +526,7 @@ void convert_part(part *parti, int *thread_index){
     count++;
   }
 
-  printf(" 100%s completed\n",pp);
+  printf(" 100%s completed\n",GLOBpp);
   FREEMEMORY(nquantities);
   FREEMEMORY(npoints);
   FREEMEMORY(pdata);
@@ -542,14 +542,13 @@ void convert_part(part *parti, int *thread_index){
   fclose(partstream);
 //  fclose(partsizestream);
   {
-    char before_label[256],after_label[256],xxx[2];
+    char before_label[256],after_label[256];
 
-    strcpy(xxx,"X");
     getfilesizelabel(sizebefore,before_label);
     getfilesizelabel(sizeafter,after_label);
     printf("    records=%i, ",count);
     printf("Sizes: original=%s, ",before_label);
-    printf("compressed=%s (%4.1f%s reduction)\n",after_label,(float)sizebefore/(float)sizeafter,xxx);
+    printf("compressed=%s (%4.1f%s reduction)\n",after_label,(float)sizebefore/(float)sizeafter,GLOBx);
   }
 
 }
@@ -717,7 +716,7 @@ void part2iso(part *parti, int *thread_index){
 
   parti->compressed2=0;
 #ifdef pp_THREAD
-  if(cleanfiles==0){
+  if(GLOBcleanfiles==0){
     int fileindex;
 
     fileindex = parti + 1 - partinfo;
@@ -819,12 +818,12 @@ void part2iso(part *parti, int *thread_index){
   CCisoheader(isofile,isolonglabel,isoshortlabel,isounits,levels,&nlevels,&error);
 
   LOCK_PART2ISO;
-  if(first_part2iso_smvopen==1){
-    first_part2iso_smvopen=0;
-    SMVISOFILE=fopen(smvisofile,"w");
+  if(GLOBfirst_part2iso_smvopen==1){
+    GLOBfirst_part2iso_smvopen=0;
+    SMVISOFILE=fopen(GLOBsmvisofile,"w");
   }
   else{
-    SMVISOFILE=fopen(smvisofile,"a");
+    SMVISOFILE=fopen(GLOBsmvisofile,"a");
   }
 
   fprintf(SMVISOFILE,"ISOF %i\n",blocknumber);
@@ -894,7 +893,7 @@ void part2iso(part *parti, int *thread_index){
     }
 #else
     if(percent_done>percent_next){
-      printf(" %i%s",percent_next,pp);
+      printf(" %i%s",percent_next,GLOBpp);
       fflush(stdout);
       percent_next+=10;
     }
@@ -1014,7 +1013,7 @@ void part2iso(part *parti, int *thread_index){
     threadinfo[*thread_index].stat=-1;
   }
 #else
-  printf(" 100%s completed\n",pp);
+  printf(" 100%s completed\n",GLOBpp);
 #endif
 
   FREEMEMORY(nquantities);

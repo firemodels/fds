@@ -38,8 +38,6 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
   int ncompressed_rle;
   uLongf ncompressed_zlib;
   int returncode;
-  char pp[2];
-  char xxx[2];
   int percent_done;
   int percent_next=10;
   long data_loc;
@@ -54,7 +52,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
 //int compress (Bytef *dest,   uLongf *destLen, const Bytef *source, uLong sourceLen);
 //int uncompress (Bytef *dest,   uLongf *destLen, const Bytef *source, uLong sourceLen);
 
-  if(cleanfiles==0){
+  if(GLOBcleanfiles==0){
 #ifdef pp_THREAD
     int fileindex;
 
@@ -65,9 +63,6 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
 #endif
   }
 
-  strcpy(pp,"%");
-  strcpy(xxx,"X");
-  
   if(getfileinfo(smoke3dfile,NULL,NULL)!=0){
     printf("  %s does not exist\n",smoke3dfile);
     return;
@@ -80,8 +75,8 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
 
   // name 3d smoke flie
 
-  if(destdir!=NULL){
-    strcpy(smoke3dfile_svz,destdir);
+  if(GLOBdestdir!=NULL){
+    strcpy(smoke3dfile_svz,GLOBdestdir);
     strcat(smoke3dfile_svz,smoke3di->filebase);
   }
   else{
@@ -91,8 +86,8 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
 
   // name size file
 
-  if(destdir!=NULL){
-    strcpy(smoke3dsizefile_svz,destdir);
+  if(GLOBdestdir!=NULL){
+    strcpy(smoke3dsizefile_svz,GLOBdestdir);
     strcat(smoke3dsizefile_svz,smoke3di->filebase);
   }
   else{
@@ -102,14 +97,14 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
 
   // remove files if clean option is set
 
-  if(cleanfiles==1){
+  if(GLOBcleanfiles==1){
     smoke3dstream=fopen(smoke3dfile_svz,"rb");
     if(smoke3dstream!=NULL){
       fclose(smoke3dstream);
       printf("  Removing %s.\n",smoke3dfile_svz);
       UNLINK(smoke3dfile_svz);
       LOCK_COMPRESS;
-      filesremoved++;
+      GLOBfilesremoved++;
       UNLOCK_COMPRESS;
     }
     smoke3dsizestream=fopen(smoke3dsizefile_svz,"r");
@@ -118,13 +113,13 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
       printf("  Removing %s.\n",smoke3dsizefile_svz);
       UNLINK(smoke3dsizefile_svz);
       LOCK_COMPRESS;
-      filesremoved++;
+      GLOBfilesremoved++;
       UNLOCK_COMPRESS;
     }
     return;
   }
 
-  if(overwrite_s==0){
+  if(GLOBoverwrite_s==0){
     smoke3dstream=fopen(smoke3dfile_svz,"rb");
     if(smoke3dstream!=NULL){
       fclose(smoke3dstream);
@@ -225,7 +220,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
 
     sizebefore+=12+ncompressed_rle;
 
-    if(count%smoke3dzipstep!=0)continue;
+    if(count%GLOBsmoke3dzipstep!=0)continue;
     time_max=time;
 
     // uncompress frame data (from RLE format)
@@ -236,7 +231,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
       printf("  ***warning frame size expected=%i frame size found=%i\n",nfull_file,nfull_data);
     }
 
-    if(doit_lighting==1&&smoke3di->is_soot==1){
+    if(GLOBdoit_lighting==1&&smoke3di->is_soot==1){
       build_radiancemap(&radianceinfo);
       nfull_data+=nx*ny*nz;
     }
@@ -262,7 +257,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
     }
 #else
     if(percent_done>percent_next){
-      printf(" %i%s",percent_next,pp);
+      printf(" %i%s",percent_next,GLOBpp);
       fflush(stdout);
       percent_next+=10;
     }
@@ -271,7 +266,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
     // write out new entries in the size (sz) file
 
     nchars[0]=nfull_data;
-    if(doit_lighting==1&&smoke3di->is_soot==1){
+    if(GLOBdoit_lighting==1&&smoke3di->is_soot==1){
       nchars[1]=-ncompressed_zlib;
     }
     else{
@@ -284,7 +279,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
 
 // time, nframeboth, ncompressed_rle, ncompressed_zlib, nlightdata
     nlight_data=nfull_data-nfull_file;
-    if(doit_lighting==1&&smoke3di->is_soot==1)nlight_data=-nlight_data;
+    if(GLOBdoit_lighting==1&&smoke3di->is_soot==1)nlight_data=-nlight_data;
     fprintf(smoke3dsizestream,"%f %i %i %i %i\n",time,nfull_data,ncompressed_rle,(int)ncompressed_zlib,nlight_data);
   }
 #ifdef pp_THREAD
@@ -294,12 +289,12 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
     getfilesizelabel(sizebefore,before_label);
     getfilesizelabel(sizeafter,after_label);
     smoke3di->compressed=1;
-    sprintf(smoke3di->summary,"compressed from %s to %s (%4.1f%s reduction)",before_label,after_label,(float)sizebefore/(float)sizeafter,xxx);
+    sprintf(smoke3di->summary,"compressed from %s to %s (%4.1f%s reduction)",before_label,after_label,(float)sizebefore/(float)sizeafter,GLOBx);
     fflush(stdout);
     threadinfo[*thread_index].stat=-1;
   }
 #else
-  printf(" 100%s completed\n",pp);
+  printf(" 100%s completed\n",GLOBpp);
   printf("  records=%i, ",count);
   {
     char before_label[256],after_label[256];
@@ -309,7 +304,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
 
     printf("Sizes: original=%s, ",before_label);
 
-    printf("compressed=%s (%4.1f%s reduction)\n\n",after_label,(float)sizebefore/(float)sizeafter,xxx);
+    printf("compressed=%s (%4.1f%s reduction)\n\n",after_label,(float)sizebefore/(float)sizeafter,GLOBx);
     fflush(stdout);
   }
 #endif
@@ -335,7 +330,7 @@ void *compress_smoke3ds(void *arg){
 
   for(i=0;i<nsmoke3dinfo;i++){
     smoke3di = smoke3dinfo + i;
-    if(autozip==1&&smoke3di->autozip==0)continue;
+    if(GLOBautozip==1&&smoke3di->autozip==0)continue;
     LOCK_SMOKE;
     if(smoke3di->inuse==1){
       UNLOCK_SMOKE;

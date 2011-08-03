@@ -31,16 +31,11 @@ int clean_boundary(patch *patchi){
   FILE *BOUNDARYFILE=NULL;
   char boundaryfile_svz[1024], boundarysizefile_svz[1024];
   FILE *boundarystream=NULL,*boundarysizestream=NULL;
-  char pp[2];
-  char xxx[2];
   char *boundary_file;
   char filetype[256];
   char *shortlabel;
 
   boundary_file=patchi->file;
-
-  strcpy(pp,"%");
-  strcpy(xxx,"X");
 
   // check if boundary file is accessible
 
@@ -57,8 +52,8 @@ int clean_boundary(patch *patchi){
 
   // set up boundary compressed file
 
-  if(destdir!=NULL){
-    strcpy(boundaryfile_svz,destdir);
+  if(GLOBdestdir!=NULL){
+    strcpy(boundaryfile_svz,GLOBdestdir);
     strcat(boundaryfile_svz,patchi->filebase);
   }
   else{
@@ -66,8 +61,8 @@ int clean_boundary(patch *patchi){
   }
   strcat(boundaryfile_svz,".svz");
 
-  if(destdir!=NULL){
-    strcpy(boundarysizefile_svz,destdir);
+  if(GLOBdestdir!=NULL){
+    strcpy(boundarysizefile_svz,GLOBdestdir);
     strcat(boundarysizefile_svz,patchi->filebase);
   }
   else{
@@ -81,7 +76,7 @@ int clean_boundary(patch *patchi){
     printf("  Removing %s.\n",boundaryfile_svz);
     UNLINK(boundaryfile_svz);
     LOCK_COMPRESS;
-    filesremoved++;
+    GLOBfilesremoved++;
     UNLOCK_COMPRESS;
   }
   boundarysizestream=fopen(boundarysizefile_svz,"rb");
@@ -90,7 +85,7 @@ int clean_boundary(patch *patchi){
     printf("  Removing %s.\n",boundarysizefile_svz);
     UNLINK(boundarysizefile_svz);
     LOCK_COMPRESS;
-    filesremoved++;
+    GLOBfilesremoved++;
     UNLOCK_COMPRESS;
   }
   return 0;
@@ -116,8 +111,6 @@ int convert_boundary(patch *patchi, int *thread_index){
   uLong npatchfull;
   unsigned int sizebefore=0, sizeafter=0;
   int count=-1;
-  char pp[2];
-  char xxx[2];
   int version;
   char *boundary_file;
   char filetype[256];
@@ -143,9 +136,6 @@ int convert_boundary(patch *patchi, int *thread_index){
     sprintf(threadinfo[*thread_index].label,"bf %i",fileindex);
   }
 #endif
-  strcpy(pp,"%");
-  strcpy(xxx,"X");
-
   fileversion = 1;
   one = 1;
   zero=0;
@@ -170,8 +160,8 @@ int convert_boundary(patch *patchi, int *thread_index){
 
   // set up boundary compressed file
 
-  if(destdir!=NULL){
-    strcpy(boundaryfile_svz,destdir);
+  if(GLOBdestdir!=NULL){
+    strcpy(boundaryfile_svz,GLOBdestdir);
     strcat(boundaryfile_svz,patchi->filebase);
   }
   else{
@@ -179,8 +169,8 @@ int convert_boundary(patch *patchi, int *thread_index){
   }
   strcat(boundaryfile_svz,".svz");
 
-  if(destdir!=NULL){
-    strcpy(boundarysizefile_svz,destdir);
+  if(GLOBdestdir!=NULL){
+    strcpy(boundarysizefile_svz,GLOBdestdir);
     strcat(boundarysizefile_svz,patchi->filebase);
   }
   else{
@@ -188,7 +178,7 @@ int convert_boundary(patch *patchi, int *thread_index){
   }
   strcat(boundarysizefile_svz,".szz");
 
-  if(overwrite_b==0){
+  if(GLOBoverwrite_b==0){
     boundarystream=fopen(boundaryfile_svz,"rb");
     boundarysizestream=fopen(boundarysizefile_svz,"r");
     if(boundarystream!=NULL||boundarysizestream!=NULL){
@@ -351,7 +341,7 @@ int convert_boundary(patch *patchi, int *thread_index){
       if(time<time_max)continue;
       count++;
 
-      if(count%boundzipstep!=0)continue;
+      if(count%GLOBboundzipstep!=0)continue;
       time_max=time;
 
       for(i=0;i<npatchfull;i++){
@@ -398,7 +388,7 @@ int convert_boundary(patch *patchi, int *thread_index){
       }
 #else
       if(percent_done>percent_next){
-        printf(" %i%s",percent_next,pp);
+        printf(" %i%s",percent_next,GLOBpp);
         fflush(stdout);
         percent_next+=10;
       }
@@ -406,7 +396,7 @@ int convert_boundary(patch *patchi, int *thread_index){
     }
 wrapup:
 #ifndef pp_THREAD
-    printf(" 100%s completed\n",pp);
+    printf(" 100%s completed\n",GLOBpp);
 #endif
     FREEMEMORY(ijks);
     FREEMEMORY(patchvals);
@@ -425,12 +415,12 @@ wrapup:
     getfilesizelabel(sizeafter,after_label);
 #ifdef pp_THREAD
     patchi->compressed=1;
-    sprintf(patchi->summary,"compressed from %s to %s (%4.1f%s reduction)",before_label,after_label,(float)sizebefore/(float)sizeafter,xxx);
+    sprintf(patchi->summary,"compressed from %s to %s (%4.1f%s reduction)",before_label,after_label,(float)sizebefore/(float)sizeafter,GLOBx);
     threadinfo[*thread_index].stat=-1;
 #else
     printf("  records=%i, ",count);
     printf("Sizes: original=%s, ",before_label);
-    printf("compressed=%s (%4.1f%s reduction)\n\n",after_label,(float)sizebefore/(float)sizeafter,xxx);
+    printf("compressed=%s (%4.1f%s reduction)\n\n",after_label,(float)sizebefore/(float)sizeafter,GLOBx);
 #endif
   }
 
@@ -481,10 +471,10 @@ void *compress_patches(void *arg){
 
   if(npatchinfo<=0)return NULL;
   LOCK_PATCH;
-  if(first_patch==1){
-    first_patch=0;
+  if(GLOBfirst_patch==1){
+    GLOBfirst_patch=0;
 
-    if(cleanfiles==1){
+    if(GLOBcleanfiles==1){
       for(i=0;i<npatchinfo;i++){
         patchi = patchinfo + i;
         clean_boundary(patchi);
@@ -494,7 +484,7 @@ void *compress_patches(void *arg){
     }
     for(i=0;i<npatchinfo;i++){
       patchi = patchinfo + i;
-      if(autozip==1&&patchi->autozip==0)continue;
+      if(GLOBautozip==1&&patchi->autozip==0)continue;
 
       pb=getpatch(patchi->label.shortlabel);
       if(pb!=NULL){
@@ -511,7 +501,7 @@ void *compress_patches(void *arg){
 
   // find bounds
 
-    if(get_boundary_bounds==1){
+    if(GLOBget_boundary_bounds==1){
       Get_Boundary_Bounds();
     }
     for(i=0;i<npatchinfo;i++){
@@ -526,13 +516,13 @@ void *compress_patches(void *arg){
   }
   UNLOCK_PATCH;
 
-  if(cleanfiles==1)return NULL;
+  if(GLOBcleanfiles==1)return NULL;
 
   // convert and compress files
 
   for(i=0;i<npatchinfo;i++){
     patchi = patchinfo + i;
-    if(autozip==1&&patchi->autozip==0)continue;
+    if(GLOBautozip==1&&patchi->autozip==0)continue;
 
     if(patchi->doit==1){
       LOCK_PATCH;
@@ -645,7 +635,7 @@ void mt_update_patch_hist(void){
 }
 #endif
 
-/* ------------------ get_boundary_bounds ------------------------ */
+/* ------------------ Get_Boundary_Bounds ------------------------ */
 
 void Get_Boundary_Bounds(void){
   int i;

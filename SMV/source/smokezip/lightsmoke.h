@@ -38,12 +38,4 @@ void build_radiancemap(radiancedata *radianceinfo);
 void test_kd(void);
 #endif
 
-//***********************
-//************* variables
-//***********************
-
-EXTERN int doit_smoke3d, doit_boundary, doit_slice, doit_plot3d;
-#ifdef pp_PART2
-EXTERN int doit_particle;
-#endif
 

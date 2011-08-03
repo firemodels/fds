@@ -75,8 +75,8 @@ int convert_plot3d(plot3d *plot3di){
 
   // set up plot3d compressed file
 
-  if(destdir!=NULL){
-    strcpy(plot3dfile_svz,destdir);
+  if(GLOBdestdir!=NULL){
+    strcpy(plot3dfile_svz,GLOBdestdir);
     strcat(plot3dfile_svz,plot3di->filebase);
   }
   else{
@@ -92,20 +92,20 @@ int convert_plot3d(plot3d *plot3di){
     }
   }
 
-  if(cleanfiles==1){
+  if(GLOBcleanfiles==1){
     plot3dstream=fopen(plot3dfile_svz,"rb");
     if(plot3dstream!=NULL){
       fclose(plot3dstream);
       printf("  Removing %s.\n",plot3dfile_svz);
       UNLINK(plot3dfile_svz);
       LOCK_COMPRESS;
-      filesremoved++;
+      GLOBfilesremoved++;
       UNLOCK_COMPRESS;
     }
     return 0;
   }
 
-  if(overwrite_plot3d==0){
+  if(GLOBoverwrite_plot3d==0){
     plot3dstream=fopen(plot3dfile_svz,"rb");
     if(plot3dstream!=NULL){
       fclose(plot3dstream);
@@ -222,18 +222,16 @@ int convert_plot3d(plot3d *plot3di){
 
   {
     char before_label[256],after_label[256];
-    char xxx[2];
-  
-    strcpy(xxx,"X");
+
     getfilesizelabel(sizebefore,before_label);
     getfilesizelabel(sizeafter,after_label);
 #ifdef pp_THREAD
     LOCK_PRINT;
-    printf("\n%s\n  compressed from %s to %s (%4.1f%s reduction)\n\n",plot3di->file,before_label,after_label,(float)sizebefore/(float)sizeafter,xxx);
+    printf("\n%s\n  compressed from %s to %s (%4.1f%s reduction)\n\n",plot3di->file,before_label,after_label,(float)sizebefore/(float)sizeafter,GLOBx);
     UNLOCK_PRINT;
 #else
     printf("Sizes: original=%s, ",before_label);
-    printf("compressed=%s (%4.1f%s reduction)\n",after_label,(float)sizebefore/(float)sizeafter,xxx);
+    printf("compressed=%s (%4.1f%s reduction)\n",after_label,(float)sizebefore/(float)sizeafter,GLOBx);
 #endif
   }
 
@@ -262,16 +260,16 @@ void *compress_plot3ds(void *arg){
   plot3d *plot3di, *pb;
 
   LOCK_PLOT3D;
-  if(first_plot3d==1){
-    first_plot3d=0;
+  if(GLOBfirst_plot3d==1){
+    GLOBfirst_plot3d=0;
     for(i=0;i<nplot3dinfo;i++){
       plot3di = plot3dinfo + i;
-      if(autozip==1&&plot3di->autozip==0)continue;
+      if(GLOBautozip==1&&plot3di->autozip==0)continue;
       plot3di->count=0;
     }
     for(i=0;i<nplot3dinfo;i++){
       plot3di = plot3dinfo + i;
-      if(autozip==1&&plot3di->autozip==0)continue;
+      if(GLOBautozip==1&&plot3di->autozip==0)continue;
       plot3di->doit=1;
 
       pb=plot3dinfo;
@@ -290,7 +288,7 @@ void *compress_plot3ds(void *arg){
 
   for(i=0;i<nplot3dinfo;i++){
     plot3di = plot3dinfo + i;
-    if(autozip==1&&plot3di->autozip==0)continue;
+    if(GLOBautozip==1&&plot3di->autozip==0)continue;
     LOCK_PLOT3D;
     if(plot3di->inuse==1){
       UNLOCK_PLOT3D;
@@ -303,7 +301,7 @@ void *compress_plot3ds(void *arg){
       convert_plot3d(plot3di);
     }
     else{
-      if(cleanfiles==0){
+      if(GLOBcleanfiles==0){
         printf("%s not compressed\n",plot3di->file);
         printf("  Min and Max for %s not set in .ini file\n",plot3di->labels[0].shortlabel);
       }

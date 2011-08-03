@@ -92,8 +92,7 @@ unsigned int irle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer
 
 /* ------------------ compress_volsliceframe ------------------------ */
 
-void compress_volsliceframe(float *data_in, int n_data_in, 
-                float timeval_in, float *vmin_in, float *vmax_in,
+void compress_volsliceframe(float *data_in, int n_data_in, float timeval_in, float *vmin_in, float *vmax_in,
                 unsigned char **compressed_data_out, uLongf *ncompressed_data_out
                 ){
   float valmin, valmax;
@@ -153,12 +152,8 @@ void compress_volsliceframe(float *data_in, int n_data_in,
 
   //  compress data
 
-  {
-    unsigned char *ctemp;
+  compress(c_data_compressed+32,&n_data_compressedm32, c_data, n_data_in);
 
-    ctemp = c_data_compressed+32;
-    compress(ctemp,&n_data_compressedm32, c_data, n_data_in);
-  }
   n_data_compressed=n_data_compressedm32+32;
   CheckMemory;
 
@@ -173,10 +168,11 @@ void compress_volsliceframe(float *data_in, int n_data_in,
   CheckMemory;
 
   // resize and deallocate buffers
+
   ResizeMemory((void **)&c_data_compressed, n_data_compressed);
   FREEMEMORY(c_data);
   *compressed_data_out=c_data_compressed;
-  *ncompressed_data_out=n_data_compressedm32;
+  *ncompressed_data_out=n_data_compressed;
 }
 
 /* ------------------ uncompress_volsliceframe ------------------------ */

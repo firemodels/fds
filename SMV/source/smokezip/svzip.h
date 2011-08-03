@@ -373,57 +373,58 @@ STDCALL FORTopenslice(char *slicefilename, int *unit, int *endian,
 //************* variables
 //***********************
 
-EXTERN int GLOBnvolrenderinfo;
-EXTERN int doit_smoke3d, doit_boundary, doit_slice, doit_plot3d, GLOBdoit_volslice;
+EXTERN int nvolrenderinfo;
+EXTERN int GLOBdoit_smoke3d, GLOBdoit_boundary, GLOBdoit_slice, GLOBdoit_plot3d, GLOBdoit_volslice;
 #ifdef pp_PART2
-EXTERN int doit_particle;
+EXTERN int GLOBdoit_particle;
 #endif
 
-EXTERN int first_initsphere,GLOBfirst_slice,first_patch,first_plot3d,first_part2iso,first_part2iso_smvopen;
+EXTERN int GLOBdoit_lighting;
+
+EXTERN int GLOBfirst_initsphere,GLOBfirst_slice,GLOBfirst_patch,GLOBfirst_plot3d,GLOBfirst_part2iso,GLOBfirst_part2iso_smvopen;
 EXTERN int GLOBframeskip;
-EXTERN int no_chop;
+EXTERN int GLOBno_chop;
+
 EXTERN patch *patchinfo;
 EXTERN mesh *meshinfo;
 EXTERN smoke3d *smoke3dinfo;
-EXTERN int npatchinfo;
-
-EXTERN int nsliceinfo, nplot3dinfo;
-
 EXTERN slice *sliceinfo;
 EXTERN plot3d *plot3dinfo;
+EXTERN part *partinfo;
+EXTERN part5class *partclassinfo;
+EXTERN part5prop *part5propinfo;
+EXTERN threaddata *threadinfo;
+EXTERN spherepoints sphereinfo;
+
+EXTERN int npatchinfo, nsliceinfo, nplot3dinfo, npartinfo;;
+EXTERN int npartclassinfo;
+EXTERN int nsmoke3dinfo;
+#ifdef pp_PART
+EXTERN int maxpart5propinfo, npart5propinfo;
+#endif
+
 
 EXTERN int nmeshes;
 EXTERN int GLOBoverwrite_slice;
 EXTERN int GLOBoverwrite_volslice;
-EXTERN int overwrite_plot3d;
+EXTERN int GLOBoverwrite_plot3d;
 #ifdef pp_PART
-EXTERN int overwrite_part;
-EXTERN part *partinfo;
-EXTERN int npartinfo;
-EXTERN int npartclassinfo;
-EXTERN part5class *partclassinfo;
-EXTERN part5prop *part5propinfo;
-EXTERN int maxpart5propinfo, npart5propinfo;
+EXTERN int GLOBoverwrite_part;
 #endif
-EXTERN int nsmoke3dinfo;
-EXTERN int endianswitch,overwrite_b,overwrite_s;
-EXTERN int cleanfiles;
-EXTERN char *destdir,*sourcedir;
-EXTERN int lensourcedir,lendestdir;
-EXTERN char pp[2];
-EXTERN int smoke3dzipstep, boundzipstep, slicezipstep;
-EXTERN int filesremoved;
-EXTERN int endf, syst;
-EXTERN char endianfilebase[1024];
-EXTERN char *endianfile;
-EXTERN spherepoints sphereinfo;
-EXTERN int autozip, make_demo;
-EXTERN int get_bounds, get_slice_bounds, get_plot3d_bounds, get_boundary_bounds;
+EXTERN int endianswitch,GLOBoverwrite_b,GLOBoverwrite_s;
+EXTERN int GLOBcleanfiles;
+EXTERN char *GLOBdestdir,*GLOBsourcedir;
+EXTERN char GLOBpp[2],GLOBx[2];
+EXTERN int GLOBsmoke3dzipstep, GLOBboundzipstep, GLOBslicezipstep;
+EXTERN int GLOBfilesremoved;
+EXTERN int GLOBendf, GLOBsyst;
+EXTERN char GLOBendianfilebase[1024];
+EXTERN char *GLOBendianfile;
+EXTERN int GLOBautozip, GLOBmake_demo;
+EXTERN int GLOBget_bounds, GLOBget_slice_bounds, GLOBget_plot3d_bounds, GLOBget_boundary_bounds;
 #ifdef pp_PART
-EXTERN int get_part_bounds;
-EXTERN int partfile2iso;
+EXTERN int GLOBget_part_bounds;
+EXTERN int GLOBpartfile2iso;
 #endif
-EXTERN char smvisofile[1024];
-EXTERN threaddata *threadinfo;
-EXTERN int doit_lighting;
+EXTERN char GLOBsmvisofile[1024];
 

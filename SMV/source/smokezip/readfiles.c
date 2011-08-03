@@ -268,9 +268,9 @@ int readsmv(char *smvfile){
   ismoke3d_seq=0;
   rewind(streamsmv);
 #ifndef pp_THREAD
-  if(cleanfiles==0)printf("Compressing .bf, .iso, .s3d, and .sf data files referenced in %s\n\n",smvfile);
+  if(GLOBcleanfiles==0)printf("Compressing .bf, .iso, .s3d, and .sf data files referenced in %s\n\n",smvfile);
 #endif
-  if(cleanfiles==1){
+  if(GLOBcleanfiles==1){
     printf("Removing compressed .bf, .iso, .s3d and .sf data files referenced in %s\n",smvfile);
     printf("   (Each removal occurs only if the corresponding uncompressed file exists)\n\n");
   }
@@ -289,21 +289,24 @@ int readsmv(char *smvfile){
       FILE *endianstream;
       int one;
 
-      endf=1;
+      GLOBendf=1;
       if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
       trim(buffer);
-      strcpy(endianfilebase,buffer);
-      FREEMEMORY(endianfile);
-      if(sourcedir==NULL){
-        NewMemory((void **)&endianfile,strlen(buffer)+1);
-        strcpy(endianfile,buffer);
+      strcpy(GLOBendianfilebase,buffer);
+      FREEMEMORY(GLOBendianfile);
+      if(GLOBsourcedir==NULL){
+        NewMemory((void **)&GLOBendianfile,strlen(buffer)+1);
+        strcpy(GLOBendianfile,buffer);
       }
       else{
-        NewMemory((void **)&endianfile,strlen(buffer)+strlen(sourcedir)+1);
-        strcpy(endianfile,sourcedir);
-        strcat(endianfile,buffer);
+        int lendir=0;
+
+        if(GLOBsourcedir!=NULL)lendir=strlen(GLOBsourcedir);
+        NewMemory((void **)&GLOBendianfile,strlen(buffer)+lendir+1);
+        strcpy(GLOBendianfile,GLOBsourcedir);
+        strcat(GLOBendianfile,buffer);
       }
-      endianstream=fopen(endianfile,"rb");
+      endianstream=fopen(GLOBendianfile,"rb");
       if(endianstream!=NULL){
         fseek(endianstream,4,SEEK_CUR);
         fread(&one,4,1,endianstream);
@@ -348,7 +351,7 @@ int readsmv(char *smvfile){
   */
     if(match(buffer,"SYST",4) == 1){
       if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
-      syst=1;
+      GLOBsyst=1;
       trim(buffer);
       if(match(buffer,"SGI",3) == 1||match(buffer,"AIX",3)==1){
         if(getendian()==0){
@@ -405,16 +408,16 @@ int readsmv(char *smvfile){
       trim(buffer);
       buffer2=trim_front(buffer);
       filelen=strlen(buffer2);
-      if(sourcedir!=NULL){
-        filelen+=lensourcedir+1;
+      if(GLOBsourcedir!=NULL){
+        filelen+=strlen(GLOBsourcedir)+1;
       }
       if(filelen<=0)break;
-      if(getfileinfo(buffer2,sourcedir,&filesize)==0){
-        NewMemory((void **)&smoke3di->file,(unsigned int)(filelen+lensourcedir+1));
+      if(getfileinfo(buffer2,GLOBsourcedir,&filesize)==0){
+        NewMemory((void **)&smoke3di->file,(unsigned int)(filelen+1));
         NewMemory((void **)&smoke3di->filebase,(unsigned int)(filelen+1));
         STRCPY(smoke3di->filebase,buffer2);
-        if(sourcedir!=NULL){
-          STRCPY(smoke3di->file,sourcedir);
+        if(GLOBsourcedir!=NULL){
+          STRCPY(smoke3di->file,GLOBsourcedir);
           STRCAT(smoke3di->file,buffer2);
         }
         else{
@@ -528,12 +531,15 @@ int readsmv(char *smvfile){
       trim(buffer);
       buffer2=trim_front(buffer);
       if(strlen(buffer2)<=0)break;
-      if(getfileinfo(buffer2,sourcedir,&filesize)==0){
-        NewMemory((void **)&parti->file,(unsigned int)(strlen(buffer2)+lensourcedir+1));
+      if(getfileinfo(buffer2,GLOBsourcedir,&filesize)==0){
+        int lendir=0;
+
+        if(GLOBsourcedir!=NULL)lendir=strlen(GLOBsourcedir);
+        NewMemory((void **)&parti->file,(unsigned int)(strlen(buffer2)+lendir+1));
         NewMemory((void **)&parti->filebase,(unsigned int)(strlen(buffer2)+1));
         STRCPY(parti->filebase,buffer2);
-        if(sourcedir!=NULL){
-          STRCPY(parti->file,sourcedir);
+        if(GLOBsourcedir!=NULL){
+          STRCPY(parti->file,GLOBsourcedir);
           STRCAT(parti->file,buffer2);
         }
         else{
@@ -593,12 +599,15 @@ int readsmv(char *smvfile){
       trim(buffer);
       buffer2=trim_front(buffer);
       if(strlen(buffer2)<=0)break;
-      if(getfileinfo(buffer2,sourcedir,&filesize)==0){
-        NewMemory((void **)&patchi->file,(unsigned int)(strlen(buffer2)+lensourcedir+1));
+      if(getfileinfo(buffer2,GLOBsourcedir,&filesize)==0){
+        int lendir=0;
+
+        if(GLOBsourcedir!=NULL)lendir=strlen(GLOBsourcedir);
+        NewMemory((void **)&patchi->file,(unsigned int)(strlen(buffer2)+lendir+1));
         NewMemory((void **)&patchi->filebase,(unsigned int)(strlen(buffer2)+1));
         STRCPY(patchi->filebase,buffer2);
-        if(sourcedir!=NULL){
-          STRCPY(patchi->file,sourcedir);
+        if(GLOBsourcedir!=NULL){
+          STRCPY(patchi->file,GLOBsourcedir);
           STRCAT(patchi->file,buffer2);
         }
         else{
@@ -609,7 +618,7 @@ int readsmv(char *smvfile){
           break;
         }
         patchi->filesize=filesize;
-        if(get_boundary_bounds==1){
+        if(GLOBget_boundary_bounds==1){
           int endian, npatches, error, boundaryunitnumber;
           FILE_SIZE lenfile;
 
@@ -703,7 +712,7 @@ int readsmv(char *smvfile){
       slicei->compressed=0;
       slicei->vol_compressed=0;
         
-      if(get_slice_bounds==1){
+      if(GLOBget_slice_bounds==1){
         NewMemory((void **)&slicei->histogram,sizeof(histogramdata));
       }
 
@@ -711,12 +720,15 @@ int readsmv(char *smvfile){
       trim(buffer);
       buffer2=trim_front(buffer);
       if(strlen(buffer2)<=0)break;
-      if(getfileinfo(buffer2,sourcedir,&filesize)==0){
-        NewMemory((void **)&slicei->file,(unsigned int)(strlen(buffer2)+lensourcedir+1));
+      if(getfileinfo(buffer2,GLOBsourcedir,&filesize)==0){
+        int lendir=0;
+
+        if(GLOBsourcedir!=NULL)lendir=strlen(GLOBsourcedir);
+        NewMemory((void **)&slicei->file,(unsigned int)(strlen(buffer2)+lendir+1));
         NewMemory((void **)&slicei->filebase,(unsigned int)(strlen(buffer2)+1));
         STRCPY(slicei->filebase,buffer2);
-        if(sourcedir!=NULL){
-          STRCPY(slicei->file,sourcedir);
+        if(GLOBsourcedir!=NULL){
+          STRCPY(slicei->file,GLOBsourcedir);
           STRCAT(slicei->file,buffer2);
         }
         else{
@@ -781,12 +793,15 @@ int readsmv(char *smvfile){
       trim(buffer);
       buffer2=trim_front(buffer);
       if(strlen(buffer2)<=0)break;
-      if(getfileinfo(buffer2,sourcedir,&filesize)==0){
-        NewMemory((void **)&plot3di->file,(unsigned int)(strlen(buffer2)+lensourcedir+1));
+      if(getfileinfo(buffer2,GLOBsourcedir,&filesize)==0){
+        int lendir=0;
+
+        if(GLOBsourcedir!=NULL)lendir=strlen(GLOBsourcedir);
+        NewMemory((void **)&plot3di->file,(unsigned int)(strlen(buffer2)+lendir+1));
         NewMemory((void **)&plot3di->filebase,(unsigned int)(strlen(buffer2)+1));
         STRCPY(plot3di->filebase,buffer2);
-        if(sourcedir!=NULL){
-          STRCPY(plot3di->file,sourcedir);
+        if(GLOBsourcedir!=NULL){
+          STRCPY(plot3di->file,GLOBsourcedir);
         }
         else{
           STRCPY(plot3di->file,"");
@@ -1022,20 +1037,20 @@ void readini2(char *inifile){
     }
     if(GLOBframeskip<1&&match(buffer,"SLICEZIPSTEP",12)==1){
 	    fgets(buffer,BUFFERSIZE,stream);
-	    sscanf(buffer,"%i",&slicezipstep);
-	    if(slicezipstep<1)slicezipstep=1;
+	    sscanf(buffer,"%i",&GLOBslicezipstep);
+	    if(GLOBslicezipstep<1)GLOBslicezipstep=1;
       continue;
     }
     if(GLOBframeskip<1&&match(buffer,"SMOKE3DZIPSTEP",14)==1){
 	    fgets(buffer,BUFFERSIZE,stream);
-	    sscanf(buffer,"%i",&smoke3dzipstep);
-	    if(smoke3dzipstep<1)smoke3dzipstep=1;
+	    sscanf(buffer,"%i",&GLOBsmoke3dzipstep);
+	    if(GLOBsmoke3dzipstep<1)GLOBsmoke3dzipstep=1;
       continue;
     }
     if(GLOBframeskip<1&&match(buffer,"BOUNDZIPSTEP",12)==1){
 	    fgets(buffer,BUFFERSIZE,stream);
-	    sscanf(buffer,"%i",&boundzipstep);
-	    if(boundzipstep<1)boundzipstep=1;
+	    sscanf(buffer,"%i",&GLOBboundzipstep);
+	    if(GLOBboundzipstep<1)GLOBboundzipstep=1;
       continue;
     }
 
@@ -1161,7 +1176,7 @@ void readini2(char *inifile){
 void init_volrender(void){
   int i;
 
-  GLOBnvolrenderinfo=0;
+  nvolrenderinfo=0;
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
     volrenderdata *vr;
@@ -1201,7 +1216,7 @@ void init_volrender(void){
       continue;
     }
   }
-  GLOBnvolrenderinfo=0;
+  nvolrenderinfo=0;
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
     volrenderdata *vr;
@@ -1209,7 +1224,7 @@ void init_volrender(void){
     meshi = meshinfo + i;
     vr = &(meshi->volrenderinfo);
     if(vr->smoke!=NULL){
-      GLOBnvolrenderinfo++;
+      nvolrenderinfo++;
       vr->smoke->isvolslice=1;
       vr->smoke->voltype=1;
       if(vr->fire!=NULL){

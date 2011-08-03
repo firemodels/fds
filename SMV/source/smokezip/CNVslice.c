@@ -36,7 +36,6 @@ int convert_volslice(slice *slicei, int *thread_index){
   int ijkbar[6];
   uLong framesize;
   float *sliceframe_data=NULL;
-  char xxx[2];
   int sizebefore, sizeafter;
   int returncode;
   long data_loc;
@@ -49,7 +48,7 @@ int convert_volslice(slice *slicei, int *thread_index){
   FILE *slicestream;
 
 #ifdef pp_THREAD
-  if(cleanfiles==0){
+  if(GLOBcleanfiles==0){
     int fileindex;
 
     fileindex = slicei + 1 - sliceinfo;
@@ -65,9 +64,6 @@ int convert_volslice(slice *slicei, int *thread_index){
   }
 
   slice_file=slicei->file;
-
-  strcpy(pp,"%");
-  strcpy(xxx,"X");
 
   // check if slice file is accessible
 
@@ -89,8 +85,8 @@ int convert_volslice(slice *slicei, int *thread_index){
 
   // set up slice compressed file
 
-  if(destdir!=NULL){
-    strcpy(slicefile_svz,destdir);
+  if(GLOBdestdir!=NULL){
+    strcpy(slicefile_svz,GLOBdestdir);
     strcat(slicefile_svz,slicei->filebase);
   }
   else{
@@ -106,14 +102,14 @@ int convert_volslice(slice *slicei, int *thread_index){
     }
   }
 
-  if(cleanfiles==1){
+  if(GLOBcleanfiles==1){
     slicestream=fopen(slicefile_svz,"rb");
     if(slicestream!=NULL){
       fclose(slicestream);
       printf("  Removing %s.\n",slicefile_svz);
       UNLINK(slicefile_svz);
       LOCK_COMPRESS;
-      filesremoved++;
+      GLOBfilesremoved++;
       UNLOCK_COMPRESS;
     }
     return 0;
@@ -138,7 +134,7 @@ int convert_volslice(slice *slicei, int *thread_index){
   // read and write slice header
 
 #ifndef pp_THREAD
-  if(cleanfiles==0){
+  if(GLOBcleanfiles==0){
     printf("Compressing %s (%s)\n",slice_file,filetype);
   }
 #endif
@@ -173,11 +169,13 @@ int convert_volslice(slice *slicei, int *thread_index){
       float time;
 
       FORTSLICEREAD(&time,1);
-      sizebefore+=12;
       if(returncode==0)break;
-      FORTSLICEREAD(sliceframe_data,framesize);    //---------------
       CheckMemory;
+      sizebefore+=12;
+
+      FORTSLICEREAD(sliceframe_data,framesize);    //---------------
       if(returncode==0)break;
+      CheckMemory;
       sizebefore+=(4+framesize*sizeof(float)+4);
 
       valmin=NULL;
@@ -192,14 +190,16 @@ int convert_volslice(slice *slicei, int *thread_index){
         vmax=1400.0;
         valmax=&vmax;
       }
+      else{
+        ASSERT(0);
+      }
       CheckMemory;
-      compress_volsliceframe(sliceframe_data, framesize,
-                time, valmin, valmax,
+      compress_volsliceframe(sliceframe_data, framesize,time, valmin, valmax,
                 &compressed_data_out, &ncompressed_data_out);
       CheckMemory;
-      sizeafter+=ncompressed_data_out+32;
+      sizeafter+=ncompressed_data_out;
       if(ncompressed_data_out>0){
-        fwrite(compressed_data_out,1,ncompressed_data_out+32,slicestream);
+        fwrite(compressed_data_out,1,ncompressed_data_out,slicestream);
       }
       CheckMemory;
       FREEMEMORY(compressed_data_out);
@@ -220,7 +220,7 @@ int convert_volslice(slice *slicei, int *thread_index){
       }
 #else
       if(percent_done>percent_next){
-        printf(" %i%s",percent_next,pp);
+        printf(" %i%s",percent_next,GLOBpp);
         fflush(stdout);
         percent_next+=10;
       }
@@ -235,7 +235,7 @@ int convert_volslice(slice *slicei, int *thread_index){
 
 wrapup:
 #ifndef pp_THREAD
-    printf(" 100%s completed\n",pp);
+    printf(" 100%s completed\n",GLOBpp);
 #endif
 
   fclose(SLICEFILE);
@@ -248,12 +248,12 @@ wrapup:
     getfilesizelabel(sizeafter,after_label);
 #ifdef pp_THREAD
     slicei->vol_compressed=1;
-    sprintf(slicei->volsummary,"compressed from %s to %s (%4.1f%s reduction)",before_label,after_label,(float)sizebefore/(float)sizeafter,xxx);
+    sprintf(slicei->volsummary,"compressed from %s to %s (%4.1f%s reduction)",before_label,after_label,(float)sizebefore/(float)sizeafter,GLOBx);
     threadinfo[*thread_index].stat=-1;
 #else
     printf("  records=%i, ",count);
     printf("Sizes: original=%s, ",before_label);
-    printf("compressed=%s (%4.1f%s reduction)\n\n",after_label,(float)sizebefore/(float)sizeafter,xxx);
+    printf("compressed=%s (%4.1f%s reduction)\n\n",after_label,(float)sizebefore/(float)sizeafter,GLOBx);
 #endif
   }
 
@@ -279,8 +279,6 @@ int convert_slice(slice *slicei, int *thread_index){
   float *sliceframe_data=NULL;
   unsigned char *sliceframe_compressed=NULL, *sliceframe_uncompressed=NULL;
   unsigned char *sliceframe_compressed_rle=NULL, *sliceframe_uncompressed_rle=NULL;
-  char pp[2];
-  char xxx[2];
   char cval[256];
   int sizebefore, sizeafter;
   int returncode;
@@ -305,7 +303,7 @@ int convert_slice(slice *slicei, int *thread_index){
   FILE *slicestream,*slicesizestream;
 
 #ifdef pp_THREAD
-  if(cleanfiles==0){
+  if(GLOBcleanfiles==0){
     int fileindex;
 
     fileindex = slicei + 1 - sliceinfo;
@@ -315,9 +313,6 @@ int convert_slice(slice *slicei, int *thread_index){
 
   slice_file=slicei->file;
   version=slicei->version;
-
-  strcpy(pp,"%");
-  strcpy(xxx,"X");
 
   fileversion = 1;
   one = 1;
@@ -343,8 +338,8 @@ int convert_slice(slice *slicei, int *thread_index){
 
   // set up slice compressed file
 
-  if(destdir!=NULL){
-    strcpy(slicefile_svz,destdir);
+  if(GLOBdestdir!=NULL){
+    strcpy(slicefile_svz,GLOBdestdir);
     strcat(slicefile_svz,slicei->filebase);
   }
   else{
@@ -366,8 +361,8 @@ int convert_slice(slice *slicei, int *thread_index){
     }
   }
 
-  if(destdir!=NULL){
-    strcpy(slicesizefile_svz,destdir);
+  if(GLOBdestdir!=NULL){
+    strcpy(slicesizefile_svz,GLOBdestdir);
     strcat(slicesizefile_svz,slicei->filebase);
   }
   else{
@@ -389,14 +384,14 @@ int convert_slice(slice *slicei, int *thread_index){
     }
   }
 
-  if(cleanfiles==1){
+  if(GLOBcleanfiles==1){
     slicestream=fopen(slicefile_svz,"rb");
     if(slicestream!=NULL){
       fclose(slicestream);
       printf("  Removing %s.\n",slicefile_svz);
       UNLINK(slicefile_svz);
       LOCK_COMPRESS;
-      filesremoved++;
+      GLOBfilesremoved++;
       UNLOCK_COMPRESS;
     }
     slicesizestream=fopen(slicesizefile_svz,"rb");
@@ -405,7 +400,7 @@ int convert_slice(slice *slicei, int *thread_index){
       printf("  Removing %s.\n",slicesizefile_svz);
       UNLINK(slicesizefile_svz);
       LOCK_COMPRESS;
-      filesremoved++;
+      GLOBfilesremoved++;
       UNLOCK_COMPRESS;
     }
     return 0;
@@ -445,7 +440,7 @@ int convert_slice(slice *slicei, int *thread_index){
   sprintf(cval,"%f",slicei->valmin);
   trimzeros(cval);
 #ifndef pp_THREAD
-  if(cleanfiles==0){
+  if(GLOBcleanfiles==0){
     printf("Compressing %s (%s)\n",slice_file,filetype);
     printf("  using min=%s %s",cval,units);
   }
@@ -453,7 +448,7 @@ int convert_slice(slice *slicei, int *thread_index){
   sprintf(cval,"%f",slicei->valmax);
   trimzeros(cval);
 #ifndef pp_THREAD
-  if(cleanfiles==0){
+  if(GLOBcleanfiles==0){
     printf(" max=%s %s\n",cval,units);
     printf(" ");
   }
@@ -465,7 +460,7 @@ int convert_slice(slice *slicei, int *thread_index){
   
   chop_min=0;
   chop_max=255;
-  if(no_chop==0){
+  if(GLOBno_chop==0){
     if(slicei->setchopvalmax==1){
         chop_max = 255*(slicei->chopvalmax-valmin)/denom;
         if(chop_max<0)chop_max=0;
@@ -622,7 +617,7 @@ int convert_slice(slice *slicei, int *thread_index){
       }
 #else
       if(percent_done>percent_next){
-        printf(" %i%s",percent_next,pp);
+        printf(" %i%s",percent_next,GLOBpp);
         fflush(stdout);
         percent_next+=10;
       }
@@ -670,7 +665,7 @@ int convert_slice(slice *slicei, int *thread_index){
         }
       }
       itime++;
-      if(itime%slicezipstep!=0)continue;
+      if(itime%GLOBslicezipstep!=0)continue;
 
       //int compress (Bytef *dest,   uLongf *destLen, const Bytef *source, uLong sourceLen);
       ncompressed_zlib=ncompressed_save;
@@ -690,7 +685,7 @@ int convert_slice(slice *slicei, int *thread_index){
 
 wrapup:
 #ifndef pp_THREAD
-    printf(" 100%s completed\n",pp);
+    printf(" 100%s completed\n",GLOBpp);
 #endif
     FREEMEMORY(sliceframe_data);
     FREEMEMORY(sliceframe_compressed);
@@ -711,17 +706,16 @@ wrapup:
     getfilesizelabel(sizeafter,after_label);
 #ifdef pp_THREAD
     slicei->compressed=1;
-    sprintf(slicei->summary,"compressed from %s to %s (%4.1f%s reduction)",before_label,after_label,(float)sizebefore/(float)sizeafter,xxx);
+    sprintf(slicei->summary,"compressed from %s to %s (%4.1f%s reduction)",before_label,after_label,(float)sizebefore/(float)sizeafter,GLOBx);
     threadinfo[*thread_index].stat=-1;
 #else
     printf("  records=%i, ",count);
     printf("Sizes: original=%s, ",before_label);
-    printf("compressed=%s (%4.1f%s reduction)\n\n",after_label,(float)sizebefore/(float)sizeafter,xxx);
+    printf("compressed=%s (%4.1f%s reduction)\n\n",after_label,(float)sizebefore/(float)sizeafter,GLOBx);
 #endif
   }
 
   return 1;
-
 }
 
 /* ------------------ getslice ------------------------ */
@@ -746,9 +740,9 @@ void *compress_volslices(void *arg){
   int i;
 
   thread_index = (int *)arg;
-  if(GLOBnvolrenderinfo<=0)return NULL;
+  if(nvolrenderinfo<=0)return NULL;
 
-  if(cleanfiles==1)return NULL;
+  if(GLOBcleanfiles==1)return NULL;
 
   // convert and compress files
 
@@ -765,9 +759,9 @@ void *compress_volslices(void *arg){
       continue;
     }
     slicei->involuse=1;
-    UNLOCK_VOLSLICE;
 
     convert_volslice(slicei,thread_index);
+    UNLOCK_VOLSLICE;
   }
   return NULL;
 }
@@ -786,7 +780,7 @@ void *compress_slices(void *arg){
   LOCK_SLICE;
   if(GLOBfirst_slice==1){
     GLOBfirst_slice=0;
-    if(cleanfiles==1){
+    if(GLOBcleanfiles==1){
       for(i=0;i<nsliceinfo;i++){
         slicei = sliceinfo + i;
         convert_slice(slicei,thread_index);
@@ -796,23 +790,23 @@ void *compress_slices(void *arg){
     }
     for(i=0;i<nsliceinfo;i++){
       slicei = sliceinfo + i;
-      if(autozip==1&&slicei->autozip==0)continue;
+      if(GLOBautozip==1&&slicei->autozip==0)continue;
       slicei->count=0;
     }
-    if(get_slice_bounds==1){
+    if(GLOBget_slice_bounds==1){
       Get_Slice_Bounds();
     }
     for(i=0;i<nsliceinfo;i++){
       char *label;
 
       slicei = sliceinfo + i;
-      if(autozip==1&&slicei->autozip==0)continue;
+      if(GLOBautozip==1&&slicei->autozip==0)continue;
       slicei->doit=1;
 
       sb=getslice(slicei->label.shortlabel);
       if(sb==NULL)slicei->doit=0;
       label = slicei->label.longlabel;
-      if(make_demo==1&&(strcmp(label,"TEMPERATURE")==0||strcmp(label,"oxygen")==0)){
+      if(GLOBmake_demo==1&&(strcmp(label,"TEMPERATURE")==0||strcmp(label,"oxygen")==0)){
         slicei->setvalmax=1;
         slicei->setvalmin=1;
         if(strcmp(label,"TEMPERATURE")==0){
@@ -838,13 +832,13 @@ void *compress_slices(void *arg){
   }
   UNLOCK_SLICE;
 
-  if(cleanfiles==1)return NULL;
+  if(GLOBcleanfiles==1)return NULL;
 
   // convert and compress files
 
   for(i=0;i<nsliceinfo;i++){
     slicei = sliceinfo + i;
-    if(autozip==1&&slicei->autozip==0)continue;
+    if(GLOBautozip==1&&slicei->autozip==0)continue;
     LOCK_SLICE;
     if(slicei->inuse==1){
       UNLOCK_SLICE;

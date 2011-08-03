@@ -54,7 +54,8 @@
 #define pp_OSX
 #endif
 
-#define pp_VOLTEST
+//#define pp_LIGHT
+//#define pp_KDTEST
 #define EGZ
 #define USE_ZLIB
 #define pp_PART
@@ -73,7 +74,6 @@
 #undef pp_release
 #define SMZVERSION "test"
 #define pp_PART2
-//#define pp_KDTEST
 #endif
 
 #ifdef WIN32
