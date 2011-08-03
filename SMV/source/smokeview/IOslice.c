@@ -1300,6 +1300,9 @@ void getsliceparams(void){
     else if(sd->compression_type==1){
       error=0;
       if(getsliceheader0(sd->comp_file,sd->size_file,sd->compression_type,&is1,&is2,&js1,&js2,&ks1,&ks2, &sd->volslice)==0)error=1;
+      ni = is2 + 1 - is1;
+      nj = js2 + 1 - js1;
+      nk = ks2 + 1 - ks1;
     }
     if(error==0){
       sd->is1=is1;

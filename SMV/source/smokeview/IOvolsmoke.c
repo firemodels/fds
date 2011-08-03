@@ -1315,10 +1315,9 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
     float valmin=0.0;
 
     // one,file version,ndata_compressed,nbytes 1/2/4,ndata_uncompressed,time,valmin,valmax,data ....
-    compress_volsliceframe(smokeframe_data, framesize,
-                time, &valmin, NULL,
+    compress_volsliceframe(smokeframe_data, framesize, time, &valmin, NULL,
                 &c_smokedata_compressed, &n_smokedata_compressed);
-    size_after+=n_smokedata_compressed+VOL_OFFSET;
+    size_after+=n_smokedata_compressed;
     vr->smokedataptrs[framenum]=c_smokedata_compressed;
   }
   else{
@@ -1341,10 +1340,9 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
       if(vr->is_compressed==1){
         float valmin=20.0, valmax=1400.0;
 
-        compress_volsliceframe(fireframe_data, framesize,
-                time, &valmin, &valmax,
+        compress_volsliceframe(fireframe_data, framesize,  time, &valmin, &valmax,
                 &c_firedata_compressed, &n_firedata_compressed);
-        size_after+=n_firedata_compressed+VOL_OFFSET;
+        size_after+=n_firedata_compressed;
         vr->firedataptrs[framenum]=c_firedata_compressed;
         vr->nfiredata_compressed[framenum]=n_firedata_compressed;
       }
