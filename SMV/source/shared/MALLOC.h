@@ -4,6 +4,10 @@
 // $Revision$
 // $Author$
 
+#ifdef pp_THREAD
+#include <pthread.h>
+#endif
+
 #ifndef pp_OSX
 #include <malloc.h>
 #endif
@@ -42,6 +46,15 @@ MMEXTERN MMdata *MMfirstptr, *MMlastptr;
   #define sizeofDebugByte 0
 #endif
 
+#ifdef pp_THREAD
+MMEXTERN pthread_mutex_t mutexSLICE_BOUND,mutexPATCH_BOUND,mutexPART2ISO,mutexPRINT,mutexMEM;
+#define LOCK_MEM           pthread_mutex_lock(&mutexMEM)
+#define UNLOCK_MEM         pthread_mutex_unlock(&mutexMEM)
+#else
+#define LOCK_MEM
+#define UNLOCK_MEM
+#endif
+
 #ifdef pp_MEMDEBUG
 #define NewMemory(f,g) __NewMemory((f),(g),(#f),__FILE__,__LINE__)
 #define ResizeMemory(f,g) __ResizeMemory((f),(g),(#f),__FILE__,__LINE__)
@@ -65,6 +78,7 @@ void _memorystatus(unsigned int size,unsigned int *availmem, unsigned int *memus
 
 #ifdef pp_MEMDEBUG
 void _CheckMemory(void);
+void _CheckMemoryNOTHREAD(void);
 void _CheckMemoryOn(void);
 void _CheckMemoryOff(void);
 void _PrintMemoryInfo(void);
@@ -72,6 +86,7 @@ void _PrintAllMemoryInfo(void);
 int _GGetMemoryInfo(void);
 #define ValidPointer(pv,size) _ValidPointer(pv, size)
 #define CheckMemory _CheckMemory()
+#define CheckMemoryNOTHREAD _CheckMemoryNOTHREAD()
 #define CheckMemoryOn _CheckMemoryOn()
 #define CheckMemoryOff _CheckMemoryOff()
 #define PrintMemoryInfo _PrintMemoryInfo()
@@ -113,9 +128,12 @@ MMEXTERN mallocflag __NewMemory(void **ppv, size_t size, char *varname, char *fi
 MMEXTERN mallocflag _ResizeMemory(void **ppv, size_t sizeNew);
 MMEXTERN mallocflag _NewMemory(void **ppv, size_t size);
 MMEXTERN void FreeMemory(void *pv);
+MMEXTERN mallocflag _ResizeMemoryNOTHREAD(void **ppv, size_t sizeNew);
+MMEXTERN mallocflag _NewMemoryNOTHREAD(void **ppv, size_t size);
+MMEXTERN void FreeMemoryNOTHREAD(void *pv);
 void initMM(void);
 void FreeAllMemory(void);
 mallocflag _ValidPointer(void *pv, size_t size);
 
 #endif
-#define FREEMEMORY(f) if((f)!=NULL){FreeMemory((f));(f)=NULL;}
+#define FREEMEMORY(f) if((f)!=NULL){LOCK_MEM;FreeMemoryNOTHREAD((f));UNLOCK_MEM;(f)=NULL;}

@@ -56,11 +56,26 @@ void initMM(void){
 
   MMlastptr->prev=MMfirstptr;
   MMlastptr->next=NULL;
+#ifdef pp_THREAD
+  pthread_mutex_init(&mutexMEM,NULL);
+#endif
+
 }
 
 /* ------------------ _NewMemory ------------------------ */
 
 mallocflag _NewMemory(void **ppv, size_t size){
+  mallocflag returnval;
+
+  LOCK_MEM;
+  returnval=_NewMemoryNOTHREAD((void **)&ppv, size);
+  UNLOCK_MEM;
+  return returnval;
+}
+
+/* ------------------ _NewMemoryNOTHREAD ------------------------ */
+
+mallocflag _NewMemoryNOTHREAD(void **ppv, size_t size){
   void **ppb=(void **)ppv;
 #ifdef pp_MEMDEBUG
   char *c;
@@ -92,7 +107,7 @@ mallocflag _NewMemory(void **ppv, size_t size){
 
 #ifdef pp_MEMDEBUG
   {
-    CheckMemory;
+    CheckMemoryNOTHREAD;
     if(*ppb != NULL){
       if(sizeofDebugByte!=0){
        c = (char *)(*ppb) + size;
@@ -116,6 +131,7 @@ void FreeAllMemory(void){
   MMdata *thisptr,*nextptr;
   int infoblocksize;
 
+  LOCK_MEM;
   infoblocksize=(sizeof(MMdata)+3)/4;
   infoblocksize*=4;
 
@@ -123,13 +139,23 @@ void FreeAllMemory(void){
   for(;;){
     nextptr=thisptr->next;
     if(nextptr==NULL||thisptr->marker!=markerByte)break;
-    FreeMemory((char *)thisptr+infoblocksize);
+    FreeMemoryNOTHREAD((char *)thisptr+infoblocksize);
   }
+  UNLOCK_MEM;
 }
+
 
 /* ------------------ FreeMemory ------------------------ */
 
 void FreeMemory(void *pv){
+  LOCK_MEM;
+  FreeMemoryNOTHREAD(pv);
+  UNLOCK_MEM;
+}
+
+/* ------------------ FreeMemoryNOTHREAD ------------------------ */
+
+void FreeMemoryNOTHREAD(void *pv){
 #ifdef pp_MEMDEBUG
   int len_memory;
 #endif
@@ -141,7 +167,7 @@ void FreeMemory(void *pv){
   infoblocksize*=4;
 #ifdef pp_MEMDEBUG
   {
-    CheckMemory;
+    CheckMemoryNOTHREAD;
     len_memory=sizeofBlock((char *)pv);
     memset((char *)pv, memGarbage, len_memory);
     FreeBlockInfo((char *)pv);
@@ -160,6 +186,17 @@ void FreeMemory(void *pv){
 /* ------------------ ResizeMemory ------------------------ */
 
 mallocflag _ResizeMemory(void **ppv, size_t sizeNew){
+  mallocflag returnval;
+
+  LOCK_MEM;
+  returnval=_ResizeMemoryNOTHREAD((void **)&ppv, sizeNew);
+  UNLOCK_MEM;
+  return returnval;
+}
+
+/* ------------------ ResizeMemory ------------------------ */
+
+mallocflag _ResizeMemoryNOTHREAD(void **ppv, size_t sizeNew){
   bbyte **ppold, *pbNew;
   int infoblocksize;
   MMdata *this_ptr, *prev_ptr, *next_ptr;
@@ -175,7 +212,7 @@ mallocflag _ResizeMemory(void **ppv, size_t sizeNew){
   ASSERT(ppold != NULL && sizeNew != 0);
 #ifdef pp_MEMDEBUG
   {
-    CheckMemory;
+    CheckMemoryNOTHREAD;
     sizeOld = sizeofBlock(*ppold);
     if(sizeNew<sizeOld){
       memset((*ppold)+sizeNew,memGarbage,sizeOld-sizeNew);
@@ -183,9 +220,9 @@ mallocflag _ResizeMemory(void **ppv, size_t sizeNew){
     else if (sizeNew > sizeOld){
       void *pbForceNew;
 
-      if(_NewMemory((void **)&pbForceNew, sizeNew)){
+      if(_NewMemoryNOTHREAD((void **)&pbForceNew, sizeNew)){
         memcpy(pbForceNew, *ppold, sizeOld);
-        FreeMemory(*ppold);
+        FreeMemoryNOTHREAD(*ppold);
         *ppold = pbForceNew;
       }
     }
@@ -245,7 +282,8 @@ mallocflag __NewMemory(void **ppv, size_t size, char *varname, char *file, int l
   char dirsep='/';
 #endif
 
-  return_code=_NewMemory(ppb,size);
+  LOCK_MEM;
+  return_code=_NewMemoryNOTHREAD(ppb,size);
   pbi=GetBlockInfo((bbyte *)*ppb);
   pbi->linenumber=linenumber;
 
@@ -278,6 +316,7 @@ mallocflag __NewMemory(void **ppv, size_t size, char *varname, char *file, int l
     strncpy(pbi->varname,varname2,255);
     strcat(pbi->varname,"\0");
   }
+  UNLOCK_MEM;
   return return_code;
 }
 
@@ -288,7 +327,8 @@ mallocflag __ResizeMemory(void **ppv, size_t size, char *varname, char *file, in
   blockinfo *pbi;
   int return_code;
 
-  return_code=_ResizeMemory(ppb,size);
+  LOCK_MEM;
+  return_code=_ResizeMemoryNOTHREAD(ppb,size);
   pbi=GetBlockInfo((bbyte *)*ppb);
   pbi->linenumber=linenumber;
   if(strlen(file)<256){
@@ -305,6 +345,7 @@ mallocflag __ResizeMemory(void **ppv, size_t size, char *varname, char *file, in
     strncpy(pbi->varname,varname,255);
     strcat(pbi->varname,"\0");
   }
+  UNLOCK_MEM;
   return return_code;
 }
 
@@ -400,9 +441,18 @@ void _CheckMemoryOff(void){
   checkmemoryflag=0;
 }
 
+
 /* ------------------ _CheckMemory ------------------------ */
 
 void _CheckMemory(void){
+  LOCK_MEM;
+  _CheckMemoryNOTHREAD();
+  UNLOCK_MEM;
+}
+
+/* ------------------ _CheckMemory ------------------------ */
+
+void _CheckMemoryNOTHREAD(void){
   blockinfo *pbi;
   if(checkmemoryflag==0)return;
   for (pbi = pbiHead; pbi != NULL; pbi = pbi->pbiNext)
@@ -499,12 +549,15 @@ mallocflag _ValidPointer(void *pv, size_t size){
 char *_strcpy(char *s1, const char *s2){
   blockinfo *pbi;
   int offset;
-  CheckMemory;
+
+  LOCK_MEM;
+  CheckMemoryNOTHREAD;
   pbi = GetBlockInfo_nofail(s1);
   if(pbi!=NULL){
     offset = s1 - pbi->pb;
     ASSERT(pbi->size - offset >= strlen(s2)+1);
   }
+  UNLOCK_MEM;
 
   return strcpy(s1,s2);
 }
@@ -514,12 +567,15 @@ char *_strcpy(char *s1, const char *s2){
 char *_strcat(char *s1, const char *s2){
   blockinfo *pbi;
   int offset;
-  CheckMemory;
+
+  LOCK_MEM;
+  CheckMemoryNOTHREAD;
   pbi = GetBlockInfo_nofail(s1);
   if(pbi!=NULL){
     offset = s1 - pbi->pb;
     ASSERT(pbi->size - offset >= strlen(s1)+strlen(s2)+1);
   }
+  UNLOCK_MEM;
 
   return strcat(s1,s2);
 }
