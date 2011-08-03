@@ -23,6 +23,7 @@
 #include "update.h"
 #include "IOvolsmoke.h"
 #include "compress.h"
+#include "string_util.h"
 
 // svn revision character string
 char IOvolsmoke_revision[]="$Revision$";
@@ -187,6 +188,8 @@ void init_volrender(void){
     slicei = sliceinfo + i;
     blocknumber = slicei->blocknumber;
     if(blocknumber<0||blocknumber>=nmeshes)continue;
+    if(file_exists(slicei->reg_file)!=1)continue;
+
     meshi = meshinfo + blocknumber;
     if(slicei->nslicei!=meshi->ibar+1||slicei->nslicej!=meshi->jbar+1||slicei->nslicek!=meshi->kbar+1)continue;
     vr = &(meshi->volrenderinfo);
@@ -1183,7 +1186,7 @@ int get_volsmoke_nframes(volrenderdata *vr){
   // nframes = (totalsize - skip)/(12 + framesize);
 
   nframes=0;
-  filesize=getfilesize(smokeslice->file);
+  filesize=getfilesize(smokeslice->reg_file);
   if(filesize>0){
     nframes = (filesize-skip)/(12 + framesize);
   }
@@ -1211,7 +1214,7 @@ float get_volsmoke_frame_time(volrenderdata *vr, int framenum){
   skip += framenum*(HEADER_SIZE +4        +TRAILER_SIZE); // framenum time's
   skip += framenum*(HEADER_SIZE +4*framesize+TRAILER_SIZE); // framenum slice data's
 
-  SLICEFILE=fopen(smokeslice->file,"rb");
+  SLICEFILE=fopen(smokeslice->reg_file,"rb");
   if(SLICEFILE==NULL)return time;
 
   returncode=fseek(SLICEFILE,skip,SEEK_SET); // skip from beginning of file
@@ -1289,7 +1292,7 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
   skip += framenum*(HEADER_SIZE +4        +TRAILER_SIZE); // framenum time's
   skip += framenum*(HEADER_SIZE +4*framesize+TRAILER_SIZE); // framenum slice data's
 
-  SLICEFILE=fopen(smokeslice->file,"rb");
+  SLICEFILE=fopen(smokeslice->reg_file,"rb");
   if(SLICEFILE==NULL)return;
 
   returncode=fseek(SLICEFILE,skip,SEEK_SET); // skip from beginning of file
@@ -1328,7 +1331,7 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
   fclose(SLICEFILE);
 
   if(fireslice!=NULL){
-    SLICEFILE=fopen(fireslice->file,"rb");
+    SLICEFILE=fopen(fireslice->reg_file,"rb");
     if(SLICEFILE!=NULL){
       returncode=fseek(SLICEFILE,skip,SEEK_SET); // skip from beginning of file
 
