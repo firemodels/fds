@@ -271,6 +271,9 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Load data in background"),&use_multi_threading);
     glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Load data only at render times"),&load_at_rendertimes);
     glui_3dsmoke->add_checkbox_to_panel(panel_volume,"b/w",&volbw);
+    if(have_volcompressed==1){
+      glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Load compressed data"),&load_volcompressed);
+    }
 #ifdef pp_MOUSEDOWN
     glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Hide volsmoke while moving"),&hide_volsmoke);
 #endif

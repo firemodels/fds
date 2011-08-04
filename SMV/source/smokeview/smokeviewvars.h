@@ -18,6 +18,8 @@
 SVEXTERN int SVDECL(mouse_down,0);
 SVEXTERN int SVDECL(hide_volsmoke,1);
 #endif
+SVEXTERN int SVDECL(have_volcompressed,0);
+SVEXTERN int SVDECL(load_volcompressed,0);
 SVEXTERN int SVDECL(use_multi_threading,1);
 SVEXTERN int SVDECL(load_at_rendertimes,1);
 SVEXTERN int nvolrenderinfo;

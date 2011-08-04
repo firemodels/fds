@@ -89,7 +89,7 @@ void update_framenumber(int changetime){
         }
         vr->iframe=j;
         if(smoke!=NULL&&vr->iframe>=0){
-          if(vr->is_compressed==1){
+          if(vr->is_compressed==1||load_volcompressed==1){
             unsigned char *c_smokedata_compressed;
             uLongf framesize;
             float timeval;
@@ -108,7 +108,7 @@ void update_framenumber(int changetime){
           CheckMemory;
         }
         if(fire!=NULL&&vr->iframe>=0){
-          if(vr->is_compressed==1){
+          if(vr->is_compressed==1||load_volcompressed==1){
             unsigned char *c_firedata_compressed;
             uLongf framesize;
             float timeval;

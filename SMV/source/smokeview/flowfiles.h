@@ -392,6 +392,7 @@ typedef struct _volrenderdata {
   unsigned char *c_smokedata_view, *c_firedata_view;
   float *smokedata_full, *firedata_full;
   float *smokedata_view, *firedata_view;
+  long int *firepos, *smokepos;
   void *smokedataptr, *firedataptr;
   void **smokedataptrs, **firedataptrs;
   int *nsmokedata_compressed, *nfiredata_compressed;
@@ -903,7 +904,7 @@ typedef struct _slice {
   int seq_id, autoload;
   char *file;
   char *size_file;
-  char *comp_file, *reg_file;
+  char *comp_file, *reg_file, *vol_file;
   char *slicelabel;
   int terrain, cellcenter, fire_line;
   int compression_type;

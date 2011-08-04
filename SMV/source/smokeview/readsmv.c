@@ -4747,6 +4747,19 @@ typedef struct {
       STRCPY(sd->comp_file,bufptr);
       STRCAT(sd->comp_file,".svz");
 
+      {
+        char volfile[1024];
+
+        strcpy(volfile,bufptr);
+        strcat(volfile,".svv");
+        sd->vol_file=NULL;
+        if(file_exists(volfile)==1){
+          NewMemory((void **)&sd->vol_file,(unsigned int)(len+4+1));
+          STRCPY(sd->vol_file,volfile);
+          have_volcompressed=1;
+        }
+      }
+
       NewMemory((void **)&sd->size_file,(unsigned int)(len+3+1));
       STRCPY(sd->size_file,bufptr);
       STRCAT(sd->size_file,".sz");

@@ -156,10 +156,11 @@ void compress_volsliceframe(float *data_in, int n_data_in, float timeval_in, flo
 
   n_data_compressed=n_data_compressedm32+32;
   CheckMemory;
-
+// 1,completion,version
+// 1,version,n_data_compressed,nbytes,n_data_in,time,valmin,valmax,data ....
   memcpy(c_data_compressed+0,&one,4);
   memcpy(c_data_compressed+4,&version,4);
-  memcpy(c_data_compressed+8,&n_data_compressedm32,4);
+  memcpy(c_data_compressed+8,&n_data_compressed,4);
   memcpy(c_data_compressed+12,&nbytes,4);
   memcpy(c_data_compressed+16,&n_data_in,4);
   memcpy(c_data_compressed+20,&timeval_in,4);
@@ -188,7 +189,7 @@ int uncompress_volsliceframe(unsigned char *compressed_data_in,
   valmin=*(float *)(compressed_data_in+24);
   valmax=*(float *)(compressed_data_in+28);
   *timeval_out=*(float *)(compressed_data_in+20);
-  countin = *(int *)(compressed_data_in+8);
+  countin = *(int *)(compressed_data_in+8)-32;
   ndatafile = *(int *)(compressed_data_in+16);
 
   uncompress(fullbuffer,&countout,compressed_data_in+32,countin);
