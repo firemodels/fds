@@ -1177,8 +1177,10 @@ int get_volsmoke_nframes(volrenderdata *vr){
   int nframes,filesize;
 
   smokeslice=vr->smoke;
-  volstream=fopen(vr->smoke->vol_file,"rb");
-  if(volstream==NULL){//xxx
+  if(load_volcompressed==1&&vr->smoke->vol_file!=NULL){
+    volstream=fopen(vr->smoke->vol_file,"rb");
+  }
+  if(volstream==NULL){
     fireslice=vr->fire;
     framesize = smokeslice->nslicei*smokeslice->nslicej*smokeslice->nslicek;
     framesize *= 4; // convert to bytes
@@ -1203,14 +1205,14 @@ int get_volsmoke_nframes(volrenderdata *vr){
 // 1,version,n_data_compressedm32,nbytes,n_data_in,time,valmin,valmax,data ....
     fseek(volstream,12,SEEK_SET);
     for(nframes=0;;nframes++){
-      int *ncompressed;
+      int ncompressed;
 
-      if(fread(buffer,1,32,volstream)!=32)break;;
-      ncompressed=(int *)(buffer+8)-32;
-      if(fseek(volstream,*ncompressed,SEEK_CUR)!=0)break;;
+      if(fread(buffer,1,32,volstream)!=32)break;
+      ncompressed=*(int *)(buffer+8)-32;
+      if(fseek(volstream,ncompressed,SEEK_CUR)!=0)break;
     }
+    fclose(volstream);
   }
-  fclose(volstream);
   return nframes;
 }
 
@@ -1251,9 +1253,11 @@ void get_volsmoke_all_times(volrenderdata *vr){
   int i;
   FILE *volstream=NULL;
 
-  if(vr->smoke->vol_file!=NULL)volstream=fopen(vr->smoke->vol_file,"rb");
+  if(load_volcompressed==1&&vr->smoke->vol_file!=NULL){
+    volstream=fopen(vr->smoke->vol_file,"rb");
+  }
 
-  if(volstream==NULL||load_volcompressed==0){
+  if(volstream==NULL){
     for(i=0;i<vr->nframes;i++){
       vr->times[i]=get_volsmoke_frame_time(vr,i);
     }
@@ -1269,10 +1273,10 @@ void get_volsmoke_all_times(volrenderdata *vr){
       float *time;
 
       vr->smokepos[i]=ftell(volstream);
-      if(fread(buffer,1,32,volstream)!=32)break;;
+      if(fread(buffer,1,32,volstream)!=32)break;
       ncompressed=*(int *)(buffer+8)-32;
       time=(float *)(buffer+20);
-      if(fseek(volstream,ncompressed,SEEK_CUR)!=0)break;;
+      if(fseek(volstream,ncompressed,SEEK_CUR)!=0)break;
       vr->times[i]=*time;
     }
     fclose(volstream);
@@ -1284,9 +1288,9 @@ void get_volsmoke_all_times(volrenderdata *vr){
         int ncompressed;
 
         vr->firepos[i]=ftell(volstream);
-        if(fread(buffer,1,32,volstream)!=32)break;;
+        if(fread(buffer,1,32,volstream)!=32)break;
         ncompressed=*(int *)(buffer+8)-32;
-        if(fseek(volstream,ncompressed,SEEK_CUR)!=0)break;;
+        if(fseek(volstream,ncompressed,SEEK_CUR)!=0)break;
       }
       fclose(volstream);
     }
@@ -1345,9 +1349,10 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
     NewMemory((void **)&fireframe_data,framesize*sizeof(float));
   }
 
-  if(vr->smoke->vol_file!=NULL)volstream=fopen(vr->smoke->vol_file,"rb");
-
-  if(volstream==NULL||load_volcompressed==0){
+  if(load_volcompressed==1&&vr->smoke->vol_file!=NULL){
+    volstream=fopen(vr->smoke->vol_file,"rb");
+  }
+  if(volstream==NULL){
     skip =           (HEADER_SIZE+30        +TRAILER_SIZE); // long label
     skip +=          (HEADER_SIZE+30        +TRAILER_SIZE); // short label
     skip +=          (HEADER_SIZE+30        +TRAILER_SIZE); // unit label
@@ -1401,7 +1406,7 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
 // 1,version,n_data_compressedm32,nbytes,n_data_in,time,valmin,valmax,data ....
     fseek(volstream,vr->smokepos[framenum],SEEK_SET);
     fread(buffer,8,4,volstream);
-    ncompressed=*(int *)(buffer+8)-32;
+    ncompressed=*(int *)(buffer+8);
     time = *(float *)(buffer+20);
     fseek(volstream,vr->smokepos[framenum],SEEK_SET);
     NewMemory((void **)&c_smokedata_compressed,ncompressed);
@@ -1425,8 +1430,10 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
   }
 
   if(fireslice!=NULL){
-    if(vr->smoke->vol_file!=NULL)volstream=fopen(vr->smoke->vol_file,"rb");
-    if(volstream==NULL||load_volcompressed==0){
+    if(load_volcompressed==1&&vr->fire->vol_file!=NULL){
+      volstream=fopen(vr->fire->vol_file,"rb");
+    }
+    if(volstream==NULL){
       SLICEFILE=fopen(fireslice->reg_file,"rb");
       if(SLICEFILE!=NULL){
         returncode=fseek(SLICEFILE,skip,SEEK_SET); // skip from beginning of file
@@ -1460,7 +1467,7 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
 // 1,version,n_data_compressedm32,nbytes,n_data_in,time,valmin,valmax,data ....
       fseek(volstream,vr->firepos[framenum],SEEK_SET);
       fread(buffer,8,4,volstream);
-      ncompressed=*(int *)(buffer+8)-32;
+      ncompressed=*(int *)(buffer+8);
       time = *(float *)(buffer+20);
       fseek(volstream,vr->firepos[framenum],SEEK_SET);
       NewMemory((void **)&c_firedata_compressed,ncompressed);
