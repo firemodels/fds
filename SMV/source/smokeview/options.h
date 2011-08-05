@@ -47,6 +47,7 @@
 #ifdef pp_BETA
 // #define pp_BENCHMARK
 //#define pp_GPUDEPTH
+#define pp_GPUTHROTTLE
 #define pp_SLICECONTOURS
 #define pp_SHOWLIGHT
 #define pp_LANG

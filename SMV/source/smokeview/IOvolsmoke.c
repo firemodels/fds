@@ -975,6 +975,15 @@ void drawsmoke3dGPUVOL(void){
   mesh *meshi, *meshold=NULL;
   int ii;
 
+//  SVEXTERN int GPUload[30],GPUtime[30],SVDECL(nGPUframes,0),SVDECL(iGPUframes,0);
+#ifdef pp_GPUTHROTTLE
+  thisGPUtime=glutGet(GLUT_ELAPSED_TIME)/1000.0;
+  if(thisGPUtime>lastGPUtime+0.25){
+    printf("GPU data_rate=%4.1f Mbytes/s\n",4.0*GPUnframes/(thisGPUtime-lastGPUtime)/1000000.0);
+    lastGPUtime=thisGPUtime;
+    GPUnframes=0;
+  }
+#endif
 #ifdef pp_MOUSEDOWN  
   if(mouse_down==1&&hide_volsmoke==1){
     return;
@@ -1742,6 +1751,9 @@ void update_volsmoke_texture(mesh *meshi, float *smokedata, float *firedata){
   nx = meshi->ibar+1;
   ny = meshi->jbar+1;
   nz = meshi->kbar+1;
+#ifdef pp_GPUTHROTTLE
+  GPUnframes+=2*nx*ny*nz;
+#endif
   glActiveTexture(GL_TEXTURE0);
   glTexSubImage3D(GL_TEXTURE_3D,0,
     xoffset,yoffset,zoffset,

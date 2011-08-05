@@ -14,6 +14,10 @@
 #include "threader.h"
 #include "string_util.h"
 
+#ifdef pp_GPUTHROTTLE
+  SVEXTERN float SVDECL(thisGPUtime,0.0), SVDECL(lastGPUtime,0.0);
+  SVEXTERN int SVDECL(GPUnframes,0);
+#endif
 #ifdef pp_MOUSEDOWN
 SVEXTERN int SVDECL(mouse_down,0);
 SVEXTERN int SVDECL(hide_volsmoke,1);
