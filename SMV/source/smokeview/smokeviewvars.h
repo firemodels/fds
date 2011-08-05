@@ -16,7 +16,8 @@
 
 #ifdef pp_GPUTHROTTLE
   SVEXTERN float SVDECL(thisGPUtime,0.0), SVDECL(lastGPUtime,0.0);
-  SVEXTERN int SVDECL(GPUnframes,0);
+  SVEXTERN float SVDECL(thisMOTIONtime,0.0), SVDECL(lastMOTIONtime,0.0);
+  SVEXTERN int SVDECL(GPUnframes,0),SVDECL(MOTIONnframes,0);
 #endif
 #ifdef pp_MOUSEDOWN
 SVEXTERN int SVDECL(mouse_down,0);

@@ -462,6 +462,21 @@ void motion(int xm, int ym){
   float direction_angle;
   float elevation_angle;
 
+#ifdef pp_GPUTHROTTLE
+  if(usegpu==1&&showvolrender==1&&hide_volsmoke==0){
+    float fps;
+
+    thisMOTIONtime=glutGet(GLUT_ELAPSED_TIME)/1000.0;
+    fps = MOTIONnframes/(thisMOTIONtime-lastMOTIONtime);
+    if(fps>5.0)return;
+    MOTIONnframes++;
+    if(thisMOTIONtime>lastMOTIONtime+0.25){
+      printf("MOTION: %4.1f fps\n",fps);
+      lastMOTIONtime=thisMOTIONtime;
+      MOTIONnframes=0;
+    }
+  }
+#endif
   eye_xyz = camera_current->eye;
   angle_zx = camera_current->angle_zx;
   

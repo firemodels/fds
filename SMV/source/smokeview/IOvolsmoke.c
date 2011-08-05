@@ -979,7 +979,7 @@ void drawsmoke3dGPUVOL(void){
 #ifdef pp_GPUTHROTTLE
   thisGPUtime=glutGet(GLUT_ELAPSED_TIME)/1000.0;
   if(thisGPUtime>lastGPUtime+0.25){
-    printf("GPU data_rate=%4.1f Mbytes/s\n",4.0*GPUnframes/(thisGPUtime-lastGPUtime)/1000000.0);
+    printf("CPU->GPU 4.1f Mbytes/s\n",4.0*GPUnframes/(thisGPUtime-lastGPUtime)/1000000.0);
     lastGPUtime=thisGPUtime;
     GPUnframes=0;
   }
