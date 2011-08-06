@@ -7524,10 +7524,10 @@ int readini2(char *inifile, int localfile){
 
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %i %i %i %f %f",
-        &compress_volsmoke,&use_multi_threading,&load_at_rendertimes,&volbw,
+        &glui_compress_volsmoke,&use_multi_threading,&load_at_rendertimes,&volbw,
         &temperature_cutoff,&opacity_factor
         );
-      if(compress_volsmoke!=0)compress_volsmoke=1;
+      if(glui_compress_volsmoke!=0)glui_compress_volsmoke=1;
       if(use_multi_threading!=0)use_multi_threading=1;
       if(load_at_rendertimes!=0)load_at_rendertimes=1;
       if(temperature_cutoff<100.0)temperature_cutoff=100.0;
@@ -10410,7 +10410,7 @@ void writeini(int flag){
   fprintf(fileout," %i %i\n",show_smokesensors,test_smokesensors);
   fprintf(fileout,"VOLSMOKE\n");
   fprintf(fileout," %i %i %i %i %f %f",
-        compress_volsmoke,use_multi_threading,load_at_rendertimes,volbw,
+        glui_compress_volsmoke,use_multi_threading,load_at_rendertimes,volbw,
         temperature_cutoff,opacity_factor
         );
 

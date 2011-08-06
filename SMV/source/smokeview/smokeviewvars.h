@@ -24,11 +24,11 @@ SVEXTERN int SVDECL(mouse_down,0);
 SVEXTERN int SVDECL(hide_volsmoke,1);
 #endif
 SVEXTERN int SVDECL(have_volcompressed,0);
-SVEXTERN int SVDECL(load_volcompressed,0);
+SVEXTERN int SVDECL(glui_load_volcompressed,0),SVDECL(load_volcompressed,0);
 SVEXTERN int SVDECL(use_multi_threading,1);
 SVEXTERN int SVDECL(load_at_rendertimes,1);
 SVEXTERN int nvolrenderinfo;
-SVEXTERN int SVDECL(compress_volsmoke,0);
+SVEXTERN int SVDECL(compress_volsmoke,0),SVDECL(glui_compress_volsmoke,0);
 SVEXTERN int SVDECL(read_vol_mesh,-3);
 SVEXTERN int SVDECL(trainer_temp_index,0),SVDECL(trainer_oxy_index,0);
 SVEXTERN int SVDECL(*trainer_temp_indexes,NULL),SVDECL(*trainer_oxy_indexes,NULL);

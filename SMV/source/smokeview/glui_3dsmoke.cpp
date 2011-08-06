@@ -60,6 +60,7 @@ void update_alpha(void);
 #define VOL_SMOKE 13
 #define VOL_NGRID 18
 #define SMOKE_OPTIONS 19
+#define LOAD_COMPRESSED_DATA 20
 
 GLUI_Listbox *LISTBOX_smoke_colorbar=NULL;
 #ifdef pp_CULL
@@ -67,6 +68,7 @@ GLUI_Spinner *SPINNER_cull_portsize=NULL;
 GLUI_Spinner *SPINNER_temperature_cutoff=NULL;
 GLUI_Spinner *SPINNER_opacity_factor=NULL;
 GLUI_Checkbox *CHECKBOX_show_cullports=NULL;
+GLUI_Checkbox *CHECKBOX_compress_volsmoke=NULL;
 GLUI_Checkbox *CHECKBOX_usevolrender=NULL;
 #endif
 #ifdef pp_MOUSEDOWN
@@ -75,7 +77,7 @@ GLUI_Checkbox *CHECKBOX_hide_volsmoke=NULL;
 GLUI_Checkbox *CHECKBOX_use_firesmokemap=NULL;
 GLUI_Checkbox *CHECKBOX_smokecullflag=NULL;
 GLUI *glui_3dsmoke=NULL;
-GLUI_RadioGroup *alphagroup=NULL,*rendergroup=NULL,*skipframes,*radio_smokesensors=NULL;
+GLUI_RadioGroup *alphagroup=NULL,*rendergroup=NULL,*skipframes,*radio_smokesensors=NULL,*loadvolgroup=NULL;
 GLUI_Spinner *SPINNER_cvis=NULL;
 GLUI_Checkbox *CHECKBOX_test_smokesensors=NULL;
 GLUI_Checkbox *CHECKBOX_smokeGPU=NULL;
@@ -177,8 +179,8 @@ extern "C" void glui_3dsmoke_setup(int main_window){
 #endif
   if(nsmoke3dinfo>0&&nvolrenderinfo>0){
     rendergroup = glui_3dsmoke->add_radiogroup_to_panel(panel_overall,&smoke_render_option,SMOKE_OPTIONS,SMOKE_3D_CB);
-    glui_3dsmoke->add_radiobutton_to_group(rendergroup,_("Slice Render Options"));
-    glui_3dsmoke->add_radiobutton_to_group(rendergroup,_("Volume Render Options"));
+    glui_3dsmoke->add_radiobutton_to_group(rendergroup,_("Slice Render Settings"));
+    glui_3dsmoke->add_radiobutton_to_group(rendergroup,_("Volume Render Settings"));
   }
   else{
     smoke_render_option=0;
@@ -263,25 +265,28 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   glui_3dsmoke->add_column_to_panel(panel_overall,false);
 
   if(nvolrenderinfo>0){
-    panel_volume = glui_3dsmoke->add_panel_to_panel(panel_overall,"Volumes");
-#ifdef _DEBUG
-    CHECKBOX_usevolrender=glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Use full volume rendering"),&usevolrender,VOL_SMOKE,SMOKE_3D_CB);
-#endif
-    glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Compress data"),&compress_volsmoke);
-    glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Load data in background"),&use_multi_threading);
-    glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Load data only at render times"),&load_at_rendertimes);
-    glui_3dsmoke->add_checkbox_to_panel(panel_volume,"b/w",&volbw);
+    panel_volume = glui_3dsmoke->add_panel_to_panel(panel_overall,"Volume Render Settings");
     if(have_volcompressed==1){
-      glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Load compressed data"),&load_volcompressed);
+      loadvolgroup = glui_3dsmoke->add_radiogroup_to_panel(panel_volume,&glui_load_volcompressed,LOAD_COMPRESSED_DATA,SMOKE_3D_CB);
+        glui_3dsmoke->add_radiobutton_to_group(loadvolgroup,_("Load full data"));
+        glui_3dsmoke->add_radiobutton_to_group(loadvolgroup,_("Load compressed data"));
     }
+    glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Load data in background"),&use_multi_threading);
+    CHECKBOX_compress_volsmoke=glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Compress data while loading"),&glui_compress_volsmoke);
+    if(have_volcompressed==1){
+      SMOKE_3D_CB(LOAD_COMPRESSED_DATA);
+    }
+    glui_3dsmoke->add_checkbox_to_panel(panel_volume,"Display data as b/w",&volbw);
 #ifdef pp_MOUSEDOWN
-    glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Hide volsmoke while moving"),&hide_volsmoke);
+    glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Hide data while moving scene"),&hide_volsmoke);
 #endif
+    glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Load data only at render times"),&load_at_rendertimes);
     SPINNER_temperature_cutoff=glui_3dsmoke->add_spinner_to_panel(panel_volume,_("Temperature cutoff"),GLUI_SPINNER_FLOAT,&temperature_cutoff);
     SPINNER_temperature_cutoff->set_float_limits(100.0,1199.0);
     SPINNER_opacity_factor=glui_3dsmoke->add_spinner_to_panel(panel_volume,_("Soot density factor"),GLUI_SPINNER_FLOAT,&opacity_factor);
     SPINNER_opacity_factor->set_float_limits(1.0,10.0);
 #ifdef _DEBUG
+    CHECKBOX_usevolrender=glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Show"),&usevolrender,VOL_SMOKE,SMOKE_3D_CB);
     glui_3dsmoke->add_checkbox_to_panel(panel_volume,"block smoke",&block_volsmoke);
     glui_3dsmoke->add_checkbox_to_panel(panel_volume,"debug",&smoke3dVoldebug);
 #endif
@@ -421,6 +426,14 @@ extern "C" void SMOKE_3D_CB(int var){
 
   updatemenu=1;
   switch (var){
+  case LOAD_COMPRESSED_DATA:
+    if(load_volcompressed==1){
+      CHECKBOX_compress_volsmoke->disable();
+    }
+    else{
+      CHECKBOX_compress_volsmoke->enable();
+    }
+    break;
   case SMOKE_OPTIONS:
     if(smoke_render_option==0){
       if(panel_hrrcut!=NULL)panel_hrrcut->enable();

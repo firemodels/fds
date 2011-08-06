@@ -431,6 +431,14 @@ void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, mesh
     cum_smokecolor[1]/=alphahat;
     cum_smokecolor[2]/=alphahat;
     cum_smokecolor[3]=alphahat;
+    if(volbw==1){
+      float gray;
+
+      gray=0.299*cum_smokecolor[0] + 0.587*cum_smokecolor[1] + 0.114*cum_smokecolor[2];
+      cum_smokecolor[0] = gray;
+      cum_smokecolor[1] = gray;
+      cum_smokecolor[2] = gray;
+    }
   }
   else{
     cum_smokecolor[0]=0.0;
@@ -979,7 +987,7 @@ void drawsmoke3dGPUVOL(void){
 #ifdef pp_GPUTHROTTLE
   thisGPUtime=glutGet(GLUT_ELAPSED_TIME)/1000.0;
   if(thisGPUtime>lastGPUtime+0.25){
-    printf("CPU->GPU 4.1f Mbytes/s\n",4.0*GPUnframes/(thisGPUtime-lastGPUtime)/1000000.0);
+    printf("CPU->GPU %4.1f Mbytes/s\n",4.0*GPUnframes/(thisGPUtime-lastGPUtime)/(1024.0*1024.0));
     lastGPUtime=thisGPUtime;
     GPUnframes=0;
   }
@@ -1635,6 +1643,8 @@ void read_volsmoke_allframes_allmeshes(void){
   int nframes=0;
   int i;
 
+  compress_volsmoke=glui_compress_volsmoke;
+  load_volcompressed=glui_load_volcompressed;
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
     volrenderdata *vr;
@@ -1675,7 +1685,7 @@ void init_volsmoke_texture(mesh *meshi){
   GLsizei nx, ny, nz;
 
 
-  printf("Setting 3D smoke/fire textures for %s ...",meshi->label);
+  printf("Defining smoke and fire textures for %s ...",meshi->label);
   fflush(stdout);
 
   glActiveTexture(GL_TEXTURE0);
