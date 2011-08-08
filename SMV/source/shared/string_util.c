@@ -44,12 +44,18 @@ void parsecsv(char *buffer, char **tokens, int ncols, int *ntokens){
        returning number of values found in ntokens
   */
   int nt=0;
-  char *token;
+  int i;
+  int lenbuffer;
 
-  token=strtok(buffer,",");
-  while(token!=NULL&&nt<ncols){
-    tokens[nt++]=token;
-    token=strtok(NULL,",");
+  lenbuffer=strlen(buffer);
+  for(i=0;i<lenbuffer;i++){
+    if(buffer[i]==',')buffer[i]=0;
+  }
+  tokens[nt++]=buffer;
+  for(i=1;i<lenbuffer;i++){
+    if(buffer[i]==0){
+      tokens[nt++]=buffer+i+1;
+    }
   }
   *ntokens=nt;
 }
