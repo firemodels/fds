@@ -1,8 +1,8 @@
 &HEAD CHID= 'LLNL_53', TITLE= '1986 LLNL Enclosure Fire Test 53'/
 &MESH IJK=30,20,30, XB=0,6,0,4,0,4.5 /
-&TIME  T_END=1000. /
-&MISC TMPA=33. /Fire
-&DUMP DT_PL3D=100.,  DT_DEVC = 500. /
+&TIME T_END=1000. /
+&MISC TMPA=33. /
+&DUMP DT_DEVC = 200. /
 &RADI RADIATIVE_FRACTION=0.20 /
 
 &REAC FUEL='METHANE'
@@ -23,7 +23,7 @@
 
 &OBST XB=2.7,3.2,1.7,2.2,0.0,0.2, 
 
-SURF_IDS='BURNER','Duct','Duct' / Construction
+SURF_IDS='BURNER','Duct','Duct' /
 
 &MATL ID= 'Wall Aluminum Silicate'
    	FYI= 'Al_2 O_3 Si O_2 Refractory'
