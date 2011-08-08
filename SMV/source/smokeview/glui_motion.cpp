@@ -617,6 +617,24 @@ extern "C" void TRANSLATE_CB(int var){
   float *cos_direction_angle, *sin_direction_angle;
   int *rotation_index;
 
+#ifdef pp_GPUTHROTTLE
+  if(usegpu==1&&showvolrender==1&&hide_volsmoke==0&&
+     (var==EYE_ROTATE||var==EYE_ROTATE_90||var==ROTATE_ZX||var==TRANSLATE_XY||var==GLUI_Z)
+    ){
+    float fps;
+
+    thisMOTIONtime=glutGet(GLUT_ELAPSED_TIME)/1000.0;
+    fps = MOTIONnframes/(thisMOTIONtime-lastMOTIONtime);
+    if(fps>5.0)return;
+    MOTIONnframes++;
+    if(thisMOTIONtime>lastMOTIONtime+0.25){
+      printf("MOTION: %4.1f fps\n",fps);
+      lastMOTIONtime=thisMOTIONtime;
+      MOTIONnframes=0;
+    }
+  }
+#endif
+
   if(var==CURSOR){
     updatemenu=1;
     return;
