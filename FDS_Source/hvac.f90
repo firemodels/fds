@@ -567,7 +567,8 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
             EXIT
          ENDIF
          IF(N==N_FILTERS) THEN
-            WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: Problem with DUCTNODE:',TRIM(DN%ID),',FILTER ',TRIM(NODE_FILTER_A(NN)),' not found'
+            WRITE(MESSAGE,'(A,A,A,A,A)') 'ERROR: Problem with DUCTNODE ',TRIM(DN%ID), &
+                                         '. FILTER ',TRIM(NODE_FILTER_A(NN)),' not found.'
             CALL SHUTDOWN(MESSAGE)
          ENDIF
       ENDDO
