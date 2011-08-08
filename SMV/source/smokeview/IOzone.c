@@ -1304,7 +1304,6 @@ void drawroomdata(void){
   float *zoneqfirebase;
   float ylay;
   float qdot;
-  float radius, height;
   float *colorv;
   unsigned char color;
   unsigned char *izonetubase;
@@ -1394,18 +1393,23 @@ void drawroomdata(void){
 #endif
 
   if(viszonefire==1){
-    glColor3f(0.7f,0.7f,0.7f);
+    float smokecolor[3]={0.7,0.7,0.7};
+    float firecolor[3]={1.0,0.5,0.0};
+
+    glColor3fv(smokecolor);
     for(i=0;i<nfires;i++){
       qdot = zoneqfirebase[i]/1000.0f;
       if(qdot>0.0f){
         firedata *firei;
+        float radius, plumeheight;
 
+        // radius/plumeheight = .268 = atan(15 degrees)
         firei = fireinfo + i;
-        height = (0.23f*pow((double)qdot,(double)0.4)/(1.0f+2.0f*0.268f))/xyzmaxdiff;
-        radius = height*0.268f;
+        plumeheight = (0.23f*pow((double)qdot,(double)0.4)/(1.0f+2.0f*0.268f))/xyzmaxdiff;
+        radius = plumeheight*0.268f;
         glPushMatrix();
         glTranslatef(firei->absx,firei->absy,firei->absz);
-        DrawCone(radius,height);
+        DrawCone(radius,plumeheight);
         glPopMatrix();
       }
     }
