@@ -7,14 +7,18 @@ addpath '../../Validation/Harrison_Spill_Plumes/Experimental_Data'
 addpath '../../Validation/Harrison_Spill_Plumes/FDS_Output_Files'
 
 %Read in Experimental data
-[A,C,D] = xlsread('Harrison_Spill_Plumes.csv');
+HSPstruct = importdata('Harrison_Spill_Plumes.csv'); %read in csv file
+A=HSPstruct.data; %numerical data
+At=HSPstruct.textdata; %text data
+C=At(:,1:2);
 S = zeros(length(A),2);
-S(1:length(A),1) = A(1:length(A),6);
+S(1:length(A),1) = A(1:length(A),4);
 
 %Read in FDS data
 %There was no neat way to do this. Forgive me for what I am about to do.
 %SE4
-B = xlsread('SE4_devc.csv');
+Bstruct = importdata('SE4_devc.csv');%read in csv file
+B=Bstruct.data; %numerical data from FDS output
 [x,y]= size(B);
 S(7,2)  =  B(x,3);
 S(10,2) =  B(x,3);
@@ -27,7 +31,8 @@ S(94,2) =  B(x,6);
 S(115,2)=  B(x,7);
 S(118,2)=  B(x,7);
 %SE5
-B = xlsread('SE5_devc.csv');
+Bstruct = importdata('SE5_devc.csv');%read in csv file
+B=Bstruct.data; %numerical data from FDS output
 [x,y]= size(B);
 S(8,2)  =  B(x,3);
 S(11,2) =  B(x,3);
@@ -40,7 +45,8 @@ S(95,2) =  B(x,6);
 S(116,2)=  B(x,7);
 S(119,2)=  B(x,7);
 %SE6
-B = xlsread('SE6_devc.csv');
+Bstruct = importdata('SE6_devc.csv');%read in csv file
+B=Bstruct.data; %numerical data from FDS output
 [x,y]= size(B);
 S(9,2)  =  B(x,3);
 S(12,2) =  B(x,3);
@@ -49,7 +55,8 @@ S(60,2) =  B(x,5);
 S(93,2) =  B(x,6);
 S(117,2)=  B(x,7);
 %SE7
-B = xlsread('SE7_devc.csv');
+Bstruct = importdata('SE7_devc.csv');%read in csv file
+B=Bstruct.data; %numerical data from FDS output;
 [x,y]= size(B);
 S(13,2) =  B(x,3);
 S(16,2) =  B(x,3);
@@ -62,7 +69,8 @@ S(99,2) =  B(x,6);
 S(120,2)=  B(x,7);
 S(123,2)=  B(x,7);
 %SE8
-B = xlsread('SE8_devc.csv');
+Bstruct = importdata('SE8_devc.csv');%read in csv file
+B=Bstruct.data; %numerical data from FDS output
 [x,y]= size(B);
 S(14,2) =  B(x,3);
 S(17,2) =  B(x,3);
@@ -75,7 +83,8 @@ S(100,2)=  B(x,6);
 S(121,2)=  B(x,7);
 S(124,2)=  B(x,7);
 %SE9
-B = xlsread('SE9_devc.csv');
+Bstruct = importdata('SE9_devc.csv');%read in csv file
+B=Bstruct.data; %numerical data from FDS output
 [x,y]= size(B);
 S(15,2) =  B(x,3);
 S(18,2) =  B(x,3);
@@ -85,7 +94,8 @@ S(65,2) =  B(x,5);
 S(98,2) =  B(x,6);
 S(122,2)=  B(x,7);
 %SE10
-B = xlsread('SE10_devc.csv');
+Bstruct = importdata('SE10_devc.csv');%read in csv file
+B=Bstruct.data; %numerical data from FDS output
 [x,y]= size(B);
 S(1,2)  =  B(x,3);
 S(4,2)  =  B(x,3);
@@ -98,7 +108,8 @@ S(89,2) =  B(x,6);
 S(110,2)=  B(x,7);
 S(113,2)=  B(x,7);
 %SE11
-B = xlsread('SE11_devc.csv');
+Bstruct = importdata('SE11_devc.csv');%read in csv file
+B=Bstruct.data; %numerical data from FDS output
 [x,y]= size(B);
 S(2,2)  =  B(x,3);
 S(5,2)  =  B(x,3);
@@ -111,7 +122,8 @@ S(90,2) =  B(x,6);
 S(111,2)=  B(x,7);
 S(114,2)=  B(x,7);
 %SE12
-B = xlsread('SE12_devc.csv');
+Bstruct = importdata('SE12_devc.csv');%read in csv file
+B=Bstruct.data; %numerical data from FDS output
 [x,y]= size(B);
 S(3,2)  =  B(x,3);
 S(6,2)  =  B(x,3);
@@ -120,7 +132,8 @@ S(55,2) =  B(x,5);
 S(88,2) =  B(x,6);
 S(112,2)=  B(x,7);
 %SE13
-B = xlsread('SE13_devc.csv');
+Bstruct = importdata('SE13_devc.csv');%read in csv file
+B=Bstruct.data; %numerical data from FDS output
 [x,y]= size(B);
 S(22,2) =  B(x,3);
 S(31,2) =  B(x,4);
@@ -128,7 +141,8 @@ S(71,2) =  B(x,5);
 S(80,2) =  B(x,6);
 S(104,2)=  B(x,7);
 %SE14
-B = xlsread('SE14_devc.csv');
+Bstruct = importdata('SE14_devc.csv');%read in csv file
+B=Bstruct.data; %numerical data from FDS output
 [x,y]= size(B);
 S(23,2) =  B(x,3);
 S(32,2) =  B(x,4);
@@ -136,7 +150,8 @@ S(72,2) =  B(x,5);
 S(81,2) =  B(x,6);
 S(105,2)=  B(x,7);
 %SE15
-B = xlsread('SE14_devc.csv');
+Bstruct = importdata('SE15_devc.csv');%read in csv file
+B=Bstruct.data; %numerical data from FDS output
 [x,y]= size(B);
 S(24,2) =  B(x,3);
 S(33,2) =  B(x,4);
@@ -144,7 +159,8 @@ S(73,2) =  B(x,5);
 S(82,2) =  B(x,6);
 S(106,2)=  B(x,7);
 %SE16
-B = xlsread('SE16_devc.csv');
+Bstruct = importdata('SE16_devc.csv');%read in csv file
+B=Bstruct.data; %numerical data from FDS output
 [x,y]= size(B);
 S(19,2) =  B(x,2);
 S(34,2) =  B(x,3);
@@ -152,7 +168,8 @@ S(68,2) =  B(x,4);
 S(83,2) =  B(x,5);
 S(101,2)=  B(x,6);
 %SE17
-B = xlsread('SE17_devc.csv');
+Bstruct = importdata('SE17_devc.csv');%read in csv file
+B=Bstruct.data; %numerical data from FDS output
 [x,y]= size(B);
 S(20,2) =  B(x,2);
 S(35,2) =  B(x,3);
@@ -160,7 +177,8 @@ S(69,2) =  B(x,4);
 S(84,2) =  B(x,5);
 S(102,2)=  B(x,6);
 %SE18
-B = xlsread('SE18_devc.csv');
+Bstruct = importdata('SE18_devc.csv');%read in csv file
+B=Bstruct.data; %numerical data from FDS output
 [x,y]= size(B);
 S(21,2) =  B(x,2);
 S(36,2) =  B(x,3);
@@ -168,7 +186,8 @@ S(70,2) =  B(x,4);
 S(85,2) =  B(x,5);
 S(103,2)=  B(x,6);
 %SE19
-B = xlsread('SE19_devc.csv');
+Bstruct = importdata('SE19_devc.csv');%read in csv file
+B=Bstruct.data; %numerical data from FDS output
 [x,y]= size(B);
 S(25,2) =  B(x,3);
 S(28,2) =  B(x,4);
@@ -176,7 +195,8 @@ S(74,2) =  B(x,5);
 S(77,2) =  B(x,6);
 S(107,2)=  B(x,7);
 %SE20
-B = xlsread('SE20_devc.csv');
+Bstruct = importdata('SE20_devc.csv');%read in csv file
+B=Bstruct.data; %numerical data from FDS output
 [x,y]= size(B);
 S(26,2) =  B(x,3);
 S(29,2) =  B(x,4);
@@ -184,7 +204,8 @@ S(75,2) =  B(x,5);
 S(78,2) =  B(x,6);
 S(108,2)=  B(x,7);
 %SE21
-B = xlsread('SE21_devc.csv');
+Bstruct = importdata('SE21_devc.csv');%read in csv file
+B=Bstruct.data; %numerical data from FDS output
 [x,y]= size(B);
 S(27,2) =  B(x,3);
 S(30,2) =  B(x,4);
