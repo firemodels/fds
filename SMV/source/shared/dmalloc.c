@@ -68,7 +68,7 @@ mallocflag _NewMemory(void **ppv, size_t size){
   mallocflag returnval;
 
   LOCK_MEM;
-  returnval=_NewMemoryNOTHREAD((void **)&ppv, size);
+  returnval=_NewMemoryNOTHREAD(ppv, size);
   UNLOCK_MEM;
   return returnval;
 }
@@ -189,7 +189,7 @@ mallocflag _ResizeMemory(void **ppv, size_t sizeNew){
   mallocflag returnval;
 
   LOCK_MEM;
-  returnval=_ResizeMemoryNOTHREAD((void **)&ppv, sizeNew);
+  returnval=_ResizeMemoryNOTHREAD(ppv, sizeNew);
   UNLOCK_MEM;
   return returnval;
 }
