@@ -49,12 +49,15 @@ SUBROUTINE COMPUTE_VISCOSITY(NM)
 ! Compute turblent eddy viscosity from constant coefficient Smagorinsky model
 
 USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY
-USE TURBULENCE, ONLY: VARDEN_DYNSMAG
+USE TURBULENCE, ONLY: VARDEN_DYNSMAG,TEST_FILTER
 INTEGER, INTENT(IN) :: NM
-REAL(EB) :: ZZ_GET(0:N_TRACKED_SPECIES)
+REAL(EB) :: ZZ_GET(0:N_TRACKED_SPECIES),NU_K,DELTA,KSGS
 INTEGER :: I,J,K,IIG,JJG,KKG,II,JJ,KK,IW
-REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP=>NULL(),UP=>NULL(),VP=>NULL(),WP=>NULL(), &
+                                       UP_HAT=>NULL(),VP_HAT=>NULL(),WP_HAT=>NULL(), &
+                                       UU=>NULL(),VV=>NULL(),WW=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
+REAL(EB), PARAMETER :: C_K=0.1_EB
  
 CALL POINT_TO_MESH(NM)
  
@@ -90,16 +93,14 @@ DO K=1,KBAR
 ENDDO
 !$OMP END DO
 
-! Compute strain rate, also potentially needed for DNS mixing time
+! Smagorinsky (1963) eddy viscosity
 
-CALL COMPUTE_STRAIN_RATE(NM)
+IF ((LES .AND. .NOT.DEARDORFF) .OR. EVACUATION_ONLY(NM)) THEN
 
-! Compute eddy viscosity using Smagorinsky model
-
-IF (LES .OR. EVACUATION_ONLY(NM)) THEN
-
-   IF (PREDICTOR .AND. DYNSMAG) CALL VARDEN_DYNSMAG(NM)
-
+   CALL COMPUTE_STRAIN_RATE(NM)
+   
+   IF (PREDICTOR .AND. DYNSMAG) CALL VARDEN_DYNSMAG(NM) ! dynamic procedure, Moin et al. (1991)
+   
    !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) &
    !$OMP PRIVATE(K,J,I)
    DO K=1,KBAR
@@ -113,6 +114,69 @@ IF (LES .OR. EVACUATION_ONLY(NM)) THEN
    !$OMP END DO
    
 ENDIF
+
+! Deardorff (1980) eddy viscosity model (experimental)
+
+DEARDORFF_IF: IF (LES .AND. DEARDORFF) THEN
+
+IF (PREDICTOR) THEN
+      UU=>U
+      VV=>V
+      WW=>W
+   ELSE
+      UU=>US
+      VV=>VS
+      WW=>WS
+   ENDIF
+
+   ! Velocities relative to the p-cell center
+   UP => WORK1
+   VP => WORK2
+   WP => WORK3
+   UP=0._EB
+   VP=0._EB
+   WP=0._EB
+
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            UP(I,J,K) = 0.5_EB*(UU(I,J,K) + UU(I-1,J,K))
+            VP(I,J,K) = 0.5_EB*(VV(I,J,K) + VV(I,J-1,K))
+            WP(I,J,K) = 0.5_EB*(WW(I,J,K) + WW(I,J,K-1))
+         ENDDO
+      ENDDO
+   ENDDO
+
+   UP_HAT => WORK4
+   VP_HAT => WORK5
+   WP_HAT => WORK6
+   UP_HAT=0._EB
+   VP_HAT=0._EB
+   WP_HAT=0._EB
+
+   CALL TEST_FILTER(UP_HAT,UP,-1.E10_EB,1.E10_EB)
+   CALL TEST_FILTER(VP_HAT,VP,-1.E10_EB,1.E10_EB)
+   CALL TEST_FILTER(WP_HAT,WP,-1.E10_EB,1.E10_EB)
+
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            IF (TWO_D) THEN
+               DELTA = MAX(DX(I),DZ(K))
+            ELSE
+               DELTA = MAX(DX(I),DY(J),DZ(K))
+            ENDIF
+            
+            KSGS = 0.5_EB*( (UP(I,J,K)-UP_HAT(I,J,K))**2 + (VP(I,J,K)-VP_HAT(I,J,K))**2 + (WP(I,J,K)-WP_HAT(I,J,K))**2 )
+            NU_K = C_K*DELTA*SQRT(KSGS)
+            
+            MU(I,J,K) = MU(I,J,K) + RHOP(I,J,K)*NU_K
+         ENDDO
+      ENDDO
+   ENDDO
+
+ENDIF DEARDORFF_IF
 
 ! Mirror viscosity into solids and exterior boundary cells
 
