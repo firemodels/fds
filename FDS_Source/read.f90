@@ -9719,6 +9719,20 @@ IF (NODE_ID/='null') THEN
    ENDDO
 ENDIF
 
+IF (TRIM(QUANTITY)=='FILTER LOADING') THEN
+   Y_INDEX = -999
+   DO NS = 1,N_TRACKED_SPECIES
+      IF (TRIM(SPECIES_MIXTURE(NS)%ID)==TRIM(SPEC_ID)) THEN
+         Z_INDEX = NS
+         EXIT
+      ENDIF
+   ENDDO
+   IF (Z_INDEX<0) THEN
+      WRITE(MESSAGE,'(A,A,A)')  'ERROR: FILTER LOADING. ',TRIM(SPEC_ID),' is not a tracked species'
+      CALL SHUTDOWN(MESSAGE)
+   ENDIF  
+ENDIF
+
 ! Assign PART_INDEX when PART_ID is specified
 
 IF (PART_ID/='null') THEN
