@@ -1,8 +1,8 @@
 &HEAD CHID= 'LLNL_04', TITLE= '1986 LLNL Enclosure Fire Test 04' /
 &MESH IJK=30,20,30, XB=0,6,0,4,0,4.5 /
-&TIME T_END=300. /
+&TIME T_BEGIN=-30., T_END=300. /
 &MISC TMPA=24. /
-&DUMP DT_DEVC = 60. /
+&DUMP DT_DEVC = 30. /
 
 
 Fire
