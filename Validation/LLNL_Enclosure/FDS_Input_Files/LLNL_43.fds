@@ -1,7 +1,7 @@
-&HEAD CHID= 'LLNL_49', TITLE= '1986 LLNL Enclosure Fire Test 49'/
+&HEAD CHID= 'LLNL_43', TITLE= '1986 LLNL Enclosure Fire Test 43' /
 &MESH IJK=30,20,30, XB=0,6,0,4,0,4.5 /
 &TIME T_BEGIN=-50., T_END=500. /
-&MISC TMPA=26. /
+&MISC TMPA=34. /
 &DUMP DT_DEVC = 50. /
 &RADI RADIATIVE_FRACTION=0.20 /
 
@@ -21,7 +21,7 @@
 &RAMP ID='fire', T=   0., F=0. /
 &RAMP ID='fire', T=  10., F=1. /
 
-&OBST XB=2.7,3.2,1.7,2.2,0.0,.31, SURF_IDS='BURNER','Duct','Duct' /
+&OBST XB=2.7,3.2,1.7,2.2,0.0,1.83, SURF_IDS='BURNER','Duct','Duct' /
 
 &MATL ID= 'Wall Aluminum Silicate'
    	FYI= 'Al_2 O_3 Si O_2 Refractory'
@@ -77,11 +77,11 @@ Ventilation
 
 &SURF ID='Inlet'
       COLOR='GREEN'
-      LEAK_PATH=1,0/
+      LEAK_PATH=1,0 /
 
 &SURF ID='EXHAUST'
       COLOR='BLUE'
-      VOLUME_FLUX=0.18/
+      LEAK_PATH=1,0 /
 
 &OBST XB=0.6,1.0,0.0,0.5,0.6,0.6, SURF_ID='Duct' / Inlet duct work
 &OBST XB=0.6,1.0,0.0,0.1,1.0,1.0, SURF_ID='Duct' /
