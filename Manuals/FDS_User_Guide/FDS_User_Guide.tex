@@ -6415,7 +6415,7 @@ Sometimes it is convenient to introduce droplets or particles at the start of th
 &INIT PART_ID='drops', XB=..., NUMBER_INITIAL_DROPLETS=2000, MASS_PER_VOLUME=2.5 /
 \end{verbatim} \normalsize
 
-It is also possible to initialize monodisperse droplets pointwise by specifying the droplet postion (m), velocity (m/s), diameter (microns), and temperature ($^\circ$C).  This feature allows the user to specify an arbitrary droplet distribution by using a sufficient number of {\ct INIT} lines.
+It is also possible to initialize monodisperse droplets pointwise by specifying the droplet position (m), velocity (m/s), diameter (microns), and temperature ($^\circ$C).  This feature allows the user to specify an arbitrary droplet distribution by using a sufficient number of {\ct INIT} lines.
 
 \footnotesize
 \begin{verbatim}
@@ -6493,7 +6493,7 @@ radiative properties can be given by specifying the components of the material r
 a spectral property {\ct TABLE} and specifying the {\ct ID} of that table is {\ct RADIATIVE\_PROPERTY\_TABLE} property on the {\ct PART} line.
 Each row of a spectral property table contains three real numbers: wavelength ($\mu$m), real and complex components of the refractive index.
 The real part of the refractive index should be a positive number. If it is greater than 10.0, the particles are treated as perfectly reflecting spheres. The complex part should be a non-negative number. Values less than 1.0E-6 are treated as non-absorbing.
-Below is an example of the use of spectral property table, listing the properties at wavelenghts 1, 5 and 10 $\mu$m.
+Below is an example of the use of spectral property table, listing the properties at wavelengths 1, 5 and 10 $\mu$m.
 
 \footnotesize
 \begin{verbatim}
