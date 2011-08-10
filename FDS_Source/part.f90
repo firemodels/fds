@@ -1787,12 +1787,12 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
                ITERATE_TEMP: DO WHILE (TEMPITER)
                   TEMPITER=.FALSE.
                   CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET2,CP2,TMP_G_I)
-                  IF (TMP_G_I < 4999._EB) THEN
+                  IF (TMP_G_I > 1._EB) THEN
                      CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET2,CP,TMP_G_I-1._EB)
-                     DCPDT = CP-CP2                     
-                  ELSE
-                     CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET2,CP,TMP_G_I-1._EB)                  
                      DCPDT = CP2-CP
+                  ELSE
+                     CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET2,CP,TMP_G_I+1._EB)
+                     DCPDT = CP-CP2
                   ENDIF
                   ! Compute approximation of d(cp)/dT                  
                   TMP_G_I = TMP_G_I+(H_NEW-CP2*TMP_G_I*M_GAS_NEW)/(M_GAS_NEW*(CP2+TMP_G_I*DCPDT))
