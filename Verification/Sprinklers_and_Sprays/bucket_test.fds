@@ -27,6 +27,6 @@
 &SLCF PBZ=0.1,QUANTITY='DROPLET FLUX Z', PART_ID='water drops' /
 &SLCF PBZ=2.5,QUANTITY='DROPLET FLUX Z', PART_ID='water drops' /
 
-&BNDF QUANTITY='AMPUA', PART_ID='water drops' /  Accumulated Mass Per Unit Area, i.e., the Buckets
+&DEVC ID='Mass',  XB=-5.0,5.0,-5.0,5.0,0.0,0.1, QUANTITY='AMPUA', PART_ID='water drops', STATISTICS='SURFACE INTEGRAL'  /
 
 &TAIL /
