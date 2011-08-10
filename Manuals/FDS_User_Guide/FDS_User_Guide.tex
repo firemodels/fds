@@ -5061,7 +5061,7 @@ fan itself can be positioned about halfway along the passage.
 \item[{\ct COOLANT\_TEMPERATURE}] The inlet temperature of the working fluid ($^\circ$C).
 \item[{\ct CTRL\_ID}] Name of a control function controlling the operation of the aircoil.
 \item[{\ct DEVC\_ID}] Name of a device controlling the operation of the aircoil.
-\item[{\ct EFFICIENCY}] The heat exchagner efficiency, \eta, from 0 to 1.  1 indicates the exit temperatures on both sides of the heat exchanger will be equal.
+\item[{\ct EFFICIENCY}] The heat exchagner efficiency, $\eta$, from 0 to 1.  1 indicates the exit temperatures on both sides of the heat exchanger will be equal.
 \item[{\ct FIXED\_Q}] Constant heat exchange rate.  Negative is heat removal from the duct.
 \end{description}
 
@@ -9701,6 +9701,7 @@ of a {\ct DUCT\_ID}, and quantities for a node require the specification of a {\
 {\ct QUANTITY}                                  & Symbol                                    & Units           \\
 \hline \hline
 \endhead
+{\ct AIRCOIL HEAT EXCHANGE}                     & Heat exchange rate for an aircoil         &  kW                   \\ \hline
 {\ct DUCT DENSITY}                              & Density of the flow in a duct             &  kg/m$^3$             \\ \hline
 {\ct DUCT MASS FLOW}                            & Mass flow in a duct                       &  kg/s                 \\ \hline
 {\ct DUCT MASS FRACTION}                        & Mass fraction of a species in a duct      &  kg/kg                \\ \hline
@@ -9708,6 +9709,8 @@ of a {\ct DUCT\_ID}, and quantities for a node require the specification of a {\
 {\ct DUCT VELOCITY}                             & Velocity of a duct                        &  m/s                  \\ \hline
 {\ct DUCT VOLUME FLOW}                          & Volumetric flow in a duct                 &  m$^3$/s              \\ \hline
 {\ct DUCT VOLUME FRACTION}                      & Volume fraction of a species in a duct    &  mol/mol              \\ \hline
+{\ct FILTER LOADING}                            & Loading of a species in a filter          &  kg                   \\ \hline
+{\ct FILTER LOSS}                               & Flow loss through a filter                &                       \\ \hline
 {\ct NODE DENSITY}                              & Density of the flow through a node        &  kg/m$^3$             \\ \hline
 {\ct NODE MASS FRACTION}                        & Mass fraction of a species in a node      &  kg/kg                \\ \hline
 {\ct NODE PRESSURE}                             & Pressure of a node                        &       Pa              \\ \hline
