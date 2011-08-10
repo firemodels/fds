@@ -4838,7 +4838,7 @@ Additionally you must define the locations where the HVAC network joins the comp
 
 
 \begin{description}
-\item[{\ct TYPE\_ID}] is a character string that indicates the type of component that the namelist group is defining.   {\ct TYPE\_ID} can be {\ct 'DUCT'}, {\ct 'NODE'}, or {\ct 'FAN'}.
+\item[{\ct TYPE\_ID}] is a character string that indicates the type of component that the namelist group is defining.   {\ct TYPE\_ID} can be {\ct 'DUCT'}, {\ct 'NODE'}, {\ct 'FAN'}, {\ct 'FILTER'}, or {\ct 'AIRCOIL'}.
 \item[{\ct ID}] is a character string giving a name to the component.  The name must be unique amongst all other components of that type; however, the same name can be given to components of different types ({\em i.e.} a duct and a node could have the same name but two ducts could not).
 \end{description}
 
@@ -4855,6 +4855,7 @@ A number of examples of simple HVAC systems are given in the HVAC folder of the 
 \end{verbatim}\normalsize
 
 \begin{description}
+\item[{\ct AIRCOIL\_ID}] is the {\ct ID} of an aircoil located in the duct.
 \item[{\ct AREA}] is the area of the duct in m$^2$. Either {\ct AREA} or {\ct DIAMETER} must be defined.
 \item[{\ct CTRL\_ID}] is the {\ct ID} of a {\ct CTRL} function for a damper (open/closed) or fan (on/off) in the duct.  Only one of {\ct CTRL\_ID} or {\ct DEVC\_ID} can be defined.
 \item[{\ct DAMPER}] is a logical variable indicating the presence of a damper in the duct.  The state of the damper is controlled by
@@ -4884,6 +4885,7 @@ function named by {\ct CTRL\_ID} or {\ct DEVC\_ID}.  Only one of either {\ct DAM
 \begin{description}
 \item[{\ct AMBIENT}] is a logical value.  If {\ct .TRUE.}, then the node is connected to the ambient ({\em i.e.} it is equivalent to the {\ct OPEN} boundary condition on a {\ct SURF} line).
 \item[{\ct DUCT\_ID}] gives the {\ct ID}s of the ducts connected to the node.  Up to 10 ducts can be connected to a node.
+\item[{\ct FILTER\_ID}] gives the {\ct ID} a filter located at the node.  A node with a filter can only have two connected ducts.
 \item[{\ct LOSS}] is an $n$ by $n$ array of real numbers giving the flow losses for the node.  {\ct LOSS(I,J)} is the loss for flow from from duct {\ct I} to duct {\ct J}.  For a terminal node ({\em e.g.} a node connected to the ambient or to a {\ct VENT}) the {\ct LOSS} is entered as a pair of numbers representing loss for flow entering the HVAC system and for flow exiting the HVAC system.
 \item[{\ct VENT\_ID}] is the name of the {\ct VENT} where the node connects to the FDS computational domain.
 \item[{\ct XYZ}] is a triplet of real numbers giving the coordinates of the node.  This location is used to compute buoyancy heads.
@@ -4960,10 +4962,14 @@ separate ``pressure zones.'' Two HVAC ducts are defined.  One is a quadratic fan
 &OBST XB= -0.15, 0.15,-1.0, 1.0, 0.0, 2.0 / Partition Wall
 
 
-&VENT XB=-0.15,-0.15,-0.2, 0.2, 0.4, 0.6, COLOR='RED', ID='BLOW LEFT 1',SURF_ID='HVAC',IOR=-1/
-&VENT XB= 0.15, 0.15,-0.2, 0.2, 0.4, 0.6, COLOR='GREEN', ID='BLOW LEFT 2',SURF_ID='HVAC',IOR=1/
-&VENT XB=-0.15,-0.15,-0.2, 0.2, 1.4, 1.6, COLOR='BLUE', ID='BLOW RIGHT 1',SURF_ID='HVAC',IOR=-1/
-&VENT XB= 0.15, 0.15,-0.2, 0.2, 1.4, 1.6, COLOR='YELLOW', ID='BLOW RIGHT 2',SURF_ID='HVAC',IOR=1/
+&VENT XB=-0.15,-0.15,-0.2, 0.2, 0.4, 0.6, COLOR='RED', ID='BLOW LEFT 1',
+      SURF_ID='HVAC',IOR=-1/
+&VENT XB= 0.15, 0.15,-0.2, 0.2, 0.4, 0.6, COLOR='GREEN', ID='BLOW LEFT 2',
+      SURF_ID='HVAC',IOR=1/
+&VENT XB=-0.15,-0.15,-0.2, 0.2, 1.4, 1.6, COLOR='BLUE', ID='BLOW RIGHT 1',
+      SURF_ID='HVAC',IOR=-1/
+&VENT XB= 0.15, 0.15,-0.2, 0.2, 1.4, 1.6, COLOR='YELLOW', ID='BLOW RIGHT 2',
+      SURF_ID='HVAC',IOR=1/
 
 &HVAC ID='LEFT 1',TYPE_ID='NODE',DUCT_ID='LEFT',VENT_ID='BLOW LEFT 1'/
 &HVAC ID='LEFT 2',TYPE_ID='NODE',DUCT_ID='LEFT',VENT_ID='BLOW LEFT 2'/
@@ -5017,6 +5023,56 @@ fan itself can be positioned about halfway along the passage.
 
 \clearpage
 
+\subsection{HVAC Filter Parameters}
+
+\footnotesize
+\begin{verbatim}
+&HVAC TYPE='FILTER', ID='filtername', LOADING=initial loading, SPEC_ID='speciesname',
+      EFFICIENCY=species filtering efficiency, MULTIPLIER=multiplier for species loading,
+      CLEAN_LOSS=clean flow loss, RAMP_ID='rampname', LOSS=loading loss/
+\end{verbatim}\normalsize
+
+
+\begin{description}
+\item[{\ct CLEAN\_LOSS}] is the flow loss through the filter when it is new (zero loading).
+\item[{\ct EFFICIENCY}] is an array of the species removal efficiency from 0 to 1 where 0 is no removal of that species and 1 is complete filtration of the species.
+\item[{\ct LOADING}] The initial loading (kg) of the filter
+\item[{\ct LOSS}] Invokes a linear flow loss model where the flow loss is given as a linear function of the total loading, $K_{filter}=K_{CLEAN\_LOSS}+K_{LOSS} \sum \left( L_i M_i \right)$, where L$_i$ is the species loading and M$_i$ is a multiplier.  Only one of {\ct LOSS} or {\ct RAMP\_ID} should be specified.
+\item[{\ct MULTIPLIER}] is an array of the species multiplier, M$_i$, used in computing the total filter loading when computing loss.  
+\item[{\ct RAMP\_ID}] identifies the {\ct RAMP} that contains a table of pressure drop across the filter as a function of total loading (see summation in {\ct LOSS}.   Only one of {\ct LOSS} or {\ct RAMP\_ID} should be specified.
+\item[{\ct SPEC\_ID}] identifies the tracked species for the inputs of {\ct MULTIPLIER} and {\ct LOADING}.
+\end{description}
+
+\subsection{HVAC Aircoil Parameters}
+
+\footnotesize
+\begin{verbatim}
+&HVAC TYPE='AIRCOIL', ID='aircoilname', DEVC_ID='devicename', CTRL_ID='ctrlname',
+      EFFICIENCY=aircoil efficiency, FIXED_Q=fixed heat exchange,
+      COOLANT_CP=working fluid specific heat,
+      COOLANT_TEMPERATURE= working fluid inlet temperature,
+      COOLANT_MDOT=working fluid flow rate/
+\end{verbatim}\normalsize
+
+
+\begin{description}
+\item[{\ct COOLANT\_CP}] The specific heat (kJ/kg/K) of the working fluid.
+\item[{\ct COOLANT\_MDOT}] The flow rate of the working fluid (kg/s).
+\item[{\ct COOLANT\_TEMPERATURE}] The inlet temperature of the working fluid ($^\circ$C).
+\item[{\ct CTRL\_ID}] Name of a control function controlling the operation of the aircoil.
+\item[{\ct DEVC\_ID}] Name of a device controlling the operation of the aircoil.
+\item[{\ct EFFICIENCY}] The heat exchagner efficiency, \eta, from 0 to 1.  1 indicates the exit temperatures on both sides of the heat exchanger will be equal.
+\item[{\ct FIXED\_Q}] Constant heat exchange rate.  Negative is heat removal from the duct.
+\end{description}
+
+Either {\ct FIXED\_Q} or the set {\ct COOLANT\_CP}, {\ct COOLANT\_MDOT}, {\ct COOLANT\_TEMPERATURE}, and {\ct EFFICIENCY} should be specified.  In the later case the heat exchange is computed as:
+
+\be T_{fluid,out}=\frac{c_{p,gas} u_{duct} A_{duct} \rho_{duct} T_{duct,in} + c_{p,fluid} \dm_{fluid} T_{fluid,in}}{c_{p,gas} u_{duct} A_{duct} \rho_{duct} + c_{p,fluid} \dm_{fluid}}
+\ee
+
+\be \dq_{coil}=\eta  c_{p,fluid} \dm_{fluid} \left( T_{fluid,in} - T_{fluid,out} \right)
+\ee
+
 
 \section{Pressure-Related Effects: The \texorpdfstring{{\tt ZONE}}{ZONE} Namelist Group (Table \ref{tbl:VENT})}
 \label{info:ZONE}
@@ -5026,6 +5082,8 @@ often, $\bp$ is just the hydrostatic pressure, and $\tp$ is the flow-induced spa
 You can specify any number of sealed compartments within the computational
 domain that can have their own ``background'' pressures, and these compartments, or ``pressure zones,'' can be connected via leakage and duct paths whose
 flow rates are tied to the pressure of the adjacent zones.
+
+
 
 \subsection{Specifying Pressure Zones}
 \label{info:ZONE_Basics}
@@ -9960,23 +10018,34 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct HVAC} (HVAC System Definition)} \\
 \hline \hline
 \endhead
+{\ct AIRCOIL\_ID}               & Character         & Name of an aircoil in a duct    &               &  {\ct 'null'}         \\ \hline
 {\ct AMBIENT}                   & Logical           & Node is connected to the ambient                  &               &  {\ct .FALSE.}        \\ \hline
 {\ct AREA}                      & Real              & Area of a duct                                    & m$^2$         &                       \\ \hline
+{\ct CLEAN\_LOSS}               & Real              & Flow loss for a clean filter                                    &               &                       \\ \hline
+{\ct COOLANT\_CP}               & Real              & Specific heat for the working fluid of an aircoil   & kJ/kg/K       &                       \\ \hline
+{\ct COOLANT\_MDOT}             & Real              & Flow rate for the working fluid of an aircoil   & kg/s          &                       \\ \hline
+{\ct COOLANT\_TEMPERATURE}      & Real              &Inlet temperature for the working fluid of an aircoil   & $^\circ$C             &                       \\ \hline
 {\ct CTRL\_ID}                  & Character         & Name of {\ct CTRL} controlling a fan or damper    &               &  {\ct 'null'}         \\ \hline
 {\ct DAMPER}                    & Logical           & Damper is present in a duct                       &               &  {\ct .FALSE.}        \\ \hline
 {\ct DEVC\_ID}                  & Character         & Name of {\ct DEVC} controlling a fan or damper    &               &  {\ct 'null'}         \\ \hline
 {\ct DIAMETER}                  & Real              & Diameter of a duct                                &  m            &                       \\ \hline
 {\ct DUCT\_ID}                  & Character Array   & Name of ducts connected to a node                 &               &                       \\ \hline
+{\ct EFFICIENCY}                & Real Array        & Efficiency of a filter or aircoil                                    &               & 1.                     \\ \hline
 {\ct FAN\_ID}                   & Character         & Name of a fan in a duct                           &               &  {\ct 'null'}         \\ \hline
+{\ct FILTER\_ID}                & Character         & Name of a fan in a node                           &               &  {\ct 'null'}         \\ \hline
+{\ct FIXED\_Q}                  & Real              & Fixed heat exchange (positive is heat addition) for an aircoil        & kW            &                       \\ \hline
 {\ct ID}                        & Character         & Name of component                                 &               &                       \\ \hline
 {\ct LENGTH}                    & Real              & Length of a duct                                  &  m            &                       \\ \hline
-{\ct LOSS}                      & Real Array        & Flow loss coefficients for a duct or node         &               &                       \\ \hline
+{\ct LOADING}                   & Real Array        & The initial species loading of a filter         & kg            & 0                     \\ \hline
+{\ct LOADING\_MULTIPLIER}       & Real Array        & Filter flow loss multiplier for species         & kg            & 0                     \\ \hline
+{\ct LOSS}                      & Real Array        & Flow loss coefficients for a duct, node, or filter   &               &                       \\ \hline
 {\ct MAX\_FLOW}                 & Real              & Maximum volumetric flow for a quadratic fan       &  m$^3$/s      &                       \\ \hline
 {\ct MAX\_PRESSURE}             & Real              & Stall pressure for a quadratic fan                &  Pa           &                       \\ \hline
 {\ct NODE\_ID}                  & Character Doublet & Name of nodes connected to a duct                 &               &                       \\ \hline
 {\ct RAMP\_ID}                  & Character         & Name of {\ct RAMP} containing a fan or volume flow curve &               &  {\ct 'null'}         \\ \hline
 {\ct REVERSE}                   & Logical           & Indicates fan or {\ct VOLUME\_FLOW} direction is from second node to first node &               &  {\ct 'null'}         \\ \hline
 {\ct ROUGHNESS}                 & Real              & Absolute roughness of a duct                      &  m            &                       \\ \hline
+{\ct SPEC\_ID}                  & Character         & List of tracked species           &               &                       \\ \hline
 {\ct TAU\_FAN}                  & Real              & Ramp time for a fan                               & s             & 1.                      \\ \hline
 {\ct TAU\_VF}                   & Real              & Ramp time for {\ct VOLUME\_FLOW}                  & s             & 1.                      \\ \hline
 {\ct TYPE\_ID}                  & Character         & Type of component                                 &               &                       \\ \hline
