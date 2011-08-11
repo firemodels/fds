@@ -23,6 +23,7 @@
 SVEXTERN int SVDECL(mouse_down,0);
 SVEXTERN int SVDECL(hide_volsmoke,1);
 #endif
+SVEXTERN int SVDECL(freeze_volsmoke,0);
 SVEXTERN int SVDECL(have_volcompressed,0);
 SVEXTERN int SVDECL(glui_load_volcompressed,0),SVDECL(load_volcompressed,0);
 SVEXTERN int SVDECL(use_multi_threading,1);

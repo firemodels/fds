@@ -271,6 +271,10 @@ void getvolsmokedir(float *mm){
 
   volfacelistdata *vi;
 
+#ifdef _DEBUG
+  if(freeze_volsmoke==1)return;
+#endif
+
   pi=4.0*atan(1.0);
 
   xyzeyeorig[0] = -(mm[0]*mm[12]+mm[1]*mm[13]+ mm[2]*mm[14])/mscale[0];

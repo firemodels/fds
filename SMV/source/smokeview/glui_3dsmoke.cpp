@@ -286,6 +286,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     SPINNER_opacity_factor=glui_3dsmoke->add_spinner_to_panel(panel_volume,_("Soot density factor"),GLUI_SPINNER_FLOAT,&opacity_factor);
     SPINNER_opacity_factor->set_float_limits(1.0,10.0);
 #ifdef _DEBUG
+    glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Freeze"),&freeze_volsmoke);
     CHECKBOX_usevolrender=glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Show"),&usevolrender,VOL_SMOKE,SMOKE_3D_CB);
     glui_3dsmoke->add_checkbox_to_panel(panel_volume,"block smoke",&block_volsmoke);
     glui_3dsmoke->add_checkbox_to_panel(panel_volume,"debug",&smoke3dVoldebug);
