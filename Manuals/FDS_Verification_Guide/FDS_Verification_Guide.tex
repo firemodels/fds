@@ -844,7 +844,7 @@ Next, in Figure \ref{fig_dynsmag_cbc}, we show results for the dynamic model ana
 
 Wall flows are notoriously challenging for large-eddy simulation (LES) \cite{Baggett:1997,Baggett:1998,Cabot:1995,Pope:2000,Sagaut:2001}.  In spite of their promise and sophistication, practical LES codes are resigned to \emph{model} the wall shear stress as opposed to \emph{resolving} the dynamically important length scales near the wall.
 
-In this work we introduce the Werner and Wengle (WW) wall model \cite{Werner:1991} and the rough wall log law from Pope \cite{Pope:2000} into the NIST Fire Dynamics Simulator (FDS) as a practical first step in developing models for turbulent flow around complex geometry and over complex terrain.  Such models are required in order for FDS to accurately model, for example, tunnel fires, smoke transport in complex architectures, and wildland-urban interface (WUI) fires \cite{WUI}. As a minimum requirement, a wall model should accurately reproduce the mean wall stress for flow in a straight channel.  We verify that this is true for FDS by reproducing the Moody chart, a plot of friction factor versus Reynolds number for pipe flow \cite{Moody:1944}.
+In this work we introduce the Werner and Wengle (WW) wall model \cite{Werner:1991} and the rough wall log law from Pope \cite{Pope:2000} into the NIST Fire Dynamics Simulator (FDS) as a practical first step in developing models for turbulent flow around complex geometry and over complex terrain.  Such models are required in order for FDS to accurately model, for example, tunnel fires, smoke transport in complex architectures, and wildland-urban interface (WUI) fires. As a minimum requirement, a wall model should accurately reproduce the mean wall stress for flow in a straight channel.  We verify that this is true for FDS by reproducing the Moody chart, a plot of friction factor versus Reynolds number for pipe flow \cite{Moody:1944}.
 
 The remainder of this section is organized as follows. In Section \ref{formulation} we describe the model formulation. Then, in Section \ref{results}, we conduct a verification study of the wall boundary conditions for laminar and turbulent flows in FDS.  From this study we are able to draw quantitative conclusions in Section \ref{conclusions} about the accuracy of the channel flow simulations for smooth and rough walls.
 
@@ -1492,10 +1492,9 @@ It is expected that this gauge would register a heat flux of
 $\sigma T^4=20.26$~kW/m$^2$. Finally, the plot in the lower right of Fig.~\ref{hot_spheres_plot} indicates the
 integrated intensity, $4 \sigma T^4=81.04$~kW/m$^2$.
 
-
-\noindent
 \begin{figure}[h]
-\begin{tabular*}{\textwidth}{lr}
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/hot_spheres_rad_loss_1} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/hot_spheres_rad_loss_2} \\
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/hot_spheres_heat_flux}  &
@@ -1526,9 +1525,10 @@ If the radiative intensity remains constant during the time step, the average dr
 By setting $T_0=0$~$^\circ$C, $\Delta t =0.01$~s, $m =0.01$~kg, and $c_p =1.0$~kJ/kg, the final value of $\overline{T_d}$ should equal
 $\dot{Q}_r$. Figure~\ref{droplet_absorption_figures} shows comparisons of the predicted average droplet temperature and the expected value in cartesian and cylindrical
 coordinate systems.
-\noindent
+
 \begin{figure}[h]
-\begin{tabular*}{\textwidth}{lr}
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/droplet_absorption_cart} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/droplet_absorption_cyl}
 \end{tabular*}
@@ -2611,13 +2611,19 @@ As opposed to the other cases above, this case tests the predicted rate of evapo
 \end{figure}
 
 
+\newpage
 
 \section{Particles in 1D (terminal\_velocity)}
-If a single droplet having a constant drag coefficient falls through a stationary fluid, its velocity and trajectory can be found analytically. This is the ``terminal velocity'' case. The particle starts from rest and falls under the influence of gravity and drag in 1D. FDS runs until a steady-state solution is reached. The equation governing this motion is
+
+If a single droplet having a constant drag coefficient falls through a stationary fluid, its velocity and trajectory can be found analytically.
+This is the ``terminal velocity'' case. The particle starts from rest and falls under the influence of gravity and drag in 1D.
+FDS runs until a steady-state solution is reached. The equation governing this motion is
 \[
 	\dot{u} = K u^2 - g \quad ; \quad K \equiv \frac{\rho_a C_d A}{2 m}
 \]
-$\rho_a$ is the ambient air density, $C_d$ is the drag coefficient of the droplet, $A$ is the cross-sectional area of the droplet, and $m$ is the mass of the droplet. Defining $\rho_d$ as the density of the droplet and $D_d$ as the diameter of the droplet and solving this ODE with zero ICs, the solution below and equivalent definition of $K$ for a droplet is found.
+$\rho_a$ is the ambient air density, $C_d$ is the drag coefficient of the droplet, $A$ is the cross-sectional area of the droplet, and $m$ is the mass of the droplet.
+Defining $\rho_d$ as the density of the droplet and $D_d$ as the diameter of the droplet and solving this ODE with zero ICs,
+the solution below and equivalent definition of $K$ for a droplet is found.
 % D = 10 mm
 % Cd = 1.0
 % g = -9.8 m/s^2
@@ -2626,7 +2632,8 @@ $\rho_a$ is the ambient air density, $C_d$ is the drag coefficient of the drople
 	x = - \frac{\text{ln}\left[\text{cosh}\left(\sqrt{g K} t \right)\right]}{K} \quad ; \quad
 	K \equiv \frac{3 \rho_a C_d}{4 \rho_d D_d}
 \ee
-FDS ran the terminal velocity case over several time steps. The precise configuration of the scenario is detailed in the table below. The error of this terminal velocity and the L$_\infty$ norm of position error are computed and plotted for each time step.
+FDS ran the terminal velocity case over several time steps. The precise configuration of the scenario is detailed in the table below.
+The error of this terminal velocity and the L$_\infty$ norm of position error are computed and plotted for each time step.
 \begin{center}
 \begin{tabular}{|r|c|l|}
 \hline
@@ -2637,19 +2644,21 @@ Droplet fluid density & $\rho_d$ & 1000~kg/m$^3$ \\
 \hline
 \end{tabular}
 \end{center}
-FDS demonstrated second-order convergence in the terminal velocity case for both the velocities and the positions. See figures \ref{fig_terminal_velocity_convergence} and \ref{fig_position_convergence}.
-\begin{figure}
-   \begin{center}
-      \scalebox{.7}{\includegraphics{SCRIPT_FIGURES/terminal_velocity_convergence}}
-      \caption{\label{fig_terminal_velocity_convergence} \small FDS exhibits second-order convergence for the particle velocity in the terminal velocity case.}
-   \end{center}
+FDS demonstrated second-order convergence in the terminal velocity case for both the velocities and the positions. See Fig.~\ref{fig_terminal_velocity_convergence}.
+
+\begin{figure}[h]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/terminal_velocity_convergence} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/position_convergence}
+\end{tabular*}
+\caption[Convergence analysis of terminal velocity test case.]{(Left) FDS exhibits second-order convergence for the particle velocity in the terminal velocity case. (Right) FDS exhibits second-order convergence for the particle position in the terminal velocity case.}
+\label{fig_terminal_velocity_convergence}
 \end{figure}
-\begin{figure}
-   \begin{center}
-      \scalebox{.7}{\includegraphics{SCRIPT_FIGURES/position_convergence}}
-      \caption{\label{fig_position_convergence} \small FDS exhibits second-order convergence for the particle position in the terminal velocity case.}
-   \end{center}
-\end{figure}
+
+
+\clearpage
+
 \section{Accuracy of Fluid-Particle Momentum Transfer}
 In Appendix G of the Technical Reference Guide the numerical scheme FDS uses to compute these trajectories is detailed. The equation for particle velocities is
 \begin{equation}
@@ -2682,6 +2691,9 @@ This third-order error per time step becomes an accumulated second-order error, 
 
 
 Due to this error, the $\Delta t^3$ term of the position equation is dropped because it offers no improvements in accuracy but requires more computation.
+
+\newpage
+
 \section{2D Flat Fire Trajectory (flat\_fire)}
 There are no known solutions of the drag equations in higher dimensions. However, ballisticians developed an approximate solution useful for computing trajectories of projectiles when guns are shot within a certain range of angles. This solution makes use of the ``flat fire'' assumption. In short, if a particle is launched with its velocity in only the $x$-direction and its $y$-velocity is never very significant compared against the $x$-velocity, then throughout the entire trajectory $u$ is a good approximation for $|\mathbf{u}|$.
 
@@ -2770,7 +2782,11 @@ A 1~m by 1~m by 1~m compartment is initialized with the lower half of the compar
 
 \section{HVAC Energy Conservation and Pressure (HVAC\_energy\_pressure)}
 
-A 1~m by 1~m by 1~m box is divided into two equal compartments by a vertical wall, see Figure~\ref{fig_HVAC_e_p}.  The ambient species is defined with a molecular weight of 28 g/mol, a specific heat of 1 kJ/kg/K and a specific enthalpy of 298.15 kJ/kg at the reference temperature of 298.15~K.  The left side of the compartment is initialized to twice the ambient temperature.  A simple HVAC system of two 0.1 m$^2$ ducts is created.  The first duct takes suction from the lower left half and discharges into the lower right half, and this duct is given a fixed volume flow rate 0.1 m$^3$/s.  The second duct is placed in the upper half of the compartment and is assigned a flow loss of 1 and an area of 0.01 m$^2$.  It is expected that the top and bottom duct velocities will be 10 m/s and 1 m/s respectively, the total energy will be conserved, that at the start of the computation hot gas will be seen entering the lower right and cold gas entering the upper left, and that at the end of the computation the pressure difference between the two sides will be 43.6 Pa based on Eq.~\ref{HVAC_steady_state}
+A 1~m by 1~m by 1~m box is divided into two equal compartments by a vertical wall, see Figure~\ref{fig_HVAC_e_p}.
+The ambient species is defined with a molecular weight of 28 g/mol, a specific heat of 1 kJ/kg/K and a specific enthalpy of 298.15 kJ/kg at the reference temperature of 298.15~K.
+The left side of the compartment is initialized to twice the ambient temperature.  A simple HVAC system of two 0.1 m$^2$ ducts is created.
+The first duct takes suction from the lower left half and discharges into the lower right half, and this duct is given a fixed volume flow rate 0.1 m$^3$/s.
+The second duct is placed in the upper half of the compartment and is assigned a flow loss of 1 and an area of 0.01 m$^2$.  It is expected that the top and bottom duct velocities will be 10 m/s and 1 m/s respectively, the total energy will be conserved, that at the start of the computation hot gas will be seen entering the lower right and cold gas entering the upper left, and that at the end of the computation the pressure difference between the two sides will be 43.6 Pa based on Eq.~\ref{HVAC_steady_state}
 
 \begin{figure}[ht]
 \noindent
