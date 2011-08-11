@@ -8771,55 +8771,22 @@ water drops time to reach the floor. The total mass of water discharged is
 \be
   \mathrm{ 180 \; \frac{L}{min} \times 1 \; \frac{kg}{L} \times \frac{1}{60} \; \frac{min}{s} \times 30 \; s = 90 \; kg }
 \ee
-In the simulation, the boundary quantity {\ct water\_drops\_AMPUA}
-(Accumulated Mass Per Unit Area) records the total water mass per
+In the simulation, the quantity {\ct 'AMPUA'} with {\ct STATISTICS='SURFACE INTEGRAL'} is applied to the {\ct DEVC} line.
+Accumulated Mass Per Unit Area records the total water mass per
 unit area (kg/m$^2$), analogous to actual buckets the size of a grid cell.
 Summing the values of {\ct water\_drops\_AMPUA} over the entire
-floor yields 88.3~kg. Where is the missing water? Some droplets evaporate, and some droplets
+floor yields a total of 90 kg (Figure \ref{bucket_test_fig}). In some cases an in balance in mass of water may occur. Some droplets evaporate, and some droplets
 fly beyond the computational domain. Note that
-there are no actual ``buckets'' in the simulation.
+there are no actual ''buckets'' in the simulation.
 
-The accumulated water mass at the floor is extracted from
-the boundary ({\ct BNDF}) file via the command line program
-{\bf fds2ascii}. Here is a transcript of the session
-used to convert the binary FDS output file into ASCII format:
+\begin{figure}[ht]
+\centering
+\includegraphics[scale=0.55]{SCRIPT_FIGURES/bucket_test}
+\caption[Output of {\ct bucket\_test} test case.]{Output of {\ct bucket\_test} test cases.}
+\label{bucket_test_fig}
+\end{figure}
 
-\footnotesize
-\begin{verbatim}
->> fds2ascii
-  Enter Job ID string (CHID):
-bucket_test
-  What type of file to parse?
-  PL3D file? Enter 1
-  SLCF file? Enter 2
-  BNDF file? Enter 3
-3
-  Enter Sampling Factor for Data?
-  (1 for all data, 2 for every other point, etc.)
-1
-  Limit the domain size? (y or n)
-y
-  Enter min/max x, y and z
--5 5 -5 5 0 1
-  1   MESH  1, water_drops_AMPUA
-  Enter starting and ending time for averaging (s)
-35 36
-  Enter orientation: (plus or minus 1, 2 or 3)
-3
-  Enter number of variables
-1
- Enter boundary file index for variable 1
-1
- Enter output file name:
-bucket_test_fds2ascii.csv
-  Writing to file...      bucket_test_fds2ascii.csv
-\end{verbatim}
-
-\normalsize \noindent
-Note that there really is no need to time-average the results. The quantity is inherently accumulating. Also, the
-``orientation'' refers to direction of the surface. In this case, we're interested in the positive $z$ direction, or 3.
-
-Note also that if you desire that the droplets be counted more than once towards the summation of {\ct AMPUA}, set {\ct RECOUNT\_DRIP=.TRUE.} on any {\ct BNDF} line.
+Note that there really is no need to time-average the results. The quantity is inherently accumulating.
 
 
 
