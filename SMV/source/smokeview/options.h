@@ -58,6 +58,7 @@
 
 #ifdef _DEBUG  // comment out following line if debugging REALLY large cases (to avoid memory checks)
 #define pp_MEMDEBUG
+#define pp_FREEZE_VOLSMOKE
 #endif
 
 //VVVVVVVVVVVVVVVVVVVVVVVVVVVVV  turn on windows only options VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV

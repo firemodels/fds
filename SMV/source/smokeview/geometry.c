@@ -271,7 +271,7 @@ void getvolsmokedir(float *mm){
 
   volfacelistdata *vi;
 
-#ifdef _DEBUG
+#ifdef pp_FREEZE_VOLSMOKE
   if(freeze_volsmoke==1)return;
 #endif
 

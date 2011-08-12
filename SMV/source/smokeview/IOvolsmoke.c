@@ -453,7 +453,7 @@ void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, mesh
 void compute_all_smokecolors(void){
   int ii;
 
-#ifdef _DEBUG
+#ifdef pp_FREEZE_VOLSMOKE
   if(freeze_volsmoke==1)return;
 #endif
   for(ii=0;ii<nmeshes;ii++){
