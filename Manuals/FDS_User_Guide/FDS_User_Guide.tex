@@ -3288,7 +3288,7 @@ calculations. You can change the empirical coefficients using {\ct C\_HORIZONTAL
 \subsubsection{Changing the Convective Heat Transfer Coefficient}
 
 If you want to change the default convective heat transfer coefficient, you can set it to a constant using
-{\ct H\_FIXED} on the {\ct SURF} line in units of W/m$^2$/K. 
+{\ct H\_FIXED} on the {\ct SURF} line in units of W/m$^2$/K.
 
 \subsubsection{Specifying the Heat Flux at a Solid Surface}
 
@@ -4921,7 +4921,7 @@ Also note that {\ct FAN} defines a class of fans rather than one specific fan. T
 
 In Section~\ref{info:Velocity_BC} there is a discussion of velocity boundary conditions,
 in which a fan is modeled simply as a solid boundary that blows or
-sucks air, regardless of the surrounding pressure field. In the HVAC model, this approach to modeling a fan occurs when the fan is specified with a {\ct VOLUME\_FLOW}.  
+sucks air, regardless of the surrounding pressure field. In the HVAC model, this approach to modeling a fan occurs when the fan is specified with a {\ct VOLUME\_FLOW}.
 In reality, fans operate based on
 the pressure drop across the duct or manifold in which they are
 installed. A very simple ``fan curve'' is given by:
@@ -4934,8 +4934,8 @@ This simple ''fan curve'' is the ''quadratic'' fan model as the pressure is prop
 The volume flow in the absence of a pressure difference, {\ct MAX\_FLOW}, is given $\dot{V}_{\hbox{\footnotesize max}}$.  The pressure difference, $\Delta p=p_1-p_2$, indicates the difference in
 pressure between the downstream compartment, or ``zone,'' and the upstream. The subscript 1 indicates downstream and 2 indicates upstream.
 The term, $\Delta p_{\hbox{\footnotesize max}}$, is the maximum
-pressure difference, {\ct MAX\_PRESSURE}, the fan can operate upon, and it is assumed to be a positive number. 
-The flow through a fan will decrease from $\dot{V}_{\hbox{\footnotesize max}}$ at zero pressure difference to 0 $m^3$/s at $\Delta p_{\hbox{\footnotesize max}}$.  
+pressure difference, {\ct MAX\_PRESSURE}, the fan can operate upon, and it is assumed to be a positive number.
+The flow through a fan will decrease from $\dot{V}_{\hbox{\footnotesize max}}$ at zero pressure difference to 0 $m^3$/s at $\Delta p_{\hbox{\footnotesize max}}$.
 If the pressure difference increases beyond this, air will be forced backwards through the fan.  Figure~\ref{fig:Fan_Curve} displays a typical fan curve.
 
 \begin{figure}[ht!]
@@ -5038,7 +5038,7 @@ fan itself can be positioned about halfway along the passage.
 \item[{\ct EFFICIENCY}] is an array of the species removal efficiency from 0 to 1 where 0 is no removal of that species and 1 is complete filtration of the species.
 \item[{\ct LOADING}] The initial loading (kg) of the filter
 \item[{\ct LOSS}] Invokes a linear flow loss model where the flow loss is given as a linear function of the total loading, $K_{filter}=K_{CLEAN\_LOSS}+K_{LOSS} \sum \left( L_i M_i \right)$, where L$_i$ is the species loading and M$_i$ is a multiplier.  Only one of {\ct LOSS} or {\ct RAMP\_ID} should be specified.
-\item[{\ct MULTIPLIER}] is an array of the species multiplier, M$_i$, used in computing the total filter loading when computing loss.  
+\item[{\ct MULTIPLIER}] is an array of the species multiplier, M$_i$, used in computing the total filter loading when computing loss.
 \item[{\ct RAMP\_ID}] identifies the {\ct RAMP} that contains a table of pressure drop across the filter as a function of total loading (see summation in {\ct LOSS}.   Only one of {\ct LOSS} or {\ct RAMP\_ID} should be specified.
 \item[{\ct SPEC\_ID}] identifies the tracked species for the inputs of {\ct MULTIPLIER} and {\ct LOADING}.
 \end{description}
@@ -5838,7 +5838,7 @@ solve transport equations for multiple gaseous fuels. Consequently, the burning 
 FDS to account for the difference in the heats of combustion of the various combustibles. In effect, you specify a single gas phase
 reaction as a surrogate for all the potential fuel sources.
 
-The gas phase reaction can be described in two ways. By default, the reaction of fuel and oxygen is infinitely fast and controlled only by mixing, hence
+Combustion can be modeled in two ways. By default, the reaction of fuel and oxygen is infinitely fast and controlled only by mixing, hence
 the label {\em mixing-controlled}. The alternative is that the reaction is {\em finite-rate}. The latter approach usually requires very fine grid resolution is not
 practical for large-scale fire applications. This chapter describes both methods, with an emphasis on the more
 commonly used mixing-controlled model. The {\ct REAC} namelist group contains the parameters for both modes of combustion.
@@ -5864,18 +5864,18 @@ You are responsible for defining the basic fuel chemistry and the post-combustio
 For the simple chemistry model, each reaction is assumed to be of the form:
 \be \mathrm{C_xH_yO_zN_v + \nu_{O_2} \; O_2 \rightarrow
     \nu_{CO_2} \; CO_2 + \nu_{H_2O} \; H_2O +
-    \nu_{CO}   \; CO   + \nu_{soot} \; Soot + \nu_{N_2} \; N_2} \ee
+    \nu_{CO}   \; CO   + \nu_s \; Soot + \nu_{N_2} \; N_2} \ee
 You need only specify the chemical formula of the fuel along with
-the yields of CO and soot, and the amount of hydrogen in the soot, $\mathrm{H_{frac}}$.
+the yields of CO and soot, and the volume fraction of hydrogen in the soot, $X_\Hy$.
 FDS will use that information internally to determine the amount of combustion products that are formed:
 \begin{eqnarray*}
-\mathrm{ \nu_{O_2}  }    &=& \mathrm{ \nu_{CO_2} + \frac{\nu_{CO}}{2} + \frac{\nu_{H_2O}}{2} - \frac{\hbox{z}}{2}  } \\
-\mathrm{ \nu_{CO_2} }    &=& \mathrm{ \hbox{x} - \nu_{CO} - (1-H_{frac}) \nu_{soot} }  \\
-\mathrm{ \nu_{H_2O} }    &=& \mathrm{ \frac{\hbox{y}}{2} - \frac{H_{frac}}{2} \nu_{soot}}\\
-\mathrm{ \nu_{CO}   }    &=& \mathrm{ \frac{W_f}{W_{CO}} y_{CO} } \\
-\mathrm{ \nu_{soot} }    &=& \mathrm{ \frac{W_f}{W_s} y_s } \\
-\mathrm{ \nu_{N_2}  }    &=& \mathrm{ \frac{\hbox{v}}{2} } \\
-\mathrm{ W_s        }    &=& \mathrm{ H_{frac} \, W_H + (1-H_{frac}) \, W_C }
+\nu_{\OTWO}    &=& \nu_{\COTWO} + \frac{\nu_{\CO}}{2} + \frac{\nu_{\HTWOO}}{2} - \frac{\hbox{z}}{2}   \\
+\nu_{\COTWO}   &=& \hbox{x} - \nu_{\CO} - (1-X_\Hy) \, \nu_s \\
+\nu_{\HTWOO}   &=& \frac{\hbox{y}}{2} - \frac{X_\Hy}{2} \, \nu_s \\
+\nu_{\CO}      &=& \frac{W_f}{W_{\CO}} \, y_{\CO}  \\
+\nu_s          &=& \frac{W_f}{W_s} \, y_s  \\
+\nu_{\NTWO}    &=& \frac{\hbox{v}}{2}  \\
+W_s            &=& X_\Hy \, W_\Hy + (1-X_\Hy) \, W_\C 
 \end{eqnarray*}
 
 \noindent The following parameters may be prescribed on the {\ct REAC} line when using the simple chemistry model.
@@ -5889,8 +5889,8 @@ This parameter is independent of the inputs for the fuel chemistry, i.e. {\ct C,
 If the {\ct FUEL} is in the table, then FDS will use the built-in formula to obtain the values of C,H,O, and N.
 By default, FDS uses the gas thermophysical properties of {\ct ETHYLENE} for the fuel.
 \item[{\ct FORMULA}] A character string that identities the chemical formula of the fuel species for the reaction.
-This input only has meaning when simple chemistry is being used and the formula can only contain C,H,O, or N.
-Specifying a formula means the individual inputs of C,H,O, and N do not need to be specified. See ~\ref{gas_species_props} for a description on how to input a {\ct FORMULA}.
+This input only has meaning when simple chemistry is being used and the formula can only contain C, H, O, or N.
+Specifying a formula means the individual inputs of C, H, O, and N do not need to be specified. See ~\ref{gas_species_props} for a description on how to input a {\ct FORMULA}.
 \item[{\ct ID}] A character string that identifies the reaction. Normally, this label is not used by FDS, but it is useful to
 label the {\ct REAC} line if more than one reactions are specified.
 \item[{\ct C, H, O, N}] The fuel chemical formula. All numbers are positive.  One of either C or H must be specified.
@@ -5898,13 +5898,13 @@ This input is not needed if {\ct FORMULA} is specified or if the {\ct FUEL} is i
 \item[{\ct Y\_O2\_INFTY}] Ambient mass fraction of oxygen (Default 0.232428)
 \item[{\ct Y\_CO2\_INFTY}] Ambient mass fraction of carbon dioxide (Default 0.0058)
 \item[{\ct HUMIDITY}] Relative humidity of the background air species, in units of \%. (Default 40~\%).
-\item[{\ct CO\_YIELD}] The fraction of fuel mass converted into carbon
-monoxide, $y_{CO}$. (Default 0.0)
+\item[{\ct CO\_YIELD}] The fraction of fuel mass converted into carbon monoxide, $y_{\CO}$. Note that this parameter is only appropriate when the
+simple chemistry model is applied. (Default 0.)
 \item[{\ct SOOT\_YIELD}] The fraction of fuel mass converted into smoke particulate, $y_s$.
-Note that this parameter does not apply to the processes of soot growth and oxidation,
-but rather to the net production of the smoke particulate from the fire.  (Default is 0.0)
-\item[{\ct SOOT\_H\_FRACTION}] The fraction of the atoms in the soot that are hydrogen.  Note that this input only applies to simple chemistry {\ct REAC} inputs.
+Note that this parameter is only appropriate when the simple chemistry model is applied.  (Default 0.)
+\item[{\ct SOOT\_H\_FRACTION}] The fraction of the atoms in the soot that are hydrogen. 
 For all other types of {\ct REAC} inputs the species {\ct SOOT} is assumed to be pure carbon unless a {\ct FORMULA} is provided.
+Note that this parameter is only appropriate when the simple chemistry model is applied. 
 (Default 0.1 - equivalent to the input {\ct FORMULA='C0.9H0.1'} for other {\ct REAC} types)
 \end{description}
 
@@ -5927,7 +5927,7 @@ yields are zero.
       HEAT_OF_COMBUSTION = 46460. /
 \end{verbatim}
 \normalsize
-\noindent Here, the {\ct FORMULA} is known, but the product yields are not. Also, the user prefers to specify the {\ct HEAT\_OF\_COMBUSTION} rather than have it calculated. See
+\noindent Here, the {\ct FORMULA} is known, but the product yields are not. The heat of combustion is specified explicitly rather than calculated. See
 Section~\ref{info:heat_of_combustion} for more details on the heat of combustion.
 
 \footnotesize
@@ -5949,7 +5949,7 @@ Section~\ref{info:heat_of_combustion} for more details on the heat of combustion
 The {\ct HEAT\_OF\_COMBUSTION} (kJ/kg) is the amount of
 energy released per unit mass of fuel consumed. Note that if the heat of combustion is not
 specified, it is assumed to be
-\be \Delta H \approx \frac{\nu_{O_2} \; W_{O_2} } { \nu_{f} \; W_{f} } \; \; \hbox{\ct EPUMO2}  \quad \quad \hbox{kJ/kg}  \label{EPUMO2} \ee
+\be \Delta H \approx \frac{\nu_{OTWO} \; W_{\OTWO} } { W_{f} } \; \; \hbox{\ct EPUMO2}  \quad \quad \hbox{kJ/kg}  \label{EPUMO2} \ee
 The quantity {\ct EPUMO2} (kJ/kg) is the amount of energy released per unit mass of oxygen consumed.
 Its default is 13,100~kJ/kg.  Note that if both {\ct EPUMO2} and {\ct HEAT\_OF\_COMBUSTION} are
 specified that FDS will ignore the value for {\ct EPUMO2}.
@@ -5991,7 +5991,7 @@ a given mesh cell at a given time step. This section provides a brief explanatio
 In an LES simulation, the consumption rate of gaseous fuel is given by the expression:
 \be \dm_f''' = -\rho \min \left( Y_\F , \frac{Y_\OTWO}{s}, \beta \frac{Y_{\hbox{\tiny P}}}{1+s} \right) \; \left( 1 - e^{-\dt/\tau} \right)   \quad ; \quad
    s=\frac{W_\F}{\nu_{\OTWO} W_{\OTWO} }  \ee
-Here, $\tau$ is a mixing time scale and $\beta$ is an empirical parameter equal to 1. You can change the value of $\beta$ by specifying {\ct BETA\_EDC}. Its default value
+Here, $\tau$ is a mixing time scale and $\beta$ is an empirical parameter. You can change the value of $\beta$ by specifying {\ct BETA\_EDC}. Its default value
 is 2. There is a minimum value of $Y_{\hbox{\tiny P}}$ required to allow for a reaction to occur before any products have accumulated. It is specified with
 {\ct Y\_P\_MIN\_EDC}, and its default value is 0.01.
 
@@ -6009,7 +6009,7 @@ the relevant physical mechanisms occur at length scales smaller than a
 single mesh cell. Flames are extinguished due to lowered
 temperatures and dilution of the oxygen supply. A simple
 suppression algorithm has been implemented in FDS that attempts to
-gauge whether or not a flame is viable at the fuel-oxygen interface. The Technical Reference Guide~\cite{FDS_Math_Guide}
+gauge whether or not combustion is viable. The Technical Reference Guide~\cite{FDS_Math_Guide}
 contains more details about how the mechanism works. The only
 parameter you can control is the {\ct CRITICAL\_FLAME\_TEMPERATURE} set on the {\ct REAC} line.
 The default value is 1427~$^\circ$C.
@@ -6023,26 +6023,30 @@ Note that if this parameter is used, then some form of heat/ignition source must
 
 \subsubsection{Example Case: door\_crack}
 
-This example uses a compartment surrounded by the ambient that contains a fan in one wall and a closed door with leakage at its bottom in the opposite wall.  A small (160~kW) fire is added to the compartment. Initially, the pressure rises due to the heat from the fire and the fan blowing air into the compartment.  Eventually the the pressure rise inside the compartment exceeds the maximum pressure of the fan, at which point the compartment begins to exhaust from both the fan and the leakge.  Pressure will continue to rise due to the fire until the pressure relief due to leakage and backflow through the fan equals the pressure increase from the fire.  As heat is lost to the walls, and as pressure is relieved, the pressure rise slows, and eventually the pressure decreases which allows the fan to push air back into the compartment.   Eventually, the fire at the burner
-is self-extinguished due to lack of oxygen; however, the fuel-rich gases in the compartment will continue to burn where the fan is blowing fresh air into the compartment and at the leak where fuel rich gases exit the compartment.
+This example uses a compartment surrounded by the ambient that contains a fan in one wall and a closed door with leakage at its bottom in the opposite wall.  
+A small (160~kW) fire is added to the compartment. Initially, the pressure rises due to the heat from the fire and the fan blowing air into the compartment.  
+Eventually the the pressure rise inside the compartment exceeds the maximum pressure of the fan, at which point the compartment begins to exhaust from both the fan and the leakage.  
+Pressure will continue to rise due to the fire until the pressure relief due to leakage and back flow through the fan equals the pressure increase from the fire.  
+As heat is lost to the walls, and as pressure is relieved, the pressure rise slows, and eventually the pressure decreases which allows the fan to push air back into the compartment.   
+Eventually, the fire at the burner is self-extinguished due to lack of oxygen; however, the fuel-rich gases in the compartment will continue to burn where the 
+fan is blowing fresh air into the compartment and at the leak where fuel rich gases exit the compartment.
 
 \begin{figure}[ht]
-\begin{tabular*}{\textwidth}{lr}
-\includegraphics[height=2.5in]{SCRIPT_FIGURES/door_crack_Pressure} &
-\includegraphics[height=2.5in]{SCRIPT_FIGURES/door_crack_HRR}
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/door_crack_Pressure} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/door_crack_HRR}
 \end{tabular*}
 \caption[Output of {\bf door\_crack} test case.]{Output of {\bf door\_crack} test case.}
 \end{figure}
 
-While this case has a number of interesting physical effects, and it {\em verifies} several features of FDS, it is very important to note the following:
-\begin{itemize}
-\item Although there is smoke seen flowing backwards out the fan duct, in reality there would have been much more. Most conventionally built structures will not withstand over-pressures
+While this case has a number of interesting physical effects, and it {\em verifies} several features of FDS, it is important to note that although 
+there is smoke seen flowing backwards out the fan duct, in reality there would have been much more. Most conventionally built structures will not withstand over-pressures
 of 0.25~atm without some sort of relief. The fan and the crack under the door obey simple formulae based on pressure differences, but these assumptions have limits.
-\item It is likely that the fire in this scenario would indeed extinguish itself as the oxygen volume fraction decreased below about 15~\%. {\bf But,} its re-ignition at the door crack
+Also, it is likely that the fire in this scenario would indeed extinguish itself as the oxygen volume fraction decreased below about 15~\%. {\bf But,} its re-ignition at the door crack
 and fan grill would depend on the presence of a spark or hot spot of some sort. FDS continues to flow fuel into the compartment past the point of local extinction, but the compartment
 cools. The default combustion algorithm in FDS assumes that in every grid cell there is a ``virtual spark plug'' that initiates combustion if fuel and oxygen are
 present.
-\end{itemize}
 
 
 \subsection{More Complicated Stoichiometry}
@@ -6058,7 +6062,7 @@ specified simply by:
 &REAC FUEL = 'METHANE' /
 \end{verbatim} \normalsize
 
-\noindent But, you could also explicitly list the individual gas species (and track them too in the calculation):
+\noindent But, you could also explicitly list the individual gas species (and track them in the calculation as well):
 
 \footnotesize
 \begin{verbatim}
@@ -6127,12 +6131,12 @@ species approach is preferable because the reaction rates are typically tabulate
 \section{Finite Rate Combustion}
 \label{info:finite}
 
-Usually, FDS uses a mixing controlled combustion model. However, FDS can also compute reaction rates constants using an Arrhenius model. This section describes how to do this.
+Usually, FDS uses a mixing-controlled combustion model. However, FDS can also employ finite-rate reactions using an Arrhenius model. This section describes how to do this.
 
 \begin{enumerate}
-\item It is strongly recommended that Arrhenius-rate reactions be invoked only
+\item It is strongly recommended that finite-rate reactions be invoked only
 when FDS is running in DNS mode. Set {\ct DNS=.TRUE.} on the {\ct MISC} line.
-Note: you may use the Arrhenius-rate reaction scheme in an
+You may use the finite-rate reaction model in an
 LES calculation, but because the temperature in a large scale calculation
 is smeared out over a mesh cell, some of the reaction parameters may need
 to be modified to account for the lower temperatures.
@@ -6140,20 +6144,19 @@ to be modified to account for the lower temperatures.
 \item Read Section~\ref{info:SPEC} and ~\ref{info:SMIX} for a description of the boundary
 conditions for the gas species.
 \item The {\ct REAC} namelist group is used to designate the fuel and the reaction rate
-parameters.  For an Arrhenius-rate reaction you can specify multiple {\ct REAC} lines.  Note that FDS will evaluate the reactions simultaneously.
+parameters.  For a finite-rate reaction you can specify multiple {\ct REAC} lines.  Note that FDS will evaluate the reactions simultaneously.
 \end{enumerate}
 
-The inputs to use the Arrhenius-rate model are given below:
+\noindent The inputs to use the finite-rate model are given below:
 
 \begin{description}
 \item[{\ct FUEL}] Character string indicating which of the listed gas species is the fuel.
 \item[{\ct A}] Pre-exponential factor in units of cm$^3$/mole/s.
-\item[{\ct E}] Activation energy for in units of kJ/kmol.
-\item[{\ct EQUATION}] Character string defining the reaction stoichiometry.  Can be used instead of specifying {\ct SMIX\_ID} and {\ct NU}.  See~\ref{info:EQUATION}.
-\item[{\ct NU}] Array containing the stoichiometry of the chemical reaction for each {\ct SMIX} where negative values indicate reactants and positive values indicate products.
-\item[{\ct N\_S}] Array containing the exponents for the finite rate equation for each {\ct SPEC}.
+\item[{\ct E}] Activation energy in units of kJ/kmol.
+\item[{\ct EQUATION}] (Optional) Character string defining the reaction stoichiometry.  Can be used instead of specifying {\ct SMIX\_ID} and {\ct NU}.  See~\ref{info:EQUATION}.
+\item[{\ct NU}] Array containing the stoichiometric coefficients where negative values indicate reactants and positive values indicate products.
+\item[{\ct N\_S}] Array containing the exponents for the finite rate equation for each species.
 \item[{\ct N\_T}] The temperature exponent for the rate (Default is 0 or no temperature dependence).
-\item[{\ct SMIX\_ID}] Array containing the names of the tracked species that participate in the reaction.  These entries correspond to the inputs on {\ct NU}.
 \item[{\ct SPEC\_ID}] Array containing the names of the species in the rate equation for the reaction. Note that it is possible that a given {\ct SPEC} can
 contribute to the rate but not be a reactant or product. In other words,
 the rate equation can be dependent on a species that does not participate directly in the reaction. These entries correspond to the inputs on {\ct N\_S}.
@@ -6195,33 +6198,35 @@ For example if the reaction defines the complete combustion of methane using pri
 \footnotesize
 \begin{verbatim}
 &REAC FUEL='METHANE', EQUATION ='METHANE+2*OXYGEN=CARBON DIOXIDE+2*WATER VAPOR',
-HEAT_OF_COMBUSTION=50000. /
+      HEAT_OF_COMBUSTION=50000. /
 
 &REAC FUEL='METHANE', EQUATION ='CH4+2*O2=CO2+2*H2O',
-HEAT_OF_COMBUSTION=50000. /
+      HEAT_OF_COMBUSTION=50000. /
 
 &REAC FUEL='METHANE', EQUATION ='METHANE+2*O2=CO2+2*H2O',
-HEAT_OF_COMBUSTION=50000. /
+      HEAT_OF_COMBUSTION=50000. /
 \end{verbatim} \normalsize
 
 
-\subsection{Reaction Rate Limiters}
+\subsection{Special Topic: Reaction Rate Limiters}
 \label{info:REAC_Limiters}
 
 At certain critical points in a calculation, like the moment of ignition, the local reaction rate can be very large due to limitations in the models, long time
 steps, or both. To prevent fictitiously high values of the reaction rate that can lead to numerical instabilities, a limiting value of the heat release rate
 per unit volume is used:
 \be \dq'''_{\hbox{\tiny max}} = \frac{ \hbox{\ct HRRPUA\_SHEET} }{\dx} + \hbox{\ct HRRPUV\_AVERAGE} \ee
+where {\ct HRRPUA\_SHEET} is given in units of kW/m$^2$ and {\ct HRRPUV\_AVERAGE} is given in units of kW/m$^3$.
 
-\subsection{Diagnostic Parameters}
+
+\subsection{Special Topic: Diagnostic Parameters}
 \label{info:REAC_Diagnostics}
 
 \begin{description}
-\item[{\ct CHECK\_ATOM\_BALANCE}] If chemical formulas are provide for all {\ct SPEC} that participate in a reaction, then FDS will
-check the stoichiometry to ensure that atoms are conserved.  Setting this flag to {\ct .FALSE.} will bypass this check.  (default is {\ct .TRUE.})
-\item{\ct REAC\_ATOM\_ERROR} This is the error tolerance in atoms for the reaction stoichiometry check.  (default is 1.E-5)
-\item{\ct REAC\_MASS\_ERROR} This is the relative error tolerance computed as (mass of products - mass of reactants)/(mass of products)
-for the reaction stoichiometry mass balance check.  (default is 1.E-4)
+\item[{\ct CHECK\_ATOM\_BALANCE}] If chemical formulas are provided for all species that participate in a reaction, then FDS will
+check the stoichiometry to ensure that atoms are conserved.  Setting this flag to {\ct .FALSE.} will bypass this check.  (Default {\ct .TRUE.})
+\item{\ct REAC\_ATOM\_ERROR} Error tolerance in units of atoms for the reaction stoichiometry check.  (Default 1.E-5)
+\item{\ct REAC\_MASS\_ERROR} Relative error tolerance computed as (mass of products - mass of reactants)/(mass of products)
+for the reaction stoichiometry mass balance check.  (Default 1.E-4)
 \end{description}
 
 
@@ -6238,9 +6243,19 @@ issues related to the radiative transport solver.
 \label{info:RADI}
 
 {\ct RADI} is the namelist group that contains all of the parameters related to the radiation solver. There can be only one
-{\ct RADI} line in the input file.
+{\ct RADI} line in the input file. It is possible to turn off the radiation transport
+solver (saving roughly 20 \% in CPU time) by adding the statement
+{\ct RADIATION=.FALSE.} to the {\ct RADI} line.  If burning
+is taking place and radiation is turned off, then the total heat
+release rate is reduced by the {\ct RADIATIVE\_FRACTION}, which is
+also input on the {\ct RADI} line. This radiated energy completely
+disappears from the calculation. For fire scenarios it is not recommended that you turn off the
+radiation transport. This feature is used mainly for diagnostic purposes or when the changes in
+temperature are relatively small.
 
-The most important {\ct RADI} parameter is the fraction of energy released from the
+\subsection{Radiative Fraction}
+
+The most important radiation parameter is the fraction of energy released from the
 fire as thermal radiation, commonly referred to as the {\em radiative fraction}. It is a function of both the flame temperature
 and chemical composition, neither of which are reliably calculated in a large
 scale fire calculation because the flame sheet is not well-resolved.
@@ -6258,63 +6273,54 @@ and the source term in the radiative transport equation is then based solely
 on the gas temperature and the chemical composition. By default, the {\ct RADIATIVE\_FRACTION} is
 0.35 for an LES calculation, and zero for DNS.
 
-The radiation properties of most common gases involved in combustion processes (water vapor, carbon dioxide, carbon monoxide, fuel) and
-soot particles are automatically taken into account if the simulation involves combustion. In simulations with no combustion nor radiating species, it is
-possible to use a constant absorption coefficient by specifying {\ct KAPPA0} on the {\ct RADI} line.
-
-It is possible to turn off the radiation transport
-solver (saving roughly 20 \% in CPU time) by adding the statement
-{\ct RADIATION=.FALSE.} to the {\ct RADI} line.  If burning
-is taking place and radiation is turned off, then the total heat
-release rate is reduced by the {\ct RADIATIVE\_FRACTION}, which is
-input on the {\ct RADI} line. This radiated energy completely
-disappears from the calculation. For fire scenarios it is not recommended that you turn off the
-radiation transport. This feature is used mainly for diagnostic purposes.
-
-
 
 \subsection{Spatial and Temporal Resolution of the Radiation Transport Equation}
 
 \label{info:RADI_Resolution}
 
-There are several ways to improve the performance of the Finite Volume
-Method in solving the radiation transport equation (RTE), most of which
-increase the computation time. The solver has two modes of
-operation -- a gray gas model (default) and a wide band model~\cite{FDS_Math_Guide}.
-Modifications to these models can be made via parameters on the
-{\ct RADI} line. If running in gray gas mode (default), increase the number
+There are several ways to improve the spatial and temporal accuracy of the Finite Volume
+Method in solving the radiation transport equation (RTE), but these will
+increase the computation time. You can increase the number
 of angles from the default 100 with the integer parameter
 {\ct NUMBER\_RADIATION\_ANGLES}. The frequency of calls to the radiation
-solver can be reduced from every 3 time steps with integer called
+solver can be changed from every 3 time steps with an integer called
 {\ct TIME\_STEP\_INCREMENT}. The increment over which the angles are
 updated can be reduced from 5 with the integer called {\ct ANGLE\_INCREMENT}.
-Briefly, if {\ct TIME\_STEP\_INCREMENT} and {\ct ANGLE\_INCREMENT} are
+If {\ct TIME\_STEP\_INCREMENT} and {\ct ANGLE\_INCREMENT} are
 both set to 1, the radiation field is completely updated in a single
-time step, but the cost of the calculation increases significantly.
+time step, but the cost of the calculation increases significantly. By default,
+the radiation transport equation is fully updated every 15 time steps.
 
 \subsection{Radiative Absorption and Scattering by Particles}
 
 \label{info:RADI_Absorption}
 
 The absorption and scattering of thermal radiation by Lagrangian particles is included in the radiation transport equation. The radiative properties of
-the water and fuel particles (droplets) are determined automatically. For fuel, the properties of Heptane are assumed. For other types of particles, the
+the water and fuel particles (droplets) are determined automatically. For fuel, the properties of heptane are assumed. For other types of particles, the
 radiative properties can be given by specifying the components of the material refractive index on the corresponding {\ct PART} line, using keywords
-{\ct REAL\_REFRACTIVE\_INDEX} and {\ct COMPLEX\_REFRACTIVE\_INDEX}. Alternatively, wavelength dependent values of these two quantities can be tabulated in a {\ct TABLE} and called using the {\ct RADIATIVE\_PROPERTY\_TABLE}. More details can be found in Section~\ref{radiative_part_props}.
+{\ct REAL\_REFRACTIVE\_INDEX} and {\ct COMPLEX\_REFRACTIVE\_INDEX}. Alternatively, wavelength dependent values of these two 
+quantities can be tabulated in a {\ct TABLE} and called using the {\ct RADIATIVE\_PROPERTY\_TABLE}. More details can be found in Section~\ref{radiative_part_props}.
 
-Other parameters affecting the computations of particle-radiation interaction are: {\ct RADTMP} is the assumed radiative source temperature.
+Other parameters affecting the computations of particle-radiation interaction are listed here. {\ct RADTMP} is the assumed radiative source temperature.
 It is used in the spectral weighting during the computation of the mean scattering and absorption cross sections. The default is 900~$^\circ$C.
 {\ct NMIEANG} is the number of angles in the numerical integration of the Mie-phase function.
 Increasing {\ct NMIEANG} improves the accuracy of the radiative properties of water droplets. The cost
 of the better accuracy is seen in the initialization phase, not during the actual simulation. The default value for {\ct NMIEANG}
 is 15.
 
+The radiation properties of most common gases involved in combustion processes (water vapor, carbon dioxide, carbon monoxide, fuel) and
+soot particles are automatically taken into account if the simulation involves combustion. In simulations with no combustion nor radiating species, it is
+possible to use a constant absorption coefficient by specifying {\ct KAPPA0} on the {\ct RADI} line.
+
 
 \subsection{Wide Band Model}
 
 \label{info:RADI_Wide_Band}
 
+The radiation solver has two modes of
+operation -- a gray gas model (default) and a wide band model~\cite{FDS_Math_Guide}.
 If the optional six band model is desired,
-set {\ct WIDE\_BAND\_MODEL=.TRUE.}. It is recommended that this option
+set {\ct WIDE\_BAND\_MODEL=.TRUE.} It is recommended that this option
 only be used when the fuel is relatively non-sooting because it
 adds significantly to the cost of the calculation. To add three
 additional fuel bands, set {\ct CH4\_BANDS=.TRUE.}. See FDS Technical
@@ -8756,13 +8762,11 @@ It is possible to record various properties of droplets and particles. Some of t
 Likewise, {\ct 'AMPUA'} is the \underline{A}ccumulated \underline{M}ass \underline{P}er \underline{U}nit \underline{A}rea.
 Both of these are given in units of kg/m$^2$. Think of these outputs as measures of the instantaneous mass density per unit area,
 and the accumulated total, respectively. The accumulated total is analogous to a ``bucket test,'' where the droplets are collected
-in buckets and the total mass determined at the end of a given time period. The cooling of a solid surface by droplets of a
-given type is given by {\ct 'CPUA'}, the \underline{C}ooling \underline{P}er \underline{U}nit \underline{A}rea in units of kW/m$^2$.
-
-Be aware of the fact that the default behavior for droplets hitting the ``floor,'' that is, the plane $z=\hbox{\ct ZMIN}$,
+in buckets\footnote{Be aware of the fact that the default behavior for droplets hitting the ``floor,'' that is, the plane $z=\hbox{\ct ZMIN}$,
 is to disappear ({\ct POROUS\_FLOOR=.TRUE.} on the {\ct MISC} line).
 In this case, {\ct 'MPUA'} will be zero, but {\ct 'AMPUA'} will not. FDS stores the droplet mass just before removing the droplet from
-the simulation for the purpose of saving CPU time.
+the simulation for the purpose of saving CPU time.} and the total mass determined at the end of a given time period. The cooling of a solid surface by droplets of a
+given type is given by {\ct 'CPUA'}, the \underline{C}ooling \underline{P}er \underline{U}nit \underline{A}rea in units of kW/m$^2$.
 
 In the test case {\bf bucket\_test}, a single sprinkler is
 mounted 10~cm below a 5~m ceiling. Water flows for 30~s at a constant
@@ -8772,21 +8776,18 @@ water drops time to reach the floor. The total mass of water discharged is
   \mathrm{ 180 \; \frac{L}{min} \times 1 \; \frac{kg}{L} \times \frac{1}{60} \; \frac{min}{s} \times 30 \; s = 90 \; kg }
 \ee
 In the simulation, the quantity {\ct 'AMPUA'} with {\ct STATISTICS='SURFACE INTEGRAL'} is applied to the {\ct DEVC} line.
-Accumulated Mass Per Unit Area records the total water mass per
-unit area (kg/m$^2$), analogous to actual buckets the size of a grid cell.
-Summing the values of {\ct water\_drops\_AMPUA} over the entire
-floor yields a total of 90 kg (Figure \ref{bucket_test_fig}). In some cases an in balance in mass of water may occur. Some droplets evaporate, and some droplets
-fly beyond the computational domain. Note that
-there are no actual ''buckets'' in the simulation.
+{\ct 'AMPUA'} records the accumulated water mass per unit area (kg/m$^2$), analogous to actual buckets the size of a grid cell.
+Summing the values of {\ct 'AMPUA'} over the entire
+floor yields a total of 90~kg (Fig.~\ref{bucket_test_fig}). Note that there really is no need to time-average the results. The quantity is inherently accumulating.
 
 \begin{figure}[ht]
 \centering
 \includegraphics[scale=0.55]{SCRIPT_FIGURES/bucket_test}
-\caption[Output of {\ct bucket\_test} test case.]{Output of {\ct bucket\_test} test cases.}
+\caption[Output of the {\ct bucket\_test} case.]{Accumulated water collected at the floor in the {\ct bucket\_test} case.}
 \label{bucket_test_fig}
 \end{figure}
 
-Note that there really is no need to time-average the results. The quantity is inherently accumulating.
+
 
 
 
