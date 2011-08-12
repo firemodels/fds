@@ -43,7 +43,7 @@ char IOsmoke_revision[]="$Revision$";
 #define ADJUSTALPHA(ALPHAIN,ASPECTRATIO,NORM,NORMTYPE) \
             alphaf_out[n]=0;\
             if(ALPHAIN==0)continue;\
-            if(adjustalphaflag==3&&iblank_smoke3d!=NULL&&iblank_smoke3d[n]==0)continue;\
+            if((adjustalphaflag==2||adjustalphaflag==3)&&iblank_smoke3d!=NULL&&iblank_smoke3d[n]==0)continue;\
             if(adjustalphaflag==2){\
               alphaf_out[n]=ALPHAIN;\
             }\
@@ -320,7 +320,7 @@ void drawsmoke_frame(void){
   }
 #ifdef pp_GPU
   if(usegpu==1){
-    if(usevolrender==1){
+    if(showvolrender==1){
       LoadVolSmokeShaders();
     }
     else{
@@ -329,7 +329,7 @@ void drawsmoke_frame(void){
   }
 #endif
 #ifdef pp_CULL
-  if(usegpu==1&&cullsmoke==1&&usevolrender==0){
+  if(usegpu==1&&cullsmoke==1&&showvolrender==0){
     drawsmoke3dCULL();
   }
   else{
@@ -374,7 +374,7 @@ void drawsmoke_frame(void){
   }
 #ifdef pp_GPU
   if(usegpu==1){
-    if(usevolrender==1){
+    if(showvolrender==1){
       UnLoadShaders();
     }
     else{
