@@ -1932,7 +1932,7 @@ void setslicecolors(float smin, float smax,
   getSliceColors(sd->qslicedata,sd->nslicetotal,sd->slicelevel,
                 smin,smax,
                 nrgb_full,nrgb,
-                sb->colorlabels,&scale,sb->levels256,
+                sb->colorlabels,&scale,&sb->fscale,sb->levels256,
                 &sd->extreme_min,&sd->extreme_max
                 );
 }
@@ -1949,12 +1949,11 @@ void setslicelabels(float smin, float smax,
   sb = slicebounds + slicetype;
   sb->label=&(sd->label);
 
-
   *errorcode=0;
   printf("setting up slice labels \n");
   scale=sb->scale;
   getSliceLabels(smin,smax,nrgb,
-                sb->colorlabels,&scale,sb->levels256);
+                sb->colorlabels,&scale,&sb->fscale,sb->levels256);
 }
 
 /* ------------------ setslicebounds ------------------------ */

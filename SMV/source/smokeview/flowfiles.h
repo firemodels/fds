@@ -999,6 +999,7 @@ typedef struct {
   float valmin_data,valmax_data;
   char colorlabels[12][11];
   float levels256[256];
+  float fscale;
   char scale[31];
   flowlabels *label;
 } databounds;

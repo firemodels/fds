@@ -781,12 +781,12 @@ EXTERNCPP void updateallisolabels(int slicetype, int *errorcode);
 EXTERNCPP void setslicelabels(float smin, float smax, 
                     slice *sd, int *errorcode);
 EXTERNCPP void getSliceLabels(float tmin, float tmax, int nlevel,
-              char labels[12][11],char **scale, float *tlevels256);
+              char labels[12][11],char **scale, float *fscale, float *tlevels256);
 EXTERNCPP void updatePart5extremes(void);
 EXTERNCPP void getSliceColors(const float *t, int nt, unsigned char *it,
               float tmin, float tmax, 
               int ndatalevel, int nlevel,
-              char labels[12][11],char **scale, float *tlevels2,
+              char labels[12][11],char **scale, float *fscale, float *tlevels2,
               int *extreme_min, int *extreme_max
               );
 EXTERNCPP void setisolabels(float smin, float smax, 

@@ -1086,7 +1086,7 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
 void getSliceColors(const float *t, int nt, unsigned char *it,
               float local_tmin, float local_tmax, 
               int ndatalevel, int nlevel,
-              char labels[12][11],char **scale, float *tlevels256,
+              char labels[12][11],char **scale, float *fscale, float *tlevels256,
               int *extreme_min, int *extreme_max
               ){
   int n;
@@ -1134,16 +1134,19 @@ void getSliceColors(const float *t, int nt, unsigned char *it,
     local_tmin *= pow((double)10.0,(double)-expmin);
     local_tmax *= pow((double)10.0,(double)-expmin);
     sprintf(*scale,"*10^%i",expmin);
+    *fscale=pow(10.0,(float)expmin);
   }
   if(expmin==0&&(expmax<EXPMIN||expmax>EXPMAX)){
     local_tmin *= pow((double)10.0,(double)-expmax);
     local_tmax *= pow((double)10.0,(double)-expmax);
     sprintf(*scale,"*10^%i",expmax);
+    *fscale=pow(10.0,(float)expmax);
   }
   if(expmax==0&&(expmin<EXPMIN||expmin>EXPMAX)){
     local_tmin *= pow((double)10.0,(double)-expmin);
     local_tmax *= pow((double)10.0,(double)-expmin);
     sprintf(*scale,"*10^%i",expmin);
+    *fscale=pow(10.0,(float)expmin);
   }
 
   range = local_tmax-local_tmin;
@@ -1162,7 +1165,7 @@ void getSliceColors(const float *t, int nt, unsigned char *it,
 /* ------------------ getSliceLabelels ------------------------ */
 
 void getSliceLabels(float local_tmin, float local_tmax, int nlevel,
-              char labels[12][11],char **scale, float *tlevels256){
+              char labels[12][11],char **scale, float *fscale, float *tlevels256){
   int n;
   float dt, tval;
   float range;
@@ -1171,22 +1174,26 @@ void getSliceLabels(float local_tmin, float local_tmax, int nlevel,
   range = local_tmax-local_tmin;
 
   STRCPY(*scale,"");
+  *fscale=1.0;
   frexp10(local_tmax, &expmax);
   frexp10(local_tmin, &expmin);
   if(expmin!=0&&expmax!=0&&expmax-expmin<=2&&(expmin<EXPMIN||expmin>EXPMAX)){
     local_tmin *= pow((double)10.0,(double)-expmin);
     local_tmax *= pow((double)10.0,(double)-expmin);
     sprintf(*scale,"*10^%i",expmin);
+    *fscale=pow(10.0,(float)expmin);
   }
   if(expmin==0&&(expmax<EXPMIN||expmax>EXPMAX)){
     local_tmin *= pow((double)10.0,(double)-expmax);
     local_tmax *= pow((double)10.0,(double)-expmax);
     sprintf(*scale,"*10^%i",expmax);
+    *fscale=pow(10.0,(float)expmax);
   }
   if(expmax==0&&(expmin<EXPMIN||expmin>EXPMAX)){
     local_tmin *= pow((double)10.0,(double)-expmin);
     local_tmax *= pow((double)10.0,(double)-expmin);
     sprintf(*scale,"*10^%i",expmin);
+    *fscale=pow(10.0,(float)expmin);
   }
 
   range = local_tmax-local_tmin;
@@ -1302,6 +1309,7 @@ void drawColorBars(void){
   int sliceflag=0;
   int isoflag=0;
   float *slicefactor=NULL;
+  float slicefactor2[2];
   float slicerange,isorange;
   char slicecolorlabel[256];
   char *slicecolorlabel_ptr=NULL;
@@ -1594,7 +1602,14 @@ void drawColorBars(void){
     outputBarText(right[leftslice],bottom[0],color1,"Slice");
     outputBarText(right[leftslice],bottom[1],color1,sb->label->shortlabel);
     outputBarText(right[leftslice],bottom[2],color1,unitlabel);
-    outputBarText(right[leftslice],bottom[3],color1,sb->scale);
+    if(strcmp(unitlabel,"ppm")==0&&slicefactor!=NULL){
+      slicefactor2[0]=*slicefactor*sb->fscale;
+      slicefactor2[1]=0.0;
+      slicefactor=slicefactor2;
+    }
+    else{
+      outputBarText(right[leftslice],bottom[3],color1,sb->scale);
+    }
   }
   if(showiso_colorbar==1){
     sb = isobounds + iisottype;
