@@ -257,10 +257,23 @@ void getvolsmokedir(float *mm){
    Q=  ( m1 m5  m9 )  u = (m13)
        ( m2 m6 m10 )      (m14)
       
-      (Q   u) (x)     (0)      
-      (v^T 1) (y)   = (1)
+       ( m0 m1  m2 )
+ Q^T=  ( m4 m5  m6 )
+       ( m8 m9 m10 )
+
+           ( M_x  0    0  )
+       M = ( 0   M_y   0  )
+           ( 0    0   M_z )
+
+      (Q   u) (M) (x)     (0)      
+      (v^T 1) (1) (y)   = (1)
        
-      m3=m7=m11=0, v^T=0, y=1   Qx+u=0 => x=-Q^Tu
+      m3=m7=m11=0, v^T=0, y=1   QMx+u=0 => x=-inv(M)Q^Tu
+
+            ( m0 m1  m2 ) (m12)   ( m0*m12 + m1*m13 +  m2*m14 )/M_x
+       x = -( m4 m5  m6 ) (m13) = ( m4*m12 + m5*m13 +  m6*m14 )/M_y
+            ( m8 m9 m10 ) (m14)   ( m8*m12 + m9*m13 + m10*m14 )/M_z
+
     */
   int i,ii,j;
   float norm[3];
