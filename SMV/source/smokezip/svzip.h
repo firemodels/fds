@@ -396,7 +396,7 @@ EXTERN part5prop *part5propinfo;
 EXTERN threaddata *threadinfo;
 EXTERN spherepoints sphereinfo;
 
-EXTERN int npatchinfo, nsliceinfo, nplot3dinfo, npartinfo;;
+EXTERN int npatchinfo, nsliceinfo, nplot3dinfo, npartinfo;
 EXTERN int npartclassinfo;
 EXTERN int nsmoke3dinfo;
 #ifdef pp_PART
