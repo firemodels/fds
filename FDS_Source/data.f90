@@ -2147,7 +2147,7 @@ SELECT CASE(GAS_NAME)
    CASE('HELIUM')          
       SIGMA=2.551_EB 
       EPSOK= 10.22_EB 
-      FORMULA='He2'
+      FORMULA='He'
    CASE('HYDROGEN')        
       SIGMA=2.827_EB 
       EPSOK= 59.7_EB
