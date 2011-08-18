@@ -1,0 +1,199 @@
+% $Date: 2011-07-31 22:17:46 -0400 (Sun, 31 Jul 2011) $
+% $Revision: 8832 $
+% $Author: gforney $
+
+\documentclass[11pt,twoside]{book}
+\usepackage{times,mathptm,multirow,fancyvrb,color,array}
+\usepackage{picins}
+
+%\usepackage{wrapfig}
+\usepackage[pdftex]{graphicx}
+\usepackage{hyperref}
+\pdfcompresslevel=9
+\DeclareGraphicsExtensions{.jpg,.pdf,.png}
+\usepackage{setspace,moreverb}
+
+\usepackage{color}
+%\usepackage{pdfsync}
+
+\pagestyle{plain}
+
+\setlength{\textwidth}{6.5in}
+\setlength{\oddsidemargin}{0.00in}
+\setlength{\evensidemargin}{0.0in}
+\setlength{\textheight}{9.0in}
+\setlength{\topmargin}{0.00in}
+\setlength{\parindent}{0.2in}
+
+\setlength{\headheight}{0.00in}
+\setlength{\headsep}{0.0in}
+\setlength{\paperheight}{11.0in}
+\setlength{\paperwidth}{8.5in}
+%
+% new commands for this paper
+%
+\newcommand{\bverb}{
+\begin{Verbatim}[frame=single,rulecolor=\color{blue},
+framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
+}
+\newcommand{\everb}{
+\end{Verbatim}
+}
+\newcommand{\degF}{$^\circ$F}
+\newcommand{\degC}{$^\circ$C}
+\newcommand{\figoptions}{htp}
+\newcommand{\hhref}[1]{\href{#1}{{\tt #1}
+}}
+\newcommand{\figheight}{1.5in}
+\newcommand{\infigheight}{0.75in}
+\newcommand{\figheightA}{1.7in}
+\newcommand{\figheightC}{1.7in}
+\newcommand{\figwidth}{3.333333in}
+\newcommand{\figwidthb}{2.0in}
+\newcommand{\FDS}{{FDS}}
+\newcommand{\fds}{{FDS}}
+\newcommand{\Smokeview}{{Smokeview}}
+\newcommand{\smokeview}{{Smokeview}}
+\newcommand{\parma}{.75}
+\newcommand{\parmb}{.5}
+\newcommand{\parmc}{0.25}
+\newcommand{\bold}[1]{{\bf #1}}
+\newcommand{\etc}{{\em etc}}
+\newcommand{\ie}{{\em i.e.}}
+\newcommand{\eg}{{\em e.g.}}
+\newcommand{\via}{{via\ }}
+\newcommand{\dialoguenmenu}{\fbox{\tt Diaglog} }
+\newcommand{\optionmenu}{\fbox{\tt Option} }
+\newcommand{\loadmenu}{\fbox{\tt Load/Unload} }
+\newcommand{\tourmenu}{\fbox{\tt Tour} }
+\newcommand{\helpmenu}{\fbox{\tt Help} }
+\newcommand{\setbounds}{\fbox{\tt Set Bounds} }
+\newcommand{\showmenu}{\fbox{\tt Show/Hide} }
+\newcommand{\frameit}[1]{\fbox{\tt #1}}
+\newcommand{\blist}{
+\begin{list}
+{}{
+\setlength{\leftmargin}{\parma in}
+\setlength{\labelwidth}{\parmb in}
+\setlength{\labelsep}{\parmc in}
+\setlength{\listparindent}{0.3in}
+\setlength{\topsep}{.3in}
+\setlength{\parsep}{.0in}
+}}
+\newcommand{\elist}{\end{list}}
+\newcommand{\hitem}[1]{\item[{\bf #1} \hfill]}
+
+\bibliographystyle{unsrt}
+%\doublespace
+\begin{document}
+\pagestyle{empty}
+%
+% ----------------------  first cover/title page --------------------------
+%
+\begin{minipage}[t][9in][s]{6.5in}
+
+\huge \flushright{NIST Special Publication 1017-2}
+
+\vspace{1in}
+
+\Huge
+\flushright{A Note on Visualizing Smoke and Fire \\
+using Volume Rendering }
+%\flushright{(Draft: \today)}
+
+\vspace{.5in}
+\normalsize
+\flushright{Glenn P. Forney}
+
+\vfill
+
+\flushright{\includegraphics[width=2.in]{figures/nistident_flright_vec}}
+
+\end{minipage}
+
+\newpage
+
+\hspace{5in}
+\newpage
+
+%
+% ----------------------  second cover/title page --------------------------
+%
+\begin{minipage}[t][9in][s]{6.5in}
+
+\huge
+\flushright{NIST Special Publication 1017-2}
+
+\vspace{1.in}
+
+\Huge
+\flushright{A Note on Visualizing Smoke and Fire \\
+using Volume Rendering }
+
+\vspace{.5in}
+
+\normalsize
+\flushright{Glenn P. Forney\\
+%\includegraphics[width=1in]{FIGURES/bfrl}  \\
+{\em Fire Research Division} \\
+{\em Building and Fire Research Laboratory}  \\
+}
+
+\vspace{.25in}
+
+\flushright{\today \\
+Smokeview Version 5.6 \\
+SVN Repository~$Revision: 8832 $}
+
+\vfill
+
+\flushright{\includegraphics[width=1in]{doc} }
+
+\small
+\flushright{U.S. Department of Commerce \\
+{\em Gary Locke, Secretary} \\
+\hspace{1in} \\
+National Institute of Standards and Technology \\
+{\em Patrick Gallagher, Director} }
+
+
+
+\end{minipage}
+
+
+\date{}
+%\pubnumber{xxxx}
+\title{\ttitle}
+\author{Glenn P. Forney}
+
+%\pubdate{February 2001}
+%\makecover{1}
+
+\setlength{\parindent}{0.25in}
+
+\newpage
+
+\frontmatter \pagestyle{plain}
+
+\tableofcontents \listoffigures
+
+\mainmatter
+
+\pagenumbering{arabic}
+
+%
+% -------------------  Introduction ------------------------
+%
+
+\chapter{Introduction}
+\input{smoke_notes}
+
+%
+% -------------------  References ------------------------
+%
+
+\bibliography{../Bibliography/FDS_general,../Bibliography/FDS_refs,../Bibliography/FDS_mathcomp,../Bibliography/sv_fire,../Bibliography/sv_graphics}
+
+\addcontentsline{toc}{chapter}{Bibliography}
+
+\end{document}
