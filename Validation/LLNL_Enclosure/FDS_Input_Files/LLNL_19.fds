@@ -84,9 +84,17 @@ Ventilation
       COLOR='GREEN'
       LEAK_PATH=1,0 /
 
-&SURF ID='EXHAUST'
+ SURF ID='EXHAUST'
       COLOR='BLUE'
       VOLUME_FLUX=0.3 /
+&SURF ID='EXHAUST', COLOR='BLUE', MASS_FLUX_TOTAL=0.731, RAMP_V='exhaust ramp' /
+&RAMP ID='exhaust ramp', T=   0., F=1.00 /
+&RAMP ID='exhaust ramp', T= 500., F=0.92 /
+&RAMP ID='exhaust ramp', T=1000., F=0.89 /
+&RAMP ID='exhaust ramp', T=2000., F=0.87 /
+&RAMP ID='exhaust ramp', T=3000., F=0.86 /
+&RAMP ID='exhaust ramp', T=4000., F=0.85 /
+&RAMP ID='exhaust ramp', T=5000., F=0.85 /
 
 &OBST XB=0.6,1.0,0.0,2.2,1.0,1.0, SURF_ID='Duct' / Inlet duct work
 &OBST XB=0.6,1.0,0.0,1.8,0.6,0.6, SURF_ID='Duct' /
