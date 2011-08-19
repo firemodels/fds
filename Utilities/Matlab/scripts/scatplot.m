@@ -41,8 +41,7 @@ else
     qrange = [2:100];
 end
 
-paper_width  = 6.0; % inches
-paper_height = 6.0; % inches
+plot_style
 
 Q = importdata(qfil);
 H = textscan(Q{1},'%q','delimiter',',');
@@ -95,8 +94,8 @@ for j=qrange
          end
         
         % format the legend and axis labels
-        xlabel(Ind_Title,'Interpreter','LaTeX','FontSize',14)
-        ylabel(Dep_Title,'Interpreter','LaTeX','FontSize',14)
+        xlabel(Ind_Title,'Interpreter','LaTeX','FontSize',Scat_Label_Font_Size)
+        ylabel(Dep_Title,'Interpreter','LaTeX','FontSize',Scat_Label_Font_Size)
         axis([Plot_Min Plot_Max Plot_Min Plot_Max])
         
         set(gca,'Units','inches')
@@ -106,7 +105,7 @@ for j=qrange
         set(gca,'Position',[1,1,4.5,4.5])
         
         text(Plot_Min+Title_Position(1)*(Plot_Max-Plot_Min),Plot_Min+Title_Position(2)*(Plot_Max-Plot_Min),...
-            Scatter_Plot_Title,'FontSize',14,'FontName','Times','Interpreter','LaTeX')
+            Scatter_Plot_Title,'FontSize',Scat_Title_Font_Size,'FontName','Times','Interpreter','LaTeX')
   
          if Sigma_E > 0.0
              text(Plot_Min+(Title_Position(1)+0.05)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.05)*(Plot_Max-Plot_Min),...
@@ -131,8 +130,8 @@ for j=qrange
         % print to pdf
         set(gcf,'Visible','on');
         set(gcf,'PaperUnits','inches');
-        set(gcf,'PaperSize',[paper_width paper_height]);
-        set(gcf,'PaperPosition',[0 0 paper_width paper_height]);
+        set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
+        set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
         display(['Printing scatter plot ',num2str(j),'...'])
         print(gcf,'-dpdf',[pwd,'/../../Manuals/',Plot_Filename])
         
