@@ -52,14 +52,14 @@ for s = 1:N_Agents
    FDS_File = ['Cup_' Fuel{f} '_' Agent{s} '_devc.csv'];
    [fds_data] = csvread(FDS_File,2);
    n_fds = size(fds_data,1);
-   i_first = find(fds_data(1:n_fds,5)>HRR_Limit,1,'first');
-   i_last = find(fds_data(i_first:n_fds,5)<HRR_Limit,1,'first');
+   i_first = find(fds_data(1:n_fds,4)>HRR_Limit,1,'first');
+   i_last = find(fds_data(i_first:n_fds,4)<HRR_Limit,1,'first');
    if (isempty(i_last))
       % not yet extinguished
       i_last = 1;
    end
-   FDS_X(f,s) = fds_data(i_last,4);
-   FDS_Y(f,s) = fds_data(i_last,3);
+   FDS_X(f,s) = fds_data(i_last,3);
+   FDS_Y(f,s) = fds_data(i_last,2);
 
    Exp_X(f,s) = exp_data(1,(f-1)*N_Agents+s);
    Exp_Y(f,s) = exp_data(2,(f-1)*N_Agents+s);   
