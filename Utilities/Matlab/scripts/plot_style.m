@@ -17,6 +17,8 @@ Font_Name       = 'Times';
 Key_Font_Size   = 12;
 Title_Font_Size = 16;
 Label_Font_Size = 16;
+Scat_Title_Font_Size = 14;
+Scat_Label_Font_Size = 14;
 
 % line properties
 Line_Width      = 1.0;
@@ -32,6 +34,8 @@ Plot_Y          = 0.8;
 Paper_Units     = 'inches';
 Paper_Width     = 6.5;
 Paper_Height    = 4.5;
+Scat_Paper_Height = 6.0;
+Scat_Paper_Width  = 6.0;
 
 % print properties
 Figure_Visibility = 'on';
