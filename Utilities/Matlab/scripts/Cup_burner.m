@@ -106,15 +106,15 @@ Plot_X = 1.35*(Paper_Height-Plot_Height)/2;
 Plot_Y = 1.25*(Paper_Height-Plot_Height)/2;
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Height,Plot_Height])
 set(hf(1),'DefaultLineLineWidth',Line_Width)
-xlabel('Experimental MEC (volume fraction)','Interpreter','LaTeX','FontSize',Label_Font_Size)
-ylabel('FDS MEC (volume fraction)','Interpreter','LaTeX','FontSize',Label_Font_Size)
+xlabel('Measured MEC (volume fraction)','Interpreter','LaTeX','FontSize',Scat_Label_Font_Size)
+ylabel('Predicted MEC (volume fraction)','Interpreter','LaTeX','FontSize',Scat_Label_Font_Size)
 legend(hX,XLegendStr,'Location',X_leg_pos)
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
-set(gcf,'PaperSize',[Paper_Height Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Height Paper_Height]);
+set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
 print(gcf,'-dpdf','../../Manuals/FDS_Validation_Guide/FIGURES/Cup_Burner/Cup_Burner_volfrac');
 
 
@@ -150,15 +150,15 @@ Plot_X = 1.35*(Paper_Height-Plot_Height)/2;
 Plot_Y = 1.25*(Paper_Height-Plot_Height)/2;
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Height,Plot_Height])
 set(hf(2),'DefaultLineLineWidth',Line_Width)
-xlabel('Experimental MEC (mass fraction)','Interpreter','LaTeX','FontSize',Label_Font_Size)
-ylabel('FDS MEC (mass fraction)','Interpreter','LaTeX','FontSize',Label_Font_Size)
+xlabel('Measured MEC (mass fraction)','Interpreter','LaTeX','FontSize',Scat_Label_Font_Size)
+ylabel('Predicted MEC (mass fraction)','Interpreter','LaTeX','FontSize',Scat_Label_Font_Size)
 legend(hY,YLegendStr,'Location',Y_leg_pos)
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
-set(gcf,'PaperSize',[Paper_Height Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Height Paper_Height]);
+set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
 print(gcf,'-dpdf','../../Manuals/FDS_Validation_Guide/FIGURES/Cup_Burner/Cup_Burner_massfrac');
 
 %close all
