@@ -1,4 +1,46 @@
-\section{Radiance Equation}
+%
+% -------------------  smoke notes ------------------------
+%
+
+\section{Overview}
+
+Smoke visualization techniques such as the use of tracer particles or shaded 2D contours are useful for
+analyzing data quantitatively but are not suitable for
+applications such as
+using a virtual fire fighter trainer
+or examining the obscuration effects of smoke in
+an outdoor environment.  These applications require visualization methods that display simulation data in a realistic manner.
+These methods need to determine opacities and colors from simulation data.
+
+A complete method for visualizing smoke and fire taking into account absorption, emission, and scattering (both in and out)
+requires the solution of the the volume rendering equation\cite{} also called the radiation transport equation (RTE)\cite{}.
+The solution of this integro-differential equation requires large amounts of memory and computational resources.  Approximations 
+and simplifications 
+are required when displaying smoke at interactive frame rates.
+
+Two approaches are described for visualizing smoke.  The first approach, a slice rendering method, integrates a simplified form of the RTE 
+for each vertex in each simulation grid or slice plane.
+The integral's path length is one slice plane to the next.  The resulting partially transparent slice planes are combined by the video hardware to form one image.
+The slice planes are oriented to be perpendicular to the
+viewer's line of sight. The second approach, a volume rendering method, integrates a simplified form of the RTE 
+from the front of the solution domain to the back rather than across just one slice plane.
+Video hardware is again exploited, this time to compute a line integral for each screen pixel.  Opacities and color for both methods are
+computed using soot density and temperature data derived from a fire simulation.  Colors are determined from a prescribed colormap which
+is a function of temperature.
+
+
+
+%\section{Background}
+
+%\cite{stam:99}\cite{stam:95}\cite{fedkiw:01}\cite{stam:00}
+%\cite{PRESS88a} \cite{marchingcubes}
+
+%\cite{stam:99a}\cite{sayood:96a}\cite{Bajaj:01a}\cite{Levoy:90a}
+%\cite{Sabella:88a}\cite{Gardner:85a}
+
+\section{Theory}
+\subsection{Terminology}
+\subsection{Radiation Transport Equation}
 \newcommand{\siga}{ \sigma_a(x) }
 \newcommand{\sigt}{ \sigma_t(x) }
 \newcommand{\sigs}{ \sigma_s(x) }
@@ -12,8 +54,9 @@
 \newcommand{\intmf}[2]{ \exp\left({-\int_#1^#2 \sigts ds}\right) }
 \newcommand{\intmff}[2]{ {-\int_#1^#2 \sigts ds} }
 
+The radiation transport equation is used to calculate radiance within a region with participating media due to one or more light sources.
 The change in radiance along a ray with direction $\omega$ may be
-expressed by the radiation transfer equation given by
+expressed by the radiation transport equation given by
 
 \begin{eqnarray}
 \label{eq:fullrte}
@@ -38,6 +81,8 @@ emission and in-scattering causes radiance to increase.
 \caption{xxx.} \label{figRadiance}
 \end{figure}
 
+\subsection{Approximating the Radiation Transport Equation}
+\subsubsection{Absorption and Out-Scattering - Beer-Lambert Law}
 Equation (\ref{eq:fullrte}) may be simplified by neglecting the
 in-scattering and emission terms and combining the absorption and
 out-scattering terms using $\sigt=\siga+\sigs$ to obtain
@@ -46,11 +91,21 @@ out-scattering terms using $\sigt=\siga+\sigs$ to obtain
 \dLdx&=&-\sigt L(x)\\
 L(0)&=&L_0
 \end{eqnarray*}
-which has solution (known as Beer's law)
-\begin{eqnarray*}
-\frac{L(D)}{L_0}&=&\intmf{0}{D}
-\end{eqnarray*}
+which has solution
+\begin{equation}
+\label{eq:beer1}
+\frac{L(D)}{L_0}=\intmf{0}{D}
+\end{equation}
 
+If $\sigt$ is constant then equation (\ref{eq:beer1}) simplifies to
+\begin{equation}
+\label{eq:beer2}
+\frac{L(D)}{L_0}=\exp(-\sigma_t D)
+\end{equation}
+which is known as the Beer-Lambert law\cite{}.
+
+
+\subsubsection{Absorption, Out-Scattering and Emission}
 Alternatively, if the emission term is also included when
 simplifying equation (\ref{eq:fullrte})  the following
 differential equation results.
@@ -84,3 +139,291 @@ The radiance at $D$ is then given by
  L(D)=\tau(0)L_0 + \int_0^D\tau(x)\siga\Le dx
 \end{equation}
 where $\tau(x)=\intmf{x}{D}$ .
+
+%
+% -------------------  Slice Rendering ------------------------
+%
+
+\section{Slice Rendering}
+
+
+%
+% -------------------  Computing Opacity ------------------------
+%
+
+\subsection{Computing Opacity}
+The process of computing opacity at nodes in a slice plane is illustrated schematically in Figure \ref{figsmokesetup}.
+A ray travels from the background to the observer through intervening smoke.
+At each step towards the observer, light is absorbed, scattered or emitted by the smoke.  Emission effects are ignored.  Scattering effects presently are only accounted for in the value of the total mass extinction coefficient used.  Contributions are assumed to be from both absorption and scattering.
+The obscuration is computed along each ray one grid plane at a time, using Beer's law as follows.  The $\alpha$ values are pre-computed by FDS using Beer's
+law~\cite{Siegel:2001}
+\begin{equation}
+\alpha=1-\exp(-ks\Delta x) \label{eq:alpha}
+\end{equation}
+
+\noindent for a particular view direction (down the x axis) where $\Delta x$
+is this distance between two nodes, $k$ is the total soot mass
+extinction coefficient and $s$ be the soot density. Beer's law is
+an empirical relationship relating light absorption to the
+material properties of the media the light is traveling through,
+in this case soot or smoke.
+
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[width=6.0in]{figures/smoke_setup}
+\end{center}
+\caption {Smoke is drawn by blending the smoke color with the
+background color.  The amount of blending depends on the amount of
+obscuration as determined from soot density and path length.}
+\label{figsmokesetup}
+\end{figure}
+
+The $\alpha$ parameter in equation (\ref{eq:alpha}) is used by OpenGL to blend smoke planes with the current background, the same blending process discussed in Section \ref{blending}.  The $\alpha$ parameter used here also represents an opacity, 0.0 for completely transparent, 1.0 for completely opaque.
+
+%
+% -------------------  Adjusting Opacity ------------------------
+%
+
+\subsection{Adjusting Opacity}
+
+The absorption parameter, $\alpha$, needs to be adjusted when the
+view direction is not aligned along the axis orthogonal to the
+viewing planes (as in Figure \ref{figray}), the distance between
+adjacent smoke planes changes, or viewing planes are skipped.
+\begin{figure}[\figoptions]
+\centerline{\includegraphics[width=5.0in]{figures/forney_figure4}}
+\caption [Diagram illustrating the adjustment needed to opaqueness
+parameter, $\alpha$, for non axis aligned views.] { Diagram
+illustrating adjustment needed to opaqueness parameter, $\alpha$,
+for non axis aligned views. The $\alpha$ value along the ray
+containing the $\hat{x}$ segment needs to be larger to account for
+the longer path length. } \label{figray}
+\end{figure}
+
+Ten million exponential operations per second are required to
+display smoke with corrected $\alpha$'s at 10 frames per second if
+the simulation has grid dimensions of $100\times 100\times 100$.
+Recent advances in CPU and video hardware makes these types of
+visualizations possible. These corrections may also be performed
+in the video card (GPU), resulting in increased display rates
+because the GPU performs the corrections simultaneously at all or
+many of the grid nodes rather than one at a time as the CPU would.
+
+The $\alpha$ obscurations are pre-computed using the distance
+$\Delta x$ between adjacent planes along the x-axis. The adjusted
+$\hat{\alpha}$ expressed in terms of $\Delta\hat{x}$ is given by
+\begin{equation}
+\label{eq:adjusted}
+\hat{\alpha}=1-\exp(-ks\Delta \hat{x})\\
+\end{equation}
+where $\Delta\hat{x}$ is the distance between planes along the line of site.
+Equations (\ref{eq:alpha}) and (\ref{eq:adjusted}) may be used to
+solve for $\hat{\alpha}$ in terms of $\alpha$ to obtain
+\begin{equation}
+\label{eq:alphahat}
+\hat{\alpha}=1-(1-\alpha)^{\Delta\hat{x}/\Delta x}
+\end{equation}
+after noting that
+\begin{eqnarray*}
+1-\hat{\alpha}=\exp(-ks\Delta\hat{x})=\exp(-ks\Delta
+x)^{\Delta\hat{x}/\Delta x}=(1-\alpha)^{\Delta\hat{x}/\Delta x}
+\end{eqnarray*}
+
+The computation of equation (\ref{eq:alphahat}) is expensive
+because the exponential is computed at each grid node for every
+time step.  In addition, numerical cancellation may occur for
+small $\alpha$ leading to loss of significant digits. Both
+problems may be solved by expanding equation (\ref{eq:alphahat})
+in a Taylor series and keeping only the first few terms:
+\begin{eqnarray*}
+\hat{\alpha}\approx \alpha r -
+\frac{\alpha^2}{2}r(r-1)+\frac{\alpha^3}{6}r(r-1)(r-2)
+\end{eqnarray*}
+where $r=\sec(\theta)=\Delta \hat{x}/\Delta
+x=||x_p-x_e||/n\cdot(x_p-x_e)$, $n$ is the unit vector normal to
+the current plane being drawn, $\theta$ is the angle between the
+view direction and $n$, $x_e$ is the observers position and $x_p$
+is the vertex being drawn (along the view direction).  These terms
+are illustrated in Figure \ref{figray}.
+
+When planes are skipped, equation (\ref{eq:alphahat}) may be simplified.  In particular,
+when every 2nd plane is
+skipped, $\Delta\hat{x}/\Delta x=2$, so that equation (\ref{eq:alphahat}) simplifies to
+\begin{eqnarray*}
+\hat{\alpha}=1-(1-\alpha)^2=2\alpha-\alpha^2
+\end{eqnarray*}
+
+The video hardware uses $\alpha$ values contained in the smoke
+planes to obscure the background much like a camera uses a neutral
+density filter to darken a scene.  Extending the analogy,
+Smokeview uses one spatial/time varying {\em numerical}\ neutral
+density filter for each plane of smoke data.  On a node by node
+basis then, each smoke plane obscures the current image stored in
+the OpenGL back buffer by the amount $(1-\alpha)$ to form a new
+back buffer image.  Figure \ref{figplume} illustrates this process
+showing several snapshots of a fire plume. The final image in the
+lower right is the most realistic. A simplistic description of one
+step of this process is given by
+
+\begin{eqnarray*}
+\mbox{new buffer image} = (1-\alpha)\times \mbox{old buffer image}
+\end{eqnarray*}
+
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[height=4.0in]{figures/splume_20_27}&
+\includegraphics[height=4.0in]{figures/splume_17_27}\\
+slices 20 to 27&slices 17 to 27\\
+\includegraphics[height=4.0in]{figures/splume_14_27}&
+\includegraphics[height=4.0in]{figures/splume_11_27}\\
+slices 14 to 27&slices 11 to 27
+\end{tabular}
+\end{center}
+\caption [Smoke plume visualized using several vertical parallel
+partially transparent planes.] {Smoke plume visualized using
+several vertical parallel partially transparent planes. The
+transparency is computing using soot density which is in turn
+computed using conservation equations for mass, momentum and
+energy. } \label{figplume}
+\end{figure}
+
+\noindent This process is repeated for each smoke plane. Figure
+\ref{figsmoke3d} illustrates this process showing smoke and fire
+in a townhouse kitchen fire.
+
+The visualization is performed by displaying a series of partially
+transparent planes. For illustration, these planes are made more
+conspicuous (in Figure \ref{figsmoke3d}a) by skipping smoke planes
+(displaying every third plane) and orienting them along the `x'
+axis. Figure \ref{figsmoke3d}b shows the visualization as it
+normally appears with all slice planes shown and oriented along a
+plane most perpendicular to the view direction.
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{l}
+\includegraphics[height=3.75in]{figures/thouse5c_skip}\\
+a) slices skipped and oriented along `x' directions\\
+\includegraphics[height=3.75in]{figures/thouse5c_full}\\
+b) all slices shown and oriented towards viewer \\
+\end{tabular}
+\end{center}
+\caption{Realistic visualization of a townhouse kitchen fire simulated
+using FDS5. Planes in the top image are drawn to be conspicuous by
+skipping 2 out of every 3 planes and by aligning planes along the
+x axis. All planes in the bottom image are displayed (none are
+skipped) and they are aligned to be closest to perpendicular of
+all possible plane orientations.
+  }
+\label{figsmoke3d}%
+\end{figure}
+
+%
+% -------------------  Lighting Smoke ------------------------
+%
+
+%\chapter{Lighting Smoke}
+
+
+%
+% -------------------  Orienting smoke planes ------------------------
+%
+
+\subsection{Orienting smoke planes}
+
+Smoke opacity data computed as described in previous sections is
+stored in a 3D array. This array corresponds to the solution
+domain as set up in an FDS input file (or some other model). Smoke
+planes are drawn in Smokeview through this data.  The orientation
+is chosen to be most perpendicular to the viewers line of sight. A
+plane orientation exactly perpendicular to the view direction
+could be drawn if one is willing to pay the added CPU cost of
+interpolating opacity values between grid nodes.
+
+Figure \ref{figDIRA} illustrates this process showing three view
+directions and the corresponding smoke plane orientations that
+would be used. Off-axis viewing is minimized by selecting the view
+planes orientation that minimizes the angle between the planes
+normal direction and the view direction. This angle, $\theta$, is
+illustrated in Figure \ref{figDIRB}, and is given by
+\begin{eqnarray*}
+\cos(\theta)=\frac{n\cdot v_e}{||n||~||v_e||}
+\end{eqnarray*}
+
+\noindent where $n$ is normal vector for the candidate smoke
+plane, and $v_e$ is the view direction vector.  In OpenGL, the
+view direction vector, $v_e$, is computed by simply obtaining the
+modelview matrix, $M$ and multiplying it by the vector,
+$(0,0,1)^T$ or equivalently the third row of $M$.
+
+\begin{figure}
+\begin{tabular}{ccc}
+\includegraphics[width=2.0in]{figures/figDIR1a}&
+\includegraphics[width=2.0in]{figures/figDIR1b}&
+\includegraphics[width=2.0in]{figures/figDIR1c}\\
+a) smoke planes parallel to $y$ axis& b) smoke planes parallel to
+$y=x$ axis)&
+c) smoke planes parallel to $x$ axis\\
+\end{tabular}
+\caption{View of smoke planes from above.  Smoke Planes are
+oriented so that they are {\em most perpendicular}\ to the line of sight }
+\label{figDIRA}
+\end{figure}
+
+\begin{figure}
+\centerline{\includegraphics[width=6.0in]{figures/figDIR2}}
+\caption{Diagram illustrating the angle between the line of sight
+and smoke plane normal vector.  View planes are chosen to minimize
+this angle.} \label{figDIRB}
+\end{figure}
+
+%
+% -------------------  Compression ------------------------
+%
+
+\subsection{Compressing Smoke Data}
+
+The opacity parameters are computed at each node for all time
+steps. As noted earlier, the space required to store these values
+can easily exceed the 2GB file size limit found on 32 bit
+operating systems. Techniques are required to reduce storage
+requirements.
+
+Compression for this application occurs in two steps.  First, a
+four to one compression level is achieved by using Beer's law to
+convert soot density, a four byte floating point quantity, to
+opacity, a one byte quantity.  Video cards presently use only one
+byte to represent opacity. Next, the sequence of opacity values
+are compressed using run-length encoding. Run length encoding
+works as follows.
+
+\begin{enumerate}
+\item Represent four or more consecutive identical characters as
+$\# n c$ where $\#$ is a special character denoting the beginning
+of a repeated sequence, $n$ is the number of repeats and $c$ is
+the character repeated.  $n$ can be up to 254 (255 is used to
+represent the {\em special}\ character). \item Represent
+characters not repeated four or more times as is.
+\end{enumerate}
+
+So, the character string {\tt aaaaaabbbbcc}\ would be encoded {\tt \#6b\#4bcc}.
+
+Run length encoding provides a reasonably good compression ratio,
+is simple to implement and more importantly can be decompressed
+quickly. This last property is important for any compression
+scheme chosen because it is a rate limiting step in the process
+that Smokeview uses to display smoke data. The CPU time required
+to compute the smoke flow can easily exceed one minute of CPU time
+per outputted time step, so extra time used to produce a more
+compact file is affordable. However, each data frame is
+decompressed {\em on the fly}\ so a compression format that can be
+rapidly decompressed is critical.
+
+Smokezip is a software program developed as a companion to
+Smokeview and FDS to compress FDS data files. A second compression
+scheme is used by Smokezip to compress FDS files even more
+compactly.  Smokezip uses the ZLIB compression library available
+at (\hhref{http://zlib.net/}).
+
+\section{Volume Rendering}
