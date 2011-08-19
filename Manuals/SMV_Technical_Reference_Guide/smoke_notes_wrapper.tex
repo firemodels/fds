@@ -1,34 +1,30 @@
-% $Date: 2011-07-31 22:17:46 -0400 (Sun, 31 Jul 2011) $
-% $Revision: 8832 $
-% $Author: gforney $
-
-\documentclass[11pt,twoside]{article}
-\usepackage{times,mathptm,multirow,fancyvrb,color,array}
-\usepackage{picins}
-
-%\usepackage{wrapfig}
+\documentclass[10pt]{article}
+\usepackage{mathptm,times}
 \usepackage[pdftex]{graphicx}
+\usepackage{rotating}
+\usepackage{multirow,fancyvrb,color,array}
+\usepackage{picins}
 \usepackage{hyperref}
-\pdfcompresslevel=9
-\DeclareGraphicsExtensions{.jpg,.pdf,.png}
+\pdfcompresslevel=9 \DeclareGraphicsExtensions{.jpg,.pdf,.png}
 \usepackage{setspace,moreverb}
 
-\usepackage{color}
-%\usepackage{pdfsync}
+\newcommand{\nopart}{\expandafter\def\csname Parent-1\endcsname{}} % To fix table of contents in pdf.
+
+\setlength{\textwidth}{6.5in} \setlength{\textheight}{9.0in}
+\setlength{\topmargin}{0.in} \setlength{\headheight}{0.in}
+\setlength{\headsep}{0.in} \setlength{\parindent}{0.25in}
+\setlength{\oddsidemargin}{0.0in}
+\setlength{\evensidemargin}{0.0in} \setlength{\parindent}{0.0in}
+\setlength{\parskip}{\baselineskip}
+\setlength{\paperheight}{11.0in} \setlength{\paperwidth}{8.5in}
+
+\begin{document}
+
+\bibliographystyle{unsrt}
+
 
 \pagestyle{plain}
 
-\setlength{\textwidth}{6.5in}
-\setlength{\oddsidemargin}{0.00in}
-\setlength{\evensidemargin}{0.0in}
-\setlength{\textheight}{9.0in}
-\setlength{\topmargin}{0.00in}
-\setlength{\parindent}{0.2in}
-
-\setlength{\headheight}{0.00in}
-\setlength{\headsep}{0.0in}
-\setlength{\paperheight}{11.0in}
-\setlength{\paperwidth}{8.5in}
 %
 % new commands for this paper
 %
@@ -37,11 +33,11 @@
 
 
 \bibliographystyle{unsrt}
-%\doublespace
-\begin{document}
-\pagestyle{empty}
-\tableofcontents
-\listoffigures
+
+\doublespace
+
+\pagestyle{empty} \tableofcontents
+%\listoffigures
 %
 % ----------------------  first cover/title page --------------------------
 %
@@ -49,6 +45,18 @@
 \pagenumbering{arabic}
 \newpage
 
+PROCEEDINGS, Fire and Evacuation Modeling Technical Conference 2011 \\
+Baltimore, Maryland, August 15-16, 2011
+
+\begin{center}
+{\bf A NOTE ON VISUALIZING SMOKE AND FIRE} \\
+\hspace{1in} \\
+Glenn Forney \\
+National Institute of Standards and Technology \\
+Gaithersburg, Maryland, USA \\
+e-mail: glenn.forney@nist.gov \\
+\hspace{1in} \\
+\end{center}
 %
 % -------------------  Introduction ------------------------
 %
