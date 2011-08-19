@@ -67,6 +67,46 @@ WALL_CLOCK_TIME    = WALL_CLOCK_SECONDS + DATE_TIME(8)*0.001_EB
 END FUNCTION WALL_CLOCK_TIME
 
 
+SUBROUTINE GET_DATE(DATE)
+
+INTEGER :: DATE_TIME(8)
+CHARACTER(10) :: BIG_BEN(3),MONTH
+CHARACTER(30), INTENT(OUT) :: DATE
+
+CALL DATE_AND_TIME(BIG_BEN(1),BIG_BEN(2),BIG_BEN(3),DATE_TIME)
+
+SELECT CASE(DATE_TIME(2))
+   CASE(1)
+      MONTH='January'
+   CASE(2)
+      MONTH='February'
+   CASE(3)
+      MONTH='March'
+   CASE(4)
+      MONTH='April'
+   CASE(5)
+      MONTH='May'
+   CASE(6)
+      MONTH='June'
+   CASE(7)
+      MONTH='July'
+   CASE(8)
+      MONTH='August'
+   CASE(9)
+      MONTH='September'
+   CASE(10)
+      MONTH='October'
+   CASE(11)
+      MONTH='November'
+   CASE(12)
+      MONTH='December'
+END SELECT
+
+WRITE(DATE,'(A,I3,A,I4,2X,I2.2,A,I2.2,A,I2.2)') TRIM(MONTH),DATE_TIME(3),', ',DATE_TIME(1), & 
+                                                DATE_TIME(5),':',DATE_TIME(6),':',DATE_TIME(7)
+END SUBROUTINE GET_DATE
+
+
 SUBROUTINE SHUTDOWN(MESSAGE)  
 
 ! Stops the code gracefully after writing a message
