@@ -465,3 +465,51 @@ background color.  The amount of blending depends on the amount of
 obscuration as determined from soot density and path length.}
 \label{figsmokesetup2}
 \end{figure}
+
+\subsection{Combining Multiple Solutions}
+Equation (\ref{eq:rtesoln}), is the solution to an approximate form of the radiation transport equation over a path
+from $x=0$ to $x=D$.  As illustrated in Figure \ref{figsmokesetup3}, 
+suppose that this path is split at $D_1$ into two parts, the first part from $0$ to $D_1$ and the second part from $D_1$ to $D$.  
+Further, suppose that the RTE solution is known on each part.
+This section describes how these two solutions may be combined to form a solution
+over the entire interval $0$ to $D$.
+
+Given a radiance of $L_0$ at $x=0$, the radiance at $D$, denoted $L(D)$ is given by
+\begin{eqnarray}
+\label{eq:rtesoln}
+L(D)&=&\tau(0,D)L_0 + \int_0^D\tau(x,D)\siga\Le dx
+\end{eqnarray}
+This is the RTE solution over the entire interval $0$ to $D$.
+Similarly, $D_1$ and $D$ is given by
+\begin{eqnarray*}
+L_1(D_1)&=&\tau(0,D_1)L_0 + \int_0^{D_1}\tau(x,D_1)\siga\Le dx\\
+L_2(D)&=&\tau(D_1,D)L_0 + \int_{D_1}^{D}\tau(x,D)\siga\Le dx
+\end{eqnarray*}
+where the initial conditions are $L_1(0)=L_0$ and $L_2(D_1)=L_0$.
+
+The optical depth, $\tau(a,b)$, may be expressed as $\tau(a,b)=\tau(a,x)\tau(x,b)$ since
+\begin{eqnarray*}
+\tau(a,b)&=&\exp\left(-\int_a^b \sigt ds\right)\\
+&=&\exp\left(-\int_a^x \sigt ds -\int_x^b \sigt ds\right)\\
+&=&\exp\left(-\int_a^x \sigt ds\right)\exp\left(-\int_x^b \sigt ds\right)\\
+&=&\tau(a,x)\tau(x,b)
+\end{eqnarray*}
+Using this property, the RTE solution, $L(x)$, over the full interval may be re-written in terms of solutions $L_1(x)$ and $L_2(x)$ using
+\begin{eqnarray*}
+L(D)&=&\tau(0,D)L_0 + \int_0^D\tau(x,D)\siga\Le dx\\
+&=&\tau(0,D_1)\tau(D_1,D)L_0 + \int_0^{D_1}\tau(x,D_1)\tau(D_1,D)\Le dx + \int_{D_1}^{D}\tau(x,D)\Le dx\\
+&=&\tau(D_1,D)\left(\tau(0,D_1)L_0 + \int_0^{D_1}\tau(x,D_1)\Le dx\right) + \int_{D_1}^{D}\tau(x,D)\Le dx\\
+&=&\tau(D_1,D)L_1(D_1)+L_2(D)-\tau(D_1,D)L_0\\
+&=&\tau(D_1,D)(L_1(D_1)-L_0) + L_2(D)
+\end{eqnarray*}
+This relationship may be exploited to draw smoke one mesh at a time using local properties of each mesh without having to solve the RTE equation over the entire interval at once.
+
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[width=4.0in]{figures/smoke_setup3}
+\end{center}
+\caption {Smoke is drawn by blending the smoke color with the
+background color.  The amount of blending depends on the amount of
+obscuration as determined from soot density and path length.}
+\label{figsmokesetup3}
+\end{figure}
