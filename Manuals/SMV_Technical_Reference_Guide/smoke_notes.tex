@@ -6,19 +6,19 @@
 
 Methods for visualizing data such as 2D
 contours or 3D iso-surfaces are useful for analyzing data quantitatively but are not
-as suitable for applications where realism is required such as in a fire fighting simulator.
+suitable for applications where realism is required such as in a fire fighting simulator.
 Realistic smoke visualization methods need to determine opacities and colors from simulation
-data using physics based principles.  
-This note describes two methods for visualizing smoke realistically both using a form of the radiation transport equation\cite{} to model
+data using physics based principles.
+This \paper\ describes two methods for visualizing smoke realistically both using a form of the radiation transport equation\cite{Siegel:2001} to model
 smoke opacity and color.
 Simplifications used to make these visualizations practical are discussed.
 
 A complete method for visualizing smoke and fire taking into
-account light/smoke interactions such as absorption, emission, and scattering (both in and out)
-requires the solution of the the volume rendering equation\cite{}
-also called the radiation transport equation (RTE)\cite{}.
+account interactions between light and smoke such as absorption, emission, and scattering (both in and out)
+requires the solution of the the volume rendering equation\cite{levoy:1988}
+also called the radiation transport equation (RTE)\cite{Siegel:2001}.
 This equation models how light appears to an observer after interacting with a participating media in this case smoke.
-The equation solved here for visualization purposes is the same one used in a fire model such as FDS\cite{}
+The equation solved here for visualization purposes is the same one used in a fire model such as FDS\cite{FDS_Tech_Guide}
 for modeling radiative heat transfer except that a different wave length of light (visible rather than infrared) is used in the solution.
 
 The
@@ -29,13 +29,13 @@ interactive frame rates.  The primary approximation is to take
 advantage of the low albedo character of smoke by either simplifying or eliminating the scattering term in the RTE.
 
 Two techniques for visualizing smoke realistically are slice rendered and volume
-rendered methods.  These methods both solve a form of the RTE equation.  
-The integrated quantity in both cases is ultimately an opacity, the fraction of light obscured. 
-They 
-differ in the path over which they are integrated.
-The integration path for a slice rendered method is a segment between two adjacent grid planes within a 
-3D mesh.  The integration path for a volume rendered method is a segment between the front and back surface of a 3D mesh (across multiple grid planes).
+rendered methods.  These methods both solve a form of the RTE equation.
+The integrated quantity in both cases is ultimately an opacity, the fraction of light obscured.
+They
+differ in the path length over which they are integrated.
 
+The integration path for a slice rendered method is a segment between two adjacent grid planes within a
+3D mesh.
 There is one slice plane for each plane of simulated data.
 The resulting partially transparent slice planes are drawn individually and
 combined by the video hardware to form one image. The slice planes
@@ -44,18 +44,21 @@ are oriented to be perpendicular to the viewer's line of sight.
 The second approach, a volume rendering method, again integrates a
 simplified form of the radiation transport equation but over the entire entire simulation mesh (from the
 front of the solution domain to the back) rather than across just
-one slice plane. As a result, there is only one plane of data drawn.  The video hardware is again exploited, but this time to
+one slice plane. A volume rendered method then computes opacity across multiple grid planes.
+As a result, there is only one plane of data drawn.  The video hardware is again exploited, but this time to
 compute a line integral for each screen pixel across the entire grid.  Opacities and
 color for both methods are computed using soot density and
 temperature data derived from a fire simulation. Colors are
 determined from a prescribed colormap which is a function of
 temperature.
+\cite{nguyen:02} \cite{rushmeier:95} \cite{fedkiw:01}\cite{rushmeier:1987}\cite{gpugems}\cite{dutre:2002}
 
 
 %\section{Background}
 
 %\cite{stam:99}\cite{stam:95}\cite{fedkiw:01}\cite{stam:00}
 %\cite{PRESS88a} \cite{marchingcubes}
+
 
 %\cite{stam:99a}\cite{sayood:96a}\cite{Bajaj:01a}\cite{Levoy:90a}
 %\cite{Sabella:88a}\cite{Gardner:85a}
@@ -400,7 +403,9 @@ emission and in-scattering causes radiance to increase.
 \begin{center}
 \includegraphics[width=6.0in]{figures/rte_setup}
 \end{center}
-\caption{xxx.} \label{figRadiance}
+\caption{Components of the radiation transport equation decreasing radiance along a ray are
+absorption and out-scattering while components increasing radiance along a ray are emission and in-scattering.}
+\label{figRadiance}
 \end{figure}
 
 \subsection{Approximating the Radiation Transport Equation}
@@ -466,9 +471,9 @@ by $\tau(a,b)=\intmf{a}{b}$ .
 \begin{center}
 \includegraphics[width=4.0in]{figures/smoke_setup2}
 \end{center}
-\caption {Smoke is drawn by blending the smoke color with the
-background color.  The amount of blending depends on the amount of
-obscuration as determined from soot density and path length.}
+\caption {Opacity and color is computed for each pixel on an image plane by solving a line integral
+representation of a simplified form of the radiation transport equation.
+}
 \label{figsmokesetup2}
 \end{figure}
 
@@ -517,8 +522,20 @@ This relationship may be exploited to draw smoke one mesh at a time using the pr
 \begin{center}
 \includegraphics[width=4.0in]{figures/smoke_setup3}
 \end{center}
-\caption {Smoke is drawn by blending the smoke color with the
-background color.  The amount of blending depends on the amount of
-obscuration as determined from soot density and path length.}
+\caption {Solutions to the RTE for two intervals are combined to form a solution to the RTE
+for the merger of these intervals.
+}
 \label{figsmokesetup3}
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[height=4.0in]{figures/plume5c_vol_orig}&
+\includegraphics[height=4.0in]{figures/plume5c_vol_side}\\
+a) front view&b) side view\\
+\end{tabular}
+\end{center}
+\caption {Volume rendered smoke plume viewed from two directions.}
+\label{volplume_example}
 \end{figure}
