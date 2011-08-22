@@ -4,42 +4,48 @@
 
 \section{Overview}
 
-Visualization techniques such as those used to view color shaded
-contours are useful for analyzing data quantitatively but are not
-as suitable for applications such as using a virtual fire fighter
-trainer or examining the obscuration effects of smoke in an
-outdoor environment.  These applications require visualization
-methods that display simulation data in a realistic manner. These
-methods need to determine opacities and colors from simulation
-data.  This paper describes two methods, slice rendered and volume
-rendered, for visualizing smoke realistically.  Each is based on
-an approximation of the radiation transport equation\cite{} and
-differ mainly in path length over which integrals are performed.
+Methods for visualizing data such as 2D
+contours or 3D iso-surfaces are useful for analyzing data quantitatively but are not
+as suitable for applications where realism is required such as in a fire fighting simulator.
+Realistic smoke visualization methods need to determine opacities and colors from simulation
+data using physics based principles.  
+This note describes two methods for visualizing smoke realistically both using a form of the radiation transport equation\cite{} to model
+smoke opacity and color.
+Simplifications used to make these visualizations practical are discussed.
 
 A complete method for visualizing smoke and fire taking into
-account absorption, emission, and scattering (both in and out)
+account light/smoke interactions such as absorption, emission, and scattering (both in and out)
 requires the solution of the the volume rendering equation\cite{}
-also called the radiation transport equation (RTE)\cite{}. The
-solution of this integro-differential equation requires large
-amounts of memory and computational resources.  Approximations and
-simplifications are required in order to display smoke at
-interactive frame rates.  The main approximation is to take
-advantage of the low albedo character of smoke which results in
-less scattering events than would occur in a high albedo media
-such as a cloud.
+also called the radiation transport equation (RTE)\cite{}.
+This equation models how light appears to an observer after interacting with a participating media in this case smoke.
+The equation solved here for visualization purposes is the same one used in a fire model such as FDS\cite{}
+for modeling radiative heat transfer except that a different wave length of light (visible rather than infrared) is used in the solution.
 
-Two approaches are described for visualizing smoke. The first
-approach, a slice rendering method, integrates a simplified form
-of the radiation transport for each vertex in each simulation grid
-or slice plane. The integral's path length is one slice plane to
-the next. The resulting partially transparent slice planes are
+The
+solution of this integro-differential equation requires significant
+memory and computational resources.  Approximations
+are required in order to display smoke at
+interactive frame rates.  The primary approximation is to take
+advantage of the low albedo character of smoke by either simplifying or eliminating the scattering term in the RTE.
+
+Two techniques for visualizing smoke realistically are slice rendered and volume
+rendered methods.  These methods both solve a form of the RTE equation.  
+The integrated quantity in both cases is ultimately an opacity, the fraction of light obscured. 
+They 
+differ in the path over which they are integrated.
+The integration path for a slice rendered method is a segment between two adjacent grid planes within a 
+3D mesh.  The integration path for a volume rendered method is a segment between the front and back surface of a 3D mesh (across multiple grid planes).
+
+There is one slice plane for each plane of simulated data.
+The resulting partially transparent slice planes are drawn individually and
 combined by the video hardware to form one image. The slice planes
 are oriented to be perpendicular to the viewer's line of sight.
+
 The second approach, a volume rendering method, again integrates a
-simplified form of the radiation transport equation but from the
-front of the solution domain to the back rather than across just
-one slice plane. Video hardware is again exploited, this time to
-compute a line integral for each screen pixel.  Opacities and
+simplified form of the radiation transport equation but over the entire entire simulation mesh (from the
+front of the solution domain to the back) rather than across just
+one slice plane. As a result, there is only one plane of data drawn.  The video hardware is again exploited, but this time to
+compute a line integral for each screen pixel across the entire grid.  Opacities and
 color for both methods are computed using soot density and
 temperature data derived from a fire simulation. Colors are
 determined from a prescribed colormap which is a function of
@@ -468,8 +474,8 @@ obscuration as determined from soot density and path length.}
 
 \subsection{Combining Multiple Solutions}
 Equation (\ref{eq:rtesoln}), is the solution to an approximate form of the radiation transport equation over a path
-from $x=0$ to $x=D$.  As illustrated in Figure \ref{figsmokesetup3}, 
-suppose that this path is split at $D_1$ into two parts, the first part from $0$ to $D_1$ and the second part from $D_1$ to $D$.  
+from $x=0$ to $x=D$.  As illustrated in Figure \ref{figsmokesetup3},
+suppose that this path is split at $D_1$ into two parts, the first part from $0$ to $D_1$ and the second part from $D_1$ to $D$.
 Further, suppose that the RTE solution is known on each part.
 This section describes how these two solutions may be combined to form a solution
 over the entire interval $0$ to $D$.
@@ -480,29 +486,32 @@ Given a radiance of $L_0$ at $x=0$, the radiance at $D$, denoted $L(D)$ is given
 L(D)&=&\tau(0,D)L_0 + \int_0^D\tau(x,D)\siga\Le dx
 \end{eqnarray}
 This is the RTE solution over the entire interval $0$ to $D$.
-Similarly, $D_1$ and $D$ is given by
+Similarly, $L_1(D_1)$ and $L_2(D)$ is given by
 \begin{eqnarray*}
 L_1(D_1)&=&\tau(0,D_1)L_0 + \int_0^{D_1}\tau(x,D_1)\siga\Le dx\\
 L_2(D)&=&\tau(D_1,D)L_0 + \int_{D_1}^{D}\tau(x,D)\siga\Le dx
 \end{eqnarray*}
 where the initial conditions are $L_1(0)=L_0$ and $L_2(D_1)=L_0$.
 
-The optical depth, $\tau(a,b)$, may be expressed as $\tau(a,b)=\tau(a,x)\tau(x,b)$ since
+The optical depth, $\tau(a,b)=\exp\left(-\int_a^b \sigt ds\right)$, may be expressed as $\tau(a,b)=\tau(a,x)\tau(x,b)$ since
 \begin{eqnarray*}
 \tau(a,b)&=&\exp\left(-\int_a^b \sigt ds\right)\\
 &=&\exp\left(-\int_a^x \sigt ds -\int_x^b \sigt ds\right)\\
 &=&\exp\left(-\int_a^x \sigt ds\right)\exp\left(-\int_x^b \sigt ds\right)\\
 &=&\tau(a,x)\tau(x,b)
 \end{eqnarray*}
-Using this property, the RTE solution, $L(x)$, over the full interval may be re-written in terms of solutions $L_1(x)$ and $L_2(x)$ using
+Using this property, RTE solutions $L_1(x)$ and $L_2(x)$ over two sub-intervals $[0,D_1]$ and $[D_1,D]$ may be combined into the solution $L(x)$ over the merged
+interval $[0,D]$.  This follows from
 \begin{eqnarray*}
 L(D)&=&\tau(0,D)L_0 + \int_0^D\tau(x,D)\siga\Le dx\\
 &=&\tau(0,D_1)\tau(D_1,D)L_0 + \int_0^{D_1}\tau(x,D_1)\tau(D_1,D)\Le dx + \int_{D_1}^{D}\tau(x,D)\Le dx\\
-&=&\tau(D_1,D)\left(\tau(0,D_1)L_0 + \int_0^{D_1}\tau(x,D_1)\Le dx\right) + \int_{D_1}^{D}\tau(x,D)\Le dx\\
+&=&\tau(D_1,D)
+\underbrace{\left(\tau(0,D_1)L_0 + \int_0^{D_1}\tau(x,D_1)\Le dx\right)}_{L_1(D_1)} +
+\underbrace{\int_{D_1}^{D}\tau(x,D)\Le dx}_{L_2(D)-\tau(D_1,D)L_0}\\
 &=&\tau(D_1,D)L_1(D_1)+L_2(D)-\tau(D_1,D)L_0\\
 &=&\tau(D_1,D)(L_1(D_1)-L_0) + L_2(D)
 \end{eqnarray*}
-This relationship may be exploited to draw smoke one mesh at a time using local properties of each mesh without having to solve the RTE equation over the entire interval at once.
+This relationship may be exploited to draw smoke one mesh at a time using the properties local to each mesh without having to solve the RTE equation over the entire interval at once.
 
 \begin{figure}[\figoptions]
 \begin{center}
