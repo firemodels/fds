@@ -1812,56 +1812,66 @@ void Update_Isotris(int flag){
         for(ilev=0;ilev<meshi->nisolevels;ilev++){
           if(showlevels[ilev]==0)continue;
           asurfi = asurface + ilev;
-          niso_trans += asurfi->niso_triangles;
-          for(itri=0;itri<asurfi->niso_triangles;itri++){
-            *iso_trans_tmp++=asurfi->iso_triangles+itri;
+          if(asurfi->iso_triangles>0){
+            niso_trans += asurfi->niso_triangles;
+            for(itri=0;itri<asurfi->niso_triangles;itri++){
+              *iso_trans_tmp++=asurfi->iso_triangles+itri;
+            }
+            colorptr=isoi->colorlevels[ilev];
+            colorptr[3]=transparentlevel;
           }
-          colorptr=isoi->colorlevels[ilev];
-          colorptr[3]=transparentlevel;
         }
       }
       else if(transparent_state==MIN_SOLID){
         for(ilev=0;ilev<1;ilev++){
           if(showlevels[ilev]==0)continue;
           asurfi = asurface + ilev;
-          niso_opaques += asurfi->niso_triangles;
-          for(itri=0;itri<asurfi->niso_triangles;itri++){
-            *iso_opaques_tmp++=asurfi->iso_triangles+itri;
+          if(asurfi->niso_triangles>0){
+            niso_opaques += asurfi->niso_triangles;
+            for(itri=0;itri<asurfi->niso_triangles;itri++){
+              *iso_opaques_tmp++=asurfi->iso_triangles+itri;
+            }
+            colorptr=isoi->colorlevels[ilev];
+            colorptr[3]=1.0;
           }
-          colorptr=isoi->colorlevels[ilev];
-          colorptr[3]=1.0;
         }
         for(ilev=1;ilev<meshi->nisolevels;ilev++){
           if(showlevels[ilev]==0)continue;
           asurfi = asurface + ilev;
-          niso_trans += asurfi->niso_triangles;
-          for(itri=0;itri<asurfi->niso_triangles;itri++){
-            *iso_trans_tmp++=asurfi->iso_triangles+itri;
+          if(asurfi->niso_triangles>0){
+            niso_trans += asurfi->niso_triangles;
+            for(itri=0;itri<asurfi->niso_triangles;itri++){
+              *iso_trans_tmp++=asurfi->iso_triangles+itri;
+            }
+            colorptr=isoi->colorlevels[ilev];
+            colorptr[3]=transparentlevel;
           }
-          colorptr=isoi->colorlevels[ilev];
-          colorptr[3]=transparentlevel;
         }
       }
       else if(transparent_state==MAX_SOLID){
         for(ilev=0;ilev<meshi->nisolevels-1;ilev++){
           if(showlevels[ilev]==0)continue;
           asurfi = asurface + ilev;
-          niso_trans += asurfi->niso_triangles;
-          for(itri=0;itri<asurfi->niso_triangles;itri++){
-            *iso_trans_tmp++=asurfi->iso_triangles+itri;
-          } 
-          colorptr=isoi->colorlevels[ilev];
-          colorptr[3]=transparentlevel;
+          if(asurfi->niso_triangles>0){
+            niso_trans += asurfi->niso_triangles;
+            for(itri=0;itri<asurfi->niso_triangles;itri++){
+              *iso_trans_tmp++=asurfi->iso_triangles+itri;
+            } 
+            colorptr=isoi->colorlevels[ilev];
+            colorptr[3]=transparentlevel;
+          }
         }
         for(ilev=meshi->nisolevels-1;ilev<meshi->nisolevels;ilev++){
           if(showlevels[ilev]==0)continue;
           asurfi = asurface + ilev;
-          niso_opaques += asurfi->niso_triangles;
-          for(itri=0;itri<asurfi->niso_triangles;itri++){
-            *iso_opaques_tmp++=asurfi->iso_triangles+itri;
+          if(asurfi->niso_triangles>0){
+            niso_opaques += asurfi->niso_triangles;
+            for(itri=0;itri<asurfi->niso_triangles;itri++){
+              *iso_opaques_tmp++=asurfi->iso_triangles+itri;
+            }
+            colorptr=isoi->colorlevels[ilev];
+            colorptr[3]=1.0;
           }
-          colorptr=isoi->colorlevels[ilev];
-          colorptr[3]=1.0;
         }
       }
       else if(transparent_state==ALL_SOLID){
@@ -1869,12 +1879,14 @@ void Update_Isotris(int flag){
           CheckMemory;
           if(showlevels[ilev]==0)continue;
           asurfi = asurface + ilev;
-          niso_opaques += asurfi->niso_triangles;
-          for(itri=0;itri<asurfi->niso_triangles;itri++){
-            *iso_opaques_tmp++=asurfi->iso_triangles+itri;
+          if(asurfi->niso_triangles>0){
+            niso_opaques += asurfi->niso_triangles;
+            for(itri=0;itri<asurfi->niso_triangles;itri++){
+              *iso_opaques_tmp++=asurfi->iso_triangles+itri;
+            }
+            colorptr=isoi->colorlevels[ilev];
+            colorptr[3]=1.0;
           }
-          colorptr=isoi->colorlevels[ilev];
-          colorptr[3]=1.0;
         }
       }
     }
