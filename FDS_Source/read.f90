@@ -8927,9 +8927,13 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
             WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),' is a smoke detector and must have a PROP_ID'
             CALL SHUTDOWN(MESSAGE)
          ENDIF
-         IF (PROPERTY(DV%PROP_INDEX)%Y_INDEX<0 .AND. PROPERTY(DV%PROP_INDEX)%Z_INDEX<0 .AND. SOOT_INDEX<1) THEN
-            WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),' is a smoke detector and requires a smoke source'
-            CALL SHUTDOWN(MESSAGE)
+         IF (PROPERTY(DV%PROP_INDEX)%Y_INDEX<0 .AND. PROPERTY(DV%PROP_INDEX)%Z_INDEX<0) THEN
+            IF (SOOT_INDEX<1) THEN
+               WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),' is a smoke detector and requires a smoke source'
+               CALL SHUTDOWN(MESSAGE)
+            ELSE
+               PROPERTY(DV%PROP_INDEX)%Y_INDEX = SOOT_INDEX
+            ENDIF
          ENDIF
          ALLOCATE(DV%T_E(-1:1000))
          ALLOCATE(DV%Y_E(-1:1000))
@@ -8938,6 +8942,8 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
          DV%N_T_E    = -1
          DV%Y_C      = 0._EB
          DV%SETPOINT = PROPERTY(DV%PROP_INDEX)%ACTIVATION_OBSCURATION
+         IF (PROPERTY(DV%PROP_INDEX)%Y_INDEX>0) DV%Y_INDEX = PROPERTY(DV%PROP_INDEX)%Y_INDEX
+         IF (PROPERTY(DV%PROP_INDEX)%Z_INDEX>0) DV%Z_INDEX = PROPERTY(DV%PROP_INDEX)%Z_INDEX
    
       CASE ('LINK TEMPERATURE','SPRINKLER LINK TEMPERATURE') 
 
@@ -9015,9 +9021,13 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
       CASE ('PATH OBSCURATION')
 
          IF (DV%PROP_INDEX>0) THEN
-            IF (PROPERTY(DV%PROP_INDEX)%Y_INDEX<1 .AND. PROPERTY(DV%PROP_INDEX)%Z_INDEX<1 .AND. SOOT_INDEX<1) THEN
-               WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),' is a smoke detector and requires a smoke source'
-               CALL SHUTDOWN(MESSAGE)
+            IF (PROPERTY(DV%PROP_INDEX)%Y_INDEX<1 .AND. PROPERTY(DV%PROP_INDEX)%Z_INDEX<1) THEN
+               IF (SOOT_INDEX<1) THEN
+                  WRITE(MESSAGE,'(A,A,A)') 'ERROR: DEVC ',TRIM(DV%ID),' is a smoke detector and requires a smoke source'
+                  CALL SHUTDOWN(MESSAGE)
+               ELSE
+                  PROPERTY(DV%PROP_INDEX)%Y_INDEX = SOOT_INDEX
+               ENDIF
             ENDIF
          ELSE
             IF (SOOT_INDEX <=0) THEN
@@ -9025,6 +9035,8 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
                CALL SHUTDOWN(MESSAGE)
             ENDIF
          ENDIF
+         IF (PROPERTY(DV%PROP_INDEX)%Y_INDEX>0) DV%Y_INDEX = PROPERTY(DV%PROP_INDEX)%Y_INDEX
+         IF (PROPERTY(DV%PROP_INDEX)%Z_INDEX>0) DV%Z_INDEX = PROPERTY(DV%PROP_INDEX)%Z_INDEX
          NM = DV%MESH
          M=>MESHES(NM)
          DISTANCE = SQRT((DV%X1-DV%X2)**2 + (DV%Y1-DV%Y2)**2 + (DV%Z1-DV%Z2)**2)
