@@ -2393,7 +2393,9 @@ CHARACTER(12) :: SV_LABEL
 TYPE (VENTS_TYPE), POINTER :: VT
 
 CALL POINT_TO_MESH(NM)
- 
+
+T_TMP = T
+
 ! Check to see if an obstacle is to be removed or created
 
 OBST_LOOP: DO N=1,N_OBST
@@ -2452,11 +2454,8 @@ OBST_LOOP: DO N=1,N_OBST
    ! The evacuation flow field calculation is done before T_BEGIN
 
    IF (OB%DEVC_INDEX>0) THEN
-      IF (EVACUATION_GRID(NM) .AND. DEVICE(OB%DEVC_INDEX)%QUANTITY=='TIME' .AND. DEVICE(OB%DEVC_INDEX)%SETPOINT<=T_BEGIN) THEN
+      IF (EVACUATION_GRID(NM) .AND. DEVICE(OB%DEVC_INDEX)%QUANTITY=='TIME' .AND. DEVICE(OB%DEVC_INDEX)%SETPOINT<=T_BEGIN) &
          T_TMP = T - EVAC_DT_FLOWFIELD*EVAC_TIME_ITERATIONS
-      ELSE
-         T_TMP = T
-      ENDIF
    ENDIF
 
    ! Write a message to the Smokeview .smv file that the obstruction has been created or removed
