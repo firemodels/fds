@@ -1,45 +1,40 @@
 %
-% -------------------  smoke notes ------------------------
+% -------------------  Introduction ------------------------
 %
 
-\section{Overview}
+\section{Introduction}
 
-Methods for visualizing data such as 2D
-contours or 3D iso-surfaces are useful for analyzing data quantitatively but are not
-suitable for applications where realism is required such as in a fire fighting simulator.
-Realistic smoke visualization methods need to determine opacities and colors from simulation
-data using physics based principles.
-This \paper\ describes two methods for visualizing smoke realistically both using a form of the radiation transport equation\cite{Siegel:2001} to model
-smoke opacity and color.
-Simplifications used to make these visualizations practical are discussed.
+This \paper\ describes two methods for visualizing smoke realistically both using a form of the radiation transport equation\cite{Siegel:2001,kajiya:1986} to utimately model
+smoke opacity and color. Realistic visualization methods are important for applications
+where one needs to observe the effects of fire and smoke on the underlying scene
+rather than to know that smoke has a certain temperature or density.  This would be the case for a fire fighter using a computer based fire fighting simulator.
+Realistic visualization  methods complement but do not replace other more traditional visualization methods such as 2D
+contouring or 3D iso-surfacing which are better suited for analyzing data quantitatively.
 
 A complete method for visualizing smoke and fire taking into
-account interactions between light and smoke such as absorption, emission, and scattering (both in and out)
-requires the solution of the the volume rendering equation\cite{levoy:1988}
-also called the radiation transport equation (RTE)\cite{Siegel:2001}.
+account interactions between light and smoke such as absorption, emission, and scattering
+requires the solution of the radiation transport equation (RTE)\cite{Siegel:2001} also called the volume rendering equation\cite{levoy:1988}.
 This equation models how light appears to an observer after interacting with a participating media in this case smoke.
-The equation solved here for visualization purposes is the same one used in a fire model such as FDS\cite{FDS_Tech_Guide}
-for modeling radiative heat transfer except that a different wave length of light (visible rather than infrared) is used in the solution.
+The equation solved here for visualization purposes is identical to the one used in the Fire Dynamics Simulator (FDS)\cite{FDS_Tech_Guide}
+for modeling radiative heat transfer except that a different wave length (visible rather than infrared) is used in the solution.
 
 The
 solution of this integro-differential equation requires significant
-memory and computational resources.  Approximations
+computational and memory  resources.  Approximations
 are required in order to display smoke at
 interactive frame rates.  The primary approximation is to take
 advantage of the low albedo character of smoke by either simplifying or eliminating the scattering term in the RTE.
 
-Two techniques for visualizing smoke realistically are slice rendered and volume
+Two techniques for visualizing smoke realistically discussed here are slice rendered and volume
 rendered methods.  These methods both solve a form of the RTE equation.
 The integrated quantity in both cases is ultimately an opacity, the fraction of light obscured.
 They
-differ in the path length over which they are integrated.
+differ in the path length over which the equations are integrated.
 
-The integration path for a slice rendered method is a segment between two adjacent grid planes within a
-3D mesh.
+The integration path for a slice rendered method is a segment between two adjacent grid planes within a 3D mesh.
 There is one slice plane for each plane of simulated data.
 The resulting partially transparent slice planes are drawn individually and
-combined by the video hardware to form one image. The slice planes
-are oriented to be perpendicular to the viewer's line of sight.
+combined by the video hardware to form one image. Planes through the data (xy, xz, yz or diagonally) are chosen to be most perpendicular to the viewer's line of sight.
 
 The second approach, a volume rendering method, again integrates a
 simplified form of the radiation transport equation but over the entire entire simulation mesh (from the
@@ -64,10 +59,218 @@ temperature.
 %\cite{Sabella:88a}\cite{Gardner:85a}
 
 %
-% -------------------  Slice Rendering ------------------------
+% -------------------  Visualization Model ------------------------
+%
+
+\section{Visualization Model}
+The parameter used to model smoke appearance is radiance with units of watts per square meter per steradian, W/(sr$\cdot$m$^2$).  The parameter used as a boundary condition when modeling heat transfer in a fire model such as FDS is heat flux with units of watts per square meter, W/m$^2$. The solid angle unit, sr, accounts for the fact that an object appears brighter if it emits a set amount of light through a smaller cross-sectional area. This has the interesting implication (ignoring atmospheric effects) that the sun will appear equally bright on the Earth as on Mars.  The sun's disk however will appear smaller on Mars accounting for the smaller amount of heat transfer that occurs as expected.  From a visualization perspective, this implies that image brightness does not depend on image distance from the observer unless  participating media is present to absorb or scatter  intervening light.  The radiation transport equation discussed in this section models the change in radiance due to these factors.
+
+%
+% ----------  Radiation Transport Equation --------------
+%
+
+\subsection{Radiation Transport Equation}
+\newcommand{\siga}{ \sigma_a(x) }
+\newcommand{\sigt}{ \sigma_t(x) }
+\newcommand{\sigs}{ \sigma_s(x) }
+\newcommand{\sigts}{ \sigma_t(s) }
+\newcommand{\Le}{ L_e(x) }
+\newcommand{\Lexo}{ L_e(x,\omega) }
+\newcommand{\Lxo}{ L(x,\omega) }
+\newcommand{\dLdx}{ \frac{dL}{dx}(x)}
+\newcommand{\intf}[2]{ \exp\left({\int_#1^#2 \sigts ds}\right) }
+\newcommand{\intff}[2]{ {\int_#1^#2 \sigts ds} }
+\newcommand{\intmf}[2]{ \exp\left({-\int_#1^#2 \sigts ds}\right) }
+\newcommand{\intmff}[2]{ {-\int_#1^#2 \sigts ds} }
+
+The radiation transport equation is used to calculate radiance
+within a region with participating media due to one or more light
+sources. The change in radiance along a ray with direction
+$\omega$ may be expressed by the radiation transport equation
+given by
+
+\begin{eqnarray}
+\label{eq:fullrte}
+ \left(\omega\cdot\nabla\right)\Lxo =
+-\underbrace{\siga\Lxo}_\mathrm{absorption}-\underbrace{\sigs\Lxo}_\mathrm{out-scattering}
++ \underbrace{\siga\Lexo}_\mathrm{emission} +
+\underbrace{\sigs\int_{4\pi}p(x,\omega,\omega')L_i(x,\omega')d\omega'}_\mathrm{in-scattering}
+\end{eqnarray}
+
+\noindent where, as illustrated in Figure \ref{figRadiance},
+$\Lxo$ is the radiance at $x$ along a direction $\omega$, $\siga$
+is the absorption coefficient, $\sigs$ is the scattering
+coefficient, $\Lexo$ is the radiance emitted at $x$ in direction
+$\omega$ and $p(x,\omega,\omega')$ is the fraction of light moving
+along direction $\omega'$ scattered along direction $\omega$.
+Absorption, and out-scattering causes radiance to decrease while
+emission and in-scattering causes radiance to increase.
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[width=6.0in]{figures/rte_setup}
+\end{center}
+\caption{Components of the radiation transport equation decreasing radiance along a ray are
+absorption and out-scattering while components increasing radiance are emission and in-scattering.}
+\label{figRadiance}
+\end{figure}
+
+%
+% ----  Approximating the Radiation Transport Equation ------------------------
+%
+
+\subsection{Approximating the Radiation Transport Equation}
+
+%
+% ----------  Absorption and Out-Scattering - Beer-Lambert Law --------------
+%
+
+\subsubsection{Absorption and Out-Scattering - Beer-Lambert Law}
+Equation (\ref{eq:fullrte}) may be simplified by neglecting the
+in-scattering and emission terms and combining the absorption and
+out-scattering terms using $\sigt=\siga+\sigs$ to obtain
+
+\begin{eqnarray*}
+\dLdx&=&-\sigt L(x)\\
+L(0)&=&L_0
+\end{eqnarray*}
+which has solution
+\begin{equation}
+\label{eq:beer1} \frac{L(D)}{L_0}=\intmf{0}{D}
+\end{equation}
+
+If $\sigt$ is constant then equation (\ref{eq:beer1}) simplifies
+to
+\begin{equation}
+\label{eq:beer2} \frac{L(D)}{L_0}=\exp(-\sigma_t D)
+\end{equation}
+which is known as the Beer-Lambert law\cite{}.
+
+%
+% ----------  Absorption, Out-Scattering and Emission ------------------------
+%
+
+\subsubsection{Absorption, Out-Scattering and Emission}
+Alternatively, if the emission term is also included when
+simplifying equation (\ref{eq:fullrte})  the following
+differential equation results.
+
+\begin{eqnarray}
+\label{eq:simple_rte}
+\dLdx&=&-\sigt L(x) + \siga L_e(x)\\
+ L(0)&=&L_0\nonumber
+\end{eqnarray}
+
+This equation may be solved by rearranging terms and applying the
+integrating factor $\exp(\int_0^x \sigts ds)$ to both sides to
+obtain
+\begin{eqnarray*}
+\intf{0}{x}\left(\dLdx+\sigt L(x)\right)&=&  \intf{0}{x}\siga \Le\\
+\frac{d}{dx}\left(\intf{0}{x} L(x)\right)&=& \intf{0}{x}\siga \Le
+\end{eqnarray*}
+Integrating both sides and substituting the integration limits
+results in
+\begin{eqnarray*}
+\left.\intf{0}{x} L(x)\right|_0^D&=& \int_0^D\intf{0}{x}\siga \Le dx \\
+\intf{0}{D} L(D)-L_0&=& \int_0^D\intf{0}{x}\siga \Le dx
+\end{eqnarray*}
+Solving for $L(D)$ after noting that
+$\intff{0}{x}-\intff{0}{D}=-\intff{x}{D}$ results in
+\begin{eqnarray*}
+L(D)&=&\intmf{0}{D} L_0+ \int_0^D\intmf{x}{D}\siga \Le dx\\
+\end{eqnarray*}
+The radiance at $D$ is then given by
+\begin{equation}
+ L(D)=\tau(0,D)L_0 + \int_0^D\tau(x,D)\siga\Le dx
+\end{equation}
+where $\tau(a,b)$ is the optical depth between $a$ and $b$ given
+by $\tau(a,b)=\intmf{a}{b}$ .
+
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[width=4.0in]{figures/smoke_setup2}
+\end{center}
+\caption {Opacity and color is computed for each pixel on an image plane by solving a line integral
+representation of a simplified form of the radiation transport equation.
+}
+\label{figsmokesetup2}
+\end{figure}
+
+%
+% -------------------  Combining Multiple Solutions ------------------------
+%
+
+\subsubsection{Combining Multiple Solutions}
+Equation (\ref{eq:rtesoln}), is the solution to an approximate form of the radiation transport equation over a path
+from $x=0$ to $x=D$.  As illustrated in Figure \ref{figsmokesetup3},
+suppose that this path is split at $D_1$ into two parts, the first part from $0$ to $D_1$ and the second part from $D_1$ to $D$.
+Further, suppose that the RTE solution is known on each part.
+This section describes how these two solutions may be combined to form a solution
+over the entire interval $0$ to $D$.
+
+Given a radiance of $L_0$ at $x=0$, the radiance at $D$, denoted $L(D)$ is given by
+\begin{eqnarray}
+\label{eq:rtesoln}
+L(D)&=&\tau(0,D)L_0 + \int_0^D\tau(x,D)\siga\Le dx
+\end{eqnarray}
+This is the RTE solution over the entire interval $0$ to $D$.
+Similarly, $L_1(D_1)$ and $L_2(D)$ is given by
+\begin{eqnarray*}
+L_1(D_1)&=&\tau(0,D_1)L_0 + \int_0^{D_1}\tau(x,D_1)\siga\Le dx\\
+L_2(D)&=&\tau(D_1,D)L_0 + \int_{D_1}^{D}\tau(x,D)\siga\Le dx
+\end{eqnarray*}
+where the initial conditions are $L_1(0)=L_0$ and $L_2(D_1)=L_0$.
+
+The optical depth, $\tau(a,b)=\exp\left(-\int_a^b \sigt ds\right)$, may be expressed as $\tau(a,b)=\tau(a,x)\tau(x,b)$ since
+\begin{eqnarray*}
+\tau(a,b)&=&\exp\left(-\int_a^b \sigt ds\right)\\
+&=&\exp\left(-\int_a^x \sigt ds -\int_x^b \sigt ds\right)\\
+&=&\exp\left(-\int_a^x \sigt ds\right)\exp\left(-\int_x^b \sigt ds\right)\\
+&=&\tau(a,x)\tau(x,b)
+\end{eqnarray*}
+Using this property, RTE solutions $L_1(x)$ and $L_2(x)$ over two sub-intervals $[0,D_1]$ and $[D_1,D]$ may be combined into the solution $L(x)$ over the merged
+interval $[0,D]$.  This follows from
+\begin{eqnarray*}
+L(D)&=&\tau(0,D)L_0 + \int_0^D\tau(x,D)\siga\Le dx\\
+&=&\tau(0,D_1)\tau(D_1,D)L_0 + \int_0^{D_1}\tau(x,D_1)\tau(D_1,D)\Le dx + \int_{D_1}^{D}\tau(x,D)\Le dx\\
+&=&\tau(D_1,D)
+\underbrace{\left(\tau(0,D_1)L_0 + \int_0^{D_1}\tau(x,D_1)\Le dx\right)}_{L_1(D_1)} +
+\underbrace{\int_{D_1}^{D}\tau(x,D)\Le dx}_{L_2(D)-\tau(D_1,D)L_0}\\
+&=&\tau(D_1,D)L_1(D_1)+L_2(D)-\tau(D_1,D)L_0\\
+&=&\tau(D_1,D)(L_1(D_1)-L_0) + L_2(D)
+\end{eqnarray*}
+This relationship may be exploited to draw smoke one mesh at a time using the properties local to each mesh without having to solve the RTE equation over the entire interval at once.
+
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[width=4.0in]{figures/smoke_setup3}
+\end{center}
+\caption {Solutions to the RTE for two intervals are combined to form a solution to the RTE
+for the merger of these intervals.
+}
+\label{figsmokesetup3}
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[height=4.0in]{figures/plume5c_vol_orig}&
+\includegraphics[height=4.0in]{figures/plume5c_vol_side}\\
+a) front view&b) side view\\
+\end{tabular}
+\end{center}
+\caption {Volume rendered smoke plume viewed from two directions.}
+\label{volplume_example}
+\end{figure}
+
+%
+% -------------------  Slice Rendered Smoke ------------------------
 %
 
 \section{Slice Rendered Smoke}
+A slice rendering algorithm for visualizing smoke consists of
+partitioning a 3D computational domain into a series of 2D slices.
+The slice orientation is chosen to be the one most perpendicular to the viewer's line
+of sight where possible choices are slice planes parallel to the XY, XZ, YZ axis or planes diagonal to the data.  The opacity at each grid node is computed using the distance $\Delta x$ between adjacent YZ planes and soot density data computed by the fire model.  If slice orientations other than YZ are displayed, then opacities are adjusted if the plane to plane distance is other than $\Delta x$.  Opacity data is computed and compressed using run length encoding as a preprocessing step and decompressed one frame at a time as data is displayed.
 
 
 %
@@ -75,13 +278,13 @@ temperature.
 %
 
 \subsection{Computing Opacity}
-The process of computing opacity at nodes in a slice plane is
+The process of computing opacity at slice plane nodes is
 illustrated schematically in Figure \ref{figsmokesetup}. A ray
 travels from the background to the observer through intervening
-smoke. At each step towards the observer, light is absorbed,
-scattered or emitted by the smoke.  Emission effects are ignored.
+smoke. Light is absorbed,
+scattered by the smoke as the ray passes each slice plane .  Emission effects are ignored.
 Scattering effects presently are only accounted for in the value
-of the total mass extinction coefficient used.  Contributions are
+of the total mass extinction coefficient used.  Light losses are
 assumed to be from both absorption and scattering. The obscuration
 is computed along each ray one grid plane at a time, using Beer's
 law as follows.  The $\alpha$ values are pre-computed by FDS using
@@ -93,24 +296,21 @@ Beer's law~\cite{Siegel:2001}
 \noindent for a particular view direction (down the x axis) where
 $\Delta x$ is this distance between two nodes, $k$ is the total
 soot mass extinction coefficient and $s$ be the soot density.
-Beer's law is an empirical relationship relating light absorption
-to the material properties of the media the light is travelling
+Note that using the notation from the previous section, $\sigma_t=\sigma_a+\sigma_s=ks$.  Beer's law is an empirical relationship relating light absorption
+to the material properties of the media the light is traveling
+through, in this case soot or smoke.
 
 \begin{figure}[\figoptions]
 \begin{center}
 \includegraphics[width=4.0in]{figures/smoke_setup}
 \end{center}
-\caption {Smoke is drawn by blending the smoke color with the
-background color.  The amount of blending depends on the amount of
-obscuration as determined from soot density and path length.}
+\caption {Opacity, $\alpha_i$, computed at node $i$ using soot density, $S_i$ and grid spacing $\Delta x$.}
 \label{figsmokesetup}
 \end{figure}
 
-through, in this case soot or smoke.
 
 The $\alpha$ parameter in equation (\ref{eq:alpha}) is used by
-OpenGL to blend smoke planes with the current background, the same
-blending process discussed in Section \ref{blending}.  The
+OpenGL to blend smoke planes with the current background.  The
 $\alpha$ parameter used here also represents an opacity, 0.0 for
 completely transparent, 1.0 for completely opaque.
 
@@ -125,7 +325,7 @@ view direction is not aligned along the axis orthogonal to the
 viewing planes (as in Figure \ref{figray}), the distance between
 adjacent smoke planes changes, or viewing planes are skipped.
 \begin{figure}[\figoptions]
-\centerline{\includegraphics[width=5.0in]{figures/forney_figure4}}
+\centerline{\includegraphics[width=3.5in]{figures/forney_figure4}}
 \caption [Diagram illustrating the adjustment needed to opaqueness
 parameter, $\alpha$, for non axis aligned views.] { Diagram
 illustrating adjustment needed to opaqueness parameter, $\alpha$,
@@ -218,10 +418,9 @@ slices 14 to 27&slices 11 to 27
 \end{center}
 \caption [Smoke plume visualized using several vertical parallel
 partially transparent planes.] {Smoke plume visualized using
-several vertical parallel partially transparent planes. The
-transparency is computing using soot density which is in turn
-computed using conservation equations for mass, momentum and
-energy. } \label{figplume}
+several vertical parallel partially transparent planes. The smoke
+plume looks more realistic as more slice planes
+are included to form the image. } \label{figplume}
 \end{figure}
 
 \noindent This process is repeated for each smoke plane. Figure
@@ -253,13 +452,6 @@ all possible plane orientations.
   }
 \label{figsmoke3d}%
 \end{figure}
-
-%
-% -------------------  Lighting Smoke ------------------------
-%
-
-%\chapter{Lighting Smoke}
-
 
 %
 % -------------------  Orienting smoke planes ------------------------
@@ -294,9 +486,9 @@ $(0,0,1)^T$ or equivalently the third row of $M$.
 
 \begin{figure}
 \begin{tabular}{ccc}
-\includegraphics[width=2.0in]{figures/figDIR1a}&
-\includegraphics[width=2.0in]{figures/figDIR1b}&
-\includegraphics[width=2.0in]{figures/figDIR1c}\\
+\includegraphics[width=2.25in]{figures/figDIR1a}&
+\includegraphics[width=2.25in]{figures/figDIR1b}&
+\includegraphics[width=2.25in]{figures/figDIR1c}\\
 a) smoke planes parallel to $y$ axis& b) smoke planes parallel to
 $y=x$ axis)&
 c) smoke planes parallel to $x$ axis\\
@@ -314,15 +506,14 @@ this angle.} \label{figDIRB}
 \end{figure}
 
 %
-% -------------------  Compression ------------------------
+% -------------------  Compressing Smoke Data ------------------------
 %
 
 \subsection{Compressing Smoke Data}
 
 The opacity parameters are computed at each node for all time
-steps. As noted earlier, the space required to store these values
-can easily exceed the 2GB file size limit found on 32 bit
-operating systems. Techniques are required to reduce storage
+steps. The space required to store these values
+can easily become quite large. Compression techniques are required to reduce storage
 requirements.
 
 Compression for this application occurs in two steps.  First, a
@@ -330,8 +521,10 @@ four to one compression level is achieved by using Beer's law to
 convert soot density, a four byte floating point quantity, to
 opacity, a one byte quantity.  Video cards presently use only one
 byte to represent opacity. Next, the sequence of opacity values
-are compressed using run-length encoding. Run length encoding
-works as follows.
+are compressed using run-length encoding, a compression scheme where
+repeated ``runs'' of data are replaced with a number (number of repeats),
+and the value repeated.  In more detail,
+
 
 \begin{enumerate}
 \item Represent four or more consecutive identical characters as
@@ -361,181 +554,48 @@ scheme is used by Smokezip to compress FDS files even more
 compactly.  Smokezip uses the ZLIB compression library available
 at (\hhref{http://zlib.net/}).
 
+%
+% -------------------  Volume Rendered Smoke ------------------------
+%
+
 \section{Volume Rendered Smoke}
-\subsection{Terminology}
-\subsection{Radiation Transport Equation}
-\newcommand{\siga}{ \sigma_a(x) }
-\newcommand{\sigt}{ \sigma_t(x) }
-\newcommand{\sigs}{ \sigma_s(x) }
-\newcommand{\sigts}{ \sigma_t(s) }
-\newcommand{\Le}{ L_e(x) }
-\newcommand{\Lexo}{ L_e(x,\omega) }
-\newcommand{\Lxo}{ L(x,\omega) }
-\newcommand{\dLdx}{ \frac{dL}{dx}(x)}
-\newcommand{\intf}[2]{ \exp\left({\int_#1^#2 \sigts ds}\right) }
-\newcommand{\intff}[2]{ {\int_#1^#2 \sigts ds} }
-\newcommand{\intmf}[2]{ \exp\left({-\int_#1^#2 \sigts ds}\right) }
-\newcommand{\intmff}[2]{ {-\int_#1^#2 \sigts ds} }
+A general volume rendering algorithm consists of two steps:
 
-The radiation transport equation is used to calculate radiance
-within a region with participating media due to one or more light
-sources. The change in radiance along a ray with direction
-$\omega$ may be expressed by the radiation transport equation
-given by
+\begin{enumerate}
+\item Mapping data at each volume element (voxel) of a 3D data mesh to optical properties of optical density and color.
+\item Form a 2D projected image by casting a
+ray, one ray for each pixel in the 2D image, into the 3D data mesh using the optical properties mapped in step 1 to mix densities and colors.
+\end{enumerate}
 
+To produce a realistic image, the strategy then is to perform this mixing in the same way that light would behave.  For this application, an approximate form of the RTE is solved.  We wish to solve
+(repeating (\ref{eq:simple_rte}) and (\ref{})
 \begin{eqnarray}
-\label{eq:fullrte}
- \left(\omega\cdot\nabla\right)\Lxo =
--\underbrace{\siga\Lxo}_\mathrm{absorption}-\underbrace{\sigs\Lxo}_\mathrm{out-scattering}
-+ \underbrace{\siga\Lexo}_\mathrm{emission} +
-\underbrace{\sigs\int_{4\pi}p(x,\omega,\omega')L_i(x,\omega')d\omega'}_\mathrm{in-scattering}
-\end{eqnarray}
-
-\noindent where, as illustrated in Figure \ref{figRadiance},
-$\Lxo$ is the radiance at $x$ along a direction $\omega$, $\siga$
-is the absorption coefficient, $\sigs$ is the scattering
-coefficient, $\Lexo$ is the radiance emitted at $x$ in direction
-$\omega$ and $p(x,\omega,\omega')$ is the fraction of light moving
-along direction $\omega'$ scattered along direction $\omega$.
-Absorption, and out-scattering causes radiance to decrease while
-emission and in-scattering causes radiance to increase.
-\begin{figure}[\figoptions]
-\begin{center}
-\includegraphics[width=6.0in]{figures/rte_setup}
-\end{center}
-\caption{Components of the radiation transport equation decreasing radiance along a ray are
-absorption and out-scattering while components increasing radiance are emission and in-scattering.}
-\label{figRadiance}
-\end{figure}
-
-\subsection{Approximating the Radiation Transport Equation}
-\subsubsection{Absorption and Out-Scattering - Beer-Lambert Law}
-Equation (\ref{eq:fullrte}) may be simplified by neglecting the
-in-scattering and emission terms and combining the absorption and
-out-scattering terms using $\sigt=\siga+\sigs$ to obtain
-
-\begin{eqnarray*}
-\dLdx&=&-\sigt L(x)\\
-L(0)&=&L_0
-\end{eqnarray*}
-which has solution
-\begin{equation}
-\label{eq:beer1} \frac{L(D)}{L_0}=\intmf{0}{D}
-\end{equation}
-
-If $\sigt$ is constant then equation (\ref{eq:beer1}) simplifies
-to
-\begin{equation}
-\label{eq:beer2} \frac{L(D)}{L_0}=\exp(-\sigma_t D)
-\end{equation}
-which is known as the Beer-Lambert law\cite{}.
-
-
-\subsubsection{Absorption, Out-Scattering and Emission}
-Alternatively, if the emission term is also included when
-simplifying equation (\ref{eq:fullrte})  the following
-differential equation results.
-
-\begin{eqnarray}
-\label{eq:simple_rte}
+\label{eq:simple_rtee}
 \dLdx&=&-\sigt L(x) + \siga L_e(x)\\
  L(0)&=&L_0\nonumber
 \end{eqnarray}
-
-This equation may be solved by rearranging terms and applying the
-integrating factor $\exp(\int_0^x \sigts ds)$ to both sides to
-obtain
-\begin{eqnarray*}
-\intf{0}{x}\left(\dLdx+\sigt L(x)\right)&=&  \intf{0}{x}\siga \Le\\
-\frac{d}{dx}\left(\intf{0}{x} L(x)\right)&=& \intf{0}{x}\siga \Le
-\end{eqnarray*}
-Integrating both sides and substituting the integration limits
-results in
-\begin{eqnarray*}
-\left.\intf{0}{x} L(x)\right|_0^D&=& \int_0^D\intf{0}{x}\siga \Le dx \\
-\intf{0}{D} L(D)-L_0&=& \int_0^D\intf{0}{x}\siga \Le dx
-\end{eqnarray*}
-Solving for $L(D)$ after noting that
-$\intff{0}{x}-\intff{0}{D}=-\intff{x}{D}$ results in
-\begin{eqnarray*}
-L(D)&=&\intmf{0}{D} L_0+ \int_0^D\intmf{x}{D}\siga \Le dx\\
-\end{eqnarray*}
-The radiance at $D$ is then given by
+using
 \begin{equation}
  L(D)=\tau(0,D)L_0 + \int_0^D\tau(x,D)\siga\Le dx
 \end{equation}
-where $\tau(a,b)$ is the optical depth between $a$ and $b$ given
-by $\tau(a,b)=\intmf{a}{b}$ .
+to collapse data from a series of 3D data meshes into 2D images.  2D images are constructed on the side of the 3D data meshes (at least 1, no more than 3) facing the viewer.  As the scene is moved through rotations and translations the surface images are constantly recomputed and redrawn giving the observer the illusion that the image is 3D drawn within (rather than on the surface) of the data mesh.
 
-\begin{figure}[\figoptions]
-\begin{center}
-\includegraphics[width=4.0in]{figures/smoke_setup2}
-\end{center}
-\caption {Opacity and color is computed for each pixel on an image plane by solving a line integral
-representation of a simplified form of the radiation transport equation.
-}
-\label{figsmokesetup2}
-\end{figure}
-
-\subsection{Combining Multiple Solutions}
-Equation (\ref{eq:rtesoln}), is the solution to an approximate form of the radiation transport equation over a path
-from $x=0$ to $x=D$.  As illustrated in Figure \ref{figsmokesetup3},
-suppose that this path is split at $D_1$ into two parts, the first part from $0$ to $D_1$ and the second part from $D_1$ to $D$.
-Further, suppose that the RTE solution is known on each part.
-This section describes how these two solutions may be combined to form a solution
-over the entire interval $0$ to $D$.
-
-Given a radiance of $L_0$ at $x=0$, the radiance at $D$, denoted $L(D)$ is given by
-\begin{eqnarray}
-\label{eq:rtesoln}
-L(D)&=&\tau(0,D)L_0 + \int_0^D\tau(x,D)\siga\Le dx
-\end{eqnarray}
-This is the RTE solution over the entire interval $0$ to $D$.
-Similarly, $L_1(D_1)$ and $L_2(D)$ is given by
+\subsection{Discretizing the Radiation Transport Equation}
+\newcommand{\htau}[1]{\hat{\tau}_{#1}}
+\newcommand{\sigai}[1]{\sigma_{a,#1}}
+\newcommand{\Lei}[1]{L_{e,#1}}
 \begin{eqnarray*}
-L_1(D_1)&=&\tau(0,D_1)L_0 + \int_0^{D_1}\tau(x,D_1)\siga\Le dx\\
-L_2(D)&=&\tau(D_1,D)L_0 + \int_{D_1}^{D}\tau(x,D)\siga\Le dx
+\Delta x &= & \Delta s = \frac{D}{N}\\
+x_i&=&i \Delta x = i \Delta s\\
+\hat{\tau}_i&=&\tau(x_i,D)=\exp\left(-\int_{x_i}^D\sigma_t(s)ds\right)\\
+&\approx&\exp\left(-\sum_{j=i}^{N-1}\sigma_t(s_j)\Delta s\right)\\
+&=&\prod_{j=i}^{N-1}\exp\left(-\sigma_t(s_j)\Delta s\right)\\
+&=&\prod_{j=i}^{N-1}\tau_j\\
 \end{eqnarray*}
-where the initial conditions are $L_1(0)=L_0$ and $L_2(D_1)=L_0$.
-
-The optical depth, $\tau(a,b)=\exp\left(-\int_a^b \sigt ds\right)$, may be expressed as $\tau(a,b)=\tau(a,x)\tau(x,b)$ since
 \begin{eqnarray*}
-\tau(a,b)&=&\exp\left(-\int_a^b \sigt ds\right)\\
-&=&\exp\left(-\int_a^x \sigt ds -\int_x^b \sigt ds\right)\\
-&=&\exp\left(-\int_a^x \sigt ds\right)\exp\left(-\int_x^b \sigt ds\right)\\
-&=&\tau(a,x)\tau(x,b)
+\sigma_{a,i}&=&\sigma_t(x_i)\\
+\Lei{i}&=&L_e(x_i)\\
+L_i &= &\htau{0}L_0 + \sum_{i=0}^{N-1}\htau{i}\sigai{i}\Lei{i}\Delta x
 \end{eqnarray*}
-Using this property, RTE solutions $L_1(x)$ and $L_2(x)$ over two sub-intervals $[0,D_1]$ and $[D_1,D]$ may be combined into the solution $L(x)$ over the merged
-interval $[0,D]$.  This follows from
-\begin{eqnarray*}
-L(D)&=&\tau(0,D)L_0 + \int_0^D\tau(x,D)\siga\Le dx\\
-&=&\tau(0,D_1)\tau(D_1,D)L_0 + \int_0^{D_1}\tau(x,D_1)\tau(D_1,D)\Le dx + \int_{D_1}^{D}\tau(x,D)\Le dx\\
-&=&\tau(D_1,D)
-\underbrace{\left(\tau(0,D_1)L_0 + \int_0^{D_1}\tau(x,D_1)\Le dx\right)}_{L_1(D_1)} +
-\underbrace{\int_{D_1}^{D}\tau(x,D)\Le dx}_{L_2(D)-\tau(D_1,D)L_0}\\
-&=&\tau(D_1,D)L_1(D_1)+L_2(D)-\tau(D_1,D)L_0\\
-&=&\tau(D_1,D)(L_1(D_1)-L_0) + L_2(D)
-\end{eqnarray*}
-This relationship may be exploited to draw smoke one mesh at a time using the properties local to each mesh without having to solve the RTE equation over the entire interval at once.
 
-\begin{figure}[\figoptions]
-\begin{center}
-\includegraphics[width=4.0in]{figures/smoke_setup3}
-\end{center}
-\caption {Solutions to the RTE for two intervals are combined to form a solution to the RTE
-for the merger of these intervals.
-}
-\label{figsmokesetup3}
-\end{figure}
 
-\begin{figure}[\figoptions]
-\begin{center}
-\begin{tabular}{cc}
-\includegraphics[height=4.0in]{figures/plume5c_vol_orig}&
-\includegraphics[height=4.0in]{figures/plume5c_vol_side}\\
-a) front view&b) side view\\
-\end{tabular}
-\end{center}
-\caption {Volume rendered smoke plume viewed from two directions.}
-\label{volplume_example}
-\end{figure}
