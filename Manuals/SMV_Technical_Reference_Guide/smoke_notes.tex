@@ -46,7 +46,6 @@ color for both methods are computed using soot density and
 temperature data derived from a fire simulation. Colors are
 determined from a prescribed colormap which is a function of
 temperature.
-\cite{nguyen:02} \cite{rushmeier:95} \cite{fedkiw:01}\cite{rushmeier:1987}\cite{gpugems}\cite{dutre:2002}
 
 
 %\section{Background}
@@ -562,13 +561,27 @@ at (\hhref{http://zlib.net/}).
 A general volume rendering algorithm consists of two steps:
 
 \begin{enumerate}
-\item Mapping data at each volume element (voxel) of a 3D data mesh to optical properties of optical density and color.
-\item Form a 2D projected image by casting a
-ray, one ray for each pixel in the 2D image, into the 3D data mesh using the optical properties mapped in step 1 to mix densities and colors.
+\item Mapping data at each volume element (voxel) of a 3D data
+mesh to optical properties of optical density and color. \item
+Form a 2D projected image by casting a ray, one ray for each pixel
+in the 2D image, into the 3D data mesh using the optical
+properties mapped in step 1 to mix densities and colors.
 \end{enumerate}
 
-To produce a realistic image, the strategy then is to perform this mixing in the same way that light would behave.  For this application, an approximate form of the RTE is solved.  We wish to solve
-(repeating (\ref{eq:simple_rte}) and (\ref{})
+This can be implemented \cite[Chapter 39]{gpugems} using
+\begin{eqnarray*}
+\hat{C}_i&=&\left(1-\hat{\alpha}_{i-1}\right)C_i + \hat{C}_{i-1}\\
+\hat{\alpha}_i&=&\left(1-\hat{\alpha}_{i-1}\right)\alpha_i+\hat{\alpha}_{i-1}
+\end{eqnarray*}
+where $\hat{C}_i$ and $\hat{\alpha}_i$ are color and opacity
+accumulated so far at the $i$'th step while stepping through the
+3D data set from front to back.  The values $C_i$ and $\alpha_i$
+are the color and opacity at the $i$'th step.  A general transfer
+function is used to map data values to color and opacity. To
+produce a realistic image, the strategy then is to perform this
+mixing in the same way that light would behave.  For this
+application, an approximate form of the RTE is solved.  We wish to
+solve (repeating (\ref{eq:simple_rte}) and (\ref{})
 \begin{eqnarray}
 \label{eq:simple_rtee}
 \dLdx&=&-\sigt L(x) + \siga L_e(x)\\
@@ -576,26 +589,55 @@ To produce a realistic image, the strategy then is to perform this mixing in the
 \end{eqnarray}
 using
 \begin{equation}
+\label{eq:rtesoln}
  L(D)=\tau(0,D)L_0 + \int_0^D\tau(x,D)\siga\Le dx
 \end{equation}
-to collapse data from a series of 3D data meshes into 2D images.  2D images are constructed on the side of the 3D data meshes (at least 1, no more than 3) facing the viewer.  As the scene is moved through rotations and translations the surface images are constantly recomputed and redrawn giving the observer the illusion that the image is 3D drawn within (rather than on the surface) of the data mesh.
+where
+\begin{equation}
+\label{eq:optdepth}
+\tau(a,b)=\intmf{a}{b}
+\end{equation}
+to collapse data from a series of 3D data meshes into 2D images.
+2D images are constructed on the side of the 3D data meshes (at
+least 1, no more than 3) facing the viewer.  As the scene is moved
+through rotations and translations the surface images are
+constantly recomputed and redrawn giving the observer the illusion
+that the image is 3D drawn within (rather than on the surface) of
+the data mesh.
 
 \subsection{Discretizing the Radiation Transport Equation}
 \newcommand{\htau}[1]{\hat{\tau}_{#1}}
 \newcommand{\sigai}[1]{\sigma_{a,#1}}
 \newcommand{\Lei}[1]{L_{e,#1}}
-\begin{eqnarray*}
-\Delta x &= & \Delta s = \frac{D}{N}\\
-x_i&=&i \Delta x = i \Delta s\\
-\hat{\tau}_i&=&\tau(x_i,D)=\exp\left(-\int_{x_i}^D\sigma_t(s)ds\right)\\
+
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[width=3.5in]{figures/smoke_discrete_setup}
+\end{center}
+\caption {Setup for discretizing the equations used to model
+radiance within a column of 3D smoke data.}
+\label{figsmokediscretesetup}
+\end{figure}
+
+Equation (\ref{eq:optdepth}) may be approximated using a Reimann
+sum  to obtain
+\begin{eqnarray}
+\nonumber
+\hat{\tau}_i=\tau(x_i,D)&=&\exp\left(-\int_{x_i}^D\sigma_t(s)ds\right)\\
+\nonumber
 &\approx&\exp\left(-\sum_{j=i}^{N-1}\sigma_t(s_j)\Delta s\right)\\
+\nonumber
 &=&\prod_{j=i}^{N-1}\exp\left(-\sigma_t(s_j)\Delta s\right)\\
-&=&\prod_{j=i}^{N-1}\tau_j\\
-\end{eqnarray*}
+\label{eq:tauhat_discrete}
+\hat{\tau}_i&=&\prod_{j=i}^{N-1}\tau_j
+\end{eqnarray}
+where $\tau_j=\exp\left(-\sigma_t(s_j)\Delta s\right)$,
+$s_j=j\Delta s$ and $\Delta s=D/N$ . Equation (\ref{eq:rtesoln})
+may then be discretized using equation (\ref{eq:tauhat_discrete})
+to obtain
 \begin{eqnarray*}
-\sigma_{a,i}&=&\sigma_t(x_i)\\
-\Lei{i}&=&L_e(x_i)\\
-L_i &= &\htau{0}L_0 + \sum_{i=0}^{N-1}\htau{i}\sigai{i}\Lei{i}\Delta x
+L_i &= &\htau{0}L_0 +
+\sum_{i=0}^{N-1}\htau{i}\sigai{i}\Lei{i}\Delta x
 \end{eqnarray*}
-
-
+where $\sigma_{a,i}=\sigma_t(x_i)$, $\Lei{i}=L_e(x_i)$,
+$x_i=i\Delta x$ and $\Delta x=D/N$ .
