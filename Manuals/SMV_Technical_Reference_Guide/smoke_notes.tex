@@ -632,12 +632,30 @@ sum  to obtain
 \hat{\tau}_i&=&\prod_{j=i}^{N-1}\tau_j
 \end{eqnarray}
 where $\tau_j=\exp\left(-\sigma_t(s_j)\Delta s\right)$,
-$s_j=j\Delta s$ and $\Delta s=D/N$ . Equation (\ref{eq:rtesoln})
+$s_j=j\Delta s$ and $\Delta s=D/N$ . Letting $\hat{L}_D\approx L(D)$, equation (\ref{eq:rtesoln})
 may then be discretized using equation (\ref{eq:tauhat_discrete})
 to obtain
-\begin{eqnarray*}
-L_i &= &\htau{0}L_0 +
+\begin{equation}
+\label{eq:discrete_rte}
+\hat{L}_D = \htau{0}L_0 +
 \sum_{i=0}^{N-1}\htau{i}\sigai{i}\Lei{i}\Delta x
-\end{eqnarray*}
+\end{equation}
 where $\sigma_{a,i}=\sigma_t(x_i)$, $\Lei{i}=L_e(x_i)$,
-$x_i=i\Delta x$ and $\Delta x=D/N$ .
+$x_i=i\Delta x$ and $\Delta x=D/N$ .  
+The terms in equation (\ref{eq:discrete_rte}) are summed from back to front.  The $i=0$ terms are located
+furthest from the observer while the $i=N-1$ terms are located closest to the observer.  We wish to perform the sum in reverse order, from front to back so that the sum may be terminated early if further contributions would not change the result. Let $\hat{L}_j$ and $\hat{L}_j$ be intermediate results at nodes $j$ and $j-1$
+to compute $\hat{L}_D$ in (\ref{eq:discrete_rte}) as in
+\begin{eqnarray}
+\hat{L}_{j-1} &= &\htau{j-1}L_0 + \sum_{i=j-1}^{N-1}\htau{i}\sigai{i}\Lei{i}\Delta x\\
+\hat{L}_j     &= &\htau{j}  L_0 + \sum_{i=j}^{N-1}  \htau{i}\sigai{i}\Lei{i}\Delta x
+\end{eqnarray}
+One may then compute $\hat{L}_0$ recursively using
+\begin{eqnarray}
+\hat{L}_{j-1} -\hat{L}_{j}&= &(\htau{j-1}-\htau{j})L_0 + \htau{j-1}\sigai{j-1}\Lei{j-1}\Delta x\\
+                        &= &\htau{j}\left[\left(\frac{\htau{j-1}}{\htau{j}}-1\right)L_0 + \frac{\htau{j-1}}{\htau{j}}\sigai{j-1}\Lei{j-1}\Delta x\right]\\
+                        &= &\htau{j}\left[-\left(1-\tau_{j-1}\right)L_0 + \tau_{j-1}\sigai{j-1}\Lei{j-1}\Delta x\right]\\
+\end{eqnarray}
+where from (\ref{eq:tauhat_discrete}) $\htau{j-1}/\htau{j}=\tau_{j-1}$.  Therefore, $\hat{L}_j$ may be expressed recursively using $\hat{L}_{j}$ and
+\begin{eqnarray}
+\hat{L}_{j-1} &= &\hat{L}_{j}+\htau{j}\left[-\left(1-\tau_{j-1}\right)L_0 + \tau_{j-1}\sigai{j-1}\Lei{j-1}\Delta x\right]
+\end{eqnarray}
