@@ -51,7 +51,7 @@ SUBROUTINE COMPUTE_VISCOSITY(NM)
 USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY
 USE TURBULENCE, ONLY: VARDEN_DYNSMAG,TEST_FILTER
 INTEGER, INTENT(IN) :: NM
-REAL(EB) :: ZZ_GET(0:N_TRACKED_SPECIES),NU_K,DELTA,KSGS
+REAL(EB) :: ZZ_GET(0:N_TRACKED_SPECIES),NU_K,DELTA,KSGS,U2,V2,W2
 INTEGER :: I,J,K,IIG,JJG,KKG,II,JJ,KK,IW
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP=>NULL(),UP=>NULL(),VP=>NULL(),WP=>NULL(), &
                                        UP_HAT=>NULL(),VP_HAT=>NULL(),WP_HAT=>NULL(), &
@@ -63,9 +63,15 @@ CALL POINT_TO_MESH(NM)
  
 IF (PREDICTOR) THEN
    RHOP => RHO
+   UU   => U
+   VV   => V
+   WW   => W
    IF (N_TRACKED_SPECIES > 0) ZZP => ZZ
 ELSE
    RHOP => RHOS
+   UU   => US
+   VV   => VS
+   WW   => WS
    IF (N_TRACKED_SPECIES > 0 .AND. .NOT.EVACUATION_ONLY(NM)) ZZP => ZZS
 ENDIF
 
@@ -119,17 +125,8 @@ ENDIF
 
 DEARDORFF_IF: IF (LES .AND. DEARDORFF) THEN
 
-IF (PREDICTOR) THEN
-      UU=>U
-      VV=>V
-      WW=>W
-   ELSE
-      UU=>US
-      VV=>VS
-      WW=>WS
-   ENDIF
-
    ! Velocities relative to the p-cell center
+
    UP => WORK1
    VP => WORK2
    WP => WORK3
@@ -177,6 +174,21 @@ IF (PREDICTOR) THEN
    ENDDO
 
 ENDIF DEARDORFF_IF
+ 
+! Compute resolved kinetic energy per unit mass
+
+!$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I,U2,V2,W2)
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         U2 = 0.25_EB*(UU(I-1,J,K)+UU(I,J,K))**2
+         V2 = 0.25_EB*(VV(I,J-1,K)+VV(I,J,K))**2
+         W2 = 0.25_EB*(WW(I,J,K-1)+WW(I,J,K))**2
+         KRES(I,J,K) = 0.5_EB*(U2+V2+W2)
+      ENDDO
+   ENDDO
+ENDDO
+!$OMP END DO NOWAIT
 
 ! Mirror viscosity into solids and exterior boundary cells
 
@@ -1117,7 +1129,7 @@ USE TURBULENCE, ONLY: COMPRESSION_WAVE
 
 ! Estimates the velocity components at the next time step
 
-REAL(EB) :: TNOW,U2,V2,W2
+REAL(EB) :: TNOW
 INTEGER  :: STOP_STATUS,I,J,K
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T
@@ -1174,20 +1186,6 @@ ENDDO
 
 ENDIF FREEZE_VELOCITY_IF
 
-! Compute resolved kinetic energy per unit mass
-
-!$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I,U2,V2,W2)
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         U2 = 0.25_EB*(US(I-1,J,K)+US(I,J,K))**2
-         V2 = 0.25_EB*(VS(I,J-1,K)+VS(I,J,K))**2
-         W2 = 0.25_EB*(WS(I,J,K-1)+WS(I,J,K))**2
-         KRES(I,J,K) = 0.5_EB*(U2+V2+W2)
-      ENDDO
-   ENDDO
-ENDDO
-!$OMP END DO NOWAIT
 !$OMP END PARALLEL
 
 
@@ -1213,7 +1211,7 @@ USE TURBULENCE, ONLY: MEASURE_TURBULENCE_RESOLUTION,COMPRESSION_WAVE
 
 ! Correct the velocity components
 
-REAL(EB) :: TNOW,U2,V2,W2
+REAL(EB) :: TNOW
 INTEGER  :: I,J,K
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T
@@ -1269,20 +1267,6 @@ ENDDO
 
 ENDIF FREEZE_VELOCITY_IF
 
-! Compute resolved kinetic energy per unit mass
-
-!$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I,U2,V2,W2)
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         U2 = 0.25_EB*(U(I-1,J,K)+U(I,J,K))**2
-         V2 = 0.25_EB*(V(I,J-1,K)+V(I,J,K))**2
-         W2 = 0.25_EB*(W(I,J,K-1)+W(I,J,K))**2
-         KRES(I,J,K) = 0.5_EB*(U2+V2+W2)
-      ENDDO
-   ENDDO
-ENDDO
-!$OMP END DO NOWAIT
 !$OMP END PARALLEL
 
 
