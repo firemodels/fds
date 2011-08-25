@@ -59,6 +59,8 @@ $RUNFDS Pressure_Effects pressure_rise
 $RUNFDS Pressure_Effects zone_break
 $RUNFDS Pressure_Effects zone_shape
 $RUNFDS Pressure_Solver dancing_eddies
+$RUNFDS Pressure_Solver dancing_eddies_1mesh
+$RUNFDS Pressure_Solver dancing_eddies_tol=p1
 $RUNFDS Pressure_Solver duct_flow
 $RUNFDS Pressure_Solver hallways
 $RUNFDS Pyrolysis cable_11_insulation_mcc
