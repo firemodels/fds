@@ -271,15 +271,18 @@ DT_SUM = 0._EB
 I_TS = 1
 ODE_LOOP: DO WHILE (DT_SUM < DT)
    DZZDT = 0._EB
-   RATE_CONSTANT = 0._EB
+   DZZDT2 = 0._EB
    Q_NR = 0._EB
+   Q_NR2 = 0._EB
+   RATE_CONSTANT = 0._EB
    REACTION_LOOP: DO NR = 1, N_REACTIONS   
       RN => REACTION(NR)      
       CALL COMPUTE_RATE_CONSTANT(NR,RN%MODE,I_TS,Q_OUT,RATE_CONSTANT(NR),ZZ_I,I,J,K)
       IF (RATE_CONSTANT(NR) < ZERO_P) CYCLE REACTION_LOOP
       Q_NR(NR) = RATE_CONSTANT(NR)*RN%HEAT_OF_COMBUSTION*RHO(I,J,K)
       DZZDT = DZZDT + RN%NU * SPECIES_MIXTURE%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW*RATE_CONSTANT(NR)
-   END DO REACTION_LOOP     
+   END DO REACTION_LOOP   
+   IF (ALL(DZZDT < ZERO_P)) EXIT ODE_LOOP    
    IF (ALL(DZZDT < ZERO_P)) EXIT ODE_LOOP
    ZZ_N = ZZ_I + DZZDT * DT_NEW
 
@@ -312,10 +315,12 @@ ODE_LOOP: DO WHILE (DT_SUM < DT)
    IF (Q_OUT + Q_SUM*DT_NEW > Q_UPPER * DT) THEN
       DT_NEW = MAX(0._EB,(Q_UPPER * DT - Q_OUT))/Q_SUM
       Q_OUT = Q_OUT+Q_SUM*DT_NEW
-      ZZ_I = ZZ_I + DZZDT * DT_NEW
+      ZZ_I = ZZ_I + 0.5_EB*(DZZDT+DZZDT2)*DT_NEW
       EXIT ODE_LOOP
    ENDIF   
-   
+
+   ZZ_I = ZZ_I +0.5_EB*(DZZDT+DZZDT2)*DT_NEW
+
    Q_OUT = Q_OUT+Q_SUM*DT_NEW
  
    DT_SUM = DT_SUM + DT_NEW
@@ -351,7 +356,6 @@ SELECT CASE (MODE)
          CALL COMPUTE_RATE_CONSTANT(NR,FINITE_RATE,I_TS,Q_IN,RATE_CONSTANT,ZZ_GET,I,J,K)      
       ENDIF
    CASE(MIXING_CONTROLLED)
-      
          IF_SUPPRESSION: IF (SUPPRESSION) THEN
             ! Evaluate empirical extinction criteria
             IF (I_TS==1) THEN
@@ -359,39 +363,45 @@ SELECT CASE (MODE)
                    RATE_CONSTANT = 0._EB
                    RETURN
                 ENDIF
-            ELSE
-               IF (RATE_CONSTANT <= ZERO_P) RETURN
+            !ELSE
+            !   IF (RATE_CONSTANT <= ZERO_P) RETURN
             ENDIF
          ENDIF IF_SUPPRESSION
 
-         IF (TWO_D) THEN
-            DELTA = MAX(DX(I),DZ(K))
-         ELSE
-            DELTA = MAX(DX(I),DY(J),DZ(K))
-         ENDIF
-
-         LES_IF: IF (LES) THEN
-         
-            TAU_D = D_Z(MIN(4999,NINT(TMP(I,J,K))),RN%FUEL_SMIX_INDEX)
-            TAU_D = DELTA**2/TAU_D ! diffusive time scale 
-         
-            IF (DEARDORFF) THEN
-               TAU_U = 0.1_EB*SC*RHO(I,J,K)*DELTA**2/MU(I,J,K) ! turbulent mixing time scale
+         FIXED_TIME: IF (FIXED_MIX_TIME>0._EB) THEN
+            MIX_TIME(I,J,K)=FIXED_MIX_TIME   
+               
+         ELSE FIXED_TIME
+            IF (TWO_D) THEN
+               DELTA = MAX(DX(I),DZ(K))
             ELSE
-               TAU_U = DELTA/SQRT(2._EB*KSGS(I,J,K)+1.E-10_EB) ! advective time scale
+               DELTA = MAX(DX(I),DY(J),DZ(K))
             ENDIF
+
+            LES_IF: IF (LES) THEN
             
-            TAU_G = SQRT(2._EB*DELTA/(GRAV+1.E-10_EB)) ! acceleration time scale
+               TAU_D = D_Z(MIN(4999,NINT(TMP(I,J,K))),RN%FUEL_SMIX_INDEX)
+               TAU_D = DELTA**2/TAU_D ! diffusive time scale 
             
-            MIX_TIME(I,J,K)=MAX(TAU_CHEM,MIN(TAU_D,TAU_U,TAU_G,TAU_FLAME)) ! Eq. 7, McDermott, McGrattan, Floyd
+               IF (DEARDORFF) THEN
+                  TAU_U = 0.1_EB*SC*RHO(I,J,K)*DELTA**2/MU(I,J,K) ! turbulent mixing time scale
+               ELSE
+                  TAU_U = DELTA/SQRT(2._EB*KSGS(I,J,K)+1.E-10_EB) ! advective time scale
+               ENDIF
+               
+               TAU_G = SQRT(2._EB*DELTA/(GRAV+1.E-10_EB)) ! acceleration time scale
+               
+               MIX_TIME(I,J,K)=MAX(TAU_CHEM,MIN(TAU_D,TAU_U,TAU_G,TAU_FLAME)) ! Eq. 7, McDermott, McGrattan, Floyd
 
-         ELSE LES_IF
+            ELSE LES_IF
 
-            TAU_D = D_Z(MIN(4999,NINT(TMP(I,J,K))),RN%FUEL_SMIX_INDEX)
-            TAU_D = DELTA**2/TAU_D
-            MIX_TIME(I,J,K)= TAU_D
+               TAU_D = D_Z(MIN(4999,NINT(TMP(I,J,K))),RN%FUEL_SMIX_INDEX)
+               TAU_D = DELTA**2/TAU_D
+               MIX_TIME(I,J,K)= TAU_D
 
-         ENDIF LES_IF
+            ENDIF LES_IF
+         ENDIF FIXED_TIME
+         
          YY_F_LIM=1.E15_EB
          IF (N_REACTIONS > 1) THEN
             DO NS=0,N_TRACKED_SPECIES
@@ -424,7 +434,6 @@ SELECT CASE (MODE)
             YY_F_LIM = MIN(YY_F_LIM,ZZ_PRODUCT)
          ENDIF
          YY_F_LIM = MAX(YY_F_LIM,Y_F_MIN)
-         IF (FIXED_MIX_TIME>0._EB) MIX_TIME(I,J,K)=FIXED_MIX_TIME      
          RATE_CONSTANT = YY_F_LIM/MIX_TIME(I,J,K)      
       
    CASE(FINITE_RATE)
