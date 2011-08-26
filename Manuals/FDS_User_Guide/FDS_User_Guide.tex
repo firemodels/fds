@@ -2399,6 +2399,9 @@ parameter {\ct TMP\_INNER} on the {\ct SURF} line. An initial velocity
 can be prescribed via {\ct U0}, {\ct V0}, and {\ct W0} on the {\ct MISC} line.
 
 
+
+\clearpage
+
 \section{Special Topic: The Pressure Solver: The \texorpdfstring{{\tt PRES}}{PRES} Namelist Group (Table \ref{tbl:PRES})}
 \label{info:PRES}
 
@@ -2422,7 +2425,7 @@ To do so, specify {\ct VELOCITY\_TOLERANCE} on the {\ct PRES} line to be the max
 boundary or the largest error at a mesh interface. It is in units of m/s.
 If you set this, experiment with different values, and monitor the number of pressure iterations required at each time step to achieve your
 desired tolerance. A good value to start with is $\dx/10$, where $\dx$ is the characteristic grid cell size.
-The number of iterations are written out to the file {\bf CHID.out}. If you use a value that is too small, the CPU time required might be prohibitive.
+The number of iterations are written out to the file {\ct CHID.out}. If you use a value that is too small, the CPU time required might be prohibitive.
 The maximum number of iterations per time step is given by {\ct MAX\_PRESSURE\_ITERATIONS}, also on the {\ct PRES} line. Its default value is 10000.
 
 There are two parameters on the {\ct PRES} line that control iterative procedures related to the coupling of velocity and pressure. One is
@@ -2448,9 +2451,26 @@ the inflow exactly because of inaccuracies at the solid and mesh boundaries. The
 \end{figure}
 
 
+\subsubsection{Example Case: Pressure\_Solver/dancing\_eddies}
+
+In this example, air is pushed through a 300~m long, two-dimensional channel at 5~m/s. A plate obstruction normal to the flow creates a Karman vortex street. The computational
+domain is divided into 4 meshes, each 75~m long. Two simulations are performed, one in which the {\ct VELOCITY\_TOLERANCE} is set to 0.1~m/s ({\ct dancing\_eddies\_tol=p1.fds}), and one 
+in which it is set to 0.01~m/s ({\ct dancing\_eddies.fds}). Figure~\ref{dancing_eddies} shows the downstream pressure histories for these two cases compared to a simulation that uses only one mesh. The case with the tighter tolerance produces a better match to the single mesh solution, but at a higher computational cost.
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_p1}
+\includegraphics[width=3in]{SCRIPT_FIGURES/dancing_eddies_p01}
+\includegraphics[width=\textwidth]{SCRIPT_FIGURES/dancing_eddies}
+\end{center}
+\caption[Results of the dancing eddies test case.]{(Top) Comparison of pressure traces 200~m from the left opening of the channel for two different settings
+of {\ct VELOCITY\_TOLERANCE}. (Bottom) A contour plot of the pressure after 120~s for the case with the tolerance set to 0.01~m/s.}
+\label{dancing_eddies}
+\end{figure}
 
 
 
+\clearpage
 
 \section{Special Topic: Setting Limits: The \texorpdfstring{{\tt CLIP}}{CLIP} Namelist Group (Table \ref{tbl:CLIP})}
 \label{info:CLIP}
@@ -2902,7 +2922,7 @@ The first special {\ct VENT} is invoked by the parameter {\ct SURF\_ID='OPEN'}. 
 
 By default, it is assumed that ambient conditions exist beyond the {\ct 'OPEN'} vent. However, in some cases, you may want to alter this assumption, for example, the temperature. If you assume a temperature other than ambient, specify {\ct TMP\_EXTERIOR} along with {\ct SURF\_ID='OPEN'}. Use this option cautiously -- in many situations if you want to describe the exterior of a building, it is better to include the exterior explicitly in your calculation because the flow in and out of the doors and windows will be more naturally captured. See Section~\ref{info:stackeffect} for more details. If you want to specify a non-ambient pressure at the {\ct OPEN} boundary, see Section~\ref{info:pressure_boundary}.
 
-The user should also be aware that the {\ct OPEN} pressure boundary condition is most stable for flows that are predominantly normal  to the vent, either mostly in or mostly out.  This is because the prescribed pressure at an {\ct OPEN} boundary is ill-conditioned (a small perturbation to the input may lead to large change in the output) if the flow is parallel to the vent.  Suppose, for example, that an outdoor flow is 10 m/s in the $x$ direction and $\pm 0.001$ m/s in the $z$ direction with an {\ct OPEN} top boundary.  The kinetic energy of this flow is roughly $k=50$ m$^2$/s$^2$.  When the vertical velocity is positive (+0.001 m/s) then the prescibed boundary condition for the stagnation pressure is set to ${\cal H} = k = 50$ m$^2$/s$^2$.  But when the vertical velocity is negative (-0.001 m/s) then ${\cal H} = 0$ (see \cite{FDS_Tech_Guide}).  For this reason, {\ct OPEN} vents are not recommended for the top or side boundaries in an outdoor flow.  See Section \ref{info:mean_forcing} for a better alternative.
+The user should also be aware that the {\ct OPEN} pressure boundary condition is most stable for flows that are predominantly normal  to the vent, either mostly in or mostly out.  This is because the prescribed pressure at an {\ct OPEN} boundary is ill-conditioned (a small perturbation to the input may lead to large change in the output) if the flow is parallel to the vent.  Suppose, for example, that an outdoor flow is 10 m/s in the $x$ direction and $\pm 0.001$ m/s in the $z$ direction with an {\ct OPEN} top boundary.  The kinetic energy of this flow is roughly $k=50$ m$^2$/s$^2$.  When the vertical velocity is positive (+0.001 m/s) then the prescribed boundary condition for the stagnation pressure is set to ${\cal H} = k = 50$ m$^2$/s$^2$.  But when the vertical velocity is negative (-0.001 m/s) then ${\cal H} = 0$ (see \cite{FDS_Tech_Guide}).  For this reason, {\ct OPEN} vents are not recommended for the top or side boundaries in an outdoor flow.  See Section \ref{info:mean_forcing} for a better alternative.
 
 \begin{warning}
 Vents to the outside of the computational domain ({\ct OPEN} vents)
@@ -5875,7 +5895,7 @@ FDS will use that information internally to determine the amount of combustion p
 \nu_{\CO}      &=& \frac{W_f}{W_{\CO}} \, y_{\CO}  \\
 \nu_s          &=& \frac{W_f}{W_s} \, y_s  \\
 \nu_{\NTWO}    &=& \frac{\hbox{v}}{2}  \\
-W_s            &=& X_\Hy \, W_\Hy + (1-X_\Hy) \, W_\C 
+W_s            &=& X_\Hy \, W_\Hy + (1-X_\Hy) \, W_\C
 \end{eqnarray*}
 
 \noindent The following parameters may be prescribed on the {\ct REAC} line when using the simple chemistry model.
@@ -5902,9 +5922,9 @@ This input is not needed if {\ct FORMULA} is specified or if the {\ct FUEL} is i
 simple chemistry model is applied. (Default 0.)
 \item[{\ct SOOT\_YIELD}] The fraction of fuel mass converted into smoke particulate, $y_s$.
 Note that this parameter is only appropriate when the simple chemistry model is applied.  (Default 0.)
-\item[{\ct SOOT\_H\_FRACTION}] The fraction of the atoms in the soot that are hydrogen. 
+\item[{\ct SOOT\_H\_FRACTION}] The fraction of the atoms in the soot that are hydrogen.
 For all other types of {\ct REAC} inputs the species {\ct SOOT} is assumed to be pure carbon unless a {\ct FORMULA} is provided.
-Note that this parameter is only appropriate when the simple chemistry model is applied. 
+Note that this parameter is only appropriate when the simple chemistry model is applied.
 (Default 0.1 - equivalent to the input {\ct FORMULA='C0.9H0.1'} for other {\ct REAC} types)
 \end{description}
 
@@ -6023,12 +6043,12 @@ Note that if this parameter is used, then some form of heat/ignition source must
 
 \subsubsection{Example Case: door\_crack}
 
-This example uses a compartment surrounded by the ambient that contains a fan in one wall and a closed door with leakage at its bottom in the opposite wall.  
-A small (160~kW) fire is added to the compartment. Initially, the pressure rises due to the heat from the fire and the fan blowing air into the compartment.  
-Eventually the the pressure rise inside the compartment exceeds the maximum pressure of the fan, at which point the compartment begins to exhaust from both the fan and the leakage.  
-Pressure will continue to rise due to the fire until the pressure relief due to leakage and back flow through the fan equals the pressure increase from the fire.  
-As heat is lost to the walls, and as pressure is relieved, the pressure rise slows, and eventually the pressure decreases which allows the fan to push air back into the compartment.   
-Eventually, the fire at the burner is self-extinguished due to lack of oxygen; however, the fuel-rich gases in the compartment will continue to burn where the 
+This example uses a compartment surrounded by the ambient that contains a fan in one wall and a closed door with leakage at its bottom in the opposite wall.
+A small (160~kW) fire is added to the compartment. Initially, the pressure rises due to the heat from the fire and the fan blowing air into the compartment.
+Eventually the the pressure rise inside the compartment exceeds the maximum pressure of the fan, at which point the compartment begins to exhaust from both the fan and the leakage.
+Pressure will continue to rise due to the fire until the pressure relief due to leakage and back flow through the fan equals the pressure increase from the fire.
+As heat is lost to the walls, and as pressure is relieved, the pressure rise slows, and eventually the pressure decreases which allows the fan to push air back into the compartment.
+Eventually, the fire at the burner is self-extinguished due to lack of oxygen; however, the fuel-rich gases in the compartment will continue to burn where the
 fan is blowing fresh air into the compartment and at the leak where fuel rich gases exit the compartment.
 
 \begin{figure}[ht]
@@ -6040,7 +6060,7 @@ fan is blowing fresh air into the compartment and at the leak where fuel rich ga
 \caption[Output of {\bf door\_crack} test case.]{Output of {\bf door\_crack} test case.}
 \end{figure}
 
-While this case has a number of interesting physical effects, and it {\em verifies} several features of FDS, it is important to note that although 
+While this case has a number of interesting physical effects, and it {\em verifies} several features of FDS, it is important to note that although
 there is smoke seen flowing backwards out the fan duct, in reality there would have been much more. Most conventionally built structures will not withstand over-pressures
 of 0.25~atm without some sort of relief. The fan and the crack under the door obey simple formulae based on pressure differences, but these assumptions have limits.
 Also, it is likely that the fire in this scenario would indeed extinguish itself as the oxygen volume fraction decreased below about 15~\%. {\bf But,} its re-ignition at the door crack
@@ -6050,7 +6070,7 @@ present.
 
 
 \subsection{More Complicated Stoichiometry}
-\label{info:SMIX}
+
 
 The ``simple chemistry''  inputs described above can only be used when there is a single mixing-controlled reaction and the fuel molecule contains only C, O, H, and N.
 For any other situation, you must specify the reaction stoichiometry in greater detail. This means that you must explicitly specify the gas species, or species mixtures, along with
@@ -6141,7 +6161,7 @@ LES calculation, but because the temperature in a large scale calculation
 is smeared out over a mesh cell, some of the reaction parameters may need
 to be modified to account for the lower temperatures.
 \item The background species, if unspecified on a {\ct SPEC} or {\ct SMIX} line, is normally set to be {\ct 'AIR'}.
-\item Read Section~\ref{info:SPEC} and ~\ref{info:SMIX} for a description of the boundary
+\item Read Sections~\ref{info:SPEC} and \ref{info:SMIX} for a description of the boundary
 conditions for the gas species.
 \item The {\ct REAC} namelist group is used to designate the fuel and the reaction rate
 parameters.  For a finite-rate reaction you can specify multiple {\ct REAC} lines.  Note that FDS will evaluate the reactions simultaneously.
@@ -6298,7 +6318,7 @@ the radiation transport equation is fully updated every 15 time steps.
 The absorption and scattering of thermal radiation by Lagrangian particles is included in the radiation transport equation. The radiative properties of
 the water and fuel particles (droplets) are determined automatically. For fuel, the properties of heptane are assumed. For other types of particles, the
 radiative properties can be given by specifying the components of the material refractive index on the corresponding {\ct PART} line, using keywords
-{\ct REAL\_REFRACTIVE\_INDEX} and {\ct COMPLEX\_REFRACTIVE\_INDEX}. Alternatively, wavelength dependent values of these two 
+{\ct REAL\_REFRACTIVE\_INDEX} and {\ct COMPLEX\_REFRACTIVE\_INDEX}. Alternatively, wavelength dependent values of these two
 quantities can be tabulated in a {\ct TABLE} and called using the {\ct RADIATIVE\_PROPERTY\_TABLE}. More details can be found in Section~\ref{radiative_part_props}.
 
 Other parameters affecting the computations of particle-radiation interaction are listed here. {\ct RADTMP} is the assumed radiative source temperature.
