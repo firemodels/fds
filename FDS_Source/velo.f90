@@ -51,13 +51,13 @@ SUBROUTINE COMPUTE_VISCOSITY(NM)
 USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY
 USE TURBULENCE, ONLY: VARDEN_DYNSMAG,TEST_FILTER
 INTEGER, INTENT(IN) :: NM
-REAL(EB) :: ZZ_GET(0:N_TRACKED_SPECIES),NU_K,DELTA,KSGS,U2,V2,W2
+REAL(EB) :: ZZ_GET(0:N_TRACKED_SPECIES),NU_K,DELTA,KSGS,NU_G,GRAD_RHO(3),U2,V2,W2
 INTEGER :: I,J,K,IIG,JJG,KKG,II,JJ,KK,IW
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP=>NULL(),UP=>NULL(),VP=>NULL(),WP=>NULL(), &
                                        UP_HAT=>NULL(),VP_HAT=>NULL(),WP_HAT=>NULL(), &
                                        UU=>NULL(),VV=>NULL(),WW=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
-REAL(EB), PARAMETER :: C_K=0.1_EB
+REAL(EB), PARAMETER :: C_K=0.1_EB, C_G=0.04_EB
  
 CALL POINT_TO_MESH(NM)
  
@@ -175,6 +175,33 @@ DEARDORFF_IF: IF (LES .AND. DEARDORFF) THEN
 
 ENDIF DEARDORFF_IF
  
+! Add viscosity for stably stratified flows
+
+GRAVITY_IF: IF (LES .AND. GRAV_VISC) THEN
+
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            IF (TWO_D) THEN
+               DELTA = MAX(DX(I),DZ(K))
+            ELSE
+               DELTA = MAX(DX(I),DY(J),DZ(K))
+            ENDIF
+            
+            GRAD_RHO(1) = 0.5_EB*RDX(I)*(RHOP(I+1,J,K)-RHOP(I-1,J,K))
+            GRAD_RHO(2) = 0.5_EB*RDY(J)*(RHOP(I,J+1,K)-RHOP(I,J-1,K))
+            GRAD_RHO(3) = 0.5_EB*RDZ(K)*(RHOP(I,J,K+1)-RHOP(I,J,K-1))
+            
+            NU_G = C_G*DELTA**2*SQRT(MAX(ZERO_P,DOT_PRODUCT(GRAD_RHO,GVEC))/RHOP(I,J,K))
+            
+            MU(I,J,K) = MAX(MU(I,J,K),RHOP(I,J,K)*NU_G)
+         ENDDO
+      ENDDO
+   ENDDO
+
+ENDIF GRAVITY_IF
+
 ! Compute resolved kinetic energy per unit mass
 
 !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I,U2,V2,W2)
