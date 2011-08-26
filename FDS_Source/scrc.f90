@@ -8013,7 +8013,6 @@ WRITE(SCARC_LU,*) TYPE_EXCHANGE, NW, NX, NY, NC
                END SELECT SELECT_EXCHANGE_COMPACT
 
           END SELECT
-WRITE(SCARC_LU,*) 'SS1'
 
          !!! Finally exchange send buffer with corresponding neighbors
          IF (RNODE/=SNODE) THEN
@@ -8035,7 +8034,6 @@ ENDDO EXCHANGE_SEND_LOOP1
 IF (USE_MPI.AND.NREQ_SCARC/=0) CALL MPI_WAITALL(NREQ_SCARC,REQ_SCARC(1:NREQ_SCARC),MPI_STATUS_IGNORE,IERR)
 
 
-WRITE(SCARC_LU,*) 'SS2'
 !!!----------------------------------------------------------------------------------------------------
 !!! Extract communication data from corresponding RECEIVE-buffers
 !!!----------------------------------------------------------------------------------------------------
@@ -8093,7 +8091,6 @@ EXCHANGE_SEND_LOOP2: DO NOM = NMESHES_MIN, NMESHES_MAX
                NX   => SOC%NX
                NY   => SOC%NY
       
-WRITE(SCARC_LU,*) 'SS2', NX, NY
                SELECT_EXCHANGE_COMPACT2: SELECT CASE (TYPE_EXCHANGE)
       
                   CASE (NSCARC_EXCHANGE_VECTOR) 
@@ -8121,7 +8118,6 @@ WRITE(SCARC_LU,*) 'SS2', NX, NY
                 END SELECT SELECT_EXCHANGE_COMPACT2
 
          END SELECT
-WRITE(SCARC_LU,*) 'SS3'
 
       ENDIF EXCHANGE_RECV_IF
    ENDDO EXCHANGE_RECV_LOOP2
