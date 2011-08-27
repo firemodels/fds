@@ -4,19 +4,19 @@
 
 \section{Introduction}
 
-This \paper\ describes two methods for visualizing smoke realistically both using a form of the radiation transport equation\cite{Siegel:2001,kajiya:1986} to utimately model
+This \paper\ describes two methods for visualizing smoke  both using a form of the radiation transport equation\cite{Siegel:2001,kajiya:1986} to  model
 smoke opacity and color. Realistic visualization methods are important for applications
 where one needs to observe the effects of fire and smoke on the underlying scene
-rather than to know that smoke has a certain temperature or density.  This would be the case for a fire fighter using a computer based fire fighting simulator.
+rather than to know that smoke has a certain define temperature or density value.  This would be the case for a fire fighter using a computer based fire fighting simulator.
 Realistic visualization  methods complement but do not replace other more traditional visualization methods such as 2D
 contouring or 3D iso-surfacing which are better suited for analyzing data quantitatively.
 
-A complete method for visualizing smoke and fire taking into
+Complete methods for visualizing smoke and fire taking into
 account interactions between light and smoke such as absorption, emission, and scattering
-requires the solution of the radiation transport equation (RTE)\cite{Siegel:2001} also called the volume rendering equation\cite{levoy:1988}.
-This equation models how light appears to an observer after interacting with a participating media in this case smoke.
-The equation solved here for visualization purposes is identical to the one used in the Fire Dynamics Simulator (FDS)\cite{FDS_Tech_Guide}
-for modeling radiative heat transfer except that a different wave length (visible rather than infrared) is used in the solution.
+require the solution of the radiation transport equation (RTE)\cite{Siegel:2001} also called the volume rendering equation\cite{levoy:1988}.
+This equation models how light appears to an observer after interacting with a participating media.
+The equation solved  for visualization purposes is identical to the one used in the Fire Dynamics Simulator (FDS)\cite{FDS_Tech_Guide}
+for modeling radiative heat transfer except that a different wave length is used in the solution, visible rather than infrared.
 
 The
 solution of this integro-differential equation requires significant
@@ -25,23 +25,24 @@ are required in order to display smoke at
 interactive frame rates.  The primary approximation is to take
 advantage of the low albedo character of smoke by either simplifying or eliminating the scattering term in the RTE.
 
-Two techniques for visualizing smoke realistically discussed here are slice rendered and volume
+Two techniques for visualizing smoke realistically discussed are slice rendered and volume
 rendered methods.  These methods both solve a form of the RTE equation.
 The integrated quantity in both cases is ultimately an opacity, the fraction of light obscured.
 They
 differ in the path length over which the equations are integrated.
 
-The integration path for a slice rendered method is a segment between two adjacent grid planes within a 3D mesh.
+The integration path for a slice rendered method is a segment between two adjacent grid planes within a 3D mesh
 There is one slice plane for each plane of simulated data.
 The resulting partially transparent slice planes are drawn individually and
-combined by the video hardware to form one image. Planes through the data (xy, xz, yz or diagonally) are chosen to be most perpendicular to the viewer's line of sight.
+combined by the video hardware to form one image. Planes are drawn through the data along the xy, xz, yz axes or diagonally to the coordinate planes.  The particular plane drawn is chosen to be the one most perpendicular to the viewer's line of sight.
 
 The second approach, a volume rendering method, again integrates a
-simplified form of the radiation transport equation but over the entire entire simulation mesh (from the
-front of the solution domain to the back) rather than across just
+simplified form of the radiation transport equation but over the entire entire simulation mesh,
+from the
+front of the solution domain to the back, rather than across just
 one slice plane. A volume rendered method then computes opacity across multiple grid planes.
 As a result, there is only one plane of data drawn.  The video hardware is again exploited, but this time to
-compute a line integral for each screen pixel across the entire grid.  Opacities and
+compute a line integral for each pixel in the observer's view.  Opacities and
 color for both methods are computed using soot density and
 temperature data derived from a fire simulation. Colors are
 determined from a prescribed colormap which is a function of
@@ -62,7 +63,7 @@ temperature.
 %
 
 \section{Visualization Model}
-The parameter used to model smoke appearance is radiance with units of watts per square meter per steradian, W/(sr$\cdot$m$^2$).  The parameter used as a boundary condition when modeling heat transfer in a fire model such as FDS is heat flux with units of watts per square meter, W/m$^2$. The solid angle unit, sr, accounts for the fact that an object appears brighter if it emits a set amount of light through a smaller cross-sectional area. This has the interesting implication (ignoring atmospheric effects) that the sun will appear equally bright on the Earth as on Mars.  The sun's disk however will appear smaller on Mars accounting for the smaller amount of heat transfer that occurs as expected.  From a visualization perspective, this implies that image brightness does not depend on image distance from the observer unless  participating media is present to absorb or scatter  intervening light.  The radiation transport equation discussed in this section models the change in radiance due to these factors.
+The parameter used to model smoke appearance is radiance with units of watts per square meter per steradian, W/(sr$\cdot$m$^2$).  The parameter used as a boundary condition when modeling heat transfer in a fire model such as FDS is heat flux with units of watts per square meter, W/m$^2$. The solid angle unit, sr, accounts for the fact that an object appears brighter if it emits a given amount of light through a smaller cross-sectional area. This has the interesting implication, ignoring atmospheric effects, at pointed out in \cite{} that the sun will appear equally bright on the Earth as on Mars.  The sun's disk however will appear smaller on Mars accounting for the smaller amount of heat transfer that occurs as expected.  From a visualization perspective, this implies that image brightness does not depend on image distance from the observer unless  participating media is present to absorb or scatter  intervening light.  The radiation transport equation discussed in this section models the change in radiance due to these factors.
 
 %
 % ----------  Radiation Transport Equation --------------
@@ -103,7 +104,9 @@ coefficient, $\Lexo$ is the radiance emitted at $x$ in direction
 $\omega$ and $p(x,\omega,\omega')$ is the fraction of light moving
 along direction $\omega'$ scattered along direction $\omega$.
 Absorption, and out-scattering causes radiance to decrease while
-emission and in-scattering causes radiance to increase.
+emission and in-scattering causes radiance to increase. The terms $L$, $L_e$ and $L_i$
+each have units of W/m$^2$sr$^{-1}$.  The terms $\sigma_a$ and $\sigma_s$ have units of
+m$^{-1}$ and specify the change per unit length the radiance term they are applied to.
 \begin{figure}[\figoptions]
 \begin{center}
 \includegraphics[width=6.0in]{figures/rte_setup}
@@ -150,7 +153,7 @@ which is known as the Beer-Lambert law\cite{}.
 
 \subsubsection{Absorption, Out-Scattering and Emission}
 Alternatively, if the emission term is also included when
-simplifying equation (\ref{eq:fullrte})  the following
+simplifying equation (\ref{eq:fullrte}),  the following
 differential equation results.
 
 \begin{eqnarray}
@@ -160,8 +163,8 @@ differential equation results.
 \end{eqnarray}
 
 This equation may be solved by rearranging terms and applying the
-integrating factor $\exp(\int_0^x \sigts ds)$ to both sides to
-obtain
+integrating factor $\exp(\int_0^x \sigts ds)$ 
+obtaining
 \begin{eqnarray*}
 \intf{0}{x}\left(\dLdx+\sigt L(x)\right)&=&  \intf{0}{x}\siga \Le\\
 \frac{d}{dx}\left(\intf{0}{x} L(x)\right)&=& \intf{0}{x}\siga \Le
@@ -177,11 +180,11 @@ $\intff{0}{x}-\intff{0}{D}=-\intff{x}{D}$ results in
 \begin{eqnarray*}
 L(D)&=&\intmf{0}{D} L_0+ \int_0^D\intmf{x}{D}\siga \Le dx\\
 \end{eqnarray*}
-The radiance at $D$ is then given by
+which may be simplified to
 \begin{equation}
  L(D)=\tau(0,D)L_0 + \int_0^D\tau(x,D)\siga\Le dx
 \end{equation}
-where $\tau(a,b)$ is the optical depth between $a$ and $b$ given
+after defining $\tau(a,b)$ to represent the optical depth between $a$ and $b$ given
 by $\tau(a,b)=\intmf{a}{b}$ .
 
 \begin{figure}[\figoptions]
@@ -194,72 +197,6 @@ representation of a simplified form of the radiation transport equation.
 \label{figsmokesetup2}
 \end{figure}
 
-%
-% -------------------  Combining Multiple Solutions ------------------------
-%
-
-\subsubsection{Combining Multiple Solutions}
-Equation (\ref{eq:rtesoln}), is the solution to an approximate form of the radiation transport equation over a path
-from $x=0$ to $x=D$.  As illustrated in Figure \ref{figsmokesetup3},
-suppose that this path is split at $D_1$ into two parts, the first part from $0$ to $D_1$ and the second part from $D_1$ to $D$.
-Further, suppose that the RTE solution is known on each part.
-This section describes how these two solutions may be combined to form a solution
-over the entire interval $0$ to $D$.
-
-Given a radiance of $L_0$ at $x=0$, the radiance at $D$, denoted $L(D)$ is given by
-\begin{eqnarray}
-\label{eq:rtesoln}
-L(D)&=&\tau(0,D)L_0 + \int_0^D\tau(x,D)\siga\Le dx
-\end{eqnarray}
-This is the RTE solution over the entire interval $0$ to $D$.
-Similarly, $L_1(D_1)$ and $L_2(D)$ is given by
-\begin{eqnarray*}
-L_1(D_1)&=&\tau(0,D_1)L_0 + \int_0^{D_1}\tau(x,D_1)\siga\Le dx\\
-L_2(D)&=&\tau(D_1,D)L_0 + \int_{D_1}^{D}\tau(x,D)\siga\Le dx
-\end{eqnarray*}
-where the initial conditions are $L_1(0)=L_0$ and $L_2(D_1)=L_0$.
-
-The optical depth, $\tau(a,b)=\exp\left(-\int_a^b \sigt ds\right)$, may be expressed as $\tau(a,b)=\tau(a,x)\tau(x,b)$ since
-\begin{eqnarray*}
-\tau(a,b)&=&\exp\left(-\int_a^b \sigt ds\right)\\
-&=&\exp\left(-\int_a^x \sigt ds -\int_x^b \sigt ds\right)\\
-&=&\exp\left(-\int_a^x \sigt ds\right)\exp\left(-\int_x^b \sigt ds\right)\\
-&=&\tau(a,x)\tau(x,b)
-\end{eqnarray*}
-Using this property, RTE solutions $L_1(x)$ and $L_2(x)$ over two sub-intervals $[0,D_1]$ and $[D_1,D]$ may be combined into the solution $L(x)$ over the merged
-interval $[0,D]$.  This follows from
-\begin{eqnarray*}
-L(D)&=&\tau(0,D)L_0 + \int_0^D\tau(x,D)\siga\Le dx\\
-&=&\tau(0,D_1)\tau(D_1,D)L_0 + \int_0^{D_1}\tau(x,D_1)\tau(D_1,D)\Le dx + \int_{D_1}^{D}\tau(x,D)\Le dx\\
-&=&\tau(D_1,D)
-\underbrace{\left(\tau(0,D_1)L_0 + \int_0^{D_1}\tau(x,D_1)\Le dx\right)}_{L_1(D_1)} +
-\underbrace{\int_{D_1}^{D}\tau(x,D)\Le dx}_{L_2(D)-\tau(D_1,D)L_0}\\
-&=&\tau(D_1,D)L_1(D_1)+L_2(D)-\tau(D_1,D)L_0\\
-&=&\tau(D_1,D)(L_1(D_1)-L_0) + L_2(D)
-\end{eqnarray*}
-This relationship may be exploited to draw smoke one mesh at a time using the properties local to each mesh without having to solve the RTE equation over the entire interval at once.
-
-\begin{figure}[\figoptions]
-\begin{center}
-\includegraphics[width=4.0in]{figures/smoke_setup3}
-\end{center}
-\caption {Solutions to the RTE for two intervals are combined to form a solution to the RTE
-for the merger of these intervals.
-}
-\label{figsmokesetup3}
-\end{figure}
-
-\begin{figure}[\figoptions]
-\begin{center}
-\begin{tabular}{cc}
-\includegraphics[height=4.0in]{figures/plume5c_vol_orig}&
-\includegraphics[height=4.0in]{figures/plume5c_vol_side}\\
-a) front view&b) side view\\
-\end{tabular}
-\end{center}
-\caption {Volume rendered smoke plume viewed from two directions.}
-\label{volplume_example}
-\end{figure}
 
 %
 % -------------------  Slice Rendered Smoke ------------------------
@@ -598,12 +535,24 @@ where
 \tau(a,b)=\intmf{a}{b}
 \end{equation}
 to collapse data from a series of 3D data meshes into 2D images.
-2D images are constructed on the side of the 3D data meshes (at
+As illustrated in Figure \ref{fig:volplume_example}2D, images are constructed on the side of the 3D data meshes (at
 least 1, no more than 3) facing the viewer.  As the scene is moved
 through rotations and translations the surface images are
 constantly recomputed and redrawn giving the observer the illusion
 that the image is 3D drawn within (rather than on the surface) of
 the data mesh.
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[height=4.0in]{figures/plume5c_vol_orig}&
+\includegraphics[height=4.0in]{figures/plume5c_vol_side}\\
+a) front view&b) side view\\
+\end{tabular}
+\end{center}
+\caption {Volume rendered smoke plume viewed from two directions.}
+\label{fig:volplume_example}
+\end{figure}
 
 \subsection{Discretizing the Radiation Transport Equation}
 \newcommand{\htau}[1]{\hat{\tau}_{#1}}
@@ -641,7 +590,7 @@ to obtain
 \sum_{i=0}^{N-1}\htau{i}\sigai{i}\Lei{i}\Delta x
 \end{equation}
 where $\sigma_{a,i}=\sigma_t(x_i)$, $\Lei{i}=L_e(x_i)$,
-$x_i=i\Delta x$ and $\Delta x=D/N$ .  
+$x_i=i\Delta x$ and $\Delta x=D/N$ .
 The terms in equation (\ref{eq:discrete_rte}) are summed from back to front.  The $i=0$ terms are located
 furthest from the observer while the $i=N-1$ terms are located closest to the observer.  We wish to perform the sum in reverse order, from front to back so that the sum may be terminated early if further contributions would not change the result. Let $\hat{L}_j$ and $\hat{L}_j$ be intermediate results at nodes $j$ and $j-1$
 to compute $\hat{L}_D$ in (\ref{eq:discrete_rte}) as in
@@ -659,3 +608,60 @@ where from (\ref{eq:tauhat_discrete}) $\htau{j-1}/\htau{j}=\tau_{j-1}$.  Therefo
 \begin{eqnarray}
 \hat{L}_{j-1} &= &\hat{L}_{j}+\htau{j}\left[-\left(1-\tau_{j-1}\right)L_0 + \tau_{j-1}\sigai{j-1}\Lei{j-1}\Delta x\right]
 \end{eqnarray}
+
+%
+% -------------------  Combining Multiple Solutions ------------------------
+%
+
+\subsection{Volume Rendering on Multiple Meshes}
+When drawing smoke for cases with multiple data meshes, it is more practical to draw smoke one mesh at a time (rather than drawing smoke once using data from all meshes) since data from other meshes may not be accessible.  The RTE solution or equivalently the computed smoke opacity requires smoke properties for the entire line of sight which may encompass more than one data mesh.  This section discusses how smoke opacities may be computed for each individual data mesh then be combined appropriately to form smoke opacities for the entire data domain.
+
+Equation (\ref{eq:rtesoln}), is the solution to an approximate form of the radiation transport equation over a path
+from $x=0$ to $x=D$.  As illustrated in Figure \ref{figsmokesetup3},
+suppose that this path is split at $D_1$ into two parts, the first part from $0$ to $D_1$ and the second part from $D_1$ to $D$.
+Further, suppose that the RTE solution is known on each part.
+This section describes how these two solutions may be combined to form a solution
+over the entire interval $0$ to $D$.
+
+Given a radiance of $L_0$ at $x=0$, the radiance at $D$, denoted $L(D)$ is given by
+\begin{eqnarray}
+\label{eq:rtesoln2}
+L(D)&=&\tau(0,D)L_0 + \int_0^D\tau(x,D)\siga\Le dx
+\end{eqnarray}
+This is the RTE solution over the entire interval $0$ to $D$.
+Similarly, $L_1(D_1)$ and $L_2(D)$ is given by
+\begin{eqnarray*}
+L_1(D_1)&=&\tau(0,D_1)L_0 + \int_0^{D_1}\tau(x,D_1)\siga\Le dx\\
+L_2(D)&=&\tau(D_1,D)L_0 + \int_{D_1}^{D}\tau(x,D)\siga\Le dx
+\end{eqnarray*}
+where the initial conditions are $L_1(0)=L_0$ and $L_2(D_1)=L_0$.
+
+The optical depth, $\tau(a,b)=\exp\left(-\int_a^b \sigt ds\right)$, may be expressed as $\tau(a,b)=\tau(a,x)\tau(x,b)$ since
+\begin{eqnarray*}
+\tau(a,b)&=&\exp\left(-\int_a^b \sigt ds\right)\\
+&=&\exp\left(-\int_a^x \sigt ds -\int_x^b \sigt ds\right)\\
+&=&\exp\left(-\int_a^x \sigt ds\right)\exp\left(-\int_x^b \sigt ds\right)\\
+&=&\tau(a,x)\tau(x,b)
+\end{eqnarray*}
+Using this property, RTE solutions $L_1(x)$ and $L_2(x)$ over two sub-intervals $[0,D_1]$ and $[D_1,D]$ may be combined into the solution $L(x)$ over the merged
+interval $[0,D]$.  This follows from
+\begin{eqnarray*}
+L(D)&=&\tau(0,D)L_0 + \int_0^D\tau(x,D)\siga\Le dx\\
+&=&\tau(0,D_1)\tau(D_1,D)L_0 + \int_0^{D_1}\tau(x,D_1)\tau(D_1,D)\Le dx + \int_{D_1}^{D}\tau(x,D)\Le dx\\
+&=&\tau(D_1,D)
+\underbrace{\left(\tau(0,D_1)L_0 + \int_0^{D_1}\tau(x,D_1)\Le dx\right)}_{L_1(D_1)} +
+\underbrace{\int_{D_1}^{D}\tau(x,D)\Le dx}_{L_2(D)-\tau(D_1,D)L_0}\\
+&=&\tau(D_1,D)L_1(D_1)+L_2(D)-\tau(D_1,D)L_0\\
+&=&\tau(D_1,D)(L_1(D_1)-L_0) + L_2(D)
+\end{eqnarray*}
+This relationship may be exploited to draw smoke one mesh at a time using the properties local to each mesh without having to solve the RTE equation over the entire interval at once.
+
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[width=4.0in]{figures/smoke_setup3}
+\end{center}
+\caption {Solutions to the RTE for two intervals are combined to form a solution to the RTE
+for the merger of these intervals.
+}
+\label{figsmokesetup3}
+\end{figure}
