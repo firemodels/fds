@@ -224,7 +224,8 @@ int setVolSmokeShaders() {
     "  }" // end inside=1
     "  fragmaxpos = mix(fragpos,eyepos,-alpha_min);"
     "  pathdist = distance(fragpos,fragmaxpos);"
-    "  n_iter = max(1,int(pathdist/dcell+0.5));"
+    "  n_iter = int(pathdist/dcell+0.5);"
+    "  if(n_iter<1)n_iter=1;"
     "  dstep = pathdist*xyzmaxdiff/n_iter;"
     "  tauhat=1.0;"
     "  alphahat=0.0;"
