@@ -142,6 +142,7 @@ $RUNFDS Species FED_FIC_SMIX
 $RUNFDS Species Methane_flame_simple
 $RUNFDS Species Methane_flame_primitive
 $RUNFDS Species Methane_flame_lumped
+$RUNFDS Species RR_Test
 $RUNFDS Sprinklers_and_Sprays activate_sprinklers
 $RUNFDS Sprinklers_and_Sprays bucket_test_2
 $RUNFDS Sprinklers_and_Sprays bucket_test
