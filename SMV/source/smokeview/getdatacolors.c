@@ -908,7 +908,7 @@ void getZoneColors(const float *t, int nt, unsigned char *it,
 
 void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, float *ttmax, 
               int ndatalevel, int nlevel,
-              char **labels,char **labelsiso,char **scale, float *tlevels, float *tlevels256,
+              char **labels,char **labelsiso,char **scale, float *fscale, float *tlevels, float *tlevels256,
               int *extreme_min, int *extreme_max
               ){
   int n;
@@ -1028,16 +1028,19 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
     local_tmin *= pow((double)10.0,(double)-expmin);
     local_tmax *= pow((double)10.0,(double)-expmin);
     sprintf(*scale,"*10^%i",expmin);
+    *fscale=pow(10.0,(float)expmin);
   }
   if(expmin==0&&(expmax<EXPMIN||expmax>EXPMAX)){
     local_tmin *= pow((double)10.0,(double)-expmax);
     local_tmax *= pow((double)10.0,(double)-expmax);
     sprintf(*scale,"*10^%i",expmax);
+    *fscale=pow(10.0,(float)expmax);
   }
   if(expmax==0&&(expmin<EXPMIN||expmin>EXPMAX)){
     local_tmin *= pow((double)10.0,(double)-expmin);
     local_tmax *= pow((double)10.0,(double)-expmin);
     sprintf(*scale,"*10^%i",expmin);
+    *fscale=pow(10.0,(float)expmin);
   }
 
   range = local_tmax-local_tmin;
@@ -1320,6 +1323,7 @@ void drawColorBars(void){
   int plot3dunitclass, plot3dunittype;
   int plot3dflag=0;
   float *plot3dfactor=NULL;
+  float plot3dfactor2[2];
   float plot3drange;
   char plot3dcolorlabel[256];
   char *plot3dcolorlabel_ptr=NULL;
@@ -1663,7 +1667,15 @@ void drawColorBars(void){
     outputBarText(right[0],bottom[0],color1,"Plot3d");
     outputBarText(right[0],bottom[1],color1,p3label);
     outputBarText(right[0],bottom[2],color1,unitlabel);
-    outputBarText(right[0],bottom[3],color1,scalep3[plotn-1]);
+    if(strcmp(unitlabel,"ppm")==0&&plot3dfactor!=NULL){
+      plot3dfactor2[0]=*plot3dfactor*fscalep3[plotn-1];
+      plot3dfactor2[1]=0.0;
+      plot3dfactor=plot3dfactor2;
+    }
+    else{
+      outputBarText(right[0],bottom[3],color1,scalep3[plotn-1]);
+    }
+
   }
   if(showzone==1&&sethazardcolor==0){
     strcpy(unitlabel,"C");

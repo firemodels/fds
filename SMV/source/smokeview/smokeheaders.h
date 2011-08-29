@@ -773,7 +773,7 @@ EXTERNCPP void getZoneColors(const float *t, int nt, unsigned char *it,
                );
 EXTERNCPP void getPlot3DColors(int iplot, int settmin, float *ttmin, int settmax, float *ttmax, 
               int ndatalevel, int nlevel,
-              char **labels,char **labelsiso, char **scale, float *tlevels, float *tlevels256,
+              char **labels,char **labelsiso, char **scale, float *fscale, float *tlevels, float *tlevels256,
               int *extreme_min, int *extreme_max
               );
 EXTERNCPP float getsliceval(slice *sd, unsigned char ival);

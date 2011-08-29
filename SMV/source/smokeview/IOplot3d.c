@@ -145,6 +145,9 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
       }
       FREEMEMORY(scalep3);
     }
+    if(fscalep3!=NULL){
+      FREEMEMORY(fscalep3);
+    }
     if(p3levels!=NULL){
       for(nn=0;nn<mxplot3dvars;nn++){
         FREEMEMORY(p3levels[nn]);
@@ -277,6 +280,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
 
   if(NewMemory((void **)&colorlabelp3,mxplot3dvars*sizeof(char **))==0||
      NewMemory((void **)&colorlabeliso,mxplot3dvars*sizeof(char **))==0||
+     NewMemory((void **)&fscalep3     ,mxplot3dvars*sizeof(float))==0||
      NewMemory((void **)&scalep3     ,mxplot3dvars*sizeof(char *))==0){
     *errorcode=1;
     readplot3d("",ifile,UNLOAD,&error);
@@ -286,6 +290,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
     colorlabelp3[nn]=NULL;
     colorlabeliso[nn]=NULL;
     scalep3[nn]=NULL;
+    fscalep3[nn]=1.0;
   }
   for(nn=0;nn<mxplot3dvars;nn++){
     if(NewMemory((void **)&colorlabelp3[nn],MAXRGB*sizeof(char *))==0||
@@ -357,7 +362,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
     }
     getPlot3DColors(nn,
                   setp3min[nn],p3min+nn, setp3max[nn],p3max+nn, 
-                  nrgb_full, nrgb-1, *(colorlabelp3+nn),*(colorlabeliso+nn),scalep3copy,p3levels[nn],p3levels256[nn],
+                  nrgb_full, nrgb-1, *(colorlabelp3+nn),*(colorlabeliso+nn),scalep3copy,fscalep3+nn,p3levels[nn],p3levels256[nn],
                   plot3dinfo[ifile].extreme_min+nn,plot3dinfo[ifile].extreme_max+nn);
     scalep3copy++;
   }
