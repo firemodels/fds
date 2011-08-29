@@ -2985,7 +2985,6 @@ void LoadVSliceMenu(int value){
     submenulabel = slicei->label.longlabel;
     for(i=0;i<nvslice;i++){
       char *longlabel;
-      int errorcode;
 
       vslicei = vsliceinfo + i;
       slicei=sliceinfo + vslicei->ival;
@@ -3391,8 +3390,6 @@ void ShowAllSlices(char *type1, char *type2){
     int msliceindex;
   
     if(trainerload==2){
-      int i;
-
       if(trainerload==trainerload_old){
         trainer_temp_index++;
         if(trainer_temp_index>trainer_temp_n-1){
@@ -3402,8 +3399,6 @@ void ShowAllSlices(char *type1, char *type2){
       msliceindex=trainer_temp_indexes[trainer_temp_index];
     }
     else{ 
-      int i;
-
       if(trainerload==trainerload_old){
         trainer_oxy_index++;
         if(trainer_oxy_index>trainer_oxy_n-1){
@@ -3503,7 +3498,6 @@ void LoadSliceMenu(int value){
       submenulabel = slicei->label.longlabel;
       for(i=0;i<nsliceinfo;i++){
         char *longlabel;
-        int errorcode;
 
         slicei = sliceinfo + i;
         longlabel = slicei->label.longlabel;
