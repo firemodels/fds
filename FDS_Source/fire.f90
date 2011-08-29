@@ -89,8 +89,8 @@ DO K=1,KBAR
             CASE(EXPLICIT_EULER)
                CALL ODE_EXPLICIT_EULER(I,J,K,ZZ_GET,Q(I,J,K))
             CASE(RUNGE_KUTTA_2)
-               CALL ODE_RUNGE_KUTTA_2(I,J,K,ZZ_GET,Q(I,J,K))               
-         END SELECT        
+               CALL ODE_RUNGE_KUTTA_2(I,J,K,ZZ_GET,Q(I,J,K))
+         END SELECT
 
          ! Update RSUM and ZZ         
          IF (Q(I,J,K) > 0._EB) THEN
@@ -224,6 +224,7 @@ ODE_LOOP: DO WHILE (DT_SUM < DT)
    IF (ANY(ZZ_N < 0._EB)) THEN
       DO NS=0,N_TRACKED_SPECIES
           IF (ZZ_N(NS) < 0._EB .AND. ABS(DZZDT(NS))>ZERO_P) DT_NEW = MIN(DT_NEW,-ZZ_I(NS)/DZZDT(NS))
+             IF (RN%E <= ZERO_P) EXIT ODE_LOOP
       ENDDO
    ENDIF  
 
@@ -289,6 +290,7 @@ ODE_LOOP: DO WHILE (DT_SUM < DT)
    IF (ANY(ZZ_N < 0._EB)) THEN
       DO NS=0,N_TRACKED_SPECIES
           IF (ZZ_N(NS) < 0._EB .AND. ABS(DZZDT(NS))>ZERO_P) DT_NEW = MIN(DT_NEW,-ZZ_I(NS)/DZZDT(NS))
+             IF (RN%E <= ZERO_P) EXIT ODE_LOOP
       ENDDO
    ENDIF  
 
@@ -307,6 +309,7 @@ ODE_LOOP: DO WHILE (DT_SUM < DT)
    IF (ANY(ZZ_N < 0._EB)) THEN
       DO NS=0,N_TRACKED_SPECIES
           IF (ZZ_N(NS) < 0._EB .AND. ABS(DZZDT(NS)+DZZDT2(NS))>ZERO_P) DT_NEW = MIN(DT_NEW,-2._EB*ZZ_I(NS)/(DZZDT(NS)+DZZDT2(NS)))
+          IF (RN%E <= ZERO_P) EXIT ODE_LOOP
       ENDDO
    ENDIF     
 
@@ -319,10 +322,8 @@ ODE_LOOP: DO WHILE (DT_SUM < DT)
       EXIT ODE_LOOP
    ENDIF   
 
-   ZZ_I = ZZ_I +0.5_EB*(DZZDT+DZZDT2)*DT_NEW
-
    Q_OUT = Q_OUT+Q_SUM*DT_NEW
- 
+   ZZ_I = ZZ_I + 0.5_EB*(DZZDT+DZZDT2) * DT_NEW
    DT_SUM = DT_SUM + DT_NEW
    IF (DT_NEW < DT_ODE) DT_NEW = DT_ODE
    IF (DT_NEW + DT_SUM > DT) DT_NEW = DT - DT_SUM
