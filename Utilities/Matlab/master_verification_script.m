@@ -40,17 +40,17 @@ plotdir = [pwd,'/../../Manuals/'];
 
 %Special cases
  
-% run scripts/turb_model
-% run scripts/wall_model
-% run scripts/pyrolysis
-% run scripts/birch_tga
-% run scripts/water_ice_water
-% run scripts/pcm_slab
-% run scripts/pulsating
-% run scripts/compression_wave
-% run scripts/plate_view_factor
-% run scripts/low_flux_hot_gas_filling
-% run scripts/terminal_velocity_convergence
-% run scripts/flat_fire_comparison
+run scripts/turb_model
+run scripts/wall_model
+run scripts/pyrolysis
+run scripts/birch_tga
+run scripts/water_ice_water
+run scripts/pcm_slab
+run scripts/pulsating
+run scripts/compression_wave
+run scripts/plate_view_factor
+run scripts/low_flux_hot_gas_filling
+run scripts/terminal_velocity_convergence
+run scripts/flat_fire_comparison
 
 display('verification scripts completed successfully!')
