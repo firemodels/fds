@@ -1,8 +1,8 @@
 &HEAD CHID='Main_Control_Room_No_Purge', TITLE='Cabinet fire in MCR affecting visibility of operators.'/
 
-&MESH IJK=123,81,25, XB=0.0, 24.6, 0.0, 16.2, 0.0, 5.2 /
+&MESH IJK=123,81,25, XB=0.0,24.6,0.0,16.2,0.0,5.2 /
 
-&TIME T_BEGIN=-60.0, T_END=3600.0 /
+&TIME T_END=3600.0 /
 
 General construction
 
@@ -18,20 +18,28 @@ General construction
       MATL_ID        = 'CONCRETE'
       THICKNESS      = 0.9 /
 
+&SURF ID             = 'CONCRETE CEILING'
+      COLOR          = 'GRAY 50'
+      MATL_ID        = 'CONCRETE'
+      THICKNESS      = 0.5 /
+
 Fire
 
 &REAC ID                          = 'XPE/Neoprene'
       C                           = 2.
       H                           = 4.5
       OTHER                       = 0.5
-      MW_OTHER                    = 34.
+      MW_OTHER                    = 35.5
       HEAT_OF_COMBUSTION          = 10300.
       MASS_EXTINCTION_COEFFICIENT = 8700.
-      SOOT_YIELD                  = 0.1 /
+      CO_YIELD                    = 0.1
+      SOOT_YIELD                  = 0.175 /
+
+&RADI RADIATIVE_FRACTION=0.53 /
 
 &SURF ID     = 'ELECTRICAL FIRE'
       COLOR  = 'ORANGE'
-      HRRPUA = 702.
+      HRRPUA = 5850.
       RAMP_Q = 'fire' / 
 
 &RAMP ID='fire', T=   0, F=0.0000 /
@@ -62,15 +70,8 @@ Fire
 &RAMP ID='fire', T=1200, F=1.0000 /
 &RAMP ID='fire', T=2340, F=0.0000 /
 
-&OBST XB= 1.5, 1.5, 3.0, 5.0, 0.0, 2.4, SURF_ID = 'CABINET' / cabinet side
-&OBST XB= 2.5, 2.5, 3.0, 5.0, 0.0, 2.4, SURF_ID = 'CABINET' / cabinet side
-&OBST XB= 1.5, 2.5, 3.0, 3.0, 0.0, 2.4, SURF_ID = 'CABINET' / cabinet side
-&OBST XB= 1.5, 2.5, 5.0, 5.0, 0.0, 2.4, SURF_ID = 'CABINET' / cabinet side
-&OBST XB= 1.5, 2.5, 3.0, 5.0, 2.4, 2.4, SURF_ID = 'CABINET' / cabinet top
-&HOLE XB= 2.4, 2.6, 3.7, 4.3, 1.8, 2.1 / Air Vent
-&HOLE XB= 1.3, 1.6, 3.5, 4.5, 0.2, 0.6 / Grill
-
-&OBST XB= 1.8, 2.0, 3.5, 4.5, 0.4, 1.4, SURF_ID6 = 'CABINET','ELECTRICAL FIRE','CABINET','CABINET','CABINET','CABINET' /
+&OBST XB= 1.5, 2.5, 3.0, 5.0, 0.0, 2.4, SURF_ID = 'CABINET' / 
+&VENT XB= 2.5, 2.5, 3.7, 4.3, 1.9, 2.1, SURF_ID = 'ELECTRICAL FIRE' / 
 
 Ventilation
 
@@ -86,47 +87,33 @@ Ventilation
 
 &SURF ID             = 'SUPPLY'
       COLOR          = 'BLUE 4'
-      VOLUME_FLUX    = -0.48
+      VOLUME_FLUX    = -0.45
       RAMP_V	     = 'PURGE' /
 
 &SURF ID             = 'RETURN'
       COLOR          = 'CARROT'
-      VOLUME_FLUX    = 1.28
+      VOLUME_FLUX    = 1.34
       RAMP_V	     = 'PURGE' / 
 
-&RAMP ID='PURGE', T=-60.0, F=0.0 /
-&RAMP ID='PURGE', T=  1.0, F=0.0 /
-&RAMP ID='PURGE', T=120.0, F=0.0 /
-&RAMP ID='PURGE', T=121.0, F=0.0 /
+&RAMP ID='PURGE', T=   0.0, F=0.0 /
+&RAMP ID='PURGE', T=3600.0, F=0.0 /
 
 &OBST XB=  3.4,  4.0,  3.0,  3.6, 3.0, 5.2, SURF_ID = 'DUCT STEEL' /
-&OBST XB=  3.4,  4.0,  3.0,  3.6, 2.8, 2.8, SURF_ID = 'DUCT STEEL' /
-&HOLE XB=  3.6,  3.8,  3.2,  3.4, 2.7, 2.9 /
 &VENT XB=  3.4,  4.0,  3.0,  3.6, 3.0, 3.0, SURF_ID = 'SUPPLY' /
 
 &OBST XB=  3.4,  4.0,  8.6,  9.2, 3.0, 5.2, SURF_ID = 'DUCT STEEL' /
-&OBST XB=  3.4,  4.0,  8.6,  9.2, 2.8, 2.8, SURF_ID = 'DUCT STEEL' /
-&HOLE XB=  3.6,  3.8,  8.8,  9.0, 2.7, 2.9 /
 &VENT XB=  3.4,  4.0,  8.6,  9.2, 3.0, 3.0, SURF_ID = 'SUPPLY' /
 
 &OBST XB= 12.0, 12.6,  3.0,  3.6, 3.0, 5.2, SURF_ID = 'DUCT STEEL' /
-&OBST XB= 12.0, 12.6,  3.0,  3.6, 2.8, 2.8, SURF_ID = 'DUCT STEEL' /
-&HOLE XB= 12.2, 12.4,  3.2,  3.4, 2.7, 2.9 /
 &VENT XB= 12.0, 12.6,  3.0,  3.6, 3.0, 3.0, SURF_ID = 'SUPPLY' /
 
 &OBST XB= 12.0, 12.6,  8.6,  9.2, 3.0, 5.2, SURF_ID = 'DUCT STEEL' /
-&OBST XB= 12.0, 12.6,  8.6,  9.2, 2.8, 2.8, SURF_ID = 'DUCT STEEL' /
-&HOLE XB= 12.2, 12.4,  8.8,  9.0, 2.7, 2.9 /
 &VENT XB= 12.0, 12.6,  8.6,  9.2, 3.0, 3.0, SURF_ID = 'SUPPLY' /
 
 &OBST XB= 20.6, 21.2,  3.0,  3.6, 3.0, 5.2, SURF_ID = 'DUCT STEEL' /
-&OBST XB= 20.6, 21.2,  3.0,  3.6, 2.8, 2.8, SURF_ID = 'DUCT STEEL' /
-&HOLE XB= 20.8, 21.0,  3.2,  3.4, 2.7, 2.9 /
 &VENT XB= 20.6, 21.2,  3.0,  3.6, 3.0, 3.0, SURF_ID = 'SUPPLY' /
 
 &OBST XB= 20.6, 21.2,  8.6,  9.2, 3.0, 5.2, SURF_ID = 'DUCT STEEL' /
-&OBST XB= 20.6, 21.2,  8.6,  9.2, 2.8, 2.8, SURF_ID = 'DUCT STEEL' /
-&HOLE XB= 20.8, 21.0,  8.8,  9.0, 2.7, 2.9 /
 &VENT XB= 20.6, 21.2,  8.6,  9.2, 3.0, 3.0, SURF_ID = 'SUPPLY' /
 
 &OBST XB=  3.4,  4.0, 12.7, 13.3, 4.9, 5.2, SURF_ID = 'DUCT STEEL' /
@@ -145,9 +132,10 @@ Miscellaneous construction
 &SURF ID             = 'CARPETED FLOOR'
       COLOR          = 'LIGHT STEEL BLUE'
       MATL_ID(1:2,1) = 'CARPET', 'CONCRETE'
-      THICKNESS      = 0.01,0.5 /
+      THICKNESS      = 0.0125,0.5 /
 
 &VENT MB='ZMIN', SURF_ID='CARPETED FLOOR' / 
+&VENT MB='ZMAX', SURF_ID='CONCRETE CEILING' / 
 
 &MATL ID             = 'GYPSUM'
       SPECIFIC_HEAT  = 1.1
@@ -191,8 +179,9 @@ Miscellaneous construction
 &OBST XB=  3.5,  5.5,  4.0,  5.0, 0.0, 2.4, SURF_ID = 'CABINET' / 
 &OBST XB=  9.5, 14.5,  4.0,  5.0, 0.0, 2.4, SURF_ID = 'CABINET' / 
 &OBST XB= 18.6, 20.6,  4.0,  5.0, 0.0, 2.4, SURF_ID = 'CABINET' / 
-&OBST XB=  0.0, 24.6,  0.0,  2.0, 0.0, 2.4, SURF_ID = 'CABINET' / 
-&OBST XB= 22.6, 22.6,  3.0,  5.0, 0.0, 2.4, SURF_ID = 'CABINET' / 
+&OBST XB=  0.0, 24.6,  0.0,  1.0, 0.0, 2.4, SURF_ID = 'CABINET' / 
+&OBST XB=  0.0, 24.6,  1.0,  1.5, 0.0, 1.0, SURF_ID = 'CABINET' / 
+&OBST XB= 21.6, 22.6,  3.0,  5.0, 0.0, 2.4, SURF_ID = 'CABINET' / 
 
 &MATL ID                    = 'WOOD'
       SPECIFIC_HEAT         = 2.5
@@ -202,7 +191,7 @@ Miscellaneous construction
 &SURF ID             = 'TABLE'
       COLOR          = 'TOMATO'
       MATL_ID        = 'WOOD'
-      THICKNESS      = 0.05 /
+      THICKNESS      = 0.20 /
 
 &OBST XB= 11.0, 13.0, 10.0, 11.0, 1.0, 1.0, SURF_ID = 'TABLE' / back table top
 &OBST XB= 11.0, 13.0,  8.0,  9.0, 1.0, 1.0, SURF_ID = 'TABLE' / front table top
