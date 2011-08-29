@@ -167,28 +167,50 @@ void RenderFrame(int view_mode){
     int image_num;
     char suffix[20];
 
+    strcpy(renderfile_suffix,"_");
     if(RenderTime==0){
       image_num=seqnum;
-      strcpy(renderfile_suffix,"_s");
+      strcat(renderfile_suffix,"s");
     }
     else{
       image_num=itimes/RenderSkip;
       strcpy(renderfile_suffix,"_");
     }
+    if(renderfilelabel==0||RenderTime==0){
+      sprintf(suffix,"%04i",image_num);
+    }
+    else{
+      float time;
+      char timelabel[20], *timelabelptr;
+
+      time = times[itimes];
+      if(time<0.001){
+        sprintf(timelabel,"%4.4f",time);
+      }
+      else if(time>=0.001&&time<0.01){
+        sprintf(timelabel,"%4.3f",time);
+      }
+      else if(time>=0.01&&time<0.1){
+        sprintf(timelabel,"%4.2f",time);
+      }
+      else{
+        sprintf(timelabel,"%4.1f",time);
+      }
+      trimzeros(timelabel);
+      trim(timelabel);
+      timelabelptr=trim_front(timelabel);
+      strcpy(suffix,timelabelptr);
+    }
     switch (view_mode){
     case VIEW_CENTER:
-      sprintf(suffix,"%04i",image_num);
       if(RenderTime==0)seqnum++;
       break;
     case VIEW_LEFT:
-      sprintf(suffix,"%04i_L",image_num);
+      strcat(suffix,"_L");
       break;
     case VIEW_RIGHT:
-      if(showstereo!=0&&showstereo!=1){
-        sprintf(suffix,"%04i",image_num);
-      }
-      else{
-        sprintf(suffix,"%04i_R",image_num);
+      if(showstereo==0||showstereo==1){
+        strcat(suffix,"_R");
       }
       if(RenderTime==0)seqnum++;
       break;

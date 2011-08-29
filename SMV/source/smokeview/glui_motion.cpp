@@ -63,6 +63,7 @@ extern "C" char glui_motion_revision[]="$Revision$";
 #define RENDER_SKIP_LIST 2
 #define RENDER_START 3
 #define RENDER_STOP 4
+#define RENDER_LABEL 5
 
 void EYEVIEW_CB(int var);
 void BUTTON_hide2_CB(int var);
@@ -88,6 +89,7 @@ GLUI_Rollout *panel_projection=NULL;
 GLUI_Panel *panel_anglebuttons=NULL;
 GLUI_RadioGroup *projection_radio=NULL,*eyeview_radio=NULL;
 GLUI_RadioGroup *render_type_radio=NULL;
+GLUI_RadioGroup *render_label_radio=NULL;
 GLUI_RadioGroup *eyelevel_radio=NULL;
 GLUI_Translation *rotate_zx=NULL,*eyerotate_z=NULL;
 GLUI_Translation *translate_z=NULL,*translate_xy=NULL;
@@ -169,6 +171,22 @@ extern "C" void reset_glui_view(int ival){
 
 extern "C" void enable_reset_saved_view(void){
   if(reset_saved_view!=NULL)reset_saved_view->enable();
+}
+
+
+/* ------------------ update_glui_filelabel ------------------------ */
+
+extern "C" void update_glui_filelabel(int var){
+  if(var==0||var==1){
+    if(render_label_radio!=NULL){
+      int val1;
+
+      val1 = render_label_radio->get_int_val();
+      if(val1!=var){
+        render_label_radio->set_int_val(var);
+      }
+    }
+  }
 }
 
 /* ------------------ update_glui_speed ------------------------ */
@@ -348,6 +366,12 @@ extern "C" void glui_motion_setup(int main_window){
 #ifdef pp_JPEG
   glui_motion->add_radiobutton_to_group(render_type_radio,"JPEG");
 #endif
+  glui_motion->add_separator_to_panel(render_panel);
+  render_label_radio=glui_motion->add_radiogroup_to_panel(render_panel,&renderfilelabel,RENDER_LABEL,RENDER_CB);
+  glui_motion->add_radiobutton_to_group(render_label_radio,"frame number");
+  glui_motion->add_radiobutton_to_group(render_label_radio,"time (s)");
+  update_glui_filelabel(renderfilelabel);
+
 
   render_size_index=RenderWindow; 
   render_size_list = glui_motion->add_listbox_to_panel(render_panel,_("Size:"),&render_size_index,RENDER_SIZE_LIST,RENDER_CB);
@@ -1155,6 +1179,8 @@ void EYEVIEW_CB(int var){
 void RENDER_CB(int var){
   updatemenu=1;
   switch (var){
+    case RENDER_LABEL:
+      break;
     case RENDER_TYPE:
       break;
     case RENDER_SIZE_LIST:

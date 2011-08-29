@@ -782,6 +782,7 @@ SVEXTERN char ext_jpg[5];
 SVEXTERN char ext_gif[5];
 #endif
 SVEXTERN int renderfiletype;
+SVEXTERN int SVDECL(renderfilelabel,0);
 SVEXTERN char part_ext[6];
 SVEXTERN char ini_ext[5];
 

@@ -1352,6 +1352,14 @@ void RenderMenu(int value){
     render_double_state=0;
     RenderState(0);
     break;
+  case RenderLABELframenumber:
+    renderfilelabel=0;
+    update_glui_filelabel(renderfilelabel);
+    break;
+  case RenderLABELtime:
+    renderfilelabel=1;
+    update_glui_filelabel(renderfilelabel);
+    break;
   case RenderPNG:
      renderfiletype=0;
      updatemenu=1;  
@@ -6483,100 +6491,100 @@ updatemenu=0;
   if(frameratevalue!=2004)glutAddMenuEntry(_("4 x Real time"),2004);
   if(frameratevalue!=1000)glutAddMenuEntry(_("Unlimited"),1000);
   if(frameratevalue==1000)glutAddMenuEntry(_("*Unlimited"),1000);
-  if(frameratevalue<0){glutAddMenuEntry(_("*Step"),-1);}
-   else{glutAddMenuEntry(_("Step"),-1);}
-
-/* --------------------------------render menu -------------------------- */
-   {
-     char renderwindow[1024];
-     char renderwindow2[1024];
-     char renderwindow3[1024];
-     char renderwindow4[1024];
-
-
-     sprintf(renderwindow,"%i%s%i(current)",screenWidth,"x",screenHeight);
-     strcpy(renderwindow2,"*");
-     strcat(renderwindow2,renderwindow);
-     sprintf(renderwindow3,"%i%s%i(2*current)",2*screenWidth,"x",2*screenHeight);
-     strcpy(renderwindow4,"*");
-     strcat(renderwindow4,renderwindow3);
-
-
-  CREATEMENU(rendermenu,RenderMenu);
-  glutAddMenuEntry("SIZE",10000);
-  if(renderW==320){
-    glutAddMenuEntry("*320x240",Render320);
-    glutAddMenuEntry("640x480",Render640);
-    glutAddMenuEntry(renderwindow,RenderWindow);
-    glutAddMenuEntry(renderwindow3,Render2Window);
-  }
-  else if(renderW==640){
-    glutAddMenuEntry("320x240",Render320);
-    glutAddMenuEntry("*640x480",Render640);
-    glutAddMenuEntry(renderwindow,RenderWindow);
-    glutAddMenuEntry(renderwindow3,Render2Window);
-  }
-  else if(renderW==2*screenWidth){
-    glutAddMenuEntry("320x240",Render320);
-    glutAddMenuEntry("640x480",Render640);
-    glutAddMenuEntry(renderwindow,RenderWindow);
-    glutAddMenuEntry(renderwindow4,Render2Window);
+  if(frameratevalue<0){
+    glutAddMenuEntry(_("*Step"),-1);
   }
   else{
-    glutAddMenuEntry("320x240",Render320);
-    glutAddMenuEntry("640x480",Render640);
-    glutAddMenuEntry(renderwindow2,RenderWindow);
-    glutAddMenuEntry(renderwindow3,Render2Window);
+    glutAddMenuEntry(_("Step"),-1);
   }
-  glutAddMenuEntry("-",10000);
-  glutAddMenuEntry(_("Type"),10000);
-  if(renderfiletype==0){
-    glutAddMenuEntry("*PNG",RenderPNG);
+
+/* --------------------------------render menu -------------------------- */
+  {
+    char renderwindow[1024];
+    char renderwindow2[1024];
+    char renderwindow3[1024];
+    char renderwindow4[1024];
+    char rendertemp[1024];
+
+    strcpy(renderwindow,"  ");
+    if(renderW==320)strcat(renderwindow,"*");
+    strcat(renderwindow,"320x240");
+
+    strcpy(renderwindow2,"  ");
+    if(renderW==640)strcat(renderwindow2,"*");
+    strcat(renderwindow2,"640x480");
+
+    sprintf(rendertemp,"%i%s%i (current)",screenWidth,"x",screenHeight);
+    strcpy(renderwindow3,"  ");
+    if(renderW!=320&&renderW!=640&&renderW!=2*screenWidth)strcat(renderwindow3,"*");
+    strcat(renderwindow3,rendertemp);
+
+    sprintf(rendertemp,"%i%s%i (2*current)",2*screenWidth,"x",2*screenHeight);
+    strcpy(renderwindow4,"  ");
+    if(renderW==2*screenWidth)strcat(renderwindow4,"*");
+    strcat(renderwindow4,rendertemp);
+
+    CREATEMENU(rendermenu,RenderMenu);
+    glutAddMenuEntry("SIZE:",10000);
+    glutAddMenuEntry(renderwindow,Render320);
+    glutAddMenuEntry(renderwindow2,Render640);
+    glutAddMenuEntry(renderwindow3,RenderWindow);
+    glutAddMenuEntry(renderwindow4,Render2Window);
+
+    glutAddMenuEntry(_("Type:"),10000);
+    if(renderfiletype==0){
+      glutAddMenuEntry("  *PNG",RenderPNG);
 #ifdef pp_JPEG
-    glutAddMenuEntry("JPEG",RenderJPEG);
+      glutAddMenuEntry("  JPEG",RenderJPEG);
 #endif
 #ifdef pp_GDGIF
-    glutAddMenuEntry("GIF",RenderGIF);
+      glutAddMenuEntry("  GIF",RenderGIF);
 #endif
-  }
-  if(renderfiletype==1){
-    glutAddMenuEntry("PNG",RenderPNG);
+    }
+    if(renderfiletype==1){
+      glutAddMenuEntry("  PNG",RenderPNG);
 #ifdef pp_JPEG
-    glutAddMenuEntry("*JPEG",RenderJPEG);
+      glutAddMenuEntry("  *JPEG",RenderJPEG);
 #endif
 #ifdef pp_GDGIF
-    glutAddMenuEntry("GIF",RenderGIF);
+      glutAddMenuEntry("  GIF",RenderGIF);
 #endif
-  }
-  if(renderfiletype==2){
-    glutAddMenuEntry("PNG",RenderPNG);
+    }
+    if(renderfiletype==2){
+      glutAddMenuEntry("  PNG",RenderPNG);
 #ifdef pp_JPEG
-    glutAddMenuEntry("JPEG",RenderJPEG);
+      glutAddMenuEntry("  JPEG",RenderJPEG);
 #endif
 #ifdef pp_GDGIF
-    glutAddMenuEntry("*GIF",RenderGIF);
+      glutAddMenuEntry("  *GIF",RenderGIF);
 #endif
+    }
+
+    glutAddMenuEntry("Suffix:",10000);
+    if(renderfilelabel==0){
+      glutAddMenuEntry("  *Frame number",RenderLABELframenumber);
+      glutAddMenuEntry("  Time",RenderLABELtime);
+    }
+    if(renderfilelabel==1){
+      glutAddMenuEntry("  Frame number",RenderLABELframenumber);
+      glutAddMenuEntry("  *Time",RenderLABELtime);
+    }
+    glutAddMenuEntry(_("Number:"),10000);
+    glutAddMenuEntry(_("  One Frame"),RenderOnce);
+    update_glui_render();
+    if(RenderTime==1||touring==1){
+      glutAddMenuEntry(_("  All frames"),1);
+      glutAddMenuEntry(_("  Every 2nd frame"),2);
+      glutAddMenuEntry(_("  Every 3rd frame"),3);
+      glutAddMenuEntry(_("  Every 4th frame"),4);
+      glutAddMenuEntry(_("  Every 5th frame"),5);
+      glutAddMenuEntry(_("  Every 10th frame"),10);
+      glutAddMenuEntry(_("  Every 20th frame"),20);
+      glutAddMenuEntry(_("  Cancel"),RenderCancel);
+    }
   }
-  glutAddMenuEntry("-",10000);
-  glutAddMenuEntry(_("Number"),10000);
-  glutAddMenuEntry(_("One Frame"),RenderOnce);
-  update_glui_render();
-  if(RenderTime==1||touring==1){
-   // if(render_double_state==0){
-    glutAddMenuEntry(_("All frames"),1);
-    glutAddMenuEntry(_("Every 2nd frame"),2);
-    glutAddMenuEntry(_("Every 3rd frame"),3);
-    glutAddMenuEntry(_("Every 4th frame"),4);
-    glutAddMenuEntry(_("Every 5th frame"),5);
-    glutAddMenuEntry(_("Every 10th frame"),10);
-    glutAddMenuEntry(_("Every 20th frame"),20);
-    glutAddMenuEntry(_("Cancel"),RenderCancel);
-   // }
-  }
-   }
 
    /* --------------------------------viewpoint menu -------------------------- */
-
 
   CREATEMENU(dialogmenu,DialogMenu);
   if(nterraininfo>0){

@@ -8622,6 +8622,12 @@ int readini2(char *inifile, int localfile){
 #endif
       continue;
     }
+    if(match(buffer,"RENDERFILELABEL",15)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i ",&renderfilelabel);
+      if(renderfilelabel!=0)renderfilelabel=1;
+      continue;
+    }
     if(match(buffer,"SHOWGRIDLOC",11)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i ",&visgridloc);
@@ -10485,6 +10491,8 @@ void writeini(int flag){
   fprintf(fileout," %i\n",apertureindex);
   fprintf(fileout,"RENDERFILETYPE\n");
   fprintf(fileout," %i\n",renderfiletype);
+  fprintf(fileout,"RENDERFILELABEL\n");
+  fprintf(fileout," %i\n",renderfilelabel);
   fprintf(fileout,"SHOWGRIDLOC\n");
   fprintf(fileout," %i\n",visgridloc);
   fprintf(fileout,"PIXELSKIP\n");
