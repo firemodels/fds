@@ -2108,10 +2108,12 @@ void updatecolors(int changecolorindex){
     int tflag=0;
     unsigned char *alpha;
     colorbardata *cbi;
+    float *fire_cb;
 
     cbi = colorbarinfo + colorbartype;
 
     alpha = colorbarinfo[colorbartype].alpha;
+    fire_cb = colorbarinfo[fire_colorbar_index].colorbar;
     for(n=0;n<nrgb_full;n++){
       float rgb_cb[3],graylevel;
 
@@ -2124,9 +2126,9 @@ void updatecolors(int changecolorindex){
       else{
         rgb_full[n][3]=transparentlevel_local;
       }
-      rgb_smokecolormap[4*n+0]=fire_colorbar->colorbar[3*n];
-      rgb_smokecolormap[4*n+1]=fire_colorbar->colorbar[3*n+1];
-      rgb_smokecolormap[4*n+2]=fire_colorbar->colorbar[3*n+2];
+      rgb_smokecolormap[4*n+0]=fire_cb[3*n];
+      rgb_smokecolormap[4*n+1]=fire_cb[3*n+1];
+      rgb_smokecolormap[4*n+2]=fire_cb[3*n+2];
       if(alpha[n]==0){
         rgb_smokecolormap[4*n+3]=0.0;
       }
