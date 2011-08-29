@@ -9830,7 +9830,7 @@ QUANTITY_INDEX_LOOP: DO ND=-N_OUTPUT_QUANTITIES,N_OUTPUT_QUANTITIES
          CALL SHUTDOWN(MESSAGE)
       END IF
 
-      IF (TRIM(QUANTITY)=='SURFACE DENSITY') THEN
+      IF (TRIM(QUANTITY)=='SURFACE DEPOSITION') THEN
          Y_INDEX = -999
          DO NS=0,N_TRACKED_SPECIES
             IF (TRIM(SPEC_ID)==TRIM(SPECIES_MIXTURE(NS)%ID)) THEN
@@ -9839,14 +9839,15 @@ QUANTITY_INDEX_LOOP: DO ND=-N_OUTPUT_QUANTITIES,N_OUTPUT_QUANTITIES
             ENDIF
          ENDDO
          IF (Z_INDEX < 0) THEN
-            WRITE(MESSAGE,'(A,A,A)')  'ERROR: SURFACE DENSITY for ',TRIM(SPEC_ID),' is invalid as species is not a tracked species'
+            WRITE(MESSAGE,'(A,A,A,A)')'ERROR: SURFACE DEPOSITION for ',TRIM(SPEC_ID),' is invalid as species', &
+                                    ' is not a tracked species'
             CALL SHUTDOWN(MESSAGE)         
          ELSEIF (Z_INDEX==0) THEN
             WRITE(MESSAGE,'(A)')  'ERROR: Cannot select background species for deposition'
             CALL SHUTDOWN(MESSAGE)         
          ENDIF
          IF(.NOT. SPECIES_MIXTURE(Z_INDEX)%DEPOSITING) THEN
-            WRITE(MESSAGE,'(A,A,A)')  'ERROR: SURFACE DENSITY for ',TRIM(SPEC_ID),' is not an aerosol tracked species'
+            WRITE(MESSAGE,'(A,A,A)')'ERROR: SURFACE DEPOSITION for ',TRIM(SPEC_ID),' is not an aerosol tracked species'
             CALL SHUTDOWN(MESSAGE)         
          ENDIF
          IF (SPECIES_MIXTURE(Z_INDEX)%AWM_INDEX < 0) THEN
