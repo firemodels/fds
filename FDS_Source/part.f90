@@ -573,7 +573,6 @@ OVERALL_INSERT_LOOP: DO
       ! Start processing the INITIALIZATION info
 
       N_INITIAL = IN%NUMBER_INITIAL_DROPLETS
-
       IF (N_INITIAL==0) CYCLE VOLUME_INSERT_LOOP
 
       MASS_PER_VOLUME = IN%MASS_PER_VOLUME
@@ -675,7 +674,7 @@ OVERALL_INSERT_LOOP: DO
    
          IF (PC%SURF_INDEX>0) THEN
             SF => SURFACE(PC%SURF_INDEX)
-            DR%WALL_INDEX = IN%WALL_INDEX_START + I - 1
+            DR%WALL_INDEX = IN%WALL_INDEX_START(NM) + I - 1
             IF (SF%THICKNESS>0._EB) THEN
                DR%R = SF%THICKNESS
             ELSEIF (SF%RADIUS>0._EB) THEN
@@ -695,6 +694,7 @@ OVERALL_INSERT_LOOP: DO
             IJKW(8,DR%WALL_INDEX) = KK
          ENDIF
    
+
          IF (PC%N_SPLIT>1) THEN
             DR%SPLIT_IOR = MOD(I-1,PC%N_SPLIT)+1
             DR%PWT = DR%PWT/REAL(PC%N_SPLIT,EB)
@@ -1482,6 +1482,8 @@ H_SOLID                = 300._EB    ! Heat transfer coefficient from solid surfa
 D_AIR                  = 2.6E-5_EB  ! Water Vapor - Air binary diffusion (m2/s at 25 C, Incropera & DeWitt, Table A.8) 
 SC_AIR                 = 0.6_EB     ! NU_AIR/D_AIR (Incropera & DeWitt, Chap 7, External Flow)
 PR_AIR                 = 0.7_EB     
+SC_AIR                 = SC
+PR_AIR                 = PR
 SH_FAC_GAS             = 0.6_EB*SC_AIR**ONTH
 NU_FAC_GAS             = 0.6_EB*PR_AIR**ONTH        
 SH_FAC_WALL            = 0.037_EB*SC_AIR**ONTH

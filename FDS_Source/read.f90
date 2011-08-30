@@ -8144,6 +8144,10 @@ INIT_LOOP: DO N=1,N_INIT_READ
                      CALL SHUTDOWN(MESSAGE)
                   ENDIF
                ENDIF
+               ! Allocate wall index start array
+               ALLOCATE(IN%WALL_INDEX_START(NMESHES),STAT=IZERO)
+               CALL ChkMemErr('READ','WALL_INDEX_START',IZERO)
+               IN%WALL_INDEX_START = -1
             ENDIF
             
             ! Special case: POINTWISE_DROPLET_INIT

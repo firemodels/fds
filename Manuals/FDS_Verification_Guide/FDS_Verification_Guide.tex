@@ -2031,7 +2031,7 @@ The expected and computed results for non-charring material are compared in~\ref
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_vent_char_spher_fuel} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_vent_char_spher_gas}
 \end{tabular*}
-\caption[The {\bf surf\_mass\_vent\_X\_char\_X} test cases.]{Comparison of analytical mass change and simulated mass changes for charring surfaces associated with vents.}
+\caption[The {\bf surf\_mass\_vent\_char\_X\_Y} test cases.]{Comparison of analytical mass change and simulated mass changes for charring surfaces associated with vents.}
 \label{surf_mass_vent_char}
 \end{figure}
 
@@ -2045,7 +2045,7 @@ The expected and computed results for non-charring material are compared in~\ref
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_vent_nonchar_spher_fuel} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_vent_nonchar_spher_gas}
 \end{tabular*}
-\caption[The {\bf surf\_mass\_vent\_X\_nonchar\_X} test cases.]{Comparison of analytical mass change and simulated mass changes for non-charring surfaces associated with vents.}
+\caption[The {\bf surf\_mass\_vent\_nonchar\_X\_Y} test cases.]{Comparison of analytical mass change and simulated mass changes for non-charring surfaces associated with vents.}
 \label{surf_mass_vent_nonchar}
 \end{figure}
 
@@ -2076,7 +2076,7 @@ The analytical and computed results for non-charring material are compared in~\r
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_char_spher_fuel} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_char_spher_gas}
 \end{tabular*}
-\caption[The {\bf surf\_mass\_part\_X\_char\_X} test cases.]{Comparison of analytical mass change and simulated mass changes for charring surfaces associated with particles.}
+\caption[The {\bf surf\_mass\_part\_char\_X\_Y} test cases.]{Comparison of analytical mass change and simulated mass changes for charring surfaces associated with particles.}
 \label{surf_mass_part_char}
 \end{figure}
 
@@ -2090,8 +2090,23 @@ The analytical and computed results for non-charring material are compared in~\r
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_spher_fuel} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_spher_gas}
 \end{tabular*}
-\caption[The {\bf surf\_mass\_part\_X\_nonchar\_X} test cases.]{Comparison of analytical mass change and simulated mass changes for non-charring surfaces associated with particles.}
+\caption[The {\bf surf\_mass\_part\__nonchar\_X\_Y} test cases.]{Comparison of analytical mass change and simulated mass changes for non-charring surfaces associated with particles.}
 \label{surf_mass_part_nonchar}
+\end{figure}
+
+A set of more advanced computations are performed to test the conservation of mass in cases involving multiple and split particles. The case has three meshes, and each mesh has the same mass of charring cylindrical particles as the cases above. As the length of the cylindrical particles is four times 0.1 m, the dcylinder diameter is only half of the value used above.
+\begin{description}
+\item[Mesh 1] has four 0.1 m long cylinders with 5 mm radius. The locations are randomly chosen from a plane defined by the {\ct INIT} statement.
+\item[Mesh 2] has eight 0.05 m long cylinders, initilized using the {\ct INIT} and {\ct MULT} statements.
+\item[Mesh 3] has eight 0.05 m long cylinders, initilized using the {\ct INIT} and {\ct MULT} statements. The cylinders are split in two sections using the {\ct NUMBER\_RADIATIVE\_ANGLES} feature of the {\ct PART} class.
+\end{description}
+The analytical and computed results are compared in~\ref{surf_mass_part_char_advanced}. The readability of the figure is improved by setting the external heat fluxes of the meshes 1 to 3 are set to 50, 45 and 40 kW/m~${}^2$, respectively.
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=5.0in]{SCRIPT_FIGURES/surf_mass_part_char_cyl_gas_advanced} 
+\end{center}
+\caption[The {\bf surf\_mass\_part\_char\_cyl\_gas\_advanced} test cases.]{Comparison of analytical mass change and advanced simulated mass changes for charring, cylindrical surface associated with particles in three variations.}
+\label{surf_mass_part_char_advanced}
 \end{figure}
 
 \clearpage

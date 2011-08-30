@@ -175,6 +175,7 @@ $RUNFDS Surf_mass surf_mass_part_char_cart_fuel
 $RUNFDS Surf_mass surf_mass_part_char_cart_gas
 $RUNFDS Surf_mass surf_mass_part_char_cyl_fuel
 $RUNFDS Surf_mass surf_mass_part_char_cyl_gas
+$RUNFDS Surf_mass surf_mass_part_char_cyl_gas_advanced
 $RUNFDS Surf_mass surf_mass_part_char_spher_fuel
 $RUNFDS Surf_mass surf_mass_part_char_spher_gas
 $RUNFDS Surf_mass surf_mass_part_nonchar_cart_fuel
