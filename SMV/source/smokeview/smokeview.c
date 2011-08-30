@@ -574,6 +574,7 @@ void UpdateTimeLabels(void){
   }
   else{
     float dt;
+    char timeval[30], *timevalptr;
 
     if(ntimes>1){
       dt=times[1]-times[0];
@@ -582,18 +583,9 @@ void UpdateTimeLabels(void){
       dt=0.0;
     }
     if(dt<0.0)dt=-dt;
-    if(dt<0.001){
-      sprintf(timelabel,"Time: %4.4f",time0);
-    }
-    else if(dt>=0.001&&dt<0.01){
-      sprintf(timelabel,"Time: %4.3f",time0);
-    }
-    else if(dt>=0.01&&dt<0.1){
-      sprintf(timelabel,"Time: %4.2f",time0);
-    }
-    else{
-      sprintf(timelabel,"Time: %4.1f",time0);
-    }
+    timevalptr=time2timelabel(time0,dt,timeval);
+    strcpy(timelabel,"Time: ");
+    strcat(timelabel,timevalptr);
   }
   sprintf(framelabel,"Frame: %i",itimes);
   if(hrrinfo!=NULL&&hrrinfo->display==1&&hrrinfo->loaded==1){

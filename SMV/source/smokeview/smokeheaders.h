@@ -407,6 +407,7 @@ EXTERNCPP void updateslicefilenum(void);
 EXTERNCPP void drawstaticiso(const isosurface *asurface,int surfacetype, 
                              int smoothnorms, int trans_flag, int data_type, 
                              float line_width);
+EXTERNCPP char *time2timelabel(float time, float dt, char *timelabel);
 EXTERNCPP void normalize(float *xyz, int n);
 #ifndef CPP
 EXTERNCPP void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostreamptr,

@@ -96,7 +96,44 @@ void Render(int view_mode){
   }
 }
 
-//void pauseSV(void);
+  /* ------------------ time2timelabel ------------------------ */
+
+char *time2timelabel(float time, float dt, char *timelabel){
+  char *timelabelptr;
+
+  if(dt<0.001){
+    sprintf(timelabel,"%4.4f",time);
+  }
+  else if(dt>=0.001&&dt<0.01){
+    sprintf(timelabel,"%4.3f",time);
+  }
+  else if(dt>=0.01&&dt<0.1){
+    sprintf(timelabel,"%4.2f",time);
+  }
+  else{
+    sprintf(timelabel,"%4.1f",time);
+  }
+  trimzeros(timelabel);
+  trim(timelabel);
+  timelabelptr=trim_front(timelabel);
+  return timelabelptr;
+}
+
+  /* ------------------ getplot3dtime ------------------------ */
+
+int getplot3dtime(float *time){
+  int i;
+
+  for(i=0;i<nplot3dinfo;i++){
+    plot3d *plot3di;
+
+    plot3di = plot3dinfo + i;
+    if(plot3di->loaded==0||plot3di->display==0)continue;
+    *time = plot3di->time;
+    return 1;
+  }
+  return 0;
+}
 
   /* ------------------ RenderFrame ------------------------ */
 
@@ -170,36 +207,41 @@ void RenderFrame(int view_mode){
     strcpy(renderfile_suffix,"_");
     if(RenderTime==0){
       image_num=seqnum;
-      strcat(renderfile_suffix,"s");
     }
     else{
       image_num=itimes/RenderSkip;
-      strcpy(renderfile_suffix,"_");
     }
     if(renderfilelabel==0||RenderTime==0){
-      sprintf(suffix,"%04i",image_num);
+      float time;
+      int code;
+
+      if(RenderTime==0){
+        sprintf(suffix,"s%04i",image_num);
+      }
+      else{
+        sprintf(suffix,"%04i",image_num);
+      }
+      code = getplot3dtime(&time);
+      if(code==1&&renderfilelabel==1){
+        char timelabel[20], *timelabelptr, dt=1.0;
+  
+        timelabelptr = time2timelabel(time,dt,timelabel);
+        strcat(suffix,"_");
+        strcat(suffix,timelabelptr);
+        strcat(suffix,"s");
+      }
     }
     else{
       float time;
       char timelabel[20], *timelabelptr;
+      float dt;
 
       time = times[itimes];
-      if(time<0.001){
-        sprintf(timelabel,"%4.4f",time);
-      }
-      else if(time>=0.001&&time<0.01){
-        sprintf(timelabel,"%4.3f",time);
-      }
-      else if(time>=0.01&&time<0.1){
-        sprintf(timelabel,"%4.2f",time);
-      }
-      else{
-        sprintf(timelabel,"%4.1f",time);
-      }
-      trimzeros(timelabel);
-      trim(timelabel);
-      timelabelptr=trim_front(timelabel);
+      dt = times[1]-times[0];
+      if(dt<0.0)dt=-dt;
+      timelabelptr = time2timelabel(time,dt,timelabel);
       strcpy(suffix,timelabelptr);
+      strcat(suffix,"s");
     }
     switch (view_mode){
     case VIEW_CENTER:
