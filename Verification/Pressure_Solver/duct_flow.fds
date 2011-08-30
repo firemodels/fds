@@ -8,7 +8,7 @@ Test pressure iteration routine for flow through a duct across meshes
 &TIME T_END=60.0 /
 &PRES VELOCITY_TOLERANCE=0.01 /
 
-&SURF ID='FAN', VEL=1.0, COLOR='INVISIBLE', POROUS=.TRUE. /
+&SURF ID='FAN', VEL=1.0, COLOR='INVISIBLE' /
 &SURF ID='DUCT', COLOR='GRAY 30' /
 
 &OBST XB=1.0,1.0,1.0,2.0,1.0,2.0, SURF_ID='FAN' /

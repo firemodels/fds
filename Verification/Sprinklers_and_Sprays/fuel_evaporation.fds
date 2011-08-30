@@ -11,8 +11,8 @@ A sealed box is filled with fuel droplets that evaporate rapidly and burn.
 cSURF ID='WALL', ADIABATIC=.TRUE. /
 &MATL ID='WALL', CONDUCTIVITY=0.05,SPECIFIC_HEAT=1.,DENSITY=1000. /
 &SURF ID='WALL', MATL_ID='WALL', THICKNESS=0.1,DEFAULT=.TRUE. /
-&SURF ID='BLOW_UP'  , VEL=0.5, POROUS=.TRUE. /
-&SURF ID='BLOW_DOWN', VEL=-.5, POROUS=.TRUE. /
+&SURF ID='BLOW_UP'  , VEL=0.5, /
+&SURF ID='BLOW_DOWN', VEL=-.5, /
 
 &REAC FUEL='HEPTANE'
       FUEL='N-HEPTANE'
