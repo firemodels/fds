@@ -646,7 +646,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          END SELECT
          KAPPA_PART = 0.25_EB*DR%PWT*SURFACE_AREA*RDX(IID)*RRN(IID)*RDY(JJD)*RDZ(KKD)
          KAPPAW(IID,JJD,KKD) = KAPPAW(IID,JJD,KKD) + KAPPA_PART
-         KFST4W(IID,JJD,KKD) = KFST4W(IID,JJD,KKD) + 4._EB*SIGMA*KAPPA_PART*DR%TMP**4
+         KFST4W(IID,JJD,KKD) = KFST4W(IID,JJD,KKD) + FOUR_SIGMA*KAPPA_PART*DR%TMP**4
       ENDDO
       QR_W = 0._EB
    ENDIF
@@ -886,12 +886,10 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                         IW = WALL_INDEX(IC,-ISTEP)
                         IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) THEN
                            ILXU = WALL(IW)%ILW(N,IBND)
-                           AZ = 0.5*AZ
                         ENDIF
                         IW = WALL_INDEX(IC,-KSTEP*3)
                         IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) THEN
                            ILZU = WALL(IW)%ILW(N,IBND)
-                           AX = 0.5*AX
                         ENDIF
                      ENDIF
                      AIU_SUM = AX*ILXU + AZ*ILZU 
@@ -920,20 +918,14 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                         IF (IC/=0) THEN
                            IW = WALL_INDEX(IC,-ISTEP)
                            IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) THEN
-                              AY = 0.5*AY
-                              AZ = 0.5*AZ
                               ILXU = WALL(IW)%ILW(N,IBND)
                            ENDIF
                            IW = WALL_INDEX(IC,-JSTEP*2)
                            IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) THEN
-                              AX = 0.5*AX
-                              AZ = 0.5*AZ
                               ILYU = WALL(IW)%ILW(N,IBND)
                            ENDIF
                            IW = WALL_INDEX(IC,-KSTEP*3)
                            IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) THEN
-                              AX = 0.5*AX
-                              AY = 0.5*AY
                               ILZU = WALL(IW)%ILW(N,IBND)
                            ENDIF
                         ENDIF
