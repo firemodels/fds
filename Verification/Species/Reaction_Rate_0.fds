@@ -4,7 +4,7 @@ A + B -> C
 ------------------------------------------------
 # Labels and Meshes
 -------------------------------------------------
-&HEAD CHID='Reaction_Rate_Test', TITLE='Reaction_Rate_Zero_Order, SVN $Revision: 8920 $'/
+&HEAD CHID='Reaction_Rate_0', TITLE='Reaction_Rate_Zero_Order, SVN $Revision: 8949 $'/
 
 &MESH IJK=4,4,4, XB=0.0,0.1,0.0,0.1,0.0,0.1 /
 &MISC DNS=.TRUE. /
@@ -20,7 +20,7 @@ A + B -> C
 
 &REAC ID = 'R1'
       FUEL = 'CARBON MONOXIDE'
-      EQUATION='CARBON MONOXIDE+0.5*O2=CO2'
+      EQUATION='CO+0.5*O2=CO2'
       A = 4.244963238e-6
       E = 0.0
       HEAT_OF_COMBUSTION=283/
@@ -31,7 +31,6 @@ A + B -> C
 &DEVC XYZ= 0.05,0.05,0.05, QUANTITY='MASS FRACTION', SPEC_ID='OXYGEN',  ID='O2' /
 &DEVC XYZ= 0.05,0.05,0.05, QUANTITY='MASS FRACTION', SPEC_ID='CARBON MONOXIDE',  ID='CO' /
 &DEVC XYZ= 0.05,0.05,0.05, QUANTITY='MASS FRACTION', SPEC_ID='CARBON DIOXIDE',  ID='CO2' /
-#DEVC XYZ= 0.05,0.05,0.05, QUANTITY='MASS FRACTION', SPEC_ID='NITROGEN',  ID='N2' /
 
 &SLCF PBY = 0.05 QUANTITY = 'MASS FRACTION', SPEC_ID='CARBON MONOXIDE' /
 &SLCF PBY = 0.05 QUANTITY = 'MASS FRACTION', SPEC_ID='CARBON DIOXIDE' /
