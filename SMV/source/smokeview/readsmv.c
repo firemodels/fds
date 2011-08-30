@@ -4703,6 +4703,7 @@ typedef struct {
         trim(slicelabelptr);
         slicelabelptr=trim_front(slicelabelptr);
         strcpy(slicelabel,slicelabelptr);
+        slicelabelptr=slicelabel;
       }
       if(match(buffer,"SLCT",4) == 1){
         terrain=1;
@@ -4778,7 +4779,7 @@ typedef struct {
 
         lenslicelabel=strlen(slicelabel)+1;
         NewMemory((void **)&sd->slicelabel,lenslicelabel);
-        strcpy(sd->slicelabel,slicelabelptr);
+        strcpy(sd->slicelabel,slicelabel);
       }
       sd->fire_line=fire_line;
       sd->terrain=terrain;

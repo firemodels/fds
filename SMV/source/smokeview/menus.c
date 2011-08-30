@@ -7426,18 +7426,19 @@ updatemenu=0;
             CREATEMENU(loadsubmslicemenu[nloadsubmslicemenu],LoadMultiSliceMenu);
             nloadsubmslicemenu++;
           }
+          STRCPY(menulabel,"");
           if(mslicei->loaded==1){
-            STRCPY(menulabel,"*");
-            STRCAT(menulabel,mslicei->menulabel);
+            STRCAT(menulabel,"*");
             nmultisliceloaded++;
           }
           else if(mslicei->loaded==-1){
-            STRCPY(menulabel,"#");
-            STRCAT(menulabel,mslicei->menulabel);
+            STRCAT(menulabel,"#");
             nmultisliceloaded++;
           }
-          else{
-            STRCPY(menulabel,mslicei->menulabel);
+          STRCAT(menulabel,mslicei->menulabel);
+          if(sd->slicelabel!=NULL){
+            STRCAT(menulabel," - ");
+            STRCAT(menulabel,sd->slicelabel);
           }
           glutAddMenuEntry(menulabel,i);
         }
@@ -7501,38 +7502,45 @@ updatemenu=0;
       for(i=0;i<nsliceinfo;i++){
         slice *sd,*sdim1,*sdip1;
 
-        if(i!=0)sdim1 = sliceinfo + sliceorderindex[i-1];
+        if(i!=0){
+          sdim1 = sliceinfo + sliceorderindex[i-1];
+        }
         sd = sliceinfo + sliceorderindex[i];
-        if(i!=nsliceinfo-1)sdip1 = sliceinfo + sliceorderindex[i+1];
-
+        if(i!=nsliceinfo-1){
+          sdip1 = sliceinfo + sliceorderindex[i+1];
+        }
         if(i==0||strcmp(sd->label.longlabel,sdim1->label.longlabel)!=0){
           CREATEMENU(loadsubslicemenu[iloadsubslicemenu],LoadSliceMenu);
         }
+        STRCPY(menulabel,"");
         if(sd->loaded==1){
-          STRCPY(menulabel,check);
-          STRCAT(menulabel,sd->menulabel);
+          STRCAT(menulabel,check);
         }
-        else{
-          STRCPY(menulabel,sd->menulabel);
+        STRCAT(menulabel,sd->menulabel);
+        if(sd->slicelabel!=NULL){
+          STRCAT(menulabel," - ");
+          STRCAT(menulabel,sd->slicelabel);
         }
-        if(sd->menu_show==1)glutAddMenuEntry(menulabel,sliceorderindex[i]);
+        if(sd->menu_show==1){
+          glutAddMenuEntry(menulabel,sliceorderindex[i]);
+        }
         if(i==nsliceinfo-1||strcmp(sd->label.longlabel,sdip1->label.longlabel)!=0){
           subslice_menuindex[iloadsubslicemenu]=sliceorderindex[i];
-		  if(sd->ndirxyz[1]+sd->ndirxyz[2]+sd->ndirxyz[3]>1){
+  		    if(sd->ndirxyz[1]+sd->ndirxyz[2]+sd->ndirxyz[3]>1){
             glutAddMenuEntry("-",-999);
-		  }
-		  if(sd->ndirxyz[1]>1){
+		      }
+		      if(sd->ndirxyz[1]>1){
             glutAddMenuEntry(_("Load All x"),-1000-4*iloadsubslicemenu-1);
-		  }
-		  if(sd->ndirxyz[2]>1){
+		      }
+		      if(sd->ndirxyz[2]>1){
             glutAddMenuEntry(_("Load All y"),-1000-4*iloadsubslicemenu-2);
-		  }
-		  if(sd->ndirxyz[3]>1){
+		      }
+		      if(sd->ndirxyz[3]>1){
             glutAddMenuEntry(_("Load All z"),-1000-4*iloadsubslicemenu-3);
-		  }
-		  if(sd->ndirxyz[1]+sd->ndirxyz[2]+sd->ndirxyz[3]>1){
+		      }
+		      if(sd->ndirxyz[1]+sd->ndirxyz[2]+sd->ndirxyz[3]>1){
             glutAddMenuEntry(_("Load All"),-1000-4*iloadsubslicemenu);
-		  }
+		      }
         }
         if(i==0||strcmp(sd->label.longlabel,sdim1->label.longlabel)!=0){
           iloadsubslicemenu++;
