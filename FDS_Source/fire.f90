@@ -89,8 +89,8 @@ DO K=1,KBAR
             CASE(EXPLICIT_EULER)
                CALL ODE_EXPLICIT_EULER(I,J,K,ZZ_GET,Q(I,J,K))
             CASE(RUNGE_KUTTA_2)
-               CALL ODE_RUNGE_KUTTA_2(I,J,K,ZZ_GET,Q(I,J,K))
-         END SELECT
+               CALL ODE_RUNGE_KUTTA_2(I,J,K,ZZ_GET,Q(I,J,K))               
+         END SELECT        
 
          ! Update RSUM and ZZ         
          IF (Q(I,J,K) > 0._EB) THEN
@@ -199,7 +199,6 @@ REAL(EB) :: ZZ_0(0:N_TRACKED_SPECIES),ZZ_I(0:N_TRACKED_SPECIES),ZZ_N(0:N_TRACKED
 INTEGER :: NR,I_TS,NODETS=20,NS
 TYPE(REACTION_TYPE),POINTER :: RN=>NULL()
 
-
 Q_OUT = 0._EB
 ZZ_0 = MAX(0._EB,ZZ_GET)
 ZZ_I = ZZ_0
@@ -224,7 +223,6 @@ ODE_LOOP: DO WHILE (DT_SUM < DT)
    IF (ANY(ZZ_N < 0._EB)) THEN
       DO NS=0,N_TRACKED_SPECIES
           IF (ZZ_N(NS) < 0._EB .AND. ABS(DZZDT(NS))>ZERO_P) DT_NEW = MIN(DT_NEW,-ZZ_I(NS)/DZZDT(NS))
-             IF (RN%E <= ZERO_P) EXIT ODE_LOOP
       ENDDO
    ENDIF  
 
@@ -236,7 +234,6 @@ ODE_LOOP: DO WHILE (DT_SUM < DT)
       EXIT ODE_LOOP
    ENDIF   
    Q_OUT = Q_OUT+Q_SUM*DT_NEW
-   
    ZZ_I = ZZ_I + DZZDT * DT_NEW
    DT_SUM = DT_SUM + DT_NEW
    IF (DT_NEW < DT_ODE) DT_NEW = DT_ODE
@@ -290,7 +287,6 @@ ODE_LOOP: DO WHILE (DT_SUM < DT)
    IF (ANY(ZZ_N < 0._EB)) THEN
       DO NS=0,N_TRACKED_SPECIES
           IF (ZZ_N(NS) < 0._EB .AND. ABS(DZZDT(NS))>ZERO_P) DT_NEW = MIN(DT_NEW,-ZZ_I(NS)/DZZDT(NS))
-             IF (RN%E <= ZERO_P) EXIT ODE_LOOP
       ENDDO
    ENDIF  
 
@@ -309,7 +305,6 @@ ODE_LOOP: DO WHILE (DT_SUM < DT)
    IF (ANY(ZZ_N < 0._EB)) THEN
       DO NS=0,N_TRACKED_SPECIES
           IF (ZZ_N(NS) < 0._EB .AND. ABS(DZZDT(NS)+DZZDT2(NS))>ZERO_P) DT_NEW = MIN(DT_NEW,-2._EB*ZZ_I(NS)/(DZZDT(NS)+DZZDT2(NS)))
-          IF (RN%E <= ZERO_P) EXIT ODE_LOOP
       ENDDO
    ENDIF     
 
@@ -322,8 +317,10 @@ ODE_LOOP: DO WHILE (DT_SUM < DT)
       EXIT ODE_LOOP
    ENDIF   
 
+   ZZ_I = ZZ_I +0.5_EB*(DZZDT+DZZDT2)*DT_NEW
+
    Q_OUT = Q_OUT+Q_SUM*DT_NEW
-   ZZ_I = ZZ_I + 0.5_EB*(DZZDT+DZZDT2) * DT_NEW
+ 
    DT_SUM = DT_SUM + DT_NEW
    IF (DT_NEW < DT_ODE) DT_NEW = DT_ODE
    IF (DT_NEW + DT_SUM > DT) DT_NEW = DT - DT_SUM
@@ -439,17 +436,26 @@ SELECT CASE (MODE)
       
    CASE(FINITE_RATE)
       RATE_CONSTANT = 0._EB
-      CALL GET_MASS_FRACTION_ALL(ZZ_GET,YY_PRIMITIVE)
+      CALL GET_MASS_FRACTION_ALL(ZZ_GET,YY_PRIMITIVE)      
       RATE_CONSTANT = RN%A*RHO(I,J,K)**RN%RHO_EXPONENT*EXP(-RN%E/(R0*TMP(I,J,K)))*TMP(I,J,K)**RN%N_T
-      DO NS=1,N_SPECIES
-         IF(RN%N_S(NS)>= -998._EB) THEN
-            IF (YY_PRIMITIVE(NS) < ZZ_MIN) THEN
+      IF (ALL(RN%N_S<-998._EB)) THEN
+         DO NS=1,N_TRACKED_SPECIES
+            IF(RN%NU(NS)<0._EB .AND. ZZ_GET(NS) < ZZ_MIN) THEN
                RATE_CONSTANT = 0._EB
                RETURN
+            ENDIF            
+         ENDDO
+      ELSE
+         DO NS=1,N_SPECIES
+            IF(RN%N_S(NS)>= -998._EB) THEN
+               IF (YY_PRIMITIVE(NS) < ZZ_MIN) THEN
+                  RATE_CONSTANT = 0._EB
+                  RETURN
+               ENDIF
+               RATE_CONSTANT = YY_PRIMITIVE(NS)**RN%N_S(NS)*RATE_CONSTANT
             ENDIF
-            RATE_CONSTANT = YY_PRIMITIVE(NS)**RN%N_S(NS)*RATE_CONSTANT
-         ENDIF
-      ENDDO
+         ENDDO
+      ENDIF
 
 END SELECT
 
