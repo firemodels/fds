@@ -17,7 +17,7 @@ OSX64FORTLIBDIR = /opt/intel/Compiler/11.1/080/lib
 
 # Definition of the object variables
 
-obj =    main.o CNV3dsmoke.o CNVboundary.o CNVpart.o CNVplot3d.o CNVslice.o assert.o csphere.o dmalloc.o egz_stdio.o lightsmoke.o smv_endian.o histogram.o readfiles.o utilities.o isobox.o string_util.o kdtree.o threader.o getdata.o getsizes.o
+obj =    main.o CNV3dsmoke.o CNVboundary.o CNVpart.o CNVplot3d.o CNVslice.o assert.o csphere.o dmalloc.o egz_stdio.o lightsmoke.o smv_endian.o histogram.o readfiles.o utilities.o isobox.o string_util.o kdtree.o threader.o compress.o getdata.o getsizes.o 
 objwin = $(obj:.o=.obj)
 
 # main has to be compiled without optimization (on a Windows PC) otherwise errors occcur
