@@ -96,45 +96,6 @@ void Render(int view_mode){
   }
 }
 
-  /* ------------------ time2timelabel ------------------------ */
-
-char *time2timelabel(float time, float dt, char *timelabel){
-  char *timelabelptr;
-
-  if(dt<0.001){
-    sprintf(timelabel,"%4.4f",time);
-  }
-  else if(dt>=0.001&&dt<0.01){
-    sprintf(timelabel,"%4.3f",time);
-  }
-  else if(dt>=0.01&&dt<0.1){
-    sprintf(timelabel,"%4.2f",time);
-  }
-  else{
-    sprintf(timelabel,"%4.1f",time);
-  }
-  trimzeros(timelabel);
-  trim(timelabel);
-  timelabelptr=trim_front(timelabel);
-  return timelabelptr;
-}
-
-  /* ------------------ getplot3dtime ------------------------ */
-
-int getplot3dtime(float *time){
-  int i;
-
-  for(i=0;i<nplot3dinfo;i++){
-    plot3d *plot3di;
-
-    plot3di = plot3dinfo + i;
-    if(plot3di->loaded==0||plot3di->display==0)continue;
-    *time = plot3di->time;
-    return 1;
-  }
-  return 0;
-}
-
   /* ------------------ RenderFrame ------------------------ */
 
 void RenderFrame(int view_mode){

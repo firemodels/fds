@@ -791,5 +791,25 @@ char *getstring(char *buffer){
   return NULL;
 }
 
+  /* ------------------ time2timelabel ------------------------ */
 
+char *time2timelabel(float time, float dt, char *timelabel){
+  char *timelabelptr;
 
+  if(dt<0.001){
+    sprintf(timelabel,"%4.4f",time);
+  }
+  else if(dt>=0.001&&dt<0.01){
+    sprintf(timelabel,"%4.3f",time);
+  }
+  else if(dt>=0.01&&dt<0.1){
+    sprintf(timelabel,"%4.2f",time);
+  }
+  else{
+    sprintf(timelabel,"%4.1f",time);
+  }
+  trimzeros(timelabel);
+  trim(timelabel);
+  timelabelptr=trim_front(timelabel);
+  return timelabelptr;
+}

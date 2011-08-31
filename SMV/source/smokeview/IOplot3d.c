@@ -2144,3 +2144,19 @@ void get_plot3d_uvw(float xyz[3], float uvw[3]){
 }
 
 #endif
+
+  /* ------------------ getplot3dtime ------------------------ */
+
+int getplot3dtime(float *time){
+  int i;
+
+  for(i=0;i<nplot3dinfo;i++){
+    plot3d *plot3di;
+
+    plot3di = plot3dinfo + i;
+    if(plot3di->loaded==0||plot3di->display==0)continue;
+    *time = plot3di->time;
+    return 1;
+  }
+  return 0;
+}

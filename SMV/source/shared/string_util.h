@@ -45,6 +45,7 @@ EXTERNCPP int log_base2(float xx);
 EXTERNCPP void array2string(float *vals, int nvals, char *string);
 EXTERNCPP float frexp10(float x, int *exp10);
 EXTERNCPP char *getstring(char *buffer);
+EXTERNCPP char *time2timelabel(float time, float dt, char *timelabel);
 
 
 #ifdef WIN32
