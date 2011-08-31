@@ -7,7 +7,7 @@
 \subsection{Background}
 
 Realistic visualization methods are important for applications
-where one needs to observe the effects of fire and smoke on the underlying scene
+where one needs to observe effects of fire and smoke on the underlying scene
 rather than to know that smoke has a certain temperature or density value.  This would be the case for a fire fighter using a computer based fire fighting simulator.
 Realistic visualization  methods complement but do not replace other more traditional visualization methods such as 2D
 contouring or 3D iso-surfacing which are better suited for analyzing data quantitatively.
@@ -16,15 +16,15 @@ Complete methods for visualizing smoke and fire taking into
 account interactions between light and smoke such as absorption, emission, and scattering
 require the solution of the radiation transport equation (RTE)\cite{Siegel:2001} also called the volume rendering equation\cite{levoy:1988}.
 This equation models how light appears to an observer after interacting with a participating media.
-The RTE used by Smokeview\cite{} to model smoke and fire appearance is identical to that used by the Fire Dynamics Simulator (FDS)\cite{FDS_Tech_Guide}
-to model radiative heat transfer.  Smokeview solves the RTE using visible while FDS solves the RTE using infrared wavelengths. One difference in the solution procedure is that Smokeview requires a solution only at the observer's viewpoint while FDS requires solutions at all points within the solution domain.
+The RTE used by Smokeview\citesmv\ to model smoke and fire appearance is identical to that used by the Fire Dynamics Simulator (FDS)\cite{FDS_Tech_Guide}
+to model radiative heat transfer.  Smokeview solves the RTE using visible while FDS solves the RTE using infrared wavelengths of light. One other important difference in the solution procedure is that Smokeview requires a solution only at the observer's viewpoint while FDS requires solutions at all points within the solution domain.
 
 Even so, the
 solution of this integro-differential equation for visualization still requires significant
 computational and memory  resources.  Approximations
 are required in order to display smoke at
 interactive frame rates.  The primary approximation is to take
-advantage of the low albedo character of smoke by either simplifying or eliminating the scattering term in the RTE.
+advantage of the small albedo character of smoke allowing one to either simplify or eliminate the scattering term in the RTE.
 
 Two techniques for visualizing smoke realistically discussed are slice rendered and volume
 rendered methods.  These methods both solve a form of the RTE equation.
@@ -50,7 +50,7 @@ determined from a prescribed colormap which is a function of
 temperature.
 
 \subsection{Overview}
-This \paper\ is organized as follows.  A model for visualizing smoke and fire is discussed, the RTE. The RTE is simplified in several ways one of which giving Beer's law.  
+This \paper\ is organized as follows.  A model for visualizing smoke and fire is discussed.  This model, the radiative transport equation (RTE),is simplified in several ways one of which giving Beer's law.  
 Two methods are then discussed for visualizing smoke  both using a form of the RTE.  The first method, slice rendering,  uses a series of partially transparent slices to represent smoke and fire. The second method, volume rendering, solves the RTE over the entire domain. Finally, several areas where the visualization methods may be improved are given.
 
 %\section{Background}
