@@ -75,7 +75,7 @@
 ** TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 ** MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
 */
-
+#include "pragmas.h"
 #ifndef __glew_h__
 #define __glew_h__
 #define __GLEW_H__
@@ -175,7 +175,6 @@ typedef _W64 int ptrdiff_t;
  * GLEW_STATIC is defined for static library.
  * GLEW_BUILD  is defined for building the DLL library.
  */
-
 #ifdef GLEW_STATIC
 #  define GLEWAPI extern
 #else
