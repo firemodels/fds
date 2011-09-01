@@ -92,9 +92,15 @@ SVEXTERN cullplanedata *cullplaneinfo;
 SVEXTERN cullplanedata **sort_cullplaneinfo;
 SVEXTERN int have_setpixelcount,update_initcullplane;
 #endif
+SVEXTERN int opengl_version;
+SVEXTERN char opengl_version_label[256];
+
 SVEXTERN int SVDECL(usevolrender,1);
+#ifndef pp_GPU
+SVEXTERN int SVDECL(usegpu,0);
+#endif
 #ifdef pp_GPU
-SVEXTERN int usegpu,gpuactive;
+SVEXTERN int SVDECL(usegpu,0),gpuactive;
 SVEXTERN int GPU_aspectratio;
 SVEXTERN int GPU_smoke3d_rthick, GPU_skip, GPU_hrrcutoff, GPU_hrr, GPU_hrrpuv_max_smv, GPU_hrrpuv_cutoff;
 SVEXTERN int GPU_firecolor, GPU_is_smoke, GPU_smokecolormap;

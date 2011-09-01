@@ -31,7 +31,9 @@
 //#define pp_GEOMPRINT
 #define pp_MOUSEDOWN
 #define pp_GPU
+#ifdef pp_GPU
 #define pp_CULL
+#endif
 #define pp_LIGHT
 #define pp_MESSAGE
 #define pp_DRAWISO
@@ -47,7 +49,9 @@
 #ifdef pp_BETA
 // #define pp_BENCHMARK
 //#define pp_GPUDEPTH
+#ifdef pp_GPU
 #define pp_GPUTHROTTLE
+#endif
 #define pp_SLICECONTOURS
 #define pp_SHOWLIGHT
 #define pp_LANG
@@ -119,10 +123,6 @@
 #else
 #define STRUCTSTAT struct stat
 #define STAT stat
-#endif
-
-#ifdef pp_CULL
-#define pp_GPU
 #endif
 
 #ifndef pp_OSX

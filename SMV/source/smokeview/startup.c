@@ -8,6 +8,9 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#ifdef pp_GPU
+#include "glew.h"
+#endif
 #ifdef pp_OSX
 #include <GLUT/glut.h>
 #else
@@ -285,6 +288,28 @@ void sv_startup_c(int argc, char **argv){
   rgb_plot3d_contour[nrgb-1]=&rgb_full[255][0];
 }
 
+/* ------------------ get_opengl_version ------------------------ */
+
+int get_opengl_version(char *version_label){
+  const GLubyte *version_string;
+  char version_label2[256];
+  int i;
+  int major=0, minor=0, subminor=0;
+  
+  version_string=glGetString(GL_VERSION);
+  if(version_string==NULL){
+    printf("   *** warning: GL_VERSION string is NULL\n");
+    return -1;
+  }
+  strcpy(version_label2,(char *)version_string);
+  strcpy(version_label,version_label2);
+  for(i=0;i<strlen(version_label2);i++){
+    if(version_label2[i]=='.')version_label2[i]=' ';
+  }
+  sscanf(version_label2,"%i %i %i",&major,&minor,&subminor);
+  return 100*major+10*minor+subminor;
+}
+
 /* ------------------ InitOpenGL ------------------------ */
 
 void InitOpenGL(void){
@@ -353,42 +378,48 @@ void InitOpenGL(void){
   printf(_("initialized"));
   printf("\n");
 #endif
-//  glutWindowStatusFunc(WindowStatus);
-  err=0;
 
-#ifdef pp_GPU
-#ifdef _DEBUG
-  printf(_("   Initializing GPU shaders"));
-  printf("\n");
-#endif
-  err=init_shaders();
+  opengl_version = get_opengl_version(opengl_version_label);
+
+  err=0;  
+ #ifdef pp_GPU
+  err=glewInit();
+  if(err==GLEW_OK){
+    err=0;
+  }
+  else{
+    printf("   GLEW initialization failed\n");
+    err=1;
+  }
   if(err==0){
+    err=init_shaders();
 #ifdef _DEBUG
-    printf(_("   GPU shaders initialization successfully completed"));
-    printf("\n");
+    if(err==0){
+      printf(_("   GPU shader initialization succeeded"));
+      printf("\n");
+    }
 #endif
+    if(err!=0){
+      printf(_("   GPU shader initialization failed"));
+      printf("\n");
+    }
   }
 #endif
 #ifdef pp_CULL
   if(err==0){
-#ifdef _DEBUG
-    printf(_("   Initializing OpenGL culling extensions - "));
-#endif
     err=init_cull_exts();
-    if(err==0){
 #ifdef _DEBUG
-      printf(_("initialized"));
+    if(err==0){
+      printf(_("   Culling extension initialization succeeded"));
       printf("\n");
+    }
 #endif
+    if(err!=0){
+      printf(_("   Culling extension initialization failed"));
+      printf("\n");
     }
   }
-  else{
-    warning_message(_("OpenGL culling initialization not attempted since the GPU shader initialization failed."));
-  }
 #endif
-  if(err!=0){
-    warning_message(_("unable to initialize GPU shaders and/or OpenGL culling extensions."));
-  }
 
   light_position0[0]=1.0f;
   light_position0[1]=1.0f;

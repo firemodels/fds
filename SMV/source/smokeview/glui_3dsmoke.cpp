@@ -65,12 +65,12 @@ void update_alpha(void);
 GLUI_Listbox *LISTBOX_smoke_colorbar=NULL;
 #ifdef pp_CULL
 GLUI_Spinner *SPINNER_cull_portsize=NULL;
+GLUI_Checkbox *CHECKBOX_show_cullports=NULL;
+#endif
+GLUI_Checkbox *CHECKBOX_usevolrender=NULL;
 GLUI_Spinner *SPINNER_temperature_cutoff=NULL;
 GLUI_Spinner *SPINNER_opacity_factor=NULL;
-GLUI_Checkbox *CHECKBOX_show_cullports=NULL;
 GLUI_Checkbox *CHECKBOX_compress_volsmoke=NULL;
-GLUI_Checkbox *CHECKBOX_usevolrender=NULL;
-#endif
 #ifdef pp_MOUSEDOWN
 GLUI_Checkbox *CHECKBOX_hide_volsmoke=NULL;
 #endif
