@@ -103,9 +103,9 @@ plot(0.28,E2_bar,'ro','MarkerSize',8)
 plot(0.66,E3_bar,'bo','MarkerSize',8)
 
 if strcmp(chid,'csmag_32')
-    legend(H(1:4),'FDS zero visc','FDS mol visc','FDS Smag','filtered CBC data','Location','East')
+    legend(H(1:4),'FDS zero visc','FDS mol visc','FDS eddy visc','filtered CBC data','Location','East')
 else
-    legend(H(3:4),'FDS Smag','filtered CBC data','Location','NorthEast')
+    legend(H(3:4),'FDS','filtered CBC data','Location','NorthEast')
 end
 
 % add SVN if file is available
