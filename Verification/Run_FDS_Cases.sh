@@ -9,7 +9,7 @@ export RUNFDS=$SVNROOT/Utilities/Scripts/runfds.sh
 export BASEDIR=`pwd`
 
 # uncomment following line to stop all cases
-#export STOPFDS=1
+# export STOPFDS=1
 
 ./FDS_Cases.sh
 
