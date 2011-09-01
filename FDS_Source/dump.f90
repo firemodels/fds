@@ -214,7 +214,7 @@ ELSE
    ENDIF
    PT2_IF: IF (PERIODIC_TEST==2) THEN
       IF (T>=UVW_CLOCK_CBC(IUVW)) THEN
-         WRITE(FN_UVW,'(A,A,I3.3,A)') TRIM(CHID),'_uvw_',NINT(T*100._EB),'.csv'
+         WRITE(FN_UVW,'(A,A,I3.3,A)') TRIM(CHID),'_uvw_',IUVW,'.csv'
          CALL DUMP_UVW(NM,FN_UVW)
          IUVW = IUVW + 1
       ENDIF
