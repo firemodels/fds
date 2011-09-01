@@ -7693,7 +7693,7 @@ int readini2(char *inifile, int localfile){
       continue;
     }
 #ifdef pp_GPU
-    if(match(buffer,"USEGPU",6)==1){
+    if(gpuactive==1&&match(buffer,"USEGPU",6)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&usegpu);
       if(usegpu!=0)usegpu=1;
@@ -9388,8 +9388,13 @@ int readini2(char *inifile, int localfile){
       if(match(buffer,"SMOKECULL",9)==1){
         if(fgets(buffer,255,stream)==NULL)break;
 #ifdef pp_CULL
-        sscanf(buffer,"%i",&cullsmoke);
-        if(cullsmoke!=0)cullsmoke=1;
+        if(gpuactive==1){
+          sscanf(buffer,"%i",&cullsmoke);
+          if(cullsmoke!=0)cullsmoke=1;
+        }
+        else{
+          cullsmoke=0;
+        }
 #else
         sscanf(buffer,"%i",&smokecullflag);
 #endif
