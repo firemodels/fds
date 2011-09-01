@@ -232,6 +232,10 @@ $RUNFDS Turbulence csmag_64
 $RUNFDS Turbulence dsmag_32
 $RUNFDS Turbulence dsmag_64
 $RUNFDS Turbulence mu0_32
+$RUNFDS Turbulence deardorff_32
+$RUNFDS Turbulence deardorff_64
+$RUNFDS Turbulence vreman_32
+$RUNFDS Turbulence vreman_64
 
 $RUNFDS Visualization objects_dynamic
 $RUNFDS Visualization objects_static
