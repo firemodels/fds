@@ -3,7 +3,7 @@
 // $Author$
 
 #include "options.h"
-#ifdef pp_GPU
+#ifdef pp_GLEW
 #include "glew.h"
 #endif
 #include <stdio.h>
@@ -2039,7 +2039,7 @@ void update_texturebar(void){
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_smokecolormap);
 
 #ifdef pp_GPU
-  if(nvolrenderinfo>0){
+  if(gpuactive==1&&nvolrenderinfo>0){
     glActiveTexture(GL_TEXTURE2);
     glTexSubImage1D(GL_TEXTURE_1D,0,0,256,GL_RGBA,GL_FLOAT, rgb_smokecolormap);
     glActiveTexture(GL_TEXTURE0);
@@ -2320,9 +2320,11 @@ void updatecolors(int changecolorindex){
   initcadcolors();
   update_texturebar();
 #ifdef pp_GPU
-  glActiveTexture(GL_TEXTURE2);
-  glTexSubImage1D(GL_TEXTURE_1D,0,0,256,GL_RGBA,GL_FLOAT, rgb_smokecolormap);
-  glActiveTexture(GL_TEXTURE0);
+  if(gpuactive==1){
+    glActiveTexture(GL_TEXTURE2);
+    glTexSubImage1D(GL_TEXTURE_1D,0,0,256,GL_RGBA,GL_FLOAT, rgb_smokecolormap);
+    glActiveTexture(GL_TEXTURE0);
+  }
 #endif
 
 }        

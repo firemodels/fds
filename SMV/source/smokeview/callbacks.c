@@ -776,18 +776,24 @@ void keyboard_2(unsigned char key, int x, int y){
   }
 #ifdef pp_CULL
   if(strncmp((const char *)&key2,"C",1)==0){
-    if(nsmoke3dinfo>0&&cullactive==1){
+    if(nsmoke3dinfo>0&&cullactive==1&&gpuactive==1){
       cullsmoke=1-cullsmoke;
       update_smoke3dflags();
       initcull(cullsmoke);
       print_gpu_cull_state();
     }
+    if(cullactive==0||gpuactive==0)cullsmoke=0;
     return;    
   }
 #endif
 #ifdef pp_GPU
   if((nsmoke3dinfo>0||nrooms>0)&&strncmp((const char *)&key2,"G",1)==0){
-    if(gpuactive==1)usegpu=1-usegpu;
+    if(gpuactive==1){
+      usegpu=1-usegpu;
+    }
+    else{
+      usegpu=0;
+    }
     if(nsmoke3dinfo>0){
       update_smoke3dflags();
     }

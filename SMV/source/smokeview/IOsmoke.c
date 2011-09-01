@@ -3,7 +3,7 @@
 // $Author$
 
 #include "options.h"
-#ifdef pp_GPU
+#ifdef pp_GLEW
 #include "glew.h"
 #endif
 #include <stdio.h>  

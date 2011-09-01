@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
-#ifdef pp_GPU
+#ifdef pp_GLEW
 #include "glew.h"
 #endif
 #ifdef pp_OSX

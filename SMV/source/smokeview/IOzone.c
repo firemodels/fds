@@ -7,7 +7,7 @@
 #include <stdlib.h> 
 #include <string.h>
 #include <math.h>
-#ifdef pp_GPU
+#ifdef pp_GLEW
 #include "glew.h"
 #endif
 #include "flowfiles.h"

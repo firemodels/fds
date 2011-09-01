@@ -31,6 +31,7 @@
 //#define pp_GEOMPRINT
 #define pp_MOUSEDOWN
 #define pp_GPU
+#define pp_GLEW
 #ifdef pp_GPU
 #define pp_CULL
 #endif

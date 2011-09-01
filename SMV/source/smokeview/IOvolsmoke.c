@@ -3,7 +3,7 @@
 // $Author$
 
 #include "options.h"
-#ifdef pp_GPU
+#ifdef pp_GLEW
 #include "glew.h"
 #endif
 #include <stdio.h>  
@@ -1660,7 +1660,9 @@ void read_volsmoke_allframes_allmeshes(void){
     vr->loaded=1;
     vr->display=1;
 #ifdef pp_GPU
-    init_volsmoke_texture(meshi);
+    if(gpuactive==1){
+      init_volsmoke_texture(meshi);
+    }
 #endif
   }
   plotstate=getplotstate(DYNAMIC_PLOTS);
