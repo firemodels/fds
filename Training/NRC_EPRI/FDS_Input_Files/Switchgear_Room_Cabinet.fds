@@ -34,18 +34,12 @@ Cables
       QUANTITY                  = 'CABLE TEMPERATURE'
       CABLE_DIAMETER            = 0.015
       CABLE_JACKET_THICKNESS    = 0.0015
-      CABLE_MASS_PER_LENGTH     = 0.4
-      CABLE_FAILURE_TEMPERATURE = 200. / THIEF model inputs
+      CABLE_MASS_PER_LENGTH     = 0.38
+      CABLE_FAILURE_TEMPERATURE = 205. / THIEF model inputs
 
-&MATL ID            = 'COPPER'
-      SPECIFIC_HEAT = 0.38
-      CONDUCTIVITY  = 387.
-      DENSITY       = 8940.   /
-
-&SURF ID                        = 'CABLE'
+&SURF ID                        = 'NON-BURNING CABLE'
       COLOR                     = 'BLACK'
-      MATL_ID(1,1:2)            = 'PE/PVC','COPPER'
-      MATL_MASS_FRACTION(1,1:2) = 0.33,0.67
+      MATL_ID                   = 'PE/PVC'
       THICKNESS                 = 0.025  
       BACKING                   = 'EXPOSED' / Description of "slab" of cables in the tray
 
@@ -66,7 +60,7 @@ Cables
 
 &MULT ID='tray', DY=3.0, DZ=0.5, J_LOWER=-1, J_UPPER=1, K_LOWER=0, K_UPPER=2 /
 
-&OBST XB= 1.0, 25.5, 9.0, 9.8, 3.9, 4.0, SURF_IDS = 'CABLE','TRAY','CABLE', MULT_ID='tray' /
+&OBST XB= 1.0, 25.5, 9.0, 9.8, 3.9, 4.0, SURF_IDS = 'NON-BURNING CABLE','TRAY','NON-BURNING CABLE', MULT_ID='tray' /
 
 &VENT XB= 8.0,  8.5, 9.0, 9.8, 4.0, 4.0, SURF_ID = 'BURNING CABLE', DEVC_ID='Temp_Cable_A_FDS' /
 &VENT XB= 1.0,  8.0, 9.0, 9.8, 4.0, 4.0, SURF_ID = 'BURNING CABLE', DEVC_ID='Temp_Cable_A_FDS', SPREAD_RATE=0.0009, XYZ=8.,9.5,4. /
@@ -106,9 +100,12 @@ Cabinet Fire
       C                  = 2.
       H                  = 3.5
       OTHER              = 0.5
-      MW_OTHER           = 34.
-      HEAT_OF_COMBUSTION = 24000.
+      MW_OTHER           = 35.5
+      HEAT_OF_COMBUSTION = 16000.
+      CO_YIELD           = 0.1 /
       SOOT_YIELD         = 0.1 /
+
+&RADI RADIATIVE_FRACTION = 0.5 /
 
 &SURF ID            = 'CABINET FIRE'
       COLOR         = 'ORANGE'
@@ -170,15 +167,18 @@ Ventilation
 &OBST XB=24.0,24.5,12.0,12.6, 5.4, 5.4, SURF_ID = 'DUCT STEEL'/
 &VENT XB=24.0,24.5,12.0,12.6, 5.6, 5.6, SURF_ID = 'RETURN'/
 
-&VENT XB= 0.0, 0.0,15.0,16.1, 0.0, 2.0, COLOR='BROWN', SURF_ID='DUCT STEEL' /
+&VENT XB= 0.0, 0.0,15.0,16.1, 0.2, 2.0, COLOR='BROWN', SURF_ID='DUCT STEEL' /
+&VENT XB= 0.0, 0.0,15.0,16.1, 0.0, 0.2, SURF_ID='DOOR CRACK' /
+&SURF ID='DOOR CRACK', LEAK_PATH=1,0, COLOR='BEIGE' /
+&ZONE LEAK_AREA(0)=0.02275 /
 
 Output
 
 &DUMP DT_DEVC=15., DT_HRR=15. /
 
-&DEVC ID='Temp_Cable_A_FDS', PROP_ID='PE/PVC CABLE', XYZ=8.3,9.5,3.8, ORIENTATION=0,0,-1, SETPOINT=200. /
-&DEVC ID='Temp_Cable_B_FDS', PROP_ID='PE/PVC CABLE', XYZ=8.3,9.5,4.3, ORIENTATION=0,0,-1, SETPOINT=200. /
-&DEVC ID='Temp_Cable_C_FDS', PROP_ID='PE/PVC CABLE', XYZ=8.3,9.5,4.8, ORIENTATION=0,0,-1, SETPOINT=200. /
+&DEVC ID='Temp_Cable_A_FDS', PROP_ID='PE/PVC CABLE', XYZ=8.3,9.5,3.8, ORIENTATION=0,0,-1, SETPOINT=205. /
+&DEVC ID='Temp_Cable_B_FDS', PROP_ID='PE/PVC CABLE', XYZ=8.3,9.5,4.3, ORIENTATION=0,0,-1, SETPOINT=205. /
+&DEVC ID='Temp_Cable_C_FDS', PROP_ID='PE/PVC CABLE', XYZ=8.3,9.5,4.8, ORIENTATION=0,0,-1, SETPOINT=205. /
 
 &DEVC QUANTITY='RADIATIVE HEAT FLUX GAS',  ID='Flux_Cable_A_FDS', XYZ=8.3,9.5,3.9, ORIENTATION=0,0,-1 /
 &DEVC QUANTITY='RADIATIVE HEAT FLUX GAS',  ID='Flux_Cable_B_FDS', XYZ=8.3,9.5,4.4, ORIENTATION=0,0,-1 /
