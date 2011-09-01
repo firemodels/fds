@@ -57,7 +57,7 @@ xlabel('k, 1/m','FontSize',Title_Font_Size)
 % Add lines to indicate cutoff wavenumbers
 loglog( [k0*N/2,k0*N/2],[1e-10,1e-2],'k--'); % LES Nyquist limit
 
-anno_obj_handle=annotation('textarrow',[.55,.43],[.8,.5],'String','Time');
+anno_obj_handle=annotation('textarrow',[.56,.44],[.85,.55],'String','Time');
 set(anno_obj_handle,'FontName',Font_Name)
 
 % % Apply transfer function (optional)
