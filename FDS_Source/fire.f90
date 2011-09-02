@@ -97,7 +97,6 @@ DO K=1,KBAR
             Q_EXISTS = .TRUE.
             CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM(I,J,K)) 
             ZZ(I,J,K,1:N_TRACKED_SPECIES) = ZZ_GET(1:N_TRACKED_SPECIES)
-            IF (ENTHALPY_TRANSPORT) E(I,J,K) = E(I,J,K) + DT*Q(I,J,K)
             ! Divergence term would be inserted here
             DZZ(1:N_TRACKED_SPECIES) = DZZ(1:N_TRACKED_SPECIES) - ZZ_GET(1:N_TRACKED_SPECIES)
             DZZ(0) = -SUM(DZZ(1:N_TRACKED_SPECIES))
