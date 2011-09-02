@@ -1864,8 +1864,6 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
 
             D_LAGRANGIAN(II,JJ,KK) =  D_LAGRANGIAN(II,JJ,KK) + (MW_RATIO *M_VAP /M_GAS + &
                                       (M_VAP*DELTA_H_G - Q_CON_GAS)/H_G_OLD) * WGT / DT_SUBSTEP
-                                      
-            IF (ENTHALPY_TRANSPORT) E(II,JJ,KK) = E(II,JJ,KK) + (M_VAP*(H_L+H_V)-Q_CON_GAS)*RVC*WGT
 
             ! Keep track of total mass evaporated in cell
 

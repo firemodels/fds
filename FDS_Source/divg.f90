@@ -25,7 +25,7 @@ USE EVAC, ONLY: EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, EMESH_NFIELDS, EVAC_FDS6
  
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX,KDTDY,KDTDZ,DP,KP, &
-          RHO_D_DZDX,RHO_D_DZDY,RHO_D_DZDZ,RHO_D,RHOP,H_RHO_D_DZDX,H_RHO_D_DZDY,H_RHO_D_DZDZ,RTRM,EE
+          RHO_D_DZDX,RHO_D_DZDY,RHO_D_DZDZ,RHO_D,RHOP,H_RHO_D_DZDX,H_RHO_D_DZDY,H_RHO_D_DZDZ,RTRM
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
 REAL(EB) :: DELKDELT,VC,DTDX,DTDY,DTDZ,TNOW,ZZ_GET(0:N_TRACKED_SPECIES), &
             HDIFF,DZDX,DZDY,DZDZ,T,RDT,RHO_D_DZDN,TSI,TIME_RAMP_FACTOR,ZONE_VOLUME,DELTA_P,PRES_RAMP_FACTOR,&
@@ -48,12 +48,10 @@ SELECT CASE(PREDICTOR)
       DP => DS   
       R_PBAR = 1._EB/PBAR
       RHOP => RHOS
-      EE=>ES
    CASE(.FALSE.) 
       DP => DDDT 
       R_PBAR = 1._EB/PBAR_S
       RHOP => RHO
-      EE=>E
 END SELECT
 
 ! Determine if pressure ZONEs have merged
@@ -112,8 +110,6 @@ DP = 0._EB
 IF (N_TRACKED_SPECIES > 0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
    DEL_RHO_D_DEL_Z = 0._EB
 ENDIF
-
-IF (ENTHALPY_TRANSPORT) ENTHALPY_SOURCE=0._EB
 
 ! Add species diffusion terms to divergence expression and compute diffusion term for species equations
  
@@ -263,8 +259,6 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
                   DP(I,J,K) = DP(I,J,K) + DIV_DIFF_HEAT_FLUX
                   
-                  IF (ENTHALPY_TRANSPORT) ENTHALPY_SOURCE(I,J,K) = ENTHALPY_SOURCE(I,J,K) + DIV_DIFF_HEAT_FLUX
-                  
                ENDDO
             ENDDO
          ENDDO
@@ -277,8 +271,6 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
                                     (     H_RHO_D_DZDZ(I,J,K)-       H_RHO_D_DZDZ(I,J,K-1))*RDZ(K)
             
                DP(I,J,K) = DP(I,J,K) + DIV_DIFF_HEAT_FLUX
-               
-               IF (ENTHALPY_TRANSPORT) ENTHALPY_SOURCE(I,J,K) = ENTHALPY_SOURCE(I,J,K) + DIV_DIFF_HEAT_FLUX
                
             ENDDO
          ENDDO
@@ -432,7 +424,6 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
             KDTDZ(II,JJ,KK-1) = 0._EB
       END SELECT
       DP(IIG,JJG,KKG) = DP(IIG,JJG,KKG) - QCONF(IW)*RDN(IW)
-      IF (ENTHALPY_TRANSPORT) ENTHALPY_SOURCE(IIG,JJG,KKG) = ENTHALPY_SOURCE(IIG,JJG,KKG) - QCONF(IW)*RDN(IW)
    ENDDO CORRECTION_LOOP
 
    ! Compute (q + del dot k del T) and add to the divergence
@@ -446,10 +437,6 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
                              (KDTDY(I,J,K)-KDTDY(I,J-1,K))*RDY(J) + &
                              (KDTDZ(I,J,K)-KDTDZ(I,J,K-1))*RDZ(K)
                   DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + QR(I,J,K)
-                  
-                  ! add divergence of heat flux vector (heat release added in fire)
-                  IF (ENTHALPY_TRANSPORT) ENTHALPY_SOURCE(I,J,K) = ENTHALPY_SOURCE(I,J,K) + DELKDELT + QR(I,J,K)
-                  
                ENDDO 
             ENDDO
          ENDDO
@@ -461,35 +448,12 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
                   (R(I)*KDTDX(I,J,K)-R(I-1)*KDTDX(I-1,J,K))*RDX(I)*RRN(I) + &
                        (KDTDZ(I,J,K)-       KDTDZ(I,J,K-1))*RDZ(K)
                   DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + QR(I,J,K)
-                  
-                  ! add divergence of heat flux vector (heat release added in fire)
-                  IF (ENTHALPY_TRANSPORT) ENTHALPY_SOURCE(I,J,K) = ENTHALPY_SOURCE(I,J,K) + DELKDELT + QR(I,J,K)
-                   
                ENDDO 
             ENDDO
          ENDDO
    END SELECT CYLINDER3
  
 ENDIF ENERGY
-
-! Conservative enthalpy correction
-
-ENTHALPY_IF: IF (ENTHALPY_TRANSPORT) THEN
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-         
-            IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
-            CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP,TMP(I,J,K))
-
-            DP(I,J,K) = DP(I,J,K) + 0.5_EB*(EE(I,J,K) - RHOP(I,J,K)*CP*TMP(I,J,K))/DT
-
-         ENDDO 
-      ENDDO
-   ENDDO
-ENDIF ENTHALPY_IF
-
 
 ! Compute RTRM = R*sum(Z_i/M_i)/(PBAR*C_P) and multiply it by divergence terms already summed up
  
@@ -572,7 +536,6 @@ IF (STRATIFICATION .AND. .NOT.EVACUATION_ONLY(NM)) THEN
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             DP(I,J,K) = DP(I,J,K) + (RTRM(I,J,K)-R_PBAR(K,PRESSURE_ZONE(I,J,K)))*0.5_EB*(W(I,J,K)+W(I,J,K-1))*GVEC(3)*RHO_0(K)
-            IF (ENTHALPY_TRANSPORT) ENTHALPY_SOURCE(I,J,K) = ENTHALPY_SOURCE(I,J,K) + 0.5_EB*(W(I,J,K)+W(I,J,K-1))*GVEC(3)*RHO_0(K)
          ENDDO
       ENDDO
    ENDDO
@@ -824,7 +787,6 @@ PRESSURE_ZONE_LOOP: DO IPZ=1,N_ZONE
             IF (PRESSURE_ZONE(I,J,K) /= IPZ) CYCLE 
             IF (SOLID(CELL_INDEX(I,J,K)))    CYCLE
             DP(I,J,K) = DP(I,J,K) + (RTRM(I,J,K)-R_PBAR(K,IPZ))*D_PBAR_DT_P(IPZ)
-            IF (ENTHALPY_TRANSPORT) ENTHALPY_SOURCE(I,J,K) = ENTHALPY_SOURCE(I,J,K) + D_PBAR_DT_P(IPZ)
          ENDDO
       ENDDO
    ENDDO
