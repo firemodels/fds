@@ -681,7 +681,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             IF (WIDE_BAND_MODEL) BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),TMP(I,J,K))
             KFST4(I,J,K) = BBF*KAPPA(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4
-            IF (RADIATIVE_FRACTION>0._EB .AND. Q(I,J,K)>0._EB) THEN
+            IF (RADIATIVE_FRACTION*Q(I,J,K)>KFST4(I,J,K)) THEN
                VOL  = R(I)*DX(I)*DY(J)*DZ(K)
                HRR  = HRR  + Q(I,J,K)*VOL
                RSUM = RSUM + KFST4(I,J,K)*VOL
@@ -703,7 +703,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          DO J=1,JBAR
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               IF (RADIATIVE_FRACTION>0._EB .AND. Q(I,J,K)>0._EB) THEN
+               IF (RADIATIVE_FRACTION*Q(I,J,K)>KFST4(I,J,K)) THEN
                   KFST4(I,J,K) = KFST4(I,J,K)*RTE_SOURCE_CORRECTION_FACTOR + KAPPA(I,J,K)*UIIP(I,J,K)
                ENDIF
             ENDDO
