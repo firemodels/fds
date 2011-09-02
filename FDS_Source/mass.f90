@@ -28,13 +28,13 @@ USE COMP_FUNCTIONS, ONLY: SECOND
 USE PHYSICAL_FUNCTIONS, ONLY: GET_AVERAGE_SPECIFIC_HEAT
 USE GLOBAL_CONSTANTS, ONLY: N_TRACKED_SPECIES,NULL_BOUNDARY,OPEN_BOUNDARY,INTERPOLATED_BOUNDARY, &
                             PREDICTOR,CORRECTOR,EVACUATION_ONLY,SOLID_PHASE_ONLY,TUSED,DEBUG_OPENMP,SOLID_BOUNDARY, &
-                            NO_MASS_FLUX,SPECIFIED_MASS_FLUX,HVAC_BOUNDARY,ENTHALPY_TRANSPORT, &
+                            NO_MASS_FLUX,SPECIFIED_MASS_FLUX,HVAC_BOUNDARY, &
                             INCLUDE_NUMERICAL_DIFFUSION,FLUX_LIMITER
 INTEGER, INTENT(IN) :: NM
-REAL(EB) :: TNOW,ZZZ(4),UN,CP,ZZ_GET(0:N_TRACKED_SPECIES),E_F,RHO_D_DZDN
+REAL(EB) :: TNOW,ZZZ(4),UN,RHO_D_DZDN
 INTEGER  :: I,J,K,N,II,JJ,KK,IIG,JJG,KKG,IW,IOR,IBC
 REAL(EB), POINTER, DIMENSION(:) :: UWP
-REAL(EB), POINTER, DIMENSION(:,:,:) :: FX=>NULL(),FY=>NULL(),FZ=>NULL(),EE=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: FX=>NULL(),FY=>NULL(),FZ=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
 
 IF (EVACUATION_ONLY(NM) .OR. SOLID_PHASE_ONLY) RETURN
@@ -50,7 +50,6 @@ IF (PREDICTOR) THEN
    RHOP => RHO
    UWP  => UW
    IF (N_TRACKED_SPECIES > 0) ZZP => ZZ
-   EE => E
 ELSE
    UU => US
    VV => VS
@@ -59,7 +58,6 @@ ELSE
    RHOP => RHOS
    UWP  => UWS
    IF (N_TRACKED_SPECIES > 0) ZZP => ZZS
-   EE => ES
 ENDIF
 
 FX=>WORK4
@@ -418,177 +416,6 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       !$OMP END PARALLEL
       
 ENDDO SPECIES_LOOP
-
-
-! experimental conservative enthalpy transport
-
-ENTHALPY_IF: IF (ENTHALPY_TRANSPORT) THEN
-
-   FX=0._EB
-   FY=0._EB
-   FZ=0._EB
-
-   !$OMP PARALLEL DEFAULT(NONE) &
-   !$OMP SHARED(KBAR,JBAR,IBAR,KBM1,JBM1,IBM1,EE,FX,FY,FZ,UU,VV,WW,FLUX_LIMITER,R, &
-   !$OMP        N_EXTERNAL_WALL_CELLS,N_INTERNAL_WALL_CELLS,BOUNDARY_TYPE,IJKW, &
-   !$OMP        UVW_SAVE,N_TRACKED_SPECIES,ZZ_F,TMP_F,RHO_F,WALL_INDEX,CELL_INDEX, &
-   !$OMP        SOLID,RDX,RDY,RDZ,RRN,ENTHALPY_SOURCE)
-
-   !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I,ZZZ)
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBM1
-            ZZZ(1:4) = EE(I-1:I+2,J,K)
-            FX(I,J,K) = UU(I,J,K)*SCALAR_FACE_VALUE(UU(I,J,K),ZZZ,FLUX_LIMITER)*R(I)
-         ENDDO
-      ENDDO
-   ENDDO
-   !$OMP END DO NOWAIT
-
-   !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I,ZZZ)
-   DO K=1,KBAR
-      DO J=1,JBM1
-         DO I=1,IBAR
-            ZZZ(1:4) = EE(I,J-1:J+2,K)
-            FY(I,J,K) = VV(I,J,K)*SCALAR_FACE_VALUE(VV(I,J,K),ZZZ,FLUX_LIMITER)
-         ENDDO
-      ENDDO
-   ENDDO
-   !$OMP END DO NOWAIT
-
-   !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I,ZZZ)
-   DO K=1,KBM1
-      DO J=1,JBAR
-         DO I=1,IBAR
-            ZZZ(1:4) = EE(I,J,K-1:K+2)
-            FZ(I,J,K) = WW(I,J,K)*SCALAR_FACE_VALUE(WW(I,J,K),ZZZ,FLUX_LIMITER)
-         ENDDO
-      ENDDO
-   ENDDO
-   !$OMP END DO
-
-   !$OMP DO PRIVATE(IW,II,JJ,KK,IOR,IBC,IIG,JJG,KKG,UN,ZZ_GET,CP,E_F,ZZZ)
-   WLOOP3_FL: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-   
-      IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY) CYCLE WLOOP3_FL
-       
-      II  = IJKW(1,IW) 
-      JJ  = IJKW(2,IW)
-      KK  = IJKW(3,IW)
-      IOR = IJKW(4,IW)
-      IBC = IJKW(5,IW)
-      IIG = IJKW(6,IW)
-      JJG = IJKW(7,IW)
-      KKG = IJKW(8,IW)
-      
-      SELECT CASE(IOR)
-         CASE( 1)
-            UN = UU(II,JJ,KK)
-         CASE(-1)
-            UN = UU(II-1,JJ,KK)
-         CASE( 2)
-            UN = VV(II,JJ,KK)
-         CASE(-2)
-            UN = VV(II,JJ-1,KK)
-         CASE( 3)
-            UN = WW(II,JJ,KK)
-         CASE(-3)
-            UN = WW(II,JJ,KK-1)
-      END SELECT
-      
-      ! In case of interpolated boundary, use the original velocity, not the averaged value
-
-      IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
-      
-      ! Boundary value of enthalpy
-      
-      IF (UN*REAL(IOR,EB)>ZERO_P) THEN
-         ! inflow
-         IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = ZZ_F(IW,1:N_TRACKED_SPECIES)
-         CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP,TMP_F(IW)) 
-         E_F = RHO_F(IW)*CP*TMP_F(IW)
-      ELSE
-         ! outflow
-         E_F = EE(IIG,JJG,KKG)
-      ENDIF
-   
-      ! overwrite first off-wall advective flux if flow is away from the wall and if the face is not also a wall cell
-      
-      OFF_WALL_SELECT_3: SELECT CASE(IOR)
-         CASE( 1) OFF_WALL_SELECT_3
-            !      ghost          FX/UU(II+1)
-            ! ///   II   ///  II+1  |  II+2  | ...
-            !                       ^ WALL_INDEX(II+1,+1)
-            IF ((UU(II+1,JJ,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0)) THEN
-               ZZZ(1:3) = (/E_F,EE(II+1:II+2,JJ,KK)/)
-               FX(II+1,JJ,KK) = UU(II+1,JJ,KK)*SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZZ,FLUX_LIMITER)*R(II+1)
-            ENDIF
-         CASE(-1) OFF_WALL_SELECT_3
-            !            FX/UU(II-2)     ghost
-            ! ... |  II-2  |  II-1  ///   II   ///
-            !              ^ WALL_INDEX(II-1,-1)
-            IF ((UU(II-2,JJ,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0)) THEN
-               ZZZ(2:4) = (/EE(II-2:II-1,JJ,KK),E_F/)
-               FX(II-2,JJ,KK) = UU(II-2,JJ,KK)*SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZZ,FLUX_LIMITER)*R(II-2)
-            ENDIF
-         CASE( 2) OFF_WALL_SELECT_3
-            IF ((VV(II,JJ+1,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0)) THEN
-               ZZZ(1:3) = (/E_F,EE(II,JJ+1:JJ+2,KK)/)
-               FY(II,JJ+1,KK) = VV(II,JJ+1,KK)*SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZZ,FLUX_LIMITER)
-            ENDIF
-         CASE(-2) OFF_WALL_SELECT_3
-            IF ((VV(II,JJ-2,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0)) THEN
-               ZZZ(2:4) = (/EE(II,JJ-2:JJ-1,KK),E_F/)
-               FY(II,JJ-2,KK) = VV(II,JJ-2,KK)*SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZZ,FLUX_LIMITER)
-            ENDIF
-         CASE( 3) OFF_WALL_SELECT_3
-            IF ((WW(II,JJ,KK+1)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0)) THEN
-               ZZZ(1:3) = (/E_F,EE(II,JJ,KK+1:KK+2)/)
-               FZ(II,JJ,KK+1) = WW(II,JJ,KK+1)*SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZZ,FLUX_LIMITER)
-            ENDIF
-         CASE(-3) OFF_WALL_SELECT_3
-            IF ((WW(II,JJ,KK-2)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0)) THEN
-               ZZZ(2:4) = (/EE(II,JJ,KK-2:KK-1),E_F/)
-               FZ(II,JJ,KK-2) = WW(II,JJ,KK-2)*SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ,FLUX_LIMITER)
-            ENDIF
-      END SELECT OFF_WALL_SELECT_3
-
-      ! Compute flux on the face of the wall cell
-
-      SELECT CASE(IOR)
-         CASE( 1)
-            FX(II,JJ,KK)   = UN*E_F*R(II)
-         CASE(-1)
-            FX(II-1,JJ,KK) = UN*E_F*R(II-1)
-         CASE( 2)
-            FY(II,JJ,KK)   = UN*E_F
-         CASE(-2)
-            FY(II,JJ-1,KK) = UN*E_F
-         CASE( 3)
-            FZ(II,JJ,KK)   = UN*E_F
-         CASE(-3)
-            FZ(II,JJ,KK-1) = UN*E_F
-      END SELECT
-      
-   ENDDO WLOOP3_FL
-   !$OMP END DO
-
-   !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I)
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            ENTHALPY_SOURCE(I,J,K) = -ENTHALPY_SOURCE(I,J,K)               &
-                                   + (FX(I,J,K)-FX(I-1,J,K))*RDX(I)*RRN(I) &
-                                   + (FY(I,J,K)-FY(I,J-1,K))*RDY(J)        &
-                                   + (FZ(I,J,K)-FZ(I,J,K-1))*RDZ(K) 
-         ENDDO
-      ENDDO
-   ENDDO
-   !$OMP END DO NOWAIT
-   !$OMP END PARALLEL
-
-ENDIF ENTHALPY_IF
  
 TUSED(3,NM)=TUSED(3,NM)+SECOND()-TNOW
 END SUBROUTINE MASS_FINITE_DIFFERENCES
@@ -603,7 +430,7 @@ USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_GAS_CONSTANT
 USE GLOBAL_CONSTANTS, ONLY: N_TRACKED_SPECIES,TMPMAX,TMPMIN,EVACUATION_ONLY, &
                             PREDICTOR,CORRECTOR,CHANGE_TIME_STEP,TMPA,N_ZONE, &
                             GAS_SPECIES, R0,SOLID_PHASE_ONLY,TUSED, &
-                            DEBUG_OPENMP,CLIP_MASS_FRACTION,ENTHALPY_TRANSPORT
+                            DEBUG_OPENMP,CLIP_MASS_FRACTION
 REAL(EB) :: DTRATIO,OMDTRATIO,TNOW,ZZ_GET(0:N_TRACKED_SPECIES)
 INTEGER  :: I,J,K,N
 INTEGER, INTENT(IN) :: NM
@@ -620,7 +447,7 @@ CASE(.TRUE.) PREDICTOR_STEP
 
    !$OMP PARALLEL DEFAULT(NONE) &
    !$OMP SHARED(CHANGE_TIME_STEP,NM,N_TRACKED_SPECIES,KBAR,JBAR,IBAR,SOLID,CELL_INDEX,ZZS,DT,DEL_RHO_D_DEL_Z, &
-   !$OMP        ENTHALPY_TRANSPORT,ES,E,ENTHALPY_SOURCE,RHO,ZZ, &
+   !$OMP        RHO,ZZ, &
    !$OMP        DTRATIO,DT_PREV,OMDTRATIO,RHOS, &
    !$OMP        FRHO,CLIP_MASS_FRACTION,N_ZONE,PBAR_S,PBAR,D_PBAR_DT,KBP1,JBP1,IBP1,RSUM,TMP,PRESSURE_ZONE, &
    !$OMP        TMPMIN,TMPMAX)
@@ -645,19 +472,6 @@ CASE(.TRUE.) PREDICTOR_STEP
          ENDDO
       ENDDO
       !$OMP END DO NOWAIT
-      
-      ENTHALPY_IF_1A: IF (ENTHALPY_TRANSPORT) THEN
-         !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I)
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-                  ES(I,J,K) = E(I,J,K)-DT*ENTHALPY_SOURCE(I,J,K)
-               ENDDO
-            ENDDO
-         ENDDO
-         !$OMP END DO
-      ENDIF ENTHALPY_IF_1A
 
    ELSE
 
@@ -677,19 +491,6 @@ CASE(.TRUE.) PREDICTOR_STEP
          ENDDO
       ENDDO
       !$OMP END DO NOWAIT
-      
-      ENTHALPY_IF_1B: IF (ENTHALPY_TRANSPORT) THEN
-         !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I)
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-                  ES(I,J,K) = OMDTRATIO*E(I,J,K) + DTRATIO*ES(I,J,K)
-               ENDDO
-            ENDDO
-         ENDDO
-         !$OMP END DO
-      ENDIF ENTHALPY_IF_1B
 
    ENDIF
 
@@ -788,7 +589,6 @@ CASE(.FALSE.) PREDICTOR_STEP
 
    !$OMP PARALLEL DEFAULT(NONE) &
    !$OMP SHARED(N_TRACKED_SPECIES,KBAR,JBAR,IBAR,SOLID,CELL_INDEX,ZZ,RHO,RHOS,ZZS,DT,DEL_RHO_D_DEL_Z, &
-   !$OMP        ENTHALPY_TRANSPORT,E,ES,ENTHALPY_SOURCE, &
    !$OMP        FRHO,CLIP_MASS_FRACTION,N_ZONE,PBAR,PBAR_S,D_PBAR_S_DT,KBP1,JBP1,IBP1,RSUM,TMP,PRESSURE_ZONE, &
    !$OMP        TMPMIN,TMPMAX)
    
@@ -804,18 +604,6 @@ CASE(.FALSE.) PREDICTOR_STEP
       ENDDO
    ENDDO
    !$OMP END DO NOWAIT
-   
-   ENTHALPY_IF_2: IF (ENTHALPY_TRANSPORT) THEN
-      !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I)
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               E(I,J,K) = .5_EB*(E(I,J,K)+ES(I,J,K)-DT*ENTHALPY_SOURCE(I,J,K))
-            ENDDO
-         ENDDO
-      ENDDO
-      !$OMP END DO
-   ENDIF ENTHALPY_IF_2
 
    ! Correct density at next time step
 
