@@ -9366,7 +9366,7 @@ LOGICAL :: VECTOR,CELL_CENTERED, FIRE_LINE, EVACUATION,LEVEL_SET_FIRE_LINE
 CHARACTER(30) :: QUANTITY,SPEC_ID,PART_ID,QUANTITY2
 TYPE (SLICE_TYPE), POINTER :: SL=>NULL()
 NAMELIST /SLCF/ AGL_SLICE,CELL_CENTERED,EVACUATION,FIRE_LINE,FYI,LEVEL_SET_FIRE_LINE,MAXIMUM_VALUE,MESH_NUMBER,MINIMUM_VALUE,&
-                PART_ID,PBX,PBY,PBZ,QUANTITY,QUANTITY2,SPEC_ID,VECTOR,VELO_INDEX,XB
+                PART_ID,PBX,PBY,PBZ,QUANTITY,QUANTITY2,SPEC_ID,VECTOR,VELO_INDEX,XB,ID
 
 MESH_LOOP: DO NM=1,NMESHES
 
@@ -9414,6 +9414,7 @@ MESH_LOOP: DO NM=1,NMESHES
       PBY      = -1.E6_EB
       PBZ      = -1.E6_EB
       VECTOR   = .FALSE.
+      ID       = 'null'
       MESH_NUMBER=NM
       MINIMUM_VALUE = 0._EB
       MAXIMUM_VALUE = 0._EB
@@ -9472,6 +9473,7 @@ MESH_LOOP: DO NM=1,NMESHES
       VECTORLOOP: DO ITER=1,NITER
          N = N + 1
          SL=>SLICE(N)
+         SL%ID = ID
          SL%I1 = NINT( GINV(XB(1)-XS,1,NM)*RDXI)
          SL%I2 = NINT( GINV(XB(2)-XS,1,NM)*RDXI)
          SL%J1 = NINT( GINV(XB(3)-YS,2,NM)*RDETA)
@@ -9502,11 +9504,11 @@ MESH_LOOP: DO NM=1,NMESHES
          CALL GET_QUANTITY_INDEX(SL%SMOKEVIEW_LABEL,SL%SMOKEVIEW_BAR_LABEL,SL%INDEX,SL%INDEX2, &
                                  SL%Y_INDEX,SL%Z_INDEX,SL%PART_INDEX,I_DUM,I_DUM,'SLCF', &
                                  QUANTITY,QUANTITY2,SPEC_ID,PART_ID,'null','null')
+
          ! For terrain slices, AGL=above ground level
          ! FIRE_LINE==.TRUE. means a terrain slice at one grid cell above ground with quantity temperature.
          ! Smokeview will display only regions where temperature is above 200 C. This is currently hard wired.
          ! LEVEL_SET_FIRE_LINE = .TRUE. will create a slice file  !!! this is not fully functional !!!
-
 
          IF (ITER == 1 .AND. (AGL_SLICE > -1._EB .OR. FIRE_LINE .OR.  LEVEL_SET_FIRE_LINE ) ) THEN 
             SL%TERRAIN_SLICE = .TRUE.
