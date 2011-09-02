@@ -2469,7 +2469,7 @@ LAMBDALOOP: DO NLAMBDA = 1, NLMBDMIE
       DO I = 1,NMIEANG2
          PHSFUN(I) = 2._EB*(abs(S1(I))**2 + abs(S2(I))**2 )
       ENDDO
-      PHSFUN = PHSFUN/(QS*XXX(NX)**2)
+      IF (QS/=0._EB) PHSFUN = PHSFUN/(QS*XXX(NX)**2)
 
 !     Calculate the innermost integral of the forward scattering fraction
 
