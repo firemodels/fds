@@ -833,7 +833,7 @@ typedef struct {
   char *comp_file, *size_file, *reg_file;
   int sort_tags_loaded;
   int compression_type;
-  int loaded, display;
+  int loaded, display, reload;
   int evac;
   float zoffset;
   int blocknumber;

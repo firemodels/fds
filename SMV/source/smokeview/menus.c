@@ -2240,6 +2240,15 @@ void LoadUnloadMenu(int value){
     }
     for(i=0;i<npartinfo;i++){
       if(partinfo[i].loaded==1){
+        partinfo[i].reload=1;
+        readpart(partinfo[i].file,i,UNLOAD,&errorcode);
+      }
+      else{
+        partinfo[i].reload=0;
+      }
+    }
+    for(i=0;i<npartinfo;i++){
+      if(partinfo[i].reload==1){
         readpart(partinfo[i].file,i,LOAD,&errorcode);
       }
     }
