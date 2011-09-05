@@ -2238,10 +2238,23 @@ in a velocity of 10.09~m/s through the vent.  FDS computes a peak velocity of 10
 \subsection{Special Topic: Large Eddy Simulation Parameters}
 \label{info:LES}
 
-By default FDS uses the dynamic procedure \cite{Germano:1991} to compute the Smagorinsky constant in the turbulent viscosity, which is modeled as
-\be \mu_{\hbox{\tiny LES}} = \rho \, (C_s\, \Delta)^2 \,
-   \left(2 \; \overline{\bS}_{ij} : \overline{\bS}_{ij} - \frac{2}{3} (\nabla \cdot \overline{\bu})^2 \right)^\ha \ee
-where $C_s$ is a function of the local flow conditions and $\Delta$ is a length scale on the order of the size of a grid cell.  FDS takes the local maximum cell dimension as the filter width, $\Delta = \max(\delta x, \delta y, \delta z)$. The bar above the various quantities denotes that these are the resolved, or {\em filtered}, values, meaning that they are computed on a numerical grid. The other diffusive parameters, the thermal conductivity and material diffusivity, are related to the turbulent viscosity by
+By default FDS uses the Deardorff \cite{Deardorff:1980,Pope:2000} turbulent viscosity,
+\begin{equation}
+\mu_{\hbox{\tiny LES}} = C_k \Delta \sqrt{k_{sgs}}
+\end{equation}
+where $C_k=0.1$ and the subgrid scale (sgs) kinetic energy is taken from an algebraic relationship based on scale similarity (see the FDS Technical Reference Guide~\cite{FDS_Math_Guide}).
+
+Options for the turbulent viscosity model specified using {\ct TURBULENCE\_MODEL} on {\ct MISC}:
+\begin{center}
+\begin{tabular}{ll}
+{\ct 'CONSMAG'}   & constant coefficient Smagorinsky model \cite{Smagorinsky:1}, additionally specify {\ct CSMAG}\\
+{\ct 'DYNSMAG'}   & dynamic Smagorinsky model \cite{Germano:1991}\\
+{\ct 'DEARDORFF'} & Deardorff model \cite{Deardorff:1980} (default) \\
+{\ct 'VREMAN'}    & Vreman's eddy viscosity model \cite{Vreman:2004}
+\end{tabular}
+\end{center}
+
+The other diffusive parameters, the thermal conductivity and material diffusivity, are related to the turbulent viscosity by
 \be k_{\hbox{\tiny LES}} = \frac{\mu_{\hbox{\tiny LES}} \, c_p}{\PR_t}
 \quad ; \quad
  (\rho D)_{\hbox{\tiny LES}} =\frac{\mu_{\hbox{\tiny LES}}}{\SC_t} \ee
@@ -2249,8 +2262,7 @@ The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ ar
 
 \begin{warning}
 \noindent
-To return to the non-dynamic form of LES used in FDS versions 1-5, set {\ct DYNSMAG=.FALSE.} on the {\ct MISC} line. You can change
-the empirical constant $C_s$ via {\ct CSMAG}. Its default value is 0.2.
+To return to the non-dynamic form of LES used in FDS versions 1-5, set {\ct TURBULENCE\_MODEL='CONSMAG'} on the {\ct MISC} line. You can change the empirical constant $C_s$ via {\ct CSMAG}. Its default value is 0.2.
 \end{warning}
 
 
@@ -10253,7 +10265,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct C\_VERTICAL}               & Real          & See Section~\ref{info:convection}                         &               & 1.31             \\ \hline
 %{\ct DEBUG\_OPENMP}             & Logical       & Debug flag for OpenMP                                     &               & {\ct .FALSE.}     \\ \hline
 {\ct DNS}                       & Logical       & See Section~\ref{info:MISC_Basics}                        &               & {\ct .FALSE.}     \\ \hline
-{\ct DYNSMAG}                   & Logical       & See Section~\ref{info:LES}                                &               & {\ct .FALSE.}     \\ \hline
 {\ct EVACUATION\_DRILL}         & Logical       & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide}     &               & {\ct .FALSE.}     \\ \hline
 {\ct EVACUATION\_MC\_MODE}      & Logical       & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide}     &               & {\ct .FALSE.}     \\ \hline
 {\ct EVAC\_PRESSURE\_ITERATIONS}& Integer       & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide}     &               & 50                \\ \hline
@@ -10294,6 +10305,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TEXTURE\_ORIGIN(3)}        & Char.~Triplet & See Section~\ref{info:texture_map}                        & m             & (0.,0.,0.)        \\ \hline
 {\ct THICKEN\_OBSTRUCTIONS}     & Logical       & See Section~\ref{info:OBST_Basics}                        &               & {\ct .FALSE.}     \\ \hline
 {\ct TMPA}                      & Real          & See Section~\ref{info:MISC_Basics}                        & $^\circ$C     & 20.               \\ \hline
+{\ct TURBULENCE\_MODEL}         & Character     & See Section~\ref{info:LES}                                &               & {\ct 'DEARDORFF'} \\ \hline
 {\ct U0,V0,W0}                  & Reals         & See Section~\ref{info:MISC_Basics}                        & m/s           & 0.                \\ \hline
 {\ct VISIBILITY\_FACTOR}        & Real          & Visibility parameter                                      &               & 3                 \\ \hline
 {\ct VN\_MAX}                   & Real          & See Section~\ref{info:CFL}                                &               & 1.0               \\ \hline
