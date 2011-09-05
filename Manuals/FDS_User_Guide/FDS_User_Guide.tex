@@ -2240,16 +2240,17 @@ in a velocity of 10.09~m/s through the vent.  FDS computes a peak velocity of 10
 
 By default FDS uses the Deardorff \cite{Deardorff:1980,Pope:2000} turbulent viscosity,
 \begin{equation}
-\mu_{\hbox{\tiny LES}} = C_k \Delta \sqrt{k_{sgs}}
+(\mu_{\hbox{\tiny LES}}/\rho) = C_\nu \Delta \sqrt{k_{sgs}}
 \end{equation}
-where $C_k=0.1$ and the subgrid scale (sgs) kinetic energy is taken from an algebraic relationship based on scale similarity (see the FDS Technical Reference Guide~\cite{FDS_Math_Guide}).
+where $C_\nu=0.1$ and the subgrid scale (sgs) kinetic energy is taken from an algebraic relationship based on scale similarity (see the FDS Technical Reference Guide~\cite{FDS_Math_Guide}).
 
-Options for the turbulent viscosity model specified using {\ct TURBULENCE\_MODEL} on {\ct MISC}:
+Options for the turbulent viscosity model are (set {\ct TURBULENCE\_MODEL} on {\ct MISC}):
 \begin{center}
+\vskip-\baselineskip
 \begin{tabular}{ll}
-{\ct 'CONSMAG'}   & constant coefficient Smagorinsky model \cite{Smagorinsky:1}, additionally specify {\ct CSMAG}\\
-{\ct 'DYNSMAG'}   & dynamic Smagorinsky model \cite{Germano:1991}\\
-{\ct 'DEARDORFF'} & Deardorff model \cite{Deardorff:1980} (default) \\
+{\ct 'CONSTANT SMAGORINSKY'}   & constant coefficient Smagorinsky model \cite{Smagorinsky:1}, additionally specify {\ct CSMAG}\\
+{\ct 'DYNAMIC SMAGORINSKY'}   & dynamic Smagorinsky model \cite{Germano:1991,Moin:1991}\\
+{\ct 'DEARDORFF'} & Deardorff model \cite{Deardorff:1980,Pope:2000} (default) \\
 {\ct 'VREMAN'}    & Vreman's eddy viscosity model \cite{Vreman:2004}
 \end{tabular}
 \end{center}
