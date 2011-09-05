@@ -2297,9 +2297,17 @@ WRITE(LU_OUTPUT,'(A,F8.1)')   '   Time Shrink Factor (s/s)      ',TIME_SHRINK_FA
 WRITE(LU_OUTPUT,'(A,F8.1)')   '   Simulation Start Time (s)     ',T_BEGIN
 WRITE(LU_OUTPUT,'(A,F8.1)')   '   Simulation End Time (s)       ',(T_END-T_BEGIN) * TIME_SHRINK_FACTOR + T_BEGIN
 IF (LES) THEN
-   WRITE(LU_OUTPUT,'(A)')        '   LES Calculation'
-   IF (.NOT.DYNSMAG) WRITE(LU_OUTPUT,'(A,F8.2)')  '   Smagorinsky Constant          ',CSMAG
-   IF (     DYNSMAG) WRITE(LU_OUTPUT,'(A)')       '   Dynamic Smagorinsky Model'
+   WRITE(LU_OUTPUT,'(A)')     '   LES Calculation'
+   SELECT CASE (TURB_MODEL)
+      CASE(CONSMAG)
+         WRITE(LU_OUTPUT,'(A,F8.2)')  '   Smagorinsky Constant          ',CSMAG
+      CASE(DYNSMAG)
+         WRITE(LU_OUTPUT,'(A)')       '   Dynamic Smagorinsky Model'
+      CASE(DEARDORFF)
+         WRITE(LU_OUTPUT,'(A)')       '   Deardorff Model'
+      CASE(VREMAN)
+         WRITE(LU_OUTPUT,'(A)')       '   Vreman Model'
+   END SELECT
    WRITE(LU_OUTPUT,'(A,F8.2)')   '   Turbulent Prandtl Number      ',PR
    IF (N_TRACKED_SPECIES>0._EB) WRITE(LU_OUTPUT,'(A,F8.2)')   '   Turbulent Schmidt Number      ',SC
 ENDIF
