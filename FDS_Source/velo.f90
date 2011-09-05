@@ -78,7 +78,7 @@ ENDIF
 
 !$OMP PARALLEL DEFAULT(NONE) &
 !$OMP SHARED(N_TRACKED_SPECIES,EVACUATION_ONLY,KBAR,JBAR,IBAR,SOLID,CELL_INDEX,ZZP,MU,TMP, &
-!$OMP        LES,NM,CSMAG,TWO_D,DX,DY,DZ,USE_MAX_FILTER_WIDTH,RDX,RDY,RDZ,UU,VV,WW,DYNSMAG,RHOP,CSD2, &
+!$OMP        LES,NM,CSMAG,TWO_D,DX,DY,DZ,USE_MAX_FILTER_WIDTH,RDX,RDY,RDZ,UU,VV,WW,RHOP,CSD2, &
 !$OMP        N_EXTERNAL_WALL_CELLS,N_INTERNAL_WALL_CELLS,BOUNDARY_TYPE,IJKW,KRES, &
 !$OMP        IBP1,JBP1,KBP1) &
 !$OMP PRIVATE(ZZ_GET,CSD2)
@@ -98,147 +98,141 @@ DO K=1,KBAR
 ENDDO
 !$OMP END DO
 
-! Smagorinsky (1963) eddy viscosity
+IF (EVACUATION_ONLY(NM)) TURB_MODEL=CONSMAG
 
-IF ((LES .AND. .NOT.(DEARDORFF .OR. VREMAN)) .OR. EVACUATION_ONLY(NM)) THEN
+SELECT_TURB: SELECT CASE (TURB_MODEL)
 
-   CALL COMPUTE_STRAIN_RATE(NM)
+   CASE (CONSMAG,DYNSMAG) SELECT_TURB ! Smagorinsky (1963) eddy viscosity
+
+      CALL COMPUTE_STRAIN_RATE(NM)
    
-   IF (PREDICTOR .AND. DYNSMAG) CALL VARDEN_DYNSMAG(NM) ! dynamic procedure, Moin et al. (1991)
+      IF (PREDICTOR .AND. TURB_MODEL==DYNSMAG) CALL VARDEN_DYNSMAG(NM) ! dynamic procedure, Moin et al. (1991)
    
-   !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) &
-   !$OMP PRIVATE(K,J,I)
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            MU(I,J,K) = MU(I,J,K) + RHOP(I,J,K)*CSD2(I,J,K)*STRAIN_RATE(I,J,K)
-         ENDDO
-      ENDDO
-   ENDDO
-   !$OMP END DO
-   
-ENDIF
-
-! Deardorff (1980) eddy viscosity model (experimental)
-
-DEARDORFF_IF: IF (LES .AND. DEARDORFF) THEN
-
-   ! Velocities relative to the p-cell center
-
-   UP => WORK1
-   VP => WORK2
-   WP => WORK3
-   UP=0._EB
-   VP=0._EB
-   WP=0._EB
-
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            UP(I,J,K) = 0.5_EB*(UU(I,J,K) + UU(I-1,J,K))
-            VP(I,J,K) = 0.5_EB*(VV(I,J,K) + VV(I,J-1,K))
-            WP(I,J,K) = 0.5_EB*(WW(I,J,K) + WW(I,J,K-1))
-         ENDDO
-      ENDDO
-   ENDDO
-   
-   ! extrapolate to ghost cells
-
-   CALL EX2G3D(UP,-1.E10_EB,1.E10_EB)
-   CALL EX2G3D(VP,-1.E10_EB,1.E10_EB)
-   CALL EX2G3D(WP,-1.E10_EB,1.E10_EB)
-
-   UP_HAT => WORK4
-   VP_HAT => WORK5
-   WP_HAT => WORK6
-   UP_HAT=0._EB
-   VP_HAT=0._EB
-   WP_HAT=0._EB
-
-   CALL TEST_FILTER(UP_HAT,UP,-1.E10_EB,1.E10_EB)
-   CALL TEST_FILTER(VP_HAT,VP,-1.E10_EB,1.E10_EB)
-   CALL TEST_FILTER(WP_HAT,WP,-1.E10_EB,1.E10_EB)
-
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            IF (TWO_D) THEN
-               DELTA = MAX(DX(I),DZ(K))
-            ELSE
-               DELTA = MAX(DX(I),DY(J),DZ(K))
-            ENDIF
-            
-            KSGS = 0.5_EB*( (UP(I,J,K)-UP_HAT(I,J,K))**2 + (VP(I,J,K)-VP_HAT(I,J,K))**2 + (WP(I,J,K)-WP_HAT(I,J,K))**2 )
-            NU_EDDY = C_DEARDORFF*DELTA*SQRT(KSGS)
-            
-            MU(I,J,K) = MU(I,J,K) + RHOP(I,J,K)*NU_EDDY
-         ENDDO
-      ENDDO
-   ENDDO
-
-ENDIF DEARDORFF_IF
-
-! Vreman (2004) eddy viscosity model (experimental)
-
-VREMAN_IF: IF (LES .AND. VREMAN) THEN
-
-   ! A. W. Vreman. An eddy-viscosity subgrid-scale model for turbulent shear flow: Algebraic theory and applications.
-   ! Phys. Fluids, 16(10):3670-3681, 2004.
-   
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            DUDX = RDX(I)*(UU(I,J,K)-UU(I-1,J,K))
-            DVDY = RDY(J)*(VV(I,J,K)-VV(I,J-1,K))
-            DWDZ = RDZ(K)*(WW(I,J,K)-WW(I,J,K-1))
-            DUDY = 0.25_EB*RDY(J)*(UU(I,J+1,K)-UU(I,J-1,K)+UU(I-1,J+1,K)-UU(I-1,J-1,K))
-            DUDZ = 0.25_EB*RDZ(K)*(UU(I,J,K+1)-UU(I,J,K-1)+UU(I-1,J,K+1)-UU(I-1,J,K-1)) 
-            DVDX = 0.25_EB*RDX(I)*(VV(I+1,J,K)-VV(I-1,J,K)+VV(I+1,J-1,K)-VV(I-1,J-1,K))
-            DVDZ = 0.25_EB*RDZ(K)*(VV(I,J,K+1)-VV(I,J,K-1)+VV(I,J-1,K+1)-VV(I,J-1,K-1))
-            DWDX = 0.25_EB*RDX(I)*(WW(I+1,J,K)-WW(I-1,J,K)+WW(I+1,J,K-1)-WW(I-1,J,K-1))
-            DWDY = 0.25_EB*RDY(J)*(WW(I,J+1,K)-WW(I,J-1,K)+WW(I,J+1,K-1)-WW(I,J-1,K-1))
-         
-            ! Vreman, Eq. (6)
-            A_IJ(1,1)=DUDX; A_IJ(2,1)=DUDY; A_IJ(3,1)=DUDZ
-            A_IJ(1,2)=DVDX; A_IJ(2,2)=DVDY; A_IJ(3,2)=DVDZ
-            A_IJ(1,3)=DWDX; A_IJ(2,3)=DWDY; A_IJ(3,3)=DWDZ
-
-            AA=0._EB
-            DO JJ=1,3
-               DO II=1,3
-                  AA = AA + A_IJ(II,JJ)*A_IJ(II,JJ)
-               ENDDO
+      !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) &
+      !$OMP PRIVATE(K,J,I)
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               MU(I,J,K) = MU(I,J,K) + RHOP(I,J,K)*CSD2(I,J,K)*STRAIN_RATE(I,J,K)
             ENDDO
-               
-            ! Vreman, Eq. (7)
-            B_IJ(1,1)=(DX(I)*A_IJ(1,1))**2 + (DY(J)*A_IJ(2,1))**2 + (DZ(K)*A_IJ(3,1))**2
-            B_IJ(2,2)=(DX(I)*A_IJ(1,2))**2 + (DY(J)*A_IJ(2,2))**2 + (DZ(K)*A_IJ(3,2))**2
-            B_IJ(3,3)=(DX(I)*A_IJ(1,3))**2 + (DY(J)*A_IJ(2,3))**2 + (DZ(K)*A_IJ(3,3))**2
-
-            B_IJ(1,2)=DX(I)**2*A_IJ(1,1)*A_IJ(1,2) + DY(J)**2*A_IJ(2,1)*A_IJ(2,2) + DZ(K)**2*A_IJ(3,1)*A_IJ(3,2)
-            B_IJ(1,3)=DX(I)**2*A_IJ(1,1)*A_IJ(1,3) + DY(J)**2*A_IJ(2,1)*A_IJ(2,3) + DZ(K)**2*A_IJ(3,1)*A_IJ(3,3)
-            B_IJ(2,3)=DX(I)**2*A_IJ(1,2)*A_IJ(1,3) + DY(J)**2*A_IJ(2,2)*A_IJ(2,3) + DZ(K)**2*A_IJ(3,2)*A_IJ(3,3)
-
-            BB = B_IJ(1,1)*B_IJ(2,2) - B_IJ(1,2)**2 &
-               + B_IJ(1,1)*B_IJ(3,3) - B_IJ(1,3)**2 &
-               + B_IJ(2,2)*B_IJ(3,3) - B_IJ(2,3)**2    ! Vreman, Eq. (8)
- 
-            IF (ABS(AA)>ZERO_P) THEN
-               NU_EDDY = C_VREMAN*SQRT(BB/AA)  ! Vreman, Eq. (5)
-            ELSE
-               NU_EDDY=0._EB
-            ENDIF
-    
-            MU(I,J,K) = MU(I,J,K) + RHOP(I,J,K)*NU_EDDY 
-         
          ENDDO
       ENDDO
-   ENDDO
+      !$OMP END DO
    
-ENDIF VREMAN_IF
+   CASE (DEARDORFF) SELECT_TURB ! Deardorff (1980) eddy viscosity model (current default)
+
+      ! Velocities relative to the p-cell center
+
+      UP => WORK1
+      VP => WORK2
+      WP => WORK3
+      UP=0._EB
+      VP=0._EB
+      WP=0._EB
+
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               UP(I,J,K) = 0.5_EB*(UU(I,J,K) + UU(I-1,J,K))
+               VP(I,J,K) = 0.5_EB*(VV(I,J,K) + VV(I,J-1,K))
+               WP(I,J,K) = 0.5_EB*(WW(I,J,K) + WW(I,J,K-1))
+            ENDDO
+         ENDDO
+      ENDDO
+   
+      ! extrapolate to ghost cells
+
+      CALL EX2G3D(UP,-1.E10_EB,1.E10_EB)
+      CALL EX2G3D(VP,-1.E10_EB,1.E10_EB)
+      CALL EX2G3D(WP,-1.E10_EB,1.E10_EB)
+
+      UP_HAT => WORK4
+      VP_HAT => WORK5
+      WP_HAT => WORK6
+      UP_HAT=0._EB
+      VP_HAT=0._EB
+      WP_HAT=0._EB
+
+      CALL TEST_FILTER(UP_HAT,UP,-1.E10_EB,1.E10_EB)
+      CALL TEST_FILTER(VP_HAT,VP,-1.E10_EB,1.E10_EB)
+      CALL TEST_FILTER(WP_HAT,WP,-1.E10_EB,1.E10_EB)
+
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               IF (TWO_D) THEN
+                  DELTA = MAX(DX(I),DZ(K))
+               ELSE
+                  DELTA = MAX(DX(I),DY(J),DZ(K))
+               ENDIF
+            
+               KSGS = 0.5_EB*( (UP(I,J,K)-UP_HAT(I,J,K))**2 + (VP(I,J,K)-VP_HAT(I,J,K))**2 + (WP(I,J,K)-WP_HAT(I,J,K))**2 )
+               NU_EDDY = C_DEARDORFF*DELTA*SQRT(KSGS)
+            
+               MU(I,J,K) = MU(I,J,K) + RHOP(I,J,K)*NU_EDDY
+            ENDDO
+         ENDDO
+      ENDDO
+
+   CASE (VREMAN) SELECT_TURB ! Vreman (2004) eddy viscosity model (experimental)
+
+      ! A. W. Vreman. An eddy-viscosity subgrid-scale model for turbulent shear flow: Algebraic theory and applications.
+      ! Phys. Fluids, 16(10):3670-3681, 2004.
+   
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               DUDX = RDX(I)*(UU(I,J,K)-UU(I-1,J,K))
+               DVDY = RDY(J)*(VV(I,J,K)-VV(I,J-1,K))
+               DWDZ = RDZ(K)*(WW(I,J,K)-WW(I,J,K-1))
+               DUDY = 0.25_EB*RDY(J)*(UU(I,J+1,K)-UU(I,J-1,K)+UU(I-1,J+1,K)-UU(I-1,J-1,K))
+               DUDZ = 0.25_EB*RDZ(K)*(UU(I,J,K+1)-UU(I,J,K-1)+UU(I-1,J,K+1)-UU(I-1,J,K-1)) 
+               DVDX = 0.25_EB*RDX(I)*(VV(I+1,J,K)-VV(I-1,J,K)+VV(I+1,J-1,K)-VV(I-1,J-1,K))
+               DVDZ = 0.25_EB*RDZ(K)*(VV(I,J,K+1)-VV(I,J,K-1)+VV(I,J-1,K+1)-VV(I,J-1,K-1))
+               DWDX = 0.25_EB*RDX(I)*(WW(I+1,J,K)-WW(I-1,J,K)+WW(I+1,J,K-1)-WW(I-1,J,K-1))
+               DWDY = 0.25_EB*RDY(J)*(WW(I,J+1,K)-WW(I,J-1,K)+WW(I,J+1,K-1)-WW(I,J-1,K-1))
+         
+               ! Vreman, Eq. (6)
+               A_IJ(1,1)=DUDX; A_IJ(2,1)=DUDY; A_IJ(3,1)=DUDZ
+               A_IJ(1,2)=DVDX; A_IJ(2,2)=DVDY; A_IJ(3,2)=DVDZ
+               A_IJ(1,3)=DWDX; A_IJ(2,3)=DWDY; A_IJ(3,3)=DWDZ
+
+               AA=0._EB
+               DO JJ=1,3
+                  DO II=1,3
+                     AA = AA + A_IJ(II,JJ)*A_IJ(II,JJ)
+                  ENDDO
+               ENDDO
+               
+               ! Vreman, Eq. (7)
+               B_IJ(1,1)=(DX(I)*A_IJ(1,1))**2 + (DY(J)*A_IJ(2,1))**2 + (DZ(K)*A_IJ(3,1))**2
+               B_IJ(2,2)=(DX(I)*A_IJ(1,2))**2 + (DY(J)*A_IJ(2,2))**2 + (DZ(K)*A_IJ(3,2))**2
+               B_IJ(3,3)=(DX(I)*A_IJ(1,3))**2 + (DY(J)*A_IJ(2,3))**2 + (DZ(K)*A_IJ(3,3))**2
+
+               B_IJ(1,2)=DX(I)**2*A_IJ(1,1)*A_IJ(1,2) + DY(J)**2*A_IJ(2,1)*A_IJ(2,2) + DZ(K)**2*A_IJ(3,1)*A_IJ(3,2)
+               B_IJ(1,3)=DX(I)**2*A_IJ(1,1)*A_IJ(1,3) + DY(J)**2*A_IJ(2,1)*A_IJ(2,3) + DZ(K)**2*A_IJ(3,1)*A_IJ(3,3)
+               B_IJ(2,3)=DX(I)**2*A_IJ(1,2)*A_IJ(1,3) + DY(J)**2*A_IJ(2,2)*A_IJ(2,3) + DZ(K)**2*A_IJ(3,2)*A_IJ(3,3)
+
+               BB = B_IJ(1,1)*B_IJ(2,2) - B_IJ(1,2)**2 &
+                  + B_IJ(1,1)*B_IJ(3,3) - B_IJ(1,3)**2 &
+                  + B_IJ(2,2)*B_IJ(3,3) - B_IJ(2,3)**2    ! Vreman, Eq. (8)
+ 
+               IF (ABS(AA)>ZERO_P) THEN
+                  NU_EDDY = C_VREMAN*SQRT(BB/AA)  ! Vreman, Eq. (5)
+               ELSE
+                  NU_EDDY=0._EB
+               ENDIF
+    
+               MU(I,J,K) = MU(I,J,K) + RHOP(I,J,K)*NU_EDDY 
+         
+            ENDDO
+         ENDDO
+      ENDDO
+   
+END SELECT SELECT_TURB
  
 ! Add viscosity for stably stratified flows (experimental)
 

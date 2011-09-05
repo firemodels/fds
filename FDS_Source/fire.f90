@@ -380,7 +380,7 @@ SELECT CASE (MODE)
                TAU_D = D_Z(MIN(4999,NINT(TMP(I,J,K))),RN%FUEL_SMIX_INDEX)
                TAU_D = DELTA**2/TAU_D ! diffusive time scale 
             
-               IF (DEARDORFF) THEN
+               IF (TURB_MODEL==DEARDORFF) THEN
                   TAU_U = 0.1_EB*SC*RHO(I,J,K)*DELTA**2/MU(I,J,K) ! turbulent mixing time scale
                ELSE
                   TAU_U = DELTA/SQRT(2._EB*KSGS(I,J,K)+1.E-10_EB) ! advective time scale
