@@ -2574,7 +2574,7 @@ ENDDO COUNT_REAC_LOOP
 
 ALLOCATE(REACTION(N_REACTIONS),STAT=IZERO)
 
-! Read the store the reaction parameters
+! Read and store the reaction parameters
 
 REAC_READ_LOOP: DO NR=1,N_REACTIONS
 
