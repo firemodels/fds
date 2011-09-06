@@ -34,12 +34,10 @@ SYSTEMLIBS = -lpthread -lXmu -lGLU -lGL -lm
 
 # FORTRAN Library directories for various platforms
 
-#OSX32FORTLIBDIR  = /opt/intel/fc/10.1.006/lib
-OSX32FORTLIBDIR  = /opt/intel/Compiler/11.1/080/lib
-OSX64FORTLIBDIR  = /opt/intel/Compiler/11.1/080/lib
-#LINUX32FORTLIBDIR  = /opt/intel/fc/10.1.021/lib
-LINUX32FORTLIBDIR  = /opt/intel/11/lib/ia32
-LINUX64FORTLIBDIR  = /opt/intel/11/lib/intel64
+OSX32FORTLIBDIR  = /opt/intel/composerxe/lib
+OSX64FORTLIBDIR  = /opt/intel/composerxe/lib
+LINUX32FORTLIBDIR  = /opt/intel/composerxe/lib/ia32
+LINUX64FORTLIBDIR  = /opt/intel/composerxe/lib/intel64
 
 # Definition of the object variables
 
