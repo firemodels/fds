@@ -50,45 +50,15 @@ sigma=5.67040040*10^-8;
 
 qin=sigma*1450^4;
 
-% Lasketaan myös Keefe et al. datoista
-temp=importdata('Data/toluene/Keefe_toluene_2/tla105em.y'); % in L /molcm
-vstart=temp(1)*10^2;
-vend=temp(2)*10^2;
-npt=temp(3);
-v=linspace(vstart,vend,npt);
-a=temp(4:end)*0.1*9339; % L/mol/cm=0.1 m^3/mol/m, Tolueenin tiheys 9339 mol/m^3
-Tau(:,1)=effmean3(a,v,x,1450);
+temp=csvread('abscoeffs.csv',2);
 
+v=temp(:,1);
+for i=2:size(temp,2)
+    a=temp(:,i);
+    %ind=a>0;
+    Tau(:,i-1)=effmean3(a,v,x,1450);
+end
 
-% testataan myös metanoli
-[a v]=readyspec('Data/Methanol/Bertie/CH3OH/MTHEM93.y');
-Tau(:,2)=effmean3(a*2.4719e+004,v,x,1450);
-% molar mass 32.04 g mol?1 density 792 kg/m^3
-% => density = 2.4719e+004 mol/m^3
-
-
-% Vesi
-[a v]=readyspec('Data/Water/Bertie/WTEREM95.y');
-Tau(:,3)=effmean3(a*5.5556e+004,v,x,1450);
-% molar mass 18.0153 g/mol density 1000 kg/m^3
-% => density =5.5556e+004 mol/m^3
-
-% Bentseeni Data/Benzene/Keefe_benzene/bzh6emf2.y
-[a v]=readyspec('Data/Benzene/Keefe_benzene/bzh6emf2.y');
-Tau(:,4)=effmean3(a*100*11161,v,x,1450);
-% Density 11161 mol/m^3 at T=300K ja P = 1 atm
-%kappa0=-log(Tau).'/(x*1e-3).';
-
-% Diesel
-A=csvread('Data/Diesel/Sazhin2004.csv',1,0);
-[C,IA,IB]=UNION(A(:,1),A(:,1));
-A=A(IB,:);
-l=A(:,1)*1e-6;
-a=A(:,2)*2*pi/l;
-a=A(:,2)*2*pi./l;
-
-v=1./l;
-Tau(:,5)=effmean3(a,v,x,1450);
 plot(x*1e3,Tau,'LineWidth',2,'LineSmoothing','on');
 %semilogy(x*1e3,Tau,'LineWidth',2,'LineSmoothing','on');
 xlabel('Path length (mm)','FontSize',14,'FontName',Font_Name);
