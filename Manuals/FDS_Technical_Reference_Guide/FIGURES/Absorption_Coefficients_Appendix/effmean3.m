@@ -18,7 +18,7 @@ switch(optargin)
 end
         
 
-
+options=optimset('Display','off');
 
 % incident radiation
 %dv=abs(min(diff(v)))/4;
@@ -42,27 +42,32 @@ end
 %figure;
 %plot(S,Itot/Itot(1));
 %hold
-I0=Itot(1);
-T=Itot/I0;
+qin=Itot(1);
+T=Itot/qin;
 
 [ncol nrow]=size(S);
 if(ncol>1) S=S.'; end
 [ncol nrow]=size(T);
 if(ncol>1) T=T.'; end
 
+% Solve the absorption coefficient from beer-lambert law
 amean0(j)=-log(T)/S; % Least squares fit.
 
 % fit using the two-flux radiation model
-[amean(j),fval,exitflag,output]=fminbnd(@(X) targetfun(X,S,Itot,I0),0,2*amean0(j))
+% use the beer-lambert estimates to constrain the search area.
+F=@(X) targetfun(X,S,Itot,qin);
+[amean(j),resnorm,residual,exitflag,output]=lsqnonlin(F,0.5*amean0(j),0,2*amean0(j),options);
 
 %[q,X] = irad_twoflux(max(S),I0,amean,20,100);
 %plot(S,exp(-amean0*S),'r');
 %plot(X,q/I0,'g');
 end
 
- function mse=targetfun(kappa,expx,expy,qin)
+ function res=targetfun(kappa,expx,expy,qin)
         [q,X] = irad_twoflux(max(expx),qin,kappa,20,1000);
-        q=interp1(X,q,expx,'linear');
-        mse=sum((expy-q).^2);
+        q=interp1(X,q,expx,'linear','extrap');
+        ind=isnan(q);
+        q(ind)=expy(ind); % Ignore nan
+        res=(expy-q)/qin;
   end
 end
