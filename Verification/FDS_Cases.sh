@@ -143,6 +143,7 @@ $RUNFDS Species Methane_flame_simple
 $RUNFDS Species Methane_flame_primitive
 $RUNFDS Species Methane_flame_lumped
 $RUNFDS Species Reaction_Rate_0
+$RUNFDS Species Reaction_Rate_2
 $RUNFDS Sprinklers_and_Sprays activate_sprinklers
 $RUNFDS Sprinklers_and_Sprays bucket_test_2
 $RUNFDS Sprinklers_and_Sprays bucket_test
