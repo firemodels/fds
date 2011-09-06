@@ -26,7 +26,7 @@ IF EXIST %togoogle% rmdir /S /Q %togoogle%
 mkdir %togoogle%
 
 copy intel_Win_32\fds_win_32.exe %togoogle%\.
-copy mpi_intel_Win_32\fds_win_mpi_32.exe %togoogle%\.
+copy mpi_intel_Win_32\fds_mpi_win_32.exe %togoogle%\.
 
 echo.
 echo winzipping distribution directory
