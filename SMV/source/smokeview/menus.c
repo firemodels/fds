@@ -6052,16 +6052,22 @@ updatemenu=0;
     nvsliceloaded0=0;
     for(i=0;i<nvslice;i++){
       vslice *vd;
+      slice *sd;
 
       vd = vsliceinfo + i;
       if(vd->loaded==0)continue;
+      sd = sliceinfo + vd->ival;
       nvsliceloaded0++;
       STRCPY(menulabel,"");
-      if(plotstate==DYNAMIC_PLOTS&&sliceinfo[vd->ival].type==islicetype&&vd->display==1){
+      if(plotstate==DYNAMIC_PLOTS&&sd->type==islicetype&&vd->display==1){
         vd_shown=vd;
-        STRCPY(menulabel,"*");
+        STRCAT(menulabel,"*");
       }
-      STRCAT(menulabel,sliceinfo[vd->ival].menulabel2);
+      STRCAT(menulabel,sd->menulabel2);
+      if(sd->slicelabel!=NULL){
+        STRCAT(menulabel," - ");
+        STRCAT(menulabel,sd->slicelabel);
+      }
       glutAddMenuEntry(menulabel,i);
     }
     if(show_slice_in_obst==1)glutAddMenuEntry(_("*Show vector slice in blockage"),-11);
@@ -6087,20 +6093,24 @@ updatemenu=0;
   if(nsliceinfo>0&&nmultislices<nsliceinfo){
     CREATEMENU(showmultislicemenu,ShowMultiSliceMenu);
     for(i=0;i<nmultislices;i++){
+      slice *sd;
+
       mslicei = multisliceinfo + i;
       if(mslicei->loaded==0)continue;
+      sd = sliceinfo + mslicei->islices[0];
+      STRCPY(menulabel,"");
       if(plotstate==DYNAMIC_PLOTS&&mslicei->display!=0&&mslicei->type==islicetype){
         if(mslicei->display==1){
-          STRCPY(menulabel,"*");
-          STRCAT(menulabel,mslicei->menulabel2);
+          STRCAT(menulabel,"*");
         }
         else if(mslicei->display==-1){
-          STRCPY(menulabel,"#");
-          STRCAT(menulabel,mslicei->menulabel2);
+          STRCAT(menulabel,"#");
         }
       }
-      else{
-        STRCPY(menulabel,mslicei->menulabel2);
+      STRCAT(menulabel,mslicei->menulabel2);
+      if(sd->slicelabel!=NULL){
+        STRCAT(menulabel," - ");
+        STRCAT(menulabel,sd->slicelabel);
       }
       glutAddMenuEntry(menulabel,i);
     }
@@ -6124,13 +6134,15 @@ updatemenu=0;
       if(sd_shown==NULL&&sd->type==islicetype){
         sd_shown = sd;
       }
+      STRCPY(menulabel,"");
       if(plotstate==DYNAMIC_PLOTS&&sd->display==1&&sd->type==islicetype){
         sd_shown=sd;
-        STRCPY(menulabel,check);
-        STRCAT(menulabel,sd->menulabel2);  
+        STRCAT(menulabel,check);
       }
-      else{
-        STRCPY(menulabel,sd->menulabel2);  
+      STRCAT(menulabel,sd->menulabel2);  
+      if(sd->slicelabel!=NULL){
+        STRCAT(menulabel," - ");
+        STRCAT(menulabel,sd->slicelabel);
       }
       glutAddMenuEntry(menulabel,i);
     }
@@ -7173,17 +7185,20 @@ updatemenu=0;
           nloadsubmvslicemenu++;
         }
 
+        STRCPY(menulabel,"");
         if(mvslicei->loaded==1){
-          STRCPY(menulabel,"*");
-          STRCAT(menulabel,mvslicei->menulabel);
+          STRCAT(menulabel,"*");
           nmultisliceloaded++;
         }
         else if(mvslicei->loaded==-1){
-          STRCPY(menulabel,"#");
-          STRCAT(menulabel,mvslicei->menulabel);
+          STRCAT(menulabel,"#");
         }
         else{
-          STRCPY(menulabel,mvslicei->menulabel);
+        }
+        STRCAT(menulabel,mvslicei->menulabel);
+        if(si->slicelabel!=NULL){
+          STRCAT(menulabel," - ");
+          STRCAT(menulabel,si->slicelabel);
         }
         glutAddMenuEntry(menulabel,i);
       }
