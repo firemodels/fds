@@ -5,9 +5,15 @@
 #Change the following two lines to reflect the locations
 # of the GLUT library (.a) and includes on your system
 
-SIZE=-m32
-OUTPUT_LIB=OSX_32
-#SIZE=-m64
+#SIZE=-m32
+SIZE=-m64
+
+#PLATFORM=-D pp_OSX
+PLATFORM=
+
+#OUTPUT_LIB=LINUX_32
+OUTPUT_LIB=LINUX_64
+#OUTPUT_LIB=OSX_32
 #OUTPUT_LIB=OSX_64
 GLUT_INC_LOCATION=../include2
 
@@ -15,7 +21,8 @@ CFLAGS =
 
 
 CC=icc
-CPPFLAGS=-D pp_OSX -I${GLUT_INC_LOCATION} -I ../include ${SIZE}
+#CPPFLAGS=$(PLATFORM) -I${GLUT_INC_LOCATION} -I ../include ${SIZE}
+CPPFLAGS=$(PLATFORM) -I${GLUT_INC_LOCATION} -I ../include2/glut ${SIZE}
 LPATH=${GLUTPATH} 
 INCS= 
 
@@ -28,7 +35,7 @@ GLUI_OBJS = glui_add_controls.o glui.o glui_bitmap_img_data.o glui_bitmaps.o glu
 
 libglui.a: $(GLUI_OBJS)
 	@echo "Creating library"
-	ar -r -L libglui.a $(GLUI_OBJS)
+	ar rcs libglui.a $(GLUI_OBJS)
 	cp libglui.a $(OUTPUT_LIB)/.
 
 .cpp.o:
