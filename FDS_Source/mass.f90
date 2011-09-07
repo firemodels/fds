@@ -566,9 +566,9 @@ CASE(.TRUE.) PREDICTOR_STEP
    ! Extract predicted temperature at next time step from Equation of State
    
    !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I)
-   DO K=0,KBP1
-      DO J=0,JBP1
-         DO I=0,IBP1
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
             TMP(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHOS(I,J,K))
          ENDDO
       ENDDO
@@ -676,9 +676,9 @@ CASE(.FALSE.) PREDICTOR_STEP
    ! Extract predicted temperature at next time step from Equation of State
 
    !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I)
-   DO K=0,KBP1
-      DO J=0,JBP1
-         DO I=0,IBP1
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
             TMP(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHO(I,J,K))
          ENDDO
       ENDDO
