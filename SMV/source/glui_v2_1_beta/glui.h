@@ -20,7 +20,11 @@
 #ifndef _GLUI_H_
 #define _GLUI_H_
 
+#ifdef pp_OSX
+#include <GLUT/glut.h>
+#else
 #include <GL/glut.h>
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
