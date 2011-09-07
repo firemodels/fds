@@ -1097,6 +1097,8 @@ CHARACTER(30) :: VEG_DEVICE
 TYPE (GEOMETRY_TYPE), POINTER :: G=>NULL()
 REAL(EB) :: THETA,UU(3)=0._EB,EYE(3,3)=0._EB,PP(3,3)=0._EB,QQ(3,3)=0._EB,RR(3,3)=0._EB,VOR(3),VOR_DEFAULT(3)
 INTEGER :: TYPE_INDICATOR
+TYPE (NODES_TYPE), POINTER :: ND=>NULL()
+TYPE (TRIANGULAR_SURFACE_TYPE), POINTER :: TRI=>NULL()
 
 ! If this is an MPI job and this is not the master node, open the .smv file only if this is not a RESTART case
 
@@ -1735,6 +1737,29 @@ DO N=1,N_GEOM
    
    END SELECT
 ENDDO
+
+
+! Write out NODE info (experimental)
+
+WRITE(LU_SMV,'(/A)') 'NODE'
+WRITE(LU_SMV,'(I5)') N_NODE
+
+DO N=1,N_NODE
+   ND => NODES(N)
+   WRITE(LU_SMV,'(3F12.6)') ND%X,ND%Y,ND%Z
+ENDDO
+   
+
+! Write out TRIANGULAR SURFACE info (experimental)
+
+WRITE(LU_SMV,'(/A)') 'TRIS'
+WRITE(LU_SMV,'(I5)') N_TRIS
+
+DO N=1,N_TRIS
+   TRI => TRIANGULAR_SURFACE(N)
+   WRITE(LU_SMV,'(3I5)') TRI%N(1),TRI%N(2),TRI%N(3)
+ENDDO
+
 
 ENDIF MASTER_NODE_IF
 
