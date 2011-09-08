@@ -3544,7 +3544,7 @@ typedef struct {
           err = length-1.0;
           if(err<0.0)err=-err;
           if(err>0.001){
-            printf("*** warning: imbedded triangle norm is not a unit vector, length=%f\n",length);
+            printf("*** warning: embedded triangle norm is not a unit vector, length=%f\n",length);
             printf("    Using smokeview normal.\n");
             trianglei->fdsnorm=0;
           }
