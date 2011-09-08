@@ -3901,6 +3901,73 @@ void VentMenu(int value){
   glutPostRedisplay();
 }
 
+
+/* ------------------ ImbeddedMenu ------------------------ */
+
+void ImbeddedMenu(int value){
+  updatemenu=1;
+  switch (value){
+    case 0:
+      if(showtrisurface==1&&showtrioutline==1){
+        showtrisurface=0;
+        showtrioutline=1;
+      }
+      else if(showtrisurface==1&&showtrioutline==0){
+        showtrisurface=0;
+        showtrioutline=0;
+      }
+      else if(showtrisurface==0&&showtrioutline==1){
+        showtrisurface=1;
+        showtrioutline=0;
+      }
+      else{
+        showtrisurface=1;
+        showtrioutline=0;
+      }
+      break;
+    case 1:
+      if(showtrisurface==1&&showtrioutline==1){
+        showtrisurface=1;
+        showtrioutline=0;
+      }
+      else if(showtrisurface==1&&showtrioutline==0){
+        showtrisurface=0;
+        showtrioutline=1;
+      }
+      else if(showtrisurface==0&&showtrioutline==1){
+        showtrisurface=0;
+        showtrioutline=0;
+      }
+      else{
+        showtrisurface=0;
+        showtrioutline=1;
+      }
+      break;
+    case 2:
+      if(showtrisurface==1&&showtrioutline==1){
+        showtrisurface=1;
+        showtrioutline=0;
+      }
+      else if(showtrisurface==1&&showtrioutline==0){
+        showtrisurface=1;
+        showtrioutline=1;
+      }
+      else if(showtrisurface==0&&showtrioutline==1){
+        showtrisurface=1;
+        showtrioutline=1;
+      }
+      else{
+        showtrisurface=1;
+        showtrioutline=1;
+      }
+      break;
+      case 3:
+        showtrinormal=1-showtrinormal;
+        break;
+  }
+  glutPostRedisplay();
+}
+
 /* ------------------ BlockageMenu ------------------------ */
 
 //     visBlocks (visBLOCKNormal, visBLOCKAsInput )
@@ -4327,7 +4394,7 @@ static int plot3dshowmenu=0, staticvariablemenu=0, helpmenu=0;
 static int vectorskipmenu=0,unitsmenu=0;
 static int isosurfacemenu=0, isovariablemenu=0, levelmenu=0;
 static int isoblockmenu=0, fontmenu=0, aperturemenu=0,dialogmenu=0,zoommenu=0;
-static int gridslicemenu=0, blockagemenu=0, loadpatchmenu=0, ventmenu=0;
+static int gridslicemenu=0, blockagemenu=0, imbeddedmenu=0, loadpatchmenu=0, ventmenu=0;
 static int loadisomenu=0, isosurfacetypemenu=0;
 static int geometrymenu=0, loadunloadmenu=0, reloadmenu=0, disclaimermenu=0, terrain_showmenu=0;
 static int scriptmenu=0;
@@ -4632,6 +4699,37 @@ updatemenu=0;
       glutAddMenuEntry(_("Down"),DOWNwallmenu);
     }
   }
+
+/* --------------------------------imbedded menu -------------------------- */
+
+  CREATEMENU(imbeddedmenu,ImbeddedMenu);
+  glutAddMenuEntry(_("View Method:"),999);
+  if(showtrisurface==1){
+    glutAddMenuEntry(_(" *Solid"),0);
+  }
+  else{
+    glutAddMenuEntry(_(" Solid"),0);
+  }
+  if(showtrioutline==1){
+    glutAddMenuEntry(_(" *Outline"),1);
+  }
+  else{
+    glutAddMenuEntry(_(" Outline"),1);
+  }
+  if(showtrisurface==1&&showtrioutline==1){
+    glutAddMenuEntry(_(" *Solid and Outline"),2);
+  }
+  else{
+    glutAddMenuEntry(_(" Solid and Outline"),2);
+  }
+#ifdef pp_BETA
+  if(showtrinormal==1){
+    glutAddMenuEntry(_(" *Show normal"),3);
+  }
+  else{
+    glutAddMenuEntry(_(" *Show normal"),3);
+  }
+#endif
 
 /* --------------------------------blockage menu -------------------------- */
   CREATEMENU(blockagemenu,BlockageMenu);
@@ -5228,6 +5326,7 @@ updatemenu=0;
 
   CREATEMENU(geometrymenu,GeometryMenu);
   if(showedit==0&&ntotal_blockages>0)glutAddSubMenu(_("Obstacles"),blockagemenu);
+  if(ntriinfo>0)glutAddSubMenu(_("Imbedded Solids"),imbeddedmenu);
   if(nobject_defs>0){
     int num_activedevices=0;
 

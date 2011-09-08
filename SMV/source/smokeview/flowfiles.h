@@ -15,11 +15,21 @@ typedef struct {
   float *xyz;
 } nodedata;
 
+
+/* --------------------------  tri ------------------------------------ */
+
+typedef struct {
+  struct _surface *surf;
+  float *color;
+  int trinodes[3];
+  float normal[3];
+} triangle;
+
 /* --------------------------  tridata ------------------------------------ */
 
 typedef struct {
   int ntris;
-  int *trinodes;
+  triangle *tris;
 } tridata;
 
 /* --------------------------  bounds ------------------------------------ */
@@ -197,7 +207,7 @@ typedef struct {
 
 /* --------------------------  surface ------------------------------------ */
 
-typedef struct {
+typedef struct _surface {
   char *surfacelabel,*texturefile;
   int type; /* 
                0 - regular block non-textured 

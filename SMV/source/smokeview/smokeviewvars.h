@@ -26,6 +26,7 @@ SVEXTERN int SVDECL(hide_volsmoke,1);
 #ifdef pp_FREEZE_VOLSMOKE
 SVEXTERN int SVDECL(freeze_volsmoke,0);
 #endif
+SVEXTERN int SVDECL(showtrisurface,1),SVDECL(showtrioutline,1),SVDECL(showtrinormal,1);
 SVEXTERN int SVDECL(nnodeinfo,0), SVDECL(ntriinfo,0);
 SVEXTERN tridata SVDECL(*triinfo,NULL);
 SVEXTERN nodedata SVDECL(*nodeinfo,NULL);

@@ -799,6 +799,8 @@ EXTERNCPP void getIsoLabels(float tmin, float tmax, int nlevel,
 EXTERNCPP int SVimage2file(char *GIFfilename, int rendertype, int width, int height);
 EXTERNCPP void update_showhidebuttons(void);
 EXTERNCPP void update_fileload(void);
+EXTERNCPP surface *get_surface(char *label);
+EXTERNCPP void CalcTriNormal(float *v1, float *v2, float *v3, float *norm);
 
 #ifndef CPP
 #include "smokefortheaders.h"

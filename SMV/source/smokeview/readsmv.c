@@ -1968,81 +1968,6 @@ int readsmv(char *file, char *file2){
 
     /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++ NODE ++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-    if(match(buffer,"NODE",4) == 1){
-      int nnodes=0,i;
-      nodedata *nodei;
-      float *xyzn;
-
-      nodei = nodeinfo + nnodeinfo;
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&nnodes);
-      nodei->nnodes=nnodes;
-      if(nnodes>0){
-        NewMemory((void **)&nodei->xyz,3*nnodes*sizeof(float));
-      }
-      else{
-        nodei->xyz=NULL;
-      }
-  
-      xyzn = nodei->xyz;
-      for(i=0;i<nnodes;i++){
-        float xyz[3];
- 
-        xyz[0]=0.0;
-        xyz[1]=0.0;
-        xyz[2]=0.0;
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%f %f %f",xyz,xyz+1,xyz+2);
-        *xyzn++ = xyz[0];
-        *xyzn++ = xyz[1];
-        *xyzn++ = xyz[2];
-      }
-      nnodeinfo++;
-      continue;
-    }
-
-    /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++ TRIS ++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-    if(match(buffer,"TRIS",4) == 1){
-      int ntris=0,i;
-      tridata *trii;
-      int *trinodesn;
-
-      trii = triinfo + ntriinfo;
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&ntris);
-      trii->ntris=ntris;
-      if(ntris>0){
-        NewMemory((void **)&trii->trinodes,3*ntris*sizeof(int));
-        trinodesn = trii->trinodes;
-      }
-      else{
-        trii->trinodes=NULL;
-      }
-      for(i=0;i<ntris;i++){
-        int trinodes[3];
- 
-        trinodes[0]=0;
-        trinodes[1]=0;
-        trinodes[2]=0;
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%i %i %i",trinodes,trinodes+1,trinodes+2);
-        *trinodesn++ = trinodes[0]-1;
-        *trinodesn++ = trinodes[1]-1;
-        *trinodesn++ = trinodes[2]-1;
-      }
-      ntriinfo++;
-      continue;
-    }
-
-    /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++ OBST ++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
@@ -3521,6 +3446,97 @@ typedef struct {
       }
     }
     CheckMemory;
+
+
+    /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++ NODE ++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"NODE",4) == 1){
+      int nnodes=0,i;
+      nodedata *nodei;
+      float *xyzn;
+
+      nodei = nodeinfo + nnodeinfo;
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&nnodes);
+      nodei->nnodes=nnodes;
+      if(nnodes>0){
+        NewMemory((void **)&nodei->xyz,3*nnodes*sizeof(float));
+      }
+      else{
+        nodei->xyz=NULL;
+      }
+  
+      xyzn = nodei->xyz;
+      for(i=0;i<nnodes;i++){
+        float xyz[3];
+ 
+        xyz[0]=0.0;
+        xyz[1]=0.0;
+        xyz[2]=0.0;
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%f %f %f",xyz,xyz+1,xyz+2);
+        *xyzn++ = xyz[0];
+        *xyzn++ = xyz[1];
+        *xyzn++ = xyz[2];
+      }
+      nnodeinfo++;
+      continue;
+    }
+
+    /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++ TRIS ++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"TRIS",4) == 1){
+      int ntris=0,i;
+      tridata *trii;
+      int *trinodesn;
+      char *surf_labelptr;
+      char surf_label[256];
+
+      trii = triinfo + ntriinfo;
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&ntris);
+      trii->ntris=ntris;
+      if(ntris>0){
+        NewMemory((void **)&trii->tris,ntris*sizeof(triangle));
+      }
+      else{
+        trii->tris=NULL;
+      }
+      for(i=0;i<ntris;i++){
+        int trinodes[3],*trinodesn;
+        char *surfaceptr;
+        triangle *trianglei;
+       
+        trinodes[0]=0;
+        trinodes[1]=0;
+        trinodes[2]=0;
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%i %i %i",trinodes,trinodes+1,trinodes+2);
+        trianglei = trii->tris+i;
+        trinodesn=trianglei->trinodes;
+        trinodesn[0] = trinodes[0]-1;
+        trinodesn[1] = trinodes[1]-1;
+        trinodesn[2] = trinodes[2]-1;
+        surfaceptr=strchr(buffer,'%');
+        if(surfaceptr!=NULL){
+          surfaceptr++;
+          surfaceptr=trim_front(surfaceptr);
+          trim(surfaceptr);
+          trianglei->surf=get_surface(surfaceptr);
+        }
+        else{
+          trianglei->surf=surfacedefault;
+        }
+      }
+      ntriinfo++;
+      continue;
+    }
 
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -5850,6 +5866,36 @@ typedef struct {
     }
   }
 
+// compute triangle norms
+
+  for(j=0;j<ntriinfo;j++){
+    tridata *trii;
+    nodedata *nodei;
+    float *xyzptr[3];
+    float *xyznorm;
+    float *xyz;
+
+    trii = triinfo + j;
+    nodei = nodeinfo + j;
+    
+    xyz = nodei->xyz;
+    for(i=0;i<nodei->nnodes;i++){
+      xyz[0] = (xyz[0] - xbar0)/xyzmaxdiff;
+      xyz[1] = (xyz[1] - ybar0)/xyzmaxdiff;
+      xyz[2] = (xyz[2] - zbar0)/xyzmaxdiff;
+      xyz += 3;
+    }
+    
+    for(i=0;i<trii->ntris;i++){
+      xyzptr[0] = nodei->xyz+3*trii->tris[i].trinodes[0];
+      xyzptr[1] = nodei->xyz+3*trii->tris[i].trinodes[1];
+      xyzptr[2] = nodei->xyz+3*trii->tris[i].trinodes[2];
+      xyznorm = trii->tris[i].normal;
+      CalcTriNormal(xyzptr[0],xyzptr[1],xyzptr[2],xyznorm);
+    }
+  }
+
+
 #ifdef pp_SHOOTER
   shooter_xyz[0]=xbar/2.0;
   shooter_xyz[1] = 0.0;
@@ -7711,13 +7757,23 @@ int readini2(char *inifile, int localfile){
       vecfactor = get_vecfactor(&iveclengths);
       continue;
     }
-
     if(match(buffer,"ISOTRAN2",8)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i ",&transparent_state);
       continue;
     }
-
+    if(match(buffer,"SHOWTRIANGLES",13)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i %i %i",&showtrisurface,&showtrioutline,&showtrinormal);
+      if(showtrisurface!=0)showtrisurface=1;
+      if(showtrioutline!=0)showtrioutline=1;
+#ifdef pp_BETA
+      if(showtrinormal!=0)showtrinormal=1;
+#else
+      showtrinormal=0;
+#endif
+      continue;
+    }
     if(match(buffer,"SHOWSTREAK",10)==1){
       void ParticleStreakShowMenu(int var);
 
@@ -10509,6 +10565,8 @@ void writeini(int flag){
   fprintf(fileout,"%f\n",vertical_factor);
   fprintf(fileout,"OFFSETSLICE\n");
   fprintf(fileout," %i\n",offset_slice);
+  fprintf(fileout,"SHOWTRIANGLES\n");
+  fprintf(fileout," %i %i %i\n",showtrisurface,showtrioutline,showtrinormal);
   fprintf(fileout,"SHOWSTREAK\n");
   fprintf(fileout," %i %i %i %i\n",streak5show,streak5step,showstreakhead,streak_index);
   fprintf(fileout,"VECLENGTH\n");
@@ -11202,5 +11260,19 @@ void init_evac_prop(void){
   prop_evacdefault->smokeview_id=prop_evacdefault->smokeview_ids[0];
 
   prop_evacdefault->ntextures=0;
+}
+
+/* ------------------ init_evac_prop ------------------------ */
+
+surface *get_surface(char *label){
+  int i;
+  
+  for(i=0;i<nsurfaces;i++){
+    surface *surfi;
+
+    surfi = surfaceinfo + i;
+    if(strcmp(surfi->surfacelabel,label)==0)return surfi;
+  }
+  return surfacedefault;
 }
 
