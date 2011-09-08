@@ -5346,6 +5346,40 @@ void draw_tris(void){
         glVertex3fv(xyz2);
       }
       glEnd();
+
+      glPointSize(6.0);
+      glBegin(GL_POINTS);
+      for(j=0;j<ntris;j++){
+        int *trinodes;
+        float *xyzptr[3];
+        float *xyznorm;
+        float xyz1[3];
+        float xyz2[3];
+       
+        trinodes = trii->tris[j].trinodes;
+      
+        xyznorm=trii->tris[j].normal;
+        if(trii->tris[j].fdsnorm==1){
+          color=black;
+        }
+        else{
+          color = blue;
+        }
+
+        xyzptr[0] = nodei->xyz+3*trinodes[0];
+        xyzptr[1] = nodei->xyz+3*trinodes[1];
+        xyzptr[2] = nodei->xyz+3*trinodes[2];
+        xyz1[0]=(xyzptr[0][0]+xyzptr[1][0] + xyzptr[2][0])/3.0;
+        xyz1[1]=(xyzptr[0][1]+xyzptr[1][1] + xyzptr[2][1])/3.0;
+        xyz1[2]=(xyzptr[0][2]+xyzptr[1][2] + xyzptr[2][2])/3.0;
+        xyz2[0]=xyz1[0]+0.1*xyznorm[0];
+        xyz2[1]=xyz1[1]+0.1*xyznorm[1];
+        xyz2[2]=xyz1[2]+0.1*xyznorm[2];
+
+        glColor3fv(color);
+        glVertex3fv(xyz2);
+      }
+      glEnd();
     }
   }
 }
