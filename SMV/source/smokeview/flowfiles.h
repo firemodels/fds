@@ -21,7 +21,7 @@ typedef struct {
 typedef struct {
   struct _surface *surf;
   float *color;
-  int trinodes[3];
+  int trinodes[3],fdsnorm;
   float normal[3];
 } triangle;
 

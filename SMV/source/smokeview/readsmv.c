@@ -3497,6 +3497,7 @@ typedef struct {
       int *trinodesn;
       char *surf_labelptr;
       char surf_label[256];
+      float normal[3];
 
       trii = triinfo + ntriinfo;
       fgets(buffer,255,stream);
@@ -3512,17 +3513,40 @@ typedef struct {
         int trinodes[3],*trinodesn;
         char *surfaceptr;
         triangle *trianglei;
+        float *norm;
        
         trinodes[0]=0;
         trinodes[1]=0;
         trinodes[2]=0;
         fgets(buffer,255,stream);
-        sscanf(buffer,"%i %i %i",trinodes,trinodes+1,trinodes+2);
+        normal[0]=-2.0;
+        normal[1]=-2.0;
+        normal[2]=-2.0;
+        sscanf(buffer,"%i %i %i %f %f %f",trinodes,trinodes+1,trinodes+2,normal,normal+1,normal+2);
         trianglei = trii->tris+i;
         trinodesn=trianglei->trinodes;
         trinodesn[0] = trinodes[0]-1;
         trinodesn[1] = trinodes[1]-1;
         trinodesn[2] = trinodes[2]-1;
+        if(normal[0]<-1.5){
+          trianglei->fdsnorm=0;
+        }
+        else{
+          float length,err;
+
+          trianglei->fdsnorm=1;
+          norm = trianglei->normal;
+          norm[0]=normal[0];
+          norm[1]=normal[1];
+          norm[2]=normal[2];
+          length = norm[0]*norm[0] + norm[1]*norm[2] + norm[3]*norm[3];
+          length = sqrt(length);
+          err = length-1.0;
+          if(err<0.0)err=-err;
+          if(err>0.001){
+            printf("*** warning imbedded triangle norm is not a unit vector, length=%f\n",length);
+          }
+        }
         surfaceptr=strchr(buffer,'%');
         if(surfaceptr!=NULL){
           surfaceptr++;
@@ -5887,11 +5911,13 @@ typedef struct {
     }
     
     for(i=0;i<trii->ntris;i++){
-      xyzptr[0] = nodei->xyz+3*trii->tris[i].trinodes[0];
-      xyzptr[1] = nodei->xyz+3*trii->tris[i].trinodes[1];
-      xyzptr[2] = nodei->xyz+3*trii->tris[i].trinodes[2];
-      xyznorm = trii->tris[i].normal;
-      CalcTriNormal(xyzptr[0],xyzptr[1],xyzptr[2],xyznorm);
+      if(trii->tris[i].fdsnorm==0){
+        xyzptr[0] = nodei->xyz+3*trii->tris[i].trinodes[0];
+        xyzptr[1] = nodei->xyz+3*trii->tris[i].trinodes[1];
+        xyzptr[2] = nodei->xyz+3*trii->tris[i].trinodes[2];
+        xyznorm = trii->tris[i].normal;
+        CalcTriNormal(xyzptr[0],xyzptr[1],xyzptr[2],xyznorm);
+      }
     }
   }
 

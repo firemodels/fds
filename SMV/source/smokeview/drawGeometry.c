@@ -5250,6 +5250,7 @@ void CalcTriNormal(float *v1, float *v2, float *v3, float *norm){
 void draw_tris(void){
   int i;
   float black[]={0.0,0.0,0.0,1.0};
+  float blue[]={0.0,0.0,1.0,1.0};
 
   for(i=0;i<ntriinfo;i++){
     tridata *trii;
@@ -5324,11 +5325,11 @@ void draw_tris(void){
         trinodes = trii->tris[j].trinodes;
       
         xyznorm=trii->tris[j].normal;
-        if(showtrioutline==1&&showtrisurface==1){
-          color = black;
+        if(trii->tris[j].fdsnorm==1){
+          color=black;
         }
         else{
-          color = trii->tris[j].surf->color;
+          color = blue;
         }
         xyzptr[0] = nodei->xyz+3*trinodes[0];
         xyzptr[1] = nodei->xyz+3*trinodes[1];
