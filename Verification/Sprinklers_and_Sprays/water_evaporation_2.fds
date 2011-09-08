@@ -5,7 +5,7 @@ This case tests conservation of mass and energy.
 
 &MESH IJK=4,4,4, XB=0.0,0.4,0.0,0.4,0.0,0.4 / 
 
-&TIME T_END=7000.0/ 
+&TIME T_END=28800.0/ 
 
 &MISC TMPA=500., GVEC=0,0,0, STRATIFICATION=.FALSE./
 
@@ -14,11 +14,6 @@ This case tests conservation of mass and energy.
 &SPEC ID='WATER VAPOR', MASS_FRACTION_0=0.0/
 
 &SURF ID='WALL', ADIABATIC=.TRUE., COLOR='SILVER',DEFAULT=.TRUE. /
-&SURF ID='BLOW_UP'  , VEL=0.3 /
-&SURF ID='BLOW_DOWN', VEL=-.3 /
-
-&OBST XB=0.2,0.4,0.2,0.4,0.2,0.2, SURF_ID='BLOW_UP',   OUTLINE=.TRUE. / 
-&OBST XB=0.0,0.2,0.0,0.2,0.2,0.2, SURF_ID='BLOW_DOWN', OUTLINE=.TRUE. / 
 
 &INIT PART_ID='water drops', NUMBER_INITIAL_DROPLETS=1, MASS_PER_VOLUME=523.6, XB=0.2,0.3,0.2,0.3,0.2,0.3  /
 
