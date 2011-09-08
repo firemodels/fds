@@ -51,6 +51,7 @@ void update_glui_viewlist(void);
 void update_glui_cellcenter_interp(void);
 float gmod(float x, float y);
 void  OBJECT_CB(int flag);
+void SmokeColorBarMenu(int var);
 
 /* ------------------ WindowStatus ------------------------ */
 
@@ -2013,6 +2014,10 @@ void Display(void){
       glutAttachMenu(GLUT_RIGHT_BUTTON);
       updatemenu=0;
     }
+  }
+  if(update_fire_colorbar_index==1){
+    SmokeColorBarMenu(fire_colorbar_index_ini);
+    update_fire_colorbar_index=0;
   }
 
   if(showtime==0&&ntotal_smooth_blockages>0){

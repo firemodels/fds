@@ -7951,8 +7951,8 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"FIRECOLORMAP",12)==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i",&use_firesmokemap,&fire_colorbar_index);
-      SmokeColorBarMenu(fire_colorbar_index);
+      sscanf(buffer,"%i %i",&use_firesmokemap,&fire_colorbar_index_ini);
+      update_fire_colorbar_index=1;
       continue;
     }
     if(match(buffer,"SHOWEXTREMEDATA",15)==1){

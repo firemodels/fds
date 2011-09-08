@@ -239,6 +239,8 @@ SVEXTERN int visgridloc;
 SVEXTERN int valindex;
 
 SVEXTERN int fire_colorbar_index,SVDECL(fire_colorbar_index_save,-1);
+SVEXTERN int SVDECL(update_fire_colorbar_index,0);
+SVEXTERN int SVDECL(fire_colorbar_index_ini,0);
 SVEXTERN colorbardata *fire_colorbar;
 SVEXTERN float *rgb2_ini;
 SVEXTERN float rgb_full[MAXRGB][4];
