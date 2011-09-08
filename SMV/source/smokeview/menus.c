@@ -4727,7 +4727,7 @@ updatemenu=0;
     glutAddMenuEntry(_(" *Show normal"),3);
   }
   else{
-    glutAddMenuEntry(_(" *Show normal"),3);
+    glutAddMenuEntry(_(" Show normal"),3);
   }
 #endif
 
