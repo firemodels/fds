@@ -303,6 +303,11 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
     antialias(0);
   }
 
+  /* ++++++++++++++++++++++++ draw triangles +++++++++++++++++++++++++ */
+  
+  if(ntriinfo){
+    draw_tris();
+  }
 
   /* ++++++++++++++++++++++++ draw blockages +++++++++++++++++++++++++ */
 

@@ -1293,6 +1293,11 @@ int readsmv(char *file, char *file2){
   FREEMEMORY(surfaceinfo);
   FREEMEMORY(terrain_texture);
 
+  FREEMEMORY(triinfo);
+  ntriinfo=0;
+  FREEMEMORY(nodeinfo);
+  nnodeinfo=0;
+
   if(cadgeominfo!=NULL)freecadinfo();
 
   if(file==NULL){
@@ -1355,6 +1360,14 @@ int readsmv(char *file, char *file2){
 
     if(match(buffer,"PROP",4) == 1){
       npropinfo++;
+      continue;
+    }
+    if(match(buffer,"NODE",4) == 1){
+      nnodeinfo++;
+      continue;
+    }
+    if(match(buffer,"TRIS",4) == 1){
+      ntriinfo++;
       continue;
     }
     if(match(buffer,"SMOKEDIFF",9) == 1){
@@ -1649,6 +1662,14 @@ int readsmv(char *file, char *file2){
    ************************************************************************
  */
 
+ if(nnodeinfo>0){
+   NewMemory((void **)&nodeinfo,nnodeinfo*sizeof(nodedata));
+   nnodeinfo=0;
+ }
+ if(ntriinfo>0){
+   NewMemory((void **)&triinfo,ntriinfo*sizeof(tridata));
+   ntriinfo=0;
+ }
  if(npropinfo>0){
    NewMemory((void **)&propinfo,npropinfo*sizeof(propdata));
    npropinfo=1; // the 0'th prop is the default human property
@@ -1943,6 +1964,81 @@ int readsmv(char *file, char *file2){
         BREAK;
       }
       if(strncmp(buffer," ",1)==0||buffer[0]==0)continue;
+    }
+
+    /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++ NODE ++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"NODE",4) == 1){
+      int nnodes=0,i;
+      nodedata *nodei;
+      float *xyzn;
+
+      nodei = nodeinfo + nnodeinfo;
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&nnodes);
+      nodei->nnodes=nnodes;
+      if(nnodes>0){
+        NewMemory((void **)&nodei->xyz,3*nnodes*sizeof(float));
+      }
+      else{
+        nodei->xyz=NULL;
+      }
+  
+      xyzn = nodei->xyz;
+      for(i=0;i<nnodes;i++){
+        float xyz[3];
+ 
+        xyz[0]=0.0;
+        xyz[1]=0.0;
+        xyz[2]=0.0;
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%f %f %f",xyz,xyz+1,xyz+2);
+        *xyzn++ = xyz[0];
+        *xyzn++ = xyz[1];
+        *xyzn++ = xyz[2];
+      }
+      nnodeinfo++;
+      continue;
+    }
+
+    /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++ TRIS ++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"TRIS",4) == 1){
+      int ntris=0,i;
+      tridata *trii;
+      int *trinodesn;
+
+      trii = triinfo + ntriinfo;
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&ntris);
+      trii->ntris=ntris;
+      if(ntris>0){
+        NewMemory((void **)&trii->trinodes,3*ntris*sizeof(int));
+        trinodesn = trii->trinodes;
+      }
+      else{
+        trii->trinodes=NULL;
+      }
+      for(i=0;i<ntris;i++){
+        int trinodes[3];
+ 
+        trinodes[0]=0;
+        trinodes[1]=0;
+        trinodes[2]=0;
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%i %i %i",trinodes,trinodes+1,trinodes+2);
+        *trinodesn++ = trinodes[0]-1;
+        *trinodesn++ = trinodes[1]-1;
+        *trinodesn++ = trinodes[2]-1;
+      }
+      ntriinfo++;
+      continue;
     }
 
     /*

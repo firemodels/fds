@@ -17,6 +17,7 @@
 #include "smokeviewvars.h"
 #include "translate.h"
 #include "update.h"
+#include "string_util.h"
 
 // svn revision character string
 char drawGeometry_revision[]="$Revision$";
@@ -5222,6 +5223,74 @@ void remove_dup_blockages(void){
   }
   updatefacelists=1;
 }
-  
 
-  
+/* ------------------ CalcTriNormal ------------------------ */
+
+void CalcTriNormal(float *v1, float *v2, float *v3, float *norm){
+  float u[3], v[3];
+  int i;
+
+  for(i=0;i<3;i++){
+    u[i]=v2[i]-v1[i];
+    v[i]=v3[i]-v1[i];
+  }
+  /*
+     i   j  k
+     ux uy uz
+     vx vy vz
+  */
+  norm[0]=u[1]*v[2]-u[2]*v[1];
+  norm[1]=u[2]*v[0]-u[0]*v[2];
+  norm[2]=u[0]*v[1]-u[1]*v[0];
+  ReduceToUnit(norm);
+}
+
+/* ------------------ draw_tris ------------------------ */
+
+void draw_tris(void){
+  int i;
+
+  for(i=0;i<ntriinfo;i++){
+    tridata *trii;
+    nodedata *nodei;
+    int ntris;
+    int j;
+    int *trinodet;
+    float color[3];
+
+    trii = triinfo + i;
+    nodei = nodeinfo + i;
+    ntris = trii->ntris;
+    trinodet = trii->trinodes;
+    color[0]=0.8;
+    color[1]=0.4;
+    color[2]=0.2;
+    glBegin(GL_TRIANGLES);
+    for(j=0;j<ntris;j++){
+      int trinodes[3];
+      float *xyzptr[3];
+      float xyznorm[3];
+      
+      trinodes[0]=*trinodet++;
+      trinodes[1]=*trinodet++;
+      trinodes[2]=*trinodet++;
+      
+      xyzptr[0] = nodei->xyz+3*trinodes[0];
+      xyzptr[1] = nodei->xyz+3*trinodes[1];
+      xyzptr[2] = nodei->xyz+3*trinodes[2];
+      CalcTriNormal(xyzptr[0],xyzptr[1],xyzptr[2],xyznorm);
+      glNormal3fv(xyznorm);
+      glColor3fv(color);
+      glVertex3fv(xyzptr[0]);
+      glVertex3fv(xyzptr[1]);
+      glVertex3fv(xyzptr[2]);
+      color[0]+=0.7;
+      color[1]+=0.3;
+      color[2]+=0.2;
+      if(color[0]>1.0)color[0]-=1.0;
+      if(color[1]>1.0)color[1]-=1.0;
+      if(color[2]>1.0)color[2]-=1.0;
+    }
+    glEnd();
+  }
+}

@@ -8,6 +8,20 @@
 #include "isodefs.h"
 #include "histogram.h"
 
+/* --------------------------  nodedata ------------------------------------ */
+
+typedef struct {
+  int nnodes;
+  float *xyz;
+} nodedata;
+
+/* --------------------------  tridata ------------------------------------ */
+
+typedef struct {
+  int ntris;
+  int *trinodes;
+} tridata;
+
 /* --------------------------  bounds ------------------------------------ */
 
 typedef struct {

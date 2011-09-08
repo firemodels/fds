@@ -27,6 +27,7 @@ EXTERNCPP void getzonedatacsv(int nzonet, int nrooms, int nfires,
                               float *zonepr, float *zoneylay,  float *zonetl, float *zonetu,
                               float **zoneodl, float **zoneodu,
                               int *error);
+EXTERNCPP void draw_tris(void);
 EXTERNCPP void getzonesizecsv(int *nzonet, int *nroom2, int *nfires, int *error);
 EXTERNCPP void remove_dup_blockages(void);
 EXTERNCPP void sort_iso_triangles(float *mm);
