@@ -3537,7 +3537,7 @@ typedef struct {
           norm[0]=normal[0];
           norm[1]=normal[1];
           norm[2]=normal[2];
-          length = norm[0]*norm[0] + norm[1]*norm[2] + norm[3]*norm[3];
+          length = norm[0]*norm[0] + norm[1]*norm[1] + norm[2]*norm[2];
           length = sqrt(length);
           err = length-1.0;
           if(err<0.0)err=-err;
