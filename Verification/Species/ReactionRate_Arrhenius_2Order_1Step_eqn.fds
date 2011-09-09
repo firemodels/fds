@@ -4,7 +4,7 @@ C3H8+5*O2=4*H2O+3*CO2
 ------------------------------------------------
 # Labels and Meshes
 -------------------------------------------------
-&HEAD CHID='Reaction_Rate_2', TITLE='Finite_Rate_2nd_Order' /
+&HEAD CHID='ReactionRate_Arrhenius_2Order_1Step', TITLE='Finite_Rate_2nd_Order' /
 &MESH IJK=8,8,8, XB=0.0,0.1,0.0,0.1,0.0,0.1 /
 &MISC GVEC=0.0, 0.0, 0.0 / 
 

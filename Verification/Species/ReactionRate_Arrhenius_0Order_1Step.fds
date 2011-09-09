@@ -1,10 +1,10 @@
 Test Case to examine fixed reaction rates
-A + B -> C
+CO+0.5O2 -> CO2
 
 ------------------------------------------------
 # Labels and Meshes
 -------------------------------------------------
-&HEAD CHID='Reaction_Rate_0', TITLE='Reaction_Rate_Zero_Order, SVN $Revision: 8949 $'/
+&HEAD CHID='ReactionRate_Arrhenius_0Order_1Step', TITLE='Reaction_Rate_Zero_Order, SVN $Revision: 8949 $'/
 
 &MESH IJK=4,4,4, XB=0.0,0.1,0.0,0.1,0.0,0.1 /
 &MISC DNS=.TRUE. /
