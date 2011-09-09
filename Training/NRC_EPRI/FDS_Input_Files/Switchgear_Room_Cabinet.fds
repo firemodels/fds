@@ -101,11 +101,11 @@ Cabinet Fire
       H                  = 3.5
       OTHER              = 0.5
       MW_OTHER           = 35.5
-      HEAT_OF_COMBUSTION = 16000.
-      CO_YIELD           = 0.1 /
-      SOOT_YIELD         = 0.1 /
+      HEAT_OF_COMBUSTION = 20900.
+      CO_YIELD           = 0.147 /
+      SOOT_YIELD         = 0.136 /
 
-&RADI RADIATIVE_FRACTION = 0.5 /
+&RADI RADIATIVE_FRACTION = 0.49 /
 
 &SURF ID            = 'CABINET FIRE'
       COLOR         = 'ORANGE'
@@ -189,10 +189,6 @@ Output
 
 &DEVC QUANTITY='GAUGE HEAT FLUX', ID='Flux_Cabinet_A_FDS', XB=4.0,22.5, 5.0, 8.0,0.0,2.6, SURF_ID='CABINET', STATISTICS='MAX' /
 &DEVC QUANTITY='GAUGE HEAT FLUX', ID='Flux_Cabinet_B_FDS', XB=4.0,22.5,11.0,14.0,0.0,2.6, SURF_ID='CABINET', STATISTICS='MAX' /
-
-&PROP ID='Smoke Detector', QUANTITY='CHAMBER OBSCURATION', LENGTH=1.8, ACTIVATION_OBSCURATION = 4.9 /
-&DEVC ID='Smoke_1_FDS', XYZ= 6.6, 9.3, 6.1, PROP_ID='Smoke Detector' /
-&DEVC ID='Smoke_2_FDS', XYZ=19.9, 9.3, 6.1, PROP_ID='Smoke Detector' /
 
 Smokeview output
 
