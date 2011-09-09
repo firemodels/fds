@@ -590,31 +590,25 @@ void IsoShowMenu(int value){
     break;
    case 94:
     transparent_state=ALL_SOLID;
-    Update_Isotris(1);
     break;
    case 95:
     transparent_state=ALL_TRANSPARENT;
-    Update_Isotris(1);
     break;
    case 96:
     transparent_state=MIN_SOLID;
-    Update_Isotris(1);
     break;
    case 97:
     transparent_state=MAX_SOLID;
-    Update_Isotris(1);
     break;
    case 98:
     for(i=0;i<nisolevels;i++){
       showlevels[i]=0;
     }
-    Update_Isotris(1);
     break;
    case 99:
     for(i=0;i<nisolevels;i++){
       showlevels[i]=1;
     }
-    Update_Isotris(1);
     break;
    default:
     if(value>99&&value<999&&value-100<nisolevels){
@@ -655,8 +649,8 @@ void IsoShowMenu(int value){
      updateShow();
     }
   }
-  
   update_iso_showlevels();
+  Update_Isotris(1);
 
   updatemenu=1;  
   glutPostRedisplay();
