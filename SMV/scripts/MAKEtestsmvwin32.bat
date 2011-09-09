@@ -26,7 +26,6 @@ cd %svn_root%\smv\source\smokeview
 
 cd %svn_root%\smv\Build\INTEL_WIN_TEST_32
 call make_smv
-copy %svn_root%\smv\bin\smv5_win_test_32.exe %svn_root%\smv\for_bundle\smokeview32_test.exe
 
 echo.
 echo compilation complete
