@@ -5326,7 +5326,7 @@ updatemenu=0;
 
   CREATEMENU(geometrymenu,GeometryMenu);
   if(showedit==0&&ntotal_blockages>0)glutAddSubMenu(_("Obstacles"),blockagemenu);
-  if(ntriinfo>0)glutAddSubMenu(_("Embedded Solids"),embeddedmenu);
+  if(ntrilistinfo>0)glutAddSubMenu(_("Embedded Solids"),embeddedmenu);
   if(nobject_defs>0){
     int num_activedevices=0;
 

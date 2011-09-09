@@ -8,29 +8,38 @@
 #include "isodefs.h"
 #include "histogram.h"
 
-/* --------------------------  nodedata ------------------------------------ */
+/* --------------------------  point ------------------------------------ */
 
 typedef struct {
-  int nnodes;
-  float *xyz;
-} nodedata;
+  float xyz[3],norm[3];
+  int itriangle,ntriangles;
+  struct _triangle **triangles;
+} point;
 
+/* --------------------------  triangle ------------------------------------ */
 
-/* --------------------------  tri ------------------------------------ */
-
-typedef struct {
+typedef struct _triangle {
   struct _surface *surf;
   float *color;
-  int trinodes[3],fdsnorm;
+  int fdsnorm;
+  point *points[3];
   float normal[3];
 } triangle;
 
-/* --------------------------  tridata ------------------------------------ */
+/* --------------------------  pointlistdata ------------------------------------ */
 
 typedef struct {
-  int ntris;
-  triangle *tris;
-} tridata;
+  int npoints;
+  point *points;
+} pointlistdata;
+
+
+/* --------------------------  trilistdata ------------------------------------ */
+
+typedef struct {
+  int ntriangles;
+  triangle *triangles;
+} trilistdata;
 
 /* --------------------------  bounds ------------------------------------ */
 

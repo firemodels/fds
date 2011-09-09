@@ -5252,62 +5252,81 @@ void draw_tris(void){
   float black[]={0.0,0.0,0.0,1.0};
   float blue[]={0.0,0.0,1.0,1.0};
 
-  for(i=0;i<ntriinfo;i++){
-    tridata *trii;
-    nodedata *nodei;
+  for(i=0;i<ntrilistinfo;i++){
+    trilistdata *trilisti;
+    pointlistdata *pointlisti;
     int ntris;
     int j;
     float *color;
 
-    trii = triinfo + i;
-    nodei = nodeinfo + i;
-    ntris = trii->ntris;
+    trilisti = trilistinfo + i;
+    pointlisti = pointlistinfo + i;
+    ntris = trilisti->ntriangles;
     if(showtrisurface==1){
+      glEnable(GL_LIGHTING);
+      glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
+      glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
+      glEnable(GL_COLOR_MATERIAL);
       glBegin(GL_TRIANGLES);
       for(j=0;j<ntris;j++){
-        int *trinodes;
         float *xyzptr[3];
         float *xyznorm;
-       
-        trinodes = trii->tris[j].trinodes;
-      
-        xyznorm=trii->tris[j].normal;
-        glNormal3fv(xyznorm);
-        color = trii->tris[j].surf->color;
-        xyzptr[0] = nodei->xyz+3*trinodes[0];
-        xyzptr[1] = nodei->xyz+3*trinodes[1];
-        xyzptr[2] = nodei->xyz+3*trinodes[2];
+        triangle *trianglei;
 
+        trianglei = trilisti->triangles+j;
+       
+        xyznorm=trianglei->normal;
+        glNormal3fv(xyznorm);
+
+        color = trianglei->surf->color;
         glColor3fv(color);
+
+        //xyznorm = trianglei->points[0]->norm;
+        //glNormal3fv(xyznorm);
+        xyzptr[0] = trianglei->points[0]->xyz;
         glVertex3fv(xyzptr[0]);
+
+        //xyznorm = trianglei->points[1]->norm;
+        //glNormal3fv(xyznorm);
+        xyzptr[1] = trianglei->points[1]->xyz;
         glVertex3fv(xyzptr[1]);
+
+        //xyznorm = trianglei->points[2]->norm;
+        //glNormal3fv(xyznorm);
+        xyzptr[2] = trianglei->points[2]->xyz;
         glVertex3fv(xyzptr[2]);
       }
       glEnd();
+      glDisable(GL_COLOR_MATERIAL);
+      glDisable(GL_LIGHTING);
     }
     if(showtrioutline==1){
       glBegin(GL_LINES);
       for(j=0;j<ntris;j++){
-        int *trinodes;
         float *xyzptr[3];
         float *xyznorm;
+        triangle *trianglei;
+
+        trianglei = trilisti->triangles+j;
        
-        trinodes = trii->tris[j].trinodes;
-      
-        if(showtrisurface==0){
-          color = trii->tris[j].surf->color;
-        }
-        else{
+        xyznorm=trianglei->normal;
+        glNormal3fv(xyznorm);
+
+        xyzptr[0] = trianglei->points[0]->xyz;
+        xyzptr[1] = trianglei->points[1]->xyz;
+        xyzptr[2] = trianglei->points[2]->xyz;
+
+        if(showtrisurface==1){
           color = black;
         }
-        xyzptr[0] = nodei->xyz+3*trinodes[0];
-        xyzptr[1] = nodei->xyz+3*trinodes[1];
-        xyzptr[2] = nodei->xyz+3*trinodes[2];
-
+        else{
+          color = trianglei->surf->color;
+        }
         glColor3fv(color);
         glVertex3fv(xyzptr[0]);
         glVertex3fv(xyzptr[1]);
         glVertex3fv(xyzptr[1]);
+        glVertex3fv(xyzptr[2]);
         glVertex3fv(xyzptr[2]);
         glVertex3fv(xyzptr[0]);
       }
@@ -5316,31 +5335,32 @@ void draw_tris(void){
     if(showtrinormal==1){
       glBegin(GL_LINES);
       for(j=0;j<ntris;j++){
-        int *trinodes;
-        float *xyzptr[3];
+        float *p1, *p2, *p3;
         float *xyznorm;
-        float xyz1[3];
-        float xyz2[3];
+        triangle *trianglei;
+        float xyz1[3], xyz2[3];
+
+        trianglei = trilisti->triangles+j;
        
-        trinodes = trii->tris[j].trinodes;
-      
-        xyznorm=trii->tris[j].normal;
-        if(trii->tris[j].fdsnorm==1){
-          color=black;
+        xyznorm=trianglei->normal;
+
+        p1 = trianglei->points[0]->xyz;
+        p2 = trianglei->points[1]->xyz;
+        p3 = trianglei->points[2]->xyz;
+
+        xyz1[0] = (p1[0] + p2[0] + p3[0])/3.0;
+        xyz1[1] = (p1[1] + p2[1] + p3[1])/3.0;
+        xyz1[2] = (p1[2] + p2[2] + p3[2])/3.0;
+        xyz2[0] = xyz1[0] + 0.1*xyznorm[0];
+        xyz2[1] = xyz1[1] + 0.1*xyznorm[1];
+        xyz2[2] = xyz1[2] + 0.1*xyznorm[2];
+
+        if(trianglei->fdsnorm==1){
+          color = black;
         }
         else{
-          color = blue;
+          color=blue;
         }
-        xyzptr[0] = nodei->xyz+3*trinodes[0];
-        xyzptr[1] = nodei->xyz+3*trinodes[1];
-        xyzptr[2] = nodei->xyz+3*trinodes[2];
-        xyz1[0]=(xyzptr[0][0]+xyzptr[1][0] + xyzptr[2][0])/3.0;
-        xyz1[1]=(xyzptr[0][1]+xyzptr[1][1] + xyzptr[2][1])/3.0;
-        xyz1[2]=(xyzptr[0][2]+xyzptr[1][2] + xyzptr[2][2])/3.0;
-        xyz2[0]=xyz1[0]+0.1*xyznorm[0];
-        xyz2[1]=xyz1[1]+0.1*xyznorm[1];
-        xyz2[2]=xyz1[2]+0.1*xyznorm[2];
-
         glColor3fv(color);
         glVertex3fv(xyz1);
         glVertex3fv(xyz2);
@@ -5350,32 +5370,32 @@ void draw_tris(void){
       glPointSize(6.0);
       glBegin(GL_POINTS);
       for(j=0;j<ntris;j++){
-        int *trinodes;
-        float *xyzptr[3];
+        float *p1, *p2, *p3;
         float *xyznorm;
-        float xyz1[3];
-        float xyz2[3];
+        triangle *trianglei;
+        float xyz1[3], xyz2[3];
+
+        trianglei = trilisti->triangles+j;
        
-        trinodes = trii->tris[j].trinodes;
-      
-        xyznorm=trii->tris[j].normal;
-        if(trii->tris[j].fdsnorm==1){
-          color=black;
+        xyznorm=trianglei->normal;
+
+        p1 = trianglei->points[0]->xyz;
+        p2 = trianglei->points[1]->xyz;
+        p3 = trianglei->points[2]->xyz;
+
+        xyz1[0] = (p1[0] + p2[0] + p3[0])/3.0;
+        xyz1[1] = (p1[1] + p2[1] + p3[1])/3.0;
+        xyz1[2] = (p1[2] + p2[2] + p3[2])/3.0;
+        xyz2[0] = xyz1[0] + 0.1*xyznorm[0];
+        xyz2[1] = xyz1[1] + 0.1*xyznorm[1];
+        xyz2[2] = xyz1[2] + 0.1*xyznorm[2];
+
+        if(trianglei->fdsnorm==1){
+          color = black;
         }
         else{
-          color = blue;
+          color=blue;
         }
-
-        xyzptr[0] = nodei->xyz+3*trinodes[0];
-        xyzptr[1] = nodei->xyz+3*trinodes[1];
-        xyzptr[2] = nodei->xyz+3*trinodes[2];
-        xyz1[0]=(xyzptr[0][0]+xyzptr[1][0] + xyzptr[2][0])/3.0;
-        xyz1[1]=(xyzptr[0][1]+xyzptr[1][1] + xyzptr[2][1])/3.0;
-        xyz1[2]=(xyzptr[0][2]+xyzptr[1][2] + xyzptr[2][2])/3.0;
-        xyz2[0]=xyz1[0]+0.1*xyznorm[0];
-        xyz2[1]=xyz1[1]+0.1*xyznorm[1];
-        xyz2[2]=xyz1[2]+0.1*xyznorm[2];
-
         glColor3fv(color);
         glVertex3fv(xyz2);
       }
@@ -5383,3 +5403,101 @@ void draw_tris(void){
     }
   }
 }
+
+/* ------------------ update_triangles ------------------------ */
+
+void update_triangles(void){
+  int j;
+
+  for(j=0;j<ntrilistinfo;j++){
+    trilistdata *trilisti;
+    pointlistdata *pointlisti;
+    float *xyzptr[3];
+    float *xyznorm;
+    float *xyz;
+    int i;
+
+    trilisti = trilistinfo + j;
+    pointlisti = pointlistinfo + j;
+    
+    for(i=0;i<pointlisti->npoints;i++){
+      xyz = pointlisti->points[i].xyz;
+      xyz[0] = (xyz[0] - xbar0)/xyzmaxdiff;
+      xyz[1] = (xyz[1] - ybar0)/xyzmaxdiff;
+      xyz[2] = (xyz[2] - zbar0)/xyzmaxdiff;
+      xyz += 3;
+    }
+    
+    for(i=0;i<trilisti->ntriangles;i++){
+      triangle *trianglei;
+
+      trianglei = trilisti->triangles+i;
+      if(trilisti->triangles[i].fdsnorm==0){
+        xyzptr[0] = trianglei->points[0]->xyz;
+        xyzptr[1] = trianglei->points[1]->xyz;
+        xyzptr[2] = trianglei->points[2]->xyz;
+        xyznorm = trianglei->normal;
+        CalcTriNormal(xyzptr[0],xyzptr[1],xyzptr[2],xyznorm);
+      }
+    }
+
+    for(i=0;i<pointlisti->npoints;i++){
+      point *pointi;
+
+      pointi = pointlisti->points + i;
+      pointi->ntriangles=0;
+      pointi->itriangle=0;
+    }
+    for(i=0;i<trilisti->ntriangles;i++){
+      triangle *trianglei;
+
+      trianglei = trilisti->triangles+i;
+      trianglei->points[0]->ntriangles++;
+      trianglei->points[1]->ntriangles++;
+      trianglei->points[2]->ntriangles++;
+    }
+    for(i=0;i<pointlisti->npoints;i++){
+      point *pointi;
+
+      pointi = pointlisti->points + i;
+      if(pointi->ntriangles>0){
+        NewMemory((void **)&pointi->triangles,pointi->ntriangles*sizeof(triangle *));
+      }
+    }
+    for(i=0;i<trilisti->ntriangles;i++){
+      triangle *trianglei;
+      point *pointi;
+
+      trianglei = trilisti->triangles+i;
+      pointi = trianglei->points[0];
+      pointi->triangles[pointi->itriangle++]=trianglei;
+      pointi = trianglei->points[1];
+      pointi->triangles[pointi->itriangle++]=trianglei;
+      pointi = trianglei->points[2];
+      pointi->triangles[pointi->itriangle++]=trianglei;
+    }
+    for(i=0;i<pointlisti->npoints;i++){
+      point *pointi;
+      int k;
+      float *norm;
+
+      pointi = pointlisti->points + i;
+      norm=pointi->norm;
+      norm[0]=0.0;
+      norm[1]=0.0;
+      norm[2]=0.0;
+      for(k=0;k<pointi->ntriangles;k++){
+        float *norm2;
+        triangle *trianglei;
+
+        trianglei = pointi->triangles[k];
+        norm2 = trianglei->normal;
+        norm[0]+=norm2[0];
+        norm[1]+=norm2[1];
+        norm[2]+=norm2[2];
+      }
+      ReduceToUnit(norm);
+    }
+  }
+}
+

@@ -1293,10 +1293,10 @@ int readsmv(char *file, char *file2){
   FREEMEMORY(surfaceinfo);
   FREEMEMORY(terrain_texture);
 
-  FREEMEMORY(triinfo);
-  ntriinfo=0;
-  FREEMEMORY(nodeinfo);
-  nnodeinfo=0;
+  FREEMEMORY(trilistinfo);
+  ntrilistinfo=0;
+  FREEMEMORY(pointlistinfo);
+  npointlistinfo=0;
 
   if(cadgeominfo!=NULL)freecadinfo();
 
@@ -1363,11 +1363,11 @@ int readsmv(char *file, char *file2){
       continue;
     }
     if(match(buffer,"NODE",4) == 1){
-      nnodeinfo++;
+      npointlistinfo++;
       continue;
     }
     if(match(buffer,"TRIS",4) == 1){
-      ntriinfo++;
+      ntrilistinfo++;
       continue;
     }
     if(match(buffer,"SMOKEDIFF",9) == 1){
@@ -1662,13 +1662,13 @@ int readsmv(char *file, char *file2){
    ************************************************************************
  */
 
- if(nnodeinfo>0){
-   NewMemory((void **)&nodeinfo,nnodeinfo*sizeof(nodedata));
-   nnodeinfo=0;
+ if(npointlistinfo>0){
+   NewMemory((void **)&pointlistinfo,npointlistinfo*sizeof(pointlistdata));
+   npointlistinfo=0;
  }
- if(ntriinfo>0){
-   NewMemory((void **)&triinfo,ntriinfo*sizeof(tridata));
-   ntriinfo=0;
+ if(ntrilistinfo>0){
+   NewMemory((void **)&trilistinfo,ntrilistinfo*sizeof(trilistdata));
+   ntrilistinfo=0;
  }
  if(npropinfo>0){
    NewMemory((void **)&propinfo,npropinfo*sizeof(propdata));
@@ -3455,21 +3455,20 @@ typedef struct {
   */
     if(match(buffer,"NODE",4) == 1){
       int nnodes=0,i;
-      nodedata *nodei;
+      pointlistdata *pointlisti;
       float *xyzn;
 
-      nodei = nodeinfo + nnodeinfo;
+      pointlisti = pointlistinfo + npointlistinfo;
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&nnodes);
-      nodei->nnodes=nnodes;
+      pointlisti->npoints=nnodes;
       if(nnodes>0){
-        NewMemory((void **)&nodei->xyz,3*nnodes*sizeof(float));
+        NewMemory((void **)&pointlisti->points,nnodes*sizeof(point));
       }
       else{
-        nodei->xyz=NULL;
+        pointlisti->points=NULL;
       }
   
-      xyzn = nodei->xyz;
       for(i=0;i<nnodes;i++){
         float xyz[3];
  
@@ -3478,11 +3477,12 @@ typedef struct {
         xyz[2]=0.0;
         fgets(buffer,255,stream);
         sscanf(buffer,"%f %f %f",xyz,xyz+1,xyz+2);
-        *xyzn++ = xyz[0];
-        *xyzn++ = xyz[1];
-        *xyzn++ = xyz[2];
+        xyzn = pointlisti->points[i].xyz;
+        xyzn[0] = xyz[0];
+        xyzn[1] = xyz[1];
+        xyzn[2] = xyz[2];
       }
-      nnodeinfo++;
+      npointlistinfo++;
       continue;
     }
 
@@ -3493,21 +3493,23 @@ typedef struct {
   */
     if(match(buffer,"TRIS",4) == 1){
       int ntris=0,i;
-      tridata *trii;
+      trilistdata *trii;
+      pointlistdata *pointlisti;
       int *trinodesn;
       char *surf_labelptr;
       char surf_label[256];
       float normal[3];
 
-      trii = triinfo + ntriinfo;
+      trii = trilistinfo + ntrilistinfo;
+      pointlisti = pointlistinfo + ntrilistinfo;
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&ntris);
-      trii->ntris=ntris;
+      trii->ntriangles=ntris;
       if(ntris>0){
-        NewMemory((void **)&trii->tris,ntris*sizeof(triangle));
+        NewMemory((void **)&trii->triangles,ntris*sizeof(triangle));
       }
       else{
-        trii->tris=NULL;
+        trii->triangles=NULL;
       }
       for(i=0;i<ntris;i++){
         int trinodes[3],*trinodesn;
@@ -3515,19 +3517,15 @@ typedef struct {
         triangle *trianglei;
         float *norm;
        
-        trinodes[0]=0;
-        trinodes[1]=0;
-        trinodes[2]=0;
         fgets(buffer,255,stream);
         normal[0]=-2.0;
         normal[1]=-2.0;
         normal[2]=-2.0;
         sscanf(buffer,"%i %i %i %f %f %f",trinodes,trinodes+1,trinodes+2,normal,normal+1,normal+2);
-        trianglei = trii->tris+i;
-        trinodesn=trianglei->trinodes;
-        trinodesn[0] = trinodes[0]-1;
-        trinodesn[1] = trinodes[1]-1;
-        trinodesn[2] = trinodes[2]-1;
+        trianglei = trii->triangles+i;
+        trianglei->points[0] = pointlisti->points+trinodes[0]-1;
+        trianglei->points[1] = pointlisti->points+trinodes[1]-1;
+        trianglei->points[2] = pointlisti->points+trinodes[2]-1;
         if(normal[0]<-1.5){
           trianglei->fdsnorm=0;
         }
@@ -3560,7 +3558,7 @@ typedef struct {
           trianglei->surf=surfacedefault;
         }
       }
-      ntriinfo++;
+      ntrilistinfo++;
       continue;
     }
 
@@ -5893,35 +5891,7 @@ typedef struct {
   }
 
 // compute triangle norms
-
-  for(j=0;j<ntriinfo;j++){
-    tridata *trii;
-    nodedata *nodei;
-    float *xyzptr[3];
-    float *xyznorm;
-    float *xyz;
-
-    trii = triinfo + j;
-    nodei = nodeinfo + j;
-    
-    xyz = nodei->xyz;
-    for(i=0;i<nodei->nnodes;i++){
-      xyz[0] = (xyz[0] - xbar0)/xyzmaxdiff;
-      xyz[1] = (xyz[1] - ybar0)/xyzmaxdiff;
-      xyz[2] = (xyz[2] - zbar0)/xyzmaxdiff;
-      xyz += 3;
-    }
-    
-    for(i=0;i<trii->ntris;i++){
-      if(trii->tris[i].fdsnorm==0){
-        xyzptr[0] = nodei->xyz+3*trii->tris[i].trinodes[0];
-        xyzptr[1] = nodei->xyz+3*trii->tris[i].trinodes[1];
-        xyzptr[2] = nodei->xyz+3*trii->tris[i].trinodes[2];
-        xyznorm = trii->tris[i].normal;
-        CalcTriNormal(xyzptr[0],xyzptr[1],xyzptr[2],xyznorm);
-      }
-    }
-  }
+  update_triangles();
 
 
 #ifdef pp_SHOOTER
