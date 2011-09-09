@@ -1,12 +1,12 @@
 
  Fire Dynamics Simulator
 
- Compilation Date : Fri, 17 Jun 2011
+ Compilation Date : Fri, 02 Sep 2011
  Version          : 6.0.0 Serial
 
  OpenMP Disabled
 
- SVN Revision No. : 8562
+ SVN Revision No. : 8990
 
  Job TITLE        : Flat Smooth Fast Detached
  Job ID string    : Vettori_Sloped_FSFD
@@ -32,7 +32,7 @@
    Simulation Start Time (s)          0.0
    Simulation End Time (s)          120.0
    LES Calculation
-   Dynamic Smagorinsky Model
+   Smagorinsky Constant              0.20
    Turbulent Prandtl Number          0.50
    Turbulent Schmidt Number          0.50
    Ambient Temperature (C)          20.00
@@ -89,7 +89,7 @@
    Ambient Density (kg/m^3)      0.749
 
    SOOT                          
-   Aerosol
+   Gas Species
    Lumped species component only
    Molecular Weight (g/mol)       10.91042
    Ambient Density (kg/m^3)      0.454
@@ -368,1817 +368,1938 @@
 
  Run Time Diagnostics
 
-       Time Step       1   June 19, 2011  10:29:04
+       Time Step       1   September  4, 2011  16:26:26
        ----------------------------------------------
-       CPU/step:     1.102 s, Total CPU:      1.10 s
+       CPU/step:     0.945 s, Total CPU:      0.94 s
        Time step:  0.08997 s, Total time:     0.09 s
        Max CFL number:  0.90E+00 at (  2, 23,  8)
-       Max divergence:  0.19E-01 at ( 36, 31,  4)
+       Max divergence:  0.19E-01 at ( 37, 30,  4)
        Min divergence: -0.12E-05 at (  5, 11, 17)
-       Max VN  number:  0.81E-01 at ( 16, 35, 11)
-       Total Heat Release Rate:              0.237 kW
-       Radiation Loss to Boundaries:         0.027 kW
+       Max VN  number:  0.15E-01 at ( 54, 16, 12)
+       Total Heat Release Rate:              0.240 kW
+       Radiation Loss to Boundaries:         0.029 kW
  
-       Time Step       2   June 19, 2011  10:29:05
+       Time Step       2   September  4, 2011  16:26:57
        ----------------------------------------------
-       CPU/step:     0.451 s, Total CPU:      1.55 s
+       CPU/step:     0.369 s, Total CPU:      1.31 s
        Time step:  0.08997 s, Total time:     0.18 s
        Max CFL number:  0.90E+00 at (  2, 23,  8)
-       Max divergence:  0.77E-01 at ( 36, 31,  4)
+       Max divergence:  0.83E-01 at ( 36, 31,  4)
        Min divergence: -0.12E-05 at (  5, 11, 17)
-       Max VN  number:  0.77E-01 at ( 16, 35, 11)
-       Total Heat Release Rate:              0.661 kW
-       Radiation Loss to Boundaries:         0.091 kW
+       Max VN  number:  0.15E-01 at ( 54, 16, 12)
+       Total Heat Release Rate:              1.086 kW
+       Radiation Loss to Boundaries:         0.156 kW
  
-       Time Step       3   June 19, 2011  10:29:09
+       Time Step       3   September  4, 2011  16:33:30
        ----------------------------------------------
-       CPU/step:     0.465 s, Total CPU:      2.02 s
+       CPU/step:     0.377 s, Total CPU:      1.69 s
        Time step:  0.08997 s, Total time:     0.27 s
        Max CFL number:  0.90E+00 at (  2, 23,  8)
-       Max divergence:  0.13E+00 at ( 36, 31,  4)
+       Max divergence:  0.15E+00 at ( 39, 32,  4)
        Min divergence: -0.12E-05 at (  5, 11, 17)
-       Max VN  number:  0.73E-01 at ( 16, 35, 11)
-       Total Heat Release Rate:              1.208 kW
-       Radiation Loss to Boundaries:         0.173 kW
+       Max VN  number:  0.15E-01 at ( 54, 16, 12)
+       Total Heat Release Rate:              2.015 kW
+       Radiation Loss to Boundaries:         0.294 kW
  
-       Time Step       4   June 19, 2011  10:29:10
+       Time Step       4   September  4, 2011  16:37:19
        ----------------------------------------------
-       CPU/step:     0.535 s, Total CPU:      2.55 s
+       CPU/step:     0.453 s, Total CPU:      2.14 s
        Time step:  0.08997 s, Total time:     0.36 s
-       Max CFL number:  0.90E+00 at (  2, 23,  8)
-       Max divergence:  0.22E+00 at ( 36, 33,  4)
-       Min divergence: -0.12E-05 at ( 17, 14, 17)
-       Max VN  number:  0.71E-01 at ( 15, 10, 20)
-       Total Heat Release Rate:              2.053 kW
-       Radiation Loss to Boundaries:         0.287 kW
+       Max CFL number:  0.90E+00 at ( 36, 31,  4)
+       Max divergence:  0.22E+00 at ( 39, 32,  4)
+       Min divergence: -0.12E-05 at ( 72, 37, 15)
+       Max VN  number:  0.14E-01 at ( 54, 16, 12)
+       Total Heat Release Rate:              2.990 kW
+       Radiation Loss to Boundaries:         0.422 kW
  
-       Time Step       5   June 19, 2011  10:29:12
+       Time Step       5   September  4, 2011  16:37:50
        ----------------------------------------------
-       CPU/step:     0.465 s, Total CPU:      3.02 s
+       CPU/step:     0.390 s, Total CPU:      2.53 s
        Time step:  0.08997 s, Total time:     0.45 s
        Max CFL number:  0.90E+00 at ( 36, 31,  4)
-       Max divergence:  0.40E+00 at ( 39, 30,  4)
-       Min divergence: -0.12E-05 at ( 17, 14, 17)
-       Max VN  number:  0.71E-01 at ( 15, 10, 20)
-       Total Heat Release Rate:              3.473 kW
-       Radiation Loss to Boundaries:         0.501 kW
+       Max divergence:  0.31E+00 at ( 39, 32,  4)
+       Min divergence: -0.24E-01 at ( 36, 34,  4)
+       Max VN  number:  0.14E-01 at ( 54, 16, 12)
+       Total Heat Release Rate:              3.988 kW
+       Radiation Loss to Boundaries:         0.571 kW
  
-       Time Step       6   June 19, 2011  10:29:15
+       Time Step       6   September  4, 2011  16:37:52
        ----------------------------------------------
-       CPU/step:     0.468 s, Total CPU:      3.49 s
+       CPU/step:     0.431 s, Total CPU:      2.96 s
        Time step:  0.08997 s, Total time:     0.54 s
-       Max CFL number:  0.90E+00 at ( 38, 29,  4)
-       Max divergence:  0.79E+00 at ( 35, 30,  4)
-       Min divergence: -0.12E-05 at ( 17, 14, 17)
-       Max VN  number:  0.70E-01 at ( 15, 10, 20)
-       Total Heat Release Rate:              4.422 kW
-       Radiation Loss to Boundaries:         0.643 kW
+       Max CFL number:  0.90E+00 at ( 36, 31,  4)
+       Max divergence:  0.39E+00 at ( 39, 32,  4)
+       Min divergence: -0.16E-01 at ( 38, 31,  5)
+       Max VN  number:  0.14E-01 at ( 54, 16, 12)
+       Total Heat Release Rate:              4.998 kW
+       Radiation Loss to Boundaries:         0.727 kW
  
-       Time Step       7   June 19, 2011  10:29:18
+       Time Step       7   September  4, 2011  16:37:54
        ----------------------------------------------
-       CPU/step:     0.582 s, Total CPU:      4.07 s
+       CPU/step:     0.643 s, Total CPU:      3.61 s
        Time step:  0.08997 s, Total time:     0.63 s
-       Max CFL number:  0.90E+00 at ( 35, 32,  4)
-       Max divergence:  0.31E+01 at ( 39, 30,  4)
-       Min divergence: -0.51E-02 at ( 36, 33,  4)
-       Max VN  number:  0.70E-01 at ( 15, 10, 20)
-       Total Heat Release Rate:             14.423 kW
-       Radiation Loss to Boundaries:         2.052 kW
+       Max CFL number:  0.90E+00 at ( 40, 33,  4)
+       Max divergence:  0.47E+00 at ( 39, 32,  4)
+       Min divergence: -0.15E-01 at ( 40, 27,  4)
+       Max VN  number:  0.17E-01 at ( 40, 33,  4)
+       Total Heat Release Rate:              6.015 kW
+       Radiation Loss to Boundaries:         0.845 kW
  
-       Time Step       8   June 19, 2011  10:29:19
+       Time Step       8   September  4, 2011  16:37:54
        ----------------------------------------------
-       CPU/step:     0.443 s, Total CPU:      4.51 s
+       CPU/step:     0.441 s, Total CPU:      4.05 s
        Time step:  0.08997 s, Total time:     0.72 s
-       Max CFL number:  0.90E+00 at ( 39, 30,  4)
-       Max divergence:  0.47E+01 at ( 37, 33,  4)
-       Min divergence: -0.24E-01 at ( 38, 29,  4)
-       Max VN  number:  0.69E-01 at ( 15, 10, 20)
-       Total Heat Release Rate:             13.769 kW
-       Radiation Loss to Boundaries:         1.964 kW
+       Max CFL number:  0.90E+00 at ( 40, 33,  4)
+       Max divergence:  0.53E+00 at ( 39, 32,  4)
+       Min divergence: -0.13E-01 at ( 36, 34,  4)
+       Max VN  number:  0.25E-01 at ( 40, 33,  4)
+       Total Heat Release Rate:              7.036 kW
+       Radiation Loss to Boundaries:         1.003 kW
  
-       Time Step       9   June 19, 2011  10:29:21
+       Time Step       9   September  4, 2011  16:38:01
        ----------------------------------------------
-       CPU/step:     0.461 s, Total CPU:      4.97 s
+       CPU/step:     0.405 s, Total CPU:      4.45 s
        Time step:  0.08997 s, Total time:     0.81 s
-       Max CFL number:  0.90E+00 at ( 37, 33,  4)
-       Max divergence:  0.12E+02 at ( 40, 29,  4)
-       Min divergence: -0.68E-01 at ( 36, 33,  4)
-       Max VN  number:  0.69E-01 at ( 15, 10, 20)
-       Total Heat Release Rate:             74.632 kW
-       Radiation Loss to Boundaries:        11.116 kW
- 
-       Time Step      10   June 19, 2011  10:29:23
-       ----------------------------------------------
-       CPU/step:     0.771 s, Total CPU:      5.74 s
-       Time step:  0.04476 s, Total time:     0.85 s
-       Max CFL number:  0.10E+01 at ( 40, 31,  4)
-       Max divergence:  0.10E+02 at ( 36, 33,  4)
-       Min divergence: -0.21E-01 at ( 35, 30,  4)
-       Max VN  number:  0.34E-01 at ( 15, 10, 20)
-       Total Heat Release Rate:             58.175 kW
-       Radiation Loss to Boundaries:         8.179 kW
- 
-       Time Step      20   June 19, 2011  10:29:33
-       ----------------------------------------------
-       CPU/step:     0.518 s, Total CPU:     10.92 s
-       Time step:  0.02311 s, Total time:     1.19 s
-       Max CFL number:  0.86E+00 at ( 40, 31,  4)
-       Max divergence:  0.11E+02 at ( 35, 28,  4)
-       Min divergence: -0.21E+01 at ( 37, 33,  6)
-       Max VN  number:  0.29E+00 at ( 35, 33,  6)
-       Total Heat Release Rate:             94.358 kW
-       Radiation Loss to Boundaries:        15.016 kW
- 
-       Time Step      30   June 19, 2011  10:29:41
-       ----------------------------------------------
-       CPU/step:     0.500 s, Total CPU:     15.92 s
-       Time step:  0.01872 s, Total time:     1.39 s
-       Max CFL number:  0.93E+00 at ( 38, 29,  5)
-       Max divergence:  0.12E+02 at ( 40, 28,  4)
-       Min divergence: -0.31E+01 at ( 36, 32,  7)
-       Max VN  number:  0.31E+00 at ( 36, 32,  7)
-       Total Heat Release Rate:            103.003 kW
-       Radiation Loss to Boundaries:        13.489 kW
- 
-       Time Step      40   June 19, 2011  10:29:47
-       ----------------------------------------------
-       CPU/step:     0.494 s, Total CPU:     20.86 s
-       Time step:  0.01586 s, Total time:     1.55 s
-       Max CFL number:  0.96E+00 at ( 38, 29,  8)
-       Max divergence:  0.12E+02 at ( 35, 28,  4)
-       Min divergence: -0.20E+01 at ( 38, 29, 11)
-       Max VN  number:  0.33E+00 at ( 37, 29, 10)
-       Total Heat Release Rate:             94.508 kW
-       Radiation Loss to Boundaries:        11.572 kW
- 
-       Time Step      50   June 19, 2011  10:29:53
-       ----------------------------------------------
-       CPU/step:     0.480 s, Total CPU:     25.66 s
-       Time step:  0.01425 s, Total time:     1.70 s
-       Max CFL number:  0.94E+00 at ( 38, 30,  8)
-       Max divergence:  0.81E+01 at ( 40, 30,  4)
-       Min divergence: -0.21E+01 at ( 38, 29, 15)
-       Max VN  number:  0.35E+00 at ( 37, 30,  9)
-       Total Heat Release Rate:             50.380 kW
-       Radiation Loss to Boundaries:         5.091 kW
- 
-       Time Step      60   June 19, 2011  10:29:59
-       ----------------------------------------------
-       CPU/step:     0.488 s, Total CPU:     30.53 s
-       Time step:  0.01275 s, Total time:     1.84 s
-       Max CFL number:  0.88E+00 at ( 39, 29,  9)
-       Max divergence:  0.12E+02 at ( 40, 33,  4)
-       Min divergence: -0.16E+01 at ( 38, 28, 18)
-       Max VN  number:  0.24E+00 at ( 38, 31, 10)
-       Total Heat Release Rate:             82.343 kW
-       Radiation Loss to Boundaries:        10.427 kW
- 
-       Time Step      70   June 19, 2011  10:30:06
-       ----------------------------------------------
-       CPU/step:     0.511 s, Total CPU:     35.64 s
-       Time step:  0.01236 s, Total time:     1.95 s
-       Max CFL number:  0.85E+00 at ( 39, 29, 12)
-       Max divergence:  0.11E+02 at ( 40, 28,  4)
-       Min divergence: -0.17E+01 at ( 38, 27, 20)
-       Max VN  number:  0.30E+00 at ( 38, 31, 11)
-       Total Heat Release Rate:             70.731 kW
-       Radiation Loss to Boundaries:         8.730 kW
- 
-       Time Step      80   June 19, 2011  10:30:12
-       ----------------------------------------------
-       CPU/step:     0.495 s, Total CPU:     40.59 s
-       Time step:  0.01360 s, Total time:     2.09 s
-       Max CFL number:  0.88E+00 at ( 39, 30, 11)
-       Max divergence:  0.12E+02 at ( 40, 33,  4)
-       Min divergence: -0.12E+01 at ( 38, 26, 22)
-       Max VN  number:  0.38E+00 at ( 36, 30, 13)
-       Total Heat Release Rate:             76.440 kW
-       Radiation Loss to Boundaries:        10.279 kW
- 
-       Time Step      90   June 19, 2011  10:30:21
-       ----------------------------------------------
-       CPU/step:     0.473 s, Total CPU:     45.32 s
-       Time step:  0.01360 s, Total time:     2.22 s
-       Max CFL number:  0.86E+00 at ( 39, 29, 12)
-       Max divergence:  0.12E+02 at ( 40, 28,  4)
-       Min divergence: -0.10E+01 at ( 40, 31,  7)
-       Max VN  number:  0.35E+00 at ( 36, 30, 15)
-       Total Heat Release Rate:            102.823 kW
-       Radiation Loss to Boundaries:        13.942 kW
- 
-       Time Step     100   June 19, 2011  10:30:30
-       ----------------------------------------------
-       CPU/step:     0.481 s, Total CPU:     50.13 s
-       Time step:  0.01496 s, Total time:     2.37 s
-       Max CFL number:  0.85E+00 at ( 38, 32, 15)
-       Max divergence:  0.12E+02 at ( 40, 28,  4)
-       Min divergence: -0.15E+01 at ( 40, 31,  9)
-       Max VN  number:  0.27E+00 at ( 34, 30, 16)
-       Total Heat Release Rate:            100.692 kW
-       Radiation Loss to Boundaries:        13.344 kW
- 
-       Time Step     200   June 19, 2011  10:31:40
-       ----------------------------------------------
-       CPU/step:     0.511 s, Total CPU:      1.69 min
-       Time step:  0.01329 s, Total time:     3.84 s
-       Max CFL number:  0.81E+00 at ( 32, 47, 25)
-       Max divergence:  0.11E+02 at ( 35, 29,  4)
-       Min divergence: -0.15E+01 at ( 39, 30,  9)
-       Max VN  number:  0.36E+00 at ( 46, 35, 23)
-       Total Heat Release Rate:             67.223 kW
-       Radiation Loss to Boundaries:         8.639 kW
- 
-       Time Step     300   June 19, 2011  10:32:42
-       ----------------------------------------------
-       CPU/step:     0.538 s, Total CPU:      2.58 min
-       Time step:  0.01338 s, Total time:     5.35 s
-       Max CFL number:  0.93E+00 at ( 38, 31, 14)
-       Max divergence:  0.12E+02 at ( 37, 33,  4)
-       Min divergence: -0.27E+01 at ( 37, 28,  9)
-       Max VN  number:  0.50E+00 at ( 41, 34,  5)
-       Total Heat Release Rate:             19.667 kW
-       Radiation Loss to Boundaries:         3.180 kW
- 
-       Time Step     400   June 19, 2011  10:33:39
-       ----------------------------------------------
-       CPU/step:     0.555 s, Total CPU:      3.51 min
-       Time step:  0.01099 s, Total time:     6.40 s
-       Max CFL number:  0.89E+00 at ( 38, 29, 18)
-       Max divergence:  0.42E+01 at ( 36, 32,  4)
-       Min divergence: -0.21E+01 at ( 36, 31, 12)
-       Max VN  number:  0.46E+00 at ( 33, 26, 23)
-       Total Heat Release Rate:             64.622 kW
-       Radiation Loss to Boundaries:         7.970 kW
- 
-       Time Step     500   June 19, 2011  10:34:37
-       ----------------------------------------------
-       CPU/step:     0.577 s, Total CPU:      4.47 min
-       Time step:  0.01268 s, Total time:     7.57 s
-       Max CFL number:  0.80E+00 at ( 39, 28, 16)
-       Max divergence:  0.11E+02 at ( 38, 33,  4)
-       Min divergence: -0.27E+01 at ( 38, 32,  7)
-       Max VN  number:  0.35E+00 at ( 58, 32, 23)
-       Total Heat Release Rate:             53.073 kW
-       Radiation Loss to Boundaries:         7.478 kW
- 
-       Time Step     600   June 19, 2011  10:35:35
-       ----------------------------------------------
-       CPU/step:     0.573 s, Total CPU:      5.43 min
-       Time step:  0.01491 s, Total time:     9.06 s
-       Max CFL number:  0.96E+00 at ( 33, 32, 24)
-       Max divergence:  0.12E+02 at ( 35, 31,  4)
-       Min divergence: -0.28E+01 at ( 38, 29,  7)
-       Max VN  number:  0.39E+00 at ( 29, 32, 23)
-       Total Heat Release Rate:            103.436 kW
-       Radiation Loss to Boundaries:        15.772 kW
- 
-       Time Step     700   June 19, 2011  10:36:33
-       ----------------------------------------------
-       CPU/step:     0.577 s, Total CPU:      6.39 min
-       Time step:  0.01003 s, Total time:    10.15 s
-       Max CFL number:  0.83E+00 at ( 42, 34, 25)
-       Max divergence:  0.12E+02 at ( 37, 33,  4)
-       Min divergence: -0.18E+01 at ( 37, 30, 12)
-       Max VN  number:  0.40E+00 at ( 38, 33, 22)
-       Total Heat Release Rate:             18.729 kW
-       Radiation Loss to Boundaries:         2.955 kW
- 
-       Time Step     800   June 19, 2011  10:37:30
-       ----------------------------------------------
-       CPU/step:     0.578 s, Total CPU:      7.35 min
-       Time step:  0.01099 s, Total time:    11.31 s
-       Max CFL number:  0.84E+00 at ( 37, 30, 17)
-       Max divergence:  0.11E+02 at ( 35, 28,  4)
-       Min divergence: -0.18E+01 at ( 37, 30, 19)
-       Max VN  number:  0.35E+00 at ( 38, 28,  4)
-       Total Heat Release Rate:             81.610 kW
-       Radiation Loss to Boundaries:        11.510 kW
- 
-       Time Step     900   June 19, 2011  10:38:29
-       ----------------------------------------------
-       CPU/step:     0.576 s, Total CPU:      8.31 min
-       Time step:  0.01381 s, Total time:    12.53 s
-       Max CFL number:  0.91E+00 at ( 40, 34, 25)
-       Max divergence:  0.11E+02 at ( 35, 30,  4)
-       Min divergence: -0.16E+01 at ( 38, 31,  9)
-       Max VN  number:  0.32E+00 at ( 38, 31,  9)
-       Total Heat Release Rate:             88.906 kW
-       Radiation Loss to Boundaries:        12.264 kW
- 
-       Time Step    1000   June 19, 2011  10:39:25
-       ----------------------------------------------
-       CPU/step:     0.560 s, Total CPU:      9.24 min
-       Time step:  0.01444 s, Total time:    13.91 s
-       Max CFL number:  0.91E+00 at ( 38, 31, 12)
-       Max divergence:  0.12E+02 at ( 35, 30,  4)
-       Min divergence: -0.23E+01 at ( 39, 32,  8)
-       Max VN  number:  0.60E+00 at ( 45, 28, 23)
-       Total Heat Release Rate:             84.772 kW
-       Radiation Loss to Boundaries:        11.951 kW
- 
-       Time Step    1100   June 19, 2011  10:40:19
-       ----------------------------------------------
-       CPU/step:     0.542 s, Total CPU:     10.15 min
-       Time step:  0.01293 s, Total time:    15.22 s
-       Max CFL number:  0.82E+00 at ( 37, 38, 25)
-       Max divergence:  0.11E+02 at ( 40, 32,  4)
-       Min divergence: -0.19E+01 at ( 40, 30,  7)
-       Max VN  number:  0.57E+00 at ( 38, 26, 23)
-       Total Heat Release Rate:             76.863 kW
-       Radiation Loss to Boundaries:        11.533 kW
- 
-       Time Step    1200   June 19, 2011  10:41:14
-       ----------------------------------------------
-       CPU/step:     0.545 s, Total CPU:     11.05 min
-       Time step:  0.01117 s, Total time:    16.27 s
-       Max CFL number:  0.88E+00 at ( 37, 28, 12)
-       Max divergence:  0.11E+02 at ( 37, 29,  4)
-       Min divergence: -0.26E+01 at ( 37, 32, 10)
-       Max VN  number:  0.40E+00 at ( 38, 24, 23)
-       Total Heat Release Rate:            109.312 kW
-       Radiation Loss to Boundaries:        14.982 kW
- 
-       Time Step    1300   June 19, 2011  10:42:08
-       ----------------------------------------------
-       CPU/step:     0.543 s, Total CPU:     11.96 min
-       Time step:  0.01277 s, Total time:    17.51 s
-       Max CFL number:  0.79E+00 at ( 36, 30, 11)
-       Max divergence:  0.12E+02 at ( 40, 32,  4)
-       Min divergence: -0.19E+01 at ( 38, 31,  8)
-       Max VN  number:  0.47E+00 at ( 35, 19, 23)
-       Total Heat Release Rate:            100.107 kW
-       Radiation Loss to Boundaries:        15.881 kW
- 
-       Time Step    1400   June 19, 2011  10:43:03
-       ----------------------------------------------
-       CPU/step:     0.544 s, Total CPU:     12.86 min
-       Time step:  0.01234 s, Total time:    18.65 s
-       Max CFL number:  0.86E+00 at ( 38, 30, 11)
-       Max divergence:  0.99E+01 at ( 36, 29,  4)
-       Min divergence: -0.28E+01 at ( 38, 32,  6)
-       Max VN  number:  0.37E+00 at ( 39, 31, 14)
-       Total Heat Release Rate:             78.142 kW
-       Radiation Loss to Boundaries:        11.464 kW
- 
-       Time Step    1500   June 19, 2011  10:43:57
-       ----------------------------------------------
-       CPU/step:     0.541 s, Total CPU:     13.77 min
-       Time step:  0.01410 s, Total time:    19.96 s
-       Max CFL number:  0.84E+00 at ( 37, 32, 10)
-       Max divergence:  0.12E+02 at ( 38, 33,  4)
-       Min divergence: -0.20E+01 at ( 37, 32, 12)
-       Max VN  number:  0.31E+00 at ( 37, 31, 11)
-       Total Heat Release Rate:             65.535 kW
-       Radiation Loss to Boundaries:        11.472 kW
- 
-       Time Step    1600   June 19, 2011  10:44:51
-       ----------------------------------------------
-       CPU/step:     0.540 s, Total CPU:     14.67 min
-       Time step:  0.01410 s, Total time:    21.37 s
-       Max CFL number:  0.92E+00 at ( 39, 31,  7)
-       Max divergence:  0.12E+02 at ( 39, 33,  4)
-       Min divergence: -0.19E+01 at ( 39, 32,  9)
-       Max VN  number:  0.29E+00 at ( 38, 30, 10)
-       Total Heat Release Rate:             97.094 kW
-       Radiation Loss to Boundaries:        14.834 kW
- 
-       Time Step    1700   June 19, 2011  10:45:49
-       ----------------------------------------------
-       CPU/step:     0.573 s, Total CPU:     15.62 min
-       Time step:  0.00989 s, Total time:    22.52 s
-       Max CFL number:  0.87E+00 at ( 36, 31, 15)
-       Max divergence:  0.10E+02 at ( 38, 29,  4)
-       Min divergence: -0.34E+01 at ( 38, 30,  8)
-       Max VN  number:  0.28E+00 at ( 38, 35, 19)
-       Total Heat Release Rate:            125.326 kW
-       Radiation Loss to Boundaries:        21.095 kW
- 
-       Time Step    1800   June 19, 2011  10:46:47
-       ----------------------------------------------
-       CPU/step:     0.576 s, Total CPU:     16.58 min
-       Time step:  0.01097 s, Total time:    23.54 s
-       Max CFL number:  0.89E+00 at ( 37, 33, 16)
-       Max divergence:  0.11E+02 at ( 36, 28,  4)
-       Min divergence: -0.38E+01 at ( 38, 32,  8)
-       Max VN  number:  0.35E+00 at ( 37, 30,  7)
-       Total Heat Release Rate:            137.326 kW
-       Radiation Loss to Boundaries:        20.400 kW
- 
-       Time Step    1900   June 19, 2011  10:47:45
-       ----------------------------------------------
-       CPU/step:     0.579 s, Total CPU:     17.55 min
-       Time step:  0.00993 s, Total time:    24.57 s
-       Max CFL number:  0.84E+00 at ( 38, 30, 17)
-       Max divergence:  0.98E+01 at ( 40, 32,  4)
-       Min divergence: -0.25E+01 at ( 36, 32,  9)
-       Max VN  number:  0.37E+00 at ( 69, 36, 23)
-       Total Heat Release Rate:            137.576 kW
-       Radiation Loss to Boundaries:        21.748 kW
- 
-       Time Step    2000   June 19, 2011  10:48:43
-       ----------------------------------------------
-       CPU/step:     0.577 s, Total CPU:     18.51 min
-       Time step:  0.01244 s, Total time:    25.70 s
-       Max CFL number:  0.86E+00 at ( 46, 38, 25)
-       Max divergence:  0.11E+02 at ( 36, 28,  4)
-       Min divergence: -0.21E+01 at ( 36, 28, 13)
-       Max VN  number:  0.43E+00 at ( 31, 31, 23)
-       Total Heat Release Rate:            128.573 kW
-       Radiation Loss to Boundaries:        22.118 kW
- 
-       Time Step    2100   June 19, 2011  10:49:41
-       ----------------------------------------------
-       CPU/step:     0.578 s, Total CPU:     19.47 min
-       Time step:  0.01004 s, Total time:    26.77 s
-       Max CFL number:  0.89E+00 at ( 36, 30,  9)
-       Max divergence:  0.12E+02 at ( 39, 28,  4)
-       Min divergence: -0.41E+01 at ( 34, 32,  7)
-       Max VN  number:  0.33E+00 at ( 44, 30, 23)
-       Total Heat Release Rate:            148.383 kW
-       Radiation Loss to Boundaries:        22.081 kW
- 
-       Time Step    2200   June 19, 2011  10:50:39
-       ----------------------------------------------
-       CPU/step:     0.579 s, Total CPU:     20.44 min
-       Time step:  0.01085 s, Total time:    27.86 s
-       Max CFL number:  0.94E+00 at ( 36, 31,  4)
-       Max divergence:  0.11E+02 at ( 35, 31,  4)
-       Min divergence: -0.29E+01 at ( 37, 30,  9)
-       Max VN  number:  0.27E+00 at ( 36, 33, 21)
-       Total Heat Release Rate:            122.399 kW
-       Radiation Loss to Boundaries:        20.628 kW
- 
-       Time Step    2300   June 19, 2011  10:51:38
-       ----------------------------------------------
-       CPU/step:     0.581 s, Total CPU:     21.40 min
-       Time step:  0.01127 s, Total time:    28.99 s
-       Max CFL number:  0.93E+00 at ( 37, 32, 13)
-       Max divergence:  0.11E+02 at ( 40, 33,  4)
-       Min divergence: -0.22E+01 at ( 37, 33, 16)
-       Max VN  number:  0.38E+00 at ( 37, 47, 23)
-       Total Heat Release Rate:            129.876 kW
-       Radiation Loss to Boundaries:        21.732 kW
- 
-       Time Step    2400   June 19, 2011  10:52:36
-       ----------------------------------------------
-       CPU/step:     0.586 s, Total CPU:     22.38 min
-       Time step:  0.00966 s, Total time:    29.99 s
-       Max CFL number:  0.84E+00 at ( 38, 30, 16)
-       Max divergence:  0.11E+02 at ( 35, 33,  4)
-       Min divergence: -0.32E+01 at ( 36, 28, 11)
-       Max VN  number:  0.23E+00 at ( 39, 29, 22)
-       Total Heat Release Rate:            163.260 kW
-       Radiation Loss to Boundaries:        26.026 kW
- 
-       Time Step    2500   June 19, 2011  10:53:35
-       ----------------------------------------------
-       CPU/step:     0.581 s, Total CPU:     23.35 min
-       Time step:  0.00864 s, Total time:    30.95 s
-       Max CFL number:  0.87E+00 at ( 39, 31, 16)
-       Max divergence:  0.11E+02 at ( 36, 32,  4)
-       Min divergence: -0.29E+01 at ( 35, 32,  8)
-       Max VN  number:  0.31E+00 at ( 39, 33, 19)
-       Total Heat Release Rate:            176.563 kW
-       Radiation Loss to Boundaries:        28.855 kW
- 
-       Time Step    2600   June 19, 2011  10:54:35
-       ----------------------------------------------
-       CPU/step:     0.577 s, Total CPU:     24.31 min
-       Time step:  0.00817 s, Total time:    31.89 s
-       Max CFL number:  0.84E+00 at ( 38, 32, 13)
-       Max divergence:  0.11E+02 at ( 36, 33,  4)
-       Min divergence: -0.20E+01 at ( 35, 29, 11)
-       Max VN  number:  0.30E+00 at ( 29, 31, 23)
-       Total Heat Release Rate:            155.223 kW
-       Radiation Loss to Boundaries:        24.746 kW
- 
-       Time Step    2700   June 19, 2011  10:55:32
-       ----------------------------------------------
-       CPU/step:     0.551 s, Total CPU:     25.23 min
-       Time step:  0.00941 s, Total time:    32.90 s
-       Max CFL number:  0.90E+00 at ( 38, 30, 16)
-       Max divergence:  0.11E+02 at ( 36, 29,  4)
-       Min divergence: -0.52E+01 at ( 38, 32, 19)
-       Max VN  number:  0.36E+00 at ( 38, 32, 19)
-       Total Heat Release Rate:            190.788 kW
-       Radiation Loss to Boundaries:        28.945 kW
- 
-       Time Step    2800   June 19, 2011  10:56:27
-       ----------------------------------------------
-       CPU/step:     0.546 s, Total CPU:     26.14 min
-       Time step:  0.00960 s, Total time:    33.91 s
-       Max CFL number:  0.95E+00 at ( 37, 31,  8)
-       Max divergence:  0.11E+02 at ( 40, 30,  4)
-       Min divergence: -0.30E+01 at ( 40, 32, 14)
-       Max VN  number:  0.25E+00 at ( 40, 32, 14)
-       Total Heat Release Rate:            145.112 kW
-       Radiation Loss to Boundaries:        24.396 kW
- 
-       Time Step    2900   June 19, 2011  10:57:22
-       ----------------------------------------------
-       CPU/step:     0.544 s, Total CPU:     27.04 min
-       Time step:  0.00967 s, Total time:    34.90 s
-       Max CFL number:  0.98E+00 at ( 38, 31,  9)
-       Max divergence:  0.12E+02 at ( 37, 33,  4)
-       Min divergence: -0.28E+01 at ( 36, 35, 10)
-       Max VN  number:  0.33E+00 at ( 27, 41, 23)
-       Total Heat Release Rate:            148.590 kW
-       Radiation Loss to Boundaries:        22.552 kW
- 
-       Time Step    3000   June 19, 2011  10:58:16
-       ----------------------------------------------
-       CPU/step:     0.540 s, Total CPU:     27.94 min
-       Time step:  0.00956 s, Total time:    35.83 s
-       Max CFL number:  0.80E+00 at ( 38, 33, 22)
-       Max divergence:  0.11E+02 at ( 35, 33,  4)
-       Min divergence: -0.27E+01 at ( 34, 31,  7)
-       Max VN  number:  0.40E+00 at ( 40, 33,  4)
-       Total Heat Release Rate:            179.541 kW
-       Radiation Loss to Boundaries:        29.757 kW
- 
-       Time Step    3100   June 19, 2011  10:59:12
-       ----------------------------------------------
-       CPU/step:     0.545 s, Total CPU:     28.85 min
-       Time step:  0.00772 s, Total time:    36.84 s
-       Max CFL number:  0.90E+00 at ( 35, 28,  9)
-       Max divergence:  0.12E+02 at ( 37, 33,  4)
-       Min divergence: -0.52E+01 at ( 37, 29, 17)
-       Max VN  number:  0.29E+00 at ( 37, 29, 17)
-       Total Heat Release Rate:            167.686 kW
-       Radiation Loss to Boundaries:        27.249 kW
- 
-       Time Step    3200   June 19, 2011  11:00:08
-       ----------------------------------------------
-       CPU/step:     0.559 s, Total CPU:     29.78 min
-       Time step:  0.00877 s, Total time:    37.75 s
-       Max CFL number:  0.91E+00 at ( 37, 29, 14)
-       Max divergence:  0.12E+02 at ( 37, 32,  4)
-       Min divergence: -0.26E+01 at ( 37, 33, 17)
-       Max VN  number:  0.30E+00 at ( 36, 30, 12)
-       Total Heat Release Rate:            221.179 kW
-       Radiation Loss to Boundaries:        36.146 kW
- 
-       Time Step    3300   June 19, 2011  11:01:02
-       ----------------------------------------------
-       CPU/step:     0.534 s, Total CPU:     30.67 min
-       Time step:  0.01008 s, Total time:    38.64 s
-       Max CFL number:  0.91E+00 at ( 35, 32, 18)
-       Max divergence:  0.11E+02 at ( 36, 34,  4)
-       Min divergence: -0.22E+01 at ( 36, 29, 11)
-       Max VN  number:  0.43E+00 at ( 37, 32,  9)
-       Total Heat Release Rate:            130.578 kW
-       Radiation Loss to Boundaries:        25.359 kW
- 
-       Time Step    3400   June 19, 2011  11:01:57
-       ----------------------------------------------
-       CPU/step:     0.537 s, Total CPU:     31.57 min
-       Time step:  0.01032 s, Total time:    39.72 s
-       Max CFL number:  0.87E+00 at ( 36, 33, 13)
-       Max divergence:  0.12E+02 at ( 36, 28,  4)
-       Min divergence: -0.43E+01 at ( 38, 30,  9)
-       Max VN  number:  0.45E+00 at ( 38, 30, 10)
-       Total Heat Release Rate:            165.739 kW
-       Radiation Loss to Boundaries:        30.879 kW
- 
-       Time Step    3500   June 19, 2011  11:02:51
-       ----------------------------------------------
-       CPU/step:     0.538 s, Total CPU:     32.46 min
-       Time step:  0.00774 s, Total time:    40.70 s
-       Max CFL number:  0.90E+00 at ( 38, 31, 12)
-       Max divergence:  0.10E+02 at ( 38, 33,  4)
-       Min divergence: -0.40E+01 at ( 38, 31, 14)
-       Max VN  number:  0.41E+00 at ( 38, 31, 14)
-       Total Heat Release Rate:            202.198 kW
-       Radiation Loss to Boundaries:        31.855 kW
- 
-       Time Step    3600   June 19, 2011  11:03:45
-       ----------------------------------------------
-       CPU/step:     0.536 s, Total CPU:     33.36 min
-       Time step:  0.00884 s, Total time:    41.60 s
-       Max CFL number:  0.96E+00 at ( 38, 30,  7)
-       Max divergence:  0.12E+02 at ( 38, 33,  4)
-       Min divergence: -0.35E+01 at ( 37, 31, 10)
-       Max VN  number:  0.28E+00 at ( 38, 32, 12)
-       Total Heat Release Rate:            223.315 kW
-       Radiation Loss to Boundaries:        37.785 kW
- 
-       Time Step    3700   June 19, 2011  11:04:43
-       ----------------------------------------------
-       CPU/step:     0.578 s, Total CPU:     34.32 min
-       Time step:  0.01068 s, Total time:    42.57 s
-       Max CFL number:  0.83E+00 at ( 36, 32,  6)
-       Max divergence:  0.11E+02 at ( 35, 33,  4)
-       Min divergence: -0.43E+01 at ( 36, 32,  9)
-       Max VN  number:  0.43E+00 at ( 37, 24, 23)
-       Total Heat Release Rate:            190.740 kW
-       Radiation Loss to Boundaries:        33.406 kW
- 
-       Time Step    3800   June 19, 2011  11:05:41
-       ----------------------------------------------
-       CPU/step:     0.579 s, Total CPU:     35.29 min
-       Time step:  0.00828 s, Total time:    43.59 s
-       Max CFL number:  0.90E+00 at ( 37, 32, 13)
-       Max divergence:  0.13E+02 at ( 35, 32,  4)
-       Min divergence: -0.28E+01 at ( 38, 31, 18)
-       Max VN  number:  0.25E+00 at ( 39, 32, 15)
-       Total Heat Release Rate:            174.712 kW
-       Radiation Loss to Boundaries:        30.022 kW
- 
-       Time Step    3900   June 19, 2011  11:06:40
-       ----------------------------------------------
-       CPU/step:     0.584 s, Total CPU:     36.26 min
-       Time step:  0.00812 s, Total time:    44.43 s
-       Max CFL number:  0.87E+00 at ( 38, 34, 22)
-       Max divergence:  0.10E+02 at ( 36, 33,  4)
-       Min divergence: -0.45E+01 at ( 39, 28,  6)
-       Max VN  number:  0.27E+00 at ( 37, 31, 22)
-       Total Heat Release Rate:            157.506 kW
-       Radiation Loss to Boundaries:        29.685 kW
- 
-       Time Step    4000   June 19, 2011  11:07:38
-       ----------------------------------------------
-       CPU/step:     0.580 s, Total CPU:     37.23 min
-       Time step:  0.00819 s, Total time:    45.39 s
-       Max CFL number:  0.93E+00 at ( 38, 31, 12)
-       Max divergence:  0.11E+02 at ( 40, 30,  4)
-       Min divergence: -0.37E+01 at ( 39, 32, 17)
-       Max VN  number:  0.28E+00 at ( 33, 33, 23)
-       Total Heat Release Rate:            220.178 kW
-       Radiation Loss to Boundaries:        38.173 kW
- 
-       Time Step    4100   June 19, 2011  11:08:36
-       ----------------------------------------------
-       CPU/step:     0.578 s, Total CPU:     38.19 min
-       Time step:  0.00983 s, Total time:    46.30 s
-       Max CFL number:  0.90E+00 at ( 36, 34,  8)
-       Max divergence:  0.11E+02 at ( 35, 28,  4)
-       Min divergence: -0.34E+01 at ( 36, 34, 12)
-       Max VN  number:  0.30E+00 at ( 36, 32, 22)
-       Total Heat Release Rate:            306.588 kW
-       Radiation Loss to Boundaries:        54.052 kW
- 
-       Time Step    4200   June 19, 2011  11:09:34
-       ----------------------------------------------
-       CPU/step:     0.583 s, Total CPU:     39.16 min
-       Time step:  0.00970 s, Total time:    47.21 s
-       Max CFL number:  0.91E+00 at ( 35, 32,  9)
-       Max divergence:  0.11E+02 at ( 40, 30,  4)
-       Min divergence: -0.28E+01 at ( 40, 27, 14)
-       Max VN  number:  0.36E+00 at ( 36, 42, 23)
-       Total Heat Release Rate:            244.623 kW
-       Radiation Loss to Boundaries:        41.944 kW
- 
-       Time Step    4300   June 19, 2011  11:10:33
-       ----------------------------------------------
-       CPU/step:     0.580 s, Total CPU:     40.13 min
-       Time step:  0.00956 s, Total time:    48.13 s
-       Max CFL number:  0.89E+00 at ( 38, 32,  7)
-       Max divergence:  0.12E+02 at ( 36, 33,  4)
-       Min divergence: -0.36E+01 at ( 41, 32, 18)
-       Max VN  number:  0.48E+00 at ( 39, 34, 22)
-       Total Heat Release Rate:            196.513 kW
-       Radiation Loss to Boundaries:        37.962 kW
- 
-       Time Step    4400   June 19, 2011  11:11:31
-       ----------------------------------------------
-       CPU/step:     0.578 s, Total CPU:     41.09 min
-       Time step:  0.01010 s, Total time:    49.04 s
-       Max CFL number:  0.91E+00 at ( 38, 33,  9)
-       Max divergence:  0.11E+02 at ( 40, 29,  4)
-       Min divergence: -0.31E+01 at ( 38, 32, 13)
-       Max VN  number:  0.41E+00 at ( 60, 38, 23)
-       Total Heat Release Rate:            207.313 kW
-       Radiation Loss to Boundaries:        39.256 kW
- 
-       Time Step    4500   June 19, 2011  11:12:30
-       ----------------------------------------------
-       CPU/step:     0.580 s, Total CPU:     42.06 min
-       Time step:  0.00728 s, Total time:    50.03 s
-       Max CFL number:  0.92E+00 at ( 37, 31,  9)
-       Max divergence:  0.11E+02 at ( 35, 30,  4)
-       Min divergence: -0.27E+01 at ( 35, 36, 18)
-       Max VN  number:  0.25E+00 at ( 39, 26, 23)
-       Total Heat Release Rate:            240.973 kW
-       Radiation Loss to Boundaries:        45.004 kW
- 
-       Time Step    4600   June 19, 2011  11:13:28
-       ----------------------------------------------
-       CPU/step:     0.580 s, Total CPU:     43.02 min
-       Time step:  0.00899 s, Total time:    50.88 s
-       Max CFL number:  0.90E+00 at ( 37, 27, 24)
-       Max divergence:  0.10E+02 at ( 37, 28,  4)
-       Min divergence: -0.30E+01 at ( 36, 33, 11)
-       Max VN  number:  0.34E+00 at ( 40, 28,  6)
-       Total Heat Release Rate:            215.193 kW
-       Radiation Loss to Boundaries:        43.670 kW
- 
-       Time Step    4700   June 19, 2011  11:14:26
-       ----------------------------------------------
-       CPU/step:     0.582 s, Total CPU:     43.99 min
-       Time step:  0.00818 s, Total time:    51.70 s
-       Max CFL number:  0.88E+00 at ( 37, 31, 20)
-       Max divergence:  0.12E+02 at ( 37, 32,  4)
-       Min divergence: -0.39E+01 at ( 41, 31, 14)
-       Max VN  number:  0.33E+00 at ( 40, 32, 13)
-       Total Heat Release Rate:            334.731 kW
-       Radiation Loss to Boundaries:        55.586 kW
- 
-       Time Step    4800   June 19, 2011  11:15:25
-       ----------------------------------------------
-       CPU/step:     0.583 s, Total CPU:     44.96 min
-       Time step:  0.00798 s, Total time:    52.52 s
-       Max CFL number:  0.85E+00 at ( 39, 31, 10)
-       Max divergence:  0.11E+02 at ( 38, 33,  4)
-       Min divergence: -0.34E+01 at ( 42, 32, 16)
-       Max VN  number:  0.28E+00 at ( 42, 30, 23)
-       Total Heat Release Rate:            246.542 kW
-       Radiation Loss to Boundaries:        44.704 kW
- 
-       Time Step    4900   June 19, 2011  11:16:23
-       ----------------------------------------------
-       CPU/step:     0.586 s, Total CPU:     45.94 min
-       Time step:  0.00890 s, Total time:    53.39 s
-       Max CFL number:  0.82E+00 at ( 38, 31, 15)
-       Max divergence:  0.11E+02 at ( 39, 28,  4)
-       Min divergence: -0.35E+01 at ( 35, 28,  6)
-       Max VN  number:  0.26E+00 at ( 35, 28,  6)
-       Total Heat Release Rate:            270.425 kW
-       Radiation Loss to Boundaries:        52.120 kW
- 
-       Time Step    5000   June 19, 2011  11:17:22
-       ----------------------------------------------
-       CPU/step:     0.587 s, Total CPU:     46.92 min
-       Time step:  0.00902 s, Total time:    54.30 s
-       Max CFL number:  0.91E+00 at ( 36, 30, 11)
-       Max divergence:  0.11E+02 at ( 38, 33,  4)
-       Min divergence: -0.28E+01 at ( 37, 30, 16)
-       Max VN  number:  0.30E+00 at ( 38, 30, 16)
-       Total Heat Release Rate:            321.156 kW
-       Radiation Loss to Boundaries:        57.862 kW
- 
-       Time Step    5100   June 19, 2011  11:18:22
-       ----------------------------------------------
-       CPU/step:     0.588 s, Total CPU:     47.90 min
-       Time step:  0.00847 s, Total time:    55.17 s
-       Max CFL number:  0.87E+00 at ( 34, 23, 24)
-       Max divergence:  0.10E+02 at ( 40, 29,  4)
-       Min divergence: -0.35E+01 at ( 36, 30,  8)
-       Max VN  number:  0.36E+00 at ( 42, 27,  4)
-       Total Heat Release Rate:            244.140 kW
-       Radiation Loss to Boundaries:        49.781 kW
- 
-       Time Step    5200   June 19, 2011  11:19:20
-       ----------------------------------------------
-       CPU/step:     0.580 s, Total CPU:     48.86 min
-       Time step:  0.00747 s, Total time:    56.04 s
-       Max CFL number:  0.87E+00 at ( 37, 30,  9)
-       Max divergence:  0.11E+02 at ( 37, 34,  4)
-       Min divergence: -0.43E+01 at ( 36, 32, 15)
-       Max VN  number:  0.42E+00 at ( 40, 28,  4)
-       Total Heat Release Rate:            365.102 kW
-       Radiation Loss to Boundaries:        63.670 kW
- 
-       Time Step    5300   June 19, 2011  11:20:14
-       ----------------------------------------------
-       CPU/step:     0.538 s, Total CPU:     49.76 min
-       Time step:  0.01030 s, Total time:    56.95 s
-       Max CFL number:  0.85E+00 at ( 38, 34, 18)
-       Max divergence:  0.11E+02 at ( 36, 29,  4)
-       Min divergence: -0.25E+01 at ( 38, 34, 21)
-       Max VN  number:  0.47E+00 at ( 35, 37, 22)
-       Total Heat Release Rate:            224.971 kW
-       Radiation Loss to Boundaries:        49.873 kW
- 
-       Time Step    5400   June 19, 2011  11:21:09
-       ----------------------------------------------
-       CPU/step:     0.549 s, Total CPU:     50.68 min
-       Time step:  0.00868 s, Total time:    57.80 s
-       Max CFL number:  0.82E+00 at ( 35, 34, 15)
-       Max divergence:  0.11E+02 at ( 41, 33,  4)
-       Min divergence: -0.45E+01 at ( 40, 33, 15)
-       Max VN  number:  0.36E+00 at ( 37, 53, 23)
-       Total Heat Release Rate:            377.436 kW
-       Radiation Loss to Boundaries:        73.576 kW
- 
-       Time Step    5500   June 19, 2011  11:22:04
-       ----------------------------------------------
-       CPU/step:     0.549 s, Total CPU:     51.59 min
-       Time step:  0.00821 s, Total time:    58.68 s
-       Max CFL number:  0.89E+00 at ( 37, 34, 13)
-       Max divergence:  0.11E+02 at ( 38, 28,  4)
-       Min divergence: -0.51E+01 at ( 37, 34, 17)
-       Max VN  number:  0.32E+00 at ( 36, 34, 23)
-       Total Heat Release Rate:            506.279 kW
-       Radiation Loss to Boundaries:        88.584 kW
- 
-       Time Step    5600   June 19, 2011  11:22:59
-       ----------------------------------------------
-       CPU/step:     0.548 s, Total CPU:     52.50 min
-       Time step:  0.00764 s, Total time:    59.48 s
-       Max CFL number:  0.87E+00 at ( 35, 33, 13)
-       Max divergence:  0.12E+02 at ( 36, 29,  4)
-       Min divergence: -0.55E+01 at ( 41, 29,  9)
-       Max VN  number:  0.40E+00 at ( 29, 33, 23)
-       Total Heat Release Rate:            300.561 kW
-       Radiation Loss to Boundaries:        60.988 kW
- 
-       Time Step    5700   June 19, 2011  11:23:55
-       ----------------------------------------------
-       CPU/step:     0.558 s, Total CPU:     53.43 min
-       Time step:  0.00795 s, Total time:    60.32 s
-       Max CFL number:  0.10E+01 at ( 34, 32, 11)
-       Max divergence:  0.11E+02 at ( 38, 34,  4)
-       Min divergence: -0.42E+01 at ( 38, 29,  9)
-       Max VN  number:  0.35E+00 at ( 38, 32,  8)
-       Total Heat Release Rate:            419.532 kW
-       Radiation Loss to Boundaries:        81.035 kW
- 
-       Time Step    5800   June 19, 2011  11:24:51
-       ----------------------------------------------
-       CPU/step:     0.562 s, Total CPU:     54.37 min
-       Time step:  0.00830 s, Total time:    61.07 s
-       Max CFL number:  0.95E+00 at ( 39, 46, 24)
-       Max divergence:  0.11E+02 at ( 36, 29,  4)
-       Min divergence: -0.34E+01 at ( 38, 31, 14)
-       Max VN  number:  0.38E+00 at ( 35, 28,  4)
-       Total Heat Release Rate:            366.852 kW
-       Radiation Loss to Boundaries:        73.733 kW
- 
-       Time Step    5900   June 19, 2011  11:25:47
-       ----------------------------------------------
-       CPU/step:     0.559 s, Total CPU:     55.30 min
-       Time step:  0.00754 s, Total time:    61.87 s
-       Max CFL number:  0.93E+00 at ( 37, 32, 17)
-       Max divergence:  0.12E+02 at ( 40, 31,  5)
-       Min divergence: -0.43E+01 at ( 40, 29, 16)
-       Max VN  number:  0.33E+00 at ( 23, 34, 23)
-       Total Heat Release Rate:            447.608 kW
-       Radiation Loss to Boundaries:        82.935 kW
- 
-       Time Step    6000   June 19, 2011  11:26:43
-       ----------------------------------------------
-       CPU/step:     0.560 s, Total CPU:     56.23 min
-       Time step:  0.00694 s, Total time:    62.63 s
-       Max CFL number:  0.88E+00 at ( 35, 33, 17)
-       Max divergence:  0.11E+02 at ( 40, 30,  4)
-       Min divergence: -0.36E+01 at ( 37, 36, 22)
-       Max VN  number:  0.39E+00 at ( 32, 34, 23)
-       Total Heat Release Rate:            387.954 kW
-       Radiation Loss to Boundaries:        77.886 kW
- 
-       Time Step    6100   June 19, 2011  11:27:40
-       ----------------------------------------------
-       CPU/step:     0.561 s, Total CPU:     57.17 min
-       Time step:  0.00772 s, Total time:    63.48 s
-       Max CFL number:  0.96E+00 at ( 35, 45, 25)
-       Max divergence:  0.11E+02 at ( 40, 28,  4)
-       Min divergence: -0.27E+01 at ( 39, 28,  7)
-       Max VN  number:  0.28E+00 at ( 32,  6, 23)
-       Total Heat Release Rate:            355.332 kW
-       Radiation Loss to Boundaries:        80.540 kW
- 
-       Time Step    6200   June 19, 2011  11:28:36
-       ----------------------------------------------
-       CPU/step:     0.560 s, Total CPU:     58.10 min
-       Time step:  0.00773 s, Total time:    64.25 s
-       Max CFL number:  0.89E+00 at ( 31, 49, 25)
-       Max divergence:  0.11E+02 at ( 38, 28,  4)
-       Min divergence: -0.31E+01 at ( 38, 31, 20)
-       Max VN  number:  0.40E+00 at ( 38, 36, 20)
-       Total Heat Release Rate:            373.220 kW
-       Radiation Loss to Boundaries:        73.793 kW
- 
-       Time Step    6300   June 19, 2011  11:29:31
-       ----------------------------------------------
-       CPU/step:     0.553 s, Total CPU:     59.02 min
-       Time step:  0.00657 s, Total time:    65.05 s
-       Max CFL number:  0.85E+00 at ( 39, 30, 13)
-       Max divergence:  0.11E+02 at ( 35, 34,  4)
-       Min divergence: -0.36E+01 at ( 37, 33, 22)
-       Max VN  number:  0.30E+00 at ( 37, 42, 23)
-       Total Heat Release Rate:            432.647 kW
-       Radiation Loss to Boundaries:        96.837 kW
- 
-       Time Step    6400   June 19, 2011  11:30:26
-       ----------------------------------------------
-       CPU/step:     0.549 s, Total CPU:     59.94 min
-       Time step:  0.00718 s, Total time:    65.84 s
-       Max CFL number:  0.93E+00 at ( 38, 31,  8)
-       Max divergence:  0.11E+02 at ( 36, 28,  4)
-       Min divergence: -0.35E+01 at ( 39, 29, 13)
-       Max VN  number:  0.34E+00 at ( 47, 36, 23)
-       Total Heat Release Rate:            477.042 kW
-       Radiation Loss to Boundaries:        99.134 kW
- 
-       Time Step    6500   June 19, 2011  11:31:22
-       ----------------------------------------------
-       CPU/step:     0.551 s, Total CPU:      1.01 hr
-       Time step:  0.00716 s, Total time:    66.60 s
-       Max CFL number:  0.90E+00 at ( 35, 34, 17)
-       Max divergence:  0.13E+02 at ( 35, 30,  4)
-       Min divergence: -0.42E+01 at ( 35, 29, 16)
-       Max VN  number:  0.32E+00 at ( 44, 53, 23)
-       Total Heat Release Rate:            412.261 kW
-       Radiation Loss to Boundaries:        91.206 kW
- 
-       Time Step    6600   June 19, 2011  11:32:17
-       ----------------------------------------------
-       CPU/step:     0.548 s, Total CPU:      1.03 hr
-       Time step:  0.00731 s, Total time:    67.39 s
-       Max CFL number:  0.93E+00 at ( 50, 29, 24)
-       Max divergence:  0.11E+02 at ( 40, 34,  4)
-       Min divergence: -0.28E+01 at ( 39, 28,  6)
-       Max VN  number:  0.33E+00 at ( 39, 32, 19)
-       Total Heat Release Rate:            464.837 kW
-       Radiation Loss to Boundaries:        96.684 kW
- 
-       Time Step    6700   June 19, 2011  11:33:12
-       ----------------------------------------------
-       CPU/step:     0.552 s, Total CPU:      1.04 hr
-       Time step:  0.00682 s, Total time:    68.11 s
-       Max CFL number:  0.89E+00 at ( 39, 34, 14)
-       Max divergence:  0.11E+02 at ( 35, 29,  4)
-       Min divergence: -0.31E+01 at ( 34, 34, 18)
-       Max VN  number:  0.35E+00 at ( 36, 34, 17)
-       Total Heat Release Rate:            430.024 kW
-       Radiation Loss to Boundaries:        99.766 kW
- 
-       Time Step    6800   June 19, 2011  11:34:07
-       ----------------------------------------------
-       CPU/step:     0.551 s, Total CPU:      1.06 hr
-       Time step:  0.00649 s, Total time:    68.82 s
-       Max CFL number:  0.88E+00 at ( 37, 36, 18)
-       Max divergence:  0.11E+02 at ( 40, 31,  4)
-       Min divergence: -0.30E+01 at ( 35, 27,  7)
-       Max VN  number:  0.30E+00 at ( 36, 53, 23)
-       Total Heat Release Rate:            591.599 kW
-       Radiation Loss to Boundaries:       115.257 kW
- 
-       Time Step    6900   June 19, 2011  11:35:03
-       ----------------------------------------------
-       CPU/step:     0.553 s, Total CPU:      1.08 hr
-       Time step:  0.00602 s, Total time:    69.55 s
-       Max CFL number:  0.90E+00 at ( 37, 32, 12)
-       Max divergence:  0.12E+02 at ( 35, 28,  4)
-       Min divergence: -0.40E+01 at ( 39, 32, 20)
-       Max VN  number:  0.24E+00 at ( 37, 32, 18)
-       Total Heat Release Rate:            565.322 kW
-       Radiation Loss to Boundaries:       112.108 kW
- 
-       Time Step    7000   June 19, 2011  11:35:58
-       ----------------------------------------------
-       CPU/step:     0.553 s, Total CPU:      1.09 hr
-       Time step:  0.00701 s, Total time:    70.25 s
-       Max CFL number:  0.93E+00 at ( 32, 34, 20)
-       Max divergence:  0.11E+02 at ( 35, 31,  4)
-       Min divergence: -0.23E+01 at ( 37, 30,  8)
-       Max VN  number:  0.38E+00 at ( 35, 36, 19)
-       Total Heat Release Rate:            677.881 kW
-       Radiation Loss to Boundaries:       144.054 kW
- 
-       Time Step    7100   June 19, 2011  11:36:54
-       ----------------------------------------------
-       CPU/step:     0.553 s, Total CPU:      1.11 hr
-       Time step:  0.00764 s, Total time:    70.95 s
-       Max CFL number:  0.84E+00 at ( 37, 34, 22)
-       Max divergence:  0.11E+02 at ( 36, 29,  4)
-       Min divergence: -0.27E+01 at ( 36, 34, 23)
-       Max VN  number:  0.45E+00 at ( 36, 34, 23)
-       Total Heat Release Rate:            581.978 kW
-       Radiation Loss to Boundaries:       126.072 kW
- 
-       Time Step    7200   June 19, 2011  11:37:49
-       ----------------------------------------------
-       CPU/step:     0.552 s, Total CPU:      1.12 hr
-       Time step:  0.00856 s, Total time:    71.68 s
-       Max CFL number:  0.85E+00 at ( 35, 35, 16)
-       Max divergence:  0.13E+02 at ( 37, 28,  4)
-       Min divergence: -0.48E+01 at ( 39, 35, 11)
-       Max VN  number:  0.33E+00 at ( 39, 34, 11)
-       Total Heat Release Rate:            486.223 kW
-       Radiation Loss to Boundaries:       112.975 kW
- 
-       Time Step    7300   June 19, 2011  11:38:45
-       ----------------------------------------------
-       CPU/step:     0.556 s, Total CPU:      1.14 hr
-       Time step:  0.00683 s, Total time:    72.39 s
-       Max CFL number:  0.92E+00 at ( 36, 34, 15)
-       Max divergence:  0.12E+02 at ( 40, 30,  4)
-       Min divergence: -0.28E+01 at ( 37, 29, 13)
-       Max VN  number:  0.34E+00 at ( 37, 34, 20)
-       Total Heat Release Rate:            521.861 kW
-       Radiation Loss to Boundaries:       119.785 kW
- 
-       Time Step    7400   June 19, 2011  11:39:41
-       ----------------------------------------------
-       CPU/step:     0.553 s, Total CPU:      1.15 hr
-       Time step:  0.00658 s, Total time:    73.13 s
-       Max CFL number:  0.87E+00 at ( 35, 33, 22)
-       Max divergence:  0.12E+02 at ( 37, 34,  4)
-       Min divergence: -0.20E+01 at ( 39, 31, 14)
-       Max VN  number:  0.29E+00 at ( 36, 29,  4)
-       Total Heat Release Rate:            475.994 kW
-       Radiation Loss to Boundaries:       109.238 kW
- 
-       Time Step    7500   June 19, 2011  11:40:36
-       ----------------------------------------------
-       CPU/step:     0.550 s, Total CPU:      1.17 hr
-       Time step:  0.00724 s, Total time:    73.85 s
-       Max CFL number:  0.89E+00 at ( 37, 37, 24)
-       Max divergence:  0.12E+02 at ( 39, 30,  5)
-       Min divergence: -0.31E+01 at ( 33, 31, 17)
-       Max VN  number:  0.29E+00 at ( 37, 34, 21)
-       Total Heat Release Rate:            631.597 kW
-       Radiation Loss to Boundaries:       142.557 kW
- 
-       Time Step    7600   June 19, 2011  11:41:31
-       ----------------------------------------------
-       CPU/step:     0.552 s, Total CPU:      1.18 hr
-       Time step:  0.00780 s, Total time:    74.58 s
-       Max CFL number:  0.84E+00 at ( 29, 32, 24)
-       Max divergence:  0.11E+02 at ( 35, 32,  4)
-       Min divergence: -0.30E+01 at ( 40, 30, 19)
-       Max VN  number:  0.37E+00 at ( 41, 32, 17)
-       Total Heat Release Rate:            420.089 kW
-       Radiation Loss to Boundaries:       115.037 kW
- 
-       Time Step    7700   June 19, 2011  11:42:27
-       ----------------------------------------------
-       CPU/step:     0.553 s, Total CPU:      1.20 hr
-       Time step:  0.00811 s, Total time:    75.34 s
-       Max CFL number:  0.85E+00 at ( 39, 45, 24)
-       Max divergence:  0.12E+02 at ( 40, 31,  4)
-       Min divergence: -0.36E+01 at ( 35, 27,  6)
-       Max VN  number:  0.36E+00 at ( 46, 35, 23)
-       Total Heat Release Rate:            657.662 kW
-       Radiation Loss to Boundaries:       150.024 kW
- 
-       Time Step    7800   June 19, 2011  11:43:23
-       ----------------------------------------------
-       CPU/step:     0.558 s, Total CPU:      1.21 hr
-       Time step:  0.00718 s, Total time:    76.02 s
-       Max CFL number:  0.89E+00 at ( 50, 35, 24)
-       Max divergence:  0.12E+02 at ( 35, 29,  4)
-       Min divergence: -0.45E+01 at ( 40, 28,  6)
-       Max VN  number:  0.41E+00 at ( 33, 31, 23)
-       Total Heat Release Rate:            540.826 kW
-       Radiation Loss to Boundaries:       127.980 kW
- 
-       Time Step    7900   June 19, 2011  11:44:19
-       ----------------------------------------------
-       CPU/step:     0.557 s, Total CPU:      1.23 hr
-       Time step:  0.00713 s, Total time:    76.74 s
-       Max CFL number:  0.94E+00 at ( 39, 34, 16)
-       Max divergence:  0.12E+02 at ( 35, 32,  4)
-       Min divergence: -0.31E+01 at ( 41, 36, 21)
-       Max VN  number:  0.39E+00 at ( 39, 34, 18)
-       Total Heat Release Rate:            632.204 kW
-       Radiation Loss to Boundaries:       152.047 kW
- 
-       Time Step    8000   June 19, 2011  11:45:18
-       ----------------------------------------------
-       CPU/step:     0.585 s, Total CPU:      1.25 hr
-       Time step:  0.00724 s, Total time:    77.46 s
-       Max CFL number:  0.94E+00 at ( 37, 32, 11)
-       Max divergence:  0.13E+02 at ( 36, 28,  4)
-       Min divergence: -0.38E+01 at ( 39, 32, 19)
-       Max VN  number:  0.35E+00 at ( 37, 33, 14)
-       Total Heat Release Rate:            794.845 kW
-       Radiation Loss to Boundaries:       170.525 kW
- 
-       Time Step    8100   June 19, 2011  11:46:17
-       ----------------------------------------------
-       CPU/step:     0.586 s, Total CPU:      1.26 hr
-       Time step:  0.00787 s, Total time:    78.15 s
-       Max CFL number:  0.88E+00 at ( 39, 36, 11)
-       Max divergence:  0.13E+02 at ( 38, 28,  4)
-       Min divergence: -0.32E+01 at ( 37, 32, 20)
-       Max VN  number:  0.33E+00 at ( 37, 43, 23)
-       Total Heat Release Rate:            806.318 kW
-       Radiation Loss to Boundaries:       187.635 kW
- 
-       Time Step    8200   June 19, 2011  11:47:16
-       ----------------------------------------------
-       CPU/step:     0.587 s, Total CPU:      1.28 hr
-       Time step:  0.00683 s, Total time:    78.87 s
-       Max CFL number:  0.85E+00 at ( 24, 44, 25)
-       Max divergence:  0.13E+02 at ( 36, 34,  4)
-       Min divergence: -0.44E+01 at ( 39, 30, 16)
-       Max VN  number:  0.32E+00 at ( 37, 53, 23)
-       Total Heat Release Rate:            669.824 kW
-       Radiation Loss to Boundaries:       163.903 kW
- 
-       Time Step    8300   June 19, 2011  11:48:14
-       ----------------------------------------------
-       CPU/step:     0.584 s, Total CPU:      1.29 hr
-       Time step:  0.00809 s, Total time:    79.58 s
-       Max CFL number:  0.89E+00 at ( 35, 34, 10)
-       Max divergence:  0.13E+02 at ( 36, 33,  4)
-       Min divergence: -0.26E+01 at ( 36, 39, 22)
-       Max VN  number:  0.31E+00 at ( 37, 33, 14)
-       Total Heat Release Rate:            533.008 kW
-       Radiation Loss to Boundaries:       159.138 kW
- 
-       Time Step    8400   June 19, 2011  11:49:12
-       ----------------------------------------------
-       CPU/step:     0.578 s, Total CPU:      1.31 hr
-       Time step:  0.00744 s, Total time:    80.33 s
-       Max CFL number:  0.93E+00 at ( 36, 33, 12)
-       Max divergence:  0.11E+02 at ( 39, 28,  4)
-       Min divergence: -0.38E+01 at ( 37, 33, 22)
-       Max VN  number:  0.29E+00 at ( 41, 33, 15)
-       Total Heat Release Rate:            668.247 kW
-       Radiation Loss to Boundaries:       163.935 kW
- 
-       Time Step    8500   June 19, 2011  11:50:09
-       ----------------------------------------------
-       CPU/step:     0.563 s, Total CPU:      1.33 hr
-       Time step:  0.00552 s, Total time:    80.99 s
-       Max CFL number:  0.91E+00 at ( 38, 30, 22)
-       Max divergence:  0.13E+02 at ( 34, 30,  4)
-       Min divergence: -0.40E+01 at ( 38, 31,  7)
-       Max VN  number:  0.25E+00 at ( 47, 33, 23)
-       Total Heat Release Rate:            726.799 kW
-       Radiation Loss to Boundaries:       190.210 kW
- 
-       Time Step    8600   June 19, 2011  11:51:05
-       ----------------------------------------------
-       CPU/step:     0.561 s, Total CPU:      1.34 hr
-       Time step:  0.00758 s, Total time:    81.72 s
-       Max CFL number:  0.92E+00 at ( 38, 33, 21)
-       Max divergence:  0.12E+02 at ( 38, 28,  4)
-       Min divergence: -0.43E+01 at ( 32, 30, 17)
-       Max VN  number:  0.36E+00 at ( 35, 28, 22)
-       Total Heat Release Rate:            758.571 kW
-       Radiation Loss to Boundaries:       193.491 kW
- 
-       Time Step    8700   June 19, 2011  11:52:02
-       ----------------------------------------------
-       CPU/step:     0.565 s, Total CPU:      1.36 hr
-       Time step:  0.00717 s, Total time:    82.42 s
-       Max CFL number:  0.85E+00 at ( 30, 42, 25)
-       Max divergence:  0.12E+02 at ( 34, 32, 10)
-       Min divergence: -0.31E+01 at ( 35, 33, 22)
-       Max VN  number:  0.60E+00 at ( 34, 33, 22)
-       Total Heat Release Rate:            659.276 kW
-       Radiation Loss to Boundaries:       184.589 kW
- 
-       Time Step    8800   June 19, 2011  11:52:58
-       ----------------------------------------------
-       CPU/step:     0.563 s, Total CPU:      1.37 hr
-       Time step:  0.00761 s, Total time:    83.10 s
-       Max CFL number:  0.97E+00 at ( 38, 33, 16)
-       Max divergence:  0.13E+02 at ( 34, 31,  4)
-       Min divergence: -0.28E+01 at ( 38, 33, 17)
-       Max VN  number:  0.39E+00 at ( 36, 27,  6)
-       Total Heat Release Rate:            822.220 kW
-       Radiation Loss to Boundaries:       204.187 kW
- 
-       Time Step    8900   June 19, 2011  11:53:54
-       ----------------------------------------------
-       CPU/step:     0.563 s, Total CPU:      1.39 hr
-       Time step:  0.00713 s, Total time:    83.79 s
-       Max CFL number:  0.86E+00 at ( 28, 43, 25)
-       Max divergence:  0.12E+02 at ( 39, 28,  4)
-       Min divergence: -0.30E+01 at ( 35, 28,  7)
-       Max VN  number:  0.32E+00 at ( 38, 32, 22)
-       Total Heat Release Rate:            540.591 kW
-       Radiation Loss to Boundaries:       170.637 kW
- 
-       Time Step    9000   June 19, 2011  11:54:51
-       ----------------------------------------------
-       CPU/step:     0.561 s, Total CPU:      1.40 hr
-       Time step:  0.00682 s, Total time:    84.50 s
-       Max CFL number:  0.94E+00 at ( 39, 33, 14)
-       Max divergence:  0.12E+02 at ( 40, 32,  4)
-       Min divergence: -0.23E+01 at ( 31, 34, 20)
-       Max VN  number:  0.34E+00 at ( 45, 53, 23)
-       Total Heat Release Rate:            819.773 kW
-       Radiation Loss to Boundaries:       215.049 kW
- 
-       Time Step    9100   June 19, 2011  11:55:47
-       ----------------------------------------------
-       CPU/step:     0.563 s, Total CPU:      1.42 hr
-       Time step:  0.00663 s, Total time:    85.15 s
-       Max CFL number:  0.85E+00 at ( 35, 34, 16)
-       Max divergence:  0.11E+02 at ( 37, 28,  4)
-       Min divergence: -0.41E+01 at ( 37, 29, 20)
-       Max VN  number:  0.33E+00 at ( 36, 30, 19)
-       Total Heat Release Rate:            690.642 kW
-       Radiation Loss to Boundaries:       198.741 kW
- 
-       Time Step    9200   June 19, 2011  11:56:43
-       ----------------------------------------------
-       CPU/step:     0.559 s, Total CPU:      1.44 hr
-       Time step:  0.00730 s, Total time:    85.85 s
-       Max CFL number:  0.90E+00 at ( 38, 36, 14)
-       Max divergence:  0.12E+02 at ( 34, 30,  4)
-       Min divergence: -0.37E+01 at ( 34, 29, 13)
-       Max VN  number:  0.32E+00 at ( 38, 34, 11)
-       Total Heat Release Rate:            682.325 kW
-       Radiation Loss to Boundaries:       209.649 kW
- 
-       Time Step    9300   June 19, 2011  11:57:39
-       ----------------------------------------------
-       CPU/step:     0.563 s, Total CPU:      1.45 hr
-       Time step:  0.00602 s, Total time:    86.51 s
-       Max CFL number:  0.79E+00 at ( 36, 43, 24)
-       Max divergence:  0.11E+02 at ( 37, 28,  4)
-       Min divergence: -0.64E+01 at ( 37, 37, 15)
-       Max VN  number:  0.24E+00 at ( 37, 37, 17)
-       Total Heat Release Rate:            561.675 kW
-       Radiation Loss to Boundaries:       199.324 kW
- 
-       Time Step    9400   June 19, 2011  11:58:36
-       ----------------------------------------------
-       CPU/step:     0.562 s, Total CPU:      1.47 hr
-       Time step:  0.00619 s, Total time:    87.22 s
-       Max CFL number:  0.77E+00 at ( 33, 32, 19)
-       Max divergence:  0.11E+02 at ( 37, 28,  4)
-       Min divergence: -0.39E+01 at ( 31, 33, 17)
-       Max VN  number:  0.23E+00 at ( 55, 32, 23)
-       Total Heat Release Rate:            916.731 kW
-       Radiation Loss to Boundaries:       264.525 kW
- 
-       Time Step    9500   June 19, 2011  11:59:32
-       ----------------------------------------------
-       CPU/step:     0.561 s, Total CPU:      1.48 hr
-       Time step:  0.00720 s, Total time:    87.87 s
-       Max CFL number:  0.95E+00 at ( 35, 35, 14)
-       Max divergence:  0.11E+02 at ( 36, 28,  4)
-       Min divergence: -0.37E+01 at ( 35, 36, 21)
-       Max VN  number:  0.42E+00 at ( 35, 37, 20)
-       Total Heat Release Rate:            769.379 kW
-       Radiation Loss to Boundaries:       233.793 kW
- 
-       Time Step    9600   June 19, 2011  12:00:28
-       ----------------------------------------------
-       CPU/step:     0.563 s, Total CPU:      1.50 hr
-       Time step:  0.00618 s, Total time:    88.55 s
-       Max CFL number:  0.84E+00 at ( 40, 34, 18)
-       Max divergence:  0.12E+02 at ( 40, 28,  4)
-       Min divergence: -0.43E+01 at ( 40, 30,  8)
-       Max VN  number:  0.34E+00 at ( 39,  4, 22)
-       Total Heat Release Rate:            911.104 kW
-       Radiation Loss to Boundaries:       264.399 kW
- 
-       Time Step    9700   June 19, 2011  12:01:25
-       ----------------------------------------------
-       CPU/step:     0.566 s, Total CPU:      1.51 hr
-       Time step:  0.00639 s, Total time:    89.25 s
-       Max CFL number:  0.89E+00 at ( 37, 34, 15)
-       Max divergence:  0.12E+02 at ( 37, 28,  4)
-       Min divergence: -0.17E+01 at ( 36, 35, 23)
-       Max VN  number:  0.29E+00 at ( 30, 53, 13)
-       Total Heat Release Rate:            869.165 kW
-       Radiation Loss to Boundaries:       243.721 kW
- 
-       Time Step    9800   June 19, 2011  12:02:22
-       ----------------------------------------------
-       CPU/step:     0.564 s, Total CPU:      1.53 hr
-       Time step:  0.00632 s, Total time:    89.92 s
-       Max CFL number:  0.83E+00 at ( 35, 35, 24)
-       Max divergence:  0.11E+02 at ( 41, 30,  5)
-       Min divergence: -0.33E+01 at ( 37, 34, 24)
-       Max VN  number:  0.34E+00 at ( 37, 34, 23)
-       Total Heat Release Rate:            652.705 kW
-       Radiation Loss to Boundaries:       243.076 kW
- 
-       Time Step    9900   June 19, 2011  12:03:18
-       ----------------------------------------------
-       CPU/step:     0.563 s, Total CPU:      1.54 hr
-       Time step:  0.00655 s, Total time:    90.58 s
-       Max CFL number:  0.89E+00 at ( 47, 27, 25)
-       Max divergence:  0.11E+02 at ( 40, 28,  4)
-       Min divergence: -0.38E+01 at ( 32, 32, 20)
-       Max VN  number:  0.32E+00 at ( 36, 34, 15)
-       Total Heat Release Rate:            831.669 kW
-       Radiation Loss to Boundaries:       261.062 kW
- 
-       Time Step   10000   June 19, 2011  12:04:15
-       ----------------------------------------------
-       CPU/step:     0.566 s, Total CPU:      1.56 hr
-       Time step:  0.00673 s, Total time:    91.24 s
-       Max CFL number:  0.88E+00 at ( 32, 43, 25)
-       Max divergence:  0.12E+02 at ( 38, 29,  4)
-       Min divergence: -0.41E+01 at ( 35, 34, 21)
-       Max VN  number:  0.36E+00 at ( 47, 18, 23)
-       Total Heat Release Rate:            774.935 kW
-       Radiation Loss to Boundaries:       249.636 kW
- 
-       Time Step   10100   June 19, 2011  12:05:12
-       ----------------------------------------------
-       CPU/step:     0.564 s, Total CPU:      1.58 hr
-       Time step:  0.00721 s, Total time:    91.91 s
-       Max CFL number:  0.91E+00 at ( 35, 32, 11)
-       Max divergence:  0.11E+02 at ( 36, 28,  4)
-       Min divergence: -0.28E+01 at ( 40, 35, 17)
-       Max VN  number:  0.35E+00 at ( 36, 33, 13)
-       Total Heat Release Rate:            693.953 kW
-       Radiation Loss to Boundaries:       248.141 kW
- 
-       Time Step   10200   June 19, 2011  12:06:09
-       ----------------------------------------------
-       CPU/step:     0.564 s, Total CPU:      1.59 hr
-       Time step:  0.00612 s, Total time:    92.52 s
-       Max CFL number:  0.93E+00 at ( 39, 31, 22)
-       Max divergence:  0.12E+02 at ( 40, 28,  4)
-       Min divergence: -0.50E+01 at ( 37, 36, 22)
-       Max VN  number:  0.63E+00 at ( 36, 53, 23)
-       Total Heat Release Rate:            883.234 kW
-       Radiation Loss to Boundaries:       269.315 kW
- 
-       Time Step   10300   June 19, 2011  12:07:06
-       ----------------------------------------------
-       CPU/step:     0.567 s, Total CPU:      1.61 hr
-       Time step:  0.00644 s, Total time:    93.22 s
-       Max CFL number:  0.95E+00 at ( 36, 34, 17)
-       Max divergence:  0.12E+02 at ( 36, 28,  4)
-       Min divergence: -0.19E+01 at ( 34, 30, 16)
-       Max VN  number:  0.28E+00 at ( 21, 24, 23)
-       Total Heat Release Rate:            779.644 kW
-       Radiation Loss to Boundaries:       265.856 kW
- 
-       Time Step   10400   June 19, 2011  12:08:02
-       ----------------------------------------------
-       CPU/step:     0.565 s, Total CPU:      1.62 hr
-       Time step:  0.00712 s, Total time:    93.90 s
-       Max CFL number:  0.93E+00 at ( 37, 33, 16)
-       Max divergence:  0.12E+02 at ( 36, 31, 11)
-       Min divergence: -0.26E+01 at ( 35, 32, 13)
-       Max VN  number:  0.33E+00 at ( 40, 32, 17)
-       Total Heat Release Rate:            928.187 kW
-       Radiation Loss to Boundaries:       317.977 kW
- 
-       Time Step   10500   June 19, 2011  12:08:59
-       ----------------------------------------------
-       CPU/step:     0.563 s, Total CPU:      1.64 hr
-       Time step:  0.00664 s, Total time:    94.55 s
+       Max CFL number:  0.90E+00 at ( 40, 33,  4)
+       Max divergence:  0.59E+00 at ( 39, 32,  4)
+       Min divergence: -0.70E-02 at ( 35, 27,  4)
+       Max VN  number:  0.38E-01 at ( 40, 33,  4)
+       Total Heat Release Rate:              8.059 kW
+       Radiation Loss to Boundaries:         1.154 kW
+ 
+       Time Step      10   September  4, 2011  16:38:03
+       ----------------------------------------------
+       CPU/step:     0.722 s, Total CPU:      5.18 s
+       Time step:  0.08997 s, Total time:     0.90 s
+       Max CFL number:  0.90E+00 at ( 40, 33,  4)
+       Max divergence:  0.65E+00 at ( 39, 32,  4)
+       Min divergence: -0.98E-05 at ( 41, 29,  3)
+       Max VN  number:  0.55E-01 at ( 40, 33,  4)
+       Total Heat Release Rate:              9.083 kW
+       Radiation Loss to Boundaries:         1.251 kW
+ 
+       Time Step      20   September  4, 2011  16:41:15
+       ----------------------------------------------
+       CPU/step:     0.542 s, Total CPU:     10.59 s
+       Time step:  0.04458 s, Total time:     1.62 s
+       Max CFL number:  0.89E+00 at ( 39, 32,  4)
+       Max divergence:  0.12E+01 at ( 39, 32,  4)
+       Min divergence: -0.94E-01 at ( 39, 32,  6)
+       Max VN  number:  0.14E+00 at ( 38, 30,  4)
+       Total Heat Release Rate:             16.474 kW
+       Radiation Loss to Boundaries:         2.150 kW
+ 
+       Time Step      30   September  4, 2011  16:41:21
+       ----------------------------------------------
+       CPU/step:     0.531 s, Total CPU:     15.91 s
+       Time step:  0.02680 s, Total time:     1.96 s
+       Max CFL number:  0.94E+00 at ( 38, 31,  5)
+       Max divergence:  0.16E+01 at ( 37, 30,  4)
+       Min divergence: -0.35E+00 at ( 38, 30,  8)
+       Max VN  number:  0.14E+00 at ( 38, 30,  7)
+       Total Heat Release Rate:             20.579 kW
+       Radiation Loss to Boundaries:         2.564 kW
+ 
+       Time Step      40   September  4, 2011  16:41:27
+       ----------------------------------------------
+       CPU/step:     0.496 s, Total CPU:     20.87 s
+       Time step:  0.02334 s, Total time:     2.20 s
+       Max CFL number:  0.89E+00 at ( 37, 31,  8)
+       Max divergence:  0.17E+01 at ( 37, 32,  4)
+       Min divergence: -0.36E+00 at ( 38, 30, 11)
+       Max VN  number:  0.19E+00 at ( 37, 30,  9)
+       Total Heat Release Rate:             23.399 kW
+       Radiation Loss to Boundaries:         2.782 kW
+ 
+       Time Step      50   September  4, 2011  16:41:32
+       ----------------------------------------------
+       CPU/step:     0.513 s, Total CPU:     26.00 s
+       Time step:  0.02334 s, Total time:     2.44 s
+       Max CFL number:  0.93E+00 at ( 37, 30, 13)
+       Max divergence:  0.18E+01 at ( 38, 29,  4)
+       Min divergence: -0.42E+00 at ( 37, 31,  8)
+       Max VN  number:  0.21E+00 at ( 37, 30, 13)
+       Total Heat Release Rate:             26.210 kW
+       Radiation Loss to Boundaries:         3.147 kW
+ 
+       Time Step      60   September  4, 2011  16:41:38
+       ----------------------------------------------
+       CPU/step:     0.539 s, Total CPU:     31.39 s
+       Time step:  0.02098 s, Total time:     2.66 s
+       Max CFL number:  0.92E+00 at ( 37, 31, 11)
+       Max divergence:  0.19E+01 at ( 37, 29,  4)
+       Min divergence: -0.77E+00 at ( 38, 31, 10)
+       Max VN  number:  0.18E+00 at ( 36, 30, 15)
+       Total Heat Release Rate:             28.715 kW
+       Radiation Loss to Boundaries:         3.505 kW
+ 
+       Time Step      70   September  4, 2011  16:41:43
+       ----------------------------------------------
+       CPU/step:     0.510 s, Total CPU:     36.49 s
+       Time step:  0.01807 s, Total time:     2.86 s
+       Max CFL number:  0.99E+00 at ( 38, 31, 15)
+       Max divergence:  0.20E+01 at ( 38, 32,  4)
+       Min divergence: -0.77E+00 at ( 38, 31,  8)
+       Max VN  number:  0.22E+00 at ( 38, 31, 15)
+       Total Heat Release Rate:             30.958 kW
+       Radiation Loss to Boundaries:         3.741 kW
+ 
+       Time Step      80   September  4, 2011  16:41:56
+       ----------------------------------------------
+       CPU/step:     0.459 s, Total CPU:     41.09 s
+       Time step:  0.01584 s, Total time:     3.02 s
+       Max CFL number:  0.87E+00 at ( 38, 31, 18)
+       Max divergence:  0.21E+01 at ( 39, 31,  4)
+       Min divergence: -0.10E+01 at ( 38, 31, 11)
+       Max VN  number:  0.17E+00 at ( 38, 31, 19)
+       Total Heat Release Rate:             32.781 kW
+       Radiation Loss to Boundaries:         3.970 kW
+ 
+       Time Step      90   September  4, 2011  16:42:05
+       ----------------------------------------------
+       CPU/step:     0.488 s, Total CPU:     45.97 s
+       Time step:  0.01584 s, Total time:     3.17 s
+       Max CFL number:  0.89E+00 at ( 38, 30, 20)
+       Max divergence:  0.22E+01 at ( 39, 31,  4)
+       Min divergence: -0.74E+00 at ( 38, 31, 16)
+       Max VN  number:  0.19E+00 at ( 39, 31, 24)
+       Total Heat Release Rate:             34.630 kW
+       Radiation Loss to Boundaries:         4.198 kW
+ 
+       Time Step     100   September  4, 2011  16:42:10
+       ----------------------------------------------
+       CPU/step:     0.554 s, Total CPU:     51.51 s
+       Time step:  0.01584 s, Total time:     3.33 s
+       Max CFL number:  0.85E+00 at ( 40, 33, 25)
+       Max divergence:  0.23E+01 at ( 39, 31,  4)
+       Min divergence: -0.80E+00 at ( 38, 31, 11)
+       Max VN  number:  0.17E+00 at ( 38, 31, 19)
+       Total Heat Release Rate:             36.565 kW
+       Radiation Loss to Boundaries:         4.421 kW
+ 
+       Time Step     200   September  4, 2011  16:43:28
+       ----------------------------------------------
+       CPU/step:     0.526 s, Total CPU:      1.74 min
+       Time step:  0.01398 s, Total time:     4.95 s
+       Max CFL number:  0.89E+00 at ( 37, 30, 21)
+       Max divergence:  0.31E+01 at ( 36, 30,  4)
+       Min divergence: -0.13E+01 at ( 37, 31, 13)
+       Max VN  number:  0.17E+00 at ( 37, 30, 21)
+       Total Heat Release Rate:             54.678 kW
+       Radiation Loss to Boundaries:         6.708 kW
+ 
+       Time Step     300   September  4, 2011  16:44:23
+       ----------------------------------------------
+       CPU/step:     0.494 s, Total CPU:      2.56 min
+       Time step:  0.01505 s, Total time:     6.30 s
+       Max CFL number:  0.95E+00 at ( 36, 31, 20)
+       Max divergence:  0.33E+01 at ( 39, 31,  4)
+       Min divergence: -0.13E+01 at ( 38, 31, 13)
+       Max VN  number:  0.25E+00 at ( 37, 32, 24)
+       Total Heat Release Rate:             61.467 kW
+       Radiation Loss to Boundaries:         7.651 kW
+ 
+       Time Step     400   September  4, 2011  16:45:13
+       ----------------------------------------------
+       CPU/step:     0.494 s, Total CPU:      3.38 min
+       Time step:  0.01225 s, Total time:     7.59 s
+       Max CFL number:  0.87E+00 at ( 37, 31, 21)
+       Max divergence:  0.35E+01 at ( 36, 30,  4)
+       Min divergence: -0.14E+01 at ( 38, 31, 12)
+       Max VN  number:  0.22E+00 at ( 37, 29, 24)
+       Total Heat Release Rate:             65.707 kW
+       Radiation Loss to Boundaries:         8.320 kW
+ 
+       Time Step     500   September  4, 2011  16:46:02
+       ----------------------------------------------
+       CPU/step:     0.491 s, Total CPU:      4.20 min
+       Time step:  0.01267 s, Total time:     8.84 s
+       Max CFL number:  0.97E+00 at ( 37, 32, 20)
+       Max divergence:  0.37E+01 at ( 37, 32,  4)
+       Min divergence: -0.14E+01 at ( 37, 32, 21)
+       Max VN  number:  0.24E+00 at ( 38, 31, 24)
+       Total Heat Release Rate:             70.311 kW
+       Radiation Loss to Boundaries:         9.067 kW
+ 
+       Time Step     600   September  4, 2011  16:46:52
+       ----------------------------------------------
+       CPU/step:     0.493 s, Total CPU:      5.02 min
+       Time step:  0.01268 s, Total time:    10.09 s
+       Max CFL number:  0.90E+00 at ( 36, 29, 20)
+       Max divergence:  0.44E+01 at ( 37, 29,  4)
+       Min divergence: -0.17E+01 at ( 38, 31, 13)
+       Max VN  number:  0.20E+00 at ( 38, 31, 16)
+       Total Heat Release Rate:             74.751 kW
+       Radiation Loss to Boundaries:         9.760 kW
+ 
+       Time Step     700   September  4, 2011  16:47:41
+       ----------------------------------------------
+       CPU/step:     0.493 s, Total CPU:      5.84 min
+       Time step:  0.01209 s, Total time:    11.36 s
+       Max CFL number:  0.95E+00 at ( 37, 30, 20)
+       Max divergence:  0.45E+01 at ( 38, 32,  4)
+       Min divergence: -0.17E+01 at ( 37, 30, 10)
+       Max VN  number:  0.24E+00 at ( 39, 32, 19)
+       Total Heat Release Rate:             83.856 kW
+       Radiation Loss to Boundaries:        11.078 kW
+ 
+       Time Step     800   September  4, 2011  16:48:31
+       ----------------------------------------------
+       CPU/step:     0.493 s, Total CPU:      6.67 min
+       Time step:  0.01265 s, Total time:    12.52 s
+       Max CFL number:  0.90E+00 at ( 38, 32, 18)
+       Max divergence:  0.46E+01 at ( 38, 29,  4)
+       Min divergence: -0.19E+01 at ( 38, 30, 10)
+       Max VN  number:  0.26E+00 at ( 39, 32, 19)
+       Total Heat Release Rate:             91.671 kW
+       Radiation Loss to Boundaries:        12.188 kW
+ 
+       Time Step     900   September  4, 2011  16:49:21
+       ----------------------------------------------
+       CPU/step:     0.494 s, Total CPU:      7.49 min
+       Time step:  0.01212 s, Total time:    13.63 s
+       Max CFL number:  0.88E+00 at ( 38, 32, 16)
+       Max divergence:  0.48E+01 at ( 36, 30,  4)
+       Min divergence: -0.17E+01 at ( 37, 30, 11)
+       Max VN  number:  0.20E+00 at ( 38, 31, 24)
+       Total Heat Release Rate:             99.267 kW
+       Radiation Loss to Boundaries:        13.381 kW
+ 
+       Time Step    1000   September  4, 2011  16:50:11
+       ----------------------------------------------
+       CPU/step:     0.498 s, Total CPU:      8.32 min
+       Time step:  0.01067 s, Total time:    14.71 s
+       Max CFL number:  0.88E+00 at ( 36, 31, 12)
+       Max divergence:  0.52E+01 at ( 38, 32,  4)
+       Min divergence: -0.28E+01 at ( 36, 32, 13)
+       Max VN  number:  0.21E+00 at ( 36, 30, 16)
+       Total Heat Release Rate:            107.272 kW
+       Radiation Loss to Boundaries:        14.795 kW
+ 
+       Time Step    1100   September  4, 2011  16:51:01
+       ----------------------------------------------
+       CPU/step:     0.496 s, Total CPU:      9.15 min
+       Time step:  0.01136 s, Total time:    15.78 s
+       Max CFL number:  0.88E+00 at ( 37, 31, 12)
+       Max divergence:  0.54E+01 at ( 36, 30,  4)
+       Min divergence: -0.22E+01 at ( 37, 29, 17)
+       Max VN  number:  0.22E+00 at ( 37, 29, 17)
+       Total Heat Release Rate:            113.469 kW
+       Radiation Loss to Boundaries:        16.196 kW
+ 
+       Time Step    1200   September  4, 2011  16:51:51
+       ----------------------------------------------
+       CPU/step:     0.499 s, Total CPU:      9.98 min
+       Time step:  0.01045 s, Total time:    16.79 s
+       Max CFL number:  0.92E+00 at ( 38, 30, 20)
+       Max divergence:  0.54E+01 at ( 39, 32,  4)
+       Min divergence: -0.24E+01 at ( 38, 32, 10)
+       Max VN  number:  0.21E+00 at ( 37, 30, 24)
+       Total Heat Release Rate:            117.677 kW
+       Radiation Loss to Boundaries:        17.062 kW
+ 
+       Time Step    1300   September  4, 2011  16:52:40
+       ----------------------------------------------
+       CPU/step:     0.497 s, Total CPU:     10.81 min
+       Time step:  0.00986 s, Total time:    17.80 s
+       Max CFL number:  0.84E+00 at ( 37, 32, 12)
+       Max divergence:  0.57E+01 at ( 39, 29,  4)
+       Min divergence: -0.32E+01 at ( 39, 31, 16)
+       Max VN  number:  0.21E+00 at ( 39, 31, 16)
+       Total Heat Release Rate:            118.962 kW
+       Radiation Loss to Boundaries:        16.873 kW
+ 
+       Time Step    1400   September  4, 2011  16:53:30
+       ----------------------------------------------
+       CPU/step:     0.493 s, Total CPU:     11.63 min
+       Time step:  0.01069 s, Total time:    18.83 s
+       Max CFL number:  0.88E+00 at ( 37, 31, 19)
+       Max divergence:  0.56E+01 at ( 39, 31,  4)
+       Min divergence: -0.19E+01 at ( 37, 30, 13)
+       Max VN  number:  0.18E+00 at ( 37, 29, 17)
+       Total Heat Release Rate:            123.875 kW
+       Radiation Loss to Boundaries:        18.286 kW
+ 
+       Time Step    1500   September  4, 2011  16:54:20
+       ----------------------------------------------
+       CPU/step:     0.494 s, Total CPU:     12.45 min
+       Time step:  0.01128 s, Total time:    19.89 s
+       Max CFL number:  0.90E+00 at ( 39, 31, 16)
+       Max divergence:  0.54E+01 at ( 39, 31,  4)
+       Min divergence: -0.25E+01 at ( 40, 31, 14)
+       Max VN  number:  0.23E+00 at ( 40, 31, 14)
+       Total Heat Release Rate:            124.670 kW
+       Radiation Loss to Boundaries:        18.671 kW
+ 
+       Time Step    1600   September  4, 2011  16:55:23
+       ----------------------------------------------
+       CPU/step:     0.517 s, Total CPU:     13.31 min
+       Time step:  0.00971 s, Total time:    20.88 s
+       Max CFL number:  0.88E+00 at ( 39, 31, 15)
+       Max divergence:  0.55E+01 at ( 39, 29,  4)
+       Min divergence: -0.20E+01 at ( 38, 31, 14)
+       Max VN  number:  0.22E+00 at ( 40, 31, 17)
+       Total Heat Release Rate:            131.561 kW
+       Radiation Loss to Boundaries:        20.479 kW
+ 
+       Time Step    1700   September  4, 2011  16:56:17
+       ----------------------------------------------
+       CPU/step:     0.544 s, Total CPU:     14.22 min
+       Time step:  0.00925 s, Total time:    21.84 s
+       Max CFL number:  0.90E+00 at ( 39, 31, 16)
+       Max divergence:  0.60E+01 at ( 37, 29,  4)
+       Min divergence: -0.26E+01 at ( 39, 31, 17)
+       Max VN  number:  0.20E+00 at ( 36, 33, 20)
+       Total Heat Release Rate:            138.615 kW
+       Radiation Loss to Boundaries:        21.274 kW
+ 
+       Time Step    1800   September  4, 2011  16:57:13
+       ----------------------------------------------
+       CPU/step:     0.547 s, Total CPU:     15.13 min
+       Time step:  0.00899 s, Total time:    22.77 s
        Max CFL number:  0.90E+00 at ( 38, 33, 15)
-       Max divergence:  0.11E+02 at ( 40, 33,  4)
-       Min divergence: -0.25E+01 at ( 36, 32, 22)
-       Max VN  number:  0.40E+00 at ( 15, 53, 23)
-       Total Heat Release Rate:            979.476 kW
-       Radiation Loss to Boundaries:       299.919 kW
+       Max divergence:  0.59E+01 at ( 36, 31,  4)
+       Min divergence: -0.23E+01 at ( 39, 31, 10)
+       Max VN  number:  0.19E+00 at ( 40, 31, 24)
+       Total Heat Release Rate:            144.273 kW
+       Radiation Loss to Boundaries:        22.268 kW
  
-       Time Step   10600   June 19, 2011  12:09:56
+       Time Step    1900   September  4, 2011  16:58:08
        ----------------------------------------------
-       CPU/step:     0.569 s, Total CPU:      1.65 hr
-       Time step:  0.00607 s, Total time:    95.19 s
-       Max CFL number:  0.84E+00 at ( 36, 33, 16)
-       Max divergence:  0.12E+02 at ( 37, 28,  4)
-       Min divergence: -0.14E+01 at ( 30, 35, 23)
-       Max VN  number:  0.25E+00 at ( 36, 32, 22)
-       Total Heat Release Rate:           1001.952 kW
-       Radiation Loss to Boundaries:       346.310 kW
+       CPU/step:     0.548 s, Total CPU:     16.05 min
+       Time step:  0.01041 s, Total time:    23.68 s
+       Max CFL number:  0.98E+00 at ( 36, 30, 20)
+       Max divergence:  0.65E+01 at ( 38, 29,  4)
+       Min divergence: -0.33E+01 at ( 38, 33, 12)
+       Max VN  number:  0.21E+00 at ( 38, 32, 12)
+       Total Heat Release Rate:            155.437 kW
+       Radiation Loss to Boundaries:        23.385 kW
  
-       Time Step   10700   June 19, 2011  12:10:53
+       Time Step    2000   September  4, 2011  16:59:03
        ----------------------------------------------
-       CPU/step:     0.565 s, Total CPU:      1.67 hr
-       Time step:  0.00676 s, Total time:    95.82 s
-       Max CFL number:  0.91E+00 at ( 35, 32, 24)
-       Max divergence:  0.12E+02 at ( 40, 33,  4)
-       Min divergence: -0.35E+01 at ( 40, 28,  8)
-       Max VN  number:  0.29E+00 at ( 35,  3, 20)
-       Total Heat Release Rate:            774.090 kW
-       Radiation Loss to Boundaries:       304.084 kW
+       CPU/step:     0.548 s, Total CPU:     16.96 min
+       Time step:  0.00863 s, Total time:    24.60 s
+       Max CFL number:  0.90E+00 at ( 38, 29, 10)
+       Max divergence:  0.70E+01 at ( 38, 29,  4)
+       Min divergence: -0.28E+01 at ( 38, 28, 12)
+       Max VN  number:  0.20E+00 at ( 38, 29, 13)
+       Total Heat Release Rate:            159.953 kW
+       Radiation Loss to Boundaries:        23.875 kW
  
-       Time Step   10800   June 19, 2011  12:11:51
+       Time Step    2100   September  4, 2011  16:59:58
        ----------------------------------------------
-       CPU/step:     0.564 s, Total CPU:      1.69 hr
-       Time step:  0.00666 s, Total time:    96.52 s
-       Max CFL number:  0.82E+00 at ( 40, 38, 25)
-       Max divergence:  0.12E+02 at ( 35, 29,  4)
-       Min divergence: -0.37E+01 at ( 35, 30, 19)
-       Max VN  number:  0.33E+00 at ( 40, 37, 21)
-       Total Heat Release Rate:           1159.481 kW
-       Radiation Loss to Boundaries:       379.627 kW
+       CPU/step:     0.545 s, Total CPU:     17.87 min
+       Time step:  0.00930 s, Total time:    25.57 s
+       Max CFL number:  0.99E+00 at ( 38, 32, 16)
+       Max divergence:  0.71E+01 at ( 36, 31,  4)
+       Min divergence: -0.27E+01 at ( 37, 32, 15)
+       Max VN  number:  0.26E+00 at ( 38, 32, 16)
+       Total Heat Release Rate:            166.524 kW
+       Radiation Loss to Boundaries:        27.648 kW
  
-       Time Step   10900   June 19, 2011  12:12:49
+       Time Step    2200   September  4, 2011  17:00:53
        ----------------------------------------------
-       CPU/step:     0.562 s, Total CPU:      1.70 hr
-       Time step:  0.00733 s, Total time:    97.20 s
-       Max CFL number:  0.84E+00 at ( 25, 44, 25)
-       Max divergence:  0.11E+02 at ( 38, 33,  5)
-       Min divergence: -0.27E+01 at ( 35, 34, 21)
-       Max VN  number:  0.43E+00 at ( 37, 25, 23)
-       Total Heat Release Rate:            947.790 kW
-       Radiation Loss to Boundaries:       308.824 kW
+       CPU/step:     0.551 s, Total CPU:     18.79 min
+       Time step:  0.00827 s, Total time:    26.47 s
+       Max CFL number:  0.86E+00 at ( 39, 28, 22)
+       Max divergence:  0.69E+01 at ( 39, 29,  4)
+       Min divergence: -0.22E+01 at ( 38, 31, 16)
+       Max VN  number:  0.17E+00 at ( 39, 28, 22)
+       Total Heat Release Rate:            162.737 kW
+       Radiation Loss to Boundaries:        25.891 kW
  
-       Time Step   11000   June 19, 2011  12:13:46
+       Time Step    2300   September  4, 2011  17:01:48
        ----------------------------------------------
-       CPU/step:     0.565 s, Total CPU:      1.72 hr
-       Time step:  0.00648 s, Total time:    97.87 s
-       Max CFL number:  0.80E+00 at ( 37, 31, 20)
+       CPU/step:     0.545 s, Total CPU:     19.69 min
+       Time step:  0.00980 s, Total time:    27.38 s
+       Max CFL number:  0.89E+00 at ( 32, 25, 25)
+       Max divergence:  0.71E+01 at ( 36, 31,  4)
+       Min divergence: -0.20E+01 at ( 38, 32, 18)
+       Max VN  number:  0.23E+00 at ( 38, 33, 17)
+       Total Heat Release Rate:            172.541 kW
+       Radiation Loss to Boundaries:        29.803 kW
+ 
+       Time Step    2400   September  4, 2011  17:02:43
+       ----------------------------------------------
+       CPU/step:     0.549 s, Total CPU:     20.61 min
+       Time step:  0.00889 s, Total time:    28.25 s
+       Max CFL number:  0.90E+00 at ( 38, 32, 13)
+       Max divergence:  0.76E+01 at ( 38, 32,  4)
+       Min divergence: -0.28E+01 at ( 40, 32, 17)
+       Max VN  number:  0.22E+00 at ( 40, 32, 17)
+       Total Heat Release Rate:            169.696 kW
+       Radiation Loss to Boundaries:        28.599 kW
+ 
+       Time Step    2500   September  4, 2011  17:03:38
+       ----------------------------------------------
+       CPU/step:     0.549 s, Total CPU:     21.52 min
+       Time step:  0.00795 s, Total time:    29.12 s
+       Max CFL number:  0.91E+00 at ( 36, 31, 19)
+       Max divergence:  0.75E+01 at ( 37, 29,  4)
+       Min divergence: -0.25E+01 at ( 37, 33, 14)
+       Max VN  number:  0.16E+00 at ( 37, 32, 21)
+       Total Heat Release Rate:            171.497 kW
+       Radiation Loss to Boundaries:        28.288 kW
+ 
+       Time Step    2600   September  4, 2011  17:04:33
+       ----------------------------------------------
+       CPU/step:     0.547 s, Total CPU:     22.44 min
+       Time step:  0.00875 s, Total time:    29.97 s
+       Max CFL number:  0.91E+00 at ( 40, 33, 17)
+       Max divergence:  0.67E+01 at ( 39, 30,  4)
+       Min divergence: -0.37E+01 at ( 37, 30, 15)
+       Max VN  number:  0.20E+00 at ( 40, 33, 17)
+       Total Heat Release Rate:            180.918 kW
+       Radiation Loss to Boundaries:        32.128 kW
+ 
+       Time Step    2700   September  4, 2011  17:05:27
+       ----------------------------------------------
+       CPU/step:     0.545 s, Total CPU:     23.34 min
+       Time step:  0.00865 s, Total time:    30.85 s
+       Max CFL number:  0.86E+00 at ( 39, 31, 11)
+       Max divergence:  0.79E+01 at ( 38, 32,  4)
+       Min divergence: -0.24E+01 at ( 39, 32, 14)
+       Max VN  number:  0.18E+00 at ( 37, 28, 22)
+       Total Heat Release Rate:            177.480 kW
+       Radiation Loss to Boundaries:        29.394 kW
+ 
+       Time Step    2800   September  4, 2011  17:06:23
+       ----------------------------------------------
+       CPU/step:     0.552 s, Total CPU:     24.27 min
+       Time step:  0.00875 s, Total time:    31.73 s
+       Max CFL number:  0.85E+00 at ( 36, 33, 19)
+       Max divergence:  0.77E+01 at ( 39, 31,  4)
+       Min divergence: -0.26E+01 at ( 38, 31, 17)
+       Max VN  number:  0.17E+00 at ( 39, 32, 13)
+       Total Heat Release Rate:            181.908 kW
+       Radiation Loss to Boundaries:        31.250 kW
+ 
+       Time Step    2900   September  4, 2011  17:07:19
+       ----------------------------------------------
+       CPU/step:     0.560 s, Total CPU:     25.20 min
+       Time step:  0.00744 s, Total time:    32.60 s
+       Max CFL number:  0.87E+00 at ( 38, 31, 19)
+       Max divergence:  0.76E+01 at ( 39, 32,  4)
+       Min divergence: -0.28E+01 at ( 38, 31, 20)
+       Max VN  number:  0.19E+00 at ( 38, 31, 20)
+       Total Heat Release Rate:            178.021 kW
+       Radiation Loss to Boundaries:        30.695 kW
+ 
+       Time Step    3000   September  4, 2011  17:08:15
+       ----------------------------------------------
+       CPU/step:     0.558 s, Total CPU:     26.13 min
+       Time step:  0.00990 s, Total time:    33.51 s
+       Max CFL number:  0.95E+00 at ( 37, 29, 11)
+       Max divergence:  0.70E+01 at ( 36, 30,  4)
+       Min divergence: -0.26E+01 at ( 38, 30, 13)
+       Max VN  number:  0.26E+00 at ( 36, 34, 24)
+       Total Heat Release Rate:            174.655 kW
+       Radiation Loss to Boundaries:        29.279 kW
+ 
+       Time Step    3100   September  4, 2011  17:09:12
+       ----------------------------------------------
+       CPU/step:     0.562 s, Total CPU:     27.07 min
+       Time step:  0.00904 s, Total time:    34.40 s
+       Max CFL number:  0.85E+00 at ( 37, 31, 17)
+       Max divergence:  0.88E+01 at ( 38, 30,  4)
+       Min divergence: -0.35E+01 at ( 38, 30, 16)
+       Max VN  number:  0.21E+00 at ( 38, 30, 16)
+       Total Heat Release Rate:            190.131 kW
+       Radiation Loss to Boundaries:        32.969 kW
+ 
+       Time Step    3200   September  4, 2011  17:10:08
+       ----------------------------------------------
+       CPU/step:     0.560 s, Total CPU:     28.00 min
+       Time step:  0.00868 s, Total time:    35.30 s
+       Max CFL number:  0.88E+00 at ( 36, 29, 14)
+       Max divergence:  0.71E+01 at ( 37, 29,  4)
+       Min divergence: -0.30E+01 at ( 36, 29, 16)
+       Max VN  number:  0.19E+00 at ( 36, 29, 15)
+       Total Heat Release Rate:            188.887 kW
+       Radiation Loss to Boundaries:        33.490 kW
+ 
+       Time Step    3300   September  4, 2011  17:11:04
+       ----------------------------------------------
+       CPU/step:     0.559 s, Total CPU:     28.93 min
+       Time step:  0.00983 s, Total time:    36.16 s
+       Max CFL number:  0.85E+00 at ( 35, 33, 23)
+       Max divergence:  0.76E+01 at ( 36, 29,  4)
+       Min divergence: -0.23E+01 at ( 37, 31, 17)
+       Max VN  number:  0.18E+00 at ( 36, 31, 11)
+       Total Heat Release Rate:            194.087 kW
+       Radiation Loss to Boundaries:        35.966 kW
+ 
+       Time Step    3400   September  4, 2011  17:12:01
+       ----------------------------------------------
+       CPU/step:     0.564 s, Total CPU:     29.87 min
+       Time step:  0.00781 s, Total time:    37.05 s
+       Max CFL number:  0.89E+00 at ( 36, 32, 14)
+       Max divergence:  0.71E+01 at ( 40, 29,  4)
+       Min divergence: -0.33E+01 at ( 36, 32, 15)
+       Max VN  number:  0.21E+00 at ( 36, 32, 14)
+       Total Heat Release Rate:            186.146 kW
+       Radiation Loss to Boundaries:        34.277 kW
+ 
+       Time Step    3500   September  4, 2011  17:12:56
+       ----------------------------------------------
+       CPU/step:     0.550 s, Total CPU:     30.79 min
+       Time step:  0.00924 s, Total time:    37.87 s
+       Max CFL number:  0.87E+00 at ( 36, 32, 15)
+       Max divergence:  0.91E+01 at ( 36, 30,  4)
+       Min divergence: -0.23E+01 at ( 37, 32, 10)
+       Max VN  number:  0.19E+00 at ( 36, 31, 18)
+       Total Heat Release Rate:            192.096 kW
+       Radiation Loss to Boundaries:        38.082 kW
+ 
+       Time Step    3600   September  4, 2011  17:13:51
+       ----------------------------------------------
+       CPU/step:     0.546 s, Total CPU:     31.70 min
+       Time step:  0.00908 s, Total time:    38.75 s
+       Max CFL number:  0.85E+00 at ( 37, 32, 10)
+       Max divergence:  0.75E+01 at ( 38, 29,  4)
+       Min divergence: -0.21E+01 at ( 37, 34, 12)
+       Max VN  number:  0.19E+00 at ( 39, 28, 19)
+       Total Heat Release Rate:            201.627 kW
+       Radiation Loss to Boundaries:        36.199 kW
+ 
+       Time Step    3700   September  4, 2011  17:14:45
+       ----------------------------------------------
+       CPU/step:     0.546 s, Total CPU:     32.61 min
+       Time step:  0.00978 s, Total time:    39.71 s
+       Max CFL number:  0.91E+00 at ( 40, 29, 22)
+       Max divergence:  0.72E+01 at ( 39, 29,  4)
+       Min divergence: -0.32E+01 at ( 38, 33, 12)
+       Max VN  number:  0.20E+00 at ( 38, 33, 12)
+       Total Heat Release Rate:            199.302 kW
+       Radiation Loss to Boundaries:        37.177 kW
+ 
+       Time Step    3800   September  4, 2011  17:15:40
+       ----------------------------------------------
+       CPU/step:     0.546 s, Total CPU:     33.52 min
+       Time step:  0.00868 s, Total time:    40.62 s
+       Max CFL number:  0.85E+00 at ( 38, 32, 12)
+       Max divergence:  0.75E+01 at ( 38, 32,  4)
+       Min divergence: -0.31E+01 at ( 40, 33, 17)
+       Max VN  number:  0.22E+00 at ( 39, 32, 24)
+       Total Heat Release Rate:            195.416 kW
+       Radiation Loss to Boundaries:        36.381 kW
+ 
+       Time Step    3900   September  4, 2011  17:16:35
+       ----------------------------------------------
+       CPU/step:     0.547 s, Total CPU:     34.43 min
+       Time step:  0.00963 s, Total time:    41.55 s
+       Max CFL number:  0.84E+00 at ( 38, 30, 18)
+       Max divergence:  0.88E+01 at ( 38, 32,  4)
+       Min divergence: -0.34E+01 at ( 37, 33, 12)
+       Max VN  number:  0.18E+00 at ( 38, 30, 19)
+       Total Heat Release Rate:            218.435 kW
+       Radiation Loss to Boundaries:        42.636 kW
+ 
+       Time Step    4000   September  4, 2011  17:17:31
+       ----------------------------------------------
+       CPU/step:     0.549 s, Total CPU:     35.34 min
+       Time step:  0.00894 s, Total time:    42.41 s
+       Max CFL number:  0.92E+00 at ( 39, 31, 16)
+       Max divergence:  0.86E+01 at ( 39, 30,  4)
+       Min divergence: -0.23E+01 at ( 38, 30, 18)
+       Max VN  number:  0.19E+00 at ( 38, 32, 24)
+       Total Heat Release Rate:            200.608 kW
+       Radiation Loss to Boundaries:        37.989 kW
+ 
+       Time Step    4100   September  4, 2011  17:18:25
+       ----------------------------------------------
+       CPU/step:     0.547 s, Total CPU:     36.25 min
+       Time step:  0.00821 s, Total time:    43.28 s
+       Max CFL number:  0.93E+00 at ( 39, 30, 16)
+       Max divergence:  0.76E+01 at ( 36, 30,  4)
+       Min divergence: -0.29E+01 at ( 38, 32, 12)
+       Max VN  number:  0.19E+00 at ( 39, 31, 18)
+       Total Heat Release Rate:            219.686 kW
+       Radiation Loss to Boundaries:        43.625 kW
+ 
+       Time Step    4200   September  4, 2011  17:19:20
+       ----------------------------------------------
+       CPU/step:     0.546 s, Total CPU:     37.16 min
+       Time step:  0.00800 s, Total time:    44.13 s
+       Max CFL number:  0.91E+00 at ( 35, 33, 21)
+       Max divergence:  0.88E+01 at ( 37, 32,  4)
+       Min divergence: -0.26E+01 at ( 37, 29, 13)
+       Max VN  number:  0.17E+00 at ( 35, 33, 22)
+       Total Heat Release Rate:            220.578 kW
+       Radiation Loss to Boundaries:        42.504 kW
+ 
+       Time Step    4300   September  4, 2011  17:20:15
+       ----------------------------------------------
+       CPU/step:     0.549 s, Total CPU:     38.08 min
+       Time step:  0.00837 s, Total time:    44.99 s
+       Max CFL number:  0.92E+00 at ( 37, 30, 12)
+       Max divergence:  0.86E+01 at ( 36, 30,  4)
+       Min divergence: -0.39E+01 at ( 37, 30, 13)
+       Max VN  number:  0.20E+00 at ( 37, 30, 12)
+       Total Heat Release Rate:            217.936 kW
+       Radiation Loss to Boundaries:        41.587 kW
+ 
+       Time Step    4400   September  4, 2011  17:21:10
+       ----------------------------------------------
+       CPU/step:     0.544 s, Total CPU:     38.99 min
+       Time step:  0.00822 s, Total time:    45.86 s
+       Max CFL number:  0.91E+00 at ( 38, 31, 16)
+       Max divergence:  0.76E+01 at ( 37, 33,  4)
+       Min divergence: -0.28E+01 at ( 35, 32, 13)
+       Max VN  number:  0.20E+00 at ( 38, 32, 18)
+       Total Heat Release Rate:            205.328 kW
+       Radiation Loss to Boundaries:        38.922 kW
+ 
+       Time Step    4500   September  4, 2011  17:22:05
+       ----------------------------------------------
+       CPU/step:     0.546 s, Total CPU:     39.90 min
+       Time step:  0.00769 s, Total time:    46.70 s
+       Max CFL number:  0.82E+00 at ( 38, 28, 22)
+       Max divergence:  0.90E+01 at ( 39, 31,  4)
+       Min divergence: -0.23E+01 at ( 39, 32, 13)
+       Max VN  number:  0.18E+00 at ( 38, 32, 12)
+       Total Heat Release Rate:            226.685 kW
+       Radiation Loss to Boundaries:        43.499 kW
+ 
+       Time Step    4600   September  4, 2011  17:23:00
+       ----------------------------------------------
+       CPU/step:     0.549 s, Total CPU:     40.81 min
+       Time step:  0.01044 s, Total time:    47.59 s
+       Max CFL number:  0.97E+00 at ( 39, 31, 10)
+       Max divergence:  0.91E+01 at ( 39, 30,  4)
+       Min divergence: -0.25E+01 at ( 36, 29,  8)
+       Max VN  number:  0.28E+00 at ( 37, 33, 11)
+       Total Heat Release Rate:            253.380 kW
+       Radiation Loss to Boundaries:        47.706 kW
+ 
+       Time Step    4700   September  4, 2011  17:23:54
+       ----------------------------------------------
+       CPU/step:     0.545 s, Total CPU:     41.72 min
+       Time step:  0.00882 s, Total time:    48.41 s
+       Max CFL number:  0.90E+00 at ( 38, 34, 20)
+       Max divergence:  0.89E+01 at ( 38, 33,  4)
+       Min divergence: -0.28E+01 at ( 37, 32, 13)
+       Max VN  number:  0.24E+00 at ( 40, 31, 17)
+       Total Heat Release Rate:            250.945 kW
+       Radiation Loss to Boundaries:        49.286 kW
+ 
+       Time Step    4800   September  4, 2011  17:24:49
+       ----------------------------------------------
+       CPU/step:     0.548 s, Total CPU:     42.63 min
+       Time step:  0.00809 s, Total time:    49.21 s
+       Max CFL number:  0.96E+00 at ( 39, 30, 22)
+       Max divergence:  0.10E+02 at ( 38, 29,  4)
+       Min divergence: -0.29E+01 at ( 39, 31, 20)
+       Max VN  number:  0.24E+00 at ( 39, 30, 22)
+       Total Heat Release Rate:            261.008 kW
+       Radiation Loss to Boundaries:        51.360 kW
+ 
+       Time Step    4900   September  4, 2011  17:25:44
+       ----------------------------------------------
+       CPU/step:     0.548 s, Total CPU:     43.55 min
+       Time step:  0.00825 s, Total time:    50.04 s
+       Max CFL number:  0.92E+00 at ( 39, 32, 20)
+       Max divergence:  0.92E+01 at ( 38, 33,  4)
+       Min divergence: -0.29E+01 at ( 36, 34, 14)
+       Max VN  number:  0.21E+00 at ( 39, 31, 21)
+       Total Heat Release Rate:            272.254 kW
+       Radiation Loss to Boundaries:        51.197 kW
+ 
+       Time Step    5000   September  4, 2011  17:26:39
+       ----------------------------------------------
+       CPU/step:     0.548 s, Total CPU:     44.46 min
+       Time step:  0.00756 s, Total time:    50.82 s
+       Max CFL number:  0.89E+00 at ( 37, 29, 21)
+       Max divergence:  0.11E+02 at ( 35, 30,  4)
+       Min divergence: -0.28E+01 at ( 35, 30, 11)
+       Max VN  number:  0.21E+00 at ( 37, 29, 21)
+       Total Heat Release Rate:            284.712 kW
+       Radiation Loss to Boundaries:        56.619 kW
+ 
+       Time Step    5100   September  4, 2011  17:27:31
+       ----------------------------------------------
+       CPU/step:     0.512 s, Total CPU:     45.31 min
+       Time step:  0.00804 s, Total time:    51.61 s
+       Max CFL number:  0.86E+00 at ( 41, 32, 18)
+       Max divergence:  0.11E+02 at ( 37, 29,  4)
+       Min divergence: -0.34E+01 at ( 38, 29, 11)
+       Max VN  number:  0.21E+00 at ( 39, 30, 15)
+       Total Heat Release Rate:            288.823 kW
+       Radiation Loss to Boundaries:        55.942 kW
+ 
+       Time Step    5200   September  4, 2011  17:28:22
+       ----------------------------------------------
+       CPU/step:     0.514 s, Total CPU:     46.17 min
+       Time step:  0.00784 s, Total time:    52.40 s
+       Max CFL number:  0.89E+00 at ( 36, 30, 15)
+       Max divergence:  0.11E+02 at ( 39, 33,  4)
+       Min divergence: -0.29E+01 at ( 37, 31, 19)
+       Max VN  number:  0.20E+00 at ( 38, 28, 13)
+       Total Heat Release Rate:            319.188 kW
+       Radiation Loss to Boundaries:        63.360 kW
+ 
+       Time Step    5300   September  4, 2011  17:29:14
+       ----------------------------------------------
+       CPU/step:     0.511 s, Total CPU:     47.02 min
+       Time step:  0.00830 s, Total time:    53.22 s
+       Max CFL number:  0.93E+00 at ( 38, 30,  7)
+       Max divergence:  0.11E+02 at ( 37, 29,  4)
+       Min divergence: -0.48E+01 at ( 38, 29, 12)
+       Max VN  number:  0.23E+00 at ( 38, 29, 12)
+       Total Heat Release Rate:            332.122 kW
+       Radiation Loss to Boundaries:        68.506 kW
+ 
+       Time Step    5400   September  4, 2011  17:30:05
+       ----------------------------------------------
+       CPU/step:     0.515 s, Total CPU:     47.88 min
+       Time step:  0.00694 s, Total time:    53.95 s
+       Max CFL number:  0.85E+00 at ( 36, 34, 16)
+       Max divergence:  0.95E+01 at ( 36, 32,  4)
+       Min divergence: -0.33E+01 at ( 37, 31, 14)
+       Max VN  number:  0.20E+00 at ( 37, 35, 19)
+       Total Heat Release Rate:            297.494 kW
+       Radiation Loss to Boundaries:        58.054 kW
+ 
+       Time Step    5500   September  4, 2011  17:30:57
+       ----------------------------------------------
+       CPU/step:     0.515 s, Total CPU:     48.74 min
+       Time step:  0.00736 s, Total time:    54.72 s
+       Max CFL number:  0.90E+00 at ( 37, 31, 15)
+       Max divergence:  0.10E+02 at ( 39, 33,  4)
+       Min divergence: -0.21E+01 at ( 36, 34, 10)
+       Max VN  number:  0.17E+00 at ( 37, 31, 16)
+       Total Heat Release Rate:            294.184 kW
+       Radiation Loss to Boundaries:        60.071 kW
+ 
+       Time Step    5600   September  4, 2011  17:31:48
+       ----------------------------------------------
+       CPU/step:     0.512 s, Total CPU:     49.59 min
+       Time step:  0.00908 s, Total time:    55.46 s
+       Max CFL number:  0.95E+00 at ( 38, 31,  9)
+       Max divergence:  0.11E+02 at ( 39, 33,  4)
+       Min divergence: -0.29E+01 at ( 39, 32, 11)
+       Max VN  number:  0.28E+00 at ( 39, 32, 12)
+       Total Heat Release Rate:            323.171 kW
+       Radiation Loss to Boundaries:        64.517 kW
+ 
+       Time Step    5700   September  4, 2011  17:32:40
+       ----------------------------------------------
+       CPU/step:     0.514 s, Total CPU:     50.45 min
+       Time step:  0.00859 s, Total time:    56.26 s
+       Max CFL number:  0.94E+00 at ( 36, 32, 12)
+       Max divergence:  0.11E+02 at ( 36, 28,  4)
+       Min divergence: -0.19E+01 at ( 40, 34, 16)
+       Max VN  number:  0.20E+00 at ( 36, 29, 10)
+       Total Heat Release Rate:            343.416 kW
+       Radiation Loss to Boundaries:        71.282 kW
+ 
+       Time Step    5800   September  4, 2011  17:33:32
+       ----------------------------------------------
+       CPU/step:     0.517 s, Total CPU:     51.31 min
+       Time step:  0.00696 s, Total time:    57.01 s
+       Max CFL number:  0.86E+00 at ( 36, 30, 17)
+       Max divergence:  0.11E+02 at ( 35, 31,  4)
+       Min divergence: -0.49E+01 at ( 39, 31, 18)
+       Max VN  number:  0.26E+00 at ( 39, 31, 17)
+       Total Heat Release Rate:            300.103 kW
+       Radiation Loss to Boundaries:        61.428 kW
+ 
+       Time Step    5900   September  4, 2011  17:34:23
+       ----------------------------------------------
+       CPU/step:     0.512 s, Total CPU:     52.16 min
+       Time step:  0.00745 s, Total time:    57.78 s
+       Max CFL number:  0.85E+00 at ( 35, 32, 15)
+       Max divergence:  0.12E+02 at ( 35, 30,  4)
+       Min divergence: -0.28E+01 at ( 35, 32, 16)
+       Max VN  number:  0.24E+00 at ( 35, 32, 15)
+       Total Heat Release Rate:            301.013 kW
+       Radiation Loss to Boundaries:        62.169 kW
+ 
+       Time Step    6000   September  4, 2011  17:35:15
+       ----------------------------------------------
+       CPU/step:     0.515 s, Total CPU:     53.02 min
+       Time step:  0.00808 s, Total time:    58.49 s
+       Max CFL number:  0.91E+00 at ( 39, 33, 17)
+       Max divergence:  0.10E+02 at ( 35, 30,  4)
+       Min divergence: -0.28E+01 at ( 38, 32, 16)
+       Max VN  number:  0.19E+00 at ( 39, 34, 20)
+       Total Heat Release Rate:            377.748 kW
+       Radiation Loss to Boundaries:        82.106 kW
+ 
+       Time Step    6100   September  4, 2011  17:36:07
+       ----------------------------------------------
+       CPU/step:     0.517 s, Total CPU:     53.88 min
+       Time step:  0.00756 s, Total time:    59.22 s
+       Max CFL number:  0.90E+00 at ( 38, 34, 22)
+       Max divergence:  0.12E+02 at ( 40, 31,  4)
+       Min divergence: -0.31E+01 at ( 39, 31, 16)
+       Max VN  number:  0.22E+00 at ( 38, 34, 22)
+       Total Heat Release Rate:            370.918 kW
+       Radiation Loss to Boundaries:        75.243 kW
+ 
+       Time Step    6200   September  4, 2011  17:36:59
+       ----------------------------------------------
+       CPU/step:     0.515 s, Total CPU:     54.74 min
+       Time step:  0.00637 s, Total time:    59.97 s
+       Max CFL number:  0.83E+00 at ( 36, 32, 21)
+       Max divergence:  0.11E+02 at ( 40, 31,  4)
+       Min divergence: -0.30E+01 at ( 38, 30, 16)
+       Max VN  number:  0.18E+00 at ( 38, 31, 20)
+       Total Heat Release Rate:            335.063 kW
+       Radiation Loss to Boundaries:        70.647 kW
+ 
+       Time Step    6300   September  4, 2011  17:37:51
+       ----------------------------------------------
+       CPU/step:     0.518 s, Total CPU:     55.60 min
+       Time step:  0.00679 s, Total time:    60.67 s
+       Max CFL number:  0.81E+00 at ( 34, 34, 24)
+       Max divergence:  0.12E+02 at ( 40, 29,  4)
+       Min divergence: -0.31E+01 at ( 39, 29, 10)
+       Max VN  number:  0.15E+00 at ( 36, 31, 24)
+       Total Heat Release Rate:            351.547 kW
+       Radiation Loss to Boundaries:        75.981 kW
+ 
+       Time Step    6400   September  4, 2011  17:38:42
+       ----------------------------------------------
+       CPU/step:     0.517 s, Total CPU:     56.46 min
+       Time step:  0.00630 s, Total time:    61.41 s
+       Max CFL number:  0.88E+00 at ( 36, 30, 15)
        Max divergence:  0.12E+02 at ( 39, 28,  4)
-       Min divergence: -0.46E+01 at ( 36, 30,  8)
-       Max VN  number:  0.36E+00 at ( 36, 30,  9)
-       Total Heat Release Rate:            897.652 kW
-       Radiation Loss to Boundaries:       329.540 kW
+       Min divergence: -0.34E+01 at ( 40, 30, 10)
+       Max VN  number:  0.18E+00 at ( 35, 32, 23)
+       Total Heat Release Rate:            434.491 kW
+       Radiation Loss to Boundaries:        88.624 kW
  
-       Time Step   11100   June 19, 2011  12:14:42
+       Time Step    6500   September  4, 2011  17:39:34
        ----------------------------------------------
-       CPU/step:     0.557 s, Total CPU:      1.73 hr
-       Time step:  0.00686 s, Total time:    98.52 s
-       Max CFL number:  0.95E+00 at ( 35, 45, 25)
-       Max divergence:  0.12E+02 at ( 37, 34,  7)
-       Min divergence: -0.34E+01 at ( 37, 30, 23)
-       Max VN  number:  0.37E+00 at ( 40, 33, 20)
-       Total Heat Release Rate:           1149.436 kW
-       Radiation Loss to Boundaries:       360.631 kW
+       CPU/step:     0.514 s, Total CPU:     57.32 min
+       Time step:  0.00718 s, Total time:    62.15 s
+       Max CFL number:  0.88E+00 at ( 36, 32, 10)
+       Max divergence:  0.11E+02 at ( 40, 33,  4)
+       Min divergence: -0.35E+01 at ( 40, 30, 13)
+       Max VN  number:  0.20E+00 at ( 37, 32, 14)
+       Total Heat Release Rate:            424.038 kW
+       Radiation Loss to Boundaries:        91.304 kW
  
-       Time Step   11200   June 19, 2011  12:15:38
+       Time Step    6600   September  4, 2011  17:40:25
        ----------------------------------------------
-       CPU/step:     0.556 s, Total CPU:      1.75 hr
-       Time step:  0.00715 s, Total time:    99.20 s
-       Max CFL number:  0.82E+00 at ( 41, 33, 11)
-       Max divergence:  0.12E+02 at ( 37, 32,  8)
-       Min divergence: -0.29E+01 at ( 35, 29,  8)
-       Max VN  number:  0.42E+00 at ( 39, 32, 17)
-       Total Heat Release Rate:           1216.908 kW
-       Radiation Loss to Boundaries:       385.482 kW
+       CPU/step:     0.512 s, Total CPU:     58.17 min
+       Time step:  0.00698 s, Total time:    62.87 s
+       Max CFL number:  0.83E+00 at ( 38, 32, 19)
+       Max divergence:  0.12E+02 at ( 35, 32,  4)
+       Min divergence: -0.26E+01 at ( 36, 31, 14)
+       Max VN  number:  0.21E+00 at ( 37, 31, 18)
+       Total Heat Release Rate:            365.896 kW
+       Radiation Loss to Boundaries:        77.968 kW
  
-       Time Step   11300   June 19, 2011  12:16:34
+       Time Step    6700   September  4, 2011  17:41:17
        ----------------------------------------------
-       CPU/step:     0.554 s, Total CPU:      1.76 hr
-       Time step:  0.00715 s, Total time:    99.92 s
-       Max CFL number:  0.93E+00 at ( 38, 30, 14)
-       Max divergence:  0.11E+02 at ( 40, 29,  4)
-       Min divergence: -0.19E+01 at ( 41, 33, 14)
-       Max VN  number:  0.40E+00 at ( 39, 32, 16)
-       Total Heat Release Rate:           1259.043 kW
-       Radiation Loss to Boundaries:       439.569 kW
+       CPU/step:     0.516 s, Total CPU:     59.03 min
+       Time step:  0.00725 s, Total time:    63.61 s
+       Max CFL number:  0.95E+00 at ( 39, 31, 22)
+       Max divergence:  0.11E+02 at ( 35, 32,  4)
+       Min divergence: -0.24E+01 at ( 37, 31, 19)
+       Max VN  number:  0.19E+00 at ( 39, 31, 22)
+       Total Heat Release Rate:            408.550 kW
+       Radiation Loss to Boundaries:        90.449 kW
  
-       Time Step   11400   June 19, 2011  12:17:30
+       Time Step    6800   September  4, 2011  17:42:09
        ----------------------------------------------
-       CPU/step:     0.557 s, Total CPU:      1.78 hr
-       Time step:  0.00670 s, Total time:   100.53 s
-       Max CFL number:  0.99E+00 at ( 35, 32, 12)
-       Max divergence:  0.12E+02 at ( 35, 29,  4)
-       Min divergence: -0.27E+01 at ( 35, 30, 18)
-       Max VN  number:  0.27E+00 at ( 37, 31, 16)
-       Total Heat Release Rate:           1149.803 kW
-       Radiation Loss to Boundaries:       425.851 kW
+       CPU/step:     0.516 s, Total CPU:     59.89 min
+       Time step:  0.00677 s, Total time:    64.33 s
+       Max CFL number:  0.89E+00 at ( 40, 32, 16)
+       Max divergence:  0.12E+02 at ( 36, 28,  4)
+       Min divergence: -0.30E+01 at ( 40, 33, 20)
+       Max VN  number:  0.16E+00 at ( 41, 31, 17)
+       Total Heat Release Rate:            466.211 kW
+       Radiation Loss to Boundaries:        99.970 kW
  
-       Time Step   11500   June 19, 2011  12:18:26
+       Time Step    6900   September  4, 2011  17:43:00
        ----------------------------------------------
-       CPU/step:     0.557 s, Total CPU:      1.79 hr
-       Time step:  0.00676 s, Total time:   101.17 s
-       Max CFL number:  0.88E+00 at ( 36, 36, 24)
+       CPU/step:     0.515 s, Total CPU:      1.01 hr
+       Time step:  0.00734 s, Total time:    65.03 s
+       Max CFL number:  0.90E+00 at ( 36, 33, 22)
+       Max divergence:  0.12E+02 at ( 40, 32,  4)
+       Min divergence: -0.25E+01 at ( 40, 31, 16)
+       Max VN  number:  0.23E+00 at ( 36, 33, 22)
+       Total Heat Release Rate:            507.405 kW
+       Radiation Loss to Boundaries:       111.956 kW
+ 
+       Time Step    7000   September  4, 2011  17:43:52
+       ----------------------------------------------
+       CPU/step:     0.515 s, Total CPU:      1.03 hr
+       Time step:  0.00795 s, Total time:    65.77 s
+       Max CFL number:  0.93E+00 at ( 39, 31, 19)
+       Max divergence:  0.13E+02 at ( 37, 33,  4)
+       Min divergence: -0.38E+01 at ( 39, 31, 20)
+       Max VN  number:  0.24E+00 at ( 36, 33, 22)
+       Total Heat Release Rate:            484.427 kW
+       Radiation Loss to Boundaries:       106.709 kW
+ 
+       Time Step    7100   September  4, 2011  17:44:44
+       ----------------------------------------------
+       CPU/step:     0.515 s, Total CPU:      1.04 hr
+       Time step:  0.00703 s, Total time:    66.45 s
+       Max CFL number:  0.95E+00 at ( 38, 33, 14)
+       Max divergence:  0.12E+02 at ( 38, 33,  4)
+       Min divergence: -0.36E+01 at ( 36, 34, 20)
+       Max VN  number:  0.21E+00 at ( 39, 31, 14)
+       Total Heat Release Rate:            475.648 kW
+       Radiation Loss to Boundaries:       106.558 kW
+ 
+       Time Step    7200   September  4, 2011  17:45:35
+       ----------------------------------------------
+       CPU/step:     0.516 s, Total CPU:      1.06 hr
+       Time step:  0.00577 s, Total time:    67.14 s
+       Max CFL number:  0.89E+00 at ( 37, 33, 15)
        Max divergence:  0.12E+02 at ( 38, 28,  4)
-       Min divergence: -0.33E+01 at ( 41, 33, 18)
-       Max VN  number:  0.24E+00 at ( 49, 31, 23)
-       Total Heat Release Rate:           1077.702 kW
-       Radiation Loss to Boundaries:       400.744 kW
+       Min divergence: -0.48E+01 at ( 34, 33, 20)
+       Max VN  number:  0.19E+00 at ( 34, 33, 19)
+       Total Heat Release Rate:            469.041 kW
+       Radiation Loss to Boundaries:       108.803 kW
  
-       Time Step   11600   June 19, 2011  12:19:21
+       Time Step    7300   September  4, 2011  17:46:27
        ----------------------------------------------
-       CPU/step:     0.557 s, Total CPU:      1.81 hr
-       Time step:  0.00666 s, Total time:   101.85 s
-       Max CFL number:  0.88E+00 at ( 38, 37, 18)
-       Max divergence:  0.14E+02 at ( 35, 33, 12)
-       Min divergence: -0.43E+01 at ( 39, 37, 21)
-       Max VN  number:  0.34E+00 at ( 42, 33, 10)
-       Total Heat Release Rate:           1200.213 kW
-       Radiation Loss to Boundaries:       412.666 kW
+       CPU/step:     0.516 s, Total CPU:      1.07 hr
+       Time step:  0.00546 s, Total time:    67.80 s
+       Max CFL number:  0.87E+00 at ( 37, 33, 19)
+       Max divergence:  0.14E+02 at ( 40, 30,  4)
+       Min divergence: -0.27E+01 at ( 40, 31, 19)
+       Max VN  number:  0.16E+00 at ( 37, 33, 20)
+       Total Heat Release Rate:            463.551 kW
+       Radiation Loss to Boundaries:       109.413 kW
  
-       Time Step   11700   June 19, 2011  12:20:17
+       Time Step    7400   September  4, 2011  17:47:19
        ----------------------------------------------
-       CPU/step:     0.558 s, Total CPU:      1.83 hr
-       Time step:  0.00727 s, Total time:   102.54 s
-       Max CFL number:  0.87E+00 at ( 39, 31, 17)
-       Max divergence:  0.12E+02 at ( 40, 28,  4)
-       Min divergence: -0.25E+01 at ( 40, 26, 22)
-       Max VN  number:  0.30E+00 at ( 55,  4, 23)
-       Total Heat Release Rate:            781.623 kW
-       Radiation Loss to Boundaries:       345.878 kW
+       CPU/step:     0.513 s, Total CPU:      1.08 hr
+       Time step:  0.00727 s, Total time:    68.47 s
+       Max CFL number:  0.93E+00 at ( 35, 33, 14)
+       Max divergence:  0.12E+02 at ( 40, 29,  4)
+       Min divergence: -0.37E+01 at ( 39, 35, 16)
+       Max VN  number:  0.18E+00 at ( 37, 34, 13)
+       Total Heat Release Rate:            458.345 kW
+       Radiation Loss to Boundaries:       101.701 kW
  
-       Time Step   11800   June 19, 2011  12:21:13
+       Time Step    7500   September  4, 2011  17:48:11
        ----------------------------------------------
-       CPU/step:     0.556 s, Total CPU:      1.84 hr
-       Time step:  0.00727 s, Total time:   103.26 s
-       Max CFL number:  0.84E+00 at ( 40, 31, 17)
-       Max divergence:  0.11E+02 at ( 38, 28,  4)
-       Min divergence: -0.20E+01 at ( 40, 44, 23)
-       Max VN  number:  0.31E+00 at ( 36, 16, 23)
-       Total Heat Release Rate:           1032.824 kW
-       Radiation Loss to Boundaries:       403.201 kW
+       CPU/step:     0.518 s, Total CPU:      1.10 hr
+       Time step:  0.00598 s, Total time:    69.15 s
+       Max CFL number:  0.98E+00 at ( 37, 31, 17)
+       Max divergence:  0.12E+02 at ( 38, 33,  4)
+       Min divergence: -0.40E+01 at ( 37, 30, 21)
+       Max VN  number:  0.16E+00 at ( 37, 30, 20)
+       Total Heat Release Rate:            473.260 kW
+       Radiation Loss to Boundaries:       103.148 kW
  
-       Time Step   11900   June 19, 2011  12:22:09
+       Time Step    7600   September  4, 2011  17:49:02
        ----------------------------------------------
-       CPU/step:     0.555 s, Total CPU:      1.86 hr
-       Time step:  0.00586 s, Total time:   103.93 s
-       Max CFL number:  0.80E+00 at ( 49, 32, 24)
-       Max divergence:  0.10E+02 at ( 40, 28,  4)
-       Min divergence: -0.32E+01 at ( 38, 29,  8)
-       Max VN  number:  0.41E+00 at ( 49, 32, 23)
-       Total Heat Release Rate:            736.741 kW
-       Radiation Loss to Boundaries:       348.116 kW
+       CPU/step:     0.517 s, Total CPU:      1.11 hr
+       Time step:  0.00601 s, Total time:    69.82 s
+       Max CFL number:  0.85E+00 at ( 36, 35, 19)
+       Max divergence:  0.17E+02 at ( 38, 30, 10)
+       Min divergence: -0.31E+01 at ( 35, 34, 23)
+       Max VN  number:  0.20E+00 at ( 38, 34, 22)
+       Total Heat Release Rate:            500.063 kW
+       Radiation Loss to Boundaries:       113.290 kW
  
-       Time Step   12000   June 19, 2011  12:23:04
+       Time Step    7700   September  4, 2011  17:49:59
        ----------------------------------------------
-       CPU/step:     0.555 s, Total CPU:      1.87 hr
-       Time step:  0.00676 s, Total time:   104.62 s
-       Max CFL number:  0.90E+00 at ( 38, 37, 24)
-       Max divergence:  0.11E+02 at ( 41, 31,  4)
-       Min divergence: -0.45E+01 at ( 36, 30,  7)
-       Max VN  number:  0.31E+00 at ( 37, 34, 22)
-       Total Heat Release Rate:           1161.475 kW
-       Radiation Loss to Boundaries:       465.271 kW
+       CPU/step:     0.516 s, Total CPU:      1.13 hr
+       Time step:  0.00751 s, Total time:    70.51 s
+       Max CFL number:  0.91E+00 at ( 37, 32, 13)
+       Max divergence:  0.12E+02 at ( 40, 31,  4)
+       Min divergence: -0.42E+01 at ( 36, 32, 19)
+       Max VN  number:  0.20E+00 at ( 35, 32, 19)
+       Total Heat Release Rate:            592.471 kW
+       Radiation Loss to Boundaries:       137.408 kW
  
-       Time Step   12100   June 19, 2011  12:24:01
+       Time Step    7800   September  4, 2011  17:50:51
        ----------------------------------------------
-       CPU/step:     0.560 s, Total CPU:      1.89 hr
-       Time step:  0.00643 s, Total time:   105.29 s
-       Max CFL number:  0.91E+00 at ( 39, 34, 18)
-       Max divergence:  0.11E+02 at ( 40, 28,  4)
-       Min divergence: -0.21E+01 at ( 40, 38, 22)
-       Max VN  number:  0.35E+00 at ( 39, 33, 20)
-       Total Heat Release Rate:           1185.759 kW
-       Radiation Loss to Boundaries:       452.047 kW
- 
-       Time Step   12200   June 19, 2011  12:24:57
-       ----------------------------------------------
-       CPU/step:     0.558 s, Total CPU:      1.90 hr
-       Time step:  0.00607 s, Total time:   105.95 s
-       Max CFL number:  0.88E+00 at ( 32, 35, 20)
-       Max divergence:  0.11E+02 at ( 40, 28,  4)
-       Min divergence: -0.21E+01 at ( 37, 30, 16)
-       Max VN  number:  0.26E+00 at ( 35, 53, 23)
-       Total Heat Release Rate:           1363.273 kW
-       Radiation Loss to Boundaries:       464.339 kW
- 
-       Time Step   12300   June 19, 2011  12:25:53
-       ----------------------------------------------
-       CPU/step:     0.560 s, Total CPU:      1.92 hr
-       Time step:  0.00745 s, Total time:   106.57 s
-       Max CFL number:  0.87E+00 at ( 38, 35, 23)
-       Max divergence:  0.12E+02 at ( 37, 33,  4)
-       Min divergence: -0.24E+01 at ( 39, 29,  8)
-       Max VN  number:  0.39E+00 at ( 35, 28, 23)
-       Total Heat Release Rate:            953.621 kW
-       Radiation Loss to Boundaries:       390.594 kW
- 
-       Time Step   12400   June 19, 2011  12:26:49
-       ----------------------------------------------
-       CPU/step:     0.565 s, Total CPU:      1.93 hr
-       Time step:  0.00750 s, Total time:   107.27 s
-       Max CFL number:  0.94E+00 at ( 40, 36, 17)
+       CPU/step:     0.519 s, Total CPU:      1.14 hr
+       Time step:  0.00661 s, Total time:    71.20 s
+       Max CFL number:  0.81E+00 at ( 39, 34, 19)
        Max divergence:  0.12E+02 at ( 36, 33,  4)
-       Min divergence: -0.26E+01 at ( 34, 37, 15)
-       Max VN  number:  0.32E+00 at (  7, 52, 23)
-       Total Heat Release Rate:           1055.715 kW
-       Radiation Loss to Boundaries:       398.278 kW
+       Min divergence: -0.16E+01 at ( 37, 32, 19)
+       Max VN  number:  0.18E+00 at ( 38, 31, 17)
+       Total Heat Release Rate:            569.668 kW
+       Radiation Loss to Boundaries:       136.311 kW
  
-       Time Step   12500   June 19, 2011  12:27:46
+       Time Step    7900   September  4, 2011  17:51:43
        ----------------------------------------------
-       CPU/step:     0.558 s, Total CPU:      1.95 hr
-       Time step:  0.00775 s, Total time:   107.97 s
-       Max CFL number:  0.90E+00 at ( 36, 33, 15)
-       Max divergence:  0.11E+02 at ( 40, 28,  4)
-       Min divergence: -0.34E+01 at ( 43, 30, 19)
-       Max VN  number:  0.37E+00 at ( 41, 32, 22)
-       Total Heat Release Rate:           1412.436 kW
-       Radiation Loss to Boundaries:       484.689 kW
+       CPU/step:     0.526 s, Total CPU:      1.16 hr
+       Time step:  0.00695 s, Total time:    71.85 s
+       Max CFL number:  0.88E+00 at ( 39, 32, 22)
+       Max divergence:  0.13E+02 at ( 38, 33,  4)
+       Min divergence: -0.23E+01 at ( 38, 32, 22)
+       Max VN  number:  0.21E+00 at ( 38, 33, 22)
+       Total Heat Release Rate:            499.645 kW
+       Radiation Loss to Boundaries:       119.818 kW
  
-       Time Step   12600   June 19, 2011  12:28:42
+       Time Step    8000   September  4, 2011  17:52:36
        ----------------------------------------------
-       CPU/step:     0.557 s, Total CPU:      1.97 hr
-       Time step:  0.00665 s, Total time:   108.62 s
-       Max CFL number:  0.86E+00 at ( 38, 36, 13)
-       Max divergence:  0.15E+02 at ( 38, 32, 10)
-       Min divergence: -0.42E+01 at ( 41, 35, 17)
-       Max VN  number:  0.32E+00 at ( 38, 32,  9)
-       Total Heat Release Rate:           1188.285 kW
-       Radiation Loss to Boundaries:       451.425 kW
+       CPU/step:     0.520 s, Total CPU:      1.17 hr
+       Time step:  0.00642 s, Total time:    72.51 s
+       Max CFL number:  0.84E+00 at ( 37, 33, 14)
+       Max divergence:  0.12E+02 at ( 38, 33,  4)
+       Min divergence: -0.27E+01 at ( 38, 34, 17)
+       Max VN  number:  0.17E+00 at ( 38, 34, 21)
+       Total Heat Release Rate:            533.577 kW
+       Radiation Loss to Boundaries:       128.118 kW
  
-       Time Step   12700   June 19, 2011  12:29:37
+       Time Step    8100   September  4, 2011  17:53:28
        ----------------------------------------------
-       CPU/step:     0.550 s, Total CPU:      1.98 hr
-       Time step:  0.00688 s, Total time:   109.28 s
-       Max CFL number:  0.89E+00 at ( 40, 33, 20)
-       Max divergence:  0.11E+02 at ( 40, 28,  4)
-       Min divergence: -0.20E+01 at ( 37, 37, 22)
-       Max VN  number:  0.30E+00 at ( 37, 33, 21)
-       Total Heat Release Rate:            992.346 kW
-       Radiation Loss to Boundaries:       411.178 kW
- 
-       Time Step   12800   June 19, 2011  12:30:32
-       ----------------------------------------------
-       CPU/step:     0.547 s, Total CPU:      2.00 hr
-       Time step:  0.00685 s, Total time:   109.95 s
-       Max CFL number:  0.96E+00 at ( 34, 34, 12)
-       Max divergence:  0.12E+02 at ( 38, 31,  6)
-       Min divergence: -0.19E+01 at ( 42, 32, 18)
-       Max VN  number:  0.27E+00 at ( 36, 32, 20)
-       Total Heat Release Rate:           1159.417 kW
-       Radiation Loss to Boundaries:       454.912 kW
- 
-       Time Step   12900   June 19, 2011  12:31:27
-       ----------------------------------------------
-       CPU/step:     0.548 s, Total CPU:      2.01 hr
-       Time step:  0.00671 s, Total time:   110.57 s
-       Max CFL number:  0.97E+00 at ( 36, 34, 16)
-       Max divergence:  0.13E+02 at ( 39, 28,  4)
-       Min divergence: -0.26E+01 at ( 40, 38,  8)
-       Max VN  number:  0.40E+00 at ( 33, 44, 23)
-       Total Heat Release Rate:           1038.575 kW
-       Radiation Loss to Boundaries:       455.246 kW
- 
-       Time Step   13000   June 19, 2011  12:32:22
-       ----------------------------------------------
-       CPU/step:     0.551 s, Total CPU:      2.03 hr
-       Time step:  0.00739 s, Total time:   111.24 s
-       Max CFL number:  0.92E+00 at ( 38, 37, 17)
-       Max divergence:  0.13E+02 at ( 37, 30,  5)
-       Min divergence: -0.21E+01 at ( 33, 38, 12)
-       Max VN  number:  0.30E+00 at ( 37, 34, 22)
-       Total Heat Release Rate:            921.712 kW
-       Radiation Loss to Boundaries:       399.588 kW
- 
-       Time Step   13100   June 19, 2011  12:33:17
-       ----------------------------------------------
-       CPU/step:     0.548 s, Total CPU:      2.04 hr
-       Time step:  0.00601 s, Total time:   111.92 s
-       Max CFL number:  0.94E+00 at ( 38, 35, 14)
-       Max divergence:  0.12E+02 at ( 36, 28,  4)
-       Min divergence: -0.29E+01 at ( 39, 31, 21)
-       Max VN  number:  0.34E+00 at ( 38, 50, 23)
-       Total Heat Release Rate:            970.196 kW
-       Radiation Loss to Boundaries:       416.400 kW
- 
-       Time Step   13200   June 19, 2011  12:34:12
-       ----------------------------------------------
-       CPU/step:     0.548 s, Total CPU:      2.06 hr
-       Time step:  0.00630 s, Total time:   112.58 s
-       Max CFL number:  0.93E+00 at ( 35, 34, 16)
-       Max divergence:  0.11E+02 at ( 34, 33,  4)
-       Min divergence: -0.30E+01 at ( 35, 28,  8)
-       Max VN  number:  0.48E+00 at (  7, 34, 23)
-       Total Heat Release Rate:           1049.339 kW
-       Radiation Loss to Boundaries:       436.967 kW
- 
-       Time Step   13300   June 19, 2011  12:35:07
-       ----------------------------------------------
-       CPU/step:     0.550 s, Total CPU:      2.07 hr
-       Time step:  0.00712 s, Total time:   113.31 s
-       Max CFL number:  0.95E+00 at ( 35, 36, 15)
-       Max divergence:  0.12E+02 at ( 40, 28,  4)
-       Min divergence: -0.31E+01 at ( 41, 32, 17)
-       Max VN  number:  0.37E+00 at ( 36, 32, 20)
-       Total Heat Release Rate:           1144.053 kW
-       Radiation Loss to Boundaries:       452.264 kW
- 
-       Time Step   13400   June 19, 2011  12:36:02
-       ----------------------------------------------
-       CPU/step:     0.547 s, Total CPU:      2.09 hr
-       Time step:  0.00758 s, Total time:   114.03 s
-       Max CFL number:  0.90E+00 at ( 35, 34, 14)
+       CPU/step:     0.519 s, Total CPU:      1.19 hr
+       Time step:  0.00651 s, Total time:    73.19 s
+       Max CFL number:  0.83E+00 at ( 37, 32, 22)
        Max divergence:  0.12E+02 at ( 38, 28,  4)
-       Min divergence: -0.35E+01 at ( 36, 28,  8)
-       Max VN  number:  0.45E+00 at ( 34, 47, 23)
-       Total Heat Release Rate:           1231.988 kW
-       Radiation Loss to Boundaries:       488.271 kW
+       Min divergence: -0.25E+01 at ( 35, 30,  8)
+       Max VN  number:  0.22E+00 at ( 37, 30, 21)
+       Total Heat Release Rate:            502.875 kW
+       Radiation Loss to Boundaries:       125.321 kW
  
-       Time Step   13500   June 19, 2011  12:37:01
+       Time Step    8200   September  4, 2011  17:54:20
        ----------------------------------------------
-       CPU/step:     0.548 s, Total CPU:      2.10 hr
-       Time step:  0.00625 s, Total time:   114.66 s
-       Max CFL number:  0.89E+00 at ( 29, 41, 24)
-       Max divergence:  0.11E+02 at ( 41, 29,  4)
-       Min divergence: -0.44E+01 at ( 39, 37, 20)
-       Max VN  number:  0.31E+00 at ( 35, 34, 17)
-       Total Heat Release Rate:            933.667 kW
-       Radiation Loss to Boundaries:       410.066 kW
+       CPU/step:     0.521 s, Total CPU:      1.20 hr
+       Time step:  0.00691 s, Total time:    73.87 s
+       Max CFL number:  0.95E+00 at ( 38, 33, 13)
+       Max divergence:  0.12E+02 at ( 38, 32, 15)
+       Min divergence: -0.31E+01 at ( 40, 35, 18)
+       Max VN  number:  0.20E+00 at ( 38, 32, 15)
+       Total Heat Release Rate:            637.179 kW
+       Radiation Loss to Boundaries:       144.580 kW
  
-       Time Step   13600   June 19, 2011  12:37:56
+       Time Step    8300   September  4, 2011  17:55:12
        ----------------------------------------------
-       CPU/step:     0.550 s, Total CPU:      2.12 hr
-       Time step:  0.00586 s, Total time:   115.31 s
-       Max CFL number:  0.86E+00 at ( 34, 37, 19)
-       Max divergence:  0.13E+02 at ( 37, 32,  8)
-       Min divergence: -0.24E+01 at ( 38, 33, 11)
-       Max VN  number:  0.26E+00 at ( 38, 30, 23)
-       Total Heat Release Rate:           1106.121 kW
-       Radiation Loss to Boundaries:       446.975 kW
+       CPU/step:     0.517 s, Total CPU:      1.21 hr
+       Time step:  0.00644 s, Total time:    74.52 s
+       Max CFL number:  0.87E+00 at ( 38, 33, 13)
+       Max divergence:  0.14E+02 at ( 37, 33,  4)
+       Min divergence: -0.30E+01 at ( 36, 31, 19)
+       Max VN  number:  0.17E+00 at ( 37, 33, 21)
+       Total Heat Release Rate:            600.116 kW
+       Radiation Loss to Boundaries:       152.893 kW
  
-       Time Step   13700   June 19, 2011  12:38:51
+       Time Step    8400   September  4, 2011  17:56:04
        ----------------------------------------------
-       CPU/step:     0.548 s, Total CPU:      2.13 hr
-       Time step:  0.00731 s, Total time:   115.99 s
-       Max CFL number:  0.85E+00 at ( 36, 34,  9)
-       Max divergence:  0.14E+02 at ( 35, 32, 17)
-       Min divergence: -0.17E+01 at ( 35, 54, 15)
-       Max VN  number:  0.33E+00 at ( 39, 32, 14)
-       Total Heat Release Rate:           1376.029 kW
-       Radiation Loss to Boundaries:       489.951 kW
+       CPU/step:     0.519 s, Total CPU:      1.23 hr
+       Time step:  0.00669 s, Total time:    75.20 s
+       Max CFL number:  0.92E+00 at ( 38, 34, 18)
+       Max divergence:  0.13E+02 at ( 39, 28,  4)
+       Min divergence: -0.28E+01 at ( 37, 34, 17)
+       Max VN  number:  0.20E+00 at ( 38, 34, 18)
+       Total Heat Release Rate:            573.044 kW
+       Radiation Loss to Boundaries:       136.611 kW
  
-       Time Step   13800   June 19, 2011  12:39:47
+       Time Step    8500   September  4, 2011  17:56:56
        ----------------------------------------------
-       CPU/step:     0.549 s, Total CPU:      2.15 hr
-       Time step:  0.00766 s, Total time:   116.66 s
-       Max CFL number:  0.93E+00 at ( 32, 35, 23)
-       Max divergence:  0.12E+02 at ( 36, 28,  4)
-       Min divergence: -0.18E+01 at ( 34, 41, 22)
-       Max VN  number:  0.31E+00 at ( 35, 46, 23)
-       Total Heat Release Rate:           1300.495 kW
-       Radiation Loss to Boundaries:       475.128 kW
+       CPU/step:     0.521 s, Total CPU:      1.24 hr
+       Time step:  0.00638 s, Total time:    75.90 s
+       Max CFL number:  0.85E+00 at ( 37, 31, 16)
+       Max divergence:  0.12E+02 at ( 35, 31,  4)
+       Min divergence: -0.26E+01 at ( 38, 33, 23)
+       Max VN  number:  0.21E+00 at ( 38, 33, 22)
+       Total Heat Release Rate:            566.756 kW
+       Radiation Loss to Boundaries:       138.915 kW
  
-       Time Step   13900   June 19, 2011  12:40:42
+       Time Step    8600   September  4, 2011  17:57:47
        ----------------------------------------------
-       CPU/step:     0.548 s, Total CPU:      2.16 hr
-       Time step:  0.00695 s, Total time:   117.33 s
-       Max CFL number:  0.85E+00 at ( 27, 29, 25)
-       Max divergence:  0.11E+02 at ( 37, 28,  5)
-       Min divergence: -0.23E+01 at ( 34, 35, 18)
-       Max VN  number:  0.39E+00 at ( 23, 53, 23)
-       Total Heat Release Rate:           1029.398 kW
-       Radiation Loss to Boundaries:       451.445 kW
+       CPU/step:     0.513 s, Total CPU:      1.26 hr
+       Time step:  0.00693 s, Total time:    76.53 s
+       Max CFL number:  0.82E+00 at ( 40, 34, 21)
+       Max divergence:  0.13E+02 at ( 36, 33,  4)
+       Min divergence: -0.27E+01 at ( 35, 30, 15)
+       Max VN  number:  0.21E+00 at ( 40, 31, 12)
+       Total Heat Release Rate:            592.574 kW
+       Radiation Loss to Boundaries:       147.074 kW
  
-       Time Step   14000   June 19, 2011  12:41:37
+       Time Step    8700   September  4, 2011  17:58:39
        ----------------------------------------------
-       CPU/step:     0.549 s, Total CPU:      2.18 hr
-       Time step:  0.00728 s, Total time:   118.02 s
-       Max CFL number:  0.84E+00 at ( 37, 33, 16)
+       CPU/step:     0.514 s, Total CPU:      1.27 hr
+       Time step:  0.00641 s, Total time:    77.19 s
+       Max CFL number:  0.98E+00 at ( 35, 33, 23)
+       Max divergence:  0.13E+02 at ( 39, 33,  4)
+       Min divergence: -0.30E+01 at ( 39, 33, 15)
+       Max VN  number:  0.24E+00 at ( 39, 34, 24)
+       Total Heat Release Rate:            474.594 kW
+       Radiation Loss to Boundaries:       135.164 kW
+ 
+       Time Step    8800   September  4, 2011  17:59:31
+       ----------------------------------------------
+       CPU/step:     0.518 s, Total CPU:      1.29 hr
+       Time step:  0.00546 s, Total time:    77.83 s
+       Max CFL number:  0.79E+00 at ( 35, 33, 18)
+       Max divergence:  0.12E+02 at ( 40, 31,  4)
+       Min divergence: -0.32E+01 at ( 39, 30, 14)
+       Max VN  number:  0.25E+00 at ( 35, 31, 19)
+       Total Heat Release Rate:            631.028 kW
+       Radiation Loss to Boundaries:       158.487 kW
+ 
+       Time Step    8900   September  4, 2011  18:00:23
+       ----------------------------------------------
+       CPU/step:     0.515 s, Total CPU:      1.30 hr
+       Time step:  0.00639 s, Total time:    78.47 s
+       Max CFL number:  0.92E+00 at ( 36, 34, 22)
+       Max divergence:  0.12E+02 at ( 40, 33,  4)
+       Min divergence: -0.27E+01 at ( 36, 34, 22)
+       Max VN  number:  0.25E+00 at ( 36, 34, 22)
+       Total Heat Release Rate:            603.371 kW
+       Radiation Loss to Boundaries:       157.424 kW
+ 
+       Time Step    9000   September  4, 2011  18:01:14
+       ----------------------------------------------
+       CPU/step:     0.517 s, Total CPU:      1.31 hr
+       Time step:  0.00590 s, Total time:    79.12 s
+       Max CFL number:  0.96E+00 at ( 38, 31, 19)
+       Max divergence:  0.13E+02 at ( 37, 28,  4)
+       Min divergence: -0.24E+01 at ( 37, 30, 23)
+       Max VN  number:  0.17E+00 at ( 37, 30, 23)
+       Total Heat Release Rate:            694.625 kW
+       Radiation Loss to Boundaries:       184.709 kW
+ 
+       Time Step    9100   September  4, 2011  18:02:06
+       ----------------------------------------------
+       CPU/step:     0.517 s, Total CPU:      1.33 hr
+       Time step:  0.00627 s, Total time:    79.77 s
+       Max CFL number:  0.87E+00 at ( 37, 34, 21)
+       Max divergence:  0.12E+02 at ( 39, 28,  4)
+       Min divergence: -0.27E+01 at ( 34, 29, 16)
+       Max VN  number:  0.18E+00 at ( 37, 34, 24)
+       Total Heat Release Rate:            614.107 kW
+       Radiation Loss to Boundaries:       165.363 kW
+ 
+       Time Step    9200   September  4, 2011  18:02:58
+       ----------------------------------------------
+       CPU/step:     0.515 s, Total CPU:      1.34 hr
+       Time step:  0.00547 s, Total time:    80.41 s
+       Max CFL number:  0.89E+00 at ( 40, 33, 23)
+       Max divergence:  0.14E+02 at ( 38, 33,  4)
+       Min divergence: -0.27E+01 at ( 36, 33, 15)
+       Max VN  number:  0.21E+00 at ( 40, 33, 23)
+       Total Heat Release Rate:            576.170 kW
+       Radiation Loss to Boundaries:       171.107 kW
+ 
+       Time Step    9300   September  4, 2011  18:03:50
+       ----------------------------------------------
+       CPU/step:     0.518 s, Total CPU:      1.36 hr
+       Time step:  0.00717 s, Total time:    81.04 s
+       Max CFL number:  0.87E+00 at ( 37, 31, 10)
+       Max divergence:  0.13E+02 at ( 38, 33,  4)
+       Min divergence: -0.22E+01 at ( 39, 31, 18)
+       Max VN  number:  0.18E+00 at ( 39, 31, 18)
+       Total Heat Release Rate:            682.319 kW
+       Radiation Loss to Boundaries:       185.031 kW
+ 
+       Time Step    9400   September  4, 2011  18:04:42
+       ----------------------------------------------
+       CPU/step:     0.518 s, Total CPU:      1.37 hr
+       Time step:  0.00608 s, Total time:    81.66 s
+       Max CFL number:  0.91E+00 at ( 41, 31, 21)
+       Max divergence:  0.12E+02 at ( 38, 33,  4)
+       Min divergence: -0.30E+01 at ( 40, 28, 19)
+       Max VN  number:  0.16E+00 at ( 41, 31, 21)
+       Total Heat Release Rate:            658.654 kW
+       Radiation Loss to Boundaries:       189.578 kW
+ 
+       Time Step    9500   September  4, 2011  18:05:34
+       ----------------------------------------------
+       CPU/step:     0.516 s, Total CPU:      1.39 hr
+       Time step:  0.00702 s, Total time:    82.33 s
+       Max CFL number:  0.92E+00 at ( 40, 30, 19)
+       Max divergence:  0.12E+02 at ( 40, 31,  4)
+       Min divergence: -0.25E+01 at ( 41, 31, 19)
+       Max VN  number:  0.19E+00 at ( 41, 33, 15)
+       Total Heat Release Rate:            784.246 kW
+       Radiation Loss to Boundaries:       206.874 kW
+ 
+       Time Step    9600   September  4, 2011  18:06:25
+       ----------------------------------------------
+       CPU/step:     0.514 s, Total CPU:      1.40 hr
+       Time step:  0.00668 s, Total time:    83.00 s
+       Max CFL number:  0.87E+00 at ( 40, 33, 16)
+       Max divergence:  0.13E+02 at ( 40, 31,  4)
+       Min divergence: -0.23E+01 at ( 38, 35, 23)
+       Max VN  number:  0.20E+00 at ( 39, 31, 16)
+       Total Heat Release Rate:            837.940 kW
+       Radiation Loss to Boundaries:       224.565 kW
+ 
+       Time Step    9700   September  4, 2011  18:07:17
+       ----------------------------------------------
+       CPU/step:     0.518 s, Total CPU:      1.41 hr
+       Time step:  0.00600 s, Total time:    83.65 s
+       Max CFL number:  0.89E+00 at ( 38, 30, 13)
        Max divergence:  0.12E+02 at ( 40, 28,  4)
-       Min divergence: -0.18E+01 at ( 40, 34, 10)
-       Max VN  number:  0.38E+00 at ( 34, 32, 22)
-       Total Heat Release Rate:           1012.893 kW
-       Radiation Loss to Boundaries:       408.347 kW
+       Min divergence: -0.31E+01 at ( 35, 32, 23)
+       Max VN  number:  0.20E+00 at ( 38, 30, 18)
+       Total Heat Release Rate:            671.217 kW
+       Radiation Loss to Boundaries:       193.466 kW
  
-       Time Step   14100   June 19, 2011  12:42:32
+       Time Step    9800   September  4, 2011  18:08:09
        ----------------------------------------------
-       CPU/step:     0.556 s, Total CPU:      2.19 hr
-       Time step:  0.00669 s, Total time:   118.68 s
-       Max CFL number:  0.94E+00 at ( 31, 29, 25)
-       Max divergence:  0.12E+02 at ( 35, 34,  4)
-       Min divergence: -0.31E+01 at ( 32, 35, 13)
-       Max VN  number:  0.31E+00 at ( 30, 33, 23)
-       Total Heat Release Rate:            970.771 kW
-       Radiation Loss to Boundaries:       428.453 kW
+       CPU/step:     0.514 s, Total CPU:      1.43 hr
+       Time step:  0.00651 s, Total time:    84.29 s
+       Max CFL number:  0.95E+00 at ( 40, 33, 17)
+       Max divergence:  0.12E+02 at ( 37, 28,  4)
+       Min divergence: -0.30E+01 at ( 39, 29, 19)
+       Max VN  number:  0.17E+00 at ( 32, 34, 24)
+       Total Heat Release Rate:            807.189 kW
+       Radiation Loss to Boundaries:       216.270 kW
  
-       Time Step   14200   June 19, 2011  12:43:29
+       Time Step    9900   September  4, 2011  18:09:00
        ----------------------------------------------
-       CPU/step:     0.559 s, Total CPU:      2.21 hr
-       Time step:  0.00629 s, Total time:   119.33 s
-       Max CFL number:  0.87E+00 at ( 34, 39, 25)
-       Max divergence:  0.11E+02 at ( 39, 34,  5)
-       Min divergence: -0.44E+01 at ( 37, 32, 10)
-       Max VN  number:  0.30E+00 at ( 33, 53, 23)
-       Total Heat Release Rate:           1116.354 kW
-       Radiation Loss to Boundaries:       455.578 kW
+       CPU/step:     0.516 s, Total CPU:      1.44 hr
+       Time step:  0.00610 s, Total time:    84.93 s
+       Max CFL number:  0.85E+00 at ( 38, 30, 22)
+       Max divergence:  0.12E+02 at ( 38, 33,  4)
+       Min divergence: -0.35E+01 at ( 35, 32, 18)
+       Max VN  number:  0.20E+00 at ( 36, 32, 20)
+       Total Heat Release Rate:            728.629 kW
+       Radiation Loss to Boundaries:       226.692 kW
  
-       Time Step   14300   June 19, 2011  12:44:24
+       Time Step   10000   September  4, 2011  18:09:52
        ----------------------------------------------
-       CPU/step:     0.557 s, Total CPU:      2.23 hr
-       Time step:  0.00692 s, Total time:   119.99 s
-       Max CFL number:  0.91E+00 at ( 35, 34, 19)
-       Max divergence:  0.12E+02 at ( 37, 35,  5)
-       Min divergence: -0.20E+01 at ( 34, 32, 12)
-       Max VN  number:  0.47E+00 at ( 38, 53, 23)
-       Total Heat Release Rate:           1104.371 kW
-       Radiation Loss to Boundaries:       427.371 kW
+       CPU/step:     0.517 s, Total CPU:      1.46 hr
+       Time step:  0.00659 s, Total time:    85.56 s
+       Max CFL number:  0.93E+00 at ( 39, 34, 18)
+       Max divergence:  0.13E+02 at ( 39, 33,  4)
+       Min divergence: -0.17E+01 at ( 42, 33, 23)
+       Max VN  number:  0.19E+00 at ( 36, 31, 15)
+       Total Heat Release Rate:            875.615 kW
+       Radiation Loss to Boundaries:       242.933 kW
  
-       Time Step   14301   June 19, 2011  12:44:25
+       Time Step   10100   September  4, 2011  18:10:44
        ----------------------------------------------
-       CPU/step:     0.538 s, Total CPU:      2.23 hr
-       Time step:  0.00692 s, Total time:   120.00 s
-       Max CFL number:  0.89E+00 at ( 35, 34, 19)
-       Max divergence:  0.12E+02 at ( 37, 35,  5)
-       Min divergence: -0.20E+01 at ( 34, 32, 12)
-       Max VN  number:  0.47E+00 at ( 38, 53, 23)
-       Total Heat Release Rate:           1106.618 kW
-       Radiation Loss to Boundaries:       428.362 kW
+       CPU/step:     0.515 s, Total CPU:      1.47 hr
+       Time step:  0.00734 s, Total time:    86.19 s
+       Max CFL number:  0.95E+00 at ( 38, 35, 21)
+       Max divergence:  0.12E+02 at ( 35, 28,  4)
+       Min divergence: -0.24E+01 at ( 35, 32, 21)
+       Max VN  number:  0.24E+00 at ( 37, 33, 23)
+       Total Heat Release Rate:            837.323 kW
+       Radiation Loss to Boundaries:       230.308 kW
+ 
+       Time Step   10200   September  4, 2011  18:11:36
+       ----------------------------------------------
+       CPU/step:     0.518 s, Total CPU:      1.49 hr
+       Time step:  0.00635 s, Total time:    86.76 s
+       Max CFL number:  0.85E+00 at ( 40, 32, 20)
+       Max divergence:  0.13E+02 at ( 37, 28,  4)
+       Min divergence: -0.40E+01 at ( 39, 32, 21)
+       Max VN  number:  0.26E+00 at ( 38, 31, 19)
+       Total Heat Release Rate:            703.653 kW
+       Radiation Loss to Boundaries:       213.022 kW
+ 
+       Time Step   10300   September  4, 2011  18:12:28
+       ----------------------------------------------
+       CPU/step:     0.518 s, Total CPU:      1.50 hr
+       Time step:  0.00599 s, Total time:    87.37 s
+       Max CFL number:  0.10E+01 at ( 36, 33, 20)
+       Max divergence:  0.14E+02 at ( 38, 33,  4)
+       Min divergence: -0.52E+01 at ( 39, 30, 18)
+       Max VN  number:  0.18E+00 at ( 39, 30, 17)
+       Total Heat Release Rate:            732.760 kW
+       Radiation Loss to Boundaries:       226.460 kW
+ 
+       Time Step   10400   September  4, 2011  18:13:19
+       ----------------------------------------------
+       CPU/step:     0.515 s, Total CPU:      1.52 hr
+       Time step:  0.00603 s, Total time:    87.99 s
+       Max CFL number:  0.90E+00 at ( 38, 32, 18)
+       Max divergence:  0.12E+02 at ( 40, 28,  4)
+       Min divergence: -0.21E+01 at ( 36, 31, 22)
+       Max VN  number:  0.27E+00 at ( 37, 32, 21)
+       Total Heat Release Rate:            712.501 kW
+       Radiation Loss to Boundaries:       227.081 kW
+ 
+       Time Step   10500   September  4, 2011  18:14:11
+       ----------------------------------------------
+       CPU/step:     0.518 s, Total CPU:      1.53 hr
+       Time step:  0.00684 s, Total time:    88.61 s
+       Max CFL number:  0.96E+00 at ( 34, 31, 24)
+       Max divergence:  0.12E+02 at ( 37, 28,  4)
+       Min divergence: -0.22E+01 at ( 38, 27, 18)
+       Max VN  number:  0.22E+00 at ( 37, 33, 24)
+       Total Heat Release Rate:            771.530 kW
+       Radiation Loss to Boundaries:       234.485 kW
+ 
+       Time Step   10600   September  4, 2011  18:15:03
+       ----------------------------------------------
+       CPU/step:     0.519 s, Total CPU:      1.54 hr
+       Time step:  0.00614 s, Total time:    89.22 s
+       Max CFL number:  0.80E+00 at ( 33, 32, 18)
+       Max divergence:  0.12E+02 at ( 40, 30,  4)
+       Min divergence: -0.33E+01 at ( 39, 32, 17)
+       Max VN  number:  0.19E+00 at ( 33, 32, 18)
+       Total Heat Release Rate:            800.776 kW
+       Radiation Loss to Boundaries:       237.500 kW
+ 
+       Time Step   10700   September  4, 2011  18:15:55
+       ----------------------------------------------
+       CPU/step:     0.516 s, Total CPU:      1.56 hr
+       Time step:  0.00582 s, Total time:    89.85 s
+       Max CFL number:  0.85E+00 at ( 32, 32, 21)
+       Max divergence:  0.12E+02 at ( 36, 30, 13)
+       Min divergence: -0.31E+01 at ( 34, 31, 20)
+       Max VN  number:  0.19E+00 at ( 33, 31, 20)
+       Total Heat Release Rate:            823.265 kW
+       Radiation Loss to Boundaries:       260.636 kW
+ 
+       Time Step   10800   September  4, 2011  18:16:47
+       ----------------------------------------------
+       CPU/step:     0.517 s, Total CPU:      1.57 hr
+       Time step:  0.00625 s, Total time:    90.50 s
+       Max CFL number:  0.85E+00 at ( 33, 34, 20)
+       Max divergence:  0.13E+02 at ( 35, 30,  4)
+       Min divergence: -0.27E+01 at ( 40, 33, 19)
+       Max VN  number:  0.14E+00 at ( 36, 29, 14)
+       Total Heat Release Rate:            996.373 kW
+       Radiation Loss to Boundaries:       308.802 kW
+ 
+       Time Step   10900   September  4, 2011  18:17:39
+       ----------------------------------------------
+       CPU/step:     0.519 s, Total CPU:      1.59 hr
+       Time step:  0.00644 s, Total time:    91.13 s
+       Max CFL number:  0.93E+00 at ( 39, 32, 19)
+       Max divergence:  0.12E+02 at ( 37, 28,  4)
+       Min divergence: -0.16E+01 at ( 36, 35, 24)
+       Max VN  number:  0.16E+00 at ( 40, 30, 13)
+       Total Heat Release Rate:            947.658 kW
+       Radiation Loss to Boundaries:       295.190 kW
+ 
+       Time Step   11000   September  4, 2011  18:18:31
+       ----------------------------------------------
+       CPU/step:     0.517 s, Total CPU:      1.60 hr
+       Time step:  0.00593 s, Total time:    91.73 s
+       Max CFL number:  0.88E+00 at ( 36, 35, 18)
+       Max divergence:  0.14E+02 at ( 37, 33,  4)
+       Min divergence: -0.20E+01 at ( 34, 29, 13)
+       Max VN  number:  0.17E+00 at ( 36, 34, 23)
+       Total Heat Release Rate:            958.465 kW
+       Radiation Loss to Boundaries:       283.631 kW
+ 
+       Time Step   11100   September  4, 2011  18:19:22
+       ----------------------------------------------
+       CPU/step:     0.514 s, Total CPU:      1.62 hr
+       Time step:  0.00652 s, Total time:    92.33 s
+       Max CFL number:  0.95E+00 at ( 38, 30, 18)
+       Max divergence:  0.14E+02 at ( 35, 28,  4)
+       Min divergence: -0.19E+01 at ( 35, 34, 13)
+       Max VN  number:  0.21E+00 at ( 39, 29, 21)
+       Total Heat Release Rate:            917.357 kW
+       Radiation Loss to Boundaries:       298.139 kW
+ 
+       Time Step   11200   September  4, 2011  18:20:14
+       ----------------------------------------------
+       CPU/step:     0.521 s, Total CPU:      1.63 hr
+       Time step:  0.00560 s, Total time:    92.94 s
+       Max CFL number:  0.90E+00 at ( 35, 36, 24)
+       Max divergence:  0.13E+02 at ( 35, 28,  4)
+       Min divergence: -0.18E+01 at ( 36, 33, 25)
+       Max VN  number:  0.18E+00 at ( 37, 34, 24)
+       Total Heat Release Rate:            824.611 kW
+       Radiation Loss to Boundaries:       289.187 kW
+ 
+       Time Step   11300   September  4, 2011  18:21:06
+       ----------------------------------------------
+       CPU/step:     0.516 s, Total CPU:      1.64 hr
+       Time step:  0.00578 s, Total time:    93.56 s
+       Max CFL number:  0.82E+00 at ( 37, 32, 21)
+       Max divergence:  0.13E+02 at ( 37, 28,  4)
+       Min divergence: -0.14E+01 at ( 35, 36, 24)
+       Max VN  number:  0.17E+00 at ( 34, 32, 23)
+       Total Heat Release Rate:            803.754 kW
+       Radiation Loss to Boundaries:       272.642 kW
+ 
+       Time Step   11400   September  4, 2011  18:21:58
+       ----------------------------------------------
+       CPU/step:     0.514 s, Total CPU:      1.66 hr
+       Time step:  0.00636 s, Total time:    94.17 s
+       Max CFL number:  0.97E+00 at ( 36, 32, 15)
+       Max divergence:  0.14E+02 at ( 40, 28,  4)
+       Min divergence: -0.19E+01 at ( 33, 29, 18)
+       Max VN  number:  0.20E+00 at ( 34, 30, 18)
+       Total Heat Release Rate:            872.214 kW
+       Radiation Loss to Boundaries:       320.338 kW
+ 
+       Time Step   11500   September  4, 2011  18:22:49
+       ----------------------------------------------
+       CPU/step:     0.517 s, Total CPU:      1.67 hr
+       Time step:  0.00623 s, Total time:    94.84 s
+       Max CFL number:  0.92E+00 at ( 33, 39, 25)
+       Max divergence:  0.13E+02 at ( 38, 35, 13)
+       Min divergence: -0.27E+01 at ( 40, 34, 21)
+       Max VN  number:  0.18E+00 at ( 40, 34, 21)
+       Total Heat Release Rate:            987.819 kW
+       Radiation Loss to Boundaries:       325.983 kW
+ 
+       Time Step   11600   September  4, 2011  18:23:41
+       ----------------------------------------------
+       CPU/step:     0.518 s, Total CPU:      1.69 hr
+       Time step:  0.00604 s, Total time:    95.50 s
+       Max CFL number:  0.86E+00 at ( 32, 32, 25)
+       Max divergence:  0.14E+02 at ( 36, 30, 10)
+       Min divergence: -0.26E+01 at ( 41, 31, 18)
+       Max VN  number:  0.15E+00 at ( 35, 41, 24)
+       Total Heat Release Rate:            833.236 kW
+       Radiation Loss to Boundaries:       303.503 kW
+ 
+       Time Step   11700   September  4, 2011  18:24:33
+       ----------------------------------------------
+       CPU/step:     0.518 s, Total CPU:      1.70 hr
+       Time step:  0.00679 s, Total time:    96.11 s
+       Max CFL number:  0.85E+00 at ( 41, 34, 18)
+       Max divergence:  0.12E+02 at ( 40, 28,  4)
+       Min divergence: -0.16E+01 at ( 42, 35, 19)
+       Max VN  number:  0.21E+00 at ( 34, 32, 13)
+       Total Heat Release Rate:           1057.101 kW
+       Radiation Loss to Boundaries:       340.327 kW
+ 
+       Time Step   11800   September  4, 2011  18:25:26
+       ----------------------------------------------
+       CPU/step:     0.522 s, Total CPU:      1.72 hr
+       Time step:  0.00583 s, Total time:    96.74 s
+       Max CFL number:  0.83E+00 at ( 30, 37, 25)
+       Max divergence:  0.13E+02 at ( 38, 33,  4)
+       Min divergence: -0.20E+01 at ( 37, 31, 25)
+       Max VN  number:  0.19E+00 at ( 38, 33, 24)
+       Total Heat Release Rate:           1037.983 kW
+       Radiation Loss to Boundaries:       347.907 kW
+ 
+       Time Step   11900   September  4, 2011  18:26:17
+       ----------------------------------------------
+       CPU/step:     0.515 s, Total CPU:      1.73 hr
+       Time step:  0.00678 s, Total time:    97.36 s
+       Max CFL number:  0.86E+00 at ( 49, 22, 25)
+       Max divergence:  0.13E+02 at ( 39, 33, 12)
+       Min divergence: -0.40E+01 at ( 40, 36, 20)
+       Max VN  number:  0.21E+00 at ( 40, 35, 23)
+       Total Heat Release Rate:            955.241 kW
+       Radiation Loss to Boundaries:       322.430 kW
+ 
+       Time Step   12000   September  4, 2011  18:27:10
+       ----------------------------------------------
+       CPU/step:     0.520 s, Total CPU:      1.75 hr
+       Time step:  0.00547 s, Total time:    98.00 s
+       Max CFL number:  0.78E+00 at ( 28, 35, 25)
+       Max divergence:  0.13E+02 at ( 37, 28,  4)
+       Min divergence: -0.19E+01 at ( 39, 29, 22)
+       Max VN  number:  0.13E+00 at ( 36, 30, 14)
+       Total Heat Release Rate:           1005.464 kW
+       Radiation Loss to Boundaries:       353.625 kW
+ 
+       Time Step   12100   September  4, 2011  18:28:02
+       ----------------------------------------------
+       CPU/step:     0.522 s, Total CPU:      1.76 hr
+       Time step:  0.00750 s, Total time:    98.62 s
+       Max CFL number:  0.92E+00 at ( 36, 47, 25)
+       Max divergence:  0.12E+02 at ( 39, 34,  4)
+       Min divergence: -0.20E+01 at ( 34, 32, 15)
+       Max VN  number:  0.21E+00 at ( 34, 32, 14)
+       Total Heat Release Rate:            973.036 kW
+       Radiation Loss to Boundaries:       325.499 kW
+ 
+       Time Step   12200   September  4, 2011  18:28:54
+       ----------------------------------------------
+       CPU/step:     0.519 s, Total CPU:      1.77 hr
+       Time step:  0.00700 s, Total time:    99.26 s
+       Max CFL number:  0.94E+00 at ( 37, 37, 25)
+       Max divergence:  0.12E+02 at ( 40, 33,  4)
+       Min divergence: -0.17E+01 at ( 36, 27,  9)
+       Max VN  number:  0.30E+00 at ( 40, 32, 19)
+       Total Heat Release Rate:           1016.231 kW
+       Radiation Loss to Boundaries:       370.922 kW
+ 
+       Time Step   12300   September  4, 2011  18:29:46
+       ----------------------------------------------
+       CPU/step:     0.520 s, Total CPU:      1.79 hr
+       Time step:  0.00542 s, Total time:    99.87 s
+       Max CFL number:  0.86E+00 at ( 36, 33, 18)
+       Max divergence:  0.12E+02 at ( 40, 33,  4)
+       Min divergence: -0.22E+01 at ( 33, 43, 24)
+       Max VN  number:  0.23E+00 at ( 37, 31, 17)
+       Total Heat Release Rate:           1035.767 kW
+       Radiation Loss to Boundaries:       392.974 kW
+ 
+       Time Step   12400   September  4, 2011  18:30:38
+       ----------------------------------------------
+       CPU/step:     0.521 s, Total CPU:      1.80 hr
+       Time step:  0.00561 s, Total time:   100.51 s
+       Max CFL number:  0.94E+00 at ( 36, 31, 21)
+       Max divergence:  0.12E+02 at ( 39, 28,  4)
+       Min divergence: -0.13E+01 at ( 37, 34, 25)
+       Max VN  number:  0.19E+00 at ( 36, 31, 24)
+       Total Heat Release Rate:           1051.726 kW
+       Radiation Loss to Boundaries:       394.361 kW
+ 
+       Time Step   12500   September  4, 2011  18:31:30
+       ----------------------------------------------
+       CPU/step:     0.516 s, Total CPU:      1.82 hr
+       Time step:  0.00678 s, Total time:   101.15 s
+       Max CFL number:  0.96E+00 at ( 39, 33, 16)
+       Max divergence:  0.13E+02 at ( 35, 28,  4)
+       Min divergence: -0.18E+01 at ( 37, 20, 24)
+       Max VN  number:  0.22E+00 at ( 37, 33, 24)
+       Total Heat Release Rate:           1096.854 kW
+       Radiation Loss to Boundaries:       408.747 kW
+ 
+       Time Step   12600   September  4, 2011  18:32:22
+       ----------------------------------------------
+       CPU/step:     0.518 s, Total CPU:      1.83 hr
+       Time step:  0.00598 s, Total time:   101.79 s
+       Max CFL number:  0.93E+00 at ( 33, 38, 25)
+       Max divergence:  0.12E+02 at ( 39, 28,  4)
+       Min divergence: -0.24E+01 at ( 39, 27, 18)
+       Max VN  number:  0.17E+00 at ( 42, 32, 20)
+       Total Heat Release Rate:           1059.766 kW
+       Radiation Loss to Boundaries:       410.599 kW
+ 
+       Time Step   12700   September  4, 2011  18:33:14
+       ----------------------------------------------
+       CPU/step:     0.519 s, Total CPU:      1.85 hr
+       Time step:  0.00511 s, Total time:   102.40 s
+       Max CFL number:  0.90E+00 at ( 37, 30, 21)
+       Max divergence:  0.12E+02 at ( 40, 32,  4)
+       Min divergence: -0.13E+01 at ( 38, 34, 23)
+       Max VN  number:  0.19E+00 at ( 38, 35, 23)
+       Total Heat Release Rate:           1172.631 kW
+       Radiation Loss to Boundaries:       419.644 kW
+ 
+       Time Step   12800   September  4, 2011  18:34:06
+       ----------------------------------------------
+       CPU/step:     0.519 s, Total CPU:      1.86 hr
+       Time step:  0.00625 s, Total time:   103.00 s
+       Max CFL number:  0.91E+00 at ( 48, 37, 25)
+       Max divergence:  0.13E+02 at ( 40, 32,  4)
+       Min divergence: -0.22E+01 at ( 47, 33, 25)
+       Max VN  number:  0.24E+00 at ( 38, 33, 22)
+       Total Heat Release Rate:           1126.070 kW
+       Radiation Loss to Boundaries:       414.634 kW
+ 
+       Time Step   12900   September  4, 2011  18:34:58
+       ----------------------------------------------
+       CPU/step:     0.518 s, Total CPU:      1.88 hr
+       Time step:  0.00667 s, Total time:   103.67 s
+       Max CFL number:  0.89E+00 at ( 37, 29, 17)
+       Max divergence:  0.12E+02 at ( 40, 32,  4)
+       Min divergence: -0.23E+01 at ( 38, 28, 22)
+       Max VN  number:  0.19E+00 at ( 37, 29, 22)
+       Total Heat Release Rate:           1007.174 kW
+       Radiation Loss to Boundaries:       383.203 kW
+ 
+       Time Step   13000   September  4, 2011  18:35:50
+       ----------------------------------------------
+       CPU/step:     0.521 s, Total CPU:      1.89 hr
+       Time step:  0.00561 s, Total time:   104.30 s
+       Max CFL number:  0.85E+00 at ( 38, 34, 22)
+       Max divergence:  0.12E+02 at ( 39, 33,  4)
+       Min divergence: -0.19E+01 at ( 34, 31, 20)
+       Max VN  number:  0.17E+00 at ( 37, 32, 20)
+       Total Heat Release Rate:           1228.256 kW
+       Radiation Loss to Boundaries:       474.682 kW
+ 
+       Time Step   13100   September  4, 2011  18:36:42
+       ----------------------------------------------
+       CPU/step:     0.519 s, Total CPU:      1.90 hr
+       Time step:  0.00648 s, Total time:   104.91 s
+       Max CFL number:  0.88E+00 at ( 34, 32, 19)
+       Max divergence:  0.12E+02 at ( 38, 33,  4)
+       Min divergence: -0.21E+01 at ( 31, 27, 25)
+       Max VN  number:  0.20E+00 at ( 34, 33, 20)
+       Total Heat Release Rate:           1124.162 kW
+       Radiation Loss to Boundaries:       445.706 kW
+ 
+       Time Step   13200   September  4, 2011  18:37:34
+       ----------------------------------------------
+       CPU/step:     0.519 s, Total CPU:      1.92 hr
+       Time step:  0.00673 s, Total time:   105.56 s
+       Max CFL number:  0.87E+00 at ( 38, 31, 16)
+       Max divergence:  0.12E+02 at ( 40, 30,  4)
+       Min divergence: -0.16E+01 at ( 37, 28, 24)
+       Max VN  number:  0.25E+00 at ( 35, 32, 13)
+       Total Heat Release Rate:           1095.677 kW
+       Radiation Loss to Boundaries:       406.934 kW
+ 
+       Time Step   13300   September  4, 2011  18:38:26
+       ----------------------------------------------
+       CPU/step:     0.522 s, Total CPU:      1.93 hr
+       Time step:  0.00617 s, Total time:   106.20 s
+       Max CFL number:  0.81E+00 at ( 38, 35, 23)
+       Max divergence:  0.13E+02 at ( 35, 28,  4)
+       Min divergence: -0.34E+01 at ( 35, 28,  9)
+       Max VN  number:  0.20E+00 at ( 38, 35, 23)
+       Total Heat Release Rate:           1032.752 kW
+       Radiation Loss to Boundaries:       405.473 kW
+ 
+       Time Step   13400   September  4, 2011  18:39:19
+       ----------------------------------------------
+       CPU/step:     0.521 s, Total CPU:      1.95 hr
+       Time step:  0.00522 s, Total time:   106.89 s
+       Max CFL number:  0.85E+00 at ( 38, 30, 17)
+       Max divergence:  0.12E+02 at ( 36, 28,  4)
+       Min divergence: -0.20E+01 at ( 35, 28,  8)
+       Max VN  number:  0.20E+00 at ( 38, 32, 18)
+       Total Heat Release Rate:            946.264 kW
+       Radiation Loss to Boundaries:       383.745 kW
+ 
+       Time Step   13500   September  4, 2011  18:40:11
+       ----------------------------------------------
+       CPU/step:     0.518 s, Total CPU:      1.96 hr
+       Time step:  0.00681 s, Total time:   107.53 s
+       Max CFL number:  0.87E+00 at ( 40, 32, 18)
+       Max divergence:  0.12E+02 at ( 40, 28,  4)
+       Min divergence: -0.18E+01 at ( 39, 31, 25)
+       Max VN  number:  0.22E+00 at ( 38, 31, 23)
+       Total Heat Release Rate:           1042.491 kW
+       Radiation Loss to Boundaries:       437.549 kW
+ 
+       Time Step   13600   September  4, 2011  18:41:03
+       ----------------------------------------------
+       CPU/step:     0.521 s, Total CPU:      1.98 hr
+       Time step:  0.00681 s, Total time:   108.16 s
+       Max CFL number:  0.96E+00 at ( 34, 34, 20)
+       Max divergence:  0.13E+02 at ( 37, 30, 12)
+       Min divergence: -0.19E+01 at ( 42, 28, 25)
+       Max VN  number:  0.17E+00 at ( 34, 34, 20)
+       Total Heat Release Rate:            983.058 kW
+       Radiation Loss to Boundaries:       416.344 kW
+ 
+       Time Step   13700   September  4, 2011  18:41:55
+       ----------------------------------------------
+       CPU/step:     0.519 s, Total CPU:      1.99 hr
+       Time step:  0.00688 s, Total time:   108.80 s
+       Max CFL number:  0.83E+00 at ( 48, 34, 24)
+       Max divergence:  0.13E+02 at ( 35, 28,  4)
+       Min divergence: -0.19E+01 at ( 24, 33, 25)
+       Max VN  number:  0.26E+00 at ( 37, 32, 24)
+       Total Heat Release Rate:            981.075 kW
+       Radiation Loss to Boundaries:       411.132 kW
+ 
+       Time Step   13800   September  4, 2011  18:42:47
+       ----------------------------------------------
+       CPU/step:     0.520 s, Total CPU:      2.01 hr
+       Time step:  0.00650 s, Total time:   109.44 s
+       Max CFL number:  0.88E+00 at ( 38, 31, 20)
+       Max divergence:  0.13E+02 at ( 40, 28,  4)
+       Min divergence: -0.20E+01 at ( 34, 33, 18)
+       Max VN  number:  0.18E+00 at ( 36, 33, 15)
+       Total Heat Release Rate:           1002.764 kW
+       Radiation Loss to Boundaries:       392.130 kW
+ 
+       Time Step   13900   September  4, 2011  18:43:39
+       ----------------------------------------------
+       CPU/step:     0.520 s, Total CPU:      2.02 hr
+       Time step:  0.00631 s, Total time:   110.12 s
+       Max CFL number:  0.86E+00 at ( 38, 38, 25)
+       Max divergence:  0.12E+02 at ( 40, 28,  4)
+       Min divergence: -0.23E+01 at ( 35, 30, 10)
+       Max VN  number:  0.19E+00 at ( 40, 32, 20)
+       Total Heat Release Rate:           1074.759 kW
+       Radiation Loss to Boundaries:       454.128 kW
+ 
+       Time Step   14000   September  4, 2011  18:44:31
+       ----------------------------------------------
+       CPU/step:     0.520 s, Total CPU:      2.03 hr
+       Time step:  0.00667 s, Total time:   110.76 s
+       Max CFL number:  0.95E+00 at ( 37, 33, 17)
+       Max divergence:  0.12E+02 at ( 35, 28,  4)
+       Min divergence: -0.15E+01 at ( 39, 40, 25)
+       Max VN  number:  0.17E+00 at ( 40, 32, 20)
+       Total Heat Release Rate:           1049.424 kW
+       Radiation Loss to Boundaries:       467.557 kW
+ 
+       Time Step   14100   September  4, 2011  18:45:23
+       ----------------------------------------------
+       CPU/step:     0.518 s, Total CPU:      2.05 hr
+       Time step:  0.00630 s, Total time:   111.42 s
+       Max CFL number:  0.89E+00 at ( 38, 30, 12)
+       Max divergence:  0.11E+02 at ( 35, 31,  4)
+       Min divergence: -0.16E+01 at ( 40, 26, 20)
+       Max VN  number:  0.19E+00 at ( 38, 29, 16)
+       Total Heat Release Rate:           1248.133 kW
+       Radiation Loss to Boundaries:       449.827 kW
+ 
+       Time Step   14200   September  4, 2011  18:46:15
+       ----------------------------------------------
+       CPU/step:     0.520 s, Total CPU:      2.06 hr
+       Time step:  0.00678 s, Total time:   112.04 s
+       Max CFL number:  0.93E+00 at ( 35, 33, 19)
+       Max divergence:  0.12E+02 at ( 39, 33,  4)
+       Min divergence: -0.14E+01 at ( 34, 29, 19)
+       Max VN  number:  0.19E+00 at ( 33, 33, 22)
+       Total Heat Release Rate:            779.082 kW
+       Radiation Loss to Boundaries:       380.556 kW
+ 
+       Time Step   14300   September  4, 2011  18:47:07
+       ----------------------------------------------
+       CPU/step:     0.518 s, Total CPU:      2.08 hr
+       Time step:  0.00693 s, Total time:   112.71 s
+       Max CFL number:  0.91E+00 at ( 38, 31, 21)
+       Max divergence:  0.12E+02 at ( 40, 28,  4)
+       Min divergence: -0.20E+01 at ( 38, 33, 22)
+       Max VN  number:  0.21E+00 at ( 38, 31, 24)
+       Total Heat Release Rate:           1017.752 kW
+       Radiation Loss to Boundaries:       409.873 kW
+ 
+       Time Step   14400   September  4, 2011  18:47:59
+       ----------------------------------------------
+       CPU/step:     0.518 s, Total CPU:      2.09 hr
+       Time step:  0.00745 s, Total time:   113.38 s
+       Max CFL number:  0.87E+00 at ( 43, 22, 25)
+       Max divergence:  0.12E+02 at ( 38, 28,  4)
+       Min divergence: -0.19E+01 at ( 35, 34, 19)
+       Max VN  number:  0.21E+00 at ( 36, 32, 14)
+       Total Heat Release Rate:           1073.078 kW
+       Radiation Loss to Boundaries:       416.362 kW
+ 
+       Time Step   14500   September  4, 2011  18:48:52
+       ----------------------------------------------
+       CPU/step:     0.523 s, Total CPU:      2.11 hr
+       Time step:  0.00625 s, Total time:   114.04 s
+       Max CFL number:  0.91E+00 at ( 36, 34, 14)
+       Max divergence:  0.13E+02 at ( 36, 28,  4)
+       Min divergence: -0.27E+01 at ( 39, 30, 12)
+       Max VN  number:  0.22E+00 at ( 39, 31, 12)
+       Total Heat Release Rate:           1045.530 kW
+       Radiation Loss to Boundaries:       420.098 kW
+ 
+       Time Step   14600   September  4, 2011  18:49:44
+       ----------------------------------------------
+       CPU/step:     0.518 s, Total CPU:      2.12 hr
+       Time step:  0.00701 s, Total time:   114.64 s
+       Max CFL number:  0.96E+00 at ( 34, 32, 17)
+       Max divergence:  0.12E+02 at ( 38, 33,  4)
+       Min divergence: -0.19E+01 at ( 34, 31, 25)
+       Max VN  number:  0.28E+00 at ( 35, 33, 21)
+       Total Heat Release Rate:           1117.827 kW
+       Radiation Loss to Boundaries:       436.463 kW
+ 
+       Time Step   14700   September  4, 2011  18:50:36
+       ----------------------------------------------
+       CPU/step:     0.521 s, Total CPU:      2.13 hr
+       Time step:  0.00664 s, Total time:   115.27 s
+       Max CFL number:  0.85E+00 at ( 39, 31, 20)
+       Max divergence:  0.13E+02 at ( 39, 28,  4)
+       Min divergence: -0.20E+01 at ( 36, 28, 25)
+       Max VN  number:  0.19E+00 at ( 37, 31, 24)
+       Total Heat Release Rate:           1026.696 kW
+       Radiation Loss to Boundaries:       429.087 kW
+ 
+       Time Step   14800   September  4, 2011  18:51:29
+       ----------------------------------------------
+       CPU/step:     0.528 s, Total CPU:      2.15 hr
+       Time step:  0.00708 s, Total time:   115.89 s
+       Max CFL number:  0.93E+00 at ( 35, 29, 16)
+       Max divergence:  0.12E+02 at ( 35, 28,  4)
+       Min divergence: -0.20E+01 at ( 36, 32, 17)
+       Max VN  number:  0.19E+00 at ( 38, 27, 24)
+       Total Heat Release Rate:           1000.599 kW
+       Radiation Loss to Boundaries:       443.342 kW
+ 
+       Time Step   14900   September  4, 2011  18:52:21
+       ----------------------------------------------
+       CPU/step:     0.524 s, Total CPU:      2.16 hr
+       Time step:  0.00621 s, Total time:   116.56 s
+       Max CFL number:  0.76E+00 at ( 38, 33, 19)
+       Max divergence:  0.12E+02 at ( 37, 33,  4)
+       Min divergence: -0.25E+01 at ( 36, 27, 10)
+       Max VN  number:  0.18E+00 at ( 39, 33, 23)
+       Total Heat Release Rate:           1129.854 kW
+       Radiation Loss to Boundaries:       477.092 kW
+ 
+       Time Step   15000   September  4, 2011  18:53:14
+       ----------------------------------------------
+       CPU/step:     0.527 s, Total CPU:      2.18 hr
+       Time step:  0.00568 s, Total time:   117.21 s
+       Max CFL number:  0.93E+00 at ( 39, 29, 19)
+       Max divergence:  0.12E+02 at ( 40, 28,  4)
+       Min divergence: -0.17E+01 at ( 38, 29, 17)
+       Max VN  number:  0.16E+00 at ( 40, 30, 22)
+       Total Heat Release Rate:            829.762 kW
+       Radiation Loss to Boundaries:       391.037 kW
+ 
+       Time Step   15100   September  4, 2011  18:54:07
+       ----------------------------------------------
+       CPU/step:     0.528 s, Total CPU:      2.19 hr
+       Time step:  0.00590 s, Total time:   117.83 s
+       Max CFL number:  0.95E+00 at ( 35, 32, 19)
+       Max divergence:  0.12E+02 at ( 40, 28,  4)
+       Min divergence: -0.16E+01 at ( 35, 30, 22)
+       Max VN  number:  0.16E+00 at ( 35, 32, 24)
+       Total Heat Release Rate:            993.793 kW
+       Radiation Loss to Boundaries:       430.003 kW
+ 
+       Time Step   15200   September  4, 2011  18:55:00
+       ----------------------------------------------
+       CPU/step:     0.527 s, Total CPU:      2.21 hr
+       Time step:  0.00682 s, Total time:   118.48 s
+       Max CFL number:  0.91E+00 at ( 34, 32, 19)
+       Max divergence:  0.12E+02 at ( 39, 33,  4)
+       Min divergence: -0.29E+01 at ( 40, 34, 18)
+       Max VN  number:  0.25E+00 at ( 35, 31, 19)
+       Total Heat Release Rate:           1046.439 kW
+       Radiation Loss to Boundaries:       406.898 kW
+ 
+       Time Step   15300   September  4, 2011  18:55:53
+       ----------------------------------------------
+       CPU/step:     0.526 s, Total CPU:      2.22 hr
+       Time step:  0.00655 s, Total time:   119.13 s
+       Max CFL number:  0.81E+00 at ( 39, 32, 18)
+       Max divergence:  0.13E+02 at ( 35, 28,  4)
+       Min divergence: -0.18E+01 at ( 36, 35, 14)
+       Max VN  number:  0.17E+00 at ( 38, 31, 24)
+       Total Heat Release Rate:            961.473 kW
+       Radiation Loss to Boundaries:       422.274 kW
+ 
+       Time Step   15400   September  4, 2011  18:56:46
+       ----------------------------------------------
+       CPU/step:     0.526 s, Total CPU:      2.24 hr
+       Time step:  0.00683 s, Total time:   119.79 s
+       Max CFL number:  0.85E+00 at ( 36, 33, 17)
+       Max divergence:  0.13E+02 at ( 40, 28,  4)
+       Min divergence: -0.25E+01 at ( 41, 31, 13)
+       Max VN  number:  0.18E+00 at ( 35, 34, 18)
+       Total Heat Release Rate:           1007.349 kW
+       Radiation Loss to Boundaries:       424.127 kW
+ 
+       Time Step   15428   September  4, 2011  18:57:00
+       ----------------------------------------------
+       CPU/step:     0.514 s, Total CPU:      2.24 hr
+       Time step:  0.00751 s, Total time:   120.00 s
+       Max CFL number:  0.85E+00 at ( 43, 30, 25)
+       Max divergence:  0.13E+02 at ( 40, 28,  4)
+       Min divergence: -0.25E+01 at ( 41, 31, 13)
+       Max VN  number:  0.20E+00 at ( 35, 34, 22)
+       Total Heat Release Rate:           1201.876 kW
+       Radiation Loss to Boundaries:       446.453 kW
  
 
 
  DEVICE Activation Times
 
-   1  SPK_1                             65.3 s
-   7  SPK_2                             65.5 s
-  13  SPK_3                             58.1 s
-  19  SPK_4                             59.5 s
+   1  SPK_1                             55.8 s
+   7  SPK_2                             55.7 s
+  13  SPK_3                             48.4 s
+  19  SPK_4                             48.9 s
 
 
  CPU Time Usage, Mesh   1
 
                  CPU (s)        %  
        ----------------------------
-       MAIN      8020.96     100.00
-       DIVG      1274.03      15.88
-       MASS      1635.50      20.39
-       VELO      3111.22      38.79
-       PRES       276.87       3.45
-       WALL       200.39       2.50
-       DUMP        54.73       0.68
+       MAIN      8079.42     100.00
+       DIVG      1501.77      18.59
+       MASS      1957.92      24.23
+       VELO      2388.29      29.56
+       PRES       307.05       3.80
+       WALL       184.53       2.28
+       DUMP        59.21       0.73
        PART         0.00       0.00
-       RADI      1224.56      15.27
-       FIRE       233.24       2.91
-       COMM         0.20       0.00
-       SubTot    8010.74      99.87
+       RADI      1459.25      18.06
+       FIRE       210.63       2.61
+       COMM         0.23       0.00
+       SubTot    8068.88      99.87
 
 
- Time Stepping Wall Clock Time (s):     8121.625
- Total Elapsed Wall Clock Time (s):     8384.552
+ Time Stepping Wall Clock Time (s):     9034.652
+ Total Elapsed Wall Clock Time (s):     9260.001
 
 STOP: FDS completed successfully
