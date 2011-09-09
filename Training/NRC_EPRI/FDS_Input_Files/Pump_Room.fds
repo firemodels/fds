@@ -19,6 +19,14 @@ General construction
       MATL_ID        = 'CONCRETE'
       THICKNESS      = 0.1 /
 
+&SURF ID             = 'CONCRETE FLOOR'
+      COLOR          = 'GRAY'
+      MATL_ID        = 'CONCRETE'
+      THICKNESS      = 0.9 /
+
+&VENT MB='ZMIN', SURF_ID='CONCRETE FLOOR' /
+&VENT MB='ZMAX', SURF_ID='CONCRETE FLOOR' /
+
 Cable
 
 &MATL ID             = 'PE/PVC'
@@ -27,9 +35,9 @@ Cable
       DENSITY        = 1380. /
 
 &MATL ID            = 'COPPER'
-      SPECIFIC_HEAT = 0.38
-      CONDUCTIVITY  = 387.
-      DENSITY       = 8940.   /
+      SPECIFIC_HEAT = 0.3831
+      CONDUCTIVITY  = 386.
+      DENSITY       = 8954  /
 
 &MATL ID             = 'Kaowool'
       SPECIFIC_HEAT  = 1.07
@@ -44,7 +52,7 @@ Cable
       MATL_ID(2,1:2) = 'PE/PVC','COPPER'
       MATL_MASS_FRACTION(2,1:2) = 0.33,0.67
       BACKING        = 'EXPOSED'
-      THICKNESS      = 0.051,0.025,0.051 /
+      THICKNESS      = 0.05,0.025,0.05 /
 
 &SURF ID             = 'TRAY'
       COLOR          = 'PINK'
@@ -61,13 +69,13 @@ Fire
       FYI                = 'Kerosene, C_14 H_30'
       C                  = 14.
       H                  = 30.
-      HEAT_OF_COMBUSTION = 46000.
+      HEAT_OF_COMBUSTION = 46400.
       SOOT_YIELD         = 0.1 /
 
 &SURF ID     = 'OIL FIRE'
       COLOR  = 'ORANGE'
       RAMP_Q = 'fire ramp'
-      HRRPUA = 1794.0 /
+      HRRPUA = 1811. /
 
 &RAMP ID='fire ramp', T=   0., F=0.0 /
 &RAMP ID='fire ramp', T=   1., F=1.0 /
@@ -91,8 +99,8 @@ Pump
       MATL_ID        = 'STEEL'
       THICKNESS      = 0.0015 /
 
-&OBST XB= 2.5, 6.0, 2.3, 3.8, 0.0, 1.5, SURF_ID='PUMP' /
-&OBST XB= 4.5, 6.0, 2.3, 3.8, 1.5, 2.1, SURF_ID='PUMP' /
+&OBST XB= 2.5, 4.5, 2.3, 3.8, 0.0, 1.5, SURF_ID='PUMP' /
+&OBST XB= 4.5, 6.0, 2.3, 3.8, 0.0, 2.1, SURF_ID='PUMP' /
 
 Ventilation
 
@@ -129,16 +137,7 @@ Output devices
 
 &DUMP DT_DEVC=15., DT_HRR=15. /
 
-&DEVC ID='Gas_Temp_FDS',   XYZ=2.0,3.0,4.5, QUANTITY='TEMPERATURE' /
-
-&PROP ID='Sprinkler', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=130, ACTIVATION_TEMPERATURE=100., 
-      FLOW_RATE=0.1, SPRAY_ANGLE=65.,75., PART_ID='water droplets', DROPLET_VELOCITY=0.1 /
-&DEVC ID='Sprinkler1', XYZ=4.5,3.0,4.8, PROP_ID='Sprinkler' /
-
-&PART ID='water droplets', WATER=.TRUE./
-
-&PROP ID='Smoke Detector', QUANTITY='spot obscuration', LENGTH=1.8, ACTIVATION_OBSCURATION = 4.9 /
-&DEVC ID='Smoke1', XYZ=3.8,3.0,4.8, PROP_ID='Smoke Detector' /
+&DEVC ID='Gas_Temp_FDS', XYZ=2.0,3.0,4.5, QUANTITY='TEMPERATURE' /
 
 &DEVC QUANTITY='WALL TEMPERATURE', ID='Temp_Wall_FDS', XYZ=0.0,3.0,4.0, IOR=1 /
 &DEVC QUANTITY='WALL TEMPERATURE', ID='Max_Surf_Temp_ERFBS_FDS', XB=0,3,0,5,2,6, STATISTICS='MAX', SURF_ID='RACEWAY' /
