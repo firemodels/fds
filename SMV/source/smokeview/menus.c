@@ -3902,9 +3902,9 @@ void VentMenu(int value){
 }
 
 
-/* ------------------ EmbeddedMenu ------------------------ */
+/* ------------------ ImmersedMenu ------------------------ */
 
-void EmbeddedMenu(int value){
+void ImmersedMenu(int value){
   updatemenu=1;
   switch (value){
     case 0:
@@ -4394,7 +4394,7 @@ static int plot3dshowmenu=0, staticvariablemenu=0, helpmenu=0;
 static int vectorskipmenu=0,unitsmenu=0;
 static int isosurfacemenu=0, isovariablemenu=0, levelmenu=0;
 static int isoblockmenu=0, fontmenu=0, aperturemenu=0,dialogmenu=0,zoommenu=0;
-static int gridslicemenu=0, blockagemenu=0, embeddedmenu=0, loadpatchmenu=0, ventmenu=0;
+static int gridslicemenu=0, blockagemenu=0, immersedmenu=0, loadpatchmenu=0, ventmenu=0;
 static int loadisomenu=0, isosurfacetypemenu=0;
 static int geometrymenu=0, loadunloadmenu=0, reloadmenu=0, disclaimermenu=0, terrain_showmenu=0;
 static int scriptmenu=0;
@@ -4702,7 +4702,7 @@ updatemenu=0;
 
 /* --------------------------------embedded menu -------------------------- */
 
-  CREATEMENU(embeddedmenu,EmbeddedMenu);
+  CREATEMENU(immersedmenu,ImmersedMenu);
   glutAddMenuEntry(_("View Method:"),999);
   if(showtrisurface==1){
     glutAddMenuEntry(_(" *Solid"),0);
@@ -5326,7 +5326,7 @@ updatemenu=0;
 
   CREATEMENU(geometrymenu,GeometryMenu);
   if(showedit==0&&ntotal_blockages>0)glutAddSubMenu(_("Obstacles"),blockagemenu);
-  if(ntrilistinfo>0)glutAddSubMenu(_("Embedded Solids"),embeddedmenu);
+  if(ntrilistinfo>0)glutAddSubMenu(_("Immersed Solids"),immersedmenu);
   if(nobject_defs>0){
     int num_activedevices=0;
 
