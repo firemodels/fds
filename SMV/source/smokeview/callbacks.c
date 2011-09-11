@@ -2456,20 +2456,10 @@ void reset_gltime(void){
 void update_current_mesh(mesh *meshi){
   int i;
   iso *isoi;
+  int nsteps=-1;
 
   current_mesh=meshi;
-  if(isoinfo!=NULL&&current_mesh->isofilenum!=-1){
-    loaded_isomesh=NULL;
-    for(i=0;i<nisoinfo;i++){
-      isoi = isoinfo + i;
-      if(isoi->loaded==0)continue;
-      loaded_isomesh = meshinfo+isoi->blocknumber;
-      break;
-    }
-  }
-  else{
-    loaded_isomesh=NULL;
-  }
+  loaded_isomesh=get_loaded_isomesh();
   update_iso_showlevels();
   update_plot3dtitle();
 }

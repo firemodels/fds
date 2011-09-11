@@ -306,14 +306,7 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
     {
       iso *isoi;
 
-      loaded_isomesh=NULL;
-      for(ii=0;ii<nisoinfo;ii++){
-        isoi=isoinfo+ii;
-        if(isoi->loaded==1){
-          loaded_isomesh=meshinfo+isoi->blocknumber;
-          break;
-        }
-      }
+      loaded_isomesh=get_loaded_isomesh();
       update_iso_showlevels();
     }
     return;
@@ -626,7 +619,7 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
 
   ib->loaded=1;
   ib->display=1;
-  loaded_isomesh=meshinfo+ib->blocknumber;
+  loaded_isomesh=get_loaded_isomesh();
   update_iso_showlevels();
   ReadIsoFile=1;
   plotstate=getplotstate(DYNAMIC_PLOTS);
@@ -1910,6 +1903,25 @@ void Update_Isotris(int flag){
   CheckMemory;
 }
 
+/* ------------------ get_loaded_isomesh ------------------------ */
 
+mesh *get_loaded_isomesh(void){
+  mesh *return_mesh;
+  int i,nsteps=-1;
 
+  if(isoinfo==NULL)return NULL;
+  return_mesh=NULL;
+  for(i=0;i<nisoinfo;i++){
+    mesh *mesh2;
+    iso *isoi;
 
+    isoi = isoinfo + i;
+    if(isoi->loaded==0)continue;
+    mesh2 = meshinfo + isoi->blocknumber;
+    if(nsteps==-1||mesh2->nisosteps<nsteps){
+      return_mesh = mesh2;
+      nsteps=mesh2->nisosteps;
+    }
+  }
+  return return_mesh;
+}

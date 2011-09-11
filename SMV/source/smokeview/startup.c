@@ -2114,7 +2114,6 @@ void initvars0(void){
   current_mesh=NULL;
   mesh_save=NULL;
   mesh_last=NULL;
-  loaded_isomesh=NULL;
   tourinfo=NULL;
 
   treeinfo=NULL;
