@@ -287,6 +287,7 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
   ib->isoupdate_timestep=-1;
   meshi = meshinfo+blocknumber;
   unloadiso(meshi);
+  unload_iso_trans();
   ib->loaded=0;
   ib->display=0;
   plotstate=getplotstate(DYNAMIC_PLOTS);
@@ -660,8 +661,35 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
     printf(" %.1f MB downloaded in %.2f s (overhead: %.2f s)",
     (float)file_size/1000000.,delta_time,delta_time0-delta_time);
   }
+
   glutPostRedisplay();
   CheckMemory;
+}
+
+/* ------------------ unloadiso_iso_trans ------------------------ */
+
+void unload_iso_trans(void){
+  if(iso_trans_list!=NULL){
+    int i;
+
+    for(i=0;i<niso_timesteps;i++){
+      FREEMEMORY(iso_trans_list[i]);
+    }
+    FREEMEMORY(niso_trans_list);
+    FREEMEMORY(iso_trans_list);
+  }
+  if(iso_opaques_list!=NULL){
+      int i;
+
+      for(i=0;i<niso_timesteps;i++){
+        FREEMEMORY(iso_opaques_list[i]);
+      }
+    FREEMEMORY(niso_opaques_list);
+    FREEMEMORY(iso_opaques_list);
+  }
+
+  niso_trans=0;
+  niso_opaques=0;
 }
 
 /* ------------------ unloadiso ------------------------ */
@@ -690,27 +718,8 @@ void unloadiso(mesh *meshi){
   meshi->nisosteps=0;
   FREEMEMORY(ib->normaltable);
 
-  if(iso_trans_list!=NULL){
-    int i;
+  unload_iso_trans();
 
-    for(i=0;i<niso_timesteps;i++){
-      FREEMEMORY(iso_trans_list[i]);
-    }
-    FREEMEMORY(niso_trans_list);
-    FREEMEMORY(iso_trans_list);
-  }
-  if(iso_opaques_list!=NULL){
-      int i;
-
-      for(i=0;i<niso_timesteps;i++){
-        FREEMEMORY(iso_opaques_list[i]);
-      }
-    FREEMEMORY(niso_opaques_list);
-    FREEMEMORY(iso_opaques_list);
-  }
-
-  niso_trans=0;
-  niso_opaques=0;
   ib->loaded=0;
   ib->display=0;
   plotstate=getplotstate(DYNAMIC_PLOTS);

@@ -792,6 +792,7 @@ EXTERNCPP void getSliceColors(const float *t, int nt, unsigned char *it,
               char labels[12][11],char **scale, float *fscale, float *tlevels2,
               int *extreme_min, int *extreme_max
               );
+EXTERNCPP void unload_iso_trans(void);
 EXTERNCPP void setisolabels(float smin, float smax, 
                     iso *sd, int *errorcode);
 EXTERNCPP void getIsoLabels(float tmin, float tmax, int nlevel,
