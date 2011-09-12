@@ -2455,7 +2455,6 @@ LAMBDALOOP: DO NLAMBDA = 1, NLMBDMIE
    RADIUSLOOP: DO NX = 1, NRDMIE
 
       XXX(NX) = MIN(XX_MAX,2._EB*PI*RDMIE(NX)/LMBDMIE(NLAMBDA))
-
       CALL MIEV0( XXX(NX), CREFIN, PERFCT, MIMCUT, ANYANG,   &
                   NMIEANG2, XMU2, NMOM, IPOLZN, MOMDIM, PRNT,  &
                   QE, QS, GQSC, &
@@ -2466,10 +2465,14 @@ LAMBDALOOP: DO NLAMBDA = 1, NLMBDMIE
 
 !     Calculate single drop phase function
 
-      DO I = 1,NMIEANG2
-         PHSFUN(I) = 2._EB*(abs(S1(I))**2 + abs(S2(I))**2 )
-      ENDDO
-      IF (ABS(QS)>ZERO_P) PHSFUN = PHSFUN/(QS*XXX(NX)**2)
+      IF (ABS(QS)>ZERO_P) THEN
+         DO I = 1,NMIEANG2
+            PHSFUN(I) = 2._EB*(abs(S1(I))**2 + abs(S2(I))**2 )
+         ENDDO
+         PHSFUN = PHSFUN/(QS*XXX(NX)**2)
+      ELSE
+         PHSFUN = 1.0_EB
+      ENDIF
 
 !     Calculate the innermost integral of the forward scattering fraction
 
@@ -2507,7 +2510,6 @@ LAMBDALOOP: DO NLAMBDA = 1, NLMBDMIE
          STMP = STMP + (PFOR(I,I)+PFOR(I+1,I)+PFOR(I+1,I+1))*AIJ/3._EB
       ENDDO
       CHI_F(NX,NLAMBDA) = 2._EB*STMP/(4._EB*PI/NRA)      
-
    ENDDO RADIUSLOOP
 ENDDO LAMBDALOOP
 
