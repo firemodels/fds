@@ -44,7 +44,6 @@ f(k_fds);
 loglog(f(kk),slope_scale*f(kk).^(-5/3),'k-','LineWidth',1)
 loglog([f_puff,f_puff],[min(pave(k)),max(pave(k))],'k--','LineWidth',2);
 loglog([.5/dt,.5/dt],[min(pave(k)),1e-3*max(pave(k))],nyquist_style,'LineWidth',2);
-loglog([.5/dt_out,.5/dt_out],[min(pave(k)),1e-2*max(pave(k))],'k--','LineWidth',2);
 
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
@@ -71,7 +70,6 @@ annotation('arrow',[.3 .4],[.3 .3]);
 text(1e1,4e-2,'-5/3','FontSize',Label_Font_Size,'Interpreter','LaTeX')
 text(1e2,1.1e-3,'Nyquist','FontSize',Label_Font_Size,'Interpreter','LaTeX')
 text(1.4e2,.4e-3,'limit','FontSize',Label_Font_Size,'Interpreter','LaTeX')
-text(4e0,4e-6,'output resolution','FontSize',Label_Font_Size,'Interpreter','LaTeX')
 
 % add SVN if file is available
 
