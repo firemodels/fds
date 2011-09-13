@@ -31,24 +31,24 @@ vent = ['&VENT MB=''ZMAX'', SURF_ID=''OPEN''/']; fprintf(fid,'%s\n',vent);
 
 fprintf(fid,'%s\n','  '); % blank line
 
-% write NODE lines
+% write VERT lines
 
 s = size(x);
 
 for i=1:s(1)
     for j=1:s(2)
-       node = ['&NODE XYZ=',num2str(x(i,j)),',',num2str(y(i,j)),',',num2str(z(i,j)),' /'];
-       fprintf(fid,'%s\n',node);
+       vert = ['&VERT X=',num2str(x(i,j)),',',num2str(y(i,j)),',',num2str(z(i,j)),' /'];
+       fprintf(fid,'%s\n',vert);
     end
 end
 
 fprintf(fid,'%s\n','  '); % blank line
 
-% write TRIS lines
+% write FACE lines
 
 for i=1:length(tri(:,1))
-    tris = ['&TRIS NODES=',num2str(tri(i,1)),',',num2str(tri(i,3)),',',num2str(tri(i,2)),', SURF_ID=''terrain'' /'];
-    fprintf(fid,'%s\n',tris);
+    face = ['&FACE N=',num2str(tri(i,1)),',',num2str(tri(i,3)),',',num2str(tri(i,2)),', SURF_ID=''terrain'' /'];
+    fprintf(fid,'%s\n',face);
 end
 
 fprintf(fid,'%s\n','  '); % blank line
