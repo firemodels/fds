@@ -1362,11 +1362,11 @@ int readsmv(char *file, char *file2){
       npropinfo++;
       continue;
     }
-    if(match(buffer,"NODE",4) == 1){
+    if(match(buffer,"VERT",4) == 1){
       npointlistinfo++;
       continue;
     }
-    if(match(buffer,"TRIS",4) == 1){
+    if(match(buffer,"FACE",4) == 1){
       ntrilistinfo++;
       continue;
     }
@@ -3453,7 +3453,7 @@ typedef struct {
     +++++++++++++++++++++++++++++ NODE ++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"NODE",4) == 1){
+    if(match(buffer,"VERT",4) == 1){
       int nnodes=0,i;
       pointlistdata *pointlisti;
       float *xyzn;
@@ -3488,10 +3488,10 @@ typedef struct {
 
     /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++ TRIS ++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++ FACE ++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"TRIS",4) == 1){
+    if(match(buffer,"FACE",4) == 1){
       int ntris=0,i;
       trilistdata *trii;
       pointlistdata *pointlisti;
