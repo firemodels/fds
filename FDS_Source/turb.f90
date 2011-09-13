@@ -2190,7 +2190,7 @@ USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 IMPLICIT NONE
 
 PRIVATE
-PUBLIC :: INIT_IBM,VELTAN2D,VELTAN3D,TRILINEAR,GETX,GETU,GETGRAD,INIT_TRIS
+PUBLIC :: INIT_IBM,VELTAN2D,VELTAN3D,TRILINEAR,GETX,GETU,GETGRAD,INIT_FACE
  
 CONTAINS
 
@@ -2199,14 +2199,19 @@ USE MEMORY_FUNCTIONS, ONLY: ChkMemErr
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T
-INTEGER :: I,J,K,NG
+INTEGER :: I,J,K,NG,NV,I_MIN,I_MAX,J_MIN,J_MAX,K_MIN,K_MAX,IERR
 TYPE (MESH_TYPE), POINTER :: M
 TYPE (GEOMETRY_TYPE), POINTER :: G
-REAL(EB) :: DELTA,RP,XU(3),PP(3),DP,TIME,TOL=1.E-9_EB
-REAL(EB) :: X_MIN,Y_MIN,Z_MIN,X_MAX,Y_MAX,Z_MAX
+REAL(EB) :: DELTA,RP,XU(3),PP(3),DP,TIME,TOL=1.E-9_EB, &
+            X_MIN,Y_MIN,Z_MIN,X_MAX,Y_MAX,Z_MAX,XX(4),YY(4),ZZ(4),XP(3)
 
 TIME = T
 M => MESHES(NM)
+
+M%U_MASK=1
+M%V_MASK=1
+M%W_MASK=1
+M%P_MASK=1
 
 ! geometry loop
 
@@ -2342,11 +2347,11 @@ GEOM_LOOP: DO NG=1,N_GEOM
             
                CASE(IBOX) MASK_SHAPE
                
-                  ! this will not work for overlapping geometry, but use for now
-                  M%U_MASK(I,J,K)=1
-                  M%V_MASK(I,J,K)=1
-                  M%W_MASK(I,J,K)=1
-                  M%P_MASK(I,J,K)=1
+                  !! this will not work for overlapping geometry, but use for now
+                  !M%U_MASK(I,J,K)=1
+                  !M%V_MASK(I,J,K)=1
+                  !M%W_MASK(I,J,K)=1
+                  !M%P_MASK(I,J,K)=1
                   
                   ! see if the point is inside geometry
                   IF (ABS( M%X(I)-G%X)<G%HL(1) .AND. &
@@ -2372,10 +2377,10 @@ GEOM_LOOP: DO NG=1,N_GEOM
                   
                CASE(ISPHERE) MASK_SHAPE
                
-                  M%U_MASK(I,J,K)=1
-                  M%V_MASK(I,J,K)=1
-                  M%W_MASK(I,J,K)=1
-                  M%P_MASK(I,J,K)=1
+                  !M%U_MASK(I,J,K)=1
+                  !M%V_MASK(I,J,K)=1
+                  !M%W_MASK(I,J,K)=1
+                  !M%P_MASK(I,J,K)=1
                
                   RP = SQRT( (M%X(I)-G%X)**2+(M%YC(J)-G%Y)**2+(M%ZC(K)-G%Z)**2 )
                   IF (RP-G%RADIUS < DELTA) M%U_MASK(I,J,K) = 0
@@ -2395,10 +2400,10 @@ GEOM_LOOP: DO NG=1,N_GEOM
                   
                CASE(ICYLINDER) MASK_SHAPE
                
-                  M%U_MASK(I,J,K)=1
-                  M%V_MASK(I,J,K)=1
-                  M%W_MASK(I,J,K)=1
-                  M%P_MASK(I,J,K)=1
+                  !M%U_MASK(I,J,K)=1
+                  !M%V_MASK(I,J,K)=1
+                  !M%W_MASK(I,J,K)=1
+                  !M%P_MASK(I,J,K)=1
                
                   CYLINDER_Y: IF (ABS(G%YOR-1._EB)<EPSILON_EB) THEN
                      RP = SQRT( (M%X(I)-G%X)**2+(M%ZC(K)-G%Z)**2 )
@@ -2482,47 +2487,188 @@ GEOM_LOOP: DO NG=1,N_GEOM
 
 ENDDO GEOM_LOOP
 
+! unstructured geometry loop
+
+VOLUME_LOOP: DO NV=1,N_VOLU
+
+   XX(1) = VERTEX(VOLUME(NV)%VERTEX(1))%X
+   XX(2) = VERTEX(VOLUME(NV)%VERTEX(2))%X
+   XX(3) = VERTEX(VOLUME(NV)%VERTEX(3))%X
+   XX(4) = VERTEX(VOLUME(NV)%VERTEX(4))%X
+
+   YY(1) = VERTEX(VOLUME(NV)%VERTEX(1))%Y
+   YY(2) = VERTEX(VOLUME(NV)%VERTEX(2))%Y
+   YY(3) = VERTEX(VOLUME(NV)%VERTEX(3))%Y
+   YY(4) = VERTEX(VOLUME(NV)%VERTEX(4))%Y
+
+   ZZ(1) = VERTEX(VOLUME(NV)%VERTEX(1))%Z
+   ZZ(2) = VERTEX(VOLUME(NV)%VERTEX(2))%Z
+   ZZ(3) = VERTEX(VOLUME(NV)%VERTEX(3))%Z
+   ZZ(4) = VERTEX(VOLUME(NV)%VERTEX(4))%Z
+
+   ! bounding box
+
+   X_MIN = MINVAL(XX)
+   X_MAX = MAXVAL(XX)
+
+   Y_MIN = MINVAL(YY)
+   Y_MAX = MAXVAL(YY)
+
+   Z_MIN = MINVAL(ZZ)
+   Z_MAX = MAXVAL(ZZ)
+
+   I_MIN = M%IBAR
+   J_MIN = M%JBAR
+   K_MIN = M%KBAR
+
+   IF (X_MIN>=M%XS .AND. X_MIN<=M%XF) I_MIN = MAX(0,FLOOR((X_MIN-M%XS)/M%DX(1))-1)
+   IF (Y_MIN>=M%YS .AND. Y_MIN<=M%YF) J_MIN = MAX(0,FLOOR((Y_MIN-M%YS)/M%DY(1))-1)
+   IF (Z_MIN>=M%ZS .AND. Z_MIN<=M%ZF) K_MIN = MAX(0,FLOOR((Z_MIN-M%ZS)/M%DZ(1))-1)
+   
+   I_MAX = 0
+   J_MAX = 0
+   K_MAX = 0
+
+   IF (X_MAX>=M%XS .AND. X_MAX<=M%XF) I_MAX = MIN(M%IBAR,CEILING((X_MAX-M%XS)/M%DX(1))+1)
+   IF (Y_MAX>=M%YS .AND. Y_MAX<=M%YF) J_MAX = MIN(M%JBAR,CEILING((Y_MAX-M%YS)/M%DY(1))+1)
+   IF (Z_MAX>=M%ZS .AND. Z_MAX<=M%ZF) K_MAX = MIN(M%KBAR,CEILING((Z_MAX-M%ZS)/M%DZ(1))+1)
+   
+   IF (TWO_D) THEN
+      J_MIN=1
+      J_MAX=1
+   ENDIF
+   
+   IF ( I_MAX<I_MIN .OR. &
+        J_MAX<J_MIN .OR. &
+        K_MAX<K_MIN ) CYCLE VOLUME_LOOP
+
+   ! mask cells
+
+   DO K=K_MIN,K_MAX
+      DO J=J_MIN,J_MAX
+         DO I=I_MIN,I_MAX
+
+            ! test pcell (cell center)
+            XP = (/M%XC(I),M%YC(J),M%ZC(K)/)
+            IERR=0
+            CALL TEST_POINT_IN_VOLUME(IERR,XP,XX,YY,ZZ)
+            IF (IERR==1) M%P_MASK(I,J,K)=-1
+
+            ! test ucell
+            XP = (/M%X(I),M%YC(J),M%ZC(K)/)
+            IERR=0
+            CALL TEST_POINT_IN_VOLUME(IERR,XP,XX,YY,ZZ)
+            IF (IERR==1) M%U_MASK(I,J,K)=-1
+
+            ! test vcell
+            XP = (/M%XC(I),M%Y(J),M%ZC(K)/)
+            IERR=0
+            CALL TEST_POINT_IN_VOLUME(IERR,XP,XX,YY,ZZ)
+            IF (IERR==1) M%V_MASK(I,J,K)=-1
+
+            ! test wcell
+            XP = (/M%XC(I),M%YC(J),M%Z(K)/)
+            IERR=0
+            CALL TEST_POINT_IN_VOLUME(IERR,XP,XX,YY,ZZ)
+            IF (IERR==1) M%W_MASK(I,J,K)=-1
+
+         ENDDO
+      ENDDO
+   ENDDO
+
+ENDDO VOLUME_LOOP
+
 END SUBROUTINE INIT_IBM
 
 
-SUBROUTINE INIT_TRIS
+SUBROUTINE TEST_POINT_IN_VOLUME(IERR,XP,XX,YY,ZZ)
+USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
+IMPLICIT NONE
+
+INTEGER, INTENT(INOUT) :: IERR
+REAL(EB), INTENT(IN) :: XP(3),XX(4),YY(4),ZZ(4)
+REAL(EB) :: U_VEC(3),V_VEC(3),N_VEC(3),Q_VEC(3),R_VEC(3)
+INTEGER :: I,N(4,4)
+
+! In this routine, we test all four faces of the tet volume defined by the points X(i),Y(i),Z(i); i=1:4.
+! If the point is on the negative side of all the faces, it is inside the volume.
+
+! define the vertex ordering for each face (store later)
+
+N(1,:) = (/1,2,3,4/)
+N(2,:) = (/1,3,4,2/)
+N(3,:) = (/1,4,2,3/)
+N(4,:) = (/2,4,3,1/)
+
+IERR=1 ! start by assuming the point is inside
+
+FACE_LOOP: DO I=1,4
+
+   ! vectors forming the sides of the triangle
+
+   U_VEC = (/XX(N(I,2))-XX(N(I,1)),YY(N(I,2))-YY(N(I,1)),ZZ(N(I,2))-ZZ(N(I,1))/)
+   V_VEC = (/XX(N(I,3))-XX(N(I,1)),YY(N(I,3))-YY(N(I,1)),ZZ(N(I,3))-ZZ(N(I,1))/)
+
+   CALL CROSS_PRODUCT(N_VEC,U_VEC,V_VEC)
+
+   ! form a vector from a point on the triangular surface to the point XP
+
+   Q_VEC = XP-(/XX(N(I,1)),YY(N(I,1)),ZZ(N(I,1))/)
+
+   ! also form a vector from the triangular surface to the other point on the volume defining inside
+
+   R_VEC = (/XX(N(I,4)),YY(N(I,4)),ZZ(N(I,4))/)-(/XX(N(I,1)),YY(N(I,1)),ZZ(N(I,1))/)
+
+   ! if the sign of the dot products are equal, the point is inside, else it is outside and we return
+
+   IF ( ABS( SIGN(1._EB,DOT_PRODUCT(Q_VEC,N_VEC))-SIGN(1._EB,DOT_PRODUCT(R_VEC,N_VEC)) )>ZERO_P ) THEN
+      IERR=0
+      RETURN
+   ENDIF
+
+ENDDO FACE_LOOP
+
+END SUBROUTINE TEST_POINT_IN_VOLUME
+
+
+SUBROUTINE INIT_FACE
 
 USE COMP_FUNCTIONS, ONLY: SHUTDOWN
-USE GLOBAL_CONSTANTS, ONLY: N_TRIS
+USE GLOBAL_CONSTANTS, ONLY: N_FACE
 USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
 IMPLICIT NONE
 
 INTEGER :: I
 REAL(EB) :: N_VEC(3),N_LENGTH,U_VEC(3),V_VEC(3)
-TYPE(TRIANGULAR_SURFACE_TYPE), POINTER :: TRI
+TYPE(FACET_TYPE), POINTER :: F
 REAL(EB), PARAMETER :: TOL=1.E-10_EB
 
-DO I=1,N_TRIS
+DO I=1,N_FACE
 
-   TRI=>TRIANGULAR_SURFACE(I)
+   F=>FACET(I)
 
-   U_VEC(1) = TRINODES(TRI%NODE(2))%X - TRINODES(TRI%NODE(1))%X
-   U_VEC(2) = TRINODES(TRI%NODE(2))%Y - TRINODES(TRI%NODE(1))%Y
-   U_VEC(3) = TRINODES(TRI%NODE(2))%Z - TRINODES(TRI%NODE(1))%Z
+   U_VEC(1) = VERTEX(F%VERTEX(2))%X - VERTEX(F%VERTEX(1))%X
+   U_VEC(2) = VERTEX(F%VERTEX(2))%Y - VERTEX(F%VERTEX(1))%Y
+   U_VEC(3) = VERTEX(F%VERTEX(2))%Z - VERTEX(F%VERTEX(1))%Z
 
-   V_VEC(1) = TRINODES(TRI%NODE(3))%X - TRINODES(TRI%NODE(1))%X
-   V_VEC(2) = TRINODES(TRI%NODE(3))%Y - TRINODES(TRI%NODE(1))%Y
-   V_VEC(3) = TRINODES(TRI%NODE(3))%Z - TRINODES(TRI%NODE(1))%Z
+   V_VEC(1) = VERTEX(F%VERTEX(3))%X - VERTEX(F%VERTEX(1))%X
+   V_VEC(2) = VERTEX(F%VERTEX(3))%Y - VERTEX(F%VERTEX(1))%Y
+   V_VEC(3) = VERTEX(F%VERTEX(3))%Z - VERTEX(F%VERTEX(1))%Z
 
    CALL CROSS_PRODUCT(N_VEC,U_VEC,V_VEC)
    N_LENGTH = SQRT(DOT_PRODUCT(N_VEC,N_VEC))
 
    IF (N_LENGTH>TOL) THEN
-      TRI%NVEC(1) = N_VEC(1)/N_LENGTH
-      TRI%NVEC(2) = N_VEC(2)/N_LENGTH
-      TRI%NVEC(3) = N_VEC(3)/N_LENGTH
+      F%NVEC(1) = N_VEC(1)/N_LENGTH
+      F%NVEC(2) = N_VEC(2)/N_LENGTH
+      F%NVEC(3) = N_VEC(3)/N_LENGTH
    ELSE
-      CALL SHUTDOWN('ERROR: Invalid triangular surface')
+      CALL SHUTDOWN('ERROR: Invalid facet')
    ENDIF
 
 ENDDO
 
-END SUBROUTINE INIT_TRIS
+END SUBROUTINE INIT_FACE
 
 
 REAL(EB) FUNCTION TRILINEAR(UU,DXI,LL)
