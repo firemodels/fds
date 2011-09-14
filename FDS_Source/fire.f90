@@ -447,7 +447,7 @@ SELECT CASE (MODE)
          DO NS=1,N_SPECIES
             IF(RN%N_S(NS)>= -998._EB) THEN
                IF (YY_PRIMITIVE(NS) < ZZ_MIN) THEN
-                  RATE_CONSTANT = RATE_CONSTANT
+                  RATE_CONSTANT = 0._EB
                ELSE
                   RATE_CONSTANT = YY_PRIMITIVE(NS)**RN%N_S(NS)*RATE_CONSTANT
                ENDIF
