@@ -1,4 +1,4 @@
-&HEAD CHID='FM_SNL_04',TITLE='FM-SNL Test 4' /
+&HEAD CHID='FM_SNL_14',TITLE='FM-SNL Test 14' /
 
 &MESH IJK=24,24, 60, XB=11.0,13.4, 5.0, 7.4, 0.0, 6.1 /
 &MESH IJK=67,25, 30, XB= 0.0,13.4, 0.0, 5.0, 0.0, 6.1 /
@@ -6,25 +6,25 @@
 &MESH IJK=67,24, 30, XB= 0.0,13.4, 7.4,12.2, 0.0, 6.1 /
 &MESH IJK=24,61, 30, XB=13.4,18.2, 0.0,12.2, 0.0, 6.1 /
 
-&TIME T_END=1210. /
+&TIME T_END=1140. /
 
 &MISC TMPA=15. /
 
 &RADI RADIATIVE_FRACTION=0.4 /
-&REAC FUEL         = 'PROPYLENE'
-      FYI        = 'Propylene, C_3 H_6'
-      C          = 3.
-      H          = 6.
+&REAC FUEL         = 'METHANOL'
+      FYI        = 'Methanol, C H_4 O'
+      C          = 1.
+      H          = 4.
       SOOT_YIELD = 0.02 /
 
-&SURF ID='burner', HRRPUA=806., RAMP_Q='fire', COLOR='RED' / 
+&SURF ID='burner', HRRPUA=780., RAMP_Q='fire', COLOR='RED' / 
 &RAMP ID='fire',T=  0.0,F=0.0 /
-&RAMP ID='fire',T= 60.0,F=0.0625 /
-&RAMP ID='fire',T=120.0,F=0.25   /
-&RAMP ID='fire',T=180.0,F=0.5625 /
-&RAMP ID='fire',T=240.0,F=1.0    /
-&RAMP ID='fire',T=600.0,F=1.0    /
-&RAMP ID='fire',T=601.0,F=0.0    /
+&RAMP ID='fire',T= 10.0,F=1.0 /
+&RAMP ID='fire',T=120.0,F=1.0 /
+&RAMP ID='fire',T=180.0,F=1.0 /
+&RAMP ID='fire',T=240.0,F=1.0 /
+&RAMP ID='fire',T=575.0,F=1.0 /
+&RAMP ID='fire',T=576.0,F=0.0 /
 
 &MATL ID='MARINITE'
       FYI='Nowlen, Survivors Guide, Feb 1999'
@@ -40,7 +40,7 @@
 
 &SURF ID='duct',VOLUME_FLUX=-0.11,COLOR='GREEN' / 
 
-&OBST XB=11.8,12.6, 5.7,6.5,0.0,0.2,SURF_IDS='burner','WALL BOARD','WALL BOARD' /sand burner 
+&OBST XB=8.75,9.55,11.4,12.2,0.0,0.2,SURF_IDS='burner','WALL BOARD','WALL BOARD' /sand burner 
 
 &OBST XB= 2.8, 3.4, 2.8, 3.4, 4.9, 6.1, SURF_IDS='WALL BOARD','WALL BOARD','duct' /#1 injection duct 
 &OBST XB= 2.8, 3.4, 2.8, 3.4, 4.6, 4.6 /  deflector plate
