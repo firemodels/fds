@@ -3,6 +3,7 @@
 % cube_demo.m
 %
 % Builds cube with tet volume mesh in FDS format from Matlab tetramesh example.
+% The surface tri mesh is generated using the freeBoundary function.
 
 close all
 clear all
@@ -28,10 +29,16 @@ fprintf(fid,'%s\n','  '); % blank line
 
 mesh = ['&MESH IJK=16,16,16, XB=-5,5,-5,5,-5,5/']; fprintf(fid,'%s\n',mesh); fprintf(fid,'%s\n','  ');
 
-time = ['&TIME T_END=1./']; fprintf(fid,'%s\n',time); fprintf(fid,'%s\n','  '); % blank line
+time = ['&TIME T_END=10./']; fprintf(fid,'%s\n',time); fprintf(fid,'%s\n','  '); % blank line
 
 misc = ['&MISC IMMERSED_BOUNDARY_METHOD=0 /']; fprintf(fid,'%s\n',misc); fprintf(fid,'%s\n','  '); % blank line
 
+vent = ['&VENT XB=-5,5,-5,5,-5,-5, SURF_ID=''supply'' /']; fprintf(fid,'%s\n',vent);
+vent = ['&VENT XB=-5,5,-5,5,5,5, SURF_ID=''OPEN'' /']; fprintf(fid,'%s\n',vent);
+
+fprintf(fid,'%s\n','  '); % blank line
+
+surf = ['&SURF ID=''supply'', VEL=-1., COLOR=''LIGHT BLUE''/'];  fprintf(fid,'%s\n',surf);
 surf = ['&SURF ID=''s1'', COLOR=''WHITE''/'];  fprintf(fid,'%s\n',surf);
 surf = ['&SURF ID=''s2'', COLOR=''YELLOW''/']; fprintf(fid,'%s\n',surf);
 surf = ['&SURF ID=''s3'', COLOR=''ORANGE''/']; fprintf(fid,'%s\n',surf);
@@ -45,6 +52,7 @@ matl = ['&MATL ID=''my solid'', DENSITY=1000., CONDUCTIVITY=1., SPECIFIC_HEAT=1.
 
 fprintf(fid,'%s\n','  '); % blank line
 
+slcf = ['&SLCF PBY=0, QUANTITY=''VELOCITY'', VECTOR=.TRUE. /'];  fprintf(fid,'%s\n',slcf);
 slcf = ['&SLCF XB=-5,5,-5,5,-5,5, QUANTITY=''P MASK'', CELL_CENTERED=.TRUE. /'];  fprintf(fid,'%s\n',slcf);
 slcf = ['&SLCF XB=-5,5,-5,5,-5,5, QUANTITY=''U MASK'', CELL_CENTERED=.TRUE. /'];  fprintf(fid,'%s\n',slcf);
 slcf = ['&SLCF XB=-5,5,-5,5,-5,5, QUANTITY=''V MASK'', CELL_CENTERED=.TRUE. /'];  fprintf(fid,'%s\n',slcf);
