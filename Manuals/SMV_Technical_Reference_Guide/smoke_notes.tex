@@ -427,16 +427,18 @@ a) front view&b) side view\\
 \newcommand{\sigai}[1]{\sigma_{a,#1}}
 \newcommand{\Lei}[1]{L_{e,#1}}
 
+Figure \ref{fig:smokediscretesetup} illustrates one of possibly many paths through smoke for which radiance line integral computations are required.  The coordinate system is set up so that that the origin, $x_0$ is to the far right. This is where radiance presumably starts out at its full value.  The observer is located at the far left, $x_N$, where radiance has is computed and displayed.
+
 \begin{figure}[\figoptions]
 \begin{center}
 \includegraphics[width=3.5in]{figures/smoke_discrete_setup}
 \end{center}
 \caption {Setup for discretizing the equations used to model
 radiance within a column of 3D smoke data.}
-\label{figsmokediscretesetup}
+\label{fig:smokediscretesetup}
 \end{figure}
 
-Equation (\ref{eq:optdepth}) may be approximated using a Riemann sum  to obtain
+The optical depth, $\tau(a,b)$, in equation (\ref{eq:optdepth}) may be approximated using a Riemann sum  after defining sample points $s_j=j\Delta s$ with spacing $\Delta s=D/N$ to obtain
 
 \begin{eqnarray}
 \nonumber
@@ -449,7 +451,9 @@ Equation (\ref{eq:optdepth}) may be approximated using a Riemann sum  to obtain
 \hat{\tau}_i&=&\prod_{j=i}^{N-1}\tau_j
 \end{eqnarray}
 
-where $\tau_j=\exp\left(-\sigma_t(s_j)\Delta s\right)$, $s_j=j\Delta s$ and $\Delta s=D/N$ . Letting $\hat{L}_D\approx L(D)$, equation (\ref{eq:rtesoln}) may then be discretized using equation (\ref{eq:tauhat_discrete}) to obtain
+where $\tau_j=\exp\left(-\sigma_t(s_j)\Delta s\right)$ represents the transparency over one step. 
+
+Similarly, the radiance given by $L(D)$ in equation (\ref{eq:rtesoln}) may be approximated using a Riemann sum to obtain
 
 \begin{equation}
 \label{eq:discrete_rte}
@@ -457,23 +461,30 @@ where $\tau_j=\exp\left(-\sigma_t(s_j)\Delta s\right)$, $s_j=j\Delta s$ and $\De
 \sum_{i=0}^{N-1}\htau{i}\sigai{i}\Lei{i}\Delta x
 \end{equation}
 
-where $\sigma_{a,i}=\sigma_t(x_i)$, $\Lei{i}=L_e(x_i)$, $x_i=i\Delta x$ and $\Delta x=D/N$ .
-The terms in equation (\ref{eq:discrete_rte}) are summed from back to front.  The $i=0$ terms are located furthest from the observer while the $i=N-1$ terms are located closest to the observer.  We wish to perform the sum in reverse order, from front to back so that the sum may be terminated early if further contributions would not change the result. Let $\hat{L}_j$ and $\hat{L}_j$ be intermediate results at nodes $j$ and $j-1$ to compute $\hat{L}_D$ in (\ref{eq:discrete_rte}) as in
+where $\sigma_{a,i}=\sigma_t(x_i)$, $\Lei{i}=L_e(x_i)$, $x_i=i\Delta x$ and $\Delta x=D/N$ and $\htau{i}$ is obtained from (\ref{eq:tauhat_discrete}).
+
+
+The terms in equation (\ref{eq:discrete_rte}) are summed from back to front.  The location of the $i=0$ term is furthest from the observer while the location of the $i=N-1$ term is closest to the observer.  We wish to perform this sum in reverse order, from the front to the back so that the sum may be terminated early if further contributions would not change the result. 
+
+To then compute $\hat{L}_0$ recursively,
+let $\hat{L}_j$ and $\hat{L}_{j-1}$ be intermediate results at nodes $j$ and $j-1$ .  Then
 
 \begin{eqnarray}
+\label{eq:recurse1}
 \hat{L}_{j-1} &= &\htau{j-1}L_0 + \sum_{i=j-1}^{N-1}\htau{i}\sigai{i}\Lei{i}\Delta x\\
+\label{eq:recurse2}
 \hat{L}_j     &= &\htau{j}  L_0 + \sum_{i=j}^{N-1}  \htau{i}\sigai{i}\Lei{i}\Delta x
 \end{eqnarray}
 
-One may then compute $\hat{L}_0$ recursively using
+Subtracting (\ref{eq:recurse2}) from (\ref{eq:recurse1}), one obtains
 
-\begin{eqnarray}
+\begin{eqnarray*}
 \hat{L}_{j-1} -\hat{L}_{j}&= &(\htau{j-1}-\htau{j})L_0 + \htau{j-1}\sigai{j-1}\Lei{j-1}\Delta x\\
                         &= &\htau{j}\left[\left(\frac{\htau{j-1}}{\htau{j}}-1\right)L_0 + \frac{\htau{j-1}}{\htau{j}}\sigai{j-1}\Lei{j-1}\Delta x\right]\\
-                        &= &\htau{j}\left[-\left(1-\tau_{j-1}\right)L_0 + \tau_{j-1}\sigai{j-1}\Lei{j-1}\Delta x\right]\\
-\end{eqnarray}
+                        &= &\htau{j}\left[-\left(1-\tau_{j-1}\right)L_0 + \tau_{j-1}\sigai{j-1}\Lei{j-1}\Delta x\right]
+\end{eqnarray*}
 
-where from (\ref{eq:tauhat_discrete}) $\htau{j-1}/\htau{j}=\tau_{j-1}$.  Therefore, $\hat{L}_j$ may be expressed recursively using $\hat{L}_{j}$ and
+where from (\ref{eq:tauhat_discrete}) $\htau{j-1}/\htau{j}=\tau_{j-1}$.  Therefore, $\hat{L}_{j-1}$ may be expressed recursively using $\hat{L}_{j}$ using
 
 \begin{eqnarray}
 \hat{L}_{j-1} &= &\hat{L}_{j}+\htau{j}\left[-\left(1-\tau_{j-1}\right)L_0 + \tau_{j-1}\sigai{j-1}\Lei{j-1}\Delta x\right]
