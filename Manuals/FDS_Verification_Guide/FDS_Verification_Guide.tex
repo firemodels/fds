@@ -1732,9 +1732,120 @@ mass of three combustion products. First figure shows the comparison simple vs. 
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/Methane_flame_simple_primitive}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/Methane_flame_simple_lumped}
 \end{tabular*}
-\caption[Yield of combustion products using three alternative definitions of the same chemistry.]{The cumulation of combustion product mass using three alternative definitions of the combustion chemistry. (Left) Simple chemistry vs. primitive species. (Right) Simple chemistry vs. lumped spcies. }
+\caption[Yield of combustion products using three alternative definitions of the same chemistry.]{The cumulation of combustion product mass using three alternative definitions of the combustion chemistry. (Left) Simple chemistry vs. primitive species. (Right) Simple chemistry vs. lumped species. }
 \label{fig_methane_flame_yields}
 \end{figure}
+
+\section{Reaction Rate Cases (ReactionRate\_)}
+
+Similar to the mass flux boundary condition, the gas phase reaction model is important to FDS' ability to determine total heat release. Below are a series of test cases designed to check the reaction rate mechanism for mixing controlled reactions, finite rate reactions, and mixed mode reactions. 
+
+\subsection{Mixing-controlled reactions (ReactionRate\_MixCtrl\_)}
+
+The mixing-controlled (mixed is burned) reaction model with local extinction is the default reaction mechanism in FDS. The reaction rate is determined by the eddy dissipation concept (EDC). The EDC says that the mean local species consumption rate for each reaction is determined from the local mean fuel, oxidizer, and product mass fractions and the turbulent mixing time by the following equation \cite{Poinsot:TNC}:
+
+\begin{equation}\label{eq:EDC}
+\bar{k}_{i}(\tilde{Y},\tau_{mix})=C_{mag}\frac{1}{\tau_{mix}}min(\tilde{Y}_{fuel},\frac{\tilde{Y}_{ox}}{s},\beta\frac{\tilde{Y}_{prod}}{(1+s)})
+\end{equation}
+where $C_{mag}$ and $\beta$ are model constants and $s$ is determined from the stoichiometry of the reaction. This model can be considered a deficient model as the consumption rate is found by the limiting species. To determine species evolution for the reaction, a system of ordinary differential equations is solved for each participating species:
+
+\begin{equation}\label{eq:spec_ode}
+\frac{dY_{i}}{dt}=R_{i}  \; \text{for 1 to i tracked species}
+\end{equation}
+where $R_i=\nu_{i}\frac{W_{i}}{W_{fuel}}\bar{k}_{i}$ is the reaction rate for the $i^{th}$ species. To test this implementation, a 1-step methane reaction
+
+\begin{equation}\label{eq:1step_methane}
+CH_4+2O_2 \rightarrow  CO_2+2H_2O
+\end{equation}
+is considered for both a fuel limiting and oxygen limiting case with a fixed mixing time, $\tau_{mix}=0.1s$.
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_MixCtrl_Flim_1Step} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_MixCtrl_O2lim_1Step}
+\end{tabular*}
+\caption[Species Evolution in Mixing Controlled Reaction]{Time evolution of species mass fraction for a 1-step mixing controlled reaction with a fixed mixing time of $\tau_{mix}=0.1s$. (Left) Fuel limited reaction. (Right) Oxygen limited reaction.}
+\label{fig:MixCtrl_1Step}
+\end{figure}
+
+Similar to the 1-step reaction, the EDC reaction implementation was tested for a 2-step methane reaction
+
+\begin{eqnarray}\label{eq:2step_methane}
+CH_4+1.5O_2 \rightarrow  CO+2H_2O \\
+\nonumber CO+0.5O_2 \rightarrow CO_2
+\end{eqnarray}
+for both fuel limited and oxygen limited conditions with a fixed mixing time, $\tau_{mix}=0.1s$.
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_MixCtrl_Flim_2Step} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_MixCtrl_O2lim_2Step}
+\end{tabular*}
+\caption[Species Evolution in Mixing Controlled Reaction]{Time evolution of species mass fraction for a 2-step mixing controlled reaction with a fixed mixing time of $\tau_{mix}=0.1s$. (Left) Fuel limited reaction. (Right) Oxygen limited reaction.}
+\label{fig:MixCtrl_2Step}
+\end{figure}
+
+\subsection{Finite rate reactions (ReactionRate\_Arrhenius\_)}
+
+The solution process for species evolution in finite rate reactions is similar to mixing-controlled reactions in that species evolution is found by solving a system of ordinary equations (\ref{eq:spec_ode}). The main difference between the mechanisms is that instead of the reaction rate being determined by the turbulent mixing time as part of the EDC, the reaction rate in finite rate reactions is found using an Arrhenius reaction equation:
+
+\begin{equation}\label{eq:FR_Arr}
+\bar{k}_{i}=-A\prod(Y_{i}^{a_{i}})T^{n_{i}}\exp(-E/RT)
+\end{equation}
+where A, E, $a_{i}$, and $n_{i}$ are user defined inputs based on the specific reaction. Note that since Equation \ref{eq:FR_Arr} has an exponential term, the integration of Equation Set \ref{eq:spec_ode} is solved using a Runge-Kutta 2 mechanism as compared to a Explicit Euler scheme used in the mixing controlled test case. 
+
+Here we consider two 1-step cases, a zero-order and second-order reaction.  First, a 1-step, zero-order test case of carbon monoxide oxidation:
+
+\begin{equation}\label{eq:1step_CO}
+CO+0.5O_2 \rightarrow  CO_2
+\end{equation}
+
+In this case, $E$, $a_{i}$, and $n_{i}$ are set to zero, and $A$ is set such that $\bar{k}_{i} = 1$. The resulting reaction rates simplify to a function of molecular weight and stoichiometric coefficients.
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_Arrhenius_0Order_1Step}
+\end{center}
+\caption[Species Evolution in Finite Rate Reaction]{Time evolution of species mass fraction for a 1-step zero order Arrhenius finite rate reaction.}
+\label{fig:Arrhenius_0Order_1step}
+\end{figure} 
+The second test case is a 1-step, second-order propane reaction.  
+
+\begin{equation}\label{eq:1step_propane}
+C_3H_8+5O_2 \rightarrow  3CO_2+4H_2O
+\end{equation}
+$E$ and $n_{i}$ are still set to zero, but $a_{i}=[1,1,0,0]$  for propane, oxygen, carbon monoxide, and water vapor respectively, making the reaction second-order ($\mathcal{O}=\sum a_{i}$).
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_Arrhenius_2Order_1Step}
+\end{center}
+\caption[Species Evolution in Finite Rate Reaction]{Time evolution of species mass fraction for a 1-step second order Arrhenius finite rate reaction.}
+\label{fig:Arrhenius_2Order_1step}
+\end{figure}
+
+Multi-step Arrhenius finite rate reactions are also tested. A 2-step propane reaction:
+\begin{eqnarray}\label{eq:2step_propane}
+C_3H_8+3.5O_2 \rightarrow  3CO+4H_2O \\
+\nonumber CO+0.5O_2 \rightarrow CO_2
+\end{eqnarray}
+and a 3-step propane reaction reaction:
+\begin{eqnarray}\label{eq:3step_propane}
+C_3H_8+3.5O_2 \rightarrow  3CO+4H_2O \\
+\nonumber CO+0.5O_2 \leftrightarrow CO_2
+\end{eqnarray}
+ are considered. Equation \ref{eq:3step_propane} includes the decomposition of $CO_2$ into $CO$ and $O_2$ which the 2-step does not. The reaction order for the first two steps in both cases is 1.75. In the first reaction $a_{i}=[0.1,1.65,0,0]$ for propane, oxygen, carbon monoxide, and water vapor respectively. In the second (forward) reaction $a_{i}=[1,0.25,0,0.5]$ for carbon monoxide, oxygen, carbon dioxide, and water vapor respectively. Note that in the second step, water vapor contributes to the reaction rate based on its local concentration despite not being a participant in the reaction. For the reverse reaction in Equation \ref{eq:3step_propane}, $a_{i}=[1,0,0]$ for carbon dioxide, carbon monoxide, and oxygen respectively.
+ 
+ \begin{figure}[ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_Arrhenius_1-75Order_2Step} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_Arrhenius_1-75Order_3Step}
+\end{tabular*}
+\caption[Species Evolution in Mixing Controlled Reaction]{Time evolution of species mass fraction for mulit-step Arrhenius finite rate propane reactions. (Left) 2-step. (Right) 3-step.}
+\label{fig:MixCtrl_2Step}
+\end{figure}
+ 
+\subsection{Mixed mode reactions (ReactionRate\_Mixed\_)}
 
 
 \section{Fractional Effective Dose (FED) and Fractional Irritant Concentration (FIC) (\texorpdfstring{{\bf FED\_FIC}}{FED\_FIC}) }
