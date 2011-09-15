@@ -2199,11 +2199,13 @@ USE MEMORY_FUNCTIONS, ONLY: ChkMemErr
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T
-INTEGER :: I,J,K,NG,NV,I_MIN,I_MAX,J_MIN,J_MAX,K_MIN,K_MAX,IERR
+INTEGER :: I,J,K,NG,NV,I_MIN,I_MAX,J_MIN,J_MAX,K_MIN,K_MAX
 TYPE (MESH_TYPE), POINTER :: M
 TYPE (GEOMETRY_TYPE), POINTER :: G
 REAL(EB) :: DELTA,RP,XU(3),PP(3),DP,TIME,TOL=1.E-9_EB, &
-            X_MIN,Y_MIN,Z_MIN,X_MAX,Y_MAX,Z_MAX,XX(4),YY(4),ZZ(4),XP(3)
+            X_MIN,Y_MIN,Z_MIN,X_MAX,Y_MAX,Z_MAX,XX(4),YY(4),ZZ(4),XP(3),BB(6)
+
+IF (ICYC>1 .AND. N_GEOM==0) RETURN
 
 TIME = T
 M => MESHES(NM)
@@ -2487,7 +2489,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
 
 ENDDO GEOM_LOOP
 
-! unstructured geometry loop
+! unstructured geometry
 
 VOLUME_LOOP: DO NV=1,N_VOLU
 
@@ -2550,27 +2552,19 @@ VOLUME_LOOP: DO NV=1,N_VOLU
 
             ! test pcell (cell center)
             XP = (/M%XC(I),M%YC(J),M%ZC(K)/)
-            IERR=0
-            CALL TEST_POINT_IN_VOLUME(IERR,XP,XX,YY,ZZ)
-            IF (IERR==1) M%P_MASK(I,J,K)=-1
+            IF ( POINT_IN_TETRAHEDRON(XP,XX,YY,ZZ) ) M%P_MASK(I,J,K)=-1
 
             ! test ucell
             XP = (/M%X(I),M%YC(J),M%ZC(K)/)
-            IERR=0
-            CALL TEST_POINT_IN_VOLUME(IERR,XP,XX,YY,ZZ)
-            IF (IERR==1) M%U_MASK(I,J,K)=-1
+            IF ( POINT_IN_TETRAHEDRON(XP,XX,YY,ZZ) ) M%U_MASK(I,J,K)=-1
 
             ! test vcell
             XP = (/M%XC(I),M%Y(J),M%ZC(K)/)
-            IERR=0
-            CALL TEST_POINT_IN_VOLUME(IERR,XP,XX,YY,ZZ)
-            IF (IERR==1) M%V_MASK(I,J,K)=-1
+            IF ( POINT_IN_TETRAHEDRON(XP,XX,YY,ZZ) ) M%V_MASK(I,J,K)=-1
 
             ! test wcell
             XP = (/M%XC(I),M%YC(J),M%Z(K)/)
-            IERR=0
-            CALL TEST_POINT_IN_VOLUME(IERR,XP,XX,YY,ZZ)
-            IF (IERR==1) M%W_MASK(I,J,K)=-1
+            IF ( POINT_IN_TETRAHEDRON(XP,XX,YY,ZZ) ) M%W_MASK(I,J,K)=-1 
 
          ENDDO
       ENDDO
@@ -2578,14 +2572,68 @@ VOLUME_LOOP: DO NV=1,N_VOLU
 
 ENDDO VOLUME_LOOP
 
+! point in general polyhedron
+
+RAY_TEST: IF (.TRUE.) THEN
+
+! bounding box (will use better data structure later)
+
+BB(1) = MINVAL(VERTEX%X)
+BB(2) = MAXVAL(VERTEX%X)
+BB(3) = MINVAL(VERTEX%Y)
+BB(4) = MAXVAL(VERTEX%Y)
+BB(5) = MINVAL(VERTEX%Z)
+BB(6) = MAXVAL(VERTEX%Z)
+
+DO K=1,M%KBAR
+   DO J=1,M%JBAR
+      DO I=1,M%IBAR
+         ! test pcell (cell center)
+         XP = (/M%XC(I),M%YC(J),M%ZC(K)/)
+         IF ( POINT_IN_POLYHEDRON(XP,BB) ) M%P_MASK(I,J,K)=-1
+      ENDDO
+   ENDDO
+ENDDO
+
+DO K=1,M%KBAR
+   DO J=1,M%JBAR
+      DO I=0,M%IBAR
+         ! test ucell
+         XP = (/M%X(I),M%YC(J),M%ZC(K)/)
+         IF ( POINT_IN_POLYHEDRON(XP,BB) ) M%U_MASK(I,J,K)=-1
+      ENDDO
+   ENDDO
+ENDDO
+
+DO K=1,M%KBAR
+   DO J=0,M%JBAR
+      DO I=1,M%IBAR
+         ! test vcell
+         XP = (/M%XC(I),M%Y(J),M%ZC(K)/)
+         IF ( POINT_IN_POLYHEDRON(XP,BB) ) M%V_MASK(I,J,K)=-1
+      ENDDO
+   ENDDO
+ENDDO
+
+DO K=0,M%KBAR
+   DO J=1,M%JBAR
+      DO I=1,M%IBAR
+         ! test wcell
+         XP = (/M%XC(I),M%YC(J),M%Z(K)/)
+         IF ( POINT_IN_POLYHEDRON(XP,BB) ) M%W_MASK(I,J,K)=-1 
+      ENDDO
+   ENDDO
+ENDDO
+
+ENDIF RAY_TEST
+
 END SUBROUTINE INIT_IBM
 
 
-SUBROUTINE TEST_POINT_IN_VOLUME(IERR,XP,XX,YY,ZZ)
+LOGICAL FUNCTION POINT_IN_TETRAHEDRON(XP,XX,YY,ZZ)
 USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
 IMPLICIT NONE
 
-INTEGER, INTENT(INOUT) :: IERR
 REAL(EB), INTENT(IN) :: XP(3),XX(4),YY(4),ZZ(4)
 REAL(EB) :: U_VEC(3),V_VEC(3),N_VEC(3),Q_VEC(3),R_VEC(3)
 INTEGER :: I,N(4,4)
@@ -2600,7 +2648,7 @@ N(2,:) = (/1,3,4,2/)
 N(3,:) = (/1,4,2,3/)
 N(4,:) = (/2,4,3,1/)
 
-IERR=1 ! start by assuming the point is inside
+POINT_IN_TETRAHEDRON=.TRUE. ! start by assuming the point is inside
 
 FACE_LOOP: DO I=1,4
 
@@ -2622,13 +2670,181 @@ FACE_LOOP: DO I=1,4
    ! if the sign of the dot products are equal, the point is inside, else it is outside and we return
 
    IF ( ABS( SIGN(1._EB,DOT_PRODUCT(Q_VEC,N_VEC))-SIGN(1._EB,DOT_PRODUCT(R_VEC,N_VEC)) )>ZERO_P ) THEN
-      IERR=0
+      POINT_IN_TETRAHEDRON=.FALSE.
       RETURN
    ENDIF
 
 ENDDO FACE_LOOP
 
-END SUBROUTINE TEST_POINT_IN_VOLUME
+END FUNCTION POINT_IN_TETRAHEDRON
+
+
+LOGICAL FUNCTION POINT_IN_POLYHEDRON(XP,BB)
+IMPLICIT NONE
+
+REAL(EB), INTENT(IN) :: XP(3),BB(6)
+REAL(EB) :: XX(3),YY(3),ZZ(3),R(3)
+INTEGER :: I,N_INTERSECTIONS
+
+! Schneider and Eberly, Geometric Tools for Computer Graphics, Morgan Kaufmann, 2003. Section 13.4
+
+POINT_IN_POLYHEDRON=.FALSE.
+
+! test global bounding box
+
+IF ( XP(1)<BB(1) .OR. XP(1)>BB(2) ) RETURN
+IF ( XP(2)<BB(3) .OR. XP(2)>BB(4) ) RETURN
+IF ( XP(3)<BB(5) .OR. XP(3)>BB(6) ) RETURN
+
+N_INTERSECTIONS=0
+
+R = (/0._EB,0._EB,1._EB/) ! ray
+
+FACE_LOOP: DO I=1,N_FACE
+
+   ! test bounding box
+   XX(1) = VERTEX(FACET(I)%VERTEX(1))%X
+   XX(2) = VERTEX(FACET(I)%VERTEX(2))%X
+   XX(3) = VERTEX(FACET(I)%VERTEX(3))%X
+
+   IF (XP(1)<MINVAL(XX)) THEN; CYCLE FACE_LOOP; ENDIF
+   IF (XP(1)>MAXVAL(XX)) THEN; CYCLE FACE_LOOP; ENDIF
+
+   YY(1) = VERTEX(FACET(I)%VERTEX(1))%Y
+   YY(2) = VERTEX(FACET(I)%VERTEX(2))%Y
+   YY(3) = VERTEX(FACET(I)%VERTEX(3))%Y
+
+   IF (XP(2)<MINVAL(YY)) THEN; CYCLE FACE_LOOP; ENDIF
+   IF (XP(2)>MAXVAL(YY)) THEN; CYCLE FACE_LOOP; ENDIF
+
+   ZZ(1) = VERTEX(FACET(I)%VERTEX(1))%Z
+   ZZ(2) = VERTEX(FACET(I)%VERTEX(2))%Z
+   ZZ(3) = VERTEX(FACET(I)%VERTEX(3))%Z
+
+   IF (XP(3)>MAXVAL(ZZ)) THEN; CYCLE FACE_LOOP; ENDIF
+
+   IF ( RAY_TRIANGLE_INTERSECT(I,XP,R) ) N_INTERSECTIONS = N_INTERSECTIONS+1
+
+ENDDO FACE_LOOP
+
+IF ( MOD(N_INTERSECTIONS,2)/=0 ) POINT_IN_POLYHEDRON=.TRUE.
+
+END FUNCTION POINT_IN_POLYHEDRON
+
+
+LOGICAL FUNCTION POINT_IN_TRIANGLE(XP,XX,YY)
+USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
+IMPLICIT NONE
+
+REAL(EB), INTENT(IN) :: XP(2),XX(3),YY(3)
+REAL(EB) :: V_VEC(2),N_VEC(2),Q_VEC(2),R_VEC(2)
+INTEGER :: I,N(3,3)
+
+! This routine is similar to POINT_IN_TETRAHEDRON
+
+N(1,:) = (/1,2,3/)
+N(2,:) = (/2,3,1/)
+N(3,:) = (/3,1,2/)
+
+POINT_IN_TRIANGLE=.TRUE. ! start by assuming the point is inside
+
+EDGE_LOOP: DO I=1,3
+
+   ! vector along the direction of edge I
+
+   V_VEC = (/XX(N(I,2))-XX(N(I,1)),YY(N(I,2))-YY(N(I,1))/)
+
+   ! find vector normal to edge
+
+   IF (ABS(V_VEC(2))>ZERO_P) THEN
+      N_VEC = (/1._EB, -V_VEC(1)/V_VEC(2)/)
+   ELSE
+      N_VEC = (/0._EB, 1._EB/)
+   ENDIF
+
+   print *,N_VEC
+
+   ! form a vector from a point on the edge to the point XP
+
+   Q_VEC = XP-(/XX(N(I,1)),YY(N(I,1))/)
+
+   ! also form a vector from the edge to the other point on the triangle defining inside
+
+   R_VEC = (/XX(N(I,3)),YY(N(I,3))/)-(/XX(N(I,1)),YY(N(I,1))/)
+
+   ! if the sign of the dot products are equal, the point is inside, else it is outside and we return
+
+   IF ( ABS( SIGN(1._EB,DOT_PRODUCT(Q_VEC,N_VEC))-SIGN(1._EB,DOT_PRODUCT(R_VEC,N_VEC)) )>ZERO_P ) THEN
+      POINT_IN_TRIANGLE=.FALSE.
+      RETURN
+   ENDIF
+
+ENDDO EDGE_LOOP
+
+END FUNCTION POINT_IN_TRIANGLE
+
+
+LOGICAL FUNCTION RAY_TRIANGLE_INTERSECT(TRI,XP,D)
+USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
+IMPLICIT NONE
+
+INTEGER, INTENT(IN) :: TRI
+REAL(EB), INTENT(IN) :: XP(3),D(3)
+REAL(EB) :: E1(3),E2(3),P(3),S(3),Q(3),U,V,TMP,V1(3),V2(3),V3(3),T !,XI(3)
+
+! Schneider and Eberly, Section 11.1
+
+V1(1) = VERTEX(FACET(TRI)%VERTEX(1))%X
+V1(2) = VERTEX(FACET(TRI)%VERTEX(1))%Y
+V1(3) = VERTEX(FACET(TRI)%VERTEX(1))%Z
+
+V2(1) = VERTEX(FACET(TRI)%VERTEX(3))%X
+V2(2) = VERTEX(FACET(TRI)%VERTEX(3))%Y
+V2(3) = VERTEX(FACET(TRI)%VERTEX(3))%Z
+
+V3(1) = VERTEX(FACET(TRI)%VERTEX(2))%X
+V3(2) = VERTEX(FACET(TRI)%VERTEX(2))%Y
+V3(3) = VERTEX(FACET(TRI)%VERTEX(2))%Z
+
+E1 = V2-V1
+E2 = V3-V1
+
+CALL CROSS_PRODUCT(P,D,E2)
+
+TMP = DOT_PRODUCT(P,E1)
+
+IF ( ABS(TMP)<ZERO_P ) THEN
+   RAY_TRIANGLE_INTERSECT=.FALSE.
+   RETURN
+ENDIF
+
+TMP = 1._EB/TMP
+S = XP-V1
+
+U = TMP*DOT_PRODUCT(S,P)
+IF (U<0._EB .OR. U>1._EB) THEN
+   RAY_TRIANGLE_INTERSECT=.FALSE.
+   RETURN
+ENDIF
+
+CALL CROSS_PRODUCT(Q,S,E1)
+V = TMP*DOT_PRODUCT(D,Q)
+IF (V<0._EB .OR. V>1._EB) THEN
+   RAY_TRIANGLE_INTERSECT=.FALSE.
+   RETURN
+ENDIF
+
+T = TMP*DOT_PRODUCT(E2,Q)
+!XI = XP + T*D ! the intersection point
+
+IF (T>0._EB) THEN
+   RAY_TRIANGLE_INTERSECT=.TRUE.
+ELSE
+   RAY_TRIANGLE_INTERSECT=.FALSE.
+ENDIF
+RETURN
+
+END FUNCTION RAY_TRIANGLE_INTERSECT
 
 
 SUBROUTINE INIT_FACE
