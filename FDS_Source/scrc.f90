@@ -72,6 +72,7 @@ PUBLIC SCARC_COARSE_OMEGA
 PUBLIC SCARC_COARSE_PRECON 
  
 PUBLIC SCARC_DEBUG 
+PUBLIC SCARC_MKL 
 
 !!!----------------------------------------------------------------------------------------------------
 !!! corresponding declarations (with default settings)
@@ -127,6 +128,9 @@ CHARACTER(20) :: SCARC_COARSE_PRECON     = 'SSOR'             ! preconditioner
 CHARACTER(20) :: SCARC_DEBUG = 'NONE'                         ! debugging level (NONE/LESS/MEDIUM/MUCH)
 CHARACTER(40) :: SCARC_FN                                     ! file name for ScaRC debug messages
 INTEGER       :: SCARC_LU                                     ! unit number for ScaRC debug file
+
+!!! MKL library
+LOGICAL       :: SCARC_MKL = .FALSE.
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -289,7 +293,7 @@ INTEGER, PARAMETER :: NSCARC_TIME_NONE              = -1, &
 
 INTEGER, PARAMETER :: NSCARC_LEVEL_NONE             = -1, &      ! no predefined initial solution used
                       NSCARC_LEVEL_MIN              =  0, &      ! minimum multigrid level 
-                      NSCARC_LEVEL_MAX              =  8         ! maximum multigrid level 
+                      NSCARC_LEVEL_MAX              =  10        ! maximum multigrid level 
 
 INTEGER, PARAMETER :: NSCARC_INITIAL_NONE           = -1         ! another initial function ?
  
@@ -331,15 +335,19 @@ INTEGER, ALLOCATABLE, DIMENSION (:)    :: REQ_SCARC
 INTEGER, PARAMETER :: N_TIMERS_SCARC=18         
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: TUSED_SCARC
 
-!!! auxiliary variables for global and local scalproducts and number of cells
+!!! auxiliary variables for global and local scalproducts, number of global cells and global dimensions
 REAL(EB), ALLOCATABLE, DIMENSION (:) :: SP_LOCAL
 INTEGER,  ALLOCATABLE, DIMENSION (:) :: NC_GLOBAL, NC_LOCAL
+INTEGER,  ALLOCATABLE, DIMENSION (:) :: NA_COARSE, NC_COARSE, NX_COARSE, NY_COARSE, NZ_COARSE
 
 !!! number of couplings in given matrix stencil and pointer to indices in matrix stencil on given level 
 INTEGER :: ID, ILX, ILY, ILZ, IUX, IUY, IUZ
 
 !!! Index numbers of different vector types (used in different ScaRC-solvers)
 INTEGER :: VEC_NONE, VEC_X, VEC_F, VEC_Y, VEC_G, VEC_W, VEC_D, VEC_Z, VEC_X2, VEC_D2, VEC_W2, VEC_Y2
+
+!!! counter and displacement arrays for global data exchanges
+INTEGER, ALLOCATABLE, DIMENSION(:) :: COUNTS_SCARC, DISPLS_SCARC
 
  
 !!! Private type declarations
@@ -970,7 +978,6 @@ MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
          ALLOCATE (SCARC(NM)%BANDED(NLEVEL_MIN:NLEVEL_MAX), STAT=IERR)
          CALL CHKMEMERR ('SCARC_SETUP_TYPES', 'BANDED', IERR)
       CASE (NSCARC_SYSTEM_COMPACT)
-WRITE(SCARC_LU,*) 'ALLOCATING COMPACT for ',NLEVEL_MIN,' to ', NLEVEL_MAX
          ALLOCATE (SCARC(NM)%COMPACT(NLEVEL_MIN:NLEVEL_MAX), STAT=IERR)
          CALL CHKMEMERR ('SCARC_SETUP_TYPES', 'COMPACT', IERR)
    END SELECT
@@ -1130,7 +1137,7 @@ END SUBROUTINE SCARC_SETUP_MESHES
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_SETUP_EXCHANGE 
 INTEGER :: NOM, NM, NL, NLMIN, NLMAX
-INTEGER :: IERR, IREFINE
+INTEGER :: IERR
 TYPE (MESH_TYPE)          , POINTER :: M
 TYPE (SCARC_TYPE)         , POINTER :: S
 TYPE (OMESH_TYPE)         , POINTER :: OM
@@ -1233,23 +1240,20 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
          
             !!! In case of GMG with a predefined grid hierarchy allocate corresponding level-structures
             IF (NLEVEL_MAX > NLEVEL_MIN .AND. TYPE_MULTIGRID==NSCARC_MULTIGRID_GEOMETRIC) THEN                   
-               IREFINE=1
                DO NL=NLEVEL_MIN+1,NLEVEL_MAX
-         
-                  IREFINE=IREFINE*2
          
                   OSBC => S%OSCARC(NOM)%BANDED(NL)                            ! pointer to coarser level
                   OSBF => S%OSCARC(NOM)%BANDED(NL-1)                          ! pointer to finer level
          
                   ! get number of internal cells and external wall cells on neighbor NOM for level NL
-                  OSBC%NX=OSBF%NX/IREFINE
+                  OSBC%NX=OSBF%NX/2
                   SELECT CASE (TYPE_DIMENSION)
                      CASE (NSCARC_DIMENSION_TWO)
                         OSBC%NY=1
                      CASE (NSCARC_DIMENSION_THREE)
-                        OSBC%NY=OSBF%NY/IREFINE
+                        OSBC%NY=OSBF%NY/2
                   END SELECT
-                  OSBC%NZ=OSBF%NZ/IREFINE
+                  OSBC%NZ=OSBF%NZ/2
          
                   OSBC%NC = OSBC%NX * OSBC%NY * OSBC%NZ
                   OSBC%NW = 2*OSBC%NX*OSBC%NY + 2*OSBC%NX*OSBC%NZ + 2*OSBC%NY*OSBC%NZ  
@@ -1301,23 +1305,20 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
          
             !!! In case of GMG with a predefined grid hierarchy allocate corresponding level-structures
             IF (NLEVEL_MAX > NLEVEL_MIN .AND. TYPE_MULTIGRID==NSCARC_MULTIGRID_GEOMETRIC) THEN                   
-               IREFINE=1
                DO NL=NLEVEL_MIN+1,NLEVEL_MAX
-         
-                  IREFINE=IREFINE*2
          
                   OSCC => S%OSCARC(NOM)%COMPACT(NL)                            ! pointer to coarser level
                   OSCF => S%OSCARC(NOM)%COMPACT(NL-1)                          ! pointer to finer level
          
                   ! get number of internal cells and external wall cells on neighbor NOM for level NL
-                  OSCC%NX=OSCF%NX/IREFINE
+                  OSCC%NX=OSCF%NX/2
                   SELECT CASE (TYPE_DIMENSION)
                      CASE (NSCARC_DIMENSION_TWO)
                         OSCC%NY=1
                      CASE (NSCARC_DIMENSION_THREE)
-                        OSCC%NY=OSCF%NY/IREFINE
+                        OSCC%NY=OSCF%NY/2
                   END SELECT
-                  OSCC%NZ=OSCF%NZ/IREFINE
+                  OSCC%NZ=OSCF%NZ/2
          
                   OSCC%NC=OSCC%NX * OSCC%NY * OSCC%NZ
                   OSCC%NW= 2*OSCC%NX*OSCC%NY + 2*OSCC%NX*OSCC%NZ + 2*OSCC%NY*OSCC%NZ  
@@ -1334,6 +1335,15 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
    
 END SELECT SELECT_SYSTEM
 
+!!!
+!!! Exchange information about lengths of abutting faces
+!!!
+IERR = 0
+IF (NMESHES>1) THEN
+   ALLOCATE (REQ_SCARC(N_EXCHANGES*40))
+   CALL CHKMEMERR ('SCARC_SETUP_GLOBAL', 'REQ_SCARC', IERR)
+   REQ_SCARC = MPI_REQUEST_NULL
+ENDIF
 
 !!!-------------------------------------------------------------------------------------------------------
 !!! Initialize communication structures on finest level (if there is more than 1 mesh) 
@@ -1610,7 +1620,6 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
          
             IREFINE=1
             COMPACT_GMG_LEVEL_LOOP: DO NL = NLEVEL_MIN+1, NLEVEL_MAX
-WRITE(SCARC_LU,*) 'COMPACT_GMG_IF: LEVEL=',NL, SIZE(S%COMPACT)
             
                !!! point to SCARC grid structures on coarser and finer level
                SCC => S%COMPACT(NL)
@@ -1643,7 +1652,6 @@ WRITE(SCARC_LU,*) 'COMPACT_GMG_IF: LEVEL=',NL, SIZE(S%COMPACT)
                !!! 
                IWC=1
          
-WRITE(SCARC_LU,*) 'COMPACT_GMG_IF: LEVEL=',SCC%NX, SCC%NY, SCC%NZ, SCC%NW
                !!! wall cells along IOR=1
                IOFFSET = 0
                DO IZC=1,SCC%NZ
@@ -1854,13 +1862,13 @@ SELECT CASE (TYPE_DIMENSION)
                IDIFF = IJKW_FI (10, IW_FI(2)) - IJKW_FI (10, IW_FI(1))
                IF (IDIFF == 1) THEN
                   I1 = IJKW_FI (13, IW_FI(2))/2
-                  I2 = K1
+                  I2 = I1
                ELSE IF (IDIFF == 2) THEN
                   I1 = IJKW_FI (13, IW_FI(1))/2
                   I1 = IJKW_FI (13, IW_FI(2))/2
                ELSE IF (IDIFF == 0) THEN
                   I1 = (IJKW_FI (13, IW_FI(1))+1)/2
-                  I2 = K1
+                  I2 = I1
                ELSE
                   WRITE(*,*) 'WRONG resolutions in SCARC_SETUP_FACE, IOR0=',IOR0
                   STOP
@@ -2203,16 +2211,6 @@ INTEGER :: NM, NOM, NL, IERR
 TYPE (OSCARC_TYPE), POINTER :: OS, OSO
 
 
-!!!
-!!! Exchange information about lengths of abutting faces
-!!!
-IERR = 0
-IF (NMESHES>1) THEN
-   ALLOCATE (REQ_SCARC(N_EXCHANGES*40))
-   CALL CHKMEMERR ('SCARC_SETUP_GLOBAL', 'REQ_SCARC', IERR)
-   REQ_SCARC = MPI_REQUEST_NULL
-ENDIF
-
 IF (NMESHES < 0) THEN
 
    LEVEL_LOOP: DO NL = NLEVEL_MIN+1, NLEVEL_MAX
@@ -2347,10 +2345,10 @@ MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
             CASE (NSCARC_MULTIGRID_GEOMETRIC)
    
                DO NL = NLEVEL_MIN, NLEVEL_MAX
-WRITE(SCARC_LU,*) 'GMG: CALLING FOR LEVEL ', NL, NLEVEL_MAX, NLEVEL_MIN
                   CALL SCARC_SETUP_MATRIX  (NM, NL)
                   CALL SCARC_SETUP_BOUNDARY(NM, NL)
                ENDDO 
+
    
             !!!-------------------------------------------------------------------------------------------
             !!! algebraic multigrid:
@@ -2369,10 +2367,13 @@ WRITE(SCARC_LU,*) 'GMG: CALLING FOR LEVEL ', NL, NLEVEL_MAX, NLEVEL_MIN
    
 ENDDO MESHES_LOOP
 
-CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_MATRIX , NLEVEL_MIN, 'SETUP_SYSTEM', 'MATRIX')
-CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_IJKW   , NLEVEL_MIN, 'SETUP_SYSTEM', 'IJKW')
-CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_BCINDEX, NLEVEL_MIN, 'SETUP_SYSTEM', 'PRESSURE_BC_INDEX')
-CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_ACELL  , NLEVEL_MIN, 'SETUP_SYSTEM', 'ADJACENT_CELL')
+IF (TYPE_METHOD == NSCARC_METHOD_MULTIGRID) THEN
+!   CALL SCARC_SETUP_COARSE_MATRIX(NLEVEL_MIN)
+ENDIF
+
+DO NL=NLEVEL_MIN, NLEVEL_MAX
+   CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_MATRIX , NL, 'SETUP_SYSTEM', 'MATRIX000')
+ENDDO
 
 !!!-------------------------------------------------------------------------------------------------------
 !!! Exchange matrix entries along internal boundaries:
@@ -2392,8 +2393,103 @@ IF (NMESHES>1) THEN
 
 ENDIF
 
-CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_ACELL , NLEVEL_MIN,'SETUP_SYSTEM2','ADJACENT_CELL')
+DO NL=NLEVEL_MIN, NLEVEL_MAX
+   CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_MATRIX , NL, 'SETUP_SYSTEM', 'MATRIX')
+ENDDO
+CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_IJKW   , NLEVEL_MIN, 'SETUP_SYSTEM', 'IJKW')
+CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_BCINDEX, NLEVEL_MIN, 'SETUP_SYSTEM', 'PRESSURE_BC_INDEX')
+CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_ACELL  , NLEVEL_MIN, 'SETUP_SYSTEM', 'ADJACENT_CELL')
 END SUBROUTINE SCARC_SETUP_SYSTEM
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Allocate matrix for the usual 5-point-stencil (2D) or 7-point-stencil (3D)
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+SUBROUTINE SCARC_SETUP_COARSE_MATRIX (NL)
+INTEGER, INTENT(IN) :: NL
+TYPE (SCARC_BANDED_TYPE) , POINTER :: SB
+TYPE (SCARC_COMPACT_TYPE), POINTER :: SC
+INTEGER, ALLOCATABLE, DIMENSION(:) :: BUFFER0
+INTEGER :: NM, IERR
+
+IERR=0
+
+ALLOCATE(NA_COARSE(NMESHES), STAT=IERR)
+CALL ChkMemErr('SCARC_SETUP_COARSE_MATRIX','NA_COARSE',IERR)
+ALLOCATE(NC_COARSE(NMESHES), STAT=IERR)
+CALL ChkMemErr('SCARC_SETUP_COARSE_MATRIX','NC_COARSE',IERR)
+
+SELECT CASE(TYPE_SYSTEM)
+
+   CASE (NSCARC_SYSTEM_BANDED) 
+
+      ALLOCATE(NX_COARSE(NMESHES), STAT=IERR)
+      CALL ChkMemErr('SCARC_SETUP_COARSE_MATRIX','NX_COARSE',IERR)
+      ALLOCATE(NY_COARSE(NMESHES), STAT=IERR)
+      CALL ChkMemErr('SCARC_SETUP_COARSE_MATRIX','NY_COARSE',IERR)
+      ALLOCATE(NZ_COARSE(NMESHES), STAT=IERR)
+      CALL ChkMemErr('SCARC_SETUP_COARSE_MATRIX','NZ_COARSE',IERR)
+
+      DO NM = NMESHES_MIN, NMESHES
+         SB => SCARC(NM)%BANDED(NL)
+         NA_COARSE(NM) = SB%NA
+         NC_COARSE(NM) = SB%NC
+         NX_COARSE(NM) = SB%NX
+         NY_COARSE(NM) = SB%NY
+         NZ_COARSE(NM) = SB%NZ
+      ENDDO
+
+   CASE (NSCARC_SYSTEM_COMPACT) 
+
+      DO NM = NMESHES_MIN, NMESHES
+         SC => SCARC(NM)%COMPACT(NL)
+         NA_COARSE(NM) = SC%NA
+         NC_COARSE(NM) = SC%NC
+      ENDDO
+
+END SELECT
+
+ALLOCATE(BUFFER0(NMESHES), STAT=IERR)
+CALL ChkMemErr('SCARC_SETUP_COARSE_MATRIX','BUFFER0',IERR)
+
+IF (USE_MPI) THEN
+
+   SELECT CASE(TYPE_SYSTEM)
+
+      CASE (NSCARC_SYSTEM_BANDED) 
+
+         BUFFER0 = NA_COARSE
+         CALL MPI_ALLGATHERV(BUFFER0(DISPLS_SCARC(MYID)+1),COUNTS_SCARC(MYID), MPI_INTEGER, &
+                             NA_COARSE, COUNTS_SCARC, DISPLS_SCARC, MPI_INTEGER, MPI_COMM_WORLD, IERR)
+
+      CASE (NSCARC_SYSTEM_COMPACT) 
+
+         BUFFER0 = NA_COARSE
+         CALL MPI_ALLGATHERV(BUFFER0(DISPLS_SCARC(MYID)+1),COUNTS_SCARC(MYID), MPI_INTEGER, &
+                             NA_COARSE, COUNTS_SCARC, DISPLS_SCARC, MPI_INTEGER, MPI_COMM_WORLD, IERR)
+
+   END SELECT
+
+ENDIF
+
+DEALLOCATE(BUFFER0)
+
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) THEN
+   WRITE(SCARC_LU,*) 'NA_COARSE:'
+   WRITE(SCARC_LU,'(16i4)') (NA_COARSE(NM),NM=1,NMESHES)
+   WRITE(SCARC_LU,*) 'NC_COARSE:'
+   WRITE(SCARC_LU,'(16i4)') (NC_COARSE(NM),NM=1,NMESHES)
+   IF (TYPE_SYSTEM == NSCARC_SYSTEM_BANDED) THEN
+      WRITE(SCARC_LU,*) 'NX_COARSE:'
+      WRITE(SCARC_LU,'(16i4)') (NX_COARSE(NM),NM=1,NMESHES)
+      WRITE(SCARC_LU,*) 'NY_COARSE:'
+      WRITE(SCARC_LU,'(16i4)') (NY_COARSE(NM),NM=1,NMESHES)
+      WRITE(SCARC_LU,*) 'NZ_COARSE:'
+      WRITE(SCARC_LU,'(16i4)') (NZ_COARSE(NM),NM=1,NMESHES)
+   ENDIF
+ENDIF
+
+END SUBROUTINE SCARC_SETUP_COARSE_MATRIX
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -2895,13 +2991,16 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
                SELECT CASE (SB%BC_INDEX(IW))
                   CASE (DIRICHLET)                        ! set Dirichlet BC's along open boundary cells
                     SB%A(IC,ID) = SB%A(IC,ID) - DBC
+!WRITE(SCARC_LU,*) 'DIRICHLET :, IC=',IC
                   !CASE (INTERNAL)                        ! do nothing along internal boundaries (only debugging)
                   CASE (NEUMANN)                          ! set Neumann BC's at all other nodes
                     SB%A(IC,ID) = SB%A(IC,ID) + DBC
+!WRITE(SCARC_LU,*) 'NEUMANN  :, IC=',IC
                END SELECT
          
             ENDDO WALLCELL_LOOP2D_BANDED
 
+!WRITE(SCARC_LU,*) '====================================='
         
          !!!------------------ 3D ---------------------------
          CASE (NSCARC_DIMENSION_THREE)
@@ -2995,11 +3094,9 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
                SELECT CASE (SC%BC_INDEX(IW))
                   CASE (DIRICHLET)                        ! set Dirichlet BC's along open boundary cells
                      SC%A(IP) = SC%A(IP) - DBC
-WRITE(SCARC_LU,*) IW, ' DIRICHLET : SC%A(',IP,')=',SC%A(IP), DBC
                   !CASE (INTERNAL)                        ! do nothing along internal boundaries (only debugging)
                   CASE (NEUMANN)                          ! set Neumann BC's at all other nodes
                      SC%A(IP) = SC%A(IP) + DBC
-WRITE(SCARC_LU,*) IW, ' NEUMANN   : SC%A(',IP,')=',SC%A(IP), DBC
                END SELECT
          
             ENDDO WALLCELL_LOOP2D_COMPACT
@@ -3342,8 +3439,6 @@ IF (TYPE_MULTIGRID /= NSCARC_MULTIGRID_ALGEBRAIC) RETURN
 CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_ACELL , NLEVEL_MIN,'SETUP_COARSENING','ADJACENT_CELL')
 CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_MATRIX, NLEVEL_MIN,'SETUP_COARSENING', 'MATRIX')
 
-WRITE(SCARC_LU,*) 'NLEVEL_MIN=',NLEVEL_MIN
-WRITE(SCARC_LU,*) 'NLEVEL_MAX=',NLEVEL_MAX
 
 !!! Determine number of multigrid levels
 LEVEL_LOOP: DO NL = NLEVEL_MIN, NLEVEL_MAX-1
@@ -4979,6 +5074,8 @@ SELECT_METHOD: SELECT CASE (TYPE_METHOD)
 
 END SELECT SELECT_METHOD
 
+STOP
+
 TUSED_SCARC(NSCARC_TIME_SOLVER  ,:)=TUSED_SCARC(NSCARC_TIME_SOLVER  ,:)+SECOND()-TNOW_SOLVER
 TUSED_SCARC(NSCARC_TIME_TOTAL,:)=TUSED_SCARC(NSCARC_TIME_TOTAL,:)+SECOND()-TNOW_SOLVER
 END SUBROUTINE SCARC_SOLVER
@@ -5132,6 +5229,11 @@ SELECT CASE (TYPE_SYSTEM)
                                        + AB(IC, ILX) * VB1(I-1, 1, K  )   &         ! lower x-component
                                        + AB(IC, IUX) * VB1(I+1, 1, K  )   &         ! upper x-component
                                        + AB(IC, IUZ) * VB1(I  , 1, K+1) )           ! upper z-component
+!  IF (NM==1.and.I==16.and.k==16) &
+!         WRITE(SCARC_LU,'(2i3,11e11.3)') I,K,VB2(I,1,K),AB(IC,ID),AB(IC,ILZ),AB(IC,ILX),AB(IC,IUX),AB(IC,IUZ),&
+!                                 VB1(I,1,K),VB1(I,1,K-1),VB1(I-1,1,K),VB1(I+1,1,K),VB1(I,1,K+1)
+
+
                   ENDDO
                ENDDO
          
@@ -5202,7 +5304,8 @@ REAL(EB), DIMENSION(:,:,:), POINTER ::  VB1, VB2
 REAL(EB), DIMENSION(:)    , POINTER ::  VC1, VC2
 INTEGER , POINTER :: NX, NY, NZ, NC
 INTEGER  :: NM, IERR, NL0, I, J, K, IC
-REAL(EB) :: SP_GLOBAL
+REAL(EB) :: SP_GLOBAL, DDOT
+EXTERNAL :: DDOT
 
 !!!----------------------------------------------------------------------------------------------------
 !!! Compute local scalarproduct
@@ -5242,10 +5345,14 @@ SELECT CASE (TYPE_SYSTEM)
          
          NC  => SCARC(NM)%COMPACT(NL)%NC
       
-         SP_LOCAL(NM) = 0.0_EB
-         DO IC = 1, NC
-            SP_LOCAL(NM) = SP_LOCAL(NM) + VC1(IC) * VC2(IC)
-         ENDDO
+         IF (SCARC_MKL) THEN
+            SP_LOCAL(NM) = DDOT(NC, VC1, 1, VC2, 1)
+         ELSE
+            SP_LOCAL(NM) = 0.0_EB
+            DO IC = 1, NC
+               SP_LOCAL(NM) = SP_LOCAL(NM) + VC1(IC) * VC2(IC)
+            ENDDO
+         ENDIF
       
       ENDDO
 
@@ -5280,7 +5387,8 @@ REAL(EB), DIMENSION(:,:,:), POINTER ::  VB
 REAL(EB), DIMENSION(:)    , POINTER ::  VC
 INTEGER , POINTER :: NX, NY, NZ, NC
 INTEGER  :: NM, IERR, I, J, K, IC
-REAL(EB) :: SP_GLOBAL
+REAL(EB) :: SP_GLOBAL, DDOT
+EXTERNAL :: DDOT
 
 !!!----------------------------------------------------------------------------------------------------
 !!! Compute local scalarproduct
@@ -5317,11 +5425,15 @@ SELECT CASE (TYPE_SYSTEM)
       
          NC => SCARC(NM)%COMPACT(NL)%NC
       
-         SP_LOCAL(NM) = 0.0_EB
-         DO IC = 1, NC
-            SP_LOCAL(NM) = SP_LOCAL(NM) + VC(IC) * VC(IC)
-         ENDDO
-      
+         IF (SCARC_MKL) THEN
+            SP_LOCAL(NM) = DDOT(NC, VC, 1, VC, 1)
+         ELSE
+            SP_LOCAL(NM) = 0.0_EB
+            DO IC = 1, NC
+               SP_LOCAL(NM) = SP_LOCAL(NM) + VC(IC) * VC(IC)
+            ENDDO
+         ENDIF
+
       ENDDO
 
 END SELECT
@@ -5355,7 +5467,9 @@ INTEGER , INTENT(IN):: NVECTOR1, NVECTOR2, NL
 REAL(EB), INTENT(IN):: SCAL1, SCAL2
 REAL(EB), DIMENSION(:,:,:), POINTER ::  VB1, VB2
 REAL(EB), DIMENSION(:)    , POINTER ::  VC1, VC2
+INTEGER , POINTER :: NC
 INTEGER  :: NM
+EXTERNAL :: DAXPBY
 
 SELECT CASE (TYPE_SYSTEM)
 
@@ -5379,7 +5493,12 @@ SELECT CASE (TYPE_SYSTEM)
          VC1 => POINT_TO_CVECTOR(NVECTOR1, NM, NL)
          VC2 => POINT_TO_CVECTOR(NVECTOR2, NM, NL)
 
-         VC2 = SCAL1 * VC1 + SCAL2 * VC2
+         IF (SCARC_MKL) THEN
+            NC  => SCARC(NM)%COMPACT(NL)%NC
+            CALL DAXPBY(NC, SCAL1, VC1, 1, SCAL2, VC2, 1)
+         ELSE
+            VC2 = SCAL1 * VC1 + SCAL2 * VC2
+         ENDIF
 
       ENDDO
 
@@ -5397,7 +5516,9 @@ INTEGER , INTENT(IN):: NVECTOR1, NVECTOR2, NL
 REAL(EB), INTENT(IN):: SCAL1
 REAL(EB), DIMENSION(:,:,:), POINTER ::  VB1, VB2
 REAL(EB), DIMENSION(:)    , POINTER ::  VC1, VC2
+INTEGER , POINTER :: NC
 INTEGER  :: NM
+EXTERNAL :: DCOPY, DSCAL
 
 SELECT CASE (TYPE_SYSTEM)
 
@@ -5421,8 +5542,14 @@ SELECT CASE (TYPE_SYSTEM)
          VC1 => POINT_TO_CVECTOR(NVECTOR1, NM, NL)
          VC2 => POINT_TO_CVECTOR(NVECTOR2, NM, NL)
 
-         VC2 = SCAL1 * VC1 
-      
+         IF (SCARC_MKL) THEN
+            NC  => SCARC(NM)%COMPACT(NL)%NC
+            CALL DCOPY(NC, VC1, 1, VC2, 1)
+            CALL DSCAL(NC, SCAL1, VC2, 1)
+         ELSE
+            VC2 = SCAL1 * VC1
+         ENDIF
+
       ENDDO
 
 END SELECT
@@ -5974,6 +6101,7 @@ CALL SCARC_VECTOR_SUM     (VEC_F, VEC_D, 1.0_EB, -1.0_EB, NL)                   
 
 ICYCLE = SCARC_CYCLE_CONTROL(NSCARC_CYCLE_SETUP, NL)
 RESIN  = SCARC_L2NORM (VEC_D, NL)                                                      !  RESIN := ||D||
+WRITE(0,'(a,i3,a,e14.5,a,e14.5)') ' MG-Iteration  =',0,': Residuum=',RESIN
 
 CALL SCARC_CONVERGENCE_INFO(RESIN, 0, NL, CROUTINE)
 
@@ -6035,6 +6163,7 @@ MULTIGRID_LOOP: DO ITE = 1, NIT
    RES = SCARC_L2NORM (VEC_D, NL)                                                     ! RES := ||D||
 
    ISTATE = SCARC_CONVERGENCE_STATE(RESIN, RES, EPS, ITE, NL, CROUTINE)               ! convergence ?
+WRITE(0,'(a,i3,a,e14.5,a,e14.5)') ' MG-Iteration  =',ITE,': Residuum=',SCARC_RESIDUAL
    IF (ISTATE /= NSCARC_STATE_PROCEED) EXIT MULTIGRID_LOOP
  
 ENDDO MULTIGRID_LOOP
@@ -6047,6 +6176,7 @@ ENDDO MULTIGRID_LOOP
 !!!   - Exchange values along internal boundaries (consistency!)
 !!!----------------------------------------------------------------------------------------------------
 CALL SCARC_CONVERGENCE_RATE(RESIN, RES, ITE, ISTATE, CROUTINE)
+WRITE(0,'(a,e14.5)') '                                        ---->  Konvergenzrate=',SCARC_CAPPA
 
 IF (TYPE_SCOPE == NSCARC_SCOPE_MAIN) THEN
    CALL SCARC_TERMINATE_SOLVER(NLEVEL_MIN)
@@ -6159,31 +6289,33 @@ SELECT CASE (NTYPE)
       CROUTINE = 'SCARC_POSTSMOOTHER'
 END SELECT
 BL2NORM  = .TRUE.
-IF (NTYPE == NSCARC_CYCLE_PRESMOOTH) THEN
+IF (NTYPE == NSCARC_CYCLE_PRESMOOTH.AND.NL==1) THEN
    BMATVEC = .FALSE.
 ELSE
    BMATVEC = .TRUE.
 ENDIF
+   BMATVEC = .TRUE.
 
 NIT      = SCARC_SMOOTH_ITERATIONS
 EPS      = SCARC_SMOOTH_ACCURACY
 OMEGA    = SCARC_SMOOTH_OMEGA
-RESIN    = 1.0_EB
 ITE      = 0
 
 !!!----------------------------------------------------------------------------------------------------
 !!! Calculate initial defect on level NL (only if BMATVEC = .TRUE.)
 !!! Because initial vector is set to zero, this defect corresponds to F
 !!!----------------------------------------------------------------------------------------------------
-!IF (BMATVEC) THEN
+IF (BMATVEC) THEN
    CALL SCARC_MATVEC_PRODUCT (VEC0_X, VEC0_D, NL)                             !  D := A*X
    CALL SCARC_VECTOR_SUM     (VEC0_F, VEC0_D, 1.0_EB, -1.0_EB, NL)            !  D := F - D
-!ENDIF
+ENDIF
 
-!IF (BL2NORM) THEN
+IF (BL2NORM.AND.BMATVEC) THEN
    RESIN = SCARC_L2NORM (VEC0_D, NL)                                          !  RESIN := ||D||
    CALL SCARC_CONVERGENCE_INFO(RESIN, ITE, NL, CROUTINE)
-!ENDIF
+ELSE
+   RESIN = SCARC_RESIDUAL
+ENDIF
 
 !!!----------------------------------------------------------------------------------------------------
 !!! Smoothing loop
@@ -6195,7 +6327,7 @@ SMOOTH_LOOP: DO ITE=1, NIT
    CALL SCARC_MATVEC_PRODUCT  (VEC0_X, VEC0_D, NL)                            !  D := A*X
    CALL SCARC_VECTOR_SUM      (VEC0_F, VEC0_D, 1.0_EB, -1.0_EB, NL)           !  D := F - D
 
-   IF (BL2NORM) THEN
+   IF (BL2NORM.OR.ITE==NIT) THEN
       RES    = SCARC_L2NORM (VEC0_D, NL)                                      !  RES := ||D||
       ISTATE = SCARC_CONVERGENCE_STATE(RESIN, RES, EPS, ITE, NL, CROUTINE)
       IF (ISTATE /= NSCARC_STATE_PROCEED) EXIT SMOOTH_LOOP                    !  RES < TOL ?
@@ -6689,6 +6821,8 @@ TYPE (MESH_TYPE), POINTER ::  M
 TYPE (SCARC_BANDED_TYPE) , POINTER :: SB
 TYPE (SCARC_COMPACT_TYPE), POINTER :: SC
 
+
+
 SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
 
    !!!-------------------------------------------------------------------------------------------------------
@@ -6734,7 +6868,7 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
          
             !!! -------------- 2D ------------------
             CASE (NSCARC_DIMENSION_TWO)
-            
+
                DO NM = NMESHES_MIN, NMESHES_MAX
          
                   M  => MESHES(NM)
@@ -6796,6 +6930,8 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
                      END SELECT
                   
                   ENDDO BANDED_WALLCELL_LOOP2D
+               SB%X(1:M%IBAR,1,1:M%KBAR) = 0.0_EB
+               SB%F(1:M%IBAR,1,1:M%KBAR) = 1.0_EB
                
                ENDDO
             
@@ -6876,8 +7012,9 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
          
          END SELECT SELECT_BANDED_DIMENSION
 
-      ENDIF
    
+
+      ENDIF
          
    !!!-------------------------------------------------------------------------------------------------------
    !!! Compact system
@@ -7076,13 +7213,13 @@ END SUBROUTINE SCARC_SETUP_SOLVER
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_CONVERGENCE_INFO(RES, ITE, NL, CROUTINE)
 INTEGER, INTENT(IN) :: ITE, NL
-INTEGER  :: NM
 REAL(EB), INTENT(IN) :: RES
 CHARACTER(*), INTENT(IN) :: CROUTINE
+INTEGER:: NM
 
-IF (TYPE_DEBUG >= NSCARC_DEBUG_LESS .AND. MYID==0) write(*,1000) TRIM(CROUTINE), NM, NL, ITE,  RES
 DO NM = NMESHES_MIN, NMESHES_MAX
-   IF (TYPE_DEBUG >= NSCARC_DEBUG_LESS) WRITE(SCARC_LU,1000) TRIM(CROUTINE), NM, NL, ITE,  RES
+   IF (TYPE_DEBUG >= NSCARC_DEBUG_LESS.AND.NM==1) WRITE(SCARC_LU,1000) TRIM(CROUTINE), NM, NL, ITE,  RES
+   IF (TYPE_DEBUG >= NSCARC_DEBUG_LESS.AND.NM==1) write(*       ,1000) TRIM(CROUTINE), NM, NL, ITE,  RES
 ENDDO
 
 1000 FORMAT (5X,A30,': mesh', i4,': level=',i4,': #ite= ',i4,': res =',e14.6)
@@ -7100,11 +7237,12 @@ REAL(EB), INTENT(IN) :: RESIN, RES, EPS
 CHARACTER(*), INTENT(IN) :: CROUTINE
 
 ISTATE = NSCARC_STATE_PROCEED
+SCARC_RESIDUAL = RES
 
 DO NM = NMESHES_MIN, NMESHES_MAX
-   IF (TYPE_DEBUG >= NSCARC_DEBUG_LESS)          WRITE(SCARC_LU,1000) TRIM(CROUTINE), NM, NL, ITE, RES
+   IF (TYPE_DEBUG >= NSCARC_DEBUG_LESS.AND.NM==1) WRITE(SCARC_LU,1000) TRIM(CROUTINE), NM, NL, ITE, RES
+   IF (TYPE_DEBUG >= NSCARC_DEBUG_LESS.AND.NM==1) WRITE(*       ,1000) TRIM(CROUTINE), NM, NL, ITE, RES
 ENDDO
-IF (TYPE_DEBUG >= NSCARC_DEBUG_LESS.AND.MYID==0) WRITE(*       ,1000) TRIM(CROUTINE), NM, NL, ITE, RES
 
 SELECT CASE (TYPE_ACCURACY)
    CASE (NSCARC_ACCURACY_RELATIVE)
@@ -7149,9 +7287,9 @@ ELSE
 ENDIF
 
 DO NM = NMESHES_MIN, NMESHES_MAX
-   IF (TYPE_DEBUG >= NSCARC_DEBUG_LESS)          WRITE(SCARC_LU,2000) TRIM(CROUTINE), SCARC_CAPPA 
+   IF (TYPE_DEBUG >= NSCARC_DEBUG_LESS.AND.NM==1) WRITE(SCARC_LU,2000) TRIM(CROUTINE), SCARC_CAPPA 
+   IF (TYPE_DEBUG >= NSCARC_DEBUG_LESS.AND.NM==1) WRITE(*       ,2000) TRIM(CROUTINE), SCARC_CAPPA 
 ENDDO
-IF (TYPE_DEBUG >= NSCARC_DEBUG_LESS.AND.MYID==0) WRITE(*       ,2000) TRIM(CROUTINE), SCARC_CAPPA 
 
 2000 FORMAT (5X,A30,':',10X,'---> convergence rate =',e14.6,/, &
              5X ,'----------------------------------------------------------------------------------------')
@@ -7176,7 +7314,7 @@ INTEGER  :: IX_CO, IY_CO, IZ_CO, IC_CO
 REAL(EB) :: AUX
 
 TYPE_VECTOR = NVECTOR_FI
-CALL SCARC_EXCHANGE(NSCARC_EXCHANGE_VECTOR, NL_FI)
+IF (TYPE_MULTIGRID == NSCARC_MULTIGRID_ALGEBRAIC) CALL SCARC_EXCHANGE(NSCARC_EXCHANGE_VECTOR, NL_FI)
 CALL SCARC_DEBUG_LEVEL (NVECTOR_FI, 'RESTRICTION','D before restrict', NL_FI)
 
 SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
@@ -8044,9 +8182,7 @@ EXCHANGE_SEND_LOOP2: DO NOM = NMESHES_MIN, NMESHES_MAX
       SNODE  = PROCESS(NOM)
       RNODE  = PROCESS(NM)
 
-      OS  => SCARC(NM)%OSCARC(NOM)
       OSO => SCARC(NOM)%OSCARC(NM)
-
 
       EXCHANGE_RECV_IF: IF (OSO%NICMAX_S/=0 .AND. OSO%NICMAX_R/=0) THEN
 
@@ -8315,7 +8451,7 @@ PACK_SEND: DO IW=1,NW
             IC = (KK-1)*SC%NX*SC%NY + (JJ-1)*SC%NX + II
             SEND_BUF(LL+1) = REAL(IW,EB)
             SEND_BUF(LL+2) = REAL(CVECTOR(IC),EB)
-WRITE(SCARC_LU,*) 'PACK_CVECTOR_INT: SEND_BUF(',LL+2,')=',SEND_BUF(LL+2),': IC=',IC
+!WRITE(SCARC_LU,*) 'PACK_CVECTOR_INT: SEND_BUF(',LL+2,')=',SEND_BUF(LL+2),': IC=',IC
             LL = LL+2
          ENDDO
       ENDDO
@@ -8384,6 +8520,21 @@ TYPE (SCARC_BANDED_TYPE), POINTER:: SB
 
 SB => SCARC(NM)%BANDED(NL)
 
+!IF (NM==1.AND.NL==3) THEN
+!WRITE(SCARC_LU,*) '=================================='
+!WRITE(SCARC_LU,*) 'PACKING BMATRIX on mesh ', NM, ' level ', NL
+!WRITE(SCARC_LU,*) '=================================='
+!WRITE(SCARC_LU,*) 'NW(1)=',SCARC(1)%BANDED(3)%NW
+!WRITE(SCARC_LU,*) 'NW(2)=',SCARC(2)%BANDED(3)%NW
+!WRITE(SCARC_LU,*) 'NW(3)=',SCARC(3)%BANDED(3)%NW
+!WRITE(SCARC_LU,*) 'NW(4)=',SCARC(4)%BANDED(3)%NW
+!WRITE(SCARC_LU,*) 'NW=',NW
+!WRITE(SCARC_LU,*) 'IJKW='
+!DO IW=1,NW
+!WRITE(SCARC_LU,'(15i3)') (IJKW(II,IW),II=1,15)
+!ENDDO
+!ENDIF
+
 LL = 0
 IWW = 0
 SELECT CASE (NTYPE)
@@ -8402,6 +8553,7 @@ SELECT CASE (NTYPE)
                   IWW = IWW + 1
                   SEND_BUF(LL+1) = REAL(IW,EB)
                   SEND_BUF(LL+2) = SB%DI2(IOR0)
+!IF (NM==1.AND.NL==3) WRITE(SCARC_LU,*) 'SENDING  ', II, KK, IOR0, SB%DI2(IOR0)
                   LL = LL+2
                ENDDO
             ENDDO
@@ -8433,6 +8585,12 @@ INTEGER IW, LL, ISUM, I, J, K, II, JJ, KK, IC, ICPL
 TYPE (SCARC_BANDED_TYPE), POINTER:: SB
 
 SB => SCARC(NM)%BANDED(NL)
+
+!IF (NM==1.AND.NL==3) THEN
+!WRITE(SCARC_LU,*) '=================================='
+!WRITE(SCARC_LU,*) 'UNPACKING BMATRIX on mesh ', NM, ' level ', NL
+!WRITE(SCARC_LU,*) '=================================='
+!ENDIF
 
 LL = 0
 SELECT CASE (NTYPE)
@@ -8468,6 +8626,8 @@ SELECT CASE (NTYPE)
             IF (IW == -SB%A(IC,ICPL)) THEN
                SB%A(IC,ICPL) = ZSUM/REAL(ISUM,EB)
                SB%ADJACENT_CELL (IW) = IC
+!IF (NM==1.AND.NL==3) &
+!   WRITE(SCARC_LU,'(A,i3,a,i3,a,e14.6,a,i3,a,i3)') 'GETTING  A(',IC,',',ICPL,')=',SB%A(IC,ICPL),': IW=',IW,': ADJACENT=',IC
             ENDIF
          ENDDO
       
@@ -8682,7 +8842,7 @@ CHARACTER (20) :: LINE
 TYPE (SCARC_BANDED_TYPE) , POINTER :: SB
 TYPE (SCARC_COMPACT_TYPE), POINTER :: SC, SC1, SC2
 
-IF (TYPE_DEBUG == NSCARC_DEBUG_NONE) RETURN
+IF (TYPE_DEBUG < NSCARC_DEBUG_MEDIUM) RETURN
 
 SELECT CASE (NTYPE)
 
@@ -9191,8 +9351,9 @@ END SUBROUTINE SCARC_DEBUG_LEVEL
 !!! Print out timings for ScaRC - not updated at the moment
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_TIMINGS
-INTEGER:: NM, N, IERR, I
-INTEGER, ALLOCATABLE, DIMENSION(:) :: COUNTS_SCARC, DISPLS_SCARC, COUNTS_SCARC_TIMERS, DISPLS_SCARC_TIMERS
+INTEGER:: NM, IERR, I
+INTEGER , ALLOCATABLE, DIMENSION(:)   :: COUNTS_SCARC_TIMERS, DISPLS_SCARC_TIMERS
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: BUFFER
 CHARACTER(40) :: NAME_SCARC(0:N_TIMERS_SCARC)
 REAL(EB) :: TPCNT_SCARC(0:N_TIMERS_SCARC)
 
@@ -9201,24 +9362,14 @@ IF (TYPE_DEBUG == NSCARC_DEBUG_NONE) RETURN
 
 IERR=0
  
-ALLOCATE(COUNTS_SCARC(0:NUMPROCS-1))
 ALLOCATE(COUNTS_SCARC_TIMERS(0:NUMPROCS-1))
-ALLOCATE(DISPLS_SCARC(0:NUMPROCS-1))
 ALLOCATE(DISPLS_SCARC_TIMERS(0:NUMPROCS-1))
+ALLOCATE(BUFFER(N_TIMERS_SCARC, NMESHES))
 
-COUNTS_SCARC = 0
-DO N=0,NUMPROCS-1
-   DO NM=1,NMESHES
-      IF (PROCESS(NM)==N) COUNTS_SCARC(N) = COUNTS_SCARC(N) + 1
-   ENDDO
-ENDDO
-DISPLS_SCARC(0) = 0
-DO N=1,NUMPROCS-1
-   DISPLS_SCARC(N) = COUNTS_SCARC(N-1) + DISPLS_SCARC(N-1)
-ENDDO
 COUNTS_SCARC_TIMERS = COUNTS_SCARC*N_TIMERS_SCARC
 DISPLS_SCARC_TIMERS = DISPLS_SCARC*N_TIMERS_SCARC
 
+BUFFER = TUSED_SCARC
 IF (USE_MPI) CALL MPI_GATHERV(TUSED_SCARC(1,DISPLS_SCARC(MYID)+1),COUNTS_SCARC_TIMERS(MYID),&
                               MPI_DOUBLE_PRECISION,TUSED_SCARC, COUNTS_SCARC_TIMERS,DISPLS_SCARC_TIMERS,&
                               MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IERR)
