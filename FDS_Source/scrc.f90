@@ -72,7 +72,7 @@ PUBLIC SCARC_COARSE_OMEGA
 PUBLIC SCARC_COARSE_PRECON 
  
 PUBLIC SCARC_DEBUG 
-PUBLIC SCARC_MKL 
+!PUBLIC SCARC_MKL 
 
 !!!----------------------------------------------------------------------------------------------------
 !!! corresponding declarations (with default settings)
@@ -975,6 +975,7 @@ MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
       
    SELECT CASE (TYPE_SYSTEM)
       CASE (NSCARC_SYSTEM_BANDED)
+WRITE(SCARC_LU,*) 'NM=',NM,': ALLOCATE SCARC(',NM,')%BANDED(',NLEVEL_MIN,':',NLEVEL_MAX,')'
          ALLOCATE (SCARC(NM)%BANDED(NLEVEL_MIN:NLEVEL_MAX), STAT=IERR)
          CALL CHKMEMERR ('SCARC_SETUP_TYPES', 'BANDED', IERR)
       CASE (NSCARC_SYSTEM_COMPACT)
@@ -1136,7 +1137,7 @@ END SUBROUTINE SCARC_SETUP_MESHES
 !!! Setup communication structure for data exchange 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_SETUP_EXCHANGE 
-INTEGER :: NOM, NM, NL, NLMIN, NLMAX
+INTEGER :: NOM, NM, NL, NLMIN, NLMAX, N
 INTEGER :: IERR
 TYPE (MESH_TYPE)          , POINTER :: M
 TYPE (SCARC_TYPE)         , POINTER :: S
@@ -1203,7 +1204,6 @@ MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
    
    ENDDO OTHER_MESHES_LOOP
 ENDDO MESHES_LOOP
-
 
 SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
 
@@ -1336,7 +1336,7 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
 END SELECT SELECT_SYSTEM
 
 !!!
-!!! Exchange information about lengths of abutting faces
+!!! Allocate request array for data exchanges
 !!!
 IERR = 0
 IF (NMESHES>1) THEN
@@ -1344,6 +1344,24 @@ IF (NMESHES>1) THEN
    CALL CHKMEMERR ('SCARC_SETUP_GLOBAL', 'REQ_SCARC', IERR)
    REQ_SCARC = MPI_REQUEST_NULL
 ENDIF
+
+!!!
+!!! Allocate counter and displacement vector for global data exchanges
+!!!
+ALLOCATE(COUNTS_SCARC(0:NUMPROCS-1))
+ALLOCATE(DISPLS_SCARC(0:NUMPROCS-1))
+
+COUNTS_SCARC = 0
+DO N=0,NUMPROCS-1
+   DO NM=1,NMESHES
+      IF (PROCESS(NM)==N) COUNTS_SCARC(N) = COUNTS_SCARC(N) + 1
+   ENDDO
+ENDDO
+DISPLS_SCARC(0) = 0
+DO N=1,NUMPROCS-1
+   DISPLS_SCARC(N) = COUNTS_SCARC(N-1) + DISPLS_SCARC(N-1)
+ENDDO
+
 
 !!!-------------------------------------------------------------------------------------------------------
 !!! Initialize communication structures on finest level (if there is more than 1 mesh) 
@@ -2368,7 +2386,7 @@ MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
 ENDDO MESHES_LOOP
 
 IF (TYPE_METHOD == NSCARC_METHOD_MULTIGRID) THEN
-!   CALL SCARC_SETUP_COARSE_MATRIX(NLEVEL_MIN)
+   CALL SCARC_SETUP_COARSE_MATRIX(NLEVEL_MAX)
 ENDIF
 
 DO NL=NLEVEL_MIN, NLEVEL_MAX
@@ -2395,10 +2413,11 @@ ENDIF
 
 DO NL=NLEVEL_MIN, NLEVEL_MAX
    CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_MATRIX , NL, 'SETUP_SYSTEM', 'MATRIX')
+   CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_IJKW   , NL, 'SETUP_SYSTEM', 'IJKW')
 ENDDO
-CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_IJKW   , NLEVEL_MIN, 'SETUP_SYSTEM', 'IJKW')
 CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_BCINDEX, NLEVEL_MIN, 'SETUP_SYSTEM', 'PRESSURE_BC_INDEX')
 CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_ACELL  , NLEVEL_MIN, 'SETUP_SYSTEM', 'ADJACENT_CELL')
+stop
 END SUBROUTINE SCARC_SETUP_SYSTEM
 
 
@@ -2430,7 +2449,7 @@ SELECT CASE(TYPE_SYSTEM)
       ALLOCATE(NZ_COARSE(NMESHES), STAT=IERR)
       CALL ChkMemErr('SCARC_SETUP_COARSE_MATRIX','NZ_COARSE',IERR)
 
-      DO NM = NMESHES_MIN, NMESHES
+      DO NM = NMESHES_MIN, NMESHES_MAX
          SB => SCARC(NM)%BANDED(NL)
          NA_COARSE(NM) = SB%NA
          NC_COARSE(NM) = SB%NC
@@ -2441,7 +2460,7 @@ SELECT CASE(TYPE_SYSTEM)
 
    CASE (NSCARC_SYSTEM_COMPACT) 
 
-      DO NM = NMESHES_MIN, NMESHES
+      DO NM = NMESHES_MIN, NMESHES_MAX
          SC => SCARC(NM)%COMPACT(NL)
          NA_COARSE(NM) = SC%NA
          NC_COARSE(NM) = SC%NC
@@ -2462,11 +2481,31 @@ IF (USE_MPI) THEN
          CALL MPI_ALLGATHERV(BUFFER0(DISPLS_SCARC(MYID)+1),COUNTS_SCARC(MYID), MPI_INTEGER, &
                              NA_COARSE, COUNTS_SCARC, DISPLS_SCARC, MPI_INTEGER, MPI_COMM_WORLD, IERR)
 
+         BUFFER0 = NC_COARSE
+         CALL MPI_ALLGATHERV(BUFFER0(DISPLS_SCARC(MYID)+1),COUNTS_SCARC(MYID), MPI_INTEGER, &
+                             NC_COARSE, COUNTS_SCARC, DISPLS_SCARC, MPI_INTEGER, MPI_COMM_WORLD, IERR)
+
+         BUFFER0 = NX_COARSE
+         CALL MPI_ALLGATHERV(BUFFER0(DISPLS_SCARC(MYID)+1),COUNTS_SCARC(MYID), MPI_INTEGER, &
+                             NX_COARSE, COUNTS_SCARC, DISPLS_SCARC, MPI_INTEGER, MPI_COMM_WORLD, IERR)
+
+         BUFFER0 = NY_COARSE
+         CALL MPI_ALLGATHERV(BUFFER0(DISPLS_SCARC(MYID)+1),COUNTS_SCARC(MYID), MPI_INTEGER, &
+                             NY_COARSE, COUNTS_SCARC, DISPLS_SCARC, MPI_INTEGER, MPI_COMM_WORLD, IERR)
+
+         BUFFER0 = NZ_COARSE
+         CALL MPI_ALLGATHERV(BUFFER0(DISPLS_SCARC(MYID)+1),COUNTS_SCARC(MYID), MPI_INTEGER, &
+                             NZ_COARSE, COUNTS_SCARC, DISPLS_SCARC, MPI_INTEGER, MPI_COMM_WORLD, IERR)
+
       CASE (NSCARC_SYSTEM_COMPACT) 
 
          BUFFER0 = NA_COARSE
          CALL MPI_ALLGATHERV(BUFFER0(DISPLS_SCARC(MYID)+1),COUNTS_SCARC(MYID), MPI_INTEGER, &
                              NA_COARSE, COUNTS_SCARC, DISPLS_SCARC, MPI_INTEGER, MPI_COMM_WORLD, IERR)
+
+         BUFFER0 = NC_COARSE
+         CALL MPI_ALLGATHERV(BUFFER0(DISPLS_SCARC(MYID)+1),COUNTS_SCARC(MYID), MPI_INTEGER, &
+                             NC_COARSE, COUNTS_SCARC, DISPLS_SCARC, MPI_INTEGER, MPI_COMM_WORLD, IERR)
 
    END SELECT
 
@@ -2681,6 +2720,7 @@ SELECT CASE (TYPE_SYSTEM)
              
       SB%NA   = SB%NC * SB%NCPL                                      ! total number of matrix entries
 
+WRITE(SCARC_LU,*) 'NM=',NM,': NL=',NL,': SB%NA=',SB%NA
 
 !!!----------------------------------------------------------------------------------------------------
 !!! Compact storage technique:
@@ -5074,8 +5114,6 @@ SELECT_METHOD: SELECT CASE (TYPE_METHOD)
 
 END SELECT SELECT_METHOD
 
-STOP
-
 TUSED_SCARC(NSCARC_TIME_SOLVER  ,:)=TUSED_SCARC(NSCARC_TIME_SOLVER  ,:)+SECOND()-TNOW_SOLVER
 TUSED_SCARC(NSCARC_TIME_TOTAL,:)=TUSED_SCARC(NSCARC_TIME_TOTAL,:)+SECOND()-TNOW_SOLVER
 END SUBROUTINE SCARC_SOLVER
@@ -5304,8 +5342,8 @@ REAL(EB), DIMENSION(:,:,:), POINTER ::  VB1, VB2
 REAL(EB), DIMENSION(:)    , POINTER ::  VC1, VC2
 INTEGER , POINTER :: NX, NY, NZ, NC
 INTEGER  :: NM, IERR, NL0, I, J, K, IC
-REAL(EB) :: SP_GLOBAL, DDOT
-EXTERNAL :: DDOT
+REAL(EB) :: SP_GLOBAL!, DDOT
+!EXTERNAL :: DDOT
 
 !!!----------------------------------------------------------------------------------------------------
 !!! Compute local scalarproduct
@@ -5345,14 +5383,14 @@ SELECT CASE (TYPE_SYSTEM)
          
          NC  => SCARC(NM)%COMPACT(NL)%NC
       
-         IF (SCARC_MKL) THEN
-            SP_LOCAL(NM) = DDOT(NC, VC1, 1, VC2, 1)
-         ELSE
+!         IF (SCARC_MKL) THEN
+!            SP_LOCAL(NM) = DDOT(NC, VC1, 1, VC2, 1)
+!         ELSE
             SP_LOCAL(NM) = 0.0_EB
             DO IC = 1, NC
                SP_LOCAL(NM) = SP_LOCAL(NM) + VC1(IC) * VC2(IC)
             ENDDO
-         ENDIF
+!         ENDIF
       
       ENDDO
 
@@ -5387,8 +5425,8 @@ REAL(EB), DIMENSION(:,:,:), POINTER ::  VB
 REAL(EB), DIMENSION(:)    , POINTER ::  VC
 INTEGER , POINTER :: NX, NY, NZ, NC
 INTEGER  :: NM, IERR, I, J, K, IC
-REAL(EB) :: SP_GLOBAL, DDOT
-EXTERNAL :: DDOT
+REAL(EB) :: SP_GLOBAL !, DDOT
+!EXTERNAL :: DDOT
 
 !!!----------------------------------------------------------------------------------------------------
 !!! Compute local scalarproduct
@@ -5425,14 +5463,14 @@ SELECT CASE (TYPE_SYSTEM)
       
          NC => SCARC(NM)%COMPACT(NL)%NC
       
-         IF (SCARC_MKL) THEN
-            SP_LOCAL(NM) = DDOT(NC, VC, 1, VC, 1)
-         ELSE
+!         IF (SCARC_MKL) THEN
+!            SP_LOCAL(NM) = DDOT(NC, VC, 1, VC, 1)
+!         ELSE
             SP_LOCAL(NM) = 0.0_EB
             DO IC = 1, NC
                SP_LOCAL(NM) = SP_LOCAL(NM) + VC(IC) * VC(IC)
             ENDDO
-         ENDIF
+!         ENDIF
 
       ENDDO
 
@@ -5467,9 +5505,9 @@ INTEGER , INTENT(IN):: NVECTOR1, NVECTOR2, NL
 REAL(EB), INTENT(IN):: SCAL1, SCAL2
 REAL(EB), DIMENSION(:,:,:), POINTER ::  VB1, VB2
 REAL(EB), DIMENSION(:)    , POINTER ::  VC1, VC2
-INTEGER , POINTER :: NC
+!INTEGER , POINTER :: NC
 INTEGER  :: NM
-EXTERNAL :: DAXPBY
+!EXTERNAL :: DAXPBY
 
 SELECT CASE (TYPE_SYSTEM)
 
@@ -5493,12 +5531,12 @@ SELECT CASE (TYPE_SYSTEM)
          VC1 => POINT_TO_CVECTOR(NVECTOR1, NM, NL)
          VC2 => POINT_TO_CVECTOR(NVECTOR2, NM, NL)
 
-         IF (SCARC_MKL) THEN
-            NC  => SCARC(NM)%COMPACT(NL)%NC
-            CALL DAXPBY(NC, SCAL1, VC1, 1, SCAL2, VC2, 1)
-         ELSE
+!         IF (SCARC_MKL) THEN
+!            NC  => SCARC(NM)%COMPACT(NL)%NC
+!            CALL DAXPBY(NC, SCAL1, VC1, 1, SCAL2, VC2, 1)
+!         ELSE
             VC2 = SCAL1 * VC1 + SCAL2 * VC2
-         ENDIF
+!         ENDIF
 
       ENDDO
 
@@ -5516,9 +5554,9 @@ INTEGER , INTENT(IN):: NVECTOR1, NVECTOR2, NL
 REAL(EB), INTENT(IN):: SCAL1
 REAL(EB), DIMENSION(:,:,:), POINTER ::  VB1, VB2
 REAL(EB), DIMENSION(:)    , POINTER ::  VC1, VC2
-INTEGER , POINTER :: NC
+!INTEGER , POINTER :: NC
 INTEGER  :: NM
-EXTERNAL :: DCOPY, DSCAL
+!EXTERNAL :: DCOPY, DSCAL
 
 SELECT CASE (TYPE_SYSTEM)
 
@@ -5542,13 +5580,13 @@ SELECT CASE (TYPE_SYSTEM)
          VC1 => POINT_TO_CVECTOR(NVECTOR1, NM, NL)
          VC2 => POINT_TO_CVECTOR(NVECTOR2, NM, NL)
 
-         IF (SCARC_MKL) THEN
-            NC  => SCARC(NM)%COMPACT(NL)%NC
-            CALL DCOPY(NC, VC1, 1, VC2, 1)
-            CALL DSCAL(NC, SCAL1, VC2, 1)
-         ELSE
+!         IF (SCARC_MKL) THEN
+!            NC  => SCARC(NM)%COMPACT(NL)%NC
+!            CALL DCOPY(NC, VC1, 1, VC2, 1)
+!            CALL DSCAL(NC, SCAL1, VC2, 1)
+!         ELSE
             VC2 = SCAL1 * VC1
-         ENDIF
+!         ENDIF
 
       ENDDO
 
@@ -6930,8 +6968,6 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
                      END SELECT
                   
                   ENDDO BANDED_WALLCELL_LOOP2D
-               SB%X(1:M%IBAR,1,1:M%KBAR) = 0.0_EB
-               SB%F(1:M%IBAR,1,1:M%KBAR) = 1.0_EB
                
                ENDDO
             
@@ -8189,6 +8225,7 @@ EXCHANGE_SEND_LOOP2: DO NOM = NMESHES_MIN, NMESHES_MAX
          IF (RNODE/=SNODE) THEN
             BUFFER => OSO%RECV_BUF
          ELSE
+            OS => SCARC(NM)%OSCARC(NOM)
             BUFFER => OS%SEND_BUF
          ENDIF
 
