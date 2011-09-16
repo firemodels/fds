@@ -5245,12 +5245,79 @@ void CalcTriNormal(float *v1, float *v2, float *v3, float *norm){
   ReduceToUnit(norm);
 }
 
+/* ----------------------- compare_verts ----------------------------- */
+
+int compare_verts( const void *arg1, const void *arg2 ){
+  point *pointi, *pointj;
+  float *xyzi, *xyzj;
+
+  pointi = (point *)arg1;
+  pointj = (point *)arg2;
+  xyzi = pointi->xyz;
+  xyzj = pointj->xyz;
+
+  if(xyzi[0]<xyzj[0])return -1;
+  if(xyzi[0]>xyzj[0])return 1;
+  if(xyzi[1]<xyzj[1])return -1;
+  if(xyzi[1]>xyzj[1])return 1;
+  if(xyzi[2]<xyzj[2])return -1;
+  if(xyzi[2]>xyzj[2])return 1;
+  return 0;
+}
+
+/* ------------------ draw_tris ------------------------ */
+
+void get_faceinfo(void){
+  int i;
+
+  for(i=0;i<ntrilistinfo;i++){
+    trilistdata *trilisti;
+    pointlistdata *pointlisti;
+    point **points;
+    int j;
+    int ndups=0,nused=0;;
+
+    trilisti = trilistinfo + i;
+    pointlisti = pointlistinfo + i;
+
+    if(pointlisti->npoints>0){
+      NewMemory((void **)&points,pointlisti->npoints*sizeof(point *));
+      for(j=0;j<pointlisti->npoints;j++){
+        points[j]=pointlisti->points+j;
+        points[j]->nused=0;
+      }
+      qsort(points,pointlisti->npoints,sizeof(point *),compare_verts);
+      for(j=1;j<pointlisti->npoints;j++){
+        if(compare_verts(points[j-1],points[j])==0)ndups++;
+      }
+      for(j=0;j<trilisti->ntriangles;j++){
+        triangle *trii;
+
+        trii = trilisti->triangles + j;
+        trii->points[0]->nused++;
+        trii->points[1]->nused++;
+        trii->points[2]->nused++;
+      }
+      for(j=0;j<pointlisti->npoints;j++){
+        if(points[j]->nused>0)nused++;
+      }
+      printf("Face/Vertex Summary\n");
+      printf("  Vertices: %i\n",pointlisti->npoints);
+      printf("      used: %i\n",nused);
+      printf("      dups: %i\n",ndups);
+      FREEMEMORY(points);
+    }
+  }
+}
+
 /* ------------------ draw_tris ------------------------ */
 
 void draw_tris(void){
   int i;
   float black[]={0.0,0.0,0.0,1.0};
   float blue[]={0.0,0.0,1.0,1.0};
+
+  get_faceinfo();
 
   for(i=0;i<ntrilistinfo;i++){
     trilistdata *trilisti;

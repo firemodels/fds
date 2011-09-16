@@ -12,7 +12,7 @@
 
 typedef struct {
   float xyz[3],norm[3];
-  int itriangle,ntriangles;
+  int itriangle,ntriangles,nused;
   struct _triangle **triangles;
 } point;
 

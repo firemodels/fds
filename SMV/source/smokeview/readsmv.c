@@ -6499,7 +6499,6 @@ typedef struct {
 #endif
   update_mesh_terrain();
 
-
   printf(_("wrap up completed"));
   printf("\n");
 #ifdef _DEBUG
