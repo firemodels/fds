@@ -1,8 +1,10 @@
 &HEAD CHID='peaks_demo', TITLE='Matlab demo of delaunay' /
   
-&MESH IJK=30,30,30, XB=0,15,0,15,-7.5,7.5/
+&MESH IJK=16,16,16, XB=0,15,0,15,-7.5,7.5/
   
-&TIME T_END=0./
+&TIME T_END=1./
+  
+&MISC IMMERSED_BOUNDARY_METHOD=0 /
   
 &SURF ID='terrain', COLOR='GREEN'/
   
@@ -12,6 +14,11 @@
 &VENT MB='YMAX', SURF_ID='OPEN'/
 &VENT MB='ZMIN', SURF_ID='OPEN'/
 &VENT MB='ZMAX', SURF_ID='OPEN'/
+  
+&SLCF XB=0,15,0,15,-7.5,7.5, QUANTITY='P MASK', CELL_CENTERED=.TRUE. /
+&SLCF XB=0,15,0,15,-7.5,7.5, QUANTITY='U MASK', CELL_CENTERED=.TRUE. /
+&SLCF XB=0,15,0,15,-7.5,7.5, QUANTITY='V MASK', CELL_CENTERED=.TRUE. /
+&SLCF XB=0,15,0,15,-7.5,7.5, QUANTITY='W MASK', CELL_CENTERED=.TRUE. /
   
 &VERT X=1,1,6.6713e-05 /
 &VERT X=2,1,0.000508 /
@@ -332,7 +339,8 @@
 &FACE N=182,198,197, SURF_ID='terrain' /
 &FACE N=151,167,166, SURF_ID='terrain' /
 &FACE N=196,197,211, SURF_ID='terrain' /
-&FACE N=197,181,182, SURF_ID='terrain' /
+&FACE N=212,197,213, SURF_ID='terrain' /
+&FACE N=182,197,181, SURF_ID='terrain' /
 &FACE N=16,17,32, SURF_ID='terrain' /
 &FACE N=48,33,34, SURF_ID='terrain' /
 &FACE N=18,17,3, SURF_ID='terrain' /
@@ -343,7 +351,7 @@
 &FACE N=33,18,34, SURF_ID='terrain' /
 &FACE N=20,19,4, SURF_ID='terrain' /
 &FACE N=18,19,34, SURF_ID='terrain' /
-&FACE N=65,81,80, SURF_ID='terrain' /
+&FACE N=66,81,65, SURF_ID='terrain' /
 &FACE N=32,31,16, SURF_ID='terrain' /
 &FACE N=32,18,33, SURF_ID='terrain' /
 &FACE N=79,94,78, SURF_ID='terrain' /
@@ -371,7 +379,7 @@
 &FACE N=78,63,64, SURF_ID='terrain' /
 &FACE N=35,36,50, SURF_ID='terrain' /
 &FACE N=34,50,49, SURF_ID='terrain' /
-&FACE N=66,81,65, SURF_ID='terrain' /
+&FACE N=81,80,65, SURF_ID='terrain' /
 &FACE N=50,65,64, SURF_ID='terrain' /
 &FACE N=64,80,79, SURF_ID='terrain' /
 &FACE N=64,79,78, SURF_ID='terrain' /
@@ -627,8 +635,7 @@
 &FACE N=199,200,215, SURF_ID='terrain' /
 &FACE N=200,216,215, SURF_ID='terrain' /
 &FACE N=181,197,196, SURF_ID='terrain' /
-&FACE N=197,213,212, SURF_ID='terrain' /
-&FACE N=197,212,211, SURF_ID='terrain' /
+&FACE N=211,197,212, SURF_ID='terrain' /
 &FACE N=199,215,214, SURF_ID='terrain' /
 &FACE N=199,214,213, SURF_ID='terrain' /
   
