@@ -3958,6 +3958,9 @@ void ImmersedMenu(int value){
       case 3:
         showtrinormal=1-showtrinormal;
         break;
+      case 4:
+        smoothtrinormal=1-smoothtrinormal;
+        break;
   }
   glutPostRedisplay();
 }
@@ -4722,6 +4725,12 @@ updatemenu=0;
   }
   else{
     glutAddMenuEntry(_(" Show normal"),3);
+  }
+  if(smoothtrinormal==1){
+    glutAddMenuEntry(_(" *Smooth normal"),4);
+  }
+  else{
+    glutAddMenuEntry(_(" Smooth normal"),4);
   }
 #endif
 
