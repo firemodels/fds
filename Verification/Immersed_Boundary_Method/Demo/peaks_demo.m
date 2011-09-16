@@ -16,9 +16,11 @@ fid = fopen('peaks_demo.fds','wt');
 
 head = ['&HEAD CHID=''peaks_demo'', TITLE=''Matlab demo of delaunay'' /']; fprintf(fid,'%s\n',head); fprintf(fid,'%s\n','  ');
 
-mesh = ['&MESH IJK=30,30,30, XB=0,15,0,15,-7.5,7.5/']; fprintf(fid,'%s\n',mesh); fprintf(fid,'%s\n','  ');
+mesh = ['&MESH IJK=16,16,16, XB=0,15,0,15,-7.5,7.5/']; fprintf(fid,'%s\n',mesh); fprintf(fid,'%s\n','  ');
 
-time = ['&TIME T_END=0./']; fprintf(fid,'%s\n',time); fprintf(fid,'%s\n','  '); % blank line
+time = ['&TIME T_END=1./']; fprintf(fid,'%s\n',time); fprintf(fid,'%s\n','  '); % blank line
+
+misc = ['&MISC IMMERSED_BOUNDARY_METHOD=0 /']; fprintf(fid,'%s\n',misc); fprintf(fid,'%s\n','  '); % blank line
 
 surf = ['&SURF ID=''terrain'', COLOR=''GREEN''/']; fprintf(fid,'%s\n',surf); fprintf(fid,'%s\n','  ');
 
@@ -28,6 +30,13 @@ vent = ['&VENT MB=''YMIN'', SURF_ID=''OPEN''/']; fprintf(fid,'%s\n',vent);
 vent = ['&VENT MB=''YMAX'', SURF_ID=''OPEN''/']; fprintf(fid,'%s\n',vent);
 vent = ['&VENT MB=''ZMIN'', SURF_ID=''OPEN''/']; fprintf(fid,'%s\n',vent);
 vent = ['&VENT MB=''ZMAX'', SURF_ID=''OPEN''/']; fprintf(fid,'%s\n',vent);
+
+fprintf(fid,'%s\n','  '); % blank line
+
+slcf = ['&SLCF XB=0,15,0,15,-7.5,7.5, QUANTITY=''P MASK'', CELL_CENTERED=.TRUE. /'];  fprintf(fid,'%s\n',slcf);
+slcf = ['&SLCF XB=0,15,0,15,-7.5,7.5, QUANTITY=''U MASK'', CELL_CENTERED=.TRUE. /'];  fprintf(fid,'%s\n',slcf);
+slcf = ['&SLCF XB=0,15,0,15,-7.5,7.5, QUANTITY=''V MASK'', CELL_CENTERED=.TRUE. /'];  fprintf(fid,'%s\n',slcf);
+slcf = ['&SLCF XB=0,15,0,15,-7.5,7.5, QUANTITY=''W MASK'', CELL_CENTERED=.TRUE. /'];  fprintf(fid,'%s\n',slcf);
 
 fprintf(fid,'%s\n','  '); % blank line
 
