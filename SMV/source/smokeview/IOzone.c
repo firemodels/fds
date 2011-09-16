@@ -18,6 +18,8 @@
 // svn revision character string
 char IOzone_revision[]="$Revision$";
 
+void drawtrunccone(float d1, float d2, float height, unsigned char *rgbcolor);
+
 /* ------------------ getzonesizecsv ------------------------ */
 
 void getzonesizecsv(int *nzonet, int *nroom, int *nfires, int *error){
@@ -1393,23 +1395,22 @@ void drawroomdata(void){
 #endif
 
   if(viszonefire==1){
-    float smokecolor[3]={0.7,0.7,0.7};
-    float firecolor[3]={1.0,0.5,0.0};
-
-    glColor3fv(smokecolor);
     for(i=0;i<nfires;i++){
       qdot = zoneqfirebase[i]/1000.0f;
       if(qdot>0.0f){
         firedata *firei;
-        float radius, plumeheight;
+        roomdata *roomi;
+        float diameter, plumeheight, maxheight;
 
         // radius/plumeheight = .268 = atan(15 degrees)
         firei = fireinfo + i;
+        roomi = roominfo + firei->roomnumber-1;
+        maxheight=roomi->z1-firei->absz;
         plumeheight = (0.23f*pow((double)qdot,(double)0.4)/(1.0f+2.0f*0.268f))/xyzmaxdiff;
-        radius = plumeheight*0.268f;
+        diameter = 2.0*plumeheight*0.268f;
         glPushMatrix();
         glTranslatef(firei->absx,firei->absy,firei->absz);
-        DrawCone(radius,plumeheight);
+        DrawFirePlume(diameter,plumeheight,maxheight);
         glPopMatrix();
       }
     }
@@ -1418,26 +1419,24 @@ void drawroomdata(void){
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 }
 
-/* ------------------ DrawCone ------------------------ */
+/* ------------------ DrawFirePlume ------------------------ */
 
-void DrawCone(float radius, float height){
-#define NX 13
-#define NH 9
-  int i,j;
-  float x[NX]={1.,.866,.500,.000,-.500, -.866,-1.0,-.866,-.500,  0., .5,   .866,1.};
-  float y[NX]={0.,.500,.866,1.00, .866,  .500, 0.0,-.500,-.866,-1.,-.866,-.5,  0.};
-  float h[NH]={1.,.875,.750,.625, .500,  .375, .25, .125, .000};
+void DrawFirePlume(float diameter, float height, float maxheight){
+  unsigned char smokecolor[3]={178,178,178};
+  unsigned char firecolor[3]={255,128,0};
+  float d1, d2, plumeheight;
 
-  glPushMatrix();
-  glScalef(radius,radius,height);
-  for(i=0;i<NX-1;i++){
-    glBegin(GL_QUAD_STRIP);
-    for(j=0;j<NH-1;j++){
-      glVertex3f(h[j]*x[i],h[j]*y[i],h[j]);
-      glVertex3f(h[j]*x[i+1],h[j]*y[i+1],h[j]);
-    }
-    glEnd();
+  d1=diameter;
+  if(height<=maxheight){
+    d2=0.0;
+    plumeheight=height;
   }
-  glPopMatrix();
+  else{
+    d2 = d1*(sqrt(4.0*height/maxheight-3.0)-1.0);
+    plumeheight=maxheight;
+
+  }
+  drawtrunccone(d1,d2,plumeheight,firecolor);
+
 }
 

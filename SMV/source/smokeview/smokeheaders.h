@@ -681,7 +681,7 @@ EXTERNCPP void updatechopcolors(void);
 EXTERNCPP void freelabels(flowlabels *label);
 EXTERNCPP int readini(int scriptconfigfile);
 EXTERNCPP void writeini(int flag);
-EXTERNCPP void DrawCone(float radius, float height);
+EXTERNCPP void DrawFirePlume(float radius, float height, float maxheight);
 EXTERNCPP int ispatchtype(int type);
 EXTERNCPP void adjustdatabounds(const float *pdata, int skip, int ndata, int setpmin, float *pmin, int setpmax, float *pmax);
 EXTERNCPP void adjustpartbounds(const float *pdata, int particle_type, int droplet_type, const unsigned char *isprink, 
