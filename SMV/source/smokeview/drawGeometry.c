@@ -5265,6 +5265,52 @@ int compare_verts( const void *arg1, const void *arg2 ){
   return 0;
 }
 
+float distxy(float *x, float *y){
+  float r1, r2, r3;
+
+  r1 = x[0]-y[0];
+  r2 = x[1]-y[1];
+  r3 = x[2]-y[2];
+  return sqrt(r1*r1+r2*r2+r3*r3);
+}
+
+/* ------------------ get_angle ------------------------ */
+
+float get_angle(float d1, float d2, float d3){
+  float angle;
+  float arg;
+
+  arg = (d2*d2+d3*d3-d1*d1)/(2.0*d2*d3);
+  if(arg<-1.0)arg=-1.0;
+  if(arg>1.0)arg=1.0;
+  angle = acos(arg)*180.0/(4.0*atan(1.0));
+  return angle;
+}
+
+/* ------------------ get_minangle ------------------------ */
+
+float get_minangle(triangle *trii){
+  float minangle;
+  float d1, d2, d3;
+  float *xyz1, *xyz2, *xyz3;
+  float angle1, angle2, angle3,sum;
+
+  xyz1 = trii->points[0]->xyz;
+  xyz2 = trii->points[1]->xyz;
+  xyz3 = trii->points[2]->xyz;
+  d1 = distxy(xyz1,xyz2);
+  d2 = distxy(xyz1,xyz3);
+  d3 = distxy(xyz2,xyz3);
+  angle1 = get_angle(d1,d2,d3);
+  angle2 = get_angle(d2,d1,d3);
+  angle3 = get_angle(d3,d1,d2);
+  sum=angle1+angle2+angle3;
+  minangle = angle1;
+  if(angle2<minangle)minangle=angle2;
+  if(angle3<minangle)minangle=angle3;
+  return minangle;
+}
+
 /* ------------------ draw_tris ------------------------ */
 
 void get_faceinfo(void){
@@ -5275,7 +5321,7 @@ void get_faceinfo(void){
     pointlistdata *pointlisti;
     point **points;
     int j;
-    int ndups=0,nused=0;;
+    int ndups=0,nused=0,nskinny=0;
 
     trilisti = trilistinfo + i;
     pointlisti = pointlistinfo + i;
@@ -5292,19 +5338,24 @@ void get_faceinfo(void){
       }
       for(j=0;j<trilisti->ntriangles;j++){
         triangle *trii;
+        float min_angle;
 
         trii = trilisti->triangles + j;
         trii->points[0]->nused++;
         trii->points[1]->nused++;
         trii->points[2]->nused++;
+        if(get_minangle(trii)<=1.0)nskinny++;
+
       }
       for(j=0;j<pointlisti->npoints;j++){
         if(points[j]->nused>0)nused++;
       }
       printf("Face/Vertex Summary\n");
-      printf("  Vertices: %i\n",pointlisti->npoints);
-      printf("      used: %i\n",nused);
-      printf("      dups: %i\n",ndups);
+      printf("      Faces: %i\n",trilisti->ntriangles);
+      printf(" slim faces: %i\n",nskinny);
+      printf("   Vertices: %i\n",pointlisti->npoints);
+      printf("     unused: %i\n",pointlisti->npoints-nused);
+      printf(" duplicates: %i\n\n",ndups);
       FREEMEMORY(points);
     }
   }
@@ -5316,8 +5367,6 @@ void draw_tris(void){
   int i;
   float black[]={0.0,0.0,0.0,1.0};
   float blue[]={0.0,0.0,1.0,1.0};
-
-  get_faceinfo();
 
   for(i=0;i<ntrilistinfo;i++){
     trilistdata *trilisti;
