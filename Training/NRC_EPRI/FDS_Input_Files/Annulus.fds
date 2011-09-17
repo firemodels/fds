@@ -67,15 +67,15 @@ Construction
 
 Target Cables
 
-&MATL ID             = 'PVC'
-      SPECIFIC_HEAT  = 1.29
-      CONDUCTIVITY   = 0.192
-      DENSITY        = 1380. 
-      EMISSIVITY     = 0.95 /
+&MATL ID            = 'PE/PVC'
+      SPECIFIC_HEAT = 1.289
+      CONDUCTIVITY  = 0.192
+      DENSITY       = 1380.
+      EMISSIVITY    = 0.95 / Properties of the plastics within the cable
 
 &SURF ID             = 'TARGET CABLE'
       COLOR          = 'OLIVE'
-      MATL_ID        = 'PVC'
+      MATL_ID        = 'PE/PVC'
       GEOMETRY       = 'CYLINDRICAL'
       THICKNESS      = 0.0075 / 
 
@@ -94,20 +94,22 @@ Fire
       C                  = 2.
       H                  = 3.5
       OTHER              = 0.5
-      MW_OTHER           = 34.
-      HEAT_OF_COMBUSTION = 16000.
-      SOOT_YIELD         = 0.1 /
+      MW_OTHER           = 35.5
+      HEAT_OF_COMBUSTION = 20900.
+      CO_YIELD           = 0.147
+      SOOT_YIELD         = 0.136 /
+
+&RADI RADIATIVE_FRACTION=0.49 /
 
 &SURF ID             = 'BURNING CABLE'
       COLOR          = 'ORANGE'
-      TMP_FRONT      = 300.
       RAMP_Q         = 'fire ramp'
       HRRPUA         = 250. /
 
 &RAMP ID='fire ramp', T=   0., F=0. /
-&RAMP ID='fire ramp', T=   5., F=1. /
-&RAMP ID='fire ramp', T=1683., F=1. /
-&RAMP ID='fire ramp', T=1684., F=0. /
+&RAMP ID='fire ramp', T= 441., F=1. /
+&RAMP ID='fire ramp', T=2207., F=1. /
+&RAMP ID='fire ramp', T=2648., F=0. /
 
 &OBST XB= 0.85, 1.45, 1.6, 1.7, 4.4, 9.0, SURF_ID = 'TRAY' /
 &VENT XB= 0.85, 1.45, 1.6, 1.6, 4.4, 9.0, XYZ=1.15,1.6,4.4, SPREAD_RATE=0.258,  SURF_ID = 'BURNING CABLE' /
@@ -124,9 +126,6 @@ Output
 &PROP ID='Standard Sprinkler', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=130., ACTIVATION_TEMPERATURE=100., SPRAY_ANGLE=30.,80., FLOW_RATE=200. /
 &DEVC ID='Link_Temp_FDS', PROP_ID='Standard Sprinkler', XYZ=0.0,1.6,12.7 /
 &OBST XB=-0.2, 0.2, 1.5, 1.7,13.0,13.0, SURF_ID='TRAY'/ Sprinkler heat shield
-
-&PROP ID='Smoke Detector', QUANTITY='CHAMBER OBSCURATION', LENGTH=1.8, ACTIVATION_OBSCURATION=4.9 /
-&DEVC ID='Obscuration_FDS', PROP_ID='Smoke Detector', XYZ=0.0,0.1,15. /
 
 Smokeview output
 
