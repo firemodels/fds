@@ -3961,6 +3961,9 @@ void ImmersedMenu(int value){
       case 4:
         smoothtrinormal=1-smoothtrinormal;
         break;
+      case 5:
+        hilight_skinny = 1 - hilight_skinny;
+        break;
   }
   glutPostRedisplay();
 }
@@ -4731,6 +4734,12 @@ updatemenu=0;
   }
   else{
     glutAddMenuEntry(_(" Smooth normal"),4);
+  }
+  if(hilight_skinny==1){
+    glutAddMenuEntry(_(" *Hilight skinny triangles"),5);
+  }
+  else{
+    glutAddMenuEntry(_(" Hilight skinny triangles"),5);
   }
 #endif
 

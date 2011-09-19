@@ -847,6 +847,8 @@ SVEXTERN char **colorlabelpart;
 SVEXTERN char **colorlabelpatch;
 SVEXTERN char **colorlabelzone;
 
+SVEXTERN int SVDECL(hilight_skinny,1);
+
 SVEXTERN int minfill, maxfill;
 
 //SVEXTERN int *xycolor, *xzcolor, *yzcolor;

@@ -22,7 +22,7 @@ typedef struct _triangle {
   struct _surface *surf;
   int interior;
   float *color;
-  int fdsnorm;
+  int fdsnorm,skinny;
   point *points[3];
   float normal[3];
 } triangle;

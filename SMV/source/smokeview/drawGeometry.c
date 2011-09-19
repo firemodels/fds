@@ -5265,6 +5265,8 @@ int compare_verts( const void *arg1, const void *arg2 ){
   return 0;
 }
 
+/* ------------------ distxy ------------------------ */
+
 float distxy(float *x, float *y){
   float r1, r2, r3;
 
@@ -5293,7 +5295,7 @@ float get_minangle(triangle *trii){
   float minangle;
   float d1, d2, d3;
   float *xyz1, *xyz2, *xyz3;
-  float angle1, angle2, angle3,sum;
+  float angle1, angle2, angle3;
 
   xyz1 = trii->points[0]->xyz;
   xyz2 = trii->points[1]->xyz;
@@ -5304,7 +5306,6 @@ float get_minangle(triangle *trii){
   angle1 = get_angle(d1,d2,d3);
   angle2 = get_angle(d2,d1,d3);
   angle3 = get_angle(d3,d1,d2);
-  sum=angle1+angle2+angle3;
   minangle = angle1;
   if(angle2<minangle)minangle=angle2;
   if(angle3<minangle)minangle=angle3;
@@ -5344,7 +5345,13 @@ void get_faceinfo(void){
         trii->points[0]->nused++;
         trii->points[1]->nused++;
         trii->points[2]->nused++;
-        if(get_minangle(trii)<=1.0)nskinny++;
+        if(get_minangle(trii)<=10.0){
+          trii->skinny=1;
+          nskinny++;
+        }
+        else{
+          trii->skinny=0;
+        }
 
       }
       for(j=0;j<pointlisti->npoints;j++){
@@ -5367,6 +5374,8 @@ void draw_tris(void){
   int i;
   float black[]={0.0,0.0,0.0,1.0};
   float blue[]={0.0,0.0,1.0,1.0};
+  float skinny_color[]={1.0,0.0,0.0,1.0};
+  float *last_color=NULL;
 
   for(i=0;i<ntrilistinfo;i++){
     trilistdata *trilisti;
@@ -5396,8 +5405,16 @@ void draw_tris(void){
           xyznorm=trianglei->normal;
           glNormal3fv(xyznorm);
 
-          color = trianglei->surf->color;
-          glColor3fv(color);
+          if(hilight_skinny==1&&trianglei->skinny==1){
+            color=skinny_color;
+          }
+          else{
+            color = trianglei->surf->color;
+          }
+          if(color!=last_color){
+            glColor3fv(color);
+            last_color=color;
+          }
 
           xyzptr[0] = trianglei->points[0]->xyz;
           glVertex3fv(xyzptr[0]);
