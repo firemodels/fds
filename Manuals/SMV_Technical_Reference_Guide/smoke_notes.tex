@@ -357,11 +357,12 @@ compactly.  Smokezip uses the ZLIB compression library available at (\hhref{http
 %
 
 \section{Volume Rendered Smoke}
-As illustrated in Figure \ref{figsmokesetup2}, a general volume rendering algorithm consists of two steps:
+Volume rendering is the process of forming an image by mixing partially transparent colors derived from a 3D collection of data.  The association of data to color is called a transfer function.  This transfer function may be arbitary or based on physics depending on how realistic one wishes the rendered image to appear.  Figure \ref{figsmokesetup2} illustrates this process.  Data is mapped to color and opacity then combined to form an image.  In more detail, a general volume rendering algorithm consists of:
 
 \begin{enumerate}
 \item Mapping data at each volume element (voxel) of a 3D data
-mesh to optical properties of optical density and color. \item
+mesh to the optical properties color and opacity.
+\item
 Form a 2D projected image by casting a ray, one ray for each pixel
 in the 2D image, into the 3D data mesh using the optical
 properties mapped in step 1 to mix densities and colors.
@@ -385,20 +386,19 @@ This can be implemented \cite[Chapter 39]{gpugems} using the recursion
 \end{eqnarray*}
 
 where $\hat{C}_i$ and $\hat{\alpha}_i$ are color and opacity accumulated so far at the $i$'th step while stepping through the 3D data set from front to back.  The values $C_i$ and $\alpha_i$
-are the color and opacity at the $i$'th step.  A general transfer function is used to map data values to color and opacity. To produce a realistic image, the strategy then is to perform this mixing in the same way that light would behave.  For this application, an approximate form of the RTE is solved.  We wish to solve (repeating (\ref{eq:simple_rte}) and (\ref{})
+are the color and opacity at the $i$'th step.  A general transfer function is used to map data values to color and opacity. To produce a realistic image, the strategy then is to perform this mixing in the same way that light would behave.  For this application, an approximate form of the RTE is solved.  The solution
 
-\begin{eqnarray}
-\label{eq:simple_rtee}
-\dLdx&=&-\sigt L(x) + \siga L_e(x)\\
- L(0)&=&L_0\nonumber
-\end{eqnarray}
-
-using
 
 \begin{equation}
 \label{eq:rtesoln}
  L(D)=\tau(0,D)L_0 + \int_0^D\tau(x,D)\siga\Le dx
 \end{equation}
+
+to 
+\begin{eqnarray*}
+\dLdx&=&-\sigt L(x) + \siga L_e(x)\\
+ L(0)&=&L_0\nonumber
+\end{eqnarray*}
 
 where
 
@@ -407,18 +407,20 @@ where
 \tau(a,b)=\intmf{a}{b}
 \end{equation}
 
-to collapse data from a series of 3D data meshes into 2D images. As illustrated in Figure \ref{fig:volplume_example}2D, images are constructed on the side of the 3D data meshes (at
-least 1, no more than 3) facing the viewer.  As the scene is moved through rotations and translations the surface images are constantly recomputed and redrawn giving the observer the illusion that the image is 3D drawn within (rather than on the surface) of the data mesh.
+is used to collapse data from a series of 3D data meshes into 2D images. As illustrated in Figure \ref{fig:volplume_example}, 2D images are constructed on the side of the 3D data meshes (at least 1, no more than 3) facing the viewer.  As the scene is moved through rotations and translations the surface images are constantly recomputed and redrawn giving the observer the illusion that the image is 3D drawn within (rather than on the surface) of the data mesh.
 
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{cc}
-\includegraphics[height=4.0in]{figures/plume5c_vol_orig}&
-\includegraphics[height=4.0in]{figures/plume5c_vol_side}\\
+\includegraphics[width=3.5in]{figures/vis_test2_nonfreeze}&
+\includegraphics[width=3.5in]{figures/vis_test2_freeze}\\
 a) front view&b) side view\\
 \end{tabular}
 \end{center}
-\caption {Volume rendered smoke plume viewed from two directions.}
+\caption[Volume rendered smoke plume shown from two directions.]{Volume rendered smoke plume shown from two directions. 
+The first direction is as seen by the observer.  The second direction shows 
+the plume as it is computed on the two forward facing faces of the data mesh.
+}
 \label{fig:volplume_example}
 \end{figure}
 
