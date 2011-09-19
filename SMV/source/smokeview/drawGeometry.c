@@ -5434,7 +5434,16 @@ void draw_tris(void){
 
           trianglei = trilisti->triangles+j;
        
-          color = trianglei->surf->color;
+          if(hilight_skinny==1&&trianglei->skinny==1){
+            color=skinny_color;
+          }
+          else{
+            color = trianglei->surf->color;
+          }
+          if(color!=last_color){
+            glColor3fv(color);
+            last_color=color;
+          }
           glColor3fv(color);
 
           xyznorm = trianglei->points[0]->norm;
