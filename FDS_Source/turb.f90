@@ -2723,7 +2723,7 @@ FACE_LOOP: DO I=1,N_FACE
 
    IF (XP(3)>MAXVAL(ZZ)) CYCLE FACE_LOOP
 
-   RAY_TEST_LOOP: DO J=1,2
+   RAY_TEST_LOOP: DO J=1,3
       IRAY = RAY_TRIANGLE_INTERSECT(I,XP,RAY_DIRECTION)
       SELECT CASE(IRAY)
          CASE(0)
@@ -2735,7 +2735,9 @@ FACE_LOOP: DO I=1,N_FACE
             EXIT RAY_TEST_LOOP
          CASE(2)
             ! ray intersects edge, try new ray (shift origin)
-            XP=XP+(/EPS,0._EB,0._EB/)
+            IF (J==1) XP=XP+(/EPS,0._EB,0._EB/) ! shift in x direction
+            IF (J==2) XP=XP+(/0._EB,EPS,0._EB/) ! shift in y direction
+            IF (J==3) WRITE(LU_ERR,*) 'WARNING: ray test failed'
       END SELECT
    ENDDO RAY_TEST_LOOP
 
