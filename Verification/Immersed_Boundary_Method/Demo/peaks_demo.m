@@ -5,9 +5,10 @@
 close all
 clear all
 
-[x,y] = meshgrid(1:15,1:15);
+N=16;
+[x,y] = meshgrid(0:N,0:N);
 tri = delaunay(x,y);
-z = peaks(15);
+z = peaks(N+1);
 %trimesh(tri,x,y,z)
 
 % write FDS input file
@@ -16,7 +17,7 @@ fid = fopen('peaks_demo.fds','wt');
 
 head = ['&HEAD CHID=''peaks_demo'', TITLE=''Matlab demo of delaunay'' /']; fprintf(fid,'%s\n',head); fprintf(fid,'%s\n','  ');
 
-mesh = ['&MESH IJK=16,16,16, XB=0,15,0,15,-7.5,7.5/']; fprintf(fid,'%s\n',mesh); fprintf(fid,'%s\n','  ');
+mesh = ['&MESH IJK=32,32,32, XB=0,16,0,16,-8,8/']; fprintf(fid,'%s\n',mesh); fprintf(fid,'%s\n','  ');
 
 time = ['&TIME T_END=1./']; fprintf(fid,'%s\n',time); fprintf(fid,'%s\n','  '); % blank line
 
@@ -33,10 +34,10 @@ vent = ['&VENT MB=''ZMAX'', SURF_ID=''OPEN''/']; fprintf(fid,'%s\n',vent);
 
 fprintf(fid,'%s\n','  '); % blank line
 
-slcf = ['&SLCF XB=0,15,0,15,-7.5,7.5, QUANTITY=''P MASK'', CELL_CENTERED=.TRUE. /'];  fprintf(fid,'%s\n',slcf);
-slcf = ['&SLCF XB=0,15,0,15,-7.5,7.5, QUANTITY=''U MASK'', CELL_CENTERED=.TRUE. /'];  fprintf(fid,'%s\n',slcf);
-slcf = ['&SLCF XB=0,15,0,15,-7.5,7.5, QUANTITY=''V MASK'', CELL_CENTERED=.TRUE. /'];  fprintf(fid,'%s\n',slcf);
-slcf = ['&SLCF XB=0,15,0,15,-7.5,7.5, QUANTITY=''W MASK'', CELL_CENTERED=.TRUE. /'];  fprintf(fid,'%s\n',slcf);
+slcf = ['&SLCF XB=0,16,0,16,-8,8, QUANTITY=''P MASK'', CELL_CENTERED=.TRUE. /'];  fprintf(fid,'%s\n',slcf);
+slcf = ['&SLCF XB=0,16,0,16,-8,8, QUANTITY=''U MASK'', CELL_CENTERED=.TRUE. /'];  fprintf(fid,'%s\n',slcf);
+slcf = ['&SLCF XB=0,16,0,16,-8,8, QUANTITY=''V MASK'', CELL_CENTERED=.TRUE. /'];  fprintf(fid,'%s\n',slcf);
+slcf = ['&SLCF XB=0,16,0,16,-8,8, QUANTITY=''W MASK'', CELL_CENTERED=.TRUE. /'];  fprintf(fid,'%s\n',slcf);
 
 fprintf(fid,'%s\n','  '); % blank line
 
