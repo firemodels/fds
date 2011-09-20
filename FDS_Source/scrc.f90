@@ -106,21 +106,21 @@ INTEGER       :: SCARC_KRYLOV_ITERATIONS = 1000               ! max number of it
 REAL (EB)     :: SCARC_KRYLOV_ACCURACY   = 1.E-15_EB          ! requested accuracy for convergence
 
 !!! Parameters for smoothing method (used in multigrids-methods)
-CHARACTER(20) :: SCARC_SMOOTH            = 'JACOBI'           ! smoother for MG (JACOBI/SSOR/GSTRIX)
+CHARACTER(20) :: SCARC_SMOOTH            = 'SSOR'             ! smoother for MG (JACOBI/SSOR/GSTRIX)
 INTEGER       :: SCARC_SMOOTH_ITERATIONS = 1000               ! max number of iterations 
 REAL (EB)     :: SCARC_SMOOTH_ACCURACY   = 1.E-15_EB          ! requested accuracy for convergence
 REAL (EB)     :: SCARC_SMOOTH_OMEGA      = 0.90E+0_EB         ! relaxation parameter 
 
 !!! Parameters for preconditioning method (used in Krylov-methods)
-CHARACTER(20) :: SCARC_PRECON            = 'JACOBI'           ! preconditioner for CG/BICG (JACOBI/SSOR/GSTRIX/MG)
+CHARACTER(20) :: SCARC_PRECON            = 'SSOR'             ! preconditioner for CG/BICG (JACOBI/SSOR/GSTRIX/MG)
 INTEGER       :: SCARC_PRECON_ITERATIONS = 1000               ! max number of iterations 
 REAL (EB)     :: SCARC_PRECON_ACCURACY   = 1.E-15_EB          ! requested accuracy for convergence
 REAL (EB)     :: SCARC_PRECON_OMEGA      = 0.90E+0_EB         ! relaxation parameter 
 
 !!! Parameters for coarse grid method
 CHARACTER(20) :: SCARC_COARSE            = 'CG'               ! coarse grid solver (CG/Gaussian elimination)
-INTEGER       :: SCARC_COARSE_ITERATIONS = 1000               ! max number of iterations 
-REAL (EB)     :: SCARC_COARSE_ACCURACY   = 1.E-15_EB          ! requested accuracy for convergence
+INTEGER       :: SCARC_COARSE_ITERATIONS = 100                ! max number of iterations 
+REAL (EB)     :: SCARC_COARSE_ACCURACY   = 1.E-12_EB          ! requested accuracy for convergence
 REAL (EB)     :: SCARC_COARSE_OMEGA      = 1.5E+0_EB          ! relaxation parameter 
 CHARACTER(20) :: SCARC_COARSE_PRECON     = 'SSOR'             ! preconditioner
  
@@ -187,7 +187,7 @@ INTEGER, PARAMETER :: NSCARC_PRECON_NONE            = -1, &
                       NSCARC_PRECON_SSOR            =  2, &      ! preconditioning by SSOR-method
                       NSCARC_PRECON_GSTRIX          =  3, &      ! preconditioning by GSTRIX-method
                       NSCARC_PRECON_FFT             =  4, &      ! preconditioning by FFT-method
-                      NSCARC_PRECON_MG              =  5         ! preconditioning by MG-method
+                      NSCARC_PRECON_MULTIGRID       =  5         ! preconditioning by MG-method
 
 INTEGER, PARAMETER :: NSCARC_CYCLE_NONE             = -1, &
                       NSCARC_CYCLE_F                =  0, &      ! F-cycle for mg-method
@@ -235,6 +235,10 @@ INTEGER, PARAMETER :: NSCARC_COARSENING_NONE        = -1, &
 INTEGER, PARAMETER :: NSCARC_COARSE_NONE            = -1, &
                       NSCARC_COARSE_CG              =  1, &      ! coarse grid solution by cg-method
                       NSCARC_COARSE_GE              =  2         ! coarse grid solution by Gaussian elimination
+
+INTEGER, PARAMETER :: NSCARC_DIRECT_NONE            = -1, &
+                      NSCARC_DIRECT_GE              =  1, &      ! direct solution by Gaussian elmination
+                      NSCARC_DIRECT_LU              =  2         ! direct solution by LU-decomposition 
 
 INTEGER, PARAMETER :: NSCARC_VECTOR_NONE            = -1, &
                       NSCARC_VECTOR_X               =  1, &      ! selection parameter for vector X
@@ -320,6 +324,7 @@ INTEGER :: TYPE_DEBUG      = NSCARC_DEBUG_NONE
 INTEGER :: TYPE_INITIAL    = NSCARC_INITIAL_NONE
 INTEGER :: TYPE_EXCHANGE   = NSCARC_EXCHANGE_NONE
 INTEGER :: TYPE_VECTOR     = NSCARC_VECTOR_NONE
+INTEGER :: TYPE_DIRECT     = NSCARC_DIRECT_NONE
 
 !!! range of meshes which must be processed for MYID
 INTEGER :: NMESHES_MIN, NMESHES_MAX                 
@@ -571,8 +576,8 @@ SELECT CASE (TRIM(SCARC_METHOD))
             TYPE_PRECON = NSCARC_PRECON_SSOR
          CASE ('GSTRIX')
             TYPE_PRECON = NSCARC_PRECON_GSTRIX
-         CASE ('MG')
-            TYPE_PRECON = NSCARC_PRECON_MG
+         CASE ('MULTIGRID')
+            TYPE_PRECON = NSCARC_PRECON_MULTIGRID
          CASE ('FFT')
             TYPE_PRECON = NSCARC_PRECON_FFT
          CASE DEFAULT
@@ -595,6 +600,14 @@ SELECT CASE (TRIM(SCARC_METHOD))
             WRITE(CMESSAGE,1002) 'multigrid',TRIM(SCARC_MULTIGRID),&
                                  'ScaRC','GEOMETRIC','ALGEBRAIC'
             CALL SCARC_SHUTDOWN(CMESSAGE)
+      END SELECT 
+
+      !!! set type of multigrid method (GEOMETRIC/ALGEBRAIC)
+      SELECT CASE (TRIM(SCARC_COARSE))
+         CASE ('CG')
+            TYPE_KRYLOV = NSCARC_KRYLOV_CG
+         CASE ('GE')
+            TYPE_DIRECT = NSCARC_DIRECT_GE
       END SELECT 
 
       !!! set type of smoother (JACOBI/SSOR/GSTRIX)
@@ -620,7 +633,7 @@ END SELECT
 !!! if a multigrid solver is used (either as main solver or as preconditioner)
 !!! set types for multigrid, coarse grid solver and cycling pattern
 !!!----------------------------------------------------------------------------------------------------
-IF (TYPE_METHOD == NSCARC_METHOD_MULTIGRID .OR. TYPE_PRECON == NSCARC_PRECON_MG) THEN
+IF (TYPE_METHOD == NSCARC_METHOD_MULTIGRID .OR. TYPE_PRECON == NSCARC_PRECON_MULTIGRID) THEN
 
    !!! set type of multigrid (GEOMETRIC/ALGEBRAIC with corresponding coarsening strategy)
    SELECT CASE (TRIM(SCARC_MULTIGRID))
@@ -670,7 +683,6 @@ IF (TYPE_METHOD == NSCARC_METHOD_MULTIGRID .OR. TYPE_PRECON == NSCARC_PRECON_MG)
    SELECT CASE (TRIM(SCARC_COARSE))
       CASE ('CG')
          TYPE_COARSE = NSCARC_COARSE_CG
-         TYPE_KRYLOV = NSCARC_KRYLOV_CG
       CASE ('GE')
          TYPE_COARSE = NSCARC_COARSE_GE
       CASE DEFAULT
@@ -730,7 +742,7 @@ SELECT CASE (TRIM(SCARC_SYSTEM))
          CASE (NSCARC_METHOD_KRYLOV)
 
             SELECT_PRECON: SELECT CASE (TYPE_PRECON)
-               CASE (NSCARC_PRECON_MG) 
+               CASE (NSCARC_PRECON_MULTIGRID) 
                   IF (TYPE_MULTIGRID == NSCARC_MULTIGRID_GEOMETRIC) THEN
                      TYPE_SYSTEM = NSCARC_SYSTEM_BANDED
                   ELSE
@@ -975,7 +987,6 @@ MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
       
    SELECT CASE (TYPE_SYSTEM)
       CASE (NSCARC_SYSTEM_BANDED)
-WRITE(SCARC_LU,*) 'NM=',NM,': ALLOCATE SCARC(',NM,')%BANDED(',NLEVEL_MIN,':',NLEVEL_MAX,')'
          ALLOCATE (SCARC(NM)%BANDED(NLEVEL_MIN:NLEVEL_MAX), STAT=IERR)
          CALL CHKMEMERR ('SCARC_SETUP_TYPES', 'BANDED', IERR)
       CASE (NSCARC_SYSTEM_COMPACT)
@@ -1862,7 +1873,7 @@ SELECT CASE (TYPE_DIMENSION)
          J2 = 1
          SELECT CASE (ABS(IOR0))
             CASE (1)
-               KDIFF = IJKW_FI (13, IW_FI(2)) - IJKW_FI (13, IW_FI(1))
+               KDIFF = IJKW_FI (12, IW_FI(2)) - IJKW_FI (12, IW_FI(1))
                IF (KDIFF == 1) THEN
                   K1 = IJKW_FI (15, IW_FI(2))/2
                   K2 = K1
@@ -1972,7 +1983,7 @@ SELECT CASE (TYPE_DIMENSION)
          SELECT CASE (ABS(IOR0))
             CASE (1)
                JDIFF = IJKW_FI (11, IW_FI(2)) - IJKW_FI (11, IW_FI(1))
-               KDIFF = IJKW_FI (13, IW_FI(3)) - IJKW_FI (13, IW_FI(1))
+               KDIFF = IJKW_FI (12, IW_FI(3)) - IJKW_FI (12, IW_FI(1))
                IF (JDIFF==1 .AND. KDIFF==1) THEN
                   J1 = IJKW_FI (14, IW_FI(2))/2
                   J2 = J1
@@ -1994,7 +2005,7 @@ SELECT CASE (TYPE_DIMENSION)
                ENDIF
             CASE (2)
                IDIFF = IJKW_FI (10, IW_FI(2)) - IJKW_FI (10, IW_FI(1))
-               KDIFF = IJKW_FI (13, IW_FI(3)) - IJKW_FI (13, IW_FI(1))
+               KDIFF = IJKW_FI (12, IW_FI(3)) - IJKW_FI (12, IW_FI(1))
                IF (IDIFF==1 .AND. KDIFF==1) THEN
                   I1 = IJKW_FI (13, IW_FI(2))/2
                   I2 = I1
@@ -2016,7 +2027,7 @@ SELECT CASE (TYPE_DIMENSION)
                ENDIF
             CASE (3)
                IDIFF = IJKW_FI (10, IW_FI(2)) - IJKW_FI (10, IW_FI(1))
-               JDIFF = IJKW_FI (10, IW_FI(2)) - IJKW_FI (10, IW_FI(1))
+               JDIFF = IJKW_FI (11, IW_FI(3)) - IJKW_FI (11, IW_FI(1))
                IF (IDIFF==1 .AND. JDIFF==1) THEN
                   I1 = IJKW_FI (13, IW_FI(2))/2
                   I2 = I1
@@ -2311,7 +2322,7 @@ MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
             !!!-------------------------------------------------------------------------------------------
             !!! in case of multigrid as preconditioner:
             !!!-------------------------------------------------------------------------------------------
-            CASE (NSCARC_PRECON_MG)
+            CASE (NSCARC_PRECON_MULTIGRID)
    
                SELECT_PRECON_MG: SELECT CASE (TYPE_MULTIGRID)
    
@@ -2417,7 +2428,6 @@ DO NL=NLEVEL_MIN, NLEVEL_MAX
 ENDDO
 CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_BCINDEX, NLEVEL_MIN, 'SETUP_SYSTEM', 'PRESSURE_BC_INDEX')
 CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_ACELL  , NLEVEL_MIN, 'SETUP_SYSTEM', 'ADJACENT_CELL')
-stop
 END SUBROUTINE SCARC_SETUP_SYSTEM
 
 
@@ -2720,7 +2730,7 @@ SELECT CASE (TYPE_SYSTEM)
              
       SB%NA   = SB%NC * SB%NCPL                                      ! total number of matrix entries
 
-WRITE(SCARC_LU,*) 'NM=',NM,': NL=',NL,': SB%NA=',SB%NA
+!WRITE(SCARC_LU,*) 'NM=',NM,': NL=',NL,': SB%NA=',SB%NA
 
 !!!----------------------------------------------------------------------------------------------------
 !!! Compact storage technique:
@@ -3259,7 +3269,7 @@ MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
                   SB%Z = 0.0_EB
          
          
-                  IF (TYPE_PRECON == NSCARC_PRECON_MG) THEN
+                  IF (TYPE_PRECON == NSCARC_PRECON_MULTIGRID) THEN
                
                      ALLOCATE (SB%X2(0:IBP1, 0:JBP1, 0:KBP1), STAT=IERR)
                      CALL CHKMEMERR ('SCARC', 'X2', IERR)
@@ -3379,7 +3389,7 @@ MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
                   CALL CHKMEMERR ('SCARC', 'Z', IERR)
                   SC%Z = 0.0_EB
       
-                  IF (TYPE_PRECON == NSCARC_PRECON_MG) THEN
+                  IF (TYPE_PRECON == NSCARC_PRECON_MULTIGRID) THEN
       
                      ALLOCATE (SC%X2(SC%NCE), STAT=IERR)
                      CALL CHKMEMERR ('SCARC', 'X2', IERR)
@@ -5653,7 +5663,7 @@ SELECT CASE (TYPE_SYSTEM)
          !!!--------------------------------------------------------------------------------------------
          !!! Multigrid preconditioner
          !!!--------------------------------------------------------------------------------------------
-         CASE (NSCARC_PRECON_MG)
+         CASE (NSCARC_PRECON_MULTIGRID)
       
             CALL SCARC_METHOD_MULTIGRID (NSCARC_SCOPE_PRECON, NVECTOR2)
       
@@ -5788,7 +5798,7 @@ SELECT CASE (TYPE_SYSTEM)
          !!!--------------------------------------------------------------------------------------------
          !!! Multigrid preconditioner
          !!!--------------------------------------------------------------------------------------------
-         CASE (NSCARC_PRECON_MG)
+         CASE (NSCARC_PRECON_MULTIGRID)
       
             CALL SCARC_METHOD_MULTIGRID (NSCARC_SCOPE_PRECON, NVECTOR2)
       
@@ -6139,7 +6149,8 @@ CALL SCARC_VECTOR_SUM     (VEC_F, VEC_D, 1.0_EB, -1.0_EB, NL)                   
 
 ICYCLE = SCARC_CYCLE_CONTROL(NSCARC_CYCLE_SETUP, NL)
 RESIN  = SCARC_L2NORM (VEC_D, NL)                                                      !  RESIN := ||D||
-WRITE(0,'(a,i3,a,e14.5,a,e14.5)') ' MG-Iteration  =',0,': Residuum=',RESIN
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) &
+   WRITE(0,'(a,i3,a,e14.5,a,e14.5)') ' MG-Iteration  =',0,': Residuum=',RESIN
 
 CALL SCARC_CONVERGENCE_INFO(RESIN, 0, NL, CROUTINE)
 
@@ -6201,7 +6212,8 @@ MULTIGRID_LOOP: DO ITE = 1, NIT
    RES = SCARC_L2NORM (VEC_D, NL)                                                     ! RES := ||D||
 
    ISTATE = SCARC_CONVERGENCE_STATE(RESIN, RES, EPS, ITE, NL, CROUTINE)               ! convergence ?
-WRITE(0,'(a,i3,a,e14.5,a,e14.5)') ' MG-Iteration  =',ITE,': Residuum=',SCARC_RESIDUAL
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) &
+   WRITE(0,'(a,i3,a,e14.5,a,e14.5)') ' MG-Iteration  =',ITE,': Residuum=',SCARC_RESIDUAL
    IF (ISTATE /= NSCARC_STATE_PROCEED) EXIT MULTIGRID_LOOP
  
 ENDDO MULTIGRID_LOOP
@@ -6214,7 +6226,8 @@ ENDDO MULTIGRID_LOOP
 !!!   - Exchange values along internal boundaries (consistency!)
 !!!----------------------------------------------------------------------------------------------------
 CALL SCARC_CONVERGENCE_RATE(RESIN, RES, ITE, ISTATE, CROUTINE)
-WRITE(0,'(a,e14.5)') '                                        ---->  Konvergenzrate=',SCARC_CAPPA
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) &
+   WRITE(0,'(a,e14.5)') '                                        ---->  Konvergenzrate=',SCARC_CAPPA
 
 IF (TYPE_SCOPE == NSCARC_SCOPE_MAIN) THEN
    CALL SCARC_TERMINATE_SOLVER(NLEVEL_MIN)
@@ -6767,6 +6780,8 @@ INTEGER:: NMETHOD
 SELECT CASE (NSCOPE)
    CASE (NSCARC_SCOPE_COARSE)
       NMETHOD = NSCARC_METHOD_KRYLOV
+   CASE (NSCARC_SCOPE_PRECON)
+      NMETHOD = NSCARC_METHOD_MULTIGRID
    CASE DEFAULT
       NMETHOD = TYPE_METHOD
 END SELECT
@@ -6796,9 +6811,11 @@ SELECT CASE (NMETHOD)
                CASE (NSCARC_SCOPE_MAIN)
                   CROUTINE = 'SCARC_GLOBAL_CG'
                   NL = NLEVEL_MIN
+                  !TYPE_ACCURACY = NSCARC_ACCURACY_RELATIVE
                CASE (NSCARC_SCOPE_COARSE)
                   CROUTINE = 'SCARC_COARSE_CG'
                   NL = NLEVEL_MAX
+                  !TYPE_ACCURACY = NSCARC_ACCURACY_ABSOLUTE
             END SELECT
       
          !!! BICG-method
@@ -6817,9 +6834,11 @@ SELECT CASE (NMETHOD)
                CASE (NSCARC_SCOPE_MAIN)
                   CROUTINE = 'SCARC_GLOBAL_BICG'
                   NL = NLEVEL_MIN
+                  !TYPE_ACCURACY = NSCARC_ACCURACY_RELATIVE
                CASE (NSCARC_SCOPE_COARSE)
                   CROUTINE = 'SCARC_COARSE_BICG'
                   NL = NLEVEL_MAX
+                  !TYPE_ACCURACY = NSCARC_ACCURACY_ABSOLUTE
             END SELECT
       
       END SELECT
@@ -6831,17 +6850,28 @@ SELECT CASE (NMETHOD)
 
       NL = NLEVEL_MIN
 
-      VEC_X = NSCARC_VECTOR_X
-      VEC_D = NSCARC_VECTOR_D
-
       VEC_F = NRHS                                                   ! set correct right hand side vector
 
       !!! select scope (multigrid as main solver or preconditioner)
       SELECT CASE (NSCOPE)
          CASE (NSCARC_SCOPE_MAIN)
+
             CROUTINE = 'SCARC_GLOBAL_MULTIGRID'
+
+            VEC_X = NSCARC_VECTOR_X
+            VEC_D = NSCARC_VECTOR_D
+
+            !TYPE_ACCURACY = NSCARC_ACCURACY_RELATIVE
+
          CASE (NSCARC_SCOPE_PRECON)
+
             CROUTINE = 'SCARC_PRECON_MULTIGRID'
+
+            VEC_X = NSCARC_VECTOR_X2
+            VEC_D = NSCARC_VECTOR_D2
+
+            !TYPE_ACCURACY = NSCARC_ACCURACY_RELATIVE
+
       END SELECT
 
 END SELECT
@@ -6886,16 +6916,22 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
                ENDDO
             ENDIF
             
+            IF (TYPE_PRECON == NSCARC_PRECON_MULTIGRID) THEN
+               
+            ENDIF
+
          !!! In case of a multigrid method with coarse grid solution by CG, clear CG-vectors on max level
          CASE (NSCARC_METHOD_MULTIGRID)
             
-            DO NM = NMESHES_MIN, NMESHES_MAX
-               SCARC(NM)%BANDED(NLEVEL_MAX)%X = 0.0_EB
-               SCARC(NM)%BANDED(NLEVEL_MAX)%D = 0.0_EB
-               SCARC(NM)%BANDED(NLEVEL_MAX)%G = 0.0_EB
-               SCARC(NM)%BANDED(NLEVEL_MAX)%Y = 0.0_EB
-               SCARC(NM)%BANDED(NLEVEL_MAX)%W = 0.0_EB
-            ENDDO
+            IF (TYPE_COARSE == NSCARC_COARSE_CG) THEN
+               DO NM = NMESHES_MIN, NMESHES_MAX
+                  SCARC(NM)%BANDED(NLEVEL_MAX)%X = 0.0_EB
+                  SCARC(NM)%BANDED(NLEVEL_MAX)%D = 0.0_EB
+                  SCARC(NM)%BANDED(NLEVEL_MAX)%G = 0.0_EB
+                  SCARC(NM)%BANDED(NLEVEL_MAX)%Y = 0.0_EB
+                  SCARC(NM)%BANDED(NLEVEL_MAX)%W = 0.0_EB
+               ENDDO
+            ENDIF
 
       END SELECT SELECT_BANDED_METHOD
 
@@ -7283,6 +7319,7 @@ ENDDO
 SELECT CASE (TYPE_ACCURACY)
    CASE (NSCARC_ACCURACY_RELATIVE)
       IF (RES <= RESIN*EPS)  ISTATE = NSCARC_STATE_CONV
+      IF (RES <= 1.0E-15)    ISTATE = NSCARC_STATE_CONV
    CASE (NSCARC_ACCURACY_ABSOLUTE)
       IF (RES <= EPS .AND. RES <= RESIN*SCARC_ACCURACY_RELATIVE) ISTATE = NSCARC_STATE_CONV
 END SELECT
