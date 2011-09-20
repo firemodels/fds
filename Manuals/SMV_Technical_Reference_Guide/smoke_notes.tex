@@ -357,13 +357,13 @@ compactly.  Smokezip uses the ZLIB compression library available at (\hhref{http
 %
 
 \section{Volume Rendered Smoke}
-Volume rendering is the process of forming an image by mixing partially transparent colors derived from a 3D collection of data.  The association of data to color is called a transfer function.  This transfer function may be arbitary or based on physics depending on how realistic one wishes the rendered image to appear.  Figure \ref{figsmokesetup2} illustrates this process.  Data is mapped to color and opacity then combined to form an image.  In more detail, a general volume rendering algorithm consists of:
+Volume rendering is the process of visualizing 3D data by mixing partially transparent colors derived from 3D data.  The association of data to color is called a transfer function.  This transfer function may be arbitrary designed to highlight certain portions of the data or based on physics designed to produce realistic appearing images.  Figure \ref{figsmokesetup2} illustrates this process.  Data is first mapped to color and opacity then combined to form an image.  In more detail, a general volume rendering algorithm consists of:
 
 \begin{enumerate}
 \item Mapping data at each volume element (voxel) of a 3D data
-mesh to the optical properties color and opacity.
+mesh to optical properties color and opacity.
 \item
-Form a 2D projected image by casting a ray, one ray for each pixel
+Forming a 2D projected image by casting a ray, one ray for each pixel
 in the 2D image, into the 3D data mesh using the optical
 properties mapped in step 1 to mix densities and colors.
 \end{enumerate}
@@ -378,36 +378,41 @@ representation of a simplified form of the radiation transport equation.
 \label{figsmokesetup2}
 \end{figure}
 
-This can be implemented \cite[Chapter 39]{gpugems} using the recursion
+This can be implemented \cite[Chapter 39]{gpugems} using the forward recursion
 
 \begin{eqnarray*}
+\hat{C}_0&=&0\\
+\hat{\alpha}_0&=&0\\
 \hat{C}_i&=&\left(1-\hat{\alpha}_{i-1}\right)C_i + \hat{C}_{i-1}\\
 \hat{\alpha}_i&=&\left(1-\hat{\alpha}_{i-1}\right)\alpha_i+\hat{\alpha}_{i-1}
 \end{eqnarray*}
 
-where $\hat{C}_i$ and $\hat{\alpha}_i$ are color and opacity accumulated so far at the $i$'th step while stepping through the 3D data set from front to back.  The values $C_i$ and $\alpha_i$
-are the color and opacity at the $i$'th step.  A general transfer function is used to map data values to color and opacity. To produce a realistic image, the strategy then is to perform this mixing in the same way that light would behave.  For this application, an approximate form of the RTE is solved.  The solution
-
+where $\hat{C}_i$ and $\hat{\alpha}_i$ are color and opacity accumulated at the $i$'th step while stepping through the 3D data set from front to back.  The values $C_i$ and $\alpha_i$
+are the color and opacity at the $i$'th step.  A general transfer function is used to map data values to color and opacity. To produce a realistic image, the strategy is to perform this mixing in the same way that light would behave by solving an approximate form of the radiation transport equation.  The solution
 
 \begin{equation}
 \label{eq:rtesoln}
  L(D)=\tau(0,D)L_0 + \int_0^D\tau(x,D)\siga\Le dx
 \end{equation}
 
-to 
+to
 \begin{eqnarray*}
 \dLdx&=&-\sigt L(x) + \siga L_e(x)\\
  L(0)&=&L_0\nonumber
 \end{eqnarray*}
 
-where
+
+is used to collapse 3D data into 2D images projected onto the front facing sides of the data mesh or meshes. As before,
 
 \begin{equation}
 \label{eq:optdepth}
 \tau(a,b)=\intmf{a}{b}
 \end{equation}
 
-is used to collapse data from a series of 3D data meshes into 2D images. As illustrated in Figure \ref{fig:volplume_example}, 2D images are constructed on the side of the 3D data meshes (at least 1, no more than 3) facing the viewer.  As the scene is moved through rotations and translations the surface images are constantly recomputed and redrawn giving the observer the illusion that the image is 3D drawn within (rather than on the surface) of the data mesh.
+is the optical depth between $a$ and $b$.
+
+Figure \ref{fig:volplume_example} illustrates this process showing two images.  
+The image on the left is presented from the point of view of the observer.  The image on the right is rotated showing more clearly the projections.  As the scene is moved through rotations and translations the projected surface images are constantly recomputed and redrawn presenting the illusion that the image is 3D and drawn within (rather than on the surface) of the data mesh.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -417,8 +422,8 @@ is used to collapse data from a series of 3D data meshes into 2D images. As illu
 a) front view&b) side view\\
 \end{tabular}
 \end{center}
-\caption[Volume rendered smoke plume shown from two directions.]{Volume rendered smoke plume shown from two directions. 
-The first direction is as seen by the observer.  The second direction shows 
+\caption[Volume rendered smoke plume shown from two directions.]{Volume rendered smoke plume shown from two directions.
+The first direction is as seen by the observer.  The second direction shows
 the plume as it is computed on the two forward facing faces of the data mesh.
 }
 \label{fig:volplume_example}
@@ -429,7 +434,7 @@ the plume as it is computed on the two forward facing faces of the data mesh.
 \newcommand{\sigai}[1]{\sigma_{a,#1}}
 \newcommand{\Lei}[1]{L_{e,#1}}
 
-Figure \ref{fig:smokediscretesetup} illustrates one of possibly many paths through smoke for which radiance line integral computations are required.  The coordinate system is set up so that that the origin, $x_0$ is to the far right. This is where radiance presumably starts out at its full value.  The observer is located at the far left, $x_N$, where radiance has is computed and displayed.
+The RTE solution in (\ref{eq:rtesoln}) and the optical depth in (\ref{eq:optdepth}) may be approximated using a Riemann sum.  Figure \ref{fig:smokediscretesetup}\ illustrates one of possibly many paths through smoke for which a radiance line integral computation is required.  The coordinate system is set up so that the origin, $x_0$, is on right where radiance presumably has its full value.  The observer in this example is located on the left at $x_N$  where radiance has is computed and displayed.  
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -442,18 +447,18 @@ radiance within a column of 3D smoke data.}
 
 The optical depth, $\tau(a,b)$, in equation (\ref{eq:optdepth}) may be approximated using a Riemann sum  after defining sample points $s_j=j\Delta s$ with spacing $\Delta s=D/N$ to obtain
 
-\begin{eqnarray}
-\nonumber
+\begin{eqnarray*}
 \hat{\tau}_i=\tau(x_i,D)&=&\exp\left(-\int_{x_i}^D\sigma_t(s)ds\right)\\
-\nonumber
 &\approx&\exp\left(-\sum_{j=i}^{N-1}\sigma_t(s_j)\Delta s\right)\\
-\nonumber
-&=&\prod_{j=i}^{N-1}\exp\left(-\sigma_t(s_j)\Delta s\right)\\
+&=&\prod_{j=i}^{N-1}\exp\left(-\sigma_t(s_j)\Delta s\right)
+\end{eqnarray*}
+or
+\begin{eqnarray}
 \label{eq:tauhat_discrete}
 \hat{\tau}_i&=&\prod_{j=i}^{N-1}\tau_j
 \end{eqnarray}
 
-where $\tau_j=\exp\left(-\sigma_t(s_j)\Delta s\right)$ represents the transparency over one step. 
+where $\tau_j=\exp\left(-\sigma_t(s_j)\Delta s\right)$ represents the transparency over one interval.
 
 Similarly, the radiance given by $L(D)$ in equation (\ref{eq:rtesoln}) may be approximated using a Riemann sum to obtain
 
@@ -466,10 +471,10 @@ Similarly, the radiance given by $L(D)$ in equation (\ref{eq:rtesoln}) may be ap
 where $\sigma_{a,i}=\sigma_t(x_i)$, $\Lei{i}=L_e(x_i)$, $x_i=i\Delta x$ and $\Delta x=D/N$ and $\htau{i}$ is obtained from (\ref{eq:tauhat_discrete}).
 
 
-The terms in equation (\ref{eq:discrete_rte}) are summed from back to front.  The location of the $i=0$ term is furthest from the observer while the location of the $i=N-1$ term is closest to the observer.  We wish to perform this sum in reverse order, from the front to the back so that the sum may be terminated early if further contributions would not change the result. 
+The terms in equation (\ref{eq:discrete_rte}) are summed from back to front.  The location of the $i=0$ term is furthest from the observer while the location of the $i=N-1$ term is closest to the observer.  We wish to perform this sum in reverse order, from the front to the back so that the sum may be terminated early if further contributions would not change the result.
 
-To then compute $\hat{L}_0$ recursively,
-let $\hat{L}_j$ and $\hat{L}_{j-1}$ be intermediate results at nodes $j$ and $j-1$ .  Then
+Therefore, to compute $\hat{L}_0$ recursively,
+let $\hat{L}_j$ and $\hat{L}_{j-1}$ be intermediate results at nodes $j$ and $j-1$ given by
 
 \begin{eqnarray}
 \label{eq:recurse1}
