@@ -1,4 +1,4 @@
-# Makefile for Fire Dynamics Simulator (FDS), Version 5
+# Makefile for Fire Dynamics Simulator (FDS)
 
 # To use this makefile, select the appropriate compiler and OS from the list below. For example, to
 # compile the 64 bit parallel version (MPI) of FDS under Linux using the Intel compilers type:
@@ -17,7 +17,7 @@ VPATH = ../FDS_Source
 
 objf_serial = prec.o mpis.o smvv.o cons.o devc.o data.o type.o mesh.o func.o irad.o \
              ieva.o pois.o scrc.o radi.o evac.o part.o vege.o ctrl.o turb.o dump.o hvac.o read.o \
-             mass.o wall.o fire.o divg.o init.o velo.o pres.o main.o
+             mass.o wall.o fire.o divg.o init.o velo.o pres.o geom.o main.o
 obj_serial = isob.o $(objf_serial)
 
 objwinf_serial = $(objf_serial:.o=.obj)
@@ -25,7 +25,7 @@ objwin_serial = $(obj_serial:.o=.obj)
 
 objf_mpi = prec.o mpip.o smvv.o cons.o devc.o data.o type.o mesh.o func.o irad.o \
           ieva.o pois.o scrc.o radi.o evac.o part.o vege.o ctrl.o turb.o dump.o hvac.o read.o \
-          mass.o wall.o fire.o divg.o init.o velo.o pres.o main.o
+          mass.o wall.o fire.o divg.o init.o velo.o pres.o geom.o main.o
 obj_mpi = isob.o $(objf_mpi)
 
 objwinf_mpi = $(objf_mpi:.o=.obj)
@@ -529,6 +529,7 @@ data.o : prec.o func.o cons.o
 func.o : prec.o cons.o type.o mesh.o devc.o
 ctrl.o : prec.o cons.o type.o mesh.o func.o
 turb.o : func.o prec.o cons.o mesh.o
+geom.o : func.o prec.o cons.o mesh.o
 scrc.o : prec.o cons.o mesh.o func.o pois.o
 irad.o : func.o prec.o cons.o type.o mesh.o
 ieva.o : func.o prec.o cons.o type.o mesh.o
@@ -559,6 +560,7 @@ data.obj : prec.obj func.obj cons.obj
 func.obj : prec.obj cons.obj type.obj mesh.obj devc.obj
 ctrl.obj : prec.obj cons.obj type.obj mesh.obj func.obj
 turb.obj : func.obj prec.obj cons.obj mesh.obj
+geom.obj : func.obj prec.obj cons.obj mesh.obj
 scrc.obj : prec.obj cons.obj mesh.obj func.obj pois.obj
 irad.obj : func.obj prec.obj cons.obj type.obj mesh.obj
 ieva.obj : func.obj prec.obj cons.obj type.obj mesh.obj
