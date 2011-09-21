@@ -431,17 +431,15 @@ the plume as it is computed on the two forward facing faces of the data mesh.
 \end{figure}
 
 \subsection{Discretizing the Radiation Transport Equation}
-\newcommand{\htau}[1]{\hat{\tau}_{#1}}
+\newcommand{\htau}[1]{\tau_{#1}^{N-1}}
 \newcommand{\sigai}[1]{\sigma_{a,#1}}
 \newcommand{\Lei}[1]{L_{e,#1}}
+\newcommand{\Lhatj}[1]{L_{#1}^N}
+\newcommand{\Lhatjj}[1]{\hat{L}_{#1}^N}
+\newcommand{\Leii}[1]{\hat{L}_{e,#1}}
 
-The RTE solution, (\ref{eq:rtesoln}), and the optical depth, (\ref{eq:optdepth}), may be approximated using a Riemann sum as in
-\begin{eqnarray*}
-\int_a^b f(x)dx \approx \sum_{i=0}^{N-1}f(x_i)\Delta x
-\end{eqnarray*}
-where $x_i=a+i\Delta x$ and $\Delta x=(b-a)/N$.
 
-Figure \ref{fig:smokediscretesetup}\ illustrates one of possibly many paths through smoke for which a radiance line integral computation is required.  The coordinate system is set up so that the origin, $x_0$, is on right where radiance presumably has its full value.  The observer in this example is located on the left at $x_N$  where radiance is computed and displayed.  
+Figure \ref{fig:smokediscretesetup}\ illustrates a discretization through  smoke.  The path is split into $N$ regions each with length $\Delta x=(x_N-x_0)/N$.  The coordinate system is defined so that the origin, $x_0$, is on right with initial radiance, $L_0$.  The observer in this example is located on the left at $x_N=D$  where radiance is computed and displayed.  
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -452,57 +450,68 @@ radiance within a column of 3D smoke data.}
 \label{fig:smokediscretesetup}
 \end{figure}
 
-The optical depth, $\tau(a,b)$, in equation (\ref{eq:optdepth}) may be approximated using a Riemann sum  after defining sample points $s_j=j\Delta s$ with spacing $\Delta s=D/N$ to obtain
+The optical depth, $\tau(a,b)$, in equation (\ref{eq:optdepth}) may be approximated using a Riemann sum  after defining sample points $s_j=j\Delta s$ with spacing $\Delta s=x_N/N$ to obtain
 
 \begin{eqnarray*}
-\hat{\tau}_i=\tau(x_i,D)&=&\exp\left(-\int_{x_i}^D\sigma_t(s)ds\right)\\
+\htau{i}=\tau(x_i,x_N)&=&\exp\left(-\int_{x_i}^{x_N}\sigma_t(s)ds\right)\\
 &\approx&\exp\left(-\sum_{j=i}^{N-1}\sigma_t(s_j)\Delta s\right)\\
 &=&\prod_{j=i}^{N-1}\exp\left(-\sigma_t(s_j)\Delta s\right)
 \end{eqnarray*}
 or
 \begin{eqnarray}
 \label{eq:tauhat_discrete}
-\hat{\tau}_i&=&\prod_{j=i}^{N-1}\tau_j
+\htau{i}&=&\prod_{j=i}^{N-1}\tau_j
 \end{eqnarray}
 
 where $\tau_j=\exp\left(-\sigma_t(s_j)\Delta s\right)$ represents the transparency over one discretization interval.
 
-Similarly, the radiance given by $L(D)$ in equation (\ref{eq:rtesoln}) may be approximated using a Riemann sum to obtain
+Similarly, the radiance given by $L(x_N)$ in equation (\ref{eq:rtesoln}) may be approximated to obtain
 
 \begin{equation}
 \label{eq:discrete_rte}
-\hat{L}_D = \htau{0}L_0 +
+L_{N} = \htau{0}L_0 +
 \sum_{i=0}^{N-1}\htau{i}\sigai{i}\Lei{i}\Delta x
 \end{equation}
 
-where $\sigma_{a,i}=\sigma_t(x_i)$, $\Lei{i}=L_e(x_i)$, $x_i=i\Delta x$ and $\Delta x=D/N$ and $\htau{i}$ is obtained from (\ref{eq:tauhat_discrete}).
+where $\sigma_{a,i}=\sigma_t(x_i)$, $\Lei{i}=L_e(x_i)$, $x_i=i\Delta x$ and $\Delta x=x_N/N$. 
+Scaling by $L_0$ and letting $\hat{L}_N=L_N/L_0$ and
+$\Leii{i}=\sigma_{a,i}L_{e,i}\Delta x/L_0$, equation (\ref{eq:discrete_rte}) simplifies to
 
+\begin{equation}
+\label{eq:discrete_rte2}
+\hat{L}_N = \htau{0} + \sum_{i=0}^{N-1}\htau{i}\Leii{i}
+\end{equation}
 
-The terms in equation (\ref{eq:discrete_rte}) are summed from back to front.  The location of the $i=0$ term is furthest from the observer while the location of the $i=N-1$ term is closest to the observer.  We wish to perform this sum in reverse order, from the front to the back so that the sum may be terminated early if further contributions would not change the result.
+The terms in equation (\ref{eq:discrete_rte2}) are summed from back to front meaning that the location of the $i=0$ term is furthest from the observer while the location of the $i=N-1$ term is closest.  We wish to perform this sum in reverse order, from front to back so that the sum may be terminated early if further contributions would not significantly change the result.
 
-Therefore, to compute $\hat{L}_0$ recursively,
-let $\hat{L}_j$ and $\hat{L}_{j-1}$ be intermediate results at nodes $j$ and $j-1$ given by
+Therefore, to compute $L_N$,
+let $\Lhatjj{j}$ denote the partial sum using terms $i=j$ through $i=N-1$ in (\ref{eq:discrete_rte2}).  Using this notation $\hat{L}_N=\Lhatjj{0}$ . Then
 
 \begin{eqnarray}
 \label{eq:recurse1}
-\hat{L}_{j-1} &= &\htau{j-1}L_0 + \sum_{i=j-1}^{N-1}\htau{i}\sigai{i}\Lei{i}\Delta x\\
+\Lhatjj{j-1} &= &\htau{j-1} + \sum_{i=j-1}^{N-1}\htau{i}\Leii{i}\\
 \label{eq:recurse2}
-\hat{L}_j     &= &\htau{j}  L_0 + \sum_{i=j}^{N-1}  \htau{i}\sigai{i}\Lei{i}\Delta x
+\Lhatjj{j}     &= &\htau{j} + \sum_{i=j}^{N-1}  \htau{i}\Leii{i}
 \end{eqnarray}
 
-Subtracting (\ref{eq:recurse2}) from (\ref{eq:recurse1}), one obtains
+Subtracting (\ref{eq:recurse2}) from (\ref{eq:recurse1}) results in
 
 \begin{eqnarray*}
-\hat{L}_{j-1} -\hat{L}_{j}&= &(\htau{j-1}-\htau{j})L_0 + \htau{j-1}\sigai{j-1}\Lei{j-1}\Delta x\\
-                        &= &\htau{j}\left[\left(\frac{\htau{j-1}}{\htau{j}}-1\right)L_0 + \frac{\htau{j-1}}{\htau{j}}\sigai{j-1}\Lei{j-1}\Delta x\right]\\
-                        &= &\htau{j}\left[-\left(1-\tau_{j-1}\right)L_0 + \tau_{j-1}\sigai{j-1}\Lei{j-1}\Delta x\right]
+\Lhatjj{j-1} -\Lhatjj{j}&= &(\htau{j-1}-\htau{j}) + \htau{j-1}\Leii{j-1}\\
+                        &= &\htau{j}\left[\left(\frac{\htau{j-1}}{\htau{j}}-1\right) + \frac{\htau{j-1}}{\htau{j}}\Leii{j-1}\right]\\
+                        &= &\htau{j}\left[-\left(1-\tau_{j-1}\right) + \tau_{j-1}\Leii{j-1}\right]
 \end{eqnarray*}
 
-where from (\ref{eq:tauhat_discrete}) $\htau{j-1}/\htau{j}=\tau_{j-1}$.  Therefore, $\hat{L}_{j-1}$ may be expressed recursively using $\hat{L}_{j}$ using
+where from (\ref{eq:tauhat_discrete}), $\htau{j-1}/\htau{j}=\tau_{j-1}$.  
+
+Starting the recursion with 
+$\Lhatjj{N}=0$ and $\htau{N}=1$, the scaled radiance $\Lhatjj{0}$ may be determined by computing the terms
 
 \begin{eqnarray}
-\hat{L}_{j-1} &= &\hat{L}_{j}+\htau{j}\left[-\left(1-\tau_{j-1}\right)L_0 + \tau_{j-1}\sigai{j-1}\Lei{j-1}\Delta x\right]
+\Lhatjj{j-1} &= &\Lhatjj{j}+\htau{j}\left[-\left(1-\tau_{j-1}\right) + \tau_{j-1}\Leii{j-1}\right]
 \end{eqnarray}
+
+for $j=N,\cdots,1$.
 
 %
 % -------------------  Combining Multiple Solutions ------------------------
