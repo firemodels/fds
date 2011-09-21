@@ -289,11 +289,10 @@ SUBROUTINE INIT_IBM(T,NM)
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T
-INTEGER :: I,J,K,NG,NV,I_MIN,I_MAX,J_MIN,J_MAX,K_MIN,K_MAX
+INTEGER :: I,J,K,N,IERR
 TYPE (MESH_TYPE), POINTER :: M
 TYPE (GEOMETRY_TYPE), POINTER :: G
-REAL(EB) :: DELTA,RP,XU(3),PP(3),DP,TIME,TOL=1.E-9_EB, &
-            X_MIN,Y_MIN,Z_MIN,X_MAX,Y_MAX,Z_MAX,XX(4),YY(4),ZZ(4),XP(3),BB(6)
+REAL(EB) :: DELTA,RP,XU(3),PP(3),DP,TIME,TOL=1.E-10_EB,XP(3),BB(6),V1(3),V2(3),V3(3),V4(3)
 
 IF (ICYC>1 .AND. N_GEOM==0) RETURN
 
@@ -307,9 +306,9 @@ M%P_MASK=1
 
 ! geometry loop
 
-GEOM_LOOP: DO NG=1,N_GEOM
+GEOM_LOOP: DO N=1,N_GEOM
 
-   G => GEOMETRY(NG)
+   G => GEOMETRY(N)
 
    IF (ICYC>1 .AND. (.NOT. G%TRANSLATE) .AND. (.NOT. G%ROTATE)) CYCLE GEOM_LOOP
    
@@ -343,22 +342,22 @@ GEOM_LOOP: DO NG=1,N_GEOM
          G%Y2 = G%Y2 + G%V*DT
          G%Z1 = G%Z1 + G%W*DT
          G%Z2 = G%Z2 + G%W*DT
-         X_MIN = G%X1
-         X_MAX = G%X2
-         Y_MIN = G%Y1
-         Y_MAX = G%Y2
-         Z_MIN = G%Z1
-         Z_MAX = G%Z2
-         G%HL(1) = 0.5_EB*(X_MAX-X_MIN) + TOL
-         G%HL(2) = 0.5_EB*(X_MAX-X_MIN) + TOL
-         G%HL(3) = 0.5_EB*(X_MAX-X_MIN) + TOL
+         BB(1) = G%X1
+         BB(2) = G%X2
+         BB(3) = G%Y1
+         BB(4) = G%Y2
+         BB(5) = G%Z1
+         BB(6) = G%Z2
+         G%HL(1) = 0.5_EB*(BB(2)-BB(1)) + TOL
+         G%HL(2) = 0.5_EB*(BB(2)-BB(1)) + TOL
+         G%HL(3) = 0.5_EB*(BB(2)-BB(1)) + TOL
       CASE(ISPHERE) SELECT_SHAPE
-         X_MIN = G%X-G%RADIUS
-         Y_MIN = G%Y-G%RADIUS
-         Z_MIN = G%Z-G%RADIUS
-         X_MAX = G%X+G%RADIUS
-         Y_MAX = G%Y+G%RADIUS
-         Z_MAX = G%Z+G%RADIUS
+         BB(1) = G%X-G%RADIUS
+         BB(3) = G%Y-G%RADIUS
+         BB(5) = G%Z-G%RADIUS
+         BB(2) = G%X+G%RADIUS
+         BB(4) = G%Y+G%RADIUS
+         BB(6) = G%Z+G%RADIUS
          IBM_UVWMAX = IBM_UVWMAX + G%RADIUS*MAXVAL((/ABS(G%OMEGA_X),ABS(G%OMEGA_Y),ABS(G%OMEGA_Z)/))*RDX(1)
       CASE(ICYLINDER) SELECT_SHAPE
          G%HL(1) = 0.5_EB*(G%X2-G%X1)
@@ -366,39 +365,39 @@ GEOM_LOOP: DO NG=1,N_GEOM
          G%HL(3) = 0.5_EB*(G%Z2-G%Z1)
          
          IF (ABS(G%XOR-1._EB)<EPSILON_EB) THEN ! cylinder aligned with x axis
-            X_MIN = G%X-G%HL(1)
-            Y_MIN = G%Y-G%RADIUS
-            Z_MIN = G%Z-G%RADIUS
-            X_MAX = G%X+G%HL(1)
-            Y_MAX = G%Y+G%RADIUS
-            Z_MAX = G%Z+G%RADIUS
+            BB(1) = G%X-G%HL(1)
+            BB(3) = G%Y-G%RADIUS
+            BB(5) = G%Z-G%RADIUS
+            BB(2) = G%X+G%HL(1)
+            BB(4) = G%Y+G%RADIUS
+            BB(6) = G%Z+G%RADIUS
          ENDIF
          
          IF (ABS(G%YOR-1._EB)<EPSILON_EB) THEN ! cylinder aligned with y axis
-            X_MIN = G%X-G%RADIUS
-            Y_MIN = G%Y-G%HL(2)
-            Z_MIN = G%Z-G%RADIUS
-            X_MAX = G%X+G%RADIUS
-            Y_MAX = G%Y+G%HL(2)
-            Z_MAX = G%Z+G%RADIUS
+            BB(1) = G%X-G%RADIUS
+            BB(3) = G%Y-G%HL(2)
+            BB(5) = G%Z-G%RADIUS
+            BB(2) = G%X+G%RADIUS
+            BB(4) = G%Y+G%HL(2)
+            BB(6) = G%Z+G%RADIUS
          ENDIF
          
          IF (ABS(G%ZOR-1._EB)<EPSILON_EB) THEN ! cylinder aligned with z axis
-            X_MIN = G%X-G%RADIUS
-            Y_MIN = G%Y-G%RADIUS
-            Z_MIN = G%Z-G%HL(3)
-            X_MAX = G%X+G%RADIUS
-            Y_MAX = G%Y+G%RADIUS
-            Z_MAX = G%Z+G%HL(3)
+            BB(1) = G%X-G%RADIUS
+            BB(3) = G%Y-G%RADIUS
+            BB(5) = G%Z-G%HL(3)
+            BB(2) = G%X+G%RADIUS
+            BB(4) = G%Y+G%RADIUS
+            BB(6) = G%Z+G%HL(3)
          ENDIF
          
       CASE(IPLANE)
-         X_MIN = M%XS
-         Y_MIN = M%YS
-         Z_MIN = M%ZS
-         X_MAX = M%XF
-         Y_MAX = M%YF
-         Z_MAX = M%ZF
+         BB(1) = M%XS
+         BB(3) = M%YS
+         BB(5) = M%ZS
+         BB(2) = M%XF
+         BB(4) = M%YF
+         BB(6) = M%ZF
          PP   = (/G%X,G%Y,G%Z/)
          G%NN = (/G%XOR,G%YOR,G%ZOR/) - PP          ! normal vector to plane
          G%NN = G%NN/SQRT(DOT_PRODUCT(G%NN,G%NN))   ! unit normal
@@ -408,17 +407,17 @@ GEOM_LOOP: DO NG=1,N_GEOM
    G%MIN_J(NM) = M%JBAR
    G%MIN_K(NM) = M%KBAR
 
-   IF (X_MIN>=M%XS .AND. X_MIN<=M%XF) G%MIN_I(NM) = MAX(0,FLOOR((X_MIN-M%XS)/M%DX(1))-1)
-   IF (Y_MIN>=M%YS .AND. Y_MIN<=M%YF) G%MIN_J(NM) = MAX(0,FLOOR((Y_MIN-M%YS)/M%DY(1))-1)
-   IF (Z_MIN>=M%ZS .AND. Z_MIN<=M%ZF) G%MIN_K(NM) = MAX(0,FLOOR((Z_MIN-M%ZS)/M%DZ(1))-1)
+   IF (BB(1)>=M%XS .AND. BB(1)<=M%XF) G%MIN_I(NM) = MAX(0,FLOOR((BB(1)-M%XS)/M%DX(1))-1)
+   IF (BB(3)>=M%YS .AND. BB(3)<=M%YF) G%MIN_J(NM) = MAX(0,FLOOR((BB(3)-M%YS)/M%DY(1))-1)
+   IF (BB(5)>=M%ZS .AND. BB(5)<=M%ZF) G%MIN_K(NM) = MAX(0,FLOOR((BB(5)-M%ZS)/M%DZ(1))-1)
    
    G%MAX_I(NM) = 0
    G%MAX_J(NM) = 0
    G%MAX_K(NM) = 0
 
-   IF (X_MAX>=M%XS .AND. X_MAX<=M%XF) G%MAX_I(NM) = MIN(M%IBAR,CEILING((X_MAX-M%XS)/M%DX(1))+1)
-   IF (Y_MAX>=M%YS .AND. Y_MAX<=M%YF) G%MAX_J(NM) = MIN(M%JBAR,CEILING((Y_MAX-M%YS)/M%DY(1))+1)
-   IF (Z_MAX>=M%ZS .AND. Z_MAX<=M%ZF) G%MAX_K(NM) = MIN(M%KBAR,CEILING((Z_MAX-M%ZS)/M%DZ(1))+1)
+   IF (BB(2)>=M%XS .AND. BB(2)<=M%XF) G%MAX_I(NM) = MIN(M%IBAR,CEILING((BB(2)-M%XS)/M%DX(1))+1)
+   IF (BB(4)>=M%YS .AND. BB(4)<=M%YF) G%MAX_J(NM) = MIN(M%JBAR,CEILING((BB(4)-M%YS)/M%DY(1))+1)
+   IF (BB(6)>=M%ZS .AND. BB(6)<=M%ZF) G%MAX_K(NM) = MIN(M%KBAR,CEILING((BB(6)-M%ZS)/M%DZ(1))+1)
    
    IF (TWO_D) THEN
       G%MIN_J(NM)=1
@@ -459,13 +458,13 @@ GEOM_LOOP: DO NG=1,N_GEOM
                       ABS( M%Z(K)-G%Z)<G%HL(3)) M%W_MASK(I,J,K) = -1
                   
                   ! see if the point is in surface layer
-                  IF (X_MAX<M%X(I) .AND. M%X(I)<X_MAX+DELTA) M%U_MASK(I,J,K) = 0
-                  IF (Y_MAX<M%Y(J) .AND. M%Y(J)<Y_MAX+DELTA) M%V_MASK(I,J,K) = 0
-                  IF (Z_MAX<M%Z(K) .AND. M%Z(K)<Z_MAX+DELTA) M%W_MASK(I,J,K) = 0
+                  IF (BB(2)<M%X(I) .AND. M%X(I)<BB(2)+DELTA) M%U_MASK(I,J,K) = 0
+                  IF (BB(4)<M%Y(J) .AND. M%Y(J)<BB(4)+DELTA) M%V_MASK(I,J,K) = 0
+                  IF (BB(6)<M%Z(K) .AND. M%Z(K)<BB(6)+DELTA) M%W_MASK(I,J,K) = 0
                   
-                  IF (X_MIN-DELTA<M%X(I) .AND. M%X(I)<X_MIN) M%U_MASK(I,J,K) = 0
-                  IF (Y_MIN-DELTA<M%Y(J) .AND. M%Y(J)<Y_MIN) M%V_MASK(I,J,K) = 0
-                  IF (Z_MIN-DELTA<M%Z(K) .AND. M%Z(K)<Z_MIN) M%W_MASK(I,J,K) = 0
+                  IF (BB(1)-DELTA<M%X(I) .AND. M%X(I)<BB(1)) M%U_MASK(I,J,K) = 0
+                  IF (BB(3)-DELTA<M%Y(J) .AND. M%Y(J)<BB(3)) M%V_MASK(I,J,K) = 0
+                  IF (BB(5)-DELTA<M%Z(K) .AND. M%Z(K)<BB(5)) M%W_MASK(I,J,K) = 0
                   
                CASE(ISPHERE) MASK_SHAPE
                
@@ -581,81 +580,60 @@ ENDDO GEOM_LOOP
 
 ! unstructured geometry
 
-VOLUME_LOOP: DO NV=1,N_VOLU
+VOLUME_LOOP: DO N=1,N_VOLU
 
-   XX(1) = VERTEX(VOLUME(NV)%VERTEX(1))%X
-   XX(2) = VERTEX(VOLUME(NV)%VERTEX(2))%X
-   XX(3) = VERTEX(VOLUME(NV)%VERTEX(3))%X
-   XX(4) = VERTEX(VOLUME(NV)%VERTEX(4))%X
-
-   YY(1) = VERTEX(VOLUME(NV)%VERTEX(1))%Y
-   YY(2) = VERTEX(VOLUME(NV)%VERTEX(2))%Y
-   YY(3) = VERTEX(VOLUME(NV)%VERTEX(3))%Y
-   YY(4) = VERTEX(VOLUME(NV)%VERTEX(4))%Y
-
-   ZZ(1) = VERTEX(VOLUME(NV)%VERTEX(1))%Z
-   ZZ(2) = VERTEX(VOLUME(NV)%VERTEX(2))%Z
-   ZZ(3) = VERTEX(VOLUME(NV)%VERTEX(3))%Z
-   ZZ(4) = VERTEX(VOLUME(NV)%VERTEX(4))%Z
+   V1 = (/VERTEX(VOLUME(N)%VERTEX(1))%X,VERTEX(VOLUME(N)%VERTEX(1))%Y,VERTEX(VOLUME(N)%VERTEX(1))%Z/)
+   V2 = (/VERTEX(VOLUME(N)%VERTEX(2))%X,VERTEX(VOLUME(N)%VERTEX(2))%Y,VERTEX(VOLUME(N)%VERTEX(2))%Z/)
+   V3 = (/VERTEX(VOLUME(N)%VERTEX(3))%X,VERTEX(VOLUME(N)%VERTEX(3))%Y,VERTEX(VOLUME(N)%VERTEX(3))%Z/)
+   V4 = (/VERTEX(VOLUME(N)%VERTEX(4))%X,VERTEX(VOLUME(N)%VERTEX(4))%Y,VERTEX(VOLUME(N)%VERTEX(4))%Z/)
 
    ! bounding box
 
-   X_MIN = MINVAL(XX)
-   X_MAX = MAXVAL(XX)
-
-   Y_MIN = MINVAL(YY)
-   Y_MAX = MAXVAL(YY)
-
-   Z_MIN = MINVAL(ZZ)
-   Z_MAX = MAXVAL(ZZ)
-
-   I_MIN = M%IBAR
-   J_MIN = M%JBAR
-   K_MIN = M%KBAR
-
-   IF (X_MIN>=M%XS .AND. X_MIN<=M%XF) I_MIN = MAX(0,FLOOR((X_MIN-M%XS)/M%DX(1))-1)
-   IF (Y_MIN>=M%YS .AND. Y_MIN<=M%YF) J_MIN = MAX(0,FLOOR((Y_MIN-M%YS)/M%DY(1))-1)
-   IF (Z_MIN>=M%ZS .AND. Z_MIN<=M%ZF) K_MIN = MAX(0,FLOOR((Z_MIN-M%ZS)/M%DZ(1))-1)
-   
-   I_MAX = 0
-   J_MAX = 0
-   K_MAX = 0
-
-   IF (X_MAX>=M%XS .AND. X_MAX<=M%XF) I_MAX = MIN(M%IBAR,CEILING((X_MAX-M%XS)/M%DX(1))+1)
-   IF (Y_MAX>=M%YS .AND. Y_MAX<=M%YF) J_MAX = MIN(M%JBAR,CEILING((Y_MAX-M%YS)/M%DY(1))+1)
-   IF (Z_MAX>=M%ZS .AND. Z_MAX<=M%ZF) K_MAX = MIN(M%KBAR,CEILING((Z_MAX-M%ZS)/M%DZ(1))+1)
-   
-   IF (TWO_D) THEN
-      J_MIN=1
-      J_MAX=1
-   ENDIF
-   
-   IF ( I_MAX<I_MIN .OR. &
-        J_MAX<J_MIN .OR. &
-        K_MAX<K_MIN ) CYCLE VOLUME_LOOP
+   BB(1) = MIN(V1(1),V2(1),V3(1),V4(1))
+   BB(2) = MAX(V1(1),V2(1),V3(1),V4(1))
+   BB(3) = MIN(V1(2),V2(2),V3(2),V4(2))
+   BB(4) = MAX(V1(2),V2(2),V3(2),V4(2))
+   BB(5) = MIN(V1(3),V2(3),V3(3),V4(3))
+   BB(6) = MAX(V1(3),V2(3),V3(3),V4(3))
 
    ! mask cells
 
-   DO K=K_MIN,K_MAX
-      DO J=J_MIN,J_MAX
-         DO I=I_MIN,I_MAX
-
+   DO K=1,M%KBAR
+      DO J=1,M%JBAR
+         DO I=1,M%IBAR
             ! test pcell (cell center)
             XP = (/M%XC(I),M%YC(J),M%ZC(K)/)
-            IF ( POINT_IN_TETRAHEDRON(XP,XX,YY,ZZ) ) M%P_MASK(I,J,K)=-1
+            IF ( POINT_IN_TETRAHEDRON(XP,V1,V2,V3,V4,BB) ) M%P_MASK(I,J,K)=-1
+         ENDDO
+      ENDDO
+   ENDDO
 
+   DO K=1,M%KBAR
+      DO J=1,M%JBAR
+         DO I=0,M%IBAR
             ! test ucell
             XP = (/M%X(I),M%YC(J),M%ZC(K)/)
-            IF ( POINT_IN_TETRAHEDRON(XP,XX,YY,ZZ) ) M%U_MASK(I,J,K)=-1
+            IF ( POINT_IN_TETRAHEDRON(XP,V1,V2,V3,V4,BB) ) M%U_MASK(I,J,K)=-1
+         ENDDO
+      ENDDO
+   ENDDO
 
+   DO K=1,M%KBAR
+      DO J=0,M%JBAR
+         DO I=1,M%IBAR
             ! test vcell
             XP = (/M%XC(I),M%Y(J),M%ZC(K)/)
-            IF ( POINT_IN_TETRAHEDRON(XP,XX,YY,ZZ) ) M%V_MASK(I,J,K)=-1
+            IF ( POINT_IN_TETRAHEDRON(XP,V1,V2,V3,V4,BB) ) M%V_MASK(I,J,K)=-1
+         ENDDO
+      ENDDO
+   ENDDO
 
+   DO K=0,M%KBAR
+      DO J=1,M%JBAR
+         DO I=1,M%IBAR
             ! test wcell
             XP = (/M%XC(I),M%YC(J),M%Z(K)/)
-            IF ( POINT_IN_TETRAHEDRON(XP,XX,YY,ZZ) ) M%W_MASK(I,J,K)=-1 
-
+            IF ( POINT_IN_TETRAHEDRON(XP,V1,V2,V3,V4,BB) ) M%W_MASK(I,J,K)=-1 
          ENDDO
       ENDDO
    ENDDO
@@ -710,52 +688,191 @@ DO K=0,M%KBAR
       DO I=1,M%IBAR
          ! test wcell
          XP = (/M%XC(I),M%YC(J),M%Z(K)/)
-         IF ( POINT_IN_POLYHEDRON(XP,BB) ) M%W_MASK(I,J,K)=-1 
+         IF ( POINT_IN_POLYHEDRON(XP,BB) ) M%W_MASK(I,J,K)=-1
       ENDDO
    ENDDO
 ENDDO
 
 ENDIF RAY_TEST
 
+CUT_CELL_TEST: IF (.TRUE.) THEN
+
+FACE_LOOP: DO N=1,N_FACE
+
+   V1 = (/VERTEX(FACET(N)%VERTEX(1))%X,VERTEX(FACET(N)%VERTEX(1))%Y,VERTEX(FACET(N)%VERTEX(1))%Z/)
+   V2 = (/VERTEX(FACET(N)%VERTEX(2))%X,VERTEX(FACET(N)%VERTEX(2))%Y,VERTEX(FACET(N)%VERTEX(2))%Z/)
+   V3 = (/VERTEX(FACET(N)%VERTEX(3))%X,VERTEX(FACET(N)%VERTEX(3))%Y,VERTEX(FACET(N)%VERTEX(3))%Z/)
+
+   DO K=1,M%KBAR
+      DO J=1,M%JBAR
+         DO I=1,M%IBAR
+
+            BB(1) = M%X(I-1)
+            BB(2) = M%X(I)
+            BB(3) = M%Y(J-1)
+            BB(4) = M%Y(J)
+            BB(5) = M%Z(K-1)
+            BB(6) = M%Z(K)
+
+            CALL TRIANGLE_BOX_INTERSECT(IERR,V1,V2,V3,BB)
+
+            IF (IERR==1) M%P_MASK(I,J,K)=0
+
+         ENDDO
+      ENDDO
+   ENDDO
+
+ENDDO FACE_LOOP
+
+ENDIF CUT_CELL_TEST
+
 END SUBROUTINE INIT_IBM
 
 
-LOGICAL FUNCTION POINT_IN_TETRAHEDRON(XP,XX,YY,ZZ)
+SUBROUTINE TRIANGLE_BOX_INTERSECT(IERR,V1,V2,V3,BB)
+IMPLICIT NONE
+
+INTEGER, INTENT(OUT) :: IERR
+REAL(EB), INTENT(IN) :: V1(3),V2(3),V3(3),BB(6)
+REAL(EB) :: PP(4),XI(3)
+
+IERR=0
+
+! Are vertices outside of bounding planes?
+
+IF (MAX(V1(1),V2(1),V3(1))<BB(1)) RETURN
+IF (MIN(V1(1),V2(1),V3(1))>BB(2)) RETURN
+IF (MAX(V1(2),V2(2),V3(2))<BB(3)) RETURN
+IF (MIN(V1(2),V2(2),V3(2))>BB(4)) RETURN
+IF (MAX(V1(3),V2(3),V3(3))<BB(5)) RETURN
+IF (MIN(V1(3),V2(3),V3(3))>BB(6)) RETURN
+
+! Any vertices inside bounding box?
+
+IF ( V1(1)>=BB(1).AND.V1(1)<=BB(2) .AND. &
+     V1(2)>=BB(3).AND.V1(2)<=BB(4) .AND. &
+     V1(3)>=BB(5).AND.V1(3)<=BB(6) ) THEN
+   IERR=1
+   RETURN
+ENDIF
+IF ( V2(1)>=BB(1).AND.V2(1)<=BB(2) .AND. &
+     V2(2)>=BB(3).AND.V2(2)<=BB(4) .AND. &
+     V2(3)>=BB(5).AND.V2(3)<=BB(6) ) THEN
+   IERR=1
+   RETURN
+ENDIF
+IF ( V3(1)>=BB(1).AND.V3(1)<=BB(2) .AND. &
+     V3(2)>=BB(3).AND.V3(2)<=BB(4) .AND. &
+     V3(3)>=BB(5).AND.V3(3)<=BB(6) ) THEN
+   IERR=1
+   RETURN
+ENDIF
+
+! There are a couple other trivial rejection tests we could employ.
+! But for now we jump straight to line segment--plane intersection.
+
+! Test edge V1,V2 for intersection with each face of box
+PP = (/-1._EB,0._EB,0._EB,BB(1)/) ! plane represented by normal vector (PP(1:3)) and min distance to origin (PP(4))
+CALL LINE_PLANE_INTERSECT(IERR,XI,V1,V2,PP,BB(3:6),1)
+
+END SUBROUTINE TRIANGLE_BOX_INTERSECT
+
+
+SUBROUTINE LINE_PLANE_INTERSECT(IERR,Q,P0,P1,PP,SS,IPLANE)
+USE MATH_FUNCTIONS, ONLY: NORM2
+IMPLICIT NONE
+
+INTEGER, INTENT(OUT) :: IERR
+REAL(EB), INTENT(OUT) :: Q(3)
+REAL(EB), INTENT(IN) :: P0(3),P1(3),PP(4),SS(4)
+INTEGER, INTENT(IN) :: IPLANE
+REAL(EB) :: D(3),T,DENOM
+REAL(EB), PARAMETER :: EPS=1.E-10_EB
+
+IERR=0
+Q=-999._EB
+T=0._EB
+
+D = P1-P0
+D = D/NORM2(D)
+
+DENOM = DOT_PRODUCT(PP(1:3),D)
+IF (DENOM>EPS) T = -( DOT_PRODUCT(PP(1:3),P0)+PP(4) )/DENOM
+
+Q_TEST: IF (T>EPS .AND. T<=1._EB) THEN
+   Q = P0 + T*D
+   
+   ! test Q in SS
+
+   SELECT CASE(IPLANE)
+      CASE(1,2)
+         IF ( Q(2)>=SS(1).AND.Q(2)<=SS(2) .AND. &
+              Q(3)>=SS(3).AND.Q(3)<=SS(4) ) IERR=1
+      CASE(3,4)
+         IF ( Q(1)>=SS(1).AND.Q(1)<=SS(2) .AND. &
+              Q(3)>=SS(3).AND.Q(3)<=SS(4) ) IERR=1
+      CASE(5,6)
+         IF ( Q(1)>=SS(1).AND.Q(1)<=SS(2) .AND. &
+              Q(2)>=SS(3).AND.Q(2)<=SS(4) ) IERR=1
+   END SELECT
+
+ENDIF Q_TEST
+
+END SUBROUTINE LINE_PLANE_INTERSECT
+
+
+LOGICAL FUNCTION POINT_IN_TETRAHEDRON(XP,V1,V2,V3,V4,BB)
 USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
 IMPLICIT NONE
 
-REAL(EB), INTENT(IN) :: XP(3),XX(4),YY(4),ZZ(4)
+REAL(EB), INTENT(IN) :: XP(3),V1(3),V2(3),V3(3),V4(3),BB(6)
 REAL(EB) :: U_VEC(3),V_VEC(3),N_VEC(3),Q_VEC(3),R_VEC(3)
-INTEGER :: I,N(4,4)
+INTEGER :: I
 
 ! In this routine, we test all four faces of the tet volume defined by the points X(i),Y(i),Z(i); i=1:4.
 ! If the point is on the negative side of all the faces, it is inside the volume.
 
-! define the vertex ordering for each face (store later)
+POINT_IN_TETRAHEDRON=.FALSE.
 
-N(1,:) = (/1,2,3,4/)
-N(2,:) = (/1,3,4,2/)
-N(3,:) = (/1,4,2,3/)
-N(4,:) = (/2,4,3,1/)
+! first test bounding box
 
-POINT_IN_TETRAHEDRON=.TRUE. ! start by assuming the point is inside
+IF (XP(1)<BB(1)) RETURN
+IF (XP(1)>BB(2)) RETURN
+IF (XP(2)<BB(3)) RETURN
+IF (XP(2)>BB(4)) RETURN
+IF (XP(3)<BB(5)) RETURN
+IF (XP(3)>BB(6)) RETURN
+
+POINT_IN_TETRAHEDRON=.TRUE.
 
 FACE_LOOP: DO I=1,4
 
-   ! vectors forming the sides of the triangle
-
-   U_VEC = (/XX(N(I,2))-XX(N(I,1)),YY(N(I,2))-YY(N(I,1)),ZZ(N(I,2))-ZZ(N(I,1))/)
-   V_VEC = (/XX(N(I,3))-XX(N(I,1)),YY(N(I,3))-YY(N(I,1)),ZZ(N(I,3))-ZZ(N(I,1))/)
-
-   CALL CROSS_PRODUCT(N_VEC,U_VEC,V_VEC)
-
-   ! form a vector from a point on the triangular surface to the point XP
-
-   Q_VEC = XP-(/XX(N(I,1)),YY(N(I,1)),ZZ(N(I,1))/)
-
-   ! also form a vector from the triangular surface to the other point on the volume defining inside
-
-   R_VEC = (/XX(N(I,4)),YY(N(I,4)),ZZ(N(I,4))/)-(/XX(N(I,1)),YY(N(I,1)),ZZ(N(I,1))/)
+   SELECT CASE(I)
+      CASE(1)
+         ! vertex ordering = 1,2,3,4
+         Q_VEC = XP-(/V1(1),V1(2),V1(3)/) ! form a vector from a point on the triangular surface to the point XP
+         R_VEC = (/V4(1),V4(2),V4(3)/)-(/V1(1),V1(2),V1(3)/) ! vector from the tri to other point of volume defining inside
+         U_VEC = (/V2(1)-V1(1),V2(2)-V1(2),V2(3)-V1(3)/) ! vectors forming the sides of the triangle
+         V_VEC = (/V3(1)-V1(1),V3(2)-V1(2),V3(3)-V1(3)/)
+      CASE(2)
+         ! vertex ordering = 1,3,4,2
+         Q_VEC = XP-(/V1(1),V1(2),V1(3)/)
+         R_VEC = (/V2(1),V2(2),V2(3)/)-(/V1(1),V1(2),V1(3)/)
+         U_VEC = (/V3(1)-V1(1),V3(2)-V1(2),V3(3)-V1(3)/)
+         V_VEC = (/V4(1)-V1(1),V4(2)-V1(2),V4(3)-V1(3)/)
+      CASE(3)
+         ! vertex ordering = 1,4,2,3
+         Q_VEC = XP-(/V1(1),V1(2),V1(3)/)
+         R_VEC = (/V2(1),V2(2),V2(3)/)-(/V1(1),V1(2),V1(3)/)
+         U_VEC = (/V4(1)-V1(1),V4(2)-V1(2),V4(3)-V1(3)/)
+         V_VEC = (/V2(1)-V1(1),V2(2)-V1(2),V2(3)-V1(3)/)
+      CASE(4)
+         ! vertex ordering = 2,4,3,1
+         Q_VEC = XP-(/V2(1),V2(2),V2(3)/)
+         R_VEC = (/V1(1),V1(2),V1(3)/)-(/V2(1),V2(2),V2(3)/)
+         U_VEC = (/V4(1)-V2(1),V4(2)-V2(2),V4(3)-V2(3)/)
+         V_VEC = (/V3(1)-V2(1),V3(2)-V2(2),V3(3)-V2(3)/)
+   END SELECT
 
    ! if the sign of the dot products are equal, the point is inside, else it is outside and we return
 
@@ -867,8 +984,6 @@ EDGE_LOOP: DO I=1,3
    ELSE
       N_VEC = (/0._EB, 1._EB/)
    ENDIF
-
-   print *,N_VEC
 
    ! form a vector from a point on the edge to the point XP
 
