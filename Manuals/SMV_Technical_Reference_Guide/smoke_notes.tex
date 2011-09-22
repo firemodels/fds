@@ -367,10 +367,10 @@ converting data values along the way to color and opacity.  Choose a step size (
 Combine the colors and opacities found in step 2 using a forward recursion such as \cite[Chapter 39]{gpugems} 
 
 \begin{eqnarray*}
-\hat{C}_0&=&0\\
 \hat{\alpha}_0&=&0\\
-\hat{C}_i&=&\left(1-\hat{\alpha}_{i-1}\right)C_i + \hat{C}_{i-1}\\
-\hat{\alpha}_i&=&\left(1-\hat{\alpha}_{i-1}\right)\alpha_i+\hat{\alpha}_{i-1}
+\hat{C}_0&=&0\\
+\hat{\alpha}_i&=&\left(1-\hat{\alpha}_{i-1}\right)\alpha_i+\hat{\alpha}_{i-1}\\
+\hat{C}_i&=&\left(1-\hat{\alpha}_{i-1}\right)C_i + \hat{C}_{i-1}
 \end{eqnarray*}
 
 where $\hat{C}_i$ and $\hat{\alpha}_i$ are color and opacity accumulated at the $i$'th step while stepping through the 3D data set from front to back.  The values $C_i$ and $\alpha_i$
@@ -436,6 +436,7 @@ the plume as it is computed on the two forward facing faces of the data mesh.
 \newcommand{\Lei}[1]{L_{e,#1}}
 \newcommand{\Lhatj}[1]{L_{#1}^N}
 \newcommand{\Lhatjj}[1]{\hat{L}_{#1}^N}
+\newcommand{\Chatjj}[1]{\hat{C}_{#1}^N}
 \newcommand{\Leii}[1]{\hat{L}_{e,#1}}
 
 
@@ -473,36 +474,31 @@ L_{N} = \htau{0}L_0 +
 \sum_{i=0}^{N-1}\htau{i}\sigai{i}\Lei{i}\Delta x
 \end{equation}
 
-where $\sigma_{a,i}=\sigma_t(x_i)$, $\Lei{i}=L_e(x_i)$, $x_i=i\Delta x$ and $\Delta x=x_N/N$. 
-Scaling by $L_0$ and letting $\hat{L}_N=L_N/L_0$ and
-$\Leii{i}=\sigma_{a,i}L_{e,i}\Delta x/L_0$, equation (\ref{eq:discrete_rte}) simplifies to
+where $\sigma_{a,i}=\sigma_a(x_i)$, $\Lei{i}=L_e(x_i)$, $x_i=i\Delta x$ and $\Delta x=x_N/N$. 
+Letting $\Leii{i}=\sigma_{a,i}L_{e,i}\Delta x$, this simplifies to
 
 \begin{equation}
 \label{eq:discrete_rte2}
-\hat{L}_N = \htau{0} + \sum_{i=0}^{N-1}\htau{i}\Leii{i}
+L_N = \htau{0}L_0 + \sum_{i=0}^{N-1}\htau{i}\Leii{i}
 \end{equation}
 
 The terms in equation (\ref{eq:discrete_rte2}) are summed from back to front meaning that the location of the $i=0$ term is furthest from the observer while the location of the $i=N-1$ term is closest.  We wish to perform this sum in reverse order, from front to back so that the sum may be terminated early if further contributions would not significantly change the result.
 
 Therefore, to compute $L_N$,
-let $\Lhatjj{j}$ denote the partial sum using terms $i=j$ through $i=N-1$ in (\ref{eq:discrete_rte2}).  Using this notation $\hat{L}_N=\Lhatjj{0}$ . Then
+let $\Chatjj{j}$ denote the partial sum using terms $i=j$ through $i=N-1$ in the summation term in (\ref{eq:discrete_rte2}).  Using this notation $\hat{L}_N=\htau{0}L_0+\Chatjj{0}$ . Then
 
 \begin{eqnarray}
 \label{eq:recurse1}
-\Lhatjj{j-1} &= &\htau{j-1} + \sum_{i=j-1}^{N-1}\htau{i}\Leii{i}\\
+\Chatjj{j-1} &= &\sum_{i=j-1}^{N-1}\htau{i}\Leii{i}\\
 \label{eq:recurse2}
-\Lhatjj{j}     &= &\htau{j} + \sum_{i=j}^{N-1}  \htau{i}\Leii{i}
+\Chatjj{j}     &= &\sum_{i=j}^{N-1}  \htau{i}\Leii{i}
 \end{eqnarray}
 
 Subtracting (\ref{eq:recurse2}) from (\ref{eq:recurse1}) results in
 
 \begin{eqnarray*}
-\Lhatjj{j-1} -\Lhatjj{j}&= &(\htau{j-1}-\htau{j}) + \htau{j-1}\Leii{j-1}\\
-                        &= &\htau{j}\left[\left(\frac{\htau{j-1}}{\htau{j}}-1\right) + \frac{\htau{j-1}}{\htau{j}}\Leii{j-1}\right]\\
-                        &= &\htau{j}\left[-\left(1-\tau_{j-1}\right) + \tau_{j-1}\Leii{j-1}\right]
+\Chatjj{j-1} -\Chatjj{j}&= &\htau{j-1}\Leii{j-1}
 \end{eqnarray*}
-
-where from (\ref{eq:tauhat_discrete}), $\htau{j-1}/\htau{j}=\tau_{j-1}$.  
 
 Starting the recursion with 
 $\Lhatjj{N}=0$ and $\htau{N}=1$, the scaled radiance $\Lhatjj{0}$ may be determined by computing the terms
@@ -551,10 +547,10 @@ Using this property, RTE solutions $L_1(x)$ and $L_2(x)$ over two sub-intervals 
 
 \begin{eqnarray*}
 L(D)&=&\tau(0,D)L_0 + \int_0^D\tau(x,D)\siga\Le dx\\
-&=&\tau(0,D_1)\tau(D_1,D)L_0 + \int_0^{D_1}\tau(x,D_1)\tau(D_1,D)\Le dx + \int_{D_1}^{D}\tau(x,D)\Le dx\\
+&=&\tau(0,D_1)\tau(D_1,D)L_0 + \int_0^{D_1}\tau(x,D_1)\tau(D_1,D)\siga\Le dx + \int_{D_1}^{D}\tau(x,D)\siga\Le dx\\
 &=&\tau(D_1,D)
-\underbrace{\left(\tau(0,D_1)L_0 + \int_0^{D_1}\tau(x,D_1)\Le dx\right)}_{L_1(D_1)} +
-\underbrace{\int_{D_1}^{D}\tau(x,D)\Le dx}_{L_2(D)-\tau(D_1,D)L_0}\\
+\underbrace{\left(\tau(0,D_1)L_0 + \int_0^{D_1}\tau(x,D_1)\siga\Le dx\right)}_{L_1(D_1)} +
+\underbrace{\int_{D_1}^{D}\tau(x,D)\siga\Le dx}_{L_2(D)-\tau(D_1,D)L_0}\\
 &=&\tau(D_1,D)L_1(D_1)+L_2(D)-\tau(D_1,D)L_0\\
 &=&\tau(D_1,D)(L_1(D_1)-L_0) + L_2(D)
 \end{eqnarray*}
