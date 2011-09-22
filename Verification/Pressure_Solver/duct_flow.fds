@@ -63,7 +63,7 @@ Test pressure iteration routine for flow through a duct across meshes
 &SLCF PBY=1.5,QUANTITY='H' /
 
 &DEVC XB=1.0,1.0,1.0,2.0,1.0,2.0, QUANTITY='VOLUME FLOW +', ID='flow_in' /
-&DEVC XB=1.1,1.1,1.0,2.0,4.0,5.0, QUANTITY='VOLUME FLOW -', ID='flow_out' /
+&DEVC XB=1.0,1.0,1.0,2.0,4.0,5.0, QUANTITY='VOLUME FLOW -', ID='flow_out' /
 &DEVC XYZ=0.,0.,0., QUANTITY='MAXIMUM VELOCITY ERROR', ID='error' /
 &DEVC XYZ=0.,0.,0., QUANTITY='PRESSURE ITERATIONS', ID='iter' /
 
