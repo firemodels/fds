@@ -1275,7 +1275,7 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
                   OSBC%NW = 2*OSBC%NX*OSBC%NY + 2*OSBC%NX*OSBC%NZ + 2*OSBC%NY*OSBC%NZ  
          
                   ALLOCATE(OSBC%IJKW(15,OSBC%NW), STAT=IERR)
-                  CALL ChkMemErr('SCARC_SETUP_WALLCELLS','IJKW',IERR)
+                  CALL ChkMemErr('SCARC_SETUP_EXCHANGE','IJKW',IERR)
                   OSBC%IJKW = 0
                
                ENDDO
@@ -1316,7 +1316,7 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
             OSCF%NW = 2*OSCF%NX*OSCF%NY + 2*OSCF%NX*OSCF%NZ + 2*OSCF%NY*OSCF%NZ  
          
             ALLOCATE(OSCF%IJKW(15,OSCF%NW), STAT=IERR)
-            CALL ChkMemErr('SCARC_SETUP_WALLCELLS','IJKW',IERR)
+            CALL ChkMemErr('SCARC_SETUP_EXCHANGE','IJKW',IERR)
             OSCF%IJKW = 0
          
             !!! In case of GMG with a predefined grid hierarchy allocate corresponding level-structures
@@ -1340,7 +1340,7 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
                   OSCC%NW= 2*OSCC%NX*OSCC%NY + 2*OSCC%NX*OSCC%NZ + 2*OSCC%NY*OSCC%NZ  
          
                   ALLOCATE(OSCC%IJKW(15,OSCC%NW), STAT=IERR)
-                  CALL ChkMemErr('SCARC_SETUP_WALLCELLS','IJKW',IERR)
+                  CALL ChkMemErr('SCARC_SETUP_EXCHANGE','IJKW',IERR)
                   OSCC%IJKW = 0
                
                ENDDO
@@ -1455,8 +1455,8 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
                SBF%BC_INDEX(IWF) = DIRICHLET
             ELSE IF (M%IJKW(9,IWF) /= 0) THEN
                SBF%BC_INDEX(IWF) = INTERNAL
-            ELSE IF (M%BOUNDARY_TYPE(IWF) == NULL_BOUNDARY) THEN
-               SBF%BC_INDEX(IWF) = DIRICHLET
+            !ELSE IF (M%BOUNDARY_TYPE(IWF) == NULL_BOUNDARY) THEN
+            !   SBF%BC_INDEX(IWF) = DIRICHLET
             ELSE
                SBF%BC_INDEX(IWF) = NEUMANN
             ENDIF
@@ -1629,8 +1629,8 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
                SCF%BC_INDEX(IWF) = DIRICHLET
             ELSE IF (M%IJKW(9,IWF) /= 0) THEN
                SCF%BC_INDEX(IWF) = INTERNAL
-            ELSE IF (M%BOUNDARY_TYPE(IWF) == NULL_BOUNDARY) THEN
-               SCF%BC_INDEX(IWF) = DIRICHLET
+            !ELSE IF (M%BOUNDARY_TYPE(IWF) == NULL_BOUNDARY) THEN
+            !   SCF%BC_INDEX(IWF) = DIRICHLET
             ELSE
                SCF%BC_INDEX(IWF) = NEUMANN
             ENDIF
@@ -6296,7 +6296,7 @@ CALL SCARC_VECTOR_SUM     (VEC_F, VEC_D, 1.0_EB, -1.0_EB, NL)                   
 
 ICYCLE = SCARC_CYCLE_CONTROL(NSCARC_CYCLE_SETUP, NL)
 RESIN  = SCARC_L2NORM (VEC_D, NL)                                                      !  RESIN := ||D||
-IF (TYPE_DEBUG == NSCARC_DEBUG_NONE) &
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) &
    WRITE(0,'(a,i3,a,e14.5,a,e14.5)') ' MG-Iteration  =',0,': Residuum=',RESIN
 
 CALL SCARC_CONVERGENCE_INFO(RESIN, 0, NL, CROUTINE)
@@ -6359,7 +6359,7 @@ MULTIGRID_LOOP: DO ITE = 1, NIT
    RES = SCARC_L2NORM (VEC_D, NL)                                                     ! RES := ||D||
 
    ISTATE = SCARC_CONVERGENCE_STATE(RESIN, RES, EPS, ITE, NL, CROUTINE)               ! convergence ?
-IF (TYPE_DEBUG == NSCARC_DEBUG_NONE) &
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) &
    WRITE(0,'(a,i3,a,e14.5,a,e14.5)') ' MG-Iteration  =',ITE,': Residuum=',SCARC_RESIDUAL
    IF (ISTATE /= NSCARC_STATE_PROCEED) EXIT MULTIGRID_LOOP
  
@@ -6373,7 +6373,7 @@ ENDDO MULTIGRID_LOOP
 !!!   - Exchange values along internal boundaries (consistency!)
 !!!----------------------------------------------------------------------------------------------------
 CALL SCARC_CONVERGENCE_RATE(RESIN, RES, ITE, ISTATE, CROUTINE)
-IF (TYPE_DEBUG == NSCARC_DEBUG_NONE) &
+IF (TYPE_DEBUG > NSCARC_DEBUG_NONE) &
    WRITE(0,'(a,e14.5)') '                                        ---->  Konvergenzrate=',SCARC_CAPPA
 
 IF (TYPE_SCOPE == NSCARC_SCOPE_MAIN) THEN
