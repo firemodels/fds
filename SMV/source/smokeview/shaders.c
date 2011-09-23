@@ -260,7 +260,6 @@ int setVolSmokeShaders() {
     "    cum_color += tauterm*pt_color;"
     "    tauhat *= taui;"
     "  }"
-    "  cum_color /= alphahat;"
     "  if(volbw==1){"
     "    gray=0.299*cum_color.r + 0.587*cum_color.g + 0.114*cum_color.b;"
     "    cum_color=vec3(gray,gray,gray);"
