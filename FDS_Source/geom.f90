@@ -289,12 +289,12 @@ SUBROUTINE INIT_IBM(T,NM)
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T
-INTEGER :: I,J,K,N,IERR
+INTEGER :: I,J,K,N,IERR,I_MIN,I_MAX,J_MIN,J_MAX,K_MIN,K_MAX
 TYPE (MESH_TYPE), POINTER :: M
 TYPE (GEOMETRY_TYPE), POINTER :: G
 REAL(EB) :: DELTA,RP,XU(3),PP(3),DP,TIME,TOL=1.E-10_EB,XP(3),BB(6),V1(3),V2(3),V3(3),V4(3)
 
-IF (ICYC>1 .AND. N_GEOM==0) RETURN
+IF (ICYC>0 .AND. N_GEOM==0) RETURN
 
 TIME = T
 M => MESHES(NM)
@@ -642,7 +642,7 @@ ENDDO VOLUME_LOOP
 
 ! point in general polyhedron
 
-RAY_TEST: IF (.TRUE.) THEN
+RAY_TEST: IF (.FALSE.) THEN
 
 ! bounding box (will use better data structure later)
 
@@ -703,9 +703,24 @@ FACE_LOOP: DO N=1,N_FACE
    V2 = (/VERTEX(FACET(N)%VERTEX(2))%X,VERTEX(FACET(N)%VERTEX(2))%Y,VERTEX(FACET(N)%VERTEX(2))%Z/)
    V3 = (/VERTEX(FACET(N)%VERTEX(3))%X,VERTEX(FACET(N)%VERTEX(3))%Y,VERTEX(FACET(N)%VERTEX(3))%Z/)
 
-   DO K=1,M%KBAR
-      DO J=1,M%JBAR
-         DO I=1,M%IBAR
+   BB(1) = MIN(V1(1),V2(1),V3(1))
+   BB(2) = MAX(V1(1),V2(1),V3(1))
+   BB(3) = MIN(V1(2),V2(2),V3(2))
+   BB(4) = MAX(V1(2),V2(2),V3(2))
+   BB(5) = MIN(V1(3),V2(3),V3(3))
+   BB(5) = MAX(V1(3),V2(3),V3(3))
+
+   I_MIN = MAX(1,FLOOR((BB(1)-M%XS)/M%DX(1))-1)
+   J_MIN = MAX(1,FLOOR((BB(3)-M%YS)/M%DY(1))-1)
+   K_MIN = MAX(1,FLOOR((BB(5)-M%ZS)/M%DZ(1))-1)
+
+   I_MAX = MIN(M%IBAR,CEILING((BB(2)-M%XS)/M%DX(1))+1)
+   J_MAX = MIN(M%JBAR,CEILING((BB(4)-M%YS)/M%DY(1))+1)
+   K_MAX = MIN(M%KBAR,CEILING((BB(6)-M%ZS)/M%DZ(1))+1)
+
+   DO K=K_MIN,K_MAX
+      DO J=J_MIN,J_MAX
+         DO I=I_MIN,I_MAX
 
             BB(1) = M%X(I-1)
             BB(2) = M%X(I)
@@ -713,10 +728,39 @@ FACE_LOOP: DO N=1,N_FACE
             BB(4) = M%Y(J)
             BB(5) = M%Z(K-1)
             BB(6) = M%Z(K)
-
+            IERR=0
             CALL TRIANGLE_BOX_INTERSECT(IERR,V1,V2,V3,BB)
-
             IF (IERR==1) M%P_MASK(I,J,K)=0
+
+            BB(1) = M%XC(I)
+            BB(2) = M%XC(I+1)
+            BB(3) = M%Y(J-1)
+            BB(4) = M%Y(J)
+            BB(5) = M%Z(K-1)
+            BB(6) = M%Z(K)
+            IERR=0
+            CALL TRIANGLE_BOX_INTERSECT(IERR,V1,V2,V3,BB)
+            IF (IERR==1) M%U_MASK(I,J,K)=0
+
+            BB(1) = M%X(I-1)
+            BB(2) = M%X(I)
+            BB(3) = M%YC(J)
+            BB(4) = M%YC(J+1)
+            BB(5) = M%Z(K-1)
+            BB(6) = M%Z(K)
+            IERR=0
+            CALL TRIANGLE_BOX_INTERSECT(IERR,V1,V2,V3,BB)
+            IF (IERR==1) M%V_MASK(I,J,K)=0
+
+            BB(1) = M%X(I-1)
+            BB(2) = M%X(I)
+            BB(3) = M%Y(J-1)
+            BB(4) = M%Y(J)
+            BB(5) = M%ZC(K)
+            BB(6) = M%ZC(K+1)
+            IERR=0
+            CALL TRIANGLE_BOX_INTERSECT(IERR,V1,V2,V3,BB)
+            IF (IERR==1) M%W_MASK(I,J,K)=0
 
          ENDDO
       ENDDO
@@ -734,7 +778,7 @@ IMPLICIT NONE
 
 INTEGER, INTENT(OUT) :: IERR
 REAL(EB), INTENT(IN) :: V1(3),V2(3),V3(3),BB(6)
-REAL(EB) :: PP(4),XI(3)
+REAL(EB) :: PLANE(4)
 
 IERR=0
 
@@ -772,53 +816,82 @@ ENDIF
 ! But for now we jump straight to line segment--plane intersection.
 
 ! Test edge V1,V2 for intersection with each face of box
-PP = (/-1._EB,0._EB,0._EB,BB(1)/) ! plane represented by normal vector (PP(1:3)) and min distance to origin (PP(4))
-CALL LINE_PLANE_INTERSECT(IERR,XI,V1,V2,PP,BB(3:6),1)
+PLANE = (/-1._EB,0._EB,0._EB,BB(1)/); CALL LINE_PLANE_INTERSECT(IERR,V1,V2,PLANE,BB,-1); IF (IERR==1) RETURN
+PLANE = (/ 1._EB,0._EB,0._EB,BB(2)/); CALL LINE_PLANE_INTERSECT(IERR,V1,V2,PLANE,BB, 1); IF (IERR==1) RETURN
+PLANE = (/0._EB,-1._EB,0._EB,BB(3)/); CALL LINE_PLANE_INTERSECT(IERR,V1,V2,PLANE,BB,-2); IF (IERR==1) RETURN
+PLANE = (/0._EB, 1._EB,0._EB,BB(4)/); CALL LINE_PLANE_INTERSECT(IERR,V1,V2,PLANE,BB, 2); IF (IERR==1) RETURN
+PLANE = (/0._EB,0._EB,-1._EB,BB(5)/); CALL LINE_PLANE_INTERSECT(IERR,V1,V2,PLANE,BB,-3); IF (IERR==1) RETURN
+PLANE = (/0._EB,0._EB, 1._EB,BB(6)/); CALL LINE_PLANE_INTERSECT(IERR,V1,V2,PLANE,BB, 3); IF (IERR==1) RETURN
+
+! Test edge V2,V3 for intersection with each face of box
+PLANE = (/-1._EB,0._EB,0._EB,BB(1)/); CALL LINE_PLANE_INTERSECT(IERR,V2,V3,PLANE,BB,-1); IF (IERR==1) RETURN
+PLANE = (/ 1._EB,0._EB,0._EB,BB(2)/); CALL LINE_PLANE_INTERSECT(IERR,V2,V3,PLANE,BB, 1); IF (IERR==1) RETURN
+PLANE = (/0._EB,-1._EB,0._EB,BB(3)/); CALL LINE_PLANE_INTERSECT(IERR,V2,V3,PLANE,BB,-2); IF (IERR==1) RETURN
+PLANE = (/0._EB, 1._EB,0._EB,BB(4)/); CALL LINE_PLANE_INTERSECT(IERR,V2,V3,PLANE,BB, 2); IF (IERR==1) RETURN
+PLANE = (/0._EB,0._EB,-1._EB,BB(5)/); CALL LINE_PLANE_INTERSECT(IERR,V2,V3,PLANE,BB,-3); IF (IERR==1) RETURN
+PLANE = (/0._EB,0._EB, 1._EB,BB(6)/); CALL LINE_PLANE_INTERSECT(IERR,V2,V3,PLANE,BB, 3); IF (IERR==1) RETURN
+
+! Test edge V3,V1 for intersection with each face of box
+PLANE = (/-1._EB,0._EB,0._EB,BB(1)/); CALL LINE_PLANE_INTERSECT(IERR,V3,V1,PLANE,BB,-1); IF (IERR==1) RETURN
+PLANE = (/ 1._EB,0._EB,0._EB,BB(2)/); CALL LINE_PLANE_INTERSECT(IERR,V3,V1,PLANE,BB, 1); IF (IERR==1) RETURN
+PLANE = (/0._EB,-1._EB,0._EB,BB(3)/); CALL LINE_PLANE_INTERSECT(IERR,V3,V1,PLANE,BB,-2); IF (IERR==1) RETURN
+PLANE = (/0._EB, 1._EB,0._EB,BB(4)/); CALL LINE_PLANE_INTERSECT(IERR,V3,V1,PLANE,BB, 2); IF (IERR==1) RETURN
+PLANE = (/0._EB,0._EB,-1._EB,BB(5)/); CALL LINE_PLANE_INTERSECT(IERR,V3,V1,PLANE,BB,-3); IF (IERR==1) RETURN
+PLANE = (/0._EB,0._EB, 1._EB,BB(6)/); CALL LINE_PLANE_INTERSECT(IERR,V3,V1,PLANE,BB, 3); IF (IERR==1) RETURN
 
 END SUBROUTINE TRIANGLE_BOX_INTERSECT
 
 
-SUBROUTINE LINE_PLANE_INTERSECT(IERR,Q,P0,P1,PP,SS,IPLANE)
+SUBROUTINE LINE_PLANE_INTERSECT(IERR,P0,P1,PP,BB,IOR)
 USE MATH_FUNCTIONS, ONLY: NORM2
 IMPLICIT NONE
 
 INTEGER, INTENT(OUT) :: IERR
-REAL(EB), INTENT(OUT) :: Q(3)
-REAL(EB), INTENT(IN) :: P0(3),P1(3),PP(4),SS(4)
-INTEGER, INTENT(IN) :: IPLANE
-REAL(EB) :: D(3),T,DENOM
+REAL(EB), INTENT(IN) :: P0(3),P1(3),PP(4),BB(6)
+INTEGER, INTENT(IN) :: IOR
+REAL(EB) :: D(3),T,DENOM, Q0(3)
 REAL(EB), PARAMETER :: EPS=1.E-10_EB
 
 IERR=0
-Q=-999._EB
+Q0=-999._EB
 T=0._EB
 
 D = P1-P0
 D = D/NORM2(D)
 
 DENOM = DOT_PRODUCT(PP(1:3),D)
-IF (DENOM>EPS) T = -( DOT_PRODUCT(PP(1:3),P0)+PP(4) )/DENOM
-
-Q_TEST: IF (T>EPS .AND. T<=1._EB) THEN
-   Q = P0 + T*D
-   
-   ! test Q in SS
-
-   SELECT CASE(IPLANE)
-      CASE(1,2)
-         IF ( Q(2)>=SS(1).AND.Q(2)<=SS(2) .AND. &
-              Q(3)>=SS(3).AND.Q(3)<=SS(4) ) IERR=1
-      CASE(3,4)
-         IF ( Q(1)>=SS(1).AND.Q(1)<=SS(2) .AND. &
-              Q(3)>=SS(3).AND.Q(3)<=SS(4) ) IERR=1
-      CASE(5,6)
-         IF ( Q(1)>=SS(1).AND.Q(1)<=SS(2) .AND. &
-              Q(2)>=SS(3).AND.Q(2)<=SS(4) ) IERR=1
-   END SELECT
-
-ENDIF Q_TEST
+IF (DENOM>EPS) THEN
+   T = -( DOT_PRODUCT(PP(1:3),P0)+PP(4) )/DENOM
+   IF (T>=0._EB .AND. T<=1._EB) THEN
+      Q0 = P0 + T*D ! instersection point
+      IF (POINT_IN_BOX_2D(Q0,BB,IOR)) IERR=1
+   ENDIF
+ENDIF
 
 END SUBROUTINE LINE_PLANE_INTERSECT
+
+
+LOGICAL FUNCTION POINT_IN_BOX_2D(P,B,IOR)
+IMPLICIT NONE
+
+REAL(EB), INTENT(IN) :: P(3),B(4)
+INTEGER, INTENT(IN) :: IOR
+
+POINT_IN_BOX_2D=.FALSE.
+
+SELECT CASE(ABS(IOR))
+   CASE(1) ! YZ plane
+      IF ( P(2)>=B(1).AND.P(2)<=B(2) .AND. &
+           P(3)>=B(3).AND.P(3)<=B(4) ) POINT_IN_BOX_2D=.TRUE.
+   CASE(2) ! XZ plane
+      IF ( P(1)>=B(1).AND.P(1)<=B(2) .AND. &
+           P(3)>=B(3).AND.P(3)<=B(4) ) POINT_IN_BOX_2D=.TRUE.
+   CASE(3) ! XY plane
+      IF ( P(1)>=B(1).AND.P(1)<=B(2) .AND. &
+           P(2)>=B(3).AND.P(2)<=B(4) ) POINT_IN_BOX_2D=.TRUE.
+END SELECT
+
+END FUNCTION POINT_IN_BOX_2D
 
 
 LOGICAL FUNCTION POINT_IN_TETRAHEDRON(XP,V1,V2,V3,V4,BB)
