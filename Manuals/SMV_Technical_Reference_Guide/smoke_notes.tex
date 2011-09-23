@@ -6,21 +6,21 @@
 
 \subsection{Background}
 
-Realistic visualization methods are important for applications where one needs to observe effects of fire and smoke on the underlying scene rather than to know that smoke has a certain temperature or density value.  This would be the case for a fire fighter using a computer based fire fighting simulator. Realistic visualization  methods complement but do not replace other more traditional visualization methods such as 2D contouring or 3D iso-surfacing which are better suited for analyzing data quantitatively.
+Realistic visualization methods are important for applications where one wishes to observe effects of fire and smoke rather than determine properties such as temperature or velocity.  This would be the case for a fire fighter using a computer based fire fighting simulator. Realistic visualization methods, however, complement but do not replace other more traditional visualization methods such as 2D contouring or 3D iso-surfacing which are better suited for analyzing data quantitatively.
 
-Complete methods for visualizing smoke and fire taking into account interactions between light and smoke such as absorption, emission, and scattering require the solution of the radiation transport equation (RTE)\cite{Siegel:2001} also called the volume rendering equation\cite{levoy:1988}. This equation models how light appears to an observer after interacting with a participating media. The RTE used by Smokeview\citesmv\ to model smoke and fire appearance is identical to that used by the Fire Dynamics Simulator (FDS)\cite{FDS_Tech_Guide} to model radiative heat transfer.  Smokeview solves the RTE using visible while FDS solves the RTE using infrared wavelengths of light. One other important difference in the solution procedure is that Smokeview requires a solution only at the observer's viewpoint while FDS requires solutions at all points within the solution domain.
+Complete methods for visualizing smoke and fire taking into account interactions between light and smoke such as absorption, emission, and scattering require the solution of the radiation transport equation (RTE)\cite{Siegel:2001} also called the volume rendering equation\cite{levoy:1988}. This equation models how light appears to an observer after interacting with smoke, a participating media. The RTE used by Smokeview\citesmv\ to model smoke and fire appearance is identical to that used by the Fire Dynamics Simulator (FDS)\cite{FDS_Tech_Guide} to model radiative heat transfer.  Smokeview solves the RTE using visible while FDS solves the RTE using infrared wavelengths of light. One other important difference is that Smokeview requires a solution only at the observer's viewpoint while FDS requires solutions at all points within the solution domain.
 
-Even so, the solution of this integro-differential equation for visualization still requires significant computational and memory  resources.  Approximations are required in order to display smoke at interactive frame rates.  The primary approximation is to take advantage of the small albedo character of smoke allowing one to either simplify or eliminate the scattering term in the RTE.
+Even so, the solution of this integro-differential equation for visualization still requires significant computational and memory  resources.  Approximations are required in order to display smoke at interactive frame rates.  The primary approximation is to take advantage of the low albedo character of smoke allowing one to either simplify or eliminate scattering terms in the RTE.
 
-Two techniques for visualizing smoke realistically discussed are slice rendered and volume rendered methods.  These methods both solve a form of the RTE equation.  The integrated quantity in both cases is ultimately an opacity, the fraction of light obscured.  They differ in the path length over which the equations are integrated.
+Two techniques discussed for visualizing smoke realistically are slice rendered and volume rendered methods\cite{levoy:1988,Engel:2006}.    These methods both solve a form of the RTE equation.  The integrated quantity in both cases is opacity, the fraction of light obscured.  They differ in how the integration path is partitioned.
 
-The integration path for a slice rendered method is a segment between two adjacent grid planes within a 3D mesh. There is one slice plane for each plane of simulated data. The resulting partially transparent slice planes are drawn individually and combined by the video hardware to form one image. Planes are drawn through the data along the xy, xz, yz axes or diagonally to the coordinate planes.  The particular plane drawn is chosen to be the one most perpendicular to the viewer's line of sight.
+The integration path for a slice rendered method is split at grid plane within a 3D mesh. There is one partially transparent slice for each plane of simulated data. Planes are drawn through the data along the xy, xz, yz axes or diagonally to the coordinate planes.  The particular plane drawn is chosen to be the one most perpendicular to the viewer's line of sight.
+The resulting partially transparent slice planes are drawn individually and combined by the video hardware to form one image.  
 
-The second approach, a volume rendering method, again integrates a simplified form of the radiation transport equation but over the entire entire simulation mesh, from the front of the solution domain to the back, rather than across just one slice plane. A volume rendered method then computes opacity across multiple grid planes.  As a result, there is only one plane of data drawn.  The video hardware is again exploited, but this time to compute a line integral for each pixel in the observer's view.  Opacities and color for both methods are computed using soot density and temperature data derived from a fire simulation. Colors are determined from a prescribed colormap which is a function of
-temperature.
+The second approach, a volume rendering method, again integrates a simplified form of the radiation transport equation but over the entire entire data mesh, from the front (relative to the observer) of the solution domain to the back, rather than across just one slice plane. A volume rendered method then computes opacity across multiple grid planes.  As a result, there is only one plane of data displayed.  The video hardware is again exploited, but this time to compute a line integral for each pixel in the observer's view.  Opacities and color for both methods are computed using transfer functions using soot density and temperature data derived from a fire simulation.
 
 \subsection{Overview}
-This \paper\ is organized as follows.  A model for visualizing smoke and fire is discussed.  This model, the radiative transport equation (RTE),is simplified in several ways one of which giving Beer's law.  Two methods are then discussed for visualizing smoke  both using a form of the RTE.  The first method, slice rendering,  uses a series of partially transparent slices to represent smoke and fire. The second method, volume rendering, solves the RTE over the entire domain. Finally, several areas where the visualization methods may be improved are given.
+This \paper\ is organized as follows.  A model for visualizing smoke and fire is discussed.  This model, the radiative transport equation (RTE),is simplified in several ways one of which gives the Beer-Lambert law.  Two methods are then discussed for visualizing smoke  both using a form of the RTE.  The first method, slice rendering,  uses a series of partially transparent slices to represent smoke and fire. The second method, volume rendering, solves the RTE over the entire domain. Finally, several areas where the visualization methods may be improved are given.
 
 %\section{Background}
 
@@ -36,7 +36,8 @@ This \paper\ is organized as follows.  A model for visualizing smoke and fire is
 %
 
 \section{Visualization Model}
-The parameter used to model smoke appearance is radiance with units of watts per square meter per steradian, W/(sr$\cdot$m$^2$).  The parameter used as a boundary condition when modeling heat transfer in a fire model such as FDS is heat flux with units of watts per square meter, W/m$^2$. The solid angle unit, sr, accounts for the fact that an object appears brighter if it emits a given amount of light through a smaller cross-sectional area. This has the interesting implication, ignoring atmospheric effects, at pointed out in \cite{} that the sun will appear equally bright on the Earth as on Mars.  The sun's disk however will appear smaller on Mars accounting for the smaller amount of heat transfer that occurs as expected.  From a visualization perspective, this implies that image brightness does not depend on image distance from the observer unless  participating media is present to absorb or scatter  intervening light.  The radiation transport equation discussed in this section models the change in radiance due to these factors.
+The parameter used to model smoke appearance is radiance with units of watts per square meter per unit solid angle, W/(sr$\cdot$m$^2$).  The parameter used as a boundary condition when modeling heat transfer in a fire model such as FDS is heat flux with units of watts per square meter, W/m$^2$. The solid angle accounts for the fact that a light source appears brighter if it emits a given amount of light through a smaller cross-sectional area.
+This has the interesting implication, ignoring atmospheric effects, as pointed out in \cite{}, that the sun appears equally bright on the Earth as on Mars.  The diminished heat flux $(W/m^2)$ on Mars due to the increased distance from the sun is exactly offset by the reduced solid angle ($sr$) of the sun's disk.  From a visualization perspective, this implies that image brightness does not depend on image distance unless  participating media is present to absorb or scatter  intervening light.  The radiation transport equation discussed in this section models the change in radiance due to these factors.
 
 %
 % ----------  Radiation Transport Equation --------------
@@ -56,7 +57,7 @@ The parameter used to model smoke appearance is radiance with units of watts per
 \newcommand{\intmf}[2]{ \exp\left({-\int_#1^#2 \sigts ds}\right) }
 \newcommand{\intmff}[2]{ {-\int_#1^#2 \sigts ds} }
 
-The radiation transport equation is used to calculate radiance within a region with participating media due to one or more light sources. The change in radiance along a ray with direction $\omega$ may be expressed by the radiation transport equation given by
+The radiation transport equation is used to calculate radiance due to one or more light sources within a region possibly containing a participating media such as smoke. The change in radiance along a ray with direction $\omega$ may be expressed using
 
 \begin{eqnarray}
 \label{eq:fullrte}
@@ -66,7 +67,7 @@ The radiation transport equation is used to calculate radiance within a region w
 \underbrace{\sigs\int_{4\pi}p(x,\omega,\omega')C_i(x,\omega')d\omega'}_\mathrm{in-scattering}
 \end{eqnarray}
 
-\noindent where, as illustrated in Figure \ref{figRadiance}, $\Lxo$ is the radiance at $x$ along a direction $\omega$, $\siga$ is the absorption coefficient, $\sigs$ is the scattering coefficient, $\Lexo$ is the radiance emitted at $x$ in direction $\omega$ and $p(x,\omega,\omega')$ is the fraction of light moving along direction $\omega'$ scattered along direction $\omega$. Absorption, and out-scattering causes radiance to decrease while emission and in-scattering causes radiance to increase. The terms $C$, $C_e$ and $C_i$ each have units of W/m$^2$sr$^{-1}$.  The terms $\sigma_a$ and $\sigma_s$ have units of m$^{-1}$ and specify the change per unit length the radiance term they are applied to.
+\noindent where, as illustrated in Figure \ref{figRadiance}, $\Lxo$ represents the radiance at $x$ along a direction $\omega$, $\siga$ is the absorption coefficient, $\sigs$ is the scattering coefficient, $\Lexo$ is the radiance emitted at $x$ in direction $\omega$ and $p(x,\omega,\omega')$ is the fraction of light moving along direction $\omega'$ scattered along direction $\omega$. Absorption, and out-scattering causes radiance to decrease while emission and in-scattering causes radiance to increase. The terms $C$, $C_e$ and $C_i$ each have units of W/m$^2$sr$^{-1}$.  The terms $\sigma_a$ and $\sigma_s$ each have units of m$^{-1}$ and specify the change per unit length to the radiance term they are applied to.
 \begin{figure}[\figoptions]
 \begin{center}
 \includegraphics[width=6.0in]{figures/rte_setup}
@@ -82,12 +83,15 @@ absorption and out-scattering while components increasing radiance are emission 
 
 \subsection{Approximating the Radiation Transport Equation}
 
+The RTE may be simplified in several ways depending on which terms are included or ignored.
+The first simplification includes only light-smoke interactions due to absorption and out-scattering. This results in the Beer-Lambert law.  The second simplification discussed includes absorption, out-scattering and emission terms ignoring in-scattering.
+
 %
 % ----------  Absorption and Out-Scattering - Beer-Lambert Law --------------
 %
 
 \subsubsection{Absorption and Out-Scattering - Beer-Lambert Law}
-Equation (\ref{eq:fullrte}) may be simplified by neglecting the in-scattering and emission terms and combining the absorption and out-scattering terms using $\sigt=\siga+\sigs$ to obtain
+Equation (\ref{eq:fullrte}) may be simplified by neglecting the in-scattering and emission terms and combining the absorption and out-scattering coefficients using $\sigt=\siga+\sigs$ to obtain
 
 \begin{eqnarray*}
 \dLdx&=&-\sigt C(x)\\
@@ -98,19 +102,19 @@ which has solution
 \label{eq:beer1} \frac{C(D)}{C_0}=\intmf{0}{D}
 \end{equation}
 
-If $\sigt$ is constant then equation (\ref{eq:beer1}) simplifies
+If $\sigt$ is constant, equation (\ref{eq:beer1}) simplifies
 to
 \begin{equation}
 \label{eq:beer2} \frac{C(D)}{C_0}=\exp(-\sigma_t D)
 \end{equation}
-which is known as the Beer-Lambert law\cite{}.
+which is known as the Beer-Lambert law\cite{Siegel:2001}.
 
 %
 % ----------  Absorption, Out-Scattering and Emission ------------------------
 %
 
 \subsubsection{Absorption, Out-Scattering and Emission}
-Alternatively, if the emission term is also included when simplifying equation (\ref{eq:fullrte}),  the following differential equation results.
+Alternatively, if the emission term is also included when simplifying equation (\ref{eq:fullrte}),  the following linear differential equation results.
 
 \begin{eqnarray}
 \label{eq:simple_rte}
@@ -146,7 +150,7 @@ by $\tau(a,b)=\intmf{a}{b}$ .
 %
 
 \section{Slice Rendered Smoke}
-A slice rendering algorithm for visualizing smoke consists of partitioning a 3D computational domain into a series of 2D slices.  The slice orientation is chosen to be the one most perpendicular to the viewer's line of sight where possible choices are slice planes parallel to the XY, XZ, YZ axis or planes diagonal to the data.  The opacity at each grid node is computed using the distance $\Delta x$ between adjacent YZ planes and soot density data computed by the fire model.  If slice orientations other than YZ are displayed, then opacities are adjusted if the plane to plane distance is other than $\Delta x$.  Opacity data is computed and compressed using run length encoding as a preprocessing step and decompressed one frame at a time as data is displayed.
+A slice rendering algorithm for visualizing smoke consists of partitioning a 3D computational domain into a series of 2D slices.  The slice orientation is chosen to be the one most perpendicular to the viewer's line of sight where possible choices are slice planes parallel to the three cartesian coordinate planes (XY, XZ, YZ) or planes diagonal to the data.  The opacity at each grid node is computed using the distance $\Delta x$ between adjacent YZ planes and soot density data computed by the fire model.  If slice orientations other than YZ are displayed, then opacities are adjusted if the distance between planes is different than $\Delta x$.  Opacity data is computed and compressed using run length encoding as a preprocessing step and decompressed one frame at a time as data is displayed.
 
 
 %
@@ -154,13 +158,13 @@ A slice rendering algorithm for visualizing smoke consists of partitioning a 3D 
 %
 
 \subsection{Computing Opacity}
-The process of computing opacity at slice plane nodes is illustrated schematically in Figure \ref{figsmokesetup}. A ray travels from the background to the observer through intervening
-smoke. Light is absorbed, scattered by the smoke as the ray passes each slice plane .  Emission effects are ignored. Scattering effects presently are only accounted for in the value of the total mass extinction coefficient used.  Light losses are assumed to be from both absorption and scattering. The obscuration is computed along each ray one grid plane at a time, using Beer's law as follows.  The $\alpha$ values are pre-computed by FDS using Beer's law~\cite{Siegel:2001}
+Computing opacity at slice plane nodes is illustrated in Figure \ref{figsmokesetup}. A ray travels from the background to the observer through intervening
+smoke. Light is absorbed or scattered by the smoke as the ray passes each slice plane .  Emission effects are ignored. Scattering effects presently are only accounted for in the value of the total mass extinction coefficient used.  Light losses are assumed to be from both absorption and scattering. The obscuration is computed along each ray one grid plane at a time, using Beer's law as follows.  The $\alpha$ values are pre-computed by FDS using Beer's law~\cite{Siegel:2001}
 \begin{equation}
 \alpha=1-\exp(-ks\Delta x) \label{eq:alpha}
 \end{equation}
 
-\noindent for a particular view direction (down the x axis) where $\Delta x$ is this distance between two nodes, $k$ is the total soot mass extinction coefficient and $s$ be the soot density.  Note that using the notation from the previous section, $\sigma_t=\sigma_a+\sigma_s=ks$.  Beer's law is an empirical relationship relating light absorption to the material properties of the media the light is traveling through, in this case soot or smoke.
+\noindent for a particular view direction (down the x axis) where $\Delta x$ is this distance between two grid plane, $k$ is the total soot mass extinction coefficient and $s$ is the soot density.  Note that using the notation from the previous section, $\sigma_t=\sigma_a+\sigma_s=ks$.  Beer's law is an empirical relationship relating light absorption to the material properties of the media the light is traveling through, in this case soot or smoke.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -255,8 +259,9 @@ plume looks more realistic as more slice planes
 are included to form the image. } \label{figplume}
 \end{figure}
 
-\noindent This process is repeated for each smoke plane. Figure \ref{figsmoke3d} illustrates this process showing smoke and fire in a townhouse kitchen fire.
+\noindent This process is repeated for each smoke plane. 
 
+Figure \ref{figsmoke3d} illustrates this process showing smoke and fire in a townhouse kitchen fire.
 The visualization is performed by displaying a series of partially transparent planes. For illustration, these planes are made more conspicuous (in Figure \ref{figsmoke3d}a) by skipping smoke planes (displaying every third plane) and orienting them along the `x' axis. Figure \ref{figsmoke3d}b shows the visualization as it normally appears with all slice planes shown and oriented along a
 plane most perpendicular to the view direction.
 
@@ -313,7 +318,7 @@ oriented so that they are {\em most perpendicular}\ to the line of sight }
 \end{figure}
 
 \begin{figure}
-\centerline{\includegraphics[width=6.0in]{figures/figDIR2}}
+\centerline{\includegraphics[width=3.5in]{figures/figDIR2}}
 \caption{Diagram illustrating the angle between the line of sight
 and smoke plane normal vector.  View planes are chosen to minimize
 this angle.} \label{figDIRB}
@@ -357,12 +362,15 @@ compactly.  Smokezip uses the ZLIB compression library available at (\hhref{http
 %
 
 \section{Volume Rendered Smoke}
-Volume rendering is the process of visualizing 3D data by mixing partially transparent colors derived from 3D data.  The association of data to color is called a transfer function.  This transfer function may be arbitrary designed to highlight certain portions of the data or based on physics designed to produce realistic appearing images.  Figure \ref{figsmokesetup2} illustrates this process.  Data is first mapped to color and opacity then combined to form an image.  In more detail, a general volume rendering algorithm consists of:
+Volume rendering is the process of visualizing 3D data by mixing partially transparent colors derived from 3D data.  An entire volume of data is used to generate an image rather than just a slice as in the previous section.  Transfer functions are used to map data to color and density.  These colors and densities are then combined to form an image.  The transfer functions may be arbitrary designed to highlight certain portions of the data or based on physics designed to produce realistic appearing images.  Figure \ref{figsmokesetup2} illustrates this process.  Data is first mapped to color and opacity then combined to form an image.  In more detail, a general volume rendering algorithm consists of:
 
 \begin{enumerate}
+
 \item For each pixel in the image plane, cast a ray through that pixel into the 3D data set
-\item Step along the ray between the front of the 3D data set and the back
+
+\item Step along the ray between the front (relative to the observer) of the 3D data set and the back
 converting data values along the way to color and opacity.  Choose a step size (possibly varying) to capture changes occurring in the data set.
+
 \item
 Combine the colors and opacities found in step 2 using a forward recursion such as \cite[Chapter 39]{gpugems}
 
@@ -377,6 +385,14 @@ where $\hat{C}_i$ and $\hat{\alpha}_i$ are color and opacity accumulated at the 
 are the color and opacity at the $i$'th step.
 The values $C_i$ and $\alpha_i$
 are the color and opacity at the $i$'th step.
+
+\item Mix the volume rendered color, $\hat{C}_N$, with the colors already rendered ({\em i.e.}\ with the OpenGL destination buffer) using
+\begin{eqnarray*}
+\noindent\mbox{updated background color} = (1-\hat{\alpha)}_N\times \mbox{original background
+color} + 1\times\hat{C}_N
+\end{eqnarray*}
+The OpenGL call, {\tt   glBlendFunc(GL\_ONE,GL\_ONE\_MINUS\_SRC\_ALPHA);
+}, is used to implent this mixing mode in Smokeview.
 \end{enumerate}
 
 \begin{figure}[\figoptions]
@@ -516,7 +532,8 @@ Given a radiance of $C_0$ at $x=0$, the radiance at $D$, denoted $C(D)$ is given
 C(D)&=&\tau(0,D)C_0 + \int_0^D\tau(x,D)\siga\Le dx
 \end{eqnarray}
 
-This is the RTE solution over the entire interval $0$ to $D$. Similarly, $C_1(D_1)$ and $C_2(D)$ are given by
+This is the
+RTE solution over the entire interval $0$ to $D$. Similarly, $C_1(D_1)$ and $C_2(D)$ are given by
 
 \begin{eqnarray*}
 C_1(D_1)&=&\tau(0,D_1)C_0 + \int_0^{D_1}\tau(x,D_1)\siga\Le dx\\
@@ -535,3 +552,9 @@ for the merger of these intervals.
 }
 \label{figsmokesetup3}
 \end{figure}
+
+\section{Future Work}
+This note describes the algorithms Smokeview uses to display smoke and fire realistically.
+These algorithms may be improved in several ways.  Presently, only radiation from soot is used to visualize smoke.  Radiation emissions from heated gas components such as CO2 and water vapor are neglected.  These contributions may be accounted for by solving the RTE for several wavelength bands (as is done by FDS) and combining the results.  The interaction between volume rendered smoke and interior solid objects may be improved by interacting with interior solid objects (FDS OBST's) .  The integration needs to terminate at the first blockage encountered rather than the far side of the data mesh rather.  Finally, the transfer function relating temperature to fire color may be improved by using a physics based approach rather than a color map.
+
+
