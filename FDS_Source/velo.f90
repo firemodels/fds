@@ -493,7 +493,6 @@ SUBROUTINE VELOCITY_FLUX(T,NM)
 ! Compute convective and diffusive terms of the momentum equations
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
-USE COMPLEX_GEOMETRY, ONLY: INIT_IBM
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: T,MUX,MUY,MUZ,UP,UM,VP,VM,WP,WM,VTRM,OMXP,OMXM,OMYP,OMYM,OMZP,OMZM,TXYP,TXYM,TXZP,TXZM,TYZP,TYZM, &
             DTXYDY,DTXZDZ,DTYZDZ,DTXYDX,DTXZDX,DTYZDY, &
@@ -529,8 +528,6 @@ TYZ => WORK3
 OMX => WORK4
 OMY => WORK5
 OMZ => WORK6
-
-
 
 !$OMP PARALLEL DEFAULT(NONE) &
 !$OMP SHARED(KBAR,JBAR,IBAR,RDXN,RDYN,RDZN,UU,VV,WW,OMX,OMY,OMZ,MU,TXY,TXZ,TYZ, &
@@ -886,10 +883,7 @@ IF (PATCH_VELOCITY) CALL PATCH_VELOCITY_FLUX
 ! Adjust FVX, FVY and FVZ at solid, internal obstructions for no flux
 
 CALL NO_FLUX(NM)
-IF (IMMERSED_BOUNDARY_METHOD>=0) THEN
-   IF (PREDICTOR) CALL INIT_IBM(T,NM)
-   CALL IBM_VELOCITY_FLUX(NM)
-ENDIF
+IF (IMMERSED_BOUNDARY_METHOD>=0) CALL IBM_VELOCITY_FLUX(NM)
 IF (EVACUATION_ONLY(NM)) FVZ = 0._EB
 
 END SUBROUTINE VELOCITY_FLUX
@@ -3088,14 +3082,14 @@ UNSTRUCTURED_GEOMETRY: IF (N_FACE>0 .OR. N_VOLU>0) THEN
                CASE( 1) SELECT_MASK_1
                   ! point is in gas phase
                   CYCLE                   
-               CASE(-1) SELECT_MASK_1
+               CASE(-1,0) SELECT_MASK_1
                   ! point is inside solid    
                   U_IBM = 0._EB
-               CASE( 0) SELECT_MASK_1
-                  SELECT_IBM_1: SELECT CASE(IMMERSED_BOUNDARY_METHOD)
-                     CASE DEFAULT SELECT_IBM_1
-                        CYCLE
-                  END SELECT SELECT_IBM_1
+!               CASE( 0) SELECT_MASK_1
+!                  SELECT_IBM_1: SELECT CASE(IMMERSED_BOUNDARY_METHOD)
+!                     CASE DEFAULT SELECT_IBM_1
+!                        CYCLE
+!                  END SELECT SELECT_IBM_1
             END SELECT SELECT_MASK_1
 
             IF (PREDICTOR) DUUDT = (U_IBM-U(I,J,K))/DT
@@ -3116,14 +3110,14 @@ UNSTRUCTURED_GEOMETRY: IF (N_FACE>0 .OR. N_VOLU>0) THEN
                CASE( 1) SELECT_MASK_2
                   ! point is in gas phase
                   CYCLE                   
-               CASE(-1) SELECT_MASK_2
+               CASE(-1,0) SELECT_MASK_2
                   ! point is inside solid    
                   V_IBM = 0._EB
-               CASE( 0) SELECT_MASK_2
-                  SELECT_IBM_2: SELECT CASE(IMMERSED_BOUNDARY_METHOD)
-                     CASE DEFAULT SELECT_IBM_2
-                        CYCLE
-                  END SELECT SELECT_IBM_2
+!               CASE( 0) SELECT_MASK_2
+!                  SELECT_IBM_2: SELECT CASE(IMMERSED_BOUNDARY_METHOD)
+!                     CASE DEFAULT SELECT_IBM_2
+!                        CYCLE
+!                  END SELECT SELECT_IBM_2
             END SELECT SELECT_MASK_2
 
             IF (PREDICTOR) DVVDT = (V_IBM-V(I,J,K))/DT
@@ -3144,14 +3138,14 @@ UNSTRUCTURED_GEOMETRY: IF (N_FACE>0 .OR. N_VOLU>0) THEN
                CASE( 1) SELECT_MASK_3
                   ! point is in gas phase
                   CYCLE                   
-               CASE(-1) SELECT_MASK_3
+               CASE(-1,0) SELECT_MASK_3
                   ! point is inside solid    
                   W_IBM = 0._EB
-               CASE( 0) SELECT_MASK_3
-                  SELECT_IBM_3: SELECT CASE(IMMERSED_BOUNDARY_METHOD)
-                     CASE DEFAULT SELECT_IBM_3
-                        CYCLE
-                  END SELECT SELECT_IBM_3
+!               CASE( 0) SELECT_MASK_3
+!                  SELECT_IBM_3: SELECT CASE(IMMERSED_BOUNDARY_METHOD)
+!                     CASE DEFAULT SELECT_IBM_3
+!                        CYCLE
+!                  END SELECT SELECT_IBM_3
             END SELECT SELECT_MASK_3
 
             IF (PREDICTOR) DWWDT = (W_IBM-W(I,J,K))/DT
