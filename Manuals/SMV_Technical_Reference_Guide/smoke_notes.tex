@@ -47,10 +47,10 @@ The parameter used to model smoke appearance is radiance with units of watts per
 \newcommand{\sigt}{ \sigma_t(x) }
 \newcommand{\sigs}{ \sigma_s(x) }
 \newcommand{\sigts}{ \sigma_t(s) }
-\newcommand{\Le}{ L_e(x) }
-\newcommand{\Lexo}{ L_e(x,\omega) }
-\newcommand{\Lxo}{ L(x,\omega) }
-\newcommand{\dLdx}{ \frac{dL}{dx}(x)}
+\newcommand{\Le}{ C_e(x) }
+\newcommand{\Lexo}{ C_e(x,\omega) }
+\newcommand{\Lxo}{ C(x,\omega) }
+\newcommand{\dLdx}{ \frac{dC}{dx}(x)}
 \newcommand{\intf}[2]{ \exp\left({\int_#1^#2 \sigts ds}\right) }
 \newcommand{\intff}[2]{ {\int_#1^#2 \sigts ds} }
 \newcommand{\intmf}[2]{ \exp\left({-\int_#1^#2 \sigts ds}\right) }
@@ -63,10 +63,10 @@ The radiation transport equation is used to calculate radiance within a region w
  \left(\omega\cdot\nabla\right)\Lxo =
 -\underbrace{\siga\Lxo}_\mathrm{absorption}-\underbrace{\sigs\Lxo}_\mathrm{out-scattering}
 + \underbrace{\siga\Lexo}_\mathrm{emission} +
-\underbrace{\sigs\int_{4\pi}p(x,\omega,\omega')L_i(x,\omega')d\omega'}_\mathrm{in-scattering}
+\underbrace{\sigs\int_{4\pi}p(x,\omega,\omega')C_i(x,\omega')d\omega'}_\mathrm{in-scattering}
 \end{eqnarray}
 
-\noindent where, as illustrated in Figure \ref{figRadiance}, $\Lxo$ is the radiance at $x$ along a direction $\omega$, $\siga$ is the absorption coefficient, $\sigs$ is the scattering coefficient, $\Lexo$ is the radiance emitted at $x$ in direction $\omega$ and $p(x,\omega,\omega')$ is the fraction of light moving along direction $\omega'$ scattered along direction $\omega$. Absorption, and out-scattering causes radiance to decrease while emission and in-scattering causes radiance to increase. The terms $L$, $L_e$ and $L_i$ each have units of W/m$^2$sr$^{-1}$.  The terms $\sigma_a$ and $\sigma_s$ have units of m$^{-1}$ and specify the change per unit length the radiance term they are applied to.
+\noindent where, as illustrated in Figure \ref{figRadiance}, $\Lxo$ is the radiance at $x$ along a direction $\omega$, $\siga$ is the absorption coefficient, $\sigs$ is the scattering coefficient, $\Lexo$ is the radiance emitted at $x$ in direction $\omega$ and $p(x,\omega,\omega')$ is the fraction of light moving along direction $\omega'$ scattered along direction $\omega$. Absorption, and out-scattering causes radiance to decrease while emission and in-scattering causes radiance to increase. The terms $C$, $C_e$ and $C_i$ each have units of W/m$^2$sr$^{-1}$.  The terms $\sigma_a$ and $\sigma_s$ have units of m$^{-1}$ and specify the change per unit length the radiance term they are applied to.
 \begin{figure}[\figoptions]
 \begin{center}
 \includegraphics[width=6.0in]{figures/rte_setup}
@@ -90,18 +90,18 @@ absorption and out-scattering while components increasing radiance are emission 
 Equation (\ref{eq:fullrte}) may be simplified by neglecting the in-scattering and emission terms and combining the absorption and out-scattering terms using $\sigt=\siga+\sigs$ to obtain
 
 \begin{eqnarray*}
-\dLdx&=&-\sigt L(x)\\
-L(0)&=&L_0
+\dLdx&=&-\sigt C(x)\\
+C(0)&=&C_0
 \end{eqnarray*}
 which has solution
 \begin{equation}
-\label{eq:beer1} \frac{L(D)}{L_0}=\intmf{0}{D}
+\label{eq:beer1} \frac{C(D)}{C_0}=\intmf{0}{D}
 \end{equation}
 
 If $\sigt$ is constant then equation (\ref{eq:beer1}) simplifies
 to
 \begin{equation}
-\label{eq:beer2} \frac{L(D)}{L_0}=\exp(-\sigma_t D)
+\label{eq:beer2} \frac{C(D)}{C_0}=\exp(-\sigma_t D)
 \end{equation}
 which is known as the Beer-Lambert law\cite{}.
 
@@ -114,28 +114,28 @@ Alternatively, if the emission term is also included when simplifying equation (
 
 \begin{eqnarray}
 \label{eq:simple_rte}
-\dLdx&=&-\sigt L(x) + \siga L_e(x)\\
- L(0)&=&L_0\nonumber
+\dLdx&=&-\sigt C(x) + \siga C_e(x)\\
+ C(0)&=&C_0\nonumber
 \end{eqnarray}
 
 This equation may be solved by rearranging terms and applying the integrating factor $\exp(\int_0^x \sigts ds)$ obtaining
 \begin{eqnarray*}
-\intf{0}{x}\left(\dLdx+\sigt L(x)\right)&=&  \intf{0}{x}\siga \Le\\
-\frac{d}{dx}\left(\intf{0}{x} L(x)\right)&=& \intf{0}{x}\siga \Le
+\intf{0}{x}\left(\dLdx+\sigt C(x)\right)&=&  \intf{0}{x}\siga \Le\\
+\frac{d}{dx}\left(\intf{0}{x} C(x)\right)&=& \intf{0}{x}\siga \Le
 \end{eqnarray*}
 Integrating both sides and substituting the integration limits results in
 \begin{eqnarray*}
-\left.\intf{0}{x} L(x)\right|_0^D&=& \int_0^D\intf{0}{x}\siga \Le dx \\
-\intf{0}{D} L(D)-L_0&=& \int_0^D\intf{0}{x}\siga \Le dx
+\left.\intf{0}{x} C(x)\right|_0^D&=& \int_0^D\intf{0}{x}\siga \Le dx \\
+\intf{0}{D} C(D)-C_0&=& \int_0^D\intf{0}{x}\siga \Le dx
 \end{eqnarray*}
-Solving for $L(D)$ after noting that
+Solving for $C(D)$ after noting that
 $\intff{0}{x}-\intff{0}{D}=-\intff{x}{D}$ results in
 \begin{eqnarray*}
-L(D)&=&\intmf{0}{D} L_0+ \int_0^D\intmf{x}{D}\siga \Le dx\\
+C(D)&=&\intmf{0}{D} C_0+ \int_0^D\intmf{x}{D}\siga \Le dx\\
 \end{eqnarray*}
 which may be simplified to
 \begin{equation}
- L(D)=\tau(0,D)L_0 + \int_0^D\tau(x,D)\siga\Le dx
+ C(D)=\tau(0,D)C_0 + \int_0^D\tau(x,D)\siga\Le dx
 \end{equation}
 after defining $\tau(a,b)$ to represent the optical depth between $a$ and $b$ given
 by $\tau(a,b)=\intmf{a}{b}$ .
@@ -364,7 +364,7 @@ Volume rendering is the process of visualizing 3D data by mixing partially trans
 \item Step along the ray between the front of the 3D data set and the back
 converting data values along the way to color and opacity.  Choose a step size (possibly varying) to capture changes occurring in the data set.
 \item
-Combine the colors and opacities found in step 2 using a forward recursion such as \cite[Chapter 39]{gpugems} 
+Combine the colors and opacities found in step 2 using a forward recursion such as \cite[Chapter 39]{gpugems}
 
 \begin{eqnarray*}
 \hat{\alpha}_0&=&0\\
@@ -374,9 +374,9 @@ Combine the colors and opacities found in step 2 using a forward recursion such 
 \end{eqnarray*}
 
 where $\hat{C}_i$ and $\hat{\alpha}_i$ are color and opacity accumulated at the $i$'th step while stepping through the 3D data set from front to back.  The values $C_i$ and $\alpha_i$
-are the color and opacity at the $i$'th step.  
+are the color and opacity at the $i$'th step.
 The values $C_i$ and $\alpha_i$
-are the color and opacity at the $i$'th step.  
+are the color and opacity at the $i$'th step.
 \end{enumerate}
 
 \begin{figure}[\figoptions]
@@ -393,13 +393,13 @@ A general transfer function is used to map data values to color and opacity. To 
 
 \begin{equation}
 \label{eq:rtesoln}
- L(D)=\tau(0,D)L_0 + \int_0^D\tau(x,D)\siga\Le dx
+ C(D)=\tau(0,D)C_0 + \int_0^D\tau(x,D)\siga\Le dx
 \end{equation}
 
 to the radiative transport equation (obtained from (\ref{eq:fullrte}) after dropping the in-scattering term)
 \begin{eqnarray*}
-\dLdx&=&-\sigt L(x) + \siga L_e(x)\\
- L(0)&=&L_0\nonumber
+\dLdx&=&-\sigt C(x) + \siga C_e(x)\\
+ C(0)&=&C_0\nonumber
 \end{eqnarray*}
 
 
@@ -412,7 +412,7 @@ is used to collapse 3D data into 2D images projected onto the front facing sides
 
 is the optical depth between points $a$ and $b$ along a ray cast through the data.
 
-Figure \ref{fig:volplume_example} illustrates this process showing two images.  
+Figure \ref{fig:volplume_example} illustrates this process showing two images.
 The image on the left is presented from the point of view of the observer.  The image on the right is rotated showing more clearly the images projected on teh front facing sides of the data mesh.  As the scene is moved through rotations and translations the projected surface images are constantly recomputed and redrawn presenting the illusion that the image is 3D and drawn within (rather than on the surface) of the data mesh.
 
 \begin{figure}[\figoptions]
@@ -433,14 +433,14 @@ the plume as it is computed on the two forward facing faces of the data mesh.
 \subsection{Discretizing the Radiation Transport Equation}
 \newcommand{\htau}[1]{\tau_{#1}^{N-1}}
 \newcommand{\sigai}[1]{\sigma_{a,#1}}
-\newcommand{\Lei}[1]{L_{e,#1}}
-\newcommand{\Lhatj}[1]{L_{#1}^N}
-\newcommand{\Lhatjj}[1]{\hat{L}_{#1}^N}
+\newcommand{\Lei}[1]{C_{e,#1}}
+\newcommand{\Lhatj}[1]{C_{#1}^N}
+\newcommand{\Lhatjj}[1]{\hat{C}_{#1}^N}
 \newcommand{\Chatjj}[1]{\hat{C}_{#1}^N}
-\newcommand{\Leii}[1]{\hat{L}_{e,#1}}
+\newcommand{\Leii}[1]{\hat{C}_{e,#1}}
 
 
-Figure \ref{fig:smokediscretesetup}\ illustrates a discretization through  smoke.  The path is split into $N$ regions each with length $\Delta x=(x_N-x_0)/N$.  The coordinate system is defined so that the origin, $x_0$, is on right with initial radiance, $L_0$.  The observer in this example is located on the left at $x_N=D$  where radiance is computed and displayed.  
+Figure \ref{fig:smokediscretesetup}\ illustrates a discretization through  smoke.  The path is split into $N$ regions each with length $\Delta x=(x_N-x_0)/N$.  The coordinate system is defined so that the initial radiance, $C_0$, is located at $x_0$ and the observer is located at $x_N=D$  where the final radiance, $C_N$, is computed and displayed.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -466,26 +466,26 @@ or
 
 where $\tau_j=\exp\left(-\sigma_t(s_j)\Delta s\right)$ represents the transparency over one discretization interval.
 
-Similarly, the radiance given by $L(x_N)$ in equation (\ref{eq:rtesoln}) may be approximated to obtain
+Similarly, the radiance given by $C(x_N)$ in equation (\ref{eq:rtesoln}) may be approximated to obtain
 
 \begin{equation}
 \label{eq:discrete_rte}
-L_{N} = \htau{0}L_0 +
+C_{N} = \htau{0}C_0 +
 \sum_{i=0}^{N-1}\htau{i}\sigai{i}\Lei{i}\Delta x
 \end{equation}
 
-where $\sigma_{a,i}=\sigma_a(x_i)$, $\Lei{i}=L_e(x_i)$, $x_i=i\Delta x$ and $\Delta x=x_N/N$. 
-Letting $\Leii{i}=\sigma_{a,i}L_{e,i}\Delta x$, this simplifies to
+where $\sigma_{a,i}=\sigma_a(x_i)$, $\Lei{i}=C_e(x_i)$, $x_i=i\Delta x$ and $\Delta x=x_N/N$.
+Letting $\Leii{i}=\sigma_{a,i}C_{e,i}\Delta x$, this simplifies to
 
 \begin{equation}
 \label{eq:discrete_rte2}
-L_N = \htau{0}L_0 + \sum_{i=0}^{N-1}\htau{i}\Leii{i}
+C_N = \htau{0}C_0 + \sum_{i=0}^{N-1}\htau{i}\Leii{i}
 \end{equation}
 
 The terms in equation (\ref{eq:discrete_rte2}) are summed from back to front meaning that the location of the $i=0$ term is furthest from the observer while the location of the $i=N-1$ term is closest.  We wish to perform this sum in reverse order, from front to back so that the sum may be terminated early if further contributions would not significantly change the result.
 
-Therefore, to compute $L_N$,
-let $\Chatjj{j}$ denote the partial sum using terms $i=j$ through $i=N-1$ in the summation term in (\ref{eq:discrete_rte2}).  Using this notation $\hat{L}_N=\htau{0}L_0+\Chatjj{0}$ . Then
+Therefore, to compute $C_N$,
+let $\Chatjj{j}$ denote the partial sum using terms $i=j$ through $i=N-1$ in the summation term in (\ref{eq:discrete_rte2}).  Using this notation $\hat{C}_N=\htau{0}C_0+\Chatjj{0}$ . Then
 
 \begin{eqnarray}
 \label{eq:recurse1}
@@ -494,68 +494,37 @@ let $\Chatjj{j}$ denote the partial sum using terms $i=j$ through $i=N-1$ in the
 \Chatjj{j}     &= &\sum_{i=j}^{N-1}  \htau{i}\Leii{i}
 \end{eqnarray}
 
-Subtracting (\ref{eq:recurse2}) from (\ref{eq:recurse1}) results in
+Subtracting (\ref{eq:recurse2}) from (\ref{eq:recurse1}) and solving for $\Chatjj{j-1}$ results in
 
 \begin{eqnarray*}
-\Chatjj{j-1} -\Chatjj{j}&= &\htau{j-1}\Leii{j-1}
+\Chatjj{j-1}&=&\Chatjj{j}+\htau{j-1}\Leii{j-1}
 \end{eqnarray*}
-
-Starting the recursion with 
-$\Lhatjj{N}=0$ and $\htau{N}=1$, the scaled radiance $\Lhatjj{0}$ may be determined by computing the terms
-
-\begin{eqnarray}
-\Lhatjj{j-1} &= &\Lhatjj{j}+\htau{j}\left[-\left(1-\tau_{j-1}\right) + \tau_{j-1}\Leii{j-1}\right]
-\end{eqnarray}
-
-for $j=N,\cdots,1$.
 
 %
 % -------------------  Combining Multiple Solutions ------------------------
 %
 
 \subsection{Volume Rendering on Multiple Meshes}
-When drawing smoke for cases with multiple data meshes, it is more practical to draw smoke one mesh at a time (rather than drawing smoke once using data from all meshes) since data from other meshes may not be accessible.  The RTE solution or equivalently the computed smoke opacity requires smoke properties for the entire line of sight which may encompass more than one data mesh.  This section discusses how smoke opacities may be computed for each individual data mesh then be combined appropriately to form smoke opacities for the entire data domain.
+When drawing smoke for cases with multiple data meshes, it is more practical to draw smoke one mesh at a time rather than drawing smoke once using data from all meshes since data from other meshes may not be easily accessible.  The RTE solution or equivalently the computed smoke opacity requires smoke properties for the entire line of sight which may encompass more than one data mesh.  This section discusses how smoke opacities may be computed for each individual data mesh and combined appropriately to form smoke opacities for the entire data domain.
 
 Equation (\ref{eq:rtesoln}), is the solution to an approximate form of the radiation transport equation over a path from $x=0$ to $x=D$.  As illustrated in Figure \ref{figsmokesetup3}, suppose that this path is split at $D_1$ into two parts, the first part from $0$ to $D_1$ and the second part from $D_1$ to $D$. Further, suppose that the RTE solution is known on each part. This section describes how these two solutions may be combined to form a solution over the entire interval $0$ to $D$.
 
-Given a radiance of $L_0$ at $x=0$, the radiance at $D$, denoted $L(D)$ is given by
+Given a radiance of $C_0$ at $x=0$, the radiance at $D$, denoted $C(D)$ is given by
 
 \begin{eqnarray}
 \label{eq:rtesoln2}
-L(D)&=&\tau(0,D)L_0 + \int_0^D\tau(x,D)\siga\Le dx
+C(D)&=&\tau(0,D)C_0 + \int_0^D\tau(x,D)\siga\Le dx
 \end{eqnarray}
 
-This is the RTE solution over the entire interval $0$ to $D$. Similarly, $L_1(D_1)$ and $L_2(D)$ is given by
+This is the RTE solution over the entire interval $0$ to $D$. Similarly, $C_1(D_1)$ and $C_2(D)$ are given by
 
 \begin{eqnarray*}
-L_1(D_1)&=&\tau(0,D_1)L_0 + \int_0^{D_1}\tau(x,D_1)\siga\Le dx\\
-L_2(D)&=&\tau(D_1,D)L_0 + \int_{D_1}^{D}\tau(x,D)\siga\Le dx
+C_1(D_1)&=&\tau(0,D_1)C_0 + \int_0^{D_1}\tau(x,D_1)\siga\Le dx\\
+C_2(D)&=&\tau(D_1,D)C_{2,0} + \int_{D_1}^{D}\tau(x,D)\siga\Le dx
 \end{eqnarray*}
 
-where the initial conditions are $L_1(0)=L_0$ and $L_2(D_1)=L_0$.
+where the initial conditions are $C_1(0)=C_0$ and $C_2(D_1)=C_1(D_1)=C_{2,0}$.  These two solutions may be combined by drawing the $C_1(D_1)$ solution first (assuming it is behind so solution $C_2(D)$) and drawing $C_2(D)$ second.
 
-The optical depth, $\tau(a,b)=\exp\left(-\int_a^b \sigt ds\right)$, may be expressed as  $\tau(a,b)=\tau(a,x)\tau(x,b)$ since
-
-\begin{eqnarray*}
-\tau(a,b)&=&\exp\left(-\int_a^b \sigt ds\right)\\
-&=&\exp\left(-\int_a^x \sigt ds -\int_x^b \sigt ds\right)\\
-&=&\exp\left(-\int_a^x \sigt ds\right)\exp\left(-\int_x^b \sigt ds\right)\\
-&=&\tau(a,x)\tau(x,b)
-\end{eqnarray*}
-
-Using this property, RTE solutions $L_1(x)$ and $L_2(x)$ over two sub-intervals $[0,D_1]$ and $[D_1,D]$ may be combined into the solution $L(x)$ over the merged interval $[0,D]$.  This follows from
-
-\begin{eqnarray*}
-L(D)&=&\tau(0,D)L_0 + \int_0^D\tau(x,D)\siga\Le dx\\
-&=&\tau(0,D_1)\tau(D_1,D)L_0 + \int_0^{D_1}\tau(x,D_1)\tau(D_1,D)\siga\Le dx + \int_{D_1}^{D}\tau(x,D)\siga\Le dx\\
-&=&\tau(D_1,D)
-\underbrace{\left(\tau(0,D_1)L_0 + \int_0^{D_1}\tau(x,D_1)\siga\Le dx\right)}_{L_1(D_1)} +
-\underbrace{\int_{D_1}^{D}\tau(x,D)\siga\Le dx}_{L_2(D)-\tau(D_1,D)L_0}\\
-&=&\tau(D_1,D)L_1(D_1)+L_2(D)-\tau(D_1,D)L_0\\
-&=&\tau(D_1,D)(L_1(D_1)-L_0) + L_2(D)
-\end{eqnarray*}
-
-This relationship may be exploited to draw smoke one mesh at a time using the properties local to each mesh without having to solve the RTE equation over the entire interval at once.
 
 \begin{figure}[\figoptions]
 \begin{center}
