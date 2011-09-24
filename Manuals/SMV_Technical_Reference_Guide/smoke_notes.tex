@@ -15,7 +15,7 @@ Even so, the solution of this integro-differential equation for visualization st
 Two techniques discussed for visualizing smoke realistically are slice rendered and volume rendered methods\cite{levoy:1988,Engel:2006}.    These methods both solve a form of the RTE equation.  The integrated quantity in both cases is opacity, the fraction of light obscured.  They differ in how the integration path is partitioned.
 
 The integration path for a slice rendered method is split at grid plane within a 3D mesh. There is one partially transparent slice for each plane of simulated data. Planes are drawn through the data along the xy, xz, yz axes or diagonally to the coordinate planes.  The particular plane drawn is chosen to be the one most perpendicular to the viewer's line of sight.
-The resulting partially transparent slice planes are drawn individually and combined by the video hardware to form one image.  
+The resulting partially transparent slice planes are drawn individually and combined by the video hardware to form one image.
 
 The second approach, a volume rendering method, again integrates a simplified form of the radiation transport equation but over the entire entire data mesh, from the front (relative to the observer) of the solution domain to the back, rather than across just one slice plane. A volume rendered method then computes opacity across multiple grid planes.  As a result, there is only one plane of data displayed.  The video hardware is again exploited, but this time to compute a line integral for each pixel in the observer's view.  Opacities and color for both methods are computed using transfer functions using soot density and temperature data derived from a fire simulation.
 
@@ -259,7 +259,7 @@ plume looks more realistic as more slice planes
 are included to form the image. } \label{figplume}
 \end{figure}
 
-\noindent This process is repeated for each smoke plane. 
+\noindent This process is repeated for each smoke plane.
 
 Figure \ref{figsmoke3d} illustrates this process showing smoke and fire in a townhouse kitchen fire.
 The visualization is performed by displaying a series of partially transparent planes. For illustration, these planes are made more conspicuous (in Figure \ref{figsmoke3d}a) by skipping smoke planes (displaying every third plane) and orienting them along the `x' axis. Figure \ref{figsmoke3d}b shows the visualization as it normally appears with all slice planes shown and oriented along a
@@ -274,8 +274,9 @@ a) slices skipped and oriented along `x' directions\\
 b) all slices shown and oriented towards viewer \\
 \end{tabular}
 \end{center}
-\caption{Realistic visualization of a townhouse kitchen fire simulated
-using FDS5. Planes in the top image are drawn to be conspicuous by
+\caption[Realistic visualization of a townhouse kitchen fire simulated
+using FDS.]{Realistic visualization of a townhouse kitchen fire simulated
+using FDS. Planes in the top image are drawn to be conspicuous by
 skipping 2 out of every 3 planes and by aligning planes along the
 x axis. All planes in the bottom image are displayed (none are
 skipped) and they are aligned to be closest to perpendicular of
