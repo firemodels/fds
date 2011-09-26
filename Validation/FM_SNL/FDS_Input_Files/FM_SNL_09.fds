@@ -8,7 +8,7 @@
 
 &TIME T_END=1080. /
 
-&MISC TMPA=15. /
+&MISC TMPA=21. /
 
 &RADI RADIATIVE_FRACTION=0.4 /
 &REAC FUEL         = 'PROPYLENE'
@@ -23,8 +23,8 @@
 &RAMP ID='fire',T=120.0,F=0.25   /
 &RAMP ID='fire',T=180.0,F=0.5625 /
 &RAMP ID='fire',T=240.0,F=1.0    /
-&RAMP ID='fire',T=620.0,F=1.0    /
-&RAMP ID='fire',T=621.0,F=0.0    /
+&RAMP ID='fire',T=680.0,F=1.0    /
+&RAMP ID='fire',T=681.0,F=0.0    /
 
 &MATL ID='MARINITE'
       FYI='Nowlen, Survivors Guide, Feb 1999'

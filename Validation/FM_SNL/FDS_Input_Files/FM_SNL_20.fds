@@ -6,7 +6,7 @@
 &MESH IJK=39,41,32, XB=10.4,18.2, 4.0,12.2, 0.0, 6.1 /
 &MESH IJK=52,17,32, XB= 0.0,10.4, 8.8,12.2, 0.0, 6.1 /
 
-&TIME T_END=6600. /
+&TIME T_END=660. /
 
 &MISC TMPA=19. /
 
@@ -17,9 +17,9 @@
       H          = 16.
       SOOT_YIELD = 0.2 /
 
-&SURF ID='burner', HRRPUA=1468., RAMP_Q='fire', COLOR='RED' / 
+&SURF ID='burner', HRRPUA=1560., RAMP_Q='fire', COLOR='RED' / 
 &RAMP ID='fire',T=   0.0,F=0.0 /
-&RAMP ID='fire',T=  10.0,F=1.0 /
+&RAMP ID='fire',T=  30.0,F=1.0 /
 &RAMP ID='fire',T= 120.0,F=1.0 /
 &RAMP ID='fire',T= 180.0,F=1.0 /
 &RAMP ID='fire',T= 240.0,F=1.0 /

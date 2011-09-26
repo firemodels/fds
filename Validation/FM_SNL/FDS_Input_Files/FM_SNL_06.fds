@@ -23,8 +23,8 @@
 &RAMP ID='fire',T=120.0,F=1.0 /
 &RAMP ID='fire',T=180.0,F=1.0 /
 &RAMP ID='fire',T=240.0,F=1.0 /
-&RAMP ID='fire',T=575.0,F=1.0 /
-&RAMP ID='fire',T=576.0,F=0.0 /
+&RAMP ID='fire',T=550.0,F=1.0 /
+&RAMP ID='fire',T=551.0,F=0.0 /
 
 &MATL ID='MARINITE'
       FYI='Nowlen, Survivors Guide, Feb 1999'
