@@ -373,9 +373,9 @@ ZONE_LOOP: DO N=1,N_ZONE
       DO J=0,JBP1
          DO I=0,IBP1
             IF (M%PRESSURE_ZONE(I,J,K)==N) CYCLE
-            IF (ABS(M%X(I) - PZ%X1) >=ZERO_P .AND. M%XC(I) < PZ%X2 .AND. &
-                ABS(M%Y(J) - PZ%Y1) >=ZERO_P .AND. M%YC(J) < PZ%Y2 .AND. &
-                ABS(M%Z(K) - PZ%Z1) >=ZERO_P .AND. M%ZC(K) < PZ%Z2) THEN 
+            IF (M%X(I) - PZ%X1 >=0._EB .AND. M%XC(I) < PZ%X2 .AND. &
+                M%Y(J) - PZ%Y1 >=0._EB .AND. M%YC(J) < PZ%Y2 .AND. &
+                M%Z(K) - PZ%Z1 >=0._EB .AND. M%ZC(K) < PZ%Z2) THEN 
                 M%PRESSURE_ZONE(I,J,K) = N
                 DO IOPZ=0,N_ZONE
                    IF (PZ%LEAK_AREA(IOPZ) > 0._EB) ACTUAL_LEAK_AREA(N,IOPZ) = PZ%LEAK_AREA(IOPZ)
