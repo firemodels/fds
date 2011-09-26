@@ -17,7 +17,7 @@
       H          = 16.
       SOOT_YIELD = 0.2 /
 
-&SURF ID='burner', HRRPUA=1560., RAMP_Q='fire', COLOR='RED' / 
+&SURF ID='burner', HRRPUA=780., RAMP_Q='fire', COLOR='RED' / 
 &RAMP ID='fire',T=  0.0,F=0.0 /
 &RAMP ID='fire',T= 10.0,F=1.0 /
 &RAMP ID='fire',T=120.0,F=1.0 /
