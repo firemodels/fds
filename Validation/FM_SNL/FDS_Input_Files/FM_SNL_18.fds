@@ -20,10 +20,10 @@
 
 &SURF ID='burner', HRRPUA=780., RAMP_Q='fire', COLOR='RED' / 
 &RAMP ID='fire',T=  0.0,F=0.0 /
-&RAMP ID='fire',T= 10.0,F=1.0 /
-&RAMP ID='fire',T=120.0,F=1.0 /
-&RAMP ID='fire',T=180.0,F=1.0 /
-&RAMP ID='fire',T=240.0,F=1.0 /
+&RAMP ID='fire',T=300.0,F=0.1 /
+&RAMP ID='fire',T=420.0,F=0.25 /
+&RAMP ID='fire',T=480.0,F=0.625 /
+&RAMP ID='fire',T=540.0,F=1.0 /
 &RAMP ID='fire',T=1120.0,F=1.0 /
 &RAMP ID='fire',T=1121.0,F=0.0 /
 
