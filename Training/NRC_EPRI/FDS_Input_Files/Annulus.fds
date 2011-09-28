@@ -4,6 +4,8 @@
 
 &TIME T_END=3600. /
 
+&MISC TMPA=35. /
+
 Ventilation and openings
 
 &VENT MB='YMIN', SURF_ID='OPEN' /
