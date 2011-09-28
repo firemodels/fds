@@ -59,8 +59,8 @@ MMEXTERN pthread_mutex_t mutexSLICE_BOUND,mutexPATCH_BOUND,mutexPART2ISO,mutexPR
 #define NewMemory(f,g) __NewMemory((f),(g),(#f),__FILE__,__LINE__)
 #define ResizeMemory(f,g) __ResizeMemory((f),(g),(#f),__FILE__,__LINE__)
 #else
-#define NewMemory(f,g) _NewMemory((f),(g))
-#define ResizeMemory(f,g) _ResizeMemory((f),(g))
+#define NewMemory(f,g) _NewMemory((f),(g),(#f),__FILE__,__LINE__)
+#define ResizeMemory(f,g) _ResizeMemory((f),(g),(#f),__FILE__,__LINE__)
 #endif
 
 #ifdef pp_memstatus
@@ -125,8 +125,8 @@ size_t sizeofBlock(bbyte *pv);
 MMEXTERN mallocflag __ResizeMemory(void **ppv, size_t sizeNew,char *varname, char *file, int linenumber);
 MMEXTERN mallocflag __NewMemory(void **ppv, size_t size, char *varname, char *file,int linenumber);
 #endif
-MMEXTERN mallocflag _ResizeMemory(void **ppv, size_t sizeNew);
-MMEXTERN mallocflag _NewMemory(void **ppv, size_t size);
+MMEXTERN mallocflag _ResizeMemory(void **ppv, size_t sizeNew, char *varname, char *file,int linenumber);
+MMEXTERN mallocflag _NewMemory(void **ppv, size_t size, char *varname, char *file,int linenumber);
 MMEXTERN void FreeMemory(void *pv);
 MMEXTERN mallocflag _ResizeMemoryNOTHREAD(void **ppv, size_t sizeNew);
 MMEXTERN mallocflag _NewMemoryNOTHREAD(void **ppv, size_t size);

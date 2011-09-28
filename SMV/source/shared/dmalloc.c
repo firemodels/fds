@@ -64,11 +64,20 @@ void initMM(void){
 
 /* ------------------ _NewMemory ------------------------ */
 
-mallocflag _NewMemory(void **ppv, size_t size){
+mallocflag _NewMemory(void **ppv, size_t size, char *varname, char *file, int linenumber){
   mallocflag returnval;
 
   LOCK_MEM;
   returnval=_NewMemoryNOTHREAD(ppv, size);
+  if(returnval!=1){
+                     printf("*** warning: memory allocation request failed.\n");
+    if(varname!=NULL)printf("             variable: %s\n",varname);
+                     printf("                 size: %u\n",(unsigned int)size);
+    if(file!=NULL){
+                     printf("                 file: %s\n",file);
+                     printf("          line number: %i\n",linenumber);
+    }
+  }
   UNLOCK_MEM;
   return returnval;
 }
@@ -185,11 +194,20 @@ void FreeMemoryNOTHREAD(void *pv){
 
 /* ------------------ ResizeMemory ------------------------ */
 
-mallocflag _ResizeMemory(void **ppv, size_t sizeNew){
+mallocflag _ResizeMemory(void **ppv, size_t sizeNew,  char *varname, char *file, int linenumber){
   mallocflag returnval;
 
   LOCK_MEM;
   returnval=_ResizeMemoryNOTHREAD(ppv, sizeNew);
+  if(returnval!=1){
+                     printf("*** warning: memory allocation request failed.\n");
+    if(varname!=NULL)printf("             variable: %s\n",varname);
+                     printf("                 size: %u\n",(unsigned int)sizeNew);
+    if(file!=NULL){
+                     printf("                 file: %s\n",file);
+                     printf("          line number: %i\n",linenumber);
+    }
+  }
   UNLOCK_MEM;
   return returnval;
 }
@@ -316,6 +334,15 @@ mallocflag __NewMemory(void **ppv, size_t size, char *varname, char *file, int l
     strncpy(pbi->varname,varname2,255);
     strcat(pbi->varname,"\0");
   }
+  if(return_code!=1){
+                     printf("*** warning: memory allocation request failed.\n");
+    if(varname!=NULL)printf("             variable: %s\n",varname);
+                     printf("                 size: %u\n",(unsigned int)size);
+    if(file!=NULL){
+                     printf("                 file: %s\n",file);
+                     printf("          line number: %i\n",linenumber);
+    }
+  }
   UNLOCK_MEM;
   return return_code;
 }
@@ -344,6 +371,15 @@ mallocflag __ResizeMemory(void **ppv, size_t size, char *varname, char *file, in
   else{
     strncpy(pbi->varname,varname,255);
     strcat(pbi->varname,"\0");
+  }
+  if(return_code!=1){
+                     printf("*** warning: memory allocation request failed.\n");
+    if(varname!=NULL)printf("             variable: %s\n",varname);
+                     printf("                 size: %u\n",(unsigned int)size);
+    if(file!=NULL){
+                     printf("                 file: %s\n",file);
+                     printf("          line number: %i\n",linenumber);
+    }
   }
   UNLOCK_MEM;
   return return_code;
