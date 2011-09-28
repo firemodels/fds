@@ -1,49 +1,47 @@
-An ISO 9701 compartment within a larger sealed domain has a fan blowing into it and several leaks.
-Case 1 has a fan and a crack under the door.
-Case 2 adds the extra leak to the great beyond.
+&HEAD CHID='leak_test_2', TITLE='Test of Leakage and Fans, SVN $Revision: 7172 $' /
 
-&HEAD CHID='leak_test_2', TITLE='Test of Leakage and Fans in an ISO 9705 Compartment, SVN $Revision: 7172 $' /
+&MESH IJK=20,10,10, XB=-1.0, 1.0, 0.0, 1.0, 0.0, 1.0 /
 
-&MESH IJK=25,20,16, XB=-2.4, 2.6,-2.0, 2.0, 0.0, 3.2 /
+&TIME T_END=1000.0 /
+&DUMP MASS_FILE=.TRUE.,NFRAMES=200/
 
-&TIME T_END=3600.0 /
-&DUMP NFRAMES=180/
-
-&SURF ID='DOOR CRACK', LEAK_PATH=1,2/
-&SURF ID='VENT CRACK', LEAK_PATH=0,2 / <--- Case 2
+&RADI RADIATION=.FALSE./
 
 &ZONE /  Declare the entire mesh to be pressure zone 1, but then over-ride with second ZONE declaration
-&ZONE XB=-1.65, 1.85,-1.25, 1.25, 0.00, 2.45, LEAK_AREA(0)=0.0000, LEAK_AREA(1)=0.0002,  LEAK_AREA(0)=0.0002/ for Case 2
+&ZONE XB= 0.1, 1.0, 0.0, 1.0, 0.0, 1.0, LEAK_AREA(1)=0.002, LEAK_AREA(0)=0.002 / for Case 2
 
 &SPEC MW=28.,ID='BACKGROUND',BACKGROUND=.TRUE./
 
-&OBST XB=-1.80, 2.00,-1.40,-1.20, 0.00, 2.60 / Left Wall
-&OBST XB=-1.80, 2.00, 1.20, 1.40, 0.00, 2.60 / Right Wall
-&OBST XB=-1.80,-1.60,-1.20, 1.20, 0.00, 2.60 / Back Wall
-&OBST XB=-1.80, 1.80,-1.20, 1.20, 2.40, 2.60 / Ceiling
-&OBST XB= 1.80, 2.00,-1.20,-0.60, 0.00, 2.60 / Panel to Left of Door
-&OBST XB= 1.80, 2.00, 0.60, 1.20, 0.00, 2.60 / Panel to Right of Door
-&OBST XB= 1.80, 2.00,-0.60, 0.60, 2.00, 2.60 / Soffit
-&OBST XB= 1.80, 2.00,-0.60, 0.60, 0.10, 2.00, COLOR='GREEN' / Door
+&OBST XB=-0.1,0.1,0.0,1.0,0.1,1.0/
 
-&VENT XB=-1.80,-1.80,-0.20, 0.20, 0.20, 0.60, COLOR='PINK',  SURF_ID='HVAC',ID='IN' / 
-&VENT XB=-1.60,-1.60,-0.20, 0.20, 1.00, 1.40, COLOR='RED',   SURF_ID='HVAC',ID='OUT' / 
+&VENT XB=-0.1,-0.1,0.4,0.6,0.7,0.9,, COLOR='PINK',  SURF_ID='HVAC',ID='IN' / 
+&VENT XB= 0.1, 0.1,0.4,0.6,0.7,0.9, COLOR='RED',   SURF_ID='HVAC',ID='OUT' / 
 
 &HVAC ID='IN',TYPE_ID='NODE',DUCT_ID='DUCT1',VENT_ID='IN'/
 &HVAC ID='OUT',TYPE_ID='NODE',DUCT_ID='DUCT1',VENT_ID='OUT'/
 &HVAC ID='DUCT1',TYPE_ID='DUCT',NODE_ID='IN','OUT',LENGTH=0.1,AREA=0.1,LOSS=0.0,0.0,FAN_ID='FAN'/
-&HVAC ID='FAN',TYPE_ID='FAN',TAU_FAN=1.,MAX_FLOw=0.1,MAX_PRESSURE=1000./
+&HVAC ID='FAN',TYPE_ID='FAN',TAU_FAN=1.,MAX_FLOw=0.06,MAX_PRESSURE=300./
 
-&OBST XB= 1.80, 2.00,-0.60, 0.60, 0.00, 0.20, COLOR='BLUE', SURF_ID='DOOR CRACK' / 
 
-&VENT XB= 0.00, 0.20,-0.20, 0.20, 2.40, 2.40, COLOR='GRAY', SURF_ID='VENT CRACK' / <---- Case 2
+&OBST XB=-0.1,0.1,0.0,1.0,0.0,0.1/
 
-&SLCF PBY=0.0,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
-&SLCF PBY=0.0,QUANTITY='DENSITY' /
-&SLCF PBY=0.0,QUANTITY='PRESSURE' /
 
-&DEVC ID='pres_1', XYZ=2.2,0.0,0.5, QUANTITY='PRESSURE' /
-&DEVC ID='pres_2', XYZ=0.0,0.0,0.5, QUANTITY='PRESSURE' /
+&SURF ID='LEAK',LEAK_PATH=1,2/
+&SURF ID='LEAK2',LEAK_PATH=2,0/
+
+&VENT XB=-0.2,-0.1,0.0,1.0,0.0,0.0, COLOR='GREEN',SURF_ID='LEAK' / 
+&VENT XB= 0.1, 0.2,0.0,1.0,0.0,0.0, COLOR='ORANGE',SURF_ID='LEAK' /
+
+&VENT XB= 0.9,1.0,0.0,1.0,0.0,0.0, COLOR='BLUE',SURF_ID='LEAK2' / for Case 2
+
+&SLCF PBY=0.5,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
+&SLCF PBY=0.5,QUANTITY='DENSITY' /
+&SLCF PBY=0.5,QUANTITY='PRESSURE' /
+
+&BNDF QUANTITY='NET HEAT FLUX'/
+
+&DEVC ID='pres_1', XYZ=-0.5,0.5,0.0, QUANTITY='PRESSURE' /
+&DEVC ID='pres_2', XYZ= 0.5,0.5,0.0, QUANTITY='PRESSURE' /
 
 &TAIL /
 
