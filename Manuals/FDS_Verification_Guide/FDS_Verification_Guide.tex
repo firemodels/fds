@@ -2966,22 +2966,15 @@ The second duct is placed in the upper half of the compartment and is assigned a
 
 \section{Single Zone Leakage: {\bf leak\_test}}
 
-In the following examples, both leaks and fans are demonstrated. A simple compartment (3.6~m by 2.4~m by 2.4~m) has a small fan at one end and
-one leak under the door at the other end. It is
-assumed for this example that the compartment is contained within a larger compartment that is perfectly sealed. The fan draws air into the
-compartment from the plenum space, increasing the pressure inside and decreasing it outside.  A steady state is achieved when the volume flow into
-and out of the compartment falls into balance.
+In the following examples, both leaks and fans are demonstrated. A two compartments (each 3.6~m by 2.4~m by 2.4~m) are connected by a small fan and a leak at the floor.
 
 The volume flow rate of the fan is given by the ``fan curve'' \be \dot{V}_{\hbox{\footnotesize fan}} = A_{\hbox{\footnotesize duct}}
 U_{\hbox{\footnotesize max}} \;
    \hbox{sign} (\Delta p_{\hbox{\footnotesize max}}-\Delta p)
    \sqrt{ \frac{ |\Delta p - \Delta p_{\hbox{\footnotesize max}}|}{\Delta p_{\hbox{\footnotesize max}} } }  \ee
-where $\Delta p$ is the difference in pressure and $A_{\hbox{\scriptsize duct}}=0.16$~m$^2$, $U_{\hbox{\scriptsize max}}=0.1$~m/s, and $\Delta
-p_{\hbox{\scriptsize max}}=1000$~Pa. The volume flow due to the leak is given by: \be \dot{V}_{\hbox{\scriptsize leak}} = A_{\hbox{\scriptsize leak}}
-\sqrt{ \frac{ 2 \Delta p}{ \rho_\infty} } \ee where $A_{\hbox{\scriptsize leak}}=0.0001$~m$^2$ and $\rho_\infty=1.2$~kg/m$^3$. After 5~min the
-pressure difference is 938.2~Pa. The theoretical value, obtained by equating the fan and leak volume flow rates and solving for $\Delta_p$, is
-938.9~Pa. The slight difference is due to the fact that the solid boundaries within the interior of the computational domain admit a slight volume
-flux related to details of the numerical solver.  The results are shown in Fig.~\ref{leak_test}.
+where $\Delta p$ is the difference in pressure and $A_{\hbox{\scriptsize duct}}=0.1$~m$^2$, $U_{\hbox{\scriptsize max}}=0.6$~m/s, and $\Delta
+p_{\hbox{\scriptsize max}}=300$~Pa. The volume flow due to the leak is given by: \be \dot{V}_{\hbox{\scriptsize leak}} = A_{\hbox{\scriptsize leak}}
+\sqrt{ \frac{ 2 \Delta p}{ \rho} } \ee where $A_{\hbox{\scriptsize leak}}=0.0001$~m$^2$ and $\rho$ is the density at the leakage vent on the discharge side of the fan.  Assuming that the pressure difference is evenly split between the two compartments, equating the fan and leak volume flow rates, and solving for $\Delta_p$, $\Delta_p$ is 190.7~Pa. The results are shown in Fig.~\ref{leak_test}.  Since the leakage flow cannot begin until there is a pressure rise on the discharge side of the compartment, it is expected that the true split in the pressure will be biased slightly high on the fan discharge side.  The total pressure difference, however, should match.
 
 \begin{figure}[ht]
    \begin{center}
@@ -2993,15 +2986,11 @@ flux related to details of the numerical solver.  The results are shown in Fig.~
 
 \section{Multiple zone leakage (leak\_test\_2)}
 
-Two compartments are defined: A 5 m x 4 m x 3. 2 m compartment containing a second 3.6 m x 2.4 m x 2.4 m compartment, see Figure~\ref{fig_HVAC_leak_fan}.
-The interior compartment is connected to the exterior compartment both by a fan (quadratic fan curve with a maximum volumetric flow of 0.005 m$^3$/s and a
-maximum pressure of 1000 Pa) and by an 0.0001 m$^2$ leakage path.  The interior compartment is also connected to the ambient by an 0.0001 m$^2$ leakage path.
-The fan is defined with a 1 s tanh ramp to reach full power.  When the simulation starts the fan will begin to remove air from the outer compartment and discharge it into the
-inner compartment.  As the pressure rises, the leakage flows will slowly increase until the leakage flow is equal to the flow from the fan.
+This sample case starts with the same input as leak\_test.  A second leakage vent is added to the floor of the discharge side of the fan.  This vent leaks to the ambient.  When the simulation starts the fan will begin to remove air from the suction side and discharge it to the other compartment.  As the pressure rises, the leakage flows will slowly increase until the leakage flow is equal to the flow from the fan.
 Since some air from the interior compartment is being discharged to the ambient, the average pressure of the two compartments will
 decrease until the pressure of the interior compartment is equal to that of the ambient.  At this point in time, no more leakage flow will occur to the
 ambient and the fan flow will equal intra-compartment leakage flow.  Given the leakage area and the fan curve, this will occur when the pressure difference between the
-two compartments is 598~Pa.
+two compartments is the same as the pressure difference from leak\_test (190.7~Pa.) only now the discharge side should be at 0~Pa.
 
 \begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
