@@ -730,7 +730,10 @@ FACE_LOOP: DO N=1,N_FACE
             BB(6) = M%Z(K)
             IERR=0
             CALL TRIANGLE_BOX_INTERSECT(IERR,V1,V2,V3,BB)
-            IF (IERR==1) M%P_MASK(I,J,K)=0
+            IF (IERR==1) THEN
+               M%P_MASK(I,J,K)=0
+               CALL INSERT(CELL_INDEX(I,J,K),FACET(N)%CUTCELL_LIST)
+            ENDIF
 
             BB(1) = M%XC(I)
             BB(2) = M%XC(I+1)
@@ -784,6 +787,22 @@ ENDIF CUT_CELL_TEST
 !print *,M%P_MASK(1:3,1,1)
 
 END SUBROUTINE INIT_IBM
+
+
+! http://www.sdsc.edu/~tkaiser/f90.html#Linked lists
+RECURSIVE SUBROUTINE INSERT(ITEM,ROOT) 
+   IMPLICIT NONE 
+   TYPE(LINKED_LIST_TYPE), POINTER :: ROOT 
+   INTEGER :: ITEM,IZERO
+   IF (.NOT.ASSOCIATED(ROOT)) THEN 
+      ALLOCATE(ROOT,STAT=IZERO)
+      CALL ChkMemErr('GEOM','ROOT',IZERO)
+      NULLIFY(ROOT%NEXT) 
+      ROOT%INDEX = ITEM 
+   ELSE 
+      CALL INSERT(ITEM,ROOT%NEXT) 
+   ENDIF 
+END SUBROUTINE 
 
 
 SUBROUTINE TRIANGLE_BOX_INTERSECT(IERR,V1,V2,V3,BB)
