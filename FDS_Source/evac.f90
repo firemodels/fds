@@ -1068,8 +1068,8 @@ CONTAINS
        ! Note: If EVACUATION_DRILL=true there are no fire meshes
        ! Note: If NO_EVACUATION=true there are no evacuation meshes
        ! There are fire grids ==> save fed and evac flow fields
+       ! Simple chemistry need always REAC line, non-simple chemistry does not need this
        I_EVAC = 16*1 + 8*0 + 4*0 + 2*1 + 1*1
-       IF (N_REACTIONS == 0) I_EVAC = 16*1 + 8*0 + 4*0 + 2*0 + 1*1
     ELSE
        ! There are no fire meshes
        IF (EVACUATION_MC_MODE) THEN
@@ -4888,7 +4888,8 @@ CONTAINS
             END IF
          END DO Nodeloop2
          IF (EVAC_CORRS(n)%INODE2 == 0 .OR. EVAC_CORRS(n)%IMESH2 == 0) THEN
-            WRITE(MESSAGE,'(A,A,A)') 'ERROR: CORR ',Trim(ID),' problem with TO_NODE'
+            WRITE(MESSAGE,'(A,A,A,A)') 'ERROR: CORR ',Trim(EVAC_CORRS(n)%ID),' problem with TO_NODE ',&
+                 Trim(EVAC_CORRS(n)%TO_NODE)
             CALL SHUTDOWN(MESSAGE)
          END IF
       END DO
@@ -4911,7 +4912,8 @@ CONTAINS
             END IF
          END DO PDX_StrsLoop
          IF (EVAC_DOORS(n)%INODE2 == 0 .OR. EVAC_DOORS(n)%IMESH2 == 0) THEN
-            WRITE(MESSAGE,'(A,A,A)') 'ERROR: DOOR ',TRIM(EVAC_DOORS(n)%ID),' problem with TO_NODE'
+            WRITE(MESSAGE,'(A,A,A,A)') 'ERROR: DOOR ',TRIM(EVAC_DOORS(n)%ID),' problem with TO_NODE ',&
+                 TRIM(EVAC_DOORS(n)%TO_NODE)
             CALL SHUTDOWN(MESSAGE)
          END IF
       END DO
@@ -5127,11 +5129,10 @@ CONTAINS
     CALL ChkMemErr('READ_EVAC','seed_rnd',IZERO)
     IF (.NOT. NOT_RANDOM) THEN    ! Initialize the generator randomly
        CALL DATE_AND_TIME(values = t_rnd)
-       seed_rnd = 100.0_EB*t_rnd(7) + t_rnd(8)/10.0_EB
+       seed_rnd = 31*t_rnd(7) + 29*t_rnd(8)
     ELSE
        ! Do not use a random seed, use a constant seed
-       ! Timo: MPI and random numbers and FDS noise is problem.
-       seed_rnd = 2819.381_EB
+       seed_rnd = 2819
     END IF
     CALL RANDOM_SEED(put=seed_rnd)
     DEALLOCATE(seed_rnd)
