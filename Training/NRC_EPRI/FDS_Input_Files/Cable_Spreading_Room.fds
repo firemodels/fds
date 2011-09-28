@@ -22,6 +22,7 @@ General construction
 &SURF ID            = 'CONCRETE WALL'
       COLOR         = 'GRAY'
       MATL_ID       = 'CONCRETE'
+      BACKING       = 'EXPOSED'
       THICKNESS     = 0.5 /
 
 &OBST XB=16.3,23.7, 6.6,12.0, 0.0, 4.0, SURF_ID='CONCRETE WALL' /
@@ -29,11 +30,11 @@ General construction
 
 Cables
 
-&PROP ID            = 'THIEF CABLE MODEL'
-      QUANTITY      = 'CABLE TEMPERATURE'
-      CABLE_DIAMETER = 0.015
-      CABLE_JACKET_THICKNESS = 0.0015
-      CABLE_MASS_PER_LENGTH = 0.4
+&PROP ID                        = 'THIEF CABLE MODEL'
+      QUANTITY                  = 'CABLE TEMPERATURE'
+      CABLE_DIAMETER            = 0.015
+      CABLE_JACKET_THICKNESS    = 0.0015
+      CABLE_MASS_PER_LENGTH     = 0.4
       CABLE_FAILURE_TEMPERATURE = 205. /
 
 &MATL ID            = 'COPPER'
@@ -44,14 +45,13 @@ Cables
 &MATL ID            = 'PE/PVC'
       SPECIFIC_HEAT = 1.289
       CONDUCTIVITY  = 0.192
-      DENSITY       = 1380.
-      EMISSIVITY    = 0.95 / Material properties of the cable plastics
+      DENSITY       = 1380. / Material properties of the cable plastic slabs
 
 &SURF ID                        = 'CABLE'
       COLOR                     = 'BLACK'
       MATL_ID(1,1:2)            = 'PE/PVC','COPPER'
       MATL_MASS_FRACTION(1,1:2) = 0.33,0.67
-      THICKNESS                 = 0.025
+      THICKNESS                 = 0.030
       BACKING                   = 'EXPOSED' /
 
 &SURF ID            = 'TRAY'
@@ -70,11 +70,15 @@ Cables
 
 Fire
 
-&REAC ID='Cellulose'
-      C = 2.
-      H = 2. 
-      HEAT_OF_COMBUSTION=20000.
-      SOOT_YIELD=0.015 /
+&REAC ID='Cellulose/Polyethylene'
+      C = 4.
+      H = 7. 
+      O = 2.5
+      HEAT_OF_COMBUSTION=30400.
+      CO_YIELD=0.014 /
+      SOOT_YIELD=0.038 /
+
+&RADI RADIATIVE_FRACTION = 0.4 /
 
 &SURF ID     = 'FIRE'
       COLOR  = 'ORANGE'
@@ -98,8 +102,8 @@ Fire
 &RAMP ID='fire ramp', T= 420., F=0.766 /
 &RAMP ID='fire ramp', T= 450., F=0.879 /
 &RAMP ID='fire ramp', T= 480., F=1.000 /
-&RAMP ID='fire ramp', T= 635., F=1.000 /
-&RAMP ID='fire ramp', T= 636., F=0.000 /
+&RAMP ID='fire ramp', T= 799., F=1.000 /
+&RAMP ID='fire ramp', T= 800., F=0.000 /
 
 &OBST XB= 32.7, 33.3, 16.0, 16.6, 0.00, 0.8, SURF_IDS = 'FIRE','DUCT STEEL','DUCT STEEL' /
 
@@ -113,6 +117,7 @@ Ventilation
 &SURF ID            = 'DOOR'
       COLOR         = 'BROWN'
       MATL_ID       = 'STEEL'
+      BACKING       = 'EXPOSED'
       THICKNESS     = 0.1 /
 
 &HOLE XB= 5.0, 7.0,-0.6, 0.1, 0.0, 2.0 /
