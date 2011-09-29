@@ -8356,7 +8356,7 @@ READ_ZONE_LOOP: DO N=1,N_ZONE
       DO NN = 1,N-1
          IF(P_ZONE(NN)%LEAK_AREA(N)>0._EB) THEN
             IF(P_ZONE(N)%LEAK_AREA(NN) > 0._EB) THEN
-               WRITE(MESSAGE,'(A,I,A,I)')  'ERROR: LEAK_AREA specified twice for ZONE ',N,' and ',NN
+               WRITE(MESSAGE,'(A,I3,A,I3)')  'ERROR: LEAK_AREA specified twice for ZONE ',N,' and ',NN
                CALL SHUTDOWN(MESSAGE)           
             ELSE
                P_ZONE(N)%LEAK_AREA(NN) = P_ZONE(NN)%LEAK_AREA(N)
