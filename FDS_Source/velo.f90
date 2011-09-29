@@ -3079,7 +3079,7 @@ UNSTRUCTURED_GEOMETRY: IF (N_FACE>0 .OR. N_VOLU>0) THEN
       DO J=1,JBAR
          DO I=0,IBAR
 
-            SELECT_MASK_1: SELECT CASE(U_MASK(I,J,K))
+            SELECT_MASK_1: SELECT CASE(P_MASK(I,J,K))
                CASE( 1) SELECT_MASK_1
                   ! point is in gas phase
                   CYCLE                   
@@ -3107,7 +3107,7 @@ UNSTRUCTURED_GEOMETRY: IF (N_FACE>0 .OR. N_VOLU>0) THEN
       DO J=0,JBAR
          DO I=1,IBAR
 
-            SELECT_MASK_2: SELECT CASE(V_MASK(I,J,K))
+            SELECT_MASK_2: SELECT CASE(P_MASK(I,J,K))
                CASE( 1) SELECT_MASK_2
                   ! point is in gas phase
                   CYCLE                   
@@ -3135,7 +3135,7 @@ UNSTRUCTURED_GEOMETRY: IF (N_FACE>0 .OR. N_VOLU>0) THEN
       DO J=1,JBAR
          DO I=1,IBAR
 
-            SELECT_MASK_3: SELECT CASE(W_MASK(I,J,K))
+            SELECT_MASK_3: SELECT CASE(P_MASK(I,J,K))
                CASE( 1) SELECT_MASK_3
                   ! point is in gas phase
                   CYCLE                   
