@@ -293,6 +293,8 @@ INTEGER :: I,J,K,N,IERR,I_MIN,I_MAX,J_MIN,J_MAX,K_MIN,K_MAX
 TYPE (MESH_TYPE), POINTER :: M
 TYPE (GEOMETRY_TYPE), POINTER :: G
 REAL(EB) :: DELTA,RP,XU(3),PP(3),DP,TIME,TOL=1.E-10_EB,XP(3),BB(6),V1(3),V2(3),V3(3),V4(3)
+TYPE (LINKED_LIST_TYPE), POINTER :: LL
+LOGICAL :: END_OF_LIST=.TRUE.
 
 IF (ICYC>0 .AND. N_GEOM==0) RETURN
 
@@ -732,38 +734,9 @@ FACE_LOOP: DO N=1,N_FACE
             CALL TRIANGLE_BOX_INTERSECT(IERR,V1,V2,V3,BB)
             IF (IERR==1) THEN
                M%P_MASK(I,J,K)=0
-               CALL INSERT(CELL_INDEX(I,J,K),FACET(N)%CUTCELL_LIST)
+               CALL INSERT(M%CELL_INDEX_IBM(I,J,K),FACET(N)%CUTCELL_LIST)
+               print *,M%CELL_INDEX_IBM(I,J,K)
             ENDIF
-
-            BB(1) = M%XC(I)
-            BB(2) = M%XC(I+1)
-            BB(3) = M%Y(J-1)
-            BB(4) = M%Y(J)
-            BB(5) = M%Z(K-1)
-            BB(6) = M%Z(K)
-            IERR=0
-            CALL TRIANGLE_BOX_INTERSECT(IERR,V1,V2,V3,BB)
-            IF (IERR==1) M%U_MASK(I,J,K)=0
-
-            BB(1) = M%X(I-1)
-            BB(2) = M%X(I)
-            BB(3) = M%YC(J)
-            BB(4) = M%YC(J+1)
-            BB(5) = M%Z(K-1)
-            BB(6) = M%Z(K)
-            IERR=0
-            CALL TRIANGLE_BOX_INTERSECT(IERR,V1,V2,V3,BB)
-            IF (IERR==1) M%V_MASK(I,J,K)=0
-
-            BB(1) = M%X(I-1)
-            BB(2) = M%X(I)
-            BB(3) = M%Y(J-1)
-            BB(4) = M%Y(J)
-            BB(5) = M%ZC(K)
-            BB(6) = M%ZC(K+1)
-            IERR=0
-            CALL TRIANGLE_BOX_INTERSECT(IERR,V1,V2,V3,BB)
-            IF (IERR==1) M%W_MASK(I,J,K)=0
 
          ENDDO
       ENDDO
@@ -772,6 +745,20 @@ FACE_LOOP: DO N=1,N_FACE
 ENDDO FACE_LOOP
 
 ENDIF CUT_CELL_TEST
+
+print *
+LL=>FACET(1)%CUTCELL_LIST
+IF ( ASSOCIATED(LL) ) THEN
+    END_OF_LIST=.FALSE.
+    DO WHILE (.NOT.END_OF_LIST)
+       print *, LL%INDEX
+       LL=>LL%NEXT
+       IF ( .NOT.ASSOCIATED(LL) ) THEN
+          print *,'done printing linked list!'
+          END_OF_LIST=.TRUE.
+       ENDIF
+    ENDDO
+ENDIF
 
 !print *
 !print *,M%P_MASK(1:3,3,3)
