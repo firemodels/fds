@@ -1229,13 +1229,14 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
             H_G   = CPBAR * TMP(II,JJ,KK)
             H_SUM = H_SUM+H_G*AREA*RHOP(II,JJ,KK)
             TMP_SUM = TMP_SUM + TMP(II,JJ,KK)*AREA
+            IZ1 = PRESSURE_ZONE(II,JJ,KK)
             SELECT CASE (IOR)
                CASE (3)
-                  P_AVE = 0.5_EB*(PBARP(KK-1,PRESSURE_ZONE(II,JJ,KK-1))+PBARP(KK,PRESSURE_ZONE(II,JJ,KK)))
+                  P_AVE = 0.5_EB*(PBARP(KK-1,IZ1)+PBARP(KK,IZ1))
                CASE (-3)
-                  P_AVE = 0.5_EB*(PBARP(KK,PRESSURE_ZONE(II,JJ,KK))+PBARP(KK+1,PRESSURE_ZONE(II,JJ,KK+1)))
+                  P_AVE = 0.5_EB*(PBARP(KK,IZ1)+PBARP(KK+1,IZ1))
                CASE DEFAULT
-                  P_AVE = PBARP(KK,PRESSURE_ZONE(II,JJ,KK))          
+                  P_AVE = PBARP(KK,IZ1)          
             END SELECT
             P_SUM = P_SUM + (P_AVE+RHO(II,JJ,KK)*(HP(II,JJ,KK)-KRES(II,JJ,KK)))*AREA      
             AREA_SUM = AREA_SUM + AREA      
@@ -1304,9 +1305,9 @@ LEAKAGE_BC: IF (LEAK_DUCTS > 0) THEN
       LEAK_RHO(IZ1,IZ2,NM) = LEAK_RHO(IZ1,IZ2,NM) + RHOP(II,JJ,KK)*AREA
       SELECT CASE (IOR)
          CASE (3)
-            P_AVE = 0.5_EB*(PBARP(KK-1,PRESSURE_ZONE(II,JJ,KK-1))+PBARP(KK,PRESSURE_ZONE(II,JJ,KK)))
+            P_AVE = 0.5_EB*(PBARP(KK-1,PRESSURE_ZONE(II,JJ,KK))+PBARP(KK,PRESSURE_ZONE(II,JJ,KK)))
          CASE (-3)
-            P_AVE = 0.5_EB*(PBARP(KK,PRESSURE_ZONE(II,JJ,KK))+PBARP(KK+1,PRESSURE_ZONE(II,JJ,KK+1)))
+            P_AVE = 0.5_EB*(PBARP(KK,PRESSURE_ZONE(II,JJ,KK))+PBARP(KK+1,PRESSURE_ZONE(II,JJ,KK)))
          CASE DEFAULT
             P_AVE = PBARP(KK,PRESSURE_ZONE(II,JJ,KK))          
       END SELECT      
