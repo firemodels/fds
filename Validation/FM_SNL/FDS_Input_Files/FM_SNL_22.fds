@@ -8,7 +8,7 @@
 
 &TIME T_END=1440. /
 
-&MISC TMPA=17. /
+&MISC TMPA=14. /
 
 &RADI RADIATIVE_FRACTION=0.4 /
 &REAC FUEL='PROPYLENE'
@@ -19,10 +19,10 @@
 
 &SURF ID='burner', HRRPUA=1468., RAMP_Q='fire', COLOR='RED' / 
 &RAMP ID='fire',T=   0.0,F=0.0 /
-&RAMP ID='fire',T= 120.0,F=0.0625 /
-&RAMP ID='fire',T= 180.0,F=0.25   /
-&RAMP ID='fire',T= 240.0,F=0.5625 /
-&RAMP ID='fire',T= 300.0,F=1.0    /
+&RAMP ID='fire',T= 180.0,F=0.0625 /
+&RAMP ID='fire',T= 240.0,F=0.25   /
+&RAMP ID='fire',T= 300.0,F=0.5625 /
+&RAMP ID='fire',T= 360.0,F=1.0    /
 &RAMP ID='fire',T= 815.0,F=1.0    /
 &RAMP ID='fire',T= 816.0,F=0.0    /
 
