@@ -1,10 +1,10 @@
 &HEAD CHID='FM_SNL_06',TITLE='FM-SNL Test 6' /
 
-&MESH IJK=24,24, 60, XB=11.0,13.4, 5.0, 7.4, 0.0, 6.1 /
-&MESH IJK=67,25, 30, XB= 0.0,13.4, 0.0, 5.0, 0.0, 6.1 /
-&MESH IJK=55,12, 30, XB= 0.0,11.0, 5.0, 7.4, 0.0, 6.1 /
-&MESH IJK=67,24, 30, XB= 0.0,13.4, 7.4,12.2, 0.0, 6.1 /
-&MESH IJK=24,61, 30, XB=13.4,18.2, 0.0,12.2, 0.0, 6.1 /
+&MESH IJK=24,24, 60, XB=8.4, 10.8, 10.8, 12.2, 0.0, 6.1 /
+&MESH IJK=42,12, 30, XB= 0.0, 8.4, 10.8, 12.2, 0.0, 6.1 /
+&MESH IJK=37,12, 30, XB= 10.8, 18.2, 10.8, 12.2, 0.0, 6.1 /
+&MESH IJK=45,54, 30, XB= 0.0, 9.0, 0.0, 10.8, 0.0, 6.1 /
+&MESH IJK=46,54, 30, XB=9.0,18.2, 0.0, 10.8, 0.0, 6.1 /
 
 &TIME T_END=975. /
 
@@ -23,8 +23,8 @@
 &RAMP ID='fire',T=120.0,F=1.0 /
 &RAMP ID='fire',T=180.0,F=1.0 /
 &RAMP ID='fire',T=240.0,F=1.0 /
-&RAMP ID='fire',T=550.0,F=1.0 /
-&RAMP ID='fire',T=551.0,F=0.0 /
+&RAMP ID='fire',T=675.0,F=1.0 /
+&RAMP ID='fire',T=676.0,F=0.0 /
 
 &MATL ID='MARINITE'
       FYI='Nowlen, Survivors Guide, Feb 1999'
