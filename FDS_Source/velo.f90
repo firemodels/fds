@@ -2577,9 +2577,10 @@ REAL(EB) :: U_IBM,V_IBM,W_IBM,DN, &
             PE,PW,PN,PS,PT,PB, &
             U_DATA(0:1,0:1,0:1),XI(3),DXI(3),DXC(3),XVELO(3),XGEOM(3),XCELL(3),XEDGX(3),XEDGY(3),XEDGZ(3),XSURF(3), &
             U_VEC(3),U_GEOM(3),N_VEC(3),DIVU,GRADU(3,3),GRADP(3),TAU_IJ(3,3), &
-            MU_WALL,RRHO,MUA,DUUDT,DVVDT,DWWDT,DELTA,WT
-INTEGER :: I,J,K,NG,IJK(3),I_VEL,IP1,IM1,JP1,JM1,KP1,KM1,ITMP
+            MU_WALL,RRHO,MUA,DUUDT,DVVDT,DWWDT,DELTA,WT, NXNY_REAL,NX_REAL,IC_REAL
+INTEGER :: I,J,K,NG,IJK(3),I_VEL,IP1,IM1,JP1,JM1,KP1,KM1,ITMP, N
 TYPE(GEOMETRY_TYPE), POINTER :: G
+TYPE(LINKED_LIST_TYPE), POINTER :: L
 
 ! References:
 !
@@ -3073,92 +3074,44 @@ GEOM_LOOP: DO NG=1,N_GEOM
    
 ENDDO GEOM_LOOP
 
-UNSTRUCTURED_GEOMETRY: IF (N_FACE>0 .OR. N_VOLU>0) THEN
+NXNY_REAL = REAL(IBAR*JBAR,EB)+1.E-10_EB
+NX_REAL = REAL(IBAR,EB)+1.E-10_EB
 
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=0,IBAR
+UNSTRUCTURED_GEOMETRY_LOOP: DO N=1,N_FACE
 
-            SELECT_MASK_1: SELECT CASE(P_MASK(I,J,K))
-               CASE( 1) SELECT_MASK_1
-                  ! point is in gas phase
-                  CYCLE                   
-               CASE(-1,0) SELECT_MASK_1
-                  ! point is inside solid    
-                  U_IBM = 0._EB
-!               CASE( 0) SELECT_MASK_1
-!                  SELECT_IBM_1: SELECT CASE(IMMERSED_BOUNDARY_METHOD)
-!                     CASE DEFAULT SELECT_IBM_1
-!                        CYCLE
-!                  END SELECT SELECT_IBM_1
-            END SELECT SELECT_MASK_1
+   L=>FACET(N)%CUTCELL_LIST
 
-            IF (PREDICTOR) DUUDT = (U_IBM-U(I,J,K))/DT
-            IF (CORRECTOR) DUUDT = (2._EB*U_IBM-(U(I,J,K)+US(I,J,K)))/DT
-         
-            FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
+   LIST_LOOP: DO
 
-         ENDDO
-      ENDDO
-   ENDDO
+      IF ( .NOT. ASSOCIATED(L) ) EXIT
 
-   IF_NOT_2D: IF (.NOT.TWO_D) THEN
-   DO K=1,KBAR
-      DO J=0,JBAR
-         DO I=1,IBAR
+      IC_REAL = REAL(L%INDEX,EB)
+      K = CEILING(IC_REAL/NXNY_REAL)
+      J = CEILING((IC_REAL-(K-1)*NXNY_REAL)/NX_REAL)
+      I = NINT(IC_REAL-(K-1)*NXNY_REAL-(J-1)*NX_REAL)
 
-            SELECT_MASK_2: SELECT CASE(P_MASK(I,J,K))
-               CASE( 1) SELECT_MASK_2
-                  ! point is in gas phase
-                  CYCLE                   
-               CASE(-1,0) SELECT_MASK_2
-                  ! point is inside solid    
-                  V_IBM = 0._EB
-!               CASE( 0) SELECT_MASK_2
-!                  SELECT_IBM_2: SELECT CASE(IMMERSED_BOUNDARY_METHOD)
-!                     CASE DEFAULT SELECT_IBM_2
-!                        CYCLE
-!                  END SELECT SELECT_IBM_2
-            END SELECT SELECT_MASK_2
+      !print *,L%INDEX,I,J,K
 
-            IF (PREDICTOR) DVVDT = (V_IBM-V(I,J,K))/DT
-            IF (CORRECTOR) DVVDT = (2._EB*V_IBM-(V(I,J,K)+VS(I,J,K)))/DT
-         
-            FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT
+      U_IBM = 0._EB
+      IF (PREDICTOR) DUUDT = (U_IBM-U(I,J,K))/DT
+      IF (CORRECTOR) DUUDT = (2._EB*U_IBM-(U(I,J,K)+US(I,J,K)))/DT
+      FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
 
-         ENDDO
-      ENDDO
-   ENDDO
-   ENDIF IF_NOT_2D
+      V_IBM = 0._EB
+      IF (PREDICTOR) DVVDT = (V_IBM-V(I,J,K))/DT
+      IF (CORRECTOR) DVVDT = (2._EB*V_IBM-(V(I,J,K)+VS(I,J,K)))/DT
+      FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT
 
-   DO K=0,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
+      W_IBM = 0._EB
+      IF (PREDICTOR) DWWDT = (W_IBM-W(I,J,K))/DT
+      IF (CORRECTOR) DWWDT = (2._EB*W_IBM-(W(I,J,K)+WS(I,J,K)))/DT
+      FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
 
-            SELECT_MASK_3: SELECT CASE(P_MASK(I,J,K))
-               CASE( 1) SELECT_MASK_3
-                  ! point is in gas phase
-                  CYCLE                   
-               CASE(-1,0) SELECT_MASK_3
-                  ! point is inside solid    
-                  W_IBM = 0._EB
-!               CASE( 0) SELECT_MASK_3
-!                  SELECT_IBM_3: SELECT CASE(IMMERSED_BOUNDARY_METHOD)
-!                     CASE DEFAULT SELECT_IBM_3
-!                        CYCLE
-!                  END SELECT SELECT_IBM_3
-            END SELECT SELECT_MASK_3
+      L=>L%NEXT
 
-            IF (PREDICTOR) DWWDT = (W_IBM-W(I,J,K))/DT
-            IF (CORRECTOR) DWWDT = (2._EB*W_IBM-(W(I,J,K)+WS(I,J,K)))/DT
-         
-            FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
+   ENDDO LIST_LOOP
 
-         ENDDO
-      ENDDO
-   ENDDO
-
-ENDIF UNSTRUCTURED_GEOMETRY
+ENDDO UNSTRUCTURED_GEOMETRY_LOOP
 
 END SUBROUTINE IBM_VELOCITY_FLUX
 
