@@ -289,12 +289,12 @@ SUBROUTINE INIT_IBM(T,NM)
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T
-INTEGER :: I,J,K,N,IERR,I_MIN,I_MAX,J_MIN,J_MAX,K_MIN,K_MAX
+INTEGER :: I,J,K,N,IERR,I_MIN,I_MAX,J_MIN,J_MAX,K_MIN,K_MAX,IC
 TYPE (MESH_TYPE), POINTER :: M
 TYPE (GEOMETRY_TYPE), POINTER :: G
 REAL(EB) :: DELTA,RP,XU(3),PP(3),DP,TIME,TOL=1.E-10_EB,XP(3),BB(6),V1(3),V2(3),V3(3),V4(3)
-TYPE (LINKED_LIST_TYPE), POINTER :: LL
-LOGICAL :: END_OF_LIST=.TRUE.
+!TYPE (LINKED_LIST_TYPE), POINTER :: LL
+!LOGICAL :: END_OF_LIST=.TRUE.
 
 IF (ICYC>0 .AND. N_GEOM==0) RETURN
 
@@ -733,9 +733,9 @@ FACE_LOOP: DO N=1,N_FACE
             IERR=0
             CALL TRIANGLE_BOX_INTERSECT(IERR,V1,V2,V3,BB)
             IF (IERR==1) THEN
-               M%P_MASK(I,J,K)=0
-               CALL INSERT(M%CELL_INDEX_IBM(I,J,K),FACET(N)%CUTCELL_LIST)
-               print *,M%CELL_INDEX_IBM(I,J,K)
+               IC = (K-1)*IBAR*JBAR + (J-1)*IBAR + I
+               CALL INSERT(IC,FACET(N)%CUTCELL_LIST)
+               !print *,IC
             ENDIF
 
          ENDDO
@@ -746,19 +746,19 @@ ENDDO FACE_LOOP
 
 ENDIF CUT_CELL_TEST
 
-print *
-LL=>FACET(1)%CUTCELL_LIST
-IF ( ASSOCIATED(LL) ) THEN
-    END_OF_LIST=.FALSE.
-    DO WHILE (.NOT.END_OF_LIST)
-       print *, LL%INDEX
-       LL=>LL%NEXT
-       IF ( .NOT.ASSOCIATED(LL) ) THEN
-          print *,'done printing linked list!'
-          END_OF_LIST=.TRUE.
-       ENDIF
-    ENDDO
-ENDIF
+!print *
+!LL=>FACET(1)%CUTCELL_LIST
+!IF ( ASSOCIATED(LL) ) THEN
+!    END_OF_LIST=.FALSE.
+!    DO WHILE (.NOT.END_OF_LIST)
+!       print *, LL%INDEX
+!       LL=>LL%NEXT
+!       IF ( .NOT.ASSOCIATED(LL) ) THEN
+!          print *,'done printing linked list!'
+!          END_OF_LIST=.TRUE.
+!       ENDIF
+!    ENDDO
+!ENDIF
 
 !print *
 !print *,M%P_MASK(1:3,3,3)
@@ -1268,7 +1268,10 @@ DO I=1,N_FACE
       F%NVEC(2) = N_VEC(2)/N_LENGTH
       F%NVEC(3) = N_VEC(3)/N_LENGTH
    ELSE
-      CALL SHUTDOWN('ERROR: Invalid facet')
+      !CALL SHUTDOWN('ERROR: Invalid facet')
+      F%NVEC(1) = 0._EB
+      F%NVEC(2) = 0._EB
+      F%NVEC(3) = 0._EB
    ENDIF
 
 ENDDO
