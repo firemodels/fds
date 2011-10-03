@@ -5260,6 +5260,8 @@ Likewise, the boundaries of Zone 1 and Zone 2 must include solids whose {\ct SUR
 two zones. The {\ct SURF}aces with the {\ct LEAK\_PATH} attribute lump all of the
 leakage over these areas. The order of the two pressure zones designated by {\ct LEAK\_PATH} is unimportant.
 
+The HVAC output quantities can be used to determine the leakage flows.  FDS give the duct connecting Zone A with Zone B the name {\ct 'LEAK A B'} and the duct nodes will be named {\ct 'LEAK A B'} for the Zone A side of the leak and {\ct 'LEAK B A'} for the Zone B side of the leak.  Note that for the duct names, FDS will use the lower numbered zone as Zone A.
+
 \clearpage
 
 \section{Special Topic: Pressure Boundary Conditions}
