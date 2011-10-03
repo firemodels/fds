@@ -640,6 +640,7 @@ extern "C" void TRANSLATE_CB(int var){
   float *direction_angle;
   float *cos_direction_angle, *sin_direction_angle;
   int *rotation_index;
+  int i;
 
 #ifdef pp_GPUTHROTTLE
   if(usegpu==1&&showvolrender==1&&hide_volsmoke==0&&
@@ -770,7 +771,6 @@ extern "C" void TRANSLATE_CB(int var){
       update_windowsizelist();
       ResizeWindow(screenWidth,screenHeight);
       break;
-
     case PROJECTION:
       ZoomMenu(-2);
       camera_current->projection_type=projection_type;
@@ -821,6 +821,13 @@ extern "C" void TRANSLATE_CB(int var){
       break;
     case ZOOM:
       zoomindex=-1;
+      for(i=0;i<5;i++){
+        if(fabs(zoom-zooms[i])<0.001){
+          zoomindex=i;
+          zoom=zooms[i];
+          break;
+        }
+      }
       camera_current->zoom=zoom;
       aperture_glui=zoom2aperture(zoom);
       if(SPINNER_aperture!=NULL)SPINNER_aperture->set_float_val(aperture_glui);
@@ -834,6 +841,15 @@ extern "C" void TRANSLATE_CB(int var){
         if(SPINNER_aperture!=NULL)SPINNER_aperture->set_float_val(aperture_glui);
       }
       zoomindex=-1;
+      for(i=0;i<5;i++){
+        if(fabs(zoom-zooms[i])<0.001){
+          zoomindex=i;
+          zoom=zooms[i];
+          aperture_glui=zoom2aperture(zoom);
+          if(SPINNER_aperture!=NULL)SPINNER_aperture->set_float_val(aperture_glui);
+          break;
+        }
+      }
       camera_current->zoom=zoom;
       if(SPINNER_zoom!=NULL)SPINNER_zoom->set_float_val(zoom);
       break;

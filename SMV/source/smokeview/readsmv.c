@@ -8179,6 +8179,7 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"PROJECTION",10)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&projection_type);
+      TRANSLATE_CB(PROJECTION);
       update_projection_type();
       continue;
     }
@@ -8831,6 +8832,7 @@ int readini2(char *inifile, int localfile){
           zoomindex=4;
         }
       }
+      //xxx zoomini=zoom;
       updatezoommenu=1;
       ZoomMenu(zoomindex);
       continue;
