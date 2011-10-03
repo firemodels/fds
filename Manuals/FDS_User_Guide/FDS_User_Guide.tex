@@ -4878,7 +4878,8 @@ Additionally you must define the locations where the HVAC network joins the comp
 A number of examples of simple HVAC systems are given in the HVAC folder of the sample cases and are discussed in the FDS Verification Guide.
 
 
-\subsection{HVAC Duct Parameters}
+\subsection{HVAC Duct Parameters} 
+\label{info:HVACduct}
 
 \footnotesize
 \begin{verbatim}
@@ -4908,7 +4909,7 @@ function named by {\ct CTRL\_ID} or {\ct DEVC\_ID}.  Only one of either {\ct DAM
 
 
 \subsection{HVAC Node Parameters}
-
+\label{info:HVACnode}
 \footnotesize
 \begin{verbatim}
 &HVAC TYPE_ID='NODE', ID='nodename', DUCT_ID='duct 1','duct 2',..'duct n', VENT_ID='vent',
@@ -4927,22 +4928,24 @@ If the node is connected to the FDS domain, then do not specify {\ct XYZ}.  FDS 
 
 
 
-\subsection{HVAC Fan Parameters}
-
+\subsection{'HVAC Fan Parameters}
+\label{info:HVACfan}
 \footnotesize
 \begin{verbatim}
-&HVAC TYPE='FAN', ID='fanname', RAMP_ID='rampname', VOLUME_FLOW=volumeflow,
-      MAX_FLOW=maxflow, MAX_PRESSURE=maxpressure, LOSS=offloss /
+&HVAC TYPE='FAN', ID='fanname', RAMP_ID='rampname',  DEVC_ID='devicename', CTRL_ID='ctrlname', VOLUME_FLOW=volumeflow, MAX_FLOW=maxflow, 
+MAX_PRESSURE=maxpressure, LOSS=offloss /
 \end{verbatim}\normalsize
 
 
 \begin{description}
+\item[{\ct CTRL\_ID}] Name of a control function controlling the operation of the fan.
+\item[{\ct DEVC\_ID}] Name of a device controlling the operation of the fan.
 \item[{\ct LOSS}] is the flow loss through the fan when it is not operational.
 \item[{\ct MAX\_FLOW}] is the maximum volumetric flow of the fan in m$^3$/s.  This input activates a quadratic fan model.
 \item[{\ct MAX\_PRESSURE}] is the stall pressure of the fan in Pa.  This input activates a quadratic fan model.
 \item[{\ct RAMP\_ID}] identifies the {\ct RAMP} that contains a table of pressure drop across the fan (Pa) versus the volumetric flow rates (m$^3$/s) .
-{\ct VOLUME\_FLOW} is the fixed volumetric flow of the fan (m$^3$/s).
 \item[{\ct TAU\_FAN}]  defines a tanh ({\ct TAU\_FAN} > 0) or t$^2$ ramp ({\ct TAU\_FAN} < 0) for the fan.  This is applied to the flowrate computed by any of the three types (constant flow, quadratic, or user defined ramp) of fans.
+\item[{\ct VOLUME\_FLOW}] is the fixed volumetric flow of the fan (m$^3$/s).
 \end{description}
 
 \noindent
@@ -5057,7 +5060,7 @@ fan itself can be positioned about halfway along the passage.
 \clearpage
 
 \subsection{HVAC Filter Parameters}
-
+\label{info:HVACfilter}
 \footnotesize
 \begin{verbatim}
 &HVAC TYPE='FILTER', ID='filtername', LOADING=initial loading, SPEC_ID='speciesname',
@@ -5077,7 +5080,7 @@ fan itself can be positioned about halfway along the passage.
 \end{description}
 
 \subsection{HVAC Aircoil Parameters}
-
+\label{info:HVACaircoil}
 \footnotesize
 \begin{verbatim}
 &HVAC TYPE='AIRCOIL', ID='aircoilname', DEVC_ID='devicename', CTRL_ID='ctrlname',
@@ -10024,40 +10027,40 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct HVAC} (HVAC System Definition)} \\
 \hline \hline
 \endhead
-{\ct AIRCOIL\_ID}               & Character         & Name of an aircoil in a duct    &               &  {\ct 'null'}         \\ \hline
-{\ct AMBIENT}                   & Logical           & Node is connected to the ambient                  &               &  {\ct .FALSE.}        \\ \hline
-{\ct AREA}                      & Real              & Area of a duct                                    & m$^2$         &                       \\ \hline
-{\ct CLEAN\_LOSS}               & Real              & Flow loss for a clean filter                                    &               &                       \\ \hline
-{\ct COOLANT\_CP}               & Real              & Specific heat for the working fluid of an aircoil   & kJ/kg/K       &                       \\ \hline
-{\ct COOLANT\_MDOT}             & Real              & Flow rate for the working fluid of an aircoil   & kg/s          &                       \\ \hline
-{\ct COOLANT\_TEMPERATURE}      & Real              &Inlet temperature for the working fluid of an aircoil   & $^\circ$C             &                       \\ \hline
-{\ct CTRL\_ID}                  & Character         & Name of {\ct CTRL} controlling a fan or damper    &               &  {\ct 'null'}         \\ \hline
-{\ct DAMPER}                    & Logical           & Damper is present in a duct                       &               &  {\ct .FALSE.}        \\ \hline
-{\ct DEVC\_ID}                  & Character         & Name of {\ct DEVC} controlling a fan or damper    &               &  {\ct 'null'}         \\ \hline
-{\ct DIAMETER}                  & Real              & Diameter of a duct                                &  m            &                       \\ \hline
-{\ct DUCT\_ID}                  & Character Array   & Name of ducts connected to a node                 &               &                       \\ \hline
-{\ct EFFICIENCY}                & Real Array        & Efficiency of a filter or aircoil                                    &               & 1.                     \\ \hline
-{\ct FAN\_ID}                   & Character         & Name of a fan in a duct                           &               &  {\ct 'null'}         \\ \hline
-{\ct FILTER\_ID}                & Character         & Name of a fan in a node                           &               &  {\ct 'null'}         \\ \hline
-{\ct FIXED\_Q}                  & Real              & Fixed heat exchange (positive is heat addition) for an aircoil        & kW            &                       \\ \hline
-{\ct ID}                        & Character         & Name of component                                 &               &                       \\ \hline
-{\ct LENGTH}                    & Real              & Length of a duct                                  &  m            &                       \\ \hline
-{\ct LOADING}                   & Real Array        & The initial species loading of a filter         & kg            & 0                     \\ \hline
-{\ct LOADING\_MULTIPLIER}       & Real Array        & Filter flow loss multiplier for species         & kg            & 0                     \\ \hline
-{\ct LOSS}                      & Real Array        & Flow loss coefficients for a duct, node, or filter   &               &                       \\ \hline
-{\ct MAX\_FLOW}                 & Real              & Maximum volumetric flow for a quadratic fan       &  m$^3$/s      &                       \\ \hline
-{\ct MAX\_PRESSURE}             & Real              & Stall pressure for a quadratic fan                &  Pa           &                       \\ \hline
-{\ct NODE\_ID}                  & Character Doublet & Name of nodes connected to a duct                 &               &                       \\ \hline
-{\ct RAMP\_ID}                  & Character         & Name of {\ct RAMP} containing a fan or volume flow curve &               &  {\ct 'null'}         \\ \hline
-{\ct REVERSE}                   & Logical           & Indicates fan or {\ct VOLUME\_FLOW} direction is from second node to first node &               &  {\ct 'null'}         \\ \hline
-{\ct ROUGHNESS}                 & Real              & Absolute roughness of a duct                      &  m            &                       \\ \hline
-{\ct SPEC\_ID}                  & Character         & List of tracked species           &               &                       \\ \hline
-{\ct TAU\_FAN}                  & Real              & Ramp time for a fan                               & s             & 1.                      \\ \hline
-{\ct TAU\_VF}                   & Real              & Ramp time for {\ct VOLUME\_FLOW}                  & s             & 1.                      \\ \hline
-{\ct TYPE\_ID}                  & Character         & Type of component                                 &               &                       \\ \hline
-{\ct VENT\_ID}                  & Character         & Name of the {\ct VENT} the node is connected to   &               &  {\ct 'null'}         \\ \hline
-{\ct VOLUME\_FLOW}              & Real              & Fixed volumetric flow of a duct                   &  m$^3$/s      &                       \\ \hline
-{\ct XYZ}                       & Real Triplet      & Coordinates of a node                             &  m            &                       \\ \hline
+{\ct AIRCOIL\_ID}               & Character         & See Section~\ref{info:HVACduct} &               &        \\ \hline
+{\ct AMBIENT}                   & Logical           & See Section~\ref{info:HVACnode} &               & {\ct .FALSE.}  \\ \hline
+{\ct AREA}                      & Real              & See Section~\ref{info:HVACduct} & m$^2$         &        \\ \hline
+{\ct CLEAN\_LOSS}               & Real              & See Section ~\ref{info:HVACfilter}                                    &               &        \\ \hline
+{\ct COOLANT\_CP}               & Real              & See Section ~\ref{info:HVACaircoil}   & kJ/kg/K       &        \\ \hline
+{\ct COOLANT\_MDOT}             & Real              & See Section ~\ref{info:HVACaircoil}   & kg/s          &        \\ \hline
+{\ct COOLANT\_TEMPERATURE}      & Real              & See Section ~\ref{info:HVACaircoil}    & $^\circ$C             &         \\ \hline
+{\ct CTRL\_ID}                  & Character         & See Sections ~\ref{info:HVACduct}, ~\ref{info:HVACfan}, and~\ref{info:HVACfilter}  &               &        \\ \hline
+{\ct DAMPER}                    & Logical           & See Section~\ref{info:HVACduct}                       &               & {\ct .FALSE.}  \\ \hline
+{\ct DEVC\_ID}                  & Character         & See Sections ~\ref{info:HVACduct}, ~\ref{info:HVACfan}, and~\ref{info:HVACfilter}   &               &        \\ \hline
+{\ct DIAMETER}                  & Real              & See Section~\ref{info:HVACduct}                                &  m            &        \\ \hline
+{\ct DUCT\_ID}                  & Character Array   & See Section~\ref{info:HVACnode}                 &               &        \\ \hline
+{\ct EFFICIENCY}                & Real Array        &  See Sections ~\ref{info:HVACfilter} and ~\ref{info:HVACaircoil}         &               & 1.0    \\ \hline
+{\ct FAN\_ID}                   & Character         & See Section~\ref{info:HVACduct}                           &               &        \\ \hline
+{\ct FILTER\_ID}                & Character         & See Section~\ref{info:HVACnode}                           &               &        \\ \hline
+{\ct FIXED\_Q}                  & Real              & See Section ~\ref{info:HVACaircoil}     & kW            &        \\ \hline
+{\ct ID}                        & Character         & Name of component                                 &               &        \\ \hline
+{\ct LENGTH}                    & Real              & See Section~\ref{info:HVACduct}                                  &  m            &        \\ \hline
+{\ct LOADING}                   & Real Array        &  See Section ~\ref{info:HVACfilter}         & kg            & 0.0    \\ \hline
+{\ct LOADING\_MULTIPLIER}       & Real Array        &  See Section ~\ref{info:HVACfilter}         & kg            & 0.0    \\ \hline
+{\ct LOSS}                      & Real Array        & See Sections ~\ref{info:HVACduct}, ~\ref{info:HVACnode}, ~\ref{info:HVACfan}, and~\ref{info:HVACfilter}  &               & 0.0    \\ \hline
+{\ct MAX\_FLOW}                 & Real              & See Section ~\ref{info:HVACfan}   &  m$^3$/s      &        \\ \hline
+{\ct MAX\_PRESSURE}             & Real              &  See Section ~\ref{info:HVACfan}                 &  Pa           &        \\ \hline
+{\ct NODE\_ID}                  & Character Doublet & See Section~\ref{info:HVACduct}                 &               &         \\ \hline
+{\ct RAMP\_ID}                  & Character         & See Sections ~\ref{info:HVACduct}, ~\ref{info:HVACfilter}, and~\ref{info:HVACfan}  &               &          \\ \hline
+{\ct REVERSE}                   & Logical           & See Section~\ref{info:HVACduct} &               & {\ct .FALSE.}  \\ \hline
+{\ct ROUGHNESS}                 & Real              & See Section~\ref{info:HVACduct}                      &  m            & 0.0    \\ \hline
+{\ct SPEC\_ID}                  & Character         & See Section ~\ref{info:HVACfilter}            &               &        \\ \hline
+{\ct TAU\_FAN}                  & Real              & See Section ~\ref{info:HVACfan}                                & s             & 1.0    \\ \hline
+{\ct TAU\_VF}                   & Real              & See Section~\ref{info:HVACduct}                  & s             & 1.0    \\ \hline
+{\ct TYPE\_ID}                  & Character         & See Section~\ref{info:HVAC}                                 &               &        \\ \hline
+{\ct VENT\_ID}                  & Character         & See Section~\ref{info:HVACnode}   &               &        \\ \hline
+{\ct VOLUME\_FLOW}              & Real              & See Section~\ref{info:HVACduct} and ~\ref{info:HVACfan} &  m$^3$/s      &                       \\ \hline
+{\ct XYZ}                       & Real Triplet      & See Section~\ref{info:HVACnode}                             &  m            &        \\ \hline
 \end{longtable}
 
 
