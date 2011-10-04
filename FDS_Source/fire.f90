@@ -445,6 +445,7 @@ SELECT CASE (MODE)
          ENDDO
       ELSE
          DO NS=1,N_SPECIES
+            IF(ABS(RN%N_S(NS)) <= ZERO_P) CYCLE
             IF(RN%N_S(NS)>= -998._EB) THEN
                IF (YY_PRIMITIVE(NS) < ZZ_MIN) THEN
                   RATE_CONSTANT = 0._EB
