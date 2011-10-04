@@ -1981,8 +1981,8 @@ void Display(void){
    }
 
   if(updatezoommenu==1||first_display>0){
-     if(first_display>0)first_display--;
-     updatezoommenu=0;
+    if(first_display>0)first_display--;
+    updatezoommenu=0;
     ZoomMenu(zoomindex);
   }
   if(update_makeiblank_smoke3d==1){

@@ -83,7 +83,7 @@ SVEXTERN int skip_slice_in_embedded_mesh;
 SVEXTERN int n_embedded_meshes;
 
 SVEXTERN int force_isometric;
-SVEXTERN int updategluiview;
+SVEXTERN int SVDECL(updategluiview,1);
 SVEXTERN int render_double,render_double_state,render_double_menu,render_from_menu;
 SVEXTERN int usetexturebar;
 SVEXTERN int show_smokelighting;
@@ -493,7 +493,7 @@ SVEXTERN int blockage_index;
 SVEXTERN int windowresized;
 
 SVEXTERN int SVDECL(updatemenu,0), first_display;
-SVEXTERN int updatezoommenu;
+SVEXTERN int updatezoommenu,SVDECL(updatezoomini,0);
 SVEXTERN int updatemenu_count;
 SVEXTERN int SVDECL(use_graphics,1);
 
@@ -722,7 +722,7 @@ SVEXTERN int projection_type;
 SVEXTERN float apertures[5];
 SVEXTERN float aperture,aperture_glui,aperture_default;
 SVEXTERN float zooms[5];
-SVEXTERN float zoom;
+SVEXTERN float zoom,SVDECL(zoomini,1.0);
 SVEXTERN int rgbmask[16];
 SVEXTERN GLint nredbits, ngreenbits, nbluebits;
 SVEXTERN int nredshift, ngreenshift, nblueshift;

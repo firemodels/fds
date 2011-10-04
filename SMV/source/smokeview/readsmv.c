@@ -8832,8 +8832,8 @@ int readini2(char *inifile, int localfile){
           zoomindex=4;
         }
       }
-      //xxx zoomini=zoom;
-      updatezoommenu=1;
+      zoomini=zoom;
+      updatezoomini=1;
       ZoomMenu(zoomindex);
       continue;
     }
