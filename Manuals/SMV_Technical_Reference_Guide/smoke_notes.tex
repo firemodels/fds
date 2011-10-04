@@ -9,16 +9,16 @@ This \paper\ documents the physics and associated numerical algorithms used by S
 
 Realistic visualization methods are important for applications where one wishes to observe effects of fire and smoke rather than determine data characteristics such as temperature or velocity.  This would be the case for a fire fighter using a computer based fire fighting simulator. Realistic visualization methods, however, complement but do not replace other more traditional visualization methods such as 2D contouring or 3D iso-surfacing which are better suited for analyzing data quantitatively.
 
-Complete methods for visualizing smoke and fire data taking into account interactions between light and smoke such as absorption, emission, and scattering require the solution of the radiation transport equation (RTE)\cite{Siegel:2001} also called the volume rendering equation\cite{levoy:1988}. This equation models how light appears to an observer after interacting with smoke, a participating media. The RTE used by Smokeview\citesmv\ to model smoke and fire appearance is identical to that used by the Fire Dynamics Simulator (FDS)\cite{FDS_Tech_Guide} to model radiative heat transfer.  Smokeview solves the RTE using visible while FDS solves the RTE using infrared wavelengths of light. One other important difference is that Smokeview requires a solution only at the observer's viewpoint while FDS requires solutions at all points within the solution domain, a radiation field.
+Complete methods for visualizing smoke and fire data taking into account interactions between light and smoke such as absorption, emission, and scattering require the solution of the radiation transport equation (RTE)\cite{Siegel:2001} also called the volume rendering equation\cite{levoy:1988}. This equation models how light appears to an observer after interacting with smoke, a participating media. The RTE used by Smokeview\citesmv\ to model smoke and fire appearance is identical to that used by the Fire Dynamics Simulator (FDS)\cite{FDS_Tech_Guide} to model radiative heat transfer.  Smokeview solves the RTE using visible while FDS solves the RTE using infrared wavelengths of light. Smokeview solves the RTE assuming a gray gas environment.  This is the default solution method for FDS.  One other important difference is that Smokeview requires a solution only at the observer's viewpoint while FDS requires solutions at all points within the solution domain, a radiation field.
 
 Even so, the solution of this integro-differential equation for visualization requires significant computation and memory  resources.  Approximations are required in order to display smoke and fire at interactive frame rates.  The primary approximation is to take advantage of the low albedo character of smoke allowing one to either simplify or eliminate scattering terms in the RTE.
 
-Two techniques discussed for visualizing smoke realistically are slice rendered and volume rendered methods\cite{levoy:1988,Engel:2006}.    These methods both solve a form of the RTE equation.  The integrated quantity in both cases is opacity, the fraction of light obscured.  They differ in how the integration path is partitioned.
+Two techniques discussed for visualizing smoke realistically are slice rendered and volume rendered methods\cite{levoy:1988,Engel:2006}.    These methods both solve a form of the RTE equation.  The integrated quantity in both cases results in an opacity, the fraction of light obscured.  They differ in how the integration path is partitioned.
 
-The integration path for a slice rendered method is split at grid planes within a 3D mesh. There is one partially transparent slice for each plane of simulated data. Planes are drawn through the data along the XY, XZ, YZ coordinate planes or diagonally to the coordinate planes.  The particular plane drawn is chosen to be the one most perpendicular to the viewer's line of sight.
+The integration path for a slice rendered method is split at grid planes within a 3D mesh. There is one partially transparent slice for each plane of simulated data. Planes are drawn through the data along the XY, XZ, YZ coordinate planes or diagonally to these  planes.   The separation distance between these planes becomes smaller as more planes are used to simulate a case.  As a result, the computed opacity values stored on these grid planes have more numerical error.  In fact, if these planes are sufficiently close, the computed opacity values truncate to zero.  The particular plane drawn is chosen to be the one most perpendicular to the viewer's line of sight.
 The resulting partially transparent slice planes are drawn individually and combined by the video hardware to form one image.
 
-The second approach, a volume rendering method, again integrates a simplified form of the radiation transport equation but over the entire entire data mesh, from the front (relative to the observer) of the solution domain to the back, rather than across just one slice plane. A volume rendered method then computes opacity across multiple grid planes.  As a result, there is only one plane of data displayed.  The video hardware is again exploited, but this time to compute a line integral for each pixel in the observer's view.  Opacities and color for both methods are computed using transfer functions using soot density and temperature data obtained from a fire simulation.
+The second approach, a volume rendering method, again integrates a simplified form of the radiation transport equation but over the entire data mesh, from the front (relative to the observer) of the solution domain to the back, rather than across just one slice plane. By performing the entire integral at once instead of in pieces as in the slice rendered method, the volume rendered method does not suffer from the numerical problems of the slice rendered method.  (The intermediate computation terms are stored using full precision arithmetic rather than 8 bits).  A volume rendered method then computes opacity across multiple grid planes.  As a result, there is only one plane of data displayed.  The video hardware is again exploited, but this time to compute a line integral for each pixel in the observer's view.  Opacities and color for both methods are computed using transfer functions using soot density and temperature data obtained from a fire simulation.
 
 \subsection{Overview}
 This \paper\ is organized as follows.  A model for visualizing smoke and fire is discussed.  This model, the radiative transport equation (RTE), is simplified in several ways one of which gives the Beer-Lambert law.  Two methods are then discussed for visualizing smoke  both using a form of the RTE.  The first method, slice rendering,  uses a series of partially transparent slices to represent smoke and fire. The second method, volume rendering, solves the RTE over the entire domain. Finally, several areas where the visualization methods may be improved are given.
@@ -184,11 +184,10 @@ The absorption parameter, $\alpha$, needs to be adjusted when the view direction
 
 \begin{figure}[\figoptions]
 \centerline{\includegraphics[width=3.5in]{figures/forney_figure4}}
-\caption [Diagram illustrating the adjustment needed to opaqueness
-parameter, $\alpha$, for non axis aligned views.] { Diagram
-illustrating adjustment needed to opaqueness parameter, $\alpha$,
-for non axis aligned views. The $\alpha$ value along the ray
-containing the $\hat{x}$ segment needs to be larger to account for
+\caption [Diagram illustrating the adjustment required for the opaqueness parameter, $\alpha$,
+for non axis aligned views.] { Diagram
+illustrating the adjustment required for the opaqueness parameter, $\alpha$,
+for non axis aligned views. The $\hat{\alpha}$ value along the $\Delta\hat{x}$ segment needs to account for
 the longer path length. } \label{figray}
 \end{figure}
 
@@ -215,7 +214,7 @@ after noting that
 x)^{\Delta\hat{x}/\Delta x}=(1-\alpha)^{\Delta\hat{x}/\Delta x}
 \end{eqnarray*}
 
-The computation of equation (\ref{eq:alphahat}) is expensive because the exponential is computed at each grid node for every time step.  In addition, numerical cancelation may occur for small $\alpha$ leading to loss of significant digits. Both problems may be solved by expanding equation (\ref{eq:alphahat}) in a Taylor series and keeping only the first few terms:
+The computation of equation (\ref{eq:alphahat}) is expensive because the exponential is computed at each grid node for every time step.  In addition, numerical cancellation may occur for small $\alpha$ leading to loss of significant digits. Both problems may be solved by expanding equation (\ref{eq:alphahat}) in a Taylor series and keeping only the first few terms:
 
 \begin{eqnarray*}
 \hat{\alpha}\approx \alpha r -
@@ -360,17 +359,17 @@ Start the recursion with $\hat{\alpha}_{N}=\hat{C}_{N}=0$. Continue the recursio
 \hat{C}_i&=&\hat{C}_{i+1}+\left(1-\hat{\alpha}_{i+1}\right)C_i
 \end{eqnarray}
 
-where $\hat{C}_i$ and $\hat{\alpha}_i$ are color and opacity accumulated from steps $N$ to $i$ while stepping through the 3D data set from front to back.  When data is mapped appropriately, this recursion is simply a numerical integration of the radiation transport equation.
+where $\hat{C}_i$ and $\hat{\alpha}_i$ are color and opacity accumulated from steps $N$ to $i$ while stepping through the 3D data set from front to back.  When data is mapped appropriately to color and opacity, this recursion is simply a numerical integration of the radiation transport equation.
 The values $C_i$ and $\alpha_i$ are the color and opacity at the $i$'th step.  
 
 \item Mix the volume rendered color, $\hat{C}_N$, with the colors already rendered using
 
 \begin{eqnarray*}
-\noindent\mbox{updated background color} = (1-\hat{\alpha)_N}\times \mbox{original background
+\noindent\mbox{updated background color} = (1-\hat{\alpha_N)}\times \mbox{original background
 color} + 1\times\hat{C}_N
 \end{eqnarray*}
 
-The OpenGL call, {\tt   glBlendFunc(GL\_ONE,GL\_ONE\_MINUS\_SRC\_ALPHA); }, is used to implent this mixing mode in Smokeview.
+The OpenGL call, {\tt   glBlendFunc(GL\_ONE,GL\_ONE\_MINUS\_SRC\_ALPHA); }, is used to implement this mixing mode in Smokeview.
 \end{enumerate}
 
 \begin{figure}[\figoptions]
@@ -405,7 +404,7 @@ is used to collapse 3D data into 2D images projected onto the front facing sides
 
 is the optical depth between points $a$ and $b$ along a ray cast through the data.  
 
-Figure \ref{fig:volplume_example} illustrates this process showing two images.  The image on the left is presented from the point of view of the observer.  The image on the right is the same image rotated showing more clearly the images projected on the front facing sides of the data mesh.  As the scene is moved through rotations and translations the projected surface images are constantly recomputed and redrawn presenting the illusion that the image is 3D and drawn within (rather than on the surface) of the data mesh.
+Figure \ref{fig:volplume_example} illustrates this process showing two images.  The image on the left is presented from the point of view of the observer.  The image on the right is the same image rotated to show more clearly the images projected on the front facing sides of the data mesh.  As the scene is moved through rotations and translations the projected surface images are constantly recomputed and redrawn presenting the illusion that the image is 3D and drawn within (rather than on the surface) of the data mesh.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -496,15 +495,15 @@ Therefore, to compute $C_N$, let $\Chatjj{j}$ denote the partial sum using terms
 
 \begin{eqnarray}
 \label{eq:recurse1}
-\Chatjj{j-1} &= &\sum_{i=j-1}^{N-1}\htau{i}\Leii{i}\\
+\Chatjj{j} &= &\sum_{i=j}^{N-1}\htau{i}\Leii{i}\\
 \label{eq:recurse2}
-\Chatjj{j}     &= &\sum_{i=j}^{N-1}  \htau{i}\Leii{i}
+\Chatjj{j+1}     &= &\sum_{i=j+1}^{N-1}  \htau{i}\Leii{i}
 \end{eqnarray}
 
-Subtracting (\ref{eq:recurse2}) from (\ref{eq:recurse1}) and solving for $\Chatjj{j-1}$ results in
+Subtracting (\ref{eq:recurse2}) from (\ref{eq:recurse1}) and solving for $\Chatjj{j}$ results in
 
 \begin{eqnarray*}
-\Chatjj{j-1}&=&\Chatjj{j}+\htau{j-1}\Leii{j-1}
+\Chatjj{j}&=&\Chatjj{j+1}+\htau{j}\Leii{j}
 \end{eqnarray*}
 which is equivalent to (\ref{eq:colorupdate}).
 
@@ -545,6 +544,6 @@ for the merger of these intervals.
 \end{figure}
 
 \section{Future Work}
-This note describes the algorithms Smokeview uses to display smoke and fire realistically.  These algorithms may be improved in several ways.  Presently, only radiation from soot is used to visualize smoke.  Radiation emissions from heated gas components such as CO2 and water vapor are neglected.  These contributions may be accounted for by solving the RTE for several wavelength bands (as is done by FDS) and combining the results.  The interaction between volume rendered smoke and interior solid objects may be improved by interacting with interior solid objects (FDS OBST's) .  The integration needs to terminate at the first blockage encountered rather than the far side of the data mesh rather.  Finally, the transfer function relating temperature to fire color may be improved by using a physics based approach rather than a color map.
+This note describes the algorithms Smokeview uses to display smoke and fire realistically.  These algorithms may be improved in several ways.  Presently, only radiation from soot is used to visualize smoke.  Radiation emissions from heated gas components such as CO2 and water vapor are neglected.  The gray gas assumption may be relaxed by solving the RTE for several wavelength bands (as may be done by FDS) and combining the results.  The interaction between volume rendered smoke and interior solid objects may be improved by interacting with interior solid objects (FDS OBST's) .  The integration needs to terminate at the first blockage encountered rather than the far side of the data mesh rather.  Finally, the transfer function relating temperature to fire color may be improved by using a physics based approach rather than a color map.
 
 
