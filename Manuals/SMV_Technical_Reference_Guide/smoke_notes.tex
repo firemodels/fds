@@ -15,10 +15,10 @@ Even so, the solution of this integro-differential equation for visualization re
 
 Two techniques discussed for visualizing smoke realistically are slice rendered and volume rendered methods\cite{levoy:1988,Engel:2006}.    These methods both solve a form of the RTE equation.  The integrated quantity in both cases results in an opacity, the fraction of light obscured.  They differ in how the integration path is partitioned.
 
-The integration path for a slice rendered method is split at grid planes within a 3D mesh. There is one partially transparent slice for each plane of simulated data. Planes are drawn through the data along the XY, XZ, YZ coordinate planes or diagonally to these  planes.   The separation distance between these planes becomes smaller as more planes are used to simulate a case.  As a result, the computed opacity values stored on these grid planes have more numerical error.  In fact, if these planes are sufficiently close, the computed opacity values truncate to zero.  The particular plane drawn is chosen to be the one most perpendicular to the viewer's line of sight.
+The integration path for a slice rendered method is split at grid planes within a 3D mesh. There is one partially transparent slice for each plane of simulated data. Planes are drawn through the data along the XY, XZ, YZ coordinate planes or diagonally to these  planes.   The separation distance between these planes becomes smaller as more planes are used to simulate a case.  As a result, the computed opacity values have more numerical error.  In fact, if these planes are sufficiently close, the computed opacities truncate to zero.  The particular plane drawn is chosen to be the one most perpendicular to the viewer's line of sight.
 The resulting partially transparent slice planes are drawn individually and combined by the video hardware to form one image.
 
-The second approach, a volume rendering method, again integrates a simplified form of the radiation transport equation but over the entire data mesh, from the front (relative to the observer) of the solution domain to the back, rather than across just one slice plane. By performing the entire integral at once instead of in pieces as in the slice rendered method, the volume rendered method does not suffer from the numerical problems of the slice rendered method.  (The intermediate computation terms are stored using full precision arithmetic rather than 8 bits).  A volume rendered method then computes opacity across multiple grid planes.  As a result, there is only one plane of data displayed.  The video hardware is again exploited, but this time to compute a line integral for each pixel in the observer's view.  Opacities and color for both methods are computed using transfer functions using soot density and temperature data obtained from a fire simulation.
+The second approach, a volume rendering method, again integrates a simplified form of the radiation transport equation but over the entire data mesh, from the front (relative to the observer) of the solution domain to the back, rather than across just one slice plane. By performing the entire integral at once instead of in pieces as in the slice rendered method, the volume rendered method does not suffer from the numerical truncation errors of the slice rendered method.  (The intermediate computation terms are stored using full precision arithmetic rather than 8 bits).  A volume rendered method then computes opacity across multiple grid planes.  As a result, there is only one plane of data displayed.  The video hardware is again exploited, but this time to compute a line integral for each pixel in the observer's view.  Opacities and color for both methods are computed using transfer functions using soot density and temperature data obtained from a fire simulation.
 
 \subsection{Overview}
 This \paper\ is organized as follows.  A model for visualizing smoke and fire is discussed.  This model, the radiative transport equation (RTE), is simplified in several ways one of which gives the Beer-Lambert law.  Two methods are then discussed for visualizing smoke  both using a form of the RTE.  The first method, slice rendering,  uses a series of partially transparent slices to represent smoke and fire. The second method, volume rendering, solves the RTE over the entire domain. Finally, several areas where the visualization methods may be improved are given.
@@ -184,9 +184,9 @@ The absorption parameter, $\alpha$, needs to be adjusted when the view direction
 
 \begin{figure}[\figoptions]
 \centerline{\includegraphics[width=3.5in]{figures/forney_figure4}}
-\caption [Diagram illustrating the adjustment required for the opaqueness parameter, $\alpha$,
+\caption [Diagram illustrating the adjustment required to the opaqueness parameter, $\alpha$,
 for non axis aligned views.] { Diagram
-illustrating the adjustment required for the opaqueness parameter, $\alpha$,
+illustrating the adjustment required to the opaqueness parameter, $\alpha$,
 for non axis aligned views. The $\hat{\alpha}$ value along the $\Delta\hat{x}$ segment needs to account for
 the longer path length. } \label{figray}
 \end{figure}
@@ -269,7 +269,7 @@ a) slices skipped and oriented along `x' directions\\
 b) all slices shown and oriented towards viewer \\
 \end{tabular}
 \end{center}
-\caption[Realistic visualization of a townhouse kitchen fire simulated using FDS.]{Realistic visualization of a townhouse kitchen fire simulated using FDS. Planes in the top image are drawn to be conspicuous by skipping 2 out of every 3 planes and by aligning planes along the x axis. All planes in the bottom image are displayed (none are skipped) and they are aligned to be closest to perpendicular of all possible plane orientations.}
+\caption[Realistic visualization of a townhouse kitchen fire simulated using FDS.]{Realistic visualization of a townhouse kitchen fire simulated using FDS. For illustrative purposes, planes in the top image are oriented along the X axis .  Planes in the bottom image are aligned along the y axis, the axis most perpendicular to the line of sight.}
 \label{figsmoke3d}%
 \end{figure}
 
@@ -346,7 +346,7 @@ Volume rendering is the process of visualizing 3D data by mixing partially trans
 
 \item For each pixel in the image plane, cast a ray from the observer's viewpoint through that pixel into the 3D data set
 
-\item Step along the ray from the front (relative to the observer) to the back of the 3D data set converting data values along the way to color and opacity.  Choose a step size data values to be converted (possibly varying) to capture changes occurring in the data set.
+\item Step along the ray from the front (relative to the observer) to the back of the 3D data set converting data values along the way to color and opacity.  Choose a step size (possibly varying) to capture changes occurring in the data set.
 
 \item
 Combine the colors and opacities found in step 2 using recursion\cite[Chapter 39]{gpugems}.
