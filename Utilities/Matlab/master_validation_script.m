@@ -24,6 +24,11 @@ close all
 clear all
 
 addpath 'scripts'
+% Scripts that run prior to dataplot
+
+flame_height
+cat_mccaffrey
+NIST_RSE
 
 % Name of dataplot input file, directory where data is located, and 
 % directory to put the plots
@@ -32,14 +37,9 @@ cfil = [pwd,'/validation_data_config_matlab.csv'];
 vdir = [pwd,'/../../Validation/'];
 plotdir = [pwd,'/../../Manuals/'];
 
-% Scripts that run prior to dataplot
-
-flame_height
-cat_mccaffrey
-
 % dataplot creates most of the plots for the Validation Guide. It must be run before scatplot, which makes the scatter plots.
 
-[saved_data,drange] = dataplot(cfil,vdir,plotdir);
+[saved_data,drange] = dataplot(cfil,vdir,plotdir,'NIST RSE 1994');
 scatplot(saved_data,drange)
 
 % Miscellaneous other scripts for special cases
