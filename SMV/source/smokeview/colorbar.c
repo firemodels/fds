@@ -329,7 +329,7 @@ void initdefaultcolorbars(void){
   colorbardata *cbi;
   int ii;
 
-  ndefaultcolorbars=11;
+  ndefaultcolorbars=12;
   
   FREEMEMORY(colorbarinfo);
   ncolorbars=ndefaultcolorbars;
@@ -508,6 +508,72 @@ void initdefaultcolorbars(void){
   cbi->rgb_node[9]=255;
   cbi->rgb_node[10]=128;
   cbi->rgb_node[11]=0;
+  cbi++;
+
+  // fire (black->orange)
+
+  fire_colorbar_index=cbi-colorbarinfo;
+  fire_colorbar=cbi;
+  strcpy(cbi->label,"fire (black->orange)");
+  cbi->label_ptr=cbi->label;
+
+  cbi->nnodes=11;
+  cbi->nodehilight=0;
+
+  cbi->index_node[0]=0;
+  cbi->rgb_node[0]=0;
+  cbi->rgb_node[1]=0;
+  cbi->rgb_node[2]=0;
+
+  cbi->index_node[1]=128;
+  cbi->rgb_node[3]=0;
+  cbi->rgb_node[4]=0;
+  cbi->rgb_node[5]=0;
+
+  cbi->index_node[2]=129;
+  cbi->rgb_node[6]=255;
+  cbi->rgb_node[7]=51;
+  cbi->rgb_node[8]=0;
+
+  cbi->index_node[3]=143;
+  cbi->rgb_node[9]=255;
+  cbi->rgb_node[10]=69;
+  cbi->rgb_node[11]=0;
+
+  cbi->index_node[4]=159;
+  cbi->rgb_node[12]=255;
+  cbi->rgb_node[13]=82;
+  cbi->rgb_node[14]=0;
+
+  cbi->index_node[5]=175;
+  cbi->rgb_node[15]=255;
+  cbi->rgb_node[16]=93;
+  cbi->rgb_node[17]=0;
+
+  cbi->index_node[6]=191;
+  cbi->rgb_node[18]=255;
+  cbi->rgb_node[19]=102;
+  cbi->rgb_node[20]=0;
+
+  cbi->index_node[7]=207;
+  cbi->rgb_node[21]=255;
+  cbi->rgb_node[22]=111;
+  cbi->rgb_node[23]=0;
+
+  cbi->index_node[8]=223;
+  cbi->rgb_node[24]=255;
+  cbi->rgb_node[25]=118;
+  cbi->rgb_node[26]=0;
+
+  cbi->index_node[9]=239;
+  cbi->rgb_node[27]=255;
+  cbi->rgb_node[28]=124;
+  cbi->rgb_node[29]=0;
+
+  cbi->index_node[10]=255;
+  cbi->rgb_node[30]=255;
+  cbi->rgb_node[31]=130;
+  cbi->rgb_node[32]=0;
   cbi++;
 
   // fire (new)

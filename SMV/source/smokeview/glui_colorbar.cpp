@@ -346,7 +346,8 @@ void COLORBAR_CB(int var){
       rgb1[2]=rgb2[2];
     }
     cbi->nnodes--;
-    update_colorbar_splits(current_colorbar);
+    //update_colorbar_splits(current_colorbar);
+    update_colorbar_splits(cbi);
     remapcolorbar(cbi);
     updatecolors(-1);
     if(colorbarpoint==cbi->nnodes)colorbarpoint=cbi->nnodes-1;
