@@ -11,7 +11,7 @@
 % and post processing scripts
 %------------------------------------------------
 
-addpath('../../Validation/NIST_RSE_1994/Test/')
+addpath('../../Validation/NIST_RSE_1994/FDS_Output_Files/')
 
 %------------------------------------------------
 % Read in FDS output files
