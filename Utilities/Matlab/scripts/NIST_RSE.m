@@ -426,7 +426,7 @@ RSE_Results(:,13)=meanTFBB;
 
 header1 = {'HRR','O2Rear_FDS','CO2Rear_FDS','CORear_FDS','UHRear_FDS','O2Front_FDS','CO2Front_FDS',...
     'COFront_FDS','UHFront_FDS','TRSampA_FDS','TRSampBB_FDS','TFSampA_FDS','TFSampBB_FDS'};
-filename1 = '../../Validation/NIST_RSE_1994//FDS_Output_Files/NIST_RSE_1994_FDS.csv';
+filename1 = '../../Validation/NIST_RSE_1994/FDS_Output_Files/NIST_RSE_1994_FDS.csv';
 fid = fopen(filename1,'wt');
 fprintf(fid,'%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n',header1{:});
 for i=1:9
