@@ -26,7 +26,7 @@ General construction
 Fire
 
 &REAC ID                          = 'XPE/Neoprene'
-      C                           = 2.
+      C                           = 3.
       H                           = 4.5
       OTHER                       = 0.5
       MW_OTHER                    = 35.5
