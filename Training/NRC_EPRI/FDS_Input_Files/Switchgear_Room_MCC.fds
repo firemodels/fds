@@ -1,7 +1,9 @@
 &HEAD CHID='Switchgear_Room_MCC', TITLE='MCC fire in a switchgear room'  /
 
-&MESH IJK=54,54,20, XB=0.0, 8.5,0.0,8.5,0.0,3.0 /
-&MESH IJK=54,54,60, XB=8.5,17.1,0.0,8.5,0.0,9.0 /
+&MESH IJK=85,85,30, XB= 0.0, 8.5,0.0,8.5,0.0,3.0 /
+&MESH IJK=28,85,90, XB= 8.5,11.3,0.0,8.5,0.0,9.0 /
+&MESH IJK=28,85,90, XB=11.3,14.1,0.0,8.5,0.0,9.0 /
+&MESH IJK=30,85,90, XB=14.1,17.1,0.0,8.5,0.0,9.0 /
 
 &TIME T_END=3600. /
 
@@ -61,7 +63,7 @@ Cabinets
 Fire
 
 &REAC ID='XPE/Neoprene'
-      C = 2.
+      C = 3.
       H = 4.5
       OTHER = 0.5
       MW_OTHER=35.5

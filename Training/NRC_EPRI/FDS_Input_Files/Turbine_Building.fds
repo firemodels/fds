@@ -63,13 +63,13 @@ Fire
 
 &SURF ID             = 'LUBE OIL SPILL'
       COLOR          = 'ORANGE'
-      HRRPUA         = 1794.   
+      HRRPUA         = 1810.   
       RAMP_Q         = 'fire' /
 
 &RAMP ID='fire', T=   0., F=0. /
 &RAMP ID='fire', T=  10., F=1. /
-&RAMP ID='fire', T=2270., F=1. /
-&RAMP ID='fire', T=2280., F=0. /
+&RAMP ID='fire', T=2144., F=1. /
+&RAMP ID='fire', T=2145., F=0. /
 
 &VENT XB= 14.5, 19.1, 47.0, 53.1, 0.0, 0.0, SURF_ID='LUBE OIL SPILL'/
 
