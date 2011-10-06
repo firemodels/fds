@@ -45,7 +45,7 @@
 
 &MATL ID                   = 'MARINITE'
       FYI                  = 'BNZ Materials, Marinite I, 1/5 Density'
-      EMISSIVIT            = 0.8
+      EMISSIVITY           = 0.8
       DENSITY              = 147.
       SPECIFIC_HEAT_RAMP   = 'rampcp'
       CONDUCTIVITY_RAMP    = 'rampks' /
