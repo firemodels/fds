@@ -19,31 +19,52 @@ addpath('../../Validation/NIST_RSE_1994/FDS_Output_Files/')
 %------------------------------------------------
 
 %-------------
+% Setup FDS Device Headers
+%-------------
+Header = {'Time','"O2Rear_FDS"','"CO2Rear_FDS"','"CORear_FDS"','"UHRear_FDS"',...
+    '"H2ORear_FDS"','"O2Front_FDS"','"CO2Front_FDS"','"COFront_FDS"','"UHFront_FDS"',...
+    '"H2OFront_FDS"','"TRSampA_FDS"','"TRSampBB_FDS"','"TFSampA_FDS"','"TFSampBB_FDS"'};
+
+%-------------
 % 50 kW
 %-------------
 RSE_50_struct=importdata('NIST_RSE_1994_50_devc.csv'); %FDS data file
 RSE_50_header=RSE_50_struct.textdata; % headers
 RSE_50data=RSE_50_struct.data; % data
 
-time50=RSE_50data(:,1); % time
-
-O2_rear_fds_50=RSE_50data(:,2); % oxygen volume percent rear
-CO2_rear_fds_50=RSE_50data(:,3); % carbon dioxide volume percent rear
-CO_rear_fds_50=RSE_50data(:,4); % carbon monoxide volume percent rear
-Methane_rear_fds_50=RSE_50data(:,5); % fuel volume percent rear
-H2O_rear_fds_50=RSE_50data(:,6); % water vapor volume percent rear
-
-O2_front_fds_50=RSE_50data(:,7); % oxygen volume percent front
-CO2_front_fds_50=RSE_50data(:,8); % carbon dioxide volume percent front
-CO_front_fds_50=RSE_50data(:,9); % carbon monoxide volume percent front
-Methane_front_fds_50=RSE_50data(:,10); % fuel volume percent front
-H2O_front_fds_50=RSE_50data(:,11); % water vapor volume percent front
-
-temp_rearA_fds_50=RSE_50data(:,12); % temperature rear sample A
-temp_rearB_fds_50=RSE_50data(:,13); % temperature rear sample B
-
-temp_frontA_fds_50=RSE_50data(:,14); % temperature front sample A
-temp_frontB_fds_50=RSE_50data(:,15); % temperature front sample 
+for i=1:length(Header)
+    if strcmp(Header(1),RSE_50_header(2,i)) 
+        time50=RSE_50data(:,i); % time
+    elseif strcmp(Header(2),RSE_50_header(2,i))
+        O2_rear_fds_50=RSE_50data(:,i); % oxygen volume percent rear
+    elseif strcmp(Header(3),RSE_50_header(2,i))
+        CO2_rear_fds_50=RSE_50data(:,i); % carbon dioxide volume percent rear
+    elseif strcmp(Header(4),RSE_50_header(2,i))
+        CO_rear_fds_50=RSE_50data(:,i); % carbon monoxide volume percent rear
+    elseif strcmp(Header(5),RSE_50_header(2,i))
+        Methane_rear_fds_50=RSE_50data(:,i); % fuel volume percent rear
+    elseif strcmp(Header(6),RSE_50_header(2,i))
+        H2O_rear_fds_50=RSE_50data(:,i); % water vapor volume percent rear
+    elseif strcmp(Header(7),RSE_50_header(2,i))
+        O2_front_fds_50=RSE_50data(:,i); % oxygen volume percent front
+    elseif strcmp(Header(8),RSE_50_header(2,i))
+        CO2_front_fds_50=RSE_50data(:,i); % carbon dioxide volume percent front
+    elseif strcmp(Header(9),RSE_50_header(2,i))
+        CO_front_fds_50=RSE_50data(:,i); % carbon monoxide volume percent front
+    elseif strcmp(Header(10),RSE_50_header(2,i))
+        Methane_front_fds_50=RSE_50data(:,i); % fuel volume percent front
+    elseif strcmp(Header(11),RSE_50_header(2,i))
+        H2O_front_fds_50=RSE_50data(:,i); % water vapor volume percent front
+    elseif strcmp(Header(12),RSE_50_header(2,i))
+        temp_rearA_fds_50=RSE_50data(:,i); % temperature rear sample A
+    elseif strcmp(Header(13),RSE_50_header(2,i))
+        temp_rearB_fds_50=RSE_50data(:,i); % temperature rear sample B
+    elseif strcmp(Header(14),RSE_50_header(2,i))
+        temp_frontA_fds_50=RSE_50data(:,i); % temperature front sample A
+    elseif strcmp(Header(15),RSE_50_header(2,i))
+        temp_frontB_fds_50=RSE_50data(:,i); % temperature front sample
+    end
+end
 % -------------
 % 75 kW
 % -------------
@@ -51,25 +72,39 @@ RSE_75_struct=importdata('NIST_RSE_1994_75_devc.csv'); %FDS data file
 RSE_75_header=RSE_75_struct.textdata; % headers
 RSE_75data=RSE_75_struct.data; % data
 
-time75=RSE_75data(:,1); % time
-
-O2_rear_fds_75=RSE_75data(:,2); % oxygen volume percent rear
-CO2_rear_fds_75=RSE_75data(:,3); % carbon dioxide volume percent rear
-CO_rear_fds_75=RSE_75data(:,4); % carbon monoxide volume percent rear
-Methane_rear_fds_75=RSE_75data(:,5); % fuel volume percent rear
-H2O_rear_fds_75=RSE_75data(:,6); % water vapor volume percent rear
-
-O2_front_fds_75=RSE_75data(:,7); % oxygen volume percent front
-CO2_front_fds_75=RSE_75data(:,8); % carbon dioxide volume percent front
-CO_front_fds_75=RSE_75data(:,9); % carbon monoxide volume percent front
-Methane_front_fds_75=RSE_75data(:,10); % fuel volume percent front
-H2O_front_fds_75=RSE_75data(:,11); % water vapor volume percent front
-
-temp_rearA_fds_75=RSE_75data(:,12); % temperature rear sample A
-temp_rearB_fds_75=RSE_75data(:,13); % temperature rear sample B
-
-temp_frontA_fds_75=RSE_75data(:,14); % temperature front sample A
-temp_frontB_fds_75=RSE_75data(:,15); % temperature front sample B
+for i=1:length(Header)
+    if strcmp(Header(1),RSE_75_header(2,i)) 
+        time75=RSE_75data(:,i); % time
+    elseif strcmp(Header(2),RSE_75_header(2,i))
+        O2_rear_fds_75=RSE_75data(:,i); % oxygen volume percent rear
+    elseif strcmp(Header(3),RSE_75_header(2,i))
+        CO2_rear_fds_75=RSE_75data(:,i); % carbon dioxide volume percent rear
+    elseif strcmp(Header(4),RSE_75_header(2,i))
+        CO_rear_fds_75=RSE_75data(:,i); % carbon monoxide volume percent rear
+    elseif strcmp(Header(5),RSE_75_header(2,i))
+        Methane_rear_fds_75=RSE_75data(:,i); % fuel volume percent rear
+    elseif strcmp(Header(6),RSE_75_header(2,i))
+        H2O_rear_fds_75=RSE_75data(:,i); % water vapor volume percent rear
+    elseif strcmp(Header(7),RSE_75_header(2,i))
+        O2_front_fds_75=RSE_75data(:,i); % oxygen volume percent front
+    elseif strcmp(Header(8),RSE_75_header(2,i))
+        CO2_front_fds_75=RSE_75data(:,i); % carbon dioxide volume percent front
+    elseif strcmp(Header(9),RSE_75_header(2,i))
+        CO_front_fds_75=RSE_75data(:,i); % carbon monoxide volume percent front
+    elseif strcmp(Header(10),RSE_75_header(2,i))
+        Methane_front_fds_75=RSE_75data(:,i); % fuel volume percent front
+    elseif strcmp(Header(11),RSE_75_header(2,i))
+        H2O_front_fds_75=RSE_75data(:,i); % water vapor volume percent front
+    elseif strcmp(Header(12),RSE_75_header(2,i))
+        temp_rearA_fds_75=RSE_75data(:,i); % temperature rear sample A
+    elseif strcmp(Header(13),RSE_75_header(2,i))
+        temp_rearB_fds_75=RSE_75data(:,i); % temperature rear sample B
+    elseif strcmp(Header(14),RSE_75_header(2,i))
+        temp_frontA_fds_75=RSE_75data(:,i); % temperature front sample A
+    elseif strcmp(Header(15),RSE_75_header(2,i))
+        temp_frontB_fds_75=RSE_75data(:,i); % temperature front sample
+    end
+end
 % -------------
 % 100 kW
 % -------------
@@ -77,25 +112,39 @@ RSE_100_struct=importdata('NIST_RSE_1994_100_devc.csv'); %FDS data file
 RSE_100_header=RSE_100_struct.textdata; % headers
 RSE_100data=RSE_100_struct.data; % data
 
-time100=RSE_100data(:,1); % time
-
-O2_rear_fds_100=RSE_100data(:,2); % oxygen volume percent rear
-CO2_rear_fds_100=RSE_100data(:,3); % carbon dioxide volume percent rear
-CO_rear_fds_100=RSE_100data(:,4); % carbon monoxide volume percent rear
-Methane_rear_fds_100=RSE_100data(:,5); % fuel volume percent rear
-H2O_rear_fds_100=RSE_100data(:,6); % water vapor volume percent rear
-
-O2_front_fds_100=RSE_100data(:,7); % oxygen volume percent front
-CO2_front_fds_100=RSE_100data(:,8); % carbon dioxide volume percent front
-CO_front_fds_100=RSE_100data(:,9); % carbon monoxide volume percent front
-Methane_front_fds_100=RSE_100data(:,10); % fuel volume percent front
-H2O_front_fds_100=RSE_100data(:,11); % water vapor volume percent front
-
-temp_rearA_fds_100=RSE_100data(:,12); % temperature rear sample A
-temp_rearB_fds_100=RSE_100data(:,13); % temperature rear sample B
-
-temp_frontA_fds_100=RSE_100data(:,14); % temperature front sample A
-temp_frontB_fds_100=RSE_100data(:,15); % temperature front sample B
+for i=1:length(Header)
+    if strcmp(Header(1),RSE_100_header(2,i)) 
+        time100=RSE_100data(:,i); % time
+    elseif strcmp(Header(2),RSE_100_header(2,i))
+        O2_rear_fds_100=RSE_100data(:,i); % oxygen volume percent rear
+    elseif strcmp(Header(3),RSE_100_header(2,i))
+        CO2_rear_fds_100=RSE_100data(:,i); % carbon dioxide volume percent rear
+    elseif strcmp(Header(4),RSE_100_header(2,i))
+        CO_rear_fds_100=RSE_100data(:,i); % carbon monoxide volume percent rear
+    elseif strcmp(Header(5),RSE_100_header(2,i))
+        Methane_rear_fds_100=RSE_100data(:,i); % fuel volume percent rear
+    elseif strcmp(Header(6),RSE_100_header(2,i))
+        H2O_rear_fds_100=RSE_100data(:,i); % water vapor volume percent rear
+    elseif strcmp(Header(7),RSE_100_header(2,i))
+        O2_front_fds_100=RSE_100data(:,i); % oxygen volume percent front
+    elseif strcmp(Header(8),RSE_100_header(2,i))
+        CO2_front_fds_100=RSE_100data(:,i); % carbon dioxide volume percent front
+    elseif strcmp(Header(9),RSE_100_header(2,i))
+        CO_front_fds_100=RSE_100data(:,i); % carbon monoxide volume percent front
+    elseif strcmp(Header(10),RSE_100_header(2,i))
+        Methane_front_fds_100=RSE_100data(:,i); % fuel volume percent front
+    elseif strcmp(Header(11),RSE_100_header(2,i))
+        H2O_front_fds_100=RSE_100data(:,i); % water vapor volume percent front
+    elseif strcmp(Header(12),RSE_100_header(2,i))
+        temp_rearA_fds_100=RSE_100data(:,i); % temperature rear sample A
+    elseif strcmp(Header(13),RSE_100_header(2,i))
+        temp_rearB_fds_100=RSE_100data(:,i); % temperature rear sample B
+    elseif strcmp(Header(14),RSE_100_header(2,i))
+        temp_frontA_fds_100=RSE_100data(:,i); % temperature front sample A
+    elseif strcmp(Header(15),RSE_100_header(2,i))
+        temp_frontB_fds_100=RSE_100data(:,i); % temperature front sample
+    end
+end
 % -------------
 % 150 kW
 % -------------
@@ -103,25 +152,39 @@ RSE_150_struct=importdata('NIST_RSE_1994_150_devc.csv'); %FDS data file
 RSE_150_header=RSE_150_struct.textdata; % headers
 RSE_150data=RSE_150_struct.data; % data
 
-time150=RSE_150data(:,1); % time
-
-O2_rear_fds_150=RSE_150data(:,2); % oxygen volume percent rear
-CO2_rear_fds_150=RSE_150data(:,3); % carbon dioxide volume percent rear
-CO_rear_fds_150=RSE_150data(:,4); % carbon monoxide volume percent rear
-Methane_rear_fds_150=RSE_150data(:,5); % fuel volume percent rear
-H2O_rear_fds_150=RSE_150data(:,6); % water vapor volume percent rear
-
-O2_front_fds_150=RSE_150data(:,7); % oxygen volume percent front
-CO2_front_fds_150=RSE_150data(:,8); % carbon dioxide volume percent front
-CO_front_fds_150=RSE_150data(:,9); % carbon monoxide volume percent front
-Methane_front_fds_150=RSE_150data(:,10); % fuel volume percent front
-H2O_front_fds_150=RSE_150data(:,11); % water vapor volume percent front
-
-temp_rearA_fds_150=RSE_150data(:,12); % temperature rear sample A
-temp_rearB_fds_150=RSE_150data(:,13); % temperature rear sample B
-
-temp_frontA_fds_150=RSE_150data(:,14); % temperature front sample A
-temp_frontB_fds_150=RSE_150data(:,15); % temperature front sample B
+for i=1:length(Header)
+    if strcmp(Header(1),RSE_150_header(2,i)) 
+        time150=RSE_150data(:,i); % time
+    elseif strcmp(Header(2),RSE_150_header(2,i))
+        O2_rear_fds_150=RSE_150data(:,i); % oxygen volume percent rear
+    elseif strcmp(Header(3),RSE_150_header(2,i))
+        CO2_rear_fds_150=RSE_150data(:,i); % carbon dioxide volume percent rear
+    elseif strcmp(Header(4),RSE_150_header(2,i))
+        CO_rear_fds_150=RSE_150data(:,i); % carbon monoxide volume percent rear
+    elseif strcmp(Header(5),RSE_150_header(2,i))
+        Methane_rear_fds_150=RSE_150data(:,i); % fuel volume percent rear
+    elseif strcmp(Header(6),RSE_150_header(2,i))
+        H2O_rear_fds_150=RSE_150data(:,i); % water vapor volume percent rear
+    elseif strcmp(Header(7),RSE_150_header(2,i))
+        O2_front_fds_150=RSE_150data(:,i); % oxygen volume percent front
+    elseif strcmp(Header(8),RSE_150_header(2,i))
+        CO2_front_fds_150=RSE_150data(:,i); % carbon dioxide volume percent front
+    elseif strcmp(Header(9),RSE_150_header(2,i))
+        CO_front_fds_150=RSE_150data(:,i); % carbon monoxide volume percent front
+    elseif strcmp(Header(10),RSE_150_header(2,i))
+        Methane_front_fds_150=RSE_150data(:,i); % fuel volume percent front
+    elseif strcmp(Header(11),RSE_150_header(2,i))
+        H2O_front_fds_150=RSE_150data(:,i); % water vapor volume percent front
+    elseif strcmp(Header(12),RSE_150_header(2,i))
+        temp_rearA_fds_150=RSE_150data(:,i); % temperature rear sample A
+    elseif strcmp(Header(13),RSE_150_header(2,i))
+        temp_rearB_fds_150=RSE_150data(:,i); % temperature rear sample B
+    elseif strcmp(Header(14),RSE_150_header(2,i))
+        temp_frontA_fds_150=RSE_150data(:,i); % temperature front sample A
+    elseif strcmp(Header(15),RSE_150_header(2,i))
+        temp_frontB_fds_150=RSE_150data(:,i); % temperature front sample
+    end
+end
 % -------------
 % 200 kW
 % -------------
@@ -129,25 +192,39 @@ RSE_200_struct=importdata('NIST_RSE_1994_200_devc.csv'); %FDS data file
 RSE_200_header=RSE_200_struct.textdata; % headers
 RSE_200data=RSE_200_struct.data; % data
 
-time200=RSE_200data(:,1); % time
-
-O2_rear_fds_200=RSE_200data(:,2); % oxygen volume percent rear
-CO2_rear_fds_200=RSE_200data(:,3); % carbon dioxide volume percent rear
-CO_rear_fds_200=RSE_200data(:,4); % carbon monoxide volume percent rear
-Methane_rear_fds_200=RSE_200data(:,5); % fuel volume percent rear
-H2O_rear_fds_200=RSE_200data(:,6); % water vapor volume percent rear
-
-O2_front_fds_200=RSE_200data(:,7); % oxygen volume percent front
-CO2_front_fds_200=RSE_200data(:,8); % carbon dioxide volume percent front
-CO_front_fds_200=RSE_200data(:,9); % carbon monoxide volume percent front
-Methane_front_fds_200=RSE_200data(:,10); % fuel volume percent front
-H2O_front_fds_200=RSE_200data(:,11); % water vapor volume percent front
-
-temp_rearA_fds_200=RSE_200data(:,12); % temperature rear sample A
-temp_rearB_fds_200=RSE_200data(:,13); % temperature rear sample B
-
-temp_frontA_fds_200=RSE_200data(:,14); % temperature front sample A
-temp_frontB_fds_200=RSE_200data(:,15); % temperature front sample B
+for i=1:length(Header)
+    if strcmp(Header(1),RSE_200_header(2,i)) 
+        time200=RSE_200data(:,i); % time
+    elseif strcmp(Header(2),RSE_200_header(2,i))
+        O2_rear_fds_200=RSE_200data(:,i); % oxygen volume percent rear
+    elseif strcmp(Header(3),RSE_200_header(2,i))
+        CO2_rear_fds_200=RSE_200data(:,i); % carbon dioxide volume percent rear
+    elseif strcmp(Header(4),RSE_200_header(2,i))
+        CO_rear_fds_200=RSE_200data(:,i); % carbon monoxide volume percent rear
+    elseif strcmp(Header(5),RSE_200_header(2,i))
+        Methane_rear_fds_200=RSE_200data(:,i); % fuel volume percent rear
+    elseif strcmp(Header(6),RSE_200_header(2,i))
+        H2O_rear_fds_200=RSE_200data(:,i); % water vapor volume percent rear
+    elseif strcmp(Header(7),RSE_200_header(2,i))
+        O2_front_fds_200=RSE_200data(:,i); % oxygen volume percent front
+    elseif strcmp(Header(8),RSE_200_header(2,i))
+        CO2_front_fds_200=RSE_200data(:,i); % carbon dioxide volume percent front
+    elseif strcmp(Header(9),RSE_200_header(2,i))
+        CO_front_fds_200=RSE_200data(:,i); % carbon monoxide volume percent front
+    elseif strcmp(Header(10),RSE_200_header(2,i))
+        Methane_front_fds_200=RSE_200data(:,i); % fuel volume percent front
+    elseif strcmp(Header(11),RSE_200_header(2,i))
+        H2O_front_fds_200=RSE_200data(:,i); % water vapor volume percent front
+    elseif strcmp(Header(12),RSE_200_header(2,i))
+        temp_rearA_fds_200=RSE_200data(:,i); % temperature rear sample A
+    elseif strcmp(Header(13),RSE_200_header(2,i))
+        temp_rearB_fds_200=RSE_200data(:,i); % temperature rear sample B
+    elseif strcmp(Header(14),RSE_200_header(2,i))
+        temp_frontA_fds_200=RSE_200data(:,i); % temperature front sample A
+    elseif strcmp(Header(15),RSE_200_header(2,i))
+        temp_frontB_fds_200=RSE_200data(:,i); % temperature front sample
+    end
+end
 % -------------
 % 300 kW
 % -------------
@@ -155,25 +232,39 @@ RSE_300_struct=importdata('NIST_RSE_1994_300_devc.csv'); %FDS data file
 RSE_300_header=RSE_300_struct.textdata; % headers
 RSE_300data=RSE_300_struct.data; % data
 
-time300=RSE_300data(:,1); % time
-
-O2_rear_fds_300=RSE_300data(:,2); % oxygen volume percent rear
-CO2_rear_fds_300=RSE_300data(:,3); % carbon dioxide volume percent rear
-CO_rear_fds_300=RSE_300data(:,4); % carbon monoxide volume percent rear
-Methane_rear_fds_300=RSE_300data(:,5); % fuel volume percent rear
-H2O_rear_fds_300=RSE_300data(:,6); % water vapor volume percent rear
-
-O2_front_fds_300=RSE_300data(:,7); % oxygen volume percent front
-CO2_front_fds_300=RSE_300data(:,8); % carbon dioxide volume percent front
-CO_front_fds_300=RSE_300data(:,9); % carbon monoxide volume percent front
-Methane_front_fds_300=RSE_300data(:,10); % fuel volume percent front
-H2O_front_fds_300=RSE_300data(:,11); % water vapor volume percent front
-
-temp_rearA_fds_300=RSE_300data(:,12); % temperature rear sample A
-temp_rearB_fds_300=RSE_300data(:,13); % temperature rear sample B
-
-temp_frontA_fds_300=RSE_300data(:,14); % temperature front sample A
-temp_frontB_fds_300=RSE_300data(:,15); % temperature front sample B
+for i=1:length(Header)
+    if strcmp(Header(1),RSE_300_header(2,i)) 
+        time300=RSE_300data(:,i); % time
+    elseif strcmp(Header(2),RSE_300_header(2,i))
+        O2_rear_fds_300=RSE_300data(:,i); % oxygen volume percent rear
+    elseif strcmp(Header(3),RSE_300_header(2,i))
+        CO2_rear_fds_300=RSE_300data(:,i); % carbon dioxide volume percent rear
+    elseif strcmp(Header(4),RSE_300_header(2,i))
+        CO_rear_fds_300=RSE_300data(:,i); % carbon monoxide volume percent rear
+    elseif strcmp(Header(5),RSE_300_header(2,i))
+        Methane_rear_fds_300=RSE_300data(:,i); % fuel volume percent rear
+    elseif strcmp(Header(6),RSE_300_header(2,i))
+        H2O_rear_fds_300=RSE_300data(:,i); % water vapor volume percent rear
+    elseif strcmp(Header(7),RSE_300_header(2,i))
+        O2_front_fds_300=RSE_300data(:,i); % oxygen volume percent front
+    elseif strcmp(Header(8),RSE_300_header(2,i))
+        CO2_front_fds_300=RSE_300data(:,i); % carbon dioxide volume percent front
+    elseif strcmp(Header(9),RSE_300_header(2,i))
+        CO_front_fds_300=RSE_300data(:,i); % carbon monoxide volume percent front
+    elseif strcmp(Header(10),RSE_300_header(2,i))
+        Methane_front_fds_300=RSE_300data(:,i); % fuel volume percent front
+    elseif strcmp(Header(11),RSE_300_header(2,i))
+        H2O_front_fds_300=RSE_300data(:,i); % water vapor volume percent front
+    elseif strcmp(Header(12),RSE_300_header(2,i))
+        temp_rearA_fds_300=RSE_300data(:,i); % temperature rear sample A
+    elseif strcmp(Header(13),RSE_300_header(2,i))
+        temp_rearB_fds_300=RSE_300data(:,i); % temperature rear sample B
+    elseif strcmp(Header(14),RSE_300_header(2,i))
+        temp_frontA_fds_300=RSE_300data(:,i); % temperature front sample A
+    elseif strcmp(Header(15),RSE_300_header(2,i))
+        temp_frontB_fds_300=RSE_300data(:,i); % temperature front sample
+    end
+end
 % -------------
 % 400 kW
 % -------------
@@ -181,25 +272,39 @@ RSE_400_struct=importdata('NIST_RSE_1994_400_devc.csv'); %FDS data file
 RSE_400_header=RSE_400_struct.textdata; % headers
 RSE_400data=RSE_400_struct.data; % data
 
-time400=RSE_400data(:,1); % time
-
-O2_rear_fds_400=RSE_400data(:,2); % oxygen volume percent rear
-CO2_rear_fds_400=RSE_400data(:,3); % carbon dioxide volume percent rear
-CO_rear_fds_400=RSE_400data(:,4); % carbon monoxide volume percent rear
-Methane_rear_fds_400=RSE_400data(:,5); % fuel volume percent rear
-H2O_rear_fds_400=RSE_400data(:,6); % water vapor volume percent rear
-
-O2_front_fds_400=RSE_400data(:,7); % oxygen volume percent front
-CO2_front_fds_400=RSE_400data(:,8); % carbon dioxide volume percent front
-CO_front_fds_400=RSE_400data(:,9); % carbon monoxide volume percent front
-Methane_front_fds_400=RSE_400data(:,10); % fuel volume percent front
-H2O_front_fds_400=RSE_400data(:,11); % water vapor volume percent front
-
-temp_rearA_fds_400=RSE_400data(:,12); % temperature rear sample A
-temp_rearB_fds_400=RSE_400data(:,13); % temperature rear sample B
-
-temp_frontA_fds_400=RSE_400data(:,14); % temperature front sample A
-temp_frontB_fds_400=RSE_400data(:,15); % temperature front sample B
+for i=1:length(Header)
+    if strcmp(Header(1),RSE_400_header(2,i)) 
+        time400=RSE_400data(:,i); % time
+    elseif strcmp(Header(2),RSE_400_header(2,i))
+        O2_rear_fds_400=RSE_400data(:,i); % oxygen volume percent rear
+    elseif strcmp(Header(3),RSE_400_header(2,i))
+        CO2_rear_fds_400=RSE_400data(:,i); % carbon dioxide volume percent rear
+    elseif strcmp(Header(4),RSE_400_header(2,i))
+        CO_rear_fds_400=RSE_400data(:,i); % carbon monoxide volume percent rear
+    elseif strcmp(Header(5),RSE_400_header(2,i))
+        Methane_rear_fds_400=RSE_400data(:,i); % fuel volume percent rear
+    elseif strcmp(Header(6),RSE_400_header(2,i))
+        H2O_rear_fds_400=RSE_400data(:,i); % water vapor volume percent rear
+    elseif strcmp(Header(7),RSE_400_header(2,i))
+        O2_front_fds_400=RSE_400data(:,i); % oxygen volume percent front
+    elseif strcmp(Header(8),RSE_400_header(2,i))
+        CO2_front_fds_400=RSE_400data(:,i); % carbon dioxide volume percent front
+    elseif strcmp(Header(9),RSE_400_header(2,i))
+        CO_front_fds_400=RSE_400data(:,i); % carbon monoxide volume percent front
+    elseif strcmp(Header(10),RSE_400_header(2,i))
+        Methane_front_fds_400=RSE_400data(:,i); % fuel volume percent front
+    elseif strcmp(Header(11),RSE_400_header(2,i))
+        H2O_front_fds_400=RSE_400data(:,i); % water vapor volume percent front
+    elseif strcmp(Header(12),RSE_400_header(2,i))
+        temp_rearA_fds_400=RSE_400data(:,i); % temperature rear sample A
+    elseif strcmp(Header(13),RSE_400_header(2,i))
+        temp_rearB_fds_400=RSE_400data(:,i); % temperature rear sample B
+    elseif strcmp(Header(14),RSE_400_header(2,i))
+        temp_frontA_fds_400=RSE_400data(:,i); % temperature front sample A
+    elseif strcmp(Header(15),RSE_400_header(2,i))
+        temp_frontB_fds_400=RSE_400data(:,i); % temperature front sample
+    end
+end
 % -------------
 % 500 kW
 % -------------
@@ -207,25 +312,39 @@ RSE_500_struct=importdata('NIST_RSE_1994_500_devc.csv'); %FDS data file
 RSE_500_header=RSE_500_struct.textdata; % headers
 RSE_500data=RSE_500_struct.data; % data
 
-time500=RSE_500data(:,1); % time
-
-O2_rear_fds_500=RSE_500data(:,2); % oxygen volume percent rear
-CO2_rear_fds_500=RSE_500data(:,3); % carbon dioxide volume percent rear
-CO_rear_fds_500=RSE_500data(:,4); % carbon monoxide volume percent rear
-Methane_rear_fds_500=RSE_500data(:,5); % fuel volume percent rear
-H2O_rear_fds_500=RSE_500data(:,6); % water vapor volume percent rear
-
-O2_front_fds_500=RSE_500data(:,7); % oxygen volume percent front
-CO2_front_fds_500=RSE_500data(:,8); % carbon dioxide volume percent front
-CO_front_fds_500=RSE_500data(:,9); % carbon monoxide volume percent front
-Methane_front_fds_500=RSE_500data(:,10); % fuel volume percent front
-H2O_front_fds_500=RSE_500data(:,11); % water vapor volume percent front
-
-temp_rearA_fds_500=RSE_500data(:,12); % temperature rear sample A
-temp_rearB_fds_500=RSE_500data(:,13); % temperature rear sample B
-
-temp_frontA_fds_500=RSE_500data(:,14); % temperature front sample A
-temp_frontB_fds_500=RSE_500data(:,15); % temperature front sample B
+for i=1:length(Header)
+    if strcmp(Header(1),RSE_500_header(2,i)) 
+        time500=RSE_500data(:,i); % time
+    elseif strcmp(Header(2),RSE_500_header(2,i))
+        O2_rear_fds_500=RSE_500data(:,i); % oxygen volume percent rear
+    elseif strcmp(Header(3),RSE_500_header(2,i))
+        CO2_rear_fds_500=RSE_500data(:,i); % carbon dioxide volume percent rear
+    elseif strcmp(Header(4),RSE_500_header(2,i))
+        CO_rear_fds_500=RSE_500data(:,i); % carbon monoxide volume percent rear
+    elseif strcmp(Header(5),RSE_500_header(2,i))
+        Methane_rear_fds_500=RSE_500data(:,i); % fuel volume percent rear
+    elseif strcmp(Header(6),RSE_500_header(2,i))
+        H2O_rear_fds_500=RSE_500data(:,i); % water vapor volume percent rear
+    elseif strcmp(Header(7),RSE_500_header(2,i))
+        O2_front_fds_500=RSE_500data(:,i); % oxygen volume percent front
+    elseif strcmp(Header(8),RSE_500_header(2,i))
+        CO2_front_fds_500=RSE_500data(:,i); % carbon dioxide volume percent front
+    elseif strcmp(Header(9),RSE_500_header(2,i))
+        CO_front_fds_500=RSE_500data(:,i); % carbon monoxide volume percent front
+    elseif strcmp(Header(10),RSE_500_header(2,i))
+        Methane_front_fds_500=RSE_500data(:,i); % fuel volume percent front
+    elseif strcmp(Header(11),RSE_500_header(2,i))
+        H2O_front_fds_500=RSE_500data(:,i); % water vapor volume percent front
+    elseif strcmp(Header(12),RSE_500_header(2,i))
+        temp_rearA_fds_500=RSE_500data(:,i); % temperature rear sample A
+    elseif strcmp(Header(13),RSE_500_header(2,i))
+        temp_rearB_fds_500=RSE_500data(:,i); % temperature rear sample B
+    elseif strcmp(Header(14),RSE_500_header(2,i))
+        temp_frontA_fds_500=RSE_500data(:,i); % temperature front sample A
+    elseif strcmp(Header(15),RSE_500_header(2,i))
+        temp_frontB_fds_500=RSE_500data(:,i); % temperature front sample
+    end
+end
 % -------------
 % 600 kW
 % -------------
@@ -233,25 +352,39 @@ RSE_600_struct=importdata('NIST_RSE_1994_600_devc.csv'); %FDS data file
 RSE_600_header=RSE_600_struct.textdata; % headers
 RSE_600data=RSE_600_struct.data; % data
 
-time600=RSE_600data(:,1); % time
-
-O2_rear_fds_600=RSE_600data(:,2); % oxygen volume percent rear
-CO2_rear_fds_600=RSE_600data(:,3); % carbon dioxide volume percent rear
-CO_rear_fds_600=RSE_600data(:,4); % carbon monoxide volume percent rear
-Methane_rear_fds_600=RSE_600data(:,5); % fuel volume percent rear
-H2O_rear_fds_600=RSE_600data(:,6); % water vapor volume percent rear
-
-O2_front_fds_600=RSE_600data(:,7); % oxygen volume percent front
-CO2_front_fds_600=RSE_600data(:,8); % carbon dioxide volume percent front
-CO_front_fds_600=RSE_600data(:,9); % carbon monoxide volume percent front
-Methane_front_fds_600=RSE_600data(:,10); % fuel volume percent front
-H2O_front_fds_600=RSE_600data(:,11); % water vapor volume percent front
-
-temp_rearA_fds_600=RSE_600data(:,12); % temperature rear sample A
-temp_rearB_fds_600=RSE_600data(:,13); % temperature rear sample B
-
-temp_frontA_fds_600=RSE_600data(:,14); % temperature front sample A
-temp_frontB_fds_600=RSE_600data(:,15); % temperature front sample B
+for i=1:length(Header)
+    if strcmp(Header(1),RSE_600_header(2,i)) 
+        time600=RSE_600data(:,i); % time
+    elseif strcmp(Header(2),RSE_600_header(2,i))
+        O2_rear_fds_600=RSE_600data(:,i); % oxygen volume percent rear
+    elseif strcmp(Header(3),RSE_600_header(2,i))
+        CO2_rear_fds_600=RSE_600data(:,i); % carbon dioxide volume percent rear
+    elseif strcmp(Header(4),RSE_600_header(2,i))
+        CO_rear_fds_600=RSE_600data(:,i); % carbon monoxide volume percent rear
+    elseif strcmp(Header(5),RSE_600_header(2,i))
+        Methane_rear_fds_600=RSE_600data(:,i); % fuel volume percent rear
+    elseif strcmp(Header(6),RSE_600_header(2,i))
+        H2O_rear_fds_600=RSE_600data(:,i); % water vapor volume percent rear
+    elseif strcmp(Header(7),RSE_600_header(2,i))
+        O2_front_fds_600=RSE_600data(:,i); % oxygen volume percent front
+    elseif strcmp(Header(8),RSE_600_header(2,i))
+        CO2_front_fds_600=RSE_600data(:,i); % carbon dioxide volume percent front
+    elseif strcmp(Header(9),RSE_600_header(2,i))
+        CO_front_fds_600=RSE_600data(:,i); % carbon monoxide volume percent front
+    elseif strcmp(Header(10),RSE_600_header(2,i))
+        Methane_front_fds_600=RSE_600data(:,i); % fuel volume percent front
+    elseif strcmp(Header(11),RSE_600_header(2,i))
+        H2O_front_fds_600=RSE_600data(:,i); % water vapor volume percent front
+    elseif strcmp(Header(12),RSE_600_header(2,i))
+        temp_rearA_fds_600=RSE_600data(:,i); % temperature rear sample A
+    elseif strcmp(Header(13),RSE_600_header(2,i))
+        temp_rearB_fds_600=RSE_600data(:,i); % temperature rear sample B
+    elseif strcmp(Header(14),RSE_600_header(2,i))
+        temp_frontA_fds_600=RSE_600data(:,i); % temperature front sample A
+    elseif strcmp(Header(15),RSE_600_header(2,i))
+        temp_frontB_fds_600=RSE_600data(:,i); % temperature front sample
+    end
+end
 
 %------------------------------------------------
 % Building FDS data file with average species/temp
@@ -433,5 +566,3 @@ for i=1:9
     fprintf(fid,'%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f\n',RSE_Results(i,:));
 end
 fclose(fid);
-
-
