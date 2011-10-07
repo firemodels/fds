@@ -17,7 +17,7 @@ CHARACTER(255), PARAMETER :: geomdate='$Date$'
 
 PRIVATE
 PUBLIC :: INIT_IBM,TRILINEAR,GETX,GETU,GETGRAD,INIT_FACE,GET_REV_geom, &
-          READ_GEOM,READ_VERT,READ_FACE,READ_VOLU
+          READ_GEOM,READ_VERT,READ_FACE,READ_VOLU,GET_VELO_IBM
  
 CONTAINS
 
@@ -724,19 +724,49 @@ FACE_LOOP: DO N=1,N_FACE
       DO J=J_MIN,J_MAX
          DO I=I_MIN,I_MAX
 
+            IC = (K-1)*M%IBAR*M%JBAR + (J-1)*M%IBAR + I
+            !DX = M%X(I)-M%X(I-1)
+            !DY = M%Y(J)-M%Y(J-1)
+            !DZ = M%Z(K)-M%Z(K-1)
+
             BB(1) = M%X(I-1)
             BB(2) = M%X(I)
             BB(3) = M%Y(J-1)
             BB(4) = M%Y(J)
             BB(5) = M%Z(K-1)
             BB(6) = M%Z(K)
+            CALL TRIANGLE_BOX_INTERSECT(IERR,V1,V2,V3,BB)
+            IF (IERR==1) CALL INSERT(IC,FACET(N)%P_CELL_LIST)
+
+            BB(1) = M%XC(I)   !-DX
+            BB(2) = M%XC(I+1) !+DX
+            BB(3) = M%Y(J-1)  !-DY
+            BB(4) = M%Y(J)    !+DY
+            BB(5) = M%Z(K-1)  !-DZ
+            BB(6) = M%Z(K)    !+DZ
             IERR=0
             CALL TRIANGLE_BOX_INTERSECT(IERR,V1,V2,V3,BB)
-            IF (IERR==1) THEN
-               IC = (K-1)*IBAR*JBAR + (J-1)*IBAR + I
-               CALL INSERT(IC,FACET(N)%CUTCELL_LIST)
-               !print *,IC
-            ENDIF
+            IF (IERR==1) CALL INSERT(IC,FACET(N)%U_CELL_LIST)
+
+            BB(1) = M%X(I-1)  !-DX
+            BB(2) = M%X(I)    !+DX
+            BB(3) = M%YC(J)   !-DY
+            BB(4) = M%YC(J+1) !+DY
+            BB(5) = M%Z(K-1)  !-DZ
+            BB(6) = M%Z(K)    !+DZ
+            IERR=0
+            CALL TRIANGLE_BOX_INTERSECT(IERR,V1,V2,V3,BB)
+            IF (IERR==1) CALL INSERT(IC,FACET(N)%V_CELL_LIST)
+
+            BB(1) = M%X(I-1)  !-DX
+            BB(2) = M%X(I)    !+DX
+            BB(3) = M%Y(J-1)  !-DY
+            BB(4) = M%Y(J)    !+DY
+            BB(5) = M%ZC(K)   !-DZ
+            BB(6) = M%ZC(K+1) !+DZ
+            IERR=0
+            CALL TRIANGLE_BOX_INTERSECT(IERR,V1,V2,V3,BB)
+            IF (IERR==1) CALL INSERT(IC,FACET(N)%W_CELL_LIST)
 
          ENDDO
       ENDDO
@@ -800,6 +830,12 @@ REAL(EB), INTENT(IN) :: V1(3),V2(3),V3(3),BB(6)
 REAL(EB) :: PLANE(4),P0(3),P1(3)
 
 IERR=0
+
+!! Filter small triangles
+!
+!A_TRI = TRIANGLE_AREA(V1,V2,V3)
+!A_BB  = MIN( (BB(2)-BB(1))*(BB(4)-BB(3)), (BB(2)-BB(1))*(BB(6)-BB(5)), (BB(4)-BB(3))*(BB(6)-BB(5)) )
+!IF (A_TRI < 0.01*A_BB) RETURN
 
 ! Are vertices outside of bounding planes?
 
@@ -882,6 +918,22 @@ P1 = (/BB(2),BB(3),BB(6)/)
 CALL LINE_SEGMENT_TRIANGLE_INTERSECT(IERR,V1,V2,V3,P0,P1); IF (IERR==1) RETURN
 
 END SUBROUTINE TRIANGLE_BOX_INTERSECT
+
+
+REAL(EB) FUNCTION TRIANGLE_AREA(V1,V2,V3)
+USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT,NORM2
+IMPLICIT NONE
+
+REAL(EB), INTENT(IN) :: V1(3),V2(3),V3(3)
+REAL(EB) :: N(3),R1(3),R2(3)
+
+R1 = V2-V1
+R2 = V3-V1
+CALL CROSS_PRODUCT(N,R1,R2)
+
+TRIANGLE_AREA = 0.5_EB*NORM2(N)
+
+END FUNCTION TRIANGLE_AREA
 
 
 SUBROUTINE LINE_SEGMENT_TRIANGLE_INTERSECT(IERR,V1,V2,V3,P0,P1)
@@ -1111,51 +1163,43 @@ IF ( MOD(N_INTERSECTIONS,2)/=0 ) POINT_IN_POLYHEDRON=.TRUE.
 END FUNCTION POINT_IN_POLYHEDRON
 
 
-LOGICAL FUNCTION POINT_IN_TRIANGLE(XP,XX,YY)
+LOGICAL FUNCTION POINT_IN_TRIANGLE(P,V1,V2,V3)
 USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
 IMPLICIT NONE
 
-REAL(EB), INTENT(IN) :: XP(2),XX(3),YY(3)
-REAL(EB) :: V_VEC(2),N_VEC(2),Q_VEC(2),R_VEC(2)
-INTEGER :: I,N(3,3)
+REAL(EB), INTENT(IN) :: P(3),V1(3),V2(3),V3(3)
+REAL(EB) :: E(3),E1(3),E2(3),N(3),R(3),Q(3)
+INTEGER :: I
+REAL(EB), PARAMETER :: EPS=1.E-10_EB
 
-! This routine is similar to POINT_IN_TETRAHEDRON
-
-N(1,:) = (/1,2,3/)
-N(2,:) = (/2,3,1/)
-N(3,:) = (/3,1,2/)
+! This routine tests whether the projection of P, in the plane normal
+! direction, onto to the plane defined by the triangle (V1,V2,V3) is
+! inside the triangle.
 
 POINT_IN_TRIANGLE=.TRUE. ! start by assuming the point is inside
 
+! compute face normal
+E1 = V2-V1
+E2 = V3-V1
+CALL CROSS_PRODUCT(N,E1,E2)
+
 EDGE_LOOP: DO I=1,3
-
-   ! vector along the direction of edge I
-
-   V_VEC = (/XX(N(I,2))-XX(N(I,1)),YY(N(I,2))-YY(N(I,1))/)
-
-   ! find vector normal to edge
-
-   IF (ABS(V_VEC(2))>ZERO_P) THEN
-      N_VEC = (/1._EB, -V_VEC(1)/V_VEC(2)/)
-   ELSE
-      N_VEC = (/0._EB, 1._EB/)
-   ENDIF
-
-   ! form a vector from a point on the edge to the point XP
-
-   Q_VEC = XP-(/XX(N(I,1)),YY(N(I,1))/)
-
-   ! also form a vector from the edge to the other point on the triangle defining inside
-
-   R_VEC = (/XX(N(I,3)),YY(N(I,3))/)-(/XX(N(I,1)),YY(N(I,1))/)
-
-   ! if the sign of the dot products are equal, the point is inside, else it is outside and we return
-
-   IF ( ABS( SIGN(1._EB,DOT_PRODUCT(Q_VEC,N_VEC))-SIGN(1._EB,DOT_PRODUCT(R_VEC,N_VEC)) )>ZERO_P ) THEN
+   SELECT CASE(I)
+      CASE(1)
+         E = V2-V1
+         R = P-V1
+      CASE(2)
+         E = V3-V2
+         R = P-V2
+      CASE(3)
+         E = V1-V3
+         R = P-V3
+   END SELECT
+   CALL CROSS_PRODUCT(Q,E,R)
+   IF ( DOT_PRODUCT(Q,N) < -EPS ) THEN
       POINT_IN_TRIANGLE=.FALSE.
       RETURN
    ENDIF
-
 ENDDO EDGE_LOOP
 
 END FUNCTION POINT_IN_TRIANGLE
@@ -1361,16 +1405,17 @@ END SELECT
 END SUBROUTINE GETX
 
 
-SUBROUTINE GETU(U_DATA,DXI,XI,XU,INDU,I_VEL,NM)
+SUBROUTINE GETU(U_DATA,DXI,XI_IN,I_VEL,NM)
 IMPLICIT NONE
 
 REAL(EB), INTENT(OUT) :: U_DATA(0:1,0:1,0:1),DXI(3)
-REAL(EB), INTENT(IN) :: XI(3),XU(3)
-INTEGER, INTENT(IN) :: INDU(3),I_VEL,NM
+REAL(EB), INTENT(IN) :: XI_IN(3)
+INTEGER, INTENT(IN) :: I_VEL,NM
 TYPE(MESH_TYPE), POINTER :: M
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW
-INTEGER :: II,JJ,KK,N
-CHARACTER(100) :: MESSAGE
+INTEGER :: II,JJ,KK
+!CHARACTER(100) :: MESSAGE
+REAL(EB) :: XI(3)
 
 M=>MESHES(NM)
 IF (PREDICTOR) THEN
@@ -1383,48 +1428,85 @@ ELSE
    WW => M%WS
 ENDIF
 
-II = INDU(1)
-JJ = INDU(2)
-KK = INDU(3)
+!II = INDU(1)
+!JJ = INDU(2)
+!KK = INDU(3)
+!
+!IF (XI(1)<XU(1)) THEN
+!   N=CEILING((XU(1)-XI(1))/M%DX(II))
+!   II=MAX(0,II-N)
+!   DXI(1)=XI(1)-(XU(1)-REAL(N,EB)*M%DX(II))
+!ELSE
+!   N=FLOOR((XI(1)-XU(1))/M%DX(II))
+!   II=MIN(IBP1,II+N)
+!   DXI(1)=XI(1)-(XU(1)+REAL(N,EB)*M%DX(II))
+!ENDIF
+!
+!IF (XI(2)<XU(2)) THEN
+!   N=CEILING((XU(2)-XI(2))/M%DY(JJ))
+!   JJ=MAX(0,JJ-N)
+!   DXI(2)=XI(2)-(XU(2)-REAL(N,EB)*M%DY(JJ))
+!ELSE
+!   N=FLOOR((XI(2)-XU(2))/M%DY(JJ))
+!   JJ=MIN(JBP1,JJ+N)
+!   DXI(2)=XI(2)-(XU(2)+REAL(N,EB)*M%DY(JJ))
+!ENDIF
+!
+!IF (XI(3)<XU(3)) THEN
+!   N=CEILING((XU(3)-XI(3))/M%DZ(KK))
+!   KK=MAX(0,KK-N)
+!   DXI(3)=XI(3)-(XU(3)-REAL(N,EB)*M%DZ(KK))
+!ELSE
+!   N=FLOOR((XI(3)-XU(3))/M%DZ(KK))
+!   KK=MIN(KBP1,KK+N)
+!   DXI(3)=XI(3)-(XU(3)+REAL(N,EB)*M%DZ(KK))
+!ENDIF
 
-IF (XI(1)<XU(1)) THEN
-   N=CEILING((XU(1)-XI(1))/M%DX(II))
-   II=MAX(0,II-N)
-   DXI(1)=XI(1)-(XU(1)-REAL(N,EB)*M%DX(II))
-ELSE
-   N=FLOOR((XI(1)-XU(1))/M%DX(II))
-   II=MIN(IBP1,II+N)
-   DXI(1)=XI(1)-(XU(1)+REAL(N,EB)*M%DX(II))
-ENDIF
+XI(1) = MAX(M%XS,MIN(M%XF,XI_IN(1)))
+XI(2) = MAX(M%YS,MIN(M%YF,XI_IN(2)))
+XI(3) = MAX(M%ZS,MIN(M%ZF,XI_IN(3)))
 
-IF (XI(2)<XU(2)) THEN
-   N=CEILING((XU(2)-XI(2))/M%DY(JJ))
-   JJ=MAX(0,JJ-N)
-   DXI(2)=XI(2)-(XU(2)-REAL(N,EB)*M%DY(JJ))
-ELSE
-   N=FLOOR((XI(2)-XU(2))/M%DY(JJ))
-   JJ=MIN(JBP1,JJ+N)
-   DXI(2)=XI(2)-(XU(2)+REAL(N,EB)*M%DY(JJ))
-ENDIF
+SELECT CASE(I_VEL)
+   CASE(1)
+      II = FLOOR((XI(1)-M%XS)/M%DX(1))
+      JJ = FLOOR((XI(2)-M%YS)/M%DY(1)+0.5_EB)
+      KK = FLOOR((XI(3)-M%ZS)/M%DZ(1)+0.5_EB)
+      DXI(1) = XI(1) - M%X(II)
+      DXI(2) = XI(2) - M%YC(JJ)
+      DXI(3) = XI(3) - M%ZC(KK)
+   CASE(2)
+      II = FLOOR((XI(1)-M%XS)/M%DX(1)+0.5_EB)
+      JJ = FLOOR((XI(2)-M%YS)/M%DY(1))
+      KK = FLOOR((XI(3)-M%ZS)/M%DZ(1)+0.5_EB)
+      DXI(1) = XI(1) - M%XC(II)
+      DXI(2) = XI(2) - M%Y(JJ)
+      DXI(3) = XI(3) - M%ZC(KK)
+   CASE(3)
+      II = FLOOR((XI(1)-M%XS)/M%DX(1)+0.5_EB)
+      JJ = FLOOR((XI(2)-M%YS)/M%DY(1)+0.5_EB)
+      KK = FLOOR((XI(3)-M%ZS)/M%DZ(1))
+      DXI(1) = XI(1) - M%XC(II)
+      DXI(2) = XI(2) - M%YC(JJ)
+      DXI(3) = XI(3) - M%Z(KK)
+   CASE(4)
+      II = FLOOR((XI(1)-M%XS)/M%DX(1)+0.5_EB)
+      JJ = FLOOR((XI(2)-M%YS)/M%DY(1)+0.5_EB)
+      KK = FLOOR((XI(3)-M%ZS)/M%DZ(1)+0.5_EB)
+      DXI(1) = XI(1) - M%XC(II)
+      DXI(2) = XI(2) - M%YC(JJ)
+      DXI(3) = XI(3) - M%ZC(KK)
+END SELECT
 
-IF (XI(3)<XU(3)) THEN
-   N=CEILING((XU(3)-XI(3))/M%DZ(KK))
-   KK=MAX(0,KK-N)
-   DXI(3)=XI(3)-(XU(3)-REAL(N,EB)*M%DZ(KK))
-ELSE
-   N=FLOOR((XI(3)-XU(3))/M%DZ(KK))
-   KK=MIN(KBP1,KK+N)
-   DXI(3)=XI(3)-(XU(3)+REAL(N,EB)*M%DZ(KK))
-ENDIF
+DXI = MAX(0._EB,DXI)
 
-IF (ANY(DXI<0._EB)) THEN
-   WRITE(MESSAGE,'(A)') 'ERROR: DXI<0 in GETU'
-   CALL SHUTDOWN(MESSAGE)
-ENDIF
-IF (DXI(1)>M%DX(II) .OR. DXI(2)>M%DY(JJ) .OR. DXI(3)>M%DZ(KK)) THEN
-   WRITE(MESSAGE,'(A)') 'ERROR: DXI>DX in GETU'
-   CALL SHUTDOWN(MESSAGE)
-ENDIF
+!IF (ANY(DXI<0._EB)) THEN
+!   WRITE(MESSAGE,'(A)') 'ERROR: DXI<0 in GETU'
+!   CALL SHUTDOWN(MESSAGE)
+!ENDIF
+!IF (DXI(1)>M%DX(II) .OR. DXI(2)>M%DY(JJ) .OR. DXI(3)>M%DZ(KK)) THEN
+!   WRITE(MESSAGE,'(A)') 'ERROR: DXI>DX in GETU'
+!   CALL SHUTDOWN(MESSAGE)
+!ENDIF
 
 SELECT CASE(I_VEL)
    CASE(1)
@@ -1544,6 +1626,44 @@ G_DATA(1,1,0) = DUDX(II+1,JJ+1,KK)
 G_DATA(1,1,1) = DUDX(II+1,JJ+1,KK+1)
 
 END SUBROUTINE GETGRAD
+
+
+SUBROUTINE GET_VELO_IBM(VELO_IBM,IERR,VELO_INDEX,XVELO,TRI_INDEX,IBM_INDEX,DXC,NM)
+USE MATH_FUNCTIONS, ONLY: NORM2
+IMPLICIT NONE
+
+REAL(EB), INTENT(OUT) :: VELO_IBM
+INTEGER, INTENT(OUT) :: IERR
+REAL(EB), INTENT(IN) :: XVELO(3),DXC(3)
+INTEGER, INTENT(IN) :: VELO_INDEX,TRI_INDEX,IBM_INDEX,NM
+REAL(EB) :: N(3),R(3),V1(3),V2(3),V3(3),T,U_DATA(0:1,0:1,0:1),XI(3),DXI(3)
+REAL(EB), PARAMETER :: EPS=1.E-10_EB
+
+IERR=0
+VELO_IBM=0._EB
+
+V1 = (/VERTEX(FACET(TRI_INDEX)%VERTEX(1))%X,VERTEX(FACET(TRI_INDEX)%VERTEX(1))%Y,VERTEX(FACET(TRI_INDEX)%VERTEX(1))%Z/)
+V2 = (/VERTEX(FACET(TRI_INDEX)%VERTEX(2))%X,VERTEX(FACET(TRI_INDEX)%VERTEX(2))%Y,VERTEX(FACET(TRI_INDEX)%VERTEX(2))%Z/)
+V3 = (/VERTEX(FACET(TRI_INDEX)%VERTEX(3))%X,VERTEX(FACET(TRI_INDEX)%VERTEX(3))%Y,VERTEX(FACET(TRI_INDEX)%VERTEX(3))%Z/)
+N = FACET(TRI_INDEX)%NVEC
+
+R = XVELO-V1
+IF ( NORM2(R)<EPS ) R = XVELO-V2 ! select a different vertex
+
+T = DOT_PRODUCT(R,N)
+
+IF (IBM_INDEX==0 .AND. T<EPS) RETURN ! the velocity point is on or interior to the surface
+
+IF (IBM_INDEX==1) THEN
+   XI = XVELO + T*N
+   CALL GETU(U_DATA,DXI,XI,VELO_INDEX,NM)
+   VELO_IBM = 0.5_EB*TRILINEAR(U_DATA,DXI,DXC)
+   RETURN
+ENDIF
+
+IERR=1
+
+END SUBROUTINE GET_VELO_IBM
 
 
 SUBROUTINE GET_REV_geom(MODULE_REV,MODULE_DATE)

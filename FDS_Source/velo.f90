@@ -2563,7 +2563,7 @@ END SUBROUTINE BAROCLINIC_CORRECTION
 
 SUBROUTINE IBM_VELOCITY_FLUX(NM)
 
-USE COMPLEX_GEOMETRY, ONLY: TRILINEAR,GETX,GETU,GETGRAD
+USE COMPLEX_GEOMETRY, ONLY: TRILINEAR,GETX,GETU,GETGRAD,GET_VELO_IBM
 USE TURBULENCE, ONLY: VELTAN2D,VELTAN3D
 
 INTEGER, INTENT(IN) :: NM
@@ -2577,10 +2577,10 @@ REAL(EB) :: U_IBM,V_IBM,W_IBM,DN, &
             PE,PW,PN,PS,PT,PB, &
             U_DATA(0:1,0:1,0:1),XI(3),DXI(3),DXC(3),XVELO(3),XGEOM(3),XCELL(3),XEDGX(3),XEDGY(3),XEDGZ(3),XSURF(3), &
             U_VEC(3),U_GEOM(3),N_VEC(3),DIVU,GRADU(3,3),GRADP(3),TAU_IJ(3,3), &
-            MU_WALL,RRHO,MUA,DUUDT,DVVDT,DWWDT,DELTA,WT, NXNY_REAL,NX_REAL,IC_REAL
-INTEGER :: I,J,K,NG,IJK(3),I_VEL,IP1,IM1,JP1,JM1,KP1,KM1,ITMP, N
+            MU_WALL,RRHO,MUA,DUUDT,DVVDT,DWWDT,DELTA,WT, NXNY_REAL,NX_REAL,IC_REAL,XV(3)
+INTEGER :: I,J,K,NG,IJK(3),I_VEL,IP1,IM1,JP1,JM1,KP1,KM1,ITMP,TRI_INDEX,IERR
 TYPE(GEOMETRY_TYPE), POINTER :: G
-TYPE(LINKED_LIST_TYPE), POINTER :: L
+TYPE(LINKED_LIST_TYPE), POINTER :: PCL,UCL,VCL,WCL
 
 ! References:
 !
@@ -2708,7 +2708,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
                      CASE(1)
                         U_ROT = (XVELO(3)-XGEOM(3))*G%OMEGA_Y - (XVELO(2)-XGEOM(2))*G%OMEGA_Z
                         CALL GETX(XI,XVELO,NG)
-                        CALL GETU(U_DATA,DXI,XI,XVELO,IJK,1,NM)
+                        CALL GETU(U_DATA,DXI,XI,1,NM)
                         U_IBM = TRILINEAR(U_DATA,DXI,DXC)
                         IF (DNS) U_IBM = 0.5_EB*(U_IBM+(G%U+U_ROT)) ! linear profile
                         IF (LES) U_IBM = 0.9_EB*(U_IBM+(G%U+U_ROT)) ! power law
@@ -2733,7 +2733,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
                         U_GEOM = (/G%U+U_ROT,G%V+V_ROT,G%W+W_ROT/)
                         
                         ! store interpolated value
-                        CALL GETU(U_DATA,DXI,XI,XVELO,IJK,1,NM)
+                        CALL GETU(U_DATA,DXI,XI,1,NM)
                         U_IBM = TRILINEAR(U_DATA,DXI,DXC)
                         IF (DNS) U_IBM = 0.5_EB*(U_IBM+(G%U+U_ROT)) ! linear profile
                         IF (LES) U_IBM = 0.9_EB*(U_IBM+(G%U+U_ROT)) ! power law
@@ -2765,7 +2765,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
  
                         RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(IP1,J,K))
                         !!MUA = 0.5_EB*(MU(I,J,K)+MU(IP1,J,K)) ! strictly speaking, should be interpolated to XI
-                        CALL GETU(U_DATA,DXI,XI,XCELL,IJK,4,NM); MUA = TRILINEAR(U_DATA,DXI,DXC)
+                        CALL GETU(U_DATA,DXI,XI,4,NM); MUA = TRILINEAR(U_DATA,DXI,DXC)
                   
                         TAU_IJ(1,1) = -MUA*(GRADU(1,1)-TWTH*DIVU)
                         TAU_IJ(2,2) = -MUA*(GRADU(2,2)-TWTH*DIVU)
@@ -2845,7 +2845,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
                         CASE(1)
                            V_ROT = (XVELO(1)-XGEOM(1))*G%OMEGA_Z - (XVELO(3)-XGEOM(3))*G%OMEGA_X
                            CALL GETX(XI,XVELO,NG)
-                           CALL GETU(U_DATA,DXI,XI,XVELO,IJK,2,NM)
+                           CALL GETU(U_DATA,DXI,XI,2,NM)
                            V_IBM = TRILINEAR(U_DATA,DXI,DXC)
                            IF (DNS) V_IBM = 0.5_EB*(V_IBM+(G%V+V_ROT))
                            IF (LES) V_IBM = 0.9_EB*(V_IBM+(G%V+V_ROT))
@@ -2870,7 +2870,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
                            U_GEOM = (/G%U+U_ROT,G%V+V_ROT,G%W+W_ROT/)
                            
                            ! store interpolated value
-                           CALL GETU(U_DATA,DXI,XI,XVELO,IJK,2,NM)
+                           CALL GETU(U_DATA,DXI,XI,2,NM)
                            V_IBM = TRILINEAR(U_DATA,DXI,DXC)
                            IF (DNS) V_IBM = 0.5_EB*(V_IBM+(G%V+V_ROT))
                            IF (LES) V_IBM = 0.9_EB*(V_IBM+(G%V+V_ROT))
@@ -2902,7 +2902,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
  
                            RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I,JP1,K))
                            !!MUA = 0.5_EB*(MU(I,J,K)+MU(I,JP1,K)) ! strictly speaking, should be interpolated to XI
-                           CALL GETU(U_DATA,DXI,XI,XCELL,IJK,4,NM); MUA = TRILINEAR(U_DATA,DXI,DXC)
+                           CALL GETU(U_DATA,DXI,XI,4,NM); MUA = TRILINEAR(U_DATA,DXI,DXC)
                   
                            TAU_IJ(1,1) = -MUA*(GRADU(1,1)-TWTH*DIVU)
                            TAU_IJ(2,2) = -MUA*(GRADU(2,2)-TWTH*DIVU)
@@ -2961,7 +2961,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
                      CASE(1)
                         W_ROT = (XVELO(2)-XGEOM(2))*G%OMEGA_X - (XVELO(1)-XGEOM(1))*G%OMEGA_Y
                         CALL GETX(XI,XVELO,NG)
-                        CALL GETU(U_DATA,DXI,XI,XVELO,IJK,3,NM)
+                        CALL GETU(U_DATA,DXI,XI,3,NM)
                         W_IBM = TRILINEAR(U_DATA,DXI,DXC)
                         IF (DNS) W_IBM = 0.5_EB*(W_IBM+(G%W+W_ROT)) ! linear profile
                         IF (LES) W_IBM = 0.9_EB*(W_IBM+(G%W+W_ROT)) ! power law
@@ -2986,7 +2986,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
                         U_GEOM = (/G%U+U_ROT,G%V+V_ROT,G%W+W_ROT/)
                         
                         ! store interpolated value
-                        CALL GETU(U_DATA,DXI,XI,XVELO,IJK,3,NM)
+                        CALL GETU(U_DATA,DXI,XI,3,NM)
                         W_IBM = TRILINEAR(U_DATA,DXI,DXC)
                         IF (DNS) W_IBM = 0.5_EB*(W_IBM+(G%W+W_ROT)) ! linear profile
                         IF (LES) W_IBM = 0.9_EB*(W_IBM+(G%W+W_ROT)) ! power law
@@ -3018,7 +3018,7 @@ GEOM_LOOP: DO NG=1,N_GEOM
  
                         RRHO  = 2._EB/(RHOP(I,J,K)+RHOP(I,J,KP1))
                         !!MUA = 0.5_EB*(MU(I,J,K)+MU(I,J,KP1)) ! strictly speaking, should be interpolated to XI
-                        CALL GETU(U_DATA,DXI,XI,XCELL,IJK,4,NM); MUA = TRILINEAR(U_DATA,DXI,DXC)
+                        CALL GETU(U_DATA,DXI,XI,4,NM); MUA = TRILINEAR(U_DATA,DXI,DXC)
                   
                         TAU_IJ(1,1) = -MUA*(GRADU(1,1)-TWTH*DIVU)
                         TAU_IJ(2,2) = -MUA*(GRADU(2,2)-TWTH*DIVU)
@@ -3077,39 +3077,97 @@ ENDDO GEOM_LOOP
 NXNY_REAL = REAL(IBAR*JBAR,EB)+1.E-10_EB
 NX_REAL = REAL(IBAR,EB)+1.E-10_EB
 
-UNSTRUCTURED_GEOMETRY_LOOP: DO N=1,N_FACE
+UNSTRUCTURED_GEOMETRY_LOOP: DO TRI_INDEX=1,N_FACE
 
-   L=>FACET(N)%CUTCELL_LIST
+   PCL=>FACET(TRI_INDEX)%P_CELL_LIST
+   UCL=>FACET(TRI_INDEX)%U_CELL_LIST
+   VCL=>FACET(TRI_INDEX)%V_CELL_LIST
+   WCL=>FACET(TRI_INDEX)%W_CELL_LIST
 
-   LIST_LOOP: DO
+   P_CELL_LOOP: DO
 
-      IF ( .NOT. ASSOCIATED(L) ) EXIT
+      IF ( .NOT. ASSOCIATED(PCL) ) EXIT
 
-      IC_REAL = REAL(L%INDEX,EB)
+      IC_REAL = REAL(PCL%INDEX,EB)
       K = CEILING(IC_REAL/NXNY_REAL)
       J = CEILING((IC_REAL-(K-1)*NXNY_REAL)/NX_REAL)
       I = NINT(IC_REAL-(K-1)*NXNY_REAL-(J-1)*NX_REAL)
 
-      !print *,L%INDEX,I,J,K
+      !print *,LP%INDEX,I,J,K
 
-      U_IBM = 0._EB
-      IF (PREDICTOR) DUUDT = (U_IBM-U(I,J,K))/DT
-      IF (CORRECTOR) DUUDT = (2._EB*U_IBM-(U(I,J,K)+US(I,J,K)))/DT
-      FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
+      PCL=>PCL%NEXT
 
-      V_IBM = 0._EB
-      IF (PREDICTOR) DVVDT = (V_IBM-V(I,J,K))/DT
-      IF (CORRECTOR) DVVDT = (2._EB*V_IBM-(V(I,J,K)+VS(I,J,K)))/DT
-      FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT
+   ENDDO P_CELL_LOOP
 
-      W_IBM = 0._EB
-      IF (PREDICTOR) DWWDT = (W_IBM-W(I,J,K))/DT
-      IF (CORRECTOR) DWWDT = (2._EB*W_IBM-(W(I,J,K)+WS(I,J,K)))/DT
-      FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
+   U_CELL_LOOP: DO
 
-      L=>L%NEXT
+      IF ( .NOT. ASSOCIATED(UCL) ) EXIT
 
-   ENDDO LIST_LOOP
+      IC_REAL = REAL(UCL%INDEX,EB)
+      K = CEILING(IC_REAL/NXNY_REAL)
+      J = CEILING((IC_REAL-(K-1)*NXNY_REAL)/NX_REAL)
+      I = NINT(IC_REAL-(K-1)*NXNY_REAL-(J-1)*NX_REAL)
+      IJK = (/I,J,K/)
+      DXC = (/DXN(I),DY(J),DZ(K)/)
+      XV = (/X(I),YC(J),ZC(K)/)
+
+      CALL GET_VELO_IBM(U_IBM,IERR,1,XV,TRI_INDEX,IMMERSED_BOUNDARY_METHOD,DXC,NM)
+      IF (IERR==0) THEN
+         !if (i==67 .and. j==32 .and. k==22) print *,u_ibm
+         IF (PREDICTOR) DUUDT = (U_IBM-U(I,J,K))/DT
+         IF (CORRECTOR) DUUDT = (2._EB*U_IBM-(U(I,J,K)+US(I,J,K)))/DT
+         FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
+      ENDIF
+
+      UCL=>UCL%NEXT
+
+   ENDDO U_CELL_LOOP
+
+   V_CELL_LOOP: DO
+
+      IF ( .NOT. ASSOCIATED(VCL) ) EXIT
+
+      IC_REAL = REAL(VCL%INDEX,EB)
+      K = CEILING(IC_REAL/NXNY_REAL)
+      J = CEILING((IC_REAL-(K-1)*NXNY_REAL)/NX_REAL)
+      I = NINT(IC_REAL-(K-1)*NXNY_REAL-(J-1)*NX_REAL)
+      IJK = (/I,J,K/)
+      DXC = (/DX(I),DYN(J),DZ(K)/)
+      XV = (/XC(I),Y(J),ZC(K)/)
+
+      CALL GET_VELO_IBM(V_IBM,IERR,2,XV,TRI_INDEX,IMMERSED_BOUNDARY_METHOD,DXC,NM)
+      IF (IERR==0) THEN
+         IF (PREDICTOR) DVVDT = (V_IBM-V(I,J,K))/DT
+         IF (CORRECTOR) DVVDT = (2._EB*V_IBM-(V(I,J,K)+VS(I,J,K)))/DT
+         FVY(I,J,K) = -RDYN(J)*(HP(I,J+1,K)-HP(I,J,K)) - DVVDT
+      ENDIF
+
+      VCL=>VCL%NEXT
+
+   ENDDO V_CELL_LOOP
+
+   W_CELL_LOOP: DO
+
+      IF ( .NOT. ASSOCIATED(WCL) ) EXIT
+
+      IC_REAL = REAL(WCL%INDEX,EB)
+      K = CEILING(IC_REAL/NXNY_REAL)
+      J = CEILING((IC_REAL-(K-1)*NXNY_REAL)/NX_REAL)
+      I = NINT(IC_REAL-(K-1)*NXNY_REAL-(J-1)*NX_REAL)
+      IJK = (/I,J,K/)
+      DXC = (/DX(I),DY(J),DZN(K)/)
+      XV = (/XC(I),YC(J),Z(K)/)
+
+      CALL GET_VELO_IBM(W_IBM,IERR,3,XV,TRI_INDEX,IMMERSED_BOUNDARY_METHOD,DXC,NM)
+      IF (IERR==0) THEN
+         IF (PREDICTOR) DWWDT = (W_IBM-W(I,J,K))/DT
+         IF (CORRECTOR) DWWDT = (2._EB*W_IBM-(W(I,J,K)+WS(I,J,K)))/DT
+         FVZ(I,J,K) = -RDZN(K)*(HP(I,J,K+1)-HP(I,J,K)) - DWWDT
+      ENDIF
+
+      WCL=>WCL%NEXT
+
+   ENDDO W_CELL_LOOP
 
 ENDDO UNSTRUCTURED_GEOMETRY_LOOP
 
