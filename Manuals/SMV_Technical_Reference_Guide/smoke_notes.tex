@@ -328,12 +328,31 @@ of a repeated sequence, $n$ is the number of repeats and $c$ is the character re
 represent the {\em special}\ character). \item Represent characters not repeated four or more times as is.
 \end{enumerate}
 
-So, the character string {\tt aaaaaabbbbcc}\ would be encoded {\tt \#6b\#4bcc}.
+The character string {\tt aaaaaabbbbcc}\ would then be encoded as {\tt \#6b\#4bcc}.
 
 Run length encoding provides a reasonably good compression ratio, is simple to implement and more importantly can be decompressed quickly. This last property is important for any compression scheme chosen because it is a rate limiting step in the process that Smokeview uses to display smoke data. The CPU time required to compute the smoke flow can easily exceed one minute of CPU time
 per outputted time step, so extra time used to produce a more compact file is affordable. However, each data frame is decompressed {\em on the fly}\ so a compression format that can be rapidly decompressed is critical.
 
 A second compression scheme is used by Smokezip, companion software to FDS and Smokeview, to compress FDS files even more compactly.  Smokezip uses the ZLIB compression library~\cite{ZLIB}.
+
+\subsection{Limitation}
+As noted earlier, the slice rendering method for visualizing smoke records opacities on grid planes using
+\begin{equation}
+\label{eq:alpha}
+\alpha=1-\exp(-k s\Delta x)
+\end{equation}
+where $k$ is the mass extinction coefficient, $s$ is the soot density and $\Delta x$ is the distance between adjacent grid planes.  Problems with round off error can occur because $\alpha$'s are stored using only 8 bits, the size typical video hardware uses to represent color and alpha channels.  
+As a result, opacity values are quantized.  Only values of 0, 1/255, $\cdots$, 254/255, 1 can be represented.  In particular any $\alpha$ value smaller than $1/255$ truncates to 0.
+This can occur when more grid cells are used to resolve a solution domain, {\em i.e.}\ when $\Delta x$ is sufficiently small so that $\alpha<1/256$.
+
+For example, suppose that a 1~m column of smoke has opacity of 0.5.  Substituting $\Delta x=1$ and $\alpha=1/2$ into (\ref{eq:alpha}) gives $ks=-\ln(1/2)$.  Solving for $\Delta x$ in (\ref{eq:alpha}) using this value of $ks$ and $\alpha=1/255$ gives
+\begin{equation}
+\Delta x = \frac{\ln(254/255)}{\ln(1/2)}
+\end{equation}
+Therefore, when $\Delta x<\ln(254/255)/\ln(1/2)\approx 0.00567$ the opacity truncates to zero.  Equivalently, the opacity truncates to zero when $N>\ln(1/2)/\ln(254/255)\approx 177$ where $N$ is the number of grid planes in the 1~m column of smoke.
+
+To get around this problem, a volume rendering algorithm for visualizing smoke has been implemented where intermediate smoke opacities are stored using full precision arithmetic instead of 8 bits.  This algorithm is discussed in the next section.
+
 
 %
 % -------------------  Volume Rendered Smoke ------------------------
@@ -360,7 +379,7 @@ Start the recursion with $\hat{\alpha}_{N}=\hat{C}_{N}=0$. Continue the recursio
 \end{eqnarray}
 
 where $\hat{C}_i$ and $\hat{\alpha}_i$ are color and opacity accumulated from steps $N$ to $i$ while stepping through the 3D data set from front to back.  When data is mapped appropriately to color and opacity, this recursion is simply a numerical integration of the radiation transport equation.
-The values $C_i$ and $\alpha_i$ are the color and opacity at the $i$'th step.  
+The values $C_i$ and $\alpha_i$ are the color and opacity at the $i$'th step.
 
 \item Mix the volume rendered color, $\hat{C}_N$, with the colors already rendered using
 
@@ -376,8 +395,9 @@ The OpenGL call, {\tt   glBlendFunc(GL\_ONE,GL\_ONE\_MINUS\_SRC\_ALPHA); }, is u
 \begin{center}
 \includegraphics[width=6.5in]{figures/smoke_setup2}
 \end{center}
-\caption {Opacity and color is computed for each pixel on an image plane by solving a line integral
-representation of a simplified form of the radiation transport equation.
+\caption[Opacity and color is computed for each pixel on an image plane by solving a line integral
+representation of a simplified form of the radiation transport equation.]{Opacity and color is computed for each pixel on an image plane by solving a line integral
+representation of a simplified form of the radiation transport equation.  Rays are cast from the observer through the  image plane into the 3D data set.  The line integral is computed where the ray intersects the data set.
 }
 \label{figsmokesetup2}
 \end{figure}
@@ -402,7 +422,7 @@ is used to collapse 3D data into 2D images projected onto the front facing sides
 \tau(a,b)=\intmf{a}{b}
 \end{equation}
 
-is the optical depth between points $a$ and $b$ along a ray cast through the data.  
+is the optical depth between points $a$ and $b$ along a ray cast through the data.
 
 Figure \ref{fig:volplume_example} illustrates this process showing two images.  The image on the left is presented from the point of view of the observer.  The image on the right is the same image rotated to show more clearly the images projected on the front facing sides of the data mesh.  As the scene is moved through rotations and translations the projected surface images are constantly recomputed and redrawn presenting the illusion that the image is 3D and drawn within (rather than on the surface) of the data mesh.
 
@@ -431,7 +451,7 @@ The first direction is as seen by the observer.  The second direction shows the 
 \newcommand{\Leii}[1]{\hat{C}_{e,#1}}
 
 
-Figure \ref{fig:smokediscretesetup}\ illustrates a discretization through  smoke.  The path is split into $N$ regions each with length $\Delta x=(x_N-x_0)/N$.  The coordinate system is defined so that the initial radiance, $C_0$, is located at $x_0$ and the observer is located at $x_N=D$  where the final radiance, $C_N$, is computed and displayed.
+Figure \ref{fig:smokediscretesetup}\ illustrates a discretization through  smoke.  The path is split into $N$ regions each with length $\Delta x=(x_N-x_0)/N$.  The coordinate system is setup so that the initial radiance, $C_0$, is located at $x_0$ and the final radiance, $C_N$ located at $x_N$ closest to the observer.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -514,23 +534,23 @@ which is equivalent to (\ref{eq:colorupdate}).
 \subsection{Volume Rendering on Multiple Meshes}
 When drawing smoke for cases with multiple data meshes, it is more practical to draw smoke one mesh at a time rather than drawing smoke once using data from all meshes since data from other meshes may not be easily accessible.  The RTE solution or equivalently the computed smoke opacity requires smoke properties for the entire line of sight which may encompass more than one data mesh.  This section discusses how smoke opacities may be computed for each individual data mesh and combined appropriately to form smoke opacities for the entire data domain.
 
-Equation (\ref{eq:rtesoln}) is the solution to an approximate form of the radiation transport equation over a path from $x=0$ to $x=D$.  As illustrated in Figure \ref{figsmokesetup3}, suppose that this path is split at $D_1$ into two parts, the first part from $0$ to $D_1$ and the second part from $D_1$ to $D$. Further, suppose that the RTE solution is known on each part. This section describes how these two solutions may be combined to form a solution over the entire interval $0$ to $D$.
+Equation (\ref{eq:rtesoln}) is the solution to an approximate form of the radiation transport equation over a path from $x=x_0$ to $x=x_N$.  As illustrated in Figure \ref{figsmokesetup3}, suppose that this path is split at $D_1$ into two parts, the first part from $x_0$ to $D_1$ and the second part from $D_1$ to $x_N$. Further, suppose that the RTE solution is known on each part. This section describes how these two solutions may be combined to form a solution over the entire interval $x_0$ to $x_N$.
 
-Given a radiance of $C_0$ at $x=0$, the radiance at $D$, denoted $C(D)$ is given by
+Given a radiance of $C_0$ at $x=x_0$, the radiance at $x_N$, denoted $C(x_N)$ is given by
 
 \begin{eqnarray}
 \label{eq:rtesoln2}
-C(D)&=&\tau(0,D)C_0 + \int_0^D\tau(x,D)\siga\Le dx
+C(x_N)&=&\tau(x_0,x_N)C_0 + \int_{x_0}^{x_N}\tau(x,x_N)\siga\Le dx
 \end{eqnarray}
 
-This is the RTE solution over the entire interval $0$ to $D$. Similarly, $C_1(D_1)$ and $C_2(D)$ are given by
+This is the RTE solution over the entire interval $x_0$ to $x_N$. Similarly, $C_1(D_1)$ and $C_2(x_N)$ are given by
 
 \begin{eqnarray*}
-C_1(D_1)&=&\tau(0,D_1)C_0 + \int_0^{D_1}\tau(x,D_1)\siga\Le dx\\
-C_2(D)&=&\tau(D_1,D)C_{2,0} + \int_{D_1}^{D}\tau(x,D)\siga\Le dx
+C_1(D_1)&=&\tau(x_0,D_1)C_0 + \int_{x_0}^{D_1}\tau(x,D_1)\siga\Le dx\\
+C_2(x_N)&=&\tau(D_1,x_N)C_{2,0} + \int_{D_1}^{x_N}\tau(x,x_N)\siga\Le dx
 \end{eqnarray*}
 
-where the initial conditions are $C_1(0)=C_0$ and $C_2(D_1)=C_1(D_1)=C_{2,0}$.  These two solutions may be combined by drawing the $C_1(D_1)$ solution first (assuming it is behind so solution $C_2(D)$) and drawing $C_2(D)$ second.
+where the initial conditions are $C_1(0)=C_0$ and $C_2(D_1)=C_1(D_1)=C_{2,0}$.  These two solutions may be combined by drawing the $C_1(D_1)$ solution first (assuming it is behind so solution $C_2(x_N)$) and drawing $C_2(x_N)$ second.
 
 
 \begin{figure}[\figoptions]
@@ -544,6 +564,6 @@ for the merger of these intervals.
 \end{figure}
 
 \section{Future Work}
-This \paper\ describes the algorithms Smokeview uses to display smoke and fire realistically.  These algorithms may be improved in several ways.  Presently, only radiation from soot is used to visualize smoke.  Radiation emissions from heated gas components such as CO2 and water vapor are neglected.  The gray gas assumption may be relaxed by solving the RTE for several wavelength bands (as may be done by FDS) and combining the results.  The interaction between volume rendered smoke and interior solid objects may be improved by interacting with interior solid objects (FDS OBST's) .  The integration needs to terminate at the first blockage encountered rather than the far side of the data mesh rather.  Finally, the transfer function relating temperature to fire color may be improved by using a physics based approach rather than a color map.
+This \paper\ describes the algorithms Smokeview uses to display smoke and fire realistically using physics based algorithms.  These algorithms may be improved in several ways.  Presently, only radiation from soot is used to visualize smoke.  Radiation emissions from heated gas components such as CO2 and water vapor are neglected.  The gray gas assumption may be relaxed by solving the RTE for several wavelength bands (as may be done by FDS) and combining the results.  The interaction between volume rendered smoke and interior solid objects may be improved by accounting for interior solid objects such as FDS OBST's.  The RTE line integration needs to terminate at the first blockage encountered rather than the far side of the data mesh.  Work on unstructured geometries presently researched for future incorporation into FDS may also lead to better physics there.  Finally, the transfer function relating temperature to fire color may be improved by using a physics based approach rather than a color map.
 
 
