@@ -13,6 +13,6 @@ source ~/.bashrc_fds intel64
 # uncomment following line to stop all cases
 #export STOPFDS=1
 
-$RUNFDSMPI 16 $INDIR vis_test
-$RUNFDSMPI 16 $INDIR vis_test2
-$RUNFDSMPI 16 $INDIR vis_test3
+$RUNFDSMPI 16 $INDIR vis_mtest1
+$RUNFDSMPI 16 $INDIR vis_mtest2
+$RUNFDSMPI 16 $INDIR vis_mtest3
