@@ -1,10 +1,11 @@
 Test Case to examine fixed reaction rates
 C3H8+3.5*O2=4*H2O+3*CO2
 CO+0.5O2=CO2
+CO2=CO+0.5O2
 ------------------------------------------------
 # Labels and Meshes
 -------------------------------------------------
-&HEAD CHID='ReactionRate_Arrhenius_1-75Order_2Step', TITLE='Finite_Rate_1-75_Order' /
+&HEAD CHID='ReactionRate_Arrhenius_1p75Order_3Step', TITLE='Finite_Rate_1-75_Order' /
 &MESH IJK=8,8,8, XB=0.0,0.1,0.0,0.1,0.0,0.1 /
 &MISC GVEC=0.0, 0.0, 0.0 / 
 
@@ -45,7 +46,7 @@ CO+0.5O2=CO2
 
 &REAC ID = 'R2'
       FUEL = 'CARBON MONOXIDE'
-      A = 8e3
+      A = 4e3
       E = 0.0
       SMIX_ID='CARBON MONOXIDE','OXYGEN','CARBON DIOXIDE'
       SPEC_ID='OXYGEN','CARBON MONOXIDE','WATER VAPOR'
@@ -53,6 +54,18 @@ CO+0.5O2=CO2
       N_S = 0.25,1,0.5
       HEAT_OF_COMBUSTION=283.
       ODE_SOLVER=RUNGE_KUTTA_2 /
+
+&REAC ID = 'R3'
+      FUEL = 'CARBON DIOXIDE'
+      A = 4e-4
+      E = 0.0
+      SMIX_ID= 'CARBON DIOXIDE','OXYGEN','CARBON MONOXIDE'
+      SPEC_ID='CARBON DIOXIDE'
+      NU= -1,0.5,1
+      N_S = 1.0
+      HEAT_OF_COMBUSTION=283.
+      ODE_SOLVER=RUNGE_KUTTA_2 /
+
 
 # Note: The values of A and E are not typical for a reaction and are used purely for verification.
 
