@@ -36,10 +36,10 @@ SYSTEMLIBS = -lpthread -lXmu -lGLU -lGL -lm
 
 #OSX32FORTLIBDIR  = /opt/intel/composerxe/lib
 #OSX64FORTLIBDIR  = /opt/intel/composerxe/lib
-#LINUX32FORTLIBDIR  = /opt/intel/composerxe/lib/ia32
-#LINUX64FORTLIBDIR  = /opt/intel/composerxe/lib/intel64
 OSX32FORTLIBDIR  = /opt/intel/Compiler/11.1/080/lib
 OSX64FORTLIBDIR  = /opt/intel/Compiler/11.1/080/lib
+#LINUX32FORTLIBDIR  = /opt/intel/composerxe/lib/ia32
+#LINUX64FORTLIBDIR  = /opt/intel/composerxe/lib/intel64
 LINUX32FORTLIBDIR  = /opt/intel/Compiler/11.1/069/lib/ia32
 LINUX64FORTLIBDIR  = /opt/intel/Compiler/11.1/069/lib/intel64
 
