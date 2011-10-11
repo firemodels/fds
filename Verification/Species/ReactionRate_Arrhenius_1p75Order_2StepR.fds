@@ -5,7 +5,7 @@ CO2=CO+0.5O2
 ------------------------------------------------
 # Labels and Meshes
 -------------------------------------------------
-&HEAD CHID='ReactionRate_Arrhenius_1p75Order_3Step', TITLE='Finite_Rate_1-75_Order' /
+&HEAD CHID='ReactionRate_Arrhenius_1p75Order_2StepR', TITLE='Finite_Rate_1-75_Order' /
 &MESH IJK=8,8,8, XB=0.0,0.1,0.0,0.1,0.0,0.1 /
 &MISC GVEC=0.0, 0.0, 0.0 / 
 
