@@ -144,8 +144,8 @@ $RUNFDS Species Methane_flame_primitive
 $RUNFDS Species Methane_flame_lumped
 $RUNFDS Species ReactionRate_Arrhenius_0Order_1Step
 $RUNFDS Species ReactionRate_Arrhenius_2Order_1Step
-$RUNFDS Species ReactionRate_Arrhenius_1-75Order_2Step
-$RUNFDS Species ReactionRate_Arrhenius_1-75Order_3Step
+$RUNFDS Species ReactionRate_Arrhenius_1p75Order_2Step
+$RUNFDS Species ReactionRate_Arrhenius_1p75Order_2StepR
 $RUNFDS Species ReactionRate_MixCtrl_O2lim_1Step
 $RUNFDS Species ReactionRate_MixCtrl_Flim_1Step
 $RUNFDS Species ReactionRate_MixCtrl_O2lim_2Step
