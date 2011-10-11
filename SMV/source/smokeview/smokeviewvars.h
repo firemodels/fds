@@ -1010,7 +1010,7 @@ SVEXTERN int smoke3d_external;
 
 SVEXTERN smoke3d *smoke3dinfo;
 SVEXTERN int fire_red, fire_green, fire_blue;
-SVEXTERN float SVDECL(smoke_shade,0.3);
+SVEXTERN float SVDECL(smoke_shade,0.0);
 SVEXTERN float fire_halfdepth;
 SVEXTERN float hrrpuv_cutoff, global_hrrpuv_cutoff;
 
