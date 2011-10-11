@@ -2752,7 +2752,7 @@ typedef struct {
 
           strcpy(message,_("The texture file: "));
           strcat(message,buffer3);
-          strcat(message,_("was not found in either the current working directory or in "));
+          strcat(message,_(" was not found in either the current working directory or in "));
           strcat(message,smvprogdir);
           warning_message(message);
         }
