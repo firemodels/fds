@@ -1749,14 +1749,14 @@ This section describes a series of test cases designed to check the reaction rat
 
 \subsection{Mixing-controlled reactions (ReactionRate\_MixCtrl\_)}
 
-The mixing-controlled (mixed is burned) reaction model with local extinction is the default reaction mechanism in FDS. The reaction rate is determined by the eddy dissipation concept (EDC). The EDC assumes that the consumption rate of fuel is determined from the local fuel, oxidizer, and product mass fractions and the turbulent mixing time by the following equation \cite{Poinsot:TNC}:
+The mixing-controlled (mixed is burned) reaction model with local extinction is the default reaction mechanism in FDS. The reaction rate is determined by the eddy dissipation concept (EDC). The EDC assumes that the consumption rate of fuel for each reaction is determined from the local fuel, oxidizer, and product mass fractions and the turbulent mixing time by the following equation \cite{Poinsot:TNC}:
 
 \begin{equation}\label{eq:EDC}
-k = \frac{C}{\tau_{mix}} \, \min \left( Y_F,\frac{Y_\OTWO}{s},\beta\frac{Y_P}{(1+s)} \right)
+k_{i} = \frac{C}{\tau_{mix}} \, \min \left( Y_F,\frac{Y_\OTWO}{s},\beta\frac{Y_P}{(1+s)} \right)
 \end{equation}
-where $C$ and $\beta$ are model constants and $s$ is determined from the stoichiometry of the reaction. This model can be considered a deficient model as the consumption rate is found by the limiting species. To determine species evolution for the reaction, a system of ordinary differential equations is solved for each participating species:
+where $C$ and $\beta$ are model constants and $s$ is determined from the stoichiometry of the reaction. This model can be considered a deficient model as the consumption rate is found by the limiting species. To determine species evolution for the reaction, a system of ordinary differential equations is solved for each participating species ($\alpha$):
 \begin{equation}\label{eq:spec_ode}
-\frac{dY_{i}}{dt}= \frac{\nu_i \, W_i}{W_F} \, k
+\frac{dY_{\alpha}}{dt}= \frac{\nu_{\alpha} \, W_{\alpha}}{W_F} \, k
 \end{equation}
 To test this implementation, a one-step methane reaction
 \begin{equation}\label{eq:1step_methane}
@@ -1769,7 +1769,7 @@ is considered for both a fuel-limiting and oxygen-limiting case with a fixed mix
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_MixCtrl_Flim_1Step} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_MixCtrl_O2lim_1Step}
 \end{tabular*}
-\caption[Species Evolution in Mixing Controlled Reaction]{Time evolution of species mass fraction for a 1-step mixing controlled reaction with a fixed mixing time of $\tau_{mix}=0.1s$. (Left) Fuel limited reaction. (Right) Oxygen limited reaction.}
+\caption[Species Evolution in Mixing Controlled Reaction]{Time evolution of species mass fraction for a one-step mixing controlled reaction with a fixed mixing time of $\tau_{mix}=0.1s$. (Left) Fuel-limited reaction. (Right) Oxygen-limited reaction.}
 \label{fig:MixCtrl_1Step}
 \end{figure}
 
@@ -1794,56 +1794,56 @@ for both fuel-limited and oxygen-limited conditions with a fixed mixing time, $\
 
 The solution process for species evolution in finite rate reactions is similar to mixing-controlled reactions in that species evolution is found by solving a system of ordinary equations (\ref{eq:spec_ode}). The main difference between the mechanisms is that instead of the reaction rate being determined by the turbulent mixing time, the reaction rate in finite rate reactions is found using an Arrhenius reaction equation:
 \begin{equation}\label{eq:FR_Arr}
-\bar{k}_{i}=-A\prod(Y_{i}^{a_{i}})T^{n_{i}}\exp(-E/RT)
+{k}_{i}=-A\prod(Y_{\alpha}^{a_{\alpha}})T^{n_{\alpha}}\exp(-E/RT)
 \end{equation}
-where A, E, $a_{i}$, and $n_{i}$ are user defined inputs based on the specific reaction. Note that since Equation \ref{eq:FR_Arr} has an exponential term, the integration of Equation Set \ref{eq:spec_ode} is solved using a two-step Runge-Kutta scheme as compared to an explicit Euler scheme used in the mixing-controlled test case.
+where A, E, $a_{\alpha}$, and $n_{\alpha}$ are user defined inputs based on the specific reaction. Note that since Equation \ref{eq:FR_Arr} has an exponential term, the integration of Equation Set \ref{eq:spec_ode} is solved using a two-step Runge-Kutta scheme as compared to an explicit Euler scheme used in the mixing-controlled test cases.
 
 Here we consider two one-step cases, a zero-order and second-order reaction.  First, a one-step, zero-order test case of carbon monoxide oxidation:
 \begin{equation}\label{eq:1step_CO}
 \mathrm{CO+0.5 \, O_2 \rightarrow  CO_2}
 \end{equation}
-In this case, $E$, $a_{i}$, and $n_{i}$ are set to zero, and $A$ is set such that $\bar{k}_{i} = 1$. The resulting reaction rates simplify to a function of molecular weight and stoichiometric coefficients.
+In this case, $E$, $a_{\alpha}$, and $n_{\alpha}$ are set to zero, and $A$ is set such that ${k}_{i} = 1$. The resulting reaction rates simplify to a function of molecular weight and stoichiometric coefficients.
 
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_Arrhenius_0Order_1Step}
 \end{center}
-\caption[Species Evolution in Finite Rate Reaction]{Time evolution of species mass fraction for a 1-step zero order Arrhenius finite rate reaction.}
+\caption[Species Evolution in Finite Rate Reaction]{Time evolution of species mass fraction for a one-step zero-order Arrhenius finite rate reaction.}
 \label{fig:Arrhenius_0Order_1step}
 \end{figure}
-The second test case is a one-step, second-order propane reaction.
+The second test case is a one-step, second-order propane reaction:
 
 \begin{equation}\label{eq:1step_propane}
 \mathrm{C_3H_8 + 5 \, O_2 \rightarrow  3 \, CO_2 + 4 \, H_2O}
 \end{equation}
-$E$ and $n_{i}$ are still set to zero, but $a_{i}=[1,1,0,0]$  for propane, oxygen, carbon monoxide, and water vapor respectively, making the reaction second-order ($\mathcal{O}=\sum a_{i}$).
+$E$ and $n_{\alpha}$ are still set to zero, but $a_{\alpha}=[1,1,0,0]$  for propane, oxygen, carbon monoxide, and water vapor respectively, making the reaction second-order ($\mathcal{O}=\sum a_{\alpha}$).
 
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_Arrhenius_2Order_1Step}
 \end{center}
-\caption[Species Evolution in Finite Rate Reaction]{Time evolution of species mass fraction for a 1-step second order Arrhenius finite rate reaction.}
+\caption[Species Evolution in Finite Rate Reaction]{Time evolution of species mass fraction for a one-step second-order Arrhenius finite rate reaction.}
 \label{fig:Arrhenius_2Order_1step}
 \end{figure}
 
-Multi-step Arrhenius finite rate reactions are also tested. A 2-step propane reaction:
+Multi-step Arrhenius finite rate reactions are also tested. A two-step forward propane reaction:
 \begin{eqnarray}\label{eq:2step_propane}
 \mathrm{C_3H_8+3.5 \, O_2 \rightarrow  3 \, CO + 4 \, H_2O} \\
 \nonumber \mathrm{CO+0.5 \, O_2 \rightarrow CO_2}
 \end{eqnarray}
-and a 3-step propane reaction reaction:
-\begin{eqnarray}\label{eq:3step_propane}
+and a two-step reversible propane reaction:
+\begin{eqnarray}\label{eq:2step_propane_rev}
 \mathrm{C_3H_8+3.5 \, O_2 \rightarrow  3 \, CO+4 \, H_2O} \\
 \nonumber \mathrm{CO + 0.5 \, O_2 \leftrightarrow CO_2}
 \end{eqnarray}
- are considered. Equation \ref{eq:3step_propane} includes the decomposition of $CO_2$ into $CO$ and $O_2$ which the 2-step does not. The reaction order for the first two steps in both cases is 1.75. In the first reaction $a_{i}=[0.1,1.65,0,0]$ for propane, oxygen, carbon monoxide, and water vapor respectively. In the second (forward) reaction $a_{i}=[1,0.25,0,0.5]$ for carbon monoxide, oxygen, carbon dioxide, and water vapor respectively. Note that in the second step, water vapor contributes to the reaction rate based on its local concentration despite not being a participant in the reaction. For the reverse reaction in Equation \ref{eq:3step_propane}, $a_{i}=[1,0,0]$ for carbon dioxide, carbon monoxide, and oxygen respectively.
+ are considered. Equation \ref{eq:2step_propane_rev} includes the decomposition of $CO_2$ into $CO$ and $O_2$ which the forward only two-step mechanism does not. This reaction mechanism is represented by three separate reactions on the {\ct REAC} line in an FDS input file. The reaction order for the first two steps in both cases is 1.75. In the first reaction $a_{\alpha}=[0.1,1.65,0,0]$ for propane, oxygen, carbon monoxide, and water vapor respectively. In the forward carbon monoxide reaction $a_{\alpha}=[1,0.25,0,0.5]$ for carbon monoxide, oxygen, carbon dioxide, and water vapor respectively. Note that in the  forward second step, water vapor contributes to the reaction rate based on its local concentration despite not being a participant in the reaction. For the reverse reaction in Equation \ref{eq:2step_propane_rev}, $a_{\alpha}=[1,0,0]$ for carbon dioxide, carbon monoxide, and oxygen respectively.
 
  \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_Arrhenius_1-75Order_2Step} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_Arrhenius_1-75Order_3Step}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_Arrhenius_1p75Order_2Step} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_Arrhenius_1p75Order_2StepR}
 \end{tabular*}
-\caption[Species Evolution in Mixing Controlled Reaction]{Time evolution of species mass fraction for multi-step Arrhenius finite rate propane reactions. (Left) 2-step. (Right) 3-step.}
+\caption[Species Evolution in Mixing Controlled Reaction]{Time evolution of species mass fraction for multi-step Arrhenius finite rate propane reactions. (Left) Two-step reaction. (Right) Two-step reaction with reversible CO reaction.}
 \label{fig:MixCtrl_2Step2}
 \end{figure}
 
