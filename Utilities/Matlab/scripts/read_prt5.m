@@ -6,9 +6,12 @@
 %
 % Example:
 %
-% >> read_prt5('terminal_velocity.prt5')
+% >> read_prt5('terminal_velocity.prt5','real*8')
+%
+% precision = 'real*4' if EB_PART_FILE=.FALSE.
+% precision = 'real*8' if EB_PART_FILE=.TRUE.
 
-function [STIME, XP, YP, ZP, QP] = read_prt5(filename)
+function [STIME, XP, YP, ZP, QP] = read_prt5(filename,precision)
 
 fid = fopen(filename);
 
@@ -50,7 +53,7 @@ while ~feof(fid)
     n = n + 1;
     
     DUMMY = fread(fid,1,'integer*4');
-    stime_tmp = fread(fid,1,'real*8');
+    stime_tmp = fread(fid,1,precision);
     DUMMY = fread(fid,1,'integer*4');
     
     if size(stime_tmp,1)==0
@@ -66,9 +69,9 @@ while ~feof(fid)
         DUMMY = fread(fid,1,'integer*4');
         
         DUMMY = fread(fid,1,'integer*4');
-        xp = fread(fid,NPLIM,'real*8');
-        yp = fread(fid,NPLIM,'real*8');
-        zp = fread(fid,NPLIM,'real*8');
+        xp = fread(fid,NPLIM,precision);
+        yp = fread(fid,NPLIM,precision);
+        zp = fread(fid,NPLIM,precision);
         DUMMY = fread(fid,1,'integer*4');
         
         for NP=1:NPLIM
@@ -85,7 +88,7 @@ while ~feof(fid)
         if N_QUANTITIES(NPC)>0
             DUMMY = fread(fid,1,'integer*4');
             for NQ=1:N_QUANTITIES(NPC)
-                qp = fread(fid,NPLIM,'real*8');
+                qp = fread(fid,NPLIM,precision);
                 for NP=1:NPLIM
                     QP(n,NP,NPC,NQ) = qp(NP);
                 end
@@ -99,7 +102,7 @@ while ~feof(fid)
 end
 fclose(fid);
 
-display('Part file read successfully!')
+%display('Part file read successfully!')
 
 % Examples for plotting position and quantities
 
