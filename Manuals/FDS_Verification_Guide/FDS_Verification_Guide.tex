@@ -2591,10 +2591,31 @@ Fig.~\ref{fig_birch_tga} near the temperature of 100~$^\circ$C.
 
 \chapter{Lagrangian Particles}
 
-This chapter contains verification cases that test all aspects of particles, droplets, sprays, and so on. Note that in FDS, lagrangian particles are used for
-a variety of purposes, not just water droplets.
+This chapter contains verification cases that test all aspects of particles, droplets, sprays, and so on. Note that in FDS, lagrangian particles are used for a variety of purposes, not just water droplets.
 
-\section{Momentum Transfer (\texorpdfstring{{\bf particle\_drag}}{particle\_drag})}
+\section{Fluid-Particle Momentum Transfer (fluid\_part\_mom\_x, \_y, \_z)}
+
+The {\bf fluid\_part\_mom} cases test accuracy, stability, and momentum conservation for the general case of momentum transfer between fluid and particles via drag.  Examples include, sprinkler and mist nozzles and ember transport.  For sprinkler nozzle applications, it is impossible to resolve the details of the nozzle and the fluid flow and particle transport near the nozzle presents challenges to accuracy and stability of integrating the particle drag laws, which are a coupled set of ordinary differential equations for each component of momentum for each particle and the fluid.  Details of the FDS scheme are given in the Tech Guide.  In short, we find an analytical solution for the case of binary fluid-particle interaction and apply this solution to the case of multiple particles by enforcing total momentum conservation within a fluid cell.  The resulting scheme is guaranteed to be stable because the fluid velocity cannot overshoot the cell equilibrium velocity (total momentum of fluid and particles divided by the total mass).
+
+We set up three separate tests, one for each coordinate direction.  These are labeled \_x, \_y, and \_z in the verification directory.  We consider a duct 1 m $\times$ 1 m in the vertical and spanwise directions and 10 m in the streamwise direction.  The boundary conditions are periodic in the streamwise direction and free slip walls along the inside of the duct. The fluid grid is 40 $\times$ 4 $\times$ 4 for the x case; the y and z cases use analogous grids.  The fluid velocity is initialized to be 10 m/s in the streamwise direction.  A monodisperse distribution of 1000 particles is initialized with zero velocity and random positions in the first cubic meter of the duct.  Gravity is set to zero.
+
+As the case proceeds momentum is exchanged between the fluid and the particles.  The momenta relax toward equilibrium.  The results for all three tests are shown in Figure \ref{fig_fluid_part_mom}.  On the left, the green symbols represent the total momentum of the system, which, as can be seen, is conserved.  The fluid (blue) and the particle (red) momenta are closely following the analytical solution (solid lines) which is the basis of the scheme.  The plot on the right shows the fluid (blue) and particle (red) velocities compared to the system equilibrium velocity (greeen dashed line).  By construction of the method, both the fluid and the particle velocities are approaching the equilibrium velocity at long times.
+
+\begin{figure}[h]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/fluid_part_momentum} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/fluid_part_velocity}
+\end{tabular*}
+\caption[Test of fluid-particle momentum transfer for nonstationary particles.]{Outputs of the {\bf fluid\_part\_mom} cases.  (Left) The fluid momentum (blue), the particle momentum (red), and the total momentum (green) are plotted for each coordinate direction, $x$ (circles), $y$ (inverted triangles), and $z$ (plus symbols). (Right) The fluid (blue) and particle (red) velocities are plotted for each direction.  Also, the equilibrium velocity (total momentum [fluid plus particles] divided by the total mass) is shown as a dashed green line.  Stability of the momentum exchange is guaranteed because by construction the fluid velocity cannot overshoot the equilibrium velocity; the fluid velocity relaxes toward it.}
+\label{fig_fluid_part_mom}
+\end{figure}
+
+\clearpage
+
+\newpage
+
+\section{Stationary Particles (\texorpdfstring{{\bf particle\_drag}}{particle\_drag})}
 \label{particle_drag}
 
 The particle drag test cases consider a 1~m by 1~m by 1~m
@@ -2656,8 +2677,141 @@ F & 150 & 1600 \tabularnewline
 
 \clearpage
 
+\newpage
 
+\section{Particles in 1D (terminal\_velocity)}
 
+\subsubsection{Ben Trettel, NIST SURF student}
+
+If a single droplet having a constant drag coefficient falls through a stationary fluid, its velocity and trajectory can be found analytically.
+This is the ``terminal velocity'' case. The particle starts from rest and falls under the influence of gravity and drag in 1D.
+FDS runs until a steady-state solution is reached. The equation governing this motion is
+\[
+	\dot{u} = K u^2 - g \quad ; \quad K \equiv \frac{\rho_a C_d A}{2 m}
+\]
+$\rho_a$ is the ambient air density, $C_d$ is the drag coefficient of the droplet, $A$ is the cross-sectional area of the droplet, and $m$ is the mass of the droplet.
+Defining $\rho_d$ as the density of the droplet and $D_d$ as the diameter of the droplet and solving this ODE with zero ICs,
+the solution below and equivalent definition of $K$ for a droplet is found.
+% D = 10 mm
+% Cd = 1.0
+% g = -9.8 m/s^2
+\be
+	u = \frac{d x}{d t} = - \sqrt{\frac{g}{K}} \text{tanh}\left(\sqrt{g K} t\right) \quad ; \quad
+	x = - \frac{\text{ln}\left[\text{cosh}\left(\sqrt{g K} t \right)\right]}{K} \quad ; \quad
+	K \equiv \frac{3 \rho_a C_d}{4 \rho_d D_d}
+\ee
+The terminal velocity case is run over several time steps. The precise configuration of the scenario is detailed in the table below.
+The $L_\infty$ error of the terminal velocity and position are computed and plotted for each time step.
+\begin{center}
+\begin{tabular}{|r|c|l|}
+\hline
+Drag coefficient of droplet & $C_d$ & 1 \\
+Diameter of droplet & $D_d$ & 10~mm \\
+Gravitational acceleration & $g$ & 9.8~m/s$^2$ \\
+Droplet fluid density & $\rho_d$ & 1000~kg/m$^3$ \\
+\hline
+\end{tabular}
+\end{center}
+FDS demonstrated second-order convergence in the terminal velocity case for both the velocities and the positions. See Fig.~\ref{fig_terminal_velocity_convergence}.
+
+\begin{figure}[h]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/terminal_velocity_convergence} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/position_convergence}
+\end{tabular*}
+\caption[Convergence analysis of terminal velocity test case.]{(Left) FDS convergence for the particle velocity in the terminal velocity case. (Right) FDS convergence for the particle position in the terminal velocity case.}
+\label{fig_terminal_velocity_convergence}
+\end{figure}
+
+%
+%\section{Accuracy of Fluid-Particle Momentum Transfer}
+%In Appendix G of the Technical Reference Guide the numerical scheme FDS uses to compute these trajectories is detailed. The equation for particle velocities is
+%\begin{equation}
+%	\mathbf{u}_p^{n+1} = \frac{\mathbf{u}_p^n}{1 + \beta_p \Delta t} + \frac{(\mathbf{u}_p^n + \alpha_p \mathbf{U}_p^n)\beta_p \Delta t}{(1 + \beta_p \Delta t)(1 + \alpha_p)} + \mathbf{g} \Delta t - \frac{\alpha_p \beta_p (\Delta t)^2}{2 (1 + \alpha_p)} \left[\mathbf{u}_r^n \left(\frac{\mathbf{u}_r^n \cdot \mathbf{g}}{|\mathbf{u}_r^n|^2}\right) + \mathbf{g}\right] \,.
+%\end{equation}
+%And the equation for particle positions is
+%\begin{equation}
+%	\mathbf{x}_p^{n+1} = \mathbf{x}_p^n + \left(\frac{\mathbf{u}_p^n + \alpha_p \mathbf{U}_p^n}{1 + \alpha_p}\right) \Delta t + \frac{\alpha_p (\mathbf{u}_p^n - \mathbf{U}_p^n)}{\beta_p (1 + \alpha_p)} \text{ln}(\beta_p \Delta t + 1) + \frac{\mathbf{g} (\Delta t)^2}{2} - \frac{\alpha_p \beta_p (\Delta t)^3}{6 (1 + \alpha_p)} \left[\mathbf{u}_p^n \left(\frac{\mathbf{u}_p^n \cdot \mathbf{g}}{|\mathbf{u}_p^n|^2}\right) + \mathbf{g}\right] \,.
+%\end{equation}
+%The particle velocities are second-order accurate in time. In other words, they are accurate to an order-of-magnitude of $\Delta t^2$. The error committed each time step as shown in Appendix G is
+%\begin{equation}
+%	\epsilon = \mathcal{O}(\Delta t^3) \,.
+%\end{equation}
+%This error is accumulated over many time steps. The allows us to define the total error $E \equiv n \epsilon$ where $n = T/\Delta T$ is the number of time steps and $T$ is the final time iterated out to. The total error can be found to be
+%\begin{equation}
+%	E = n \epsilon = \frac{T}{\Delta t} \mathcal{O}(\Delta t^3) = \mathcal{O}(\Delta t^2) \,.
+%\end{equation}
+%The particle velocities should be second-order accurate, as has been shown in FDS.
+%
+%
+%The accuracy of the particle positions, $\mathbf{x}$ is less obvious and finding their accuracy requires knowledge of the accuracy of $\mathbf{u}$. The natural log term of the position equation reduces the order of accuracy. Note that
+%\begin{equation}
+%	\frac{\alpha_p (\mathbf{u}_p^n - \mathbf{U}_p^n)}{\beta_p (1 + \alpha_p)} \text{ln}(\beta_p \Delta t + 1) = \frac{\alpha_p (\mathbf{u}_p^n - \mathbf{U}_p^n)}{1 + \alpha_p} \left(\Delta t - \frac{\beta_p \Delta t^2}{2} + \cdots \right) \quad \text{ for } \beta_p t < 1 \,.
+%\end{equation}
+%Also note that $\mathbf{u}_p^n = \mathbf{u}_{p,\text{exact}}^n + \mathcal{O}(\Delta t^2)$ in general. This error propagates through the natural log term. If only the relevant parts of the term are extracted we can see that
+%\begin{equation}
+%	\frac{\mathbf{u}_p^n}{\beta_p} \text{ln}(\beta_p \Delta t + 1) = (\mathbf{u}_{p,\text{exact}}^n + \mathcal{O}(\Delta t^2)) \left(\Delta t - \frac{\beta_p \Delta t^2}{2} + \cdots \right) = \frac{\mathbf{u}_{p,\text{exact}}^n \text{ln}(\beta_p \Delta t + 1)}{\beta_p} + \mathcal{O}(\Delta t^3) \,.
+%\end{equation}
+%This third-order error per time step becomes an accumulated second-order error, and consequently the position scheme is only second-order accurate as has been shown numerically.
+%
+%
+%Due to this error, the $\Delta t^3$ term of the position equation is dropped because it offers no improvements in accuracy but requires more computation.
+
+\clearpage
+
+\newpage
+
+\section{2D Flat Fire Trajectory (flat\_fire)}
+
+\subsubsection{Ben Trettel, NIST SURF student}
+
+There are no known solutions of the drag equations in multiple dimensions. However, ballisticians have developed an approximate solution useful for computing trajectories of projectiles when guns are shot within a certain range of angles. This solution makes use of the ``flat fire'' assumption. In short, if a particle is launched with its velocity in only the horizontal direction and its vertical velocity is never very significant compared to the horizonal velocity, then throughout the entire trajectory the horizontal velocity component, $u$, is a good approximation for the velocity magnitude, $|\mathbf{u}|$.
+
+%In 2D, this approximation decouples the $x$ equation of motion from the $y$ equation of motion and reduces the $y$ equation of motion to a linear ODE.
+%\begin{align*}
+%	\ddot{x} = -K \dot{x} \sqrt{\dot{x}^2 + \dot{y}^2} \quad &; \quad \ddot{y} = -K \dot{y} \sqrt{\dot{x}^2 + \dot{y^2}} - g \\
+%	&\Downarrow \\
+%	\ddot{x} = -K \dot{x}^2 \quad &; \quad \ddot{y} = -K \dot{y} \dot{x} - g
+%\end{align*}
+To ensure that the flat fire assumption is valid, the following ICs are used: $x(0) = 0$, $\dot{x}(0) = u(0) = V_0$, $z(0) = h$, $\dot{z}(0) = w(0) = 0$. The exact solution to this system is below.
+\be
+	x = \frac{\text{log}(V_0 K t + 1)}{K} \quad ; \quad
+	z = h + \frac{g \text{log}(V_0 K t + 1)}{2 (V_0 K)^2} - \frac{g t^2}{4} - \frac{g t}{2 V_0 K} \quad ; \quad
+	K \equiv \frac{3 \rho_a C_d}{4 \rho_d D_d}
+\ee
+\be
+	u = \frac{\mbox{d} x}{\mbox{d} t} = \frac{V_0}{V_0 K t + 1} \quad ; \quad w = \frac{\mbox{d} z}{\mbox{d} t} = \frac{g}{2 V_0 K (V_0 K t + 1)} - \frac{g t}{2} - \frac{g}{2 V_0 K}
+\ee
+The following case was run in FDS and compared against the approximate solution:
+\begin{center}
+\begin{tabular}{|r|c|l|}
+\hline
+Drag coefficient of droplet & $C_d$ & 0.2 \\
+Diameter of droplet & $D_d$ & 5~mm \\
+Gravitational acceleration & $g$ & 9.8~m/s$^2$ \\
+Droplet fluid density & $\rho_d$ & 1000~kg/m$^3$ \\
+Starting $x$-velocity & $V_0$ & 400~m/s \\
+\hline
+\end{tabular}
+\end{center}
+As can be seen in Figure \ref{flat_fire_plots}, FDS agrees well with this approximate solution. The flat fire solution should have slightly faster vertical velocities, $w$, at extended times because the speed of the particle is approximated with $u$, which is lower than the true speed at extended times. This ensures the drag force is lower than it should be, and consequently $w$ is too fast. In the lower left plot in Figure \ref{flat_fire_plots} the $w$-velocity from FDS is slightly slower than the flat fire solution.
+\begin{figure}[p]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/flat_fire_trajectory} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/flat_fire_x} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/flat_fire_z} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/flat_fire_u} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/flat_fire_w} &
+\end{tabular*}
+\caption{Output of the test case called {\bf flat\_fire}.}
+\label{flat_fire_plots}
+\end{figure}
+
+\clearpage
+
+\newpage
 
 \section{Water Droplet Evaporation (\texorpdfstring{{\textbf{water\_evaporation}}}{water\_evaporation}) }
 \label{water_evaporation}
@@ -2776,141 +2930,9 @@ As opposed to the other cases above, this case tests the predicted rate of evapo
 \label{water_evaporation_4_plots}
 \end{figure}
 
-
-\newpage
-
-\section{Particles in 1D (terminal\_velocity)}
-
-If a single droplet having a constant drag coefficient falls through a stationary fluid, its velocity and trajectory can be found analytically.
-This is the ``terminal velocity'' case. The particle starts from rest and falls under the influence of gravity and drag in 1D.
-FDS runs until a steady-state solution is reached. The equation governing this motion is
-\[
-	\dot{u} = K u^2 - g \quad ; \quad K \equiv \frac{\rho_a C_d A}{2 m}
-\]
-$\rho_a$ is the ambient air density, $C_d$ is the drag coefficient of the droplet, $A$ is the cross-sectional area of the droplet, and $m$ is the mass of the droplet.
-Defining $\rho_d$ as the density of the droplet and $D_d$ as the diameter of the droplet and solving this ODE with zero ICs,
-the solution below and equivalent definition of $K$ for a droplet is found.
-% D = 10 mm
-% Cd = 1.0
-% g = -9.8 m/s^2
-\be
-	u = \frac{d x}{d t} = - \sqrt{\frac{g}{K}} \text{tanh}\left(\sqrt{g K} t\right) \quad ; \quad
-	x = - \frac{\text{ln}\left[\text{cosh}\left(\sqrt{g K} t \right)\right]}{K} \quad ; \quad
-	K \equiv \frac{3 \rho_a C_d}{4 \rho_d D_d}
-\ee
-FDS ran the terminal velocity case over several time steps. The precise configuration of the scenario is detailed in the table below.
-The error of this terminal velocity and the L$_\infty$ norm of position error are computed and plotted for each time step.
-\begin{center}
-\begin{tabular}{|r|c|l|}
-\hline
-Drag coefficient of droplet & $C_d$ & 1 \\
-Diameter of droplet & $D_d$ & 10~mm \\
-Gravitational acceleration & $g$ & 9.8~m/s$^2$ \\
-Droplet fluid density & $\rho_d$ & 1000~kg/m$^3$ \\
-\hline
-\end{tabular}
-\end{center}
-FDS demonstrated second-order convergence in the terminal velocity case for both the velocities and the positions. See Fig.~\ref{fig_terminal_velocity_convergence}.
-
-\begin{figure}[h]
-\noindent
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/terminal_velocity_convergence} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/position_convergence}
-\end{tabular*}
-\caption[Convergence analysis of terminal velocity test case.]{(Left) FDS exhibits second-order convergence for the particle velocity in the terminal velocity case. (Right) FDS exhibits second-order convergence for the particle position in the terminal velocity case.}
-\label{fig_terminal_velocity_convergence}
-\end{figure}
-
-
 \clearpage
 
-\section{Accuracy of Fluid-Particle Momentum Transfer}
-In Appendix G of the Technical Reference Guide the numerical scheme FDS uses to compute these trajectories is detailed. The equation for particle velocities is
-\begin{equation}
-	\mathbf{u}_p^{n+1} = \frac{\mathbf{u}_p^n}{1 + \beta_p \Delta t} + \frac{(\mathbf{u}_p^n + \alpha_p \mathbf{U}_p^n)\beta_p \Delta t}{(1 + \beta_p \Delta t)(1 + \alpha_p)} + \mathbf{g} \Delta t - \frac{\alpha_p \beta_p (\Delta t)^2}{2 (1 + \alpha_p)} \left[\mathbf{u}_r^n \left(\frac{\mathbf{u}_r^n \cdot \mathbf{g}}{|\mathbf{u}_r^n|^2}\right) + \mathbf{g}\right] \,.
-\end{equation}
-And the equation for particle positions is
-\begin{equation}
-	\mathbf{x}_p^{n+1} = \mathbf{x}_p^n + \left(\frac{\mathbf{u}_p^n + \alpha_p \mathbf{U}_p^n}{1 + \alpha_p}\right) \Delta t + \frac{\alpha_p (\mathbf{u}_p^n - \mathbf{U}_p^n)}{\beta_p (1 + \alpha_p)} \text{ln}(\beta_p \Delta t + 1) + \frac{\mathbf{g} (\Delta t)^2}{2} - \frac{\alpha_p \beta_p (\Delta t)^3}{6 (1 + \alpha_p)} \left[\mathbf{u}_p^n \left(\frac{\mathbf{u}_p^n \cdot \mathbf{g}}{|\mathbf{u}_p^n|^2}\right) + \mathbf{g}\right] \,.
-\end{equation}
-The particle velocities are second-order accurate in time. In other words, they are accurate to an order-of-magnitude of $\Delta t^2$. The error committed each time step as shown in Appendix G is
-\begin{equation}
-	\epsilon = \mathcal{O}(\Delta t^3) \,.
-\end{equation}
-This error is accumulated over many time steps. The allows us to define the total error $E \equiv n \epsilon$ where $n = T/\Delta T$ is the number of time steps and $T$ is the final time iterated out to. The total error can be found to be
-\begin{equation}
-	E = n \epsilon = \frac{T}{\Delta t} \mathcal{O}(\Delta t^3) = \mathcal{O}(\Delta t^2) \,.
-\end{equation}
-The particle velocities should be second-order accurate, as has been shown in FDS.
-
-
-The accuracy of the particle positions, $\mathbf{x}$ is less obvious and finding their accuracy requires knowledge of the accuracy of $\mathbf{u}$. The natural log term of the position equation reduces the order of accuracy. Note that
-\begin{equation}
-	\frac{\alpha_p (\mathbf{u}_p^n - \mathbf{U}_p^n)}{\beta_p (1 + \alpha_p)} \text{ln}(\beta_p \Delta t + 1) = \frac{\alpha_p (\mathbf{u}_p^n - \mathbf{U}_p^n)}{1 + \alpha_p} \left(\Delta t - \frac{\beta_p \Delta t^2}{2} + \cdots \right) \quad \text{ for } \beta_p t < 1 \,.
-\end{equation}
-Also note that $\mathbf{u}_p^n = \mathbf{u}_{p,\text{exact}}^n + \mathcal{O}(\Delta t^2)$ in general. This error propagates through the natural log term. If only the relevant parts of the term are extracted we can see that
-\begin{equation}
-	\frac{\mathbf{u}_p^n}{\beta_p} \text{ln}(\beta_p \Delta t + 1) = (\mathbf{u}_{p,\text{exact}}^n + \mathcal{O}(\Delta t^2)) \left(\Delta t - \frac{\beta_p \Delta t^2}{2} + \cdots \right) = \frac{\mathbf{u}_{p,\text{exact}}^n \text{ln}(\beta_p \Delta t + 1)}{\beta_p} + \mathcal{O}(\Delta t^3) \,.
-\end{equation}
-This third-order error per time step becomes an accumulated second-order error, and consequently the position scheme is only second-order accurate as has been shown numerically.
-
-
-Due to this error, the $\Delta t^3$ term of the position equation is dropped because it offers no improvements in accuracy but requires more computation.
-
 \newpage
-
-\section{2D Flat Fire Trajectory (flat\_fire)}
-There are no known solutions of the drag equations in higher dimensions. However, ballisticians developed an approximate solution useful for computing trajectories of projectiles when guns are shot within a certain range of angles. This solution makes use of the ``flat fire'' assumption. In short, if a particle is launched with its velocity in only the $x$-direction and its $y$-velocity is never very significant compared against the $x$-velocity, then throughout the entire trajectory $u$ is a good approximation for $|\mathbf{u}|$.
-
-
-%In 2D, this approximation decouples the $x$ equation of motion from the $y$ equation of motion and reduces the $y$ equation of motion to a linear ODE.
-%\begin{align*}
-%	\ddot{x} = -K \dot{x} \sqrt{\dot{x}^2 + \dot{y}^2} \quad &; \quad \ddot{y} = -K \dot{y} \sqrt{\dot{x}^2 + \dot{y^2}} - g \\
-%	&\Downarrow \\
-%	\ddot{x} = -K \dot{x}^2 \quad &; \quad \ddot{y} = -K \dot{y} \dot{x} - g
-%\end{align*}
-To ensure that the flat fire assumption is valid, the following ICs are used: $x(0) = 0$, $\dot{x}(0) = u(0) = V_0$, $y(0) = h$, $\dot{y}(0) = v(0) = 0$. The exact solution to this system is below.
-\be
-	x = \frac{\text{log}(V_0 K t + 1)}{K} \quad ; \quad
-	y = h + \frac{g \text{log}(V_0 K t + 1)}{2 (V_0 K)^2} - \frac{g t^2}{4} - \frac{g t}{2 V_0 K} \quad ; \quad
-	K \equiv \frac{3 \rho_a C_d}{4 \rho_d D_d}
-\ee
-\be
-	u = \frac{d x}{d t} = \frac{V_0}{V_0 K t + 1} \quad ; \quad v = \frac{d y}{d t} = \frac{g}{2 V_0 K (V_0 K t + 1)} - \frac{g t}{2} - \frac{g}{2 V_0 K}
-\ee
-The following case was run in FDS and compared against the approximate solution:
-\begin{center}
-\begin{tabular}{|r|c|l|}
-\hline
-Drag coefficient of droplet & $C_d$ & 0.2 \\
-Diameter of droplet & $D_d$ & 5~mm \\
-Gravitational acceleration & $g$ & 9.8~m/s$^2$ \\
-Droplet fluid density & $\rho_d$ & 1000~kg/m$^3$ \\
-Starting $x$-velocity & $V_0$ & 400~m/s \\
-\hline
-\end{tabular}
-\end{center}
-As can be seen in figure \ref{flat_fire_plots}, FDS agrees well with this approximate solution. The flat fire solution should have slightly faster $v$-velocities at extended times because the speed of the particle is approximated with $u$, which is lower than the true speed at extended times. This ensures the drag force is lower than it should be, and consequently, the $v$-velocity is too fast. In the lower left plot in \ref{flat_fire_plots} the $v$-velocity from FDS is slightly slower than the flat fire solution.
-\begin{figure}[p]
-\noindent
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/flat_fire_trajectory} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/flat_fire_x} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/flat_fire_z} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/flat_fire_u} \\
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/flat_fire_w} &
-\end{tabular*}
-\caption{Output of the test case called {\bf flat\_fire}.}
-\label{flat_fire_plots}
-\end{figure}
-
-
-
-
-
-
-
 
 
 \chapter{Heating, Ventilating, and Air Conditioning (HVAC)}
