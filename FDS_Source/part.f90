@@ -880,7 +880,7 @@ DO I=1,NLP
    II  = FLOOR(XI+1._EB)
    JJ  = FLOOR(YJ+1._EB)
    KK  = FLOOR(ZK+1._EB)
-   IF (DR%PWT>0._EB) NDPC(II,JJ,KK)=NDPC(II,JJ,KK)+1._EB
+   IF (DR%PWT>0._EB) NDPC(II,JJ,KK)=NDPC(II,JJ,KK)+DR%PWT
 ENDDO
 
 ! Loop through all Lagrangian particles and move them one time step
