@@ -52,5 +52,6 @@ run scripts/plate_view_factor
 run scripts/low_flux_hot_gas_filling
 run scripts/terminal_velocity_convergence
 run scripts/flat_fire_comparison
+run scripts/fluid_part
 
 display('verification scripts completed successfully!')
