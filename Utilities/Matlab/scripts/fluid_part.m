@@ -126,6 +126,19 @@ legend(H(1:11),'FDS fluid U','FDS fluid V','FDS fluid W', ...
               'FDS particle U','FDS particle V','FDS particle W', ...
               'FDS total U','FDS total V','FDS total W', ...
               'analytical fluid','analytical particle')
+          
+% add SVN if file is available
+
+SVN_Filename = [ddir,'fluid_part_mom_x_svn.txt'];
+if exist(SVN_Filename,'file')
+    SVN = importdata(SVN_Filename);
+    x_lim = get(gca,'XLim');
+    y_lim = get(gca,'YLim');
+    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
+    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
+    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
+        'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+end
 
 set(gcf,'Visible','on');
 set(gcf,'PaperUnits',Paper_Units);
@@ -172,6 +185,19 @@ ylabel('Velocity (m/s)','Interpreter','LaTeX','FontSize',Label_Font_Size)
 legend(H(1:7),'FDS fluid U','FDS fluid V','FDS fluid W',...
               'FDS particle U','FDS particle V','FDS particle W',...
               'equilibrium velocity')
+          
+% add SVN if file is available
+
+SVN_Filename = [ddir,'fluid_part_mom_x_svn.txt'];
+if exist(SVN_Filename,'file')
+    SVN = importdata(SVN_Filename);
+    x_lim = get(gca,'XLim');
+    y_lim = get(gca,'YLim');
+    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
+    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
+    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
+        'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+end
 
 set(gcf,'Visible','on');
 set(gcf,'PaperUnits',Paper_Units);
