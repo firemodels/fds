@@ -170,6 +170,9 @@ $RUNFDS Sprinklers_and_Sprays terminal_velocity_dt\=0_01
 $RUNFDS Sprinklers_and_Sprays terminal_velocity_dt\=0_001
 $RUNFDS Sprinklers_and_Sprays terminal_velocity_dt\=0_0001
 $RUNFDS Sprinklers_and_Sprays flat_fire
+$RUNFDS Sprinklers_and_Sprays fluid_part_mom_x
+$RUNFDS Sprinklers_and_Sprays fluid_part_mom_y
+$RUNFDS Sprinklers_and_Sprays fluid_part_mom_z
 $RUNFDS Sprinklers_and_Sprays water_cooling
 $RUNFDS Sprinklers_and_Sprays water_evaporation_1
 $RUNFDS Sprinklers_and_Sprays water_evaporation_2
