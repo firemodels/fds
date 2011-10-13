@@ -2750,9 +2750,9 @@ typedef struct {
         if(texturebuffer!=NULL&&buffer3!=NULL&&found_texture==0&&strncmp(buffer3,"null",4)!=0){
           char message[1024];
 
-          strcpy(message,_("The texture file: "));
+          strcpy(message,"The texture file: ");
           strcat(message,buffer3);
-          strcat(message,_(" was not found in either the current working directory or in "));
+          strcat(message," was not found in either the current working directory or in ");
           strcat(message,smvprogdir);
           warning_message(message);
         }
