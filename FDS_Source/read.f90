@@ -8236,11 +8236,15 @@ INIT_LOOP: DO N=1,N_INIT_READ
                IN%X0 = XYZ(1) + MR%DX0
                IN%Y0 = XYZ(2) + MR%DY0
                IN%Z0 = XYZ(3) + MR%DZ0
-               IN%U0 = UVW(1)
-               IN%V0 = UVW(2)
-               IN%W0 = UVW(3)
-               IN%RADIUS = DIAMETER*0.5E-6_EB        ! convert diameter (microns) to radius (meters)
+               !IN%U0 = UVW(1)
+               !IN%V0 = UVW(2)
+               !IN%W0 = UVW(3)
+               IN%RADIUS = DIAMETER*0.5E-6_EB   ! convert diameter (microns) to radius (meters)
             ENDIF POINTWISE_DROPLET_IF
+            ! also allow UVW to be set for XB init
+            IN%U0 = UVW(1)
+            IN%V0 = UVW(2)
+            IN%W0 = UVW(3)
          
          ENDDO I_MULT_LOOP
       ENDDO J_MULT_LOOP
