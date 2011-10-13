@@ -652,9 +652,9 @@ OVERALL_INSERT_LOOP: DO
                KK = CELLSK(FLOOR((DR%Z-ZS)*RDZINT)) + 1._EB
                IF (.NOT.SOLID(CELL_INDEX(II,JJ,KK))) EXIT BLOCK_OUT_LOOP
             ENDDO BLOCK_OUT_LOOP
-            DR%U   = 0._EB                     ! No initial velocity
-            DR%V   = 0._EB
-            DR%W   = 0._EB
+            DR%U   = IN%U0                     ! Initial velocity (default zero)
+            DR%V   = IN%V0
+            DR%W   = IN%W0
             DR%R   = 0._EB                     ! Radius is zero unless DIAMETER has been specified
             DR%TMP = PC%TMP_INITIAL            ! Initial temperature
             DR%PWT = 1._EB                     ! Weighting factor is one unless changed below
