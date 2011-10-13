@@ -77,25 +77,21 @@ if(show_smoketest==0){\
     xyzindex=xyzindex2;                                  \
   }                                                      \
   for(node=0;node<6;node++){                             \
+    unsigned char alphabyte;\
+    float alphaval;\
+    int mm;\
     mm = xyzindex[node];                                 \
     alphabyte = value[mm];                               \
-    switch (skip){                                       \
-      case 1:\
-       break;\
-      case 2:                                              \
-        alphaval=alphabyte/255.0; \
-        alphaval=alphaval*(2.0-alphaval);                  \
-        alphabyte=alphaval*255.0;\
-       break;                                             \
-      case 3:                                              \
-        alphaval=alphabyte/255.0;                              \
-        alphaval = 3*alphaval*(1.0-alphaval*(1.0-alphaval/3.0));\
-        alphabyte = 255*alphaval; \
-        break;                                                   \
-      default:\
-        ASSERT(FFALSE);\
-        break;\
-    }                                                          \
+    if(skip==2){\
+      alphaval=alphabyte/255.0; \
+      alphaval=alphaval*(2.0-alphaval);                  \
+      alphabyte=alphaval*255.0;\
+    }\
+    else if(skip==3){\
+      alphaval=alphabyte/255.0;                              \
+      alphaval = alphaval*(3.0-alphaval*(3.0-alphaval));\
+      alphabyte = 255*alphaval; \
+    }\
     if(show_smoke_lighting==1&&have_light==1){\
       glColor4ub(light_value[mm],light_value[mm],light_value[mm],alphabyte);                                \
     }\
@@ -109,6 +105,7 @@ if(show_smoketest==0){\
 }\
 else{\
   for(node=0;node<6;node++){                             \
+    int mm;\
     mm = xyzindex1[node];                                 \
     glColor4ub(0,0,0,(unsigned char)smoke_alpha);\
     glVertex3f(XX,YY,ZZ);                                \
@@ -133,25 +130,21 @@ if(show_smoketest==0){\
     xyzindex=xyzindex2;                                  \
   }                                                      \
   for(node=0;node<6;node++){                             \
+    unsigned char alphabyte;\
+    float alphaval;\
+    int mm;\
     mm = xyzindex[node];                                 \
     alphabyte = value[mm];                               \
-    switch (skip){                                       \
-      case 1:\
-       break;\
-      case 2:                                              \
-        alphaval=alphabyte/255.0; \
-        alphaval=alphaval*(2.0-alphaval);                  \
-        alphabyte=alphaval*255.0;\
-       break;                                             \
-      case 3:                                              \
-        alphaval=alphabyte/255.0;                              \
-        alphaval = 3*alphaval*(1.0-alphaval*(1.0-alphaval/3.0));\
-        alphabyte = 255*alphaval; \
-        break;                                                   \
-      default:\
-        ASSERT(FFALSE);\
-        break;\
-    }                                                          \
+    if(skip==2){\
+      alphaval=alphabyte/255.0; \
+      alphaval=alphaval*(2.0-alphaval);                  \
+      alphabyte=alphaval*255.0;\
+    }\
+    else if(skip==3){\
+      alphaval=alphabyte/255.0;                              \
+      alphaval = alphaval*(3.0-alphaval*(3.0-alphaval));\
+      alphabyte = 255*alphaval; \
+    }\
     colorptr=mergecolorptr+ivalue[mm];\
     colorptr[3]=alphabyte;                                   \
     glColor4ubv(colorptr);                                \
@@ -160,6 +153,7 @@ if(show_smoketest==0){\
 }\
 else{\
   for(node=0;node<6;node++){                             \
+    int mm;\
     mm = xyzindex1[node];                                 \
     glColor4ub(0,0,0,(unsigned char)smoke_alpha);\
     glVertex3f(XX,YY,ZZ);                                \
@@ -191,25 +185,21 @@ if(show_smoketest==0){\
     xyzindex=xyzindex2;                                  \
   }                                                      \
   for(node=0;node<6;node++){                             \
+    unsigned char alphabyte;\
+    float alphaval;\
+    int mm;\
     mm = xyzindex[node];                                 \
     alphabyte = value[mm];                               \
-    switch (skip){                                       \
-      case 1:\
-       break;\
-      case 2:                                              \
-        alphaval=alphabyte/255.0; \
-        alphaval=alphaval*(2.0-alphaval);                  \
-        alphabyte=alphaval*255.0;\
-       break;                                             \
-      case 3:                                              \
-        alphaval=alphabyte/255.0;                              \
-        alphaval = 3*alphaval*(1.0-alphaval*(1.0-alphaval/3.0));\
-        alphabyte = 255*alphaval; \
-        break;                                                   \
-      default:\
-        ASSERT(FFALSE);\
-        break;\
-    }                                                          \
+    if(skip==2){\
+      alphaval=alphabyte/255.0; \
+      alphaval=alphaval*(2.0-alphaval);                  \
+      alphabyte=alphaval*255.0;\
+    }\
+    else if(skip==3){\
+      alphaval=alphabyte/255.0;                              \
+      alphaval = alphaval*(3.0-alphaval*(3.0-alphaval));\
+      alphabyte = 255*alphaval; \
+    }\
     colorptr=mergecolorptr+ivalue[mm];\
     colorptr[3]=alphabyte;                                   \
     glColor4ubv(colorptr);                                \
@@ -222,6 +212,7 @@ else{\
   z_offset[2]=znode_offset[m22];\
   z_offset[3]=znode_offset[m21];\
   for(node=0;node<6;node++){                             \
+    int mm;\
     mm = xyzindex1[node];                                 \
     glColor4ub(0,0,0,(unsigned char)smoke_alpha);\
     glVertex3f(XX,YY,ZZ+z_offset[mm]);                                \
@@ -1151,10 +1142,8 @@ void drawsmoke3d(smoke3d *smoke3di){
   unsigned char mergealpha,*mergealphaptr,*mergecolorptr;
   int nx,ny,nz;
   unsigned char *alphaf_in,*alphaf_out,*alphaf_ptr,*lightf_ptr,*light_in;
-  float alphaval;
-  unsigned char alphabyte;
   unsigned char *colorptr;
-  int xyzindex1[6],xyzindex2[6],*xyzindex,node,mm;
+  int xyzindex1[6],xyzindex2[6],*xyzindex,node;
   float xnode[4],znode[4],ynode[4];
   int skip;
     int iterm, jterm, kterm,nxy;
