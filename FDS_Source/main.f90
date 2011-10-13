@@ -1252,7 +1252,7 @@ IF (.NOT.EVACUATION_ONLY(NM)) ALLOCATE(MESHES(NM)%OMESH(NMESHES))
  
 OTHER_MESH_LOOP: DO NOM=1,NMESHES
  
-   IF (NOM==NM .AND. PERIODIC_TEST==0) CYCLE OTHER_MESH_LOOP
+   !IF (NOM==NM) CYCLE OTHER_MESH_LOOP
 
    IF (EVACUATION_ONLY(NM)) THEN
       IF (EVACUATION_GRID(NM) .AND. .NOT.EVACUATION_ONLY(NOM)) N_COMMUNICATIONS = N_COMMUNICATIONS + 1
@@ -1278,29 +1278,38 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
       M%OMESH(NOM)%NIC_S = M%OMESH(NOM)%NIC_S + 1
       FOUND = .TRUE.
       IOR = M%IJKW(4,IW)
-      NOT_PERIODIC: IF (PERIODIC_TEST==0) THEN
-         SELECT CASE(IOR)
-            CASE( 1) 
-               IMIN=MAX(IMIN,M%IJKW(10,IW)-1)
-            CASE(-1) 
-               IMAX=MIN(IMAX,M%IJKW(13,IW)+1)
-            CASE( 2) 
-               JMIN=MAX(JMIN,M%IJKW(11,IW)-1)
-            CASE(-2) 
-               JMAX=MIN(JMAX,M%IJKW(14,IW)+1)
-            CASE( 3) 
-               KMIN=MAX(KMIN,M%IJKW(12,IW)-1)
-            CASE(-3) 
-               KMAX=MIN(KMAX,M%IJKW(15,IW)+1)
-         END SELECT
-      ENDIF NOT_PERIODIC
+      SELECT CASE(IOR)
+         CASE( 1) 
+            IMIN=MAX(IMIN,M%IJKW(10,IW)-1)
+         CASE(-1) 
+            IMAX=MIN(IMAX,M%IJKW(13,IW)+1)
+         CASE( 2) 
+            JMIN=MAX(JMIN,M%IJKW(11,IW)-1)
+         CASE(-2) 
+            JMAX=MIN(JMAX,M%IJKW(14,IW)+1)
+         CASE( 3) 
+            KMIN=MAX(KMIN,M%IJKW(12,IW)-1)
+         CASE(-3) 
+            KMAX=MIN(KMAX,M%IJKW(15,IW)+1)
+      END SELECT
    ENDDO SEARCH_LOOP
+
+   ! For PERIODIC boundaries with 1 or 2 meshes, we must revert to allocating whole copies of OMESH
+
+   IF (IMIN>IMAX) THEN; IMIN=0; IMAX=M2%IBP1; ENDIF
+   IF (JMIN>JMAX) THEN; JMIN=0; JMAX=M2%JBP1; ENDIF
+   IF (KMIN>KMAX) THEN; KMIN=0; KMAX=M2%KBP1; ENDIF
  
-   IF ( M2%XS>=M%XS .AND. M2%XF<=M%XF .AND. M2%YS>=M%YS .AND. M2%YF<=M%YF .AND. M2%ZS>=M%ZS .AND. M2%ZF<=M%ZF ) FOUND = .TRUE.
+   ! Embedded meshes
+
+   IF ( NM/=NOM .AND. &
+        M2%XS>=M%XS .AND. M2%XF<=M%XF .AND. &
+        M2%YS>=M%YS .AND. M2%YF<=M%YF .AND. &
+        M2%ZS>=M%ZS .AND. M2%ZF<=M%ZF ) FOUND = .TRUE.
  
    IF (.NOT.FOUND) CYCLE OTHER_MESH_LOOP
 
-   ! Tally the number of comunications for this process
+   ! Tally the number of communications for this process
 
    N_COMMUNICATIONS = N_COMMUNICATIONS + 1
  
@@ -1393,8 +1402,8 @@ IF (EVACUATION_ONLY(NM)) RETURN
  
 OTHER_MESH_LOOP: DO NOM=1,NMESHES
  
-   IF (NOM==NM .AND. PERIODIC_TEST==0) CYCLE OTHER_MESH_LOOP
-   IF (EVACUATION_ONLY(NOM)) CYCLE OTHER_MESH_LOOP ! Issue 257 bug fix
+   !IF (NOM==NM) CYCLE OTHER_MESH_LOOP
+   IF (EVACUATION_ONLY(NOM)) CYCLE OTHER_MESH_LOOP
 
    IF (M%OMESH(NOM)%NIC_S==0 .AND. M%OMESH(NOM)%NIC_R>0) THEN
       M2=>MESHES(NOM)
