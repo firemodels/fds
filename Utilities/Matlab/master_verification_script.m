@@ -27,7 +27,8 @@ radiation_plane_layer;    display('radiation_plane_layer complete...')
 ns2d;                     display('ns2d complete...')
 wall_internal_radiation;  display('wall_internal_radiation complete...')
 ashrae_7;                 display('ashrae_7 complete...')
- 
+flame_species;            display('flame_species complete...')
+
 % Directories where the data is stored, and where to write the output
 
 cfil = [pwd,'/verification_data_config_matlab.csv'];
