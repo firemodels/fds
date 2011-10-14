@@ -1729,17 +1729,14 @@ The total mass of CO$_2$, H$_2$O and CO is recorded.
 The simulation is performed using the three alternative ways
 to define the combustion reaction: {\em simple chemistry}, {\em primitive species}, and {\em lumped species}. The
 same amount of each product species should be produced in each case. The following two figures compare the
-mass of the three combustion products. The first figure compares the simple chemistry versus the primitive species and the second figure compares the 
-simple chemistry versus the lumped species.
-\begin{figure}[h]
-\begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/Methane_flame_simple_primitive}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/Methane_flame_simple_lumped}
-\end{tabular*}
-\caption[Yield of combustion products using three alternative definitions of the same reaction.]{The combustion product masses using three alternative definitions of the reaction. (Left) Simple chemistry vs. primitive species. (Right) Simple chemistry vs. lumped species. }
+mass of the three combustion products. The figure compares the simple chemistry versus the primitive species and versus the lumped species.
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/Methane_flame_reac_comp}
+\caption[Yield of combustion products using three alternative definitions of the same reaction.]{The combustion product masses using three alternative definitions of the reaction:  Simple chemistry vs. primitive species vs. lumped species. }
 \label{fig_methane_flame_yields}
+\end{center}
 \end{figure}
-
 
 \clearpage
 
@@ -1747,16 +1744,16 @@ simple chemistry versus the lumped species.
 
 This section describes a series of test cases designed to check the reaction rate mechanism for mixing-controlled, finite-rate, and mixed-mode reaction schemes.
 
-\subsection{Mixing-controlled reactions (ReactionRate\_MixCtrl\_)}
+\subsection{Mixing-Controlled Reactions (ReactionRate\_MixCtrl\_)}
 
-The mixing-controlled (mixed is burned) reaction model with local extinction is the default reaction mechanism in FDS. The reaction rate is determined by the eddy dissipation concept (EDC). The EDC assumes that the consumption rate of fuel for each reaction is determined from the local fuel, oxidizer, and product mass fractions and the turbulent mixing time by the following equation \cite{Poinsot:TNC}:
+The mixing-controlled (mixed is burned) reaction model with local extinction is the default reaction mechanism in FDS. The reaction rate is determined by the eddy dissipation model (EDM). The EDM assumes that the consumption rate of fuel for each reaction is determined from the local fuel, oxidizer, and product mass fractions and the turbulent mixing time by the following equation \cite{Poinsot:TNC}:
 
-\begin{equation}\label{eq:EDC}
-k_{i} = \frac{C}{\tau_{mix}} \, \min \left( Y_F,\frac{Y_\OTWO}{s},\beta\frac{Y_P}{(1+s)} \right)
+\begin{equation}\label{eq:EDM}
+\dot{m}^{\prime\prime\prime}_{fuel,i} = \frac{C}{\tau_{mix}} \, \min \left( Y_F,\frac{Y_\OTWO}{s},\beta\frac{Y_P}{(1+s)} \right)
 \end{equation}
-where $C$ and $\beta$ are model constants and $s$ is determined from the stoichiometry of the reaction. This model can be considered a deficient model as the consumption rate is found by the limiting species. To determine species evolution for the reaction, a system of ordinary differential equations is solved for each participating species ($\alpha$):
+where $C$ and $\beta$ are model constants and $s$ is mass stoichiometric coefficient. This model can be considered a deficient model as the consumption rate is found by the limiting species. To determine species evolution for the reaction, a system of ordinary differential equations is solved for each participating species ($\alpha$):
 \begin{equation}\label{eq:spec_ode}
-\frac{dY_{\alpha}}{dt}= \frac{\nu_{\alpha} \, W_{\alpha}}{W_F} \, k
+\frac{dY_{\alpha}}{dt}= \frac{\nu_{\alpha} \, W_{\alpha}}{W_F} \, \dot{m}^{\prime\prime\prime}_{fuel} 
 \end{equation}
 To test this implementation, a one-step methane reaction
 \begin{equation}\label{eq:1step_methane}
@@ -1769,7 +1766,7 @@ is considered for both a fuel-limiting and oxygen-limiting case with a fixed mix
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_MixCtrl_Flim_1Step} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_MixCtrl_O2lim_1Step}
 \end{tabular*}
-\caption[Species Evolution in Mixing Controlled Reaction]{Time evolution of species mass fraction for a one-step mixing controlled reaction with a fixed mixing time of $\tau_{mix}=0.1s$. (Left) Fuel-limited reaction. (Right) Oxygen-limited reaction.}
+\caption[Species Evolution in Mixing Controlled Reaction]{Time evolution of species mass fraction for a one-step mixing controlled reaction with a fixed mixing time of $\tau_{mix}=0.1$~s. (Left) Fuel-limited reaction. (Right) Oxygen-limited reaction.}
 \label{fig:MixCtrl_1Step}
 \end{figure}
 
@@ -1790,7 +1787,7 @@ for both fuel-limited and oxygen-limited conditions with a fixed mixing time, $\
 \label{fig:MixCtrl_2Step}
 \end{figure}
 
-\subsection{Finite rate reactions (ReactionRate\_Arrhenius\_)}
+\subsection{Finite Rate Reactions (ReactionRate\_Arrhenius\_)}
 
 The solution process for species evolution in finite rate reactions is similar to mixing-controlled reactions in that species evolution is found by solving a system of ordinary equations (\ref{eq:spec_ode}). The main difference between the mechanisms is that instead of the reaction rate being determined by the turbulent mixing time, the reaction rate in finite rate reactions is found using an Arrhenius reaction equation:
 \begin{equation}\label{eq:FR_Arr}
@@ -1836,7 +1833,7 @@ and a two-step reversible propane reaction:
 \mathrm{C_3H_8+3.5 \, O_2 \rightarrow  3 \, CO+4 \, H_2O} \\
 \nonumber \mathrm{CO + 0.5 \, O_2 \leftrightarrow CO_2}
 \end{eqnarray}
- are considered. Equation \ref{eq:2step_propane_rev} includes the decomposition of $CO_2$ into $CO$ and $O_2$ which the forward only two-step mechanism does not. This reaction mechanism is represented by three separate reactions on the {\ct REAC} line in an FDS input file. The reaction order for the first two steps in both cases is 1.75. In the first reaction $a_{\alpha}=[0.1,1.65,0,0]$ for propane, oxygen, carbon monoxide, and water vapor respectively. In the forward carbon monoxide reaction $a_{\alpha}=[1,0.25,0,0.5]$ for carbon monoxide, oxygen, carbon dioxide, and water vapor respectively. Note that in the  forward second step, water vapor contributes to the reaction rate based on its local concentration despite not being a participant in the reaction. For the reverse reaction in Equation \ref{eq:2step_propane_rev}, $a_{\alpha}=[1,0,0]$ for carbon dioxide, carbon monoxide, and oxygen respectively.
+ are considered. Equation \ref{eq:2step_propane_rev} includes the decomposition of $\mathrm{CO_2}$ into $\mathrm{CO}$ and $\mathrm{O_2}$ which the forward only two-step mechanism does not. This reaction mechanism is represented by three separate reactions on the {\ct REAC} line in an FDS input file. The reaction order for the first two steps in both cases is 1.75. In the first reaction $a_{\alpha}=[0.1,1.65,0,0]$ for propane, oxygen, carbon monoxide, and water vapor respectively. In the forward carbon monoxide reaction $a_{\alpha}=[1,0.25,0,0.5]$ for carbon monoxide, oxygen, carbon dioxide, and water vapor respectively. Note that in the  forward second step, water vapor contributes to the reaction rate based on its local concentration despite not being a participant in the reaction. For the reverse reaction in Equation \ref{eq:2step_propane_rev}, $a_{\alpha}=[1,0,0]$ for carbon dioxide, carbon monoxide, and oxygen respectively.
 
  \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
