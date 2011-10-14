@@ -1707,7 +1707,7 @@ SELECT CASE (SPEC_ID)
               - 0.0000000000005561213_EB*TE**4 + 2.857776E-17_EB*TE**5 - 8.989582_EB*LOG(TE) !kJ/mol/K
          CP = CP / 31.9988*1000_EB!J/kg-K
       ENDIF
-      H = 190332.28442_EB !J/kg     
+      H = 190302.3147857_EB !J/kg     
    CASE('PROPANE') !NIST webbook
       TE = MIN(1500._EB,MAX(100._EB,TE))
       CP = 1.67536E-09_EB*TE**4 - 5.46675E-06_EB*TE**3 + 4.38029E-03_EB*TE**2 + 2.79490E+00_EB*TE + 6.11728E+02_EB !J/kg/K   
@@ -2020,7 +2020,7 @@ SELECT CASE (SPEC_ID)
       T = MIN(100._EB,MAX(60._EB,REAL(I_TMP,EB)))
       CP = 8.33333E-04_EB*T**3 - 1.42143E-01_EB*T**2 + 8.10952E+00_EB*T + 1.50911E+03_EB!J/kg/K
       H_L = -91185.35477_EB !J/kg
-      H_V = 240008.9577_EB !J/kg
+      H_V = 213000._EB !J/kg
       T_REF = 54.8_EB !K
       T_MELT = 54.8_EB !K
       T_BOIL = 90.19_EB !K 
