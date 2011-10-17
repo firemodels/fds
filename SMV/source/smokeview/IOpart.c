@@ -837,7 +837,7 @@ void getpart5header(particle *parti, int partframestep, int *nf_all){
     sscanf(buffer,"%f",&time);
     exitloop=0;
     for(i=0;i<parti->nclasses;i++){
-      if(fgets(buffer,255,stream)==NULL||(npartframes_max!=-1&&nframes_all+1>npartframes_max)){
+      if(fgets(buffer,255,stream)==NULL||(npartinfo>1&&npartframes_max!=-1&&nframes_all+1>npartframes_max)){
         exitloop=1;
         break;
       }
