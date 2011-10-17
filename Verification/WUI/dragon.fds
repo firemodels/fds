@@ -1,4 +1,4 @@
-&HEAD CHID='dragon', TITLE='brand test, SVN $Revision: 4615 $' /
+&HEAD CHID='dragon', TITLE='brand test, SVN $Revision$' /
 
 &MESH IJK=50,25,20, XB= 0.0,10.0,0.0,5.0,0.0,4.0 /
 &MESH IJK=75,45,70,  XB=10.0,25.0,-2.0,7.0,0.0,14.0 /
