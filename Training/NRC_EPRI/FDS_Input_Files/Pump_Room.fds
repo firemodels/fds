@@ -52,7 +52,7 @@ Cable
       MATL_ID(2,1:2) = 'PE/PVC','COPPER'
       MATL_MASS_FRACTION(2,1:2) = 0.33,0.67
       BACKING        = 'EXPOSED'
-      THICKNESS      = 0.05,0.025,0.05 /
+      THICKNESS      = 0.05,0.06,0.05 /
 
 &SURF ID             = 'TRAY'
       COLOR          = 'PINK'
@@ -65,12 +65,15 @@ Cable
 
 Fire
 
-&REAC ID                 = 'KEROSENE'
-      FYI                = 'Kerosene, C_14 H_30'
+&REAC ID                 = 'HYDROCARBON'
+      FYI                = 'General Hydrocarbon, C_14 H_30'
       C                  = 14.
       H                  = 30.
       HEAT_OF_COMBUSTION = 46400.
-      SOOT_YIELD         = 0.1 /
+      CO_YIELD           = 0.019
+      SOOT_YIELD         = 0.059 /
+
+&RADI RADIATIVE_FRACTION=0.34 /
 
 &SURF ID     = 'OIL FIRE'
       COLOR  = 'ORANGE'
@@ -79,8 +82,8 @@ Fire
 
 &RAMP ID='fire ramp', T=   0., F=0.0 /
 &RAMP ID='fire ramp', T=   1., F=1.0 /
-&RAMP ID='fire ramp', T=1348., F=1.0 /
-&RAMP ID='fire ramp', T=1349., F=0.0 /
+&RAMP ID='fire ramp', T=1345., F=1.0 /
+&RAMP ID='fire ramp', T=1346., F=0.0 /
 
 &OBST XB= 2.3, 6.3, 2.1, 2.3, 0.0, 0.1, SURF_IDS='OIL FIRE', 'CONCRETE WALL', 'CONCRETE WALL' /
 &OBST XB= 2.3, 6.3, 3.8, 4.1, 0.0, 0.1, SURF_IDS='OIL FIRE', 'CONCRETE WALL', 'CONCRETE WALL' /
