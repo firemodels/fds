@@ -930,6 +930,16 @@ void script_loadparticles(scriptdata *scripti){
   printf("Script: loading particles files");
   printf("\n");
 
+  npartframes_max=get_min_partframes();
+  for(i=0;i<npartinfo;i++){
+    particle *parti;
+
+    parti = partinfo + i;
+    if(parti->evac==1)continue;
+    if(parti->version==1){
+      readpart(parti->file,i,UNLOAD,&errorcode);
+    }
+  }
   for(i=0;i<npartinfo;i++){
     particle *parti;
 
@@ -1356,6 +1366,7 @@ void script_loadfile(scriptdata *scripti){
       return;
     }
   }
+  npartframes_max=get_min_partframes();
   for(i=0;i<npartinfo;i++){
     particle *parti;
 

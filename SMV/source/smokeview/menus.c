@@ -2241,6 +2241,12 @@ void LoadUnloadMenu(int value){
         partinfo[i].reload=0;
       }
     }
+    npartframes_max=get_min_partframes();
+    for(i=0;i<npartinfo;i++){
+      if(partinfo[i].reload==1){
+        readpart(partinfo[i].file,i,UNLOAD,&errorcode);
+      }
+    }
     for(i=0;i<npartinfo;i++){
       if(partinfo[i].reload==1){
         readpart(partinfo[i].file,i,LOAD,&errorcode);
@@ -2535,6 +2541,14 @@ void EvacMenu(int value){
 
       parti=partinfo + i;
       if(parti->evac==0)continue;
+      readpart(parti->file,i,UNLOAD,&errorcode);
+    }
+    npartframes_max=get_min_partframes();
+    for(i=0;i<npartinfo;i++){
+      particle *parti;
+
+      parti=partinfo + i;
+      if(parti->evac==0)continue;
       ReadEvacFile=1;
       readpart(parti->file,i,LOAD,&errorcode);
       if(scriptoutstream!=NULL){
@@ -2791,6 +2805,12 @@ void ParticleMenu(int value){
       partj = partinfo + whichpart;
       if(scriptoutstream!=NULL){
         fprintf(scriptoutstream,"LOADPARTICLES\n");
+      }
+      npartframes_max=get_min_partframes();
+      for(i=0;i<npartinfo;i++){
+        parti = partinfo + i;
+        if(parti->evac==1)continue;
+        readpart(parti->file,i,UNLOAD,&errorcode);
       }
       for(i=0;i<npartinfo;i++){
         parti = partinfo + i;

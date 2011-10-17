@@ -694,6 +694,7 @@ EXTERNCPP void scalefloat2string(float floatfrom, char *stringto, const float *s
 EXTERNCPP void scalestring(const char *stringfrom, char *stringto, const float *scale, float range);
 EXTERNCPP void num2string(char *string, float tval, float range);
 EXTERNCPP int initcase_c(int argc, char **argv);
+EXTERNCPP int get_min_partframes(void);
 
 
 EXTERNCPP void freecadinfo(void);

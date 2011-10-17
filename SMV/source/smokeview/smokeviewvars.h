@@ -82,6 +82,7 @@ SVEXTERN int show_slice_in_obst, offset_slice;
 SVEXTERN int skip_slice_in_embedded_mesh;
 SVEXTERN int n_embedded_meshes;
 
+SVEXTERN int npartframes_max;
 SVEXTERN int force_isometric;
 SVEXTERN int SVDECL(updategluiview,1);
 SVEXTERN int render_double,render_double_state,render_double_menu,render_from_menu;

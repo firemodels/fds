@@ -918,6 +918,14 @@ void InitOpenGL(void){
         readplot3d(plot3di->file,i,LOAD,&errorcode);
       }
     }
+    npartframes_max=get_min_partframes();
+    for(i=0;i<npartinfo;i++){
+      particle *parti;
+
+      parti = partinfo + i;
+      if(parti->autoload==0&&parti->loaded==1)readpart(parti->file,i,UNLOAD,&errorcode);
+      if(parti->autoload==1)readpart(parti->file,i,UNLOAD,&errorcode);
+    }
     for(i=0;i<npartinfo;i++){
       particle *parti;
 
