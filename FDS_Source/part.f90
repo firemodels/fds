@@ -1777,13 +1777,6 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
             ENDIF
             M_DROP = M_DROP - M_VAP
         
-            ! Compute surface cooling and density
-
-            IF (DR%IOR/=0 .AND. DR%WALL_INDEX>0) THEN
-               WCPUA(IW,EVAP_INDEX) = WCPUA(IW,EVAP_INDEX) + OMRAF*WGT*(Q_RAD+Q_CON_WALL)*RAW(IW)/DT_SUBSTEP
-               WMPUA(IW,EVAP_INDEX) = WMPUA(IW,EVAP_INDEX) + OMRAF*WGT*M_DROP*RAW(IW)/REAL(N_SUBSTEPS,EB) 
-            ENDIF
-
             ! Add fuel evaporation rate to running counter and adjust mass of evaporated fuel to account for different 
             ! Heat of Combustion between fuel droplet and gas
 
@@ -1895,6 +1888,11 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
 
             DR%R   = (M_DROP/FTPR)**ONTH
             DR%TMP = TMP_DROP_NEW
+
+            ! Compute surface cooling
+
+            IF (DR%IOR/=0 .AND. DR%WALL_INDEX>0) &
+               WCPUA(IW,EVAP_INDEX) = WCPUA(IW,EVAP_INDEX) + OMRAF*WGT*(Q_RAD+Q_CON_WALL)*RAW(IW)/DT_SUBSTEP
 
             ! Get out of the loop if the droplet has evaporated completely
 
