@@ -2268,6 +2268,7 @@ int getmaxrevision(void){
   MAXREV(glui_wui_revision);
 
   MAXREV(IOboundary_revision);
+  MAXREV(IOembed_revision);
   MAXREV(IOhrr_revision);
   MAXREV(IOiso_revision);
   MAXREV(IOobject_revision);
