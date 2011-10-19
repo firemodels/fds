@@ -1993,14 +1993,14 @@ int readsmv(char *file, char *file2){
   */
     if(match(buffer,"GEOM",4) == 1){
       geomdata *geomi;
-      char buff2;
+      char *buff2;
 
       fgets(buffer,255,stream);
       geomi = geominfo + ngeominfo;
       trim(buffer);
       buff2 = trim_front(buffer);
-      NewMemory((void **)&geomi->file,strlen(buffer2)+1);
-      strcpy(geomi->file,buffer2);
+      NewMemory((void **)&geomi->file,strlen(buff2)+1);
+      strcpy(geomi->file,buff2);
 
       ngeominfo++;
     }
