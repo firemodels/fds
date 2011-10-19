@@ -18,6 +18,7 @@
 #include "translate.h"
 #include "update.h"
 #include "string_util.h"
+#include "smv_endian.h"
 
 // svn revision character string
 char IOembed_revision[]="$Revision$";
@@ -510,8 +511,242 @@ void update_triangles(void){
   }
 }
 
-/* ------------------ readgeom ------------------------ */
+#define FORTREAD(var,count,STREAM) fseek(STREAM,4,SEEK_CUR);\
+                           returncode=fread(var,4,count,STREAM);\
+                           if(returncode!=count)returncode=0;\
+                           if(endianswitch==1&&returncode!=0)endian_switch(var,count);\
+                           fseek(STREAM,4,SEEK_CUR)
 
-void readgeom(char *file){
+#define FORTREADBR(var,count,STREAM) FORTREAD(var,count,STREAM);if(returncode==0)break;
+/*
+typedef struct {
+  float xyz[3],norm[3];
+  int itriangle,ntriangles,nused;
+  struct _triangle **triangles;
+} point;
+
+typedef struct _triangle {
+  struct _surface *surf;
+  int interior;
+  float *color;
+  int fdsnorm,skinny;
+  point *points[3];
+  float normal[3];
+} triangle;
+
+typedef struct {
+  int npoints;
+  point *points;
+} pointlistdata;
+
+typedef struct {
+  int ntriangles;
+  triangle *triangles;
+} trilistdata;
+
+ typedef struct {
+  char *file;
+  pointlistdata *pointlistinfo;
+  trilistdata *trilistinfo;
+  float *times;
+  int ntimes;
+} geomdata;
+*/
+
+/* ------------------ get_geom_header ------------------------ */
+
+void get_geom_header(char *file, int *ntimes){
+  FILE *stream;
+  int one=1,endianswitch=0;
+  int ntris,nvert;
+  float time;
+  int first=1;
+  int nt;
+  int returncode;
+
+  stream = fopen(file,"r");
+  if(stream==NULL){
+    *ntimes=-1;
+    return;
+  }
+  fseek(stream,4,SEEK_CUR);fread(&one,4,1,stream);fseek(stream,4,SEEK_CUR);
+  if(one!=1)endianswitch=1;
+  nt=-1;
+  for(;;){
+    if(first!=1){
+      FORTREADBR(&time,1,stream);
+    }
+    first=0;
+    FORTREADBR(&nvert,1,stream);
+    if(nvert!=0)fseek(stream,4+3*nvert*4+4,SEEK_CUR);    
+    FORTREADBR(&ntris,1,stream);
+    if(ntris!=0)fseek(stream,4+3*ntris*4+4,SEEK_CUR);    
+    nt++;
+  }
+  *ntimes=nt;
+  fclose(stream);
 }
 
+/* ------------------ get_geomdata_header ------------------------ */
+
+void get_geomdata_header(char *file, int *ntimes, int *nvals){
+  FILE *stream;
+  int one=1,endianswitch=0;
+  int nface_static,nface_dynamic;
+  float time;
+  int nt,nv;
+  int returncode;
+
+  stream = fopen(file,"r");
+  if(stream==NULL){
+    *ntimes=-1;
+    return;
+  }
+  fseek(stream,4,SEEK_CUR);fread(&one,4,1,stream);fseek(stream,4,SEEK_CUR);
+  if(one!=1)endianswitch=1;
+  nt=-1;
+  nv=0;
+  for(;;){
+    FORTREADBR(&time,1,stream);
+    FORTREADBR(&nface_static,1,stream);
+    if(nface_static!=0)fseek(stream,4+nface_static*4+4,SEEK_CUR);    
+    FORTREADBR(&nface_dynamic,1,stream);
+    if(nface_dynamic!=0)fseek(stream,4+nface_dynamic*4+4,SEEK_CUR);    
+    nt++;
+    nv+=(nface_static+nface_dynamic);
+  }
+  *ntimes=nt;
+  *nvals=nv;
+  fclose(stream);
+}
+
+/* ------------------ readgeom ------------------------ */
+
+void readgeom(int ifile, int flag, int *errorcode){
+  geomdata *geomi;
+  char *file;
+  FILE *stream;
+  int one=1, endianswitch=0;
+  int returncode;
+  int nvert, ntris;
+  int ntimes;
+  float *xyz=NULL;
+  int nxyz=0;
+  int *ijk=NULL,nijk=0;
+  int i;
+  point *points;
+  triangle *triangles;
+  int first=1;
+
+
+  geomi = geominfo + ifile;
+  file = geomi->file;
+
+  get_geom_header(file,&ntimes);
+  if(ntimes<0)return;
+  stream = fopen(file,"r");
+
+  fseek(stream,4,SEEK_CUR);fread(&one,4,1,stream);fseek(stream,4,SEEK_CUR);
+  if(one!=1)endianswitch=1;
+
+  geomi->ntimes=ntimes;
+  NewMemory((void **)&geomi->pointlistinfo,(ntimes+1)*sizeof(pointlistdata));
+  NewMemory((void **)&geomi->trilistinfo,(ntimes+1)*sizeof(trilistdata));
+  NewMemory((void **)&geomi->times,(ntimes+1)*sizeof(float));
+
+  for(i=0;i<=ntimes;i++){
+    float time;
+    pointlistdata *pointlisti;
+    trilistdata *trilisti;
+
+    pointlisti = geomi->pointlistinfo+i;
+    trilisti = geomi->trilistinfo+i;
+    if(first!=1)FORTREAD(&time,1,stream);
+    first=0;
+    FORTREAD(&nvert,1,stream);
+    FORTREAD(&nvert,1,stream);
+    if(nvert>0){
+      FREEMEMORY(xyz);
+      NewMemory((void **)&xyz,3*nvert*sizeof(float));
+      NewMemory((void **)&points,nvert*sizeof(point));
+      pointlisti->points=points;
+      FORTREAD(xyz,3*nvert,stream);
+      for(i=0;i<nvert;i++){
+        points[i].xyz[0]=xyz[3*i+0];
+        points[i].xyz[1]=xyz[3*i+1];
+        points[i].xyz[2]=xyz[3*i+2];
+      }
+    }
+    FORTREAD(&ntris,1,stream);
+    if(ntris>0){
+      FREEMEMORY(ijk);
+      NewMemory((void **)&ijk,3*ntris*sizeof(int));
+      NewMemory((void **)&triangles,ntris*sizeof(triangle));
+      trilisti->triangles=triangles;
+      FORTREAD(ijk,3*ntris,stream);
+      for(i=0;i<nvert;i++){
+        triangles[i].points[0]=points+ijk[3*i+0];
+        triangles[i].points[1]=points+ijk[3*i+1];
+        triangles[i].points[2]=points+ijk[3*i+2];
+      }
+    }
+  }
+}
+
+/* ------------------ readgeomdata ------------------------ */
+
+void readgeomdata(int ifile, int flag, int *errorcode){
+  patch *patchi;
+  char *file;
+  FILE *stream;
+  int one=1, endianswitch=0;
+  int returncode;
+  int nvert, ntris;
+  int ntimes;
+  float *xyz=NULL;
+  int nxyz=0;
+  int *ijk=NULL,nijk=0;
+  int i;
+  point *points;
+  triangle *triangles;
+  int first=1;
+  float *val_buffer=NULL;
+  int nval_buffer=0;
+  int nvals;
+  float *vals;
+  float patchmin_global, patchmax_global;
+
+  patchi = patchinfo + ifile;
+  if(patchi->filetype!=2)return;
+  file = patchi->file;
+
+  get_geomdata_header(file,&ntimes,&nvals);
+  if(nvals>0){
+    NewMemory((void **)&vals,nvals*sizeof(float));
+    NewMemory((void **)&patchi->igeom_vals,nvals*sizeof(char));
+    patchi->geom_vals=vals;
+  }
+  patchi->ngeom_vals=nvals;
+  for(i=0;i<ntimes;i++){
+    float time;
+    int nface_static, nface_dynamic;
+
+    FORTREADBR(&time,1,stream);
+    FORTREADBR(&nface_static,1,stream);
+    if(nface_static>0){
+      FORTREADBR(vals,nface_static,stream);
+      vals+=nface_static;
+    }
+    FORTREADBR(&nface_dynamic,1,stream);
+    if(nface_dynamic>0){
+      FORTREADBR(vals,nface_dynamic,stream);
+      vals+=nface_dynamic;
+    }
+  }
+  getBoundaryColors3(patchi,patchi->geom_vals, patchi->ngeom_vals, patchi->igeom_vals,
+    setpatchmin,&patchmin, setpatchmax,&patchmax, 
+    &patchmin_global, &patchmax_global,
+    nrgb, colorlabelpatch,patchi->scale,boundarylevels256,
+    &patchi->extreme_min,&patchi->extreme_max);
+  FREEMEMORY(patchi->geom_vals);
+}

@@ -5098,6 +5098,8 @@ typedef struct {
           }
         }
       }
+      patchi->geom_vals=NULL;
+      patchi->ngeom_vals=0;
       patchi->blocknumber=blocknumber;
       patchi->seq_id=nn_patch;
       patchi->autoload=0;

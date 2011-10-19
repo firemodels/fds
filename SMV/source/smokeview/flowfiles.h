@@ -240,6 +240,10 @@ typedef struct _surface {
 
 typedef struct {
   char *file;
+  pointlistdata *pointlistinfo;
+  trilistdata *trilistinfo;
+  float *times;
+  int ntimes;
 } geomdata;
 
 /* --------------------------  facedata ------------------------------------ */
@@ -1123,6 +1127,9 @@ typedef struct {
   float local_valmin, local_valmax;
   float diff_valmin, diff_valmax;
   int blocknumber,loaded,display;
+  float *geom_vals;
+  unsigned char *igeom_vals;
+  int ngeom_vals;
   flowlabels label;
   char scale[31];
   char menulabel[128];
