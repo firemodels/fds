@@ -10,7 +10,7 @@ clear all
 
 % read the Abaqus input file
 
-[X Tet] = importabaqus('Ibeam.inp');
+[X Tet] = abaqus2fds('Ibeam.inp');
 
 % write FDS input file
 
