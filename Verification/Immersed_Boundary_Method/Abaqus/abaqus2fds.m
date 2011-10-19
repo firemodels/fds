@@ -1,12 +1,12 @@
 % McDermott
 % 10-19-11
-% importabaqus.m
+% abaqus2fds.m
 %
 % Read nodes and volumes from Abaqus input file
 %
 % Example: [N V] = importabaqus(filename)
 
-function [N V] = importabaqus(filename)
+function [N V] = abaqus2fds(filename)
 
 if ~exist(filename)
     display('file does not exist')
