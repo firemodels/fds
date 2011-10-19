@@ -4,7 +4,7 @@
 %
 % Read nodes and volumes from Abaqus input file
 %
-% Example: [N V] = importabaqus(filename)
+% Example: [N V] = abaqus2fds(filename)
 
 function [N V] = abaqus2fds(filename)
 
