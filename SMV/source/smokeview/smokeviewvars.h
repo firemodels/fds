@@ -82,6 +82,9 @@ SVEXTERN int show_slice_in_obst, offset_slice;
 SVEXTERN int skip_slice_in_embedded_mesh;
 SVEXTERN int n_embedded_meshes;
 
+SVEXTERN geomdata SVDECL(*geominfo,NULL);
+SVEXTERN int SVDECL(ngeominfo,0);
+
 SVEXTERN int npartframes_max;
 SVEXTERN int force_isometric;
 SVEXTERN int SVDECL(updategluiview,1);

@@ -229,7 +229,7 @@ void update_patch_bounds(patch *patchi){
     patch *patchj;
 
     patchj=patchinfo+j;
-    if(patchj->type!=patchi->type||patchj->cellcenter!=patchi->cellcenter)continue;
+    if(patchj->type!=patchi->type||patchj->filetype!=patchi->filetype)continue;
     merge_histogram(&full_histogram,patchj->histogram);
   }
 
@@ -244,7 +244,7 @@ void update_patch_bounds(patch *patchi){
     patch *patchj;
 
     patchj=patchinfo+j;
-    if(patchi==patchj||patchj->type!=patchi->type||patchj->cellcenter!=patchi->cellcenter)continue;
+    if(patchi==patchj||patchj->type!=patchi->type||patchj->filetype!=patchi->filetype)continue;
 
     boundj = &patchj->bounds;
     memcpy(boundj,boundi,sizeof(bounddata));

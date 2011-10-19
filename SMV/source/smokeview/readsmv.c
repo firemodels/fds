@@ -1046,6 +1046,17 @@ int readsmv(char *file, char *file2){
   ntotal_blockages=0;
   ntotal_smooth_blockages=0;
 
+  if(ngeominfo>0){
+    for(i=0;i<ngeominfo;i++){
+      geomdata *geomi;
+
+      geomi = geominfo + i;
+      FREEMEMORY(geomi->file);
+    }
+    FREEMEMORY(geominfo);
+    ngeominfo=0;
+  }
+
   FREEMEMORY(tickinfo);
   nticks=0;
   ntickssmv=0;
@@ -1358,6 +1369,10 @@ int readsmv(char *file, char *file2){
     */
 
 
+    if(match(buffer,"GEOM",4) == 1){
+      ngeominfo++;
+      continue;
+    }
     if(match(buffer,"PROP",4) == 1){
       npropinfo++;
       continue;
@@ -1622,7 +1637,7 @@ int readsmv(char *file, char *file2){
       do_pass4=1;
       continue;
     }
-    if(match(buffer,"BNDF",4) == 1|| match(buffer,"BNDC",4) == 1){
+    if(match(buffer,"BNDF",4) == 1|| match(buffer,"BNDC",4) == 1||match(buffer,"BNDE",4) == 1){
       npatchinfo++;
       continue;
     }
@@ -1663,6 +1678,10 @@ int readsmv(char *file, char *file2){
    ************************************************************************
  */
 
+ if(ngeominfo>0){
+   NewMemory((void **)&geominfo,ngeominfo*sizeof(geomdata));
+   ngeominfo=0;
+ }
  if(npointlistinfo>0){
    NewMemory((void **)&pointlistinfo,npointlistinfo*sizeof(pointlistdata));
    npointlistinfo=0;
@@ -1965,6 +1984,25 @@ int readsmv(char *file, char *file2){
         BREAK;
       }
       if(strncmp(buffer," ",1)==0||buffer[0]==0)continue;
+    }
+
+    /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++ GEOM ++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"GEOM",4) == 1){
+      geomdata *geomi;
+      char buff2;
+
+      fgets(buffer,255,stream);
+      geomi = geominfo + ngeominfo;
+      trim(buffer);
+      buff2 = trim_front(buffer);
+      NewMemory((void **)&geomi->file,strlen(buffer2)+1);
+      strcpy(geomi->file,buffer2);
+
+      ngeominfo++;
     }
 
     /*
@@ -4978,7 +5016,7 @@ typedef struct {
     ++++++++++++++++++++++ BNDF ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"BNDF",4) == 1||match(buffer,"BNDC",4) == 1){
+    if(match(buffer,"BNDF",4) == 1||match(buffer,"BNDC",4) == 1||match(buffer,"BNDE",4) == 1){
       patch *patchi;
 
       nn_patch++;
@@ -5002,12 +5040,13 @@ typedef struct {
 
       patchi->version=version;
   
+      patchi->filetype=0;
       if(match(buffer,"BNDC",4) == 1){
-        patchi->cellcenter=1;
+        patchi->filetype=1;
         cellcenter_bound_active=1;
       }
-      else{
-        patchi->cellcenter=0;
+      if(match(buffer,"BNDE",4) == 1){
+        patchi->filetype=2;
       }
 
       if(fgets(buffer,255,stream)==NULL){
@@ -5036,6 +5075,29 @@ typedef struct {
         patchi->compression_type=0;
         patchi->file=patchi->reg_file;
       }
+
+      patchi->geomfile=NULL;
+      patchi->geom=NULL;
+      if(patchi->filetype==2){
+        int igeom;
+
+        if(fgets(buffer,255,stream)==NULL){
+          npatchinfo--;
+          BREAK;
+        }
+        bufptr=trim_string(buffer);
+        NewMemory((void **)&patchi->geomfile,strlen(bufptr)+1);
+        strcpy(patchi->geomfile,bufptr);
+        for(igeom=0;igeom<ngeominfo;igeom++){
+          geomdata *geomi;
+
+          geomi = geominfo + igeom;
+          if(strcmp(geomi->file,patchi->geomfile)==0){
+            patchi->geom=geomi;
+            break;
+          }
+        }
+      }
       patchi->blocknumber=blocknumber;
       patchi->seq_id=nn_patch;
       patchi->autoload=0;
@@ -5051,10 +5113,13 @@ typedef struct {
       patchi->chopmax=0.0;
       meshinfo[blocknumber].patchfilenum=-1;
       if(STAT(patchi->file,&statbuffer)==0){
-        if(patchi->cellcenter==1){
+        if(patchi->filetype==1){
           if(readlabels_cellcenter(&patchi->label,stream)==2)return 2;
         }
-        else{
+        else if(patchi->filetype==0){
+          if(readlabels(&patchi->label,stream)==2)return 2;
+        }
+        else if(patchi->filetype==2){
           if(readlabels(&patchi->label,stream)==2)return 2;
         }
         NewMemory((void **)&patchi->histogram,sizeof(histogramdata));
@@ -7529,14 +7594,14 @@ void readboundini(void){
     if(match(buffer,"B_BOUNDARY",10)==1){
       float gmin, gmax;
       float pmin, pmax;
-      int cellcenter;
+      int filetype;
       char *buffer2ptr;
       int lenbuffer2;
       int i;
 
       fgets(buffer,255,stream);
       strcpy(buffer2,"");
-      sscanf(buffer,"%f %f %f %f %i %s",&gmin,&pmin,&pmax,&gmax,&cellcenter,buffer2);
+      sscanf(buffer,"%f %f %f %f %i %s",&gmin,&pmin,&pmax,&gmax,&filetype,buffer2);
       trim(buffer2);
       buffer2ptr=trim_front(buffer2);
       lenbuffer2=strlen(buffer2ptr);
@@ -7544,7 +7609,7 @@ void readboundini(void){
         patch *patchi;
 
         patchi = patchinfo +i;
-        if(lenbuffer2!=0&&strcmp(patchi->label.shortlabel,buffer2ptr)==0&&patchi->cellcenter==cellcenter&&is_file_newer(boundinifilename,patchi->file)==1){
+        if(lenbuffer2!=0&&strcmp(patchi->label.shortlabel,buffer2ptr)==0&&patchi->filetype==filetype&&is_file_newer(boundinifilename,patchi->file)==1){
           bounddata *boundi;
 
           boundi = &patchi->bounds;
@@ -7592,7 +7657,7 @@ void writeboundini(void){
       patch *patchj;
 
       patchj = patchinfo + j;
-      if(patchi->type==patchj->type&&patchi->cellcenter==patchj->cellcenter){
+      if(patchi->type==patchj->type&&patchi->filetype==patchj->filetype){
         skipi=1;
         break;
       }
@@ -7605,7 +7670,7 @@ void writeboundini(void){
       if(stream==NULL)return;
     }
     fprintf(stream,"B_BOUNDARY\n");
-    fprintf(stream," %f %f %f %f %i %s\n",boundi->global_min,boundi->percentile_min,boundi->percentile_max,boundi->global_max,patchi->cellcenter,patchi->label.shortlabel);
+    fprintf(stream," %f %f %f %f %i %s\n",boundi->global_min,boundi->percentile_min,boundi->percentile_max,boundi->global_max,patchi->filetype,patchi->label.shortlabel);
   }
   if(stream!=NULL)fclose(stream);
 }

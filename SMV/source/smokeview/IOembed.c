@@ -510,3 +510,8 @@ void update_triangles(void){
   }
 }
 
+/* ------------------ readgeom ------------------------ */
+
+void readgeom(char *file){
+}
+

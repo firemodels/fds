@@ -236,6 +236,12 @@ typedef struct _surface {
   int used_by_obst,used_by_vent;
 } surface;
 
+/* --------------------------  geomdata ------------------------------------ */
+
+typedef struct {
+  char *file;
+} geomdata;
+
 /* --------------------------  facedata ------------------------------------ */
 
 typedef struct {
@@ -1099,9 +1105,11 @@ typedef struct {
   int seq_id, autoload;
   char *file,*size_file;
   char *comp_file, *reg_file;
+  char *geomfile;
+  geomdata *geom;
   //int *patchsize;
   int version;
-  int cellcenter;
+  int filetype;
   int type;
   int inuse,inuse_getbounds;
   int unit_start;

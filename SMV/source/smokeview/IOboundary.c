@@ -2092,28 +2092,37 @@ void drawpatch_frame(void){
         if(patchi->loaded==0||patchi->display==0||patchi->type!=ipatchtype)continue;
         if(usetexturebar!=0){
           if(vis_threshold==1&&do_threshold==1){
-            if(patchi->cellcenter==1){
+            if(patchi->filetype==1){
               drawpatch_threshold_cellcenter(meshi);
             }
-            else{
+            else if(patchi->filetype==0){
               drawpatch_texture_threshold(meshi);
+            }
+            else if(patchi->filetype==1){
+              // draw embedded data
             }
           }
           else{
-            if(patchi->cellcenter==1){
+            if(patchi->filetype==1){
               drawpatch_cellcenter(meshi);
             }
-            else{
+            else if(patchi->filetype==0){
               drawpatch_texture(meshi);
+            }
+            else if(patchi->filetype==2){
+              // draw embedded data
             }
           }
         }
         else{
-          if(patchi->cellcenter==1){
+          if(patchi->filetype==1){
             drawpatch_cellcenter(meshi);
           }
-          else{
+          else if(patchi->filetype==0){
             drawpatch(meshi);
+          }
+          else if(patchi->filetype==2){
+            // draw embedded data
           }
         }
         if(vis_threshold==1&&vis_onlythreshold==1&&do_threshold==1)drawonlythreshold(meshi);
@@ -3779,7 +3788,7 @@ int update_patch_hist(patch *patchj){
     mesh *meshi;
 
     patchi = patchinfo + i;
-    if(patchi->inuse_getbounds==1||patchi->histogram->complete==1||patchi->type!=patchj->type||patchi->cellcenter!=patchj->cellcenter||patchi->bounds.defined==1)continue;
+    if(patchi->inuse_getbounds==1||patchi->histogram->complete==1||patchi->type!=patchj->type||patchi->filetype!=patchj->filetype||patchi->bounds.defined==1)continue;
 
     patchi->inuse_getbounds=1;
     meshi = meshinfo + patchi->blocknumber;
