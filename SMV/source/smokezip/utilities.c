@@ -20,8 +20,6 @@ char utilities_revision[]="$Revision$";
 
 int iseed=0;
 
-#define FORTREAD(read) fseek(BOUNDARYFILE,4,SEEK_CUR);returncode=read;fseek(BOUNDARYFILE,4,SEEK_CUR);
-
 /* ------------------ match ------------------------ */
 
 int match(const char *buffer, const char *key, unsigned int lenkey){

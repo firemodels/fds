@@ -19,11 +19,6 @@ char CNVpart_revision[]="$Revision$";
 
 
 void endian_switch(void *val, int nval);
-#define FORTREAD(var,size) fseek(PARTFILE,4,SEEK_CUR);\
-                           returncode=fread(var,4,size,PARTFILE);\
-                           if(returncode!=size)returncode=0;\
-                           if(endianswitch==1&&returncode!=0)endian_switch(var,size);\
-                           fseek(PARTFILE,4,SEEK_CUR)
 #define READ(var,size) returncode=fread(var,4,size,PARTFILE);\
                        if(returncode!=size)returncode=0;\
                        if(endianswitch==1&&returncode!=0)endian_switch(var,size);

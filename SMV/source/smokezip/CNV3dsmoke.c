@@ -16,9 +16,6 @@
 // svn revision character string
 char CNV3dsmoke_revision[]="$Revision$";
 
-
-#define FORTREAD(read) fseek(BOUNDARYFILE,4,SEEK_CUR);returncode=read;fseek(BOUNDARYFILE,4,SEEK_CUR);
-
 /* ------------------ convert_3dsmoke ------------------------ */
 
 void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){

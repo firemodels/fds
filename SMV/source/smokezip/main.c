@@ -17,8 +17,6 @@
 
 #define MARK 255
 
-#define FORTREAD(read) fseek(BOUNDARYFILE,4,SEEK_CUR);returncode=read;fseek(BOUNDARYFILE,4,SEEK_CUR);
-
 //dummy change to bump version number to 1.4.2
 
 // svn revision character string
