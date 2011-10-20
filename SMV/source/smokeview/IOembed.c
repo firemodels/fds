@@ -638,6 +638,18 @@ void readgeom(int ifile, int flag, int *errorcode){
   triangle *triangles;
   int first=1;
 
+  // 1
+  //   static geometry
+  // nverts
+  // x1 y1 z1 ... xnverts ynverts znverts
+  // nfaces
+  // i1 j1 k1 ... infaces jnfaces knfaces
+  //  dynamic geometry (one entry for each time step)
+  // time
+  // nverts
+  // x1 y1 z1 ... xnverts ynverts znverts
+  // nfaces
+  // i1 j1 k1 ... infaces jnfaces knfaces
 
   geomi = geominfo + ifile;
   file = geomi->file;
@@ -715,6 +727,13 @@ void readgeomdata(int ifile, int flag, int *errorcode){
   int nvals;
   float *vals;
   float patchmin_global, patchmax_global;
+
+  // 1
+  // time
+  // nstatic
+  // vals_1, ...vals_nstatic
+  // ndynamic
+  // vals_1, ... vals_ndyamic
 
   patchi = patchinfo + ifile;
   if(patchi->filetype!=2)return;

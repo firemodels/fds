@@ -431,6 +431,23 @@ endif
 return
 end subroutine getdirval
 
+subroutine dummy()
+
+open(unit=99,file="test.geo",form="unformatted")
+write(99)1
+write(99)4
+write(99)0.0,0.0,0.0
+write(99)1.0,0.0,0.0
+write(99)0.0,1.0,0.0
+write(99)0.0,0.0,1.0
+write(99)4
+write(99)0,1,3
+write(99)1,2,3
+write(99)0,3,2
+write(99)0,2,1
+close(99)
+end subroutine dummy
+
 !  ------------------ getslicedata ------------------------ 
 
 subroutine getslicedata(file_unit,slicefilename,longlabel,shortlabel,units,&
@@ -474,6 +491,8 @@ integer :: ii, kk
 integer :: joff, koff
 integer :: count
 integer :: funit
+
+call dummy()
 
 lu11 = file_unit
 joff = 0
