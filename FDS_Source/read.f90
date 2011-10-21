@@ -10042,6 +10042,12 @@ QUANTITY_INDEX_LOOP: DO ND=-N_OUTPUT_QUANTITIES,N_OUTPUT_QUANTITIES
                CALL SHUTDOWN(MESSAGE)
             ENDIF
             IF (QUANTITY=='AMPUA') ACCUMULATE_WATER = .TRUE.
+         CASE ('BNDE')
+            IF (.NOT. OUTPUT_QUANTITY(ND)%BNDE_APPROPRIATE) THEN
+               WRITE(MESSAGE,'(3A)')  'ERROR: The QUANTITY ',TRIM(QUANTITY),' is not appropriate for BNDE'
+               CALL SHUTDOWN(MESSAGE)
+            ENDIF
+            IF (QUANTITY=='AMPUA') ACCUMULATE_WATER = .TRUE.
          CASE('ISOF')
             IF (.NOT.OUTPUT_QUANTITY(ND)%ISOF_APPROPRIATE) THEN
                WRITE(MESSAGE,'(3A)')  'ERROR: ISOF quantity ',TRIM(QUANTITY),' not appropriate for isosurface'
