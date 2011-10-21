@@ -2420,6 +2420,16 @@ IF (N_TREES_OUT>0 .AND. T>VEG_CLOCK) THEN
    VEG_CLOCK = VEG_CLOCK + DT_VEG
 ENDIF
 
+! Dump unstructured geometry and boundary element info
+
+IF (N_BNDE>0 .AND. T>BNDE_CLOCK) THEN
+   IF (MYID==0) THEN
+      CALL DUMP_BNDE(T)
+      CALL DUMP_GEOM(T)
+   ENDIF
+   BNDE_CLOCK = BNDE_CLOCK + DT_BNDE
+ENDIF
+
 ! Dump out Evac info
 
 IF (MYID==MAX(0,EVAC_PROCESS)) CALL EVAC_CSV(T)
