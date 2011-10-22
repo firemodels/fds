@@ -32,9 +32,9 @@ int getpatchface2dir(mesh *gb, int i1, int i2, int j1, int j2, int k1, int k2, i
                     int *blockonpatch, mesh **meshonpatch);
 int getpatchindex(const patch *patchi);
 
-/* ------------------ readpatch ------------------------ */
+/* ------------------ readpatch_bndf ------------------------ */
 
-void readpatch(int ifile, int flag, int *errorcode){
+void readpatch_bndf(int ifile, int flag, int *errorcode){
   int error;
   FILE_SIZE lenfile;
   int patchfilenum;
@@ -945,6 +945,20 @@ void readpatch(int ifile, int flag, int *errorcode){
   }
 
   glutPostRedisplay();
+}
+
+/* ------------------ readpatch ------------------------ */
+
+void readpatch(int ifile, int flag, int *errorcode){
+  patch *patchi;
+
+  patchi = patchinfo + ifile;
+  if(patchi->filetype==2){
+    readgeomdata(ifile,flag,errorcode);
+  }
+  else{
+    readpatch(ifile,flag,errorcode);
+  }
 }
 
 /* ------------------ nodeinblockage ------------------------ */

@@ -727,6 +727,8 @@ void readgeomdata(int ifile, int flag, int *errorcode){
   int nvals;
   float *vals;
   float patchmin_global, patchmax_global;
+  int n;
+  int error;
 
   // 1
   // time
@@ -746,6 +748,10 @@ void readgeomdata(int ifile, int flag, int *errorcode){
     patchi->geom_vals=vals;
   }
   patchi->ngeom_vals=nvals;
+  stream = fopen(file,"r");
+
+  fseek(stream,4,SEEK_CUR);fread(&one,4,1,stream);fseek(stream,4,SEEK_CUR);
+  if(one!=1)endianswitch=1;
   for(i=0;i<ntimes;i++){
     float time;
     int nface_static, nface_dynamic;
@@ -760,6 +766,25 @@ void readgeomdata(int ifile, int flag, int *errorcode){
     if(nface_dynamic>0){
       FORTREADBR(vals,nface_dynamic,stream);
       vals+=nface_dynamic;
+    }
+  }
+  if(colorlabelpatch!=NULL){
+    for(n=0;n<MAXRGB;n++){
+      FREEMEMORY(colorlabelpatch[n]);
+    }
+    FREEMEMORY(colorlabelpatch);
+  }
+  if(NewMemory((void **)&colorlabelpatch,MAXRGB*sizeof(char *))==0){
+    readpatch(ifile,UNLOAD,&error);
+    return;
+  }
+  for(n=0;n<MAXRGB;n++){
+    colorlabelpatch[n]=NULL;
+  }
+  for(n=0;n<nrgb;n++){
+    if(NewMemory((void **)&colorlabelpatch[n],11)==0){
+      readpatch(ifile,UNLOAD,&error);
+      return;
     }
   }
   getBoundaryColors3(patchi,patchi->geom_vals, patchi->ngeom_vals, patchi->igeom_vals,
