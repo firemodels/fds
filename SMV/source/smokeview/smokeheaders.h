@@ -27,7 +27,7 @@ EXTERNCPP void getzonedatacsv(int nzonet, int nrooms, int nfires,
                               float *zonepr, float *zoneylay,  float *zonetl, float *zonetu,
                               float **zoneodl, float **zoneodu,
                               int *error);
-EXTERNCPP void draw_tris(void);
+EXTERNCPP void draw_geom(void);
 EXTERNCPP void getzonesizecsv(int *nzonet, int *nroom2, int *nfires, int *error);
 EXTERNCPP void remove_dup_blockages(void);
 EXTERNCPP void sort_iso_triangles(float *mm);
@@ -706,10 +706,11 @@ EXTERNCPP void readcadgeom(cadgeom *cd);
 EXTERNCPP void drawcadgeom(const cadgeom *cd);
 EXTERNCPP void drawcad2geom_opaque(const cadgeom *cd,int trans_flag);
 
+EXTERNCPP void draw_geomdata(patch *patchi);
 EXTERNCPP char *newtextptr(char ***texture_list,int *n_texture_list,char *texturebuffer,char *lastbuffer);
 
 EXTERNCPP void readplot3d(char *file, int ifile, int flag,int *errorcode);
-EXTERNCPP void readgeomdata(int ifile, int flag, int *errorcode);
+EXTERNCPP void read_geomdata(int ifile, int flag, int *errorcode);
 EXTERNCPP void readpatch(int ifile, int flag, int *errorcode);
 EXTERNCPP void readpart(char *file, int ifile, int flag, int *errorcode);
 EXTERNCPP void readzone(int ifile, int flag, int *errorcode);

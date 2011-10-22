@@ -1,10 +1,10 @@
 
 !  ------------------ getembeddata ------------------------ 
 
-subroutine getembeddata(filename,endian,ntimes,nvals,times,vals,error)
+subroutine getembeddata(filename,endian,ntimes,nvals,times,nstatics,ndynamics,vals,error)
 #ifdef pp_cvf
 #ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getembeddata@32' :: getembeddata
+!DEC$ ATTRIBUTES ALIAS:'_getembeddata@40' :: getembeddata
 #endif
 #endif
 implicit none
@@ -12,11 +12,13 @@ character(len=*), intent(in) :: filename
 integer, intent(in) :: endian, ntimes, nvals
 integer, intent(out) :: error
 real, intent(out), dimension(:) :: times(ntimes), vals(nvals)
+integer, intent(out), dimension(:) :: nstatics(ntimes), ndynamics(ntimes)
 
 integer :: endian2, lu20, finish
 logical :: isopen,exists
 real :: time, dummy, i
 integer :: one, nstatic, ndynamic, itime, nvars
+real :: valmin, valmax
 
 
 lu20=20
@@ -47,9 +49,20 @@ read(lu20)one
 nvars=0
 do itime=1, ntimes
   read(lu20,iostat=finish)times(itime)
+  write(6,10)times(itime)
+10 format("boundary element time=",f9.2)  
   if(finish.eq.0)read(lu20,iostat=finish)nstatic
+  nstatics(itime)=nstatic
   if(finish.eq.0)read(lu20,iostat=finish)(vals(nvars+i),i=1,nstatic)
+  valmin = vals(nvars+1)
+  valmax = valmin
+  do i = 2, nstatic
+    if(vals(nvars+i).lt.valmin)valmin=vals(nvars+i)
+    if(vals(nvars+i).gt.valmax)valmax=vals(nvars+i)
+  end do
+  write(6,*)"valmin=",valmin," valmax=",valmax
   if(finish.eq.0)read(lu20,iostat=finish)ndynamic
+  ndynamics(itime)=ndynamic
   if(finish.eq.0.and.ndynamic.ne.0)then
     read(lu20,iostat=finish)(vals(nvars+nstatic+i),i=1,nstatic)
   endif

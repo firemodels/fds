@@ -111,7 +111,7 @@ float get_minangle(triangle *trii){
   return minangle;
 }
 
-/* ------------------ draw_tris ------------------------ */
+/* ------------------ draw_faceinfo ------------------------ */
 
 void get_faceinfo(void){
   int i;
@@ -167,9 +167,9 @@ void get_faceinfo(void){
   }
 }
 
-/* ------------------ draw_tris ------------------------ */
+/* ------------------ draw_geom ------------------------ */
 
-void draw_tris(void){
+void draw_geom(void){
   int i;
   float black[]={0.0,0.0,0.0,1.0};
   float blue[]={0.0,0.0,1.0,1.0};
@@ -620,9 +620,9 @@ void get_geomdata_header(char *file, int *ntimes, int *nvals){
   fclose(stream);
 }
 
-/* ------------------ readgeom ------------------------ */
+/* ------------------ read_geom ------------------------ */
 
-void readgeom(int ifile, int flag, int *errorcode){
+void read_geom(int ifile, int flag, int *errorcode){
   geomdata *geomi;
   char *file;
   FILE *stream;
@@ -705,9 +705,9 @@ void readgeom(int ifile, int flag, int *errorcode){
   }
 }
 
-/* ------------------ readgeomdata ------------------------ */
+/* ------------------ read_geomdata ------------------------ */
 
-void readgeomdata(int ifile, int flag, int *errorcode){
+void read_geomdata(int ifile, int flag, int *errorcode){
   patch *patchi;
   char *file;
   FILE *stream;
@@ -741,10 +741,23 @@ void readgeomdata(int ifile, int flag, int *errorcode){
   if(patchi->filetype!=2)return;
   file = patchi->file;
 
+  patchi->loaded=0;
+  patchi->display=0;
+
+  FREEMEMORY(patchi->geom_nstatics);
+  FREEMEMORY(patchi->geom_ndynamics);
+  FREEMEMORY(patchi->geom_ivals_static);
+  FREEMEMORY(patchi->geom_ivals_dynamic);
   FREEMEMORY(patchi->geom_vals);
-  FREEMEMORY(patchi->igeom_vals);
+  FREEMEMORY(patchi->geom_ivals);
   FREEMEMORY(patchi->geom_times);
-  if(flag==UNLOAD)return;
+  if(flag==UNLOAD){
+    plotstate=getplotstate(DYNAMIC_PLOTS);
+    update_patchtype();
+    update_unit_defs();
+    updatetimes();
+    return;
+  }
 
   //get_geomdata_header(file,&ntimes,&nvals);
   endian = getendian();
@@ -753,12 +766,25 @@ void readgeomdata(int ifile, int flag, int *errorcode){
   FORTgetembedsize(file, &endian, &ntimes, &nvals, &error, lenfile);
 
   if(nvals>0){
+    NewMemory((void **)&patchi->geom_nstatics,ntimes*sizeof(int));
+    NewMemory((void **)&patchi->geom_ndynamics,ntimes*sizeof(int));
     NewMemory((void **)&patchi->geom_times,ntimes*sizeof(float));
+    NewMemory((void **)&patchi->geom_ivals_static,ntimes*sizeof(int *));
+    NewMemory((void **)&patchi->geom_ivals_dynamic,ntimes*sizeof(int *));
     NewMemory((void **)&patchi->geom_vals,nvals*sizeof(float));
-    NewMemory((void **)&patchi->igeom_vals,nvals*sizeof(char));
-    patchi->ngeom_vals=nvals;
+    NewMemory((void **)&patchi->geom_ivals,nvals*sizeof(char));
   }
-  FORTgetembeddata(file, &endian, &ntimes, &nvals, patchi->geom_times, patchi->geom_vals, &error, lenfile);
+  FORTgetembeddata(file, &endian, &ntimes, &nvals, patchi->geom_times, 
+    patchi->geom_nstatics, patchi->geom_ndynamics, patchi->geom_vals, &error, lenfile);
+
+  patchi->geom_ntimes=ntimes;
+  patchi->geom_nvals=nvals;
+  patchi->geom_ivals_static[0] = patchi->geom_ivals;
+  patchi->geom_ivals_dynamic[0] = patchi->geom_ivals_static[0]+patchi->geom_nstatics[0];
+  for(i=1;i<ntimes;i++){
+    patchi->geom_ivals_static[i] = patchi->geom_ivals_dynamic[i-1]+patchi->geom_ndynamics[i-1];
+    patchi->geom_ivals_dynamic[i] = patchi->geom_ivals_static[i] + patchi->geom_nstatics[i];
+  }
   if(colorlabelpatch!=NULL){
     for(n=0;n<MAXRGB;n++){
       FREEMEMORY(colorlabelpatch[n]);
@@ -778,10 +804,110 @@ void readgeomdata(int ifile, int flag, int *errorcode){
       return;
     }
   }
-  getBoundaryColors3(patchi,patchi->geom_vals, patchi->ngeom_vals, patchi->igeom_vals,
+  //setpatchmin=1;
+  //patchmin=20.0;
+  //setpatchmax=1;
+  //patchmax=620.0;
+  getBoundaryColors3(patchi,patchi->geom_vals, patchi->geom_nvals, patchi->geom_ivals,
     setpatchmin,&patchmin, setpatchmax,&patchmax, 
     &patchmin_global, &patchmax_global,
     nrgb, colorlabelpatch,patchi->scale,boundarylevels256,
     &patchi->extreme_min,&patchi->extreme_max);
   FREEMEMORY(patchi->geom_vals);
+  patchi->loaded=1;
+  patchi->display=1;
+  ipatchtype=getpatchtype(patchinfo+ifile);
+  plotstate=getplotstate(DYNAMIC_PLOTS);
+  update_patchtype();
+  update_unit_defs();
+  updatetimes();
+  update_framenumber(1);
+}
+
+/* ------------------ draw_geomdata ------------------------ */
+
+void draw_geomdata(patch *patchi){
+  int i;
+  float black[]={0.0,0.0,0.0,1.0};
+  float blue[]={0.0,0.0,1.0,1.0};
+  float skinny_color[]={1.0,0.0,0.0,1.0};
+  float *last_color=NULL;
+
+  for(i=0;i<ntrilistinfo;i++){
+    trilistdata *trilisti;
+    pointlistdata *pointlisti;
+    int ntris,npoints;
+    int j;
+    float *color;
+
+    trilisti = trilistinfo + i;
+    pointlisti = pointlistinfo + i;
+    ntris = trilisti->ntriangles;
+    npoints = pointlisti->npoints;
+
+    glEnable(GL_LIGHTING);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
+    glEnable(GL_COLOR_MATERIAL);
+    glBegin(GL_TRIANGLES);
+    if(smoothtrinormal==0){
+      for(j=0;j<ntris;j++){
+        float *xyzptr[3];
+        float *xyznorm;
+        triangle *trianglei;
+        int color_index;
+
+        trianglei = trilisti->triangles+j;
+       
+        xyznorm=trianglei->normal;
+        glNormal3fv(xyznorm);
+
+        color_index = patchi->geom_ival_static[j];
+        color=rgb_patch+4*color_index;
+        glColor3fv(color);
+
+        xyzptr[0] = trianglei->points[0]->xyz;
+        glVertex3fv(xyzptr[0]);
+
+        xyzptr[1] = trianglei->points[1]->xyz;
+        glVertex3fv(xyzptr[1]);
+
+        xyzptr[2] = trianglei->points[2]->xyz;
+        glVertex3fv(xyzptr[2]);
+      }
+    }
+    else{
+      for(j=0;j<ntris;j++){
+        float *xyzptr[3];
+        float *xyznorm;
+        triangle *trianglei;
+        int color_index;
+
+        trianglei = trilisti->triangles+j;
+       
+        color_index = patchi->geom_ival_static[j];
+        color=rgb_patch+4*color_index;
+        glColor3fv(color);
+
+        xyznorm = trianglei->points[0]->norm;
+        glNormal3fv(xyznorm);
+        xyzptr[0] = trianglei->points[0]->xyz;
+        glVertex3fv(xyzptr[0]);
+
+        xyznorm = trianglei->points[1]->norm;
+        glNormal3fv(xyznorm);
+        xyzptr[1] = trianglei->points[1]->xyz;
+        glVertex3fv(xyzptr[1]);
+
+        xyznorm = trianglei->points[2]->norm;
+        glNormal3fv(xyznorm);
+        xyzptr[2] = trianglei->points[2]->xyz;
+        glVertex3fv(xyzptr[2]);
+      }
+    }
+    glEnd();
+    glDisable(GL_COLOR_MATERIAL);
+    glDisable(GL_LIGHTING);
+  }
+
 }

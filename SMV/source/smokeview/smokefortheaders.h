@@ -67,7 +67,8 @@
 #define FORTgetboundaryheader2 getboundaryheader2
 #endif
 
-STDCALL FORTgetembeddata(char *filename, int *endian, int *ntimes, int *nvals, float *times, float *vals, int *error, FILE_SIZE lenfile);
+STDCALL FORTgetembeddata(char *filename, int *endian, int *ntimes, int *nvals, float *times, int *nstatics, int *ndynamics,
+                         float *vals, int *error, FILE_SIZE lenfile);
 STDCALL FORTgetembedsize(char *filename, int *endian, int *ntimes, int *nvars, int *error, FILE_SIZE lenfile);
 STDCALL FORTgetboundaryheader1(char *boundaryfilename, int *boundaryunitnumber, 
                                int *endian, int *npatch, int *error, FILE_SIZE lenfile);

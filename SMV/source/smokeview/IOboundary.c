@@ -954,7 +954,7 @@ void readpatch(int ifile, int flag, int *errorcode){
 
   patchi = patchinfo + ifile;
   if(patchi->filetype==2){
-    readgeomdata(ifile,flag,errorcode);
+    read_geomdata(ifile,flag,errorcode);
   }
   else{
     readpatch(ifile,flag,errorcode);
@@ -2095,6 +2095,14 @@ void drawpatch_frame(void){
   mesh *meshi;
   int i;
 
+  for(i=0;i<npatchinfo;i++){
+    patch *patchi;
+
+    patchi = patchinfo + i;
+    if(patchi->filetype!=2)continue;
+    if(patchi->loaded==0||patchi->display==0)continue;
+    draw_geomdata(patchi);
+  }
   for(i=0;i<nmeshes;i++){
     meshi=meshinfo+i;
     if(meshi->npatches>0){
@@ -2112,9 +2120,6 @@ void drawpatch_frame(void){
             else if(patchi->filetype==0){
               drawpatch_texture_threshold(meshi);
             }
-            else if(patchi->filetype==1){
-              // draw embedded data
-            }
           }
           else{
             if(patchi->filetype==1){
@@ -2122,9 +2127,6 @@ void drawpatch_frame(void){
             }
             else if(patchi->filetype==0){
               drawpatch_texture(meshi);
-            }
-            else if(patchi->filetype==2){
-              // draw embedded data
             }
           }
         }
@@ -2134,9 +2136,6 @@ void drawpatch_frame(void){
           }
           else if(patchi->filetype==0){
             drawpatch(meshi);
-          }
-          else if(patchi->filetype==2){
-            // draw embedded data
           }
         }
         if(vis_threshold==1&&vis_onlythreshold==1&&do_threshold==1)drawonlythreshold(meshi);
@@ -3348,30 +3347,23 @@ int getpatchtype(const patch *patchi){
 
 void update_patchtype(){
   int i;
-  patch *patchi;
 
   for(i=0;i<npatchinfo;i++){
+    patch *patchi;
+
     patchi = patchinfo + i;
     if(patchi->loaded==1&&patchi->display==1&&patchi->type==ipatchtype)return;
   }
 
   for(i=0;i<npatchinfo;i++){
+    patch *patchi;
+
     patchi = patchinfo + i;
     if(patchi->loaded==1&&patchi->display==1){
       ipatchtype = getpatchindex(patchi);
       return;
     }
   }
-  /*
-  for(i=0;i<npatchinfo;i++){
-    patchi = patchinfo + i;
-    if(patchi->loaded==1){
-      ipatchtype = getpatchindex(patchi);
-      patchi->display=1;
-    }
-  }
-  */
-
   ipatchtype = -1;
   return;
     

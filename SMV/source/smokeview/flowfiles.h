@@ -1128,8 +1128,12 @@ typedef struct {
   float diff_valmin, diff_valmax;
   int blocknumber,loaded,display;
   float *geom_times, *geom_vals;
-  unsigned char *igeom_vals;
-  int ngeom_vals;
+  int *geom_timeslist,geom_ipatch;
+  unsigned char *geom_ivals, **geom_ivals_static, **geom_ivals_dynamic;
+  unsigned char *geom_ival_static, *geom_ival_dynamic;
+  int geom_nval_static, geom_nval_dynamic;
+  int *geom_nstatics, *geom_ndynamics;
+  int geom_nvals, geom_ntimes;
   flowlabels label;
   char scale[31];
   char menulabel[128];

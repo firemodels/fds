@@ -5098,10 +5098,15 @@ typedef struct {
           }
         }
       }
+      patchi->geom_timeslist=NULL;
+      patchi->geom_ivals_dynamic=NULL;
+      patchi->geom_ivals_static=NULL;
+      patchi->geom_ndynamics=NULL;
+      patchi->geom_nstatics=NULL;
       patchi->geom_times=NULL;
       patchi->geom_vals=NULL;
-      patchi->igeom_vals=NULL;
-      patchi->ngeom_vals=0;
+      patchi->geom_ivals=NULL;
+      patchi->geom_nvals=0;
       patchi->blocknumber=blocknumber;
       patchi->seq_id=nn_patch;
       patchi->autoload=0;
