@@ -6325,9 +6325,10 @@ ELOOP: DO N=1,N_BNDE
    
    WRITE(LU_BNDE(N)) STIME
    WRITE(LU_BNDE(N)) N_FACE
-   DO I=1,N_FACE
-      WRITE(LU_BNDE(N)) REAL(GEOM_OUTPUT(BE%INDEX,I),FB)
-   ENDDO  
+   IF(N_FACE.GT.0)THEN
+      WRITE(LU_BNDE(N)) (REAL(GEOM_OUTPUT(BE%INDEX,I),FB),I=1,N_FACE)
+   ENDIF
+   WRITE(LU_BNDE(N)) 0 ! for now there are zero values associated with a moving geometry
 
 ENDDO ELOOP
 
