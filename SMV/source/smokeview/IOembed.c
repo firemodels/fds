@@ -741,6 +741,10 @@ void readgeomdata(int ifile, int flag, int *errorcode){
   if(patchi->filetype!=2)return;
   file = patchi->file;
 
+  FREEMEMORY(patchi->geom_vals);
+  FREEMEMORY(patchi->igeom_vals);
+  if(flag==UNLOAD)return;
+
   get_geomdata_header(file,&ntimes,&nvals);
   if(nvals>0){
     NewMemory((void **)&vals,nvals*sizeof(float));
