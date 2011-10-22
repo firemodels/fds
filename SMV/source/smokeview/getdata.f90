@@ -1,3 +1,64 @@
+
+!  ------------------ getembeddata ------------------------ 
+
+subroutine getembeddata(filename,endian,ntimes,nvals,times,vals,error)
+#ifdef pp_cvf
+#ifndef X64
+!DEC$ ATTRIBUTES ALIAS:'_getembeddata@32' :: getembeddata
+#endif
+#endif
+implicit none
+character(len=*), intent(in) :: filename
+integer, intent(in) :: endian, ntimes, nvals
+integer, intent(out) :: error
+real, intent(out), dimension(:) :: times(ntimes), vals(nvals)
+
+integer :: endian2, lu20, finish
+logical :: isopen,exists
+real :: time, dummy, i
+integer :: one, nstatic, ndynamic, itime, nvars
+
+
+lu20=20
+inquire(unit=lu20,opened=isopen)
+
+if(isopen)close(lu20)
+inquire(file=trim(filename),exist=exists)
+if(exists)then
+#ifdef pp_cvf
+endian2=0
+endian2=endian
+if(endian2.eq.1)then
+  open(unit=lu20,file=trim(filename),form="unformatted",action="read",shared,convert="BIG_ENDIAN")
+ else
+  open(unit=lu20,file=trim(filename),form="unformatted",action="read",shared)
+endif
+#else	   
+  open(unit=lu20,file=trim(filename),form="unformatted",action="read")
+#endif
+ else
+  write(6,*)'The boundary element file name, ',trim(filename),' does not exist'
+  error=1
+  return
+endif
+
+error = 0
+read(lu20)one
+nvars=0
+do itime=1, ntimes
+  read(lu20,iostat=finish)times(itime)
+  if(finish.eq.0)read(lu20,iostat=finish)nstatic
+  if(finish.eq.0)read(lu20,iostat=finish)(vals(nvars+i),i=1,nstatic)
+  if(finish.eq.0)read(lu20,iostat=finish)ndynamic
+  if(finish.eq.0.and.ndynamic.ne.0)then
+    read(lu20,iostat=finish)(vals(nvars+nstatic+i),i=1,nstatic)
+  endif
+  if(finish.ne.0)return
+  nvars = nvars + nstatic + ndynamic
+end do
+
+end subroutine getembeddata
+
 !  ------------------ getzonedata ------------------------ 
 
 subroutine getzonedata(zonefilename,nzonet,nrooms, nfires, zonet,zoneqfire,zonepr, zoneylay,zonetl,zonetu,endian,error)

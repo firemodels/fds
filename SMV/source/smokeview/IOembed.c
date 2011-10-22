@@ -725,10 +725,10 @@ void readgeomdata(int ifile, int flag, int *errorcode){
   float *val_buffer=NULL;
   int nval_buffer=0;
   int nvals;
-  float *vals;
   float patchmin_global, patchmax_global;
   int n;
   int error;
+  FILE_SIZE lenfile;
 
   // 1
   // time
@@ -743,35 +743,22 @@ void readgeomdata(int ifile, int flag, int *errorcode){
 
   FREEMEMORY(patchi->geom_vals);
   FREEMEMORY(patchi->igeom_vals);
+  FREEMEMORY(patchi->geom_times);
   if(flag==UNLOAD)return;
 
-  get_geomdata_header(file,&ntimes,&nvals);
+  //get_geomdata_header(file,&ntimes,&nvals);
+  endian = getendian();
+  lenfile = strlen(file);
+
+  FORTgetembedsize(file, &endian, &ntimes, &nvals, &error, lenfile);
+
   if(nvals>0){
-    NewMemory((void **)&vals,nvals*sizeof(float));
+    NewMemory((void **)&patchi->geom_times,ntimes*sizeof(float));
+    NewMemory((void **)&patchi->geom_vals,nvals*sizeof(float));
     NewMemory((void **)&patchi->igeom_vals,nvals*sizeof(char));
-    patchi->geom_vals=vals;
+    patchi->ngeom_vals=nvals;
   }
-  patchi->ngeom_vals=nvals;
-  stream = fopen(file,"r");
-
-  fseek(stream,4,SEEK_CUR);fread(&one,4,1,stream);fseek(stream,4,SEEK_CUR);
-  if(one!=1)endianswitch=1;
-  for(i=0;i<ntimes;i++){
-    float time;
-    int nface_static, nface_dynamic;
-
-    FORTREADBR(&time,1,stream);
-    FORTREADBR(&nface_static,1,stream);
-    if(nface_static>0){
-      FORTREADBR(vals,nface_static,stream);
-      vals+=nface_static;
-    }
-    FORTREADBR(&nface_dynamic,1,stream);
-    if(nface_dynamic>0){
-      FORTREADBR(vals,nface_dynamic,stream);
-      vals+=nface_dynamic;
-    }
-  }
+  FORTgetembeddata(file, &endian, &ntimes, &nvals, patchi->geom_times, patchi->geom_vals, &error, lenfile);
   if(colorlabelpatch!=NULL){
     for(n=0;n<MAXRGB;n++){
       FREEMEMORY(colorlabelpatch[n]);

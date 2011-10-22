@@ -15,6 +15,8 @@
 #define STDCALL extern void
 #endif
 #ifndef pp_noappend
+#define FORTgetembedsize getembedsize_
+#define FORTgetembeddata getembeddata_
 #define FORTopenboundary openboundary_
 #define FORTfcreate_part5sizefile fcreate_part5sizefile_
 #define FORTgetzonesize getzonesize_
@@ -39,6 +41,8 @@
 #define FORTgetboundaryheader1 getboundaryheader1_
 #define FORTgetboundaryheader2 getboundaryheader2_
 #else
+#define FORTgetembedsize getembedsize
+#define FORTgetembeddata getembeddata
 #define FORTopenboundary openboundary
 #define FORTfcreate_part5sizefile fcreate_part5sizefile
 #define FORTgetzonesize getzonesize
@@ -63,6 +67,8 @@
 #define FORTgetboundaryheader2 getboundaryheader2
 #endif
 
+STDCALL FORTgetembeddata(char *filename, int *endian, int *ntimes, int *nvals, float *times, float *vals, int *error, FILE_SIZE lenfile);
+STDCALL FORTgetembedsize(char *filename, int *endian, int *ntimes, int *nvars, int *error, FILE_SIZE lenfile);
 STDCALL FORTgetboundaryheader1(char *boundaryfilename, int *boundaryunitnumber, 
                                int *endian, int *npatch, int *error, FILE_SIZE lenfile);
 STDCALL FORTgetboundaryheader2(int *boundaryunitnumber, int *version, int *npatches,

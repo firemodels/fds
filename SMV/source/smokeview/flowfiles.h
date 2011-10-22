@@ -1127,7 +1127,7 @@ typedef struct {
   float local_valmin, local_valmax;
   float diff_valmin, diff_valmax;
   int blocknumber,loaded,display;
-  float *geom_vals;
+  float *geom_times, *geom_vals;
   unsigned char *igeom_vals;
   int ngeom_vals;
   flowlabels label;

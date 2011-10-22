@@ -1,4 +1,65 @@
 
+!  ------------------ getembedsize ------------------------ 
+
+subroutine getembedsize(filename,endian,ntimes,nvars,error)
+#ifdef pp_cvf
+#ifndef X64
+!DEC$ ATTRIBUTES ALIAS:'_getembedsize@24' :: getembedsize
+#endif
+#endif
+implicit none
+character(len=*), intent(in) :: filename
+integer, intent(in) :: endian
+integer, intent(out) :: ntimes, nvars, error
+
+integer :: endian2, lu20, finish
+logical :: isopen,exists
+real :: time, dummy, i
+integer :: one, nstatic, ndynamic
+
+
+lu20=20
+inquire(unit=lu20,opened=isopen)
+
+if(isopen)close(lu20)
+inquire(file=trim(filename),exist=exists)
+if(exists)then
+#ifdef pp_cvf
+endian2=0
+endian2=endian
+if(endian2.eq.1)then
+  open(unit=lu20,file=trim(filename),form="unformatted",action="read",shared,convert="BIG_ENDIAN")
+ else
+  open(unit=lu20,file=trim(filename),form="unformatted",action="read",shared)
+endif
+#else	   
+  open(unit=lu20,file=trim(filename),form="unformatted",action="read")
+#endif
+ else
+  write(6,*)'The boundary element file name, ',trim(filename),' does not exist'
+  error=1
+  return
+endif
+
+error = 0
+read(lu20)one
+ntimes=0
+nvars=0
+do 
+  read(lu20,iostat=finish)time
+  if(finish.eq.0)read(lu20,iostat=finish)nstatic
+  if(finish.eq.0)read(lu20,iostat=finish)(dummy,i=1,nstatic)
+  if(finish.eq.0)read(lu20,iostat=finish)ndynamic
+  if(finish.eq.0.and.ndynamic.ne.0)then
+    read(lu20,iostat=finish)(dummy,i=1,nstatic)
+  endif
+  if(finish.ne.0)return
+  nvars = nvars + nstatic + ndynamic
+  ntimes = ntimes + 1
+end do
+
+end subroutine getembedsize
+
 !  ------------------ endian_open ------------------------ 
 
 integer function endian_open(file,lunit,endian)
