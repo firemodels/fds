@@ -16,8 +16,7 @@ clear all
 
 fid = fopen('Ibeam_demo.fds','wt');
 
-head = ['&HEAD CHID=''Ibeam_demo'', TITLE=''Demo of Abaqus >> Matlab freeBoundary, created by Ibeam_demo.m'' /'];
-fprintf(fid,'%s\n',head);
+head = ['&HEAD CHID=''Ibeam_demo'', TITLE=''Demo of Abaqus >> Matlab freeBoundary, created by Ibeam_demo.m'' /']; fprintf(fid,'%s\n',head);
 
 fprintf(fid,'%s\n','  '); % blank line
 
@@ -50,6 +49,10 @@ fprintf(fid,'%s\n','  '); % blank line
 
 slcf = ['&SLCF PBY=0, QUANTITY=''TEMPERATURE'', VECTOR=.TRUE. /'];  fprintf(fid,'%s\n',slcf);
 slcf = ['&SLCF PBX=0, QUANTITY=''TEMPERATURE'', VECTOR=.TRUE. /'];  fprintf(fid,'%s\n',slcf);
+
+fprintf(fid,'%s\n','  '); % blank line
+
+bnde = ['&BNDE QUANTITY=''WALL TEMPERATURE'' /'];  fprintf(fid,'%s\n',bnde);
 
 fprintf(fid,'%s\n','  '); % blank line
 
