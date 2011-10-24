@@ -804,10 +804,10 @@ void read_geomdata(int ifile, int flag, int *errorcode){
       return;
     }
   }
-  //setpatchmin=1;
-  //patchmin=20.0;
-  //setpatchmax=1;
-  //patchmax=620.0;
+  setpatchmin=1;
+  patchmin=20.0;
+  setpatchmax=1;
+  patchmax=2000.0;
   getBoundaryColors3(patchi,patchi->geom_vals, patchi->geom_nvals, patchi->geom_ivals,
     setpatchmin,&patchmin, setpatchmax,&patchmax, 
     &patchmin_global, &patchmax_global,
