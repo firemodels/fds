@@ -817,9 +817,9 @@ void synctimes(void){
       patch *patchi;
 
       meshi=meshinfo+j;
+      if(meshi->patchfilenum<0||meshi->patchtimes==NULL)continue;
       patchi=patchinfo+meshi->patchfilenum;
       if(patchi->filetype==2)continue;
-      if(meshi->patchtimes==NULL)continue;
       if(n==0){
         istart=0;
       }
