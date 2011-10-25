@@ -28,7 +28,6 @@ set level=Release-3_Maintenance
 set version=%smv_version%
 
 echo Uploading Smokeview %level% version=%smv_version% revision=%smv_revision%
-pause
 
 Rem --------------- 64 bit OSX ----------------
 

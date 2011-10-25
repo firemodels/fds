@@ -27,7 +27,6 @@ Rem should not need to edit any lines below
 set level=Release-4_Test
 
 echo Uploading Smokeview %level% version=test revision=%smv_revision%
-pause
 
 Rem --------------- 32 bit Linux ----------------
 

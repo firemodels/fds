@@ -22,7 +22,6 @@ goto:eof
 call %envfile%
 
 echo Uploading Smokeview %level% version=%smv_version% revision=%smv_revision%
-pause
 
 %svn_drive%
 cd %svn_root%\smv\for_bundle\to_google

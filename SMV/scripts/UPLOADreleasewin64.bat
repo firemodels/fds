@@ -35,7 +35,6 @@ set upload_osx32=0
 set version=%smv_version%
 
 echo Uploading Smokeview %level% version=%smv_version% revision=%smv_revision%
-pause
 
 Rem --------------- 64 bit Windows ----------------
 if not %upload_win64% == 1 goto endif_win64
