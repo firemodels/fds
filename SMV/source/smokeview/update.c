@@ -450,6 +450,13 @@ void updateShow(void){
         break;
       }
     }
+    patchembedded=0;
+    for(ii=0;ii<npatch_loaded;ii++){
+      i = patch_loaded_list[ii];
+      patchi=patchinfo+i;
+      if(patchi->filetype!=2||patchi->display==0||patchi->type!=ipatchtype)continue;
+      patchembedded=1;
+    }
   }
   partflag=0;
   if(visSmoke==1&&visTimeSmoke==1){

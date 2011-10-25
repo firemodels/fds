@@ -85,6 +85,7 @@ SVEXTERN int n_embedded_meshes;
 SVEXTERN geomdata SVDECL(*geominfo,NULL);
 SVEXTERN int SVDECL(ngeominfo,0);
 
+SVEXTERN int SVDECL(patchembedded,0);
 SVEXTERN int npartframes_max;
 SVEXTERN int force_isometric;
 SVEXTERN int SVDECL(updategluiview,1);

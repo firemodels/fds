@@ -187,7 +187,7 @@ void draw_geom(void){
     pointlisti = pointlistinfo + i;
     ntris = trilisti->ntriangles;
     npoints = pointlisti->npoints;
-    if(showtrisurface==1){
+    if(patchembedded==0&&showtrisurface==1){
       glEnable(GL_LIGHTING);
       glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
       glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
