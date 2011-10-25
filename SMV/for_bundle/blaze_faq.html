@@ -1,0 +1,86 @@
+<html>
+<head>
+
+<TITLE>
+Cluster/FDS Usage Notes
+</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF" >
+
+
+<a name="top">
+<h2>Cluster/FDS Usage Notes</h2>
+<p><hr>
+<h3>Cluster</h3>
+<ul>
+
+<li>Adding a user account
+<pre>
+cuseradd -u uid  user
+<ul>
+<li> if user has an account on the old cluster use uid from there
+<li> set /home/user as home directory in /etc/passwd
+<li> set /bin/tcsh as shell in /etc/passwd
+</ul>
+passwd user
+pwconv
+passsync
+smbpasswd -a user
+</pre>
+
+<li>Powering down the cluster<br>
+<ul>
+<li>su to root
+<li>Power off the compute nodes.  Type: <b>POWEROFF</b><br>
+you will be given one chance to change your mind.
+This script powers down nodes: node001->node032 .
+<li>Power off the head node.  Type: <b>poweroff</b>
+<li>Power off the switches
+<li>Turn off the UPS at the bottom of the cabinet
+</ul>
+<li>Powering up the cluster (reverse of power down instructions)<br>
+<ul>
+<li>Power up the switches
+<li>Power up the UPS
+<li>Power up the head node. (wait until head node boots up before proceeding)
+<li>Power up the compute nodes
+</ul>
+<li>Resetting the clocks to the correct time<br>
+To correct the time on blaze type: 
+<ol>
+<li>/etc/init.d/ntpd stop
+<li>ntpdate "leo.cfr.nist.gov"<br>
+type the above several times until the offset displayed is close to 0
+<li>/etc/init.d/ntpd start
+</ol>
+To correct the time on the compute nodes type:
+<ol>
+<li>fornodesp "/etc/init.d stop"
+<li>fornodesp "ntpdate 129.6.160.154"<br>
+type the above several times until the offset displayed is close to 0
+<li>fornodesp "/etc/init.d/ntpd start"
+</ol>
+
+
+</ul>
+
+<h3>FDS</h3>
+<ul>
+<li>Running a serial FDS case<br>
+qfds.sh path_to_fds casename.fds
+
+<li>Running a parallel FDS case<br>
+qfdsmpi.sh nprocs path_to_fds casename.fds
+
+<li>Creating a PBS script file<br>
+qmake.sh nprocs nprocs_per_node path_to_fds casename.fds
+<li>Examining run queues<br>
+qstat
+<li>Setting up a FDS/Smokeview repository
+</ul>
+
+
+
+</body>
+
+</html>
