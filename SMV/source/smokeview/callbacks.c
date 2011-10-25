@@ -21,6 +21,7 @@
 #include "smokeviewvars.h"
 #include "update.h"
 #include "IOvolsmoke.h"
+#include "datadefs.h"
 
 #define KEY_ALT 0
 #define KEY_CTRL 1

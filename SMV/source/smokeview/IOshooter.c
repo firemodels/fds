@@ -15,6 +15,7 @@
 #include "flowfiles.h"
 #include "MALLOC.h"
 #include "smokeviewvars.h"
+#include "datadefs.h"
 
 // svn revision character string
 char IOshooter_revision[]="$Revision$";
@@ -49,19 +50,6 @@ int  allocate_shooter(void){
   return 0;
 
 }
-
-/*
-typedef struct _shootpointdata {
-  struct _shootpointdata *prev;
-  float xyz[3], uvw[3], val;
-} shootpointdata;
-
-typedef struct {
-  float time;
-  int frame;
-  shootpointdata *beg, *end;
-} shoottimedata;
-*/
 
 /* ------------------ get_vel ------------------------ */
 

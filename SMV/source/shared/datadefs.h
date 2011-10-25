@@ -26,4 +26,3 @@
 #ifndef IJKCELL
 #define IJKCELL(i,j,k) ((i)+ (j)*ibar+(k)*ibar*jbar)
 #endif
-
