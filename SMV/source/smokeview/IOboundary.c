@@ -3794,7 +3794,8 @@ int update_patch_hist(patch *patchj){
     mesh *meshi;
 
     patchi = patchinfo + i;
-    if(patchi->inuse_getbounds==1||patchi->histogram->complete==1||patchi->type!=patchj->type||patchi->filetype!=patchj->filetype||patchi->bounds.defined==1)continue;
+    if(patchi->inuse_getbounds==1||patchi->histogram->complete==1||patchi->type!=patchj->type||
+       patchi->filetype!=patchj->filetype||patchi->bounds.defined==1||patchi->filetype==2)continue;
 
     patchi->inuse_getbounds=1;
     meshi = meshinfo + patchi->blocknumber;

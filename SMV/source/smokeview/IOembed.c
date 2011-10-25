@@ -777,6 +777,12 @@ void read_geomdata(int ifile, int flag, int *errorcode){
   FORTgetembeddata(file, &endian, &ntimes, &nvals, patchi->geom_times, 
     patchi->geom_nstatics, patchi->geom_ndynamics, patchi->geom_vals, &error, lenfile);
 
+  init_histogram(patchi->histogram);
+
+  update_histogram(patchi->geom_vals,nvals,patchi->histogram);
+
+  complete_histogram(patchi->histogram);
+
   patchi->geom_ntimes=ntimes;
   patchi->geom_nvals=nvals;
   patchi->geom_ivals_static[0] = patchi->geom_ivals;
@@ -804,10 +810,6 @@ void read_geomdata(int ifile, int flag, int *errorcode){
       return;
     }
   }
-  setpatchmin=1;
-  patchmin=20.0;
-  setpatchmax=1;
-  patchmax=2000.0;
   getBoundaryColors3(patchi,patchi->geom_vals, patchi->geom_nvals, patchi->geom_ivals,
     setpatchmin,&patchmin, setpatchmax,&patchmax, 
     &patchmin_global, &patchmax_global,
