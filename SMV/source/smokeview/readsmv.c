@@ -2912,13 +2912,14 @@ typedef struct {
 
       buffer_csvptr=buffer_csv;
       strcpy(buffer_csv,bufptr);
-      strcat(buffer_csv,".csv");
       filename=get_zonefilename(buffer_csvptr);
       if(filename!=NULL){
         zonei->csv=1;
+        zonecsv=1;
       }
       else{
         zonei->csv=0;
+        zonecsv=0;
         filename=get_zonefilename(bufptr);
       }
 

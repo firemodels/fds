@@ -61,25 +61,29 @@ void getzonesizecsv(int *nzonet, int *nroom, int *nfires, int *error){
 /* ------------------ getzonedatacsv ------------------------ */
 
 void getzonedatacsv(int nzonet, int nrooms, int nfires, 
-                    float *zonet, float *zoneqfire, 
+                    float *zonet, float *zoneqfire, float *zonefheight, float *zonefbase, float *zonefdiam,
                     float *zonepr, float *zoneylay,  float *zonetl, float *zonetu,
-                    float **zoneodlptr, float **zoneoduptr, 
+                    float **zoneodlptr, float **zoneoduptr,
                     int *error){
   char *zone_labels[]={
     "Time", "s", 
     "ULT_", "C", "LLT_", "C", "HGT_", "m", "PRS_", "Pa",
     "ATARG_", "W/m^2", "FTARG_", "W/m^2",  
-    "HRR_", "W", "FHGT_", "m",
-    "ULOD_", "1/m", "LLOD_", "1/m"
+    "HRR_", "W", "FLHGT_", "m",
+    "ULOD_", "1/m", "LLOD_", "1/m", "FAREA_", "m^2", "FBASE_", "m"
   };
   int i,ii,iif, use_od=1;
   device *zonet_dev=NULL, **zoneqfire_devs=NULL;
   device **zonepr_devs=NULL, **zoneylay_devs=NULL, **zonetl_devs=NULL, **zonetu_devs=NULL, **zoneodl_devs=NULL, **zoneodu_devs=NULL;
+  device **zonefheight_devs=NULL, **zonefbase_devs=NULL, **zonefarea_devs=NULL;
   float *zoneodl, *zoneodu;
 
   *error=0;
   if(nfires>0){
     NewMemory((void **)&zoneqfire_devs,nfires*sizeof(device *));
+    NewMemory((void **)&zonefheight_devs,nfires*sizeof(device *));
+    NewMemory((void **)&zonefbase_devs,nfires*sizeof(device *));
+    NewMemory((void **)&zonefarea_devs,nfires*sizeof(device *));
   }
 
   if(nrooms>0){
@@ -151,6 +155,24 @@ void getzonedatacsv(int nzonet, int nrooms, int nfires,
       *error=1;
       return;
     }
+    sprintf(label,"FLHGT_%i",i+1);
+    zonefheight_devs[i]=getdevice(label);
+    if(zonefheight_devs[i]==NULL||zonefheight_devs[i]->nvals!=nzonet){
+      *error=1;
+      return;
+    }
+    sprintf(label,"FBASE_%i",i+1);
+    zonefbase_devs[i]=getdevice(label);
+    if(zoneqfire_devs[i]==NULL||zoneqfire_devs[i]->nvals!=nzonet){
+      *error=1;
+      return;
+    }
+    sprintf(label,"FAREA_%i",i+1);
+    zonefarea_devs[i]=getdevice(label);
+    if(zonefarea_devs[i]==NULL||zonefarea_devs[i]->nvals!=nzonet){
+      *error=1;
+      return;
+    }
   }
 
   ii=0;
@@ -164,6 +186,7 @@ void getzonedatacsv(int nzonet, int nrooms, int nfires,
       zoneylay[ii]=zoneylay_devs[j]->vals[i];
       zonetl[ii]=zonetl_devs[j]->vals[i];
       zonetu[ii]=zonetu_devs[j]->vals[i];
+
       if(use_od==1){
         zoneodl[ii]=zoneodl_devs[j]->vals[i];
         zoneodu[ii]=zoneodu_devs[j]->vals[i];
@@ -171,7 +194,13 @@ void getzonedatacsv(int nzonet, int nrooms, int nfires,
       ii++;
     }
     for(j=0;j<nfires;j++){
-      zoneqfire[iif]=zoneqfire_devs[j]->vals[i];
+      float area;
+
+      zoneqfire[iif]=1000.0*zoneqfire_devs[j]->vals[i];
+      zonefheight[iif]=zonefheight_devs[j]->vals[i];
+      area=zonefarea_devs[j]->vals[i];
+      zonefdiam[iif]=2.0*sqrt(area/3.14159);
+      zonefbase[iif]=zonefbase_devs[j]->vals[i];
       iif++;
     }
   }
@@ -183,6 +212,9 @@ void getzonedatacsv(int nzonet, int nrooms, int nfires,
   FREEMEMORY(zonetu_devs);
   FREEMEMORY(zoneodl_devs);
   FREEMEMORY(zoneodu_devs);
+  FREEMEMORY(zonefheight_devs);
+  FREEMEMORY(zonefarea_devs);
+  FREEMEMORY(zonefbase_devs);
 }
 
 /* ------------------ getsmokedir ------------------------ */
@@ -329,6 +361,9 @@ void readzone(int ifile, int flag, int *errorcode){
   FREEMEMORY(zonepr);
   FREEMEMORY(hazardcolor);
   FREEMEMORY(zoneqfire);
+  FREEMEMORY(zonefheight);
+  FREEMEMORY(zonefdiam);
+  FREEMEMORY(zonefbase);
   FREEMEMORY(izonetu);
   FREEMEMORY(zoneodl);
   FREEMEMORY(zoneodu);
@@ -409,7 +444,15 @@ void readzone(int ifile, int flag, int *errorcode){
     }
     if(nfires!=0){
       FREEMEMORY(zoneqfire);
-      if(NewMemory((void **)&zoneqfire,nfires*nzonet*sizeof(float))==0){
+      FREEMEMORY(zonefheight);
+      FREEMEMORY(zonefdiam);
+      FREEMEMORY(zonefbase);
+      if(
+        NewMemory((void **)&zoneqfire,nfires*nzonet*sizeof(float))==0||
+        NewMemory((void **)&zonefheight,nfires*nzonet*sizeof(float))==0||
+        NewMemory((void **)&zonefdiam,nfires*nzonet*sizeof(float))==0||
+        NewMemory((void **)&zonefbase,nfires*nzonet*sizeof(float))==0
+        ){
         *errorcode=1;
         return;
       }
@@ -428,20 +471,32 @@ void readzone(int ifile, int flag, int *errorcode){
   }
   CheckMemory;
   if(zonei->csv==1){
-    getzonedatacsv(nzonet,nrooms, nfires, zonet, zoneqfire,zonepr,zoneylay,zonetl,zonetu,&zoneodl,&zoneodu,&error);
+    getzonedatacsv(nzonet,nrooms,  nfires, zonet,zoneqfire, zonefheight, zonefbase, zonefdiam,
+                   zonepr,zoneylay,zonetl,zonetu,&zoneodl,&zoneodu,&error);
   }
   else{
     FORTgetzonedata(file,&nzonet,&nrooms, &nfires, zonet,zoneqfire,zonepr,zoneylay,zonetl,zonetu,&endian,&error,zonefilelen);
+  }
+
+  if(zonei->csv==0){
+    ii=0;
+    for(i=0;i<nzonet;i++){
+      for(j=0;j<nrooms;j++){
+        zonetu[ii]-=273.15;
+        zonetl[ii]-=273.15;
+        ii++;
+      }
+    }
   }
   CheckMemory;
   ii = 0;
   for(i=0;i<nzonet;i++){
     for(j=0;j<nrooms;j++){
-      if(zonetu[ii]>=773.0f){
+      if(zonetu[ii]>=773.0f-273.15){
 		    hazardcolor[ii]=RED;
       }
       else{
-		    if(zonetu[ii]>=323.0){
+		    if(zonetu[ii]>=323.0-273.15){
           if(zoneylay[ii]>1.5){
             hazardcolor[ii]=YELLOW;
           }
@@ -459,15 +514,6 @@ void readzone(int ifile, int flag, int *errorcode){
         }
       }
       zoneylay[ii]/=xyzmaxdiff;
-      ii++;
-    }
-  }
-
-  ii=0;
-  for(i=0;i<nzonet;i++){
-    for(j=0;j<nrooms;j++){
-      zonetu[ii]-=273.15;
-      zonetl[ii]-=273.15;
       ii++;
     }
   }
@@ -1303,7 +1349,7 @@ void drawroomdata(void){
   float xroom0, yroom0, zroom0, xroom, yroom, zroom;
   float *zoneylaybase,dy;
   unsigned char *hazardcolorbase, *zonecolorbase;
-  float *zoneqfirebase;
+  float *zoneqfirebase, *zonefheightbase, *zonefdiambase, *zonefbasebase;
   float ylay;
   float qdot;
   float *colorv;
@@ -1321,6 +1367,9 @@ void drawroomdata(void){
   hazardcolorbase = hazardcolor + izone*nrooms;
   zoneylaybase = zoneylay + izone*nrooms;
   zoneqfirebase = zoneqfire + izone*nfires;
+  zonefheightbase = zonefheight + izone*nfires;
+  zonefdiambase = zonefdiam + izone*nfires;
+  zonefbasebase = zonefbase + izone*nfires;
 
   if(sethazardcolor==1){
     zonecolorbase=hazardcolorbase;
@@ -1396,22 +1445,46 @@ void drawroomdata(void){
 
   if(viszonefire==1){
     for(i=0;i<nfires;i++){
-      qdot = zoneqfirebase[i]/1000.0f;
-      if(qdot>0.0f){
-        firedata *firei;
-        roomdata *roomi;
-        float diameter, plumeheight, maxheight;
 
-        // radius/plumeheight = .268 = atan(15 degrees)
-        firei = fireinfo + i;
-        roomi = roominfo + firei->roomnumber-1;
-        maxheight=roomi->z1-firei->absz;
-        plumeheight = (0.23f*pow((double)qdot,(double)0.4)/(1.0f+2.0f*0.268f))/xyzmaxdiff;
-        diameter = 2.0*plumeheight*0.268f;
-        glPushMatrix();
-        glTranslatef(firei->absx,firei->absy,firei->absz);
-        DrawFirePlume(diameter,plumeheight,maxheight);
-        glPopMatrix();
+      qdot = zoneqfirebase[i]/1000.0f;
+      if(zonecsv==1){
+        if(qdot>0.0f){
+          firedata *firei;
+          roomdata *roomi;
+          float diameter, plumeheight, maxheight;
+          float deltaz;
+
+          // radius/plumeheight = .268 = atan(15 degrees)
+          firei = fireinfo + i;
+          roomi = roominfo + firei->roomnumber-1;
+          diameter = zonefdiambase[i]/xyzmaxdiff;
+          deltaz = zonefbasebase[i]/xyzmaxdiff;
+          maxheight=roomi->z1-deltaz;
+          plumeheight = zonefheightbase[i]/xyzmaxdiff;
+//          printf("i=%i deltaz=%f plumeheight=%f area=%f\n",i,deltaz*xyzmaxdiff,plumeheight*xyzmaxdiff,3.14159*diameter*diameter*xyzmaxdiff*xyzmaxdiff/4.0);
+          glPushMatrix();
+          glTranslatef(firei->absx,firei->absy,deltaz);
+          DrawFirePlume(diameter,plumeheight,maxheight);
+          glPopMatrix();
+        }
+      }
+      else{
+        if(qdot>0.0f){
+          firedata *firei;
+          roomdata *roomi;
+          float diameter, plumeheight, maxheight;
+
+          // radius/plumeheight = .268 = atan(15 degrees)
+          firei = fireinfo + i;
+          roomi = roominfo + firei->roomnumber-1;
+          maxheight=roomi->z1-firei->absz;
+          plumeheight = (0.23f*pow((double)qdot,(double)0.4)/(1.0f+2.0f*0.268f))/xyzmaxdiff;
+          diameter = 2.0*plumeheight*0.268f;
+          glPushMatrix();
+          glTranslatef(firei->absx,firei->absy,firei->absz);
+          DrawFirePlume(diameter,plumeheight,maxheight);
+          glPopMatrix();
+        }
       }
     }
   }

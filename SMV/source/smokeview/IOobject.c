@@ -4313,7 +4313,7 @@ device *getdevice(char *label){
     device *devicei;
 
     devicei = deviceinfo + i;
-    if(strcmp(devicei->label,label)==0)return devicei;
+    if(STRCMP(devicei->label,label)==0)return devicei;
   }
   return NULL;
 }

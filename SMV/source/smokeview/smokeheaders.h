@@ -23,10 +23,10 @@ int SUB_portfrustum(int quad,
                    );
 EXTERNCPP device *getdevice(char *label);
 EXTERNCPP void getzonedatacsv(int nzonet, int nrooms, int nfires, 
-                              float *zonet, float *zoneqfire, 
-                              float *zonepr, float *zoneylay,  float *zonetl, float *zonetu,
-                              float **zoneodl, float **zoneodu,
-                              int *error);
+                    float *zonet, float *zoneqfire, float *zonefheight, float *zonefbase, float *zonefdiam,
+                    float *zonepr, float *zoneylay,  float *zonetl, float *zonetu,
+                    float **zoneodlptr, float **zoneoduptr,
+                    int *error);
 EXTERNCPP void draw_geom(void);
 EXTERNCPP void getzonesizecsv(int *nzonet, int *nroom2, int *nfires, int *error);
 EXTERNCPP void remove_dup_blockages(void);
