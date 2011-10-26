@@ -2422,7 +2422,7 @@ ENDIF
 
 ! Dump unstructured geometry and boundary element info
 
-IF (N_BNDE>0 .AND. T>BNDE_CLOCK) THEN
+IF (N_BNDE>0 .AND. T>=BNDE_CLOCK) THEN
    IF (MYID==0) THEN
       CALL DUMP_BNDE(T)
       CALL DUMP_GEOM(T)
