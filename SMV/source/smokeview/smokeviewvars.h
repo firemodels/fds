@@ -780,7 +780,7 @@ SVEXTERN FILE *scriptoutstream;
 SVEXTERN char *scriptinifilename2;
 SVEXTERN char *logfilename;
 SVEXTERN char *flushfile, *chidfilebase;
-SVEXTERN char *hrrfilename,*devcfilename;
+SVEXTERN char SVDECL(*hrrfilename,NULL),SVDECL(*devcfilename,NULL);
 SVEXTERN hrrdata *hrrinfo;
 SVEXTERN char *smokezippath;
 SVEXTERN char SVDECL(*INI_fds_filein,NULL), SVDECL(*fds_filein,NULL);

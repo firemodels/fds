@@ -5406,6 +5406,8 @@ void init_device(device *devicei, float *xyz, float *xyzn, int state0, int npara
     devicei->xyznorm[1]=0.0;
     devicei->xyznorm[2]=1.0;
   }
+  devicei->times=NULL;
+  devicei->vals=NULL;
   devicei->nstate_changes=0;
   devicei->istate_changes=0;
   devicei->act_times=NULL;
