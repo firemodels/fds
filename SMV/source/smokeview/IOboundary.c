@@ -957,7 +957,7 @@ void readpatch(int ifile, int flag, int *errorcode){
     read_geomdata(ifile,flag,errorcode);
   }
   else{
-    readpatch(ifile,flag,errorcode);
+    readpatch_bndf(ifile,flag,errorcode);
   }
 }
 
