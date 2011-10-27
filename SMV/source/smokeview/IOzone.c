@@ -512,7 +512,7 @@ void readzone(int ifile, int flag, int *errorcode){
     }
     FREEMEMORY(zonevvents); 
     if(nzvvents>0){
-      NewMemory((void **)&zonehvents,nzvvents*nzonet*sizeof(float));
+      NewMemory((void **)&zonevvents,nzvvents*nzonet*sizeof(float));
     }
     FREEMEMORY(zoneqfire);
     FREEMEMORY(zonefheight);
