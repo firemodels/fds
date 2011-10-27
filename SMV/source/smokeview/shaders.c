@@ -32,7 +32,7 @@ int setZoneSmokeShaders() {
     
     "void main(){"
     "  float L,opacity,alpha,alpha_min,alpha_zlay;"
-    "  float factor_U, factor_L;"
+    "  float factor_U, factor_L, grey;"
     
     "  vec3 dalphamin,dalphamax;"
     "  L=distance(fragpos,eyepos)*xyzmaxdiff;"
@@ -94,8 +94,9 @@ int setZoneSmokeShaders() {
     "      factor_L=1.0/odl;"
     "    }"
     "  }" // end inside=1
+    "  grey=0.0;"
     "  opacity = 1.0-exp(-(factor_L+factor_U)*L);"
-    "  gl_FragColor = vec4(0.3,0.3,0.3,opacity);"
+    "  gl_FragColor = vec4(grey,grey,grey,opacity);"
     "}" // end of main
   };
 

@@ -669,8 +669,8 @@ void fill_zonedata(int izone_index){
     roomi->itu=getZoneColor(tu0[i],zonemin,zonemax,nrgb_full);
     roomi->rho_L=PAMB/R/roomi->tl;
     roomi->rho_U=PAMB/R/roomi->tu;
-    if(zoneodl!=NULL)roomi->od_L=odl0[i];
-    if(zoneodu!=NULL)roomi->od_U=odu0[i];
+    if(zoneodl!=NULL)roomi->od_L=1.0/MAX(odl0[i],0.0001);
+    if(zoneodu!=NULL)roomi->od_U=1.0/MAX(odu0[i],0.0001);
   }
   roomi=roominfo+nrooms;
   roomi->pfloor=0.0;
@@ -1429,6 +1429,7 @@ void drawzonesmoke(roomdata *roomi){
         float y11, y12, y22, y21;
         float z11, z12, z22, z21;
         float a11, a12, a22, a21;
+        float grey=0.0;
 
         x11 = vxyz[0][i][j];
         x12 = vxyz[0][i][j+1];
@@ -1447,18 +1448,18 @@ void drawzonesmoke(roomdata *roomi){
         a21 = vxyz[3][i+1][j];
         a22 = vxyz[3][i+1][j+1];
 
-        glColor4f(0.0,0.0,0.0,a11);
+        glColor4f(grey,grey,grey,a11);
         glVertex3f(x11,y11,z11);
-        glColor4f(0.0,0.0,0.0,a12);
+        glColor4f(grey,grey,grey,a12);
         glVertex3f(x12,y12,z12);
-        glColor4f(0.0,0.0,0.0,a22);
+        glColor4f(grey,grey,grey,a22);
         glVertex3f(x22,y22,z22);
 
-        glColor4f(0.0,0.0,0.0,a11);
+        glColor4f(grey,grey,grey,a11);
         glVertex3f(x11,y11,z11);
-        glColor4f(0.0,0.0,0.0,a22);
+        glColor4f(grey,grey,grey,a22);
         glVertex3f(x22,y22,z22);
-        glColor4f(0.0,0.0,0.0,a21);
+        glColor4f(grey,grey,grey,a21);
         glVertex3f(x21,y21,z21);
       }
     }
