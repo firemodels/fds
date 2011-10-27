@@ -1494,7 +1494,7 @@ void drawfiredata(void){
           maxheight=roomi->z1-deltaz;
           flameheight = zonefheightbase[i]/xyzmaxdiff;
           glPushMatrix();
-          glTranslatef(firei->absx,firei->absy,deltaz);
+          glTranslatef(firei->absx,firei->absy,roomi->z0+deltaz);
           DrawFirePlume(diameter,flameheight,maxheight);
           glPopMatrix();
         }
