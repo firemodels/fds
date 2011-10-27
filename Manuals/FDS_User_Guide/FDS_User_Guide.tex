@@ -7653,7 +7653,7 @@ if the text were added to an {\ct OBST} line, that obstruction would change from
 When using a {\ct DEVC} output to control FDS, the instanteneous value of the the {\ct DEVC} is used.  For some {\ct QUANTITY} types, such as {\ct TEMPERATURE}, this output can be very noisy.  To prevent a spurious spike from causing a state change of the {\ct DEVC} you can specify the parameter {\ct SMOOTHING\_FACTOR}.  This is a parameter that can vary between 0 and 1.  It performs an exponential smoothing of the {\ct DEVC} output as follows:
 
 \be
-\bar{x}^n=\bar{x}^{n-1} {\ct SMOOTHING\_FACTOR} + x (1-{\ct SMOOTHING\_FACTOR})
+\bar{x}^n=\bar{x}^{n-1} \, \mbox{\ct SMOOTHING\_FACTOR} + x \,(1-\mbox{\ct SMOOTHING\_FACTOR})
 \ee
 
 \noindent
