@@ -606,6 +606,7 @@ EXTERNCPP void drawEvac(const particle *parti);
 EXTERNCPP void drawStaticPart(const particle *parti);
 EXTERNCPP void drawgrid(const mesh *gb);
 EXTERNCPP void drawroomgeom(void);
+EXTERNCPP void drawfiredata(void);
 EXTERNCPP void drawroomdata(void);
 EXTERNCPP void drawventdata(void);
 EXTERNCPP void Init(void);

@@ -395,6 +395,21 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
     drawiso(DRAW_SOLID);
   }
 
+/* ++++++++++++++++++++++++ draw zone fire modeling info +++++++++++++++++++++++++ */
+
+  if(nrooms>0){
+    drawroomgeom();
+    sniffErrors("after drawroomgeom");
+    if(showzone==1){
+      drawfiredata();
+      sniffErrors("after drawroomdata");
+      if(ReadZoneFile==1&&nzvents>0){
+        drawventdata();
+        sniffErrors("after drawventdata");
+      }
+    }
+  }
+
 
 //**********************************************************************************
 //**********************************************************************************
@@ -432,17 +447,9 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
 /* ++++++++++++++++++++++++ draw zone fire modeling info +++++++++++++++++++++++++ */
 
-  if(nrooms>0){
-    drawroomgeom();
-    sniffErrors("after drawroomgeom");
-  }
-  if(showzone==1){
+  if(nrooms>0&&showzone==1){
     drawroomdata();
     sniffErrors("after drawroomdata");
-    if(ReadZoneFile==1&&nzvents>0){
-      drawventdata();
-      sniffErrors("after drawventdata");
-    }
   }
 
 /* ++++++++++++++++++++++++ draw slice files +++++++++++++++++++++++++ */

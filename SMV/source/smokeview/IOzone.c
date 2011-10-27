@@ -763,11 +763,6 @@ void drawroomgeom(void){
   
   fill_zonedata(izone);
 
-  if(cullfaces==1)glDisable(GL_CULL_FACE);
-
-
-  if(use_transparency_data==1)transparenton();
-
 /* draw the frame */
 
   antialias(1);
@@ -876,9 +871,6 @@ void drawroomgeom(void){
       glEnd();
     }
   }
-
-  if(use_transparency_data==1)transparentoff();
-  if(cullfaces==1)glEnable(GL_CULL_FACE);
 }
 
 /* ------------------ drawventdata ------------------------ */
@@ -951,7 +943,7 @@ void drawventdata(void){
     }
     get_dpT(yelev, 20, zvi->room1, zvi->room2, zvi->vdata, &zvi->dpmin, &zvi->dpmax, zvi->itempdata);
   }
-  factor = 0.1/zone_maxventflow;
+  factor = 0.1*zone_ventfactor/zone_maxventflow;
   for(i=0;i<nzvents;i++){
     zvent *zvi;
     int j;
@@ -1467,13 +1459,74 @@ void drawzonesmoke(roomdata *roomi){
   }
 }
 
+/* ------------------ drawfiredata ------------------------ */
+
+void drawfiredata(void){
+  int i;
+  float *zoneqfirebase, *zonefheightbase, *zonefdiambase, *zonefbasebase;
+
+  if(zonet[0]>times[itimes])return;
+  if(cullfaces==1)glDisable(GL_CULL_FACE);
+
+  zoneqfirebase = zoneqfire + izone*nfires;
+  zonefheightbase = zonefheight + izone*nfires;
+  zonefdiambase = zonefdiam + izone*nfires;
+  zonefbasebase = zonefbase + izone*nfires;
+
+  if(viszonefire==1){
+    for(i=0;i<nfires;i++){
+      float qdot;
+      float diameter, flameheight, maxheight;
+
+      qdot = zoneqfirebase[i]/1000.0f;
+      if(zonecsv==1){
+        if(qdot>0.0f){
+          firedata *firei;
+          roomdata *roomi;
+          float deltaz;
+
+          // radius/plumeheight = .268 = atan(15 degrees)
+          firei = fireinfo + i;
+          roomi = roominfo + firei->roomnumber-1;
+          diameter = zonefdiambase[i]/xyzmaxdiff;
+          deltaz = zonefbasebase[i]/xyzmaxdiff;
+          maxheight=roomi->z1-deltaz;
+          flameheight = zonefheightbase[i]/xyzmaxdiff;
+          glPushMatrix();
+          glTranslatef(firei->absx,firei->absy,deltaz);
+          DrawFirePlume(diameter,flameheight,maxheight);
+          glPopMatrix();
+        }
+      }
+      else{
+        if(qdot>0.0f){
+          firedata *firei;
+          roomdata *roomi;
+
+          // radius/plumeheight = .268 = atan(15 degrees)
+          firei = fireinfo + i;
+          roomi = roominfo + firei->roomnumber-1;
+          maxheight=roomi->z1-firei->absz;
+          flameheight = (0.23f*pow((double)qdot,(double)0.4)/(1.0f+2.0f*0.268f))/xyzmaxdiff;
+          diameter = 2.0*flameheight*0.268f;
+          glPushMatrix();
+          glTranslatef(firei->absx,firei->absy,firei->absz);
+          DrawFirePlume(diameter,flameheight,maxheight);
+          glPopMatrix();
+        }
+      }
+    }
+  }
+  if(use_transparency_data==1)transparentoff();
+  if(cullfaces==1)glEnable(GL_CULL_FACE);
+}
+
 /* ------------------ drawroomdata ------------------------ */
 
 void drawroomdata(void){
   float xroom0, yroom0, zroom0, xroom, yroom, zroom;
   float *zoneylaybase,dy;
   unsigned char *hazardcolorbase, *zonecolorbase;
-  float *zoneqfirebase, *zonefheightbase, *zonefdiambase, *zonefbasebase;
   float ylay;
   float qdot;
   float *colorv;
@@ -1482,17 +1535,13 @@ void drawroomdata(void){
   int i;
 
   if(zonet[0]>times[itimes])return;
-  if(cullfaces==1)glDisable(GL_CULL_FACE);
 
+  if(cullfaces==1)glDisable(GL_CULL_FACE);
   if(use_transparency_data==1)transparenton();
 
   izonetubase = izonetu + izone*nrooms;
   hazardcolorbase = hazardcolor + izone*nrooms;
   zoneylaybase = zoneylay + izone*nrooms;
-  zoneqfirebase = zoneqfire + izone*nfires;
-  zonefheightbase = zonefheight + izone*nfires;
-  zonefdiambase = zonefdiam + izone*nfires;
-  zonefbasebase = zonefbase + izone*nfires;
 
   if(sethazardcolor==1){
     zonecolorbase=hazardcolorbase;
@@ -1566,51 +1615,6 @@ void drawroomdata(void){
   }
 #endif
 
-  if(viszonefire==1){
-    for(i=0;i<nfires;i++){
-
-      qdot = zoneqfirebase[i]/1000.0f;
-      if(zonecsv==1){
-        if(qdot>0.0f){
-          firedata *firei;
-          roomdata *roomi;
-          float diameter, plumeheight, maxheight;
-          float deltaz;
-
-          // radius/plumeheight = .268 = atan(15 degrees)
-          firei = fireinfo + i;
-          roomi = roominfo + firei->roomnumber-1;
-          diameter = zonefdiambase[i]/xyzmaxdiff;
-          deltaz = zonefbasebase[i]/xyzmaxdiff;
-          maxheight=roomi->z1-deltaz;
-          plumeheight = zonefheightbase[i]/xyzmaxdiff;
-//          printf("i=%i deltaz=%f plumeheight=%f area=%f\n",i,deltaz*xyzmaxdiff,plumeheight*xyzmaxdiff,3.14159*diameter*diameter*xyzmaxdiff*xyzmaxdiff/4.0);
-          glPushMatrix();
-          glTranslatef(firei->absx,firei->absy,deltaz);
-          DrawFirePlume(diameter,plumeheight,maxheight);
-          glPopMatrix();
-        }
-      }
-      else{
-        if(qdot>0.0f){
-          firedata *firei;
-          roomdata *roomi;
-          float diameter, plumeheight, maxheight;
-
-          // radius/plumeheight = .268 = atan(15 degrees)
-          firei = fireinfo + i;
-          roomi = roominfo + firei->roomnumber-1;
-          maxheight=roomi->z1-firei->absz;
-          plumeheight = (0.23f*pow((double)qdot,(double)0.4)/(1.0f+2.0f*0.268f))/xyzmaxdiff;
-          diameter = 2.0*plumeheight*0.268f;
-          glPushMatrix();
-          glTranslatef(firei->absx,firei->absy,firei->absz);
-          DrawFirePlume(diameter,plumeheight,maxheight);
-          glPopMatrix();
-        }
-      }
-    }
-  }
   if(use_transparency_data==1)transparentoff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 }

@@ -1048,13 +1048,26 @@ void keyboard_2(unsigned char key, int x, int y){
     }
     return;
   }
-  if(strncmp((const char *)&key2,"a",1)==0&&(eyeview==EYE_CENTERED||(visVector==1&&ReadPlot3dFile==1)||showvslice==1)){
+  if(strncmp((const char *)&key2,"a",1)==0&&(eyeview==EYE_CENTERED||(visVector==1&&ReadPlot3dFile==1)||showvslice==1||isZoneFireModel==1)){
     if(eyeview==EYE_CENTERED){
       handle_move_keys(256+key2);
     }
     else{
       iveclengths += FlowDir;
       vecfactor = get_vecfactor(&iveclengths);
+      if(isZoneFireModel==1){
+        if(iveclengths==0){
+          zone_ventfactor=1.0;
+        }
+        else{
+          if(FlowDir>0){
+            zone_ventfactor*=1.5;
+          }
+          else{
+            zone_ventfactor/=1.5;
+          }
+        }
+      }
       printf("iveclengths=%i\n",iveclengths);
       if(visVector==1&&ReadPlot3dFile==1){
         gbsave=current_mesh;

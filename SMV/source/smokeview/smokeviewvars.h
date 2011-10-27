@@ -217,6 +217,7 @@ SVEXTERN float SVDECL(*zoneodl,NULL), SVDECL(*zoneodu,NULL), SVDECL(*zonehvents,
 SVEXTERN int SVDECL(zonecsv,0),SVDECL(nzvents,0),SVDECL(nzhvents,0),SVDECL(nzvvents,0);
 SVEXTERN float zone_maxventflow;
 SVEXTERN unsigned char *hazardcolor;
+SVEXTERN float SVDECL(zone_ventfactor,1.0);
 SVEXTERN unsigned char *izonetu;
 SVEXTERN int nzonet;
 SVEXTERN float barright;
