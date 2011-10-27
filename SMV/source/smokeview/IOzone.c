@@ -1489,7 +1489,7 @@ void drawfiredata(void){
           firei = fireinfo + i;
           roomi = roominfo + firei->roomnumber-1;
           diameter = zonefdiambase[i]/xyzmaxdiff;
-          deltaz = zonefbasebase[i]/xyzmaxdiff;
+          deltaz = (firei->absz+zonefbasebase[i])/xyzmaxdiff;
           maxheight=roomi->z1-deltaz;
           flameheight = zonefheightbase[i]/xyzmaxdiff;
           glPushMatrix();
