@@ -1197,7 +1197,6 @@ void initvars1(void){
   smokeskipm1=0;
   nrooms=0;
   nzone=0;
-  nzvents=0;
   nfires=0;
   ratio=1.0;
   aspect=1.;

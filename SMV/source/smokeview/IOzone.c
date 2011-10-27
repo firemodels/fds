@@ -14,6 +14,7 @@
 #include "MALLOC.h"
 #include "smokeviewvars.h"
 #include "update.h"
+#include "datadefs.h"
 
 // svn revision character string
 char IOzone_revision[]="$Revision$";
@@ -22,37 +23,52 @@ void drawtrunccone(float d1, float d2, float height, unsigned char *rgbcolor);
 
 /* ------------------ getzonesizecsv ------------------------ */
 
-void getzonesizecsv(int *nzonet, int *nroom, int *nfires, int *error){
-   device *dv_time,*dv_room,*dv_fire;
-   int nr,nf;
+void getzonesizecsv(int *nzonet, int *nroom, int *nfires, int *nhvents, int *nvvents, int *error){
+   device *dev;
+   int nr,nf,nv;
    int i;
+   char label[100];
 
    
    *error=0;
-   dv_time=getdevice("Time");
-   if(dv_time==NULL){
+   dev=getdevice("Time");
+   if(dev==NULL){
      *error=1;
      return;
    }
    nr=0;
    for(i=0;i<ndeviceinfo;i++){
-     char room_label[100];
-     
-     sprintf(room_label,"LLT_%i",i+1);
-     dv_room=getdevice(room_label);
-     if(dv_room==NULL)break;
-     *nzonet=dv_room->nvals;
+     sprintf(label,"LLT_%i",i+1);
+     dev=getdevice(label);
+     if(dev==NULL)break;
+     *nzonet=dev->nvals;
      nr++;
    }
    *nroom=nr;
 
+   nv=0;
+   for(i=0;i<ndeviceinfo;i++){
+     sprintf(label,"HVENT_%i",i+1);
+     dev=getdevice(label);
+     if(dev==NULL)break;
+     nv++;
+   }
+   *nhvents=nv;
+
+   nv=0;
+   for(i=0;i<ndeviceinfo;i++){
+     sprintf(label,"VVENT_%i",i+1);
+     dev=getdevice(label);
+     if(dev==NULL)break;
+     nv++;
+   }
+   *nvvents=nv;
+
    nf=0;
    for(i=0;i<ndeviceinfo;i++){
-     char fire_label[100];
-     
-     sprintf(fire_label,"HRR_%i",i+1);
-     dv_fire=getdevice(fire_label);
-     if(dv_fire==NULL)break;
+     sprintf(label,"HRR_%i",i+1);
+     dev=getdevice(label);
+     if(dev==NULL)break;
      nf++;
    }
    *nfires=nf;
@@ -63,19 +79,13 @@ void getzonesizecsv(int *nzonet, int *nroom, int *nfires, int *error){
 void getzonedatacsv(int nzonet, int nrooms, int nfires, 
                     float *zonet, float *zoneqfire, float *zonefheight, float *zonefbase, float *zonefdiam,
                     float *zonepr, float *zoneylay,  float *zonetl, float *zonetu,
-                    float **zoneodlptr, float **zoneoduptr,
+                    float **zoneodlptr, float **zoneoduptr, float *zonehvents, float *zonevvents,
                     int *error){
-  char *zone_labels[]={
-    "Time", "s", 
-    "ULT_", "C", "LLT_", "C", "HGT_", "m", "PRS_", "Pa",
-    "ATARG_", "W/m^2", "FTARG_", "W/m^2",  
-    "HRR_", "W", "FLHGT_", "m",
-    "ULOD_", "1/m", "LLOD_", "1/m", "FAREA_", "m^2", "FBASE_", "m"
-  };
-  int i,ii,iif, use_od=1;
+  int i,ii,iif, use_od=1, iihv, iivv;
   device *zonet_dev=NULL, **zoneqfire_devs=NULL;
   device **zonepr_devs=NULL, **zoneylay_devs=NULL, **zonetl_devs=NULL, **zonetu_devs=NULL, **zoneodl_devs=NULL, **zoneodu_devs=NULL;
   device **zonefheight_devs=NULL, **zonefbase_devs=NULL, **zonefarea_devs=NULL;
+  device **zonehvents_devs=NULL, **zonevvents_devs=NULL;
   float *zoneodl, *zoneodu;
 
   *error=0;
@@ -93,6 +103,14 @@ void getzonedatacsv(int nzonet, int nrooms, int nfires,
     NewMemory((void **)&zonetu_devs,nrooms*sizeof(device *));
     NewMemory((void **)&zoneodl_devs,nrooms*sizeof(device *));
     NewMemory((void **)&zoneodu_devs,nrooms*sizeof(device *));
+  }
+
+  if(nzhvents>0){
+    NewMemory((void **)&zonehvents_devs,nzhvents*sizeof(device *));
+  }
+
+  if(nzvvents>0){
+    NewMemory((void **)&zonevvents_devs,nzvvents*sizeof(device *));
   }
 
   zonet_dev=getdevice("Time");
@@ -175,8 +193,32 @@ void getzonedatacsv(int nzonet, int nrooms, int nfires,
     }
   }
 
+  for(i=0;i<nzhvents;i++){
+    char label[100];
+
+    sprintf(label,"HVENT_%i",i+1);
+    zonehvents_devs[i]=getdevice(label);
+    if(zonehvents_devs[i]==NULL||zonehvents_devs[i]->nvals!=nzonet){
+      *error=1;
+      return;
+    }
+  }
+
+  for(i=0;i<nzvvents;i++){
+    char label[100];
+
+    sprintf(label,"VVENT_%i",i+1);
+    zonevvents_devs[i]=getdevice(label);
+    if(zonevvents_devs[i]==NULL||zonevvents_devs[i]->nvals!=nzonet){
+      *error=1;
+      return;
+    }
+  }
+
   ii=0;
   iif=0;
+  iihv=0;
+  iivv=0;
   for(i=0;i<nzonet;i++){
     int j;
 
@@ -203,8 +245,18 @@ void getzonedatacsv(int nzonet, int nrooms, int nfires,
       zonefbase[iif]=zonefbase_devs[j]->vals[i];
       iif++;
     }
+    for(j=0;j<nzhvents;j++){
+      zonehvents[iihv] = zonehvents_devs[j]->vals[i];
+      iihv++;
+    }
+    for(j=0;j<nzvvents;j++){
+      zonehvents[iivv] = zonevvents_devs[j]->vals[i];
+      iivv++;
+    }
   }
 
+  FREEMEMORY(zonehvents_devs);
+  FREEMEMORY(zonevvents_devs);
   FREEMEMORY(zoneqfire_devs);
   FREEMEMORY(zonepr_devs);
   FREEMEMORY(zoneylay_devs);
@@ -343,7 +395,7 @@ void getzonesmokedir(float *mm){
 void readzone(int ifile, int flag, int *errorcode){
   int n;
   int error,ntotal,i,j,ii;
-  int nrooms2,nfires2;
+  int nrooms2,nfires2,nzhvents2,nzvvents2;
   size_t zonefilelen;
   int fort_unit;
   zonedata *zonei;
@@ -354,6 +406,8 @@ void readzone(int ifile, int flag, int *errorcode){
   zonei = zoneinfo + ifile;
   file = zonei->file;
   if(zonei->loaded==0&&flag==UNLOAD)return;
+  FREEMEMORY(zonehvents);
+  FREEMEMORY(zonevvents);
   FREEMEMORY(zonet);
   FREEMEMORY(zoneylay);
   FREEMEMORY(zonetl);
@@ -391,19 +445,29 @@ void readzone(int ifile, int flag, int *errorcode){
   zonefilelen = strlen(file);
   if(zonei->csv==1){
     read_device_data(zonei->file,LOAD);
-    getzonesizecsv(&nzonet,&nrooms2,&nfires2,&error);
+    getzonesizecsv(&nzonet,&nrooms2,&nfires2,&nzhvents2,&nzvvents2,&error);
   }
   else{
     FORTgetzonesize(file,&nzonet,&nrooms2,&nfires2,&endian,&error,zonefilelen);
+    nzhvents2=nzhvents;
+    nzvvents2=nzvvents;
   }
   CheckMemory;
-  if(error!=0||nrooms!=nrooms2||nzonet==0){
+  if(error!=0||nrooms!=nrooms2||nzonet==0||nzhvents!=nzhvents2||nzvvents!=nzvvents2){
     showzone=0;
     updatetimes();
     ReadZoneFile=0;
     if(nrooms!=nrooms2){
       printf("*** error: number of rooms specified in the smv file (%i)\n",nrooms);
       printf("    not consistent with the number specified in the zone file (%i)\n",nrooms2);
+    }
+    if(nzhvents!=nzhvents2){
+      printf("*** error: number of horizontal flow vents specified in the smv file (%i)\n",nzhvents);
+      printf("    not consistent with the number specified in the data file (%i)\n",nzhvents2);
+    }
+    if(nzvvents!=nzvvents2){
+      printf("*** error: number of vertical flow vents specified in the smv file (%i)\n",nzvvents);
+      printf("    not consistent with the number specified in the data file (%i)\n",nzvvents2);
     }
     if(nzonet<=0)printf("*** warning: The file, %s, contains no data\n",file);
     return;
@@ -442,11 +506,19 @@ void readzone(int ifile, int flag, int *errorcode){
       *errorcode=1;
       return;
     }
+    FREEMEMORY(zonehvents); 
+    if(nzhvents>0){
+      NewMemory((void **)&zonehvents,nzhvents*nzonet*sizeof(float));
+    }
+    FREEMEMORY(zonevvents); 
+    if(nzvvents>0){
+      NewMemory((void **)&zonehvents,nzvvents*nzonet*sizeof(float));
+    }
+    FREEMEMORY(zoneqfire);
+    FREEMEMORY(zonefheight);
+    FREEMEMORY(zonefdiam);
+    FREEMEMORY(zonefbase);
     if(nfires!=0){
-      FREEMEMORY(zoneqfire);
-      FREEMEMORY(zonefheight);
-      FREEMEMORY(zonefdiam);
-      FREEMEMORY(zonefbase);
       if(
         NewMemory((void **)&zoneqfire,nfires*nzonet*sizeof(float))==0||
         NewMemory((void **)&zonefheight,nfires*nzonet*sizeof(float))==0||
@@ -472,7 +544,7 @@ void readzone(int ifile, int flag, int *errorcode){
   CheckMemory;
   if(zonei->csv==1){
     getzonedatacsv(nzonet,nrooms,  nfires, zonet,zoneqfire, zonefheight, zonefbase, zonefdiam,
-                   zonepr,zoneylay,zonetl,zonetu,&zoneodl,&zoneodu,&error);
+                   zonepr,zoneylay,zonetl,zonetu,&zoneodl,&zoneodu, zonehvents, zonevvents, &error);
   }
   else{
     FORTgetzonedata(file,&nzonet,&nrooms, &nfires, zonet,zoneqfire,zonepr,zoneylay,zonetl,zonetu,&endian,&error,zonefilelen);
@@ -553,14 +625,18 @@ void readzone(int ifile, int flag, int *errorcode){
   updatetimes();
   updatemenu=1;
   activezone = zoneinfo + ifile;
+  if(nzhvents>0||nzvvents>0){
+    printf("computing vent bounds\n");
+    getzoneventbounds();
+  }
   IDLE();
 
 }
 
-/* ------------------ fill_roomdata ------------------------ */
+/* ------------------ fill_zonedata ------------------------ */
 
-void fill_roomdata(int izone_index){
-  float *pr0, *tl0, *tu0, *ylay0, *odl0, *odu0;
+void fill_zonedata(int izone_index){
+  float *pr0, *tl0, *tu0, *ylay0, *odl0, *odu0, *hvent0;
   int i;
   roomdata *roomi;
 
@@ -574,8 +650,15 @@ void fill_roomdata(int izone_index){
   ylay0 = zoneylay + izone_index*nrooms;
   tl0 = zonetl + izone_index*nrooms;
   tu0 = zonetu + izone_index*nrooms;
+  hvent0 = zonehvents + izone_index*nzhvents;
   if(zoneodl!=NULL)odl0 = zoneodl + izone_index*nrooms;
   if(zoneodu!=NULL)odu0 = zoneodu + izone_index*nrooms;
+  for(i=0;i<nzhvents;i++){
+    zvent *zventi;
+
+    zventi = zventinfo + i;
+    zventi->area_fraction=CLAMP(hvent0[i]/zventi->area,0.0,1.0);
+  }
   for(i=0;i<nrooms;i++){
     roomi = roominfo + i;
     roomi->pfloor=pr0[i];
@@ -620,7 +703,7 @@ float get_p(float y, float pfloor, float ylay, float rho_L, float rho_U){
 
 /* ------------------ get_dpT ------------------------ */
 
-void get_dpT(float *yy, int n, roomdata *r1, roomdata *r2, float *delp, int *iT){
+void get_dpT(float *yy, int n, roomdata *r1, roomdata *r2, float *delp, float *dpmin, float *dpmax, int *iT){
   float p1, p2;
   int itslab;
   int fsign;
@@ -660,6 +743,12 @@ void get_dpT(float *yy, int n, roomdata *r1, roomdata *r2, float *delp, int *iT)
     delp[i]=fsign*sqrt(fabs(p1-p2));
     iT[i]=itslab;
   }
+  *dpmin=delp[0];
+  *dpmax=delp[0];
+  for(i=1;i<n;i++){
+    if(delp[i]<*dpmin)*dpmin=delp[i];
+    if(delp[i]>*dpmax)*dpmax=delp[i];
+  }
   return;
 }
 
@@ -672,7 +761,7 @@ void drawroomgeom(void){
   int idir;
   float yy,zz;
   
-  fill_roomdata(izone);
+  fill_zonedata(izone);
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
@@ -794,8 +883,53 @@ void drawroomgeom(void){
 
 /* ------------------ drawventdata ------------------------ */
 
-void drawventdata(void){
+void getzoneventbounds(void){
   float vmin, vmax;
+  float factor;
+  int i;
+  int idir;
+  float x1, yy;
+
+  for(i=0;i<nzvents;i++){
+    zvent *zvi;
+
+    zvi = zventinfo + i;
+    zvi->g_dpmax=-1000000000.0;
+    zvi->g_dpmin=1000000000.0;
+  }
+  for(izone=0;izone<nzonet;izone++){
+    fill_zonedata(izone);
+    for(i=0;i<nzvents;i++){
+      int j;
+      zvent *zvi;
+      float yelev[20];
+
+      zvi = zventinfo + i;
+      if(zvi->vent_orien==1)continue;
+      for(j=0;j<20;j++){
+        yelev[j]=(zvi->z1*(19-j)+zvi->z2*j)/19.0;
+      }
+      get_dpT(yelev, 20, zvi->room1, zvi->room2, zvi->vdata, &zvi->dpmin, &zvi->dpmax, zvi->itempdata);
+      if(zvi->dpmin<zvi->g_dpmin)zvi->g_dpmin=zvi->dpmin;
+      if(zvi->dpmax>zvi->g_dpmax)zvi->g_dpmax=zvi->dpmax;
+      printf("i=%i min=%f max=%f\n",izone,zvi->g_dpmin,zvi->g_dpmax);
+    }
+  }
+  zone_maxventflow=0.0;
+  for(i=0;i<nzvents;i++){
+    zvent *zvi;
+    float yelev[20];
+
+    zvi = zventinfo + i;
+    if(zvi->vent_orien==1)continue;
+    if(ABS(zvi->g_dpmin)>zone_maxventflow)zone_maxventflow=ABS(zvi->g_dpmin);
+    if(ABS(zvi->g_dpmax)>zone_maxventflow)zone_maxventflow=ABS(zvi->g_dpmax);
+  }
+}
+
+/* ------------------ drawventdata ------------------------ */
+
+void drawventdata(void){
   float factor;
   int i;
   int idir;
@@ -803,8 +937,6 @@ void drawventdata(void){
 
   if(visVents==0)return;
   if(visVentLines==0&&visVentSolid==0)return;
-  vmin=1000000000.0;
-  vmax=-vmin;
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
@@ -818,17 +950,9 @@ void drawventdata(void){
     for(j=0;j<20;j++){
       yelev[j]=(zvi->z1*(19-j)+zvi->z2*j)/19.0;
     }
-    get_dpT(yelev, 20, zvi->room1, zvi->room2, zvi->vdata, zvi->itempdata);
-    for(j=0;j<20;j++){
-      if(zvi->vdata[j]>vmax)vmax=zvi->vdata[j];
-      if(zvi->vdata[j]<vmin)vmin=zvi->vdata[j];
-    }
+    get_dpT(yelev, 20, zvi->room1, zvi->room2, zvi->vdata, &zvi->dpmin, &zvi->dpmax, zvi->itempdata);
   }
-  if(vmin<0.0)vmin=-vmin;
-  if(vmax<0.0)vmax=-vmax;
-  if(vmin>vmax)vmax=vmin;
-  factor=0.1/vmax;
-
+  factor = 0.1/zone_maxventflow;
   for(i=0;i<nzvents;i++){
     zvent *zvi;
     int j;
@@ -849,8 +973,8 @@ void drawventdata(void){
       for(j=0;j<19;j++){
         float dy1,dy2;
 
-        dy1 = factor*zvi->vdata[j];
-        dy2 = factor*zvi->vdata[j+1];
+        dy1 = factor*zvi->area_fraction*zvi->vdata[j];
+        dy2 = factor*zvi->area_fraction*zvi->vdata[j+1];
         if(idir==1||idir==4){
           dy1=-dy1;
           dy2=-dy2;
@@ -928,7 +1052,7 @@ void drawventdata(void){
       for(j=0;j<20;j++){
         float dy1;
 
-        dy1 = factor*zvi->vdata[j];
+        dy1 = factor*zvi->area_fraction*zvi->vdata[j];
         vcolor1=rgb_full[zvi->itempdata[j]];
         glColor3fv(vcolor1);
         switch (idir){
@@ -1359,7 +1483,6 @@ void drawroomdata(void){
 
   if(zonet[0]>times[itimes])return;
   if(cullfaces==1)glDisable(GL_CULL_FACE);
-
 
   if(use_transparency_data==1)transparenton();
 

@@ -25,10 +25,11 @@ EXTERNCPP device *getdevice(char *label);
 EXTERNCPP void getzonedatacsv(int nzonet, int nrooms, int nfires, 
                     float *zonet, float *zoneqfire, float *zonefheight, float *zonefbase, float *zonefdiam,
                     float *zonepr, float *zoneylay,  float *zonetl, float *zonetu,
-                    float **zoneodlptr, float **zoneoduptr,
+                    float **zoneodlptr, float **zoneoduptr, float *zonehvents, float *zonevvents,
                     int *error);
 EXTERNCPP void draw_geom(void);
-EXTERNCPP void getzonesizecsv(int *nzonet, int *nroom2, int *nfires, int *error);
+EXTERNCPP void getzonesizecsv(int *nzonet, int *nroom2, int *nfires, int *nzhvents, int *nzvvents, int *error);
+EXTERNCPP void getzoneventbounds(void);
 EXTERNCPP void remove_dup_blockages(void);
 EXTERNCPP void sort_iso_triangles(float *mm);
 EXTERNCPP void Update_Isotris(int flag);
@@ -270,7 +271,7 @@ EXTERNCPP int isblockagevisible(blockagedata *bc, float time);
 EXTERNCPP float zoom2aperture(float zoom0);
 EXTERNCPP float aperture2zoom(float ap);
 EXTERNCPP int getZoneColor(float t, float tmin, float tmax, int nlevel);
-EXTERNCPP void fill_roomdata(int izone);
+EXTERNCPP void fill_zonedata(int izone);
 EXTERNCPP void update_overwrite(void);
 EXTERNCPP void compress_svzip(void);
 EXTERNCPP void drawTargets(void);

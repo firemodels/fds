@@ -1898,6 +1898,8 @@ int readsmv(char *file, char *file2){
     if(NewMemory((void **)&zventinfo,nzvents*sizeof(zvent))==0)return 2;
   }
   nzvents=0;
+  nzhvents=0;
+  nzvvents=0;
 
   FREEMEMORY(textureinfo);
   FREEMEMORY(surfaceinfo);
@@ -3588,10 +3590,13 @@ typedef struct {
       color[2]=1.0;
       color[3]=1.0;
       if(zonevent_orien==0){
+        nzhvents++;
         sscanf(buffer,"%i %i %i %f %f %f %f %f %f %f",
           &roomfrom,&roomto, &face,&width,&ventoffset,&bottom,&top,
           color,color+1,color+2
           );
+
+        zvi->area=width*(top-bottom);
         
         if(roomfrom<1||roomfrom>nrooms)roomfrom=nrooms+1;
         roomi = roominfo + roomfrom-1;
@@ -3634,6 +3639,7 @@ typedef struct {
         float xcen, ycen;
         int r_from, r_to;
 
+        nzvvents++;
         sscanf(buffer,"%i %i %i %f %i %f %f %f",
           &r_from,&r_to,&face,&vent_area,&hvent_type,
           color,color+1,color+2

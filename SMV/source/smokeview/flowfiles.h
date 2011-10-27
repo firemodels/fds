@@ -1190,8 +1190,10 @@ typedef struct {
 typedef struct {
   float x1,x2,y1,y2,z1,z2,yy,zz;
   int dir;
+  float dpmin, dpmax;
+  float g_dpmin, g_dpmax;
   roomdata *room1, *room2;
-  float area;
+  float area, area_fraction;
   float *color;
   float vdata[20];
   int itempdata[20];
