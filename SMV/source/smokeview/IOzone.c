@@ -453,8 +453,7 @@ void readzone(int ifile, int flag, int *errorcode){
     nzvvents2=nzvvents;
   }
   CheckMemory;
-  if(error!=0||nrooms!=nrooms2||nzonet==0||nzhvents!=nzhvents2){
-//  if(error!=0||nrooms!=nrooms2||nzonet==0||nzhvents!=nzhvents2||nzvvents!=nzvvents2){
+  if(error!=0||nrooms!=nrooms2||nzonet==0||nzhvents!=nzhvents2||nzvvents!=nzvvents2){
     showzone=0;
     updatetimes();
     ReadZoneFile=0;
@@ -466,10 +465,10 @@ void readzone(int ifile, int flag, int *errorcode){
       printf("*** error: number of horizontal flow vents specified in the smv file (%i)\n",nzhvents);
       printf("    not consistent with the number specified in the data file (%i)\n",nzhvents2);
     }
-   // if(nzvvents!=nzvvents2){
-   //   printf("*** error: number of vertical flow vents specified in the smv file (%i)\n",nzvvents);
-   //   printf("    not consistent with the number specified in the data file (%i)\n",nzvvents2);
-   // }
+    if(nzvvents!=nzvvents2){
+      printf("*** error: number of vertical flow vents specified in the smv file (%i)\n",nzvvents);
+      printf("    not consistent with the number specified in the data file (%i)\n",nzvvents2);
+    }
     if(nzonet<=0)printf("*** warning: The file, %s, contains no data\n",file);
     return;
   }
