@@ -2997,121 +2997,6 @@ typedef struct {
       }
       continue;
     }
-  /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++++++ DEVICE +++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-    DEVICE
-    label
-    x y z xn yn zn state nparams ntextures 
-    p0 p1 ... p5
-    p6 ...    p11
-    texturefile1
-    ...
-    texturefilen
-
-    */
-    if(
-      (match(buffer,"DEVICE",6) == 1)&&
-      (match(buffer,"DEVICE_ACT",10) != 1)
-      ){
-      device *devicei;
-      float xyz[3]={0.0,0.0,0.0}, xyzn[3]={0.0,0.0,0.0};
-      int state0=0;
-      int nparams=0, nparams_textures=0;
-      char *labelptr, *prop_id;
-      char prop_buffer[255];
-      char quant_buffer[255];
-      char *quant;
-
-      devicei = deviceinfo + ndeviceinfo;
-      devicei->type=DEVICE_DEVICE;
-      fgets(buffer,255,stream);
-
-      strcpy(devicei->quantity,"");
-      quant=strchr(buffer,'%');
-      if(quant!=NULL){
-        *quant=0;
-        quant++;
-        trim(quant);
-        strcpy(devicei->quantity,trim_front(quant));
-      }
-
-      trim(buffer);
-      strcpy(devicei->label,trim_front(buffer));
-      devicei->object = get_SVOBJECT_type(buffer,missing_device);
-      devicei->params=NULL;
-      devicei->times=NULL;
-      devicei->vals=NULL;
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f %f %f %f %i %i %i",
-        xyz,xyz+1,xyz+2,xyzn,xyzn+1,xyzn+2,&state0,&nparams,&nparams_textures);
-      get_labels(buffer,-1,&prop_id,NULL,prop_buffer);
-      devicei->prop=get_prop_id(prop_id);
-      if(prop_id!=NULL&&devicei->prop!=NULL&&devicei->prop->smv_object!=NULL){
-        devicei->object=devicei->prop->smv_object;
-      }
-      else{
-        NewMemory((void **)&devicei->prop,sizeof(propdata));
-        init_prop(devicei->prop,1,devicei->label);
-        devicei->prop->smv_object=devicei->object;
-        devicei->prop->smv_objects[0]=devicei->prop->smv_object;
-      }
-      if(nparams_textures<0)nparams_textures=0;
-      if(nparams_textures>1)nparams_textures=1;
-      devicei->ntextures=nparams_textures;
-      if(nparams_textures>0){
-         NewMemory((void **)&devicei->textureinfo,sizeof(texture));
-      }
-      else{
-        devicei->textureinfo=NULL;
-        devicei->texturefile=NULL;
-      }
-
-      labelptr=strchr(buffer,'%');
-      if(labelptr!=NULL){
-        trim(labelptr);
-        if(strlen(labelptr)>1){
-          labelptr++;
-          labelptr=trim_front(labelptr);
-          if(strlen(labelptr)==0)labelptr=NULL;
-        }
-        else{
-          labelptr=NULL;
-        }
-      }
-
-      if(nparams<=0){
-        init_device(devicei,xyz,xyzn,state0,0,NULL,labelptr);
-      }
-      else{
-        float *params,*pc;
-        int nsize;
-
-        nsize = 6*((nparams-1)/6+1);
-        NewMemory((void **)&params,(nsize+devicei->ntextures)*sizeof(float));
-        pc=params;
-        for(i=0;i<nsize/6;i++){
-          fgets(buffer,255,stream);
-          sscanf(buffer,"%f %f %f %f %f %f",pc,pc+1,pc+2,pc+3,pc+4,pc+5);
-          pc+=6;
-        }
-        init_device(devicei,xyz,xyzn,state0,nparams,params,labelptr);
-      }
-      get_elevaz(devicei->xyznorm,&devicei->dtheta,devicei->rotate_axis,NULL);
-      if(nparams_textures>0){
-        fgets(buffer,255,stream);
-        trim(buffer);
-        buffer3=trim_front(buffer);
-        NewMemory((void **)&devicei->texturefile,strlen(buffer3)+1);
-        strcpy(devicei->texturefile,buffer3);
-      }
-
-      CheckMemory;
-      ndeviceinfo++;
-      continue;
-    }
   }
 /* 
    ************************************************************************
@@ -5271,6 +5156,121 @@ typedef struct {
       continue;
     }
 
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ DEVICE +++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    DEVICE
+    label
+    x y z xn yn zn state nparams ntextures 
+    p0 p1 ... p5
+    p6 ...    p11
+    texturefile1
+    ...
+    texturefilen
+
+    */
+    if(
+      (match(buffer,"DEVICE",6) == 1)&&
+      (match(buffer,"DEVICE_ACT",10) != 1)
+      ){
+      device *devicei;
+      float xyz[3]={0.0,0.0,0.0}, xyzn[3]={0.0,0.0,0.0};
+      int state0=0;
+      int nparams=0, nparams_textures=0;
+      char *labelptr, *prop_id;
+      char prop_buffer[255];
+      char quant_buffer[255];
+      char *quant;
+
+      devicei = deviceinfo + ndeviceinfo;
+      devicei->type=DEVICE_DEVICE;
+      fgets(buffer,255,stream);
+
+      strcpy(devicei->quantity,"");
+      quant=strchr(buffer,'%');
+      if(quant!=NULL){
+        *quant=0;
+        quant++;
+        trim(quant);
+        strcpy(devicei->quantity,trim_front(quant));
+      }
+
+      trim(buffer);
+      strcpy(devicei->label,trim_front(buffer));
+      devicei->object = get_SVOBJECT_type(buffer,missing_device);
+      devicei->params=NULL;
+      devicei->times=NULL;
+      devicei->vals=NULL;
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f %f %f %f %f %f %i %i %i",
+        xyz,xyz+1,xyz+2,xyzn,xyzn+1,xyzn+2,&state0,&nparams,&nparams_textures);
+      get_labels(buffer,-1,&prop_id,NULL,prop_buffer);
+      devicei->prop=get_prop_id(prop_id);
+      if(prop_id!=NULL&&devicei->prop!=NULL&&devicei->prop->smv_object!=NULL){
+        devicei->object=devicei->prop->smv_object;
+      }
+      else{
+        NewMemory((void **)&devicei->prop,sizeof(propdata));
+        init_prop(devicei->prop,1,devicei->label);
+        devicei->prop->smv_object=devicei->object;
+        devicei->prop->smv_objects[0]=devicei->prop->smv_object;
+      }
+      if(nparams_textures<0)nparams_textures=0;
+      if(nparams_textures>1)nparams_textures=1;
+      devicei->ntextures=nparams_textures;
+      if(nparams_textures>0){
+         NewMemory((void **)&devicei->textureinfo,sizeof(texture));
+      }
+      else{
+        devicei->textureinfo=NULL;
+        devicei->texturefile=NULL;
+      }
+
+      labelptr=strchr(buffer,'%');
+      if(labelptr!=NULL){
+        trim(labelptr);
+        if(strlen(labelptr)>1){
+          labelptr++;
+          labelptr=trim_front(labelptr);
+          if(strlen(labelptr)==0)labelptr=NULL;
+        }
+        else{
+          labelptr=NULL;
+        }
+      }
+
+      if(nparams<=0){
+        init_device(devicei,xyz,xyzn,state0,0,NULL,labelptr);
+      }
+      else{
+        float *params,*pc;
+        int nsize;
+
+        nsize = 6*((nparams-1)/6+1);
+        NewMemory((void **)&params,(nsize+devicei->ntextures)*sizeof(float));
+        pc=params;
+        for(i=0;i<nsize/6;i++){
+          fgets(buffer,255,stream);
+          sscanf(buffer,"%f %f %f %f %f %f",pc,pc+1,pc+2,pc+3,pc+4,pc+5);
+          pc+=6;
+        }
+        init_device(devicei,xyz,xyzn,state0,nparams,params,labelptr);
+      }
+      get_elevaz(devicei->xyznorm,&devicei->dtheta,devicei->rotate_axis,NULL);
+      if(nparams_textures>0){
+        fgets(buffer,255,stream);
+        trim(buffer);
+        buffer3=trim_front(buffer);
+        NewMemory((void **)&devicei->texturefile,strlen(buffer3)+1);
+        strcpy(devicei->texturefile,buffer3);
+      }
+
+      CheckMemory;
+      ndeviceinfo++;
+      continue;
+    }
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ THCP ++++++++++++++++++++++++++++++
