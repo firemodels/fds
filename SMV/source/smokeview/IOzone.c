@@ -912,7 +912,6 @@ void getzoneventbounds(void){
       get_dpT(yelev, 20, zvi->room1, zvi->room2, zvi->vdata, &zvi->dpmin, &zvi->dpmax, zvi->itempdata);
       if(zvi->dpmin<zvi->g_dpmin)zvi->g_dpmin=zvi->dpmin;
       if(zvi->dpmax>zvi->g_dpmax)zvi->g_dpmax=zvi->dpmax;
-      printf("i=%i min=%f max=%f\n",izone,zvi->g_dpmin,zvi->g_dpmax);
     }
   }
   zone_maxventflow=0.0;
