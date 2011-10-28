@@ -28,13 +28,14 @@ This \paper\ is organized as follows.  A model for visualizing smoke and fire is
 %
 
 \section{Visualization Model}
-The quantity used to model smoke appearance is radiance with units of watts per square meter per unit solid angle~(W/(sr$\cdot$m$^2$)).  The parameter used as a boundary condition when modeling heat transfer in a fire model such as FDS is heat flux with units of watts per square meter~(W/m$^2$). The solid angle accounts for the fact that a light source appears brighter if it emits a given amount of light through a smaller cross-sectional area.  This has the interesting implication, ignoring atmospheric effects, as pointed out in~\cite{dutre:2002}, that the sun appears equally bright on the Earth as on Mars.  The diminished heat flux $(W/m^2)$ on Mars due to the increased distance from the sun is exactly offset by the reduced solid angle ($sr$) of the sun's disk.  From a visualization perspective, this implies that image brightness does not depend on image distance unless  participating media is present to absorb or scatter  intervening light.  The radiation transport equation discussed in this section models the change in radiance due to these factors.
+The visualization model used here to simulate smoke appearance is the radiation transport equation (RTE).  
+This equation uses the quantity, radiance, to represent smoke appearance.  Radiance has units of watts per square meter per unit solid angle~(W/(sr$\cdot$m$^2$)).  The parameter used as a boundary condition when modeling heat transfer in a fire model such as FDS is heat flux with units of watts per square meter~(W/m$^2$). The solid angle accounts for the fact that a light source appears brighter if it emits a given amount of light through a smaller cross-sectional area.  This has the interesting implication, ignoring atmospheric effects, as pointed out in~\cite{dutre:2002}, that the sun appears equally bright on the Earth as on Mars.  The diminished heat flux $(W/\mbox{m}^2)$ on Mars due to the increased distance from the sun is exactly offset by the reduced solid angle ($sr$) of the sun's disk.  From a visualization perspective, this implies that image brightness does not depend on image distance unless  participating media is present to absorb or scatter  intervening light.  The radiation transport equation discussed in this section models the change in radiance or appearance due to these factors.
 
 %
 % ----------  Radiation Transport Equation --------------
 %
 
-\subsection{Radiation Transport Equation}
+\subsection{Full Radiation Transport Equation}
 \newcommand{\siga}{ \sigma_a(x) }
 \newcommand{\sigt}{ \sigma_t(x) }
 \newcommand{\sigs}{ \sigma_s(x) }
@@ -48,7 +49,7 @@ The quantity used to model smoke appearance is radiance with units of watts per 
 \newcommand{\intmf}[2]{ \exp\left({-\int_{#1}^{#2} \sigts ds}\right) }
 \newcommand{\intmff}[2]{ {-\int_#1^#2 \sigts ds} }
 
-The radiation transport equation is used to calculate radiance due to one or more light sources within a region possibly containing a participating media such as smoke. The change in radiance along a ray with direction $\omega$ may be expressed using
+The radiation transport equation is used to calculate radiance due to one or more light sources within a region possibly containing a participating media such as smoke\cite{\cite{Siegel:2001}}. The change in radiance along a ray with direction $\omega$ may be expressed using
 
 \begin{eqnarray}
 \label{eq:fullrte}
@@ -58,7 +59,8 @@ The radiation transport equation is used to calculate radiance due to one or mor
 \underbrace{\sigs\int_{4\pi}p(x,\omega,\omega')C_i(x,\omega')d\omega'}_\mathrm{in-scattering}
 \end{eqnarray}
 
-\noindent where, as illustrated in Figure \ref{figRadiance}, $\Lxo$ represents the  radiance at $x$ along a direction $\omega$, $\siga$ is the absorption coefficient, $\sigs$ is the scattering coefficient, $\Lexo$ is the radiance emitted at $x$ in direction $\omega$ and $p(x,\omega,\omega')$ is the fraction of light moving along direction $\omega'$ scattered along direction $\omega$. Absorption and out-scattering cause radiance to decrease while emission and in-scattering cause radiance to increase. The terms $C$, $C_e$ and $C_i$ each have units of W/m$^2$sr$^{-1}$.  The terms $\sigma_a$ and $\sigma_s$ each have units of m$^{-1}$ and specify the change per unit length to the radiance term they are applied to.
+\noindent where, as illustrated in Figure \ref{figRadiance}, $\Lxo$ represents the  radiance at $x$ along a direction $\omega$.
+The right hand side of (\ref{eq:fullrte}) is split into four components representing absorption, in and out scattering and emission where $\siga$ is the absorption coefficient, $\sigs$ is the scattering coefficient, $\Lexo$ is the radiance emitted at $x$ in direction $\omega$ and $p(x,\omega,\omega')$ is the fraction of light moving along direction $\omega'$ scattered along direction $\omega$. Absorption and out-scattering cause radiance to decrease while emission and in-scattering cause radiance to increase. The terms $C$, $C_e$ and $C_i$ each have units of W/m$^2$sr$^{-1}$.  The terms $\sigma_a$ and $\sigma_s$ each have units of m$^{-1}$ and specify the change per unit length to the radiance term they are applied to.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -73,41 +75,11 @@ absorption and out-scattering while components increasing radiance are emission 
 % ----  Approximating the Radiation Transport Equation ------------------------
 %
 
-\subsection{Approximating the Radiation Transport Equation}
+\subsection{Approximate Radiation Transport Equation}
 
 The RTE may be simplified in several ways depending on which terms are included or ignored.  The first simplification includes only interactions between light and smoke due to absorption and out-scattering. This results in the Beer-Lambert law.  The second simplification discussed includes absorption, out-scattering and emission terms ignoring in-scattering.
 
-%
-% ----------  Absorption and Out-Scattering - Beer-Lambert Law --------------
-%
-
-\subsubsection{Absorption and Out-Scattering - Beer-Lambert Law}
-Equation (\ref{eq:fullrte}) may be simplified by neglecting the in-scattering and emission terms and combining the absorption and out-scattering coefficients using $\sigt=\siga+\sigs$ to obtain
-
-\begin{eqnarray*}
-\dLdx&=&-\sigt C(x)\\
-C(x_0)&=&C_0
-\end{eqnarray*}
-which has solution
-\begin{equation}
-\label{eq:beer1} \frac{C(x_N)}{C_0}=\intmf{{x_0}}{x_N}
-\end{equation}
-
-If $\sigt$ is constant, equation (\ref{eq:beer1}) simplifies to
-
-\begin{equation}
-\label{eq:beer2} \frac{C(x_N)}{C_0}=\exp(-\sigma_t x_N)
-\end{equation}
-
-which is known as the Beer-Lambert law~\cite{Siegel:2001}.
-
-%
-% ----------  Absorption, Out-Scattering and Emission ------------------------
-%
-
-\subsubsection{Absorption, Out-Scattering and Emission}
-
-Alternatively, if the emission term is also included when simplifying equation (\ref{eq:fullrte}),  the following linear differential equation results.
+Equation (\ref{eq:fullrte}) may be simplified by neglecting the in-scattering term combining the absorption and out-scattering coefficients using $\sigt=\siga+\sigs$ to obtain
 
 \begin{eqnarray}
 \label{eq:simple_rte}
@@ -138,16 +110,24 @@ C(x_N)&=&\intmf{x_0}{x_N} C_0+ \int_{x_0}^{x_N}\intmf{x}{x_N}\siga \Le dx\\
 which may be simplified to
 
 \begin{equation}
+\label{eq:rte_simp}
  C(x_N)=\tau(x_0,x_N)C_0 + \int_{x_0}^{x_N}\tau(x,x_N)\siga\Le dx
 \end{equation}
 
-after defining $\tau(a,b)$ to represent the optical depth between $a$ and $b$ given by $\tau(a,b)=\intmf{a}{b}$ .
+after defining $\tau(a,b)$ to represent the optical depth between $a$ and $b$ given by $\tau(a,b)=\intmf{a}{b}$ .  
+If the emission/integral term in (\ref{eq:rte_simp}) is neglected, $\sigma_t(x)=\sigma_t$ is constant over the path with length
+$L=x_N-x_0$ then
+\begin{equation}
+\label{eq:rte_simp2}
+ \frac{C(x_N)}{C_0}=\exp(-\sigma_tL)
+\end{equation}
+results which is the Beer-Lambert law.
 
 %
 % -------------------  Slice Rendered Smoke ------------------------
 %
 
-\section{Slice Rendered Smoke}
+\section{Solving the RTE using Slices}
 A slice rendering algorithm for visualizing smoke consists of partitioning a 3D computational domain into a series of 2D slices.  The slice orientation is chosen to be the one most perpendicular to the viewer's line of sight where possible choices are slice planes parallel to the three cartesian coordinate planes (XY, XZ, YZ) or planes diagonal to the data.  The opacity at each grid node is computed using the distance $\Delta x$ between adjacent YZ planes and soot density data computed by the fire model.  If slice orientations other than YZ are displayed, then opacities are adjusted if the distance between planes is different than $\Delta x$.  Opacity data is computed and compressed using run length encoding as a preprocessing step and decompressed one frame at a time as data is displayed.
 
 
@@ -156,13 +136,13 @@ A slice rendering algorithm for visualizing smoke consists of partitioning a 3D 
 %
 
 \subsection{Computing Opacity}
-Computing opacity at slice plane nodes is illustrated in Figure \ref{figsmokesetup}. A ray travels from the background to the observer through intervening smoke. Light is absorbed or scattered by the smoke as the ray passes each slice plane .  Emission effects are ignored. Scattering effects presently are only accounted for in the value of the total mass extinction coefficient used.  Light losses are assumed to be from both absorption and scattering. The obscuration is computed along each ray one grid plane at a time, using the Beer-Lambert law as follows.  The $\alpha$ values are pre-computed by FDS using the Beer-Lambert law~\cite{Siegel:2001}
+Computing opacity at slice plane nodes is illustrated in Figure \ref{figsmokesetup}. A ray travels from the background to the observer through intervening smoke. Light is absorbed or scattered by the smoke as the ray passes each slice plane .  Emission effects are ignored. Scattering effects presently are only accounted for in the value of the total mass extinction coefficient used.  Light losses are assumed to be from both absorption and scattering. The obscuration is computed along each ray one grid plane at a time, using the Beer-Lambert law as follows.  The $\alpha=1-\tau$ values are pre-computed by FDS using the Beer-Lambert law~\cite{Siegel:2001}
 
 \begin{equation}
-\alpha=1-\exp(-ks\Delta x) \label{eq:alpha}
+\alpha=1-\exp(-\sigma_t\Delta x) \label{eq:alpha}
 \end{equation}
 
-\noindent for a particular view direction (down the x axis) where $\Delta x$ is this distance between two grid plane, $k$ is the total soot mass extinction coefficient and $s$ is the soot density.  Note that using the notation from the previous section, $\sigma_t=\sigma_a+\sigma_s=ks$.  The Beer-Lambert law is an empirical relationship relating light absorption to the material properties of the media the light is travelling through, in this case soot or smoke.
+\noindent for a particular view direction (down the x axis) where $\Delta x$ is this distance between two grid plane and as before $\sigma_t=\sigma_a+\sigma_s$ is the total mass extinction coefficient.  The Beer-Lambert law is an empirical relationship relating light absorption to the material properties of the media the light is travelling through, in this case soot or smoke.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -197,7 +177,7 @@ The $\alpha$ obscurations are pre-computed using the distance $\Delta x$ between
 
 \begin{equation}
 \label{eq:adjusted}
-\hat{\alpha}=1-\exp(-ks\Delta \hat{x})\\
+\hat{\alpha}=1-\exp(-\sigma_t\Delta \hat{x})\\
 \end{equation}
 
 where $\Delta\hat{x}$ is the distance between planes along the line of site.  Equations (\ref{eq:alpha}) and (\ref{eq:adjusted}) may be used to solve for $\hat{\alpha}$ in terms of $\alpha$ to obtain
@@ -210,7 +190,7 @@ where $\Delta\hat{x}$ is the distance between planes along the line of site.  Eq
 after noting that
 
 \begin{eqnarray*}
-1-\hat{\alpha}=\exp(-ks\Delta\hat{x})=\exp(-ks\Delta
+1-\hat{\alpha}=\exp(-\sigma_t\Delta\hat{x})=\exp(-\sigma_t\Delta
 x)^{\Delta\hat{x}/\Delta x}=(1-\alpha)^{\Delta\hat{x}/\Delta x}
 \end{eqnarray*}
 
@@ -345,7 +325,7 @@ where $k$ is the mass extinction coefficient, $s$ is the soot density and $\Delt
 As a result, opacity values are quantized.  Only values of 0, 1/255, $\cdots$, 254/255, 1 can be represented.  In particular any $\alpha$ value smaller than $1/255$ truncates to 0.
 This can occur when more grid cells are used to resolve a solution domain, {\em i.e.}\ when $\Delta x$ is sufficiently small so that $\alpha<1/256$.
 
-For example, suppose that a 1~m column of smoke has opacity of 0.5.  Substituting $\Delta x=1$ and $\alpha=1/2$ into (\ref{eq:alpha}) gives $ks=-\ln(1/2)$.  Solving for $\Delta x$ in (\ref{eq:alpha}) using this value of $ks$ and $\alpha=1/255$ gives
+For example, suppose that a 1~m column of smoke has opacity of 0.5.  Substituting $\Delta x=1$ and $\alpha=1/2$ into (\ref{eq:alpha}) gives $\sigma_t=-\ln(1/2)$.  Solving for $\Delta x$ in (\ref{eq:alpha}) using this value of $\sigma_t$ and $\alpha=1/255$ gives
 \begin{equation}
 \Delta x = \frac{\ln(254/255)}{\ln(1/2)}
 \end{equation}
@@ -358,7 +338,7 @@ To get around this problem, a volume rendering algorithm for visualizing smoke h
 % -------------------  Volume Rendered Smoke ------------------------
 %
 
-\section{Volume Rendered Smoke}
+\section{Solving the RTE using Volumes}
 Volume rendering is the process of visualizing 3D data by mixing partially transparent colors derived from 3D data to form an image.  An entire volume of data is used to generate an image rather than just a slice as in the previous section.  Transfer functions are used to map data to color and optical density (opacity).  These colors and opacities are then combined to form an image.  The transfer functions may be arbitrary designed to highlight certain portions of the data or based on physics designed to produce realistic appearing images.  Figure \ref{figsmokesetup2} illustrates this process.  Data is first mapped to color and opacity then combined to form an image.  In more detail, a general volume rendering algorithm consists of:
 
 \begin{enumerate}

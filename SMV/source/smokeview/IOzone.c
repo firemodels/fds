@@ -236,12 +236,16 @@ void getzonedatacsv(int nzonet, int nrooms, int nfires,
       ii++;
     }
     for(j=0;j<nfires;j++){
-      float area;
+      float area, diam;
 
       zoneqfire[iif]=1000.0*zoneqfire_devs[j]->vals[i];
       zonefheight[iif]=zonefheight_devs[j]->vals[i];
       area=zonefarea_devs[j]->vals[i];
-      zonefdiam[iif]=2.0*sqrt(area/3.14159);
+      diam=2.0*sqrt(area/3.14159);
+      if(diam<0.0001){
+        diam=0.1/xyzmaxdiff;
+      }
+      zonefdiam[iif]=diam;
       zonefbase[iif]=zonefbase_devs[j]->vals[i];
       iif++;
     }
