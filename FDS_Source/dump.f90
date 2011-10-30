@@ -5467,7 +5467,7 @@ SELECT CASE(IND)
    CASE(3) ! Normal Velocity
       GEOM_OUTPUT = 0._EB
    CASE(4) ! Gas Temperature
-      GEOM_OUTPUT = 0._EB
+      GEOM_OUTPUT = FACET(FACE_INDEX)%TMP_G-TMPM
    CASE(5) ! Wall Temperature
       GEOM_OUTPUT = FACET(FACE_INDEX)%TMP_F-TMPM
 END SELECT
