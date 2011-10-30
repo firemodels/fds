@@ -121,10 +121,9 @@ after defining $\tau(a,b)$ to represent the optical depth between $a$ and $b$ gi
 \end{equation}
 As noted earlier, if the emission term is neglected and $\sigma_t(x)=\sigma_t$ is constant over a path with length
 $L=x_N-x_0$ then (\ref{eq:rte_simp}) simplifies to
-\begin{equation}
-\label{eq:rte_simp2}
+\begin{eqnarray*}
  \frac{C(x_N)}{C_0}=\exp(-\sigma_tL)
-\end{equation}
+\end{eqnarray*}
 which is the Beer-Lambert law.
 
 %
@@ -145,7 +144,8 @@ There are many ways to slice a 3D data set.  The slice orientation is chosen to 
 Computing opacity at slice plane nodes is illustrated in Figure \ref{figsmokesetup}. A ray travels from the background to the observer through intervening smoke. Light is absorbed or scattered by the smoke as the ray passes each slice plane .  Emission effects are ignored. Scattering effects presently are only accounted for in the value of the total mass extinction coefficient used.  Light losses are assumed to be from both absorption and scattering. The obscuration is computed along each ray one grid plane at a time, using the Beer-Lambert law as follows.  The $\alpha=1-\tau$ values are pre-computed by FDS using the Beer-Lambert law~\cite{Siegel:2001}
 
 \begin{equation}
-\alpha=1-\exp(-\sigma_t\Delta x) \label{eq:alpha}
+\label{eq:alpha}
+\alpha=1-\exp(-\sigma_t\Delta x)
 \end{equation}
 
 \noindent for a particular view direction (down the x axis) where $\Delta x$ is this distance between two grid plane and as before $\sigma_t=\sigma_a+\sigma_s$ is the total mass extinction coefficient.  The Beer-Lambert law is an empirical relationship relating light absorption to the material properties of the media the light is traveling through, in this case soot or smoke.
@@ -409,10 +409,9 @@ The optical depth, $\tau(a,b)$, defined in equation (\ref{eq:optdepth}) is discr
 
 or
 
-\begin{eqnarray}
-\label{eq:tauhat_discrete}
+\begin{eqnarray*}
 \htau{i}&=&\prod_{j=i}^{N-1}\tau_j
-\end{eqnarray}
+\end{eqnarray*}
 
 where $\tau_j=\exp\left(-\sigma_t(s_j)\Delta s\right)$ represents the transparency over one discretization interval.
 For $i=N-1\cdots 0$, the optical depth $\htau{i}$ may be computed recursively using
@@ -434,11 +433,10 @@ which simplifies to
 
 Similarly, the radiance given by the RTE solution $C(x_N)$ in equation (\ref{eq:rtesoln}) may be discretized to obtain
 
-\begin{equation}
-\label{eq:discrete_rte}
+\begin{eqnarray*}
 C_{N} = \htau{0}C_0 +
 \sum_{i=0}^{N-1}\htau{i}\sigai{i}\Lei{i}\Delta x
-\end{equation}
+\end{eqnarray*}
 
 where $\sigma_{a,i}=\sigma_a(x_i)$, $\Lei{i}=C_e(x_i)$, $x_i=x_0+i\Delta x$ and $\Delta x=(x_N-x_0)/N$.  Letting $\Leii{i}=\sigma_{a,i}C_{e,i}\Delta x$, this simplifies to
 
@@ -479,12 +477,11 @@ An algorithm for determining image opacities and colors using volume rendering i
 Combine the colors and opacities found in step 2 using recursion~\cite[Chapter 39]{gpugems}.
 Start the recursion with $\hat{\alpha}_{N}=\hat{C}_{N}=0$. Continue the recursion for $i=N-1$ to $i=0$ by computing $\hat{\alpha}_i$ and $\hat{C}_i$ using:
 
-\begin{eqnarray}
-\label{eq:alphaupdate}
+\begin{eqnarray*}
+\nonumber
 \hat{\alpha}_i&=&\hat{\alpha}_{i+1}+\left(1-\hat{\alpha}_{i+1}\right)\alpha_i\\
-\label{eq:colorupdate}
 \hat{C}_i&=&\hat{C}_{i+1}+\left(1-\hat{\alpha}_{i+1}\right)C_i
-\end{eqnarray}
+\end{eqnarray*}
 
 where $\hat{C}_i$ and $\hat{\alpha}_i$ are color and opacity accumulated from steps $N$ to $i$ while stepping through the 3D data set from front to back.  When data is mapped appropriately to color and opacity, this recursion is simply a numerical integration of the radiation transport equation.
 The values $C_i$ and $\alpha_i$ are the color and opacity at the $i$'th step.
