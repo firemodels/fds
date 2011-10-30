@@ -80,11 +80,10 @@ The RTE may be simplified in several ways depending on which terms are included 
 
 Equation (\ref{eq:fullrte}) is then approximated by neglecting the integral term and using $\sigt=\siga+\sigs$ to obtain
 
-\begin{eqnarray}
-\label{eq:simple_rte}
+\begin{eqnarray*}
 \dLdx&=&-\sigt C(x) + \siga C_e(x)\\
- C(x_0)&=&C_0\nonumber
-\end{eqnarray}
+ C(x_0)&=&C_0
+\end{eqnarray*}
 
 This equation may be solved by rearranging terms and applying the integrating factor $\exp(\int_{x_0}^x \sigts ds)$ obtaining
 
@@ -324,17 +323,17 @@ A second compression scheme is used by Smokezip, companion software to FDS and S
 \subsection{Slice Rendering Limitation}
 As noted earlier, the slice rendering method for visualizing smoke records opacities on grid planes using
 \begin{equation}
-\label{eq:alpha2}
+\label{eq:alpha3}
 \alpha=1-\exp(-\sigma_t\Delta x)
 \end{equation}
 where again $\Delta x$ is the distance between adjacent grid planes.  Problems with round off error can occur because $\alpha$'s are stored using only 8 bits, the size typical video hardware uses to represent color and alpha channels.
 As a result, opacity values are quantized.  Only values of 0, 1/255, $\cdots$, 254/255, 1 can be represented.  In particular any $\alpha$ value smaller than $1/255$ truncates to 0.
 This can occur when more grid cells are used to resolve a solution domain, {\em i.e.}\ when $\Delta x$ is sufficiently small so that $\alpha<1/256$.
 
-For example, suppose that a 1~m column of smoke has opacity of 0.5.  Substituting $\Delta x=1$ and $\alpha=1/2$ into (\ref{eq:alpha2}) gives $\sigma_t=-\ln(1/2)$.  Solving for $\Delta x$ using this value of $\sigma_t$ and $\alpha=1/255$ gives
-\begin{equation}
+For example, suppose that a 1~m column of smoke has opacity of 0.5.  Substituting $\Delta x=1$ and $\alpha=1/2$ into (\ref{eq:alpha3}) gives $\sigma_t=-\ln(1/2)$.  Solving for $\Delta x$ using this value of $\sigma_t$ and $\alpha=1/255$ gives
+\begin{eqnarray*}
 \Delta x = \frac{\ln(254/255)}{\ln(1/2)}
-\end{equation}
+\end{eqnarray*}
 Therefore, when $\Delta x<\ln(254/255)/\ln(1/2)\approx 0.00567$ the opacity truncates to zero.  Equivalently, the opacity truncates to zero when $N>\ln(1/2)/\ln(254/255)\approx 177$ where $N$ is the number of grid planes in the 1~m column of smoke.
 
 To get around this problem, a volume rendering algorithm for visualizing smoke has been implemented where intermediate smoke opacities are stored using full precision arithmetic instead of 8 bits.  This algorithm is discussed in the next section.
@@ -427,7 +426,7 @@ Substituting $1-\halpha{i}=\htau{i}$ and $1-\alpha_i=\tau_i$ into (\ref{eq:tauha
 \end{eqnarray*}
 which simplifies to
 \begin{eqnarray}
-\label{eq:alpha}
+\label{eq:alpha2}
 \halpha{i}&=&\halpha{i+1} + (1-\halpha{i+1})\alpha_i
 \end{eqnarray}
 
@@ -461,7 +460,7 @@ Subtracting (\ref{eq:recurse2}) from (\ref{eq:recurse1}) and solving for $\Chatj
 \label{eq:color}
 \Chatjj{j}&=&\Chatjj{j+1}+\htau{j}\Leii{j}
 \end{eqnarray}
-The basic computational strategy then is to compute a color using equation (\ref{eq:color}) and an opacity using equation (\ref{eq:alpha}) for each pixel in the 2D projected image.
+The basic computational strategy then is to compute a color using equation (\ref{eq:color}) and an opacity using equation (\ref{eq:alpha2}) for each pixel in the 2D projected image.
 
 
 \subsection{Solution Algorithm}
