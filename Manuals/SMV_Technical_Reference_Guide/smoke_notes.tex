@@ -59,7 +59,7 @@ The radiation transport equation is used to calculate radiance due to one or mor
 \end{eqnarray}
 
 \noindent where  $\Lxo$ represents the  radiance at $x$ along a direction $\omega$.
-As illustrated in Figure \ref{figRadiance}, the right hand side of (\ref{eq:fullrte}) is split into four components representing absorption, in and out scattering and emission where $\siga$ is the absorption coefficient, $\sigs$ is the scattering coefficient, $\Lexo$ is the radiance emitted at $x$ along a direction $\omega$ and $p(x,\omega,\omega')$ is the fraction of light moving along direction $\omega'$ scattered along direction $\omega$. Absorption and out-scattering cause radiance to decrease while emission and in-scattering cause radiance to increase. The terms $C$, $C_e$ and $C_i$ each have units of W/m$^2$sr$^{-1}$.  The terms $\sigma_a$ and $\sigma_s$ each have units of m$^{-1}$ and specify the change per unit length to the radiance term they are applied to.
+As illustrated in Figure \ref{figRadiance}, the right hand side of (\ref{eq:fullrte}) is split into four components accounting for absorption, in and out scattering and emission where $\siga$ is the absorption coefficient, $\sigs$ is the scattering coefficient, $\Lexo$ is the radiance emitted at $x$ along a direction $\omega$ and $p(x,\omega,\omega')$ is the fraction of light moving along direction $\omega'$ scattered along direction $\omega$. Absorption and out-scattering cause radiance to decrease while emission and in-scattering cause radiance to increase. The terms $C$, $C_e$ and $C_i$ each have units of W/m$^2$sr$^{-1}$.  The terms $\sigma_a$ and $\sigma_s$ each have units of m$^{-1}$ and specify the change per unit length to the radiance term they are applied to.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -134,7 +134,7 @@ which is the Beer-Lambert law.
 \section{Solving the RTE using Slices}
 A slice rendering algorithm for visualizing smoke consists of partitioning a 3D computational domain into a series of 2D slices.  The RTE is then solved on each slice.  Each slice solution only accounts for conditions between adjacent slices.  The individual partially transparent slice solutions are then combined using video hardware to form the final image.
 
-There are many ways to {\em slice}\ a 3D data set.  The slice orientation is chosen to be the one most perpendicular to the viewer's line of sight where possible choices are slice planes parallel to the three cartesian coordinate planes (XY, XZ, YZ) or planes diagonal to the data.  The opacity at each grid node is computed using the distance $\Delta x$ between adjacent YZ planes and soot density data computed by the fire model.  If slice orientations other than YZ are displayed, then opacities are adjusted if the distance between planes is different than $\Delta x$.  Opacity data is computed and compressed using run length encoding as a preprocessing step and decompressed one frame at a time as data is displayed.
+There are many ways to slice a 3D data set.  The slice orientation is chosen to be the one most perpendicular to the viewer's line of sight where possible choices are slice planes parallel to the three cartesian coordinate planes (XY, XZ, YZ) or planes diagonal to the data.  The opacity at each grid node is computed using the distance $\Delta x$ between adjacent YZ planes and soot density data computed by the fire model.  If slice orientations other than YZ are displayed, then opacities are adjusted if the distance between planes is different than $\Delta x$.  Opacity data is computed and compressed using run length encoding as a preprocessing step and decompressed one frame at a time as data is displayed.
 
 
 %
@@ -321,17 +321,17 @@ per outputted time step, so extra time used to produce a more compact file is af
 
 A second compression scheme is used by Smokezip, companion software to FDS and Smokeview, to compress FDS files even more compactly.  Smokezip uses the ZLIB compression library~\cite{ZLIB}.
 
-\subsection{Limitation}
+\subsection{Slice Rendering Limitation}
 As noted earlier, the slice rendering method for visualizing smoke records opacities on grid planes using
 \begin{equation}
-\label{eq:alpha}
+\label{eq:alpha2}
 \alpha=1-\exp(-\sigma_t\Delta x)
 \end{equation}
-where $\sigma_t$ total mass extinction coefficient and $\Delta x$ is the distance between adjacent grid planes.  Problems with round off error can occur because $\alpha$'s are stored using only 8 bits, the size typical video hardware uses to represent color and alpha channels.
+where again $\Delta x$ is the distance between adjacent grid planes.  Problems with round off error can occur because $\alpha$'s are stored using only 8 bits, the size typical video hardware uses to represent color and alpha channels.
 As a result, opacity values are quantized.  Only values of 0, 1/255, $\cdots$, 254/255, 1 can be represented.  In particular any $\alpha$ value smaller than $1/255$ truncates to 0.
 This can occur when more grid cells are used to resolve a solution domain, {\em i.e.}\ when $\Delta x$ is sufficiently small so that $\alpha<1/256$.
 
-For example, suppose that a 1~m column of smoke has opacity of 0.5.  Substituting $\Delta x=1$ and $\alpha=1/2$ into (\ref{eq:alpha}) gives $\sigma_t=-\ln(1/2)$.  Solving for $\Delta x$ in (\ref{eq:alpha}) using this value of $\sigma_t$ and $\alpha=1/255$ gives
+For example, suppose that a 1~m column of smoke has opacity of 0.5.  Substituting $\Delta x=1$ and $\alpha=1/2$ into (\ref{eq:alpha2}) gives $\sigma_t=-\ln(1/2)$.  Solving for $\Delta x$ using this value of $\sigma_t$ and $\alpha=1/255$ gives
 \begin{equation}
 \Delta x = \frac{\ln(254/255)}{\ln(1/2)}
 \end{equation}
@@ -346,8 +346,6 @@ To get around this problem, a volume rendering algorithm for visualizing smoke h
 
 \section{Solving the RTE using Volumes}
 Volume rendering is the process of visualizing 3D data by projecting partially transparent colors derived from 3D data onto a 2D image.  An entire volume of data is used to generate an image rather than just a slice as in the previous section.  Transfer functions are used to map data to color and optical density (opacity).  These colors and opacities are then combined to form an image.  The transfer functions may be arbitrary designed to highlight certain portions of the data or based on physics designed to produce realistic appearing images.  Figure \ref{figsmokesetup2} illustrates this process.  Data is first mapped to color and opacity then combined to form an image.
-
-
 \begin{figure}[\figoptions]
 \begin{center}
 \includegraphics[width=6.5in]{figures/smoke_setup2}
@@ -401,7 +399,7 @@ radiance within a column of 3D smoke data.}
 \label{fig:smokediscretesetup}
 \end{figure}
 
-The optical depth, $\tau(a,b)$, in equation (\ref{eq:optdepth}) is discretized using a Riemann sum  after defining sample points $s_j=x_0+j\Delta s$ with spacing $\Delta s=x_N/N$ to obtain
+The optical depth, $\tau(a,b)$, defined in equation (\ref{eq:optdepth}) is discretized using a Riemann sum  after defining sample points $s_j=x_0+j\Delta s$ with spacing $\Delta s=(x_N-x_0)/N$ to obtain
 
 \begin{eqnarray*}
 \htau{i}=\tau(x_i,x_N)&=&\exp\left(-\int_{x_i}^{x_N}\sigma_t(s)ds\right)\\
@@ -442,8 +440,7 @@ C_{N} = \htau{0}C_0 +
 \sum_{i=0}^{N-1}\htau{i}\sigai{i}\Lei{i}\Delta x
 \end{equation}
 
-where $\sigma_{a,i}=\sigma_a(x_i)$, $\Lei{i}=C_e(x_i)$, $x_i=x_0+i\Delta x$ and $\Delta x=x_N/N$.
-Letting $\Leii{i}=\sigma_{a,i}C_{e,i}\Delta x$, this simplifies to
+where $\sigma_{a,i}=\sigma_a(x_i)$, $\Lei{i}=C_e(x_i)$, $x_i=x_0+i\Delta x$ and $\Delta x=(x_N-x_0)/N$.  Letting $\Leii{i}=\sigma_{a,i}C_{e,i}\Delta x$, this simplifies to
 
 \begin{equation}
 \label{eq:discrete_rte2}
