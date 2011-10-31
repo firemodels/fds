@@ -617,6 +617,7 @@ void draw_devices(void){
     for(i=0;i<ndeviceinfo;i++){
       devicei = deviceinfo + i;
       if(devicei->object->visible==0)continue;
+      if(devicei->in_zone_csv==1)continue;
       if(devicei->plane_surface!=NULL){
         int j;
 
@@ -680,6 +681,7 @@ void draw_devices(void){
       continue;
     }
     if(isZoneFireModel==1&&STRCMP(devicei->object->label,"target")==0&&visSensor==0)continue;
+    if(devicei->in_zone_csv==1)continue;
 
     save_use_displaylist=devicei->object->use_displaylist;
     tagval=i+1;
@@ -5363,6 +5365,7 @@ void init_device(device *devicei, float *xyz, float *xyzn, int state0, int npara
   float norm;
   int i;
 
+  devicei->in_zone_csv=0;
   devicei->labelptr=devicei->label;
   devicei->color=NULL;
   devicei->line_width=1.0;

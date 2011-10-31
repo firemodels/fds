@@ -745,6 +745,7 @@ typedef struct _device{
   float *params;
   int istate_changes, nstate_changes, state0;
   int *showstatelist;
+  int in_zone_csv;
   isosurface **plane_surface;
   propdata *prop;
   sv_object *object;

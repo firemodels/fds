@@ -114,6 +114,7 @@ void getzonedatacsv(int nzonet, int nrooms, int nfires,
   }
 
   zonet_dev=getdevice("Time");
+  if(zonet_dev!=NULL)zonet_dev->in_zone_csv=1;
   for(i=0;i<nrooms;i++){
     char label[100];
 
@@ -123,6 +124,7 @@ void getzonedatacsv(int nzonet, int nrooms, int nfires,
       *error=1;
       return;
     }
+    zonepr_devs[i]->in_zone_csv=1;
 
     sprintf(label,"HGT_%i",i+1);
     zoneylay_devs[i]=getdevice(label);
@@ -130,6 +132,7 @@ void getzonedatacsv(int nzonet, int nrooms, int nfires,
       *error=1;
       return;
     }
+    zoneylay_devs[i]->in_zone_csv=1;
 
     sprintf(label,"LLT_%i",i+1);
     zonetl_devs[i]=getdevice(label);
@@ -137,6 +140,7 @@ void getzonedatacsv(int nzonet, int nrooms, int nfires,
       *error=1;
       return;
     }
+    zonetl_devs[i]->in_zone_csv=1;
 
     sprintf(label,"ULT_%i",i+1);
     zonetu_devs[i]=getdevice(label);
@@ -144,14 +148,25 @@ void getzonedatacsv(int nzonet, int nrooms, int nfires,
       *error=1;
       return;
     }
+    zonetu_devs[i]->in_zone_csv=1;
 
     sprintf(label,"LLOD_%i",i+1);
     zoneodl_devs[i]=getdevice(label);
-    if(zoneodl_devs[i]==NULL)use_od=0;
+    if(zoneodl_devs[i]==NULL){
+      use_od=0;
+    }
+    else{
+      zoneodl_devs[i]->in_zone_csv=1;
+    }
 
     sprintf(label,"ULOD_%i",i+1);
     zoneodu_devs[i]=getdevice(label);
-    if(zoneodu_devs[i]==NULL)use_od=0;
+    if(zoneodu_devs[i]==NULL){
+      use_od=0;
+    }
+    else{
+      zoneodu_devs[i]->in_zone_csv=1;
+    }
   }
   if(use_od==1){
     NewMemory((void **)&zoneodl     ,nrooms*nzonet*sizeof(float));
@@ -173,24 +188,31 @@ void getzonedatacsv(int nzonet, int nrooms, int nfires,
       *error=1;
       return;
     }
+    zoneqfire_devs[i]->in_zone_csv=1;
+
     sprintf(label,"FLHGT_%i",i+1);
     zonefheight_devs[i]=getdevice(label);
     if(zonefheight_devs[i]==NULL||zonefheight_devs[i]->nvals!=nzonet){
       *error=1;
       return;
     }
+    zonefheight_devs[i]->in_zone_csv=1;
+
     sprintf(label,"FBASE_%i",i+1);
     zonefbase_devs[i]=getdevice(label);
-    if(zoneqfire_devs[i]==NULL||zoneqfire_devs[i]->nvals!=nzonet){
+    if(zonefbase_devs[i]==NULL||zonefbase_devs[i]->nvals!=nzonet){
       *error=1;
       return;
     }
+    zonefbase_devs[i]->in_zone_csv=1;
+
     sprintf(label,"FAREA_%i",i+1);
     zonefarea_devs[i]=getdevice(label);
     if(zonefarea_devs[i]==NULL||zonefarea_devs[i]->nvals!=nzonet){
       *error=1;
       return;
     }
+    zonefarea_devs[i]->in_zone_csv=1;
   }
 
   for(i=0;i<nzhvents;i++){
@@ -202,6 +224,7 @@ void getzonedatacsv(int nzonet, int nrooms, int nfires,
       *error=1;
       return;
     }
+    zonehvents_devs[i]->in_zone_csv=1;
   }
 
   for(i=0;i<nzvvents;i++){
@@ -213,6 +236,7 @@ void getzonedatacsv(int nzonet, int nrooms, int nfires,
       *error=1;
       return;
     }
+    zonevvents_devs[i]->in_zone_csv=1;
   }
 
   ii=0;
