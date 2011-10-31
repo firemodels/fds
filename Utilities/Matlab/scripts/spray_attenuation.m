@@ -59,9 +59,9 @@ for p = 1:8
    [fds_data] = csvread(FDS_File,2);
    
    % Collect data
-   % initial flux between t = 0.1 and 0.2 s
+   % initial flux between t = 0.1 and 1.0 s
    i1 = find(fds_data(:,1)>=0.1,1,'first');
-   i2 = find(fds_data(:,1)<=0.2,1,'last');
+   i2 = find(fds_data(:,1)<=4.0,1,'last');
    FDS_Flux_0(n,p) = mean(fds_data(i1:i2,2));
    % spray properties at t = 9 s.
    i2 = find(fds_data(:,1)<9,1,'last')-1;
@@ -69,8 +69,8 @@ for p = 1:8
    dmax = max(dmax,FDS_d32(n,p));
    FDS_w(n,p) = -1*fds_data(i2,4);
    wmax = max(wmax,FDS_w(n,p));
-   % Final flux as mean between t=10 and 15 s.
-   i1 = find(fds_data(:,1)>=10,1,'first');
+   % Final flux as mean between t=11 and 15 s.
+   i1 = find(fds_data(:,1)>=12,1,'first');
    i2 = find(fds_data(:,1)>10,1,'last')-1;
    FDS_Flux(n,p) = mean(fds_data(i1:i2,2));
    FDS_Attenuation(n,p) = 100*(FDS_Flux_0(n,p)-FDS_Flux(n,p))/FDS_Flux_0(n,p);
