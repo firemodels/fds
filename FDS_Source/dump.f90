@@ -2624,9 +2624,9 @@ SURFLOOP: DO N=0,N_SURF
       ENDDO
       WRITE(LU_OUTPUT,'(A,F9.3,A)')     '     Total surface density ', SD, ' kg/m2'
       WRITE(LU_OUTPUT,'(A,F5.2,A)')     '     Reaction products considered from the first ',SF%LAYER_DIVIDE, ' layers.'
-      WRITE(LU_OUTPUT,'(A)')            '     Solid Phase Nodes (m):      '
+      WRITE(LU_OUTPUT,'(A)')            '     Solid Phase Node, Layer, Coordinates(m):'
       DO I=0,SF%N_CELLS
-         WRITE(LU_OUTPUT,'(10X,I4, F10.5)') I,SF%X_S(I)
+         WRITE(LU_OUTPUT,'(15X,I6, I7, F16.7)') I,SF%LAYER_INDEX(MAX(I,1)), SF%X_S(I)
       ENDDO
       IF (SF%GEOMETRY==SURF_CARTESIAN) THEN
          IF (SF%BACKING==VOID)      WRITE(LU_OUTPUT,'(A)') '     Backing to void'
