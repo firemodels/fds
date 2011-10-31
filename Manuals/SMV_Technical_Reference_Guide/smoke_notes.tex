@@ -59,7 +59,7 @@ The radiation transport equation is used to calculate radiance due to one or mor
 \end{eqnarray}
 
 \noindent where  $\Lxo$ represents the  radiance at $x$ along a direction $\omega$.
-As illustrated in Figure \ref{figRadiance}, the right hand side of (\ref{eq:fullrte}) is split into four components accounting for absorption, in and out scattering and emission where $\siga$ is the absorption coefficient, $\sigs$ is the scattering coefficient, $\Lexo$ is the radiance emitted at $x$ along a direction $\omega$ and $p(x,\omega,\omega')$ is the fraction of light moving along direction $\omega'$ scattered along direction $\omega$. Absorption and out-scattering cause radiance to decrease while emission and in-scattering cause radiance to increase. The terms $C$, $C_e$ and $C_i$ each have units of W/m$^2$sr$^{-1}$.  The terms $\sigma_a$ and $\sigma_s$ each have units of m$^{-1}$ and specify the change per unit length to the radiance term they are applied to.
+As illustrated in Figure \ref{figRadiance}, the right hand side of (\ref{eq:fullrte}) is split into four components accounting for absorption, in and out scattering and emission where $\siga$ is the absorption coefficient, $\sigs$ is the scattering coefficient, $\Lexo$ is the radiance emitted at $x$ along a direction $\omega$ and $p(x,\omega,\omega')$ is the fraction of light moving along direction $\omega'$ scattered along direction $\omega$. Absorption and out-scattering cause radiance to decrease while emission and in-scattering cause radiance to increase. The radiance terms $C$, $C_e$ and $C_i$ each have units of W/m$^2$sr$^{-1}$.  The coefficients $\sigma_a$ and $\sigma_s$ each have units of m$^{-1}$ and specify the change per unit length to the radiance term they are applied to.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -113,12 +113,12 @@ which may be simplified to
  C(x_N)=\tau(x_0,x_N)C_0 + \int_{x_0}^{x_N}\tau(x,x_N)\siga\Le dx
 \end{equation}
 
-after defining $\tau(a,b)$ to represent the optical depth between $a$ and $b$ given by
+after defining $\tau(a,b)$ as 
 \begin{equation}
 \label{eq:optdepth}
 \tau(a,b)=\intmf{a}{b}
 \end{equation}
-As noted earlier, if the emission term is neglected and $\sigma_t(x)=\sigma_t$ is constant over a path with length
+which represents the optical depth between $a$ and $b$.  As noted earlier, if the emission term is neglected and $\sigma_t(x)=\sigma_t$ is constant over a path with length
 $L=x_N-x_0$ then (\ref{eq:rte_simp}) simplifies to
 \begin{eqnarray*}
  \frac{C(x_N)}{C_0}=\exp(-\sigma_tL)
@@ -173,7 +173,7 @@ C&=&\int_{x_0}^{x_N}\tau(x,x_N)\sigma_a(x)C_e(x)dx\\
 &=&\alpha_2C_1+C_2
 \end{eqnarray*}
 
-Summarizing,
+Summarizing, full-interval values $C$ and $\alpha$ may be written in terms of sub-interval values $C_1$, $C_2$, $\alpha_1$ and $\alpha_2$ using
 
 \begin{eqnarray}
 \label{eq:alpha_summary}
@@ -391,7 +391,7 @@ For example, suppose that a 1~m column of smoke has opacity of 0.5.  Substitutin
 \begin{eqnarray*}
 \Delta x = \frac{\ln(254/255)}{\ln(1/2)}
 \end{eqnarray*}
-Therefore, when $\Delta x<\ln(254/255)/\ln(1/2)\approx 0.00567$ the opacity will truncate to zero.  Equivalently, the opacity truncates to zero when $N>\ln(1/2)/\ln(254/255)\approx 177$ where $N$ is the number of grid planes in the 1~m column of smoke.  Smokeview will not draw smoke in this situation even though smoke is present.
+Therefore, the opacity, $\alpha$, will truncate to zero (for this example) whenever $\Delta x<\ln(254/255)/\ln(1/2)\approx 0.00567$ .  Equivalently, the opacity truncates to zero when $N>\ln(1/2)/\ln(254/255)\approx 177$ where $N$ is the number of grid planes in the 1~m column of smoke.  Smoke that Smokeview draws in this situation will be {\em invisible}.
 
 To overcome this problem, the RTE needs to be solved across the full 3D data mesh where intermediate smoke opacities are stored using full precision arithmetic.  One such algorithm is discussed in the next section.
 
@@ -494,14 +494,15 @@ C_{N} = \htau{0}C_0 +
 \sum_{i=0}^{N-1}\htau{i}\sigai{i}\Lei{i}\Delta x
 \end{eqnarray*}
 
-where $\sigma_{a,i}=\sigma_a(x_i)$, $\Lei{i}=C_e(x_i)$, $x_i=x_0+i\Delta x$ and $\Delta x=(x_N-x_0)/N$.  Letting $\Leii{i}=\sigma_{a,i}C_{e,i}\Delta x$, this simplifies to
+where $\sigma_{a,i}=\sigma_a(x_i)$, $\Lei{i}=C_e(x_i)$, $x_i=x_0+i\Delta x$ and $\Delta x=(x_N-x_0)/N$.  
+This simplifies to
 
 \begin{equation}
 \label{eq:discrete_rte2}
 C_N = \htau{0}C_0 + \sum_{i=0}^{N-1}\htau{i}\Leii{i}
 \end{equation}
 
-The terms in (\ref{eq:discrete_rte2}) are summed from back to front meaning that the location of the $i=0$ term is furthest from the observer while the location of the $i=N-1$ term is closest.  We wish to perform this sum in reverse order, from front to back so that the sum may be terminated early if further contributions would not significantly change the result.
+where $\Leii{i}=\sigma_{a,i}C_{e,i}\Delta x$.  The terms in (\ref{eq:discrete_rte2}) are summed from back to front meaning that the location of the $i=0$ term is furthest from the observer while the location of the $i=N-1$ term is closest.  We wish to perform this sum in reverse order, from front to back so that the sum may be terminated early if further contributions would not significantly change the result.
 
 Therefore, to compute $C_N$, let $\Chatjj{j}$ denote the partial sum using terms $i=j$ through $i=N-1$ in the summation term in (\ref{eq:discrete_rte2}).  Using this notation $\hat{C}_N=\htau{0}C_0+\Chatjj{0}$ . Then
 
