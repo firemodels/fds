@@ -27,7 +27,7 @@ This \paper\ is organized as follows.  A model for visualizing smoke and fire is
 % -------------------  Visualization Model ------------------------
 %
 
-\section{Visualization Model}
+\section{Radiation Transport Equation - RTE}
 The visualization model used here to simulate smoke appearance is the radiation transport equation (RTE)~\cite{Siegel:2001}.  This equation uses the quantity radiance to represent smoke appearance.  Radiance has units of watts per square meter per unit solid angle~(W/(sr$\cdot$m$^2$)).  The solid angle accounts for the fact that a light source appears brighter if it emits a given amount of light through a smaller cross-sectional area.  This has the interesting implication, ignoring atmospheric effects, as pointed out in~\cite{dutre:2002}, that the sun appears equally bright on the Earth as on Mars.  The diminished heat flux $(W/\mbox{m}^2)$ on Mars due to the increased distance from the sun is exactly offset by the reduced solid angle ($sr$) of the sun's disk.  From a visualization perspective, this implies that image brightness does not depend on image distance from the observer unless  participating media is present to absorb or scatter  intervening light.  The radiation transport equation discussed in this section models the change in radiance or appearance due to these factors.
 
 %
@@ -125,15 +125,73 @@ $L=x_N-x_0$ then (\ref{eq:rte_simp}) simplifies to
 \end{eqnarray*}
 which is the Beer-Lambert law.
 
+
+%
+% -------------------  Combining Multiple Solutions ------------------------
+%
+
+\subsection{Splitting the Radiation Transport Equation}
+This section discusses splitting a RTE solution across meshes, combining RTE solutions obtained on two or on individual 3D meshes into one solution across all data.
+It is more practical to draw smoke one mesh at a time when visualizing multiple mesh cases since required data may not be easily accessible from all meshes, especially if the GPU is used for drawing.  The RTE solution or equivalently the computed radiance and smoke opacity require  properties for the entire line of sight which may encompass more than one data mesh.  This section discusses how  radiance and opacity may be computed by combining solutions from each individual mesh along the line of sight.  For example, as illustrated in Figure \ref{figsmokesetup3}, consider an interval $[x_0,x_N]$ that is split at $D$ into two sub-intervals $[x_0,D]$ and $[D,x_N]$.  The goal then is to compute a radiance and opacity for $[x_0,x_N]$ using radiances and opacities computed on  the two sub-intervals.
+
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[width=4.0in]{figures/smoke_setup3}
+\end{center}
+\caption {Solutions to the RTE on two sub-intervals are combined to form a solution to the RTE
+for the merger of these intervals.}
+\label{figsmokesetup3}
+\end{figure}
+
+Let $C$ be a radiance computed on $[x_0,x_N]$ and $C_1$ and $C_2$ be radiances computed on two sub-intervals of $[x_0,x_N]$.  Likewise let $\alpha$ be an optical depth computed on $[x_0,x_N]$ and $\alpha_1$ and $\alpha_2$ be optical depths computed on two sub-intervals of $[x_0,x_N]$.
+From (\ref{eq:rte_simp}) and (\ref{eq:optdepth}), the radiance $C$ and optical depth $\alpha$ are given by
+
+\begin{eqnarray*}
+C&=&\int_{x_0}^{x_N}\tau(x,x_N)\sigma_a(x)C_e(x)dx\\
+\alpha&=&\tau(x_0,x_N)
+\end{eqnarray*}
+
+Likewise, the radiances $C_1$ and $C_2$ and optical depths $\alpha_1$ and $\alpha_2$ for the intervals $[x_0,D]$ and $[D,x_N]$ are given by
+
+\begin{eqnarray*}
+C_1&=&\int_{x_0}^{D}\tau(x,D)\sigma_a(x)C_e(x)dx\\
+C_2&=&\int_{D}^{x_N}\tau(x,x_N)\sigma_a(x)C_e(x)dx\\
+\alpha_1&=&\tau(x_0,D)\\
+\alpha_2&=&\tau(D,x_N)
+\end{eqnarray*}
+
+The optical depth $\alpha$ can be split into two parts giving
+\begin{eqnarray*}
+\alpha&=&\tau(x_0,x_N)=\tau(x_0,D)\tau(D,x_N)=\alpha_1\alpha_2
+\end{eqnarray*}
+since from (\ref{eq:optdepth}) it can be shown that for any $x$, $\tau(a,b)=\tau(a,x)\tau(x,b)$.
+The radiance $C$ can also be split into two parts giving
+\begin{eqnarray*}
+C&=&\int_{x_0}^{x_N}\tau(x,x_N)\sigma_a(x)C_e(x)dx\\
+&=&\int_{x_0}^{D}\tau(x,x_N)\sigma_a(x)C_e(x)dx+\int_{D}^{x_N}\tau(x,x_N)\sigma_a(x)C_e(x)dx\\
+&=&\tau(D,x_N)\int_{x_0}^{D}\tau(x,D)\sigma_a(x)C_e(x)dx+\int_{D}^{x_N}\tau(x,x_N)\sigma_a(x)C_e(x)dx\\
+&=&\alpha_2C_1+C_2
+\end{eqnarray*}
+
+Summarizing,
+
+\begin{eqnarray}
+\label{eq:alpha_summary}
+\alpha&=&\alpha_1\alpha_2\\
+\label{eq:C_summary}
+C&=&\alpha_2C_1+C_2
+\end{eqnarray}
+
+Equations (\ref{eq:alpha_summary}) and (\ref{eq:C_summary}) can then be used to draw smoke and fire one mesh at a time.
+
 %
 % -------------------  Slice Rendered Smoke ------------------------
 %
 
 \section{Solving the RTE using Slices}
-A slice rendering algorithm for visualizing smoke consists of partitioning a 3D computational domain into a series of 2D slices.  The RTE is then solved on each slice.  Each slice solution only accounts for conditions between adjacent slices.  The individual partially transparent slice solutions are then combined using video hardware to form the final image.
+A slice rendering algorithm for visualizing smoke consists of splitting the RTE across individual slice planes within a single mesh.  The 3D computational domain is partitioned into a series of 2D slices.  The RTE is then solved on each slice.  Each slice solution only accounts for conditions between adjacent slices.  The individual partially transparent slice solutions are then combined using video hardware to form the final image.   Problems can occur with numerical round off error if two slices are too close together which require solution methods  involving data volumes rather than data slices. These methods are discussed in the next section.
 
 There are many ways to slice a 3D data set.  The slice orientation is chosen to be the one most perpendicular to the viewer's line of sight where possible choices are slice planes parallel to the three cartesian coordinate planes (XY, XZ, YZ) or planes diagonal to the data.  The opacity at each grid node is computed using the distance $\Delta x$ between adjacent YZ planes and soot density data computed by the fire model.  If slice orientations other than YZ are displayed, then opacities are adjusted if the distance between planes is different than $\Delta x$.  Opacity data is computed and compressed using run length encoding as a preprocessing step and decompressed one frame at a time as data is displayed.
-
 
 %
 % -------------------  Computing Opacity ------------------------
@@ -326,16 +384,16 @@ As noted earlier, the slice rendering method for visualizing smoke records opaci
 \alpha=1-\exp(-\sigma_t\Delta x)
 \end{equation}
 where again $\Delta x$ is the distance between adjacent grid planes.  Problems with round off error can occur because $\alpha$'s are stored using only 8 bits, the size typical video hardware uses to represent color and alpha channels.
-As a result, opacity values are quantized.  Only values of 0, 1/255, $\cdots$, 254/255, 1 can be represented.  In particular any $\alpha$ value smaller than $1/255$ truncates to 0.
-This can occur when more grid cells are used to resolve a solution domain, {\em i.e.}\ when $\Delta x$ is sufficiently small so that $\alpha<1/256$.
+As a result, opacity values are quantized.  Only values of 0, 1/255, $\cdots$, 254/255, 1 can be represented.  In particular, any $\alpha$ value computed to be smaller than $1/255$ will truncate to 0.
+This can occur when more grid cells are used to resolve a solution domain, {\em i.e.}\ when $\Delta x$ is sufficiently small so that $\alpha<1/255$.
 
 For example, suppose that a 1~m column of smoke has opacity of 0.5.  Substituting $\Delta x=1$ and $\alpha=1/2$ into (\ref{eq:alpha3}) gives $\sigma_t=-\ln(1/2)$.  Solving for $\Delta x$ using this value of $\sigma_t$ and $\alpha=1/255$ gives
 \begin{eqnarray*}
 \Delta x = \frac{\ln(254/255)}{\ln(1/2)}
 \end{eqnarray*}
-Therefore, when $\Delta x<\ln(254/255)/\ln(1/2)\approx 0.00567$ the opacity truncates to zero.  Equivalently, the opacity truncates to zero when $N>\ln(1/2)/\ln(254/255)\approx 177$ where $N$ is the number of grid planes in the 1~m column of smoke.
+Therefore, when $\Delta x<\ln(254/255)/\ln(1/2)\approx 0.00567$ the opacity will truncate to zero.  Equivalently, the opacity truncates to zero when $N>\ln(1/2)/\ln(254/255)\approx 177$ where $N$ is the number of grid planes in the 1~m column of smoke.  Smokeview will not draw smoke in this situation even though smoke is present.
 
-To get around this problem, a volume rendering algorithm for visualizing smoke has been implemented where intermediate smoke opacities are stored using full precision arithmetic instead of 8 bits.  This algorithm is discussed in the next section.
+To overcome this problem, the RTE needs to be solved across the full 3D data mesh where intermediate smoke opacities are stored using full precision arithmetic.  One such algorithm is discussed in the next section.
 
 
 %
@@ -493,65 +551,6 @@ The values $C_i$ and $\alpha_i$ are the color and opacity at the $i$'th step.
 The OpenGL call, {\tt   glBlendFunc(GL\_ONE,GL\_ONE\_MINUS\_SRC\_ALPHA); }, is used to implement this mixing mode in Smokeview.
 \end{enumerate}
 
-
-%
-% -------------------  Combining Multiple Solutions ------------------------
-%
-
-\subsection{Volume Rendering on Multiple Meshes}
-It is more practical to draw smoke one mesh at a time when visualizing multiple mesh cases since required data may not be easily accessible from all meshes, especially if the GPU is used for drawing.  The RTE solution or equivalently the computed radiance and smoke opacity require  properties for the entire line of sight which may encompass more than one data mesh.  This section discusses how  radiance and opacity may be computed by combining solutions from each individual mesh along the line of sight.  For example, as illustrated in Figure \ref{figsmokesetup3}, consider an interval $[x_0,x_N]$ that is split at $D$ into two sub-intervals $[x_0,D]$ and $[D,x_N]$.  The goal then is to compute a radiance and opacity for $[x_0,x_N]$ using radiances and opacities computed on  the two sub-intervals.
-
-\begin{figure}[\figoptions]
-\begin{center}
-\includegraphics[width=4.0in]{figures/smoke_setup3}
-\end{center}
-\caption {Solutions to the RTE on two sub-intervals are combined to form a solution to the RTE
-for the merger of these intervals.}
-\label{figsmokesetup3}
-\end{figure}
-
-Let $C$ be a radiance computed on $[x_0,x_N]$ and $C_1$ and $C_2$ be radiances computed on two sub-intervals of $[x_0,x_N]$.  Likewise let $\alpha$ be an optical depth computed on $[x_0,x_N]$ and $\alpha_1$ and $\alpha_2$ be optical depths computed on two sub-intervals of $[x_0,x_N]$.
-From (\ref{eq:rte_simp}) and (\ref{eq:optdepth}), the radiance $C$ and optical depth $\alpha$ are given by
-
-\begin{eqnarray*}
-C&=&\int_{x_0}^{x_N}\tau(x,x_N)\sigma_a(x)C_e(x)dx\\
-\alpha&=&\tau(x_0,x_N)
-\end{eqnarray*}
-
-Likewise, the radiances $C_1$ and $C_2$ and optical depths $\alpha_1$ and $\alpha_2$ for the intervals $[x_0,D]$ and $[D,x_N]$ are given by
-
-\begin{eqnarray*}
-C_1&=&\int_{x_0}^{D}\tau(x,D)\sigma_a(x)C_e(x)dx\\
-C_2&=&\int_{D}^{x_N}\tau(x,x_N)\sigma_a(x)C_e(x)dx\\
-\alpha_1&=&\tau(x_0,D)\\
-\alpha_2&=&\tau(D,x_N)
-\end{eqnarray*}
-
-\label{eq:optdepth}
-
-The optical depth $\alpha$ can be split into two parts giving
-\begin{eqnarray*}
-\alpha&=&\tau(x_0,x_N)=\tau(x_0,D)\tau(D,x_N)=\alpha_1\alpha_2
-\end{eqnarray*}
-since from (\label{eq:optdepth}) it can be shown that for any $x$, $\tau(a,b)=\tau(a,x)\tau(x,b)$.
-The radiance $C$ can also be split into two parts giving
-\begin{eqnarray*}
-C&=&\int_{x_0}^{x_N}\tau(x,x_N)\sigma_a(x)C_e(x)dx\\
-&=&\int_{x_0}^{D}\tau(x,x_N)\sigma_a(x)C_e(x)dx+\int_{D}^{x_N}\tau(x,x_N)\sigma_a(x)C_e(x)dx\\
-&=&\tau(D,x_N)\int_{x_0}^{D}\tau(x,D)\sigma_a(x)C_e(x)dx+\int_{D}^{x_N}\tau(x,x_N)\sigma_a(x)C_e(x)dx\\
-&=&\alpha_2C_1+C_2
-\end{eqnarray*}
-
-Summarizing,
-
-\begin{eqnarray}
-\label{eq:alpha_summary}
-\alpha&=&\alpha_1\alpha_2\\
-\label{eq:C_summary}
-C&=&\alpha_2C_1+C_2
-\end{eqnarray}
-
-Equations (\ref{eq:alpha_summary}) and (\ref{eq:C_summary}) can then be used to draw smoke and fire one mesh at a time.
 
 \section{Future Work}
 This \paper\ describes the algorithms Smokeview uses to display smoke and fire realistically using physics based algorithms.  These algorithms may be improved in several ways.  Presently, only radiation from soot is used to visualize smoke.  Radiation emissions from heated gas components such as CO2 and water vapor are neglected.  The gray gas assumption may be relaxed by solving the RTE for several wavelength bands (as may be done by FDS) and combining the results.  The interaction between volume rendered smoke and interior solid objects may be improved by accounting for interior solid objects such as FDS OBST's.  The RTE line integration needs to terminate at the first blockage encountered rather than the far side of the data mesh.  Work on unstructured geometries presently researched for future incorporation into FDS may also lead to better physics there.  Finally, the transfer function relating temperature to fire color may be improved by using a physics based approach rather than a color map.
