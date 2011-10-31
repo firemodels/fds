@@ -2467,7 +2467,7 @@ the inflow exactly because of inaccuracies at the solid and mesh boundaries. The
 \subsubsection{Example Case: Pressure\_Solver/dancing\_eddies}
 
 In this example, air is pushed through a 300~m long, two-dimensional channel at 5~m/s. A plate obstruction normal to the flow creates a Karman vortex street. The computational
-domain is divided into 4 meshes, each 75~m long. Two simulations are performed, one in which the {\ct VELOCITY\_TOLERANCE} is set to 0.1~m/s ({\ct dancing\_eddies\_tol=p1.fds}), and one 
+domain is divided into 4 meshes, each 75~m long. Two simulations are performed, one in which the {\ct VELOCITY\_TOLERANCE} is set to 0.1~m/s ({\ct dancing\_eddies\_tol=p1.fds}), and one
 in which it is set to 0.01~m/s ({\ct dancing\_eddies.fds}). Figure~\ref{dancing_eddies} shows the downstream pressure histories for these two cases compared to a simulation that uses only one mesh. The case with the tighter tolerance produces a better match to the single mesh solution, but at a higher computational cost.
 
 \begin{figure}[ht]
@@ -3643,26 +3643,26 @@ on the layer boundaries.
 
 The default parameters are usually appropriate for simple heat transfer calculations but sometimes the use of pyrolysis reactions
 makes the temperatures and burning rate fluctuate. Adjustments may also be needed in case of
-extremely transient heat transfer situations. The numerical accuracy and stability of the solid phase solution may be improved by 
-one of the following methods: 
+extremely transient heat transfer situations. The numerical accuracy and stability of the solid phase solution may be improved by
+one of the following methods:
 \begin{description}
 \item[Make the mesh density more uniform ] inside the material by setting {\ct STRETCH\_FACTOR(NL)=1.}
 on the {\ct SURF} line. This will generate a perfectly uniform mesh for layer number {\ct NL}. (This happens automatically if the layer
-contains one or more reacting materials.) Values between 1 and 2 give different levels of stretching.  
-Note that {\ct STRETCH\_FACTOR} needs to be specified for all the layers. 
+contains one or more reacting materials.) Values between 1 and 2 give different levels of stretching.
+Note that {\ct STRETCH\_FACTOR} needs to be specified for all the layers.
 \item[Make the mesh cells smaller] by setting {\ct CELL\_SIZE\_FACTOR} less than 1.0. For example, {\ct CELL\_SIZE\_FACTOR=0.5} makes the
-mesh cells half the size. The scaling always applies to all layers. 
+mesh cells half the size. The scaling always applies to all layers.
 \item[Improve the time resolutions] by setting {\ct WALL\_INCREMENT=1} on the
 {\ct TIME} line. This forces the solid phase temperatures to be solved on every time step.
-\item[Enforce the re-gridding] of shrinking wall cells by setting {\ct REGRID\_FACTOR} on the {\ct SURF} line to a value that is larger than 0.9 (default) 
-and smaller than 1.0. For example, {\ct REGRID\_FACTOR=0.99} will cause re-gridding when the any of the cells has changed one percent in size, thus 
+\item[Enforce the re-gridding] of shrinking wall cells by setting {\ct REGRID\_FACTOR} on the {\ct SURF} line to a value that is larger than 0.9 (default)
+and smaller than 1.0. For example, {\ct REGRID\_FACTOR=0.99} will cause re-gridding when the any of the cells has changed one percent in size, thus
 reducing the amount of interpolation errors. Setting {\ct REGRID\_FACTOR} less than 0.9 can save computing time in some cases.
 \end{description}
 
 If all the material components of the surface are reacting, and the pyrolysis reactions have no solid residue, the thickness of
 the surface is going to shrink when the surface reacts. Each of the shrinking layers will vanish from the computation when its thickness gets
-smaller than a prescribed limiting value. This value can be set on a {\ct SURF} line via {\ct MINIMUM\_LAYER\_THICKNESS} keyword, 
-defaulting to 1.E-6 m. When all the material of a shrinking surface is consumed but {\ct BURN\_AWAY} is not 
+smaller than a prescribed limiting value. This value can be set on a {\ct SURF} line via {\ct MINIMUM\_LAYER\_THICKNESS} keyword,
+defaulting to 1.E-6 m. When all the material of a shrinking surface is consumed but {\ct BURN\_AWAY} is not
 prescribed, the surface temperature is set to {\ct TMP\_BACK}, convective heat flux to zero and burning rate to zero.
 
 See Section~\ref{solid_phase_verification} for ways to check and improve the accuracy of the solid phase calculation.
@@ -4881,7 +4881,7 @@ Additionally you must define the locations where the HVAC network joins the comp
 A number of examples of simple HVAC systems are given in the HVAC folder of the sample cases and are discussed in the FDS Verification Guide.
 
 
-\subsection{HVAC Duct Parameters} 
+\subsection{HVAC Duct Parameters}
 \label{info:HVACduct}
 
 \footnotesize
@@ -4935,7 +4935,7 @@ If the node is connected to the FDS domain, then do not specify {\ct XYZ}.  FDS 
 \label{info:HVACfan}
 \footnotesize
 \begin{verbatim}
-&HVAC TYPE='FAN', ID='fanname', RAMP_ID='rampname',  DEVC_ID='devicename', CTRL_ID='ctrlname', VOLUME_FLOW=volumeflow, MAX_FLOW=maxflow, 
+&HVAC TYPE='FAN', ID='fanname', RAMP_ID='rampname',  DEVC_ID='devicename', CTRL_ID='ctrlname', VOLUME_FLOW=volumeflow, MAX_FLOW=maxflow,
 MAX_PRESSURE=maxpressure, LOSS=offloss /
 \end{verbatim}\normalsize
 
@@ -8691,6 +8691,9 @@ This does not require that you do a simple chemistry calculation; only that you 
 {\ct SPEC} line. You can
 specify a unique {\ct MASS\_EXTINCTION\_COEFFICIENT} on the {\ct SPEC} line as well.
 
+Note that FDS cannot report a visibility of infinity, but rather reports a {\ct MAXIMUM\_VISIBILITY} that you can control via the
+{\ct MISC} line. The default is 30~m.
+
 
 \subsection{Layer Height and the Average Upper and Lower Layer Temperatures}
 \label{info:layerheight}
@@ -10287,8 +10290,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct IMMERSED\_BOUNDARY\_METHOD} & Logical       &                                                           &               & {\ct .FALSE.}     \\ \hline
 {\ct LAPSE\_RATE}               & Real          & See Section~\ref{info:stratification}                     &  $^\circ$C/m  & 0                 \\ \hline
 {\ct LES}                       & Logical       & See Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
-{\ct MAXIMUM\_VISIBILITY}       & Real          & Visibility parameter                                      &  m            &  30               \\ \hline
+{\ct MAXIMUM\_VISIBILITY}       & Real          & See Section~\ref{info:visibility}                         &  m            &  30               \\ \hline
 {\ct MEAN\_FORCING(3)}          & Logical       & See Section~\ref{info:mean_forcing}                       &               & {\ct .FALSE.}     \\ \hline
+%{\ct MIXING\_LAYER\_H0}         & Real          & See FDS Verification Guide                                &  m            &                   \\ \hline
+%{\ct MIXING\_LAYER\_THETA0}     & Real          & See FDS Verification Guide                                &               &                   \\ \hline
+%{\ct MIXING\_LAYER\_U0}         & Real          & See FDS Verification Guide                                &  m/s          &                   \\ \hline
 {\ct NOISE}                     & Logical       & See Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
 {\ct NO\_EVACUATION}            & Logical       & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide}     &               & {\ct .FALSE.}     \\ \hline
 %{\ct NSTRATA}                   & Logical       & No. bins for droplet distribution                         &               & 7                 \\ \hline
@@ -10316,7 +10322,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TMPA}                      & Real          & See Section~\ref{info:MISC_Basics}                        & $^\circ$C     & 20.               \\ \hline
 {\ct TURBULENCE\_MODEL}         & Character     & See Section~\ref{info:LES}                                &               & {\ct 'DEARDORFF'} \\ \hline
 {\ct U0,V0,W0}                  & Reals         & See Section~\ref{info:MISC_Basics}                        & m/s           & 0.                \\ \hline
-{\ct VISIBILITY\_FACTOR}        & Real          & Visibility parameter                                      &               & 3                 \\ \hline
+{\ct VISIBILITY\_FACTOR}        & Real          & See Section~\ref{info:visibility}                         &               & 3                 \\ \hline
 {\ct VN\_MAX}                   & Real          & See Section~\ref{info:CFL}                                &               & 1.0               \\ \hline
 {\ct VN\_MIN}                   & Real          & See Section~\ref{info:CFL}                                &               & 0.8               \\ \hline
 {\ct WIND\_ONLY}                & Logical       & See Wildland Fire User's Guide                            &               & {\ct .FALSE.}     \\ \hline
