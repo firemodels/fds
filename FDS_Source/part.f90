@@ -58,6 +58,7 @@ PART_CLASS_LOOP: DO IPC=1,N_PART
       STRATIFY: DO I=1,NSTRATA
          LL = (I-1)*BIN_SIZE
          UL =  I   *BIN_SIZE
+         IL = 1
          LL_LOOP: DO J=1,NDC
             IF (PC%R_CDF(J)>LL) THEN
                IL = J-1 
@@ -65,6 +66,7 @@ PART_CLASS_LOOP: DO IPC=1,N_PART
                EXIT LL_LOOP
             ENDIF
          ENDDO LL_LOOP
+         IU = NDC
          UL_LOOP: DO J=NDC,1,-1
             IF (PC%R_CDF(J)<=UL) THEN
                IU = J 
