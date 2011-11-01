@@ -2126,7 +2126,6 @@ void initvars0(void){
   ntreeinfo=0;
   terraininfo=NULL;
   nterraininfo=0;
-  visTerrainType=4;
   treecolor[0]=0.09;
   treecolor[1]=0.5;
   treecolor[2]=0.015;
@@ -2195,7 +2194,6 @@ void initvars0(void){
   script_iso=0;
   logfilename=NULL;
   flushfile=NULL, chidfilebase=NULL;
-  hrrfilename=NULL;
   hrrinfo=NULL;
   smokezippath=NULL;
   scriptinifilename2=NULL;

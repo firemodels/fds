@@ -2152,11 +2152,11 @@ void LoadUnloadMenu(int value){
     if(scriptoutstream!=NULL){
       fprintf(scriptoutstream,"UNLOADALL\n");
     }
-    if(hrrfilename!=NULL){
+    if(hrr_csvfilename!=NULL){
       readhrr(UNLOAD, &errorcode);
     }
-    if(devcfilename!=NULL){
-      read_device_data(devcfilename,UNLOAD);
+    if(devc_csvfilename!=NULL){
+      read_device_data(devc_csvfilename,UNLOAD);
     }
     if(nvolrenderinfo>0){
       LoadVolSmoke3DMenu(UNLOAD_ALL);
@@ -2191,11 +2191,11 @@ void LoadUnloadMenu(int value){
   if(value==RELOADALL){
     LOCK_COMPRESS
     readsmv_dynamic(smvfilename);
-    if(hrrfilename!=NULL){
+    if(hrr_csvfilename!=NULL){
       readhrr(LOAD, &errorcode);
     }
-    if(devcfilename!=NULL){
-      read_device_data(devcfilename,LOAD);
+    if(devc_csvfilename!=NULL){
+      read_device_data(devc_csvfilename,LOAD);
     }
     islicetype_save=islicetype;
     for(i=0;i<nsliceinfo;i++){
@@ -4300,8 +4300,8 @@ void GeometryMenu(int value){
       BlockageMenu(visBlocksSave);
     }
     else{
-      visBlocksSave=visBlocks;
-      BlockageMenu(visBLOCKHide);
+    //  visBlocksSave=visBlocks;
+    //  BlockageMenu(visBLOCKHide);
     }
     visTerrainType=value-17;
     if(visTerrainType==0){

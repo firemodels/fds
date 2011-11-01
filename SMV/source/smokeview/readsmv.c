@@ -4710,18 +4710,25 @@ typedef struct {
         }
       }
       if(chidfilebase!=NULL){
-        NewMemory((void **)&hrrfilename,(unsigned int)(strlen(chidfilebase)+8+1));
-        STRCPY(hrrfilename,chidfilebase);
-        STRCAT(hrrfilename,"_hrr.csv");
-        if(STAT(hrrfilename,&statbuffer)!=0){
-          FREEMEMORY(hrrfilename);
+        NewMemory((void **)&hrr_csvfilename,(unsigned int)(strlen(chidfilebase)+8+1));
+        STRCPY(hrr_csvfilename,chidfilebase);
+        STRCAT(hrr_csvfilename,"_hrr.csv");
+        if(STAT(hrr_csvfilename,&statbuffer)!=0){
+          FREEMEMORY(hrr_csvfilename);
         }
         
-        NewMemory((void **)&devcfilename,(unsigned int)(strlen(chidfilebase)+9+1));
-        STRCPY(devcfilename,chidfilebase);
-        STRCAT(devcfilename,"_devc.csv");
-        if(STAT(devcfilename,&statbuffer)!=0){
-          FREEMEMORY(devcfilename);
+        NewMemory((void **)&devc_csvfilename,(unsigned int)(strlen(chidfilebase)+9+1));
+        STRCPY(devc_csvfilename,chidfilebase);
+        STRCAT(devc_csvfilename,"_devc.csv");
+        if(STAT(devc_csvfilename,&statbuffer)!=0){
+          FREEMEMORY(devc_csvfilename);
+        }
+
+        NewMemory((void **)&exp_csvfilename,(unsigned int)(strlen(chidfilebase)+8+1));
+        STRCPY(exp_csvfilename,chidfilebase);
+        STRCAT(exp_csvfilename,"_exp.csv");
+        if(STAT(exp_csvfilename,&statbuffer)!=0){
+          FREEMEMORY(exp_csvfilename);
         }
       }
       continue;
@@ -4742,11 +4749,11 @@ typedef struct {
       STRCPY(chidfilebase,bufptr);
 
       if(chidfilebase!=NULL){
-        NewMemory((void **)&hrrfilename,(unsigned int)(strlen(chidfilebase)+8+1));
-        STRCPY(hrrfilename,chidfilebase);
-        STRCAT(hrrfilename,"_hrr.csv");
-        if(STAT(hrrfilename,&statbuffer)!=0){
-          FREEMEMORY(hrrfilename);
+        NewMemory((void **)&hrr_csvfilename,(unsigned int)(strlen(chidfilebase)+8+1));
+        STRCPY(hrr_csvfilename,chidfilebase);
+        STRCAT(hrr_csvfilename,"_hrr.csv");
+        if(STAT(hrr_csvfilename,&statbuffer)!=0){
+          FREEMEMORY(hrr_csvfilename);
         }
       }
       continue;
@@ -5771,11 +5778,11 @@ typedef struct {
   if(meshinfo!=NULL&&meshinfo->jbar==1){
     force_isometric=1;
   }
-  if(hrrfilename!=NULL){
+  if(hrr_csvfilename!=NULL){
     readhrr(LOAD, &errorcode);
   }
-  if(devcfilename!=NULL){
-    read_device_data(devcfilename,LOAD);
+  if(devc_csvfilename!=NULL){
+    read_device_data(devc_csvfilename,LOAD);
   }
 
   init_multi_threading();
@@ -7872,13 +7879,6 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"SHOWTERRAIN",11)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&visTerrainType);
-      /*
-      if(visTerrain!=0)visTerrain=1;
-      if(visTerrain==1){
-        visTerrain=1-visTerrain;
-        GeometryMenu(17);
-      }
-      */
       continue;
     }
     if(match(buffer,"STEREO",6)==1){
