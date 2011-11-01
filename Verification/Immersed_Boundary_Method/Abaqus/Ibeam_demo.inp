@@ -4364,22 +4364,23 @@
 ** 
 ** Name: Predefined Field-1   Type: Temperature
 *Initial Conditions, type=TEMPERATURE
-_PickedSet6, 20.
+_PickedSet6, 500.
 ** ----------------------------------------------------------------
 ** 
 ** STEP: Step-1
 ** 
 *Step, name=Step-1, inc=100000
-*Heat Transfer, end=PERIOD, deltmx=20.
-0.1, 10., 0.0003, 0.2, 
+*Heat Transfer, end=PERIOD, deltmx=100.
+0.1, 300., 0.0003, 10, 
 *controls, parameter=time incrementation
  50, 60, 70, 80, 90, 100, 110, 120, 130, 10, 150
 ** 
 ** BOUNDARY CONDITIONS
 ** 
 ** Name: BC-1 Type: Temperature
-*Boundary, user
-Set-OutSurf, 11, 11
+*Boundary
+Set-Hot, 11, 11, 3000.
+** 
 ** OUTPUT REQUESTS
 ** 
 *Restart, write, frequency=0
@@ -4388,6 +4389,8 @@ Set-OutSurf, 11, 11
 ** 
 *Output, field, number interval=10
 *Node output
+NT
+*NODE FILE, GLOBAL=NO, nset=Set-OutSurf
 NT
 *Output, history, frequency=0
 *End Step
