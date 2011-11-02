@@ -31,11 +31,6 @@ void getzonesizecsv(int *nzonet, int *nroom, int *nfires, int *nhvents, int *nvv
 
    
    *error=0;
-   dev=getdevice("Time");
-   if(dev==NULL){
-     *error=1;
-     return;
-   }
    nr=0;
    for(i=0;i<ndeviceinfo;i++){
      sprintf(label,"LLT_%i",i+1);
@@ -82,11 +77,12 @@ void getzonedatacsv(int nzonet, int nrooms, int nfires,
                     float **zoneodlptr, float **zoneoduptr, float *zonehvents, float *zonevvents,
                     int *error){
   int i,ii,iif, use_od=1, iihv, iivv;
-  device *zonet_dev=NULL, **zoneqfire_devs=NULL;
+  device **zoneqfire_devs=NULL;
   device **zonepr_devs=NULL, **zoneylay_devs=NULL, **zonetl_devs=NULL, **zonetu_devs=NULL, **zoneodl_devs=NULL, **zoneodu_devs=NULL;
   device **zonefheight_devs=NULL, **zonefbase_devs=NULL, **zonefarea_devs=NULL;
   device **zonehvents_devs=NULL, **zonevvents_devs=NULL;
   float *zoneodl, *zoneodu;
+  float *times;
 
   *error=0;
   if(nfires>0){
@@ -113,8 +109,6 @@ void getzonedatacsv(int nzonet, int nrooms, int nfires,
     NewMemory((void **)&zonevvents_devs,nzvvents*sizeof(device *));
   }
 
-  zonet_dev=getdevice("Time");
-  if(zonet_dev!=NULL)zonet_dev->in_zone_csv=1;
   for(i=0;i<nrooms;i++){
     char label[100];
 
@@ -243,10 +237,12 @@ void getzonedatacsv(int nzonet, int nrooms, int nfires,
   iif=0;
   iihv=0;
   iivv=0;
+  times = *(zonepr_devs[0]->timesptr);
+
   for(i=0;i<nzonet;i++){
     int j;
 
-    zonet[i]=zonepr_devs[0]->times[i];
+    zonet[i]=times[i];
     for(j=0;j<nrooms;j++){
       zonepr[ii]=zonepr_devs[j]->vals[i];
       zoneylay[ii]=zoneylay_devs[j]->vals[i];
@@ -472,7 +468,8 @@ void readzone(int ifile, int flag, int *errorcode){
   }
   zonefilelen = strlen(file);
   if(zonei->csv==1){
-    read_device_data(zonei->file,LOAD);
+    read_device_data(zonei->file,1,UNLOAD);
+    read_device_data(zonei->file,1,LOAD);
     getzonesizecsv(&nzonet,&nrooms2,&nfires2,&nzhvents2,&nzvvents2,&error);
   }
   else{

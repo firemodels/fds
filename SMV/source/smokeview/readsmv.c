@@ -5214,7 +5214,7 @@ typedef struct {
       strcpy(devicei->label,trim_front(buffer));
       devicei->object = get_SVOBJECT_type(buffer,missing_device);
       devicei->params=NULL;
-      devicei->times=NULL;
+      devicei->timesptr=NULL;
       devicei->vals=NULL;
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f %f %f %f %f %i %i %i",
@@ -5781,8 +5781,11 @@ typedef struct {
   if(hrr_csvfilename!=NULL){
     readhrr(LOAD, &errorcode);
   }
-  if(devc_csvfilename!=NULL){
-    read_device_data(devc_csvfilename,LOAD);
+  if(devc_csvfilename!=NULL||exp_csvfilename!=NULL){
+    read_device_data(NULL,0,UNLOAD);
+    if(devc_csvfilename!=NULL)read_device_data(devc_csvfilename,0,LOAD);
+    read_device_data(NULL,2,UNLOAD);
+    if(exp_csvfilename!=NULL)read_device_data(exp_csvfilename,2,LOAD);
   }
 
   init_multi_threading();

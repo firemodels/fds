@@ -726,7 +726,7 @@ typedef struct _device{
   int screenijk[3], visval;
   char label[30], *labelptr;
   char quantity[30], unit[30];
-  float *times, *vals;
+  float **timesptr, *vals;
   int ival,nvals,type2,type2vis;
   mesh *device_mesh;
   texture  *textureinfo;
@@ -739,6 +739,7 @@ typedef struct _device{
   float dtheta, rotate_axis[3];
   float act_time;
   float *color, line_width;
+  int filetype;
   float *act_times;
   int *state_values;
   int nparams;
@@ -756,7 +757,8 @@ typedef struct _device{
 
 typedef struct {
   int unique;
-  device *udev,*vdev,*wdev,*valdev;
+  int filetype;
+  device *udev,*vdev,*wdev,*valdev,*veldev,*angledev;
 } vdevice;
 
 /* --------------------------  camviewdata ------------------------------------ */

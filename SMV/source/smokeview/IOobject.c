@@ -539,8 +539,8 @@ void get_vdevice_vel(float time, vdevice *vdevicei, float *vel){
 /* ----------------------- get_devices_val ----------------------------- */
 
 #define IN_INTERVAL(IVAL) \
-  if(time>=devicei->times[IVAL]&&time<=devicei->times[IVAL+1]){\
-    if(time-devicei->times[IVAL]<devicei->times[IVAL+1]-time){\
+  if(time>=times[IVAL]&&time<=times[IVAL+1]){\
+    if(time-times[IVAL]<times[IVAL+1]-time){\
       devicei->val=devicei->vals[IVAL];\
     }\
     else{\
@@ -553,10 +553,13 @@ void get_vdevice_vel(float time, vdevice *vdevicei, float *vel){
 float get_device_val(float time, device *devicei){
   int nvals;
   int i, ival;
+  float *times;
+  float *vals;
 
   nvals = devicei->nvals;
   ival = devicei->ival;
 
+  times = *(devicei->timesptr);
   IN_INTERVAL(ival);
   if(ival<nvals-1){
     IN_INTERVAL(ival+1);
@@ -565,11 +568,11 @@ float get_device_val(float time, device *devicei){
     IN_INTERVAL(ival-1);
   }
 
-  if(time<=devicei->times[0]){
+  if(time<=times[0]){
     devicei->val=devicei->vals[0];
     devicei->ival=0;
   }
-  else if(time>=devicei->times[nvals-1]){
+  else if(time>=times[nvals-1]){
     devicei->val=devicei->vals[nvals-1];
     devicei->ival=nvals-2;
   }
@@ -581,7 +584,7 @@ float get_device_val(float time, device *devicei){
 
     while (high-low>1){
       mid = (low+high)/2;
-      if(time>devicei->times[mid]){
+      if(time>times[mid]){
         low=mid;
       }
       else{
@@ -4322,33 +4325,36 @@ device *getdevice(char *label){
 
 /* ----------------------- read_device_data ----------------------------- */
 
-void read_device_data(char *file, int loadstatus){
+void read_device_data(char *file, int filetype, int loadstatus){
   FILE *stream;
   int nrows, ncols;
   int irow, icol;
-  float *vals;
+  float *vals=NULL;
   int i;
   char *buffer, *buffer2;
-  char **devcunits, **devclabels;
-  device **devices;
+  char **devcunits=NULL, **devclabels=NULL;
+  device **devices=NULL;
   int ntokens;
   int max_line_length,buffer_len;
+  device *device_time;
+  float *times, **timesptr;
 
 // unload data
 
-  for(i=0;i<ndeviceinfo;i++){
-    device *devicei;
+  if(loadstatus==UNLOAD){
+    for(i=0;i<ndeviceinfo;i++){
+      device *devicei;
 
-    devicei = deviceinfo + i;
-    if(i==0){
-      FREEMEMORY(devicei->times);
+      devicei = deviceinfo + i;
+      if(devicei->filetype!=filetype)continue;
+      if(devicei->timesptr!=NULL){
+        FREEMEMORY(*(devicei->timesptr));
+        FREEMEMORY(devicei->timesptr);
+      }
+      FREEMEMORY(devicei->vals);
     }
-    else{
-      devicei->times=NULL;
-    }
-    FREEMEMORY(devicei->vals);
+    return;
   }
-  if(loadstatus==UNLOAD)return;
 
   // find number of rows and columns
 
@@ -4369,19 +4375,6 @@ void read_device_data(char *file, int loadstatus){
   NewMemory((void **)&devclabels,ncols*sizeof(char *));
   NewMemory((void **)&devices,ncols*sizeof(device *));
 
-  for(i=0;i<ndeviceinfo;i++){
-    device *devicei;
-
-    devicei = deviceinfo + i;
-    if(i==0){
-      NewMemory((void **)&devicei->times,nrows*sizeof(float));
-    }
-    else{
-      devicei->times=deviceinfo->times;
-    }
-    NewMemory((void **)&devicei->vals,nrows*sizeof(float));
-  }
-
   fgets(buffer,buffer_len,stream);
   parsecsv(buffer,devcunits,ncols,&ntokens);
   for(i=0;i<ntokens;i++){
@@ -4397,13 +4390,22 @@ void read_device_data(char *file, int loadstatus){
     devclabels[i]=trim_front(devclabels[i]);
   }
 
+  NewMemory((void **)&times,nrows*sizeof(float));
+  NewMemory((void **)&timesptr,sizeof(float *));
+  *timesptr=times;
   for(i=1;i<ntokens;i++){
     device *devicei;
     int j;
 
     devicei = getdevice(devclabels[i]);
     devices[i]=devicei;
-    if(devicei==NULL)continue;
+    if(devicei==NULL){
+      printf("*** warning: spreadsheet entry: %s is not present in %s\n",devclabels[i],smvfilename);
+      continue;
+    }
+    devicei->filetype=filetype;
+    NewMemory((void **)&devicei->vals,nrows*sizeof(float));
+    devicei->timesptr=timesptr;
     strcpy(devicei->unit,devcunits[i]);
     devicei->nvals=nrows-2;
   }
@@ -4413,7 +4415,7 @@ void read_device_data(char *file, int loadstatus){
 
     fgets(buffer,buffer_len,stream);
     fparsecsv(buffer,vals,ncols,&ntokens);
-    deviceinfo->times[irow-2]=vals[icol];
+    times[irow-2]=vals[icol];
     for(icol=1;icol<ncols;icol++){
       device *devicei;
 
@@ -4439,6 +4441,7 @@ void read_device_data(char *file, int loadstatus){
     int j;
 
     devi = deviceinfo + i;
+    if(devi->filetype!=filetype)continue;
     xyzval=devi->xyz;
 
     vdevi = vdeviceinfo + nvdeviceinfo;
@@ -4446,54 +4449,104 @@ void read_device_data(char *file, int loadstatus){
     vdevi->udev=NULL;
     vdevi->vdev=NULL;
     vdevi->wdev=NULL;
-    vdevi->unique=1;
+    vdevi->angledev=NULL;
+    vdevi->veldev=NULL;
+
     for(j=0;j<ndeviceinfo;j++){
       device *devj;
       float *xyz;
 
       devj = deviceinfo + j;
+      if(devj->filetype!=2)continue;
+      xyz = devj->xyz;
+      if(strcmp(devj->quantity,"VELOCITY")!=0)continue;
+      if(fabs(xyz[0]-xyzval[0])>EPSDEV)continue;
+      if(fabs(xyz[1]-xyzval[1])>EPSDEV)continue;
+      if(fabs(xyz[2]-xyzval[2])>EPSDEV)continue;
+      vdevi->veldev=devj;
+      vdevi->filetype=filetype;
+      break;
+    }
+
+    for(j=0;j<ndeviceinfo;j++){
+      device *devj;
+      float *xyz;
+
+      devj = deviceinfo + j;
+      if(devj->filetype!=2)continue;
+      xyz = devj->xyz;
+      if(strcmp(devj->quantity,"ANGLE")!=0)continue;
+      if(fabs(xyz[0]-xyzval[0])>EPSDEV)continue;
+      if(fabs(xyz[1]-xyzval[1])>EPSDEV)continue;
+      if(fabs(xyz[2]-xyzval[2])>EPSDEV)continue;
+      vdevi->angledev=devj;
+      vdevi->filetype=filetype;
+      break;
+    }
+
+    for(j=0;j<ndeviceinfo;j++){
+      device *devj;
+      float *xyz;
+
+      devj = deviceinfo + j;
+      if(devj->filetype!=0)continue;
       xyz = devj->xyz;
       if(strcmp(devj->quantity,"U-VELOCITY")!=0)continue;
       if(fabs(xyz[0]-xyzval[0])>EPSDEV)continue;
       if(fabs(xyz[1]-xyzval[1])>EPSDEV)continue;
       if(fabs(xyz[2]-xyzval[2])>EPSDEV)continue;
       vdevi->udev=devj;
+      vdevi->filetype=filetype;
       break;
     }
+
     for(j=0;j<ndeviceinfo;j++){
       device *devj;
       float *xyz;
 
       devj = deviceinfo + j;
+      if(devj->filetype!=0)continue;
       xyz = devj->xyz;
       if(strcmp(devj->quantity,"V-VELOCITY")!=0)continue;
       if(fabs(xyz[0]-xyzval[0])>EPSDEV)continue;
       if(fabs(xyz[1]-xyzval[1])>EPSDEV)continue;
       if(fabs(xyz[2]-xyzval[2])>EPSDEV)continue;
       vdevi->vdev=devj;
+      vdevi->filetype=filetype;
       break;
     }
+
     for(j=0;j<ndeviceinfo;j++){
       device *devj;
       float *xyz;
 
       devj = deviceinfo + j;
+      if(devj->filetype!=0)continue;
       xyz = devj->xyz;
       if(strcmp(devj->quantity,"W-VELOCITY")!=0)continue;
       if(fabs(xyz[0]-xyzval[0])>EPSDEV)continue;
       if(fabs(xyz[1]-xyzval[1])>EPSDEV)continue;
       if(fabs(xyz[2]-xyzval[2])>EPSDEV)continue;
       vdevi->wdev=devj;
+      vdevi->filetype=filetype;
       break;
     }
-    if(vdevi->udev!=NULL||vdevi->vdev!=NULL||vdevi->wdev!=NULL){
+
+    if(vdevi->udev!=NULL||vdevi->vdev!=NULL||vdevi->wdev!=NULL||vdevi->angledev!=NULL||vdevi->veldev!=NULL){
       nvdeviceinfo++;
     }
   }
   for(i=0;i<nvdeviceinfo;i++){
     vdevice *vdevi;
+
+    vdevi = vdeviceinfo + i;
+    vdevi->unique=1;
+  }
+  for(i=0;i<nvdeviceinfo;i++){
+    vdevice *vdevi;
     int j;
     float *xyzi;
+    int count=0;
 
     vdevi = vdeviceinfo + i;
     xyzi = vdevi->valdev->xyz;
@@ -4509,28 +4562,45 @@ void read_device_data(char *file, int loadstatus){
       if(fabs(xyzi[2]-xyzj[2])>EPSDEV)continue;
       vdevj->unique=0;
     }
-
   }
   max_dev_vel=-1.0;
   for(i=0;i<nvdeviceinfo;i++){
     vdevice *vdevi;
-    device *devval,*udev,*vdev,*wdev;
+    device *devval;
     int j;
 
     vdevi = vdeviceinfo + i;
+    if(vdevi->unique==0)continue;
     devval = vdevi->valdev;
-    udev=vdevi->udev;
-    vdev=vdevi->vdev;
-    wdev=vdevi->wdev;
-    for(j=0;j<devval->nvals;j++){
-      float uvel=0.0, vvel=0.0, wvel=0.0;
-      float speed;
+    if(vdevi->filetype==0){
+      device *udev,*vdev,*wdev;
 
-      if(udev!=NULL)uvel=udev->vals[j];
-      if(vdev!=NULL)vvel=vdev->vals[j];
-      if(wdev!=NULL)wvel=wdev->vals[j];
-      speed = sqrt(uvel*uvel+vvel*vvel+wvel*wvel);
-      if(speed>max_dev_vel)max_dev_vel=speed;
+      udev=vdevi->udev;
+      vdev=vdevi->vdev;
+      wdev=vdevi->wdev;
+      for(j=0;j<devval->nvals;j++){
+        float uvel=0.0, vvel=0.0, wvel=0.0;
+        float speed;
+
+        if(udev!=NULL)uvel=udev->vals[j];
+        if(vdev!=NULL)vvel=vdev->vals[j];
+        if(wdev!=NULL)wvel=wdev->vals[j];
+        speed = sqrt(uvel*uvel+vvel*vvel+wvel*wvel);
+        if(speed>max_dev_vel)max_dev_vel=speed;
+      }
+    }
+    if(vdevi->filetype==2){
+      device *veldev;
+
+      veldev=vdevi->veldev;
+      if(veldev!=NULL){
+        for(j=0;j<devval->nvals;j++){
+          float speed;
+
+          speed=veldev->vals[j];
+          if(speed>max_dev_vel)max_dev_vel=speed;
+        }
+      }
     }
   }
 
@@ -5365,6 +5435,7 @@ void init_device(device *devicei, float *xyz, float *xyzn, int state0, int npara
   float norm;
   int i;
 
+  devicei->filetype=-1;
   devicei->in_zone_csv=0;
   devicei->labelptr=devicei->label;
   devicei->color=NULL;
@@ -5409,7 +5480,7 @@ void init_device(device *devicei, float *xyz, float *xyzn, int state0, int npara
     devicei->xyznorm[1]=0.0;
     devicei->xyznorm[2]=1.0;
   }
-  devicei->times=NULL;
+  devicei->timesptr=NULL;
   devicei->vals=NULL;
   devicei->nstate_changes=0;
   devicei->istate_changes=0;
