@@ -1372,7 +1372,7 @@ REAL(EB) :: MUA,TSI,WGT,TNOW,RAMP_T,OMW,MU_WALL,RHO_WALL,SLIP_COEF,VEL_T, &
             MU_DUIDXJ_USE(2),DUIDXJ_USE(2),DUMMY,VEL_EDDY
 INTEGER  :: I,J,K,NOM(2),IIO(2),JJO(2),KKO(2),IE,II,JJ,KK,IEC,IOR,IWM,IWP,ICMM,ICMP,ICPM,ICPP,IC,ICD,ICDO,IVL,I_SGN,IS, &
             VELOCITY_BC_INDEX,IIGM,JJGM,KKGM,IIGP,JJGP,KKGP,IBCM,IBCP,ITMP,ICD_SGN,ICDO_SGN
-LOGICAL :: ALTERED_GRADIENT(-2:2),PROCESS_EDGE,SYNTHETIC_EDDY_METHOD
+LOGICAL :: ALTERED_GRADIENT(-2:2),PROCESS_EDGE,SYNTHETIC_EDDY_METHOD,HVAC_TANGENTIAL
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),U_Y=>NULL(),U_Z=>NULL(), &
                                        V_X=>NULL(),V_Z=>NULL(),W_X=>NULL(),W_Y=>NULL(),RHOP=>NULL(),VEL_OTHER=>NULL()
@@ -1613,18 +1613,21 @@ EDGE_LOOP: DO IE=1,N_EDGES
             ! Set up synthetic eddy method (experimental)
             
             SYNTHETIC_EDDY_METHOD = .FALSE.
+            HVAC_TANGENTIAL = .FALSE.
             IF (IWM>0 .AND. IWP>0) THEN
                IF (VENT_INDEX(IWM)==VENT_INDEX(IWP)) THEN
                   IF (VENT_INDEX(IWM)>0) THEN
                      VT=>VENTS(VENT_INDEX(IWM))
                      IF (VT%N_EDDY>0) SYNTHETIC_EDDY_METHOD=.TRUE.
+                     IF (ALL(VT%UVW > -1.E12_EB) .AND. VT%NODE_INDEX > 0) HVAC_TANGENTIAL = .TRUE.
                   ENDIF
                ENDIF
             ENDIF
             
             ! Determine if there is a tangential velocity component
 
-            VEL_T_IF: IF (.NOT.SF%SPECIFIED_TANGENTIAL_VELOCITY .AND. .NOT.SYNTHETIC_EDDY_METHOD) THEN
+            VEL_T_IF: IF (.NOT.SF%SPECIFIED_TANGENTIAL_VELOCITY .AND. .NOT.SYNTHETIC_EDDY_METHOD .AND. &
+                          .NOT. HVAC_TANGENTIAL) THEN
                VEL_T = 0._EB
             ELSE VEL_T_IF
                VEL_EDDY = 0._EB
@@ -1665,51 +1668,77 @@ EDGE_LOOP: DO IE=1,N_EDGES
                   TSI=T-SF%T_IGN
                ENDIF
                PROFILE_FACTOR = 1._EB
-               IF (SF%PROFILE==ATMOSPHERIC) PROFILE_FACTOR = (MAX(0._EB,ZC(KK)-GROUND_LEVEL)/SF%Z0)**SF%PLE
-               RAMP_T = EVALUATE_RAMP(TSI,SF%TAU(TIME_VELO),SF%RAMP_INDEX(TIME_VELO))
-               IF (IEC==1 .OR. (IEC==2 .AND. ICD==2)) VEL_T = RAMP_T*(PROFILE_FACTOR*SF%VEL_T(2) + VEL_EDDY)
-               IF (IEC==3 .OR. (IEC==2 .AND. ICD==1)) VEL_T = RAMP_T*(PROFILE_FACTOR*SF%VEL_T(1) + VEL_EDDY)
+               IF (HVAC_TANGENTIAL .AND. 0.5*(UWS(IWM)+UWS(IWP)) > 0._EB) HVAC_TANGENTIAL = .FALSE.
+               IF (HVAC_TANGENTIAL) THEN
+                  VEL_T = 0._EB
+                  IEC_SELECT: SELECT CASE(IEC) ! edge orientation
+                     CASE (1)
+                        IF (ICD==1) VEL_T = 0.5*(UWS(IWM)+UWS(IWP))/VT%UVW(ABS(VT%IOR))*VT%UVW(3)
+                        IF (ICD==2) VEL_T = 0.5*(UWS(IWM)+UWS(IWP))/VT%UVW(ABS(VT%IOR))*VT%UVW(2)
+                     CASE (2)
+                        IF (ICD==1) VEL_T = 0.5*(UWS(IWM)+UWS(IWP))/VT%UVW(ABS(VT%IOR))*VT%UVW(1)
+                        IF (ICD==2) VEL_T = 0.5*(UWS(IWM)+UWS(IWP))/VT%UVW(ABS(VT%IOR))*VT%UVW(3)
+                     CASE (3)                     
+                        IF (ICD==1) VEL_T = 0.5*(UWS(IWM)+UWS(IWP))/VT%UVW(ABS(VT%IOR))*VT%UVW(2)
+                        IF (ICD==2) VEL_T = 0.5*(UWS(IWM)+UWS(IWP))/VT%UVW(ABS(VT%IOR))*VT%UVW(1)
+                  END SELECT IEC_SELECT
+                  IF (VT%IOR > 0) VEL_T = -VEL_T
+               ELSE
+                  IF (SF%PROFILE==ATMOSPHERIC) PROFILE_FACTOR = (MAX(0._EB,ZC(KK)-GROUND_LEVEL)/SF%Z0)**SF%PLE
+                  RAMP_T = EVALUATE_RAMP(TSI,SF%TAU(TIME_VELO),SF%RAMP_INDEX(TIME_VELO))
+                  IF (IEC==1 .OR. (IEC==2 .AND. ICD==2)) VEL_T = RAMP_T*(PROFILE_FACTOR*SF%VEL_T(2) + VEL_EDDY)
+                  IF (IEC==3 .OR. (IEC==2 .AND. ICD==1)) VEL_T = RAMP_T*(PROFILE_FACTOR*SF%VEL_T(1) + VEL_EDDY)
+               ENDIF
             ENDIF VEL_T_IF
  
             ! Choose the appropriate boundary condition to apply
+            IF (HVAC_TANGENTIAL)  THEN
 
-            BOUNDARY_CONDITION: SELECT CASE(VELOCITY_BC_INDEX)
+               VEL_GHOST = 2._EB*VEL_T - VEL_GAS
+               DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
+               MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
+               ALTERED_GRADIENT(ICD_SGN) = .TRUE.
+      
+            ELSE
 
-               CASE (FREE_SLIP_BC) BOUNDARY_CONDITION
+               BOUNDARY_CONDITION: SELECT CASE(VELOCITY_BC_INDEX)
 
-                  VEL_GHOST = VEL_GAS
-                  DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
-                  MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
-                  ALTERED_GRADIENT(ICD_SGN) = .TRUE.
+                  CASE (FREE_SLIP_BC) BOUNDARY_CONDITION
 
-               CASE (NO_SLIP_BC) BOUNDARY_CONDITION
+                     VEL_GHOST = VEL_GAS
+                     DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
+                     MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
+                     ALTERED_GRADIENT(ICD_SGN) = .TRUE.
 
-                  VEL_GHOST = 2._EB*VEL_T - VEL_GAS
-                  DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
-                  MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
-                  ALTERED_GRADIENT(ICD_SGN) = .TRUE.
+                  CASE (NO_SLIP_BC) BOUNDARY_CONDITION
 
-               CASE (WALL_MODEL) BOUNDARY_CONDITION
+                     VEL_GHOST = 2._EB*VEL_T - VEL_GAS
+                     DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
+                     MU_DUIDXJ(ICD_SGN) = MUA*DUIDXJ(ICD_SGN)
+                     ALTERED_GRADIENT(ICD_SGN) = .TRUE.
 
-                  IF ( SOLID(CELL_INDEX(IIGM,JJGM,KKGM)) .OR. SOLID(CELL_INDEX(IIGP,JJGP,KKGP)) ) THEN
-                     MU_WALL = MUA
-                     SLIP_COEF=-1._EB
-                  ELSE
-                     ITMP = MIN(5000,NINT(0.5_EB*(TMP(IIGM,JJGM,KKGM)+TMP(IIGP,JJGP,KKGP))))
-                     MU_WALL = MU_Z(ITMP,0)*SPECIES_MIXTURE(0)%MW
-                     RHO_WALL = 0.5_EB*( RHOP(IIGM,JJGM,KKGM) + RHOP(IIGP,JJGP,KKGP) )
-                     CALL WERNER_WENGLE_WALL_MODEL(SLIP_COEF,DUMMY,VEL_GAS-VEL_T,MU_WALL/RHO_WALL,DXX(ICD),SF%ROUGHNESS)
-                  ENDIF
-                  VEL_GHOST = 2._EB*VEL_T - VEL_GAS
-                  DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
-                  MU_DUIDXJ(ICD_SGN) = MU_WALL*(VEL_GAS-VEL_T)*I_SGN*(1._EB-SLIP_COEF)/DXX(ICD)
-                  ALTERED_GRADIENT(ICD_SGN) = .TRUE.
-                  IF (BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .NEQV. BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
-                     DUIDXJ(ICD_SGN) = 0.5_EB*DUIDXJ(ICD_SGN)
-                     MU_DUIDXJ(ICD_SGN) = 0.5_EB*MU_DUIDXJ(ICD_SGN)
-                  ENDIF
+                  CASE (WALL_MODEL) BOUNDARY_CONDITION
 
-            END SELECT BOUNDARY_CONDITION
+                     IF ( SOLID(CELL_INDEX(IIGM,JJGM,KKGM)) .OR. SOLID(CELL_INDEX(IIGP,JJGP,KKGP)) ) THEN
+                        MU_WALL = MUA
+                        SLIP_COEF=-1._EB
+                     ELSE
+                        ITMP = MIN(5000,NINT(0.5_EB*(TMP(IIGM,JJGM,KKGM)+TMP(IIGP,JJGP,KKGP))))
+                        MU_WALL = MU_Z(ITMP,0)*SPECIES_MIXTURE(0)%MW
+                        RHO_WALL = 0.5_EB*( RHOP(IIGM,JJGM,KKGM) + RHOP(IIGP,JJGP,KKGP) )
+                        CALL WERNER_WENGLE_WALL_MODEL(SLIP_COEF,DUMMY,VEL_GAS-VEL_T,MU_WALL/RHO_WALL,DXX(ICD),SF%ROUGHNESS)
+                     ENDIF
+                     VEL_GHOST = 2._EB*VEL_T - VEL_GAS
+                     DUIDXJ(ICD_SGN) = I_SGN*(VEL_GAS-VEL_GHOST)/DXX(ICD)
+                     MU_DUIDXJ(ICD_SGN) = MU_WALL*(VEL_GAS-VEL_T)*I_SGN*(1._EB-SLIP_COEF)/DXX(ICD)
+                     ALTERED_GRADIENT(ICD_SGN) = .TRUE.
+                     IF (BOUNDARY_TYPE(IWM)==SOLID_BOUNDARY .NEQV. BOUNDARY_TYPE(IWP)==SOLID_BOUNDARY) THEN
+                        DUIDXJ(ICD_SGN) = 0.5_EB*DUIDXJ(ICD_SGN)
+                        MU_DUIDXJ(ICD_SGN) = 0.5_EB*MU_DUIDXJ(ICD_SGN)
+                     ENDIF
+
+               END SELECT BOUNDARY_CONDITION
+            ENDIF
 
          ELSE INTERPOLATION_IF  ! Use data from another mesh
  
