@@ -489,6 +489,15 @@ void ColorBarMenu(int value){
      setbw=0;
      updatecolors(-1);
      break;
+   case -17:
+     colorbar_shading=0;
+     break;
+   case -18:
+     colorbar_shading=1;
+     break;
+   case -19:
+     colorbar_shading=2;
+     break;
    default:
      ASSERT(FFALSE);
      break;
@@ -4409,7 +4418,7 @@ void InitMenus(int unload){
   int ntextures_used;
   int multiprop;
 
-static int titlemenu=0, labelmenu=0, colorbarmenu=0, smokecolorbarmenu=0, lightingmenu=0, showhidemenu=0;
+static int titlemenu=0, labelmenu=0, colorbarmenu=0, colorbarshademenu, smokecolorbarmenu=0, lightingmenu=0, showhidemenu=0;
 static int optionmenu=0, rotatetypemenu=0;
 static int resetmenu=0, frameratemenu=0, rendermenu=0, smokeviewinimenu=0, inisubmenu=0;
 #ifdef pp_COMPRESS
@@ -6115,6 +6124,27 @@ updatemenu=0;
     }
   }
 
+
+/* -------------------------------- colorbarmenu -------------------------- */
+
+  CREATEMENU(colorbarshademenu,ColorBarMenu);
+  if(colorbar_shading==0){
+    glutAddMenuEntry("*Continuous",-17);
+    glutAddMenuEntry("Lines",-18);
+    glutAddMenuEntry("Stepped",-19);
+  }
+  else if(colorbar_shading==1){
+    glutAddMenuEntry("Continuous",-17);
+    glutAddMenuEntry("*Lines",-18);
+    glutAddMenuEntry("Stepped",-19);
+  }
+  else{
+    glutAddMenuEntry("Continuous",-17);
+    glutAddMenuEntry("Lines",-18);
+    glutAddMenuEntry("*Stepped",-19);
+  }
+
+
 /* -------------------------------- colorbarmenu -------------------------- */
 
   CREATEMENU(colorbarmenu,ColorBarMenu);
@@ -6151,6 +6181,7 @@ updatemenu=0;
   else{
     glutAddMenuEntry(_("  Flip colorbar"),-2);
   }
+  glutAddSubMenu("  Colorbar Shade Type",colorbarshademenu);
   if(showcolorbarlines==1){
     glutAddMenuEntry(_("  *Use colorbar lines"),-8);
   }
