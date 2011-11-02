@@ -4798,6 +4798,8 @@ opening. In these cases, you might consider simply specifying a flat plate obstr
 {\ct VENT} with an offset of one mesh cell. The plate will simply redirect the air flow in all lateral
 directions.
 
+If the louvered vent is part of an HVAC system, please see \ref{info:HVAClouvers} for details on how to specify the louver.  
+
 \subsection{Special Topic: Tangential Velocity Boundary Conditions at Solid Surfaces}
 \label{info:WALL_MODEL}
 
@@ -4929,7 +4931,7 @@ function named by {\ct CTRL\_ID} or {\ct DEVC\_ID}.  Only one of either {\ct DAM
 If the node is connected to the FDS domain, then do not specify {\ct XYZ}.  FDS will compute it as the centroid of the {\ct VENT}.
 \end{description}
 
-
+A duct node must either have two or more ducts attached to it or it must have either {\ct AMBIENT = .TRUE.} or a {\ct VENT\_ID} specified.  When defining a {\ct VENT} as a component of an HVAC system you must set {\ct SURF\_ID = 'HVAC'} and you must set the {\ct ID}.  Note that you cannot give more than one  {\ct VENT} the same {\ct ID}.  
 
 \subsection{'HVAC Fan Parameters}
 \label{info:HVACfan}
@@ -5112,6 +5114,18 @@ Either {\ct FIXED\_Q} or the set {\ct COOLANT\_CP}, {\ct COOLANT\_MDOT}, {\ct CO
 \be \dq_{coil}=\eta  c_{p,fluid} \dm_{fluid} \left( T_{fluid,in} - T_{fluid,out} \right)
 \ee
 
+\subsection{Louvered HVAC Vents}
+\label{info:HVAClouvers}
+
+The HVAC system being modeled may either have louvers that redirect the flow leaving a vent or the orientation of the real vent may not lie along one of the axes in FDS.  To define the flow direction for an HVAC outlet, you can use the keyword {\ct UVW} on {\ct VENT}.  {\ct UWV} is the vector indicating the direction of flow from the {\ct VENT}.  For example:
+
+\footnotesize
+\begin{verbatim}
+&OBST XB=1.0,2.0,0.0,1.0,0.0,1.0/
+&VENT XB=1.0,1.0,0.0,1.0,0.0,1.0, SURF_ID='HVAC', ID='HVAC OUTLET', UVW = -1,0,1/
+\end{verbatim}\normalsize
+
+The above input defines a vent lying in the y-z plane facing in the -x direction.  The flow vector indicates that the flow from this vent is in the -x direction with a 45 degree up angle (the x and z components are equal in size).  FDS will set the tangential velocity of the vent to obtain the specified direction indicated by {\ct UVW}.  This will only be done if the vent is inputting gas into the domain.
 
 \section{Pressure-Related Effects: The \texorpdfstring{{\tt ZONE}}{ZONE} Namelist Group (Table \ref{tbl:VENT})}
 \label{info:ZONE}
@@ -11085,6 +11099,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TEXTURE\_ORIGIN(3)}    & Real Triplet      & See Section~\ref{info:texture_map}                            & m             & (0.,0.,0.)          \\ \hline
 {\ct TMP\_EXTERIOR}         & Real              & See Section~\ref{info:Special_VENTS}                          & $^\circ$C     &                     \\ \hline
 {\ct TRANSPARENCY}          & Real              & See Section~\ref{info:colors}                                 &               &   1.0               \\ \hline
+{\ct UVW(3) }               & Real Triplet      & See Section~\ref{info:HVAClouvers}                                 & m/s           &                     \\ \hline
 {\ct VEL\_RMS}              & Real              & See Section~\ref{info:synthetic_turbulence}                   & m/s           & 0.                     \\ \hline
 {\ct XB(6) }                & Real Sextuplet    & See Section~\ref{info:VENT_Basics}                            & m             &                     \\ \hline
 {\ct XYZ(3) }               & Real Triplet      & See Section~\ref{info:spread}                                 & m             &                     \\ \hline
