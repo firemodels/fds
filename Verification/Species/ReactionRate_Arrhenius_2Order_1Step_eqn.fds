@@ -26,7 +26,7 @@ C3H8+5*O2=4*H2O+3*CO2
       SPEC_ID='NITROGEN','PROPANE','OXYGEN','WATER VAPOR','CARBON DIOXIDE'
       N_S = 0,1,1,0,0
       HEAT_OF_COMBUSTION=46460.
-      ODE_SOLVER=RUNGE_KUTTA_2 /
+      ODE_SOLVER='RUNGE-KUTTA 2'  /
 
 # Note: The values of A and E are not typical for a reaction and are used purely for verification.
       
