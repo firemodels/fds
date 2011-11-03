@@ -8,8 +8,8 @@ CO+0.5*O2->CO2
 &HEAD CHID='ReactionRate_MixCtrl_O2lim_2Step', TITLE='Fixed_Mixing_Time_Test_Case' /
 &MESH IJK=8,8,8, XB=0.0,0.1,0.0,0.1,0.0,0.1 /
 &MISC GVEC=0.0, 0.0, 0.0 /
-&TIME T_END=1.0, DT=0.05 /
-
+&TIME T_END=2   /
+&DUMP DT_DEVC = 0.5 /
 ------------------------------------------------
 # Reaction Rate Parameters
 -------------------------------------------------
@@ -28,7 +28,7 @@ CO+0.5*O2->CO2
       BETA_EDC=2
       SUPPRESSION=.FALSE.
       HEAT_OF_COMBUSTION=15000
-      ODE_SOLVER=RUNGE_KUTTA_2 /
+      ODE_SOLVER='RUNGE-KUTTA 2'  /
 
 &REAC FUEL='CARBON MONOXIDE'
       SMIX_ID='CARBON MONOXIDE','OXYGEN','CARBON DIOXIDE' 
@@ -37,7 +37,7 @@ CO+0.5*O2->CO2
       BETA_EDC=2
       SUPPRESSION=.FALSE.
       HEAT_OF_COMBUSTION=283
-      ODE_SOLVER= RUNGE_KUTTA_2 /
+      ODE_SOLVER= 'RUNGE-KUTTA 2'  /
 
 -------------------------------------------------
 # Devices and Slices

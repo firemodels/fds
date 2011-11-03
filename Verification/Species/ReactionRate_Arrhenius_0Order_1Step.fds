@@ -7,7 +7,7 @@ CO+0.5O2 -> CO2
 &HEAD CHID='ReactionRate_Arrhenius_0Order_1Step', TITLE='Finite_Rate_Zero_Order'/
 
 &MESH IJK=4,4,4, XB=0.0,0.1,0.0,0.1,0.0,0.1 /
-&TIME T_END=10.0 DT=0.1 /
+&TIME T_END=10.0 DT=0.5 /
 
 -------------------------------------------------
 # Reaction Rate Parameters
@@ -22,7 +22,8 @@ CO+0.5O2 -> CO2
       EQUATION='CO+0.5*O2=CO2'
       A = 4.244963238e-6
       E = 0.0
-      HEAT_OF_COMBUSTION=283/
+      HEAT_OF_COMBUSTION=283
+      ODE_SOLVER='IMPLICIT EULER' /
       
 -------------------------------------------------
 # Devices and Slices
