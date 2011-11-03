@@ -592,7 +592,7 @@ SVEXTERN int nrgb2_ini;
 SVEXTERN int rgb_white, rgb_yellow, rgb_blue, rgb_red;
 SVEXTERN int rgb_green, rgb_magenta, rgb_cyan, rgb_black;
 SVEXTERN int numColorbars;
-SVEXTERN int setbw,colorbarflip,showcolorbarlines,SVDECL(colorbar_shading,0);
+SVEXTERN int setbw,colorbarflip;
 SVEXTERN int setbwSAVE;
 SVEXTERN int background_flip;
 SVEXTERN float SVDECL(transparentlevel,0.8);

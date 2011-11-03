@@ -530,7 +530,7 @@ void drawplot3d_texture(mesh *meshi){
   if(use_transparency_data==1){
     transparenton();
   }
-  if(visVector==0&&p3cont2d==SHADED_CONTOURS){
+  if(visVector==0&&(p3cont2d==SHADED_CONTOURS||p3cont2d==LINE_CONTOURS)){
     glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
     glEnable(GL_TEXTURE_1D);
     glBindTexture(GL_TEXTURE_1D,texture_plot3d_colorbar_id);
@@ -858,7 +858,7 @@ void drawplot3d_texture(mesh *meshi){
       glEnd();
     }
   }
-  if(visVector==0&&p3cont2d==SHADED_CONTOURS){
+  if(visVector==0&&(p3cont2d==SHADED_CONTOURS||p3cont2d==LINE_CONTOURS)){
     glDisable(GL_TEXTURE_1D);
   }
   if(use_transparency_data==1){

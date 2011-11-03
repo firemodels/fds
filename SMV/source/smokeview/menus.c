@@ -443,14 +443,6 @@ void ColorBarMenu(int value){
       update_extreme();
       updatecolors(-1);
       break;
-    case -8:
-      showcolorbarlines=1-showcolorbarlines;
-      if(showcolorbarlines==1){
-        p3cont2d=SHADED_CONTOURS;
-        update_plot3d_display();
-      }
-      updatecolors(-1);
-      break;
     case -11:
      background_flip = 1-background_flip;
      updatecolors(-1);
@@ -490,13 +482,16 @@ void ColorBarMenu(int value){
      updatecolors(-1);
      break;
    case -17:
-     colorbar_shading=0;
+     p3cont2d=SHADED_CONTOURS;
+     updatecolors(-1);
      break;
    case -18:
-     colorbar_shading=1;
+     p3cont2d=STEPPED_CONTOURS;
+     updatecolors(-1);
      break;
    case -19:
-     colorbar_shading=2;
+     p3cont2d=LINE_CONTOURS;
+     updatecolors(-1);
      break;
    default:
      ASSERT(FFALSE);
@@ -6128,20 +6123,19 @@ updatemenu=0;
 /* -------------------------------- colorbarmenu -------------------------- */
 
   CREATEMENU(colorbarshademenu,ColorBarMenu);
-  if(colorbar_shading==0){
+  if(p3cont2d==SHADED_CONTOURS){
     glutAddMenuEntry("*Continuous",-17);
-    glutAddMenuEntry("Lines",-18);
-    glutAddMenuEntry("Stepped",-19);
+    glutAddMenuEntry("Stepped",-18);
+    glutAddMenuEntry("Lines",-19);
   }
-  else if(colorbar_shading==1){
+  else if(p3cont2d==STEPPED_CONTOURS){
     glutAddMenuEntry("Continuous",-17);
-    glutAddMenuEntry("*Lines",-18);
-    glutAddMenuEntry("Stepped",-19);
-  }
-  else{
+    glutAddMenuEntry("*Stepped",-18);
+    glutAddMenuEntry("Lines",-19);
+  }else if(p3cont2d==LINE_CONTOURS){
     glutAddMenuEntry("Continuous",-17);
-    glutAddMenuEntry("Lines",-18);
-    glutAddMenuEntry("*Stepped",-19);
+    glutAddMenuEntry("Stepped",-18);
+    glutAddMenuEntry("*Lines",-19);
   }
 
 
@@ -6176,19 +6170,12 @@ updatemenu=0;
     glutAddMenuEntry(_("  Highlight extreme data"),-7);
   }
   if(colorbarflip==1){
-    glutAddMenuEntry(_("  *Flip colorbar"),-2);
+    glutAddMenuEntry(_("  *Flip"),-2);
   }
   else{
-    glutAddMenuEntry(_("  Flip colorbar"),-2);
+    glutAddMenuEntry(_("  Flip"),-2);
   }
-  glutAddSubMenu("  Colorbar Shade Type",colorbarshademenu);
-  if(showcolorbarlines==1){
-    glutAddMenuEntry(_("  *Use colorbar lines"),-8);
-  }
-  else{
-    glutAddMenuEntry(_("  Use colorbar lines"),-8);
-  }
-  glutAddMenuEntry(_("  Cycle colorbar"),-3);
+  glutAddSubMenu("  Type:",colorbarshademenu);
   glutAddMenuEntry(_("  Reset"),-4);
   glutAddMenuEntry("-",-999);
   glutAddMenuEntry(_("Shades:"),-999);

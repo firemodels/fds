@@ -120,7 +120,6 @@ GLUI_Rollout *rollout_slice_chop=NULL;
 #define LOAD_FILES 92
 #define COLORBAR_EXTREME2 109
 #define TRANSPARENTLEVEL 110
-#define COLORBAR_LINES 111
 #define COLORBAR_LIST2 112
 #define COLORBAR_SMOOTH 113
 
@@ -203,7 +202,6 @@ GLUI_Checkbox *CHECKBOX_constant_coloring=NULL;
 GLUI_Checkbox *CHECKBOX_show_evac_color=NULL;
 GLUI_Checkbox *CHECKBOX_data_coloring=NULL;
 GLUI_Checkbox *CHECKBOX_transparentflag=NULL;
-GLUI_Checkbox *CHECKBOX_showcolorbarlines=NULL;
 GLUI_Checkbox *CHECKBOX_axissmooth=NULL;
 GLUI_Checkbox *CHECKBOX_extreme2=NULL;
 GLUI_Checkbox *startup_checkbox=NULL;
@@ -688,7 +686,6 @@ extern "C" void glui_bounds_setup(int main_window){
     LISTBOX_colorbar2->set_int_val(colorbartype);
   }
   CHECKBOX_axissmooth=glui_bounds->add_checkbox_to_panel(panel_colorbar,_("Smooth colorbar labels"),&axissmooth,COLORBAR_SMOOTH,Slice_CB);
-  CHECKBOX_showcolorbarlines=glui_bounds->add_checkbox_to_panel(panel_colorbar,_("Lines"),&showcolorbarlines,COLORBAR_LINES,Slice_CB);
   CHECKBOX_extreme2=glui_bounds->add_checkbox_to_panel(panel_colorbar,_("Highlight extreme data"),&show_extremedata,
     COLORBAR_EXTREME2,Slice_CB);
   CHECKBOX_transparentflag=glui_bounds->add_checkbox_to_panel(panel_colorbar,_("Use transparency:"),&use_transparency_data,DATA_transparent,Slice_CB);
@@ -992,13 +989,6 @@ void PLOT3D_CB(int var){
     updatemenu=1;
     break;
   case UPDATEPLOT:
-    if(p3cont2d==LINE_CONTOURS){
-      showcolorbarlines=1;
-      p3cont2d=SHADED_CONTOURS;
-    }
-    else{
-      showcolorbarlines=0;
-    }
     updatecolors(-1);
     updatemenu=1;
     glutPostRedisplay();
@@ -1858,12 +1848,6 @@ extern "C" void Slice_CB(int var){
       update_colorbar_list();
       ColorBarMenu(selectedcolorbar_index);
       colorbar_global2local();
-  }
-  if(var==COLORBAR_LINES){
-    if(showcolorbarlines==1)p3cont2d=SHADED_CONTOURS;
-    update_plot3d_display();
-    updatecolors(-1);
-    return;
   }
   if(var==COLORBAR_SMOOTH){
     updatemenu=1;

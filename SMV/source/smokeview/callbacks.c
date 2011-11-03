@@ -1012,14 +1012,7 @@ void keyboard_2(unsigned char key, int x, int y){
     case GLUT_ACTIVE_SHIFT:
     default:
       p3cont2d++;
-      if(p3cont2d>2||(p3cont2d==STEPPED_CONTOURS&&showcolorbarlines==1))p3cont2d=SHADED_CONTOURS;
-      if(p3cont2d==LINE_CONTOURS){
-        showcolorbarlines=1;
-        p3cont2d=SHADED_CONTOURS;
-      }
-      else{
-        showcolorbarlines=0;
-      }
+      if(p3cont2d>2)p3cont2d=0;
       update_plot3d_display();
       updatecolors(-1);
     }
