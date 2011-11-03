@@ -3255,18 +3255,20 @@ PARTICLE_CLASS_LOOP: DO N=1,N_PART
                QP(NPP,NN) = DR%V
             CASE( 8)  ! W-VELOCITY
                QP(NPP,NN) = DR%W
-            CASE(34)  ! DROPLET DIAMETER
+            CASE(434)  ! DROPLET DIAMETER
                QP(NPP,NN) = 2.E6*DR%R
-            CASE(35)  ! DROPLET VELOCITY
+            CASE(435)  ! DROPLET VELOCITY
                QP(NPP,NN) = SQRT(DR%U**2+DR%V**2+DR%W**2)
-            CASE(36)  ! DROPLET PHASE
+            CASE(436)  ! DROPLET PHASE
                QP(NPP,NN) = DR%IOR
-            CASE(37)  ! DROPLET TEMPERATURE
+            CASE(437)  ! DROPLET TEMPERATURE
                QP(NPP,NN) = DR%TMP - TMPM
-            CASE(38)  ! DROPLET MASS
+            CASE(438)  ! DROPLET MASS
                QP(NPP,NN) = 1.E9_EB*PC%FTPR*DR%R**3
-            CASE(39)  ! DROPLET AGE
+            CASE(439)  ! DROPLET AGE
                QP(NPP,NN) = T-DR%T
+            CASE(440)  ! DROPLET WEIGHTING FACTOR
+               QP(NPP,NN) = DR%PWT
          END SELECT
       ENDDO
    ENDDO LOAD_LOOP
@@ -3354,18 +3356,20 @@ PARTICLE_CLASS_LOOP: DO N=1,N_PART
                QP(NPP,NN) = DR%V
             CASE( 8)  ! W-VELOCITY
                QP(NPP,NN) = DR%W
-            CASE(34)  ! DROPLET DIAMETER
+            CASE(434)  ! DROPLET DIAMETER
                QP(NPP,NN) = 2.E6*DR%R
-            CASE(35)  ! DROPLET VELOCITY
+            CASE(435)  ! DROPLET VELOCITY
                QP(NPP,NN) = SQRT(DR%U**2+DR%V**2+DR%W**2)
-            CASE(36)  ! DROPLET PHASE
+            CASE(436)  ! DROPLET PHASE
                QP(NPP,NN) = DR%IOR
-            CASE(37)  ! DROPLET TEMPERATURE
+            CASE(437)  ! DROPLET TEMPERATURE
                QP(NPP,NN) = DR%TMP - TMPM
-            CASE(38)  ! DROPLET MASS
+            CASE(438)  ! DROPLET MASS
                QP(NPP,NN) = 1.E9_EB*PC%FTPR*DR%R**3
-            CASE(39)  ! DROPLET AGE
+            CASE(439)  ! DROPLET AGE
                QP(NPP,NN) = T-DR%T
+            CASE(440)  ! DROPLET WEIGHTING FACTOR
+               QP(NPP,NN) = DR%PWT
          END SELECT
       ENDDO
    ENDDO LOAD_LOOP
@@ -5676,7 +5680,7 @@ PART_DIST_LOOP: DO I=1,N_PART
    OPEN (LU,FILE=FN,FORM='FORMATTED',STATUS='REPLACE')
    WRITE(LU,'(A)') 'radius (m), cummulative distribution function'
    DO J=1,NDC
-      WRITE(LU,'(E12.5,A,E12.5)') PC%R_CDF(J),',',PC%CDF(J)
+      WRITE(LU,'(E16.9,A,E16.9)') PC%R_CDF(J),',',PC%CDF(J)
    ENDDO
    CLOSE(LU)
 ENDDO PART_DIST_LOOP
