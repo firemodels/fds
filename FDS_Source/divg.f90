@@ -375,7 +375,14 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
 
       ELSE CP_FTMP_IF
 
-         KP = MU*CPOPR
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+                  KP(I,J,K) = MU(I,J,K)*CPOPR  
+               ENDDO
+            ENDDO
+         ENDDO
 
       ENDIF CP_FTMP_IF
       
@@ -694,9 +701,9 @@ SUBROUTINE DIVERGENCE_PART_2(NM)
 
 USE COMP_FUNCTIONS, ONLY: SECOND
 INTEGER, INTENT(IN) :: NM
-REAL(EB), POINTER, DIMENSION(:,:,:) :: DP,D_NEW,RTRM,DIV
-REAL(EB) :: RDT,TNOW,P_EQ,P_EQ_NUM,P_EQ_DEN,RF
-REAL(EB), POINTER, DIMENSION(:) :: D_PBAR_DT_P
+REAL(EB), POINTER, DIMENSION(:,:,:) :: DP=>NULL(),RTRM=>NULL()
+REAL(EB) :: RDT,TNOW,P_EQ,P_EQ_NUM,P_EQ_DEN,RF,D_NEW,D_OLD
+REAL(EB), POINTER, DIMENSION(:) :: D_PBAR_DT_P=>NULL()
 INTEGER :: IW,IOR,II,JJ,KK,IIG,JJG,KKG,IC,I,J,K,IPZ,IOPZ,IOPZ2
 REAL(EB), DIMENSION(N_ZONE) :: USUM_ADD
 
@@ -840,42 +847,52 @@ ENDDO BC_LOOP
 
 TRUE_PROJECTION: IF (PROJECTION) THEN
 
-   DIV=>WORK1
-
    IF (PREDICTOR) THEN
       DO K = 1,KBAR
          DO J = 1,JBAR
             DO I = 1,IBAR
-               DIV(I,J,K) = (R(I)*U(I,J,K)-R(I-1)*U(I-1,J,K))*RDX(I)*RRN(I) + (V(I,J,K)-V(I,J-1,K))*RDY(J) + &
-                            (W(I,J,K)-W(I,J,K-1))*RDZ(K)
+               D_OLD = (R(I)*U(I,J,K)-R(I-1)*U(I-1,J,K))*RDX(I)*RRN(I) + (V(I,J,K)-V(I,J-1,K))*RDY(J) + &
+                       (W(I,J,K)-W(I,J,K-1))*RDZ(K)
+               DDDT(I,J,K) = (DP(I,J,K)-D_OLD)*RDT
             ENDDO
          ENDDO
       ENDDO
-      DDDT = (DP-DIV)*RDT
+
    ELSEIF (CORRECTOR) THEN
       DO K = 1,KBAR
          DO J = 1,JBAR
             DO I = 1,IBAR
-               DIV(I,J,K) = (R(I)*U(I,J,K) -R(I-1)*U(I-1,J,K)) *RDX(I)*RRN(I) + (V(I,J,K)- V(I,J-1,K)) *RDY(J) + &
-                            (W(I,J,K) -W(I,J,K-1)) *RDZ(K) &
-                          + (R(I)*US(I,J,K)-R(I-1)*US(I-1,J,K))*RDX(I)*RRN(I) + (VS(I,J,K)-VS(I,J-1,K))*RDY(J) + &
-                            (WS(I,J,K)-WS(I,J,K-1))*RDZ(K)
+               D_OLD = (R(I)*U(I,J,K) -R(I-1)*U(I-1,J,K)) *RDX(I)*RRN(I) + (V(I,J,K)- V(I,J-1,K)) *RDY(J) + &
+                       (W(I,J,K) -W(I,J,K-1)) *RDZ(K) &
+                       + (R(I)*US(I,J,K)-R(I-1)*US(I-1,J,K))*RDX(I)*RRN(I) + (VS(I,J,K)-VS(I,J-1,K))*RDY(J) + &
+                       (WS(I,J,K)-WS(I,J,K-1))*RDZ(K)
+               D(I,J,K) = DDDT(I,J,K)
+               DDDT(I,J,K) = (2._EB*DP(I,J,K)-D_OLD)*RDT
             ENDDO
          ENDDO
       ENDDO
-      D = DDDT
-      DDDT = (2._EB*DP-DIV)*RDT
    ENDIF
    
 ELSE TRUE_PROJECTION
 
    IF (PREDICTOR) THEN
-      DDDT = (DS-D)*RDT
+      DO K = 1,KBAR
+         DO J = 1,JBAR
+            DO I = 1,IBAR
+               DDDT(I,J,K) = (DS(I,J,K)-D(I,J,K))*RDT
+            ENDDO
+         ENDDO
+      ENDDO
    ELSE
-      D_NEW => WORK1
-      D_NEW = DP
-      DDDT  = (2._EB*D_NEW-DS-D)*RDT
-      D     = D_NEW
+      DO K = 1,KBAR
+         DO J = 1,JBAR
+            DO I = 1,IBAR
+               D_NEW        = DP(I,J,K)
+               DDDT(I,J,K)  = (2._EB*D_NEW-DS(I,J,K)-D(I,J,K))*RDT
+               D(I,J,K)     = D_NEW
+            ENDDO
+         ENDDO
+      ENDDO
    ENDIF
    
    ! Adjust dD/dt to correct error in divergence due to velocity matching at interpolated boundaries

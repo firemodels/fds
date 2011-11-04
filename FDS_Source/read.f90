@@ -3434,7 +3434,8 @@ PART_LOOP: DO N=1,N_PART
    CALL SEARCH_CONTROLLER('PART',PC%CTRL_ID,PC%DEVC_ID,PC%DEVC_INDEX,PC%CTRL_INDEX,N)
 
    ! Get size distribution CNF ramp
-      ! Only process particles or droplets that have mass and evaporate
+   
+   ! Only process particles or droplets that have mass and evaporate
 
    IF (.NOT.PC%EVAPORATE .OR. PC%MASSLESS .OR. PC%SURF_ID/='null' .OR. WFDS_FE) CYCLE PART_LOOP
 

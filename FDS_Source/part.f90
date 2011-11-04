@@ -560,7 +560,7 @@ OVERALL_INSERT_LOOP: DO
       ENDDO PARTICLE_INSERT_LOOP
 
       IF (MASS_SUM > 0._EB) THEN
-      IF (SF%PARTICLE_MASS_FLUX > 0._EB) THEN
+         IF (SF%PARTICLE_MASS_FLUX > 0._EB) THEN
             IF (ABS(TW(IW)-T_BEGIN)<=ZERO_P .AND. SF%RAMP_INDEX(TIME_PART)>=1) THEN
                TSI = T
             ELSE
@@ -1580,7 +1580,8 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
       IF (PC%EVAP_INDEX/=EVAP_INDEX) CYCLE PART_CLASS_LOOP
       IF (PC%TREE) CYCLE PART_CLASS_LOOP
 
-      ! Initialize quantities common to the PARTICLE_CLASS 
+      ! Initialize quantities common to the PARTICLE_CLASS
+
       SS => SPECIES(PC%Y_INDEX)
       FTPR     = PC%FTPR
       TMP_MELT = SS%TMP_MELT
