@@ -1346,7 +1346,6 @@ void initvars1(void){
   npqq=0, nopart=1;
   uindex=-1, vindex=-1, windex=-1;
 
-  p3cont2d=STEPPED_CONTOURS, p3cont3dsmooth=0;
   cullfaces=1;
   showonly_hiddenfaces=0;
 
