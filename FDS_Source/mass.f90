@@ -454,7 +454,7 @@ CASE(.TRUE.) PREDICTOR_STEP
 
    IF (.NOT.CHANGE_TIME_STEP(NM)) THEN
    
-   ! NOTE: This IF statement is required because the source terms for species and enthalpy are zeroed out at
+   ! NOTE: This IF statement is required because the source terms for species are zeroed out at
    !       the beginning of DIVERGENCE_PART_1, but the array also stores the divergence of the advective
    !       flux which is computed once in MASS_FINITE_DIFFERNENCES above, outside the CHANGE_TIME_STEP loop.
    !       DIVERGENCE_PART_1 is inside the loop.  The source terms are then applied to the next substep in
@@ -493,7 +493,6 @@ CASE(.TRUE.) PREDICTOR_STEP
       !$OMP END DO NOWAIT
 
    ENDIF
-
 
    ! Predict the density at the next time step (RHOS or RHO^*)
 
@@ -742,7 +741,6 @@ ELSE
    ENDDO
    !$OMP END DO NOWAIT
 ENDIF
-
  
 ! Correct undershoots
 
@@ -839,11 +837,18 @@ ENDDO
 
 !$OMP WORKSHARE
 
-RHOP(1:IBAR,1:JBAR,1:KBAR) = MAX(RHOMIN,RHOP(1:IBAR,1:JBAR,1:KBAR)+RHODELTA(1:IBAR,1:JBAR,1:KBAR))
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         RHOP(I,J,K) = MAX(RHOMIN,RHOP(I,J,K)+RHODELTA(I,J,J))
+      ENDDO
+   ENDDO
+ENDDO
 
 ! Correct overshoots
 
 RHODELTA = 0._EB
+
 !$OMP END WORKSHARE
 
 !$OMP DO COLLAPSE(3) SCHEDULE(DYNAMIC) &
@@ -934,9 +939,16 @@ ENDDO
 !$OMP END DO
 
 !$OMP WORKSHARE
-RHOP(1:IBAR,1:JBAR,1:KBAR) = MIN(RHOMAX,RHOP(1:IBAR,1:JBAR,1:KBAR)+RHODELTA(1:IBAR,1:JBAR,1:KBAR))
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         RHOP(I,J,K) = MIN(RHOMAX,RHOP(I,J,K)+RHODELTA(I,J,K))
+      ENDDO
+   ENDDO
+ENDDO
 !$OMP END WORKSHARE NOWAIT
 !$OMP END PARALLEL
+
 END SUBROUTINE CHECK_DENSITY
  
  
