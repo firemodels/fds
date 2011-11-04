@@ -44,7 +44,7 @@ plink %svn_logon% %scriptdir%/make_dists.csh %version%
 
 echo downloading Linux Smokeview files
 pscp %svn_logon%:%bundledir%/smv_%version%_linux.tar.gz ..\for_bundle\to_google\.
-pscp %svn_logon%:%bundledir%/smv_%version%_linux_64.tar.gz ..\for_bundle\to_google\.
+pscp %svn_logon%:%bundledir%/smv_%version%_linux64.tar.gz ..\for_bundle\to_google\.
 
 echo downloading MAC OSX Smokeview files
 pscp %svn_logon%:%bundledir%/smv_%version%_osx.tar.gz ..\for_bundle\to_google\.
