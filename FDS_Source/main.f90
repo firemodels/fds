@@ -198,8 +198,10 @@ ENDIF
 
 ! Stop all the processes if this is just a set-up run
  
-IF (SET_UP) CALL SHUTDOWN('Stop FDS, Set-up only')
- 
+IF (SET_UP) THEN
+   CALL INITIALIZE_DIAGNOSTIC_FILE
+   CALL SHUTDOWN('Stop FDS, Set-up only')
+ENDIF
 ! Set up Time arrays (All Nodes)
  
 ALLOCATE(ACTIVE_MESH(NMESHES),STAT=IZERO)
