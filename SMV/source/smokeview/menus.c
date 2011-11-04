@@ -433,6 +433,9 @@ void ColorBarMenu(int value){
       break;
     case -4:
       colorbarcycle=0;
+      show_extremedata=0;
+      colorbarflip=0;
+      p3cont2d=0;
       setbw=0;
       break;
     case -5:
@@ -443,11 +446,6 @@ void ColorBarMenu(int value){
       update_extreme();
       updatecolors(-1);
       break;
-    case -11:
-     background_flip = 1-background_flip;
-     updatecolors(-1);
-     set_labels_controls();
-     break;
     case -12:
      setbw=1-setbw;
      if(setbw==1){
@@ -853,6 +851,11 @@ void ShowHideMenu(int value){
   updatemenu=1;  
   glutPostRedisplay();
   switch (value){
+  case 15:
+   background_flip = 1-background_flip;
+   updatecolors(-1);
+   set_labels_controls();
+   break;
   case 13:
     if(plotstate==DYNAMIC_PLOTS){
       visEvac=1-visEvac;
@@ -4413,7 +4416,7 @@ void InitMenus(int unload){
   int ntextures_used;
   int multiprop;
 
-static int titlemenu=0, labelmenu=0, colorbarmenu=0, colorbarshademenu, smokecolorbarmenu=0, lightingmenu=0, showhidemenu=0;
+static int titlemenu=0, labelmenu=0, colorbarmenu=0, colorbarsmenu=0, colorbarshademenu, smokecolorbarmenu=0, lightingmenu=0, showhidemenu=0;
 static int optionmenu=0, rotatetypemenu=0;
 static int resetmenu=0, frameratemenu=0, rendermenu=0, smokeviewinimenu=0, inisubmenu=0;
 #ifdef pp_COMPRESS
@@ -6137,16 +6140,20 @@ updatemenu=0;
     glutAddMenuEntry("Stepped",-18);
     glutAddMenuEntry("*Lines",-19);
   }
+  glutAddMenuEntry("-",-999);
+  if(setbw==0){
+    glutAddMenuEntry(_("*Color/BW"),-12);
+  }
+  else{
+    glutAddMenuEntry(_("Color/*BW"),-12);
+  }
 
 
-/* -------------------------------- colorbarmenu -------------------------- */
-
-  CREATEMENU(colorbarmenu,ColorBarMenu);
+  CREATEMENU(colorbarsmenu,ColorBarMenu);
   {
     colorbardata *cbi;
     char ccolorbarmenu[256];
 
-    glutAddMenuEntry(_("Colorbar:"),-999);
     for(i=0;i<ncolorbars;i++){
       cbi = colorbarinfo + i;
 
@@ -6161,8 +6168,12 @@ updatemenu=0;
       glutAddMenuEntry(ccolorbarmenu,i);
     }
   }
-  glutAddMenuEntry("-",-999);
-  glutAddMenuEntry(_("Modify colorbar:"),-999);
+
+/* -------------------------------- colorbarmenu -------------------------- */
+
+  CREATEMENU(colorbarmenu,ColorBarMenu);
+  glutAddSubMenu("Colorbars",colorbarsmenu);
+  glutAddMenuEntry(_("Variations:"),-999);
   if(show_extremedata==1){
     glutAddMenuEntry(_("  *Highlight extreme data"),-7);
   }
@@ -6175,28 +6186,14 @@ updatemenu=0;
   else{
     glutAddMenuEntry(_("  Flip"),-2);
   }
-  glutAddSubMenu("  Type:",colorbarshademenu);
-  glutAddMenuEntry(_("  Reset"),-4);
-  glutAddMenuEntry("-",-999);
-  glutAddMenuEntry(_("Shades:"),-999);
-  if(background_flip==1){
-    glutAddMenuEntry(_("  *Flip background"),-11);
-  }
-  else{
-    glutAddMenuEntry(_("  Flip background"),-11);
-  }
-  if(setbw==0){
-    glutAddMenuEntry(_("  *Color/BW"),-12);
-  }
-  else{
-    glutAddMenuEntry(_("  Color/*BW"),-12);
-  }
+  glutAddSubMenu("  Shade Type:",colorbarshademenu);
   if(use_transparency_data==1){
     glutAddMenuEntry(_("  *Transparent (data)"),-13);
   }
   else{
     glutAddMenuEntry(_("  Transparent (data)"),-13);
   }
+  glutAddMenuEntry(_("  Reset"),-4);
 
 /* --------------------------------showVslice menu -------------------------- */
   if(nvsliceloaded==0){
@@ -6638,6 +6635,12 @@ updatemenu=0;
   if(ntextures_loaded_used>0){
     glutAddSubMenu(_("Textures"),textureshowmenu);
   }
+  if(background_flip==1){
+    glutAddMenuEntry(_("*Flip background"),15);
+  }
+  else{
+    glutAddMenuEntry(_("Flip background"),15);
+  }
 
 /* --------------------------------frame rate menu -------------------------- */
 
@@ -6891,7 +6894,7 @@ updatemenu=0;
 /* --------------------------------option menu -------------------------- */
 
   CREATEMENU(optionmenu,OptionMenu);
-  glutAddSubMenu(_("Colorbars/Shades"),colorbarmenu);
+  glutAddSubMenu(_("Data coloring"),colorbarmenu);
   if(nunitclasses>0)glutAddSubMenu(_("Units"),unitsmenu);
 #ifdef pp_SHOWLIGHT
   if(showlightmenu==1)glutAddSubMenu(_("Lighting"),lightingmenu);

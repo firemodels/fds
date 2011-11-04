@@ -507,13 +507,6 @@ extern "C" void glui_bounds_setup(int main_window){
       &unload_qdata,UNLOAD_QDATA,PLOT3D_CB);
 
     panel_pan3 = glui_bounds->add_panel_to_panel(panel_plot3d,"",GLUI_PANEL_NONE);
-    panel_contours = glui_bounds->add_panel_to_panel(panel_pan3,_("Contours"));
-    plot3d_display=glui_bounds->add_radiogroup_to_panel(panel_contours,&p3cont2d,UPDATEPLOT,PLOT3D_CB);
-    glui_bounds->add_radiobutton_to_group(plot3d_display,_("Shaded contours"));
-    glui_bounds->add_radiobutton_to_group(plot3d_display,_("Stepped contours"));
-    glui_bounds->add_radiobutton_to_group(plot3d_display,_("Line contours"));
-    
-    //glui_bounds->add_column_to_panel(panel_pan3);
     panel_vector = glui_bounds->add_panel_to_panel(panel_pan3,_("Vector"));
     glui_bounds->add_checkbox_to_panel(panel_vector,_("Show vectors"),&visVector,UPDATEPLOT,PLOT3D_CB);
     SPINNER_plot3d_vectorpointsize=glui_bounds->add_spinner_to_panel(panel_vector,_("Point size"),GLUI_SPINNER_FLOAT,&vectorpointsize,UPDATE_VECTOR,PLOT3D_CB);
@@ -671,7 +664,7 @@ extern "C" void glui_bounds_setup(int main_window){
 
   Time_CB(TBOUNDS_USE);
 
-  panel_colorbar = glui_bounds->add_rollout(_("Data coloring/transparency"),false);
+  panel_colorbar = glui_bounds->add_rollout(_("Data coloring"),false);
   if(ncolorbars>0){
     selectedcolorbar_index2=-1;
     LISTBOX_colorbar2=glui_bounds->add_listbox_to_panel(panel_colorbar,_("Colorbar:"),&selectedcolorbar_index2,COLORBAR_LIST2,Slice_CB);
@@ -685,6 +678,11 @@ extern "C" void glui_bounds_setup(int main_window){
     }
     LISTBOX_colorbar2->set_int_val(colorbartype);
   }
+  panel_contours = glui_bounds->add_panel_to_panel(panel_colorbar,_("Colorbar shade type"));
+  plot3d_display=glui_bounds->add_radiogroup_to_panel(panel_contours,&p3cont2d,UPDATEPLOT,PLOT3D_CB);
+  glui_bounds->add_radiobutton_to_group(plot3d_display,_("Continuous"));
+  glui_bounds->add_radiobutton_to_group(plot3d_display,_("Stepped"));
+  glui_bounds->add_radiobutton_to_group(plot3d_display,_("Line"));
   CHECKBOX_axissmooth=glui_bounds->add_checkbox_to_panel(panel_colorbar,_("Smooth colorbar labels"),&axissmooth,COLORBAR_SMOOTH,Slice_CB);
   CHECKBOX_extreme2=glui_bounds->add_checkbox_to_panel(panel_colorbar,_("Highlight extreme data"),&show_extremedata,
     COLORBAR_EXTREME2,Slice_CB);

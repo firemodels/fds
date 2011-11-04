@@ -2179,33 +2179,47 @@ void updatecolors(int changecolorindex){
     }
   }
   if(p3cont2d==LINE_CONTOURS){
-    {
-      for(n=0;n<nrgb_full;n++){
-        rgb_full2[n][3]=rgb_full[n][3];
-        rgb_full[n][3]=0;
-      }
-      for(n=0;n<11;n++){
-        int nnm1,nnp0,nnp1;
+    for(n=0;n<nrgb_full;n++){
+      rgb_full2[n][3]=rgb_full[n][3];
+      rgb_full[n][3]=0;
+    }
+    for(n=0;n<11;n++){
+      int nnm1,nnp0,nnp1;
         
-        if(n==0){
-          nnp0=1;
-        }
-        else if(n==10){
-          nnp0=254;
-        }
-        else{
-          nnp0=1+n*25.4;
-        }
-        nnm1=nnp0-1;
-        nnp1=nnp0+1;
-        rgb_full[nnm1][3]=rgb_full2[nnm1][3];
-        rgb_full[nnp0][3]=rgb_full2[nnp0][3];
-        rgb_full[nnp1][3]=rgb_full2[nnp1][3];
+      if(n==0){
+        nnp0=1;
       }
+      else if(n==10){
+        nnp0=254;
+      }
+      else{
+        nnp0=1+n*25.4;
+      }
+      nnm1=nnp0-1;
+      nnp1=nnp0+1;
+      rgb_full[nnm1][3]=rgb_full2[nnm1][3];
+      rgb_full[nnp0][3]=rgb_full2[nnp0][3];
+      rgb_full[nnp1][3]=rgb_full2[nnp1][3];
     }
   }
-  //xxx add code to handle STEPPED CONTOURS
   if(p3cont2d==STEPPED_CONTOURS){
+    int index[11];
+
+    for(n=0;n<10;n++){
+      index[n]=n*25.4;
+    }
+    index[10]=nrgb_full;
+    for(n=0;n<10;n++){
+      int mid;
+
+      mid = (index[n]+index[n+1])/2;
+      for(i=index[n];i<index[n+1];i++){
+        rgb_full[i][0]=rgb_full[mid][0];
+        rgb_full[i][1]=rgb_full[mid][1];
+        rgb_full[i][2]=rgb_full[mid][2];
+        rgb_full[i][3]=rgb_full[mid][3];
+      }
+    }
   }
   if(colorbarflip==1){
     {
