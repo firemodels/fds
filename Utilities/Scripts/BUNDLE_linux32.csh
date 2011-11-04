@@ -6,6 +6,7 @@ setenv fds_smvroot $1
 setenv bundlebase $2
 setenv runhost $3
 setenv fdshost leo.cfr.nist.gov
+setenv smvhost leo.cfr.nist.gov
 setenv PLATFORM LINUX32
 
 
