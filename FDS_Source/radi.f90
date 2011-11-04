@@ -712,44 +712,19 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
    ENDIF
 
    ! Calculate extinction coefficient
-
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            EXTCOE(I,J,K) = KAPPA(I,J,K) + KAPPAW(I,J,K) + SCAEFF(I,J,K)*RSA_RAT
-         ENDDO
-      ENDDO
-   ENDDO
+   
+   EXTCOE = KAPPA + KAPPAW + SCAEFF*RSA_RAT
 
    ! Update intensity field
  
    INTENSITY_UPDATE: IF (UPDATE_INTENSITY) THEN
-
-      WIDE_BAND_IF_1: IF (WIDE_BAND_MODEL) THEN
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  UIIOLD(I,J,K) = UIID(I,J,K,IBND)
-               ENDDO
-            ENDDO
-         ENDDO
-      ELSE WIDE_BAND_IF_1
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  UIIOLD(I,J,K) = UII(I,J,K)
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDIF WIDE_BAND_IF_1
-
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               UII(I,J,K) = 0._EB
-            ENDDO
-         ENDDO
-      ENDDO
+ 
+      IF (WIDE_BAND_MODEL) THEN
+         UIIOLD = UIID(:,:,:,IBND)
+      ELSE
+         UIIOLD = UII
+      ENDIF
+      UII = 0._EB
 
       ! Compute boundary condition intensity emissivity*sigma*Tw**4/pi or emissivity*QRADOUT/pi for wall with internal radiation
       
@@ -785,21 +760,9 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
  
          ANGLE_INC_COUNTER = MOD(ANGLE_INC_COUNTER,ANGLE_INCREMENT) + 1
          IF (WIDE_BAND_MODEL) THEN
-            DO K=1,KBAR
-               DO J=1,JBAR
-                  DO I=1,IBAR
-                     UIID(I,J,K,IBND) = 0._EB
-                  ENDDO
-               ENDDO
-            ENDDO
+            UIID(:,:,:,IBND) = 0._EB
          ELSE
-            DO K=1,KBAR
-               DO J=1,JBAR
-                  DO I=1,IBAR
-                     UIID(I,J,K,ANGLE_INC_COUNTER) = 0._EB
-                  ENDDO
-               ENDDO
-            ENDDO
+            UIID(:,:,:,ANGLE_INC_COUNTER) = 0._EB
          ENDIF
 
          DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
@@ -813,13 +776,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          NEND      = 1
          NSTEP     = -ANGLE_INCREMENT
 
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  IL(I,J,K) = BBFA*RPI_SIGMA*TMPA4
-               ENDDO
-            ENDDO
-         ENDDO
+         IL(:,:,:) = BBFA*RPI_SIGMA*TMPA4
 
          ANGLE_LOOP: DO N = NSTART,NEND,NSTEP  ! Sweep through control angles
  
@@ -1042,23 +999,11 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
             ! Calculate integrated intensity UIID
  
-            WIDE_BAND_IF_2: IF (WIDE_BAND_MODEL) THEN
-               DO K=1,KBAR
-                  DO J=1,JBAR
-                     DO I=1,IBAR
-                        UIID(I,J,K,IBND) = UIID(I,J,K,IBND) + WEIGH_CYL*RSA(N)*IL(I,J,K)
-                     ENDDO
-                  ENDDO
-               ENDDO
-            ELSE WIDE_BAND_IF_2
-               DO K=1,KBAR
-                  DO J=1,JBAR
-                     DO I=1,IBAR
-                        UIID(I,J,K,ANGLE_INC_COUNTER) = UIID(I,J,K,ANGLE_INC_COUNTER) + WEIGH_CYL*RSA(N)*IL(I,J,K)
-                     ENDDO
-                  ENDDO
-               ENDDO
-            ENDIF WIDE_BAND_IF_2
+            IF (WIDE_BAND_MODEL) THEN
+               UIID(:,:,:,IBND) = UIID(:,:,:,IBND) + WEIGH_CYL*RSA(N)*IL
+            ELSE
+               UIID(:,:,:,ANGLE_INC_COUNTER) = UIID(:,:,:,ANGLE_INC_COUNTER) + WEIGH_CYL*RSA(N)*IL
+            ENDIF
  
             ! Interpolate boundary intensities onto other meshes
  
@@ -1119,24 +1064,12 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
  
    ! Save source term for the energy equation (QR = -DIV Q)
 
-   WIDE_BAND_IF_3: IF (WIDE_BAND_MODEL) THEN
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               QR(I,J,K) = QR(I,J,K) + KAPPA(I,J,K)*UIID(I,J,K,IBND)-KFST4(I,J,K)
-            ENDDO
-         ENDDO
-      ENDDO
-      PARTICLE_IF: IF (NLP>0 .AND. N_EVAP_INDICES>0) THEN
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR
-                  QR_W(I,J,K) = QR_W(I,J,K) + KAPPAW(I,J,K)*UIID(I,J,K,IBND) - KFST4W(I,J,K)
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDIF PARTICLE_IF
-   ENDIF WIDE_BAND_IF_3
+   IF (WIDE_BAND_MODEL) THEN
+      QR = QR + KAPPA*UIID(:,:,:,IBND)-KFST4
+      IF (NLP>0 .AND. N_EVAP_INDICES>0) THEN
+         QR_W = QR_W + KAPPAW*UIID(:,:,:,IBND) - KFST4W
+      ENDIF
+   ENDIF
 
 ENDDO BAND_LOOP
 
@@ -1144,13 +1077,7 @@ ENDDO BAND_LOOP
 
 IF (UPDATE_INTENSITY) THEN
 
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            UII(I,J,K) = SUM(UIID(I,J,K,1:NUMBER_SPECTRAL_BANDS))
-         ENDDO
-      ENDDO
-   ENDDO
+   UII = SUM(UIID, DIM = 4)
 
    DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       IF (BOUNDARY_TYPE(IW)/=OPEN_BOUNDARY) CYCLE 
@@ -1162,15 +1089,7 @@ ENDIF
 ! Save source term for the energy equation (QR = -DIV Q). Done only in one-band (gray gas) case.
 
 IF (.NOT. WIDE_BAND_MODEL) THEN
-
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            QR(I,J,K) = KAPPA(I,J,K)*UII(I,J,K) - KFST4(I,J,K)
-         ENDDO
-      ENDDO
-   ENDDO
-
+   QR  = KAPPA*UII - KFST4
    IF (NLP>0 .AND. N_EVAP_INDICES>0) QR_W = QR_W + KAPPAW*UII - KFST4W
 
    IF_VEG_INCLUDED2: IF (NLP>0 .AND. TREE_MESH(NM)) THEN
