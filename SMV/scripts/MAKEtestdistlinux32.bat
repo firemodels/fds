@@ -28,6 +28,6 @@ echo making Linux archives
 plink %svn_logon% %scriptdir%/MAKEtestdistlinux32.csh %smv_revision%
 
 echo downloading Linux Smokeview files
-pscp %svn_logon%:%bundledir%/smv_test_%smv_revision%_linux.tar.gz ..\for_bundle\to_google\.
+pscp %svn_logon%:%bundledir%/smv_test_%smv_revision%_linux32.tar.gz ..\for_bundle\to_google\.
 
 pause

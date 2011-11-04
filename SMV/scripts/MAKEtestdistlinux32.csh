@@ -6,7 +6,7 @@ set SMVDIR=$SVNROOT/SMV/Build/intel_linux_test_32
 set SMZDIR=$SVNROOT/Utilities/smokezip/intel_linux_32
 set SMDDIR=$SVNROOT/Utilities/smokediff/intel_linux_32
 set FORBUNDLE=$SVNROOT/SMV/for_bundle
-set LINUXDIR=smv_test\_$revision\_linux
+set LINUXDIR=smv_test\_$revision\_linux32
 
 cd $FORBUNDLE
 
