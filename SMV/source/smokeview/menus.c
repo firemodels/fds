@@ -437,6 +437,8 @@ void ColorBarMenu(int value){
       colorbarflip=0;
       p3cont2d=0;
       setbw=0;
+      update_extreme();
+      updatecolors(-1);
       break;
     case -5:
       viscolorbarpath=1-viscolorbarpath;
@@ -6458,6 +6460,7 @@ updatemenu=0;
     glutAddSubMenu(_("Geometry"),geometrymenu);
   }
   glutAddSubMenu(_("Labels"),labelmenu);
+  glutAddSubMenu(_("Data coloring"),colorbarmenu);
   {
     int human_present=0;
     int particle_present=0;
@@ -6894,7 +6897,6 @@ updatemenu=0;
 /* --------------------------------option menu -------------------------- */
 
   CREATEMENU(optionmenu,OptionMenu);
-  glutAddSubMenu(_("Data coloring"),colorbarmenu);
   if(nunitclasses>0)glutAddSubMenu(_("Units"),unitsmenu);
 #ifdef pp_SHOWLIGHT
   if(showlightmenu==1)glutAddSubMenu(_("Lighting"),lightingmenu);
@@ -8601,7 +8603,7 @@ updatemenu=0;
     CREATEMENU(mainmenu,MainMenu);
     if(trainer_mode==0){
       glutAddSubMenu(_("Load/Unload"),loadunloadmenu);
-      glutAddSubMenu(_("Show/Hide"),showhidemenu);
+      glutAddSubMenu(_("Display"),showhidemenu);
       glutAddSubMenu(_("Options"),optionmenu);
       glutAddSubMenu(_("Dialogs"),dialogmenu);
       glutAddSubMenu(_("Tours"),tourmenu);
