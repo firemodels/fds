@@ -29,9 +29,9 @@ echo Uploading Smokeview %level% version=test revision=%smv_revision%
 
 Rem --------------- 64 bit OSX ----------------
 
-  set glabels=Type-Archive,Opsys-OSX,%level%
+  set glabels=Type-Archive,Opsys-OSX_64,%level%
   set dplatform=64 bit OSX
-  set platform=osx_64
+  set platform=osx64
   set summary=Smokeview test for %dplatform% (SVN r%smv_revision%)
   set exe=smv_test_%smv_revision%_%platform%.tar.gz
   echo.

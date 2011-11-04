@@ -31,7 +31,7 @@ Rem --------------- 32 bit OSX ----------------
 
   set glabels=Type-Archive,Opsys-OSX,%level%
   set dplatform=32 bit OSX
-  set platform=osx
+  set platform=osx32
   set summary=Smokeview test for %dplatform% (SVN r%smv_revision%)
   set exe=smv_test_%smv_revision%_%platform%.tar.gz
   echo.

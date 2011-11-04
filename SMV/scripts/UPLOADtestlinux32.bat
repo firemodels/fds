@@ -32,7 +32,7 @@ Rem --------------- 32 bit Linux ----------------
 
   set glabels=Type-Archive,Opsys-Linux,%level%
   set dplatform=32 bit Linux
-  set platform=linux
+  set platform=linux32
   set summary=Smokeview test for %dplatform% (SVN r%smv_revision%)
   set exe=smv_test_%smv_revision%_%platform%.tar.gz
   echo.
