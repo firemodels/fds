@@ -21,9 +21,8 @@ cd %svn_root%\Utilities\to_google
 
 set glabels=Type-Installer,Opsys-OSX,%fds_google_level%
 set dplatform=32 bit OSX
-set platform=win32
 set summary=Bundled FDS and Smokeview for %dplatform% (SVN r%fds_revision%,%smv_revision%)
-set exe=FDS_%fds_version%-SMV_%smv_version%_osx_32.tar.gz
+set exe=FDS_%fds_version%-SMV_%smv_version%_osx32.tar.gz
 
 
 echo Uploading %exe%
