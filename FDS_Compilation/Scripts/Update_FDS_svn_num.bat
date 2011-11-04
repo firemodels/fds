@@ -29,8 +29,8 @@ set scriptdir=%linux_svn_root%/FDS_Compilation/Scripts/
 set linux_fdsdir=%linux_svn_root%/FDS_Source
 
 echo.
-echo Updating %linux_fdsdir% in the Linux repository on acrux to SVN revision: %fds_revision%
-plink %svn_logon% %scriptdir%/UPDATE_fds_onhost.csh  %linux_fdsdir% %fds_revision% acrux.cfr.nist.gov
+echo Updating %linux_fdsdir% in the Linux repository on %linux_hostname$ to SVN revision: %fds_revision%
+plink %svn_logon% %scriptdir%/UPDATE_fds_onhost.csh  %linux_fdsdir% %fds_revision% %linux_hostname%
 
 echo.
 echo Updating %linux_fdsdir% in the OSX repository on %osx_hostname% to SVN revision: %fds_revision%
