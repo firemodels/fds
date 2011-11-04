@@ -79,29 +79,6 @@ if ($PLATFORM == "LINUX64" || $PLATFORM == "OSX64") then
 set ossize=intel64
 endif
 
-# qfds scripts
-
-if ($PLATFORM == "LINUX32xxx" || $PLATFORM == "LINUX64xxx") then
-echo copying qfds.sh to $bundledir/bin
-cp $bundle_setup/qfds.sh $bundledir/bin/.
-echo copying qfdsmpi.sh to $bundledir/bin
-cp $bundle_setup/qfdsmpi.sh $bundledir/bin/.
-endif
-
-if ($PLATFORM == "LINUX32xxx") then
-echo copying qfds_linux_32 to $bundledir/bin
-cp $bundle_setup/qfds_linux_32 $bundledir/bin/.
-echo copying qfds_mpi_linux_32 to $bundledir/bin
-cp $bundle_setup/qfds_mpi_linux_32 $bundledir/bin/.
-endif
-
-if ($PLATFORM == "LINUX64xxx") then
-echo copying qfds_linux_64 to $bundledir/bin
-cp $bundle_setup/qfds_linux_64 $bundledir/bin/.
-echo copying qfds_mpi_linux_64 to $bundledir/bin
-cp $bundle_setup/qfds_mpi_linux_64 $bundledir/bin/.
-endif
-
 cat <<EOF > $fullmanifest
 <html>
 <head>
@@ -187,7 +164,7 @@ cat <<EOF>>$fullmanifest
 EOF
 
 cp $fullmanifest ~/$manifest
-cp $fullmanifest $googledir//$manifest
+cp $fullmanifest $googledir/$manifest
 cat $fullmanifest | Mail -s " $PLATFORM" `whoami`
 
 echo Building archive
