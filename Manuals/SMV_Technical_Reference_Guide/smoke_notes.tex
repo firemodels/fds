@@ -3,17 +3,17 @@
 %
 
 \section{Introduction}
-This \paper\ documents the physics and associated numerical algorithms used by Smokeview\cite{Smokeview_Users_Guide} to visualize smoke and fire realistically.  Smokeview is a companion to the fire model, the Fire Dynamics Simulator (FDS)~\cite{FDS_Math_Guide}, which generates   simulation data Smokeview uses to perform these visualizations. FDS is a computational fluid dynamics model of fire-driven fluid flow. FDS solves numerically a form of the Navier-Stokes equations appropriate for low-speed, thermally-driven flow with an emphasis on smoke and heat transport from fires.
+This \paper\ documents the physics and associated numerical algorithms used by Smokeview\cite{Smokeview_Users_Guide} to visualize smoke and fire realistically.  Smokeview is a companion to the Fire Dynamics Simulator (FDS)~\cite{FDS_Math_Guide}, a fire model which generates   simulation data Smokeview uses to perform these visualizations. FDS is a computational fluid dynamics model of fire-driven fluid flow. FDS solves numerically a form of the Navier-Stokes equations appropriate for low-speed, thermally-driven flow with an emphasis on smoke and heat transport from fires.
 
 \subsection{Background}
 
 Realistic visualization methods are important for applications where one wishes to observe effects of fire and smoke rather than determine quantitative characteristics of data such as temperature or velocity.  This would be the case for a fire fighter using a computer based fire fighting simulator. Realistic visualization methods, however, complement but do not replace other more traditional visualization methods such as 2D contouring or 3D iso-surfacing which are better suited for analyzing data quantitatively.
 
-Complete methods for visualizing smoke and fire data taking into account interactions between light and smoke such as absorption, emission, and scattering require the solution of the radiation transport equation (RTE)~\cite{Siegel:2001} also called the volume rendering equation~\cite{levoy:1988}. This equation models how light appears to an observer after it interacts with smoke, a participating media. The RTE used by Smokeview~\citesmv\ to model smoke and fire appearance is identical to that used by the Fire Dynamics Simulator (FDS)~\cite{FDS_Math_Guide} to model radiative heat transfer.  Smokeview solves the RTE for visible wavelengths of light while FDS solves it for infrared. Smokeview solves the RTE assuming a gray gas environment.  This is the default solution method for FDS.  One other important difference is that Smokeview requires a solution only at the observer's viewpoint while FDS requires a radiation field, {\em i.e.} solutions at all points within the solution domain.
+Complete methods for visualizing smoke and fire data taking into account interactions between light and smoke require the solution of the radiation transport equation (RTE)~\cite{Siegel:2001} also called the volume rendering equation~\cite{levoy:1988}. This equation models how light appears to an observer after it interacts with smoke, a participating media. In particular, Smokeview uses this equation to account for emission from the fire and extinction (absorption plus out-scattering) by the smoke.  The RTE used by Smokeview to model smoke and fire appearance is identical to that used by FDS to model radiative heat transfer.  Smokeview and FDS use this equation in different ways however.  FDS solves it for infrared wavelengths of light.  Generally, Smokeview solves the RTE for visible wavelengths of light.  With the proper extinction coefficient, however, Smokeview can also view smoke at other wavelengths, simulating a thermal imager for example. Smokeview solves the RTE assuming a gray gas environment.  This is the default solution method for FDS.  One other important difference is that Smokeview requires a solution only at the observer's viewpoint while FDS requires a radiation field, {\em i.e.} solutions at all points within the solution domain.
 
 Even so, the solution of this integro-differential equation for visualization requires significant computation and memory  resources.  Approximations are required in order to display smoke and fire at interactive frame rates.  The primary approximation is to take advantage of the low albedo character of smoke allowing one to either simplify or eliminate scattering terms in the RTE.
 
-Two techniques discussed for visualizing smoke realistically are slice rendered and volume rendered methods~\cite{levoy:1988,Engel:2006}.    These methods both solve a form of the RTE equation.  The integrated quantity in both cases results in an opacity, the fraction of light obscured.  They differ in how the integration path is partitioned.
+Two techniques discussed for visualizing smoke realistically are slice rendered and volume rendered methods~\cite{levoy:1988,Engel:2006}.    These methods both solve a form of the RTE equation.  The integrated quantity in both cases is a radiance, the intensity of light seen by the observer.  They differ in how the integration path is partitioned.
 
 The integration path for a slice rendered method is split at grid planes within a 3D mesh. There is one partially transparent slice for each plane of simulated data. Planes are drawn through the data along the XY, XZ, YZ coordinate planes or diagonally to these  planes.   The separation distance between these planes becomes smaller as more planes are used to simulate a case.  As a result, due to finite precision arithmetic, the computed opacity values are subject to increased round off error.  In fact, if these planes are sufficiently close, the computed opacities truncate to zero.  The particular plane drawn is chosen to be the one most perpendicular to the viewer's line of sight.
 The resulting partially transparent slice planes are drawn individually and combined by the video hardware to form one image.
@@ -27,7 +27,7 @@ This \paper\ is organized as follows.  A model for visualizing smoke and fire is
 % -------------------  Visualization Model ------------------------
 %
 
-\section{Radiation Transport Equation - RTE}
+\section{Radiation Transport Equation}
 The visualization model used here to simulate smoke appearance is the radiation transport equation (RTE)~\cite{Siegel:2001}.  This equation uses the quantity radiance to represent smoke appearance.  Radiance has units of Watts per square meter per unit solid angle~(W/(sr$\cdot$m$^2$)).  The solid angle accounts for the fact that a light source appears brighter if it emits a given amount of light through a smaller cross-sectional area.  This has the interesting implication, ignoring atmospheric effects, as pointed out in~\cite{dutre:2002}, that the sun appears equally bright on the Earth as on Mars.  The diminished heat flux $(W/\mbox{m}^2)$ on Mars due to the increased distance from the sun is exactly offset by the reduced solid angle ($sr$) of the sun's disk.  From a visualization perspective, this implies that image brightness does not depend on image distance from the observer unless  participating media is present to absorb or scatter  intervening light.  The radiation transport equation discussed in this section models the change in radiance or appearance due to these factors.
 
 %
@@ -188,7 +188,7 @@ Equations (\ref{eq:alpha_summary}) and (\ref{eq:C_summary}) can then be used to 
 % -------------------  Slice Rendered Smoke ------------------------
 %
 
-\section{Solving the RTE using Slices}
+\section{A Solution using Slices}
 A slice rendering algorithm for visualizing smoke consists of splitting the RTE across individual slice planes within a single mesh.  The 3D computational domain is partitioned into a series of 2D slices.  The RTE is then solved on each slice.  Each slice solution only accounts for conditions between adjacent slices.  The individual partially transparent slice solutions are then combined using video hardware to form the final image.   Problems can occur with numerical round off error if two slices are too close together which require solution methods  involving data volumes rather than data slices. These methods are discussed in the next section.
 
 There are many ways to slice a 3D data set.  The slice orientation is chosen to be the one most perpendicular to the viewer's line of sight where possible choices are slice planes parallel to the three cartesian coordinate planes (XY, XZ, YZ) or planes diagonal to the data.  The opacity at each grid node is computed using the distance $\Delta x$ between adjacent YZ planes and soot density data computed by the fire model.  If slice orientations other than YZ are displayed, then opacities are adjusted if the distance between planes is different than $\Delta x$.  Opacity data is computed and compressed using run length encoding as a preprocessing step and decompressed one frame at a time as data is displayed.
@@ -198,7 +198,7 @@ There are many ways to slice a 3D data set.  The slice orientation is chosen to 
 %
 
 \subsection{Computing Opacity}
-Computing opacity at slice plane nodes is illustrated in Figure \ref{figsmokesetup}. A ray travels from the background to the observer through intervening smoke. Light is absorbed or scattered by the smoke as the ray passes each slice plane .  Emission effects are ignored. Scattering effects presently are only accounted for in the value of the total mass extinction coefficient used.  Light losses are assumed to be from both absorption and scattering. The obscuration is computed along each ray one grid plane at a time, using the Beer-Lambert law as follows.  The $\alpha=1-\tau$ values are pre-computed by FDS using the Beer-Lambert law~\cite{Siegel:2001}
+Computing opacity at slice plane nodes is illustrated in Figure \ref{figsmokesetup}. A ray travels from the background to the observer through intervening smoke. Light is absorbed or scattered by the smoke as the ray passes each slice plane .  Emission effects are accounted for by the coloring the smoke.  Scattering effects presently are only accounted for in the value of the total mass extinction coefficient used.  Light losses are assumed to be from both absorption and scattering. The obscuration is computed along each ray one grid plane at a time, using the Beer-Lambert law as follows.  The $\alpha=1-\tau$ values are pre-computed by FDS using the Beer-Lambert law~\cite{Siegel:2001}
 
 \begin{equation}
 \label{eq:alpha}
@@ -223,7 +223,7 @@ The $\alpha$ parameter in (\ref{eq:alpha}) is used by OpenGL~\cite{OpenGLRed} to
 
 \subsection{Adjusting Opacity}
 
-The absorption parameter, $\alpha$, needs to be adjusted when the view direction is not aligned along the axis orthogonal to the viewing planes (as in Figure \ref{figray}), the distance between adjacent smoke planes changes, or viewing planes are skipped.
+The absorption parameter, $\alpha$, needs to be adjusted for view directions not aligned with the axis orthogonal to the viewing planes (see Figure \ref{figray}).  The absorption coefficient also needs to be adjusted when the distance between adjacent smoke planes changes, or viewing planes are skipped.
 
 \begin{figure}[\figoptions]
 \centerline{\includegraphics[width=3.5in]{figures/forney_figure4}}
@@ -329,7 +329,7 @@ Figure \ref{figDIRA} illustrates this process showing three view directions and 
 \cos(\theta)=\frac{n\cdot v_e}{||n||~||v_e||}
 \end{eqnarray*}
 
-\noindent where $n$ is normal vector for the candidate smoke plane, and $v_e$ is the view direction vector.  In OpenGL, the view direction vector, $v_e$, is computed by simply obtaining the modelview matrix, $M$ and multiplying it by the vector, $(0,0,1)^T$ or equivalently the third row of $M$.
+\noindent where $n$ is normal vector for the candidate smoke plane, and $v_e$ is the view direction vector.  In OpenGL, the view direction vector, $v_e$, is computed by simply obtaining the OpenGL modelview matrix, $M$ and multiplying it by the vector, $(0,0,1)^T$ or equivalently the third row of $M$.
 
 \begin{figure}
 \begin{tabular}{ccc}
@@ -400,7 +400,7 @@ To overcome this problem, the RTE needs to be solved across the full 3D data mes
 % -------------------  Volume Rendered Smoke ------------------------
 %
 
-\section{Solving the RTE using Volumes}
+\section{A Solution using Volumes}
 Volume rendering is the process of visualizing 3D data by projecting partially transparent colors derived from 3D data onto a 2D image.  An entire volume of data is used to generate an image rather than just a slice as in the previous section.  Transfer functions are used to map data to color and optical density (opacity).  These colors and opacities are then combined to form an image.  The transfer functions may be arbitrary designed to highlight certain portions of the data or based on physics designed to produce realistic appearing images.  Figure \ref{figsmokesetup2} illustrates this process.  Data is first mapped to color and opacity then combined to form an image.
 \begin{figure}[\figoptions]
 \begin{center}
@@ -444,7 +444,7 @@ This section derives a discretization of the optical depth given in (\ref{eq:opt
 \newcommand{\Chatjj}[1]{\hat{C}_{#1}^N}
 \newcommand{\Leii}[1]{\hat{C}_{e,#1}}
 
-The approximate RTE solution given in (\ref{eq:rte_simp}) is discretized by converting integral terms present to Riemann sums. Figure \ref{fig:smokediscretesetup}\ illustrates the terms used to perform these discretizations.  The path is split into $N$ regions each with length $\Delta x=(x_N-x_0)/N$.  The coordinate system is setup so that the initial radiance, $C_0$, is located at $x_0$ farthest from the observer and the final radiance, $C_N$ located at $x_N$ closest to the observer.
+The approximate RTE solution given in (\ref{eq:rte_simp}) is discretized by converting integral terms present to Riemann sums. Figure \ref{fig:smokediscretesetup}\ illustrates the terms used to perform these discretizations.  The path is split into $N$ parts each with length $\Delta x=(x_N-x_0)/N$.  The coordinate system is setup so that the initial radiance, $C_0$, is located at $x_0$, most distant from the observer and the final radiance, $C_N$ located at $x_N$ closest to the observer.
 
 \begin{figure}[\figoptions]
 \begin{center}
