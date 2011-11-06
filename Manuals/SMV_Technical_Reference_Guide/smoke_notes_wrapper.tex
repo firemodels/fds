@@ -34,9 +34,9 @@
 %
 \newcommand{\hhref}[1]{\href{#1}{{\tt #1}}}
 
-\doublespace
+%\doublespace
 
-\pagestyle{empty} 
+\pagestyle{empty}
 %\tableofcontents
 %\listoffigures
 %
@@ -62,7 +62,7 @@ e-mail: glenn.forney@nist.gov \\
 {\bf ABSTRACT}\\
 \end{center}
 
-Realistic visualization methods are important for applications where one wishes to observe data effects rather than examine data quantitatively.  This \paper\ documents how the radiation transport equation (RTE) and associated numerical algorithms are used by Smokeview to visualize smoke and fire realistically.  This equation models the interaction of light and smoke due to absorption, emission, and scattering.  By noting that typical smoke due to fire has low albedo, the RTE may be approximated resulting in simpler solution procedures. Two methods are discussed for visualizing smoke, both using a form of the RTE.  The first method, slice rendering,  uses a series of partially transparent slices to represent smoke and fire. The second method, volume rendering, solves the RTE over the entire domain. Both methods use the RTE to account for emission from the fire and extinction (absorption plus scattering) by the smoke.  Several areas where the visualization methods may be improved are given.
+Realistic visualization methods are important for applications where one wishes to observe data effects rather than examine data quantitatively.  This \paper\ documents how the radiation transport equation (RTE) and associated numerical algorithms are used by Smokeview to visualize smoke and fire.  This equation models the interaction of light and smoke due to absorption, emission, and scattering.  By noting that typical smoke due to fire has low albedo, the RTE may be approximated resulting in simpler solution procedures. Two methods are discussed for visualizing smoke, both using a form of the RTE.  The first method, slice rendering,  uses a series of partially transparent slices to represent smoke and fire. The second method, volume rendering, solves the RTE over the entire domain. Both methods use the RTE to account for extinction (absorption plus out-scattering) by the smoke and emission from the fire.  Several areas where the visualization methods may be improved are given.
 
 %
 % -------------------  Introduction ------------------------
