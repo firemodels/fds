@@ -1,6 +1,6 @@
 @echo off
 
-Rem windows batch file to build smokezip from the command line
+Rem windows batch file to build smokeview from the command line
 
 IF "%SETUP_IFORT_COMPILER11%"=="1" GOTO envexist
 
@@ -9,7 +9,10 @@ set SETUP_IFORT_COMPILER11=1
 echo Setting up compiler environment
 call "%IFORT_COMPILER11%\bin\ifortvars" ia32
 call "%IFORT_COMPILER11%\bin\iclvars" ia32
+if exist "%VS_COMPILER%\vcvars32x86_amd64.bat" call "%VS_COMPILER%\vcvars32x86_amd64"
 :envexist
+
 erase *.obj
-make VPATH="../../../SMV/source/set_path" -f ../Makefile intel_win_64
+erase *.mod
+make VPATH="../../../SMV/source/set_path" -f ..\Makefile intel_win_32
 pause
