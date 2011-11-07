@@ -22,6 +22,7 @@
 #include "svn_revision.h"
 #include "translate.h"
 #include "update.h"
+#include "datadefs.h"
 
 // svn revision character string
 char startup_revision[]="$Revision$";
@@ -2217,17 +2218,7 @@ void initvars0(void){
   FontMenu(fontindex);
 }
 
-int imax(int a, int b){
-  if(a>b){
-    return a;
-  }
-  else{
-    return b;
-  }
-}
-
-
-#define MAXREV(cval) max_revision=imax(getrevision(cval),max_revision)
+#define MAXREV(cval) max_revision=MAX(getrevision(cval),max_revision)
 int getmaxrevision(void){
   int max_revision=0;
 

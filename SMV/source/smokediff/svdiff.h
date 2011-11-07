@@ -117,7 +117,6 @@ typedef struct {
 int getendian(void);
 void getSMDiffversion(char *SMDiffversion);
 int getmaxrevision(void);
-int imax(int a, int b);
 int getrevision(char *svn);
 void version(void);
 void usage(void);

@@ -8,20 +8,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include "svn_revision.h"
+#include "datadefs.h"
 
 // svn revision character string
 char utilities_revision[]="$Revision$";
-
-/* ------------------ imax ------------------------ */
-
-int imax(int a, int b){
-  if(a>b){
-    return a;
-  }
-  else{
-    return b;
-  }
-}
 
 /* ------------------ trim_front ------------------------ */
 
@@ -76,7 +66,7 @@ void version(void){
 
 /* ------------------ getmaxrev ------------------------ */
 
-#define MAXREV(cval) max_revision=imax(getrevision(cval),max_revision)
+#define MAXREV(cval) max_revision=MAX(getrevision(cval),max_revision)
 int getmaxrevision(void){
   int max_revision=0;
 
