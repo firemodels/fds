@@ -23,7 +23,7 @@ CO+0.5O2 -> CO2
       A = 4.244963238e-6
       E = 0.0
       HEAT_OF_COMBUSTION=283
-      ODE_SOLVER='IMPLICIT EULER' /
+      ODE_SOLVER='IMPLICIT TRAPEZOID' /
       
 -------------------------------------------------
 # Devices and Slices
