@@ -1,5 +1,5 @@
 SOURCE_DIR = ../../../SMV/source/
-INC_DIR = 
+INC_DIR =
 FILTERC =
 FILTERF =
 
@@ -39,7 +39,7 @@ no_target:
 # ------------- Win 32 ----------------
 #  32 bit windows
 
-intel_win_32 : CFLAGS    = -O2 /Qvec_report0 /nologo -D WIN32
+intel_win_32 : CFLAGS    = -O1 /Qvec_report0 /nologo -D WIN32 -I $(SOURCE_DIR)/shared
 intel_win_32 : FFLAGS    = 
 intel_win_32 : CC        = icl
 intel_win_32 : CPP       = icl
