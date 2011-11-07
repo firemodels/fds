@@ -4347,11 +4347,24 @@ void read_device_data(char *file, int filetype, int loadstatus){
 
       devicei = deviceinfo + i;
       if(devicei->filetype!=filetype)continue;
+      FREEMEMORY(devicei->vals);
+    }
+    for(i=0;i<ndeviceinfo;i++){
+      device *devicei;
+
+      devicei = deviceinfo + i;
+      if(devicei->filetype!=filetype)continue;
       if(devicei->timesptr!=NULL){
         FREEMEMORY(*(devicei->timesptr));
         FREEMEMORY(devicei->timesptr);
+        break;
       }
-      FREEMEMORY(devicei->vals);
+    }
+    for(i=0;i<ndeviceinfo;i++){
+      device *devicei;
+
+      devicei = deviceinfo + i;
+      devicei->timesptr=NULL;
     }
     return;
   }
