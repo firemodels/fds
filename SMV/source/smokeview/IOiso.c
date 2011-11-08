@@ -505,7 +505,7 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
             if(tcolor>1.0)tcolor=1.0;
             colorindex = (unsigned char)(tcolor*255);
             isoverti->color = rgb_iso+4*colorindex;
-            isoverti->texturecolor=tcolor;
+            isoverti->ctexturecolor=colorindex;
           }
           FREEMEMORY(tvertices_i);
         }
@@ -545,7 +545,6 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
           isotrii->v1=asurface->iso_vertices+triangles_i[3*itri];
           isotrii->v2=asurface->iso_vertices+triangles_i[3*itri+1];
           isotrii->v3=asurface->iso_vertices+triangles_i[3*itri+2];
-          isotrii->distance=-1.0;
           if(ilevel==0&&strcmp(ib->surface_label.shortlabel,"hrrpuv")==0){
             ib->colorlevels[ilevel]=hrrpuv_iso_color;
           }
@@ -822,15 +821,15 @@ void drawiso(int tranflag){
         v2 = tri->v2;
         v3 = tri->v3;
 
-        glTexCoord1f(v1->texturecolor);
+        glTexCoord1f(255.0*v1->ctexturecolor);
         glNormal3fv(v1->norm);
         glVertex3fv(v1->xyz);
         
-        glTexCoord1f(v2->texturecolor);
+        glTexCoord1f(255.0*v2->ctexturecolor);
         glNormal3fv(v2->norm);
         glVertex3fv(v2->xyz);
         
-        glTexCoord1f(v3->texturecolor);
+        glTexCoord1f(255.0*v3->ctexturecolor);
         glNormal3fv(v3->norm);
         glVertex3fv(v3->xyz);
       }
@@ -1530,7 +1529,6 @@ void uncompress_isodataframe(isosurface *asurface_in, isosurface *asurface_out, 
       isotrii->v1=asurface_out->iso_vertices+triangles_i[3*itri];
       isotrii->v2=asurface_out->iso_vertices+triangles_i[3*itri+1];
       isotrii->v3=asurface_out->iso_vertices+triangles_i[3*itri+2];
-      isotrii->distance=-1.0;
       if(ilevel==0&&strcmp(ib->surface_label.shortlabel,"hrrpuv")==0){
         ib->colorlevels[ilevel]=hrrpuv_iso_color;
       }
@@ -1670,12 +1668,17 @@ void sync_isobounds(int isottype){
 
 int compare_iso_triangles( const void *arg1, const void *arg2 ){
   isotri *trii, *trij;
+  float disti, distj;
+
 
   trii = *(isotri **)arg1;
   trij = *(isotri **)arg2;
 
-  if(trii->distance<trij->distance)return  1;
-  if(trii->distance>trij->distance)return -1;
+  disti = trii->v1->distance+trii->v2->distance+trii->v3->distance;
+  distj = trij->v1->distance+trij->v2->distance+trij->v3->distance;
+
+  if(disti<distj)return  1;
+  if(disti>distj)return -1;
   return 0;
 }
 
@@ -1693,6 +1696,8 @@ void sort_iso_triangles(float *mm){
     float xyzeye[3];
     float *xyz;
     isovert *v1, *v2, *v3;
+    float dist1, dist2;
+    isotri *trim1;
 
     tri = iso_trans[itri];
     v1 = tri->v1;
@@ -1731,8 +1736,11 @@ void sort_iso_triangles(float *mm){
       xyzeye[2]/=mscale[2];
       v3->distance=xyzeye[0]*xyzeye[0]+xyzeye[1]*xyzeye[1]+xyzeye[2]*xyzeye[2];
     }
-    tri->distance=(v1->distance+v2->distance+v3->distance);
-    if(itri>0&&dosort==0&&tri->distance>iso_trans[itri-1]->distance)dosort==1;
+    dist1=(v1->distance+v2->distance+v3->distance);
+    trim1 = iso_trans[itri-1];
+    dist2=trim1->v1->distance+trim1->v2->distance+trim1->v3->distance;
+
+    if(itri>0&&dosort==0&&dist1>dist2)dosort==1;
   }
   if(dosort==1)qsort((isotri **)iso_trans,(size_t)niso_trans,sizeof(isotri **),compare_iso_triangles);
 }
