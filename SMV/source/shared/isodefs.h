@@ -37,8 +37,8 @@
 /* iso-surface definitions */
 
 typedef struct {
-  float xyz[3],norm[3],*color,distance;
-  unsigned char flag, ctexturecolor;
+  float xyz[3],*color,distance;
+  unsigned char flag, ctexturecolor, cnorm;
 } isovert;
 
 typedef struct {

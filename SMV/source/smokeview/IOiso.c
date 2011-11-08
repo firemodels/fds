@@ -465,10 +465,6 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
           xyz[2]=offset[2]+factor*(*verti++); 
           isoverti->flag=0;
             
-          vertnorm=isoverti->norm;
-          vertnorm[0]=0.0;
-          vertnorm[1]=0.0;
-          vertnorm[2]=0.0;
           if(ilevel==0&&strcmp(ib->surface_label.shortlabel,"hrrpuv")==0){
             isoverti->color=hrrpuv_iso_color;
           }
@@ -563,36 +559,50 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
         
       if(EGZ_FEOF(isostream)!=0)break;
 
-      for(itri=0;itri<ntriangles_i/3;itri++){
-        isotri *isotrii;
-        float *v1, *v2, *v3;
-        float *trinorm, *vertnorm;
-        float area;
-        float out[3];
+      if(nvertices_i>0){
+        float *vertnorms=NULL;
+        NewMemory((void **)&vertnorms,3*nvertices_i*sizeof(float));
+        for(ivert=0;ivert<nvertices_i;ivert++){
+          vertnorms[3*ivert+0]=0.0;
+          vertnorms[3*ivert+1]=0.0;
+          vertnorms[3*ivert+2]=0.0;
+        }
+        for(itri=0;itri<ntriangles_i/3;itri++){
+          isotri *isotrii;
+          float *v1, *v2, *v3;
+          float *trinorm, *vertnorm;
+          float area;
+          float out[3];
                     
-        isotrii = asurface->iso_triangles+itri;
-        v1=isotrii->v1->xyz;
-        v2=isotrii->v2->xyz;
-        v3=isotrii->v3->xyz;
-        calcNormal2f(v1,v2,v3,out,&area);
+          isotrii = asurface->iso_triangles+itri;
+          v1=isotrii->v1->xyz;
+          v2=isotrii->v2->xyz;
+          v3=isotrii->v3->xyz;
+          calcNormal2f(v1,v2,v3,out,&area);
           
-        vertnorm = isotrii->v1->norm;
-        vertnorm[0] += out[0]*area;
-        vertnorm[1] += out[1]*area;
-        vertnorm[2] += out[2]*area;
+          vertnorm = vertnorms + 3*(isotrii->v1-asurface->iso_vertices);
+          vertnorm[0] += out[0]*area;
+          vertnorm[1] += out[1]*area;
+          vertnorm[2] += out[2]*area;
         
-        vertnorm = isotrii->v2->norm;
-        vertnorm[0] += out[0]*area;
-        vertnorm[1] += out[1]*area;
-        vertnorm[2] += out[2]*area;
+          vertnorm = vertnorms + 3*(isotrii->v2-asurface->iso_vertices);
+          vertnorm[0] += out[0]*area;
+          vertnorm[1] += out[1]*area;
+          vertnorm[2] += out[2]*area;
           
-        vertnorm = isotrii->v3->norm;
-        vertnorm[0] += out[0]*area;
-        vertnorm[1] += out[1]*area;
-        vertnorm[2] += out[2]*area;
-      }
-      for(ivert=0;ivert<nvertices_i;ivert++){
-        ReduceToUnit(asurface->iso_vertices[ivert].norm);
+          vertnorm = vertnorms + 3*(isotrii->v3-asurface->iso_vertices);
+          vertnorm[0] += out[0]*area;
+          vertnorm[1] += out[1]*area;
+          vertnorm[2] += out[2]*area;
+        }
+        for(ivert=0;ivert<nvertices_i;ivert++){
+          isovert *v1;
+
+          v1 = asurface->iso_vertices + ivert;
+          ReduceToUnit(vertnorms+3*ivert);
+          v1->cnorm=(unsigned char)getnormalindex(sphereinfo,vertnorms+3*ivert);
+        }
+        FREEMEMORY(vertnorms);
       }
       ntri_total+=asurface->niso_triangles;
       asurface++;
@@ -822,15 +832,15 @@ void drawiso(int tranflag){
         v3 = tri->v3;
 
         glTexCoord1f(255.0*v1->ctexturecolor);
-        glNormal3fv(v1->norm);
+        glNormal3fv(getnormalvectorptr(sphereinfo,v1->cnorm));
         glVertex3fv(v1->xyz);
         
         glTexCoord1f(255.0*v2->ctexturecolor);
-        glNormal3fv(v2->norm);
+        glNormal3fv(getnormalvectorptr(sphereinfo,v2->cnorm));
         glVertex3fv(v2->xyz);
         
         glTexCoord1f(255.0*v3->ctexturecolor);
-        glNormal3fv(v3->norm);
+        glNormal3fv(getnormalvectorptr(sphereinfo,v3->cnorm));
         glVertex3fv(v3->xyz);
       }
     }
@@ -847,15 +857,15 @@ void drawiso(int tranflag){
         v3 = tri->v3;
 
         glColor4fv(v1->color);
-        glNormal3fv(v1->norm);
+        glNormal3fv(getnormalvectorptr(sphereinfo,v1->cnorm));
         glVertex3fv(v1->xyz);
         
         glColor4fv(v2->color);
-        glNormal3fv(v2->norm);
+        glNormal3fv(getnormalvectorptr(sphereinfo,v2->cnorm));
         glVertex3fv(v2->xyz);
         
         glColor4fv(v3->color);
-        glNormal3fv(v3->norm);
+        glNormal3fv(getnormalvectorptr(sphereinfo,v3->cnorm));
         glVertex3fv(v3->xyz);
       }
     }
@@ -1453,7 +1463,7 @@ void uncompress_isodataframe(isosurface *asurface_in, isosurface *asurface_out, 
     verti = (unsigned short *)full_data;
     for(ivert=0;ivert<niso_vertices;ivert++){
       isovert *isoverti;
-      float *xyz,*vertnorm;
+      float *xyz;
             
       isoverti = asurface_out->iso_vertices+ivert;
       xyz = isoverti->xyz;
@@ -1462,10 +1472,6 @@ void uncompress_isodataframe(isosurface *asurface_in, isosurface *asurface_out, 
       xyz[2]=offset[2]+factor*(*verti++); 
       isoverti->flag=0;
             
-      vertnorm=isoverti->norm;
-      vertnorm[0]=0.0;
-      vertnorm[1]=0.0;
-      vertnorm[2]=0.0;
       if(ilevel==0&&strcmp(ib->surface_label.shortlabel,"hrrpuv")==0){
         isoverti->color=hrrpuv_iso_color;
       }
@@ -1477,16 +1483,9 @@ void uncompress_isodataframe(isosurface *asurface_in, isosurface *asurface_out, 
     normi = (unsigned char *)full_data + 6*niso_vertices;
     for(ivert=0;ivert<niso_vertices;ivert++){
       isovert *isoverti;
-      float *norm, *spherenorm;
-      int index;
 
       isoverti = asurface_out->iso_vertices+ivert;
-      norm=isoverti->norm;
-      index = *normi++;
-      spherenorm=sphereinfo->normals + 3*index;
-      norm[0]=spherenorm[0];
-      norm[1]=spherenorm[1];
-      norm[2]=spherenorm[2];
+      isoverti->cnorm=*normi++;
     }
 
     NewMemory((void **)&triangles_i,3*niso_triangles*sizeof(int));
