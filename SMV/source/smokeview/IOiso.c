@@ -260,7 +260,9 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
   int itime,ilevel,itri,ivert,n,ii,iitime;
   isosurface *asurface;
   int nisopoints, nisotriangles;
-
+#ifdef _DEBUG
+  int ntotal_isotris=0, ntotal_isoverts=0;
+#endif
   float time, time_max;
   EGZ_FILE *isostream;
 
@@ -412,8 +414,14 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
       asurface->dataflag=ib->dataflag;
         
       EGZ_FREAD(&nvertices_i,4,1,isostream);
+#ifdef _DEBUG
+      ntotal_isoverts+=nvertices_i;
+#endif
       if(EGZ_FEOF(isostream)!=0)break;
       EGZ_FREAD(&ntriangles_i,4,1,isostream);
+#ifdef _DEBUG
+      ntotal_isotris+=ntriangles_i;
+#endif
       if(EGZ_FEOF(isostream)!=0)break;
       asurface->niso_triangles=ntriangles_i/3;
       asurface->niso_vertices=nvertices_i;
@@ -531,14 +539,12 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
         NewMemory((void **)&asurface->iso_triangles,(ntriangles_i/3)*sizeof(isotri));
         for(itri=0;itri<ntriangles_i/3;itri++){
           isotri *isotrii;
+          float **color;
               
           isotrii=asurface->iso_triangles+itri;
           isotrii->v1=asurface->iso_vertices+triangles_i[3*itri];
           isotrii->v2=asurface->iso_vertices+triangles_i[3*itri+1];
           isotrii->v3=asurface->iso_vertices+triangles_i[3*itri+2];
-          isotrii->xyzmid[0]=(isotrii->v1->xyz[0]+isotrii->v2->xyz[0]+isotrii->v3->xyz[0])/3.0;
-          isotrii->xyzmid[1]=(isotrii->v1->xyz[1]+isotrii->v2->xyz[1]+isotrii->v3->xyz[1])/3.0;
-          isotrii->xyzmid[2]=(isotrii->v1->xyz[2]+isotrii->v2->xyz[2]+isotrii->v3->xyz[2])/3.0;
           isotrii->distance=-1.0;
           if(ilevel==0&&strcmp(ib->surface_label.shortlabel,"hrrpuv")==0){
             ib->colorlevels[ilevel]=hrrpuv_iso_color;
@@ -546,11 +552,11 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
           else{
             ib->colorlevels[ilevel]=iso_colors+4*ilevel;
           }
-          isotrii->color=ib->colorlevels+ilevel;
+          color=ib->colorlevels+ilevel;
           if(ib->dataflag==0){
-            isotrii->v1->color=*isotrii->color;
-            isotrii->v2->color=*isotrii->color;
-            isotrii->v3->color=*isotrii->color;
+            isotrii->v1->color=*color;
+            isotrii->v2->color=*color;
+            isotrii->v3->color=*color;
           }
         }
         FREEMEMORY(triangles_i);
@@ -571,11 +577,6 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
         v3=isotrii->v3->xyz;
         calcNormal2f(v1,v2,v3,out,&area);
           
-        trinorm=isotrii->norm;
-        trinorm[0]=out[0];
-        trinorm[1]=out[1];
-        trinorm[2]=out[2];
-        
         vertnorm = isotrii->v1->norm;
         vertnorm[0] += out[0]*area;
         vertnorm[1] += out[1]*area;
@@ -606,6 +607,10 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
       if(itime>=meshi->nisosteps)break;
     }
   }
+#ifdef _DEBUG
+  printf("nverts=%i ntris=%i\n",ntotal_isoverts,ntotal_isotris);
+  printf("size verts=%i tris=%i\n",(int)(ntotal_isoverts*sizeof(isovert)),(int)(ntotal_isotris*sizeof(isotri)/3));
+#endif
 
   local_stoptime = glutGet(GLUT_ELAPSED_TIME);
   delta_time = (local_stoptime-local_starttime)/1000.0;
@@ -876,43 +881,55 @@ void drawiso(int tranflag){
     for(i=0;i<niso_trans;i++){
       isotri *tri;
       float *xyz1, *xyz2, *xyz3;
+      float *color1, *color2, *color3;
         
       tri=iso_trans[i];
 
       xyz1 = tri->v1->xyz;
       xyz2 = tri->v2->xyz;
       xyz3 = tri->v3->xyz;
+      color1 = tri->v1->color;
+      color2 = tri->v2->color;
+      color3 = tri->v3->color;
 
-      glColor3fv(*tri->color);
-
+      glColor3fv(color1);
       glVertex3fv(xyz1);
+      glColor3fv(color2);
       glVertex3fv(xyz2);
         
       glVertex3fv(xyz2);
+      glColor3fv(color3);
       glVertex3fv(xyz3);
         
       glVertex3fv(xyz3);
+      glColor3fv(color1);
       glVertex3fv(xyz1);
     }
     for(i=0;i<niso_opaques;i++){
       isotri *tri;
       float *xyz1, *xyz2, *xyz3;
+      float *color1, *color2, *color3;
         
       tri=iso_opaques[i];
 
       xyz1 = tri->v1->xyz;
       xyz2 = tri->v2->xyz;
       xyz3 = tri->v3->xyz;
+      color1 = tri->v1->color;
+      color2 = tri->v2->color;
+      color3 = tri->v3->color;
 
-      glColor3fv(*tri->color);
-
+      glColor3fv(color1);
       glVertex3fv(xyz1);
+      glColor3fv(color2);
       glVertex3fv(xyz2);
         
       glVertex3fv(xyz2);
+      glColor3fv(color3);
       glVertex3fv(xyz3);
         
       glVertex3fv(xyz3);
+      glColor3fv(color1);
       glVertex3fv(xyz1);
     }
     glEnd();
@@ -930,33 +947,43 @@ void drawiso(int tranflag){
     for(i=0;i<niso_trans;i++){
       isotri *tri;
       float *xyz1, *xyz2, *xyz3;
+      float *color1, *color2, *color3;
         
       tri=iso_trans[i];
 
       xyz1 = tri->v1->xyz;
       xyz2 = tri->v2->xyz;
       xyz3 = tri->v3->xyz;
+      color1 = tri->v1->color;
+      color2 = tri->v2->color;
+      color3 = tri->v3->color;
       
-      glColor3fv(*tri->color);
-
+      glColor3fv(color1);
       glVertex3fv(xyz1);
+      glColor3fv(color2);
       glVertex3fv(xyz2);
+      glColor3fv(color3);
       glVertex3fv(xyz3);
     }
     for(i=0;i<niso_opaques;i++){
       isotri *tri;
       float *xyz1, *xyz2, *xyz3;
+      float *color1, *color2, *color3;
         
       tri=iso_opaques[i];
 
       xyz1 = tri->v1->xyz;
       xyz2 = tri->v2->xyz;
       xyz3 = tri->v3->xyz;
+      color1 = tri->v1->color;
+      color2 = tri->v2->color;
+      color3 = tri->v3->color;
       
-      glColor3fv(*tri->color);
-
+      glColor3fv(color1);
       glVertex3fv(xyz1);
+      glColor3fv(color2);
       glVertex3fv(xyz2);
+      glColor3fv(color3);
       glVertex3fv(xyz3);
     }
     glEnd();
@@ -1497,14 +1524,12 @@ void uncompress_isodataframe(isosurface *asurface_in, isosurface *asurface_out, 
 
     for(itri=0;itri<niso_triangles;itri++){
       isotri *isotrii;
+      float **color;
               
       isotrii=asurface_out->iso_triangles+itri;
       isotrii->v1=asurface_out->iso_vertices+triangles_i[3*itri];
       isotrii->v2=asurface_out->iso_vertices+triangles_i[3*itri+1];
       isotrii->v3=asurface_out->iso_vertices+triangles_i[3*itri+2];
-      isotrii->xyzmid[0]=(isotrii->v1->xyz[0]+isotrii->v2->xyz[0]+isotrii->v3->xyz[0])/3.0;
-      isotrii->xyzmid[1]=(isotrii->v1->xyz[1]+isotrii->v2->xyz[1]+isotrii->v3->xyz[1])/3.0;
-      isotrii->xyzmid[2]=(isotrii->v1->xyz[2]+isotrii->v2->xyz[2]+isotrii->v3->xyz[2])/3.0;
       isotrii->distance=-1.0;
       if(ilevel==0&&strcmp(ib->surface_label.shortlabel,"hrrpuv")==0){
         ib->colorlevels[ilevel]=hrrpuv_iso_color;
@@ -1512,11 +1537,11 @@ void uncompress_isodataframe(isosurface *asurface_in, isosurface *asurface_out, 
       else{
         ib->colorlevels[ilevel]=iso_colors+4*ilevel;
       }
-      isotrii->color=ib->colorlevels+ilevel;
+      color=ib->colorlevels+ilevel;
       if(ib->dataflag==0){
-        isotrii->v1->color=*isotrii->color;
-        isotrii->v2->color=*isotrii->color;
-        isotrii->v3->color=*isotrii->color;
+        isotrii->v1->color=*color;
+        isotrii->v2->color=*color;
+        isotrii->v3->color=*color;
       }
     }
     FREEMEMORY(triangles_i);

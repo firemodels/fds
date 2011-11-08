@@ -38,14 +38,13 @@
 
 typedef struct {
   float xyz[3],norm[3],*color,distance;
-  int flag;
+  unsigned char flag;
   float texturecolor;
 } isovert;
 
 typedef struct {
   isovert *v1, *v2, *v3;
-  float norm[3], distance, **color;
-  float xyzmid[3];
+  float distance;
 } isotri;
 
 typedef struct {
