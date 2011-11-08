@@ -70,6 +70,7 @@ GLUI_Checkbox *CHECKBOX_show_cullports=NULL;
 GLUI_Checkbox *CHECKBOX_usevolrender=NULL;
 GLUI_Spinner *SPINNER_temperature_cutoff=NULL;
 GLUI_Spinner *SPINNER_opacity_factor=NULL;
+GLUI_Spinner *SPINNER_mass_extinct=NULL;
 GLUI_Checkbox *CHECKBOX_compress_volsmoke=NULL;
 #ifdef pp_MOUSEDOWN
 GLUI_Checkbox *CHECKBOX_hide_volsmoke=NULL;
@@ -285,6 +286,8 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     SPINNER_temperature_cutoff->set_float_limits(100.0,1199.0);
     SPINNER_opacity_factor=glui_3dsmoke->add_spinner_to_panel(panel_volume,_("Soot density factor"),GLUI_SPINNER_FLOAT,&opacity_factor);
     SPINNER_opacity_factor->set_float_limits(1.0,10.0);
+    SPINNER_mass_extinct=glui_3dsmoke->add_spinner_to_panel(panel_volume,_("Mass extinction coeff"),GLUI_SPINNER_FLOAT,&mass_extinct);
+    SPINNER_mass_extinct->set_float_limits(100.0,100000.0);
 #ifdef pp_FREEZE_VOLSMOKE
     glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Freeze"),&freeze_volsmoke);
 #endif

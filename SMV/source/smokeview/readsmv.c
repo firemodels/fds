@@ -28,6 +28,7 @@
 #include "update.h"
 #include "smokeviewvars.h"
 #include "IOvolsmoke.h"
+#include "datadefs.h"
 
 // svn revision character string
 char readsmv_revision[]="$Revision$";
@@ -7762,9 +7763,9 @@ int readini2(char *inifile, int localfile){
       int meshnum;
 
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i %i %i %f %f",
+      sscanf(buffer,"%i %i %i %i %f %f %f",
         &glui_compress_volsmoke,&use_multi_threading,&load_at_rendertimes,&volbw,
-        &temperature_cutoff,&opacity_factor
+        &temperature_cutoff,&opacity_factor,&mass_extinct
         );
       if(glui_compress_volsmoke!=0)glui_compress_volsmoke=1;
       if(use_multi_threading!=0)use_multi_threading=1;
@@ -7773,6 +7774,7 @@ int readini2(char *inifile, int localfile){
       if(temperature_cutoff>1199.0)temperature_cutoff=1199.0;
       if(opacity_factor<1.0)opacity_factor=1.0;
       if(opacity_factor>10.0)opacity_factor=10.0;
+      mass_extinct=CLAMP(mass_extinct,100.0,100000.0);
       continue;
     }
     if(match(buffer,"MESHOFFSET",10)==1){
@@ -10667,9 +10669,9 @@ void writeini(int flag){
   fprintf(fileout,"SMOKESENSORS\n");
   fprintf(fileout," %i %i\n",show_smokesensors,test_smokesensors);
   fprintf(fileout,"VOLSMOKE\n");
-  fprintf(fileout," %i %i %i %i %f %f",
+  fprintf(fileout," %i %i %i %i %f %f %f",
         glui_compress_volsmoke,use_multi_threading,load_at_rendertimes,volbw,
-        temperature_cutoff,opacity_factor
+        temperature_cutoff,opacity_factor,mass_extinct
         );
 
   fprintf(fileout,"\nMISC\n");

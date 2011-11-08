@@ -183,6 +183,7 @@ int setVolSmokeShaders() {
     "uniform float xyzmaxdiff,dcell,opacity_factor,temperature_cutoff;"
     "uniform vec3 eyepos,boxmin, boxmax;"
     "varying vec3 fragpos;"
+    "uniform float mass_extinct;"
     
 #ifdef pp_GPUDEPTH
 // http://en.wikipedia.org/wiki/Depth_buffer#Mathematics
@@ -206,7 +207,7 @@ int setVolSmokeShaders() {
     "  float d;"
     "  vec3 dalphamin,dalphamax,fragmaxpos,posi;"
     "  vec3 pt_soot, pt_color,cum_color;"
-    "  float opacity,alpha_min,factor,pathdist,k;"
+    "  float opacity,alpha_min,factor,pathdist;"
     "  float colorindex,tempval,gray;"
     "  float tauhat, alphahat, taui, tauterm;"
     "  float dstep;"
@@ -233,7 +234,6 @@ int setVolSmokeShaders() {
     "  tauhat=1.0;"
     "  alphahat=0.0;"
     "  cum_color=vec3(0.0,0.0,0.0);"
-    "  k=8700;"
     "  for(i=0;i<n_iter;i++){"
     "    factor = (0.5+i)/n_iter;"
     "    posi = (mix(fragpos,fragmaxpos,factor)-boxmin)/(boxmax-boxmin);"
@@ -255,7 +255,7 @@ int setVolSmokeShaders() {
     "    else{"
     "      pt_color = vec3(0.0,0.0,0.0);"
     "    }"
-    "    taui = exp(-k*pt_soot*dstep);"
+    "    taui = exp(-mass_extinct*pt_soot*dstep);"
     "    tauterm = (1.0-taui)*tauhat;"
     "    alphahat  += tauterm;"
     "    cum_color += tauterm*pt_color;"
@@ -337,6 +337,7 @@ int setVolSmokeShaders() {
   GPUvol_dcell = glGetUniformLocation(p_volsmoke,"dcell");
   GPUvol_xyzmaxdiff = glGetUniformLocation(p_volsmoke,"xyzmaxdiff");
   GPUvol_opacity_factor = glGetUniformLocation(p_volsmoke,"opacity_factor");
+  GPUvol_mass_extinct = glGetUniformLocation(p_volsmoke,"mass_extinct");
   GPUvol_volbw = glGetUniformLocation(p_volsmoke,"volbw");
   GPUvol_temperature_cutoff = glGetUniformLocation(p_volsmoke,"temperature_cutoff");
   GPUvol_boxmin = glGetUniformLocation(p_volsmoke,"boxmin");

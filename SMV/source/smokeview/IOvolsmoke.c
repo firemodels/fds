@@ -1010,6 +1010,7 @@ void drawsmoke3dGPUVOL(void){
   glUniform3f(GPUvol_eyepos,xyzeyeorig[0],xyzeyeorig[1],xyzeyeorig[2]);
   glUniform1f(GPUvol_xyzmaxdiff,xyzmaxdiff);
   glUniform1f(GPUvol_opacity_factor,opacity_factor);
+  glUniform1f(GPUvol_mass_extinct,mass_extinct);
   glUniform1i(GPUvol_volbw,volbw);
   glUniform1f(GPUvol_temperature_cutoff,temperature_cutoff);
   if(use_transparency_data==1)transparenton();
