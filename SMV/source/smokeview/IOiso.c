@@ -265,6 +265,7 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
 #endif
   float time, time_max;
   EGZ_FILE *isostream;
+  int break_frame;
 
   int blocknumber;
   int error;
@@ -383,6 +384,7 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
   }
 
   asurface=meshi->animatedsurfaces;
+  break_frame=0;
   iitime=0;
   itime=0;
   time_max = -1000000.0;
@@ -450,8 +452,14 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
         unsigned short *verti;
         unsigned short *vertices_i;
           
-        NewMemory((void **)&asurface->iso_vertices,nvertices_i*sizeof(isovert));
-        NewMemory((void **)&vertices_i,3*nvertices_i*sizeof(unsigned short));
+        if(NewMemory((void **)&asurface->iso_vertices,nvertices_i*sizeof(isovert))==0){
+          break_frame=1;
+          break;
+        }
+        if(NewMemory((void **)&vertices_i,3*nvertices_i*sizeof(unsigned short))==0){
+          break_frame=1;
+          break;
+        }
         verti = vertices_i;
         EGZ_FREAD(vertices_i,2,(unsigned int)(3*nvertices_i),isostream);
         for(ivert=0;ivert<nvertices_i;ivert++){
@@ -480,7 +488,10 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
           
           EGZ_FREAD(&asurface->tmin,4,1,isostream);
           EGZ_FREAD(&asurface->tmax,4,1,isostream);
-          NewMemory((void **)&tvertices_i,nvertices_i*sizeof(unsigned short));
+          if(NewMemory((void **)&tvertices_i,nvertices_i*sizeof(unsigned short))==0){
+            break_frame=1;
+            break;
+          }
           EGZ_FREAD(tvertices_i,2,(unsigned int)nvertices_i,isostream);
           if(ib->tmax>ib->tmin){
             tcolor0 = (asurface->tmin-ib->tmin)/(ib->tmax-ib->tmin);
@@ -512,9 +523,15 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
         unsigned short *triangles2_i;
         int *triangles_i;
           
-        NewMemory((void **)&triangles_i,ntriangles_i*sizeof(int));
+        if(NewMemory((void **)&triangles_i,ntriangles_i*sizeof(int))==0){
+          break_frame=1;
+          break;
+        }
         if(nvertices_i<256&&nvertices_i>0){
-          NewMemory((void **)&triangles1_i,ntriangles_i*sizeof(unsigned char));
+          if(NewMemory((void **)&triangles1_i,ntriangles_i*sizeof(unsigned char))==0){
+            break_frame=1;
+            break;
+          }
           EGZ_FREAD(triangles1_i,1,(unsigned int)ntriangles_i,isostream);
           for(itri=0;itri<ntriangles_i;itri++){
             triangles_i[itri]=triangles1_i[itri];
@@ -522,7 +539,10 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
           FREEMEMORY(triangles1_i);
         }
         else if(nvertices_i>=256&&nvertices_i<65536){
-          NewMemory((void **)&triangles2_i,ntriangles_i*sizeof(unsigned short));
+          if(NewMemory((void **)&triangles2_i,ntriangles_i*sizeof(unsigned short))==0){
+            break_frame=1;
+            break;
+          }
           EGZ_FREAD(triangles2_i,2,(unsigned int)ntriangles_i,isostream);
           for(itri=0;itri<ntriangles_i;itri++){
             triangles_i[itri]=triangles2_i[itri];
@@ -532,7 +552,10 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
         else{
           EGZ_FREAD(triangles_i,4,(unsigned int)ntriangles_i,isostream);
         } 
-        NewMemory((void **)&asurface->iso_triangles,(ntriangles_i/3)*sizeof(isotri));
+        if(NewMemory((void **)&asurface->iso_triangles,(ntriangles_i/3)*sizeof(isotri))==0){
+          break_frame=1;
+          break;
+        }
         for(itri=0;itri<ntriangles_i/3;itri++){
           isotri *isotrii;
           float **color;
@@ -561,7 +584,10 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
 
       if(nvertices_i>0){
         float *vertnorms=NULL;
-        NewMemory((void **)&vertnorms,3*nvertices_i*sizeof(float));
+        if(NewMemory((void **)&vertnorms,3*nvertices_i*sizeof(float))==0){
+          break_frame=1;
+          break;
+        }
         for(ivert=0;ivert<nvertices_i;ivert++){
           vertnorms[3*ivert+0]=0.0;
           vertnorms[3*ivert+1]=0.0;
@@ -608,8 +634,12 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
       asurface++;
     }
    
+    if(break_frame==1){
+      printf("*** warning: memory allocation attempt failed at time step: %i while reading isosurface file\n",itime);
+      meshi->nisosteps=itime;
+      break;
+    }
     if(skip_frame==1||iitime%isoframestep!=0||(settmin_i==1&&time<tmin_i)||(settmax_i==1&&time>tmax_i)){
-     // if(skip_frame==1)jj--;
     }
     else{
       itime++;
