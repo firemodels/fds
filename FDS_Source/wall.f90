@@ -1724,7 +1724,7 @@ SMIX_LOOP: DO N=1,N_TRACKED_SPECIES
          CALL WERNER_WENGLE_WALL_MODEL(SF,U_TAU,VEL_W,MUGAS/RHOG,DN,0._EB)
          TAU_PLUS = TAU_PLUS_C/MUGAS**2*U_TAU**2*RHOG
          IF (TAU_PLUS < 0.2_EB) THEN !Diffusion regime            
-            U_TURB = U_TAU * (0.086_EB*MUGAS/RHOG/D_Z( MIN(5000,INT(TGAS)),0))**(-0.7_EB)
+            U_TURB = U_TAU * 0.086_EB*(MUGAS/RHOG/D_Z( MIN(5000,INT(TGAS)),0))**(-0.7_EB)
          ELSEIF (TAU_PLUS >= 0.2_EB .AND. TAU_PLUS < 22.0398_EB) THEN !Diffusion-impaction regime
             U_TURB = U_TAU * 3.5E-4_EB * TAU_PLUS**2
          ELSE ! Inertia regime
