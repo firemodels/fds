@@ -20,9 +20,8 @@ typedef struct {
 
 typedef struct _triangle {
   struct _surface *surf;
-  int interior;
-  float *color;
-  int fdsnorm,skinny;
+  unsigned char interior, fdsnorm,skinny;
+  float distance, *color;
   point *points[3];
   float normal[3];
 } triangle;
