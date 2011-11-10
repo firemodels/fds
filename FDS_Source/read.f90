@@ -8996,7 +8996,8 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
       ENDIF
 
       IF (QUANTITY_INDEX < 0 .AND. (DV%STATISTICS=='MASS MEAN' .OR. DV%STATISTICS=='VOLUME MEAN' .OR. &
-                                    DV%STATISTICS=='VOLUME INTEGRAL' .OR. DV%STATISTICS=='MASS INTEGRAL') ) THEN
+                                    DV%STATISTICS=='VOLUME INTEGRAL' .OR. DV%STATISTICS=='MASS INTEGRAL' .OR. &
+                                    DV%STATISTICS=='AREA INTEGRAL') ) THEN
          WRITE(MESSAGE,'(A,A)') 'ERROR: Invalid STATISTICS specified for wall DEVC ',TRIM(DV%ID)
          CALL SHUTDOWN(MESSAGE)
       ENDIF

@@ -1742,9 +1742,9 @@ DO N=1,N_GEOM
    WRITE(LU_SMV,'(1X,A,1F12.5)') 'D=',2._EB*G%RADIUS
    IF (G%ISHAPE==ICYLINDER) THEN
       ! for now, cylinder aligned with coordinate axis
-      IF (G%XOR==1) WRITE(LU_SMV,'(1X,A,1F12.5)') 'L=',G%X2-G%X1
-      IF (G%YOR==1) WRITE(LU_SMV,'(1X,A,1F12.5)') 'L=',G%Y2-G%Y1
-      IF (G%ZOR==1) WRITE(LU_SMV,'(1X,A,1F12.5)') 'L=',G%Z2-G%Z1
+      IF (ABS(G%XOR-1._EB) <ZERO_P) WRITE(LU_SMV,'(1X,A,1F12.5)') 'L=',G%X2-G%X1
+      IF (ABS(G%YOR-1._EB) <ZERO_P) WRITE(LU_SMV,'(1X,A,1F12.5)') 'L=',G%Y2-G%Y1
+      IF (ABS(G%ZOR-1._EB) <ZERO_P) WRITE(LU_SMV,'(1X,A,1F12.5)') 'L=',G%Z2-G%Z1
    ENDIF
    WRITE(LU_SMV,'(1X,A,1F12.5)') 'XMAX=',G%X+G%RADIUS
    WRITE(LU_SMV,'(1X,A,1F12.5)') 'YMAX=',G%Y+G%RADIUS
@@ -4055,11 +4055,11 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
             DO K=DV%K1,DV%K2
                DO J=DV%J1,DV%J2
-                  DO I=DV%I1,DV%I2
-                     IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+                  DEVICE_CELL_LOOP: DO I=DV%I1,DV%I2
+                     IF (SOLID(CELL_INDEX(I,J,K))) CYCLE DEVICE_CELL_LOOP
                      VOL = DX(I)*RC(I)*DY(J)*DZ(K)
                      NOT_FOUND = .FALSE.
-                     SELECT CASE(DV%STATISTICS)
+                     STATISTICS_SELECT: SELECT CASE(DV%STATISTICS)
                         CASE('MAX')
                            STAT_VALUE = MAX(STAT_VALUE, &
                                        GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
@@ -4083,15 +4083,20 @@ DEVICE_LOOP: DO N=1,N_DEVC
                                                         DV%PART_INDEX,DV%VELO_INDEX,T,NM)* &
                                        VOL*RHO(I,J,K)
                         CASE('AREA INTEGRAL')
-                           IF (DV%IOR==1) STAT_VALUE = STAT_VALUE + RC(I)*DY(J)*DZ(K)* &
-                                          GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                           DV%PART_INDEX,DV%VELO_INDEX,T,NM)
-                           IF (DV%IOR==2) STAT_VALUE = STAT_VALUE + DX(I)*DZ(K)* &
-                                          GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                           DV%PART_INDEX,DV%VELO_INDEX,T,NM)
-                           IF (DV%IOR==3) STAT_VALUE = STAT_VALUE + DX(I)*RC(I)*DY(J)* &
-                                          GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                           DV%PART_INDEX,DV%VELO_INDEX,T,NM)
+                           SELECT CASE (ABS(DV%IOR))
+                              CASE(1)
+                                 STAT_VALUE = STAT_VALUE + RC(I)*DY(J)*DZ(K)* &
+                                              GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
+                                                               DV%PART_INDEX,DV%VELO_INDEX,T,NM)                              
+                              CASE(2)
+                                 STAT_VALUE = STAT_VALUE + DX(I)*DZ(K)* &
+                                              GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
+                                                               DV%PART_INDEX,DV%VELO_INDEX,T,NM)                              
+                              CASE(3)
+                                 STAT_VALUE = STAT_VALUE + DX(I)*RC(I)*DY(J)* &
+                                              GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
+                                                               DV%PART_INDEX,DV%VELO_INDEX,T,NM)                              
+                           END SELECT
                         CASE('TENSOR SURFACE INTEGRAL')
                            ! similar to 'AREA INTEGRAL' but multiplies by outward unit normal and sums along outside of volume XB
                            
@@ -4117,16 +4122,16 @@ DEVICE_LOOP: DO N=1,N_DEVC
                         
                         CASE('VOLUME MEAN')
                            STAT_VALUE = STAT_VALUE + &
-                                       GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                        DV%PART_INDEX,DV%VELO_INDEX,T,NM)*VOL
+                                        GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
+                                                         DV%PART_INDEX,DV%VELO_INDEX,T,NM)*VOL
                            SUM_VALUE = SUM_VALUE + VOL
                         CASE('MASS MEAN')
                            STAT_VALUE = STAT_VALUE + VOL*RHO(I,J,K)* &
-                                       GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,&
-                                                        DV%Z_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM)
+                                        GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,&
+                                                         DV%Z_INDEX,DV%PART_INDEX,DV%VELO_INDEX,T,NM)
                            SUM_VALUE = SUM_VALUE + VOL*RHO(I,J,K)
-                     END SELECT
-                  ENDDO
+                     END SELECT STATISTICS_SELECT
+                  ENDDO DEVICE_CELL_LOOP
                ENDDO
             ENDDO
 
@@ -4741,7 +4746,7 @@ SELECT CASE(IND)
                IP = I
                JP = J
                KP = K
-               SELECT CASE(DV%IOR)
+               SELECT CASE(ABS(DV%IOR))
                   CASE(1)
                      IP   = I+1
                      VEL  = U(I,J,K)
