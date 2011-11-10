@@ -308,11 +308,17 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   if(xyz_clipplane==2){
     setClipPlanes(1);
   }
-  drawBlockages(mode,DRAW_SOLID);
+  drawBlockages(mode,DRAW_OPAQUE);
   if(xyz_clipplane==2){
     unsetClipPlanes();
   }
   sniffErrors("drawBlockages");
+
+  /* ++++++++++++++++++++++++ draw triangles +++++++++++++++++++++++++ */
+  
+  if(ntrilistinfo){
+    draw_geom(DRAW_OPAQUE);
+  }
 
 #ifdef pp_SHOOTER
 /* ++++++++++++++++++++++++ draw shooter points +++++++++++++++++++++++++ */
@@ -386,7 +392,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
     //if(isoinfo!=NULL)drawspherepoints(sphereinfo);
   if(showiso==1){
-    drawiso(DRAW_SOLID);
+    drawiso(DRAW_OPAQUE);
   }
 
 /* ++++++++++++++++++++++++ draw zone fire modeling info +++++++++++++++++++++++++ */
@@ -417,7 +423,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   /* ++++++++++++++++++++++++ draw triangles +++++++++++++++++++++++++ */
   
   if(ntrilistinfo){
-    draw_geom();
+    draw_geom(DRAW_TRANSPARENT);
   }
 
   if(showiso==1){

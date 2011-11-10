@@ -294,7 +294,7 @@ void _sniffErrors(char *whereat);
 #define PINK 3
 #define RED 4
 
-#define DRAW_SOLID 0
+#define DRAW_OPAQUE 0
 #define DRAW_TRANSPARENT 1
 
 #endif

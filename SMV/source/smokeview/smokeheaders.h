@@ -27,7 +27,7 @@ EXTERNCPP void getzonedatacsv(int nzonet, int nrooms, int nfires,
                     float *zonepr, float *zoneylay,  float *zonetl, float *zonetu,
                     float **zoneodlptr, float **zoneoduptr, float *zonehvents, float *zonevvents,
                     int *error);
-EXTERNCPP void draw_geom(void);
+EXTERNCPP void draw_geom(int flag);
 EXTERNCPP void getzonesizecsv(int *nzonet, int *nroom2, int *nfires, int *nzhvents, int *nzvvents, int *error);
 EXTERNCPP void getzoneventbounds(void);
 EXTERNCPP void remove_dup_blockages(void);

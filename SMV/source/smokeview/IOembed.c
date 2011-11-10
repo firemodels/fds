@@ -169,7 +169,7 @@ void get_faceinfo(void){
 
 /* ------------------ draw_geom ------------------------ */
 
-void draw_geom(void){
+void draw_geom(int flag){
   int i;
   float black[]={0.0,0.0,0.0,1.0};
   float blue[]={0.0,0.0,1.0,1.0};
@@ -188,7 +188,7 @@ void draw_geom(void){
     ntris = trilisti->ntriangles;
     npoints = pointlisti->npoints;
     if(patchembedded==0&&showtrisurface==1){
-      if(use_transparency_data==1)transparenton();
+      if(flag==DRAW_TRANSPARENT&&use_transparency_data==1)transparenton();
       glEnable(GL_LIGHTING);
       glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
       glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
@@ -211,6 +211,8 @@ void draw_geom(void){
           else{
             color = trianglei->surf->color;
           }
+          if(color[3]<1.0&&flag==DRAW_OPAQUE)continue;
+          if(color[3]>=1.0&&flag==DRAW_TRANSPARENT)continue;
           if(color!=last_color){
             glColor4fv(color);
             last_color=color;
@@ -240,6 +242,8 @@ void draw_geom(void){
           else{
             color = trianglei->surf->color;
           }
+          if(color[3]<1.0&&flag==DRAW_OPAQUE)continue;
+          if(color[3]>=1.0&&flag==DRAW_TRANSPARENT)continue;
           if(color!=last_color){
             glColor4fv(color);
             last_color=color;
@@ -264,9 +268,9 @@ void draw_geom(void){
       glEnd();
       glDisable(GL_COLOR_MATERIAL);
       glDisable(GL_LIGHTING);
-      if(use_transparency_data==1)transparentoff();
+      if(flag==DRAW_TRANSPARENT&&use_transparency_data==1)transparentoff();
     }
-    if(showtrioutline==1){
+    if(flag==DRAW_OPAQUE&&showtrioutline==1){
       glBegin(GL_LINES);
       for(j=0;j<ntris;j++){
         float *xyzptr[3];
@@ -298,7 +302,7 @@ void draw_geom(void){
       }
       glEnd();
     }
-    if(showtrinormal==1){
+    if(flag==DRAW_OPAQUE&&showtrinormal==1){
       if(smoothtrinormal==0){
         glBegin(GL_LINES);
         for(j=0;j<ntris;j++){
@@ -368,7 +372,7 @@ void draw_geom(void){
         }
         glEnd();
       }
-      if(smoothtrinormal==1){
+      if(flag==DRAW_OPAQUE&&smoothtrinormal==1){
         glBegin(GL_LINES);
         for(j=0;j<npoints;j++){
           float *xyznorm;
@@ -914,3 +918,76 @@ void draw_geomdata(patch *patchi){
   }
 
 }
+
+
+/* ------------------ sort_triangles ------------------------ */
+
+void sort_embed_geom(float *mm){
+  int itri;
+  int newflag;
+  int dosort=0;
+  int i;
+
+  for(i=0;i<ntrilistinfo;i++){
+    trilistdata *trilisti;
+    pointlistdata *pointlisti;
+    int ntris,npoints;
+    int j;
+    float *color;
+
+    trilisti = trilistinfo + i;/*
+
+    float xyzeye[3];
+    float *xyz;
+    isovert *v1, *v2, *v3;
+    float dist1, dist2;
+    isotri *trim1;
+
+    tri = iso_trans[itri];
+    v1 = tri->v1;
+    v2 = tri->v2;
+    v3 = tri->v3;
+    if(v1->flag!=newflag){
+      v1->flag=newflag;
+      xyz = v1->xyz;
+      xyzeye[0] = mm[0]*xyz[0] + mm[4]*xyz[1] +  mm[8]*xyz[2] + mm[12];
+      xyzeye[1] = mm[1]*xyz[0] + mm[5]*xyz[1] +  mm[9]*xyz[2] + mm[13];
+      xyzeye[2] = mm[2]*xyz[0] + mm[6]*xyz[1] + mm[10]*xyz[2] + mm[14];
+      xyzeye[0]/=mscale[0];
+      xyzeye[1]/=mscale[1];
+      xyzeye[2]/=mscale[2];
+      v1->distance=xyzeye[0]*xyzeye[0]+xyzeye[1]*xyzeye[1]+xyzeye[2]*xyzeye[2];
+    }
+    if(v2->flag!=newflag){
+      v2->flag=newflag;
+      xyz = v2->xyz;
+      xyzeye[0] = mm[0]*xyz[0] + mm[4]*xyz[1] +  mm[8]*xyz[2] + mm[12];
+      xyzeye[1] = mm[1]*xyz[0] + mm[5]*xyz[1] +  mm[9]*xyz[2] + mm[13];
+      xyzeye[2] = mm[2]*xyz[0] + mm[6]*xyz[1] + mm[10]*xyz[2] + mm[14];
+      xyzeye[0]/=mscale[0];
+      xyzeye[1]/=mscale[1];
+      xyzeye[2]/=mscale[2];
+      v2->distance=xyzeye[0]*xyzeye[0]+xyzeye[1]*xyzeye[1]+xyzeye[2]*xyzeye[2];
+    }
+    if(v3->flag!=newflag){
+      v3->flag=newflag;
+      xyz = v3->xyz;
+      xyzeye[0] = mm[0]*xyz[0] + mm[4]*xyz[1] +  mm[8]*xyz[2] + mm[12];
+      xyzeye[1] = mm[1]*xyz[0] + mm[5]*xyz[1] +  mm[9]*xyz[2] + mm[13];
+      xyzeye[2] = mm[2]*xyz[0] + mm[6]*xyz[1] + mm[10]*xyz[2] + mm[14];
+      xyzeye[0]/=mscale[0];
+      xyzeye[1]/=mscale[1];
+      xyzeye[2]/=mscale[2];
+      v3->distance=xyzeye[0]*xyzeye[0]+xyzeye[1]*xyzeye[1]+xyzeye[2]*xyzeye[2];
+    }
+    dist1=(v1->distance+v2->distance+v3->distance);
+    trim1 = iso_trans[itri-1];
+    dist2=trim1->v1->distance+trim1->v2->distance+trim1->v3->distance;
+
+    if(itri>0&&dosort==0&&dist1>dist2)dosort==1;
+    */
+  }
+  //if(dosort==1)qsort((isotri **)iso_trans,(size_t)niso_trans,sizeof(isotri **),compare_iso_triangles);
+}
+
+
