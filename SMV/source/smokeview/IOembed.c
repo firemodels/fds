@@ -188,6 +188,7 @@ void draw_geom(void){
     ntris = trilisti->ntriangles;
     npoints = pointlisti->npoints;
     if(patchembedded==0&&showtrisurface==1){
+      if(use_transparency_data==1)transparenton();
       glEnable(GL_LIGHTING);
       glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
       glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
@@ -211,7 +212,7 @@ void draw_geom(void){
             color = trianglei->surf->color;
           }
           if(color!=last_color){
-            glColor3fv(color);
+            glColor4fv(color);
             last_color=color;
           }
 
@@ -240,10 +241,9 @@ void draw_geom(void){
             color = trianglei->surf->color;
           }
           if(color!=last_color){
-            glColor3fv(color);
+            glColor4fv(color);
             last_color=color;
           }
-          glColor3fv(color);
 
           xyznorm = trianglei->points[0]->norm;
           glNormal3fv(xyznorm);
@@ -264,6 +264,7 @@ void draw_geom(void){
       glEnd();
       glDisable(GL_COLOR_MATERIAL);
       glDisable(GL_LIGHTING);
+      if(use_transparency_data==1)transparentoff();
     }
     if(showtrioutline==1){
       glBegin(GL_LINES);

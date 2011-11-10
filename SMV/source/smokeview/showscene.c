@@ -303,12 +303,6 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
     antialias(0);
   }
 
-  /* ++++++++++++++++++++++++ draw triangles +++++++++++++++++++++++++ */
-  
-  if(ntrilistinfo){
-    draw_geom();
-  }
-
   /* ++++++++++++++++++++++++ draw blockages +++++++++++++++++++++++++ */
 
   if(xyz_clipplane==2){
@@ -419,6 +413,12 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 //**********************************************************************************
 //**********************************************************************************
 //**********************************************************************************
+
+  /* ++++++++++++++++++++++++ draw triangles +++++++++++++++++++++++++ */
+  
+  if(ntrilistinfo){
+    draw_geom();
+  }
 
   if(showiso==1){
     drawiso(DRAW_TRANSPARENT);
