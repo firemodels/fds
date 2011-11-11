@@ -2305,7 +2305,7 @@ INTEGER :: N
 TYPE(REACTION_TYPE), POINTER :: RN
 
 IF (SIMPLE_CHEMISTRY) THEN
-
+   MASS_FRACTION = 0._EB
    RN => REACTION(1)
    SOOT_IF:IF (N<=1) THEN
       SELECT CASE(N)
@@ -2317,8 +2317,8 @@ IF (SIMPLE_CHEMISTRY) THEN
             SPEC_ID(3)       = 'CARBON DIOXIDE'
             SPEC_ID(4)       = 'NITROGEN'
             MASS_FRACTION(1) = Y_H2O_INFTY
-            MASS_FRACTION(2) = Y_O2_INFTY
-            MASS_FRACTION(3) = Y_CO2_INFTY
+            MASS_FRACTION(2) = Y_O2_INFTY*(1._EB-Y_H2O_INFTY)
+            MASS_FRACTION(3) = Y_CO2_INFTY*(1._EB-Y_H2O_INFTY)
             MASS_FRACTION(4) = 1._EB-SUM(MASS_FRACTION)
          CASE(1)
             ID               = RN%FUEL
