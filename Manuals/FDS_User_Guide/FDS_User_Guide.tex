@@ -11774,9 +11774,9 @@ The geometry file contains a description of immersed geometrical objects.  These
 defined in terms of nodes and triangles.  A node consists of an $(x,y,z)$ coordinate.
 A triangle
 consists of 3 nodes.  The file format allows one to specify objects that change with time.
-Static geometry is defined once and displayed by Smokeview unchanged at each time step.  
-Dynamic geometry is defined at each time step either in terms of nodes and faces 
-or in terms of a translation and two rotations (azimuthal and elevation) of dynamic geometry defined 
+Static geometry is defined once and displayed by Smokeview unchanged at each time step.
+Dynamic geometry is defined at each time step either in terms of nodes and faces
+or in terms of a translation and two rotations (azimuthal and elevation) of dynamic geometry defined
 in the first time step.
 These files are written out from {\bf dump.f} with lines equivalent to the following:
 
@@ -11789,16 +11789,16 @@ These files are written out from {\bf dump.f} with lines equivalent to the follo
   WRITE(LU_GEOM) STIME  ! first time step
   WRITE(LU_GEOM) N_VERT_STATIC, NFACE_STATIC, NVERT_DYNAMIC, N_FACE_DYNAMMIC
   IF (N_VERT_STATIC>0)  WRITE(LU_GEOM) (Xvert_S(I),Yvert_S(I),Zvert_S(I)),I=1,N_VERT_STATIC)
-  IF (N_FACE_STATIC>0)  WRITE(LU_GEOM) (FACEX_S(I),FACEY_S(I),FACEZ_S(I)),I=1,N_FACE_STATIC)
+  IF (N_FACE_STATIC>0)  WRITE(LU_GEOM) (FACE1_S(I),FACE2_S(I),FACE3_S(I)),I=1,N_FACE_STATIC)
   IF (N_VERT_DYNAMIC>0) WRITE(LU_GEOM) (Xvert_D(I),Yvert_D(I),Zvert_D(I)),I=1,N_VERT_DYNAMIC)
-  IF (N_FACE_DYNAMIC>0) WRITE(LU_GEOM) (FACEX_D(I),FACEY_D(I),FACEZ_D(I)),I=1,N_FACE_DYNAMIC)
+  IF (N_FACE_DYNAMIC>0) WRITE(LU_GEOM) (FACE1_D(I),FACE2_D(I),FACE3_D(I)),I=1,N_FACE_DYNAMIC)
 
 ! dynamic geometry
   WRITE(LU_GEOM) STIME, GEOM_TYPE  ! each successive time step (if there is time dependent geometry)
   IF(GEOM_TYPE.EQ.0)THEN
     WRITE(LU_GEOM) N_VERT_DYNAMIC,N_FACE_DYNAMIC
     IF (N_VERT_DYNAMIC>0) WRITE(LU_GEOM) (Xvert_D(I),Yvert_D(I),Zvert_D(I)),I=1,N_VERT_DYNAMIC)
-    IF (N_FACE_DYNAMIC>0) WRITE(LU_GEOM) (FACEX_D(I),FACEY_D(I),FACEZ_D(I)),I=1,N_FACE_DYNAMIC)
+    IF (N_FACE_DYNAMIC>0) WRITE(LU_GEOM) (FACE1_D(I),FACE2_D(I),FACE3_D(I)),I=1,N_FACE_DYNAMIC)
   ELSE IF(GEOM_TYPE.EQ.1)THEN
     WRITE(LU_GEOM) Xtran, Ytran, Ztran, Xrot0, Yrot0, Zrot0, rot_az, rot_elev
   ENDIF
@@ -11817,8 +11817,9 @@ swap (endian) conventions for storing floating point numbers.
 \item {\ct STIME} is the FDS simulation time.
 \item {\ct N\_VERT\_S, N\_FACE\_S, N\_VERT\_D, N\_FACE\_D}\ are the number of static and dynamic vertices and faces.
 \item {\ct Xvert\_S, Yvert\_S, Zvert\_S, Xvert\_D, Yvert\_D, Zvert\_D}\ are the static and dynamic vertex coordinates.
-\item {\ct FACEX\_S, FACEY\_S, FACEY\_S,FACEX\_D, FACEY\_D, FACEY\_D}\ are the static and dynamic vertex indices for each face (triangle).
-\item {\ct GEOM\_TYPE}\ is flag indicating how dynamic geometry is represented.  
+\item {\ct FACE1\_S, FACE2\_S, FACE3\_S,FACE1\_D, FACE2\_D, FACE3\_D}\ are the static and dynamic vertex
+indices for each face (triangle).  The indices are numbered relative to how vertices were written out earlier.
+\item {\ct GEOM\_TYPE}\ is flag indicating how dynamic geometry is represented.
 If {\ct GEOM\_TYPE}\ is 0 then time dependent geometry is written out in
 terms of nodes and faces using the same format as the static geometry.
 If {\ct GEOM\_TYPE}\ is 1 then time dependent geometry is written out in terms of a translation
@@ -11826,7 +11827,7 @@ and two rotations.  These transformations are applied to the dynamic geometry de
 at the first time step.
 \item {\ct Xtran, Ytran, Ztran}\ is the translation applied to the initial dynamic geometry (If {\ct GEOM\_TYPE}\ is 1)
 \item {\ct Xrot0, Yrot0, Zrot0}\ is the origin about which rotations occur.
-\item {\ct rot\_az, rot\_elev}\ are the azimuthal and elevation rotation angles (in degrees) applied to the initial dynamic geometry. 
+\item {\ct rot\_az, rot\_elev}\ are the azimuthal and elevation rotation angles (in degrees) applied to the initial dynamic geometry.
 \end{itemize}
 
 \section{Geometry Data Files}
@@ -11843,10 +11844,9 @@ Geometry data files are written out from {\bf dump.f} with the lines equivalent 
   WRITE(LU_GEOM_DATA) ONE
   WRITE(LU_GEOM_DATA) VERSION
   WRITE(LU_GEOM_DATA) STIME
-  WRITE(LU_GEOM_DATA) N_VERT_STATIC,N_FACE_STATIC
-  IF (N_VERT_STATIC>0) WRITE(LU_GEOM_DATA) (ValVertStatic(I)),I=1,N_VERT_STATIC)
-  IF (N_FACE_STATIC>0) WRITE(LU_GEOM_DATA) (ValFaceStatic(I)),I=1,N_VERT_STATIC)
-  WRITE(LU_GEOM_DATA) N_VERT_DYNAMIC,NFACE_DYNAMIC
+  WRITE(LU_GEOM_DATA) N_VERT_STATIC,N_FACE_STATIC,N_VERT_DYNAMIC,NFACE_DYNAMIC
+  IF (N_VERT_STATIC>0)  WRITE(LU_GEOM_DATA) (ValVertStatic(I)), I=1,N_VERT_STATIC)
+  IF (N_FACE_STATIC>0)  WRITE(LU_GEOM_DATA) (ValFaceStatic(I)), I=1,N_VERT_STATIC)
   IF (N_VERT_DYNAMIC>0) WRITE(LU_GEOM_DATA) (ValVertDynamic(I)),I=1,N_VERT_DYNAMIC)
   IF (N_FACE_DYNAMIC>0) WRITE(LU_GEOM_DATA) (ValFaceDynamic(I)),I=1,N_FACE_DYNAMIC)
               .
