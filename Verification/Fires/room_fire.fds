@@ -25,7 +25,7 @@ All material properties are completely fabricated.
       N_REACTIONS           = 1
       NU_SPEC               = 1.
       SPEC_ID               = 'POLYURETHANE'
-      REFERENCE_TEMPERATURE = 350.
+      REFERENCE_TEMPERATURE = 320.
       HEAT_OF_REACTION      = 3000.
       HEAT_OF_COMBUSTION    = 15000. /
 
@@ -37,7 +37,7 @@ All material properties are completely fabricated.
       N_REACTIONS           = 1
       NU_SPEC               = 1.
       SPEC_ID               = 'POLYURETHANE'
-      REFERENCE_TEMPERATURE = 350.
+      REFERENCE_TEMPERATURE = 320.
       HEAT_OF_REACTION      = 1500.
       HEAT_OF_COMBUSTION    = 30000. /
 

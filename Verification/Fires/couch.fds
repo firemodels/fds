@@ -7,7 +7,7 @@ The case is meant as a teaching tool and to test functionality.
 
 &TIME T_END=900. /
 
-&SURF ID='BURNER', HRRPUA=1000., PART_ID='smoke' /
+&SURF ID='BURNER', HRRPUA=1000.  /
 &REAC C=3,H=8,SOOT_YIELD=0.01,FUEL='PROPANE'/
 &MATL ID                    = 'FABRIC'
       FYI                   = 'Properties completely fabricated'
@@ -17,7 +17,7 @@ The case is meant as a teaching tool and to test functionality.
       N_REACTIONS           = 1
       NU_SPEC               = 1.
       SPEC_ID               = 'PROPANE'
-      REFERENCE_TEMPERATURE = 350.
+      REFERENCE_TEMPERATURE = 320.
       HEAT_OF_REACTION      = 3000.
       HEAT_OF_COMBUSTION    = 15000. /
 
@@ -29,7 +29,7 @@ The case is meant as a teaching tool and to test functionality.
       N_REACTIONS           = 1
       NU_SPEC               = 1.
       SPEC_ID               = 'PROPANE'
-      REFERENCE_TEMPERATURE = 350.
+      REFERENCE_TEMPERATURE = 320.
       HEAT_OF_REACTION      = 1500.
       HEAT_OF_COMBUSTION    = 30000. /
 
@@ -45,16 +45,13 @@ The case is meant as a teaching tool and to test functionality.
       COLOR          = 'PURPLE'
       BURN_AWAY      = .TRUE.
       MATL_ID(1:2,1) = 'FABRIC','FOAM'
-      THICKNESS(1:2) = 0.002,0.1 
-      PART_ID        = 'smoke' /
+      THICKNESS(1:2) = 0.002,0.1  /
 
 &SURF ID             = 'WALL'
       DEFAULT        = .TRUE.
       RGB            = 200,200,200
       MATL_ID        = 'GYPSUM PLASTER'
       THICKNESS      = 0.012 /
-
-&PART ID='smoke', MASSLESS=.TRUE., SAMPLING_FACTOR=1 /
 
 &OBST XB= 1.50, 3.10, 3.80, 4.60, 0.00, 0.40 /
 &OBST XB= 1.50, 3.10, 3.80, 4.60, 0.40, 0.60, SURF_ID='UPHOLSTERY' /
@@ -74,9 +71,12 @@ The case is meant as a teaching tool and to test functionality.
 &BNDF QUANTITY='WALL TEMPERATURE' /
 &BNDF QUANTITY='BURNING RATE' /
 
-&SLCF PBX=2.6,QUANTITY='TEMPERATURE',VECTOR=.TRUE., CELL_CENTERED=.TRUE. /
-&SLCF PBX=2.6,QUANTITY='HRRPUV', CELL_CENTERED=.TRUE. /
-&SLCF PBX=2.6,QUANTITY='RADIATION LOSS', CELL_CENTERED=.TRUE. /
+&SLCF PBX=2.60, QUANTITY='TEMPERATURE',VECTOR=.TRUE., CELL_CENTERED=.TRUE. /
+&SLCF PBX=2.60, QUANTITY='HRRPUV', CELL_CENTERED=.TRUE. /
+&SLCF PBX=2.60, QUANTITY='RADIATION LOSS', CELL_CENTERED=.TRUE. /
+&SLCF PBY=4.40, QUANTITY='TEMPERATURE',VECTOR=.TRUE., CELL_CENTERED=.TRUE. /
+&SLCF PBY=4.40, QUANTITY='HRRPUV', CELL_CENTERED=.TRUE. /
+&SLCF PBY=4.40, QUANTITY='RADIATION LOSS', CELL_CENTERED=.TRUE. /
 
 &DEVC XYZ=2.55,4.40,0.75, QUANTITY='WALL TEMPERATURE', IOR=-2, ID='temp' /
 &DEVC XYZ=2.55,4.40,0.75, QUANTITY='BURNING RATE',     IOR=-2, ID='burn' /
