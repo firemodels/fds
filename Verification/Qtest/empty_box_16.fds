@@ -1,8 +1,0 @@
-&HEAD CHID='empty_box_16', TITLE='General purpose input file to test FDS timings, SVN $Revision: 5015 $' /
-
-&MULT ID='mesh multiplier', DX=1.0, DY=1.0, DZ=1.0, I_LOWER=0, I_UPPER=1, J_LOWER=0, J_UPPER=1, K_LOWER=0, K_UPPER=3 /
-&MESH IJK=16,16,16, XB=0.0,1.0,0.0,1.0,0.0,1.0, MULT_ID='mesh multiplier' /
-
-&TIME T_END=10.0 /
-
-&TAIL /
