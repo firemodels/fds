@@ -11774,6 +11774,10 @@ The geometry file contains a description of immersed geometrical objects.  These
 defined in terms of nodes and triangles.  A node consists of an $(x,y,z)$ coordinate.
 A triangle
 consists of 3 nodes.  The file format allows one to specify objects that change with time.
+Static geometry is defined once and displayed by Smokeview unchanged at each time step.  
+Dynamic geometry is defined at each time step either in terms of nodes and faces 
+or in terms of a translation and two rotations (azimuthal and elevation) of dynamic geometry defined 
+in the first time step.
 These files are written out from {\bf dump.f} with lines equivalent to the following:
 
 \footnotesize
@@ -11783,52 +11787,52 @@ These files are written out from {\bf dump.f} with lines equivalent to the follo
   WRITE(LU_GEOM) ONE
   WRITE(LU_GEOM) VERSION
   WRITE(LU_GEOM) STIME  ! first time step
-  WRITE(LU_GEOM) N_VERT
-  IF (N_VERT>0) WRITE(LU_GEOM) (Xvert(I),Yvert(I),Zvert(I)),I=1,N_VERT)
-  WRITE(LU_GEOM(N)) N_FACE
-  IF (N_FACE>0) WRITE(LU_GEOM) (FACEX(I),FACEY(I),FACEZ(I)),I=1,N_FACE)
+  WRITE(LU_GEOM) N_VERT_STATIC, NFACE_STATIC, NVERT_DYNAMIC, N_FACE_DYNAMMIC
+  IF (N_VERT_STATIC>0)  WRITE(LU_GEOM) (Xvert_S(I),Yvert_S(I),Zvert_S(I)),I=1,N_VERT_STATIC)
+  IF (N_FACE_STATIC>0)  WRITE(LU_GEOM) (FACEX_S(I),FACEY_S(I),FACEZ_S(I)),I=1,N_FACE_STATIC)
+  IF (N_VERT_DYNAMIC>0) WRITE(LU_GEOM) (Xvert_D(I),Yvert_D(I),Zvert_D(I)),I=1,N_VERT_DYNAMIC)
+  IF (N_FACE_DYNAMIC>0) WRITE(LU_GEOM) (FACEX_D(I),FACEY_D(I),FACEZ_D(I)),I=1,N_FACE_DYNAMIC)
 
 ! dynamic geometry
   WRITE(LU_GEOM) STIME, GEOM_TYPE  ! each successive time step (if there is time dependent geometry)
   IF(GEOM_TYPE.EQ.0)THEN
-    WRITE(LU_GEOM) N_VERT
-    IF (N_VERT>0) WRITE(LU_GEOM) (Xvert(I),Yvert(I),Zvert(I)),I=1,N_VERT)
-    WRITE(LU_GEOM(N)) N_FACE
-    IF (N_FACE>0) WRITE(LU_GEOM) (FACEX(I),FACEY(I),FACEZ(I)),I=1,N_FACE)
-  ELSE IF(GEOM_TYPE.EQ.1.OR.GEOM_TYPE.EQ.2)THEN
-    WRITE(LU_GEOM) Xtran, Ytran, Ztran, rot_az, rot_elev
+    WRITE(LU_GEOM) N_VERT_DYNAMIC,N_FACE_DYNAMIC
+    IF (N_VERT_DYNAMIC>0) WRITE(LU_GEOM) (Xvert_D(I),Yvert_D(I),Zvert_D(I)),I=1,N_VERT_DYNAMIC)
+    IF (N_FACE_DYNAMIC>0) WRITE(LU_GEOM) (FACEX_D(I),FACEY_D(I),FACEZ_D(I)),I=1,N_FACE_DYNAMIC)
+  ELSE IF(GEOM_TYPE.EQ.1)THEN
+    WRITE(LU_GEOM) Xtran, Ytran, Ztran, Xrot0, Yrot0, Zrot0, rot_az, rot_elev
   ENDIF
               .
               .
               .
 \end{verbatim}
 \normalsize
-{\ct ONE}\ has the value 1.
+\begin{itemize}
+\item {\ct ONE}\ has the value 1.
 Smokeview uses this number to
 determine whether the computer creating the geometry file and the
 computer viewing the geometry file use the same or different byte
-swap (endian) conventions for storing floating point numbers.  
-{\ct VERSION}\ currently has value 0 and indicates the version number of this file format.
-{\ct STIME} is the time.
-{\ct N\_VERT}\ is the number of vertices.  
-{\ct Xvert, Yvert, Zvert}\ are the vertex coordinates.
-{\ct N\_FACE}\ is the number of faces.
-{\ct FACEX, FACEY, FACEY}\ are the vertex numbers for each face (triangle).
-If {\ct GEOM\_TYPE}\ is 0 then time dependent geometry is written out in 
+swap (endian) conventions for storing floating point numbers.
+\item {\ct VERSION}\ currently has value 0 and indicates the version number of this file format.
+\item {\ct STIME} is the FDS simulation time.
+\item {\ct N\_VERT\_S, N\_FACE\_S, N\_VERT\_D, N\_FACE\_D}\ are the number of static and dynamic vertices and faces.
+\item {\ct Xvert\_S, Yvert\_S, Zvert\_S, Xvert\_D, Yvert\_D, Zvert\_D}\ are the static and dynamic vertex coordinates.
+\item {\ct FACEX\_S, FACEY\_S, FACEY\_S,FACEX\_D, FACEY\_D, FACEY\_D}\ are the static and dynamic vertex indices for each face (triangle).
+\item {\ct GEOM\_TYPE}\ is flag indicating how dynamic geometry is represented.  
+If {\ct GEOM\_TYPE}\ is 0 then time dependent geometry is written out in
 terms of nodes and faces using the same format as the static geometry.
-If {\ct GEOM\_TYPE}\ is 1 then time dependent geometry is written out using only a translation
-and two rotations.  These transformations are applied to the static geometry defined 
-at the beginning of the file.
-If {\ct GEOM\_TYPE}\ is 2 then time dependent geometry is again written out using only a translation
-and two rotations.  These transformations are applied to the initial dynamic geometry defined
-at the beginning of the file.
-{\ct Xtran, Ytran, Ztran}\ is the translation applied to the static geometry.
-{\ct rot\_az, rot\_elev}\ is the azimuthal and elevation rotations applied to the static geometry.
+If {\ct GEOM\_TYPE}\ is 1 then time dependent geometry is written out in terms of a translation
+and two rotations.  These transformations are applied to the dynamic geometry defined
+at the first time step.
+\item {\ct Xtran, Ytran, Ztran}\ is the translation applied to the initial dynamic geometry (If {\ct GEOM\_TYPE}\ is 1)
+\item {\ct Xrot0, Yrot0, Zrot0}\ is the origin about which rotations occur.
+\item {\ct rot\_az, rot\_elev}\ are the azimuthal and elevation rotation angles (in degrees) applied to the initial dynamic geometry. 
+\end{itemize}
 
 \section{Geometry Data Files}
 \label{out:GEOMETRY_DATA}
 
-The geometry data file contains a description of data values computed by FDS on an immersed 
+The geometry data file contains a description of data values computed by FDS on an immersed
 geometrical objects.  This file is analogous to the boundary file.
 The data written out to a geometry data file MUST correspond to the geometry written out
 in the corresponding geometry file.
@@ -11838,7 +11842,7 @@ Geometry data files are written out from {\bf dump.f} with the lines equivalent 
 \begin{verbatim}
   WRITE(LU_GEOM_DATA) ONE
   WRITE(LU_GEOM_DATA) VERSION
-  WRITE(LU_GEOM_DATA) STIME  
+  WRITE(LU_GEOM_DATA) STIME
   WRITE(LU_GEOM_DATA) N_VERT_STATIC,N_FACE_STATIC
   IF (N_VERT_STATIC>0) WRITE(LU_GEOM_DATA) (ValVertStatic(I)),I=1,N_VERT_STATIC)
   IF (N_FACE_STATIC>0) WRITE(LU_GEOM_DATA) (ValFaceStatic(I)),I=1,N_VERT_STATIC)
@@ -11851,20 +11855,22 @@ Geometry data files are written out from {\bf dump.f} with the lines equivalent 
 \end{verbatim}
 The data values written out in this file correspond to the geometry written out in the geometry file.
 \normalsize
-{\ct ONE}\ has the value 1.
+\begin{itemize}
+\item {\ct ONE}\ has the value 1.
 Smokeview uses this number to
 determine whether the computer creating the geometry file and the
 computer viewing the geometry file use the same or different byte
 swap (endian) conventions for storing floating point numbers.
-{\ct VERSION}\ currently has value 0 and indicates the version number of this file format.
-{\ct STIME} is the time.
-{\ct N\_VERT\_STATIC, N\_FACE\_STATIC}\ is the number of static vertices and faces.  One can write out
+\item {\ct VERSION}\ currently has value 0 and indicates the version number of this file format.
+\item {\ct STIME} is the FDS simulation time.
+\item {\ct N\_VERT\_STATIC, N\_FACE\_STATIC}\ is the number of static vertices and faces.  One can write out
 data values located at nodes, located at the center of faces or both.
-{\ct N\_VERT\_DYNAMIC, N\_FACE\_DYNAMIC}\ is the number of dynamic vertices and faces.  One can write out
+\item {\ct N\_VERT\_DYNAMIC, N\_FACE\_DYNAMIC}\ is the number of dynamic vertices and faces.  One can write out
 data values located at nodes, located at the center of faces, both or neither (if there is no dynamic geometry).
-{\ct ValVertStatic, ValFaceStatic}\ static vertex and face data.
-{\ct ValVertDynamic, ValFaceDynamic}\ dynamic
+\item {\ct ValVertStatic, ValFaceStatic}\ static vertex and face data.
+\item {\ct ValVertDynamic, ValFaceDynamic}\ dynamic
  vertex and face data.
+\end{itemize}
 
 
 
