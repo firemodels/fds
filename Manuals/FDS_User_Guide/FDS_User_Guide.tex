@@ -4798,7 +4798,7 @@ opening. In these cases, you might consider simply specifying a flat plate obstr
 {\ct VENT} with an offset of one mesh cell. The plate will simply redirect the air flow in all lateral
 directions.
 
-If the louvered vent is part of an HVAC system, please see \ref{info:HVAClouvers} for details on how to specify the louver.  
+If the louvered vent is part of an HVAC system, please see \ref{info:HVAClouvers} for details on how to specify the louver.
 
 \subsection{Special Topic: Tangential Velocity Boundary Conditions at Solid Surfaces}
 \label{info:WALL_MODEL}
@@ -4931,7 +4931,7 @@ function named by {\ct CTRL\_ID} or {\ct DEVC\_ID}.  Only one of either {\ct DAM
 If the node is connected to the FDS domain, then do not specify {\ct XYZ}.  FDS will compute it as the centroid of the {\ct VENT}.
 \end{description}
 
-A duct node must either have two or more ducts attached to it or it must have either {\ct AMBIENT = .TRUE.} or a {\ct VENT\_ID} specified.  When defining a {\ct VENT} as a component of an HVAC system you must set {\ct SURF\_ID = 'HVAC'} and you must set the {\ct ID}.  Note that you cannot give more than one  {\ct VENT} the same {\ct ID}.  
+A duct node must either have two or more ducts attached to it or it must have either {\ct AMBIENT = .TRUE.} or a {\ct VENT\_ID} specified.  When defining a {\ct VENT} as a component of an HVAC system you must set {\ct SURF\_ID = 'HVAC'} and you must set the {\ct ID}.  Note that you cannot give more than one  {\ct VENT} the same {\ct ID}.
 
 \subsection{'HVAC Fan Parameters}
 \label{info:HVACfan}
@@ -11705,7 +11705,7 @@ due to the solid phase reactions. Array {\ct Q} contains the values of
 the output quantity, which may be wall temperature, density or
 component density.
 
-\section{3-D Smoke File Format}
+\section{3-D Smoke Files}
 \label{out:SMOKE3D}
 
 3-D smoke files contain alpha values used by Smokeview to draw
@@ -11735,7 +11735,7 @@ computer viewing the 3-D smoke file use the same or different byte
 swap (endian) conventions for storing floating point numbers.  The
 opacity data is compressed using run-length encoding (RLE).
 
-\section{Isosurface File Format}
+\section{Isosurface Files}
 \label{out:ISOF}
 
 Iso-surface files are used to store one or more surfaces where the specified {\ct QUANTITY} is a specified value. FDS outputs iso-surface data at fixed
@@ -11766,6 +11766,105 @@ The length of each {\ct triangles\_i} node is one byte if
 the number of triangles, {\ct ntriangles}, is between zero
 and 255 (inclusive), two bytes if {\ct ntriangles} is
 between 256 and 65536 (inclusive) and four bytes if {\ct ntriangles} is greater than or equal to 65536.
+
+\section{Geometry Files}
+\label{out:GEOMETRY}
+
+The geometry file contains a description of immersed geometrical objects.  These objects are
+defined in terms of nodes and triangles.  A node consists of an $(x,y,z)$ coordinate.
+A triangle
+consists of 3 nodes.  The file format allows one to specify objects that change with time.
+These files are written out from {\bf dump.f} with lines equivalent to the following:
+
+\footnotesize
+\begin{verbatim}
+! static geometry
+
+  WRITE(LU_GEOM) ONE
+  WRITE(LU_GEOM) VERSION
+  WRITE(LU_GEOM) STIME  ! first time step
+  WRITE(LU_GEOM) N_VERT
+  IF (N_VERT>0) WRITE(LU_GEOM) (Xvert(I),Yvert(I),Zvert(I)),I=1,N_VERT)
+  WRITE(LU_GEOM(N)) N_FACE
+  IF (N_FACE>0) WRITE(LU_GEOM) (FACEX(I),FACEY(I),FACEZ(I)),I=1,N_FACE)
+
+! dynamic geometry
+  WRITE(LU_GEOM) STIME, GEOM_TYPE  ! each successive time step (if there is time dependent geometry)
+  IF(GEOM_TYPE.EQ.0)THEN
+    WRITE(LU_GEOM) N_VERT
+    IF (N_VERT>0) WRITE(LU_GEOM) (Xvert(I),Yvert(I),Zvert(I)),I=1,N_VERT)
+    WRITE(LU_GEOM(N)) N_FACE
+    IF (N_FACE>0) WRITE(LU_GEOM) (FACEX(I),FACEY(I),FACEZ(I)),I=1,N_FACE)
+  ELSE IF(GEOM_TYPE.EQ.1.OR.GEOM_TYPE.EQ.2)THEN
+    WRITE(LU_GEOM) Xtran, Ytran, Ztran, rot_az, rot_elev
+  ENDIF
+              .
+              .
+              .
+\end{verbatim}
+\normalsize
+{\ct ONE}\ has the value 1.
+Smokeview uses this number to
+determine whether the computer creating the geometry file and the
+computer viewing the geometry file use the same or different byte
+swap (endian) conventions for storing floating point numbers.  
+{\ct VERSION}\ currently has value 0 and indicates the version number of this file format.
+{\ct STIME} is the time.
+{\ct N\_VERT}\ is the number of vertices.  
+{\ct Xvert, Yvert, Zvert}\ are the vertex coordinates.
+{\ct N\_FACE}\ is the number of faces.
+{\ct FACEX, FACEY, FACEY}\ are the vertex numbers for each face (triangle).
+If {\ct GEOM\_TYPE}\ is 0 then time dependent geometry is written out in 
+terms of nodes and faces using the same format as the static geometry.
+If {\ct GEOM\_TYPE}\ is 1 then time dependent geometry is written out using only a translation
+and two rotations.  These transformations are applied to the static geometry defined 
+at the beginning of the file.
+If {\ct GEOM\_TYPE}\ is 2 then time dependent geometry is again written out using only a translation
+and two rotations.  These transformations are applied to the initial dynamic geometry defined
+at the beginning of the file.
+{\ct Xtran, Ytran, Ztran}\ is the translation applied to the static geometry.
+{\ct rot\_az, rot\_elev}\ is the azimuthal and elevation rotations applied to the static geometry.
+
+\section{Geometry Data Files}
+\label{out:GEOMETRY_DATA}
+
+The geometry data file contains a description of data values computed by FDS on an immersed 
+geometrical objects.  This file is analogous to the boundary file.
+The data written out to a geometry data file MUST correspond to the geometry written out
+in the corresponding geometry file.
+Geometry data files are written out from {\bf dump.f} with the lines equivalent to the following:
+
+\footnotesize
+\begin{verbatim}
+  WRITE(LU_GEOM_DATA) ONE
+  WRITE(LU_GEOM_DATA) VERSION
+  WRITE(LU_GEOM_DATA) STIME  
+  WRITE(LU_GEOM_DATA) N_VERT_STATIC,N_FACE_STATIC
+  IF (N_VERT_STATIC>0) WRITE(LU_GEOM_DATA) (ValVertStatic(I)),I=1,N_VERT_STATIC)
+  IF (N_FACE_STATIC>0) WRITE(LU_GEOM_DATA) (ValFaceStatic(I)),I=1,N_VERT_STATIC)
+  WRITE(LU_GEOM_DATA) N_VERT_DYNAMIC,NFACE_DYNAMIC
+  IF (N_VERT_DYNAMIC>0) WRITE(LU_GEOM_DATA) (ValVertDynamic(I)),I=1,N_VERT_DYNAMIC)
+  IF (N_FACE_DYNAMIC>0) WRITE(LU_GEOM_DATA) (ValFaceDynamic(I)),I=1,N_FACE_DYNAMIC)
+              .
+              .
+              .
+\end{verbatim}
+The data values written out in this file correspond to the geometry written out in the geometry file.
+\normalsize
+{\ct ONE}\ has the value 1.
+Smokeview uses this number to
+determine whether the computer creating the geometry file and the
+computer viewing the geometry file use the same or different byte
+swap (endian) conventions for storing floating point numbers.
+{\ct VERSION}\ currently has value 0 and indicates the version number of this file format.
+{\ct STIME} is the time.
+{\ct N\_VERT\_STATIC, N\_FACE\_STATIC}\ is the number of static vertices and faces.  One can write out
+data values located at nodes, located at the center of faces or both.
+{\ct N\_VERT\_DYNAMIC, N\_FACE\_DYNAMIC}\ is the number of dynamic vertices and faces.  One can write out
+data values located at nodes, located at the center of faces, both or neither (if there is no dynamic geometry).
+{\ct ValVertStatic, ValFaceStatic}\ static vertex and face data.
+{\ct ValVertDynamic, ValFaceDynamic}\ dynamic
+ vertex and face data.
 
 
 
