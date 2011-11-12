@@ -913,8 +913,10 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
       }
 #endif
     }
-    if(nface_transparent>0&&sorttransparentfaces==1)sort_transparent_faces(modelview_scratch);
+    if(nface_transparent>0&&sort_transparent_faces==1)Sort_Transparent_Faces(modelview_scratch);
     if(showiso==1)Update_Isotris(0);
+    if(ntrilistinfo>0)Sort_Embedded_Geometry(modelview_scratch);
+    if(showiso==1&&sort_iso_triangles==1&&niso_trans>0)Sort_Iso_Triangles(modelview_scratch);
 
     glScalef(mscale[0],mscale[1],mscale[2]);
     ExtractFrustum();

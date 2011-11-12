@@ -176,6 +176,83 @@ void draw_geom(int flag){
   float skinny_color[]={1.0,0.0,0.0,1.0};
   float *last_color=NULL;
 
+
+  if(patchembedded==0&&showtrisurface==1){
+    int ntris;
+    triangle **tris;
+    float *color;
+
+    if(flag==DRAW_OPAQUE){
+      ntris=nopaque_triangles;
+      tris=opaque_triangles;
+    }
+    if(flag==DRAW_TRANSPARENT){
+      if(use_transparency_data==1)transparenton();
+      ntris=ntransparent_triangles;
+      tris=transparent_triangles;
+    }
+    glEnable(GL_LIGHTING);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
+    glEnable(GL_COLOR_MATERIAL);
+    glBegin(GL_TRIANGLES);
+    for(i=0;i<ntris;i++){
+      triangle *trianglei;
+      float *xyzptr[3];
+      float *xyznorm;
+
+      trianglei = tris[i];
+
+      if(hilight_skinny==1&&trianglei->skinny==1){
+        color=skinny_color;
+      }
+      else{
+        color = trianglei->surf->color;
+      }
+      if(color!=last_color){
+        glColor4fv(color);
+        last_color=color;
+      }
+      if(smoothtrinormal==0){
+
+        xyznorm=trianglei->normal;
+        glNormal3fv(xyznorm);
+
+        xyzptr[0] = trianglei->points[0]->xyz;
+        glVertex3fv(xyzptr[0]);
+
+        xyzptr[1] = trianglei->points[1]->xyz;
+        glVertex3fv(xyzptr[1]);
+
+        xyzptr[2] = trianglei->points[2]->xyz;
+        glVertex3fv(xyzptr[2]);
+      }
+      else{
+        xyznorm = trianglei->points[0]->norm;
+        glNormal3fv(xyznorm);
+        xyzptr[0] = trianglei->points[0]->xyz;
+        glVertex3fv(xyzptr[0]);
+
+        xyznorm = trianglei->points[1]->norm;
+        glNormal3fv(xyznorm);
+        xyzptr[1] = trianglei->points[1]->xyz;
+        glVertex3fv(xyzptr[1]);
+
+        xyznorm = trianglei->points[2]->norm;
+        glNormal3fv(xyznorm);
+        xyzptr[2] = trianglei->points[2]->xyz;
+        glVertex3fv(xyzptr[2]);
+      }
+    }
+  }
+  glEnd();
+  glDisable(GL_COLOR_MATERIAL);
+  glDisable(GL_LIGHTING);
+  if(flag==DRAW_TRANSPARENT){
+    if(use_transparency_data==1)transparentoff();
+    return;
+  }
+
   for(i=0;i<ntrilistinfo;i++){
     trilistdata *trilisti;
     pointlistdata *pointlisti;
@@ -187,90 +264,7 @@ void draw_geom(int flag){
     pointlisti = pointlistinfo + i;
     ntris = trilisti->ntriangles;
     npoints = pointlisti->npoints;
-    if(patchembedded==0&&showtrisurface==1){
-      if(flag==DRAW_TRANSPARENT&&use_transparency_data==1)transparenton();
-      glEnable(GL_LIGHTING);
-      glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
-      glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
-      glEnable(GL_COLOR_MATERIAL);
-      glBegin(GL_TRIANGLES);
-      if(smoothtrinormal==0){
-        for(j=0;j<ntris;j++){
-          float *xyzptr[3];
-          float *xyznorm;
-          triangle *trianglei;
-
-          trianglei = trilisti->triangles+j;
-       
-          if(hilight_skinny==1&&trianglei->skinny==1){
-            color=skinny_color;
-          }
-          else{
-            color = trianglei->surf->color;
-          }
-          if(color[3]<1.0&&flag==DRAW_OPAQUE)continue;
-          if(color[3]>=1.0&&flag==DRAW_TRANSPARENT)continue;
-          if(color!=last_color){
-            glColor4fv(color);
-            last_color=color;
-          }
-
-          xyznorm=trianglei->normal;
-          glNormal3fv(xyznorm);
-
-          xyzptr[0] = trianglei->points[0]->xyz;
-          glVertex3fv(xyzptr[0]);
-
-          xyzptr[1] = trianglei->points[1]->xyz;
-          glVertex3fv(xyzptr[1]);
-
-          xyzptr[2] = trianglei->points[2]->xyz;
-          glVertex3fv(xyzptr[2]);
-        }
-      }
-      else{
-        for(j=0;j<ntris;j++){
-          float *xyzptr[3];
-          float *xyznorm;
-          triangle *trianglei;
-
-          trianglei = trilisti->triangles+j;
-       
-          if(hilight_skinny==1&&trianglei->skinny==1){
-            color=skinny_color;
-          }
-          else{
-            color = trianglei->surf->color;
-          }
-          if(color[3]<1.0&&flag==DRAW_OPAQUE)continue;
-          if(color[3]>=1.0&&flag==DRAW_TRANSPARENT)continue;
-          if(color!=last_color){
-            glColor4fv(color);
-            last_color=color;
-          }
-
-          xyznorm = trianglei->points[0]->norm;
-          glNormal3fv(xyznorm);
-          xyzptr[0] = trianglei->points[0]->xyz;
-          glVertex3fv(xyzptr[0]);
-
-          xyznorm = trianglei->points[1]->norm;
-          glNormal3fv(xyznorm);
-          xyzptr[1] = trianglei->points[1]->xyz;
-          glVertex3fv(xyzptr[1]);
-
-          xyznorm = trianglei->points[2]->norm;
-          glNormal3fv(xyznorm);
-          xyzptr[2] = trianglei->points[2]->xyz;
-          glVertex3fv(xyzptr[2]);
-        }
-      }
-      glEnd();
-      glDisable(GL_COLOR_MATERIAL);
-      glDisable(GL_LIGHTING);
-      if(flag==DRAW_TRANSPARENT&&use_transparency_data==1)transparentoff();
-    }
-    if(flag==DRAW_OPAQUE&&showtrioutline==1){
+    if(showtrioutline==1){
       glBegin(GL_LINES);
       for(j=0;j<ntris;j++){
         float *xyzptr[3];
@@ -302,7 +296,7 @@ void draw_geom(int flag){
       }
       glEnd();
     }
-    if(flag==DRAW_OPAQUE&&showtrinormal==1){
+    if(showtrinormal==1){
       if(smoothtrinormal==0){
         glBegin(GL_LINES);
         for(j=0;j<ntris;j++){
@@ -372,7 +366,7 @@ void draw_geom(int flag){
         }
         glEnd();
       }
-      if(flag==DRAW_OPAQUE&&smoothtrinormal==1){
+      if(smoothtrinormal==1){
         glBegin(GL_LINES);
         for(j=0;j<npoints;j++){
           float *xyznorm;
@@ -934,7 +928,7 @@ int compare_transparent_triangles( const void *arg1, const void *arg2 ){
 
 /* ------------------ sort_triangles ------------------------ */
 
-void sort_embed_geom(float *mm){
+void Sort_Embedded_Geometry(float *mm){
   int itri;
   int newflag;
   int i;
@@ -962,10 +956,11 @@ void sort_embed_geom(float *mm){
       float *xyz1, *xyz2, *xyz3;
       float xyzeye[3];
 
-      tri = trilisti->triangles + i;
+      tri = trilisti->triangles + j;
       if(hilight_skinny==1&&tri->skinny==1)continue;
       if(tri->surf->color[3]>=1.0)continue;
       count_transparent++;
+      if(sort_embedded_geometry==0)continue;
       xyz1 = tri->points[0]->xyz;
       xyz2 = tri->points[1]->xyz;
       xyz3 = tri->points[2]->xyz;
@@ -1002,7 +997,7 @@ void sort_embed_geom(float *mm){
     for(j=0;j<trilisti->ntriangles;j++){
       triangle *tri;
 
-      tri = trilisti->triangles + i;
+      tri = trilisti->triangles + j;
       if(use_transparency_data==0||(hilight_skinny==1&&tri->skinny==1)||tri->surf->color[3]>=1.0){
         opaque_triangles[count_all++]=tri;
       }
@@ -1011,7 +1006,7 @@ void sort_embed_geom(float *mm){
       }
     }
   }
-  if(ntransparent_triangles>0){
+  if(sort_embedded_geometry==1&&ntransparent_triangles>0){
     qsort((isotri **)transparent_triangles,(size_t)ntransparent_triangles,sizeof(triangle **),compare_transparent_triangles);
   }
 }

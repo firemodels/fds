@@ -1713,7 +1713,7 @@ int compare_iso_triangles( const void *arg1, const void *arg2 ){
 
 /* ------------------ sort_triangles ------------------------ */
 
-void sort_iso_triangles(float *mm){
+void Sort_Iso_Triangles(float *mm){
   int itri;
   int newflag;
   int dosort=0;
@@ -1956,8 +1956,8 @@ void Update_Isotris(int flag){
     }
   }
 
-  if(sort_transparency==1&&niso_trans>0){
-    sort_iso_triangles(modelview_scratch);
+  if(sort_iso_triangles==1&&niso_trans>0){
+    Sort_Iso_Triangles(modelview_scratch);
   }
   niso_trans_list[loaded_isomesh->iiso]=niso_trans;
   niso_opaques_list[loaded_isomesh->iiso]=niso_opaques;

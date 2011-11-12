@@ -486,8 +486,6 @@ void motion(int xm, int ym){
 
   glutPostRedisplay();
 
-  if(ntrilistinfo>0)sort_embed_geom(modelview_scratch);
-  if(showiso==1&&sort_transparency==1&&niso_trans>0)sort_iso_triangles(modelview_scratch);
   if( colordrag==1&&(showtime==1 || showplot3d==1)){
     int temp;
     int ifactor;

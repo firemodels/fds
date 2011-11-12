@@ -3999,6 +3999,9 @@ void ImmersedMenu(int value){
       case 5:
         hilight_skinny = 1 - hilight_skinny;
         break;
+      case 6:
+        sort_embedded_geometry=1-sort_embedded_geometry;
+        break;
   }
   glutPostRedisplay();
 }
@@ -4751,11 +4754,11 @@ updatemenu=0;
   else{
     glutAddMenuEntry(_(" Outline"),1);
   }
-  if(showtrisurface==1&&showtrioutline==1){
-    glutAddMenuEntry(_(" *Solid and Outline"),2);
+  if(sort_embedded_geometry==1){
+    glutAddMenuEntry(_(" *Sort faces"),6);
   }
   else{
-    glutAddMenuEntry(_(" Solid and Outline"),2);
+    glutAddMenuEntry(_(" Sort faces"),6);
   }
 #ifdef pp_BETA
   if(showtrinormal==1){

@@ -2633,9 +2633,9 @@ int comparetransparentfaces( const void *arg1, const void *arg2 ){
   return 0;
 }
 
-/* ------------------ sort_transparent_faces ------------------------ */
+/* ------------------ Sort_Transparent_Faces ------------------------ */
 
-void sort_transparent_faces(float *mm){
+void Sort_Transparent_Faces(float *mm){
   int i;
   float *xyzface;
   float xyzeye[3];

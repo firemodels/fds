@@ -688,7 +688,7 @@ extern "C" void glui_bounds_setup(int main_window){
     COLORBAR_EXTREME2,Slice_CB);
   CHECKBOX_transparentflag=glui_bounds->add_checkbox_to_panel(panel_colorbar,_("Use transparency:"),&use_transparency_data,DATA_transparent,Slice_CB);
 #ifdef pp_BETA
-  glui_bounds->add_checkbox_to_panel(panel_colorbar,_("Sort transparent surfaces:"),&sort_transparency);
+  glui_bounds->add_checkbox_to_panel(panel_colorbar,_("Sort transparent surfaces:"),&sort_iso_triangles);
 #endif
   SPINNER_labels_transparency_data=glui_bounds->add_spinner_to_panel(panel_colorbar,_("transparency level"),GLUI_SPINNER_FLOAT,&transparentlevel,DATA_transparent,Slice_CB);
   SPINNER_labels_transparency_data->set_w(0);
