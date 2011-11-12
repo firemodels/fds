@@ -1,6 +1,6 @@
-// $Date: 2007-11-06 16:39:27 -0500 (Tue, 06 Nov 2007) $ 
-// $Revision: 938 $
-// $Author: gforney $
+// $Date$ 
+// $Revision$
+// $Author$
 
 #ifdef pp_WIN_INTEL
 #pragma warning (disable:1786)
