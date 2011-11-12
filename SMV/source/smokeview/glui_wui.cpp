@@ -1,6 +1,6 @@
-// $Date: 2008-01-21 21:39:14 -0500 (Mon, 21 Jan 2008) $ 
-// $Revision: 1222 $
-// $Author: gforney $
+// $Date$ 
+// $Revision$
+// $Author$
 
 #define CPP
 #include "options.h"
@@ -20,7 +20,7 @@
 #include "translate.h"
 
 // svn revision character string
-extern "C" char glui_wui_revision[]="$Revision: 1222 $";
+extern "C" char glui_wui_revision[]="$Revision$";
 GLUI_Panel *panel_terrain=NULL;
 
 #define TERRAIN_COLORS 35
