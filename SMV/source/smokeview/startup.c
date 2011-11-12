@@ -1240,7 +1240,6 @@ void initvars1(void){
 
   slicefilenumber=0;
   exportdata=0;
-  count=1, lastcount=1;
   nspr=0;
   RenderGif=0, RenderSkip=1;
   isoframestep=1;

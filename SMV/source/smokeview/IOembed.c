@@ -202,9 +202,6 @@ void draw_geom(int flag){
 
           trianglei = trilisti->triangles+j;
        
-          xyznorm=trianglei->normal;
-          glNormal3fv(xyznorm);
-
           if(hilight_skinny==1&&trianglei->skinny==1){
             color=skinny_color;
           }
@@ -217,6 +214,9 @@ void draw_geom(int flag){
             glColor4fv(color);
             last_color=color;
           }
+
+          xyznorm=trianglei->normal;
+          glNormal3fv(xyznorm);
 
           xyzptr[0] = trianglei->points[0]->xyz;
           glVertex3fv(xyzptr[0]);
@@ -919,15 +919,32 @@ void draw_geomdata(patch *patchi){
 
 }
 
+/* ------------------ compare_trdata ------------------------ */
+
+int compare_transparent_triangles( const void *arg1, const void *arg2 ){
+  triangle *tri, *trj;
+
+  tri = (triangle *)arg1; 
+  trj = (triangle *)arg2;
+
+  if(tri->distance<trj->distance)return -1;
+  if(tri->distance>trj->distance)return 1;
+  return 0;
+}
 
 /* ------------------ sort_triangles ------------------------ */
 
 void sort_embed_geom(float *mm){
   int itri;
   int newflag;
-  int dosort=0;
   int i;
+  int count_transparent,count_all;
 
+  CheckMemory;
+  count_transparent=0;
+  count_all=0;
+  ntransparent_triangles=count_transparent;
+  nopaque_triangles=count_all-count_transparent;
   for(i=0;i<ntrilistinfo;i++){
     trilistdata *trilisti;
     pointlistdata *pointlisti;
@@ -935,59 +952,68 @@ void sort_embed_geom(float *mm){
     int j;
     float *color;
 
-    trilisti = trilistinfo + i;/*
+    trilisti = trilistinfo + i;
 
-    float xyzeye[3];
-    float *xyz;
-    isovert *v1, *v2, *v3;
-    float dist1, dist2;
-    isotri *trim1;
+    count_all+=trilisti->ntriangles;
+    if(use_transparency_data==0)continue;
+    for(j=0;j<trilisti->ntriangles;j++){
+      triangle *tri;
+      float xyz[3];
+      float *xyz1, *xyz2, *xyz3;
+      float xyzeye[3];
 
-    tri = iso_trans[itri];
-    v1 = tri->v1;
-    v2 = tri->v2;
-    v3 = tri->v3;
-    if(v1->flag!=newflag){
-      v1->flag=newflag;
-      xyz = v1->xyz;
-      xyzeye[0] = mm[0]*xyz[0] + mm[4]*xyz[1] +  mm[8]*xyz[2] + mm[12];
-      xyzeye[1] = mm[1]*xyz[0] + mm[5]*xyz[1] +  mm[9]*xyz[2] + mm[13];
-      xyzeye[2] = mm[2]*xyz[0] + mm[6]*xyz[1] + mm[10]*xyz[2] + mm[14];
+      tri = trilisti->triangles + i;
+      if(hilight_skinny==1&&tri->skinny==1)continue;
+      if(tri->surf->color[3]>=1.0)continue;
+      count_transparent++;
+      xyz1 = tri->points[0]->xyz;
+      xyz2 = tri->points[1]->xyz;
+      xyz3 = tri->points[2]->xyz;
+      xyz[0] = xyz1[0]+xyz2[0]+xyz3[0];
+      xyz[1] = xyz1[1]+xyz2[1]+xyz3[1];
+      xyz[2] = xyz1[2]+xyz2[2]+xyz3[2];
+
+      xyzeye[0] = mm[0]*xyz[0] + mm[4]*xyz[1] +   mm[8]*xyz[2] + mm[12];
+      xyzeye[1] = mm[1]*xyz[0] + mm[5]*xyz[1] +   mm[9]*xyz[2] + mm[13];
+      xyzeye[2] = mm[2]*xyz[0] + mm[6]*xyz[1] +  mm[10]*xyz[2] + mm[14];
       xyzeye[0]/=mscale[0];
       xyzeye[1]/=mscale[1];
       xyzeye[2]/=mscale[2];
-      v1->distance=xyzeye[0]*xyzeye[0]+xyzeye[1]*xyzeye[1]+xyzeye[2]*xyzeye[2];
+      tri->distance=xyzeye[0]*xyzeye[0]+xyzeye[1]*xyzeye[1]+xyzeye[2]*xyzeye[2];
+      CheckMemory;
     }
-    if(v2->flag!=newflag){
-      v2->flag=newflag;
-      xyz = v2->xyz;
-      xyzeye[0] = mm[0]*xyz[0] + mm[4]*xyz[1] +  mm[8]*xyz[2] + mm[12];
-      xyzeye[1] = mm[1]*xyz[0] + mm[5]*xyz[1] +  mm[9]*xyz[2] + mm[13];
-      xyzeye[2] = mm[2]*xyz[0] + mm[6]*xyz[1] + mm[10]*xyz[2] + mm[14];
-      xyzeye[0]/=mscale[0];
-      xyzeye[1]/=mscale[1];
-      xyzeye[2]/=mscale[2];
-      v2->distance=xyzeye[0]*xyzeye[0]+xyzeye[1]*xyzeye[1]+xyzeye[2]*xyzeye[2];
-    }
-    if(v3->flag!=newflag){
-      v3->flag=newflag;
-      xyz = v3->xyz;
-      xyzeye[0] = mm[0]*xyz[0] + mm[4]*xyz[1] +  mm[8]*xyz[2] + mm[12];
-      xyzeye[1] = mm[1]*xyz[0] + mm[5]*xyz[1] +  mm[9]*xyz[2] + mm[13];
-      xyzeye[2] = mm[2]*xyz[0] + mm[6]*xyz[1] + mm[10]*xyz[2] + mm[14];
-      xyzeye[0]/=mscale[0];
-      xyzeye[1]/=mscale[1];
-      xyzeye[2]/=mscale[2];
-      v3->distance=xyzeye[0]*xyzeye[0]+xyzeye[1]*xyzeye[1]+xyzeye[2]*xyzeye[2];
-    }
-    dist1=(v1->distance+v2->distance+v3->distance);
-    trim1 = iso_trans[itri-1];
-    dist2=trim1->v1->distance+trim1->v2->distance+trim1->v3->distance;
-
-    if(itri>0&&dosort==0&&dist1>dist2)dosort==1;
-    */
   }
-  //if(dosort==1)qsort((isotri **)iso_trans,(size_t)niso_trans,sizeof(isotri **),compare_iso_triangles);
+  CheckMemory;
+  if(count_all==0)return;
+  FREEMEMORY(alltriangles);
+  NewMemory((void **)&alltriangles,count_all*sizeof(triangle **));
+  transparent_triangles=alltriangles;
+  opaque_triangles=alltriangles+count_transparent;
+  ntransparent_triangles=count_transparent;
+  nopaque_triangles=count_all-count_transparent;
+  count_transparent=0;
+  count_all=0;
+  for(i=0;i<ntrilistinfo;i++){
+    trilistdata *trilisti;
+    int j;
+    float *color;
+
+    trilisti = trilistinfo + i;
+    for(j=0;j<trilisti->ntriangles;j++){
+      triangle *tri;
+
+      tri = trilisti->triangles + i;
+      if(use_transparency_data==0||(hilight_skinny==1&&tri->skinny==1)||tri->surf->color[3]>=1.0){
+        opaque_triangles[count_all++]=tri;
+      }
+      else{
+        transparent_triangles[count_transparent++]=tri;
+      }
+    }
+  }
+  if(ntransparent_triangles>0){
+    qsort((isotri **)transparent_triangles,(size_t)ntransparent_triangles,sizeof(triangle **),compare_transparent_triangles);
+  }
 }
 
 

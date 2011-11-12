@@ -388,7 +388,7 @@ SVEXTERN int showtitle1, showtitle2;
 
 SVEXTERN int slicefilenumber;
 SVEXTERN int exportdata;
-SVEXTERN int count, lastcount;
+SVEXTERN int SVDECL(frame_count,1), SVDECL(last_frame_count,1);
 SVEXTERN int nspr;
 SVEXTERN int RenderGif, RenderSkip;
 SVEXTERN int isoframestep;
@@ -794,6 +794,8 @@ SVEXTERN char *zonelonglabels, *zoneshortlabels, *zoneunits;
 SVEXTERN char *smokeviewini;
 SVEXTERN int overwrite_all,erase_all;
 SVEXTERN int compress_autoloaded;
+SVEXTERN triangle SVDECL(**opaque_triangles,NULL),SVDECL(**transparent_triangles,NULL),SVDECL(**alltriangles,NULL);
+SVEXTERN int SVDECL(nopaque_triangles,0),SVDECL(ntransparent_triangles,0),SVDECL(nalltriangles,0);
 #ifdef WIN32
 SVEXTERN   char openfilebuffer[1024];
 SVEXTERN   int openfileflag;

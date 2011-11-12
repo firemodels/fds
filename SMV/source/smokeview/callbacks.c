@@ -485,7 +485,8 @@ void motion(int xm, int ym){
   reset_glui_view(-1);
 
   glutPostRedisplay();
-  //***
+
+  if(ntrilistinfo>0)sort_embed_geom(modelview_scratch);
   if(showiso==1&&sort_transparency==1&&niso_trans>0)sort_iso_triangles(modelview_scratch);
   if( colordrag==1&&(showtime==1 || showplot3d==1)){
     int temp;
@@ -2279,7 +2280,7 @@ void Idle(void){
   thistime = glutGet(GLUT_ELAPSED_TIME);
   thisinterval = thistime - lasttime;
 //  printf("lasttime=%i thistime=%i thisinterval=%f\n",lasttime,thistime,thisinterval);
-  count++;
+  frame_count++;
 
   /* increment frame counter if the proper amount of time has passed
      or if we are rendering images or stepping by hand */
@@ -2315,8 +2316,8 @@ void Idle(void){
     cpuframe++;
     if(cpuframe>=20)cpuframe=0;
    
-    lastcount=count;
-    count=1;
+    last_frame_count=frame_count;
+    frame_count=1;
     lasttime = thistime;
     if(ntimes>0){
       changetime=1;
