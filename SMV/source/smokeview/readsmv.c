@@ -283,7 +283,7 @@ void readsmv_dynamic(char *file){
       FREEMEMORY(vi->showtime);
     }
   }
-  for(i=0;i<ndeviceinfo;i++){
+  for(i=ndeviceinfo_exp;i<ndeviceinfo;i++){
     device *devicei;
 
     devicei = deviceinfo + i;
@@ -941,6 +941,187 @@ void readsmv_dynamic(char *file){
   init_plot3dtimelist();
 }
 
+/* ------------------ parse_device_keyword ------------------------ */
+
+void parse_device_keyword(FILE *stream, device *devicei){
+  float xyz[3]={0.0,0.0,0.0}, xyzn[3]={0.0,0.0,0.0};
+  int state0=0;
+  int nparams=0, nparams_textures=0;
+  char *labelptr, *prop_id;
+  char prop_buffer[255];
+  char quant_buffer[255];
+  char *quant;
+  char buffer[255],buffer2[255],*bufptr,*buffer3;
+  int i;
+
+  devicei->type=DEVICE_DEVICE;
+  fgets(buffer,255,stream);
+
+  strcpy(devicei->quantity,"");
+  quant=strchr(buffer,'%');
+  if(quant!=NULL){
+    *quant=0;
+    quant++;
+    trim(quant);
+    strcpy(devicei->quantity,trim_front(quant));
+  }
+
+  trim(buffer);
+  strcpy(devicei->label,trim_front(buffer));
+  devicei->object = get_SVOBJECT_type(buffer,missing_device);
+  devicei->params=NULL;
+  devicei->timesptr=NULL;
+  devicei->vals=NULL;
+  fgets(buffer,255,stream);
+  sscanf(buffer,"%f %f %f %f %f %f %i %i %i",
+    xyz,xyz+1,xyz+2,xyzn,xyzn+1,xyzn+2,&state0,&nparams,&nparams_textures);
+  get_labels(buffer,-1,&prop_id,NULL,prop_buffer);
+  devicei->prop=get_prop_id(prop_id);
+  if(prop_id!=NULL&&devicei->prop!=NULL&&devicei->prop->smv_object!=NULL){
+    devicei->object=devicei->prop->smv_object;
+  }
+  else{
+    NewMemory((void **)&devicei->prop,sizeof(propdata));
+    init_prop(devicei->prop,1,devicei->label);
+    devicei->prop->smv_object=devicei->object;
+    devicei->prop->smv_objects[0]=devicei->prop->smv_object;
+  }
+  if(nparams_textures<0)nparams_textures=0;
+  if(nparams_textures>1)nparams_textures=1;
+  devicei->ntextures=nparams_textures;
+  if(nparams_textures>0){
+     NewMemory((void **)&devicei->textureinfo,sizeof(texture));
+  }
+  else{
+    devicei->textureinfo=NULL;
+    devicei->texturefile=NULL;
+  }
+
+  labelptr=strchr(buffer,'%');
+  if(labelptr!=NULL){
+    trim(labelptr);
+    if(strlen(labelptr)>1){
+      labelptr++;
+      labelptr=trim_front(labelptr);
+      if(strlen(labelptr)==0)labelptr=NULL;
+    }
+    else{
+      labelptr=NULL;
+    }
+  }
+
+  if(nparams<=0){
+    init_device(devicei,xyz,xyzn,state0,0,NULL,labelptr);
+  }
+  else{
+    float *params,*pc;
+    int nsize;
+
+    nsize = 6*((nparams-1)/6+1);
+    NewMemory((void **)&params,(nsize+devicei->ntextures)*sizeof(float));
+    pc=params;
+    for(i=0;i<nsize/6;i++){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f %f %f %f %f %f",pc,pc+1,pc+2,pc+3,pc+4,pc+5);
+      pc+=6;
+    }
+    init_device(devicei,xyz,xyzn,state0,nparams,params,labelptr);
+  }
+  get_elevaz(devicei->xyznorm,&devicei->dtheta,devicei->rotate_axis,NULL);
+  if(nparams_textures>0){
+    fgets(buffer,255,stream);
+    trim(buffer);
+    buffer3=trim_front(buffer);
+    NewMemory((void **)&devicei->texturefile,strlen(buffer3)+1);
+    strcpy(devicei->texturefile,buffer3);
+  }
+}
+
+#define BREAK \
+      if((stream==stream1&&stream2==NULL)||stream==stream2)break;\
+      stream=stream2;\
+      continue
+
+/* ------------------ get_inpf ------------------------ */
+
+int get_inpf(char *file, char *file2){
+  FILE *stream=NULL,*stream1=NULL,*stream2=NULL;
+  char buffer[255],*bufptr;
+  int len;
+  STRUCTSTAT statbuffer;
+
+  stream1=fopen(file,"r");
+  if(stream1==NULL)return 1;
+  if(file2!=NULL){
+    stream2=fopen(file2,"r");
+    if(stream2==NULL){
+      fclose(stream1);
+      return 1;
+    }
+  }
+  stream=stream1;
+  for(;;){
+    if(feof(stream)!=0){
+      BREAK;
+    }
+    if(fgets(buffer,255,stream)==NULL){
+      BREAK;
+    }
+    if(strncmp(buffer," ",1)==0)continue;
+    if(match(buffer,"INPF",4) == 1){
+      if(fgets(buffer,255,stream)==NULL){
+        BREAK;
+      }
+      bufptr=trim_string(buffer);
+
+      len=strlen(bufptr);
+      FREEMEMORY(fds_filein);
+      if(NewMemory((void **)&fds_filein,(unsigned int)(len+1))==0)return 2;
+      STRCPY(fds_filein,bufptr);
+      if(STAT(fds_filein,&statbuffer)!=0){
+        FreeMemory(fds_filein);
+        fds_filein=NULL;
+      }
+
+      if(chidfilebase==NULL){
+        char *chidptr=NULL;
+        char buffer_chid[1024];
+
+        if(fds_filein!=NULL)chidptr=get_chid(fds_filein,buffer_chid);
+        if(chidptr!=NULL){
+          NewMemory((void **)&chidfilebase,(unsigned int)(strlen(chidptr)+1));
+          STRCPY(chidfilebase,chidptr);
+        }
+      }
+      if(chidfilebase!=NULL){
+        NewMemory((void **)&hrr_csvfilename,(unsigned int)(strlen(chidfilebase)+8+1));
+        STRCPY(hrr_csvfilename,chidfilebase);
+        STRCAT(hrr_csvfilename,"_hrr.csv");
+        if(STAT(hrr_csvfilename,&statbuffer)!=0){
+          FREEMEMORY(hrr_csvfilename);
+        }
+        
+        NewMemory((void **)&devc_csvfilename,(unsigned int)(strlen(chidfilebase)+9+1));
+        STRCPY(devc_csvfilename,chidfilebase);
+        STRCAT(devc_csvfilename,"_devc.csv");
+        if(STAT(devc_csvfilename,&statbuffer)!=0){
+          FREEMEMORY(devc_csvfilename);
+        }
+
+        NewMemory((void **)&exp_csvfilename,(unsigned int)(strlen(chidfilebase)+8+1));
+        STRCPY(exp_csvfilename,chidfilebase);
+        STRCAT(exp_csvfilename,"_exp.csv");
+        if(STAT(exp_csvfilename,&statbuffer)!=0){
+          FREEMEMORY(exp_csvfilename);
+        }
+      }
+      continue;
+    }
+  }
+  fclose(stream);
+  return 0;
+}
+
 /* ------------------ readsmv ------------------------ */
 
 int readsmv(char *file, char *file2){
@@ -1009,7 +1190,7 @@ int readsmv(char *file, char *file2){
   surface *surfi;
   int dup_texture;
   int version;
-
+  
   int nn_smoke3d=0;
   int nn_patch=0;
   int nn_iso=0;
@@ -1141,6 +1322,23 @@ int readsmv(char *file, char *file2){
     FREEMEMORY(deviceinfo);
     ndeviceinfo=0;
   }
+
+  // read in device (.svo) definitions
+
+  init_object_defs();
+  {
+    int return_code;
+    
+  // get input file name and form various spreadsheet file names because upon the input file name
+  
+    return_code=get_inpf(file,file2);
+    if(return_code!=0)return return_code;
+  }
+
+  // look for DEVICE entires in "experimental" spread sheet files
+  
+  read_device_header(exp_csvfilename, &deviceinfo, &ndeviceinfo_exp);
+  ndeviceinfo=ndeviceinfo_exp;
 
   if(noutlineinfo>0){
     for(i=0;i<noutlineinfo;i++){
@@ -1343,11 +1541,6 @@ int readsmv(char *file, char *file2){
    ************************ start of pass 1 ********************************* 
    ************************************************************************
  */
-
-#define BREAK \
-      if((stream==stream1&&stream2==NULL)||stream==stream2)break;\
-      stream=stream2;\
-      continue
 
   nvents=0; igrid=0; ioffset=0;
   ntc_total=0, nspr_total=0, nheat_total=0;
@@ -1937,13 +2130,14 @@ int readsmv(char *file, char *file2){
     nlabelssmv=0;
   }
   if(ndeviceinfo>0){
-    if(NewMemory((void **)&deviceinfo,ndeviceinfo*sizeof(device))==0)return 2;
-    devicecopy=deviceinfo;
+    if(deviceinfo==NULL){
+      if(NewMemory((void **)&deviceinfo,ndeviceinfo*sizeof(device))==0)return 2;
+    }
+    else{
+      if(ResizeMemory((void **)&deviceinfo,ndeviceinfo*sizeof(device))==0)return 2;
+    }
+    devicecopy=deviceinfo+ndeviceinfo_exp;
   }
-
-  // read in device (.svo) definitions
-
-  init_object_defs();
 
   if(npropinfo>0){
     npropinfo=0;
@@ -1962,7 +2156,7 @@ int readsmv(char *file, char *file2){
   iobst=0;
   ncadgeom=0;
   nsurfaces=0;
-  ndeviceinfo=0;
+  ndeviceinfo=ndeviceinfo_exp;
   noutlineinfo=0;
   if(noffset==0)ioffset=1;
   rewind(stream1);
@@ -4679,61 +4873,6 @@ typedef struct {
       }
       continue;
     }
-
-  /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++++++ INPF ++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-    if(match(buffer,"INPF",4) == 1){
-      if(fgets(buffer,255,stream)==NULL){
-        BREAK;
-      }
-      bufptr=trim_string(buffer);
-
-      len=strlen(bufptr);
-      FREEMEMORY(fds_filein);
-      if(NewMemory((void **)&fds_filein,(unsigned int)(len+1))==0)return 2;
-      STRCPY(fds_filein,bufptr);
-      if(STAT(fds_filein,&statbuffer)!=0){
-        FreeMemory(fds_filein);
-        fds_filein=NULL;
-      }
-
-      if(chidfilebase==NULL){
-        char *chidptr=NULL;
-        char buffer_chid[1024];
-
-        if(fds_filein!=NULL)chidptr=get_chid(fds_filein,buffer_chid);
-        if(chidptr!=NULL){
-          NewMemory((void **)&chidfilebase,(unsigned int)(strlen(chidptr)+1));
-          STRCPY(chidfilebase,chidptr);
-        }
-      }
-      if(chidfilebase!=NULL){
-        NewMemory((void **)&hrr_csvfilename,(unsigned int)(strlen(chidfilebase)+8+1));
-        STRCPY(hrr_csvfilename,chidfilebase);
-        STRCAT(hrr_csvfilename,"_hrr.csv");
-        if(STAT(hrr_csvfilename,&statbuffer)!=0){
-          FREEMEMORY(hrr_csvfilename);
-        }
-        
-        NewMemory((void **)&devc_csvfilename,(unsigned int)(strlen(chidfilebase)+9+1));
-        STRCPY(devc_csvfilename,chidfilebase);
-        STRCAT(devc_csvfilename,"_devc.csv");
-        if(STAT(devc_csvfilename,&statbuffer)!=0){
-          FREEMEMORY(devc_csvfilename);
-        }
-
-        NewMemory((void **)&exp_csvfilename,(unsigned int)(strlen(chidfilebase)+8+1));
-        STRCPY(exp_csvfilename,chidfilebase);
-        STRCAT(exp_csvfilename,"_exp.csv");
-        if(STAT(exp_csvfilename,&statbuffer)!=0){
-          FREEMEMORY(exp_csvfilename);
-        }
-      }
-      continue;
-    }
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ CHID +++++++++++++++++++++++++++++++++
@@ -5190,97 +5329,9 @@ typedef struct {
       (match(buffer,"DEVICE_ACT",10) != 1)
       ){
       device *devicei;
-      float xyz[3]={0.0,0.0,0.0}, xyzn[3]={0.0,0.0,0.0};
-      int state0=0;
-      int nparams=0, nparams_textures=0;
-      char *labelptr, *prop_id;
-      char prop_buffer[255];
-      char quant_buffer[255];
-      char *quant;
 
       devicei = deviceinfo + ndeviceinfo;
-      devicei->type=DEVICE_DEVICE;
-      fgets(buffer,255,stream);
-
-      strcpy(devicei->quantity,"");
-      quant=strchr(buffer,'%');
-      if(quant!=NULL){
-        *quant=0;
-        quant++;
-        trim(quant);
-        strcpy(devicei->quantity,trim_front(quant));
-      }
-
-      trim(buffer);
-      strcpy(devicei->label,trim_front(buffer));
-      devicei->object = get_SVOBJECT_type(buffer,missing_device);
-      devicei->params=NULL;
-      devicei->timesptr=NULL;
-      devicei->vals=NULL;
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f %f %f %f %i %i %i",
-        xyz,xyz+1,xyz+2,xyzn,xyzn+1,xyzn+2,&state0,&nparams,&nparams_textures);
-      get_labels(buffer,-1,&prop_id,NULL,prop_buffer);
-      devicei->prop=get_prop_id(prop_id);
-      if(prop_id!=NULL&&devicei->prop!=NULL&&devicei->prop->smv_object!=NULL){
-        devicei->object=devicei->prop->smv_object;
-      }
-      else{
-        NewMemory((void **)&devicei->prop,sizeof(propdata));
-        init_prop(devicei->prop,1,devicei->label);
-        devicei->prop->smv_object=devicei->object;
-        devicei->prop->smv_objects[0]=devicei->prop->smv_object;
-      }
-      if(nparams_textures<0)nparams_textures=0;
-      if(nparams_textures>1)nparams_textures=1;
-      devicei->ntextures=nparams_textures;
-      if(nparams_textures>0){
-         NewMemory((void **)&devicei->textureinfo,sizeof(texture));
-      }
-      else{
-        devicei->textureinfo=NULL;
-        devicei->texturefile=NULL;
-      }
-
-      labelptr=strchr(buffer,'%');
-      if(labelptr!=NULL){
-        trim(labelptr);
-        if(strlen(labelptr)>1){
-          labelptr++;
-          labelptr=trim_front(labelptr);
-          if(strlen(labelptr)==0)labelptr=NULL;
-        }
-        else{
-          labelptr=NULL;
-        }
-      }
-
-      if(nparams<=0){
-        init_device(devicei,xyz,xyzn,state0,0,NULL,labelptr);
-      }
-      else{
-        float *params,*pc;
-        int nsize;
-
-        nsize = 6*((nparams-1)/6+1);
-        NewMemory((void **)&params,(nsize+devicei->ntextures)*sizeof(float));
-        pc=params;
-        for(i=0;i<nsize/6;i++){
-          fgets(buffer,255,stream);
-          sscanf(buffer,"%f %f %f %f %f %f",pc,pc+1,pc+2,pc+3,pc+4,pc+5);
-          pc+=6;
-        }
-        init_device(devicei,xyz,xyzn,state0,nparams,params,labelptr);
-      }
-      get_elevaz(devicei->xyznorm,&devicei->dtheta,devicei->rotate_axis,NULL);
-      if(nparams_textures>0){
-        fgets(buffer,255,stream);
-        trim(buffer);
-        buffer3=trim_front(buffer);
-        NewMemory((void **)&devicei->texturefile,strlen(buffer3)+1);
-        strcpy(devicei->texturefile,buffer3);
-      }
-
+      parse_device_keyword(stream,devicei);
       CheckMemory;
       ndeviceinfo++;
       continue;

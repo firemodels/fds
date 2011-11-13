@@ -4323,6 +4323,87 @@ device *getdevice(char *label){
   return NULL;
 }
 
+/* ----------------------- rewind_device_file ----------------------------- */
+
+void rewind_device_file(FILE *stream){
+#define BUFFER_LEN 255
+  char buffer[BUFFER_LEN];
+  int found_data=0,buffer_len=BUFFER_LEN;
+
+  fgets(buffer,buffer_len,stream);
+  trim(buffer);
+  if(strcmp(buffer,"//HEADER")!=0){
+    rewind(stream);
+    return;
+  }
+  while(!feof(stream)){
+    fgets(buffer,buffer_len,stream);
+    trim(buffer);
+    if(strcmp(buffer,"//DATA")==0){
+      found_data=1;
+      break;
+    }
+  }
+  if(found_data==0){
+    printf("*** warning //DATA keyword not found in spreadsheet file\n");
+  }
+  return;
+}
+
+/* ----------------------- read_device_header ----------------------------- */
+
+void read_device_header(char *file, device **devices, int *ndevices){
+  FILE *stream;
+  device *devicecopy,*devicelist=NULL;
+#define BUFFER_LEN 255
+  char buffer[BUFFER_LEN];
+  int buffer_len=BUFFER_LEN,nd=0;
+
+  *devices=NULL;
+  *ndevices=0;
+  if(file==NULL)return;
+  stream=fopen(file,"r");
+  if(stream==NULL)return;
+  fgets(buffer,buffer_len,stream);
+  trim(buffer);
+  if(strcmp(buffer,"//HEADER")!=0){
+    fclose(stream);
+    *ndevices=0;
+    return;
+  }
+
+  while(!feof(stream)){
+    fgets(buffer,buffer_len,stream);
+    trim(buffer);
+    if(strcmp(buffer,"//DATA")==0){
+      break;
+    }
+    if(strcmp(buffer,"DEVICE")==0){
+      nd++;
+    }
+  }
+  rewind(stream);
+  *ndevices=nd;
+  if(nd<=0)return;
+
+  NewMemory((void **)&devicelist,nd*sizeof(device));
+  *devices=devicelist;
+  devicecopy=devicelist;
+
+  while(!feof(stream)){
+    fgets(buffer,buffer_len,stream);
+    trim(buffer);
+    if(strcmp(buffer,"//DATA")==0){
+      break;
+    }
+    if(strcmp(buffer,"DEVICE")==0){
+      parse_device_keyword(stream, devicecopy);
+      devicecopy++;
+    }
+  }
+
+}
+
 /* ----------------------- read_device_data ----------------------------- */
 
 void read_device_data(char *file, int filetype, int loadstatus){
@@ -4342,14 +4423,14 @@ void read_device_data(char *file, int filetype, int loadstatus){
 // unload data
 
   if(loadstatus==UNLOAD){
-    for(i=0;i<ndeviceinfo;i++){
+    for(i=ndeviceinfo_exp;i<ndeviceinfo;i++){
       device *devicei;
 
       devicei = deviceinfo + i;
       if(devicei->filetype!=filetype)continue;
       FREEMEMORY(devicei->vals);
     }
-    for(i=0;i<ndeviceinfo;i++){
+    for(i=ndeviceinfo_exp;i<ndeviceinfo;i++){
       device *devicei;
 
       devicei = deviceinfo + i;
@@ -4360,7 +4441,7 @@ void read_device_data(char *file, int filetype, int loadstatus){
         break;
       }
     }
-    for(i=0;i<ndeviceinfo;i++){
+    for(i=ndeviceinfo_exp;i<ndeviceinfo;i++){
       device *devicei;
 
       devicei = deviceinfo + i;
@@ -4373,13 +4454,14 @@ void read_device_data(char *file, int filetype, int loadstatus){
 
   stream=fopen(file,"r");
   if(stream==NULL)return;
+  rewind_device_file(stream);
   buffer_len=getrowcols(stream,&nrows,&ncols);
   if(nrows<=0||ncols<=0||buffer_len<=0){
     fclose(stream);
     return;
   }
   buffer_len+=10;
-  rewind(stream);
+  rewind_device_file(stream);
 
   NewMemory((void **)&buffer,buffer_len);
   NewMemory((void **)&buffer2,buffer_len);

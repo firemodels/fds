@@ -27,6 +27,8 @@ EXTERNCPP void getzonedatacsv(int nzonet, int nrooms, int nfires,
                     float *zonepr, float *zoneylay,  float *zonetl, float *zonetu,
                     float **zoneodlptr, float **zoneoduptr, float *zonehvents, float *zonevvents,
                     int *error);
+EXTERNCPP void read_device_header(char *file, device **devices, int *ndevices);
+EXTERNCPP void parse_device_keyword(FILE *stream, device *devicei);
 EXTERNCPP void draw_geom(int flag);
 EXTERNCPP void getzonesizecsv(int *nzonet, int *nroom2, int *nfires, int *nzhvents, int *nzvvents, int *error);
 EXTERNCPP void getzoneventbounds(void);
