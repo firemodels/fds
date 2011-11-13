@@ -677,7 +677,7 @@ SVEXTERN f_units *unitclasses,*unitclasses_default,*unitclasses_ini;
 SVEXTERN int nunitclasses,nunitclasses_default,nunitclasses_ini;
 SVEXTERN mesh *meshinfo,*current_mesh, *mesh_save, *mesh_last, SVDECL(*loaded_isomesh,NULL);
 SVEXTERN float devicenorm_length;
-SVEXTERN int ndeviceinfo,nvdeviceinfo;
+SVEXTERN int ndeviceinfo,nvdeviceinfo,ndeviceinfo_exp;
 SVEXTERN float max_dev_vel;
 SVEXTERN int last_prop_display;
 SVEXTERN device *deviceinfo;
