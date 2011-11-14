@@ -1649,27 +1649,29 @@ void drawroomdata(void){
 void DrawFirePlume(float diameter, float height, float maxheight){
   unsigned char smokecolor[3]={178,178,178};
   unsigned char firecolor[3]={255,128,0};
-  float dlower, dupper;
 
   if(height<=maxheight){
+    float dlower, dupper;
+
     dlower=diameter;
     dupper=0.0;
     drawtrunccone(dlower,dupper,height,firecolor);
   }
   else{
-    float dh,dr;
+    float dh;
+    float dlower1, dupper1;
+    float dlower2, dupper2;
 
     dh = height-maxheight;
-    dr = dh*0.268;  // tan(15deg) ~= 0.268... 
-    dlower=diameter;
-    dupper=2.0*dr;
-    drawtrunccone(dlower,dupper,maxheight,firecolor);
+    dlower1=diameter;
+    dupper1=diameter*dh/height;
+    drawtrunccone(dlower1,dupper1,maxheight,firecolor);
 
     glPushMatrix();
-    glTranslatef(0.0,0.0,maxheight-dr);
-    dlower=0.0;
-    dupper=2.0*dh;
-    drawtrunccone(dlower,dupper,dr,firecolor);
+    glTranslatef(0.0,0.0,maxheight-dupper1/2.0);
+    dlower2=0.0;
+    dupper2=2.0*dh;
+    drawtrunccone(dlower2,dupper2,dupper1/2.0,firecolor);
     glPopMatrix();
   }
 
