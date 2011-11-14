@@ -23,7 +23,7 @@ call %envfile%
 %svn_drive%
 
 set platform=%1
-set BUILDDIR=INTEL_WIN_%platform%
+set BUILDDIR=intel_win_%platform%
 
 set version=%smv_version%
 set bundledir=%svn_root%\smv\for_bundle

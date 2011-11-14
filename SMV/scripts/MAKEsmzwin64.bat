@@ -20,7 +20,7 @@ call %envfile%
 
 %svn_drive%
 
-cd %svn_root%\Utilities\smokezip\INTEL_WIN_64
+cd %svn_root%\Utilities\smokezip\intel_win_64
 erase *.obj
 make_zip.bat
 pause

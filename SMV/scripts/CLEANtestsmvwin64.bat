@@ -17,8 +17,8 @@ call %envfile%
 
 %svn_drive%
 echo.
-echo Cleaning INTEL_WIN_TEST_64
-cd %svn_root%\SMV\Build\INTEL_WIN_TEST_64
+echo Cleaning intel_win_test_64
+cd %svn_root%\SMV\Build\intel_win_test_64
 
 erase *.obj 
 

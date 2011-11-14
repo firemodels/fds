@@ -24,7 +24,7 @@ echo Using SVN revision %smv_revision% to build a test 64 bit Windows Smokeview
 %svn_drive%
 cd %svn_root%\smv\source\smokeview
 
-cd %svn_root%\smv\Build\INTEL_WIN_TEST_64
+cd %svn_root%\smv\Build\intel_win_test_64
 call make_smv
 
 echo.

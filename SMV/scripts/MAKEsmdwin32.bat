@@ -20,7 +20,7 @@ call %envfile%
 
 %svn_drive%
 
-cd %svn_root%\Utilities\smokediff\INTEL_WIN_32
+cd %svn_root%\Utilities\smokediff\intel_win_32
 erase *.obj
 make_diff.bat
 pause

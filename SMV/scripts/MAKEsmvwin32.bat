@@ -24,7 +24,7 @@ echo Using SVN revision %smv_revision% to build a 32 bit Windows Smokeview
 %svn_drive%
 cd %svn_root%\smv\source\smokeview
 
-cd %svn_root%\smv\Build\INTEL_WIN_32
+cd %svn_root%\smv\Build\intel_win_32
 call make_smv
 copy %svn_root%\smv\bin\smv5_win_32.exe %svn_root%\smv\for_bundle\smokeview32_release.exe
 

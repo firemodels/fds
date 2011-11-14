@@ -11,7 +11,7 @@ set in_fds2ascii=%svn_root%\Utilities\fds2ascii
 set in_smokediff=%svn_root%\Utilities\smokediff
 set in_smokezip=%svn_root%\Utilities\smokezip
 set in_background=%svn_root%\Utilities\background
-set in_smv=%svn_root%\SMV\Build\INTEL_WIN_%platform%
+set in_smv=%svn_root%\SMV\Build\intel_win_%platform%
 set in_for_bundle=%svn_root%\SMV\for_bundle
 
 set to_google=%svn_root%\Utilities\to_google
