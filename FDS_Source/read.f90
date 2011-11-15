@@ -4644,7 +4644,7 @@ DO N=1,N_CABL
    SURFACE(N_SURF)%CABL_INDEX   = N
 ENDDO
 
-! Add three extra surface types to the list that has already been compiled
+! Add extra surface types to the list that has already been compiled
  
 INERT_SURF_INDEX                   = 0
 OPEN_SURF_INDEX                    = N_SURF + 1
