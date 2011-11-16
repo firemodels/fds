@@ -2,7 +2,7 @@
 
 &MESH IJK=10,10,10, XB=0,1,0,1,0,1 /
   
-&TIME T_END=0 /
+&TIME T_END=10.0 /
 
 &SURF ID='yx plane', COLOR='BLUE'/
 &SURF ID='xz plane', COLOR='RED'/
@@ -13,6 +13,8 @@
 &VERT X=0.75,0.50,0.50 /
 &VERT X=0.50,0.75,0.50 /
 &VERT X=0.50,0.50,0.75 /
+
+&BNDE QUANTITY='GAS TEMPERATURE' /
 
 ! Facets with vertices, N(3), ordered so that with right-hand rule
 ! the surface normal points toward the gas phase (out of the solid).
