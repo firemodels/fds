@@ -556,30 +556,49 @@ typedef struct {
 
 void get_geom_header(char *file, int *ntimes){
   FILE *stream;
-  int one=1,endianswitch=0;
-  int ntris,nvert;
-  float time;
+  int one=0,endianswitch=0;
+  int nvertfaces[4];
+  float times[2];
   int first=1;
   int nt;
   int returncode;
+  int version;
+  int size;
 
-  stream = fopen(file,"r");
+  stream = fopen(file,"rb");
   if(stream==NULL){
     *ntimes=-1;
     return;
   }
   fseek(stream,4,SEEK_CUR);fread(&one,4,1,stream);fseek(stream,4,SEEK_CUR);
   if(one!=1)endianswitch=1;
-  nt=-1;
+  FORTREAD(&version,1,stream);
+  nt=0;
   for(;;){
-    if(first!=1){
-      FORTREADBR(&time,1,stream);
+    if(first==1){
+      FORTREADBR(times,1,stream);
+      FORTREADBR(&nvertfaces,4,stream);
+      if(nvertfaces[0]!=0)fseek(stream,4+3*nvertfaces[0]*4+4,SEEK_CUR);    
+      if(nvertfaces[1]!=0)fseek(stream,4+3*nvertfaces[1]*4+4,SEEK_CUR);    
+      if(nvertfaces[2]!=0)fseek(stream,4+3*nvertfaces[2]*4+4,SEEK_CUR);    
+      if(nvertfaces[3]!=0)fseek(stream,4+3*nvertfaces[3]*4+4,SEEK_CUR);    
     }
-    first=0;
-    FORTREADBR(&nvert,1,stream);
-    if(nvert!=0)fseek(stream,4+3*nvert*4+4,SEEK_CUR);    
-    FORTREADBR(&ntris,1,stream);
-    if(ntris!=0)fseek(stream,4+3*ntris*4+4,SEEK_CUR);    
+    else{
+      int *geom_type;
+
+      FORTREADBR(times,2,stream);
+      geom_type = (int *)(times+1);
+
+      if(*geom_type==0){
+        FORTREADBR(&nvertfaces,2,stream);
+        if(nvertfaces[0]!=0)fseek(stream,4+3*nvertfaces[0]*4+4,SEEK_CUR);    
+        if(nvertfaces[1]!=0)fseek(stream,4+3*nvertfaces[1]*4+4,SEEK_CUR);    
+      }
+      else{
+        fseek(stream,4+8*4+4,SEEK_CUR);
+      }
+    }
+
     nt++;
   }
   *ntimes=nt;
@@ -627,7 +646,6 @@ void read_geom(int ifile, int flag, int *errorcode){
   FILE *stream;
   int one=1, endianswitch=0;
   int returncode;
-  int nvert, ntris;
   int ntimes;
   float *xyz=NULL;
   int nxyz=0;
@@ -636,70 +654,105 @@ void read_geom(int ifile, int flag, int *errorcode){
   point *points;
   triangle *triangles;
   int first=1;
+  int version;
 
   // 1
-  //   static geometry
-  // nverts
-  // x1 y1 z1 ... xnverts ynverts znverts
-  // nfaces
-  // i1 j1 k1 ... infaces jnfaces knfaces
-  //  dynamic geometry (one entry for each time step)
-  // time
-  // nverts
-  // x1 y1 z1 ... xnverts ynverts znverts
-  // nfaces
-  // i1 j1 k1 ... infaces jnfaces knfaces
+  // version
+  // stime
+  // nvert_s, nface_s, nvert_d, nface_d
+  // x1 y1 z1 ... xnvert_s ynvert_s znvert_s
+  // i1 j1 k1 ... inface_s jnface_s knface_s
+  // x1 y1 z1 ... xnvert_d ynvert_d znvert_d
+  // i1 j1 k1 ... inface_d jnface_d knface_d
 
-  geomi = geominfo + ifile;
+  // time geom_type
+  // if geom_type==0
+  //   x1 y1 z1 ... xnvert_d ynvert_d znvert_d  
+  //   i1 j1 k1 ... inface_d jnface_d knface_d
+  // if geom_type==1
+  //   xtran, ytran, ztran, xrot0, yrot0, zrot0, rot_az, rot_elev
+
+
+  geomi = (patchinfo + ifile)->geom;
   file = geomi->file;
 
   get_geom_header(file,&ntimes);
   if(ntimes<0)return;
-  stream = fopen(file,"r");
+  stream = fopen(file,"rb");
 
   fseek(stream,4,SEEK_CUR);fread(&one,4,1,stream);fseek(stream,4,SEEK_CUR);
   if(one!=1)endianswitch=1;
+  FORTREAD(&version,1,stream);
 
   geomi->ntimes=ntimes;
-  NewMemory((void **)&geomi->pointlistinfo,(ntimes+1)*sizeof(pointlistdata));
-  NewMemory((void **)&geomi->trilistinfo,(ntimes+1)*sizeof(trilistdata));
-  NewMemory((void **)&geomi->times,(ntimes+1)*sizeof(float));
+  NewMemory((void **)&geomi->pointlistinfo,ntimes*sizeof(pointlistdata));
+  NewMemory((void **)&geomi->trilistinfo,ntimes*sizeof(trilistdata));
+  NewMemory((void **)&geomi->times,ntimes*sizeof(float));
 
   for(i=0;i<=ntimes;i++){
-    float time;
+    float times[2];
     pointlistdata *pointlisti;
     trilistdata *trilisti;
+    int *geom_typeptr,geom_type=0;
+    int nverts[4];
 
     pointlisti = geomi->pointlistinfo+i;
     trilisti = geomi->trilistinfo+i;
-    if(first!=1)FORTREAD(&time,1,stream);
-    first=0;
-    FORTREAD(&nvert,1,stream);
-    FORTREAD(&nvert,1,stream);
-    if(nvert>0){
-      FREEMEMORY(xyz);
-      NewMemory((void **)&xyz,3*nvert*sizeof(float));
-      NewMemory((void **)&points,nvert*sizeof(point));
-      pointlisti->points=points;
-      FORTREAD(xyz,3*nvert,stream);
-      for(i=0;i<nvert;i++){
-        points[i].xyz[0]=xyz[3*i+0];
-        points[i].xyz[1]=xyz[3*i+1];
-        points[i].xyz[2]=xyz[3*i+2];
+    if(first==1){
+      FORTREADBR(times,1,stream);
+      FORTREADBR(nverts,4,stream);
+      geom_typeptr=&geom_type;
+      first=0;
+    }
+    else{
+      nverts[0]=0;
+      nverts[1]=0;
+      FORTREADBR(times,2,stream);
+      FORTREADBR(nverts+2,2,stream);
+      geom_typeptr=(int *)(times+1);
+    }
+    pointlisti->points=NULL;
+    if(*geom_typeptr==0){
+      if(nverts[0]+nverts[1]>0){
+        int nvert;
+
+        nvert = nverts[0] + nverts[1];
+        NewMemory((void **)&xyz,3*nvert*sizeof(float));
+        NewMemory((void **)&points,nvert*sizeof(point));
+        pointlisti->points=points;
+        if(nverts[0]>0)FORTREADBR(xyz,3*nverts[0],stream);
+        if(nverts[1]>0)FORTREADBR(xyz+3*nverts[0],3*nverts[1],stream);
+        for(i=0;i<nvert;i++){
+          points[i].xyz[0]=xyz[3*i+0];
+          points[i].xyz[1]=xyz[3*i+1];
+          points[i].xyz[2]=xyz[3*i+2];
+        }
+        FREEMEMORY(xyz);
       }
     }
-    FORTREAD(&ntris,1,stream);
-    if(ntris>0){
-      FREEMEMORY(ijk);
+    else if(*geom_typeptr==1){
+      float tran_rot[8];
+
+      FORTREADBR(tran_rot,8,stream);
+      memcpy(pointlisti->translate,tran_rot,3*sizeof(float));
+      memcpy(pointlisti->rot0,tran_rot+3,3*sizeof(float));
+      memcpy(pointlisti->rot,tran_rot+6,2*sizeof(float));
+    }
+    if(*geom_typeptr==0&&nverts[2]+nverts[3]>0){
+      int ntris;
+
+      ntris = nverts[2]+nverts[3];
       NewMemory((void **)&ijk,3*ntris*sizeof(int));
       NewMemory((void **)&triangles,ntris*sizeof(triangle));
       trilisti->triangles=triangles;
-      FORTREAD(ijk,3*ntris,stream);
-      for(i=0;i<nvert;i++){
+      if(nverts[2]>0)FORTREADBR(ijk,3*nverts[2],stream);
+      if(nverts[3]>0)FORTREADBR(ijk+3*nverts[2],3*nverts[3],stream);
+      for(i=0;i<ntris;i++){
         triangles[i].points[0]=points+ijk[3*i+0];
         triangles[i].points[1]=points+ijk[3*i+1];
         triangles[i].points[2]=points+ijk[3*i+2];
       }
+      FREEMEMORY(ijk);
     }
   }
 }
@@ -762,7 +815,7 @@ void read_geomdata(int ifile, int flag, int *errorcode){
   endian = getendian();
   lenfile = strlen(file);
 
-  FORTgetembedsize(file, &endian, &ntimes, &nvals, &error, lenfile);
+  FORTgetembeddatasize(file, &endian, &ntimes, &nvals, &error, lenfile);
 
   if(nvals>0){
     NewMemory((void **)&patchi->geom_nstatics,ntimes*sizeof(int));

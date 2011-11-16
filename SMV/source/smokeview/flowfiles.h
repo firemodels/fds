@@ -31,6 +31,7 @@ typedef struct _triangle {
 typedef struct {
   int npoints;
   point *points;
+  float translate[3], rot0[3], rot[2];
 } pointlistdata;
 
 

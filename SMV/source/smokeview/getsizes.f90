@@ -4,10 +4,10 @@
 
 !  ------------------ getembedsize ------------------------ 
 
-subroutine getembedsize(filename,endian,ntimes,nvars,error)
+subroutine getembeddatasize(filename,endian,ntimes,nvars,error)
 #ifdef pp_cvf
 #ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getembedsize@24' :: getembedsize
+!DEC$ ATTRIBUTES ALIAS:'_getembedsize@24' :: getembeddatasize
 #endif
 #endif
 implicit none
@@ -61,7 +61,7 @@ do
   ntimes = ntimes + 1
 end do
 
-end subroutine getembedsize
+end subroutine getembeddatasize
 
 !  ------------------ endian_open ------------------------ 
 
