@@ -17,9 +17,9 @@ integer, intent(out) :: ntimes, nvars, error
 
 integer :: endian2, lu20, finish
 logical :: isopen,exists
-real :: time, dummy, i
-integer :: one, nstatic, ndynamic
-
+real :: time, dummy
+integer :: i, one, version
+integer :: nvert_s, nvert_d, nface_s, nface_d
 
 lu20=20
 inquire(unit=lu20,opened=isopen)
@@ -46,18 +46,18 @@ endif
 
 error = 0
 read(lu20)one
+read(lu20)version
 ntimes=0
 nvars=0
 do 
   read(lu20,iostat=finish)time
-  if(finish.eq.0)read(lu20,iostat=finish)nstatic
-  if(finish.eq.0)read(lu20,iostat=finish)(dummy,i=1,nstatic)
-  if(finish.eq.0)read(lu20,iostat=finish)ndynamic
-  if(finish.eq.0.and.ndynamic.ne.0)then
-    read(lu20,iostat=finish)(dummy,i=1,nstatic)
-  endif
+  if(finish.eq.0)read(lu20,iostat=finish)nvert_s,nface_s,nvert_d,nface_d
+  if(finish.eq.0.and.nvert_s>0)read(lu20,iostat=finish)(dummy,i=1,nvert_s)
+  if(finish.eq.0.and.nvert_d>0)read(lu20,iostat=finish)(dummy,i=1,nvert_d)
+  if(finish.eq.0.and.nface_s>0)read(lu20,iostat=finish)(dummy,i=1,nface_s)
+  if(finish.eq.0.and.nface_d>0)read(lu20,iostat=finish)(dummy,i=1,nface_d)
   if(finish.ne.0)return
-  nvars = nvars + nstatic + ndynamic
+  nvars = nvars + nvert_s + nvert_d + nface_s + nface_d
   ntimes = ntimes + 1
 end do
 

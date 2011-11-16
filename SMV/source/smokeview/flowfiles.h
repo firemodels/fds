@@ -26,21 +26,24 @@ typedef struct _triangle {
   float normal[3];
 } triangle;
 
-/* --------------------------  pointlistdata ------------------------------------ */
+/* --------------------------  geomlistdata ------------------------------------ */
 
 typedef struct {
-  int npoints;
+  int npoints,ntriangles;
   point *points;
+  triangle *triangles;
   float translate[3], rot0[3], rot[2];
-} pointlistdata;
+} geomlistdata;
 
-
-/* --------------------------  trilistdata ------------------------------------ */
+/* --------------------------  geomdata ------------------------------------ */
 
 typedef struct {
-  int ntriangles;
-  triangle *triangles;
-} trilistdata;
+  char *file;
+  int loaded, display;
+  geomlistdata *geomlistinfo;
+  float *times;
+  int ntimes;
+} geomdata;
 
 /* --------------------------  bounds ------------------------------------ */
 
@@ -235,16 +238,6 @@ typedef struct _surface {
   int transparent;
   int used_by_obst,used_by_vent;
 } surface;
-
-/* --------------------------  geomdata ------------------------------------ */
-
-typedef struct {
-  char *file;
-  pointlistdata *pointlistinfo;
-  trilistdata *trilistinfo;
-  float *times;
-  int ntimes;
-} geomdata;
 
 /* --------------------------  facedata ------------------------------------ */
 

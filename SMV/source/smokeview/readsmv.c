@@ -1503,11 +1503,6 @@ int readsmv(char *file, char *file2){
   FREEMEMORY(surfaceinfo);
   FREEMEMORY(terrain_texture);
 
-  FREEMEMORY(trilistinfo);
-  ntrilistinfo=0;
-  FREEMEMORY(pointlistinfo);
-  npointlistinfo=0;
-
   if(cadgeominfo!=NULL)freecadinfo();
 
   if(file==NULL){
@@ -1569,14 +1564,6 @@ int readsmv(char *file, char *file2){
     }
     if(match(buffer,"PROP",4) == 1){
       npropinfo++;
-      continue;
-    }
-    if(match(buffer,"VERT",4) == 1){
-      npointlistinfo++;
-      continue;
-    }
-    if(match(buffer,"FACE",4) == 1){
-      ntrilistinfo++;
       continue;
     }
     if(match(buffer,"SMOKEDIFF",9) == 1){
@@ -1875,14 +1862,6 @@ int readsmv(char *file, char *file2){
  if(ngeominfo>0){
    NewMemory((void **)&geominfo,ngeominfo*sizeof(geomdata));
    ngeominfo=0;
- }
- if(npointlistinfo>0){
-   NewMemory((void **)&pointlistinfo,npointlistinfo*sizeof(pointlistdata));
-   npointlistinfo=0;
- }
- if(ntrilistinfo>0){
-   NewMemory((void **)&trilistinfo,ntrilistinfo*sizeof(trilistdata));
-   ntrilistinfo=0;
  }
  if(npropinfo>0){
    NewMemory((void **)&propinfo,npropinfo*sizeof(propdata));
@@ -2198,6 +2177,13 @@ int readsmv(char *file, char *file2){
       buff2 = trim_front(buffer);
       NewMemory((void **)&geomi->file,strlen(buff2)+1);
       strcpy(geomi->file,buff2);
+
+      geomi->display=0;
+      geomi->loaded=0;
+      geomi->geomlistinfo=NULL;
+      geomi->times=NULL;
+      geomi->ntimes=0;
+      geomi->times=NULL;
 
       ngeominfo++;
     }
@@ -3568,122 +3554,6 @@ typedef struct {
       }
     }
     CheckMemory;
-
-
-    /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++ NODE ++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-    if(match(buffer,"VERT",4) == 1){
-      int nnodes=0,i;
-      pointlistdata *pointlisti;
-      float *xyzn;
-
-      pointlisti = pointlistinfo + npointlistinfo;
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&nnodes);
-      pointlisti->npoints=nnodes;
-      if(nnodes>0){
-        NewMemory((void **)&pointlisti->points,nnodes*sizeof(point));
-      }
-      else{
-        pointlisti->points=NULL;
-      }
-  
-      for(i=0;i<nnodes;i++){
-        float xyz[3];
- 
-        xyz[0]=0.0;
-        xyz[1]=0.0;
-        xyz[2]=0.0;
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%f %f %f",xyz,xyz+1,xyz+2);
-        xyzn = pointlisti->points[i].xyz;
-        xyzn[0] = xyz[0];
-        xyzn[1] = xyz[1];
-        xyzn[2] = xyz[2];
-      }
-      npointlistinfo++;
-      continue;
-    }
-
-    /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++ FACE ++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-    if(match(buffer,"FACE",4) == 1){
-      int ntris=0,i;
-      trilistdata *trii;
-      pointlistdata *pointlisti;
-      int *trinodesn;
-      char *surf_labelptr;
-      char surf_label[256];
-      float normal[3];
-
-      trii = trilistinfo + ntrilistinfo;
-      pointlisti = pointlistinfo + ntrilistinfo;
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&ntris);
-      trii->ntriangles=ntris;
-      if(ntris>0){
-        NewMemory((void **)&trii->triangles,ntris*sizeof(triangle));
-      }
-      else{
-        trii->triangles=NULL;
-      }
-      for(i=0;i<ntris;i++){
-        int trinodes[3],*trinodesn;
-        char *surfaceptr;
-        triangle *trianglei;
-        float *norm;
-       
-        fgets(buffer,255,stream);
-        normal[0]=-2.0;
-        normal[1]=-2.0;
-        normal[2]=-2.0;
-        sscanf(buffer,"%i %i %i %f %f %f",trinodes,trinodes+1,trinodes+2,normal,normal+1,normal+2);
-        trianglei = trii->triangles+i;
-        trianglei->points[0] = pointlisti->points+trinodes[0]-1;
-        trianglei->points[1] = pointlisti->points+trinodes[1]-1;
-        trianglei->points[2] = pointlisti->points+trinodes[2]-1;
-        if(normal[0]<-1.5){
-          trianglei->fdsnorm=0;
-        }
-        else{
-          float length,err;
-
-          trianglei->fdsnorm=1;
-          norm = trianglei->normal;
-          norm[0]=normal[0];
-          norm[1]=normal[1];
-          norm[2]=normal[2];
-          length = norm[0]*norm[0] + norm[1]*norm[1] + norm[2]*norm[2];
-          length = sqrt(length);
-          err = length-1.0;
-          if(err<0.0)err=-err;
-          if(err>0.001){
-            printf("*** warning: embedded triangle norm is not a unit vector, length=%f\n",length);
-            printf("    Using smokeview normal.\n");
-            trianglei->fdsnorm=0;
-          }
-        }
-        surfaceptr=strchr(buffer,'%');
-        if(surfaceptr!=NULL){
-          surfaceptr++;
-          surfaceptr=trim_front(surfaceptr);
-          trim(surfaceptr);
-          trianglei->surf=get_surface(surfaceptr);
-        }
-        else{
-          trianglei->surf=surfacedefault;
-        }
-      }
-      ntrilistinfo++;
-      continue;
-    }
-
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++ CLASS_OF_PARTICLES +++++++++++++++++++++++
@@ -5937,7 +5807,6 @@ typedef struct {
     }
   }
 
-
   /*
     Associate a surface with each block.
   */
@@ -6421,7 +6290,6 @@ typedef struct {
 
   xcenGLOBAL=xbar/2.0;  ycenGLOBAL=ybar/2.0; zcenGLOBAL=zbar/2.0;
 
-
   xxmax = xbar;
   if(ybar>xxmax)xxmax=ybar;
   if(zbar>xxmax)xxmax=zbar;
@@ -6643,6 +6511,7 @@ typedef struct {
 #endif
   update_mesh_terrain();
 
+  read_all_geom();
   get_faceinfo();
 
   printf(_("wrap up completed"));

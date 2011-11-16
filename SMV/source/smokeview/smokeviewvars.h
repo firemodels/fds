@@ -28,9 +28,7 @@ SVEXTERN int SVDECL(freeze_volsmoke,0);
 #endif
 SVEXTERN int SVDECL(showtrisurface,1),SVDECL(showtrioutline,1);
 SVEXTERN int SVDECL(showtrinormal,0),SVDECL(showpointnormal,0),SVDECL(smoothtrinormal,0);
-SVEXTERN int SVDECL(npointlistinfo,0), SVDECL(ntrilistinfo,0);
-SVEXTERN trilistdata SVDECL(*trilistinfo,NULL);
-SVEXTERN pointlistdata SVDECL(*pointlistinfo,NULL);
+SVEXTERN geomlistdata SVDECL(*geomlistinfo,NULL);
 SVEXTERN int SVDECL(have_volcompressed,0);
 SVEXTERN int SVDECL(glui_load_volcompressed,0),SVDECL(load_volcompressed,0);
 SVEXTERN int SVDECL(use_multi_threading,1);

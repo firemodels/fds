@@ -715,6 +715,7 @@ EXTERNCPP void draw_geomdata(patch *patchi);
 EXTERNCPP char *newtextptr(char ***texture_list,int *n_texture_list,char *texturebuffer,char *lastbuffer);
 
 EXTERNCPP void readplot3d(char *file, int ifile, int flag,int *errorcode);
+EXTERNCPP void read_all_geom(void);
 EXTERNCPP void read_geom(int ifile, int flag, int *errorcode);
 EXTERNCPP void read_geomdata(int ifile, int flag, int *errorcode);
 EXTERNCPP void readpatch(int ifile, int flag, int *errorcode);

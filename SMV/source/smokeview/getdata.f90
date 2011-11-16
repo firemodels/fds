@@ -19,10 +19,12 @@ integer, intent(out), dimension(:) :: nstatics(ntimes), ndynamics(ntimes)
 
 integer :: endian2, lu20, finish
 logical :: isopen,exists
-real :: time, dummy, i
-integer :: one, nstatic, ndynamic, itime, nvars
+real :: time, dummy
+integer :: i
+integer :: one, itime, nvars
+integer :: nvert_s, ntri_s, nvert_d, ntri_d
 real :: valmin, valmax
-
+integer :: version
 
 lu20=20
 inquire(unit=lu20,opened=isopen)
@@ -49,28 +51,28 @@ endif
 
 error = 0
 read(lu20)one
+read(lu20)version
 nvars=0
 do itime=1, ntimes
   read(lu20,iostat=finish)times(itime)
   write(6,10)times(itime)
 10 format("boundary element time=",f9.2)  
-  if(finish.eq.0)read(lu20,iostat=finish)nstatic
-  nstatics(itime)=nstatic
-  if(finish.eq.0)read(lu20,iostat=finish)(vals(nvars+i),i=1,nstatic)
+  if(finish.eq.0)read(lu20,iostat=finish)nvert_s, ntri_s, nvert_d, ntri_d
+  nstatics(itime)=ntri_s
+  if(finish.eq.0)read(lu20,iostat=finish)(vals(nvars+i),i=1,ntri_s)
   valmin = vals(nvars+1)
   valmax = valmin
-  do i = 2, nstatic
+  do i = 2, ntri_s
     if(vals(nvars+i).lt.valmin)valmin=vals(nvars+i)
     if(vals(nvars+i).gt.valmax)valmax=vals(nvars+i)
   end do
   write(6,*)"valmin=",valmin," valmax=",valmax
-  if(finish.eq.0)read(lu20,iostat=finish)ndynamic
-  ndynamics(itime)=ndynamic
-  if(finish.eq.0.and.ndynamic.ne.0)then
-    read(lu20,iostat=finish)(vals(nvars+nstatic+i),i=1,nstatic)
+  ndynamics(itime)=ntri_d
+  if(finish.eq.0.and.ntri_d.ne.0)then
+    read(lu20,iostat=finish)(vals(nvars+ntri_s+i),i=1,ntri_d)
   endif
   if(finish.ne.0)return
-  nvars = nvars + nstatic + ndynamic
+  nvars = nvars + ntri_s + ntri_d
 end do
 
 end subroutine getembeddata
