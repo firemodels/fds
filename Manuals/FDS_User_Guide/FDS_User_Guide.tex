@@ -11789,14 +11789,14 @@ These files are written out from {\bf dump.f} with lines equivalent to the follo
   WRITE(LU_GEOM) STIME  ! first time step
   WRITE(LU_GEOM) N_VERT_S, NFACE_S, NVERT_D, N_FACE_D
   IF (N_VERT_S>0)  WRITE(LU_GEOM) (Xvert_S(I),Yvert_S(I),Zvert_S(I)),I=1,N_VERT_S)
+  IF (N_VERT_D>0)  WRITE(LU_GEOM) (Xvert_D(I),Yvert_D(I),Zvert_D(I)),I=1,N_VERT_D)
   IF (N_FACE_S>0)  WRITE(LU_GEOM) (FACE1_S(I),FACE2_S(I),FACE3_S(I)),I=1,N_FACE_S)
-  IF (N_VERT_D>0) WRITE(LU_GEOM) (Xvert_D(I),Yvert_D(I),Zvert_D(I)),I=1,N_VERT_D)
-  IF (N_FACE_D>0) WRITE(LU_GEOM) (FACE1_D(I),FACE2_D(I),FACE3_D(I)),I=1,N_FACE_D)
+  IF (N_FACE_D>0)  WRITE(LU_GEOM) (FACE1_D(I),FACE2_D(I),FACE3_D(I)),I=1,N_FACE_D)
 
 ! dynamic geometry
   WRITE(LU_GEOM) STIME, GEOM_TYPE  ! each successive time step (if there is time dependent geometry)
   IF(GEOM_TYPE.EQ.0)THEN
-    WRITE(LU_GEOM) N_VERT_D,N_FACE_D
+    WRITE(LU_GEOM) N_VERT_D, N_FACE_D
     IF (N_VERT_D>0) WRITE(LU_GEOM) (Xvert_D(I),Yvert_D(I),Zvert_D(I)),I=1,N_VERT_D)
     IF (N_FACE_D>0) WRITE(LU_GEOM) (FACE1_D(I),FACE2_D(I),FACE3_D(I)),I=1,N_FACE_D)
   ELSE IF(GEOM_TYPE.EQ.1)THEN
@@ -11844,11 +11844,11 @@ Geometry data files are written out from {\bf dump.f} with the lines equivalent 
   WRITE(LU_GEOM_DATA) ONE
   WRITE(LU_GEOM_DATA) VERSION
   WRITE(LU_GEOM_DATA) STIME
-  WRITE(LU_GEOM_DATA) N_VERT_S_VALS,N_FACE_S_VALS,N_VERT_D_VALS,NFACE_D_VALS
-  IF (N_VERT_S>0)  WRITE(LU_GEOM_DATA) (ValVertStatic(I)), I=1,N_VERT_S_VALS)
-  IF (N_FACE_S>0)  WRITE(LU_GEOM_DATA) (ValFaceStatic(I)), I=1,N_VERT_S_VALS)
-  IF (N_VERT_D>0) WRITE(LU_GEOM_DATA) (ValVertDynamic(I)),I=1,N_VERT_D_VALS)
-  IF (N_FACE_D>0) WRITE(LU_GEOM_DATA) (ValFaceDynamic(I)),I=1,N_FACE_D_VALS)
+  WRITE(LU_GEOM_DATA) N_VERT_S_VALS,N_VERT_D_VALS,N_FACE_S_VALS,NFACE_D_VALS
+  IF (N_VERT_S_VALS>0)  WRITE(LU_GEOM_DATA) (ValVertStatic(I)), I=1,N_VERT_S_VALS)
+  IF (N_VERT_D_VALS>0)  WRITE(LU_GEOM_DATA) (ValVertDynamic(I)),I=1,N_VERT_D_VALS)
+  IF (N_FACE_S_VALS>0)  WRITE(LU_GEOM_DATA) (ValFaceStatic(I)), I=1,N_VERT_S_VALS)
+  IF (N_FACE_D_VALS>0)  WRITE(LU_GEOM_DATA) (ValFaceDynamic(I)),I=1,N_FACE_D_VALS)
               .
               .
               .
@@ -11863,7 +11863,7 @@ computer viewing the geometry file use the same or different byte
 swap (endian) conventions for storing floating point numbers.
 \item {\ct VERSION}\ currently has value 0 and indicates the version number of this file format.
 \item {\ct STIME} is the FDS simulation time.
-\item {\ct N\_VERT\_S\_VALS, N\_FACE\_S\_VALS}\ is the number of data values written out for static vertices and faces.  One can write out data values located at nodes, located at the center of faces or both.  
+\item {\ct N\_VERT\_S\_VALS, N\_FACE\_S\_VALS}\ is the number of data values written out for static vertices and faces.  One can write out data values located at nodes, located at the center of faces or both.
 \item {\ct N\_VERT\_D\_VALS, N\_FACE\_D\_VALS}\ is the number of dynamic values written out for dynamic vertices and faces.  One can write out
 data values located at nodes, located at the center of faces, both or neither (if there is no dynamic geometry).
 \item {\ct ValVertStatic, ValFaceStatic}\ static vertex and face data.
