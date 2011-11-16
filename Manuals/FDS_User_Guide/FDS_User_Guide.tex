@@ -11788,17 +11788,17 @@ These files are written out from {\bf dump.f} with lines equivalent to the follo
   WRITE(LU_GEOM) VERSION
   WRITE(LU_GEOM) STIME  ! first time step
   WRITE(LU_GEOM) N_VERT_S, NFACE_S, NVERT_D, N_FACE_D
-  IF (N_VERT_S>0)  WRITE(LU_GEOM) (Xvert_S(I),Yvert_S(I),Zvert_S(I)),I=1,N_VERT_S)
-  IF (N_VERT_D>0)  WRITE(LU_GEOM) (Xvert_D(I),Yvert_D(I),Zvert_D(I)),I=1,N_VERT_D)
-  IF (N_FACE_S>0)  WRITE(LU_GEOM) (FACE1_S(I),FACE2_S(I),FACE3_S(I)),I=1,N_FACE_S)
-  IF (N_FACE_D>0)  WRITE(LU_GEOM) (FACE1_D(I),FACE2_D(I),FACE3_D(I)),I=1,N_FACE_D)
+  IF (N_VERT_S>0)  WRITE(LU_GEOM) (Xvert_S(I),Yvert_S(I),Zvert_S(I),I=1,N_VERT_S)
+  IF (N_VERT_D>0)  WRITE(LU_GEOM) (Xvert_D(I),Yvert_D(I),Zvert_D(I),I=1,N_VERT_D)
+  IF (N_FACE_S>0)  WRITE(LU_GEOM) (FACE1_S(I),FACE2_S(I),FACE3_S(I),SURF_S(I),I=1,N_FACE_S)
+  IF (N_FACE_D>0)  WRITE(LU_GEOM) (FACE1_D(I),FACE2_D(I),FACE3_D(I),SURF_D(I),I=1,N_FACE_D)
 
 ! dynamic geometry
   WRITE(LU_GEOM) STIME, GEOM_TYPE  ! each successive time step (if there is time dependent geometry)
   IF(GEOM_TYPE.EQ.0)THEN
     WRITE(LU_GEOM) N_VERT_D, N_FACE_D
-    IF (N_VERT_D>0) WRITE(LU_GEOM) (Xvert_D(I),Yvert_D(I),Zvert_D(I)),I=1,N_VERT_D)
-    IF (N_FACE_D>0) WRITE(LU_GEOM) (FACE1_D(I),FACE2_D(I),FACE3_D(I)),I=1,N_FACE_D)
+    IF (N_VERT_D>0) WRITE(LU_GEOM) (Xvert_D(I),Yvert_D(I),Zvert_D(I),SURF_S(I),I=1,NVERT_D)
+    IF (N_FACE_D>0) WRITE(LU_GEOM) (FACE1_D(I),FACE2_D(I),FACE3_D(I),SURF_D(I),I=1,NFACE_D)
   ELSE IF(GEOM_TYPE.EQ.1)THEN
     WRITE(LU_GEOM) Xtran, Ytran, Ztran, Xrot0, Yrot0, Zrot0, rot_az, rot_elev
   ENDIF
@@ -11819,6 +11819,7 @@ swap (endian) conventions for storing floating point numbers.
 \item {\ct Xvert\_S, Yvert\_S, Zvert\_S, Xvert\_D, Yvert\_D, Zvert\_D}\ are the static and dynamic vertex coordinates.
 \item {\ct FACE1\_S, FACE2\_S, FACE3\_S,FACE1\_D, FACE2\_D, FACE3\_D}\ are the static and dynamic vertex
 indices for each face (triangle).  The indices are numbered relative to how vertices were written out earlier.
+\item {\ct SURF\_S, SURF\_D}\ are the static and dynamic SURF indices for each face (triangle).
 \item {\ct GEOM\_TYPE}\ is flag indicating how dynamic geometry is represented.
 If {\ct GEOM\_TYPE}\ is 0 then time dependent geometry is written out in
 terms of nodes and faces using the same format as the static geometry.
@@ -11839,7 +11840,7 @@ The data written out to a geometry data file MUST correspond to the geometry wri
 in the corresponding geometry file.
 Geometry data files are written out from {\bf dump.f} with the lines equivalent to the following:
 
-\footnotesize
+\scriptsize
 \begin{verbatim}
   WRITE(LU_GEOM_DATA) ONE
   WRITE(LU_GEOM_DATA) VERSION
