@@ -7,7 +7,7 @@
 subroutine getembeddatasize(filename,endian,ntimes,nvars,error)
 #ifdef pp_cvf
 #ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getembedsize@24' :: getembeddatasize
+!DEC$ ATTRIBUTES ALIAS:'_getembeddatasize@24' :: getembeddatasize
 #endif
 #endif
 implicit none
