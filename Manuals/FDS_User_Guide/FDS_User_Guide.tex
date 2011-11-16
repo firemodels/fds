@@ -11790,15 +11790,18 @@ These files are written out from {\bf dump.f} with lines equivalent to the follo
   WRITE(LU_GEOM) N_VERT_S, NFACE_S, NVERT_D, N_FACE_D
   IF (N_VERT_S>0)  WRITE(LU_GEOM) (Xvert_S(I),Yvert_S(I),Zvert_S(I),I=1,N_VERT_S)
   IF (N_VERT_D>0)  WRITE(LU_GEOM) (Xvert_D(I),Yvert_D(I),Zvert_D(I),I=1,N_VERT_D)
-  IF (N_FACE_S>0)  WRITE(LU_GEOM) (FACE1_S(I),FACE2_S(I),FACE3_S(I),SURF_S(I),I=1,N_FACE_S)
-  IF (N_FACE_D>0)  WRITE(LU_GEOM) (FACE1_D(I),FACE2_D(I),FACE3_D(I),SURF_D(I),I=1,N_FACE_D)
+  IF (N_FACE_S>0)  WRITE(LU_GEOM) (FACE1_S(I),FACE2_S(I),FACE3_S(I),I=1,N_FACE_S)
+  IF (N_FACE_D>0)  WRITE(LU_GEOM) (FACE1_D(I),FACE2_D(I),FACE3_D(I),I=1,N_FACE_D)
+  IF (N_FACE_S>0)  WRITE(LU_GEOM) (SURF_S(I),I=1,N_FACE_S)
+  IF (N_FACE_D>0)  WRITE(LU_GEOM) (SURF_D(I),I=1,N_FACE_D)
 
 ! dynamic geometry
   WRITE(LU_GEOM) STIME, GEOM_TYPE  ! each successive time step (if there is time dependent geometry)
   IF(GEOM_TYPE.EQ.0)THEN
     WRITE(LU_GEOM) N_VERT_D, N_FACE_D
     IF (N_VERT_D>0) WRITE(LU_GEOM) (Xvert_D(I),Yvert_D(I),Zvert_D(I),SURF_S(I),I=1,NVERT_D)
-    IF (N_FACE_D>0) WRITE(LU_GEOM) (FACE1_D(I),FACE2_D(I),FACE3_D(I),SURF_D(I),I=1,NFACE_D)
+    IF (N_FACE_D>0) WRITE(LU_GEOM) (FACE1_D(I),FACE2_D(I),FACE3_D(I),I=1,NFACE_D)
+    IF (N_FACE_D>0) WRITE(LU_GEOM) (SURF_D(I),I=1,NFACE_D)
   ELSE IF(GEOM_TYPE.EQ.1)THEN
     WRITE(LU_GEOM) Xtran, Ytran, Ztran, Xrot0, Yrot0, Zrot0, rot_az, rot_elev
   ENDIF
