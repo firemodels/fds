@@ -373,8 +373,15 @@ GEOM_HEAT_FLUX_LOOP: DO TRI_INDEX=1,N_FACE
 
       GEOM_METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
 
+         CASE(SPECIFIED_TEMPERATURE_FROM_FILE)
+            TMP_SUM(I,J,K) = TMP_SUM(I,J,K) + FACE%TMP_F
+            N_CELLS(I,J,K) = N_CELLS(I,J,K) + 1._EB
+
+            DTMP = TMP_SUM(I,J,K)/N_CELLS(I,J,K) - TMP(I,J,K)
+            Q(I,J,K) = MIN(FACE%AREA,CELL_AREA)*SF%H_FIXED*DTMP/CELL_VOLUME
+
          CASE(SPECIFIED_TEMPERATURE)
-            TMP_SUM(I,J,K) = TMP_SUM(I,J,K) + SF%TMP_FRONT ! for testing, set gas cell tmp to face tmp
+            TMP_SUM(I,J,K) = TMP_SUM(I,J,K) + SF%TMP_FRONT
             N_CELLS(I,J,K) = N_CELLS(I,J,K) + 1._EB
 
             DTMP = TMP_SUM(I,J,K)/N_CELLS(I,J,K) - TMP(I,J,K)
