@@ -481,7 +481,7 @@ ENDDO
 
 ! Unstructured Geometry Files
 
-IF (N_BNDE>0) THEN
+IF (N_FACE>0) THEN
    DO N=1,1
       LU_GEOM(N) = GET_FILE_NUMBER()
       WRITE(FN_GEOM(N),'(A,A,I2.2,A)') TRIM(CHID),'_',N,'.ge'
@@ -1796,7 +1796,7 @@ ENDDO BNDE_FILE_LOOP
 
 ! Write GEOM info for unformatted, time-dependent geometry file
 
-IF (N_BNDE>0) THEN
+IF (N_FACE>0) THEN
    WRITE(LU_SMV,'(/A)') 'GEOM'
    WRITE(LU_SMV,'(1X,A)') FN_GEOM(1)
 ENDIF
