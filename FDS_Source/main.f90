@@ -2426,11 +2426,13 @@ ENDIF
 
 ! Dump unstructured geometry and boundary element info
 
+IF (N_FACE>0 .AND. T>=GEOM_CLOCK) THEN
+   IF (MYID==0) CALL DUMP_GEOM(T)
+   GEOM_CLOCK = GEOM_CLOCK + DT_GEOM
+ENDIF
+
 IF (N_BNDE>0 .AND. T>=BNDE_CLOCK) THEN
-   IF (MYID==0) THEN
-      CALL DUMP_BNDE(T)
-      CALL DUMP_GEOM(T)
-   ENDIF
+   IF (MYID==0) CALL DUMP_BNDE(T)
    BNDE_CLOCK = BNDE_CLOCK + DT_BNDE
 ENDIF
 
