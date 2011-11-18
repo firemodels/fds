@@ -26,7 +26,7 @@ This \paper\ is organized as follows.  A model for visualizing smoke and fire is
 % -------------------  Radiation Transport Equation ------------------------
 
 \section{Radiation Transport Equation}
-The model used here to visualize smoke is the radiation transport equation (RTE)~\cite{Siegel:2001}.  This equation uses radiance to represent smoke appearance.  Radiance has units of Watts per square meter per unit solid angle~(W/(sr$\cdot$m$^2$)).  The solid angle accounts for the fact that a light source appears brighter if it emits a given amount of light through a smaller cross-sectional area.  This has the interesting implication, ignoring atmospheric effects and as pointed out in Ref.~\cite{dutre:2002}, that the sun appears equally bright on the Earth as on Mars.  The diminished heat flux $(W/\mbox{m}^2)$ on Mars due to the increased distance from the sun is exactly offset by the reduced solid angle ($sr$) of the sun's disk.  From a visualization perspective, this implies that image radiance does not depend on distance from the observer unless  participating media is present to absorb or scatter  light.  The radiation transport equation discussed in this section models the change in radiance due to these factors.
+The model used here to visualize smoke is the radiation transport equation (RTE)~\cite{Siegel:2001}.  This equation uses radiance to represent smoke appearance.  Radiance has units of Watts per square meter per unit solid angle~(W/(sr$\cdot$m$^2$)).  The solid angle accounts for the fact that a light source appears brighter if it emits a given amount of light through a smaller cross-sectional area.  This has the interesting implication, ignoring atmospheric effects and as pointed out in Ref.~\cite{dutre:2002}, that the sun's radiance appears the same observed from Earth as from Mars.  The diminished heat flux $(W/\mbox{m}^2)$ on Mars due to the increased distance from the sun is exactly offset by the reduced solid angle ($sr$) that the sun's disk subtends.  From a visualization perspective, this implies that image radiance does not depend on distance from the observer unless  participating media is present to absorb or scatter  light.  The radiation transport equation discussed in this section models the change in radiance due to these factors.
 
 \newcommand{\siga}{ \sigma_a(x) }
 \newcommand{\sigt}{ \sigma_t(x) }
@@ -41,7 +41,7 @@ The model used here to visualize smoke is the radiation transport equation (RTE)
 \newcommand{\intmf}[2]{ \exp\left({-\int_{#1}^{#2} \sigts ds}\right) }
 \newcommand{\intmff}[2]{ {-\int_#1^#2 \sigts ds} }
 
-The radiation transport equation is used to calculate radiance due to one or more light sources within a region possibly containing a participating media such as smoke~\cite{Siegel:2001}. The change in radiance along a ray with direction $\omega$ at any one instant may be expressed using
+The radiation transport equation is used to calculate radiance due to one or more light sources within a region possibly containing a participating media such as smoke~\cite{Siegel:2001}. The change in radiance along a ray with direction $\omega$ at any one instant and wavelength may be expressed using
 
 \begin{eqnarray}
 \label{eq:fullrte}
@@ -52,7 +52,7 @@ The radiation transport equation is used to calculate radiance due to one or mor
 \end{eqnarray}
 
 \noindent where  $\Lxo$ represents the  radiance at $x$ along a direction $\omega$.
-As illustrated in Figure \ref{figRadiance}, the right hand side of (\ref{eq:fullrte}) is split into four components accounting for absorption, in and out scattering and emission where $\siga$ is the absorption coefficient, $\sigs$ is the scattering coefficient, $\Lexo$ is the radiance emitted at $x$ along a direction $\omega$ and $p(x,\omega,\omega')$ is the fraction of light moving along direction $\omega'$ scattered along direction $\omega$. Absorption and out-scattering cause radiance to decrease while emission and in-scattering cause radiance to increase. The radiance terms $C$, $C_e$ and $C_i$ have units of W/m$^2$sr$^{-1}$.  The coefficients $\sigma_a$ and $\sigma_s$ have units of m$^{-1}$ and specify the change per unit length to the radiance term to which they are applied.
+As illustrated in Figure \ref{figRadiance}, the right hand side of (\ref{eq:fullrte}) is split into four components accounting for absorption, in and out scattering and emission where $\siga$ is the absorption coefficient, $\sigs$ is the scattering coefficient, $\Lexo$ is the radiance emitted at $x$ along a direction $\omega$ and $p(x,\omega,\omega')$ is the fraction of light moving along direction $\omega'$ scattered along direction $\omega$. Absorption and out-scattering cause radiance to decrease while emission and in-scattering cause radiance to increase. The radiance terms $C$, $C_e$ and $C_i$ have units of W/m$^2$sr$^{-1}$.  The coefficients $\sigma_a$ and $\sigma_s$ have units of m$^{-1}$ and specify the time and location dependent change per unit length to the radiance term to which they are applied.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -205,12 +205,19 @@ Subtracting (\ref{eq:recurse2}) from (\ref{eq:recurse1}) and solving for $\Chatj
 \label{eq:color}
 \Chatjj{j}&=&\Chatjj{j+1}+\htau{j}\Leii{j}
 \end{eqnarray}
-The basic computational strategy then is to compute a color using (\ref{eq:color}) and an opacity using (\ref{eq:alpha2}) for each pixel in the 2D projected image.  Equations (\ref{eq:alpha2}) and ({\ref{eq:color}) are equivalent to the recursions presented in Ref.~\cite[Chapter 39]{gpugems} for performing volume rendering.
+The strategy then for volume rendering an image is for each pixel in the 2D projected image to 
+\begin{enumerate}
+\item convert the background radiance $C_0$ to a color, 
+\item convert the emitted radiances along the integration path to colors and  
+\item form a weighted average of these these colors using either equation (\ref{eq:discrete_rte2}) or (\ref{eq:color}) where the weights are optical depths obtained using (\ref{eq:alpha2}) .  
+\end{enumerate}
+The conversion from radiance to color may be based on a black body temperature curve if realistic flame colors are the goal or arbitrary if only a qualitative view of the fire is the goal. 
+Equations (\ref{eq:alpha2}) and ({\ref{eq:color}) are equivalent to the recursions presented in Ref.~\cite[Chapter 39]{gpugems} for performing volume rendering.
 
 % -------------------  Splitting the Radiation Transport Equation ------------------------
 
 \subsection{Splitting the Radiation Transport Equation}
-This section discusses splitting the RTE, so that it may be solved separately on multiple meshes (or multiple slice planes).  The final solution is then obtained by  appropriately combining solutions obtained on each mesh (or slice plane).
+This section discusses splitting the RTE, so that it may be solved separately on multiple meshes or multiple slice planes.  The final solution is then obtained by  appropriately combining solutions obtained on each mesh or slice plane.
 
 It is more practical to draw smoke one mesh at a time when visualizing multiple mesh cases since required data may not be easily accessible from all meshes, especially if the GPU\footnote{graphics processing unit of the video card}\ is used for drawing.  The RTE solution or equivalently the computed radiance and smoke opacity require  properties for the entire line of sight which may encompass more than one data mesh.  This section discusses how  radiance and opacity may be computed by combining solutions from each individual mesh along the line of sight.  For example, as illustrated in Figure \ref{figsmokesetup3}, consider an interval $[x_0,x_N]$ that is split at $D$ into two sub-intervals $[x_0,D]$ and $[D,x_N]$.  The goal then is to compute a radiance and opacity for $[x_0,x_N]$ using radiances and opacities computed on  the two sub-intervals.
 
