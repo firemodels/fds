@@ -27,6 +27,11 @@ USE RADCALV
 USE DEVICE_VARIABLES, ONLY : DEVICE, GAS_CELL_RAD_FLUX, GAS_CELL_RAD_DEVC_INDEX, N_GAS_CELL_RAD_DEVC
 REAL(EB) :: THETAUP,THETALOW,PHIUP,PHILOW,F_THETA,PLANCK_C2,KSI,LT,RCRHO,YY,BBF,AP0,AMEAN
 INTEGER  :: N,I,J,K,IZERO,NN,NI,II,JJ,IIM,JJM,IBND,NS,NRA,NSB
+
+! A few miscellaneous constants
+
+FOUR_SIGMA = 4._EB*SIGMA
+RPI_SIGMA  = RPI*SIGMA
  
 ! Determine the number of polar angles (theta)
 
@@ -212,9 +217,9 @@ ENDDO
 
  
 ! General parameters
- 
-RTMPMAX = 2400._EB     ! Maximum temperature for property tables
-RTMPMIN = 300._EB      ! Minimum temperature for property tables
+
+RTMPMAX = 2470._EB     ! Maximum temperature for property tables
+RTMPMIN = 270._EB      ! Minimum temperature for property tables
   
 ! Setup spectral information
  
@@ -306,7 +311,7 @@ MAKE_KAPPA_ARRAYS: IF (SOOT_INDEX /= 0 .OR. CO_INDEX /= 0 .OR. FUEL_INDEX /= 0 .
       IF (CO_INDEX /= 0)   N_KAPPA_ARRAY = N_KAPPA_ARRAY + 1
       IF (H2O_INDEX /= 0)  N_KAPPA_ARRAY = N_KAPPA_ARRAY + 1
       IF (SOOT_INDEX /= 0) N_KAPPA_ARRAY = N_KAPPA_ARRAY + 1
-   Z2KAPPA_T = 42
+   Z2KAPPA_T = 44
    Z2KAPPA_M = 50
    NS = 0
    ALLOCATE (Z2KAPPA_M4(N_KAPPA_ARRAY),STAT=IZERO)
@@ -351,7 +356,7 @@ MAKE_KAPPA_ARRAYS: IF (SOOT_INDEX /= 0 .OR. CO_INDEX /= 0 .OR. FUEL_INDEX /= 0 .
       ENDIF
       CALL INIT_RADCAL 
       T_LOOP_Z: DO K = 0,Z2KAPPA_T
-         RCT = RTMPMIN + K*(RTMPMAX-RTMPMIN)/Z2KAPPA_T         
+         RCT = RTMPMIN + K*(RTMPMAX-RTMPMIN)/Z2KAPPA_T   
          IF (NSB>1) BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),RCT)
          Y_LOOP_Z: DO J=0,Z2KAPPA_M
             YY = (REAL(J,EB)/REAL(Z2KAPPA_M,EB))**4
@@ -369,7 +374,7 @@ MAKE_KAPPA_ARRAYS: IF (SOOT_INDEX /= 0 .OR. CO_INDEX /= 0 .OR. FUEL_INDEX /= 0 .
                         P(6)      = (1._EB-YY)
                         CALL RADCAL(AMEAN,AP0)
                         IF (NSB==1 .AND. PATH_LENGTH > 0.0_EB) THEN
-                           Z2KAPPA(N,J,K,IBND) = MIN(AMEAN,AP0)
+                           Z2KAPPA(N,J,K,1) = MIN(AMEAN,AP0)
                         ELSE
                            Z2KAPPA(N,J,K,IBND) = AP0/BBF
                         ENDIF
@@ -385,7 +390,7 @@ MAKE_KAPPA_ARRAYS: IF (SOOT_INDEX /= 0 .OR. CO_INDEX /= 0 .OR. FUEL_INDEX /= 0 .
                         P(6)      = (1._EB-YY)
                         CALL RADCAL(AMEAN,AP0)
                         IF (NSB==1 .AND. PATH_LENGTH > 0.0_EB) THEN
-                           Z2KAPPA(N,J,K,IBND) = MIN(AMEAN,AP0)
+                           Z2KAPPA(N,J,K,1) = MIN(AMEAN,AP0)
                         ELSE
                            Z2KAPPA(N,J,K,IBND) = AP0/BBF
                         ENDIF
@@ -401,7 +406,7 @@ MAKE_KAPPA_ARRAYS: IF (SOOT_INDEX /= 0 .OR. CO_INDEX /= 0 .OR. FUEL_INDEX /= 0 .
                         P(6)      = (1._EB-YY)
                         CALL RADCAL(AMEAN,AP0)
                         IF (NSB==1 .AND. PATH_LENGTH > 0.0_EB) THEN
-                           Z2KAPPA(N,J,K,IBND) = MIN(AMEAN,AP0)
+                           Z2KAPPA(N,J,K,1) = MIN(AMEAN,AP0)
                         ELSE
                            Z2KAPPA(N,J,K,IBND) = AP0/BBF
                         ENDIF
@@ -417,7 +422,7 @@ MAKE_KAPPA_ARRAYS: IF (SOOT_INDEX /= 0 .OR. CO_INDEX /= 0 .OR. FUEL_INDEX /= 0 .
                         P(6)      = (1._EB-YY)
                         CALL RADCAL(AMEAN,AP0)
                         IF (NSB==1 .AND. PATH_LENGTH > 0.0_EB) THEN
-                           Z2KAPPA(N,J,K,IBND) = MIN(AMEAN,AP0)
+                           Z2KAPPA(N,J,K,1) = MIN(AMEAN,AP0)
                         ELSE
                            Z2KAPPA(N,J,K,IBND) = AP0/BBF
                         ENDIF
@@ -434,7 +439,7 @@ MAKE_KAPPA_ARRAYS: IF (SOOT_INDEX /= 0 .OR. CO_INDEX /= 0 .OR. FUEL_INDEX /= 0 .
                         SVF = YY*RCRHO/RHO_SOOT
                         CALL RADCAL(AMEAN,AP0)                        
                         IF (NSB==1 .AND. PATH_LENGTH > 0.0_EB) THEN
-                           Z2KAPPA(N,J,K,IBND) = MIN(AMEAN,AP0)
+                           Z2KAPPA(N,J,K,1) = MIN(AMEAN,AP0)
                         ELSE
                            Z2KAPPA(N,J,K,IBND) = AP0/BBF
                         ENDIF
@@ -460,11 +465,6 @@ DROPLETS: IF (N_EVAP_INDICES>0) THEN
       IF (.NOT.PARTICLE_CLASS(J)%MASSLESS) CALL MEAN_CROSS_SECTIONS(J)
    ENDDO GET_PC_RADI
 ENDIF DROPLETS
- 
-! A few miscellaneous constants
-
-FOUR_SIGMA = 4._EB*SIGMA
-RPI_SIGMA  = RPI*SIGMA
  
 
 END SUBROUTINE INIT_RADIATION
