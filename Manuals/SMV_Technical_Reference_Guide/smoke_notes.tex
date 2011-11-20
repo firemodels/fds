@@ -205,13 +205,13 @@ Subtracting (\ref{eq:recurse2}) from (\ref{eq:recurse1}) and solving for $\Chatj
 \label{eq:color}
 \Chatjj{j}&=&\Chatjj{j+1}+\htau{j}\Leii{j}
 \end{eqnarray}
-The strategy then for volume rendering an image is for each pixel in the 2D projected image to 
+The strategy then for volume rendering an image is for each pixel in the 2D projected image to
 \begin{enumerate}
-\item convert the background radiance $C_0$ to a color, 
-\item convert the emitted radiances along the integration path to colors and  
-\item form a weighted average of these these colors using either equation (\ref{eq:discrete_rte2}) or (\ref{eq:color}) where the weights are optical depths obtained using (\ref{eq:alpha2}) .  
+\item convert the background radiance $C_0$ to a color,
+\item convert the emitted radiances along the integration path to colors and
+\item form a weighted average of these these colors using either equation (\ref{eq:discrete_rte2}) or (\ref{eq:color}) where the weights are optical depths obtained using (\ref{eq:alpha2}) .
 \end{enumerate}
-The conversion from radiance to color may be based on a black body temperature curve if realistic flame colors are the goal or arbitrary if only a qualitative view of the fire is the goal. 
+The conversion from radiance to color may be based on a black body temperature curve if realistic flame colors are the goal or arbitrary if only a qualitative view of the fire is the goal.
 Equations (\ref{eq:alpha2}) and ({\ref{eq:color}) are equivalent to the recursions presented in Ref.~\cite[Chapter 39]{gpugems} for performing volume rendering.
 
 % -------------------  Splitting the Radiation Transport Equation ------------------------
@@ -494,10 +494,30 @@ Figure \ref{fig:volplume_example} illustrates this process showing two images.  
 
 \begin{figure}[\figoptions]
 \begin{center}
+\begin{tabular}{c}
+\includegraphics[width=5.0in]{figures/colorbar_black_white}\\
+a) black to white\\
+\includegraphics[width=5.0in]{figures/colorbar_blackbody_1000K_2800K}\\
+b) black body temperature curve 1000~K to 2800~K\\
+\includegraphics[width=5.0in]{figures/colorbar_rainbow}\\
+c) rainbow
+\end{tabular}
+\end{center}
+\caption[Three example colorbars used to map temperature to color.]
+{Three example used to map temperature to color.}
+\label{fig:colormaps}
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[width=3.5in]{figures/vis_test2_nonfreeze}\\
+a) normal view
+\end{tabular}
 \begin{tabular}{cc}
-\includegraphics[width=3.5in]{figures/vis_test2_nonfreeze}&
-\includegraphics[width=3.5in]{figures/vis_test2_freeze}\\
-a) front view&b) side view\\
+\includegraphics[width=3.5in]{figures/vis_test2_freezeA}&
+\includegraphics[width=3.5in]{figures/vis_test2_freezeC}\\
+a) view from left&c) view from right\\
 \end{tabular}
 \end{center}
 \caption[Volume rendered smoke plume shown from two directions.]{Volume rendered smoke plume shown from two directions.
