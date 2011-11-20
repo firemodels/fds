@@ -1,4 +1,4 @@
-&HEAD CHID='vis_mtest3', TITLE='Sandia 1m high flow rate methane pool fire (Test 17), 6 cm resolution' /
+&HEAD CHID='vis_mtest3', TITLE='Sandia 1m high flow rate methane pool fire (Test 17), 6 cm resolution SVN $Revision$' /
 
 &MULT ID='mesh array', DX=1.5,DY=1.5,DZ=1.0, I_UPPER=1,J_UPPER=1,K_UPPER=3 /
 &MESH IJK=96,96,64, XB=-1.5,0.0,-1.5,0.0,-.0625,0.9375, MULT_ID='mesh array' /
