@@ -50,12 +50,13 @@ To correct the time on blaze type:
 <ol>
 <li>/etc/init.d/ntpd stop
 <li>ntpdate "leo.cfr.nist.gov"<br>
-type the above several times until the offset displayed is close to 0
+Type the above several times until the offset displayed is close to 0.<br>
+<em>Note: you may need to wait a few minutes after blaze boots up before this command will work.  </em>
 <li>/etc/init.d/ntpd start
 </ol>
 To correct the time on the compute nodes type:
 <ol>
-<li>fornodesp "/etc/init.d stop"
+<li>fornodesp "/etc/init.d/ntpd stop"
 <li>fornodesp "ntpdate 129.6.160.154"<br>
 type the above several times until the offset displayed is close to 0
 <li>fornodesp "/etc/init.d/ntpd start"
