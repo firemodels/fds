@@ -18,6 +18,7 @@ $RUNSMV Visualization thouse5
 $RUNSMV Visualization script_test
 $RUNSMV Visualization transparency
 $RUNSMV Visualization sprinkler_many
+$RUNSMV Visualization vis_test2
 
 $RUNSMV Wui fire_line
 $RUNSMV Wui onetree_surf_1mesh
