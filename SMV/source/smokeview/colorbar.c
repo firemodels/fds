@@ -725,24 +725,24 @@ void initdefaultcolorbars(void){
 
   cbi++;
 
-  // white->black
+  // black->white
 
   bw_colorbar_index = cbi - colorbarinfo;
-  strcpy(cbi->label,"white->black");
+  strcpy(cbi->label,"black->white");
   cbi->label_ptr=cbi->label;
 
   cbi->nnodes=2;
   cbi->nodehilight=0;
 
   cbi->index_node[0]=0;
-  cbi->rgb_node[0]=255;
-  cbi->rgb_node[1]=255;
-  cbi->rgb_node[2]=255;
+  cbi->rgb_node[0]=0;
+  cbi->rgb_node[1]=0;
+  cbi->rgb_node[2]=0;
 
   cbi->index_node[1]=255;
-  cbi->rgb_node[3] =0;
-  cbi->rgb_node[4]=0;
-  cbi->rgb_node[5]=0;
+  cbi->rgb_node[3] =255;
+  cbi->rgb_node[4]=255;
+  cbi->rgb_node[5]=255;
   cbi++;
 
 // construct colormaps from color node info
