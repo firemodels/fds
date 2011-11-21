@@ -84,7 +84,7 @@ All material properties are completely fabricated.
 &OBST XB= 3.10, 3.30, 3.80, 4.60, 0.00, 0.90, SURF_ID='UPHOLSTERY' / Couch, armrest
 &OBST XB= 1.50, 3.10, 4.40, 4.60, 0.60, 1.20, SURF_ID='UPHOLSTERY' / Couch, back cushions
 
-&VENT XB= 2.50, 2.60, 4.30, 4.40, 0.60, 0.60, SURF_ID='BURNER' / Ignition source on couch
+&VENT XB= 2.40, 2.60, 4.30, 4.40, 0.60, 0.60, SURF_ID='BURNER' / Ignition source on couch
 
 &OBST XB= 4.00, 4.60, 3.80, 4.60, 0.00, 0.40 /
 &OBST XB= 4.00, 4.60, 3.80, 4.60, 0.40, 0.60, SURF_ID='UPHOLSTERY' / Chair, back corner, seat cushion
