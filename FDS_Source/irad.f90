@@ -1,3 +1,80 @@
+MODULE RADCONS
+
+! Radiation Parameters
+
+USE PRECISION_PARAMETERS
+IMPLICIT NONE
+LOGICAL :: WIDE_BAND_MODEL,CH4_BANDS
+INTEGER :: TIME_STEP_INCREMENT,NMIEANG
+REAL(EB) :: RADTMP,PATH_LENGTH,RADIATIVE_FRACTION
+REAL(EB), ALLOCATABLE, DIMENSION(:)   :: BBFRAC,WL_LOW,WL_HIGH
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: WQABS, WQSCA
+INTEGER  :: NRDMIE, NLMBDMIE, NDG=50
+REAL(EB) DGROUP_A, DGROUP_B, WEIGH_CYL
+
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: DLN
+REAL(EB), ALLOCATABLE, DIMENSION(:)   :: RSA, DLX, DLY, DLZ, DLB
+REAL(EB) :: DPHI0, FOUR_SIGMA, RPI_SIGMA, LTSTEP, RTMPMAX, RTMPMIN
+INTEGER, ALLOCATABLE, DIMENSION(:,:) :: DLM
+INTEGER, ALLOCATABLE, DIMENSION(:)   :: NRP
+INTEGER :: NRT,NCO,UIIDIM,NLAMBDAT,NKAPPAT,NKAPPAZ
+
+!**********************************************************************************************************
+!
+!     BBFRAC    Fraction of blackbody radiation
+!     DLX       Mean X-component of the control angle ray vector
+!     DLY       Mean Y-component of the control angle ray vector
+!     DLZ       Mean Z-component of the control angle ray vector
+!     DLB       Mean Bottom-component of rayn vector (cylindrical case)
+!     DLM       Mirroring indexes
+!     DLN       Wall normal matrix
+!     DPHI0     Opening angle of the cylindrical domain
+!     E_WALL    Wall emissivity
+!     ILW       Radiation intensities on solid mirrors and mesh interfaces.
+!               Intensity integrals (band specific or angle increment) for solid and open walls
+!     INRAD_W   Incident radiative heat flux on a cell (QRADIN = E_WALL*INRAD_W)
+!     R50       Array of droplet radii corresponding to the median diameters of the distributions used in the generation
+!               of WQABS and WQSCA arrays.
+!     NDG       Number of droplet radii in WQABS and WQSCA arrays
+!     NLMBDMIE  Number of wave lengths in Mie calculations
+!     NMIEANG   Number of angle bins in forward scattering integration
+!     NRA       Total number of radiation control angles
+!     NRDMIE    Number of droplet radii in Mie calculations
+!     NRT       Number of radiation theta angles
+!     NRP       Number of radiation phi angles on each theta band
+!     NSB       Number of spectral bands (1=gray, 6=wide band, 9=wide band w. CH4)
+!     OUTRAD_W  Emitted intensity from a wall (OUTRAD_W = QRADOUT/PI)
+!     PHIUP     Upper limit of solid angle component PHI
+!     PHILOW    Lower limit of solid angle component PHI
+!     RADTMP    Radiation temperature for absorption properties (Mie)
+!     QRADIN    Absorbed radiative heat flux into a surface cell (solid wall or open)
+!     QRADOUT   Emitted radiative heat flux from a surface (solid wall or open) 
+!     RSA       Array of solid angles
+!     RTMPMAX   Maximum temperature for tabulation of radiative properties
+!     RTMPMIN   Minimum temperature for tabulation of radiative properties
+!     THETAUP   Upper limit of solid angle component THETA
+!     THETALOW  Lower limit of solid angle component THETA
+!     UII       Integrated intensity
+!     UIID      Parts of UII  if WIDE_BAND_MODEL = TRUE, UIID contains the band specific intensity
+!                             if WIDE_BAND_MODEL/= TRUE, UIID contains the ANGLE_INCREMENTs of intensity
+!     WEIGH_CYL In cylindrical coordinates, all intensities represent two actual control angles
+!     WL_LOW    Lower wavelength limit of the spectral bands
+!     WL_HIGH   Upper wavelength limit of the spectral bands
+!     WQABS     Absorption efficiency factor array 
+!     WQSCA     Scattering efficiency factor array
+!
+!     PATH_LENGTH             Mean path length for the gray gas abs. coef.
+!     ANGLE_INCREMENT         How many angles are skipped on each update
+!     NUMBER_RADIATION_ANGLES Input for NRA
+!     NUMBER_SPECTRAL_BANDS   Input for NSB
+!     TIME_STEP_INCREMENT     How often is the radiation solver called
+!
+!************************************************************************************************************
+
+END MODULE RADCONS
+
+
+
 MODULE RADCALV
 
 ! Module wrapper for RadCal subroutine
@@ -34,7 +111,8 @@ END SUBROUTINE GET_REV_irad
 
 
 SUBROUTINE INIT_RADCAL
-USE RADCONS, ONLY:RADTMP
+
+USE RADCONS, ONLY: RADTMP
 
 TWALL = RADTMP
 
@@ -57,6 +135,7 @@ END SUBROUTINE INIT_RADCAL
 
 
 SUBROUTINE RADCAL(AMEAN,AP0)
+
 USE RADCONS, ONLY:RPI_SIGMA
 INTEGER  :: I,II,KK,NM,N,MM,KMAX,KMIN
 REAL(EB) :: DOM,ABGAS,PTOT,TEMP,UK,XD,YD,XX,ENN,ARG,ARGNEW,RSL,RSS,ABLONG,ABSHRT,ABIL,ABIS,OMEGA,WL,DAMBDA,AP0, &
@@ -1670,80 +1749,6 @@ END SUBROUTINE RCDEALLOC
 
 END MODULE RADCALV
 
-
-MODULE RADCONS
-
-! Radiation Parameters
-
-USE PRECISION_PARAMETERS
-IMPLICIT NONE
-LOGICAL :: WIDE_BAND_MODEL,CH4_BANDS
-INTEGER :: TIME_STEP_INCREMENT,NMIEANG
-REAL(EB) :: RADTMP,PATH_LENGTH,RADIATIVE_FRACTION
-REAL(EB), ALLOCATABLE, DIMENSION(:)   :: BBFRAC,WL_LOW,WL_HIGH
-REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: WQABS, WQSCA
-INTEGER  :: NRDMIE, NLMBDMIE, NDG=50
-REAL(EB) DGROUP_A, DGROUP_B, WEIGH_CYL
-
-REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: DLN
-REAL(EB), ALLOCATABLE, DIMENSION(:)   :: RSA, DLX, DLY, DLZ, DLB
-REAL(EB) :: DPHI0, FOUR_SIGMA, RPI_SIGMA, LTSTEP, RTMPMAX, RTMPMIN
-INTEGER, ALLOCATABLE, DIMENSION(:,:) :: DLM
-INTEGER, ALLOCATABLE, DIMENSION(:)   :: NRP
-INTEGER :: NRT,NCO,UIIDIM,NLAMBDAT,NKAPPAT,NKAPPAZ
-!**********************************************************************************************************
-!
-!     BBFRAC    Fraction of blackbody radiation
-!     DLX       Mean X-component of the control angle ray vector
-!     DLY       Mean Y-component of the control angle ray vector
-!     DLZ       Mean Z-component of the control angle ray vector
-!     DLB       Mean Bottom-component of rayn vector (cylindrical case)
-!     DLM       Mirroring indexes
-!     DLN       Wall normal matrix
-!     DPHI0     Opening angle of the cylindrical domain
-!     E_WALL    Wall emissivity
-!     ILW       Radiation intensities on solid mirrors and mesh interfaces.
-!               Intensity integrals (band specific or angle increment) for solid and open walls
-!     INRAD_W   Incident radiative heat flux on a cell (QRADIN = E_WALL*INRAD_W)
-!     R50       Array of droplet radii corresponding to the median diameters of the distributions used in the generation
-!               of WQABS and WQSCA arrays.
-!     NDG       Number of droplet radii in WQABS and WQSCA arrays
-!     NLMBDMIE  Number of wave lengths in Mie calculations
-!     NMIEANG   Number of angle bins in forward scattering integration
-!     NRA       Total number of radiation control angles
-!     NRDMIE    Number of droplet radii in Mie calculations
-!     NRT       Number of radiation theta angles
-!     NRP       Number of radiation phi angles on each theta band
-!     NSB       Number of spectral bands (1=gray, 6=wide band, 9=wide band w. CH4)
-!     OUTRAD_W  Emitted intensity from a wall (OUTRAD_W = QRADOUT/PI)
-!     PHIUP     Upper limit of solid angle component PHI
-!     PHILOW    Lower limit of solid angle component PHI
-!     RADTMP    Radiation temperature for absorption properties (Mie)
-!     QRADIN    Absorbed radiative heat flux into a surface cell (solid wall or open)
-!     QRADOUT   Emitted radiative heat flux from a surface (solid wall or open) 
-!     RSA       Array of solid angles
-!     RTMPMAX   Maximum temperature for tabulation of radiative properties
-!     RTMPMIN   Minimum temperature for tabulation of radiative properties
-!     THETAUP   Upper limit of solid angle component THETA
-!     THETALOW  Lower limit of solid angle component THETA
-!     UII       Integrated intensity
-!     UIID      Parts of UII  if WIDE_BAND_MODEL = TRUE, UIID contains the band specific intensity
-!                             if WIDE_BAND_MODEL/= TRUE, UIID contains the ANGLE_INCREMENTs of intensity
-!     WEIGH_CYL In cylindrical coordinates, all intensities represent two actual control angles
-!     WL_LOW    Lower wavelength limit of the spectral bands
-!     WL_HIGH   Upper wavelength limit of the spectral bands
-!     WQABS     Absorption efficiency factor array 
-!     WQSCA     Scattering efficiency factor array
-!
-!     PATH_LENGTH             Mean path length for the gray gas abs. coef.
-!     ANGLE_INCREMENT         How many angles are skipped on each update
-!     NUMBER_RADIATION_ANGLES Input for NRA
-!     NUMBER_SPECTRAL_BANDS   Input for NSB
-!     TIME_STEP_INCREMENT     How often is the radiation solver called
-!
-!************************************************************************************************************
-
-END MODULE RADCONS
 
 
 MODULE SPECDATA
