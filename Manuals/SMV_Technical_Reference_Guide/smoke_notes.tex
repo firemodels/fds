@@ -475,7 +475,8 @@ To overcome this problem, the RTE needs to be solved across the full 3D data mes
 % -------------------  A Solution using Volumes ------------------------
 
 \section{A Solution using Volumes}
-Volume rendering is the process of visualizing 3D data by projecting partially transparent colors derived from 3D data onto a 2D image.  An entire volume of data is used to generate an image rather than just a slice as in the previous section.  Transfer functions are used to map data to color and optical density (opacity).  These colors and opacities are then combined to form an image.  The transfer functions may be arbitrary designed to highlight certain portions of the data or based on physics designed to produce realistic appearing images.  Figure \ref{figsmokesetup2} illustrates this process.  Data is first mapped to color and opacity then combined to form an image.
+Volume rendering is the process of visualizing 3D data by projecting partially transparent colors derived from 3D data onto a 2D image.  An entire volume of data is used to generate an image rather than just a slice as in the previous section.  In general, transfer functions are used to map data to color and optical density (opacity).  In this application temperature is mapped to color and soot density is mapped to opacity.  These colors and opacities are then combined to form an image.  The transfer functions may be arbitrary designed to highlight certain portions of the data or based on physics designed to produce realistic appearing images.  Figure \ref{figsmokesetup2} illustrates this process.  
+To produce a realistic image, data is first mapped to color and opacity then combined to form an image.  The strategy then is to perform color mixing in the same way that light would behave by solving an approximate form of the radiation transport equation.  The approximate RTE solution given in (\ref{eq:rtesoln})  is used to collapse 3D data into 2D images projected onto the sides of the mesh visible to the observer.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -483,22 +484,22 @@ Volume rendering is the process of visualizing 3D data by projecting partially t
 \end{center}
 \caption[Opacity and color is computed for each pixel on an image plane by solving a line integral
 representation of a simplified form of the radiation transport equation.]{Opacity and color is computed for each pixel on an image plane by solving a line integral
-representation of a simplified form of the radiation transport equation.  Rays are cast from the observer through the  image plane into the 3D data set.  The line integral is computed where the ray intersects the data set.
+representation of a simplified form of the radiation transport equation.  Rays are cast from the observer through the  image plane into the 3D data set converting temperatures to color and soot densities to opacity.  The line integral is computed for each pixel where the ray intersects the data set.
 }
 \label{figsmokesetup2}
 \end{figure}
 
-A general transfer function is used to map data values to color. Several examples are given in Figure \ref{fig:colormaps}.  The black to white colormap could be used to simulate the effect of a thermal imager by using black for cool temperatures and white for warm temperatures.  Colors are chosen in the black body temperature colormap to match the colors emitted by a black body source between the temperatures of 1000~K and 2800~K.  The rainbow colormap produces non-realistic images.  To produce a realistic image, the strategy is to perform color mixing in the same way that light would behave by solving an approximate form of the radiation transport equation.  The approximate RTE solution given in (\ref{eq:rtesoln})  is used to collapse 3D data into 2D images projected onto the sides of the mesh visible to the observer.
+Several other example colormaps  are given in Figure \ref{fig:colormaps}.  
+The black to white colormap in Figure \ref{fig:colormaps}a along with an appropriate extinction coefficient for infrared could be used to simulate the effect of a thermal imager by using black for cool temperatures and white for warm temperatures.  
+The rainbow colormap in Figure \ref{fig:colormaps}b produces non-realistic images which can still be of value for highlighting data of interest.
 
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{c}
-\includegraphics[width=5.0in]{figures/colorbar_blackbody_1000K_2800K}\\
-a) black body temperature curve 1000~K to 2800~K\\
 \includegraphics[width=5.0in]{figures/colorbar_black_white}\\
-b) black to white\\
+a) shades of grey\\
 \includegraphics[width=5.0in]{figures/colorbar_rainbow}\\
-c) rainbow
+b) rainbow
 \end{tabular}
 \end{center}
 \caption[Example colormaps used for converting temperature to color.]
@@ -564,12 +565,12 @@ The values $C_i$ and $\alpha_i$ are the color and opacity at the $i$'th step.
 The OpenGL call, {\tt   glBlendFunc(GL\_ONE,GL\_ONE\_MINUS\_SRC\_ALPHA); }, is used to implement this mixing mode in Smokeview.
 \end{enumerate}
 
-A limitation of the volume rendering procedure is the large file sizes required to store the full precision being used in computations.  As with the slice rendering method, compression procedures are implemented using the ZLIB library~\cite{ZLIB} to reduce this size.
+A limitation of the volume rendering procedure is the large file sizes required to store the full precision being used in computations.  For example, smoke flow computed on a 128$\times$128$\times$128 mesh for 1024 time steps requires 16 gigabytes to store data for visualization.  As with the slice rendering method, compression procedures are implemented using the ZLIB library~\cite{ZLIB} to reduce this size.
 
 
 % -------------------  Future Work ------------------------
 
 \section{Future Work}
-This \paper\ describes the algorithms Smokeview uses to display smoke and fire using physics based algorithms.  These algorithms may be improved in several ways.  Presently, only radiation from soot is used to visualize smoke.  Radiation emissions from heated gas components such as carbon dioxide and water vapor are neglected.  The gray gas assumption may be relaxed by solving the RTE for several wavelength bands (as may be done by FDS) and combining the results.  The interaction between volume rendered smoke and interior solid objects may be improved by accounting for interior solid objects such as FDS OBST's.  The RTE line integration needs to terminate at the first blockage encountered rather than the far side of the data mesh.  Work on unstructured geometries presently researched for future incorporation into FDS may also lead to better physics there.  Finally, the transfer function relating temperature to fire color may be improved by using a physics based approach rather than a color map.
+This \paper\ describes the algorithms Smokeview uses to display smoke and fire using physics based algorithms.  These algorithms may be improved in several ways.  Presently, only radiation from soot is used to visualize smoke.  Radiation emissions from heated gas components such as carbon dioxide and water vapor are neglected.  The gray gas assumption may be relaxed by solving the RTE for several wavelength bands (as may be done by FDS) and combining the results.  The RTE line integration needs to terminate at the first solid object encountered (FDS OBST) rather than the far side of the data mesh.  The computational efficiency may be improved by implementing algorithms to skip over regions with little or no smoke.  Research on unstructured geometries for future incorporation into FDS may also lead to better visualization.  Finally, the transfer function relating temperature to color may be improved by using a physics based approach rather than an assumed color map.
 
 
