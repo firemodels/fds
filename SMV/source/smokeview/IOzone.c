@@ -274,7 +274,7 @@ void getzonedatacsv(int nzonet, int nrooms, int nfires,
       iihv++;
     }
     for(j=0;j<nzvvents;j++){
-      zonehvents[iivv] = zonevvents_devs[j]->vals[i];
+      zonevvents[iivv] = zonevvents_devs[j]->vals[i];
       iivv++;
     }
   }
