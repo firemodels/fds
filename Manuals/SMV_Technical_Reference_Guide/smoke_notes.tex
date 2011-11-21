@@ -475,8 +475,8 @@ To overcome this problem, the RTE needs to be solved across the full 3D data mes
 % -------------------  A Solution using Volumes ------------------------
 
 \section{A Solution using Volumes}
-Volume rendering is the process of visualizing 3D data by projecting partially transparent colors derived from 3D data onto a 2D image.  An entire volume of data is used to generate an image rather than just a slice as in the previous section.  In general, transfer functions are used to map data to color and optical density (opacity).  In this application temperature is mapped to color and soot density is mapped to opacity.  These colors and opacities are then combined to form an image.  The transfer functions may be arbitrary designed to highlight certain portions of the data or based on physics designed to produce realistic appearing images.  Figure \ref{figsmokesetup2} illustrates this process.  
-To produce a realistic image, data is first mapped to color and opacity then combined to form an image.  The strategy then is to perform color mixing in the same way that light would behave by solving an approximate form of the radiation transport equation.  The approximate RTE solution given in (\ref{eq:rtesoln})  is used to collapse 3D data into 2D images projected onto the sides of the mesh visible to the observer.
+Volume rendering is the process of visualizing 3D data by projecting partially transparent colors derived from 3D data onto a 2D plane forming an image.  An entire volume of data is used to generate an image rather than just a slice as in the previous section.  Transfer functions or colormaps are used to map data to color and optical density (opacity).  In this application temperature is mapped to color and soot density is mapped to opacity.  These colors and opacities are then combined to form an image.  The transfer functions may be arbitrary designed to highlight certain portions of the data or based on physics designed to produce realistic appearing images.  Figure \ref{figsmokesetup2} illustrates this process.  
+Soot density is mapped to opacity.  The colors and opacities are then combined to form an image.  The strategy then is to perform color mixing in the same way that light would behave by solving an approximate form of the radiation transport equation.  The approximate RTE solution given in (\ref{eq:rtesoln})  is used to collapse 3D data into 2D images projected onto the sides of the mesh visible to the observer.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -489,25 +489,7 @@ representation of a simplified form of the radiation transport equation.  Rays a
 \label{figsmokesetup2}
 \end{figure}
 
-Several other example colormaps  are given in Figure \ref{fig:colormaps}.  
-The black to white colormap in Figure \ref{fig:colormaps}a along with an appropriate extinction coefficient for infrared could be used to simulate the effect of a thermal imager by using black for cool temperatures and white for warm temperatures.  
-The rainbow colormap in Figure \ref{fig:colormaps}b produces non-realistic images which can still be of value for highlighting data of interest.
-
-\begin{figure}[\figoptions]
-\begin{center}
-\begin{tabular}{c}
-\includegraphics[width=5.0in]{figures/colorbar_black_white}\\
-a) shades of grey\\
-\includegraphics[width=5.0in]{figures/colorbar_rainbow}\\
-b) rainbow
-\end{tabular}
-\end{center}
-\caption[Example colormaps used for converting temperature to color.]
-{Example colormaps used for converting temperature to color.}
-\label{fig:colormaps}
-\end{figure}
-
-Figure \ref{fig:volplume_example} illustrates this process showing three images.  The top center is presented from the point of view of the observer.  The two images below show the scene rotated left and right to show more clearly the images projected on the front facing sides of the data mesh.  As the scene is moved through rotations and translations the projected surface images are constantly recomputed and redrawn presenting the illusion that the image is 3D and drawn within (rather than on the surface) of the data mesh.
+Figure \ref{fig:volplume_example} illustrates the effect of projecting an image onto a plane.  The top center image is presented from the point of view of the observer.  The perspective is correct.  The two images below show the same image but from a different viewpoint.  The scene is rotated left and right to show more clearly the images projected on the front facing sides of the data mesh.  As the scene is moved through rotations and translations the projected surface images are constantly recomputed and redrawn presenting the illusion that the image is 3D and drawn within (rather than on the surface) of the data mesh.
 
 
 \begin{figure}[\figoptions]
@@ -528,6 +510,29 @@ The image, in a), is as viewed by the observer.  The other two images, b) and c)
 \label{fig:volplume_example}
 \end{figure}
 
+Three example colormaps  are illustrated in Figure \ref{fig:colormaps}.  
+The black/orange colormap in Figure \ref{fig:colormaps}a 
+is used to produce an image.  If the temperature is below a user specified value, the color is black, representing soot (where emission is not significant).  If the temperature is above this value then it is a shade of orange, representing emission from a fire.  The particular shade chosen is based on the color emmitted by a black body source.  
+The black to white colormap in Figure \ref{fig:colormaps}b along with an extinction coefficient appropriate for infrared could be used to simulate the effect of a thermal imager by using black for cool temperatures and white for warm temperatures.  
+The rainbow colormap in Figure \ref{fig:colormaps}c produces non-realistic images which can still be of value for highlighting data of interest.
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[width=5.0in]{figures/colorbar_black_orange}\\
+a) black stepped to orange\\
+\includegraphics[width=5.0in]{figures/colorbar_black_white}\\
+b) black to white\\
+\includegraphics[width=5.0in]{figures/colorbar_rainbow}\\
+c) rainbow
+\end{tabular}
+\end{center}
+\caption[Example colormaps used for converting temperature to color.]
+{Example colormaps used for converting temperature to color.}
+\label{fig:colormaps}
+\end{figure}
+
+\subsection{Implementation}
 Data required to volume render smoke is made available to Smokeview by adding lines to an FDS input file specifying 3D slice files for temperature and soot density such as
 \begin{verbatim}
 &SLCF XB=xmin,xmax,ymin,ymax,zmin,zmax, QUANTITY='TEMPERATURE' /
