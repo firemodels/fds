@@ -20,4 +20,4 @@ $RUNFDS Visualization sprinkler_many
 $RUNFDS Visualization thouse5
 $RUNFDS Visualization transparency
 $RUNFDS Visualization vis_test2
-$RUNFDS Wui fire_line
+$RUNFDS WUI fire_line
