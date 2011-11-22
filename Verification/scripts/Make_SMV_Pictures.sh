@@ -4,6 +4,8 @@
 #IPLATFORM=ia32
 PLATFORM=64
 IPLATFORM=intel64
+CURDIR=`pwd`
+cd ..
 export SVNROOT=`pwd`/..
 #export SMV=$SVNROOT/SMV/Build/intel_linux__$PLATFORM/smokeview_linux_$PLATFORM
 export SMV=$SVNROOT/SMV/Build/intel_linux_test_$PLATFORM/smokeview_linux_test_$PLATFORM
@@ -54,4 +56,5 @@ rm -f *.png
 $SMV -version > smokeview.version
 
 cd $SVNROOT/Verification
-./SMV_Cases.sh
+scripts/SMV_Cases.sh
+cd $CURDIDR
