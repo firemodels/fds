@@ -3,18 +3,17 @@
 # This script runs the FDS Verification Cases on a linux machine with
 # a batch queuing system
 
+CURDIR=`pwd`$a
+cd ..
 export SVNROOT=`pwd`/..
 export FDS=$SVNROOT/FDS_Compilation/intel_linux_64/fds_intel_linux_64
-export RUNFDS=$SVNROOT/Utilities/Scripts/runfds.sh
+export RUNIT=$SVNROOT/Utilities/Scripts/runfds.sh
 export RUNFDSFG=$SVNROOT/Utilities/Scripts/runfds.sh
 export BASEDIR=`pwd`
 # uncomment following line to stop all cases
-#export STOPFDS=1
+export STOPFDS=1
 
 scripts/SMV_Cases.sh
-
-cd $SVNROOT/Verification/Visualization
-./Run_vis.sh
 
 echo FDS cases submitted
 

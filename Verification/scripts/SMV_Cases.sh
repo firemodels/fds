@@ -1,23 +1,25 @@
 #!/bin/bash
 
-$RUNFDS Visualization capecod
-$RUNFDS Visualization colorbar
-$RUNFDS Visualization colorconv
-$RUNFDS Visualization objects_elem
-$RUNFDS Visualization objects_static
-$RUNFDS Visualization objects_dynamic
-$RUNFDS Visualization objects_dynamic3
-$RUNFDS Visualization plume5a
-$RUNFDS Visualization plume5b
-$RUNFDS Visualization plume5c
-$RUNFDS Visualization plume5c_bounddef
-$RUNFDS Visualization sillytexture
-$RUNFDS Visualization script_test
-$RUNFDS Visualization smoke_sensor
-$RUNFDS Visualization smoke_test
-$RUNFDS Visualization smoke_test2
-$RUNFDS Visualization sprinkler_many
-$RUNFDS Visualization thouse5
-$RUNFDS Visualization transparency
-$RUNFDS Visualization vis_test2
-$RUNFDS WUI fire_line
+$RUNIT Visualization capecod
+$RUNIT Visualization colorbar
+$RUNIT Visualization colorconv
+$RUNIT Visualization objects_elem
+$RUNIT Visualization objects_static
+$RUNIT Visualization objects_dynamic
+$RUNIT Visualization objects_dynamic3
+$RUNIT Visualization plume5a
+$RUNIT Visualization plume5b
+$RUNIT Visualization plume5c
+$RUNIT Visualization plume5c_bounddef
+$RUNIT Visualization sillytexture
+$RUNIT Visualization script_test
+$RUNIT Visualization smoke_sensor
+$RUNIT Visualization smoke_test
+$RUNIT Visualization smoke_test2
+$RUNIT Visualization sprinkler_many
+$RUNIT Visualization thouse5
+$RUNIT Visualization transparency
+$RUNIT Visualization vis_test2
+
+$RUNIT WUI fire_line
+$RUNIT WUI onetree_surf_1mesh
