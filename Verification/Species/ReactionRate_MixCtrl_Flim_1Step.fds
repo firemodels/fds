@@ -26,7 +26,7 @@ CH4+2*O2->CO2+2*H2O
       BETA_EDC=1E15
       SUPPRESSION=.FALSE.
       HEAT_OF_COMBUSTION=15000.
-      ODE_SOLVER='ODE EXACT' /
+      ODE_SOLVER='SINGLE EXACT' /
 
 -------------------------------------------------
 # Devices and Slices
