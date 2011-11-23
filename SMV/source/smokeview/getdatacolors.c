@@ -2023,26 +2023,33 @@ void initcadcolors(void){
 void update_texturebar(void){
   glBindTexture(GL_TEXTURE_1D,texture_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_full);
+  sniffErrors("update_texturebar - glTexImage1D A ");
 
   glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_slice);
+  sniffErrors("update_texturebar - glTexImage1D B ");
 
   glBindTexture(GL_TEXTURE_1D,texture_patch_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_patch);
+  sniffErrors("update_texturebar - glTexImage1D C ");
 
   glBindTexture(GL_TEXTURE_1D,texture_plot3d_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_plot3d);
+  sniffErrors("update_texturebar - glTexImage1D D ");
 
   glBindTexture(GL_TEXTURE_1D,texture_iso_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_iso);
+  sniffErrors("update_texturebar - glTexImage1D E ");
 
   glBindTexture(GL_TEXTURE_1D,smokecolormap_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_smokecolormap);
+  sniffErrors("update_texturebar - glTexImage1D F ");
 
 #ifdef pp_GPU
   if(gpuactive==1&&nvolrenderinfo>0){
     glActiveTexture(GL_TEXTURE2);
     glTexSubImage1D(GL_TEXTURE_1D,0,0,256,GL_RGBA,GL_FLOAT, rgb_smokecolormap);
+    sniffErrors("update_texturebar - glTexSubImage1D  ");
     glActiveTexture(GL_TEXTURE0);
   }
 #endif
@@ -2341,6 +2348,7 @@ void updatecolors(int changecolorindex){
   if(gpuactive==1){
     glActiveTexture(GL_TEXTURE2);
     glTexSubImage1D(GL_TEXTURE_1D,0,0,256,GL_RGBA,GL_FLOAT, rgb_smokecolormap);
+  sniffErrors("updatecolors after glTexSubImage1D ");
     glActiveTexture(GL_TEXTURE0);
   }
 #endif
