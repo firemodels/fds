@@ -1,7 +1,0 @@
-transpose -c MFRI_Training_Tower.cfg MFRI_Training_Tower_test_01_thcp
-transpose -c MFRI_Training_Tower.cfg MFRI_Training_Tower_test_02_thcp
-transpose -c MFRI_Training_Tower.cfg MFRI_Training_Tower_test_03_thcp
-transpose -c MFRI_Training_Tower.cfg MFRI_Training_Tower_test_04_thcp
-transpose -c MFRI_Training_Tower.cfg MFRI_Training_Tower_test_05_thcp
-transpose -c MFRI_Training_Tower.cfg MFRI_Training_Tower_test_06_thcp
-transpose -c MFRI_Training_Tower.cfg MFRI_Training_Tower_test_07_thcp
