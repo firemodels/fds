@@ -2046,10 +2046,10 @@ void update_texturebar(void){
   sniffErrors("update_texturebar - glTexImage1D F ");
 
 #ifdef pp_GPU
-  if(gpuactive==1&&nvolrenderinfo>0){
+  if(gpuactive==1&&nvolrenderinfo>0&&showvolrender==1){
     glActiveTexture(GL_TEXTURE2);
     glTexSubImage1D(GL_TEXTURE_1D,0,0,256,GL_RGBA,GL_FLOAT, rgb_smokecolormap);
-    sniffErrors("update_texturebar - glTexSubImage1D  ");
+    sniffErrors("update_texturebar - glTexSubImage1D G ");
     glActiveTexture(GL_TEXTURE0);
   }
 #endif
@@ -2345,10 +2345,10 @@ void updatecolors(int changecolorindex){
   initcadcolors();
   update_texturebar();
 #ifdef pp_GPU
-  if(gpuactive==1){
+  if(gpuactive==1&&nvolrenderinfo>0&&showvolrender==1){
     glActiveTexture(GL_TEXTURE2);
     glTexSubImage1D(GL_TEXTURE_1D,0,0,256,GL_RGBA,GL_FLOAT, rgb_smokecolormap);
-  sniffErrors("updatecolors after glTexSubImage1D ");
+    sniffErrors("updatecolors after glTexSubImage1D ");
     glActiveTexture(GL_TEXTURE0);
   }
 #endif
