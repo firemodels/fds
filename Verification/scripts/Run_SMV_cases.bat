@@ -23,6 +23,7 @@ set FDS=background -u 85 -d 5 %FDSEXE%
 set RUNFDS=call %SVNROOT%\Utilities\Scripts\runfds_win32.bat
 
 echo You are about to run the Smokeview Verification Test Suite.
+echo Press any key to proceed, CTRL c to abort
 pause > Nul
 
 echo creating FDS case list from SMV_Cases.sh
