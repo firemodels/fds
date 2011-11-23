@@ -21,10 +21,12 @@ set SH2BAT="%SVNROOT%\Utilities\Data_Processing\sh2bat"
 
 cd %smvug%
 
+echo erasing Smokeview User guide scripted figures and info files
 erase SCRIPT_FIGURES\*.png
 erase SCRIPT_FIGURES\*.help
 erase SCRIPT_FIGURES\*.version
 
+echo Creating Smokeview User guide info files
 %SMOKEVIEW% -help > SCRIPT_FIGURES\smokeview.help
 %SMOKEVIEW% -version > SCRIPT_FIGURES\smokeview.version
 %SMOKEZIP% -help > SCRIPT_FIGURES\smokezip.help
@@ -34,15 +36,18 @@ erase SCRIPT_FIGURES\*.version
 %BACKGROUND% -version > SCRIPT_FIGURES\background.version
 
 cd %smvvg%
+echo erasing Smokeview Verification guide scripted figures and info files
 erase SCRIPT_FIGURES\*.version
 erase SCRIPT_FIGURES\*.png
+echo Creating Smokeview Verification guide info file
 %SMOKEVIEW% -version > SCRIPT_FIGURES\smokeview.version
 
-echo converting SMV_Cases.sh case list to SMV_Cases.bat
+echo converting SMV_Cases.sh case list to SMV_Pictures_Cases.bat
 cd %SCRIPT_DIR%
-%SH2BAT% SMV_Cases.sh SMV_Cases.bat
+%SH2BAT% SMV_Cases.sh SMV_Pictures_Cases.bat
 
+echo Generating images
 cd %BASEDIR%
-call %SCRIPT_DIR%\SMV_Cases.bat
+call %SCRIPT_DIR%\SMV_Pictures_Cases.bat
 
 cd %SCRIPT_DIR%
