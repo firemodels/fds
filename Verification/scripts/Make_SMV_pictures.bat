@@ -2,11 +2,15 @@
 
 echo Creating figures for the Smokeview User's and Verification guides
 
-set SMOKEVIEW="smokeview"
 
 set SCRIPT_DIR=%CD%
 set BASEDIR=%CD%\..
 set SVNROOT=%BASEDIR%\..\
+
+set SMOKEVIEW="smokeview"
+set SMOKEZIP="smokezip_win_64"
+set SMOKEDIFF="smokediff_win_64"
+set BACKGROUND="background"
 
 set vis="%BASEDIR%\Visualization"
 set wui="%BASEDIR%\Wui"
@@ -23,11 +27,11 @@ erase SCRIPT_FIGURES\*.version
 
 %SMOKEVIEW% -help > SCRIPT_FIGURES\smokeview.help
 %SMOKEVIEW% -version > SCRIPT_FIGURES\smokeview.version
-smokezip -help > SCRIPT_FIGURES\smokezip.help
-smokediff -help > SCRIPT_FIGURES\smokediff.help
-smokediff -v > SCRIPT_FIGURES\smokediff.version
-background -help > SCRIPT_FIGURES\background.help
-background -version > SCRIPT_FIGURES\background.version
+%SMOKEZIP% -help > SCRIPT_FIGURES\smokezip.help
+%SMOKEDIFF% -help > SCRIPT_FIGURES\smokediff.help
+%SMOKEDIFF% -v > SCRIPT_FIGURES\smokediff.version
+%BACKGROUND% -help > SCRIPT_FIGURES\background.help
+%BACKGROUND% -version > SCRIPT_FIGURES\background.version
 
 cd %smvvg%
 erase SCRIPT_FIGURES\*.version
