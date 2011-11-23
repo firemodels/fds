@@ -2,10 +2,18 @@
 
 echo Creating figures for the Smokeview User's and Verification guides
 
-set vis="%CD%\..\Visualization"
-set wui="%CD%\..\Wui"
-set smvug="%CD%\..\..\Manuals\SMV_User_Guide"
-set smvvg="%CD%\..\..\Manuals\SMV_Verification_Guide"
+set SMOKEVIEW="smokeview"
+
+set SCRIPT_DIR=%CD%
+set BASEDIR=%CD%\..
+set SVNROOT=%BASEDIR%\..\
+
+set vis="%BASEDIR%\Visualization"
+set wui="%BASEDIR%\Wui"
+set smvug="%SVNROOT%\Manuals\SMV_User_Guide"
+set smvvg="%SVNROOT%\Manuals\SMV_Verification_Guide"
+set RUNFDS=call "%SCRIPT_DIR%\runsmv.bat"
+set SH2BAT="%SVNROOT%\Utilities\Data_Processing\sh2bat"
 
 cd %smvug%
 
@@ -13,8 +21,8 @@ erase SCRIPT_FIGURES\*.png
 erase SCRIPT_FIGURES\*.help
 erase SCRIPT_FIGURES\*.version
 
-smokeview -help > SCRIPT_FIGURES\smokeview.help
-smokeview -version > SCRIPT_FIGURES\smokeview.version
+%SMOKEVIEW% -help > SCRIPT_FIGURES\smokeview.help
+%SMOKEVIEW% -version > SCRIPT_FIGURES\smokeview.version
 smokezip -help > SCRIPT_FIGURES\smokezip.help
 smokediff -help > SCRIPT_FIGURES\smokediff.help
 smokediff -v > SCRIPT_FIGURES\smokediff.version
@@ -24,30 +32,13 @@ background -version > SCRIPT_FIGURES\background.version
 cd %smvvg%
 erase SCRIPT_FIGURES\*.version
 erase SCRIPT_FIGURES\*.png
-smokeview -version > SCRIPT_FIGURES\smokeview.version
+%SMOKEVIEW% -version > SCRIPT_FIGURES\smokeview.version
 
-cd %vis%
-smokeview -runscript capecod
-smokeview -runscript colorbar
-smokeview -runscript colorconv
-smokeview -runscript objects_elem
-smokeview -runscript objects_static
-smokeview -runscript objects_dynamic
-smokeview -runscript plume5a
-smokeview -runscript plume5b
-smokeview -runscript plume5c
-smokeview -runscript plume5c_bounddef
-smokeview -runscript sillytexture
-smokeview -runscript smoke_sensor
-smokeview -runscript smoke_test
-smokeview -runscript smoke_test2
-smokeview -runscript thouse5
-smokeview -runscript script_test
-smokeview -runscript transparency
-smokeview -runscript sprinkler_many
+echo converting SMV_Cases.sh case list to SMV_Cases.bat
+cd %SCRIPT_DIR%
+%SH2BAT% SMV_Cases.sh SMV_Cases.bat
 
-cd %wui%
-smokeview -runscript fire_line
-smokeview -runscript onetree_surf_1mesh
+cd %BASEDIR%
+call %SCRIPT_DIR%\SMV_Cases.bat
 
-cd ..\scripts
+cd %SCRIPT_DIR%
