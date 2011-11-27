@@ -7184,6 +7184,7 @@ void initmesh(mesh *meshi){
   meshi->xplt_orig=NULL;
   meshi->yplt_orig=NULL;
   meshi->zplt_orig=NULL;
+  meshi->f_iblank_cell=NULL;
   meshi->c_iblank_cell=NULL;
   meshi->c_iblank_x=NULL;
   meshi->c_iblank_y=NULL;

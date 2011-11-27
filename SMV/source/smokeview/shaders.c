@@ -178,10 +178,10 @@ int setVolSmokeShaders() {
     "uniform vec2 screensize;"
     "uniform vec2 nearfar;"
 #endif
-    "uniform sampler3D soot_density_texture,fire_texture;"
+    "uniform sampler3D soot_density_texture,fire_texture,blockage_texture;"
     "uniform int dir,inside,havefire,volbw;"
     "uniform float xyzmaxdiff,dcell,opacity_factor,temperature_cutoff;"
-    "uniform vec3 eyepos,boxmin, boxmax;"
+    "uniform vec3 eyepos,boxmin,boxmax;"
     "varying vec3 fragpos;"
     "uniform float mass_extinct;"
     
@@ -205,9 +205,9 @@ int setVolSmokeShaders() {
     "  vec2 uv = gl_FragCoord.xy/screensize.xy;"
 #endif
     "  float d;"
-    "  vec3 dalphamin,dalphamax,fragmaxpos,posi;"
-    "  vec3 pt_soot, pt_color,cum_color;"
-    "  float opacity,alpha_min,factor,pathdist;"
+    "  vec3 dalphamin,dalphamax,fragmaxpos,position,color_val,color_cum,block_pos,block_pos2;"
+    "  float soot_val,block_val,block_val2;"
+    "  float opacity,alpha_min,factor,factor2,pathdist;"
     "  float colorindex,tempval,gray;"
     "  float tauhat, alphahat, taui, tauterm;"
     "  float dstep;"
@@ -228,18 +228,23 @@ int setVolSmokeShaders() {
     "  }" // end inside=1
     "  fragmaxpos = mix(fragpos,eyepos,-alpha_min);"
     "  pathdist = distance(fragpos,fragmaxpos);"
-    "  n_iter = int(pathdist/dcell+0.5);"
+    "  n_iter = 4*int(pathdist/dcell+0.5);"
     "  if(n_iter<1)n_iter=1;"
     "  dstep = pathdist*xyzmaxdiff/n_iter;"
     "  tauhat=1.0;"
     "  alphahat=0.0;"
-    "  cum_color=vec3(0.0,0.0,0.0);"
+    "  color_cum=vec3(0.0,0.0,0.0);"
     "  for(i=0;i<n_iter;i++){"
     "    factor = (0.5+i)/n_iter;"
-    "    posi = (mix(fragpos,fragmaxpos,factor)-boxmin)/(boxmax-boxmin);"
-    "    pt_soot = texture3D(soot_density_texture,posi);"
+    "    factor2 = (0.5+i+1)/n_iter;"
+    "    position = (mix(fragpos,fragmaxpos,factor)-boxmin)/(boxmax-boxmin);"
+    "    soot_val = texture3D(soot_density_texture,position);"
+    "    block_pos = position;"
+    "    block_val = texture3D(blockage_texture,block_pos);"
+    "    block_pos2 = (mix(fragpos,fragmaxpos,factor2)-boxmin)/(boxmax-boxmin);"
+    "    block_val2 = texture3D(blockage_texture,block_pos2);"
     "    if(havefire==1){"
-    "      colorindex = texture3D(fire_texture,posi)/1200.0;" 
+    "      colorindex = texture3D(fire_texture,position)/1200.0;" 
     "      tempval = 20.0 + (1200.0-20.0)*colorindex;"
     "      if(tempval>temperature_cutoff){"
     "        colorindex = 0.5+0.5*(tempval-temperature_cutoff)/(1200.0-temperature_cutoff);"
@@ -247,29 +252,36 @@ int setVolSmokeShaders() {
     "      else{"
     "        colorindex = 0.5*tempval/temperature_cutoff;"
     "      }"
-    "      pt_color = texture1D(smokecolormap,colorindex).rgb;"
+    "      color_val = texture1D(smokecolormap,colorindex).rgb;"
     "      if(colorindex>0.5){"
-    "        pt_soot *= opacity_factor;"
+    "        soot_val *= opacity_factor;"
     "      };"
     "    }"
     "    else{"
-    "      pt_color = vec3(0.0,0.0,0.0);"
+    "      color_val = vec3(0.0,0.0,0.0);"
     "    }"
-    "    taui = exp(-mass_extinct*pt_soot*dstep);"
+    //  block_val  0.5  block_val2
+    //  0.0        x     dstep
+    //  x = dstep*(.5-block_val)/(block_val2-block_val)
+    "    if(block_val2<0.5){"
+    "      dstep *= (0.5-block_val)/(block_val2-block_val);"
+    "    }"
+    "    taui = exp(-mass_extinct*soot_val*dstep);"
     "    tauterm = (1.0-taui)*tauhat;"
     "    alphahat  += tauterm;"
-    "    cum_color += tauterm*pt_color;"
+    "    color_cum += tauterm*color_val;"
     "    tauhat *= taui;"
+    "    if(block_val2<0.5)break;"
     "  }"
     "  if(volbw==1){"
-    "    gray=0.299*cum_color.r + 0.587*cum_color.g + 0.114*cum_color.b;"
-    "    cum_color=vec3(gray,gray,gray);"
+    "    gray=0.299*color_cum.r + 0.587*color_cum.g + 0.114*color_cum.b;"
+    "    color_cum=vec3(gray,gray,gray);"
     "  }"
 #ifdef pp_GPUDEPTH
     "  d = LinearizeDepth(uv);"
     "  gl_FragColor = vec4(d,d,d,1.0);"
 #else
-    "  gl_FragColor = vec4(cum_color,alphahat);"
+    "  gl_FragColor = vec4(color_cum,alphahat);"
 #endif
     "}" // end of main
   };
@@ -343,6 +355,7 @@ int setVolSmokeShaders() {
   GPUvol_boxmin = glGetUniformLocation(p_volsmoke,"boxmin");
   GPUvol_boxmax = glGetUniformLocation(p_volsmoke,"boxmax");
   GPUvol_soot_density = glGetUniformLocation(p_volsmoke,"soot_density_texture");
+  GPUvol_blockage = glGetUniformLocation(p_volsmoke,"blockage_texture");
   GPUvol_fire = glGetUniformLocation(p_volsmoke,"fire_texture");
   GPUvol_havefire = glGetUniformLocation(p_volsmoke,"havefire");
   GPUvol_smokecolormap = glGetUniformLocation(p_volsmoke,"smokecolormap");

@@ -123,9 +123,11 @@ SVEXTERN int GPUzone_boxmin, GPUzone_boxmax;
 SVEXTERN int GPUzone_zlay;
 SVEXTERN int GPUzone_odl, GPUzone_odu;
 
-SVEXTERN int GPUvol_inside, GPUvol_dir, GPUvol_eyepos, GPUvol_xyzmaxdiff, GPUvol_soot_density, GPUvol_fire;
+SVEXTERN int GPUvol_inside, GPUvol_dir, GPUvol_eyepos, GPUvol_xyzmaxdiff;
+SVEXTERN int GPUvol_soot_density, GPUvol_fire, GPUvol_blockage;
 SVEXTERN int GPUvol_opacity_factor,GPUvol_temperature_cutoff,GPUvol_volbw,GPUvol_mass_extinct;
-SVEXTERN int GPUvol_boxmin, GPUvol_boxmax, GPUvol_smokecolormap, GPUvol_dcell, GPUvol_havefire;
+SVEXTERN int GPUvol_boxmin, GPUvol_boxmax;
+SVEXTERN int GPUvol_smokecolormap, GPUvol_dcell, GPUvol_havefire;
 #ifdef pp_GPUDEPTH
 SVEXTERN int GPUvol_depthtexture, GPUvol_screensize,GPUvol_nearfar;
 SVEXTERN GLuint SVDECL(depthtexture_id,0);
@@ -517,7 +519,7 @@ SVEXTERN int targfilenum;
 
 SVEXTERN volfacelistdata SVDECL(*volfacelistinfo,NULL),SVDECL(**volfacelistinfoptrs,NULL);
 SVEXTERN int SVDECL(nvolfacelistinfo,0);
-SVEXTERN int update_makeiblank_smoke3d, SVDECL(update_initcull,0);
+SVEXTERN int SVDECL(update_makeiblank_smoke3d,0), SVDECL(update_initcull,0);
 SVEXTERN int setPDIM;
 SVEXTERN int menustatus;
 SVEXTERN int visTimeZone, visTimeSmoke, visTimeSlice, visTimePatch, visTimeIso, visTimeEvac;

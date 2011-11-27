@@ -491,11 +491,13 @@ int makeiblank(void){
   int ijksize,i,j,k;
   int ii,ig;
   int test;
-  char *ib, *ib_x, *ib_y, *ib_z, *ib_c;
   mesh *meshi;
   int ibar,jbar,kbar;
   int nx, ny, nxy;
-  char *iblank,*iblank_cell,*iblank_x,*iblank_y,*iblank_z;
+  float *fblank_cell=NULL;
+  char *iblank=NULL,*iblank_cell=NULL,*iblank_x=NULL,*iblank_y=NULL,*iblank_z=NULL;
+
+  printf("initializing blanking arrays\n");
   if(use_iblank==0)return 0;
   for(ig=0;ig<nmeshes;ig++){
     meshi = meshinfo+ig;
@@ -503,27 +505,20 @@ int makeiblank(void){
     jbar = meshi->jbar;
     kbar = meshi->kbar;
     ijksize=(ibar+1)*(jbar+1)*(kbar+1);
-    ib=NULL;
-    ib_c=NULL;
-    ib_x=NULL;
-    ib_y=NULL;
-    ib_z=NULL;
-    if(NewMemory((void **)&ib,ijksize*sizeof(char))==0)return 1;
-    if(NewMemory((void **)&ib_c,ibar*jbar*kbar*sizeof(char))==0)return 1;
-    if(NewMemory((void **)&ib_x,ijksize*sizeof(char))==0)return 1;
-    if(NewMemory((void **)&ib_y,ijksize*sizeof(char))==0)return 1;
-    if(NewMemory((void **)&ib_z,ijksize*sizeof(char))==0)return 1;
-    meshi->c_iblank=ib;
-    meshi->c_iblank_cell=ib_c;
-    meshi->c_iblank_x=ib_x;
-    meshi->c_iblank_y=ib_y;
-    meshi->c_iblank_z=ib_z;
 
-    iblank=ib;
-    iblank_cell=ib_c;
-    iblank_x=ib_x;
-    iblank_y=ib_y;
-    iblank_z=ib_z;
+    if(NewMemory((void **)&iblank,ijksize*sizeof(char))==0)return 1;
+    if(NewMemory((void **)&iblank_cell,ibar*jbar*kbar*sizeof(char))==0)return 1;
+    if(NewMemory((void **)&fblank_cell,ibar*jbar*kbar*sizeof(float))==0)return 1;
+    if(NewMemory((void **)&iblank_x,ijksize*sizeof(char))==0)return 1;
+    if(NewMemory((void **)&iblank_y,ijksize*sizeof(char))==0)return 1;
+    if(NewMemory((void **)&iblank_z,ijksize*sizeof(char))==0)return 1;
+
+    meshi->c_iblank=iblank;
+    meshi->c_iblank_cell=iblank_cell;
+    meshi->f_iblank_cell=fblank_cell;
+    meshi->c_iblank_x=iblank_x;
+    meshi->c_iblank_y=iblank_y;
+    meshi->c_iblank_z=iblank_z;
 
     for(i=0;i<ibar*jbar*kbar;i++){
       iblank_cell[i]=1;
@@ -547,6 +542,11 @@ int makeiblank(void){
         iblank_cell[IJKCELL(i,j,k)]=0;
       }
       }
+      }
+    }
+    if(fblank_cell!=NULL){
+      for(ii=0;ii<ibar*jbar*kbar;ii++){
+        fblank_cell[ii]=iblank_cell[ii];
       }
     }
     i=0;

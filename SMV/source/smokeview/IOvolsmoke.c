@@ -1047,6 +1047,7 @@ void drawsmoke3dGPUVOL(void){
       glUniform1i(GPUvol_soot_density,0);
       glUniform1i(GPUvol_fire,1);
       glUniform1i(GPUvol_smokecolormap,2);
+      glUniform1i(GPUvol_blockage,3);
       dx = meshi->xplt[1]-meshi->xplt[0];
       dy = meshi->yplt[1]-meshi->yplt[0];
       dz = meshi->zplt[1]-meshi->zplt[0];
@@ -1752,6 +1753,20 @@ void init_volsmoke_texture(mesh *meshi){
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_smokecolormap);
   }
+
+  glActiveTexture(GL_TEXTURE3);
+  glGenTextures(1,&meshi->blockage_texture_id);
+  glBindTexture(GL_TEXTURE_3D,meshi->blockage_texture_id);
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+  nx = meshi->ibar;
+  ny = meshi->jbar;
+  nz = meshi->kbar;
+  glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, nx, ny, nz, border_size, GL_RED, GL_FLOAT, meshi->f_iblank_cell);
+
   glActiveTexture(GL_TEXTURE0);
   printf("complete\n");
   fflush(stdout);
@@ -1783,7 +1798,13 @@ void update_volsmoke_texture(mesh *meshi, float *smokedata, float *firedata){
       xoffset,yoffset,zoffset,
       nx, ny, nz,
       GL_RED, GL_FLOAT, firedata);
-    glActiveTexture(GL_TEXTURE0);
   }
+
+  glActiveTexture(GL_TEXTURE3);
+  nx = meshi->ibar;
+  ny = meshi->jbar;
+  nz = meshi->kbar;
+  glTexSubImage3D(GL_TEXTURE_3D,0,xoffset,yoffset,zoffset,nx, ny, nz,GL_RED, GL_FLOAT, meshi->f_iblank_cell);
+  glActiveTexture(GL_TEXTURE0);
 }
 #endif

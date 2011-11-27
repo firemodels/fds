@@ -449,7 +449,7 @@ typedef struct _mesh {
   int mesh_type;
   int is_bottom;
 #ifdef pp_GPU
-  GLuint smoke_texture_id,fire_texture_id;
+  GLuint smoke_texture_id,fire_texture_id,blockage_texture_id;
   float *smoke_texture_buffer,*fire_texture_buffer;
 #endif
   float meshrgb[3], *meshrgb_ptr;
@@ -480,6 +480,7 @@ typedef struct _mesh {
   int slicedir;
   int plotn;
   char *c_iblank,*c_iblank_cell,*c_iblank_x,*c_iblank_y,*c_iblank_z;
+  float *f_iblank_cell;
   char *c_iblank_embed;
   float *block_zdist;
   int zdist_flag;
