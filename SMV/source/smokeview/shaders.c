@@ -580,7 +580,7 @@ void createDepthTexture( void ){
 		depthtexture_id = 0;
 	}
 	
-  glActiveTexture(GL_TEXTURE3);
+  glActiveTexture(GL_TEXTURE4);
   glGenTextures(1, &depthtexture_id);
   glBindTexture(GL_TEXTURE_2D, depthtexture_id);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, screenWidth, screenHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);	
