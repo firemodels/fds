@@ -11,6 +11,10 @@
 #define ABS(a) ((a)>=0 ? (a) : (-(a)))
 #endif
 
+#ifndef MIX
+#define MIX(f,a,b) ( (f)*(a) + (1.0-(f))*(b))
+#endif
+
 #ifndef CLAMP
 #define CLAMP(x,lo,hi)  MIN(MAX((x),(lo)),(hi))
 #endif
