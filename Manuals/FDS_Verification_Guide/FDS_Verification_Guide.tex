@@ -1808,7 +1808,7 @@ where $\alpha$ represents each species and $\mathrm{NR}$ is the number of reacti
 The reaction rate input parameters are shown in the table below. $E$, $a_{\alpha}$, and $n_{\alpha}$ are set to zero, and $A$ is set such that ${k}_{i} = 1$. The resulting reaction rates simplify to a function of molecular weight and stoichiometric coefficients. Species evolutions results from the CO reaction in Equation (\ref{eq:1step_CO}) are shown in Figure \ref{fig:Arrhenius_0Order_1step}.
 
 \begin{center}
-\begin{tabular}{|l|l|l|l|l|l|l|l|l|}
+\begin{tabular}{|l|l|l|l|l|l|l|l|l|} 
 \hline Reaction & $\nu_{\alpha}$ & E (kJ/kmol) & A (cm$^3$/mole/s) & $a_{\alpha}$ & $n_{\alpha}$  \\ \hline \hline
 \ref{eq:1step_CO} & [-1 -0.5 1] & 0 & 4.244e-6 & [0 0 0] & [0 0 0] \\ \hline
 \end{tabular}
@@ -1872,9 +1872,9 @@ with the following reaction input parameters:
 \begin{center}
 \begin{tabular}{|l|l|l|l|l|l|l|l|l|}
 \hline Reaction & $\nu_{\alpha}$ & E (kJ/kmol) & A (cm$^3$/mole/s) & $a_{\alpha}$ & $n_{\alpha}$  \\ \hline \hline
-\ref{eq:2step_propane_rev} a & [-1 -3.5 3 4 0] & 0 & 5e2 & [0.1 1.65 0 0 0] & [0 0 0 0 0] \\ \hline
-\ref{eq:2step_propane_rev} b & [0 -0.5 -1 0 1] & 0 & 8e3 & [0 0.25 1 0.5 0] & [0 0 0 0 0] \\ \hline
-\ref{eq:2step_propane_rev} c & [0 0.5 1 0 -1] & 0 & 4e-4 & [0 0 0 0 0 1] & [0 0 0 0 0] \\ \hline
+\ref{eq:2step_propane_rev} a & [-1 -3.5 3 4 0] & 0 & 5e2  & [0.1 1.65 0 0 0] & [0 0 0 0 0] \\ \hline
+\ref{eq:2step_propane_rev} b & [0 -0.5 -1 0 1] & 0 & 8e3  & [0 0.25 1 0.5 0] & [0 0 0 0 0] \\ \hline
+\ref{eq:2step_propane_rev} c & [0 0.5 1 0 -1]  & 0 & 4e-4 & [0 0 0 0 0 1]    & [0 0 0 0 0] \\ \hline
 \end{tabular}
 \vskip8pt
 $\alpha$ is defined as [$\mathrm{C_3H_8}$ $\mathrm{O_2}$ $\mathrm{CO}$ $\mathrm{H_2O}$ $\mathrm{CO_2}$].
@@ -1888,10 +1888,39 @@ Note: the values of $E$ and $A$ used in these examples are necessarily represent
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_Arrhenius_1p75Order_2Step} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_Arrhenius_1p75Order_2StepR}
 \end{tabular*}
-\caption[Species Evolution in Mixing Controlled Reaction]{Time evolution of species mass fraction for multi-step Arrhenius finite rate propane reactions. (Left) Two-step reaction. (Right) Two-step reaction with reversible CO reaction.}
+\caption[Species Evolution in Finite Rate Reaction]{Time evolution of species mass fraction for multi-step Arrhenius finite rate propane reactions. (Left) Two-step reaction. (Right) Two-step reaction with reversible CO reaction.}
 \label{fig:Arrhenius_175Order_23step}
 \end{figure}
+\vskip8pt
+To couple verification of species mass fraction, compartment temperature, and compartment pressure an equilibrium example problem was setup. In this case, we examine a sealed box filled with a stoichiometric mixture of fuel, oxygen, and nitrogen. The two-step reversible reaction mechanism, Equation (\ref{eq:2step_propane_rev}), is used to drive the FDS simulation. The initial temperature is set to 350 $^\circ$C to ensure the reaction occurs in timely manner. The reaction rate parameters in the table below are based off values in literature from Westbrook and Dryer \cite{Westbrook:1}. The heat of combustion for reaction \ref{eq:2step_propane_rev} a and \ref{eq:2step_propane_rev} b were found using data from the NIST JANAF tables \cite{NIST_JANAF}. The heat of combustion for the reversible reaction, \ref{eq:2step_propane_rev} c, was calculated by FDS by setting REVERSIBLE=.TRUE. on the {\ct REAC} line and identifying the appropriate forward reaction ID. 
+\begin{center}
+\begin{tabular}{|l|l|l|l|l|l|l|l|l|}
+\hline Reaction & $\nu_{\alpha}$ & E (kJ/kmol) & A (cm$^3$/mole/s) & $a_{\alpha}$ & $n_{\alpha}$  \\ \hline \hline
+\ref{eq:2step_propane_rev} a & [-1 -3.5 3 4 0] & 125520 & 1.5e12 & [0.1 1.65 0 0 0] & [0 0 0 0 0] \\ \hline
+\ref{eq:2step_propane_rev} b & [0 -0.5 -1 0 1] & 167360 & 3.4e13 & [0 0.25 1 0.5 0] & [0 0 0 0 0] \\ \hline
+\ref{eq:2step_propane_rev} c & [0 0.5 1 0 -1]  & 167360 & 8e8    & [0 0 0 0 0 1]    & [0 0 0 0 0] \\ \hline
+\end{tabular}
+\vskip8pt
+$\alpha$ is defined as [$\mathrm{C_3H_8}$ $\mathrm{O_2}$ $\mathrm{CO}$ $\mathrm{H_2O}$ $\mathrm{CO_2}$].
+\end{center}
+Equilibrium values were determined using the NASA code Chemical Equilibrium with Applications (CEA) \cite{Gordon:1994}. A constant volume, constant internal energy equilibrium calculation was performed where the equilibrium values were found by minimizing Helmholtz Energy. The equilibrium species were limited to $\mathrm{C_3H_8}$, $\mathrm{O_2}$, $\mathrm{CO}$, $\mathrm{H_2O}$, and $\mathrm{CO_2}$; the same species tracked by FDS.
 
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_Equilibrium_Species}
+\end{center}
+\caption[Species Evolution in Finite Rate Reaction]{Time evolution of species mass fraction for a two-step Arrhenius finite rate reaction compared to equilibrium values.}
+\label{fig:Arrhenius_2Order_1step}
+\end{figure}
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_Equilibrium_Temperature} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_Equilibrium_Pressure}
+\end{tabular*}
+\caption[Temperature and Pressure equilibrium comparison]{Time evolution of temperature (left) and pressure (right) for two-step Arrhenius finite rate propane reactions compared to equilibrium values.}
+\label{fig:Arrhenius_175Order_23step}
+\end{figure}
 \subsection{Mixed mode reactions (ReactionRate\_Mixed\_)}
 
 
