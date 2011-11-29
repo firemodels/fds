@@ -898,7 +898,7 @@ SVEXTERN int highlight_block, highlight_mesh, highlight_flag;
 SVEXTERN int updatesmoothblocks,menusmooth,use_menusmooth;
 SVEXTERN int smoothing_blocks;
 SVEXTERN int blocksneedsmoothing;
-SVEXTERN int updategetlabels;
+SVEXTERN int SVDECL(updategetobstlabels,1);
 
 SVEXTERN int pixel_skip;
 SVEXTERN float smoke_extinct,smoke_dens,smoke_pathlength;

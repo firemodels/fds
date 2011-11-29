@@ -56,7 +56,6 @@ extern char IOzone_revision[];
 extern char isobox_revision[];
 extern char main_revision[];
 extern char output_revision[];
-extern char parseobst_revision[];
 extern char readsmv_revision[];
 extern char renderfile_revision[];
 extern char scontour2d_revision[];

@@ -5726,15 +5726,6 @@ typedef struct {
   }
   initcadcolors();
 
-  /* read in FDS input file and copy OBST labels to obstlabels */
-/*
-  if(fds_filein!=NULL){
-    CheckMemoryOff;
-    getlabels(fds_filein);
-    CheckMemoryOn;
-  }
-  */
-
   FREEMEMORY(slice_loaded_list);
   if(nsliceinfo>0){
     NewMemory((void **)&slice_loaded_list,nsliceinfo*sizeof(int));

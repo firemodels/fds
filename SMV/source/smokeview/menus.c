@@ -1019,11 +1019,11 @@ void DialogMenu(int value){
   case 16:
     showedit=1-showedit;
     if(showedit==1){
-      if(fds_filein!=NULL&&updategetlabels==1){
+      if(fds_filein!=NULL&&updategetobstlabels==1){
         CheckMemoryOff;
-        getlabels(fds_filein);
+        getobstlabels(fds_filein);
         CheckMemoryOn;
-        updategetlabels=0;
+        updategetobstlabels=0;
       }
       visBlocksSave=visBlocks;
       show_glui_edit();

@@ -1681,7 +1681,6 @@ void initvars1(void){
   use_menusmooth=0;
   smoothing_blocks=0;
   blocksneedsmoothing=0;
-  updategetlabels=1;
 
   vis_user_ticks=0;
   user_tick_show_x=1;
@@ -2275,7 +2274,6 @@ int getmaxrevision(void){
   MAXREV(main_revision);
   MAXREV(menu_revision);
   MAXREV(output_revision);
-  MAXREV(parseobst_revision);
   MAXREV(readsmv_revision);
   MAXREV(renderfile_revision);
   MAXREV(scontour2d_revision);

@@ -510,7 +510,7 @@ EXTERNCPP void updatepatchlistindex2(char *label);
 EXTERNCPP void updateplot3dlistindex(void);
 EXTERNCPP void transparentoff(void);
 EXTERNCPP void transparenton(void);
-EXTERNCPP void getlabels(const char *filein);
+EXTERNCPP void getobstlabels(const char *filein);
 EXTERNCPP void initobst(blockagedata *bc,surface *surf,int index,int meshindex);
 EXTERNCPP void setsurfaceindex(blockagedata *bc);
 EXTERNCPP void updateusetextures(void);
