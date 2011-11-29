@@ -342,11 +342,15 @@ int gettargetposition(int itarget, float time, float *x, float *y, float *z){
   for(i=0;i<nsteps-1;i++){
     if(tp->t[i]<=time&&time<=tp->t[i+1]){
       denom=tp->t[i+1]-tp->t[i];
-      if(denom!=0.0){factor=(time-tp->t[i])/denom;}
-      else{factor=1.0;}
-      *x=(1.0-factor)*tp->x[i]+factor*tp->x[i+1];
-      *y=(1.0-factor)*tp->y[i]+factor*tp->y[i+1];
-      *z=(1.0-factor)*tp->z[i]+factor*tp->z[i+1];
+      if(denom!=0.0){
+      factor=(time-tp->t[i])/denom;
+      }
+      else{
+        factor=1.0;
+      }
+      *x=MIX(factor,tp->x[i+1],tp->x[i]);
+      *y=MIX(factor,tp->y[i+1],tp->y[i]);
+      *z=MIX(factor,tp->z[i+1],tp->z[i]);
       *x = (*x-xbar0)/xyzmaxdiff;
       *y = (*y-ybar0)/xyzmaxdiff;
       *z = (*z-zbar0)/xyzmaxdiff;

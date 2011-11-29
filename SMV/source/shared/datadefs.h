@@ -15,6 +15,10 @@
 #define MIX(f,a,b) ( (f)*(a) + (1.0-(f))*(b))
 #endif
 
+#ifndef MIX2
+#define MIX2(i,n,a,b) ( ((float)(i)/(float)(n))*(a) + ( 1.0-((float)(i)/(float)(n)) )*(b))
+#endif
+
 #ifndef CLAMP
 #define CLAMP(x,lo,hi)  MIN(MAX((x),(lo)),(hi))
 #endif

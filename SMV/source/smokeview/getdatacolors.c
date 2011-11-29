@@ -1416,8 +1416,8 @@ void drawColorBars(void){
 
         rgb_plot3d = rgb_plot3d_contour[i];
 
-        yy =  (barbot*(nrgb-3-i)  + i   *tophat)/(nrgb-3);
-        yy2 = (barbot*(nrgb-4-i)+  (i+1)*tophat)/(nrgb-3);
+         yy = MIX2(i,nrgb-3,tophat,barbot);
+        yy2 = MIX2(i+1,nrgb-3,tophat,barbot);
 
         if(rgb_plot3d[3]!=0.0){
           glColor4fv(rgb_plot3d);
@@ -1437,8 +1437,9 @@ void drawColorBars(void){
 
         barmid = (barleft+barright)/2.0;
         i=-1;
-        yy =  (barbot*(nrgb-3-(i+0.5))  +(i+0.5)   *tophat)/(nrgb-3);
-        yy2 = (barbot*(nrgb-4-i)+  (i+1)*tophat)/(nrgb-3);
+         yy = MIX2(i+0.5,nrgb-3,tophat,barbot);
+        yy2 = MIX2(i+1,nrgb-3,tophat,barbot);
+
 
         if(show_extreme_below==1||show_extreme_above==1)glEnable(GL_POLYGON_SMOOTH);
 
@@ -1453,8 +1454,8 @@ void drawColorBars(void){
         }
 
         i=nrgb-2;
-        yy =  (barbot*(nrgb-3-i)  + i   *tophat)/(nrgb-3);
-        yy2 = (barbot*(nrgb-3.5-i)+  (i+0.5)*tophat)/(nrgb-3);
+         yy = MIX2(i,nrgb-3,tophat,barbot);
+        yy2 = MIX2(i+0.5,nrgb-3,tophat,barbot);
 
         rgb_plot3d = rgb_plot3d_contour[nrgb-1];
         if(show_extreme_above==1&&rgb_plot3d[3]!=0.0){
@@ -1481,8 +1482,8 @@ void drawColorBars(void){
 
         rgb_cb=rgb_full[i];
 
-         yy = (barbot*(255-i)+    i*tophat)/255.;
-        yy2 = (barbot*(254-i)+(i+1)*tophat)/255.;
+         yy = MIX2(i,255,tophat,barbot);
+        yy2 = MIX2(i+1,255,tophat,barbot);
         i3=i+1;
         if(i==nrgb_full-2)i3=i;
         rgb_cb2=rgb_full[i3];
@@ -1507,8 +1508,8 @@ void drawColorBars(void){
         top = barbot+nrgb+DYFONT;
         tophat = top - (top-barbot)/(nrgb-2);
         i=-1;
-        yy =  (barbot*(nrgb-3-(i+0.5))  +(i+0.5)   *tophat)/(nrgb-3);
-        yy2 = (barbot*(nrgb-4.0-i)+  (i+1.0)*tophat)/(nrgb-3);
+         yy = MIX2(i+0.5,nrgb-3,tophat,barbot);
+        yy2 = MIX2(i+1,nrgb-3,tophat,barbot);
 
         if(show_extreme_below==1||show_extreme_above==1)glEnable(GL_POLYGON_SMOOTH);
 
@@ -1523,8 +1524,8 @@ void drawColorBars(void){
         }
 
         i=nrgb-2;
-        yy =  (barbot*(nrgb-3-i)  + i   *tophat)/(nrgb-3)+(barbot-tophat)/255.0;
-        yy2 = (barbot*(nrgb-3.5-i)+  (i+0.5)*tophat)/(nrgb-3)+(barbot-tophat)/255.0;
+         yy = MIX2(i,nrgb-3,tophat,barbot)    +(barbot-tophat)/255.0;
+        yy2 = MIX2(i+0.5,nrgb-3,tophat,barbot)+(barbot-tophat)/255.0;
 
         if(show_extreme_above==1){
           glBegin(GL_TRIANGLES);
@@ -1890,8 +1891,8 @@ void drawColorBars(void){
         position = (float)global_changecolorindex/255.0*(float)(nrgb+DYFONT)+barbot-dyfont/2.0;
       }
       else{
-        yy = (barbot*(nrgb-i)+i*(nrgb+DYFONT+barbot))/nrgb;
-        yy2 = (barbot*(nrgb-1-i)+(i+1)*(nrgb+DYFONT+barbot))/nrgb;
+         yy = MIX2(i,nrgb,nrgb+DYFONT+barbot,barbot);
+        yy2 = MIX2(i+1,nrgb,nrgb+DYFONT+barbot,barbot);
         position = (yy+yy2)/2.0;
       }
       position = (float)global_changecolorindex/255.0*(float)(nrgb+DYFONT)+barbot-dyfont/2.0;

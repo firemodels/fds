@@ -31,7 +31,6 @@ char IOvolsmoke_revision[]="$Revision$";
 
 /* ----------------------- interp3d ----------------------------- */
 
-#define INTERP1D(f0,f1,dx) (float)((f0) + ((f1)-(f0))*(dx))
 void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, float xyz[3], mesh *meshi, int *inobst, char *blank){
   int i, j, k;
   int ijk;
@@ -114,13 +113,13 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
     val011 = vv[0]; // i,j+1,k+1
     val111 = vv[1]; // i+1,j+1,k+1
 
-    val00 = INTERP1D(val000,val100,dx);
-    val10 = INTERP1D(val010,val110,dx);
-    val01 = INTERP1D(val001,val101,dx);
-    val11 = INTERP1D(val011,val111,dx);
-     val0 = INTERP1D( val00, val10,dy);
-     val1 = INTERP1D( val01, val11,dy);
-    temperature = INTERP1D(  val0,  val1,dz);
+    val00 = MIX(dx,val100,val000);
+    val10 = MIX(dx,val110,val010);
+    val01 = MIX(dx,val101,val001);
+    val11 = MIX(dx,val111,val011);
+     val0 = MIX(dy, val10, val00);
+     val1 = MIX(dy, val11, val01);
+    temperature = MIX(dz,val1,val0);
     dtemp=(1200.0-20.0)/256;
     GETINDEX(index,temperature,20.0,dtemp,256);
     *smoke_color=rgb_smokecolormap+4*index;
@@ -145,13 +144,13 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
     val011 = vv[0]; // i,j+1,k+1
     val111 = vv[1]; // i+1,j+1,k+1
 
-    val00 = INTERP1D(val000,val100,dx);
-    val10 = INTERP1D(val010,val110,dx);
-    val01 = INTERP1D(val001,val101,dx);
-    val11 = INTERP1D(val011,val111,dx);
-     val0 = INTERP1D( val00, val10,dy);
-     val1 = INTERP1D( val01, val11,dy);
-     soot_density = INTERP1D(  val0,  val1,dz);
+    val00 = MIX(dx,val100,val000);
+    val10 = MIX(dx,val110,val010);
+    val01 = MIX(dx,val101,val001);
+    val11 = MIX(dx,val111,val011);
+     val0 = MIX(dy,val10,val00);
+     val1 = MIX(dy,val11,val01);
+     soot_density = MIX(dz,val1,val0);
      if(firedata!=NULL&&index>128)soot_density*=5.0;
     *smoke_tran = exp(-kfactor*soot_density*dstep);
   }
@@ -412,9 +411,9 @@ void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, mesh
 
     factor = (0.5 + (float)i)/(float)nsteps;
 
-    xyz[0] = (1.0-factor)*vert_beg[0] + factor*vert_end[0];
-    xyz[1] = (1.0-factor)*vert_beg[1] + factor*vert_end[1];
-    xyz[2] = (1.0-factor)*vert_beg[2] + factor*vert_end[2];
+    xyz[0] = MIX(factor,vert_end[0],vert_beg[0]);
+    xyz[1] = MIX(factor,vert_end[1],vert_beg[1]);
+    xyz[2] = MIX(factor,vert_end[2],vert_beg[2]);
 
     get_pt_smokecolor(&pt_smoketran,&pt_smokecolor, dstep,xyz, meshi, &inobst, blank);
     if(blank!=NULL&&inobst==1)break;

@@ -396,13 +396,15 @@ int edgelist2[15][16]={
       /*factor=0.0;*/
       outofbounds=1;
     }
-    xx = xxval[v1]*(1.0-factor) + xxval[v2]*factor;
-    yy = yyval[v1]*(1.0-factor) + yyval[v2]*factor;
-    zz = zzval[v1]*(1.0-factor) + zzval[v2]*factor;
+    xx = MIX(factor,xxval[v2],xxval[v1]);
+    yy = MIX(factor,yyval[v2],yyval[v1]);
+    zz = MIX(factor,zzval[v2],zzval[v1]);
     xvert[n] = xx;
     yvert[n] = yy;
     zvert[n] = zz;
-    if(tvert!=NULL)tvert[n]= tvals[v1]*(1.0-factor) + tvals[v2]*factor;
+    if(tvert!=NULL){
+      tvert[n] = MIX(factor,tvals[v2],tvals[v1]);
+    }
 
   }
   if(outofbounds==1){
@@ -1634,9 +1636,9 @@ float get_tri_area(int *edgelist, float *xyz){
 #define FACTOR(ii,v0,v1,x0,x1) \
   if(v0*v1<0.0){\
     factor2=-v0/(v1-v0);\
-    xyziso[0+3*ii]=(1.0-factor2)*(x0)[0]+factor2*(x1)[0];\
-    xyziso[1+3*ii]=(1.0-factor2)*(x0)[1]+factor2*(x1)[1];\
-    xyziso[2+3*ii]=(1.0-factor2)*(x0)[2]+factor2*(x1)[2];\
+    xyziso[0+3*ii]=MIX(factor2,(x1)[0],(x0)[0]);\
+    xyziso[1+3*ii]=MIX(factor2,(x1)[1],(x0)[1]);\
+    xyziso[2+3*ii]=MIX(factor2,(x1)[2],(x0)[2]);\
   }
 float get_iso_level_area_tetra(float level, 
                                float v0, float v1, float v2, float v3, 

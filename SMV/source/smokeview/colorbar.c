@@ -7,6 +7,7 @@
 #include <string.h>
 #include <math.h>
 #include "flowfiles.h"
+#include "datadefs.h"
 #include "MALLOC.h"
 #include "smokeviewvars.h"
 
@@ -277,9 +278,9 @@ void remapcolorbar(colorbardata *cbi){
     rgb_node = cbi->rgb_node+3*i;
     for(j=i1;j<i2;j++){
       factor = (float)(j-i1)/(float)(i2-i1);
-      colorbar[0+3*j]=((1.0-factor)*rgb_node[0]+factor*rgb_node[3])/255.0;
-      colorbar[1+3*j]=((1.0-factor)*rgb_node[1]+factor*rgb_node[4])/255.0;
-      colorbar[2+3*j]=((1.0-factor)*rgb_node[2]+factor*rgb_node[5])/255.0;
+      colorbar[0+3*j]=MIX(factor,rgb_node[3],rgb_node[0])/255.0;
+      colorbar[1+3*j]=MIX(factor,rgb_node[4],rgb_node[1])/255.0;
+      colorbar[2+3*j]=MIX(factor,rgb_node[5],rgb_node[2])/255.0;
       if(
         (rgb_node[0]==0&&rgb_node[1]==1&&rgb_node[2]==2&&
         rgb_node[3]==0&&rgb_node[4]==1&&rgb_node[5]==2)||
