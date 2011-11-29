@@ -2277,7 +2277,6 @@ int getmaxrevision(void){
   MAXREV(readsmv_revision);
   MAXREV(renderfile_revision);
   MAXREV(scontour2d_revision);
-  MAXREV(segtri_revision);
   MAXREV(skybox_revision);
   MAXREV(shaders_revision);
   MAXREV(showscene_revision);

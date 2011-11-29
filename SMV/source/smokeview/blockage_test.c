@@ -26,16 +26,6 @@ char blockage_test_revision[]="$Revision$";
 float llasttime=0.0;
 
 void adjust_new_position(float oldpos[3], float newpos[3]);
-int seg_in_box(float *p1, float *p2,  
-               float xmin, float xmax, 
-               float ymin, float ymax, 
-               float zmin, float zmax);
-
-int seg_in_rect(float *p1, float *p2,  
-                float xmin, float xmax, 
-                float ymin, float ymax, 
-                float zmin, float zmax,
-                int checkbounds);
 
 /* ------------------ get_interval ------------------------ */
 
@@ -661,6 +651,5 @@ int makeiblank(void){
     }
   }
    init_blockdist();
-//  checksolve();
   return 0;
 }

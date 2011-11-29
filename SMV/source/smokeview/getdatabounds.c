@@ -5,6 +5,7 @@
 #include "options.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "MALLOC.h"
 #include "flowfiles.h"
 #include "smokeviewdefs.h"
