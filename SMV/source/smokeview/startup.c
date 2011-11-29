@@ -2282,7 +2282,6 @@ int getmaxrevision(void){
   MAXREV(shaders_revision);
   MAXREV(showscene_revision);
   MAXREV(smokeview_revision);
-  MAXREV(smoothlabel_revision);
   MAXREV(smv_endian_revision);
   MAXREV(startup_revision);
   MAXREV(string_util_revision);

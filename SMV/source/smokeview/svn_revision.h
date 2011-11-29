@@ -64,7 +64,6 @@ extern char shaders_revision[];
 extern char skybox_revision[];
 extern char smokeview_revision[];
 extern char showscene_revision[];
-extern char smoothlabel_revision[];
 extern char string_util_revision[];
 extern char sv_api_revision[];
 extern char threader_revision[];

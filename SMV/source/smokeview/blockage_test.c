@@ -31,8 +31,6 @@ int seg_in_box(float *p1, float *p2,
                float ymin, float ymax, 
                float zmin, float zmax);
 
-int seg_in_vent(float *p1, float *p2);
-int seg_in_blockage(float *p1, float *p2);
 int seg_in_rect(float *p1, float *p2,  
                 float xmin, float xmax, 
                 float ymin, float ymax, 
@@ -665,68 +663,4 @@ int makeiblank(void){
    init_blockdist();
 //  checksolve();
   return 0;
-}
-
-/* ------------------ seg_in_blockage ------------------------ */
-
-int seg_in_blockage(float *p1, float *p2){
-  int i,j;
-  mesh *meshi;
-  blockagedata *bc;
-
-  for(i=0;i<nmeshes;i++){
-    meshi=meshinfo + i;
-    for(j=0;j<meshi->nbptrs;j++){
-      bc = meshi->blockageinfoptrs[j];
-      if(bc->showtime==NULL)continue;
-      if(j==13){
-        j=j;
-      }
-      if(seg_in_box(p1,p2,
-        bc->xmin,bc->xmax,
-        bc->ymin,bc->ymax,
-        bc->zmin,bc->zmax)==HIT)return HIT;
-
-    }
-  }
-  return MISS;
-}
-
-/* ------------------ seg_in_vent ------------------------ */
-
-int seg_in_vent(float *p1, float *p2){
-  int i,n;
-  mesh *meshi;
-  ventdata *vi;
-  int checkbounds=1;
-
-  for(i=0;i<nmeshes;i++){
-    meshi=meshinfo + i;
-#ifdef _DEBUG
-    printf("\n");
-#endif
-    for(n=0;n<meshi->nvents;n++){
-      vi = meshi->ventinfo+n;
-      if(vi->dummy==1)continue;
-#ifdef _DEBUG
-      printf("\n %i point:    %f %f - %f %f - %f %f\n",n,p1[0],p2[0],p1[1],p2[1],p1[2],p2[2]);
-      printf("  vent:  %i %f %f - %f %f - %f %f\n",n,vi->xmin,vi->xmax,vi->ymin,vi->ymax,vi->zmin,vi->zmax);
-#endif
-      if(seg_in_rect(p1,p2,
-        vi->xmin,vi->xmax,
-        vi->ymin,vi->ymax,
-        vi->zmin,vi->zmax,
-        checkbounds)==HIT){
-#ifdef _DEBUG
-        printf("\npoint:    %f %f - %f %f - %f %f\n",p1[0],p2[0],p1[1],p2[1],p1[2],p2[2]);
-        printf("vent:  %i %f %f - %f %f - %f %f\n",n,vi->xmin,vi->xmax,vi->ymin,vi->ymax,vi->zmin,vi->zmax);
-#endif
-        return HIT;
-      }
-    }
-  }
-#ifdef _DEBUG
-  printf("\nmiss\n");
-#endif
-  return MISS;
 }
