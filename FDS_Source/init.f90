@@ -3043,8 +3043,8 @@ SUBROUTINE INITIAL_NOISE(NM)
 
 ! Generate random noise at the start of the simulation
  
-REAL     :: RN
-REAL(EB) :: VFAC
+REAL     :: RN2
+REAL(EB) :: VFAC,RN
 INTEGER  :: I,J,K
 INTEGER, INTENT(IN) :: NM
  
@@ -3054,7 +3054,7 @@ IF (EVACUATION_ONLY(NM)) RETURN
 
 DO I=1,NM
    IF (EVACUATION_ONLY(NM)) CYCLE
-   CALL RANDOM_NUMBER(RN)
+   CALL RANDOM_NUMBER(RN2)
 ENDDO
 
 ! Point to local mesh variables
@@ -3070,7 +3070,8 @@ DO K=1,KBM1
       DO I=1,IBAR
          IF (SOLID(CELL_INDEX(I,J,K))   .OR. SOLID(CELL_INDEX(I,J,K+1)) .OR. &
              SOLID(CELL_INDEX(I,J+1,K)) .OR. SOLID(CELL_INDEX(I,J+1,K+1)))  CYCLE 
-         CALL RANDOM_NUMBER(RN)
+         CALL RANDOM_NUMBER(RN2)
+         RN=REAL(RN2,EB)
          RN = VFAC*(-1._EB + 2._EB*RN)*CELL_SIZE
          W(I,J,K)   = W(I,J,K)   - RN*RDY(J)
          W(I,J+1,K) = W(I,J+1,K) + RN*RDY(J+1)
@@ -3084,7 +3085,8 @@ DO K=1,KBM1
       DO I=1,IBM1
          IF (SOLID(CELL_INDEX(I,J,K))   .OR. SOLID(CELL_INDEX(I,J,K+1)) .OR. &
              SOLID(CELL_INDEX(I+1,J,K)) .OR. SOLID(CELL_INDEX(I+1,J,K+1)))  CYCLE 
-         CALL RANDOM_NUMBER(RN)
+         CALL RANDOM_NUMBER(RN2)
+         RN=REAL(RN2,EB)         
          RN = VFAC*(-1._EB + 2._EB*RN)*CELL_SIZE
          W(I,J,K)   = W(I,J,K)   - RN*RDX(I)*R(I)*RRN(I)
          W(I+1,J,K) = W(I+1,J,K) + RN*RDX(I+1)*R(I)*RRN(I+1)
@@ -3098,7 +3100,8 @@ DO K=1,KBAR
       DO I=1,IBM1
          IF (SOLID(CELL_INDEX(I,J,K))   .OR. SOLID(CELL_INDEX(I,J+1,K)) .OR. &
              SOLID(CELL_INDEX(I+1,J,K)) .OR. SOLID(CELL_INDEX(I+1,J+1,K)))  CYCLE
-         CALL RANDOM_NUMBER(RN)
+         CALL RANDOM_NUMBER(RN2)
+         RN=REAL(RN2,EB)         
          RN = VFAC*(-1._EB + 2._EB*RN)*CELL_SIZE
          V(I,J,K)   = V(I,J,K)   - RN*RDX(I)
          V(I+1,J,K) = V(I+1,J,K) + RN*RDX(I+1)
