@@ -3043,7 +3043,8 @@ SUBROUTINE INITIAL_NOISE(NM)
 
 ! Generate random noise at the start of the simulation
  
-REAL(EB) :: VFAC,RN
+REAL     :: RN
+REAL(EB) :: VFAC
 INTEGER  :: I,J,K
 INTEGER, INTENT(IN) :: NM
  
