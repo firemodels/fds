@@ -257,17 +257,17 @@ OVERALL_INSERT_LOOP: DO
                TA => TABLES(PY%SPRAY_PATTERN_INDEX)
                CALL RANDOM_NUMBER(RN)
                FIND_ROW: DO II=1,TA%NUMBER_ROWS
-                  IF (RN>PY%TABLE_ROW(II)) CYCLE FIND_ROW
+                  IF (REAL(RN,EB)>PY%TABLE_ROW(II)) CYCLE FIND_ROW
                   EXIT FIND_ROW
                END DO FIND_ROW
                CALL RANDOM_NUMBER(RN)
                !THETA_RN = TA%TABLE_DATA(II,1) + RN*(TA%TABLE_DATA(II,2)-TA%TABLE_DATA(II,1))
                ETA_MAX=0.5_EB*(COS(TA%TABLE_DATA(II,1))+1._EB)
                ETA_MIN=0.5_EB*(COS(TA%TABLE_DATA(II,2))+1._EB)
-               ETA=ETA_MIN+(ETA_MAX-ETA_MIN)*RN
+               ETA=ETA_MIN+(ETA_MAX-ETA_MIN)*REAL(RN,EB)
                THETA_RN=ACOS(2._EB*ETA-1._EB)
                CALL RANDOM_NUMBER(RN)
-               PHI_RN = TA%TABLE_DATA(II,3) + RN*(TA%TABLE_DATA(II,4)-TA%TABLE_DATA(II,3))
+               PHI_RN = TA%TABLE_DATA(II,3) + REAL(RN,EB)*(TA%TABLE_DATA(II,4)-TA%TABLE_DATA(II,3))
              
                IF (PY%PRESSURE_RAMP_INDEX>0) THEN
                   DROPLET_SPEED = PY%V_FACTOR(II)*SQRT(PIPE_PRESSURE)
@@ -276,7 +276,7 @@ OVERALL_INSERT_LOOP: DO
                ENDIF
             ELSE PICK_PATTERN !Use conical spray
                !CALL RANDOM_NUMBER(RN)
-               !THETA_RN = PY%SPRAY_ANGLE(1) + RN*(PY%SPRAY_ANGLE(2)-PY%SPRAY_ANGLE(1))
+               !THETA_RN = PY%SPRAY_ANGLE(1) + REAL(RN,EB)*(PY%SPRAY_ANGLE(2)-PY%SPRAY_ANGLE(1))
                CALL RANDOM_CHOICE(PY%SPRAY_LON_CDF(:),PY%SPRAY_LON,NDC2,PHI_RN)
                ILAT=MINLOC(ABS(PY%SPRAY_LON-PHI_RN),1) 
                CALL RANDOM_CHOICE(PY%SPRAY_LAT_CDF(:,ILAT),PY%SPRAY_LAT,NDC2,THETA_RN)
@@ -385,7 +385,7 @@ OVERALL_INSERT_LOOP: DO
             DR%PWT = 1._EB
          ELSE
             CALL RANDOM_NUMBER(RN)            
-            STRATUM = NINT(REAL(NSTRATA,EB)*RN+0.5_EB)
+            STRATUM = NINT(REAL(NSTRATA,EB)*REAL(RN,EB)+0.5_EB)
             IL = PC%IL_CDF(STRATUM)
             IU = PC%IU_CDF(STRATUM)
             CALL RANDOM_CHOICE(PC%CDF(IL:IU), PC%R_CDF(IL:IU), IU-IL,DR%R)
@@ -472,25 +472,25 @@ OVERALL_INSERT_LOOP: DO
             IF (IOR== 1) DR%X = X(II)   + VENT_OFFSET*DX(II+1)
             IF (IOR==-1) DR%X = X(II-1) - VENT_OFFSET*DX(II-1)
             CALL RANDOM_NUMBER(RN)
-            DR%Y = Y(JJ-1) + DY(JJ)*RN
+            DR%Y = Y(JJ-1) + DY(JJ)*REAL(RN,EB)
             CALL RANDOM_NUMBER(RN)
-            DR%Z = Z(KK-1) + DZ(KK)*RN
+            DR%Z = Z(KK-1) + DZ(KK)*REAL(RN,EB)
          ENDIF
          IF (ABS(IOR)==2) THEN
             IF (IOR== 2) DR%Y = Y(JJ)   + VENT_OFFSET*DY(JJ+1)
             IF (IOR==-2) DR%Y = Y(JJ-1) - VENT_OFFSET*DY(JJ-1)
             CALL RANDOM_NUMBER(RN)
-            DR%X = X(II-1) + DX(II)*RN
+            DR%X = X(II-1) + DX(II)*REAL(RN,EB)
             CALL RANDOM_NUMBER(RN)
-            DR%Z = Z(KK-1) + DZ(KK)*RN
+            DR%Z = Z(KK-1) + DZ(KK)*REAL(RN,EB)
          ENDIF
          IF (ABS(IOR)==3) THEN
             IF (IOR== 3) DR%Z = Z(KK)   + VENT_OFFSET*DZ(KK+1)
             IF (IOR==-3) DR%Z = Z(KK-1) - VENT_OFFSET*DZ(KK-1)
             CALL RANDOM_NUMBER(RN)
-            DR%X = X(II-1) + DX(II)*RN
+            DR%X = X(II-1) + DX(II)*REAL(RN,EB)
             CALL RANDOM_NUMBER(RN)
-            DR%Y = Y(JJ-1) + DY(JJ)*RN
+            DR%Y = Y(JJ-1) + DY(JJ)*REAL(RN,EB)
          ENDIF
     
          SELECT CASE(IOR)  ! Give particles an initial velocity (if desired)
@@ -545,7 +545,7 @@ OVERALL_INSERT_LOOP: DO
                DR%PWT = 1._EB
             ELSE
                CALL RANDOM_NUMBER(RN)            
-               STRATUM = NINT(REAL(NSTRATA,EB)*RN+0.5_EB)
+               STRATUM = NINT(REAL(NSTRATA,EB)*REAL(RN,EB)+0.5_EB)
                IL = PC%IL_CDF(STRATUM)
                IU = PC%IU_CDF(STRATUM)
                CALL RANDOM_CHOICE(PC%CDF(IL:IU),PC%R_CDF(IL:IU),IU-IL,DR%R)
@@ -693,7 +693,7 @@ OVERALL_INSERT_LOOP: DO
                DR%PWT = 1._EB
             ELSE
                CALL RANDOM_NUMBER(RN)            
-               STRATUM = NINT(REAL(NSTRATA,EB)*RN+0.5_EB)
+               STRATUM = NINT(REAL(NSTRATA,EB)*REAL(RN,EB)+0.5_EB)
                IL = PC%IL_CDF(STRATUM)
                IU = PC%IU_CDF(STRATUM)
                CALL RANDOM_CHOICE(PC%CDF(IL:IU),PC%R_CDF(IL:IU),IU-IL,DR%R)
@@ -791,9 +791,11 @@ REAL(EB), INTENT(IN)  :: CDF(0:NPTS),VAR(0:NPTS)
 REAL(EB), INTENT(OUT) :: CHOICE
 INTEGER  :: IT
 REAL(EB) :: CFRAC,A,B
-REAL     :: RN
+REAL(EB) :: RN
+REAL     :: RN2
  
-CALL RANDOM_NUMBER(RN)
+CALL RANDOM_NUMBER(RN2)
+RN = REAL(RN2,EB)
 A = MINVAL(CDF)
 B = MAXVAL(CDF)
 RN = A + (B-A)*RN
@@ -1149,7 +1151,7 @@ DROPLET_LOOP: DO I=1,NLP
          DR%Z = ZS + 0.05_EB*DZ(1)
          DR%IOR = 3
          CALL RANDOM_NUMBER(RN)
-         THETA_RN = TWOPI*RN
+         THETA_RN = TWOPI*REAL(RN,EB)
          DR%U = PC%HORIZONTAL_VELOCITY*COS(THETA_RN)
          DR%V = PC%HORIZONTAL_VELOCITY*SIN(THETA_RN)
          DR%W = 0._EB
@@ -1367,14 +1369,14 @@ DROPLET_LOOP: DO I=1,NLP
                DR%IOR = 0
                ELSE 
                   CALL RANDOM_NUMBER(RN)
-                  THETA_RN = TWOPI*RN
+                  THETA_RN = TWOPI*REAL(RN,EB)
                   DR%U = PC%HORIZONTAL_VELOCITY*COS(THETA_RN)
                   DR%V = PC%HORIZONTAL_VELOCITY*SIN(THETA_RN)
                   DR%W = 0._EB
                ENDIF
             CASE (3) DIRECTION
                CALL RANDOM_NUMBER(RN)
-               THETA_RN = TWOPI*RN
+               THETA_RN = TWOPI*REAL(RN,EB)
                DR%U = PC%HORIZONTAL_VELOCITY*COS(THETA_RN)
                DR%V = PC%HORIZONTAL_VELOCITY*SIN(THETA_RN)
                DR%W = 0._EB
