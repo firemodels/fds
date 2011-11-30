@@ -92,7 +92,7 @@ Property                    & Units         & Value                             
 Polymer Density             & kg/m$^3$      & 1180 $\pm$ 60                     & Direct Measurement    &  \cite{Stoliarov:CF2010}      \\ \hline
 Polymer Conductivity        & W/m/K         & 0.22 $\pm$ 0.03                   & Literature            &  \cite{Stoliarov:CF2010}      \\ \hline
 Polymer Specific Heat       & kJ/kg/K       & 1.9 $\pm$ 0.3                     & DSC                   &  \cite{Stoliarov:PDS2008}     \\ \hline
-Polymer Emissivity          &               & 0.90 $\pm$ 0.05                   & Sphere                &  \cite{Hallman:PES1974}       \\ \hline
+Polymer Emissivity          &               & 0.90 $\pm$ 0.05                   &Integrating  Sphere                &  \cite{Hallman:PES1974}       \\ \hline
 Polymer Absorption Coef.    & m$^{-1}$      & 1770 $\pm$ 590                    & FTIR                  &  \cite{Tsilingiris:ECM2003}   \\ \hline
 Char Density                & kg/m$^3$      & 248                               & Cone Calorimeter      &  \cite{Stoliarov:CF2010}      \\ \hline
 Char Conductivity           & W/m/K         & 0.37                              & Cone Calorimeter      &  \cite{Stoliarov:CF2010}      \\ \hline
@@ -156,8 +156,8 @@ Char 1 Emissivity           &               & 0.90 $\pm$ 0.05                   
 Char 1 Absorption Coef.     & m$^{-1}$      & 2453                              & Fit to cone data          &  \cite{Stoliarov:CF2010}      \\ \hline
 Char 2 Density              & kg/m$^3$      & 296                               & Assumed constant volume   &  \cite{Stoliarov:CF2010}      \\ \hline
 Char 2 Conductivity         & W/m/K         & 0.26                              & Fit to cone data          &  \cite{Stoliarov:CF2010}      \\ \hline
-Char 2 Specific Heat        & kJ/kg/K       & 1.72 $\pm$ 0.17                   & Pulsed current heating    &  \cite{Stoliarov:CF2010,Matsumoto:1996}  \\ \hline
-Char 2 Emissivity           &               & 0.85 $\pm$ 0.05                   & Pulsed current heating    &  \cite{Stoliarov:CF2010,Matsumoto:1996}  \\ \hline
+Char 2 Specific Heat        & kJ/kg/K       & 1.72 $\pm$ 0.17                   & Pulsed Current   &  \cite{Stoliarov:CF2010,Matsumoto:1996}  \\ \hline
+Char 2 Emissivity           &               & 0.85 $\pm$ 0.05                   & Pulsed Current    &  \cite{Stoliarov:CF2010,Matsumoto:1996}  \\ \hline
 Char 2 Absorption Coef.     & m$^{-1}$      & Opaque                            & Assumed                   &  \cite{Stoliarov:CF2010}      \\ \hline
 Reac 1 Pre-Exp.~Factor      & s$^{-1}$      & $(1.4 \pm 0.8) \times 10^{33}$    & TGA                       &  \cite{Stoliarov:CF2010}      \\ \hline
 Reac 1 Activation Energy    & kJ/kmol       & $(3.67 \pm 0.07) \times 10^{5}$   & TGA                       &  \cite{Stoliarov:CF2010}      \\ \hline
@@ -273,4 +273,23 @@ Combustion Efficiency   &               &          1                        & As
 \end{center}
 \end{figure}
 
+\subsection{Method Glossary}
+\begin{description}
+\item[Assumption]  Characteristics were assumed from known properties in similar materials.
+\item[Cone Calorimeter] (ASTM E 1354) The Cone Calorimeter exposes a small sample to a constant external radiant heat flux simulating exposure of the sample to a large scale fire. Mass loss data along with Oxygen Consumption Calorimetry allows the determination of the Heat of Combustion of the sample. 
+\item[Direct]  Direct measurement of densities is performed by measuring the dimensions and mass of the sample.
+\item[DSC] (ASTM E2070) A Differential Scanning Calorimeter precisely raises the temperature of a small sample of material at a constant rate. This coupled with knowledge of heat absorbed by the sample allows for the calculation of the specific heat function of a material.
+\item[Estimated] Characteristics were approximated based on know properties in similar materials.
+\item[Fit to Cone Data] Property was established by fitting  equations to experimental values obtained in the Cone Calorimeter
+\item[FTIR] Fourier Transform Infrared Spectroscopy uses a spectrometer to simultaneously characterize the absorption of all frequencies of infrared light. In testing a sample is exposed to infrared light and a detector records light that has passed through the sample. A Fourier transform of detector measurement is then translated into absorption information.
+\item[Gasification Device] Similar to the Cone Calorimeter except the experiments are conducted in a sealed cylindrical chamber. The conical heating element is held at a constant temperature and heat flux is controlled by varying sample position relative to the heater. The walls are painted black and water cooled to room temperature to minimize background radiation. Purge gases are introduced through the bottom of the chamber.
+\item[Integrating Sphere] (ASTM E1175 ) An Integrating Sphere, or an Ulbricht Sphere, is a hollow cavity whose interior has a high diffuse reflectivity. A sample placed inside the sphere is exposed to incident radiation and reflectivity measured. Emissivity can be determined from this information. The standard above is for measurement of Solar reflectivity, and was not necessarily precisely followed.
+\item[Laser Flash] (ASTM E1461) In the Laser Flash Method one surface of a sample is rapidly heated using a single pulse from a laser. Heat sensors on the opposite side of the sample record the arrival of the resulting temperature disturbance. From this thermal diffusivity/thermal conductivity can be calculated.
+\item[Literature] Results were found within previously published literature
+\item[MCC] (ASTM D7309 ) The Microscale Combustion Calorimeter (MCC)  rapidly pyrolizes a milligram size sample in an inert atmosphere. The pyrolyzate is then exposed to an abundance of oxygen.  Heat of combustion is obtained from oxygen consumption.
+\item[Pulsed Current] A sample is positioned between two electrodes in a sealed chamber with an inert atmosphere. The sample is heated through pulses of current. A radiation thermometer at the bottom of the chamber records temperature and spectral emissivity from the sample.
+\item[TGA] (ASTM E1131) In Thermal Gravimetric Analysis (TGA)  a small sample is heated at uniform rate, generally in an Nitrogen (N2) atmosphere. The percentage weight loss of the sample is recorded relative to the sample’s temperature. Rate constants can then be fitted to the data.
+\item[Thermoflixer] The Thermoflixer apparatus is based on the Transient Line Source method. A thin probe containing a heater wire and thermocouple are inserted into the sample Thermal conductivity is determined from a small change in probe temperature occurring briefly after applying power to the probe heater.
+\item[Transient Line Source] (ASTM D5930) The Transient Line Source method records temperature of a single point at a fixed distance in a sample over time using a probe. Given knowledge of the heat exposure of the sample the thermal conductivity can be found from the slope of the recorded data.
+\end{description}
 
