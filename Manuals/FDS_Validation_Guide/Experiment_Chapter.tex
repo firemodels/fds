@@ -204,12 +204,12 @@ experiments were conducted in an enclosure measuring approximately 18~m long by 
 A drawing is included in Figure~\ref{FM_SNL_Drawing}. All of the experiments included forced ventilation to simulate typical power plant conditions. Six of
 the experiments were conducted with a full-scale control room mock-up in place. Parameters varied
 during the experiments included fire intensity, enclosure ventilation rate, and fire location.
-The current guide uses data from nineteen experiments (Tests 1-17, 21, and 22). 
-In these tests,  propylene gas burners, heptane pools, and methanol pools were used as fire sources. 
+The current guide uses data from nineteen experiments (Tests 1-17, 21, and 22).
+In these tests,  propylene gas burners, heptane pools, and methanol pools were used as fire sources.
 Table~\ref{FM_SNL_Matrix} lists the test parameters.
 
-The following information was provided by the test director, 
-Steve Nowlen of Sandia National Laboratory. In particular, Tests 4, 5, and 21 were given extra attention. 
+The following information was provided by the test director,
+Steve Nowlen of Sandia National Laboratory. In particular, Tests 4, 5, and 21 were given extra attention.
 \begin{description}
 \item[Heat Release Rate:] The HRR was determined using oxygen consumption calorimetry in the exhaust stack with
 a correction applied for the carbon dioxide in the upper layer of the compartment. The
@@ -972,17 +972,19 @@ liquid fuel droplets.
 
 \label{experiment_summary}
 
-This section presents a summary of all the experiments described in this chapter in terms of quantities commonly used in fire protection engineering. This ``parameter space''
-outlines the range of applicability of the validation performed to date. The parameters are explained below:
+Table~\ref{Test_Parameters} presents a summary of all the experiments described in this chapter in terms of quantities commonly used in fire protection engineering. This ``parameter space''
+outlines the range of applicability of the validation studies performed to date. The parameters are explained below:
 
 \begin{description}
 \item[Heat Release Rate, $\dQ$,] is the range of peak heat release rates of the fires in the test series.
-\item[Fire Diameter, $D$,] is the equivalent diameter of the base of the fire.
+\item[Fire Diameter, $D$,] is the equivalent diameter of the base of the fire, calculated $D=\sqrt{4A/\pi}$, where $A$ is the area of the base.
+\item[Ceiling Height, $H$,] is the distance from floor to ceiling.
 \item[Fire Froude Number, $\dQ^*$,] is a useful non-dimensional quantity for plume correlations and flame height estimates.
 \be Q^* = \frac{\dot{Q}}{\rho_\infty c_p T_\infty \sqrt{gD} D^2} \ee
-\item[Characteristic Fire Diameter, $D^*$,] is a useful length scale that incorporates the heat release rate of the fire.
-\be D^* = \left( \frac{\dot{Q}}{\rho_\infty c_p T_\infty \sqrt{g}} \right)^{2/5}  \ee
-\item[Flame Height, $L_f$,] is the height of the visible flame, based on Heskestad's correlation:
+It is essentially the ratio of the fuel gas exit velocity and the buoyancy-induced plume velocity. Jet fires are characterized by large Froude numbers. Typical accidental fires
+have a Froude number near unity.
+\item[Flame Height relative to Ceiling Height, $L_f/H$,] is a convenient way to express the physical size of the fire relative to the size of the room.
+The height of the visible flame, based on Heskestad's correlation, is estimated by:
 \be L_f = D \, \left( 3.7 \, (\dQ^*)^{2/5} - 1.02 \right) \ee
 \item[Global Equivalence Ratio, $\phi$,] is the ratio of the mass flux of fuel to the mass flux of oxygen into the compartment, divided by the stoichiometric ratio.
 \be \phi = \frac{\dm_f}{r\, \dm{\hbox{\tiny O$_2$}}} \equiv  \frac{\dQ \, \hbox{(kW)}}{13,100 \, \hbox{(kJ/kg)} \; \dm_{\hbox{\tiny O$_2$}} } \quad ; \quad  \dm_{\hbox{\tiny O$_2$}} = \left\{
@@ -992,50 +994,112 @@ outlines the range of applicability of the validation performed to date. The par
 \ee
 Here, $r$ is the stoichiometric ratio, $A_0$ is the area of the compartment opening, $H_0$ is the height of the opening, $\rho$ is the density of air, and $\dot{V}$ is the
 volume flow of air into the compartment. If $\phi<1$, the compartment is considered ``well-ventilated'' and if $\phi>1$, the compartment is considered ``under-ventilated.''
-\item[Flame Height relative to Ceiling Height, $L_f/H$,] is a convenient way to express the physical size of the fire relative to the size of the room.
+\item[Compartment Aspect Ratios, $W/H$ and $L/H$,] indicate if the compartment is shaped like a hallway, typical room, or vertical shaft.
 \item[Relative Distance along the Ceiling, $r_{cj}/H$,] indicates the distance from the fire plume of a sprinkler, smoke detector, {\em etc.}, relative to the
 compartment height, $H$.
-\item[Relative Distance from the Fire, $r_t/D$,] indicates whether a ``target'' is near or far from the fire.
+\item[Relative Distance from the Fire, $r_{rad}/D$,] indicates whether a ``target'' is near or far from the fire.
 \end{description}
 
-\newpage
-\thispagestyle{empty}
+\newpage \thispagestyle{empty}
 \begin{sidewaystable}[p]
-\caption{Summary of the major experimental parameters. }
+\caption{Summary of important experimental parameters. }
 \begin{center}
-\begin{tabular}{|l|c|c|c|c|c|c|c|c|c|c|c|c|c|c|}
+\begin{tabular}{|l|c|c|c|c|c|c|c|c|c|c|c|c|}
 \hline
- Test Series   & $\dot{Q}$    & $D$   & $H$   & $Q^*$   & $D^*$   & $L_f/H$  & $\phi$   & $H/D^*$   & $W/H-L/H$   & $r_{cj}/H$   & $r_{rad}/D$    \\
-      & (kW)    & (m)   & (m)   &    & (m)   &   &    &    &    &    &     \\ \hline \hline
-Arup Tunnel  & 5344   & 1.6   & 7   & 1.4   & 1.8   & 0.8   & 0.03   & 3.8   & 1.1 -- 42.9   & 0 -- 1.1   & N/A   \\ \hline
-ATF Corridors  & 50 -- 500   & 0.5   & 2.4   & 0.3 -- 3.1   & 0.3 -- 0.7   & 0.3 -- 1   & 0.01 -- 0.07   & 8.5 -- 3.4   & 0.8 -- 7.1   & 0.8 -- 6   & N/A   \\ \hline
-Bryant Doorway  & 34 -- 511   & 0.3   & 2.4   & 0.4 -- 6.4   & 0.2 -- 0.7   & 0.3 -- 1   & 0.01 -- 0.16   & 9.9 -- 3.4   & 1 -- 2.1   & 0.6 -- 0.8   & N/A   \\ \hline
-CSTB Tunnel  & 1965 -- 2484   & 0.8   & 1.9   & 2.9 -- 3.7   & 1.2 -- 1.3   & 2.1 -- 2.4   & 0.04 -- 0.05   & 1.5 -- 1.4   & 1.3 -- 28.4   & 1.6 -- 12.6   & N/A   \\ \hline
-Fleury Heat Flux & 100 -- 300 & 0.3 -- 0.6 & Open &  0.3 -- 4.3 & 0.4 -- 0.6   & Open  & Open & Open & Open & Open & 0.8 -- 6.7 \\ \hline
-FM/SNL  & 470 -- 516   & 0.9   & 6.1   & 0.5 -- 0.6   & 0.7   & 0.3   & 0.2   & 8.8 -- 8.5   & 2 -- 3   & 0.2 -- 0.3   & N/A   \\ \hline
-Hamins Burner   & 0.4 -- 162   & 0.1 -- 1   & Open  & 0.1   & 0 -- 0.5   & Open  & Open  &Open   & Open   & N/A   & 0.1 -- 12   \\ \hline
-Heskestad   & $10^2-10^7$   & 1.1   & Open  & $10^{-1}-10^4$  & 0.4 -- 44   & Open  & Open  &Open   & Open   & N/A   & N/A   \\ \hline
-LLNL Enclosure  & 50 -- 400   & 0.6   & 4.5   & 0.2 -- 1.4   & 0.3 -- 0.6   & 0.1 -- 0.4   & 0.03 -- 0.22   & 15.9 -- 6.9   & 0.9 -- 1.3   & 0.3 -- 1   & N/A   \\ \hline
-McCaffrey Plume  & 14 -- 57   & 0.3   & Open  & 0.2 -- 0.7   & 0.2 -- 0.3   & Open  & Open  &Open   & Open   & N/A   & N/A   \\ \hline
-NBS Multi-Room  & 110   & 0.3   & 2.4   & 1.4   & 0.4   & 0.4 -- 5.2   & 0.12   & 6.2   & 1   & 0.5 -- 0.7   & 0.9 -- 2.4   \\ \hline
-NIST RSE  & 50 -- 600   & 0.15   & 1   & 4.9 -- 58.4   & 0.3 -- 0.8   & 1 -- 2.9   & 0.1 -- 1.15   & 3.5 -- 1.3   & 1 -- 1.5   & N/A   & N/A   \\ \hline
-NIST/NRC   & 350 -- 2200   & 1   & 4   & 0.3 -- 1.9   & 0.6 -- 1.3   & 0.4 -- 1   & 0.04 -- 0.7   & 6.5 -- 3.1   & 1.8 -- 5.4   & 0.3 -- 2   & 2 -- 4   \\ \hline
-NRCC Facade  & 5000 -- 10300   & 4.3   & 2.8   & 0.1 -- 0.2   & 1.8 -- 2.4   & 1 -- 1.8   & 2.5 -- 5.2   & 1.5 -- 1.2   & 1.6 -- 2.2   & N/A   & 0   \\ \hline
-NRL/HAI  & 50 -- 520   & 0.3 -- 0.7   & Open  & 1 -- 1.1   & 0.3 -- 0.7   & Open  & Open  &Open   & Open   & N/A   & 0.3 -- 8   \\ \hline
-Sandia Plume  & 2025 -- 5450   & 1   & Open  & 1.7 -- 4.6   & 1.2 -- 1.8   & Open  & Open  &Open   & Open   & N/A   & N/A   \\ \hline
-SP AST  & 450   & 0.3   & 2.4   & 5.7   & 0.7   & 1   & 0.13   & 3.5   & 1 -- 1.5   & N/A   & N/A   \\ \hline
-Steckler  & 31.6 -- 158   & 0.3   & 2.1   & 0.7 -- 3.5   & 0.2 -- 0.4   & 0.3 -- 0.7   & 0.01 -- 0.6   & 9.1 -- 4.8   & 1.3   & N/A   & N/A   \\ \hline
-UL/NFPRF  & 4400   & 1   & 7.6   & 3.7   & 1.7   & 0.8   & 0   & 4.5   & 4.9   & 0.1   & N/A   \\ \hline
-Ulster SBI  & 30 -- 60   & 0.2   & Open  & 1.4 -- 2.8   & 0.2 -- 0.3   & Open  & Open  &Open   & Open   & N/A   & 1 -- 7.5   \\ \hline
-USCG/HAI  & 250 -- 1000   & 0.3   & 3   & 5.6 -- 22.4   & 0.5 -- 0.9   & 0.6 -- 1.1   & 0.26 -- 1.02   & 5.6 -- 3.2   & 1.7 -- 2.3   & 0 -- 0.8   & 6 -- 15   \\ \hline
-USN Hawaii  & 100 -- 7700   & 0.3 -- 2.5   & 15   & 1.3 -- 0.7   & 0.4 -- 2.1   & 0.1 -- 0.4   & 0   & 40.3 -- 7.1   & 4.9 -- 6.5   & 0 -- 1.2   & N/A   \\ \hline
-USN Iceland  & 100 -- 15700   & 0.3 -- 3.4   & 22   & 1.3 -- 0.6   & 0.4 -- 2.8   & 0.1 -- 0.4   & 0   & 59 -- 7.8   & 2.1 -- 3.4   & 0 -- 1   & N/A   \\ \hline
-Vettori Flat  & 1055   & 0.7   & 2.6   & 2.3   & 1   & 1.2   & Closed   & 2.8   & 2.1 -- 3.5   & 0.8 -- 2.9   & N/A   \\ \hline
-Vettori Sloped  & 1055   & 0.7   & 2.5   & 2.3   & 1   & 1.2   & 0.23   & 2.6   & 2.2 -- 2.9   & N/A   & N/A   \\ \hline
-VTT Large Hall  & 1860 -- 3640   & 1.4 -- 1.8   & 19   & 0.7   & 1.2 -- 1.6   & 0.2   & 0   & 15.8 -- 12.1   & 1 -- 1.4   & 0 -- 0.6   & N/A   \\ \hline
-WTC   & 965 -- 1460   & 1   & 3.8   & 0.8 -- 1.2   & 0.9 -- 1.1   & 0.7 -- 0.9   & 0.5 -- 0.7   & 4.1 -- 3.5   & 0.9 -- 1.8   & 0.1   & 0.5 -- 2   \\ \hline
+                    & $\dot{Q}$     & $D$           & $H$   &                   &               &               &           &           &                   &                   \\
+\rb{Test Series}    & (kW)          & (m)           & (m)   & \rb{$Q^*$}        & \rb{$L_f/H$}  & \rb{$\phi$}   & \rb{$W/H$}& \rb{$L/H$}& \rb{$r_{cj}/H$}   & \rb{$r_{rad}/D$}  \\ \hline \hline
+Arup Tunnel         & 5344          & 1.6           & 7     & 1.4               & 0.8           & 0.03          & 1.1       & 43        & 0 -- 1.1          & N/A               \\ \hline
+ATF Corridors       & 50 -- 500     & 0.5           & 2.4   & 0.3 -- 3.1        & 0.3 -- 1      & 0.01 -- 0.07  & 0.8       & 7.1       & 0.8 -- 6          & N/A               \\ \hline
+Bryant Doorway      & 34 -- 511     & 0.3           & 2.4   & 0.4 -- 6.4        & 0.3 -- 1      & 0.01 -- 0.16  & 1.0       & 2.1       & 0.6 -- 0.8        & N/A               \\ \hline
+CSTB Tunnel         & 1965 -- 2484  & 0.8           & 1.9   & 2.9 -- 3.7        & 2.1 -- 2.4    & 0.04 -- 0.05  & 1.3       & 28        & 1.6 -- 12.6       & N/A               \\ \hline
+Fleury Heat Flux    & 100 -- 300    & 0.3 -- 0.6    & Open  &  0.3 -- 4.3       & Open          & Open          & Open      & Open      & Open              & 0.8 -- 6.7        \\ \hline
+FM/SNL              & 470 -- 516    & 0.9           & 6.1   & 0.5 -- 0.6        & 0.3           & 0.2           & 2.0       & 3.0       & 0.2 -- 0.3        & N/A               \\ \hline
+Hamins Burner       & 0.4 -- 162    & 0.1 -- 1.0    & Open  & 0.1               & Open          & Open          & Open      & Open      & N/A               & 0.1 -- 12         \\ \hline
+Heskestad           & $10^2-10^7$   & 1.1           & Open  & $10^{-1}-10^4$    & Open          & Open          & Open      & Open      & N/A               & N/A               \\ \hline
+LLNL Enclosure      & 50 -- 400     & 0.6           & 4.5   & 0.2 -- 1.4        & 0.1 -- 0.4    & 0.03 -- 0.22  & 0.9       & 1.3       & 0.3 -- 1.0        & N/A               \\ \hline
+McCaffrey Plume     & 14 -- 57      & 0.3           & Open  & 0.2 -- 0.7        & Open          & Open          & Open      & Open      & N/A               & N/A               \\ \hline
+NBS Multi-Room      & 110           & 0.3           & 2.4   & 1.4               & 0.4 -- 5.2    & 0.12          & 1.0       & 5.1       & 0.5 -- 0.7        & 0.9 -- 2.4        \\ \hline
+NIST RSE            & 50 -- 600     & 0.15          & 1.0   & 4.9 -- 58.4       & 1 -- 2.9      & 0.1 -- 1.15   & 1.0       & 1.5       & N/A               & N/A               \\ \hline
+NIST/NRC            & 350 -- 2200   & 1.0           & 3.8   & 0.3 -- 1.9        & 0.4 -- 1.1    & 0.04 -- 0.7   & 1.9       & 5.7       & 0.3 -- 2.1        & 2 -- 4            \\ \hline
+NRCC Facade         & 5000 -- 10300 & 4.3           & 2.8   & 0.1 -- 0.2        & 1 -- 1.8      & 2.5 -- 5.2    & 1.6       & 2.2       & N/A               & 0                 \\ \hline
+NRL/HAI             & 50 -- 520     & 0.3 -- 0.7    & Open  & 1 -- 1.1          & Open          & Open          & Open      & Open      & N/A               & 0.3 -- 8          \\ \hline
+Sandia Plume        & 2025 -- 5450  & 1.0           & Open  & 1.7 -- 4.6        & Open          & Open          & Open      & Open      & N/A               & N/A               \\ \hline
+SP AST              & 450           & 0.3           & 2.4   & 5.7               & 1             & 0.1           & 1.0       & 1.5       & N/A               & N/A               \\ \hline
+Steckler            & 31.6 -- 158   & 0.3           & 2.1   & 0.7 -- 3.5        & 0.3 -- 0.7    & 0.01 -- 0.6   & 1.3       & 1.3       & N/A               & N/A               \\ \hline
+UL/NFPRF            & 4400 -- 10000 & 1.0           & 7.6   & 3.7 -- 8.5        & 0.8 -- 1.1    & 0             & 4.9       & 4.9       & 0.1 -- 2.0        & N/A               \\ \hline
+Ulster SBI          & 30 -- 60      & 0.2           & Open  & 1.4 -- 2.8        & Open          & Open          & Open      & Open      & N/A               & 1 -- 7.5          \\ \hline
+USCG/HAI            & 250 -- 1000   & 0.3           & 3.0   & 5.6 -- 22.4       & 0.6 -- 1.1    & 0.3 -- 1.0    & 1.7       & 2.3       & 0 -- 0.8          & 6 -- 15           \\ \hline
+USN Hawaii          & 100 -- 7700   & 0.3 -- 2.5    & 15    & 1.3 -- 0.7        & 0.1 -- 0.4    & 0             & 4.9       & 6.5       & 0 -- 1.2          & N/A               \\ \hline
+USN Iceland         & 100 -- 15700  & 0.3 -- 3.4    & 22    & 1.3 -- 0.6        & 0.1 -- 0.4    & 0             & 2.1       & 3.4       & 0 -- 1.0          & N/A               \\ \hline
+Vettori Flat        & 1055          & 0.7           & 2.6   & 2.3               & 1.2           & Closed        & 2.1       & 3.5       & 0.8 -- 2.9        & N/A               \\ \hline
+Vettori Sloped      & 1055          & 0.7           & 2.5   & 2.3               & 1.2           & 0.23          & 2.2       & 2.9       & N/A               & N/A               \\ \hline
+VTT Large Hall      & 1860 -- 3640  & 1.4 -- 1.8    & 19    & 0.7               & 0.2           & 0             & 1.0       & 1.4       & 0 -- 0.6          & N/A               \\ \hline
+WTC                 & 965 -- 1460   & 1.0           & 3.8   & 0.8 -- 1.2        & 0.7 -- 0.9    & 0.5 -- 0.7    & 0.9       & 1.8       & 0.1               & 0.5 -- 2          \\ \hline
 \end{tabular}
 \end{center}
 \label{Test_Parameters}
 \nopagebreak
 \end{sidewaystable}
+
+
+\noindent
+Table~\ref{Numerical_Parameters} lists a few important parameters related to the numerical resolution of the calculation. 
+\begin{description}
+\item[Characteristic Fire Diameter, $D^*$,] is a useful length scale that incorporates the heat release rate of the fire.
+\be D^* = \left( \frac{\dot{Q}}{\rho_\infty c_p T_\infty \sqrt{g}} \right)^{2/5}  \ee
+\item[Plume Resolution Index, $D^*/\dx$,] is the number of grid cells of length $\dx$ that span the characteristic diameter of the fire. The greater its value, the more
+``resolved'' are the fire dynamics.
+\item[Ceiling Height relative to Fire Diameter, $H/D^*$,] is the non-dimensional height of the smoke plume.
+\end{description}
+Note that the calculations performed for the various validation studies described in this Guide use a wide range of values of the Plume Resolution Index, $D^*/\dx$. 
+There are several reasons for this. First,
+typical applications of FDS often involve relatively small fires in relatively large spaces, and it is impractical to use a very fine grid that captures the detailed fire dynamics. 
+Second, for some applications the accuracy of calculation is highly dependent on resolving the plume well, but for others, it is less important. For those citing the validation
+studies in this Guide, it is important that both the physical and numerical parameters are comparable to the given application. 
+
+
+\begin{table}[p]
+\caption{Summary of important numerical parameters. }
+\begin{center}
+\begin{tabular}{|l|c|c|c|}
+\hline
+                    & $D^*$         &               &               \\
+\rb{Test Series}    & (m)           & \rb{$D^*/\dx$}& \rb{$H/D^*$}  \\ \hline \hline
+Arup Tunnel         & 1.8           & 9             & 3.8           \\ \hline
+ATF Corridors       & 0.3 -- 0.7    & 3 -- 7        & 8.5 -- 3.4    \\ \hline
+Bryant Doorway      & 0.2 -- 0.7    & 5 -- 14       & 9.9 -- 3.4    \\ \hline
+CSTB Tunnel         & 1.2 -- 1.3    & 12 -- 13      & 1.5 -- 1.4    \\ \hline
+Fleury Heat Flux    & 0.4 -- 0.6    & 8 -- 12       & Open          \\ \hline
+FM/SNL              & 0.7           & 7             & 8.8 -- 8.5    \\ \hline
+Hamins Burner       & 0.04 -- 0.5   & 6             & Open          \\ \hline
+Heskestad           & 0.4 -- 44     & 5 -- 20       & Open          \\ \hline
+LLNL Enclosure      & 0.3 -- 0.6    & 1 -- 3        & 15.9 -- 6.9   \\ \hline
+McCaffrey Plume     & 0.2 -- 0.3    & 5 -- 20       & Open          \\ \hline
+NBS Multi-Room      & 0.4           & 4             & 6.2           \\ \hline
+NIST RSE            & 0.3 -- 0.8    & 12 -- 32      & 3.5 -- 1.3    \\ \hline
+NIST/NRC            & 0.6 -- 1.3    & 5 -- 11       & 6.5 -- 3.1    \\ \hline
+NRCC Facade         & 1.8 -- 2.4    & 18 -- 24      & 1.5 -- 1.2    \\ \hline
+NRL/HAI             & 0.3 -- 0.7    & 9 -- 10       & Open          \\ \hline
+Sandia Plume        & 1.2 -- 1.8    & 20 -- 118     & Open          \\ \hline
+SP AST              & 0.7           & 14            & 3.5           \\ \hline
+Steckler            & 0.2 -- 0.4    & 5 -- 9        & 9.1 -- 4.8    \\ \hline
+UL/NFPRF            & 1.7 -- 2.4    & 8 -- 12       & 4.5 -- 3.2    \\ \hline
+Ulster SBI          & 0.2 -- 0.3    & 12 -- 15      & Open          \\ \hline
+USCG/HAI            & 0.5 -- 0.9    & 5 -- 9        & 5.6 -- 3.2    \\ \hline
+USN Hawaii          & 0.4 -- 2.1    & 2 -- 11       & 40.3 -- 7.1   \\ \hline
+USN Iceland         & 0.4 -- 2.8    & 2 -- 14       & 59 -- 7.8     \\ \hline
+Vettori Flat        & 1.0           & 12            & 2.8           \\ \hline
+Vettori Sloped      & 1.0           & 10            & 2.6           \\ \hline
+VTT Large Hall      & 1.2 -- 1.6    & 5 -- 6        & 15.8 -- 12.1  \\ \hline
+WTC                 & 0.9 -- 1.1    & 9 -- 11       & 4.1 -- 3.5    \\ \hline
+\end{tabular}
+\end{center}
+\label{Numerical_Parameters}
+\nopagebreak
+\end{table}
+
+
+
+
+
+
