@@ -2243,18 +2243,17 @@ By default FDS uses the Deardorff \cite{Deardorff:1980,Pope:2000} turbulent visc
 (\mu_{\hbox{\tiny LES}}/\rho) = C_\nu \Delta \sqrt{k_{sgs}}
 \end{equation}
 where $C_\nu=0.1$ and the subgrid scale (sgs) kinetic energy is taken from an algebraic relationship based on scale similarity (see the FDS Technical Reference Guide~\cite{FDS_Math_Guide}).
-
 Options for the turbulent viscosity model are (set {\ct TURBULENCE\_MODEL} on {\ct MISC}):
 \begin{center}
-\vskip-\baselineskip
-\begin{tabular}{ll}
-{\ct 'CONSTANT SMAGORINSKY'}   & constant coefficient Smagorinsky model \cite{Smagorinsky:1}, additionally specify {\ct CSMAG}\\
-{\ct 'DYNAMIC SMAGORINSKY'}   & dynamic Smagorinsky model \cite{Germano:1991,Moin:1991}\\
-{\ct 'DEARDORFF'} & Deardorff model \cite{Deardorff:1980,Pope:2000} (default) \\
-{\ct 'VREMAN'}    & Vreman's eddy viscosity model \cite{Vreman:2004}
+\begin{tabular}{|lll|}
+\hline
+{\ct TURBULENCE\_MODEL}         & Description                                                   & Coefficient           \\ \hline 
+{\ct 'CONSTANT SMAGORINSKY'}    & Constant coefficient Smagorinsky model \cite{Smagorinsky:1}   & {\ct C\_SMAGORINSKY}  \\
+{\ct 'DYNAMIC SMAGORINSKY'}     & Dynamic Smagorinsky model \cite{Germano:1991,Moin:1991}       & None                  \\
+{\ct 'DEARDORFF'}               & Deardorff model \cite{Deardorff:1980,Pope:2000}               & {\ct C\_DEARDORFF}    \\
+{\ct 'VREMAN'}                  & Vreman's eddy viscosity model \cite{Vreman:2004}              & {\ct C\_VREMAN}       \\ \hline
 \end{tabular}
 \end{center}
-
 The other diffusive parameters, the thermal conductivity and material diffusivity, are related to the turbulent viscosity by
 \be k_{\hbox{\tiny LES}} = \frac{\mu_{\hbox{\tiny LES}} \, c_p}{\PR_t}
 \quad ; \quad
@@ -2263,7 +2262,7 @@ The turbulent Prandtl number $\PR_t$ and the turbulent Schmidt number $\SC_t$ ar
 
 \begin{warning}
 \noindent
-To return to the non-dynamic form of LES used in FDS versions 1-5, set {\ct TURBULENCE\_MODEL='CONSMAG'} on the {\ct MISC} line. You can change the empirical constant $C_s$ via {\ct CSMAG}. Its default value is 0.2.
+To return to the non-dynamic form of LES used in FDS versions 1-5, set {\ct TURBULENCE\_MODEL='CONSTANT SMAGORINSKY'} on the {\ct MISC} line. 
 \end{warning}
 
 
@@ -10283,12 +10282,15 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CHECK\_VN}                 & Logical       & See Section~\ref{info:CFL}                                &               & {\ct .TRUE.}     \\ \hline
 %{\ct CLIP\_MASS\_FRACTION}      & Logical       &                                                           &               & {\ct .FALSE.}     \\ \hline
 %{\ct CP_FTMP}                  & Logical       &                                                           &               & {\ct .FALSE.}     \\ \hline
-{\ct CSMAG}                     & Real          & See Section~\ref{info:LES}                                &               & 0.20              \\ \hline
+{\ct C\_DEARDORFF}              & Real          & See Section~\ref{info:LES}                                &               & 0.1               \\ \hline
+{\ct C\_SMAGORINSKY}            & Real          & See Section~\ref{info:LES}                                &               & 0.20              \\ \hline
 {\ct C\_FORCED}                 & Real          & See Section~\ref{info:convection}                         &               & 0.037             \\ \hline
 {\ct C\_FORCED\_CYLINDER}       & Real          & See Section~\ref{info:convection}                         &               & 0.664             \\ \hline
 {\ct C\_FORCED\_SPHERE }        & Real          & See Section~\ref{info:convection}                         &               & 0.600             \\ \hline
+{\ct C\_G}                      & Real          & See Section~\ref{info:LES}                                &               & 0.04              \\ \hline
 {\ct C\_HORIZONTAL}             & Real          & See Section~\ref{info:convection}                         &               & 1.52             \\ \hline
 {\ct C\_VERTICAL}               & Real          & See Section~\ref{info:convection}                         &               & 1.31             \\ \hline
+{\ct C\_VREMAN}                 & Real          & See Section~\ref{info:LES}                                &               & 0.07              \\ \hline
 %{\ct DEBUG\_OPENMP}             & Logical       & Debug flag for OpenMP                                     &               & {\ct .FALSE.}     \\ \hline
 {\ct DNS}                       & Logical       & See Section~\ref{info:MISC_Basics}                        &               & {\ct .FALSE.}     \\ \hline
 {\ct EVACUATION\_DRILL}         & Logical       & See FDS+Evac User's Guide~\cite{FDS_Evac_Users_Guide}     &               & {\ct .FALSE.}     \\ \hline
@@ -11157,6 +11159,7 @@ Namelist  & FDS 5 Parameter & Namelist  & FDS 6 Parameter & Notes \\ \hline \hli
 {\ct MISC}    & {\ct BACKGROUND\_SPECIES}           &  {\ct SPEC}  & {\ct BACKGROUND=.TRUE.}                     & See Section~\ref{info:SPEC}                  \\ \hline
 {\ct MISC}    & {\ct CONDUCTIVITY}                  &  {\ct SPEC}  & {\ct CONDUCTIVITY}                          & See Section~\ref{info:SPEC}                  \\ \hline
 {\ct MISC}    & {\ct CO\_PRODUCTION}                &  {\ct REAC}  & {\ct CO\_PRODUCTION}                        & See Section~\ref{info:CO}                    \\ \hline
+{\ct MISC}    & {\ct CSMAG}                         &  {\ct MISC}  & {\ct C\_SMAGORINSKY}                        & Same functionality                           \\ \hline
 {\ct MISC}    & {\ct HUMIDITY}                      &  {\ct SPEC}  & {\ct HUMIDITY}                              & See Section~\ref{info:SPEC}                  \\ \hline
 {\ct MISC}    & {\ct ISOTHERMAL}                    &              & Eliminated                                  &                                              \\ \hline
 {\ct MISC}    & {\ct MW}                            &  {\ct SPEC}  & {\ct MW}                                    & See Section~\ref{info:SPEC}                  \\ \hline
