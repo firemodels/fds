@@ -2404,7 +2404,7 @@ IF (LES) THEN
    WRITE(LU_OUTPUT,'(A)')     '   LES Calculation'
    SELECT CASE (TURB_MODEL)
       CASE(CONSMAG)
-         WRITE(LU_OUTPUT,'(A,F8.2)')  '   Smagorinsky Constant          ',CSMAG
+         WRITE(LU_OUTPUT,'(A,F8.2)')  '   Smagorinsky Constant          ',C_SMAGORINSKY
       CASE(DYNSMAG)
          WRITE(LU_OUTPUT,'(A)')       '   Dynamic Smagorinsky Model'
       CASE(DEARDORFF)
