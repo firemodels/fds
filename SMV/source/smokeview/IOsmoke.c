@@ -371,16 +371,11 @@ void drawsmoke_frame(void){
   }
 #ifdef pp_GPU
   if(usegpu==1){
-    if(showvolrender==1){
-      UnLoadShaders();
-    }
-    else{
-      UnLoadShaders();
-    }
+    UnLoadShaders();
   }
 #endif
 #ifdef pp_CULL
-  if(cullsmoke==1&&showstereo==0){
+  if(cullsmoke==1&&showstereo==0&&nsmoke3dinfo>0&&show3dsmoke==1){
     setPixelCount();
   }
 #endif
