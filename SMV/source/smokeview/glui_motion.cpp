@@ -18,6 +18,7 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 #include "translate.h"
+#include "IOvolsmoke.h"
 #include "MALLOC.h"
 
 // svn revision character string
@@ -643,14 +644,14 @@ extern "C" void TRANSLATE_CB(int var){
   int i;
 
 #ifdef pp_GPUTHROTTLE
-  if(usegpu==1&&showvolrender==1&&hide_volsmoke==0&&
+  if(usegpu==1&&showvolrender==1&&show_volsmoke_moving==1&&
      (var==EYE_ROTATE||var==EYE_ROTATE_90||var==ROTATE_ZX||var==TRANSLATE_XY||var==GLUI_Z)
     ){
     float fps;
 
     thisMOTIONtime=glutGet(GLUT_ELAPSED_TIME)/1000.0;
     fps = MOTIONnframes/(thisMOTIONtime-lastMOTIONtime);
-    if(fps>5.0)return;
+    if(fps>GPU_VOLframemax)return;
     MOTIONnframes++;
     if(thisMOTIONtime>lastMOTIONtime+0.25){
       printf("MOTION: %4.1f fps\n",fps);

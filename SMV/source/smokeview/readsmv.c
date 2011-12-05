@@ -7675,17 +7675,16 @@ int readini2(char *inifile, int localfile){
       int meshnum;
 
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i %i %i %f %f %f",
-        &glui_compress_volsmoke,&use_multi_threading,&load_at_rendertimes,&volbw,
-        &temperature_cutoff,&opacity_factor,&mass_extinct
-        );
+      sscanf(buffer,"%i %i %i %i %i",
+        &glui_compress_volsmoke,&use_multi_threading,&load_at_rendertimes,&volbw,&show_volsmoke_moving);
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f %f %f %f %f",
+        &temperature_min,&temperature_cutoff,&temperature_max,&opacity_factor,&mass_extinct);
       if(glui_compress_volsmoke!=0)glui_compress_volsmoke=1;
       if(use_multi_threading!=0)use_multi_threading=1;
       if(load_at_rendertimes!=0)load_at_rendertimes=1;
-      if(temperature_cutoff<100.0)temperature_cutoff=100.0;
-      if(temperature_cutoff>1199.0)temperature_cutoff=1199.0;
-      if(opacity_factor<1.0)opacity_factor=1.0;
-      if(opacity_factor>10.0)opacity_factor=10.0;
+      temperature_cutoff=CLAMP(temperature_cutoff,100.0,1199.0);
+      opacity_factor=CLAMP(opacity_factor,1.0,10.0);
       mass_extinct=CLAMP(mass_extinct,100.0,100000.0);
       continue;
     }
@@ -10869,6 +10868,11 @@ void writeini(int flag){
     fprintf(fileout,"COLORBARTYPE\n");
     fprintf(fileout," %i\n",colorbartype);
   }
+  fprintf(fileout,"VOLSMOKE\n");
+  fprintf(fileout," %i %i %i %i %i\n",
+    glui_compress_volsmoke,use_multi_threading,load_at_rendertimes,volbw,show_volsmoke_moving);
+  fprintf(fileout," %f %f %f %f %f\n",
+    temperature_min,temperature_cutoff,temperature_max,opacity_factor,mass_extinct);
   fprintf(fileout,"FIRECOLORMAP\n");
   fprintf(fileout," %i %i\n",use_firesmokemap,fire_colorbar_index);
   fprintf(fileout,"SHOWEXTREMEDATA\n");

@@ -2,6 +2,7 @@
 // $Revision$
 // $Author$
 
+#define GPU_VOLframemax 3.0
 #ifdef pp_GPU
 void init_volsmoke_texture(mesh *meshi);
 void update_volsmoke_texture(mesh *meshi, float *smokedata, float *firedata);

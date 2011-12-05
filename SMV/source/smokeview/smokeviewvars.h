@@ -21,7 +21,7 @@
 #endif
 #ifdef pp_MOUSEDOWN
 SVEXTERN int SVDECL(mouse_down,0);
-SVEXTERN int SVDECL(hide_volsmoke,1);
+SVEXTERN int SVDECL(show_volsmoke_moving,0);
 #endif
 #ifdef pp_FREEZE_VOLSMOKE
 SVEXTERN int SVDECL(freeze_volsmoke,0);
@@ -125,7 +125,8 @@ SVEXTERN int GPUzone_odl, GPUzone_odu;
 
 SVEXTERN int GPUvol_inside, GPUvol_dir, GPUvol_eyepos, GPUvol_xyzmaxdiff;
 SVEXTERN int GPUvol_soot_density, GPUvol_fire, GPUvol_blockage;
-SVEXTERN int GPUvol_opacity_factor,GPUvol_temperature_cutoff,GPUvol_volbw,GPUvol_mass_extinct;
+SVEXTERN int GPUvol_opacity_factor,GPUvol_volbw,GPUvol_mass_extinct;
+SVEXTERN int GPUvol_temperature_min,GPUvol_temperature_cutoff,GPUvol_temperature_max;
 SVEXTERN int GPUvol_boxmin, GPUvol_boxmax;
 SVEXTERN int GPUvol_smokecolormap, GPUvol_dcell, GPUvol_havefire;
 #ifdef pp_GPUDEPTH
@@ -931,7 +932,8 @@ SVEXTERN sv_object *avatar_defs_backup[2];
 SVEXTERN int device_sphere_segments;
 SVEXTERN int ntexturestack;
 
-SVEXTERN float SVDECL(opacity_factor,3.0),SVDECL(temperature_cutoff,700.0),SVDECL(mass_extinct,8700.0);
+SVEXTERN float SVDECL(opacity_factor,3.0),SVDECL(mass_extinct,8700.0);
+SVEXTERN float SVDECL(temperature_min,20.0),SVDECL(temperature_cutoff,700.0),SVDECL(temperature_max,1200.0);
 SVEXTERN int SVDECL(volbw,0);
 SVEXTERN float tourrad_avatar;
 SVEXTERN int dirtycircletour;

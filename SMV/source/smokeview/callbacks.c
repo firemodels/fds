@@ -465,12 +465,12 @@ void motion(int xm, int ym){
   float elevation_angle;
 
 #ifdef pp_GPUTHROTTLE
-  if(usegpu==1&&showvolrender==1&&hide_volsmoke==0){
+  if(usegpu==1&&showvolrender==1&&show_volsmoke_moving==1){
     float fps;
 
     thisMOTIONtime=glutGet(GLUT_ELAPSED_TIME)/1000.0;
     fps = MOTIONnframes/(thisMOTIONtime-lastMOTIONtime);
-    if(fps>5.0)return;
+    if(fps>GPU_VOLframemax)return;
     MOTIONnframes++;
     if(thisMOTIONtime>lastMOTIONtime+0.25){
       printf("MOTION: %4.1f fps\n",fps);

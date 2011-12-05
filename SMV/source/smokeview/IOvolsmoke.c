@@ -996,7 +996,7 @@ void drawsmoke3dGPUVOL(void){
   }
 #endif
 #ifdef pp_MOUSEDOWN  
-  if(mouse_down==1&&hide_volsmoke==1){
+  if(mouse_down==1&&show_volsmoke_moving==0){
     return;
   }
 #endif
@@ -1012,7 +1012,9 @@ void drawsmoke3dGPUVOL(void){
   glUniform1f(GPUvol_opacity_factor,opacity_factor);
   glUniform1f(GPUvol_mass_extinct,mass_extinct);
   glUniform1i(GPUvol_volbw,volbw);
+  glUniform1f(GPUvol_temperature_min,temperature_min);
   glUniform1f(GPUvol_temperature_cutoff,temperature_cutoff);
+  glUniform1f(GPUvol_temperature_max,temperature_max);
   sniffErrors("after drawsmoke3dGPUVOL before loop");
   if(use_transparency_data==1)transparenton();
   for(ii=0;ii<nvolfacelistinfo;ii++){
@@ -1786,7 +1788,7 @@ void update_volsmoke_texture(mesh *meshi, float *smokedata, float *firedata){
   ny = meshi->jbar+1;
   nz = meshi->kbar+1;
 #ifdef pp_GPUTHROTTLE
-  GPUnframes+=2*nx*ny*nz;
+  GPUnframes+=3*nx*ny*nz;
 #endif
   glActiveTexture(GL_TEXTURE0);
   glTexSubImage3D(GL_TEXTURE_3D,0,

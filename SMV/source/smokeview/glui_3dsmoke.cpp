@@ -61,6 +61,9 @@ void update_alpha(void);
 #define VOL_NGRID 18
 #define SMOKE_OPTIONS 19
 #define LOAD_COMPRESSED_DATA 20
+#define TEMP_MIN 21
+#define TEMP_CUTOFF 22
+#define TEMP_MAX 23
 
 GLUI_Listbox *LISTBOX_smoke_colorbar=NULL;
 #ifdef pp_CULL
@@ -68,13 +71,12 @@ GLUI_Spinner *SPINNER_cull_portsize=NULL;
 GLUI_Checkbox *CHECKBOX_show_cullports=NULL;
 #endif
 GLUI_Checkbox *CHECKBOX_usevolrender=NULL;
+GLUI_Spinner *SPINNER_temperature_min=NULL;
 GLUI_Spinner *SPINNER_temperature_cutoff=NULL;
+GLUI_Spinner *SPINNER_temperature_max=NULL;
 GLUI_Spinner *SPINNER_opacity_factor=NULL;
 GLUI_Spinner *SPINNER_mass_extinct=NULL;
 GLUI_Checkbox *CHECKBOX_compress_volsmoke=NULL;
-#ifdef pp_MOUSEDOWN
-GLUI_Checkbox *CHECKBOX_hide_volsmoke=NULL;
-#endif
 GLUI_Checkbox *CHECKBOX_use_firesmokemap=NULL;
 GLUI_Checkbox *CHECKBOX_smokecullflag=NULL;
 GLUI *glui_3dsmoke=NULL;
@@ -102,6 +104,7 @@ GLUI_Spinner *SPINNER_smoke3d_hrrpuv_cutoff=NULL;
 GLUI_Spinner *SPINNER_smoke3d_fire_halfdepth=NULL;
 GLUI_Spinner **SPINNER_smoke3d_hrrpuv_cutoffptr=NULL;
 GLUI_Panel *panel_overall=NULL;
+GLUI_Panel *panel_colormap2=NULL;
 GLUI_Panel *panel_colormap=NULL;
 GLUI_Panel *panel_hrrcut=NULL;
 GLUI_Panel *panel_absorption=NULL,*panel_smokesensor=NULL;
@@ -279,12 +282,20 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     }
     glui_3dsmoke->add_checkbox_to_panel(panel_volume,"Display data as b/w",&volbw);
 #ifdef pp_MOUSEDOWN
-    glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Hide data while moving scene"),&hide_volsmoke);
+    glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Show data while moving scene"),&show_volsmoke_moving);
 #endif
     glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Load data only at render times"),&load_at_rendertimes);
-    SPINNER_temperature_cutoff=glui_3dsmoke->add_spinner_to_panel(panel_volume,_("Temperature cutoff"),GLUI_SPINNER_FLOAT,&temperature_cutoff);
-    SPINNER_temperature_cutoff->set_float_limits(100.0,1199.0);
-    SPINNER_opacity_factor=glui_3dsmoke->add_spinner_to_panel(panel_volume,_("Soot density factor"),GLUI_SPINNER_FLOAT,&opacity_factor);
+
+    panel_colormap2 = glui_3dsmoke->add_panel_to_panel(panel_volume,"Temp->Colormap");
+    SPINNER_temperature_min=glui_3dsmoke->add_spinner_to_panel(panel_colormap2,_("min"),GLUI_SPINNER_FLOAT,
+                          &temperature_min,TEMP_MIN,SMOKE_3D_CB);
+    SPINNER_temperature_cutoff=glui_3dsmoke->add_spinner_to_panel(panel_colormap2,_("cutoff"),GLUI_SPINNER_FLOAT,
+                          &temperature_cutoff,TEMP_CUTOFF,SMOKE_3D_CB);
+    SPINNER_temperature_max=glui_3dsmoke->add_spinner_to_panel(panel_colormap2,_("max"),GLUI_SPINNER_FLOAT,
+                          &temperature_max,TEMP_MAX,SMOKE_3D_CB);
+    SMOKE_3D_CB(TEMP_MIN);
+
+    SPINNER_opacity_factor=glui_3dsmoke->add_spinner_to_panel(panel_volume,_("Fire opacity multiplier"),GLUI_SPINNER_FLOAT,&opacity_factor);
     SPINNER_opacity_factor->set_float_limits(1.0,10.0);
     SPINNER_mass_extinct=glui_3dsmoke->add_spinner_to_panel(panel_volume,_("Mass extinction coeff"),GLUI_SPINNER_FLOAT,&mass_extinct);
     SPINNER_mass_extinct->set_float_limits(100.0,100000.0);
@@ -432,6 +443,23 @@ extern "C" void SMOKE_3D_CB(int var){
 
   updatemenu=1;
   switch (var){
+  float temp_min, temp_cutoff, temp_max;
+  
+  case TEMP_MIN:
+  case TEMP_CUTOFF:
+  case TEMP_MAX:
+    temp_min = 20.0;
+    temp_max = (float)((int)(temperature_cutoff-1.0));
+    SPINNER_temperature_min->set_float_limits(temp_min,temp_max);
+    
+    temp_min = (float)((int)(temperature_min + 1.0));
+    temp_max = (float)((int)(temperature_max - 1.0));
+    SPINNER_temperature_cutoff->set_float_limits(temp_min,temp_max);
+
+    temp_min = (float)((int)(temperature_cutoff+1.0));
+    temp_max = 1800.0;
+    SPINNER_temperature_max->set_float_limits(temp_min,temp_max);
+    break;
   case LOAD_COMPRESSED_DATA:
     if(load_volcompressed==1){
       CHECKBOX_compress_volsmoke->disable();
