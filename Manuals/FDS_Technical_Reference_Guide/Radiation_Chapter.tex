@@ -18,7 +18,7 @@ The Radiative Transport Equation (RTE) for an absorbing, emitting, and scatterin
 \underbrace{   \frac{\sigma_s(\bx,\la)}{4\pi}
 \int_{4\pi}\Phi(\bs',\bs) \; I_{\la}(\bx,\bs') \; d\bs'
  }_{\textrm{In-scattering term}}
-\label{RTEbasic} 
+\label{RTEbasic}
 \end{eqnarray}
 where $I_{\la}(\bx,\bs)$ is the radiation intensity at wavelength,
 $\la$, $\bs$ is the direction vector of the intensity, and
@@ -98,8 +98,8 @@ where $\sigma$ is the Stefan-Boltzmann constant.
 The calculation of factors $F_n$ is explained in Ref.~\cite{Siegel:1}.
 When the intensities corresponding to the bands are known, the total
 intensity is calculated by summing over all the bands
-\be 
-   I(\bx,\bs) = \sum_{n=1}^N I_n(\bx,\bs) 
+\be
+   I(\bx,\bs) = \sum_{n=1}^N I_n(\bx,\bs)
 \ee
 Even with a reasonably small number of bands, solving multiple
 RTEs is very time consuming. Fortunately, in most large-scale fire
@@ -109,7 +109,7 @@ soot is continuous, it is possible to assume that the gas behaves as a
 gray medium.  The spectral dependence is then lumped into one
 absorption coefficient ($N=1$) and the source term is given by the
 black body radiation intensity
-\be I_b(\bx) = \sigma \, T(\bx)^4/\pi \ee
+\be I_b(\bx) = \frac{\sigma \, T(\bx)^4}{\pi} \label{emission_source_term} \ee
 This is the default mode of FDS and appropriate for most problems of
 fire engineering. In optically thin flames, where the amount of soot
 is small compared to the amount of $\rm CO_2$ and water vapor, the gray gas
@@ -117,37 +117,6 @@ assumption may produce significant over-predictions of the emitted
 radiation. From a series of numerical experiments it has been found
 that six bands ($N=6$) are usually enough to improve the accuracy in
 these cases.
-
-In calculations of limited spatial resolution, the source term, $I_b$,
-in the RTE requires special treatment in the neighborhood of the flame
-sheet because the temperatures are smeared out over a grid
-cell and are thus considerably lower than
-one would expect in a diffusion flame.
-Because of its fourth-power dependence on the temperature,
-the source term must be modeled in those grid cells cut by the flame
-sheet. Elsewhere, there is greater confidence in the computed temperature,
-and the source term can be computed directly
-\be \kappa \; I_b = \left\{ \begin{array}{cl}
-    \kappa \, \sigma \, T^4/\pi                                           & \hbox{Outside flame zone} \\ [0.15in]
-    \max(\chi_r \, \dot{q}'''/4 \pi \; , \; \kappa \, \sigma \, T^4/\pi)  & \hbox{Inside flame zone}
-    \end{array} \right.  \label{radapprox} \ee
-Here, $\dot{q}'''$ is the chemical heat release rate per unit volume
-and $\chi_r$ is an empirical estimate of the {\em local} fraction of
-that energy emitted as thermal radiation.\footnote{The radiative
-fraction, $\chi_r$, is a useful quantity in fire science. Usually, it
-is understood to be the fraction of the total heat release rate that
-takes the form of thermal radiation. For most combustibles, $\chi_r$
-is between 0.3 and 0.4. However, in Eq.~(\ref{radapprox}), $\chi_r$ is
-interpreted as the fraction of energy radiated from the combustion
-region.  For a small fire ($D<1$~m), the local $\chi_r$ is
-approximately equal to its global counterpart. However, as the fire
-increases in size, the global value will typically decrease due to a
-net re-absorption of the thermal radiation by the increasing smoke
-mantle.}  Near the flame in large scale calculations, neither $\kappa$
-nor $T$ can be computed reliably, hence the inclusion of the empirical
-radiation loss term which is designed to partition the fire's heat
-release rate in accordance with measured values.
-
 
 
 \subsection{Absorption Coefficient}
@@ -167,11 +136,39 @@ The radiant heat flux vector $\dbq_r''$ is defined
 The gas phase contribution to the radiative loss term in the energy equation is
 \be -\nabla\!\cdot \dbq_r''(\bx)(\mbox{gas}) =
     \kappa(\bx) \, \left[ U(\bx) - 4 \pi \, I_b(\bx) \right]  \quad ; \quad
-    U(\bx) = \int_{4\pi} \, I(\bx,\bs') \, d\bs'
+    U(\bx) = \int_{4\pi} \, I(\bx,\bs') \, d\bs'  \label{net_emission}
 \ee
 In words, the net radiant energy gained by a grid cell is the
 difference between that which is absorbed and that which is emitted.
 
+\subsection{Correction of the Emission Source Term}
+
+In calculations of limited spatial resolution, the source term, $I_b$,
+defined in Eq.~(\ref{emission_source_term}) requires special treatment in the flaming region. Typical FDS calculations
+use grid cells that are tens of centimeters in size, and consequently the computed temperatures constitute a bulk average and are considerably lower than
+one would expect in a diffusion flame.
+Because of its fourth-power dependence on the temperature,
+the source term must be modeled in those grid cells that are expected to contain flames. Elsewhere, there is greater confidence in the computed temperature,
+and the source term can be computed directly. 
+It is assumed that this ``flaming region'' is where the radiative fraction of the local heat release rate per unit volume, $\chi_r \dq'''$, exceeds
+that which is calculated using the emission source term given in Eq.~(\ref{emission_source_term}), $4 \kappa \sigma T^4$. In this region, we
+replace the emission source term with the following:   
+\be I_{b,f}(\bx) = \frac{C \, \sigma \, T(\bx)^4}{\pi} + \frac{U(\bx)}{4\pi}  \quad ; \quad  
+    C = \frac{\int \chi_r \, \dq''' \, dV}{\int 4 \kappa \sigma T^4 \, dV} \label{corrected_emission_source_term} 
+\ee
+When the source term defined in Eq.~(\ref{corrected_emission_source_term}) is
+substituted into Eq.~(\ref{net_emission}), we assert that the net radiative emission from the flaming region is simply the
+specified radiative fraction of the rate of heat released within this region.
+
+The radiative
+fraction, $\chi_r$, is a useful quantity in fire science. It is the nominal fraction of the heat release rate is emitted as thermal radiation. For most combustibles, $\chi_r$
+is between 0.3 and 0.4. However, in Eq.~(\ref{corrected_emission_source_term}), $\chi_r$ is
+interpreted as the fraction of energy radiated from the flaming
+region.  For a small fire ($D<1$~m), the local $\chi_r$ is
+approximately equal to its global counterpart. However, as the fire
+increases in size, the global value will typically decrease due to a
+net re-absorption of the thermal radiation by the increasing smoke
+mantle.  
 
 \newpage
 
@@ -452,9 +449,9 @@ from the local droplet number density and size distribution
 \sigma_d(\bx,\la) &= \int_0^\infty n(r(\bx)) \; Q_s(r,\la) \; \pi r^2 \; dr%N(\bx)\int_0^\infty f(r,d_m(\bx)) \; C_s(r,\la) \; dr
 \end{align}
 where $r$ is the particle radius and $Q_a$ and $Q_s$ are absorption and
-scattering efficiencies, respectively.  For the computation of the spray/particle cloud radiative properties, 
+scattering efficiencies, respectively.  For the computation of the spray/particle cloud radiative properties,
 spherical particles are assumed and the radiative properties of the individual particles
-are computed using Mie theory. 
+are computed using Mie theory.
 
 Based on \cite{Collin} and \cite{Maruyama}, the real particle size distribution inside a grid cell is modeled as a mono-disperse suspension
 whose diameter corresponds to the Sauter mean ($d_{32}$) diameter of the poly-disperse spray.
@@ -463,7 +460,7 @@ This assumption leads to a simplified expression of the radiative coefficients
 \kappa_d(\bx,\la) &= A_d(\bx) \; Q_a(r_{32},\la) \\
 \sigma_d(\bx,\la) &= A_d(\bx) \; Q_s(r_{32},\la)
 \end{align}
-These expressions are functions of the total cross sectional area per unit volume of the droplets $A_d$. $A_d$ is computed simply by summing the cross sectional areas of all the droplets within a cell and divided by the cell volume. For practical reasons, a relaxation factor of 0.5 is 
+These expressions are functions of the total cross sectional area per unit volume of the droplets $A_d$. $A_d$ is computed simply by summing the cross sectional areas of all the droplets within a cell and divided by the cell volume. For practical reasons, a relaxation factor of 0.5 is
 used to smooth slightly the temporal variation of $A_d$.
 
 \subsection{In-scattering term}
@@ -525,7 +522,7 @@ becomes
 \ee
 where the source function is based on the average particle temperature within a cell.
 
-Before the actual simulation, both $\kappa_d$ and $\overline{\sigma_d}$ are averaged over the 
+Before the actual simulation, both $\kappa_d$ and $\overline{\sigma_d}$ are averaged over the
 infrared wavelengths (1-200 $\mu$m).  A constant ``radiation'' temperature, $T_{rad}$, is used
 in the wavelength weighting.  $T_{rad}$ should be selected to
 represent a typical radiating flame temperature. A value of 1173~K is
@@ -568,15 +565,15 @@ probabilities~\cite{Wiscombe}.\\
 
 
 The absorption and scattering efficiencies and the scattering phase
-function are calculated using the MieV code developed by Wiscombe~\cite{Wiscombe}.  
-The spectral properties of the particles can be specified in terms of wavelength dependent complex refractive index. 
-Pre-compiled data are included for water and a generic hydrocarbon fuel based on diesel and heptane properties. 
+function are calculated using the MieV code developed by Wiscombe~\cite{Wiscombe}.
+The spectral properties of the particles can be specified in terms of wavelength dependent complex refractive index.
+Pre-compiled data are included for water and a generic hydrocarbon fuel based on diesel and heptane properties.
 In case of water, the values of the imaginary part of the complex refractive index (related to absorption coefficient) are taken from
-Ref.~\cite{Hale:1}, and value 1.33 is used for the real part. 
-For fuel, the droplet spectral properties are taken from~\cite{Dombrovsky:1}, who measured the refractive index 
+Ref.~\cite{Hale:1}, and value 1.33 is used for the real part.
+For fuel, the droplet spectral properties are taken from~\cite{Dombrovsky:1}, who measured the refractive index
 of a diesel fuel and compared the values with those of heptane. The diesel properties are used for the real part of the refractive index. For the complex
-part, the heptane properties are used to avoid the uncertainty associated with different types of diesel oils. Usually, the radiative properties 
-of the particle cloud are much more sensitive to the particle size and concentration than to values of the refractive index. 
+part, the heptane properties are used to avoid the uncertainty associated with different types of diesel oils. Usually, the radiative properties
+of the particle cloud are much more sensitive to the particle size and concentration than to values of the refractive index.
 
 
 
