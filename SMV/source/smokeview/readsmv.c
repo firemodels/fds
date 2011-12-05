@@ -8985,7 +8985,6 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"BLOCKLOCATION",13)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&blocklocation);
-      blocklocation_save=blocklocation;
       continue;
       }
     if(match(buffer,"SHOWOPENVENTS",13)==1){

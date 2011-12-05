@@ -155,7 +155,6 @@ int initcase_c(int argc, char **argv){
   glui_shooter_setup(mainwindow_id);
 #endif
   glui_edit_setup(mainwindow_id);
-  blocklocation=blocklocation_save;
   glui_clip_setup(mainwindow_id);
   glui_wui_setup(mainwindow_id);
   glui_labels_setup(mainwindow_id);
