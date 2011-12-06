@@ -200,6 +200,10 @@ int setVolSmokeShaders() {
     "  return (zprime+1.0)/2.0;"
     "}"
 #endif
+    "float rand(vec2 co){"
+    "  return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);"
+    "}"
+
     "void main(){"
 #ifdef pp_GPUDEPTH
   //  "  vec2 uv = gl_TexCoord[3].xy;"
@@ -211,7 +215,7 @@ int setVolSmokeShaders() {
     "  float opacity,alpha_min,factor,factor2,pathdist;"
     "  float colorindex,tempval,gray;"
     "  float tauhat, alphahat, taui, tauterm;"
-    "  float dstep;"
+    "  float dstep,onedn_iter,xi,offset;"
     "  int i,n_iter;"
 
     "  alpha_min=1000000.0;"
@@ -229,15 +233,19 @@ int setVolSmokeShaders() {
     "  }" // end inside=1
     "  fragmaxpos = mix(fragpos,eyepos,-alpha_min);"
     "  pathdist = distance(fragpos,fragmaxpos);"
-    "  n_iter = 4*int(pathdist/dcell+0.5);"
+    "  n_iter = int(pathdist/dcell+0.5);"
     "  if(n_iter<1)n_iter=1;"
+    "  xi = n_iter;"
+    "  onedn_iter=1.0/xi;"
     "  dstep = pathdist*xyzmaxdiff/n_iter;"
     "  tauhat=1.0;"
     "  alphahat=0.0;"
     "  color_cum=vec3(0.0,0.0,0.0);"
+    "  offset=0.25+0.5*rand(vec2(fragpos.x,fragpos.y));"
     "  for(i=0;i<n_iter;i++){"
-    "    factor = (0.5+i)/n_iter;"
-    "    factor2 = (0.5+i+1)/n_iter;"
+    "    xi = i;"
+    "    factor = (offset+xi)*onedn_iter;"
+    "    factor2 = (offset+xi+1.0)*onedn_iter;"
     "    position = (mix(fragpos,fragmaxpos,factor)-boxmin)/(boxmax-boxmin);"
     "    soot_val = texture3D(soot_density_texture,position);"
     "    block_pos = position;"

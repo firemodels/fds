@@ -1055,7 +1055,12 @@ void drawsmoke3dGPUVOL(void){
       dy = meshi->yplt[1]-meshi->yplt[0];
       dz = meshi->zplt[1]-meshi->zplt[0];
       dcell = sqrt(dx*dx+dy*dy+dz*dz);
-      glUniform1f(GPUvol_dcell,dcell);
+      if(mouse_down==1){
+        glUniform1f(GPUvol_dcell,4.0*dcell);
+      }
+      else{
+        glUniform1f(GPUvol_dcell,dcell);
+      }
 
       meshold=meshi;
     }
