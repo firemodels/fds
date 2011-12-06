@@ -14,8 +14,10 @@ source ~/.bashrc_fds intel64
 
 /bin/sh -c "cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR"
 
-$RUNFDS $INDIR Lattimer_20_kW_0_degree_coarse
+#$RUNFDS $INDIR Lattimer_20_kW_0_degree_coarse
 
-#$RUNFDSMPI 36 $INDIR Lattimer_20_kW_0_degree_fine
+$RUNFDSMPI 27 $INDIR Lattimer_20_kW_0_degree_coarse
+$RUNFDSMPI 27 $INDIR Lattimer_20_kW_0_degree
+$RUNFDSMPI 27 $INDIR Lattimer_20_kW_0_degree_fine
 
 echo FDS cases submitted
