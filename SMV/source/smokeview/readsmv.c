@@ -7683,7 +7683,6 @@ int readini2(char *inifile, int localfile){
       if(glui_compress_volsmoke!=0)glui_compress_volsmoke=1;
       if(use_multi_threading!=0)use_multi_threading=1;
       if(load_at_rendertimes!=0)load_at_rendertimes=1;
-      temperature_cutoff=CLAMP(temperature_cutoff,100.0,1199.0);
       opacity_factor=CLAMP(opacity_factor,1.0,10.0);
       mass_extinct=CLAMP(mass_extinct,100.0,100000.0);
       continue;

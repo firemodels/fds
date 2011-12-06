@@ -294,6 +294,8 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     SPINNER_temperature_max=glui_3dsmoke->add_spinner_to_panel(panel_colormap2,_("max"),GLUI_SPINNER_FLOAT,
                           &temperature_max,TEMP_MAX,SMOKE_3D_CB);
     SMOKE_3D_CB(TEMP_MIN);
+    SMOKE_3D_CB(TEMP_CUTOFF);
+    SMOKE_3D_CB(TEMP_MAX);
 
     SPINNER_opacity_factor=glui_3dsmoke->add_spinner_to_panel(panel_volume,_("Fire opacity multiplier"),GLUI_SPINNER_FLOAT,&opacity_factor);
     SPINNER_opacity_factor->set_float_limits(1.0,10.0);
@@ -446,17 +448,17 @@ extern "C" void SMOKE_3D_CB(int var){
   float temp_min, temp_cutoff, temp_max;
   
   case TEMP_MIN:
-  case TEMP_CUTOFF:
-  case TEMP_MAX:
     temp_min = 20.0;
-    temp_max = (float)((int)(temperature_cutoff-1.0));
+    temp_max = (float)(10*(int)(temperature_cutoff)/10-10);
     SPINNER_temperature_min->set_float_limits(temp_min,temp_max);
-    
-    temp_min = (float)((int)(temperature_min + 1.0));
-    temp_max = (float)((int)(temperature_max - 1.0));
+    break;
+  case TEMP_CUTOFF:
+    temp_min = (float)(10*(int)(temperature_min)/10 + 10);
+    temp_max = (float)(10*(int)(temperature_max)/10 - 10);
     SPINNER_temperature_cutoff->set_float_limits(temp_min,temp_max);
-
-    temp_min = (float)((int)(temperature_cutoff+1.0));
+    break;
+  case TEMP_MAX:
+    temp_min = (float)(10*(int)(temperature_cutoff)/10+10);
     temp_max = 1800.0;
     SPINNER_temperature_max->set_float_limits(temp_min,temp_max);
     break;
