@@ -260,8 +260,8 @@ No.     &  Type             & HRR (kW)      & Position      & Rate (ach)        
 13      & Heptane Pool      &    2000       & Wall          & 8                 & Empty                 &        Yes \\ \hline
 14      & Methanol Pool     &     500       & Wall          & 1                 & Empty                 &        Yes \\ \hline
 15      & Heptane Pool      &    1000       & Wall          & 1                 & Empty                 &        Yes \\ \hline
-16      & Heptane Pool      &    2000       & Corner        & 1                 & Empty                 &        Yes \\ \hline
-17      & Heptane Pool      &    2000       & Corner        & 10                & Empty                 &         No \\ \hline
+16      & Heptane Pool      &     500       & Corner        & 1                 & Empty                 &        Yes \\ \hline
+17      & Heptane Pool      &     500       & Corner        & 10                & Empty                 &         No \\ \hline
 18      &  PMMA Slab        &    1000       & Wall          & 1                 & Empty                 &         No \\ \hline
 19      & Heptane Pool      &    1000       & Center        & 1                 & Furnished             &         No \\ \hline
 20      & Heptane Pool      &    1000       & Corner        & 8                 & Furnished             &        Yes \\ \hline
@@ -1043,7 +1043,7 @@ WTC                 & 965 -- 1460   & 1.0           & 3.8   & 0.8 -- 1.2        
 
 
 \noindent
-Table~\ref{Numerical_Parameters} lists a few important parameters related to the numerical resolution of the calculation. 
+Table~\ref{Numerical_Parameters} lists a few important parameters related to the numerical resolution of the calculation.
 \begin{description}
 \item[Characteristic Fire Diameter, $D^*$,] is a useful length scale that incorporates the heat release rate of the fire.
 \be D^* = \left( \frac{\dot{Q}}{\rho_\infty c_p T_\infty \sqrt{g}} \right)^{2/5}  \ee
@@ -1051,11 +1051,11 @@ Table~\ref{Numerical_Parameters} lists a few important parameters related to the
 ``resolved'' are the fire dynamics.
 \item[Ceiling Height relative to Fire Diameter, $H/D^*$,] is the non-dimensional height of the smoke plume.
 \end{description}
-Note that the calculations performed for the various validation studies described in this Guide use a wide range of values of the Plume Resolution Index, $D^*/\dx$. 
+Note that the calculations performed for the various validation studies described in this Guide use a wide range of values of the Plume Resolution Index, $D^*/\dx$.
 There are several reasons for this. First,
-typical applications of FDS often involve relatively small fires in relatively large spaces, and it is impractical to use a very fine grid that captures the detailed fire dynamics. 
+typical applications of FDS often involve relatively small fires in relatively large spaces, and it is impractical to use a very fine grid that captures the detailed fire dynamics.
 Second, for some applications the accuracy of calculation is highly dependent on resolving the plume well, but for others, it is less important. For those citing the validation
-studies in this Guide, it is important that both the physical and numerical parameters are comparable to the given application. 
+studies in this Guide, it is important that both the physical and numerical parameters are comparable to the given application.
 
 
 \begin{table}[p]
