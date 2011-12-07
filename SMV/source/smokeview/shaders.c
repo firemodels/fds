@@ -207,7 +207,7 @@ int setVolSmokeShaders() {
     "void main(){"
 #ifdef pp_GPUDEPTH
   //  "  vec2 uv = gl_TexCoord[4].xy;"
-    "  vec2 uv = gl_FragCoord.xy/screensize.xy;"
+    "  vec2 uv = gl_FragCoord.st/screensize.xy;"
 #endif
     "  float d;"
     "  vec3 dalphamin,dalphamax,fragmaxpos,position,color_val,color_cum,block_pos,block_pos2;"
@@ -297,7 +297,11 @@ int setVolSmokeShaders() {
     "    gray=0.299*color_cum.r + 0.587*color_cum.g + 0.114*color_cum.b;"
     "    color_cum=vec3(gray,gray,gray);"
     "  }"
+#ifdef pp_GPUDEPTH
+    "  gl_FragColor = vec4(uv.x,uv.y,0.0,1.0);"
+#else
     "  gl_FragColor = vec4(color_cum/alphahat,alphahat);"
+#endif
     "}" // end of main
   };
 
@@ -606,6 +610,7 @@ void createDepthTexture( void ){
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
   glActiveTexture(GL_TEXTURE0);
 
 }
