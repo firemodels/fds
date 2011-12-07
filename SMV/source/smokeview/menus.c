@@ -8606,7 +8606,7 @@ updatemenu=0;
     CREATEMENU(mainmenu,MainMenu);
     if(trainer_mode==0){
       glutAddSubMenu(_("Load/Unload"),loadunloadmenu);
-      glutAddSubMenu(_("Display"),showhidemenu);
+      glutAddSubMenu(_("Show/Hide"),showhidemenu);
       glutAddSubMenu(_("Options"),optionmenu);
       glutAddSubMenu(_("Dialogs"),dialogmenu);
       glutAddSubMenu(_("Tours"),tourmenu);
