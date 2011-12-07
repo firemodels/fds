@@ -1763,6 +1763,7 @@ void init_volsmoke_texture(mesh *meshi){
     glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_smokecolormap);
   }
 
+#ifndef pp_GPUDEPTH
   glActiveTexture(GL_TEXTURE3);
   glGenTextures(1,&meshi->blockage_texture_id);
   glBindTexture(GL_TEXTURE_3D,meshi->blockage_texture_id);
@@ -1775,6 +1776,7 @@ void init_volsmoke_texture(mesh *meshi){
   ny = meshi->jbar;
   nz = meshi->kbar;
   glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, nx, ny, nz, border_size, GL_RED, GL_FLOAT, meshi->f_iblank_cell);
+#endif
 
   glActiveTexture(GL_TEXTURE0);
   printf("complete\n");
@@ -1809,11 +1811,14 @@ void update_volsmoke_texture(mesh *meshi, float *smokedata, float *firedata){
       GL_RED, GL_FLOAT, firedata);
   }
 
+#ifndef pp_GPUTEXTURE
   glActiveTexture(GL_TEXTURE3);
   nx = meshi->ibar;
   ny = meshi->jbar;
   nz = meshi->kbar;
   glTexSubImage3D(GL_TEXTURE_3D,0,xoffset,yoffset,zoffset,nx, ny, nz,GL_RED, GL_FLOAT, meshi->f_iblank_cell);
+#endif
+
   glActiveTexture(GL_TEXTURE0);
 }
 #endif

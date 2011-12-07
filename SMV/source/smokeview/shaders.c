@@ -206,7 +206,7 @@ int setVolSmokeShaders() {
 
     "void main(){"
 #ifdef pp_GPUDEPTH
-  //  "  vec2 uv = gl_TexCoord[3].xy;"
+  //  "  vec2 uv = gl_TexCoord[4].xy;"
     "  vec2 uv = gl_FragCoord.xy/screensize.xy;"
 #endif
     "  float d;"
@@ -232,8 +232,13 @@ int setVolSmokeShaders() {
     "  if(inside==1){"
     "  }" // end inside=1
     "  fragmaxpos = mix(fragpos,eyepos,-alpha_min);"
+#ifdef pp_GPUDEPTH
+    "  d = LinearizeDepth(uv);"
+    "  pathdist = d-distance(fragpos,eyepos);"
+#else
     "  pathdist = distance(fragpos,fragmaxpos);"
-    "  n_iter = int(pathdist/dcell+0.5);"
+#endif
+    "  n_iter = 2*int(pathdist/dcell+0.5);"
     "  if(n_iter<1)n_iter=1;"
     "  xi = n_iter;"
     "  onedn_iter=1.0/xi;"
@@ -248,10 +253,12 @@ int setVolSmokeShaders() {
     "    factor2 = (offset+xi+1.0)*onedn_iter;"
     "    position = (mix(fragpos,fragmaxpos,factor)-boxmin)/(boxmax-boxmin);"
     "    soot_val = texture3D(soot_density_texture,position);"
+#ifndef pp_GPUDEPTH
     "    block_pos = position;"
     "    block_val = texture3D(blockage_texture,block_pos);"
     "    block_pos2 = (mix(fragpos,fragmaxpos,factor2)-boxmin)/(boxmax-boxmin);"
     "    block_val2 = texture3D(blockage_texture,block_pos2);"
+#endif
     "    if(havefire==1){"
     "      tempval = texture3D(fire_texture,position);" 
     "      if(tempval>temperature_cutoff){"
@@ -269,29 +276,28 @@ int setVolSmokeShaders() {
     "    else{"
     "      color_val = vec3(0.0,0.0,0.0);"
     "    }"
+#ifndef pp_GPUDEPTH
     //  block_val  0.5  block_val2
     //  0.0        x     dstep
     //  x = dstep*(.5-block_val)/(block_val2-block_val)
     "    if(block_val2<0.5){"
     "      dstep *= (0.5-block_val)/(block_val2-block_val);"
     "    }"
+#endif
     "    taui = exp(-mass_extinct*soot_val*dstep);"
     "    tauterm = (1.0-taui)*tauhat;"
     "    alphahat  += tauterm;"
     "    color_cum += tauterm*color_val;"
     "    tauhat *= taui;"
+#ifndef pp_GPUDEPTH
     "    if(block_val2<0.5)break;"
+#endif
     "  }"
     "  if(volbw==1){"
     "    gray=0.299*color_cum.r + 0.587*color_cum.g + 0.114*color_cum.b;"
     "    color_cum=vec3(gray,gray,gray);"
     "  }"
-#ifdef pp_GPUDEPTH
-    "  d = LinearizeDepth(uv);"
-    "  gl_FragColor = vec4(d,d,d,1.0);"
-#else
     "  gl_FragColor = vec4(color_cum/alphahat,alphahat);"
-#endif
     "}" // end of main
   };
 
