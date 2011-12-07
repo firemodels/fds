@@ -8538,6 +8538,12 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
          IF (EVACUATION_ONLY(NM)) CYCLE MESH_LOOP
          M=>MESHES(NM)
          IF (XYZ(1)>=M%XS .AND. XYZ(1)<=M%XF .AND. XYZ(2)>=M%YS .AND. XYZ(2)<=M%YF .AND. XYZ(3)>=M%ZS .AND. XYZ(3)<=M%ZF) THEN
+            IF (XYZ(1)==M%XS) XYZ(1) = XYZ(1) + 0.01_EB*M%DX(1)
+            IF (XYZ(1)==M%XF) XYZ(1) = XYZ(1) - 0.01_EB*M%DX(M%IBAR)
+            IF (XYZ(2)==M%YS) XYZ(2) = XYZ(2) + 0.01_EB*M%DY(1)
+            IF (XYZ(2)==M%YF) XYZ(2) = XYZ(2) - 0.01_EB*M%DY(M%JBAR)
+            IF (XYZ(3)==M%ZS) XYZ(3) = XYZ(3) + 0.01_EB*M%DZ(1)
+            IF (XYZ(3)==M%ZF) XYZ(3) = XYZ(3) - 0.01_EB*M%DZ(M%KBAR)
             MESH_NUMBER = NM
             BAD = .FALSE.
             EXIT MESH_LOOP
