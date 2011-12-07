@@ -608,7 +608,7 @@ void createDepthTexture( void ){
 
 void getDepthTexture( void ){
   if ( depthtexture_id==0 ) createDepthTexture();
-  glActiveTexture(GL_TEXTURE3);
+  glActiveTexture(GL_TEXTURE4);
   glBindTexture(GL_TEXTURE_2D, depthtexture_id);
   glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0,0, 0, 0, screenWidth, screenHeight);
   glActiveTexture(GL_TEXTURE0);

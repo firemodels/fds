@@ -355,7 +355,6 @@ void drawsmoke_frame(void){
       if(usegpu==1){
       //  glBlendFunc(GL_ONE,GL_ONE_MINUS_SRC_ALPHA);        
         sniffErrors("before drawsmoke3dGPUVOL");
-// this is only a test       createDepthTexture();
         drawsmoke3dGPUVOL();
         sniffErrors("after drawsmoke3dGPUVOL");
       //  glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
