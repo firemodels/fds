@@ -1,0 +1,14 @@
+&HEAD CHID='wind_test1',TITLE='test experimental wind data display in smokeview SVN $Revision: 7448 $' /
+
+&MESH IJK=16,16,32, XB=0.0,200.0,0.0,200.0,0.0,200.0 /
+
+
+&TIME T_END=0.0 /  Total simulation time
+
+
+&VENT XB=  0.0,200.0,  0.0,  0.0,  0.0,200.0,SURF_ID='OPEN'/
+&VENT XB=200.0,200.0,  0.0,200.0,  0.0,200.0,SURF_ID='OPEN'/
+&VENT XB=  0.0,200.0,200.0,200.0,  0.0,200.0,SURF_ID='OPEN'/
+&VENT XB=  0.0,  0.0,  0.0,200.0,  0.0,200.0,SURF_ID='OPEN'/
+&VENT XB=  0.0,200.0,  0.0,200.0,200.0,200.0,SURF_ID='OPEN'/
+
