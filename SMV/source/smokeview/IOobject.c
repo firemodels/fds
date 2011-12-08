@@ -4327,10 +4327,12 @@ device *getdevice(char *label){
 
 void rewind_device_file(FILE *stream){
 #define BUFFER_LEN 255
-  char buffer[BUFFER_LEN];
+  char buffer[BUFFER_LEN],*comma;
   int found_data=0,buffer_len=BUFFER_LEN;
 
   fgets(buffer,buffer_len,stream);
+  comma=strchr(buffer,',');
+  if(comma!=NULL)*comma=0;
   trim(buffer);
   if(strcmp(buffer,"//HEADER")!=0){
     rewind(stream);
@@ -4338,6 +4340,8 @@ void rewind_device_file(FILE *stream){
   }
   while(!feof(stream)){
     fgets(buffer,buffer_len,stream);
+    comma=strchr(buffer,',');
+    if(comma!=NULL)*comma=0;
     trim(buffer);
     if(strcmp(buffer,"//DATA")==0){
       found_data=1;
@@ -4356,7 +4360,7 @@ void read_device_header(char *file, device **devices, int *ndevices){
   FILE *stream;
   device *devicecopy,*devicelist=NULL;
 #define BUFFER_LEN 255
-  char buffer[BUFFER_LEN];
+  char buffer[BUFFER_LEN],*comma;
   int buffer_len=BUFFER_LEN,nd=0;
 
   *devices=NULL;
@@ -4365,6 +4369,8 @@ void read_device_header(char *file, device **devices, int *ndevices){
   stream=fopen(file,"r");
   if(stream==NULL)return;
   fgets(buffer,buffer_len,stream);
+  comma=strchr(buffer,',');
+  if(comma!=NULL)*comma=0;
   trim(buffer);
   if(strcmp(buffer,"//HEADER")!=0){
     fclose(stream);
@@ -4374,6 +4380,8 @@ void read_device_header(char *file, device **devices, int *ndevices){
 
   while(!feof(stream)){
     fgets(buffer,buffer_len,stream);
+    comma=strchr(buffer,',');
+    if(comma!=NULL)*comma=0;
     trim(buffer);
     if(strcmp(buffer,"//DATA")==0){
       break;
@@ -4392,6 +4400,8 @@ void read_device_header(char *file, device **devices, int *ndevices){
 
   while(!feof(stream)){
     fgets(buffer,buffer_len,stream);
+    comma=strchr(buffer,',');
+    if(comma!=NULL)*comma=0;
     trim(buffer);
     if(strcmp(buffer,"//DATA")==0){
       break;
@@ -4411,6 +4421,7 @@ void read_device_data(char *file, int filetype, int loadstatus){
   int nrows, ncols;
   int irow, icol;
   float *vals=NULL;
+  unsigned char *valids=NULL;
   int i;
   char *buffer, *buffer2;
   char **devcunits=NULL, **devclabels=NULL;
@@ -4466,6 +4477,7 @@ void read_device_data(char *file, int filetype, int loadstatus){
   NewMemory((void **)&buffer,buffer_len);
   NewMemory((void **)&buffer2,buffer_len);
   NewMemory((void **)&vals,ncols*sizeof(float));
+  NewMemory((void **)&valids,ncols*sizeof(unsigned char));
   NewMemory((void **)&devcunits,ncols*sizeof(char *));
   NewMemory((void **)&devclabels,ncols*sizeof(char *));
   NewMemory((void **)&devices,ncols*sizeof(device *));
@@ -4500,6 +4512,7 @@ void read_device_data(char *file, int filetype, int loadstatus){
     }
     devicei->filetype=filetype;
     NewMemory((void **)&devicei->vals,nrows*sizeof(float));
+    NewMemory((void **)&devicei->valids,nrows*sizeof(unsigned char));
     devicei->timesptr=timesptr;
     strcpy(devicei->unit,devcunits[i]);
     devicei->nvals=nrows-2;
@@ -4509,7 +4522,7 @@ void read_device_data(char *file, int filetype, int loadstatus){
     int icol=0;
 
     fgets(buffer,buffer_len,stream);
-    fparsecsv(buffer,vals,ncols,&ntokens);
+    fparsecsv(buffer,vals,valids,ncols,&ntokens);
     times[irow-2]=vals[icol];
     for(icol=1;icol<ncols;icol++){
       device *devicei;
@@ -4517,6 +4530,7 @@ void read_device_data(char *file, int filetype, int loadstatus){
       devicei = devices[icol];
       if(devicei==NULL)continue;
       devicei->vals[irow-2]=vals[icol];
+      devicei->valids[irow-2]=valids[icol];
     }
   }
   FREEMEMORY(buffer);
@@ -4731,6 +4745,7 @@ void read_device_data(char *file, int filetype, int loadstatus){
   }
 
   FREEMEMORY(vals);
+  FREEMEMORY(valids);
   FREEMEMORY(devcunits);
   FREEMEMORY(devclabels)
   FREEMEMORY(devices);

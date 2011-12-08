@@ -1329,7 +1329,7 @@ int readsmv(char *file, char *file2){
   {
     int return_code;
     
-  // get input file name and form various spreadsheet file names because upon the input file name
+  // get input file name
   
     return_code=get_inpf(file,file2);
     if(return_code!=0)return return_code;

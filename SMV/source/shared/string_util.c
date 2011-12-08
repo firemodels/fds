@@ -20,7 +20,7 @@ char string_util_revision[]="$Revision$";
 
 /* ----------------------- fparsecsv ----------------------------- */
 
-void fparsecsv(char *buffer, float *vals, int ncols, int *ntokens){
+void fparsecsv(char *buffer, float *vals, unsigned char *valids, int ncols, int *ntokens){
   /*! \fn void fparsecsv(char *buffer, float *vals, int ncols, int *ntokens)
       \brief copy comma delimited values from buffer into floating point array vals
        returning number of values found in ntokens
@@ -30,7 +30,14 @@ void fparsecsv(char *buffer, float *vals, int ncols, int *ntokens){
 
   token=strtok(buffer,",");
   while(token!=NULL&&nt<ncols){
-    sscanf(token,"%f",&vals[nt++]);
+    if(STRCMP(token,"NULL")!=0){
+      valids[nt]=1;
+      sscanf(token,"%f",&vals[nt++]);
+    }
+    else{
+      valids[nt]=0;
+      vals[nt++]=0.0;
+    }
     token=strtok(NULL,",");
   }
   *ntokens=nt;
