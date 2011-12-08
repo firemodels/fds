@@ -20,7 +20,13 @@ clear all
 
 addpath 'scripts'
 
-% scripts to run prior to dataplot
+% Directories where the data is stored, and where to write the output
+
+cfil = [pwd,'/verification_data_config_matlab.csv'];
+vdir = [pwd,'/../../Verification/'];
+plotdir = [pwd,'/../../Manuals/'];
+
+% Scripts to run prior to dataplot
 
 radiation_box;            display('radiation_box complete...')
 radiation_plane_layer;    display('radiation_plane_layer complete...')
@@ -29,17 +35,11 @@ wall_internal_radiation;  display('wall_internal_radiation complete...')
 ashrae_7;                 display('ashrae_7 complete...')
 flame_species;            display('flame_species complete...')
 
-% Directories where the data is stored, and where to write the output
-
-cfil = [pwd,'/verification_data_config_matlab.csv'];
-vdir = [pwd,'/../../Verification/'];
-plotdir = [pwd,'/../../Manuals/'];
-
 % The main plotting routine is dataplot
- 
+
 [saved_data,drange] = dataplot(cfil,vdir,plotdir);
 
-%Special cases
+% Special cases
  
 run scripts/turb_model
 run scripts/wall_model

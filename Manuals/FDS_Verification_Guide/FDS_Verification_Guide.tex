@@ -1198,7 +1198,53 @@ this test case confirms that relatively low levels of diffusion are incurred at 
 
 \clearpage
 
-\section{Energy Conservation (\texorpdfstring{{\bf energy\_budget}}{energy\_budget})}
+\section{Mass Conservation}
+
+This section describes tests of global mass conservation. 
+
+\subsection{Flow of a Gas through a Simple Duct (\texorpdfstring{{\bf simple\_duct}}{simple\_duct})} 
+
+In this example, a closed chamber with a simple recirculating duct is used to demonstrate that a gas like carbon dioxide can be transported 
+through multiple meshes and its mass is conserved. An obstruction is created that leaks 0.5~kg of CO$_2$ over a time span of 10~s. 
+
+\begin{figure}[h]
+      \includegraphics[width=3in]{SCRIPT_FIGURES/simple_duct_mass} 
+   \caption[The \bf{simple\_duct} test case.]{The mass of CO$_2$ contained in a simple room connected with a recirculating duct.}
+   \label{simple_duct}
+\end{figure}
+
+
+\clearpage
+
+\subsection{Specified Mass Flux (low\_flux\_hot\_gas\_filling)}
+
+The specification of the fuel mass flux is probably the most commonly used boundary condition for specifying a fire.  When the user specifies the {\ct HRRPUA} (heat release rate per unit area), FDS divides this input by the heat of combustion for the specified fuel (propane by default) and uses this values as the specified mass flux $\dot{m}_{\alpha}^{\prime\prime}$ at the {\ct VENT}.  This seems simple enough.  But the problem is complicated by the fact that the total species flux is the sum of the advective and diffusive fluxes,
+\begin{equation}
+\label{eqn_total_flux}
+\dot{m}_{\alpha}^{\prime\prime} = \rho Y_{\alpha} u_n - \rho D_\alpha \frac{\partial Y_\alpha}{\partial n}
+\end{equation}
+where $u_n$ is the face normal mass-average velocity and $\partial/\partial n$ is the gradient normal to the face.  The velocity is determined from the total mass flux and the density at the face,
+\begin{equation}
+\label{eqn_un}
+u_n = \frac{\sum_\alpha \dot{m}_{\alpha}^{\prime\prime}}{\rho(\mathbf{Y},T)}
+\end{equation}
+The density is computed using old values of the face mass fractions and the face temperature which may be specified or computed depending on choices made by the user.  The new face mass fraction is then set to satisfy (\ref{eqn_total_flux}).  The test case below is designed to exercise contributions from both the advective and diffusive terms in this boundary condition.
+
+In the test case, we inject propane into a cube with 1 m$^2$ vents on all six faces.  We specify the {\ct MASS\_FLUX} of propane to be 0.0001 kg/(m$^2$ s) and the temperature of the face of the {\ct VENT} ({\ct TMP\_FRONT}) is specified to be 500 $^\circ$C.  The box is initially filled with air at standard conditions.  We {\ct DUMP} a {\ct MASS\_FILE} and compare the accumulation of propane with the specified rate.  The results are shown in Figure \ref{fig_low_flux_hot_gas_filling}.
+
+\begin{figure}[h]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{FIGURES/low_flux_hot_gas_filling_domain} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/low_flux_hot_gas_filling}
+\end{tabular*}
+\caption[Low flux of hot gas into a closed domain]{Test of specified mass flux boundary condition for low mass flux and specified temperature on the face of the {\ct VENT}. (Left) Image of the domain showing contours of propane mass fraction. (Right) Comparison of the accumulated mass of propane with the FDS values reported in the {\ct \_mass} file.}
+\label{fig_low_flux_hot_gas_filling}
+\end{figure}
+
+
+\clearpage
+
+\section{Energy Conservation}
 
 Because FDS employs a low Mach number assumption, it does not explicitly solve the energy conservation equation. Instead, mass transport equations are solved for the
 density and the $n-1$ gas species. Source terms from the energy equation are incorporated in the divergence, $\nabla \cdot \bu$, which arises in the
@@ -1690,37 +1736,7 @@ The predicted shield temperature is plotted in Fig.~\ref{radiation_shield_plot}.
 
 This chapter contains examples that test the computations related to species concentrations, gas properties and combustion.
 
-\section{Boundary Conditions}
 
-For most problems involving fire or combustion, \emph{the} most important parameter of a model is the total heat release.  It is therefore extremely important to assure that the correct amount of fuel is injected into the FDS computational domain.  Below we present a series of test cases for the species boundary conditions.
-
-\subsection{Specified Mass Flux (low\_flux\_hot\_gas\_filling)}
-
-The specification of the fuel mass flux is probably the most commonly used boundary condition for specifying a fire.  When the user specifies the {\ct HRRPUA} (heat release rate per unit area), FDS divides this input by the heat of combustion for the specified fuel (propane by default) and uses this values as the specified mass flux $\dot{m}_{\alpha}^{\prime\prime}$ at the {\ct VENT}.  This seems simple enough.  But the problem is complicated by the fact that the total species flux is the sum of the advective and diffusive fluxes,
-\begin{equation}
-\label{eqn_total_flux}
-\dot{m}_{\alpha}^{\prime\prime} = \rho Y_{\alpha} u_n - \rho D_\alpha \frac{\partial Y_\alpha}{\partial n}
-\end{equation}
-where $u_n$ is the face normal mass-average velocity and $\partial/\partial n$ is the gradient normal to the face.  The velocity is determined from the total mass flux and the density at the face,
-\begin{equation}
-\label{eqn_un}
-u_n = \frac{\sum_\alpha \dot{m}_{\alpha}^{\prime\prime}}{\rho(\mathbf{Y},T)}
-\end{equation}
-The density is computed using old values of the face mass fractions and the face temperature which may be specified or computed depending on choices made by the user.  The new face mass fraction is then set to satisfy (\ref{eqn_total_flux}).  The test case below is designed to exercise contributions from both the advective and diffusive terms in this boundary condition.
-
-In the test case, we inject propane into a cube with 1 m$^2$ vents on all six faces.  We specify the {\ct MASS\_FLUX} of propane to be 0.0001 kg/(m$^2$ s) and the temperature of the face of the {\ct VENT} ({\ct TMP\_FRONT}) is specified to be 500 $^\circ$C.  The box is initially filled with air at standard conditions.  We {\ct DUMP} a {\ct MASS\_FILE} and compare the accumulation of propane with the specified rate.  The results are shown in Figure \ref{fig_low_flux_hot_gas_filling}.
-
-\begin{figure}[h]
-\begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{FIGURES/low_flux_hot_gas_filling_domain} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/low_flux_hot_gas_filling}
-\end{tabular*}
-\caption[Low flux of hot gas into a closed domain]{Test of specified mass flux boundary condition for low mass flux and specified temperature on the face of the {\ct VENT}. (Left) Image of the domain showing contours of propane mass fraction. (Right) Comparison of the accumulated mass of propane with the FDS values reported in the {\ct \_mass} file.}
-\label{fig_low_flux_hot_gas_filling}
-\end{figure}
-
-
-\clearpage
 
 \section{Product Yields (Methane\_flame)}
 
@@ -1753,7 +1769,7 @@ The mixing-controlled (mixed is burned) reaction model with local extinction is 
 \end{equation}
 where $C_{EDC}$ is a model constant related to the turbulent subgrid model, $\beta_{EDC}$ is a model constant related to combustion, and $s$ is the mass stoichiometric coefficient. This model can be considered a deficient model as the consumption rate is found by the limiting species. To determine species evolution for the reaction, a system of ordinary differential equations is solved for each participating species ($\alpha$):
 \begin{equation}\label{eq:spec_ode}
-\frac{dY_{\alpha}}{dt}= \frac{\nu_{\alpha} \, W_{\alpha}}{W_F} \, \dot{m}^{\prime\prime\prime}_{F} 
+\frac{dY_{\alpha}}{dt}= \frac{\nu_{\alpha} \, W_{\alpha}}{W_F} \, \dot{m}^{\prime\prime\prime}_{F}
 \end{equation}
 To test this implementation, a one-step methane reaction
 \begin{equation}\label{eq:1step_methane}
@@ -1793,13 +1809,13 @@ The solution process for species evolution in finite rate reactions is similar t
 \begin{equation}\label{eq:FR_Arr}
 {k}_{i}=-AT^{n_{\alpha}}\exp(-E/RT)
 \end{equation}
-where $A$ is the pre-exponential, $E$ is the activation energy, and $n_{\alpha}$ determines the temperature dependence of the reaction. $A$, $E$, and $n_{\alpha}$ are user defined inputs based on a specificly defined reaction. The species mass flux for each reaction is defined by: 
+where $A$ is the pre-exponential, $E$ is the activation energy, and $n_{\alpha}$ determines the temperature dependence of the reaction. $A$, $E$, and $n_{\alpha}$ are user defined inputs based on a specificly defined reaction. The species mass flux for each reaction is defined by:
 \begin{equation}\label{eq:FR_mdot}
 \dot{m}^{\prime\prime\prime}_{\alpha,i}=k_{i}\,\displaystyle\prod Y_{\alpha}^{a_{\alpha,i}}
-\end{equation} 
+\end{equation}
 where $a_{\alpha,i}$ is a vector of species exponents defined by the user. To determine the species evolution for the reaction, a system of ordinary equations is solved for each of the participating species:
 \begin{equation}\label{eq:FR_spec}
-\frac{dY_{\alpha}}{dt}=\displaystyle\sum_{i=1}^{NR} \dot{m}^{\prime\prime\prime}_{\alpha,i} 
+\frac{dY_{\alpha}}{dt}=\displaystyle\sum_{i=1}^{NR} \dot{m}^{\prime\prime\prime}_{\alpha,i}
 \end{equation}
 where $\alpha$ represents each species and $\mathrm{NR}$ is the number of reactions. The values of $a_{\alpha}$ in Equation (\ref{eq:FR_mdot}) are specific to each reaction and for non-zero values, Equation (\ref{eq:FR_spec}) becomes  a system of non-linear differential equations. We consider both linear and non-linear cases with one and two-step reaction mechanisms. First we examine two one-step cases; a zero-order and second-order reaction. Equation (\ref{eq:1step_CO}) shows a one-step, zero-order test case of carbon monoxide oxidation:
 \begin{equation}\label{eq:1step_CO}
@@ -1808,7 +1824,7 @@ where $\alpha$ represents each species and $\mathrm{NR}$ is the number of reacti
 The reaction rate input parameters are shown in the table below. $E$, $a_{\alpha}$, and $n_{\alpha}$ are set to zero, and $A$ is set such that ${k}_{i} = 1$. The resulting reaction rates simplify to a function of molecular weight and stoichiometric coefficients. Species evolutions results from the CO reaction in Equation (\ref{eq:1step_CO}) are shown in Figure \ref{fig:Arrhenius_0Order_1step}.
 
 \begin{center}
-\begin{tabular}{|l|l|l|l|l|l|l|l|l|} 
+\begin{tabular}{|l|l|l|l|l|l|l|l|l|}
 \hline Reaction & $\nu_{\alpha}$ & E (kJ/kmol) & A (cm$^3$/mole/s) & $a_{\alpha}$ & $n_{\alpha}$  \\ \hline \hline
 \ref{eq:1step_CO} & [-1 -0.5 1] & 0 & 4.244e-6 & [0 0 0] & [0 0 0] \\ \hline
 \end{tabular}
@@ -1828,7 +1844,7 @@ The second test case is a one-step, second-order propane reaction:
 \begin{equation}\label{eq:1step_propane}
 \mathrm{C_3H_8 + 5 \, O_2 \rightarrow  3 \, CO_2 + 4 \, H_2O}
 \end{equation}
-The table below shows the reaction rate input parameters. In this case, $a_{\alpha}=[1,1,0,0]$  for propane, oxygen, carbon monoxide, and water vapor respectively. This makes the reaction second-order as $\mathcal{O}=\sum a_{\alpha}$. Species evolutions for the one-step second-order reaction are shown in Figure \ref{fig:Arrhenius_2Order_1step}. 
+The table below shows the reaction rate input parameters. In this case, $a_{\alpha}=[1,1,0,0]$  for propane, oxygen, carbon monoxide, and water vapor respectively. This makes the reaction second-order as $\mathcal{O}=\sum a_{\alpha}$. Species evolutions for the one-step second-order reaction are shown in Figure \ref{fig:Arrhenius_2Order_1step}.
 
 \begin{center}
 \begin{tabular}{|l|l|l|l|l|l|l|l|l|}
@@ -1881,7 +1897,7 @@ $\alpha$ is defined as [$\mathrm{C_3H_8}$ $\mathrm{O_2}$ $\mathrm{CO}$ $\mathrm{
 \end{center}
 Equation (\ref{eq:2step_propane_rev}) includes the decomposition of $\mathrm{CO_2}$ into $\mathrm{CO}$ and $\mathrm{O_2}$ which the forward only two-step mechanism, Equation (\ref{eq:2step_propane}), does not. This reverse reaction mechanism is represented by three separate reactions on the {\ct REAC} line in an FDS input file as indicated by rows $\mathrm{a}$, $\mathrm{b}$ and $\mathrm{c}$ in the preceding table. Species evolutions for the 2 step reverse reaction are shown in the right plot in Figure \ref{fig:Arrhenius_175Order_23step}. In the forward CO step, (row $\mathrm{b}$ in the two prior tables), we see that water vapor contributes to the reaction rate based on its local concentration despite not being a participant in the reaction.
 \vskip8pt
-Note: the values of $E$ and $A$ used in these examples are necessarily representative of the chemical reactions presented. When using finite rate chemistry consult experimental data or literature for appropriate reaction parameters. 
+Note: the values of $E$ and $A$ used in these examples are necessarily representative of the chemical reactions presented. When using finite rate chemistry consult experimental data or literature for appropriate reaction parameters.
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
@@ -1892,7 +1908,7 @@ Note: the values of $E$ and $A$ used in these examples are necessarily represent
 \label{fig:Arrhenius_175Order_23step}
 \end{figure}
 \vskip8pt
-To couple verification of species mass fraction, compartment temperature, and compartment pressure an equilibrium example problem was setup. In this case, we examine a sealed box filled with a stoichiometric mixture of fuel, oxygen, and nitrogen. The two-step reversible reaction mechanism, Equation (\ref{eq:2step_propane_rev}), is used to drive the FDS simulation. The initial temperature is set to 350 $^\circ$C to ensure the reaction occurs in timely manner. The reaction rate parameters in the table below are based off values in literature from Westbrook and Dryer \cite{Westbrook:1}. The heat of combustion for reaction \ref{eq:2step_propane_rev} a and \ref{eq:2step_propane_rev} b were found using data from the NIST JANAF tables \cite{NIST_JANAF}. The heat of combustion for the reversible reaction, \ref{eq:2step_propane_rev} c, was calculated by FDS by setting REVERSIBLE=.TRUE. on the {\ct REAC} line and identifying the appropriate forward reaction ID. 
+To couple verification of species mass fraction, compartment temperature, and compartment pressure an equilibrium example problem was setup. In this case, we examine a sealed box filled with a stoichiometric mixture of fuel, oxygen, and nitrogen. The two-step reversible reaction mechanism, Equation (\ref{eq:2step_propane_rev}), is used to drive the FDS simulation. The initial temperature is set to 350 $^\circ$C to ensure the reaction occurs in timely manner. The reaction rate parameters in the table below are based off values in literature from Westbrook and Dryer \cite{Westbrook:1}. The heat of combustion for reaction \ref{eq:2step_propane_rev} a and \ref{eq:2step_propane_rev} b were found using data from the NIST JANAF tables \cite{NIST_JANAF}. The heat of combustion for the reversible reaction, \ref{eq:2step_propane_rev} c, was calculated by FDS by setting REVERSIBLE=.TRUE. on the {\ct REAC} line and identifying the appropriate forward reaction ID.
 \begin{center}
 \begin{tabular}{|l|l|l|l|l|l|l|l|l|}
 \hline Reaction & $\nu_{\alpha}$ & E (kJ/kmol) & A (cm$^3$/mole/s) & $a_{\alpha}$ & $n_{\alpha}$  \\ \hline \hline
