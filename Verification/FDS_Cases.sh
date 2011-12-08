@@ -27,10 +27,11 @@ $RUNFDS Fires spray_burner
 $RUNFDS Flowfields gas_filling
 $RUNFDS Flowfields helium_2d
 $RUNFDS Flowfields jet_fan
-$RUNFDS Flowfields sawtooth
-$RUNFDS Flowfields tangential_velocity
-$RUNFDS Flowfields symmetry_test
 $RUNFDS Flowfields low_flux_hot_gas_filling
+$RUNFDS Flowfields sawtooth
+$RUNFDS Flowfields simple_duct
+$RUNFDS Flowfields symmetry_test
+$RUNFDS Flowfields tangential_velocity
 
 $RUNFDS HVAC ashrae7_fixed_flow
 $RUNFDS HVAC ashrae7_quadratic
