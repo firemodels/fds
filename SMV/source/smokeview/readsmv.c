@@ -956,6 +956,7 @@ void parse_device_keyword(FILE *stream, device *devicei){
 
   devicei->type=DEVICE_DEVICE;
   fgets(buffer,255,stream);
+  trim_commas(buffer);
 
   strcpy(devicei->quantity,"");
   quant=strchr(buffer,'%');
@@ -973,6 +974,8 @@ void parse_device_keyword(FILE *stream, device *devicei){
   devicei->timesptr=NULL;
   devicei->vals=NULL;
   fgets(buffer,255,stream);
+  trim_commas(buffer);
+
   sscanf(buffer,"%f %f %f %f %f %f %i %i %i",
     xyz,xyz+1,xyz+2,xyzn,xyzn+1,xyzn+2,&state0,&nparams,&nparams_textures);
   get_labels(buffer,-1,&prop_id,NULL,prop_buffer);
@@ -1022,6 +1025,8 @@ void parse_device_keyword(FILE *stream, device *devicei){
     pc=params;
     for(i=0;i<nsize/6;i++){
       fgets(buffer,255,stream);
+      trim_commas(buffer);
+
       sscanf(buffer,"%f %f %f %f %f %f",pc,pc+1,pc+2,pc+3,pc+4,pc+5);
       pc+=6;
     }
@@ -1030,6 +1035,7 @@ void parse_device_keyword(FILE *stream, device *devicei){
   get_elevaz(devicei->xyznorm,&devicei->dtheta,devicei->rotate_axis,NULL);
   if(nparams_textures>0){
     fgets(buffer,255,stream);
+    trim_commas(buffer);
     trim(buffer);
     buffer3=trim_front(buffer);
     NewMemory((void **)&devicei->texturefile,strlen(buffer3)+1);
@@ -11227,7 +11233,7 @@ void get_labels(char *buffer, int kind, char **label1, char **label2, char prop_
 propdata *get_prop_id(char *prop_id){
   int i;
 
-  if(prop_id==NULL||strlen(prop_id)==0)return NULL;
+  if(propinfo==NULL||prop_id==NULL||strlen(prop_id)==0)return NULL;
   for(i=0;i<npropinfo;i++){
     propdata *propi;
 

@@ -100,7 +100,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   if(updatefacelists==1)update_facelists();
   if(showstereo==0||showstereo==1)ClearBuffers(mode);
 
-/* ++++++++++++++++++++++++ draw viewports +++++++++++++++++++++++++ */
+/* ++++++++++++++++++++++++ setup viewports +++++++++++++++++++++++++ */
 
   if(mode==RENDER){
     BLOCK_viewport(quad,          s_left,s_down,s_width,s_height);

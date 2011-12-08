@@ -30,6 +30,7 @@ EXTERNCPP char *getprogdir(char *progname);
 
 EXTERNCPP char *lastname(char *argi);
 EXTERNCPP void trim(char *line);
+EXTERNCPP void trim_commas(char *line);
 EXTERNCPP char *trim_front(char *line);
 EXTERNCPP void trimzeros(char *line);
 EXTERNCPP void trimmzeros(char *line);

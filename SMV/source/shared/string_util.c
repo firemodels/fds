@@ -349,6 +349,18 @@ char *get_zonefilename(char *bufptr){
   return filename;
 }
 
+/* ------------------ trim_commas ------------------------ */
+
+void trim_commas(char *line){
+  char *c;
+  
+  for(c = line + strlen(line) - 1;c>=line;c--){
+    if(strncmp(c," ",1)==0||strncmp(c,"\n",1)==0||strncmp(c,"\r",1)==0)continue;
+    if(strncmp(c,",",1)!=0)break;
+    *c=' ';
+  }
+}
+
 /* ------------------ trim ------------------------ */
 
 void trim(char *line){
