@@ -721,7 +721,7 @@ typedef struct _device{
   char label[30], *labelptr;
   char quantity[30], unit[30];
   float **timesptr, *vals;
-  unsigned char *valids;
+  int *valids;
   int ival,nvals,type2,type2vis;
   mesh *device_mesh;
   texture  *textureinfo;

@@ -518,12 +518,12 @@ void draw_devices_val(void){
   glPopMatrix();
 }
 
-/* ----------------------- get_devices_val ----------------------------- */
+/* ----------------------- get_vdevice_vel ----------------------------- */
 
-void get_vdevice_vel(float time, vdevice *vdevicei, float *vel, unsigned char *valid_vel){
+void get_vdevice_vel(float time, vdevice *vdevicei, float *vel, int *valid_vel){
   float uvel=0.0, vvel=0.0, wvel=0.0;
   device *udev, *vdev, *wdev;
-  unsigned char validu=1,validv=1,validw=1;
+  int validu=1,validv=1,validw=1;
 
   udev = vdevicei->udev;
   vdev = vdevicei->vdev;
@@ -556,15 +556,17 @@ void get_vdevice_vel(float time, vdevice *vdevicei, float *vel, unsigned char *v
   if(time>=times[IVAL]&&time<=times[IVAL+1]){\
     if(time-times[IVAL]<times[IVAL+1]-time){\
       devicei->val=devicei->vals[IVAL];\
+      *valid=devicei->valids[IVAL];\
     }\
     else{\
       devicei->val=devicei->vals[IVAL+1];\
+      *valid=devicei->valids[IVAL+1];\
     }\
     devicei->ival=IVAL;\
     return devicei->val;\
   }
 
-float get_device_val(float time, device *devicei, unsigned char *valid){
+float get_device_val(float time, device *devicei, int *valid){
   int nvals;
   int i, ival;
   float *times;
@@ -620,11 +622,15 @@ float get_device_val(float time, device *devicei, unsigned char *valid){
 void output_device_val(device *devicei){
   char label[1000];
   float val;
-  unsigned char valid;
+  int valid;
 
   val=get_device_val(times[itimes],devicei,&valid);
   if(valid==1){
     sprintf(label,"%s: %.1f %s\n",devicei->quantity,val,devicei->unit);
+    output3Text(foregroundcolor,0.0,0.0,0.0,label);
+  }
+  else{
+    sprintf(label,"%s: invalid\n",devicei->quantity);
     output3Text(foregroundcolor,0.0,0.0,0.0,label);
   }
 }
@@ -663,7 +669,7 @@ void draw_devices(void){
       vdevice *vdevi;
       float vel[3],*xyz, xxx1[3], xxx2[3];
       int j;
-      unsigned char valid;
+      int valid;
 
       vdevi = vdeviceinfo + i;
       if(vdevi->unique==0)continue;
@@ -4443,7 +4449,7 @@ void read_device_data(char *file, int filetype, int loadstatus){
   int nrows, ncols;
   int irow, icol;
   float *vals=NULL;
-  unsigned char *valids=NULL;
+  int *valids=NULL;
   int i;
   char *buffer, *buffer2;
   char **devcunits=NULL, **devclabels=NULL;
@@ -4499,7 +4505,7 @@ void read_device_data(char *file, int filetype, int loadstatus){
   NewMemory((void **)&buffer,buffer_len);
   NewMemory((void **)&buffer2,buffer_len);
   NewMemory((void **)&vals,ncols*sizeof(float));
-  NewMemory((void **)&valids,ncols*sizeof(unsigned char));
+  NewMemory((void **)&valids,ncols*sizeof(int));
   NewMemory((void **)&devcunits,ncols*sizeof(char *));
   NewMemory((void **)&devclabels,ncols*sizeof(char *));
   NewMemory((void **)&devices,ncols*sizeof(device *));
@@ -4534,7 +4540,7 @@ void read_device_data(char *file, int filetype, int loadstatus){
     }
     devicei->filetype=filetype;
     NewMemory((void **)&devicei->vals,nrows*sizeof(float));
-    NewMemory((void **)&devicei->valids,nrows*sizeof(unsigned char));
+    NewMemory((void **)&devicei->valids,nrows*sizeof(int));
     devicei->timesptr=timesptr;
     strcpy(devicei->unit,devcunits[i]);
     devicei->nvals=nrows-2;
