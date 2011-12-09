@@ -411,6 +411,10 @@ OUTPUT_QUANTITY(90:98)%SPEC_ID_REQUIRED = .TRUE.
 
 ! Miscellaneous
 
+OUTPUT_QUANTITY(99)%NAME  = 'CHEMISTRY SUBITERATIONS'                   
+OUTPUT_QUANTITY(99)%UNITS  = ' '                    
+OUTPUT_QUANTITY(99)%SHORT_NAME  = 'max chem it'
+
 OUTPUT_QUANTITY(100)%NAME  = 'PRESSURE ZONE'                   
 OUTPUT_QUANTITY(100)%UNITS  = ' '                    
 OUTPUT_QUANTITY(100)%SHORT_NAME  = 'zone'
@@ -1532,13 +1536,18 @@ SELECT CASE (SPEC_ID)
       H = (1._EB-Y_O2_INFTY)*147389.82301_EB+Y_O2_INFTY*190332.28442_EB !J/kg
       CP = (1._EB-Y_O2_INFTY)*CP+Y_O2_INFTY*CP2 !J/kg/K
    CASE('ARGON')
-         CP = 20.786_EB / 0.040_EB !J/kg/K
-         H = 120683.65150_EB !J/kg  
+      CP = 20.786_EB / 0.040_EB !J/kg/K
+      H = 120683.65150_EB !J/kg  
    CASE('BUTANE') !NIST webbook
       TE = MIN(1500._EB,MAX(50._EB,TE))
       CP = 8.86084E-10_EB*TE**4 - 2.73703E-06_EB*TE**3 + 1.22469E-03_EB*TE**2 + 4.07041E+00_EB*TE + 4.91048E+02_EB !J/kg/K
       H = 272771.23409_EB !J/kg      
-      FUEL = .TRUE.                 
+      FUEL = .TRUE.
+   CASE('CARBON') !NIST webbook
+      TE = MIN(5727._EB,MAX(25._EB,TE))
+      CP = -0.013103_EB/TE**2-0.043256_EB*TE**3+0.448537_EB*TE**2-0.812428_EB*TE+21.17510_EB
+      CP = CP /  12.0107*1000_EB!J/kg/K
+      
    CASE('CARBON DIOXIDE')
       IF (TE<100._EB) THEN
          CP = 658._EB + TE * 0.06981_EB !J/kg/K
@@ -1585,7 +1594,7 @@ SELECT CASE (SPEC_ID)
       CP = -1147.201_EB+169062500_EB/TE**3-5034450._EB/TE**2+68548.35_EB/TE-0.1448912_EB*TE+0.00002890129_EB*TE**2 -&
              0.000000004187057_EB*TE**3+0.0000000000003534827_EB*TE**4-1.289128E-17_EB*TE**5+183.1773_EB*LOG(TE)!J/mol/K
       CP = CP / 30.02598_EB * 1000._EB !J/kg/K
-      H = 580062.72682_EB !J/kg            
+      H = 580062.72682_EB !J/kg
    CASE('HYDROGEN')
       IF (TE<100._EB) THEN
          CP = 14685._EB - TE * 9.084204_EB !J/kg/K
@@ -1595,6 +1604,10 @@ SELECT CASE (SPEC_ID)
          CP = CP /  2.01588*1000_EB!J/kg/K
       ENDIF
       H = 200059.42623_EB !J/kg
+   CASE('HYDROGEN ATOM')
+      CP = 20.786 !J/mol/K
+      CP = CP / 1.00849 !J/kg/K
+         
    CASE('HYDROGEN BROMIDE')
       IF (TE<100._EB) THEN
          CP = 350.925_EB + TE * 0.084659_EB !J/kg/K
@@ -1693,6 +1706,11 @@ SELECT CASE (SPEC_ID)
          CP = CP / 28.0134 * 1000._EB !J/kg/K
       ENDIF
       H = 147389.82301_EB !J/kg     
+   CASE('NITROGEN ATOM')
+      TE = MIN(6000._EB,MAX(298._EB,TE))
+      CP = 21.13581_EB - 0.388842_EB*TE + 0.043545_EB*TE**2 + 0.024685_EB*TE**3 - 0.025678/TE**2 !kJ/mol/K
+      CP = CP / 14.0067_EB * 1000._EB ! J/kg/K
+   
    CASE('NITROGEN DIOXIDE')
       IF (TE<100._EB) THEN
          CP = 722.2609_EB + TE * 0.010559_EB !J/kg/K
@@ -1720,6 +1738,16 @@ SELECT CASE (SPEC_ID)
          CP = CP / 31.9988*1000_EB!J/kg-K
       ENDIF
       H = 190302.3147857_EB !J/kg     
+   CASE('OXYGEN ATOM')
+     IF (TE<100._EB) THEN
+        CP = 0.237_EB*TE + 3.0E-15_EB
+     ELSEIF (TE >= 100._EB .AND. TE < 600._EB) THEN
+        CP = -1E-8_EB*TE**3 + 2E-5_EB*TE**2 - 0.017*TE + 25.001
+     ELSE
+        CP = -1E-11_EB*TE**3 + 2E-7_EB*TE**2 - 0.0007*TE +21.455 !kJ/mol/K
+     ENDIF
+     CP = CP / 15.9994*1000._EB !J/kg
+     
    CASE('PROPANE') !NIST webbook
       TE = MIN(1500._EB,MAX(100._EB,TE))
       CP = 1.67536E-09_EB*TE**4 - 5.46675E-06_EB*TE**3 + 4.38029E-03_EB*TE**2 + 2.79490E+00_EB*TE + 6.11728E+02_EB !J/kg/K   
@@ -1767,7 +1795,8 @@ SELECT CASE (SPEC_ID)
               0.000000000002963585_EB*TE**4-1.655321E-16_EB*TE**5+104.9238_EB*LOG(TE) !kJ/mol/K
          CP = CP / 146.0554_EB * 1000._EB !J/kg/K
       ENDIF
-      H = 102305.59191_EB !J/kg     CASE('TOLUENE')
+      H = 102305.59191_EB !J/kg     
+   CASE('TOLUENE')
       TE = MAX(TE,200._EB)
       CP = -1764.869_EB+730089.6_EB/TE**2+37622.14_EB/TE-0.223475_EB*TE+0.00003599891_EB*TE**2-0.00000000395711_EB*TE**3+&
             0.0000000000002350988_EB*TE**4-5.2885E-18_EB*TE**5+315.3972_EB*LOG(TE) !kJ/mol/K
