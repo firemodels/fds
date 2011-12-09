@@ -520,20 +520,34 @@ void draw_devices_val(void){
 
 /* ----------------------- get_devices_val ----------------------------- */
 
-void get_vdevice_vel(float time, vdevice *vdevicei, float *vel){
+void get_vdevice_vel(float time, vdevice *vdevicei, float *vel, unsigned char *valid_vel){
   float uvel=0.0, vvel=0.0, wvel=0.0;
   device *udev, *vdev, *wdev;
+  unsigned char validu=1,validv=1,validw=1;
 
   udev = vdevicei->udev;
   vdev = vdevicei->vdev;
   wdev = vdevicei->wdev;
 
-  if(udev!=NULL)uvel=get_device_val(time,udev);
-  if(vdev!=NULL)vvel=get_device_val(time,vdev);
-  if(wdev!=NULL)wvel=get_device_val(time,wdev);
-  vel[0]=uvel;
-  vel[1]=vvel;
-  vel[2]=wvel;
+  *valid_vel=0;
+  if(udev!=NULL){
+    uvel=get_device_val(time,udev,&validu);
+    if(validu==0)*valid_vel=0;
+  }
+  if(vdev!=NULL){
+    vvel=get_device_val(time,vdev,&validv);
+    if(validv==0)*valid_vel=0;
+  }
+  if(wdev!=NULL){
+    wvel=get_device_val(time,wdev,&validw);
+    if(validw==0)*valid_vel=0;
+  }
+  if(validu==1&&validv==1&&validw==1){
+    vel[0]=uvel;
+    vel[1]=vvel;
+    vel[2]=wvel;
+    *valid_vel=1;
+  }
 }
 
 /* ----------------------- get_devices_val ----------------------------- */
@@ -550,7 +564,7 @@ void get_vdevice_vel(float time, vdevice *vdevicei, float *vel){
     return devicei->val;\
   }
 
-float get_device_val(float time, device *devicei){
+float get_device_val(float time, device *devicei, unsigned char *valid){
   int nvals;
   int i, ival;
   float *times;
@@ -571,10 +585,12 @@ float get_device_val(float time, device *devicei){
   if(time<=times[0]){
     devicei->val=devicei->vals[0];
     devicei->ival=0;
+    *valid=devicei->valids[0];
   }
   else if(time>=times[nvals-1]){
     devicei->val=devicei->vals[nvals-1];
     devicei->ival=nvals-2;
+    *valid=devicei->valids[nvals-1];
   }
   else{
     int low, mid, high;
@@ -593,6 +609,7 @@ float get_device_val(float time, device *devicei){
     }
     devicei->ival=low;
     devicei->val=devicei->vals[low];
+    *valid=devicei->valids[low];
   }
 
   return devicei->val;
@@ -603,10 +620,13 @@ float get_device_val(float time, device *devicei){
 void output_device_val(device *devicei){
   char label[1000];
   float val;
+  unsigned char valid;
 
-  val=get_device_val(times[itimes],devicei);
-  sprintf(label,"%s: %.1f %s\n",devicei->quantity,val,devicei->unit);
-  output3Text(foregroundcolor,0.0,0.0,0.0,label);
+  val=get_device_val(times[itimes],devicei,&valid);
+  if(valid==1){
+    sprintf(label,"%s: %.1f %s\n",devicei->quantity,val,devicei->unit);
+    output3Text(foregroundcolor,0.0,0.0,0.0,label);
+  }
 }
 
   /* ----------------------- draw_devices ----------------------------- */
@@ -643,23 +663,25 @@ void draw_devices(void){
       vdevice *vdevi;
       float vel[3],*xyz, xxx1[3], xxx2[3];
       int j;
+      unsigned char valid;
 
       vdevi = vdeviceinfo + i;
       if(vdevi->unique==0)continue;
       xyz=vdevi->valdev->xyz;
-      get_vdevice_vel(times[itimes], vdevi, vel);
-      for(j=0;j<3;j++){
-        xxx1[j] = xyz[j] - 0.5*vel[j]/max_dev_vel;
-        xxx2[j] = xyz[j] + 0.5*vel[j]/max_dev_vel;
+      get_vdevice_vel(times[itimes], vdevi, vel, &valid);
+      if(valid==1){
+        for(j=0;j<3;j++){
+          xxx1[j] = xyz[j] - 0.5*vel[j]/max_dev_vel;
+          xxx2[j] = xyz[j] + 0.5*vel[j]/max_dev_vel;
+        }
+        glBegin(GL_LINES);
+        glVertex3fv(xxx1);
+        glVertex3fv(xxx2);
+        glEnd();
+        glBegin(GL_POINTS);
+        glVertex3fv(xxx2);
+        glEnd();
       }
-      glBegin(GL_LINES);
-      glVertex3fv(xxx1);
-      glVertex3fv(xxx2);
-      glEnd();
-      glBegin(GL_POINTS);
-      glVertex3fv(xxx2);
-      glEnd();
-      
     }
     glPopMatrix();
   }
