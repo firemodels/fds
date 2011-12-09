@@ -2511,8 +2511,8 @@ REACTION_LOOP: DO N=1,N_REACTIONS
          WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Activation Energy:',RN%E_IN
          WRITE(LU_OUTPUT,'(/A)') '   Fuel                           Heat of Combustion (kJ/kg)'    
          WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') RN%FUEL,RN%HEAT_OF_COMBUSTION/1000._EB
-      CASE (MIXING_CONTROLLED)
-         WRITE(LU_OUTPUT,'(3X,A)')  'Mixing Controlled Reaction'
+      CASE (EDDY_DISSIPATION)
+         WRITE(LU_OUTPUT,'(3X,A)')  'Eddy Dissipation Reaction'
          WRITE(LU_OUTPUT,'(//3X,A)') 'Tracked Species'
          WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'
          DO NN=0,N_TRACKED_SPECIES
@@ -4686,7 +4686,11 @@ SELECT CASE(IND)
          MEC = SPECIES(Y_INDEX)%MASS_EXTINCTION_COEFFICIENT
       ENDIF
       GAS_PHASE_OUTPUT = Y_SPECIES*RHO(II,JJ,KK)*MEC/2.3_EB
-
+   
+   CASE(99) ! CHEMISTRY SUBITERATIONS
+      GAS_PHASE_OUTPUT = MAX_CHEM_SUBIT(NM)
+      MAX_CHEM_SUBIT(NM)=0
+   
    CASE(100) ! PRESSURE ZONE
       GAS_PHASE_OUTPUT = PRESSURE_ZONE(II,JJ,KK)
 
