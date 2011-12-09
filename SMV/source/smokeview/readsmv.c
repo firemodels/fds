@@ -949,27 +949,33 @@ void parse_device_keyword(FILE *stream, device *devicei){
   int nparams=0, nparams_textures=0;
   char *labelptr, *prop_id;
   char prop_buffer[255];
-  char quant_buffer[255];
-  char *quant;
   char buffer[255],buffer2[255],*bufptr,*buffer3;
   int i;
+  char *tok1, *tok2, *tok3;
 
   devicei->type=DEVICE_DEVICE;
   fgets(buffer,255,stream);
   trim_commas(buffer);
 
+  tok1=strtok(buffer,"%");
+  tok1=trim_string(tok1);
+
+  tok2=strtok(NULL,"%");
+  tok2=trim_string(tok2);
+  
+  tok3=strtok(NULL,"%");
+  tok3=trim_string(tok3);
+
   strcpy(devicei->quantity,"");
-  quant=strchr(buffer,'%');
-  if(quant!=NULL){
-    *quant=0;
-    quant++;
-    trim(quant);
-    strcpy(devicei->quantity,trim_front(quant));
+  if(tok2!=NULL){
+    strcpy(devicei->quantity,tok2);
   }
 
-  trim(buffer);
-  strcpy(devicei->label,trim_front(buffer));
-  devicei->object = get_SVOBJECT_type(buffer,missing_device);
+  strcpy(devicei->label,tok1);
+  devicei->object = get_SVOBJECT_type(tok1,missing_device);
+  if(devicei->object==missing_device&&tok3!=NULL){
+    devicei->object = get_SVOBJECT_type(tok3,missing_device);
+  }
   devicei->params=NULL;
   devicei->timesptr=NULL;
   devicei->vals=NULL;

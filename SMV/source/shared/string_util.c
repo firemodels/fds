@@ -572,6 +572,7 @@ char *trim_string(char *buffer){
   int len;
   char *bufptr;
 
+  if(buffer==NULL)return NULL;
   len=strlen(buffer);
   buffer[len-1]='\0';
   bufptr=trim_front(buffer);
