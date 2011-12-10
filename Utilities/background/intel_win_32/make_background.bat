@@ -2,13 +2,13 @@
 
 Rem windows batch file to build background from the command line
 
-IF "%SETUP_IFORT_COMPILER11%"=="1" GOTO envexist
+IF "%SETUP_IFORT_COMPILER12%"=="1" GOTO envexist
 
-set SETUP_IFORT_COMPILER11=1
+set SETUP_IFORT_COMPILER12=1
 
 echo Setting up compiler environment
-call "%IFORT_COMPILER11%\bin\ifortvars" ia32
-call "%IFORT_COMPILER11%\bin\iclvars" ia32
+call "%IFORT_COMPILER12%\bin\ifortvars" ia32
+call "%IFORT_COMPILER12%\bin\iclvars" ia32
 
 :envexist
 if exist "%VS_COMPILER%\vcvars32x86_amd64.bat" call "%VS_COMPILER%\vcvars32x86_amd64"
