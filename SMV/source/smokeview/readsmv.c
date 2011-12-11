@@ -7674,6 +7674,10 @@ int readini2(char *inifile, int localfile){
     CheckMemory;
     if(fgets(buffer,255,stream)==NULL)break;
 
+    if(match(buffer,"SHOWDEVICEVALS",14)==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i %i %i",&showdeviceval,&showvdeviceval,&devicetypes_index);
+    }
     if(match(buffer,"USENEWDRAWFACE",14)==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&use_new_drawface);
@@ -10409,6 +10413,8 @@ void writeini(int flag){
       }
     }
 
+    fprintf(fileout,"SHOWDEVICEVALS\n");
+    fprintf(fileout,"%i %i %i",showdeviceval,showvdeviceval,devicetypes_index);
     put_startup_smoke3d(fileout);
     fprintf(fileout,"LOADFILESATSTARTUP\n");
     fprintf(fileout," %i\n",loadfiles_at_startup);

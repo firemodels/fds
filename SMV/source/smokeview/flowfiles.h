@@ -756,6 +756,13 @@ typedef struct {
   device *udev,*vdev,*wdev,*valdev,*veldev,*angledev;
 } vdevice;
 
+/* --------------------------  treedevice ------------------------------------ */
+
+typedef struct {
+  int nvdevices;
+  vdevice **vdevices;
+} treedevice;
+
 /* --------------------------  camviewdata ------------------------------------ */
 
 typedef struct {

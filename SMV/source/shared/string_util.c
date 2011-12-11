@@ -30,15 +30,17 @@ void fparsecsv(char *buffer, float *vals, int *valids, int ncols, int *ntokens){
 
   token=strtok(buffer,",");
   while(token!=NULL&&nt<ncols){
-    if(STRCMP(token,"NULL")!=0){
-      valids[nt]=1;
-      sscanf(token,"%f",&vals[nt++]);
+    if(STRCMP(token,"NULL")==0){
+      valids[nt]=0;
+      vals[nt]=0.0;
     }
     else{
-      valids[nt]=0;
-      vals[nt++]=0.0;
+      valids[nt]=1;
+      sscanf(token,"%f",&vals[nt]);
     }
+    nt++;
     token=strtok(NULL,",");
+    if(token!=NULL)trim(token);
   }
   *ntokens=nt;
 }
@@ -371,7 +373,8 @@ void trim(char *line){
   const char *c;
   const char *lf="\n", *cr="\r";
   size_t len, i;
-  
+
+  if(line==NULL)return;
   len = strlen(line);
   c = line+len-1;
   for(i=0; i<len; i++){

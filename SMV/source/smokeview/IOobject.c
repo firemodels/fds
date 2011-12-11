@@ -10,6 +10,7 @@
 #include "flowfiles.h"
 #include "MALLOC.h"
 #include "smokeviewvars.h"
+#include "datadefs.h"
 
 // svn revision character string
 char IOobject_revision[]="$Revision$";
@@ -626,11 +627,11 @@ void output_device_val(device *devicei){
 
   val=get_device_val(times[itimes],devicei,&valid);
   if(valid==1){
-    sprintf(label,"%s: %.1f %s\n",devicei->quantity,val,devicei->unit);
+    sprintf(label,"%s: %.1f %s",devicei->quantity,val,devicei->unit);
     output3Text(foregroundcolor,0.0,0.0,0.0,label);
   }
   else{
-    sprintf(label,"%s: invalid\n",devicei->quantity);
+    sprintf(label,"not available");
     output3Text(foregroundcolor,0.0,0.0,0.0,label);
   }
 }
@@ -4442,6 +4443,83 @@ void read_device_header(char *file, device **devices, int *ndevices){
 
 }
 
+#define EPSDEV 0.01
+
+/* ------------------ comparevdevices ------------------------ */
+
+int comparevdevices( const void *arg1, const void *arg2 ){
+  vdevice *vdevi, *vdevj;
+  float *xyzi, *xyzj;
+
+  vdevi = *(vdevice **)arg1;
+  vdevj = *(vdevice **)arg2;
+  xyzi = vdevi->valdev->xyz;
+  xyzj = vdevj->valdev->xyz;
+  if(xyzi[0]<xyzj[0]-EPSDEV)return -1;
+  if(xyzi[0]>xyzj[0]+EPSDEV)return 1;
+  if(xyzi[1]<xyzj[1]-EPSDEV)return -1;
+  if(xyzi[1]>xyzj[1]+EPSDEV)return 1;
+  if(xyzi[2]<xyzj[2]-EPSDEV)return -1;
+  if(xyzi[2]>xyzj[2]+EPSDEV)return 1;
+  return 0;
+}
+
+/* ----------------------- setup_tree_devices ----------------------------- */
+
+void setup_tree_devices(void){
+  int i,nvdevices;
+  treedevice *treei;
+
+  if(ntreedeviceinfo>0){
+    for(i=0;i<ntreedeviceinfo;i++){
+      treedevice *treei;
+
+      treei = treedeviceinfo + i;
+      FREEMEMORY(treei->vdevices);
+    }
+    FREEMEMORY(treedeviceinfo);
+  }
+
+  qsort((vdevice **)vdeviceptrinfo,(size_t)nvdeviceinfo,sizeof(vdevice *),comparevdevices);
+
+  NewMemory((void **)&treedeviceinfo,nvdeviceinfo*sizeof(treedevice));
+  treei = treedeviceinfo;
+  nvdevices=1;
+  for(i=1;i<nvdeviceinfo;i++){
+    float *xyzi, *xyzj;
+
+    xyzi = vdeviceptrinfo[i]->valdev->xyz;
+    xyzj = vdeviceptrinfo[i-1]->valdev->xyz;
+    if(ABS(xyzi[0]-xyzj[0])<EPSDEV&&ABS(xyzi[1]-xyzj[1])<EPSDEV){
+      nvdevices++;
+      continue;
+    }
+    treei->nvdevices=nvdevices;
+    NewMemory((void **)&treei->vdevices,nvdevices*sizeof(vdevice **));
+    treei++;
+    nvdevices=0;
+  }
+  treei->nvdevices=nvdevices;
+  if(nvdevices>0){
+    NewMemory((void **)&treei->vdevices,nvdevices*sizeof(vdevice **));
+  }
+  nvdevices=0;
+  treei=treedeviceinfo;
+  treei->vdevices[nvdevices++]=vdeviceptrinfo[0];
+  for(i=1;i<nvdeviceinfo;i++){
+    float *xyzi, *xyzj;
+
+    xyzi = vdeviceptrinfo[i]->valdev->xyz;
+    xyzj = vdeviceptrinfo[i-1]->valdev->xyz;
+    if(ABS(xyzi[0]-xyzj[0])>=EPSDEV||ABS(xyzi[1]-xyzj[1])>=EPSDEV){
+      nvdevices=0;
+      treei++;
+    }
+    treei->vdevices[nvdevices++]=vdeviceptrinfo[i];
+  }
+  ntreedeviceinfo = treei - treedeviceinfo + 1;
+}
+
 /* ----------------------- read_device_data ----------------------------- */
 
 void read_device_data(char *file, int filetype, int loadstatus){
@@ -4468,6 +4546,7 @@ void read_device_data(char *file, int filetype, int loadstatus){
       devicei = deviceinfo + i;
       if(devicei->filetype!=filetype)continue;
       FREEMEMORY(devicei->vals);
+      FREEMEMORY(devicei->valids);
     }
     for(i=ndeviceinfo_exp;i<ndeviceinfo;i++){
       device *devicei;
@@ -4566,10 +4645,10 @@ void read_device_data(char *file, int filetype, int loadstatus){
   fclose(stream);
   stream=NULL;
 
-#define EPSDEV 0.01
-
   FREEMEMORY(vdeviceinfo);
   NewMemory((void **)&vdeviceinfo,ndeviceinfo*sizeof(vdevice));
+  FREEMEMORY(vdeviceptrinfo);
+  NewMemory((void **)&vdeviceptrinfo,ndeviceinfo*sizeof(vdevice *));
   nvdeviceinfo=0;
   for(i=0;i<ndeviceinfo;i++){
     vdevice *vdevi;
@@ -4669,7 +4748,8 @@ void read_device_data(char *file, int filetype, int loadstatus){
       break;
     }
 
-    if(vdevi->udev!=NULL||vdevi->vdev!=NULL||vdevi->wdev!=NULL||vdevi->angledev!=NULL||vdevi->veldev!=NULL){
+    if(vdevi->udev!=NULL||vdevi->vdev!=NULL||vdevi->wdev!=NULL||
+      vdevi->angledev!=NULL||vdevi->veldev!=NULL){
       nvdeviceinfo++;
     }
   }
@@ -4771,6 +4851,10 @@ void read_device_data(char *file, int filetype, int loadstatus){
     }
     if(ndevicetypes>0)devicetypes[0]->type2vis=1;
   }
+  for(i=0;i<nvdeviceinfo;i++){
+    vdeviceptrinfo[i] = vdeviceinfo + i;
+  }
+  setup_tree_devices();
 
   FREEMEMORY(vals);
   FREEMEMORY(valids);

@@ -84,6 +84,7 @@ GLUI_Checkbox *CHECKBOX_labels_shade=NULL;
 GLUI_Checkbox *CHECKBOX_labels_transparent_override=NULL;
 
 GLUI_RadioGroup *RADIO_fontsize=NULL,*RADIO_showhide=NULL;
+GLUI_RadioGroup *RADIO_devicetypes=NULL;
 GLUI_Button *Button_EVAC=NULL;
 GLUI_Button *Button_PART=NULL;
 GLUI_Button *Button_SLICE=NULL;
@@ -126,6 +127,7 @@ GLUI_Panel *panel_showhide=NULL;
 #define LABELS_HMS 18
 #define SAVE_SETTINGS 99
 #define SHOWDEVICEVALS 26
+#define LABELS_devicetypes 27
 
 /* ------------------ glui_labels_setup ------------------------ */
 
@@ -186,17 +188,19 @@ extern "C" void glui_labels_setup(int main_window){
 
   if(ndeviceinfo>0){
     int i;
-    
+
     panel_objects = glui_labels->add_rollout("Devices/Objects",false);
     SPINNER_sensorrelsize=glui_labels->add_spinner_to_panel(panel_objects,_("Scaling"),GLUI_SPINNER_FLOAT,&sensorrelsize,LABELS_sensorsize,Labels_CB);
     if(ndevicetypes>0){
       glui_labels->add_checkbox_to_panel(panel_objects,_("Show velocity vectors"),&showvdeviceval);
       glui_labels->add_checkbox_to_panel(panel_objects,_("Show values"),&showdeviceval,SHOWDEVICEVALS,Labels_CB);
       panel_devicevis=glui_labels->add_panel_to_panel(panel_objects,"",false);
+      RADIO_devicetypes=glui_labels->add_radiogroup_to_panel(panel_devicevis,&devicetypes_index,LABELS_devicetypes,Labels_CB);
       for(i=0;i<ndevicetypes;i++){
-        glui_labels->add_checkbox_to_panel(panel_devicevis,devicetypes[i]->quantity,&devicetypes[i]->type2vis);
+        glui_labels->add_radiobutton_to_group(RADIO_devicetypes,devicetypes[i]->quantity);
       }
       Labels_CB(SHOWDEVICEVALS);
+      Labels_CB(LABELS_devicetypes);
     }
 
   }
@@ -446,8 +450,16 @@ extern "C" void show_glui_labels(void){
 /* ------------------ Labels_CB ------------------------ */
 
 void Labels_CB(int var){
+  int i;
+
   updatemenu=1;
   switch (var){
+  case LABELS_devicetypes:
+    for(i=0;i<ndevicetypes;i++){
+      devicetypes[i]->type2vis=0;
+    }
+    devicetypes[devicetypes_index]->type2vis=1;
+    break;
   case SHOWDEVICEVALS:
     if(panel_devicevis!=NULL){
       if(showdeviceval==1){

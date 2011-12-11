@@ -700,7 +700,7 @@ void readcadgeom(cadgeom *cd){
 
 }
 
-/* ------------------ blockcompare ------------------------ */
+/* ------------------ quadcompare ------------------------ */
 
 int quadcompare( const void *arg1, const void *arg2 ){
   int i1, i2;
