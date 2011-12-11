@@ -531,15 +531,24 @@ void get_vdevice_vel(float time, vdevice *vdevicei, float *vel, int *valid_vel){
   wdev = vdevicei->wdev;
 
   *valid_vel=0;
-  if(udev!=NULL){
+  if(udev==NULL){
+    validu=0;
+  }
+  else{
     uvel=get_device_val(time,udev,&validu);
     if(validu==0)*valid_vel=0;
   }
-  if(vdev!=NULL){
+  if(vdev==NULL){
+    validv=0;
+  }
+  else{
     vvel=get_device_val(time,vdev,&validv);
     if(validv==0)*valid_vel=0;
   }
-  if(wdev!=NULL){
+  if(wdev==NULL){
+    validw=0;
+  }
+  else{
     wvel=get_device_val(time,wdev,&validw);
     if(validw==0)*valid_vel=0;
   }
@@ -548,6 +557,20 @@ void get_vdevice_vel(float time, vdevice *vdevicei, float *vel, int *valid_vel){
     vel[1]=vvel;
     vel[2]=wvel;
     *valid_vel=1;
+  }
+  if(vdevicei->veldev!=NULL&&vdevicei->angledev!=NULL){
+    float velocity, angle;
+    int valid_velocity, valid_angle;
+#define PIFACTOR 3.14159/180.0     
+
+    velocity=get_device_val(time,vdevicei->veldev,&valid_velocity);
+    angle=get_device_val(time,vdevicei->angledev,&valid_angle);
+    if(valid_velocity==1&&valid_angle==1){
+      vel[0] = velocity*cos(PIFACTOR*angle);
+      vel[1] = velocity*sin(PIFACTOR*angle);
+      vel[2] = 0.0;
+      *valid_vel=1;
+    }
   }
 }
 
@@ -678,8 +701,8 @@ void draw_devices(void){
       get_vdevice_vel(times[itimes], vdevi, vel, &valid);
       if(valid==1){
         for(j=0;j<3;j++){
-          xxx1[j] = xyz[j] - 0.5*vel[j]/max_dev_vel;
-          xxx2[j] = xyz[j] + 0.5*vel[j]/max_dev_vel;
+          xxx1[j] = xyz[j];
+          xxx2[j] = xyz[j] + xyzmaxdiff*vel[j]/max_dev_vel;
         }
         glBegin(GL_LINES);
         glVertex3fv(xxx1);
@@ -4812,10 +4835,12 @@ void read_device_data(char *file, int filetype, int loadstatus){
       veldev=vdevi->veldev;
       if(veldev!=NULL){
         for(j=0;j<devval->nvals;j++){
-          float speed;
+          if(veldev->valids[j]==1){
+            float speed;
 
-          speed=veldev->vals[j];
-          if(speed>max_dev_vel)max_dev_vel=speed;
+            speed=veldev->vals[j];
+            if(speed>max_dev_vel)max_dev_vel=speed;
+          }
         }
       }
     }
