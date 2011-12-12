@@ -47,7 +47,7 @@ int gettokens(char *tokens, char **tokenptrs){
 
 int main(int argc, char **argv){
   char *prog;
-  char *arg,*csv;
+  char *arg,*csv,*argin=NULL;
   char file_in[256],file_out[256];
   FILE *stream_in, *stream_out;
   int in_header;
@@ -56,7 +56,12 @@ int main(int argc, char **argv){
   char *datalabels,**datalabelptrs;
   int nlabelptrs,ndatalabelptrs;
   int *transfer,ntransfer,itransfer;
+  float *zdev;
+  float xyzoffset[3]={0.0,0.0,0.0};
   int i;
+  char percen[2];
+
+  strcpy(percen,"%");
 
   prog=argv[0];
 
@@ -65,12 +70,28 @@ int main(int argc, char **argv){
    return 1;
   }
 
-  arg=argv[1];
-  csv=strstr(arg,".csv");
+  for(i=1;i<argc;i++){
+    int lenarg;
+
+    arg=argv[i];
+    lenarg=strlen(arg);
+    if(strcmp(arg,"-offset")==0){
+      i++;
+      arg=argv[i];
+      if(strlen(arg)>1){
+        sscanf(arg,"%f %f %f",xyzoffset,xyzoffset+1,xyzoffset+2);
+      }
+      continue;
+    }
+    argin=arg;
+  }
+
+
+  csv=strstr(argin,".csv");
   if(csv!=NULL)*csv=0;
-  strcpy(file_in,arg);
+  strcpy(file_in,argin);
   strcat(file_in,".csv");
-  strcpy(file_out,arg);
+  strcpy(file_out,argin);
   strcat(file_out,"_exp.csv");
 
   stream_in=fopen(file_in,"r");
@@ -96,14 +117,17 @@ int main(int argc, char **argv){
   NewMemory((void **)&datalabels,buffer_len);
   NewMemory((void **)&datalabelptrs,buffer_len*sizeof(char *));
   NewMemory((void **)&transfer,buffer_len*sizeof(int));
+  NewMemory((void **)&zdev,buffer_len*sizeof(float));
 
   if(fgets(labels,buffer_len,stream_in)==NULL){
     printf("***error: The file %s is empty\n",file_in);
     return 1;
   }
-  if(fgets(labels,buffer_len,stream_in)==NULL){
-    printf("***error: The file %s is empty\n",file_in);
-    return 1;
+  while(strncmp(labels,"Sodar",5)==0){
+    if(fgets(labels,buffer_len,stream_in)==NULL){
+      printf("***error: The file %s is empty\n",file_in);
+      return 1;
+    }
   }
   
   nlabelptrs=gettokens(labels,labelptrs);
@@ -118,9 +142,11 @@ int main(int argc, char **argv){
     }
     else if(strncmp(token,"ws",2)==0){
       transfer[i]=2;
+      zdev[i]=(float)atof(token+2);
       ntransfer++;
     }
     else if(strncmp(token,"wd",2)==0){
+      zdev[i]=(float)atof(token+2);
       transfer[i]=3;
       ntransfer++;
     }
@@ -128,6 +154,23 @@ int main(int argc, char **argv){
       transfer[i]=0;
     }
   }
+  fprintf(stream_out,"//HEADER\n");
+  for(i=0;i<nlabelptrs;i++){
+    char *token;
+
+    token=labelptrs[i];
+    if(transfer[i]==2){
+      fprintf(stream_out,"DEVICE\n");
+      fprintf(stream_out," %s %s VELOCITY %s sensor\n",token,percen,percen);
+      fprintf(stream_out," %f %f %f\n",xyzoffset[0],xyzoffset[1],xyzoffset[2]+zdev[i]);
+    }
+    else if(transfer[i]==3){
+      fprintf(stream_out,"DEVICE\n");
+      fprintf(stream_out," %s %s ANGLE %s sensor\n",token,percen,percen);
+      fprintf(stream_out," %f %f %f\n",xyzoffset[0],xyzoffset[1],xyzoffset[2]+zdev[i]);
+    }
+  }
+  fprintf(stream_out,"//DATA\n");
   itransfer=0;
   for(i=0;i<nlabelptrs;i++){
     if(transfer[i]!=0){
