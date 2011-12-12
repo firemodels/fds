@@ -173,6 +173,25 @@ int main(int argc, char **argv){
   fprintf(stream_out,"//DATA\n");
   itransfer=0;
   for(i=0;i<nlabelptrs;i++){
+    if(transfer[i]==1){
+      fprintf(stream_out,"s");
+      itransfer++;
+      if(itransfer!=ntransfer)fprintf(stream_out,",");
+    }
+    if(transfer[i]==2){
+      fprintf(stream_out,"m/s");
+      itransfer++;
+      if(itransfer!=ntransfer)fprintf(stream_out,",");
+    }
+    if(transfer[i]==3){
+      fprintf(stream_out,"deg");
+      itransfer++;
+      if(itransfer!=ntransfer)fprintf(stream_out,",");
+    }
+  }
+  fprintf(stream_out,"\n");
+  itransfer=0;
+  for(i=0;i<nlabelptrs;i++){
     if(transfer[i]!=0){
       fprintf(stream_out,"%s",labelptrs[i]);
       itransfer++;
