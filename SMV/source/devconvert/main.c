@@ -1,6 +1,6 @@
-// $Date: 2011-03-24 16:22:30 -0400 (Thu, 24 Mar 2011) $ 
-// $Revision: 7970 $
-// $Author: gforney $
+// $Date$ 
+// $Revision$
+// $Author$
 
 #define INMAIN
 #include "options.h"
@@ -15,7 +15,7 @@
 //dummy change to bump version number to 0.9
 
 // svn revision character string
-char main_revision[]="$Revision: 7970 $";
+char main_revision[]="$Revision$";
 
 void usage(char *prog);
 void version(char *prog);
