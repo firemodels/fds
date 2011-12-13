@@ -47,7 +47,7 @@ value of dT should be equal to the time averaged Q_abs.
       SAMPLING_FACTOR=1 /
 
 	
-&INIT 	NUMBER_INITIAL_DROPLETS = 100, 
+&INIT 	NUMBER_INITIAL_PARTICLES = 100, 
 	MASS_PER_VOLUME = 0.01
         XB = 1,2,1,2,1,2
 	PART_ID = 'drops' /

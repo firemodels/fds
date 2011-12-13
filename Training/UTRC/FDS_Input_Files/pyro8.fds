@@ -156,7 +156,7 @@ DEVC XYZ=0.0,0.0,2.5, QUANTITY='MIXTURE FRACTION',ID='Z2.5'/
 
 ----------------------------------------------------------------------------------------------------------------------------
 &SPEC ID='WATER VAPOR'/
-&PART ID='water drops',SPEC_ID='WATER VAPOR',EVAPORATE=.TRUE.,QUANTITIES(1:3)='DROPLET_DIAMETER','DROPLET_TEMPERATURE','DROPLET_VELOCITY',DIAMETER=60,SAMPLING_FACTOR=10/
+&PART ID='water drops',SPEC_ID='WATER VAPOR',EVAPORATE=.TRUE.,QUANTITIES(1:3)='PARTICLE_DIAMETER','PARTICLE_TEMPERATURE','PARTICLE_VELOCITY',DIAMETER=60,SAMPLING_FACTOR=10/
 
 !------------------------------------
 ! Droplet Injection
@@ -164,7 +164,7 @@ DEVC XYZ=0.0,0.0,2.5, QUANTITY='MIXTURE FRACTION',ID='Z2.5'/
 &DEVC  XYZ = 0.0, 0.0,2.2, PROP_ID =  'Nozzle', QUANTITY = 'TIME', SETPOINT = 0.0 /
 !&PROP  ID = 'Nozzle',PART_ID='water drops', OFFSET=0.1, FLOW_RATE=4.5,SPRAY_ANGLE=85,105,ORIFICE_DIAMETER=0.0007/
 &PROP  ID = 'Nozzle',PART_ID='water drops', OFFSET=0.1, FLOW_RATE=4.5,SPRAY_ANGLE=85,105,ORIFICE_DIAMETER=0.0007,
-       DROPLETS_PER_SECOND=50000 /
+       PARTICLES_PER_SECOND=50000 /
 
 !------------------------------------
 ! Control Device

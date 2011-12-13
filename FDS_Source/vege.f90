@@ -6,13 +6,13 @@ USE MESH_POINTERS
 USE TRAN
 USE PART
 USE MEMORY_FUNCTIONS, ONLY:CHKMEMERR
-USE TYPES, ONLY: DROPLET_TYPE, PARTICLE_CLASS_TYPE, PARTICLE_CLASS! WALL_TYPE,SURFACE_TYPE 
+USE TYPES, ONLY: PARTICLE_TYPE, PARTICLE_CLASS_TYPE, PARTICLE_CLASS! WALL_TYPE,SURFACE_TYPE 
 IMPLICIT NONE
 PRIVATE
 PUBLIC INITIALIZE_RAISED_VEG, RAISED_VEG_MASS_ENERGY_TRANSFER, LEVEL_SET_FIRESPREAD, GET_REV_vege, &
        BNDRY_VEG_MASS_ENERGY_TRANSFER
-TYPE (DROPLET_TYPE), POINTER :: DR
-TYPE (PARTICLE_CLASS_TYPE), POINTER :: PC
+TYPE (PARTICLE_TYPE), POINTER :: LP=>NULL()
+TYPE (PARTICLE_CLASS_TYPE), POINTER :: PC=>NULL()
 !TYPE (WALL_TYPE), POINTER :: WC
 !TYPE (SURFACE_TYPE), POINTER :: SF 
 CHARACTER(255), PARAMETER :: vegeid='$Id$'
@@ -27,7 +27,7 @@ CONTAINS
 
 SUBROUTINE INITIALIZE_RAISED_VEG(NM)
 
-USE MEMORY_FUNCTIONS, ONLY: RE_ALLOCATE_DROPLETS
+USE MEMORY_FUNCTIONS, ONLY: RE_ALLOCATE_PARTICLES
 REAL(EB) CROWN_LENGTH,CROWN_VOLUME,TANGENT,CROWN_WIDTH,CROWN_WIDTH_BOTTOM
 REAL(EB) DX_RING,DZ_RING,INNER_RADIUS,OUTER_RADIUS,R_CTR_CYL,  &
          RING_BOTTOM,RING_TOP,SLANT_WIDTH
@@ -48,7 +48,7 @@ CALL ChkMemErr('VEGE','CELL_TAKEN_FLAG',IZERO)
 
 !Diagnostic files
 !IF (NM == NMESHES) THEN
-!OPEN(9999,FILE='total_droplet_mass.out',STATUS='REPLACE')
+!OPEN(9999,FILE='total_PARTICLE_mass.out',STATUS='REPLACE')
 ! OPEN(9998,FILE='diagnostics.out',STATUS='REPLACE')
 !ENDIF
 
@@ -84,17 +84,17 @@ TREE_LOOP: DO NCT=1,N_TREES
          NLP  = NLP + 1
          NLP_TREE = NLP_TREE + 1
          IF (NLP>NLPDIM) THEN
-          CALL RE_ALLOCATE_DROPLETS(1,NM,0,1000)
-          DROPLET=>MESHES(NM)%DROPLET
+          CALL RE_ALLOCATE_PARTICLES(1,NM,0,1000)
+          PARTICLE=>MESHES(NM)%PARTICLE
          ENDIF
-         DR=>DROPLET(NLP)
-         DR%VEG_VOLFRACTION = 1._EB
-         DR%TAG = PARTICLE_TAG
-         DR%X = REAL(NXB,EB)
-         DR%Y = REAL(NYB,EB)
-         DR%Z = REAL(NZB,EB)
-         DR%CLASS = IPC
-         DR%PWT   = 1._EB  ! This is not used, but it is necessary to assign a non-zero weight factor to each particle
+         LP=>PARTICLE(NLP)
+         LP%VEG_VOLFRACTION = 1._EB
+         LP%TAG = PARTICLE_TAG
+         LP%X = REAL(NXB,EB)
+         LP%Y = REAL(NYB,EB)
+         LP%Z = REAL(NZB,EB)
+         LP%CLASS = IPC
+         LP%PWT   = 1._EB  ! This is not used, but it is necessary to assign a non-zero weight factor to each particle
          VEG_PRESENT_FLAG(NXB,NYB,NZB) = .TRUE.
         ENDIF
        ENDDO   
@@ -131,17 +131,17 @@ TREE_LOOP: DO NCT=1,N_TREES
          NLP  = NLP + 1
          NLP_TREE = NLP_TREE + 1
          IF (NLP>NLPDIM) THEN
-          CALL RE_ALLOCATE_DROPLETS(1,NM,0,1000)
-          DROPLET=>MESHES(NM)%DROPLET
+          CALL RE_ALLOCATE_PARTICLES(1,NM,0,1000)
+          PARTICLE=>MESHES(NM)%PARTICLE
          ENDIF
-         DR=>DROPLET(NLP)
-         DR%VEG_VOLFRACTION = 1._EB
-         DR%TAG = PARTICLE_TAG
-         DR%X = REAL(NXB,EB)
-         DR%Y = REAL(NYB,EB)
-         DR%Z = REAL(NZB,EB)
-         DR%CLASS = IPC
-         DR%PWT   = 1._EB  ! This is not used, but it is necessary to assign a non-zero weight factor to each particle
+         LP=>PARTICLE(NLP)
+         LP%VEG_VOLFRACTION = 1._EB
+         LP%TAG = PARTICLE_TAG
+         LP%X = REAL(NXB,EB)
+         LP%Y = REAL(NYB,EB)
+         LP%Z = REAL(NZB,EB)
+         LP%CLASS = IPC
+         LP%PWT   = 1._EB  ! This is not used, but it is necessary to assign a non-zero weight factor to each particle
          VEG_PRESENT_FLAG(NXB,NYB,NZB) = .TRUE.
         ENDIF
        ENDDO   
@@ -172,17 +172,17 @@ TREE_LOOP: DO NCT=1,N_TREES
          NLP  = NLP + 1
          NLP_TREE = NLP_TREE + 1
          IF (NLP>NLPDIM) THEN
-          CALL RE_ALLOCATE_DROPLETS(1,NM,0,1000)
-          DROPLET=>MESHES(NM)%DROPLET
+          CALL RE_ALLOCATE_PARTICLES(1,NM,0,1000)
+          PARTICLE=>MESHES(NM)%PARTICLE
          ENDIF
-         DR=>DROPLET(NLP)
-         DR%VEG_VOLFRACTION = 1._EB
-         DR%TAG = PARTICLE_TAG
-         DR%X = REAL(NXB,EB)
-         DR%Y = REAL(NYB,EB)
-         DR%Z = REAL(NZB,EB)
-         DR%CLASS = IPC
-         DR%PWT   = 1._EB  ! This is not used, but it is necessary to assign a non-zero weight factor to each particle
+         LP=>PARTICLE(NLP)
+         LP%VEG_VOLFRACTION = 1._EB
+         LP%TAG = PARTICLE_TAG
+         LP%X = REAL(NXB,EB)
+         LP%Y = REAL(NYB,EB)
+         LP%Z = REAL(NZB,EB)
+         LP%CLASS = IPC
+         LP%PWT   = 1._EB  ! This is not used, but it is necessary to assign a non-zero weight factor to each particle
          VEG_PRESENT_FLAG(NXB,NYB,NZB) = .TRUE.
         ENDIF
        ENDDO   
@@ -209,27 +209,27 @@ TREE_LOOP: DO NCT=1,N_TREES
              NLP  = NLP + 1
              NLP_RECT_VEG = NLP_RECT_VEG + 1
              IF (NLP>NLPDIM) THEN
-              CALL RE_ALLOCATE_DROPLETS(1,NM,0,1000)
-              DROPLET=>MESHES(NM)%DROPLET
+              CALL RE_ALLOCATE_PARTICLES(1,NM,0,1000)
+              PARTICLE=>MESHES(NM)%PARTICLE
              ENDIF
-             DR=>DROPLET(NLP)
-             DR%TAG = PARTICLE_TAG
-             DR%X = REAL(NXB,EB)
-             DR%Y = REAL(NYB,EB)
-             DR%Z = REAL(NZB,EB)
-             DR%CLASS = IPC
-             DR%PWT   = 1._EB  ! This is not used, but it is necessary to assign a non-zero weight factor to each particle
+             LP=>PARTICLE(NLP)
+             LP%TAG = PARTICLE_TAG
+             LP%X = REAL(NXB,EB)
+             LP%Y = REAL(NYB,EB)
+             LP%Z = REAL(NZB,EB)
+             LP%CLASS = IPC
+             LP%PWT   = 1._EB  ! This is not used, but it is necessary to assign a non-zero weight factor to each particle
              VEG_PRESENT_FLAG(NXB,NYB,NZB) = .TRUE.
              X_EXTENT = XF_RECT_VEG(NCT) - XS_RECT_VEG(NCT)
              Y_EXTENT = YF_RECT_VEG(NCT) - YS_RECT_VEG(NCT)
              Z_EXTENT = ZF_RECT_VEG(NCT) - ZS_RECT_VEG(NCT)
-             DR%VEG_VOLFRACTION = 1._EB
-!            IF (X_EXTENT < DX(NXB)) DR%VEG_VOLFRACTION = DR%VEG_VOLFRACTION*X_EXTENT/DX(NXB)
-!            IF (Y_EXTENT < DY(NYB)) DR%VEG_VOLFRACTION = DR%VEG_VOLFRACTION*Y_EXTENT/DY(NYB)
-             IF (Z_EXTENT < DZ(NZB)) DR%VEG_VOLFRACTION = DR%VEG_VOLFRACTION*Z_EXTENT/DZ(NZB)
-!            print*,'veg_volfraction',z_extent,dz(nzb),dr%veg_volfraction
+             LP%VEG_VOLFRACTION = 1._EB
+!            IF (X_EXTENT < DX(NXB)) LP%VEG_VOLFRACTION = LP%VEG_VOLFRACTION*X_EXTENT/DX(NXB)
+!            IF (Y_EXTENT < DY(NYB)) LP%VEG_VOLFRACTION = LP%VEG_VOLFRACTION*Y_EXTENT/DY(NYB)
+             IF (Z_EXTENT < DZ(NZB)) LP%VEG_VOLFRACTION = LP%VEG_VOLFRACTION*Z_EXTENT/DZ(NZB)
+!            print*,'veg_volfraction',z_extent,dz(nzb),LP%veg_volfraction
 !            print*,'veg_volfraction',xs_rect_veg(nct),xf_rect_veg(nct),ys_rect_veg(nct),yf_rect_veg(nct), &
-!                                     zs_rect_veg(nct),zf_rect_veg(nct),z_extent,dz(nzb),DR%VEG_VOLFRACTION
+!                                     zs_rect_veg(nct),zf_rect_veg(nct),z_extent,dz(nzb),LP%VEG_VOLFRACTION
             ENDIF
            ENDDO   
           ENDIF
@@ -272,17 +272,17 @@ TREE_LOOP: DO NCT=1,N_TREES
          NLP  = NLP + 1
          NLP_TREE = NLP_TREE + 1
          IF (NLP>NLPDIM) THEN
-          CALL RE_ALLOCATE_DROPLETS(1,NM,0,1000)
-          DROPLET=>MESHES(NM)%DROPLET
+          CALL RE_ALLOCATE_PARTICLES(1,NM,0,1000)
+          PARTICLE=>MESHES(NM)%PARTICLE
          ENDIF
-         DR=>DROPLET(NLP)
-         DR%VEG_VOLFRACTION = 1._EB
-         DR%TAG = PARTICLE_TAG
-         DR%X = REAL(NXB,EB)
-         DR%Y = REAL(NYB,EB)
-         DR%Z = REAL(NZB,EB)
-         DR%CLASS = IPC
-         DR%PWT   = 1._EB  ! This is not used, but it is necessary to assign a non-zero weight factor to each particle
+         LP=>PARTICLE(NLP)
+         LP%VEG_VOLFRACTION = 1._EB
+         LP%TAG = PARTICLE_TAG
+         LP%X = REAL(NXB,EB)
+         LP%Y = REAL(NYB,EB)
+         LP%Z = REAL(NZB,EB)
+         LP%CLASS = IPC
+         LP%PWT   = 1._EB  ! This is not used, but it is necessary to assign a non-zero weight factor to each particle
          VEG_PRESENT_FLAG(NXB,NYB,NZB) = .TRUE.
         ENDIF
        ENDDO   
@@ -293,62 +293,62 @@ TREE_LOOP: DO NCT=1,N_TREES
    ENDIF IF_RING_VEGETATION_BUILD
 !
 ! For the current vegetation type (particle class) assign one fuel 
-! element (droplet) to each grid cell and initialize droplet properties
+! element (PARTICLE) to each grid cell and initialize PARTICLE properties
 ! (this is precautionary needs more tested to determine its necessity)
 !
    REP_VEG_ELEMS: DO I=NLP-NLP_VEG_FUEL+1,NLP
-    DR=>DROPLET(I)
-    DR%IGNITOR = .FALSE.
+    LP=>PARTICLE(I)
+    LP%IGNITOR = .FALSE.
     DO NZB=0,KBAR
      DO NXB=0,IBAR
       GRID_LOOP: DO NYB=0,JBAR
        IF (.NOT. VEG_PRESENT_FLAG(NXB,NYB,NZB)) CYCLE GRID_LOOP
-       IF (REAL(NXB,EB)==DR%X .AND. REAL(NYB,EB)==DR%Y .AND. REAL(NZB,EB)==DR%Z) THEN 
+       IF (REAL(NXB,EB)==LP%X .AND. REAL(NYB,EB)==LP%Y .AND. REAL(NZB,EB)==LP%Z) THEN 
         IF(CELL_TAKEN_FLAG(NXB,NYB,NZB)) THEN
-         DR%R = 0.0001_EB*PC%KILL_RADIUS
+         LP%R = 0.0001_EB*PC%KILL_RADIUS
          CYCLE REP_VEG_ELEMS
         ENDIF
         CELL_TAKEN_FLAG(NXB,NYB,NZB) = .TRUE.
-        DR%X = X(NXB) - 0.5_EB*DX(NXB)
-        DR%Y = Y(NYB) - 0.5_EB*DY(NYB)
-        DR%Z = Z(NZB) - 0.5_EB*DZ(NZB)
+        LP%X = X(NXB) - 0.5_EB*DX(NXB)
+        LP%Y = Y(NYB) - 0.5_EB*DY(NYB)
+        LP%Z = Z(NZB) - 0.5_EB*DZ(NZB)
         IF (VEG_FUEL_GEOM(NCT) == 'RECTANGLE')THEN
-         DR%X = X(NXB) + 0.5_EB*DX(NXB)
-         DR%Y = Y(NYB) + 0.5_EB*DY(NYB)
-         DR%Z = Z(NZB) + 0.5_EB*DZ(NZB)
+         LP%X = X(NXB) + 0.5_EB*DX(NXB)
+         LP%Y = Y(NYB) + 0.5_EB*DY(NYB)
+         LP%Z = Z(NZB) + 0.5_EB*DZ(NZB)
         ENDIF
         TREE_MESH(NM) = .TRUE.
-        DR%SHOW = .TRUE.
-        DR%T   = 0.
-        DR%U = 0.
-        DR%V = 0.
-        DR%W = 0.
-        DR%R =  2./PC%VEG_SV !cylinder, Porterie
-        DR%IOR = 0
-        DR%VEG_FUEL_MASS  = PC%VEG_BULK_DENSITY
-        DR%VEG_MOIST_MASS = PC%VEG_MOISTURE*DR%VEG_FUEL_MASS
-        DR%VEG_CHAR_MASS  = 0.0_EB
-        DR%VEG_PACKING_RATIO = PC%VEG_BULK_DENSITY/PC%VEG_DENSITY 
-        DR%VEG_SV            = PC%VEG_SV 
-        DR%VEG_KAPPA = 0.25*PC%VEG_SV*PC%VEG_BULK_DENSITY/PC%VEG_DENSITY
-        DR%TMP = PC%VEG_INITIAL_TEMPERATURE
+        LP%SHOW = .TRUE.
+        LP%T   = 0.
+        LP%U = 0.
+        LP%V = 0.
+        LP%W = 0.
+        LP%R =  2./PC%VEG_SV !cylinder, Porterie
+        LP%IOR = 0
+        LP%VEG_FUEL_MASS  = PC%VEG_BULK_DENSITY
+        LP%VEG_MOIST_MASS = PC%VEG_MOISTURE*LP%VEG_FUEL_MASS
+        LP%VEG_CHAR_MASS  = 0.0_EB
+        LP%VEG_PACKING_RATIO = PC%VEG_BULK_DENSITY/PC%VEG_DENSITY 
+        LP%VEG_SV            = PC%VEG_SV 
+        LP%VEG_KAPPA = 0.25*PC%VEG_SV*PC%VEG_BULK_DENSITY/PC%VEG_DENSITY
+        LP%TMP = PC%VEG_INITIAL_TEMPERATURE
         IF(IGN_ELEM(NCT)) THEN
-          DR%TMP = TMPA
-          DR%IGNITOR = .TRUE.
-          DR%VEG_IGN_TON      = TON_IGN_ELEMS(NCT)
-          DR%VEG_IGN_TOFF     = TOFF_IGN_ELEMS(NCT)
-          DR%VEG_IGN_TRAMPON  = T_RAMPON_IGN_ELEMS(NCT)
-          DR%VEG_IGN_TRAMPOFF = T_RAMPOFF_IGN_ELEMS(NCT)
+          LP%TMP = TMPA
+          LP%IGNITOR = .TRUE.
+          LP%VEG_IGN_TON      = TON_IGN_ELEMS(NCT)
+          LP%VEG_IGN_TOFF     = TOFF_IGN_ELEMS(NCT)
+          LP%VEG_IGN_TRAMPON  = T_RAMPON_IGN_ELEMS(NCT)
+          LP%VEG_IGN_TRAMPOFF = T_RAMPOFF_IGN_ELEMS(NCT)
         ENDIF
-        DR%VEG_EMISS = 4.*SIGMA*DR%VEG_KAPPA*DR%TMP**4
-        DR%VEG_DIVQR = 0.0_EB
-        DR%VEG_N_TREE_OUTPUT = 0
+        LP%VEG_EMISS = 4.*SIGMA*LP%VEG_KAPPA*LP%TMP**4
+        LP%VEG_DIVQR = 0.0_EB
+        LP%VEG_N_TREE_OUTPUT = 0
 !       TREE_MESH_OUT(NM) = .FALSE.
         IF (N_TREE_OUT(NCT) /= 0) THEN
 !print*,'in vege 1'
 !print*,'in vege 1, NCT, N_TREE_OUT(NCT)',nct,n_tree_out(nct)
-         DR%VEG_N_TREE_OUTPUT = N_TREE_OUT(NCT)
-         DR%IOR = 0 !airborne static droplet
+         LP%VEG_N_TREE_OUTPUT = N_TREE_OUT(NCT)
+         LP%IOR = 0 !airborne static PARTICLE
 !        TREE_MESH_OUT(NM) = .TRUE.
         ENDIF
         CYCLE REP_VEG_ELEMS
@@ -362,7 +362,7 @@ TREE_LOOP: DO NCT=1,N_TREES
 !print*,'in vege 2: NLP,NM,TREE_MESH_OUT(NM),NCT',NLP,NM,TREE_MESH_OUT(NM),NCT
 ENDDO TREE_LOOP
 
-CALL REMOVE_DROPLETS(0._EB,NM)
+CALL REMOVE_PARTICLES(0._EB,NM)
 !print*,'in vege3: NLP',nlp
 
 DEALLOCATE(VEG_PRESENT_FLAG)
@@ -372,23 +372,23 @@ DEALLOCATE(CELL_TAKEN_FLAG)
 IF (N_TREES_OUT == 0) RETURN
 CALL POINT_TO_MESH(NM)
 TREE_OUTPUT_DATA(:,:,NM) = 0._EB
-DROPLET_LOOP: DO I=1,NLP
- DR=>DROPLET(I)
- N_TREE = DR%VEG_N_TREE_OUTPUT
+PARTICLE_LOOP: DO I=1,NLP
+ LP=>PARTICLE(I)
+ N_TREE = LP%VEG_N_TREE_OUTPUT
  IF (N_TREE /= 0) THEN
-   XI = CELLSI(FLOOR((DR%X-XS)*RDXINT))
-   YJ = CELLSJ(FLOOR((DR%Y-YS)*RDYINT))
-   ZK = CELLSK(FLOOR((DR%Z-ZS)*RDZINT))
+   XI = CELLSI(FLOOR((LP%X-XS)*RDXINT))
+   YJ = CELLSJ(FLOOR((LP%Y-YS)*RDYINT))
+   ZK = CELLSK(FLOOR((LP%Z-ZS)*RDZINT))
    II  = FLOOR(XI+1._EB)
    JJ  = FLOOR(YJ+1._EB)
    KK  = FLOOR(ZK+1._EB)
    V_CELL = DX(II)*DY(JJ)*DZ(KK)
-   TREE_OUTPUT_DATA(N_TREE,1,NM) = TREE_OUTPUT_DATA(N_TREE,1,NM) + DR%VEG_FUEL_MASS*V_CELL !kg
-   TREE_OUTPUT_DATA(N_TREE,2,NM) = TREE_OUTPUT_DATA(N_TREE,2,NM) + DR%VEG_MOIST_MASS*V_CELL !kg
-   TREE_OUTPUT_DATA(N_TREE,3,NM) = TREE_OUTPUT_DATA(N_TREE,3,NM) + DR%VEG_DIVQC*V_CELL*0.001_EB !kW
-   TREE_OUTPUT_DATA(N_TREE,4,NM) = TREE_OUTPUT_DATA(N_TREE,4,NM) + DR%VEG_DIVQR*V_CELL*0.001_EB !kW
+   TREE_OUTPUT_DATA(N_TREE,1,NM) = TREE_OUTPUT_DATA(N_TREE,1,NM) + LP%VEG_FUEL_MASS*V_CELL !kg
+   TREE_OUTPUT_DATA(N_TREE,2,NM) = TREE_OUTPUT_DATA(N_TREE,2,NM) + LP%VEG_MOIST_MASS*V_CELL !kg
+   TREE_OUTPUT_DATA(N_TREE,3,NM) = TREE_OUTPUT_DATA(N_TREE,3,NM) + LP%VEG_DIVQC*V_CELL*0.001_EB !kW
+   TREE_OUTPUT_DATA(N_TREE,4,NM) = TREE_OUTPUT_DATA(N_TREE,4,NM) + LP%VEG_DIVQR*V_CELL*0.001_EB !kW
  ENDIF
-ENDDO DROPLET_LOOP
+ENDDO PARTICLE_LOOP
 
 
 END SUBROUTINE INITIALIZE_RAISED_VEG
@@ -482,17 +482,17 @@ V_VEG               = 0.0_EB
 
 !print*,'vege h-m transfer: NM, NLP',nm,nlp
 
-DROPLET_LOOP: DO I=1,NLP
+PARTICLE_LOOP: DO I=1,NLP
 
- DR => DROPLET(I)
- IPC = DR%CLASS
+ LP => PARTICLE(I)
+ IPC = LP%CLASS
  PC=>PARTICLE_CLASS(IPC)
- IF (.NOT. PC%TREE) CYCLE DROPLET_LOOP !Ensure grid cell has vegetation
- IF (PC%MASSLESS) CYCLE DROPLET_LOOP   !Skip droplet if massless
- IF (PC%VEG_STEM) CYCLE DROPLET_LOOP   !Skip droplet if veg is a tree stem
+ IF (.NOT. PC%TREE) CYCLE PARTICLE_LOOP !Ensure grid cell has vegetation
+ IF (PC%MASSLESS) CYCLE PARTICLE_LOOP   !Skip PARTICLE if massless
+ IF (PC%VEG_STEM) CYCLE PARTICLE_LOOP   !Skip PARTICLE if veg is a tree stem
 
 ! Intialize quantities
- DR%VEG_MLR     = 0.0_EB
+ LP%VEG_MLR     = 0.0_EB
  Q_VEG_MOIST    = 0.0_EB
  Q_VEG_VOLIT    = 0.0_EB
  Q_UPTO_VOLIT   = 0.0_EB
@@ -502,7 +502,7 @@ DROPLET_LOOP: DO I=1,NLP
  MPV_CHAR_CO2   = 0.0_EB
  H_CHAR_OXID    = 0.0_EB
  MPV_VOLIT      = 0.0_EB
- MPV_CHAR       = DR%VEG_CHAR_MASS !kg/m^3
+ MPV_CHAR       = LP%VEG_CHAR_MASS !kg/m^3
  MW_VEG_MOIST_TERM = 0.0_EB
  MW_VEG_VOLIT_TERM = 0.0_EB
  VEG_FUEL_AND_CHAR_MASS    = 0.0_EB
@@ -511,10 +511,10 @@ DROPLET_LOOP: DO I=1,NLP
 
 ! Vegetation variables
  CHAR_FCTR = 1._EB - PC%VEG_CHAR_FRACTION
- SV_VEG  = DR%VEG_SV !surface-to-volume ration 1/m
- TMP_VEG = DR%TMP
- MPV_VEG = DR%VEG_FUEL_MASS !bulk density of dry veg
- MPV_MOIST     = DR%VEG_MOIST_MASS !bulk density of moisture in veg
+ SV_VEG  = LP%VEG_SV !surface-to-volume ration 1/m
+ TMP_VEG = LP%TMP
+ MPV_VEG = LP%VEG_FUEL_MASS !bulk density of dry veg
+ MPV_MOIST     = LP%VEG_MOIST_MASS !bulk density of moisture in veg
  MPV_VEG_MIN   = PC%VEG_FUEL_MPV_MIN
  MPV_MOIST_MIN = PC%VEG_MOIST_MPV_MIN
  MPV_MOIST_LOSS_MAX = PC%VEG_DEHYDRATION_RATE_MAX*DT
@@ -526,9 +526,9 @@ DROPLET_LOOP: DO I=1,NLP
  IF(PC%VEG_DEGRADATION == 'ARRHENIUS') VEG_DEGRADATION_ARRHENIUS = .TRUE.
 
 ! Determine grid cell quantities of the vegetation fuel element
- XI = CELLSI(FLOOR((DR%X-XS)*RDXINT))
- YJ = CELLSJ(FLOOR((DR%Y-YS)*RDYINT))
- ZK = CELLSK(FLOOR((DR%Z-ZS)*RDZINT))
+ XI = CELLSI(FLOOR((LP%X-XS)*RDXINT))
+ YJ = CELLSJ(FLOOR((LP%Y-YS)*RDYINT))
+ ZK = CELLSK(FLOOR((LP%Z-ZS)*RDZINT))
  II  = FLOOR(XI+1._EB)
  JJ  = FLOOR(YJ+1._EB)
  KK  = FLOOR(ZK+1._EB)
@@ -541,9 +541,9 @@ DROPLET_LOOP: DO I=1,NLP
  UBAR = AFILL2(UU,II-1,JJY,KKZ,XI-II+1,YJ-JJY+.5_EB,ZK-KKZ+.5_EB)
  VBAR = AFILL2(VV,IIX,JJ-1,KKZ,XI-IIX+.5_EB,YJ-JJ+1,ZK-KKZ+.5_EB)
  WBAR = AFILL2(WW,IIX,JJY,KK-1,XI-IIX+.5_EB,YJ-JJY+.5_EB,ZK-KK+1)
- UREL = DR%U - UBAR
- VREL = DR%V - VBAR
- WREL = DR%W - WBAR
+ UREL = LP%U - UBAR
+ VREL = LP%V - VBAR
+ WREL = LP%W - WBAR
  QREL = MAX(1.E-6_EB,SQRT(UREL*UREL + VREL*VREL + WREL*WREL))
 
 ! Other gas quantities
@@ -560,9 +560,9 @@ DROPLET_LOOP: DO I=1,NLP
 !print*,rho_gas,qrel,sv_veg,mu_air
  RE_D     = RHO_GAS*QREL*2./(SV_VEG*MU_AIR)
  QCON_VEG = SV_VEG*(0.5*K_AIR*0.683*RE_D**0.466)*0.5*TMP_GMV !W/m^2
- QCON_VEG = SV_VEG*DR%VEG_PACKING_RATIO*QCON_VEG !W/m^3
- DR%VEG_DIVQC = QCON_VEG
- QRAD_VEG = DR%VEG_DIVQR
+ QCON_VEG = SV_VEG*LP%VEG_PACKING_RATIO*QCON_VEG !W/m^3
+ LP%VEG_DIVQC = QCON_VEG
+ QRAD_VEG = LP%VEG_DIVQR
 
 ! Divergence of net heat flux
  QNET_VEG = QCON_VEG + QRAD_VEG !W/m^2
@@ -572,19 +572,19 @@ DROPLET_LOOP: DO I=1,NLP
  TMP_VEG_NEW = TMP_VEG + DTMP_VEG
 
 ! Set temperature of inert ignitor elements
- IF(DR%IGNITOR) THEN
+ IF(LP%IGNITOR) THEN
   TMP_IGNITOR = PC%VEG_INITIAL_TEMPERATURE
   TMP_VEG_NEW = TMP_IGNITOR
-  IF(T>=DR%VEG_IGN_TON .AND. T<=DR%VEG_IGN_TON+DR%VEG_IGN_TRAMPON) THEN
+  IF(T>=LP%VEG_IGN_TON .AND. T<=LP%VEG_IGN_TON+LP%VEG_IGN_TRAMPON) THEN
     TMP_VEG_NEW = &
-      TMPA + (TMP_IGNITOR-TMPA)*(T-DR%VEG_IGN_TON)/DR%VEG_IGN_TRAMPON
+      TMPA + (TMP_IGNITOR-TMPA)*(T-LP%VEG_IGN_TON)/LP%VEG_IGN_TRAMPON
   ENDIF  
-  IF(T>=DR%VEG_IGN_TOFF .AND. T<=DR%VEG_IGN_TOFF+DR%VEG_IGN_TRAMPOFF)THEN 
+  IF(T>=LP%VEG_IGN_TOFF .AND. T<=LP%VEG_IGN_TOFF+LP%VEG_IGN_TRAMPOFF)THEN 
     TMP_VEG_NEW = &
-      TMP_IGNITOR - (TMP_IGNITOR-TMP_GAS)*(T-DR%VEG_IGN_TOFF)/DR%VEG_IGN_TRAMPOFF
+      TMP_IGNITOR - (TMP_IGNITOR-TMP_GAS)*(T-LP%VEG_IGN_TOFF)/LP%VEG_IGN_TRAMPOFF
   ENDIF
-  IF(T > DR%VEG_IGN_TOFF+DR%VEG_IGN_TRAMPOFF) THEN
-   DR%R = 0.0001_EB*PC%KILL_RADIUS !remove ignitor element
+  IF(T > LP%VEG_IGN_TOFF+LP%VEG_IGN_TRAMPOFF) THEN
+   LP%R = 0.0001_EB*PC%KILL_RADIUS !remove ignitor element
    TMP_VEG_NEW = TMP_GAS
   ENDIF
  ENDIF
@@ -595,17 +595,17 @@ DROPLET_LOOP: DO I=1,NLP
 ! temperature dependence with qnet factor
 !
  IF_VEG_DEGRADATION_LINEAR: IF(VEG_DEGRADATION_LINEAR) THEN
- IF_NET_HEAT_INFLUX: IF (QNET_VEG > 0.0_EB .AND. .NOT. DR%IGNITOR) THEN !dehydrate or pyrolyze 
+ IF_NET_HEAT_INFLUX: IF (QNET_VEG > 0.0_EB .AND. .NOT. LP%IGNITOR) THEN !dehydrate or pyrolyze 
 
 ! Drying of vegetation 
    IF_DEHYDRATION: IF (MPV_MOIST > MPV_MOIST_MIN .AND. TMP_VEG_NEW > TMP_H2O_BOIL) THEN
      Q_FOR_DRYING   = (TMP_VEG_NEW - TMP_H2O_BOIL)/DTMP_VEG * QNET_VEG
      MPV_MOIST_LOSS = MIN(DT*Q_FOR_DRYING/H_VAP_H2O,MPV_MOIST-MPV_MOIST_MIN)
-     MPV_MOIST_LOSS = DR%VEG_VOLFRACTION*MPV_MOIST_LOSS !accounts for veg not filling grid cell in z
+     MPV_MOIST_LOSS = LP%VEG_VOLFRACTION*MPV_MOIST_LOSS !accounts for veg not filling grid cell in z
      MPV_MOIST_LOSS = MIN(MPV_MOIST_LOSS,MPV_MOIST_LOSS_MAX) !use specified max
      TMP_VEG_NEW       = TMP_H2O_BOIL
-     DR%VEG_MOIST_MASS = MPV_MOIST - MPV_MOIST_LOSS !kg/m^3
-     IF (DR%VEG_MOIST_MASS <= MPV_MOIST_MIN) DR%VEG_MOIST_MASS = 0.0_EB
+     LP%VEG_MOIST_MASS = MPV_MOIST - MPV_MOIST_LOSS !kg/m^3
+     IF (LP%VEG_MOIST_MASS <= MPV_MOIST_MIN) LP%VEG_MOIST_MASS = 0.0_EB
      Q_VEG_MOIST       = MPV_MOIST_LOSS*CP_H2O*(TMP_VEG_NEW - TMPA)
      MW_VEG_MOIST_TERM = MPV_MOIST_LOSS/MW_H2O
 !    IF (I == 1) print*,MPV_MOIST,MPV_MOIST_LOSS
@@ -621,16 +621,16 @@ DROPLET_LOOP: DO I=1,NLP
      MPV_VOLIT    = Q_VOLIT*0.00000239_EB
      MPV_VOLIT    = MAX(MPV_VOLIT,0._EB)
      MPV_VOLIT    = MIN(MPV_VOLIT,MPV_VOLIT_MAX) !user specified max
-     MPV_VOLIT    = DR%VEG_VOLFRACTION*MPV_VOLIT !accounts for veg not filling grid cell in z
+     MPV_VOLIT    = LP%VEG_VOLFRACTION*MPV_VOLIT !accounts for veg not filling grid cell in z
      MPV_VOLIT    = MIN(MPV_VOLIT,(MPV_VEG-MPV_VEG_MIN))
      MPV_VEG      = MPV_VEG - MPV_VOLIT
      Q_VOLIT      = MPV_VOLIT*418000._EB
      TMP_VEG_NEW  = TMP_VEG + (Q_FOR_VOLIT-Q_VOLIT)/(MPV_VEG*CP_VEG)
      TMP_VEG_NEW  = MIN(TMP_VEG_NEW,500._EB) !set to high vap temp if too hot
-     DR%VEG_FUEL_MASS = MPV_VEG
+     LP%VEG_FUEL_MASS = MPV_VEG
 !Handle veg. fuel elements if element mass <= prescribed char mass
      IF (MPV_VEG <= MPV_VEG_MIN) THEN
-       IF(PC%VEG_REMOVE_CHARRED) DR%R = 0.0001_EB*PC%KILL_RADIUS !fuel element will be removed
+       IF(PC%VEG_REMOVE_CHARRED) LP%R = 0.0001_EB*PC%KILL_RADIUS !fuel element will be removed
      ENDIF
 !Enthalpy of volatiles using Cp,volatiles(T) from Ritchie
      H_SENS_VEG_VOLIT = 0.0445_EB*(TMP_VEG_NEW**1.5_EB - TMP_GAS**1.5_EB) - & 
@@ -665,7 +665,7 @@ DROPLET_LOOP: DO I=1,NLP
   NU_O2_CHAR_VEG = 1.65_EB
   H_CHAR_OXID    = -12.0E+6_EB !J/kg
 
-  IF_NOT_IGNITOR: IF (.NOT. DR%IGNITOR) THEN !dehydrate or pyrolyze 
+  IF_NOT_IGNITOR: IF (.NOT. LP%IGNITOR) THEN !dehydrate or pyrolyze 
 
 ! Drying of vegetation 
    IF_DEHYDRATION_2: IF (MPV_MOIST > MPV_MOIST_MIN) THEN
@@ -673,8 +673,8 @@ DROPLET_LOOP: DO I=1,NLP
                           MPV_MOIST-MPV_MOIST_MIN)
      MPV_MOIST_LOSS = MIN(MPV_MOIST_LOSS,MPV_MOIST_LOSS_MAX) !use specified max
      MPV_MOIST      = MPV_MOIST - MPV_MOIST_LOSS
-     DR%VEG_MOIST_MASS = MPV_MOIST !kg/m^3
-     IF (MPV_MOIST <= MPV_MOIST_MIN) DR%VEG_MOIST_MASS = 0.0_EB
+     LP%VEG_MOIST_MASS = MPV_MOIST !kg/m^3
+     IF (MPV_MOIST <= MPV_MOIST_MIN) LP%VEG_MOIST_MASS = 0.0_EB
      MW_VEG_MOIST_TERM = MPV_MOIST_LOSS/MW_H2O
      Q_VEG_MOIST  = MPV_MOIST_LOSS*CP_H2O*(TMP_VEG - TMPA)
 !    IF (I == 1) print*,MPV_MOIST,MPV_MOIST_LOSS
@@ -686,12 +686,12 @@ DROPLET_LOOP: DO I=1,NLP
      MPV_VOLIT    = MIN(MPV_VOLIT,MPV_VOLIT_MAX) !user specified max
      MPV_VOLIT    = MIN(MPV_VOLIT,(MPV_VEG-MPV_VEG_MIN))
      MPV_VEG      = MPV_VEG - MPV_VOLIT
-     DR%VEG_FUEL_MASS = MPV_VEG
+     LP%VEG_FUEL_MASS = MPV_VEG
      VEG_FUEL_AND_CHAR_MASS = MPV_VEG
-     DR%VEG_CHAR_MASS = DR%VEG_CHAR_MASS + NU_CHAR_VEG*MPV_VOLIT !kg/m^3
+     LP%VEG_CHAR_MASS = LP%VEG_CHAR_MASS + NU_CHAR_VEG*MPV_VOLIT !kg/m^3
 !Handle veg. fuel elements if element mass <= prescribed char mass
      IF (MPV_VEG <= MPV_VEG_MIN .AND. .NOT. PC%VEG_CHAR_OXIDATION) THEN
-       IF(PC%VEG_REMOVE_CHARRED) DR%R = 0.0001_EB*PC%KILL_RADIUS !fuel element will be removed
+       IF(PC%VEG_REMOVE_CHARRED) LP%R = 0.0001_EB*PC%KILL_RADIUS !fuel element will be removed
        VEG_FUEL_AND_CHAR_MASS = MPV_VEG_MIN
      ENDIF
 !Enthalpy of volatiles using Cp,volatiles(T) from Ritchie
@@ -709,26 +709,26 @@ DROPLET_LOOP: DO I=1,NLP
 !combustion)
   IF_CHAR_OXIDATION: IF (PC%VEG_CHAR_OXIDATION) THEN
    MPV_CHAR_MIN = 0.035_EB
-   MPV_CHAR     = DR%VEG_CHAR_MASS
+   MPV_CHAR     = LP%VEG_CHAR_MASS
    IF_CHAR_OXIDATION_2: IF (MPV_CHAR > MPV_CHAR_MIN) THEN
      ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(II,JJ,KK,1:N_TRACKED_SPECIES)
      CALL GET_MASS_FRACTION(ZZ_GET,O2_INDEX,Y_O2)
-     MPV_CHAR_LOSS = DT*RHO_GAS*Y_O2*A_CHAR_VEG/NU_O2_CHAR_VEG*SV_VEG*DR%VEG_PACKING_RATIO*  &
+     MPV_CHAR_LOSS = DT*RHO_GAS*Y_O2*A_CHAR_VEG/NU_O2_CHAR_VEG*SV_VEG*LP%VEG_PACKING_RATIO*  &
                       EXP(-E_CHAR_VEG/TMP_VEG)*(1+BETA_CHAR_VEG*SQRT(2._EB*RE_D))
      MPV_CHAR_LOSS = MIN(MPV_CHAR_LOSS,MPV_CHAR-MPV_CHAR_MIN)
      MPV_CHAR_LOSS = MIN(MPV_CHAR_LOSS,PC%VEG_CHAR_FRACTION*MPV_VOLIT_MAX) !use specified max
      MPV_CHAR      = MPV_CHAR - MPV_CHAR_LOSS
      MPV_CHAR_CO2  = (1._EB + NU_O2_CHAR_VEG - NU_ASH_VEG)*MPV_CHAR_LOSS
-     DR%VEG_CHAR_MASS     = MPV_CHAR !kg/m^3
+     LP%VEG_CHAR_MASS     = MPV_CHAR !kg/m^3
      VEG_FUEL_AND_CHAR_MASS = VEG_FUEL_AND_CHAR_MASS + MPV_CHAR
      IF (MPV_VEG < MPV_VEG_MIN) THEN !charring reduce veg elem size
-      DR%VEG_PACKING_RATIO = MPV_CHAR/(PC%VEG_DENSITY*PC%VEG_CHAR_FRACTION)
-      DR%VEG_SV     = PC%VEG_SV*(ORIG_PACKING_RATIO/DR%VEG_PACKING_RATIO)**0.333_EB 
+      LP%VEG_PACKING_RATIO = MPV_CHAR/(PC%VEG_DENSITY*PC%VEG_CHAR_FRACTION)
+      LP%VEG_SV     = PC%VEG_SV*(ORIG_PACKING_RATIO/LP%VEG_PACKING_RATIO)**0.333_EB 
      ENDIF
      IF (MPV_CHAR <= MPV_CHAR_MIN) THEN 
-       DR%VEG_CHAR_MASS = 0.0_EB
+       LP%VEG_CHAR_MASS = 0.0_EB
        VEG_FUEL_AND_CHAR_MASS = MPV_CHAR_MIN
-       IF(PC%VEG_REMOVE_CHARRED) DR%R = 0.0001_EB*PC%KILL_RADIUS !fuel element will be removed
+       IF(PC%VEG_REMOVE_CHARRED) LP%R = 0.0001_EB*PC%KILL_RADIUS !fuel element will be removed
      ENDIF
    ENDIF IF_CHAR_OXIDATION_2
   ENDIF IF_CHAR_OXIDATION
@@ -736,14 +736,14 @@ DROPLET_LOOP: DO I=1,NLP
 ! print*,'TMP_VEG before',TMP_VEG
   TMP_VEG_NEW  = TMP_VEG_NEW - (MPV_MOIST_LOSS*H_VAP_H2O + MPV_VOLIT*L_PYR_VEG + & 
                                 MPV_CHAR_LOSS*H_CHAR_OXID) / &
-                               (DR%VEG_MOIST_MASS*CP_H2O + VEG_FUEL_AND_CHAR_MASS*CP_VEG)
+                               (LP%VEG_MOIST_MASS*CP_H2O + VEG_FUEL_AND_CHAR_MASS*CP_VEG)
 ! print*,'TMP_VEG after',TMP_VEG_NEW
 ! print*,'********************************************'
  ENDIF IF_NOT_IGNITOR
  ENDIF IF_VEG_DEGRADATION_ARRHENIUS
 
- DR%TMP = TMP_VEG_NEW
- DR%VEG_EMISS = 4.*SIGMA*DR%VEG_KAPPA*DR%TMP**4 !used in RTE solver
+ LP%TMP = TMP_VEG_NEW
+ LP%VEG_EMISS = 4.*SIGMA*LP%VEG_KAPPA*LP%TMP**4 !used in RTE solver
 
 ! Add affects of thermal degradation of vegetation to velocity divergence
  MW_TERM    = MW_VEG_MOIST_TERM + MW_VEG_VOLIT_TERM
@@ -755,7 +755,7 @@ DROPLET_LOOP: DO I=1,NLP
 
 ! Add water vapor and fuel vapor mass to total density
   MPV_ADDED     = MPV_MOIST_LOSS + MPV_VOLIT + MPV_CHAR_CO2
-  DR%VEG_MLR    = MPV_ADDED*RDT !used in FVX,FVY,FVZ along with drag in part.f90
+  LP%VEG_MLR    = MPV_ADDED*RDT !used in FVX,FVY,FVZ along with drag in part.f90
   RHO(II,JJ,KK) = RHO_GAS + MPV_ADDED
   RRHO_GAS_NEW  = 1._EB/RHO(II,JJ,KK)
 ! print*,'NM =',NM
@@ -791,23 +791,23 @@ DROPLET_LOOP: DO I=1,NLP
 !IF (II==12 .AND. JJ==12 .AND. KK==4) THEN 
 !IF (II==20 .AND. JJ==20 .AND. KK==25) THEN !M=14% and 49% element burnout
 !IF (II==27 .AND. JJ==20 .AND. KK==7) THEN !M=49% not full element burnout
-! WRITE(9998,'(9(ES12.4))')T,TMP_GAS,TMP_VEG,QCON_VEG,QRAD_VEG,DR%VEG_MOIST_MASS,DR%VEG_FUEL_MASS, &
+! WRITE(9998,'(9(ES12.4))')T,TMP_GAS,TMP_VEG,QCON_VEG,QRAD_VEG,LP%VEG_MOIST_MASS,LP%VEG_FUEL_MASS, &
 !                          MPV_MOIST_LOSS_MAX*RDT,MPV_VOLIT_MAX*RDT
 !ENDIF
 
 ! V_VEG               = V_VEG + V_CELL
-! TOTAL_MASS_MOIST    = TOTAL_MASS_MOIST + DR%VEG_MOIST_MASS*V_CELL
-! TOTAL_MASS_DRY_FUEL = TOTAL_MASS_DRY_FUEL + DR%VEG_FUEL_MASS*V_CELL
+! TOTAL_MASS_MOIST    = TOTAL_MASS_MOIST + LP%VEG_MOIST_MASS*V_CELL
+! TOTAL_MASS_DRY_FUEL = TOTAL_MASS_DRY_FUEL + LP%VEG_FUEL_MASS*V_CELL
 
- N_TREE = DR%VEG_N_TREE_OUTPUT
+ N_TREE = LP%VEG_N_TREE_OUTPUT
  IF (N_TREE /= 0) THEN
-  TREE_OUTPUT_DATA(N_TREE,1,NM) = TREE_OUTPUT_DATA(N_TREE,1,NM) + DR%VEG_FUEL_MASS*V_CELL !kg
-  TREE_OUTPUT_DATA(N_TREE,2,NM) = TREE_OUTPUT_DATA(N_TREE,2,NM) + DR%VEG_MOIST_MASS*V_CELL !kg
-  TREE_OUTPUT_DATA(N_TREE,3,NM) = TREE_OUTPUT_DATA(N_TREE,3,NM) + DR%VEG_DIVQC*V_CELL*0.001_EB !kW
-  TREE_OUTPUT_DATA(N_TREE,4,NM) = TREE_OUTPUT_DATA(N_TREE,4,NM) + DR%VEG_DIVQR*V_CELL*0.001_EB !kW
+  TREE_OUTPUT_DATA(N_TREE,1,NM) = TREE_OUTPUT_DATA(N_TREE,1,NM) + LP%VEG_FUEL_MASS*V_CELL !kg
+  TREE_OUTPUT_DATA(N_TREE,2,NM) = TREE_OUTPUT_DATA(N_TREE,2,NM) + LP%VEG_MOIST_MASS*V_CELL !kg
+  TREE_OUTPUT_DATA(N_TREE,3,NM) = TREE_OUTPUT_DATA(N_TREE,3,NM) + LP%VEG_DIVQC*V_CELL*0.001_EB !kW
+  TREE_OUTPUT_DATA(N_TREE,4,NM) = TREE_OUTPUT_DATA(N_TREE,4,NM) + LP%VEG_DIVQR*V_CELL*0.001_EB !kW
  ENDIF
 
-ENDDO DROPLET_LOOP
+ENDDO PARTICLE_LOOP
 
 !print*,'--------------------------------'
 !print*,'VEGE: NM, TREE_OUTPUT_DATA(1,1,NM),(1,2,NM)',nm, tree_output_data(1,1,nm),tree_output_data(1,2,nm)
@@ -820,8 +820,8 @@ ENDDO DROPLET_LOOP
 !VEG_TOTAL_DRY_MASS(NM)   = TOTAL_MASS_DRY_FUEL
 !VEG_TOTAL_MOIST_MASS(NM) = TOTAL_MASS_MOIST
 
-! Remove vegetation that has completely burned (i.e., DR%R set equal to zero)
-CALL REMOVE_DROPLETS(T,NM)
+! Remove vegetation that has completely burned (i.e., LP%R set equal to zero)
+CALL REMOVE_PARTICLES(T,NM)
  
 END SUBROUTINE RAISED_VEG_MASS_ENERGY_TRANSFER
 

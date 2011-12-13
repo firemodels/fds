@@ -76,12 +76,12 @@
 &PROP ID='bubble_props' SMOKEVIEW_PARAMETERS(1:5)='D=0.2','L=0.3','VELMAX=4.5','W=.1','H=.1' SMOKEVIEW_ID(1:4)='sphere','veltube','velegg','face_eye' /
 
 &PART ID='lava',MASSLESS=.TRUE.,
-   QUANTITIES(1:4)='U-VELOCITY','V-VELOCITY','W-VELOCITY','DROPLET TEMPERATURE'
+   QUANTITIES(1:4)='U-VELOCITY','V-VELOCITY','W-VELOCITY','PARTICLE TEMPERATURE'
    SAMPLING_FACTOR=10 PROP_ID='lava_props' /  Description of massless tracer particles. Apply at a
                                                              solid surface with the PART_ID='tracers'
 
 &PART ID='bubbles',MASSLESS=.TRUE.,
-   QUANTITIES(1:4)='U-VELOCITY','V-VELOCITY','W-VELOCITY','DROPLET TEMPERATURE'
+   QUANTITIES(1:4)='U-VELOCITY','V-VELOCITY','W-VELOCITY','PARTICLE TEMPERATURE'
    SAMPLING_FACTOR=10 PROP_ID='bubble_props' /  Description of massless tracer particles. Apply at a
                                                              solid surface with the PART_ID='tracers'
 
