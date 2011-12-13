@@ -2,6 +2,8 @@
 // $Revision$
 // $Author$
 
+#include <time.h>
+
 #ifdef IN_STRING_UTIL
 #define STREXTERN
 #define STRDECL(var,val)  var=val
