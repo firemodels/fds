@@ -11,6 +11,8 @@
 #include <math.h>
 #ifdef WIN32
 #include <direct.h>
+#include <dirent_win.h>
+#else
 #include <dirent.h>
 #endif
 #include "MALLOC.h"
@@ -838,7 +840,6 @@ char *time2timelabel(float time, float dt, char *timelabel){
   return timelabelptr;
 }
 
-#ifdef WIN32
   /* ------------------ listdir ------------------------ */
 
 int listdir(const char *path) {
@@ -857,4 +858,3 @@ int listdir(const char *path) {
   closedir(dp);
   return 0;
 }
-#endif
