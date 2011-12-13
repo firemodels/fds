@@ -30,25 +30,25 @@
       COLOR='GOLD'
 /
 
-&INIT XB=    0    0    -0.375    -0.375    -0.375    -0.375    PART_ID='Drops',NUMBER_INITIAL_DROPLETS=1/
-&INIT XB=    0    0    -0.125    -0.125    -0.375    -0.375    PART_ID='Drops',NUMBER_INITIAL_DROPLETS=1/
-&INIT XB=    0    0    0.125    0.125    -0.375    -0.375    PART_ID='Drops',NUMBER_INITIAL_DROPLETS=1/
-&INIT XB=    0    0    0.375    0.375    -0.375    -0.375    PART_ID='Drops',NUMBER_INITIAL_DROPLETS=1/
+&INIT XB=    0    0    -0.375    -0.375    -0.375    -0.375    PART_ID='Drops',NUMBER_INITIAL_PARTICLES=1/
+&INIT XB=    0    0    -0.125    -0.125    -0.375    -0.375    PART_ID='Drops',NUMBER_INITIAL_PARTICLES=1/
+&INIT XB=    0    0    0.125    0.125    -0.375    -0.375    PART_ID='Drops',NUMBER_INITIAL_PARTICLES=1/
+&INIT XB=    0    0    0.375    0.375    -0.375    -0.375    PART_ID='Drops',NUMBER_INITIAL_PARTICLES=1/
 
-&INIT XB=    0    0    -0.375    -0.375    -0.125    -0.125    PART_ID='Drops',NUMBER_INITIAL_DROPLETS=1/
-&INIT XB=    0    0    -0.125    -0.125    -0.125    -0.125    PART_ID='Drops',NUMBER_INITIAL_DROPLETS=1/
-&INIT XB=    0    0    0.125    0.125    -0.125    -0.125    PART_ID='Drops',NUMBER_INITIAL_DROPLETS=1/
-&INIT XB=    0    0    0.375    0.375    -0.125    -0.125    PART_ID='Drops',NUMBER_INITIAL_DROPLETS=1/
+&INIT XB=    0    0    -0.375    -0.375    -0.125    -0.125    PART_ID='Drops',NUMBER_INITIAL_PARTICLES=1/
+&INIT XB=    0    0    -0.125    -0.125    -0.125    -0.125    PART_ID='Drops',NUMBER_INITIAL_PARTICLES=1/
+&INIT XB=    0    0    0.125    0.125    -0.125    -0.125    PART_ID='Drops',NUMBER_INITIAL_PARTICLES=1/
+&INIT XB=    0    0    0.375    0.375    -0.125    -0.125    PART_ID='Drops',NUMBER_INITIAL_PARTICLES=1/
                             
-&INIT XB=    0    0    -0.375    -0.375    0.125    0.125    PART_ID='Drops',NUMBER_INITIAL_DROPLETS=1/
-&INIT XB=    0    0    -0.125    -0.125    0.125    0.125    PART_ID='Drops',NUMBER_INITIAL_DROPLETS=1/
-&INIT XB=    0    0    0.125    0.125    0.125    0.125    PART_ID='Drops',NUMBER_INITIAL_DROPLETS=1/
-&INIT XB=    0    0    0.375    0.375    0.125    0.125    PART_ID='Drops',NUMBER_INITIAL_DROPLETS=1/
+&INIT XB=    0    0    -0.375    -0.375    0.125    0.125    PART_ID='Drops',NUMBER_INITIAL_PARTICLES=1/
+&INIT XB=    0    0    -0.125    -0.125    0.125    0.125    PART_ID='Drops',NUMBER_INITIAL_PARTICLES=1/
+&INIT XB=    0    0    0.125    0.125    0.125    0.125    PART_ID='Drops',NUMBER_INITIAL_PARTICLES=1/
+&INIT XB=    0    0    0.375    0.375    0.125    0.125    PART_ID='Drops',NUMBER_INITIAL_PARTICLES=1/
 
-&INIT XB=    0    0    -0.375    -0.375    0.375    0.375    PART_ID='Drops',NUMBER_INITIAL_DROPLETS=1/
-&INIT XB=    0    0    -0.125    -0.125    0.375    0.375    PART_ID='Drops',NUMBER_INITIAL_DROPLETS=1/
-&INIT XB=    0    0    0.125    0.125    0.375    0.375    PART_ID='Drops',NUMBER_INITIAL_DROPLETS=1/
-&INIT XB=    0    0    0.375    0.375    0.375    0.375    PART_ID='Drops',NUMBER_INITIAL_DROPLETS=1/
+&INIT XB=    0    0    -0.375    -0.375    0.375    0.375    PART_ID='Drops',NUMBER_INITIAL_PARTICLES=1/
+&INIT XB=    0    0    -0.125    -0.125    0.375    0.375    PART_ID='Drops',NUMBER_INITIAL_PARTICLES=1/
+&INIT XB=    0    0    0.125    0.125    0.375    0.375    PART_ID='Drops',NUMBER_INITIAL_PARTICLES=1/
+&INIT XB=    0    0    0.375    0.375    0.375    0.375    PART_ID='Drops',NUMBER_INITIAL_PARTICLES=1/
 
 &PART ID='Drops'
       EVAPORATE=.FALSE.

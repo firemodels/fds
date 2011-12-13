@@ -33,13 +33,13 @@ INTEGER :: NRT,NCO,UIIDIM,NLAMBDAT,NKAPPAT,NKAPPAZ
 !     ILW       Radiation intensities on solid mirrors and mesh interfaces.
 !               Intensity integrals (band specific or angle increment) for solid and open walls
 !     INRAD_W   Incident radiative heat flux on a cell (QRADIN = E_WALL*INRAD_W)
-!     R50       Array of droplet radii corresponding to the median diameters of the distributions used in the generation
+!     R50       Array of PARTICLE radii corresponding to the median diameters of the distributions used in the generation
 !               of WQABS and WQSCA arrays.
-!     NDG       Number of droplet radii in WQABS and WQSCA arrays
+!     NDG       Number of PARTICLE radii in WQABS and WQSCA arrays
 !     NLMBDMIE  Number of wave lengths in Mie calculations
 !     NMIEANG   Number of angle bins in forward scattering integration
 !     NRA       Total number of radiation control angles
-!     NRDMIE    Number of droplet radii in Mie calculations
+!     NRDMIE    Number of PARTICLE radii in Mie calculations
 !     NRT       Number of radiation theta angles
 !     NRP       Number of radiation phi angles on each theta band
 !     NSB       Number of spectral bands (1=gray, 6=wide band, 9=wide band w. CH4)
@@ -1969,7 +1969,7 @@ DATA ((CPLXREF_WATER(I,J), J = 1,2), I =181,NWATERK)  &
 
 ! Heptane properties from
 ! L.A. Dombrovsky, S.S. Sazhin, S.V. Mikhalovsky, R. Wood, M.R. Heikal
-! Spectral properties of diesel fuel droplets
+! Spectral properties of diesel fuel PARTICLEs
 ! Fuel, Vol. 82, No. 1 (2003) pp. 15-22
 DATA (CPLXREF_FUEL( 1,J), J=1,3) / 0.7_EB,   1.47_EB, 1.55E-07_EB /
 DATA (CPLXREF_FUEL( 2,J), J=1,3) / 0.8_EB,   1.47_EB, 4.33E-07_EB /
@@ -2093,7 +2093,7 @@ CONTAINS
 SUBROUTINE MEAN_CROSS_SECTIONS(CLASS_NUMBER)
 
 ! This subroutine calculates the mean scattering and absorption
-! coefficients for each radiation band and droplet size group.
+! coefficients for each radiation band and PARTICLE size group.
 
 USE TYPES, ONLY: PARTICLE_CLASS_TYPE, PARTICLE_CLASS, TABLES_TYPE, TABLES
 USE MATH_FUNCTIONS, ONLY : INTERPOLATE1D
@@ -2109,7 +2109,7 @@ B_WIEN = 2.8977685E-3_EB
 
 NSB = NUMBER_SPECTRAL_BANDS
  
-! Find the maximum mean droplet radius
+! Find the maximum mean PARTICLE radius
  
 RMMAX = 0.0_EB
 PC => PARTICLE_CLASS(CLASS_NUMBER) 
@@ -2118,12 +2118,12 @@ IF (PC%DIAMETER>2._EB*RMMAX) RMMAX = 0.5_EB*PC%DIAMETER
 ! Allow increase of the mean radius
 RMMAX = 1.5_EB*RMMAX
  
-! Calculate parameters of the droplet group lookup table
+! Calculate parameters of the PARTICLE group lookup table
  
 DGROUP_A = (LOG(RMMAX)-LOG(RMMIN))/(NDG-1)
 DGROUP_B = LOG(RMMAX)-DGROUP_A*NDG
 
-! Generate the droplet radii for mie table (microns)
+! Generate the PARTICLE radii for mie table (microns)
  
 RDTMP = 0.2_EB
 NX = 0
@@ -2224,7 +2224,7 @@ BANDLOOP: DO IBND = 1,NSB
       NLAMBDAHIGH = MAXLOC(LMBDMIE,MASK=LMBDMIE<=WL_HIGH(IBND)*1.0E-6)
    ENDIF
 
-   !     Loop over all droplet size groups
+   !     Loop over all PARTICLE size groups
 
 
    DRGROUPLOOP: DO ND = 1, NDG
@@ -2242,7 +2242,7 @@ BANDLOOP: DO IBND = 1,NSB
          ASUM = 0._EB
          BSUM = 0._EB
 
-         !     Loop over droplet size distribution
+         !     Loop over PARTICLE size distribution
 
 !         DO I = 0,NRDINT
 !
@@ -2457,7 +2457,7 @@ LAMBDALOOP: DO NLAMBDA = 1, NLMBDMIE
 
    IF (REAL_REF_INDX(NLAMBDA) > 10._EB) PERFCT = .TRUE.
 
-!     Loop over droplet radius
+!     Loop over PARTICLE radius
 
    RADIUSLOOP: DO NX = 1, NRDMIE
 
@@ -2543,7 +2543,7 @@ SUBROUTINE MIEV0( XX, CREFIN, PERFCT, MIMCUT, ANYANG, NUMANG, XMU, &
                   PMOM, SFORW, SBACK, S1, S2, TFORW, TBACK, &
                   SPIKE )
 
-!     Mie scattering for a single droplet and wavelength.
+!     Mie scattering for a single PARTICLE and wavelength.
 !     Author:  Dr. Warren J. Wiscombe (wiscombe@climate.gsfc.nasa.gov)
 !         NASA Goddard Space Flight Center
 !         Code 913
