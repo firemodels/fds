@@ -135,6 +135,8 @@ SVEXTERN GLuint SVDECL(depthtexture_id,0);
 #endif
 
 #endif
+SVEXTERN int SVDECL(ncsvinfo,0);
+SVEXTERN csvdata SVDECL(*csvinfo,NULL);
 SVEXTERN int smoke_render_option;
 SVEXTERN float fnear, ffar;
 SVEXTERN float partfacedir[3];

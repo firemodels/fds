@@ -8,6 +8,13 @@
 #include "isodefs.h"
 #include "histogram.h"
 
+/* --------------------------  csvdata ------------------------------------ */
+
+typedef struct {
+  char *file;
+  int type;
+} csvdata;
+
 /* --------------------------  point ------------------------------------ */
 
 typedef struct {
