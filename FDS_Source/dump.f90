@@ -1229,6 +1229,14 @@ DO I=1,N_DEVC_FILES
    WRITE(LU_SMV,'(1X,A)') TRIM(FN_DEVC(I))
 ENDDO
 
+! Write out file names specified using CSVF
+
+DO N = 1, N_CSVF
+  WRITE(LU_SMV,'(/A)') 'CSVF'
+  WRITE(LU_SMV,'(1X,A)') 'ext'
+  WRITE(LU_SMV,'(1X,A)') TRIM(CSVFINFO(N)%CSVFILE)
+END DO
+
 ! Number of meshes
  
 WRITE(LU_SMV,'(/A)') 'NMESHES'
