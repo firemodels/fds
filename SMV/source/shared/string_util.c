@@ -11,6 +11,7 @@
 #include <math.h>
 #ifdef WIN32
 #include <direct.h>
+#include <dirent.h>
 #endif
 #include "MALLOC.h"
 #include "string_util.h"
@@ -835,4 +836,23 @@ char *time2timelabel(float time, float dt, char *timelabel){
   trim(timelabel);
   timelabelptr=trim_front(timelabel);
   return timelabelptr;
+}
+
+  /* ------------------ listdir ------------------------ */
+
+int listdir(const char *path) {
+  struct dirent *entry;
+  DIR *dp;
+ 
+  dp = opendir(path);
+  if (dp == NULL) {
+    perror("opendir");
+    return -1;
+  }
+ 
+  while((entry = readdir(dp)))
+    puts(entry->d_name);
+ 
+  closedir(dp);
+  return 0;
 }

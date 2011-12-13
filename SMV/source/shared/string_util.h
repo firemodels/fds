@@ -13,6 +13,7 @@
 #endif
 
 
+EXTERNCPP int listdir(const char *path);
 EXTERNCPP int randint(int min, int max);
 EXTERNCPP char *get_zonefilename(char *buffer);
 EXTERNCPP void fparsecsv(char *buffer, float *vals, int *valids, int ncols, int *ntokens);
