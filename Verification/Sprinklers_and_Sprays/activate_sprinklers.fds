@@ -16,8 +16,8 @@
 
 * defines particles, set to water, droplet diameter defined
 &SPEC ID='WATER VAPOR'/
-&PART ID='water_drops',  SPEC_ID='WATER VAPOR', SAMPLING_FACTOR=1, QUANTITIES='DROPLET DIAMETER', DIAMETER=2000. /
-&PART ID='water_drops1', SPEC_ID='WATER VAPOR', SAMPLING_FACTOR=1, QUANTITIES='DROPLET DIAMETER', DIAMETER=200. /
+&PART ID='water_drops',  SPEC_ID='WATER VAPOR', SAMPLING_FACTOR=1, QUANTITIES='PARTICLE DIAMETER', DIAMETER=2000. /
+&PART ID='water_drops1', SPEC_ID='WATER VAPOR', SAMPLING_FACTOR=1, QUANTITIES='PARTICLE DIAMETER', DIAMETER=200. /
 
 * defines sprinkler and nozzle position, quantity = control, control feature assigned, LATCH set to false permits multiple changes of state
 &DEVC XYZ=1.2,0.5,1.0, PROP_ID='Spr1', QUANTITY='CONTROL', CTRL_ID='controller 1', LATCH=.FALSE./

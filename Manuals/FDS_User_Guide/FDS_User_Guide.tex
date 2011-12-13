@@ -6125,7 +6125,7 @@ specified simply by:
 &SPEC ID='WATER VAPOR', MASS_FRACTION_0 = 0.00577 /
 &SPEC ID='CARBON DIOXIDE', MASS_FRACTION_0 = 0.00524 /
 &SPEC_ID='METHANE'/
-&REAC FUEL='METHANE', SPEC_ID='METHANE','OXYGEN','CARBON DIOXIDE','WATER VAPOR',
+&REAC FUEL='METHANE', SMIX_ID='METHANE','OXYGEN','CARBON DIOXIDE','WATER VAPOR',
       NU=-1,-2,1,2, HEAT_OF_COMBUSTION=50000. /
 \end{verbatim} \normalsize
 
@@ -6504,17 +6504,17 @@ information on devices and controls, see Sections~\ref{info:basic_control}~and~\
 
 \label{info:sprinkler_droplets}
 
-{\ct DROPLETS\_PER\_SECOND} is the  number of droplets inserted every
+{\ct PARTICLES\_PER\_SECOND} is the  number of droplets inserted every
 second per active sprinkler or nozzle (Default 5000). It is listed on the {\ct PROP} line that includes other properties of
 the sprinkler or nozzle. Note that this parameter only affects sprinklers and nozzles.
 Changing this parameter does {\em not} change the flow rate, but rather the number
 of droplets used to represent the flow.
 
 \begin{warning}
-Note that {\ct DROPLETS\_PER\_SECOND} can be a very important parameter. In some simulations, it is a good idea to increase this number so that the
+Note that {\ct PARTICLES\_PER\_SECOND} can be a very important parameter. In some simulations, it is a good idea to increase this number so that the
 liquid mass is distributed more uniformly over the droplets. If this parameter is too small, it can lead to a non-physical evaporation pattern, sometimes even to the
 point of causing a numerical instability. If you encounter a numerical instability shortly after the activation of a sprinkler or nozzle, consider increasing
-{\ct DROPLETS\_PER\_SECOND} to produce a smoother evaporation pattern that is more realistic. Keep in mind that for a real sprinkler or nozzle, there are many more
+{\ct PARTICLES\_PER\_SECOND} to produce a smoother evaporation pattern that is more realistic. Keep in mind that for a real sprinkler or nozzle, there are many more
 droplets created per second than the number that can be simulated.
 \end{warning}
 
@@ -6524,13 +6524,13 @@ droplets created per second than the number that can be simulated.
 
 
 Sometimes it is convenient to introduce droplets or particles at the start of the simulation. For this purpose, use an {\ct INIT} line with the parameter
-{\ct NUMBER\_INITIAL\_DROPLETS} to indicate the number of particles/droplets within the computational domain at the start of the simulation. Its default value is 0, meaning that initially there are no particles or droplets present. If non-zero, also specify {\ct MASS\_PER\_VOLUME} (kg/m$^3$) which specifies the particle/droplet mass per unit volume (Default 1~kg/m$^3$). Do not confuse this parameter with {\ct DENSITY}, explained in the next section. For example, water has a {\ct DENSITY} of 1000~kg/m$^3$, whereas a liter of water broken up into droplets and spread over a cubic meter has a {\ct MASS\_PER\_VOLUME} of 1~kg/m$^3$. Also, to limit the particles/droplets to a certain region of the domain, add the real sextuplet {\ct XB} to designate the coordinates of a rectangular volume. The format for {\ct XB} is the same as that used on the {\ct OBST} line. For the moment, you can only introduce a cloud of particles within a rectangular block. In future versions, the parameter {\ct SHAPE} will be used to indicate other types of initial volumes.
+{\ct NUMBER\_INITIAL\_PARTICLES} to indicate the number of particles/droplets within the computational domain at the start of the simulation. Its default value is 0, meaning that initially there are no particles or droplets present. If non-zero, also specify {\ct MASS\_PER\_VOLUME} (kg/m$^3$) which specifies the particle/droplet mass per unit volume (Default 1~kg/m$^3$). Do not confuse this parameter with {\ct DENSITY}, explained in the next section. For example, water has a {\ct DENSITY} of 1000~kg/m$^3$, whereas a liter of water broken up into droplets and spread over a cubic meter has a {\ct MASS\_PER\_VOLUME} of 1~kg/m$^3$. Also, to limit the particles/droplets to a certain region of the domain, add the real sextuplet {\ct XB} to designate the coordinates of a rectangular volume. The format for {\ct XB} is the same as that used on the {\ct OBST} line. For the moment, you can only introduce a cloud of particles within a rectangular block. In future versions, the parameter {\ct SHAPE} will be used to indicate other types of initial volumes.
 
 \footnotesize
 \begin{verbatim}
 &PART ID='drops', DIAMETER=750., SAMPLING_FACTOR=1, COLOR='RED', EVAPORATE=.FALSE. /
-&INIT PART_ID='drops', XB=..., NUMBER_INITIAL_DROPLETS=1000, MASS_PER_VOLUME=3.5 /
-&INIT PART_ID='drops', XB=..., NUMBER_INITIAL_DROPLETS=2000, MASS_PER_VOLUME=2.5 /
+&INIT PART_ID='drops', XB=..., NUMBER_INITIAL_PARTICLES=1000, MASS_PER_VOLUME=3.5 /
+&INIT PART_ID='drops', XB=..., NUMBER_INITIAL_PARTICLES=2000, MASS_PER_VOLUME=2.5 /
 \end{verbatim} \normalsize
 
 It is also possible to initialize monodisperse droplets pointwise by specifying the droplet position (m), velocity (m/s), diameter (microns), and temperature ($^\circ$C).  This feature allows the user to specify an arbitrary droplet distribution by using a sufficient number of {\ct INIT} lines.
@@ -6538,13 +6538,13 @@ It is also possible to initialize monodisperse droplets pointwise by specifying 
 \footnotesize
 \begin{verbatim}
 &PART ID='water drops', SPEC_ID='WATER VAPOR', EVAPORATE=.TRUE., SAMPLING_FACTOR=1,
-      QUANTITIES(1:3)='DROPLET_DIAMETER','DROPLET_VELOCITY','DROPLET_TEMPERATURE' /
+      QUANTITIES(1:3)='PARTICLE_DIAMETER','PARTICLE_VELOCITY','PARTICLE_TEMPERATURE' /
 &INIT XYZ=..., UVW=..., DIAMETER=200., TEMPERATURE=27.,
       MASS_PER_TIME=3.E-6, DT_INSERT=0.005, PART_ID='water drops' /
 \end{verbatim} \normalsize
 
 \noindent
-If you want to introduce droplets or particles within a given volume periodically in time and not just at the initial time, set {\ct DT\_INSERT} on the {\ct INIT} line to a positive value indicating the time increment (s) for insertion. The parameter {\ct NUMBER\_INITIAL\_DROPLETS} now indicates the number of droplets/particles inserted every {\ct DT\_INSERT} seconds. If the droplets/particles have mass, use {\ct MASS\_PER\_TIME} (kg/s) instead of {\ct MASS\_PER\_VOLUME} to indicate how much mass is to be introduced per second.  In the case of pointwise particle insertion (specification of {\ct XYZ,UVW}), a single particle is tracked but weighted based on {\ct MASS\_PER\_TIME} and {\ct DT\_INSERT} for the purposes of computing bulk source terms for mass and momentum (evaopartion and drag).
+If you want to introduce droplets or particles within a given volume periodically in time and not just at the initial time, set {\ct DT\_INSERT} on the {\ct INIT} line to a positive value indicating the time increment (s) for insertion. The parameter {\ct NUMBER\_INITIAL\_PARTICLES} now indicates the number of droplets/particles inserted every {\ct DT\_INSERT} seconds. If the droplets/particles have mass, use {\ct MASS\_PER\_TIME} (kg/s) instead of {\ct MASS\_PER\_VOLUME} to indicate how much mass is to be introduced per second.  In the case of pointwise particle insertion (specification of {\ct XYZ,UVW}), a single particle is tracked but weighted based on {\ct MASS\_PER\_TIME} and {\ct DT\_INSERT} for the purposes of computing bulk source terms for mass and momentum (evaopartion and drag).
 
 If you want to delay the insertion of droplets, you can use either a {\ct DEVC\_ID} or a {\ct CTRL\_ID} on the {\ct INIT} line to name the controlling device.
 See Section~\ref{info:basic_control} for more information on controlling devices.
@@ -6676,7 +6676,7 @@ allow you to control the rate at which droplets move horizontally or vertically 
 
 There are some applications, like the suppression of racked storage commodities, where it is useful to allow water droplets to move horizontally
 along the underside of a solid object. It is difficult to model this phenomenon precisely because it involves surface tension, surface porosity and
-absorption, and complicated geometry. However, a way to capture some of the effect is to set {\ct ALLOW\_UNDERSIDE\_DROPLETS=.TRUE.} on the
+absorption, and complicated geometry. However, a way to capture some of the effect is to set {\ct ALLOW\_UNDERSIDE\_PARTICLES=.TRUE.} on the
 {\ct MISC} line. It is normally false.
 
 \begin{warning}
@@ -6700,7 +6700,7 @@ of water droplets impinging on the top of a box followed by the cascading of wat
 \end{figure}
 
 \begin{warning}
-\noindent If you do not want droplets to accumulate on solid surfaces, set {\ct ALLOW\_UNDERSIDE\_DROPLETS=.FALSE.} on the
+\noindent If you do not want droplets to accumulate on solid surfaces, set {\ct ALLOW\_UNDERSIDE\_PARTICLES=.FALSE.} on the
 {\ct MISC} line. It is normally true.
 \end{warning}
 
@@ -6712,11 +6712,11 @@ of water droplets impinging on the top of a box followed by the cascading of wat
 The parameter {\ct QUANTITIES} is an array of character strings indicating which
 scalar quantities should be used to color the particles or droplets when viewed as an
 animation. The choices are \\
-{\ct 'DROPLET TEMPERATURE'} ($^\circ$C) \\
-{\ct 'DROPLET DIAMETER'} ($\mu$m) \\
-{\ct 'DROPLET VELOCITY'} (m/s) \\
-{\ct 'DROPLET MASS'} (kg) \\
-{\ct 'DROPLET AGE'} (s) \\
+{\ct 'PARTICLE TEMPERATURE'} ($^\circ$C) \\
+{\ct 'PARTICLE DIAMETER'} ($\mu$m) \\
+{\ct 'PARTICLE VELOCITY'} (m/s) \\
+{\ct 'PARTICLE MASS'} (kg) \\
+{\ct 'PARTICLE AGE'} (s) \\
 As a default, if no {\ct QUANTITIES} are specified and none are selected in Smokeview, then
 Smokeview will display particles with a single color.  To select this color specify either {\ct RGB} or
 {\ct COLOR}. By default, water droplets are colored blue and fuel droplets yellow. All others are colored black.
@@ -6749,7 +6749,7 @@ defined via the line
 \noindent
 Note that if the particles are {\ct MASSLESS}, it is not appropriate to color them according to any particular property.
 Particles are not colored by gas phase quantities, but rather by properties of the particle itself. For example,
-{\ct 'DROPLET\_TEMPERATURE'} for a non-massless particle refers to the temperature of the particle itself
+{\ct 'PARTICLE\_TEMPERATURE'} for a non-massless particle refers to the temperature of the particle itself
 rather than the local gas temperature.
 
 Also note that if {\ct MASSLESS=.TRUE.}, the {\ct SAMPLING\_FACTOR} is set to 1 unless you say otherwise, which would be pointless
@@ -6761,7 +6761,7 @@ since {\ct MASSLESS} particles are for visualization only.
 
 {\ct STATIC} is a logical parameter indicating whether particles move or just serve
 as obstructions or clutter. Setting {\ct STATIC=.TRUE.} only makes sense in conjunction with a non-zero value of
-{\ct NUMBER\_INITIAL\_DROPLETS} on the {\ct INIT} line. The default value of {\ct STATIC} is {\ct .FALSE.}
+{\ct NUMBER\_INITIAL\_PARTICLES} on the {\ct INIT} line. The default value of {\ct STATIC} is {\ct .FALSE.}
 
 
 \subsection{Water Droplets}
@@ -6802,11 +6802,11 @@ parameters are given here:
 &DEVC ID='nozzle_2', XYZ=4.0,0.3,0.5, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=0. /
 
 &PART ID='heptane droplets', SPEC_ID='N-HEPTANE',
-      QUANTITIES(1:2)='DIAMETER','DROPLET_TEMPERATURE',
+      QUANTITIES(1:2)='DIAMETER','PARTICLE_TEMPERATURE',
       DIAMETER=1000., HEAT_OF_COMBUSTION=44500., SAMPLING_FACTOR=1 /
 
 &PROP ID='nozzle', CLASS='NOZZLE', PART_ID='heptane droplets',
-      FLOW_RATE=1.96, FLOW_RAMP='fuel', DROPLET_VELOCITY=10.,
+      FLOW_RATE=1.96, FLOW_RAMP='fuel', PARTICLE_VELOCITY=10.,
       SPRAY_ANGLE=0.,30.   /
 &RAMP ID='fuel', T= 0.0, F=0.0  /
 &RAMP ID='fuel', T=20.0, F=1.0  /
@@ -6866,9 +6866,9 @@ of hot spheres:
 \footnotesize
 \begin{verbatim}
 &SURF ID='HOT', TMP_FRONT=500., RADIUS=0.005, GEOMETRY='SPHERICAL' /
-&PART ID='spheres', SURF_ID='HOT', QUANTITIES='DROPLET TEMPERATURE', PROP_ID='ball' /
+&PART ID='spheres', SURF_ID='HOT', QUANTITIES='PARTICLE TEMPERATURE', PROP_ID='ball' /
 &PROP ID='ball', SMOKEVIEW_ID='SPHERE', SMOKEVIEW_PARAMETERS(1)='D=0.01' /
-&INIT PART_ID='spheres', XB=0.25,0.75,0.25,0.75,0.25,0.75, NUMBER_INITIAL_DROPLETS=10 /
+&INIT PART_ID='spheres', XB=0.25,0.75,0.25,0.75,0.25,0.75, NUMBER_INITIAL_PARTICLES=10 /
 \end{verbatim}
 \normalsize
 
@@ -7084,7 +7084,7 @@ Here is a very simple example of sprinkler:
 \begin{verbatim}
 &PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=148., C_FACTOR=0.7,
       ACTIVATION_TEMPERATURE=74., OFFSET=0.10,PART_ID='water drops', FLOW_RATE=189.3,
-      DROPLET_VELOCITY=10., SPRAY_ANGLE=30.,80.   /
+      PARTICLE_VELOCITY=10., SPRAY_ANGLE=30.,80.   /
 
 &DEVC ID='Spr_60', XYZ=22.88,19.76,7.46, PROP_ID='K-11' /
 &DEVC ID='Spr_61', XYZ=22.88,21.76,7.46, PROP_ID='K-11' /
@@ -7115,12 +7115,12 @@ equivalent to 14.41~L/min/bar$^\ha$.
 sprinkler where the water droplets are initially placed in the simulation. It is assumed that
 at and beyond the {\ct OFFSET} the droplets have completely broken
 up and are transported independently of each other. (Default 0.05~m)
-\item[{\ct DROPLET\_VELOCITY}]  Initial droplet velocity. (Default 0~m/s)
+\item[{\ct PARTICLE\_VELOCITY}]  Initial droplet velocity. (Default 0~m/s)
 \item[{\ct ORIFICE\_DIAMETER}] Diameter of the nozzle orifice in m (default 0~m). This input provides an alternative way to set droplet velocity
 by giving values for {\ct FLOW\_RATE} and {\ct ORIFICE\_DIAMETER}, in which case the the droplet velocity is computed by dividing the
 flow rate by the orifice area. Use this method if you do not have any information about droplet velocity. However, quite often
-the user must fine-tune {\ct DROPLET\_VELOCITY} in order to reproduce certain spray profile.
-The {\ct ORIFICE\_DIAMETER} input is not used if either {\ct DROPLET\_VELOCITY} or {\ct SPRAY\_PATTERN\_TABLE} is specified.
+the user must fine-tune {\ct PARTICLE\_VELOCITY} in order to reproduce certain spray profile.
+The {\ct ORIFICE\_DIAMETER} input is not used if either {\ct PARTICLE\_VELOCITY} or {\ct SPRAY\_PATTERN\_TABLE} is specified.
 \item[{\ct SPRAY\_ANGLE}] A pair of angles (in degrees) through which the droplets are sprayed.
 The angles outline a conical spray pattern relative to the
 south pole of the sphere centered at the sprinkler with radius {\ct OFFSET}.
@@ -7153,7 +7153,7 @@ Technical Reference Guide~\cite{FDS_Math_Guide}.
 \subsubsection{Special Topic: Specifying Complex Spray Patterns}
 \label{info:spraypattern}
 
-If a more complex spray pattern is desired than can be achieved by using {\ct SPRAY\_ANGLE}, {\ct DROPLET\_VELOCITY},
+If a more complex spray pattern is desired than can be achieved by using {\ct SPRAY\_ANGLE}, {\ct PARTICLE\_VELOCITY},
 and {\ct FLOW\_RATE}, then a {\ct SPRAY\_PATTERN\_TABLE} can be specified using the {\ct TABL} (Section~\ref{info:TABL})
 namelist group.  For a spray pattern, specify the total flow using {\ct FLOW\_RATE} of the {\ct PROP} line, the name of the spray pattern using
 {\ct SPRAY\_PARTTERN\_TABLE} and then one or more {\ct TABL} lines of the format:
@@ -7182,7 +7182,7 @@ The jets are centered at points 30$^\circ$ below the ``equator,'' and are separa
 \begin{verbatim}
 &PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', OFFSET=0.10, PART_ID='water_drops',
       FLOW_RATE=60.,SPRAY_PATTERN_TABLE='TABLE1', SMOKEVIEW_ID='sprinkler_upright',
-      DROPLET_VELOCITY=10. /
+      PARTICLE_VELOCITY=10. /
 
 &TABL ID='TABLE1',TABLE_DATA=30,31,0,1,5,0.2/
 &TABL ID='TABLE1',TABLE_DATA=30,31,179,180,5,0.8/
@@ -7217,7 +7217,7 @@ the number of open sprinklers or nozzles is associated with certain pipe pressur
       PART_ID='water drops'
       FLOW_RATE=0.9
       OPERATING_PRESSURE = 10.0
-      DROPLET_VELOCITY=15.0
+      PARTICLE_VELOCITY=15.0
       SPRAY_ANGLE=0.0,80.0
       PRESSURE_RAMP = 'PR1' /
 
@@ -7231,7 +7231,7 @@ These lines would indicate that the pressure is 16.0 bar when the first sprinkle
 activates, 10.0 bar when two sprinklers are active, and 8.0 bar when three or more sprinklers are active. When counting the
 number of active sprinklers, FDS accounts for all active sprinklers or nozzles with {\ct PART\_ID} associated with them.
 
-When pressure ramps are used, both {\ct FLOW\_RATE} and {\ct DROPLET\_VELOCITY} are associated with the
+When pressure ramps are used, both {\ct FLOW\_RATE} and {\ct PARTICLE\_VELOCITY} are associated with the
 {\ct OPERATING\_PRESSURE}. Specify either the {\ct FLOW\_RATE}, or the
 {\ct K\_FACTOR} and {\ct OPERATING\_PRESSURE}. In the latter case, the flow rate is given by $ \dm_w = K \sqrt{p}$ and droplet velocity
 by $v = C \sqrt{p}$.  If spray pattern table is used, the coefficient $C$ is determined separately for each line of the
@@ -7254,7 +7254,7 @@ The following lines:
 &DEVC XYZ=26.91,21.28,0.50, PROP_ID='nozzle', ORIENTATION=0,0,1, QUANTITY='TIME',
       SETPOINT=5., ID='noz_2' /
 &PROP ID='nozzle', PART_ID='heptane drops', FLOW_RATE=2.132,
-      FLOW_TAU=-50., DROPLET_VELOCITY=5., SPRAY_ANGLE=0.,45.    /
+      FLOW_TAU=-50., PARTICLE_VELOCITY=5., SPRAY_ANGLE=0.,45.    /
 \end{verbatim}
 \normalsize
 
@@ -7285,7 +7285,7 @@ where $N_n$ is the number of open nozzles. The corresponding nozzle and pressure
       K_FACTOR = 2.5
       OPERATING_PRESSURE = 1
       PRESSURE_RAMP = 'PR'
-      DROPLET_VELOCITY=2.,
+      PARTICLE_VELOCITY=2.,
       SPRAY_ANGLE= 0.,60.,
       SMOKEVIEW_ID='sprinkler_upright' /
 
@@ -8191,7 +8191,7 @@ output of heat release rate and associated quantities.
 \item[{\ct MASS\_FILE}] If {\ct .TRUE.}, produce an output file listing the total masses of all gas species as a function of time.
 It is {\ct .FALSE.} by default because the calculation
 of all gas species in all mesh cells is time-consuming. The parameter {\ct DT\_MASS} controls the frequency of output.
-\item[{\ct MAXIMUM\_DROPLETS}] Maximum number of Lagrangian particles that can be included on any
+\item[{\ct MAXIMUM\_PARTICLES}] Maximum number of Lagrangian particles that can be included on any
 mesh at any given time. (Default 500000)
 \item[{\ct SMOKE3D}] If {\ct .FALSE.}, do not produce an animation of the smoke and fire. It is {\ct .TRUE.} by default.
 \item[{\ct FLUSH\_FILE\_BUFFERS}] FDS
@@ -8851,7 +8851,7 @@ floor yields a total of 90~kg (Fig.~\ref{bucket_test_fig}). Note that there real
 \subsubsection{Droplet Mass and Fluxes in Gas Phase}
 
 Away from solid surfaces, {\ct 'MPUV'} is the \underline{M}ass \underline{P}er \underline{U}nit \underline{V}olume of the droplets as they fly through
-the air, in units of kg/m$^3$.  {\ct 'DROPLET FLUX X'},  {\ct 'DROPLET FLUX Y'}, and {\ct 'DROPLET FLUX Z'} produce {\em only} slice and Plot3D files
+the air, in units of kg/m$^3$.  {\ct 'PARTICLE FLUX X'},  {\ct 'PARTICLE FLUX Y'}, and {\ct 'PARTICLE FLUX Z'} produce {\em only} slice and Plot3D files
 of the mass flux of droplets in the $x$, $y$, and $z$ directions, respectively, in units of kg/m$^2$/s.
 
 \subsubsection{Local Spray Properties}
@@ -8900,9 +8900,9 @@ A summary of the available PDPA quantities is shown in Table~\ref{tbl:pdpa}.
 {\ct QUANTITY}          & $x$                           & $f(x)$ & Unit \\ \hline
 {\ct 'DIAMETER'} (default) & 1                          & $f_1$  & $\mu$m \\
 {\ct 'ENTHALPY'}        & $(4/3)\rho_i r_i^3 \left(c_{p,i}(T_i)T_i-c_{p,i}(T_m)T_m \right)$     & $f_2$  & kJ/m$^3$ \\
-{\ct 'DROPLET FLUX X'}  & $(4/3)\rho_i r_i^3 u_i$       & $f_2$  & kg/m$^2$s \\
-{\ct 'DROPLET FLUX Y'}  & $(4/3)\rho_i r_i^3 v_i$       & $f_2$  & kg/m$^2$s \\
-{\ct 'DROPLET FLUX Z'}  & $(4/3)\rho_i r_i^3 w_i$       & $f_2$  & kg/m$^2$s \\
+{\ct 'PARTICLE FLUX X'}  & $(4/3)\rho_i r_i^3 u_i$       & $f_2$  & kg/m$^2$s \\
+{\ct 'PARTICLE FLUX Y'}  & $(4/3)\rho_i r_i^3 v_i$       & $f_2$  & kg/m$^2$s \\
+{\ct 'PARTICLE FLUX Z'}  & $(4/3)\rho_i r_i^3 w_i$       & $f_2$  & kg/m$^2$s \\
 {\ct 'U-VELOCITY'}      & $u_i$                         & $f_1$  & m/s \\
 {\ct 'V-VELOCITY'}      & $v_i$                         & $f_1$  & m/s \\
 {\ct 'W-VELOCITY'}      & $w_i$                         & $f_1$  & m/s \\
@@ -9573,14 +9573,6 @@ remember that all output quantity names ought to be in single quotes.
 {\ct CPU TIME}                                  & Elapsed CPU time                              & s              & D            \\ \hline
 {\ct DENSITY}                                   & $\rho$ or $\rho Y_\alpha$ with {\ct SPEC\_ID} & kg/m$^3$       & D,I,P,S      \\ \hline
 {\ct DIVERGENCE}                                & $\nabla \cdot \bu$                            & s$^{-1}$       & D,I,P,S      \\ \hline
-{\ct DROPLET FLUX X}$^{**}$                     & See Section~\ref{info:part_output}            & kg/m$^2$/s     & P,S          \\ \hline
-{\ct DROPLET FLUX Y}$^{**}$                     & See Section~\ref{info:part_output}            & kg/m$^2$/s     & P,S          \\ \hline
-{\ct DROPLET FLUX Z}$^{**}$                     & See Section~\ref{info:part_output}            & kg/m$^2$/s     & P,S          \\ \hline
-{\ct DROPLET DIAMETER}                          & $2 r_d$                                       & $\mu$m         & PA           \\ \hline
-{\ct DROPLET VELOCITY}                          & $|\bu_d|$                                     & m/s            & PA           \\ \hline
-{\ct DROPLET TEMPERATURE}                       & $T_d$                                         & $^\circ$C      & PA           \\ \hline
-{\ct DROPLET MASS}                              & $m_d$                                         & kg             & PA           \\ \hline
-{\ct DROPLET AGE}                               & $t_d$                                         & s              & PA           \\ \hline
 {\ct ENTHALPY}                                  & $\sum \rho Y_\alpha \int_0^T c_{p,\alpha}(T') \, dT'$  & kJ/m$^3$ & D,I,P,S   \\ \hline
 {\ct FED}                                       & See Section~\ref{info:FED}                    &                & D            \\ \hline
 {\ct FIC}                                       & See Section~\ref{info:FED}                    &                & D,S          \\ \hline
@@ -9610,6 +9602,14 @@ remember that all output quantity names ought to be in single quotes.
 {\ct OPTICAL DENSITY}                           & $K/2.3$ (Section~\ref{info:visibility})       & 1/m            & D,I,P,S      \\ \hline
 {\ct EXTINCTION COEFFICIENT}                    & $K$ (Section~\ref{info:visibility})           & 1/m            & D,I,P,S      \\ \hline
 {\ct PATH OBSCURATION}                          & See Section~\ref{info:beam_detector}          & \%             & D            \\ \hline
+{\ct PARTICLE AGE}                               & $t_d$                                         & s              & PA           \\ \hline
+{\ct PARTICLE DIAMETER}                          & $2 r_d$                                       & $\mu$m         & PA           \\ \hline
+{\ct PARTICLE FLUX X}$^{**}$                     & See Section~\ref{info:part_output}            & kg/m$^2$/s     & P,S          \\ \hline
+{\ct PARTICLE FLUX Y}$^{**}$                     & See Section~\ref{info:part_output}            & kg/m$^2$/s     & P,S          \\ \hline
+{\ct PARTICLE FLUX Z}$^{**}$                     & See Section~\ref{info:part_output}            & kg/m$^2$/s     & P,S          \\ \hline
+{\ct PARTICLE MASS}                              & $m_d$                                         & kg             & PA           \\ \hline
+{\ct PARTICLE TEMPERATURE}                       & $T_d$                                         & $^\circ$C      & PA           \\ \hline
+{\ct PARTICLE VELOCITY}                          & $|\bu_d|$                                     & m/s            & PA           \\ \hline
 {\ct PRESSURE}                                  & Perturbation pressure, $\tp$                  & Pa             & D,I,P,S      \\ \hline
 {\ct PRESSURE COEFFICIENT}                      & $C_p$ (Section~\ref{info:wind})               &                & B,D          \\ \hline
 {\ct PRESSURE ZONE}                             & See Section~\ref{info:ZONE}                   &                & D,S          \\ \hline
@@ -9681,7 +9681,6 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct ADT}                                       & Average Droplet Temperature                       & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct C\_SMAG}                                   & Smagorinsky coefficient                           &                & D,I,P,S      \\ \hline
 {\ct CABLE TEMPERATURE}                         & Inner temperature of cable                        & $^\circ$C      & D            \\ \hline
-{\ct DROPLET PHASE}                             & Orientation of droplet                            &                & PA           \\ \hline
 {\ct EMISSIVITY}                                & Surface emissivity (usually constant)             &                & B,D          \\ \hline
 {\ct F\_X, F\_Y, F\_Z}                          & Momentum terms, $F_x$, $F_y$, $F_z$               & m/s$^2$        & D,I,P,S      \\ \hline
 {\ct GAS TEMPERATURE}                           & Gas Temperature near wall                         & $^\circ$C      & B,D          \\ \hline
@@ -9692,6 +9691,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 %{\ct LEAKAGE}                                   & Volume flow due to leaks                          & m$^3$/s        & D            \\ \hline
 {\ct MAXIMUM VELOCITY ERROR}                    & See Section \ref{info:PRES}                       &                & D            \\ \hline
 {\ct MIXING TIME}                               & Combustion mixing time                            & s              & D,I,P,S      \\ \hline
+{\ct PARTICLE PHASE}                             & Orientation of droplet                            &                & PA           \\ \hline
 {\ct PDPA}                                      & Droplet diagnostics                               &                & D            \\ \hline
 {\ct PRESSURE ITERATIONS}                       & No. pressure iterations                           &                & D            \\ \hline
 {\ct RADIATION LOSS}                            & $\nabla \cdot \bq_r''$                            & kW/m$^3$       & D,I,P,S      \\ \hline
@@ -9946,7 +9946,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct EB\_PART\_FILE}                & Real         &                                   &           &                                \\ \hline
 {\ct FLUSH\_FILE\_BUFFERS}          & Logical      & See Section~\ref{info:DUMP}       &           & {\ct .TRUE.}                   \\ \hline
 {\ct MASS\_FILE}                    & Logical      & See Section~\ref{info:DUMP}       &           & {\ct .FALSE.}                  \\ \hline
-{\ct MAXIMUM\_DROPLETS}             & Integer      & See Section~\ref{info:DUMP}       &           & 500000                         \\ \hline
+{\ct MAXIMUM\_PARTICLES}             & Integer      & See Section~\ref{info:DUMP}       &           & 500000                         \\ \hline
 {\ct NFRAMES}                       & Integer      & See Section~\ref{info:DUMP}       &           & 1000                           \\ \hline
 {\ct PLOT3D\_PART\_ID(5)}           & Char.~Quint  & See Section~\ref{info:PL3D}       &           &                                \\ \hline
 {\ct PLOT3D\_QUANTITY(5)}           & Char.~Quint  & See Section~\ref{info:PL3D}       &           &                                \\ \hline
@@ -10114,7 +10114,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MASS\_PER\_TIME}           & Real              & See Section~\ref{info:initial_droplets}           & kg/s          &               \\ \hline
 {\ct MASS\_PER\_VOLUME}         & Real              & See Section~\ref{info:initial_droplets}           & kg/m$^3$      & 1             \\ \hline
 {\ct MULT\_ID }                 & Character         & See Section~\ref{info:MULT}                       &               &               \\ \hline
-{\ct NUMBER\_INITIAL\_DROPLETS} & Integer           & See Section~\ref{info:initial_droplets}           &               & 0             \\ \hline
+{\ct NUMBER\_INITIAL\_PARTICLES} & Integer           & See Section~\ref{info:initial_droplets}           &               & 0             \\ \hline
 {\ct PART\_ID}                  & Character         & See Section~\ref{info:initial_droplets}           &               &               \\ \hline
 {\ct SHAPE}                     & Character         & See Section~\ref{info:initial_droplets}           &               & {\ct 'BLOCK'} \\ \hline
 {\ct SPEC\_ID(N)}               & Character Array   & See Section~\ref{info:INIT}                       &               &               \\ \hline
@@ -10269,8 +10269,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 %{\ct AL2O3}                     & Logical      &                                                            &               & {\ct .FALSE.}    \\ \hline
-{\ct \footnotesize ALLOW\_SURFACE\_DROPLETS}  & Logical & See Section~\ref{info:surface_droplets}           &               & {\ct .TRUE.}    \\ \hline
-{\ct \footnotesize ALLOW\_UNDERSIDE\_DROPLETS}  & Logical & See Section~\ref{info:surface_droplets}         &               & {\ct .FALSE.}    \\ \hline
+{\ct \footnotesize ALLOW\_SURFACE\_PARTICLES}  & Logical & See Section~\ref{info:surface_droplets}           &               & {\ct .TRUE.}    \\ \hline
+{\ct \footnotesize ALLOW\_UNDERSIDE\_PARTICLES}  & Logical & See Section~\ref{info:surface_droplets}         &               & {\ct .FALSE.}    \\ \hline
 {\ct \footnotesize ASSUMED\_GAS\_TEMPERATURE}   & Real & See Section~\ref{solid_phase_verification}         &               &                   \\ \hline
 {\ct BAROCLINIC}                & Logical       & See Section~\ref{baroclinic_torque}                       &               & {\ct .TRUE.}     \\ \hline
 {\ct BNDF\_DEFAULT}             & Logical       & See Section~\ref{info:BNDF}                               &               & {\ct .TRUE.}      \\ \hline
@@ -10598,8 +10598,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CABLE\_MASS\_PER\_LENGTH}          & Real          & See Section~\ref{info:THIEF}                  & kg/m                  & 0.5       \\ \hline
 {\ct CHARACTERISTIC\_VELOCITY}          & Real          & See Section~\ref{info:wind}                   & m/s                   & 1.       \\ \hline
 {\ct C\_FACTOR}                         & Real          & See Section~\ref{info:sprinklers}             &                       & 0.        \\ \hline
-{\ct DROPLETS\_PER\_SECOND}             & Integer       & See Section~\ref{info:sprinklers}             &                       & 5000      \\ \hline
-{\ct DROPLET\_VELOCITY}                 & Real          & See Section~\ref{info:sprinklers}             & m/s                   & 0.       \\ \hline
+{\ct PARTICLES\_PER\_SECOND}             & Integer       & See Section~\ref{info:sprinklers}             &                       & 5000      \\ \hline
+{\ct PARTICLE\_VELOCITY}                 & Real          & See Section~\ref{info:sprinklers}             & m/s                   & 0.       \\ \hline
 {\ct FLOW\_RAMP}                        & Character     & See Section~\ref{info:sprinklers}             &                       &           \\ \hline
 {\ct FLOW\_RATE}                        & Real          & See Section~\ref{info:sprinklers}             & L/min                 &           \\ \hline
 {\ct FLOW\_TAU}                         & Real          & See Section~\ref{info:sprinklers}             &                       & 0.       \\ \hline
@@ -11169,11 +11169,11 @@ Namelist  & FDS 5 Parameter & Namelist  & FDS 6 Parameter & Notes \\ \hline \hli
 {\ct MISC}    & {\ct SURF\_DEFAULT}                 &  {\ct SURF}  & {\ct DEFAULT}                               & See Section~\ref{info:SURF}                  \\ \hline
 {\ct MISC}    & {\ct SUPPRESSION}                   &  {\ct REAC}  & {\ct SUPPRESSION}                           & See Section~\ref{info:extinction}            \\ \hline
 {\ct MISC}    & {\ct VISCOSITY}                     &  {\ct SPEC}  &  {\ct VISCOSITY}                            & See Section~\ref{info:SPEC}                  \\ \hline
-{\ct PART}    & {\ct DROPLETS\_PER\_SECOND}         &  {\ct PROP}  & {\ct DROPLETS\_PER\_SECOND}                 & See Section~\ref{info:sprinkler_droplets}    \\ \hline
+{\ct PART}    & {\ct PARTICLES\_PER\_SECOND}         &  {\ct PROP}  & {\ct PARTICLES\_PER\_SECOND}                 & See Section~\ref{info:sprinkler_droplets}    \\ \hline
 {\ct PART}    & {\ct HEAT\_OF\_VAPORIZARTION}       &  {\ct SPEC}  &  {\ct HEAT\_OF\_VAPORIZARTION}              & See Section~\ref{thermal_part_props}         \\ \hline
 {\ct PART}    & {\ct H\_V\_REFERENCE\_TEMPERATURE}  &  {\ct SPEC}  &   {\ct H\_V\_REFERENCE\_TEMPERATURE}        & See Section~\ref{thermal_part_props}         \\ \hline
 {\ct PART}    & {\ct MELTING\_TEMPERATURE}          &  {\ct SPEC}  & {\ct MELTING\_TEMPERATURE}                  & See Section~\ref{thermal_part_props}         \\ \hline
-{\ct PART}    & {\ct NUMBER\_INITIAL\_DROPLETS}     &  {\ct PROP}  & {\ct NUMBER\_INITIAL\_DROPLETS}             & See Section~\ref{info:initial_droplets}      \\ \hline
+{\ct PART}    & {\ct NUMBER\_INITIAL\_PARTICLES}     &  {\ct PROP}  & {\ct NUMBER\_INITIAL\_PARTICLES}             & See Section~\ref{info:initial_droplets}      \\ \hline
 {\ct PART}    & {\ct SPECIFIC\_HEAT}                &  {\ct SPEC}  & {\ct SPECIFIC\_HEAT\_LIQUID}                & See Section~\ref{thermal_part_props}         \\ \hline
 {\ct PART}    & {\ct VAPORIZATION\_TEMPERATURE}     &  {\ct SPEC}  & {\ct VAPORIZATION\_TEMPERATURE}             & See Section~\ref{thermal_part_props}         \\ \hline
 \end{tabular}

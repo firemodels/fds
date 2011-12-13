@@ -516,7 +516,7 @@ IF (N_REACTIONS > 0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
 ENDIF
 
 
-! Add contribution of evaporating droplets
+! Add contribution of evaporating PARTICLEs
 
 IF (NLP>0 .AND. N_EVAP_INDICES > 0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
    DO K=1,KBAR

@@ -57,14 +57,14 @@ A model of a liquid fuel spray burner used for fire tests at NIST.
 &OBST XB= 4.5, 4.5,-1.0, 1.0, 0.0, 0.1, SURF_ID='STEEL SHEET' /
 
 &PART ID='heptane droplets',SPEC_ID='N-HEPTANE',
-      QUANTITIES(1:3)='DROPLET DIAMETER','DROPLET TEMPERATURE','DROPLET AGE',
+      QUANTITIES(1:3)='PARTICLE DIAMETER','PARTICLE TEMPERATURE','PARTICLE AGE',
       DIAMETER=500.,HEAT_OF_COMBUSTION=44500.,SAMPLING_FACTOR=1 /
 
 BETE Fog Nozzle, Inc, Nozzle Number WL 1/2, 90 degree spray angle, 1.40 mm orifice, 
 Median Droplet Diameter was estimated from Weber number correlation
 
 &PROP ID='nozzle', PART_ID='heptane droplets', FLOW_RATE=1.96, FLOW_RAMP='fuel',
-      DROPLET_VELOCITY=21., SPRAY_ANGLE=0.,45., SMOKEVIEW_ID='nozzle'    /
+      PARTICLE_VELOCITY=21., SPRAY_ANGLE=0.,45., SMOKEVIEW_ID='nozzle'    /
 &RAMP ID='fuel', T= 0.0, F=0.0 /
 &RAMP ID='fuel', T=20.0, F=1.0 /
 &RAMP ID='fuel', T=40.0, F=1.0 /

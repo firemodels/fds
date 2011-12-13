@@ -30,7 +30,7 @@ CHARACTER(255), PARAMETER :: dumprev='$Revision$'
 CHARACTER(255), PARAMETER :: dumpdate='$Date$'
 
 TYPE (MESH_TYPE), POINTER :: M=>NULL()
-TYPE (DROPLET_TYPE), POINTER :: DR=>NULL()
+TYPE (PARTICLE_TYPE), POINTER :: LP=>NULL()
 TYPE (OBSTRUCTION_TYPE), POINTER :: OB=>NULL()
 TYPE (VENTS_TYPE), POINTER :: VT=>NULL()
 TYPE (PARTICLE_CLASS_TYPE), POINTER :: PC=>NULL()
@@ -129,7 +129,7 @@ EVACUATION_DUMP: IF (ANY(EVACUATION_GRID) .AND. EVACUATION_ONLY(NM)) THEN
 
 ELSE
 
-   IF (T>=PART_CLOCK(NM).AND.DROPLET_FILE) THEN
+   IF (T>=PART_CLOCK(NM).AND.PARTICLE_FILE) THEN
       IF (SYNCHRONIZE) THEN
          IF (.NOT.EB_PART_FILE) CALL DUMP_PART(T,NM)
          IF (     EB_PART_FILE) CALL DUMP_PART_EB(T,NM)
@@ -443,7 +443,7 @@ MESH_LOOP: DO NM=1,NMESHES
    
    ! Particle Files
 
-   IF (DROPLET_FILE .AND. .NOT.EVACUATION_ONLY(NM)) THEN
+   IF (PARTICLE_FILE .AND. .NOT.EVACUATION_ONLY(NM)) THEN
       LU_PART(NM) = GET_FILE_NUMBER()
       IF (NMESHES>1) THEN
          WRITE(FN_PART(NM),'(A,I4.4,A)') TRIM(CHID)//'_',NM,'.prt5'
@@ -502,7 +502,7 @@ ENDIF
 
 IF (N_INIT>0) THEN
    DO N=1,N_INIT
-      INITIALIZATION(N)%LU_DROPLET = GET_FILE_NUMBER()
+      INITIALIZATION(N)%LU_PARTICLE = GET_FILE_NUMBER()
    ENDDO
 ENDIF
 
@@ -1024,13 +1024,13 @@ ENDDO BOUNDARY_FILES
  
 ! Initialize particle dump file
  
-DROPLET_IF: IF ( (DROPLET_FILE .AND. .NOT.EVACUATION_ONLY(NM)).OR. (EVACUATION_ONLY(NM).AND.EVACUATION_GRID(NM)) ) THEN
+PARTICLE_IF: IF ( (PARTICLE_FILE .AND. .NOT.EVACUATION_ONLY(NM)).OR. (EVACUATION_ONLY(NM).AND.EVACUATION_GRID(NM)) ) THEN
  
-   APPEND_DROPLET_FILE: IF (APPEND) THEN
+   APPEND_PARTICLE_FILE: IF (APPEND) THEN
 
       OPEN(LU_PART(NM),FILE=FN_PART(NM),FORM='UNFORMATTED',STATUS='OLD',POSITION='APPEND')
 
-   ELSE APPEND_DROPLET_FILE
+   ELSE APPEND_PARTICLE_FILE
 
       IF (M%N_STRINGS+10*N_PART>M%N_STRINGS_MAX) CALL RE_ALLOCATE_STRINGS(NM)
       N = M%N_STRINGS_MAX/MAX(1,N_PART)
@@ -1085,8 +1085,8 @@ DROPLET_IF: IF ( (DROPLET_FILE .AND. .NOT.EVACUATION_ONLY(NM)).OR. (EVACUATION_O
          ENDDO
       ENDIF EVAC_ONLY2
  
-   ENDIF APPEND_DROPLET_FILE
-ENDIF DROPLET_IF
+   ENDIF APPEND_PARTICLE_FILE
+ENDIF PARTICLE_IF
 
 ! Initialize PROFile data files (CHID_prof_nn.csv)
  
@@ -2915,9 +2915,9 @@ ENDDO
 IF (N_TRACKED_SPECIES>0) WRITE(LU_CORE(NM)) ZZ
 IF (N_TRACKED_SPECIES>0) WRITE(LU_CORE(NM)) DEL_RHO_D_DEL_Z
 IF (N_TRACKED_SPECIES>0) WRITE(LU_CORE(NM)) ZZ_F
-IF (DROPLET_FILE) THEN
+IF (PARTICLE_FILE) THEN
    WRITE(LU_CORE(NM)) NLP,NLPDIM
-   WRITE(LU_CORE(NM)) DROPLET(1:NLP)
+   WRITE(LU_CORE(NM)) PARTICLE(1:NLP)
 ENDIF
 DO N=1,N_INIT
    IN => INITIALIZATION(N)
@@ -3062,11 +3062,11 @@ ENDDO
 IF (N_TRACKED_SPECIES>0) READ(LU_RESTART(NM))  ZZ
 IF (N_TRACKED_SPECIES>0) READ(LU_RESTART(NM))  DEL_RHO_D_DEL_Z
 IF (N_TRACKED_SPECIES>0) READ(LU_RESTART(NM))  ZZ_F
-IF (DROPLET_FILE) THEN
+IF (PARTICLE_FILE) THEN
    READ(LU_RESTART(NM)) NLP,NLPDIM
-   DEALLOCATE(MESHES(NM)%DROPLET)
-   ALLOCATE(MESHES(NM)%DROPLET(1:NLPDIM))
-   READ(LU_RESTART(NM)) MESHES(NM)%DROPLET(1:NLP)
+   DEALLOCATE(MESHES(NM)%PARTICLE)
+   ALLOCATE(MESHES(NM)%PARTICLE(1:NLPDIM))
+   READ(LU_RESTART(NM)) MESHES(NM)%PARTICLE(1:NLP)
 ENDIF
 
 DO N=1,N_INIT
@@ -3218,9 +3218,9 @@ PARTICLE_CLASS_LOOP: DO N=1,N_PART
    ! Count the number of particles to dump out
    NPLIM = 0
    DO I=1,NLP
-      DR=>DROPLET(I)
-      IPC = DR%CLASS
-      IF (DR%SHOW .AND. IPC==N) NPLIM = NPLIM + 1
+      LP=>PARTICLE(I)
+      IPC = LP%CLASS
+      IF (LP%SHOW .AND. IPC==N) NPLIM = NPLIM + 1
    ENDDO
    
    ! Allocate some temporary 4 byte arrays just to hold the data that is to be dumped to the file
@@ -3240,37 +3240,37 @@ PARTICLE_CLASS_LOOP: DO N=1,N_PART
  
    NPP = 0
    LOAD_LOOP: DO I=1,NLP
-      DR=>DROPLET(I)
-      IPC = DR%CLASS
-      IF (.NOT.DR%SHOW .OR. IPC/=N) CYCLE LOAD_LOOP
+      LP=>PARTICLE(I)
+      IPC = LP%CLASS
+      IF (.NOT.LP%SHOW .OR. IPC/=N) CYCLE LOAD_LOOP
       NPP = NPP + 1
       IF (NPP > NPLIM) EXIT LOAD_LOOP
-      TA(NPP) = DR%TAG
-      XP(NPP) = DR%X
-      YP(NPP) = DR%Y
-      ZP(NPP) = DR%Z
+      TA(NPP) = LP%TAG
+      XP(NPP) = LP%X
+      YP(NPP) = LP%Y
+      ZP(NPP) = LP%Z
       DO NN=1,PC%N_QUANTITIES
          SELECT CASE(PC%QUANTITIES_INDEX(NN))
             CASE( 6)  ! U-VELOCITY
-               QP(NPP,NN) = DR%U
+               QP(NPP,NN) = LP%U
             CASE( 7)  ! V-VELOCITY
-               QP(NPP,NN) = DR%V
+               QP(NPP,NN) = LP%V
             CASE( 8)  ! W-VELOCITY
-               QP(NPP,NN) = DR%W
-            CASE(434)  ! DROPLET DIAMETER
-               QP(NPP,NN) = 2.E6*DR%R
-            CASE(435)  ! DROPLET VELOCITY
-               QP(NPP,NN) = SQRT(DR%U**2+DR%V**2+DR%W**2)
-            CASE(436)  ! DROPLET PHASE
-               QP(NPP,NN) = DR%IOR
-            CASE(437)  ! DROPLET TEMPERATURE
-               QP(NPP,NN) = DR%TMP - TMPM
-            CASE(438)  ! DROPLET MASS
-               QP(NPP,NN) = 1.E9_EB*PC%FTPR*DR%R**3
-            CASE(439)  ! DROPLET AGE
-               QP(NPP,NN) = T-DR%T
-            CASE(440)  ! DROPLET WEIGHTING FACTOR
-               QP(NPP,NN) = DR%PWT
+               QP(NPP,NN) = LP%W
+            CASE(434)  ! PARTICLE DIAMETER
+               QP(NPP,NN) = 2.E6*LP%R
+            CASE(435)  ! PARTICLE VELOCITY
+               QP(NPP,NN) = SQRT(LP%U**2+LP%V**2+LP%W**2)
+            CASE(436)  ! PARTICLE PHASE
+               QP(NPP,NN) = LP%IOR
+            CASE(437)  ! PARTICLE TEMPERATURE
+               QP(NPP,NN) = LP%TMP - TMPM
+            CASE(438)  ! PARTICLE MASS
+               QP(NPP,NN) = 1.E9_EB*PC%FTPR*LP%R**3
+            CASE(439)  ! PARTICLE AGE
+               QP(NPP,NN) = T-LP%T
+            CASE(440)  ! PARTICLE WEIGHTING FACTOR
+               QP(NPP,NN) = LP%PWT
          END SELECT
       ENDDO
    ENDDO LOAD_LOOP
@@ -3319,9 +3319,9 @@ PARTICLE_CLASS_LOOP: DO N=1,N_PART
    ! Count the number of particles to dump out
    NPLIM = 0
    DO I=1,NLP
-      DR=>DROPLET(I)
-      IPC = DR%CLASS
-      IF (DR%SHOW .AND. IPC==N) NPLIM = NPLIM + 1
+      LP=>PARTICLE(I)
+      IPC = LP%CLASS
+      IF (LP%SHOW .AND. IPC==N) NPLIM = NPLIM + 1
    ENDDO
    
    ! Allocate some temporary 4 byte arrays just to hold the data that is to be dumped to the file
@@ -3341,37 +3341,37 @@ PARTICLE_CLASS_LOOP: DO N=1,N_PART
  
    NPP = 0
    LOAD_LOOP: DO I=1,NLP
-      DR=>DROPLET(I)
-      IPC = DR%CLASS
-      IF (.NOT.DR%SHOW .OR. IPC/=N) CYCLE LOAD_LOOP
+      LP=>PARTICLE(I)
+      IPC = LP%CLASS
+      IF (.NOT.LP%SHOW .OR. IPC/=N) CYCLE LOAD_LOOP
       NPP = NPP + 1
       IF (NPP > NPLIM) EXIT LOAD_LOOP
-      TA(NPP) = DR%TAG
-      XP(NPP) = DR%X
-      YP(NPP) = DR%Y
-      ZP(NPP) = DR%Z
+      TA(NPP) = LP%TAG
+      XP(NPP) = LP%X
+      YP(NPP) = LP%Y
+      ZP(NPP) = LP%Z
       DO NN=1,PC%N_QUANTITIES
          SELECT CASE(PC%QUANTITIES_INDEX(NN))
             CASE( 6)  ! U-VELOCITY
-               QP(NPP,NN) = DR%U
+               QP(NPP,NN) = LP%U
             CASE( 7)  ! V-VELOCITY
-               QP(NPP,NN) = DR%V
+               QP(NPP,NN) = LP%V
             CASE( 8)  ! W-VELOCITY
-               QP(NPP,NN) = DR%W
-            CASE(434)  ! DROPLET DIAMETER
-               QP(NPP,NN) = 2.E6*DR%R
-            CASE(435)  ! DROPLET VELOCITY
-               QP(NPP,NN) = SQRT(DR%U**2+DR%V**2+DR%W**2)
-            CASE(436)  ! DROPLET PHASE
-               QP(NPP,NN) = DR%IOR
-            CASE(437)  ! DROPLET TEMPERATURE
-               QP(NPP,NN) = DR%TMP - TMPM
-            CASE(438)  ! DROPLET MASS
-               QP(NPP,NN) = 1.E9_EB*PC%FTPR*DR%R**3
-            CASE(439)  ! DROPLET AGE
-               QP(NPP,NN) = T-DR%T
-            CASE(440)  ! DROPLET WEIGHTING FACTOR
-               QP(NPP,NN) = DR%PWT
+               QP(NPP,NN) = LP%W
+            CASE(434)  ! PARTICLE DIAMETER
+               QP(NPP,NN) = 2.E6*LP%R
+            CASE(435)  ! PARTICLE VELOCITY
+               QP(NPP,NN) = SQRT(LP%U**2+LP%V**2+LP%W**2)
+            CASE(436)  ! PARTICLE PHASE
+               QP(NPP,NN) = LP%IOR
+            CASE(437)  ! PARTICLE TEMPERATURE
+               QP(NPP,NN) = LP%TMP - TMPM
+            CASE(438)  ! PARTICLE MASS
+               QP(NPP,NN) = 1.E9_EB*PC%FTPR*LP%R**3
+            CASE(439)  ! PARTICLE AGE
+               QP(NPP,NN) = T-LP%T
+            CASE(440)  ! PARTICLE WEIGHTING FACTOR
+               QP(NPP,NN) = LP%PWT
          END SELECT
       ENDDO
    ENDDO LOAD_LOOP
@@ -3675,21 +3675,21 @@ DO K=0,KBAR
    ENDDO
 ENDDO
  
-! If sprinkler diagnostic on, pre-compute various droplet flux output
+! If sprinkler diagnostic on, pre-compute various PARTICLE flux output
 
 D_FLUX = .FALSE.
 IF (.NOT.PLOT3D) THEN
    DO IQ=1,N_SLCF
       SL => SLICE(IQ)
-      IF (OUTPUT_QUANTITY(SL%INDEX)%INTEGRATED_DROPLETS) D_FLUX = .TRUE.
+      IF (OUTPUT_QUANTITY(SL%INDEX)%INTEGRATED_PARTICLES) D_FLUX = .TRUE.
    ENDDO
 ELSE
    DO IQ=1,5
-      IF (OUTPUT_QUANTITY(PLOT3D_QUANTITY_INDEX(IQ))%INTEGRATED_DROPLETS) D_FLUX = .TRUE.
+      IF (OUTPUT_QUANTITY(PLOT3D_QUANTITY_INDEX(IQ))%INTEGRATED_PARTICLES) D_FLUX = .TRUE.
    ENDDO
 ENDIF
  
-DROPLET_INFO: IF (D_FLUX .AND. .NOT.EVACUATION_ONLY(NM)) THEN
+PARTICLE_INFO: IF (D_FLUX .AND. .NOT.EVACUATION_ONLY(NM)) THEN
  
    WFX => WORK4 
    WFY => WORK5
@@ -3700,33 +3700,33 @@ DROPLET_INFO: IF (D_FLUX .AND. .NOT.EVACUATION_ONLY(NM)) THEN
    WFZ = 0._EB
  
    DLOOP: DO I=1,NLP
-      DR=>DROPLET(I)
-      IPC=DR%CLASS
+      LP=>PARTICLE(I)
+      IPC=LP%CLASS
       PC=>PARTICLE_CLASS(IPC)
-      IF (DR%X<=XS) CYCLE DLOOP
-      IF (DR%X>=XF) CYCLE DLOOP
-      IF (DR%Y<=YS) CYCLE DLOOP
-      IF (DR%Y>=YF) CYCLE DLOOP
-      IF (DR%Z<=ZS) CYCLE DLOOP
-      IF (DR%Z>=ZF) CYCLE DLOOP
-      XI = CELLSI(NINT((DR%X-XS)*RDXINT))
-      YJ = CELLSJ(NINT((DR%Y-YS)*RDYINT))
-      ZK = CELLSK(NINT((DR%Z-ZS)*RDZINT))
+      IF (LP%X<=XS) CYCLE DLOOP
+      IF (LP%X>=XF) CYCLE DLOOP
+      IF (LP%Y<=YS) CYCLE DLOOP
+      IF (LP%Y>=YF) CYCLE DLOOP
+      IF (LP%Z<=ZS) CYCLE DLOOP
+      IF (LP%Z>=ZF) CYCLE DLOOP
+      XI = CELLSI(NINT((LP%X-XS)*RDXINT))
+      YJ = CELLSJ(NINT((LP%Y-YS)*RDYINT))
+      ZK = CELLSK(NINT((LP%Z-ZS)*RDZINT))
       II = XI + 1._EB
       JJ = YJ + 1._EB
       KK = ZK + 1._EB
-      DROPMASS = DR%PWT*PC%FTPR*DR%R**3
+      DROPMASS = LP%PWT*PC%FTPR*LP%R**3
       RVC = RDX(II)*RRN(II)*RDY(JJ)*RDZ(KK)
-      WFX(II,JJ,KK) = WFX(II,JJ,KK) + DROPMASS*DR%U*RVC
-      WFY(II,JJ,KK) = WFY(II,JJ,KK) + DROPMASS*DR%V*RVC
-      WFZ(II,JJ,KK) = WFZ(II,JJ,KK) + DROPMASS*DR%W*RVC
+      WFX(II,JJ,KK) = WFX(II,JJ,KK) + DROPMASS*LP%U*RVC
+      WFY(II,JJ,KK) = WFY(II,JJ,KK) + DROPMASS*LP%V*RVC
+      WFZ(II,JJ,KK) = WFZ(II,JJ,KK) + DROPMASS*LP%W*RVC
    ENDDO DLOOP
  
    WFX(:,:,0) = WFX(:,:,1)
    WFY(:,:,0) = WFY(:,:,1)
    WFZ(:,:,0) = WFZ(:,:,1)
  
-ENDIF DROPLET_INFO
+ENDIF PARTICLE_INFO
  
 ! Determine slice or Plot3D indicies
  
@@ -5031,13 +5031,13 @@ SELECT CASE(IND)
       PC => PARTICLE_CLASS(PART_INDEX)
       GAS_PHASE_OUTPUT = AVG_DROP_TMP(II,JJ,KK,PC%EVAP_INDEX) - TMPM
 
-   CASE(173) ! DROPLET FLUX X
+   CASE(173) ! PARTICLE FLUX X
       GAS_PHASE_OUTPUT = WFX(II,JJ,KK)
 
-   CASE(174) ! DROPLET FLUX Y
+   CASE(174) ! PARTICLE FLUX Y
       GAS_PHASE_OUTPUT = WFY(II,JJ,KK)
 
-   CASE(175) ! DROPLET FLUX Z
+   CASE(175) ! PARTICLE FLUX Z
       GAS_PHASE_OUTPUT = WFZ(II,JJ,KK)
 
    CASE(231) ! PDPA
@@ -5047,9 +5047,9 @@ SELECT CASE(IND)
             EXPON = 1._EB
          ELSEIF ((PY%QUANTITY=='MASS CONCENTRATION') .OR. &
                  (PY%QUANTITY=='ENTHALPY')           .OR. &
-                 (PY%QUANTITY=='DROPLET FLUX X')     .OR. &
-                 (PY%QUANTITY=='DROPLET FLUX Y')     .OR. &
-                 (PY%QUANTITY=='DROPLET FLUX Z')) THEN
+                 (PY%QUANTITY=='PARTICLE FLUX X')     .OR. &
+                 (PY%QUANTITY=='PARTICLE FLUX Y')     .OR. &
+                 (PY%QUANTITY=='PARTICLE FLUX Z')) THEN
             EXPON = 1._EB
          ELSE
             EXPON = 1._EB/(PY%PDPA_M-PY%PDPA_N)
@@ -5061,9 +5061,9 @@ SELECT CASE(IND)
          IF (PY%QUANTITY == 'NUMBER CONCENTRATION') DV%PDPA_DENUM = DV%PDPA_DENUM + FOTH*PI*PY%PDPA_RADIUS**3
          IF (PY%QUANTITY == 'MASS CONCENTRATION' .OR. &
              PY%QUANTITY == 'ENTHALPY'           .OR. &
-             PY%QUANTITY == 'DROPLET FLUX X'     .OR. &
-             PY%QUANTITY == 'DROPLET FLUX Y'     .OR. &
-             PY%QUANTITY == 'DROPLET FLUX Z' ) THEN
+             PY%QUANTITY == 'PARTICLE FLUX X'     .OR. &
+             PY%QUANTITY == 'PARTICLE FLUX Y'     .OR. &
+             PY%QUANTITY == 'PARTICLE FLUX Z' ) THEN
              IF (PY%PDPA_NORMALIZE) THEN
                 DV%PDPA_DENUM = DV%PDPA_DENUM + FOTH*PI*(2._EB*PY%PDPA_RADIUS)**3
              ELSE
@@ -5071,35 +5071,35 @@ SELECT CASE(IND)
              ENDIF
          ENDIF
          DLOOP: DO I=1,NLP
-            DR=>DROPLET(I)
-            IPC=DR%CLASS
+            LP=>PARTICLE(I)
+            IPC=LP%CLASS
             PC=>PARTICLE_CLASS(IPC)
             IF (PY%PART_INDEX/=IPC .AND. PY%PART_INDEX/=-1) CYCLE DLOOP
-            IF ((DR%X-DV%X)**2+(DR%Y-DV%Y)**2+(DR%Z-DV%Z)**2 > PY%PDPA_RADIUS**2) CYCLE DLOOP
+            IF ((LP%X-DV%X)**2+(LP%Y-DV%Y)**2+(LP%Z-DV%Z)**2 > PY%PDPA_RADIUS**2) CYCLE DLOOP
             SELECT CASE(PY%QUANTITY)
                CASE('U-VELOCITY') 
-                  VEL = DR%U
+                  VEL = LP%U
                CASE('V-VELOCITY')
-                  VEL = DR%V
+                  VEL = LP%V
                CASE('W-VELOCITY')
-                  VEL = DR%W
+                  VEL = LP%W
                CASE('VELOCITY') 
-                  VEL = SQRT(DR%U**2 + DR%V**2 + DR%W**2)
-               CASE('DROPLET FLUX X') 
-                  VEL = PC%FTPR*DR%U
-               CASE('DROPLET FLUX Y') 
-                  VEL = PC%FTPR*DR%V
-               CASE('DROPLET FLUX Z') 
-                  VEL = PC%FTPR*DR%W
+                  VEL = SQRT(LP%U**2 + LP%V**2 + LP%W**2)
+               CASE('PARTICLE FLUX X') 
+                  VEL = PC%FTPR*LP%U
+               CASE('PARTICLE FLUX Y') 
+                  VEL = PC%FTPR*LP%V
+               CASE('PARTICLE FLUX Z') 
+                  VEL = PC%FTPR*LP%W
                CASE('MASS CONCENTRATION') 
                   VEL = PC%FTPR
                CASE('TEMPERATURE')
-                  VEL = DR%TMP - TMPM
+                  VEL = LP%TMP - TMPM
                CASE('ENTHALPY')
-                  ITMP = INT(DR%TMP)
-                  TMP_WGT = DR%TMP - AINT(DR%TMP)
+                  ITMP = INT(LP%TMP)
+                  TMP_WGT = LP%TMP - AINT(LP%TMP)
                   VEL = (SPECIES(PC%Y_INDEX)%C_P_L_BAR(ITMP)+TMP_WGT*&
-                        (SPECIES(PC%Y_INDEX)%C_P_L_BAR(ITMP+1)-SPECIES(PC%Y_INDEX)%C_P_L_BAR(ITMP)))*DR%TMP
+                        (SPECIES(PC%Y_INDEX)%C_P_L_BAR(ITMP+1)-SPECIES(PC%Y_INDEX)%C_P_L_BAR(ITMP)))*LP%TMP
                   ITMP = INT(SPECIES(PC%Y_INDEX)%TMP_MELT)
                   TMP_WGT = SPECIES(PC%Y_INDEX)%TMP_MELT - AINT(SPECIES(PC%Y_INDEX)%TMP_MELT)
                   VEL = VEL - (SPECIES(PC%Y_INDEX)%C_P_L_BAR(ITMP)+TMP_WGT*&
@@ -5110,17 +5110,17 @@ SELECT CASE(IND)
                   VEL = 1.0_EB
             END SELECT
             ! Compute numerator and denumerator
-            DV%PDPA_NUMER = DV%PDPA_NUMER + DR%PWT*(2._EB*DR%R)**PY%PDPA_M * VEL
+            DV%PDPA_NUMER = DV%PDPA_NUMER + LP%PWT*(2._EB*LP%R)**PY%PDPA_M * VEL
             IF(PY%PDPA_HISTOGRAM)  CALL UPDATE_HISTOGRAM(PY%PDPA_HISTOGRAM_NBINS,PY%PDPA_HISTOGRAM_LIMITS &
-                                              ,DV%PDPA_HISTOGRAM_COUNTS,(2._EB*DR%R)**PY%PDPA_M * VEL,DR%PWT)
+                                              ,DV%PDPA_HISTOGRAM_COUNTS,(2._EB*LP%R)**PY%PDPA_M * VEL,LP%PWT)
 
             IF ((PY%QUANTITY /= 'NUMBER CONCENTRATION') .AND. &
                 (PY%QUANTITY /= 'MASS CONCENTRATION') .AND. &
-                (PY%QUANTITY /= 'DROPLET FLUX X') .AND. &
-                (PY%QUANTITY /= 'DROPLET FLUX Y') .AND. &
-                (PY%QUANTITY /= 'DROPLET FLUX Z') .AND. &
+                (PY%QUANTITY /= 'PARTICLE FLUX X') .AND. &
+                (PY%QUANTITY /= 'PARTICLE FLUX Y') .AND. &
+                (PY%QUANTITY /= 'PARTICLE FLUX Z') .AND. &
                 (PY%QUANTITY /= 'ENTHALPY')) THEN
-               DV%PDPA_DENUM = DV%PDPA_DENUM + DR%PWT*(2._EB*DR%R)**PY%PDPA_N
+               DV%PDPA_DENUM = DV%PDPA_DENUM + LP%PWT*(2._EB*LP%R)**PY%PDPA_N
             ENDIF
          ENDDO DLOOP
          IF (DV%PDPA_DENUM > 0._EB) GAS_PHASE_OUTPUT = (DV%PDPA_NUMER/DV%PDPA_DENUM)**EXPON         
@@ -5944,7 +5944,7 @@ HRR_SUM(NM)  = HRR_SUM(NM)  + DT*HRR(NM)
 RHRR_SUM(NM) = RHRR_SUM(NM) + DT*RHRR(NM)
 CHRR_SUM(NM) = CHRR_SUM(NM) + DT*CHRR(NM)
 FHRR_SUM(NM) = FHRR_SUM(NM) + DT*FHRR(NM)
-MLR_SUM(NM)  = MLR_SUM(NM)  + DT*(MLR(NM)+FUEL_DROPLET_MLR(NM))
+MLR_SUM(NM)  = MLR_SUM(NM)  + DT*(MLR(NM)+FUEL_PARTICLE_MLR(NM))
 HRR_TIME_INTERVAL(NM)= HRR_TIME_INTERVAL(NM) + DT
 
 END SUBROUTINE UPDATE_HRR
@@ -6004,7 +6004,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
   IF (.NOT. TREE_MESH_OUT(NM)) CYCLE MESH_LOOP 
    VEG_PRESENT = .TRUE.
-!  R_SVxPR = 1.0_EB/PC%VEG_SV*DR%VEG_PACKING_RATIO
+!  R_SVxPR = 1.0_EB/PC%VEG_SV*LP%VEG_PACKING_RATIO
    DO N_TREE = 1, N_TREES_OUT
     TREE_OUTPUT_DATA_TOTAL(N_TREE,1) = TREE_OUTPUT_DATA_TOTAL(N_TREE,1) + TREE_OUTPUT_DATA(N_TREE,1,NM) !kg
     TREE_OUTPUT_DATA_TOTAL(N_TREE,2) = TREE_OUTPUT_DATA_TOTAL(N_TREE,2) + TREE_OUTPUT_DATA(N_TREE,2,NM) !kg
@@ -6586,7 +6586,7 @@ INTEGER, INTENT(IN) :: NM
 INTEGER :: N
 LOGICAL :: EX
 
-IF ( (DROPLET_FILE.AND..NOT.EVACUATION_ONLY(NM)) .OR. (EVACUATION_ONLY(NM).AND.EVACUATION_GRID(NM)) ) THEN
+IF ( (PARTICLE_FILE.AND..NOT.EVACUATION_ONLY(NM)) .OR. (EVACUATION_ONLY(NM).AND.EVACUATION_GRID(NM)) ) THEN
    CLOSE(LU_PART(NM))
    OPEN(LU_PART(NM),FILE=FN_PART(NM),FORM='UNFORMATTED',STATUS='OLD',POSITION='APPEND')
 ENDIF

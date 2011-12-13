@@ -17,18 +17,18 @@
       CO_YIELD=0.006
       SOOT_YIELD=0.015 /
 
-&PART ID='water drops',SPEC_ID='WATER VAPOR',QUANTITIES(1:2)='DROPLET DIAMETER','DROPLET TEMPERATURE',
+&PART ID='water drops',SPEC_ID='WATER VAPOR',QUANTITIES(1:2)='PARTICLE DIAMETER','PARTICLE TEMPERATURE',
       DIAMETER=1000. /
 
 &PART ID='heptane droplets',SPEC_ID='N-HEPTANE',DENSITY=688.,
-      QUANTITIES(1:2)='DROPLET DIAMETER','DROPLET TEMPERATURE',
+      QUANTITIES(1:2)='PARTICLE DIAMETER','PARTICLE TEMPERATURE',
       DIAMETER=100.,HEAT_OF_COMBUSTION=45000. /
 
 &PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=148., C_FACTOR=0.7, ACTIVATION_TEMPERATURE=74.,
-      PART_ID='water drops', FLOW_RATE=189.3, DROPLET_VELOCITY=10., SPRAY_ANGLE=30.,80., SMOKEVIEW_ID='sprinkler_upright'  /
+      PART_ID='water drops', FLOW_RATE=189.3, PARTICLE_VELOCITY=10., SPRAY_ANGLE=30.,80., SMOKEVIEW_ID='sprinkler_upright'  /
 
 &PROP ID='nozzle', SMOKEVIEW_ID='nozzle', PART_ID='heptane droplets', FLOW_RATE=2.907, FLOW_TAU=-60.,
-      DROPLET_VELOCITY=5., SPRAY_ANGLE=0.,45.    /
+      PARTICLE_VELOCITY=5., SPRAY_ANGLE=0.,45.    /
 
 &MATL ID            = 'CONCRETE'                                                                    
       FYI           = 'Quintiere, Fire Behavior'                                                    

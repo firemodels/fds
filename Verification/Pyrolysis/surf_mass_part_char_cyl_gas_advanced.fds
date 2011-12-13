@@ -13,7 +13,7 @@ Mesh 1: 4 times 0.1 long cylinder without splits
 &PART ID='Wood_part_01', SAMPLING_FACTOR=1,SURF_ID='Wood_01', PROP_ID='image_01' /
 &INIT PART_ID='Wood_part_01', 
       XB=0.0,0.0,-0.0375,0.0375,0.15,0.15,
-      NUMBER_INITIAL_DROPLETS = 4  /
+      NUMBER_INITIAL_PARTICLES = 4  /
 &MULT ID='MULT_1_4', DX=0.0, DY=0.025,J_LOWER=0,J_UPPER=3 /
 &PROP ID='image_01', SMOKEVIEW_ID='TUBE', SMOKEVIEW_PARAMETERS='L=0.1','D=0.02' /
 &SURF ID                        = 'Wood_01'
@@ -31,7 +31,7 @@ Mesh 2: 4x2 times 0.05 long cylinders without splits
 &INIT PART_ID='Wood_part_005', 
       XB=-0.025,-0.025,-0.0375,-0.0375,1.15,1.15,
       MULT_ID = 'MULT_2_4'
-      NUMBER_INITIAL_DROPLETS = 1  /
+      NUMBER_INITIAL_PARTICLES = 1  /
 &MULT ID='MULT_2_4', DX=0.05, DY=0.025,J_LOWER=0,J_UPPER=3, I_LOWER=0,I_UPPER=1 /
 &PROP ID='image_005', SMOKEVIEW_ID='TUBE', SMOKEVIEW_PARAMETERS='L=0.05','D=0.02' /
 &SURF ID                        = 'Wood_005'
@@ -51,7 +51,7 @@ Mesh 3: 4x2 times 0.05 long cylinders, split in two
 &INIT PART_ID='Wood_part_005_split', 
       XB=-0.025,-0.025,-0.0375,-0.0375,2.15,2.15,
       MULT_ID = 'MULT_2_4'
-      NUMBER_INITIAL_DROPLETS = 1  /
+      NUMBER_INITIAL_PARTICLES = 1  /
 &SURF ID                        = 'Wood_005_40'
       COLOR                     = 'IVORY BLACK'
       MATL_ID(1,1)            	= 'PINE'
