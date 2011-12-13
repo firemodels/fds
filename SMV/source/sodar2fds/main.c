@@ -50,7 +50,6 @@ int main(int argc, char **argv){
   char *arg,*csv,*argin=NULL;
   char file_in[256],file_out[256];
   FILE *stream_in, *stream_out;
-  int in_header;
   int buffer_len, nrows, ncols;
   char *buffer,*labels,**labelptrs;
   char *datalabels,**datalabelptrs;
@@ -59,7 +58,8 @@ int main(int argc, char **argv){
   float *zdev;
   float xyzoffset[3]={0.0,0.0,0.0};
   int i;
-  char percen[2];
+  char prefix[256],percen[2];
+  int useprefix=0;
 
   strcpy(percen,"%");
 
@@ -77,16 +77,29 @@ int main(int argc, char **argv){
     lenarg=strlen(arg);
     if(strcmp(arg,"-offset")==0){
       i++;
+      if(i>=argc)continue;
       arg=argv[i];
       if(strlen(arg)>1){
         sscanf(arg,"%f %f %f",xyzoffset,xyzoffset+1,xyzoffset+2);
       }
       continue;
     }
+    else if(strcmp(arg,"-prefix")==0){
+      useprefix=1;
+      i++;
+      if(i>=argc)continue;
+      arg=argv[i];
+      strcpy(prefix,arg);
+      strcat(prefix,"_");
+      continue;
+    }
     argin=arg;
   }
 
-
+  if(argin==NULL){
+    printf("***error: An input file was not specified\n");
+    return 1;
+  }
   csv=strstr(argin,".csv");
   if(csv!=NULL)*csv=0;
   strcpy(file_in,argin);
@@ -156,17 +169,19 @@ int main(int argc, char **argv){
   }
   fprintf(stream_out,"//HEADER\n");
   for(i=0;i<nlabelptrs;i++){
-    char *token;
+    char token2[256];
 
-    token=labelptrs[i];
+    strcpy(token2,"");
+    if(useprefix==1)strcat(token2,prefix);
+    strcat(token2,labelptrs[i]);
     if(transfer[i]==2){
       fprintf(stream_out,"DEVICE\n");
-      fprintf(stream_out," %s %s VELOCITY %s sensor\n",token,percen,percen);
+      fprintf(stream_out," %s %s VELOCITY %s sensor\n",token2,percen,percen);
       fprintf(stream_out," %f %f %f\n",xyzoffset[0],xyzoffset[1],xyzoffset[2]+zdev[i]);
     }
     else if(transfer[i]==3){
       fprintf(stream_out,"DEVICE\n");
-      fprintf(stream_out," %s %s ANGLE %s sensor\n",token,percen,percen);
+      fprintf(stream_out," %s %s ANGLE %s sensor\n",token2,percen,percen);
       fprintf(stream_out," %f %f %f\n",xyzoffset[0],xyzoffset[1],xyzoffset[2]+zdev[i]);
     }
   }
@@ -192,8 +207,18 @@ int main(int argc, char **argv){
   fprintf(stream_out,"\n");
   itransfer=0;
   for(i=0;i<nlabelptrs;i++){
+    char token2[256];
+
+    strcpy(token2,"");
+    if(useprefix==1)strcat(token2,prefix);
+    strcat(token2,labelptrs[i]);
     if(transfer[i]!=0){
-      fprintf(stream_out,"%s",labelptrs[i]);
+      if(transfer[i]==1){
+        fprintf(stream_out,"%s",labelptrs[i]);
+      }
+      else{
+        fprintf(stream_out,"%s",token2);
+      }
       itransfer++;
       if(itransfer!=ntransfer)fprintf(stream_out,",");
     }
@@ -262,14 +287,16 @@ void usage(char *prog){
   svn_num=getmaxrevision();    // get svn revision number
 
   printf("\n");
-  printf("devconvert %s(%i) - %s\n",prog_version,svn_num,__DATE__);
+  printf("sodar2fds %s(%i) - %s\n",prog_version,svn_num,__DATE__);
   printf("  Convert a sodar spreadsheet data file for use by Smokeview:\n\n");
   printf("  %s",prog);
-  printf(" prog datafile.csv\n\n");
+  printf(" prog [-prefix label] [-offset x y z] datafile\n\n");
 
   printf("where\n\n");
 
-  printf("  datafile.csv  - spreadsheet file to be converted\n");
+  printf("  -prefix label  - prefix column headers with label\n");
+  printf("  -offset x y z  - offset sensor locations by (x,y,z)\n");
+  printf("  datafile.csv   - spreadsheet file to be converted\n");
 }
 
 /* ------------------ version ------------------------ */
