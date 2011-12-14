@@ -1843,7 +1843,9 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
             DHOR     = H_V*MW_DROP/R0 
             X_EQUIL  = MIN(1._EB,EXP(DHOR*(1._EB/TMP_BOIL-1._EB/MIN(TMP_DROP_NEW,TMP_BOIL))))
             Y_EQUIL = X_EQUIL/(MW_RATIO + (1._EB-MW_RATIO)*X_EQUIL)
+
             !Limit supersaturation
+
             IF (Y_GAS < Y_EQUIL) THEN
                CALL GET_MASS_FRACTION(ZZ_GET2,PC%Y_INDEX,Y_GAS)
                IF (Y_GAS/Y_EQUIL > 1.02_EB) THEN
@@ -1887,8 +1889,8 @@ EVAP_INDEX_LOOP: DO EVAP_INDEX = 1,N_EVAP_INDICES
 
             ! Compute contribution to the divergence
 
-            D_LAGRANGIAN(II,JJ,KK) =  D_LAGRANGIAN(II,JJ,KK) + (MW_RATIO *M_VAP /M_GAS + &
-                                      (M_VAP*DELTA_H_G - Q_CON_GAS)/H_G_OLD) * WGT / DT_SUBSTEP
+            D_LAGRANGIAN(II,JJ,KK) =  D_LAGRANGIAN(II,JJ,KK) &
+                                   +  (MW_RATIO*M_VAP/M_GAS + (M_VAP*DELTA_H_G - Q_CON_GAS)/H_G_OLD) * WGT / DT_SUBSTEP
 
             ! Keep track of total mass evaporated in cell
 
