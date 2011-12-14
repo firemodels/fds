@@ -18,7 +18,7 @@ Fire
 &SURF ID= 'BURNER'
       COLOR= 'RED'
       RAMP_Q='fire'
-      HRRPUA=200. /
+      HRRPUA=400. /
 
 &RAMP ID='fire', T= -20., F=0. /
 &RAMP ID='fire', T=   0., F=0. /
