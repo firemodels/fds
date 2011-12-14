@@ -1134,6 +1134,244 @@ int get_inpf(char *file, char *file2){
   return 0;
 }
 
+/* ------------------ init_textures ------------------------ */
+
+void init_textures(void){
+  // get texture filename from SURF and device info
+  int i;
+
+  ntextures = 0;
+  for(i=0;i<nsurfaces;i++){
+    surface *surfi;
+    texture *texti;
+    int len;
+
+    surfi = surfaceinfo + i;
+    if(surfi->texturefile==NULL)continue;
+    texti = textureinfo + ntextures;
+    len = strlen(surfi->texturefile);
+    NewMemory((void **)&texti->file,(len+1)*sizeof(char));
+    strcpy(texti->file,surfi->texturefile);
+    texti->loaded=0;
+    texti->used=0;
+    texti->display=0;
+    ntextures++;
+    surfi->textureinfo=textureinfo+ntextures-1;
+  }
+
+  for(i=0;i<ndevice_texture_list;i++){
+    char *texturefile;
+    texture *texti;
+    int len;
+
+    texturefile = device_texture_list[i];
+    texti = textureinfo + ntextures;
+    len = strlen(texturefile);
+    NewMemory((void **)&texti->file,(len+1)*sizeof(char));
+    device_texture_list_index[i]=ntextures;
+    strcpy(texti->file,texturefile);
+    texti->loaded=0;
+    texti->used=0;
+    texti->display=0;
+    ntextures++;
+  }
+
+  // check to see if texture files exist .
+  // If so, then convert to OpenGL format 
+  
+  for(i=0;i<ntextures;i++){
+    unsigned char *floortex;
+    int texwid, texht;
+    texture *texti;
+    int dup_texture;
+    int j;
+
+    texti = textureinfo + i;
+    texti->loaded=0;
+    if(texti->file!=NULL){
+      printf(_("      Loading textures: "));
+    }
+    else{
+      continue;
+    }
+    dup_texture=0;
+    for(j=0;j<i;j++){
+      texture *textj;
+
+      textj = textureinfo + j;
+      if(textj->loaded==0)continue;
+      if(strcmp(texti->file,textj->file)==0){
+        texti->name=textj->name;
+        texti->loaded=1;
+        dup_texture=1;
+      }
+    }
+    if(dup_texture==1){
+      printf("%s - duplicate\n",texti->file);
+      continue;
+    }
+    if(use_graphics==1){
+      int errorcode;
+
+      CheckMemory;
+      glGenTextures(1,&texti->name);
+      glBindTexture(GL_TEXTURE_2D,texti->name);
+      floortex=readpicture(texti->file,&texwid,&texht);
+      if(floortex==NULL){
+         printf(_(" - failed"));
+         printf("\n");
+         continue;
+      }
+      errorcode=gluBuild2DMipmaps(GL_TEXTURE_2D,4, texwid, texht, GL_RGBA, GL_UNSIGNED_BYTE, floortex);
+      if(errorcode!=0){
+        FREEMEMORY(floortex);
+         printf(_(" - failed"));
+         printf("\n");
+        continue;
+      }
+      FREEMEMORY(floortex);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+      texti->loaded=1;
+         printf(_(" - completed"));
+         printf("\n");
+    }
+  }
+  
+  CheckMemory;
+  if(ntextures==0){
+    FREEMEMORY(textureinfo);
+  }
+
+  // define colobar textures
+
+  printf(_("      Loading colorbar texture: "));
+
+ // glActiveTexture(GL_TEXTURE0);
+  glGenTextures(1,&texture_colorbar_id);
+  glBindTexture(GL_TEXTURE_1D,texture_colorbar_id);
+  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_full);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+#ifdef pp_GPU
+  if(gpuactive==1){
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  }
+  else{
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+  }
+#else
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+#endif
+
+  glGenTextures(1,&texture_slice_colorbar_id);
+  glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
+  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_slice);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+#ifdef pp_GPU
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+#else
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+#endif
+
+  glGenTextures(1,&texture_patch_colorbar_id);
+  glBindTexture(GL_TEXTURE_1D,texture_patch_colorbar_id);
+  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_patch);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+#ifdef pp_GPU
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+#else
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+#endif
+
+  glGenTextures(1,&texture_plot3d_colorbar_id);
+  glBindTexture(GL_TEXTURE_1D,texture_plot3d_colorbar_id);
+  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_plot3d);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+#ifdef pp_GPU
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+#else
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+#endif
+
+  glGenTextures(1,&texture_iso_colorbar_id);
+  glBindTexture(GL_TEXTURE_1D,texture_iso_colorbar_id);
+  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_iso);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+#ifdef pp_GPU
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+#else
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+#endif
+
+  //glActiveTexture(GL_TEXTURE2);
+  glGenTextures(1,&smokecolormap_id);
+  glBindTexture(GL_TEXTURE_1D,smokecolormap_id);
+  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_smokecolormap);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+#ifdef pp_GPU
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+#else
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+#endif
+  CheckMemory;
+
+  printf(_(" - completed"));
+  printf("\n");
+#ifdef pp_GPU
+#ifdef pp_GPUDEPTH
+  if(use_graphics==1){
+    createDepthTexture();
+  }
+#endif
+#endif
+
+  if(autoterrain==1&&use_graphics==1){
+    texture *tt;
+    unsigned char *floortex;
+    int texwid, texht;
+    int errorcode;
+
+    printf(_("      Loading terrain texture: "));
+    tt = terrain_texture;
+    tt->loaded=0;
+    tt->used=0;
+    tt->display=0;
+
+    glGenTextures(1,&tt->name);
+    glBindTexture(GL_TEXTURE_2D,tt->name);
+    floortex=NULL;
+    errorcode=1;
+    if(tt->file!=NULL){
+      floortex=readpicture(tt->file,&texwid,&texht);
+    }
+    if(floortex!=NULL){
+      errorcode=gluBuild2DMipmaps(GL_TEXTURE_2D,4, texwid, texht, GL_RGBA, GL_UNSIGNED_BYTE, floortex);
+    }
+    if(errorcode!=0){
+      printf(_(" - failed"));
+      printf("\n");
+    }
+    FREEMEMORY(floortex);
+    if(errorcode==0&&use_graphics==1){
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+      tt->loaded=1;
+      printf(_(" - completed"));
+      printf("\n");
+    }
+  }
+}
+
 /* ------------------ readsmv ------------------------ */
 
 int readsmv(char *file, char *file2){
@@ -3311,7 +3549,7 @@ typedef struct {
     meshi->zcen=(zbar+zbar0)/2.0;
   }
 
-  // look for DEVICE entires in "experimental" spread sheet files
+  // look for DEVICE entries in "experimental" spread sheet files
   
   if(ndeviceinfo>0){
     if(NewMemory((void **)&deviceinfo,ndeviceinfo*sizeof(device))==0)return 2;
@@ -3332,7 +3570,9 @@ typedef struct {
       }
     }
     if(ndeviceinfo>0){
-      ResizeMemory((void **)&deviceinfo,(ndeviceinfo_exp+ndeviceinfo)*sizeof(device));
+      if(ndeviceinfo_exp>0){
+        ResizeMemory((void **)&deviceinfo,(ndeviceinfo_exp+ndeviceinfo)*sizeof(device));
+      }
     }
     else{
       NewMemory((void **)&deviceinfo,ndeviceinfo_exp*sizeof(device));
@@ -3359,225 +3599,9 @@ typedef struct {
   if(nsurfaces>0||ndevice_texture_list>0){
     if(NewMemory((void **)&textureinfo,(nsurfaces+ndevice_texture_list)*sizeof(texture))==0)return 2;
   }
+  init_textures();
+  ndeviceinfo=0;
 
-  // get texture filename from SURF and device info
-
-  ntextures = 0;
-  for(i=0;i<nsurfaces;i++){
-    surfi = surfaceinfo + i;
-    if(surfi->texturefile==NULL)continue;
-    texti = textureinfo + ntextures;
-    len = strlen(surfi->texturefile);
-    NewMemory((void **)&texti->file,(len+1)*sizeof(char));
-    strcpy(texti->file,surfi->texturefile);
-    texti->loaded=0;
-    texti->used=0;
-    texti->display=0;
-    ntextures++;
-    surfi->textureinfo=textureinfo+ntextures-1;
-  }
-
-  for(i=0;i<ndevice_texture_list;i++){
-    char *texturefile;
-
-    texturefile = device_texture_list[i];
-    texti = textureinfo + ntextures;
-    len = strlen(texturefile);
-    NewMemory((void **)&texti->file,(len+1)*sizeof(char));
-    device_texture_list_index[i]=ntextures;
-    strcpy(texti->file,texturefile);
-    texti->loaded=0;
-    texti->used=0;
-    texti->display=0;
-    ntextures++;
-  }
-
-  // check to see if texture files exist .
-  // If so, then convert to OpenGL format 
-  
-  for(i=0;i<ntextures;i++){
-    unsigned char *floortex;
-    int texwid, texht;
-
-    texti = textureinfo + i;
-    texti->loaded=0;
-    if(texti->file!=NULL){
-      printf(_("      Loading textures: "));
-    }
-    else{
-      continue;
-    }
-    dup_texture=0;
-    for(j=0;j<i;j++){
-      textj = textureinfo + j;
-      if(textj->loaded==0)continue;
-      if(strcmp(texti->file,textj->file)==0){
-        texti->name=textj->name;
-        texti->loaded=1;
-        dup_texture=1;
-      }
-    }
-    if(dup_texture==1){
-      printf("%s - duplicate\n",texti->file);
-      continue;
-    }
-    if(use_graphics==1){
-      CheckMemory;
-      glGenTextures(1,&texti->name);
-      glBindTexture(GL_TEXTURE_2D,texti->name);
-      floortex=readpicture(texti->file,&texwid,&texht);
-      if(floortex==NULL){
-         printf(_(" - failed"));
-         printf("\n");
-         continue;
-      }
-      errorcode=gluBuild2DMipmaps(GL_TEXTURE_2D,4, texwid, texht, GL_RGBA, GL_UNSIGNED_BYTE, floortex);
-      if(errorcode!=0){
-        FREEMEMORY(floortex);
-         printf(_(" - failed"));
-         printf("\n");
-        continue;
-      }
-      FREEMEMORY(floortex);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-      texti->loaded=1;
-         printf(_(" - completed"));
-         printf("\n");
-    }
-  }
-  
-  CheckMemory;
-  if(ntextures==0){
-    FREEMEMORY(textureinfo);
-  }
-
-  // define colobar textures
-
-  printf(_("      Loading colorbar texture: "));
-
- // glActiveTexture(GL_TEXTURE0);
-  glGenTextures(1,&texture_colorbar_id);
-  glBindTexture(GL_TEXTURE_1D,texture_colorbar_id);
-  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_full);
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-#ifdef pp_GPU
-  if(gpuactive==1){
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  }
-  else{
-    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-  }
-#else
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-#endif
-
-  glGenTextures(1,&texture_slice_colorbar_id);
-  glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
-  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_slice);
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-#ifdef pp_GPU
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-#else
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-#endif
-
-  glGenTextures(1,&texture_patch_colorbar_id);
-  glBindTexture(GL_TEXTURE_1D,texture_patch_colorbar_id);
-  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_patch);
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-#ifdef pp_GPU
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-#else
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-#endif
-
-  glGenTextures(1,&texture_plot3d_colorbar_id);
-  glBindTexture(GL_TEXTURE_1D,texture_plot3d_colorbar_id);
-  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_plot3d);
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-#ifdef pp_GPU
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-#else
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-#endif
-
-  glGenTextures(1,&texture_iso_colorbar_id);
-  glBindTexture(GL_TEXTURE_1D,texture_iso_colorbar_id);
-  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_iso);
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-#ifdef pp_GPU
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-#else
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-#endif
-
-  //glActiveTexture(GL_TEXTURE2);
-  glGenTextures(1,&smokecolormap_id);
-  glBindTexture(GL_TEXTURE_1D,smokecolormap_id);
-  glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_smokecolormap);
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-#ifdef pp_GPU
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-#else
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-#endif
-  CheckMemory;
-
-  printf(_(" - completed"));
-  printf("\n");
-#ifdef pp_GPU
-#ifdef pp_GPUDEPTH
-  if(use_graphics==1){
-    createDepthTexture();
-  }
-#endif
-#endif
-
-  if(autoterrain==1&&use_graphics==1){
-    texture *tt;
-    unsigned char *floortex;
-    int texwid, texht;
-
-    printf(_("      Loading terrain texture: "));
-    tt = terrain_texture;
-    tt->loaded=0;
-    tt->used=0;
-    tt->display=0;
-
-    glGenTextures(1,&tt->name);
-    glBindTexture(GL_TEXTURE_2D,tt->name);
-    floortex=NULL;
-    errorcode=1;
-    if(tt->file!=NULL){
-      floortex=readpicture(tt->file,&texwid,&texht);
-    }
-    if(floortex!=NULL){
-      errorcode=gluBuild2DMipmaps(GL_TEXTURE_2D,4, texwid, texht, GL_RGBA, GL_UNSIGNED_BYTE, floortex);
-    }
-    if(errorcode!=0){
-      printf(_(" - failed"));
-      printf("\n");
-    }
-    FREEMEMORY(floortex);
-    if(errorcode==0&&use_graphics==1){
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-      tt->loaded=1;
-      printf(_(" - completed"));
-      printf("\n");
-    }
-  }
 
 /* 
     Initialize blockage labels and blockage surface labels
