@@ -2165,10 +2165,10 @@ void LoadUnloadMenu(int value){
       readhrr(UNLOAD, &errorcode);
     }
     if(devc_csvfilename!=NULL){
-      read_device_data(devc_csvfilename,0,UNLOAD);
+      read_device_data(devc_csvfilename,CSV_FDS,UNLOAD);
     }
     if(exp_csvfilename!=NULL){
-      read_device_data(exp_csvfilename,2,UNLOAD);
+      read_device_data(exp_csvfilename,CSV_EXP,UNLOAD);
     }
     if(nvolrenderinfo>0){
       LoadVolSmoke3DMenu(UNLOAD_ALL);
@@ -2207,10 +2207,10 @@ void LoadUnloadMenu(int value){
       readhrr(LOAD, &errorcode);
     }
     if(devc_csvfilename!=NULL||exp_csvfilename!=NULL){
-      read_device_data(NULL,0,UNLOAD);
-      if(devc_csvfilename!=NULL)read_device_data(devc_csvfilename,0,LOAD);
-      read_device_data(NULL,2,UNLOAD);
-      if(exp_csvfilename!=NULL)read_device_data(exp_csvfilename,2,LOAD);
+      read_device_data(NULL,CSV_FDS,UNLOAD);
+      if(devc_csvfilename!=NULL)read_device_data(devc_csvfilename,CSV_FDS,LOAD);
+      read_device_data(NULL,CSV_EXP,UNLOAD);
+      if(exp_csvfilename!=NULL)read_device_data(exp_csvfilename,CSV_EXP,LOAD);
     }
     islicetype_save=islicetype;
     for(i=0;i<nsliceinfo;i++){

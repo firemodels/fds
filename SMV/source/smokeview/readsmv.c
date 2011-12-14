@@ -1358,11 +1358,6 @@ int readsmv(char *file, char *file2){
     if(return_code!=0)return return_code;
   }
 
-  // look for DEVICE entires in "experimental" spread sheet files
-  
-  read_device_header(exp_csvfilename, &deviceinfo, &ndeviceinfo_exp);
-  ndeviceinfo=ndeviceinfo_exp;
-
   if(noutlineinfo>0){
     for(i=0;i<noutlineinfo;i++){
       outlinei = outlineinfo + i;
@@ -2139,15 +2134,6 @@ int readsmv(char *file, char *file2){
     nlabels=0;
     nlabelssmv=0;
   }
-  if(ndeviceinfo>0){
-    if(deviceinfo==NULL){
-      if(NewMemory((void **)&deviceinfo,ndeviceinfo*sizeof(device))==0)return 2;
-    }
-    else{
-      if(ResizeMemory((void **)&deviceinfo,ndeviceinfo*sizeof(device))==0)return 2;
-    }
-    devicecopy=deviceinfo+ndeviceinfo_exp;
-  }
 
   if(npropinfo>0){
     npropinfo=0;
@@ -2166,7 +2152,6 @@ int readsmv(char *file, char *file2){
   iobst=0;
   ncadgeom=0;
   nsurfaces=0;
-  ndeviceinfo=ndeviceinfo_exp;
   noutlineinfo=0;
   if(noffset==0)ioffset=1;
   rewind(stream1);
@@ -2211,16 +2196,16 @@ int readsmv(char *file, char *file2){
       trim(buffer);
       bufferptr=trim_front(buffer);
       if(strcmp(bufferptr,"hrr")==0){
-        csvi->type=1;
+        csvi->type=CSVTYPE_HRR;
       }
       else if(strcmp(bufferptr,"devc")==0){
-        csvi->type=2;
+        csvi->type=CSVTYPE_DEVC;
       }
       else if(strcmp(bufferptr,"ext")==0){
-        csvi->type=3;
+        csvi->type=CSVTYPE_EXT;
       }
       else{
-        csvi->type=0;
+        csvi->type=CSVTYPE_NULL;
       }
       if(fgets(buffer,255,stream)==NULL){
         BREAK;
@@ -2228,8 +2213,10 @@ int readsmv(char *file, char *file2){
       trim(buffer);
       file=trim_front(buffer);
       lenfile = strlen(file);
-      NewMemory((void **)&csvi->file,lenfile);
+      NewMemory((void **)&csvi->file,lenfile+1);
       strcpy(csvi->file,file);
+      csvi->loaded=0;
+      csvi->display=0;
 
       ncsvinfo++;
     }
@@ -3323,7 +3310,48 @@ typedef struct {
     meshi->zbar =zbar;
     meshi->zcen=(zbar+zbar0)/2.0;
   }
+
+  // look for DEVICE entires in "experimental" spread sheet files
   
+  if(ndeviceinfo>0){
+    if(NewMemory((void **)&deviceinfo,ndeviceinfo*sizeof(device))==0)return 2;
+    devicecopy=deviceinfo;;
+  }
+  if(ncsvinfo>0){
+    int *nexp_devices=NULL;
+    device *devicecopy;
+
+    NewMemory((void **)&nexp_devices,ncsvinfo*sizeof(int));
+    for(i=0;i<ncsvinfo;i++){
+      csvdata *csvi;
+
+      csvi = csvinfo + i;
+      if(csvi->type==CSVTYPE_EXT){
+        nexp_devices[i] = get_ndevices(csvi->file);
+        ndeviceinfo_exp += nexp_devices[i];
+      }
+    }
+    if(ndeviceinfo>0){
+      ResizeMemory((void **)&deviceinfo,(ndeviceinfo_exp+ndeviceinfo)*sizeof(device));
+    }
+    else{
+      NewMemory((void **)&deviceinfo,ndeviceinfo_exp*sizeof(device));
+    }
+    devicecopy = deviceinfo+ndeviceinfo;
+    ndeviceinfo+=ndeviceinfo_exp;
+
+    for(i=0;i<ncsvinfo;i++){
+      csvdata *csvi;
+
+      csvi = csvinfo + i;
+      if(csvi->type==CSVTYPE_EXT){
+        read_device_header(csvi->file,devicecopy,nexp_devices[i]);
+        devicecopy += nexp_devices[i];
+      }
+    }
+    FREEMEMORY(nexp_devices);
+    devicecopy=deviceinfo;
+  }
 
   // define texture data structures by constructing a list of unique file names from surfaceinfo and devices   
 
@@ -5775,12 +5803,16 @@ typedef struct {
   if(hrr_csvfilename!=NULL){
     readhrr(LOAD, &errorcode);
   }
-  if(devc_csvfilename!=NULL||exp_csvfilename!=NULL){
-    read_device_data(NULL,0,UNLOAD);
-    if(devc_csvfilename!=NULL)read_device_data(devc_csvfilename,0,LOAD);
-    read_device_data(NULL,2,UNLOAD);
-    if(exp_csvfilename!=NULL)read_device_data(exp_csvfilename,2,LOAD);
+  read_device_data(NULL,CSV_FDS,UNLOAD);
+  read_device_data(NULL,CSV_EXP,UNLOAD);
+  for(i=0;i<ncsvinfo;i++){
+    csvdata *csvi;
+
+    csvi = csvinfo + i;
+    if(csvi->type==CSVTYPE_DEVC)read_device_data(csvi->file,CSV_FDS,LOAD);
+    if(csvi->type==CSVTYPE_EXT)read_device_data(csvi->file,CSV_EXP,LOAD);
   }
+  setup_device_data();
 
   init_multi_threading();
   init_part5prop();

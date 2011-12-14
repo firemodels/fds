@@ -12,6 +12,7 @@
 
 typedef struct {
   char *file;
+  int loaded, display;
   int type;
 } csvdata;
 

@@ -468,8 +468,8 @@ void readzone(int ifile, int flag, int *errorcode){
   }
   zonefilelen = strlen(file);
   if(zonei->csv==1){
-    read_device_data(zonei->file,1,UNLOAD);
-    read_device_data(zonei->file,1,LOAD);
+    read_device_data(zonei->file,CSV_CFAST,UNLOAD);
+    read_device_data(zonei->file,CSV_CFAST,LOAD);
     getzonesizecsv(&nzonet,&nrooms2,&nfires2,&nzhvents2,&nzvvents2,&error);
   }
   else{

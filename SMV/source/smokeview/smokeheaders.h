@@ -27,7 +27,12 @@ EXTERNCPP void getzonedatacsv(int nzonet, int nrooms, int nfires,
                     float *zonepr, float *zoneylay,  float *zonetl, float *zonetu,
                     float **zoneodlptr, float **zoneoduptr, float *zonehvents, float *zonevvents,
                     int *error);
-EXTERNCPP void read_device_header(char *file, device **devices, int *ndevices);
+EXTERNCPP int get_ndevices(char *file);
+EXTERNCPP void printhrr(void);
+EXTERNCPP void readhrr(int flag, int *errorcode);
+EXTERNCPP void read_device_data(char *file, int filetype, int flag);
+EXTERNCPP void setup_device_data(void);
+EXTERNCPP void read_device_header(char *file, device *devices, int ndevices);
 EXTERNCPP void parse_device_keyword(FILE *stream, device *devicei);
 EXTERNCPP void draw_geom(int flag);
 EXTERNCPP void getzonesizecsv(int *nzonet, int *nroom2, int *nfires, int *nzhvents, int *nzvvents, int *error);
@@ -150,9 +155,6 @@ EXTERNCPP int plot3dcompare( const void *arg1, const void *arg2 );
 EXTERNCPP void update_plot_xyz(mesh *current_mesh);
 EXTERNCPP void updateplotslice_mesh(mesh *mesh_in, int slicedir);
 
-EXTERNCPP void printhrr(void);
-EXTERNCPP void readhrr(int flag, int *errorcode);
-EXTERNCPP void read_device_data(char *file, int filetype, int flag);
 EXTERNCPP char *get_chid(char *file, char *buffer);
 EXTERNCPP void setColorbarClipPlanes(int flag);
 EXTERNCPP void addcolorbar(int icolorbar);

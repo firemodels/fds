@@ -11,6 +11,15 @@ void _sniffErrors(char *whereat);
 #define sniffErrors(f)
 #endif
 
+#define CSV_FDS 0
+#define CSV_CFAST 1
+#define CSV_EXP 2
+
+#define CSVTYPE_HRR 1
+#define CSVTYPE_DEVC 2
+#define CSVTYPE_EXT 3
+#define CSVTYPE_NULL 0
+
 #define TEPS 0.00
 
 #define PART_POINTS 1
