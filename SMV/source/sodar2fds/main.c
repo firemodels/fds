@@ -60,6 +60,7 @@ int main(int argc, char **argv){
   int i;
   char prefix[256],percen[2];
   int useprefix=0;
+  char coffset[255];
 
   strcpy(percen,"%");
 
@@ -174,15 +175,17 @@ int main(int argc, char **argv){
     strcpy(token2,"");
     if(useprefix==1)strcat(token2,prefix);
     strcat(token2,labelptrs[i]);
+    sprintf(coffset,"%f %f %f",xyzoffset[0],xyzoffset[1],xyzoffset[2]+zdev[i]);
+    trimmzeros(coffset);
     if(transfer[i]==2){
       fprintf(stream_out,"DEVICE\n");
       fprintf(stream_out," %s %s VELOCITY %s sensor\n",token2,percen,percen);
-      fprintf(stream_out," %f %f %f\n",xyzoffset[0],xyzoffset[1],xyzoffset[2]+zdev[i]);
+      fprintf(stream_out," %s\n",coffset);
     }
     else if(transfer[i]==3){
       fprintf(stream_out,"DEVICE\n");
       fprintf(stream_out," %s %s ANGLE %s sensor\n",token2,percen,percen);
-      fprintf(stream_out," %f %f %f\n",xyzoffset[0],xyzoffset[1],xyzoffset[2]+zdev[i]);
+      fprintf(stream_out," %s\n",coffset);
     }
   }
   fprintf(stream_out,"//DATA\n");
