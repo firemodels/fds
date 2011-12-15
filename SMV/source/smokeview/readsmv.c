@@ -3925,8 +3925,6 @@ typedef struct {
     if(NewMemory((void **)&textureinfo,(nsurfaces+ndevice_texture_list)*sizeof(texture))==0)return 2;
   }
   init_textures();
-  ndeviceinfo=0;
-
 
 /* 
     Initialize blockage labels and blockage surface labels
