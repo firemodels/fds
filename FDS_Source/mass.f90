@@ -123,8 +123,6 @@ WLOOP_FL: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    
    ! overwrite first off-wall advective flux if flow is away from the wall and if the face is not also a wall cell
 
-   IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY .AND. BOUNDARY_TYPE(IW)/=OPEN_BOUNDARY) THEN
-
    OFF_WALL_SELECT_1: SELECT CASE(IOR)
       CASE( 1) OFF_WALL_SELECT_1
          !      ghost          FX/UU(II+1)
@@ -163,8 +161,6 @@ WLOOP_FL: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             FZ(II,JJ,KK-2) = WW(II,JJ,KK-2)*SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ,FLUX_LIMITER)
          ENDIF
    END SELECT OFF_WALL_SELECT_1
-
-   ENDIF
    
    SELECT CASE(IOR)
       CASE( 1)
@@ -300,8 +296,6 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          
          ! overwrite first off-wall advective flux if flow is away from the wall and if the face is not also a wall cell
 
-         IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY .AND. BOUNDARY_TYPE(IW)/=OPEN_BOUNDARY) THEN
-
          OFF_WALL_SELECT_2: SELECT CASE(IOR)
             CASE( 1) OFF_WALL_SELECT_2
                !      ghost          FX/UU(II+1)
@@ -352,8 +346,6 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
                      DFZ(II,JJ,KK-2,N) = FZ(II,JJ,KK-2) - 0.5_EB*(ZZZ(2)+ZZZ(3))*WW(II,JJ,KK-2)
                ENDIF
          END SELECT OFF_WALL_SELECT_2
-
-         ENDIF
 
          ! Get the normal components of velocity at the wall
 
