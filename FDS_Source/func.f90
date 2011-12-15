@@ -2050,7 +2050,7 @@ SELECT CASE(T%ITRAN(IC))
    CASE(1)
       LOOP1: DO IT=1,10
          GF = G(GINV,IC,NM)-Z
-         IF (ABS(GF)<0.002_EB) EXIT LOOP1
+         IF (ABS(GF)<0.00001_EB) EXIT LOOP1
          GINV = GINV - GF/GP(GINV,IC,NM)
       ENDDO LOOP1
    CASE(2)

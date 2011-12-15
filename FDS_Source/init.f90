@@ -2120,7 +2120,7 @@ CHECK_MESHES: IF (IW<=M%N_EXTERNAL_WALL_CELLS .AND.  .NOT.EVACUATION_ONLY(NM)) T
    ! Check to see if the current interpolated cell face spans more than one other mesh
 
    IF (NOM_CHECK(0)/=NOM_CHECK(1)) THEN
-      WRITE(LU_ERR,'(A,I3,A,I3)') 'ERROR: MESH ',NM,' is out of alignment with MESH ',MAXVAL(NOM_CHECK)
+      WRITE(LU_ERR,'(A,I3,A,I3)') 'ERROR: MESH ',NM,' is not in alignment with MESH ',MAXVAL(NOM_CHECK)
       PROCESS_STOP_STATUS = SETUP_STOP
       IERR = 1
       RETURN
@@ -2130,11 +2130,11 @@ CHECK_MESHES: IF (IW<=M%N_EXTERNAL_WALL_CELLS .AND.  .NOT.EVACUATION_ONLY(NM)) T
       MM=>MESHES(NOM)
       ALIGNED = .TRUE.
       IF ( (ABS(IOR)==2 .OR. ABS(IOR)==3) .AND. MM%DX(IIO_MIN)<=M%DX(I) .AND. &
-            ABS( ((IIO_MAX-IIO_MIN+1)*MM%DX(IIO_MIN)-M%DX(I)) / MM%DX(IIO_MIN))>0.01 ) ALIGNED = .FALSE.
+            ABS( ((MM%X(IIO_MAX)-MM%X(IIO_MIN-1))-M%DX(I)) / MM%DX(IIO_MIN))>0.01 ) ALIGNED = .FALSE.
       IF ( (ABS(IOR)==1 .OR. ABS(IOR)==3) .AND. MM%DY(JJO_MIN)<=M%DY(J) .AND. &
-            ABS( ((JJO_MAX-JJO_MIN+1)*MM%DY(JJO_MIN)-M%DY(J)) / MM%DY(JJO_MIN))>0.01 ) ALIGNED = .FALSE.
+            ABS( ((MM%Y(JJO_MAX)-MM%Y(JJO_MIN-1))-M%DY(J)) / MM%DY(JJO_MIN))>0.01 ) ALIGNED = .FALSE.
       IF ( (ABS(IOR)==1 .OR. ABS(IOR)==2) .AND. MM%DZ(KKO_MIN)<=M%DZ(K) .AND. &
-            ABS( ((KKO_MAX-KKO_MIN+1)*MM%DZ(KKO_MIN)-M%DZ(K)) / MM%DZ(KKO_MIN))>0.01 ) ALIGNED = .FALSE.
+            ABS( ((MM%Z(KKO_MAX)-MM%Z(KKO_MIN-1))-M%DZ(K)) / MM%DZ(KKO_MIN))>0.01 ) ALIGNED = .FALSE.
       IF (.NOT.ALIGNED) THEN
          WRITE(LU_ERR,'(A,I3,A,I3)') 'ERROR: MESH ',NM,' is out of alignment with MESH ',NOM
          PROCESS_STOP_STATUS = SETUP_STOP
