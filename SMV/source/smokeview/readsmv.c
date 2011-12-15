@@ -3549,12 +3549,337 @@ typedef struct {
     meshi->zcen=(zbar+zbar0)/2.0;
   }
 
-  // look for DEVICE entries in "experimental" spread sheet files
-  
   if(ndeviceinfo>0){
     if(NewMemory((void **)&deviceinfo,ndeviceinfo*sizeof(device))==0)return 2;
     devicecopy=deviceinfo;;
   }
+  ndeviceinfo=0;
+  rewind(stream1);
+  if(stream2!=NULL)rewind(stream2);
+  stream=stream1;
+  printf(_("   pass 2 "));
+  printf(_("completed"));
+  printf("\n");
+  printf(_("   pass 3"));
+  printf("\n");
+
+  /* 
+   ************************************************************************
+   ************************ start of pass 3 ****************************** 
+   ************************************************************************
+ */
+
+  for(;;){
+    if(feof(stream)!=0){
+      BREAK;
+    }
+    if(fgets(buffer,255,stream)==NULL){
+      BREAK;
+    }
+    if(strncmp(buffer," ",1)==0||buffer[0]==0)continue;
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ DEVICE +++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    DEVICE
+    label
+    x y z xn yn zn state nparams ntextures 
+    p0 p1 ... p5
+    p6 ...    p11
+    texturefile1
+    ...
+    texturefilen
+
+    */
+    if(
+      (match(buffer,"DEVICE",6) == 1)&&
+      (match(buffer,"DEVICE_ACT",10) != 1)
+      ){
+      device *devicei;
+
+      devicei = deviceinfo + ndeviceinfo;
+      parse_device_keyword(stream,devicei);
+      CheckMemory;
+      ndeviceinfo++;
+      continue;
+    }
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ THCP ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"THCP",4) == 1){
+      mesh *meshi;
+      float normdenom;
+      char *device_label;
+
+      if(ioffset==0)ioffset=1;
+      meshi=meshinfo + ioffset - 1;
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&tempval);
+      if(tempval<0)tempval=0;
+      meshi->ntc=tempval;
+      ntc_total += meshi->ntc;
+      hasSensorNorm=0;
+      if(meshi->ntc>0){
+        for(nn=0;nn<meshi->ntc;nn++){
+          float *xyz, *xyznorm;
+          fgets(buffer,255,stream);
+
+          xyz = devicecopy->xyz;
+          xyznorm = devicecopy->xyznorm;
+          xyz[0]=0.0;
+          xyz[1]=0.0;
+          xyz[2]=0.0;
+          xyznorm[0]=0.0;
+          xyznorm[1]=0.0;
+          xyznorm[2]=-1.0;
+          device_label=get_device_label(buffer);
+          sscanf(buffer,"%f %f %f %f %f %f",xyz,xyz+1,xyz+2,xyznorm,xyznorm+1,xyznorm+2);
+          normdenom=0.0;
+          normdenom+=xyznorm[0]*xyznorm[0];
+          normdenom+=xyznorm[1]*xyznorm[1];
+          normdenom+=xyznorm[2]*xyznorm[2];
+          if(normdenom>0.1){
+            hasSensorNorm=1;
+            normdenom=sqrt(normdenom);
+            xyznorm[0]/=normdenom;
+            xyznorm[1]/=normdenom;
+            xyznorm[2]/=normdenom;
+          }
+          if(device_label==NULL){
+            if(isZoneFireModel==1){
+              devicecopy->object = get_SVOBJECT_type("target",thcp_object_backup);
+            }
+            else{
+              devicecopy->object = get_SVOBJECT_type("thermoc4",thcp_object_backup);
+            }
+          }
+          else{
+            devicecopy->object = get_SVOBJECT_type(device_label,thcp_object_backup);
+          }
+          get_elevaz(xyznorm,&devicecopy->dtheta,devicecopy->rotate_axis,NULL);
+    
+          init_device(devicecopy,xyz,xyznorm,0,0,NULL,NULL);
+          devicecopy->prop=NULL;
+
+          devicecopy++;
+          ndeviceinfo++;
+        }
+      }
+      continue;
+    }
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ SPRK ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"SPRK",4) == 1 && match(buffer,"SPRK_ACT",8) != 1){
+      mesh *meshi;
+      char *device_label;
+      meshi=meshinfo + ioffset - 1;
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&tempval);
+      if(tempval<0)tempval=0;
+      meshi->nspr=tempval;
+      nspr_total += meshi->nspr;
+      if(meshi->nspr>0){
+        FREEMEMORY(meshi->xspr); FREEMEMORY(meshi->yspr); FREEMEMORY(meshi->zspr); FREEMEMORY(meshi->tspr);
+        if(NewMemory((void **)&meshi->xspr,meshi->nspr*sizeof(float))==0||
+           NewMemory((void **)&meshi->yspr,meshi->nspr*sizeof(float))==0||
+           NewMemory((void **)&meshi->zspr,meshi->nspr*sizeof(float))==0||
+           NewMemory((void **)&meshi->tspr,meshi->nspr*sizeof(float))==0||
+           NewMemory((void **)&meshi->xsprplot,meshi->nspr*sizeof(float))==0||
+           NewMemory((void **)&meshi->ysprplot,meshi->nspr*sizeof(float))==0||
+           NewMemory((void **)&meshi->zsprplot,meshi->nspr*sizeof(float))==0)return 2;
+        for(nn=0;nn<meshi->nspr;nn++){meshi->tspr[nn]=99999.;}
+        xsprcopy=meshi->xspr;
+        ysprcopy=meshi->yspr;
+        zsprcopy=meshi->zspr;
+        for(nn=0;nn<meshi->nspr;nn++){
+          float *xyznorm;
+          float normdenom;
+
+          fgets(buffer,255,stream);
+          xyznorm = devicecopy->xyznorm;
+          xyznorm[0]=0.0;
+          xyznorm[1]=0.0;
+          xyznorm[2]=-1.0;
+          device_label=get_device_label(buffer);
+          sscanf(buffer,"%f %f %f %f %f %f",xsprcopy,ysprcopy,zsprcopy,xyznorm,xyznorm+1,xyznorm+2);
+          devicecopy->act_time=-1.0;
+          devicecopy->type = DEVICE_SPRK;
+          devicecopy->xyz[0]=*xsprcopy;
+          devicecopy->xyz[1]=*ysprcopy;
+          devicecopy->xyz[2]=*zsprcopy;
+          normdenom=0.0;
+          normdenom+=xyznorm[0]*xyznorm[0];
+          normdenom+=xyznorm[1]*xyznorm[1];
+          normdenom+=xyznorm[2]*xyznorm[2];
+          normdenom=sqrt(normdenom);
+          if(normdenom>0.001){
+            xyznorm[0]/=normdenom;
+            xyznorm[1]/=normdenom;
+            xyznorm[2]/=normdenom;
+          }
+          if(device_label==NULL){
+            devicecopy->object = get_SVOBJECT_type("sprinkler_upright",sprinkler_upright_object_backup);
+          }
+          else{
+            devicecopy->object = get_SVOBJECT_type(device_label,sprinkler_upright_object_backup);
+          }
+          get_elevaz(xyznorm,&devicecopy->dtheta,devicecopy->rotate_axis,NULL);
+    
+          init_device(devicecopy,NULL,xyznorm,0,0,NULL,NULL);
+
+          devicecopy++;
+          ndeviceinfo++;
+
+          xsprcopy++; ysprcopy++; zsprcopy++;
+        }
+      }
+      continue;
+    }
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ HEAT ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"HEAT",4) == 1&&match(buffer,"HEAT_ACT",8) != 1){
+      mesh *meshi;
+      char *device_label;
+
+      meshi=meshinfo + ioffset - 1;
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&tempval);
+      if(tempval<0)tempval=0;
+      meshi->nheat=tempval;
+      nheat_total += meshi->nheat;
+      if(meshi->nheat>0){
+        FREEMEMORY(meshi->xheat); FREEMEMORY(meshi->yheat); FREEMEMORY(meshi->zheat); FREEMEMORY(meshi->theat);
+        FREEMEMORY(meshi->xheatplot); FREEMEMORY(meshi->yheatplot); FREEMEMORY(meshi->zheatplot);
+        if(NewMemory((void **)&meshi->xheat,meshi->nheat*sizeof(float))==0||
+           NewMemory((void **)&meshi->yheat,meshi->nheat*sizeof(float))==0||
+           NewMemory((void **)&meshi->zheat,meshi->nheat*sizeof(float))==0||
+           NewMemory((void **)&meshi->theat,meshi->nheat*sizeof(float))==0||
+           NewMemory((void **)&meshi->xheatplot,meshi->nheat*sizeof(float))==0||
+           NewMemory((void **)&meshi->yheatplot,meshi->nheat*sizeof(float))==0||
+           NewMemory((void **)&meshi->zheatplot,meshi->nheat*sizeof(float))==0)return 2;
+        for(nn=0;nn<meshi->nheat;nn++){
+          meshi->theat[nn]=99999.;
+        }
+        xheatcopy=meshi->xheat;
+        yheatcopy=meshi->yheat;
+        zheatcopy=meshi->zheat;
+        for(nn=0;nn<meshi->nheat;nn++){
+          float *xyznorm;
+          float normdenom;
+          fgets(buffer,255,stream);
+          xyznorm=devicecopy->xyznorm;
+          xyznorm[0]=0.0;
+          xyznorm[1]=0.0;
+          xyznorm[2]=-1.0;
+          device_label=get_device_label(buffer);
+          sscanf(buffer,"%f %f %f %f %f %f",xheatcopy,yheatcopy,zheatcopy,xyznorm,xyznorm+1,xyznorm+2);
+          devicecopy->type = DEVICE_HEAT;
+          devicecopy->act_time=-1.0;
+          devicecopy->xyz[0]=*xheatcopy;
+          devicecopy->xyz[1]=*yheatcopy;
+          devicecopy->xyz[2]=*zheatcopy;
+          normdenom=0.0;
+          normdenom+=xyznorm[0]*xyznorm[0];
+          normdenom+=xyznorm[1]*xyznorm[1];
+          normdenom+=xyznorm[2]*xyznorm[2];
+          normdenom=sqrt(normdenom);
+          if(normdenom>0.001){
+            xyznorm[0]/=normdenom;
+            xyznorm[1]/=normdenom;
+            xyznorm[2]/=normdenom;
+          }
+          if(device_label==NULL){
+            devicecopy->object = get_SVOBJECT_type("heat_detector",heat_detector_object_backup);
+          }
+          else{
+            devicecopy->object = get_SVOBJECT_type(device_label,heat_detector_object_backup);
+          }
+          get_elevaz(xyznorm,&devicecopy->dtheta,devicecopy->rotate_axis,NULL);
+
+          init_device(devicecopy,NULL,xyznorm,0,0,NULL,NULL);
+          devicecopy->prop=NULL;
+
+          devicecopy++;
+          ndeviceinfo++;
+          xheatcopy++; yheatcopy++; zheatcopy++;
+
+        }
+      }
+      continue;
+    }
+  /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ SMOD ++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if(match(buffer,"SMOD",4) == 1 && match(buffer,"SMOD_ACT",8) != 1){
+      float xyz[3];
+      int sdnum;
+      char *device_label;
+
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&sdnum);
+      if(sdnum<0)sdnum=0;
+      for(nn=0;nn<sdnum;nn++){
+        float *xyznorm;
+        float normdenom;
+
+        xyznorm = devicecopy->xyznorm;
+        xyznorm[0]=0.0;
+        xyznorm[1]=0.0;
+        xyznorm[2]=-1.0;
+        device_label=get_device_label(buffer);
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%f %f %f %f %f %f",xyz,xyz+1,xyz+2,xyznorm,xyznorm+1,xyznorm+2);
+        devicecopy->type = DEVICE_SMOKE;
+        devicecopy->act_time=-1.0;
+        devicecopy->xyz[0]=xyz[0];
+        devicecopy->xyz[1]=xyz[1];
+        devicecopy->xyz[2]=xyz[2];
+        normdenom=0.0;
+        normdenom+=xyznorm[0]*xyznorm[0];
+        normdenom+=xyznorm[1]*xyznorm[1];
+        normdenom+=xyznorm[2]*xyznorm[2];
+        normdenom=sqrt(normdenom);
+        if(normdenom>0.001){
+          xyznorm[0]/=normdenom;
+          xyznorm[1]/=normdenom;
+          xyznorm[2]/=normdenom;
+        }
+        if(device_label==NULL){
+          devicecopy->object = get_SVOBJECT_type("smoke_detector",smoke_detector_object_backup);
+        }
+        else{
+          devicecopy->object = get_SVOBJECT_type(device_label,smoke_detector_object_backup);
+        }
+        get_elevaz(xyznorm,&devicecopy->dtheta,devicecopy->rotate_axis,NULL);
+    
+        init_device(devicecopy,xyz,xyznorm,0,0,NULL,NULL);
+
+        devicecopy++;
+        ndeviceinfo++;
+
+      }
+      continue;
+    }
+  }
+  /* 
+   ************************************************************************
+   ************************ end of pass 3 ****************************** 
+   ************************************************************************
+ */
+
+  // look for DEVICE entries in "experimental" spread sheet files
+  
   if(ncsvinfo>0){
     int *nexp_devices=NULL;
     device *devicecopy;
@@ -3642,17 +3967,17 @@ typedef struct {
 
 /* 
    ************************************************************************
-   ************************ start of pass 3 ********************************* 
+   ************************ start of pass 4 ********************************* 
    ************************************************************************
  */
 
   rewind(stream1);
   if(stream2!=NULL)rewind(stream2);
   stream=stream1;
-  printf(_("   pass 2 "));
+  printf(_("   pass 3 "));
   printf(_("completed"));
   printf("\n");
-  printf(_("   pass 3"));
+  printf(_("   pass 4"));
   printf("\n");
   startpass=1;
 
@@ -5303,305 +5628,11 @@ typedef struct {
       continue;
     }
 
-  /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++++++ DEVICE +++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-    DEVICE
-    label
-    x y z xn yn zn state nparams ntextures 
-    p0 p1 ... p5
-    p6 ...    p11
-    texturefile1
-    ...
-    texturefilen
-
-    */
-    if(
-      (match(buffer,"DEVICE",6) == 1)&&
-      (match(buffer,"DEVICE_ACT",10) != 1)
-      ){
-      device *devicei;
-
-      devicei = deviceinfo + ndeviceinfo;
-      parse_device_keyword(stream,devicei);
-      CheckMemory;
-      ndeviceinfo++;
-      continue;
-    }
-  /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++++++ THCP ++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-    if(match(buffer,"THCP",4) == 1){
-      mesh *meshi;
-      float normdenom;
-      char *device_label;
-
-      if(ioffset==0)ioffset=1;
-      meshi=meshinfo + ioffset - 1;
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&tempval);
-      if(tempval<0)tempval=0;
-      meshi->ntc=tempval;
-      ntc_total += meshi->ntc;
-      hasSensorNorm=0;
-      if(meshi->ntc>0){
-        for(nn=0;nn<meshi->ntc;nn++){
-          float *xyz, *xyznorm;
-          fgets(buffer,255,stream);
-
-          xyz = devicecopy->xyz;
-          xyznorm = devicecopy->xyznorm;
-          xyz[0]=0.0;
-          xyz[1]=0.0;
-          xyz[2]=0.0;
-          xyznorm[0]=0.0;
-          xyznorm[1]=0.0;
-          xyznorm[2]=-1.0;
-          device_label=get_device_label(buffer);
-          sscanf(buffer,"%f %f %f %f %f %f",xyz,xyz+1,xyz+2,xyznorm,xyznorm+1,xyznorm+2);
-          normdenom=0.0;
-          normdenom+=xyznorm[0]*xyznorm[0];
-          normdenom+=xyznorm[1]*xyznorm[1];
-          normdenom+=xyznorm[2]*xyznorm[2];
-          if(normdenom>0.1){
-            hasSensorNorm=1;
-            normdenom=sqrt(normdenom);
-            xyznorm[0]/=normdenom;
-            xyznorm[1]/=normdenom;
-            xyznorm[2]/=normdenom;
-          }
-          if(device_label==NULL){
-            if(isZoneFireModel==1){
-              devicecopy->object = get_SVOBJECT_type("target",thcp_object_backup);
-            }
-            else{
-              devicecopy->object = get_SVOBJECT_type("thermoc4",thcp_object_backup);
-            }
-          }
-          else{
-            devicecopy->object = get_SVOBJECT_type(device_label,thcp_object_backup);
-          }
-          get_elevaz(xyznorm,&devicecopy->dtheta,devicecopy->rotate_axis,NULL);
-    
-          init_device(devicecopy,xyz,xyznorm,0,0,NULL,NULL);
-          devicecopy->prop=NULL;
-
-          devicecopy++;
-          ndeviceinfo++;
-        }
-      }
-      continue;
-    }
-  /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++++++ SPRK ++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-    if(match(buffer,"SPRK",4) == 1 && match(buffer,"SPRK_ACT",8) != 1){
-      mesh *meshi;
-      char *device_label;
-      meshi=meshinfo + ioffset - 1;
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&tempval);
-      if(tempval<0)tempval=0;
-      meshi->nspr=tempval;
-      nspr_total += meshi->nspr;
-      if(meshi->nspr>0){
-        FREEMEMORY(meshi->xspr); FREEMEMORY(meshi->yspr); FREEMEMORY(meshi->zspr); FREEMEMORY(meshi->tspr);
-        if(NewMemory((void **)&meshi->xspr,meshi->nspr*sizeof(float))==0||
-           NewMemory((void **)&meshi->yspr,meshi->nspr*sizeof(float))==0||
-           NewMemory((void **)&meshi->zspr,meshi->nspr*sizeof(float))==0||
-           NewMemory((void **)&meshi->tspr,meshi->nspr*sizeof(float))==0||
-           NewMemory((void **)&meshi->xsprplot,meshi->nspr*sizeof(float))==0||
-           NewMemory((void **)&meshi->ysprplot,meshi->nspr*sizeof(float))==0||
-           NewMemory((void **)&meshi->zsprplot,meshi->nspr*sizeof(float))==0)return 2;
-        for(nn=0;nn<meshi->nspr;nn++){meshi->tspr[nn]=99999.;}
-        xsprcopy=meshi->xspr;
-        ysprcopy=meshi->yspr;
-        zsprcopy=meshi->zspr;
-        for(nn=0;nn<meshi->nspr;nn++){
-          float *xyznorm;
-          float normdenom;
-
-          fgets(buffer,255,stream);
-          xyznorm = devicecopy->xyznorm;
-          xyznorm[0]=0.0;
-          xyznorm[1]=0.0;
-          xyznorm[2]=-1.0;
-          device_label=get_device_label(buffer);
-          sscanf(buffer,"%f %f %f %f %f %f",xsprcopy,ysprcopy,zsprcopy,xyznorm,xyznorm+1,xyznorm+2);
-          devicecopy->act_time=-1.0;
-          devicecopy->type = DEVICE_SPRK;
-          devicecopy->xyz[0]=*xsprcopy;
-          devicecopy->xyz[1]=*ysprcopy;
-          devicecopy->xyz[2]=*zsprcopy;
-          normdenom=0.0;
-          normdenom+=xyznorm[0]*xyznorm[0];
-          normdenom+=xyznorm[1]*xyznorm[1];
-          normdenom+=xyznorm[2]*xyznorm[2];
-          normdenom=sqrt(normdenom);
-          if(normdenom>0.001){
-            xyznorm[0]/=normdenom;
-            xyznorm[1]/=normdenom;
-            xyznorm[2]/=normdenom;
-          }
-          if(device_label==NULL){
-            devicecopy->object = get_SVOBJECT_type("sprinkler_upright",sprinkler_upright_object_backup);
-          }
-          else{
-            devicecopy->object = get_SVOBJECT_type(device_label,sprinkler_upright_object_backup);
-          }
-          get_elevaz(xyznorm,&devicecopy->dtheta,devicecopy->rotate_axis,NULL);
-    
-          init_device(devicecopy,NULL,xyznorm,0,0,NULL,NULL);
-
-          devicecopy++;
-          ndeviceinfo++;
-
-          xsprcopy++; ysprcopy++; zsprcopy++;
-        }
-      }
-      continue;
-    }
-  /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++++++ HEAT ++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-    if(match(buffer,"HEAT",4) == 1&&match(buffer,"HEAT_ACT",8) != 1){
-      mesh *meshi;
-      char *device_label;
-
-      meshi=meshinfo + ioffset - 1;
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&tempval);
-      if(tempval<0)tempval=0;
-      meshi->nheat=tempval;
-      nheat_total += meshi->nheat;
-      if(meshi->nheat>0){
-        FREEMEMORY(meshi->xheat); FREEMEMORY(meshi->yheat); FREEMEMORY(meshi->zheat); FREEMEMORY(meshi->theat);
-        FREEMEMORY(meshi->xheatplot); FREEMEMORY(meshi->yheatplot); FREEMEMORY(meshi->zheatplot);
-        if(NewMemory((void **)&meshi->xheat,meshi->nheat*sizeof(float))==0||
-           NewMemory((void **)&meshi->yheat,meshi->nheat*sizeof(float))==0||
-           NewMemory((void **)&meshi->zheat,meshi->nheat*sizeof(float))==0||
-           NewMemory((void **)&meshi->theat,meshi->nheat*sizeof(float))==0||
-           NewMemory((void **)&meshi->xheatplot,meshi->nheat*sizeof(float))==0||
-           NewMemory((void **)&meshi->yheatplot,meshi->nheat*sizeof(float))==0||
-           NewMemory((void **)&meshi->zheatplot,meshi->nheat*sizeof(float))==0)return 2;
-        for(nn=0;nn<meshi->nheat;nn++){
-          meshi->theat[nn]=99999.;
-        }
-        xheatcopy=meshi->xheat;
-        yheatcopy=meshi->yheat;
-        zheatcopy=meshi->zheat;
-        for(nn=0;nn<meshi->nheat;nn++){
-          float *xyznorm;
-          float normdenom;
-          fgets(buffer,255,stream);
-          xyznorm=devicecopy->xyznorm;
-          xyznorm[0]=0.0;
-          xyznorm[1]=0.0;
-          xyznorm[2]=-1.0;
-          device_label=get_device_label(buffer);
-          sscanf(buffer,"%f %f %f %f %f %f",xheatcopy,yheatcopy,zheatcopy,xyznorm,xyznorm+1,xyznorm+2);
-          devicecopy->type = DEVICE_HEAT;
-          devicecopy->act_time=-1.0;
-          devicecopy->xyz[0]=*xheatcopy;
-          devicecopy->xyz[1]=*yheatcopy;
-          devicecopy->xyz[2]=*zheatcopy;
-          normdenom=0.0;
-          normdenom+=xyznorm[0]*xyznorm[0];
-          normdenom+=xyznorm[1]*xyznorm[1];
-          normdenom+=xyznorm[2]*xyznorm[2];
-          normdenom=sqrt(normdenom);
-          if(normdenom>0.001){
-            xyznorm[0]/=normdenom;
-            xyznorm[1]/=normdenom;
-            xyznorm[2]/=normdenom;
-          }
-          if(device_label==NULL){
-            devicecopy->object = get_SVOBJECT_type("heat_detector",heat_detector_object_backup);
-          }
-          else{
-            devicecopy->object = get_SVOBJECT_type(device_label,heat_detector_object_backup);
-          }
-          get_elevaz(xyznorm,&devicecopy->dtheta,devicecopy->rotate_axis,NULL);
-
-          init_device(devicecopy,NULL,xyznorm,0,0,NULL,NULL);
-          devicecopy->prop=NULL;
-
-          devicecopy++;
-          ndeviceinfo++;
-          xheatcopy++; yheatcopy++; zheatcopy++;
-
-        }
-      }
-      continue;
-    }
-  /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++++++ SMOD ++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-    if(match(buffer,"SMOD",4) == 1 && match(buffer,"SMOD_ACT",8) != 1){
-      float xyz[3];
-      int sdnum;
-      char *device_label;
-
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&sdnum);
-      if(sdnum<0)sdnum=0;
-      for(nn=0;nn<sdnum;nn++){
-        float *xyznorm;
-        float normdenom;
-
-        xyznorm = devicecopy->xyznorm;
-        xyznorm[0]=0.0;
-        xyznorm[1]=0.0;
-        xyznorm[2]=-1.0;
-        device_label=get_device_label(buffer);
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%f %f %f %f %f %f",xyz,xyz+1,xyz+2,xyznorm,xyznorm+1,xyznorm+2);
-        devicecopy->type = DEVICE_SMOKE;
-        devicecopy->act_time=-1.0;
-        devicecopy->xyz[0]=xyz[0];
-        devicecopy->xyz[1]=xyz[1];
-        devicecopy->xyz[2]=xyz[2];
-        normdenom=0.0;
-        normdenom+=xyznorm[0]*xyznorm[0];
-        normdenom+=xyznorm[1]*xyznorm[1];
-        normdenom+=xyznorm[2]*xyznorm[2];
-        normdenom=sqrt(normdenom);
-        if(normdenom>0.001){
-          xyznorm[0]/=normdenom;
-          xyznorm[1]/=normdenom;
-          xyznorm[2]/=normdenom;
-        }
-        if(device_label==NULL){
-          devicecopy->object = get_SVOBJECT_type("smoke_detector",smoke_detector_object_backup);
-        }
-        else{
-          devicecopy->object = get_SVOBJECT_type(device_label,smoke_detector_object_backup);
-        }
-        get_elevaz(xyznorm,&devicecopy->dtheta,devicecopy->rotate_axis,NULL);
-    
-        init_device(devicecopy,xyz,xyznorm,0,0,NULL,NULL);
-
-        devicecopy++;
-        ndeviceinfo++;
-
-      }
-      continue;
-    }
   }
 
 /* 
    ************************************************************************
-   ************************ end of pass 3 ********************************* 
+   ************************ end of pass 4 ********************************* 
    ************************************************************************
  */
 
@@ -5653,18 +5684,18 @@ typedef struct {
 
   /* 
    ************************************************************************
-   ************************ start of pass 4 ********************************* 
+   ************************ start of pass 5 ********************************* 
    ************************************************************************
  */
 
   rewind(stream1);
   if(stream2!=NULL)rewind(stream2);
   stream=stream1;
-  printf(_("   pass 3 "));
+  printf(_("   pass 4 "));
   printf(_("completed"));
   printf("\n");
   if(do_pass4==1||autoterrain==1){
-    printf(_("   pass 4"));
+    printf(_("   pass 5"));
     printf("\n");
   }
 
@@ -5785,7 +5816,7 @@ typedef struct {
   }
 
   if(do_pass4==1){
-    printf(_("   pass 4 "));
+    printf(_("   pass 5 "));
     printf(_("completed"));
     printf("\n");
   }
@@ -5797,7 +5828,6 @@ typedef struct {
 #ifdef _DEBUG
   PrintMemoryInfo;
 #endif
-
 
 /* 
    ************************************************************************

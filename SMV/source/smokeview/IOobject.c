@@ -4635,10 +4635,12 @@ void read_device_data(char *file, int filetype, int loadstatus){
 
     devicei = getdevice(devclabels[i]);
     devices[i]=devicei;
+#ifdef _DEBUG
     if(devicei==NULL){
       printf("*** warning: spreadsheet entry: %s is not present in %s\n",devclabels[i],smvfilename);
       continue;
     }
+#endif
     devicei->filetype=filetype;
     NewMemory((void **)&devicei->vals,nrows*sizeof(float));
     NewMemory((void **)&devicei->valids,nrows*sizeof(int));
@@ -4690,7 +4692,7 @@ void setup_device_data(void){
   device *device_time;
   float *times, **timesptr;
 
-
+  if(ndeviceinfo==0)return;
   FREEMEMORY(vdeviceinfo);
   NewMemory((void **)&vdeviceinfo,ndeviceinfo*sizeof(vdevice));
   FREEMEMORY(vdeviceptrinfo);
