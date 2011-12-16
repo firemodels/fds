@@ -2016,7 +2016,7 @@ int readsmv(char *file, char *file2){
       ntrnz++;
       continue;
     }
-    if(match(buffer,"SURFACE") ==1&&match(buffer,"SURFACE DENSITY")!=1){
+    if(match(buffer,"SURFACE") ==1){
       nsurfaces++;
       continue;
     }
@@ -2044,7 +2044,7 @@ int readsmv(char *file, char *file2){
       ncadgeom++;
       continue;
     }
-    if(match(buffer,"VENT") == 1 && match(buffer,"VENTGEOM") != 1){
+    if(match(buffer,"VENT") == 1){
       nvent++;
       continue;
     }
@@ -2451,6 +2451,7 @@ int readsmv(char *file, char *file2){
       csvi->display=0;
 
       ncsvinfo++;
+      continue;
     }
 
     /*
@@ -2477,6 +2478,7 @@ int readsmv(char *file, char *file2){
       geomi->times=NULL;
 
       ngeominfo++;
+      continue;
     }
 
     /*
@@ -2662,6 +2664,7 @@ int readsmv(char *file, char *file2){
       //initterrain(stream, NULL, terri, xmin, xmax, nx, ymin, ymax, ny);
 
       nterraininfo++;
+      continue;
     }
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -2869,14 +2872,6 @@ int readsmv(char *file, char *file2){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
 
-/*
-typedef struct {
-  float begin[3],end[3],length;
-  float dxyz[3],dlength;
-  int dir,nbars;
-} tickdata;
-*/
-
     if(match(buffer,"TICKS") == 1){
       nticks++;
       ntickssmv++;
@@ -2894,13 +2889,7 @@ typedef struct {
         endt = ticki->end;
         nbarst=&ticki->nbars;
         dxyz = ticki->dxyz;
-        
 
-        /*
-        TICKS
-        b1 b2 b3 e1 e2 e3 nb
-        ticklength tickdir tickcolor (r g b) tickwidth 
-        */
         if(fgets(buffer,255,stream)==NULL){
           BREAK;
         }
@@ -3182,7 +3171,7 @@ typedef struct {
     ++++++++++++++++++++++ SURFACE ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"SURFACE") ==1&&match(buffer,"SURFACE DENSITY")!=1){
+    if(match(buffer,"SURFACE") ==1){
       surfi = surfaceinfo + nsurfaces;
       initsurface(surfi);
       fgets(buffer,255,stream);
@@ -3670,7 +3659,7 @@ typedef struct {
     ++++++++++++++++++++++ SPRK ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"SPRK") == 1 && match(buffer,"SPRK_ACT") != 1){
+    if(match(buffer,"SPRK") == 1){
       mesh *meshi;
       char *device_label;
       meshi=meshinfo + ioffset - 1;
@@ -3741,7 +3730,7 @@ typedef struct {
     ++++++++++++++++++++++ HEAT ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"HEAT") == 1&&match(buffer,"HEAT_ACT") != 1){
+    if(match(buffer,"HEAT") == 1){
       mesh *meshi;
       char *device_label;
 
@@ -3816,7 +3805,7 @@ typedef struct {
     ++++++++++++++++++++++ SMOD ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"SMOD") == 1 && match(buffer,"SMOD_ACT") != 1){
+    if(match(buffer,"SMOD") == 1){
       float xyz[3];
       int sdnum;
       char *device_label;
@@ -4378,7 +4367,7 @@ typedef struct {
   float base_diam;
   float base_height;
 */
-    if(match(buffer,"TREE") == 1&&match(buffer,"TREESTATE") !=1){
+    if(match(buffer,"TREE") == 1){
       fgets(buffer,255,stream);
       if(ntreeinfo!=0)continue;
       sscanf(buffer,"%i",&ntreeinfo);
@@ -4685,7 +4674,7 @@ typedef struct {
         r g b           colors - only specify if you wish to over-ride surface or default
         */
 
-    if(match(buffer,"VENT") == 1&&match(buffer,"VENTGEOM") != 1){
+    if(match(buffer,"VENT") == 1){
       mesh *meshi;
 
       ivent++;
@@ -8695,7 +8684,7 @@ int readini2(char *inifile, int localfile){
       continue;
     }
 
-    if(match(buffer,"COLORBAR") == 1 && match(buffer,"COLORBARFLIP")!=1){
+    if(match(buffer,"COLORBAR") == 1){
       float *rgb_ini_copy;
       
       CheckMemory;
@@ -9178,7 +9167,7 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%i",&surfincrement);
       continue;
       }
-    if(match(buffer,"FRAMERATE")==1&&match(buffer,"FRAMERATEVALUE")!=1){
+    if(match(buffer,"FRAMERATE")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&visFramerate);
       continue;
