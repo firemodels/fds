@@ -214,7 +214,7 @@ STDCALL FORTendianout(char *endianfilename,int lenout);
 
 //************************** global variables ****************************************
 
-EXTERN char dirseparator[3], pp[2];
+EXTERN char pp[2];
 EXTERN casedata caseinfo[2];
 EXTERN char *sourcedir1, *sourcedir2, *destdir;
 EXTERN int test_mode;

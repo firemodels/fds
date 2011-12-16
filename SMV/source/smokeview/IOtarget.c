@@ -14,6 +14,7 @@
 #include "MALLOC.h"
 #include "smokeviewvars.h"
 #include "update.h"
+#include "datadefs.h"
 
 // svn revision character string
 char IOtarget_revision[]="$Revision$";

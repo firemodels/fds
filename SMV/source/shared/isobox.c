@@ -16,6 +16,7 @@
 #include "MALLOC.h"
 #define IN_ISOBOX
 #include "isodefs.h"
+#include "datadefs.h"
 
 #define ijkcell(i,j,k) ((i)+(j)*ibar+(k)*ijbar)
 #define ij(i,j) ((i)+(j)*nx)
@@ -1507,7 +1508,7 @@ void CCisosurface2file(char *isofile, float *t, float *data, int *iblank,
         dlevel=abs(level[*nlevels-1]-level[*nlevels-2]);
       }
       else{
-        dlevel=min(abs(level[i+1]-level[i]),abs(level[i]-level[i-1]));
+        dlevel=MIN(abs(level[i+1]-level[i]),abs(level[i]-level[i-1]));
       }
     }
          
@@ -1575,7 +1576,7 @@ void CCisosurfacet2file(char *isofile, float *t, float *data, int *data2flag, fl
         dlevel=abs(level[*nlevels-1]-level[*nlevels-2]);
       }
       else{
-        dlevel=min(abs(level[i]-level[i-1]),abs(level[i+1]-level[i]));
+        dlevel=MIN(abs(level[i]-level[i-1]),abs(level[i+1]-level[i]));
       }
     }
     InitIsosurface(&surface,level[i],NULL,i);

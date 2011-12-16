@@ -26,10 +26,6 @@
 #define SV_EXTERN extern
 #endif
 
-#ifndef MIX
-#define MIX(f,a,b) ( (f)*(a) + (1.0-(f))*(b))
-#endif
-
 /* iso-surface definitions */
 
 typedef struct {
