@@ -352,111 +352,111 @@ int compile_script(char *scriptfile){
 
     if(strncmp(buffer," ",1)==0)continue;
 
-    if(match_upper(buffer,"UNLOADALL",9) == 1){
+    if(match_upper(buffer,"UNLOADALL") == 1){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"EXIT",4) == 1){
+    if(match_upper(buffer,"EXIT") == 1){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"RENDERDIR",9) == 1){
+    if(match_upper(buffer,"RENDERDIR") == 1){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"RENDERONCE",10) == 1){
+    if(match_upper(buffer,"RENDERONCE") == 1){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"RENDERDOUBLEONCE",16) == 1){
+    if(match_upper(buffer,"RENDERDOUBLEONCE") == 1){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"RENDERALL",9) == 1){
+    if(match_upper(buffer,"RENDERALL") == 1){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"VOLSMOKERENDERALL",17) == 1){
+    if(match_upper(buffer,"VOLSMOKERENDERALL") == 1){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"LOADFILE",8) == 1){
+    if(match_upper(buffer,"LOADFILE") == 1){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"LOADINIFILE",11) == 1){
+    if(match_upper(buffer,"LOADINIFILE") == 1){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"LOADVFILE",9) == 1){
+    if(match_upper(buffer,"LOADVFILE") == 1){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"LOADBOUNDARY",12) == 1){
+    if(match_upper(buffer,"LOADBOUNDARY") == 1){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"PARTCLASSCOLOR",14) == 1){
+    if(match_upper(buffer,"PARTCLASSCOLOR") == 1){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"PARTCLASSTYPE",13) == 1){
+    if(match_upper(buffer,"PARTCLASSTYPE") == 1){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"SHOWPLOT3DDATA",14) == 1){
+    if(match_upper(buffer,"SHOWPLOT3DDATA") == 1){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"PLOT3DPROPS",11) == 1){
+    if(match_upper(buffer,"PLOT3DPROPS") == 1){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"LOADTOUR",8) == 1){
+    if(match_upper(buffer,"LOADTOUR") == 1){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"UNLOADTOUR",10) == 1){
+    if(match_upper(buffer,"UNLOADTOUR") == 1){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"LOAD3DSMOKE",11) == 1){
+    if(match_upper(buffer,"LOAD3DSMOKE") == 1){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"LOADVOLSMOKE",12) == 1){
+    if(match_upper(buffer,"LOADVOLSMOKE") == 1){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"LOADVOLSMOKEFRAME",17) == 1){
+    if(match_upper(buffer,"LOADVOLSMOKEFRAME") == 1){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"LOADSLICE",9) == 1){
+    if(match_upper(buffer,"LOADSLICE") == 1){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"LOADVSLICE",10) == 1){
+    if(match_upper(buffer,"LOADVSLICE") == 1){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"LOADISO",7) == 1){
+    if(match_upper(buffer,"LOADISO") == 1){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"LOADPARTICLES",13) == 1){
+    if(match_upper(buffer,"LOADPARTICLES") == 1){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"LOADPLOT3D",10) == 1){
+    if(match_upper(buffer,"LOADPLOT3D") == 1){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"SETTIMEVAL",10) == 1){
+    if(match_upper(buffer,"SETTIMEVAL") == 1){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"SETVIEWPOINT",12) == 1){
+    if(match_upper(buffer,"SETVIEWPOINT") == 1){
       nscriptinfo++;
       continue;
     }
@@ -482,14 +482,14 @@ int compile_script(char *scriptfile){
     cleanbuffer(buffer,buffer2);
     if(strncmp(buffer," ",1)==0)continue;
 
-    if(match_upper(buffer,"UNLOADALL",9) == 1){
+    if(match_upper(buffer,"UNLOADALL") == 1){
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_UNLOADALL);
 
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"RENDERDIR",9) == 1){
+    if(match_upper(buffer,"RENDERDIR") == 1){
       int len;
 
       scripti = scriptinfo + nscriptinfo;
@@ -519,7 +519,7 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"RENDERONCE",10) == 1){
+    if(match_upper(buffer,"RENDERONCE") == 1){
       int len;
 
       scripti = scriptinfo + nscriptinfo;
@@ -535,7 +535,7 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"RENDERDOUBLEONCE",16) == 1){
+    if(match_upper(buffer,"RENDERDOUBLEONCE") == 1){
       int len;
 
       scripti = scriptinfo + nscriptinfo;
@@ -551,7 +551,7 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"RENDERALL",9) == 1){
+    if(match_upper(buffer,"RENDERALL") == 1){
       int len;
 
       scripti = scriptinfo + nscriptinfo;
@@ -573,7 +573,7 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"VOLSMOKERENDERALL",17) == 1){
+    if(match_upper(buffer,"VOLSMOKERENDERALL") == 1){
       int len;
 
       scripti = scriptinfo + nscriptinfo;
@@ -598,7 +598,7 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"LOADINIFILE",11) == 1){
+    if(match_upper(buffer,"LOADINIFILE") == 1){
       int len;
       int filetype;
 
@@ -613,7 +613,7 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"LOADFILE",8) == 1){
+    if(match_upper(buffer,"LOADFILE") == 1){
       int len;
       int filetype;
 
@@ -628,7 +628,7 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"LOADVFILE",9) == 1){
+    if(match_upper(buffer,"LOADVFILE") == 1){
       int len;
       int filetype;
 
@@ -643,7 +643,7 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"EXIT",4) == 1){
+    if(match_upper(buffer,"EXIT") == 1){
       int len;
       int filetype;
 
@@ -653,7 +653,7 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"LOADBOUNDARY",12) == 1){
+    if(match_upper(buffer,"LOADBOUNDARY") == 1){
       int len;
       int filetype;
 
@@ -668,7 +668,7 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"PARTCLASSCOLOR",14) == 1){
+    if(match_upper(buffer,"PARTCLASSCOLOR") == 1){
       int len;
       int filetype;
 
@@ -683,7 +683,7 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"PARTCLASSTYPE",13) == 1){
+    if(match_upper(buffer,"PARTCLASSTYPE") == 1){
       int len;
       int filetype;
 
@@ -698,7 +698,7 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"PLOT3DPROPS",11) == 1){
+    if(match_upper(buffer,"PLOT3DPROPS") == 1){
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_PLOT3DPROPS);
       if(fgets(buffer2,255,stream)==NULL)break;
@@ -708,7 +708,7 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"SHOWPLOT3DDATA",14) == 1){
+    if(match_upper(buffer,"SHOWPLOT3DDATA") == 1){
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_SHOWPLOT3DDATA);
       if(fgets(buffer2,255,stream)==NULL)break;
@@ -721,7 +721,7 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"LOADTOUR",8) == 1){
+    if(match_upper(buffer,"LOADTOUR") == 1){
       int len;
       int filetype;
 
@@ -736,7 +736,7 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"UNLOADTOUR",10) == 1){
+    if(match_upper(buffer,"UNLOADTOUR") == 1){
       int len;
       int filetype;
 
@@ -746,7 +746,7 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"LOAD3DSMOKE",11) == 1){
+    if(match_upper(buffer,"LOAD3DSMOKE") == 1){
       int len;
       int filetype;
 
@@ -761,7 +761,7 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"LOADVOLSMOKE",12) == 1){
+    if(match_upper(buffer,"LOADVOLSMOKE") == 1){
       int len;
       int filetype;
 
@@ -774,7 +774,7 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"LOADVOLSMOKEFRAME",17) == 1){
+    if(match_upper(buffer,"LOADVOLSMOKEFRAME") == 1){
       int len;
       int filetype;
 
@@ -787,7 +787,7 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"LOADSLICE",9) == 1){
+    if(match_upper(buffer,"LOADSLICE") == 1){
       int len;
       int filetype;
 
@@ -808,7 +808,7 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"LOADVSLICE",10) == 1){
+    if(match_upper(buffer,"LOADVSLICE") == 1){
       int len;
       int filetype;
 
@@ -829,7 +829,7 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"LOADISO",7) == 1){
+    if(match_upper(buffer,"LOADISO") == 1){
       int len;
       int filetype;
 
@@ -844,7 +844,7 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"LOADPARTICLES",13) == 1){
+    if(match_upper(buffer,"LOADPARTICLES") == 1){
       int len;
       int filetype;
 
@@ -854,7 +854,7 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"LOADPLOT3D",10) == 1){
+    if(match_upper(buffer,"LOADPLOT3D") == 1){
       int len;
       int filetype;
 
@@ -867,7 +867,7 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"SETTIMEVAL",10) == 1){
+    if(match_upper(buffer,"SETTIMEVAL") == 1){
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_SETTIMEVAL);
       if(fgets(buffer2,255,stream)==NULL)break;
@@ -878,7 +878,7 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
-    if(match_upper(buffer,"SETVIEWPOINT",12) == 1){
+    if(match_upper(buffer,"SETVIEWPOINT") == 1){
       int len;
 
       scripti = scriptinfo + nscriptinfo;
@@ -970,7 +970,7 @@ void script_loadiso(scriptdata *scripti){
 
     isoi = isoinfo + i;
     len = strlen(scripti->cval);
-    imatch = match_upper(isoi->surface_label.longlabel,scripti->cval,len);
+    imatch = match_upper(isoi->surface_label.longlabel,scripti->cval);
     if(imatch==1||imatch==2){
       readiso(isoi->file,i,LOAD,&errorcode);
     }
@@ -1064,7 +1064,7 @@ void script_load3dsmoke(scriptdata *scripti){
     smoke3d *smoke3di;
 
     smoke3di = smoke3dinfo + i;
-    if(match_upper(smoke3di->label.longlabel,scripti->cval,strlen(scripti->cval))==1){
+    if(match_upper(smoke3di->label.longlabel,scripti->cval)==1){
       readsmoke3d(i,LOAD,&errorcode);
     }
   }
@@ -1091,7 +1091,7 @@ void script_loadslice(scriptdata *scripti){
     mslicei = multisliceinfo + i;
     if(mslicei->nslices<=0)continue;
     slicei = sliceinfo + mslicei->islices[0];
-    if(match_upper(slicei->label.longlabel,scripti->cval,strlen(scripti->cval))==0)continue;
+    if(match_upper(slicei->label.longlabel,scripti->cval)==0)continue;
     if(slicei->idir!=scripti->ival)continue;
     delta_orig = slicei->position_orig - scripti->fval;
     if(delta_orig<0.0)delta_orig = -delta_orig;
@@ -1122,7 +1122,7 @@ void script_loadvslice(scriptdata *scripti){
     mvslicei = multivsliceinfo + i;
     if(mvslicei->nvslices<=0)continue;
     slicei = sliceinfo + mvslicei->ivslices[0];
-    if(match_upper(slicei->label.longlabel,scripti->cval,strlen(scripti->cval))==0)continue;
+    if(match_upper(slicei->label.longlabel,scripti->cval)==0)continue;
     if(slicei->idir!=scripti->ival)continue;
     delta_orig = slicei->position_orig - scripti->fval;
     if(delta_orig<0.0)delta_orig = -delta_orig;

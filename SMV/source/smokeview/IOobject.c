@@ -4069,9 +4069,9 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
     remove_comment(buffer);
     trim(buffer);
     buffer2=trim_front(buffer);
-    if(match(buffer2,"OBJECTDEF",9) == 1||
-       match(buffer2,"AVATARDEF",9) == 1||
-       match(buffer2,"NEWFRAME",8) == 1){
+    if(match(buffer2,"OBJECTDEF") == 1||
+       match(buffer2,"AVATARDEF") == 1||
+       match(buffer2,"NEWFRAME") == 1){
          buffer_ptr=buffer2;
          break;
     }
@@ -4947,15 +4947,15 @@ int read_object_defs(char *file){
     }
 
 
-    if(match(buffer_ptr,"OBJECTDEF",9) == 1||
-       match(buffer_ptr,"AVATARDEF",9) == 1
+    if(match(buffer_ptr,"OBJECTDEF") == 1||
+       match(buffer_ptr,"AVATARDEF") == 1
       ){
         int is_avatar=0;
       char *label;
 
       sv_object_frame *first_frame, *last_frame;
 
-      if(match(buffer_ptr,"AVATARDEF",9) == 1){
+      if(match(buffer_ptr,"AVATARDEF") == 1){
         is_avatar=1;
       }  
       ndevices++;
@@ -4998,7 +4998,7 @@ int read_object_defs(char *file){
       buffer_ptr=NULL;
       continue;
     }
-    if(match(trim_buffer,"NEWFRAME",8) == 1||firstdef==1){
+    if(match(trim_buffer,"NEWFRAME") == 1||firstdef==1){
       sv_object_frame *prev_frame,*next_frame;
 
       if(firstdef==-1)continue;
@@ -5021,7 +5021,7 @@ int read_object_defs(char *file){
       current_object->nframes++;
 
       firstdef=0;
-      if(match(trim_buffer,"NEWFRAME",8)==1){
+      if(match(trim_buffer,"NEWFRAME")==1){
         buffer_ptr=NULL;
         continue;
       }
