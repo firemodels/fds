@@ -39,6 +39,8 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
+// VVVVVVVVVVVVVVVVVVVVVVVVV  set platform defines VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+
 #ifdef pp_LINUX64
 #define pp_LINUX
 #endif
@@ -46,6 +48,44 @@
 #ifdef pp_OSX64
 #define pp_OSX
 #endif
+
+//*** turn on BIT64 if compiled on a 64 bit platform
+
+#ifdef X64
+#undef BIT64
+#define BIT64
+#endif
+
+#ifdef pp_LINUX64
+#undef BIT64
+#define BIT64
+#endif
+
+#ifdef pp_OSX64
+#undef pp_OSX
+#define pp_OSX
+#undef BIT64
+#define BIT64
+#endif
+
+#ifdef BIT64
+#define FILE_SIZE unsigned long long
+#else
+#define FILE_SIZE unsigned int
+#endif
+
+#ifdef X64
+#define STRUCTSTAT struct __stat64
+#define STAT _stat64
+#else
+#define STRUCTSTAT struct stat
+#define STAT stat
+#endif
+
+#ifndef pp_OSX
+#define pp_JPEG
+#endif
+
 
 #define EGZ
 #define USE_ZLIB
@@ -69,4 +109,24 @@
 
 #ifdef pp_release
 #define SMDiffVERSION "1.0.3"
+#endif
+
+#ifdef CPP
+#define CCC "C"
+#else
+#define CCC
+#endif
+
+#ifdef INMAIN
+#define SVEXTERN
+#define SVDECL(var,val)  var=val
+#else
+#define SVEXTERN extern CCC
+#define SVDECL(var,val)  var
+#endif
+
+#ifdef CPP
+#define EXTERNCPP extern "C"
+#else
+#define EXTERNCPP
 #endif

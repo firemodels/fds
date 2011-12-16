@@ -9,6 +9,7 @@
 #include <math.h>
 #include "svdiff.h"
 #include "MALLOC.h"
+#include "string_util.h"
 
 // svn revision character string
 char readsmv_revision[]="$Revision$";
@@ -43,30 +44,30 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     if(strncmp(buffer," ",1)==0)continue;
 
     if(
-      match(buffer,"SLCF",4) == 1||
-      match(buffer,"SLCC",4) == 1||
-      match(buffer,"SLFL",4) == 1||
-      match(buffer,"SLCT",4) == 1
+      match(buffer,"SLCF") == 1||
+      match(buffer,"SLCC") == 1||
+      match(buffer,"SLFL") == 1||
+      match(buffer,"SLCT") == 1
       ){
       nsliceinfo++;
       continue;
     }
-    if(match(buffer,"BNDF",4) == 1||
-       match(buffer,"BNDC",4) == 1
+    if(match(buffer,"BNDF") == 1||
+       match(buffer,"BNDC") == 1
        ){
       nboundary_files++;
       continue;
     }
     if(
-      match(buffer,"PL3D",4) == 1){
+      match(buffer,"PL3D") == 1){
       nplot3dinfo++;
       continue;
     }
-    if(match(buffer,"GRID",4) == 1){
+    if(match(buffer,"GRID") == 1){
       nmeshes++;
       continue;
     }
-    if(match(buffer,"PDIM",4) == 1){
+    if(match(buffer,"PDIM") == 1){
       ipdim++;
       continue;
     }
@@ -140,7 +141,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     ++++++++++++++++++++++ GRID ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"GRID",4) == 1){
+    if(match(buffer,"GRID") == 1){
       mesh *meshi;
       float *xp, *yp, *zp;
       int ibar, jbar, kbar;
@@ -171,7 +172,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     ++++++++++++++++++++++ PDIM ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"PDIM",4) == 1){
+    if(match(buffer,"PDIM") == 1){
       mesh *meshi;
 
       meshi=meshinfo+ipdim;
@@ -189,7 +190,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     ++++++++++++++++++++++ TRNX ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"TRNX",4)==1){
+    if(match(buffer,"TRNX")==1){
       float *xpltcopy, *xplt;
       int ibar, idummy, nn;
       mesh *meshi;
@@ -235,7 +236,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     ++++++++++++++++++++++ TRNY ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"TRNY",4)==1){
+    if(match(buffer,"TRNY")==1){
       float *ypltcopy, *yplt;
       int jbar, idummy, nn;
       mesh *meshi;
@@ -279,7 +280,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     ++++++++++++++++++++++ TRNZ ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"TRNZ",4)==1){
+    if(match(buffer,"TRNZ")==1){
       float *zpltcopy,*zplt;
       int kbar, idummy, nn;
       mesh *meshi;
@@ -318,7 +319,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       meshi->dz = zplt[1]-zplt[0];
       continue;
     }
-    if(match(buffer,"ENDF",4) == 1){
+    if(match(buffer,"ENDF") == 1){
       char endianfilename[1024];
       FILE *ENDIANfile;
       int endian=0, endian_native, endian_data, len;
@@ -354,7 +355,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     ++++++++++++++++++++++ PL3D ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"PL3D",4) == 1){
+    if(match(buffer,"PL3D") == 1){
       mesh *plot3dmesh;
       plot3d *plot3di;
       float time;
@@ -417,10 +418,10 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(
-      match(buffer,"SLCF",4) == 1||
-      match(buffer,"SLCC",4) == 1||
-      match(buffer,"SLFL",4) == 1||
-      match(buffer,"SLCT",4) == 1)
+      match(buffer,"SLCF") == 1||
+      match(buffer,"SLCC") == 1||
+      match(buffer,"SLFL") == 1||
+      match(buffer,"SLCT") == 1)
     {
       int version=0;
       int len;
@@ -443,16 +444,16 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
 
       strcpy(slicei->keyword,buffer);
 
-      if(match(buffer,"SLCF",4) == 1){
+      if(match(buffer,"SLCF") == 1){
         slicei->slicetype=1;
       }
-      if(match(buffer,"SLCC",4) == 1){
+      if(match(buffer,"SLCC") == 1){
         slicei->slicetype=2;
       }
-      if(match(buffer,"SLFL",4) == 1){
+      if(match(buffer,"SLFL") == 1){
         slicei->slicetype=3;
       }
-      if(match(buffer,"SLCT",4) == 1){
+      if(match(buffer,"SLCT") == 1){
         slicei->slicetype=4;
       }
 
@@ -512,8 +513,8 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     ++++++++++++++++++++++ BNDF ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"BNDF",4) == 1||
-       match(buffer,"BNDC",4) == 1
+    if(match(buffer,"BNDF") == 1||
+       match(buffer,"BNDC") == 1
        ){
       int version=0;
       int len;
@@ -538,10 +539,10 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
 
       boundaryi->version=version;
 
-      if(match(buffer,"BNDF",4) == 1){
+      if(match(buffer,"BNDF") == 1){
         boundaryi->boundarytype=1;
       }
-      if(match(buffer,"BNDC",4) == 1){
+      if(match(buffer,"BNDC") == 1){
         boundaryi->boundarytype=2;
       }
 
@@ -623,19 +624,19 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
 
     // skip over the following keywords
 
-    if(match(buffer,"ISOF",4) == 1||
-       match(buffer,"TISOF",5)==1||
-       match(buffer,"SMOKE3D",7)==1||
-       match(buffer,"PART",4)==1||
-       match(buffer,"EVAC",4)==1||
-       match(buffer,"PRT5",4)==1||
-       match(buffer,"EVA5",4)==1
+    if(match(buffer,"ISOF") == 1||
+       match(buffer,"TISOF")==1||
+       match(buffer,"SMOKE3D")==1||
+       match(buffer,"PART")==1||
+       match(buffer,"EVAC")==1||
+       match(buffer,"PRT5")==1||
+       match(buffer,"EVA5")==1
        ){
       char comm[1024];
 
       strcpy(comm,buffer);
       fgets(buffer,255,streamsmv);
-      if(match(comm,"PRT5",4)==1||match(comm,"EVA5",4)==1){
+      if(match(comm,"PRT5")==1||match(comm,"EVA5")==1){
         int i, nlines;
 
         fgets(buffer,255,streamsmv);
@@ -649,7 +650,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         fgets(buffer,255,streamsmv);
         fgets(buffer,255,streamsmv);
       }
-      if(match(comm,"TISOF",5)==1){
+      if(match(comm,"TISOF")==1){
         int i;
 
         for(i=0;i<3;i++){

@@ -16,15 +16,7 @@
 // svn revision character string
 char utilities_revision[]="$Revision$";
 
-/* ------------------ match ------------------------ */
-
-int match(const char *buffer, const char *key, unsigned int lenkey){
-  if(strncmp(buffer,key,lenkey) == 0)return(1);
-  return(0);
-}
-
-
-/* ------------------ match ------------------------ */
+/* ------------------ mesh_match ------------------------ */
 
 int mesh_match(mesh *mesh1, mesh *mesh2){
   int ibar, jbar, kbar;
@@ -42,42 +34,6 @@ int mesh_match(mesh *mesh1, mesh *mesh2){
   if(fabs(mesh1->yplt[jbar]-mesh2->yplt[jbar])>mesh1->dy)return 0;
   if(fabs(mesh1->zplt[kbar]-mesh2->zplt[kbar])>mesh1->dz)return 0;
   return 1;
-}
-
-/* ------------------ trim_front ------------------------ */
-
-char *trim_front(char *line){
-  char *blank=" ";
-  const char *c;
-  unsigned int i,len;
-
-  c = line;
-  len=strlen(line);
-  for(i=0;i<len;i++){
-    if(strncmp(c++,blank,1)!=0)return line+i;
-  }
-  return line;
-}
-
-/* ------------------ trim ------------------------ */
-
-void trim(char *line){
-  char *blank=" ";
-  const char *c;
-  const char *lf="\n";
-  unsigned int len;
-  unsigned int i;
-  len = strlen(line);
-  c = line+len-1;
-  for(i=0; i<len; i++){
-    if(strncmp(c,blank,1)!=0&&strncmp(c,lf,1)!=0){
-      c++; 
-      line[c-line]='\0';
-      return;
-    }
-    c--;
-  }
-  *line='\0';
 }
 
 /* ------------------ readlabels ------------------------ */
@@ -230,16 +186,6 @@ void fullfile(char *fileout, char *dir, char *file){
   strcpy(fileout,"");
   if(dir!=NULL)strcat(fileout,dir);
   strcat(fileout,file2);
-}
-
-/* ------------------ getendian ------------------------ */
-
-int getendian(void){
-  short val;
-  char *cval;
-  val=1;
-  cval = (char *)&val+1;
-  return (int)(*cval);
 }
 
 /* ------------------ make_fileout ------------------------ */

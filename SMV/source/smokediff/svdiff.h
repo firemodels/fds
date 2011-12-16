@@ -2,7 +2,6 @@
 // $Revision$
 // $Author$
 
-#include "pragmas.h"
 #include "histogram.h"
 
 //************************** pre-processing directives ****************************************
@@ -121,7 +120,6 @@ int getrevision(char *svn);
 void version(void);
 void usage(void);
 int getfileinfo(char *filename, char *source_dir, FILE_SIZE *filesize);
-int match(const char *buffer, const char *key, unsigned int lenkey);
 int mesh_match(mesh *mesh1, mesh *mesh2);
 void trim(char *line);
 char *trim_front(char *line);
