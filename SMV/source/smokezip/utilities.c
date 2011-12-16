@@ -20,13 +20,6 @@ char utilities_revision[]="$Revision$";
 
 int iseed=0;
 
-/* ------------------ match ------------------------ */
-
-int match(const char *buffer, const char *key, unsigned int lenkey){
-  if(strncmp(buffer,key,lenkey) == 0)return(1);
-  return(0);
-}
-
 /* ------------------ readlabels ------------------------ */
 
 int readlabels(flowlabels *flowlabel, FILE *stream){

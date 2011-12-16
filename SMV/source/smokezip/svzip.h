@@ -303,7 +303,6 @@ void Get_Part_Bounds(void);
 #endif
 void convert_3dsmoke(smoke3d *smoke3di, int *thread_index);
 void *compress_smoke3ds(void *arg);
-int match(const char *buffer, const char *key, unsigned int lenkey);
 void Normal(unsigned short *v1, unsigned short *v2, unsigned short *v3, float *normal, float *area);
 float atan3(float y, float x);
 void initvolrender(void);

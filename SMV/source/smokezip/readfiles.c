@@ -50,7 +50,7 @@ int readsmv(char *smvfile){
     ++++++++++++++++++++++ SMOKE3D ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"SMOKE3D",7) == 1){
+    if(match(buffer,"SMOKE3D") == 1){
       nsmoke3dinfo++;
       continue;
     }
@@ -59,7 +59,7 @@ int readsmv(char *smvfile){
     ++++++++++++++++++++++ BNDF ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"BNDF",4) == 1){
+    if(match(buffer,"BNDF") == 1){
       npatchinfo++;
       continue;
     }
@@ -68,7 +68,7 @@ int readsmv(char *smvfile){
     ++++++++++++++++++++++ PL3D ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"PL3D",4) == 1){
+    if(match(buffer,"PL3D") == 1){
       nplot3dinfo++;
       continue;
     }
@@ -78,7 +78,7 @@ int readsmv(char *smvfile){
     ++++++++++++++++++++++ CLASS_OF_PARTICLES++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"CLASS_OF_PARTICLES",18) == 1){
+    if(match(buffer,"CLASS_OF_PARTICLES") == 1){
       int i,nclasses;
 
       npartclassinfo++;
@@ -97,7 +97,7 @@ int readsmv(char *smvfile){
     ++++++++++++++++++++++ PART ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"PRT5",4) == 1){
+    if(match(buffer,"PRT5") == 1){
       npartinfo++;
       continue;
     }
@@ -108,10 +108,10 @@ int readsmv(char *smvfile){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(
-      match(buffer,"SLCF",4) == 1||
-      match(buffer,"SLCC",4) == 1||
-      match(buffer,"SLFL",4) == 1||
-      match(buffer,"SLCT",4) == 1
+      match(buffer,"SLCF") == 1||
+      match(buffer,"SLCC") == 1||
+      match(buffer,"SLFL") == 1||
+      match(buffer,"SLCT") == 1
       ){
       nsliceinfo++;
       continue;
@@ -121,7 +121,7 @@ int readsmv(char *smvfile){
     ++++++++++++++++++++++ GRID ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"GRID",4) == 1){
+    if(match(buffer,"GRID") == 1){
       nmeshes++;
       continue;
     }
@@ -130,7 +130,7 @@ int readsmv(char *smvfile){
     ++++++++++++++++++++++ PDIM ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"PDIM",4) == 1){
+    if(match(buffer,"PDIM") == 1){
       ipdim++;
       continue;
     }
@@ -285,7 +285,7 @@ int readsmv(char *smvfile){
     ++++++++++++++++++++++ ENDF ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"ENDF",4) == 1){
+    if(match(buffer,"ENDF") == 1){
       FILE *endianstream;
       int one;
 
@@ -321,7 +321,7 @@ int readsmv(char *smvfile){
       continue;
     }
 
-    if(match(buffer,"GRID",4) == 1){
+    if(match(buffer,"GRID") == 1){
       mesh *meshi;
 
       meshi=meshinfo+igrid;
@@ -335,7 +335,7 @@ int readsmv(char *smvfile){
     ++++++++++++++++++++++ PDIM ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"PDIM",4) == 1){
+    if(match(buffer,"PDIM") == 1){
       mesh *meshi;
 
       meshi=meshinfo+ipdim;
@@ -349,11 +349,11 @@ int readsmv(char *smvfile){
     ++++++++++++++++++++++ SYST ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"SYST",4) == 1){
+    if(match(buffer,"SYST") == 1){
       if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
       GLOBsyst=1;
       trim(buffer);
-      if(match(buffer,"SGI",3) == 1||match(buffer,"AIX",3)==1){
+      if(match(buffer,"SGI") == 1||match(buffer,"AIX")==1){
         if(getendian()==0){
           endianswitch=1;
         }
@@ -376,7 +376,7 @@ int readsmv(char *smvfile){
     ++++++++++++++++++++++ OFFSET ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"OFFSET",6) == 1){
+    if(match(buffer,"OFFSET") == 1){
       float dummy;
 
       ioffset++;
@@ -389,7 +389,7 @@ int readsmv(char *smvfile){
     ++++++++++++++++++++++ SMOKE3D ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"SMOKE3D",7) == 1){
+    if(match(buffer,"SMOKE3D") == 1){
       smoke3d *smoke3di;
       int filesize;
       int filelen;
@@ -448,7 +448,7 @@ int readsmv(char *smvfile){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
 
-    if(match(buffer,"CLASS_OF_PARTICLES",18) == 1){
+    if(match(buffer,"CLASS_OF_PARTICLES") == 1){
       part5class *partclassi;
       int j;
       char *percen;
@@ -500,7 +500,7 @@ int readsmv(char *smvfile){
     ++++++++++++++++++++++ PART ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"PRT5",4) == 1){
+    if(match(buffer,"PRT5") == 1){
       int version=0,meshindex=1;
       int i;
       char *buffer2;
@@ -574,7 +574,7 @@ int readsmv(char *smvfile){
     ++++++++++++++++++++++ BNDF ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"BNDF",4) == 1){
+    if(match(buffer,"BNDF") == 1){
       int version=0,dummy;
       char *buffer2;
       int len;
@@ -670,10 +670,10 @@ int readsmv(char *smvfile){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(
-      match(buffer,"SLCF",4) == 1||
-      match(buffer,"SLCC",4) == 1||
-      match(buffer,"SLFL",4) == 1||
-      match(buffer,"SLCT",4) == 1)
+      match(buffer,"SLCF") == 1||
+      match(buffer,"SLCC") == 1||
+      match(buffer,"SLFL") == 1||
+      match(buffer,"SLCT") == 1)
     {
       int version=0,dummy;
       char *buffer2;
@@ -753,7 +753,7 @@ int readsmv(char *smvfile){
     ++++++++++++++++++++++ PL3D ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"PL3D",4) == 1){
+    if(match(buffer,"PL3D") == 1){
       int version=0;
       char *buffer2;
       int filesize;
@@ -948,7 +948,7 @@ void readini2(char *inifile){
   while(!feof(stream)){
     if(fgets(buffer,BUFFERSIZE,stream)==NULL)break;
 
-    if(match(buffer,"V_SLICE",7)==1){
+    if(match(buffer,"V_SLICE")==1){
       int setslicemin, setslicemax;
       float slicemin, slicemax;
       slice *slicei;
@@ -967,7 +967,7 @@ void readini2(char *inifile){
       }
       continue;
     }
-    if(match(buffer,"V_PLOT3D",8)==1){
+    if(match(buffer,"V_PLOT3D")==1){
       int nplot3d_vars;
       plot3d *plot3di;
       int i;
@@ -998,7 +998,7 @@ void readini2(char *inifile){
       }
       continue;
     }
-    if(match(buffer,"C_SLICE",7)==1){
+    if(match(buffer,"C_SLICE")==1){
       int setchopslicemin, setchopslicemax;
       float chopslicemin, chopslicemax;
       slice *slicei;
@@ -1017,7 +1017,7 @@ void readini2(char *inifile){
       }
       continue;
     }
-    if(match(buffer,"V_BOUNDARY",8)==1){
+    if(match(buffer,"V_BOUNDARY")==1){
       int setpatchmin, setpatchmax;
       float patchmin, patchmax;
 
@@ -1035,19 +1035,19 @@ void readini2(char *inifile){
       }
       continue;
     }
-    if(GLOBframeskip<1&&match(buffer,"SLICEZIPSTEP",12)==1){
+    if(GLOBframeskip<1&&match(buffer,"SLICEZIPSTEP")==1){
 	    fgets(buffer,BUFFERSIZE,stream);
 	    sscanf(buffer,"%i",&GLOBslicezipstep);
 	    if(GLOBslicezipstep<1)GLOBslicezipstep=1;
       continue;
     }
-    if(GLOBframeskip<1&&match(buffer,"SMOKE3DZIPSTEP",14)==1){
+    if(GLOBframeskip<1&&match(buffer,"SMOKE3DZIPSTEP")==1){
 	    fgets(buffer,BUFFERSIZE,stream);
 	    sscanf(buffer,"%i",&GLOBsmoke3dzipstep);
 	    if(GLOBsmoke3dzipstep<1)GLOBsmoke3dzipstep=1;
       continue;
     }
-    if(GLOBframeskip<1&&match(buffer,"BOUNDZIPSTEP",12)==1){
+    if(GLOBframeskip<1&&match(buffer,"BOUNDZIPSTEP")==1){
 	    fgets(buffer,BUFFERSIZE,stream);
 	    sscanf(buffer,"%i",&GLOBboundzipstep);
 	    if(GLOBboundzipstep<1)GLOBboundzipstep=1;
@@ -1055,7 +1055,7 @@ void readini2(char *inifile){
     }
 
 #ifdef pp_PART
-    if(match(buffer,"V_PARTICLES",11)==1){
+    if(match(buffer,"V_PARTICLES")==1){
       int setpartmin, setpartmax;
       float partmin, partmax;
       part5prop *partpropi;
@@ -1075,7 +1075,7 @@ void readini2(char *inifile){
       continue;
     }
 #endif
-    if(match(buffer,"SLICEAUTO",9)==1){
+    if(match(buffer,"SLICEAUTO")==1){
       int nslice_auto=0;
       int i;
       int seq_id;
@@ -1089,7 +1089,7 @@ void readini2(char *inifile){
       }
       continue;
     }
-    if(match(buffer,"S3DAUTO",7)==1){
+    if(match(buffer,"S3DAUTO")==1){
       int n3dsmokes=0;
       int i;
       int seq_id;
@@ -1103,7 +1103,7 @@ void readini2(char *inifile){
       }
       continue;
     }
-    if(match(buffer,"PATCHAUTO",9)==1){
+    if(match(buffer,"PATCHAUTO")==1){
       int n3dsmokes=0;
       int i;
       int seq_id;
