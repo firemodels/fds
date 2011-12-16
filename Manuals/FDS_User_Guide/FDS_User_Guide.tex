@@ -6644,8 +6644,7 @@ over-ride this feature.
 The larger the value of $\gamma$, the narrower the droplet size is
 distributed about the median value. Note that you can prevent droplets or particles from
 exceeding {\ct MAXIMUM\_DIAMETER}, which is infinitely large by default. Also note that
-droplets less than {\ct MINIMUM\_DIAMETER} are assumed to evaporate in a single time step, eliminating numerical
-instabilities that can occur when droplets get very, very small. The default {\ct MINIMUM\_DIAMETER} is 20~$\mu$m.
+droplets less than {\ct MINIMUM\_DIAMETER} are assumed to evaporate in a single time step. The default {\ct MINIMUM\_DIAMETER} is set to 0.005 the value of {\ct DIAMETER}. 
 To prevent FDS from generating a distribution of droplets/particles altogether, set
 {\ct MONODISPERSE=.TRUE.} on the {\ct PART} line, in which case every droplet or particle will be assigned the
 same {\ct DIAMETER}.
