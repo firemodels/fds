@@ -4499,6 +4499,7 @@ void setup_tree_devices(void){
   int i,nvdevices;
   treedevice *treei;
 
+  if(nvdeviceinfo==0)return;
   if(ntreedeviceinfo>0){
     for(i=0;i<ntreedeviceinfo;i++){
       treedevice *treei;
