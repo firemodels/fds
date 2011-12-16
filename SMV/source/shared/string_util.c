@@ -858,3 +858,38 @@ int listdir(const char *path) {
   closedir(dp);
   return 0;
 }
+
+/* ------------------ match_upper ------------------------ */
+
+int match_upper(char *buffer, const char *key){
+  size_t lenbuffer;
+  size_t lenkey;
+  int i;
+
+  lenkey=strlen(key);
+  trim(buffer);
+  lenbuffer=strlen(buffer);
+
+  if(lenbuffer<lenkey)return 0;
+  for(i=0;i<lenkey;i++){
+    if(toupper(buffer[i])!=toupper(key[i]))return 0;
+  }
+  if(lenbuffer>lenkey&&buffer[lenkey]==':')return 2;
+  if(lenbuffer>lenkey&&!isspace(buffer[lenkey]))return 0;
+  return 1;
+}
+
+/* ------------------ match ------------------------ */
+
+int match(char *buffer, const char *key){
+  size_t lenbuffer;
+  size_t lenkey;
+
+  lenkey=strlen(key);
+  lenbuffer=strlen(buffer);
+  if(lenbuffer<lenkey)return 0;
+  if(strncmp(buffer,key,lenkey) != 0)return 0;
+  if(lenbuffer>lenkey&&!isspace(buffer[lenkey]))return 0;
+  return 1;
+}
+

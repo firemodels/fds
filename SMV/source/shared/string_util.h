@@ -13,6 +13,8 @@
 #endif
 
 
+EXTERNCPP int match(char *buffer, const char *key);
+EXTERNCPP int match_upper(char *buffer, const char *key);
 EXTERNCPP int listdir(const char *path);
 EXTERNCPP int randint(int min, int max);
 EXTERNCPP char *get_zonefilename(char *buffer);
