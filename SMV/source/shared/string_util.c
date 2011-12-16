@@ -360,7 +360,7 @@ void trim_commas(char *line){
   char *c;
   
   for(c = line + strlen(line) - 1;c>=line;c--){
-    if(strncmp(c," ",1)==0||strncmp(c,"\n",1)==0||strncmp(c,"\r",1)==0)continue;
+    if(isspace(*c))continue;
     if(strncmp(c,",",1)!=0)break;
     *c=' ';
   }
@@ -372,21 +372,16 @@ void trim(char *line){
   /*! \fn void trim(char *line)
       \brief removes trailing white space from the character string line
   */
-  char *blank=" ";
-  const char *c;
-  const char *lf="\n", *cr="\r";
-  size_t len, i;
+  char *c;
+  size_t len;
 
   if(line==NULL)return;
   len = strlen(line);
-  c = line+len-1;
-  for(i=0; i<len; i++){
-    if(strncmp(c,blank,1)!=0&&strncmp(c,lf,1)!=0&&strncmp(c,cr,1)!=0){
-      c++; 
-      line[c-line]='\0';
-      return;
-    }
-    c--;
+  if(len==0)return;
+  for(c=line+len-1; c>=line; c--){
+    if(isspace(*c))continue;
+    *(c+1)='\0';
+    return;
   }
   *line='\0';
 }
@@ -397,14 +392,12 @@ char *trim_front(char *line){
   /*! \fn char *trim_front(char *line)
       \brief returns a pointer to the first non-blank character in the character string line
   */
-  char *blank=" ";
-  const char *c;
+  char *c;
   size_t i,len;
 
-  c = line;
   len=strlen(line);
-  for(i=0;i<len;i++){
-    if(strncmp(c++,blank,1)!=0)return line+i;
+  for(c=line;c<=line+len-1;c++){
+    if(!isspace(*c))return c;
   }
   return line;
 }
