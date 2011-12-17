@@ -14,58 +14,37 @@
 #else
 #define STDCALL extern void
 #endif
-#ifndef pp_noappend
-#define FORTgetembeddatasize getembeddatasize_
-#define FORTgetembeddata getembeddata_
-#define FORTopenboundary openboundary_
-#define FORTfcreate_part5sizefile fcreate_part5sizefile_
-#define FORTgetzonesize getzonesize_
-#define FORTgetzonedata getzonedata_
-#define FORTgetxyzsize getxyzsize_
-#define FORTgetxyzdata getxyzdata_
-#define FORTgetpatchsizes1 getpatchsizes1_
-#define FORTgetpatchsizes2 getpatchsizes2_
-#define FORTgetpatchdata getpatchdata_
-#define FORTgetdata1 getdata1_
-#define FORTgetdata2 getdata2_
-#define FORTgetsizes getsizes_
-#define FORTgetsizes2 getsizes2_
-#define FORTgetsizesa getsizesa_
-#define FORTgetslicesizes getslicesizes_
-#define FORTgetslicedata getslicedata_
-#define FORTgetplot3dq getplot3dq_
-#define FORTgetsliceparms getsliceparms_
-#define FORTcolor2rgb color2rgb_
-#define FORTget_file_unit get_file_unit_
-#define FORTclosefortranfile closefortranfile_
-#define FORTgetboundaryheader1 getboundaryheader1_
-#define FORTgetboundaryheader2 getboundaryheader2_
+#ifdef pp_noappend
+#define _F(name) name
 #else
-#define FORTgetembeddatasize getembeddatasize
-#define FORTgetembeddata getembeddata
-#define FORTopenboundary openboundary
-#define FORTfcreate_part5sizefile fcreate_part5sizefile
-#define FORTgetzonesize getzonesize
-#define FORTgetzonedata getzonedata
-#define FORTgetxyzdata getxyzdata
-#define FORTgetpatchsizes1 getpatchsizes1
-#define FORTgetpatchsizes2 getpatchsizes2
-#define FORTgetpatchdata getpatchdata
-#define FORTgetdata1 getdata1
-#define FORTgetdata2 getdata2
-#define FORTgetsizes getsizes
-#define FORTgetsizesa getsizesa
-#define FORTgetsizes2 getsizes2
-#define FORTgetslicesizes getslicesizes
-#define FORTgetslicedata getslicedata
-#define FORTgetplot3dq getplot3dq
-#define FORTgetsliceparms getsliceparms
-#define FORTcolor2rgb color2rgb
-#define FORTget_file_unit get_file_unit
-#define FORTclosefortranfile closefortranfile 
-#define FORTgetboundaryheader1 getboundaryheader1
-#define FORTgetboundaryheader2 getboundaryheader2
+#define _F(name) name ## _
 #endif
+
+#define FORTgetembeddatasize _F(getembeddatasize)
+#define FORTgetembeddata _F(getembeddata)
+#define FORTopenboundary _F(openboundary)
+#define FORTfcreate_part5sizefile _F(fcreate_part5sizefile)
+#define FORTgetzonesize _F(getzonesize)
+#define FORTgetzonedata _F(getzonedata)
+#define FORTgetxyzdata _F(getxyzdata)
+#define FORTgetpatchsizes1 _F(getpatchsizes1)
+#define FORTgetpatchsizes2 _F(getpatchsizes2)
+#define FORTgetpatchdata _F(getpatchdata)
+#define FORTgetdata1 _F(getdata1)
+#define FORTgetdata2 _F(getdata2)
+#define FORTgetsizes _F(getsizes)
+#define FORTgetsizesa _F(getsizesa)
+#define FORTgetsizes2 _F(getsizes2)
+#define FORTgetslicesizes _F(getslicesizes)
+#define FORTgetslicedata _F(getslicedata)
+#define FORTgetplot3dq _F(getplot3dq)
+#define FORTgetsliceparms _F(getsliceparms)
+#define FORTcolor2rgb _F(color2rgb)
+#define FORTget_file_unit _F(get_file_unit)
+#define FORTclosefortranfile _F(closefortranfile) 
+#define FORTgetboundaryheader1 _F(getboundaryheader1)
+#define FORTgetboundaryheader2 _F(getboundaryheader2)
+
 
 STDCALL FORTgetembeddatasize(char *filename, int *endian, int *ntimes, int *nvars, int *error, FILE_SIZE lenfile);
 STDCALL FORTgetembeddata(char *filename, int *endian, int *ntimes, int *nvals, float *times, int *nstatics, int *ndynamics,
