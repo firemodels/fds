@@ -55,14 +55,10 @@ The following pages show the results of simulations of McCaffrey's five fires at
 \section{Heskestad's Flame Height Correlation}
 
 
-
-Table~\ref{Flame_Height_Parameters} lists the parameters for 16 FDS calculations of a fire in a 1~m by 1~m
-square pan\footnote{The effective diameter, $D$, of a 1~m square pan is 1.13~m, obtained by equating the area of a square and circle.},
-and Fig.~\ref{Flame_Height} compares the FDS predictions with Heskestad's empirical correlation. Note that the flame height for the FDS
-simulations is defined as the distance above the pan, on average, at which 99~\% of the fuel has been consumed. Note also that the simulations were
-run at three different grid resolutions. A convenient length scale is given by
-\be D^* = (Q^*)^{2/5} \, D \ee
+Table~\ref{Flame_Height_Parameters} lists the parameters for 16 FDS calculations of a fire in a 1~m by 1~m square pan\footnote{The effective diameter, $D$, of a 1~m square pan is 1.13~m, obtained by equating the area of a square and circle.}, and Fig.~\ref{Flame_Height} compares the FDS predictions with Heskestad's empirical correlation. Note that the flame height for the FDS simulations is defined as the distance above the pan, on average, at which 99~\% of the fuel has been consumed. Note also that the simulations were run at three different grid resolutions. A convenient length scale is given by \be D^* = (Q^*)^{2/5} \, D \ee
 Given a grid cell size, $\dx$, the three resolutions can be characterized by the non-dimensional quantity, $D^*/\dx$, whose values in this case are 5, 10 and 20.
+
+The flame height definition used in Fig.~\ref{Flame_Height} (99~\% fuel consumption) is admittedly arbitrary and is often questioned when FDS predictions of flame height are compared with experimental values, which are usually based on luminosity (effectively measuring radiation emission from soot).  Further, Heskestad's flame height correlation is one among many such correlations \cite{SFPE:Heskestad,Steward:1970,Becker:1978,Cox:1985,Hasemi:1984,Cetegen:1984,Delichatsios:1984}, and the reported variation is significant, especially at low values of $Q^*$ where the details of the burner configuration (shape of the burner, etc.) become important.  To illustrate the uncertainty one can expect from FDS calculations and to test the sensitivity of the reported FDS results to the flame height definition, Fig.~\ref{Flame_Height2} shows two different FDS flame height predictions, one at 99~\% fuel consumption (as in Fig.~\ref{Flame_Height})---the red set of curves---and one using 95~\% fuel consumption---the blue set of curves.  As in Fig.~\ref{Flame_Height}, three different grid resolutions are shown for each flame height definition.  We also overlay several different flame height correlations (colored solid lines).  The disagreement between the correlations, which roughly mimics the difference in the FDS results, is $\pm 15$~\% at values values of $Q^* > 1$.  For lower values of $Q^*$ the disagreement is as high as $\pm 65$~\%.
 
 
 \begin{table}[h!]
@@ -75,11 +71,11 @@ $Q^*$       & $\dot{Q}$~(kW)   & $D^*$ (m)  & $\dx_{10}$ (m)  \\ \hline \hline
 0.2         &   303         & 0.59    &   0.059   \\ \hline
 0.5         &   756         & 0.86    &   0.086   \\ \hline
 1           &   1513        & 1.13    &   0.113   \\ \hline
-2           & 3025          & 1.49    &   0.149   \\ \hline
-5           & 7564          & 2.15    &   0.215   \\ \hline
-10          &  15127        & 2.84    &   0.284   \\ \hline
-20          &  30255        & 3.75    &   0.375   \\ \hline
-50          &  75636        & 5.40    &   0.540   \\ \hline
+2           &   3025        & 1.49    &   0.149   \\ \hline
+5           &   7564        & 2.15    &   0.215   \\ \hline
+10          &   15127       & 2.84    &   0.284   \\ \hline
+20          &   30255       & 3.75    &   0.375   \\ \hline
+50          &   75636       & 5.40    &   0.540   \\ \hline
 100         &   151273      & 7.13    &   0.713   \\ \hline
 200         &   302545      & 9.41    &   0.941   \\ \hline
 500         &   756363      & 13.6    &   1.36    \\ \hline
@@ -105,6 +101,15 @@ $Q^*$       & $\dot{Q}$~(kW)   & $D^*$ (m)  & $\dx_{10}$ (m)  \\ \hline \hline
 {Comparison of FDS predictions of flame height from a 1~m square pan fire for Q* values ranging from
 0.1 to 10000.}
 \label{Flame_Height}
+\end{figure}
+
+\begin{figure}[h]
+\hspace{-0.65in}
+\includegraphics[width=7.5in]{FIGURES/Heskestad/Flame_Height2} \\
+\vspace{0.25in} \\
+\caption[Flame height uncertainty, multiple correlations and flame height definitions.]
+{Flame height predictions from various of correlations compared with FDS predictions using two different flame height definitions.  Uncertainty (maximum variation) at $Q^*>1$ is $\pm$ 15~\%.  At $Q^*=0.1$, the uncertainty is approximately $\pm$ 65~\%. Correlation references: Steward \cite{Steward:1970}, Becker and Liang \cite{Becker:1978}, Cox and Chitty \cite{Cox:1985}, Heskestad \cite{SFPE:Heskestad}, Hasemi and Tokunaga \cite{Hasemi:1984}, Cetegen \cite{Cetegen:1984}, Delichatsios \cite{Delichatsios:1984}.}
+\label{Flame_Height2}
 \end{figure}
 
 \begin{figure}[p]
