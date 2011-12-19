@@ -1,5 +1,5 @@
-#ifndef MALLOC_DEFINED
-#define MALLOC_DEFINED
+#ifndef MALLOC_H_DEFINED
+#define MALLOC_H_DEFINED
 // $Date$ 
 // $Revision$
 // $Author$

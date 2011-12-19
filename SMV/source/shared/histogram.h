@@ -2,6 +2,8 @@
 // $Revision$
 // $Author$
 
+#ifndef HISTOGRAM_H_DEFINED
+#define HISTOGRAM_H_DEFINED
 #ifdef pp_WIN_INTEL
 #pragma warning (disable:2259)
 #pragma warning (disable:1572)
@@ -27,5 +29,4 @@ void merge_histogram(histogramdata *histogram1, histogramdata *histogram2);
 float get_histogram_value(histogramdata *histogram, float cdf);
 void check_histogram(void);
 void complete_histogram(histogramdata *histgram);
-
-
+#endif

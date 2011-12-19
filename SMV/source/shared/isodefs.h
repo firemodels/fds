@@ -2,8 +2,8 @@
 // $Revision$
 // $Author$
 
-#ifndef DEF_ISOTEST2
-#define DEF_ISOTEST2
+#ifndef ISODEFS_H_DEFINED
+#define ISODEFS_H_DEFINED
 #define INCPOINTS 100000
 
 #if defined(WIN32)

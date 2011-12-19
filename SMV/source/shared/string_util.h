@@ -2,6 +2,8 @@
 // $Revision$
 // $Author$
 
+#ifndef STRING_UTIL_H_DEFINED
+#define STRING_UTIL_H_DEFINED
 #include <time.h>
 
 #ifdef IN_STRING_UTIL
@@ -15,25 +17,13 @@
 
 EXTERNCPP int match(char *buffer, const char *key);
 EXTERNCPP int match_upper(char *buffer, const char *key);
-EXTERNCPP int listdir(const char *path);
 EXTERNCPP int randint(int min, int max);
-EXTERNCPP char *get_zonefilename(char *buffer);
 EXTERNCPP void fparsecsv(char *buffer, float *vals, int *valids, int ncols, int *ntokens);
 EXTERNCPP void parsecsv(char *buffer, char **tokens, int ncols, int *ntokens);
 EXTERNCPP void stripquotes(char *buffer);
 EXTERNCPP void stripcommas(char *buffer);
 EXTERNCPP int getrowcols(FILE *stream, int *nrows, int *ncols);
-EXTERNCPP int can_write_to_dir(char *dir);
-EXTERNCPP int file_exists(char *filename);
-EXTERNCPP int getfilesize(char *filename);
 
-EXTERNCPP char *which(char *progname);
-EXTERNCPP FILE_SIZE get_filesize(const char *filename);
-EXTERNCPP time_t file_modtime(char *filename);
-EXTERNCPP int is_file_newer(char *file1, char *file2);
-EXTERNCPP char *getprogdir(char *progname);
-
-EXTERNCPP char *lastname(char *argi);
 EXTERNCPP void trim(char *line);
 EXTERNCPP void trim_commas(char *line);
 EXTERNCPP char *trim_front(char *line);
@@ -51,12 +41,15 @@ EXTERNCPP int log_base2(float xx);
 #endif
 EXTERNCPP void array2string(float *vals, int nvals, char *string);
 EXTERNCPP float frexp10(float x, int *exp10);
+EXTERNCPP int getrevision(char *svn);
 EXTERNCPP char *getstring(char *buffer);
 EXTERNCPP char *time2timelabel(float time, float dt, char *timelabel);
+EXTERNCPP char *randstr(char* str, int length);
 
 
 #ifdef WIN32
 STREXTERN char STRDECL(dirseparator[],"\\");
 #else
 STREXTERN char STRDECL(dirseparator[],"/");
+#endif
 #endif

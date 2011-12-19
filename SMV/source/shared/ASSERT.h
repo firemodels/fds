@@ -3,8 +3,8 @@
 // $Author$
 
 /* ------------------ ASSERT ------------------------ */
-#ifndef ASSERT_DEFINED
-#define ASSERT_DEFINED
+#ifndef ASSERT_H_DEFINED
+#define ASSERT_H_DEFINED
 
 #ifdef _DEBUG
 

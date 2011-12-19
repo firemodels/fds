@@ -1,6 +1,8 @@
 // $Date$ 
 // $Revision$
 // $Author$
+#ifndef TRANSLATE_H_DEFINED
+#define TRANSLATE_H_DEFINED
 
 #ifdef IN_TRANSLATE
 #define TREXTERN
@@ -36,5 +38,5 @@ TREXTERN int TRDECL(tr_otherlang,0);
 TREXTERN char TRDECL(*smokeview_lang,NULL);
 TREXTERN trdata TRDECL(*trinfo,NULL);
 TREXTERN int TRDECL(ntrinfo,0);
-
+#endif
 

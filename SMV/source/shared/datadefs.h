@@ -2,6 +2,8 @@
 // $Revision$
 // $Author$
 
+#ifndef DATADEFS_H_DEFINED
+#define DATADEFS_H_DEFINED
 #ifndef MAX
 #define MAX(a,b)  ((a)>(b) ? (a) : (b))
 #define MIN(a,b)  ((a)<(b) ? (a) : (b))
@@ -33,4 +35,5 @@
 
 #ifndef IJKCELL
 #define IJKCELL(i,j,k) ((i)+ (j)*ibar+(k)*ibar*jbar)
+#endif
 #endif

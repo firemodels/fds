@@ -2,6 +2,8 @@
 // $Revision$
 // $Author$
 
+#ifndef COMPRESS_H_DEFINED
+#define COMPRESS_H_DEFINED
 #include "zlib.h"
 unsigned int rle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer_out);
 unsigned int irle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer_out);
@@ -11,4 +13,5 @@ void compress_volsliceframe(float *data_in, int n_data_in,
 int uncompress_volsliceframe(unsigned char *compressed_data_in,
                            float *data_out, int n_data_in, float *timeval_out,
                            unsigned char *fullbuffer);
+#endif
 

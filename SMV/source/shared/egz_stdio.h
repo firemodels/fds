@@ -2,9 +2,9 @@
 // $Revision$
 // $Author$
 
-#ifndef EGZ_DEFINED
+#ifndef EGZ_H_DEFINED
+#define EGZ_H_DEFINED
 
-#define EGZ_DEFINED
 #ifdef EGZ
 
 #include <stdio.h>

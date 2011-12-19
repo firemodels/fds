@@ -102,17 +102,35 @@ int getrowcols(FILE *stream, int *nrows, int *ncols){
   return maxlinelength;
 }
 
+/* ------------------ getrevision ------------------------ */
+
+int getrevision(char *svn){
+  char svn_string[256];
+  char *svn_ptr;
+  int return_val;
+
+  svn_ptr=svn_string;
+  svn=strchr(svn,':');
+  if(svn==NULL||strlen(svn)<=4)return 0;
+  
+  svn++;
+  strcpy(svn_ptr,svn);
+  svn_ptr=trim_front(svn_ptr);
+  svn_ptr[strlen(svn_ptr)-1]=0;
+  trim(svn_ptr);
+  sscanf(svn_ptr,"%i",&return_val);
+  return return_val;
+}
+
 /* ------------------ stripquotes ------------------------ */
 
 void stripquotes(char *buffer){
   /*! \fn void stripquotes(char *buffer)
       \brief replaces quotes (") with blanks in the character string buffer
   */
-  int i;
   char *c;
 
-  for(i=0;i<strlen(buffer);i++){
-    c=buffer+i;
+  for(c=buffer;c<buffer+strlen(buffer);c++){
     if(*c=='"')*c=' ';
   }
 }
@@ -122,31 +140,11 @@ void stripcommas(char *buffer){
   /*! \fn void stripcommas(char *buffer)
       \brief replaces commas (,) with blanks in the character string buffer
   */
-  int i;
   char *c;
 
-  for(i=0;i<strlen(buffer);i++){
-    c=buffer+i;
+  for(c=buffer;c<buffer+strlen(buffer);c++){
     if(*c==',')*c=' ';
   }
-}
-
-/* ------------------ file_modtime ------------------------ */
-
-time_t file_modtime(char *filename){
-  /*! \fn time_t file_modtime(char *filename)
-      \brief returns the modification time of the file named filename
-  */
-  STRUCTSTAT statbuffer;
-  time_t return_val;
-  int statfile;
-
-  return_val=0;
-  if(filename==NULL)return return_val;
-  statfile=STAT(filename,&statbuffer);
-  if(statfile!=0)return return_val;
-  return_val = statbuffer.st_mtime;
-  return return_val;
 }
 
 /* ------------------ randint ------------------------ */
@@ -181,177 +179,6 @@ char *randstr(char* str, int length){
     }
     str[length]=0;
     return str;
-}
-
-/* ------------------ can_write_to_dir ------------------------ */
-
-int can_write_to_dir(char *dir){
-  /*! \fn int can_write_to_dir(char *dir)
-      \brief returns 1 if the directory can be written to, 0 otherwise
-  */
-  char *full_name;
-  char file_name[256], *file_name_ptr;
-  FILE *stream;
-  int len;
-
-  file_name_ptr=randstr(file_name,20);
-  if(file_name_ptr==NULL)return 0;
-
-  len = 20 + 1 + 1;
-  if(dir!=NULL)len+=strlen(dir);
-
-  NewMemory((void **)&full_name,len);
-
-  strcpy(full_name,"");
-  if(dir!=NULL&&strcmp(dir,".")!=0&&strlen(dir)>0){
-    strcat(full_name,dir);
-    strcat(full_name,dirseparator);
-  }
-
-  strcat(full_name,file_name_ptr);
-  
-  stream=fopen(full_name,"wb");
-  if(stream==NULL){
-    unlink(full_name);
-    FREEMEMORY(full_name);
-    return 0;
-  }
-  else{
-    fclose(stream);
-    unlink(full_name);
-    FREEMEMORY(full_name);
-  }
-  return 1;
-}
-
-/* ------------------ is_file_newer ------------------------ */
-
-int is_file_newer(char *file1, char *file2){
-  /*! \fn int is_file_newer(char *file1, char *file2)
-      \brief returns 1 if file1 is newer than file2, 0 otherwise
-  */
-  STRUCTSTAT statbuff1, statbuff2;
-  int statfile1, statfile2;
-
-  if(file1==NULL||file2==NULL)return -1;
-
-  statfile1=STAT(file1,&statbuff1);
-  statfile2=STAT(file2,&statbuff2);
-  if(statfile1!=0||statfile2!=0)return -1;
-
-  if(statbuff1.st_mtime>statbuff2.st_mtime)return 1;
-  return 0;
-}
-
-/* ------------------ rootdir ------------------------ */
-
-char *getprogdir(char *progname){
-  /*! \fn char *getprogdir(char *progname)
-      \brief returns the directory containing the file progname
-  */
-  char *progpath, *lastsep;
-#ifdef WIN32
-  char cdirsep='\\';
-#else
-  char cdirsep='/';
-#endif
-
-  lastsep=strrchr(progname,cdirsep);
-  if(lastsep==NULL){
-    char *dir;
-
-    dir = which(progname);
-    if(dir==NULL){
-      NewMemory((void **)&progpath,(unsigned int)3);
-      strcpy(progpath,".");
-      strcat(progpath,dirseparator);
-      return progpath;
-    }
-    else{
-      int lendir;
-
-      lendir=strlen(dir);
-      NewMemory((void **)&progpath,(unsigned int)(lendir+2));
-      strcpy(progpath,dir);
-      if(progpath[lendir-1]!=cdirsep)strcat(progpath,dirseparator);
-    }
-    return progpath;
-  }
-  else{
-    int lendir;
-
-    lendir=lastsep-progname+1;
-    NewMemory((void **)&progpath,(unsigned int)(lendir+1));
-    strncpy(progpath,progname,lendir);
-    progpath[lendir]=0;
-    return progpath;
-  }
-}
-
-/* ------------------ lastname ------------------------ */
-
-char *lastname(char *argi){
-  /*! \fn char *lastname(char *argi)
-      \brief returns the file name contained in the full path name argi
-  */
-  char *lastdirsep;
-  char *dir, *filename, cwdpath[1000];
-
-#ifdef WIN32
-#define CHDIR _chdir
-#define GETCWD _getcwd
-#define SEP '\\'
-#else
-#define CHDIR chdir
-#define GETCWD getcwd
-#define SEP '/'
-#endif
-
-  filename=argi;
-  lastdirsep=strrchr(argi,SEP);
-  if(lastdirsep!=NULL){
-    dir=argi;
-    filename=lastdirsep+1;
-    lastdirsep[0]=0;
-    GETCWD(cwdpath,1000);
-    if(strcmp(cwdpath,dir)!=0){
-      CHDIR(dir);
-    }
-  }
-  return filename;
-}
-
-/* ------------------ get_zonefilename ------------------------ */
-
-char *get_zonefilename(char *bufptr){
-  char *full_name, *last_name, *filename;
-  STRUCTSTAT statbuffer;
-
-  full_name=bufptr;
-  if(STAT(full_name,&statbuffer)!=0)full_name=NULL;
-
-  last_name=lastname(bufptr);
-  if(STAT(last_name,&statbuffer)!=0)last_name=NULL;
-
-  if(last_name!=NULL&&full_name!=NULL){
-    if(strcmp(last_name,full_name)==0){
-      last_name=NULL;
-    }
-  }
-
-  if(last_name!=NULL&&full_name!=NULL){
-    filename=last_name;
-  }
-  else if(last_name==NULL&&full_name!=NULL){
-    filename=full_name;
-  }
-  else if(last_name!=NULL&&full_name==NULL){
-    filename=last_name;
-  }
-  else{
-    filename=NULL;
-  }
-  return filename;
 }
 
 /* ------------------ trim_commas ------------------------ */
@@ -393,10 +220,8 @@ char *trim_front(char *line){
       \brief returns a pointer to the first non-blank character in the character string line
   */
   char *c;
-  size_t i,len;
 
-  len=strlen(line);
-  for(c=line;c<=line+len-1;c++){
+  for(c=line;c<=line+strlen(line)-1;c++){
     if(!isspace(*c))return c;
   }
   return line;
@@ -562,7 +387,7 @@ void num2string(char *string, float tval,float range){
 
 }
 
-/* ------------------ get_string ------------------------ */
+/* ------------------ trim_string ------------------------ */
 
 char *trim_string(char *buffer){
   /*! \fn char *trim_string(char *buffer)
@@ -677,97 +502,6 @@ void array2string(float *vals, int nvals, char *string){
   strcat(string,cval);
 }
 
-  /* ------------------ getfilesize ------------------------ */
-
-int getfilesize(char *filename){
-  STRUCTSTAT statbuffer;
-  int statfile;
-  int filesize;
-
-
-  filesize=0;
-  statfile=STAT(filename,&statbuffer);
-  if(statfile!=0)return 0;
-  filesize=statbuffer.st_size;
-  return filesize;
-}
-
-  /* ------------------ file_exists ------------------------ */
-
-int file_exists(char *filename){
-  /*! \fn int file_exists(char *filename)
-      \brief returns 1 if the file filename exists, 0 otherwise
-  */
-  STRUCTSTAT statbuffer;
-
-  if(STAT(filename,&statbuffer)==0){
-    return 1;
-  }
-  else{
-    return 0;
-  }
-}
-
-/* ------------------ which ------------------------ */
-
-char *which(char *progname){
-  /*! \fn char *which(char *progname)
-      \brief returns the PATH directory containing the file progname
-  */
-  char *pathlistptr, fullpath[4096], pathlist[4096], prog[4096];
-  char *dir,*returndir;
-  const char *ext;
-  char pathsep[2], dirsep[2];
-  int lendir,lenprog;
-
-#ifdef WIN32
-  strcpy(pathsep,";");
-  strcpy(dirsep,"\\");
-#else
-  strcpy(pathsep,":");
-  strcpy(dirsep,"/");
-#endif
-
-  if(progname==NULL)return NULL;
-  strcpy(prog,progname);
-  progname=prog;
-
-  pathlistptr=getenv("PATH");
-  if(pathlistptr==NULL)return NULL;
-  strcpy(pathlist,pathlistptr);
-  
-#ifdef WIN32
-  lenprog=strlen(prog);
-  ext=progname+lenprog-4;
-  if(lenprog<=4||STRCMP(ext,".exe")!=0){
-    strcat(progname,".exe");
- }
-#endif
-        
-  dir=strtok(pathlist,pathsep);
-  while(dir!=NULL){
-    strcpy(fullpath,dir);
-    strcat(fullpath,dirsep);
-    strcat(fullpath,prog);
-    if(file_exists(fullpath)==1){
-      lendir=strlen(dir);
-      if(lendir<=0)continue;
-      NewMemory((void **)&returndir,(unsigned int)(lendir+2));
-      strcpy(returndir,dir);
-      strcat(returndir,dirsep);
-#ifdef pp_BETA
-      printf("Using %s in %s\n\n",prog,dir);
-#endif
-      return returndir;
-    }
-    dir=strtok(NULL,pathsep);
-  }
-#ifdef pp_BETA
-  printf("%s not found in any path directory\n",prog);
-#endif
-  return NULL;
-}
-
 /* ------------------ frexp10 ------------------------ */
 
 float frexp10(float x, int *exp10){
@@ -831,25 +565,6 @@ char *time2timelabel(float time, float dt, char *timelabel){
   trim(timelabel);
   timelabelptr=trim_front(timelabel);
   return timelabelptr;
-}
-
-  /* ------------------ listdir ------------------------ */
-
-int listdir(const char *path) {
-  struct dirent *entry;
-  DIR *dp;
- 
-  dp = opendir(path);
-  if (dp == NULL) {
-    perror("opendir");
-    return -1;
-  }
- 
-  while((entry = readdir(dp)))
-    puts(entry->d_name);
- 
-  closedir(dp);
-  return 0;
 }
 
 /* ------------------ match_upper ------------------------ */

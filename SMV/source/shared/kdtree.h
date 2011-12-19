@@ -2,6 +2,8 @@
 // $Revision$
 // $Author$
 
+#ifndef KDTREE_H_DEFINED
+#define KDTREE_H_DEFINED
 #ifdef INKDTREE
 #define KDEXTERN
 #else
@@ -30,3 +32,4 @@ KDEXTERN kd_data *setup_kdtree(kdpoint *points, int npoints, kd_data *parent);
 KDEXTERN void get_closest_nodes(kd_data *here, float *point, kd_data **bests, int *nbests, int nwanted);
 KDEXTERN void sort_closest_nodes(kd_data **bests, int nbests, float *point);
 KDEXTERN void get_closest_points(kdpoint **pointers, int npoints, float *point);
+#endif

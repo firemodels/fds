@@ -2,8 +2,8 @@
 // $Revision$
 // $Author$
 
-#ifndef SETCSPHERE
-#define SETCSPHERE
+#ifndef CSPHERE_H_DEFINED
+#define CSPHERE_H_DEFINED
 
 typedef struct {
   int n;
