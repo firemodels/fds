@@ -14,6 +14,7 @@
 #include "lightsmoke.h"
 #include "string_util.h"
 #include "MALLOC.h"
+#include "file_util.h"
 
 #define MARK 255
 

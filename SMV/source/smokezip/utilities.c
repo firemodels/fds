@@ -81,75 +81,6 @@ void smoothlabel(float *a, float *b, int n){
 
 }
 
-  /* ------------------ getfileinfo ------------------------ */
-
-int getfileinfo(char *filename, char *source_dir, int *filesize){
-  STRUCTSTAT statbuffer;
-  int statfile;
-  char buffer[1024];
-
-  if(source_dir==NULL){
-    strcpy(buffer,filename);
-  }
-  else{
-    strcpy(buffer,source_dir);
-    strcat(buffer,filename);
-  }
-  if(filesize!=NULL)*filesize=0;
-  statfile=STAT(buffer,&statbuffer);
-  if(statfile!=0)return statfile;
-  if(filesize!=NULL)*filesize=statbuffer.st_size;
-  return statfile;
-}
-
-  /* ------------------ getfilesizelabel ------------------------ */
-
-void getfilesizelabel(int size, char *sizelabel){
-  int leftsize,rightsize;
-
-#define sizeGB   1000000000
-#define size100MB 100000000
-#define size10MB   10000000
-#define sizeMB     1000000
-#define size100KB    100000
-#define size10KB      10000
-
-  if(size>=sizeGB){
-    size/=size10MB;
-    leftsize=size/100;
-    rightsize=size-100*leftsize;
-    sprintf(sizelabel,"%i.%02i GB",leftsize,rightsize);
-  }
-  else if(size>=size100MB&&size<sizeGB){
-    size/=sizeMB;
-    leftsize=size;
-    sprintf(sizelabel,"%i MB",leftsize);
-  }
-  else if(size>=size10MB&&size<size100MB){
-    size/=size100KB;
-    leftsize=size/10;
-    rightsize=size-10*leftsize;
-    sprintf(sizelabel,"%i.%i MB",leftsize,rightsize);
-  }
-  else if(size>=sizeMB&&size<size10MB){
-    size/=size10KB;
-    leftsize=size/100;
-    rightsize=size-100*leftsize;
-    sprintf(sizelabel,"%i.%02i MB",leftsize,rightsize);
-  }
-  else if(size>=size100KB&&size<sizeMB){
-    size/=1000;
-    leftsize=size;
-    sprintf(sizelabel,"%i KB",leftsize);
-  }
-  else{
-    size/=10;
-    leftsize=size/100;
-    rightsize=size-100*leftsize;
-    sprintf(sizelabel,"%i.%02i KB",leftsize,rightsize);
-  }
-}
-
 /* ------------------ calcNormal2 ------------------------ */
 
 void Normal(unsigned short *v1, unsigned short *v2, unsigned short *v3, float *normal, float *area){
@@ -251,26 +182,6 @@ int getmaxrevision(void){
 
 void getSMZversion(char *SMZversion){
   strcpy(SMZversion,SMZVERSION);
-}
-
-/* ------------------ getrevision ------------------------ */
-
-int getrevision(char *svn){
-  char svn_string[256];
-  char *svn_ptr;
-  int return_val;
-
-  svn_ptr=svn_string;
-  svn=strchr(svn,':');
-  if(svn==NULL||strlen(svn)<=4)return 0;
-  
-  svn++;
-  strcpy(svn_ptr,svn);
-  svn_ptr=trim_front(svn_ptr);
-  svn_ptr[strlen(svn_ptr)-1]=0;
-  trim(svn_ptr);
-  sscanf(svn_ptr,"%i",&return_val);
-  return return_val;
 }
 
 /* ------------------ atan3 ------------------------ */

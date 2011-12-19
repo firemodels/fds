@@ -2,6 +2,8 @@
 // $Revision: 8236 $
 // $Author: gforney $
 
+#ifndef LIGHTSMOKE_H_DEFINED
+#define LIGHTSMOKE_H_DEFINED
 //***********************
 //************* #definess
 //***********************
@@ -37,5 +39,5 @@ void build_radiancemap(radiancedata *radianceinfo);
 #ifdef pp_KDTEST
 void test_kd(void);
 #endif
-
+#endif
 

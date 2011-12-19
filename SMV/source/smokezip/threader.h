@@ -1,7 +1,8 @@
 // $Date$ 
 // $Revision$
 // $Author$
-
+#ifndef THREADER_H_DEFINED
+#define THREADER_H_DEFINED
 #ifndef CPP
 #ifdef pp_THREAD
 #include <pthread.h>
@@ -95,3 +96,4 @@ void print_thread_stats(void);
 
 #define NTHREADS_MAX 16
 
+#endif

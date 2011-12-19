@@ -12,6 +12,7 @@
 #include "svzip.h"
 #include "lightsmoke.h"
 #include "MALLOC.h"
+#include "file_util.h"
 
 // svn revision character string
 char CNV3dsmoke_revision[]="$Revision$";

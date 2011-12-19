@@ -1,7 +1,8 @@
 // $Date$ 
 // $Revision$
 // $Author$
-
+#ifndef SVZIP_H_DEFINED
+#define SVZIP_H_DEFINED
 //***********************
 //************* #definess
 //***********************
@@ -257,7 +258,6 @@ void rand_3d(float xyz[3], float xmin, float xmax, float ymin, float ymax, float
 void get_startup_slice(int seq_id);
 void get_startup_smoke(int seq_id);
 void get_startup_patch(int seq_id);
-int getrevision(char *svn);
 void getSMZversion(char *SMZversion);
 int getmaxrevision(void);
 void version(void);
@@ -273,7 +273,6 @@ int slicedup(slice *slicej, int islice);
 void *compress_plot3ds(void *arg);
 void getfilesizelabel(int size, char *sizelabel);
 void initpdf(pdfdata *pdf);
-int getfileinfo(char *filename, char *sourcedir, int *filesize);
 void filecopy(char *destdir, char *file, char *filebase);
 void copyfile(char *destfile, char *sourcefile);
 void makesvd(char *destdir, char *smvfile);
@@ -427,3 +426,4 @@ EXTERN int GLOBpartfile2iso;
 #endif
 EXTERN char GLOBsmvisofile[1024];
 
+#endif

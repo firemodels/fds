@@ -1,7 +1,8 @@
 // $Date$ 
 // $Revision$
 // $Author$
-
+#ifndef SVN_REVISION_H_DEFINED
+#define SVN_REVISION_H_DEFINED
 extern char assert_revision[];
 extern char CNV3dsmoke_revision[];
 extern char CNVboundary_revision[];
@@ -21,4 +22,4 @@ extern char smv_endian_revision[];
 extern char string_util_revision[];
 extern char threader_revision[];
 extern char utilities_revision[];
-
+#endif

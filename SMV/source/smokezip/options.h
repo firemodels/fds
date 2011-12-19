@@ -1,7 +1,8 @@
 // $Date$ 
 // $Revision$
 // $Author$
-
+#ifndef OPTIONS_H_DEFINED
+#define OPTIONS_H_DEFINED
 #ifdef CPP
 #define CCC "C"
 #define EXTERNCPP extern "C"
@@ -107,4 +108,5 @@
 #else
 #define STRUCTSTAT struct stat
 #define STAT stat
+#endif
 #endif
