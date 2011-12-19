@@ -17,3 +17,24 @@
 #define REG_SYSTEM_PATH 3
 
 int reg_path(int setget, int pathtype, char *path);
+
+#ifdef CPP
+#define CCC "C"
+#else
+#define CCC
+#endif
+
+#ifdef INMAIN
+#define SVEXTERN
+#define SVDECL(var,val)  var=val
+#else
+#define SVEXTERN extern CCC
+#define SVDECL(var,val)  var
+#endif
+
+#ifdef CPP
+#define EXTERNCPP extern "C"
+#else
+#define EXTERNCPP
+#endif
+

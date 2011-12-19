@@ -12,6 +12,8 @@
 #include <math.h>
 #include <ctype.h>
 #include "svn_revision.h"
+#include "string_util.h"
+#include "datadefs.h"
 
 char main_revision[]="$Revision$";
 
@@ -416,4 +418,14 @@ void usage(void){
   printf("  -p - prompt user before making any changes (default when path entries are being removed)\n");
   printf("  -t - test, show but do not change Path variables\n");
   printf("  -v - show versioning information\n");
+}
+
+/* ------------------ getmaxrev ------------------------ */
+
+#define MAXREV(cval) max_revision=MAX(getrevision(cval),max_revision)
+int getmaxrevision(void){
+  int max_revision=0;
+
+  MAXREV(main_revision);
+  return max_revision;
 }
