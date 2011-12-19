@@ -14,5 +14,5 @@ if exist "%VS_COMPILER%\vcvars32x86_amd64.bat" call "%VS_COMPILER%\vcvars32x86_a
 
 erase *.obj
 erase *.mod
-make VPATH="../../../SMV/source/set_path" -f ..\Makefile intel_win_32
+make -f ..\Makefile intel_win_32
 pause
