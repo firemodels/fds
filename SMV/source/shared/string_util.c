@@ -275,6 +275,23 @@ void trimmzeros(char *line){
   }
 }
 
+char *Strstr(char *string, char *key){
+  char *k,*s,*ss;
+//   ssssssss0
+//    kkkk0
+  if(string==NULL||key==NULL)return NULL;
+
+  for(s=string;*s!=0;s++){
+    for(k=key;*k!=0;k++){
+      ss = s + (k-key);
+      if(*ss==0)return NULL;
+      if(*ss!=*k)break;
+    }
+    if(*k==0)return s;
+  }
+  return NULL;
+}
+
 /* ------------------ STRSTR ------------------------ */
 
 char *STRSTR(char *c, const char *key){
