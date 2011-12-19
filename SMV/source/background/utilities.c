@@ -13,42 +13,6 @@
 // svn revision character string
 char utilities_revision[]="$Revision$";
 
-/* ------------------ trim_front ------------------------ */
-
-char *trim_front(char *line){
-  char *blank=" ";
-  const char *c;
-  unsigned int i,len;
-
-  c = line;
-  len=strlen(line);
-  for(i=0;i<len;i++){
-    if(strncmp(c++,blank,1)!=0)return line+i;
-  }
-  return line;
-}
-
-/* ------------------ trim ------------------------ */
-
-void trim(char *line){
-  char *blank=" ";
-  const char *c;
-  const char *lf="\n";
-  unsigned int len;
-  unsigned int i;
-  len = strlen(line);
-  c = line+len-1;
-  for(i=0; i<len; i++){
-    if(strncmp(c,blank,1)!=0&&strncmp(c,lf,1)!=0){
-      c++; 
-      line[c-line]='\0';
-      return;
-    }
-    c--;
-  }
-  *line='\0';
-}
-
 /* ------------------ version ------------------------ */
 
 void version(void){
@@ -79,24 +43,4 @@ int getmaxrevision(void){
 
 void getPROGversion(char *PROGversion){
   strcpy(PROGversion,PROGVERSION);
-}
-
-/* ------------------ getrevision ------------------------ */
-
-int getrevision(char *svn){
-  char svn_string[256];
-  char *svn_ptr;
-  int return_val;
-
-  svn_ptr=svn_string;
-  svn=strchr(svn,':');
-  if(svn==NULL||strlen(svn)<=4)return 0;
-  
-  svn++;
-  strcpy(svn_ptr,svn);
-  svn_ptr=trim_front(svn_ptr);
-  svn_ptr[strlen(svn_ptr)-1]=0;
-  trim(svn_ptr);
-  sscanf(svn_ptr,"%i",&return_val);
-  return return_val;
 }

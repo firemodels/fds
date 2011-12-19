@@ -12,6 +12,7 @@
 #include <windows.h>
 #endif
 #include "svn_revision.h"
+#include "string_util.h"
 #include "background.h"
 
 //dummy change to bump version number to 0.9
@@ -314,7 +315,7 @@ static HMODULE s_hKernel = NULL;
 void GetSystemTimesAddress(){
 	if( s_hKernel == NULL )
 	{   
-		s_hKernel = LoadLibrary( "Kernel32.dll" );
+		s_hKernel = LoadLibrary((LPCWSTR)"Kernel32.dll" );
 		if( s_hKernel != NULL )
 		{
 			s_pfnGetSystemTimes = (pfnGetSystemTimes)GetProcAddress( s_hKernel, "GetSystemTimes" );
