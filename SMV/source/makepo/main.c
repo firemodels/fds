@@ -11,7 +11,6 @@
      
 int add_msgstring=0;
 void usage(char *prog);
-void trim(char *line);
 
 /* ------------------ main ------------------------ */
 

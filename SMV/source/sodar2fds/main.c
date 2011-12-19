@@ -21,7 +21,6 @@ void usage(char *prog);
 void version(char *prog);
 void getPROGversion(char *PROGversion);
 int getmaxrevision(void);
-int getrevision(char *svn);
 
 /* ------------------ gettokrns ------------------------ */
 
