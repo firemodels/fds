@@ -1063,6 +1063,7 @@ int get_inpf(char *file, char *file2){
   int len;
   STRUCTSTAT statbuffer;
 
+  if(file==NULL)return 1;
   stream1=fopen(file,"r");
   if(stream1==NULL)return 1;
   if(file2!=NULL){
