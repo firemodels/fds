@@ -1,7 +1,8 @@
 // $Date$ 
 // $Revision$
 // $Author$
-
+#ifndef SMOKEVIEWAPI_H_DEFINED
+#define SMOKEVIEWAPI_H_DEFINED
 #define DLL
 #define svWINAPI
 
@@ -22,3 +23,4 @@ DLL void svWINAPI sv_FrameRateMenu(int value); /* value > 1000 => unlimited,
 
 
 DLL void svWINAPI sv_startup_c(int argc, char **argv);
+#endif

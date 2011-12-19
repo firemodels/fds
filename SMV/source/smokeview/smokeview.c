@@ -24,6 +24,7 @@
 #include "smokeviewvars.h"
 #include "translate.h"
 #include "update.h"
+#include "file_util.h"
 
 /* dummy change to bump revision number to 5.1.5 */
 
@@ -1154,57 +1155,4 @@ void checktimebound(void){
       bc->show=bc->showtimelist[itimes];
     }
   }
-}
-
-/* ------------------ filecat ------------------------ */
-
-int filecat(char *file_in1, char *file_in2, char *file_out){
-#define SIZEBUFFER 10000
-  char buffer[SIZEBUFFER];
-  FILE *stream_in1, *stream_in2, *stream_out;
-  int chars_in;
-
-  if(file_in1==NULL||file_in2==NULL)return -1;
-  if(file_out==NULL)return -2;
-
-  stream_in1=fopen(file_in1,"r");
-  if(stream_in1==NULL)return -1;
-
-  stream_in2=fopen(file_in2,"r");
-  if(stream_in2==NULL){
-    fclose(stream_in1);
-    return -1;
-  }
-
-  stream_out=fopen(file_out,"w");
-  if(stream_out==NULL){
-    fclose(stream_in1);
-    fclose(stream_in2);
-    return -2;
-  }
-
-  for(;;){
-    int eof;
-       
-    eof=0;
-    chars_in=fread(buffer,1,SIZEBUFFER,stream_in1);
-    if(chars_in!=SIZEBUFFER)eof=1;
-    if(chars_in>0)fwrite(buffer,chars_in,1,stream_out);
-    if(eof==1)break;
-  }
-  fclose(stream_in1);
-
-  for(;;){
-    int eof;
-       
-    eof=0;
-    chars_in=fread(buffer,1,SIZEBUFFER,stream_in2);
-    if(chars_in!=SIZEBUFFER)eof=1;
-    if(chars_in>0)fwrite(buffer,chars_in,1,stream_out);
-    if(eof==1)break;
-  }
-  fclose(stream_in2);
-  fclose(stream_out);
-  return 0;
-
 }

@@ -2,8 +2,8 @@
 // $Revision$
 // $Author$
 
-#ifndef SET_SMOKEVIEWDEFS
-#define SET_SMOKEVIEWDEFS
+#ifndef SMOKEVIEWDEFS_H_DEFINED
+#define SMOKEVIEWDEFS_H_DEFINED
 #ifdef _DEBUG
 void _sniffErrors(char *whereat);
 #define sniffErrors(f) _sniffErrors(f)

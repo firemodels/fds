@@ -2,6 +2,8 @@
 // $Revision$
 // $Author$
 
+#ifndef SVN_REVISION_H_DEFINED
+#define SVN_REVISION_H_DEFINED
 extern char menu_revision[];
 extern char assert_revision[];
 extern char blockage_test_revision[];
@@ -14,7 +16,7 @@ extern char csphere_revision[];
 extern char dmalloc_revision[];
 extern char drawGeometry_revision[];
 extern char egz_stdio_revision[];
-extern char smv_endian_revision[];
+extern char file_util_revision[];
 extern char getdatabounds_revision[];
 extern char getdatacolors_revision[];
 #ifdef pp_SHOOTER
@@ -63,6 +65,7 @@ extern char shaders_revision[];
 extern char skybox_revision[];
 extern char smokeview_revision[];
 extern char showscene_revision[];
+extern char smv_endian_revision[];
 extern char string_util_revision[];
 extern char sv_api_revision[];
 extern char threader_revision[];
@@ -71,3 +74,4 @@ extern char translate_revision[];
 extern char update_revision[];
 extern char viewports_revision[];
 extern char geometry_revision[];
+#endif

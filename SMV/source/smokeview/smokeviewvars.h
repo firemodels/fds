@@ -1,7 +1,8 @@
 // $Date$ 
 // $Revision$
 // $Author$
-
+#ifndef SMOKEVIEWVARS_H_DEFINED
+#define SMOKEVIEWVARS_H_DEFINED
 #include <time.h>
 
 #include "csphere.h"
@@ -1141,6 +1142,8 @@ SVEXTERN int SVDECL(hidepatchsurface,0);
   SVEXTERN float bw_baseBASE[MAXRGB][4];
   SVEXTERN float rgb2BASE[MAXRGB][3];
   SVEXTERN float rgbhazardBASE[MAXRGB][4];
+#endif
+
 #endif
 
 

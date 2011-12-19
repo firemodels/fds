@@ -2,8 +2,8 @@
 // $Revision$
 // $Author$
 
-#ifndef DEF_smokefortheaders
-#define DEF_smokefortheaders
+#ifndef SMOKEFORTHEADERS_H_DEFINED
+#define SMOKEFORTHEADERS_H_DEFINED
 
 #include "isodefs.h"
 #include "flowfiles.h"

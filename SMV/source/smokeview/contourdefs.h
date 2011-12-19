@@ -2,8 +2,8 @@
 // $Revision$
 // $Author$
 
-#ifndef DEF_CONTOURTEST
-#define DEF_CONTOURTEST
+#ifndef COUNTOURDEFS_H_DEFINED
+#define COUNTOURDEFS_H_DEFINED
 
 #if defined(WIN32)
 #include <windows.h>

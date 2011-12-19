@@ -2,8 +2,8 @@
 // $Revision$
 // $Author$
 
-#ifndef DEF_smokeheaders
-#define DEF_smokeheaders
+#ifndef SMOKEHEADERS_H_DEFINED
+#define SMOKEHEADERS_H_DEFINED
 
 #include "isodefs.h"
 #include "flowfiles.h"
@@ -54,7 +54,6 @@ EXTERNCPP void remove_slice_loadstack(int sliceindex);
 EXTERNCPP int last_vslice_loadstack(void);
 EXTERNCPP void push_vslice_loadstack(int sliceindex);
 EXTERNCPP void remove_vslice_loadstack(int sliceindex);
-EXTERNCPP int filecat(char *file_in1, char *file_in2, char *file_out);
 EXTERNCPP void update_colorbar_smooth(void);
 EXTERNCPP void update_transparency(void);
 EXTERNCPP void update_tbounds(void);
@@ -83,7 +82,6 @@ EXTERNCPP void start_script(void);
 EXTERNCPP int run_script(void);
 EXTERNCPP int compile_script(char *scriptfile);
 EXTERNCPP scriptfiledata *insert_scriptfile(char *file);
-EXTERNCPP int file_exist(char *file);
 EXTERNCPP char *get_inifilename(int id);
 EXTERNCPP char *get_scriptfilename(int id);
 EXTERNCPP inifiledata *insert_inifile(char *file);
@@ -399,7 +397,6 @@ EXTERNCPP void handle_move_keys(int  key);
 EXTERNCPP int get_interval(float val, float *array, int n);
 
 EXTERNCPP void set_unit_vis(void);
-EXTERNCPP int getrevision(char *svn);
 EXTERNCPP void memorystatus(void);
 EXTERNCPP void showhide_translate(int var);
 EXTERNCPP void updateallplotslices(void);

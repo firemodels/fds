@@ -2,6 +2,8 @@
 // $Revision$
 // $Author$
 
+#ifndef THREADER_H_DEFINED
+#define THREADER_H_DEFINED
 #ifndef CPP
 #ifdef pp_THREAD
 #include <pthread.h>
@@ -42,5 +44,6 @@ MT_EXTERN pthread_t smooth_block_thread_id;
 MT_EXTERN pthread_t compress_thread_id;
 MT_EXTERN pthread_t update_all_patch_bounds_id;
 MT_EXTERN pthread_t read_volsmoke_id;
+#endif
 #endif
 #endif

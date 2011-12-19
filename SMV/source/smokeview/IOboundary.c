@@ -20,6 +20,7 @@
 #include "smv_endian.h"
 #include "smokeviewdefs.h"
 #include "update.h"
+#include "file_util.h"
 
 // svn revision character string
 char IOboundary_revision[]="$Revision$";

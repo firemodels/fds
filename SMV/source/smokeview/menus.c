@@ -16,7 +16,6 @@
 #endif
 #include "contourdefs.h"
 #include "isodefs.h"
-
 #include "flowfiles.h"
 #include "smokeviewapi.h"
 #include "MALLOC.h"
@@ -24,6 +23,7 @@
 #include "translate.h"
 #include "update.h"
 #include "IOvolsmoke.h"
+#include "file_util.h"
 
 /* dummy change to bump revision number to 5.1.5 */
 
@@ -8336,17 +8336,17 @@ updatemenu=0;
 
     n_inifiles=0;
     for(inifile=first_inifile.next;inifile->next!=NULL;inifile=inifile->next){
-      if(inifile->file!=NULL&&file_exist(inifile->file)==1){
+      if(inifile->file!=NULL&&file_exists(inifile->file)==1){
         n_inifiles++;
       }
     }
     if(n_inifiles>0){
       CREATEMENU(inisubmenu,IniSubMenu);
-      if(caseinifilename!=NULL&&file_exist(caseinifilename)==1){
+      if(caseinifilename!=NULL&&file_exists(caseinifilename)==1){
         glutAddMenuEntry(caseinifilename,-1);
       }
       for(inifile=first_inifile.next;inifile->next!=NULL;inifile=inifile->next){
-        if(inifile->file!=NULL&&file_exist(inifile->file)==1){
+        if(inifile->file!=NULL&&file_exists(inifile->file)==1){
           glutAddMenuEntry(inifile->file,inifile->id);
         }
       }
@@ -8364,11 +8364,11 @@ updatemenu=0;
 
     n_inifiles=0;
     for(inifile=first_inifile.next;inifile->next!=NULL;inifile=inifile->next){
-      if(inifile->file!=NULL&&file_exist(inifile->file)==1){
+      if(inifile->file!=NULL&&file_exists(inifile->file)==1){
         n_inifiles++;
       }
     }
-    if( n_inifiles>0||file_exist(INIfile)==1||file_exist(caseinifilename)==1||file_exist(smokeviewini)==1){
+    if( n_inifiles>0||file_exists(INIfile)==1||file_exists(caseinifilename)==1||file_exists(smokeviewini)==1){
       if(n_inifiles==0){
         glutAddMenuEntry(_("Read ini files"),1);
       }

@@ -2,6 +2,8 @@
 // $Revision$
 // $Author$
 
+#ifndef OPTIONS_H_DEFINED
+#define OPTIONS_H_DEFINED
 // build Smokeview as a standard release unless the pp_BETA directive is defined
 
 #define pp_release
@@ -149,4 +151,5 @@
 #define EXTERNCPP extern "C"
 #else
 #define EXTERNCPP
+#endif
 #endif

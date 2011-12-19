@@ -2,8 +2,8 @@
 // $Revision$
 // $Author$
 
-#ifndef DEF_FLOWFILES
-#define DEF_FLOWFILES
+#ifndef FLOWFILES_H_DEFINED
+#define FLOWFILES_H_DEFINED
 #include "contourdefs.h"
 #include "isodefs.h"
 #include "histogram.h"

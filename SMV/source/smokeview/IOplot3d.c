@@ -17,6 +17,7 @@
 #include "MALLOC.h"
 #include "smokeviewvars.h"
 #include "update.h"
+#include "file_util.h"
 
 // svn revision character string
 char IOplot3d_revision[]="$Revision$";

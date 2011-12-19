@@ -18,13 +18,13 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 #include "translate.h"
+#include "file_util.h"
 
 // svn revision character string
 extern "C" char glui_bounds_revision[]="$Revision$";
 // $Date$ $Author$
 
 extern "C" void update_slice_contours(int slice_type_index, float line_min, float line_max, int nline_values);
-extern "C" int file_exist(char *file);
 extern "C" void keyboard(unsigned char key, int x, int y);
 extern "C" void glui_script_disable(void);
 extern "C" void glui_script_enable();
@@ -751,7 +751,7 @@ extern "C" void glui_bounds_setup(int main_window){
 
           file=scriptfile->file;
           if(file==NULL)continue;
-          if(file_exist(file)==0)continue;
+          if(file_exists(file)==0)continue;
           len = strlen(file);
           if(len<=0)continue;
 
@@ -785,7 +785,7 @@ extern "C" void glui_bounds_setup(int main_window){
   panel_script2b = glui_bounds->add_panel_to_panel(panel_script2,"",false);
   ini_index=-2;
   LIST_ini_list = glui_bounds->add_listbox_to_panel(panel_script2b,_("Select:"),&ini_index,SCRIPT_LISTINI,Script_CB);
-  if(file_exist(caseinifilename)==1){
+  if(file_exists(caseinifilename)==1){
     ini_index=-1;
     LIST_ini_list->add_item(-1,caseinifilename);
   }
@@ -793,7 +793,7 @@ extern "C" void glui_bounds_setup(int main_window){
     inifiledata *inifile;
 
     for(inifile=first_inifile.next;inifile->next!=NULL;inifile=inifile->next){
-      if(inifile->file!=NULL&&file_exist(inifile->file)==1){
+      if(inifile->file!=NULL&&file_exists(inifile->file)==1){
         if(ini_index==-2)ini_index=inifile->id;
         LIST_ini_list->add_item(inifile->id,inifile->file);
       }

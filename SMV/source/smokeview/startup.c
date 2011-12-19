@@ -2004,28 +2004,6 @@ void initvars1(void){
 
 }
 
-/* ------------------ getrevision ------------------------ */
-
-int getrevision(char *svn){
-  char svn_string[256];
-  char *svn_ptr;
-  int return_val;
-
-  svn_ptr=svn_string;
-  svn=strchr(svn,':');
-  if(svn==NULL||strlen(svn)<=4)return 0;
-  
-  svn++;
-  strcpy(svn_ptr,svn);
-  svn_ptr=trim_front(svn_ptr);
-  svn_ptr[strlen(svn_ptr)-1]=0;
-  trim(svn_ptr);
-  sscanf(svn_ptr,"%i",&return_val);
-  return return_val;
-
-}
-
-
 /* ------------------ initvars0 ------------------------ */
 
 void initvars0(void){
@@ -2229,6 +2207,7 @@ int getmaxrevision(void){
   MAXREV(dmalloc_revision);
   MAXREV(drawGeometry_revision);
   MAXREV(egz_stdio_revision);
+  MAXREV(file_util_revision);
   MAXREV(geometry_revision);
   MAXREV(getdatabounds_revision);
   MAXREV(getdatacolors_revision);

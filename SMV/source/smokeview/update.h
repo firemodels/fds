@@ -1,7 +1,8 @@
 // $Date$ 
 // $Revision$
 // $Author$
-
+#ifndef UPDATE_H_DEFINED
+#define UPDATE_H_DEFINED
 #ifdef IN_UPDATE
 #define UPEXTERN
 #else
@@ -17,7 +18,7 @@ UPEXTERN void updatetimes(void);
 UPEXTERN int getplotstate(int choice);
 UPEXTERN int getindex(float key, const float *list, int nlist);
 UPEXTERN int isearch(float *list, int nlist, float key, int guess);
-
+#endif
 
 
 

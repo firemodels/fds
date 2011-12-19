@@ -29,6 +29,7 @@
 #include "smokeviewvars.h"
 #include "IOvolsmoke.h"
 #include "datadefs.h"
+#include "file_util.h"
 
 // svn revision character string
 char readsmv_revision[]="$Revision$";
@@ -11268,18 +11269,6 @@ FILE_SIZE get_filesize(const char *filename){
   if(statfile!=0)return return_val;
   return_val = statbuffer.st_size;
   return return_val;
-}
-
-/* ------------------ file_exit ------------------------ */
-
-int file_exist(char *file){
-  STRUCTSTAT statbuffer;
-  int statfile;
-
-  if(file==NULL)return 0;
-  statfile=STAT(file,&statbuffer);
-  if(statfile!=0)return 0;
-  return 1;
 }
 
 /* ------------------ get_labels ------------------------ */

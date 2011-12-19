@@ -25,6 +25,7 @@
 #include "compress.h"
 #include "string_util.h"
 #include "datadefs.h"
+#include "file_util.h"
 
 // svn revision character string
 char IOvolsmoke_revision[]="$Revision$";

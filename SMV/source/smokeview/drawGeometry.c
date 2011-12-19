@@ -18,6 +18,7 @@
 #include "translate.h"
 #include "update.h"
 #include "string_util.h"
+#include "file_util.h"
 
 // svn revision character string
 char drawGeometry_revision[]="$Revision$";
@@ -1936,9 +1937,7 @@ void update_facelists(void){
         if(visOpenVents==0&&vi->isOpenvent==1)continue;
         if(visDummyVents==0&&vi->dummy==1)continue;
         if(visOtherVents==0&&vi->isOpenvent==0&&vi->dummy==0)continue;
-        if(patchi!=NULL&&
-          patchi->loaded==1&&
-          patchi->display==1&&
+        if(patchi!=NULL&&patchi->loaded==1&&patchi->display==1&&
           (vis_threshold==0||vis_onlythreshold==0||do_threshold==0)&&
           (vi->dummy==1||vi->hideboundary==0)){
           continue;

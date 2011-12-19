@@ -11,6 +11,7 @@
 #include "smokeviewvars.h"
 #include "translate.h"
 #include "IOvolsmoke.h"
+#include "file_util.h"
 
 #ifdef pp_OSX
 #include <GLUT/glut.h>

@@ -2,6 +2,8 @@
 // $Revision$
 // $Author$
 
+#ifndef IOVOLSMOKE_H_DEFINED
+#define IOVOLSMOKE_H_DEFINED
 #define GPU_VOLframemax 3.0
 #ifdef pp_GPU
 void init_volsmoke_texture(mesh *meshi);
@@ -24,3 +26,4 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first);
 void read_volsmoke_frame_allmeshes(int framenum);
 void unload_volsmoke_allframes(volrenderdata *vr);
 void *read_volsmoke_allframes_allmeshes2(void *arg);
+#endif
