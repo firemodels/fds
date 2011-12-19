@@ -2,6 +2,8 @@
 // $Revision$
 // $Author$
 
+#ifndef SVDIFF_H_DEFINED
+#define SVDIFF_H_DEFINED
 #include "histogram.h"
 
 //************************** pre-processing directives ****************************************
@@ -116,15 +118,10 @@ typedef struct {
 int getendian(void);
 void getSMDiffversion(char *SMDiffversion);
 int getmaxrevision(void);
-int getrevision(char *svn);
 void version(void);
 void usage(void);
-int getfileinfo(char *filename, char *source_dir, FILE_SIZE *filesize);
 int mesh_match(mesh *mesh1, mesh *mesh2);
-void trim(char *line);
-char *trim_front(char *line);
 int readlabels(flowlabels *flowlabel, FILE *stream);
-char *setdir(char *argdir);
 int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase);
 void setup_boundary(FILE *stream_out);
 void setup_slice(FILE *stream_out);
@@ -135,8 +132,6 @@ boundary *getboundary(boundary *boundaryin, casedata *case2);
 void diff_boundaryes(FILE *stream_out);
 void diff_slices(FILE *stream_out);
 void diff_plot3ds(FILE *stream_out);
-void fullfile(char *fileout, char *dir, char *file);
-void make_outfile(char *outfile, char *destdir, char *file1, char *ext);
 int similar_grid(mesh *mesh1, mesh *mesh2, int *factor);
 int exact_grid(mesh *mesh1, mesh *mesh2, int *factor);
 int getpatchindex(int in1, boundary *boundaryin, boundary *boundaryout);
@@ -220,3 +215,4 @@ EXTERN char *sourcedir1, *sourcedir2, *destdir;
 EXTERN int test_mode;
 EXTERN char type_label[1024];
 
+#endif

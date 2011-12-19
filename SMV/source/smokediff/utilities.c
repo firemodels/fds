@@ -12,6 +12,7 @@
 #include "svn_revision.h"
 #include "MALLOC.h"
 #include "datadefs.h"
+#include "string_util.h"
 
 // svn revision character string
 char utilities_revision[]="$Revision$";
@@ -68,27 +69,6 @@ int readlabels(flowlabels *flowlabel, FILE *stream){
   if(NewMemory((void *)&flowlabel->unit,(unsigned int)(len+1))==0)return 2;
   STRCPY(flowlabel->unit,buffer);
   return 0;
-}
-
-  /* ------------------ getfileinfo ------------------------ */
-
-int getfileinfo(char *filename, char *source_dir, FILE_SIZE *filesize){
-  STRUCTSTAT statbuffer;
-  int statfile;
-  char buffer[1024];
-
-  if(source_dir==NULL){
-    strcpy(buffer,filename);
-  }
-  else{
-    strcpy(buffer,source_dir);
-    strcat(buffer,filename);
-  }
-  if(filesize!=NULL)*filesize=0;
-  statfile=STAT(buffer,&statbuffer);
-  if(statfile!=0)return statfile;
-  if(filesize!=NULL)*filesize=statbuffer.st_size;
-  return statfile;
 }
 
 /* ------------------ version ------------------------ */
@@ -154,57 +134,6 @@ int getmaxrevision(void){
 
 void getSMDiffversion(char *SMDiffversion){
   strcpy(SMDiffversion,SMDiffVERSION);
-}
-
-/* ------------------ getrevision ------------------------ */
-
-int getrevision(char *svn){
-  char svn_string[256];
-  char *svn_ptr;
-  int return_val;
-
-  svn_ptr=svn_string;
-  svn=strchr(svn,':');
-  if(svn==NULL||strlen(svn)<=4)return 0;
-  
-  svn++;
-  strcpy(svn_ptr,svn);
-  svn_ptr=trim_front(svn_ptr);
-  svn_ptr[strlen(svn_ptr)-1]=0;
-  trim(svn_ptr);
-  sscanf(svn_ptr,"%i",&return_val);
-  return return_val;
-}
-
-/* ------------------ fullfile ------------------------ */
-
-void fullfile(char *fileout, char *dir, char *file){
-  char *file2;
-
-  trim(file);
-  file2=trim_front(file);
-  strcpy(fileout,"");
-  if(dir!=NULL)strcat(fileout,dir);
-  strcat(fileout,file2);
-}
-
-/* ------------------ make_fileout ------------------------ */
-
-void make_outfile(char *outfile, char *destdir, char *file1, char *ext){
-  char filecopy[1024], *file1_noext;
-
-  trim(file1);
-  strcpy(filecopy,trim_front(file1));
-  file1_noext=strstr(filecopy,ext);
-  strcpy(outfile,"");
-  if(file1_noext==NULL)return;
-  file1_noext[0]='\0';
-  if(destdir!=NULL){
-    strcpy(outfile,destdir);
-  }
-  strcat(outfile,filecopy);
-  strcat(outfile,"_diff");
-  strcat(outfile,ext);
 }
 
 /* ------------------ similar_grid ------------------------ */

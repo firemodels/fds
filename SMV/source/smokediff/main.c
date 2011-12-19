@@ -11,6 +11,7 @@
 #include "svdiff.h"
 #include "MALLOC.h"
 #include "string_util.h"
+#include "file_util.h"
 
 //dummy change to bump version number to 1.0.3
 
@@ -213,21 +214,6 @@ int main(int argc, char **argv){
   }
 
   return 0;
-}
-       
-/* ------------------ setdir ------------------------ */
-
-char *setdir(char *argdir){
-  int lendir;
-  char *dir;
-
-  lendir=strlen(argdir);
-  NewMemory((void **)&dir,lendir+2);
-  strcpy(dir,argdir);
-  if(dir[lendir-1]!=dirseparator[0]){
-    strcat(dir,dirseparator);
-  }
-  return dir;
 }
 
 /* ------------------ usage ------------------------ */

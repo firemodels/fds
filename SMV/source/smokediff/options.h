@@ -1,7 +1,8 @@
 // $Date$ 
 // $Revision$
 // $Author$
-
+#ifndef OPTIONS_H_DEFINED
+#define OPTIONS_H_DEFINED
 #define _CRT_SECURE_NO_WARNINGS
 
  /* ------------------ options ------------------------ */
@@ -129,4 +130,5 @@
 #define EXTERNCPP extern "C"
 #else
 #define EXTERNCPP
+#endif
 #endif
