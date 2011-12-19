@@ -1,15 +1,15 @@
 SOURCE_DIR = ../../../SMV/source/
-INC_DIR =
+INC_DIR = -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/background
 FILTERC =
 FILTERF =
 
-VPATH = $(SOURCE_DIR)/background
+VPATH = $(SOURCE_DIR)/background $(SOURCE_DIR)/shared
 bin = .
 
 # Definition of the object variables
 
-objwin = main.obj utilities.obj
-obj = main.o utilities.o
+objwin = main.obj utilities.obj assert.obj dmalloc.obj string_util.obj
+obj = main.o utilities.o assert.o dmalloc.o string_util.o
 
 #*** General Purpose Rules ***
 
