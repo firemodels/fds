@@ -352,7 +352,7 @@ d,"USN Hangars, Iceland",USN_Hangars/Experimental_Data/USN_Iceland_ExpData_Test_
 s,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 s,Flame Height,,,,,,,k-,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 s,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-d,Heskestad Flame Height,Heskestad_Flame_Height/Experimental_Data/Heskestad_Correlation.csv,1,Q*,2,L/D,Heskestad Correlation,k-,0,100000,1e-1 1e0 1e1 1e2 1e3 1e4,0,100000,0.1,Heskestad_Flame_Height/FDS_Output_Files/FDS_Flame_Height.csv,1,Q*,2,L/D (RI=5)|L/D (RI=10)|L/D (RI=20),FDS ($D^*/\delta x=5$)|FDS ($D^*/\delta x=10$)|FDS ($D^*/\delta x=20$),ksq|r^|go,0,100000,,0,100000,0,max,Flame Height,Q*,L$_f$/D,0.05,15000,1,0.1,1000,1,no,0.1 0.90,SouthEast,3.53 0.88 2.57 1.00,Heskestad_Flame_Height/FDS_Output_Files/Qs=10000_RI=05_svn.txt,loglog,FDS_Validation_Guide/FIGURES/Heskestad/Flame_Height,0,Heskestad Flame Height,ko,k
+d,Heskestad Flame Height,Heskestad_Flame_Height/Experimental_Data/Heskestad_Correlation.csv,1,Q*,2,L/D,Heskestad Correlation,k-,0,100000,1e-1 1e0 1e1 1e2 1e3 1e4,0,100000,0.1,Heskestad_Flame_Height/FDS_Output_Files/FDS_Flame_Height.csv,1,Q*,2,L/D (RI=5)|L/D (RI=10)|L/D (RI=20),FDS $D^*/\delta x=5$|FDS $D^*/\delta x=10$|FDS $D^*/\delta x=20$,ksq|r^|go,0,100000,,0,100000,0,max,Flame Height,Q*,L$_f$/D,0.05,15000,1,0.1,1000,1,no,0.1 0.90,SouthEast,3.53 0.88 2.57 1.00,Heskestad_Flame_Height/FDS_Output_Files/Qs=10000_RI=05_svn.txt,loglog,FDS_Validation_Guide/FIGURES/Heskestad/Flame_Height,0,Heskestad Flame Height,ko,k
 s,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 s,Ceiling Jet,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
 s,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
