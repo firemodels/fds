@@ -1888,7 +1888,6 @@ void update_facelists(void){
     }
 
     if(
-      //meshi->patchfacevis!=NULL&&
       local_showpatch==1&&loadpatch==1){
       for(j=0;j<meshi->nbptrs;j++){
         blockagedata *bc;
@@ -1897,7 +1896,6 @@ void update_facelists(void){
         if(bc->prop!=NULL&&bc->prop->blockvis==0)continue;
         facej = meshi->faceinfo + 6*j;
         for(k=0;k<6;k++){
-//          facej->patchpresent=1-meshi->patchfacevis[7*j+patch_dir[k]];
           facej->patchpresent=1-bc->patchvis[patch_dir[k]];
           facej++;
         }
@@ -1941,7 +1939,7 @@ void update_facelists(void){
         if(patchi!=NULL&&
           patchi->loaded==1&&
           patchi->display==1&&
-          (vis_threshold==0||vis_onlythreshold==0||do_threshold==0)&& // check 1/7/2006
+          (vis_threshold==0||vis_onlythreshold==0||do_threshold==0)&&
           (vi->dummy==1||vi->hideboundary==0)){
           continue;
         }
@@ -1980,11 +1978,10 @@ void update_facelists(void){
            break;
         }
       }
-
       if((
          (visBlocks==visBLOCKOutline||visBlocks==visBLOCKSolidOutline)&&j<vent_offset)||
          (facej->patchpresent==1&&(vis_threshold==0||vis_onlythreshold==0||do_threshold==0))||
-         (facej->type==2&&visBlocks==visBLOCKAsInput)||
+         (facej->type==BLOCK_outline&&visBlocks==visBLOCKAsInput)||
          ((j>=vent_offset&&j<vent_offset+meshi->nvents)&&vi->isOpenvent==1&&visOpenVentsAsOutline==1)
         ){
         meshi->face_outlines[n_outlines++]=facej;
@@ -1997,7 +1994,7 @@ void update_facelists(void){
           drawing_texture=1;
         }
 
-        if(drawing_smooth==1&&facej->type==3)continue;
+        if(drawing_smooth==1&&facej->type==BLOCK_smooth)continue;
         if(facej->transparent==0||drawing_blockage_transparent==0){
           if(drawing_texture==0){
             if(facej->show_bothsides==0){

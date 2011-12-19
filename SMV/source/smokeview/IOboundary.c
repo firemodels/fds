@@ -328,9 +328,12 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
     float dxx, dyy, dzz, ig_factor;
     float dx_factor, dy_factor, dz_factor;
 
-    i1=meshi->pi1[n]; i2=meshi->pi2[n];
-    j1=meshi->pj1[n]; j2=meshi->pj2[n];
-    k1=meshi->pk1[n]; k2=meshi->pk2[n];
+    i1=meshi->pi1[n]; 
+    i2=meshi->pi2[n];
+    j1=meshi->pj1[n]; 
+    j2=meshi->pj2[n];
+    k1=meshi->pk1[n]; 
+    k2=meshi->pk2[n];
     if(pi->version==0){
       meshi->patchdir[n]=getpatchfacedir(meshi,i1,i2,j1,j2,k1,k2,
         meshi->blockonpatch+n,meshi->meshonpatch+n);
@@ -3222,13 +3225,6 @@ int getpatchface2dir(mesh *meshi, int i1, int i2, int j1, int j2, int k1, int k2
           *meshonpatch=meshi;
           return(1);
         }
-      }
-    }
-    for(imesh=0;imesh<nmeshes;imesh++){
-      meshblock = meshinfo + imesh;
-      if(meshblock==meshi)continue;
-      for(i=0;i<meshblock->nbptrs;i++){
-        bc=meshblock->blockageinfoptrs[i];
       }
     }
   }
