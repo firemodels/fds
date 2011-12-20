@@ -163,6 +163,16 @@ int main(int argc, char **argv){
       transfer[i]=3;
       ntransfer++;
     }
+    else if(strncmp(token,"sds",3)==0){
+      zdev[i]=(float)atof(token+2);
+      transfer[i]=4;
+      ntransfer++;
+    }
+    else if(strncmp(token,"sdwd",4)==0){
+      zdev[i]=(float)atof(token+2);
+      transfer[i]=5;
+      ntransfer++;
+    }
     else{
       transfer[i]=0;
     }
@@ -186,6 +196,16 @@ int main(int argc, char **argv){
       fprintf(stream_out," %s %s ANGLE %s sensor\n",token2,percen,percen);
       fprintf(stream_out," %s\n",coffset);
     }
+    else if(transfer[i]==4){
+      fprintf(stream_out,"DEVICE\n");
+      fprintf(stream_out," %s %s SD_VELOCITY %s sensor\n",token2,percen,percen);
+      fprintf(stream_out," %s\n",coffset);
+    }
+    else if(transfer[i]==5){
+      fprintf(stream_out,"DEVICE\n");
+      fprintf(stream_out," %s %s SD_ANGLE %s sensor\n",token2,percen,percen);
+      fprintf(stream_out," %s\n",coffset);
+    }
   }
   fprintf(stream_out,"//DATA\n");
   itransfer=0;
@@ -201,6 +221,16 @@ int main(int argc, char **argv){
       if(itransfer!=ntransfer)fprintf(stream_out,",");
     }
     if(transfer[i]==3){
+      fprintf(stream_out,"deg");
+      itransfer++;
+      if(itransfer!=ntransfer)fprintf(stream_out,",");
+    }
+    if(transfer[i]==4){
+      fprintf(stream_out,"m/s");
+      itransfer++;
+      if(itransfer!=ntransfer)fprintf(stream_out,",");
+    }
+    if(transfer[i]==5){
       fprintf(stream_out,"deg");
       itransfer++;
       if(itransfer!=ntransfer)fprintf(stream_out,",");
@@ -254,7 +284,7 @@ int main(int argc, char **argv){
           fprintf(stream_out,"%s",token);
         }
       }
-      if(transfer[i]==2){
+      if(transfer[i]==2||transfer[i]==4){
         if(strcmp(token,"99.99")==0){
           fprintf(stream_out,"NULL");
         }
@@ -262,7 +292,7 @@ int main(int argc, char **argv){
           fprintf(stream_out,"%s",token);
         }
       }
-      if(transfer[i]==3){
+      if(transfer[i]==3||transfer[i]==5){
         if(strcmp(token,"9999")==0){
           fprintf(stream_out,"NULL");
         }
@@ -331,26 +361,3 @@ int getmaxrevision(void){
   MAXREV(main_revision);
   return max_revision;
 }
-
-/* ------------------ getrevision ------------------------ */
-
-int getrevision(char *svn){
-  char svn_string[256];
-  char *svn_ptr;
-  int return_val;
-
-  svn_ptr=svn_string;
-  svn=strchr(svn,':');
-  if(svn==NULL||strlen(svn)<=4)return 0;
-  
-  svn++;
-  strcpy(svn_ptr,svn);
-  svn_ptr=trim_front(svn_ptr);
-  svn_ptr[strlen(svn_ptr)-1]=0;
-  trim(svn_ptr);
-  sscanf(svn_ptr,"%i",&return_val);
-  return return_val;
-}
-
-
-
