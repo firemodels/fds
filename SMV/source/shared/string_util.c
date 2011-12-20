@@ -275,63 +275,34 @@ void trimmzeros(char *line){
   }
 }
 
-char *Strstr(char *string, char *key){
-  char *k,*s,*ss;
-//   ssssssss0
-//    kkkk0
-  if(string==NULL||key==NULL)return NULL;
+/* ------------------ STRCMP ------------------------ */
 
-  for(s=string;*s!=0;s++){
-    for(k=key;*k!=0;k++){
-      ss = s + (k-key);
-      if(*ss==0)return NULL;
-      if(*ss!=*k)break;
-    }
-    if(*k==0)return s;
+int STRCMP(const char *s1, const char *s2){
+  /*! \fn int STRCMP(const char *s1, const char *s2)
+      \brief same as the standard function, strcmp, but ignores case
+  */
+  while (toupper(*s1) == toupper(*s2++)){
+		if (*s1++ == 0)return (0);
   }
-  return NULL;
+	return (toupper(*(const unsigned char *)s1) - toupper(*(const unsigned char *)(s2 - 1)));
 }
 
 /* ------------------ STRSTR ------------------------ */
 
-char *STRSTR(char *c, const char *key){
-  /*! \fn char *STRSTR(char *c, const char *key)
-      \brief looks for first occurence of the string key found in c ignoring case
-  */
-  char *C,*CCOPY,*CC,*cc,*result;
-  char *KEY,*KEYCOPY,*KEY2;
-  size_t i, len,len2;
-  int diff;
+char *STRSTR(char *string, const char *key){
+  char *k,*s,*ss;
 
-  if(c==NULL||key==NULL)return NULL;
-  len=strlen(c);
-  len2=strlen(key);
-  if(len<1||len2<1)return NULL;
-  if(NewMemory((void **)&C,(unsigned int)(len+1))==0)return NULL;
-  CC=C;
-  cc=c;
-  CCOPY=C;
-  if(NewMemory((void **)&KEY,(unsigned int)(len2+1))==0){
-    FreeMemory(C);
-    return NULL;
-  }
-  KEY2=KEY;
-  KEYCOPY=KEY;
-  for(i=0;i<len;i++){
-    *CC++=(char)toupper(*cc++);
-  }
-  for(i=0;i<len2;i++){
-    *KEY2++=(char)toupper(*key++);
-  }
-  *CC='\0';
-  *KEY2='\0';
-  result = strstr(C,KEY);
-  if(result!=NULL)diff = result - C;
-  FREEMEMORY(CCOPY);
-  FREEMEMORY(KEYCOPY);
-  if(result==NULL)return NULL;
-  return c + diff;
+  if(string==NULL||key==NULL)return NULL;
 
+  for(s=string;*s!=0;s++){
+    for(k=(char *)key;*k!=0;k++){
+      ss = s + (k-key);
+      if(*ss==0)return NULL;
+      if(toupper(*ss)!=toupper(*k))break;
+    }
+    if(*k==0)return s;
+  }
+  return NULL;
 }
 
 /* ------------------ scalestring ------------------------ */
@@ -419,19 +390,6 @@ char *trim_string(char *buffer){
   bufptr=trim_front(buffer);
   trim(bufptr);
   return bufptr;
-}
-
-
-/* ------------------ STRCMP ------------------------ */
-
-int STRCMP(const char *s1, const char *s2){
-  /*! \fn int STRCMP(const char *s1, const char *s2)
-      \brief same as the standard function, strcmp, but ignores case
-  */
-  while (toupper(*s1) == toupper(*s2++)){
-		if (*s1++ == 0)return (0);
-  }
-	return (toupper(*(const unsigned char *)s1) - toupper(*(const unsigned char *)(s2 - 1)));
 }
 
 /* ------------------ get_chid ------------------------ */
