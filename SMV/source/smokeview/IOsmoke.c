@@ -4105,6 +4105,9 @@ void drawsmoke3dCULL(void){
   int ntemp;
   unsigned char *iblank_smoke3d;
   int is_smoke;
+  smoke3d *smoke3di;
+  mesh *meshi;
+  cullplanedata *culli;
 
   unsigned char value[4];
   unsigned char fvalue[4];
@@ -4140,16 +4143,9 @@ void drawsmoke3dCULL(void){
   glBegin(GL_TRIANGLES);
   mesh_old=NULL;
   for(nn=0;nn<ncullplaneinfo;nn++){
-    mesh *meshi;
-    smoke3d *smoke3di;
-
-    cullplanedata *culli;
-
     culli = sort_cullplaneinfo[ncullplaneinfo-1-nn];
 
     meshi = culli->cull_mesh;
-
-
   
     if(meshi!=mesh_old){
       mesh_old=meshi;
