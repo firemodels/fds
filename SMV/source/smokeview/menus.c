@@ -17,13 +17,11 @@
 #include "contourdefs.h"
 #include "isodefs.h"
 #include "flowfiles.h"
-#include "smokeviewapi.h"
 #include "MALLOC.h"
 #include "smokeviewvars.h"
 #include "translate.h"
 #include "update.h"
 #include "IOvolsmoke.h"
-#include "file_util.h"
 
 /* dummy change to bump revision number to 5.1.5 */
 
@@ -143,12 +141,6 @@ void MainMenu(int value){
   }
   updatemenu=1;  
   glutPostRedisplay();  
-}
-
-/* ------------------ sv_MainMenu ------------------------ */
-
-void svWINAPI sv_MainMenu(int value){
-  MainMenu(value);
 }
 
 /* ------------------ StaticVariableMenu ------------------------ */
@@ -1648,7 +1640,7 @@ void FrameRateMenu(int value){
 
 /* ------------------ sv_FrameRateMenu ------------------------ */
 
-void svWINAPI sv_FrameRateMenu(int value){
+void sv_FrameRateMenu(int value){
   FrameRateMenu(value);
 }
 
@@ -4079,13 +4071,6 @@ void BlockageMenu(int value){
   updatehiddenfaces=1;
   glutPostRedisplay();
 }
-
-/* ------------------ sv_BlockageMenu ------------------------ */
-
-void svWINAPI sv_BlockageMenu(int value){
-  BlockageMenu(value);
-}
-
 
 /* ------------------ RotateTypeMenu ------------------------ */
 

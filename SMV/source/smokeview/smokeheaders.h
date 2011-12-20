@@ -27,6 +27,12 @@ EXTERNCPP void getzonedatacsv(int nzonet, int nrooms, int nfires,
                     float *zonepr, float *zoneylay,  float *zonetl, float *zonetu,
                     float **zoneodlptr, float **zoneoduptr, float *zonehvents, float *zonevvents,
                     int *error);
+EXTERNCPP void sv_init0(void);
+EXTERNCPP void sv_startup(char *file, int showpart);
+EXTERNCPP void sv_update(void);
+EXTERNCPP void sv_unload(void);
+EXTERNCPP void sv_FrameRateMenu(int value);
+EXTERNCPP void sv_startup_c(int argc, char **argv);
 EXTERNCPP int get_ndevices(char *file);
 EXTERNCPP void printhrr(void);
 EXTERNCPP void readhrr(int flag, int *errorcode);

@@ -19,7 +19,6 @@
 #include "isodefs.h"
 
 #include "flowfiles.h"
-#include "smokeviewapi.h"
 #include "MALLOC.h"
 #include "smokeviewvars.h"
 #include "IOvolsmoke.h"

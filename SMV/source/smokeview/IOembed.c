@@ -17,7 +17,6 @@
 #include "smokeviewvars.h"
 #include "translate.h"
 #include "update.h"
-#include "string_util.h"
 #include "smv_endian.h"
 
 // svn revision character string

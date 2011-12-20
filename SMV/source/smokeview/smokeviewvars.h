@@ -14,6 +14,7 @@
 
 #include "threader.h"
 #include "string_util.h"
+#include "file_util.h"
 
 #ifdef pp_GPUTHROTTLE
   SVEXTERN float SVDECL(thisGPUtime,0.0), SVDECL(lastGPUtime,0.0);

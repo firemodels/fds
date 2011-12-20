@@ -18,7 +18,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "isodefs.h"
-#include "smokeviewapi.h"
 #include "flowfiles.h"
 #include "MALLOC.h"
 #include "smokeviewvars.h"
@@ -61,13 +60,6 @@ void copy_args(int *argc, char **aargv, char ***argv_sv){
   }
 }
 #endif
-
-/* ------------------ sv_grid ------------------------ */
-
-void svWINAPI sv_grid(int val){
-  visGrid = 0;
-  if(val==1)visGrid=1;
-}
 
 /* ------------------ get_smokezippath ------------------------ */
 
@@ -140,7 +132,7 @@ void pauseSV(void){
 
 /* ------------------ sv_startup ------------------------ */
 
-void svWINAPI sv_startup(char *file, int showpart){
+void sv_startup(char *file, int showpart){
 
   int argc=2;
   char cprog[]="smokeview";
@@ -184,20 +176,20 @@ void ResizeWindow(int width, int height){
     
 /* ------------------ sv_update ------------------------ */
 
-void svWINAPI sv_update(){
+void sv_update(){
   glutMainLoop();
 }
 
 /* ------------------ sv_init0 ------------------------ */
 
-void svWINAPI sv_init0(void){
+void sv_init0(void){
 /*  int i;*/
   initcolors();
   setsmokeviewvars();
 }
 /* ------------------ sv_hide ------------------------ */
 
-void svWINAPI sv_unload(void){
+void sv_unload(void){
     int errorcode,i;
   /* first unload file data */
     for(i=0;i<nterraininfo;i++){

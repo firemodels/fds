@@ -17,8 +17,6 @@
 #include "smokeviewvars.h"
 #include "translate.h"
 #include "update.h"
-#include "string_util.h"
-#include "file_util.h"
 
 // svn revision character string
 char drawGeometry_revision[]="$Revision$";

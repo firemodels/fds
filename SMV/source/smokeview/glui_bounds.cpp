@@ -18,7 +18,6 @@
 #include "smokeviewvars.h"
 #include "smokeheaders.h"
 #include "translate.h"
-#include "file_util.h"
 
 // svn revision character string
 extern "C" char glui_bounds_revision[]="$Revision$";

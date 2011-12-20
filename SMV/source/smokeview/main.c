@@ -14,10 +14,7 @@
 #endif
 #include "MALLOC.h"
 #include "smokeviewvars.h"
-#include "smokeviewapi.h"
 #include "translate.h"
-#include "string_util.h"
-#include "file_util.h"
 
 // svn revision character string
 char main_revision[]="$Revision$";

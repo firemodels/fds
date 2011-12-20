@@ -19,12 +19,10 @@
 #include "isodefs.h"
 
 #include "flowfiles.h"
-#include "smokeviewapi.h"
 #include "MALLOC.h"
 #include "smokeviewvars.h"
 #include "translate.h"
 #include "update.h"
-#include "file_util.h"
 
 /* dummy change to bump revision number to 5.1.5 */
 
