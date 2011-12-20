@@ -761,7 +761,7 @@ typedef struct _device{
 typedef struct {
   int unique;
   int filetype;
-  device *udev,*vdev,*wdev,*valdev,*veldev,*angledev;
+  device *udev,*vdev,*wdev,*valdev,*veldev,*angledev,*sd_veldev,*sd_angledev;
 } vdevice;
 
 /* --------------------------  treedevice ------------------------------------ */

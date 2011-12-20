@@ -521,7 +521,7 @@ void draw_devices_val(void){
 
 /* ----------------------- get_vdevice_vel ----------------------------- */
 
-void get_vdevice_vel(float time, vdevice *vdevicei, float *vel, int *valid_vel){
+void get_vdevice_vel(float time, vdevice *vdevicei, float *vel, float *vminmax, float *angleminmax, int *valid_vel){
   float uvel=0.0, vvel=0.0, wvel=0.0;
   device *udev, *vdev, *wdev;
   int validu=1,validv=1,validw=1;
@@ -559,16 +559,27 @@ void get_vdevice_vel(float time, vdevice *vdevicei, float *vel, int *valid_vel){
     *valid_vel=1;
   }
   if(vdevicei->veldev!=NULL&&vdevicei->angledev!=NULL){
-    float velocity, angle;
-    int valid_velocity, valid_angle;
+    float  velocity,  angle;
+    float dvelocity, dangle;
+    int  valid_velocity,  valid_angle;
+    int dvalid_velocity=0.0, dvalid_angle=0.0;
 #define PIFACTOR 3.14159/180.0     
 
     velocity=get_device_val(time,vdevicei->veldev,&valid_velocity);
+    if(vdevicei->sd_veldev!=NULL){
+      dvelocity=get_device_val(time,vdevicei->sd_veldev,&dvalid_velocity);
+      if(dvalid_velocity==0)dvelocity=0.0;
+    }
     angle=get_device_val(time,vdevicei->angledev,&valid_angle);
+    if(vdevicei->sd_angledev!=NULL){
+      dangle=get_device_val(time,vdevicei->sd_angledev,&dvalid_angle);
+      if(dvalid_angle==0)dangle=0.0;
+    }
     if(valid_velocity==1&&valid_angle==1){
-      vel[0] = velocity*cos(PIFACTOR*angle);
-      vel[1] = velocity*sin(PIFACTOR*angle);
-      vel[2] = 0.0;
+      vminmax[0]=velocity-dvelocity;
+      vminmax[1]=velocity+dvelocity;
+      angleminmax[0]=angle-dangle;
+      angleminmax[1]=angle+dangle;
       *valid_vel=1;
     }
   }
@@ -692,13 +703,14 @@ void draw_devices(void){
     for(i=0;i<nvdeviceinfo;i++){
       vdevice *vdevi;
       float vel[3],*xyz, xxx1[3], xxx2[3];
+      float velminmax[2], angleminmax[2];
       int j;
       int valid;
 
       vdevi = vdeviceinfo + i;
       if(vdevi->unique==0)continue;
-      xyz=vdevi->valdev->xyz;
-      get_vdevice_vel(times[itimes], vdevi, vel, &valid);
+      xyz=vdevi->valdev->xyz;//xxx
+      get_vdevice_vel(times[itimes], vdevi, vel, velminmax, angleminmax,&valid);
       if(valid==1){
         for(j=0;j<3;j++){
           xxx1[j] = xyz[j];
@@ -4720,6 +4732,8 @@ void setup_device_data(void){
     vdevi->wdev=NULL;
     vdevi->angledev=NULL;
     vdevi->veldev=NULL;
+    vdevi->sd_angledev=NULL;
+    vdevi->sd_veldev=NULL;
 
     for(j=0;j<ndeviceinfo;j++){
       device *devj;
@@ -4744,11 +4758,43 @@ void setup_device_data(void){
       devj = deviceinfo + j;
       if(devj->filetype!=CSV_EXP)continue;
       xyz = devj->xyz;
+      if(strcmp(devj->quantity,"SD_VELOCITY")!=0)continue;
+      if(fabs(xyz[0]-xyzval[0])>EPSDEV)continue;
+      if(fabs(xyz[1]-xyzval[1])>EPSDEV)continue;
+      if(fabs(xyz[2]-xyzval[2])>EPSDEV)continue;
+      vdevi->sd_veldev=devj;
+      vdevi->filetype=CSV_EXP;
+      break;
+    }
+
+    for(j=0;j<ndeviceinfo;j++){
+      device *devj;
+      float *xyz;
+
+      devj = deviceinfo + j;
+      if(devj->filetype!=CSV_EXP)continue;
+      xyz = devj->xyz;
       if(strcmp(devj->quantity,"ANGLE")!=0)continue;
       if(fabs(xyz[0]-xyzval[0])>EPSDEV)continue;
       if(fabs(xyz[1]-xyzval[1])>EPSDEV)continue;
       if(fabs(xyz[2]-xyzval[2])>EPSDEV)continue;
       vdevi->angledev=devj;
+      vdevi->filetype=CSV_EXP;
+      break;
+    }
+
+    for(j=0;j<ndeviceinfo;j++){
+      device *devj;
+      float *xyz;
+
+      devj = deviceinfo + j;
+      if(devj->filetype!=CSV_EXP)continue;
+      xyz = devj->xyz;
+      if(strcmp(devj->quantity,"SD_ANGLE")!=0)continue;
+      if(fabs(xyz[0]-xyzval[0])>EPSDEV)continue;
+      if(fabs(xyz[1]-xyzval[1])>EPSDEV)continue;
+      if(fabs(xyz[2]-xyzval[2])>EPSDEV)continue;
+      vdevi->sd_angledev=devj;
       vdevi->filetype=CSV_EXP;
       break;
     }

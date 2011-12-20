@@ -329,7 +329,7 @@ EXTERNCPP void setsmokecolorflags(void);
 EXTERNCPP void Sort_Embedded_Geometry(float *mm);
 EXTERNCPP void Sort_Transparent_Faces(float *mm);
 EXTERNCPP void getsmokedir(float *mm);
-EXTERNCPP void get_vdevice_vel(float time, vdevice *devicei, float *vel, int *valid_vel);
+EXTERNCPP void get_vdevice_vel(float time, vdevice *vdevicei, float *vel, float *vminmax, float *angleminmax, int *valid_vel);
 EXTERNCPP float get_device_val(float time, device *devicei, int *valid);
 EXTERNCPP void getvolsmokedir(float *mm);
 EXTERNCPP void getzonesmokedir(float *mm);
