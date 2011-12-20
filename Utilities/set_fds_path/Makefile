@@ -8,7 +8,7 @@ bin = .
 
 # Definition of the object variables
 
-obj = main.o dmalloc.o assert.o string_util.o
+obj = main.o string_util.o
 objwin = $(obj:.o=.obj)
 
 #*** General Purpose Rules ***
