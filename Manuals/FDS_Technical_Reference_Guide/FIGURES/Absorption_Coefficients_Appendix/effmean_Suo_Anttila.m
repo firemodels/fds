@@ -58,7 +58,7 @@ v=temp(:,1);
 for i=2:size(temp,2)
     a=temp(:,i);
     %ind=a>0;
-    Tau(:,i+3)=effmean3(a,v,x,1450);
+    Tau(:,i+3)=transmission(a,v,x,1450);
 end
 
 Tau(:,9)=transmission(a,v,x,1450);

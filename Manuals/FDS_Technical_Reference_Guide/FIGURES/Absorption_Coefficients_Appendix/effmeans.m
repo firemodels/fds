@@ -42,7 +42,7 @@ set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 %END PLOT_STYLE
 
 x=0.0001:0.0001:0.005;
-Tau=zeros(length(x),5);
+Kappa=zeros(length(x),5);
 
 N=20;
 
@@ -56,16 +56,17 @@ v=temp(:,1);
 for i=2:size(temp,2)
     a=temp(:,i);
     %ind=a>0;
-    Tau(:,i-1)=effmean3(a,v,x,1450);
+    fprintf('%d\n',i)
+    Kappa(:,i-1)=effmean3(a,v,x,1450);
 end
 
-plot(x*1e3,Tau,'LineWidth',2,'LineSmoothing','on');
-%semilogy(x*1e3,Tau,'LineWidth',2,'LineSmoothing','on');
+plot(x*1e3,Kappa(:,[3 5]),'LineWidth',2,'LineSmoothing','on');
+%semilogy(x*1e3,Kappa,'LineWidth',2,'LineSmoothing','on');
 xlabel('Path length (mm)','FontSize',14,'FontName',Font_Name);
 ylabel('Absorption coefficient (1/m)','FontSize',14,'FontName',Font_Name);
-legend({'Toluene','Methanol','Water','Benzene','Diesel'},'FontSize',14,'FontName',Font_Name);
+legend({'Water','Diesel'},'FontSize',14,'FontName',Font_Name);
 %set(gca,'FontSize',14);
-axis([0 5 0 2000]);
+%axis([0 5 500 2500]);
 % print to pdf
         set(gcf,'Visible',Figure_Visibility);
         set(gcf,'PaperUnits',Paper_Units);
@@ -74,59 +75,44 @@ axis([0 5 0 2000]);
         display(['Printing plot ',num2str(j),'...'])
 %        print(gcf,'-dpdf','../KAPPA_PATH_LENGTH')
 
-exportfig(gcf,'../KAPPA_VS_PATH_LENGTH.pdf','Renderer','painters', 'width',6.5,'height',5 ,'fontsize',1.2,...
+exportfig(gcf,'../KAPPA_VS_PATH_LENGTH_WD.pdf','Renderer','painters', 'width',6.5,'height',5 ,'fontsize',1.2,...
+            'Color','CMYK','Format','pdf','Resolution',900);
+figure;
+plot(x*1e3,Kappa(:,[1:2 4]),'LineWidth',2,'LineSmoothing','on');
+%semilogy(x*1e3,Kappa,'LineWidth',2,'LineSmoothing','on');
+xlabel('Path length (mm)','FontSize',14,'FontName',Font_Name);
+ylabel('Absorption coefficient (1/m)','FontSize',14,'FontName',Font_Name);
+legend({'Toluene','Methanol','Benzene'},'FontSize',14,'FontName',Font_Name);
+%set(gca,'FontSize',14);
+axis([0 5 0 600]);
+% print to pdf
+        set(gcf,'Visible',Figure_Visibility);
+        set(gcf,'PaperUnits',Paper_Units);
+        set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+        set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+        display(['Printing plot ',num2str(j),'...'])
+%        print(gcf,'-dpdf','../KAPPA_PATH_LENGTH')
+
+exportfig(gcf,'../KAPPA_VS_PATH_LENGTH_TMB.pdf','Renderer','painters', 'width',6.5,'height',5 ,'fontsize',1.2,...
             'Color','CMYK','Format','pdf','Resolution',900);
         
 clear i
 Temp=linspace(800,1500,length(x));
 x=0.003;
 for i=1:length(Temp),
-    % Lasketaan myös Keefe et al. datoista
-temp=importdata('Data/Toluene/Keefe_toluene_2/tla105em.y'); % in L /molcm
-vstart=temp(1)*10^2;
-vend=temp(2)*10^2;
-npt=temp(3);
-v=linspace(vstart,vend,npt);
-a=temp(4:end)*0.1*9339; % L/mol/cm=0.1 m^3/mol/m, Tolueenin tiheys 9339 mol/m^3
-Tau(:,1)=effmean3(a,v,x,1450);
-
-
-% testataan myös metanoli
-[a v]=readyspec('Data/Methanol/Bertie/CH3OH/MTHEM93.y');
-Tau(i,2)=effmean3(a*2.4719e+004,v,x,Temp(i));
-% molar mass 32.04 g mol?1 density 792 kg/m^3
-% => density = 2.4719e+004 mol/m^3
-
-
-% Vesi
-[a v]=readyspec('Data/Water/Bertie/WTEREM95.y');
-Tau(i,3)=effmean3(a*5.5556e+004,v,x,Temp(i));
-% molar mass 18.0153 g/mol density 1000 kg/m^3
-% => density =5.5556e+004 mol/m^3
-
-% Bentseeni Data/Benzene/Keefe_benzene/bzh6emf2.y
-[a v]=readyspec('Data/Benzene/Keefe_benzene/bzh6emf2.y');
-Tau(i,4)=effmean3(a*100*11161,v,x,Temp(i));
-% Density 11161 mol/m^3 at T=300K ja P = 1 atm
-%kappa0=-log(Tau).'/(x*1e-3).';
-
-% Diesel
-A=csvread('Data/Diesel/Sazhin2004.csv',1,0);
-[C,IA,IB]=UNION(A(:,1),A(:,1));
-A=A(IB,:);
-l=A(:,1)*1e-6;
-a=A(:,2)*2*pi/l;
-a=A(:,2)*2*pi./l;
-
-v=1./l;
-Tau(i,5)=effmean3(a,v,x,Temp(i));
+ 
+    Kappa(i,1)=effmean3(temp(:,2),v,x,Temp(i)); 
+    Kappa(i,2)=effmean3(temp(:,3),v,x,Temp(i));
+    Kappa(i,3)=effmean3(temp(:,4),v,x,Temp(i));
+    Kappa(i,4)=effmean3(temp(:,5),v,x,Temp(i));
+    Kappa(i,5)=effmean3(temp(:,6),v,x,Temp(i));
 end
 figure;
-plot(Temp,Tau,'LineWidth',2,'LineSmoothing','on');
-%semilogy(Temp,Tau,'LineWidth',2,'LineSmoothing','on');
+plot(Temp,Kappa(:,[3 5]),'LineWidth',2,'LineSmoothing','on');
+%semilogy(Temp,Kappa,'LineWidth',2,'LineSmoothing','on');
 xlabel('Blackbody temperature (K)','FontSize',14,'FontName',Font_Name);
 ylabel('Absorption coefficient (1/m)','FontSize',14,'FontName',Font_Name);
-legend({'Toluene','Methanol','Water','Benzene','Diesel'},'FontSize',14,'FontName',Font_Name);
+legend({'Water','Diesel'},'FontSize',14,'FontName',Font_Name);
 %set(gca,'FontSize',14);
 % print to pdf
         set(gcf,'Visible',Figure_Visibility);
@@ -135,7 +121,23 @@ legend({'Toluene','Methanol','Water','Benzene','Diesel'},'FontSize',14,'FontName
         set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
         display(['Printing plot ',num2str(i),'...'])
         %print(gcf,'-dpdf','../KAPPA_TEMP')
-exportfig(gcf,'../KAPPA_VS_TEMP.pdf','Renderer','painters', 'width',6.5,'height',4.8 ,'fontsize',1.2,...
+exportfig(gcf,'../KAPPA_VS_TEMP_WD.pdf','Renderer','painters', 'width',6.5,'height',4.8 ,'fontsize',1.2,...
             'Color','CMYK','Format','pdf','Resolution',900);
-        
+
+figure;
+plot(Temp,Kappa(:,[1:2 4]),'LineWidth',2,'LineSmoothing','on');
+%semilogy(Temp,Kappa,'LineWidth',2,'LineSmoothing','on');
+xlabel('Blackbody temperature (K)','FontSize',14,'FontName',Font_Name);
+ylabel('Absorption coefficient (1/m)','FontSize',14,'FontName',Font_Name);
+legend({'Toluene','Methanol','Benzene'},'FontSize',14,'FontName',Font_Name);
+%set(gca,'FontSize',14);
+% print to pdf
+        set(gcf,'Visible',Figure_Visibility);
+        set(gcf,'PaperUnits',Paper_Units);
+        set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+        set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+        display(['Printing plot ',num2str(i),'...'])
+        %print(gcf,'-dpdf','../KAPPA_TEMP')
+exportfig(gcf,'../KAPPA_VS_TEMP_TMB.pdf','Renderer','painters', 'width',6.5,'height',4.8 ,'fontsize',1.2,...
+            'Color','CMYK','Format','pdf','Resolution',900);
 end

@@ -18,7 +18,7 @@ switch(optargin)
 end
         
 
-options=optimset('Display','off');
+options=optimset('Display','Off');
 
 % incident radiation
 %dv=abs(min(diff(v)))/4;
@@ -57,7 +57,7 @@ amean0(j)=-log(T)/S; % Least squares fit.
 % use the beer-lambert estimates to constrain the search area.
 F=@(X) targetfun(X,S,Itot,qin);
 [amean(j),resnorm,residual,exitflag,output]=lsqnonlin(F,0.5*amean0(j),0,2*amean0(j),options);
-
+fprintf('%d : %f\n',j, amean(j)/amean0(j))
 %[q,X] = irad_twoflux(max(S),I0,amean,20,100);
 %plot(S,exp(-amean0*S),'r');
 %plot(X,q/I0,'g');
