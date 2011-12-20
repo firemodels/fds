@@ -427,7 +427,7 @@ void ColorBarMenu(int value){
       colorbarcycle=0;
       show_extremedata=0;
       colorbarflip=0;
-      p3cont2d=0;
+      contour_type=SHADED_CONTOURS;
       setbw=0;
       update_extreme();
       updatecolors(-1);
@@ -474,15 +474,15 @@ void ColorBarMenu(int value){
      updatecolors(-1);
      break;
    case -17:
-     p3cont2d=SHADED_CONTOURS;
+     contour_type=SHADED_CONTOURS;
      updatecolors(-1);
      break;
    case -18:
-     p3cont2d=STEPPED_CONTOURS;
+     contour_type=STEPPED_CONTOURS;
      updatecolors(-1);
      break;
    case -19:
-     p3cont2d=LINE_CONTOURS;
+     contour_type=LINE_CONTOURS;
      updatecolors(-1);
      break;
    default:
@@ -1833,13 +1833,13 @@ void Plot3DShowMenu(int value){
     updateshowstep(1-meshi->visx,DIRX);
     break;
    case 4:
-    switch (p3cont2d){
-     case 0:
-      p3cont2d=1;
+    switch (contour_type){
+     case SHADED_CONTOURS:
+      contour_type=STEPPED_CONTOURS;
       break;
-     case 1:
-     case 2:
-      p3cont2d=0;
+     case STEPPED_CONTOURS:
+     case LINE_CONTOURS:
+      contour_type=SHADED_CONTOURS;
       break;
      default:
        ASSERT(FFALSE);
@@ -5061,10 +5061,10 @@ updatemenu=0;
     if(cmesh->visx==1)glutAddMenuEntry(_("*yz plane"),3);
     if(cmesh->visx==0)glutAddMenuEntry(_("yz plane"),3);
     if(vectorspresent==1)glutAddSubMenu(_("Flow vectors"),vectorskipmenu);
-    if(p3cont2d==SHADED_CONTOURS){
+    if(contour_type==SHADED_CONTOURS){
       glutAddMenuEntry(_("*Continuous contours"),4);
     }
-    if(p3cont2d!=SHADED_CONTOURS){
+    if(contour_type!=SHADED_CONTOURS){
       glutAddMenuEntry(_("Continuous contours"),4);
     }
     glutAddMenuEntry(_("Show all planes in active mesh"),5);
@@ -6120,16 +6120,16 @@ updatemenu=0;
 /* -------------------------------- colorbarmenu -------------------------- */
 
   CREATEMENU(colorbarshademenu,ColorBarMenu);
-  if(p3cont2d==SHADED_CONTOURS){
+  if(contour_type==SHADED_CONTOURS){
     glutAddMenuEntry("*Continuous",-17);
     glutAddMenuEntry("Stepped",-18);
     glutAddMenuEntry("Lines",-19);
   }
-  else if(p3cont2d==STEPPED_CONTOURS){
+  else if(contour_type==STEPPED_CONTOURS){
     glutAddMenuEntry("Continuous",-17);
     glutAddMenuEntry("*Stepped",-18);
     glutAddMenuEntry("Lines",-19);
-  }else if(p3cont2d==LINE_CONTOURS){
+  }else if(contour_type==LINE_CONTOURS){
     glutAddMenuEntry("Continuous",-17);
     glutAddMenuEntry("Stepped",-18);
     glutAddMenuEntry("*Lines",-19);

@@ -1402,7 +1402,7 @@ void drawColorBars(void){
     showplot3d==1){
     sniffErrors("before colorbar");
     CheckMemory;
-    if(showplot3d==1&&p3cont2d==STEPPED_CONTOURS){
+    if(showplot3d==1&&contour_type==STEPPED_CONTOURS){
       int icol;
       float top, tophat;
 
@@ -1887,7 +1887,7 @@ void drawColorBars(void){
         scalefloat2string(tttval,plot3dcolorlabel, plot3dfactor, plot3drange);
         plot3dcolorlabel_ptr=plot3dcolorlabel;
       }
-      if(p3cont2d==SHADED_CONTOURS||p3cont2d==LINE_CONTOURS){
+      if(contour_type==SHADED_CONTOURS||contour_type==LINE_CONTOURS){
         position = (float)global_changecolorindex/255.0*(float)(nrgb+DYFONT)+barbot-dyfont/2.0;
       }
       else{
@@ -2186,7 +2186,7 @@ void updatecolors(int changecolorindex){
       }
     }
   }
-  if(p3cont2d==LINE_CONTOURS){
+  if(contour_type==LINE_CONTOURS){
     for(n=0;n<nrgb_full;n++){
       rgb_full2[n][3]=rgb_full[n][3];
       rgb_full[n][3]=0;
@@ -2210,7 +2210,7 @@ void updatecolors(int changecolorindex){
       rgb_full[nnp1][3]=rgb_full2[nnp1][3];
     }
   }
-  if(p3cont2d==STEPPED_CONTOURS){
+  if(contour_type==STEPPED_CONTOURS){
     int index[11];
 
     for(n=0;n<10;n++){

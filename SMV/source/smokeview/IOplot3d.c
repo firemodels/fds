@@ -530,7 +530,7 @@ void drawplot3d_texture(mesh *meshi){
   if(use_transparency_data==1){
     transparenton();
   }
-  if(visVector==0&&(p3cont2d==SHADED_CONTOURS||p3cont2d==LINE_CONTOURS)){
+  if(visVector==0&&contour_type!=STEPPED_CONTOURS){
     glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
     glEnable(GL_TEXTURE_1D);
     glBindTexture(GL_TEXTURE_1D,texture_plot3d_colorbar_id);
@@ -539,10 +539,10 @@ void drawplot3d_texture(mesh *meshi){
   /* +++++++++++++++++++++++++++   draw yz contours +++++++++++++++++++++++++++++++++++++ */
 
   if(visx!=0){
-    if(visVector==0&&p3cont2d==STEPPED_CONTOURS){
+    if(visVector==0&&contour_type==STEPPED_CONTOURS){
       DrawContours(plot3dcontour1ptr);
     }
-    if(visVector==0&&p3cont2d!=STEPPED_CONTOURS){
+    if(visVector==0&&contour_type!=STEPPED_CONTOURS){
       if(plotx<0){
         plotx=ibar;
         updateplotslice(1);
@@ -650,10 +650,10 @@ void drawplot3d_texture(mesh *meshi){
   /* +++++++++++++++++++++++++++++++++  draw xz contours  ++++++++++++++++++++++++++++++++++++++++ */
 
   if(visy!=0){
-    if(visVector==0&&p3cont2d==STEPPED_CONTOURS){
+    if(visVector==0&&contour_type==STEPPED_CONTOURS){
       DrawContours(plot3dcontour2ptr);
     }
-    if(visVector==0&&p3cont2d!=STEPPED_CONTOURS){
+    if(visVector==0&&contour_type!=STEPPED_CONTOURS){
       /*
       if(ploty<0){
         ploty=jbar;
@@ -760,10 +760,10 @@ void drawplot3d_texture(mesh *meshi){
   /* ++++++++++++++++++++++++++++ draw xy contours ++++++++++++++++++++++++++++++++ */
 
   if(visz!=0){
-    if(visVector==0&&p3cont2d==STEPPED_CONTOURS){
+    if(visVector==0&&contour_type==STEPPED_CONTOURS){
       DrawContours(plot3dcontour3ptr);
     }
-    if(visVector==0&&p3cont2d!=STEPPED_CONTOURS){
+    if(visVector==0&&contour_type!=STEPPED_CONTOURS){
       if(plotz<0){plotz=kbar;updateplotslice(3);}
       if(plotz>kbar){plotz=0;updateplotslice(3);}
       glBegin(GL_TRIANGLES);
@@ -858,7 +858,7 @@ void drawplot3d_texture(mesh *meshi){
       glEnd();
     }
   }
-  if(visVector==0&&(p3cont2d==SHADED_CONTOURS||p3cont2d==LINE_CONTOURS)){
+  if(visVector==0&&contour_type!=STEPPED_CONTOURS){
     glDisable(GL_TEXTURE_1D);
   }
   if(use_transparency_data==1){
@@ -971,10 +971,10 @@ void drawplot3d(mesh *meshi){
   /* +++++++++++++++++++++++++++   draw yz contours +++++++++++++++++++++++++++++++++++++ */
 
   if(visx!=0){
-    if(visVector==0&&p3cont2d==STEPPED_CONTOURS){
+    if(visVector==0&&contour_type==STEPPED_CONTOURS){
       DrawContours(plot3dcontour1ptr);
     }
-    if(visVector==0&&p3cont2d!=STEPPED_CONTOURS){
+    if(visVector==0&&contour_type!=STEPPED_CONTOURS){
       if(plotx<0){
         plotx=ibar;
         updateplotslice(1);
@@ -1079,10 +1079,10 @@ void drawplot3d(mesh *meshi){
   /* +++++++++++++++++++++++++++++++++  draw xz contours  ++++++++++++++++++++++++++++++++++++++++ */
 
   if(visy!=0){
-    if(visVector==0&&p3cont2d==STEPPED_CONTOURS){
+    if(visVector==0&&contour_type==STEPPED_CONTOURS){
       DrawContours(plot3dcontour2ptr);
     }
-    if(visVector==0&&p3cont2d!=STEPPED_CONTOURS){
+    if(visVector==0&&contour_type!=STEPPED_CONTOURS){
       /*
       if(ploty<0){
         ploty=jbar;
@@ -1189,10 +1189,10 @@ void drawplot3d(mesh *meshi){
   /* ++++++++++++++++++++++++++++ draw xy contours ++++++++++++++++++++++++++++++++ */
 
   if(visz!=0){
-    if(visVector==0&&p3cont2d==STEPPED_CONTOURS){
+    if(visVector==0&&contour_type==STEPPED_CONTOURS){
       DrawContours(plot3dcontour3ptr);
     }
-    if(visVector==0&&p3cont2d!=STEPPED_CONTOURS){
+    if(visVector==0&&contour_type!=STEPPED_CONTOURS){
       if(plotz<0){plotz=kbar;updateplotslice(3);}
       if(plotz>kbar){plotz=0;updateplotslice(3);}
       glBegin(GL_TRIANGLES);

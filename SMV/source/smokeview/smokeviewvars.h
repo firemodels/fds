@@ -499,7 +499,7 @@ SVEXTERN int ntimes, SVDECL(ntimes_old,0), itimes, itime_save, itimeold, seqnum,
 SVEXTERN int npqq, nopart;
 SVEXTERN int uindex, vindex, windex;
 
-SVEXTERN int SVDECL(p3cont2d,0), SVDECL(p3cont3dsmooth,0);
+SVEXTERN int SVDECL(contour_type,0), SVDECL(p3cont3dsmooth,0);
 SVEXTERN int cullfaces;
 SVEXTERN int showonly_hiddenfaces;
 SVEXTERN int blockage_index;

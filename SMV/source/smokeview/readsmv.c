@@ -9131,8 +9131,14 @@ int readini2(char *inifile, int localfile){
       }
     if(match(buffer,"P3CONT2D")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&p3cont2d);
-      if(p3cont2d>2)p3cont2d=2;
+      sscanf(buffer,"%i",&contour_type);
+      contour_type=CLAMP(contour_type,0,2);
+      continue;
+      }
+    if(match(buffer,"CONTOURTYPE")==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&contour_type);
+      contour_type=CLAMP(contour_type,0,2);
       continue;
       }
     if(match(buffer,"P3VIEW")==1){
@@ -10551,8 +10557,8 @@ void writeini(int flag){
 
   fprintf(fileout,"\nCONTOURS\n");
   fprintf(fileout,"--------\n\n");
-  fprintf(fileout,"P3CONT2D\n");
-  fprintf(fileout," %i\n",p3cont2d);
+  fprintf(fileout,"CONTOURTYPE\n");
+  fprintf(fileout," %i\n",contour_type);
   fprintf(fileout,"P3VIEW\n");
   for(i=0;i<nmeshes;i++){
     mesh *meshi;

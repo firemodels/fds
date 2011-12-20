@@ -1335,7 +1335,7 @@ void drawpatch_texture(const mesh *meshi){
 
   /* if a contour boundary does not match a blockage face then draw "both sides" of boundary */
 
-  if((use_transparency_data==1&&p3cont2d==LINE_CONTOURS)||setpatchchopmin==1||setpatchchopmax==1)transparenton();
+  if((use_transparency_data==1&&contour_type==LINE_CONTOURS)||setpatchchopmin==1||setpatchchopmax==1)transparenton();
   glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
   glEnable(GL_TEXTURE_1D);
   glBindTexture(GL_TEXTURE_1D,texture_patch_colorbar_id);
@@ -1566,7 +1566,7 @@ void drawpatch_texture(const mesh *meshi){
     glEnd();
   }
   glDisable(GL_TEXTURE_1D);
-  if((use_transparency_data==1&&p3cont2d==LINE_CONTOURS)||setpatchchopmin==1||setpatchchopmax==1)transparentoff();
+  if((use_transparency_data==1&&contour_type==LINE_CONTOURS)||setpatchchopmin==1||setpatchchopmax==1)transparentoff();
 }
 
 /* ------------------ drawpatch_texture_threshold ------------------------ */
@@ -2213,7 +2213,7 @@ void drawpatch(const mesh *meshi){
 
   /* if a contour boundary does not match a blockage face then draw "both sides" of boundary */
 
-  if((use_transparency_data==1&&p3cont2d==LINE_CONTOURS)||setpatchchopmin==1||setpatchchopmax==1)transparenton();
+  if((use_transparency_data==1&&contour_type==LINE_CONTOURS)||setpatchchopmin==1||setpatchchopmax==1)transparenton();
   nn =0;
   glBegin(GL_TRIANGLES);
   for(n=0;n<meshi->npatches;n++){
@@ -2527,7 +2527,7 @@ void drawpatch(const mesh *meshi){
   if(hidepatchsurface==1){
     glEnd();
   }
-  if((use_transparency_data==1&&p3cont2d==LINE_CONTOURS)||setpatchchopmin==1||setpatchchopmax==1)transparentoff();
+  if((use_transparency_data==1&&contour_type==LINE_CONTOURS)||setpatchchopmin==1||setpatchchopmax==1)transparentoff();
 }
 
 /* ------------------ drawpatch_cellcenter ------------------------ */
@@ -2596,7 +2596,7 @@ void drawpatch_cellcenter(const mesh *meshi){
 
   /* if a contour boundary does not match a blockage face then draw "both sides" of boundary */
 
-  if((use_transparency_data==1&&p3cont2d==LINE_CONTOURS)||setpatchchopmin==1||setpatchchopmax==1)transparenton();
+  if((use_transparency_data==1&&contour_type==LINE_CONTOURS)||setpatchchopmin==1||setpatchchopmax==1)transparenton();
   nn =0;
   glBegin(GL_TRIANGLES);
   for(n=0;n<meshi->npatches;n++){
@@ -2799,7 +2799,7 @@ void drawpatch_cellcenter(const mesh *meshi){
   if(hidepatchsurface==1){
     glEnd();
   }
-  if((use_transparency_data==1&&p3cont2d==LINE_CONTOURS)||setpatchchopmin==1||setpatchchopmax==1)transparentoff();
+  if((use_transparency_data==1&&contour_type==LINE_CONTOURS)||setpatchchopmin==1||setpatchchopmax==1)transparentoff();
 }
 
 /* ------------------ drawolythreshold ------------------------ */

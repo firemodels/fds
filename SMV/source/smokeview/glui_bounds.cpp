@@ -678,7 +678,7 @@ extern "C" void glui_bounds_setup(int main_window){
     LISTBOX_colorbar2->set_int_val(colorbartype);
   }
   panel_contours = glui_bounds->add_panel_to_panel(panel_colorbar,_("Colorbar shade type"));
-  plot3d_display=glui_bounds->add_radiogroup_to_panel(panel_contours,&p3cont2d,UPDATEPLOT,PLOT3D_CB);
+  plot3d_display=glui_bounds->add_radiogroup_to_panel(panel_contours,&contour_type,UPDATEPLOT,PLOT3D_CB);
   glui_bounds->add_radiobutton_to_group(plot3d_display,_("Continuous"));
   glui_bounds->add_radiobutton_to_group(plot3d_display,_("Stepped"));
   glui_bounds->add_radiobutton_to_group(plot3d_display,_("Line"));
@@ -2211,7 +2211,7 @@ extern "C" void hide_glui_bounds(void){
 /* ------------------ update_plot3d_display ------------------------ */
 
 extern "C" void update_plot3d_display(void){
-  if(plot3d_display!=NULL)plot3d_display->set_int_val(p3cont2d);
+  if(plot3d_display!=NULL)plot3d_display->set_int_val(contour_type);
 }
 
 /* ------------------ update2_glui_smoke3dframestep ------------------------ */

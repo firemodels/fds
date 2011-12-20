@@ -1009,8 +1009,8 @@ void keyboard_2(unsigned char key, int x, int y){
     case GLUT_ACTIVE_CTRL:
     case GLUT_ACTIVE_SHIFT:
     default:
-      p3cont2d++;
-      if(p3cont2d>2)p3cont2d=0;
+      contour_type++;
+      if(contour_type>2)contour_type=0;
       update_plot3d_display();
       updatecolors(-1);
     }
@@ -1283,7 +1283,7 @@ void keyboard_2(unsigned char key, int x, int y){
         }
         if(show_plot3dkeywords==1){
           fprintf(scriptoutstream,"PLOT3DPROPS\n");
-          fprintf(scriptoutstream," %i %i %i %i\n",plotn,visVector,iveclengths,p3cont2d);
+          fprintf(scriptoutstream," %i %i %i %i\n",plotn,visVector,iveclengths,contour_type);
         }
       }
       if(rflag==0){

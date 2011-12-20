@@ -18,6 +18,7 @@
 #include "smokeviewvars.h"
 #include "update.h"
 #include "IOvolsmoke.h"
+#include "datadefs.h"
 
 // svn revision character string
 char IOscript_revision[]="$Revision$";
@@ -1230,9 +1231,7 @@ void script_plot3dprops(scriptdata *scripti){
   vecfactor = get_vecfactor(&iveclengths);
   printf("iveclengths=%i\n",iveclengths);
 
-  p3cont2d = scripti->ival4;
-  if(p3cont2d<0)p3cont2d=0;
-  if(p3cont2d>2)p3cont2d=2;
+  contour_type=CLAMP(scripti->ival4,0,2);
   update_plot3d_display();
 
   if(visVector==1&&ReadPlot3dFile==1){
