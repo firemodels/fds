@@ -9129,12 +9129,6 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%f %f %f",timebarcolor,timebarcolor+1,timebarcolor+2);
       continue;
       }
-    if(match(buffer,"P3CONT2D")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&contour_type);
-      contour_type=CLAMP(contour_type,0,2);
-      continue;
-      }
     if(match(buffer,"CONTOURTYPE")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&contour_type);
