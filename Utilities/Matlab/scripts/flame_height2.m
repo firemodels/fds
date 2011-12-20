@@ -84,7 +84,7 @@ Hasemi_and_Tokunaga = M.data(:,9);
 Cetegen             = M.data(:,10);
 Delichatsios        = M.data(:,11);
 
-H(1)=loglog(Qstar,Steward,'y-'); hold on
+H(1)=loglog(Qstar,Steward,'-','Color',[.5 0 .5]); hold on
 H(2)=loglog(Qstar,Becker_and_Liang,'g-');
 H(3)=loglog(Qstar(2:16),Cox_and_Chitty(2:16),'c-');
 H(4)=loglog(Qstar,Heskestad,'k-');
@@ -92,13 +92,13 @@ H(5)=loglog(Qstar(3:16),Hasemi_and_Tokunaga(3:16),'m-');
 H(6)=loglog(Qstar,Cetegen,'-','Color',[.5 .5 0]);
 H(7)=loglog(Qstar,Delichatsios,'-','Color',[0 .5 .5]);
 
-H(8)=loglog(Qstar,L_99(:,1),'rsq--');
-H(9)=loglog(Qstar,L_99(:,2),'r^--');
-H(10)=loglog(Qstar,L_99(:,3),'ro--');
+H(8)=loglog(Qstar,max(L_99(:,1:3),[],2),'r--','Linewidth',2);
+% H(9)=loglog(Qstar,L_99(:,2),'r^--');
+% H(10)=loglog(Qstar,L_99(:,3),'ro--');
 
-H(11)=loglog(Qstar,L_95(:,1),'bsq--');
-H(12)=loglog(Qstar,L_95(:,2),'b^--');
-H(13)=loglog(Qstar,L_95(:,3),'bo--');
+H(9)=loglog(Qstar,min(L_95(:,1:3),[],2),'b--','Linewidth',2);
+% H(12)=loglog(Qstar,L_95(:,2),'b^--');
+% H(13)=loglog(Qstar,L_95(:,3),'bo--');
 
 plot_handle = gca;
 plot_position = get(plot_handle,'Position');
@@ -131,12 +131,8 @@ legend_handle=legend(H,...
 					'Hasemi \& Tokunaga',...
 					'Cetegen',...
 					'Delichatsios',...
-					'FDS 99\% $D^*/\delta x=5$',...
-					'FDS 99\% $D^*/\delta x=10$',...
-					'FDS 99\% $D^*/\delta x=20$',...
-					'FDS 95\% $D^*/\delta x=5$',...
-					'FDS 95\% $D^*/\delta x=10$',...
-					'FDS 95\% $D^*/\delta x=20$',...
+					'Max FDS 99\%',...
+					'Min FDS 95\%',...
 					'Location','SoutheastOutside');
 				
 set(legend_handle,'FontSize',Key_Font_Size,'Interpreter','LaTeX')
