@@ -978,7 +978,7 @@ void parse_device_keyword(FILE *stream, device *devicei){
     devicei->object = get_SVOBJECT_type(tok3,missing_device);
   }
   devicei->params=NULL;
-  devicei->timesptr=NULL;
+  devicei->times=NULL;
   devicei->vals=NULL;
   fgets(buffer,255,stream);
   trim_commas(buffer);

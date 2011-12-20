@@ -728,7 +728,7 @@ typedef struct _device{
   int screenijk[3], visval;
   char label[30], *labelptr;
   char quantity[30], unit[30];
-  float **timesptr, *vals;
+  float *times, *vals;
   int *valids;
   int ival,nvals,type2,type2vis;
   mesh *device_mesh;

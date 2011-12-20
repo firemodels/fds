@@ -237,7 +237,7 @@ void getzonedatacsv(int nzonet, int nrooms, int nfires,
   iif=0;
   iihv=0;
   iivv=0;
-  times = *(zonepr_devs[0]->timesptr);
+  times = zonepr_devs[0]->times;
 
   for(i=0;i<nzonet;i++){
     int j;

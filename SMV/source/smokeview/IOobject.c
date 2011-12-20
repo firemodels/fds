@@ -599,7 +599,7 @@ float get_device_val(float time, device *devicei, int *valid){
   nvals = devicei->nvals;
   ival = devicei->ival;
 
-  times = *(devicei->timesptr);
+  times = devicei->times;
   IN_INTERVAL(ival);
   if(ival<nvals-1){
     IN_INTERVAL(ival+1);
@@ -4565,7 +4565,7 @@ void read_device_data(char *file, int filetype, int loadstatus){
   int ntokens;
   int max_line_length,buffer_len;
   device *device_time;
-  float *times, **timesptr;
+  float *times;
 
 // unload data
 
@@ -4580,12 +4580,19 @@ void read_device_data(char *file, int filetype, int loadstatus){
     }
     for(i=0;i<ndeviceinfo;i++){
       device *devicei;
+      float *times;
+      int j;
 
       devicei = deviceinfo + i;
-      if(devicei->filetype!=filetype)continue;
-      if(devicei->timesptr!=NULL){
-        FREEMEMORY(*(devicei->timesptr));
-        FREEMEMORY(devicei->timesptr);
+      if(devicei->filetype!=filetype||devicei->times==NULL)continue;
+      times = devicei->times;
+      FREEMEMORY(devicei->times);
+      for(j=i+1;j<ndeviceinfo;j++){
+        device *devicej;
+
+        devicej = deviceinfo + j;
+        if(devicej->filetype!=filetype)continue;
+        if(times==devicej->times)devicej->times=NULL;
       }
     }
     return;
@@ -4628,8 +4635,6 @@ void read_device_data(char *file, int filetype, int loadstatus){
   }
 
   NewMemory((void **)&times,nrows*sizeof(float));
-  NewMemory((void **)&timesptr,sizeof(float *));
-  *timesptr=times;
   for(i=1;i<ntokens;i++){
     device *devicei;
     int j;
@@ -4645,7 +4650,7 @@ void read_device_data(char *file, int filetype, int loadstatus){
     devicei->filetype=filetype;
     NewMemory((void **)&devicei->vals,nrows*sizeof(float));
     NewMemory((void **)&devicei->valids,nrows*sizeof(int));
-    devicei->timesptr=timesptr;
+    devicei->times=times;
     strcpy(devicei->unit,devcunits[i]);
     devicei->nvals=nrows-2;
   }
@@ -5747,7 +5752,7 @@ void init_device(device *devicei, float *xyz, float *xyzn, int state0, int npara
     devicei->xyznorm[1]=0.0;
     devicei->xyznorm[2]=1.0;
   }
-  devicei->timesptr=NULL;
+  devicei->times=NULL;
   devicei->vals=NULL;
   devicei->nstate_changes=0;
   devicei->istate_changes=0;
