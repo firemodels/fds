@@ -530,26 +530,25 @@ In this case the sum of the mass corrections is zero, as desired:
 
 \subsubsection{Realistic cases}
 
-The discussion above was to provide a simple case for understanding the basic idea behind the correction method.  In a realistic case we must account for multi-dimensional aspects of the problem and for the possibility that neighboring cells may both be out of bounds.  Here again we examine the case of a minimum density boundedness violation. Consider the cell $n = \{i,j,k\}$ in a 3D flow with volume $V_n$ and density $\rho_n^*$ obtained from the transport scheme.  Let ${\sf N}$ denote the set of cells containing $n$ and its neighbors excluding diagonal neighbors (in other words, only include cells which share a face with $n$).  We want to correct any boundedness violations for the $n$th cell via
+The discussion above was to provide a simple case for understanding the basic idea behind the correction method.  In a realistic case we must account for multi-dimensional aspects of the problem and for the possibility that neighboring cells may both be out of bounds.  Here again we examine the case of a minimum density boundedness violation. Consider a grid cell whose
+density is less than the minimum. Denote this cell with a ``$c$'' for center. Its volume is $V_c$ and density is $\rho_c^*$, obtained from the transport scheme.  Let the subscript ``$n$'' denote any of the six neighboring cells (in other words, only include cells which share a face with cell $c$).  We want to correct any boundedness violations for the  cell $c$ by shifting mass to or from its neighboring cells $n$:
 \begin{equation}
 \label{eqn_rhocor2}
-\rho_n = \rho_n^* + \delta \rho_n
+\rho_c = \rho_c^* + \delta \rho_c \quad ; \quad \rho_n = \rho_n^* + \delta \rho_n
 \end{equation}
-Let $\delta \rho_{mn}$ denote the density change for cell $m$ in ${\sf N}$ (the neighborhood of $n$) due to a boundedness violation in $n$. We obtain the final correction for cell $n$ by
-\begin{equation}
-\label{eqn_sumdrho}
-\delta \rho_n = \sum_{m\in{\sf N}} \delta \rho_{nm}
-\end{equation}
-where
-\begin{equation}
+We first define the amount of mass we wish to shift. For the case where $\rho^*_c < \rho_{\min}$, we need to shift the following amount of mass:
+\be m_c = \left( \rho_{\min} - \rho^*_c \right) \, V_c  \ee
+from the neighboring cells. The amount of mass each neighboring cell has to shift (without dropping below $\rho_{\min}$) is:
+The total mass that can be shifted to the neighboring cells is 
+\be m_n = \left( \max[\rho_{\min},\rho_n^*] - \rho_{\min} \right) V_n \ee
+We obtain the correction terms:
+
+\begin{eqnarray}
 \label{eqn_rhomn}
-\delta \rho_{mn} = \left\{ \begin{array}{ll}  \displaystyle \max(0,\rho_{min} - \rho_n^*) & \mbox{if} \quad m=n  \\ \displaystyle -c_n( \max[\rho_{min},\rho_m^*] - \max[\rho_{min},\rho_n^*])\frac{V_n}{V_m} & \mbox{if} \quad m\ne n \end{array} \right.
-\end{equation}
-The smoothing parameter in (\ref{eqn_rhomn}) is obtained from
-\begin{equation}
-\label{eqn_realc}
-c_n = \frac{\max(0,\rho_{min} - \rho_n^*)}{ \sum_{s\in {\sf N},s\ne n} ( \max[\rho_{min},\rho_s^*] - \max[\rho_{min},\rho_n^*] )}
-\end{equation}
+\delta \rho_c &=& \min \left[ m_c , \sum m_n \right] / V_c \\
+\delta \rho_n &=& - \min \left[ \frac{m_c}{\sum m_n} , 1 \right] m_n/V_n
+\end{eqnarray}
+
 
 
 \chapter{The Dynamic Smagorinsky Model}
@@ -783,7 +782,7 @@ Solving for $\mathbf{U}_p$ leads to
     \label{mom_U_p}
     \mathbf{U}_p = \frac{\mathbf{u}_{p,0} + \alpha_p \mathbf{U}_{p,0} + \mathbf{g} t - \mathbf{u}_g}{1 + \alpha_p} - \frac{\mathbf{u}_{r,0}}{(1 + \beta_p t)(1 + \alpha_p)} \,.
 \end{align}
-Eq. (\ref{mom_U_p}) can be substituted into Eq. (\ref{ur_short}) to get the solution for $\mathbf{u}_p$. 
+Eq. (\ref{mom_U_p}) can be substituted into Eq. (\ref{ur_short}) to get the solution for $\mathbf{u}_p$.
 \begin{align*}
     \mathbf{u}_p &= \mathbf{U}_p + \frac{\mathbf{u}_{p,0} - \mathbf{U}_{p,0}}{1 + \beta_p t} + \mathbf{u}_g \\
     &= \frac{\mathbf{u}_{p,0} + \alpha_p \mathbf{U}_{p,0} + \mathbf{g} t - \mathbf{u}_g}{1 + \alpha_p} - \frac{\mathbf{u}_{p,0} - \mathbf{U}_{p,0}}{(1 + \beta_p t)(1 + \alpha_p)} + \frac{\mathbf{u}_{p,0} - \mathbf{U}_{p,0}}{1 + \beta_p t} + \mathbf{u}_g \\
@@ -810,11 +809,11 @@ The theoretical accuracy of the equation for $\mathbf{x}^{n+1}$ appears to be $\
 %\subsubsection{Topi Sikanen, entered by Michael Van Order}
 \label{app_abscoeff}
 
-Pool fires depend on radiation feedback from the flames to the fuel surface. The feedback comes through convection, conduction and radiation. For large pool fires radiation heat transfer dominates. Radiation transport in pool fires has received a lot of attention. Studies have been made to determine the spectra of emitted radiation \cite{Suo-Anttila:PCT2009} as well as to characterize the radiation absorption by the gasses within the flame \cite{Wakatsuki:CST2008}. The transport and absorption of thermal radiation within the liquid fuel has received considerably less attention. 
+Pool fires depend on radiation feedback from the flames to the fuel surface. The feedback comes through convection, conduction and radiation. For large pool fires radiation heat transfer dominates. Radiation transport in pool fires has received a lot of attention. Studies have been made to determine the spectra of emitted radiation \cite{Suo-Anttila:PCT2009} as well as to characterize the radiation absorption by the gasses within the flame \cite{Wakatsuki:CST2008}. The transport and absorption of thermal radiation within the liquid fuel has received considerably less attention.
 
 In order to model the response of the fuel to the incident radiation it is necessary to model the absorption of this radiation. For fuels such as wood, most of the incident radiation is absorbed at a thin region near the surface. For semitransparent materials such as plastics or liquid fuels thermal radiation may penetrate a finite depth in to the fuel.  The in-depth radiation absorption by semitransparent fuels has been to best of our knowledge been studied only in the case of PMMA ~\cite{Stoliarov:CF2009}, polymer films ~\cite{Tsilingiris:ECM2003} and in liquid pool fires ~\cite{Suo-Anttila:PCT2009}.  In the latter study, the effect of radiation absorption on the burning rates was not investigated.  Most of the research considering the in-depth radiation absorption in liquids concerns boil-over of liquid pool fires on water \cite{Broeckmann:JLPPI1995}. The effect of in-depth radiation absorption on evaporation of fuel droplets has also received some attention \cite{Sazhin:IJHMT2004b}.
 
-Most liquids are highly selective absorbers, absorbing intensively in some wavelength regions while being transparent in other regions.  This leads to models of radiation transport that are both computationally intensive and for which experimental data is scarce. In this paper we attempt to characterize the absorption of radiation by liquid fuels using effective absorption coefficients similar to those used by \cite{Madhav:IJMP1995} and \cite{Manohar:JHT1995} in modeling effect of radiation absorption on PMMA pyrolysis. 
+Most liquids are highly selective absorbers, absorbing intensively in some wavelength regions while being transparent in other regions.  This leads to models of radiation transport that are both computationally intensive and for which experimental data is scarce. In this paper we attempt to characterize the absorption of radiation by liquid fuels using effective absorption coefficients similar to those used by \cite{Madhav:IJMP1995} and \cite{Manohar:JHT1995} in modeling effect of radiation absorption on PMMA pyrolysis.
 
 \subsubsection{Determining Absorption Coefficients}
 
@@ -841,7 +840,7 @@ However absorption spectra that begin from 1 $\mu$m exists for a few liquids of 
     \label{fig_absspec}
     \centering
     \includegraphics{FIGURES/Absorption_spectra.pdf}
-    \caption{Absorption spectra of liquids considered in this study.} 
+    \caption{Absorption spectra of liquids considered in this study.}
 \end{figure}
 
 \subsubsection{Effective Absorption Coefficients}
@@ -850,9 +849,9 @@ Often we are not interested in resolving the spectra of the transmitted radiatio
 
 The absorption coefficients of liquids are highly wavelength dependent being transparent in some areas. In this case, the Planck-mean absorption coefficients lead to mean absorption coefficients that are too large by several orders of magnitude. Tsiliringis et al. \cite{Tsilingiris:ECM2003} proposed the use of absorption coefficient defined as, "in conjuction with Beer's law model of radiation transport."
 
-It is preferable to determine an effective absorption coefficient that attempts to replicate the absorption of radiation over a certain path length $S$. Here the path length is not a physical measure of the system but some characteristic length over which the majority of the radiation is assumed absorbed. 
+It is preferable to determine an effective absorption coefficient that attempts to replicate the absorption of radiation over a certain path length $S$. Here the path length is not a physical measure of the system but some characteristic length over which the majority of the radiation is assumed absorbed.
 
-Here we find the intensity for finite number of wavelength bands from Equation (\ref{eqn_beerslaw}) . Then the total transmitted intensity is found by integrating over all wavelengths 
+Here we find the intensity for finite number of wavelength bands from Equation (\ref{eqn_beerslaw}) . Then the total transmitted intensity is found by integrating over all wavelengths
 
 \begin{equation}
 \label{eqn_totintens}
@@ -866,19 +865,19 @@ The effective mean absorption coefficient is then found by minimizing the norm o
      \ \bar{\kappa} = \mbox{arg } \underbrace{\mbox{min}}_{\kappa} \sum_{i=1}^{N} \left(\hat{I}_{S_i}-\bar{I}_{S_i}\right)^{2}  \mbox{.}
 \end{equation}
 
-Here $\hat{I}_S$ is the intensity predicted by our model.  The absorption coefficients so calculated, depend on both the path-length $S$ and the spectrum of the incoming radiation. The absorption coefficient $\bar{\kappa}$ itself should be seen as a curve fit parameter. 
+Here $\hat{I}_S$ is the intensity predicted by our model.  The absorption coefficients so calculated, depend on both the path-length $S$ and the spectrum of the incoming radiation. The absorption coefficient $\bar{\kappa}$ itself should be seen as a curve fit parameter.
 
-The least squares fit is chosen here since we want to reproduce the distribution of the heat source in a one dimensional heat conduction equation for the liquid. Alternatively we might choose reproduce exactly the transmitted fraction of radiation on at some path length $S$. We could select the path length to be the thickness of the fuel sample. In this case, the fuel would absorb the correct amount of radiation energy. However , the distribution of the heat source is likely to be wrong. 
+The least squares fit is chosen here since we want to reproduce the distribution of the heat source in a one dimensional heat conduction equation for the liquid. Alternatively we might choose reproduce exactly the transmitted fraction of radiation on at some path length $S$. We could select the path length to be the thickness of the fuel sample. In this case, the fuel would absorb the correct amount of radiation energy. However , the distribution of the heat source is likely to be wrong.
 
-It can be easily seen that increasing the path-length leads to lower effective absorption coefficients.  The attenuation of radiation in the fuels shows a phase of exponential decay followed by approximately constant transmitted fraction of radiation. If the liquid layer is thick enough, that we can assume that all radiation is absorbed within the layer, we can concentrate on replicating the profile of radiation attenuation. If, however, it is expected that the radiation passing through the liquid layer play an important role, we should select the absorption coefficient so that the correct amount of radiation is transmitted through the layer. Such situation might be for example a thin layer of fuel burning on top of water. Here the radiation passing through the fuel layer may heat up the underlying water and lead to boil-over earlier than only conduction would predict. 
+It can be easily seen that increasing the path-length leads to lower effective absorption coefficients.  The attenuation of radiation in the fuels shows a phase of exponential decay followed by approximately constant transmitted fraction of radiation. If the liquid layer is thick enough, that we can assume that all radiation is absorbed within the layer, we can concentrate on replicating the profile of radiation attenuation. If, however, it is expected that the radiation passing through the liquid layer play an important role, we should select the absorption coefficient so that the correct amount of radiation is transmitted through the layer. Such situation might be for example a thin layer of fuel burning on top of water. Here the radiation passing through the fuel layer may heat up the underlying water and lead to boil-over earlier than only conduction would predict.
 
 \subsubsection{Absorption Coefficients of Selected Fuels}
 
 Absorption coefficients are determined from Eqn. \ref{eqn_effcoeff}. The data used in determining the coefficients is listed in Table \ref{tbl_wavnum}. When available, spectrally resolved absorption coefficients are used for determining the total transmitted fraction of radiation according to Eqns. \ref{eqn_beerslaw} and \ref{eqn_totintens}.  The transmission data in Suo-Anttila et al. 2009 \cite{Suo-Anttila:PCT2009} was used for JP-8, ethanol and toluene. The spectrally resolved absorption coefficients from Keefe et al. were used to calculate the total transmission for toluene, benzene, water and methanol. Complex refractive index spectra of diesel reported by Sazhin et al. 2004a \cite{Sazhin:JHT2004a} was used to calculate the transmission.
 
-Figure \ref{fig_trans2} and Figure \ref{fig_trans3} show the transmitted fraction of radiation predicted by the FDS radiation model with the absorption coefficients listed in Table \ref{tbl_abscoeff}, compared with the total transmission calculated from Eqn. \ref{eqn_beerslaw}. 
+Figure \ref{fig_trans2} and Figure \ref{fig_trans3} show the transmitted fraction of radiation predicted by the FDS radiation model with the absorption coefficients listed in Table \ref{tbl_abscoeff}, compared with the total transmission calculated from Eqn. \ref{eqn_beerslaw}.
 
-The two-flux model of radiation transport predicts the attenuation of radiation well for toluene and methanol, both of which have rather low absorption coefficients. In the other extreme, the attenuation of radiation by water and ethanol is poorly replicated. Here only the exponential attenuation near the surface is reasonably replicated. 
+The two-flux model of radiation transport predicts the attenuation of radiation well for toluene and methanol, both of which have rather low absorption coefficients. In the other extreme, the attenuation of radiation by water and ethanol is poorly replicated. Here only the exponential attenuation near the surface is reasonably replicated.
 
 \begin{table}[ht]
 \caption{Characterization of data sources used for determining absorption coefficients and effective absorption coefficients for selected liquids. Blackbody temperature 1450 K and path length 3 mm. Data from Suo-Anttila et al. 2009 \cite{Suo-Anttila:PCT2009}.}
@@ -894,7 +893,7 @@ Toluene \cite{Suo-Anttila:PCT2009}   &  -          & 187.5   \\
 Toluene \cite{Bertie:AS1994a}        &  436-6500   & 160.8   \\
 Methanol                             &  2-8000     & 52      \\
 Water                                &  xxxx-xxxx  & 1578    \\
-Benzene                              &  xxxx-xxxx  & 123     \\ 
+Benzene                              &  xxxx-xxxx  & 123     \\
 \hline
 \end{tabular}
 \label{tbl_abscoeff}
@@ -918,7 +917,7 @@ Benzene                              &  xxxx-xxxx  & 123     \\
     \centering
     \includegraphics[width=3.0in]{FIGURES/KAPPA_VS_TEMP_WD.pdf}
     \includegraphics[width=3.0in]{FIGURES/KAPPA_VS_TEMP_TMB.pdf}
-   
+
     \caption{Sensitivity of effective absorption coefficient to incoming radiation temperature.}
     \label{fig_kapvtemp}
 \end{figure}
