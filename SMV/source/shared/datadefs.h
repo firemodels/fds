@@ -5,6 +5,10 @@
 #ifndef DATADEFS_H_DEFINED
 #define DATADEFS_H_DEFINED
 
+#ifndef PIFACTOR
+#define PIFACTOR (3.14159/180.0)
+#endif
+
 #ifndef MAX
 #define MAX(a,b)  ((a)>(b) ? (a) : (b))
 #define MIN(a,b)  ((a)<(b) ? (a) : (b))

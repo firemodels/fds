@@ -521,36 +521,24 @@ void draw_devices_val(void){
 
 /* ----------------------- get_vdevice_vel ----------------------------- */
 
-void get_vdevice_vel(float time, vdevice *vdevicei, float *vel, float *vminmax, float *angleminmax, int *valid_vel){
+void get_vdevice_vel(float time, vdevice *vdevicei, float *vel, float *angle, float *dvel, float *dangle, int *valid_vel){
   float uvel=0.0, vvel=0.0, wvel=0.0;
   device *udev, *vdev, *wdev;
-  int validu=1,validv=1,validw=1;
+  int validu=0,validv=0,validw=0;
 
   udev = vdevicei->udev;
   vdev = vdevicei->vdev;
   wdev = vdevicei->wdev;
 
   *valid_vel=0;
-  if(udev==NULL){
-    validu=0;
-  }
-  else{
+  if(udev!=NULL){
     uvel=get_device_val(time,udev,&validu);
-    if(validu==0)*valid_vel=0;
   }
-  if(vdev==NULL){
-    validv=0;
-  }
-  else{
+  if(vdev!=NULL){
     vvel=get_device_val(time,vdev,&validv);
-    if(validv==0)*valid_vel=0;
   }
-  if(wdev==NULL){
-    validw=0;
-  }
-  else{
+  if(wdev!=NULL){
     wvel=get_device_val(time,wdev,&validw);
-    if(validw==0)*valid_vel=0;
   }
   if(validu==1&&validv==1&&validw==1){
     vel[0]=uvel;
@@ -559,28 +547,27 @@ void get_vdevice_vel(float time, vdevice *vdevicei, float *vel, float *vminmax, 
     *valid_vel=1;
   }
   if(vdevicei->veldev!=NULL&&vdevicei->angledev!=NULL){
-    float  velocity,  angle;
-    float dvelocity, dangle;
-    int  valid_velocity,  valid_angle;
-    int dvalid_velocity=0.0, dvalid_angle=0.0;
-#define PIFACTOR 3.14159/180.0     
+    float  velocity,  ang;
+    float dvelocity=0.0, dang=0.0;
+    int  valid_velocity=0,  valid_angle=0;
+    int dvalid_velocity=0, dvalid_angle=0;
 
     velocity=get_device_val(time,vdevicei->veldev,&valid_velocity);
     if(vdevicei->sd_veldev!=NULL){
       dvelocity=get_device_val(time,vdevicei->sd_veldev,&dvalid_velocity);
       if(dvalid_velocity==0)dvelocity=0.0;
     }
-    angle=get_device_val(time,vdevicei->angledev,&valid_angle);
+    ang=get_device_val(time,vdevicei->angledev,&valid_angle);
     if(vdevicei->sd_angledev!=NULL){
-      dangle=get_device_val(time,vdevicei->sd_angledev,&dvalid_angle);
-      if(dvalid_angle==0)dangle=0.0;
+      dang=get_device_val(time,vdevicei->sd_angledev,&dvalid_angle);
+      if(dvalid_angle==0)dang=0.0;
     }
     if(valid_velocity==1&&valid_angle==1){
-      vminmax[0]=velocity-dvelocity;
-      vminmax[1]=velocity+dvelocity;
-      angleminmax[0]=angle-dangle;
-      angleminmax[1]=angle+dangle;
-      *valid_vel=1;
+      vel[0]=velocity;
+      dvel[0]=dvelocity;
+      angle[0]=ang;
+      dangle[0]=dang;
+      *valid_vel=2;
     }
   }
 }
@@ -702,16 +689,19 @@ void draw_devices(void){
     glPointSize(vectorpointsize);
     for(i=0;i<nvdeviceinfo;i++){
       vdevice *vdevi;
-      float vel[3],*xyz, xxx1[3], xxx2[3];
+      float vel[3], angle, dvel, dangle;
+      float *xyz;
       float velminmax[2], angleminmax[2];
       int j;
       int valid;
 
       vdevi = vdeviceinfo + i;
       if(vdevi->unique==0)continue;
-      xyz=vdevi->valdev->xyz;//xxx
-      get_vdevice_vel(times[itimes], vdevi, vel, velminmax, angleminmax,&valid);
+      xyz=vdevi->valdev->xyz;
+      get_vdevice_vel(times[itimes], vdevi, vel, &angle, &dvel, &dangle, &valid);
       if(valid==1){
+        float xxx1[3], xxx2[3];
+
         for(j=0;j<3;j++){
           xxx1[j] = xyz[j];
           xxx2[j] = xyz[j] + xyzmaxdiff*vel[j]/max_dev_vel;
@@ -723,6 +713,20 @@ void draw_devices(void){
         glBegin(GL_POINTS);
         glVertex3fv(xxx2);
         glEnd();
+      }
+      if(valid==2){
+        float d1=0.0, d2, height;
+        unsigned char conecolor[4]={255,0,0,255};
+
+        height=xyzmaxdiff*vel[0]/max_dev_vel;
+        d1=0.0;
+        d2=MAX(height*0.1,sin(PIFACTOR*dangle)*height);
+        glPushMatrix();
+        glTranslatef(xyz[0],xyz[1],xyz[2]);
+        glRotatef(angle,0.0,0.0,1.0);
+        glRotatef(90.0,1.0,0.0,0.0);
+        drawtrunccone(d1,d2,height,conecolor);
+        glPopMatrix();
       }
     }
     glPopMatrix();
