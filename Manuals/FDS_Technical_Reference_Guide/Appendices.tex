@@ -530,24 +530,40 @@ In this case the sum of the mass corrections is zero, as desired:
 
 \subsubsection{Realistic cases}
 
-The discussion above was to provide a simple case for understanding the basic idea behind the correction method.  In a realistic case we must account for multi-dimensional aspects of the problem and for the possibility that neighboring cells may both be out of bounds.  Here again we examine the case of a minimum density boundedness violation. Consider a grid cell whose
-density is less than the minimum. Denote this cell with a ``$c$'' for center. Its volume is $V_c$ and density is $\rho_c^*$, obtained from the transport scheme.  Let the subscript ``$n$'' denote any of the six neighboring cells (in other words, only include cells which share a face with cell $c$).  We want to correct any boundedness violations for the  cell $c$ by shifting mass to or from its neighboring cells $n$:
+The discussion above was to provide a simple case for understanding the basic idea behind the correction method.  In a realistic case we must account for multi-dimensional aspects of the problem and for the possibility that neighboring cells may both be out of bounds.  Consider a grid cell whose
+density is outside the specified range. Denote this cell with a ``$c$'' for center. Its volume is $V_c$ and density is $\rho_c^*$, obtained from the transport scheme.  Let the subscript ``$n$'' denote any of the six neighboring cells (in other words, only include cells which share a face with cell $c$).  We want to correct any boundedness violations for the  cell $c$ by shifting mass to or from its neighboring cells $n$:
 \begin{equation}
 \label{eqn_rhocor2}
 \rho_c = \rho_c^* + \delta \rho_c \quad ; \quad \rho_n = \rho_n^* + \delta \rho_n
 \end{equation}
-We first define the amount of mass we wish to shift. For the case where $\rho^*_c < \rho_{\min}$, we need to shift the following amount of mass:
-\be m_c = \left( \rho_{\min} - \rho^*_c \right) \, V_c  \ee
-from the neighboring cells. The amount of mass each neighboring cell has to shift (without dropping below $\rho_{\min}$) is:
-The total mass that can be shifted to the neighboring cells is 
-\be m_n = \left( \max[\rho_{\min},\rho_n^*] - \rho_{\min} \right) V_n \ee
-We obtain the correction terms:
-
-\begin{eqnarray}
+We first define the total amount of mass we wish to shift:
+\be m_c = | \rho^*_c - \rho_{\rm cut} | \, V_c  \ee
+where $\rho_{\rm cut}$ is the appropriate upper or lower bound of the density.
+The amount of mass each neighboring cell can accommodate without falling outside the range is:
+\be m_n = \Big| \min \Big[ \rho_{\max} , \max[\rho_{\min},\rho_n^*] \Big] - \rho_{\rm cut} \Big| \, V_n \ee
+The correction terms that guarantee mass conservation ($V_c \, \delta \rho_c = - \sum V_n \, \delta \rho_n$) are:
+\be
 \label{eqn_rhomn}
-\delta \rho_c &=& \min \left[ m_c , \sum m_n \right] / V_c \\
-\delta \rho_n &=& - \min \left[ \frac{m_c}{\sum m_n} , 1 \right] m_n/V_n
-\end{eqnarray}
+\delta \rho_c = \pm \min \left[ m_c , \sum m_n \right] / V_c  \quad ; \quad
+\delta \rho_n = \mp \min \left[ \frac{m_c}{\sum m_n} , 1 \right] m_n/V_n
+\ee
+
+Next, to correct species mass fractions that are out of bounds, we follow the exact same procedure.
+\begin{equation}
+\label{eqn_rhocor2}
+Z_c = Z_c^* + \delta Z_c \quad ; \quad Z_n = Z_n^* + \delta Z_n
+\end{equation}
+We define the amount of species mass we wish to shift:
+\be m_c = | Z^*_c - Z_{\rm cut} | \, \rho_c \, V_c  \ee
+where $Z_{\rm cut}$ is either 0 or 1.
+The amount of species mass each neighboring cell can accommodate without falling outside the range is:
+\be m_n = \Big| \min \Big[ 1 , \max[0,Z_n^*] \Big] - Z_{\rm cut} \Big| \, \rho_n \, V_n \ee
+The correction terms that guarantee mass conservation ($V_c \, \rho_c \, \delta Z_c = - \sum V_n \, \rho_n \, \delta Z_n$) are:
+\be
+\label{eqn_Zmn}
+\delta Z_c = \pm \min \left[ m_c , \sum m_n \right] / (\rho_c \, V_c)  \quad ; \quad
+\delta Z_n = \mp \min \left[ \frac{m_c}{\sum m_n} , 1 \right] m_n/(\rho_n \, V_n)
+\ee
 
 
 
