@@ -508,11 +508,11 @@ INTEGER  :: N, NN,IIG,JJG,KKG,I,J,K,IW,II,JJ,KK,IOR,IC,IWUP,IWDOWN, &
             ISTART, IEND, ISTEP, JSTART, JEND, JSTEP, &
             KSTART, KEND, KSTEP, NSTART, NEND, NSTEP, &
             I_UIID, N_UPDATES, IBND, TYY, NOM, IBC,EVAP_INDEX,NRA, I_DROP
-REAL(EB) :: XID,YJD,ZKD,ZZ_GET(0:N_TRACKED_SPECIES),KAPPA_PART,SURFACE_AREA
+REAL(EB) :: XID,YJD,ZKD,ZZ_GET(0:N_TRACKED_SPECIES),KAPPA_PART,SURFACE_AREA,WGT,OMWGT
 INTEGER :: IPC,IID,JJD,KKD,ID
 LOGICAL :: UPDATE_INTENSITY
 REAL(EB), POINTER, DIMENSION(:,:,:) :: IL=>NULL(), UIIOLD=>NULL(), KAPPAW=>NULL(), &
-                                       KFST4W=>NULL(), EXTCOE=>NULL(), SCAEFF=>NULL(),IL_UP=>NULL(),UIIP=>NULL()
+                                       KFST4W=>NULL(), EXTCOE=>NULL(), SCAEFF=>NULL(),IL_UP=>NULL()
 REAL(EB), POINTER, DIMENSION(:)     :: OUTRAD_W=>NULL(), INRAD_W=>NULL()
 INTEGER, INTENT(IN) :: NM
 TYPE (OMESH_TYPE), POINTER :: M2=>NULL()
@@ -661,40 +661,49 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
    ! Compute source term KAPPA*4*SIGMA*TMP**4
 
-   HRR  = 0._EB
-   RSUM = 0._EB
-   BBF  = 1._EB
+   HRR   = 0._EB
+   RSUM  = 0._EB
+   WGT   = 0.1_EB + 0.9_EB/REAL(RAD_CALL_COUNTER,EB)
+   OMWGT = 1._EB-WGT
 
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            IF (WIDE_BAND_MODEL) BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),TMP(I,J,K))
-            KFST4(I,J,K) = 0.9_EB*KFST4(I,J,K) + 0.1_EB*BBF*KAPPA(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4
-            IF (RADIATIVE_FRACTION*Q(I,J,K)>KFST4(I,J,K)) THEN
-               VOL  = R(I)*DX(I)*DY(J)*DZ(K)
-               HRR  = HRR  + Q(I,J,K)*VOL
-               RSUM = RSUM + KFST4(I,J,K)*VOL
-            ENDIF
+   IF (WIDE_BAND_MODEL) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),TMP(I,J,K))
+               KFST4(I,J,K) = BBF*KAPPA(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
+   ENDIF
+
+   IF (.NOT.WIDE_BAND_MODEL) THEN ! Only apply the correction to KFST4 for gray gas model
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               KFST4(I,J,K) = OMWGT*KFST4(I,J,K) + WGT*KAPPA(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4
+               IF (RADIATIVE_FRACTION*Q(I,J,K)>KFST4(I,J,K)) THEN
+                  VOL  = R(I)*DX(I)*DY(J)*DZ(K)
+                  HRR  = HRR  + Q(I,J,K)*VOL
+                  RSUM = RSUM + KFST4(I,J,K)*VOL
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
 
    ! Correct the source term in the RTE based on user-specified RADIATIVE_FRACTION
 
    IF (RSUM>0._EB) THEN
       RTE_SOURCE_CORRECTION_FACTOR = RADIATIVE_FRACTION*HRR/RSUM
-      IF (WIDE_BAND_MODEL) THEN
-         UIIP => UIID(:,:,:,IBND)
-      ELSE
-         UIIP => UII
-      ENDIF
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                IF (RADIATIVE_FRACTION*Q(I,J,K)>KFST4(I,J,K)) THEN
-                  KFST4(I,J,K) = KFST4(I,J,K)*RTE_SOURCE_CORRECTION_FACTOR + KAPPA(I,J,K)*UIIP(I,J,K)
+                  KFST4(I,J,K) = KFST4(I,J,K)*RTE_SOURCE_CORRECTION_FACTOR + KAPPA(I,J,K)*UII(I,J,K)
                ENDIF
             ENDDO
          ENDDO
