@@ -4559,7 +4559,7 @@ void setup_tree_devices(void){
     treei->nvdevices=nvdevices;
     NewMemory((void **)&treei->vdevices,nvdevices*sizeof(vdevice **));
     treei++;
-    nvdevices=0;
+    nvdevices=1;
   }
   treei->nvdevices=nvdevices;
   if(nvdevices>0){
