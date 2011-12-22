@@ -25,7 +25,6 @@ SUBROUTINE MASS_FINITE_DIFFERENCES(NM)
 ! Compute spatial differences for density equation
 
 USE COMP_FUNCTIONS, ONLY: SECOND
-USE PHYSICAL_FUNCTIONS, ONLY: GET_AVERAGE_SPECIFIC_HEAT
 USE GLOBAL_CONSTANTS, ONLY: N_TRACKED_SPECIES,NULL_BOUNDARY,OPEN_BOUNDARY,INTERPOLATED_BOUNDARY, &
                             PREDICTOR,CORRECTOR,EVACUATION_ONLY,SOLID_PHASE_ONLY,TUSED,DEBUG_OPENMP,SOLID_BOUNDARY, &
                             NO_MASS_FLUX,SPECIFIED_MASS_FLUX,HVAC_BOUNDARY, &
@@ -123,6 +122,8 @@ WLOOP_FL: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    
    ! overwrite first off-wall advective flux if flow is away from the wall and if the face is not also a wall cell
 
+   IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY .AND. BOUNDARY_TYPE(IW)/=OPEN_BOUNDARY) THEN
+
    OFF_WALL_SELECT_1: SELECT CASE(IOR)
       CASE( 1) OFF_WALL_SELECT_1
          !      ghost          FX/UU(II+1)
@@ -161,6 +162,8 @@ WLOOP_FL: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             FZ(II,JJ,KK-2) = WW(II,JJ,KK-2)*SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ,FLUX_LIMITER)
          ENDIF
    END SELECT OFF_WALL_SELECT_1
+
+   ENDIF
    
    SELECT CASE(IOR)
       CASE( 1)
@@ -294,58 +297,56 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          JJG = IJKW(7,IW)
          KKG = IJKW(8,IW)
          
-         ! overwrite first off-wall advective flux if flow is away from the wall and if the face is not also a wall cell
+         ! Overwrite first off-wall advective flux if flow is away from the wall and if the face is not also a wall cell
 
-         OFF_WALL_SELECT_2: SELECT CASE(IOR)
-            CASE( 1) OFF_WALL_SELECT_2
-               !      ghost          FX/UU(II+1)
-               ! ///   II   ///  II+1  |  II+2  | ...
-               !                       ^ WALL_INDEX(II+1,+1)
-               IF ((UU(II+1,JJ,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0)) THEN
-                  ZZZ(1:3) = (/RHO_F(IW),RHOP(II+1:II+2,JJ,KK)/)*(/ZZ_F(IW,N),ZZP(II+1:II+2,JJ,KK,N)/)
-                  FX(II+1,JJ,KK) = UU(II+1,JJ,KK)*SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZZ,FLUX_LIMITER)*R(II+1)
-                  IF (INCLUDE_NUMERICAL_DIFFUSION) &
-                     DFX(II+1,JJ,KK,N) = FX(II+1,JJ,KK) - 0.5_EB*(ZZZ(2)+ZZZ(3))*UU(II+1,JJ,KK)
-               ENDIF
-            CASE(-1) OFF_WALL_SELECT_2
-               !            FX/UU(II-2)     ghost
-               ! ... |  II-2  |  II-1  ///   II   ///
-               !              ^ WALL_INDEX(II-1,-1)
-               IF ((UU(II-2,JJ,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0)) THEN
-                  ZZZ(2:4) = (/RHOP(II-2:II-1,JJ,KK),RHO_F(IW)/)*(/ZZP(II-2:II-1,JJ,KK,N),ZZ_F(IW,N)/)
-                  FX(II-2,JJ,KK) = UU(II-2,JJ,KK)*SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZZ,FLUX_LIMITER)*R(II-2)
-                  IF (INCLUDE_NUMERICAL_DIFFUSION) &
-                     DFX(II-2,JJ,KK,N) = FX(II-2,JJ,KK) - 0.5_EB*(ZZZ(2)+ZZZ(3))*UU(II-2,JJ,KK)
-               ENDIF
-            CASE( 2) OFF_WALL_SELECT_2
-               IF ((VV(II,JJ+1,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0)) THEN
-                  ZZZ(1:3) = (/RHO_F(IW),RHOP(II,JJ+1:JJ+2,KK)/)*(/ZZ_F(IW,N),ZZP(II,JJ+1:JJ+2,KK,N)/)
-                  FY(II,JJ+1,KK) = VV(II,JJ+1,KK)*SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZZ,FLUX_LIMITER)
-                  IF (INCLUDE_NUMERICAL_DIFFUSION) &
-                     DFY(II,JJ+1,KK,N) = FY(II,JJ+1,KK) - 0.5_EB*(ZZZ(2)+ZZZ(3))*VV(II,JJ+1,KK)
-               ENDIF
-            CASE(-2) OFF_WALL_SELECT_2
-               IF ((VV(II,JJ-2,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0)) THEN
-                  ZZZ(2:4) = (/RHOP(II,JJ-2:JJ-1,KK),RHO_F(IW)/)*(/ZZP(II,JJ-2:JJ-1,KK,N),ZZ_F(IW,N)/)
-                  FY(II,JJ-2,KK) = VV(II,JJ-2,KK)*SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZZ,FLUX_LIMITER)
-                  IF (INCLUDE_NUMERICAL_DIFFUSION) &
-                     DFY(II,JJ-2,KK,N) = FY(II,JJ-2,KK) - 0.5_EB*(ZZZ(2)+ZZZ(3))*VV(II,JJ-2,KK)
-               ENDIF
-            CASE( 3) OFF_WALL_SELECT_2
-               IF ((WW(II,JJ,KK+1)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0)) THEN
-                  ZZZ(1:3) = (/RHO_F(IW),RHOP(II,JJ,KK+1:KK+2)/)*(/ZZ_F(IW,N),ZZP(II,JJ,KK+1:KK+2,N)/)
-                  FZ(II,JJ,KK+1) = WW(II,JJ,KK+1)*SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZZ,FLUX_LIMITER)
-                  IF (INCLUDE_NUMERICAL_DIFFUSION) &
-                     DFZ(II,JJ,KK+1,N) = FZ(II,JJ,KK+1) - 0.5_EB*(ZZZ(2)+ZZZ(3))*WW(II,JJ,KK+1)
-               ENDIF
-            CASE(-3) OFF_WALL_SELECT_2
-               IF ((WW(II,JJ,KK-2)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0)) THEN
-                  ZZZ(2:4) = (/RHOP(II,JJ,KK-2:KK-1),RHO_F(IW)/)*(/ZZP(II,JJ,KK-2:KK-1,N),ZZ_F(IW,N)/)
-                  FZ(II,JJ,KK-2) = WW(II,JJ,KK-2)*SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ,FLUX_LIMITER)
-                  IF (INCLUDE_NUMERICAL_DIFFUSION) &
-                     DFZ(II,JJ,KK-2,N) = FZ(II,JJ,KK-2) - 0.5_EB*(ZZZ(2)+ZZZ(3))*WW(II,JJ,KK-2)
-               ENDIF
-         END SELECT OFF_WALL_SELECT_2
+         IF (BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY .AND. BOUNDARY_TYPE(IW)/=OPEN_BOUNDARY) THEN
+
+            OFF_WALL_SELECT_2: SELECT CASE(IOR)
+               CASE( 1) OFF_WALL_SELECT_2
+                  !      ghost          FX/UU(II+1)
+                  ! ///   II   ///  II+1  |  II+2  | ...
+                  !                       ^ WALL_INDEX(II+1,+1)
+                  IF ((UU(II+1,JJ,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II+1,JJ,KK),+1)>0)) THEN
+                     ZZZ(1:3) = (/RHO_F(IW),RHOP(II+1:II+2,JJ,KK)/)*(/ZZ_F(IW,N),ZZP(II+1:II+2,JJ,KK,N)/)
+                     FX(II+1,JJ,KK) = UU(II+1,JJ,KK)*SCALAR_FACE_VALUE(UU(II+1,JJ,KK),ZZZ,FLUX_LIMITER)*R(II+1)
+                     IF (INCLUDE_NUMERICAL_DIFFUSION) DFX(II+1,JJ,KK,N) = FX(II+1,JJ,KK) - 0.5_EB*(ZZZ(2)+ZZZ(3))*UU(II+1,JJ,KK)
+                  ENDIF
+               CASE(-1) OFF_WALL_SELECT_2
+                  !            FX/UU(II-2)     ghost
+                  ! ... |  II-2  |  II-1  ///   II   ///
+                  !              ^ WALL_INDEX(II-1,-1)
+                  IF ((UU(II-2,JJ,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II-1,JJ,KK),-1)>0)) THEN
+                     ZZZ(2:4) = (/RHOP(II-2:II-1,JJ,KK),RHO_F(IW)/)*(/ZZP(II-2:II-1,JJ,KK,N),ZZ_F(IW,N)/)
+                     FX(II-2,JJ,KK) = UU(II-2,JJ,KK)*SCALAR_FACE_VALUE(UU(II-2,JJ,KK),ZZZ,FLUX_LIMITER)*R(II-2)
+                     IF (INCLUDE_NUMERICAL_DIFFUSION) DFX(II-2,JJ,KK,N) = FX(II-2,JJ,KK) - 0.5_EB*(ZZZ(2)+ZZZ(3))*UU(II-2,JJ,KK)
+                  ENDIF
+               CASE( 2) OFF_WALL_SELECT_2
+                  IF ((VV(II,JJ+1,KK)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ+1,KK),+2)>0)) THEN
+                     ZZZ(1:3) = (/RHO_F(IW),RHOP(II,JJ+1:JJ+2,KK)/)*(/ZZ_F(IW,N),ZZP(II,JJ+1:JJ+2,KK,N)/)
+                     FY(II,JJ+1,KK) = VV(II,JJ+1,KK)*SCALAR_FACE_VALUE(VV(II,JJ+1,KK),ZZZ,FLUX_LIMITER)
+                     IF (INCLUDE_NUMERICAL_DIFFUSION) DFY(II,JJ+1,KK,N) = FY(II,JJ+1,KK) - 0.5_EB*(ZZZ(2)+ZZZ(3))*VV(II,JJ+1,KK)
+                  ENDIF
+               CASE(-2) OFF_WALL_SELECT_2
+                  IF ((VV(II,JJ-2,KK)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ-1,KK),-2)>0)) THEN
+                     ZZZ(2:4) = (/RHOP(II,JJ-2:JJ-1,KK),RHO_F(IW)/)*(/ZZP(II,JJ-2:JJ-1,KK,N),ZZ_F(IW,N)/)
+                     FY(II,JJ-2,KK) = VV(II,JJ-2,KK)*SCALAR_FACE_VALUE(VV(II,JJ-2,KK),ZZZ,FLUX_LIMITER)
+                     IF (INCLUDE_NUMERICAL_DIFFUSION) DFY(II,JJ-2,KK,N) = FY(II,JJ-2,KK) - 0.5_EB*(ZZZ(2)+ZZZ(3))*VV(II,JJ-2,KK)
+                  ENDIF
+               CASE( 3) OFF_WALL_SELECT_2
+                  IF ((WW(II,JJ,KK+1)>0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK+1),+3)>0)) THEN
+                     ZZZ(1:3) = (/RHO_F(IW),RHOP(II,JJ,KK+1:KK+2)/)*(/ZZ_F(IW,N),ZZP(II,JJ,KK+1:KK+2,N)/)
+                     FZ(II,JJ,KK+1) = WW(II,JJ,KK+1)*SCALAR_FACE_VALUE(WW(II,JJ,KK+1),ZZZ,FLUX_LIMITER)
+                     IF (INCLUDE_NUMERICAL_DIFFUSION) DFZ(II,JJ,KK+1,N) = FZ(II,JJ,KK+1) - 0.5_EB*(ZZZ(2)+ZZZ(3))*WW(II,JJ,KK+1)
+                  ENDIF
+               CASE(-3) OFF_WALL_SELECT_2
+                  IF ((WW(II,JJ,KK-2)<0._EB) .AND. .NOT.(WALL_INDEX(CELL_INDEX(II,JJ,KK-1),-3)>0)) THEN
+                     ZZZ(2:4) = (/RHOP(II,JJ,KK-2:KK-1),RHO_F(IW)/)*(/ZZP(II,JJ,KK-2:KK-1,N),ZZ_F(IW,N)/)
+                     FZ(II,JJ,KK-2) = WW(II,JJ,KK-2)*SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ,FLUX_LIMITER)
+                     IF (INCLUDE_NUMERICAL_DIFFUSION) DFZ(II,JJ,KK-2,N) = FZ(II,JJ,KK-2) - 0.5_EB*(ZZZ(2)+ZZZ(3))*WW(II,JJ,KK-2)
+                  ENDIF
+            END SELECT OFF_WALL_SELECT_2
+
+         ENDIF
 
          ! Get the normal components of velocity at the wall
 
@@ -364,8 +365,13 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
                UN = WW(II,JJ,KK-1)
          END SELECT
 
-         IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
+         ! At interpolated boundaries, use the actual normal components of velocity, not the ones that have been forced to match.
+         ! This line is temporarily commented out because it may not be necessary.
+       
+     !!  IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
          
+         ! Special handling of normal component of velocity at surfaces with a specified mass flux.
+
          IF ((SURFACE(IBC)%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .OR. &
              (SURFACE(IBC)%SPECIES_BC_INDEX==HVAC_BOUNDARY       .OR. &
               ANY(SURFACE(IBC)%LEAK_PATH>0._EB)) .AND. UWS(IW)<0._EB) .AND. ZZ_F(IW,N)>0._EB) THEN
@@ -699,14 +705,15 @@ END SUBROUTINE DENSITY
 SUBROUTINE CHECK_DENSITY
  
 ! Redistribute mass from cells below or above the density cut-off limits
+! Do not apply OpenMP to this routine
 
-USE GLOBAL_CONSTANTS, ONLY : PREDICTOR, CORRECTOR, N_TRACKED_SPECIES,RHOMIN,RHOMAX,DEBUG_OPENMP,TWO_D
-REAL(EB) :: SUM,CONST,CONST2,RHOMI,RHOPI,RHOMJ,RHOPJ,RHOMK,RHOPK,RHO00,RMIN,RMAX
-INTEGER  :: IC,ISUM,I,J,K
-LOGICAL :: LC(-3:3)
-REAL(EB), POINTER, DIMENSION(:,:,:) :: RHODELTA=>NULL(),V_CELL=>NULL()
+USE GLOBAL_CONSTANTS, ONLY : PREDICTOR,RHOMIN,RHOMAX
+REAL(EB) :: MASS_N(-3:3),CONST,MASS_C,RHO_CUT,VC(-3:3),SIGN_FACTOR,SUM_MASS_N
+INTEGER  :: IC,I,J,K
+REAL(EB), POINTER, DIMENSION(:,:,:) :: DELTA_RHO=>NULL()
 
-RHODELTA => WORK2
+DELTA_RHO => WORK2
+DELTA_RHO =  0._EB
 
 IF (PREDICTOR) THEN
    RHOP=>RHOS
@@ -714,242 +721,68 @@ ELSE
    RHOP=>RHO
 ENDIF
 
-V_CELL => WORK3
-
-!$OMP PARALLEL DEFAULT(NONE) &
-!$OMP SHARED(TWO_D,KBAR,IBAR,JBAR,V_CELL,DX,DY,DZ, &
-!$OMP        RHODELTA,CELL_INDEX,SOLID,RHOMIN,RHOP,WALL_INDEX,RHOMAX)
-
-IF (TWO_D) THEN
-   !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I)
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            V_CELL(I,J,K) = DX(I)*DZ(K)
-         ENDDO
-      ENDDO
-   ENDDO
-   !$OMP END DO NOWAIT
-ELSE
-   !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I)
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            V_CELL(I,J,K) = DX(I)*DY(J)*DZ(K)
-         ENDDO
-      ENDDO
-   ENDDO
-   !$OMP END DO NOWAIT
-ENDIF
- 
-! Correct undershoots
-
-!$OMP WORKSHARE
-RHODELTA = 0._EB
-!$OMP END WORKSHARE
-
-!$OMP DO COLLAPSE(3) SCHEDULE(DYNAMIC) &
-!$OMP PRIVATE(K,J,I,IC,RMIN,SUM,ISUM,LC,RHO00,RHOMI,RHOPI,RHOMJ,RHOPJ,RHOMK,RHOPK,CONST,CONST2)
 DO K=1,KBAR
    DO J=1,JBAR
-      CHECK_LOOP: DO I=1,IBAR
+      DO I=1,IBAR
+
+         IF (RHOP(I,J,K)>=RHOMIN .AND. RHOP(I,J,K)<=RHOMAX) CYCLE
          IC = CELL_INDEX(I,J,K)
-         IF (SOLID(IC)) CYCLE CHECK_LOOP
-         RMIN = RHOMIN
-         IF (RHOP(I,J,K)>=RMIN) CYCLE CHECK_LOOP
-         SUM   = 0._EB
-         ISUM  = 0
-         LC    = .FALSE.
-         RHO00 = RHOP(I,J,K)
-         RHOMI = RHOP(I-1,J,K)
-         RHOPI = RHOP(I+1,J,K)
-         RHOMJ = RHOP(I,J-1,K)
-         RHOPJ = RHOP(I,J+1,K)
-         RHOMK = RHOP(I,J,K-1)
-         RHOPK = RHOP(I,J,K+1)
-         IF (WALL_INDEX(IC,-1)==0 .AND. RHOMI>RMIN) THEN
-            SUM = SUM + RHOMI
-            ISUM = ISUM + 1
-            LC(-1) = .TRUE.
-         ENDIF
-         IF (WALL_INDEX(IC, 1)==0 .AND. RHOPI>RMIN) THEN
-            SUM = SUM + RHOPI
-            ISUM = ISUM + 1
-            LC( 1) = .TRUE.
-         ENDIF
-         IF (WALL_INDEX(IC,-2)==0 .AND. RHOMJ>RMIN) THEN
-            SUM = SUM + RHOMJ
-            ISUM = ISUM + 1
-            LC(-2) = .TRUE.
-         ENDIF
-         IF (WALL_INDEX(IC, 2)==0 .AND. RHOPJ>RMIN) THEN
-            SUM = SUM + RHOPJ
-            ISUM = ISUM + 1
-            LC( 2) = .TRUE.
-         ENDIF
-         IF (WALL_INDEX(IC,-3)==0 .AND. RHOMK>RMIN) THEN
-            SUM = SUM + RHOMK
-            ISUM = ISUM + 1
-            LC(-3) = .TRUE.
-         ENDIF
-         IF (WALL_INDEX(IC, 3)==0 .AND. RHOPK>RMIN) THEN
-            SUM = SUM + RHOPK
-            ISUM = ISUM + 1
-            LC( 3) = .TRUE.
-         ENDIF
-         IF (ISUM==0) THEN
-            RHODELTA(I,J,K) = RMIN - RHOP(I,J,K)
-            CYCLE CHECK_LOOP
+         IF (SOLID(IC)) CYCLE
+         IF (RHOP(I,J,K)<RHOMIN) THEN
+            RHO_CUT = RHOMIN
+            SIGN_FACTOR = 1._EB
          ELSE
-            IF(ABS(SUM-ISUM*RHO00) >=ZERO_P) THEN
-               CONST = (RHOMIN-RHO00)/(SUM-ISUM*RHO00)
-               IF (LC(-1)) THEN
-                  CONST2 = CONST*V_CELL(I,J,K)/V_CELL(I-1,J,K)
-                  RHODELTA(I-1,J,K) = RHODELTA(I-1,J,K) + MAX(RMIN,RHOMI+CONST2*(RHO00-RHOMI)) - RHOP(I-1,J,K)
-               ENDIF
-               IF (LC( 1)) THEN
-                  CONST2 = CONST*V_CELL(I,J,K)/V_CELL(I+1,J,K)
-                  RHODELTA(I+1,J,K) = RHODELTA(I+1,J,K) + MAX(RMIN,RHOPI+CONST2*(RHO00-RHOPI)) - RHOP(I+1,J,K)
-               ENDIF
-               IF (LC(-2)) THEN
-                  CONST2 = CONST*V_CELL(I,J,K)/V_CELL(I,J-1,K)
-                  RHODELTA(I,J-1,K) = RHODELTA(I,J-1,K) + MAX(RMIN,RHOMJ+CONST2*(RHO00-RHOMJ)) - RHOP(I,J-1,K)
-               ENDIF
-               IF (LC( 2)) THEN
-                  CONST2 = CONST*V_CELL(I,J,K)/V_CELL(I,J+1,K)
-                  RHODELTA(I,J+1,K) = RHODELTA(I,J+1,K) + MAX(RMIN,RHOPJ+CONST2*(RHO00-RHOPJ)) - RHOP(I,J+1,K)
-               ENDIF
-               IF (LC(-3)) THEN
-                  CONST2 = CONST*V_CELL(I,J,K)/V_CELL(I,J,K-1)
-                  RHODELTA(I,J,K-1) = RHODELTA(I,J,K-1) + MAX(RMIN,RHOMK+CONST2*(RHO00-RHOMK)) - RHOP(I,J,K-1)
-               ENDIF
-               IF (LC( 3)) THEN
-                  CONST2 = CONST*V_CELL(I,J,K)/V_CELL(I,J,K+1)
-                  RHODELTA(I,J,K+1) = RHODELTA(I,J,K+1) + MAX(RMIN,RHOPK+CONST2*(RHO00-RHOPK)) - RHOP(I,J,K+1)
-               ENDIF
-               RHODELTA(I,J,K) = RHODELTA(I,J,K) + RMIN - RHOP(I,J,K)
-            ENDIF
+            RHO_CUT = RHOMAX
+            SIGN_FACTOR = -1._EB
          ENDIF
-      ENDDO CHECK_LOOP
+         MASS_N = 0._EB
+         VC( 0)  = DX(I)  *DY(J)  *DZ(K)
+         VC(-1)  = DX(I-1)*DY(J)  *DZ(K)
+         VC( 1)  = DX(I+1)*DY(J)  *DZ(K)
+         VC(-2)  = DX(I)  *DY(J-1)*DZ(K)
+         VC( 2)  = DX(I)  *DY(J+1)*DZ(K)
+         VC(-3)  = DX(I)  *DY(J)  *DZ(K-1)
+         VC( 3)  = DX(I)  *DY(J)  *DZ(K+1)
+
+         MASS_C = ABS(RHO_CUT-RHOP(I,J,K))*VC(0)
+         IF (WALL_INDEX(IC,-1)==0) MASS_N(-1) = ABS(MIN(RHOMAX,MAX(RHOMIN,RHOP(I-1,J,K)))-RHO_CUT)*VC(-1)
+         IF (WALL_INDEX(IC, 1)==0) MASS_N( 1) = ABS(MIN(RHOMAX,MAX(RHOMIN,RHOP(I+1,J,K)))-RHO_CUT)*VC( 1)
+         IF (WALL_INDEX(IC,-2)==0) MASS_N(-2) = ABS(MIN(RHOMAX,MAX(RHOMIN,RHOP(I,J-1,K)))-RHO_CUT)*VC(-2)
+         IF (WALL_INDEX(IC, 2)==0) MASS_N( 2) = ABS(MIN(RHOMAX,MAX(RHOMIN,RHOP(I,J+1,K)))-RHO_CUT)*VC( 2)
+         IF (WALL_INDEX(IC,-3)==0) MASS_N(-3) = ABS(MIN(RHOMAX,MAX(RHOMIN,RHOP(I,J,K-1)))-RHO_CUT)*VC(-3)
+         IF (WALL_INDEX(IC, 3)==0) MASS_N( 3) = ABS(MIN(RHOMAX,MAX(RHOMIN,RHOP(I,J,K+1)))-RHO_CUT)*VC( 3)
+         SUM_MASS_N = SUM(MASS_N)
+         IF (SUM_MASS_N<=ZERO_P) CYCLE
+         CONST = SIGN_FACTOR*MIN(1._EB,MASS_C/SUM_MASS_N)
+         DELTA_RHO(I,J,K)   = DELTA_RHO(I,J,K)   + CONST*SUM_MASS_N/VC( 0)
+         DELTA_RHO(I-1,J,K) = DELTA_RHO(I-1,J,K) - CONST*MASS_N(-1)/VC(-1)
+         DELTA_RHO(I+1,J,K) = DELTA_RHO(I+1,J,K) - CONST*MASS_N( 1)/VC( 1)
+         DELTA_RHO(I,J-1,K) = DELTA_RHO(I,J-1,K) - CONST*MASS_N(-2)/VC(-2)
+         DELTA_RHO(I,J+1,K) = DELTA_RHO(I,J+1,K) - CONST*MASS_N( 2)/VC( 2)
+         DELTA_RHO(I,J,K-1) = DELTA_RHO(I,J,K-1) - CONST*MASS_N(-3)/VC(-3)
+         DELTA_RHO(I,J,K+1) = DELTA_RHO(I,J,K+1) - CONST*MASS_N( 3)/VC( 3)
+      ENDDO
    ENDDO
 ENDDO
-!$OMP END DO
 
-!$OMP WORKSHARE
+RHOP(1:IBAR,1:JBAR,1:KBAR) = MIN(RHOMAX,MAX(RHOMIN,RHOP(1:IBAR,1:JBAR,1:KBAR)+DELTA_RHO(1:IBAR,1:JBAR,1:KBAR)))
 
-RHOP(1:IBAR,1:JBAR,1:KBAR) = MAX(RHOMIN,RHOP(1:IBAR,1:JBAR,1:KBAR)+RHODELTA(1:IBAR,1:JBAR,1:KBAR))
-
-! Correct overshoots
-
-RHODELTA = 0._EB
-
-!$OMP END WORKSHARE
-
-!$OMP DO COLLAPSE(3) SCHEDULE(DYNAMIC) &
-!$OMP PRIVATE(K,J,I,IC,RMAX,SUM,ISUM,LC,RHO00,RHOMI,RHOPI,RHOMJ,RHOPJ,RHOMK,RHOPK,CONST,CONST2)
-DO K=1,KBAR
-   DO J=1,JBAR
-      CHECK_LOOP2: DO I=1,IBAR
-         IC = CELL_INDEX(I,J,K)
-         IF (SOLID(IC)) CYCLE CHECK_LOOP2
-         RMAX = RHOMAX
-         IF (RHOP(I,J,K)<=RMAX) CYCLE CHECK_LOOP2
-         SUM   = 0._EB
-         ISUM  = 0
-         LC    = .FALSE.
-         RHO00 = RHOP(I,J,K)
-         RHOMI = RHOP(I-1,J,K)
-         RHOPI = RHOP(I+1,J,K)
-         RHOMJ = RHOP(I,J-1,K)
-         RHOPJ = RHOP(I,J+1,K)
-         RHOMK = RHOP(I,J,K-1)
-         RHOPK = RHOP(I,J,K+1)
-         IF (WALL_INDEX(IC,-1)==0 .AND. RHOMI<RMAX) THEN
-            SUM = SUM + RHOMI
-            ISUM = ISUM + 1
-            LC(-1) = .TRUE.
-         ENDIF
-         IF (WALL_INDEX(IC, 1)==0 .AND. RHOPI<RMAX) THEN
-            SUM = SUM + RHOPI
-            ISUM = ISUM + 1
-            LC( 1) = .TRUE.
-         ENDIF
-         IF (WALL_INDEX(IC,-2)==0 .AND. RHOMJ<RMAX) THEN
-            SUM = SUM + RHOMJ
-            ISUM = ISUM + 1
-            LC(-2) = .TRUE.
-         ENDIF
-         IF (WALL_INDEX(IC, 2)==0 .AND. RHOPJ<RMAX) THEN
-            SUM = SUM + RHOPJ
-            ISUM = ISUM + 1
-            LC( 2) = .TRUE.
-         ENDIF
-         IF (WALL_INDEX(IC,-3)==0 .AND. RHOMK<RMAX) THEN
-            SUM = SUM + RHOMK
-            ISUM = ISUM + 1
-            LC(-3) = .TRUE.
-         ENDIF
-         IF (WALL_INDEX(IC, 3)==0 .AND. RHOPK<RMAX) THEN
-            SUM = SUM + RHOPK
-            ISUM = ISUM + 1
-            LC( 3) = .TRUE.
-         ENDIF
-         IF (ISUM==0) THEN
-            RHODELTA(I,J,K) = RMAX - RHOP(I,J,K)
-            CYCLE CHECK_LOOP2
-         ELSE
-            IF(ABS(SUM-ISUM*RHO00) >=ZERO_P) THEN         
-               CONST = (RMAX-RHO00)/(SUM-ISUM*RHO00)
-               IF (LC(-1)) THEN
-                  CONST2 = CONST*V_CELL(I,J,K)/V_CELL(I-1,J,K)
-                  RHODELTA(I-1,J,K) = RHODELTA(I-1,J,K) + MIN(RMAX,RHOMI+CONST2*(RHO00-RHOMI)) - RHOP(I-1,J,K)
-               ENDIF
-               IF (LC( 1)) THEN
-                  CONST2 = CONST*V_CELL(I,J,K)/V_CELL(I+1,J,K)
-                  RHODELTA(I+1,J,K) = RHODELTA(I+1,J,K) + MIN(RMAX,RHOPI+CONST2*(RHO00-RHOPI)) - RHOP(I+1,J,K)
-               ENDIF
-               IF (LC(-2)) THEN
-                  CONST2 = CONST*V_CELL(I,J,K)/V_CELL(I,J-1,K)
-                  RHODELTA(I,J-1,K) = RHODELTA(I,J-1,K) + MIN(RMAX,RHOMJ+CONST2*(RHO00-RHOMJ)) - RHOP(I,J-1,K)
-               ENDIF
-               IF (LC( 2)) THEN
-                  CONST2 = CONST*V_CELL(I,J,K)/V_CELL(I,J+1,K)
-                  RHODELTA(I,J+1,K) = RHODELTA(I,J+1,K) + MIN(RMAX,RHOPJ+CONST2*(RHO00-RHOPJ)) - RHOP(I,J+1,K)
-               ENDIF
-               IF (LC(-3)) THEN
-                  CONST2 = CONST*V_CELL(I,J,K)/V_CELL(I,J,K-1)
-                  RHODELTA(I,J,K-1) = RHODELTA(I,J,K-1) + MIN(RMAX,RHOMK+CONST2*(RHO00-RHOMK)) - RHOP(I,J,K-1)
-               ENDIF
-               IF (LC( 3)) THEN
-                  CONST2 = CONST*V_CELL(I,J,K)/V_CELL(I,J,K+1)
-                  RHODELTA(I,J,K+1) = RHODELTA(I,J,K+1) + MIN(RMAX,RHOPK+CONST2*(RHO00-RHOPK)) - RHOP(I,J,K+1)
-               ENDIF
-               RHODELTA(I,J,K) = RHODELTA(I,J,K) + RMAX - RHOP(I,J,K)
-            ENDIF
-         ENDIF
-      ENDDO CHECK_LOOP2
-   ENDDO
-ENDDO
-!$OMP END DO
-
-!$OMP WORKSHARE
-RHOP(1:IBAR,1:JBAR,1:KBAR) = MIN(RHOMAX,RHOP(1:IBAR,1:JBAR,1:KBAR)+RHODELTA(1:IBAR,1:JBAR,1:KBAR))
-!$OMP END WORKSHARE NOWAIT
-!$OMP END PARALLEL
 END SUBROUTINE CHECK_DENSITY
  
  
+
 SUBROUTINE CHECK_MASS_FRACTION
 
 ! Redistribute species mass from cells below or above the cut-off limits
+! Do not apply OpenMP to this routine
 
-USE GLOBAL_CONSTANTS, ONLY : PREDICTOR, CORRECTOR, N_TRACKED_SPECIES,DEBUG_OPENMP
-REAL(EB) :: SUM,CONST,RHZMI,RHZPI,RHZMJ,RHZPJ,RHZMK,RHZPK,RHY0,ZMI,ZPI,ZMJ,ZPJ,ZMK,ZPK,Y00,ZMIN,ZMAX
-INTEGER  :: IC,N,ISUM, IW_A(-3:3),I,J,K
-LOGICAL  :: LC(-3:3)
-REAL(EB), POINTER, DIMENSION(:,:,:) :: ZZDELTA=>NULL()
+USE GLOBAL_CONSTANTS, ONLY : PREDICTOR,N_TRACKED_SPECIES
+REAL(EB) :: SUM,CONST,MASS_C,MASS_N(-3:3),ZZ_CUT,SIGN_FACTOR,SUM_MASS_N,VC(-3:3)
+INTEGER  :: IC,N,I,J,K
+REAL(EB), POINTER, DIMENSION(:,:,:) :: DELTA_ZZ=>NULL()
 
-ZZDELTA => WORK1
+DELTA_ZZ => WORK1
+
 IF (PREDICTOR) THEN
    RHOP    => RHOS
    ZZP     => ZZS
@@ -958,269 +791,58 @@ ELSE
    ZZP     => ZZ
 ENDIF
 
-! Search the domain for negative values of Y or Z. Redistribute mass where appropriate.
+SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
-SPECIESLOOP: DO N=1,N_TRACKED_SPECIES
+   DELTA_ZZ = 0._EB
 
-   !$OMP PARALLEL DEFAULT(NONE) &
-   !$OMP SHARED(ZZDELTA,KBAR,JBAR,IBAR,CELL_INDEX,SOLID,WALL_INDEX,ZZP,ZZ_F,N,BOUNDARY_TYPE, &
-   !$OMP        DEL_RHO_D_DEL_Z,RHOP)
-
-
-   !$OMP WORKSHARE
-   ZZDELTA = 0._EB
-   !$OMP END WORKSHARE
-
-   ! Do undershoots
-
-   !$OMP DO COLLAPSE(3) SCHEDULE(DYNAMIC) &
-   !$OMP PRIVATE(K,J,I,IC,IW_A,Y00,SUM,ISUM,LC,ZMIN,ZMI,ZPI,ZMJ,ZPJ,ZMK,ZPK, &
-   !$OMP         RHY0,RHZPI,RHZMI,RHZPJ,RHZMJ,RHZPK,RHZMK,CONST)
    DO K=1,KBAR
       DO J=1,JBAR
-         CHECK_LOOP: DO I=1,IBAR
+         DO I=1,IBAR
+
+            IF (ZZP(I,J,K,N)>=0._EB .AND. ZZP(I,J,K,N)<=1._EB) CYCLE
             IC = CELL_INDEX(I,J,K)
-            IF (SOLID(IC)) CYCLE CHECK_LOOP
-            IW_A = WALL_INDEX(IC,:)
-            Y00   = ZZP(I,J,K,N)
-            SUM   = 0._EB
-            ISUM  = 0
-            LC    = .FALSE.
-            ZMIN  = 1._EB 
-            IF (IW_A(-1) == 0) THEN
-               ZMI = ZZP(I-1,J,K,N)
-               LC(-1) = .TRUE.
+            IF (SOLID(IC)) CYCLE
+            IF (ZZP(I,J,K,N)<0._EB) THEN
+               ZZ_CUT      =  0._EB
+               SIGN_FACTOR =  1._EB
             ELSE
-                ZMI = ZZ_F(IW_A(-1),N)
-            ENDIF          
-            IF (IW_A( 1) == 0) THEN
-               ZPI = ZZP(I+1,J,K,N)
-               LC( 1) = .TRUE.
-            ELSE
-               ZPI = ZZ_F(IW_A(1),N)
-            ENDIF           
-            IF (IW_A(-2) == 0) THEN
-               ZMJ = ZZP(I,J-1,K,N)
-               LC(-2) = .TRUE.
-            ELSE
-               ZMJ = ZZ_F(IW_A(-2),N)
-            ENDIF         
-            IF (IW_A( 2) == 0) THEN
-               ZPJ = ZZP(I,J+1,K,N)
-               LC( 2) = .TRUE.
-            ELSE
-               ZPJ = ZZ_F(IW_A( 2),N)
-            ENDIF         
-            IF (IW_A(-3) == 0) THEN
-               ZMK = ZZP(I,J,K-1,N)
-               LC(-3) = .TRUE.
-            ELSE
-               ZMK = ZZ_F(IW_A(-3),N)
-            ENDIF         
-            IF (IW_A( 3) == 0) THEN
-               ZPK = ZZP(I,J,K+1,N)
-               LC( 3) = .TRUE.
-            ELSE
-               ZPK = ZZ_F(IW_A( 3),N)
-            ENDIF           
-            ZMIN = MIN(ZMI,ZPI,ZMJ,ZPJ,ZMK,ZPK)
-            ZMIN = MAX(ZMIN,0._EB)
-            IF ((DEL_RHO_D_DEL_Z(I,J,K,N) > 0._EB .AND. Y00 < ZMIN) .OR. Y00 < 0._EB) THEN
-               RHY0  = RHOP(I,J,K)  *(ZMIN - Y00)
-               IF (LC(-1) .AND. ZMI>ZMIN) THEN
-                  RHZMI = RHOP(I-1,J,K)*(ZMI - ZMIN)
-                  SUM  = SUM + RHZMI 
-                  ISUM = ISUM + 1
-               ELSE
-                  LC(-1) = .FALSE.
-               ENDIF
-               IF (LC( 1) .AND. ZPI>ZMIN) THEN
-                  RHZPI = RHOP(I+1,J,K)*(ZPI - ZMIN)
-                  SUM  = SUM + RHZPI
-                  ISUM = ISUM + 1
-               ELSE
-                  LC( 1) = .FALSE.
-               ENDIF
-               IF (LC(-2) .AND. ZMJ>ZMIN) THEN
-                  RHZMJ = RHOP(I,J-1,K)*(ZMJ - ZMIN)
-                  SUM  = SUM + RHZMJ
-                  ISUM = ISUM + 1
-               ELSE
-                  LC(-2) = .FALSE.
-               ENDIF
-               IF (LC( 2) .AND. ZPJ>ZMIN) THEN
-                  RHZPJ = RHOP(I,J+1,K)*(ZPJ - ZMIN)
-                  SUM  = SUM + RHZPJ
-                  ISUM = ISUM + 1
-                  LC( 2) = .TRUE.
-               ELSE
-                  LC( 2) = .FALSE.
-               ENDIF
-               IF (LC(-3) .AND. ZMK>ZMIN) THEN
-               RHZMK = RHOP(I,J,K-1)*(ZMK - ZMIN)
-                  SUM  = SUM + RHZMK
-                  ISUM = ISUM + 1
-               ELSE
-                  LC(-3) = .FALSE.
-               ENDIF
-               IF (LC( 3) .AND. ZPK>ZMIN) THEN
-                  RHZPK = RHOP(I,J,K+1)*(ZPK - ZMIN)
-                  SUM  = SUM + RHZPK
-                  ISUM = ISUM + 1
-               ELSE
-                  LC( 3) = .FALSE.
-               ENDIF                
-               IF (ISUM==0) THEN
-                  IF (ZMIN <= 0._EB) ZZDELTA(I,J,K) = ZZDELTA(I,J,K) + ZMIN - Y00  
-                  CYCLE CHECK_LOOP
-               ELSE
-                  IF (ABS(SUM)>=ZERO_P) THEN
-                     ZZDELTA(I,J,K) = ZZDELTA(I,J,K) + ZMIN - Y00
-                     CONST = MIN(1._EB,RHY0/SUM)
-                     IF (LC(-1)) ZZDELTA(I-1,J,K) = ZZDELTA(I-1,J,K) - RHZMI*CONST/RHOP(I-1,J,K)
-                     IF (LC( 1)) ZZDELTA(I+1,J,K) = ZZDELTA(I+1,J,K) - RHZPI*CONST/RHOP(I+1,J,K)
-                     IF (LC(-2)) ZZDELTA(I,J-1,K) = ZZDELTA(I,J-1,K) - RHZMJ*CONST/RHOP(I,J-1,K)
-                     IF (LC( 2)) ZZDELTA(I,J+1,K) = ZZDELTA(I,J+1,K) - RHZPJ*CONST/RHOP(I,J+1,K)
-                     IF (LC(-3)) ZZDELTA(I,J,K-1) = ZZDELTA(I,J,K-1) - RHZMK*CONST/RHOP(I,J,K-1)
-                     IF (LC( 3)) ZZDELTA(I,J,K+1) = ZZDELTA(I,J,K+1) - RHZPK*CONST/RHOP(I,J,K+1)
-                  ENDIF                  
-               ENDIF
+               ZZ_CUT      =  1._EB
+               SIGN_FACTOR = -1._EB
             ENDIF
-         ENDDO CHECK_LOOP
+            MASS_N = 0._EB
+            VC( 0) = DX(I)  *DY(J)  *DZ(K)
+            VC(-1) = DX(I-1)*DY(J)  *DZ(K)
+            VC( 1) = DX(I+1)*DY(J)  *DZ(K)
+            VC(-2) = DX(I)  *DY(J-1)*DZ(K)
+            VC( 2) = DX(I)  *DY(J+1)*DZ(K)
+            VC(-3) = DX(I)  *DY(J)  *DZ(K-1)
+            VC( 3) = DX(I)  *DY(J)  *DZ(K+1)
+
+            IF (WALL_INDEX(IC,-1)==0) MASS_N(-1) = RHOP(I-1,J,K)*ABS(MIN(1._EB,MAX(0._EB,ZZP(I-1,J,K,N)))-ZZ_CUT)*VC(-1)
+            IF (WALL_INDEX(IC, 1)==0) MASS_N( 1) = RHOP(I+1,J,K)*ABS(MIN(1._EB,MAX(0._EB,ZZP(I+1,J,K,N)))-ZZ_CUT)*VC( 1)
+            IF (WALL_INDEX(IC,-2)==0) MASS_N(-2) = RHOP(I,J-1,K)*ABS(MIN(1._EB,MAX(0._EB,ZZP(I,J-1,K,N)))-ZZ_CUT)*VC(-2)
+            IF (WALL_INDEX(IC, 2)==0) MASS_N( 2) = RHOP(I,J+1,K)*ABS(MIN(1._EB,MAX(0._EB,ZZP(I,J+1,K,N)))-ZZ_CUT)*VC( 2)
+            IF (WALL_INDEX(IC,-3)==0) MASS_N(-3) = RHOP(I,J,K-1)*ABS(MIN(1._EB,MAX(0._EB,ZZP(I,J,K-1,N)))-ZZ_CUT)*VC(-3)
+            IF (WALL_INDEX(IC, 3)==0) MASS_N( 3) = RHOP(I,J,K+1)*ABS(MIN(1._EB,MAX(0._EB,ZZP(I,J,K+1,N)))-ZZ_CUT)*VC( 3)
+
+            SUM_MASS_N = SUM(MASS_N)
+            IF (SUM_MASS_N<=ZERO_P) CYCLE
+            MASS_C = RHOP(I,J,K)*ABS(ZZP(I,J,K,N)-ZZ_CUT)*VC(0)
+            CONST  = SIGN_FACTOR*MIN(1._EB,MASS_C/SUM_MASS_N)
+            DELTA_ZZ(I,J,K)   = DELTA_ZZ(I,J,K)   + CONST*SUM_MASS_N/(RHOP(I,J,K)  *VC( 0))
+            DELTA_ZZ(I-1,J,K) = DELTA_ZZ(I-1,J,K) - CONST*MASS_N(-1)/(RHOP(I-1,J,K)*VC(-1))
+            DELTA_ZZ(I+1,J,K) = DELTA_ZZ(I+1,J,K) - CONST*MASS_N( 1)/(RHOP(I+1,J,K)*VC( 1))
+            DELTA_ZZ(I,J-1,K) = DELTA_ZZ(I,J-1,K) - CONST*MASS_N(-2)/(RHOP(I,J-1,K)*VC(-2))
+            DELTA_ZZ(I,J+1,K) = DELTA_ZZ(I,J+1,K) - CONST*MASS_N( 2)/(RHOP(I,J+1,K)*VC( 2))
+            DELTA_ZZ(I,J,K-1) = DELTA_ZZ(I,J,K-1) - CONST*MASS_N(-3)/(RHOP(I,J,K-1)*VC(-3))
+            DELTA_ZZ(I,J,K+1) = DELTA_ZZ(I,J,K+1) - CONST*MASS_N( 3)/(RHOP(I,J,K+1)*VC( 3))
+         ENDDO
       ENDDO
    ENDDO
-   !$OMP END DO
    
-   !$OMP WORKSHARE
-   ZZP(1:IBAR,1:JBAR,1:KBAR,N) = ZZP(1:IBAR,1:JBAR,1:KBAR,N) + ZZDELTA(1:IBAR,1:JBAR,1:KBAR)
-   ZZDELTA=0._EB
-   !$OMP END WORKSHARE
+   ZZP(1:IBAR,1:JBAR,1:KBAR,N) = ZZP(1:IBAR,1:JBAR,1:KBAR,N) + DELTA_ZZ(1:IBAR,1:JBAR,1:KBAR)
 
-   ! Do overshoots
-   !$OMP DO COLLAPSE(3) SCHEDULE(DYNAMIC) &
-   !$OMP PRIVATE(K,J,I,IC,IW_A,Y00,SUM,ISUM,LC,ZMIN,ZMI,ZPI,ZMK,ZPK,ZMJ,ZPJ,ZMAX, &
-   !$OMP         RHY0,RHZPI,RHZMI,RHZPJ,RHZMJ,RHZPK,RHZMK,CONST)
-   DO K=1,KBAR
-      DO J=1,JBAR
-         CHECK_LOOP2: DO I=1,IBAR
-            IC = CELL_INDEX(I,J,K)
-            IF (SOLID(IC)) CYCLE CHECK_LOOP2
-            IW_A  = WALL_INDEX(IC,:)
-            Y00   = ZZP(I,J,K,N)
-            SUM   = 0._EB
-            ISUM  = 0
-            LC    = .FALSE.
-            ZMIN  = 1._EB 
-            IF (IW_A(-1) == 0) THEN
-               ZMI = ZZP(I-1,J,K,N)
-               LC(-1) = .TRUE.
-            ELSE
-               ZMI = ZZ_F(IW_A(-1),N)  
-            ENDIF          
-            IF (IW_A( 1) == 0) THEN
-               ZPI = ZZP(I+1,J,K,N)
-               LC( 1) = .TRUE.
-            ELSE
-               ZPI = ZZ_F(IW_A( 1),N)  
-            ENDIF           
-            IF (IW_A(-2) == 0) THEN
-               ZMJ = ZZP(I,J-1,K,N)
-               LC(-2) = .TRUE.
-            ELSE
-               ZMJ = ZZ_F(IW_A(-2),N)  
-            ENDIF         
-            IF (IW_A( 2) == 0) THEN
-               ZPJ = ZZP(I,J+1,K,N)
-               LC( 2) = .TRUE.
-            ELSE
-               ZPJ = ZZ_F(IW_A( 2),N)  
-            ENDIF         
-            IF (IW_A(-3) == 0) THEN
-               ZMK = ZZP(I,J,K-1,N)
-               LC(-3) = .TRUE.
-            ELSE
-               ZMK = ZZ_F(IW_A(-3),N)  
-            ENDIF         
-            IF (IW_A( 3) == 0) THEN
-               ZPK = ZZP(I,J,K+1,N)
-               LC( 3) = .TRUE.
-            ELSE
-               ZPK = ZZ_F(IW_A( 3),N)  
-            ENDIF           
-            ZMAX = MAX(ZMI,ZPI,ZMJ,ZPJ,ZMK,ZPK)
-            ZMAX = MIN(ZMAX,1._EB)            
-            IF ((DEL_RHO_D_DEL_Z(I,J,K,N) < 0._EB .AND. Y00 > ZMAX) .OR. Y00 > 1._EB) THEN
-               RHY0  = RHOP(I,J,K)  *(Y00 - ZMAX)
-               IF (LC(-1) .AND. ZMI<ZMAX) THEN
-                  RHZMI = RHOP(I-1,J,K)*(ZMAX - ZMI)
-                  SUM  = SUM + RHZMI
-                  ISUM = ISUM + 1
-               ELSE
-                  LC(-1) = .FALSE.
-               ENDIF
-               IF (LC( 1) .AND. ZPI<ZMAX) THEN
-                  RHZPI = RHOP(I+1,J,K)*(ZMAX - ZPI)
-                  SUM  = SUM + RHZPI
-                  ISUM = ISUM + 1
-               ELSE
-                  LC( 1) = .FALSE.
-               ENDIF
-               IF (LC(-2) .AND. ZMJ<ZMAX) THEN
-                  RHZMJ = RHOP(I,J-1,K)*(ZMAX - ZMJ)
-                  SUM  = SUM + RHZMJ
-                  ISUM = ISUM + 1
-               ELSE
-                  LC(-2) = .FALSE.
-               ENDIF
-               IF (LC( 2) .AND. ZPJ<ZMAX) THEN
-                  RHZPJ = RHOP(I,J+1,K)*(ZMAX - ZPJ)
-                  SUM  = SUM + RHZPJ
-                  ISUM = ISUM + 1
-               ELSE
-                  LC( 2) = .FALSE.
-               ENDIF
-               IF (LC(-3) .AND. ZMK<ZMAX) THEN
-                  RHZMK = RHOP(I,J,K-1)*(ZMAX - ZMK)
-                  SUM  = SUM + RHZMK
-                  ISUM = ISUM + 1
-               ELSE
-                  LC(-3) = .FALSE.
-               ENDIF
-               IF (LC( 3) .AND. ZPK<ZMAX) THEN
-                  RHZPK = RHOP(I,J,K+1)*(ZMAX - ZPK)
-                  SUM  = SUM + RHZPK
-                  ISUM = ISUM + 1
-               ELSE
-                  LC( 3) = .FALSE.
-               ENDIF                      
-               IF (ISUM==0) THEN
-                  IF(ZMAX >= 1._EB) ZZDELTA(I,J,K) = ZZDELTA(I,J,K) + ZMAX - Y00
-                  CYCLE CHECK_LOOP2
-               ELSE
-                  IF (ABS(SUM)>=ZERO_P) THEN
-                     ZZDELTA(I,J,K) = ZZDELTA(I,J,K) + ZMAX - Y00               
-                     CONST = MIN(1._EB,RHY0/SUM)
-                     IF (LC(-1)) ZZDELTA(I-1,J,K) = ZZDELTA(I-1,J,K) + RHZMI*CONST/RHOP(I-1,J,K)
-                     IF (LC( 1)) ZZDELTA(I+1,J,K) = ZZDELTA(I+1,J,K) + RHZPI*CONST/RHOP(I+1,J,K)
-                     IF (LC(-2)) ZZDELTA(I,J-1,K) = ZZDELTA(I,J-1,K) + RHZMJ*CONST/RHOP(I,J-1,K)
-                     IF (LC( 2)) ZZDELTA(I,J+1,K) = ZZDELTA(I,J+1,K) + RHZPJ*CONST/RHOP(I,J+1,K)
-                     IF (LC(-3)) ZZDELTA(I,J,K-1) = ZZDELTA(I,J,K-1) + RHZMK*CONST/RHOP(I,J,K-1)
-                     IF (LC( 3)) ZZDELTA(I,J,K+1) = ZZDELTA(I,J,K+1) + RHZPK*CONST/RHOP(I,J,K+1)
-                  ENDIF
-               ENDIF
-            ENDIF
-         ENDDO CHECK_LOOP2
-      ENDDO
-   ENDDO  
-   !$OMP END DO 
-
-   !$OMP WORKSHARE
-   ZZP(1:IBAR,1:JBAR,1:KBAR,N) = ZZP(1:IBAR,1:JBAR,1:KBAR,N) + ZZDELTA(1:IBAR,1:JBAR,1:KBAR)
-   !$OMP END WORKSHARE NOWAIT
-   !$OMP END PARALLEL
-ENDDO SPECIESLOOP
-
-RETURN
+ENDDO SPECIES_LOOP
 
 END SUBROUTINE CHECK_MASS_FRACTION
 
