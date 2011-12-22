@@ -662,7 +662,6 @@ void output_device_val(device *devicei){
 void draw_devices(void){
   device *devicei;
   int i;
-  float *xyz;
 
   if(select_device==0||show_mode!=SELECT){
     for(i=0;i<ndeviceinfo;i++){
@@ -682,6 +681,13 @@ void draw_devices(void){
   }
 
   if(showtime==1&&itimes>=0&&itimes<ntimes&&showvdeviceval==1&&nvdeviceinfo>0){
+    glEnable(GL_LIGHTING);
+
+    glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,specular);
+
+    glEnable(GL_COLOR_MATERIAL);
     glPushMatrix();
     glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
     glTranslatef(-xbar0,-ybar0,-zbar0);
@@ -715,21 +721,29 @@ void draw_devices(void){
         glEnd();
       }
       if(valid==2){
-        float d1=0.0, d2, height;
-        unsigned char conecolor[4]={255,0,0,255};
+        float d1=0.0, d2, height, vv;
+        unsigned char conecolor[4]={0,0,0,255};
 
-        height=xyzmaxdiff*vel[0]/max_dev_vel;
-        d1=0.0;
-        d2=MAX(height*0.1,sin(PIFACTOR*dangle)*height);
+        vv=xyzmaxdiff*vel[0]/max_dev_vel;
+        height=xyzmaxdiff*dvel/max_dev_vel;
+        d1=sin(PIFACTOR*dangle)*height;
+        d2=d1*(vv-dvel)/vv;
         glPushMatrix();
         glTranslatef(xyz[0],xyz[1],xyz[2]);
         glRotatef(angle,0.0,0.0,1.0);
         glRotatef(90.0,1.0,0.0,0.0);
-        drawtrunccone(d1,d2,height,conecolor);
+        glColor3f(0.0,0.0,0.0);
+        glBegin(GL_LINES);
+        glVertex3f(0.0,0.0,0.0);
+        glVertex3f(0.0,0.0,vv);
+        glEnd();
+        glTranslatef(0.0,0.0,vv);
+        drawtrunccone(d2,d1,height,conecolor);
         glPopMatrix();
       }
     }
     glPopMatrix();
+    glDisable(GL_LIGHTING);
   }
 
   glPushMatrix();
@@ -743,6 +757,7 @@ void draw_devices(void){
     int j;
     int doit;
     float dpsi;
+    float *xyz;
 
     devicei = deviceinfo + i;
     prop=devicei->prop;
