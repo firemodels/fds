@@ -721,13 +721,14 @@ void draw_devices(void){
         glEnd();
       }
       if(valid==2){
-        float d1=0.0, d2, height, vv;
+        float dd,d1=0.0, d2, height, vv;
         unsigned char conecolor[4]={0,0,0,255};
 
-        vv=xyzmaxdiff*vel[0]/max_dev_vel;
-        height=xyzmaxdiff*dvel/max_dev_vel;
-        d1=sin(PIFACTOR*dangle)*height;
-        d2=d1*(vv-dvel)/vv;
+        vv=vel[0]*xyzmaxdiff/max_dev_vel;
+        height=2.0*dvel*xyzmaxdiff/max_dev_vel;
+        dd=2.0*vv*tan(PIFACTOR*dangle);
+        d1=dd*(vv+dvel)/vv;
+        d2=dd*(MAX(vv-dvel,0.0))/vv;
         glPushMatrix();
         glTranslatef(xyz[0],xyz[1],xyz[2]);
         glRotatef(angle,0.0,0.0,1.0);
@@ -737,7 +738,7 @@ void draw_devices(void){
         glVertex3f(0.0,0.0,0.0);
         glVertex3f(0.0,0.0,vv);
         glEnd();
-        glTranslatef(0.0,0.0,vv);
+        glTranslatef(0.0,0.0,vv-height/2.0);
         drawtrunccone(d2,d1,height,conecolor);
         glPopMatrix();
       }
