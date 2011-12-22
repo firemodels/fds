@@ -9,7 +9,6 @@ that gas temperatures remain stable when flux goes to zero.
 
 &SURF ID='HOT', NET_HEAT_FLUX=100.,RAMP_Q='HF', COLOR='RED' /
 &SURF ID='INSULATED', ADIABATIC=.TRUE., DEFAULT=.TRUE. /
-&SURF ID='BLOWER', VEL=-2 /
 
 &SLCF PBY=1.0,QUANTITY='TEMPERATURE'/
 
@@ -18,8 +17,6 @@ that gas temperatures remain stable when flux goes to zero.
 
 
 &VENT XB=0.8,1.2,0.8,1.2,0.,0.,SURF_ID='HOT'/
-
-&OBST XB=1.0,1.0,0.2,0.8,1.2,1.8,SURF_ID='BLOWER'/
 
 &DEVC XYZ=1.0,1.0,0.0,QUANTITY='NET HEAT FLUX', ID='Net Heat Flux Source', IOR= 3 /
 &DEVC XYZ=1.0,1.0,2.0,QUANTITY='NET HEAT FLUX', ID='Net Heat Flux Insulated', IOR=-3 /
