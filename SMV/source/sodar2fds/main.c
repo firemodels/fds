@@ -164,12 +164,12 @@ int main(int argc, char **argv){
       ntransfer++;
     }
     else if(strncmp(token,"sds",3)==0){
-      zdev[i]=(float)atof(token+2);
+      zdev[i]=(float)atof(token+3);
       transfer[i]=4;
       ntransfer++;
     }
     else if(strncmp(token,"sdwd",4)==0){
-      zdev[i]=(float)atof(token+2);
+      zdev[i]=(float)atof(token+4);
       transfer[i]=5;
       ntransfer++;
     }
