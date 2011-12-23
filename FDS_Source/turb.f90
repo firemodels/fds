@@ -18,7 +18,7 @@ CHARACTER(255), PARAMETER :: turbdate='$Date$'
 PRIVATE
 PUBLIC :: NS_ANALYTICAL_SOLUTION, INIT_TURB_ARRAYS, VARDEN_DYNSMAG, &
           GET_REV_turb, WERNER_WENGLE_WALL_MODEL, COMPRESSION_WAVE, VELTAN2D,VELTAN3D,STRATIFIED_MIXING_LAYER, &
-          SURFACE_HEAT_FLUX_MODEL, SYNTHETIC_TURBULENCE, SYNTHETIC_EDDY_SETUP, TEST_FILTER, EX2G3D
+          SURFACE_HEAT_FLUX_MODEL, SYNTHETIC_TURBULENCE, SYNTHETIC_EDDY_SETUP, TEST_FILTER, EX2G3D, TENSOR_DIFFUSIVITY_MODEL
  
 CONTAINS
 
@@ -822,8 +822,6 @@ ENDIF
 END SUBROUTINE WERNER_WENGLE_WALL_MODEL
 
 
-
-
 REAL(EB) FUNCTION VELTAN2D(U_VELO,U_SURF,NN,DN,DIVU,GRADU,GRADP,TAU_IJ,DT,RRHO,MU,I_VEL)
 
 REAL(EB), INTENT(IN) :: U_VELO(2),U_SURF(2),NN(2),DN,DIVU,GRADU(2,2),GRADP(2),TAU_IJ(2,2),DT,RRHO,MU
@@ -1319,6 +1317,113 @@ SELECT CASE(CODE)
 END SELECT
 
 END FUNCTION SHAPE_FUNCTION
+
+
+SUBROUTINE TENSOR_DIFFUSIVITY_MODEL(NM,N)
+
+INTEGER, INTENT(IN) :: NM,N
+INTEGER :: I,J,K
+REAL(EB) :: DELTA,DRHOZDX,DRHOZDY,DRHOZDZ,DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP=>NULL(),RHO_D_DZDX=>NULL(),RHO_D_DZDY=>NULL(),RHO_D_DZDZ=>NULL(),&
+                                       UU=>NULL(),VV=>NULL(),WW=>NULL()
+
+IF (EVACUATION_ONLY(NM)) RETURN
+CALL POINT_TO_MESH(NM)
+
+! SGS scalar flux
+! CAUTION: The flux arrays must point to the same work arrays used in DIVERGENCE_PART_1
+RHO_D_DZDX=>WORK1
+RHO_D_DZDY=>WORK2
+RHO_D_DZDZ=>WORK3
+
+IF (PREDICTOR) THEN
+   UU=>U
+   VV=>V
+   WW=>W
+   RHOP=>RHOS
+   ZZP=>ZZS
+ELSE
+   UU=>US
+   VV=>VS
+   WW=>WS
+   RHOP=>RHO
+   ZZP=>ZZ
+ENDIF
+
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=0,IBAR
+
+         DELTA = MAX(DXN(I),DY(J),DZ(K))
+               
+         DUDX = (UU(I+1,J,K)-UU(I-1,J,K))/(DX(I)+DX(I+1))
+         DUDY = (UU(I,J+1,K)-UU(I,J-1,K))/(DYN(J-1)+DYN(J))
+         DUDZ = (UU(I,J,K+1)-UU(I,J,K-1))/(DZN(K-1)+DZN(K))
+
+         DRHOZDX = RDXN(I)*(RHOP(I+1,J,K)*ZZP(I+1,J,K,N)-RHOP(I,J,K)*ZZP(I,J,K,N))
+
+         DRHOZDY = 0.25_EB*RDY(J)*( RHOP(I,J+1,K)*ZZP(I,J+1,K,N) + RHOP(I+1,J+1,K)*ZZP(I+1,J+1,K,N) &
+                                  - RHOP(I,J-1,K)*ZZP(I,J-1,K,N) - RHOP(I+1,J-1,K)*ZZP(I+1,J-1,K,N) )
+
+         DRHOZDZ = 0.25_EB*RDZ(K)*( RHOP(I,J,K+1)*ZZP(I,J,K+1,N) + RHOP(I+1,J,K+1)*ZZP(I+1,J,K+1,N) &
+                                  - RHOP(I,J,K-1)*ZZP(I,J,K-1,N) - RHOP(I+1,J,K-1)*ZZP(I+1,J,K-1,N) )
+               
+         RHO_D_DZDX(I,J,K) = RHO_D_DZDX(I,J,K) - DELTA**2/12._EB*(DUDX*DRHOZDX + DUDY*DRHOZDY + DUDZ*DRHOZDZ)
+              
+      ENDDO
+   ENDDO
+ENDDO
+
+DO K=1,KBAR
+   DO J=0,JBAR
+      DO I=1,IBAR
+
+         DELTA = MAX(DX(I),DYN(J),DZ(K))
+               
+         DVDX = (VV(I+1,J,K)-VV(I-1,J,K))/(DXN(I-1)+DXN(I))
+         DVDY = (VV(I,J+1,K)-VV(I,J-1,K))/(DY(J)+DY(J+1))
+         DVDZ = (VV(I,J,K+1)-VV(I,J,K-1))/(DZN(K-1)+DZN(K))
+
+         DRHOZDX = 0.25_EB*RDX(I)*( RHOP(I+1,J,K)*ZZP(I+1,J,K,N) + RHOP(I+1,J+1,K)*ZZP(I+1,J+1,K,N) &
+                                  - RHOP(I-1,J,K)*ZZP(I-1,J,K,N) - RHOP(I-1,J+1,K)*ZZP(I-1,J+1,K,N) )
+
+         DRHOZDY = RDYN(J)*(RHOP(I,J+1,K)*ZZP(I,J+1,K,N)-RHOP(I,J,K)*ZZP(I,J,K,N))
+
+         DRHOZDZ = 0.25_EB*RDZ(K)*( RHOP(I,J,K+1)*ZZP(I,J,K+1,N) + RHOP(I,J+1,K+1)*ZZP(I,J+1,K+1,N) &
+                                  - RHOP(I,J,K-1)*ZZP(I,J,K-1,N) - RHOP(I,J+1,K-1)*ZZP(I,J+1,K-1,N) )
+            
+         RHO_D_DZDY(I,J,K) = RHO_D_DZDY(I,J,K) - DELTA**2/12._EB*(DVDX*DRHOZDX + DVDY*DRHOZDY + DVDZ*DRHOZDZ)
+               
+      ENDDO
+   ENDDO
+ENDDO
+
+DO K=0,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+
+         DELTA = MAX(DX(I),DY(J),DZN(K))
+               
+         DWDX = (WW(I+1,J,K)-WW(I-1,J,K))/(DXN(I-1)+DXN(I))
+         DWDY = (WW(I,J+1,K)-WW(I,J-1,K))/(DYN(J-1)+DYN(J))
+         DWDZ = (WW(I,J,K+1)-WW(I,J,K-1))/(DZ(K)+DZ(K+1))
+
+         DRHOZDX = 0.25_EB*RDX(I)*( RHOP(I+1,J,K)*ZZP(I+1,J,K,N) + RHOP(I+1,J,K+1)*ZZP(I+1,J,K+1,N) &
+                                  - RHOP(I-1,J,K)*ZZP(I-1,J,K,N) - RHOP(I-1,J,K+1)*ZZP(I-1,J,K+1,N) )
+
+         DRHOZDY = 0.25_EB*RDY(J)*( RHOP(I,J+1,K)*ZZP(I,J+1,K,N) + RHOP(I,J+1,K+1)*ZZP(I,J+1,K+1,N) &
+                                  - RHOP(I,J-1,K)*ZZP(I,J-1,K,N) - RHOP(I,J-1,K+1)*ZZP(I,J-1,K+1,N) )
+
+         DRHOZDZ = RDZN(K)*(RHOP(I,J,K+1)*ZZP(I,J,K+1,N)-RHOP(I,J,K)*ZZP(I,J,K,N))
+               
+         RHO_D_DZDZ(I,J,K) = RHO_D_DZDZ(I,J,K) - DELTA**2/12._EB*(DWDX*DRHOZDX + DWDY*DRHOZDY + DWDZ*DRHOZDZ)
+               
+      ENDDO
+   ENDDO
+ENDDO
+
+END SUBROUTINE TENSOR_DIFFUSIVITY_MODEL
 
 
 SUBROUTINE GET_REV_turb(MODULE_REV,MODULE_DATE)
