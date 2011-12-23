@@ -726,7 +726,7 @@ void keyboard_2(unsigned char key, int x, int y){
        blocklocation>BLOCKlocation_exact&&ncadgeom==0){
        blocklocation=BLOCKlocation_grid;
     }
-    if(showedit==1){
+    if(showedit_dialog==1){
       if(blocklocation==BLOCKlocation_exact){
         blockage_as_input=1;
       }

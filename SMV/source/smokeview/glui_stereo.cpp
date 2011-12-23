@@ -64,7 +64,7 @@ extern "C" void update_glui_stereo(void){
 extern "C" void glui_stereo_setup(int main_window){
   if(glui_stereo!=NULL)glui_stereo->close();
   glui_stereo = GLUI_Master.create_glui("stereo",0,0,0);
-  if(showgluistereo==0)glui_stereo->hide();
+  if(showstereo_dialog==0)glui_stereo->hide();
   
   panel_stereo_method = glui_stereo->add_panel(_("Stereo Method"));
   RADIO_showstereo = glui_stereo->add_radiogroup_to_panel(panel_stereo_method,&showstereo,STEREO_SHOW,STEREO_CB);
@@ -106,7 +106,7 @@ extern "C" void glui_stereo_setup(int main_window){
 
 extern "C" void hide_glui_stereo(void){
   if(glui_stereo!=NULL)glui_stereo->hide();
-  showgluistereo=0;
+  showstereo_dialog=0;
   updatemenu=1;
 }
 

@@ -462,6 +462,8 @@ EXTERNCPP void hide_glui_clip(void);
 EXTERNCPP void show_glui_wui(void);
 EXTERNCPP void hide_glui_wui(void);
 EXTERNCPP void show_glui_labels(void);
+EXTERNCPP void show_glui_device(void);
+EXTERNCPP void hide_glui_device(void);
 EXTERNCPP void set_labels_controls(void);
 EXTERNCPP void hide_glui_labels(void);
 

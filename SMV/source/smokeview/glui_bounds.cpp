@@ -324,7 +324,7 @@ extern "C" void glui_bounds_setup(int main_window){
 
   overwrite_all=0;
   glui_bounds = GLUI_Master.create_glui( "File/Bounds Settings",0,0,0 );
-  if(showbounds==0)glui_bounds->hide();
+  if(showbound_dialog==0)glui_bounds->hide();
 
   /*  3d smoke   */
 
@@ -2137,7 +2137,7 @@ void BUTTON_hide_CB(int var){
   switch (var){
   case CLOSE:
     glui_bounds->hide();
-    showbounds=0;
+    showbound_dialog=0;
     updatemenu=1;
     break;
   case SAVE_SETTINGS:
@@ -2205,7 +2205,7 @@ extern "C" void update_overwrite(void){
 
 extern "C" void hide_glui_bounds(void){
   if(glui_bounds!=NULL)glui_bounds->hide();
-  showbounds=0;
+  showbound_dialog=0;
 }
 
 /* ------------------ update_plot3d_display ------------------------ */

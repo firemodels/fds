@@ -451,7 +451,10 @@ SVEXTERN int p3dsurfacetype;
 SVEXTERN int parttype;
 SVEXTERN int allexterior,showexterior;
 SVEXTERN int allinterior;
-SVEXTERN int showbounds,showmotion,showedit, showclip, showgluistereo, showtour, showlabels, showcolorbar, showwui;
+SVEXTERN int SVDECL(showbound_dialog,0),SVDECL(showmotion_dialog,0),SVDECL(showedit_dialog,0), SVDECL(showclip_dialog,0);
+SVEXTERN int SVDECL(showstereo_dialog,0), SVDECL(showtour_dialog,0), SVDECL(showdisplay_dialog,0), SVDECL(showcolorbar_dialog,0);
+SVEXTERN int SVDECL(showwui_dialog,0), SVDECL(showdevice_dialog,0);
+
 #ifdef pp_SHOOTER
 SVEXTERN int showshooterDLG;
 SVEXTERN float shooter_xyz[3], shooter_dxyz[3], shooter_uvw[3], shooterpointsize;

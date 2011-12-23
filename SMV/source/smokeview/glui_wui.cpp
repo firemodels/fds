@@ -78,7 +78,7 @@ extern "C" void glui_wui_setup(int main_window){
 
   if(glui_wui!=NULL)glui_wui->close();
   glui_wui = GLUI_Master.create_glui(_("Terrain"),0,0,0);
-  if(showwui==0)glui_wui->hide();
+  if(showwui_dialog==0)glui_wui->hide();
 
   panel_terrain = glui_wui->add_panel("",GLUI_PANEL_NONE);
 
@@ -151,7 +151,7 @@ extern "C" void glui_wui_setup(int main_window){
 
 extern "C" void hide_glui_wui(void){
   if(glui_wui!=NULL)glui_wui->hide();
-  showwui=0;
+  showwui_dialog=0;
   updatemenu=1;
 }
 

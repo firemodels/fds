@@ -939,14 +939,19 @@ void DialogMenu(int value){
     if(showtrainer==0)hide_trainer();
     break;
   case 22:
-    showlabels=1-showlabels;
-    if(showlabels==1)show_glui_labels();
-    if(showlabels==0)hide_glui_labels();
+    showdisplay_dialog=1-showdisplay_dialog;
+    if(showdisplay_dialog==1)show_glui_labels();
+    if(showdisplay_dialog==0)hide_glui_labels();
+    break;
+  case 28:
+    showdevice_dialog=1-showdevice_dialog;
+    if(showdevice_dialog==1)show_glui_device();
+    if(showdevice_dialog==0)hide_glui_device();
     break;
   case 14:
-    showbounds=1-showbounds;
-    if(showbounds==1)show_glui_bounds();
-    if(showbounds==0){
+    showbound_dialog=1-showbound_dialog;
+    if(showbound_dialog==1)show_glui_bounds();
+    if(showbound_dialog==0){
       showglui3dsmoke=0;
       showgluizip=0;
       hide_glui_bounds();
@@ -955,7 +960,7 @@ void DialogMenu(int value){
   case 20:
     showglui3dsmoke=1-showglui3dsmoke;
     if(showglui3dsmoke==1){
-      if(showbounds==0)DialogMenu(14);
+      if(showbound_dialog==0)DialogMenu(14);
       open_smokepanel();
     }
     else{
@@ -965,7 +970,7 @@ void DialogMenu(int value){
   case 24:
     showgluizip=1-showgluizip;
     if(showgluizip==1){
-      if(showbounds==0)DialogMenu(14);
+      if(showbound_dialog==0)DialogMenu(14);
       open_smokezippanel();
     }
     else{
@@ -973,9 +978,9 @@ void DialogMenu(int value){
     }
     break;
   case 15:
-    showmotion=1-showmotion;
-    if(showmotion==1)show_glui_motion();
-    if(showmotion==0)hide_glui_motion();
+    showmotion_dialog=1-showmotion_dialog;
+    if(showmotion_dialog==1)show_glui_motion();
+    if(showmotion_dialog==0)hide_glui_motion();
     break;
   case 21:
    showgluitour=1-showgluitour;
@@ -983,34 +988,34 @@ void DialogMenu(int value){
    if(showgluitour==0)hide_glui_tour();
    break;
   case 18:
-    showclip=1-showclip;
-    if(showclip==1)show_glui_clip();
-    if(showclip==0)hide_glui_clip();
+    showclip_dialog=1-showclip_dialog;
+    if(showclip_dialog==1)show_glui_clip();
+    if(showclip_dialog==0)hide_glui_clip();
     break;
   case 19:
-    showgluistereo=1-showgluistereo;
-    if(showgluistereo==1)show_glui_stereo();
-    if(showgluistereo==0)hide_glui_stereo();
+    showstereo_dialog=1-showstereo_dialog;
+    if(showstereo_dialog==1)show_glui_stereo();
+    if(showstereo_dialog==0)hide_glui_stereo();
     break;
   case 26:
-    showwui=1-showwui;
-    if(showwui==1)show_glui_wui();
-    if(showwui==0)hide_glui_wui();
+    showwui_dialog=1-showwui_dialog;
+    if(showwui_dialog==1)show_glui_wui();
+    if(showwui_dialog==0)hide_glui_wui();
     break;
   case 23:
-    showcolorbar=1-showcolorbar;
-    if(showcolorbar==1){
+    showcolorbar_dialog=1-showcolorbar_dialog;
+    if(showcolorbar_dialog==1){
       viscolorbarpath=1;
       show_glui_colorbar();
     }
-    if(showcolorbar==0){
+    if(showcolorbar_dialog==0){
       viscolorbarpath=0;
       hide_glui_colorbar();
     }
     break;
   case 16:
-    showedit=1-showedit;
-    if(showedit==1){
+    showedit_dialog=1-showedit_dialog;
+    if(showedit_dialog==1){
       if(fds_filein!=NULL&&updategetobstlabels==1){
         CheckMemoryOff;
         getobstlabels(fds_filein);
@@ -1021,7 +1026,7 @@ void DialogMenu(int value){
       show_glui_edit();
       visBlocks=visBLOCKNormal;
     }
-    if(showedit==0){
+    if(showedit_dialog==0){
       hide_glui_edit();
       visBlocks=visBlocksSave;
     }
@@ -1029,28 +1034,30 @@ void DialogMenu(int value){
 
     break;
   case -2:
-    showlabels=0;
+    showdisplay_dialog=0;
     hide_glui_labels();
-    showbounds=0;
+    showbound_dialog=0;
     showglui3dsmoke=0;
     showgluivol3dsmoke=0;
     showgluizip=0;
     hide_glui_bounds();
-    showmotion=0;
+    showmotion_dialog=0;
     hide_glui_motion();
     showgluitour=0;
     hide_glui_tour();
-    showclip=0;
+    showclip_dialog=0;
     hide_glui_clip();
-    showwui=0;
+    showwui_dialog=0;
     hide_glui_wui();
-    showgluistereo=0;
+    showstereo_dialog=0;
     hide_glui_stereo();
-    showcolorbar=0;
+    showcolorbar_dialog=0;
     hide_glui_colorbar();
-    if(showedit==1)DialogMenu(16);
+    if(showedit_dialog==1)DialogMenu(16);
     showtrainer=0;
     hide_trainer();
+    showdevice_dialog=0;
+    hide_glui_device();
     break;
   default:
     ASSERT(FFALSE);
@@ -5364,7 +5371,7 @@ updatemenu=0;
 /* --------------------------------geometry menu -------------------------- */
 
   CREATEMENU(geometrymenu,GeometryMenu);
-  if(showedit==0&&ntotal_blockages>0)glutAddSubMenu(_("Obstacles"),blockagemenu);
+  if(showedit_dialog==0&&ntotal_blockages>0)glutAddSubMenu(_("Obstacles"),blockagemenu);
   if(ngeominfo>0)glutAddSubMenu(_("Immersed Solids"),immersedmenu);
   if(nobject_defs>0){
     int num_activedevices=0;
@@ -6759,29 +6766,31 @@ updatemenu=0;
 
   CREATEMENU(dialogmenu,DialogMenu);
   if(nterraininfo>0){
-    if(showwui==1)glutAddMenuEntry(_("*WUI display... ALT+w"),26);
-    if(showwui==0)glutAddMenuEntry(_("WUI display... ALT+w..."),26);
+    if(showwui_dialog==1)glutAddMenuEntry(_("*WUI display... ALT+w"),26);
+    if(showwui_dialog==0)glutAddMenuEntry(_("WUI display... ALT+w..."),26);
   }
-  if(showclip==1)glutAddMenuEntry(_("*Clip geometry...  ALT+c"),18);
-  if(showclip==0)glutAddMenuEntry(_("Clip geometry...  ALT+c"),18);
+  if(showclip_dialog==1)glutAddMenuEntry(_("*Clip geometry...  ALT+c"),18);
+  if(showclip_dialog==0)glutAddMenuEntry(_("Clip geometry...  ALT+c"),18);
 #ifdef pp_COMPRESS
   if(smokezippath!=NULL&&(npatchinfo>0||nsmoke3dinfo>0||nsliceinfo>0)){
     if(showgluizip==1)glutAddMenuEntry(_("*Compression/Smokezip...  ALT+z"),24);
     if(showgluizip==0)glutAddMenuEntry(_("Compression/Smokezip...  ALT+z"),24);
   }
 #endif
-  if(showcolorbar==1)glutAddMenuEntry(_("*Customize colorbar...  ALT+c"),23);
-  if(showcolorbar==0)glutAddMenuEntry(_("Customize colorbar...  ALT+c"),23);
-  if(showlabels==1)glutAddMenuEntry(_("*Display...  ALT+d"),22);
-  if(showlabels==0)glutAddMenuEntry(_("Display...  ALT+d"),22);
+  if(showcolorbar_dialog==1)glutAddMenuEntry(_("*Customize colorbar...  ALT+c"),23);
+  if(showcolorbar_dialog==0)glutAddMenuEntry(_("Customize colorbar...  ALT+c"),23);
+  if(showdevice_dialog==1)glutAddMenuEntry(_("*Devices/Objects..."),28);
+  if(showdevice_dialog==0)glutAddMenuEntry(_("Devices/Objects..."),28);
+  if(showdisplay_dialog==1)glutAddMenuEntry(_("*Display...  ALT+d"),22);
+  if(showdisplay_dialog==0)glutAddMenuEntry(_("Display...  ALT+d"),22);
   if(isZoneFireModel==0){
-    if(showedit==1)glutAddMenuEntry(_("*Examine blockages...  ALT+e"),16);
-    if(showedit==0)glutAddMenuEntry(_("Examine blockages...  ALT+e"),16);
+    if(showedit_dialog==1)glutAddMenuEntry(_("*Examine blockages...  ALT+e"),16);
+    if(showedit_dialog==0)glutAddMenuEntry(_("Examine blockages...  ALT+e"),16);
   }
-  if(showbounds==1)glutAddMenuEntry(_("*File/Bound/Script settings...  ALT+f"),14);
-  if(showbounds==0)glutAddMenuEntry(_("File/Bound/Script settings...  ALT+f"),14);
-  if(showmotion==1)glutAddMenuEntry(_("*Motion/View/Render...  ALT+m"),15);
-  if(showmotion==0)glutAddMenuEntry(_("Motion/View/Render...  ALT+m"),15);
+  if(showbound_dialog==1)glutAddMenuEntry(_("*File/Bound/Script settings...  ALT+f"),14);
+  if(showbound_dialog==0)glutAddMenuEntry(_("File/Bound/Script settings...  ALT+f"),14);
+  if(showmotion_dialog==1)glutAddMenuEntry(_("*Motion/View/Render...  ALT+m"),15);
+  if(showmotion_dialog==0)glutAddMenuEntry(_("Motion/View/Render...  ALT+m"),15);
 #ifdef pp_SHOOTER
   if(showshooterDLG==1)glutAddMenuEntry(_("*Particle tracking..."),27);
   if(showshooterDLG==0)glutAddMenuEntry(_("Particle tracking..."),27);
@@ -6790,8 +6799,8 @@ updatemenu=0;
     if(showglui3dsmoke==1)glutAddMenuEntry(_("*3D smoke...  ALT+s"),20);
     if(showglui3dsmoke==0)glutAddMenuEntry(_("3D smoke...  ALT+s"),20);
   }
-  if(showgluistereo==1)glutAddMenuEntry(_("*Stereo parameters..."),19);
-  if(showgluistereo==0)glutAddMenuEntry(_("Stereo parameters..."),19);
+  if(showstereo_dialog==1)glutAddMenuEntry(_("*Stereo parameters..."),19);
+  if(showstereo_dialog==0)glutAddMenuEntry(_("Stereo parameters..."),19);
   if(showgluitour==1)glutAddMenuEntry(_("*Tours...  ALT+t"),21);
   if(showgluitour==0)glutAddMenuEntry(_("Tours...  ALT+t"),21);
   if(trainer_active==1){

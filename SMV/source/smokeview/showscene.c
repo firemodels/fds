@@ -192,7 +192,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
     }
     sniffErrors("after draw_devices");
 
-    if(visaxislabels==1||showedit==1){
+    if(visaxislabels==1||showedit_dialog==1){
       outputAxisLabels();
       sniffErrors("after outputAxisLables");
     }
@@ -284,7 +284,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
 /* ++++++++++++++++++++++++ draw tours +++++++++++++++++++++++++ */
 
-  if(showtour==1){
+  if(showtour_dialog==1){
     drawtours();
     sniffErrors("after drawTours");
   }

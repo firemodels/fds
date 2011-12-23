@@ -129,7 +129,7 @@ extern "C" void update_colorbar_label(void){
 /* ------------------ hide_glui_colorbar ------------------------ */
 
 void hide_glui_colorbar(void){
-  showcolorbar=0;
+  showcolorbar_dialog=0;
   if(glui_colorbar!=NULL){
     copy_camera(camera_external,camera_external_save);
     Reshape(screenWidth,screenHeight);
@@ -169,7 +169,7 @@ extern "C" void glui_colorbar_setup(int main_window){
 
   if(glui_colorbar!=NULL)glui_colorbar->close();
   glui_colorbar = GLUI_Master.create_glui(_("Colorbar editor"),0,0,0);
-  if(showcolorbar==0)glui_colorbar->hide();
+  if(showcolorbar_dialog==0)glui_colorbar->hide();
 
   panel_cb2R2 = glui_colorbar->add_panel("",GLUI_PANEL_NONE);
   BUTTON_new=glui_colorbar->add_button_to_panel(panel_cb2R2,_("New colorbar"),COLORBAR_NEW,COLORBAR_CB);

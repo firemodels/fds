@@ -256,7 +256,7 @@ void updateShow(void){
   showtitle1=0; showtitle2=0;
   show3dsmoke=0;
   smoke3dflag=0;
-  showtour=0;
+  showtour_dialog=0;
   showterrain=0;
   ntitles=0;
   if(visTitle0==1)ntitles++;
@@ -292,7 +292,7 @@ void updateShow(void){
       for(i=0;i<ntours;i++){
         touri = tourinfo + i;
         if(touri->display==1){
-          showtour=1;
+          showtour_dialog=1;
           break;
         }
       }
@@ -495,7 +495,7 @@ void updateShow(void){
 #ifdef pp_SHOOTER
     shooter_flag==1||
 #endif
-    smoke3dflag==1|| showtour==1 || evacflag==1||
+    smoke3dflag==1|| showtour_dialog==1 || evacflag==1||
     (ReadZoneFile==1&&visZone==1&&visTimeZone==1)||
     (ReadTargFile==1&&visTarg==1)
     ||showterrain==1||showvolrender==1
@@ -539,7 +539,7 @@ void updateShow(void){
 #endif    
   }
   if(showsmoke==1||showevac==1||showpatch==1||showslice==1||showvslice==1||showzone==1||showiso==1||showevac==1)RenderTime=1;
-  if(showtour==1||show3dsmoke==1||touring==1||showvolrender==1)RenderTime=1;
+  if(showtour_dialog==1||show3dsmoke==1||touring==1||showvolrender==1)RenderTime=1;
 #ifdef pp_SHOOTER
   if(showshooter==1)RenderTime=1;
 #endif

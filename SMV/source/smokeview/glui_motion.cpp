@@ -251,7 +251,7 @@ extern "C" void glui_motion_setup(int main_window){
 
   if(glui_motion!=NULL)glui_motion->close();
   glui_motion = GLUI_Master.create_glui(_("Motion/View/Render"),0,0,0);
-  if(showmotion==0)glui_motion->hide();
+  if(showmotion_dialog==0)glui_motion->hide();
 
   panel_motion = glui_motion->add_rollout(_("Motion"));
 
@@ -953,7 +953,7 @@ extern "C" void update_meshlist1(int val){
 
 extern "C" void hide_glui_motion(void){
   if(glui_motion!=NULL)glui_motion->hide();
-  showmotion=0;
+  showmotion_dialog=0;
 }
 
 /* ------------------ show_glui_motion_setup ------------------------ */
@@ -968,7 +968,7 @@ void BUTTON_hide2_CB(int var){
   switch (var){
   case 1:
     if(glui_motion!=NULL)glui_motion->hide();
-    showmotion=0;
+    showmotion_dialog=0;
     updatemenu=1;
     break;
   case SAVE_SETTINGS:

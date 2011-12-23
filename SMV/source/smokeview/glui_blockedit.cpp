@@ -68,7 +68,7 @@ extern "C" void glui_edit_setup(int main_window){
 
   if(glui_edit!=NULL)glui_edit->close();
   glui_edit = GLUI_Master.create_glui("Blockage Info",0,0,0);
-  if(showedit==0)glui_edit->hide();
+  if(showedit_dialog==0)glui_edit->hide();
 
   panel_obj_select = glui_edit->add_panel("SURFs");
 
@@ -230,7 +230,7 @@ extern "C" void glui_edit_setup(int main_window){
 extern "C" void hide_glui_edit(void){
   blockageSelect=0;
   if(glui_edit!=NULL)glui_edit->hide();
-  showedit=0;
+  showedit_dialog=0;
   updatemenu=1;
   editwindow_status=CLOSE_WINDOW;
 }

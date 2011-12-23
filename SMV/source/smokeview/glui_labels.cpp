@@ -38,16 +38,13 @@ GLUI_Spinner *SPINNER_tick_xmax=NULL;
 GLUI_Spinner *SPINNER_tick_ymax=NULL;
 GLUI_Spinner *SPINNER_tick_zmax=NULL;
 
-GLUI_Rollout *panel_objects=NULL;
 GLUI_Rollout *panel_user_tick=NULL;
 GLUI_Rollout *panel_label1=NULL;
 GLUI_Panel *panel_label2=NULL;
-GLUI_Panel *panel_devicevis=NULL;
 GLUI_Panel *panel_tick1;
 GLUI_Panel *panel_tick1a;
 GLUI_Panel *panel_tick1b;
 GLUI_Panel *panel_tick2;
-GLUI_Spinner *SPINNER_sensorrelsize=NULL;
 GLUI_Spinner *SPINNER_tick_x0=NULL;
 GLUI_Spinner *SPINNER_tick_y0=NULL;
 GLUI_Spinner *SPINNER_tick_z0=NULL;
@@ -84,7 +81,6 @@ GLUI_Checkbox *CHECKBOX_labels_shade=NULL;
 GLUI_Checkbox *CHECKBOX_labels_transparent_override=NULL;
 
 GLUI_RadioGroup *RADIO_fontsize=NULL,*RADIO_showhide=NULL;
-GLUI_RadioGroup *RADIO_devicetypes=NULL;
 GLUI_Button *Button_EVAC=NULL;
 GLUI_Button *Button_PART=NULL;
 GLUI_Button *Button_SLICE=NULL;
@@ -109,7 +105,6 @@ GLUI_Panel *panel_showhide=NULL;
 #define LABELS_transparent 6
 #define LABELS_fontsize 7
 #define LABELS_ticks 8
-#define LABELS_sensorsize 20
 #define LABELS_drawface 24
 #ifdef pp_BETA
 #define LABELS_cullblockages 25
@@ -126,8 +121,6 @@ GLUI_Panel *panel_showhide=NULL;
 #define LABELS_BENCHMARK 17
 #define LABELS_HMS 18
 #define SAVE_SETTINGS 99
-#define SHOWDEVICEVALS 26
-#define LABELS_devicetypes 27
 
 /* ------------------ glui_labels_setup ------------------------ */
 
@@ -135,7 +128,7 @@ extern "C" void glui_labels_setup(int main_window){
 
   if(glui_labels!=NULL)glui_labels->close();
   glui_labels = GLUI_Master.create_glui("Display",0,0,0);
-  if(showlabels==0)glui_labels->hide();
+  if(showdisplay_dialog==0)glui_labels->hide();
 
   panel_label1 = glui_labels->add_rollout("General Settings",true);
   CHECKBOX_labels_colorbar=glui_labels->add_checkbox_to_panel(panel_label1,_("Color bar"),&visColorLabels,LABELS_label,Labels_CB);
@@ -185,25 +178,6 @@ extern "C" void glui_labels_setup(int main_window){
   glui_labels->add_radiobutton_to_group(RADIO_fontsize,_("small font"));
   glui_labels->add_radiobutton_to_group(RADIO_fontsize,_("large font"));
 
-
-  if(ndeviceinfo>0){
-    int i;
-
-    panel_objects = glui_labels->add_rollout("Devices/Objects",false);
-    SPINNER_sensorrelsize=glui_labels->add_spinner_to_panel(panel_objects,_("Scaling"),GLUI_SPINNER_FLOAT,&sensorrelsize,LABELS_sensorsize,Labels_CB);
-    if(ndevicetypes>0){
-      glui_labels->add_checkbox_to_panel(panel_objects,_("Show velocity vectors"),&showvdeviceval);
-      glui_labels->add_checkbox_to_panel(panel_objects,_("Show values"),&showdeviceval,SHOWDEVICEVALS,Labels_CB);
-      panel_devicevis=glui_labels->add_panel_to_panel(panel_objects,"",false);
-      RADIO_devicetypes=glui_labels->add_radiogroup_to_panel(panel_devicevis,&devicetypes_index,LABELS_devicetypes,Labels_CB);
-      for(i=0;i<ndevicetypes;i++){
-        glui_labels->add_radiobutton_to_group(RADIO_devicetypes,devicetypes[i]->quantity);
-      }
-      Labels_CB(SHOWDEVICEVALS);
-      Labels_CB(LABELS_devicetypes);
-    }
-
-  }
 
   panel_user_tick = glui_labels->add_rollout("User tick settings",false);
 
@@ -437,7 +411,7 @@ extern "C" void update_showhidebuttons(void){
 
 extern "C" void hide_glui_labels(void){
   if(glui_labels!=NULL)glui_labels->hide();
-  showlabels=0;
+  showdisplay_dialog=0;
   updatemenu=1;
 }
 
@@ -454,23 +428,6 @@ void Labels_CB(int var){
 
   updatemenu=1;
   switch (var){
-  case LABELS_devicetypes:
-    for(i=0;i<ndevicetypes;i++){
-      devicetypes[i]->type2vis=0;
-    }
-    devicetypes[devicetypes_index]->type2vis=1;
-    break;
-  case SHOWDEVICEVALS:
-    if(panel_devicevis!=NULL){
-      if(showdeviceval==1){
-        panel_devicevis->enable();
-      }
-      else{
-        panel_devicevis->disable();
-      }
-    }
-
-  break;
 #ifdef pp_BETA
   case LABELS_drawface:
     /*
@@ -493,14 +450,6 @@ void Labels_CB(int var){
     updatefacelists=1;
     break;
 #endif    
-  case LABELS_sensorsize:
-    if(sensorrelsize<sensorrelsizeMIN){
-      sensorrelsize=sensorrelsizeMIN;
-      if(SPINNER_sensorrelsize!=NULL){
-        SPINNER_sensorrelsize->set_float_val(sensorrelsize);
-      }
-    }
-    break;
   case SAVE_SETTINGS:
     writeini(LOCAL_INI);
     break;

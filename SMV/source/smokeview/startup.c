@@ -39,6 +39,7 @@ void glui_message_setup(int main_window);
 #endif
 void glui_bounds_setup(int main_window);
 void glui_labels_setup(int main_window);
+void glui_device_setup(int main_window);
 void glui_edit_setup(int main_window);
 void glui_clip_setup(int main_window);
 void glui_wui_setup(int main_window);
@@ -158,6 +159,7 @@ int initcase_c(int argc, char **argv){
   glui_clip_setup(mainwindow_id);
   glui_wui_setup(mainwindow_id);
   glui_labels_setup(mainwindow_id);
+  glui_device_setup(mainwindow_id);
   glui_tour_setup(mainwindow_id);
   glui_alert_setup(mainwindow_id);
   glui_advancedtour_setup(mainwindow_id);
@@ -1288,7 +1290,6 @@ void initvars1(void){
   parttype=0;
   allexterior=1,showexterior=1;
   allinterior=1;
-  showbounds=0,showmotion=0,showedit=0, showclip=0, showgluistereo=0, showtour=0, showlabels=0, showcolorbar=0, showwui=0;
 #ifdef pp_SHOOTER
   showshooterDLG=0;
 #endif

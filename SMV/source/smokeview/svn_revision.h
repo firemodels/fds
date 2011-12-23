@@ -31,6 +31,7 @@ extern char glui_bounds_revision[];
 extern char glui_clip_revision[];
 extern char glui_wui_revision[];
 extern char glui_colorbar_revision[];
+extern char glui_device_revision[];
 extern char glui_labels_revision[];
 extern char glui_motion_revision[];
 extern char glui_stereo_revision[];

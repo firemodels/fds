@@ -80,7 +80,7 @@ extern "C" void glui_clip_setup(int main_window){
 
   if(glui_clip!=NULL)glui_clip->close();
   glui_clip = GLUI_Master.create_glui("clip",0,0,0);
-  if(showclip==0)glui_clip->hide();
+  if(showclip_dialog==0)glui_clip->hide();
 
   panel_clip = glui_clip->add_panel("",GLUI_PANEL_NONE);
   panel_clip_lower = glui_clip->add_panel_to_panel(panel_clip,_("Clip Lower"));
@@ -165,7 +165,7 @@ extern "C" void glui_clip_setup(int main_window){
 
 extern "C" void hide_glui_clip(void){
   if(glui_clip!=NULL)glui_clip->hide();
-  showclip=0;
+  showclip_dialog=0;
   updatemenu=1;
 }
 
