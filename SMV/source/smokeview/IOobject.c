@@ -239,7 +239,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
 void reporterror(char *buffer, char *token, int numargs_found, int numargs_expected);
 float get_point2box_dist(float boxmin[3], float boxmax[3], float p1[3], float p2[3]);
 
-void drawsphereseg(float anglemin, float anglemax, float rmin, float rmax, unsigned char *rgbcolor);
+void drawsphereseg(float anglemin, float anglemax, float rmin, float rmax);
 void rotateeye(void);
 void rotateaxis(float angle, float ax, float ay, float az);
 void rotatexyz(float x, float y, float z);
@@ -683,12 +683,11 @@ void draw_devices(void){
 
   if(showtime==1&&itimes>=0&&itimes<ntimes&&showvdeviceval==1&&nvdeviceinfo>0){
     glEnable(GL_LIGHTING);
-
     glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
     glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
     glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,specular);
-
     glEnable(GL_COLOR_MATERIAL);
+
     glPushMatrix();
     glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
     glTranslatef(-xbar0,-ybar0,-zbar0);
@@ -745,7 +744,7 @@ void draw_devices(void){
         anglemax=-dangle*PIFACTOR;
         rmin=MAX(vv-dvel,0.0);
         rmax=vv+dvel;
-        drawsphereseg(anglemin,anglemax,rmin,rmax,conecolor);
+        drawsphereseg(anglemin,anglemax,rmin,rmax);
         glPopMatrix();
       }
     }
@@ -1674,20 +1673,26 @@ void drawtsphere(int texture_index,float diameter, unsigned char *rgbcolor){
 
 /* ----------------------- drawsphere ----------------------------- */
 
-void drawsphereseg(float anglemin, float anglemax, float rmin, float rmax, unsigned char *rgbcolor){
+void drawsphereseg(float anglemin, float anglemax, float rmin, float rmax){
   int i, j;
   float ai, aip1, aj, ajp1;
   float danglei,danglej;
   float cosi, cosip1, sini, sinip1;
   float cosj, cosjp1, sinj, sinjp1;
-
+  float colorin[4]={1.0,0.0,0.0,1.0};
+  float colorout[4]={0.0,1.0,0.0,1.0};
+  float coloredge[4]={0.0,0.0,1.0,1.0};
+  float colori[4]={1.0,0.0,0.0,1.0};
+  float colorip1[4]={1.0,0.0,0.0,1.0};
+  float colorwhite[4]={0.0,0.0,0.0,1.0};
   anglemax=0.0;
 
   danglei = (anglemax-anglemin)/(float)NLAT;
   danglej = 2.0*4.0*atan(1.0)/(float)NLONG;
+
+  if(object_outlines==0){
+  glColor4fv(coloredge);
   glBegin(GL_QUADS);
-    
-  if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
   ai = anglemin;
   cosi = cos(ai);
   sini = sin(ai);
@@ -1710,6 +1715,9 @@ void drawsphereseg(float anglemin, float anglemax, float rmin, float rmax, unsig
     glNormal3f(-cosj,-sinj,0.0);
     glVertex3f(rmax*sini*cosj,rmax*sini*sinj,cosi*rmax);
   }
+  
+  memcpy(colori,colorin,4*sizeof(float));
+  memcpy(colorip1,colorin,4*sizeof(float));
   for(i=0;i<NLAT;i++){
     ai = anglemin + i*danglei;
     aip1 = anglemin + (i+1)*danglei;
@@ -1717,6 +1725,9 @@ void drawsphereseg(float anglemin, float anglemax, float rmin, float rmax, unsig
     cosip1 = cos(aip1);
     sini = sin(ai);
     sinip1 = sin(aip1);
+    colori[1]=0.6*(float)i/(float)NLAT;
+    colorip1[1]=0.6*(float)(i+1)/(float)NLAT;
+    glColor4fv(colori);
     for(j=0;j<NLONG;j++){
       aj = j*danglej;
       ajp1 = (j+1)*danglej;
@@ -1724,19 +1735,26 @@ void drawsphereseg(float anglemin, float anglemax, float rmin, float rmax, unsig
       cosjp1 = cos(ajp1);
       sinj = sin(aj);
       sinjp1 = sin(ajp1);
+      glColor4fv(colori);
       glNormal3f(-sini*cosj,-sini*sinj,-cosi);
       glVertex3f(rmin*sini*cosj,rmin*sini*sinj,cosi*rmin);
 
+      glColor4fv(colorip1);
       glNormal3f(-sinip1*cosj,-sinip1*sinj,-cosip1);
       glVertex3f(rmin*sinip1*cosj,rmin*sinip1*sinj,cosip1*rmin);
 
+      glColor4fv(colorip1);
       glNormal3f(-sinip1*cosjp1,-sinip1*sinjp1,-cosip1);
       glVertex3f(rmin*sinip1*cosjp1,rmin*sinip1*sinjp1,cosip1*rmin);
 
+      glColor4fv(colori);
       glNormal3f(-sini*cosjp1,-sini*sinjp1,-cosi);
       glVertex3f(rmin*sini*cosjp1,rmin*sini*sinjp1,cosi*rmin);
     }
   }
+
+  memcpy(colori,colorout,4*sizeof(float));
+  memcpy(colorip1,colorout,4*sizeof(float));
   for(i=0;i<NLAT;i++){
     ai = anglemin + i*danglei;
     aip1 = anglemin + (i+1)*danglei;
@@ -1744,6 +1762,8 @@ void drawsphereseg(float anglemin, float anglemax, float rmin, float rmax, unsig
     cosip1 = cos(aip1);
     sini = sin(ai);
     sinip1 = sin(aip1);
+    colori[2]=0.6*(float)i/(float)NLAT;
+    colorip1[2]=0.6*(float)(i+1)/(float)NLAT;
     for(j=0;j<NLONG;j++){
       aj = j*danglej;
       ajp1 = (j+1)*danglej;
@@ -1751,12 +1771,15 @@ void drawsphereseg(float anglemin, float anglemax, float rmin, float rmax, unsig
       cosjp1 = cos(ajp1);
       sinj = sin(aj);
       sinjp1 = sin(ajp1);
+
+      glColor4fv(colori);
       glNormal3f(sini*cosj,sini*sinj,cosi);
       glVertex3f(rmax*sini*cosj,rmax*sini*sinj,cosi*rmax);
 
       glNormal3f(sini*cosjp1,sini*sinjp1,cosi);
       glVertex3f(rmax*sini*cosjp1,rmax*sini*sinjp1,cosi*rmax);
 
+      glColor4fv(colorip1);
       glNormal3f(sinip1*cosjp1,sinip1*sinjp1,cosip1);
       glVertex3f(rmax*sinip1*cosjp1,rmax*sinip1*sinjp1,cosip1*rmax);
 
@@ -1765,6 +1788,108 @@ void drawsphereseg(float anglemin, float anglemax, float rmin, float rmax, unsig
     }
   }
   glEnd();
+  }
+  else{
+  ai = anglemin;
+  glColor4fv(coloredge);
+  glBegin(GL_LINES);
+  cosi = cos(ai);
+  sini = sin(ai);
+  for(j=0;j<NLONG;j++){
+    aj = j*danglej;
+    ajp1 = (j+1)*danglej;
+    cosj = cos(aj);
+    cosjp1 = cos(ajp1);
+    sinj = sin(aj);
+    sinjp1 = sin(ajp1);
+    glVertex3f(rmin*sini*cosj,rmin*sini*sinj,cosi*rmin);
+
+    glVertex3f(rmax*sini*cosj,rmax*sini*sinj,cosi*rmax);
+  }
+  
+  memcpy(colori,colorin,4*sizeof(float));
+  memcpy(colorip1,colorin,4*sizeof(float));
+  for(i=0;i<NLAT;i++){
+    ai = anglemin + i*danglei;
+    aip1 = anglemin + (i+1)*danglei;
+    cosi = cos(ai);
+    cosip1 = cos(aip1);
+    sini = sin(ai);
+    sinip1 = sin(aip1);
+    colori[1]=0.6*(float)i/(float)NLAT;
+    colorip1[1]=0.6*(float)(i+1)/(float)NLAT;
+    glColor4fv(colori);
+    for(j=0;j<NLONG;j++){
+      aj = j*danglej;
+      ajp1 = (j+1)*danglej;
+      cosj = cos(aj);
+      cosjp1 = cos(ajp1);
+      sinj = sin(aj);
+      sinjp1 = sin(ajp1);
+      glColor4fv(colori);
+      glVertex3f(rmin*sini*cosj,rmin*sini*sinj,cosi*rmin);
+
+      glColor4fv(colorip1);
+      glVertex3f(rmin*sinip1*cosj,rmin*sinip1*sinj,cosip1*rmin);
+
+      glColor4fv(colorip1);
+      glVertex3f(rmin*sinip1*cosjp1,rmin*sinip1*sinjp1,cosip1*rmin);
+
+      glColor4fv(colori);
+      glVertex3f(rmin*sini*cosjp1,rmin*sini*sinjp1,cosi*rmin);
+    }
+  }
+
+  memcpy(colori,colorout,4*sizeof(float));
+  memcpy(colorip1,colorout,4*sizeof(float));
+  for(i=0;i<NLAT;i++){
+    ai = anglemin + i*danglei;
+    aip1 = anglemin + (i+1)*danglei;
+    cosi = cos(ai);
+    cosip1 = cos(aip1);
+    sini = sin(ai);
+    sinip1 = sin(aip1);
+    colori[2]=0.6*(float)i/(float)NLAT;
+    colorip1[2]=0.6*(float)(i+1)/(float)NLAT;
+    for(j=0;j<NLONG;j++){
+      aj = j*danglej;
+      ajp1 = (j+1)*danglej;
+      cosj = cos(aj);
+      cosjp1 = cos(ajp1);
+      sinj = sin(aj);
+      sinjp1 = sin(ajp1);
+
+      glColor4fv(colori);
+      glVertex3f(rmax*sini*cosj,rmax*sini*sinj,cosi*rmax);
+
+      glVertex3f(rmax*sini*cosjp1,rmax*sini*sinjp1,cosi*rmax);
+
+      glColor4fv(colorip1);
+      glVertex3f(rmax*sinip1*cosjp1,rmax*sinip1*sinjp1,cosip1*rmax);
+
+      glVertex3f(rmax*sinip1*cosj,rmax*sinip1*sinj,cosip1*rmax);
+    }
+  }
+  glEnd();
+  }
+#ifdef xxx
+#define VECFACTOR (0.1*xyzmaxdiff)
+  glColor4fv(colorwhite);
+  glBegin(GL_LINES);
+  for(i=0;i<NLAT;i++){
+    ai = anglemin + i*danglei;
+    cosi = cos(ai);
+    sini = sin(ai);
+    for(j=0;j<NLONG;j++){
+      aj = j*danglej;
+      cosj = cos(aj);
+      sinj = sin(aj);
+      glVertex3f(rmax*sini*cosj,rmax*sini*sinj,cosi*rmax);
+      glVertex3f(rmax*sini*cosj+VECFACTOR*sini*cosj,rmax*sini*sinj+VECFACTOR*sini*sinj,cosi*rmax+VECFACTOR*cosi);
+    }
+  }
+  glEnd();
+#endif
 }
 
 /* ----------------------- drawsphere ----------------------------- */
