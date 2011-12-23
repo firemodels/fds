@@ -10490,7 +10490,7 @@ void writeini(int flag){
     }
 
     fprintf(fileout,"SHOWDEVICEVALS\n");
-    fprintf(fileout,"%i %i %i",showdeviceval,showvdeviceval,devicetypes_index);
+    fprintf(fileout,"%i %i %i\n",showdeviceval,showvdeviceval,devicetypes_index);
     put_startup_smoke3d(fileout);
     fprintf(fileout,"LOADFILESATSTARTUP\n");
     fprintf(fileout," %i\n",loadfiles_at_startup);
