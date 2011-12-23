@@ -723,7 +723,7 @@ void draw_devices(void){
       }
       if(valid==2){
         float dd,d1=0.0, d2, height, vv;
-        unsigned char conecolor[4]={32,32,128,255};
+        unsigned char conecolor[4]={0,0,255,255};
         float anglemin, anglemax, rmin, rmax;
 
         vv=vel[0]*xyzmaxdiff/max_dev_vel;
