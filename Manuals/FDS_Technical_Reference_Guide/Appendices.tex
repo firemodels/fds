@@ -566,6 +566,32 @@ The correction terms that guarantee mass conservation ($V_c \, \rho_c \, \delta 
 \ee
 
 
+%\subsubsection{An alternate view by R. McDermott}
+%
+%The discussion above was to provide a simple case for understanding the basic idea behind the correction method.  In a realistic case we must account for multi-dimensional aspects of the problem and for the possibility that neighboring cells may both be out of bounds.  Here again we examine the case of a minimum density boundedness violation. Consider the cell $i$ in a 3D flow with volume $V_i$ and density $\rho_i^*$ obtained from the transport scheme.  Let ${\sf N}$ denote the set of cells containing $i$ and its neighbors, excluding diagonal neighbors (in other words, only include cells which share a face with $i$). We want to correct any boundedness violations for the $i$th cell via
+%\begin{equation}
+%\label{eqn_rhocor2}
+%\rho_i = \rho_i^* + \delta \rho_i
+%\end{equation}
+%
+%To determine $\delta \rho_i$ we must consider the mass exchange between neighboring cells. Let $\delta \rho_{ji}$ denote the density change for cell $j$ in ${\sf N}$ due to a boundedness violation in $i$.  For example, if $\rho_i^* < \rho_{min}$ then the density in $i$ will increase by drawing mass from its neighbors (if the mass is available).  The mass exchange matrix is given by
+%\begin{equation}
+%\label{eqn_rhoij}
+%\delta \rho_{ji} = \left\{ \begin{array}{ll}  \displaystyle \max(0,\rho_{min} - \rho_i^*) & \mbox{if} \quad j=i  \\ \displaystyle -c_i( \max[\rho_{min},\rho_j^*] - \max[\rho_{min},\rho_i^*]) & \mbox{if} \quad j\ne i \end{array} \right.
+%\end{equation}
+%The smoothing parameter in (\ref{eqn_rhoij}) is obtained from
+%\begin{equation}
+%\label{eqn_reali}
+%c_i = \frac{\max(0,\rho_{min} - \rho_i^*)}{ \sum_{j, j\ne i} ( \max[\rho_{min},\rho_j^*] - \max[\rho_{min},\rho_i^*] )}
+%\end{equation}
+%
+%Mass conservation is obeyed because the mass increase in cell $i$ is balanced by a mass decrease by its neighbors.  In other words, the columns of $\delta \rho_{ji}$ sum to zero.  Note, however, that the mass exchange matrix is not symmetric.  The row sum gives the final mass correction for the $i$th cell:
+%\begin{equation}
+%\label{eqn_sumdrho}
+%\delta \rho_i = \sum_j \delta \rho_{ij}
+%\end{equation}
+
+
 
 \chapter{The Dynamic Smagorinsky Model}
 %\subsubsection{R. McDermott}
