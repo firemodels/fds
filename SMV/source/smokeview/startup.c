@@ -2185,6 +2185,8 @@ void initvars0(void){
   FontMenu(fontindex);
 }
 
+/* ------------------ getmaxrevision ------------------------ */
+
 #define MAXREV(cval) max_revision=MAX(getrevision(cval),max_revision)
 int getmaxrevision(void){
   int max_revision=0;
@@ -2209,6 +2211,7 @@ int getmaxrevision(void){
   MAXREV(glui_bounds_revision);
   MAXREV(glui_clip_revision);
   MAXREV(glui_colorbar_revision);
+  MAXREV(glui_device_revision);
   MAXREV(glui_labels_revision);
 #ifdef pp_MESSAGE
   MAXREV(glui_message_revision);
