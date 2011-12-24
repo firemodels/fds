@@ -6779,8 +6779,10 @@ updatemenu=0;
 #endif
   if(showcolorbar_dialog==1)glutAddMenuEntry(_("*Customize colorbar...  ALT+c"),23);
   if(showcolorbar_dialog==0)glutAddMenuEntry(_("Customize colorbar...  ALT+c"),23);
-  if(showdevice_dialog==1)glutAddMenuEntry(_("*Devices/Objects..."),28);
-  if(showdevice_dialog==0)glutAddMenuEntry(_("Devices/Objects..."),28);
+  if(ndeviceinfo>0){
+    if(showdevice_dialog==1)glutAddMenuEntry(_("*Devices/Objects..."),28);
+    if(showdevice_dialog==0)glutAddMenuEntry(_("Devices/Objects..."),28);
+  }
   if(showdisplay_dialog==1)glutAddMenuEntry(_("*Display...  ALT+d"),22);
   if(showdisplay_dialog==0)glutAddMenuEntry(_("Display...  ALT+d"),22);
   if(isZoneFireModel==0){

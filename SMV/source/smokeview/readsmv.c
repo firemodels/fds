@@ -3885,7 +3885,7 @@ int readsmv(char *file, char *file2){
       }
     }
     else{
-      NewMemory((void **)&deviceinfo,ndeviceinfo_exp*sizeof(device));
+      if(ndeviceinfo_exp>0)NewMemory((void **)&deviceinfo,ndeviceinfo_exp*sizeof(device));
     }
     devicecopy = deviceinfo+ndeviceinfo;
     ndeviceinfo+=ndeviceinfo_exp;
@@ -7708,8 +7708,6 @@ int readini2(char *inifile, int localfile){
   char buffer[255],buffer2[255];
 
   int tours_flag;
-  int mxframes_ini=0;
-  int mxpoints_ini=0;
   int nn;
   int n3d;
   int iplot3d, isetmin, isetmax;
@@ -8570,16 +8568,6 @@ int readini2(char *inifile, int localfile){
 		  sscanf(buffer,"%i",&partpointstep);
 		  if(partpointstep<1)partpointstep=1;
       partpointskip=partpointstep-1;
-      continue;
-    }
-    if(match(buffer,"MAXPOINTS")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&mxpoints_ini);
-      continue;
-    }
-    if(match(buffer,"MAXFRAMES")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&mxframes);
       continue;
     }
     if(match(buffer,"MSCALE")==1){
@@ -10112,8 +10100,6 @@ typedef struct {
 
   } 
   fclose(stream);
-  if(mxframes_ini!=0&&mxframes_comm==0)mxframes=mxframes_ini;
-  if(mxpoints_ini!=0&&mxpoints_comm==0)mxpoints=mxpoints_ini;
   return 0;
 
 }
@@ -10438,10 +10424,6 @@ void writeini(int flag){
 
   fprintf(fileout,"\nDATA LOADING\n");
   fprintf(fileout,"------------\n\n");
-  fprintf(fileout,"MAXFRAMES\n");
-  fprintf(fileout," %i\n",mxframes);
-  fprintf(fileout,"MAXPOINTS\n");
-  fprintf(fileout," %i\n",mxpoints);
   fprintf(fileout,"NOPART\n");
   fprintf(fileout," %i\n",nopart);
   fprintf(fileout,"PARTPOINTSTEP\n");

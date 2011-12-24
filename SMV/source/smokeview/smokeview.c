@@ -827,20 +827,6 @@ void Args(int argc, char **argv){
         printf("stereo option deactivated\n");
       }
     }
-    else if(strncmp(argv[i],"-points",7)==0){
-      ++i;
-      if(i<argc){
-        mxpoints_comm = atol(argv[i]);
-        mxpoints=mxpoints_comm;
-      }
-    }
-    else if(strncmp(argv[i],"-frames",7)==0){
-      ++i;
-      if(i<argc){
-        mxframes_comm = atol(argv[i]);
-        mxframes=mxframes_comm;
-      }
-    }
 #ifdef pp_LANG
     else if(strncmp(argv[i],"-lang",5)==0){
       ++i;
@@ -974,20 +960,12 @@ void usage(char **argv){
   printf("\n");
   printf(_(" -demo          - use demonstrator mode of Smokeview"));
   printf("\n");
-#ifdef pp_DEPRECATED
-  printf(_(" -frame nframes - maximum number of particle frames.  Default=%i",MAXFRAMES));
-  printf("\n");
-#endif
   printf(_(" -help          - display this message"));
   printf("\n");
   printf(_(" -ini           - output default smokeview parameters to smokeview.ini"));
   printf("\n");
   printf(_(" -ng_ini        - No graphics version of -ini."));
   printf("\n");
-#ifdef pp_DEPRECATED
-  printf(_(" -points npoints - maximum number of particles.  Default=%i"),MAXPOINTS);
-  printf("\n");
-#endif
   printf(_(" -runscript     - run the script file casename.ssf"));
   printf("\n");
   printf(_(" -script scriptfile - run the script file scriptfile"));

@@ -246,8 +246,6 @@ void sv_startup_c(int argc, char **argv){
   chdir(workingdir);
 #endif
 
-  mxpoints=mxpoints_orig;
-  mxframes=mxframes_orig;
   if(use_graphics==1){
 #ifdef _DEBUG
     printf(_("Initializing Smokeview graphics window - "));
@@ -1211,12 +1209,6 @@ void initvars1(void){
   glui_screenWidth=640, glui_screenHeight=480;
   windowsize_pointer=0;
   sethazardcolor=0;
-  mxpoints=MAXPOINTS;
-  mxframes=MAXFRAMES;
-  mxframepoints=MAXPOINTS;
-  mxpoints_orig=MAXPOINTS;
-  mxframes_orig=MAXFRAMES;
-  mxpoints_comm=0, mxframes_comm=0;
   timedrag=0,colordrag=0,colorsplitdrag=0;
   isonormtype=1,showisonormals=0;
   global_changecolorindex=-1;

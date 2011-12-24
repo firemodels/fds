@@ -1247,10 +1247,6 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   }
   npartpoints2=npartpoints;
   npartframes2=npartframes;
-  if(npartframes>mxframes||npartpoints>mxpoints){
-    if(npartframes>mxframes)npartframes=mxframes;
-    if(npartpoints>mxpoints)npartpoints=mxpoints;
-  }
   iframebeg=0;
   if(staticframe0==1)iframebeg=1;
   if(error!=0){
@@ -1276,7 +1272,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     }
   }
 
-  if(NewMemory((void **)&parti->ptimes,sizeof(float)*mxframes)==0){
+  if(NewMemory((void **)&parti->ptimes,sizeof(float)*npartframes)==0){
     *errorcode=1;
     FORTclosefortranfile(&file_unit);
     readpart("",ifile,UNLOAD,&error);
@@ -1287,6 +1283,8 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
      NewMemory((void **)&parti->zparts,npartpoints*sizeof(short))==0){
     *errorcode=1;
     FORTclosefortranfile(&file_unit);
+    printf("***error: memory allocation failed while attempting .\n");
+    printf("          to load %s.\n",parti->file);
     readpart("",ifile,UNLOAD,&error);
     return;
   }
@@ -1295,10 +1293,12 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   if(NewMemory((void **)&parti->tpart,npartpoints*sizeof(float))==0||
      NewMemory((void **)&parti->itpart,npartpoints*sizeof(unsigned char))==0||
      NewMemory((void **)&parti->isprink,npartpoints*sizeof(unsigned char))==0||
-     NewMemory((void **)&parti->bframe,mxframes*sizeof(int))==0||
-     NewMemory((void **)&parti->sframe,mxframes*sizeof(int))==0||
-     NewMemory((void **)&parti->sprframe,mxframes*sizeof(int))==0){
+     NewMemory((void **)&parti->bframe,npartframes*sizeof(int))==0||
+     NewMemory((void **)&parti->sframe,npartframes*sizeof(int))==0||
+     NewMemory((void **)&parti->sprframe,npartframes*sizeof(int))==0){
       *errorcode=1;
+    printf("***error: memory allocation failed while attempting .\n");
+    printf("          to load %s.\n",parti->file);
       FORTclosefortranfile(&file_unit);
       readpart("",ifile,UNLOAD,&error);
       return;
@@ -1306,7 +1306,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   for(i=0;i<npartpoints;i++){
     parti->isprink[i]=0;
   }
-  for(i=0;i<mxframes;i++){
+  for(i=0;i<npartframes;i++){
     parti->sprframe[i]=0;
   }
 
@@ -1336,23 +1336,11 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   FORTgetdata2(&file_unit,
     parti->xparts,parti->yparts,parti->zparts,
     parti->tpart,&parti->droplet_type,parti->isprink,
-    tspr,parti->bframe,parti->sframe,parti->sprframe,parti->ptimes,&nspr,&npartpoints,&mxframes,&parti->nframes,
+    tspr,parti->bframe,parti->sframe,parti->sprframe,parti->ptimes,&nspr,&npartpoints,&npartframes,&parti->nframes,
     &settmin_p,&settmax_p,&tmin_p,&tmax_p,&partframestep,&partpointstep, 
     &xbar0, &xbox, &ybar0, &ybox, &zbar0, &zbox,
     &offset_x, &offset_y, &offset_z,
     &error,1);
-  if(npartframes2>mxframes||npartpoints2>mxpoints){
-    if(npartframes2>mxframes){
-      printf("*** warning number of frames (%i) in particle file is greater than %i\n",npartframes2,mxframes);
-      printf("use: smokeview -frames %i casename\n",npartframes2);
-      printf("to view all particle frames\n\n");
-    }
-    if(npartpoints2>mxpoints){
-      printf("*** warning number of particles (%i) in particle \n    file is greater than %i\n",npartpoints2,mxpoints);
-      printf("use: smokeview -points %i casename\n",npartpoints2);
-      printf("to view all particles\n\n");
-    }
-  }
   if(error!=0||parti->nframes==0){
     if(error!=0)printf("*** warning: problem reading %s\n",file);
     *errorcode=1;

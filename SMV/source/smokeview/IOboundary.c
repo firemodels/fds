@@ -248,7 +248,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
 
     loadpatchbysteps=0;
     if(flag==LOAD){
-      mxpatch_frames = mxframes+51;
+      mxpatch_frames = MAXFRAMES+51;
       statfile=STAT(file,&statbuffer);
       if(statfile==0&&framesize!=0){
         {
