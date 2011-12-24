@@ -1,6 +1,6 @@
-// $Date: 2011-12-10 21:39:08 -0500 (Sat, 10 Dec 2011) $ 
-// $Revision: 9566 $
-// $Author: gforney $
+// $Date$ 
+// $Revision$
+// $Author$
 
 #define CPP
 #include "options.h"
@@ -20,7 +20,7 @@
 #include "translate.h"
 
 // svn revision character string2
-extern "C" char glui_device_revision[]="$Revision: 9566 $";
+extern "C" char glui_device_revision[]="$Revision$";
 
 #define DEVICE_sensorsize 20
 #define SHOWDEVICEVALS 26
