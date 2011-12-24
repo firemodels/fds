@@ -13,7 +13,6 @@
 #else
 #include <GL/glut.h>
 #endif
-#include "contourdefs.h"
 #include "MALLOC.h"
 #include "smokeviewvars.h"
 #include "update.h"

@@ -13,12 +13,10 @@
 #ifdef pp_CHECK
 #include "MALLOC.h"
 #endif
+#include "datadefs.h"
 
 // svn revision character string
 char histogram_revision[]="$Revision$";
-
-#define HMIN(X, Y)  ((X) < (Y) ? (X) : (Y))
-#define HMAX(X, Y)  ((X) > (Y) ? (X) : (Y))
 
 /* ------------------ get_histogram_value ------------------------ */
 
@@ -97,8 +95,8 @@ void copy_data2histogram(float *vals, int nvals, histogramdata *histgram){
     valmin=vals[0];
     valmax=vals[0];
     for(i=1;i<nvals;i++){
-      valmin=HMIN(vals[i],valmin);
-      valmax=HMAX(vals[i],valmax);
+      valmin=MIN(vals[i],valmin);
+      valmax=MAX(vals[i],valmax);
     }
     dbucket=(valmax-valmin)/NHIST_BUCKETS;
     if(dbucket==0.0){
@@ -109,8 +107,8 @@ void copy_data2histogram(float *vals, int nvals, histogramdata *histgram){
         int ival;
 
         ival = (vals[i]-valmin)/dbucket;
-        ival=HMAX(0,ival);
-        ival=HMIN(NHIST_BUCKETS-1,ival);
+        ival=MAX(0,ival);
+        ival=MIN(NHIST_BUCKETS-1,ival);
         histgram->buckets[ival]++;
       }
     }
@@ -148,8 +146,8 @@ void merge_histogram(histogramdata *histgram1, histogramdata *histgram2){
   float valmin_new, valmax_new;
 
   histgram1->defined=1;
-  valmin_new=HMIN(histgram1->valmin,histgram2->valmin);
-  valmax_new=HMAX(histgram1->valmax,histgram2->valmax);
+  valmin_new=MIN(histgram1->valmin,histgram2->valmin);
+  valmax_new=MAX(histgram1->valmax,histgram2->valmax);
 
   for(i=0;i<NHIST_BUCKETS;i++){
     bucket1copy[i]=histgram1->buckets[i];
@@ -170,8 +168,8 @@ void merge_histogram(histogramdata *histgram1, histogramdata *histgram2){
 
       if(bucket1copy[i]!=0){
         val = (float)(histgram1->valmin + (float)(i+0.5)*dbucket1);
-        valmin_new=HMIN(valmin_new,val);
-        valmax_new=HMAX(valmax_new,val);
+        valmin_new=MIN(valmin_new,val);
+        valmax_new=MAX(valmax_new,val);
         ival = (val-valmin_new)/dbucket_new;
         if(ival<0)ival=0;
         if(ival>NHIST_BUCKETS-1)ival=NHIST_BUCKETS-1;
@@ -179,8 +177,8 @@ void merge_histogram(histogramdata *histgram1, histogramdata *histgram2){
       }
       if(histgram2->buckets[i]!=0){
         val = (float)(histgram2->valmin + (i+0.5)*dbucket2);
-        valmin_new=HMIN(valmin_new,val);
-        valmax_new=HMAX(valmax_new,val);
+        valmin_new=MIN(valmin_new,val);
+        valmax_new=MAX(valmax_new,val);
         ival = (val-valmin_new)/dbucket_new;
         if(ival<0)ival=0;
         if(ival>NHIST_BUCKETS-1)ival=NHIST_BUCKETS-1;

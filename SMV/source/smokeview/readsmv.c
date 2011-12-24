@@ -1763,7 +1763,7 @@ int readsmv(char *file, char *file2){
   if(cadgeominfo!=NULL)freecadinfo();
 
   if(file==NULL){
-    initvars1();
+    initvars();
     return -1;  // finished  unloading memory from previous case
   }
 

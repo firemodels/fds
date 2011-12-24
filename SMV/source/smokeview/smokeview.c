@@ -15,8 +15,6 @@
 #else
 #include <GL/glut.h>
 #endif
-#include "contourdefs.h"
-#include "isodefs.h"
 
 #include "flowfiles.h"
 #include "MALLOC.h"
@@ -137,55 +135,6 @@ void setClipPlanes(int mode){
   else{
     glDisable(GL_CLIP_PLANE5);
   }
-}
-
-/* ------------------ update_rotation_index ------------------------ */
-
-void update_rotation_index(int val){
-  mesh *meshi;
-  int i;
-  float *modelview_rotate;
-  float *angle_zx;
-  int *rotation_index;
-
-  rotation_index = &camera_current->rotation_index;
-
-  *rotation_index=val;
-  if(*rotation_index==rotation_index_OLD)return;
-  if(*rotation_index>=0&&*rotation_index<nmeshes){
-    meshi = meshinfo + *rotation_index;
-    camera_current->xcen=meshi->xcen;
-    camera_current->ycen=meshi->ycen;
-    camera_current->zcen=meshi->zcen;
-  }
-  else{
-    camera_current->xcen=xcenGLOBAL;
-    camera_current->ycen=ycenGLOBAL;
-    camera_current->zcen=zcenGLOBAL;
-  }
-  rotation_index_OLD=*rotation_index;
-  modelview_rotate = camera_current->modelview;
-  for(i=0;i<16;i++){
-    modelview_rotate[i]=modelview_current[i];
-  }
-
-  angle_zx = camera_current->angle_zx;
-
-  angle_zx[0]=0.; 
-  angle_zx[1]=0.; 
-
-  camera_current->direction_angle=0.0;
-  camera_current->cos_direction_angle = 1.0;
-  camera_current->sin_direction_angle = 0.0;
-
-  camera_current->view_angle=0.0;
-  camera_current->cos_view_angle = 1.0;
-  camera_current->sin_view_angle = 0.0;
-
-  update_meshlist1(val);
-
-  glutPostRedisplay();
-
 }
 
 /* ------------------ snifferrors ------------------------ */
@@ -359,41 +308,6 @@ void updateclip(int slicedir){
   }
 }
 
-/* ------------------ drawTimeBar ------------------------ */
-
-void drawTimeBar(void){
-  float xleft=.175f, xright=1.0f, ybot=0.10f, ytop=.35f, xxright;
-
-  glDisable(GL_LIGHTING);
-  xleft = xtimeleft;
-  if(fontindex==LARGE_FONT)xleft=xtimeleft+0.11;
-  xright = xtimeright;
-
-  glLineWidth(linewidth);
-  glBegin(GL_LINE_LOOP);
-  glColor4fv(timebarcolor);
-  glVertex2f(xleft,ybot);
-  glVertex2f(xright,ybot);
-  glVertex2f(xright,ytop);
-  glVertex2f(xleft,ytop);
-  glEnd();
-
-  if(ntimes != 1){
-    xxright = xleft + (float)itimes*(xright-xleft)/(ntimes-1);
-  }
-  else{
-    xxright=xright;
-  }
-  glBegin(GL_POLYGON);
-  glColor4fv(timebarcolor);
-  glVertex2f(xleft,ybot);
-  glVertex2f(xxright,ybot);
-  glVertex2f(xxright,ytop);
-  glVertex2f(xleft,ytop);
-  glEnd();
-
-}
-
 /* ------------------ setsmokeviewvars ------------------------ */
 
 void setsmokeviewvars(void){
@@ -500,7 +414,6 @@ void Init(void){
   glShadeModel(GL_SMOOTH); 
   glDisable(GL_DITHER);
 
-
   thistime=0;
   lasttime=0;
 
@@ -550,67 +463,6 @@ void ResetView(int option){
   if(option==RESTORE_EXTERIOR_VIEW_ZOOM)camera_current->zoom=zooms[zoomindex];
   zoom=camera_current->zoom;
   update_glui_zoom();
-}
-
-/* ------------------ UpdateTimeLabels ------------------------ */
-
-void UpdateTimeLabels(void){
-  float time0;
-  int hour, min, sec,sec10;
- 
-  time0 = timeoffset;
-  if(times!=NULL)time0 = timeoffset + times[itimes];
-  if(vishmsTimelabel==1){
-    hour = time0/3600;
-    min = time0/60.0 - 60*hour;
-    sec10 = 10*(time0 -  60*min - 3600*hour);
-    sec = sec10/10;
-    sec10 = sec10 - 10*sec;
-    sprintf(timelabel,"  %i:%.2i:%.2i.%i",hour,min,sec,sec10);
-  }
-  else{
-    float dt;
-    char timeval[30], *timevalptr;
-
-    if(ntimes>1){
-      dt=times[1]-times[0];
-    }
-    else{
-      dt=0.0;
-    }
-    if(dt<0.0)dt=-dt;
-    timevalptr=time2timelabel(time0,dt,timeval);
-    strcpy(timelabel,"Time: ");
-    strcat(timelabel,timevalptr);
-  }
-  sprintf(framelabel,"Frame: %i",itimes);
-  if(hrrinfo!=NULL&&hrrinfo->display==1&&hrrinfo->loaded==1){
-    float hrr;
-
-    hrr = hrrinfo->hrrval[hrrinfo->itime];
-    if(hrr<1.0){
-      sprintf(hrrinfo->hrrlabel,"HRR: %4.1f",hrr*1000.0);
-    }
-    else if(hrr>1000.0){
-      sprintf(hrrinfo->hrrlabel,"HRR: %4.1f MW",hrr/1000.0);
-    }
-    else{
-      sprintf(hrrinfo->hrrlabel,"HRR: %4.1f kW",hrr);
-    }
-  }
-}
-
-/* ------------------ ClearBuffers ------------------------ */
-
-void ClearBuffers(int mode){
-  if(mode==RENDER){
-    glClearColor(backgroundcolor[0],backgroundcolor[1],backgroundcolor[2], 0.0f);
-  }
-  else{
-    glClearColor((float)0.0,(float)0.0,(float)0.0, (float)0.0);
-  }
-  
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 /* ------------------ Args ------------------------ */
@@ -696,7 +548,11 @@ void Args(int argc, char **argv){
       STRCPY(inputfilename_ext,c_ext);
       to_lower(inputfilename_ext);
 
-      if(c_ext!=NULL&&(strcmp(inputfilename_ext,".smv")==0||strcmp(inputfilename_ext,".svd")==0||strcmp(inputfilename_ext,".smt")==0)){
+      if(c_ext!=NULL&&
+        (strcmp(inputfilename_ext,".smv")==0||
+         strcmp(inputfilename_ext,".svd")==0||
+         strcmp(inputfilename_ext,".smt")==0)
+         ){
         c_ext[0]=0;
         STRCPY(fdsprefix,argi);
         FREEMEMORY(trainer_filename);
@@ -1027,9 +883,6 @@ void usage(char **argv){
 #ifdef pp_MOUSEDOWN
     strcat(label,", pp_MOUSEDOWN");
 #endif
-#ifdef pp_OPEN
-    strcat(label,", pp_OPEN");
-#endif
 #ifdef pp_OSX64
     strcat(label,", pp_OSX64");
 #endif
@@ -1070,65 +923,5 @@ void usage(char **argv){
     printf(_("  Smokeview was built with the following pre-processing directives set:"));
     printf("\n\n");
     printf("%s \n",labelptr);
-  }
-}
-
-/* ------------------ checktimebound ------------------------ */
-
-void checktimebound(void){
-  int i,j;
-  slice *sd;
-  mesh *meshi;
-  blockagedata *bc;
-  particle *parti;
-
-  if(timedrag==0&&itimes>ntimes-1||timedrag==1&&itimes<0){
-    izone=0;
-    itimes=0;
-    iframe=iframebeg;
-    for(i=0;i<nsliceinfo;i++){
-      sd=sliceinfo+i;
-      sd->islice=0;
-    }
-    for(i=0;i<nmeshes;i++){
-      meshi=meshinfo+i;
-      meshi->ipatch=0;
-    }
-    for(i=0;i<nmeshes;i++){
-      meshi=meshinfo+i;
-      if(meshi->isotimes==NULL)continue;
-      meshi->iiso=0;
-    }
-  }
-  if(timedrag==0&&itimes<0||timedrag==1&&itimes>ntimes-1){
-    izone=nzonet-1;
-    itimes=ntimes-1;
-    for(i=0;i<npartinfo;i++){
-      parti=partinfo+i;
-      parti->iframe=parti->nframes-1;
-    }
-    for(i=0;i<nsliceinfo;i++){
-      sd=sliceinfo+i;
-      sd->islice=sd->nsteps-1;
-    }
-    for(i=0;i<nmeshes;i++){
-      meshi=meshinfo+i;
-      meshi->ipatch=meshi->npatch_frames-1;
-    }
-    for(i=0;i<nmeshes;i++){
-      meshi=meshinfo+i;
-      if(meshi->isotimes==NULL)continue;
-      meshi->iiso=meshi->nisosteps-1;
-    }
-  }
-  /* set blockage visibility */
-
-  for(i=0;i<nmeshes;i++){
-    meshi=meshinfo+i;
-    for(j=0;j<meshi->nbptrs;j++){
-      bc=meshi->blockageinfoptrs[j];
-      if(bc->showtimelist==NULL)continue;
-      bc->show=bc->showtimelist[itimes];
-    }
   }
 }

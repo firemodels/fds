@@ -988,9 +988,42 @@ void InitOpenGL(void){
     TrainerViewMenu(trainerview);
   }
 
-/* ------------------ initvars1 ------------------------ */
+/* ------------------ initvars ------------------------ */
 
-void initvars1(void){
+void initvars(void){
+  int i;
+
+  for(i=0;i<256;i++){
+    boundarylevels256[i]=(float)i/255.0;
+  }
+
+  first_scriptfile.id=-1;
+  first_scriptfile.prev=NULL;
+  first_scriptfile.next=&last_scriptfile;
+
+  last_scriptfile.id=-1;
+  last_scriptfile.prev=&first_scriptfile;
+  last_scriptfile.next=NULL;
+
+  first_inifile.id=-1;
+  first_inifile.prev=NULL;
+  first_inifile.next=&last_inifile;
+
+  last_inifile.id=-1;
+  last_inifile.prev=&first_inifile;
+  last_inifile.next=NULL;
+
+  FontMenu(fontindex);
+
+  treecharcolor[0]=0.3;
+  treecharcolor[1]=0.3;
+  treecharcolor[2]=0.3;
+  treecharcolor[3]=1.0;
+  trunccolor[0]=0.6;
+  trunccolor[1]=0.2;
+  trunccolor[2]=0.0;
+  trunccolor[3]=1.0;
+
   direction_color[0]=39.0/255.0;
   direction_color[1]=64.0/255.0;
   direction_color[2]=139.0/255.0;
@@ -1997,194 +2030,6 @@ void initvars1(void){
 
 }
 
-/* ------------------ initvars0 ------------------------ */
-
-void initvars0(void){
-  int i;
-
-  for(i=0;i<256;i++){
-    boundarylevels256[i]=(float)i/255.0;
-  }
-  current_script_command=NULL;
-  script_dir_path=NULL;
-  scriptinfo=NULL;
-
-  nscriptinfo=0;
-  demo_option=0;
-  current_mesh=NULL;
-  camera_current=NULL, camera_save=NULL, camera_last=NULL;
-  camera_external=NULL, camera_internal=NULL, camera_ini=NULL, camera_external_save=NULL;
-  camera_list=NULL;
-
-  camera_label=NULL;
-
-  iso_ambient_ini=NULL;
-  rgb_ini=NULL;
-
-  sphere_xyz=NULL;
-  LESsystem=NULL,LESendian=NULL;
-
-  zonet=NULL, zoneylay=NULL, zonetl=NULL, zonetu=NULL, zonepr=NULL, zoneqfire=NULL;
-  hazardcolor=NULL;
-  izonetu=NULL;
-  tspr=NULL;
-
-  sphereinfo=NULL;
-  wui_sphereinfo=NULL;
-
-  tour_t=NULL, tour_t2=NULL, tour_dist=NULL, tour_dist2=NULL, tour_dist3=NULL;
-  colorbarinfo=NULL;
-
-  part5colorindex=0;
-  show_tracers_always=0;
-  sd_shown=NULL;
-  vd_shown=NULL;
-  show_all_slices=1;
-
-  selectfaceinfo=NULL;
-  selectblockinfo=NULL;
-  tickinfo=NULL;
-  firstcolor=NULL;
-  textureinfo=NULL;
-  terrain_texture=NULL;
-
-  sortedblocklist=NULL,changed_idlist=NULL;
-  surfaceinfo=NULL;
-  skyboxinfo=NULL;
-  fireinfo=NULL;
-  roominfo=NULL;
-  zventinfo=NULL;
-  zoneinfo=NULL;
-  activezone=NULL;
-  partinfo=NULL;
-  current_property=NULL;
-  partclassinfo=NULL;
-  part5propinfo=NULL;
-  npart5prop=0;
-  targinfo=NULL;
-  sliceinfo=NULL;
-  caminfo=NULL;
-  multisliceinfo=NULL;
-  multivsliceinfo=NULL;
-  outlineinfo=NULL;
-  sliceorderindex=NULL,vsliceorderindex=NULL,partorderindex=NULL;
-  patchorderindex=NULL,isoorderindex=NULL,plot3dorderindex=NULL;
-  vsliceinfo=NULL;
-  smoke3dinfo=NULL;
-  labelinfo=NULL;
-  slicetypes=NULL, isotypes=NULL, vslicetypes=NULL, patchtypes=NULL;
-  plot3dinfo=NULL;
-  plot3dtimelist=NULL;
-  patchinfo=NULL;
-  isoinfo=NULL;
-  target_positions=NULL;
-
-  bchighlight=NULL,bchighlight_old=NULL;
-  cadgeominfo=NULL;
-
-  ventcolor=NULL;
-  meshinfo=NULL;
-  current_mesh=NULL;
-  mesh_save=NULL;
-  mesh_last=NULL;
-  tourinfo=NULL;
-
-  treeinfo=NULL;
-  ntreeinfo=0;
-  terraininfo=NULL;
-  nterraininfo=0;
-  treecolor[0]=0.09;
-  treecolor[1]=0.5;
-  treecolor[2]=0.015;
-  treecolor[3]=1.0;
-  treecharcolor[0]=0.3;
-  treecharcolor[1]=0.3;
-  treecharcolor[2]=0.3;
-  treecharcolor[3]=1.0;
-  trunccolor[0]=0.6;
-  trunccolor[1]=0.2;
-  trunccolor[2]=0.0;
-  trunccolor[3]=1.0;
-
-  update_fire_line=0;
-  slice_bounds_dialog=1;
-  fire_line_index=-1;
-  fire_line_min=150.0;
-  fire_line_max=200.0;
-  tourknotskeylist=NULL;
-  tourknotstourlist=NULL;
-  selected_frame=NULL;
-  selected_tour=NULL;
-  unitclasses=NULL,unitclasses_default=NULL,unitclasses_ini=NULL;
-  smokeviewtempdir=NULL;
-  partshortlabel=NULL,partunitlabel=NULL;
-  texturedir=NULL;
-  targtimes=NULL;
-  targtimeslist=NULL;
-  zonetlist=NULL;
-  slice_loaded_list=NULL;
-  render_frame=NULL;
-  fdsprefix=NULL, fdsprefix2=NULL;
-  endianfilename=NULL;
-  targfilename=NULL;
-  sorted_surfidlist=NULL,inv_sorted_surfidlist=NULL;
-  trainer_filename=NULL;
-  test_filename=NULL;
-  filename_sb=NULL;
-  STREAM_SB=NULL;
-  read_smoothobst=0;
-  smvfilename=NULL, smvmenufile=NULL,databasefilename=NULL,smvprogdir=NULL;
-  default_script=NULL;
-  first_scriptfile.id=-1;
-  first_scriptfile.prev=NULL;
-  first_scriptfile.next=&last_scriptfile;
-
-  last_scriptfile.id=-1;
-  last_scriptfile.prev=&first_scriptfile;
-  last_scriptfile.next=NULL;
-
-  first_inifile.id=-1;
-  first_inifile.prev=NULL;
-  first_inifile.next=&last_inifile;
-
-  last_inifile.id=-1;
-  last_inifile.prev=&first_inifile;
-  last_inifile.next=NULL;
-  scriptoutstream=NULL;
-  script_recording=NULL;
-  runscript=0;
-  noexit=0;
-  colorbar_select_index=-1;
-  update_colorbar_select_index=0;
-  script_multislice=0;
-  script_multivslice=0;
-  script_iso=0;
-  logfilename=NULL;
-  flushfile=NULL, chidfilebase=NULL;
-  hrrinfo=NULL;
-  smokezippath=NULL;
-  scriptinifilename2=NULL;
-  zonelonglabels=NULL, zoneshortlabels=NULL, zoneunits=NULL;
-  smokeviewini=NULL;
-  surfids=NULL;
-  colorlabelpart=NULL;
-  colorlabelpatch=NULL;
-  colorlabelzone=NULL;
-  p3levels=NULL, zonelevels=NULL;
-  p3levels256=NULL;
-  colorlabelp3=NULL;
-  colorlabeliso=NULL;
-  partscale=NULL;
-  zonescale=NULL;
-  plotiso=NULL;
-  times=NULL;
-  sliceindex=NULL;
-  isoindex=NULL;
-  face_transparent=NULL;
-  deviceinfo=NULL;
-  FontMenu(fontindex);
-}
-
 /* ------------------ getmaxrevision ------------------------ */
 
 #define MAXREV(cval) max_revision=MAX(getrevision(cval),max_revision)
@@ -2224,6 +2069,8 @@ int getmaxrevision(void){
   MAXREV(glui_tour_revision);
   MAXREV(glui_trainer_revision);
   MAXREV(glui_wui_revision);
+  MAXREV(histogram_revision);
+  MAXREV(interp_revision);
 
   MAXREV(IOboundary_revision);
   MAXREV(IOembed_revision);
@@ -2238,12 +2085,11 @@ int getmaxrevision(void){
 #endif
   MAXREV(IOslice_revision);
   MAXREV(IOsmoke_revision);
-  MAXREV(IOvolsmoke_revision);
   MAXREV(IOtarget_revision);
   MAXREV(IOtour_revision);
+  MAXREV(IOvolsmoke_revision);
   MAXREV(IOwui_revision);
   MAXREV(IOzone_revision);
-  MAXREV(interp_revision);
   MAXREV(isobox_revision);
   MAXREV(main_revision);
   MAXREV(menu_revision);
@@ -2251,17 +2097,17 @@ int getmaxrevision(void){
   MAXREV(readsmv_revision);
   MAXREV(renderfile_revision);
   MAXREV(scontour2d_revision);
-  MAXREV(skybox_revision);
   MAXREV(shaders_revision);
   MAXREV(showscene_revision);
+  MAXREV(skybox_revision);
   MAXREV(smokeview_revision);
   MAXREV(smv_endian_revision);
   MAXREV(startup_revision);
   MAXREV(string_util_revision);
   MAXREV(sv_api_revision);
   MAXREV(threader_revision);
-  MAXREV(unit_revision);
   MAXREV(translate_revision);
+  MAXREV(unit_revision);
   MAXREV(update_revision);
   MAXREV(viewports_revision);
   return max_revision;

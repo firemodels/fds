@@ -17,7 +17,6 @@
 #endif
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "isodefs.h"
 #include "flowfiles.h"
 #include "MALLOC.h"
 #include "smokeviewvars.h"

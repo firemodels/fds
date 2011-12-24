@@ -16,8 +16,6 @@
 #else
 #include <GL/glut.h>
 #endif
-#include "contourdefs.h"
-#include "isodefs.h"
 
 #include "flowfiles.h"
 #include "MALLOC.h"

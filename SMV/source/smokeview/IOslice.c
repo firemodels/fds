@@ -18,7 +18,6 @@
 #endif
 #include "MALLOC.h"
 #include "smokeviewvars.h"
-#include "contourdefs.h"
 #include "smv_endian.h"
 #include "update.h"
 #include "interp.h"

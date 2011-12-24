@@ -14,7 +14,6 @@
 #else
 #include <GL/glut.h>
 #endif
-#include "contourdefs.h"
 #include "flowfiles.h"
 #include "MALLOC.h"
 #include "smokeviewvars.h"
@@ -292,6 +291,66 @@ void mouse_select_avatar(int button, int state, int x, int y){
     glShadeModel(GL_SMOOTH);
     glEnable(GL_BLEND);
     glEnable(GL_LIGHTING);
+  }
+}
+
+/* ------------------ checktimebound ------------------------ */
+
+void checktimebound(void){
+  int i,j;
+  slice *sd;
+  mesh *meshi;
+  blockagedata *bc;
+  particle *parti;
+
+  if(timedrag==0&&itimes>ntimes-1||timedrag==1&&itimes<0){
+    izone=0;
+    itimes=0;
+    iframe=iframebeg;
+    for(i=0;i<nsliceinfo;i++){
+      sd=sliceinfo+i;
+      sd->islice=0;
+    }
+    for(i=0;i<nmeshes;i++){
+      meshi=meshinfo+i;
+      meshi->ipatch=0;
+    }
+    for(i=0;i<nmeshes;i++){
+      meshi=meshinfo+i;
+      if(meshi->isotimes==NULL)continue;
+      meshi->iiso=0;
+    }
+  }
+  if(timedrag==0&&itimes<0||timedrag==1&&itimes>ntimes-1){
+    izone=nzonet-1;
+    itimes=ntimes-1;
+    for(i=0;i<npartinfo;i++){
+      parti=partinfo+i;
+      parti->iframe=parti->nframes-1;
+    }
+    for(i=0;i<nsliceinfo;i++){
+      sd=sliceinfo+i;
+      sd->islice=sd->nsteps-1;
+    }
+    for(i=0;i<nmeshes;i++){
+      meshi=meshinfo+i;
+      meshi->ipatch=meshi->npatch_frames-1;
+    }
+    for(i=0;i<nmeshes;i++){
+      meshi=meshinfo+i;
+      if(meshi->isotimes==NULL)continue;
+      meshi->iiso=meshi->nisosteps-1;
+    }
+  }
+  /* set blockage visibility */
+
+  for(i=0;i<nmeshes;i++){
+    meshi=meshinfo+i;
+    for(j=0;j<meshi->nbptrs;j++){
+      bc=meshi->blockageinfoptrs[j];
+      if(bc->showtimelist==NULL)continue;
+      bc->show=bc->showtimelist[itimes];
+    }
   }
 }
 
@@ -1934,6 +1993,231 @@ void handle_move_keys(int  key){
   }
 } 
 
+/* ------------------ Idle ------------------------ */
+
+void Idle(void){
+  int changetime=0;
+  float thisinterval;
+  int oldcpuframe;
+  float totalcpu;
+  int redisplay=0;
+  int ibenchrate;
+  char buffer[256];
+  float elapsed_time;
+
+  CheckMemory;
+  glutSetWindow(mainwindow_id);
+  updateShow();
+  thistime = glutGet(GLUT_ELAPSED_TIME);
+  thisinterval = thistime - lasttime;
+//  printf("lasttime=%i thistime=%i thisinterval=%f\n",lasttime,thistime,thisinterval);
+  frame_count++;
+
+  /* increment frame counter if the proper amount of time has passed
+     or if we are rendering images or stepping by hand */
+
+  if(showtime==1&&((stept==1&&(float)thisinterval>frameinterval)||RenderGif!=0||timedrag==1)){       /* ready for a new frame */
+
+    cputimes[cpuframe]=thistime/1000.;
+    
+    oldcpuframe=cpuframe-10;
+    if(oldcpuframe<0)oldcpuframe+=20;
+    totalcpu=cputimes[cpuframe]-cputimes[oldcpuframe];
+    if(benchmark==0){
+      if(totalcpu==0.0){
+   		  framerate=0.0;
+      }
+      else{
+	      framerate=10.0/totalcpu;
+      }
+    }
+    if(benchmark==1||benchmark_flag==1){
+      if(itimes==0)bench_starttime=thistime/1000.0;
+      if(itimes==ntimes-1){
+        bench_stoptime=thistime/1000.0;
+        ibenchrate=10*((float)ntimes/(bench_stoptime-bench_starttime))+0.5;
+        framerate=(float)ibenchrate/10.0;
+        sprintf(buffer,"%f",framerate);
+        trim(buffer);
+        trimzeros(buffer);
+        printf("   frame rate=%s\n",buffer);
+        if(benchmark_flag==1)bench_out(framerate);
+      }
+    }
+    cpuframe++;
+    if(cpuframe>=20)cpuframe=0;
+   
+    last_frame_count=frame_count;
+    frame_count=1;
+    lasttime = thistime;
+    if(ntimes>0){
+      changetime=1;
+      if(stept ==1 && plotstate == DYNAMIC_PLOTS && timedrag==0 && RenderGif==0){
+        /*  skip frames here if displaying in real time and frame rate is too slow*/
+        if(times!=NULL&&realtime_flag!=0&&FlowDir>0){
+          elapsed_time = (float)thistime/1000.0 - reset_time;
+          elapsed_time *= (float)realtime_flag;
+          elapsed_time += times[reset_frame];
+          if(ntimes>1&&
+            times[ntimes-1]>times[0]&&
+            (elapsed_time>times[ntimes-1]||elapsed_time<0.0)
+            ){
+            elapsed_time = gmod(elapsed_time,times[ntimes-1]-times[0])+times[0];
+          }
+          itimes = isearch(times,ntimes,elapsed_time,itimes);
+        }
+        else{
+          if(script_render_flag==0){
+            itimes+=FlowDir;
+          }
+          else{
+            itimes=script_itime;
+          }
+        }
+      }
+      if(stept==1&&timedrag==0&&RenderGif!=0){
+        itimes+=RenderSkip*FlowDir;
+      }
+
+// if toggling time display with H then show the frame that was visible
+
+      if(stept==0){
+        itime_save=-1;
+      }
+      else{
+        if(itime_save>=0){
+          itimes=itime_save;
+        }
+      }
+#ifdef pp_SHOOTER
+      if(shooter_firstframe==1&&visShooter!=0&&shooter_active==1){
+        reset_itimes0();
+      }
+#endif
+      checktimebound();
+      UpdateTimeLabels();
+    }
+    redisplay=1;
+  }
+  if(showtime==1&&stept==0&&itimeold!=itimes){
+    changetime=1;
+    checktimebound();
+    UpdateTimeLabels();
+  }
+  update_framenumber(changetime);
+  if(redisplay==1){
+    glutPostRedisplay();
+  }
+}
+
+/* ------------------ update_camera_ypos ------------------------ */
+
+void update_camera_ypos(camera *camera_data);
+
+void Reshape(int width, int height){
+  updatemenu=1;
+  ratio = (float)width/(float)height;
+  aspect = ratio;
+  if(ratio<1.0){ratio=1.0/ratio;}
+  screenWidth = width;            
+  screenHeight = height;
+  screenWidth2 = screenWidth - dwinWW;   
+  screenHeight2 = screenHeight - dwinH;
+  windowresized=1;
+  update_camera_ypos(camera_external);
+  update_windowsizelist();
+#ifdef pp_GPU
+#ifdef pp_GPUDEPTH
+  createDepthTexture();
+#endif
+#endif
+}
+
+/* ------------------ togglegridstate ------------------------ */
+
+void togglegridstate(int visg){
+  int i;
+  mesh *meshi;
+
+  visGrid=visg;
+  if(visGrid==1){
+    if(current_mesh->plotx==-1){
+      current_mesh->plotx=current_mesh->ibar/2; 
+    }
+    if(current_mesh->ploty==-1){
+      current_mesh->ploty=current_mesh->jbar/2; 
+    }
+    if(current_mesh->plotz==-1){
+      current_mesh->plotz=current_mesh->kbar/2;
+    }
+    for(i=0;i<nmeshes;i++){
+      meshi=meshinfo + i;
+      if(meshi->visx!=0||meshi->visy!=0||meshi->visz!=0)return;
+    }
+    updateshowstep(1-current_mesh->visy,DIRY);
+  }
+}
+
+/* ------------------ cputime ------------------------ */
+
+float cputime(void){
+  return (float)clock()/(float)CLOCKS_PER_SEC;
+}
+
+/* ------------------ gmod ------------------------ */
+
+float gmod(float x, float y){
+  float returnval;
+
+  if(y==0.0)return 0.0;
+  returnval = x - (int)(x/y)*y;
+  if(returnval<0.0)returnval+=y;
+  return returnval;
+}
+
+/* ------------------ reset_gltime ------------------------ */
+
+void reset_gltime(void){
+  int inttime;
+
+  if(showtime!=1)return;
+  reset_frame=itimes;
+  inttime  = glutGet(GLUT_ELAPSED_TIME);
+  reset_time = (float)inttime/1000.0;
+  if(times!=NULL&&ntimes>0){
+    start_frametime=times[0];
+    stop_frametime=times[ntimes-1];
+  }
+}
+
+/* ------------------ update_currentmesh ------------------------ */
+
+void update_current_mesh(mesh *meshi){
+  int i;
+  iso *isoi;
+  int nsteps=-1;
+
+  current_mesh=meshi;
+  loaded_isomesh=get_loaded_isomesh();
+  update_iso_showlevels();
+  update_plot3dtitle();
+}
+
+
+/* ------------------ ClearBuffers ------------------------ */
+
+void ClearBuffers(int mode){
+  if(mode==RENDER){
+    glClearColor(backgroundcolor[0],backgroundcolor[1],backgroundcolor[2], 0.0f);
+  }
+  else{
+    glClearColor((float)0.0,(float)0.0,(float)0.0, (float)0.0);
+  }
+  
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+
 /* ------------------ Display ------------------------ */
 
 void Display(void){
@@ -2257,215 +2541,5 @@ void Display(void){
     }
     glutPostRedisplay();
   }
-}
-
-/* ------------------ Idle ------------------------ */
-
-void Idle(void){
-  int changetime=0;
-  float thisinterval;
-  int oldcpuframe;
-  float totalcpu;
-  int redisplay=0;
-  int ibenchrate;
-  char buffer[256];
-  float elapsed_time;
-
-  CheckMemory;
-  glutSetWindow(mainwindow_id);
-  updateShow();
-  thistime = glutGet(GLUT_ELAPSED_TIME);
-  thisinterval = thistime - lasttime;
-//  printf("lasttime=%i thistime=%i thisinterval=%f\n",lasttime,thistime,thisinterval);
-  frame_count++;
-
-  /* increment frame counter if the proper amount of time has passed
-     or if we are rendering images or stepping by hand */
-
-  if(showtime==1&&((stept==1&&(float)thisinterval>frameinterval)||RenderGif!=0||timedrag==1)){       /* ready for a new frame */
-
-    cputimes[cpuframe]=thistime/1000.;
-    
-    oldcpuframe=cpuframe-10;
-    if(oldcpuframe<0)oldcpuframe+=20;
-    totalcpu=cputimes[cpuframe]-cputimes[oldcpuframe];
-    if(benchmark==0){
-      if(totalcpu==0.0){
-   		  framerate=0.0;
-      }
-      else{
-	      framerate=10.0/totalcpu;
-      }
-    }
-    if(benchmark==1||benchmark_flag==1){
-      if(itimes==0)bench_starttime=thistime/1000.0;
-      if(itimes==ntimes-1){
-        bench_stoptime=thistime/1000.0;
-        ibenchrate=10*((float)ntimes/(bench_stoptime-bench_starttime))+0.5;
-        framerate=(float)ibenchrate/10.0;
-        sprintf(buffer,"%f",framerate);
-        trim(buffer);
-        trimzeros(buffer);
-        printf("   frame rate=%s\n",buffer);
-        if(benchmark_flag==1)bench_out(framerate);
-      }
-    }
-    cpuframe++;
-    if(cpuframe>=20)cpuframe=0;
-   
-    last_frame_count=frame_count;
-    frame_count=1;
-    lasttime = thistime;
-    if(ntimes>0){
-      changetime=1;
-      if(stept ==1 && plotstate == DYNAMIC_PLOTS && timedrag==0 && RenderGif==0){
-        /*  skip frames here if displaying in real time and frame rate is too slow*/
-        if(times!=NULL&&realtime_flag!=0&&FlowDir>0){
-          elapsed_time = (float)thistime/1000.0 - reset_time;
-          elapsed_time *= (float)realtime_flag;
-          elapsed_time += times[reset_frame];
-          if(ntimes>1&&
-            times[ntimes-1]>times[0]&&
-            (elapsed_time>times[ntimes-1]||elapsed_time<0.0)
-            ){
-            elapsed_time = gmod(elapsed_time,times[ntimes-1]-times[0])+times[0];
-          }
-          itimes = isearch(times,ntimes,elapsed_time,itimes);
-        }
-        else{
-          if(script_render_flag==0){
-            itimes+=FlowDir;
-          }
-          else{
-            itimes=script_itime;
-          }
-        }
-      }
-      if(stept==1&&timedrag==0&&RenderGif!=0){
-        itimes+=RenderSkip*FlowDir;
-      }
-
-// if toggling time display with H then show the frame that was visible
-
-      if(stept==0){
-        itime_save=-1;
-      }
-      else{
-        if(itime_save>=0){
-          itimes=itime_save;
-        }
-      }
-#ifdef pp_SHOOTER
-      if(shooter_firstframe==1&&visShooter!=0&&shooter_active==1){
-        reset_itimes0();
-      }
-#endif
-      checktimebound();
-      UpdateTimeLabels();
-    }
-    redisplay=1;
-  }
-  if(showtime==1&&stept==0&&itimeold!=itimes){
-    changetime=1;
-    checktimebound();
-    UpdateTimeLabels();
-  }
-  update_framenumber(changetime);
-  if(redisplay==1){
-    glutPostRedisplay();
-  }
-}
-
-/* ------------------ update_camera_ypos ------------------------ */
-
-void update_camera_ypos(camera *camera_data);
-
-void Reshape(int width, int height){
-  updatemenu=1;
-  ratio = (float)width/(float)height;
-  aspect = ratio;
-  if(ratio<1.0){ratio=1.0/ratio;}
-  screenWidth = width;            
-  screenHeight = height;
-  screenWidth2 = screenWidth - dwinWW;   
-  screenHeight2 = screenHeight - dwinH;
-  windowresized=1;
-  update_camera_ypos(camera_external);
-  update_windowsizelist();
-#ifdef pp_GPU
-#ifdef pp_GPUDEPTH
-  createDepthTexture();
-#endif
-#endif
-}
-
-/* ------------------ togglegridstate ------------------------ */
-
-void togglegridstate(int visg){
-  int i;
-  mesh *meshi;
-
-  visGrid=visg;
-  if(visGrid==1){
-    if(current_mesh->plotx==-1){
-      current_mesh->plotx=current_mesh->ibar/2; 
-    }
-    if(current_mesh->ploty==-1){
-      current_mesh->ploty=current_mesh->jbar/2; 
-    }
-    if(current_mesh->plotz==-1){
-      current_mesh->plotz=current_mesh->kbar/2;
-    }
-    for(i=0;i<nmeshes;i++){
-      meshi=meshinfo + i;
-      if(meshi->visx!=0||meshi->visy!=0||meshi->visz!=0)return;
-    }
-    updateshowstep(1-current_mesh->visy,DIRY);
-  }
-}
-
-/* ------------------ cputime ------------------------ */
-
-float cputime(void){
-  return (float)clock()/(float)CLOCKS_PER_SEC;
-}
-
-/* ------------------ gmod ------------------------ */
-
-float gmod(float x, float y){
-  float returnval;
-
-  if(y==0.0)return 0.0;
-  returnval = x - (int)(x/y)*y;
-  if(returnval<0.0)returnval+=y;
-  return returnval;
-}
-
-/* ------------------ reset_gltime ------------------------ */
-
-void reset_gltime(void){
-  int inttime;
-
-  if(showtime!=1)return;
-  reset_frame=itimes;
-  inttime  = glutGet(GLUT_ELAPSED_TIME);
-  reset_time = (float)inttime/1000.0;
-  if(times!=NULL&&ntimes>0){
-    start_frametime=times[0];
-    stop_frametime=times[ntimes-1];
-  }
-}
-
-/* ------------------ update_currentmesh ------------------------ */
-
-void update_current_mesh(mesh *meshi){
-  int i;
-  iso *isoi;
-  int nsteps=-1;
-
-  current_mesh=meshi;
-  loaded_isomesh=get_loaded_isomesh();
-  update_iso_showlevels();
-  update_plot3dtitle();
 }
 

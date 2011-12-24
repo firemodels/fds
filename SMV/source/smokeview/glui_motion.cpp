@@ -551,6 +551,55 @@ extern "C" void update_translate(void){
   eyerotate_z->set_x(camera_current->direction_angle);
 }
 
+/* ------------------ update_rotation_index ------------------------ */
+
+void update_rotation_index(int val){
+  mesh *meshi;
+  int i;
+  float *modelview_rotate;
+  float *angle_zx;
+  int *rotation_index;
+
+  rotation_index = &camera_current->rotation_index;
+
+  *rotation_index=val;
+  if(*rotation_index==rotation_index_OLD)return;
+  if(*rotation_index>=0&&*rotation_index<nmeshes){
+    meshi = meshinfo + *rotation_index;
+    camera_current->xcen=meshi->xcen;
+    camera_current->ycen=meshi->ycen;
+    camera_current->zcen=meshi->zcen;
+  }
+  else{
+    camera_current->xcen=xcenGLOBAL;
+    camera_current->ycen=ycenGLOBAL;
+    camera_current->zcen=zcenGLOBAL;
+  }
+  rotation_index_OLD=*rotation_index;
+  modelview_rotate = camera_current->modelview;
+  for(i=0;i<16;i++){
+    modelview_rotate[i]=modelview_current[i];
+  }
+
+  angle_zx = camera_current->angle_zx;
+
+  angle_zx[0]=0.; 
+  angle_zx[1]=0.; 
+
+  camera_current->direction_angle=0.0;
+  camera_current->cos_direction_angle = 1.0;
+  camera_current->sin_direction_angle = 0.0;
+
+  camera_current->view_angle=0.0;
+  camera_current->cos_view_angle = 1.0;
+  camera_current->sin_view_angle = 0.0;
+
+  update_meshlist1(val);
+
+  glutPostRedisplay();
+
+}
+
 /* ------------------ update_projection_type ------------------------ */
 
 extern "C" void update_projection_type(void){

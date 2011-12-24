@@ -223,8 +223,7 @@ EXTERNCPP void LoadPatchMenu(int value);
 EXTERNCPP void LoadSliceMenu(int value);
 EXTERNCPP void LoadVSliceMenu(int value);
 
-EXTERNCPP void initvars1(void);
-EXTERNCPP void initvars0(void);
+EXTERNCPP void initvars(void);
 EXTERNCPP void RenderState(int onoff);
 EXTERNCPP void update_windowsizelist(void);
 EXTERNCPP void ResizeWindow(int width, int height);
@@ -391,7 +390,6 @@ EXTERNCPP void update_blockpath(void);
 EXTERNCPP void getinverse(float *m, float *mi);
 EXTERNCPP void matmatmult(float *m1, float *m2, float *m3);
 EXTERNCPP void matvecmult(double *m1, float *v1, float *v2);
-EXTERNCPP void update_rotation_index(int val);
 EXTERNCPP void update_meshlist1(int val);
 EXTERNCPP void update_translate(void);
 EXTERNCPP void BlockageMenu(int value);
@@ -440,7 +438,6 @@ EXTERNCPP void updatevslicemenulabels(void);
 EXTERNCPP void updateplot3dmenulabels(void);
 EXTERNCPP void handle_eyeview(int flag);
 
-EXTERNCPP void checktimebound(void);
 EXTERNCPP void getrgb(unsigned int val, unsigned char *rr, unsigned char *gg, unsigned char *bb);
 EXTERNCPP unsigned char *readpicture(char *filename, int *width, int *height);
 #ifdef pp_JPEG

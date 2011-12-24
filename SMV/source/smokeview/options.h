@@ -71,16 +71,12 @@
 
 //VVVVVVVVVVVVVVVVVVVVVVVVVVVVV  turn on windows only options VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
-#undef pp_OPEN
 #ifdef WIN32
 
 #define pp_memstatus
 #define pp_COMPRESS
 #define pp_noappend
 #include "pragmas.h"
-#ifdef pp_BETA
-#define pp_OPEN
-#endif
 #endif
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

@@ -46,7 +46,7 @@ int main(int argc, char **argv){
   int endian_fds;
   int endian_info;
 
-  initMM();
+  initMALLOC();
   GLOBdoit_lighting=0;
   GLOBdoit_smoke3d=1;
   GLOBdoit_boundary=1;

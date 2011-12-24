@@ -14,8 +14,6 @@
 #else
 #include <GL/glut.h>
 #endif
-#include "contourdefs.h"
-#include "isodefs.h"
 #include "flowfiles.h"
 #include "MALLOC.h"
 #include "smokeviewvars.h"
@@ -2296,25 +2294,6 @@ void LoadUnloadMenu(int value){
       sv_startup(fdsprefix2,0);
     }
   }
-#ifdef pp_OPEN
-  if(value==3){
-    OpenSMVFile(openfilebuffer,1024,&openfileflag);
-    if(openfileflag==1){
-      updateOpenSMVFile=1;
-    }
-    else{
-      updateOpenSMVFile=0;
-    }
-    if(updateOpenSMVFile==1){
-      DialogMenu(-2); // hide all glui menus
-      sv_unload();
-      PrintAllMemoryInfo;
-      sv_init0();
-      sv_startup(openfilebuffer,0);
-      updateOpenSMVFile=0;
-    }
-  }
-#endif
   if(value==SHOWFILES){
     glutPostRedisplay();  
     showfiles=1-showfiles;
@@ -8452,9 +8431,6 @@ updatemenu=0;
       char steplabel[100];
 
       CREATEMENU(loadunloadmenu,LoadUnloadMenu);
-#ifdef pp_OPEN
-      glutAddMenuEntry(_("Open Smokeview (.smv) file"),3);
-#endif
       strcpy(steplabel,_("error: steplabel not defined"));
       if(nsmoke3dinfo>0){
         strcpy(loadmenulabel,_("3D smoke"));
@@ -8561,13 +8537,9 @@ updatemenu=0;
         strcpy(loadmenulabel,"Zone fire file");
         glutAddSubMenu(loadmenulabel,zonemenu);
       }
-#ifdef pp_OPEN
-        glutAddMenuEntry("-",999);
-#else
       if(glui_active==1){      
         glutAddMenuEntry("-",999);
       }
-#endif
       glutAddSubMenu(_("Configuration files"),smokeviewinimenu);
       glutAddSubMenu(_("Script options"),scriptmenu);
 #ifdef pp_COMPRESS

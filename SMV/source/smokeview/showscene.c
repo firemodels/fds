@@ -15,8 +15,6 @@
 #else
 #include <GL/glut.h>
 #endif
-#include "contourdefs.h"
-#include "isodefs.h"
 
 #include "flowfiles.h"
 #include "MALLOC.h"
@@ -506,3 +504,4 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   sniffErrors("end of loop");
 
 }
+

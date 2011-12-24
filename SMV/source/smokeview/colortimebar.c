@@ -13,6 +13,90 @@
 
 char colorbar_revision[]="$Revision$";
 
+
+/* ------------------ UpdateTimeLabels ------------------------ */
+
+void UpdateTimeLabels(void){
+  float time0;
+  int hour, min, sec,sec10;
+ 
+  time0 = timeoffset;
+  if(times!=NULL)time0 = timeoffset + times[itimes];
+  if(vishmsTimelabel==1){
+    hour = time0/3600;
+    min = time0/60.0 - 60*hour;
+    sec10 = 10*(time0 -  60*min - 3600*hour);
+    sec = sec10/10;
+    sec10 = sec10 - 10*sec;
+    sprintf(timelabel,"  %i:%.2i:%.2i.%i",hour,min,sec,sec10);
+  }
+  else{
+    float dt;
+    char timeval[30], *timevalptr;
+
+    if(ntimes>1){
+      dt=times[1]-times[0];
+    }
+    else{
+      dt=0.0;
+    }
+    if(dt<0.0)dt=-dt;
+    timevalptr=time2timelabel(time0,dt,timeval);
+    strcpy(timelabel,"Time: ");
+    strcat(timelabel,timevalptr);
+  }
+  sprintf(framelabel,"Frame: %i",itimes);
+  if(hrrinfo!=NULL&&hrrinfo->display==1&&hrrinfo->loaded==1){
+    float hrr;
+
+    hrr = hrrinfo->hrrval[hrrinfo->itime];
+    if(hrr<1.0){
+      sprintf(hrrinfo->hrrlabel,"HRR: %4.1f",hrr*1000.0);
+    }
+    else if(hrr>1000.0){
+      sprintf(hrrinfo->hrrlabel,"HRR: %4.1f MW",hrr/1000.0);
+    }
+    else{
+      sprintf(hrrinfo->hrrlabel,"HRR: %4.1f kW",hrr);
+    }
+  }
+}
+
+/* ------------------ drawTimeBar ------------------------ */
+
+void drawTimeBar(void){
+  float xleft=.175f, xright=1.0f, ybot=0.10f, ytop=.35f, xxright;
+
+  glDisable(GL_LIGHTING);
+  xleft = xtimeleft;
+  if(fontindex==LARGE_FONT)xleft=xtimeleft+0.11;
+  xright = xtimeright;
+
+  glLineWidth(linewidth);
+  glBegin(GL_LINE_LOOP);
+  glColor4fv(timebarcolor);
+  glVertex2f(xleft,ybot);
+  glVertex2f(xright,ybot);
+  glVertex2f(xright,ytop);
+  glVertex2f(xleft,ytop);
+  glEnd();
+
+  if(ntimes != 1){
+    xxright = xleft + (float)itimes*(xright-xleft)/(ntimes-1);
+  }
+  else{
+    xxright=xright;
+  }
+  glBegin(GL_POLYGON);
+  glColor4fv(timebarcolor);
+  glVertex2f(xleft,ybot);
+  glVertex2f(xxright,ybot);
+  glVertex2f(xxright,ytop);
+  glVertex2f(xleft,ytop);
+  glEnd();
+
+}
+
 /* ------------------ setColorbarClipPlanes ------------------------ */
 
 void setColorbarClipPlanes(int flag){

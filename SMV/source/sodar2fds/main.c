@@ -119,7 +119,7 @@ int main(int argc, char **argv){
     return 1;
   }
 
-  initMM();
+  initMALLOC();
 
   buffer_len=getrowcols(stream_in, &nrows, &ncols);
   buffer_len+=10;

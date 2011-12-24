@@ -46,7 +46,7 @@ void _memorystatus(unsigned int size,unsigned int *availmem,unsigned int *physme
 
 /* ------------------ initMM ------------------------ */
 
-void initMM(void){
+void initMALLOC(void){
   
   MMfirstptr=&MMfirst;
   MMlastptr=&MMlast;
