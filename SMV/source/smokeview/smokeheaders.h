@@ -29,7 +29,6 @@ EXTERNCPP void getzonedatacsv(int nzonet, int nrooms, int nfires,
                     int *error);
 EXTERNCPP void sv_init0(void);
 EXTERNCPP void sv_startup(char *file, int showpart);
-EXTERNCPP void sv_update(void);
 EXTERNCPP void sv_unload(void);
 EXTERNCPP void sv_FrameRateMenu(int value);
 EXTERNCPP void sv_startup_c(int argc, char **argv);
@@ -438,6 +437,7 @@ EXTERNCPP void updatevslicemenulabels(void);
 EXTERNCPP void updateplot3dmenulabels(void);
 EXTERNCPP void handle_eyeview(int flag);
 
+EXTERNCPP void init_texturedir(void);
 EXTERNCPP void getrgb(unsigned int val, unsigned char *rr, unsigned char *gg, unsigned char *bb);
 EXTERNCPP unsigned char *readpicture(char *filename, int *width, int *height);
 #ifdef pp_JPEG

@@ -988,6 +988,28 @@ void InitOpenGL(void){
     TrainerViewMenu(trainerview);
   }
 
+/* ------------------ init_texturedir ------------------------ */
+
+void init_texturedir(void){
+  if(texturedir==NULL){
+    char *texture_buffer;
+    size_t texture_len;
+
+    texture_buffer=getenv("texturedir");
+    if(texture_buffer!=NULL){
+      texture_len=strlen(texture_buffer);
+      NewMemory((void **)&texturedir,texture_len+1);
+      strcpy(texturedir,texture_buffer);
+    }
+    if(texturedir==NULL&&smvprogdir!=NULL){
+      texture_len=strlen(smvprogdir)+strlen("textures");
+      NewMemory((void **)&texturedir,texture_len+2);
+      strcpy(texturedir,smvprogdir);
+      strcat(texturedir,"textures");
+    }
+  }
+}
+
 /* ------------------ initvars ------------------------ */
 
 void initvars(void){
