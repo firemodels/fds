@@ -1643,12 +1643,6 @@ void FrameRateMenu(int value){
   reset_gltime();
 }
 
-/* ------------------ sv_FrameRateMenu ------------------------ */
-
-void sv_FrameRateMenu(int value){
-  FrameRateMenu(value);
-}
-
 /* ------------------ IsoSurfaceTypeMenu ------------------------ */
 
 void IsoSurfaceTypeMenu(int value){
@@ -2280,19 +2274,6 @@ void LoadUnloadMenu(int value){
   //  visSmoke=1;
     updatemenu=1;  
     glutPostRedisplay();
-  }
-  if(value==2&&smvfilename!=NULL){
-#ifdef _DEBUG
-    CheckMemory;
-#endif
-    sv_unload();
-    FREEMEMORY(fdsprefix2);
-    len=0;
-    if(fdsprefix!=NULL)len=strlen(fdsprefix);
-    if(len!=0&&NewMemory((void **)&fdsprefix2,(unsigned int)(len+1))!=0){
-      STRCPY(fdsprefix2,fdsprefix);
-      sv_startup(fdsprefix2,0);
-    }
   }
   if(value==SHOWFILES){
     glutPostRedisplay();  
@@ -8546,9 +8527,6 @@ updatemenu=0;
       if(smokezippath!=NULL&&(npatchinfo>0||nsmoke3dinfo>0||nsliceinfo>0)){
         glutAddSubMenu(_("Compression"),compressmenu);
       }
-#endif
-#ifdef _DEBUG
-      glutAddMenuEntry(smvmenufile,2);
 #endif
       if(showfiles==1)glutAddMenuEntry(_("*Show file names"),SHOWFILES);
       if(showfiles==0)glutAddMenuEntry(_("Show file names"),SHOWFILES);

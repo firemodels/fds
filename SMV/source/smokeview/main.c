@@ -14,7 +14,6 @@
 #endif
 #include "MALLOC.h"
 #include "smokeviewvars.h"
-#include "translate.h"
 
 // svn revision character string
 char main_revision[]="$Revision$";
@@ -34,13 +33,11 @@ int main(int argc, char **argv){
   initcolors();
   initvars();
   if(argc==1){
-    version();
+    display_version_info();
   }
 #ifdef WIN32
   copy_args(&argc, argv, &argv_sv);
-  if(argc==1){
-    exit(0);
-  }
+  if(argc==1)return 0;
 #else
   argv_sv=argv;
 #endif
@@ -50,30 +47,17 @@ int main(int argc, char **argv){
   progname=argv_sv[0];
   smvprogdir=getprogdir(progname);
   init_texturedir();
-  get_smokezippath(smvprogdir,&smokezippath);
+  smokezippath=get_smokezippath(smvprogdir);
 
   CheckMemory;
-  Args(argc, argv_sv);
-  version();
-  printf("\n");
+  parse_commandline(argc, argv_sv);
+  display_version_info();
   if(smokezippath!=NULL)printf("Smokezip file: %s found\n",smokezippath);
-  sv_startup_c(argc,argv_sv);
-  init_translate(smvprogdir,tr_name);
-  CheckMemory;
-  startup_flag=initcase_c(argc,argv_sv);
-  if(update_bounds==1){
-    Update_All_Patch_Bounds();
-#ifdef pp_THREAD
-    pthread_join(update_all_patch_bounds_id,NULL);
-#endif
-    return 0;
-  }
-  if(startup_flag==0){
-    glutMainLoop();
-  }
-  else{
-    exit(1);
-  }
+  setup_glut(argc,argv_sv);
+  startup_flag=setup_case(argc,argv_sv);
+  if(startup_flag==0&&update_bounds==1)startup_flag=Update_Bounds();
+  if(startup_flag!=0)return 1;
+
+  glutMainLoop();
   return 0;
 }	 
-

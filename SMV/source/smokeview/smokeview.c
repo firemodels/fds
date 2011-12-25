@@ -467,7 +467,7 @@ void ResetView(int option){
 
 /* ------------------ Args ------------------------ */
 
-void Args(int argc, char **argv){
+void parse_commandline(int argc, char **argv){
   int i, len;
   char *temp;
   char buffer[255];
@@ -586,8 +586,6 @@ void Args(int argc, char **argv){
     STRUCTSTAT statbuffer;
 
     NewMemory((void **)&smvfilename,(unsigned int)(len+6));
-    FREEMEMORY(smvmenufile);
-    NewMemory((void **)&smvmenufile,(unsigned int)(len+15));
     STRCPY(smvfilename,fdsprefix);
     STRCAT(smvfilename,".smv");
     {
@@ -598,14 +596,6 @@ void Args(int argc, char **argv){
       if(default_script==NULL&&STAT(scriptbuffer,&statbuffer)==0){
         default_script = insert_scriptfile(scriptbuffer);
       }
-    }
-    STRCPY(smvmenufile,"Reload ");
-    temp = strrchr(smvfilename,(int)(*dirseparator));
-    if(temp!=NULL){
-      STRCAT(smvmenufile,temp+1);
-    }
-    else{
-      STRCAT(smvmenufile,smvfilename);
     }
   }
   if(smvfilename!=NULL){
@@ -717,7 +707,7 @@ void Args(int argc, char **argv){
       strncmp(argv[i],"-version",8)==0||
       strncmp(argv[i],"-v",2)==0
       ){
-      version();
+      display_version_info();
       exit(0);
     }
     else if(strncmp(argv[i],"-runscript",10)==0){
@@ -753,7 +743,7 @@ void Args(int argc, char **argv){
 
 /* ------------------ version ------------------------ */
 
-void version(void){
+void display_version_info(void){
     int svn_num;
 
     svn_num=getmaxrevision();    // get svn revision number
@@ -765,10 +755,6 @@ void version(void){
 #else
     printf("Smokeview (32 bit) Revision Number: %i\n",svn_num);
 #endif
-    if(revision_fds>0){
-      printf("FDS Revision Number: %i\n",revision_fds);
-    }
-    printf("Compile Date: %s\n",__DATE__);
 #ifdef WIN32
 #ifdef X64
     printf("Platform: WIN64 ");
@@ -797,7 +783,11 @@ void version(void){
 #ifdef pp_LINUX64
     printf("Platform: LINUX64\n");
 #endif
-
+    printf("Build Date: %s\n",__DATE__);
+    if(revision_fds>0){
+      printf("FDS Revision Number: %i\n",revision_fds);
+    }
+  printf("\n");
 }
 
 /* ------------------ usage ------------------------ */
@@ -925,3 +915,22 @@ void usage(char **argv){
     printf("%s \n",labelptr);
   }
 }
+
+/* ------------------ abortSV ------------------------ */
+
+void abortSV(char *message){
+  int i;
+  if(message!=NULL&&strlen(message)>0){
+    abort_message(message);
+  }
+  scanf("%i",&i);
+}
+
+/* ------------------ pauseSV ------------------------ */
+
+void pauseSV(void){
+  int i;
+  printf("program paused - press <CTRL> c to close window\n");
+  scanf("%i",&i);
+}
+

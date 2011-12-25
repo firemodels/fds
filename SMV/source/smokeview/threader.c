@@ -86,6 +86,16 @@ void smooth_blockages(void){
 }
 #endif
 
+/* ------------------ Update_Bounds ------------------------ */
+
+int Update_Bounds(void){
+  Update_All_Patch_Bounds();
+#ifdef pp_THREAD
+  pthread_join(update_all_patch_bounds_id,NULL);
+#endif
+  return 1;
+}
+
 /* ------------------ Update_All_Patch_Bounds ------------------------ */
 
 #ifdef pp_THREAD

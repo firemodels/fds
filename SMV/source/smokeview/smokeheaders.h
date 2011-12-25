@@ -27,11 +27,7 @@ EXTERNCPP void getzonedatacsv(int nzonet, int nrooms, int nfires,
                     float *zonepr, float *zoneylay,  float *zonetl, float *zonetu,
                     float **zoneodlptr, float **zoneoduptr, float *zonehvents, float *zonevvents,
                     int *error);
-EXTERNCPP void sv_init0(void);
-EXTERNCPP void sv_startup(char *file, int showpart);
-EXTERNCPP void sv_unload(void);
-EXTERNCPP void sv_FrameRateMenu(int value);
-EXTERNCPP void sv_startup_c(int argc, char **argv);
+EXTERNCPP void setup_glut(int argc, char **argv);
 EXTERNCPP int get_ndevices(char *file);
 EXTERNCPP void printhrr(void);
 EXTERNCPP void readhrr(int flag, int *errorcode);
@@ -182,7 +178,6 @@ EXTERNCPP void init_multi_threading(void);
 #ifdef WIN32
 EXTERNCPP void OpenSMVFile(char *filename,int filenamelength,int *openfile);
 #endif
-EXTERNCPP void get_smokezippath(char *progdir, char **zippath);
 EXTERNCPP int AnySmoke(char *type);
 EXTERNCPP int AnySlices(char *type);
 EXTERNCPP void TrainerViewMenu(int var);
@@ -632,9 +627,9 @@ EXTERNCPP void RenderMenu(int value);
 EXTERNCPP void LoadSmoke3DMenu(int value);
 EXTERNCPP void Display(void);
 EXTERNCPP void Visible(int state);
-EXTERNCPP void Args(int argc, char **argv);
+EXTERNCPP void parse_commandline(int argc, char **argv);
 EXTERNCPP void usage(char **argv);
-EXTERNCPP void version(void);
+EXTERNCPP void display_version_info(void);
 EXTERNCPP int getmaxrevision(void);
 EXTERNCPP void draw_demo(int nlat, int nlong);
 EXTERNCPP void draw_demo2(int option);
@@ -698,8 +693,9 @@ EXTERNCPP void getslicedatabounds(const slice *sd, float *pmin, float *pmax);
 EXTERNCPP void scalefloat2string(float floatfrom, char *stringto, const float *scale, float range);
 EXTERNCPP void scalestring(const char *stringfrom, char *stringto, const float *scale, float range);
 EXTERNCPP void num2string(char *string, float tval, float range);
-EXTERNCPP int initcase_c(int argc, char **argv);
+EXTERNCPP int setup_case(int argc, char **argv);
 EXTERNCPP int get_min_partframes(void);
+EXTERNCPP int Update_Bounds(void);
 
 
 EXTERNCPP void freecadinfo(void);

@@ -27,7 +27,6 @@
 // svn revision character string
 char startup_revision[]="$Revision$";
 
-//void get_smokezippath(char *progdir, char **zippath);
 int getmaxrevision(void);
 void glui_colorbar_setup(int main_window);
 void glui_motion_setup(int main_window);
@@ -52,7 +51,7 @@ void RenderMenu(int value);
 void GeometryMenu(int val);
 //void InitOpenGL(void);
 
-/* ------------------ initcase_c ------------------------ */
+/* ------------------ to_lower ------------------------ */
 
 void to_lower(char *string){
    size_t lenstring;
@@ -67,9 +66,9 @@ void to_lower(char *string){
    }
 }
 
-/* ------------------ initcase_c ------------------------ */
+/* ------------------ setup_case ------------------------ */
 
-int initcase_c(int argc, char **argv){
+int setup_case(int argc, char **argv){
   int return_code;
   char *input_file;
 
@@ -77,7 +76,7 @@ int initcase_c(int argc, char **argv){
   warning: the following line was commented out!! (perhaps it broke something)
      this line is necessary in order to define smvfilename and trainer_filename
   */
-  Args(argc, argv); 
+ // parse_commandlines(argc, argv); 
   return_code=-1;
   if(strcmp(inputfilename_ext,".svd")==0||demo_option==1){
     trainer_mode=1;
@@ -195,7 +194,7 @@ int initcase_c(int argc, char **argv){
 
 /* ------------------ sv_startup_c ------------------------ */
 
-void sv_startup_c(int argc, char **argv){
+void setup_glut(int argc, char **argv){
   int i;
   char *smoketempdir;
   size_t lensmoketempdir,lensmokebindir;
@@ -286,6 +285,7 @@ void sv_startup_c(int argc, char **argv){
   }
   rgb_plot3d_contour[nrgb-2]=&rgb_full[0][0];
   rgb_plot3d_contour[nrgb-1]=&rgb_full[255][0];
+  init_translate(smvprogdir,tr_name);
 }
 
 /* ------------------ get_opengl_version ------------------------ */
@@ -2126,7 +2126,6 @@ int getmaxrevision(void){
   MAXREV(smv_endian_revision);
   MAXREV(startup_revision);
   MAXREV(string_util_revision);
-  MAXREV(sv_api_revision);
   MAXREV(threader_revision);
   MAXREV(translate_revision);
   MAXREV(unit_revision);
@@ -2134,3 +2133,41 @@ int getmaxrevision(void){
   MAXREV(viewports_revision);
   return max_revision;
 }
+
+/* ------------------ copy_args ------------------------ */
+
+#ifdef WIN32
+void copy_args(int *argc, char **aargv, char ***argv_sv){
+  char *filename=NULL;
+  char **argv=NULL;
+  int filelength=1024,openfile;
+  int i;
+
+  if(NewMemory((void **)&argv,(*argc+1)*sizeof(char **))!=0){
+    *argv_sv=argv;
+    for(i=0;i<*argc;i++){
+      argv[i]=aargv[i];
+    }
+    if(*argc==1){
+      if(NewMemory((void **)&filename,(unsigned int)(filelength+1))!=0){
+        openfile=0;
+#ifdef WIN32
+        OpenSMVFile(filename,filelength,&openfile);
+#endif
+        if(openfile==1&&ResizeMemory((void **)&filename,strlen(filename)+1)!=0){
+          *argc=2;
+          argv[1]=filename;
+        }
+        else{
+          FREEMEMORY(filename);
+        }
+      }
+    }
+  }
+  else{
+    *argc=0;
+  }
+}
+#endif
+
+
