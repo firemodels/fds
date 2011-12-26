@@ -383,7 +383,6 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       printf("After slice unload: ");
       PrintMemoryInfo;
       GetMemoryInfo(num_memblocks_unload,num_memblocks_load);
-   //xxx bug   WASSERT(num_memblocks_unload+sd->num_memblocks==0,"Possible Memory Leak");
 #endif
       remove_slice_loadstack(slicefilenumber);
       return;
@@ -4218,7 +4217,7 @@ void drawvvolslice(const vslice *vd){
      }
    }
    glEnd();
-   sniffErrors("after drawvslice:lines dir=1");
+   SNIFF_ERRORS("after drawvslice:lines dir=1");
 
    glPointSize(vectorpointsize);
    glBegin(GL_POINTS);
@@ -4248,7 +4247,7 @@ void drawvvolslice(const vslice *vd){
      }
    }
    glEnd();
-   sniffErrors("after drawvslice:points dir=1");
+   SNIFF_ERRORS("after drawvslice:points dir=1");
 
 
   }
@@ -4283,7 +4282,7 @@ void drawvvolslice(const vslice *vd){
      }
    }
    glEnd();
-   sniffErrors("after drawvslice:lines dir=2");
+   SNIFF_ERRORS("after drawvslice:lines dir=2");
    glPointSize(vectorpointsize);
    glBegin(GL_POINTS);
    for(i=sd->is1; i<sd->is1+sd->nslicei; i+=vectorskip){
@@ -4312,7 +4311,7 @@ void drawvvolslice(const vslice *vd){
      }
    }
    glEnd();
-   sniffErrors("after drawvslice:points dir=2");
+   SNIFF_ERRORS("after drawvslice:points dir=2");
   }
   if(meshi->visz==1){
    constval = zplttemp[meshi->plotz]+offset_slice*sd->sliceoffset;
@@ -4344,7 +4343,7 @@ void drawvvolslice(const vslice *vd){
      }
    }
    glEnd();
-   sniffErrors("after drawvslice:lines dir=3");
+   SNIFF_ERRORS("after drawvslice:lines dir=3");
 
    glPointSize(vectorpointsize);
    glBegin(GL_POINTS);
@@ -4373,7 +4372,7 @@ void drawvvolslice(const vslice *vd){
      }
    }
    glEnd();
-   sniffErrors("after drawvslice:points dir=3");
+   SNIFF_ERRORS("after drawvslice:points dir=3");
   }
 }
 
@@ -4442,7 +4441,7 @@ void drawvvolslice_terrain(const vslice *vd){
      }
    }
    glEnd();
-   sniffErrors("after drawvslice:lines dir=1");
+   SNIFF_ERRORS("after drawvslice:lines dir=1");
 
    glPointSize(vectorpointsize);
    glBegin(GL_POINTS);
@@ -4467,7 +4466,7 @@ void drawvvolslice_terrain(const vslice *vd){
      }
    }
    glEnd();
-   sniffErrors("after drawvslice:points dir=1");
+   SNIFF_ERRORS("after drawvslice:points dir=1");
 
 
   }
@@ -4497,7 +4496,7 @@ void drawvvolslice_terrain(const vslice *vd){
      }
    }
    glEnd();
-   sniffErrors("after drawvslice:lines dir=2");
+   SNIFF_ERRORS("after drawvslice:lines dir=2");
    glPointSize(vectorpointsize);
    glBegin(GL_POINTS);
    for(i=sd->is1; i<sd->is1+sd->nslicei; i+=vectorskip){
@@ -4521,7 +4520,7 @@ void drawvvolslice_terrain(const vslice *vd){
      }
    }
    glEnd();
-   sniffErrors("after drawvslice:points dir=2");
+   SNIFF_ERRORS("after drawvslice:points dir=2");
   }
   if(meshi->visz==1){
    float zmax;
@@ -4565,7 +4564,7 @@ void drawvvolslice_terrain(const vslice *vd){
      }
    }
    glEnd();
-   sniffErrors("after drawvslice:lines dir=3");
+   SNIFF_ERRORS("after drawvslice:lines dir=3");
 
    glPointSize(vectorpointsize);
    glBegin(GL_POINTS);
@@ -4604,7 +4603,7 @@ void drawvvolslice_terrain(const vslice *vd){
      }
    }
    glEnd();
-   sniffErrors("after drawvslice:points dir=3");
+   SNIFF_ERRORS("after drawvslice:points dir=3");
   }
 }
 
@@ -4670,7 +4669,7 @@ void drawvslice(const vslice *vd){
      }
    }
    glEnd();
-   sniffErrors("after drawvslice:lines dir=1");
+   SNIFF_ERRORS("after drawvslice:lines dir=1");
 
    glPointSize(vectorpointsize);
    glBegin(GL_POINTS);
@@ -4699,7 +4698,7 @@ void drawvslice(const vslice *vd){
      }
    }
    glEnd();
-   sniffErrors("after drawvslice:points dir=1");
+   SNIFF_ERRORS("after drawvslice:points dir=1");
 
 
   }
@@ -4732,7 +4731,7 @@ void drawvslice(const vslice *vd){
      }
    }
    glEnd();
-   sniffErrors("after drawvslice:lines dir=2");
+   SNIFF_ERRORS("after drawvslice:lines dir=2");
    glPointSize(vectorpointsize);
    glBegin(GL_POINTS);
    for(i=sd->is1; i<sd->is2+1; i+=vectorskip){
@@ -4759,7 +4758,7 @@ void drawvslice(const vslice *vd){
      }
    }
    glEnd();
-   sniffErrors("after drawvslice:points dir=2");
+   SNIFF_ERRORS("after drawvslice:points dir=2");
   }
   else if(sd->idir==3){
    constval = zplttemp[sd->ks1]+offset_slice*sd->sliceoffset;
@@ -4789,7 +4788,7 @@ void drawvslice(const vslice *vd){
      }
    }
    glEnd();
-   sniffErrors("after drawvslice:lines dir=3");
+   SNIFF_ERRORS("after drawvslice:lines dir=3");
 
    glPointSize(vectorpointsize);
    glBegin(GL_POINTS);
@@ -4816,7 +4815,7 @@ void drawvslice(const vslice *vd){
      }
    }
    glEnd();
-   sniffErrors("after drawvslice:points dir=3");
+   SNIFF_ERRORS("after drawvslice:points dir=3");
   }
 }
 
@@ -4877,7 +4876,7 @@ void drawvslice_terrain(const vslice *vd){
      }
    }
    glEnd();
-   sniffErrors("after drawvslice_texture:lines dir=3");
+   SNIFF_ERRORS("after drawvslice_texture:lines dir=3");
 
    glPointSize(vectorpointsize);
    glBegin(GL_POINTS);
@@ -4900,7 +4899,7 @@ void drawvslice_terrain(const vslice *vd){
      }
    }
    glEnd();
-   sniffErrors("after drawvslice_texture:points dir=3");
+   SNIFF_ERRORS("after drawvslice_texture:points dir=3");
   }
 }
 

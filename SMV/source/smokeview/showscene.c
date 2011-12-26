@@ -101,22 +101,22 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
   if(mode==RENDER){
     BLOCK_viewport(quad,          s_left,s_down,s_width,s_height);
-    sniffErrors("after BLOCK_viewport");
+    SNIFF_ERRORS("after BLOCK_viewport");
 
     TIMEBAR_viewport(quad,          s_left,s_down,s_width,s_height);
-    sniffErrors("after TIMEBAR_viewport");
+    SNIFF_ERRORS("after TIMEBAR_viewport");
 
     COLORBAR_viewport(quad,          s_left,s_down,s_width,s_height);
-    sniffErrors("after COLORBAR_viewport");
+    SNIFF_ERRORS("after COLORBAR_viewport");
 
     LOGO_viewport(quad,          s_left,s_down,s_width,s_height);
-    sniffErrors("after LOGO_viewport");
+    SNIFF_ERRORS("after LOGO_viewport");
     
     TITLE_viewport(quad,          s_left,s_down,s_width,s_height);
-    sniffErrors("after TITLE_viewport");
+    SNIFF_ERRORS("after TITLE_viewport");
 
     Scene_viewport(quad,view_mode,s_left,s_down,s_width,s_height);
-    sniffErrors("after Scene_viewport");
+    SNIFF_ERRORS("after Scene_viewport");
   }
 
   
@@ -131,7 +131,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
     if(cb_hidesv==1){
       setColorbarClipPlanes(1);
     }
-    sniffErrors("after setColorbarClipPlanes 1");
+    SNIFF_ERRORS("after setColorbarClipPlanes 1");
   }
 
   if(eyeview==1&&nskyboxinfo>0)draw_skybox();
@@ -149,7 +149,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
       else{
         setColorbarClipPlanes(0);
       }
-      sniffErrors("after setColorbarClipPlanes 2");
+      SNIFF_ERRORS("after setColorbarClipPlanes 2");
     }
     glPointSize((float)1.0);
 
@@ -158,7 +158,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
     if(ntreeinfo>0){
       drawtrees();
-      sniffErrors("after drawtrees");
+      SNIFF_ERRORS("after drawtrees");
     }
 
 /* ++++++++++++++++++++++++ draw particles +++++++++++++++++++++++++ */
@@ -188,11 +188,11 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
     if(xyz_clipplane==2){
       unsetClipPlanes();
     }
-    sniffErrors("after draw_devices");
+    SNIFF_ERRORS("after draw_devices");
 
     if(visaxislabels==1||showedit_dialog==1){
       outputAxisLabels();
-      sniffErrors("after outputAxisLables");
+      SNIFF_ERRORS("after outputAxisLables");
     }
 
 
@@ -211,14 +211,14 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
         setClipPlanes(0);
       }
       antialias(0);
-      sniffErrors("after drawticks");
+      SNIFF_ERRORS("after drawticks");
     }
 
  /* ++++++++++++++++++++++++ draw ticks +++++++++++++++++++++++++ */
 
     if(visTicks==1&&nticks>0){
       drawticks();
-      sniffErrors("after drawticks");
+      SNIFF_ERRORS("after drawticks");
     }
 
     /* draw the box framing the simulation (corners at (0,0,0) (xbar,ybar,zbar) */
@@ -228,7 +228,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
     if(isZoneFireModel==0&&visFrame==1&&highlight_flag==2){
       drawoutlines();
-      sniffErrors("after drawoutlines");
+      SNIFF_ERRORS("after drawoutlines");
     }
 
 
@@ -242,7 +242,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
         for(igrid=0;igrid<nmeshes;igrid++){
           meshi=meshinfo+igrid;
           drawgrid(meshi);
-          sniffErrors("drawgrid");
+          SNIFF_ERRORS("drawgrid");
         }
       }
     }
@@ -254,7 +254,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   if(mode==SELECT){
     if(select_device==1){
      draw_devices();
-      sniffErrors("after drawselect_devices");
+      SNIFF_ERRORS("after drawselect_devices");
       return;
     }
   }
@@ -264,7 +264,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   if(mode==SELECT){
     if(select_avatar==1){
       drawselect_avatars();
-      sniffErrors("after drawselect_avatars");
+      SNIFF_ERRORS("after drawselect_avatars");
       return;
     }
   }
@@ -274,7 +274,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   if(mode==SELECT){
     if(edittour==1&&ntours>0){
       drawselect_tours();
-      sniffErrors("after drawselect_tours");
+      SNIFF_ERRORS("after drawselect_tours");
       return;
     }
   }
@@ -284,7 +284,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
   if(showtour_dialog==1){
     drawtours();
-    sniffErrors("after drawTours");
+    SNIFF_ERRORS("after drawTours");
   }
 
   /* ++++++++++++++++++++++++ draw stereo parallax indicator +++++++++++++++++++++++++ */
@@ -309,7 +309,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   if(xyz_clipplane==2){
     unsetClipPlanes();
   }
-  sniffErrors("drawBlockages");
+  SNIFF_ERRORS("drawBlockages");
 
   /* ++++++++++++++++++++++++ draw triangles +++++++++++++++++++++++++ */
   
@@ -396,13 +396,13 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
   if(nrooms>0){
     drawroomgeom();
-    sniffErrors("after drawroomgeom");
+    SNIFF_ERRORS("after drawroomgeom");
     if(showzone==1){
       drawfiredata();
-      sniffErrors("after drawroomdata");
+      SNIFF_ERRORS("after drawroomdata");
       if(ReadZoneFile==1&&nzvents>0){
         drawventdata();
-        sniffErrors("after drawventdata");
+        SNIFF_ERRORS("after drawventdata");
       }
     }
   }
@@ -452,7 +452,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
   if(nrooms>0&&showzone==1){
     drawroomdata();
-    sniffErrors("after drawroomdata");
+    SNIFF_ERRORS("after drawroomdata");
   }
 
 /* ++++++++++++++++++++++++ draw slice files +++++++++++++++++++++++++ */
@@ -460,28 +460,28 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   if(showslice==1&&use_transparency_data==1){
     drawslice_frame();
   } 
-  sniffErrors("after drawslice");
+  SNIFF_ERRORS("after drawslice");
 
 /* ++++++++++++++++++++++++ draw transparent blockages +++++++++++++++++++++++++ */
 
 //  draw_demo(20,20);
 //  draw_demo2(1);
   drawBlockages(mode,DRAW_TRANSPARENT);
-  sniffErrors("after drawBlokcages");
+  SNIFF_ERRORS("after drawBlokcages");
 
 /* ++++++++++++++++++++++++ draw vector slice files +++++++++++++++++++++++++ */
 
   if(showvslice==1){
     drawvslice_frame();
   }
-  sniffErrors("after drawvslice");
+  SNIFF_ERRORS("after drawvslice");
 
 /* ++++++++++++++++++++++++ draw plot3d files +++++++++++++++++++++++++ */
 
   if(showplot3d==1){
     drawplot3d_frame();
   }
-  sniffErrors("after drawplot3d");
+  SNIFF_ERRORS("after drawplot3d");
 
   /* ++++++++++++++++++++++++ draw cross hairs +++++++++++++++++++++++++ */
 
@@ -500,8 +500,6 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
       setColorbarClipPlanes(0);
     }
   }
-
-  sniffErrors("end of loop");
-
+  SNIFF_ERRORS("end of loop");
 }
 

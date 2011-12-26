@@ -137,45 +137,6 @@ void getnewpos(float *oldpos, float dx, float dy, float dz,float local_speed_fac
   from_glui_trainer=0;
 }
 
-/* ------------------ getmesh ------------------------ */
-
-mesh *getmesh(float *xyz){
-  mesh *meshi;
-  int i;
-  int ibar, jbar, kbar;
-  float xmin, xmax;
-  float ymin, ymax;
-  float zmin, zmax;
-  float *xplt, *yplt, *zplt;
-
-  for(i=0;i<nmeshes;i++){
-    meshi = meshinfo+i;
-
-    ibar = meshi->ibar;
-    jbar = meshi->jbar;
-    kbar = meshi->kbar;
-
-    xplt = meshi->xplt_orig;
-    yplt = meshi->yplt_orig;
-    zplt = meshi->zplt_orig;
-
-    xmin = xplt[0];
-    xmax = xplt[ibar];
-    if(xyz[0]<xmin||xyz[0]>xmax)continue;
-
-    ymin = yplt[0];
-    ymax = yplt[jbar];
-    if(xyz[1]<ymin||xyz[1]>ymax)continue;
-
-    zmin = zplt[0];
-    zmax = zplt[kbar];
-    if(xyz[2]<zmin||xyz[2]>zmax)continue;
-
-    return meshi;
-  }
-  return NULL;
-}
-
 /* ------------------ getblockdist ------------------------ */
 
 float getblockdist(float x, float y, float z){
@@ -347,8 +308,6 @@ int makeiblank_carve(void){
   int n_embed;
   char *ib_embed;
   char *iblank_embed;
-
-#define MESHIJ(i,j) (i)*nmeshes + (j)
 
   n_embedded_meshes=0;
   for(i=0;i<nmeshes;i++){

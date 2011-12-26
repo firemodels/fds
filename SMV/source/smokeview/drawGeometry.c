@@ -1028,7 +1028,7 @@ void drawcadgeom(const cadgeom *cd){
   glEnd();
   glDisable(GL_COLOR_MATERIAL);
   glDisable(GL_LIGHTING);
-  sniffErrors("drawcadgeom");
+  SNIFF_ERRORS("drawcadgeom");
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 
 }
@@ -4623,7 +4623,7 @@ void drawBlockages(int mode, int trans_flag){
         }
       }
     }
-    sniffErrors("after drawblocks");
+    SNIFF_ERRORS("after drawblocks");
     if(xyz_clipplane!=0)glEnable(GL_CULL_FACE);
   }
   if(trans_flag!=DRAW_TRANSPARENT&&blocklocation!=BLOCKlocation_cad){

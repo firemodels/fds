@@ -1697,81 +1697,6 @@ void handle_plot3d_keys(int  key){
 
 } 
 
-/* ------------------ training_move ------------------------ */
-                                                 
-void training_move(int  mode){
-  float dx, dy;
-  float *cos_direction_angle, *sin_direction_angle;
-//  float *elevation_angle;
-//  float *cos_elevation_angle, *sin_elevation_angle;
-
-  float *eye_xyz;
-  float *direction_angle;
-
-  float INC_ANGLE=11.25;
-  float INC_XY, INC_Z;
-
-  INC_XY=meshinfo->cellsize/xyzmaxdiff;
-  INC_Z=0.1/xyzmaxdiff;
-
-  eye_xyz = camera_current->eye;
-  direction_angle=&camera_current->direction_angle;
-
-  cos_direction_angle=&camera_current->cos_direction_angle;
-  sin_direction_angle=&camera_current->sin_direction_angle;
-
-//  elevation_angle=&camera_current->elevation_angle;
-//  cos_elevation_angle=&camera_current->cos_elevation_angle;
-//  sin_elevation_angle=&camera_current->sin_elevation_angle;
-
-#define ANGLE_LEFT -1
-#define ANGLE_RIGHT 1
-#define GO_FORWARD 0
-#define GO_BACKWARD 2
-#define MOVE_UP 3
-#define MOVE_DOWN 4
-
-
-  if(mode==ANGLE_LEFT||mode==ANGLE_RIGHT){
-    switch (mode){
-    case ANGLE_LEFT:
-      *direction_angle-=INC_ANGLE;
-      break;
-    case ANGLE_RIGHT:
-      *direction_angle+=INC_ANGLE;
-      break;
-    default:
-      ASSERT(FFALSE);
-      break;
-    }
-    *cos_direction_angle = cos(PI*(*direction_angle)/180.0);
-    *sin_direction_angle = sin(PI*(*direction_angle)/180.0);
-  }
-
-  dx = INC_XY*(*sin_direction_angle);
-  dy = INC_XY*(*cos_direction_angle);
-
-  if(mode==GO_FORWARD){
-    getnewpos(eye_xyz,dx,dy,0.0,1.0);
-  }
-  else if(mode==GO_BACKWARD){
-    getnewpos(eye_xyz,-dx,-dy,0.0,1.0);
-  }
-  else if(mode==MOVE_UP){
-    eye_xyz[2] += INC_Z;
-  }
-  else if(mode==MOVE_DOWN){
-    eye_xyz[2] -= INC_Z;
-  }
-
-  eye_xyz0[0]=eye_xyz[0];
-  eye_xyz0[1]=eye_xyz[1];
-  eye_xyz0[2]=eye_xyz[2];
-  update_translate();
-  glutPostRedisplay();
-
-} 
-
 /* ------------------ handle_move_keys ------------------------ */
                                                  
 void handle_move_keys(int  key){
@@ -1993,31 +1918,16 @@ void handle_move_keys(int  key){
   }
 } 
 
-/* ------------------ Idle ------------------------ */
+/* ------------------ UpdateFrame ------------------------ */
 
-void Idle(void){
-  int changetime=0;
-  float thisinterval;
+void UpdateFrame(float thisinterval, int *changetime, int *redisplay){
   int oldcpuframe;
   float totalcpu;
-  int redisplay=0;
   int ibenchrate;
   char buffer[256];
   float elapsed_time;
 
-  CheckMemory;
-  glutSetWindow(mainwindow_id);
-  updateShow();
-  thistime = glutGet(GLUT_ELAPSED_TIME);
-  thisinterval = thistime - lasttime;
-//  printf("lasttime=%i thistime=%i thisinterval=%f\n",lasttime,thistime,thisinterval);
-  frame_count++;
-
-  /* increment frame counter if the proper amount of time has passed
-     or if we are rendering images or stepping by hand */
-
   if(showtime==1&&((stept==1&&(float)thisinterval>frameinterval)||RenderGif!=0||timedrag==1)){       /* ready for a new frame */
-
     cputimes[cpuframe]=thistime/1000.;
     
     oldcpuframe=cpuframe-10;
@@ -2051,7 +1961,7 @@ void Idle(void){
     frame_count=1;
     lasttime = thistime;
     if(ntimes>0){
-      changetime=1;
+      *changetime=1;
       if(stept ==1 && plotstate == DYNAMIC_PLOTS && timedrag==0 && RenderGif==0){
         /*  skip frames here if displaying in real time and frame rate is too slow*/
         if(times!=NULL&&realtime_flag!=0&&FlowDir>0){
@@ -2097,8 +2007,29 @@ void Idle(void){
       checktimebound();
       UpdateTimeLabels();
     }
-    redisplay=1;
+    *redisplay=1;
   }
+}
+
+/* ------------------ Idle ------------------------ */
+
+void Idle(void){
+  int changetime=0;
+  float thisinterval;
+  int redisplay=0;
+  char buffer[256];
+
+  CheckMemory;
+  glutSetWindow(mainwindow_id);
+  updateShow();
+  thistime = glutGet(GLUT_ELAPSED_TIME);
+  thisinterval = thistime - lasttime;
+  frame_count++;
+
+  /* increment frame counter if the proper amount of time has passed
+     or if we are rendering images or stepping by hand */
+
+  UpdateFrame(thisinterval,&changetime,&redisplay);
   if(showtime==1&&stept==0&&itimeold!=itimes){
     changetime=1;
     checktimebound();
@@ -2158,12 +2089,6 @@ void togglegridstate(int visg){
   }
 }
 
-/* ------------------ cputime ------------------------ */
-
-float cputime(void){
-  return (float)clock()/(float)CLOCKS_PER_SEC;
-}
-
 /* ------------------ gmod ------------------------ */
 
 float gmod(float x, float y){
@@ -2203,7 +2128,6 @@ void update_current_mesh(mesh *meshi){
   update_plot3dtitle();
 }
 
-
 /* ------------------ ClearBuffers ------------------------ */
 
 void ClearBuffers(int mode){
@@ -2217,12 +2141,140 @@ void ClearBuffers(int mode){
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
+/* ------------------ DoStereo ------------------------ */
 
-/* ------------------ Display ------------------------ */
+int DoStereo(void){
+    int return_code=0;
+  if(showstereo==1&&videoSTEREO==1){  // temporal stereo (shuttered glasses)
+    glDrawBuffer(GL_BACK_LEFT);
+    if(showstereo_frame==0||showstereo_frame==2){
+      ShowScene(RENDER,VIEW_LEFT,0,
+        0,0,screenWidth,screenHeight);
+    }
+    glDrawBuffer(GL_BACK_RIGHT);
+    if(showstereo_frame==1||showstereo_frame==2){
+      ShowScene(RENDER,VIEW_RIGHT,0,
+        0,0,screenWidth,screenHeight);
+    }
+    if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
+    return_code=1;
+  }
+  else if(showstereo==2){             // left/right stereo
+    glDrawBuffer(GL_BACK);
+    ClearBuffers(RENDER);
+    if(showstereo_frame==0||showstereo_frame==2){
+      ShowScene(RENDER,VIEW_LEFT,0,
+        0,0,screenWidth/2,screenHeight);
+    }
+    if(showstereo_frame==1||showstereo_frame==2){
+      ShowScene(RENDER,VIEW_RIGHT,0,
+        screenWidth/2,0,screenWidth/2,screenHeight);
+    }
+    if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
+    return_code=2;
+  }
+  else if(showstereo==3){             // red/blue stereo
+    glDrawBuffer(GL_BACK);
+    glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+    glClearColor(1.0, 0.0, 0.0, 1.0); 
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    if(showstereo_frame==0||showstereo_frame==2){
+      glColorMask(GL_TRUE,GL_FALSE,GL_FALSE, GL_TRUE);
+      ShowScene(RENDER,VIEW_LEFT,0,
+        0,0,screenWidth,screenHeight);
+      glFlush();
+    }
 
-void Display(void){
-  float *angle_zx;
+    if(showstereo_frame==1||showstereo_frame==2){
+      glDrawBuffer(GL_BACK);
+      glColorMask(GL_FALSE,GL_FALSE,GL_TRUE,GL_TRUE);
+      glClearColor(0.0, 0.0, 1.0, 1.0); 
+      glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
+      ShowScene(RENDER,VIEW_RIGHT,0,
+        0,0,screenWidth,screenHeight);
+      glFlush();
+    }
+    if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
+    return_code=3;
+  }
+  else if(showstereo==4){             // red/cyan stereo
+    glDrawBuffer(GL_BACK);
+    glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+    glClearColor(1.0, 0.0, 0.0, 1.0); 
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    if(showstereo_frame==0||showstereo_frame==2){
+      glColorMask(GL_TRUE,GL_FALSE,GL_FALSE, GL_TRUE);
+      ShowScene(RENDER,VIEW_LEFT,0,
+        0,0,screenWidth,screenHeight);
+      glFlush();
+    }
+
+    if(showstereo_frame==1||showstereo_frame==2){
+      glDrawBuffer(GL_BACK);
+      glColorMask(GL_FALSE,GL_TRUE,GL_TRUE,GL_TRUE);
+      glClearColor(0.0, 1.0, 1.0, 0.0); 
+      glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+      ShowScene(RENDER,VIEW_RIGHT,0,
+        0,0,screenWidth,screenHeight);
+      glFlush();
+    }
+    if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
+    return_code=4;
+  }
+  else if(showstereo==5){             // custom red/blue stereo
+    glDrawBuffer(GL_BACK);
+    glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+    glClearColor(1.0, 1.0, 1.0, 1.0); 
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    if(showstereo_frame==0||showstereo_frame==2){
+      glColorMask(GL_TRUE,GL_FALSE,GL_FALSE, GL_TRUE);
+      ShowScene(RENDER,VIEW_LEFT,0,0,0,screenWidth,screenHeight);
+      glFlush();
+    }
+    if(showstereo_frame==1||showstereo_frame==2){
+      glDrawBuffer(GL_BACK);
+      glColorMask(GL_FALSE,GL_TRUE,GL_TRUE,GL_TRUE);
+      glClearColor(0.0, 1.0, 1.0, 1.0); 
+      glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+      ShowScene(RENDER,VIEW_RIGHT,0,0,0,screenWidth,screenHeight);
+
+      glMatrixMode(GL_PROJECTION);
+      glLoadIdentity();
+      glMatrixMode(GL_MODELVIEW);
+      glLoadIdentity();
+
+      glEnable(GL_BLEND);
+      glDisable(GL_LIGHTING);
+      glDisable(GL_COLOR_MATERIAL);
+      glDisable(GL_DITHER);
+
+      glBlendFunc(GL_DST_COLOR,GL_ZERO);
+      glBegin(GL_QUADS);
+      glColor4f(0.0,right_green,right_blue,1.0);
+      glVertex3f(-1.0,-1.0,0.1);
+      glVertex3f(1.0,-1.0,0.1);
+      glVertex3f(1.0,1.0,0.1);
+      glVertex3f(-1.0,1.0,0.1);
+      glEnd();
+
+      glFlush();
+    }
+    if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
+    glEnable(GL_LIGHTING);
+    glEnable(GL_COLOR_MATERIAL);
+    glEnable(GL_DITHER);
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+    return_code=5;
+  }
+  return return_code;
+}
+
+/* ------------------ DoScript ------------------------ */
+
+void DoScript(void){
   if(runscript==1&&default_script!=NULL){
     ScriptMenu(default_script->id);
     runscript=2;
@@ -2263,7 +2315,14 @@ void Display(void){
     }
     glutPostRedisplay();
   }
+}
 
+/* ------------------ Display ------------------------ */
+
+void Display(void){
+  int dostereo;
+
+  DoScript();
   if(update_fire_line==1){
     WUI_CB(TERRAIN_FIRE_LINE_UPDATE);
     update_fire_line=0;
@@ -2278,37 +2337,34 @@ void Display(void){
     makeiblank_smoke3d();
   }
 #ifdef pp_CULL
-    if(update_initcull==1)initcull(cullsmoke);
+  if(update_initcull==1)initcull(cullsmoke);
 #endif
 //   if(update_initcullgeom==1)initcullgeom(cullgeom);
-   if(update_streaks==1&&ReadPartFile==1){
-     void ParticleStreakShowMenu(int var);
+  if(update_streaks==1&&ReadPartFile==1){
+    void ParticleStreakShowMenu(int var);
 
-     ParticleStreakShowMenu(streak_index);
-     update_streaks=0;
-   }
-   if(update_screensize==1){
-     update_screensize=0;
-     update_windowsizelist();
-     ResizeWindow(screenWidth,screenHeight);
-   }
-   if(update_colorbar_select_index==1&&colorbar_select_index>=0&&colorbar_select_index<=255){
-     update_colorbar_select_index=0;
-     updatecolors(colorbar_select_index);
-   }
-  if(updatemenu==1&&usemenu==1){
-    if(menustatus==GLUT_MENU_NOT_IN_USE){
-      glutDetachMenu(GLUT_RIGHT_BUTTON);
-      InitMenus(LOAD);
-      glutAttachMenu(GLUT_RIGHT_BUTTON);
-      updatemenu=0;
-    }
+    ParticleStreakShowMenu(streak_index);
+    update_streaks=0;
+  }
+  if(update_screensize==1){
+    update_screensize=0;
+    update_windowsizelist();
+    ResizeWindow(screenWidth,screenHeight);
+  }
+  if(update_colorbar_select_index==1&&colorbar_select_index>=0&&colorbar_select_index<=255){
+    update_colorbar_select_index=0;
+    updatecolors(colorbar_select_index);
+  }
+  if(updatemenu==1&&usemenu==1&&menustatus==GLUT_MENU_NOT_IN_USE){
+    glutDetachMenu(GLUT_RIGHT_BUTTON);
+    InitMenus(LOAD);
+    glutAttachMenu(GLUT_RIGHT_BUTTON);
+    updatemenu=0;
   }
   if(update_fire_colorbar_index==1){
     SmokeColorBarMenu(fire_colorbar_index_ini);
     update_fire_colorbar_index=0;
   }
-
   if(showtime==0&&ntotal_smooth_blockages>0){
     int i;
 
@@ -2332,127 +2388,8 @@ void Display(void){
     }
   }
   glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-  if(showstereo==1&&videoSTEREO==1){  // temporal stereo (shuttered glasses)
-    glDrawBuffer(GL_BACK_LEFT);
-    if(showstereo_frame==0||showstereo_frame==2){
-      ShowScene(RENDER,VIEW_LEFT,0,
-        0,0,screenWidth,screenHeight);
-    }
-    glDrawBuffer(GL_BACK_RIGHT);
-    if(showstereo_frame==1||showstereo_frame==2){
-      ShowScene(RENDER,VIEW_RIGHT,0,
-        0,0,screenWidth,screenHeight);
-    }
-    if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
-  }
-  else if(showstereo==2){             // left/right stereo
-    glDrawBuffer(GL_BACK);
-    ClearBuffers(RENDER);
-    if(showstereo_frame==0||showstereo_frame==2){
-      ShowScene(RENDER,VIEW_LEFT,0,
-        0,0,screenWidth/2,screenHeight);
-    }
-    if(showstereo_frame==1||showstereo_frame==2){
-      ShowScene(RENDER,VIEW_RIGHT,0,
-        screenWidth/2,0,screenWidth/2,screenHeight);
-    }
-    if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
-  }
-  else if(showstereo==3){             // red/blue stereo
-    glDrawBuffer(GL_BACK);
-    glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
-    glClearColor(1.0, 0.0, 0.0, 1.0); 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    if(showstereo_frame==0||showstereo_frame==2){
-      glColorMask(GL_TRUE,GL_FALSE,GL_FALSE, GL_TRUE);
-      ShowScene(RENDER,VIEW_LEFT,0,
-        0,0,screenWidth,screenHeight);
-      glFlush();
-    }
-
-    if(showstereo_frame==1||showstereo_frame==2){
-      glDrawBuffer(GL_BACK);
-      glColorMask(GL_FALSE,GL_FALSE,GL_TRUE,GL_TRUE);
-      glClearColor(0.0, 0.0, 1.0, 1.0); 
-      glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
-      ShowScene(RENDER,VIEW_RIGHT,0,
-        0,0,screenWidth,screenHeight);
-      glFlush();
-    }
-    if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
-  }
-  else if(showstereo==4){             // red/cyan stereo
-    glDrawBuffer(GL_BACK);
-    glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
-    glClearColor(1.0, 0.0, 0.0, 1.0); 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    if(showstereo_frame==0||showstereo_frame==2){
-      glColorMask(GL_TRUE,GL_FALSE,GL_FALSE, GL_TRUE);
-      ShowScene(RENDER,VIEW_LEFT,0,
-        0,0,screenWidth,screenHeight);
-      glFlush();
-    }
-
-    if(showstereo_frame==1||showstereo_frame==2){
-      glDrawBuffer(GL_BACK);
-      glColorMask(GL_FALSE,GL_TRUE,GL_TRUE,GL_TRUE);
-      glClearColor(0.0, 1.0, 1.0, 0.0); 
-      glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
-      ShowScene(RENDER,VIEW_RIGHT,0,
-        0,0,screenWidth,screenHeight);
-      glFlush();
-    }
-    if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
-  }
-  else if(showstereo==5){             // custom red/blue stereo
-    glDrawBuffer(GL_BACK);
-    glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
-    glClearColor(1.0, 1.0, 1.0, 1.0); 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    if(showstereo_frame==0||showstereo_frame==2){
-      glColorMask(GL_TRUE,GL_FALSE,GL_FALSE, GL_TRUE);
-      ShowScene(RENDER,VIEW_LEFT,0,0,0,screenWidth,screenHeight);
-      glFlush();
-    }
-    if(showstereo_frame==1||showstereo_frame==2){
-      glDrawBuffer(GL_BACK);
-      glColorMask(GL_FALSE,GL_TRUE,GL_TRUE,GL_TRUE);
-      glClearColor(0.0, 1.0, 1.0, 1.0); 
-      glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
-      ShowScene(RENDER,VIEW_RIGHT,0,0,0,screenWidth,screenHeight);
-
-      glMatrixMode(GL_PROJECTION);
-      glLoadIdentity();
-      glMatrixMode(GL_MODELVIEW);
-      glLoadIdentity();
-
-      glEnable(GL_BLEND);
-      glDisable(GL_LIGHTING);
-      glDisable(GL_COLOR_MATERIAL);
-      glDisable(GL_DITHER);
-//      glShadeModel(GL_FLAT);
-
-      glBlendFunc(GL_DST_COLOR,GL_ZERO);
-      glBegin(GL_QUADS);
-      glColor4f(0.0,right_green,right_blue,1.0);
-      glVertex3f(-1.0,-1.0,0.1);
-      glVertex3f(1.0,-1.0,0.1);
-      glVertex3f(1.0,1.0,0.1);
-      glVertex3f(-1.0,1.0,0.1);
-      glEnd();
-
-      glFlush();
-    }
-    if(buffertype==DOUBLE_BUFFER&&benchmark_flag==0)glutSwapBuffers();
-    glEnable(GL_LIGHTING);
-    glEnable(GL_COLOR_MATERIAL);
-    glEnable(GL_DITHER);
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-  }
-  else{
+  dostereo=DoStereo();
+  if(dostereo==0){
     if(benchmark_flag==1){
       glDrawBuffer(GL_FRONT);
       ShowScene(RENDER,VIEW_CENTER,0,0,0,screenWidth,screenHeight);
@@ -2531,8 +2468,10 @@ void Display(void){
     if(RenderGif == 0)angle += dang;
     if(angle>PI){angle -= -2.0f*PI;}
     if(eyeview==WORLD_CENTERED||eyeview==WORLD_CENTERED_LEVEL){
-        angle_zx = camera_current->angle_zx;
-        angle_zx[0] = anglexy0 + angle*180./PI;
+      float *angle_zx;
+
+      angle_zx = camera_current->angle_zx;
+      angle_zx[0] = anglexy0 + angle*180./PI;
     }
     else{          
       camera_current->direction_angle = direction_angle0 + angle*180./PI;

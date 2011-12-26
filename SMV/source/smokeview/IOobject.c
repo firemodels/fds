@@ -4615,15 +4615,17 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
         break;
     }
   }
-
   return buffer_ptr;
 }
 
 /* ----------------------- getdevice ----------------------------- */
 
-device *getdevice(char *label){
+device *getdevice(char *label,int index){
   int i;
 
+  if(strcmp(label,"null")==0&&index>=0&&index<ndeviceinfo){
+    return deviceinfo + index;
+  }
   for(i=0;i<ndeviceinfo;i++){
     device *devicei;
 
@@ -4897,7 +4899,7 @@ void read_device_data(char *file, int filetype, int loadstatus){
     device *devicei;
     int j;
 
-    devicei = getdevice(devclabels[i]);
+    devicei = getdevice(devclabels[i],i-1);
     devices[i]=devicei;
 #ifdef _DEBUG
     if(devicei==NULL){
@@ -4905,6 +4907,7 @@ void read_device_data(char *file, int filetype, int loadstatus){
       continue;
     }
 #endif
+    if(devicei==NULL)continue;
     devicei->filetype=filetype;
     NewMemory((void **)&devicei->vals,nrows*sizeof(float));
     NewMemory((void **)&devicei->valids,nrows*sizeof(int));
@@ -5608,8 +5611,8 @@ void init_object_defs(void){
   
   svofile_exists = 0;
 
-  if(smvprogdir!=NULL){
-    strcpy(objectfile,smvprogdir);
+  if(smokeview_bindir!=NULL){
+    strcpy(objectfile,smokeview_bindir);
     strcat(objectfile,"objects.svo");
     read_object_defs(objectfile);
   }

@@ -54,16 +54,114 @@ void GeometryMenu(int val);
 /* ------------------ to_lower ------------------------ */
 
 void to_lower(char *string){
-   size_t lenstring;
-   char c;
-   size_t i;
+   char *c;
 
    if(string==NULL)return;
-   lenstring=strlen(string);
-   for(i=0;i<lenstring;i++){
-     c=string[i];
-     if(c>='A'&&c<='Z')string[i]=c+'a'-'A';
+   for(c=string;*c!=0;c++){
+     if(*c>='A'&&*c<='Z')*c+='a'-'A';
    }
+}
+
+/* ------------------ Init ------------------------ */
+
+void Init(void){
+  int errorcode;
+  mesh *meshi;
+
+  int n,i;
+
+  FREEMEMORY(plotiso);
+  NewMemory((void **)&plotiso,mxplot3dvars*sizeof(int));
+
+  for(n=0;n<mxplot3dvars;n++){
+    plotiso[n]=nrgb/2;
+  }
+
+  for(i=0;i<16;i++){
+    modelview_setup[i]=0.0;
+  }
+  for(i=0;i<4;i++){
+    modelview_setup[i+4*i]=1.0;
+  }
+
+  for(i=0;i<nmeshes;i++){
+    meshi=meshinfo+i;
+    initcontour(&meshi->plot3dcontour1,rgb_plot3d_contour,nrgb);
+    initcontour(&meshi->plot3dcontour2,rgb_plot3d_contour,nrgb);
+    initcontour(&meshi->plot3dcontour3,rgb_plot3d_contour,nrgb);
+  }
+
+  for(i=0;i<nmeshes;i++){
+    meshi=meshinfo+i;
+    meshi->currentsurf.defined=0;
+    meshi->currentsurf2.defined=0;
+  }
+
+  /* initialize box sizes, lighting parameters */
+
+  xyzbox = xbar;
+  if(ybar>xyzbox){xyzbox=ybar;}
+  if(zbar>xyzbox){xyzbox=zbar;}
+
+  {
+    char name_external[32];
+    strcpy(name_external,"external");
+    init_camera(camera_external,name_external);
+    camera_external->view_id=1;
+
+    copy_camera(camera_external_save,camera_external);
+  }
+  if(camera_ini->defined==1){
+    copy_camera(camera_current,camera_ini);
+  }
+  else{
+    camera_external->zoom=zoom;
+    copy_camera(camera_current,camera_external);
+  }
+  strcpy(camera_label,camera_current->name);
+  update_camera_label();
+  {
+    char name_internal[32];
+    strcpy(name_internal,"internal");
+    init_camera(camera_internal,name_internal);
+  }
+  camera_internal->eye[0]=0.5*xbar;
+  camera_internal->eye[1]=0.5*ybar;
+  camera_internal->eye[2]=0.5*zbar;
+  camera_internal->view_id=0;
+  copy_camera(camera_save,camera_current);
+  copy_camera(camera_last,camera_current);
+
+  init_camera_list();
+  add_default_views();
+  update_view_gluilist();
+
+  //reset_glui_view(i_view_list);
+
+  screenWidth2 = screenWidth - dwinW;
+  screenHeight2 = screenHeight - dwinH;
+
+  glEnable(GL_DEPTH_TEST);
+  glEnable(GL_NORMALIZE);
+  if(cullfaces==1)glEnable(GL_CULL_FACE);
+
+  glClearColor(backgroundcolor[0],backgroundcolor[1],backgroundcolor[2], 0.0f);
+  glShadeModel(GL_SMOOTH); 
+  glDisable(GL_DITHER);
+
+  thistime=0;
+  lasttime=0;
+
+  /* define color bar */
+
+  updatecolors(-1);
+
+  block_ambient2[3] = 1.0;
+  mat_ambient2[3] = 1.0;
+  mat_specular2[3] = 1.0;
+
+  reset_glui_view(startup_view_ini);
+  updateShow();
 }
 
 /* ------------------ setup_case ------------------------ */
@@ -143,9 +241,7 @@ int setup_case(int argc, char **argv){
   readboundini();
   if(use_graphics==0)return 0;
 
-  if(sb_atstart==1){
-    smooth_blockages();
-  }
+  if(sb_atstart==1)smooth_blockages();
 
   if(ntours==0)setup_tour();
   glui_colorbar_setup(mainwindow_id);
@@ -164,7 +260,6 @@ int setup_case(int argc, char **argv){
   glui_advancedtour_setup(mainwindow_id);
   glui_stereo_setup(mainwindow_id);
   glui_3dsmoke_setup(mainwindow_id);
-
 
   if(UpdateLIGHTS==1)updateLights(0);
 
@@ -191,8 +286,7 @@ int setup_case(int argc, char **argv){
   return 0;
 }
 
-
-/* ------------------ sv_startup_c ------------------------ */
+/* ------------------ setup_glut ------------------------ */
 
 void setup_glut(int argc, char **argv){
   int i;
@@ -204,8 +298,8 @@ void setup_glut(int argc, char **argv){
 
 // get smokeview bin directory from argv[0] which contains the full path of the smokeview binary
 
-  NewMemory((void **)&smokeviewini,    (unsigned int)(strlen(smvprogdir)+14));
-  STRCPY(smokeviewini,smvprogdir);
+  NewMemory((void **)&smokeviewini,    (unsigned int)(strlen(smokeview_bindir)+14));
+  STRCPY(smokeviewini,smokeview_bindir);
   STRCAT(smokeviewini,"smokeview.ini");
   
   startup_pass=2;
@@ -259,6 +353,7 @@ void setup_glut(int argc, char **argv){
     max_screenHeight = glutGet(GLUT_SCREEN_HEIGHT);
     if(trainer_mode==1){
       int TRAINER_WIDTH;
+
       TRAINER_WIDTH=300;
       screenWidth = glutGet(GLUT_SCREEN_WIDTH)-TRAINER_WIDTH;
       screenHeight = glutGet(GLUT_SCREEN_HEIGHT)-50; 
@@ -285,7 +380,7 @@ void setup_glut(int argc, char **argv){
   }
   rgb_plot3d_contour[nrgb-2]=&rgb_full[0][0];
   rgb_plot3d_contour[nrgb-1]=&rgb_full[255][0];
-  init_translate(smvprogdir,tr_name);
+  init_translate(smokeview_bindir,tr_name);
 }
 
 /* ------------------ get_opengl_version ------------------------ */
@@ -1001,10 +1096,10 @@ void init_texturedir(void){
       NewMemory((void **)&texturedir,texture_len+1);
       strcpy(texturedir,texture_buffer);
     }
-    if(texturedir==NULL&&smvprogdir!=NULL){
-      texture_len=strlen(smvprogdir)+strlen("textures");
+    if(texturedir==NULL&&smokeview_bindir!=NULL){
+      texture_len=strlen(smokeview_bindir)+strlen("textures");
       NewMemory((void **)&texturedir,texture_len+2);
-      strcpy(texturedir,smvprogdir);
+      strcpy(texturedir,smokeview_bindir);
       strcat(texturedir,"textures");
     }
   }
@@ -1014,6 +1109,30 @@ void init_texturedir(void){
 
 void initvars(void){
   int i;
+
+  mat_specular_orig[0]=0.5f;
+  mat_specular_orig[1]=0.5f;
+  mat_specular_orig[2]=0.2f;
+  mat_specular_orig[3]=1.0f;
+  mat_specular2=getcolorptr(mat_specular_orig);
+
+  mat_ambient_orig[0] = 0.5f;
+  mat_ambient_orig[1] = 0.5f;
+  mat_ambient_orig[2] = 0.2f;
+  mat_ambient_orig[3] = 1.0f;
+  mat_ambient2=getcolorptr(mat_ambient_orig);
+
+  ventcolor_orig[0]=1.0;
+  ventcolor_orig[1]=0.0;
+  ventcolor_orig[2]=1.0;
+  ventcolor_orig[3]=1.0;
+  ventcolor=getcolorptr(ventcolor_orig);
+
+  block_ambient_orig[0] = 1.0;
+  block_ambient_orig[1] = 0.8;
+  block_ambient_orig[2] = 0.4;
+  block_ambient_orig[3] = 1.0;
+  block_ambient2=getcolorptr(block_ambient_orig);
 
   for(i=0;i<256;i++){
     boundarylevels256[i]=(float)i/255.0;
@@ -1050,12 +1169,14 @@ void initvars(void){
   direction_color[1]=64.0/255.0;
   direction_color[2]=139.0/255.0;
   direction_color[3]=1.0;
+
   direction_color_ptr=getcolorptr(direction_color);
   arg_iblank=0;
   use_iblank=1;
   levelset_colorbar=-1;
   wallthickness_colorbar=-1;
   show_slice_terrain=0;
+
 #ifdef pp_SHOOTER
   glui_time=0.0;
   last_prop_display=-1;
@@ -2136,8 +2257,8 @@ int getmaxrevision(void){
 
 /* ------------------ copy_args ------------------------ */
 
-#ifdef WIN32
 void copy_args(int *argc, char **aargv, char ***argv_sv){
+#ifdef WIN32
   char *filename=NULL;
   char **argv=NULL;
   int filelength=1024,openfile;
@@ -2151,9 +2272,7 @@ void copy_args(int *argc, char **aargv, char ***argv_sv){
     if(*argc==1){
       if(NewMemory((void **)&filename,(unsigned int)(filelength+1))!=0){
         openfile=0;
-#ifdef WIN32
         OpenSMVFile(filename,filelength,&openfile);
-#endif
         if(openfile==1&&ResizeMemory((void **)&filename,strlen(filename)+1)!=0){
           *argc=2;
           argv[1]=filename;
@@ -2167,7 +2286,9 @@ void copy_args(int *argc, char **aargv, char ***argv_sv){
   else{
     *argc=0;
   }
-}
+#else
+  *argv_sv=aargv;
 #endif
+}
 
 

@@ -69,11 +69,11 @@ void drawpart_frame(void){
       if(parti->loaded==0||parti->display==0)continue;
       if(parti->evac==1){
         drawEvac(parti);
-        sniffErrors("after drawEvac");
+        SNIFF_ERRORS("after drawEvac");
       }
       else{
         drawPart(parti);
-        sniffErrors("after drawPart");
+        SNIFF_ERRORS("after drawPart");
       }
     }
   }
@@ -84,7 +84,7 @@ void drawpart_frame(void){
       parti = partinfo + i;
       if(parti->loaded==0||parti->display==0)continue;
       drawStaticPart(parti);
-      sniffErrors("after drawStaticPart");
+      SNIFF_ERRORS("after drawStaticPart");
     }
   }
 }
@@ -101,7 +101,7 @@ void drawevac_frame(void){
     if(parti->loaded==0||parti->display==0||parti->evac==0)continue;
     drawEvac(parti);
   }
-  sniffErrors("after drawEvac 2");
+  SNIFF_ERRORS("after drawEvac 2");
 }
 
 /* ------------------ freepart5data ------------------------ */
@@ -1476,7 +1476,7 @@ void drawselect_avatars(void){
     if(parti->loaded==0||parti->display==0)continue;
     if(parti->evac==1){
       drawEvac(parti);
-      sniffErrors("after drawEvac");
+      SNIFF_ERRORS("after drawEvac");
     }
   }
 }
@@ -1685,7 +1685,7 @@ void drawPart5(const particle *parti){
               glPopMatrix();
             }
           }
-          sniffErrors("after draw in Evac");
+          SNIFF_ERRORS("after draw in Evac");
         }
         else{
           glPointSize(partpointsize);

@@ -259,7 +259,7 @@ void drawtours(void){
     }
 
     /* keyframe times */
-    sniffErrors("after select path, selected keyframe");
+    SNIFF_ERRORS("after select path, selected keyframe");
     CheckMemory;
 
     for(i=0;i<ntours;i++){

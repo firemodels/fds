@@ -139,12 +139,12 @@ void setClipPlanes(int mode){
 
 /* ------------------ snifferrors ------------------------ */
 
-void _sniffErrors(char *whereat){
+void _Sniff_Errors(char *whereat){
   int error;
   char *glu_error;
   while((error=glGetError())!=GL_NO_ERROR){
     glu_error=(char *)gluErrorString((unsigned int)error);
-    fprintf(stderr,"GL Error:%s, where:%s %i\n",
+    fprintf(stderr,"OpenGL Error:%s, where:%s %i\n",
       glu_error,whereat,snifferrornumber);
       snifferrornumber++;
   }
@@ -238,197 +238,6 @@ void transparentoff(void){
   glDisable(GL_BLEND);
 }
 
-/* ------------------ updateclipbounds ------------------------ */
-
-void updateclipbounds(int set_i0, int *i0, int set_i1, int *i1, int imax){ 
-
-  if(set_i0==0&&set_i1==0)return;
-  if(set_i0==1&&set_i1==1){
-    if(*i0>imax-1){*i0=imax-1; *i1=imax;}
-    if(*i1>imax)*i1=imax;
-    if(*i1<1){*i1=1;*i0=0;}
-    if(*i0<0)*i0=0;
-    if(*i0>=*i1){*i0=*i1-1;}
-  }
-  if(set_i0==1&&set_i1==0){
-    if(*i0<0)*i0=0;
-    if(*i0>imax)*i0=imax;
-  }
-  if(set_i0==0&&set_i1==1){
-    if(*i1<0)*i1=0;
-    if(*i1>imax)*i1=imax;
-  }
-}
-
-/* ------------------ updateclip ------------------------ */
-
-void updateclip(int slicedir){
-  stepclip_x=0; stepclip_y=0; stepclip_z=0; 
-  stepclip_X=0; stepclip_Y=0; stepclip_Z=0;
-  switch (slicedir){
-  case 1:
-    clip_x = 1 - clip_x;
-    if(clip_x==1)printf("clip x on\n");
-    if(clip_x==0)printf("clip x off\n");
-    if(clip_x==1)stepclip_x=1;
-    break;
-  case 2:
-    clip_y = 1 - clip_y;
-    if(clip_y==1)printf("clip y on\n");
-    if(clip_y==0)printf("clip y off\n");
-    if(clip_y==1)stepclip_y=1;
-    break;
-  case 3:
-    clip_z = 1 - clip_z;
-    if(clip_z==1)printf("clip z on\n");
-    if(clip_z==0)printf("clip z off\n");
-    if(clip_z==1)stepclip_z=1;
-    break;
-  case -1:
-    clip_X = 1 - clip_X;
-    if(clip_X==1)printf("clip X on\n");
-    if(clip_X==0)printf("clip X off\n");
-    if(clip_X==1)stepclip_X=1;
-    break;
-  case -2:
-    clip_Y = 1 - clip_Y;
-    if(clip_Y==1)printf("clip Y on\n");
-    if(clip_Y==0)printf("clip Y off\n");
-    if(clip_Y==1)stepclip_Y=1;
-    break;
-  case -3:
-    clip_Z = 1 - clip_Z;
-    if(clip_Z==1)printf("clip Z on\n");
-    if(clip_Z==0)printf("clip Z off\n");
-    if(clip_Z==1)stepclip_Z=1;
-    break;
-  default:
-    ASSERT(FFALSE);
-    break;
-  }
-}
-
-/* ------------------ setsmokeviewvars ------------------------ */
-
-void setsmokeviewvars(void){
-  int i;
-
-  for(i=0;i<20;i++){
-    cputimes[i]=0.0;
-  }
-  eyexINI=0.0; 
-  eyeyINI=0.0;
-  eyezINI=0.0;
-  for(i=0;i<16;i++){
-    modelview_setup[i]=0.0;
-  }
-  for(i=0;i<4;i++){
-    modelview_setup[i+4*i]=1.0;
-  }
-}
-
-/* ------------------ Init ------------------------ */
-
-void Init(void){
-  int errorcode;
-  mesh *meshi;
-
-  int n,i;
-
-  FREEMEMORY(plotiso);
-  NewMemory((void **)&plotiso,mxplot3dvars*sizeof(int));
-
-  for(n=0;n<mxplot3dvars;n++){
-    plotiso[n]=nrgb/2;
-  }
-
-  for(i=0;i<16;i++){
-    modelview_setup[i]=0.0;
-  }
-  for(i=0;i<4;i++){
-    modelview_setup[i+4*i]=1.0;
-  }
-
-  for(i=0;i<nmeshes;i++){
-    meshi=meshinfo+i;
-    initcontour(&meshi->plot3dcontour1,rgb_plot3d_contour,nrgb);
-    initcontour(&meshi->plot3dcontour2,rgb_plot3d_contour,nrgb);
-    initcontour(&meshi->plot3dcontour3,rgb_plot3d_contour,nrgb);
-  }
-
-  for(i=0;i<nmeshes;i++){
-    meshi=meshinfo+i;
-    meshi->currentsurf.defined=0;
-    meshi->currentsurf2.defined=0;
-  }
-
-  /* initialize box sizes, lighting parameters */
-
-  xyzbox = xbar;
-  if(ybar>xyzbox){xyzbox=ybar;}
-  if(zbar>xyzbox){xyzbox=zbar;}
-
-  {
-    char name_external[32];
-    strcpy(name_external,"external");
-    init_camera(camera_external,name_external);
-    camera_external->view_id=1;
-
-    copy_camera(camera_external_save,camera_external);
-  }
-  if(camera_ini->defined==1){
-    copy_camera(camera_current,camera_ini);
-  }
-  else{
-    camera_external->zoom=zoom;
-    copy_camera(camera_current,camera_external);
-  }
-  strcpy(camera_label,camera_current->name);
-  update_camera_label();
-  {
-    char name_internal[32];
-    strcpy(name_internal,"internal");
-    init_camera(camera_internal,name_internal);
-  }
-  camera_internal->eye[0]=0.5*xbar;
-  camera_internal->eye[1]=0.5*ybar;
-  camera_internal->eye[2]=0.5*zbar;
-  camera_internal->view_id=0;
-  copy_camera(camera_save,camera_current);
-  copy_camera(camera_last,camera_current);
-
-  init_camera_list();
-  add_default_views();
-  update_view_gluilist();
-
-  //reset_glui_view(i_view_list);
-
-  screenWidth2 = screenWidth - dwinW;
-  screenHeight2 = screenHeight - dwinH;
-
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_NORMALIZE);
-  if(cullfaces==1)glEnable(GL_CULL_FACE);
-
-  glClearColor(backgroundcolor[0],backgroundcolor[1],backgroundcolor[2], 0.0f);
-  glShadeModel(GL_SMOOTH); 
-  glDisable(GL_DITHER);
-
-  thistime=0;
-  lasttime=0;
-
-  /* define color bar */
-
-  updatecolors(-1);
-
-  block_ambient2[3] = 1.0;
-  mat_ambient2[3] = 1.0;
-  mat_specular2[3] = 1.0;
-
-  reset_glui_view(startup_view_ini);
-  updateShow();
-}
-
 /* ------------------ ResetView ------------------------ */
 
 void ResetView(int option){
@@ -465,7 +274,7 @@ void ResetView(int option){
   update_glui_zoom();
 }
 
-/* ------------------ Args ------------------------ */
+/* ------------------ parse_commandline ------------------------ */
 
 void parse_commandline(int argc, char **argv){
   int i, len;
@@ -786,6 +595,12 @@ void display_version_info(void){
     printf("Build Date: %s\n",__DATE__);
     if(revision_fds>0){
       printf("FDS Revision Number: %i\n",revision_fds);
+    }
+    if(smokeviewpath!=NULL){
+      printf("Smokeview: %s\n",smokeviewpath);
+    }
+    if(smokezippath!=NULL){
+      printf("Smokezip: %s\n",smokezippath);
     }
   printf("\n");
 }

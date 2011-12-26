@@ -21,6 +21,45 @@
 // svn revision character string
 char file_util_revision[]="$Revision$";
        
+/* ------------------ get_smokezippath ------------------------ */
+
+char *get_smokezippath(char *progdir){
+  STRUCTSTAT statbuffer;
+  char *zip_path;
+
+  if(progdir!=NULL){
+    NewMemory((void **)&zip_path,strlen(progdir)+20);
+    strcpy(zip_path,progdir);
+  }
+  else{
+    NewMemory((void **)&zip_path,2+20);
+    strcpy(zip_path,".");
+    strcat(zip_path,dirseparator);
+  }
+
+  strcat(zip_path,"smokezip");
+#ifdef WIN32
+  strcat(zip_path,"_win");
+#endif
+#ifdef pp_LINUX
+  strcat(zip_path,"_linux");
+#endif
+#ifdef pp_OSX
+  strcat(zip_path,"_osx");
+#endif
+#ifdef BIT64
+  strcat(zip_path,"_64");
+#else
+  strcat(zip_path,"_32");
+#endif
+#ifdef WIN32
+  strcat(zip_path,".exe");
+#endif
+  if(STAT(zip_path,&statbuffer)==0)return zip_path;
+  FREEMEMORY(zip_path);
+  return NULL;
+}
+
 /* ------------------ setdir ------------------------ */
 
 char *setdir(char *argdir){
@@ -301,11 +340,11 @@ void getfilesizelabel(int size, char *sizelabel){
 
 /* ------------------ rootdir ------------------------ */
 
-char *getprogdir(char *progname){
-  /*! \fn char *getprogdir(char *progname)
+char *getprogdir(char *progname, char **svpath){
+  /*! \fn char *getprogdir(char *progname, char **svpath)
       \brief returns the directory containing the file progname
   */
-  char *progpath, *lastsep;
+  char *progpath, *lastsep, *smokeviewpath2;
 #ifdef WIN32
   char cdirsep='\\';
 #else
@@ -321,7 +360,6 @@ char *getprogdir(char *progname){
       NewMemory((void **)&progpath,(unsigned int)3);
       strcpy(progpath,".");
       strcat(progpath,dirseparator);
-      return progpath;
     }
     else{
       int lendir;
@@ -331,7 +369,8 @@ char *getprogdir(char *progname){
       strcpy(progpath,dir);
       if(progpath[lendir-1]!=cdirsep)strcat(progpath,dirseparator);
     }
-    return progpath;
+    NewMemory((void **)&smokeviewpath2,(unsigned int)(strlen(progpath)+strlen(progname)+1));
+    strcpy(smokeviewpath2,progpath);
   }
   else{
     int lendir;
@@ -340,8 +379,12 @@ char *getprogdir(char *progname){
     NewMemory((void **)&progpath,(unsigned int)(lendir+1));
     strncpy(progpath,progname,lendir);
     progpath[lendir]=0;
-    return progpath;
+    NewMemory((void **)&smokeviewpath2,(unsigned int)(strlen(progname)+1));
+    strcpy(smokeviewpath2,"");;
   }
+  strcat(smokeviewpath2,progname);
+  *svpath=smokeviewpath2;
+  return progpath;
 }
 
 /* ------------------ lastname ------------------------ */

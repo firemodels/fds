@@ -24,39 +24,26 @@ char main_revision[]="$Revision$";
 
 int main(int argc, char **argv){
   char **argv_sv;
-  int startup_flag;
-  size_t len;
+  int return_code;
   char *progname;
 
   //listdir(".");
   initMALLOC();
-  initcolors();
   initvars();
-  if(argc==1){
-    display_version_info();
-  }
-#ifdef WIN32
+  if(argc==1)display_version_info();
   copy_args(&argc, argv, &argv_sv);
-  if(argc==1)return 0;
-#else
-  argv_sv=argv;
-#endif
-
-  if(argc==0)return 0;
+  if(argc==0||argc==1)return 0;
 
   progname=argv_sv[0];
-  smvprogdir=getprogdir(progname);
+  smokeview_bindir=getprogdir(progname,&smokeviewpath);
   init_texturedir();
-  smokezippath=get_smokezippath(smvprogdir);
-
-  CheckMemory;
+  smokezippath=get_smokezippath(smokeview_bindir);
   parse_commandline(argc, argv_sv);
   display_version_info();
-  if(smokezippath!=NULL)printf("Smokezip file: %s found\n",smokezippath);
   setup_glut(argc,argv_sv);
-  startup_flag=setup_case(argc,argv_sv);
-  if(startup_flag==0&&update_bounds==1)startup_flag=Update_Bounds();
-  if(startup_flag!=0)return 1;
+  return_code=setup_case(argc,argv_sv);
+  if(return_code==0&&update_bounds==1)return_code=Update_Bounds();
+  if(return_code!=0)return 1;
 
   glutMainLoop();
   return 0;

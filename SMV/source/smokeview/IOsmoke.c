@@ -354,14 +354,14 @@ void drawsmoke_frame(void){
 #ifdef pp_GPU
       if(usegpu==1){
       //  glBlendFunc(GL_ONE,GL_ONE_MINUS_SRC_ALPHA);        
-        sniffErrors("before drawsmoke3dGPUVOL");
+        SNIFF_ERRORS("before drawsmoke3dGPUVOL");
         drawsmoke3dGPUVOL();
-        sniffErrors("after drawsmoke3dGPUVOL");
+        SNIFF_ERRORS("after drawsmoke3dGPUVOL");
       //  glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
       }
       else{
         drawsmoke3dVOL();
-        sniffErrors("after drawsmoke3dVOL");
+        SNIFF_ERRORS("after drawsmoke3dVOL");
       }
 #else
       drawsmoke3dVOL();
@@ -378,7 +378,7 @@ void drawsmoke_frame(void){
     setPixelCount();
   }
 #endif
-  sniffErrors("after drawsmoke");
+  SNIFF_ERRORS("after drawsmoke");
 }
 
 /* ------------------ readsmoke3d ------------------------ */
@@ -4118,7 +4118,7 @@ void drawsmoke3dCULL(void){
   if(cullfaces==1)glDisable(GL_CULL_FACE);
   transparenton();
 
-  sniffErrors("before drawsmoke3dcull");
+  SNIFF_ERRORS("before drawsmoke3dcull");
   value[0]=255;
   value[1]=255;
   value[2]=255;
@@ -4139,7 +4139,7 @@ void drawsmoke3dCULL(void){
   xyzindex2[5]=3;
 
   CheckMemory;
-  sniffErrors("in drawsmoke3dcull 1");
+  SNIFF_ERRORS("in drawsmoke3dcull 1");
   glBegin(GL_TRIANGLES);
   mesh_old=NULL;
   for(nn=0;nn<ncullplaneinfo;nn++){
@@ -4155,7 +4155,7 @@ void drawsmoke3dCULL(void){
       if(nterraininfo>0){
         znode_offset = meshi->terrain->znode_offset;
       }
-      sniffErrors("in drawsmoke3dcull 4");
+      SNIFF_ERRORS("in drawsmoke3dcull 4");
       smoke3di=meshi->cull_smoke3d;
 
       firecolor=smoke3di->hrrpuv_color;
@@ -4775,10 +4775,10 @@ void drawsmoke3dCULL(void){
     }
   }
   glEnd();
-  sniffErrors("in drawsmoke3dcull 12");
+  SNIFF_ERRORS("in drawsmoke3dcull 12");
   transparentoff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
-  sniffErrors("after drawsmokecull");
+  SNIFF_ERRORS("after drawsmokecull");
 }
 
 #endif

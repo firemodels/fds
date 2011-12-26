@@ -3234,8 +3234,8 @@ int readsmv(char *file, char *file2){
         char texturebuffer[1024];
 
         found_texture=0;
-        if(smvprogdir!=NULL&&STAT(buffer3,&statbuffer)!=0){
-          STRCPY(texturebuffer,smvprogdir);
+        if(smokeview_bindir!=NULL&&STAT(buffer3,&statbuffer)!=0){
+          STRCPY(texturebuffer,smokeview_bindir);
           STRCAT(texturebuffer,buffer3);
           if(STAT(texturebuffer,&statbuffer)==0){
             if(NewMemory((void **)&surfi->texturefile,strlen(texturebuffer)+1)==0)return 2;
@@ -3255,7 +3255,7 @@ int readsmv(char *file, char *file2){
           strcpy(message,"The texture file: ");
           strcat(message,buffer3);
           strcat(message," was not found in either the current working directory or in ");
-          strcat(message,smvprogdir);
+          strcat(message,smokeview_bindir);
           warning_message(message);
         }
       }
@@ -6865,7 +6865,7 @@ int surfid_compare( const void *arg1, const void *arg2 ){
 
 /* ------------------ updated_sorted_surfidlist ------------------------ */
 
-void update_sorted_surfidlist(){
+void update_sorted_surfidlist(void){
   int i;
 
   FREEMEMORY(sorted_surfidlist);
@@ -7531,7 +7531,7 @@ int readini(int scriptconfigfile){
   nlabels=nlabelssmv;
   nticks=ntickssmv;
   strcpy(smvprogini,"");
-  if(smvprogdir!=NULL)strcat(smvprogini,smvprogdir);
+  if(smokeview_bindir!=NULL)strcat(smvprogini,smokeview_bindir);
   strcat(smvprogini,"smokeview.ini");
   smvprogini_ptr=smokeviewini;
   if(smokeviewini!=NULL){

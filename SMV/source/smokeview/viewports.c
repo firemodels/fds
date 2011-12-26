@@ -884,7 +884,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     if(nvolrenderinfo>0&&showvolrender==1){
       if(usevolrender==1){
         getvolsmokedir(modelview_scratch);
-        sniffErrors("after getvolsmokedir");
+        SNIFF_ERRORS("after getvolsmokedir");
 #ifdef pp_GPU
         if(usegpu==0){
           compute_all_smokecolors();
@@ -896,17 +896,17 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     }
     if(nsmoke3dinfo>0&&show3dsmoke==1){
       getsmokedir(modelview_scratch);
-      sniffErrors("after getsmokedir");
+      SNIFF_ERRORS("after getsmokedir");
 #ifdef pp_CULL
       if(showstereo==0){
         if(cullsmoke==1){
           getPixelCount();
-          sniffErrors("after getPixelCount");
+          SNIFF_ERRORS("after getPixelCount");
         }
         if(cullactive==1&&update_initcullplane==1){
           initcullplane(cullsmoke);
         }
-        sniffErrors("after initcullplane");
+        SNIFF_ERRORS("after initcullplane");
       }
 #endif
     }

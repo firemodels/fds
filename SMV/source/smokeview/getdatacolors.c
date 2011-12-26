@@ -1400,7 +1400,7 @@ void drawColorBars(void){
     showpatch==1||
     (showzone==1&&sethazardcolor==0)||
     showplot3d==1){
-    sniffErrors("before colorbar");
+    SNIFF_ERRORS("before colorbar");
     CheckMemory;
     if(showplot3d==1&&contour_type==STEPPED_CONTOURS){
       int icol;
@@ -1945,39 +1945,7 @@ void drawColorBars(void){
       }
     }
   }
-
-
 }
-
-/* ------------------ initcolors ------------------------ */
-
-void initcolors(){
-  mat_specular_orig[0]=0.5f;
-  mat_specular_orig[1]=0.5f;
-  mat_specular_orig[2]=0.2f;
-  mat_specular_orig[3]=1.0f;
-
-  mat_ambient_orig[0] = 0.5f;
-  mat_ambient_orig[1] = 0.5f;
-  mat_ambient_orig[2] = 0.2f;
-  mat_ambient_orig[3] = 1.0f;
-
-  ventcolor_orig[0]=1.0;
-  ventcolor_orig[1]=0.0;
-  ventcolor_orig[2]=1.0;
-  ventcolor_orig[3]=1.0;
-
-  block_ambient_orig[0] = 1.0;
-  block_ambient_orig[1] = 0.8;
-  block_ambient_orig[2] = 0.4;
-  block_ambient_orig[3] = 1.0;
-
-  ventcolor=getcolorptr(ventcolor_orig);
-  block_ambient2=getcolorptr(block_ambient_orig);
-  mat_ambient2=getcolorptr(mat_ambient_orig);
-  mat_specular2=getcolorptr(mat_specular_orig);
-}
-
 
 /* ------------------ initcadcolors ------------------------ */
 
@@ -2024,33 +1992,33 @@ void initcadcolors(void){
 void update_texturebar(void){
   glBindTexture(GL_TEXTURE_1D,texture_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_full);
-  sniffErrors("update_texturebar - glTexImage1D A ");
+  SNIFF_ERRORS("update_texturebar - glTexImage1D A ");
 
   glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_slice);
-  sniffErrors("update_texturebar - glTexImage1D B ");
+  SNIFF_ERRORS("update_texturebar - glTexImage1D B ");
 
   glBindTexture(GL_TEXTURE_1D,texture_patch_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_patch);
-  sniffErrors("update_texturebar - glTexImage1D C ");
+  SNIFF_ERRORS("update_texturebar - glTexImage1D C ");
 
   glBindTexture(GL_TEXTURE_1D,texture_plot3d_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_plot3d);
-  sniffErrors("update_texturebar - glTexImage1D D ");
+  SNIFF_ERRORS("update_texturebar - glTexImage1D D ");
 
   glBindTexture(GL_TEXTURE_1D,texture_iso_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_iso);
-  sniffErrors("update_texturebar - glTexImage1D E ");
+  SNIFF_ERRORS("update_texturebar - glTexImage1D E ");
 
   glBindTexture(GL_TEXTURE_1D,smokecolormap_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_smokecolormap);
-  sniffErrors("update_texturebar - glTexImage1D F ");
+  SNIFF_ERRORS("update_texturebar - glTexImage1D F ");
 
 #ifdef pp_GPU
   if(gpuactive==1&&nvolrenderinfo>0&&showvolrender==1){
     glActiveTexture(GL_TEXTURE2);
     glTexSubImage1D(GL_TEXTURE_1D,0,0,256,GL_RGBA,GL_FLOAT, rgb_smokecolormap);
-    sniffErrors("update_texturebar - glTexSubImage1D G ");
+    SNIFF_ERRORS("update_texturebar - glTexSubImage1D G ");
     glActiveTexture(GL_TEXTURE0);
   }
 #endif
@@ -2349,7 +2317,7 @@ void updatecolors(int changecolorindex){
   if(gpuactive==1&&nvolrenderinfo>0&&showvolrender==1){
     glActiveTexture(GL_TEXTURE2);
     glTexSubImage1D(GL_TEXTURE_1D,0,0,256,GL_RGBA,GL_FLOAT, rgb_smokecolormap);
-    sniffErrors("updatecolors after glTexSubImage1D ");
+    SNIFF_ERRORS("updatecolors after glTexSubImage1D ");
     glActiveTexture(GL_TEXTURE0);
   }
 #endif
@@ -2634,22 +2602,6 @@ float *getcolorptr(const float *color){
   lastcolor->nextcolor=NULL;
   return lastcolor->color;
 }
-
-/* ------------------ freecolors ------------------------ */
-/*
-void freecolors(void){
-  colordata *colorptr,*nextcolor;
-  extern colordata *firstcolor;
-
-  firstcolor=NULL;
-  for(colorptr=firstcolor;;){
-    if(colorptr==NULL)return;
-    nextcolor=colorptr->nextcolor;
-    FREEMEMORY(colorptr);
-    colorptr=nextcolor;
-  }
-}
-*/
 
 /* ------------------ colorconvert ------------------------ */
 

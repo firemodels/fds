@@ -1650,5 +1650,78 @@ void reset_itimes0(void){
 }
 
 
+/* ------------------ updateclipbounds ------------------------ */
+
+void updateclipbounds(int set_i0, int *i0, int set_i1, int *i1, int imax){ 
+
+  if(set_i0==0&&set_i1==0)return;
+  if(set_i0==1&&set_i1==1){
+    if(*i0>imax-1){*i0=imax-1; *i1=imax;}
+    if(*i1>imax)*i1=imax;
+    if(*i1<1){*i1=1;*i0=0;}
+    if(*i0<0)*i0=0;
+    if(*i0>=*i1){*i0=*i1-1;}
+  }
+  if(set_i0==1&&set_i1==0){
+    if(*i0<0)*i0=0;
+    if(*i0>imax)*i0=imax;
+  }
+  if(set_i0==0&&set_i1==1){
+    if(*i1<0)*i1=0;
+    if(*i1>imax)*i1=imax;
+  }
+}
+
+/* ------------------ updateclip ------------------------ */
+
+void updateclip(int slicedir){
+  stepclip_x=0; stepclip_y=0; stepclip_z=0; 
+  stepclip_X=0; stepclip_Y=0; stepclip_Z=0;
+  switch (slicedir){
+  case 1:
+    clip_x = 1 - clip_x;
+    if(clip_x==1)printf("clip x on\n");
+    if(clip_x==0)printf("clip x off\n");
+    if(clip_x==1)stepclip_x=1;
+    break;
+  case 2:
+    clip_y = 1 - clip_y;
+    if(clip_y==1)printf("clip y on\n");
+    if(clip_y==0)printf("clip y off\n");
+    if(clip_y==1)stepclip_y=1;
+    break;
+  case 3:
+    clip_z = 1 - clip_z;
+    if(clip_z==1)printf("clip z on\n");
+    if(clip_z==0)printf("clip z off\n");
+    if(clip_z==1)stepclip_z=1;
+    break;
+  case -1:
+    clip_X = 1 - clip_X;
+    if(clip_X==1)printf("clip X on\n");
+    if(clip_X==0)printf("clip X off\n");
+    if(clip_X==1)stepclip_X=1;
+    break;
+  case -2:
+    clip_Y = 1 - clip_Y;
+    if(clip_Y==1)printf("clip Y on\n");
+    if(clip_Y==0)printf("clip Y off\n");
+    if(clip_Y==1)stepclip_Y=1;
+    break;
+  case -3:
+    clip_Z = 1 - clip_Z;
+    if(clip_Z==1)printf("clip Z on\n");
+    if(clip_Z==0)printf("clip Z off\n");
+    if(clip_Z==1)stepclip_Z=1;
+    break;
+  default:
+    ASSERT(FFALSE);
+    break;
+  }
+}
+
+
+
+
 
 

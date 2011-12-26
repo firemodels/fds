@@ -2106,42 +2106,6 @@ void get_plot3d_uvw(float xyz[3], float uvw[3]){
     }
   }
 }
-
-/* ------------------ inmesh ------------------------ */
-
- mesh *inmesh(float xyz[3]){
-  int i;
-  mesh *meshi;
-  int n;
-  float xmin, ymin, zmin;
-  float xmax, ymax, zmax;
-  int ibar, jbar, kbar;
-
-  for(i=0;i<nmeshes;i++){
-    meshi = meshinfo + i;
-
-    ibar=meshi->ibar;
-    jbar=meshi->jbar;
-    kbar=meshi->kbar;
-    xmin=meshi->xplt_orig[0];
-    ymin=meshi->yplt_orig[0];
-    zmin=meshi->zplt_orig[0];
-    xmax=meshi->xplt_orig[ibar];
-    ymax=meshi->yplt_orig[jbar];
-    zmax=meshi->zplt_orig[kbar];
-
-    if(xyz[0]<xmin)continue;
-    if(xyz[1]<ymin)continue;
-    if(xyz[2]<zmin)continue;
-
-    if(xyz[0]>xmax)continue;
-    if(xyz[1]>ymax)continue;
-    if(xyz[2]>zmax)continue;
-    return meshi;
-  }
-  return NULL;
-}
-
 #endif
 
   /* ------------------ getplot3dtime ------------------------ */

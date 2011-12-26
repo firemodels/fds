@@ -134,7 +134,7 @@ void increment_shooter_data(shootpointdata *pold, shootpointdata *pnew, float dt
       xyznew[2] += dt*uvwnew[2];
     }
     pnew[i].visible=1;
-    if(inmesh(xyznew)==NULL)pnew[i].visible=0;
+    if(getmesh(xyznew)==NULL)pnew[i].visible=0;
   }
   shooter_active=1;
 }

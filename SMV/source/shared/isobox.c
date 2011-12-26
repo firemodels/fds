@@ -18,9 +18,6 @@
 #include "isodefs.h"
 #include "datadefs.h"
 
-#define ijkcell(i,j,k) ((i)+(j)*ibar+(k)*ijbar)
-#define ij(i,j) ((i)+(j)*nx)
-
 // svn revision character string
 char isobox_revision[]="$Revision$";
 
@@ -531,7 +528,7 @@ int GetIsosurface(isosurface *surface,
                   const float *yplt, int ny, 
                   const float *zplt, int nz
                    ){
-  int ibar,ijbar;
+  int ibar,jbar;
   float xvert[12], yvert[12], zvert[12], tvert[12], *tvertptr=NULL;
   int triangles[18];
   int nvert, ntriangles;
@@ -544,7 +541,7 @@ int GetIsosurface(isosurface *surface,
   int nxy;
   
   ibar = nx-1;
-  ijbar = (nx-1)*(ny-1);
+  jbar = ny-1;
   xx = xxx;
   yy = yyy;
   zz = zzz;
@@ -560,7 +557,7 @@ int GetIsosurface(isosurface *surface,
     for(j=0;j<ny-1;j++){
       yy[0]=yplt[j];
       yy[1]=yplt[j+1];
-      ijbase = ij(i,j);
+      ijbase = IJ(i,j);
       for(k=0;k<nz-1;k++){
         ijkbase = ijbase + k*nxy;
         ip1jk = ijkbase + 1;
@@ -571,7 +568,7 @@ int GetIsosurface(isosurface *surface,
         ijp1kp1 = ijkbase + nx+nxy;
         ip1jp1kp1 = ijkbase + 1+nx+nxy;
 
-        if(iblank_cell==NULL||iblank_cell[ijkcell(i,j,k)]!=0){
+        if(iblank_cell==NULL||iblank_cell[IJKCELL(i,j,k)]!=0){
           zz[0]=zplt[k];
           zz[1]=zplt[k+1];
 

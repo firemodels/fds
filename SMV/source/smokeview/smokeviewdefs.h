@@ -5,10 +5,10 @@
 #ifndef SMOKEVIEWDEFS_H_DEFINED
 #define SMOKEVIEWDEFS_H_DEFINED
 #ifdef _DEBUG
-void _sniffErrors(char *whereat);
-#define sniffErrors(f) _sniffErrors(f)
+void _Sniff_Errors(char *whereat);
+#define SNIFF_ERRORS(f) _Sniff_Errors(f)
 #else
-#define sniffErrors(f)
+#define SNIFF_ERRORS(f)
 #endif
 
 #define CSV_FDS 0

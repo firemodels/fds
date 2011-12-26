@@ -43,4 +43,9 @@
 #ifndef IJKCELL
 #define IJKCELL(i,j,k) ((i)+ (j)*ibar+(k)*ibar*jbar)
 #endif
+
+#ifndef IJ
+#define IJ(i,j) ((i)+(j)*nx)
+#endif
+
 #endif

@@ -1004,7 +1004,7 @@ void drawsmoke3dGPUVOL(void){
   glUniform1i(GPUvol_depthtexture,4);
   glUniform2f(GPUvol_screensize,(float)screenWidth,(float)screenHeight);
   glUniform2f(GPUvol_nearfar,fnear,ffar);
-  sniffErrors("after drawsmoke3dGPUVOL A");
+  SNIFF_ERRORS("after drawsmoke3dGPUVOL A");
 #endif
   glUniform3f(GPUvol_eyepos,xyzeyeorig[0],xyzeyeorig[1],xyzeyeorig[2]);
   glUniform1f(GPUvol_xyzmaxdiff,xyzmaxdiff);
@@ -1014,7 +1014,7 @@ void drawsmoke3dGPUVOL(void){
   glUniform1f(GPUvol_temperature_min,temperature_min);
   glUniform1f(GPUvol_temperature_cutoff,temperature_cutoff);
   glUniform1f(GPUvol_temperature_max,temperature_max);
-  sniffErrors("after drawsmoke3dGPUVOL before loop");
+  SNIFF_ERRORS("after drawsmoke3dGPUVOL before loop");
   if(use_transparency_data==1)transparenton();
   for(ii=0;ii<nvolfacelistinfo;ii++){
     volrenderdata *vr;
@@ -1184,7 +1184,7 @@ void drawsmoke3dGPUVOL(void){
     }
     glEnd();
   }
-  sniffErrors("after drawsmoke3dGPUVOL after loop");
+  SNIFF_ERRORS("after drawsmoke3dGPUVOL after loop");
   if(use_transparency_data==1)transparentoff();
 }
 #endif

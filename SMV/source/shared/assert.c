@@ -27,11 +27,3 @@ void _Assert(char *filename, unsigned linenumber){
    abort();
 }
 
-void _WAssert(char *comment, char *filename, unsigned linenumber){
-  /*! \fn void _WAssert(char *comment, char *filename, unsigned linenumber)
-      \brief displays the filename and line number if an assert is thrown
-  */
-  fflush(NULL);
-  fprintf(stderr, "\nWarning: %s\nAssertion failed: %s, line %u\n",comment,filename, linenumber);
-  fflush(stderr);
-}
