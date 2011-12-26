@@ -15,15 +15,10 @@
 #else
 #include <GL/glut.h>
 #endif
-#include "flowfiles.h"
-#include "MALLOC.h"
 #include "smokeviewvars.h"
 #include "interp.h"
 #include "smv_endian.h"
-#include "update.h"
-#include "IOvolsmoke.h"
 #include "compress.h"
-#include "datadefs.h"
 
 // svn revision character string
 char IOvolsmoke_revision[]="$Revision$";

@@ -7,16 +7,13 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include "flowfiles.h"
 #ifdef pp_OSX
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
 #endif
-#include "MALLOC.h"
 #include "smokeviewvars.h"
 #include "smv_endian.h"
-#include "update.h"
 
 // svn revision character string
 char IOwui_revision[]="$Revision$";

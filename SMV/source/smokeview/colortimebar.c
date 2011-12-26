@@ -6,9 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include "flowfiles.h"
-#include "datadefs.h"
-#include "MALLOC.h"
+
 #include "smokeviewvars.h"
 
 char colorbar_revision[]="$Revision$";

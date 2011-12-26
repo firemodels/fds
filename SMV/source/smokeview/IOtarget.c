@@ -5,16 +5,13 @@
 #include "options.h"
 #include <stdio.h>  
 #include <stdlib.h>
-#include "flowfiles.h"
 #ifdef pp_OSX
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
 #endif
-#include "MALLOC.h"
+
 #include "smokeviewvars.h"
-#include "update.h"
-#include "datadefs.h"
 
 // svn revision character string
 char IOtarget_revision[]="$Revision$";

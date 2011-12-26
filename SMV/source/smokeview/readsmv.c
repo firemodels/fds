@@ -19,15 +19,9 @@
 #else
 #include <GL/glut.h>
 #endif
-#include "flowfiles.h"
-#include "MALLOC.h"
 #include <pthread.h>
 #include "smv_endian.h"
-#include "translate.h"
-#include "update.h"
 #include "smokeviewvars.h"
-#include "IOvolsmoke.h"
-#include "datadefs.h"
 
 // svn revision character string
 char readsmv_revision[]="$Revision$";

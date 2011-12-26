@@ -8,17 +8,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include "flowfiles.h"
 #ifdef pp_OSX
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
 #endif
 #include <math.h>
-#include "MALLOC.h"
 #include "smokeviewvars.h"
 #include "smv_endian.h"
-#include "update.h"
 
 // svn revision character string
 char IOpart_revision[]="$Revision$";

@@ -8,20 +8,16 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <math.h>
-#include "flowfiles.h"
-#include "compress.h"
-
 #ifdef pp_OSX
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
 #endif
-#include "MALLOC.h"
+
+#include "compress.h"
 #include "smokeviewvars.h"
 #include "smv_endian.h"
-#include "update.h"
 #include "interp.h"
-#include "datadefs.h"
 
 // svn revision character string
 char IOslice_revision[]="$Revision$";

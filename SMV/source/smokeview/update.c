@@ -16,10 +16,7 @@
 #include <GL/glut.h>
 #endif
 
-#include "flowfiles.h"
-#include "MALLOC.h"
 #include "smokeviewvars.h"
-#include "update.h"
 #include "compress.h"
 
 // svn revision character string

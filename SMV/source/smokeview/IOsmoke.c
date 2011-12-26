@@ -10,7 +10,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "flowfiles.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #ifdef pp_OSX
@@ -20,11 +19,8 @@
 #endif
 #include <float.h>
 #include "egz_stdio.h"
-#include "MALLOC.h"
 #include "smokeviewvars.h"
-#include "update.h"
 #include "interp.h"
-#include "IOvolsmoke.h"
 #include "compress.h"
 
 int cull_count=0;

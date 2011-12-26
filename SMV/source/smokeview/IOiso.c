@@ -6,7 +6,6 @@
 #include <stdio.h>  
 #include <stdlib.h>
 #include <string.h>
-#include "flowfiles.h"
 #ifdef pp_OSX
 #include <GLUT/glut.h>
 #else
@@ -14,9 +13,7 @@
 #endif
 #include <math.h>
 #include "egz_stdio.h"
-#include "MALLOC.h"
 #include "smokeviewvars.h"
-#include "update.h"
 
 // svn revision character string
 char IOiso_revision[]="$Revision$";

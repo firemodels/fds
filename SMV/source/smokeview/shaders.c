@@ -12,10 +12,7 @@ char shaders_revision[]="$Revision$";
 #ifdef pp_GLEW
 #include "glew.h"
 #endif
-#include "MALLOC.h"
-#include "flowfiles.h"
 #include "smokeviewvars.h"
-#include "MALLOC.h"
 
 GLhandleARB v,f,p_smoke, p_zonesmoke, p_volsmoke;
 void printInfoLog(GLhandleARB obj);

@@ -11,10 +11,8 @@
 #include <GL/glut.h>
 #endif
 #include "glui.h"
-#include "flowfiles.h"
 #include "ASSERT.h"
 #include "smokeviewvars.h"
-#include "translate.h"
 
 // svn revision character string
 extern "C" char glui_blockedit_revision[]="$Revision$";

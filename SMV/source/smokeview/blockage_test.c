@@ -7,15 +7,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "flowfiles.h"
 #ifdef pp_OSX
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
 #endif
-#include "MALLOC.h"
 #include "smokeviewvars.h"
-#include "datadefs.h"
 
 char blockage_test_revision[]="$Revision$";
 

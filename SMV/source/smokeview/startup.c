@@ -15,13 +15,8 @@
 #else
 #include <GL/glut.h>
 #endif
-#include "flowfiles.h"
-#include "MALLOC.h"
 #include "smokeviewvars.h"
 #include "svn_revision.h"
-#include "translate.h"
-#include "update.h"
-#include "datadefs.h"
 
 // svn revision character string
 char startup_revision[]="$Revision$";

@@ -15,11 +15,8 @@
 #include <GL/glut.h>
 #endif
 
-#include "flowfiles.h"
-#include "MALLOC.h"
 #include "smokeviewvars.h"
 #include "viewports.h"
-#include "update.h"
 
 // svn revision character string
 char showscene_revision[]="$Revision$";

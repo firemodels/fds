@@ -10,11 +10,7 @@
 #ifdef pp_GLEW
 #include "glew.h"
 #endif
-#include "flowfiles.h"
-#include "MALLOC.h"
 #include "smokeviewvars.h"
-#include "update.h"
-#include "datadefs.h"
 
 // svn revision character string
 char IOzone_revision[]="$Revision$";

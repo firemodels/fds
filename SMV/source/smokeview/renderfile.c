@@ -9,8 +9,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "smokeviewvars.h"
-#include "translate.h"
-#include "IOvolsmoke.h"
 
 #ifdef pp_OSX
 #include <GLUT/glut.h>

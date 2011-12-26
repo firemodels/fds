@@ -14,9 +14,6 @@
 #else
 #include <GL/glut.h>
 #endif
-
-#include "flowfiles.h"
-#include "MALLOC.h"
 #include "smokeviewvars.h"
 
 

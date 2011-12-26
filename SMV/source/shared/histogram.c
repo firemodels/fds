@@ -10,6 +10,7 @@
 #include <string.h>
 #include <math.h>
 #include "histogram.h"
+
 #ifdef pp_CHECK
 #include "MALLOC.h"
 #endif

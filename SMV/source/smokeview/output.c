@@ -10,8 +10,6 @@
 #endif
 #include <stdio.h>
 #include <string.h>
-#include "flowfiles.h"
-#include "MALLOC.h"
 #include "smokeviewvars.h"
 
 // svn revision character string

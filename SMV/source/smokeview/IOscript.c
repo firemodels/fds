@@ -8,17 +8,13 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <math.h>
-#include "flowfiles.h"
 #ifdef pp_OSX
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
 #endif
-#include "MALLOC.h"
+
 #include "smokeviewvars.h"
-#include "update.h"
-#include "IOvolsmoke.h"
-#include "datadefs.h"
 
 // svn revision character string
 char IOscript_revision[]="$Revision$";

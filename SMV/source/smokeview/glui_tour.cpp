@@ -12,11 +12,8 @@
 #endif
 #include <math.h>
 #include "glui.h"
-#include "flowfiles.h"
 #include "ASSERT.h"
 #include "smokeviewvars.h"
-#include "translate.h"
-#include "update.h"
 
 // svn revision character string
 extern "C" char glui_tour_revision[]="$Revision$";

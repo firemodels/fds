@@ -12,11 +12,7 @@
 #else
 #include <GL/glut.h>
 #endif
-#include "flowfiles.h"
-#include "MALLOC.h"
 #include "smokeviewvars.h"
-#include "translate.h"
-#include "update.h"
 
 // svn revision character string
 char drawGeometry_revision[]="$Revision$";

@@ -13,12 +13,7 @@
 #else
 #include <GL/glut.h>
 #endif
-#include "flowfiles.h"
-#include "MALLOC.h"
 #include "smokeviewvars.h"
-#include "translate.h"
-#include "update.h"
-#include "IOvolsmoke.h"
 
 /* dummy change to bump revision number to 5.1.5 */
 

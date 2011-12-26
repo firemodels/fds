@@ -13,12 +13,7 @@
 #else
 #include <GL/glut.h>
 #endif
-#include "flowfiles.h"
-#include "MALLOC.h"
 #include "smokeviewvars.h"
-#include "update.h"
-#include "IOvolsmoke.h"
-#include "datadefs.h"
 
 #define KEY_ALT 0
 #define KEY_CTRL 1

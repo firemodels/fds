@@ -12,7 +12,6 @@
 #include <math.h>
 #include "ASSERT.h"
 #include "smokeviewvars.h"
-#include "MALLOC.h"
 
 // svn revision character string
 char compress3dc_revision[]="$Revision$";

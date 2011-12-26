@@ -5,12 +5,17 @@
 #define SMOKEVIEWVARS_H_DEFINED
 #include <time.h>
 
+#include "datadefs.h"
+#include "translate.h"
 #include "csphere.h"
 #include "smokeviewdefs.h"
 #include "smokeheaders.h"
 #include "threader.h"
 #include "string_util.h"
 #include "file_util.h"
+#include "IOvolsmoke.h"
+#include "MALLOC.h"
+#include "update.h"
 
 #ifdef pp_GPUTHROTTLE
   SVEXTERN float SVDECL(thisGPUtime,0.0), SVDECL(lastGPUtime,0.0);

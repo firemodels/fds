@@ -7,17 +7,14 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <string.h>
-#include "flowfiles.h"
 #ifdef pp_OSX
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
 #endif
-#include "MALLOC.h"
 #include "egz_stdio.h"
 #include "smokeviewvars.h"
 #include "smv_endian.h"
-#include "update.h"
 
 // svn revision character string
 char IOboundary_revision[]="$Revision$";
