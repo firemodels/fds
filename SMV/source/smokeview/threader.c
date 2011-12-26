@@ -8,7 +8,6 @@
 #include <string.h>
 #include <math.h>
 #include "ASSERT.h"
-#include "smokeviewdefs.h"
 #include "smokeviewvars.h"
 
 // svn revision character string

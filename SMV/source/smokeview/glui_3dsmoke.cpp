@@ -15,9 +15,7 @@
 #include "flowfiles.h"
 #include "MALLOC.h"
 #include "ASSERT.h"
-#include "smokeviewdefs.h"
 #include "smokeviewvars.h"
-#include "smokeheaders.h"
 #include "translate.h"
 #include "MALLOC.h"
 

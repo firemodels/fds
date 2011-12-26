@@ -8,7 +8,6 @@
 #include <math.h>
 #include "MALLOC.h"
 #include "flowfiles.h"
-#include "smokeviewdefs.h"
 #include "smokeviewvars.h"
 
 // svn revision character string

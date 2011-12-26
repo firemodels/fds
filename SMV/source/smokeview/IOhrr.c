@@ -19,29 +19,6 @@
 // svn revision character string
 char IOhrr_revision[]="$Revision$";
 
-/* ------------------ printhrr ------------------------ */
-
-void printhrr(void){
-  int i;
-  float *hrrtime, *hrrval;
-
-  if(hrrinfo==NULL){
-    printf("hrr data not available\n");
-    return;
-  }
-  if(hrrinfo->ntimes_csv==0){
-    printf("hrr data not loaded\n");
-    return;
-  }
-  hrrtime=hrrinfo->times_csv;
-  hrrval=hrrinfo->hrrval_csv;
-  for(i=0;i<hrrinfo->ntimes_csv;i++){
-    printf(" time=%f hrr=%f\n",*hrrtime,*hrrval);
-    hrrtime++;
-    hrrval++;
-  }
-}
-
 /* ------------------ readhrr ------------------------ */
 
 void readhrr(int flag, int *errorcode){

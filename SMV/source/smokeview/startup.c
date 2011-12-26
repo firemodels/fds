@@ -7,7 +7,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
-#include <time.h>
 #ifdef pp_GLEW
 #include "glew.h"
 #endif

@@ -7,7 +7,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
-#include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #ifdef pp_OSX

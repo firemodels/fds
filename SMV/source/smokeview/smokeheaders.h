@@ -11,25 +11,9 @@
 #include "egz_stdio.h"
 #endif
 
-int SUB_portortho(int quad, 
-                   GLint i_left, GLint i_down, GLsizei i_width, GLsizei i_height,
-                   GLdouble x_left, GLdouble x_right, GLdouble x_bottom, GLdouble x_top,
-                   GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height
-                   );
-int SUB_portfrustum(int quad, 
-                   GLint i_left, GLint i_down, GLsizei i_width, GLsizei i_height,
-                   GLdouble fleft, GLdouble fright, GLdouble fdown, GLdouble fup, GLdouble fnear, GLdouble ffar,
-                   GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height
-                   );
 EXTERNCPP device *getdevice(char *label, int index);
-EXTERNCPP void getzonedatacsv(int nzonet, int nrooms, int nfires, 
-                    float *zonet, float *zoneqfire, float *zonefheight, float *zonefbase, float *zonefdiam,
-                    float *zonepr, float *zoneylay,  float *zonetl, float *zonetu,
-                    float **zoneodlptr, float **zoneoduptr, float *zonehvents, float *zonevvents,
-                    int *error);
 EXTERNCPP void setup_glut(int argc, char **argv);
 EXTERNCPP int get_ndevices(char *file);
-EXTERNCPP void printhrr(void);
 EXTERNCPP void readhrr(int flag, int *errorcode);
 EXTERNCPP void read_device_data(char *file, int filetype, int flag);
 EXTERNCPP void setup_device_data(void);
@@ -60,8 +44,6 @@ EXTERNCPP void update_transparency(void);
 EXTERNCPP void update_tbounds(void);
 EXTERNCPP void updateGluiTimeBounds(float time_min, float time_max);
 EXTERNCPP void settimeval(float timeval);
-EXTERNCPP tokendata *get_token_ptr(char *var,sv_object_frame *frame);
-EXTERNCPP int get_token_loc(char *var,sv_object_frame *frame);
 EXTERNCPP void get_indep_var_indices(sv_object *smv_object,char **var_indep_strings, int nvars_indep,int *index);
 EXTERNCPP void get_evac_indices(sv_object *smv_object, int *evac_index,int *nevac_index);
 EXTERNCPP void update_glui_set_view_xyz(float *xyz);

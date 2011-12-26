@@ -13,9 +13,7 @@
 #include "glui.h"
 #include "flowfiles.h"
 #include "ASSERT.h"
-#include "smokeviewdefs.h"
 #include "smokeviewvars.h"
-#include "smokeheaders.h"
 #include "translate.h"
 
 // svn revision character string

@@ -22,7 +22,6 @@
 #include "flowfiles.h"
 #include "MALLOC.h"
 #include <pthread.h>
-#include "csphere.h"
 #include "smv_endian.h"
 #include "translate.h"
 #include "update.h"

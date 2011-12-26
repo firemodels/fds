@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "flowfiles.h"
-#include "smokeviewdefs.h"
 #include "MALLOC.h"
 #include "smokeviewvars.h"
 

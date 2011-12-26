@@ -6,12 +6,8 @@
 #include <time.h>
 
 #include "csphere.h"
-
-#ifndef CPP
 #include "smokeviewdefs.h"
 #include "smokeheaders.h"
-#endif
-
 #include "threader.h"
 #include "string_util.h"
 #include "file_util.h"
