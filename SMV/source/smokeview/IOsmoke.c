@@ -18,6 +18,7 @@
 #include <GL/glut.h>
 #endif
 #include <float.h>
+
 #include "egz_stdio.h"
 #include "smokeviewvars.h"
 #include "interp.h"

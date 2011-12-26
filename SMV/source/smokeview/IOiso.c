@@ -12,6 +12,7 @@
 #include <GL/glut.h>
 #endif
 #include <math.h>
+
 #include "egz_stdio.h"
 #include "smokeviewvars.h"
 

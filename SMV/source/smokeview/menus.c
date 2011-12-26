@@ -13,6 +13,7 @@
 #else
 #include <GL/glut.h>
 #endif
+
 #include "smokeviewvars.h"
 
 /* dummy change to bump revision number to 5.1.5 */

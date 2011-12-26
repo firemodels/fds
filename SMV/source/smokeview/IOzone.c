@@ -10,6 +10,7 @@
 #ifdef pp_GLEW
 #include "glew.h"
 #endif
+
 #include "smokeviewvars.h"
 
 // svn revision character string

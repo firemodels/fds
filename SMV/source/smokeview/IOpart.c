@@ -14,6 +14,7 @@
 #include <GL/glut.h>
 #endif
 #include <math.h>
+
 #include "smokeviewvars.h"
 #include "smv_endian.h"
 

@@ -12,6 +12,7 @@
 #else
 #include <GL/glut.h>
 #endif
+
 #include "egz_stdio.h"
 #include "smokeviewvars.h"
 #include "smv_endian.h"

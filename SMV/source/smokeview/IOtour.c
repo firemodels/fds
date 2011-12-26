@@ -12,6 +12,7 @@
 #else
 #include <GL/glut.h>
 #endif
+
 #include "smokeviewvars.h"
 
 // svn revision character string

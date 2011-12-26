@@ -13,6 +13,7 @@
 #else
 #include <GL/glut.h>
 #endif
+
 #include "smokeviewvars.h"
 
 #define KEY_ALT 0

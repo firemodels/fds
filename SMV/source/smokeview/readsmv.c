@@ -20,6 +20,7 @@
 #include <GL/glut.h>
 #endif
 #include <pthread.h>
+
 #include "smv_endian.h"
 #include "smokeviewvars.h"
 

@@ -15,6 +15,7 @@
 #else
 #include <GL/glut.h>
 #endif
+
 #include "smokeviewvars.h"
 #include "interp.h"
 #include "smv_endian.h"

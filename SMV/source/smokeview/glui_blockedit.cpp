@@ -10,8 +10,7 @@
 #else
 #include <GL/glut.h>
 #endif
-#include "glui.h"
-#include "ASSERT.h"
+
 #include "smokeviewvars.h"
 
 // svn revision character string

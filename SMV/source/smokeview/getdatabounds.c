@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+
 #include "smokeviewvars.h"
 
 // svn revision character string

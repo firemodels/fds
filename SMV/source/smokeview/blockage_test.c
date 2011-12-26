@@ -12,6 +12,7 @@
 #else
 #include <GL/glut.h>
 #endif
+
 #include "smokeviewvars.h"
 
 char blockage_test_revision[]="$Revision$";

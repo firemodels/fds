@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include "ASSERT.h"
+
 #include "MALLOC.h"
 #include "compress.h"
 

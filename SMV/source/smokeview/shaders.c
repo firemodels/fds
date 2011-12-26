@@ -9,6 +9,7 @@ char shaders_revision[]="$Revision$";
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
+
 #ifdef pp_GLEW
 #include "glew.h"
 #endif

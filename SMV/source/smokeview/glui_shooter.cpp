@@ -12,8 +12,7 @@
 #include <GL/glut.h>
 #endif
 #include <math.h>
-#include "glui.h"
-#include "ASSERT.h"
+
 #include "smokeviewvars.h"
 
 GLUI *glui_shooter=NULL;
