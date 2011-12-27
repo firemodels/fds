@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char renderfile_revision[]="$Revision$";
+
 #include "options.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -26,10 +29,6 @@
 #ifdef pp_GDGIF
 #define GIF 2
 #endif
-
-// svn revision character string
-char renderfile_revision[]="$Revision$";
-
 
 /* ------------------ Render ------------------------ */
 

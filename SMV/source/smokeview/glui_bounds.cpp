@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+extern "C" char glui_bounds_revision[]="$Revision$";
+
 #define CPP
 #include "options.h"
 #include <string.h>
@@ -14,22 +17,8 @@
 
 #include "smokeviewvars.h"
 
-// svn revision character string
-extern "C" char glui_bounds_revision[]="$Revision$";
-// $Date$ $Author$
-
-extern "C" void update_slice_contours(int slice_type_index, float line_min, float line_max, int nline_values);
-extern "C" void keyboard(unsigned char key, int x, int y);
-extern "C" void glui_script_disable(void);
-extern "C" void glui_script_enable();
-extern "C" void writeini(int var);
-extern "C" void ScriptMenu(int var);
-extern "C" void update_glui_smoke3dframestep(void);
-extern "C" void ParticlePropShowMenu(int value);
 extern "C" void colorbar_global2local(void);
-extern "C" void ReloadMenu(int var);
 
-void COLORBAR_CB(int var);
 void SETslicemax(int setslicemax, float slicemax);
 void SETslicemin(int setslicemin, float slicemin);
 void BUTTON_hide_CB(int var);
@@ -1154,7 +1143,6 @@ void Smoke3D_CB(int var){
   case FRAMELOADING:
     smoke3dframestep=smoke3dframeskip+1;
     smoke3dzipstep=smoke3dzipskip+1;
-    update_glui_smoke3dframestep();
     updatemenu=1;
     break;
   }
@@ -2207,11 +2195,6 @@ extern "C" void hide_glui_bounds(void){
 
 extern "C" void update_plot3d_display(void){
   if(plot3d_display!=NULL)plot3d_display->set_int_val(contour_type);
-}
-
-/* ------------------ update2_glui_smoke3dframestep ------------------------ */
-
-extern "C" void update2_glui_smoke3dframestep(void){
 }
 
 /* ------------------ open_volsmokeplane ------------------------ */

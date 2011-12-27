@@ -2,15 +2,15 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char colorbar_revision[]="$Revision$";
+
 #include "options.h"
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
 
 #include "smokeviewvars.h"
-
-char colorbar_revision[]="$Revision$";
-
 
 /* ------------------ UpdateTimeLabels ------------------------ */
 

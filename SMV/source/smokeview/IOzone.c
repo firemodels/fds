@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char IOzone_revision[]="$Revision$";
+
 #include "options.h"
 #include <stdio.h>  
 #include <stdlib.h> 
@@ -12,9 +15,6 @@
 #endif
 
 #include "smokeviewvars.h"
-
-// svn revision character string
-char IOzone_revision[]="$Revision$";
 
 void drawtrunccone(float d1, float d2, float height, unsigned char *rgbcolor);
 

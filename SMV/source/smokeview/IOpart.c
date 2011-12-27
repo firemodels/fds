@@ -1,6 +1,10 @@
 // $Date$ 
 // $Revision$
 // $Author$
+
+// svn revision character string
+char IOpart_revision[]="$Revision$";
+
 #define XYZ_EXTRA 7
 
 #include "options.h"
@@ -16,16 +20,11 @@
 #include <math.h>
 
 #include "smokeviewvars.h"
-#include "smv_endian.h"
-
-// svn revision character string
-char IOpart_revision[]="$Revision$";
 
 int tagscompare( const void *arg1, const void *arg2 );
 void copy_dep_vals(part5class *partclassi, part5data *datacopy, float *colorptr, propdata *prop, int j);
 
 void draw_SVOBJECT(sv_object *object, int iframe, propdata *prop, int recurse_level);
-void ParticlePropShowMenu(int val);
 void PART_CB_INIT(void);
 void update_all_partvis(particle *parti);
 void update_partvis(int first_frame,particle *parti, part5data *datacopy, int nclasses);

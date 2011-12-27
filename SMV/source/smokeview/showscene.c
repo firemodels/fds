@@ -15,11 +15,11 @@
 #include <GL/glut.h>
 #endif
 
-#include "smokeviewvars.h"
-#include "viewports.h"
-
 // svn revision character string
 char showscene_revision[]="$Revision$";
+
+#include "smokeviewvars.h"
+#include "viewports.h"
 
 /* ------------------ ShowScene ------------------------ */
 

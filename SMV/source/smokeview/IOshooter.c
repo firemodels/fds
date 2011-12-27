@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char IOshooter_revision[]="$Revision$";
+
 #include "options.h"
 #include <stdlib.h>
 #ifdef pp_SHOOTER
@@ -14,9 +17,6 @@
 #include <math.h>
 
 #include "smokeviewvars.h"
-
-// svn revision character string
-char IOshooter_revision[]="$Revision$";
 
 /* ------------------ allocate_shooter ------------------------ */
 

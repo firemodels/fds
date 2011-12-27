@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char isobox_revision[]="$Revision$";
+
 #include "options.h"
 #include <stdlib.h>
 #ifdef pp_DRAWISO
@@ -17,9 +20,6 @@
 #define IN_ISOBOX
 #include "isodefs.h"
 #include "datadefs.h"
-
-// svn revision character string
-char isobox_revision[]="$Revision$";
 
 /* ------------------ GetIsobox ------------------------ */
 

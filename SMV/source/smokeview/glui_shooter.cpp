@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+extern "C" char glui_shooter_revision[]="$Revision$";
+
 #define CPP
 #include "options.h"
 #ifdef pp_SHOOTER
@@ -16,12 +19,6 @@
 #include "smokeviewvars.h"
 
 GLUI *glui_shooter=NULL;
-
-
-// svn revision character string
-extern "C" char glui_shooter_revision[]="$Revision$";
-// $Date$ $Author$
-
 GLUI_Panel *panel_shooter_frame=NULL;
 GLUI_Panel *panel_shooter_misc=NULL;
 GLUI_Panel *panel_shooter_frameA=NULL;

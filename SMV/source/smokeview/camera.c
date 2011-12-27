@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char camera_revision[]="$Revision$";
+
 #include "options.h"
 #include <stdlib.h>
 #include <math.h>
@@ -9,8 +12,6 @@
 #include <string.h>
 
 #include "smokeviewvars.h"
-
-char camera_revision[]="$Revision$";
 
 /* ------------------ zoom2aperture ------------------------ */
 

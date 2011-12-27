@@ -15,10 +15,10 @@
 #include <GL/glut.h>
 #endif
 
-#include "smokeviewvars.h"
-
 // svn revision character string
 char skybox_revision[]="$Revision$";
+
+#include "smokeviewvars.h"
 
 /* ------------------ loadskytexture ------------------------ */
 

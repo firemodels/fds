@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+extern "C" char glui_tour_revision[]="$Revision$";
+
 #define CPP
 #include "options.h"
 #include <string.h>
@@ -13,9 +16,6 @@
 #include <math.h>
 
 #include "smokeviewvars.h"
-
-// svn revision character string
-extern "C" char glui_tour_revision[]="$Revision$";
 
 static int viewtype=0;
 static float tour_x=0.0, tour_y=0.0, tour_z=0.0, tour_ttt, tour_az_path=0.0, tour_tension=0.0;

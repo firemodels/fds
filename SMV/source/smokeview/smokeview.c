@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char smokeview_revision[]="$Revision$";
+
 #include "options.h"
 #include <stdio.h>  
 #include <string.h>
@@ -24,8 +27,6 @@
 #include <direct.h>
 #endif
 
-// svn revision character string
-char smokeview_revision[]="$Revision$";
 int can_write_to_dir(char *dir);
 
 /* ----------------------- unsetClipPlanes ----------------------------- */

@@ -1,6 +1,10 @@
 // $Date$ 
 // $Revision$
 // $Author$
+
+// svn revision character string
+char string_util_revision[]="$Revision$";
+
 #define IN_STRING_UTIL
 #include "options.h"
 #include <stdio.h>  
@@ -17,9 +21,6 @@
 #endif
 #include "MALLOC.h"
 #include "string_util.h"
-
-// svn revision character string
-char string_util_revision[]="$Revision$";
 
 /* ----------------------- fparsecsv ----------------------------- */
 
@@ -576,3 +577,11 @@ int match(char *buffer, const char *key){
   return 1;
 }
 
+/* ----------------------- remove_comment ----------------------------- */
+
+void remove_comment(char *buffer){
+  char *comment;
+  comment = strstr(buffer,"//");
+  if(comment!=NULL)comment[0]=0;
+  return;
+}

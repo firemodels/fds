@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char geometry_revision[]="$Revision$";
+
 #include "options.h"
 #include <stdio.h>  
 #include <string.h>
@@ -17,22 +20,16 @@
 
 #include "smokeviewvars.h"
 
-
-// svn revision character string
-
-
 /* ------------------ getmesh ------------------------ */
 
 mesh *getmesh(float *xyz){
-  mesh *meshi;
   int i;
-  int ibar, jbar, kbar;
-  float xmin, xmax;
-  float ymin, ymax;
-  float zmin, zmax;
-  float *xplt, *yplt, *zplt;
 
   for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    int ibar, jbar, kbar;
+    float *xplt, *yplt, *zplt;
+
     meshi = meshinfo+i;
 
     ibar = meshi->ibar;
@@ -43,25 +40,13 @@ mesh *getmesh(float *xyz){
     yplt = meshi->yplt_orig;
     zplt = meshi->zplt_orig;
 
-    xmin = xplt[0];
-    xmax = xplt[ibar];
-    if(xyz[0]<xmin||xyz[0]>xmax)continue;
-
-    ymin = yplt[0];
-    ymax = yplt[jbar];
-    if(xyz[1]<ymin||xyz[1]>ymax)continue;
-
-    zmin = zplt[0];
-    zmax = zplt[kbar];
-    if(xyz[2]<zmin||xyz[2]>zmax)continue;
-
+    if(xyz[0]<xplt[0]||xyz[0]>xplt[ibar])continue;
+    if(xyz[1]<yplt[0]||xyz[1]>yplt[jbar])continue;
+    if(xyz[2]<zplt[0]||xyz[2]>zplt[kbar])continue;
     return meshi;
   }
   return NULL;
 }
-
-char geometry_revision[]="$Revision$";
-
 
 /* ------------------ ExtractFrustum ------------------------ */
 

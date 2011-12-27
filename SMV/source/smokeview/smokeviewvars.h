@@ -19,6 +19,7 @@
 #include "IOvolsmoke.h"
 #include "MALLOC.h"
 #include "update.h"
+#include "smv_endian.h"
 
 #ifdef pp_GPUTHROTTLE
   SVEXTERN float SVDECL(thisGPUtime,0.0), SVDECL(lastGPUtime,0.0);

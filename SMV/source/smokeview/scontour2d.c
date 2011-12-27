@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char scontour2d_revision[]="$Revision$";
+
 #include "options.h"
 #include <stdlib.h>
 #ifdef _DEBUG
@@ -14,9 +17,6 @@
 #endif
 #include "contourdefs.h"
 #include "MALLOC.h"
-
-// svn revision character string
-char scontour2d_revision[]="$Revision$";
 
 /*  
   contouring algorithm

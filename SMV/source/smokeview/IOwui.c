@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char IOwui_revision[]="$Revision$";
+
 #include "options.h"
 #include <stdio.h>  
 #include <stdlib.h>
@@ -14,10 +17,6 @@
 #endif
 
 #include "smokeviewvars.h"
-#include "smv_endian.h"
-
-// svn revision character string
-char IOwui_revision[]="$Revision$";
 
 void init_tnode(terraindata *terri);
 void init_tnorm(terraindata *terri);

@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char IOtour_revision[]="$Revision$";
+
 #include "options.h"
 #include <stdio.h>  
 #include <stdlib.h>
@@ -14,9 +17,6 @@
 #endif
 
 #include "smokeviewvars.h"
-
-// svn revision character string
-char IOtour_revision[]="$Revision$";
 
 void drawcir(float *center, float rad, float *color);
 //void TourMenu(int val);

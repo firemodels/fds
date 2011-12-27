@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char IOslice_revision[]="$Revision$";
+
 #include "options.h"
 #include <stdio.h>  
 #include <stdlib.h>
@@ -16,15 +19,9 @@
 
 #include "compress.h"
 #include "smokeviewvars.h"
-#include "smv_endian.h"
 #include "interp.h"
 
-// svn revision character string
-char IOslice_revision[]="$Revision$";
-
 int endianswitch;
-void update_slice_contours(int slice_type_index, float line_min, float line_max,int nline_values);
-void WUI_CB(int var);
 #define TERRAIN_FIRE_LINE_UPDATE 39
 
 int getslicezlibdata(char *file,

@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string2
+extern "C" char glui_device_revision[]="$Revision$";
+
 #define CPP
 #include "options.h"
 #include <string.h>
@@ -13,9 +16,6 @@
 #include <math.h>
 
 #include "smokeviewvars.h"
-
-// svn revision character string2
-extern "C" char glui_device_revision[]="$Revision$";
 
 #define DEVICE_sensorsize 20
 #define SHOWDEVICEVALS 26

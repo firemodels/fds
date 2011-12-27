@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+extern "C" char glui_motion_revision[]="$Revision$";
+
 #define CPP
 #include "options.h"
 #include <string.h>
@@ -13,9 +16,6 @@
 #include <math.h>
 
 #include "smokeviewvars.h"
-
-// svn revision character string
-extern "C" char glui_motion_revision[]="$Revision$";
 
 #define TRANSLATE_XY 101
 #define ROTATE_ZX 102

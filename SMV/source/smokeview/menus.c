@@ -1,6 +1,10 @@
 // $Date$ 
 // $Revision$
 // $Author$
+
+// svn revision character string
+char menu_revision[]="$Revision$";
+
 #include "options.h"
 #include <stdio.h>  
 #include <string.h>
@@ -30,9 +34,6 @@
 #define MENU_SIZEPRESERVING -105
 #define MENU_DUMMY -999
 
-// svn revision character string
-char menu_revision[]="$Revision$";
-void ScriptMenu(int var);
 void add_scriptlist(char *file, int id);
 void update_glui_render();
 void PropMenu(int value);

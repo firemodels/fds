@@ -2,14 +2,15 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char interp_revision[]="$Revision$";
+
 #include "options.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include "interp.h"
-
-char interp_revision[]="$Revision$";
 
 /* ------------------ get_z_interp_factors ------------------------ */
 

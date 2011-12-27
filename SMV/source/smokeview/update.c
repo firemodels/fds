@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char update_revision[]="$Revision$";
+
 #define IN_UPDATE
 #include "options.h"
 #include <stdio.h>  
@@ -18,9 +21,6 @@
 
 #include "smokeviewvars.h"
 #include "compress.h"
-
-// svn revision character string
-char update_revision[]="$Revision$";
 
 /* ------------------ compare ------------------------ */
 

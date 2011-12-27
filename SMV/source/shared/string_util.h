@@ -24,6 +24,7 @@ EXTERNCPP void stripquotes(char *buffer);
 EXTERNCPP void stripcommas(char *buffer);
 EXTERNCPP int getrowcols(FILE *stream, int *nrows, int *ncols);
 
+EXTERNCPP void remove_comment(char *buffer);
 EXTERNCPP void trim(char *line);
 EXTERNCPP void trim_commas(char *line);
 EXTERNCPP char *trim_front(char *line);

@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char IOobject_revision[]="$Revision$";
+
 #include "options.h"
 #include <stdio.h>  
 #include <stdlib.h>
@@ -9,9 +12,6 @@
 #include <string.h>
 
 #include "smokeviewvars.h"
-
-// svn revision character string
-char IOobject_revision[]="$Revision$";
 
 #define CIRCLE_SEGS 12
 
@@ -265,7 +265,6 @@ void drawnotchplate(float diameter, float height, float notchheight, float direc
 void draw_SVOBJECT(sv_object *object, int iframe, propdata *prop, int recurse_level);
 sv_object *get_object(char *label);
 void free_object(sv_object *object);
-void remove_comment(char *buffer);
 void freecircle(void);
 void initcircle(unsigned int npoints);
 
@@ -5480,15 +5479,6 @@ void free_object(sv_object *object){
     framei=next_frame;
   }
   FREEMEMORY(object);
-}
-
-/* ----------------------- remove_comment ----------------------------- */
-
-void remove_comment(char *buffer){
-  char *comment;
-  comment = strstr(buffer,"//");
-  if(comment!=NULL)comment[0]=0;
-  return;
 }
 
 /* ----------------------- update_device_textures ----------------------------- */

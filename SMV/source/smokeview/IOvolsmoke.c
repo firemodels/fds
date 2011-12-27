@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char IOvolsmoke_revision[]="$Revision$";
+
 #include "options.h"
 #ifdef pp_GLEW
 #include "glew.h"
@@ -18,11 +21,7 @@
 
 #include "smokeviewvars.h"
 #include "interp.h"
-#include "smv_endian.h"
 #include "compress.h"
-
-// svn revision character string
-char IOvolsmoke_revision[]="$Revision$";
 
 /* ----------------------- interp3d ----------------------------- */
 

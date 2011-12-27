@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char drawGeometry_revision[]="$Revision$";
+
 #include "options.h"
 #include <stdio.h>  
 #include <string.h>
@@ -14,12 +17,6 @@
 #endif
 
 #include "smokeviewvars.h"
-
-// svn revision character string
-char drawGeometry_revision[]="$Revision$";
-int comparecolorfaces( const void *arg1, const void *arg2 );
-int comparesinglefaces( const void *arg1, const void *arg2 );
-int comparesinglefaces0( const void *arg1, const void *arg2 );
 
 cadgeom *current_cadgeom;
 
@@ -1828,6 +1825,129 @@ void set_cull_vis(void){
 #endif
 }
 
+
+/* ------------------ comparesinglefaces ------------------------ */
+
+int comparesinglefaces0( const void *arg1, const void *arg2 ){
+  facedata *facei, *facej;
+  int dirs[6];
+  facei = *(facedata **)arg1;
+  facej = *(facedata **)arg2;
+
+  dirs[DOWN_X]=1;
+  dirs[UP_X]=1;
+  dirs[DOWN_Y]=2;
+  dirs[UP_Y]=2;
+  dirs[DOWN_Z]=3;
+  dirs[UP_Z]=3;
+  if(dirs[facei->dir]<dirs[facej->dir])return -1;
+  if(dirs[facei->dir]>dirs[facej->dir])return 1;
+  switch(facei->dir){
+    case DOWN_X:
+    case UP_X:
+      if(facei->imin<facej->imin)return -1;
+      if(facei->imin>facej->imin)return 1;
+      if(facei->jmin<facej->jmin)return -1;
+      if(facei->jmin>facej->jmin)return 1;
+      if(facei->kmin<facej->kmin)return -1;
+      if(facei->kmin>facej->kmin)return 1;
+      if(facei->imax<facej->imax)return -1;
+      if(facei->imax>facej->imax)return 1;
+      if(facei->jmax<facej->jmax)return -1;
+      if(facei->jmax>facej->jmax)return 1;
+      if(facei->kmax<facej->kmax)return -1;
+      if(facei->kmax>facej->kmax)return 1;
+      break;
+    case DOWN_Y:
+    case UP_Y:
+      if(facei->jmin<facej->jmin)return -1;
+      if(facei->jmin>facej->jmin)return 1;
+      if(facei->imin<facej->imin)return -1;
+      if(facei->imin>facej->imin)return 1;
+      if(facei->kmin<facej->kmin)return -1;
+      if(facei->kmin>facej->kmin)return 1;
+      if(facei->jmax<facej->jmax)return -1;
+      if(facei->jmax>facej->jmax)return 1;
+      if(facei->imax<facej->imax)return -1;
+      if(facei->imax>facej->imax)return 1;
+      if(facei->kmax<facej->kmax)return -1;
+      if(facei->kmax>facej->kmax)return 1;
+      break;
+    case DOWN_Z:
+    case UP_Z:
+      if(facei->kmin<facej->kmin)return -1;
+      if(facei->kmin>facej->kmin)return 1;
+      if(facei->imin<facej->imin)return -1;
+      if(facei->imin>facej->imin)return 1;
+      if(facei->jmin<facej->jmin)return -1;
+      if(facei->jmin>facej->jmin)return 1;
+      if(facei->kmax<facej->kmax)return -1;
+      if(facei->kmax>facej->kmax)return 1;
+      if(facei->imax<facej->imax)return -1;
+      if(facei->imax>facej->imax)return 1;
+      if(facei->jmax<facej->jmax)return -1;
+      if(facei->jmax>facej->jmax)return 1;
+      break;
+  }
+  if(facei->color<facej->color)return  1;
+  if(facei->color>facej->color)return -1;
+  return 0;
+}
+
+/* ------------------ comparesinglefaces ------------------------ */
+
+int comparesinglefaces( const void *arg1, const void *arg2 ){
+  facedata *facei, *facej;
+
+  facei = *(facedata **)arg1;
+  facej = *(facedata **)arg2;
+
+  if(facei->dir<facej->dir)return -1;
+  if(facei->dir>facej->dir)return 1;
+  switch(facei->dir){
+    case DOWN_X:   // sort DOWN data from big to small
+      if(facei->imin<facej->imin)return 1;
+      if(facei->imin>facej->imin)return -1;
+      break;
+    case UP_X:     // sort UP data from small to big
+      if(facei->imin<facej->imin)return -1;
+      if(facei->imin>facej->imin)return 1;
+      break;
+    case DOWN_Y:
+      if(facei->jmin<facej->jmin)return 1;
+      if(facei->jmin>facej->jmin)return -1;
+      break;
+    case UP_Y:
+      if(facei->jmin<facej->jmin)return -1;
+      if(facei->jmin>facej->jmin)return 1;
+      break;
+    case DOWN_Z:
+      if(facei->kmin<facej->kmin)return 1;
+      if(facei->kmin>facej->kmin)return -1;
+      break;
+    case UP_Z:
+      if(facei->kmin<facej->kmin)return -1;
+      if(facei->kmin>facej->kmin)return 1;
+      break;
+  }
+  if(facei->color<facej->color)return  1;
+  if(facei->color>facej->color)return -1;
+  return 0;
+}
+
+/* ------------------ comparecolorfaces ------------------------ */
+
+int comparecolorfaces( const void *arg1, const void *arg2 ){
+  facedata *facei, *facej;
+
+  facei = *(facedata **)arg1;
+  facej = *(facedata **)arg2;
+
+  if(facei->color<facej->color)return  1;
+  if(facei->color>facej->color)return -1;
+  return 0;
+}
+
 /* ------------------ update_facelists ------------------------ */
 
 void update_facelists(void){
@@ -2486,129 +2606,6 @@ void draw_faces(){
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_LIGHTING);
   }
-}
-
-/* ------------------ comparecolorfaces ------------------------ */
-
-int comparecolorfaces( const void *arg1, const void *arg2 ){
-  facedata *facei, *facej;
-
-  facei = *(facedata **)arg1;
-  facej = *(facedata **)arg2;
-
-  if(facei->color<facej->color)return  1;
-  if(facei->color>facej->color)return -1;
-  return 0;
-}
-
-
-/* ------------------ comparesinglefaces ------------------------ */
-
-int comparesinglefaces0( const void *arg1, const void *arg2 ){
-  facedata *facei, *facej;
-  int dirs[6];
-  facei = *(facedata **)arg1;
-  facej = *(facedata **)arg2;
-
-  dirs[DOWN_X]=1;
-  dirs[UP_X]=1;
-  dirs[DOWN_Y]=2;
-  dirs[UP_Y]=2;
-  dirs[DOWN_Z]=3;
-  dirs[UP_Z]=3;
-  if(dirs[facei->dir]<dirs[facej->dir])return -1;
-  if(dirs[facei->dir]>dirs[facej->dir])return 1;
-  switch(facei->dir){
-    case DOWN_X:
-    case UP_X:
-      if(facei->imin<facej->imin)return -1;
-      if(facei->imin>facej->imin)return 1;
-      if(facei->jmin<facej->jmin)return -1;
-      if(facei->jmin>facej->jmin)return 1;
-      if(facei->kmin<facej->kmin)return -1;
-      if(facei->kmin>facej->kmin)return 1;
-      if(facei->imax<facej->imax)return -1;
-      if(facei->imax>facej->imax)return 1;
-      if(facei->jmax<facej->jmax)return -1;
-      if(facei->jmax>facej->jmax)return 1;
-      if(facei->kmax<facej->kmax)return -1;
-      if(facei->kmax>facej->kmax)return 1;
-      break;
-    case DOWN_Y:
-    case UP_Y:
-      if(facei->jmin<facej->jmin)return -1;
-      if(facei->jmin>facej->jmin)return 1;
-      if(facei->imin<facej->imin)return -1;
-      if(facei->imin>facej->imin)return 1;
-      if(facei->kmin<facej->kmin)return -1;
-      if(facei->kmin>facej->kmin)return 1;
-      if(facei->jmax<facej->jmax)return -1;
-      if(facei->jmax>facej->jmax)return 1;
-      if(facei->imax<facej->imax)return -1;
-      if(facei->imax>facej->imax)return 1;
-      if(facei->kmax<facej->kmax)return -1;
-      if(facei->kmax>facej->kmax)return 1;
-      break;
-    case DOWN_Z:
-    case UP_Z:
-      if(facei->kmin<facej->kmin)return -1;
-      if(facei->kmin>facej->kmin)return 1;
-      if(facei->imin<facej->imin)return -1;
-      if(facei->imin>facej->imin)return 1;
-      if(facei->jmin<facej->jmin)return -1;
-      if(facei->jmin>facej->jmin)return 1;
-      if(facei->kmax<facej->kmax)return -1;
-      if(facei->kmax>facej->kmax)return 1;
-      if(facei->imax<facej->imax)return -1;
-      if(facei->imax>facej->imax)return 1;
-      if(facei->jmax<facej->jmax)return -1;
-      if(facei->jmax>facej->jmax)return 1;
-      break;
-  }
-  if(facei->color<facej->color)return  1;
-  if(facei->color>facej->color)return -1;
-  return 0;
-}
-
-/* ------------------ comparesinglefaces ------------------------ */
-
-int comparesinglefaces( const void *arg1, const void *arg2 ){
-  facedata *facei, *facej;
-
-  facei = *(facedata **)arg1;
-  facej = *(facedata **)arg2;
-
-  if(facei->dir<facej->dir)return -1;
-  if(facei->dir>facej->dir)return 1;
-  switch(facei->dir){
-    case DOWN_X:   // sort DOWN data from big to small
-      if(facei->imin<facej->imin)return 1;
-      if(facei->imin>facej->imin)return -1;
-      break;
-    case UP_X:     // sort UP data from small to big
-      if(facei->imin<facej->imin)return -1;
-      if(facei->imin>facej->imin)return 1;
-      break;
-    case DOWN_Y:
-      if(facei->jmin<facej->jmin)return 1;
-      if(facei->jmin>facej->jmin)return -1;
-      break;
-    case UP_Y:
-      if(facei->jmin<facej->jmin)return -1;
-      if(facei->jmin>facej->jmin)return 1;
-      break;
-    case DOWN_Z:
-      if(facei->kmin<facej->kmin)return 1;
-      if(facei->kmin>facej->kmin)return -1;
-      break;
-    case UP_Z:
-      if(facei->kmin<facej->kmin)return -1;
-      if(facei->kmin>facej->kmin)return 1;
-      break;
-  }
-  if(facei->color<facej->color)return  1;
-  if(facei->color>facej->color)return -1;
-  return 0;
 }
 
 /* ------------------ compareisonodes ------------------------ */

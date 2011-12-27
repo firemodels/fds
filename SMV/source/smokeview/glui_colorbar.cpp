@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+extern "C" char glui_colorbar_revision[]="$Revision$";
+
 #define CPP
 #include "options.h"
 #include <string.h>
@@ -13,9 +16,6 @@
 #include <math.h>
 
 #include "smokeviewvars.h"
-
-// svn revision character string
-extern "C" char glui_colorbar_revision[]="$Revision$";
 
 //
 // setColorbarClipPlanes(1);

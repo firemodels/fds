@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char IOboundary_revision[]="$Revision$";
+
 #include "options.h"
 #include <stdio.h>  
 #include <stdlib.h>
@@ -15,12 +18,6 @@
 
 #include "egz_stdio.h"
 #include "smokeviewvars.h"
-#include "smv_endian.h"
-
-// svn revision character string
-char IOboundary_revision[]="$Revision$";
-
-
 
 int getpatchfacedir(mesh *gb, int i1, int i2, int j1, int j2, int k1, int k2, 
                     int *blockonpatch, mesh **meshonpatch);

@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char blockage_test_revision[]="$Revision$";
+
 #include "options.h"
 #include <stdio.h>  
 #include <stdlib.h>
@@ -15,14 +18,8 @@
 
 #include "smokeviewvars.h"
 
-char blockage_test_revision[]="$Revision$";
-
 #define HIT 1
 #define MISS 0
-
-float llasttime=0.0;
-
-void adjust_new_position(float oldpos[3], float newpos[3]);
 
 /* ------------------ get_interval ------------------------ */
 

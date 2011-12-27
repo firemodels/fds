@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char getdatacolors_revision[]="$Revision$";
+
 #include "options.h"
 #ifdef pp_GLEW
 #include "glew.h"
@@ -11,9 +14,6 @@
 #include <math.h>
 
 #include "smokeviewvars.h"
-
-// svn revision character string
-char getdatacolors_revision[]="$Revision$";
 
 #define EXPMIN -2
 #define EXPMAX 3

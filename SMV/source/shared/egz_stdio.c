@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char egz_stdio_revision[]="$Revision$";
+
 #include "options.h"
 #ifdef EGZ
 #include <stdlib.h>
@@ -9,9 +12,6 @@
 #include "egz_stdio.h"
 #include "MALLOC.h"
 #include "smv_endian.h"
-
-// svn revision character string
-char egz_stdio_revision[]="$Revision$";
 
 /* ------------------ EGZ_FCLOSE ------------------------ */
 

@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char compress3dc_revision[]="$Revision$";
+
 #include "options.h"
 #ifdef WIN32
 #include <direct.h>
@@ -12,13 +15,7 @@
 #include <math.h>
 
 #include "smokeviewvars.h"
-
-// svn revision character string
-char compress3dc_revision[]="$Revision$";
-
-void compress_onoff(int flag);
-void compress_svzip2(void);
-unsigned int rle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer_out);
+#include "compress.h"
 
 #ifndef pp_noappend
 #define CCsmoke3dheader smoke3dheader_

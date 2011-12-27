@@ -2,8 +2,10 @@
 // $Revision$
 // $Author$
 
-#include "options.h"
+// svn revision character string
 char shaders_revision[]="$Revision$";
+
+#include "options.h"
 
 #ifdef pp_GPU
 #include <stdlib.h>

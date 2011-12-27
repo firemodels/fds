@@ -1,6 +1,10 @@
 // $Date$ 
 // $Revision$
 // $Author$
+
+// svn revision character string
+char threader_revision[]="$Revision$";
+
 #define INTHREADER
 #include "options.h"
 #include <stdlib.h>
@@ -10,10 +14,6 @@
 
 #include "smokeviewvars.h"
 
-// svn revision character string
-char threader_revision[]="$Revision$";
-
-void compress_svzip2(void);
 void *read_volsmoke_allframes_allmeshes2(void *arg);
 
 

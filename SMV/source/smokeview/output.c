@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char output_revision[]="$Revision$";
+
 #include "options.h"
 #ifdef pp_OSX
 #include <GLUT/glut.h>
@@ -12,9 +15,6 @@
 #include <string.h>
 
 #include "smokeviewvars.h"
-
-// svn revision character string
-char output_revision[]="$Revision$";
 
 /* ------------------ outputAxisLabels ------------------------ */
 

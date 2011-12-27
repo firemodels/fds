@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char histogram_revision[]="$Revision$";
+
 #define IN_BUCKET 1
 
 #include <sys/stat.h>
@@ -15,9 +18,6 @@
 #include "MALLOC.h"
 #endif
 #include "datadefs.h"
-
-// svn revision character string
-char histogram_revision[]="$Revision$";
 
 /* ------------------ get_histogram_value ------------------------ */
 

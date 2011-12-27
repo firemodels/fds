@@ -1,6 +1,10 @@
 // $Date$ 
 // $Revision$
 // $Author$
+
+// svn revision character string
+char file_util_revision[]="$Revision$";
+
 #include "options.h"
 #include <stdio.h>  
 #include <string.h>
@@ -18,9 +22,6 @@
 #include "string_util.h"
 #include "file_util.h"
 
-// svn revision character string
-char file_util_revision[]="$Revision$";
-       
 /* ------------------ get_smokezippath ------------------------ */
 
 char *get_smokezippath(char *progdir){

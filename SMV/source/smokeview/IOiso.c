@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char IOiso_revision[]="$Revision$";
+
 #include "options.h"
 #include <stdio.h>  
 #include <stdlib.h>
@@ -15,9 +18,6 @@
 
 #include "egz_stdio.h"
 #include "smokeviewvars.h"
-
-// svn revision character string
-char IOiso_revision[]="$Revision$";
 
 void sync_isobounds(int isottype);
 void unloadiso(mesh *gb);

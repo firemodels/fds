@@ -2,10 +2,12 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char assert_revision[]="$Revision$";
+
 #include "options.h"
 #include <stdio.h>
 #include <stdlib.h>
-char assert_revision[]="$Revision$";
 
 void _Assert(char *filename, unsigned linenumber){
   /*! \fn void _Assert(char *filename, unsigned linenumber)

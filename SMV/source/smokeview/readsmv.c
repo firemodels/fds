@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char readsmv_revision[]="$Revision$";
+
 #include "options.h"
 #ifdef pp_GLEW
 #include "glew.h"
@@ -21,11 +24,7 @@
 #endif
 #include <pthread.h>
 
-#include "smv_endian.h"
 #include "smokeviewvars.h"
-
-// svn revision character string
-char readsmv_revision[]="$Revision$";
 
 #define DEVICE_DEVICE 0
 #define DEVICE_THCP 1
@@ -38,7 +37,6 @@ int GeometryMenu(int var);
 propdata *get_prop_id(char *prop_id);
 void init_evac_prop(void);
 void init_prop(propdata *propi, int nsmokeview_ids, char *label);
-void SmokeColorBarMenu(int val);
 void getsliceparams(void);
 void getsliceparams2(void);
 

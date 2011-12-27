@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char translate_revision[]="$Revision$";
+
 #include "options.h"
 #define IN_TRANSLATE
 #include "pragmas.h"
@@ -13,10 +16,6 @@
 #include "MALLOC.h"
 #include "translate.h"
 #include "string_util.h"
-
-// svn revision character string
-char translate_revision[]="$Revision$";
-
 
 /* ------------------ compare_trdata ------------------------ */
 

@@ -75,6 +75,18 @@ EXTERNCPP void drawselect_avatars(void);
 EXTERNCPP void readterrain(char *file, int ifile, int flag, int *errorcode);
 EXTERNCPP void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, int nx, float ymin, float ymax, int ny, 
                                  int allocate_memory);
+EXTERNCPP void ParticlePropShowMenu(int value);
+EXTERNCPP void glui_script_disable(void);
+EXTERNCPP void update_slice_contours(int slice_type_index, float line_min, float line_max, int nline_values);
+EXTERNCPP void ScriptMenu(int var);
+EXTERNCPP void SmokeColorBarMenu(int var);
+EXTERNCPP void  OBJECT_CB(int flag);
+EXTERNCPP void update_glui_cellcenter_interp(void);
+EXTERNCPP void update_glui_viewlist(void);
+EXTERNCPP void glui_script_enable(void);
+EXTERNCPP void WUI_CB(int var);
+EXTERNCPP void compress_onoff(int flag);
+EXTERNCPP void compress_svzip2(void);
 EXTERNCPP void initterrain_all(void);
 EXTERNCPP void update_terrain_colors(void);
 EXTERNCPP void drawterrain(terraindata *terri, int only_geom);

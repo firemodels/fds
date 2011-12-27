@@ -2,15 +2,15 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char getdatabounds_revision[]="$Revision$";
+
 #include "options.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 
 #include "smokeviewvars.h"
-
-// svn revision character string
-char getdatabounds_revision[]="$Revision$";
 
 /* ------------------ adjustdatabounds ------------------------ */
 

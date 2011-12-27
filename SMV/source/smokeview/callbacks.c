@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char callbacks_revision[]="$Revision$";
+
 #include "options.h"
 #include <stdio.h>  
 #include <string.h>
@@ -22,8 +25,6 @@
 #define KEY_NONE 2
 
 #define TERRAIN_FIRE_LINE_UPDATE 39
-void WUI_CB(int var);
-char callbacks_revision[]="$Revision$";
 
 #undef pp_GPU_CULL_STATE
 #ifdef pp_GPU
@@ -34,18 +35,6 @@ char callbacks_revision[]="$Revision$";
 #define pp_GPU_CULL_STATE
 #endif
 #endif
-
-#ifdef pp_GPU_CULL_STATE
-void print_gpu_cull_state(void);
-#endif
-void ScriptMenu(int var);
-
-void glui_script_enable(void);
-void update_glui_viewlist(void);
-void update_glui_cellcenter_interp(void);
-float gmod(float x, float y);
-void  OBJECT_CB(int flag);
-void SmokeColorBarMenu(int var);
 
 /* ------------------ WindowStatus ------------------------ */
 
@@ -711,6 +700,51 @@ float get_vecfactor(int *ivec){
   vec=VECFRACTION*veclengths[*ivec];
   return vec;
 }
+
+#ifdef pp_GPU_CULL_STATE
+/* ------------------ print_gpu_cull_state ------------------------ */
+
+void print_gpu_cull_state(void){
+  char gpu_label[128];
+#ifdef pp_CULL
+  char cull_label[128];
+
+  if(cullactive==1){
+    if(cullsmoke==1&&usegpu==1){
+      strcpy(cull_label,"Smoke culling in use.");
+    }
+    else if(cullsmoke==1&&usegpu==0){
+      strcpy(cull_label,"Smoke culling not in use (available if GPU activates).");
+    }
+    else{
+      strcpy(cull_label,"Smoke culling not in use.");
+    }
+  }
+  else{
+    strcpy(cull_label,"Smoke culling not available.");
+  }
+#endif
+#ifdef pp_GPU
+  if(gpuactive==1){
+    if(usegpu==1){
+      strcpy(gpu_label,"GPU in use.");
+    }
+    else{
+      strcpy(gpu_label,"GPU not in use.");
+    }
+  }
+  else{
+    strcpy(gpu_label,"GPU not available.");
+  }
+  printf("%s ",gpu_label);
+#endif
+#ifdef pp_CULL
+  printf("%s",cull_label);
+#endif
+  printf("\n");
+}
+#endif
+
 /* ------------------ keyboard ------------------------ */
 
 void keyboard_2(unsigned char key, int x, int y){
@@ -1432,50 +1466,6 @@ void keyboard(unsigned char key, int x, int y){
   updatemenu=1;
 }
 
-#ifdef pp_GPU_CULL_STATE
-/* ------------------ print_gpu_cull_state ------------------------ */
-
-void print_gpu_cull_state(void){
-  char gpu_label[128];
-#ifdef pp_CULL
-  char cull_label[128];
-
-  if(cullactive==1){
-    if(cullsmoke==1&&usegpu==1){
-      strcpy(cull_label,"Smoke culling in use.");
-    }
-    else if(cullsmoke==1&&usegpu==0){
-      strcpy(cull_label,"Smoke culling not in use (available if GPU activates).");
-    }
-    else{
-      strcpy(cull_label,"Smoke culling not in use.");
-    }
-  }
-  else{
-    strcpy(cull_label,"Smoke culling not available.");
-  }
-#endif
-#ifdef pp_GPU
-  if(gpuactive==1){
-    if(usegpu==1){
-      strcpy(gpu_label,"GPU in use.");
-    }
-    else{
-      strcpy(gpu_label,"GPU not in use.");
-    }
-  }
-  else{
-    strcpy(gpu_label,"GPU not available.");
-  }
-  printf("%s ",gpu_label);
-#endif
-#ifdef pp_CULL
-  printf("%s",cull_label);
-#endif
-  printf("\n");
-}
-#endif
-
 /* ------------------ handle_eyeview ------------------------ */
 
 void handle_eyeview(int flag){
@@ -1913,6 +1903,17 @@ void handle_move_keys(int  key){
   }
 } 
 
+/* ------------------ gmod ------------------------ */
+
+float gmod(float x, float y){
+  float returnval;
+
+  if(y==0.0)return 0.0;
+  returnval = x - (int)(x/y)*y;
+  if(returnval<0.0)returnval+=y;
+  return returnval;
+}
+
 /* ------------------ UpdateFrame ------------------------ */
 
 void UpdateFrame(float thisinterval, int *changetime, int *redisplay){
@@ -2082,17 +2083,6 @@ void togglegridstate(int visg){
     }
     updateshowstep(1-current_mesh->visy,DIRY);
   }
-}
-
-/* ------------------ gmod ------------------------ */
-
-float gmod(float x, float y){
-  float returnval;
-
-  if(y==0.0)return 0.0;
-  returnval = x - (int)(x/y)*y;
-  if(returnval<0.0)returnval+=y;
-  return returnval;
 }
 
 /* ------------------ reset_gltime ------------------------ */

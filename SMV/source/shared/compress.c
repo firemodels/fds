@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char compress_revision[]="$Revision$";
+
 #include "options.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -10,9 +13,6 @@
 
 #include "MALLOC.h"
 #include "compress.h"
-
-// svn revision character string
-char compress_revision[]="$Revision$";
 
 #define MARK 255
 

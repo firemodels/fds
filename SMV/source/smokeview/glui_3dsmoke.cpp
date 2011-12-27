@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+extern "C" char glui_3dsmoke_revision[]="$Revision$";
+
 #define CPP
 #include "options.h"
 #include <string.h>
@@ -14,18 +17,12 @@
 
 #include "smokeviewvars.h"
 
-// svn revision character string
-extern "C" char glui_3dsmoke_revision[]="$Revision$";
-
-extern "C" void SmokeColorBarMenu(int fire_colorbar_index);
-extern "C" void update2_glui_smoke3dframestep(void);
 extern GLUI_Rollout *panel_smoke3d;
 extern GLUI *glui_bounds;
 
 #define IDLE() Idle();
 
 extern "C" void SMOKE_3D_CB(int var);
-void update_alpha(void);
 
 #define SMOKE_3D_CLOSE 0
 #define FIRE_RED 1
@@ -82,7 +79,6 @@ GLUI_Checkbox *CHECKBOX_smokedrawtest2=NULL;
 GLUI_Checkbox *CHECKBOX_smoke3d_external=NULL;
 GLUI_Checkbox *CHECKBOX_zlib=NULL;
 GLUI_Spinner *SPINNER_smokedrawtest_nummin=NULL;
-GLUI_Spinner *SPINNER_smoke3dframestep=NULL;
 GLUI_Spinner *SPINNER_smokedrawtest_nummax=NULL;
 #ifdef pp_GPU
 GLUI_Spinner *SPINNER_smoke3d_rthick=NULL;
@@ -141,6 +137,41 @@ extern "C" void update_smoke3dflags(void){
   SMOKE_3D_CB(CULL_SMOKE);
 #endif
   glutPostRedisplay();
+}
+
+/* ------------------ update_apha ------------------------ */
+
+void update_alpha(void){
+  char label[100];
+  char label1[100],label2[100],label3[100];
+  float depth;
+  float factor;
+
+  factor = 1.0 - exp(-smoke_extinct*smoke_dens*smoke_pathlength);
+  smoke_alpha = 255*factor;
+  if(smoke_alpha<0)smoke_alpha=0;
+  if(smoke_alpha>255)smoke_alpha=255;
+  sprintf(label1,"%f",smoke_extinct);
+  trimzeros(label1);
+  sprintf(label2,"%f",smoke_dens);
+  trimzeros(label2);
+  sprintf(label3,"%f",smoke_pathlength);
+  trimzeros(label3);
+  sprintf(label,"alpha=%i=255*(1.0-exp(-%s*%s*%s))",smoke_alpha,label1,label2,label3);
+  if(panel_testsmoke!=NULL){
+    TEXT_smokealpha->set_text(label);
+  }
+  
+  if(smoke_extinct!=0.0&&smoke_dens!=0){
+    depth=0.693147/(smoke_extinct*smoke_dens);
+    sprintf(label,"50%s smoke depth=%f","%",depth);
+  }
+  else{
+    sprintf(label,"50%s smoke depth=***","%");
+  }
+  if(panel_testsmoke!=NULL){
+    TEXT_smokedepth->set_text(label);
+  }
 }
 
 /* ------------------ glui_3dsmoke_setup ------------------------ */
@@ -392,45 +423,6 @@ extern "C" void show_glui_3dsmoke(void){
   if(glui_3dsmoke!=NULL)glui_3dsmoke->show();
 }
 
-/* ------------------ update_glui_smoke3dframestep ------------------------ */
-
-extern "C" void update_glui_smoke3dframestep(void){
-//  SPINNER_smoke3dframestep->set_int_val(smoke3dframeskip);
-}
-
-void update_alpha(void){
-  char label[100];
-  char label1[100],label2[100],label3[100];
-  float depth;
-  float factor;
-
-  factor = 1.0 - exp(-smoke_extinct*smoke_dens*smoke_pathlength);
-  smoke_alpha = 255*factor;
-  if(smoke_alpha<0)smoke_alpha=0;
-  if(smoke_alpha>255)smoke_alpha=255;
-  sprintf(label1,"%f",smoke_extinct);
-  trimzeros(label1);
-  sprintf(label2,"%f",smoke_dens);
-  trimzeros(label2);
-  sprintf(label3,"%f",smoke_pathlength);
-  trimzeros(label3);
-  sprintf(label,"alpha=%i=255*(1.0-exp(-%s*%s*%s))",smoke_alpha,label1,label2,label3);
-  if(panel_testsmoke!=NULL){
-    TEXT_smokealpha->set_text(label);
-  }
-  
-  if(smoke_extinct!=0.0&&smoke_dens!=0){
-    depth=0.693147/(smoke_extinct*smoke_dens);
-    sprintf(label,"50%s smoke depth=%f","%",depth);
-  }
-  else{
-    sprintf(label,"50%s smoke depth=***","%");
-  }
-  if(panel_testsmoke!=NULL){
-    TEXT_smokedepth->set_text(label);
-  }
-}
-
 /* ------------------ 3dsmoke_CB ------------------------ */
 
 extern "C" void SMOKE_3D_CB(int var){
@@ -524,7 +516,6 @@ extern "C" void SMOKE_3D_CB(int var){
     break;
   case FRAMELOADING:
     smoke3dframestep = smoke3dframeskip+1;
-    update2_glui_smoke3dframestep();
     updatemenu=1;
     break;
   case SAVE_SETTINGS:

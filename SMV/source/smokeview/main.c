@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char main_revision[]="$Revision$";
+
 #define INMAIN
 #include "options.h"
 #include <stdio.h>
@@ -15,8 +18,6 @@
 
 #include "smokeviewvars.h"
 
-// svn revision character string
-char main_revision[]="$Revision$";
 //  dummy change to update version to  5.6.3
 //  dummy change to force revision update
 

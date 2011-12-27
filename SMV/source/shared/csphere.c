@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char csphere_revision[]="$Revision$";
+
 #include "options.h"
 #include <stdio.h>  
 #include <stdlib.h>
@@ -18,17 +21,6 @@
 #include <string.h>
 #include <math.h>
 #include "csphere.h"
-
-// svn revision character string
-char csphere_revision[]="$Revision$";
-
-//typedef struct {
-//  int n;
-//  float dphi;
-//  float *dtheta;
-//  int *nlong;
-//  float pi;
-//} sphere;
 
 /* ------------------ initsphere ------------------------ */
 

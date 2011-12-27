@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char IOplot3d_revision[]="$Revision$";
+
 #include "options.h"
 #include <stdio.h>  
 #include <stdlib.h>
@@ -14,9 +17,6 @@
 #endif
 
 #include "smokeviewvars.h"
-
-// svn revision character string
-char IOplot3d_revision[]="$Revision$";
 
 void update_glui_plot3d(void);
 

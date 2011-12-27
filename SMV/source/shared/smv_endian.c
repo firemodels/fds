@@ -2,12 +2,11 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char smv_endian_revision[]="$Revision$";
+
 #include "options.h"
 #include "smv_endian.h"
-
-// svn revision character string
-
-char smv_endian_revision[]="$Revision$";
 
 /* ------------------ getendian ------------------------ */
 

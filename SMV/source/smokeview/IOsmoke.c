@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char IOsmoke_revision[]="$Revision$";
+
 #include "options.h"
 #ifdef pp_GLEW
 #include "glew.h"
@@ -30,8 +33,6 @@ int cull_count=0;
 #define NCULLS 5
 int cullplane_compare( const void *arg1, const void *arg2 );
 #endif
-// svn revision character string
-char IOsmoke_revision[]="$Revision$";
 
 //              alphaf_out[n]=adjustalpha(ALPHAIN, xyzeyeorig, xp, ASPECTRATIO, NORM, NORMTYPE);
 

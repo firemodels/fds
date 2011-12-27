@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+extern "C" char glui_blockedit_revision[]="$Revision$";
+
 #define CPP
 #include "options.h"
 #include <string.h>
@@ -12,9 +15,6 @@
 #endif
 
 #include "smokeviewvars.h"
-
-// svn revision character string
-extern "C" char glui_blockedit_revision[]="$Revision$";
 
 #define XMIN_SPIN 20
 #define YMIN_SPIN 21
@@ -36,8 +36,6 @@ GLUI_EditText *edittext_xmin=NULL, *edittext_ymin=NULL, *edittext_zmin=NULL;
 GLUI_EditText *edittext_xmax=NULL, *edittext_ymax=NULL, *edittext_zmax=NULL;
 GLUI_Listbox *surfacelists[7]={NULL,NULL,NULL,NULL,NULL,NULL,NULL};
 GLUI_Checkbox *blockage_checkbox=NULL;
-
-extern "C" void OBJECT_CB(int var);
 
 void BUTTON_hide3_CB(int var);
 

@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char unit_revision[]="$Revision$";
+
 #include "options.h"
 #include <stdio.h>  
 #include <string.h>
@@ -16,9 +19,6 @@
 #endif
 
 #include "smokeviewvars.h"
-
-// svn revision character string
-char unit_revision[]="$Revision$";
 
 /* ------------------ get_unit_class ------------------------ */
 

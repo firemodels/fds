@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+extern "C" char glui_wui_revision[]="$Revision$";
+
 #define CPP
 #include "options.h"
 #include <string.h>
@@ -14,8 +17,6 @@
 
 #include "smokeviewvars.h"
 
-// svn revision character string
-extern "C" char glui_wui_revision[]="$Revision$";
 GLUI_Panel *panel_terrain=NULL;
 
 #define TERRAIN_COLORS 35
@@ -56,8 +57,6 @@ GLUI_Spinner *SPINNER_blue_max=NULL;
 GLUI_Spinner *SPINNER_vertical_factor=NULL;
 GLUI_Spinner *SPINNER_fire_line_min=NULL;
 GLUI_Spinner *SPINNER_fire_line_max=NULL;
-
-extern "C" void WUI_CB(int var);
 
 /* ------------------ update_glui_wui ------------------------ */
 

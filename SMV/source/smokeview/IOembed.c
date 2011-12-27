@@ -2,6 +2,9 @@
 // $Revision$
 // $Author$
 
+// svn revision character string
+char IOembed_revision[]="$Revision$";
+
 #include "options.h"
 #include <stdio.h>  
 #include <string.h>
@@ -14,10 +17,6 @@
 #endif
 
 #include "smokeviewvars.h"
-#include "smv_endian.h"
-
-// svn revision character string
-char IOembed_revision[]="$Revision$";
 
 /* ------------------ CalcTriNormal ------------------------ */
 

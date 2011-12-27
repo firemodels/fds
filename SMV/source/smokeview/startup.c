@@ -2,6 +2,9 @@
 // $Date$ 
 // $Author$
 
+// svn revision character string
+char startup_revision[]="$Revision$";
+
 #include "options.h"
 #include <stdio.h>  
 #include <string.h>
@@ -18,9 +21,6 @@
 
 #include "smokeviewvars.h"
 #include "svn_revision.h"
-
-// svn revision character string
-char startup_revision[]="$Revision$";
 
 int getmaxrevision(void);
 void glui_colorbar_setup(int main_window);
