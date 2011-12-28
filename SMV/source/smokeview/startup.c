@@ -1081,22 +1081,22 @@ void InitOpenGL(void){
 /* ------------------ init_texturedir ------------------------ */
 
 void init_texturedir(void){
-  if(texturedir==NULL){
-    char *texture_buffer;
-    size_t texture_len;
+  char *texture_buffer;
+  size_t texture_len;
 
-    texture_buffer=getenv("texturedir");
-    if(texture_buffer!=NULL){
-      texture_len=strlen(texture_buffer);
-      NewMemory((void **)&texturedir,texture_len+1);
-      strcpy(texturedir,texture_buffer);
-    }
-    if(texturedir==NULL&&smokeview_bindir!=NULL){
-      texture_len=strlen(smokeview_bindir)+strlen("textures");
-      NewMemory((void **)&texturedir,texture_len+2);
-      strcpy(texturedir,smokeview_bindir);
-      strcat(texturedir,"textures");
-    }
+  if(texturedir!=NULL)return;
+
+  texture_buffer=getenv("texturedir");
+  if(texture_buffer!=NULL){
+    texture_len=strlen(texture_buffer);
+    NewMemory((void **)&texturedir,texture_len+1);
+    strcpy(texturedir,texture_buffer);
+  }
+  if(texturedir==NULL&&smokeview_bindir!=NULL){
+    texture_len=strlen(smokeview_bindir)+strlen("textures");
+    NewMemory((void **)&texturedir,texture_len+2);
+    strcpy(texturedir,smokeview_bindir);
+    strcat(texturedir,"textures");
   }
 }
 
@@ -2165,7 +2165,6 @@ void initvars(void){
       p3chopmax[iii]=-.0f;
     }
   }
-
 }
 
 /* ------------------ getmaxrevision ------------------------ */
@@ -2175,7 +2174,6 @@ int getmaxrevision(void){
   int max_revision=0;
 
   MAXREV(assert_revision);
-  MAXREV(blockage_test_revision);
   MAXREV(callbacks_revision);
   MAXREV(camera_revision);
   MAXREV(colorbar_revision);

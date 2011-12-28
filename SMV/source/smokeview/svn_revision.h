@@ -5,7 +5,6 @@
 #ifndef SVN_REVISION_H_DEFINED
 #define SVN_REVISION_H_DEFINED
 extern char assert_revision[];
-extern char blockage_test_revision[];
 extern char callbacks_revision[];
 extern char camera_revision[];
 extern char colorbar_revision[];

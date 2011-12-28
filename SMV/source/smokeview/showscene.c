@@ -479,12 +479,6 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   }
   SNIFF_ERRORS("after drawplot3d");
 
-  /* ++++++++++++++++++++++++ draw cross hairs +++++++++++++++++++++++++ */
-
-#ifdef _DEBUG
-    if(eyeview==EYE_CENTERED)drawMovedir();
-#endif
-
 /* ++++++++++++++++++++++++ render scene +++++++++++++++++++++++++ */
 
   Render(view_mode);

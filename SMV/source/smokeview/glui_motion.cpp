@@ -25,8 +25,6 @@ extern "C" char glui_motion_revision[]="$Revision$";
 #define EYE_ROTATE_90 6
 #define EYELEVEL 7
 #define FLOORLEVEL 8
-#define SPEED 9
-#define EYEVIEW_LEVEL 10
 #define EYE_X 21
 #define EYE_Y 22
 #define EYE_Z 23
@@ -84,7 +82,6 @@ GLUI_Panel *panel_anglebuttons=NULL;
 GLUI_RadioGroup *projection_radio=NULL,*eyeview_radio=NULL;
 GLUI_RadioGroup *render_type_radio=NULL;
 GLUI_RadioGroup *render_label_radio=NULL;
-GLUI_RadioGroup *eyelevel_radio=NULL;
 GLUI_Translation *rotate_zx=NULL,*eyerotate_z=NULL;
 GLUI_Translation *translate_z=NULL,*translate_xy=NULL;
 GLUI_Checkbox *blockpath_checkbox=NULL,*cursor_checkbox=NULL;
@@ -181,14 +178,6 @@ extern "C" void update_glui_filelabel(int var){
       }
     }
   }
-}
-
-/* ------------------ update_glui_speed ------------------------ */
-
-
-extern "C" void update_glui_speed(void){
-  TRANSLATE_CB(EYEVIEW_LEVEL);
-  if(eyelevel_radio!=NULL)eyelevel_radio->set_int_val(eyeview_level);
 }
 
 /* ------------------ update_glui_zoom ------------------------ */
@@ -630,7 +619,6 @@ extern "C" void showhide_translate(int var){
     if(eyerotate_z!=NULL)eyerotate_z->disable();
     if(eyerotate90_z!=NULL)eyerotate90_z->disable();
     if(blockpath_checkbox!=NULL)blockpath_checkbox->disable();
-    if(eyelevel_radio!=NULL)eyelevel_radio->disable();
     if(panel_speed!=NULL)panel_speed->disable();
     if(panel_height!=NULL)panel_height->disable();
     if(eyeview_radio!=NULL)eyeview_radio->set_int_val(eyeview);
@@ -659,7 +647,6 @@ extern "C" void showhide_translate(int var){
     if(eyerotate_z!=NULL)eyerotate_z->disable();
     if(eyerotate90_z!=NULL)eyerotate90_z->disable();
     if(blockpath_checkbox!=NULL)blockpath_checkbox->disable();
-    if(eyelevel_radio!=NULL)eyelevel_radio->disable();
     if(panel_speed!=NULL)panel_speed->disable();
     if(panel_height!=NULL)panel_height->disable();
     if(eyeview_radio!=NULL)eyeview_radio->set_int_val(eyeview);
@@ -825,32 +812,6 @@ extern "C" void TRANSLATE_CB(int var){
     case FLOORLEVEL:
       desired_view_height=0.6;
       break;
-    case SPEED:
-      switch (eyeview_level){
-      case CRAWL:
-        setspeed(speed_crawl);
-        break;
-      case WALK:
-        setspeed(speed_walk);
-        break;
-      }
-      break;
-    case EYEVIEW_LEVEL:
-      switch (eyeview_level){
-      case 0:
-        desired_view_height=0.6;
-        setspeed(speed_crawl);
-        break;
-      case 1:
-        desired_view_height=1.5;
-        setspeed(speed_walk);
-        break;
-      case 2:
-        desired_view_height=1.5;
-        setspeed(speed_walk);
-        break;
-      }
-      break;
     case MESH_LIST:
       if(*rotation_index>=0&&*rotation_index<nmeshes){
         update_current_mesh(meshinfo + (*rotation_index));
@@ -963,9 +924,6 @@ extern "C" void TRANSLATE_CB(int var){
     case APERTURE:
     case ZOOM:
     case FLOORLEVEL:
-    case EYELEVEL:
-    case SPEED:
-    case EYEVIEW_LEVEL:
     case PROJECTION:
     case WINDOW_RESIZE:
     case WINDOWSIZE_LIST:

@@ -2393,33 +2393,6 @@ void TourMenu(int value){
     ResetView(RESTORE_EXTERIOR_VIEW);
     defaulttour();
     break;
-  case -8:  // crawl
-    eyeview_level=0;
-    pass_through=0;
-    update_glui_speed();
-    if(trainer_mode==1){
-      eyeview=EYE_CENTERED;
-      handle_eyeview(0);
-    }
-    break;
-  case -9:  // walk
-    eyeview_level=1;
-    pass_through=0;
-    update_glui_speed();
-    if(trainer_mode==1){
-      eyeview=EYE_CENTERED;
-      handle_eyeview(0);
-    }
-    break;
-  case -10: // overview
-    eyeview_level=2;
-    pass_through=1;
-    update_glui_speed();
-    if(trainer_mode==1){
-      eyeview=EYE_CENTERED;
-      handle_eyeview(0);
-    }
-    break;
   case -11: // bird's eye
     break;
   case -21:
@@ -6371,19 +6344,10 @@ updatemenu=0;
       
     glutAddMenuEntry(_("New..."),-12);
     if(ntours>0){
-      if(trainer_mode==0){
-        glutAddMenuEntry(_("Manual"),-2);
-      }
-      else{
-        glutAddMenuEntry(_("Crawl"),-8);
-        glutAddMenuEntry(_("Walk"),-9);
-        glutAddMenuEntry(_("Overview"),-10);
-      }
-      if(trainer_mode==0||(trainer_mode==1&&ntours>0))glutAddMenuEntry("-",-999);
+      glutAddMenuEntry(_("Manual"),-2);
+      glutAddMenuEntry("-",-999);
+      glutAddSubMenu(_("Show/Hide"),showtourmenu);
     }
-  if(ntours>0){
-    glutAddSubMenu(_("Show/Hide"),showtourmenu);
-  }
   if(nvolsmoke3dloaded>0){
     CREATEMENU(showvolsmoke3dmenu,ShowVolSmoke3DMenu);
     if(nvolsmoke3dloaded>1){

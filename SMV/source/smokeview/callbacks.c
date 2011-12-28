@@ -1038,21 +1038,6 @@ void keyboard_2(unsigned char key, int x, int y){
     }
     return;
   }
-  if(strncmp((const char *)&key2,"j",1)==0&&eyeview==EYE_CENTERED){
-    int state;
-
-    state=glutGetModifiers();
-
-    switch (state){
-    case GLUT_ACTIVE_ALT:
-    case GLUT_ACTIVE_CTRL:
-    case GLUT_ACTIVE_SHIFT:
-    default:
-      eyeview_level = 1 - eyeview_level;
-      update_glui_speed();
-    }
-    return;
-  }
   if(strncmp((const char *)&key2,"g",1)==0){
     if(ntotal_blockages>0||isZoneFireModel==0){
       togglegridstate(1-visGrid);
@@ -1487,7 +1472,6 @@ void handle_eyeview(int flag){
        if(showtrainer==0&&flag==0&&eyeview_old!=EYE_CENTERED){
          ResetView(RESTORE_EXTERIOR_VIEW);
        }
-       update_glui_speed();
       if(trainer_mode==0)printf("eye centered\n");
       break;
   case WORLD_CENTERED_LEVEL:
@@ -1744,8 +1728,6 @@ void handle_move_keys(int  key){
       dx = INC_XY*(*cos_direction_angle);
       dy = INC_XY*(*sin_direction_angle);
       getnewpos(eye_xyz,dx,-dy,0.0,1.0);
-//      eye_xyz[0] += dx;
-//      eye_xyz[1] -= dy;
       break;
     case KEY_SHIFT:
     case KEY_CTRL:
@@ -1863,16 +1845,6 @@ void handle_move_keys(int  key){
     break;
   case GLUT_KEY_END:
     ResetView(RESTORE_EXTERIOR_VIEW);
-    break;
-  case GLUT_KEY_F1:
-    setspeed(speed_now/1.5);
-    break;
-  case GLUT_KEY_F2:
-    setspeed(speed_walk);
-    update_glui_speed();
-    break;
-  case GLUT_KEY_F3:
-    setspeed(speed_now*1.5);
     break;
   case GLUT_KEY_F4:
     camera_current->view_angle-=LOOKANGLE_CHANGE;

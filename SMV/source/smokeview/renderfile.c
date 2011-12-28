@@ -266,9 +266,10 @@ void RenderFrame(int view_mode){
 }
 
 /* ------------------ getscreenbuffer --------- */
+
 GLubyte *getscreenbuffer(void){
 
-  GLubyte *OpenGLimage;
+  GLubyte *OpenGLimage=NULL;
 
   int x=0, y=0;
 
@@ -442,13 +443,11 @@ int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
 
   RENDERfile = fopen(RENDERfilename, "wb");
   if (RENDERfile == NULL) {
-    {
-      char message[1024];
+    char message[1024];
 
-      strcpy(message,_("unable to write to "));
-      strcat(message,RENDERfilename);
-      warning_message(message);
-    }
+    strcpy(message,_("unable to write to "));
+    strcat(message,RENDERfilename);
+    warning_message(message);
     return 1;
   }
   NewMemory((void **)&OpenGLimage,width * height * sizeof(GLubyte) * 3);
