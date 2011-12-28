@@ -70,12 +70,14 @@ mallocflag _NewMemory(void **ppv, size_t size, char *varname, char *file, int li
   LOCK_MEM;
   returnval=_NewMemoryNOTHREAD(ppv, size);
   if(returnval!=1){
-                     printf("*** warning: memory allocation request failed.\n");
-    if(varname!=NULL)printf("             variable: %s\n",varname);
-                     printf("                 size: %u\n",(unsigned int)size);
+    printf("*** warning: memory allocation request failed.\n");
+    if(varname!=NULL){
+      printf("             variable: %s\n",varname);
+      printf("                 size: %u\n",(unsigned int)size);
+    }
     if(file!=NULL){
-                     printf("                 file: %s\n",file);
-                     printf("          line number: %i\n",linenumber);
+      printf("                 file: %s\n",file);
+      printf("          line number: %i\n",linenumber);
     }
   }
   UNLOCK_MEM;
@@ -200,12 +202,14 @@ mallocflag _ResizeMemory(void **ppv, size_t sizeNew,  char *varname, char *file,
   LOCK_MEM;
   returnval=_ResizeMemoryNOTHREAD(ppv, sizeNew);
   if(returnval!=1){
-                     printf("*** warning: memory allocation request failed.\n");
-    if(varname!=NULL)printf("             variable: %s\n",varname);
-                     printf("                 size: %u\n",(unsigned int)sizeNew);
+    printf("*** warning: memory allocation request failed.\n");
+    if(varname!=NULL){
+      printf("             variable: %s\n",varname);
+      printf("                 size: %u\n",(unsigned int)sizeNew);
+    }
     if(file!=NULL){
-                     printf("                 file: %s\n",file);
-                     printf("          line number: %i\n",linenumber);
+      printf("                 file: %s\n",file);
+      printf("          line number: %i\n",linenumber);
     }
   }
   UNLOCK_MEM;
@@ -335,12 +339,14 @@ mallocflag __NewMemory(void **ppv, size_t size, char *varname, char *file, int l
     strcat(pbi->varname,"\0");
   }
   if(return_code!=1){
-                     printf("*** warning: memory allocation request failed.\n");
-    if(varname!=NULL)printf("             variable: %s\n",varname);
-                     printf("                 size: %u\n",(unsigned int)size);
+    printf("*** warning: memory allocation request failed.\n");
+    if(varname!=NULL){
+      printf("             variable: %s\n",varname);
+      printf("                 size: %u\n",(unsigned int)size);
+    }
     if(file!=NULL){
-                     printf("                 file: %s\n",file);
-                     printf("          line number: %i\n",linenumber);
+      printf("                 file: %s\n",file);
+      printf("          line number: %i\n",linenumber);
     }
   }
   UNLOCK_MEM;
@@ -406,12 +412,10 @@ static blockinfo *GetBlockInfo(bbyte *pb){
 
 int _GGetMemoryInfo(void){
   blockinfo *pbi;
-  int n=0,size=0;
+  int n=0;
 
-  for (pbi = pbiHead; pbi != NULL; pbi = pbi->pbiNext)
-  {
+  for (pbi = pbiHead; pbi != NULL; pbi = pbi->pbiNext){
     n++;
-    size += pbi->size;
   }
   return n;
 }

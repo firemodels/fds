@@ -1733,7 +1733,7 @@ void Update_Isotris(int flag){
         for(ilev=0;ilev<meshi->nisolevels;ilev++){
           if(showlevels[ilev]==0)continue;
           asurfi = asurface + ilev;
-          if(asurfi->iso_triangles>0){
+          if(asurfi->niso_triangles>0){
             niso_trans += asurfi->niso_triangles;
             for(itri=0;itri<asurfi->niso_triangles;itri++){
               *iso_trans_tmp++=asurfi->iso_triangles+itri;

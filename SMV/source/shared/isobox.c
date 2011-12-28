@@ -946,6 +946,7 @@ int CompressIsosurface(isosurface *surface, int reduce_triangles,
 
   nn=0;
   vertices = surface->vertices;
+  ii=ordered_closestnodes[0];
   if(surface->dataflag==1)tvertices = surface->tvertices;
   nnewvertices=0;
   for(i=1;i<nvertices+1;i++){

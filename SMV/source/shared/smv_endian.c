@@ -32,7 +32,7 @@ float float_switch(float val){
   buffer2[2]=*(buffer+1);
   buffer2[3]=*buffer;
 
-  val2ptr=(float *)&buffer2;
+  val2ptr=(float *)buffer2;
   return *val2ptr;
 
 }
@@ -49,7 +49,7 @@ int int_switch(int val){
   buffer2[2]=*(buffer+1);
   buffer2[3]=*buffer;
 
-  val2ptr=(int *)&buffer2;
+  val2ptr=(int *)buffer2;
   return *val2ptr;
 
 }

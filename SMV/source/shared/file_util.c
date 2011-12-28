@@ -505,7 +505,7 @@ char *which(char *progname){
   ext=progname+lenprog-4;
   if(lenprog<=4||STRCMP(ext,".exe")!=0){
     strcat(progname,".exe");
- }
+  }
 #endif
         
   dir=strtok(pathlist,pathsep);

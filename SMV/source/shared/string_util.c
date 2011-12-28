@@ -285,7 +285,7 @@ int STRCMP(const char *s1, const char *s2){
   while (toupper(*s1) == toupper(*s2++)){
 		if (*s1++ == 0)return (0);
   }
-	return (toupper(*(const unsigned char *)s1) - toupper(*(const unsigned char *)(s2 - 1)));
+  return (toupper(*(const unsigned char *)s1) - toupper(*(const unsigned char *)(s2 - 1)));
 }
 
 /* ------------------ STRSTR ------------------------ */
@@ -405,6 +405,9 @@ char *get_chid(char *file, char *buffer){
   stream=fopen(file,"r");
   if(stream==NULL)return NULL;
 
+  found1st=0;
+  found2nd=0;
+  chidptr=NULL;
   while(!feof(stream)){
     found1st=0;
     found2nd=0;
@@ -522,20 +525,20 @@ char *getstring(char *buffer){
 
   /* ------------------ time2timelabel ------------------------ */
 
-char *time2timelabel(float time, float dt, char *timelabel){
+char *time2timelabel(float sv_time, float dt, char *timelabel){
   char *timelabelptr;
 
   if(dt<0.001){
-    sprintf(timelabel,"%4.4f",time);
+    sprintf(timelabel,"%4.4f",sv_time);
   }
   else if(dt>=0.001&&dt<0.01){
-    sprintf(timelabel,"%4.3f",time);
+    sprintf(timelabel,"%4.3f",sv_time);
   }
   else if(dt>=0.01&&dt<0.1){
-    sprintf(timelabel,"%4.2f",time);
+    sprintf(timelabel,"%4.2f",sv_time);
   }
   else{
-    sprintf(timelabel,"%4.1f",time);
+    sprintf(timelabel,"%4.1f",sv_time);
   }
   trimzeros(timelabel);
   trim(timelabel);
