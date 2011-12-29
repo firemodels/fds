@@ -1257,7 +1257,7 @@ int CompressIsosurface(isosurface *surface, int reduce_triangles,
   }
 
   for(i=0;i<nvertices;i++){
-    vertices[3*i+0]=65535*(x[i]-xmin)/xyzmaxdiff;
+    vertices[3*i]=65535*(x[i]-xmin)/xyzmaxdiff;
     vertices[3*i+1]=65535*(y[i]-ymin)/xyzmaxdiff;
     vertices[3*i+2]=65535*(z[i]-zmin)/xyzmaxdiff;
     sortedlist[i]=i;
@@ -1300,7 +1300,7 @@ int CompressIsosurface(isosurface *surface, int reduce_triangles,
 
   for(i=0;i<nvertices;i++){
 	  j=sortedlist[map2[i]];
-	  newvertices[3*i+0]=vertices[3*j+0];
+	  newvertices[3*i]=vertices[3*j];
 	  newvertices[3*i+1]=vertices[3*j+1];
 	  newvertices[3*i+2]=vertices[3*j+2];
     cs[i] = closestnodes[j];
