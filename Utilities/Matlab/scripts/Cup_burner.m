@@ -108,7 +108,8 @@ set(gca,'Position',[Plot_X,Plot_Y,Plot_Height,Plot_Height])
 set(hf(1),'DefaultLineLineWidth',Line_Width)
 xlabel('Measured MEC (volume fraction)','Interpreter','LaTeX','FontSize',Scat_Label_Font_Size)
 ylabel('Predicted MEC (volume fraction)','Interpreter','LaTeX','FontSize',Scat_Label_Font_Size)
-legend(hX,XLegendStr,'Location',X_leg_pos)
+%legend(hX,XLegendStr,'Location',X_leg_pos)
+legend(hX,XLegendStr,'Location','NorthWest')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
@@ -152,7 +153,8 @@ set(gca,'Position',[Plot_X,Plot_Y,Plot_Height,Plot_Height])
 set(hf(2),'DefaultLineLineWidth',Line_Width)
 xlabel('Measured MEC (mass fraction)','Interpreter','LaTeX','FontSize',Scat_Label_Font_Size)
 ylabel('Predicted MEC (mass fraction)','Interpreter','LaTeX','FontSize',Scat_Label_Font_Size)
-legend(hY,YLegendStr,'Location',Y_leg_pos)
+%legend(hY,YLegendStr,'Location',Y_leg_pos)
+legend(hY,YLegendStr,'Location','NorthWest')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
