@@ -74,7 +74,6 @@ void add_default_views(void){
 
 void update_camera_ypos(camera *camera_data){
   float local_aperture_default;
-  float height;
   float width;
   float asp;
   
@@ -333,7 +332,7 @@ void delete_camera(camera *cam){
 /* ------------------ get_camera ------------------------ */
 
 camera *get_camera(char *name){
-  camera *cam,*ca;
+  camera *ca;
 
   for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
     if(strcmp(ca->name,name)==0){
@@ -346,7 +345,7 @@ camera *get_camera(char *name){
 /* ------------------ get_camera_label ------------------------ */
 
 char *get_camera_label(int index){
-  camera *cam,*ca;
+  camera *ca;
 
   for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
     if(ca->view_id==index){

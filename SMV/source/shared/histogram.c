@@ -5,12 +5,9 @@
 // svn revision character string
 char histogram_revision[]="$Revision$";
 
-#define IN_BUCKET 1
-
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <math.h>
 #include "histogram.h"
 

@@ -27,7 +27,6 @@ GLUI_Spinner *SPINNER_zero_parallax=NULL, *SPINNER_right_green2=NULL, *SPINNER_r
 
 #define STEREO_CLOSE 0
 #define STEREO_RESET 2
-#define STEREO_FRAME 3
 #define STEREO_SHOW 4
 #define STEREO_GREEN 5
 #define STEREO_BLUE 6
@@ -146,6 +145,9 @@ void STEREO_CB(int var){
     break;
   case SAVE_SETTINGS:
     writeini(LOCAL_INI);
+    break;
+  default:
+    ASSERT(0);
     break;
   }
 }

@@ -167,8 +167,6 @@ void ExtractFrustum(void){
 /* ------------------ PointInFrustum ------------------------ */
 
 int PointInFrustum( float x, float y, float z){
-   int p;
-
    if( frustum[0][0]*x + frustum[0][1]*y + frustum[0][2]*z + frustum[0][3] <= 0 )return 0;
    if( frustum[1][0]*x + frustum[1][1]*y + frustum[1][2]*z + frustum[1][3] <= 0 )return 0;
    if( frustum[2][0]*x + frustum[2][1]*y + frustum[2][2]*z + frustum[2][3] <= 0 )return 0;
@@ -878,9 +876,7 @@ int makeiblank_carve(void){
   int ibar, jbar, kbar;
   int ijksize;
   int nx, ny, nz, nxy;
-  int n_embed;
   char *ib_embed;
-  char *iblank_embed;
 
   n_embedded_meshes=0;
   for(i=0;i<nmeshes;i++){
@@ -1070,118 +1066,118 @@ int makeiblank(void){
     }
     i=0;
     for(j=1;j<jbar;j++){
-    for(k=1;k<kbar;k++){
-      test=0;
-      test+=iblank_cell[IJKCELL(  i,j-1,k-1)];
-      test+=iblank_cell[IJKCELL(  i,  j,k-1)];
-      test+=iblank_cell[IJKCELL(  i,j-1,  k)];
-      test+=iblank_cell[IJKCELL(  i,  j,  k)];
-      if(test==0)iblank[IJKNODE(i,j,k)]=0;
-    }
+      for(k=1;k<kbar;k++){
+        test=0;
+        test+=iblank_cell[IJKCELL(  i,j-1,k-1)];
+        test+=iblank_cell[IJKCELL(  i,  j,k-1)];
+        test+=iblank_cell[IJKCELL(  i,j-1,  k)];
+        test+=iblank_cell[IJKCELL(  i,  j,  k)];
+        if(test==0)iblank[IJKNODE(i,j,k)]=0;
+      }
     }
     j=0;
     for(i=1;i<ibar;i++){
-    for(k=1;k<kbar;k++){
-      test=0;
-      test+=iblank_cell[IJKCELL(i-1,  j,k-1)];
-      test+=iblank_cell[IJKCELL(  i,  j,k-1)];
-      test+=iblank_cell[IJKCELL(i-1,  j,  k)];
-      test+=iblank_cell[IJKCELL(  i,  j,  k)];
-      if(test==0)iblank[IJKNODE(i,j,k)]=0;
-    }
+      for(k=1;k<kbar;k++){
+        test=0;
+        test+=iblank_cell[IJKCELL(i-1,  j,k-1)];
+        test+=iblank_cell[IJKCELL(  i,  j,k-1)];
+        test+=iblank_cell[IJKCELL(i-1,  j,  k)];
+        test+=iblank_cell[IJKCELL(  i,  j,  k)];
+        if(test==0)iblank[IJKNODE(i,j,k)]=0;
+      }
     }
     k=0;
     for(i=1;i<ibar;i++){
-    for(j=1;j<jbar;j++){
-      test=0;
-      test+=iblank_cell[IJKCELL(i-1,j-1,  k)];
-      test+=iblank_cell[IJKCELL(  i,j-1,  k)];
-      test+=iblank_cell[IJKCELL(i-1,  j,  k)];
-      test+=iblank_cell[IJKCELL(  i,  j,  k)];
-      if(test==0)iblank[IJKNODE(i,j,k)]=0;
-    }
+      for(j=1;j<jbar;j++){
+        test=0;
+        test+=iblank_cell[IJKCELL(i-1,j-1,  k)];
+        test+=iblank_cell[IJKCELL(  i,j-1,  k)];
+        test+=iblank_cell[IJKCELL(i-1,  j,  k)];
+        test+=iblank_cell[IJKCELL(  i,  j,  k)];
+        if(test==0)iblank[IJKNODE(i,j,k)]=0;
+      }
     }
     i=ibar;
     for(j=1;j<jbar;j++){
-    for(k=1;k<kbar;k++){
-      test=0;
-      test+=iblank_cell[IJKCELL(i-1,j-1,k-1)];
-      test+=iblank_cell[IJKCELL(i-1,  j,k-1)];
-      test+=iblank_cell[IJKCELL(i-1,j-1,  k)];
-      test+=iblank_cell[IJKCELL(i-1,  j,  k)];
-      if(test==0)iblank[IJKNODE(i,j,k)]=0;
-    }
+      for(k=1;k<kbar;k++){
+        test=0;
+        test+=iblank_cell[IJKCELL(i-1,j-1,k-1)];
+        test+=iblank_cell[IJKCELL(i-1,  j,k-1)];
+        test+=iblank_cell[IJKCELL(i-1,j-1,  k)];
+        test+=iblank_cell[IJKCELL(i-1,  j,  k)];
+        if(test==0)iblank[IJKNODE(i,j,k)]=0;
+      }
     }
     j=jbar;
     for(i=1;i<ibar;i++){
-    for(k=1;k<kbar;k++){
-      test=0;
-      test+=iblank_cell[IJKCELL(i-1,j-1,k-1)];
-      test+=iblank_cell[IJKCELL(  i,j-1,k-1)];
-      test+=iblank_cell[IJKCELL(i-1,j-1,  k)];
-      test+=iblank_cell[IJKCELL(  i,j-1,  k)];
-      if(test==0)iblank[IJKNODE(i,j,k)]=0;
-    }
+      for(k=1;k<kbar;k++){
+        test=0;
+        test+=iblank_cell[IJKCELL(i-1,j-1,k-1)];
+        test+=iblank_cell[IJKCELL(  i,j-1,k-1)];
+        test+=iblank_cell[IJKCELL(i-1,j-1,  k)];
+        test+=iblank_cell[IJKCELL(  i,j-1,  k)];
+        if(test==0)iblank[IJKNODE(i,j,k)]=0;
+      }
     }
     k=kbar;
     for(i=1;i<ibar;i++){
-    for(j=1;j<jbar;j++){
-      test=0;
-      test+=iblank_cell[IJKCELL(i-1,j-1,k-1)];
-      test+=iblank_cell[IJKCELL(  i,j-1,k-1)];
-      test+=iblank_cell[IJKCELL(i-1,  j,k-1)];
-      test+=iblank_cell[IJKCELL(  i,  j,k-1)];
-      if(test==0)iblank[IJKNODE(i,j,k)]=0;
-    }
+      for(j=1;j<jbar;j++){
+        test=0;
+        test+=iblank_cell[IJKCELL(i-1,j-1,k-1)];
+        test+=iblank_cell[IJKCELL(  i,j-1,k-1)];
+        test+=iblank_cell[IJKCELL(i-1,  j,k-1)];
+        test+=iblank_cell[IJKCELL(  i,  j,k-1)];
+        if(test==0)iblank[IJKNODE(i,j,k)]=0;
+      }
     }
 
     for(i=1;i<ibar;i++){
-    for(j=1;j<jbar;j++){
-    for(k=1;k<kbar;k++){
-      test=0;
-      test+=iblank_cell[IJKCELL(i-1,j-1,k-1)];
-      test+=iblank_cell[IJKCELL(  i,j-1,k-1)];
-      test+=iblank_cell[IJKCELL(i-1,  j,k-1)];
-      test+=iblank_cell[IJKCELL(  i,  j,k-1)];
-      test+=iblank_cell[IJKCELL(i-1,j-1,  k)];
-      test+=iblank_cell[IJKCELL(  i,j-1,  k)];
-      test+=iblank_cell[IJKCELL(i-1,  j,  k)];
-      test+=iblank_cell[IJKCELL(  i,  j,  k)];
-      if(test==0)iblank[IJKNODE(i,j,k)]=0;
-    }
-    }
-    }
-
-    for(j=0;j<jbar;j++){
-    for(k=0;k<kbar;k++){
-      iblank_x[IJKNODE(0,j,k)]   =2*iblank_cell[IJKCELL(0,j,k)];
-      for(i=1;i<ibar;i++){
-        iblank_x[IJKNODE(i,j,k)]=iblank_cell[IJKCELL(i-1,j,k)]+iblank_cell[IJKCELL(i,j,k)];
-      }
-      iblank_x[IJKNODE(ibar,j,k)]=2*iblank_cell[IJKCELL(ibar-1,j,k)];
-    }
-    }
-    for(i=0;i<ibar;i++){
-    for(k=0;k<kbar;k++){
-      iblank_y[IJKNODE(i,0,k)]=2*iblank_cell[IJKCELL(i,0,k)];
       for(j=1;j<jbar;j++){
-        iblank_y[IJKNODE(i,j,k)]=iblank_cell[IJKCELL(i,j-1,k)]+iblank_cell[IJKCELL(i,j,k)];
+        for(k=1;k<kbar;k++){
+          test=0;
+          test+=iblank_cell[IJKCELL(i-1,j-1,k-1)];
+          test+=iblank_cell[IJKCELL(  i,j-1,k-1)];
+          test+=iblank_cell[IJKCELL(i-1,  j,k-1)];
+          test+=iblank_cell[IJKCELL(  i,  j,k-1)];
+          test+=iblank_cell[IJKCELL(i-1,j-1,  k)];
+          test+=iblank_cell[IJKCELL(  i,j-1,  k)];
+          test+=iblank_cell[IJKCELL(i-1,  j,  k)];
+          test+=iblank_cell[IJKCELL(  i,  j,  k)];
+          if(test==0)iblank[IJKNODE(i,j,k)]=0;
+        }
       }
-      iblank_y[IJKNODE(i,jbar,k)]=2*iblank_cell[IJKCELL(i,jbar-1,k)];
     }
+
+    for(j=0;j<jbar;j++){
+      for(k=0;k<kbar;k++){
+        iblank_x[IJKNODE(0,j,k)]   =2*iblank_cell[IJKCELL(0,j,k)];
+        for(i=1;i<ibar;i++){
+          iblank_x[IJKNODE(i,j,k)]=iblank_cell[IJKCELL(i-1,j,k)]+iblank_cell[IJKCELL(i,j,k)];
+        }
+        iblank_x[IJKNODE(ibar,j,k)]=2*iblank_cell[IJKCELL(ibar-1,j,k)];
+      }
+    }
+    for(i=0;i<ibar;i++){
+      for(k=0;k<kbar;k++){
+        iblank_y[IJKNODE(i,0,k)]=2*iblank_cell[IJKCELL(i,0,k)];
+        for(j=1;j<jbar;j++){
+          iblank_y[IJKNODE(i,j,k)]=iblank_cell[IJKCELL(i,j-1,k)]+iblank_cell[IJKCELL(i,j,k)];
+        }
+        iblank_y[IJKNODE(i,jbar,k)]=2*iblank_cell[IJKCELL(i,jbar-1,k)];
+      }
     }
 
     for(i=0;i<ibar;i++){
-    for(j=0;j<jbar;j++){
-      iblank_z[IJKNODE(i,j,0)]=2*iblank_cell[IJKCELL(i,j,0)];
-      for(k=1;k<kbar;k++){
-        iblank_z[IJKNODE(i,j,k)]=iblank_cell[IJKCELL(i,j,k-1)]+iblank_cell[IJKCELL(i,j,k)];
+      for(j=0;j<jbar;j++){
+        iblank_z[IJKNODE(i,j,0)]=2*iblank_cell[IJKCELL(i,j,0)];
+        for(k=1;k<kbar;k++){
+          iblank_z[IJKNODE(i,j,k)]=iblank_cell[IJKCELL(i,j,k-1)]+iblank_cell[IJKCELL(i,j,k)];
+        }
+        iblank_z[IJKNODE(i,j,kbar)]=2*iblank_cell[IJKCELL(i,j,kbar-1)];
       }
-      iblank_z[IJKNODE(i,j,kbar)]=2*iblank_cell[IJKCELL(i,j,kbar-1)];
-    }
     }
   }
-   init_blockage_distance();
+  init_blockage_distance();
   return 0;
 }
 

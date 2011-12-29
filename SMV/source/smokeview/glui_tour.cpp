@@ -29,7 +29,6 @@ static char tour_label[sizeof(GLUI_String)];
 int nexttour(void);
 int prevtour(void);
 void TOUR_CB(int var);
-void setviewcontrols(void);
 
 GLUI_Spinner *SPINNER_t=NULL,*SPINNER_x=NULL, *SPINNER_y=NULL,*SPINNER_z=NULL;
 GLUI_Spinner *SPINNER_viewx=NULL, *SPINNER_viewy=NULL,*SPINNER_viewz=NULL;
@@ -157,7 +156,7 @@ extern "C" void glui_tour_setup(int main_window){
       glui_avatar_index=iavatar_types;
     }
 
-     LISTBOX_avatar->set_int_val(glui_avatar_index);
+    LISTBOX_avatar->set_int_val(glui_avatar_index);
   }
 
   panel_keyframe = glui_tour->add_panel("Keyframe");

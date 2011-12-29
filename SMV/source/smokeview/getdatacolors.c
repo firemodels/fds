@@ -186,12 +186,12 @@ void remap_patchdata(patch *patchi,float valmin, float valmax, int *extreme_min,
   int i;
   mesh *meshi;
   unsigned char *ipqq;
-  int npqq;
+  int npqq_local;
 
   meshi = meshinfo + patchi->blocknumber;
   ipqq = meshi->ipqq;
-  npqq = meshi->npatch_frames*meshi->npatchsize;
-  for(i=0;i<npqq;i++){
+  npqq_local = meshi->npatch_frames*meshi->npatchsize;
+  for(i=0;i<npqq_local;i++){
     float val;
     int ival;
 
@@ -261,12 +261,10 @@ void getBoundaryColors3(patch *patchi, float *t, int nt, unsigned char *it,
               int *extreme_min, int *extreme_max
               ){
   int n;
-  float *tcopy, factor, tval, range;
+  float factor, tval, range;
   int expmin, expmax;
   int itt;
   float new_tmin, new_tmax, tmin2, tmax2;
-  int i,j;
-  patch *patchj;
 
   update_patch_bounds(patchi);
 
@@ -407,12 +405,8 @@ void getBoundaryLabels(
 void updatePart5extremes(void){
   int ii,i,j,k,m;
   part5data *datacopy;
-  float *diameter_data, *length_data, *azimuth_data, *elevation_data;
-  float *u_vel_data, *v_vel_data, *w_vel_data;
 
   for(i=0;i<npart5prop;i++){
-    int n;
-
     part5prop *propi;
 
     propi = part5propinfo + i;
@@ -581,9 +575,9 @@ void getPart5Colors(particle *parti, int nlevel){
         if(prop_U!=NULL&&prop_V!=NULL&&prop_W!=NULL){
           float umax, vmax, wmax;
 
-          umax = MAX(fabs(prop_U->valmin),fabs(prop_U->valmax));
-          vmax = MAX(fabs(prop_V->valmin),fabs(prop_V->valmax));
-          wmax = MAX(fabs(prop_W->valmin),fabs(prop_W->valmax));
+          umax = MAX(ABS(prop_U->valmin),ABS(prop_U->valmax));
+          vmax = MAX(ABS(prop_V->valmin),ABS(prop_V->valmax));
+          wmax = MAX(ABS(prop_W->valmin),ABS(prop_W->valmax));
 
           denom = sqrt(umax*umax+vmax*vmax+wmax*wmax);
         }
@@ -1401,7 +1395,6 @@ void drawColorBars(void){
     SNIFF_ERRORS("before colorbar");
     CheckMemory;
     if(showplot3d==1&&contour_type==STEPPED_CONTOURS){
-      int icol;
       float top, tophat;
 
       // draw plot3d colorbars
@@ -1410,15 +1403,15 @@ void drawColorBars(void){
       tophat = top - (top-barbot)/(nrgb-2);
       glBegin(GL_QUADS);
       for (i = 0; i < nrgb-2; i++){
-        float *rgb_plot3d;
+        float *rgb_plot3d_local;
 
-        rgb_plot3d = rgb_plot3d_contour[i];
+        rgb_plot3d_local = rgb_plot3d_contour[i];
 
-         yy = MIX2(i,nrgb-3,tophat,barbot);
+        yy = MIX2(i,nrgb-3,tophat,barbot);
         yy2 = MIX2(i+1,nrgb-3,tophat,barbot);
 
-        if(rgb_plot3d[3]!=0.0){
-          glColor4fv(rgb_plot3d);
+        if(rgb_plot3d_local[3]!=0.0){
+          glColor4fv(rgb_plot3d_local);
           glVertex2f(barleft, yy); 
           glVertex2f(barright,yy);
        
@@ -1429,21 +1422,21 @@ void drawColorBars(void){
       glEnd();
       if(show_extremedata==1){
         float barmid;
-        float *rgb_plot3d;
+        float *rgb_plot3d_local;
 
-        rgb_plot3d = rgb_plot3d_contour[nrgb-2];
+        rgb_plot3d_local = rgb_plot3d_contour[nrgb-2];
 
         barmid = (barleft+barright)/2.0;
         i=-1;
-         yy = MIX2(i+0.5,nrgb-3,tophat,barbot);
+        yy = MIX2(i+0.5,nrgb-3,tophat,barbot);
         yy2 = MIX2(i+1,nrgb-3,tophat,barbot);
 
 
         if(show_extreme_below==1||show_extreme_above==1)glEnable(GL_POLYGON_SMOOTH);
 
-        if(show_extreme_below==1&&rgb_plot3d[3]!=0.0){     
+        if(show_extreme_below==1&&rgb_plot3d_local[3]!=0.0){     
           glBegin(GL_TRIANGLES);
-          glColor4fv(rgb_plot3d);
+          glColor4fv(rgb_plot3d_local);
 
           glVertex2f(barleft,yy2);
           glVertex2f(barmid,yy);
@@ -1452,13 +1445,13 @@ void drawColorBars(void){
         }
 
         i=nrgb-2;
-         yy = MIX2(i,nrgb-3,tophat,barbot);
+        yy = MIX2(i,nrgb-3,tophat,barbot);
         yy2 = MIX2(i+0.5,nrgb-3,tophat,barbot);
 
-        rgb_plot3d = rgb_plot3d_contour[nrgb-1];
-        if(show_extreme_above==1&&rgb_plot3d[3]!=0.0){
+        rgb_plot3d_local = rgb_plot3d_contour[nrgb-1];
+        if(show_extreme_above==1&&rgb_plot3d_local[3]!=0.0){
           glBegin(GL_TRIANGLES);
-          glColor4fv(rgb_plot3d);
+          glColor4fv(rgb_plot3d_local);
           glVertex2f(barleft, yy); 
           glVertex2f(barright,yy);
        
@@ -1480,7 +1473,7 @@ void drawColorBars(void){
 
         rgb_cb=rgb_full[i];
 
-         yy = MIX2(i,255,tophat,barbot);
+        yy = MIX2(i,255,tophat,barbot);
         yy2 = MIX2(i+1,255,tophat,barbot);
         i3=i+1;
         if(i==nrgb_full-2)i3=i;
@@ -1506,7 +1499,7 @@ void drawColorBars(void){
         top = barbot+nrgb+DYFONT;
         tophat = top - (top-barbot)/(nrgb-2);
         i=-1;
-         yy = MIX2(i+0.5,nrgb-3,tophat,barbot);
+        yy = MIX2(i+0.5,nrgb-3,tophat,barbot);
         yy2 = MIX2(i+1,nrgb-3,tophat,barbot);
 
         if(show_extreme_below==1||show_extreme_above==1)glEnable(GL_POLYGON_SMOOTH);
@@ -1522,7 +1515,7 @@ void drawColorBars(void){
         }
 
         i=nrgb-2;
-         yy = MIX2(i,nrgb-3,tophat,barbot)    +(barbot-tophat)/255.0;
+        yy = MIX2(i,nrgb-3,tophat,barbot)    +(barbot-tophat)/255.0;
         yy2 = MIX2(i+0.5,nrgb-3,tophat,barbot)+(barbot-tophat)/255.0;
 
         if(show_extreme_above==1){
@@ -1898,7 +1891,6 @@ void drawColorBars(void){
       outputBarText(right[0],position,color2,plot3dcolorlabel_ptr);
     }
     if(visiso==0){
-      int nlabels;
       float ddbar,bar0,vert_position;
 
       ddbar = (float)(nrgb+DYFONT)/(float)(nrgb-2);
@@ -1916,8 +1908,7 @@ void drawColorBars(void){
         outputBarText(right[0],vert_position,color1,plot3dcolorlabel_ptr);
       }
     }
-    else
-    {
+    else{
       float ddbar,bar0,vert_position;
 
       ddbar = (float)(nrgb+DYFONT)/(float)(nrgb-2);
@@ -2092,7 +2083,6 @@ void updatecolors(int changecolorindex){
     rgb_trans[4*n+3]=(float)n/(float)(nrgb_full-1);
   }
   if(colorbarinfo!=NULL){
-    int tflag=0;
     unsigned char *alpha;
     colorbardata *cbi;
     float *fire_cb;
@@ -2102,8 +2092,6 @@ void updatecolors(int changecolorindex){
     alpha = colorbarinfo[colorbartype].alpha;
     fire_cb = colorbarinfo[fire_colorbar_index].colorbar;
     for(n=0;n<nrgb_full;n++){
-      float rgb_cb[3],graylevel;
-
       rgb_full[n][0]=cbi->colorbar[3*n];
       rgb_full[n][1]=cbi->colorbar[3*n+1];
       rgb_full[n][2]=cbi->colorbar[3*n+2];

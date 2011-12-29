@@ -38,7 +38,7 @@ int EGZ_FCLOSE(EGZ_FILE *egz_stream){
 
 /* ------------------ EGZ_FOPEN ------------------------ */
 
-EGZ_FILE *EGZ_FOPEN(const char *file, const char *mode, int compress, int endian){
+EGZ_FILE *EGZ_FOPEN(const char *file, const char *mode, int compress_flag, int endian){
   /*
   endian - format (big or little endian) used in file.
            endian=0 ==> little endian (LINUX, Windows PC's)
@@ -117,7 +117,7 @@ EGZ_FILE *EGZ_FOPEN(const char *file, const char *mode, int compress, int endian
   case 'w':
   case 'a':
 #ifdef USE_ZLIB
-    if(compress==1){
+    if(compress_flag==1){
       strcpy(gzfile,file);
       strcat(gzfile,".gz");
       stream = gzopen(gzfile,mode);

@@ -17,8 +17,6 @@ extern "C" char glui_clip_revision[]="$Revision$";
 
 #include "smokeviewvars.h"
 
-#define LOCAL_INI 2
-
 GLUI_RadioGroup *radio_clip=NULL;
 GLUI *glui_clip=NULL;
 GLUI_Spinner *SPINNER_clip_xupper=NULL, *SPINNER_clip_xlower=NULL;

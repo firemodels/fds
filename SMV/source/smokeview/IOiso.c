@@ -680,7 +680,7 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
   printf("After iso load: ");
   PrintMemoryInfo;
 #endif
-  IDLE();
+  Idle();
 
   local_stoptime0 = glutGet(GLUT_ELAPSED_TIME);
   delta_time0=(local_stoptime0-local_starttime0)/1000.0;
@@ -769,7 +769,7 @@ void unloadiso(mesh *meshi){
 
   updatetimes();
   updatemenu=1;
-  IDLE();
+  Idle();
 
   return;
 }

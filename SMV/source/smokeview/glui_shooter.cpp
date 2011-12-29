@@ -343,7 +343,7 @@ void SHOOTER_CB(int var){
         SPINNER_shooter_veldir->disable();
         if(shooter_timelist!=NULL)shooter_timelist->enable();
         if(shooter_loadplot3d!=NULL)shooter_loadplot3d->enable();
-     }
+      }
       if(shooter_cont_update==1){
         SHOOTER_CB(SHOOTER_APPLY);
       }
@@ -353,6 +353,9 @@ void SHOOTER_CB(int var){
       break;
     case SHOOTER_CLOSE:
       hide_shooter();
+      break;
+    default:
+      ASSERT(0);
       break;
   }
 }

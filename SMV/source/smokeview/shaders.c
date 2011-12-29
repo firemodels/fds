@@ -531,9 +531,7 @@ void UnLoadShaders(void){
 /* ------------------ init_shaders ------------------------ */
 
 int init_shaders(void){
-  int i, major, minor;
   GLenum err;
-  char opengl_version_label[256];
   
   gpuactive=0;
   usegpu=0;
@@ -625,28 +623,6 @@ void getDepthTexture( void ){
   glActiveTexture(GL_TEXTURE0);
 }
 #endif
-
-#define printOpenGLError() printOglError(__FILE__, __LINE__)
-
-/* ------------------ printfOglError ------------------------ */
-
-int printOglError(char *file, int line)
-{
-    //
-    // Returns 1 if an OpenGL error occurred, 0 otherwise.
-    //
-    GLenum glErr;
-    int    retCode = 0;
-
-    glErr = glGetError();
-    while (glErr != GL_NO_ERROR)
-    {
-        printf("glError in file %s @ line %d: %s\n", file, line, (char *)gluErrorString(glErr));
-        retCode = 1;
-        glErr = glGetError();
-    }
-    return retCode;
-}
 
 /* ------------------ printfInfoLog ------------------------ */
 

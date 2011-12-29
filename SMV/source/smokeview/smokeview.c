@@ -27,8 +27,6 @@ char smokeview_revision[]="$Revision$";
 #include <direct.h>
 #endif
 
-int can_write_to_dir(char *dir);
-
 /* ----------------------- unsetClipPlanes ----------------------------- */
 
 void unsetClipPlanes(void){
@@ -274,8 +272,6 @@ void ResetView(int option){
 
 void parse_commandline(int argc, char **argv){
   int i, len;
-  char *temp;
-  char buffer[255];
   int iarg;
   size_t len_memory;
   char *argi;
@@ -605,34 +601,20 @@ void display_version_info(void){
 
 void usage(char **argv){
   printf("%s\n",TITLERELEASE);
-  printf(_("Visualize fire/smoke flow simulations."));
-  printf("\n\n");
-  printf(_("Usage: %s [options] casename"),argv[0]);
-  printf("\n\n");
-  printf(_("where "));
-  printf("\n\n");
-  printf(_(" casename       - project id (file names without the extension)"));
-  printf("\n");
-  printf(_(" -build         - show directives used in this build of Smokeview"));
-  printf("\n");
-  printf(_(" -demo          - use demonstrator mode of Smokeview"));
-  printf("\n");
-  printf(_(" -help          - display this message"));
-  printf("\n");
-  printf(_(" -ini           - output default smokeview parameters to smokeview.ini"));
-  printf("\n");
-  printf(_(" -ng_ini        - No graphics version of -ini."));
-  printf("\n");
-  printf(_(" -runscript     - run the script file casename.ssf"));
-  printf("\n");
-  printf(_(" -script scriptfile - run the script file scriptfile"));
-  printf("\n");
-  printf(_(" -stereo        - activate stereo mode"));
-  printf("\n");
-  printf(_(" -update_bounds - calculate boundary file bounds and save to casename.bini"));
-  printf("\n");
-  printf(_(" -version       - display version information"));
-  printf("\n");
+  printf("%s\n\n",_("Visualize fire/smoke flow simulations."));
+  printf("Usage: %s [options] casename",argv[0]);
+  printf("%s\n\n",_("where "));
+  printf("%s\n",_(" casename       - project id (file names without the extension)"));
+  printf("%s\n",_(" -build         - show directives used in this build of Smokeview"));
+  printf("%s\n",_(" -demo          - use demonstrator mode of Smokeview"));
+  printf("%s\n",_(" -help          - display this message"));
+  printf("%s\n",_(" -ini           - output default smokeview parameters to smokeview.ini"));
+  printf("%s\n",_(" -ng_ini        - No graphics version of -ini."));
+  printf("%s\n",_(" -runscript     - run the script file casename.ssf"));
+  printf("%s\n",_(" -script scriptfile - run the script file scriptfile"));
+  printf("%s\n",_(" -stereo        - activate stereo mode"));
+  printf("%s\n",_(" -update_bounds - calculate boundary file bounds and save to casename.bini"));
+  printf("%s\n",_(" -version       - display version information"));
 
   if(showbuild==1){
     char label[1024],*labelptr;
@@ -721,8 +703,7 @@ void usage(char **argv){
     strcat(label,", WIN32");
 #endif
     printf("  \n");
-    printf(_("  Smokeview was built with the following pre-processing directives set:"));
-    printf("\n\n");
+    printf("%s\n\n",_("  Smokeview was built with the following pre-processing directives set:"));
     printf("%s \n",labelptr);
   }
 }

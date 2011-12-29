@@ -216,12 +216,6 @@ extern "C" void glui_trainer_setup(int main_window){
   TRAINER_CB(TRAINERVIEWPOINTS);
 
 }
-#define ANGLE_LEFT -1
-#define ANGLE_RIGHT 1
-#define GO_FORWARD 0
-#define GO_BACKWARD 2
-#define MOVE_UP 3
-#define MOVE_DOWN 4
 
 /* ------------------ ROTATE_CB ------------------------ */
 
@@ -285,7 +279,7 @@ void TRAINER_CB(int var){
     }
     LIST_viewpoint->set_int_val(trainer_viewpoints);
     TRAINER_CB(TRAINERVIEWPOINTS);
-  break;
+    break;
   case TRAINERVIEWPOINTS:
     if(trainer_viewpoints!=-1){
       ResetMenu(trainer_viewpoints);
@@ -392,6 +386,9 @@ void TRAINER_CB(int var){
     updatechopcolors();
     colorbarflip=0;
     ColorBarMenu(-2);
+    break;
+  default:
+    ASSERT(0);
     break;
   }
 }

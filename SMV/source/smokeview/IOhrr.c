@@ -19,11 +19,11 @@ char IOhrr_revision[]="$Revision$";
 #include "smokeviewvars.h"
 
 /* ------------------ readhrr ------------------------ */
-
+#define LENBUFFER 1024
 void readhrr(int flag, int *errorcode){
   FILE *HRRFILE;
   int ntimeshrr, nfirst;
-  char buffer[10240];
+  char buffer[LENBUFFER];
   float *hrrtime, *hrrval;
   int display=0;
   int ntimes_saved;
@@ -64,7 +64,7 @@ void readhrr(int flag, int *errorcode){
   ntimeshrr=0;
   nfirst=-1;
   while(!feof(HRRFILE)){
-    if(fgets(buffer,1024,HRRFILE)==NULL)break;
+    if(fgets(buffer,LENBUFFER,HRRFILE)==NULL)break;
     if(nfirst==-1&&strstr(buffer,".")!=NULL)nfirst=ntimeshrr;
     ntimeshrr++;
   }
@@ -84,7 +84,7 @@ void readhrr(int flag, int *errorcode){
 // read no more than the number of lines found during first pass
 
   while(ntimeshrr<ntimes_saved&&!feof(HRRFILE)){
-    if(fgets(buffer,10245,HRRFILE)==NULL)break;
+    if(fgets(buffer,LENBUFFER,HRRFILE)==NULL)break;
     if(ntimeshrr<nfirst){
       ntimeshrr++;
       continue;

@@ -234,7 +234,7 @@ void readvslice(int ivslice, int flag, int *errorcode){
   printf("After vslice load: ");
   PrintMemoryInfo;
 #endif
-  IDLE();
+  Idle();
 }
 
 /* ------------------ readslice ------------------------ */
@@ -688,7 +688,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
   GetMemoryInfo(sd->num_memblocks,num_memblocks_load);
   PrintMemoryInfo;
 #endif
-  IDLE();
+  Idle();
 
   exportdata=1;
   if(exportdata==0){

@@ -72,8 +72,6 @@ extern "C" void glui_message_setup(int main_window){
 /* ------------------ MESSAGE_CB ------------------------ */
 
 void Message_CB(int var){
-  int i;
-
   switch (var){
     case warning_OK:
       glui_warning->hide();
@@ -85,6 +83,9 @@ void Message_CB(int var){
     case abort_OK:
       glui_abort->hide();
       exit(1);
+      break;
+    default:
+      ASSERT(0);
       break;
   }
 }
@@ -116,7 +117,6 @@ void wrap_line(char *message2){
 
 extern "C" void warning_message(char *message){
   char message2[sizeof(GLUI_String)];
-  int i,offset=0;
 
   strcpy(message2,_("*** Warning: "));
   strcat(message2,message);
@@ -142,7 +142,6 @@ extern "C" void warning_message(char *message){
 
 extern "C" void error_message(char *message){
   char message2[sizeof(GLUI_String)];
-  int i, offset=0;
 
   strcpy(message2,_("*** Error: "));
   strcat(message2,message);
@@ -167,7 +166,6 @@ extern "C" void error_message(char *message){
 
 extern "C" void abort_message(char *message){
   char message2[sizeof(GLUI_String)];
-  int i, offset=0;
 
   strcpy(message2,_("*** Fatal error: "));
   strcat(message2,message);
@@ -189,7 +187,6 @@ extern "C" void abort_message(char *message){
 
 extern "C" void message_message(char *message){
   char message2[sizeof(GLUI_String)];
-  int i, offset=0;
 
   strcpy(message2,message);
   wrap_line(message2);

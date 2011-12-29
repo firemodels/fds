@@ -20,8 +20,6 @@ extern "C" char glui_3dsmoke_revision[]="$Revision$";
 extern GLUI_Rollout *panel_smoke3d;
 extern GLUI *glui_bounds;
 
-#define IDLE() Idle();
-
 extern "C" void SMOKE_3D_CB(int var);
 
 #define SMOKE_3D_CLOSE 0
@@ -430,7 +428,7 @@ extern "C" void SMOKE_3D_CB(int var){
 
   updatemenu=1;
   switch (var){
-  float temp_min, temp_cutoff, temp_max;
+  float temp_min, temp_max;
   
   case TEMP_MIN:
     temp_min = 20.0;
@@ -530,7 +528,7 @@ extern "C" void SMOKE_3D_CB(int var){
     }
     glutPostRedisplay();
     force_redisplay=1;
-    IDLE();
+    Idle();
     break;
   case FIRE_RED:
   case FIRE_GREEN:
@@ -557,14 +555,14 @@ extern "C" void SMOKE_3D_CB(int var){
       updatecolors(-1);
     }
     force_redisplay=1;
-    IDLE();
+    Idle();
     break;
   case FIRE_HALFDEPTH:
   case FIRE_CUTOFF:
   case FIRE_ALPHA:
     glutPostRedisplay();
     force_redisplay=1;
-    IDLE();
+    Idle();
     break;
 #ifdef pp_GPU
   case SMOKE_RTHICK:
@@ -572,13 +570,13 @@ extern "C" void SMOKE_3D_CB(int var){
     smoke3d_thick = log_base2(smoke3d_rthick);
     glutPostRedisplay();
     force_redisplay=1;
-    IDLE();
+    Idle();
     break;
 #else
   case SMOKE_THICK:
     glutPostRedisplay();
     force_redisplay=1;
-    IDLE();
+    Idle();
     break;
 #endif
 #ifdef pp_CULL

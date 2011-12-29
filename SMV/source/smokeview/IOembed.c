@@ -133,7 +133,6 @@ void get_faceinfo(void){
       }
       for(j=0;j<geomlisti->ntriangles;j++){
         triangle *trii;
-        float min_angle;
 
         trii = geomlisti->triangles + j;
         trii->points[0]->nused++;
@@ -543,7 +542,6 @@ void get_geom_header(char *file, int *ntimes){
   int nt;
   int returncode;
   int version;
-  int size;
 
   stream = fopen(file,"rb");
   if(stream==NULL){
@@ -638,7 +636,6 @@ void read_geom(int ifile, int flag, int *errorcode){
   int returncode;
   int ntimes;
   float *xyz=NULL;
-  int nxyz=0;
   int i;
   point *points;
   triangle *triangles;
@@ -721,6 +718,7 @@ void read_geom(int ifile, int flag, int *errorcode){
     geomlisti->points=NULL;
     if(*geom_typeptr==0&&nvert_s+nvert_d>0){
       int nvert;
+      int ii;
 
       nvert = nvert_s + nvert_d;
       NewMemory((void **)&xyz,3*nvert*sizeof(float));
@@ -733,10 +731,10 @@ void read_geom(int ifile, int flag, int *errorcode){
       if(nvert_d>0){
         FORTREADBR(xyz+3*nvert_s,3*nvert_d,stream);
       }
-      for(i=0;i<nvert;i++){
-        points[i].xyz[0]=xyz[3*i+0];
-        points[i].xyz[1]=xyz[3*i+1];
-        points[i].xyz[2]=xyz[3*i+2];
+      for(ii=0;ii<nvert;ii++){
+        points[ii].xyz[0]=xyz[3*ii+0];
+        points[ii].xyz[1]=xyz[3*ii+1];
+        points[ii].xyz[2]=xyz[3*ii+2];
       }
       FREEMEMORY(xyz);
     }
@@ -751,6 +749,7 @@ void read_geom(int ifile, int flag, int *errorcode){
     if(*geom_typeptr==0&&ntri_s+ntri_d>0){
       int ntris;
       int *surf_ind=NULL,*ijk=NULL;
+      int ii;
 
       ntris = ntri_s+ntri_d;
       NewMemory((void **)&triangles,ntris*sizeof(triangle));
@@ -770,10 +769,10 @@ void read_geom(int ifile, int flag, int *errorcode){
      // if(ntri_d>0){
      //   FORTREADBR(ijk+ntri_s,ntri_d,stream);
      // }
-      for(i=0;i<ntris;i++){
-        triangles[i].points[0]=points+ijk[3*i+0]-1;
-        triangles[i].points[1]=points+ijk[3*i+1]-1;
-        triangles[i].points[2]=points+ijk[3*i+2]-1;
+      for(ii=0;ii<ntris;ii++){
+        triangles[ii].points[0]=points+ijk[3*ii+0]-1;
+        triangles[ii].points[1]=points+ijk[3*ii+1]-1;
+        triangles[ii].points[2]=points+ijk[3*ii+2]-1;
         //triangles[i].surf=surfaceinfo + surf_ind[i] - 1;
         triangles[i].surf=surfacedefault;
       }
@@ -790,20 +789,8 @@ void read_geom(int ifile, int flag, int *errorcode){
 void read_geomdata(int ifile, int flag, int *errorcode){
   patch *patchi;
   char *file;
-  FILE *stream;
-  int one=1, endianswitch=0;
-  int returncode;
-  int nvert, ntris;
   int ntimes;
-  float *xyz=NULL;
-  int nxyz=0;
-  int *ijk=NULL;
   int i;
-  point *points;
-  triangle *triangles;
-  int first=1;
-  float *val_buffer=NULL;
-  int nval_buffer=0;
   int nvals;
   float patchmin_global, patchmax_global;
   int n;
@@ -910,15 +897,11 @@ void read_geomdata(int ifile, int flag, int *errorcode){
 
 void draw_geomdata(patch *patchi){
   int i;
-  float black[]={0.0,0.0,0.0,1.0};
-  float blue[]={0.0,0.0,1.0,1.0};
-  float skinny_color[]={1.0,0.0,0.0,1.0};
-  float *last_color=NULL;
 
   for(i=0;i<ngeominfo;i++){
     geomdata *geomi;
     geomlistdata *geomlisti;
-    int ntris,npoints;
+    int ntris;
     int j;
     float *color;
 
@@ -926,7 +909,6 @@ void draw_geomdata(patch *patchi){
     if(geomi->display==0||geomi->loaded==0)continue;
     geomlisti = geomi->geomlistinfo;
     ntris = geomlisti->ntriangles;
-    npoints = geomlisti->npoints;
 
     glEnable(GL_LIGHTING);
     glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
@@ -1016,8 +998,6 @@ int compare_transparent_triangles( const void *arg1, const void *arg2 ){
 /* ------------------ sort_triangles ------------------------ */
 
 void Sort_Embedded_Geometry(float *mm){
-  int itri;
-  int newflag;
   int i;
   int count_transparent,count_all;
 
@@ -1028,9 +1008,7 @@ void Sort_Embedded_Geometry(float *mm){
   nopaque_triangles=count_all-count_transparent;
   for(i=0;i<ngeominfo;i++){
     geomlistdata *geomlisti;
-    int ntris,npoints;
     int j;
-    float *color;
     geomdata *geomi;
 
     geomi = geominfo + i;
@@ -1080,7 +1058,6 @@ void Sort_Embedded_Geometry(float *mm){
   for(i=0;i<ngeominfo;i++){
     geomlistdata *geomlisti;
     int j;
-    float *color;
     geomdata *geomi;
 
     geomi = geominfo + i;

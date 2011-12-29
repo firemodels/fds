@@ -1261,10 +1261,10 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
 
   */
   int n,j,k;
-  int jend,jjj;
-  float xminmax[2], xminmax2[2];
-  float yminmax[2], yminmax2[2];
-  float zminmax[2], zminmax2[2];
+  int jend=1,jjj;
+  float xminmax[2]={0.0,1.0}, xminmax2[2]={0.0,1.0};
+  float yminmax[2]={0.0,1.0}, yminmax2[2]={0.0,1.0};
+  float zminmax[2]={0.0,1.0}, zminmax2[2]={0.0,1.0};
   float xx[8], yy[8], zz[8];
   float xx2[8], yy2[8], zz2[8];
   float *xplt, *yplt, *zplt;
@@ -1709,11 +1709,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
 /* ------------------ clip_face ------------------------ */
 
 int clip_face(facedata *facei){
-  float *xyz;
-  int i;
-
   if(xyz_clipplane==0)return 0;
-  xyz = facei->exact_vertex_coords;
   if(clip_x==1&&xbar0+xyzmaxdiff*facei->xmax<clip_x_val)return 1;
   if(clip_X==1&&xbar0+xyzmaxdiff*facei->xmin>clip_X_val)return 1;
   if(clip_y==1&&ybar0+xyzmaxdiff*facei->ymax<clip_y_val)return 1;
@@ -1727,25 +1723,21 @@ int clip_face(facedata *facei){
 
 void set_cull_vis(void){
   int imesh;
-#ifdef pp_BETA
-  int nports;
-  int ntotal;
+#ifdef pp_GEOMPRINT
+  int nports=0;
+  int ntotal=0;
 #endif
 
   if(update_initcullgeom==1){
     initcullgeom(cullgeom);
     update_facelists();
   }
-#ifdef pp_BETA
-  nports=0;
-  ntotal=0;
-#endif
   for(imesh=0;imesh<nmeshes;imesh++){
     int iport;
     mesh *meshi;
 
     meshi = meshinfo + imesh;
-#ifdef pp_BETA
+#ifdef pp_GEOMPRINT
     ntotal+=meshi->ncullgeominfo;
 #endif    
     for(iport=0;iport<meshi->ncullgeominfo;iport++){
@@ -1764,56 +1756,56 @@ void set_cull_vis(void){
       
       if(PointInFrustum(xx[0],yy[0],zz[0])==1){
         culli->vis=1;
-#ifdef pp_BETA        
+#ifdef pp_GEOMPRINT
         nports++;
 #endif        
         continue;
       }
       if(PointInFrustum(xx[1],yy[0],zz[0])==1){
         culli->vis=1;
-#ifdef pp_BETA        
+#ifdef pp_GEOMPRINT
         nports++;
 #endif        
         continue;
       }
       if(PointInFrustum(xx[0],yy[1],zz[0])==1){
         culli->vis=1;
-#ifdef pp_BETA        
+#ifdef pp_GEOMPRINT
         nports++;
 #endif        
         continue;
       }
       if(PointInFrustum(xx[1],yy[1],zz[0])==1){
         culli->vis=1;
-#ifdef pp_BETA        
+#ifdef pp_GEOMPRINT
         nports++;
 #endif        
         continue;
       }
       if(PointInFrustum(xx[0],yy[0],zz[1])==1){
         culli->vis=1;
-#ifdef pp_BETA        
+#ifdef pp_GEOMPRINT
         nports++;
 #endif        
         continue;
       }
       if(PointInFrustum(xx[1],yy[0],zz[1])==1){
         culli->vis=1;
-#ifdef pp_BETA        
+#ifdef pp_GEOMPRINT
         nports++;
 #endif        
         continue;
       }
       if(PointInFrustum(xx[0],yy[1],zz[1])==1){
         culli->vis=1;
-#ifdef pp_BETA        
+#ifdef pp_GEOMPRINT
         nports++;
 #endif        
         continue;
       }
       if(PointInFrustum(xx[1],yy[1],zz[1])==1){
         culli->vis=1;
-#ifdef pp_BETA        
+#ifdef pp_GEOMPRINT
         nports++;
 #endif        
         continue;
@@ -2321,6 +2313,13 @@ void drawselect_faces(){
   return;
 }
 
+#ifdef pp_GEOMPRINT
+#define COLOR_SWAPS color_swaps++;
+#define FACES_DRAWN faces_drawn++;
+#else
+#define COLOR_SWAPS
+#define FACES_DRAWN
+#endif
 #define DRAWFACE(DEFfacetest,DEFeditcolor)    \
         float *facepos;\
         culldata *cullport;\
@@ -2352,7 +2351,7 @@ void drawselect_faces(){
         if(new_color!=old_color){\
           old_color=new_color;\
           glColor4fv(old_color);\
-          color_swaps++;\
+          COLOR_SWAPS\
         }\
         glVertex3fv(vertices+0);\
         glVertex3fv(vertices+3);\
@@ -2360,7 +2359,7 @@ void drawselect_faces(){
         glVertex3fv(vertices+0);\
         glVertex3fv(vertices+6);\
         glVertex3fv(vertices+9);\
-        faces_drawn++;
+        FACES_DRAWN
 
 /* ------------------ drawfaces ------------------------ */
 
@@ -2375,8 +2374,10 @@ void draw_faces(){
   float up_color[4]={0.9,0.9,0.9,1.0};
   float down_color[4]={0.1,0.1,0.1,1.0};
   float highlight_color[4]={1.0,0.0,0.0,1.0};
+#ifdef pp_GEOMPRINT
   int color_swaps=0;
   int faces_drawn=0;
+#endif
 
   if(nface_normals_single>0){
     glEnable(GL_LIGHTING);
@@ -3674,7 +3675,6 @@ void MakeIsoBlockages2(mesh *meshi, smoothblockage *sb){
   int ibar,jbar,kbar;
   int nx2, ny2, nz2;
   
-  int ii, jj, kk;
   int read_error=0;
 
 #define cellindex2(i,j,k) ((i+1)+(j+1)*nx2+(k+1)*nx2*ny2)
@@ -4038,7 +4038,6 @@ void init_user_ticks(void){
 
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
-    int j;
 
     meshi = meshinfo + i;
     if(meshi->boxmin[0]<user_tick_min[0])user_tick_min[0]=meshi->boxmin[0];
@@ -4477,14 +4476,11 @@ int get_tick_dir(float *mm){
        
       m3=m7=m11=0, v^T=0, y=1   Qx+u=0 => x=-Q^Tu
     */
-  int i,ii,j;
-  mesh *meshj;
+  int i,ii;
   float norm[3],scalednorm[3];
   float normdir[3];
   float absangle,cosangle,minangle;
   int iminangle;
-  float dx, dy, dz;
-  float factor;
   float pi;
 
   pi=4.0*atan(1.0);
@@ -4733,8 +4729,10 @@ void draw_facesOLD(){
   float up_color[4]={0.9,0.9,0.9,1.0};
   float down_color[4]={0.1,0.1,0.1,1.0};
   float highlight_color[4]={1.0,0.0,0.0,1.0};
+#ifdef pp_GEOMPRINT
   int color_swaps=0;
   int faces_drawn=0;
+#endif
   if(nface_normals_single>0){
     glEnable(GL_LIGHTING);
     glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
@@ -4785,7 +4783,9 @@ void draw_facesOLD(){
         if(new_color!=old_color){
           old_color=new_color;
           glColor4fv(old_color);
+#ifdef pp_GEOMPRINT
           color_swaps++;
+#endif
         }
         glNormal3fv(facei->normal);
         glVertex3fv(vertices+0);
@@ -4794,7 +4794,9 @@ void draw_facesOLD(){
         glVertex3fv(vertices+0);
         glVertex3fv(vertices+6);
         glVertex3fv(vertices+9);
+#ifdef pp_GEOMPRINT
         faces_drawn++;
+#endif
       }
     }
     glEnd();
@@ -5097,31 +5099,31 @@ culldata *get_face_port(mesh *meshi, facedata *facei){
   int nx, ny, nz;
   int ixyz;
   culldata *return_cull;
-  int *skip,*nxyz;
+  int *skip2,*nxyz;
 
-  skip=meshi->nxyzskipgeomcull;
+  skip2=meshi->nxyzskipgeomcull;
   nxyz=meshi->nxyzgeomcull;
   nx=nxyz[0];
   ny=nxyz[1];
   nz=nxyz[2];
 
-  ii1=facei->imin/skip[0];
+  ii1=facei->imin/skip2[0];
   if(facei->imax!=facei->imin){
-    ii2=(facei->imax-1)/skip[0];
+    ii2=(facei->imax-1)/skip2[0];
     if(ii1!=ii2)return NULL;
   }
   if(ii1<0||ii1>nx)return NULL;
 
-  jj1=facei->jmin/skip[1];
+  jj1=facei->jmin/skip2[1];
   if(facei->jmin!=facei->jmax){
-    jj2=(facei->jmax-1)/skip[1];
+    jj2=(facei->jmax-1)/skip2[1];
     if(jj1!=jj2)return NULL;
   }
   if(jj1<0||jj1>ny)return NULL;
 
-  kk1=facei->kmin/skip[2];
+  kk1=facei->kmin/skip2[2];
   if(facei->kmin!=facei->kmax){
-    kk2=(facei->kmax-1)/skip[2];
+    kk2=(facei->kmax-1)/skip2[2];
     if(kk1!=kk2)return NULL;
   }
   if(kk1<0||kk1>nz)return NULL;
@@ -5173,8 +5175,6 @@ void remove_dup_blockages(void){
     if(meshi->nbptrs>1){
       blockagedata **bclist;
       int jj,j;
-      int ndups=0;
-
 
       bclist=meshi->blockageinfoptrs;
       qsort(bclist,(size_t)meshi->nbptrs,sizeof(blockagedata *),blockagecompare);
@@ -5196,7 +5196,6 @@ void remove_dup_blockages(void){
         if(ijk1[4]!=ijk2[4]||ijk1[5]!=ijk2[5])continue;
         bcm1->dup=1;
         bc->dup=2;
-        ndups++;
       }
       jj=0;
       for(j=0;j<meshi->nbptrs;j++){
@@ -5239,9 +5238,11 @@ void getobstlabels(const char *filein){
     fdsobstcount++;
   }
   nobstlabels=fdsobstcount;
-  if(nobstlabels>0)NewMemory((void **)&obstlabels,nobstlabels*sizeof(char *));
-  for(i=0;i<nobstlabels;i++){
-    obstlabels[i]=NULL;
+  if(nobstlabels>0){
+    NewMemory((void **)&obstlabels,nobstlabels*sizeof(char *));
+    for(i=0;i<nobstlabels;i++){
+      obstlabels[i]=NULL;
+    }
   }
   rewind(stream_in);
   fdsobstcount=0;

@@ -341,12 +341,6 @@ void checktimebound(void){
 /* ------------------ mouse ------------------------ */
 
 void mouse(int button, int state, int x, int y){
-  int mouse_x, mouse_y;
-  GLubyte r, g, b;
-  int val1, val;
-  selectdata *sd;
-  mesh *meshi;
-  int i;
   float *eye_xyz;
 
   if(trainer_mode==1){
@@ -449,7 +443,7 @@ void mouse(int button, int state, int x, int y){
       checktimebound();
       timedrag=1;
       stept=0;
-      IDLE();
+      Idle();
 
       return;
     }
@@ -558,8 +552,6 @@ void motion(int xm, int ym){
     int temp;
     int ifactor;
     float factor;
-    int valmax=255;
-    int valmin=0;
 
     temp = (int)(1.2*dwinH);
     if(xm>screenWidth-dwinWW){
@@ -592,7 +584,7 @@ void motion(int xm, int ym){
       checktimebound();
       timedrag=1;
     }
-    IDLE();
+    Idle();
     return;
   }
   screenWidth2 = screenWidth - dwinWW;
@@ -1190,7 +1182,7 @@ void keyboard_2(unsigned char key, int x, int y){
         demo_mode++;
         if(demo_mode>5)demo_mode=0;
       }
-        break;
+      break;
     }
     return;
   }
@@ -1421,7 +1413,7 @@ void keyboard_2(unsigned char key, int x, int y){
   if(plotstate==DYNAMIC_PLOTS){
     if(timedrag==0)itimes += skip*FlowDir;
     checktimebound();
-    IDLE();
+    Idle();
 
     return;
   }
@@ -1749,13 +1741,8 @@ void handle_move_keys(int  key){
     {
       float local_speed_factor=1.0;
 
-      switch (key_state){
-      case KEY_SHIFT:
-        local_speed_factor=4.0;
-      default:
-        getnewpos(eye_xyz,dx,-dy,0.0,local_speed_factor);
-        break;
-      }
+      if(key_state==KEY_SHIFT)local_speed_factor=4.0;
+      getnewpos(eye_xyz,dx,-dy,0.0,local_speed_factor);
     }
     break;
   case GLUT_KEY_LEFT:
@@ -1790,41 +1777,29 @@ void handle_move_keys(int  key){
     }
     break;
   case GLUT_KEY_DOWN:
-    {
+    if(key_state==KEY_ALT){
+      eye_xyz[2] -= INC_Z;
+    }
+    else{
       float local_speed_factor=1.0;
 
-      switch (key_state){
-      case KEY_ALT:
-        eye_xyz[2] -= INC_Z;
-        break;
-      case KEY_SHIFT:
-        speed_factor=4.0;
-      case KEY_CTRL:
-      default:
-        dx = INC_XY*(*sin_direction_angle);
-        dy = INC_XY*(*cos_direction_angle);
-        getnewpos(eye_xyz,-dx,-dy,0.0,local_speed_factor);
-        break;
-      }
+      if(key_state==KEY_SHIFT)local_speed_factor=4.0;
+      dx = INC_XY*(*sin_direction_angle);
+      dy = INC_XY*(*cos_direction_angle);
+      getnewpos(eye_xyz,-dx,-dy,0.0,local_speed_factor);
     }
     break;
   case GLUT_KEY_UP:
-    {
+    if(key_state==KEY_ALT){  
+      eye_xyz[2] += INC_Z;
+    }
+    else{
       float local_speed_factor=1.0;
-
-      switch (key_state){
-      case KEY_ALT:
-        eye_xyz[2] += INC_Z;
-        break;
-      case KEY_SHIFT:
-        speed_factor=4.0;
-      case KEY_CTRL:
-      default:
-        dx = INC_XY*(*sin_direction_angle);
-        dy = INC_XY*(*cos_direction_angle);
-        getnewpos(eye_xyz,dx,dy,0.0,local_speed_factor);
-        break;
-      }
+  
+      if(key_state==KEY_SHIFT)local_speed_factor=4.0;
+      dx = INC_XY*(*sin_direction_angle);
+      dy = INC_XY*(*cos_direction_angle);
+      getnewpos(eye_xyz,dx,dy,0.0,local_speed_factor);
     }
     break;
   case GLUT_KEY_PAGE_UP:
@@ -1985,7 +1960,6 @@ void Idle(void){
   int changetime=0;
   float thisinterval;
   int redisplay=0;
-  char buffer[256];
 
   CheckMemory;
   glutSetWindow(mainwindow_id);
@@ -2075,10 +2049,6 @@ void reset_gltime(void){
 /* ------------------ update_currentmesh ------------------------ */
 
 void update_current_mesh(mesh *meshi){
-  int i;
-  iso *isoi;
-  int nsteps=-1;
-
   current_mesh=meshi;
   loaded_isomesh=get_loaded_isomesh();
   update_iso_showlevels();

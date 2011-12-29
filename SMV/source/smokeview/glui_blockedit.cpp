@@ -50,7 +50,6 @@ extern "C" void glui_edit_setup(int main_window){
   surface *surfi;
   char *surfacelabel;
   int i;
-  mesh *meshi;
 
   ibar=current_mesh->ibar;
   jbar=current_mesh->jbar;
@@ -242,10 +241,6 @@ extern "C" void DialogMenu(int value);
 /* ------------------ BUTTON_hide3_CB ------------------------ */
 
 void BUTTON_hide3_CB(int var){
-  blockagedata *bc;
-  blockagedata *bchighlight_save;
-  int i,j,k;
-  mesh *meshi;
   switch (var){
   case CLOSE_WINDOW: 
     DialogMenu(16);
@@ -268,7 +263,6 @@ void BUTTON_hide3_CB(int var){
 extern "C" void update_blockvals(int flag){
   float xmin, xmax, ymin, ymax, zmin, zmax;
   int imin, jmin, kmin;
-  char *label;
   int i;
   int temp;
   float *xplt_orig, *yplt_orig, *zplt_orig;
@@ -470,9 +464,11 @@ void OBJECT_CB(int var){
       OBJECT_CB(UPDATE_LIST);
       break;
       case BLOCKAGE_AS_INPUT2:
-        blockage_snapped=1-blockage_as_input;
-        blockage_checkbox->set_int_val(blockage_snapped);
       case BLOCKAGE_AS_INPUT:
+        if(var==BLOCKAGE_AS_INPUT2){
+          blockage_snapped=1-blockage_as_input;
+          blockage_checkbox->set_int_val(blockage_snapped);
+        }
         blockage_as_input=1-blockage_snapped;
         if(blockage_as_input==1){
           blocklocation=BLOCKlocation_exact;

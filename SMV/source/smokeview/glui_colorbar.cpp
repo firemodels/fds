@@ -290,13 +290,13 @@ void COLORBAR_CB(int var){
     if(colorbarpoint<1)colorbarpoint=1;
     cbi->nodehilight=colorbarpoint;
     for(i=cbi->nnodes-1;i>=colorbarpoint+1;i--){
-      unsigned char *rgb1, *rgb2;
+      unsigned char *rgb1, *rgb2_local;
 
-      rgb2 = cbi->rgb_node+3*i;
-      rgb1 = rgb2-3;
-      rgb2[0] =rgb1[0];
-      rgb2[1] =rgb1[1];
-      rgb2[2] =rgb1[2];
+      rgb2_local = cbi->rgb_node+3*i;
+      rgb1 = rgb2_local-3;
+      rgb2_local[0] =rgb1[0];
+      rgb2_local[1] =rgb1[1];
+      rgb2_local[2] =rgb1[2];
       cbi->index_node[i]=cbi->index_node[i-1];
     }
     {
@@ -330,14 +330,14 @@ void COLORBAR_CB(int var){
 
     if(cbi->nnodes<2)return;
     for(i=colorbarpoint+1;i<cbi->nnodes;i++){
-      unsigned char *rgb1, *rgb2;
+      unsigned char *rgb1, *rgb2_local;
 
       cbi->index_node[i-1]=cbi->index_node[i];
-      rgb2 = cbi->rgb_node+3*i;
-      rgb1 = rgb2-3;
-      rgb1[0]=rgb2[0];
-      rgb1[1]=rgb2[1];
-      rgb1[2]=rgb2[2];
+      rgb2_local = cbi->rgb_node+3*i;
+      rgb1 = rgb2_local-3;
+      rgb1[0]=rgb2_local[0];
+      rgb1[1]=rgb2_local[1];
+      rgb1[2]=rgb2_local[2];
     }
     cbi->nnodes--;
     //update_colorbar_splits(current_colorbar);
@@ -459,6 +459,9 @@ void COLORBAR_CB(int var){
       COLORBAR_CB(COLORBAR_LIST);
     }
     break;
+  default:
+    ASSERT(0);
+    break;
   }
 }
 
@@ -466,7 +469,7 @@ void COLORBAR_CB(int var){
 
 extern "C" void colorbar_global2local(void){
   colorbardata *cbi;
-  unsigned char *rgb;
+  unsigned char *rgb_local;
   int icolorbar;
 
   if(colorbartype<0||colorbartype>=ncolorbars)return;
@@ -502,22 +505,20 @@ extern "C" void colorbar_global2local(void){
     BUTTON_deletepoint->disable();
     SPINNER_colorindex->disable();
   }
-  rgb = cbi->rgb_node+3*colorbarpoint;
-  SPINNER_right_red->set_int_val(  (int)(rgb[0]));
-  SPINNER_right_green->set_int_val((int)(rgb[1]));
-  SPINNER_right_blue->set_int_val( (int)(rgb[2]));
+  rgb_local = cbi->rgb_node+3*colorbarpoint;
+  SPINNER_right_red->set_int_val(  (int)(rgb_local[0]));
+  SPINNER_right_green->set_int_val((int)(rgb_local[1]));
+  SPINNER_right_blue->set_int_val( (int)(rgb_local[2]));
 
-  rgb = rgb_below_min;
-  SPINNER_down_red->set_int_val(  (int)(rgb[0]));
-  SPINNER_down_green->set_int_val(  (int)(rgb[1]));
-  SPINNER_down_blue->set_int_val(  (int)(rgb[2]));
+  rgb_local = rgb_below_min;
+  SPINNER_down_red->set_int_val(  (int)(rgb_local[0]));
+  SPINNER_down_green->set_int_val(  (int)(rgb_local[1]));
+  SPINNER_down_blue->set_int_val(  (int)(rgb_local[2]));
 
-  rgb = rgb_above_max;
-  SPINNER_up_red->set_int_val(  (int)(rgb[0]));
-  SPINNER_up_green->set_int_val(  (int)(rgb[1]));
-  SPINNER_up_blue->set_int_val(  (int)(rgb[2]));
+  rgb_local = rgb_above_max;
+  SPINNER_up_red->set_int_val(  (int)(rgb_local[0]));
+  SPINNER_up_green->set_int_val(  (int)(rgb_local[1]));
+  SPINNER_up_blue->set_int_val(  (int)(rgb_local[2]));
 
   COLORBAR_CB(COLORBAR_EXTREME);
-
-
 }

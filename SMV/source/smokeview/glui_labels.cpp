@@ -17,7 +17,6 @@ extern "C" char glui_labels_revision[]="$Revision$";
 
 #include "smokeviewvars.h"
 
-extern "C" void Labels_CB(int value);
 int nevacloaded,nplot3dloaded,nsmoke3dloaded,nisoloaded,nsliceloaded,nvsliceloaded,npartloaded,npatchloaded;
 
 GLUI *glui_labels=NULL;
@@ -101,9 +100,6 @@ GLUI_Panel *panel_showhide=NULL;
 #define LABELS_fontsize 7
 #define LABELS_ticks 8
 #define LABELS_drawface 24
-#ifdef pp_BETA
-#define LABELS_cullblockages 25
-#endif
 
 #define LABELS_particleshow    10
 #define LABELS_sliceshow       11
@@ -419,8 +415,6 @@ extern "C" void show_glui_labels(void){
 /* ------------------ Labels_CB ------------------------ */
 
 void Labels_CB(int var){
-  int i;
-
   updatemenu=1;
   switch (var){
 #ifdef pp_BETA
@@ -511,7 +505,6 @@ void Labels_CB(int var){
       ASSERT(FFALSE);
       break;
     }
-    break;
     break;
   case  LABELS_particleshow:
     switch (showhide_option){

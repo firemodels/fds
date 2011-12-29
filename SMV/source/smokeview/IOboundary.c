@@ -55,7 +55,6 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   int nn;
   int filenum;
   char *patchscale;
-  int npatchloaded;
   int ncompressed_buffer;
   char *file;
   int local_starttime=0, local_stoptime=0;
@@ -66,7 +65,6 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
 
   if(patchinfo[ifile].loaded==0&&flag==UNLOAD)return;
 
-  local_starttime0 = glutGet(GLUT_ELAPSED_TIME);
   local_first=1;
   CheckMemory;
   patchfilenum=ifile;
@@ -744,9 +742,6 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
       /* create char contour plot for each patch corresponding to a blockage */
 
       {
-        float chartemp_ign;
-        surface *surfi;
-        int surf_index;
 
         nn=0;
 #ifdef USE_ZLIB
@@ -870,12 +865,8 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   patchi = patchinfo + ifile;
   patchscale = patchi->scale;
   patchbase = patchinfo + getpatchindex(patchi);
-  npatchloaded=0;
   patchinfo[ifile].loaded=1;
   ipatchtype=getpatchtype(patchinfo+ifile);
-  for(i=0;i<npatchinfo;i++){
-    if(patchinfo[i].loaded==1&&patchinfo[i].type==ipatchtype)npatchloaded++;
-  }
   switch(loadpatchbysteps){
   case 0:
     getBoundaryColors3(patchinfo + ifile,meshi->pqq, npqq, meshi->ipqq, 
@@ -923,7 +914,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   printf("After boundary file load: ");
   PrintMemoryInfo;
 #endif
-  IDLE();
+  Idle();
 
   local_stoptime0 = glutGet(GLUT_ELAPSED_TIME);
   delta_time0=(local_stoptime0-local_starttime0)/1000.0;
@@ -1266,7 +1257,7 @@ void global2localpatchbounds(const char *key){
 
 void drawpatch_texture(const mesh *meshi){
   float r11, r12, r21, r22;
-  int n,nn;
+  int n;
   int nrow, ncol, irow, icol;
   float *xyzp1, *xyzp2;
   unsigned char *ipq1, *ipq2;
@@ -1284,7 +1275,6 @@ void drawpatch_texture(const mesh *meshi){
   blockagedata *bc;
   patch *patchi;
   mesh *meshblock;
-  float clear_color[4]={1.0,1.0,1.0,1.0};
   float dboundx,dboundy,dboundz;
   float *xplt, *yplt, *zplt;
 
@@ -1333,7 +1323,6 @@ void drawpatch_texture(const mesh *meshi){
   glEnable(GL_TEXTURE_1D);
   glBindTexture(GL_TEXTURE_1D,texture_patch_colorbar_id);
 
-  nn =0;
   glBegin(GL_TRIANGLES);
   for(n=0;n<meshi->npatches;n++){
     iblock = meshi->blockonpatch[n];
@@ -1342,7 +1331,6 @@ void drawpatch_texture(const mesh *meshi){
     if(iblock!=-1&&meshblock!=NULL){
       bc=meshblock->blockageinfoptrs[iblock];
       if(bc->showtimelist!=NULL&&bc->showtimelist[itimes]==0){
-        nn += patchrow[n]*patchcol[n];
         continue;
       }
     }
@@ -1391,14 +1379,12 @@ void drawpatch_texture(const mesh *meshi){
         }
       }
     }
-    nn += patchrow[n]*patchcol[n];
   }
   glEnd();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 
   /* if a contour boundary DOES match a blockage face then draw "one sides" of boundary */
 
-  nn=0;
   if(hidepatchsurface==1){
     glBegin(GL_TRIANGLES);
   }
@@ -1408,7 +1394,6 @@ void drawpatch_texture(const mesh *meshi){
     if(iblock!=-1){
       bc=meshblock->blockageinfoptrs[iblock];
       if(bc->showtimelist!=NULL&&bc->showtimelist[itimes]==0){
-        nn += patchrow[n]*patchcol[n];
         continue;
       }
     }
@@ -1430,6 +1415,9 @@ void drawpatch_texture(const mesh *meshi){
           case 3:
             glTranslatef(0.00,0.0,dboundz);
             break;
+          default:
+            ASSERT(0);
+            break;
         }
         glBegin(GL_TRIANGLES);
       }
@@ -1475,11 +1463,9 @@ void drawpatch_texture(const mesh *meshi){
         glPopMatrix();
       }
     }
-    nn += patchrow[n]*patchcol[n];
   }
 
   /* if a contour boundary DOES match a blockage face then draw "one sides" of boundary */
-  nn=0;
   for(n=0;n<meshi->npatches;n++){
     iblock = meshi->blockonpatch[n];
     meshblock = meshi->meshonpatch[n];
@@ -1487,7 +1473,6 @@ void drawpatch_texture(const mesh *meshi){
     if(iblock!=-1&&meshblock!=NULL){
       bc=meshblock->blockageinfoptrs[iblock];
       if(bc->showtimelist!=NULL&&bc->showtimelist[itimes]==0){
-        nn += patchrow[n]*patchcol[n];
         continue;
       }
     }
@@ -1509,6 +1494,9 @@ void drawpatch_texture(const mesh *meshi){
           case -3:
             glTranslatef(0.0,0.0,-dboundz);
             break;
+          default:
+            ASSERT(0);
+            break;
         }
         glBegin(GL_TRIANGLES);
       }
@@ -1553,7 +1541,6 @@ void drawpatch_texture(const mesh *meshi){
         glPopMatrix();
       }
     }
-    nn += patchrow[n]*patchcol[n];
   }
   if(hidepatchsurface==1){
     glEnd();
@@ -1873,12 +1860,9 @@ void drawpatch_texture_threshold(const mesh *meshi){
 /* ------------------ drawpatch_threshold_cellcenter ------------------------ */
 
 void drawpatch_threshold_cellcenter(const mesh *meshi){
-  float r11, r12, r21, r22;
   int n,nn,nn1;
   int nrow, ncol, irow, icol;
   float *xyzp1, *xyzp2;
-  unsigned char *ipq1, *ipq2;
-  unsigned char *ipqqcopy;
   float *xyzpatchcopy;
   int *patchblankcopy, *ip1, *ip2;
   float *patchtimes;
@@ -1887,7 +1871,6 @@ void drawpatch_threshold_cellcenter(const mesh *meshi){
   int *patchdir, *patchrow, *patchcol;
   int *blockstart;
   int *patchblank;
-  unsigned char *ipqqi;
   int iblock;
   blockagedata *bc;
   patch *patchi;
@@ -1910,11 +1893,9 @@ void drawpatch_threshold_cellcenter(const mesh *meshi){
   switch(patchi->compression_type){
   case 0:
     ASSERT(meshi->ipqqi!=NULL);
-    ipqqi=meshi->ipqqi;
     break;
   case 1:
     ASSERT(meshi->ipqqi_zlib!=NULL);
-    ipqqi=meshi->ipqqi_zlib;
     break;
   default:
     ASSERT(0);
@@ -1944,15 +1925,12 @@ void drawpatch_threshold_cellcenter(const mesh *meshi){
       ncol=patchcol[n];
       xyzpatchcopy = xyzpatch + 3*blockstart[n];
       patchblankcopy = patchblank + blockstart[n];
-      ipqqcopy = ipqqi + blockstart[n];
 
       for(irow=0;irow<nrow-1;irow++){
         xyzp1 = xyzpatchcopy + 3*irow*ncol;
         ip1 = patchblankcopy + irow*ncol;
         nn1 = nn + irow*ncol;
         xyzp2 = xyzp1 + 3*ncol;
-        ipq1 = ipqqcopy + irow*ncol;
-        ipq2 = ipq1 + ncol;
         ip2 = ip1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
@@ -1969,7 +1947,7 @@ void drawpatch_threshold_cellcenter(const mesh *meshi){
             glVertex3fv(xyzp2+3);
             glVertex3fv(xyzp2);
           }
-          ipq1++; ipq2++; ip1++; ip2++;
+          ip1++; ip2++;
           xyzp1+=3;
           xyzp2+=3;
         }
@@ -1999,15 +1977,13 @@ void drawpatch_threshold_cellcenter(const mesh *meshi){
       ncol=patchcol[n];
       xyzpatchcopy = xyzpatch + 3*blockstart[n];
       patchblankcopy = patchblank + blockstart[n];
-      ipqqcopy = ipqqi + blockstart[n];
+
       for(irow=0;irow<nrow-1;irow++){
         xyzp1 = xyzpatchcopy + 3*irow*ncol;
-        ipq1 = ipqqcopy + irow*ncol;
         ip1 = patchblankcopy + irow*ncol;
         nn1 = nn + irow*ncol;
 
         xyzp2 = xyzp1 + 3*ncol;
-        ipq2 = ipq1 + ncol;
         ip2 = ip1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
@@ -2024,7 +2000,7 @@ void drawpatch_threshold_cellcenter(const mesh *meshi){
             glVertex3fv(xyzp2+3);
             glVertex3fv(xyzp2);
           }
-          ipq1++; ipq2++; ip1++; ip2++;
+          ip1++; ip2++;
           xyzp1+=3;
           xyzp2+=3;
         }
@@ -2051,14 +2027,12 @@ void drawpatch_threshold_cellcenter(const mesh *meshi){
       ncol=patchcol[n];
       xyzpatchcopy = xyzpatch + 3*blockstart[n];
       patchblankcopy = patchblank + blockstart[n];
-      ipqqcopy = ipqqi + blockstart[n];
+
       for(irow=0;irow<nrow-1;irow++){
         xyzp1 = xyzpatchcopy + 3*irow*ncol;
         ip1 = patchblankcopy + irow*ncol;
         nn1 = nn + irow*ncol;
         xyzp2 = xyzp1 + 3*ncol;
-        ipq1 = ipqqcopy + irow*ncol;
-        ipq2 = ipq1 + ncol;
         ip2 = ip1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
@@ -2074,7 +2048,7 @@ void drawpatch_threshold_cellcenter(const mesh *meshi){
             glVertex3fv(xyzp2);
             glVertex3fv(xyzp2+3);
           }
-          ipq1++; ipq2++; ip1++; ip2++;
+          ip1++; ip2++;
           xyzp1+=3;
           xyzp2+=3;
         }
@@ -2088,7 +2062,6 @@ void drawpatch_threshold_cellcenter(const mesh *meshi){
 /* ------------------ drawpatch_frame ------------------------ */
 
 void drawpatch_frame(void){
-  patch *patchi;
   mesh *meshi;
   int i;
 
@@ -2107,6 +2080,8 @@ void drawpatch_frame(void){
 
       filenum=meshi->patchfilenum;
       if(filenum!=-1){
+        patch *patchi;
+
         patchi = patchinfo + filenum;
         if(patchi->loaded==0||patchi->display==0||patchi->type!=ipatchtype)continue;
         if(usetexturebar!=0){
@@ -2332,6 +2307,9 @@ void drawpatch(const mesh *meshi){
           case 3:
             glTranslatef(0.00,0.0,dboundz);
             break;
+          default:
+            ASSERT(0);
+            break;
         }
         glBegin(GL_TRIANGLES);
       }
@@ -2441,6 +2419,9 @@ void drawpatch(const mesh *meshi){
           case -3:
             glTranslatef(0.00,0.0,-dboundz);
             break;
+          default:
+            ASSERT(0);
+            break;
         }
         glBegin(GL_TRIANGLES);
       }
@@ -2529,7 +2510,7 @@ void drawpatch_cellcenter(const mesh *meshi){
   int n,nn,nn1;
   int nrow, ncol, irow, icol;
   float *xyzp1, *xyzp2;
-  unsigned char *ipq1, *ipq2;
+  unsigned char *ipq1;
   unsigned char *ipqqcopy;
   float *xyzpatchcopy;
   int *patchblankcopy, *ip1, *ip2;
@@ -2543,7 +2524,7 @@ void drawpatch_cellcenter(const mesh *meshi){
   int iblock;
   blockagedata *bc;
   patch *patchi;
-  float *color11, *color12, *color21, *color22;
+  float *color11;
   mesh *meshblock;
 
   float dboundx,dboundy,dboundz;
@@ -2615,7 +2596,6 @@ void drawpatch_cellcenter(const mesh *meshi){
         nn1 = nn + irow*ncol;
         xyzp2 = xyzp1 + 3*ncol;
         ipq1 = ipqqcopy + irow*ncol;
-        ipq2 = ipq1 + ncol;
         ip2 = ip1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
@@ -2633,7 +2613,7 @@ void drawpatch_cellcenter(const mesh *meshi){
             glVertex3fv(xyzp2+3);
             glVertex3fv(xyzp2);
           }
-          ipq1++; ipq2++; ip1++; ip2++;
+          ipq1++; ip1++; ip2++;
           xyzp1+=3;
           xyzp2+=3;
         }
@@ -2678,6 +2658,9 @@ void drawpatch_cellcenter(const mesh *meshi){
           case 3:
             glTranslatef(0.0,0.0,dboundz);
             break;
+          default:
+            ASSERT(0);
+            break;
         }
         glBegin(GL_TRIANGLES);
       }
@@ -2688,7 +2671,6 @@ void drawpatch_cellcenter(const mesh *meshi){
         nn1 = nn + irow*ncol;
 
         xyzp2 = xyzp1 + 3*ncol;
-        ipq2 = ipq1 + ncol;
         ip2 = ip1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
@@ -2706,7 +2688,7 @@ void drawpatch_cellcenter(const mesh *meshi){
             glVertex3fv(xyzp2+3);
             glVertex3fv(xyzp2);
           }
-          ipq1++; ipq2++; ip1++; ip2++;
+          ipq1++; ip1++; ip2++;
           xyzp1+=3;
           xyzp2+=3;
         }
@@ -2750,6 +2732,9 @@ void drawpatch_cellcenter(const mesh *meshi){
           case -3:
             glTranslatef(0.0,0.0,-dboundz);
             break;
+          default:
+            ASSERT(0);
+            break;
         }
         glBegin(GL_TRIANGLES);
       }
@@ -2759,7 +2744,6 @@ void drawpatch_cellcenter(const mesh *meshi){
         nn1 = nn + irow*ncol;
         xyzp2 = xyzp1 + 3*ncol;
         ipq1 = ipqqcopy + irow*ncol;
-        ipq2 = ipq1 + ncol;
         ip2 = ip1 + ncol;
 
         for(icol=0;icol<ncol-1;icol++){
@@ -2777,7 +2761,7 @@ void drawpatch_cellcenter(const mesh *meshi){
             glVertex3fv(xyzp2);
             glVertex3fv(xyzp2+3);
           }
-          ipq1++; ipq2++; ip1++; ip2++;
+          ipq1++; ip1++; ip2++;
           xyzp1+=3;
           xyzp2+=3;
         }
@@ -3197,8 +3181,6 @@ int getpatchface2dir(mesh *meshi, int i1, int i2, int j1, int j2, int k1, int k2
                     int *blockonpatch, mesh **meshonpatch){
   int i;
   blockagedata *bc;
-  mesh *meshblock;
-  int imesh;
 
   *meshonpatch=NULL;
   if(i1==i2){
@@ -3622,7 +3604,7 @@ void getpatchsizeinfo(patch *patchi, int *nframes, int *buffersize){
 /* ------------------ getpatchdata_zlib ------------------------ */
 
 void getpatchdata_zlib(patch *patchi,unsigned char *data,int ndata, 
-                       float *local_times, unsigned int *zipoffset, unsigned int *zipsize, int ntimes){
+                       float *local_times, unsigned int *zipoffset, unsigned int *zipsize, int ntimes_local){
   EGZ_FILE *stream;
   float local_time;
   unsigned int compressed_size;
@@ -3692,9 +3674,9 @@ void getpatchdata_zlib(patch *patchi,unsigned char *data,int ndata,
                
     if(skip_frame==1||local_count%boundframestep!=0)continue;
     i++;
-    if(i>=ntimes)break;
+    if(i>=ntimes_local)break;
     printf("boundary time=%.2f\n",local_time);
-    ASSERT(i<ntimes);
+    ASSERT(i<ntimes_local);
     local_times[i]=local_time;
     zipoffset[i]=offset;
     zipsize[i]=compressed_size;
@@ -3772,7 +3754,7 @@ int update_patch_hist(patch *patchj){
   endiandata=getendian();
 
   for(i=0;i<npatchinfo;i++){
-    int endian, npatches, error, boundaryunitnumber;
+    int endian_local, npatches, error;
     patch *patchi;
     int unit1;
     FILE_SIZE lenfile;
@@ -3781,14 +3763,12 @@ int update_patch_hist(patch *patchj){
     float patchtime1, *patchframe;
     int patchframesize;
     int j;
-    mesh *meshi;
 
     patchi = patchinfo + i;
     if(patchi->inuse_getbounds==1||patchi->histogram->complete==1||patchi->type!=patchj->type||
        patchi->filetype!=patchj->filetype||patchi->bounds.defined==1||patchi->filetype==2)continue;
 
     patchi->inuse_getbounds=1;
-    meshi = meshinfo + patchi->blocknumber;
 
     if(first==1){
       printf("Determining %s percentile and global data bounds\n",patchi->label.longlabel);
@@ -3799,7 +3779,7 @@ int update_patch_hist(patch *patchj){
     lenfile=strlen(patchi->file);
 
     FORTget_file_unit(&unit1,&patchi->unit_start);
-    FORTgetboundaryheader1(patchi->file,&unit1,&endian, &npatches, &error, lenfile);
+    FORTgetboundaryheader1(patchi->file,&unit1,&endian_local, &npatches, &error, lenfile);
     if(npatches==0){
       FORTclosefortranfile(&unit1);
       continue;
@@ -3818,12 +3798,12 @@ int update_patch_hist(patch *patchj){
 
     patchframesize=0;
     for(j=0;j<npatches;j++){
-      int patchsize;
+      int npatchsize;
 
-      patchsize = (pi2[j]+1-pi1[j]);
-      patchsize *= (pj2[j]+1-pj1[j]);
-      patchsize *= (pk2[j]+1-pk1[j]);
-      patchframesize+=patchsize;
+      npatchsize = (pi2[j]+1-pi1[j]);
+      npatchsize *= (pj2[j]+1-pj1[j]);
+      npatchsize *= (pk2[j]+1-pk1[j]);
+      patchframesize+=npatchsize;
     }
     
     FORTget_file_unit(&unit1,&patchi->unit_start);

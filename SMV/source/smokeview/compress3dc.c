@@ -70,7 +70,7 @@ void CCsmoke3dheader(char *file,int *is1, int *is2, int *js1, int *js2, int *ks1
 
 /* ------------------ CCsmoke3dtofile ------------------------ */
 
-void CCsmoke3dtofile(char *file, float *time, float *dx, int *type, float *xyz, int *nx, int *ny, int *nz){
+void CCsmoke3dtofile(char *file, float *smoke_time, float *dx, int *type, float *xyz, int *nx, int *ny, int *nz){
 
   FILE *binfile,*textfile;
   unsigned char *buffer_in, *buffer_out;
@@ -145,7 +145,7 @@ void CCsmoke3dtofile(char *file, float *time, float *dx, int *type, float *xyz, 
   nchars[0]=nchars_in;
   nchars[1]=nchars_out;
 
-  fwrite(time,4,1,binfile);
+  fwrite(smoke_time,4,1,binfile);
   fwrite(nchars,4,2,binfile);
   if(nchars_out>0)fwrite(buffer_out,1,nchars_out,binfile);
 
@@ -157,7 +157,7 @@ void CCsmoke3dtofile(char *file, float *time, float *dx, int *type, float *xyz, 
   strcat(textfilename,".sz");
   textfile=fopen(textfilename,"a");
   if(textfile!=NULL){
-    fprintf(textfile,"%f %i %i\n",*time,nchars_in,nchars_out);
+    fprintf(textfile,"%f %i %i\n",*smoke_time,nchars_in,nchars_out);
     fclose(textfile);
   }
 }

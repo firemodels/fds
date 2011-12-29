@@ -25,12 +25,6 @@ extern "C" char glui_motion_revision[]="$Revision$";
 #define EYE_ROTATE_90 6
 #define EYELEVEL 7
 #define FLOORLEVEL 8
-#define EYE_X 21
-#define EYE_Y 22
-#define EYE_Z 23
-#define CRAWL 0
-#define WALK 1
-#define RUN 2
 
 #define LABEL_VIEW 4
 
@@ -60,7 +54,6 @@ extern "C" char glui_motion_revision[]="$Revision$";
 void EYEVIEW_CB(int var);
 void BUTTON_hide2_CB(int var);
 void BUTTON_Reset_CB(int var);
-void TRANSLATE_CB(int var);
 
 GLUI_Listbox *meshlist1=NULL;
 GLUI_Listbox *render_size_list=NULL;
@@ -717,7 +710,6 @@ extern "C" void TRANSLATE_CB(int var){
       }
       glui_move_mode=EYE_ROTATE;
       return;
-      break;
     case EYE_ROTATE_90:
       {
         float diffangle;
@@ -783,6 +775,9 @@ extern "C" void TRANSLATE_CB(int var){
           glui_screenWidth=1280;
           glui_screenHeight=1024;
           break;
+        default:
+          ASSERT(0);
+          break;
       }
       if(windowsize_pointer>=2){
         SPINNER_window_width->set_int_val(glui_screenWidth);
@@ -805,7 +800,6 @@ extern "C" void TRANSLATE_CB(int var){
       ZoomMenu(-2);
       camera_current->projection_type=projection_type;
       return;
-      break;
     case EYELEVEL:
       desired_view_height=1.5;
       break;
@@ -822,7 +816,6 @@ extern "C" void TRANSLATE_CB(int var){
         update_rotation_index(nmeshes);
       }
       return;
-      break;
     case ZOOM:
       zoomindex=-1;
       for(i=0;i<5;i++){
@@ -857,9 +850,9 @@ extern "C" void TRANSLATE_CB(int var){
       camera_current->zoom=zoom;
       if(SPINNER_zoom!=NULL)SPINNER_zoom->set_float_val(zoom);
       break;
-//    default:
-//      ASSERT(FFALSE);
-//      break;
+    default:
+      ASSERT(0);
+      break;
   }
   
   dx = d_eye_xyz[0];
@@ -974,6 +967,9 @@ void BUTTON_hide2_CB(int var){
   case SAVE_SETTINGS:
     updatemenu=1;
     writeini(LOCAL_INI);
+    break;
+  default:
+    ASSERT(0);
     break;
   }
 }
@@ -1220,6 +1216,9 @@ void RENDER_CB(int var){
       break;
     case RENDER_STOP:
       RenderMenu(RenderCancel);
+      break;
+    default:
+      ASSERT(0);
       break;
   }
 }

@@ -22,7 +22,6 @@ char startup_revision[]="$Revision$";
 #include "smokeviewvars.h"
 #include "svn_revision.h"
 
-int getmaxrevision(void);
 void glui_colorbar_setup(int main_window);
 void glui_motion_setup(int main_window);
 #ifdef pp_SHOOTER
@@ -42,8 +41,6 @@ void glui_advancedtour_setup(int main_window);
 void glui_stereo_setup(int main_window);
 void glui_trainer_setup(int main_window);
 void glui_3dsmoke_setup(int main_window);
-void RenderMenu(int value);
-void GeometryMenu(int val);
 //void InitOpenGL(void);
 
 /* ------------------ to_lower ------------------------ */
@@ -60,7 +57,6 @@ void to_lower(char *string){
 /* ------------------ Init ------------------------ */
 
 void Init(void){
-  int errorcode;
   mesh *meshi;
 
   int n,i;
@@ -286,7 +282,7 @@ int setup_case(int argc, char **argv){
 void setup_glut(int argc, char **argv){
   int i;
   char *smoketempdir;
-  size_t lensmoketempdir,lensmokebindir;
+  size_t lensmoketempdir;
 #ifdef pp_OSX
   char workingdir[1000];
 #endif
@@ -311,13 +307,12 @@ void setup_glut(int argc, char **argv){
       if(strncmp(smokeviewtempdir+lensmoketempdir-1,dirseparator,1)!=0){
         STRCAT(smokeviewtempdir,dirseparator);
       }
-      printf(_("Scratch directory:"));
+      printf("%s",_("Scratch directory:"));
       printf(" %s\n",smokeviewtempdir);
     }
   }
 #ifdef pp_BETA
-  printf(_("*** This version of Smokeview is intended for review and testing ONLY. ***"));
-  printf("\n");
+  printf("%s\n",_("*** This version of Smokeview is intended for review and testing ONLY. ***"));
 #endif
 
 #ifdef pp_OSX
@@ -325,10 +320,9 @@ void setup_glut(int argc, char **argv){
 #endif
   if(use_graphics==1){
     printf("\n");
-    printf(_("Initializing Glut - "));
+    printf("%s",_("Initializing Glut - "));
     glutInit(&argc, argv);
-    printf(_("initialized"));
-    printf("\n");
+    printf("%s\n",_("initialized"));
   }
 #ifdef pp_OSX
   chdir(workingdir);
@@ -336,12 +330,11 @@ void setup_glut(int argc, char **argv){
 
   if(use_graphics==1){
 #ifdef _DEBUG
-    printf(_("Initializing Smokeview graphics window - "));
+    printf("%s",_("Initializing Smokeview graphics window - "));
 #endif
     glutInitWindowSize(screenWidth, screenHeight);
 #ifdef _DEBUG
-    printf(_("initialized"));
-    printf("\n");
+    printf("%s\n",_("initialized"));
 #endif
 
     max_screenWidth = glutGet(GLUT_SCREEN_WIDTH);
@@ -406,7 +399,7 @@ void InitOpenGL(void){
   int type;
   int err;
 
-  printf(_("Initializing OpenGL - "));
+  printf("%s",_("Initializing OpenGL - "));
   
   type = GLUT_RGB|GLUT_DEPTH;
   if(buffertype==GLUT_DOUBLE){
@@ -429,30 +422,27 @@ void InitOpenGL(void){
   }
 
 #ifdef _DEBUG
-  printf(_("   Initializing Glut display mode - "));
+  printf("%s",_("   Initializing Glut display mode - "));
 #endif
   glutInitDisplayMode(type);
 #ifdef _DEBUG
-  printf(_("initialized"));
-  printf("\n");
+  printf("%s\n",_("initialized"));
 #endif
 
   CheckMemory;
 #ifdef _DEBUG
-  printf(_("   creating window"));
-  printf("\n");
+  printf("%s\n",_("   creating window"));
 #endif
   mainwindow_id=glutCreateWindow("");
 #ifdef _DEBUG
-  printf(_("   window created"));
-  printf("\n");
+  printf("%s\n",_("   window created"));
 #endif
 
 #ifdef pp_MESSAGE
   glui_message_setup(mainwindow_id);
 #endif
 #ifdef _DEBUG
-  printf(_("   Initializing callbacks - "));
+  printf("%s",_("   Initializing callbacks - "));
 #endif
   glutSpecialUpFunc(specialkeyboard_up);
   glutKeyboardUpFunc(keyboard_up);
@@ -465,8 +455,7 @@ void InitOpenGL(void){
   glutVisibilityFunc(NULL);
   glutMenuStatusFunc(MenuStatus);
 #ifdef _DEBUG
-  printf(_("initialized"));
-  printf("\n");
+  printf("%s\n",_("initialized"));
 #endif
 
   opengl_version = get_opengl_version(opengl_version_label);
@@ -485,13 +474,11 @@ void InitOpenGL(void){
     err=init_shaders();
 #ifdef _DEBUG
     if(err==0){
-      printf(_("   GPU shader initialization succeeded"));
-      printf("\n");
+      printf("%s\n",_("   GPU shader initialization succeeded"));
     }
 #endif
     if(err!=0){
-      printf(_("   GPU shader initialization failed"));
-      printf("\n");
+      printf("%s\n",_("   GPU shader initialization failed"));
     }
   }
 #endif
@@ -500,13 +487,11 @@ void InitOpenGL(void){
     err=init_cull_exts();
 #ifdef _DEBUG
     if(err==0){
-      printf(_("   Culling extension initialization succeeded"));
-      printf("\n");
+      printf("%s\n",_("   Culling extension initialization succeeded"));
     }
 #endif
     if(err!=0){
-      printf(_("   Culling extension initialization failed"));
-      printf("\n");
+      printf("%s\n",_("   Culling extension initialization failed"));
     }
   }
 #endif
@@ -538,7 +523,7 @@ void InitOpenGL(void){
     if(nblueshift<0)nblueshift=0;
   }
   opengldefined=1;
-  printf(_("initialized"));
+  printf("%s",_("initialized"));
 }
 
 /* ------------------ set_3dsmoke_startup ------------------------ */
@@ -2169,9 +2154,9 @@ void initvars(void){
 
 /* ------------------ getmaxrevision ------------------------ */
 
-#define MAXREV(cval) max_revision=MAX(getrevision(cval),max_revision)
+#define MAXREV(cval) rev=getrevision(cval);max_revision=MAX(rev,max_revision)
 int getmaxrevision(void){
-  int max_revision=0;
+  int max_revision=0,rev;
 
   MAXREV(assert_revision);
   MAXREV(callbacks_revision);

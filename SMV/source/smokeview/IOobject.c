@@ -573,16 +573,16 @@ void get_vdevice_vel(float time, vdevice *vdevicei, float *vel, float *angle, fl
 /* ----------------------- get_devices_val ----------------------------- */
 
 #define IN_INTERVAL(IVAL) \
-  if(time>=times[IVAL]&&time<=times[IVAL+1]){\
-    if(time-times[IVAL]<times[IVAL+1]-time){\
-      devicei->val=devicei->vals[IVAL];\
-      *valid=devicei->valids[IVAL];\
+  if(time>=times[(IVAL)]&&time<=times[(IVAL)+1]){\
+    if(time-times[(IVAL)]<times[(IVAL)+1]-time){\
+      devicei->val=devicei->vals[(IVAL)];\
+      *valid=devicei->valids[(IVAL)];\
     }\
     else{\
-      devicei->val=devicei->vals[IVAL+1];\
-      *valid=devicei->valids[IVAL+1];\
+      devicei->val=devicei->vals[(IVAL)+1];\
+      *valid=devicei->valids[(IVAL)+1];\
     }\
-    devicei->ival=IVAL;\
+    devicei->ival=(IVAL);\
     return devicei->val;\
   }
 
@@ -1042,7 +1042,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop, int recurs
   }
   toknext=NULL;
   for(ii=0;;ii++){
-    tokendata *toki,*tok1,*tok2,*tok3,*tok4;
+    tokendata *toki;
 #define NARGVAL 6
     float arg[NARGVAL], *argptr;
     int j;

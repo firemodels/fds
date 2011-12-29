@@ -14,9 +14,6 @@ char threader_revision[]="$Revision$";
 
 #include "smokeviewvars.h"
 
-void *read_volsmoke_allframes_allmeshes2(void *arg);
-
-
 /* ------------------ init_all_threads ------------------------ */
 
 void init_multi_threading(void){

@@ -598,7 +598,6 @@ EXTERNCPP void ResetView(int option);
 EXTERNCPP void Reshape(int width, int height);
 EXTERNCPP void UpdateTimeLabels(void);
 EXTERNCPP void Idle(void);
-#define IDLE() Idle();
 EXTERNCPP void RenderFrame(int view_mode);
 EXTERNCPP int readlabels(flowlabels *label, FILE *stream);
 EXTERNCPP int readlabels_terrain(flowlabels *label, FILE *stream);

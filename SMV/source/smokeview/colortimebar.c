@@ -190,11 +190,11 @@ void drawcolorbarpath(void){
   glPointSize(5.0);
   glBegin(GL_POINTS);
   for(i=0;i<255;i++){
-    float *rgb;
+    float *rgbi;
 
-    rgb=cbi->colorbar+3*i;
-    glColor3fv(rgb);
-    glVertex3fv(rgb);
+    rgbi=cbi->colorbar+3*i;
+    glColor3fv(rgbi);
+    glVertex3fv(rgbi);
   }
   glEnd();
 
@@ -249,11 +249,11 @@ void drawcolorbarpath(void){
     glPointSize(10.0);
     glBegin(GL_POINTS);
     for(i=0;i<cbi->nnodes;i++){
-      float *rgb;
+      float *rgbi;
 
-      rgb = cbi->colorbar+3*cbi->index_node[i];
+      rgbi = cbi->colorbar+3*cbi->index_node[i];
       dzpoint = (float)cbi->index_node[i]/255.0;
-      glColor3fv(rgb);
+      glColor3fv(rgbi);
       glVertex3f(1.5,0.0,dzpoint);
     }
     glEnd();
@@ -268,23 +268,23 @@ void drawcolorbarpath(void){
       output3Text(foregroundcolor, 1.55,0.0,dzpoint,cbuff);
     }
     if(colorbarpoint>=0&&colorbarpoint<cbi->nnodes){
-      float *rgb;
+      float *rgbi;
 
       glPointSize(20.0);
       glBegin(GL_POINTS);
-      rgb = cbi->colorbar+3*cbi->index_node[colorbarpoint];
+      rgbi = cbi->colorbar+3*cbi->index_node[colorbarpoint];
       dzpoint = (float)cbi->index_node[colorbarpoint]/255.0;
-      glColor3fv(rgb);
+      glColor3fv(rgbi);
       glVertex3f(1.5,0.0,dzpoint);
       glEnd();
     }
 
     glBegin(GL_QUAD_STRIP);
     for(i=0;i<256;i++){
-      float *rgb;
+      float *rgbi;
 
-      rgb=cbi->colorbar+3*i;
-      glColor3fv(rgb);
+      rgbi=cbi->colorbar+3*i;
+      glColor3fv(rgbi);
       zbot=(float)i/255.0;
       glVertex3f(1.1,0.0,zbot);
       glVertex3f(1.3,0.0,zbot);
@@ -293,10 +293,10 @@ void drawcolorbarpath(void){
 
     glBegin(GL_QUAD_STRIP);
     for(i=0;i<256;i++){
-      float *rgb;
+      float *rgbi;
 
-      rgb=cbi->colorbar+3*i;
-      glColor3fv(rgb);
+      rgbi=cbi->colorbar+3*i;
+      glColor3fv(rgbi);
       zbot=(float)i/255.0;
       glVertex3f(1.3,0.0,zbot);
       glVertex3f(1.1,0.0,zbot);
@@ -304,10 +304,10 @@ void drawcolorbarpath(void){
     glEnd();
     glBegin(GL_QUAD_STRIP);
     for(i=0;i<256;i++){
-      float *rgb;
+      float *rgbi;
 
-      rgb=cbi->colorbar+3*i;
-      glColor3fv(rgb);
+      rgbi=cbi->colorbar+3*i;
+      glColor3fv(rgbi);
       zbot=(float)i/255.0;
       glVertex3f(1.2,-0.1,zbot);
       glVertex3f(1.2, 0.1,zbot);
@@ -315,10 +315,10 @@ void drawcolorbarpath(void){
     glEnd();
     glBegin(GL_QUAD_STRIP);
     for(i=0;i<256;i++){
-      float *rgb;
+      float *rgbi;
 
-      rgb=cbi->colorbar+3*i;
-      glColor3fv(rgb);
+      rgbi=cbi->colorbar+3*i;
+      glColor3fv(rgbi);
       zbot=(float)i/255.0;
       glVertex3f(1.2, 0.1,zbot);
       glVertex3f(1.2,-0.1,zbot);
@@ -407,10 +407,7 @@ void remapcolorbar(colorbardata *cbi){
 
 void initdefaultcolorbars(void){
   int i;
-  float dval;
-  int nlegs;
   colorbardata *cbi;
-  int ii;
 
   ndefaultcolorbars=12;
   
@@ -838,8 +835,6 @@ void initdefaultcolorbars(void){
   rgb_above_max[2]=0;
 
   for(i=0;i<ndefaultcolorbars;i++){
-    unsigned char *rgb_min, *rgb_max;
-
     cbi = colorbarinfo + i;
 
     remapcolorbar(cbi);

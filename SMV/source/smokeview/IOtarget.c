@@ -170,7 +170,7 @@ void readtarget(const char *file, int ifile, int flag, int *errorcode){
   plotstate=getplotstate(DYNAMIC_PLOTS);
   updatetimes();
   fclose(stream);
-  IDLE();
+  Idle();
 
 }
 
@@ -320,7 +320,7 @@ void readtarget2(const char *file, int ifile, int flag, int *errorcode){
   plotstate=getplotstate(DYNAMIC_PLOTS);
   updatetimes();
   fclose(stream);
-  IDLE();
+  Idle();
 
 }
 

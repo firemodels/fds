@@ -111,7 +111,7 @@ void Device_CB(int var){
       }
     }
 
-  break;
+    break;
   case DEVICE_sensorsize:
     if(sensorrelsize<sensorrelsizeMIN){
       sensorrelsize=sensorrelsizeMIN;
