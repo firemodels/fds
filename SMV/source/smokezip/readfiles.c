@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "egz_stdio.h"
 #include "svzip.h"
 #include "MALLOC.h"
 #include "string_util.h"
@@ -248,7 +247,7 @@ int readsmv(char *smvfile){
   }
 #endif
   
-  // read in smv file a second time to compress files
+  // read in smv file a second time_local to compress files
 
   ioffset=0;
   ipatch=0;
@@ -502,7 +501,7 @@ int readsmv(char *smvfile){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"PRT5") == 1){
-      int version=0,meshindex=1;
+      int version_local=0,meshindex=1;
       int i;
       char *buffer2;
       int len;
@@ -512,7 +511,7 @@ int readsmv(char *smvfile){
       len=strlen(buffer);
       if(len>4){
         buffer2=buffer+4;
-        sscanf(buffer2,"%i %i",&meshindex,&version);
+        sscanf(buffer2,"%i %i",&meshindex,&version_local);
         meshindex--;
 
       }
@@ -531,7 +530,7 @@ int readsmv(char *smvfile){
       if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
       trim(buffer);
       buffer2=trim_front(buffer);
-      if(strlen(buffer2)<=0)break;
+      if(strlen(buffer2)==0)break;
       if(getfileinfo(buffer2,GLOBsourcedir,&filesize)==0){
         int lendir=0;
 
@@ -576,7 +575,7 @@ int readsmv(char *smvfile){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"BNDF") == 1){
-      int version=0,dummy;
+      int version_local=0,dummy;
       char *buffer2;
       int len;
       int filesize;
@@ -584,7 +583,7 @@ int readsmv(char *smvfile){
       len=strlen(buffer);
       if(len>4){
         buffer2=buffer+4;
-        sscanf(buffer2,"%i %i",&dummy,&version);
+        sscanf(buffer2,"%i %i",&dummy,&version_local);
       }
 
       patchi = patchinfo + ipatch;
@@ -594,12 +593,12 @@ int readsmv(char *smvfile){
       patchi->autozip = 0;
       patchi->inuse=0;
       patchi->compressed=0;
-      patchi->version=version;
+      patchi->version=version_local;
 
       if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
       trim(buffer);
       buffer2=trim_front(buffer);
-      if(strlen(buffer2)<=0)break;
+      if(strlen(buffer2)==0)break;
       if(getfileinfo(buffer2,GLOBsourcedir,&filesize)==0){
         int lendir=0;
 
@@ -649,7 +648,7 @@ int readsmv(char *smvfile){
             patchi->patchdir=patchdir;
             patchi->npatches=npatches;
             patchi->patchsize=patchsize;
-            FORTgetboundaryheader2(&boundaryunitnumber, &version, &npatches, pi1, pi2, pj1, pj2, pk1, pk2, patchdir);
+            FORTgetboundaryheader2(&boundaryunitnumber, &version_local, &npatches, pi1, pi2, pj1, pj2, pk1, pk2, patchdir);
             for(i=0;i<npatches;i++){
               patchi->patchsize[i] = (pi2[i]+1-pi1[i])*(pj2[i]+1-pj1[i])*(pk2[i]+1-pk1[i]);
             }
@@ -676,7 +675,7 @@ int readsmv(char *smvfile){
       match(buffer,"SLFL") == 1||
       match(buffer,"SLCT") == 1)
     {
-      int version=0,dummy;
+      int version_local=0,dummy;
       char *buffer2;
       int len;
       int filesize;
@@ -686,7 +685,7 @@ int readsmv(char *smvfile){
       len=strlen(buffer);
       if(len>4){
         buffer2=buffer+4;
-        sscanf(buffer2,"%i %i",&dummy,&version);
+        sscanf(buffer2,"%i %i",&dummy,&version_local);
       }
 
       if(nmeshes>1){
@@ -705,7 +704,7 @@ int readsmv(char *smvfile){
       slicei = sliceinfo + islice;
       slicei->blocknumber=blocknumber;
       slicei->unit_start=unit_start++;
-      slicei->version=version;
+      slicei->version=version_local;
       slicei->seq_id = islice_seq;
       slicei->autozip = 0;
       slicei->inuse=0;
@@ -720,7 +719,7 @@ int readsmv(char *smvfile){
       if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
       trim(buffer);
       buffer2=trim_front(buffer);
-      if(strlen(buffer2)<=0)break;
+      if(strlen(buffer2)==0)break;
       if(getfileinfo(buffer2,GLOBsourcedir,&filesize)==0){
         int lendir=0;
 
@@ -755,12 +754,12 @@ int readsmv(char *smvfile){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"PL3D") == 1){
-      int version=0;
+      int version_local=0;
       char *buffer2;
       int filesize;
       plot3d *plot3di;
       int blocknumber;
-      float time;
+      float time_local;
       int blocktemp;
 
       if(nmeshes>1){
@@ -772,11 +771,11 @@ int readsmv(char *smvfile){
       if(strlen(buffer)>5){
         buffer2 = buffer+5;
         blocktemp=1;
-        sscanf(buffer2,"%s %f %i",buffer2,&time,&blocktemp);
+        sscanf(buffer2,"%s %f %i",buffer2,&time_local,&blocktemp);
         if(blocktemp>0&&blocktemp<=nmeshes)blocknumber = blocktemp-1;
       }
       else{
-        time=-1.0;
+        time_local=-1.0;
       }
 
       plot3di = plot3dinfo + iplot3d;
@@ -784,16 +783,16 @@ int readsmv(char *smvfile){
       iplot3d_seq++;
       plot3di->seq_id = iplot3d;
       plot3di->autozip = 0;
-      plot3di->version=version;
+      plot3di->version=version_local;
       plot3di->plot3d_mesh=meshinfo + blocknumber;
-      plot3di->time=time;
+      plot3di->time=time_local;
       plot3di->inuse=0;
       plot3di->compressed=0;
 
       if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
       trim(buffer);
       buffer2=trim_front(buffer);
-      if(strlen(buffer2)<=0)break;
+      if(strlen(buffer2)==0)break;
       if(getfileinfo(buffer2,GLOBsourcedir,&filesize)==0){
         int lendir=0;
 
@@ -912,11 +911,6 @@ void readini(char *casenameini){
   char *smoketemp;
   char globalini[256],smokeviewini[256];
   char *globaliniptr, *smokeviewiniptr;
-#ifdef pp_cvf
-char dirseparator[]="\\";
-#else
-char dirseparator[]="/";
-#endif
 
   smoketemp = getenv("SMOKEVIEWINI");
   if(smoketemp==NULL)smoketemp=getenv("smokeviewini");

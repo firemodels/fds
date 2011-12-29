@@ -235,9 +235,6 @@ extern "C" void show_glui_edit(void){
   glui_edit->show();
 }
 
-extern "C" void DialogMenu(int value);
-
-
 /* ------------------ BUTTON_hide3_CB ------------------------ */
 
 void BUTTON_hide3_CB(int var){
@@ -356,7 +353,7 @@ extern "C" void update_blockvals(int flag){
 
 /* ------------------ OBJECT_CB ------------------------ */
 
-void OBJECT_CB(int var){
+extern "C" void OBJECT_CB(int var){
   int i,temp;
   switch (var){
     case UPDATE_LIST:

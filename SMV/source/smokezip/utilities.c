@@ -9,7 +9,6 @@
 #include <string.h>
 #include <math.h>
 #include "zlib.h"
-#include "egz_stdio.h"
 #include "svzip.h"
 #include "MALLOC.h"
 #include "string_util.h"
@@ -152,9 +151,9 @@ void version(void){
 
 /* ------------------ getmaxrev ------------------------ */
 
-#define MAXREV(cval) max_revision=MAX(getrevision(cval),max_revision)
+#define MAXREV(cval) rev=getrevision(cval);max_revision=MAX(rev,max_revision)
 int getmaxrevision(void){
-  int max_revision=0;
+  int max_revision=0,rev;
 
   MAXREV(assert_revision);
   MAXREV(CNV3dsmoke_revision);

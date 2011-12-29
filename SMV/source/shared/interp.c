@@ -6,8 +6,6 @@
 char interp_revision[]="$Revision$";
 
 #include "options.h"
-#include <stdio.h>
-#include <stdlib.h>
 #include "interp.h"
 
 /* ------------------ get_z_interp_factors ------------------------ */

@@ -20,7 +20,6 @@ char CNVboundary_revision[]="$Revision$";
 pdfdata pdfmerge,pdfframe;
 
 
-void endian_switch(void *val, int nval);
 #define FORTREAD(var,size) fseek(BOUNDARYFILE,4,SEEK_CUR);\
                            returncode=fread(var,4,size,BOUNDARYFILE);\
                            if(endianswitch==1)endian_switch(var,size);\
@@ -102,7 +101,7 @@ int convert_boundary(patch *patchi, int *thread_index){
   int ijkbounds[9];
   int i;
   int fileversion,one;
-  float time;
+  float time_local;
   int i1, i2, j1, j2, k1, k2;
   float *patchvals=NULL,*patchvalscopy;
   unsigned char *full_boundarybuffer=NULL,*compressed_boundarybuffer=NULL;
@@ -244,7 +243,7 @@ int convert_boundary(patch *patchi, int *thread_index){
   // local min max  (min max found for this file)
   // npatch
   // i1,i2,j1,j2,k1,k2,idir,dummy,dummy (npatch times)
-  // time
+  // time_local
   // compressed size of frame
   // compressed buffer
   
@@ -315,7 +314,7 @@ int convert_boundary(patch *patchi, int *thread_index){
     while(feof(BOUNDARYFILE)==0){
       int j ;
 
-      FORTREAD(&time,1);
+      FORTREAD(&time_local,1);
       sizebefore+=12;
       if(returncode==0)break;
 
@@ -323,7 +322,7 @@ int convert_boundary(patch *patchi, int *thread_index){
       for(j=0;j<npatch;j++){
         int size;
 
-        i1 = ijks[6*j+0];
+        i1 = ijks[6*j];
         i2 = ijks[6*j+1];
         j1 = ijks[6*j+2];
         j2 = ijks[6*j+3];
@@ -339,11 +338,11 @@ int convert_boundary(patch *patchi, int *thread_index){
 
 //      patchi = patchinfo + i;
 
-      if(time<time_max)continue;
+      if(time_local<time_max)continue;
       count++;
 
       if(count%GLOBboundzipstep!=0)continue;
-      time_max=time;
+      time_max=time_local;
 
       for(i=0;i<npatchfull;i++){
         unsigned char ival;
@@ -369,10 +368,10 @@ int convert_boundary(patch *patchi, int *thread_index){
       if(returncode!=0){
         printf("*** error: compress returncode=%i\n",returncode);
       }
-//      printf("time=%f before %i after=%i\n",time,npatchfull,ncompressed_zlib);
+//      printf("time=%f before %i after=%i\n",time_local,npatchfull,ncompressed_zlib);
 
-      fprintf(boundarysizestream,"%f %i %i\n",time,(int)npatchfull,(int)ncompressed_zlib);
-      fwrite(&time,4,1,boundarystream);                                       // write out time
+      fprintf(boundarysizestream,"%f %i %i\n",time_local,(int)npatchfull,(int)ncompressed_zlib);
+      fwrite(&time_local,4,1,boundarystream);                                       // write out time_local
       fwrite(&ncompressed_zlib,4,1,boundarystream);                           // write out compressed size of frame
       fwrite(compressed_boundarybuffer,1,ncompressed_zlib,boundarystream);    // write out compressed buffer
       sizeafter+=ncompressed_zlib+8;

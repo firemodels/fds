@@ -19,13 +19,6 @@ char CNVpart_revision[]="$Revision$";
 
 
 
-void endian_switch(void *val, int nval);
-#define READ(var,size) returncode=fread(var,4,size,PARTFILE);\
-                       if(returncode!=size)returncode=0;\
-                       if(endianswitch==1&&returncode!=0)endian_switch(var,size);
-#define READBR(var,size) READ(var,size);if(returncode==0)break;
-#define SEEK returncode=fseek(PARTFILE,4,SEEK_CUR)
-#define SEEKBR SEEK;if(returncode!=0)break
 void part2iso(part *parti,int *thread_index);
 
 
@@ -215,7 +208,7 @@ void convert_part(part *parti, int *thread_index){
   int unit;
   int nclasses;
   int *nquantities, *npoints;
-  float time;
+  float time_local;
   int error;
   int endiandata;
   int *tagdata;
@@ -253,7 +246,7 @@ void convert_part(part *parti, int *thread_index){
   // quantities_1, ..., quantities_nclasses
 
   //*** data frame
-  // time
+  // time_local
   // points_1, ..., points_nclasses
   // ntotal_int, ntotal_char
   // ncompressedpoints
@@ -329,7 +322,7 @@ void convert_part(part *parti, int *thread_index){
     fclose(PARTFILEstream);
     fclose(partstream);
     return;
- }
+  }
 
   if(GLOBcleanfiles==1){
     partstream=fopen(partfile_svz,"rb");
@@ -405,15 +398,15 @@ void convert_part(part *parti, int *thread_index){
     unsigned char *cbuff;
     int ncompressed_int, ncompressed_char;
 
-    FORTgetpartdataframe(&unit,&nclasses,nquantities,npoints,&time,tagdata,pdata,&size,&error);
+    FORTgetpartdataframe(&unit,&nclasses,nquantities,npoints,&time_local,tagdata,pdata,&size,&error);
     if(error!=0)break;
 
-    fwrite(&time,4,1,partstream);
+    fwrite(&time_local,4,1,partstream);
     fwrite(npoints,4,nclasses,partstream);
     sizeafter+=4*(1+nclasses);
     sizebefore+=size;
 
-//    fprintf(partsizestream,"%f\n",time);
+//    fprintf(partsizestream,"%f\n",time_local);
 
     vals=pdata;
     tagdataptr=(unsigned int *)tagdata;
@@ -583,7 +576,7 @@ void Get_Part_Bounds(void){
     int error1;
     int nclasses;
     int *nquantities, *npoints;
-    float time;
+    float time_local;
     int error, size;
     int nquantities_total;
     int j;
@@ -620,7 +613,7 @@ void Get_Part_Bounds(void){
       float *x, *y, *z, *vals;
       int k;
 
-      FORTgetpartdataframe(&unit,&nclasses,nquantities,npoints,&time,tagdata,pdata,&size,&error);
+      FORTgetpartdataframe(&unit,&nclasses,nquantities,npoints,&time_local,tagdata,pdata,&size,&error);
       if(error!=0)break;
 
       vals=pdata;
@@ -681,14 +674,13 @@ void part2iso(part *parti, int *thread_index){
   int endiandata;
 
   int blocknumber;
-  FILE_SIZE lenfile;
+  FILE_SIZE len_partfile;
   int unit;
   int error1;
   int nclasses;
   int *nquantities, *npoints, *partindex;
-  float time;
+  float time_local;
   int error, size;
-  int nquantities_total;
   int j;
   int npartcount, i;
   mesh *partmesh;
@@ -701,7 +693,6 @@ void part2iso(part *parti, int *thread_index){
   float *xpltcell, *ypltcell, *zpltcell;
   int data2flag=1;
   float *partcount;
-  char smvappen[1024];
   FILE *SMVISOFILE=NULL;
   int nx2, ny2, nz2;
   float xmin, ymin, zmin;
@@ -729,10 +720,10 @@ void part2iso(part *parti, int *thread_index){
   NewMemory((void **)&tagdata,1000000*sizeof(int));
   NewMemory((void **)&partindex,1000000*sizeof(int));
 
-  lenfile=strlen(parti->file);
+  len_partfile=strlen(parti->file);
   LOCK_COMPRESS;
   FORTget_file_unit(&unit,&parti->unit_start);
-  FORTopenpart(parti->file,&unit,&endiandata,&error1,lenfile);
+  FORTopenpart(parti->file,&unit,&endiandata,&error1,len_partfile);
   UNLOCK_COMPRESS;
 
   FORTgetpartheader1(&unit,&nclasses,&fdsversion,&size);
@@ -792,7 +783,6 @@ void part2iso(part *parti, int *thread_index){
     for(k=0;k<nquantities[j];k++){
       part5class *classj;
       part5prop *propi;
-      flowlabels *labels;
 
       classj=parti->classptr[j];
       propi=part5propinfo_copy+getpartprop_index(classj->labels[k].shortlabel);
@@ -874,7 +864,7 @@ void part2iso(part *parti, int *thread_index){
     float *x, *y, *z, *vals;
     int k;
 
-    FORTgetpartdataframe(&unit,&nclasses,nquantities,npoints,&time,tagdata,pdata,&size,&error);
+    FORTgetpartdataframe(&unit,&nclasses,nquantities,npoints,&time_local,tagdata,pdata,&size,&error);
 
     file_size+=size;
 
@@ -936,13 +926,10 @@ void part2iso(part *parti, int *thread_index){
       }
       for(k=0;k<nquantities[j];k++){
         part5prop *propi;
-        int data2flag=1;
-        char *vallabel;
           
         propi=part5propinfo_copy+getpartprop_index(classj->labels[k].shortlabel);
 
         for(i=0;i<npoints[j];i++){
-          int ix, iy, iz;
           int ijkval;
 
           ijkval = partindex[i];
@@ -956,7 +943,7 @@ void part2iso(part *parti, int *thread_index){
         vals += npoints[j];
       }
     }
-    CCisosurface2file(isofile, &time, partcount, NULL, levels, &nlevels,
+    CCisosurface2file(isofile, &time_local, partcount, NULL, levels, &nlevels,
         xpltcell, &nx2, ypltcell, &ny2, zpltcell, &nz2,
         &reduce_triangles, &error);
 
@@ -966,7 +953,7 @@ void part2iso(part *parti, int *thread_index){
       propi = part5propinfo_copy + i;
       if(propi->used==0)continue;
 
-      CCisosurfacet2file(propi->isofilename, &time, partcount, &data2flag, propi->partvals, NULL, levels, &nlevels,
+      CCisosurfacet2file(propi->isofilename, &time_local, partcount, &data2flag, propi->partvals, NULL, levels, &nlevels,
             xpltcell, &nx2, ypltcell, &ny2, zpltcell, &nz2,
             &reduce_triangles, &error);
     }

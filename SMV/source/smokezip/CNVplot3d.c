@@ -17,11 +17,6 @@
 // svn revision character string
 char CNVplot3d_revision[]="$Revision$";
 
-#ifdef WIN32
-#define STDCALL extern void _stdcall
-#else
-#define STDCALL extern void
-#endif
 #ifndef pp_noappend
 #define FORTgetplot3dq getplot3dq_
 #else
@@ -37,7 +32,7 @@ int convert_plot3d(plot3d *plot3di){
   char plot3dfile_svz[1024];
   int fileversion, one, zero;
   char *plot3d_file;
-  int version;
+  int version_local;
   char filetype[1024];
   char *shortlabel;
   FILE *PLOT3DFILE, *plot3dstream;
@@ -50,7 +45,7 @@ int convert_plot3d(plot3d *plot3di){
 
   plot3di->compressed=0;
   plot3d_file=plot3di->file;
-  version=plot3di->version;
+  version_local=plot3di->version;
 
   fileversion = 1;
   one = 1;
@@ -185,7 +180,7 @@ int convert_plot3d(plot3d *plot3di){
   fwrite(&one,4,1,plot3dstream);           // write out a 1 to determine "endianness" when file is read in later
   fwrite(&zero,4,1,plot3dstream);          // write out a zero now, then a one just before file is closed
   fwrite(&fileversion,4,1,plot3dstream);   // write out compressed fileversion in case file format changes later
-  fwrite(&version,4,1,plot3dstream);       // fds plot3d file version
+  fwrite(&version_local,4,1,plot3dstream);       // fds plot3d file version
   fwrite(minmax,4,10,plot3dstream);        // write out min/max bounds for each plot3d file component
   fwrite(ijkbar,4,3,plot3dstream);         // write out ibar, jbar, kbar
   fwrite(plot3dframe_compressed,1,ncompressed_zlib,plot3dstream);  // write out compressed plot3d data

@@ -21,7 +21,7 @@ int main(int argc, char **argv){
   int i;
   char *arg,*prog, *file_lang=NULL, *file_template=NULL;
 
-  initMM();
+  initMALLOC();
   prog=argv[0];
   for(i=1;i<argc;i++){
     int lenarg;

@@ -2077,7 +2077,7 @@ void updatecolors(int changecolorindex){
   initrgb();
   nrgb_full = MAXRGB;
   for(n=0;n<nrgb_full;n++){
-    rgb_trans[4*n+0]=0.0;
+    rgb_trans[4*n]=0.0;
     rgb_trans[4*n+1]=0.0;
     rgb_trans[4*n+2]=0.0;
     rgb_trans[4*n+3]=(float)n/(float)(nrgb_full-1);
@@ -2101,7 +2101,7 @@ void updatecolors(int changecolorindex){
       else{
         rgb_full[n][3]=transparentlevel_local;
       }
-      rgb_smokecolormap[4*n+0]=fire_cb[3*n];
+      rgb_smokecolormap[4*n]=fire_cb[3*n];
       rgb_smokecolormap[4*n+1]=fire_cb[3*n+1];
       rgb_smokecolormap[4*n+2]=fire_cb[3*n+2];
       if(alpha[n]==0){
@@ -2323,7 +2323,7 @@ void updatechopcolors(void){
 
   last_particle_type=current_particle_type;
   for(i=0;i<nrgb_full;i++){
-    rgb_iso[4*i+0]=rgb_full[i][0];
+    rgb_iso[4*i]=rgb_full[i][0];
     rgb_iso[4*i+1]=rgb_full[i][1];
     rgb_iso[4*i+2]=rgb_full[i][2];
     if(rgb_full[i][3]>0.001){
@@ -2333,7 +2333,7 @@ void updatechopcolors(void){
       rgb_iso[4*i+3]=0.0;
     }
 
-    rgb_slice[4*i+0]=rgb_full[i][0];
+    rgb_slice[4*i]=rgb_full[i][0];
     rgb_slice[4*i+1]=rgb_full[i][1];
     rgb_slice[4*i+2]=rgb_full[i][2];
     if(rgb_full[i][3]>0.001){
@@ -2343,7 +2343,7 @@ void updatechopcolors(void){
       rgb_slice[4*i+3]=0.0;
     }
 
-    rgb_part[4*i+0]=rgb_full[i][0];
+    rgb_part[4*i]=rgb_full[i][0];
     rgb_part[4*i+1]=rgb_full[i][1];
     rgb_part[4*i+2]=rgb_full[i][2];
     rgb_part[4*i+3]=rgb_full[i][3];
@@ -2354,7 +2354,7 @@ void updatechopcolors(void){
       rgb_part[4*i+3]=0.0;
     }
 
-    rgb_plot3d[4*i+0]=rgb_full[i][0];
+    rgb_plot3d[4*i]=rgb_full[i][0];
     rgb_plot3d[4*i+1]=rgb_full[i][1];
     rgb_plot3d[4*i+2]=rgb_full[i][2];
     rgb_plot3d[4*i+3]=rgb_full[i][3];
@@ -2365,7 +2365,7 @@ void updatechopcolors(void){
       rgb_plot3d[4*i+3]=0.0;
     }
 
-    rgb_patch[4*i+0]=rgb_full[i][0];
+    rgb_patch[4*i]=rgb_full[i][0];
     rgb_patch[4*i+1]=rgb_full[i][1];
     rgb_patch[4*i+2]=rgb_full[i][2];
     if(rgb_full[i][3]>0.001){

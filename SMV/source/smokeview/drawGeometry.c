@@ -652,7 +652,7 @@ void readcadgeom(cadgeom *cd){
     xyzpoints = quadi->xyzpoints;
     normal = quadi->normals;
     sscanf(buffer,"%f %f %f %f %f %f %f %f %f %f %f %f ",
-      xyzpoints+0, xyzpoints+1, xyzpoints+2,
+      xyzpoints, xyzpoints+1, xyzpoints+2,
       xyzpoints+3, xyzpoints+4, xyzpoints+5,
       xyzpoints+6, xyzpoints+7, xyzpoints+8,
       xyzpoints+9,xyzpoints+10,xyzpoints+11
@@ -859,7 +859,7 @@ void readcad2geom(cadgeom *cd){
     xyzpoints = quadi->xyzpoints;
     normal = quadi->normals;
     sscanf(buffer,"%f %f %f %f %f %f %f %f %f %f %f %f %i",
-      xyzpoints+0,xyzpoints+1,xyzpoints+2,
+      xyzpoints,xyzpoints+1,xyzpoints+2,
       xyzpoints+3,xyzpoints+4,xyzpoints+5,
       xyzpoints+6,xyzpoints+7,xyzpoints+8,
       xyzpoints+9,xyzpoints+10,xyzpoints+11,&look_index
@@ -914,7 +914,7 @@ void update_cadtextcoords(cadquad *quadi){
 
 
   for(i=0;i<4;i++){
-    qx=xbar0+xyz[3*i+0]*xyzmaxdiff - t_origin[0];
+    qx=xbar0+xyz[3*i]*xyzmaxdiff - t_origin[0];
     qy=ybar0+xyz[3*i+1]*xyzmaxdiff - t_origin[1];
     qz=zbar0+xyz[3*i+2]*xyzmaxdiff - t_origin[2];
 
@@ -1610,7 +1610,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
       xvert=xx[jjj]+offset[0];
       yvert=yy[jjj]+offset[1];
       zvert=zz[jjj]+offset[2];
-      faceptr->approx_vertex_coords[3*k+0]=xvert;
+      faceptr->approx_vertex_coords[3*k]=xvert;
       faceptr->approx_vertex_coords[3*k+1]=yvert;
       faceptr->approx_vertex_coords[3*k+2]=zvert;
 
@@ -1619,11 +1619,11 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
       faceptr->approx_center_coord[2]+=zvert;
 
 
-      faceptr->exact_vertex_coords[3*k+0]=xx2[jjj]+offset[0];
+      faceptr->exact_vertex_coords[3*k]=xx2[jjj]+offset[0];
       faceptr->exact_vertex_coords[3*k+1]=yy2[jjj]+offset[1];
       faceptr->exact_vertex_coords[3*k+2]=zz2[jjj]+offset[2];
-      if(faceptr->exact_vertex_coords[3*k+0]<faceptr->xmin)faceptr->xmin=faceptr->exact_vertex_coords[3*k+0];
-      if(faceptr->exact_vertex_coords[3*k+0]>faceptr->xmax)faceptr->xmax=faceptr->exact_vertex_coords[3*k+0];
+      if(faceptr->exact_vertex_coords[3*k]<faceptr->xmin)faceptr->xmin=faceptr->exact_vertex_coords[3*k];
+      if(faceptr->exact_vertex_coords[3*k]>faceptr->xmax)faceptr->xmax=faceptr->exact_vertex_coords[3*k];
       if(faceptr->exact_vertex_coords[3*k+1]<faceptr->ymin)faceptr->ymin=faceptr->exact_vertex_coords[3*k+1];
       if(faceptr->exact_vertex_coords[3*k+1]>faceptr->ymax)faceptr->ymax=faceptr->exact_vertex_coords[3*k+1];
       if(faceptr->exact_vertex_coords[3*k+2]<faceptr->zmin)faceptr->zmin=faceptr->exact_vertex_coords[3*k+2];
@@ -1696,9 +1696,9 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
       ya_texture[3] = ya_texture[2];
 
       for(k=0;k<4;k++){
-        faceptr->approx_texture_coords[2*k+0]=xa_texture[k]/t_width; 
+        faceptr->approx_texture_coords[2*k]=xa_texture[k]/t_width; 
         faceptr->approx_texture_coords[2*k+1]=ya_texture[k]/t_height;
-        faceptr->exact_texture_coords[2*k+0]=xe_texture[k]/t_width; 
+        faceptr->exact_texture_coords[2*k]=xe_texture[k]/t_width; 
         faceptr->exact_texture_coords[2*k+1]=ye_texture[k]/t_height;
       }
     }
@@ -1880,6 +1880,9 @@ int comparesinglefaces0( const void *arg1, const void *arg2 ){
       if(facei->jmax<facej->jmax)return -1;
       if(facei->jmax>facej->jmax)return 1;
       break;
+    default:
+      ASSERT(0);
+      break;
   }
   if(facei->color<facej->color)return  1;
   if(facei->color>facej->color)return -1;
@@ -1920,6 +1923,9 @@ int comparesinglefaces( const void *arg1, const void *arg2 ){
     case UP_Z:
       if(facei->kmin<facej->kmin)return -1;
       if(facei->kmin>facej->kmin)return 1;
+      break;
+    default:
+      ASSERT(0);
       break;
   }
   if(facei->color<facej->color)return  1;
@@ -2267,6 +2273,9 @@ void update_facelists(void){
             }
             meshi->nface_normals_single_UP_Z++;
             break;
+          default:
+            ASSERT(0);
+            break;
         }
       }
     }
@@ -2302,7 +2311,7 @@ void drawselect_faces(){
         getrgb(color_index+1,&r,&g,&b);
         glColor3ub(r,g,b);
         color_index++;
-        glVertex3fv(vertices+0);
+        glVertex3fv(vertices);
         glVertex3fv(vertices+3);
         glVertex3fv(vertices+6);
         glVertex3fv(vertices+9);
@@ -2353,10 +2362,10 @@ void drawselect_faces(){
           glColor4fv(old_color);\
           COLOR_SWAPS\
         }\
-        glVertex3fv(vertices+0);\
+        glVertex3fv(vertices);\
         glVertex3fv(vertices+3);\
         glVertex3fv(vertices+6);\
-        glVertex3fv(vertices+0);\
+        glVertex3fv(vertices);\
         glVertex3fv(vertices+6);\
         glVertex3fv(vertices+9);\
         FACES_DRAWN
@@ -2497,7 +2506,7 @@ void draw_faces(){
           glColor4fv(old_color);
         }
         glNormal3fv(facei->normal);
-        glVertex3fv(vertices+0);
+        glVertex3fv(vertices);
         glVertex3fv(vertices+3);
         glVertex3fv(vertices+6);
         glVertex3fv(vertices+9);
@@ -2538,16 +2547,16 @@ void draw_faces(){
           }
           glBegin(GL_LINES);
           glColor3fv(facei->linecolor);
-          glVertex3fv(vertices+0);
+          glVertex3fv(vertices);
           glVertex3fv(vertices+3);
           glVertex3fv(vertices+3);
           glVertex3fv(vertices+6);
           glVertex3fv(vertices+6);
           glVertex3fv(vertices+9);
           glVertex3fv(vertices+9);
-          glVertex3fv(vertices+0);
+          glVertex3fv(vertices);
           if(showtimelist!=NULL&&showtimelist[itimes]==0){
-            glVertex3fv(vertices+0);
+            glVertex3fv(vertices);
             glVertex3fv(vertices+6);
             glVertex3fv(vertices+3);
             glVertex3fv(vertices+9);
@@ -2671,74 +2680,72 @@ void draw_transparent_faces(){
   if(drawing_transparent==1)transparenton();
 
   if(nface_transparent>0){
-  glEnable(GL_LIGHTING);
-  glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
-  glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
-  glEnable(GL_COLOR_MATERIAL);
-//    if(cullfaces==1)glDisable(GL_CULL_FACE); // DEBUG WORK AROUND
-  glBegin(GL_QUADS);
-  for(i=0;i<nface_transparent;i++){
-    facei = face_transparent[i];
-   // if(blocklocation==BLOCKlocation_grid||showedit_dialog==1){
-    if(blocklocation==BLOCKlocation_grid){
-      vertices = facei->approx_vertex_coords;
-    }
-    else{
-      vertices = facei->exact_vertex_coords;
-    }
-    showtimelist_handle = facei->showtimelist_handle;
-    showtimelist = *showtimelist_handle;
-    if(showtimelist!=NULL&&showtimelist[itimes]==0)continue;
-    if(showedit_dialog==0){
-      new_color=facei->color;
-    }
-    else{
-      if(visNormalEditColors==0)new_color=block_ambient2;
-      if(visNormalEditColors==1)new_color=facei->color;
-      if(highlight_block==facei->blockageindex&&highlight_mesh==facei->meshindex){
-        new_color=highlight_color;
-        switch (xyz_dir){
-         case XDIR:
-          if(facei->dir==UP_X)new_color=up_color;
-          if(facei->dir==DOWN_X)new_color=down_color;
-          break;
-         case YDIR:
-          if(facei->dir==UP_Y)new_color=up_color;
-          if(facei->dir==DOWN_Y)new_color=down_color;
-          break;
-         case ZDIR:
-          if(facei->dir==UP_Z)new_color=up_color;
-          if(facei->dir==DOWN_Z)new_color=down_color;
-          break;
-         default:
-          ASSERT(FFALSE);
-          break;
+    glEnable(GL_LIGHTING);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
+    glEnable(GL_COLOR_MATERIAL);
+    glBegin(GL_QUADS);
+    for(i=0;i<nface_transparent;i++){
+      facei = face_transparent[i];
+      if(blocklocation==BLOCKlocation_grid){
+        vertices = facei->approx_vertex_coords;
+      }
+      else{
+        vertices = facei->exact_vertex_coords;
+      }
+      showtimelist_handle = facei->showtimelist_handle;
+      showtimelist = *showtimelist_handle;
+      if(showtimelist!=NULL&&showtimelist[itimes]==0)continue;
+      if(showedit_dialog==0){
+        new_color=facei->color;
+      }
+      else{
+        if(visNormalEditColors==0)new_color=block_ambient2;
+        if(visNormalEditColors==1)new_color=facei->color;
+        if(highlight_block==facei->blockageindex&&highlight_mesh==facei->meshindex){
+          new_color=highlight_color;
+          switch (xyz_dir){
+           case XDIR:
+            if(facei->dir==UP_X)new_color=up_color;
+            if(facei->dir==DOWN_X)new_color=down_color;
+            break;
+           case YDIR:
+            if(facei->dir==UP_Y)new_color=up_color;
+            if(facei->dir==DOWN_Y)new_color=down_color;
+            break;
+           case ZDIR:
+            if(facei->dir==UP_Z)new_color=up_color;
+            if(facei->dir==DOWN_Z)new_color=down_color;
+            break;
+           default:
+            ASSERT(FFALSE);
+            break;
+          }
         }
       }
+      if(
+         fabs(new_color[0]-old_color[0])>0.0001||
+         fabs(new_color[1]-old_color[1])>0.0001||
+         fabs(new_color[2]-old_color[2])>0.0001||
+         fabs(new_color[3]-old_color[3])>0.0001||
+         use_transparency_geom==1
+         ){
+        old_color[0]=new_color[0];
+        old_color[1]=new_color[1];
+        old_color[2]=new_color[2];
+        old_color[3]=new_color[3];
+        if(use_transparency_geom==1)old_color[3]=transparency_geom;
+        glColor4fv(old_color);
+      }
+      glNormal3fv(facei->normal);
+      glVertex3fv(vertices);
+      glVertex3fv(vertices+3);
+      glVertex3fv(vertices+6);
+      glVertex3fv(vertices+9);
     }
-    if(
-       fabs(new_color[0]-old_color[0])>0.0001||
-       fabs(new_color[1]-old_color[1])>0.0001||
-       fabs(new_color[2]-old_color[2])>0.0001||
-       fabs(new_color[3]-old_color[3])>0.0001||
-       use_transparency_geom==1
-       ){
-      old_color[0]=new_color[0];
-      old_color[1]=new_color[1];
-      old_color[2]=new_color[2];
-      old_color[3]=new_color[3];
-      if(use_transparency_geom==1)old_color[3]=transparency_geom;
-      glColor4fv(old_color);
-    }
-    glNormal3fv(facei->normal);
-    glVertex3fv(vertices+0);
-    glVertex3fv(vertices+3);
-    glVertex3fv(vertices+6);
-    glVertex3fv(vertices+9);
-  }
-  glEnd();
-  glDisable(GL_LIGHTING);
-  glDisable(GL_COLOR_MATERIAL);
+    glEnd();
+    glDisable(GL_LIGHTING);
+    glDisable(GL_COLOR_MATERIAL);
   }
 
   if(nface_transparent_double>0){
@@ -2775,7 +2782,7 @@ void draw_transparent_faces(){
         glColor4fv(old_color);
       }
       glNormal3fv(facei->normal);
-      glVertex3fv(vertices+0);
+      glVertex3fv(vertices);
       glVertex3fv(vertices+3);
       glVertex3fv(vertices+6);
       glVertex3fv(vertices+9);
@@ -3377,7 +3384,7 @@ void getsmoothblockparms(mesh *meshi, smoothblockage *sb){
       break;
     }
     if(fail==0){
-      meshi->smoothblockagecolors[4*nsmoothcolors+0]=bc->color[0];
+      meshi->smoothblockagecolors[4*nsmoothcolors]=bc->color[0];
       meshi->smoothblockagecolors[4*nsmoothcolors+1]=bc->color[1];
       meshi->smoothblockagecolors[4*nsmoothcolors+2]=bc->color[2];
       meshi->smoothblockagecolors[4*nsmoothcolors+3]=bc->color[3];
@@ -4788,10 +4795,10 @@ void draw_facesOLD(){
 #endif
         }
         glNormal3fv(facei->normal);
-        glVertex3fv(vertices+0);
+        glVertex3fv(vertices);
         glVertex3fv(vertices+3);
         glVertex3fv(vertices+6);
-        glVertex3fv(vertices+0);
+        glVertex3fv(vertices);
         glVertex3fv(vertices+6);
         glVertex3fv(vertices+9);
 #ifdef pp_GEOMPRINT
@@ -4858,7 +4865,7 @@ void draw_facesOLD(){
           glColor4fv(old_color);
         }
         glNormal3fv(facei->normal);
-        glVertex3fv(vertices+0);
+        glVertex3fv(vertices);
         glVertex3fv(vertices+3);
         glVertex3fv(vertices+6);
         glVertex3fv(vertices+9);
@@ -4899,16 +4906,16 @@ void draw_facesOLD(){
           }
           glBegin(GL_LINES);
           glColor3fv(facei->linecolor);
-          glVertex3fv(vertices+0);
+          glVertex3fv(vertices);
           glVertex3fv(vertices+3);
           glVertex3fv(vertices+3);
           glVertex3fv(vertices+6);
           glVertex3fv(vertices+6);
           glVertex3fv(vertices+9);
           glVertex3fv(vertices+9);
-          glVertex3fv(vertices+0);
+          glVertex3fv(vertices);
           if(showtimelist!=NULL&&showtimelist[itimes]==0){
-            glVertex3fv(vertices+0);
+            glVertex3fv(vertices);
             glVertex3fv(vertices+6);
             glVertex3fv(vertices+3);
             glVertex3fv(vertices+9);

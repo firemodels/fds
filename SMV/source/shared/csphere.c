@@ -15,10 +15,7 @@ char csphere_revision[]="$Revision$";
 #include <GL/glut.h>
 #endif
 #endif
-#include "egz_stdio.h"
 #include "MALLOC.h"
-#include <sys/stat.h>
-#include <string.h>
 #include <math.h>
 #include "csphere.h"
 

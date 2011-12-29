@@ -1004,7 +1004,7 @@ pass2_fs_dither (j_decompress_ptr cinfo,
        * for either sign of the error value.
        * Note: errorptr points to *previous* column's array entry.
        */
-      cur0 = RIGHT_SHIFT(cur0 + errorptr[dir3+0] + 8, 4);
+      cur0 = RIGHT_SHIFT(cur0 + errorptr[dir3] + 8, 4);
       cur1 = RIGHT_SHIFT(cur1 + errorptr[dir3+1] + 8, 4);
       cur2 = RIGHT_SHIFT(cur2 + errorptr[dir3+2] + 8, 4);
       /* Limit the error using transfer function set by init_error_limit.

@@ -4,9 +4,7 @@
 
 #include "options.h"
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <math.h>
 #include "string_util.h"
      
 int add_msgstring=0;
@@ -16,17 +14,17 @@ void usage(char *prog);
 
 int main(int argc, char **argv){
   char buffer[1024];
-  int i;
+  int ii;
   char *arg,*prog;
   FILE *stream;
 
   //stream=fopen("menus.c","r");
   stream=stdin;
   prog=argv[0];
-  for(i=1;i<argc;i++){
+  for(ii=1;ii<argc;ii++){
     int lenarg;
 
-    arg=argv[i];
+    arg=argv[ii];
     lenarg=strlen(arg);
     if(arg[0]=='-'&&lenarg>1){
       switch(arg[1]){
@@ -46,7 +44,6 @@ int main(int argc, char **argv){
   if(add_msgstring==0){
     while(!feof(stream)){
       char *beg,*end, *beg2;
-      int i,len;
 
       fgets(buffer,sizeof(buffer),stream);
       beg=strstr(buffer,"_(\"");
@@ -63,6 +60,8 @@ int main(int argc, char **argv){
       }
       end=strstr(beg+1,"\"");
       if(end!=NULL){
+        int i,len;
+
         end[1]=0;
         len=strlen(beg);
         for(i=len-2;i>=0;i--){

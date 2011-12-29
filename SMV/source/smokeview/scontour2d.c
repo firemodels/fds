@@ -378,12 +378,11 @@ void getlinecontours(const  float *xgrid, const float *ygrid, int nx, int ny,
   float *xline=NULL, *yline=NULL;
   float *xlinecopy, *ylinecopy;
   int mxpolys,mxlines;
-  int nnode2,casen,doit;
+  int nnode2,doit;
   int ij0,ij2,i2j,i2j2;
   int nlinepts;
   int nlevels;
   int blankit=0;
-  int minfill, maxfill;
   float dval;
 
   
@@ -652,7 +651,7 @@ void DrawContours(const contour *ci){
 
 void DrawLineContours(const contour *ci, float linewidth){
 
-  int nlevels, n, npolys, *polysize, ipoly,j,nnodes;
+  int nlevels, n;
   float xyzval;
   float *xline, *yline;
   float **rgb;

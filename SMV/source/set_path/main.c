@@ -8,9 +8,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <windows.h>
-#include <tchar.h>
-#include <math.h>
 #include <ctype.h>
+#include "ASSERT.h"
 #include "svn_revision.h"
 #include "string_util.h"
 #include "datadefs.h"
@@ -32,22 +31,17 @@ int batch_mode=0;
 char path_type[10];
 
 
-char *trim_front(char *line);
 void usage(void);
 void version(void);
-void trim(char *line);
-char *parse_path_key(int flag, char *path_buffer, char *newentry);
-int STRCMP(const char *s1, const char *s2);
-char *STRSTR(char *c, const char *key);
 
 /* ------------------ backup_path ------------------------ */
 
-void backup_path(char *path_type, char *pathbuffer){
+void backup_path(char *path_type_local, char *pathbuffer){
   FILE *stream;
   char file[256],filebase[256];
   int i;
 
-  strcpy(filebase,path_type);
+  strcpy(filebase,path_type_local);
   strcat(filebase,"_path_backup");
   for(i=0;i<=100;i++){
     if(i==0){
@@ -64,7 +58,7 @@ void backup_path(char *path_type, char *pathbuffer){
 
   stream=fopen(file,"w");
   if(stream!=NULL){
-    fprintf(stream,"%s Path\n",path_type);
+    fprintf(stream,"%s Path\n",path_type_local);
     fprintf(stream,"%s\n",pathbuffer);
     fclose(stream);
   }
@@ -72,12 +66,12 @@ void backup_path(char *path_type, char *pathbuffer){
 
 /* ------------------ prompt_user ------------------------ */
 
-int prompt_user(char *path_type, char *pathbuffer){
+int prompt_user(char *path_type_local, char *pathbuffer){
   int answer=0;
   char c_answer[10], *c_answer_ptr;
 
   c_answer_ptr=c_answer;
-  printf("\nSet %s path to:\n",path_type);
+  printf("\nSet %s path to:\n",path_type_local);
   printf("%s ?\n",pathbuffer);
   printf("y=yes, n=no\n");
   scanf("%s",c_answer);
@@ -96,12 +90,6 @@ int main(int argc, char **argv){
   char pathbuffer[BUFFER_SIZE];
   char tokens[BUFFER_SIZE], newpath[BUFFER_SIZE], *token;
   int newentry_present;
-
-#define ADD_USER_PATH 0
-#define REMOVE_USER_PATH 1
-
-#define ADD_SYSTEM_PATH 0
-#define REMOVE_SYSTEM_PATH 1
 
   strcpy(path_type,"User");
   if(argc==1){
@@ -154,7 +142,6 @@ int main(int argc, char **argv){
       case 'v':
         version();
         return 0;
-        break;
       default:
         usage();
         return 1;
@@ -249,7 +236,6 @@ int main(int argc, char **argv){
     }
     if(newentry_present==1){
       int answer=0;
-      char c_answer[10], *c_answer_ptr;
 
       if(prompt_user_flag==1){
         answer = prompt_user(path_type,newpath);
@@ -284,13 +270,13 @@ int main(int argc, char **argv){
 
 int reg_path(int setget, int pathtype, char *path){
 
-  HKEY hKey, hTree;
+  HKEY hKey, hTree=NULL;
   long lRet;
   char temp[10000];
   DWORD dwBufLen;
   int lenpath;
 
-  LPCTSTR reg_path;
+  LPCTSTR reg_path_local=NULL;
   
   char creg_user_path[]="Environment";
   LPCTSTR reg_user_path=creg_user_path;
@@ -303,24 +289,26 @@ int reg_path(int setget, int pathtype, char *path){
 
   switch (pathtype) {
     case REG_USER_PATH:
-      reg_path=reg_user_path;
+      reg_path_local=reg_user_path;
       hTree=HKEY_CURRENT_USER;
       break;
     case REG_SYSTEM_PATH:
-      reg_path=reg_system_path;
+      reg_path_local=reg_system_path;
       hTree=HKEY_LOCAL_MACHINE;
+      break;
+    default:
+      ASSERT(0);
       break;
   }
   switch (setget) {
     case REG_GET:
-      lRet = RegOpenKeyEx( hTree, reg_path, 0, KEY_QUERY_VALUE, &hKey );
+      lRet = RegOpenKeyEx( hTree, reg_path_local, 0, KEY_QUERY_VALUE, &hKey );
       switch (lRet){
         case ERROR_FILE_NOT_FOUND:
           printf("%s path not present\n",path_type);
           strcpy(path,"");
           dwBufLen=0;
           return 0;
-          break;
         case ERROR_SUCCESS:
           break;
         default:
@@ -350,7 +338,7 @@ int reg_path(int setget, int pathtype, char *path){
       }
       break;
     case REG_SET:
-      lRet = RegOpenKeyEx( hTree, reg_path, 0, KEY_QUERY_VALUE | KEY_SET_VALUE, &hKey );
+      lRet = RegOpenKeyEx( hTree, reg_path_local, 0, KEY_QUERY_VALUE | KEY_SET_VALUE, &hKey );
       if(lRet!=ERROR_SUCCESS){
         printf("RegOpenKeyEx error: %i\n",(int)lRet);
         return 0;
@@ -377,6 +365,9 @@ int reg_path(int setget, int pathtype, char *path){
         printf("RegCloseKey error: %i\n",(int)lRet);
         return 0;
       }
+      break;
+    default:
+      ASSERT(0);
       break;
   }
   return 1;
@@ -422,9 +413,9 @@ void usage(void){
 
 /* ------------------ getmaxrev ------------------------ */
 
-#define MAXREV(cval) max_revision=MAX(getrevision(cval),max_revision)
+#define MAXREV(cval) rev=getrevision(cval);max_revision=MAX(rev,max_revision)
 int getmaxrevision(void){
-  int max_revision=0;
+  int max_revision=0,rev;
 
   MAXREV(main_revision);
   return max_revision;

@@ -5,10 +5,7 @@
 #include "options.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
-#include <math.h>
 #include "zlib.h"
-#include "ASSERT.h"
 #include "svzip.h"
 
 // svn revision character string

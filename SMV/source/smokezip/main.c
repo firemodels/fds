@@ -9,14 +9,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "egz_stdio.h"
 #include "svzip.h"
-#include "lightsmoke.h"
 #include "string_util.h"
 #include "MALLOC.h"
 #include "file_util.h"
-
-#define MARK 255
 
 //dummy change to bump version number to 1.4.2
 
@@ -313,11 +309,9 @@ int main(int argc, char **argv){
       case 'h':
         usage(prog);
         return 1;
-        break;
       case 'v':
         version();
         return 1;
-        break;
       default:
         usage(prog);
         return 1;

@@ -284,8 +284,6 @@ mallocflag _ResizeMemoryNOTHREAD(void **ppv, size_t sizeNew){
 #ifdef pp_MEMDEBUG
 /* ------------------ pointer comparison defines ------------------------ */
 
-#define fPtrLess(pLeft, pRight)   ((pLeft) <  (pRight))
-#define fPtrGrtr(pLeft, pRight)   ((pLeft) >  (pRight))
 #define fPtrEqual(pLeft, pRight)  ((pLeft) == (pRight))
 #define fPtrLessEq(pLeft, pRight) ((pLeft) <= (pRight))
 #define fPtrGrtrEq(pLeft, pRight) ((pLeft) >= (pRight))
@@ -379,12 +377,14 @@ mallocflag __ResizeMemory(void **ppv, size_t size, char *varname, char *file, in
     strcat(pbi->varname,"\0");
   }
   if(return_code!=1){
-                     printf("*** warning: memory allocation request failed.\n");
-    if(varname!=NULL)printf("             variable: %s\n",varname);
-                     printf("                 size: %u\n",(unsigned int)size);
+    printf("*** warning: memory allocation request failed.\n");
+    if(varname!=NULL){
+      printf("             variable: %s\n",varname);
+      printf("                 size: %u\n",(unsigned int)size);
+    }
     if(file!=NULL){
-                     printf("                 file: %s\n",file);
-                     printf("          line number: %i\n",linenumber);
+      printf("                 file: %s\n",file);
+      printf("          line number: %i\n",linenumber);
     }
   }
   UNLOCK_MEM;

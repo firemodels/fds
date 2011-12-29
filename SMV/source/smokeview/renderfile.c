@@ -19,7 +19,6 @@ char renderfile_revision[]="$Revision$";
 #else
 #include <GL/glut.h>
 #endif
-#include "MALLOC.h"
 #include "gd.h"
 
 #define PNG 0

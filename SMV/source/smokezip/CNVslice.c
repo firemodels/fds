@@ -20,8 +20,6 @@ char CNVslice_revision[]="$Revision$";
 
 void mt_update_slice_hist(void);
 
-void endian_switch(void *val, int nval);
-
 #define FORTSLICEREAD(var,size) fseek(SLICEFILE,4,SEEK_CUR);\
                            returncode=fread(var,4,size,SLICEFILE);\
                            if(endianswitch==1)endian_switch(var,size);\
@@ -140,10 +138,10 @@ int convert_volslice(slice *slicei, int *thread_index){
   sizeafter=0;
 
   {
-    int one=1, version=0, completion=0;
+    int one=1, version_local=0, completion=0;
 
     fwrite(&one,4,1,slicestream);
-    fwrite(&version,4,1,slicestream);
+    fwrite(&version_local,4,1,slicestream);
     fwrite(&completion,4,1,slicestream);
   }
 
@@ -162,9 +160,9 @@ int convert_volslice(slice *slicei, int *thread_index){
       float *valmin, *valmax;
       unsigned char *compressed_data_out;
       uLongf ncompressed_data_out;
-      float time;
+      float time_local;
 
-      FORTSLICEREAD(&time,1);
+      FORTSLICEREAD(&time_local,1);
       if(returncode==0)break;
       CheckMemory;
       sizebefore+=12;
@@ -190,7 +188,7 @@ int convert_volslice(slice *slicei, int *thread_index){
         ASSERT(0);
       }
       CheckMemory;
-      compress_volsliceframe(sliceframe_data, framesize, time, valmin, valmax,
+      compress_volsliceframe(sliceframe_data, framesize, time_local, valmin, valmax,
                 &compressed_data_out, &ncompressed_data_out);
       CheckMemory;
       sizeafter+=ncompressed_data_out;
@@ -272,7 +270,7 @@ int convert_slice(slice *slicei, int *thread_index){
   char slicefile_svz[1024], slicesizefile_svz[1024];
   int fileversion, one, zero;
   char *slice_file;
-  int version;
+  int version_local;
   char filetype[1024];
   char *shortlabel, *unit;
   char units[256];
@@ -285,7 +283,7 @@ int convert_slice(slice *slicei, int *thread_index){
   int sizebefore, sizeafter;
   int returncode;
   float minmax[2];
-  float time;
+  float time_local;
   long data_loc;
   int percent_done;
   int percent_next=10;
@@ -314,7 +312,7 @@ int convert_slice(slice *slicei, int *thread_index){
 #endif
 
   slice_file=slicei->file;
-  version=slicei->version;
+  version_local=slicei->version;
 
   fileversion = 1;
   one = 1;
@@ -479,7 +477,7 @@ int convert_slice(slice *slicei, int *thread_index){
   fwrite(&one,4,1,slicestream);           // write out a 1 to determine "endianness" when file is read in later
   fwrite(&zero,4,1,slicestream);          // write out a zero now, then a one just before file is closed
   fwrite(&fileversion,4,1,slicestream);   // write out compressed fileversion in case file format changes later
-  fwrite(&version,4,1,slicestream);       // fds slice file version
+  fwrite(&version_local,4,1,slicestream);       // fds slice file version
   sizeafter=16;
 
   //*** SLICE FILE FORMATS
@@ -504,7 +502,7 @@ int convert_slice(slice *slicei, int *thread_index){
   // endian
   // completion (0/1)
   // fileversion (compressed format)
-  // version  (slicef version)
+  // version_local  (slicef version)
   // global min max (used to perform conversion)
   // i1,i2,j1,j2,k1,k2
 
@@ -593,15 +591,15 @@ int convert_slice(slice *slicei, int *thread_index){
     for(;;){
       int i;
 
-      FORTSLICEREAD(&time,1);
+      FORTSLICEREAD(&time_local,1);
       sizebefore+=12;
       if(returncode==0)break;
       FORTSLICEREAD(sliceframe_data,framesize);    //---------------
       if(returncode==0)break;
 
       sizebefore+=(8+framesize*4);
-      if(time<time_max)continue;
-      time_max=time;
+      if(time_local<time_max)continue;
+      time_max=time_local;
 
 #ifndef pp_THREAD
       count++;
@@ -674,11 +672,11 @@ int convert_slice(slice *slicei, int *thread_index){
       returncode=compress(sliceframe_compressed,&ncompressed_zlib,sliceframe_uncompressed,framesize);
 
       fileloc=ftell(slicestream);
-      fwrite(&time,4,1,slicestream);
+      fwrite(&time_local,4,1,slicestream);
       fwrite(&ncompressed_zlib,4,1,slicestream);
       fwrite(sliceframe_compressed,1,ncompressed_zlib,slicestream);
       sizeafter+=(8+ncompressed_zlib);
-      fprintf(slicesizestream,"%f %i, %li\n",time,(int)ncompressed_zlib,fileloc);
+      fprintf(slicesizestream,"%f %i, %li\n",time_local,(int)ncompressed_zlib,fileloc);
     }
     if(returncode!=0){
       printf("*** error: compress returncode=%i\n",returncode);

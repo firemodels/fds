@@ -828,7 +828,7 @@ void TOUR_CB(int var){
 
 /* ------------------ delete_tourlsit ------------------------ */
 
-void delete_tourlist(void){
+extern "C" void delete_tourlist(void){
   int i;
   if(LISTBOX_tour==NULL)return;
   for(i=0;i<ntours;i++){
@@ -838,7 +838,7 @@ void delete_tourlist(void){
 
 /* ------------------ create_tourlist ------------------------ */
 
-void create_tourlist(void){
+extern "C" void create_tourlist(void){
   int i;
   tourdata *touri;
   char label[1000];
@@ -891,7 +891,7 @@ int prevtour(void){
 
 /* ------------------ update_tourcontrols ------------------------ */
 
-void update_tourcontrols(void){
+extern "C" void update_tourcontrols(void){
 
   if(BUTTONnext_tour==NULL)return;
   if(BUTTONprev_tour==NULL)return;
@@ -948,6 +948,6 @@ void update_tourcontrols(void){
 
 /* ------------------ update_globaltension ------------------------ */
 
-void update_globaltension(void){
+extern "C" void update_globaltension(void){
   TOUR_CB(GLOBAL_TENSIONFLAG);
 }

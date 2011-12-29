@@ -414,7 +414,7 @@ extern "C" void show_glui_labels(void){
 
 /* ------------------ Labels_CB ------------------------ */
 
-void Labels_CB(int var){
+extern "C" void Labels_CB(int var){
   updatemenu=1;
   switch (var){
 #ifdef pp_BETA

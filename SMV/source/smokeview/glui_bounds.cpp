@@ -22,7 +22,11 @@ extern "C" void colorbar_global2local(void);
 void SETslicemax(int setslicemax, float slicemax,int setslicechopmax, float slicechopmax);
 void SETslicemin(int setslicemin, float slicemin, int setslicechopmin, float slicechopmin);
 void BUTTON_hide_CB(int var);
-void PART_CB(int var), Bound_CB(int var), Slice_CB(int var), PLOT3D_CB(int var), Iso_CB(int var), Smoke3D_CB(int var);
+void PART_CB(int var);
+void Bound_CB(int var);
+void PLOT3D_CB(int var);
+void Iso_CB(int var);
+void Smoke3D_CB(int var);
 void Time_CB(int var);
 void Script_CB(int var);
 void boundmenu(GLUI_Rollout **rollout_bound, GLUI_Rollout **rollout_chop, GLUI_Panel *panel, char *button_title,
@@ -41,8 +45,6 @@ void boundmenu(GLUI_Rollout **rollout_bound, GLUI_Rollout **rollout_chop, GLUI_P
 GLUI_Rollout *rollout_slice_bound=NULL;
 GLUI_Rollout *rollout_slice_chop=NULL;
 
-#define TRUNCATEMIN 8
-#define TRUNCATEMAX 9
 #define SETVALMIN 1
 #define SETVALMAX 2
 #define VALMIN 3
@@ -87,7 +89,6 @@ GLUI_Rollout *rollout_slice_chop=NULL;
 #define SCRIPT_RUNSCRIPT 37
 #define SCRIPT_LOADINI 38
 #define SCRIPT_LISTINI 39
-#define SCRIPT_EDIT_RENDERDIR 40
 #define SCRIPT_RENDER 41
 #define SCRIPT_RENDER_SUFFIX 42
 #define SCRIPT_RENDER_DIR 43
@@ -929,26 +930,31 @@ void PLOT3D_CB(int var){
     updatechopcolors();
     switch (setp3chopmin_temp){
       case 0:
-      con_p3_chopmin->disable();
-      break;
+        con_p3_chopmin->disable();
+        break;
       case 1:
-      con_p3_chopmin->enable();
-      break;
+        con_p3_chopmin->enable();
+        break;
+      default:
+        ASSERT(0);
+        break;
     }
     break;
   case SETCHOPMAXVAL:
     updatechopcolors();
     switch (setp3chopmax_temp){
       case 0:
-      con_p3_chopmax->disable();
-      break;
+        con_p3_chopmax->disable();
+        break;
       case 1:
-      con_p3_chopmax->enable();
-      break;
+        con_p3_chopmax->enable();
+        break;
+      default:
+        ASSERT(0);
+        break;
     }
     break;
   case CHOPVALMIN:
-//      &setp3chopmin_temp, &setp3chopmax_temp,&p3chopmin_temp,&p3chopmax_temp,
     p3chopmin[list_p3_index]=p3chopmin_temp;
     setp3chopmin[list_p3_index]=setp3chopmin_temp;
 
@@ -1020,6 +1026,9 @@ void PLOT3D_CB(int var){
     case CHOP_MIN:
       con_p3_min->enable();
       break;
+    default:
+      ASSERT(0);
+      break;
    }
    break;
   case SETVALMAX:
@@ -1031,6 +1040,9 @@ void PLOT3D_CB(int var){
       case SET_MIN:
       case CHOP_MIN:
         con_p3_max->enable();
+        break;
+      default:
+        ASSERT(0);
         break;
      }
    break;
@@ -1048,6 +1060,9 @@ void PLOT3D_CB(int var){
    }
    updateglui();
    break;
+  default:
+    ASSERT(0);
+    break;
   }
 }
 
@@ -1135,6 +1150,9 @@ void Iso_CB(int var){
     isozipstep=isozipskip+1;
     updatemenu=1;
     break;
+  default:
+    ASSERT(0);
+    break;
   }
 }
 void Smoke3D_CB(int var){
@@ -1143,6 +1161,9 @@ void Smoke3D_CB(int var){
     smoke3dframestep=smoke3dframeskip+1;
     smoke3dzipstep=smoke3dzipskip+1;
     updatemenu=1;
+    break;
+  default:
+    ASSERT(0);
     break;
   }
 }
@@ -1157,7 +1178,7 @@ extern "C" void add_scriptlist(char *file, int id){
 
 /* ------------------ glui_script_enable ------------------------ */
 
-  void glui_script_enable(void){
+extern "C" void glui_script_enable(void){
     BUTTON_script_start->enable();
     BUTTON_script_stop->enable();
     BUTTON_script_runscript->enable();
@@ -1169,7 +1190,7 @@ extern "C" void add_scriptlist(char *file, int id){
 
 /* ------------------ glui_script_disable ------------------------ */
 
-  void glui_script_disable(void){
+extern "C"  void glui_script_disable(void){
     BUTTON_script_start->disable();
     BUTTON_script_stop->disable();
     BUTTON_script_runscript->disable();
@@ -1309,7 +1330,7 @@ extern "C" void add_scriptlist(char *file, int id){
         }
         else if(id>=0){
           inifilename = get_inifilename(id);
-          if(inifilename==NULL||strlen(inifilename)<=0)break;
+          if(inifilename==NULL||strlen(inifilename)==0)break;
           scriptinifilename2=scriptinifilename;
           strcpy(scriptinifilename,inifilename);
           windowresized=0;
@@ -1334,6 +1355,9 @@ extern "C" void add_scriptlist(char *file, int id){
       BUTTON_script_saveini->set_name(label);
       break;
     case SCRIPT_SETSUFFIX:
+      break;
+    default:
+      ASSERT(0);
       break;
     }
   }
@@ -1366,6 +1390,9 @@ void Bound_CB(int var){
       case 1:
       con_patch_chopmin->enable();
       break;
+    default:
+      ASSERT(0);
+      break;
     }
     update_hidepatchsurface();
     break;
@@ -1374,11 +1401,14 @@ void Bound_CB(int var){
     local2globalpatchbounds(patchlabellist[list_patch_index]);
     switch (setpatchchopmax){
       case 0:
-      con_patch_chopmax->disable();
-      break;
+        con_patch_chopmax->disable();
+        break;
       case 1:
-      con_patch_chopmax->enable();
-      break;
+        con_patch_chopmax->enable();
+        break;
+      default:
+        ASSERT(0);
+        break;
     }
     update_hidepatchsurface();
     break;
@@ -1424,19 +1454,25 @@ void Bound_CB(int var){
 
     switch (setpatchchopmin){
       case 0:
-      con_patch_chopmin->disable();
-      break;
+        con_patch_chopmin->disable();
+        break;
       case 1:
-      con_patch_chopmin->enable();
-      break;
+        con_patch_chopmin->enable();
+        break;
+      default:
+        ASSERT(0);
+        break;
     }
     switch (setpatchchopmax){
       case 0:
-      con_patch_chopmax->disable();
-      break;
+        con_patch_chopmax->disable();
+        break;
       case 1:
-      con_patch_chopmax->enable();
-      break;
+        con_patch_chopmax->enable();
+        break;
+      default:
+        ASSERT(0);
+        break;
     }
 
     list_patch_index_old = list_patch_index;
@@ -1451,6 +1487,9 @@ void Bound_CB(int var){
     case SET_MIN:
       con_patch_min->enable();
       break;
+    default:
+      ASSERT(0);
+      break;
     }
     Bound_CB(FILEUPDATE);
     break;
@@ -1463,9 +1502,12 @@ void Bound_CB(int var){
     case SET_MAX:
       con_patch_max->enable();
       break;
+    default:
+      ASSERT(0);
+      break;
     }
     Bound_CB(FILEUPDATE);
-  break;
+    break;
   case FILEUPDATE:
     local2globalpatchbounds(patchlabellist[list_patch_index]);
     break;
@@ -1506,6 +1548,9 @@ void Bound_CB(int var){
     break;
   case LOAD_FILES:
       load_startup_smoke();
+    break;
+  default:
+    ASSERT(0);
     break;
   }
 }
@@ -1683,6 +1728,9 @@ void PART_CB(int var){
       case 1:
       con_part_chopmin->enable();
       break;
+    default:
+      ASSERT(0);
+      break;
     }
     break;
   case SETCHOPMAXVAL:
@@ -1693,6 +1741,9 @@ void PART_CB(int var){
       break;
       case 1:
       con_part_chopmax->enable();
+      break;
+    default:
+      ASSERT(0);
       break;
     }
     break;
@@ -1724,6 +1775,9 @@ void PART_CB(int var){
       if(propi!=NULL)partmin=propi->user_min;
       if(con_part_min!=NULL)con_part_min->enable();
       break;
+    default:
+      ASSERT(0);
+      break;
     }
     if(propi!=NULL)propi->valmin=partmin;
     if(con_part_min!=NULL)con_part_min->set_float_val(partmin);
@@ -1746,6 +1800,9 @@ void PART_CB(int var){
       if(propi!=NULL)partmax=propi->user_max;
       if(con_part_max!=NULL)con_part_max->enable();
       break;
+    default:
+      ASSERT(0);
+      break;
     }
     if(propi!=NULL)propi->valmax=partmax;
     if(con_part_max!=NULL)con_part_max->set_float_val(partmax);
@@ -1762,7 +1819,10 @@ void PART_CB(int var){
      updateglui();
      ParticlePropShowMenu(prop_index_SAVE);
     }
-   break;
+    break;
+  default:
+    ASSERT(0);
+    break;
   }
 }
 
@@ -1803,6 +1863,9 @@ void Time_CB(int var){
     break;
   case RELOAD_DATA:
     ReloadMenu(0);
+    break;
+  default:
+    ASSERT(0);
     break;
   }
 }
@@ -1897,11 +1960,14 @@ extern "C" void Slice_CB(int var){
     SETslicemin(setslicemin,slicemin,setslicechopmin,slicechopmin);
     switch (setslicechopmin){
       case 0:
-      con_slice_chopmin->disable();
-      break;
+        con_slice_chopmin->disable();
+        break;
       case 1:
-      con_slice_chopmin->enable();
-      break;
+        con_slice_chopmin->enable();
+        break;
+      default:
+        ASSERT(0);
+        break;
     }
     break;
   case SETCHOPMAXVAL:
@@ -1913,6 +1979,9 @@ extern "C" void Slice_CB(int var){
       break;
       case 1:
       con_slice_chopmax->enable();
+      break;
+    default:
+      ASSERT(0);
       break;
     }
     break;
@@ -1938,6 +2007,9 @@ extern "C" void Slice_CB(int var){
     case SET_MIN:
       con_slice_min->enable();
       break;
+    default:
+      ASSERT(0);
+      break;
     }
     if(con_slice_setmin!=NULL)con_slice_setmin->set_int_val(setslicemin);
     SETslicemin(setslicemin,slicemin,setslicechopmin,slicechopmin);
@@ -1945,13 +2017,16 @@ extern "C" void Slice_CB(int var){
   case SETVALMAX:
     ASSERT(con_slice_max!=NULL);
     switch (setslicemax){
-    case PERCENTILE_MAX:
-    case GLOBAL_MAX:
-      con_slice_max->disable();
-      break;
-    case SET_MAX:
-      con_slice_max->enable();
-      break;
+      case PERCENTILE_MAX:
+      case GLOBAL_MAX:
+        con_slice_max->disable();
+        break;
+      case SET_MAX:
+        con_slice_max->enable();
+        break;
+      default:
+        ASSERT(0);
+        break;
     }
     if(con_slice_setmax!=NULL)con_slice_setmax->set_int_val(setslicemax);
     SETslicemax(setslicemax,slicemax,setslicechopmax,slicechopmax);
@@ -1998,6 +2073,9 @@ extern "C" void Slice_CB(int var){
     case SET_MIN:
       con_slice_min->enable();
       break;
+    default:
+      ASSERT(0);
+      break;
     }
     ASSERT(con_slice_max!=NULL);
     con_slice_max->set_float_val(slicemax);
@@ -2008,6 +2086,9 @@ extern "C" void Slice_CB(int var){
       break;
     case SET_MAX:
       con_slice_max->enable();
+      break;
+    default:
+      ASSERT(0);
       break;
     }
 
@@ -2054,6 +2135,9 @@ extern "C" void Slice_CB(int var){
       LoadSliceMenu(0);
     }
     updateglui();
+    break;
+  default:
+    ASSERT(0);
     break;
   }
 }
@@ -2112,7 +2196,7 @@ extern "C" void updateslicelistindex(int sfn){
 
 /* ------------------ updateglui ------------------------ */
 
-void updateglui(void){
+extern "C" void updateglui(void){
   GLUI_Master.sync_live_all();
 }
 
@@ -2130,6 +2214,9 @@ void BUTTON_hide_CB(int var){
     break;
   case COMPRESS_FILES:
     printf("compressing\n");
+    break;
+  default:
+    ASSERT(0);
     break;
   }
 }
@@ -2258,7 +2345,7 @@ extern "C" void updateGluiTimeBounds(float time_min, float time_max){
 
 /* ------------------ update_tbounds ------------------------ */
 
-void update_tbounds(void){
+extern "C" void update_tbounds(void){
   settmin_p=use_tload_begin;
   settmax_p=use_tload_end;
   tmin_p=tload_begin;

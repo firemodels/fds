@@ -73,14 +73,14 @@ float distxy(float *x, float *y){
 /* ------------------ get_angle ------------------------ */
 
 float get_angle(float d1, float d2, float d3){
-  float angle;
+  float angle_local;
   float arg;
 
   arg = (d2*d2+d3*d3-d1*d1)/(2.0*d2*d3);
   if(arg<-1.0)arg=-1.0;
   if(arg>1.0)arg=1.0;
-  angle = acos(arg)*180.0/(4.0*atan(1.0));
-  return angle;
+  angle_local = acos(arg)*180.0/(4.0*atan(1.0));
+  return angle_local;
 }
 
 /* ------------------ get_minangle ------------------------ */
@@ -529,15 +529,15 @@ void update_triangles(void){
                            if(endianswitch==1&&returncode!=0)endian_switch(var,count);\
                            fseek(STREAM,4,SEEK_CUR)
 
-#define FORTREADBR(var,count,STREAM) FORTREAD(var,count,STREAM);if(returncode==0)break;
+#define FORTREADBR(var,count,STREAM) FORTREAD(var,(count),STREAM);if(returncode==0)break;
 
 /* ------------------ get_geom_header ------------------------ */
 
-void get_geom_header(char *file, int *ntimes){
+void get_geom_header(char *file, int *ntimes_local){
   FILE *stream;
   int one=0,endianswitch=0;
   int nvertfaces[4];
-  float times[2];
+  float times_local[2];
   int first=1;
   int nt;
   int returncode;
@@ -545,7 +545,7 @@ void get_geom_header(char *file, int *ntimes){
 
   stream = fopen(file,"rb");
   if(stream==NULL){
-    *ntimes=-1;
+    *ntimes_local=-1;
     return;
   }
   fseek(stream,4,SEEK_CUR);fread(&one,4,1,stream);fseek(stream,4,SEEK_CUR);
@@ -554,7 +554,7 @@ void get_geom_header(char *file, int *ntimes){
   nt=0;
   for(;;){
     if(first==1){
-      FORTREADBR(times,1,stream);
+      FORTREADBR(times_local,1,stream);
       FORTREADBR(&nvertfaces,4,stream);
       if(nvertfaces[0]!=0)fseek(stream,4+3*nvertfaces[0]*4+4,SEEK_CUR);    
       if(nvertfaces[1]!=0)fseek(stream,4+3*nvertfaces[1]*4+4,SEEK_CUR);    
@@ -564,8 +564,8 @@ void get_geom_header(char *file, int *ntimes){
     else{
       int *geom_type;
 
-      FORTREADBR(times,2,stream);
-      geom_type = (int *)(times+1);
+      FORTREADBR(times_local,2,stream);
+      geom_type = (int *)(times_local+1);
 
       if(*geom_type==0){
         FORTREADBR(&nvertfaces,2,stream);
@@ -579,23 +579,23 @@ void get_geom_header(char *file, int *ntimes){
 
     nt++;
   }
-  *ntimes=nt;
+  *ntimes_local=nt;
   fclose(stream);
 }
 
 /* ------------------ get_geomdata_header ------------------------ */
 
-void get_geomdata_header(char *file, int *ntimes, int *nvals){
+void get_geomdata_header(char *file, int *ntimes_local, int *nvals){
   FILE *stream;
   int one=1,endianswitch=0;
   int nface_static,nface_dynamic;
-  float time;
+  float time_local;
   int nt,nv;
   int returncode;
 
   stream = fopen(file,"r");
   if(stream==NULL){
-    *ntimes=-1;
+    *ntimes_local=-1;
     return;
   }
   fseek(stream,4,SEEK_CUR);fread(&one,4,1,stream);fseek(stream,4,SEEK_CUR);
@@ -603,7 +603,7 @@ void get_geomdata_header(char *file, int *ntimes, int *nvals){
   nt=-1;
   nv=0;
   for(;;){
-    FORTREADBR(&time,1,stream);
+    FORTREADBR(&time_local,1,stream);
     FORTREADBR(&nface_static,1,stream);
     if(nface_static!=0)fseek(stream,4+nface_static*4+4,SEEK_CUR);    
     FORTREADBR(&nface_dynamic,1,stream);
@@ -611,7 +611,7 @@ void get_geomdata_header(char *file, int *ntimes, int *nvals){
     nt++;
     nv+=(nface_static+nface_dynamic);
   }
-  *ntimes=nt;
+  *ntimes_local=nt;
   *nvals=nv;
   fclose(stream);
 }
@@ -634,7 +634,7 @@ void read_geom(int ifile, int flag, int *errorcode){
   FILE *stream;
   int one=1, endianswitch=0;
   int returncode;
-  int ntimes;
+  int ntimes_local;
   float *xyz=NULL;
   int i;
   point *points;
@@ -679,19 +679,19 @@ void read_geom(int ifile, int flag, int *errorcode){
 
   file = geomi->file;
 
-  get_geom_header(file,&ntimes);
-  if(ntimes<0)return;
+  get_geom_header(file,&ntimes_local);
+  if(ntimes_local<0)return;
   stream = fopen(file,"rb");
 
   fseek(stream,4,SEEK_CUR);fread(&one,4,1,stream);fseek(stream,4,SEEK_CUR);
   if(one!=1)endianswitch=1;
   FORTREAD(&version,1,stream);
 
-  geomi->ntimes=ntimes;
-  NewMemory((void **)&geomi->geomlistinfo,ntimes*sizeof(geomlistdata));
+  geomi->ntimes=ntimes_local;
+  NewMemory((void **)&geomi->geomlistinfo,ntimes_local*sizeof(geomlistdata));
 
-  for(i=0;i<ntimes;i++){
-    float times[2];
+  for(i=0;i<ntimes_local;i++){
+    float times_local[2];
     geomlistdata *geomlisti;
     int *geom_typeptr,geom_type=0;
     int nverts[4];
@@ -699,7 +699,7 @@ void read_geom(int ifile, int flag, int *errorcode){
 
     geomlisti = geomi->geomlistinfo+i;
     if(first==1){
-      FORTREADBR(times,1,stream);
+      FORTREADBR(times_local,1,stream);
       FORTREADBR(nverts,4,stream);
       geom_typeptr=&geom_type;
       first=0;
@@ -707,9 +707,9 @@ void read_geom(int ifile, int flag, int *errorcode){
     else{
       nvert_s=0;
       ntri_s=0;
-      FORTREADBR(times,2,stream);
+      FORTREADBR(times_local,2,stream);
       FORTREADBR(nverts+2,2,stream);
-      geom_typeptr=(int *)(times+1);
+      geom_typeptr=(int *)(times_local+1);
     }
     nvert_s=nverts[0];
     ntri_s=nverts[1];
@@ -732,7 +732,7 @@ void read_geom(int ifile, int flag, int *errorcode){
         FORTREADBR(xyz+3*nvert_s,3*nvert_d,stream);
       }
       for(ii=0;ii<nvert;ii++){
-        points[ii].xyz[0]=xyz[3*ii+0];
+        points[ii].xyz[0]=xyz[3*ii];
         points[ii].xyz[1]=xyz[3*ii+1];
         points[ii].xyz[2]=xyz[3*ii+2];
       }
@@ -770,7 +770,7 @@ void read_geom(int ifile, int flag, int *errorcode){
      //   FORTREADBR(ijk+ntri_s,ntri_d,stream);
      // }
       for(ii=0;ii<ntris;ii++){
-        triangles[ii].points[0]=points+ijk[3*ii+0]-1;
+        triangles[ii].points[0]=points+ijk[3*ii]-1;
         triangles[ii].points[1]=points+ijk[3*ii+1]-1;
         triangles[ii].points[2]=points+ijk[3*ii+2]-1;
         //triangles[i].surf=surfaceinfo + surf_ind[i] - 1;
@@ -789,7 +789,7 @@ void read_geom(int ifile, int flag, int *errorcode){
 void read_geomdata(int ifile, int flag, int *errorcode){
   patch *patchi;
   char *file;
-  int ntimes;
+  int ntimes_local;
   int i;
   int nvals;
   float patchmin_global, patchmax_global;
@@ -830,7 +830,7 @@ void read_geomdata(int ifile, int flag, int *errorcode){
   endian = getendian();
   lenfile = strlen(file);
 
-  FORTgetembeddatasize(file, &endian, &ntimes, &nvals, &error, lenfile);
+  FORTgetembeddatasize(file, &endian, &ntimes_local, &nvals, &error, lenfile);
 
   if(nvals>0){
     NewMemory((void **)&patchi->geom_nstatics,ntimes*sizeof(int));

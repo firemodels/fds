@@ -2735,7 +2735,7 @@ int readsmv(char *file, char *file2){
 
         NewMemory((void **)&partclassi->labels,partclassi->ntypes*sizeof(flowlabels));
        
-        labelj = partclassi->labels+0; // placeholder for hidden
+        labelj = partclassi->labels; // placeholder for hidden
 
         labelj->longlabel=NULL;
         labelj->shortlabel=NULL;
@@ -6287,7 +6287,7 @@ typedef struct {
       for(j=0;j<cd->nquads;j++){
         quadi = cd->quad+j;
         for(k=0;k<4;k++){
-          quadi->xyzpoints[3*k+0] = (quadi->xyzpoints[3*k+0]-xbar0)/xyzmaxdiff;
+          quadi->xyzpoints[3*k] = (quadi->xyzpoints[3*k]-xbar0)/xyzmaxdiff;
           quadi->xyzpoints[3*k+1] = (quadi->xyzpoints[3*k+1]-ybar0)/xyzmaxdiff;
           quadi->xyzpoints[3*k+2] = (quadi->xyzpoints[3*k+2]-zbar0)/xyzmaxdiff;
         }
@@ -9475,7 +9475,7 @@ int readini2(char *inifile, int localfile){
         sscanf(buffer,"%f %f",angle_zx,angle_zx+1);
 
 		    fgets(buffer,255,stream);
-        sscanf(buffer,"%f %f %f %f",mat+0,mat+1,mat+2,mat+3);
+        sscanf(buffer,"%f %f %f %f",mat,mat+1,mat+2,mat+3);
 
 		    fgets(buffer,255,stream);
         sscanf(buffer,"%f %f %f %f",mat+4,mat+5,mat+6,mat+7);

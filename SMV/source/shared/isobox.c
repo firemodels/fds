@@ -778,7 +778,7 @@ int CompressIsosurface(isosurface *surface, int reduce_triangles,
   }
 
   for(i=0;i<nvertices;i++){
-    vertices[3*i+0]=(unsigned short)(65535*(x[i]-xmin)/xyzmaxdiff);
+    vertices[3*i]=(unsigned short)(65535*(x[i]-xmin)/xyzmaxdiff);
     vertices[3*i+1]=(unsigned short)(65535*(y[i]-ymin)/xyzmaxdiff);
     vertices[3*i+2]=(unsigned short)(65535*(z[i]-zmin)/xyzmaxdiff);
     sortedlist[i]=i;
@@ -791,7 +791,7 @@ int CompressIsosurface(isosurface *surface, int reduce_triangles,
 
     sdi = sortinfo + i;
     sdi->index=sortedlist[i];
-    sdi->vertex[0]=vertices[3*i+0];
+    sdi->vertex[0]=vertices[3*i];
     sdi->vertex[1]=vertices[3*i+1];
     sdi->vertex[2]=vertices[3*i+2];
   }
@@ -851,7 +851,7 @@ int CompressIsosurface(isosurface *surface, int reduce_triangles,
 
   for(i=0;i<nvertices;i++){
 	  j=sortedlist[map2[i]];
-	  newvertices[3*i+0]=vertices[3*j+0];
+	  newvertices[3*i]=vertices[3*j];
 	  newvertices[3*i+1]=vertices[3*j+1];
 	  newvertices[3*i+2]=vertices[3*j+2];
     cs[i] = closestnodes[j];
@@ -1506,7 +1506,7 @@ void CCisosurface2file(char *isofile, float *t, float *data, int *iblank,
         dlevel=abs(level[*nlevels-1]-level[*nlevels-2]);
       }
       else{
-        dlevel=MIN(abs(level[i+1]-level[i]),abs(level[i]-level[i-1]));
+        dlevel=MIN(ABS(level[i+1]-level[i]),ABS(level[i]-level[i-1]));
       }
     }
          
@@ -1564,7 +1564,7 @@ void CCisosurfacet2file(char *isofile, float *t, float *data, int *data2flag, fl
   if(isostream==NULL)return;
   *error = 0;
   for(i=0;i<*nlevels;i++){
-    float dlevel;
+    float dlevel=0.0;
     
     if(*nlevels>1){
       if(i==0){
@@ -1574,7 +1574,11 @@ void CCisosurfacet2file(char *isofile, float *t, float *data, int *data2flag, fl
         dlevel=abs(level[*nlevels-1]-level[*nlevels-2]);
       }
       else{
-        dlevel=MIN(abs(level[i]-level[i-1]),abs(level[i+1]-level[i]));
+        float val1, val2;
+
+        val1=ABS(level[i]-level[i-1]);
+        val2=ABS(level[i+1]-level[i]);
+        dlevel=MIN(val1,val2);
       }
     }
     InitIsosurface(&surface,level[i],NULL,i);

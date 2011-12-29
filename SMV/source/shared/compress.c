@@ -9,7 +9,6 @@ char compress_revision[]="$Revision$";
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
 
 #include "MALLOC.h"
 #include "compress.h"
@@ -41,11 +40,12 @@ unsigned int rle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer_
       *buffer_out=thischar;
       lastchar=thischar;
       break;
-    case 4:
-      buffer_out-=3;
-      *buffer_out++=cmark;
-      *buffer_out++=thischar;
     default:
+      if(nrepeats==4){
+        buffer_out-=3;
+        *buffer_out++=cmark;
+        *buffer_out++=thischar;
+      }
       if(nrepeats!=4)buffer_out--;
       *buffer_out=nrepeats;
       if(nrepeats==254){
@@ -158,7 +158,7 @@ void compress_volsliceframe(float *data_in, int n_data_in, float timeval_in, flo
   CheckMemory;
 // 1,completion,version
 // 1,version,n_data_compressed,nbytes,n_data_in,time,valmin,valmax,data ....
-  memcpy(c_data_compressed+0,&one,4);
+  memcpy(c_data_compressed,&one,4);
   memcpy(c_data_compressed+4,&version,4);
   memcpy(c_data_compressed+8,&n_data_compressed,4);
   memcpy(c_data_compressed+12,&nbytes,4);

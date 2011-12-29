@@ -5,9 +5,8 @@
 
 #include "options.h"
 #include <stdio.h>  
-#include <string.h>
 #include <stdlib.h>
-#include <math.h>
+#include "datadefs.h"
 #include "kdtree.h"
 #include "MALLOC.h"
 
@@ -285,7 +284,7 @@ kd_data *closest_node(kd_data *here, float *point, kd_data *best){
 /* ----------------------- setup_kdtree ----------------------------- */
 
 kd_data *setup_kdtree(kdpoint *points, int npoints, kd_data *parent){
-  int axis;
+  int axis=0;
   kd_data *kdptr;
   int median_index,nleft,nright;
   float xyzmin[3], xyzmax[3];
@@ -316,9 +315,9 @@ kd_data *setup_kdtree(kdpoint *points, int npoints, kd_data *parent){
   dy = xyzmax[1] - xyzmin[1];
   dz = xyzmax[2] - xyzmin[2];
 
-  if(dx>=dy&&dx>=dy)axis = 0;
-  if(dy>=dx&&dy>=dz)axis = 1;
-  if(dz>=dy&&dz>=dx)axis = 2;
+  if(dx>=MAX(dy,dz))axis = 0;
+  if(dy>=MAX(dx,dz))axis = 1;
+  if(dz>=MAX(dx,dy))axis = 2;
 
   if(parent!=NULL&&axis!=parent->axis)nsort++;
   switch (axis) {
@@ -330,6 +329,9 @@ kd_data *setup_kdtree(kdpoint *points, int npoints, kd_data *parent){
       break;
     case 2:
       qsort((kdpoint *)points,npoints,sizeof(kdpoint),compare_pointz);
+      break;
+    default:
+      ASSERT(0);
       break;
   }
   median_index = npoints/2;

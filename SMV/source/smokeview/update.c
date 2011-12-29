@@ -223,10 +223,8 @@ void updateShow(void){
   int shooter_flag;
 #endif
   int ii;
-  slice *sd;
   vslice *vd;
   iso *isoi;
-  mesh *meshi;
   patch *patchi;
   particle *parti;
   showtime=0; 
@@ -331,6 +329,8 @@ void updateShow(void){
   slicecolorbarflag=0;
   if(visTimeSlice==1){
     for(ii=0;ii<nslice_loaded;ii++){
+      slice *sd;
+
       i=slice_loaded_list[ii];
       sd = sliceinfo+i;
       if(sd->display==0||sd->type!=islicetype)continue;
@@ -341,6 +341,7 @@ void updateShow(void){
     }
     for(ii=0;ii<nslice_loaded;ii++){
       mesh *slicemesh;
+      slice *sd;
 
       i=slice_loaded_list[ii];
       sd = sliceinfo+i;
@@ -355,6 +356,8 @@ void updateShow(void){
     }
     if(show_extreme_above==0){
       for(ii=0;ii<nslice_loaded;ii++){
+        slice *sd;
+
         i=slice_loaded_list[ii];
         sd = sliceinfo+i;
         if(sd->display==0||sd->type!=islicetype)continue;
@@ -366,6 +369,8 @@ void updateShow(void){
     }
     if(show_extreme_below==0){
       for(ii=0;ii<nslice_loaded;ii++){
+        slice *sd;
+
         i=slice_loaded_list[ii];
         sd = sliceinfo+i;
         if(sd->display==0||sd->type!=islicetype)continue;
@@ -495,38 +500,42 @@ void updateShow(void){
     ||showterrain==1||showvolrender==1
     )
     )showtime=1;
-    if(plotstate==DYNAMIC_PLOTS&&ReadIsoFile==1&&visAIso!=0&&isoflag==1)showtime2=1;
-    if(plotstate==DYNAMIC_PLOTS){
-      if(smoke3dflag==1)show3dsmoke=1;
-      if(partflag==1)showsmoke=1;
-      if(evacflag==1)showevac=1;
-      if(showevac==1&&parttype>0){
-        showevac_colorbar=1;
-        if(current_property!=NULL&&strcmp(current_property->label->longlabel,"HUMAN_COLOR")==0){
-          showevac_colorbar=0;
-        }
+  if(plotstate==DYNAMIC_PLOTS&&ReadIsoFile==1&&visAIso!=0&&isoflag==1)showtime2=1;
+  if(plotstate==DYNAMIC_PLOTS){
+    if(smoke3dflag==1)show3dsmoke=1;
+    if(partflag==1)showsmoke=1;
+    if(evacflag==1)showevac=1;
+    if(showevac==1&&parttype>0){
+      showevac_colorbar=1;
+      if(current_property!=NULL&&strcmp(current_property->label->longlabel,"HUMAN_COLOR")==0){
+        showevac_colorbar=0;
       }
-      if(patchflag==1)showpatch=1;
+    }
+    if(patchflag==1)showpatch=1;
+    for(i=0;i<nmeshes;i++){
+      mesh *meshi;
+
+      meshi=meshinfo+i;
+      meshi->visInteriorPatches=0;
+    }
+    if(showpatch==1&&visPatchType[0]==1){
       for(i=0;i<nmeshes;i++){
+        mesh *meshi;
+
         meshi=meshinfo+i;
-        meshi->visInteriorPatches=0;
-      }
-      if(showpatch==1&&visPatchType[0]==1){
-        for(i=0;i<nmeshes;i++){
-          meshi=meshinfo+i;
-          if(meshi->patchtimes==NULL)continue;
-          patchi = patchinfo+meshi->patchfilenum;
-          if(patchi->loaded==1&&patchi->display==1&&patchi->type==ipatchtype){
-            meshi->visInteriorPatches=1;
-          }
+        if(meshi->patchtimes==NULL)continue;
+        patchi = patchinfo+meshi->patchfilenum;
+        if(patchi->loaded==1&&patchi->display==1&&patchi->type==ipatchtype){
+          meshi->visInteriorPatches=1;
         }
       }
-      if(sliceflag==1)showslice=1;
-      if(vsliceflag==1)showvslice=1;
-      if(ReadZoneFile==1&&visZone==1&&visTimeZone==1)showzone=1;
-      if(ReadIsoFile==1&&visAIso!=0){
-        showiso=1;
-      }
+    }
+    if(sliceflag==1)showslice=1;
+    if(vsliceflag==1)showvslice=1;
+    if(ReadZoneFile==1&&visZone==1&&visTimeZone==1)showzone=1;
+    if(ReadIsoFile==1&&visAIso!=0){
+      showiso=1;
+    }
     if(ReadTargFile==1&&visTarg==1)showtarget=1;
 #ifdef pp_SHOOTER
     if(shooter_flag==1)showshooter=1;
@@ -540,6 +549,8 @@ void updateShow(void){
   if(plotstate==STATIC_PLOTS&&ReadPlot3dFile==1&&plotn>0&&plotn<=numplot3dvars)showplot3d=1;
   if(showplot3d==1){
     for(i=0;i<nmeshes;i++){
+      mesh *meshi;
+
       meshi=meshinfo+i;
       ii=meshi->plot3dfilenum;
       if(ii==-1)continue;
@@ -548,6 +559,8 @@ void updateShow(void){
       if(plot3dinfo[ii].extreme_min[plotn-1]==1)show_extreme_below=1;
     }
     for(i=0;i<nmeshes;i++){
+      mesh *meshi;
+
       meshi=meshinfo+i;
       ii=meshi->plot3dfilenum;
       if(ii==-1)continue;
@@ -720,22 +733,22 @@ void synctimes(void){
 
   /* synchronize shooter times */
 #ifdef pp_SHOOTER
-  if(visShooter!=0&&shooter_active==1){
-    if(n==0){
-      istart=0;
+    if(visShooter!=0&&shooter_active==1){
+      if(n==0){
+        istart=0;
+      }
+      else{
+        istart=shooter_timeslist[n-1];
+      }
+      i=istart;
+      while(shoottimeinfo[i].time<times[n]&&i<nshooter_frames){
+        i++;
+      }
+      if(i>=nshooter_frames){
+        i=nshooter_frames-1;
+      }
+      shooter_timeslist[n]=i;
     }
-    else{
-      istart=shooter_timeslist[n-1];
-    }
-    i=istart;
-    while(shoottimeinfo[i].time<times[n]&&i<nshooter_frames){
-      i++;
-    }
-    if(i>=nshooter_frames){
-      i=nshooter_frames-1;
-    }
-    shooter_timeslist[n]=i;
-  }
 #endif
 
   /* synchronize slice times */
@@ -766,9 +779,9 @@ void synctimes(void){
       for(jj=0;jj<nsmoke3dinfo;jj++){
         smoke3di = smoke3dinfo + jj;
         if(smoke3di->loaded==0)continue;
-         if(n==0){
-          istart=0;
-         }
+        if(n==0){
+         istart=0;
+        }
         else{
           istart=smoke3di->timeslist[n-1];
         }
@@ -906,10 +919,8 @@ void updatetimes(void){
   int i,k;
   slice *sd;
   iso *ib;
-  mesh *meshi;
   blockagedata *bc;
   ventdata *vi;
-  patch *patchi;
   particle *parti;
   tourdata *touri;
   int filenum;
@@ -959,6 +970,9 @@ void updatetimes(void){
     }
   }
   for(i=0;i<nmeshes;i++){
+    patch *patchi;
+    mesh *meshi;
+
     meshi=meshinfo+i;
     filenum =meshi->patchfilenum;
     if(filenum!=-1){
@@ -973,6 +987,8 @@ void updatetimes(void){
   }
   if(ReadIsoFile==1&&visAIso!=0){
     for(i=0;i<nmeshes;i++){
+      mesh *meshi;
+
       meshi=meshinfo+i;
       if(meshi->isofilenum<0)continue;
       ib = isoinfo + meshi->isofilenum;
@@ -983,6 +999,7 @@ void updatetimes(void){
   if(nvolrenderinfo>0){
     for(i=0;i<nmeshes;i++){
       volrenderdata *vr;
+      mesh *meshi;
 
       meshi=meshinfo+i;
       vr = &meshi->volrenderinfo;
@@ -1112,6 +1129,9 @@ void updatetimes(void){
     }
   }
   for(i=0;i<nmeshes;i++){
+    patch *patchi;
+    mesh *meshi;
+
     meshi=meshinfo + i;
     filenum=meshi->patchfilenum;
     if(filenum!=-1){
@@ -1132,6 +1152,8 @@ void updatetimes(void){
   if(nvolrenderinfo>0){
     for(i=0;i<nmeshes;i++){
       volrenderdata *vr;
+      mesh *meshi;
+
 
       meshi=meshinfo + i;
       vr = &meshi->volrenderinfo;
@@ -1163,6 +1185,8 @@ void updatetimes(void){
   }
   if(ReadIsoFile==1&&visAIso!=0){
     for(i=0;i<nisoinfo;i++){
+      mesh *meshi;
+
       ib = isoinfo+i;
       if(ib->loaded==0)continue;
       meshi=meshinfo + ib->blocknumber;
@@ -1310,6 +1334,8 @@ void updatetimes(void){
     }
   }
   for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+
     meshi=meshinfo+i;
     if(meshi->isotimes==NULL)continue;
     FREEMEMORY(meshi->isotimeslist);
@@ -1341,6 +1367,8 @@ void updatetimes(void){
 
   if(ntotal_smooth_blockages>0){
     for(i=0;i<nmeshes;i++){
+      mesh *meshi;
+
       meshi=meshinfo+i;
       FREEMEMORY(meshi->showsmoothtimelist);
       if(ntimes>0)NewMemory((void **)&meshi->showsmoothtimelist,ntimes*sizeof(smoothblockage *));
@@ -1368,6 +1396,8 @@ void updatetimes(void){
   izone=0; 
   reset_itimes0();
   for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+
     meshi=meshinfo+i;
     meshi->ipatch=0;
   }
@@ -1377,6 +1407,8 @@ void updatetimes(void){
   }
   iframe=iframebeg; 
   for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+
     meshi=meshinfo+i;
     if(meshi->isotimes==NULL)continue;
     meshi->iiso=0;
@@ -1390,6 +1422,7 @@ void updatetimes(void){
 
   for(i=0;i<nmeshes;i++){
     int j;
+    mesh *meshi;
 
     meshi=meshinfo+i;
     for(j=0;j<meshi->nbptrs;j++){
@@ -1433,6 +1466,7 @@ void updatetimes(void){
 
   for(i=0;i<nmeshes;i++){
     int j;
+    mesh *meshi;
 
     meshi=meshinfo+i;
     if(meshi->ventinfo==NULL)continue;
@@ -1474,7 +1508,6 @@ void updatetimes(void){
 
 int getplotstate(int choice){
   int i;
-  mesh *meshi;
   plot3d *ploti;
   slice *slicei;
   vslice *vslicei;
@@ -1493,6 +1526,8 @@ int getplotstate(int choice){
     case STATIC_PLOTS_NORECURSE:
       stept = 0;
       for(i=0;i<nmeshes;i++){
+        mesh *meshi;
+
         meshi=meshinfo + i;
         if(meshi->plot3dfilenum==-1)continue;
         ploti = plot3dinfo + meshi->plot3dfilenum;

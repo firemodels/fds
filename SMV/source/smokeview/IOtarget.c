@@ -276,7 +276,7 @@ void readtarget2(const char *file, int ifile, int flag, int *errorcode){
       target_positions[n].x[i]=xt;
       target_positions[n].y[i]=yt;
       target_positions[n].z[i]=zt;
-      target_positions[n].vals[6*i+0]=vals_local[0];
+      target_positions[n].vals[6*i]=vals_local[0];
       target_positions[n].vals[6*i+1]=vals_local[1];
       target_positions[n].vals[6*i+2]=vals_local[2];
       target_positions[n].vals[6*i+3]=vals_local[3];
