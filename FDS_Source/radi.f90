@@ -858,17 +858,11 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                      IF (MODULO(N,NRP(1))==0) AYU = 0._EB
                      IF (IC/=0) THEN
                         IW = WALL_INDEX(IC,-ISTEP)
-                        IF (IW/=0) THEN
-                           IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILXU = WALL(IW)%ILW(N,IBND)
-                        ENDIF                        
+                        IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILXU = WALL(IW)%ILW(N,IBND)
                         IW = WALL_INDEX(IC,-JSTEP*2)
-                        IF (IW/=0) THEN
-                           IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY)ILYU = WALL(IW)%ILW(N,IBND)
-                        ENDIF
+                        IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY)ILYU = WALL(IW)%ILW(N,IBND)
                         IW = WALL_INDEX(IC,-KSTEP*3)
-                        IF (IW/=0) THEN
-                           IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY)ILZU = WALL(IW)%ILW(N,IBND)
-                        ENDIF
+                        IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY)ILZU = WALL(IW)%ILW(N,IBND)
                      ENDIF
                      AIU_SUM = AXU*ILXU + AYU*ILYU + AZ*ILZU
                      A_SUM = AXD + AYD + AZ
@@ -892,13 +886,9 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                      AZ  = DX(I)         * ABS(DLZ(N))
                      IF (IC/=0) THEN
                         IW = WALL_INDEX(IC,-ISTEP)
-                        IF (IW/=0) THEN
-                           IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILXU = WALL(IW)%ILW(N,IBND)
-                        ENDIF
+                        IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILXU = WALL(IW)%ILW(N,IBND)
                         IW = WALL_INDEX(IC,-KSTEP*3)
-                        IF (IW/=0) THEN
-                           IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILZU = WALL(IW)%ILW(N,IBND)
-                        ENDIF
+                        IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILZU = WALL(IW)%ILW(N,IBND)
                      ENDIF
                      AIU_SUM = AX*ILXU + AZ*ILZU 
                      A_SUM = AX + AZ
@@ -925,17 +915,11 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                         AZ  = DX(I) * DY(J)         * ABS(DLZ(N))
                         IF (IC/=0) THEN
                            IW = WALL_INDEX(IC,-ISTEP)
-                           IF (IW/=0) THEN
-                              IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILXU = WALL(IW)%ILW(N,IBND)
-                           ENDIF
+                           IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILXU = WALL(IW)%ILW(N,IBND)
                            IW = WALL_INDEX(IC,-JSTEP*2)
-                           IF (IW/=0) THEN
-                              IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILYU = WALL(IW)%ILW(N,IBND)
-                           ENDIF
+                           IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILYU = WALL(IW)%ILW(N,IBND)
                            IW = WALL_INDEX(IC,-KSTEP*3)
-                           IF (IW/=0) THEN
-                              IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILZU = WALL(IW)%ILW(N,IBND)
-                           ENDIF
+                           IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILZU = WALL(IW)%ILW(N,IBND)
                         ENDIF
                         A_SUM = AX + AY + AZ
                         AIU_SUM = AX*ILXU + AY*ILYU + AZ*ILZU 

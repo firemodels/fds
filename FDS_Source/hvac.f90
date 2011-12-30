@@ -1212,6 +1212,7 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
             IC = CELL_INDEX(II,JJ,KK)
             IF (SOLID(IC)) CYCLE
             IW = WALL_INDEX(IC,-IOR)
+            IF (IW==0) CYCLE VENT_LOOP
             WC => WALL(IW)
             AREA = WC%AW
             IF (WC%PRESSURE_ZONE_WALL /= NODE_ZONE) THEN
