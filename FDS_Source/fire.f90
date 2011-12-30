@@ -393,7 +393,7 @@ ODE_LOOP: DO WHILE (DT_SUM < DT)
       
       IF (ALL(TOL_INT_VECTOR < -998._EB)) THEN !calculates sub time step based on user inputted tolerance
          DT_NEW = DT_ODE
-      ELSEIF (DT_SUM == 0._EB .OR. COUNTER < 1) THEN
+      ELSEIF (ABS(DT_SUM) < ZERO_P .OR. COUNTER < 1) THEN
          COUNTER = COUNTER + 1
          ZZ_1 = ZZ_0 + 0.5_EB * (DZZDT + DZZDTE) * DT
          ZZ_2 = ZZ_0 + 0.5_EB * (DZZDT + DZZDTE) * 0.5_EB * DT
