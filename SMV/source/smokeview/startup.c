@@ -2146,7 +2146,7 @@ void initvars(void){
       p3chopmin[iii]=1.0f;
       setp3max[iii]=PERCENTILE_MAX;
       p3max[iii]=1.0f;
-      p3chopmax[iii]=-.0f;
+      p3chopmax[iii]=0.0f;
     }
   }
 }

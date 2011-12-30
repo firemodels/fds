@@ -9,9 +9,6 @@ char threader_revision[]="$Revision$";
 #include "options.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
-#include <math.h>
-
 #include "smokeviewvars.h"
 
 /* ------------------ init_all_threads ------------------------ */

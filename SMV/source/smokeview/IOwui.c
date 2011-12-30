@@ -23,7 +23,6 @@ void init_tnorm(terraindata *terri);
 void init_terraincell(terraindata *terri);
 void free_terraincell(terraindata *terri);
 
-#define ijcell2(i,j) nxcell*(j) + (i)
 #define ijnode2(i,j) ((nxcell+1)*(j) + (i))
 #define ijnode3(i,j) ((nycell+1)*(i) + (j))
 #define FORTWUIREAD(var,size) fseek(WUIFILE,4,SEEK_CUR);\
@@ -150,7 +149,7 @@ float get_zcell_val(mesh *meshi,float xval, float yval, float *zval_offset, int 
       terri=meshj->terrain;
       nxcell = terri->nx;
       zcell = terri->zcell;
-      zval = zcell[ijcell2(ival,jval)];
+      zval = zcell[IJCELL2(ival,jval)];
       *loc=1;
       zval_return = zterrain_min+vertical_factor*(zval-zterrain_min);
       if(zval_offset!=NULL){
@@ -206,7 +205,7 @@ float get_zcell_val_offset(mesh *meshi,float xval, float yval, int *loc){
       terri=meshj->terrain;
       nxcell = terri->nx;
       zcell = terri->zcell;
-      zval = zcell[ijcell2(ival,jval)];
+      zval = zcell[IJCELL2(ival,jval)];
       *loc=1;
       zvaloffset = zterrain_min+vertical_factor*(zval-zterrain_min)-zval;
 
@@ -537,7 +536,7 @@ void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, 
     for(i=0;i<nx;i++){
       float zval;
 
-      ij = ijcell2(i,j);
+      ij = IJCELL2(i,j);
       zval=meshi->zcell[ij];
       if(zval<zterrain_min)zterrain_min=zval;
       if(zval>zterrain_max)zterrain_max=zval;
@@ -1080,10 +1079,10 @@ void init_tnode(terraindata *terri){
       ii = i;
       if(ii==terri->nx)ii--;
 
-      zz =  zcell[ijcell2(im1,jm1)];
-      zz += zcell[ijcell2(im1,jj)];
-      zz += zcell[ijcell2(ii,jm1)];
-      zz += zcell[ijcell2(ii,jj)];
+      zz =  zcell[IJCELL2(im1,jm1)];
+      zz += zcell[IJCELL2(im1,jj)];
+      zz += zcell[IJCELL2(ii,jm1)];
+      zz += zcell[IJCELL2(ii,jj)];
       zz *= 0.25;
       *znode++=zz;
     }

@@ -1981,7 +1981,7 @@ void IniSubMenu(int value){
     char *inifilename;
 
     inifilename = get_inifilename(value);
-    if(inifilename==NULL||strlen(inifilename)<=0)return;
+    if(inifilename==NULL||strlen(inifilename)==0)return;
     scriptinifilename2=scriptinifilename;
     strcpy(scriptinifilename,inifilename);
     windowresized=0;
@@ -4138,7 +4138,6 @@ void ZoneShowMenu(int value){
   switch (value){
   case 999:
     return;
-    break;
   case 1:
     visVZone=0;
     visHZone=1;
@@ -4527,7 +4526,6 @@ updatemenu=0;
     if(patchi->loaded==1)npatchloaded++;
   }
 
-#define DESTROYMENU(f) 
 #define CREATEMENU(menu,Menu) menu=glutCreateMenu(Menu);\
   if(nmenus<10000){\
     strcpy(menuinfo[nmenus].label,#Menu);\

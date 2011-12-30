@@ -32,8 +32,6 @@ char renderfile_revision[]="$Revision$";
 /* ------------------ Render ------------------------ */
 
 void Render(int view_mode){
-  int i;
-
   if(current_script_command!=NULL&&current_script_command->command==SCRIPT_VOLSMOKERENDERALL){
     if( (render_frame[itimes]>0&&showstereo==0)||(render_frame[itimes]>1&&showstereo!=0) ){
       if(itimes==0){
@@ -96,13 +94,7 @@ void Render(int view_mode){
   /* ------------------ RenderFrame ------------------------ */
 
 void RenderFrame(int view_mode){
-  char renderfile[1024],renderfile2[1024];
-  FILE *stream;
-  char *ext;
-  char *renderfile_prefix;
-  int use_script_filename=0;
   char renderfile_name[1024], renderfile_dir[1024], renderfile_full[1024], renderfile_suffix[1024], *renderfile_ext;
-  char *temp_name;
   int use_scriptfile;
 
   if(view_mode==VIEW_LEFT&&(showstereo==2||showstereo==3))return;
@@ -170,7 +162,7 @@ void RenderFrame(int view_mode){
       image_num=itimes/RenderSkip;
     }
     if(renderfilelabel==0||RenderTime==0){
-      float time;
+      float time_local;
       int code;
 
       if(RenderTime==0){
@@ -179,25 +171,25 @@ void RenderFrame(int view_mode){
       else{
         sprintf(suffix,"%04i",image_num);
       }
-      code = getplot3dtime(&time);
+      code = getplot3dtime(&time_local);
       if(code==1&&renderfilelabel==1){
-        char timelabel[20], *timelabelptr, dt=1.0;
+        char timelabel_local[20], *timelabelptr, dt=1.0;
   
-        timelabelptr = time2timelabel(time,dt,timelabel);
+        timelabelptr = time2timelabel(time_local,dt,timelabel_local);
         strcat(suffix,"_");
         strcat(suffix,timelabelptr);
         strcat(suffix,"s");
       }
     }
     else{
-      float time;
-      char timelabel[20], *timelabelptr;
+      float time_local;
+      char timelabel_local[20], *timelabelptr;
       float dt;
 
-      time = times[itimes];
+      time_local = times[itimes];
       dt = times[1]-times[0];
       if(dt<0.0)dt=-dt;
-      timelabelptr = time2timelabel(time,dt,timelabel);
+      timelabelptr = time2timelabel(time_local,dt,timelabel_local);
       strcpy(suffix,timelabelptr);
       strcat(suffix,"s");
     }
@@ -297,7 +289,7 @@ int mergescreenbuffers(GLubyte *screenbuffers[4]){
   GLubyte *p;
   gdImagePtr RENDERimage;
   unsigned int r, g, b;
-  int i,j,rgb;
+  int i,j,rgb_local;
 
   switch (renderfiletype){
   case PNG:
@@ -365,8 +357,8 @@ int mergescreenbuffers(GLubyte *screenbuffers[4]){
   for (i = 2*screenHeight-1 ; i>=screenHeight; i--) {
     for(j=0;j<screenWidth;j++){
       r=*p++; g=*p++; b=*p++;
-      rgb = (r<<16)|(g<<8)|b;
-      gdImageSetPixel(RENDERimage,j,i,rgb);
+      rgb_local = (r<<16)|(g<<8)|b;
+      gdImageSetPixel(RENDERimage,j,i,rgb_local);
 
     }
   }
@@ -374,8 +366,8 @@ int mergescreenbuffers(GLubyte *screenbuffers[4]){
   for (i = 2*screenHeight-1 ; i>=screenHeight; i--) {
     for(j=screenWidth;j<2*screenWidth;j++){
       r=*p++; g=*p++; b=*p++;
-      rgb = (r<<16)|(g<<8)|b;
-      gdImageSetPixel(RENDERimage,j,i,rgb);
+      rgb_local = (r<<16)|(g<<8)|b;
+      gdImageSetPixel(RENDERimage,j,i,rgb_local);
 
     }
   }
@@ -383,8 +375,8 @@ int mergescreenbuffers(GLubyte *screenbuffers[4]){
   for (i = screenHeight-1 ; i>=0; i--) {
     for(j=0;j<screenWidth;j++){
       r=*p++; g=*p++; b=*p++;
-      rgb = (r<<16)|(g<<8)|b;
-      gdImageSetPixel(RENDERimage,j,i,rgb);
+      rgb_local = (r<<16)|(g<<8)|b;
+      gdImageSetPixel(RENDERimage,j,i,rgb_local);
 
     }
   }
@@ -392,8 +384,8 @@ int mergescreenbuffers(GLubyte *screenbuffers[4]){
   for (i = screenHeight-1 ; i>=0; i--) {
     for(j=screenWidth;j<2*screenWidth;j++){
       r=*p++; g=*p++; b=*p++;
-      rgb = (r<<16)|(g<<8)|b;
-      gdImageSetPixel(RENDERimage,j,i,rgb);
+      rgb_local = (r<<16)|(g<<8)|b;
+      gdImageSetPixel(RENDERimage,j,i,rgb_local);
 
     }
   }
@@ -437,7 +429,7 @@ int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
   GLubyte *OpenGLimage, *p;
   gdImagePtr RENDERimage;
   unsigned int r, g, b;
-  int i,j,rgb;
+  int i,j,rgb_local;
   int x=0, y=0;
 
   RENDERfile = fopen(RENDERfilename, "wb");
@@ -475,8 +467,8 @@ int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
   for (i = height-1 ; i>=0; i--) {
     for(j=0;j<width;j++){
       r=*p++; g=*p++; b=*p++;
-      rgb = (r<<16)|(g<<8)|b;
-      gdImageSetPixel(RENDERimage,j,i,rgb);
+      rgb_local = (r<<16)|(g<<8)|b;
+      gdImageSetPixel(RENDERimage,j,i,rgb_local);
     }
   }
 
@@ -623,7 +615,7 @@ unsigned char *readpicture(char *filename, int *width, int *height){
 #ifdef pp_JPEG
 /* ------------------ readjpeg ------------------------ */
 
-unsigned char *readjpeg(const char *filename,int *width, int *height, int skip){
+unsigned char *readjpeg(const char *filename,int *width, int *height, int skip_local){
 
   FILE *file;
   gdImagePtr image;
@@ -641,8 +633,8 @@ unsigned char *readjpeg(const char *filename,int *width, int *height, int skip){
   if(image==NULL)return NULL;
   WIDTH=gdImageSX(image);
   HEIGHT=gdImageSY(image);
-  if(skip<0)skip=0;
-  jump = skip + 1;
+  if(skip_local<0)skip_local=0;
+  jump = skip_local + 1;
   NEWWIDTH=WIDTH/jump;
   if(WIDTH%jump!=0)NEWWIDTH++;
   NEWHEIGHT=HEIGHT/jump;
