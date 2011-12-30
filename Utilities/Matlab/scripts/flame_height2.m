@@ -135,6 +135,7 @@ legend_handle=legend(H,...
 					'Min FDS 95\%',...
 					'Location','SoutheastOutside');
 				
+set(legend_handle,'FontName',Font_Name,'Interpreter','LaTeX')
 set(legend_handle,'FontSize',Key_Font_Size,'Interpreter','LaTeX')
 
 %plot_position = get(plot_handle,'Position')
