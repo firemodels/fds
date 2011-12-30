@@ -1618,16 +1618,9 @@ EDGE_LOOP: DO IE=1,N_EDGES
          ENDIF
          
          ! Throw out edge orientations that need not be processed
-         IF(IWM==0) THEN
-            BOUNDARY_TYPE_M = NULL_BOUNDARY
-         ELSE
-            BOUNDARY_TYPE_M = WALL(IWM)%BOUNDARY_TYPE
-         ENDIF
-         IF(IWP==0) THEN
-            BOUNDARY_TYPE_P = NULL_BOUNDARY
-         ELSE
-            BOUNDARY_TYPE_P = WALL(IWP)%BOUNDARY_TYPE
-         ENDIF        
+         BOUNDARY_TYPE_M = WALL(IWM)%BOUNDARY_TYPE
+         BOUNDARY_TYPE_P = WALL(IWP)%BOUNDARY_TYPE
+
          IF (BOUNDARY_TYPE_M==NULL_BOUNDARY .AND. BOUNDARY_TYPE_P==NULL_BOUNDARY) CYCLE ORIENTATION_LOOP
 
          ! Decide whether or not to process edge using data interpolated from another mesh
