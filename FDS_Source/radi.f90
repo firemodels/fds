@@ -507,7 +507,7 @@ REAL(EB) :: T, RAP, AX, AXU, AXD, AY, AYU, AYD, AZ, VC, RU, RD, RP, &
 INTEGER  :: N, NN,IIG,JJG,KKG,I,J,K,IW,II,JJ,KK,IOR,IC,IWUP,IWDOWN, &
             ISTART, IEND, ISTEP, JSTART, JEND, JSTEP, &
             KSTART, KEND, KSTEP, NSTART, NEND, NSTEP, &
-            I_UIID, N_UPDATES, IBND, TYY, NOM, IBC,EVAP_INDEX,NRA, I_DROP
+            I_UIID, N_UPDATES, IBND, TYY, NOM, SURF_INDEX,EVAP_INDEX,NRA, I_DROP
 REAL(EB) :: XID,YJD,ZKD,ZZ_GET(0:N_TRACKED_SPECIES),KAPPA_PART,SURFACE_AREA,WGT,OMWGT
 INTEGER :: IPC,IID,JJD,KKD,ID
 LOGICAL :: UPDATE_INTENSITY
@@ -549,11 +549,11 @@ IF (WIDE_BAND_MODEL) THEN
    QR = 0._EB
 ENDIF
 IF (UPDATE_INTENSITY) THEN
-   QRADIN = 0._EB
+   WALL%QRADIN = 0._EB
 ENDIF
  
 ! Loop over spectral bands
- 
+
 BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
    
    KAPPAW = 0._EB
@@ -617,7 +617,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
    ENDIF IF_VEG_INCLUDED
 
    ! Virtual particles
-   
+  
    IF (NLP>0 .AND. VIRTUAL_PARTICLES) THEN
       DO ID = 1,NLP
          LP => PARTICLE(ID)
@@ -640,7 +640,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
       ENDDO
       QR_W = 0._EB
    ENDIF
- 
+
    ! Compute absorption coefficient KAPPA
  
    KAPPA = KAPPA0
@@ -661,18 +661,18 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
    ! Compute source term KAPPA*4*SIGMA*TMP**4
 
-   HRR   = 0._EB
-   RSUM  = 0._EB
+   HRR  = 0._EB
+   RSUM = 0._EB
    WGT   = 0.1_EB + 0.9_EB/REAL(RAD_CALL_COUNTER,EB)
    OMWGT = 1._EB-WGT
 
    IF (WIDE_BAND_MODEL) THEN
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),TMP(I,J,K))
-               KFST4(I,J,K) = BBF*KAPPA(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),TMP(I,J,K))
+            KFST4(I,J,K) = BBF*KAPPA(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4
             ENDDO
          ENDDO
       ENDDO
@@ -689,9 +689,9 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                   HRR  = HRR  + Q(I,J,K)*VOL
                   RSUM = RSUM + KFST4(I,J,K)*VOL
                ENDIF
-            ENDDO
          ENDDO
       ENDDO
+   ENDDO
    ENDIF
 
    ! Correct the source term in the RTE based on user-specified RADIATIVE_FRACTION
@@ -729,23 +729,21 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
       
       BBF = 1.0_EB
       DO IW = 1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS+N_VIRTUAL_WALL_CELLS
-         IF (BOUNDARY_TYPE(IW) == OPEN_BOUNDARY) THEN
+         IF (WALL(IW)%BOUNDARY_TYPE == OPEN_BOUNDARY) THEN
             BBF = BBFA
          ELSE
-            IF (WIDE_BAND_MODEL) BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),TMP_F(IW))
-            IBC = IJKW(5,IW)
-            SF  => SURFACE(IBC)
-            IF (.NOT. SF%INTERNAL_RADIATION) QRADOUT(IW) = E_WALL(IW)*SIGMA*TMP_F(IW)**4
+            IF (WIDE_BAND_MODEL) BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),WALL(IW)%TMP_F)
+            SF  => SURFACE(WALL(IW)%SURF_INDEX)
+            IF (.NOT. SF%INTERNAL_RADIATION) WALL(IW)%QRADOUT = WALL(IW)%E_WALL*SIGMA*WALL(IW)%TMP_F**4
          ENDIF
-         OUTRAD_W(IW) = BBF*RPI*QRADOUT(IW)
+         OUTRAD_W(IW) = BBF*RPI*WALL(IW)%QRADOUT
       ENDDO
 
       ! Compute boundary condition term incoming radiation integral
  
       DO IW = 1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-         IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) CYCLE
-         IOR = IJKW(4,IW)
-         INRAD_W(IW) = SUM(-DLN(IOR,:)* WALL(IW)%ILW(:,IBND),1, DLN(IOR,:)<0._EB)
+         IF (WALL(IW)%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE
+         INRAD_W(IW) = SUM(-DLN(WALL(IW)%IOR,:)* WALL(IW)%ILW(:,IBND),1, DLN(WALL(IW)%IOR,:)<0._EB)
       ENDDO
  
       ! If updating intensities first time, sweep ALL angles
@@ -765,7 +763,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          ENDIF
 
          DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-            IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) WALL(IW)%ILW(ANGLE_INC_COUNTER,IBND) = 0._EB
+            IF (WALL(IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) WALL(IW)%ILW(ANGLE_INC_COUNTER,IBND) = 0._EB
          ENDDO
  
          ! Set the bounds and increment for the angleloop. Step downdard because in cylindrical case the Nth angle 
@@ -782,14 +780,14 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             ! Boundary conditions: Intensities leaving the boundaries.
             
             WALL_LOOP1: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-               IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY) CYCLE WALL_LOOP1
-               IOR = IJKW(4,IW)
+               IF (WALL(IW)%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP1
+               IOR = WALL(IW)%IOR
                IF (DLN(IOR,N) < 0._EB) CYCLE WALL_LOOP1
-               II  = IJKW(1,IW)
-               JJ  = IJKW(2,IW)
-               KK  = IJKW(3,IW)
+               II  = WALL(IW)%II
+               JJ  = WALL(IW)%JJ
+               KK  = WALL(IW)%KK
                IF (.NOT.TWO_D .OR. ABS(IOR)/=2) THEN
-                  SELECT CASE (BOUNDARY_TYPE(IW))
+                  SELECT CASE (WALL(IW)%BOUNDARY_TYPE)
                      CASE (OPEN_BOUNDARY) 
                         IL(II,JJ,KK) = BBFA*RPI_SIGMA*TMPA4
                      CASE (MIRROR_BOUNDARY) 
@@ -798,14 +796,14 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                      CASE (INTERPOLATED_BOUNDARY) 
                         IL(II,JJ,KK) = WALL(IW)%ILW(N,IBND)
                      CASE DEFAULT ! solid wall
-                        WALL(IW)%ILW(N,IBND) = OUTRAD_W(IW) + RPI*(1._EB-E_WALL(IW))* INRAD_W(IW)
+                        WALL(IW)%ILW(N,IBND) = OUTRAD_W(IW) + RPI*(1._EB-WALL(IW)%E_WALL)* INRAD_W(IW)
                   END SELECT
                ELSEIF (CYLINDRICAL) THEN
-                  IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) CYCLE WALL_LOOP1
+                  IF (WALL(IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) CYCLE WALL_LOOP1
                   IL(II,JJ,KK) = WALL(IW)%ILW(N,IBND)
                ENDIF
             ENDDO WALL_LOOP1
- 
+
             ! Determine sweep direction in physical space
  
             ISTART = 1
@@ -860,16 +858,16 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                      IF (MODULO(N,NRP(1))==0) AYU = 0._EB
                      IF (IC/=0) THEN
                         IW = WALL_INDEX(IC,-ISTEP)
-                        IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) THEN
-                           ILXU = WALL(IW)%ILW(N,IBND)
-                        ENDIF
+                        IF (IW/=0) THEN
+                           IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILXU = WALL(IW)%ILW(N,IBND)
+                        ENDIF                        
                         IW = WALL_INDEX(IC,-JSTEP*2)
-                        IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) THEN
-                           ILYU = WALL(IW)%ILW(N,IBND)
+                        IF (IW/=0) THEN
+                           IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY)ILYU = WALL(IW)%ILW(N,IBND)
                         ENDIF
                         IW = WALL_INDEX(IC,-KSTEP*3)
-                        IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) THEN
-                           ILZU = WALL(IW)%ILW(N,IBND)
+                        IF (IW/=0) THEN
+                           IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY)ILZU = WALL(IW)%ILW(N,IBND)
                         ENDIF
                      ENDIF
                      AIU_SUM = AXU*ILXU + AYU*ILYU + AZ*ILZU
@@ -894,12 +892,12 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                      AZ  = DX(I)         * ABS(DLZ(N))
                      IF (IC/=0) THEN
                         IW = WALL_INDEX(IC,-ISTEP)
-                        IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) THEN
-                           ILXU = WALL(IW)%ILW(N,IBND)
+                        IF (IW/=0) THEN
+                           IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILXU = WALL(IW)%ILW(N,IBND)
                         ENDIF
                         IW = WALL_INDEX(IC,-KSTEP*3)
-                        IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) THEN
-                           ILZU = WALL(IW)%ILW(N,IBND)
+                        IF (IW/=0) THEN
+                           IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILZU = WALL(IW)%ILW(N,IBND)
                         ENDIF
                      ENDIF
                      AIU_SUM = AX*ILXU + AZ*ILZU 
@@ -927,16 +925,16 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                         AZ  = DX(I) * DY(J)         * ABS(DLZ(N))
                         IF (IC/=0) THEN
                            IW = WALL_INDEX(IC,-ISTEP)
-                           IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) THEN
-                              ILXU = WALL(IW)%ILW(N,IBND)
+                           IF (IW/=0) THEN
+                              IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILXU = WALL(IW)%ILW(N,IBND)
                            ENDIF
                            IW = WALL_INDEX(IC,-JSTEP*2)
-                           IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) THEN
-                              ILYU = WALL(IW)%ILW(N,IBND)
+                           IF (IW/=0) THEN
+                              IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILYU = WALL(IW)%ILW(N,IBND)
                            ENDIF
                            IW = WALL_INDEX(IC,-KSTEP*3)
-                           IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) THEN
-                              ILZU = WALL(IW)%ILW(N,IBND)
+                           IF (IW/=0) THEN
+                              IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILZU = WALL(IW)%ILW(N,IBND)
                            ENDIF
                         ENDIF
                         A_SUM = AX + AY + AZ
@@ -950,7 +948,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                ENDDO KLOOP
  
             ENDIF GEOMETRY
- 
+
             ! Copy the Y-downwind intensities to Y-upwind in cylindrical case
  
             IF (CYLINDRICAL) THEN
@@ -961,10 +959,12 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                   IF (SOLID(IC)) CYCLE CILOOP2
                   IWUP   = WALL_INDEX(CELL_INDEX(I,J,K),-2)
                   IWDOWN = WALL_INDEX(CELL_INDEX(I,J,K), 2)
-                  IF (MODULO(N,NRP(1))==1) THEN
-                     WALL(IWUP)%ILW(N,IBND) = WALL(IWDOWN)%ILW(N,IBND)
-                  ELSE
-                     WALL(IWUP)%ILW(N-1,IBND) = WALL(IWDOWN)%ILW(N,IBND)
+                  IF (IWUP /=0 .AND. IWDOWN /= 0) THEN
+                     IF (MODULO(N,NRP(1))==1) THEN
+                        WALL(IWUP)%ILW(N,IBND) = WALL(IWDOWN)%ILW(N,IBND)
+                     ELSE
+                        WALL(IWUP)%ILW(N-1,IBND) = WALL(IWDOWN)%ILW(N,IBND)
+                     ENDIF
                   ENDIF
                ENDDO CILOOP2
                ENDDO CKLOOP2
@@ -973,26 +973,26 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             ! Boundary values: Incoming radiation
             
             WALL_LOOP2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-               IF (BOUNDARY_TYPE(IW)==NULL_BOUNDARY)   CYCLE WALL_LOOP2     
-               IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY)   CYCLE WALL_LOOP2  
-               IOR = IJKW(4,IW)
+               IF (WALL(IW)%BOUNDARY_TYPE==NULL_BOUNDARY)   CYCLE WALL_LOOP2     
+               IF (WALL(IW)%BOUNDARY_TYPE==OPEN_BOUNDARY)   CYCLE WALL_LOOP2  
+               IOR = WALL(IW)%IOR
                IF (TWO_D .AND. .NOT.CYLINDRICAL  .AND. ABS(IOR)==2) CYCLE WALL_LOOP2  ! 2-D non cylindrical
                IF (DLN(IOR,N)>=0._EB) CYCLE WALL_LOOP2     ! outgoing
-               IIG = IJKW(6,IW)
-               JJG = IJKW(7,IW)
-               KKG = IJKW(8,IW)
+               IIG = WALL(IW)%IIG
+               JJG = WALL(IW)%JJG
+               KKG = WALL(IW)%KKG
                INRAD_W(IW) = INRAD_W(IW) + DLN(IOR,N) * WALL(IW)%ILW(N,IBND) ! update incoming radiation,step 1
                WALL(IW)%ILW(N,IBND) = IL(IIG,JJG,KKG)
                INRAD_W(IW) = INRAD_W(IW) - DLN(IOR,N) * WALL(IW)%ILW(N,IBND) ! update incoming radiation,step 2
             ENDDO WALL_LOOP2
  
             WALL_LOOP3: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-               IF (BOUNDARY_TYPE(IW)/=OPEN_BOUNDARY)   CYCLE WALL_LOOP3 
-               IOR = IJKW(4,IW)
+               IF (WALL(IW)%BOUNDARY_TYPE/=OPEN_BOUNDARY)   CYCLE WALL_LOOP3 
+               IOR = WALL(IW)%IOR
                IF (DLN(IOR,N)>=0._EB) CYCLE WALL_LOOP3     ! outgoing
-               IIG = IJKW(6,IW)
-               JJG = IJKW(7,IW)
-               KKG = IJKW(8,IW)
+               IIG = WALL(IW)%IIG
+               JJG = WALL(IW)%JJG
+               KKG = WALL(IW)%KKG
                WALL(IW)%ILW(ANGLE_INC_COUNTER,IBND) = WALL(IW)%ILW(ANGLE_INC_COUNTER,IBND)-DLN(IOR,N)*IL(IIG,JJG,KKG)
             ENDDO WALL_LOOP3
 
@@ -1015,7 +1015,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                   IF (M2%IJKW(9,IW)/=NM .OR. M2%BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) CYCLE OTHER_WALL_LOOP
                   IOR = M2%IJKW(4,IW)
                   IF (DLN(IOR,N)<=0._EB) CYCLE OTHER_WALL_LOOP
-                  M2%WALL(IW)%ILW(N,IBND)=IL(M2%IJKW(10,IW),M2%IJKW(11,IW),M2%IJKW(12,IW))
+                  M2%WALL_ILW(IW)%ILW(N,IBND)=IL(M2%IJKW(10,IW),M2%IJKW(11,IW),M2%IJKW(12,IW))
                ENDDO OTHER_WALL_LOOP
             ENDDO INTERPOLATION_LOOP
 
@@ -1035,13 +1035,13 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                   LP => PARTICLE(I_DROP)
                   PC => PARTICLE_CLASS(LP%CLASS)
                   IF (PC%N_SPLIT < 2) CYCLE PARTICLE_RADIATION_LOOP
-                  IBC = PC%SURF_INDEX
-                  IF (IBC<1) CYCLE PARTICLE_RADIATION_LOOP
+                  SURF_INDEX = PC%SURF_INDEX
+                  IF (SURF_INDEX<1) CYCLE PARTICLE_RADIATION_LOOP
                   IW = LP%WALL_INDEX
                   COSINE = PC%ORIENTATION(LP%SPLIT_IOR,1)*DLX(N) + &
                            PC%ORIENTATION(LP%SPLIT_IOR,2)*DLY(N) + &
                            PC%ORIENTATION(LP%SPLIT_IOR,3)*DLZ(N)
-                  IF (COSINE <0._EB) WALL(IW)%ILW(N,IBND) = -COSINE * IL_UP(IJKW(1,IW),IJKW(2,IW),IJKW(3,IW))
+                  IF (COSINE <0._EB) WALL(IW)%ILW(N,IBND) = -COSINE * IL_UP(WALL(IW)%II, WALL(IW)%JJ, WALL(IW)%KK)
                ENDDO PARTICLE_RADIATION_LOOP
             ENDIF
 
@@ -1052,11 +1052,10 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
       ! Compute incoming flux on walls 
 
       DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-         IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY) CYCLE 
-         IBC = IJKW(5,IW)
-         SF  => SURFACE(IBC)      
+         IF (WALL(IW)%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE 
+         SF  => SURFACE(WALL(IW)%SURF_INDEX)      
          EFLUX = EVALUATE_RAMP(T,SF%TAU(TIME_EFLUX),SF%RAMP_INDEX(TIME_EFLUX))*SF%EXTERNAL_FLUX
-         QRADIN(IW)  = QRADIN(IW) + E_WALL(IW)*(INRAD_W(IW)+BBFA*EFLUX)
+         WALL(IW)%QRADIN  = WALL(IW)%QRADIN + WALL(IW)%E_WALL*(INRAD_W(IW)+BBFA*EFLUX)
       ENDDO 
 
    ENDIF INTENSITY_UPDATE
@@ -1079,8 +1078,8 @@ IF (UPDATE_INTENSITY) THEN
    UII = SUM(UIID, DIM = 4)
 
    DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-      IF (BOUNDARY_TYPE(IW)/=OPEN_BOUNDARY) CYCLE 
-      QRADIN(IW)  = SUM(WALL(IW)%ILW)
+      IF (WALL(IW)%BOUNDARY_TYPE/=OPEN_BOUNDARY) CYCLE 
+      WALL(IW)%QRADIN  = SUM(WALL(IW)%ILW)
    ENDDO 
 
 ENDIF
@@ -1111,7 +1110,7 @@ IF (GAS_CELL_RAD_FLUX) THEN
       IF (DV%MESH /= NM) CYCLE DEVC_LOOP2
       IW = DV%VIRTUAL_WALL_INDEX
       IF (IW>0) THEN
-         QRADIN(IW) = E_WALL(IW)*WEIGH_CYL*SUM(DV%ILW)
+         WALL(IW)%QRADIN = WALL(IW)%E_WALL*WEIGH_CYL*SUM(DV%ILW)
       ENDIF
    ENDDO DEVC_LOOP2
 ENDIF
@@ -1125,9 +1124,9 @@ IF (VIRTUAL_PARTICLES) THEN
          SF => SURFACE(PC%SURF_INDEX)
          EFLUX = EVALUATE_RAMP(T,SF%TAU(TIME_EFLUX),SF%RAMP_INDEX(TIME_EFLUX))*SF%EXTERNAL_FLUX
          IF(PC%N_SPLIT>1) THEN
-            QRADIN(IW) = E_WALL(IW)*(WEIGH_CYL*SUM(WALL(IW)%ILW) + EFLUX)
+            WALL(IW)%QRADIN = WALL(IW)%E_WALL*(WEIGH_CYL*SUM(WALL(IW)%ILW) + EFLUX)
          ELSE
-            QRADIN(IW) = E_WALL(IW)*(0.25_EB*UII(IJKW(1,IW),IJKW(2,IW),IJKW(3,IW)) + EFLUX)
+            WALL(IW)%QRADIN = WALL(IW)%E_WALL*(0.25_EB*UII( WALL(IW)%II, WALL(IW)%JJ, WALL(IW)%KK) + EFLUX)
          ENDIF   
       ENDIF
    ENDDO PARTICLE_LOOP

@@ -30,25 +30,26 @@ INTEGER :: I,J,K,IW,IOR,NOM,N_INT_CELLS,IIO,JJO,KKO
 REAL(EB) :: TRM1,TRM2,TRM3,TRM4,RES,LHSS,RHSS,H_OTHER,DWWDT,DVVDT,DUUDT,RFODT,TNOW,DUMMY=0._EB, &
             TSI,TIME_RAMP_FACTOR,DX_OTHER,DY_OTHER,DZ_OTHER,P_EXTERNAL
 TYPE (VENTS_TYPE), POINTER :: VT=>NULL()
+TYPE (WALL_TYPE), POINTER :: WC=>NULL()
  
 IF (SOLID_PHASE_ONLY) RETURN
 IF (FREEZE_VELOCITY) RETURN
-
+UWP=>WALL_WORK2
 TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
- 
+
 IF (PREDICTOR) THEN
    UU => U
    VV => V
    WW => W
    HP => H
-   UWP=> UWS
+   UWP(1:N_EXTERNAL_WALL_CELLS) = WALL(1:N_EXTERNAL_WALL_CELLS)%UWS   
 ELSE
    UU => US
    VV => VS
    WW => WS
    HP => HS
-   UWP=> UW
+   UWP(1:N_EXTERNAL_WALL_CELLS) = WALL(1:N_EXTERNAL_WALL_CELLS)%UW
 ENDIF
 
 ! Miscellaneous settings for wind and baroclinic cases
@@ -75,15 +76,15 @@ RFODT = RELAXATION_FACTOR/DT
 !$OMP PRIVATE(IW,I,J,K,IOR,DUUDT,DVVDT,DWWDT,NOM,H_OTHER,KKO,JJO,IIO, &
 !$OMP         N_INT_CELLS,DX_OTHER,DY_OTHER,DZ_OTHER,VT,TSI,TIME_RAMP_FACTOR,P_EXTERNAL) 
 WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
- 
-   I   = IJKW(1,IW)
-   J   = IJKW(2,IW)
-   K   = IJKW(3,IW)
-   IOR = IJKW(4,IW)
+   WC => WALL(IW)
+   I   = WC%II
+   J   = WC%JJ
+   K   = WC%KK
+   IOR = WC%IOR
 
    ! Apply pressure gradients at NEUMANN boundaries: dH/dn = -F_n - d(u_n)/dt
 
-   IF_NEUMANN: IF (PRESSURE_BC_INDEX(IW)==NEUMANN) THEN
+   IF_NEUMANN: IF (WC%PRESSURE_BC_INDEX==NEUMANN) THEN
       SELECT CASE(IOR)
          CASE( 1)
             BXS(J,K) = HX(0)   *(-FVX(0,J,K)    + DUWDT(IW))
@@ -102,9 +103,9 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
 
    ! Apply pressures at DIRICHLET boundaries, depending on the specific type
  
-   IF_DIRICHLET: IF (PRESSURE_BC_INDEX(IW)==DIRICHLET) THEN
+   IF_DIRICHLET: IF (WC%PRESSURE_BC_INDEX==DIRICHLET) THEN
 
-      NOT_OPEN: IF (BOUNDARY_TYPE(IW)/=OPEN_BOUNDARY .AND. BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) THEN
+      NOT_OPEN: IF (WC%BOUNDARY_TYPE/=OPEN_BOUNDARY .AND. WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) THEN
 
          ! Solid boundary that uses a Dirichlet BC to drive the normal component of velocity towards UWP
  
@@ -139,51 +140,51 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
 
       ! Interpolated boundary -- set boundary value of H to be average of neighboring cells from previous time step
  
-      INTERPOLATED_ONLY: IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
+      INTERPOLATED_ONLY: IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) THEN
 
-         NOM     = IJKW(9,IW)
+         NOM     = WC%NOM
          H_OTHER = 0._EB
-         DO KKO=IJKW(12,IW),IJKW(15,IW)
-            DO JJO=IJKW(11,IW),IJKW(14,IW)
-               DO IIO=IJKW(10,IW),IJKW(13,IW)
+         DO KKO=WC%NOM_IB(3),WC%NOM_IB(6)
+            DO JJO=WC%NOM_IB(2),WC%NOM_IB(5)
+               DO IIO=WC%NOM_IB(1),WC%NOM_IB(4)
                   IF (PREDICTOR) H_OTHER = H_OTHER + OMESH(NOM)%H(IIO,JJO,KKO)
                   IF (CORRECTOR) H_OTHER = H_OTHER + OMESH(NOM)%HS(IIO,JJO,KKO)
                ENDDO
             ENDDO
          ENDDO
-         N_INT_CELLS = (IJKW(13,IW)-IJKW(10,IW)+1) * (IJKW(14,IW)-IJKW(11,IW)+1) * (IJKW(15,IW)-IJKW(12,IW)+1)
+         N_INT_CELLS = (WC%NOM_IB(4)-WC%NOM_IB(1)+1) * (WC%NOM_IB(5)-WC%NOM_IB(2)+1) * (WC%NOM_IB(6)-WC%NOM_IB(3)+1)
          H_OTHER = H_OTHER/REAL(N_INT_CELLS,EB)
          
          SELECT CASE(IOR)
             CASE( 1)
-               DX_OTHER = MESHES(NOM)%DX(IJKW(10,IW))
+               DX_OTHER = MESHES(NOM)%DX(WC%NOM_IB(1))
                BXS(J,K) = (DX_OTHER*HP(1,J,K) + DX(1)*H_OTHER)/(DX(1)+DX_OTHER) + WALL_WORK1(IW)
             CASE(-1)
-               DX_OTHER = MESHES(NOM)%DX(IJKW(10,IW))
+               DX_OTHER = MESHES(NOM)%DX(WC%NOM_IB(1))
                BXF(J,K) = (DX_OTHER*HP(IBAR,J,K) + DX(IBAR)*H_OTHER)/(DX(IBAR)+DX_OTHER)+ WALL_WORK1(IW)
             CASE( 2)
-               DY_OTHER = MESHES(NOM)%DY(IJKW(11,IW))
+               DY_OTHER = MESHES(NOM)%DY(WC%NOM_IB(2))
                BYS(I,K) = (DY_OTHER*HP(I,1,K) + DY(1)*H_OTHER)/(DY(1)+DY_OTHER)+ WALL_WORK1(IW)
             CASE(-2)
-               DY_OTHER = MESHES(NOM)%DY(IJKW(11,IW))
+               DY_OTHER = MESHES(NOM)%DY(WC%NOM_IB(2))
                BYF(I,K) = (DY_OTHER*HP(I,JBAR,K) + DY(JBAR)*H_OTHER)/(DY(JBAR)+DY_OTHER)+ WALL_WORK1(IW)
             CASE( 3)
-               DZ_OTHER = MESHES(NOM)%DZ(IJKW(12,IW))
+               DZ_OTHER = MESHES(NOM)%DZ(WC%NOM_IB(3))
                BZS(I,J) = (DZ_OTHER*HP(I,J,1) + DZ(1)*H_OTHER)/(DZ(1)+DZ_OTHER)+ WALL_WORK1(IW)
             CASE(-3)
-               DZ_OTHER = MESHES(NOM)%DZ(IJKW(12,IW))
+               DZ_OTHER = MESHES(NOM)%DZ(WC%NOM_IB(3))
                BZF(I,J) = (DZ_OTHER*HP(I,J,KBAR) + DZ(KBAR)*H_OTHER)/(DZ(KBAR)+DZ_OTHER)+ WALL_WORK1(IW)
          END SELECT
- 
+
       ENDIF INTERPOLATED_ONLY
  
       ! OPEN (passive opening to exterior of domain) boundary. Apply inflow/outflow BC.
 
-      OPEN_IF: IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) THEN
+      OPEN_IF: IF (WC%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
  
-         IF (VENT_INDEX(IW)>0) THEN
-            VT => VENTS(VENT_INDEX(IW))
-            IF (ABS(TW(IW)-T_BEGIN)<=ZERO_P .AND. VT%PRESSURE_RAMP_INDEX >=1) THEN
+         IF (WC%VENT_INDEX>0) THEN
+            VT => VENTS(WC%VENT_INDEX)
+            IF (ABS(WC%TW-T_BEGIN)<=ZERO_P .AND. VT%PRESSURE_RAMP_INDEX >=1) THEN
                TSI = T
             ELSE
                TSI = T - T_BEGIN
@@ -195,39 +196,39 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
          SELECT CASE(IOR)
             CASE( 1)
                IF (UU(0,J,K)<0._EB) THEN
-                  BXS(J,K) = P_EXTERNAL/RHO_F(IW) + KRES(1,J,K)
+                  BXS(J,K) = P_EXTERNAL/WC%RHO_F + KRES(1,J,K)
                ELSE
-                  BXS(J,K) = P_EXTERNAL/RHO_F(IW) + H0
+                  BXS(J,K) = P_EXTERNAL/WC%RHO_F + H0
                ENDIF
             CASE(-1)
                IF (UU(IBAR,J,K)>0._EB) THEN
-                  BXF(J,K) = P_EXTERNAL/RHO_F(IW) + KRES(IBAR,J,K)
+                  BXF(J,K) = P_EXTERNAL/WC%RHO_F + KRES(IBAR,J,K)
                ELSE
-                  BXF(J,K) = P_EXTERNAL/RHO_F(IW) + H0
+                  BXF(J,K) = P_EXTERNAL/WC%RHO_F + H0
                ENDIF
             CASE( 2)
                IF (VV(I,0,K)<0._EB) THEN
-                  BYS(I,K) = P_EXTERNAL/RHO_F(IW) + KRES(I,1,K)
+                  BYS(I,K) = P_EXTERNAL/WC%RHO_F + KRES(I,1,K)
                ELSE
-                  BYS(I,K) = P_EXTERNAL/RHO_F(IW) + H0
+                  BYS(I,K) = P_EXTERNAL/WC%RHO_F + H0
                ENDIF
             CASE(-2)
                IF (VV(I,JBAR,K)>0._EB) THEN
-                  BYF(I,K) = P_EXTERNAL/RHO_F(IW) + KRES(I,JBAR,K)
+                  BYF(I,K) = P_EXTERNAL/WC%RHO_F + KRES(I,JBAR,K)
                ELSE
-                  BYF(I,K) = P_EXTERNAL/RHO_F(IW) + H0
+                  BYF(I,K) = P_EXTERNAL/WC%RHO_F + H0
                ENDIF
             CASE( 3)
                IF (WW(I,J,0)<0._EB) THEN
-                  BZS(I,J) = P_EXTERNAL/RHO_F(IW) + KRES(I,J,1)
+                  BZS(I,J) = P_EXTERNAL/WC%RHO_F + KRES(I,J,1)
                ELSE
-                  BZS(I,J) = P_EXTERNAL/RHO_F(IW) + H0
+                  BZS(I,J) = P_EXTERNAL/WC%RHO_F + H0
                ENDIF
             CASE(-3)
                IF (WW(I,J,KBAR)>0._EB) THEN
-                  BZF(I,J) = P_EXTERNAL/RHO_F(IW) + KRES(I,J,KBAR)
+                  BZF(I,J) = P_EXTERNAL/WC%RHO_F + KRES(I,J,KBAR)
                ELSE
-                  BZF(I,J) = P_EXTERNAL/RHO_F(IW) + H0
+                  BZF(I,J) = P_EXTERNAL/WC%RHO_F + H0
                ENDIF
          END SELECT
     
@@ -498,38 +499,39 @@ USE COMP_FUNCTIONS, ONLY: SECOND
 USE GLOBAL_CONSTANTS
 
 INTEGER, INTENT(IN) :: NM
-REAL(EB), POINTER, DIMENSION(:) :: UWP=>NULL()
+REAL(EB), POINTER, DIMENSION(:) :: UWP
 INTEGER :: IW,IOR,II,JJ,KK,IIO,JJO,KKO,NOM
 REAL(EB) :: TNOW,U_NEW,V_NEW,W_NEW,U_NEW_OTHER,V_NEW_OTHER,W_NEW_OTHER,VELOCITY_ERROR,DUDT,DVDT,DWDT
 TYPE(OMESH_TYPE), POINTER :: OM=>NULL()
-TYPE(MESH_TYPE), POINTER :: M2
+TYPE(MESH_TYPE), POINTER :: M2=>NULL()
+TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 
 TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
-
+UWP => WALL_WORK2
 IF (PREDICTOR) THEN
-   UWP=> UWS
+   UWP(1:N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS) = WALL(1:N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS)%UWS
 ELSE
-   UWP=> UW
+   UWP(1:N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS) = WALL(1:N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS)%UW
 ENDIF
 
 VELOCITY_ERROR_MAX(NM) = 0._EB
 WALL_WORK1 = 0._EB
 
 CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+   WC=>WALL(IW)
+   IF (WC%BOUNDARY_TYPE/=SOLID_BOUNDARY .AND. WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE CHECK_WALL_LOOP
 
-   IF (BOUNDARY_TYPE(IW)/=SOLID_BOUNDARY .AND. BOUNDARY_TYPE(IW)/=INTERPOLATED_BOUNDARY) CYCLE CHECK_WALL_LOOP
-
-   IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
-      NOM = IJKW(9,IW)
+   IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) THEN
+      NOM = WC%NOM
       OM => OMESH(NOM)
       IF (OM%NIC_R/=OM%NIC_S) CYCLE CHECK_WALL_LOOP
    ENDIF
 
-   II  = IJKW(1,IW)
-   JJ  = IJKW(2,IW)
-   KK  = IJKW(3,IW)
-   IOR = IJKW(4,IW)
+   II  = WC%II
+   JJ  = WC%JJ
+   KK  = WC%KK
+   IOR = WC%IOR
 
    ! Update normal component of velocity at the mesh boundary
 
@@ -567,12 +569,12 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
    ! At interpolated boundaries, compare updated normal component of velocity with that of the other mesh
 
-   IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
-      OM  => OMESH(IJKW(9,IW))
-      M2  =>  MESHES(IJKW(9,IW))
-      IIO = IJKW(10,IW)
-      JJO = IJKW(11,IW)
-      KKO = IJKW(12,IW)
+   IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) THEN
+      OM  => OMESH(WC%NOM)
+      M2  =>  MESHES(WC%NOM)
+      IIO = WC%NOM_IB(1)
+      JJO = WC%NOM_IB(2)
+      KKO = WC%NOM_IB(3)
       IF (PREDICTOR) THEN
          SELECT CASE(IOR)
             CASE( 1)
@@ -620,7 +622,7 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
    ! At solid boundaries, compare updated normal velocity with specified normal velocity (UWP)
 
-   IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY) THEN
+   IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
       SELECT CASE(IOR)
          CASE( 1)
             U_NEW_OTHER = -UWP(IW)
@@ -675,10 +677,11 @@ SUBROUTINE COMPUTE_A_B(A,B,NM)
 USE GLOBAL_CONSTANTS, ONLY: SOLID_BOUNDARY,OPEN_BOUNDARY,NULL_BOUNDARY,INTERPOLATED_BOUNDARY,PREDICTOR,PRESSIT_SCALE_FACTOR
 REAL(EB) :: A(:,:),B(:),DUDT_OTHER,DVDT_OTHER,DWDT_OTHER,DA,DUUDT,DVVDT,DWWDT,DUDT_AVG,DVDT_AVG,DWDT_AVG,DX_M,DY_M,DZ_M, &
             OM_DUDT,OM_DVDT,OM_DWDT
-REAL(EB), POINTER, DIMENSION(:,:,:) :: OM_HP,HP
-TYPE (MESH_TYPE), POINTER :: M2
-TYPE (OMESH_TYPE), POINTER :: OM
+REAL(EB), POINTER, DIMENSION(:,:,:) :: OM_HP=>NULL(),HP=>NULL()
+TYPE (MESH_TYPE), POINTER :: M2=>NULL()
+TYPE (OMESH_TYPE), POINTER :: OM=>NULL()
 INTEGER :: I,J,K,NM,II,JJ,KK,IIO,JJO,KKO,NOM,IW
+TYPE (WALL_TYPE), POINTER :: WC=>NULL()
  
 CALL POINT_TO_MESH(NM)
 
@@ -699,8 +702,9 @@ DO KK=1,KBAR
    DO JJ=1,JBAR
       DA = R(II)*DY(JJ)*DZ(KK)
          IW = WALL_INDEX(CELL_INDEX(II+1,JJ,KK),-1)
-         IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
-            NOM = IJKW(9,IW)
+         WC=>WALL(IW)
+         IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) THEN
+            NOM = WC%NOM
             OM  => OMESH(NOM)
             IF (PREDICTOR) THEN
                OM_HP => OM%H
@@ -708,15 +712,15 @@ DO KK=1,KBAR
                OM_HP => OM%HS
             ENDIF
             M2  => MESHES(NOM)
-            IIO = IJKW(10,IW)
-            JJO = IJKW(11,IW)
-            KKO = IJKW(12,IW)
+            IIO = WC%NOM_IB(1)
+            JJO = WC%NOM_IB(2)
+            KKO = WC%NOM_IB(3)
             A(NM,NM)  = A(NM,NM)  - DA/DX_M
             A(NM,NOM) = A(NM,NOM) + DA/DX_M
             DUDT_OTHER = 0._EB
-            DO KKO=IJKW(12,IW),IJKW(15,IW)
-               DO JJO=IJKW(11,IW),IJKW(14,IW)
-                  DO IIO=IJKW(10,IW),IJKW(13,IW)
+            DO KKO=WC%NOM_IB(3),WC%NOM_IB(6)
+               DO JJO=WC%NOM_IB(2),WC%NOM_IB(5)
+                  DO IIO=WC%NOM_IB(1),WC%NOM_IB(4)
                      OM_DUDT    = -(OM%FVX(IIO,JJO,KKO)+M2%RDXN(IIO)*(OM_HP(IIO+1,JJO,KKO)-OM_HP(IIO,JJO,KKO)))
                      DUDT_OTHER = DUDT_OTHER + OM_DUDT*MIN(1._EB,M2%R(IIO)*M2%DY(JJO)*M2%DZ(KKO)/DA)
                   ENDDO
@@ -726,8 +730,8 @@ DO KK=1,KBAR
             DUDT_AVG     = 0.5_EB*(DUDT_OTHER+DUUDT)
             B(NM)         = B(NM) - DA*DUDT_AVG    
          ENDIF
-         IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY .OR. BOUNDARY_TYPE(IW)==NULL_BOUNDARY) B(NM) = B(NM) + DUWDT(IW)*DA
-         IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) THEN
+         IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. WC%BOUNDARY_TYPE==NULL_BOUNDARY) B(NM) = B(NM) + DUWDT(IW)*DA
+         IF (WC%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
             A(NM,NM) = A(NM,NM) - 2._EB*DA/DX_M
             B(NM)   = B(NM)   + (FVX(II,JJ,KK)+(HP(II+1,JJ,KK)-HP(II,JJ,KK))*RDXN(0))*DA
          ENDIF
@@ -741,8 +745,9 @@ DO KK=1,KBAR
    DO JJ=1,JBAR
       DA = R(II)*DY(JJ)*DZ(KK)
          IW = WALL_INDEX(CELL_INDEX(II,JJ,KK),1)
-         IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
-            NOM = IJKW(9,IW)
+         WC=>WALL(IW)
+         IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) THEN
+            NOM = WC%NOM
             OM  => OMESH(NOM)
             IF (PREDICTOR) THEN
                OM_HP => OM%H
@@ -750,15 +755,12 @@ DO KK=1,KBAR
                OM_HP => OM%HS
             ENDIF
             M2  => MESHES(NOM)
-            IIO = IJKW(10,IW)
-            JJO = IJKW(11,IW)
-            KKO = IJKW(12,IW)
             A(NM,NM)  = A(NM,NM)  - DA/DX_M
             A(NM,NOM) = A(NM,NOM) + DA/DX_M
             DUDT_OTHER = 0._EB
-            DO KKO=IJKW(12,IW),IJKW(15,IW)
-               DO JJO=IJKW(11,IW),IJKW(14,IW)
-                  DO IIO=IJKW(10,IW),IJKW(13,IW)
+            DO KKO=WC%NOM_IB(3),WC%NOM_IB(6)
+               DO JJO=WC%NOM_IB(2),WC%NOM_IB(5)
+                  DO IIO=WC%NOM_IB(1),WC%NOM_IB(4)
                      OM_DUDT    = -(OM%FVX(IIO-1,JJO,KKO)+M2%RDXN(IIO-1)*(OM_HP(IIO,JJO,KKO)-OM_HP(IIO-1,JJO,KKO)))
                      DUDT_OTHER = DUDT_OTHER + OM_DUDT*MIN(1._EB,M2%R(IIO-1)*M2%DY(JJO)*M2%DZ(KKO)/DA)
                   ENDDO
@@ -768,8 +770,8 @@ DO KK=1,KBAR
             DUDT_AVG     = 0.5_EB*(DUDT_OTHER+DUUDT)
             B(NM)         = B(NM) + DA*DUDT_AVG    
          ENDIF
-         IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY .OR. BOUNDARY_TYPE(IW)==NULL_BOUNDARY) B(NM) = B(NM) + DUWDT(IW)*DA
-         IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) THEN
+         IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. WALL(IW)%BOUNDARY_TYPE==NULL_BOUNDARY) B(NM) = B(NM) + DUWDT(IW)*DA
+         IF (WALL(IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
             A(NM,NM) = A(NM,NM) - 2._EB*DA/DX_M
             B(NM)   = B(NM)   - (FVX(II,JJ,KK)+(HP(II+1,JJ,KK)-HP(II,JJ,KK))*RDXN(IBAR))*DA
          ENDIF
@@ -783,8 +785,9 @@ DO KK=1,KBAR
    DO II=1,IBAR
       DA = DX(II)*DZ(KK)
          IW = WALL_INDEX(CELL_INDEX(II,JJ+1,KK),-2)
-         IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
-            NOM = IJKW(9,IW)
+         WC=>WALL(IW)
+         IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) THEN
+            NOM = WC%NOM
             OM  => OMESH(NOM)
             IF (PREDICTOR) THEN
                OM_HP => OM%H
@@ -792,15 +795,12 @@ DO KK=1,KBAR
                OM_HP => OM%HS
             ENDIF
             M2  => MESHES(NOM)
-            IIO = IJKW(10,IW)
-            JJO = IJKW(11,IW)
-            KKO = IJKW(12,IW)
             A(NM,NM)  = A(NM,NM)  - DA/DY_M
             A(NM,NOM) = A(NM,NOM) + DA/DY_M
             DVDT_OTHER = 0._EB
-            DO KKO=IJKW(12,IW),IJKW(15,IW)
-               DO JJO=IJKW(11,IW),IJKW(14,IW)
-                  DO IIO=IJKW(10,IW),IJKW(13,IW)
+            DO KKO=WC%NOM_IB(3),WC%NOM_IB(6)
+               DO JJO=WC%NOM_IB(2),WC%NOM_IB(5)
+                  DO IIO=WC%NOM_IB(1),WC%NOM_IB(4)
                      OM_DVDT    = -(OM%FVY(IIO,JJO,KKO)+M2%RDYN(JJO)*(OM_HP(IIO,JJO+1,KKO)-OM_HP(IIO,JJO,KKO)))
                      DVDT_OTHER = DVDT_OTHER + OM_DVDT*MIN(1._EB,M2%DX(IIO)*M2%DZ(KKO)/DA)
                   ENDDO
@@ -810,8 +810,8 @@ DO KK=1,KBAR
             DVDT_AVG     = 0.5_EB*(DVDT_OTHER+DVVDT)
             B(NM)         = B(NM) - DA*DVDT_AVG
          ENDIF
-         IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY .OR. BOUNDARY_TYPE(IW)==NULL_BOUNDARY) B(NM) = B(NM) + DUWDT(IW)*DA
-         IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) THEN
+         IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. WALL(IW)%BOUNDARY_TYPE==NULL_BOUNDARY) B(NM) = B(NM) + DUWDT(IW)*DA
+         IF (WALL(IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
             A(NM,NM) = A(NM,NM) - 2._EB*DA/DY_M
             B(NM)   = B(NM)   + (FVY(II,JJ,KK)+(HP(II,JJ+1,KK)-HP(II,JJ,KK))*RDYN(0))*DA
          ENDIF
@@ -825,8 +825,9 @@ DO KK=1,KBAR
    DO II=1,IBAR
       DA = DX(II)*DZ(KK)
          IW = WALL_INDEX(CELL_INDEX(II,JJ,KK),2)
-         IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
-            NOM = IJKW(9,IW)
+         WC=>WALL(IW)
+         IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) THEN
+            NOM = WC%NOM
             OM  => OMESH(NOM)
             IF (PREDICTOR) THEN
                OM_HP => OM%H
@@ -834,15 +835,12 @@ DO KK=1,KBAR
                OM_HP => OM%HS
             ENDIF
             M2  => MESHES(NOM)
-            IIO = IJKW(10,IW)
-            JJO = IJKW(11,IW)
-            KKO = IJKW(12,IW)
             A(NM,NM)  = A(NM,NM)  - DA/DY_M
             A(NM,NOM) = A(NM,NOM) + DA/DY_M
             DVDT_OTHER = 0._EB
-            DO KKO=IJKW(12,IW),IJKW(15,IW)
-               DO JJO=IJKW(11,IW),IJKW(14,IW)
-                  DO IIO=IJKW(10,IW),IJKW(13,IW)
+            DO KKO=WC%NOM_IB(3),WC%NOM_IB(6)
+               DO JJO=WC%NOM_IB(2),WC%NOM_IB(5)
+                  DO IIO=WC%NOM_IB(1),WC%NOM_IB(4)
                      OM_DVDT    = -(OM%FVY(IIO,JJO-1,KKO)+M2%RDYN(JJO-1)*(OM_HP(IIO,JJO,KKO)-OM_HP(IIO,JJO-1,KKO)))
                      DVDT_OTHER = DVDT_OTHER + OM_DVDT*MIN(1._EB,M2%DX(IIO)*M2%DZ(KKO)/DA)
                   ENDDO
@@ -852,8 +850,8 @@ DO KK=1,KBAR
             DVDT_AVG      = 0.5_EB*(DVDT_OTHER+DVVDT)
             B(NM)          = B(NM) + DA*DVDT_AVG
          ENDIF
-         IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY .OR. BOUNDARY_TYPE(IW)==NULL_BOUNDARY) B(NM) = B(NM) + DUWDT(IW)*DA
-         IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) THEN
+         IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. WALL(IW)%BOUNDARY_TYPE==NULL_BOUNDARY) B(NM) = B(NM) + DUWDT(IW)*DA
+         IF (WALL(IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
             A(NM,NM) = A(NM,NM) - 2._EB*DA/DY_M
             B(NM)   = B(NM)   - (FVY(II,JJ,KK)+(HP(II,JJ+1,KK)-HP(II,JJ,KK))*RDYN(JBAR))*DA
          ENDIF
@@ -867,8 +865,9 @@ DO JJ=1,JBAR
    DO II=1,IBAR
       DA = RC(II)*DX(II)*DY(JJ)
          IW = WALL_INDEX(CELL_INDEX(II,JJ,KK+1),-3)
-         IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
-            NOM = IJKW(9,IW)
+         WC=>WALL(IW)
+         IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) THEN
+            NOM = WC%NOM
             OM  => OMESH(NOM)
             IF (PREDICTOR) THEN
                OM_HP => OM%H
@@ -876,15 +875,12 @@ DO JJ=1,JBAR
                OM_HP => OM%HS
             ENDIF
             M2  => MESHES(NOM)
-            IIO = IJKW(10,IW)
-            JJO = IJKW(11,IW)
-            KKO = IJKW(12,IW)
             A(NM,NM)  = A(NM,NM)  - DA/DZ_M
             A(NM,NOM) = A(NM,NOM) + DA/DZ_M 
             DWDT_OTHER = 0._EB
-            DO KKO=IJKW(12,IW),IJKW(15,IW)
-               DO JJO=IJKW(11,IW),IJKW(14,IW)
-                  DO IIO=IJKW(10,IW),IJKW(13,IW)
+            DO KKO=WC%NOM_IB(3),WC%NOM_IB(6)
+               DO JJO=WC%NOM_IB(2),WC%NOM_IB(5)
+                  DO IIO=WC%NOM_IB(1),WC%NOM_IB(4)
                      OM_DWDT    = -(OM%FVZ(IIO,JJO,KKO)+M2%RDZN(KKO)*(OM_HP(IIO,JJO,KKO+1)-OM_HP(IIO,JJO,KKO)))
                      DWDT_OTHER = DWDT_OTHER + OM_DWDT*MIN(1._EB,M2%RC(IIO)*M2%DX(IIO)*M2%DY(JJO)/DA)
                   ENDDO
@@ -894,8 +890,8 @@ DO JJ=1,JBAR
             DWDT_AVG     = 0.5_EB*(DWDT_OTHER+DWWDT)
             B(NM)         = B(NM) - DA*DWDT_AVG
          ENDIF
-         IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY .OR. BOUNDARY_TYPE(IW)==NULL_BOUNDARY) B(NM) = B(NM) + DUWDT(IW)*DA
-         IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) THEN
+         IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. WALL(IW)%BOUNDARY_TYPE==NULL_BOUNDARY) B(NM) = B(NM) + DUWDT(IW)*DA
+         IF (WALL(IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
             A(NM,NM) = A(NM,NM) - 2._EB*DA/DZ_M
             B(NM)   = B(NM)   + (FVZ(II,JJ,KK)+(HP(II,JJ,KK+1)-HP(II,JJ,KK))*RDZN(0))*DA
          ENDIF
@@ -909,8 +905,9 @@ DO JJ=1,JBAR
    DO II=1,IBAR
       DA = RC(II)*DX(II)*DY(JJ)
          IW = WALL_INDEX(CELL_INDEX(II,JJ,KK),3)
-         IF (BOUNDARY_TYPE(IW)==INTERPOLATED_BOUNDARY) THEN
-            NOM = IJKW(9,IW)
+         WC=>WALL(IW)
+         IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) THEN
+            NOM = WC%NOM
             OM  => OMESH(NOM)
             IF (PREDICTOR) THEN
                OM_HP => OM%H
@@ -918,15 +915,12 @@ DO JJ=1,JBAR
                OM_HP => OM%HS
             ENDIF
             M2  => MESHES(NOM)
-            IIO = IJKW(10,IW)
-            JJO = IJKW(11,IW)
-            KKO = IJKW(12,IW)
             A(NM,NM)  = A(NM,NM)  - DA/DZ_M 
             A(NM,NOM) = A(NM,NOM) + DA/DZ_M 
             DWDT_OTHER = 0._EB
-            DO KKO=IJKW(12,IW),IJKW(15,IW)
-               DO JJO=IJKW(11,IW),IJKW(14,IW)
-                  DO IIO=IJKW(10,IW),IJKW(13,IW)
+            DO KKO=WC%NOM_IB(3),WC%NOM_IB(6)
+               DO JJO=WC%NOM_IB(2),WC%NOM_IB(5)
+                  DO IIO=WC%NOM_IB(1),WC%NOM_IB(4)
                      OM_DWDT    = -(OM%FVZ(IIO,JJO,KKO-1)+M2%RDZN(KKO-1)*(OM_HP(IIO,JJO,KKO)-OM_HP(IIO,JJO,KKO-1)))
                      DWDT_OTHER = DWDT_OTHER + OM_DWDT*MIN(1._EB,M2%RC(IIO)*M2%DX(IIO)*M2%DY(JJO)/DA)
                   ENDDO
@@ -936,8 +930,8 @@ DO JJ=1,JBAR
             DWDT_AVG     = 0.5_EB*(DWDT_OTHER+DWWDT)
             B(NM)         = B(NM) + DA*DWDT_AVG
          ENDIF
-         IF (BOUNDARY_TYPE(IW)==SOLID_BOUNDARY .OR. BOUNDARY_TYPE(IW)==NULL_BOUNDARY) B(NM) = B(NM) + DUWDT(IW)*DA
-         IF (BOUNDARY_TYPE(IW)==OPEN_BOUNDARY) THEN
+         IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY .OR. WALL(IW)%BOUNDARY_TYPE==NULL_BOUNDARY) B(NM) = B(NM) + DUWDT(IW)*DA
+         IF (WALL(IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
             A(NM,NM) = A(NM,NM) - 2._EB*DA/DZ_M
             B(NM)   = B(NM)   - (FVZ(II,JJ,KK)+(HP(II,JJ,KK+1)-HP(II,JJ,KK))*RDZN(KBAR))*DA
          ENDIF
