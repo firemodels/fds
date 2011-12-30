@@ -236,6 +236,9 @@ void adjustpart5bounds(particle *parti){
     case SET_MIN:
       propi->valmin=propi->user_min;
       break;
+    default:
+      ASSERT(0);
+      break;
     }
     switch (propi->setvalmax){
     case PERCENTILE_MAX:
@@ -247,6 +250,9 @@ void adjustpart5bounds(particle *parti){
       break;
     case SET_MAX:
       propi->valmax=propi->user_max;
+      break;
+    default:
+      ASSERT(0);
       break;
     }
   }

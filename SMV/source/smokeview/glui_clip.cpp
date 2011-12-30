@@ -79,22 +79,19 @@ extern "C" void glui_clip_setup(int main_window){
   panel_clip_lower = glui_clip->add_panel_to_panel(panel_clip,_("Clip Lower"));
 
   panel_clipx = glui_clip->add_panel_to_panel(panel_clip_lower,"X",GLUI_PANEL_NONE);
-  SPINNER_clip_xlower=glui_clip->add_spinner_to_panel(panel_clipx,"X",GLUI_SPINNER_FLOAT,&clip_x_val,
-    SPINNER_xlower,CLIP_CB);
+  SPINNER_clip_xlower=glui_clip->add_spinner_to_panel(panel_clipx,"X",GLUI_SPINNER_FLOAT,&clip_x_val,SPINNER_xlower,CLIP_CB);
   SPINNER_clip_xlower->set_float_limits(xclip_min,xclip_max,GLUI_LIMIT_CLAMP);
   glui_clip->add_column_to_panel(panel_clipx,false);
   CHECKBOX_clip_xlower=glui_clip->add_checkbox_to_panel(panel_clipx,"",&clip_x,CLIP_xlower,CLIP_CB);
 
   panel_clipy = glui_clip->add_panel_to_panel(panel_clip_lower,"Y",GLUI_PANEL_NONE);
-  SPINNER_clip_ylower=glui_clip->add_spinner_to_panel(panel_clipy,"Y",GLUI_SPINNER_FLOAT,&clip_y_val,
-    SPINNER_ylower,CLIP_CB);
+  SPINNER_clip_ylower=glui_clip->add_spinner_to_panel(panel_clipy,"Y",GLUI_SPINNER_FLOAT,&clip_y_val,SPINNER_ylower,CLIP_CB);
   SPINNER_clip_ylower->set_float_limits(yclip_min,yclip_max,GLUI_LIMIT_CLAMP);
   glui_clip->add_column_to_panel(panel_clipy,false);
   CHECKBOX_clip_ylower=glui_clip->add_checkbox_to_panel(panel_clipy,"",&clip_y,CLIP_ylower,CLIP_CB);
 
   panel_clipz = glui_clip->add_panel_to_panel(panel_clip_lower,"Z",GLUI_PANEL_NONE);
-  SPINNER_clip_zlower=glui_clip->add_spinner_to_panel(panel_clipz,"Z",GLUI_SPINNER_FLOAT,&clip_z_val,
-    SPINNER_zlower,CLIP_CB);
+  SPINNER_clip_zlower=glui_clip->add_spinner_to_panel(panel_clipz,"Z",GLUI_SPINNER_FLOAT,&clip_z_val,SPINNER_zlower,CLIP_CB);
   SPINNER_clip_zlower->set_float_limits(zclip_min,zclip_max,GLUI_LIMIT_CLAMP);
   glui_clip->add_column_to_panel(panel_clipz,false);
   CHECKBOX_clip_zlower=glui_clip->add_checkbox_to_panel(panel_clipz,"",&clip_z,CLIP_zlower,CLIP_CB);
@@ -109,22 +106,19 @@ extern "C" void glui_clip_setup(int main_window){
   panel_clip_upper = glui_clip->add_panel_to_panel(panel_clip,_("Clip upper"));
 
   panel_clipX = glui_clip->add_panel_to_panel(panel_clip_upper,"X",GLUI_PANEL_NONE);
-  SPINNER_clip_xupper=glui_clip->add_spinner_to_panel(panel_clipX,"X",GLUI_SPINNER_FLOAT,&clip_X_val,
-    SPINNER_xupper,CLIP_CB);
+  SPINNER_clip_xupper=glui_clip->add_spinner_to_panel(panel_clipX,"X",GLUI_SPINNER_FLOAT,&clip_X_val,SPINNER_xupper,CLIP_CB);
   SPINNER_clip_xupper->set_float_limits(xclip_min,xclip_max,GLUI_LIMIT_CLAMP);
   glui_clip->add_column_to_panel(panel_clipX,false);
   CHECKBOX_clip_xupper=glui_clip->add_checkbox_to_panel(panel_clipX,"",&clip_X,CLIP_xupper,CLIP_CB);
 
   panel_clipY = glui_clip->add_panel_to_panel(panel_clip_upper,"Y",GLUI_PANEL_NONE);
-  SPINNER_clip_yupper=glui_clip->add_spinner_to_panel(panel_clipY,"Y",GLUI_SPINNER_FLOAT,&clip_Y_val,
-    SPINNER_yupper,CLIP_CB);
+  SPINNER_clip_yupper=glui_clip->add_spinner_to_panel(panel_clipY,"Y",GLUI_SPINNER_FLOAT,&clip_Y_val,SPINNER_yupper,CLIP_CB);
   SPINNER_clip_yupper->set_float_limits(yclip_min,yclip_max,GLUI_LIMIT_CLAMP);
   glui_clip->add_column_to_panel(panel_clipY,false);
   CHECKBOX_clip_yupper=glui_clip->add_checkbox_to_panel(panel_clipY,"",&clip_Y,CLIP_yupper,CLIP_CB);
 
   panel_clipZ = glui_clip->add_panel_to_panel(panel_clip_upper,"Z",GLUI_PANEL_NONE);
-  SPINNER_clip_zupper=glui_clip->add_spinner_to_panel(panel_clipZ,"Z",GLUI_SPINNER_FLOAT,&clip_Z_val,
-    SPINNER_zupper,CLIP_CB);
+  SPINNER_clip_zupper=glui_clip->add_spinner_to_panel(panel_clipZ,"Z",GLUI_SPINNER_FLOAT,&clip_Z_val,SPINNER_zupper,CLIP_CB);
   SPINNER_clip_zupper->set_float_limits(zclip_min,zclip_max,GLUI_LIMIT_CLAMP);
   glui_clip->add_column_to_panel(panel_clipZ,false);
   CHECKBOX_clip_zupper=glui_clip->add_checkbox_to_panel(panel_clipZ,"",&clip_Z,CLIP_zupper,CLIP_CB);
@@ -295,15 +289,8 @@ void CLIP_CB(int var){
     ASSERT(0);
     break;
   }
-  switch (var){
-  case SPINNER_xlower:
-  case SPINNER_xupper:
-  case SPINNER_ylower:
-  case SPINNER_yupper:
-  case SPINNER_zlower:
-  case SPINNER_zupper:
+  if(var>=CLIP_xlower&&var<=CLIP_zupper){
     clip2cam(camera_current);
-    break;
   }
 }
 

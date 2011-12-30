@@ -1213,22 +1213,22 @@ void keyboard_2(unsigned char key, int x, int y){
     return;
   }
   if(strncmp((const char *)&key2,"H",1)==0){
-    int nslice_loaded=0, nvslice_loaded=0;
+    int nslice_loaded_local=0, nvslice_loaded_local=0;
 
     for(i=0;i<nsliceinfo;i++){
       slice *sd;
 
       sd = sliceinfo + i;
-      if(sd->loaded==1)nslice_loaded++;
+      if(sd->loaded==1)nslice_loaded_local++;
     }
     for(i=0;i<nvslice;i++){
       vslice *vd;
 
       vd = vsliceinfo + i;
-      if(vd->loaded==1)nvslice_loaded++;
+      if(vd->loaded==1)nvslice_loaded_local++;
     }
     stept=1;
-    if(nvslice_loaded>0){
+    if(nvslice_loaded_local>0){
       if(show_all_slices==0){
         ShowVSliceMenu(SHOW_ALL);
         force_redisplay=1;
@@ -1238,7 +1238,7 @@ void keyboard_2(unsigned char key, int x, int y){
         ShowVSliceMenu(HIDE_ALL);
       }
     }
-    if(nvslice_loaded==0&&nslice_loaded>0){
+    if(nvslice_loaded_local==0&&nslice_loaded_local>0){
       if(show_all_slices==0){
         ShowHideSliceMenu(SHOW_ALL);
         force_redisplay=1;
@@ -1985,8 +1985,6 @@ void Idle(void){
 
 /* ------------------ update_camera_ypos ------------------------ */
 
-void update_camera_ypos(camera *camera_data);
-
 void Reshape(int width, int height){
   updatemenu=1;
   ratio = (float)width/(float)height;
@@ -2388,20 +2386,20 @@ void Display(void){
   }
   if(touring == 1 ){
     if(RenderGif != 0){
-      if(ntimes>0)angle += 2.0*PI/((float)ntimes/(float)RenderSkip);
-      if(ntimes==0)angle += 2.0*PI/((float)maxtourframes/(float)RenderSkip);
+      if(ntimes>0)angle_global += 2.0*PI/((float)ntimes/(float)RenderSkip);
+      if(ntimes==0)angle_global += 2.0*PI/((float)maxtourframes/(float)RenderSkip);
     }
 //    if(RenderGif == 0)angle += dang/lastcount;
-    if(RenderGif == 0)angle += dang;
-    if(angle>PI){angle -= -2.0f*PI;}
+    if(RenderGif == 0)angle_global += dang_global;
+    if(angle_global>PI){angle_global -= -2.0f*PI;}
     if(eyeview==WORLD_CENTERED||eyeview==WORLD_CENTERED_LEVEL){
       float *angle_zx;
 
       angle_zx = camera_current->angle_zx;
-      angle_zx[0] = anglexy0 + angle*180./PI;
+      angle_zx[0] = anglexy0 + angle_global*180./PI;
     }
     else{          
-      camera_current->direction_angle = direction_angle0 + angle*180./PI;
+      camera_current->direction_angle = direction_angle0 + angle_global*180./PI;
       camera_current->cos_direction_angle = cos(PI*camera_current->direction_angle/180.0);
       camera_current->sin_direction_angle = sin(PI*camera_current->direction_angle/180.0);
     }

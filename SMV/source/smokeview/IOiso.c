@@ -197,7 +197,7 @@ void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostreamptr, int
   for(;;){
     int skip_frame;
 
-    EGZ_FREAD(&time_local,4,1,*isostreamptr);
+    {EGZ_FREAD(&time_local,4,1,*isostreamptr);}
     skip_frame=1;
     if(time_local>time_max){
       skip_frame=0;
@@ -205,9 +205,9 @@ void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostreamptr, int
     }
     if(EGZ_FEOF(*isostreamptr)!=0)break;
     for(n=0;n<nlevels;n++){
-      EGZ_FREAD(&nvertices_i,4,1,*isostreamptr);
+      {EGZ_FREAD(&nvertices_i,4,1,*isostreamptr);}
       if(EGZ_FEOF(*isostreamptr)!=0)break;
-	    EGZ_FREAD(&ntriangles_i,4,1,*isostreamptr);
+      {EGZ_FREAD(&ntriangles_i,4,1,*isostreamptr);}
       if(EGZ_FEOF(*isostreamptr)!=0)break;
       skip_local=0;
       if(nvertices_i>0){
@@ -222,16 +222,16 @@ void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostreamptr, int
           skip_local += 2*nvertices_i;
         }
       }
-	    if(nvertices_i<256){                 /* number of triangles */
+      if(nvertices_i<256){                 /* number of triangles */
 	      skip_local+=ntriangles_i;
       }
       else if(nvertices_i>=256&&nvertices_i<65536){
 	      skip_local+=ntriangles_i*2;
       }
-	    else{
-	     skip_local+=ntriangles_i*4;
+      else{
+	      skip_local+=ntriangles_i*4;
       }
-      EGZ_FSEEK(*isostreamptr,skip,SEEK_CUR);
+      {EGZ_FSEEK(*isostreamptr,skip,SEEK_CUR);}
     }
     if(skip_frame==1)continue;
     i++;
@@ -431,9 +431,9 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
   	      skip += (ntriangles_i*2);
         }
 	      else{
-  	      skip += (ntriangles_i*4);
+          skip += (ntriangles_i*4);
         }
-        EGZ_FSEEK(isostream,skip,SEEK_CUR);
+        {EGZ_FSEEK(isostream,skip,SEEK_CUR);}
         continue;
       }
       
@@ -1120,18 +1120,18 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
         vv2[k]=xyzmin[k]+xyzmaxdiff_local*v2[k]/65535.;
         vv3[k]=xyzmin[k]+xyzmaxdiff_local*v3[k]/65535.;
       }
-		  if(smoothnorm==1){
+      if(smoothnorm==1){
         norm1 = vertexnorm+i1;
-	      norm2 = vertexnorm+i2;
-	      norm3 = vertexnorm+i3;
-	      glNormal3sv(norm1);
+        norm2 = vertexnorm+i2;
+        norm3 = vertexnorm+i3;
+        glNormal3sv(norm1);
         glVertex3fv(vv1);
-	      glNormal3sv(norm2);
+        glNormal3sv(norm2);
         glVertex3fv(vv2);
-	      glNormal3sv(norm3);
+        glNormal3sv(norm3);
         glVertex3fv(vv3);
       }
-	    else{
+      else{
         glNormal3sv(norm);
         glVertex3fv(vv1);
         glVertex3fv(vv2);
@@ -1225,9 +1225,9 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
         vv3[k]=xyzmin[k]+xyzmaxdiff_local*v3[k]/65535.;
       }
 
-	  	if(isonormtype==1){
+      if(isonormtype==1){
         norm1 = vertexnorm+i1;
-		    norm2 = vertexnorm+i2;
+        norm2 = vertexnorm+i2;
 		    norm3 = vertexnorm+i3;
         for(k=0;k<3;k++){
           vv1n[k]=vv1[k]+norm1[k]/(8.*32768.)/4.0;
@@ -1620,7 +1620,7 @@ void Sort_Iso_Triangles(float *mm){
 /* ------------------ update_isotri_list ------------------------ */
 
 void Update_Isotris(int flag){
-  int ilev,itri;
+  int itri;
   isosurface *asurfi;
   isotri **iso_trans_tmp,**iso_opaques_tmp;
   int *showlevels;
@@ -1716,6 +1716,8 @@ void Update_Isotris(int flag){
       showlevels=meshi->showlevels;
   
       if(transparent_state==ALL_TRANSPARENT){
+        int ilev;
+
         for(ilev=0;ilev<meshi->nisolevels;ilev++){
           if(showlevels[ilev]==0)continue;
           asurfi = asurface + ilev;
@@ -1730,6 +1732,8 @@ void Update_Isotris(int flag){
         }
       }
       else if(transparent_state==MIN_SOLID){
+        int ilev;
+
         for(ilev=0;ilev<1;ilev++){
           if(showlevels[ilev]==0)continue;
           asurfi = asurface + ilev;
@@ -1756,6 +1760,8 @@ void Update_Isotris(int flag){
         }
       }
       else if(transparent_state==MAX_SOLID){
+        int ilev;
+
         for(ilev=0;ilev<meshi->nisolevels-1;ilev++){
           if(showlevels[ilev]==0)continue;
           asurfi = asurface + ilev;
@@ -1782,6 +1788,8 @@ void Update_Isotris(int flag){
         }
       }
       else if(transparent_state==ALL_SOLID){
+        int ilev;
+
         for(ilev=0;ilev<meshi->nisolevels;ilev++){
           CheckMemory;
           if(showlevels[ilev]==0)continue;

@@ -205,9 +205,6 @@ void drawcolorbarpath(void){
     glColor3ubv(rrgb);
     glVertex3f(rrgb[0]/255.0,rrgb[1]/255.0,rrgb[2]/255.0);
   }
-#define PLEFT -0.01
-#define PRIGHT 1.01
-
 #define PLEFT2 -0.1
 #define PRIGHT2 1.1
 
@@ -340,7 +337,7 @@ void remapcolorbar(colorbardata *cbi){
   rgb_node=cbi->rgb_node;
   alpha=cbi->alpha;
   for(i=0;i<cbi->index_node[0];i++){
-    colorbar[0+3*i]=rgb_node[0]/255.0;
+    colorbar[3*i]=rgb_node[0]/255.0;
     colorbar[1+3*i]=rgb_node[1]/255.0;
     colorbar[2+3*i]=rgb_node[2]/255.0;
     if(
@@ -360,7 +357,7 @@ void remapcolorbar(colorbardata *cbi){
     rgb_node = cbi->rgb_node+3*i;
     for(j=i1;j<i2;j++){
       factor = (float)(j-i1)/(float)(i2-i1);
-      colorbar[0+3*j]=MIX(factor,rgb_node[3],rgb_node[0])/255.0;
+      colorbar[3*j]=MIX(factor,rgb_node[3],rgb_node[0])/255.0;
       colorbar[1+3*j]=MIX(factor,rgb_node[4],rgb_node[1])/255.0;
       colorbar[2+3*j]=MIX(factor,rgb_node[5],rgb_node[2])/255.0;
       if(
@@ -378,7 +375,7 @@ void remapcolorbar(colorbardata *cbi){
   }
   rgb_node = cbi->rgb_node+3*(cbi->nnodes-1);
   for(i=cbi->index_node[cbi->nnodes-1];i<256;i++){
-    colorbar[0+3*i]=rgb_node[0]/255.0;
+    colorbar[3*i]=rgb_node[0]/255.0;
     colorbar[1+3*i]=rgb_node[1]/255.0;
     colorbar[2+3*i]=rgb_node[2]/255.0;
     if(
@@ -396,7 +393,7 @@ void remapcolorbar(colorbardata *cbi){
     colorbar[0]=rgb_below_min[0];
     colorbar[1]=rgb_below_min[1];
     colorbar[2]=rgb_below_min[2];
-    colorbar[0+3*255]=rgb_above_max[0];
+    colorbar[3*255]=rgb_above_max[0];
     colorbar[1+3*255]=rgb_above_max[1];
     colorbar[2+3*255]=rgb_above_max[2];
   }

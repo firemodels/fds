@@ -1639,7 +1639,7 @@ float get_tri_area(int *edgelist, float *xyz){
 #define FACTOR(ii,v0,v1,x0,x1) \
   if(v0*v1<0.0){\
     factor2=-v0/(v1-v0);\
-    xyziso[0+3*ii]=MIX(factor2,(x1)[0],(x0)[0]);\
+    xyziso[3*ii]=MIX(factor2,(x1)[0],(x0)[0]);\
     xyziso[1+3*ii]=MIX(factor2,(x1)[1],(x0)[1]);\
     xyziso[2+3*ii]=MIX(factor2,(x1)[2],(x0)[2]);\
   }

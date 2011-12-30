@@ -263,7 +263,6 @@ void drawpolydisk(int nsides, float diameter, float height, unsigned char *rgbco
 void drawring(float d_inner, float d_outer, float height, unsigned char *rgbcolor);
 void drawnotchplate(float diameter, float height, float notchheight, float direction, unsigned char *rgbcolor);
 void draw_SVOBJECT(sv_object *object, int iframe, propdata *prop, int recurse_level);
-sv_object *get_object(char *label);
 void free_object(sv_object *object);
 void freecircle(void);
 void initcircle(unsigned int npoints);
@@ -308,7 +307,7 @@ int rgbsize=0;
 
 /* ------------------ get_world_eyepos ------------------------ */
 
-void get_world_eyepos(float *mm, float user_eyepos[3],float scaled_eyepos[3]){
+void get_world_eyepos(float *mm, float user_eyepos[3],float scaled_eyepos_local[3]){
     /*
       ( m0 m4 m8  m12 ) (x)    (0)
       ( m1 m5 m9  m13 ) (y)    (0)
@@ -325,9 +324,9 @@ void get_world_eyepos(float *mm, float user_eyepos[3],float scaled_eyepos[3]){
       m3=m7=m11=0, v^T=0, y=1   Qx+u=0 => x=-Q^Tu
     */
 
-  scaled_eyepos[0] = -(mm[0]*mm[12]+mm[1]*mm[13]+ mm[2]*mm[14])/mscale[0];
-  scaled_eyepos[1] = -(mm[4]*mm[12]+mm[5]*mm[13]+ mm[6]*mm[14])/mscale[1];
-  scaled_eyepos[2] = -(mm[8]*mm[12]+mm[9]*mm[13]+mm[10]*mm[14])/mscale[2];
+  scaled_eyepos_local[0] = -(mm[0]*mm[12]+mm[1]*mm[13]+ mm[2]*mm[14])/mscale[0];
+  scaled_eyepos_local[1] = -(mm[4]*mm[12]+mm[5]*mm[13]+ mm[6]*mm[14])/mscale[1];
+  scaled_eyepos_local[2] = -(mm[8]*mm[12]+mm[9]*mm[13]+mm[10]*mm[14])/mscale[2];
   user_eyepos[0] = xbar0 + xyzmaxdiff*scaled_eyepos[0];
   user_eyepos[1] = ybar0 + xyzmaxdiff*scaled_eyepos[1];
   user_eyepos[2] = zbar0 + xyzmaxdiff*scaled_eyepos[2];
@@ -337,9 +336,7 @@ void get_world_eyepos(float *mm, float user_eyepos[3],float scaled_eyepos[3]){
 
 void getsmokesensors(void){
   int doit, i;
-//  int index;
   int width, height;
-  unsigned char rgbval[3];
 
   width = screenWidth;
   height = screenHeight;
@@ -502,6 +499,9 @@ void draw_devices_val(void){
             trimzeros(label);
           }
           break;
+        default:
+          ASSERT(0);
+          break;
       }
       if(devicei->visval>128){
         output3Text(black,xyz[0]+0.2*xyznorm[0],xyz[1]+0.2*xyznorm[1],xyz[2]+0.2*xyznorm[2],label);
@@ -519,7 +519,7 @@ void draw_devices_val(void){
 
 /* ----------------------- get_vdevice_vel ----------------------------- */
 
-void get_vdevice_vel(float time, vdevice *vdevicei, float *vel, float *angle, float *dvel, float *dangle, int *valid_vel){
+void get_vdevice_vel(float time_local, vdevice *vdevicei, float *vel, float *angle_local, float *dvel, float *dangle, int *valid_vel){
   float uvel=0.0, vvel=0.0, wvel=0.0;
   device *udev, *vdev, *wdev;
   int validu=0,validv=0,validw=0;
@@ -530,13 +530,13 @@ void get_vdevice_vel(float time, vdevice *vdevicei, float *vel, float *angle, fl
 
   *valid_vel=0;
   if(udev!=NULL){
-    uvel=get_device_val(time,udev,&validu);
+    uvel=get_device_val(time_local,udev,&validu);
   }
   if(vdev!=NULL){
-    vvel=get_device_val(time,vdev,&validv);
+    vvel=get_device_val(time_local,vdev,&validv);
   }
   if(wdev!=NULL){
-    wvel=get_device_val(time,wdev,&validw);
+    wvel=get_device_val(time_local,wdev,&validw);
   }
   if(validu==1&&validv==1&&validw==1){
     vel[0]=uvel;
@@ -550,20 +550,20 @@ void get_vdevice_vel(float time, vdevice *vdevicei, float *vel, float *angle, fl
     int  valid_velocity=0,  valid_angle=0;
     int dvalid_velocity=0, dvalid_angle=0;
 
-    velocity=get_device_val(time,vdevicei->veldev,&valid_velocity);
+    velocity=get_device_val(time_local,vdevicei->veldev,&valid_velocity);
     if(vdevicei->sd_veldev!=NULL){
-      dvelocity=get_device_val(time,vdevicei->sd_veldev,&dvalid_velocity);
+      dvelocity=get_device_val(time_local,vdevicei->sd_veldev,&dvalid_velocity);
       if(dvalid_velocity==0)dvelocity=0.0;
     }
-    ang=get_device_val(time,vdevicei->angledev,&valid_angle);
+    ang=get_device_val(time_local,vdevicei->angledev,&valid_angle);
     if(vdevicei->sd_angledev!=NULL){
-      dang=get_device_val(time,vdevicei->sd_angledev,&dvalid_angle);
+      dang=get_device_val(time_local,vdevicei->sd_angledev,&dvalid_angle);
       if(dvalid_angle==0)dang=0.0;
     }
     if(valid_velocity==1&&valid_angle==1){
       vel[0]=velocity;
       dvel[0]=dvelocity;
-      angle[0]=ang;
+      angle_local[0]=ang;
       dangle[0]=dang;
       *valid_vel=2;
     }
@@ -573,8 +573,8 @@ void get_vdevice_vel(float time, vdevice *vdevicei, float *vel, float *angle, fl
 /* ----------------------- get_devices_val ----------------------------- */
 
 #define IN_INTERVAL(IVAL) \
-  if(time>=times[(IVAL)]&&time<=times[(IVAL)+1]){\
-    if(time-times[(IVAL)]<times[(IVAL)+1]-time){\
+  if(time_local>=times_local[(IVAL)]&&time_local<=times_local[(IVAL)+1]){\
+    if(time_local-times_local[(IVAL)]<times_local[(IVAL)+1]-time_local){\
       devicei->val=devicei->vals[(IVAL)];\
       *valid=devicei->valids[(IVAL)];\
     }\
@@ -586,16 +586,15 @@ void get_vdevice_vel(float time, vdevice *vdevicei, float *vel, float *angle, fl
     return devicei->val;\
   }
 
-float get_device_val(float time, device *devicei, int *valid){
+float get_device_val(float time_local, device *devicei, int *valid){
   int nvals;
-  int i, ival;
-  float *times;
-  float *vals;
+  int ival;
+  float *times_local;
 
   nvals = devicei->nvals;
   ival = devicei->ival;
 
-  times = devicei->times;
+  times_local = devicei->times;
   IN_INTERVAL(ival);
   if(ival<nvals-1){
     IN_INTERVAL(ival+1);
@@ -604,12 +603,12 @@ float get_device_val(float time, device *devicei, int *valid){
     IN_INTERVAL(ival-1);
   }
 
-  if(time<=times[0]){
+  if(time_local<=times_local[0]){
     devicei->val=devicei->vals[0];
     devicei->ival=0;
     *valid=devicei->valids[0];
   }
-  else if(time>=times[nvals-1]){
+  else if(time_local>=times_local[nvals-1]){
     devicei->val=devicei->vals[nvals-1];
     devicei->ival=nvals-2;
     *valid=devicei->valids[nvals-1];
@@ -622,7 +621,7 @@ float get_device_val(float time, device *devicei, int *valid){
 
     while (high-low>1){
       mid = (low+high)/2;
-      if(time>times[mid]){
+      if(time_local>times_local[mid]){
         low=mid;
       }
       else{
@@ -694,7 +693,6 @@ void draw_devices(void){
       vdevice *vdevi;
       float vel[3], angle, dvel, dangle;
       float *xyz;
-      float velminmax[2], angleminmax[2];
       int j;
       int valid;
 
@@ -719,7 +717,6 @@ void draw_devices(void){
       }
       if(valid==2){
         float dd,d1=0.0, d2, height, vv;
-        unsigned char conecolor[4]={0,0,255,255};
         float anglemin, anglemax, rmin, rmax;
 
         vv=vel[0]*xyzmaxdiff/max_dev_vel;
@@ -814,8 +811,7 @@ void draw_devices(void){
       doit=1;
     }
     {
-      float cos_az, sin_az;
-      float *axis,axis2[2];
+      float *axis;
 
       axis = devicei->rotate_axis;
       glRotatef(devicei->dtheta,axis[0],axis[1],axis[2]);
@@ -904,11 +900,10 @@ void drawTargetNorm(void){
 
 /* ----------------------- draw_SVOBJECT ----------------------------- */
 
-void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop, int recurse_level){
+void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int recurse_level){
   sv_object_frame *framei,*frame0;
   tokendata *toknext;
-  int *op;
-  unsigned char *rgbptr;
+  unsigned char *rgbptr_local;
   unsigned char rgbcolor[4];
   int displaylist_id=0;
   int ii;
@@ -922,8 +917,8 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop, int recurs
     object=object_dev;
   }
   if(object->visible==0)return;
-  if(iframe>object->nframes-1||iframe<0)iframe=0;
-  framei=object->obj_frames[iframe];
+  if(iframe_local>object->nframes-1||iframe_local<0)iframe_local=0;
+  framei=object->obj_frames[iframe_local];
   frame0=object->obj_frames[0];
   
   ASSERT(framei->error==0||framei->error==1);
@@ -938,7 +933,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop, int recurs
   rgbcolor[1]=0;
   rgbcolor[2]=0;
   rgbcolor[3]=255;
-  rgbptr=rgbcolor;
+  rgbptr_local=rgbcolor;
   glPushMatrix();
 
 // copy in default values ( :var=value in objects.svo file )
@@ -1057,10 +1052,10 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop, int recurs
     toknext=toki->next;
 
     if(select_device_color_ptr==NULL){
-      rgbptr=rgbcolor;
+      rgbptr_local=rgbcolor;
     }
     else{
-      rgbptr=select_device_color_ptr;
+      rgbptr_local=select_device_color_ptr;
     }
     for(j=0;j<toki->nvars;j++){
       tokendata *tokj;
@@ -1090,26 +1085,26 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop, int recurs
 	  case SV_INCLUDEF:
 	    {
         sv_object *included_object;
-        int iframe;
+        int iframe_local2;
 	      char *object_name;
 
 	      if(toki->included_object==NULL){
 	        if(toki->command==SV_INCLUDEF){
-	          iframe=arg[0];
+	          iframe_local2=arg[0];
 		      }
 	        else{
-            iframe=0;
+            iframe_local2=0;
 		      }
           object_name = (toki-1)->string;
           included_object = get_SVOBJECT_type(object_name,missing_device);
-	        toki->included_frame=iframe;
+	        toki->included_frame=iframe_local2;
 	        toki->included_object=included_object;
         }
 	      else{
-          iframe=toki->included_frame;
+          iframe_local2=toki->included_frame;
           included_object = toki->included_object;
         }
-        draw_SVOBJECT(included_object, iframe, NULL, recurse_level+1);
+        draw_SVOBJECT(included_object, iframe_local2, NULL, recurse_level+1);
       }
       break;
     case SV_ABS:
@@ -1197,7 +1192,6 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop, int recurs
       break;
     case SV_CLIP:
       {
-        int argval, argmin, argmax, stackskip;
         float val, valmin, valmax;
 
         val=arg[0];
@@ -1375,94 +1369,94 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop, int recurs
       glScalef(arg[0],arg[1],arg[2]);
       break;
     case SV_DRAWCUBE:
-      drawcube(arg[0],rgbptr);
-      rgbptr=NULL;
+      drawcube(arg[0],rgbptr_local);
+      rgbptr_local=NULL;
       break;
     case SV_DRAWCUBEC:
-      drawcubec(arg[0],rgbptr);
-      rgbptr=NULL;
+      drawcubec(arg[0],rgbptr_local);
+      rgbptr_local=NULL;
       break;
     case SV_DRAWSQUARE:
-      drawsquare(arg[0],rgbptr);
-      rgbptr=NULL;
+      drawsquare(arg[0],rgbptr_local);
+      rgbptr_local=NULL;
       break;
     case SV_DRAWVENT:
-      drawvent(arg[0],arg[1],rgbptr);
-      rgbptr=NULL;
+      drawvent(arg[0],arg[1],rgbptr_local);
+      rgbptr_local=NULL;
       break;
     case SV_DRAWDISK:
-      drawdisk(arg[0],arg[1], rgbptr);
-      rgbptr=NULL;
+      drawdisk(arg[0],arg[1], rgbptr_local);
+      rgbptr_local=NULL;
       break;
     case SV_DRAWARCDISK:
-      drawarcdisk(arg[0],arg[1], arg[2], rgbptr);
-      rgbptr=NULL;
+      drawarcdisk(arg[0],arg[1], arg[2], rgbptr_local);
+      rgbptr_local=NULL;
       break;
     case SV_DRAWCDISK:
-      drawcdisk(arg[0],arg[1], rgbptr);
-      rgbptr=NULL;
+      drawcdisk(arg[0],arg[1], rgbptr_local);
+      rgbptr_local=NULL;
       break;
     case SV_DRAWHEXDISK:
-      drawhexdisk(arg[0],arg[1], rgbptr);
-      rgbptr=NULL;
+      drawhexdisk(arg[0],arg[1], rgbptr_local);
+      rgbptr_local=NULL;
       break;
     case SV_DRAWPOLYDISK:
       {
         int nsides;
   
         nsides = arg[0]+0.5;
-        drawpolydisk(nsides, arg[1],arg[2], rgbptr);
-        rgbptr=NULL;
+        drawpolydisk(nsides, arg[1],arg[2], rgbptr_local);
+        rgbptr_local=NULL;
       }
       break;
     case SV_DRAWRING:
-      drawring(arg[0],arg[1], arg[2], rgbptr);
-      rgbptr=NULL;
+      drawring(arg[0],arg[1], arg[2], rgbptr_local);
+      rgbptr_local=NULL;
       break;
     case SV_DRAWNOTCHPLATE:
-      drawnotchplate(arg[0],arg[1], arg[2], arg[3], rgbptr);
-      rgbptr=NULL;
+      drawnotchplate(arg[0],arg[1], arg[2], arg[3], rgbptr_local);
+      rgbptr_local=NULL;
       break;
     case SV_DRAWTRUNCCONE:
-      drawtrunccone(arg[0],arg[1],arg[2], rgbptr);
-      rgbptr=NULL;
+      drawtrunccone(arg[0],arg[1],arg[2], rgbptr_local);
+      rgbptr_local=NULL;
       break;
     case SV_DRAWCONE:
-      drawcone(arg[0],arg[1], rgbptr);
-      rgbptr=NULL;
+      drawcone(arg[0],arg[1], rgbptr_local);
+      rgbptr_local=NULL;
       break;
     case SV_DRAWTSPHERE:
       {
         int texture_index;
 
         texture_index = arg[0]+0.5;
-        drawtsphere(texture_index,arg[1],rgbptr);
+        drawtsphere(texture_index,arg[1],rgbptr_local);
       }
-      rgbptr=NULL;
+      rgbptr_local=NULL;
       break;
     case SV_DRAWSPHERE:
-      drawsphere(arg[0],rgbptr);
-      rgbptr=NULL;
+      drawsphere(arg[0],rgbptr_local);
+      rgbptr_local=NULL;
       break;
     case SV_DRAWHSPHERE:
-      drawhsphere(arg[0],rgbptr);
-      rgbptr=NULL;
+      drawhsphere(arg[0],rgbptr_local);
+      rgbptr_local=NULL;
       break;
     case SV_DRAWTRIBLOCK:
-      drawtriblock(arg[0],arg[1],rgbptr);
-      rgbptr=NULL;
+      drawtriblock(arg[0],arg[1],rgbptr_local);
+      rgbptr_local=NULL;
       break;
     case SV_DRAWCIRCLE:
-      drawcircle(arg[0],rgbptr);
-      rgbptr=NULL;
+      drawcircle(arg[0],rgbptr_local);
+      rgbptr_local=NULL;
       break;
     case SV_DRAWARC:
-      drawarc(arg[0],arg[1],rgbptr);
-      rgbptr=NULL;
+      drawarc(arg[0],arg[1],rgbptr_local);
+      rgbptr_local=NULL;
       break;
     case SV_DRAWPOINT:
-      drawpoint(rgbptr);
-      rgbptr=NULL;
+      drawpoint(rgbptr_local);
+      rgbptr_local=NULL;
       break;
     case SV_GETTEXTUREINDEX:
       {
@@ -1482,42 +1476,40 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop, int recurs
       }
       break;
     case SV_SETCOLOR:
-      {
-      FILE_SIZE lenstring;
-      int iarg[3];
-      char *stringptr;
-
-      stringptr = (toki-1)->string;
-
-      lenstring=(FILE_SIZE)strlen(stringptr);
-      FORTcolor2rgb(iarg,stringptr,lenstring);
-      arg[0]=iarg[0];
-      arg[1]=iarg[1];
-      arg[2]=iarg[2];
-      }
     case SV_SETRGB:
-      {
-        if(setbw==1){
-          float grey;
+      if(toki->command==SV_SETCOLOR){
+        FILE_SIZE lenstring;
+        int iarg[3];
+        char *stringptr;
 
-          grey = color2bw(arg);
-          rgbcolor[0]=grey;
-          rgbcolor[1]=grey;
-          rgbcolor[2]=grey;
-          rgbcolor[3]=255;
-        }
-        else{
-          rgbcolor[0]=arg[0];
-          rgbcolor[1]=arg[1];
-          rgbcolor[2]=arg[2];
-          rgbcolor[3]=255;
-        }
-        if(select_device_color_ptr==NULL){
-          rgbptr=rgbcolor;
-        }
-        else{
-          rgbptr=select_device_color_ptr;
-        }
+        stringptr = (toki-1)->string;
+
+        lenstring=(FILE_SIZE)strlen(stringptr);
+        FORTcolor2rgb(iarg,stringptr,lenstring);
+        arg[0]=iarg[0];
+        arg[1]=iarg[1];
+        arg[2]=iarg[2];
+      }
+      if(setbw==1){
+        float grey;
+
+        grey = color2bw(arg);
+        rgbcolor[0]=grey;
+        rgbcolor[1]=grey;
+        rgbcolor[2]=grey;
+        rgbcolor[3]=255;
+      }
+      else{
+        rgbcolor[0]=arg[0];
+        rgbcolor[1]=arg[1];
+        rgbcolor[2]=arg[2];
+        rgbcolor[3]=255;
+      }
+      if(select_device_color_ptr==NULL){
+        rgbptr_local=rgbcolor;
+      }
+      else{
+        rgbptr_local=select_device_color_ptr;
       }
       break;
     case SV_SETLINEWIDTH:
@@ -1537,16 +1529,16 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe, propdata *prop, int recurs
         rgbcolor[2]=255*arg[0];
         rgbcolor[3]=255;
         if(select_device_color_ptr==NULL){
-          rgbptr=rgbcolor;
+          rgbptr_local=rgbcolor;
         }
         else{
-          rgbptr=select_device_color_ptr;
+          rgbptr_local=select_device_color_ptr;
         }
       }
       break;
     case SV_DRAWLINE:
-      drawline(arg,arg+3,rgbptr);
-      rgbptr=NULL;
+      drawline(arg,arg+3,rgbptr_local);
+      rgbptr_local=NULL;
       break;
     case SV_PUSH:
       glPushMatrix();
@@ -1590,14 +1582,11 @@ void drawline(float *xyz1, float *xyz2, unsigned char *rgbcolor){
 
 void drawtsphere(int texture_index,float diameter, unsigned char *rgbcolor){
   texture *texti;
-  float latitude, longitude;
 
   if(texture_index<0||texture_index>ntextures-1){
     texti=NULL;
   }
   else{
-    int itext;
-
     texti = textureinfo + texture_index;
     if(texti->loaded==0||texti->display==0)texti=NULL;
   }
@@ -1681,7 +1670,7 @@ void drawsphereseg(float anglemin, float anglemax, float rmin, float rmax){
   float coloredge[4]={0.0,0.0,1.0,1.0};
   float colori[4]={1.0,0.0,0.0,1.0};
   float colorip1[4]={1.0,0.0,0.0,1.0};
-  float colorwhite[4]={0.0,0.0,0.0,1.0};
+
   anglemax=0.0;
 
   danglei = (anglemax-anglemin)/(float)NLAT;
@@ -4263,7 +4252,6 @@ int get_token_id(char *token, int *opptr, int *num_opptr, int *num_outopptr, int
 
 int get_token_loc(char *var,sv_object_frame *frame){
   int i;
-  int return_val;
 
   for(i=0;i<frame->nsymbols;i++){
     int ii;
@@ -4307,8 +4295,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
   char *buffer_ptr=NULL,*buffer2;
   int i;
   int nsymbols,ncommands;
-  int ntext=0;
-  int ntextures=0;
+  int ntextures_local=0;
   int last_command_index=0;
 
   *eof = 0;
@@ -4447,8 +4434,6 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
       last_command_index=i;
     }
     else if(c=='$'){
-      char vartoken[255];
-      char *vartokenptr;
       tokendata *tokdest;
 
       toki->loc=get_token_loc(toki->token+1,frame);
@@ -4468,7 +4453,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
       toki->type=TOKEN_GETVAL;
     }
     else if(c==':'){
-      char *var, *val, *tok, *equal;
+      char *var, *val, *equal;
       char bufcopy[1024];
 
       strcpy(bufcopy,toki->token);
@@ -4530,7 +4515,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
       if(texturefile!=NULL){
         sptr=texturefile+2;
         toki->type=TOKEN_TEXTURE;
-        ntextures++;
+        ntextures_local++;
       }
       lenstr=strlen(sptr);
       if(sptr[lenstr-1]=='"')sptr[lenstr-1]=' ';
@@ -4544,7 +4529,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
       toki->varptr=&toki->var;
     }
   }
-  frame->ntextures=ntextures;
+  frame->ntextures=ntextures_local;
   for(i=0;i<ntokens;i++){
     tokendata *toki;
     char c;
@@ -4564,7 +4549,6 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
 
   for(i=0;i<ncommands;i++){
     tokendata *toki;
-    char c;
 
     toki = frame->command_list[i];
     switch (toki->command){
@@ -4609,6 +4593,9 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
             break;
           }
         }
+        break;
+      default:
+        ASSERT(0);
         break;
     }
   }
@@ -4667,7 +4654,6 @@ void rewind_device_file(FILE *stream){
 
 int get_ndevices(char *file){
   FILE *stream;
-#define BUFFER_LEN 255
   char buffer[BUFFER_LEN],*comma;
   int buffer_len=BUFFER_LEN,nd=0;
 
@@ -4703,9 +4689,9 @@ int get_ndevices(char *file){
 
 void read_device_header(char *file, device *devices, int ndevices){
   FILE *stream;
-  device *devicecopy,*devicelist=NULL;
+  device *devicecopy;
   char buffer[BUFFER_LEN],*comma;
-  int buffer_len=BUFFER_LEN,nd=0;
+  int buffer_len=BUFFER_LEN;
 
   if(file==NULL)return;
   stream=fopen(file,"r");
@@ -4759,8 +4745,6 @@ void setup_tree_devices(void){
   if(nvdeviceinfo==0)return;
   if(ntreedeviceinfo>0){
     for(i=0;i<ntreedeviceinfo;i++){
-      treedevice *treei;
-
       treei = treedeviceinfo + i;
       FREEMEMORY(treei->vdevices);
     }
@@ -4812,7 +4796,7 @@ void setup_tree_devices(void){
 void read_device_data(char *file, int filetype, int loadstatus){
   FILE *stream;
   int nrows, ncols;
-  int irow, icol;
+  int irow;
   float *vals=NULL;
   int *valids=NULL;
   int i;
@@ -4820,9 +4804,8 @@ void read_device_data(char *file, int filetype, int loadstatus){
   char **devcunits=NULL, **devclabels=NULL;
   device **devices=NULL;
   int ntokens;
-  int max_line_length,buffer_len;
-  device *device_time;
-  float *times;
+  int buffer_len;
+  float *times_local;
 
 // unload data
 
@@ -4837,19 +4820,18 @@ void read_device_data(char *file, int filetype, int loadstatus){
     }
     for(i=0;i<ndeviceinfo;i++){
       device *devicei;
-      float *times;
       int j;
 
       devicei = deviceinfo + i;
       if(devicei->filetype!=filetype||devicei->times==NULL)continue;
-      times = devicei->times;
+      times_local = devicei->times;
       FREEMEMORY(devicei->times);
       for(j=i+1;j<ndeviceinfo;j++){
         device *devicej;
 
         devicej = deviceinfo + j;
         if(devicej->filetype!=filetype)continue;
-        if(times==devicej->times)devicej->times=NULL;
+        if(times_local==devicej->times)devicej->times=NULL;
       }
     }
     return;
@@ -4891,10 +4873,9 @@ void read_device_data(char *file, int filetype, int loadstatus){
     devclabels[i]=trim_front(devclabels[i]);
   }
 
-  NewMemory((void **)&times,nrows*sizeof(float));
+  NewMemory((void **)&times_local,nrows*sizeof(float));
   for(i=1;i<ntokens;i++){
     device *devicei;
-    int j;
 
     devicei = getdevice(devclabels[i],i-1);
     devices[i]=devicei;
@@ -4908,7 +4889,7 @@ void read_device_data(char *file, int filetype, int loadstatus){
     devicei->filetype=filetype;
     NewMemory((void **)&devicei->vals,nrows*sizeof(float));
     NewMemory((void **)&devicei->valids,nrows*sizeof(int));
-    devicei->times=times;
+    devicei->times=times_local;
     strcpy(devicei->unit,devcunits[i]);
     devicei->nvals=nrows-2;
   }
@@ -4918,7 +4899,7 @@ void read_device_data(char *file, int filetype, int loadstatus){
 
     fgets(buffer,buffer_len,stream);
     fparsecsv(buffer,vals,valids,ncols,&ntokens);
-    times[irow-2]=vals[icol];
+    times_local[irow-2]=vals[icol];
     for(icol=1;icol<ncols;icol++){
       device *devicei;
 
@@ -4942,19 +4923,11 @@ void read_device_data(char *file, int filetype, int loadstatus){
 /* ----------------------- setup_device_data ----------------------------- */
 
 void setup_device_data(void){
-  FILE *stream;
-  int nrows, ncols;
-  int irow, icol;
   float *vals=NULL;
   int *valids=NULL;
   int i;
-  char *buffer, *buffer2;
   char **devcunits=NULL, **devclabels=NULL;
   device **devices=NULL;
-  int ntokens;
-  int max_line_length,buffer_len;
-  device *device_time;
-  float *times, **timesptr;
 
   if(ndeviceinfo==0)return;
   FREEMEMORY(vdeviceinfo);
@@ -5103,7 +5076,6 @@ void setup_device_data(void){
     vdevice *vdevi;
     int j;
     float *xyzi;
-    int count=0;
 
     vdevi = vdeviceinfo + i;
     xyzi = vdevi->valdev->xyz;
@@ -5214,8 +5186,6 @@ int read_object_defs(char *file){
   sv_object *temp_object, *prev_object, *next_object, *current_object;
   sv_object_frame *current_frame;
   int firstdef;
-  float *arglist;
-  int *oplist, nargs, nops;
   sv_object *object_start, *objecti;
   size_t lenbuffer;
   int ndevices=0;
@@ -5359,13 +5329,12 @@ int read_object_defs(char *file){
       framei = frame_start;
       j=0;
       for(;framei->next!=NULL;){
-        int iop, npushpop=0, ii;
+        int npushpop=0, ii;
 
         CheckMemory;
         objecti->obj_frames[j]=framei;
         for(ii=0;ii<framei->ncommands;ii++){
           tokendata *command;
-          char *c;
           int op;
 
 
@@ -5594,7 +5563,6 @@ void init_object_defs(void){
   char com_buffer[1024];
   char com_buffer2[1024];
   char objectfile[1024];
-  sv_object *objecti,*object_start;
   int i;
   
   svofile_exists = 0;
@@ -5710,7 +5678,7 @@ void init_object_defs(void){
 /* ----------------------- init_avatar ----------------------------- */
 
 void init_avatar(void){
-  int iavatar_types;
+  int iavatar_types_local;
   sv_object *objecti,*object_start;
   char com_buffer[1024];
   char labels[1024];
@@ -5737,12 +5705,12 @@ void init_avatar(void){
   avatar_types[0]=avatar_defs_backup[0];
   avatar_types[1]=avatar_defs_backup[1];
 
-  iavatar_types=2;
+  iavatar_types_local=2;
   for(objecti = object_start;objecti->next!=NULL;objecti=objecti->next){
     if(objecti->type==0)continue;
-    avatar_types[iavatar_types++]=objecti;
+    avatar_types[iavatar_types_local++]=objecti;
   }
-  iavatar_types=0;
+  iavatar_types_local=0;
 }
 
 /* ----------------------- dist ----------------------------- */
@@ -6060,7 +6028,7 @@ void init_device(device *devicei, float *xyz, float *xyzn, int state0, int npara
 void get_indep_var_indices(sv_object *smv_object, 
         char **var_indep_strings, int nvars_indep, int *index){
 
-  int i,j;
+  int i;
   sv_object_frame *obj_frame;
 
   obj_frame=smv_object->obj_frames[0];
@@ -6079,7 +6047,6 @@ void get_evac_indices(sv_object *smv_object,int *evac_index,int *nevac_index){
 
   int n;
 
-  int i,j;
   sv_object_frame *obj_frame;
 
   obj_frame=smv_object->obj_frames[0];
@@ -6160,7 +6127,7 @@ void normalize(float *xyz, int n){
 
 void parse_object_string(char *string,char **tokens, int *ntokens){
   int i, len, in_quote, ntok, in_token, last_in_token,ntok2=0;
-  char *c,*tok;
+  char *c;
   char *tokens_head[BUFFER_SIZE], *tokens_tail[BUFFER_SIZE];
   int in_head=1,nhead=0,ntail=0;
   
@@ -6206,17 +6173,16 @@ void parse_object_string(char *string,char **tokens, int *ntokens){
       if(ntail>0&&(strcmp(tok,"include")==0||strcmp(tok,"includef")==0)){
         int j;
         sv_object *included_object;
-        int iframe;
+        int iframe_local;
 	      char *object_name;
 	      int nparms;
 	      sv_object_frame *frame;
-        int len;
-        sv_object_frame *frame_start, *framei;
+        int len2;
         
         object_name=tokens_tail[ntail-2];
         if(object_name[0]=='"')object_name++;
-        len=strlen(object_name);
-        if(object_name[len-1]=='"')object_name[len-1]=0;
+        len2=strlen(object_name);
+        if(object_name[len2-1]=='"')object_name[len2-1]=0;
         
         if(missing_device==NULL){
           char com_buffer[1024];
@@ -6231,18 +6197,18 @@ void parse_object_string(char *string,char **tokens, int *ntokens){
           char *iframe_label;
           
           iframe_label=tokens_tail[ntail-3];
-          sscanf(iframe_label,"%i",&iframe);
-          if(iframe<0)iframe=0;
-          if(iframe>included_object->nframes-1)iframe=included_object->nframes-1;
+          sscanf(iframe_label,"%i",&iframe_local);
+          if(iframe_local<0)iframe_local=0;
+          if(iframe_local>included_object->nframes-1)iframe_local=included_object->nframes-1;
           nparms=3;
         }
         else{
-          iframe=0;
+          iframe_local=0;
           nparms=2;
         }
         ntail-=nparms;
         for(j=0,frame=included_object->first_frame.next;frame->next!=NULL;j++,frame=frame->next){
-          if(j==iframe)break;
+          if(j==iframe_local)break;
         }
         in_head2=1;
         for(j=0;j<frame->ntokens;j++){
@@ -6250,8 +6216,6 @@ void parse_object_string(char *string,char **tokens, int *ntokens){
           
           cc = frame->tokens[j].tokenlabel;
           if(in_head2==1&&cc[0]==':'){
-            int jj;
-            
             tokens_head[nhead++]=frame->tokens[j].tokenfulllabel;
           }
           else{

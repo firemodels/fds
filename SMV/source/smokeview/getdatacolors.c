@@ -1491,43 +1491,42 @@ void drawColorBars(void){
       }
       glEnd();
     }
-      if(show_extremedata==1){
-        float top, tophat, barmid;
+    if(show_extremedata==1){
+      float top, tophat, barmid;
 
-        barmid=(barleft+barright)/2.0;
+      barmid=(barleft+barright)/2.0;
+      top = barbot+nrgb+DYFONT;
+      tophat = top - (top-barbot)/(nrgb-2);
+      i=-1;
+      yy = MIX2(i+0.5,nrgb-3,tophat,barbot);
+      yy2 = MIX2(i+1,nrgb-3,tophat,barbot);
 
-        top = barbot+nrgb+DYFONT;
-        tophat = top - (top-barbot)/(nrgb-2);
-        i=-1;
-        yy = MIX2(i+0.5,nrgb-3,tophat,barbot);
-        yy2 = MIX2(i+1,nrgb-3,tophat,barbot);
+      if(show_extreme_below==1||show_extreme_above==1)glEnable(GL_POLYGON_SMOOTH);
 
-        if(show_extreme_below==1||show_extreme_above==1)glEnable(GL_POLYGON_SMOOTH);
+      if(show_extreme_below==1){
+        glBegin(GL_TRIANGLES);
+        glColor4fv(rgb_full[0]);
 
-        if(show_extreme_below==1){
-          glBegin(GL_TRIANGLES);
-          glColor4fv(rgb_full[0]);
-
-          glVertex2f(barleft, yy2);
-          glVertex2f(barmid, yy); 
-          glVertex2f(barright,yy2);
-          glEnd();
-        }
-
-        i=nrgb-2;
-        yy = MIX2(i,nrgb-3,tophat,barbot)    +(barbot-tophat)/255.0;
-        yy2 = MIX2(i+0.5,nrgb-3,tophat,barbot)+(barbot-tophat)/255.0;
-
-        if(show_extreme_above==1){
-          glBegin(GL_TRIANGLES);
-          glColor4fv(rgb_full[nrgb_full-1]);
-          glVertex2f(barleft, yy); 
-          glVertex2f(barright,yy);
-          glVertex2f(barmid, yy2);
-          glEnd();
-        }
-        if(show_extreme_below==1||show_extreme_above==1)glDisable(GL_POLYGON_SMOOTH);
+        glVertex2f(barleft, yy2);
+        glVertex2f(barmid, yy); 
+        glVertex2f(barright,yy2);
+        glEnd();
       }
+
+      i=nrgb-2;
+      yy = MIX2(i,nrgb-3,tophat,barbot)    +(barbot-tophat)/255.0;
+      yy2 = MIX2(i+0.5,nrgb-3,tophat,barbot)+(barbot-tophat)/255.0;
+
+      if(show_extreme_above==1){
+        glBegin(GL_TRIANGLES);
+        glColor4fv(rgb_full[nrgb_full-1]);
+        glVertex2f(barleft, yy); 
+        glVertex2f(barright,yy);
+        glVertex2f(barmid, yy2);
+        glEnd();
+      }
+      if(show_extreme_below==1||show_extreme_above==1)glDisable(GL_POLYGON_SMOOTH);
+    }
   }
   leftsmoke=0;
   leftslice=0;

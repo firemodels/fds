@@ -1373,7 +1373,7 @@ void RenderMenu(int value){
     if(RenderTime==0&&touring==0)return;
     if(touring==1){
       rendertourcount=0;
-      tourangle=0.0;
+      tourangle_global=0.0;
     }
     if(stept==0){
       keyboard('t',0,0);

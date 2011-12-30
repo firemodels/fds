@@ -1316,7 +1316,6 @@ void initvars(void){
 #endif
 
   show_transparent_vents=1;
-  angle=0.0, dang=0.025f, tourangle=0.0;
   maxtourframes=500;
   blockageSelect=0;
   ntourknots=0;

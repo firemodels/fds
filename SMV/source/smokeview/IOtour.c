@@ -914,7 +914,7 @@ void defaulttour(void){
   float *eye_xyz,*angle_zx;
 
   touring=1;
-  angle=0;
+  angle_global=0;
   eye_xyz = camera_current->eye;
   angle_zx = camera_current->angle_zx;
 

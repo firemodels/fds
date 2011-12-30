@@ -20,7 +20,7 @@
 
 // svn revision character string
 char main_revision[]="$Revision$";
-void run_command(void);
+//void run_command(void);
 
 void usage(char *prog);
 #ifdef WIN32
@@ -62,8 +62,6 @@ int main(int argc, char **argv){
   int itime;
   char *arg;
   char *command;
-  char *command_arg;
-  int n;
 
 #ifdef pp_LINUX  
   hostlistfile=NULL;
@@ -117,9 +115,7 @@ int main(int argc, char **argv){
                 strcpy(hostlistfile,arg);
               }
             }
-#endif
             break;
-#ifdef pp_LINUX
           case 'p':
             i++;
             if(i<argc){
@@ -142,12 +138,10 @@ int main(int argc, char **argv){
           case 'v':
             version();
             return 1;
-            break;
           default:
             printf("Unknown option: %s\n",arg);
             usage(prog);
             return 1;
-            break;
 	      }
       }
     }
@@ -344,7 +338,7 @@ unsigned char cpuusage()
 	static ULARGE_INTEGER  ul_sys_kernel_old;
 	static ULARGE_INTEGER  ul_sys_user_old;
 
-	unsigned char usage = 0;
+	unsigned char usage_local = 0;
 
 	// we cannot directly use GetSystemTimes on C language
 	/* add this line :: pfnGetSystemTimes */
@@ -356,7 +350,7 @@ unsigned char cpuusage()
 	CopyMemory(&ul_sys_kernel, &ft_sys_kernel, sizeof(FILETIME)); // Could been optimized away...
 	CopyMemory(&ul_sys_user  , &ft_sys_user  , sizeof(FILETIME)); // Could been optimized away...
 
-	usage  =
+	usage_local  =
 		(
 		(
 		(
@@ -381,7 +375,7 @@ unsigned char cpuusage()
 	ul_sys_user_old.QuadPart   = ul_sys_user.QuadPart;
 	ul_sys_kernel_old.QuadPart = ul_sys_kernel.QuadPart;
 
-	return usage;
+	return usage_local;
 }
 #endif
 #ifdef pp_LINUX
@@ -536,9 +530,9 @@ void version(void){
 
 /* ------------------ getmaxrev ------------------------ */
 
-#define MAXREV(cval) max_revision=MAX(getrevision(cval),max_revision)
+#define MAXREV(cval) rev=getrevision(cval);max_revision=MAX(rev,max_revision)
 int getmaxrevision(void){
-  int max_revision=0;
+  int max_revision=0,rev;
 
   MAXREV(main_revision);
   return max_revision;

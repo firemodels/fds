@@ -67,12 +67,12 @@ void Render(int view_mode){
     if(touring == 1 && ntimes == 0){
       if(rendertourcount % RenderSkip == 0)RenderFrame(view_mode);
       rendertourcount++;
-      if(ntimes>0)tourangle += (float)(2.0*PI/((float)ntimes/(float)RenderSkip));
-      if(ntimes==0)tourangle += (float)(2.0*PI/((float)maxtourframes/(float)RenderSkip));
-      if(tourangle>2.0*PI){
+      if(ntimes>0)tourangle_global += (float)(2.0*PI/((float)ntimes/(float)RenderSkip));
+      if(ntimes==0)tourangle_global += (float)(2.0*PI/((float)maxtourframes/(float)RenderSkip));
+      if(tourangle_global>2.0*PI){
         RenderState(0);
         RenderSkip=1;
-        tourangle=0.0;
+        tourangle_global=0.0;
       }
     }
   }
