@@ -40,6 +40,7 @@ plotdir = [pwd,'/../../Manuals/'];
 % Special cases
  
 run scripts/turb_model
+run scripts/jet_decay
 run scripts/wall_model
 run scripts/pyrolysis
 run scripts/birch_tga
