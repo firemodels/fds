@@ -221,7 +221,7 @@ INTEGER, PARAMETER :: NSCARC_DEBUG_NONE             = -1, &      ! no debugging 
                       NSCARC_DEBUG_RESTRICTION      = 13         ! show restriction matrix 
 
 INTEGER, PARAMETER :: NSCARC_COARSENING_NONE        = -1, &
-                      NSCARC_COARSENING_RS3         =  1, &      ! parallel Ruge-Stüben 
+                      NSCARC_COARSENING_RS3         =  1, &      ! parallel Ruge-StÃ¼ben 
                       NSCARC_COARSENING_A1          =  2, &      ! aggressive 1 (path=1, length=2)
                       NSCARC_COARSENING_A2          =  3, &      ! aggressive 2 (path=2, length=2)
                       NSCARC_COARSENING_PMIS        =  4, &      ! PMIS 
@@ -1246,7 +1246,7 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
             !!! point to grid structure of OSCARC(NM) on finest level
             OSBF => S%OSCARC(NOM)%BANDED(NLEVEL_MIN)
 
-            OSBF%IJKW => MESHES(NOM)%IJKW
+            OSBF%IJKW => MESHES(NOM)%OMESH(NOM)%IJKW  
 
             OSBF%NX =  MESHES(NOM)%IBAR 
             OSBF%NY =  MESHES(NOM)%JBAR 
@@ -1274,10 +1274,10 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
                   OSBC%NC = OSBC%NX * OSBC%NY * OSBC%NZ
                   OSBC%NW = 2*OSBC%NX*OSBC%NY + 2*OSBC%NX*OSBC%NZ + 2*OSBC%NY*OSBC%NZ  
          
-                  ALLOCATE(OSBC%IJKW(15,OSBC%NW), STAT=IERR)
+                 ALLOCATE(OSBC%IJKW(15,OSBC%NW), STAT=IERR)
                   CALL ChkMemErr('SCARC_SETUP_EXCHANGE','IJKW',IERR)
                   OSBC%IJKW = 0
-               
+                         
                ENDDO
             ENDIF
                
@@ -1307,7 +1307,7 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
             !!! point to grid structure of OSCARC(NM) on finest level
             OSCF => S%OSCARC(NOM)%COMPACT(NLEVEL_MIN)
 
-            OSCF%IJKW => MESHES(NOM)%IJKW
+            OSCF%IJKW => MESHES(NOM)%OMESH(NOM)%IJKW   !****CHECK
 
             OSCF%NX = MESHES(NOM)%IBAR 
             OSCF%NY = MESHES(NOM)%JBAR 
@@ -1433,7 +1433,7 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
          !!! Determine array IJKW and PRESSURE_BC_INDEX on finest level
          SBF => S%BANDED(NLEVEL_MIN)
          
-         SBF%IJKW     => M%IJKW
+         SBF%IJKW     => M%OMESH(NM)%IJKW   !****CHECK
          SBF%BC_INDEX => M%PRESSURE_BC_INDEX
 
          SBF%NW =  M%N_EXTERNAL_WALL_CELLS
@@ -1451,9 +1451,9 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
          DO IWF = 1, SBF%NW
       
             !!! Determine boundary type for IWF
-            IF (M%BOUNDARY_TYPE(IWF) == OPEN_BOUNDARY) THEN
+            IF (M%WALL(IWF)%BOUNDARY_TYPE == OPEN_BOUNDARY) THEN
                SBF%BC_INDEX(IWF) = DIRICHLET
-            ELSE IF (M%IJKW(9,IWF) /= 0) THEN
+            ELSE IF (M%OMESH(NM)%IJKW(9,IWF) /= 0) THEN !****CHECK
                SBF%BC_INDEX(IWF) = INTERNAL
             !ELSE IF (M%BOUNDARY_TYPE(IWF) == NULL_BOUNDARY) THEN
             !   SBF%BC_INDEX(IWF) = DIRICHLET
@@ -1463,11 +1463,11 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
       
 
             !!! Store subdivision information
-            IOR0 = M%IJKW(4,IWF)
+            IOR0 = M%OMESH(NM)%IJKW(4,IWF)!****CHECK
 
             IF (IOR_LAST /= IOR0) SBF%SUBDIVISION(1,IOR0) = IWF
             SBF%SUBDIVISION(2,IOR0) = SBF%SUBDIVISION(2,IOR0) + 1
-            IF (SBF%IJKW(9,IWF) /= 0 .AND. INBR(IOR0) /= SBF%IJKW(9,IWF)) THEN
+            IF (SBF%IJKW(9,IWF) /= 0 .AND. INBR(IOR0) /= SBF%IJKW(9,IWF)) THEN 
                SBF%SUBDIVISION(3,IOR0) = SBF%SUBDIVISION(3,IOR0) + 1
                INBR(IOR0) = SBF%IJKW(9,IWF)
             ENDIF
@@ -1607,7 +1607,7 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
          !!! Determine array IJKW and PRESSURE_BC_INDEX on finest level
          SCF => S%COMPACT(NLEVEL_MIN)
          
-         SCF%IJKW     => M%IJKW
+         SCF%IJKW     => M%OMESH(NM)%IJKW!****CHECK
          SCF%BC_INDEX => M%PRESSURE_BC_INDEX
 
          SCF%NW =  M%N_EXTERNAL_WALL_CELLS
@@ -1625,9 +1625,9 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
          DO IWF = 1, SCF%NW
       
             !!! Determine boundary type for IWF
-            IF (M%BOUNDARY_TYPE(IWF) == OPEN_BOUNDARY) THEN
+            IF (M%WALL(IWF)%BOUNDARY_TYPE == OPEN_BOUNDARY) THEN
                SCF%BC_INDEX(IWF) = DIRICHLET
-            ELSE IF (M%IJKW(9,IWF) /= 0) THEN
+            ELSE IF (M%OMESH(NM)%IJKW(9,IWF) /= 0) THEN !****CHECK
                SCF%BC_INDEX(IWF) = INTERNAL
             !ELSE IF (M%BOUNDARY_TYPE(IWF) == NULL_BOUNDARY) THEN
             !   SCF%BC_INDEX(IWF) = DIRICHLET
@@ -1636,7 +1636,7 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
             ENDIF
       
             !!! Store subdivision information
-            IOR0 = M%IJKW(4,IWF)
+            IOR0 = M%OMESH(NM)%IJKW(4,IWF)!****CHECK
 
             IF (IOR_LAST /= IOR0) SCF%SUBDIVISION(1,IOR0) = IWF
             SCF%SUBDIVISION(2,IOR0) = SCF%SUBDIVISION(2,IOR0) + 1
@@ -2144,23 +2144,23 @@ OTHER_MESH_LOOP: DO NOM = 1, NMESHES
    SEARCH_LOOP: DO IW=1,NW
    
       ! neighborship structure already known from finest level
-      IF (MESHES(NM)%IJKW(9,IW)/=NOM) CYCLE SEARCH_LOOP
+      IF (MESHES(NM)%OMESH(NM)%IJKW(9,IW)/=NOM) CYCLE SEARCH_LOOP !****CHECK
       OS%NIC_S = OS%NIC_S + 1
       FOUND = .TRUE.
    
-      SELECT CASE (IJKW(4,IW))
+      SELECT CASE (MESHES(NM)%OMESH(NM)%IJKW(4,IW))!****CHECK
          CASE ( 1)
-            IMIN=MAX(IMIN,IJKW(10,IW)-1)
+            IMIN=MAX(IMIN,MESHES(NM)%OMESH(NM)%IJKW(10,IW)-1)!****CHECK
          CASE (-1) 
-            IMAX=MIN(IMAX,IJKW(13,IW))
+            IMAX=MIN(IMAX,MESHES(NM)%OMESH(NM)%IJKW(13,IW))!****CHECK
          CASE ( 2) 
-            JMIN=MAX(JMIN,IJKW(11,IW)-1)
+            JMIN=MAX(JMIN,MESHES(NM)%OMESH(NM)%IJKW(11,IW)-1)!****CHECK
          CASE (-2) 
-            JMAX=MIN(JMAX,IJKW(14,IW))
+            JMAX=MIN(JMAX,MESHES(NM)%OMESH(NM)%IJKW(14,IW))!****CHECK
          CASE ( 3) 
-            KMIN=MAX(KMIN,IJKW(12,IW)-1)
+            KMIN=MAX(KMIN,MESHES(NM)%OMESH(NM)%IJKW(12,IW)-1)!****CHECK
          CASE (-3)
-            KMAX=MIN(KMAX,IJKW(15,IW))
+            KMAX=MIN(KMAX,MESHES(NM)%OMESH(NM)%IJKW(15,IW))!****CHECK
       END SELECT
    ENDDO SEARCH_LOOP
    
@@ -4411,7 +4411,7 @@ CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_CELLTYPES', 'CELLTYP
       
                      IC = (IZ-1)*SC%NX + IX
       
-                     IF (SC%MEASURE(IC)==5.0_EB) THEN
+                     IF (ABS(SC%MEASURE(IC)-5.0_EB)<ZERO_P) THEN
       
                         SC%MEASURE(IC)  = 0.0_EB
                         SC%CELLTYPE(IC) = NSCARC_CELLTYPE_COARSE
@@ -4434,7 +4434,7 @@ CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_CELLTYPES', 'CELLTYP
       
                         IC = (IZ-1)*SC%NX*SC%NY + (IY-1)*SC%NX + IX
       
-                        IF (SC%MEASURE(IC)==5.0_EB) THEN
+                        IF (ABS(SC%MEASURE(IC)-5.0_EB)<ZERO_P) THEN
       
                            SC%MEASURE(IC)  = 0.0_EB
                            SC%CELLTYPE(IC) = NSCARC_CELLTYPE_COARSE
@@ -7116,40 +7116,40 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
                   ! set boundary conditions at exterior boundaries (corresponding to pois.f90)
                   BANDED_WALLCELL_LOOP2D: DO IW = 1, M%N_EXTERNAL_WALL_CELLS
                
-                     I = M%IJKW(6,IW)
-                     J = M%IJKW(7,IW)
-                     K = M%IJKW(8,IW)
+                     I = M%OMESH(NM)%IJKW(6,IW)!****CHECK
+                     J = M%OMESH(NM)%IJKW(7,IW)!****CHECK
+                     K = M%OMESH(NM)%IJKW(8,IW)!****CHECK
             
                      IF (J /= 1) THEN
                         WRITE(*,*) 'Wrong index for J =',J,' in SCARC_SETUP_SOLVER !!!'
                         STOP
                      ENDIF
                   
-                     IOR0 = M%IJKW(4,IW)
+                     IOR0 = M%OMESH(NM)%IJKW(4,IW)!****CHECK
                   
                      SELECT CASE (IOR0)
                         CASE (1)
-                           IF (M%PRESSURE_BC_INDEX(IW)==DIRICHLET) THEN
+                           IF (M%WALL(IW)%PRESSURE_BC_INDEX==DIRICHLET) THEN
                               SB%F(I,J,K) = SB%F(I,J,K) - 2.0_EB * SB%DXI2 * M%BXS(1,K)         ! Dirichlet
-                           ELSE IF (M%PRESSURE_BC_INDEX(IW)==NEUMANN) THEN
+                           ELSE IF (M%WALL(IW)%PRESSURE_BC_INDEX==NEUMANN) THEN
                               SB%F(I,J,K) = SB%F(I,J,K) + SB%DXI * M%BXS(1,K)                   ! Neumann
                            ENDIF
                         CASE (-1)
-                           IF (M%PRESSURE_BC_INDEX(IW)==DIRICHLET) THEN
+                           IF (M%WALL(IW)%PRESSURE_BC_INDEX==DIRICHLET) THEN
                               SB%F(I,J,K) = SB%F(I,J,K) - 2.0_EB * SB%DXI2 *M%BXF(1,K)          ! Dirichlet
-                           ELSE IF (M%PRESSURE_BC_INDEX(IW)==NEUMANN) THEN
+                           ELSE IF (M%WALL(IW)%PRESSURE_BC_INDEX==NEUMANN) THEN
                               SB%F(I,J,K) = SB%F(I,J,K) - SB%DXI *M%BXF(1,K)                    ! Neumann
                            ENDIF
                         CASE (3)
-                           IF (M%PRESSURE_BC_INDEX(IW)==DIRICHLET) THEN
+                           IF (M%WALL(IW)%PRESSURE_BC_INDEX==DIRICHLET) THEN
                               SB%F(I,J,K) = SB%F(I,J,K) - 2.0_EB * SB%DZI2 * M%BZS(I,1)         ! Dirichlet
-                           ELSE IF (M%PRESSURE_BC_INDEX(IW)==NEUMANN) THEN
+                           ELSE IF (M%WALL(IW)%PRESSURE_BC_INDEX==NEUMANN) THEN
                               SB%F(I,J,K) = SB%F(I,J,K) + SB%DZI * M%BZS(I,1)                   ! Neumann
                            ENDIF
                         CASE (-3)
-                           IF (M%PRESSURE_BC_INDEX(IW)==DIRICHLET) THEN
+                           IF (M%WALL(IW)%PRESSURE_BC_INDEX==DIRICHLET) THEN
                               SB%F(I,J,K) = SB%F(I,J,K) - 2.0_EB * SB%DZI2 * M%BZF(I,1)         ! Dirichlet
-                           ELSE IF (M%PRESSURE_BC_INDEX(IW)==NEUMANN) THEN
+                           ELSE IF (M%WALL(IW)%PRESSURE_BC_INDEX==NEUMANN) THEN
                               SB%F(I,J,K) = SB%F(I,J,K) - SB%DZI  * M%BZF(I,1)                  ! Neumann
                            ENDIF
                      END SELECT
@@ -7184,47 +7184,47 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
             
                   BANDED_WALLCELL_LOOP3D: DO IW = 1, M%N_EXTERNAL_WALL_CELLS
                   
-                     I = M%IJKW(6,IW)
-                     J = M%IJKW(7,IW)
-                     K = M%IJKW(8,IW)
+                     I = M%OMESH(NM)%IJKW(6,IW)!****CHECK
+                     J = M%OMESH(NM)%IJKW(7,IW)!****CHECK
+                     K = M%OMESH(NM)%IJKW(8,IW)!****CHECK
                   
-                     IOR0 = M%IJKW(4,IW)
+                     IOR0 = M%OMESH(NM)%IJKW(4,IW)!****CHECK
                   
                      SELECT CASE (IOR0)
                         CASE (1)
-                           IF (M%PRESSURE_BC_INDEX(IW)==DIRICHLET) THEN
+                           IF (M%WALL(IW)%PRESSURE_BC_INDEX==DIRICHLET) THEN
                               SB%F(I,J,K) = SB%F(I,J,K) - 2.0_EB * SB%DXI2 * M%BXS(J,K)         ! Dirichlet
-                           ELSE IF (M%PRESSURE_BC_INDEX(IW)==NEUMANN) THEN
+                           ELSE IF (M%WALL(IW)%PRESSURE_BC_INDEX==NEUMANN) THEN
                               SB%F(I,J,K) = SB%F(I,J,K) + SB%DXI * M%BXS(J,K)                   ! Neumann
                            ENDIF
                         CASE (-1)
-                           IF (M%PRESSURE_BC_INDEX(IW)==DIRICHLET) THEN
+                           IF (M%WALL(IW)%PRESSURE_BC_INDEX==DIRICHLET) THEN
                               SB%F(I,J,K) = SB%F(I,J,K) - 2.0_EB * SB%DXI2 *M%BXF(J,K)          ! Dirichlet
-                           ELSE IF (M%PRESSURE_BC_INDEX(IW)==NEUMANN) THEN
+                           ELSE IF (M%WALL(IW)%PRESSURE_BC_INDEX==NEUMANN) THEN
                               SB%F(I,J,K) = SB%F(I,J,K) - SB%DXI *M%BXF(J,K)                    ! Neumann
                            ENDIF
                         CASE (2)
-                           IF (M%PRESSURE_BC_INDEX(IW)==DIRICHLET) THEN
+                           IF (M%WALL(IW)%PRESSURE_BC_INDEX==DIRICHLET) THEN
                               SB%F(I,J,K) = SB%F(I,J,K) - 2.0_EB * SB%DYI2 * M%BYS(I,K)         ! Dirichlet
-                           ELSE IF (M%PRESSURE_BC_INDEX(IW)==NEUMANN) THEN
+                           ELSE IF (M%WALL(IW)%PRESSURE_BC_INDEX==NEUMANN) THEN
                               SB%F(I,J,K) = SB%F(I,J,K) + SB%DYI * M%BYS(I,K)                   ! Neumann
                            ENDIF
                         CASE (-2)
-                           IF (M%PRESSURE_BC_INDEX(IW)==DIRICHLET) THEN
+                           IF (M%WALL(IW)%PRESSURE_BC_INDEX==DIRICHLET) THEN
                               SB%F(I,J,K) = SB%F(I,J,K) - 2.0_EB * SB%DYI2 *M%BYF(I,K)          ! Dirichlet
-                           ELSE IF (M%PRESSURE_BC_INDEX(IW)==NEUMANN) THEN
+                           ELSE IF (M%WALL(IW)%PRESSURE_BC_INDEX==NEUMANN) THEN
                               SB%F(I,J,K) = SB%F(I,J,K) - SB%DYI *M%BYF(I,K)                    ! Neumann
                            ENDIF
                         CASE (3)
-                           IF (M%PRESSURE_BC_INDEX(IW)==DIRICHLET) THEN
+                           IF (M%WALL(IW)%PRESSURE_BC_INDEX==DIRICHLET) THEN
                               SB%F(I,J,K) = SB%F(I,J,K) - 2.0_EB * SB%DZI2 * M%BZS(I,J)         ! Dirichlet
-                           ELSE IF (M%PRESSURE_BC_INDEX(IW)==NEUMANN) THEN
+                           ELSE IF (M%WALL(IW)%PRESSURE_BC_INDEX==NEUMANN) THEN
                               SB%F(I,J,K) = SB%F(I,J,K) + SB%DZI * M%BZS(I,J)                   ! Neumann
                            ENDIF
                         CASE (-3)
-                           IF (M%PRESSURE_BC_INDEX(IW)==DIRICHLET) THEN
+                           IF (M%WALL(IW)%PRESSURE_BC_INDEX==DIRICHLET) THEN
                               SB%F(I,J,K) = SB%F(I,J,K) - 2.0_EB * SB%DZI2 * M%BZF(I,J)         ! Dirichlet
-                           ELSE IF (M%PRESSURE_BC_INDEX(IW)==NEUMANN) THEN
+                           ELSE IF (M%WALL(IW)%PRESSURE_BC_INDEX==NEUMANN) THEN
                               SB%F(I,J,K) = SB%F(I,J,K) - SB%DZI  * M%BZF(I,J)                  ! Neumann
                            ENDIF
                      END SELECT
@@ -7305,41 +7305,41 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
                   ! set boundary conditions at exterior boundaries (corresponding to pois.f90)
                   COMPACT_WALLCELL_LOOP2D: DO IW = 1, M%N_EXTERNAL_WALL_CELLS
                
-                     I = M%IJKW(6,IW)
-                     J = M%IJKW(7,IW)
-                     K = M%IJKW(8,IW)
+                     I = M%OMESH(NM)%IJKW(6,IW)!****CHECK
+                     J = M%OMESH(NM)%IJKW(7,IW)!****CHECK
+                     K = M%OMESH(NM)%IJKW(8,IW)!****CHECK
             
                      IF (J /= 1) THEN
                         WRITE(*,*) 'Wrong index for J =',J,' in SCARC_SETUP_SOLVER !!!'
                         STOP
                      ENDIF
                   
-                     IOR0 = M%IJKW(4,IW)
+                     IOR0 = M%OMESH(NM)%IJKW(4,IW)!****CHECK
                      IC = (K-1)*M%IBAR + I
                      
                      SELECT CASE (IOR0)
                         CASE (1)
-                           IF (M%PRESSURE_BC_INDEX(IW)==DIRICHLET) THEN
+                           IF (M%WALL(IW)%PRESSURE_BC_INDEX==DIRICHLET) THEN
                               SC%F(IC) = SC%F(IC) - 2.0_EB * SC%DXI2 * M%BXS(1,K)         ! Dirichlet
-                           ELSE IF (M%PRESSURE_BC_INDEX(IW)==NEUMANN) THEN
+                           ELSE IF (M%WALL(IW)%PRESSURE_BC_INDEX==NEUMANN) THEN
                               SC%F(IC) = SC%F(IC) + SC%DXI * M%BXS(1,K)                   ! Neumann
                            ENDIF
                         CASE (-1)
-                           IF (M%PRESSURE_BC_INDEX(IW)==DIRICHLET) THEN
+                           IF (M%WALL(IW)%PRESSURE_BC_INDEX==DIRICHLET) THEN
                               SC%F(IC) = SC%F(IC) - 2.0_EB * SC%DXI2 *M%BXF(1,K)          ! Dirichlet
-                           ELSE IF (M%PRESSURE_BC_INDEX(IW)==NEUMANN) THEN
+                           ELSE IF (M%WALL(IW)%PRESSURE_BC_INDEX==NEUMANN) THEN
                               SC%F(IC) = SC%F(IC) - SC%DXI *M%BXF(1,K)                    ! Neumann
                            ENDIF
                         CASE (3)
-                           IF (M%PRESSURE_BC_INDEX(IW)==DIRICHLET) THEN
+                           IF (M%WALL(IW)%PRESSURE_BC_INDEX==DIRICHLET) THEN
                               SC%F(IC) = SC%F(IC) - 2.0_EB * SC%DZI2 * M%BZS(I,1)         ! Dirichlet
-                           ELSE IF (M%PRESSURE_BC_INDEX(IW)==NEUMANN) THEN
+                           ELSE IF (M%WALL(IW)%PRESSURE_BC_INDEX==NEUMANN) THEN
                               SC%F(IC) = SC%F(IC) + SC%DZI * M%BZS(I,1)                   ! Neumann
                            ENDIF
                         CASE (-3)
-                           IF (M%PRESSURE_BC_INDEX(IW)==DIRICHLET) THEN
+                           IF (M%WALL(IW)%PRESSURE_BC_INDEX==DIRICHLET) THEN
                               SC%F(IC) = SC%F(IC) - 2.0_EB * SC%DZI2 * M%BZF(I,1)         ! Dirichlet
-                           ELSE IF (M%PRESSURE_BC_INDEX(IW)==NEUMANN) THEN
+                           ELSE IF (M%WALL(IW)%PRESSURE_BC_INDEX==NEUMANN) THEN
                               SC%F(IC) = SC%F(IC) - SC%DZI  * M%BZF(I,1)                  ! Neumann
                            ENDIF
                      END SELECT
@@ -7372,48 +7372,48 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
             
                   COMPACT_WALLCELL_LOOP3D: DO IW = 1, M%N_EXTERNAL_WALL_CELLS
                   
-                     I = M%IJKW(6,IW)
-                     J = M%IJKW(7,IW)
-                     K = M%IJKW(8,IW)
+                     I = M%OMESH(NM)%IJKW(6,IW)!****CHECK
+                     J = M%OMESH(NM)%IJKW(7,IW)!****CHECK
+                     K = M%OMESH(NM)%IJKW(8,IW)!****CHECK
                   
-                     IOR0 = M%IJKW(4,IW)
+                     IOR0 = M%OMESH(NM)%IJKW(4,IW)!****CHECK
                      IC = (K-1) * M%IBAR * M%JBAR + (J-1) * M%IBAR + I
                   
                      SELECT CASE (IOR0)
                         CASE (1)
-                           IF (M%PRESSURE_BC_INDEX(IW)==DIRICHLET) THEN
+                           IF (M%WALL(IW)%PRESSURE_BC_INDEX==DIRICHLET) THEN
                               SC%F(IC) = SC%F(IC) - 2.0_EB * SC%DXI2 * M%BXS(J,K)         ! Dirichlet
-                           ELSE IF (M%PRESSURE_BC_INDEX(IW)==NEUMANN) THEN
+                           ELSE IF (M%WALL(IW)%PRESSURE_BC_INDEX==NEUMANN) THEN
                               SC%F(IC) = SC%F(IC) + SC%DXI * M%BXS(J,K)                   ! Neumann
                            ENDIF
                         CASE (-1)
-                           IF (M%PRESSURE_BC_INDEX(IW)==DIRICHLET) THEN
+                           IF (M%WALL(IW)%PRESSURE_BC_INDEX==DIRICHLET) THEN
                               SC%F(IC) = SC%F(IC) - 2.0_EB * SC%DXI2 *M%BXF(J,K)          ! Dirichlet
-                           ELSE IF (M%PRESSURE_BC_INDEX(IW)==NEUMANN) THEN
+                           ELSE IF (M%WALL(IW)%PRESSURE_BC_INDEX==NEUMANN) THEN
                               SC%F(IC) = SC%F(IC) - SC%DXI *M%BXF(J,K)                    ! Neumann
                            ENDIF
                         CASE (2)
-                           IF (M%PRESSURE_BC_INDEX(IW)==DIRICHLET) THEN
+                           IF (M%WALL(IW)%PRESSURE_BC_INDEX==DIRICHLET) THEN
                               SC%F(IC) = SC%F(IC) - 2.0_EB * SC%DYI2 * M%BYS(I,K)         ! Dirichlet
-                           ELSE IF (M%PRESSURE_BC_INDEX(IW)==NEUMANN) THEN
+                           ELSE IF (M%WALL(IW)%PRESSURE_BC_INDEX==NEUMANN) THEN
                               SC%F(IC) = SC%F(IC) + SC%DYI * M%BYS(I,K)                   ! Neumann
                            ENDIF
                         CASE (-2)
-                           IF (M%PRESSURE_BC_INDEX(IW)==DIRICHLET) THEN
+                           IF (M%WALL(IW)%PRESSURE_BC_INDEX==DIRICHLET) THEN
                               SC%F(IC) = SC%F(IC) - 2.0_EB * SC%DYI2 *M%BYF(I,K)          ! Dirichlet
-                           ELSE IF (M%PRESSURE_BC_INDEX(IW)==NEUMANN) THEN
+                           ELSE IF (M%WALL(IW)%PRESSURE_BC_INDEX==NEUMANN) THEN
                               SC%F(IC) = SC%F(IC) - SC%DYI *M%BYF(I,K)                    ! Neumann
                            ENDIF
                         CASE (3)
-                           IF (M%PRESSURE_BC_INDEX(IW)==DIRICHLET) THEN
+                           IF (M%WALL(IW)%PRESSURE_BC_INDEX==DIRICHLET) THEN
                               SC%F(IC) = SC%F(IC) - 2.0_EB * SC%DZI2 * M%BZS(I,J)         ! Dirichlet
-                           ELSE IF (M%PRESSURE_BC_INDEX(IW)==NEUMANN) THEN
+                           ELSE IF (M%WALL(IW)%PRESSURE_BC_INDEX==NEUMANN) THEN
                               SC%F(IC) = SC%F(IC) + SC%DZI * M%BZS(I,J)                   ! Neumann
                            ENDIF
                         CASE (-3)
-                           IF (M%PRESSURE_BC_INDEX(IW)==DIRICHLET) THEN
+                           IF (M%WALL(IW)%PRESSURE_BC_INDEX==DIRICHLET) THEN
                               SC%F(IC) = SC%F(IC) - 2.0_EB * SC%DZI2 * M%BZF(I,J)         ! Dirichlet
-                           ELSE IF (M%PRESSURE_BC_INDEX(IW)==NEUMANN) THEN
+                           ELSE IF (M%WALL(IW)%PRESSURE_BC_INDEX==NEUMANN) THEN
                               SC%F(IC) = SC%F(IC) - SC%DZI  * M%BZF(I,J)                  ! Neumann
                            ENDIF
                      END SELECT
@@ -8040,50 +8040,50 @@ DO NM = NMESHES_MIN, NMESHES_MAX
    !!! compute ghost cell values
    WALL_CELL_LOOP: DO IW = 1, M%N_EXTERNAL_WALL_CELLS
    
-      I0 = M%IJKW(1,IW)
-      J0 = M%IJKW(2,IW)
-      K0 = M%IJKW(3,IW)
+      I0 = M%OMESH(NM)%IJKW(1,IW)!****CHECK
+      J0 = M%OMESH(NM)%IJKW(2,IW)!****CHECK
+      K0 = M%OMESH(NM)%IJKW(3,IW)!****CHECK
    
-      I1 = M%IJKW(6,IW)
-      J1 = M%IJKW(7,IW)
-      K1 = M%IJKW(8,IW)
+      I1 = M%OMESH(NM)%IJKW(6,IW)!****CHECK
+      J1 = M%OMESH(NM)%IJKW(7,IW)!****CHECK
+      K1 = M%OMESH(NM)%IJKW(8,IW)!****CHECK
    
-      IOR0 = M%IJKW(4,IW)
+      IOR0 = M%OMESH(NM)%IJKW(4,IW)!****CHECK
    
       IF (IOR0 == 1) THEN
-         IF (M%PRESSURE_BC_INDEX(IW)==DIRICHLET) THEN
+         IF (M%WALL(IW)%PRESSURE_BC_INDEX==DIRICHLET) THEN
             HP(I0,J0,K0) = -HP(I1,J1,K1) + 2.0_EB * M%BXS(J1,K1)
-         ELSE IF (M%PRESSURE_BC_INDEX(IW)==NEUMANN) THEN
+         ELSE IF (M%WALL(IW)%PRESSURE_BC_INDEX==NEUMANN) THEN
             HP(I0,J0,K0) =  HP(I1,J1,K1) - DXI *M%BXS(J1,K1)
          ENDIF
       ELSE IF (IOR0 == -1) THEN
-         IF (M%PRESSURE_BC_INDEX(IW)==DIRICHLET) THEN
+         IF (M%WALL(IW)%PRESSURE_BC_INDEX==DIRICHLET) THEN
             HP(I0,J0,K0) = -HP(I1,J1,K1) + 2.0_EB * M%BXF(J1,K1)
-         ELSE IF (M%PRESSURE_BC_INDEX(IW)==NEUMANN) THEN
+         ELSE IF (M%WALL(IW)%PRESSURE_BC_INDEX==NEUMANN) THEN
             HP(I0,J0,K0) =  HP(I1,J1,K1) + DXI *M%BXF(J1,K1)
          ENDIF
       ELSE IF (IOR0 == 2) THEN
-         IF (M%PRESSURE_BC_INDEX(IW)==DIRICHLET) THEN
+         IF (M%WALL(IW)%PRESSURE_BC_INDEX==DIRICHLET) THEN
             HP(I0,J0,K0) = -HP(I1,J1,K1) + 2.0_EB * M%BYS(I1,K1)
-         ELSE IF (M%PRESSURE_BC_INDEX(IW)==NEUMANN) THEN
+         ELSE IF (M%WALL(IW)%PRESSURE_BC_INDEX==NEUMANN) THEN
             HP(I0,J0,K0) =  HP(I1,J1,K1) - DETA *M%BYS(I1,K1)
          ENDIF
       ELSE IF (IOR0 == -2) THEN
-         IF (M%PRESSURE_BC_INDEX(IW)==DIRICHLET) THEN
+         IF (M%WALL(IW)%PRESSURE_BC_INDEX==DIRICHLET) THEN
             HP(I0,J0,K0) = -HP(I1,J1,K1) + 2.0_EB * M%BYF(I1,K1)
-         ELSE IF (M%PRESSURE_BC_INDEX(IW)==NEUMANN) THEN
+         ELSE IF (M%WALL(IW)%PRESSURE_BC_INDEX==NEUMANN) THEN
             HP(I0,J0,K0) =  HP(I1,J1,K1) + DETA *M%BYF(I1,K1)
          ENDIF
       ELSE IF (IOR0 == 3) THEN
-         IF (M%PRESSURE_BC_INDEX(IW)==DIRICHLET) THEN
+         IF (M%WALL(IW)%PRESSURE_BC_INDEX==DIRICHLET) THEN
             HP(I0,J0,K0) = -HP(I1,J1,K1) + 2.0_EB * M%BZS(I1,J1)
-         ELSE IF (M%PRESSURE_BC_INDEX(IW)==NEUMANN) THEN
+         ELSE IF (M%WALL(IW)%PRESSURE_BC_INDEX==NEUMANN) THEN
             HP(I0,J0,K0) =  HP(I1,J1,K1) - DZETA *M%BZS(I1,J1)
          ENDIF
       ELSE IF (IOR0 == -3) THEN
-         IF (M%PRESSURE_BC_INDEX(IW)==DIRICHLET) THEN
+         IF (M%WALL(IW)%PRESSURE_BC_INDEX==DIRICHLET) THEN
             HP(I0,J0,K0) = -HP(I1,J1,K1) + 2.0_EB * M%BZF(I1,J1)
-         ELSE IF (M%PRESSURE_BC_INDEX(IW)==NEUMANN) THEN
+         ELSE IF (M%WALL(IW)%PRESSURE_BC_INDEX==NEUMANN) THEN
             HP(I0,J0,K0) =  HP(I1,J1,K1) + DZETA *M%BZF(I1,J1)
          ENDIF
       ENDIF

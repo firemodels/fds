@@ -7241,7 +7241,7 @@ CONTAINS
     INTEGER, PARAMETER :: N_SECTORS = 2
     REAL(EB) DTSP,UBAR,VBAR,X1,Y1,XI,YJ,ZK, WSPA, WSPB
     INTEGER ICN,I,J,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ,ICX, ICY, N, J1, I_OBST, I_OBSTX, I_OBSTY
-    INTEGER  IE, TIM_IC, TIM_IW, TIM_IWX, TIM_IWY, TIM_IW2, TIM_IC2, IBC, NM_SEE
+    INTEGER  IE, TIM_IC, TIM_IW, TIM_IWX, TIM_IWY, TIM_IW2, TIM_IC2, SURF_INDEX, NM_SEE
     REAL(EB) :: P2P_DIST, P2P_DIST_MAX, P2P_U, P2P_V, EVEL, TIM_DIST, EVEL2
     REAL(EB), DIMENSION(4) :: D_XY
     LOGICAL, DIMENSION(4) :: FOUNDWALL_XY
@@ -8429,8 +8429,8 @@ CONTAINS
                 IF ( II < IIN ) THEN
                    TIM_IC = CELL_INDEX(IIN,JJN,KK)
                    CALL GET_IW(IIN,JJN,KK,-1,TIM_IW)
-                   IBC = IJKW(5,TIM_IW)
-                   IF (SURFACE(IBC)%VEL> 0.0_EB .OR. BOUNDARY_TYPE(TIM_IW)==OPEN_BOUNDARY) THEN
+                   SURF_INDEX =WALL(TIM_IW)%SURF_INDEX
+                   IF (SURFACE(SURF_INDEX)%VEL> 0.0_EB .OR. WALL(TIM_IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
                       HR%X = X1 
                       HR%Y = HR%Y
                       Y1 = HR%Y
@@ -8438,8 +8438,8 @@ CONTAINS
                 ELSE
                    TIM_IC = CELL_INDEX(IIN,JJN,KK)
                    CALL GET_IW(IIN,JJN,KK,+1,TIM_IW)
-                   IBC = IJKW(5,TIM_IW)
-                   IF (SURFACE(IBC)%VEL> 0.0_EB .OR. BOUNDARY_TYPE(TIM_IW)==OPEN_BOUNDARY) THEN
+                   SURF_INDEX = WALL(TIM_IW)%SURF_INDEX
+                   IF (SURFACE(SURF_INDEX)%VEL> 0.0_EB .OR. WALL(TIM_IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
                       HR%X = X1 
                       HR%Y = HR%Y
                       Y1 = HR%Y
@@ -8450,8 +8450,8 @@ CONTAINS
                 IF ( JJ < JJN ) THEN
                    TIM_IC = CELL_INDEX(IIN,JJN,KK)
                    CALL GET_IW(IIN,JJN,KK,-2,TIM_IW)
-                   IBC = IJKW(5,TIM_IW)
-                   IF (SURFACE(IBC)%VEL> 0.0_EB .OR. BOUNDARY_TYPE(TIM_IW)==OPEN_BOUNDARY) THEN
+                   SURF_INDEX = WALL(TIM_IW)%SURF_INDEX
+                   IF (SURFACE(SURF_INDEX)%VEL> 0.0_EB .OR. WALL(TIM_IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
                       HR%X = HR%X
                       X1 = HR%X
                       HR%Y = Y1
@@ -8459,8 +8459,8 @@ CONTAINS
                 ELSE
                    TIM_IC = CELL_INDEX(IIN,JJN,KK)
                    CALL GET_IW(IIN,JJN,KK,+2,TIM_IW)
-                   IBC = IJKW(5,TIM_IW)
-                   IF (SURFACE(IBC)%VEL> 0.0_EB .OR. BOUNDARY_TYPE(TIM_IW)==OPEN_BOUNDARY) THEN
+                   SURF_INDEX = WALL(TIM_IW)%SURF_INDEX
+                   IF (SURFACE(SURF_INDEX)%VEL> 0.0_EB .OR. WALL(TIM_IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
                       HR%X = HR%X
                       X1 = HR%X
                       HR%Y = Y1 
@@ -9597,36 +9597,36 @@ CONTAINS
                 TIM_IC  = CELL_INDEX(II,JJ,KKN)   ! Present
                 TIM_IWX = WALL_INDEX(TIM_IC, +1)  ! Right
                 IF (TIM_IWX>0) THEN
-                   I_OBST = OBST_INDEX_W(TIM_IWX)
+                   I_OBST = WALL(TIM_IWX)%OBST_INDEX
                    IF (OBSTRUCTION(I_OBST)%HIDDEN) TIM_IWX = 0
                 END IF
                 TIM_IWY = WALL_INDEX(TIM_IC, +2)  ! Up
                 IF (TIM_IWY>0) THEN
-                   I_OBST = OBST_INDEX_W(TIM_IWY)
+                   I_OBST = WALL(TIM_IWY)%OBST_INDEX
                    IF (OBSTRUCTION(I_OBST)%HIDDEN) TIM_IWY = 0
                 END IF
                 TIM_IC  = CELL_INDEX(II,JJ+1,KKN) ! One cell up
                 TIM_IW  = WALL_INDEX(TIM_IC, +1)  ! Up and right
                 IF (TIM_IW>0) THEN
-                   I_OBST = OBST_INDEX_W(TIM_IW)
+                   I_OBST = WALL(TIM_IW)%OBST_INDEX
                    IF (OBSTRUCTION(I_OBST)%HIDDEN) TIM_IW = 0
                 END IF
                 TIM_IC2 = CELL_INDEX(II+1,JJ,KKN) ! One cell right
                 TIM_IW2 = WALL_INDEX(TIM_IC2, +2) ! Right and up
                 IF (TIM_IW2>0) THEN
-                   I_OBST = OBST_INDEX_W(TIM_IW2)
+                   I_OBST = WALL(TIM_IW2)%OBST_INDEX
                    IF (OBSTRUCTION(I_OBST)%HIDDEN) TIM_IW2 = 0
                 END IF
                 IF (TIM_IWY /= 0) EXIT LOOP_PXPY  ! 
                 IF ( (TIM_IWX==0).AND.(TIM_IWY==0).AND.(TIM_IW/=0 .OR. TIM_IW2/=0) ) THEN
                    IF (TIM_IW/=0) THEN
                       ! First y-direction then x-direction
-                      X11 = XW(TIM_IW )                 ! Corner point x
-                      Y11 = YW(TIM_IW )-0.5_EB*DY(JJ+1) ! Corner point y
+                      X11 = WALL(TIM_IW)%XW                 ! Corner point x
+                      Y11 = WALL(TIM_IW)%YW-0.5_EB*DY(JJ+1) ! Corner point y
                    ELSE
                       ! First x-direction then y-direction
-                      X11 = XW(TIM_IW2)-0.5_EB*DX(II+1) ! Corner point x
-                      Y11 = YW(TIM_IW2)                 ! Corner point y
+                      X11 = WALL(TIM_IW2)%XW-0.5_EB*DX(II+1) ! Corner point x
+                      Y11 = WALL(TIM_IW2)%YW                 ! Corner point y
                    END IF
 
                    CALL CORNER_FORCES(X1, Y1, X11, Y11, P2P_DIST_MAX, P2P_U, P2P_V, SOCIAL_F, &
@@ -9648,36 +9648,36 @@ CONTAINS
                 TIM_IC  = CELL_INDEX(II,JJ,KKN)   ! Present
                 TIM_IWX = WALL_INDEX(TIM_IC, -1)  ! Left
                 IF (TIM_IWX>0) THEN
-                   I_OBST = OBST_INDEX_W(TIM_IWX)
+                   I_OBST = WALL(TIM_IWX)%OBST_INDEX
                    IF (OBSTRUCTION(I_OBST)%HIDDEN) TIM_IWX = 0
                 END IF
                 TIM_IWY = WALL_INDEX(TIM_IC, +2)  ! Up
                 IF (TIM_IWY>0) THEN
-                   I_OBST = OBST_INDEX_W(TIM_IWY)
+                   I_OBST = WALL(TIM_IWY)%OBST_INDEX
                    IF (OBSTRUCTION(I_OBST)%HIDDEN) TIM_IWY = 0
                 END IF
                 TIM_IC  = CELL_INDEX(II,JJ+1,KKN) ! One cell up
                 TIM_IW  = WALL_INDEX(TIM_IC, -1)  ! Up and left 
                 IF (TIM_IW>0) THEN
-                   I_OBST = OBST_INDEX_W(TIM_IW)
+                   I_OBST = WALL(TIM_IW)%OBST_INDEX
                    IF (OBSTRUCTION(I_OBST)%HIDDEN) TIM_IW = 0
                 END IF
                 TIM_IC2 = CELL_INDEX(II-1,JJ,KKN) ! One cell left
                 TIM_IW2 = WALL_INDEX(TIM_IC2, +2) ! Left and up
                 IF (TIM_IW2>0) THEN
-                   I_OBST = OBST_INDEX_W(TIM_IW2)
+                   I_OBST = WALL(TIM_IW2)%OBST_INDEX
                    IF (OBSTRUCTION(I_OBST)%HIDDEN) TIM_IW2 = 0
                 END IF
                 IF (TIM_IWY /= 0) EXIT LOOP_MXPY
                 IF ( (TIM_IWX==0).AND.(TIM_IWY==0).AND.(TIM_IW/=0 .OR. TIM_IW2/=0) ) THEN
                    IF (TIM_IW/=0) THEN
                       ! First y-direction then x-direction
-                      X11 = XW(TIM_IW )                 ! Corner point x
-                      Y11 = YW(TIM_IW )-0.5_EB*DY(JJ+1) ! Corner point y
+                      X11 = WALL(TIM_IW)%XW                 ! Corner point x
+                      Y11 = WALL(TIM_IW)%YW-0.5_EB*DY(JJ+1) ! Corner point y
                    ELSE
                       ! First x-direction then y-direction
-                      X11 = XW(TIM_IW2)+0.5_EB*DX(II-1) ! Corner point x
-                      Y11 = YW(TIM_IW2)                 ! Corner point y
+                      X11 = WALL(TIM_IW2)%XW+0.5_EB*DX(II-1) ! Corner point x
+                      Y11 = WALL(TIM_IW2)%YW                 ! Corner point y
                    END IF
 
                    CALL CORNER_FORCES(X1, Y1, X11, Y11, P2P_DIST_MAX, P2P_U, P2P_V, SOCIAL_F, &
@@ -9699,36 +9699,36 @@ CONTAINS
                 TIM_IC  = CELL_INDEX(II,JJ,KKN)   ! Present
                 TIM_IWX = WALL_INDEX(TIM_IC, +1)  ! Right
                 IF (TIM_IWX>0) THEN
-                   I_OBST = OBST_INDEX_W(TIM_IWX)
+                   I_OBST = WALL(TIM_IWX)%OBST_INDEX
                    IF (OBSTRUCTION(I_OBST)%HIDDEN) TIM_IWX = 0
                 END IF
                 TIM_IWY = WALL_INDEX(TIM_IC, -2)  ! Down
                 IF (TIM_IWY>0) THEN
-                   I_OBST = OBST_INDEX_W(TIM_IWY)
+                   I_OBST = WALL(TIM_IWY)%OBST_INDEX
                    IF (OBSTRUCTION(I_OBST)%HIDDEN) TIM_IWY = 0
                 END IF
                 TIM_IC  = CELL_INDEX(II,JJ-1,KKN) ! One cell down
                 TIM_IW  = WALL_INDEX(TIM_IC, +1)  ! Down and right
                 IF (TIM_IW>0) THEN
-                   I_OBST = OBST_INDEX_W(TIM_IW)
+                   I_OBST = WALL(TIM_IW)%OBST_INDEX
                    IF (OBSTRUCTION(I_OBST)%HIDDEN) TIM_IW = 0
                 END IF
                 TIM_IC2 = CELL_INDEX(II+1,JJ,KKN) ! One cell right
                 TIM_IW2 = WALL_INDEX(TIM_IC2, -2) ! Right and down
                 IF (TIM_IW2>0) THEN
-                   I_OBST = OBST_INDEX_W(TIM_IW2)
+                   I_OBST = WALL(TIM_IW2)%OBST_INDEX
                    IF (OBSTRUCTION(I_OBST)%HIDDEN) TIM_IW2 = 0
                 END IF
                 IF (TIM_IWY /= 0) EXIT LOOP_PXMY
                 IF ( (TIM_IWX==0).AND.(TIM_IWY==0).AND.(TIM_IW/=0 .OR. TIM_IW2/=0) ) THEN
                    IF (TIM_IW/=0) THEN
                       ! First y-direction then x-direction
-                      X11 = XW(TIM_IW )                 ! Corner point x
-                      Y11 = YW(TIM_IW )+0.5_EB*DY(JJ-1) ! Corner point y
+                      X11 = WALL(TIM_IW)%XW                 ! Corner point x
+                      Y11 = WALL(TIM_IW)%YW+0.5_EB*DY(JJ-1) ! Corner point y
                    ELSE
                       ! First x-direction then y-direction
-                      X11 = XW(TIM_IW2)-0.5_EB*DX(II+1) ! Corner point x
-                      Y11 = YW(TIM_IW2)                 ! Corner point y
+                      X11 = WALL(TIM_IW2)%XW-0.5_EB*DX(II+1) ! Corner point x
+                      Y11 = WALL(TIM_IW2)%YW                 ! Corner point y
                    END IF
 
                    CALL CORNER_FORCES(X1, Y1, X11, Y11, P2P_DIST_MAX, P2P_U, P2P_V, SOCIAL_F, &
@@ -9750,36 +9750,36 @@ CONTAINS
                 TIM_IC  = CELL_INDEX(II,JJ,KKN)   ! Present
                 TIM_IWX = WALL_INDEX(TIM_IC, -1)  ! Left
                 IF (TIM_IWX>0) THEN
-                   I_OBST = OBST_INDEX_W(TIM_IWX)
+                   I_OBST = WALL(TIM_IWX)%OBST_INDEX
                    IF (OBSTRUCTION(I_OBST)%HIDDEN) TIM_IWX = 0
                 END IF
                 TIM_IWY = WALL_INDEX(TIM_IC, -2)  ! Down
                 IF (TIM_IWY>0) THEN
-                   I_OBST = OBST_INDEX_W(TIM_IWY)
+                   I_OBST = WALL(TIM_IWY)%OBST_INDEX
                    IF (OBSTRUCTION(I_OBST)%HIDDEN) TIM_IWY = 0
                 END IF
                 TIM_IC  = CELL_INDEX(II,JJ-1,KKN) ! Once cell down
                 TIM_IW  = WALL_INDEX(TIM_IC, -1)  ! Down and left
                 IF (TIM_IW>0) THEN
-                   I_OBST = OBST_INDEX_W(TIM_IW)
+                   I_OBST = WALL(TIM_IW)%OBST_INDEX
                    IF (OBSTRUCTION(I_OBST)%HIDDEN) TIM_IW = 0
                 END IF
                 TIM_IC2 = CELL_INDEX(II-1,JJ,KKN) ! One cell left
                 TIM_IW2 = WALL_INDEX(TIM_IC2, -2) ! Left and down
                 IF (TIM_IW2>0) THEN
-                   I_OBST = OBST_INDEX_W(TIM_IW2)
+                   I_OBST = WALL(TIM_IW2)%OBST_INDEX
                    IF (OBSTRUCTION(I_OBST)%HIDDEN) TIM_IW2 = 0
                 END IF
                 IF (TIM_IWY /= 0) EXIT LOOP_MXMY
                 IF ( (TIM_IWX==0).AND.(TIM_IWY==0).AND.(TIM_IW/=0 .OR. TIM_IW2/=0) ) THEN
                    IF (TIM_IW/=0) THEN
                       ! First y-direction then x-direction
-                      X11 = XW(TIM_IW )                 ! Corner point x
-                      Y11 = YW(TIM_IW )+0.5_EB*DY(JJ-1) ! Corner point y
+                      X11 = WALL(TIM_IW)%XW                 ! Corner point x
+                      Y11 = WALL(TIM_IW)%YW+0.5_EB*DY(JJ-1) ! Corner point y
                    ELSE
                       ! First x-direction then y-direction
-                      X11 = XW(TIM_IW2)+0.5_EB*DX(II-1) ! Corner point x
-                      Y11 = YW(TIM_IW2)                 ! Corner point y
+                      X11 = WALL(TIM_IW2)%XW+0.5_EB*DX(II-1) ! Corner point x
+                      Y11 = WALL(TIM_IW2)%YW                 ! Corner point y
                    END IF
 
                    CALL CORNER_FORCES(X1, Y1, X11, Y11, P2P_DIST_MAX, P2P_U, P2P_V, SOCIAL_F, &
@@ -12930,7 +12930,7 @@ CONTAINS
 
       ! Check if there are doors (vents with vel >0)
       DO ii = 1, N_VENT
-         IF (ABS(VENTS(ii)%IOR)>2 .OR. SURFACE(VENTS(ii)%IBC)%VEL<=0) CYCLE
+         IF (ABS(VENTS(ii)%IOR)>2 .OR. SURFACE(VENTS(ii)%SURF_INDEX)%VEL<=0) CYCLE
          dist1 = SQRT((VENTS(ii)%x1-x_tmp(2))**2 + (VENTS(ii)%y1-y_tmp(2))**2) ! door - agent centre distance
          dist2 = SQRT((VENTS(ii)%x2-x_tmp(2))**2 + (VENTS(ii)%y2-y_tmp(2))**2)
          IF ( (MIN(dist1,dist2)-HR%Radius) > P2P_DIST_MAX) CYCLE
@@ -14400,13 +14400,13 @@ CONTAINS
           iw1 = M%WALL_INDEX(ic ,isx*1) ! sideways
           iw2 = M%WALL_INDEX(ic2,isy*2) ! side + main direction
           IF (iw >0) THEN
-             IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw ))%HIDDEN .AND. M%OBST_INDEX_W(iw )>0) iw  = 0
+             IF (M%OBSTRUCTION(M%WALL(IW)%OBST_INDEX)%HIDDEN .AND. M%WALL(IW)%OBST_INDEX>0) iw  = 0
           END IF
           IF (iw1>0) THEN
-             IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw1))%HIDDEN .AND. M%OBST_INDEX_W(iw1)>0) iw1 = 0
+             IF (M%OBSTRUCTION(M%WALL(IW1)%OBST_INDEX)%HIDDEN .AND. M%WALL(IW1)%OBST_INDEX>0) iw1 = 0
           END IF
           IF (iw2>0) THEN
-             IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw2))%HIDDEN .AND. M%OBST_INDEX_W(iw2)>0) iw2 = 0
+             IF (M%OBSTRUCTION(M%WALL(IW2)%OBST_INDEX)%HIDDEN .AND. M%WALL(IW2)%OBST_INDEX>0) iw2 = 0
           END IF
           ! iw is zero, if there is no solid boundary
           ! from (i,j)==>(i,jnew):    iw and iw2 are zero, iw1 does not matter
@@ -14433,13 +14433,13 @@ CONTAINS
           iw1 = M%WALL_INDEX(ic ,isy*2) ! sideways
           iw2 = M%WALL_INDEX(ic2,isx*1) ! side + main direction
           IF (iw >0) THEN
-             IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw ))%HIDDEN .AND. M%OBST_INDEX_W(iw )>0) iw  = 0
+             IF (M%OBSTRUCTION(M%WALL(IW)%OBST_INDEX)%HIDDEN .AND. M%WALL(IW)%OBST_INDEX>0) iw  = 0
           END IF
           IF (iw1>0) THEN
-             IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw1))%HIDDEN .AND. M%OBST_INDEX_W(iw1)>0) iw1 = 0
+             IF (M%OBSTRUCTION(M%WALL(IW1)%OBST_INDEX)%HIDDEN .AND. M%WALL(IW1)%OBST_INDEX>0) iw1 = 0
           END IF
           IF (iw2>0) THEN
-             IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw2))%HIDDEN .AND. M%OBST_INDEX_W(iw2)>0) iw2 = 0
+             IF (M%OBSTRUCTION(M%WALL(IW2)%OBST_INDEX)%HIDDEN .AND. M%WALL(IW2)%OBST_INDEX>0) iw2 = 0
           END IF
           ! iw is zero, if there is no solid boundary
           ! from (i,j)==>(inew,j):    iw and iw2 are zero, iw1 does not matter
@@ -14526,13 +14526,13 @@ CONTAINS
           iw1 = MFF%WALL_INDEX(ic ,isx*1) ! sideways
           iw2 = MFF%WALL_INDEX(ic2,isy*2) ! side + main direction
           IF (iw >0) THEN
-             IF (MFF%OBSTRUCTION(MFF%OBST_INDEX_W(iw ))%HIDDEN .AND. MFF%OBST_INDEX_W(iw )>0) iw  = 0
+             IF (MFF%OBSTRUCTION(MFF%WALL(IW)%OBST_INDEX)%HIDDEN .AND. MFF%WALL(IW)%OBST_INDEX>0) iw  = 0
           END IF
           IF (iw1>0) THEN
-             IF (MFF%OBSTRUCTION(MFF%OBST_INDEX_W(iw1))%HIDDEN .AND. MFF%OBST_INDEX_W(iw1)>0) iw1 = 0
+             IF (MFF%OBSTRUCTION(MFF%WALL(IW1)%OBST_INDEX)%HIDDEN .AND. MFF%WALL(IW1)%OBST_INDEX>0) iw1 = 0
           END IF
           IF (iw2>0) THEN
-             IF (MFF%OBSTRUCTION(MFF%OBST_INDEX_W(iw2))%HIDDEN .AND. MFF%OBST_INDEX_W(iw2)>0) iw2 = 0
+             IF (MFF%OBSTRUCTION(MFF%WALL(IW2)%OBST_INDEX)%HIDDEN .AND. MFF%WALL(IW2)%OBST_INDEX>0) iw2 = 0
           END IF
           ! iw is zero, if there is no solid boundary
           ! from (i,j)==>(i,jnew):    iw and iw2 are zero, iw1 does not matter
@@ -14567,13 +14567,13 @@ CONTAINS
           iw1 = MFF%WALL_INDEX(ic ,isy*2) ! sideways
           iw2 = MFF%WALL_INDEX(ic2,isx*1) ! side + main direction
           IF (iw >0) THEN
-             IF (MFF%OBSTRUCTION(MFF%OBST_INDEX_W(iw ))%HIDDEN .AND. MFF%OBST_INDEX_W(iw )>0) iw  = 0
+             IF (MFF%OBSTRUCTION(MFF%WALL(IW)%OBST_INDEX)%HIDDEN .AND. MFF%WALL(IW)%OBST_INDEX>0) iw  = 0
           END IF
           IF (iw1>0) THEN
-             IF (MFF%OBSTRUCTION(MFF%OBST_INDEX_W(iw1))%HIDDEN .AND. MFF%OBST_INDEX_W(iw1)>0) iw1 = 0
+             IF (MFF%OBSTRUCTION(MFF%WALL(IW1)%OBST_INDEX)%HIDDEN .AND. MFF%WALL(IW1)%OBST_INDEX>0) iw1 = 0
           END IF
           IF (iw2>0) THEN
-             IF (MFF%OBSTRUCTION(MFF%OBST_INDEX_W(iw2))%HIDDEN .AND. MFF%OBST_INDEX_W(iw2)>0) iw2 = 0
+             IF (MFF%OBSTRUCTION(MFF%WALL(IW2)%OBST_INDEX)%HIDDEN .AND. MFF%WALL(IW2)%OBST_INDEX>0) iw2 = 0
           END IF
           ! iw is zero, if there is no solid boundary
           ! from (i,j)==>(inew,j):    iw and iw2 are zero, iw1 does not matter
@@ -14623,7 +14623,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: istat
     !
     ! Local variables
-    INTEGER :: ii, jj, iw, ic, ibc, is, i_end, iin, jjn, kkn, I_OBST
+    INTEGER :: ii, jj, iw, ic, SURF_INDEX, is, i_end, iin, jjn, kkn, I_OBST
     REAL(EB) :: dx, dy, d_mx, d_px, d_my, d_py
     TYPE (MESH_TYPE), POINTER :: M =>NULL()
 
@@ -14659,29 +14659,29 @@ CONTAINS
        END IF
        iw = M%wall_index(ic, is*1)      ! wall index
        IF (iw>0) THEN
-          IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw))%HIDDEN .AND. M%OBST_INDEX_W(iw)>0) iw = 0
+          IF (M%OBSTRUCTION(M%WALL(IW)%OBST_INDEX)%HIDDEN .AND. M%WALL(IW)%OBST_INDEX>0) iw = 0
        END IF
        DO WHILE (iw==0 .AND. ii/=i_end)
           ii = ii + is
           ic = M%cell_index(ii,jjn,kkn)  ! cell index
           iw = M%wall_index(ic, is*1)      ! wall index
           IF (iw>0) THEN
-             IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw))%HIDDEN .AND. M%OBST_INDEX_W(iw)>0) iw = 0
+             IF (M%OBSTRUCTION(M%WALL(IW)%OBST_INDEX)%HIDDEN .AND. M%WALL(IW)%OBST_INDEX>0) iw = 0
           END IF
        END DO
 
        IF (iw /= 0) THEN
           FoundWall_xy(1) = .TRUE.
-          ibc = M%IJKW(5,iw)         ! Boundary condition index
+          SURF_INDEX = M%WALL(IW)%SURF_INDEX ! Boundary condition index
           ! There is a 'door', i.e., outflow-boundary (or open boundary)
           ! so no wall forces ==> exit this loop
-          d_mx = M%xw(iw)
+          d_mx = M%WALL(IW)%XW
           I_OBST = M%OBST_INDEX_C(IC)
           IF (M%Solid(ic) .AND. .NOT.M%OBSTRUCTION(I_OBST)%HIDDEN) THEN
              WRITE(MESSAGE,'(A,I4,2I6)') 'ERROR: Find_Walls ',nm, ii,jjn
              CALL SHUTDOWN(MESSAGE)
           END IF
-          IF (SURFACE(ibc)%VEL> 0.0_EB .OR. M%BOUNDARY_TYPE(iw)==OPEN_BOUNDARY) THEN
+          IF (SURFACE(SURF_INDEX)%VEL> 0.0_EB .OR. M%WALL(IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
              !d_mx = d_mx + is*(2.0_EB*d_cutoff)
              FoundWall_xy(1) = .FALSE.
           END IF
@@ -14708,29 +14708,29 @@ CONTAINS
        END IF
        iw = M%wall_index(ic, is*1)      ! wall index
        IF (iw>0) THEN
-          IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw))%HIDDEN .AND. M%OBST_INDEX_W(iw)>0) iw = 0
+          IF (M%OBSTRUCTION(M%WALL(IW)%OBST_INDEX)%HIDDEN .AND. M%WALL(IW)%OBST_INDEX>0) iw = 0
        END IF
        DO WHILE (iw==0 .AND. ii/=i_end)
           ii = ii + is
           ic = M%cell_index(ii,jjn,kkn)  ! cell index
           iw = M%wall_index(ic, is*1)      ! wall index
           IF (iw>0) THEN
-             IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw))%HIDDEN .AND. M%OBST_INDEX_W(iw)>0) iw = 0
+             IF (M%OBSTRUCTION(M%WALL(IW)%OBST_INDEX)%HIDDEN .AND. M%WALL(IW)%OBST_INDEX>0) iw = 0
           END IF
        END DO
 
        IF (iw /= 0) THEN
           FoundWall_xy(2) = .TRUE.
-          ibc = M%IJKW(5,iw)         ! Boundary condition index
+          SURF_INDEX = M%WALL(IW)%SURF_INDEX ! Boundary condition index
           ! There is a 'door', i.e., outflow-boundary (or open boundary)
           ! so no wall forces ==> exit this loop
-          d_px = M%xw(iw)
+          d_px = M%WALL(IW)%XW
           I_OBST = M%OBST_INDEX_C(IC)
           IF (M%Solid(ic) .AND. .NOT.M%OBSTRUCTION(I_OBST)%HIDDEN) THEN
              WRITE(MESSAGE,'(A,I4,2I6)') 'ERROR: Find_Walls ',nm, ii,jjn
              CALL SHUTDOWN(MESSAGE)
           END IF
-          IF (SURFACE(ibc)%VEL> 0.0_EB .OR. M%BOUNDARY_TYPE(iw)==OPEN_BOUNDARY) THEN
+          IF (SURFACE(SURF_INDEX)%VEL> 0.0_EB .OR. M%WALL(IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
              !d_px = d_px + is*(2.0_EB*d_cutoff)
              FoundWall_xy(2) = .FALSE.
           END IF
@@ -14757,29 +14757,29 @@ CONTAINS
        END IF
        iw = M%wall_index(ic, is*2)      ! wall index
        IF (iw>0) THEN
-          IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw))%HIDDEN .AND. M%OBST_INDEX_W(iw)>0) iw = 0
+          IF (M%OBSTRUCTION(M%WALL(IW)%OBST_INDEX)%HIDDEN .AND. M%WALL(IW)%OBST_INDEX>0) iw = 0
        END IF
        DO WHILE (iw==0 .AND. jj/=i_end)
           jj = jj + is
           ic = M%cell_index(iin,jj,kkn)  ! cell index
           iw = M%wall_index(ic, is*2)      ! wall index
           IF (iw>0) THEN
-             IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw))%HIDDEN .AND. M%OBST_INDEX_W(iw)>0) iw = 0
+             IF (M%OBSTRUCTION(M%WALL(IW)%OBST_INDEX)%HIDDEN .AND. M%WALL(IW)%OBST_INDEX>0) iw = 0
           END IF
        END DO
 
        IF (iw /= 0) THEN
           FoundWall_xy(3) = .TRUE.
-          ibc = M%IJKW(5,iw)         ! Boundary condition index
+          SURF_INDEX = M%WALL(IW)%SURF_INDEX ! Boundary condition index
           ! There is a 'door', i.e., outflow-boundary (or open boundary)
           ! so no wall forces ==> exit this loop
-          d_my = M%yw(iw)
+          d_my = M%WALL(IW)%YW
           I_OBST = M%OBST_INDEX_C(IC)
           IF (M%Solid(ic) .AND. .NOT.M%OBSTRUCTION(I_OBST)%HIDDEN) THEN
              WRITE(MESSAGE,'(A,I4,2I6)') 'ERROR: Find_Walls ',nm, ii,jjn
              CALL SHUTDOWN(MESSAGE)
           END IF
-          IF (SURFACE(ibc)%VEL> 0.0_EB .OR. M%BOUNDARY_TYPE(iw)==OPEN_BOUNDARY) THEN
+          IF (SURFACE(SURF_INDEX)%VEL> 0.0_EB .OR. M%WALL(IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
              !d_my = d_my + is*(2.0_EB*d_cutoff)
              FoundWall_xy(3) = .FALSE.
           END IF
@@ -14806,29 +14806,29 @@ CONTAINS
        END IF
        iw = M%wall_index(ic, is*2)      ! wall index
        IF (iw>0) THEN
-          IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw))%HIDDEN .AND. M%OBST_INDEX_W(iw)>0) iw = 0
+          IF (M%OBSTRUCTION(M%WALL(IW)%OBST_INDEX)%HIDDEN .AND. M%WALL(IW)%OBST_INDEX>0) iw = 0
        END IF
        DO WHILE (iw==0 .AND. jj/=i_end)
           jj = jj + is
           ic = M%cell_index(iin,jj,kkn)  ! cell index
           iw = M%wall_index(ic, is*2)      ! wall index
           IF (iw>0) THEN
-             IF (M%OBSTRUCTION(M%OBST_INDEX_W(iw))%HIDDEN .AND. M%OBST_INDEX_W(iw)>0) iw = 0
+             IF (M%OBSTRUCTION(M%WALL(IW)%OBST_INDEX)%HIDDEN .AND. M%WALL(IW)%OBST_INDEX>0) iw = 0
           END IF
        END DO
 
        IF (iw /= 0) THEN
           FoundWall_xy(4) = .TRUE.
-          ibc = M%IJKW(5,iw)         ! Boundary condition index
+          SURF_INDEX = M%WALL(IW)%SURF_INDEX  ! Boundary condition index
           ! There is a 'door', i.e., outflow-boundary (or open boundary)
           ! so no wall forces ==> exit this loop
-          d_py = M%yw(iw)
+          d_py = M%WALL(IW)%YW
           I_OBST = M%OBST_INDEX_C(IC)
           IF (M%Solid(ic) .AND. .NOT.M%OBSTRUCTION(I_OBST)%HIDDEN) THEN
              WRITE(MESSAGE,'(A,I4,2I6)') 'ERROR: Find_Walls ',nm, ii,jjn
              CALL SHUTDOWN(MESSAGE)
           END IF
-          IF (SURFACE(ibc)%VEL> 0.0_EB .OR. M%BOUNDARY_TYPE(iw)==OPEN_BOUNDARY) THEN
+          IF (SURFACE(SURF_INDEX)%VEL> 0.0_EB .OR. M%WALL(IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
              !d_py = d_py + is*(2.0_EB*d_cutoff)
              FoundWall_xy(4) = .FALSE.
           END IF
