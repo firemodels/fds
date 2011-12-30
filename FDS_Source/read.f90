@@ -2490,7 +2490,6 @@ CALL ChkMemErr('READ','D_Z',IZERO)
 D_Z = 0._EB   
 
 ! Adjust reference enthalpy to 0 K if a RAMP_CP is given
-
 DO N=1,N_SPECIES
    SS => SPECIES(N)
    IF(SS%RAMP_CP_INDEX > 0) THEN
@@ -2508,8 +2507,7 @@ END DO
 
 
 ! Loop through temperatures from 1 K to 5000 K to get temperature-specific gas properties.  Data from JANAF 4
-
-TABLE_LOOP: DO J=1,5000
+DO J = 1,5000
 
    ! For each primitive species, get its property values at temperature J
 
@@ -2524,7 +2522,6 @@ TABLE_LOOP: DO J=1,5000
       IF (SS%RAMP_K_INDEX>0)  K_TMP(N) = EVALUATE_RAMP(REAL(J,EB),1._EB,SS%RAMP_K_INDEX)/SS%MW
       IF (SS%RAMP_MU_INDEX>0) MU_TMP(N) = EVALUATE_RAMP(REAL(J,EB),1._EB,SS%RAMP_MU_INDEX)/SS%MW
    ENDDO
-
    ! For each tracked species, store the mass-weighted property values
 
    DO N=0,N_TRACKED_SPECIES
@@ -2539,8 +2536,7 @@ TABLE_LOOP: DO J=1,5000
          CPBAR_Z(J,N) = CPBAR_Z(0,N) + CP_Z(J,N)
       ENDIF
    ENDDO
-
-ENDDO TABLE_LOOP
+ENDDO
 
 DEALLOCATE(D_TMP)
 DEALLOCATE(MU_TMP)
@@ -5710,7 +5706,7 @@ SUBROUTINE PROC_WALL
 USE GEOMETRY_FUNCTIONS
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 
-INTEGER :: IBC,N,NL,NWP_MAX
+INTEGER :: SURF_INDEX,N,NL,NWP_MAX
 REAL(EB) :: K_S_0,C_S_0,SMALLEST_CELL_SIZE(MAX_LAYERS)
 
 ! Calculate ambient temperature thermal DIFFUSIVITY for each MATERIAL, to be used in determining number of solid cells
@@ -5736,9 +5732,9 @@ NWP_MAX = 0  ! For some utility arrays, need to know the greatest number of poin
 ! Compute smallest cell size for each layer such that internal cells double in size.
 ! Each layer should have an odd number of cells.
 
-SURF_GRID_LOOP: DO IBC=0,N_SURF
+SURF_GRID_LOOP: DO SURF_INDEX=0,N_SURF
 
-   SF => SURFACE(IBC)
+   SF => SURFACE(SURF_INDEX)
    IF (SF%THERMAL_BC_INDEX /= THERMALLY_THICK) CYCLE SURF_GRID_LOOP
 
    ! Compute number of points per layer, and then sum up to get total points for the surface
@@ -6473,20 +6469,20 @@ MESH_LOOP: DO NM=1,NMESHES
  
                ! Save boundary condition info for obstacles
  
-               OB%IBC(:) = DEFAULT_SURF_INDEX
+               OB%SURF_INDEX(:) = DEFAULT_SURF_INDEX
           
                NNNN = 0
                DO NNN=0,N_SURF
-                  IF (SURF_ID    ==SURFACE(NNN)%ID) OB%IBC(:)    = NNN
-                  IF (SURF_IDS(1)==SURFACE(NNN)%ID) OB%IBC(3)    = NNN
-                  IF (SURF_IDS(2)==SURFACE(NNN)%ID) OB%IBC(-2:2) = NNN
-                  IF (SURF_IDS(3)==SURFACE(NNN)%ID) OB%IBC(-3)   = NNN
-                  IF (SURF_ID6(1)==SURFACE(NNN)%ID) OB%IBC(-1)   = NNN
-                  IF (SURF_ID6(2)==SURFACE(NNN)%ID) OB%IBC( 1)   = NNN
-                  IF (SURF_ID6(3)==SURFACE(NNN)%ID) OB%IBC(-2)   = NNN
-                  IF (SURF_ID6(4)==SURFACE(NNN)%ID) OB%IBC( 2)   = NNN
-                  IF (SURF_ID6(5)==SURFACE(NNN)%ID) OB%IBC(-3)   = NNN
-                  IF (SURF_ID6(6)==SURFACE(NNN)%ID) OB%IBC( 3)   = NNN
+                  IF (SURF_ID    ==SURFACE(NNN)%ID) OB%SURF_INDEX(:)    = NNN
+                  IF (SURF_IDS(1)==SURFACE(NNN)%ID) OB%SURF_INDEX(3)    = NNN
+                  IF (SURF_IDS(2)==SURFACE(NNN)%ID) OB%SURF_INDEX(-2:2) = NNN
+                  IF (SURF_IDS(3)==SURFACE(NNN)%ID) OB%SURF_INDEX(-3)   = NNN
+                  IF (SURF_ID6(1)==SURFACE(NNN)%ID) OB%SURF_INDEX(-1)   = NNN
+                  IF (SURF_ID6(2)==SURFACE(NNN)%ID) OB%SURF_INDEX( 1)   = NNN
+                  IF (SURF_ID6(3)==SURFACE(NNN)%ID) OB%SURF_INDEX(-2)   = NNN
+                  IF (SURF_ID6(4)==SURFACE(NNN)%ID) OB%SURF_INDEX( 2)   = NNN
+                  IF (SURF_ID6(5)==SURFACE(NNN)%ID) OB%SURF_INDEX(-3)   = NNN
+                  IF (SURF_ID6(6)==SURFACE(NNN)%ID) OB%SURF_INDEX( 3)   = NNN
                   IF (TRIM(SURFACE(NNN)%ID)==TRIM(EVAC_SURF_DEFAULT)) NNNN = NNN
                ENDDO
 
@@ -6504,7 +6500,7 @@ MESH_LOOP: DO NM=1,NMESHES
          
                FACE_LOOP: DO NNN=-3,3
                   IF (NNN==0) CYCLE FACE_LOOP
-                  IF (SURFACE(OB%IBC(NNN))%BURN_AWAY) THEN
+                  IF (SURFACE(OB%SURF_INDEX(NNN))%BURN_AWAY) THEN
                      OB%CONSUMABLE = .TRUE.
                      IF (.NOT.SAWTOOTH) THEN
                         IF (ID=='null')WRITE(MESSAGE,'(A,I5,A)')'ERROR: OBST ',N,       ' cannot be BURN_AWAY and SAWTOOTH=.FALSE.'
@@ -6872,7 +6868,7 @@ CONTAINS
     ! Passed variables
     INTEGER, INTENT(IN) :: NM, IMODE, EVAC_N
     ! Local variables
-    INTEGER :: N, N_END, I, I1, I2, J1, J2
+    INTEGER :: N, N_END, I1, I2, J1, J2
     REAL(EB) :: TINY
 
     TINY = 0.1_EB*MIN(MESHES(NM)%DXI, MESHES(NM)%DETA)
@@ -7698,11 +7694,11 @@ MESH_LOOP_1: DO NM=1,NMESHES
          CALL SHUTDOWN(MESSAGE)
       ENDIF
 
-      ! Assign IBC, Index of the Boundary Condition
+      ! Assign SURF_INDEX, Index of the Boundary Condition
 
-      VT%IBC = DEFAULT_SURF_INDEX
+      VT%SURF_INDEX = DEFAULT_SURF_INDEX
       DO NNN=0,N_SURF
-         IF (SURF_ID==SURFACE(NNN)%ID) VT%IBC = NNN
+         IF (SURF_ID==SURFACE(NNN)%ID) VT%SURF_INDEX = NNN
       ENDDO
 
       IF (SURF_ID=='OPEN')                            VT%TYPE_INDICATOR =  2
@@ -7710,10 +7706,10 @@ MESH_LOOP_1: DO NM=1,NMESHES
       IF ((MB/='null' .OR.  PBX>-1.E5_EB .OR. PBY>-1.E5_EB .OR. PBZ>-1.E5_EB) .AND. SURF_ID=='OPEN') VT%TYPE_INDICATOR = -2
  
       VT%BOUNDARY_TYPE = SOLID_BOUNDARY
-      IF (VT%IBC==OPEN_SURF_INDEX)     VT%BOUNDARY_TYPE = OPEN_BOUNDARY
-      IF (VT%IBC==MIRROR_SURF_INDEX)   VT%BOUNDARY_TYPE = MIRROR_BOUNDARY
-      IF (VT%IBC==PERIODIC_SURF_INDEX) VT%BOUNDARY_TYPE = PERIODIC_BOUNDARY
-      IF (VT%IBC==HVAC_SURF_INDEX)     VT%BOUNDARY_TYPE = HVAC_BOUNDARY
+      IF (VT%SURF_INDEX==OPEN_SURF_INDEX)     VT%BOUNDARY_TYPE = OPEN_BOUNDARY
+      IF (VT%SURF_INDEX==MIRROR_SURF_INDEX)   VT%BOUNDARY_TYPE = MIRROR_BOUNDARY
+      IF (VT%SURF_INDEX==PERIODIC_SURF_INDEX) VT%BOUNDARY_TYPE = PERIODIC_BOUNDARY
+      IF (VT%SURF_INDEX==HVAC_SURF_INDEX)     VT%BOUNDARY_TYPE = HVAC_BOUNDARY
       VT%IOR = IOR
       VT%ORDINAL = NN
  
