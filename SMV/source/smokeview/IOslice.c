@@ -22,7 +22,6 @@ char IOslice_revision[]="$Revision$";
 #include "interp.h"
 
 int endianswitch;
-#define TERRAIN_FIRE_LINE_UPDATE 39
 
 int getslicezlibdata(char *file,
                             int set_tmin, int set_tmax, float tmin, float tmax, int ncompressed, int sliceskip, int nsliceframes,
@@ -388,7 +387,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       statfile=STAT(file,&statbuffer);
     }
     if(sd->compression_type==0){
-      FORTgetslicesizes(file, &sd->nslicei, &sd->nslicej, &sd->nslicek, &sd->nsteps, &sliceframestep, &endian,&error,
+      FORTgetslicesizes(file, &sd->nslicei, &sd->nslicej, &sd->nslicek, &sd->nsteps, &sliceframestep, &endian_smv,&error,
         &settmin_s, &settmax_s, &tmin_s, &tmax_s, &headersize, &framesize, &statfile,
         slicefilelen);
     }
@@ -459,7 +458,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       FORTget_file_unit(&file_unit,&file_unit);
       FORTgetslicedata(&file_unit,file,slicelonglabels,sliceshortlabels,sliceunits,
                    &sd->is1,&sd->is2,&sd->js1,&sd->js2,&sd->ks1,&sd->ks2,&sd->idir,
-                   &qmin,&qmax,sd->qslicedata,sd->slicetimes,&sd->nsteps,&sliceframestep, &endian,
+                   &qmin,&qmax,sd->qslicedata,sd->slicetimes,&sd->nsteps,&sliceframestep, &endian_smv,
                    &settmin_s,&settmax_s,&tmin_s,&tmax_s,
                    slicefilelen,labellen,labellen,labellen);
       ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicei*sd->nslicej*sd->nslicek*sd->nsteps));
@@ -470,17 +469,17 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     if(slice_average_flag==1){
       int data_per_timestep;
       int ndata;
-      int ntimes;
+      int ntimes_local;
 
       data_per_timestep=sd->nslicei*sd->nslicej*sd->nslicek;
-      ntimes=sd->nsteps;
-      ndata = data_per_timestep*ntimes;
+      ntimes_local=sd->nsteps;
+      ndata = data_per_timestep*ntimes_local;
       show_slice_average=1;
 
       if(
         sd->compression_type==1||
         sd->compression_type==2||
-        average_slice_data(sd->qslicedata,sd->qslicedata,ndata,data_per_timestep,sd->slicetimes,ntimes,slice_average_interval)==1
+        average_slice_data(sd->qslicedata,sd->qslicedata,ndata,data_per_timestep,sd->slicetimes,ntimes_local,slice_average_interval)==1
         ){
         show_slice_average=0; // averaging failed
       }
@@ -488,17 +487,17 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     if(slice_turbprop_flag==1){
       int data_per_timestep;
       int ndata;
-      int ntimes;
+      int ntimes_local;
 
       data_per_timestep=sd->nslicei*sd->nslicej*sd->nslicek;
-      ntimes=sd->nsteps;
-      ndata = data_per_timestep*ntimes;
+      ntimes_local=sd->nsteps;
+      ndata = data_per_timestep*ntimes_local;
       show_slice_average=1;
 
       if(
         sd->compression_type==1||
         sd->compression_type==2||
-        auto_turbprop_slice_data(sd->qslicedata,sd->qslicedata,ndata,data_per_timestep,sd->slicetimes,ntimes,slice_average_interval)==1
+        auto_turbprop_slice_data(sd->qslicedata,sd->qslicedata,ndata,data_per_timestep,sd->slicetimes,ntimes_local,slice_average_interval)==1
         ){
         show_slice_average=0; // averaging failed
       }
@@ -1269,7 +1268,7 @@ int new_multi(slice *sdold,slice *sd){
 /* ------------------ getsliceparams ------------------------ */
 
 void getsliceparams(void){
-  int i,iii;
+  int i;
   char *file;
   slice *sd,*sdold;
   int error;
@@ -1286,7 +1285,7 @@ void getsliceparams(void){
     file = sd->file;
     lenfile = strlen(file);
     if(sd->compression_type==0){
-      FORTgetsliceparms(file,&endian,
+      FORTgetsliceparms(file,&endian_smv,
         &is1,&is2,&js1,&js2,&ks1,&ks2,&ni,&nj,&nk,&sd->volslice,&error,lenfile);
     }
     else if(sd->compression_type==1){
@@ -1402,8 +1401,6 @@ void getsliceparams(void){
     }
   }
   if(nsliceinfo>0){
-    int ii;
-
     FREEMEMORY(sliceorderindex);
     NewMemory((void **)&sliceorderindex,sizeof(int)*nsliceinfo);
     for(i=0;i<nsliceinfo;i++){
@@ -1733,7 +1730,6 @@ void update_slice_contours(int slice_type_index, float line_min, float line_max,
     for(i=0;i<nline_values;i++){
       int val_index;
       float val;
-      int ii;
       float valmin, valmax;
       
       valmin = sb->levels256[0];
@@ -1776,6 +1772,9 @@ void update_slice_contours(int slice_type_index, float line_min, float line_max,
       case 3:
       constval = zplt[sd->ks1]+offset_slice*sd->sliceoffset;
       break;
+      default:
+        ASSERT(0);
+        break;
     }
 
     freecontours(sd->line_contours,sd->nline_contours);
@@ -1797,6 +1796,9 @@ void update_slice_contours(int slice_type_index, float line_min, float line_max,
         case 3:
         getlinecontours(xplt,yplt,nx,ny,vals,NULL,line_min,line_max,ci);
         break;
+        default:
+          ASSERT(0);
+          break;
       }
     }
   }
@@ -1975,7 +1977,7 @@ void getslicedatabounds(const slice *sd, float *pmin, float *pmax){
   float *pdata;
   int ndata;
   int n;
-  int frame_number,point;
+  int frame_number,point_local;
   int first=1;
 
   pdata = sd->qslicedata;
@@ -1983,8 +1985,8 @@ void getslicedatabounds(const slice *sd, float *pmin, float *pmax){
 
   for (n=0;n<ndata;n++){
     frame_number = n/(sd->nsliceii);
-    point = n - frame_number*sd->nsliceii;
-    if(sd->c_iblank!=NULL&&sd->c_iblank[point]==0){
+    point_local = n - frame_number*sd->nsliceii;
+    if(sd->c_iblank!=NULL&&sd->c_iblank[point_local]==0){
       continue;
     }
     if(first==1){
@@ -2457,7 +2459,7 @@ void drawslice(const slice *sd){
 
 void drawslice_cellcenter(const slice *sd){
   int i,j,k,n,n2;
-  int i11, i31, i13, i33;
+  int i33;
   float constval,x1,x3,yy1,y3,z1,z3;
   int maxj;
 
@@ -2984,10 +2986,9 @@ void drawslice_texture(const slice *sd){
 #define ijnode2(i,j) ((nycell+1)*(i) + (j))
 
 void drawslice_terrain(const slice *sd){
-  int i,j,k,n,n2;
+  int i,j,n,n2;
   float r11, r13, r31, r33;
-  float constval,x1,x3,yy1,y3,z1,z3;
-  int maxj;
+  float constval,x1,x3,yy1,y3;
 
   float *xplt, *yplt;
   terraindata *terri;
@@ -3546,7 +3547,7 @@ void drawvolslice_terrain(const slice *sd){
 
 void drawvolslice_cellcenter(const slice *sd){
   int i,j,k,n,n2;
-  int i11, i31, i13, i33;
+  int i33;
   float constval,x1,x3,yy1,y3,z1,z3;
   int maxj;
 
@@ -4815,10 +4816,9 @@ void drawvslice(const vslice *vd){
 /* ------------------ drawvslice_terrain ------------------------ */
 
 void drawvslice_terrain(const vslice *vd){
-  int i,j,k,n;
+  int i,j,n;
   int i11;
-  float constval,x1,yy1,z1;
-  int maxj;
+  float constval,x1,yy1;
   slice *u, *v, *w,*sd;
   float dx, dy, dz;
   float vrange;
@@ -5076,7 +5076,7 @@ void init_Slicedata(void){
 
 /* ------------------ auto_turbprop_slice_data ------------------------ */
 
-int auto_turbprop_slice_data(float *data_out, float *u, int ndata, int data_per_timestep, float *times, int ntimes, float average_time){
+int auto_turbprop_slice_data(float *data_out, float *u, int ndata, int data_per_timestep, float *times_local, int ntimes_local, float average_time){
   float *u_avg, *u_prime;
   float *uu_avg;
   int i;
@@ -5087,7 +5087,7 @@ int auto_turbprop_slice_data(float *data_out, float *u, int ndata, int data_per_
   NewMemory((void **)&uu_avg,ndata*sizeof(float));
   NewMemory((void **)&u_prime,ndata*sizeof(float));
 
-  average_slice_data(u_avg,u, ndata, data_per_timestep, times, ntimes, average_time);
+  average_slice_data(u_avg,u, ndata, data_per_timestep, times_local, ntimes_local, average_time);
 
   for(i=0;i<ndata;i++){
     uu_avg[i]=u[i]*u[i];
@@ -5095,8 +5095,8 @@ int auto_turbprop_slice_data(float *data_out, float *u, int ndata, int data_per_
     u_prime[i]*=u_prime[i];
   }
 
-  average_slice_data(u_prime,u_prime, ndata, data_per_timestep, times, ntimes, average_time);
-  average_slice_data(uu_avg,uu_avg, ndata, data_per_timestep, times, ntimes, average_time);
+  average_slice_data(u_prime,u_prime, ndata, data_per_timestep, times_local, ntimes_local, average_time);
+  average_slice_data(uu_avg,uu_avg, ndata, data_per_timestep, times_local, ntimes_local, average_time);
 
   for(i=0;i<ndata;i++){
     if(uu_avg[i]==0.0){
@@ -5116,17 +5116,17 @@ int auto_turbprop_slice_data(float *data_out, float *u, int ndata, int data_per_
 
 /* ------------------ average_slice_data ------------------------ */
 
-int average_slice_data(float *data_out, float *data_in, int ndata, int data_per_timestep, float *times, int ntimes, float average_time){
+int average_slice_data(float *data_out, float *data_in, int ndata, int data_per_timestep, float *times_local, int ntimes_local, float average_time){
 
-#define IND(itime,ival) (itime)*data_per_timestep + (ival)
+#define IND(itime,ival) ((itime)*data_per_timestep + (ival))
   float *datatemp=NULL;
   int below, above, naverage;
   float average_timed2;
   int i, j, k;
 
   if(data_in==NULL||data_out==NULL)return 1;
-  if(ndata<data_per_timestep||data_per_timestep<1||ntimes<1||average_time<0.0)return 1;
-  if(ndata!=data_per_timestep*ntimes)return 1;
+  if(ndata<data_per_timestep||data_per_timestep<1||ntimes_local<1||average_time<0.0)return 1;
+  if(ndata!=data_per_timestep*ntimes_local)return 1;
 
   average_timed2 = average_time/2.0;
 
@@ -5134,18 +5134,18 @@ int average_slice_data(float *data_out, float *data_in, int ndata, int data_per_
   for(i=0;i<ndata;i++){
     datatemp[i]=0.0;
   }
-  for(i=0;i<ntimes;i++){
-    printf("averaging time=%.2f\n",times[i]);
+  for(i=0;i<ntimes_local;i++){
+    printf("averaging time=%.2f\n",times_local[i]);
     below=0;
     for(j=i-1;j>=0;j--){
-      if(times[i]-times[j]>average_timed2){
+      if(times_local[i]-times_local[j]>average_timed2){
         below=j+1;
         break;
       }
     }
-    above=ntimes-1;
-    for(j=i+1;j<ntimes;j++){
-      if(times[j]-times[i]>average_timed2){
+    above=ntimes_local-1;
+    for(j=i+1;j<ntimes_local;j++){
+      if(times_local[j]-times_local[i]>average_timed2){
         above=j-1;
         break;
       }
@@ -5198,11 +5198,11 @@ int getsliceheader0(char *comp_file, char *size_file, int compression_type, int 
 /* ------------------ getsliceheader ------------------------ */
 
 int getsliceheader(char *comp_file, char *size_file, int compression_type,
-                   int framestep, int set_tmin, int set_tmax, float tmin, float tmax,
+                   int framestep, int set_tmin, int set_tmax, float tmin_local, float tmax_local,
                    int *nx, int *ny, int *nz, int *nsteps, int *ntotal, float *valmin, float *valmax){
   FILE *stream;
   int i1, i2, j1, j2, k1, k2;
-  float time;
+  float time_local;
   int ncompressed;
   int count;
   char buffer[256];
@@ -5235,7 +5235,7 @@ int getsliceheader(char *comp_file, char *size_file, int compression_type,
   while(!feof(stream)){
 
     if(fgets(buffer,255,stream)==NULL)break;
-    sscanf(buffer,"%f %i %i",&time,&ncompressed_zlib, &ncompressed_rle);
+    sscanf(buffer,"%f %i %i",&time_local,&ncompressed_zlib, &ncompressed_rle);
     if(compression_type==1){
       ncompressed=ncompressed_zlib;
     }
@@ -5243,8 +5243,8 @@ int getsliceheader(char *comp_file, char *size_file, int compression_type,
       ncompressed=ncompressed_rle;
     }
     if(count++%framestep!=0)continue;
-    if(set_tmin==1&&time<tmin)continue;
-    if(set_tmax==1&&time>tmax)continue;
+    if(set_tmin==1&&time_local<tmin_local)continue;
+    if(set_tmax==1&&time_local>tmax_local)continue;
     (*nsteps)++;
     *ntotal+=ncompressed;
   }
@@ -5272,20 +5272,20 @@ int getsliceheader(char *comp_file, char *size_file, int compression_type,
 /* ------------------ getslicecompresseddata ------------------------ */
 
 int getslicecompresseddata(char *file, 
-                            int set_tmin, int set_tmax, float tmin, float tmax, int ncompressed, int sliceskip, int nsliceframes,
-                            float *times, unsigned char *compressed_data, compinfo *compindex, float *valmin, float *valmax){
+                            int set_tmin, int set_tmax, float tmin_local, float tmax_local, int ncompressed, int sliceskip, int nsliceframes,
+                            float *times_local, unsigned char *compressed_data, compinfo *compindex, float *valmin, float *valmax){
   int returnval;
 
-  returnval=getslicezlibdata(file,set_tmin,set_tmax,tmin,tmax,ncompressed,sliceskip,nsliceframes,
-                            times,compressed_data,compindex,valmin,valmax);
+  returnval=getslicezlibdata(file,set_tmin,set_tmax,tmin_local,tmax_local,ncompressed,sliceskip,nsliceframes,
+                            times_local,compressed_data,compindex,valmin,valmax);
   return returnval;
 }
 
 /* ------------------ getsliceczlibdata ------------------------ */
 
 int getslicezlibdata(char *file, 
-                            int set_tmin, int set_tmax, float tmin, float tmax, int ncompressed, int sliceskip, int nsliceframes,
-                            float *times, unsigned char *compressed_data, compinfo *compindex, float *valmin, float *valmax){
+                            int set_tmin, int set_tmax, float tmin_local, float tmax_local, int ncompressed, int sliceskip, int nsliceframes,
+                            float *times_local, unsigned char *compressed_data, compinfo *compindex, float *valmin, float *valmax){
   FILE *stream;
   int count, ns;
   unsigned char *cd;
@@ -5340,11 +5340,11 @@ int getslicezlibdata(char *file,
 
     fread(&ttime,4,1,stream);
     fread(&nncomp,4,1,stream);
-    if(count++%sliceskip!=0||set_tmin==1&&ttime<tmin||set_tmax==1&&ttime>tmax){
+    if(count++%sliceskip!=0||set_tmin==1&&ttime<tmin_local||set_tmax==1&&ttime>tmax_local){
       fseek(stream,nncomp,SEEK_CUR);
       continue;
     }
-    times[ns++]=ttime;
+    times_local[ns++]=ttime;
     compindex[ns].offset=compindex[ns-1].offset+nncomp;
     compindex[ns-1].size=nncomp;
 
@@ -5376,7 +5376,7 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type){
   float minmax[2];
   int ijkbar[6];
   FILE *stream, *sizestream, *RLESLICEFILE;
-  float time;
+  float time_local;
   int ncompressed;
   int count;
   size_t returncode;
@@ -5402,9 +5402,9 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type){
     count=2;
 
     while(!feof(stream)){
-      fread(&time,4,1,stream);
+      fread(&time_local,4,1,stream);
       fread(&ncompressed,4,1,stream);
-      fprintf(sizestream,"%f %i\n",time,ncompressed);
+      fprintf(sizestream,"%f %i\n",time_local,ncompressed);
       count++;
       fseek(stream,ncompressed,SEEK_CUR);
     }
@@ -5435,13 +5435,13 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type){
     fprintf(sizestream,"%f %f\n",minmax[0],minmax[1]);
     count=2;
     while(!feof(stream)){
-      FORTRLESLICEREAD(&time,1);
+      FORTRLESLICEREAD(&time_local,1);
       if(returncode==0)break;
       FORTRLESLICEREAD(&ncompressed,1);
       if(returncode==0)break;
       returncode=fseek(stream,8+ncompressed,SEEK_CUR);
       if(returncode!=0)break;
-      fprintf(sizestream,"%f %i %i\n",time,0,ncompressed);
+      fprintf(sizestream,"%f %i %i\n",time_local,0,ncompressed);
       count++;
     }
   }
@@ -5454,13 +5454,13 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type){
 #ifdef USE_ZLIB
 /* ------------------ uncompress_slicedataframe ------------------------ */
 
-void uncompress_slicedataframe(slice *sd,int iframe){
+void uncompress_slicedataframe(slice *sd,int iframe_local){
   unsigned int countin;
   uLongf countout;
   unsigned char *compressed_data;
 
-  compressed_data = sd->qslicedata_compressed + sd->compindex[iframe].offset;
-  countin = sd->compindex[iframe].size;
+  compressed_data = sd->qslicedata_compressed + sd->compindex[iframe_local].offset;
+  countin = sd->compindex[iframe_local].size;
   countout=sd->nsliceii;
 
   if(sd->compression_type==1){

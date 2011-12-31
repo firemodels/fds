@@ -1703,7 +1703,7 @@ int readsmv(char *file, char *file2){
 
   nvents=0; 
   setPDIM=0;
-  endian = getendian();
+  endian_smv = getendian();
   endian_native = getendian();
   endian_data=endian_native;
   FREEMEMORY(LESsystem);
@@ -2485,7 +2485,7 @@ int readsmv(char *file, char *file2){
 
         fgets(buffer,255,stream);
         sscanf(buffer,"%i %i %i %i %i %i %i %i",ijk2,ijk2+1,ijk2+2,ijk2+3,ijk2+4,ijk2+5,&colorindex_local,&blocktype_local);
-        if(blocktype>=0&&(blocktype_local&8)==8){
+        if(blocktype_local>=0&&(blocktype_local&8)==8){
           is_block_terrain[nn]=1;
         }
         else{
@@ -5136,8 +5136,8 @@ typedef struct {
         fseek(ENDIANfile,4,SEEK_SET);
         fread(&endian_data,4,1,ENDIANfile);
         fclose(ENDIANfile);
-        endian=endian_native;
-        if(endian_data!=1)endian=1-endian_native;
+        endian_smv=endian_native;
+        if(endian_data!=1)endian_smv=1-endian_native;
         setendian=1;
       }
       continue;
@@ -6400,7 +6400,7 @@ typedef struct {
     if(match(LESsystem,"DVF")==1||match(LESendian,"l")==1||match(LESendian,"L")==1){
       endian_data=0;
     }
-    endian = endian_data;
+    endian_smv = endian_data;
   }
 
   if(nisoinfo>0){
@@ -6446,9 +6446,7 @@ typedef struct {
   }
 
   if(nsliceinfo>0){
-    FREEMEMORY(sliceindex);
     FREEMEMORY(slicebounds);
-    if(NewMemory((void*)&sliceindex,nsliceinfo*sizeof(int))==0)return 2;
     if(NewMemory((void*)&slicebounds,nsliceinfo*sizeof(databounds))==0)return 2;
     nslice2=0;
     for(i=0;i<nsliceinfo;i++){
@@ -6460,7 +6458,6 @@ typedef struct {
       slicei->valmax=0.0;
       slicei->setvalmin=0;
       slicei->setvalmax=0;
-      sliceindex[nslice2]=i;
       slicebounds[nslice2].datalabel=slicei->label.shortlabel;
       slicebounds[nslice2].setvalmin=0;
       slicebounds[nslice2].setvalmax=0;

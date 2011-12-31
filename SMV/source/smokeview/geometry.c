@@ -934,7 +934,7 @@ int makeiblank_carve(void){
     }
     for(j=0;j<nmeshes;j++){
       mesh *meshj;
-      int i1, i2, j1, j2, k1, k2;
+      int i1, i2, jj1, j2, k1, k2;
       int ii, jj, kk;
       float *xplt, *yplt, *zplt;
 
@@ -964,7 +964,7 @@ int makeiblank_carve(void){
       }
       for(jj=0;jj<ny;jj++){
         if(yplt[jj]<=meshj->boxmin[1]&&meshj->boxmin[1]<yplt[jj+1]){
-          j1=jj;
+          jj1=jj;
           break;
         }
       }
@@ -988,7 +988,7 @@ int makeiblank_carve(void){
       }
 
       for(kk=k1;kk<=k2;kk++){
-        for(jj=j1;jj<=j2;jj++){
+        for(jj=jj1;jj<=j2;jj++){
           for(ii=i1;ii<=i2;ii++){
             ib_embed[IJKNODE(ii,jj,kk)]=0;
           }

@@ -75,7 +75,6 @@ void increment_shooter_data(shootpointdata *pold, shootpointdata *pnew, float dt
   float *xyznew, *uvwnew;
   float g=9.8;
   float dt;
-  int nsteps;
 
   // dv/dt = g - |g|(v-v_a)/v_inf
   // dx/dt = v
@@ -112,8 +111,8 @@ void increment_shooter_data(shootpointdata *pold, shootpointdata *pnew, float dt
       dvel[1] = uvwnew[1]-uvw_air[1];
       dvel[2] = uvwnew[2]-uvw_air[2];
 
-      dvelmin = MIN(abs(dvel[0]),abs(dvel[1]));
-      dvelmin = MIN(abs(1.0+dvel[2]),dvelmin);
+      dvelmin = MIN(ABS(dvel[0]),ABS(dvel[1]));
+      dvelmin = MIN(ABS(1.0+dvel[2]),dvelmin);
       if(shooter_v_inf>0.01){
         dt = MIN(dt,0.1*shooter_v_inf/dvelmin);
         uvwnew[0] -= g*dt*(    dvel[0]/shooter_v_inf);
@@ -201,13 +200,13 @@ void solve_shooter_data(void){
 
 void draw_shooter(void){
   int i;
-  int iframe;
+  int iframe_local;
   shootpointdata *pb, *pe;
   int nframes;
 
-  iframe = shooter_timeslist[itimes];
-  pb = shoottimeinfo[iframe].beg;
-  pe = shoottimeinfo[iframe].end;
+  iframe_local = shooter_timeslist[itimes];
+  pb = shoottimeinfo[iframe_local].beg;
+  pe = shoottimeinfo[iframe_local].end;
   nframes = pe + 1 - pb;
 
 

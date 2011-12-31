@@ -407,7 +407,7 @@ SVEXTERN int iframe, iframebeg, izone;
 SVEXTERN int eyeview,eyeview_level;
 SVEXTERN int eyeview_old,eyeview_SAVE,eyeview_last;
 SVEXTERN int frameratevalue;
-SVEXTERN int setpartmin, setpartmax, setslicemin, setslicemax, endian;
+SVEXTERN int setpartmin, setpartmax, setslicemin, setslicemax, SVDECL(endian_smv,0);
 SVEXTERN float slice_line_contour_min;
 SVEXTERN float slice_line_contour_max;
 SVEXTERN int slice_line_contour_num;
@@ -1075,7 +1075,7 @@ SVEXTERN int SVDECL(*loadpatchsubmenus,NULL), nloadpatchsubmenus;
 SVEXTERN int npatchtypes;
 SVEXTERN char SVDECL(**patchlabellist,NULL);
 SVEXTERN int SVDECL(*patchlabellist_index,NULL);
-SVEXTERN int SVDECL(*sliceindex,NULL), SVDECL(*isoindex,NULL);
+SVEXTERN int SVDECL(*isoindex,NULL);
 
 SVEXTERN int have_vents_int;
 SVEXTERN int nface_outlines, nface_textures, nface_transparent;

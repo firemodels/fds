@@ -188,7 +188,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   if(patchinfo[ifile].compression_type==0){
     FILE_SIZE labellen=LABELLEN;
 
-    FORTgetpatchsizes1(&file_unit,file,patchlonglabel,patchshortlabel,patchunit,&endian,&meshi->npatches,&headersize,&error,
+    FORTgetpatchsizes1(&file_unit,file,patchlonglabel,patchshortlabel,patchunit,&endian_smv,&meshi->npatches,&headersize,&error,
                        lenfile,labellen,labellen,labellen);
     if(error!=0){
       readpatch(ifile,UNLOAD,&error);

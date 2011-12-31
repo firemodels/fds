@@ -34,7 +34,6 @@ float *get_terraincolor(terraincell *ti);
 int getterrain_data(char *file,terraindata *terri);
 int getterrain_size(char *file,float *xmin, float *xmax, int *nx, float *ymin, float *ymax, int *ny, int *ntimes);
 void drawcone(float d1, float height, float *rgbcolor);
-void drawtrunccone(float d1, float d2, float height, float *rgbcolor);
 void drawdisk(float diameter, float height, float *rgbcolor);
 static float specular[4]={0.4,0.4,0.4,1.0};
 
@@ -101,6 +100,9 @@ void drawtrees(void){
         glTranslatef(0.0,0.0,treei->base_height);
         drawcone(treei->trunk_diam,crown_height,trunccolor);
         break;
+      default:
+        ASSERT(0);
+        break;
     }
     glPopMatrix();
 
@@ -122,7 +124,6 @@ float get_zcell_val(mesh *meshi,float xval, float yval, float *zval_offset, int 
   float *xplt, *yplt;
   int ibar, jbar;
   float dx, dy;
-  float *znode;
   int nxcell;
   float *zcell,zval,zval_return;
   int imesh;
@@ -172,7 +173,6 @@ float get_zcell_val_offset(mesh *meshi,float xval, float yval, int *loc){
   float *xplt, *yplt;
   int ibar, jbar;
   float dx, dy;
-  float *znode;
   int nxcell;
   float *zcell,zval;
   int imesh;
@@ -238,17 +238,11 @@ void update_terrain_colors(void){
 /* ------------------ initterrain_all ------------------------ */
 
 void initterrain_all(void){
-  char buffer[1024];
   float dx, dy;
-  float *x, *y;
   float *znode, *znode_offset;
   int nycell;
   float znormal3[3];
-  int k;
-  int nz;
-  int ibar, jbar;
   int imesh;
-  float *xplt, *yplt;
   float denom;
   unsigned char *uc_znormal;
 
@@ -270,19 +264,16 @@ void initterrain_all(void){
 
     uc_znormal = terri->uc_znormal;
     for(j=0;j<=terri->ny;j++){
-      int i,jm1, im1;
-      float zz;
+      int i;
       float ynode;
 
       ynode = terri->y[j];
 
       for(i=0;i<=terri->nx;i++){
-        int ii, jj;
         float xnode;
         int count, loc1, loc2, loc3, loc4;
         float val1, val2, val3, val4;
         float val1_offset, val2_offset, val3_offset, val4_offset;
-        float valx1, valx2, valx3, valx4;
         float valx1a, valx2a, valx3a, valx4a;
         float valx1b, valx2b, valx3b, valx4b;
         float valy1a, valy2a, valy3a, valy4a;
@@ -416,7 +407,6 @@ void initterrain_all(void){
   for(imesh=0;imesh<nmeshes;imesh++){
     mesh *meshi;
     terraindata *terri;
-    int minfill=1, maxfill=1;
     int i, j;
     float zmin, zmax, dz;
     
@@ -461,14 +451,10 @@ void initterrain_all(void){
 
 void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, int nx, float ymin, float ymax, int ny, 
                        int allocate_memory){
-  char buffer[1024];
   float dx, dy;
   float *x, *y, *z;
-  float *znode, *zcell;
   int nxcell;
-  float *znormal;
-  int i,j,k;
-  int ijkcell;
+  int i,j;
   int ij;
 
   if(meshi!=NULL){
@@ -661,7 +647,7 @@ void drawterrain(terraindata *terri, int only_geom){
 /* ------------------ drawterrain ------------------------ */
 
 void drawterrain_texture(terraindata *terri, int only_geom){
-  float *znode, *znormal;
+  float *znode;
   unsigned char *uc_znormal, *uc_zn;
   int nxcell,nycell;
   int i, j;
@@ -873,7 +859,7 @@ void readterrain(char *file, int ifile, int flag, int *errorcode){
 
 /* ------------------ getterrain_size ------------------------ */
 
-int getterrain_size(char *file,float *xmin, float *xmax, int *nx, float *ymin, float *ymax, int *ny, int *ntimes){
+int getterrain_size(char *file,float *xmin, float *xmax, int *nx, float *ymin, float *ymax, int *ny, int *times_local){
   FILE *WUIFILE;
   int one;
   float xyminmax[4];
@@ -881,7 +867,7 @@ int getterrain_size(char *file,float *xmin, float *xmax, int *nx, float *ymin, f
   int endianswitch=0;
   size_t returncode;
   int version;
-  float time;
+  float time_local;
   int nchanges;
   int nt=0;
 
@@ -906,7 +892,7 @@ int getterrain_size(char *file,float *xmin, float *xmax, int *nx, float *ymin, f
 
   for(;;){
     
-    FORTWUIREAD(&time,1);
+    FORTWUIREAD(&time_local,1);
     if(returncode==0)break;
 
     FORTWUIREAD(&nchanges,1);
@@ -917,7 +903,7 @@ int getterrain_size(char *file,float *xmin, float *xmax, int *nx, float *ymin, f
     nt++;
 
   }
-  *ntimes=nt;
+  *times_local=nt;
 
   fclose(WUIFILE);
 
@@ -933,13 +919,13 @@ int getterrain_data(char *file,terraindata *terri){
   int one;
   int endianswitch=0;
   size_t returncode;
-  float time;
+  float time_local;
   int nchanges;
   int nt;
   int nx, ny;
   int *cellindex_buffer;
   unsigned char *cellstate_buffer;
-  float *times;
+  float *times_local;
   int ntotal;
 
   WUIFILE = fopen(file,"rb");
@@ -955,7 +941,7 @@ int getterrain_data(char *file,terraindata *terri){
   nx = terri->nx;
   ny = terri->ny;
   ntotal = nx*ny;
-  times=terri->times;
+  times_local=terri->times;
 
   NewMemory((void **)&cellindex_buffer,nx*ny*sizeof(int));
   NewMemory((void **)&cellstate_buffer,nx*ny);
@@ -968,10 +954,10 @@ int getterrain_data(char *file,terraindata *terri){
   
   for(nt=0;nt<terri->ntimes;nt++){
     
-    FORTWUIREAD(&time,1);
-    printf("terrain time=%f\n",time);
+    FORTWUIREAD(&time_local,1);
+    printf("terrain time=%f\n",time_local);
     if(returncode==0)break;
-    *times++ = time;
+    *times_local++ = time_local;
 
     FORTWUIREAD(&nchanges,1);
     if(returncode==0)break;
@@ -995,7 +981,7 @@ int getterrain_data(char *file,terraindata *terri){
         }
         ii = ti->nstates;
         ti->state[ii] = cellstate_buffer[i];
-        ti->time[ii] = time;
+        ti->time[ii] = time_local;
         ti->nstates++;
       }
     }
@@ -1092,7 +1078,7 @@ void init_tnode(terraindata *terri){
 /* ------------------ init_tnorm ------------------------ */
 
 void init_tnorm(terraindata *terri){
-  float *znormal, *znode;
+  float *znode;
   unsigned char *uc_znormal;
   float znormal3[3];
   int i, j;
@@ -1147,7 +1133,7 @@ void init_tnorm(terraindata *terri){
 
 /* ------------------ update_terrain ------------------------ */
 
-void update_terrain(int allocate_memory, float vertical_factor){
+void update_terrain(int allocate_memory, float vertical_factor_local){
   if(autoterrain==1){
     int i;
 
@@ -1202,7 +1188,7 @@ void update_terrain(int allocate_memory, float vertical_factor){
   }
 }
 
-/* ------------------ if_slice_terrain ------------------------ */
+/* ------------------ have_terrain_slice ------------------------ */
 
 int have_terrain_slice(void){
   int i;

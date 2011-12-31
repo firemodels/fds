@@ -115,7 +115,7 @@ void drawtours(void){
   tourdata *touri;
   pathdata *pj;
   keyframe *framej;
-  int iframe;
+  int iframe_local;
   float *eye;
 
   float *tmp_tourcol_text,*tmp_tourcol_pathline,*tmp_tourcol_pathknots;
@@ -295,8 +295,8 @@ void drawtours(void){
           if(touri->display==0||touri->nkeyframes<=1)continue;
           if(touri->path_timeslist==NULL)continue;
 
-          iframe = touri->path_timeslist[itimes];
-          pj = touri->pathnodes + iframe;
+          iframe_local = touri->path_timeslist[itimes];
+          pj = touri->pathnodes + iframe_local;
           if(keyframe_snap==1)pj = pj->keysnap;
 
           eye = pj->eye;
@@ -316,8 +316,8 @@ void drawtours(void){
           if(touri->display==0||touri->nkeyframes<=1)continue;
           if(touri->path_timeslist==NULL)continue;
 
-          iframe = touri->path_timeslist[itimes];
-          pj = touri->pathnodes + iframe;
+          iframe_local = touri->path_timeslist[itimes];
+          pj = touri->pathnodes + iframe_local;
           if(keyframe_snap==1)pj = pj->keysnap;
 
           eye = pj->eye;
@@ -334,8 +334,8 @@ void drawtours(void){
           if(touri->display==0||touri->nkeyframes<=1)continue;
           if(touri->path_timeslist==NULL)continue;
 
-          iframe = touri->path_timeslist[itimes];
-          pj = touri->pathnodes + iframe;
+          iframe_local = touri->path_timeslist[itimes];
+          pj = touri->pathnodes + iframe_local;
           if(keyframe_snap==1)pj = pj->keysnap;
           eye = pj->eye;
           oview = pj->oview;
@@ -424,7 +424,7 @@ void createtourpaths(void){
   float *aview0, *aview1, *aview2;
   float *eye, *aview, *oview;
   float vtime;
-  int iframe;
+  int iframe_local;
   float f1, f2, dt;
   float dx, dy, denom, dx2, dy2;
   float a, b, c;
@@ -440,7 +440,7 @@ void createtourpaths(void){
 
   float vdist,vtime2,vdt;
   float tour_tstart, tour_tstop;
-  float viewx, viewy, dummy;
+  float viewx_local, viewy_local, dummy;
 
   float dz, dist, pi;
 //  keyframe *framejm1;
@@ -627,16 +627,16 @@ void createtourpaths(void){
     // evaluate quantities along path - determine distances
     // define tour_t and tour_dist (tour_t is uniform )
 
-    iframe=0;
+    iframe_local=0;
     tour_dist[0]=0.0;
     for(j=0;j<view_ntimes;j++){
       pj = touri->pathnodes + j;
       f1 = (view_ntimes-1-j)/(float)(view_ntimes-1);
       f2 = 1-f1;
       vtime = view_tstart*f1 + view_tstop*f2;
-      iframe = isearch(touri->keyframe_times,touri->nkeyframes,vtime,iframe);
-      kf1 = touri->keyframe_list[iframe];
-      kf2 = touri->keyframe_list[iframe+1];
+      iframe_local = isearch(touri->keyframe_times,touri->nkeyframes,vtime,iframe_local);
+      kf1 = touri->keyframe_list[iframe_local];
+      kf2 = touri->keyframe_list[iframe_local+1];
       pj->keysnap=&kf1->nodeval;
       dt = kf2->nodeval.time - kf1->nodeval.time;
       f1 = (vtime - kf1->nodeval.time)/dt;
@@ -653,12 +653,12 @@ void createtourpaths(void){
       if(kf1->nodeval.eye[0]==kf2->nodeval.eye[0]&&
          kf1->nodeval.eye[1]==kf2->nodeval.eye[1]&&
          kf1->nodeval.eye[2]==kf2->nodeval.eye[2]){
-        eye[0] = hermiteeye(1.0,0,kf1->prev,kf1,&viewx);
-        eye[1] = hermiteeye(1.0,1,kf1->prev,kf1,&viewy);
+        eye[0] = hermiteeye(1.0,0,kf1->prev,kf1,&viewx_local);
+        eye[1] = hermiteeye(1.0,1,kf1->prev,kf1,&viewy_local);
       }
       else{
-        eye[0] = hermiteeye(f1,0,kf1,kf2,&viewx);
-        eye[1] = hermiteeye(f1,1,kf1,kf2,&viewy);
+        eye[0] = hermiteeye(f1,0,kf1,kf2,&viewx_local);
+        eye[1] = hermiteeye(f1,1,kf1,kf2,&viewy_local);
       }
       eye[2] = hermiteeye(f1,2,kf1,kf2,&dummy);
       eye[3] = hermiteeye(f1,3,kf1,kf2,&dummy);
@@ -669,8 +669,8 @@ void createtourpaths(void){
       pj->elev_path = hermiteeye(f1,5,kf1,kf2,&dummy);
       pj->zoom   = hermiteeye(f1,4,kf1,kf2,&dummy);
 
-      oview[0]=viewx;
-      oview[1]=viewy;
+      oview[0]=viewx_local;
+      oview[1]=viewy_local;
       oview[2]=0.0;
       tour_t[j]=vtime;
       if(j!=0){
@@ -767,7 +767,7 @@ void createtourpaths(void){
       tour_dist2[j]=avgsum/11.0;
     }
 
-    iframe = 0;
+    iframe_local = 0;
     tour_t2[0]=0.0;
     tour_dist2[0]=0.0;
     tour_tstart = touri->keyframe_list[0]->nodeval.time;
@@ -775,10 +775,10 @@ void createtourpaths(void){
     vdt = (tour_tstop - tour_tstart)/(float)(view_ntimes-1);
     for(j=1;j<view_ntimes;j++){
       vdist = tour_dist2[j];
-      iframe = isearch(tour_dist,view_ntimes,vdist,iframe);
-      f1 = (vdist-tour_dist[iframe])/(tour_dist[iframe+1]-tour_dist[iframe]);
+      iframe_local = isearch(tour_dist,view_ntimes,vdist,iframe_local);
+      f1 = (vdist-tour_dist[iframe_local])/(tour_dist[iframe_local+1]-tour_dist[iframe_local]);
       f2 = 1 - f1;
-      tour_t2[j] = f2*tour_t[iframe] + f1*tour_t[iframe+1] ;
+      tour_t2[j] = f2*tour_t[iframe_local] + f1*tour_t[iframe_local+1] ;
     }
     iframe_old=-1;
     for(j=0;j<view_ntimes;j++){
@@ -800,8 +800,8 @@ void createtourpaths(void){
       aview=pj->aview;
       oview=pj->oview;
 
-      eye[0] = hermiteeye(f1,0,kf1,kf2,&viewx);
-      eye[1] = hermiteeye(f1,1,kf1,kf2,&viewy);
+      eye[0] = hermiteeye(f1,0,kf1,kf2,&viewx_local);
+      eye[1] = hermiteeye(f1,1,kf1,kf2,&viewy_local);
       eye[2] = hermiteeye(f1,2,kf1,kf2,&dummy);
       eye[3] = hermiteeye(f1,3,kf1,kf2,&dummy);
       pj->zoom   = hermiteeye(f1,4,kf1,kf2,&dummy);
@@ -812,8 +812,8 @@ void createtourpaths(void){
       aview[2] = hermiteview(f1,2,kf1,kf2,&dummy);
 
       if(kf1->viewtype==0||kf2->viewtype==0){
-        dx = viewx;
-        dy = viewy;
+        dx = viewx_local;
+        dy = viewy_local;
         denom = 10.0*sqrt(dx*dx+dy*dy);
         if(denom==0.0)denom=1.0;
         dx /= denom;
@@ -931,8 +931,8 @@ void defaulttour(void){
 }
 
 /* ------------------ addframe ------------------------ */
-keyframe *add_frame(keyframe *framei, float time, float *eye, float key_az_path, float elev_path, float bank, float params[3],
-                    int viewtype,float zoom,float view[3]){
+keyframe *add_frame(keyframe *framei, float time_local, float *eye, float key_az_path, float elev_path, float bank, float params[3],
+                    int viewtype,float zoom_local,float view[3]){
   keyframe *frame,*framen;
   float *feye, *faview;
 
@@ -963,8 +963,8 @@ keyframe *add_frame(keyframe *framei, float time, float *eye, float key_az_path,
   faview[1]=(view[1]-ybar0)/xyzmaxdiff;
   faview[2]=(view[2]-zbar0)/xyzmaxdiff;
 
-  frame->noncon_time=time;
-  frame->disp_time=time;
+  frame->noncon_time=time_local;
+  frame->disp_time=time_local;
 
   frame->bias=params[1];
   frame->continuity=params[2];
@@ -972,7 +972,7 @@ keyframe *add_frame(keyframe *framei, float time, float *eye, float key_az_path,
   frame->continuity=0.0;         // no longer using continuity
   frame->tension=params[0];
   frame->viewtype=viewtype;
-  frame->nodeval.zoom=zoom;
+  frame->nodeval.zoom=zoom_local;
   frame->keyview_x=0.0;
   frame->keyview_y=0.0;
 
@@ -1014,13 +1014,13 @@ void new_select(keyframe *newselect){
 
 void init_circulartour(void){
   int nkeyframes,j;
-  float key_az_path, elev_path, key_bank, params[3],key_view[3], key_xyz[3], zoom;
+  float key_az_path, elev_path, key_bank, params[3],key_view[3], key_xyz[3], zoom_local;
   int viewtype=0;
   tourdata *touri;
   float key_time;
   float angle_local;
   float f1;
-  float A, B, rad, cosangle, sinangle;
+  float rad, cosangle, sinangle;
   float max_xyz, dx, dy, dz;
   float pi;
   keyframe *thisframe,*addedframe;
@@ -1068,9 +1068,9 @@ void init_circulartour(void){
     key_time = view_tstart*(1.0-f1) + view_tstop*f1;
 
     viewtype=1;
-    zoom=1.0;
+    zoom_local=1.0;
     addedframe=add_frame(thisframe, key_time, key_xyz, 
-      key_az_path, elev_path, key_bank, params, viewtype,zoom,key_view);
+      key_az_path, elev_path, key_bank, params, viewtype,zoom_local,key_view);
     thisframe=addedframe;
     touri->keyframe_times[j]=key_time;
   }
@@ -1082,7 +1082,7 @@ void init_circulartour(void){
 tourdata *add_tour(char *label){
   tourdata *tourtemp=NULL,*touri;
   int nkeyframes;
-  float key_az_path, elev_path, key_bank, params[3],key_view[3], key_xyz[3], zoom;
+  float key_az_path, elev_path, key_bank, params[3],key_view[3], key_xyz[3], zoom_local;
   int viewtype=0;
   float key_time;
   int i;
@@ -1119,7 +1119,7 @@ tourdata *add_tour(char *label){
   params[1] = 0.0;
   params[2] = 0.0;
   viewtype=0;
-  zoom=1.0;
+  zoom_local=1.0;
 
   key_xyz[0] = xbar0 - 1.0;
   key_xyz[1] = ybar0 - 1.0;
@@ -1127,7 +1127,7 @@ tourdata *add_tour(char *label){
   key_time = view_tstart;
   thisframe=&touri->first_frame;
   addedframe=add_frame(thisframe,key_time, key_xyz, key_az_path, elev_path, key_bank, 
-    params, viewtype,zoom,key_view);
+    params, viewtype,zoom_local,key_view);
   touri->keyframe_times[0]=key_time;
 
   key_xyz[0] = xbarORIG + 1.0;
@@ -1136,7 +1136,7 @@ tourdata *add_tour(char *label){
   key_time = view_tstop;
   thisframe=addedframe;
   add_frame(thisframe,key_time, key_xyz, key_az_path, elev_path, key_bank,
-    params, viewtype,zoom,key_view);
+    params, viewtype,zoom_local,key_view);
   touri->keyframe_times[1]=key_time;
   touri->display=1;
 

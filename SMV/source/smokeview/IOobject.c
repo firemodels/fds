@@ -4595,7 +4595,6 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
         }
         break;
       default:
-        ASSERT(0);
         break;
     }
   }

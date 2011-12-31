@@ -20,18 +20,17 @@ char IOvolsmoke_revision[]="$Revision$";
 #endif
 
 #include "smokeviewvars.h"
-#include "interp.h"
 #include "compress.h"
 
 /* ----------------------- interp3d ----------------------------- */
 
-void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, float xyz[3], mesh *meshi, int *inobst, char *blank){
+void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, float xyz[3], mesh *meshi, int *inobst, char *blank_local){
   int i, j, k;
   int ijk;
   float val000,val100,val010,val110;
   float val001,val101,val011,val111;
   float val00,val01,val10,val11;
-  float val0, val1, val;
+  float val0, val1;
   int nx, ny, nz, nxy;
   float dx, dy, dz;
   float dxbar, dybar, dzbar;
@@ -39,14 +38,14 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
   int ijkcell;
   float *xplt, *yplt, *zplt;
   int ibar, jbar, kbar;
-  float *smokedata, *firedata;
+  float *smokedata_local, *firedata_local;
   float kfactor=8700.0;
   float soot_density, temperature;
   int index;
   float black[]={0.0,0.0,0.0,1.0};
 
-  smokedata = meshi->volrenderinfo.smokedataptr;
-  firedata = meshi->volrenderinfo.firedataptr;
+  smokedata_local = meshi->volrenderinfo.smokedataptr;
+  firedata_local = meshi->volrenderinfo.firedataptr;
 
   xplt = meshi->xplt_cen;
   yplt = meshi->yplt_cen;
@@ -68,9 +67,9 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
   GETINDEX(j,xyz[1],yplt[0],dybar,jbar);
   GETINDEX(k,xyz[2],zplt[0],dzbar,kbar);
 
-  if(blank!=NULL){
+  if(blank_local!=NULL){
     ijkcell=IJKCELL(i,j,k);
-    if(blank[ijkcell]==0){
+    if(blank_local[ijkcell]==0){
       *inobst=1;
       return;
     }
@@ -88,10 +87,10 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
   dz = (xyz[2] - zplt[k])/dzbar;
   dz = CLAMP(dz,0.0,1.0);
 
-  if(firedata!=NULL){
+  if(firedata_local!=NULL){
     float dtemp;
 
-    vv = firedata + ijk;
+    vv = firedata_local + ijk;
     val000 = vv[0]; // i,j,k
     val100 = vv[1]; // i+1,j,k
 
@@ -121,8 +120,8 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
   else{
     *smoke_color=getcolorptr(black);
   }
-  if(smokedata!=NULL){
-    vv = smokedata + ijk;
+  if(smokedata_local!=NULL){
+    vv = smokedata_local + ijk;
     val000 = vv[0]; // i,j,k
     val100 = vv[1]; // i+1,j,k
 
@@ -145,7 +144,7 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
      val0 = MIX(dy,val10,val00);
      val1 = MIX(dy,val11,val01);
      soot_density = MIX(dz,val1,val0);
-     if(firedata!=NULL&&index>128)soot_density*=5.0;
+     if(firedata_local!=NULL&&index>128)soot_density*=5.0;
     *smoke_tran = exp(-kfactor*soot_density*dstep);
   }
 }
@@ -154,7 +153,6 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
 
 void init_volrender(void){
   int i;
-  int ijkbarmax;
 
   nvolrenderinfo=0;
   for(i=0;i<nmeshes;i++){
@@ -271,19 +269,17 @@ void init_volrender(void){
 
 void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, mesh *meshi, int iwall){
   float t_intersect, t_intersect_min=FLT_MAX, *boxmin, *boxmax;
-  float tmin, tmax;
   int i;
   int nsteps;
-  float dist, dx, dy, dz;
+  float dx, dy, dz;
   float distseg, dxseg, dyseg, dzseg;
   float xyz[3];
   float sootdensum;
-  float opacity;
   float *vert_beg, *vert_end;
   int iwall_min=0;
   float xyzvals[3];
   int isteps;
-  char *blank;
+  char *blank_local;
   float pt_smoketran, *pt_smokecolor;
   float tauhat,alphahat;
 
@@ -362,6 +358,9 @@ void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, mesh
         vert_end[1] = CLAMP(xyzvert[1] + t_intersect_min*dy,boxmin[1],boxmax[1]);
         vert_end[2] = boxmax[2];
         break;
+      default:
+        ASSERT(0);
+        break;
     }
   }
 
@@ -386,10 +385,10 @@ void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, mesh
   sootdensum=0.0;
   isteps=0;
   if(block_volsmoke==1){
-    blank=meshi->c_iblank_cell;
+    blank_local=meshi->c_iblank_cell;
   }
   else{
-    blank=NULL;
+    blank_local=NULL;
   }
   cum_smokecolor[0]=0.0;
   cum_smokecolor[1]=0.0;
@@ -398,8 +397,7 @@ void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, mesh
   tauhat=1.0;
   alphahat=0.0;
   for(i=0;i<nsteps;i++){
-    float sootden, factor;
-    int icell, jcell, kcell;
+    float factor;
     int inobst;
     float alphai;
 
@@ -409,8 +407,8 @@ void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, mesh
     xyz[1] = MIX(factor,vert_end[1],vert_beg[1]);
     xyz[2] = MIX(factor,vert_end[2],vert_beg[2]);
 
-    get_pt_smokecolor(&pt_smoketran,&pt_smokecolor, dstep,xyz, meshi, &inobst, blank);
-    if(blank!=NULL&&inobst==1)break;
+    get_pt_smokecolor(&pt_smoketran,&pt_smokecolor, dstep,xyz, meshi, &inobst, blank_local);
+    if(blank_local!=NULL&&inobst==1)break;
 
     alphai = 1.0 - pt_smoketran;
     alphahat +=  alphai*tauhat;
@@ -454,12 +452,9 @@ void compute_all_smokecolors(void){
     mesh *meshi;
     volrenderdata *vr;
     int iwall;
-    float *alpha;
     float dstep;
     float dx, dy, dz;
     float *x, *y, *z; 
-    int i, j, k;
-    int count=0;
     int ibar, jbar, kbar;
     float *smokecolor;
 
@@ -582,6 +577,9 @@ void compute_all_smokecolors(void){
             }
           }
           break;
+        default:
+          ASSERT(0);
+          break;
       }
     }
   }
@@ -596,7 +594,6 @@ void drawsmoke3dVOLdebug(void){
     volfacelistdata *vi;
     mesh *meshi;
     volrenderdata *vr;
-    int i,j;
     float x[2], y[2], z[2];
     float *xplt, *yplt, *zplt;
     int ibar, jbar, kbar;
@@ -666,6 +663,9 @@ void drawsmoke3dVOLdebug(void){
         y[1] = yplt[jbar];
         output3Text(foregroundcolor, (x[0]+x[1])/2.0,(y[0]+y[1])/2.0,(z[0]+z[1])/2.0, label);
         break;
+      default:
+        ASSERT(0);
+        break;
     }
   }
   glBegin(GL_LINES);
@@ -673,14 +673,13 @@ void drawsmoke3dVOLdebug(void){
     volfacelistdata *vi;
     mesh *meshi;
     volrenderdata *vr;
-    int i,j;
     float x[2], y[2], z[2];
     float *xplt, *yplt, *zplt;
     int ibar, jbar, kbar;
     char label[256];
     int iwall;
 
-    sprintf(label,"*** %i %%%",ii);
+    sprintf(label,"*** %i ***",ii);
 
     vi = volfacelistinfoptrs[ii];
     iwall=vi->iwall;
@@ -752,6 +751,9 @@ void drawsmoke3dVOLdebug(void){
         glVertex3f(x[0],y[1],z[0]);
         glVertex3f(x[1],y[0],z[0]);
         break;
+      default:
+        ASSERT(0);
+        break;
     }
   }
   glEnd();
@@ -761,8 +763,6 @@ void drawsmoke3dVOLdebug(void){
 
 void drawsmoke3dVOL(void){
   int iwall;
-  float xyz[3];
-  float dx, dy, dz;
   int ii;
 
   if(use_transparency_data==1)transparenton();
@@ -773,7 +773,6 @@ void drawsmoke3dVOL(void){
     int i,j;
     float xx, yy, zz;
     float x[2], y[2], z[2];
-    float *alpha;
     int n00, n01, n10, n11;
     float *xplt, *yplt, *zplt;
     int ibar, jbar, kbar;
@@ -961,6 +960,9 @@ void drawsmoke3dVOL(void){
           smokecolor+=4;
         }
         break;
+      default:
+        ASSERT(0);
+        break;
     }
     glEnd();
   }
@@ -975,9 +977,8 @@ void drawsmoke3dGPUVOL(void){
 #define NROWS_GPU 2
 #define NCOLS_GPU 2
   int iwall;
-  float xyz[3];
   float dx, dy, dz;
-  mesh *meshi, *meshold=NULL;
+  mesh *meshold=NULL;
   int ii;
 
 //  SVEXTERN int GPUload[30],GPUtime[30],SVDECL(nGPUframes,0),SVDECL(iGPUframes,0);
@@ -1016,7 +1017,7 @@ void drawsmoke3dGPUVOL(void){
     volfacelistdata *vi;
     mesh *meshi;
     int i,j;
-    float x1, x2, y1, y2, z1, z2;
+    float x1, x2, yy1, yy2, z1, z2;
     float xx, yy, zz;
 
     vi = volfacelistinfoptrs[ii];
@@ -1029,7 +1030,7 @@ void drawsmoke3dGPUVOL(void){
     if(vr->firedataptr==NULL&&vr->smokedataptr==NULL)continue;
     
     if(meshi!=meshold){
-      float dx, dy, dz, dcell;
+      float ddx, ddy, ddz, dcell;
 
       glUniform1i(GPUvol_inside,meshi->inside);
       glUniform3f(GPUvol_boxmin,meshi->x0,meshi->y0,meshi->z0);
@@ -1045,10 +1046,10 @@ void drawsmoke3dGPUVOL(void){
       glUniform1i(GPUvol_fire,1);
       glUniform1i(GPUvol_smokecolormap,2);
       glUniform1i(GPUvol_blockage,3);
-      dx = meshi->xplt[1]-meshi->xplt[0];
-      dy = meshi->yplt[1]-meshi->yplt[0];
-      dz = meshi->zplt[1]-meshi->zplt[0];
-      dcell = sqrt(dx*dx+dy*dy+dz*dz);
+      ddx = meshi->xplt[1]-meshi->xplt[0];
+      ddy = meshi->yplt[1]-meshi->yplt[0];
+      ddz = meshi->zplt[1]-meshi->zplt[0];
+      dcell = sqrt(ddx*ddx+ddy*ddy+ddz*ddz);
       if(mouse_down==1){
         glUniform1f(GPUvol_dcell,4.0*dcell);
       }
@@ -1073,29 +1074,29 @@ void drawsmoke3dGPUVOL(void){
           xx = meshi->x1;
         }
         for(i=0;i<NCOLS_GPU-1;i++){
-          y1 = meshi->y0 + i*dy;
-          y2 = y1 + dy;
+          yy1 = meshi->y0 + i*dy;
+          yy2 = yy1 + dy;
           for(j=0;j<NROWS_GPU-1;j++){
             z1 = meshi->z0 + j*dz;
             z2 = z1 + dz;
             
             if(meshi->inside==0&&iwall>0||meshi->inside!=0&&iwall<0){
-              glVertex3f(xx,y1,z1);
-              glVertex3f(xx,y2,z1);
-              glVertex3f(xx,y2,z2);
+              glVertex3f(xx,yy1,z1);
+              glVertex3f(xx,yy2,z1);
+              glVertex3f(xx,yy2,z2);
 
-              glVertex3f(xx,y1,z1);
-              glVertex3f(xx,y2,z2);
-              glVertex3f(xx,y1,z2);
+              glVertex3f(xx,yy1,z1);
+              glVertex3f(xx,yy2,z2);
+              glVertex3f(xx,yy1,z2);
             }
             else{
-              glVertex3f(xx,y1,z1);
-              glVertex3f(xx,y2,z2);
-              glVertex3f(xx,y2,z1);
+              glVertex3f(xx,yy1,z1);
+              glVertex3f(xx,yy2,z2);
+              glVertex3f(xx,yy2,z1);
 
-              glVertex3f(xx,y1,z1);
-              glVertex3f(xx,y1,z2);
-              glVertex3f(xx,y2,z2);
+              glVertex3f(xx,yy1,z1);
+              glVertex3f(xx,yy1,z2);
+              glVertex3f(xx,yy2,z2);
             }
           }
         }
@@ -1152,29 +1153,32 @@ void drawsmoke3dGPUVOL(void){
           x1 = meshi->x0 + i*dx;
           x2 = x1 + dx;
           for(j=0;j<NROWS_GPU-1;j++){
-            y1 = meshi->y0 + j*dy;
-            y2 = y1 + dy;
+            yy1 = meshi->y0 + j*dy;
+            yy2 = yy1 + dy;
 
             if(meshi->inside==0&&iwall>0||meshi->inside!=0&&iwall<0){
-              glVertex3f(x1,y1,zz);
-              glVertex3f(x2,y1,zz);
-              glVertex3f(x2,y2,zz);
+              glVertex3f(x1,yy1,zz);
+              glVertex3f(x2,yy1,zz);
+              glVertex3f(x2,yy2,zz);
 
-              glVertex3f(x1,y1,zz);
-              glVertex3f(x2,y2,zz);
-              glVertex3f(x1,y2,zz);
+              glVertex3f(x1,yy1,zz);
+              glVertex3f(x2,yy2,zz);
+              glVertex3f(x1,yy2,zz);
             }
             else{
-              glVertex3f(x1,y1,zz);
-              glVertex3f(x2,y2,zz);
-              glVertex3f(x2,y1,zz);
+              glVertex3f(x1,yy1,zz);
+              glVertex3f(x2,yy2,zz);
+              glVertex3f(x2,yy1,zz);
 
-              glVertex3f(x1,y1,zz);
-              glVertex3f(x1,y2,zz);
-              glVertex3f(x2,y2,zz);
+              glVertex3f(x1,yy1,zz);
+              glVertex3f(x1,yy2,zz);
+              glVertex3f(x2,yy2,zz);
             }
           }
         }
+        break;
+      default:
+        ASSERT(0);
         break;
     }
     glEnd();
@@ -1196,10 +1200,7 @@ void drawsmoke3dGPUVOL(void){
 int get_volsmoke_nframes(volrenderdata *vr){
 	slice *fireslice, *smokeslice;
   FILE *volstream=NULL;
-  int framesize,skip,returncode;
-  float time, *sliceframe_data;
-  int endianswitch=0;
-  int nf;
+  int framesize,skip_local;
   int nframes,filesize;
 
   smokeslice=vr->smoke;
@@ -1212,17 +1213,17 @@ int get_volsmoke_nframes(volrenderdata *vr){
     framesize *= 4; // convert to bytes
     framesize += HEADER_SIZE + TRAILER_SIZE;
 
-    skip =           (HEADER_SIZE+30        +TRAILER_SIZE); // long label
-    skip +=          (HEADER_SIZE+30        +TRAILER_SIZE); // short label
-    skip +=          (HEADER_SIZE+30        +TRAILER_SIZE); // unit label
-    skip +=          (HEADER_SIZE+24        +TRAILER_SIZE); // is1, is2, js1, js2, ks1, ks2
+    skip_local =           (HEADER_SIZE+30        +TRAILER_SIZE); // long label
+    skip_local +=          (HEADER_SIZE+30        +TRAILER_SIZE); // short label
+    skip_local +=          (HEADER_SIZE+30        +TRAILER_SIZE); // unit label
+    skip_local +=          (HEADER_SIZE+24        +TRAILER_SIZE); // is1, is2, js1, js2, ks1, ks2
 
-  // nframes = (totalsize - skip)/(12 + framesize);
+  // nframes = (totalsize - skip_local)/(12 + framesize);
 
     nframes=0;
     filesize=getfilesize(smokeslice->reg_file);
     if(filesize>0){
-      nframes = (filesize-skip)/(12 + framesize);
+      nframes = (filesize-skip_local)/(12 + framesize);
     }
   }
   else{
@@ -1245,32 +1246,32 @@ int get_volsmoke_nframes(volrenderdata *vr){
 /* ------------------ get_volsmoke_frame_time ------------------------ */
 
 float get_volsmoke_frame_time(volrenderdata *vr, int framenum){
-	slice *fireslice, *smokeslice;
+	slice *smokeslice;
   FILE *SLICEFILE;
-  int framesize,skip,returncode;
-  float time=0.0, *sliceframe_data;
+  int framesize,returncode;
+  float time_local=0.0;
   int endianswitch=0;
-  char *meshlabel;
+  int skip_local;
 
-  if(framenum<0||framenum>=vr->nframes)return time;
+  if(framenum<0||framenum>=vr->nframes)return time_local;
   smokeslice=vr->smoke;
   framesize = smokeslice->nslicei*smokeslice->nslicej*smokeslice->nslicek;
 
-  skip =           (HEADER_SIZE+30        +TRAILER_SIZE); // long label
-  skip +=          (HEADER_SIZE+30        +TRAILER_SIZE); // short label
-  skip +=          (HEADER_SIZE+30        +TRAILER_SIZE); // unit label
-  skip +=          (HEADER_SIZE+24        +TRAILER_SIZE); // is1, is2, js1, js2, ks1, ks2
-  skip += framenum*(HEADER_SIZE +4        +TRAILER_SIZE); // framenum time's
-  skip += framenum*(HEADER_SIZE +4*framesize+TRAILER_SIZE); // framenum slice data's
+  skip_local =           (HEADER_SIZE+30        +TRAILER_SIZE); // long label
+  skip_local +=          (HEADER_SIZE+30        +TRAILER_SIZE); // short label
+  skip_local +=          (HEADER_SIZE+30        +TRAILER_SIZE); // unit label
+  skip_local +=          (HEADER_SIZE+24        +TRAILER_SIZE); // is1, is2, js1, js2, ks1, ks2
+  skip_local += framenum*(HEADER_SIZE +4        +TRAILER_SIZE); // framenum time's
+  skip_local += framenum*(HEADER_SIZE +4*framesize+TRAILER_SIZE); // framenum slice data's
 
   SLICEFILE=fopen(smokeslice->reg_file,"rb");
-  if(SLICEFILE==NULL)return time;
+  if(SLICEFILE==NULL)return time_local;
 
-  returncode=fseek(SLICEFILE,skip,SEEK_SET); // skip from beginning of file
+  returncode=fseek(SLICEFILE,skip_local,SEEK_SET); // skip from beginning of file
 
-  FORTSLICEREAD(&time,1);
+  FORTSLICEREAD(&time_local,1);
   fclose(SLICEFILE);
-  return time;
+  return time_local;
 }
 
 /* ------------------ get_volsmoke_frame_time ------------------------ */
@@ -1290,30 +1291,30 @@ void get_volsmoke_all_times(volrenderdata *vr){
   }
   else{
     unsigned char buffer[32];
-    int i;
+    int ii;
 // 1,completion,version
 // 1,version,n_data_compressedm32,nbytes,n_data_in,time,valmin,valmax,data ....
     fseek(volstream,12,SEEK_SET);
-    for(i=0;i<vr->nframes;i++){
+    for(ii=0;ii<vr->nframes;ii++){
       int ncompressed;
-      float *time;
+      float *time_local;
 
-      vr->smokepos[i]=ftell(volstream);
+      vr->smokepos[ii]=ftell(volstream);
       if(fread(buffer,1,32,volstream)!=32)break;
       ncompressed=*(int *)(buffer+8)-32;
-      time=(float *)(buffer+20);
+      time_local=(float *)(buffer+20);
       if(fseek(volstream,ncompressed,SEEK_CUR)!=0)break;
-      vr->times[i]=*time;
+      vr->times[ii]=*time_local;
     }
     fclose(volstream);
     volstream=NULL;
     if(vr->fire->vol_file!=NULL)volstream=fopen(vr->fire->vol_file,"rb");
     if(volstream!=NULL){
       fseek(volstream,12,SEEK_SET);
-      for(i=0;i<vr->nframes;i++){
+      for(ii=0;ii<vr->nframes;ii++){
         int ncompressed;
 
-        vr->firepos[i]=ftell(volstream);
+        vr->firepos[ii]=ftell(volstream);
         if(fread(buffer,1,32,volstream)!=32)break;
         ncompressed=*(int *)(buffer+8)-32;
         if(fseek(volstream,ncompressed,SEEK_CUR)!=0)break;
@@ -1328,12 +1329,12 @@ void get_volsmoke_all_times(volrenderdata *vr){
 void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
 	slice *fireslice, *smokeslice;
   FILE *SLICEFILE;
-  int framesize,framesize2,skip,returncode;
-  float time, *smokeframe_data, *fireframe_data;
+  int framesize,framesize2,skip_local,returncode;
+  float time_local, *smokeframe_data, *fireframe_data;
   int endianswitch=0;
   char *meshlabel;
   unsigned char *c_smokedata_compressed=NULL, *c_firedata_compressed=NULL;
-  unsigned char *c_smokedata_compressed2=NULL, *c_firedata_compressed2=NULL;
+  unsigned char *c_firedata_compressed2=NULL;
   uLongf n_smokedata_compressed, n_firedata_compressed;
   unsigned int size_before=0, size_after=0;
   FILE *volstream=NULL;
@@ -1379,40 +1380,40 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
     volstream=fopen(vr->smoke->vol_file,"rb");
   }
   if(volstream==NULL){
-    skip =           (HEADER_SIZE+30        +TRAILER_SIZE); // long label
-    skip +=          (HEADER_SIZE+30        +TRAILER_SIZE); // short label
-    skip +=          (HEADER_SIZE+30        +TRAILER_SIZE); // unit label
-    skip +=          (HEADER_SIZE+24        +TRAILER_SIZE); // is1, is2, js1, js2, ks1, ks2
-    skip += framenum*(HEADER_SIZE +4        +TRAILER_SIZE); // framenum time's
-    skip += framenum*(HEADER_SIZE +4*framesize+TRAILER_SIZE); // framenum slice data's
+    skip_local =           (HEADER_SIZE+30        +TRAILER_SIZE); // long label
+    skip_local +=          (HEADER_SIZE+30        +TRAILER_SIZE); // short label
+    skip_local +=          (HEADER_SIZE+30        +TRAILER_SIZE); // unit label
+    skip_local +=          (HEADER_SIZE+24        +TRAILER_SIZE); // is1, is2, js1, js2, ks1, ks2
+    skip_local += framenum*(HEADER_SIZE +4        +TRAILER_SIZE); // framenum time's
+    skip_local += framenum*(HEADER_SIZE +4*framesize+TRAILER_SIZE); // framenum slice data's
 
     SLICEFILE=fopen(smokeslice->reg_file,"rb");
     if(SLICEFILE==NULL)return;
 
-    returncode=fseek(SLICEFILE,skip,SEEK_SET); // skip from beginning of file
+    returncode=fseek(SLICEFILE,skip_local,SEEK_SET); // skip from beginning of file
 
-    FORTSLICEREAD(&time,1);
-    if(times!=NULL&&times[itimes]>time)restart_time=1;
+    FORTSLICEREAD(&time_local,1);
+    if(times!=NULL&&times[itimes]>time_local)restart_time=1;
     if(*first==1){
       *first=0;
-      printf("time=%.2f %s: ",time,meshlabel);
+      printf("time=%.2f %s: ",time_local,meshlabel);
     }
     else{
-      if(time>=10.0)printf(" ");
-      if(time>=100.0)printf(" ");
-      if(time>=1000.0)printf(" ");
+      if(time_local>=10.0)printf(" ");
+      if(time_local>=100.0)printf(" ");
+      if(time_local>=1000.0)printf(" ");
       printf("          %s: ",meshlabel);
     }
 
-    vr->times[framenum]=time;
+    vr->times[framenum]=time_local;
     FORTSLICEREAD(smokeframe_data,framesize);
     CheckMemory;
     size_before+=sizeof(float)*framesize;
     if(vr->is_compressed==1){
       float valmin=0.0;
 
-    // one,file version,ndata_compressed,nbytes 1/2/4,ndata_uncompressed,time,valmin,valmax,data ....
-      compress_volsliceframe(smokeframe_data, framesize, time, &valmin, NULL,
+    // one,file version,ndata_compressed,nbytes 1/2/4,ndata_uncompressed,time_local,valmin,valmax,data ....
+      compress_volsliceframe(smokeframe_data, framesize, time_local, &valmin, NULL,
                   &c_smokedata_compressed, &n_smokedata_compressed);
       size_after+=n_smokedata_compressed;
       vr->smokedataptrs[framenum]=c_smokedata_compressed;
@@ -1433,7 +1434,7 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
     fseek(volstream,vr->smokepos[framenum],SEEK_SET);
     fread(buffer,8,4,volstream);
     ncompressed=*(int *)(buffer+8);
-    time = *(float *)(buffer+20);
+    time_local = *(float *)(buffer+20);
     fseek(volstream,vr->smokepos[framenum],SEEK_SET);
     NewMemory((void **)&c_smokedata_compressed,ncompressed);
     fread(c_smokedata_compressed,1,ncompressed,volstream);
@@ -1441,16 +1442,16 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
 
     if(*first==1){
       *first=0;
-      printf("time=%.2f %s: ",time,meshlabel);
+      printf("time=%.2f %s: ",time_local,meshlabel);
     }
     else{
-      if(time>=10.0)printf(" ");
-      if(time>=100.0)printf(" ");
-      if(time>=1000.0)printf(" ");
+      if(time_local>=10.0)printf(" ");
+      if(time_local>=100.0)printf(" ");
+      if(time_local>=1000.0)printf(" ");
       printf("          %s: ",meshlabel);
     }
 
-    vr->times[framenum]=time;
+    vr->times[framenum]=time_local;
     fclose(volstream);
     volstream=NULL;
   }
@@ -1462,17 +1463,17 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
     if(volstream==NULL){
       SLICEFILE=fopen(fireslice->reg_file,"rb");
       if(SLICEFILE!=NULL){
-        returncode=fseek(SLICEFILE,skip,SEEK_SET); // skip from beginning of file
+        returncode=fseek(SLICEFILE,skip_local,SEEK_SET); // skip from beginning of file
 
-        FORTSLICEREAD(&time,1);
-        vr->times[framenum]=time;
+        FORTSLICEREAD(&time_local,1);
+        vr->times[framenum]=time_local;
         FORTSLICEREAD(fireframe_data,framesize);
         CheckMemory;
         size_before+=sizeof(float)*framesize;
         if(vr->is_compressed==1){
           float valmin=20.0, valmax=1400.0;
 
-          compress_volsliceframe(fireframe_data, framesize,  time, &valmin, &valmax,
+          compress_volsliceframe(fireframe_data, framesize,  time_local, &valmin, &valmax,
                   &c_firedata_compressed, &n_firedata_compressed);
           size_after+=n_firedata_compressed;
           vr->firedataptrs[framenum]=c_firedata_compressed;
@@ -1490,17 +1491,17 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
       int ncompressed;
 
 // 1,completion,version
-// 1,version,n_data_compressedm32,nbytes,n_data_in,time,valmin,valmax,data ....
+// 1,version,n_data_compressedm32,nbytes,n_data_in,time_local,valmin,valmax,data ....
       fseek(volstream,vr->firepos[framenum],SEEK_SET);
       fread(buffer,8,4,volstream);
       ncompressed=*(int *)(buffer+8);
-      time = *(float *)(buffer+20);
+      time_local = *(float *)(buffer+20);
       fseek(volstream,vr->firepos[framenum],SEEK_SET);
       NewMemory((void **)&c_firedata_compressed,ncompressed);
       fread(c_firedata_compressed,1,ncompressed,volstream);
       vr->firedataptrs[framenum]=c_firedata_compressed;
 
-      vr->times[framenum]=time;
+      vr->times[framenum]=time_local;
       printf(", fire");
       fclose(volstream);
       volstream=NULL;
@@ -1583,8 +1584,6 @@ void read_volsmoke_allframes(volrenderdata *vr){
 
 void read_volsmoke_frame_allmeshes(int framenum){
   int i;
-  float time_old;
-  int ntimes_old;
   int first=1;
 
   for(i=0;i<nmeshes;i++){
@@ -1649,7 +1648,6 @@ void *read_volsmoke_allframes_allmeshes2(void *arg){
 /* ------------------ read_volsmoke_allframes_allmeshes ------------------------ */
 
 void read_volsmoke_allframes_allmeshes(void){
-  int nframes=0;
   int i;
 
   compress_volsmoke=glui_compress_volsmoke;
@@ -1691,7 +1689,6 @@ void read_volsmoke_allframes_allmeshes(void){
 /* ------------------ init_volsmoke_texture ------------------------ */
 
 void init_volsmoke_texture(mesh *meshi){
-  int i;
   GLint border_size=0;
   GLsizei nx, ny, nz;
 
@@ -1779,10 +1776,9 @@ void init_volsmoke_texture(mesh *meshi){
 
 /* ------------------ update_3dsmoke_texture ------------------------ */
 
-void update_volsmoke_texture(mesh *meshi, float *smokedata, float *firedata){
+void update_volsmoke_texture(mesh *meshi, float *smokedata_local, float *firedata_local){
   GLint xoffset=0,yoffset=0,zoffset=0;
   GLsizei nx, ny, nz;
-  int ntextures;
 
 //  glGetIntegerv(GL_MAX_TEXTURE_COORDS,&ntextures);
   nx = meshi->ibar+1;
@@ -1795,14 +1791,14 @@ void update_volsmoke_texture(mesh *meshi, float *smokedata, float *firedata){
   glTexSubImage3D(GL_TEXTURE_3D,0,
     xoffset,yoffset,zoffset,
     nx, ny, nz,
-    GL_RED, GL_FLOAT, smokedata);
+    GL_RED, GL_FLOAT, smokedata_local);
 
-  if(firedata!=NULL){  
+  if(firedata_local!=NULL){  
     glActiveTexture(GL_TEXTURE1);
     glTexSubImage3D(GL_TEXTURE_3D,0,
       xoffset,yoffset,zoffset,
       nx, ny, nz,
-      GL_RED, GL_FLOAT, firedata);
+      GL_RED, GL_FLOAT, firedata_local);
   }
 
 #ifndef pp_GPUTEXTURE

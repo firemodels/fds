@@ -1398,7 +1398,7 @@ void initvars(void){
   eyeview=0,eyeview_level=1;
   eyeview_old=0,eyeview_SAVE=0,eyeview_last=0;
   frameratevalue=1000;
-  setpartmin=PERCENTILE_MIN, setpartmax=PERCENTILE_MAX, setslicemin=PERCENTILE_MIN, setslicemax=PERCENTILE_MAX, endian=0;
+  setpartmin=PERCENTILE_MIN, setpartmax=PERCENTILE_MAX, setslicemin=PERCENTILE_MIN, setslicemax=PERCENTILE_MAX;
   setpartmin_old=setpartmin;
   setpartmax_old=setpartmax;
   setpatchmin=GLOBAL_MIN, setpatchmax=GLOBAL_MAX, setzonemin=0, setzonemax=0;

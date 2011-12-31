@@ -20,7 +20,7 @@ void drawtrunccone(float d1, float d2, float height, unsigned char *rgbcolor);
 
 /* ------------------ getzonesizecsv ------------------------ */
 
-void getzonesizecsv(int *nzonet, int *nroom, int *nfires, int *nhvents, int *nvvents, int *error){
+void getzonesizecsv(int *nzonet_local, int *nroom, int *nfires_local, int *nhvents, int *nvvents, int *error){
    device *dev;
    int nr,nf,nv;
    int i;
@@ -33,7 +33,7 @@ void getzonesizecsv(int *nzonet, int *nroom, int *nfires, int *nhvents, int *nvv
      sprintf(label,"LLT_%i",i+1);
      dev=getdevice(label,-1);
      if(dev==NULL)break;
-     *nzonet=dev->nvals;
+     *nzonet_local=dev->nvals;
      nr++;
    }
    *nroom=nr;
@@ -63,39 +63,39 @@ void getzonesizecsv(int *nzonet, int *nroom, int *nfires, int *nhvents, int *nvv
      if(dev==NULL)break;
      nf++;
    }
-   *nfires=nf;
+   *nfires_local=nf;
 }
 
 /* ------------------ getzonedatacsv ------------------------ */
 
-void getzonedatacsv(int nzonet, int nrooms, int nfires, 
-                    float *zonet, float *zoneqfire, float *zonefheight, float *zonefbase, float *zonefdiam,
-                    float *zonepr, float *zoneylay,  float *zonetl, float *zonetu,
-                    float **zoneodlptr, float **zoneoduptr, float *zonehvents, float *zonevvents,
+void getzonedatacsv(int nzonet_local, int nrooms_local, int nfires_local, 
+                    float *zonet_local, float *zoneqfire_local, float *zonefheight_local, float *zonefbase_local, float *zonefdiam_local,
+                    float *zonepr_local, float *zoneylay_local,  float *zonetl_local, float *zonetu_local,
+                    float **zoneodlptr, float **zoneoduptr, float *zonehvents_local, float *zonevvents_local,
                     int *error){
   int i,ii,iif, use_od=1, iihv, iivv;
   device **zoneqfire_devs=NULL;
   device **zonepr_devs=NULL, **zoneylay_devs=NULL, **zonetl_devs=NULL, **zonetu_devs=NULL, **zoneodl_devs=NULL, **zoneodu_devs=NULL;
   device **zonefheight_devs=NULL, **zonefbase_devs=NULL, **zonefarea_devs=NULL;
   device **zonehvents_devs=NULL, **zonevvents_devs=NULL;
-  float *zoneodl, *zoneodu;
-  float *times;
+  float *zoneodl_local, *zoneodu_local;
+  float *times_local;
 
   *error=0;
-  if(nfires>0){
-    NewMemory((void **)&zoneqfire_devs,nfires*sizeof(device *));
-    NewMemory((void **)&zonefheight_devs,nfires*sizeof(device *));
-    NewMemory((void **)&zonefbase_devs,nfires*sizeof(device *));
-    NewMemory((void **)&zonefarea_devs,nfires*sizeof(device *));
+  if(nfires_local>0){
+    NewMemory((void **)&zoneqfire_devs,nfires_local*sizeof(device *));
+    NewMemory((void **)&zonefheight_devs,nfires_local*sizeof(device *));
+    NewMemory((void **)&zonefbase_devs,nfires_local*sizeof(device *));
+    NewMemory((void **)&zonefarea_devs,nfires_local*sizeof(device *));
   }
 
-  if(nrooms>0){
-    NewMemory((void **)&zonepr_devs,nrooms*sizeof(device *));
-    NewMemory((void **)&zoneylay_devs,nrooms*sizeof(device *));
-    NewMemory((void **)&zonetl_devs,nrooms*sizeof(device *));
-    NewMemory((void **)&zonetu_devs,nrooms*sizeof(device *));
-    NewMemory((void **)&zoneodl_devs,nrooms*sizeof(device *));
-    NewMemory((void **)&zoneodu_devs,nrooms*sizeof(device *));
+  if(nrooms_local>0){
+    NewMemory((void **)&zonepr_devs,nrooms_local*sizeof(device *));
+    NewMemory((void **)&zoneylay_devs,nrooms_local*sizeof(device *));
+    NewMemory((void **)&zonetl_devs,nrooms_local*sizeof(device *));
+    NewMemory((void **)&zonetu_devs,nrooms_local*sizeof(device *));
+    NewMemory((void **)&zoneodl_devs,nrooms_local*sizeof(device *));
+    NewMemory((void **)&zoneodu_devs,nrooms_local*sizeof(device *));
   }
 
   if(nzhvents>0){
@@ -106,12 +106,12 @@ void getzonedatacsv(int nzonet, int nrooms, int nfires,
     NewMemory((void **)&zonevvents_devs,nzvvents*sizeof(device *));
   }
 
-  for(i=0;i<nrooms;i++){
+  for(i=0;i<nrooms_local;i++){
     char label[100];
 
     sprintf(label,"PRS_%i",i+1);
     zonepr_devs[i]=getdevice(label,-1);
-    if(zonepr_devs[i]==NULL||zonepr_devs[i]->nvals!=nzonet){
+    if(zonepr_devs[i]==NULL||zonepr_devs[i]->nvals!=nzonet_local){
       *error=1;
       return;
     }
@@ -119,7 +119,7 @@ void getzonedatacsv(int nzonet, int nrooms, int nfires,
 
     sprintf(label,"HGT_%i",i+1);
     zoneylay_devs[i]=getdevice(label,-1);
-    if(zoneylay_devs[i]==NULL||zoneylay_devs[i]->nvals!=nzonet){
+    if(zoneylay_devs[i]==NULL||zoneylay_devs[i]->nvals!=nzonet_local){
       *error=1;
       return;
     }
@@ -127,7 +127,7 @@ void getzonedatacsv(int nzonet, int nrooms, int nfires,
 
     sprintf(label,"LLT_%i",i+1);
     zonetl_devs[i]=getdevice(label,-1);
-    if(zonetl_devs[i]==NULL||zonetl_devs[i]->nvals!=nzonet){
+    if(zonetl_devs[i]==NULL||zonetl_devs[i]->nvals!=nzonet_local){
       *error=1;
       return;
     }
@@ -135,7 +135,7 @@ void getzonedatacsv(int nzonet, int nrooms, int nfires,
 
     sprintf(label,"ULT_%i",i+1);
     zonetu_devs[i]=getdevice(label,-1);
-    if(zonetu_devs[i]==NULL||zonetu_devs[i]->nvals!=nzonet){
+    if(zonetu_devs[i]==NULL||zonetu_devs[i]->nvals!=nzonet_local){
       *error=1;
       return;
     }
@@ -160,22 +160,22 @@ void getzonedatacsv(int nzonet, int nrooms, int nfires,
     }
   }
   if(use_od==1){
-    NewMemory((void **)&zoneodl     ,nrooms*nzonet*sizeof(float));
-    NewMemory((void **)&zoneodu     ,nrooms*nzonet*sizeof(float));
+    NewMemory((void **)&zoneodl_local     ,nrooms_local*nzonet_local*sizeof(float));
+    NewMemory((void **)&zoneodu_local     ,nrooms_local*nzonet_local*sizeof(float));
   }
   else{
-    zoneodl=NULL;
-    zoneodu=NULL;
+    zoneodl_local=NULL;
+    zoneodu_local=NULL;
   }
-  *zoneodlptr=zoneodl;
-  *zoneoduptr=zoneodu;
+  *zoneodlptr=zoneodl_local;
+  *zoneoduptr=zoneodu_local;
 
-  for(i=0;i<nfires;i++){
+  for(i=0;i<nfires_local;i++){
     char label[100];
 
     sprintf(label,"HRR_%i",i+1);
     zoneqfire_devs[i]=getdevice(label,-1);
-    if(zoneqfire_devs[i]==NULL||zoneqfire_devs[i]->nvals!=nzonet){
+    if(zoneqfire_devs[i]==NULL||zoneqfire_devs[i]->nvals!=nzonet_local){
       *error=1;
       return;
     }
@@ -183,7 +183,7 @@ void getzonedatacsv(int nzonet, int nrooms, int nfires,
 
     sprintf(label,"FLHGT_%i",i+1);
     zonefheight_devs[i]=getdevice(label,-1);
-    if(zonefheight_devs[i]==NULL||zonefheight_devs[i]->nvals!=nzonet){
+    if(zonefheight_devs[i]==NULL||zonefheight_devs[i]->nvals!=nzonet_local){
       *error=1;
       return;
     }
@@ -191,7 +191,7 @@ void getzonedatacsv(int nzonet, int nrooms, int nfires,
 
     sprintf(label,"FBASE_%i",i+1);
     zonefbase_devs[i]=getdevice(label,-1);
-    if(zonefbase_devs[i]==NULL||zonefbase_devs[i]->nvals!=nzonet){
+    if(zonefbase_devs[i]==NULL||zonefbase_devs[i]->nvals!=nzonet_local){
       *error=1;
       return;
     }
@@ -199,7 +199,7 @@ void getzonedatacsv(int nzonet, int nrooms, int nfires,
 
     sprintf(label,"FAREA_%i",i+1);
     zonefarea_devs[i]=getdevice(label,-1);
-    if(zonefarea_devs[i]==NULL||zonefarea_devs[i]->nvals!=nzonet){
+    if(zonefarea_devs[i]==NULL||zonefarea_devs[i]->nvals!=nzonet_local){
       *error=1;
       return;
     }
@@ -211,7 +211,7 @@ void getzonedatacsv(int nzonet, int nrooms, int nfires,
 
     sprintf(label,"HVENT_%i",i+1);
     zonehvents_devs[i]=getdevice(label,-1);
-    if(zonehvents_devs[i]==NULL||zonehvents_devs[i]->nvals!=nzonet){
+    if(zonehvents_devs[i]==NULL||zonehvents_devs[i]->nvals!=nzonet_local){
       *error=1;
       return;
     }
@@ -223,7 +223,7 @@ void getzonedatacsv(int nzonet, int nrooms, int nfires,
 
     sprintf(label,"VVENT_%i",i+1);
     zonevvents_devs[i]=getdevice(label,-1);
-    if(zonevvents_devs[i]==NULL||zonevvents_devs[i]->nvals!=nzonet){
+    if(zonevvents_devs[i]==NULL||zonevvents_devs[i]->nvals!=nzonet_local){
       *error=1;
       return;
     }
@@ -234,44 +234,44 @@ void getzonedatacsv(int nzonet, int nrooms, int nfires,
   iif=0;
   iihv=0;
   iivv=0;
-  times = zonepr_devs[0]->times;
+  times_local = zonepr_devs[0]->times;
 
-  for(i=0;i<nzonet;i++){
+  for(i=0;i<nzonet_local;i++){
     int j;
 
-    zonet[i]=times[i];
-    for(j=0;j<nrooms;j++){
-      zonepr[ii]=zonepr_devs[j]->vals[i];
-      zoneylay[ii]=zoneylay_devs[j]->vals[i];
-      zonetl[ii]=zonetl_devs[j]->vals[i];
-      zonetu[ii]=zonetu_devs[j]->vals[i];
+    zonet_local[i]=times_local[i];
+    for(j=0;j<nrooms_local;j++){
+      zonepr_local[ii]=zonepr_devs[j]->vals[i];
+      zoneylay_local[ii]=zoneylay_devs[j]->vals[i];
+      zonetl_local[ii]=zonetl_devs[j]->vals[i];
+      zonetu_local[ii]=zonetu_devs[j]->vals[i];
 
       if(use_od==1){
-        zoneodl[ii]=zoneodl_devs[j]->vals[i];
-        zoneodu[ii]=zoneodu_devs[j]->vals[i];
+        zoneodl_local[ii]=zoneodl_devs[j]->vals[i];
+        zoneodu_local[ii]=zoneodu_devs[j]->vals[i];
       }
       ii++;
     }
-    for(j=0;j<nfires;j++){
+    for(j=0;j<nfires_local;j++){
       float area, diam;
 
-      zoneqfire[iif]=1000.0*zoneqfire_devs[j]->vals[i];
-      zonefheight[iif]=zonefheight_devs[j]->vals[i];
+      zoneqfire_local[iif]=1000.0*zoneqfire_devs[j]->vals[i];
+      zonefheight_local[iif]=zonefheight_devs[j]->vals[i];
       area=zonefarea_devs[j]->vals[i];
       diam=2.0*sqrt(area/3.14159);
       if(diam<0.0001){
         diam=0.1/xyzmaxdiff;
       }
-      zonefdiam[iif]=diam;
-      zonefbase[iif]=zonefbase_devs[j]->vals[i];
+      zonefdiam_local[iif]=diam;
+      zonefbase_local[iif]=zonefbase_devs[j]->vals[i];
       iif++;
     }
     for(j=0;j<nzhvents;j++){
-      zonehvents[iihv] = zonehvents_devs[j]->vals[i];
+      zonehvents_local[iihv] = zonehvents_devs[j]->vals[i];
       iihv++;
     }
     for(j=0;j<nzvvents;j++){
-      zonevvents[iivv] = zonevvents_devs[j]->vals[i];
+      zonevvents_local[iivv] = zonevvents_devs[j]->vals[i];
       iivv++;
     }
   }
@@ -418,7 +418,6 @@ void readzone(int ifile, int flag, int *errorcode){
   int error,ntotal,i,j,ii;
   int nrooms2,nfires2,nzhvents2,nzvvents2;
   size_t zonefilelen;
-  int fort_unit;
   zonedata *zonei;
   char *file;
 
@@ -470,7 +469,7 @@ void readzone(int ifile, int flag, int *errorcode){
     getzonesizecsv(&nzonet,&nrooms2,&nfires2,&nzhvents2,&nzvvents2,&error);
   }
   else{
-    FORTgetzonesize(file,&nzonet,&nrooms2,&nfires2,&endian,&error,zonefilelen);
+    FORTgetzonesize(file,&nzonet,&nrooms2,&nfires2,&endian_smv ,&error,zonefilelen);
     nzhvents2=nzhvents;
     nzvvents2=nzvvents;
   }
@@ -569,7 +568,7 @@ void readzone(int ifile, int flag, int *errorcode){
                    zonepr,zoneylay,zonetl,zonetu,&zoneodl,&zoneodu, zonehvents, zonevvents, &error);
   }
   else{
-    FORTgetzonedata(file,&nzonet,&nrooms, &nfires, zonet,zoneqfire,zonepr,zoneylay,zonetl,zonetu,&endian,&error,zonefilelen);
+    FORTgetzonedata(file,&nzonet,&nrooms, &nfires, zonet,zoneqfire,zonepr,zoneylay,zonetl,zonetu,&endian_smv,&error,zonefilelen);
   }
 
   if(zonei->csv==0){
@@ -778,7 +777,7 @@ void get_dpT(float *yy, int n, roomdata *r1, roomdata *r2, float *delp, float *d
 
 void drawroomgeom(void){
   float xroom0, yroom0, zroom0, xroom, yroom, zroom;
-  float x1,x2,y1,y2,z1,z2;
+  float x1,x2,yy1,yy2,z1,z2;
   int i;
   int idir;
   float yy,zz;
@@ -877,14 +876,14 @@ void drawroomgeom(void){
         break;
       case 5:
       case 6:
-        y1=zvi->y1;
-        y2=zvi->y2;
+        yy1=zvi->y1;
+        yy2=zvi->y2;
         zz=zvi->zz;
-        glVertex3f(x1,y1,zz);
-        glVertex3f(x2,y1,zz);
-        glVertex3f(x2,y2,zz);
-        glVertex3f(x1,y2,zz);
-        glVertex3f(x1,y1,zz);
+        glVertex3f(x1,yy1,zz);
+        glVertex3f(x2,yy1,zz);
+        glVertex3f(x2,yy2,zz);
+        glVertex3f(x1,yy2,zz);
+        glVertex3f(x1,yy1,zz);
         break;
       default:
         ASSERT(FFALSE);
@@ -898,11 +897,7 @@ void drawroomgeom(void){
 /* ------------------ drawventdata ------------------------ */
 
 void getzoneventbounds(void){
-  float vmin, vmax;
-  float factor;
   int i;
-  int idir;
-  float x1, yy;
 
   for(i=0;i<nzvents;i++){
     zvent *zvi;
@@ -931,7 +926,6 @@ void getzoneventbounds(void){
   zone_maxventflow=0.0;
   for(i=0;i<nzvents;i++){
     zvent *zvi;
-    float yelev[20];
 
     zvi = zventinfo + i;
     if(zvi->vent_orien==1)continue;
@@ -1102,7 +1096,7 @@ void drawventdata(void){
 float getzonethick(int dir, roomdata *roomi, float xyz[3]){
   float dx, dy, dz, L;
   float alpha, alpha_min, alpha_ylay;
-  float x0, x1, y0, y1, z0, z1;
+  float x0, x1, yy0, yy1, z0, z1;
   float factor_L, factor_U, factor;
   float ylay;
   float thick;
@@ -1110,8 +1104,8 @@ float getzonethick(int dir, roomdata *roomi, float xyz[3]){
 
   x0 = roomi->x0;
   x1 = roomi->x1;
-  y0 = roomi->y0;
-  y1 = roomi->y1;
+  yy0 = roomi->y0;
+  yy1 = roomi->y1;
   z0 = roomi->z0;
   z1 = roomi->z1;
   odl = roomi->od_L;
@@ -1139,13 +1133,13 @@ float getzonethick(int dir, roomdata *roomi, float xyz[3]){
     }
   }
   if(dir!=-2){
-    alpha =  (y0 - xyz[1])/dy;
+    alpha =  (yy0 - xyz[1])/dy;
     if(alpha>0.0&&alpha<alpha_min){
       alpha_min=alpha;
     }
   }
   if(dir!=2){
-    alpha =  (y1 - xyz[1])/dy;
+    alpha =  (yy1 - xyz[1])/dy;
     if(alpha>0.0&&alpha<alpha_min){
       alpha_min=alpha;
     }
@@ -1222,7 +1216,6 @@ void drawzonesmokeGPU(roomdata *roomi){
 #define NROWS_GPU 2
 #define NCOLS_GPU 2
   int iwall;
-  float xyz[3];
   float dx, dy, dz;
   
   glUniform3f(GPUzone_eyepos,xyzeyeorig[0],xyzeyeorig[1],xyzeyeorig[2]);
@@ -1236,7 +1229,7 @@ void drawzonesmokeGPU(roomdata *roomi){
 
   for(iwall=-3;iwall<=3;iwall++){
     int i,j;
-    float x1, x2, y1, y2, z1, z2;
+    float x1, x2, yy1, yy2, z1, z2;
 
     if(iwall==0||roomi->drawsides[iwall+3]==0)continue;
 
@@ -1255,19 +1248,19 @@ void drawzonesmokeGPU(roomdata *roomi){
           x1=roomi->x1;
         }
         for(i=0;i<NCOLS_GPU-1;i++){
-          y1 = roomi->y0 + i*dy;
-          y2 = y1 + dy;
+          yy1 = roomi->y0 + i*dy;
+          yy2 = yy1 + dy;
           for(j=0;j<NROWS_GPU-1;j++){
             z1 = roomi->z0 + j*dz;
             z2 = z1 + dz;
 
-            glVertex3f(x1,y1,z1);
-            glVertex3f(x1,y2,z1);
-            glVertex3f(x1,y2,z2);
+            glVertex3f(x1,yy1,z1);
+            glVertex3f(x1,yy2,z1);
+            glVertex3f(x1,yy2,z2);
 
-            glVertex3f(x1,y1,z1);
-            glVertex3f(x1,y2,z2);
-            glVertex3f(x1,y1,z2);
+            glVertex3f(x1,yy1,z1);
+            glVertex3f(x1,yy2,z2);
+            glVertex3f(x1,yy1,z2);
           }
         }
         break;
@@ -1276,10 +1269,10 @@ void drawzonesmokeGPU(roomdata *roomi){
         dx = roomi->dx/(NCOLS_GPU-1);
         dz = roomi->dz/(NROWS_GPU-1);
         if(iwall<0){
-          y1=roomi->y0;
+          yy1=roomi->y0;
         }
         else{
-          y1=roomi->y1;
+          yy1=roomi->y1;
         }
         for(i=0;i<NCOLS_GPU-1;i++){
           x1 = roomi->x0 + i*dx;
@@ -1289,22 +1282,22 @@ void drawzonesmokeGPU(roomdata *roomi){
             z2 = z1 + dz;
 
             if(roomi->zoneinside==0){
-            glVertex3f(x1,y1,z1);
-            glVertex3f(x2,y1,z1);
-            glVertex3f(x2,y1,z2);
+            glVertex3f(x1,yy1,z1);
+            glVertex3f(x2,yy1,z1);
+            glVertex3f(x2,yy1,z2);
 
-            glVertex3f(x1,y1,z1);
-            glVertex3f(x2,y1,z2);
-            glVertex3f(x1,y1,z2);
+            glVertex3f(x1,yy1,z1);
+            glVertex3f(x2,yy1,z2);
+            glVertex3f(x1,yy1,z2);
             }
             else{
-            glVertex3f(x1,y1,z1);
-            glVertex3f(x2,y1,z2);
-            glVertex3f(x2,y1,z1);
+            glVertex3f(x1,yy1,z1);
+            glVertex3f(x2,yy1,z2);
+            glVertex3f(x2,yy1,z1);
 
-            glVertex3f(x1,y1,z1);
-            glVertex3f(x1,y1,z2);
-            glVertex3f(x2,y1,z2);
+            glVertex3f(x1,yy1,z1);
+            glVertex3f(x1,yy1,z2);
+            glVertex3f(x2,yy1,z2);
             }
           }
         }
@@ -1323,29 +1316,32 @@ void drawzonesmokeGPU(roomdata *roomi){
           x1 = roomi->x0 + i*dx;
           x2 = x1 + dx;
           for(j=0;j<NROWS_GPU-1;j++){
-            y1 = roomi->y0 + j*dy;
-            y2 = y1 + dy;
+            yy1 = roomi->y0 + j*dy;
+            yy2 = yy1 + dy;
 
             if(roomi->zoneinside==0){
-            glVertex3f(x1,y1,z1);
-            glVertex3f(x2,y1,z1);
-            glVertex3f(x2,y2,z1);
+            glVertex3f(x1,yy1,z1);
+            glVertex3f(x2,yy1,z1);
+            glVertex3f(x2,yy2,z1);
 
-            glVertex3f(x1,y1,z1);
-            glVertex3f(x2,y2,z1);
-            glVertex3f(x1,y2,z1);
+            glVertex3f(x1,yy1,z1);
+            glVertex3f(x2,yy2,z1);
+            glVertex3f(x1,yy2,z1);
             }
             else{
-            glVertex3f(x1,y1,z1);
-            glVertex3f(x2,y2,z1);
-            glVertex3f(x2,y1,z1);
+            glVertex3f(x1,yy1,z1);
+            glVertex3f(x2,yy2,z1);
+            glVertex3f(x2,yy1,z1);
 
-            glVertex3f(x1,y1,z1);
-            glVertex3f(x1,y2,z1);
-            glVertex3f(x2,y2,z1);
+            glVertex3f(x1,yy1,z1);
+            glVertex3f(x1,yy2,z1);
+            glVertex3f(x2,yy2,z1);
             }
           }
         }
+        break;
+      default:
+        ASSERT(0);
         break;
     }
     glEnd();
@@ -1433,6 +1429,9 @@ void drawzonesmoke(roomdata *roomi){
             vxyz[3][i][j]=getzonethick(iwall,roomi,xyz);
           }
         }
+        break;
+      default:
+        ASSERT(0);
         break;
     }
 
@@ -1550,7 +1549,6 @@ void drawroomdata(void){
   float *zoneylaybase,dy;
   unsigned char *hazardcolorbase, *zonecolorbase;
   float ylay;
-  float qdot;
   float *colorv;
   unsigned char color;
   unsigned char *izonetubase;
@@ -1644,7 +1642,6 @@ void drawroomdata(void){
 /* ------------------ DrawFirePlume ------------------------ */
 
 void DrawFirePlume(float diameter, float height, float maxheight){
-  unsigned char smokecolor[3]={178,178,178};
   unsigned char firecolor[3]={255,128,0};
 
   if(height<=maxheight){

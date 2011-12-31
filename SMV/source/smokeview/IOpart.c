@@ -25,19 +25,11 @@ int tagscompare( const void *arg1, const void *arg2 );
 void copy_dep_vals(part5class *partclassi, part5data *datacopy, float *colorptr, propdata *prop, int j);
 
 void draw_SVOBJECT(sv_object *object, int iframe, propdata *prop, int recurse_level);
-void PART_CB_INIT(void);
 void update_all_partvis(particle *parti);
 void update_partvis(int first_frame,particle *parti, part5data *datacopy, int nclasses);
 int get_tagindex(const particle *parti, part5data **data, int tagval);
 #define READPASS 1
 #define READFAIL 0
-#define SEEKPASS 0
-
-#define FORTPART5READORIG(var,size) fseek(PART5FILE,4,SEEK_CUR);\
-                           returncode=fread(var,4,size,PART5FILE);\
-                           if(endianswitch==1)endian_switch(var,size);\
-                           fseek(PART5FILE,4,SEEK_CUR)
-
 
 #define FORTPART5READ(var,size) \
 returncode=READPASS;\
@@ -161,16 +153,16 @@ void initpart5data(part5data *datacopy, part5class *partclassi){
 
 /* ------------------ getpart5data ------------------------ */
 
-void getpart5data(particle *parti, int partframestep, int partpointstep, int nf_all, float *delta_time, FILE_SIZE *file_size){
+void getpart5data(particle *parti, int partframestep_local, int partpointstep_local, int nf_all, float *delta_time, FILE_SIZE *file_size){
   FILE *PART5FILE;
   int one;
   int endianswitch=0;
   int version;
   int nclasses;
   int i;
-  int skip;
+  int skip_local;
   size_t returncode;
-  float time;
+  float time_local;
   int nparts;
   int *numtypes=NULL,*numtypescopy, *numpoints=NULL;
   int numtypes_temp[2];
@@ -203,8 +195,8 @@ void getpart5data(particle *parti, int partframestep, int partpointstep, int nf_
     if(returncode==0)goto wrapup;
     *numtypescopy++=numtypes_temp[0];
     *numtypescopy++=numtypes_temp[1];
-    skip = 2*(numtypes_temp[0]+numtypes_temp[1])*(8 + 30);
-    returncode=fseek(PART5FILE,skip,SEEK_CUR);
+    skip_local = 2*(numtypes_temp[0]+numtypes_temp[1])*(8 + 30);
+    returncode=fseek(PART5FILE,skip_local,SEEK_CUR);
     if(returncode!=0)goto wrapup;
   }
   CheckMemory;
@@ -218,9 +210,9 @@ void getpart5data(particle *parti, int partframestep, int partpointstep, int nf_
 
     CheckMemory;
     if(count>=nf_all)break;
-    FORTPART5READ(&time,1);
+    FORTPART5READ(&time_local,1);
     
-    if(count%partframestep!=0||(settmin_p==1&&time<tmin_p-TEPS)||(settmax_p==1&&time>tmax_p+TEPS)){
+    if(count%partframestep_local!=0||(settmin_p==1&&time_local<tmin_p-TEPS)||(settmax_p==1&&time_local>tmax_p+TEPS)){
       doit=0;
     }
     else{
@@ -231,8 +223,8 @@ void getpart5data(particle *parti, int partframestep, int partpointstep, int nf_
 
     if(returncode==0)break;
     if(doit==1){
-      printf("particle time=%.2f",time);
-      parti->ptimes[count2]=time;
+      printf("particle time=%.2f",time_local);
+      parti->ptimes[count2]=time_local;
     }
     for(i=0;i<nclasses;i++){
       part5class *partclassi;
@@ -242,7 +234,7 @@ void getpart5data(particle *parti, int partframestep, int partpointstep, int nf_
       FORTPART5READ(&nparts,1);
       if(returncode==0)goto wrapup;
       numpoints[i]=nparts;
-      skip=0;
+      skip_local=0;
       CheckMemory;
       if(doit==1){
         short *sx, *sy, *sz;
@@ -296,10 +288,10 @@ void getpart5data(particle *parti, int partframestep, int partpointstep, int nf_
       }
       else{
         if(parti->evac==1){
-          skip += 4 + XYZ_EXTRA*4*nparts + 4;  
+          skip_local += 4 + XYZ_EXTRA*4*nparts + 4;  
         }
         else{
-          skip += 4 + 3*4*nparts + 4;  
+          skip_local += 4 + 3*4*nparts + 4;  
         }
       }
       CheckMemory;
@@ -320,7 +312,7 @@ void getpart5data(particle *parti, int partframestep, int partpointstep, int nf_
         }
       }
       else{
-        skip += 4 + 4*nparts + 4;  // skip over tag for now
+        skip_local += 4 + 4*nparts + 4;  // skip over tag for now
       }
       CheckMemory;
       if(doit==1){
@@ -331,18 +323,18 @@ void getpart5data(particle *parti, int partframestep, int partpointstep, int nf_
       }
       else{
         if(numtypes[2*i]>0){
-          skip += 4 + 4*nparts*numtypes[2*i] + 4;  // skip over vals for now
+          skip_local += 4 + 4*nparts*numtypes[2*i] + 4;  // skip over vals for now
         }
       }
       CheckMemory;
       if(numtypes[2*i+1]>0){
-        skip += 4 + 4*nparts*numtypes[2*i+1] + 4;
+        skip_local += 4 + 4*nparts*numtypes[2*i+1] + 4;
       }
 
       
       returncode=0;
-      if(skip>0){
-        returncode=fseek(PART5FILE,skip,SEEK_CUR);
+      if(skip_local>0){
+        returncode=fseek(PART5FILE,skip_local,SEEK_CUR);
         if(returncode!=0)goto wrapup;
       }
       CheckMemory;
@@ -684,7 +676,7 @@ int get_tagindex(const particle *partin, part5data **datain, int tagval){
 int getpart5nframes(particle *parti){
   FILE *stream;
   char buffer[256];
-  float time;
+  float time_local;
   //int count;
   char *reg_file, *size_file;
   int i;
@@ -733,7 +725,7 @@ int getpart5nframes(particle *parti){
     int exitloop;
 
     if(fgets(buffer,255,stream)==NULL)break;
-    sscanf(buffer,"%f",&time);
+    sscanf(buffer,"%f",&time_local);
     exitloop=0;
     for(i=0;i<parti->nclasses;i++){
       if(fgets(buffer,255,stream)==NULL){
@@ -774,10 +766,10 @@ int get_min_partframes(void){
 
 /* ------------------ getpart5header ------------------------ */
 
-void getpart5header(particle *parti, int partframestep, int *nf_all){
+void getpart5header(particle *parti, int partframestep_local, int *nf_all){
   FILE *stream;
   char buffer[256];
-  float time;
+  float time_local;
   int count;
   char *reg_file, *size_file;
   int i;
@@ -830,7 +822,7 @@ void getpart5header(particle *parti, int partframestep, int *nf_all){
     int exitloop;
 
     if(fgets(buffer,255,stream)==NULL)break;
-    sscanf(buffer,"%f",&time);
+    sscanf(buffer,"%f",&time_local);
     exitloop=0;
     for(i=0;i<parti->nclasses;i++){
       if(fgets(buffer,255,stream)==NULL||(npartinfo>1&&npartframes_max!=-1&&nframes_all+1>npartframes_max)){
@@ -840,9 +832,9 @@ void getpart5header(particle *parti, int partframestep, int *nf_all){
     }
     if(exitloop==1)break;
     nframes_all++;
-    if((nframes_all-1)%partframestep!=0||
-       (settmin_p!=0&&time<tmin_p-TEPS)||
-       (settmax_p!=0&&time>tmax_p+TEPS)){
+    if((nframes_all-1)%partframestep_local!=0||
+       (settmin_p!=0&&time_local<tmin_p-TEPS)||
+       (settmax_p!=0&&time_local>tmax_p+TEPS)){
        continue;
     }
     (parti->nframes)++;
@@ -883,10 +875,10 @@ void getpart5header(particle *parti, int partframestep, int *nf_all){
         fail=1;
         break;
       }
-      sscanf(buffer,"%f",&time);
-      if(count%partframestep!=0||
-         (settmin_p!=0&&time<tmin_p-TEPS)||
-         (settmax_p!=0&&time>tmax_p+TEPS)){
+      sscanf(buffer,"%f",&time_local);
+      if(count%partframestep_local!=0||
+         (settmin_p!=0&&time_local<tmin_p-TEPS)||
+         (settmax_p!=0&&time_local>tmax_p+TEPS)){
         for(j=0;j<parti->nclasses;j++){
           if(fgets(buffer,255,stream)==NULL){
             fail=1;
@@ -901,7 +893,7 @@ void getpart5header(particle *parti, int partframestep, int *nf_all){
 
         part5class *partclassj;
 
-        datacopy->time = time;
+        datacopy->time = time_local;
         partclassj = parti->partclassptr[j];
         initpart5data(datacopy,partclassj);
         if(fgets(buffer,255,stream)==NULL){
@@ -1126,7 +1118,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   unsigned char *isprinkcopy;
   int error=0;
   int bytesperpoint;
-  int skip;
+  int skip_local;
   int statfile,statfile2;
   STRUCTSTAT statbuffer,statbuffer2;
   char partsizefile[1024],buffer[1024];
@@ -1209,7 +1201,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   printf("Sizing particle data: %s\n",file);
   file_unit=15;
   FORTget_file_unit(&file_unit,&file_unit);
-  FORTgetsizes(&file_unit,file,&ibar,&jbar,&kbar,&nb,&nv,&nspr,&mxframepoints,&endian,&staticframe0,&error,lenfile);
+  FORTgetsizes(&file_unit,file,&ibar,&jbar,&kbar,&nb,&nv,&nspr,&mxframepoints,&endian_smv,&staticframe0,&error,lenfile);
   STRCPY(partsizefile,file);
   STRCAT(partsizefile,".sz");
   statfile=STAT(file,&statbuffer);
@@ -1239,7 +1231,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     }
     file_unit=15;
     FORTget_file_unit(&file_unit,&file_unit);
-    FORTgetsizes(&file_unit,file,&ibar,&jbar,&kbar,&nb,&nv,&nspr,&mxframepoints,&endian,&staticframe0,&error,lenfile);
+    FORTgetsizes(&file_unit,file,&ibar,&jbar,&kbar,&nb,&nv,&nspr,&mxframepoints,&endian_smv,&staticframe0,&error,lenfile);
   }
   npartpoints2=npartpoints;
   npartframes2=npartframes;
@@ -1354,13 +1346,13 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     parti->particle_type=0;
   }
   havesprinkpart=0;
-  skip=0;
-  if(staticframe0==1)skip=parti->sframe[0];
-  tcopy=parti->tpart+skip;
+  skip_local=0;
+  if(staticframe0==1)skip_local=parti->sframe[0];
+  tcopy=parti->tpart+skip_local;
   tmin=1000000000.0;
   tmax=-tmin;
   isprinkcopy=parti->isprink;
-  for(n=skip;n<nmax;n++){
+  for(n=skip_local;n<nmax;n++){
     if(*isprinkcopy==0&&parti->particle_type==0){
       tcopy++; 
       isprinkcopy++;
@@ -1385,7 +1377,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   printf("computing particle color levels \n");
   if(parti->particle_type!=0||parti->droplet_type!=0){
     adjustpartbounds(parti->tpart,parti->particle_type,parti->droplet_type,parti->isprink,
-      skip,nmax,setpartmin,&tmin,setpartmax,&tmax);
+      skip_local,nmax,setpartmin,&tmin,setpartmax,&tmax);
   }
   if(setpartmin == SET_MIN){
     tmin = partmin;
@@ -1410,10 +1402,10 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
       return;
     }
   }
-  getPartColors(parti->tpart, skip, nmax, 
+  getPartColors(parti->tpart, skip_local, nmax, 
     parti->itpart,parti->isprink,parti->particle_type,parti->droplet_type,
     &tmin, &tmax, nrgb, colorlabelpart, partscale,partlevels256);
-  for(n=0;n<skip;n++){
+  for(n=0;n<skip_local;n++){
     parti->itpart[n]=0;
   }
   FREEMEMORY(parti->tpart);
@@ -1716,8 +1708,6 @@ void drawPart5(const particle *parti){
             if(datacopy->partclassbase->vis_type==PART_SMV_DEVICE){
               for(j=0;j<datacopy->npoints;j++){
                 float *colorptr;
- //               int nvalstack;
-                  int ii;
 
                 if(vis[j]!=1)continue;
                   
@@ -1962,7 +1952,6 @@ void copy_dep_vals(part5class *partclassi, part5data *datacopy, float *colorptr,
 
     unsigned char *var_type;
     unsigned char color_index;
-    float val;
     part5prop *varprop;
     float valmin, valmax;
     char *shortlabel;

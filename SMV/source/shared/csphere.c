@@ -278,9 +278,6 @@ void drawspherepoints(spherepoints *spherei){
   }
 
   for(i=0;i<=spherei->n;i++){
-    if(i==spherei->n){
-      i=i;
-    }
     for(j=0;j<spherei->nlong[i];j++){
       index++;
       w=spherei->normals+3*index;

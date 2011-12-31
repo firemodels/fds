@@ -23,7 +23,7 @@ void readtarget(const char *file, int ifile, int flag, int *errorcode){
   float ttargmin, ttargmax;
   char buffer[255];
   int n,colorindex;
-  float time;
+  float time_local;
   int exitloop = 0;
   float *t, *x, *y, *z, *x2, *y2, *z2;
   float xt, yt, zt;
@@ -133,8 +133,8 @@ void readtarget(const char *file, int ifile, int flag, int *errorcode){
     target_positions[n].z2=z2;
     for(i=0;i<nsteps;i++){
       if(fgets(buffer,255,stream)!=NULL){
-        sscanf(buffer,"%f %f %f %f %f %f %f",&time,&xt,&yt,&zt,&xt2,&yt2,&zt2);
-        target_positions[n].t[i]=time;
+        sscanf(buffer,"%f %f %f %f %f %f %f",&time_local,&xt,&yt,&zt,&xt2,&yt2,&zt2);
+        target_positions[n].t[i]=time_local;
         target_positions[n].x[i]=xt;
         target_positions[n].y[i]=yt;
         target_positions[n].z[i]=zt;
@@ -180,7 +180,7 @@ void readtarget2(const char *file, int ifile, int flag, int *errorcode){
   FILE *stream;
   char buffer[255];
   int n;
-  float time;
+  float time_local;
   float *t, *x, *y, *z;
   float xt, yt, zt;
   int i;
@@ -268,11 +268,11 @@ void readtarget2(const char *file, int ifile, int flag, int *errorcode){
   for(i=0;i<ntargtimes;i++){
     if(fgets(buffer,255,stream)!=NULL){
       sscanf(buffer,"%f %f %f %f %f %f %f %f %f %f",
-        &time,&xt,&yt,&zt,
+        &time_local,&xt,&yt,&zt,
         vals_local,vals_local+1,vals_local+2,vals_local+3,vals_local+4,vals_local+5
         );
-      target_positions[n].t[i]=time;
-      targtimes[i]=time;
+      target_positions[n].t[i]=time_local;
+      targtimes[i]=time_local;
       target_positions[n].x[i]=xt;
       target_positions[n].y[i]=yt;
       target_positions[n].z[i]=zt;
@@ -326,7 +326,7 @@ void readtarget2(const char *file, int ifile, int flag, int *errorcode){
 
 /* ------------------ gettargetposition ------------------------ */
 
-int gettargetposition(int itarget, float time, float *x, float *y, float *z){
+int gettargetposition(int itarget, float time_local, float *x, float *y, float *z){
   targpos *tp;
   int i,nsteps;
   float factor;
@@ -336,12 +336,12 @@ int gettargetposition(int itarget, float time, float *x, float *y, float *z){
   tp = target_positions+itarget;
   nsteps = tp->nsteps;
   if(nsteps<=1)return INVISIBLE;
-  if(time<tp->t[0]||time>tp->t[nsteps-1])return INVISIBLE;
+  if(time_local<tp->t[0]||time_local>tp->t[nsteps-1])return INVISIBLE;
   for(i=0;i<nsteps-1;i++){
-    if(tp->t[i]<=time&&time<=tp->t[i+1]){
+    if(tp->t[i]<=time_local&&time_local<=tp->t[i+1]){
       denom=tp->t[i+1]-tp->t[i];
       if(denom!=0.0){
-      factor=(time-tp->t[i])/denom;
+      factor=(time_local-tp->t[i])/denom;
       }
       else{
         factor=1.0;
@@ -385,12 +385,13 @@ void drawTargets(void){
      case 2:
        for(i=0;i<ntargets;i++){
          unsigned char *color;
+         int jj;
 
-         j = targtimeslist[itimes];
+         jj = targtimeslist[itimes];
          color = target_positions[i].color;
-         xtarget=(target_positions[i].x[j]-xbar0)/xyzmaxdiff;;
-         ytarget=(target_positions[i].y[j]-ybar0)/xyzmaxdiff;
-         ztarget=(target_positions[i].z[j]-zbar0)/xyzmaxdiff;
+         xtarget=(target_positions[i].x[jj]-xbar0)/xyzmaxdiff;;
+         ytarget=(target_positions[i].y[jj]-ybar0)/xyzmaxdiff;
+         ztarget=(target_positions[i].z[jj]-zbar0)/xyzmaxdiff;
          glPointSize((float)4.0);
          glBegin(GL_QUADS);
 #define DELTA 0.1f
@@ -401,42 +402,42 @@ void drawTargets(void){
 #define TOP 4
 #define BOTTOM 5
          /* left */
-         glColor3fv(rgb_full[color[6*j+LEFT]]);
+         glColor3fv(rgb_full[color[6*jj+LEFT]]);
          glVertex3f(xtarget,ytarget,      ztarget      );
          glVertex3f(xtarget,ytarget,      ztarget+DELTA);
          glVertex3f(xtarget,ytarget+DELTA,ztarget+DELTA);
          glVertex3f(xtarget,ytarget+DELTA,ztarget      );
 
          /* right */
-         glColor3fv(rgb_full[color[6*j+RIGHT]]);
+         glColor3fv(rgb_full[color[6*jj+RIGHT]]);
          glVertex3f(xtarget+DELTA,ytarget,      ztarget      );
          glVertex3f(xtarget+DELTA,ytarget+DELTA,ztarget      );
          glVertex3f(xtarget+DELTA,ytarget+DELTA,ztarget+DELTA);
          glVertex3f(xtarget+DELTA,ytarget,      ztarget+DELTA);
 
          /* front */
-         glColor3fv(rgb_full[color[6*j+FRONT]]);
+         glColor3fv(rgb_full[color[6*jj+FRONT]]);
          glVertex3f(xtarget,      ytarget,ztarget      );
          glVertex3f(xtarget+DELTA,ytarget,ztarget      );
          glVertex3f(xtarget+DELTA,ytarget,ztarget+DELTA);
          glVertex3f(xtarget,      ytarget,ztarget+DELTA);
 
          /* back */
-         glColor3fv(rgb_full[color[6*j+BACK]]);
+         glColor3fv(rgb_full[color[6*jj+BACK]]);
          glVertex3f(xtarget,      ytarget+DELTA,ztarget      );
          glVertex3f(xtarget,      ytarget+DELTA,ztarget+DELTA);
          glVertex3f(xtarget+DELTA,ytarget+DELTA,ztarget+DELTA);
          glVertex3f(xtarget+DELTA,ytarget+DELTA,ztarget      );
 
          /* bottom */
-         glColor3fv(rgb_full[color[6*j+BOTTOM]]);
+         glColor3fv(rgb_full[color[6*jj+BOTTOM]]);
          glVertex3f(xtarget,      ytarget,      ztarget);
          glVertex3f(xtarget,      ytarget+DELTA,ztarget);
          glVertex3f(xtarget+DELTA,ytarget+DELTA,ztarget);
          glVertex3f(xtarget+DELTA,ytarget,      ztarget);
 
          /* top */
-         glColor3fv(rgb_full[color[6*j+TOP]]);
+         glColor3fv(rgb_full[color[6*jj+TOP]]);
          glVertex3f(xtarget,      ytarget,      ztarget+DELTA);
          glVertex3f(xtarget+DELTA,ytarget,      ztarget+DELTA);
          glVertex3f(xtarget+DELTA,ytarget+DELTA,ztarget+DELTA);

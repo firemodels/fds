@@ -1731,6 +1731,9 @@ void HelpMenu(int value){
       ShellExecute(NULL, "open", "http://fire.nist.gov/fds/", NULL, NULL, SW_SHOWNORMAL);
 #endif
       break;
+    default:
+      ASSERT(0);
+      break;
   }
 }
 
@@ -2134,7 +2137,6 @@ void DisclaimerMenu(int value){
 
 void LoadUnloadMenu(int value){
   int errorcode;
-  size_t len;
   int i;
   int ii;
 
@@ -2596,7 +2598,7 @@ void Particle5ShowMenu(int value){
 void ParticlePropShowMenu(int value){
   part5prop *propi;
 
-  int propvalue, showvalue;
+  int propvalue;
 
   propvalue = (-value)/10000-1;
   value = -((-value)%10000);
@@ -3038,8 +3040,7 @@ void UnloadMultiSliceMenu(int value){
 /* ------------------ ShowVolSmoke3DMenu ------------------------ */
 
 void ShowVolSmoke3DMenu(int value){
-  int i,errorcode;
-  smoke3d *smoke3di, *smoke3dj;
+  int i;
 
   if(value==999)return;
   updatemenu=1;
@@ -3133,9 +3134,6 @@ void UnLoadVolSmoke3DMenu(int value){
 /* ------------------ LoadVolSmoke3DMenu ------------------------ */
 
 void LoadVolSmoke3DMenu(int value){
-  int i,errorcode;
-  smoke3d *smoke3di, *smoke3dj;
-
   if(value==999)return;
   updatemenu=1;
   glutSetCursor(GLUT_CURSOR_WAIT);
@@ -3934,6 +3932,9 @@ void ImmersedMenu(int value){
       case 6:
         sort_embedded_geometry=1-sort_embedded_geometry;
         break;
+      default:
+        ASSERT(0);
+        break;
   }
   glutPostRedisplay();
 }
@@ -4314,10 +4315,6 @@ void MENU_vslice(int vec_type){
 void InitMenus(int unload){
   int showflag, hideflag;
   int n,i,ii;
-  FILE *stream;
-  FILE *stream2;
-  FILE *stream3;
-  int readinifile=0;
   char caselabel[255],chari[4];
   int showall,hideall;
   char levellabel[1024];
@@ -4355,7 +4352,7 @@ static int showhideslicemenu=0,showvslicemenu=0;
 static int plot3dshowmenu=0, staticvariablemenu=0, helpmenu=0;
 static int vectorskipmenu=0,unitsmenu=0;
 static int isosurfacemenu=0, isovariablemenu=0, levelmenu=0;
-static int isoblockmenu=0, fontmenu=0, aperturemenu=0,dialogmenu=0,zoommenu=0;
+static int fontmenu=0, aperturemenu=0,dialogmenu=0,zoommenu=0;
 static int gridslicemenu=0, blockagemenu=0, immersedmenu=0, loadpatchmenu=0, ventmenu=0;
 static int loadisomenu=0, isosurfacetypemenu=0;
 static int geometrymenu=0, loadunloadmenu=0, reloadmenu=0, disclaimermenu=0, terrain_showmenu=0;
@@ -4374,7 +4371,6 @@ static int *loadsubplot3dmenu=NULL, nloadsubplot3dmenu=0;
 static int loadmultivslicemenu=0, unloadmultivslicemenu=0;
 static int unloadmultislicemenu=0, vslicemenu=0, staticslicemenu=0;
 static int evacmenu=0, particlemenu=0, particlesubmenu=0, showpatchmenu=0, zonemenu=0, isoshowmenu=0, isolevelmenu=0, smoke3dshowmenu=0;
-static int particle5showmenu=0;
 static int particlepropshowmenu=0,humanpropshowmenu=0;
 static int *particlepropshowsubmenu=NULL;
 static int particlestreakshowmenu=0;
@@ -4534,7 +4530,6 @@ updatemenu=0;
 
   {
     for(i=0;i<nmenus;i++){
-      int menuvar;
       menudata *menui;
 
       menui = menuinfo + i;
@@ -5459,6 +5454,9 @@ updatemenu=0;
           glutAddMenuEntry(_("    temperature"),6);
           glutAddMenuEntry(_("    hazard"),5);
           break;
+        default:
+          ASSERT(0);
+          break;
       }
       if(sethazardcolor!=2){
         glutAddMenuEntry(_("  2D smoke drawn:"),999);
@@ -5474,6 +5472,9 @@ updatemenu=0;
           break;
         case 2:
           glutAddMenuEntry(_("  *3D smoke"),7);
+          break;
+        default:
+          ASSERT(0);
           break;
       }
       if(visZone==0){
@@ -6300,7 +6301,7 @@ updatemenu=0;
 
     for(i=0;i<ntours;i++){
       tourdata *touri;
-      int glui_avatar_index;
+      int glui_avatar_index_local;
 
       touri = tourinfo + i;
       if(touri->display==1){
@@ -6314,11 +6315,11 @@ updatemenu=0;
       else{
         STRCPY(menulabel,touri->menulabel);
       }
-      glui_avatar_index = touri->glui_avatar_index;
-      if(glui_avatar_index>=0&&glui_avatar_index<navatar_types){
+      glui_avatar_index_local = touri->glui_avatar_index;
+      if(glui_avatar_index_local>=0&&glui_avatar_index_local<navatar_types){
         sv_object *avatari;
 
-        avatari=avatar_types[glui_avatar_index];
+        avatari=avatar_types[glui_avatar_index_local];
         strcat(menulabel,"(");
         strcat(menulabel,avatari->label);
         strcat(menulabel,")");

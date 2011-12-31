@@ -132,7 +132,6 @@ void update_menu(void);
 
 void get_newscriptfilename(char *newscriptfilename){
   char buffer[1024];
-  char filebase[1024];
   int i;
   int nexti;
   scriptfiledata *scriptfile;
@@ -163,8 +162,6 @@ void get_newscriptfilename(char *newscriptfilename){
 /* ------------------ get_scriptfilename ------------------------ */
 
 char *get_scriptfilename(int id){
-  scriptfiledata *thisptr,*prevptr,*nextptr;
-  int len;
   scriptfiledata *scriptfile;
 
   for(scriptfile=first_scriptfile.next;scriptfile->next!=NULL;scriptfile=scriptfile->next){
@@ -177,8 +174,6 @@ char *get_scriptfilename(int id){
 /* ------------------ get_scriptfilename ------------------------ */
 
 char *get_inifilename(int id){
-  inifiledata *thisptr,*prevptr,*nextptr;
-  int len;
   inifiledata *inifile;
 
   for(inifile=first_inifile.next;inifile->next!=NULL;inifile=inifile->next){
@@ -595,7 +590,6 @@ int compile_script(char *scriptfile){
     }
     if(match_upper(buffer,"LOADINIFILE") == 1){
       int len;
-      int filetype;
 
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_LOADINIFILE);
@@ -610,7 +604,6 @@ int compile_script(char *scriptfile){
     }
     if(match_upper(buffer,"LOADFILE") == 1){
       int len;
-      int filetype;
 
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_LOADFILE);
@@ -625,7 +618,6 @@ int compile_script(char *scriptfile){
     }
     if(match_upper(buffer,"LOADVFILE") == 1){
       int len;
-      int filetype;
 
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_LOADVFILE);
@@ -639,9 +631,6 @@ int compile_script(char *scriptfile){
       continue;
     }
     if(match_upper(buffer,"EXIT") == 1){
-      int len;
-      int filetype;
-
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_EXIT);
 
@@ -650,7 +639,6 @@ int compile_script(char *scriptfile){
     }
     if(match_upper(buffer,"LOADBOUNDARY") == 1){
       int len;
-      int filetype;
 
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_LOADBOUNDARY);
@@ -665,7 +653,6 @@ int compile_script(char *scriptfile){
     }
     if(match_upper(buffer,"PARTCLASSCOLOR") == 1){
       int len;
-      int filetype;
 
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_PARTCLASSCOLOR);
@@ -680,7 +667,6 @@ int compile_script(char *scriptfile){
     }
     if(match_upper(buffer,"PARTCLASSTYPE") == 1){
       int len;
-      int filetype;
 
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_PARTCLASSTYPE);
@@ -718,7 +704,6 @@ int compile_script(char *scriptfile){
     }
     if(match_upper(buffer,"LOADTOUR") == 1){
       int len;
-      int filetype;
 
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_LOADTOUR);
@@ -732,9 +717,6 @@ int compile_script(char *scriptfile){
       continue;
     }
     if(match_upper(buffer,"UNLOADTOUR") == 1){
-      int len;
-      int filetype;
-
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_UNLOADTOUR);
 
@@ -743,7 +725,6 @@ int compile_script(char *scriptfile){
     }
     if(match_upper(buffer,"LOAD3DSMOKE") == 1){
       int len;
-      int filetype;
 
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_LOAD3DSMOKE);
@@ -757,9 +738,6 @@ int compile_script(char *scriptfile){
       continue;
     }
     if(match_upper(buffer,"LOADVOLSMOKE") == 1){
-      int len;
-      int filetype;
-
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_LOADVOLSMOKE);
       if(fgets(buffer2,255,stream)==NULL)break;
@@ -770,9 +748,6 @@ int compile_script(char *scriptfile){
       continue;
     }
     if(match_upper(buffer,"LOADVOLSMOKEFRAME") == 1){
-      int len;
-      int filetype;
-
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_LOADVOLSMOKEFRAME);
       if(fgets(buffer2,255,stream)==NULL)break;
@@ -784,7 +759,6 @@ int compile_script(char *scriptfile){
     }
     if(match_upper(buffer,"LOADSLICE") == 1){
       int len;
-      int filetype;
 
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_LOADSLICE);
@@ -805,7 +779,6 @@ int compile_script(char *scriptfile){
     }
     if(match_upper(buffer,"LOADVSLICE") == 1){
       int len;
-      int filetype;
 
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_LOADVSLICE);
@@ -826,7 +799,6 @@ int compile_script(char *scriptfile){
     }
     if(match_upper(buffer,"LOADISO") == 1){
       int len;
-      int filetype;
 
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_LOADISO);
@@ -840,9 +812,6 @@ int compile_script(char *scriptfile){
       continue;
     }
     if(match_upper(buffer,"LOADPARTICLES") == 1){
-      int len;
-      int filetype;
-
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_LOADPARTICLES);
 
@@ -850,9 +819,6 @@ int compile_script(char *scriptfile){
       continue;
     }
     if(match_upper(buffer,"LOADPLOT3D") == 1){
-      int len;
-      int filetype;
-
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_LOADPLOT3D);
       if(fgets(buffer2,255,stream)==NULL)break;
@@ -895,25 +861,25 @@ int compile_script(char *scriptfile){
 /* ------------------ run_renderall ------------------------ */
 
 void script_renderall(scriptdata *scripti){
-  int skip;
+  int skip_local;
 
-  skip=scripti->ival;
-  if(skip<1)skip=1;
-  printf("Script: Rendering every %i frames",skip);
+  skip_local=scripti->ival;
+  if(skip_local<1)skip_local=1;
+  printf("Script: Rendering every %i frames",skip_local);
   printf("\n");
-  RenderMenu(skip);
+  RenderMenu(skip_local);
 }
 
 /* ------------------ run_volsmokerenderall ------------------------ */
 
 void script_volsmokerenderall(scriptdata *scripti){
-  int skip;
+  int skip_local;
 
   script_loadvolsmokeframe2();
-  skip=scripti->ival;
-  if(skip<1)skip=1;
-  printf("Script: Rendering every %i frames\n",skip);
-  RenderMenu(skip);
+  skip_local=scripti->ival;
+  if(skip_local<1)skip_local=1;
+  printf("Script: Rendering every %i frames\n",skip_local);
+  RenderMenu(skip_local);
 }
 
 /* ------------------ script_loadparticles ------------------------ */
@@ -979,7 +945,6 @@ void script_loadiso(scriptdata *scripti){
 
 void script_loadvolsmoke(scriptdata *scripti){
   int imesh;
-  int i;
 
   imesh = scripti->ival;
   if(imesh==-1){
@@ -1072,7 +1037,6 @@ void script_load3dsmoke(scriptdata *scripti){
 
 void script_loadslice(scriptdata *scripti){
   int i;
-  int errorcode;
 
   printf("Script: loading slice files of type: %s",scripti->cval);
   printf("\n");
@@ -1103,7 +1067,6 @@ void script_loadslice(scriptdata *scripti){
 
 void script_loadvslice(scriptdata *scripti){
   int i;
-  int errorcode;
   float delta_orig;
 
   printf("Script: loading vector slice files of type: %s",scripti->cval);
@@ -1134,7 +1097,6 @@ void script_loadvslice(scriptdata *scripti){
 
 void script_loadtour(scriptdata *scripti){
   int i;
-  int errorcode;
 
   printf("Script: loading tour %s",scripti->cval);
   printf("\n");
@@ -1247,9 +1209,8 @@ void script_plot3dprops(scriptdata *scripti){
 /* ------------------ script_showplot3ddata ------------------------ */
 
 void script_showplot3ddata(scriptdata *scripti){
-  int i;
   mesh *meshi;
-  int imesh, dir, p_index, showhide;
+  int imesh, dir, showhide;
   float val;
   int isolevel;
 
@@ -1288,6 +1249,9 @@ void script_showplot3ddata(scriptdata *scripti){
       updatesurface();
       updatemenu=1;  
       break;
+    default:
+      ASSERT(0);
+      break;
   }
   updateplotslice(dir);
 
@@ -1320,9 +1284,6 @@ void script_partclasstype(scriptdata *scripti){
 /* ------------------ script_loadinifile ------------------------ */
 
 void script_loadinifile(scriptdata *scripti){
-  int i;
-  int errorcode;
-
   printf("Script: loading ini file %s",scripti->cval);
   printf("\n");
   scriptinifilename2=scripti->cval;
@@ -1389,7 +1350,6 @@ void script_loadfile(scriptdata *scripti){
   }
   for(i=0;i<nzone;i++){
     zonedata *zonei;
-    char *file;
 
     zonei = zoneinfo + i;
     if(strcmp(zonei->file,scripti->cval)==0){
@@ -1418,17 +1378,17 @@ void script_loadfile(scriptdata *scripti){
 
 void script_loadplot3d(scriptdata *scripti){
   int i;
-  float time;
+  float time_local;
   int blocknum;
 
-  time = scripti->fval;
+  time_local = scripti->fval;
   blocknum = scripti->ival-1;
 
   for(i=0;i<nplot3dinfo;i++){
     plot3d *plot3di;
 
     plot3di = plot3dinfo + i;
-    if(plot3di->blocknumber==blocknum&&fabs(plot3di->time-time)<0.5){
+    if(plot3di->blocknumber==blocknum&&fabs(plot3di->time-time_local)<0.5){
       LoadPlot3dMenu(i);
     }
   }
@@ -1442,7 +1402,6 @@ void script_loadplot3d(scriptdata *scripti){
 
 void script_loadvfile(scriptdata *scripti){
   int i;
-  int errorcode;
 
   printf("Script: loading vector slice file %s",scripti->cval);
   printf("\n");
@@ -1653,6 +1612,9 @@ int run_script(void){
       break;
     case SCRIPT_SETVIEWPOINT:
       script_setviewpoint(scripti);
+      break;
+    default:
+      ASSERT(0);
       break;
   }
   glutPostRedisplay();

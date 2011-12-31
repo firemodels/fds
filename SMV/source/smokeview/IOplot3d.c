@@ -232,7 +232,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
   printf("Loading plot3d data: %s\n",file);
   local_starttime = glutGet(GLUT_ELAPSED_TIME);
   if(p->compression_type==0){
-    FORTgetplot3dq(file,&nx,&ny,&nz,meshi->qdata,&error,&endian,&isotest,plot3dfilelen);
+    FORTgetplot3dq(file,&nx,&ny,&nz,meshi->qdata,&error,&endian_smv,&isotest,plot3dfilelen);
   }
   if(NewMemory((void **)&meshi->iqdata,numplot3dvars*ntotal*sizeof(unsigned char))==0){
     *errorcode=1;
@@ -1388,7 +1388,7 @@ void updateallplotslices(void){
 /* ------------------ get_plot3d_index ------------------------ */
 
 int get_plot3d_index(mesh *meshi, int dir, float val){
-  float valmin,valdiff;
+  float valmin;
   int i, ivalmin, nvals;
   float *xyz;
 
@@ -1405,6 +1405,9 @@ int get_plot3d_index(mesh *meshi, int dir, float val){
       xyz = meshi->zplt_orig;
       nvals = meshi->kbar;
       break;
+    default:
+      ASSERT(0);
+      break;
   }
   
   ivalmin=0;
@@ -1420,13 +1423,13 @@ int get_plot3d_index(mesh *meshi, int dir, float val){
 
 /* ------------------ update_plot_xyz ------------------------ */
 
-void update_plot_xyz(mesh *current_mesh){
+void update_plot_xyz(mesh *current_mesh_local){
   int i;
   float xval, yval, zval;
 
-  xval = current_mesh->xplt[current_mesh->plotx];
-  yval = current_mesh->yplt[current_mesh->ploty];
-  zval = current_mesh->zplt[current_mesh->plotz];
+  xval = current_mesh_local->xplt[current_mesh_local->plotx];
+  yval = current_mesh_local->yplt[current_mesh_local->ploty];
+  zval = current_mesh_local->zplt[current_mesh_local->plotz];
 
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
@@ -1435,7 +1438,7 @@ void update_plot_xyz(mesh *current_mesh){
     float zmin, zmax;
 
     meshi=meshinfo+i;
-    if(meshi==current_mesh)continue;
+    if(meshi==current_mesh_local)continue;
 
     xmin = meshi->xplt[0];
     xmax = meshi->xplt[meshi->ibar];
@@ -2010,7 +2013,7 @@ int plot3dlistcompare( const void *arg1, const void *arg2 ){
 void init_plot3dtimelist(void){
   int i;
   plot3d *plot3di;
-  float lasttime,val;
+  float lasttime_local,val;
 
   FREEMEMORY(plot3dtimelist);
   nplot3dtimelist=0;
@@ -2024,13 +2027,13 @@ void init_plot3dtimelist(void){
     plot3dtimelist[i]=plot3di->time;
   }
   qsort( (float *)plot3dtimelist, (size_t)nplot3dinfo, sizeof(int), plot3dlistcompare );
-  lasttime=-999999.0;
+  lasttime_local=-999999.0;
   for(i=0;i<nplot3dinfo;i++){
     val=plot3dtimelist[i];
-    if(fabs((double)(val-lasttime))>0.1){
+    if(fabs((double)(val-lasttime_local))>0.1){
       nplot3dtimelist++;
       plot3dtimelist[nplot3dtimelist-1]=val;
-      lasttime=val;
+      lasttime_local=val;
     }
   }
 }
@@ -2108,7 +2111,7 @@ void get_plot3d_uvw(float xyz[3], float uvw[3]){
 
   /* ------------------ getplot3dtime ------------------------ */
 
-int getplot3dtime(float *time){
+int getplot3dtime(float *time_local){
   int i;
 
   for(i=0;i<nplot3dinfo;i++){
@@ -2116,7 +2119,7 @@ int getplot3dtime(float *time){
 
     plot3di = plot3dinfo + i;
     if(plot3di->loaded==0||plot3di->display==0)continue;
-    *time = plot3di->time;
+    *time_local = plot3di->time;
     return 1;
   }
   return 0;

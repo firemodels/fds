@@ -7,11 +7,9 @@ char translate_revision[]="$Revision$";
 
 #include "options.h"
 #define IN_TRANSLATE
-#include "pragmas.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <ctype.h>
 #include "MALLOC.h"
 #include "translate.h"
@@ -42,10 +40,10 @@ int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr){
   char buffer[1000];
   char *buf;
   char *key, *value;
-  trdata *trinfo;
-  int ntrinfo;
+  trdata *trinfo_local;
+  int ntrinfo_local;
 
-  ntrinfo=0;
+  ntrinfo_local=0;
   stream=fopen(file,"r");
   if(stream==NULL)return 0;
 
@@ -54,15 +52,15 @@ int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr){
     buf=trim_front(buffer);
     trim(buf);
     key = strstr(buf,"msgid");
-    if(key!=NULL&&key==buf)ntrinfo++;
+    if(key!=NULL&&key==buf)ntrinfo_local++;
   }
-  if(ntrinfo==0)return 0;
+  if(ntrinfo_local==0)return 0;
 
-  NewMemory((void **)&trinfo,sizeof(trdata)*ntrinfo);
-  *trinfoptr=trinfo;
-  *ntrinfoptr=ntrinfo;
+  NewMemory((void **)&trinfo_local,sizeof(trdata)*ntrinfo_local);
+  *trinfoptr=trinfo_local;
+  *ntrinfoptr=ntrinfo_local;
 
-  ntrinfo=0;
+  ntrinfo_local=0;
   rewind(stream);
   while(!feof(stream)){
     trdata *tri;
@@ -73,8 +71,8 @@ int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr){
     trim(buf);
     key = strstr(buf,"msgid");
     if(key==NULL||key!=buf)continue;
-    ntrinfo++;
-    tri = trinfo + ntrinfo - 1;
+    ntrinfo_local++;
+    tri = trinfo_local + ntrinfo_local - 1;
     key = getstring(key+5);
     if(key==NULL){
       tri->key=NULL;
@@ -100,7 +98,7 @@ int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr){
   }
   fclose(stream);
 
-  qsort(trinfo,ntrinfo,sizeof(trdata),compare_trdata);
+  qsort(trinfo_local,ntrinfo_local,sizeof(trdata),compare_trdata);
   return 1;
 }
 

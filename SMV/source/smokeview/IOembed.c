@@ -682,6 +682,7 @@ void read_geom(int ifile, int flag, int *errorcode){
   get_geom_header(file,&ntimes_local);
   if(ntimes_local<0)return;
   stream = fopen(file,"rb");
+  if(stream==NULL)return;
 
   fseek(stream,4,SEEK_CUR);fread(&one,4,1,stream);fseek(stream,4,SEEK_CUR);
   if(one!=1)endianswitch=1;
@@ -827,10 +828,10 @@ void read_geomdata(int ifile, int flag, int *errorcode){
   }
 
   //get_geomdata_header(file,&ntimes,&nvals);
-  endian = getendian();
+  endian_smv = getendian();
   lenfile = strlen(file);
 
-  FORTgetembeddatasize(file, &endian, &ntimes_local, &nvals, &error, lenfile);
+  FORTgetembeddatasize(file, &endian_smv, &ntimes_local, &nvals, &error, lenfile);
 
   if(nvals>0){
     NewMemory((void **)&patchi->geom_nstatics,ntimes*sizeof(int));
@@ -841,7 +842,7 @@ void read_geomdata(int ifile, int flag, int *errorcode){
     NewMemory((void **)&patchi->geom_vals,nvals*sizeof(float));
     NewMemory((void **)&patchi->geom_ivals,nvals*sizeof(char));
   }
-  FORTgetembeddata(file, &endian, &ntimes, &nvals, patchi->geom_times, 
+  FORTgetembeddata(file, &endian_smv, &ntimes, &nvals, patchi->geom_times, 
     patchi->geom_nstatics, patchi->geom_ndynamics, patchi->geom_vals, &error, lenfile);
 
   init_histogram(patchi->histogram);
