@@ -391,7 +391,7 @@ int readsmv(char *smvfile){
   */
     if(match(buffer,"SMOKE3D") == 1){
       smoke3d *smoke3di;
-      int filesize;
+      FILE_SIZE filesize;
       int filelen;
       char *buffer2;
 
@@ -506,7 +506,7 @@ int readsmv(char *smvfile){
       char *buffer2;
       int len;
       part *parti;
-      int filesize;
+      FILE_SIZE filesize;
 
       len=strlen(buffer);
       if(len>4){
@@ -578,7 +578,7 @@ int readsmv(char *smvfile){
       int version_local=0,dummy;
       char *buffer2;
       int len;
-      int filesize;
+      FILE_SIZE filesize;
 
       len=strlen(buffer);
       if(len>4){
@@ -678,7 +678,7 @@ int readsmv(char *smvfile){
       int version_local=0,dummy;
       char *buffer2;
       int len;
-      int filesize;
+      FILE_SIZE filesize;
       slice *slicei;
       int blocknumber;
 
@@ -756,7 +756,7 @@ int readsmv(char *smvfile){
     if(match(buffer,"PL3D") == 1){
       int version_local=0;
       char *buffer2;
-      int filesize;
+      FILE_SIZE filesize;
       plot3d *plot3di;
       int blocknumber;
       float time_local;

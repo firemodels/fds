@@ -248,7 +248,6 @@ int getfilesize(char *filename){
   int statfile;
   int filesize;
 
-
   filesize=0;
   statfile=STAT(filename,&statbuffer);
   if(statfile!=0)return 0;
