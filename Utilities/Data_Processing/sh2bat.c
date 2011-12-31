@@ -67,7 +67,7 @@ int main(int argc, char **argv){
     }
     exit(1);
   }
-  while(1){
+  for(;;){
     if(fgets(buffer,1024,streamin)==NULL)break;
     trim(buffer);
     if(strlen(buffer)==0||buffer[0]=='#')continue;
@@ -83,10 +83,13 @@ int main(int argc, char **argv){
 /* ------------------ usage ------------------------ */
 
 void usage(char *prog){
+  char RUNFDS[32];
+
+  strcpy(RUNFDS,"%RUNFDS%");
   fprintf(stderr,"%s file_in file_out\n\n",prog);
   fprintf(stderr,"  convert the Linux/OSX script file file_in to a windows bat file equivalent by\n");
   fprintf(stderr,"  ignoring lines beginning with the comment character # and converting \n");
-  fprintf(stderr,"  the Linux/OSX symbol $RUNFDS to the DOS symbol %RUNFDS% \n");
+  fprintf(stderr,"  the Linux/OSX symbol $RUNFDS to the DOS symbol %s\n",RUNFDS);
 }
 
 /* ------------------ trim ------------------------ */
