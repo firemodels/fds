@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 #include "svdiff.h"
 #include "MALLOC.h"
 #include "file_util.h"

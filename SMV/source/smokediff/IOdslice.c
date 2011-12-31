@@ -10,7 +10,6 @@
 #include "svdiff.h"
 #include "MALLOC.h"
 #include "file_util.h"
-#include "string_util.h"
 
 // svn revision character string
 char IOdslice_revision[]="$Revision$";

@@ -662,7 +662,7 @@ void Get_Part_Bounds(void){
   }
 }
 
-#define IJKVAL(ix,iy,iz) (ix) + (iy)*nx2 + (iz)*nx2*ny2
+#define IJKVAL(ix,iy,iz) ((ix) + (iy)*nx2 + (iz)*nx2*ny2)
 
   /* ------------------ part2iso ------------------------ */
 

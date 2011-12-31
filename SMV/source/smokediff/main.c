@@ -38,6 +38,9 @@ int main(int argc, char **argv){
 #endif
   strcpy(pp,"%");
 
+  NewMemory((void **)&caseinfo,2*sizeof(casedata));
+
+
  // check_histogram();  
   test_mode=0;
   sourcedir1=NULL;
@@ -80,7 +83,6 @@ int main(int argc, char **argv){
       case 'h':
         usage();
         return 1;
-        break;
       case 'n':
         if(arg[2]=='p'){
           no_plot3d=1;
@@ -122,7 +124,6 @@ int main(int argc, char **argv){
       case 'v':
         version();
         return 1;
-        break;
       default:
         usage();
         return 1;
@@ -219,14 +220,12 @@ int main(int argc, char **argv){
 /* ------------------ usage ------------------------ */
 
 void usage(void){
-  char pp[2];
   char smv_version[100];
   int svn_num;
 
   getSMDiffversion(smv_version);  // get Smokeview version (ie 5.x.z)
   svn_num=getmaxrevision();    // get svn revision number
 
-  strcpy(pp,"%");
   printf("\n");
   printf("  smokediff [options] smv_case1 smv_case2\n");
   printf("    version: %s (revision %i) - %s\n\n",smv_version,svn_num,__DATE__);

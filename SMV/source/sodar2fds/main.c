@@ -270,15 +270,15 @@ int main(int argc, char **argv){
       if(transfer[i]==1){
         if(strchr(token,':')!=NULL){
           char *hour, *min, *sec;
-          int time=0;
+          int time_local=0;
 
           hour=strtok(token,":");
           min=strtok(NULL,":");
           sec=strtok(NULL,":");
-          if(hour!=NULL)time+=3600*atoi(hour);
-          if(min!=NULL)time+=60*atoi(min);
-          if(sec!=NULL)time+=atoi(sec);
-          fprintf(stream_out,"%i",time);
+          if(hour!=NULL)time_local+=3600*atoi(hour);
+          if(min!=NULL)time_local+=60*atoi(min);
+          if(sec!=NULL)time_local+=atoi(sec);
+          fprintf(stream_out,"%i",time_local);
         }
         else{
           fprintf(stream_out,"%s",token);
@@ -334,14 +334,14 @@ void usage(char *prog){
 /* ------------------ version ------------------------ */
 
 void version(char *prog){
-    char version[100];
+    char version_local[100];
     int svn_num;
 
-    getPROGversion(version);  // get Smokeview version (ie 5.x.z)
+    getPROGversion(version_local);  // get Smokeview version (ie 5.x.z)
     svn_num=getmaxrevision();    // get svn revision number
     printf("\n");
     printf("%s\n\n",prog);
-    printf("Version: %s\n",version);
+    printf("Version: %s\n",version_local);
     printf("SVN Revision Number: %i\n",svn_num);
     printf("Compile Date: %s\n",__DATE__);
 }
@@ -354,9 +354,9 @@ void getPROGversion(char *PROGversion){
 
 /* ------------------ getmaxrev ------------------------ */
 
-#define MAXREV(cval) max_revision=MAX(getrevision(cval),max_revision)
+#define MAXREV(cval) rev=getrevision(cval);max_revision=MAX(rev,max_revision)
 int getmaxrevision(void){
-  int max_revision=0;
+  int max_revision=0,rev;
 
   MAXREV(main_revision);
   return max_revision;

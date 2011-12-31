@@ -111,7 +111,7 @@ int convert_boundary(patch *patchi, int *thread_index){
   uLong npatchfull;
   unsigned int sizebefore=0, sizeafter=0;
   int count=-1;
-  int version;
+  int version_local;
   char *boundary_file;
   char filetype[256];
   char *shortlabel, *unit;
@@ -125,7 +125,7 @@ int convert_boundary(patch *patchi, int *thread_index){
   float time_max;
 
   boundary_file=patchi->file;
-  version=patchi->version;
+  version_local=patchi->version;
   patchi->compressed=0;
 
 #ifdef pp_THREAD
@@ -278,7 +278,7 @@ int convert_boundary(patch *patchi, int *thread_index){
     if(NewMemory((void **)&ijks,6*npatch*sizeof(int))==0)goto wrapup;
     CheckMemory;
     ijkscopy=ijks;
-    if(version==1)nbounds=9;
+    if(version_local==1)nbounds=9;
 
     npatchfull=0;
     for(i=0;i<npatch;i++){

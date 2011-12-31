@@ -222,7 +222,7 @@ int is_file_newer(char *file1, char *file2){
 
   /* ------------------ getfileinfo ------------------------ */
 
-int getfileinfo(char *filename, char *source_dir, int *filesize){
+int getfileinfo(char *filename, char *source_dir, FILE_SIZE *filesize){
   STRUCTSTAT statbuffer;
   int statfile;
   char buffer[1024];

@@ -8,10 +8,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 #include "MALLOC.h"
 #include "translate.h"
-#include "string_util.h"
      
 void usage(char *prog);
 
@@ -29,11 +27,8 @@ int main(int argc, char **argv){
     arg=argv[i];
     lenarg=strlen(arg);
     if(arg[0]=='-'&&lenarg>1){
-      switch(arg[1]){
-      default:
-        usage(prog);
-        return 1;
-      }
+      usage(prog);
+      return 1;
     }
     else{
       if(file_lang==NULL){
@@ -56,24 +51,22 @@ int main(int argc, char **argv){
     return1 = parse_lang(file_lang, &trinfo_lang, &ntrinfo_lang);
     return2 = parse_lang(file_template, &trinfo_template, &ntrinfo_template);
     if(return1==1&&return2==1){
-      int i;
-
       printf("\n");
       for(i=0;i<ntrinfo_template;i++){
-        trdata *tr_template_i, *tr_otherlang;
+        trdata *tri, *tr_otherlangi;
 
-        tr_template_i = trinfo_template + i;
+        tri = trinfo_template + i;
         // foreach string in template look for a translation and store it in lang
-        tr_otherlang = bsearch(tr_template_i,trinfo_lang,ntrinfo_lang,sizeof(trdata),compare_trdata);
-        if(tr_otherlang!=NULL){
-          tr_template_i->value=tr_otherlang->value;
+        tr_otherlangi = bsearch(tri,trinfo_lang,ntrinfo_lang,sizeof(trdata),compare_trdata);
+        if(tr_otherlangi!=NULL){
+          tri->value=tr_otherlangi->value;
         }
         else{
-          tr_template_i->value=NULL;
+          tri->value=NULL;
         }
-        printf("msgid \"%s\"\n",tr_template_i->key);
-        if(tr_template_i->value!=NULL){
-          printf("msgstr \"%s\"\n",tr_template_i->value);
+        printf("msgid \"%s\"\n",tri->key);
+        if(tri->value!=NULL){
+          printf("msgstr \"%s\"\n",tri->value);
         }
         else{
           printf("msgstr \"\"\n");

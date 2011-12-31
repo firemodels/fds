@@ -146,8 +146,7 @@ void init_translate(char *bindir, char *tr_name){
     else{
       printf(_("Failed to parse translation file: %s"),smokeview_lang);
       printf("\n");
-      printf(_("Menus will be in English"));
-      printf("\n");
+      printf("%s\n",_("Menus will be in English"));
     }
   }
 }
@@ -159,7 +158,8 @@ char *translate(char *string){
       \brief return the translation of string, return string if translation not found
   */
   char c;
-  int i, len, nchars_before=0, nchars_in=0, nchars_after=0;
+  int i, len, nchars_before=0, nchars_after=0;
+  unsigned int nchars_in=0;
   char *string_before, *string_in, *string_out, *string_after;
 
   if(tr_otherlang==0)return string;

@@ -227,7 +227,6 @@ int convert_volslice(slice *slicei, int *thread_index){
     FREEMEMORY(sliceframe_data);
   }
 
-wrapup:
 #ifndef pp_THREAD
     printf(" 100%s completed\n",GLOBpp);
 #endif

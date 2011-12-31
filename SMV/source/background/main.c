@@ -20,7 +20,6 @@
 
 // svn revision character string
 char main_revision[]="$Revision$";
-//void run_command(void);
 
 void usage(char *prog);
 #ifdef WIN32

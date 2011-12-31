@@ -359,20 +359,20 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     if(match(buffer,"PL3D") == 1){
       mesh *plot3dmesh;
       plot3d *plot3di;
-      float time;
+      float time_local;
       int meshnumber=1;
       char full_file[1024];
       FILE_SIZE filesize;
 
       if(strlen(buffer)>4){
-        sscanf(buffer+4,"%f %i",&time,&meshnumber);
+        sscanf(buffer+4,"%f %i",&time_local,&meshnumber);
       }
 
       plot3dmesh = meshinfo + meshnumber - 1;
 
       plot3di = plot3dinfo + iplot3d;
       plot3di->plot3dmesh=plot3dmesh;
-      plot3di->time=time;
+      plot3di->time=time_local;
       trim(buffer);
       strcpy(plot3di->keyword,buffer);
 
@@ -424,7 +424,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       match(buffer,"SLFL") == 1||
       match(buffer,"SLCT") == 1)
     {
-      int version=0;
+      int version_local=0;
       int len;
       FILE_SIZE filesize;
       slice *slicei;
@@ -434,7 +434,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
 
       len=strlen(buffer);
       if(len>4){
-        sscanf(buffer+4,"%i %i",&meshnumber,&version);
+        sscanf(buffer+4,"%i %i",&meshnumber,&version_local);
       }
 
       slicei = sliceinfo + islice;
@@ -458,11 +458,11 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         slicei->slicetype=4;
       }
 
-      slicei->version=version;
+      slicei->version=version_local;
 
       if(fgets(buffer,255,streamsmv)==NULL)break;
       trim(buffer);
-      if(strlen(buffer)<=0)break;
+      if(strlen(buffer)==0)break;
       fullfile(full_file,smvcase->dir,buffer);
       if(getfileinfo(full_file,NULL,&filesize)==0){
         int is1, is2, js1, js2, ks1, ks2;
@@ -517,7 +517,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     if(match(buffer,"BNDF") == 1||
        match(buffer,"BNDC") == 1
        ){
-      int version=0;
+      int version_local=0;
       int len;
       FILE_SIZE filesize;
       boundary *boundaryi;
@@ -527,7 +527,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
 
       len=strlen(buffer);
       if(len>4){
-        sscanf(buffer+4,"%i %i",&meshnumber,&version);
+        sscanf(buffer+4,"%i %i",&meshnumber,&version_local);
       }
 
       boundaryi = boundaryinfo + iboundary;
@@ -538,7 +538,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
 
       strcpy(boundaryi->keyword,buffer);
 
-      boundaryi->version=version;
+      boundaryi->version=version_local;
 
       if(match(buffer,"BNDF") == 1){
         boundaryi->boundarytype=1;
@@ -549,7 +549,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
 
       if(fgets(buffer,255,streamsmv)==NULL)break;
       trim(buffer);
-      if(strlen(buffer)<=0)break;
+      if(strlen(buffer)==0)break;
       fullfile(full_file,smvcase->dir,buffer);
       if(getfileinfo(full_file,NULL,&filesize)==0){
         int lenfile, endian, npatches, error, boundaryunitnumber;
@@ -591,7 +591,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
           boundaryi->npatches=npatches;
           boundaryi->patchsize=patchsize;
           boundaryi->qoffset=qoffset;
-          FORTgetboundaryheader2(&boundaryunitnumber, &version, &npatches, pi1, pi2, pj1, pj2, pk1, pk2, patchdir);
+          FORTgetboundaryheader2(&boundaryunitnumber, &version_local, &npatches, pi1, pi2, pj1, pj2, pk1, pk2, patchdir);
           for(i=0;i<npatches;i++){
             boundaryi->patchsize[i] = (pi2[i]+1-pi1[i])*(pj2[i]+1-pj1[i])*(pk2[i]+1-pk1[i]);
             if(i==0){

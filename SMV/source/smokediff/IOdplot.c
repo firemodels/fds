@@ -60,24 +60,24 @@ plot3d *getplot3d(plot3d *plot3din, casedata *case2){
   dz = meshin->dz/2.0;
 
   for(i=0;i<case2->nplot3dinfo;i++){
-    plot3d *plot3dout;
+    plot3d *plot3dout_local;
     mesh *meshout;
 
-    plot3dout = case2->plot3dinfo + i;
-    meshout = plot3dout->plot3dmesh;
-    if(fabs(plot3din->time-plot3dout->time)>0.05)continue;
-    if(strcmp(plot3din->labels[0].longlabel,plot3dout->labels[0].longlabel)!=0)continue;
-    if(strcmp(plot3din->labels[1].longlabel,plot3dout->labels[1].longlabel)!=0)continue;
-    if(strcmp(plot3din->labels[2].longlabel,plot3dout->labels[2].longlabel)!=0)continue;
-    if(strcmp(plot3din->labels[3].longlabel,plot3dout->labels[3].longlabel)!=0)continue;
-    if(strcmp(plot3din->labels[4].longlabel,plot3dout->labels[4].longlabel)!=0)continue;
+    plot3dout_local = case2->plot3dinfo + i;
+    meshout = plot3dout_local->plot3dmesh;
+    if(fabs(plot3din->time-plot3dout_local->time)>0.05)continue;
+    if(strcmp(plot3din->labels[0].longlabel,plot3dout_local->labels[0].longlabel)!=0)continue;
+    if(strcmp(plot3din->labels[1].longlabel,plot3dout_local->labels[1].longlabel)!=0)continue;
+    if(strcmp(plot3din->labels[2].longlabel,plot3dout_local->labels[2].longlabel)!=0)continue;
+    if(strcmp(plot3din->labels[3].longlabel,plot3dout_local->labels[3].longlabel)!=0)continue;
+    if(strcmp(plot3din->labels[4].longlabel,plot3dout_local->labels[4].longlabel)!=0)continue;
     if(fabs(meshin->xbar0-meshout->xbar0)>dx)continue;
     if(fabs(meshin->xbar-meshout->xbar)>dx)continue;
     if(fabs(meshin->ybar0-meshout->ybar0)>dy)continue;
     if(fabs(meshin->ybar-meshout->ybar)>dy)continue;
     if(fabs(meshin->zbar0-meshout->zbar0)>dz)continue;
     if(fabs(meshin->zbar-meshout->zbar)>dz)continue;
-    return plot3dout;
+    return plot3dout_local;
   }
   return NULL;
 }

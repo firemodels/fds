@@ -12,7 +12,7 @@ EXTERNCPP int filecat(char *file_in1, char *file_in2, char *file_out);
 EXTERNCPP void make_outfile(char *outfile, char *destdir, char *file1, char *ext);
 EXTERNCPP void fullfile(char *fileout, char *dir, char *file);
 EXTERNCPP char *setdir(char *argdir);
-EXTERNCPP int getfileinfo(char *filename, char *sourcedir, int *filesize);
+EXTERNCPP int getfileinfo(char *filename, char *sourcedir, FILE_SIZE *filesize);
 EXTERNCPP int listdir(const char *path);
 EXTERNCPP char *get_zonefilename(char *buffer);
 EXTERNCPP int can_write_to_dir(char *dir);
