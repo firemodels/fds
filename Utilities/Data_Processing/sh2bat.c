@@ -70,13 +70,31 @@ int main(int argc, char **argv){
   for(;;){
     if(fgets(buffer,1024,streamin)==NULL)break;
     trim(buffer);
-    if(strlen(buffer)==0||buffer[0]=='#')continue;
-    if(strncmp(buffer,"$RUNFDS",7)==0){
-      fprintf(streamout,"%s %s\n","%RUNFDS%",buffptr+8);
+    if(strlen(buffer)==0){
+      fprintf(streamout,"\n");
+      continue;
     }
-    else{
-      fprintf(streamout,"%s\n",buffer);
+    if(buffer[0]=='#'){
+      if(strlen(buffer)>0){
+        fprintf(streamout,"REM %s\n",buffer+1);
+      }
+      else{
+        fprintf(streamout,"REM\n");
+      }
+      continue;
     }
+    if(buffer[0]=='$'){
+      char *comm_beg, *comm_end, *data;
+      
+      comm_beg=buffer;
+      comm_end=strchr(buffer,' ');
+      data = comm_end+1;
+      *comm_end=0;
+      fprintf(streamout,"%s%s%s %s\n","%",comm_beg,"%",data);
+      continue;
+
+    }
+    fprintf(streamout,"%s\n",buffer);
   }
 }
 
