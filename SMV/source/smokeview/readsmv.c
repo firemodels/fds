@@ -6519,7 +6519,7 @@ typedef struct {
   /* make static blockage iso-surfaces */
 
 #ifndef WIN32
-  if(endian!=getendian()){
+  if(endian_smv!=getendian()){
     printf("*** Warning: Smokeview is running on a ");
     if(getendian()==1){
       printf(" little endian computer\n");
@@ -6528,7 +6528,7 @@ typedef struct {
       printf(" big endian computer\n");
     }
     printf("    but the data being visualized was generated on a ");
-    if(endian==1){
+    if(endian_smv==1){
       printf(" little endian computer\n");
     }
     else{
