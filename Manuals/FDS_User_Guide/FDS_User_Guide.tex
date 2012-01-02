@@ -2636,8 +2636,8 @@ FDS from removing the obstruction if it is embedded within another, like a door 
 {\ct ALLOW\_VENT=.FALSE.}
 \item Obstructions can be made semi-transparent by assigning a {\ct TRANSPARENCY} on the {\ct OBST} line. This real parameter ranges from
 0 to 1, with 0 being fully transparent. The parameter should always be set along with either {\ct COLOR} or an {\ct RGB} triplet. It can
-also be specified on the appropriate {\ct SURF} line, along with a color indicator.
-\item Obstructions are drawn solid in Smokeview. To draw an outline representation, set {\ct OUTLINE=.TRUE.}
+also be specified on the appropriate {\ct SURF} line, along with a color indicator. If you want the obstruction to be invisible, set {\ct COLOR='INVISBLE'}.
+\item Obstructions are drawn solid in Smokeview. To draw an outline representation, set {\ct OUTLINE=.TRUE.} 
 \end{itemize}
 
 
@@ -2816,7 +2816,7 @@ parameter respectively, to the {\ct HOLE} line.
 
 If you want the obstruction that is to be cut out to have a different color
 than the original obstruction, set the {\ct COLOR} or integer triplet
-{\ct RGB} on the {\ct HOLE} line (see Section~\ref{info:colors}).
+{\ct RGB} on the {\ct HOLE} line (see Section~\ref{info:colors}). If you want the obstruction to be invisible, set {\ct COLOR='INVISBLE'}.
 
 When a {\ct HOLE} is in a {\ct .FALSE.} state, an obstruction is placed in the hole.
 To make this obstruction transparent, the {\ct TRANSPARENCY} parameter should be specified by
@@ -3031,7 +3031,9 @@ REYNOLDS_STRESS(3,3) = VEL_RMS**2
 
 \noindent and all other components of {\ct REYNOLDS\_STRESS} are zero.
 
-In Chapter 7 of Jarrin's thesis \cite{Jarrin:2008}, he introduces the Modified Synthetic Eddy Method in which the eddy length scales are anisotropic.  This allows more realistic charaterization of streamwise vorticies in a turbulent boundary layer.  To specify the length scales corrosponding to the $\sigma_{ij}$ values in Jarrin's Eq.~(7.1) use {\ct L\_EDDY\_IJ(3,3)}.  For example,
+In Chapter 7 of Jarrin's thesis \cite{Jarrin:2008}, he introduces the Modified Synthetic Eddy Method in which the eddy length scales are anisotropic.  
+This allows more realistic characterization of streamwise vortices in a turbulent boundary layer.  
+To specify the length scales corresponding to the $\sigma_{ij}$ values in Jarrin's Eq.~(7.1) use {\ct L\_EDDY\_IJ(3,3)}.  For example,
 
 \footnotesize
 \begin{verbatim}
