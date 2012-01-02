@@ -18,6 +18,6 @@ source ~/.bashrc_fds intel64
 
 $RUNFDSMPI 27 $INDIR Lattimer_20_kW_0_degree_coarse
 $RUNFDSMPI 27 $INDIR Lattimer_20_kW_0_degree
-$RUNFDSMPI 27 $INDIR Lattimer_20_kW_0_degree_fine
+$RUNFDSMPI 125 $INDIR Lattimer_20_kW_0_degree_fine
 
 echo FDS cases submitted
