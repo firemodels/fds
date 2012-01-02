@@ -1793,7 +1793,28 @@ int readsmv(char *file, char *file2){
 
 
     if(match(buffer,"CSVF") == 1){
-      ncsvinfo++;
+      int nfiles;
+      char *file_local;
+
+      nfiles=0;
+      fgets(buffer,255,stream);
+      trim(buffer);
+      bufferptr=trim_front(buffer);
+      if(strcmp(bufferptr,"hrr")==0){
+        nfiles=1;
+        continue;
+      }
+      if(strcmp(bufferptr,"devc")==0){
+        nfiles=1;
+        continue;
+      }
+      if(strcmp(bufferptr,"ext")==0){
+        fgets(buffer,255,stream);
+        trim(buffer);
+        file_local=trim_front(buffer);
+        nfiles = get_nfilelist(".",file_local);
+      }
+      ncsvinfo+=nfiles;
       continue;
     }
     if(match(buffer,"GEOM") == 1){
