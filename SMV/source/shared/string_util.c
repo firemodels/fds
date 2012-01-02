@@ -546,6 +546,20 @@ char *time2timelabel(float sv_time, float dt, char *timelabel){
   return timelabelptr;
 }
 
+/* ------------------ match ------------------------ */
+
+int match(char *buffer, const char *key){
+  size_t lenbuffer;
+  size_t lenkey;
+
+  lenkey=strlen(key);
+  lenbuffer=strlen(buffer);
+  if(lenbuffer<lenkey)return 0;
+  if(strncmp(buffer,key,lenkey) != 0)return 0;
+  if(lenbuffer>lenkey&&!isspace(buffer[lenkey]))return 0;
+  return 1;
+}
+
 /* ------------------ match_upper ------------------------ */
 
 int match_upper(char *buffer, const char *key){
@@ -566,18 +580,85 @@ int match_upper(char *buffer, const char *key){
   return 1;
 }
 
-/* ------------------ match ------------------------ */
+/* ----------------------- match_wild ----------------------------- */
 
-int match(char *buffer, const char *key){
-  size_t lenbuffer;
-  size_t lenkey;
+int match_wild(char *pTameText, char *pWildText){
+// This function compares text strings, the second of which can have wildcards ('*').
+//
+//Matching Wildcards: An Algorithm
+//by Kirk J. Krauss
+// http://drdobbs.com/windows/210200888
+// (modified from original by setting bCaseSensitive and cAltTerminator in the 
+//  body of the routine and changing routine name to match_wild, also changed
+//  formatting to be consistent with smokeview coding style)
 
-  lenkey=strlen(key);
-  lenbuffer=strlen(buffer);
-  if(lenbuffer<lenkey)return 0;
-  if(strncmp(buffer,key,lenkey) != 0)return 0;
-  if(lenbuffer>lenkey&&!isspace(buffer[lenkey]))return 0;
-  return 1;
+  char cAltTerminator='\0';
+#ifdef WIN32
+  int bCaseSensitive=0;
+#else
+  int bCaseSensitive=1;
+#endif
+  int bMatch = 1;
+  char *pAfterLastWild = NULL; // The location after the last '*', if we've encountered one
+  char *pAfterLastTame = NULL; // The location in the tame string, from which we started after last wildcard
+  char t, w;
+
+        // Walk the text strings one character at a time.
+  for(;;){
+    t = *pTameText;
+    w = *pWildText;
+
+    if (!t || t == cAltTerminator){
+      if (!w || w == cAltTerminator)break;    // "x" matches "x"
+      else if (w == '*'){
+        pWildText++;
+        continue;                             // "x*" matches "x" or "xy"
+      }
+      else if (pAfterLastTame){
+        if (!(*pAfterLastTame) || *pAfterLastTame == cAltTerminator){
+          bMatch = 0;
+          break;
+        }
+        pTameText = pAfterLastTame++;
+        pWildText = pAfterLastWild;
+        continue;
+      }
+      bMatch = 0;
+      break;                                  // "x" doesn't match "xy"
+    }
+    else{
+      if (!bCaseSensitive){
+  //   convert characters to lowercase
+        if (t >= 'A' && t <= 'Z')t += ('a' - 'A');
+        if (w >= 'A' && w <= 'Z')w += ('a' - 'A');
+      }
+      if (t != w){
+        if (w == '*'){
+          pAfterLastWild = ++pWildText;
+          pAfterLastTame = pTameText;
+          continue;                           // "*y" matches "xy"
+        }
+        else if (pAfterLastWild){
+          pWildText = pAfterLastWild;
+          w = *pWildText;
+          if (!w || w == cAltTerminator)break;// "*" matches "x"
+          else{
+            if (!bCaseSensitive && w >= 'A' && w <= 'Z')w += ('a' - 'A');
+            if (t == w)pWildText++;
+          }
+          pTameText++;
+          continue;                           // "*sip*" matches "mississippi"
+        }
+        else{
+          bMatch = 0;
+          break;                              // "x" doesn't match "y"
+        }
+      }
+    }
+    pTameText++;
+    pWildText++; 
+  }
+  return bMatch;
 }
 
 /* ----------------------- remove_comment ----------------------------- */

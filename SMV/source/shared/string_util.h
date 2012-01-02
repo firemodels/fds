@@ -15,6 +15,7 @@
 #endif
 
 
+EXTERNCPP int match_wild(char *pTameText, char *pWildText);
 EXTERNCPP int match(char *buffer, const char *key);
 EXTERNCPP int match_upper(char *buffer, const char *key);
 EXTERNCPP int randint(int min, int max);
