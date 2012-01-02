@@ -57,11 +57,6 @@ value of dT should be equal to the time averaged Q_abs.
 	STATISTICS = 'VOLUME INTEGRAL', XB = 0,3,0,3,0,3 /
 &DEVC QUANTITY='ADT', PART_ID='drops', ID = 'ADT'
 	STATISTICS = 'VOLUME MEAN', XB = 1,2,1,2,1,2 /
-&DEVC QUANTITY='MPUV', PART_ID='drops' 
-	STATISTICS = 'VOLUME INTEGRAL', XB = 0,3,0,3,0,3 /
-&DEVC QUANTITY='ADD', PART_ID='drops' 
-	STATISTICS = 'VOLUME MEAN', XB = 1,2,1,2,1,2 /
-	
 
 &TAIL /
 

@@ -29,7 +29,6 @@ $RUNFDS Flowfields helium_2d
 $RUNFDS Flowfields jet_fan
 $RUNFDS Flowfields low_flux_hot_gas_filling
 $RUNFDS Flowfields sawtooth
-$RUNFDS Flowfields simple_duct
 $RUNFDS Flowfields symmetry_test
 $RUNFDS Flowfields tangential_velocity
 
@@ -72,8 +71,6 @@ $RUNFDS Pressure_Effects zone_shape
 $RUNFDS Pressure_Solver dancing_eddies
 $RUNFDS Pressure_Solver dancing_eddies_1mesh
 $RUNFDS Pressure_Solver dancing_eddies_tol=p1
-$RUNFDS Pressure_Solver duct_flow
-$RUNFDS Pressure_Solver hallways
 
 $RUNFDS Pyrolysis cable_11_insulation_mcc
 $RUNFDS Pyrolysis cable_23_insulation_mcc

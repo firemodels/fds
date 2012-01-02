@@ -1,4 +1,6 @@
 #!/bin/bash
 
-$RUNFDSMPI 8  Visualization mplume8
+$RUNFDSMPI 5 Flowfields simple_duct
+$RUNFDSMPI 8 Pressure_Solver duct_flow
+$RUNFDSMPI 5 Pressure_Solver hallways
 
