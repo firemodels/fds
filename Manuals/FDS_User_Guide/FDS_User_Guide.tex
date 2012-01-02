@@ -6524,7 +6524,7 @@ droplets created per second than the number that can be simulated.
 
 
 Sometimes it is convenient to introduce droplets or particles at the start of the simulation. For this purpose, use an {\ct INIT} line with the parameter
-{\ct NUMBER\_INITIAL\_PARTICLES} to indicate the number of particles/droplets within the computational domain at the start of the simulation. Its default value is 0, meaning that initially there are no particles or droplets present. If non-zero, also specify {\ct MASS\_PER\_VOLUME} (kg/m$^3$) which specifies the particle/droplet mass per unit volume (Default 1~kg/m$^3$). Do not confuse this parameter with {\ct DENSITY}, explained in the next section. For example, water has a {\ct DENSITY} of 1000~kg/m$^3$, whereas a liter of water broken up into droplets and spread over a cubic meter has a {\ct MASS\_PER\_VOLUME} of 1~kg/m$^3$. Also, to limit the particles/droplets to a certain region of the domain, add the real sextuplet {\ct XB} to designate the coordinates of a rectangular volume. The format for {\ct XB} is the same as that used on the {\ct OBST} line. For the moment, you can only introduce a cloud of particles within a rectangular block. In future versions, the parameter {\ct SHAPE} will be used to indicate other types of initial volumes.
+{\ct NUMBER\_INITIAL\_PARTICLES} to indicate the number of particles/droplets within the computational domain at the start of the simulation. Its default value is 0, meaning that initially there are no particles or droplets present. If non-zero, also specify {\ct MASS\_PER\_VOLUME} (kg/m$^3$) which specifies the particle/droplet mass per unit volume (Default 1~kg/m$^3$). Do not confuse this parameter with {\ct DENSITY}, explained in the next section. For example, water has a {\ct DENSITY} of 1000~kg/m$^3$, whereas a liter of water broken up into droplets and spread over a cubic meter has a {\ct MASS\_PER\_VOLUME} of 1~kg/m$^3$. Also, to limit the particles/droplets to a certain region of the domain, add the real sextuplet {\ct XB} to designate the coordinates of a rectangular volume. The format for {\ct XB} is the same as that used on the {\ct OBST} line. You can only introduce a cloud of particles within a rectangular block, and the volume of the block is calculated according to the dimensions {\ct XB}, regardless of whether there are solid obstructions within this volume.
 
 \footnotesize
 \begin{verbatim}
@@ -6533,6 +6533,7 @@ Sometimes it is convenient to introduce droplets or particles at the start of th
 &INIT PART_ID='drops', XB=..., NUMBER_INITIAL_PARTICLES=2000, MASS_PER_VOLUME=2.5 /
 \end{verbatim} \normalsize
 
+\noindent
 It is also possible to initialize monodisperse droplets pointwise by specifying the droplet position (m), velocity (m/s), diameter (microns), and temperature ($^\circ$C).  This feature allows the user to specify an arbitrary droplet distribution by using a sufficient number of {\ct INIT} lines.
 
 \footnotesize
@@ -6544,7 +6545,7 @@ It is also possible to initialize monodisperse droplets pointwise by specifying 
 \end{verbatim} \normalsize
 
 \noindent
-If you want to introduce droplets or particles within a given volume periodically in time and not just at the initial time, set {\ct DT\_INSERT} on the {\ct INIT} line to a positive value indicating the time increment (s) for insertion. The parameter {\ct NUMBER\_INITIAL\_PARTICLES} now indicates the number of droplets/particles inserted every {\ct DT\_INSERT} seconds. If the droplets/particles have mass, use {\ct MASS\_PER\_TIME} (kg/s) instead of {\ct MASS\_PER\_VOLUME} to indicate how much mass is to be introduced per second.  In the case of pointwise particle insertion (specification of {\ct XYZ,UVW}), a single particle is tracked but weighted based on {\ct MASS\_PER\_TIME} and {\ct DT\_INSERT} for the purposes of computing bulk source terms for mass and momentum (evaopartion and drag).
+If you want to introduce droplets or particles within a given volume periodically in time and not just at the initial time, set {\ct DT\_INSERT} on the {\ct INIT} line to a positive value indicating the time increment (s) for insertion. The parameter {\ct NUMBER\_INITIAL\_PARTICLES} now indicates the number of droplets/particles inserted every {\ct DT\_INSERT} seconds. If the droplets/particles have mass, use {\ct MASS\_PER\_TIME} (kg/s) instead of {\ct MASS\_PER\_VOLUME} to indicate how much mass is to be introduced per second.  In the case of pointwise particle insertion (specification of {\ct XYZ,UVW}), a single particle is tracked but weighted based on {\ct MASS\_PER\_TIME} and {\ct DT\_INSERT} for the purposes of computing bulk source terms for mass and momentum (evaporation and drag).
 
 If you want to delay the insertion of droplets, you can use either a {\ct DEVC\_ID} or a {\ct CTRL\_ID} on the {\ct INIT} line to name the controlling device.
 See Section~\ref{info:basic_control} for more information on controlling devices.
@@ -6644,7 +6645,7 @@ over-ride this feature.
 The larger the value of $\gamma$, the narrower the droplet size is
 distributed about the median value. Note that you can prevent droplets or particles from
 exceeding {\ct MAXIMUM\_DIAMETER}, which is infinitely large by default. Also note that
-droplets less than {\ct MINIMUM\_DIAMETER} are assumed to evaporate in a single time step. The default {\ct MINIMUM\_DIAMETER} is set to 0.005 the value of {\ct DIAMETER}. 
+droplets less than {\ct MINIMUM\_DIAMETER} are assumed to evaporate in a single time step. The default {\ct MINIMUM\_DIAMETER} is set to 0.005 the value of {\ct DIAMETER}.
 To prevent FDS from generating a distribution of droplets/particles altogether, set
 {\ct MONODISPERSE=.TRUE.} on the {\ct PART} line, in which case every droplet or particle will be assigned the
 same {\ct DIAMETER}.
@@ -6652,14 +6653,15 @@ same {\ct DIAMETER}.
 \subsection{Secondary breakup}
 \label{info:secondary_breakup}
 If {\ct BREAKUP=.TRUE.} is set on the {\ct PART} line, particles may undergo secondary breakup.
-In this case the user should also specify {\ct SURFACE\_TENSION} of the liquid and breakup distribution parameters {\ct BREAKUP\_CHILD\_DIAMETER} and {\ct BREAKUP\_CHILD\_GAMMA\_D}.
+In this case the user should also specify {\ct SURFACE\_TENSION} of the liquid and breakup distribution parameters \\
+{\ct BREAKUP\_CHILD\_DIAMETER} and {\ct BREAKUP\_CHILD\_GAMMA\_D}.
 
 
 \subsection{Drag}
 \label{info:particle_drag}
 
 For massive particles the default drag law (i.e., the drag coefficient correlation as a function of Reynolds number [based on particle diameter]) is that of a sphere.
-To invoke the cylinder drag law set {\ct DRAG\_LAW$=$`CYLINDER'} on the {\ct PART} line.  If neither of these options is applicable,
+To invoke the cylinder drag law set {\ct DRAG\_LAW} to {\ct `CYLINDER'} on the {\ct PART} line.  If neither of these options is applicable,
 the user may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct USER\_DRAG\_COEFFICIENT} on {\ct PART}.
 The {\ct USER\_DRAG\_COEFFICIENT} trumps the {\ct DRAG\_LAW}.
 
@@ -7060,7 +7062,7 @@ specified on the {\ct DEVC} line.
 
 \newpage
 
-\section{Special Devices and their Properties: The \texorpdfstring{{\tt PROP}}{PROP} Namelist Group (Table \ref{tbl:PROP})}
+\section{Special Device Properties: The \texorpdfstring{{\tt PROP}}{PROP} Namelist Group (Table \ref{tbl:PROP})}
 \label{info:PROP}
 
 Many devices are fairly easy to describe, like a point measurement, with only a few parameters which can be included on the
@@ -10045,27 +10047,27 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct HVAC} (HVAC System Definition)} \\
 \hline \hline
 \endhead
-{\ct AIRCOIL\_ID}               & Character         & Section~\ref{info:HVACduct} &               &        \\ \hline
-{\ct AMBIENT}                   & Logical           & Section~\ref{info:HVACnode} &               & {\ct .FALSE.}  \\ \hline
-{\ct AREA}                      & Real              & Section~\ref{info:HVACduct} & m$^2$         &        \\ \hline
-{\ct CLEAN\_LOSS}               & Real              & Section ~\ref{info:HVACfilter}                                    &               &        \\ \hline
-{\ct COOLANT\_CP}               & Real              & Section ~\ref{info:HVACaircoil}   & kJ/kg/K       &        \\ \hline
-{\ct COOLANT\_MDOT}             & Real              & Section ~\ref{info:HVACaircoil}   & kg/s          &        \\ \hline
-{\ct COOLANT\_TEMPERATURE}      & Real              & Section ~\ref{info:HVACaircoil}    & $^\circ$C             &         \\ \hline
-{\ct CTRL\_ID}                  & Character         & Sections ~\ref{info:HVACduct}, ~\ref{info:HVACfan}, and~\ref{info:HVACfilter}  &               &        \\ \hline
-{\ct DAMPER}                    & Logical           & Section~\ref{info:HVACduct}                       &               & {\ct .FALSE.}  \\ \hline
-{\ct DEVC\_ID}                  & Character         & Sections ~\ref{info:HVACduct}, ~\ref{info:HVACfan}, and~\ref{info:HVACfilter}   &               &        \\ \hline
-{\ct DIAMETER}                  & Real              & Section~\ref{info:HVACduct}                                &  m            &        \\ \hline
-{\ct DUCT\_ID}                  & Character Array   & Section~\ref{info:HVACnode}                 &               &        \\ \hline
-{\ct EFFICIENCY}                & Real Array        &  Sections ~\ref{info:HVACfilter} and ~\ref{info:HVACaircoil}         &               & 1.0    \\ \hline
-{\ct FAN\_ID}                   & Character         & Section~\ref{info:HVACduct}                           &               &        \\ \hline
-{\ct FILTER\_ID}                & Character         & Section~\ref{info:HVACnode}                           &               &        \\ \hline
-{\ct FIXED\_Q}                  & Real              & Section ~\ref{info:HVACaircoil}     & kW            &        \\ \hline
-{\ct ID}                        & Character         & Name of component                                 &               &        \\ \hline
-{\ct LENGTH}                    & Real              & Section~\ref{info:HVACduct}                                  &  m            &        \\ \hline
+{\ct AIRCOIL\_ID}               & Character         & Section~\ref{info:HVACduct}                                                   &               &        \\ \hline
+{\ct AMBIENT}                   & Logical           & Section~\ref{info:HVACnode}                                                   &               & {\ct .FALSE.}  \\ \hline
+{\ct AREA}                      & Real              & Section~\ref{info:HVACduct}                                                   & m$^2$         &        \\ \hline
+{\ct CLEAN\_LOSS}               & Real              & Section~\ref{info:HVACfilter}                                                 &               &        \\ \hline
+{\ct COOLANT\_CP}               & Real              & Section~\ref{info:HVACaircoil}                                                & kJ/kg/K       &        \\ \hline
+{\ct COOLANT\_MDOT}             & Real              & Section~\ref{info:HVACaircoil}                                                & kg/s          &        \\ \hline
+{\ct COOLANT\_TEMPERATURE}      & Real              & Section~\ref{info:HVACaircoil}                                                & $^\circ$C             &         \\ \hline
+{\ct CTRL\_ID}                  & Character         & Sections~\ref{info:HVACduct}, \ref{info:HVACfan}, and \ref{info:HVACfilter}   &               &        \\ \hline
+{\ct DAMPER}                    & Logical           & Section~\ref{info:HVACduct}                                                   &               & {\ct .FALSE.}  \\ \hline
+{\ct DEVC\_ID}                  & Character         & Sections ~\ref{info:HVACduct}, \ref{info:HVACfan}, and \ref{info:HVACfilter}  &               &        \\ \hline
+{\ct DIAMETER}                  & Real              & Section~\ref{info:HVACduct}                                                   &  m            &        \\ \hline
+{\ct DUCT\_ID}                  & Character Array   & Section~\ref{info:HVACnode}                                                   &               &        \\ \hline
+{\ct EFFICIENCY}                & Real Array        & Sections ~\ref{info:HVACfilter} and ~\ref{info:HVACaircoil}                   &               & 1.0    \\ \hline
+{\ct FAN\_ID}                   & Character         & Section~\ref{info:HVACduct}                                                   &               &        \\ \hline
+{\ct FILTER\_ID}                & Character         & Section~\ref{info:HVACnode}                                                   &               &        \\ \hline
+{\ct FIXED\_Q}                  & Real              & Section ~\ref{info:HVACaircoil}                                               & kW            &        \\ \hline
+{\ct ID}                        & Character         & Section~\ref{info:HVAC}                                                       &               &        \\ \hline
+{\ct LENGTH}                    & Real              & Section~\ref{info:HVACduct}                                                   &  m            &        \\ \hline
 {\ct LOADING}                   & Real Array        &  Section ~\ref{info:HVACfilter}         & kg            & 0.0    \\ \hline
 {\ct LOADING\_MULTIPLIER}       & Real Array        &  Section ~\ref{info:HVACfilter}         & kg            & 0.0    \\ \hline
-{\ct LOSS}                      & Real Array        & Sections ~\ref{info:HVACduct}, ~\ref{info:HVACnode}, ~\ref{info:HVACfan}, and~\ref{info:HVACfilter}  &               & 0.0    \\ \hline
+{\ct LOSS}                      & Real Array        & Sections ~\ref{info:HVACduct} -- \ref{info:HVACfilter}  &               & 0.0    \\ \hline
 {\ct MAX\_FLOW}                 & Real              & Section ~\ref{info:HVACfan}   &  m$^3$/s      &        \\ \hline
 {\ct MAX\_PRESSURE}             & Real              &  Section ~\ref{info:HVACfan}                 &  Pa           &        \\ \hline
 {\ct NODE\_ID}                  & Character Doublet & Section~\ref{info:HVACduct}                 &               &         \\ \hline
