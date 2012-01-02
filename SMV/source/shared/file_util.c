@@ -271,6 +271,70 @@ int file_exists(char *filename){
   }
 }
 
+  /* ------------------ get_filelist ------------------------ */
+
+void free_filelist(char **filelist, int nfilelist) {
+  int i;
+
+  for(i=0;i<nfilelist;i++){
+    FREEMEMORY(filelist[i]);
+  }
+  FREEMEMORY(filelist);
+}
+
+
+  /* ------------------ get_filelist ------------------------ */
+
+int get_nfilelist(const char *path, char *key) {
+  struct dirent *entry;
+  DIR *dp;
+  int maxfiles=0;
+ 
+  dp = opendir(path);
+  if (dp == NULL) {
+    perror("opendir");
+    return 0;
+  }
+  while( (entry = readdir(dp)) ){
+    if(match_wild(entry->d_name,key)==1)maxfiles++;
+  }
+  return maxfiles;
+}
+
+ /* ------------------ get_filelist ------------------------ */
+
+int get_filelist(const char *path, char *key, int maxfiles, char ***filelist) {
+  struct dirent *entry;
+  DIR *dp;
+  int nfiles=0;
+  char **flist;
+ 
+  dp = opendir(path);
+  if (dp == NULL) {
+    perror("opendir");
+    *filelist=NULL;
+    return 0;
+  }
+  if(maxfiles==0){
+    closedir(dp);
+    *filelist=NULL;
+    return 0;
+  }
+  NewMemory((void **)&flist,maxfiles*sizeof(char **));
+  while( (entry = readdir(dp))&&nfiles<maxfiles ){
+    if(match_wild(entry->d_name,key)==1){
+      char *file;
+
+      NewMemory((void **)&file,entry->d_namlen+1);
+      strcpy(file,entry->d_name);
+      flist[nfiles++]=file;
+    }
+  }
+  *filelist=flist;
+  closedir(dp);
+  return nfiles;
+}
+
   /* ------------------ listdir ------------------------ */
 
 int listdir(const char *path) {
