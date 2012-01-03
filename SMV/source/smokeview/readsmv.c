@@ -26,6 +26,15 @@ char readsmv_revision[]="$Revision$";
 
 #include "smokeviewvars.h"
 
+#define BREAK \
+      if((stream==stream1&&stream2==NULL)||stream==stream2)break;\
+      stream=stream2;\
+      continue
+
+#define COLOR_INVISIBLE -2
+
+#define BLOCK_OUTLINE 2
+
 #define DEVICE_DEVICE 0
 #define DEVICE_HEAT 2     
 #define DEVICE_SPRK 3
@@ -1028,11 +1037,6 @@ void parse_device_keyword(FILE *stream, device *devicei){
   }
 }
 
-#define BREAK \
-      if((stream==stream1&&stream2==NULL)||stream==stream2)break;\
-      stream=stream2;\
-      continue
-
 /* ------------------ get_inpf ------------------------ */
 
 int get_inpf(char *file, char *file2){
@@ -1794,25 +1798,32 @@ int readsmv(char *file, char *file2){
 
     if(match(buffer,"CSVF") == 1){
       int nfiles;
-      char *file_local;
+      char *file_ptr,*type_ptr;
 
-      nfiles=0;
       fgets(buffer,255,stream);
       trim(buffer);
-      bufferptr=trim_front(buffer);
-      if(strcmp(bufferptr,"hrr")==0){
-        nfiles=1;
-        continue;
+      type_ptr=trim_front(buffer);
+
+      fgets(buffer2,255,stream);
+      trim(buffer2);
+      file_ptr=trim_front(buffer2);
+      nfiles=1;
+      if(strcmp(type_ptr,"hrr")==0){
+        if(file_exists(file_ptr)==0)nfiles=0;
       }
-      if(strcmp(bufferptr,"devc")==0){
-        nfiles=1;
-        continue;
+      else if(strcmp(type_ptr,"devc")==0){
+        if(file_exists(file_ptr)==0)nfiles=0;
       }
-      if(strcmp(bufferptr,"ext")==0){
-        fgets(buffer,255,stream);
-        trim(buffer);
-        file_local=trim_front(buffer);
-        nfiles = get_nfilelist(".",file_local);
+      else if(strcmp(type_ptr,"ext")==0){
+        if(strchr(file_ptr,'*')==NULL){
+          if(file_exists(file_ptr)==0)nfiles=0;
+        }
+        else{
+          nfiles = get_nfilelist(".",file_ptr);
+        }
+      }
+      else{
+        nfiles=0;
       }
       ncsvinfo+=nfiles;
       continue;
@@ -1859,7 +1870,6 @@ int readsmv(char *file, char *file2){
       }
       continue;
     }
-
     if(match(buffer,"TERRAIN") == 1){
       nterraininfo++;
       continue;
@@ -1933,7 +1943,6 @@ int readsmv(char *file, char *file2){
       }
       continue;
     }
-
     if(match(buffer,"REVISION")==1){
       revision_fds=-1;
       if(fgets(buffer,255,stream)==NULL){
@@ -2412,39 +2421,79 @@ int readsmv(char *file, char *file2){
   */
     if(match(buffer,"CSVF") == 1){
       csvdata *csvi;
-      char *file_local;
-      int lenfile;
-      
+      char *type_ptr, *file_ptr;
+      int nfiles=1;
+
       csvi = csvinfo + ncsvinfo;
+
       if(fgets(buffer,255,stream)==NULL){
         BREAK;
       }
       trim(buffer);
-      bufferptr=trim_front(buffer);
-      if(strcmp(bufferptr,"hrr")==0){
-        csvi->type=CSVTYPE_HRR;
-      }
-      else if(strcmp(bufferptr,"devc")==0){
-        csvi->type=CSVTYPE_DEVC;
-      }
-      else if(strcmp(bufferptr,"ext")==0){
-        csvi->type=CSVTYPE_EXT;
-      }
-      else{
-        csvi->type=CSVTYPE_NULL;
-      }
-      if(fgets(buffer,255,stream)==NULL){
+      type_ptr=trim_front(buffer);
+
+      if(fgets(buffer2,255,stream)==NULL){
         BREAK;
       }
-      trim(buffer);
-      file_local=trim_front(buffer);
-      lenfile = strlen(file_local);
-      NewMemory((void **)&csvi->file,lenfile+1);
-      strcpy(csvi->file,file_local);
+      trim(buffer2);
+      file_ptr=trim_front(buffer2);
+
       csvi->loaded=0;
       csvi->display=0;
 
-      ncsvinfo++;
+      if(strcmp(type_ptr,"hrr")==0){
+        if(file_exists(file_ptr)==1){
+          csvi->type=CSVTYPE_HRR;
+          NewMemory((void **)&csvi->file,strlen(file_ptr)+1);
+          strcpy(csvi->file,file_ptr);
+        }
+        else{
+          nfiles=0;
+        }
+      }
+      else if(strcmp(type_ptr,"devc")==0){
+        if(file_exists(file_ptr)==1){
+          csvi->type=CSVTYPE_DEVC;
+          NewMemory((void **)&csvi->file,strlen(file_ptr)+1);
+          strcpy(csvi->file,file_ptr);
+        }
+        else{
+          nfiles=0;
+        }
+      }
+      else if(strcmp(type_ptr,"ext")==0){
+        if(strchr(file_ptr,'*')==NULL){
+          if(file_exists(file_ptr)==1){
+            csvi->type=CSVTYPE_EXT;
+            NewMemory((void **)&csvi->file,strlen(file_ptr)+1);
+            strcpy(csvi->file,file_ptr);
+          }
+          else{
+            nfiles=0;
+          }
+        }
+        else{
+          char **filelist;
+          int nfilelist;
+
+          nfilelist = get_nfilelist(".",file_ptr);
+          nfiles=get_filelist(".",file_ptr,nfilelist,&filelist);
+          for(i=0;i<nfiles;i++){
+            csvi = csvinfo + ncsvinfo + i;
+            csvi->loaded=0;
+            csvi->display=0;
+            csvi->type=CSVTYPE_EXT;
+            NewMemory((void **)&csvi->file,strlen(filelist[i])+1);
+            strcpy(csvi->file,filelist[i]);
+          }
+          free_filelist(filelist,nfilelist);
+        }
+      }
+      else{
+        nfiles=0;
+      }
+
+      ncsvinfo+=nfiles;
       continue;
     }
 
@@ -4518,9 +4567,6 @@ typedef struct {
         setsurfaceindex(bc);
       }
 
-#define COLOR_INVISIBLE -2
-
-#define BLOCK_OUTLINE 2
       nn=-1;
       for(iblock=0;iblock<n_blocks;iblock++){
         if(autoterrain==1&&meshi->is_block_terrain!=NULL&&meshi->is_block_terrain[iblock]==1){
