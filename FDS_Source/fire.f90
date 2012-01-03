@@ -394,7 +394,6 @@ ODE_LOOP: DO WHILE (DT_SUM < DT)
       IF (ALL(TOL_INT_VECTOR < -998._EB)) THEN !calculates sub time step based on user inputted tolerance
          DT_NEW = DT_ODE
       ELSEIF (ABS(DT_SUM) < ZERO_P .OR. COUNTER < 1) THEN
-         COUNTER = COUNTER + 1
          ZZ_1 = ZZ_0 + 0.5_EB * (DZZDT + DZZDTE) * DT
          ZZ_2 = ZZ_0 + 0.5_EB * (DZZDT + DZZDTE) * 0.5_EB * DT
          DIFF_ZZ = ABS(MAXVAL(ZZ_1 - ZZ_2))
@@ -409,15 +408,16 @@ ODE_LOOP: DO WHILE (DT_SUM < DT)
       ZZ_N = ZZ_0 + 0.5_EB * (DZZDT + DZZDTE) * DT_NEW ! Updates species 
       Q_SUM = SUM(0.5_EB*(Q_NR+Q_NRE)) * DT_NEW ! Updates energy
 
-      IF (ANY(ZZ_N < 0._EB)) THEN !Shrinks time step if negative mass fractions
+      DO WHILE (ANY(ZZ_N < 0._EB)) !Shrinks time step if negative mass fractions
             DT_NEW = 0.95_EB*DT_NEW
-      ELSE
-         TOL_CALC = MAXVAL(ABS(ZZ_N-ZZ_I)) ! Check tolerance
-         ZZ_I = ZZ_N ! Updates guess vector for implicit iteration
-    !!!! COUNTER = COUNTER + 1
-      ENDIF     
+            ZZ_N = ZZ_0 + 0.5_EB * (DZZDT + DZZDTE) * DT_NEW ! Updates species
+      ENDDO
+      
+      TOL_CALC = MAXVAL(ABS(ZZ_N-ZZ_I)) ! Check tolerance
+      ZZ_I = ZZ_N ! Updates guess vector for implicit iteration
       COUNTER = COUNTER + 1
-      IF (COUNTER > 501) EXIT TOLERANCE_LOOP
+
+      IF (COUNTER > 750) EXIT TOLERANCE_LOOP
    ENDDO TOLERANCE_LOOP
   
    IF (Q_OUT + Q_SUM > Q_UPPER * DT) THEN
@@ -541,7 +541,7 @@ SELECT CASE (MODE)
          RATE_CONSTANT = YY_F_LIM/MIX_TIME(I,J,K)      
    CASE(FINITE_RATE)
       RATE_CONSTANT = 0._EB
-      CALL GET_MASS_FRACTION_ALL(ZZ_GET,YY_PRIMITIVE)      
+      CALL GET_MASS_FRACTION_ALL(ZZ_GET,YY_PRIMITIVE)    
       RATE_CONSTANT = RN%A*RHO(I,J,K)**RN%RHO_EXPONENT*EXP(-RN%E/(R0*TMP(I,J,K)))*TMP(I,J,K)**RN%N_T
       IF (ALL(RN%N_S<-998._EB)) THEN
          DO NS=0,N_TRACKED_SPECIES
@@ -568,7 +568,7 @@ SELECT CASE (MODE)
       RATE_CONSTANT_ED=RATE_CONSTANT
       CALL COMPUTE_RATE_CONSTANT(NR,FINITE_RATE,I_TS,Q_IN,RATE_CONSTANT,ZZ_GET,I,J,K)
       RATE_CONSTANT_FR=RATE_CONSTANT
-      RATE_CONSTANT=MAX(RATE_CONSTANT_ED,RATE_CONSTANT_FR)
+      RATE_CONSTANT=MIN(RATE_CONSTANT_ED,RATE_CONSTANT_FR)
 END SELECT
 
 RETURN
