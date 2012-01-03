@@ -8,12 +8,6 @@
 
 #define pp_release
 
-// uncomment the following line if using LINT to check code
-// #define pp_LINT
-#ifdef pp_LINT
-#include "lint.h"
-#endif
-
 //*** uncomment the following two lines to force all versions to be beta
 //#undef pp_BETA
 //#define pp_BETA
@@ -66,13 +60,11 @@
 
 #ifdef _DEBUG  // comment out following line if debugging REALLY large cases (to avoid memory checks)
 #define pp_MEMDEBUG
-
 #endif
 
 //VVVVVVVVVVVVVVVVVVVVVVVVVVVVV  turn on windows only options VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
 #ifdef WIN32
-
 #define pp_memstatus
 #define pp_COMPRESS
 #define pp_noappend
