@@ -688,7 +688,43 @@ AVATARDEF
  90.0 rotatez
  0.0 0.0 1.0 translate $W $D $H1 scalexyz 
   push 0.0 -0.25 0.05 translate 0.3 2.5 0.3 scalexyz "CYAN" setcolor 0.2 drawsphere pop 
-  $R $G $B setrgb 1.0 0.05 drawdisk 
+  $R $G $B setrgb 1.0 0.05 drawdisk
+
+AVATARDEF
+ fire_fighter
+ "TAN" setcolor // head color  TAN 210 180 140
+ 0.3 0.3 0.3 scalexyz 
+ 0.0 0.0 0.0 translate
+ push  0.0 0.0 5.2 translate 1.1 drawsphere 
+   "BLUE" setcolor // eye color BLUE
+   push -0.25 -0.4 0.05 translate 0.2 drawsphere pop // eye
+   push  0.25 -0.4 0.05 translate 0.2 drawsphere pop // eye
+   pop // head
+ "YELLOW" setcolor  // body color 
+ push  0.0 0.0 3.55 translate 0.5 0.3 1.0 scalexyz 2.5 drawsphere pop // trunk
+ "YELLOW" setcolor // arm color 
+ push -0.9 0.0 3.5 translate  35.0 rotatey 0.2  0.2  1.0 scalexyz 3.0 drawsphere pop // arm
+ push  0.9 0.0 3.5 translate -35.0 rotatey 0.2  0.2  1.0 scalexyz 3.0 drawsphere pop // arm
+ "BLUE" setcolor // leg color 
+ push -0.5 0.0 1.3 translate  30.0 rotatey 0.25 0.25 1.0 scalexyz 3.0 drawsphere pop // leg
+ push  0.5 0.0 1.3 translate -30.0 rotatey 0.25 0.25 1.0 scalexyz 3.0 drawsphere pop // leg
+
+OBJECTDEF
+ airpack
+ 96 96 96 setrgb
+ push 180.0 rotatey 0.2 drawhsphere pop
+ 0.2 0.55 drawdisk
+ 0.0 0.0 0.55 translate 0.2 drawhsphere
+OBJECTDEF  // used by smokeview to display smoke thickness
+ helmit
+ 255 51 51 setrgb
+ 0.3 drawhsphere
+ 0.4 0.02 drawdisk
+AVATARDEF
+ fire_fighter_with_gear          // label, name of avatar
+ push "fire_fighter" include pop
+ push 0.0 0.0 1.65 translate 1.0 1.0 1.0 scalexyz "helmit" include pop
+ push 0.0 0.2 0.80 translate "airpack" include pop
 
    // ************ Elementary object definitions ********************
 
