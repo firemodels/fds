@@ -30,9 +30,10 @@ extern "C" char glui_device_revision[]="$Revision$";
 #define OPEN_CANCEL 3
 #define OPEN_FILTER 4
 #define OPEN_APPLY_FILTER 5
+#define OPEN_UPDATE_LIST 6
 void Open_CB(int var);
 int openfile_index=0;
-int nfilelist;
+int nfilelist=0;
 char **filelist;
 char open_filter[sizeof(GLUI_String)];
 GLUI_Panel *panel_open=NULL;
@@ -96,12 +97,7 @@ extern "C" void glui_device_setup(int main_window){
   glui_device->add_button_to_panel(panel_open,_("Up"),OPEN_UP,Open_CB);
   openfile_index=0;
   LISTBOX_open=glui_device->add_listbox_to_panel(panel_open,"",&openfile_index,OPEN_FILEINDEX,Open_CB);
-  nfilelist=get_nfilelist(".","*.csv");
-  get_filelist(".", "*.csv",nfilelist,&filelist);
-  for(i=0;i<nfilelist;i++){
-    LISTBOX_open->add_item(i,filelist[i]);
-  }
-  free_filelist(filelist,nfilelist);
+  Open_CB(OPEN_UPDATE_LIST);
   panel_open2 = glui_device->add_panel_to_panel(panel_open,"",false);
   EDIT_filter=glui_device->add_edittext_to_panel(panel_open2,"filter:",GLUI_EDITTEXT_TEXT,open_filter,OPEN_FILTER,Open_CB);
   glui_device->add_column_to_panel(panel_open2);
@@ -136,6 +132,8 @@ extern "C" void show_glui_device(void){
 /* ------------------ Device_CB ------------------------ */
 
 void Open_CB(int var){
+  int i;
+
   switch (var){
     case OPEN_UP:
       break;
@@ -148,6 +146,17 @@ void Open_CB(int var){
     case OPEN_FILTER:
       break;
     case OPEN_APPLY_FILTER:
+      break;
+    case OPEN_UPDATE_LIST:
+      for(i=0;i<nfilelist;i++){
+        LISTBOX_open->delete_item(filelist[i]);
+      }
+      free_filelist(filelist,&nfilelist);
+      nfilelist=get_nfilelist(".","*.csv");
+      get_filelist(".", "*.csv",nfilelist,&filelist);
+      for(i=0;i<nfilelist;i++){
+        LISTBOX_open->add_item(i,filelist[i]);
+      }
       break;
     default:
       ASSERT(0);

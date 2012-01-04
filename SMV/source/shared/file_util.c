@@ -273,13 +273,14 @@ int file_exists(char *filename){
 
   /* ------------------ get_filelist ------------------------ */
 
-void free_filelist(char **filelist, int nfilelist) {
+void free_filelist(char **filelist, int *nfilelist) {
   int i;
 
-  for(i=0;i<nfilelist;i++){
+  for(i=0;i<*nfilelist;i++){
     FREEMEMORY(filelist[i]);
   }
   FREEMEMORY(filelist);
+  *nfilelist=0;
 }
 
 
@@ -322,6 +323,7 @@ int get_filelist(const char *path, char *key, int maxfiles, char ***filelist) {
   }
   NewMemory((void **)&flist,maxfiles*sizeof(char **));
   while( (entry = readdir(dp))&&nfiles<maxfiles ){
+    printf(" file=%s type=%i\n",entry->d_name,entry->d_type);
     if(match_wild(entry->d_name,key)==1){
       char *file;
 

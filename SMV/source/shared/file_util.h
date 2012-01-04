@@ -19,7 +19,7 @@ EXTERNCPP int can_write_to_dir(char *dir);
 EXTERNCPP int file_exists(char *filename);
 EXTERNCPP int getfilesize(char *filename);
 
-EXTERNCPP void free_filelist(char **filelist, int nfilelist);
+EXTERNCPP void free_filelist(char **filelist, int *nfilelist);
 EXTERNCPP int get_nfilelist(const char *path, char *key) ;
 EXTERNCPP int get_filelist(const char *path, char *key, int maxfiles, char ***filelist);
 EXTERNCPP char *which(char *progname);

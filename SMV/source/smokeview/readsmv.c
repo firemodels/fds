@@ -2486,7 +2486,7 @@ int readsmv(char *file, char *file2){
             NewMemory((void **)&csvi->file,strlen(filelist[i])+1);
             strcpy(csvi->file,filelist[i]);
           }
-          free_filelist(filelist,nfilelist);
+          free_filelist(filelist,&nfilelist);
         }
       }
       else{

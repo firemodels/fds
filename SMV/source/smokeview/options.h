@@ -25,7 +25,6 @@
 
 //#define pp_HIDEMULTI
 //#define pp_GEOMPRINT
-//#define pp_OPEN
 #define pp_MOUSEDOWN
 #define pp_GPU
 #define pp_GLEW
@@ -47,6 +46,7 @@
 #ifdef pp_BETA
 // #define pp_BENCHMARK
 //#define pp_GPUDEPTH
+#define pp_OPEN
 #ifdef pp_GPU
 #define pp_GPUTHROTTLE
 #endif
