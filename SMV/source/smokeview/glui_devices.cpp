@@ -34,7 +34,7 @@ extern "C" char glui_device_revision[]="$Revision$";
 void Open_CB(int var);
 int openfile_index=0;
 int nfilelist=0;
-char **filelist;
+char path_dir[1024],**filelist;
 char open_filter[sizeof(GLUI_String)];
 GLUI_Panel *panel_open=NULL;
 GLUI_Panel *panel_open2=NULL;
@@ -97,6 +97,7 @@ extern "C" void glui_device_setup(int main_window){
   glui_device->add_button_to_panel(panel_open,_("Up"),OPEN_UP,Open_CB);
   openfile_index=0;
   LISTBOX_open=glui_device->add_listbox_to_panel(panel_open,"",&openfile_index,OPEN_FILEINDEX,Open_CB);
+  strcpy(path_dir,".");
   Open_CB(OPEN_UPDATE_LIST);
   panel_open2 = glui_device->add_panel_to_panel(panel_open,"",false);
   EDIT_filter=glui_device->add_edittext_to_panel(panel_open2,"filter:",GLUI_EDITTEXT_TEXT,open_filter,OPEN_FILTER,Open_CB);
@@ -153,7 +154,7 @@ void Open_CB(int var){
       }
       free_filelist(filelist,&nfilelist);
       nfilelist=get_nfilelist(".","*.csv");
-      get_filelist(".", "*.csv",nfilelist,&filelist);
+      get_filelist(path_dir, "*.csv",nfilelist,&filelist);
       for(i=0;i<nfilelist;i++){
         LISTBOX_open->add_item(i,filelist[i]);
       }

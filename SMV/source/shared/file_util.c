@@ -309,6 +309,9 @@ int get_filelist(const char *path, char *key, int maxfiles, char ***filelist) {
   DIR *dp;
   int nfiles=0;
   char **flist;
+
+  // DT_DIR - is a diretory
+  // DT_REG - is a regular file
  
   dp = opendir(path);
   if (dp == NULL) {
@@ -323,8 +326,10 @@ int get_filelist(const char *path, char *key, int maxfiles, char ***filelist) {
   }
   NewMemory((void **)&flist,maxfiles*sizeof(char **));
   while( (entry = readdir(dp))&&nfiles<maxfiles ){
-    printf(" file=%s type=%i\n",entry->d_name,entry->d_type);
-    if(match_wild(entry->d_name,key)==1){
+    int isdir=0;
+
+    if(entry->d_type==DT_DIR&&entry->d_name[0]!='.')isdir=1;
+    if(match_wild(entry->d_name,key)==1||isdir==1){
       char *file;
 
       NewMemory((void **)&file,strlen(entry->d_name)+1);
