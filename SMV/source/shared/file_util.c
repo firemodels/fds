@@ -327,7 +327,7 @@ int get_filelist(const char *path, char *key, int maxfiles, char ***filelist) {
     if(match_wild(entry->d_name,key)==1){
       char *file;
 
-      NewMemory((void **)&file,entry->d_namlen+1);
+      NewMemory((void **)&file,strlen(entry->d_name)+1);
       strcpy(file,entry->d_name);
       flist[nfiles++]=file;
     }
