@@ -23,6 +23,26 @@ extern "C" char glui_device_revision[]="$Revision$";
 #define SAVE_SETTINGS 99
 #define DEVICE_close 3
 
+#ifdef pp_OPEN
+#define OPEN_UP 0
+#define OPEN_FILEINDEX 1
+#define OPEN_OPEN 2
+#define OPEN_CANCEL 3
+#define OPEN_FILTER 4
+#define OPEN_APPLY_FILTER 5
+void Open_CB(int var);
+int openfile_index=0;
+int nfilelist;
+char **filelist;
+char open_filter[sizeof(GLUI_String)];
+GLUI_Panel *panel_open=NULL;
+GLUI_Panel *panel_open2=NULL;
+GLUI_Panel *panel_open3=NULL;
+GLUI_Listbox *LISTBOX_open=NULL;
+GLUI_EditText *EDIT_filter=NULL;
+int i;
+#endif
+
 
 GLUI *glui_device=NULL;
 GLUI_Panel *panel_objects=NULL;
@@ -71,6 +91,29 @@ extern "C" void glui_device_setup(int main_window){
 
   glui_device->add_button_to_panel(panel_label3,_("Close"),DEVICE_close,Device_CB);
 
+#ifdef pp_OPEN
+  panel_open = glui_device->add_panel("Open",true);
+  glui_device->add_button_to_panel(panel_open,_("Up"),OPEN_UP,Open_CB);
+  openfile_index=0;
+  LISTBOX_open=glui_device->add_listbox_to_panel(panel_open,"",&openfile_index,OPEN_FILEINDEX,Open_CB);
+  nfilelist=get_nfilelist(".","*.csv");
+  get_filelist(".", "*.csv",nfilelist,&filelist);
+  for(i=0;i<nfilelist;i++){
+    LISTBOX_open->add_item(i,filelist[i]);
+  }
+  free_filelist(filelist,nfilelist);
+  panel_open2 = glui_device->add_panel_to_panel(panel_open,"",false);
+  EDIT_filter=glui_device->add_edittext_to_panel(panel_open2,"filter:",GLUI_EDITTEXT_TEXT,open_filter,OPEN_FILTER,Open_CB);
+  glui_device->add_column_to_panel(panel_open2);
+  glui_device->add_button_to_panel(panel_open2,_("Apply Filter"),OPEN_APPLY_FILTER,Open_CB);
+
+  panel_open3 = glui_device->add_panel_to_panel(panel_open,"",false);
+  glui_device->add_button_to_panel(panel_open3,_("Open"),OPEN_OPEN,Open_CB);
+  glui_device->add_column_to_panel(panel_open3);
+  glui_device->add_button_to_panel(panel_open3,_("Cancel"),OPEN_CANCEL,Open_CB);
+
+#endif
+
   glui_device->set_main_gfx_window( main_window );
 }
 
@@ -87,6 +130,31 @@ extern "C" void hide_glui_device(void){
 extern "C" void show_glui_device(void){
   if(glui_device!=NULL)glui_device->show();
 }
+
+#ifdef pp_OPEN
+
+/* ------------------ Device_CB ------------------------ */
+
+void Open_CB(int var){
+  switch (var){
+    case OPEN_UP:
+      break;
+    case OPEN_FILEINDEX:
+      break;
+    case OPEN_OPEN:
+      break;
+    case OPEN_CANCEL:
+      break;
+    case OPEN_FILTER:
+      break;
+    case OPEN_APPLY_FILTER:
+      break;
+    default:
+      ASSERT(0);
+      break;
+  }
+}
+#endif
 
 /* ------------------ Device_CB ------------------------ */
 
