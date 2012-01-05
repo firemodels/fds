@@ -121,10 +121,12 @@ for i=2:2000
            continue
         end
         [H M] = dvcread(d1_Filename,d1_Col_Name_Row);
-        d1_Ind_Col = find(strcmp(H,d1_Ind_Col_Name));
+        %d1_Ind_Col = find(strcmp(H,d1_Ind_Col_Name));
+        R1 = parse(d1_Ind_Col_Name);
         S1 = parse(d1_Dep_Col_Name);
         style = parse(d1_Style);
         for j=1:length(S1)
+            d1_Ind_Col = find(strcmp(H,R1(min(j,length(R1)))));
             d1_Dep_Col = find(strcmp(H,S1(j)));
             clear indices
             indices = find(d1_Comp_Start<=M(:,d1_Ind_Col) & M(:,d1_Ind_Col)<=d1_Comp_End);
@@ -160,10 +162,12 @@ for i=2:2000
            continue
         end
         [H M] = dvcread(d2_Filename,d2_Col_Name_Row);
-        d2_Ind_Col = find(strcmp(H,d2_Ind_Col_Name));
+        %d2_Ind_Col = find(strcmp(H,d2_Ind_Col_Name));
+        R2 = parse(d2_Ind_Col_Name);
         S2 = parse(d2_Dep_Col_Name);
         style = parse(d2_Style);
         for j=1:length(S2)
+            d2_Ind_Col = find(strcmp(H,R2(min(j,length(R2)))));
             d2_Dep_Col = find(strcmp(H,S2(j)));
             clear indices
             indices = find(d2_Comp_Start<=M(:,d2_Ind_Col) & M(:,d2_Ind_Col)<=d2_Comp_End);

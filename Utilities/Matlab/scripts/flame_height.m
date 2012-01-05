@@ -51,9 +51,9 @@ for i=1:16 % hrr loop
         
         % determine flame height
         for n=1:length(z)
-            hrr(n) = sum(hrrpul(1:n))*dz*Qdot(i)/Qdot_line; % cummulative heat release
+            hrr(n) = sum(hrrpul(1:n))*dz; % cummulative heat release
         end
-        k = find(hrr>f*Qdot(i),1);
+        k = find(hrr>f*Qdot_line,1);
         if (k>1) 
             L(j) = z(k-1)+dz*(f*Qdot(i)-hrr(k-1))/(hrr(k)-hrr(k-1));
         else
@@ -119,13 +119,15 @@ for j=1:3 % resolution loop
 		dz = z(2)-z(1);
 		hrrpul = M.data(:,2);
 		Qdot_line = sum(hrrpul)*dz;
-		L(k) = 1.13*(3.7*Qstar(k)^(2/5)-1.02); % Heskestad correlation, D=1.13
+        f = 0.99;
 		
 		% determine flame height
 		for n=1:length(z)
 			hrr(n) = sum(hrrpul(1:n))*dz/Qdot_line; % cummulative heat release
-		end
-		
+        end
+		kk = find(hrr>f,1);
+        L(k) = z(kk-1)+dz*(f-hrr(kk-1))/(hrr(kk)-hrr(kk-1));
+        
 		A=[A,(z+dz/2)/L(k),hrr'];
 		
 	end % hrr loop
