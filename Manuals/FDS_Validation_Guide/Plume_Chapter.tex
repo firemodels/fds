@@ -55,55 +55,56 @@ The following pages show the results of simulations of McCaffrey's five fires at
 \section{Heskestad's Flame Height Correlation}
 
 
-Table~\ref{Flame_Height_Parameters} lists the parameters for 16 FDS calculations of a fire in a 1~m by 1~m square pan\footnote{The effective diameter, $D$, of a 1~m square pan is 1.13~m, obtained by equating the area of a square and circle.}, Fig.~\ref{Flame_Height_check_hrr} shows a verification of the heat release rate for each case, and Fig.~\ref{Flame_Height} compares the FDS predictions with Heskestad's empirical correlation. Note that the flame height for the FDS simulations is defined as the distance above the pan, on average, at which 99~\% of the fuel has been consumed. Note also that the simulations were run at three different grid resolutions. A convenient length scale is given by \be D^* = (Q^*)^{2/5} \, D \ee
+Table~\ref{Flame_Height_Parameters} lists the parameters for FDS simulations of fires in a 1~m by 1~m square pan\footnote{The effective diameter, $D$, of a 1~m square pan is 1.13~m, obtained by equating the area of a square and circle.}. Figure~\ref{Flame_Height_check_hrr} shows a verification of the heat release rate for each case, and Fig.~\ref{Flame_Height} compares the FDS predictions with Heskestad's empirical correlation. Note that the flame height for the FDS simulations is defined as the distance above the pan, on average, at which 99~\% of the fuel has been consumed. Note also that the simulations were run at three different grid resolutions. A convenient length scale is given by \be D^* = (Q^*)^{2/5} \, D \ee
 Given a grid cell size, $\dx$, the three resolutions can be characterized by the non-dimensional quantity, $D^*/\dx$, whose values in these cases are 5, 10 and 20.
 
-The flame height definition used in Fig.~\ref{Flame_Height} (99~\% fuel consumption) is admittedly arbitrary and is often questioned when FDS predictions of flame height are compared with experimental values, which are usually based on luminosity (effectively measuring radiation emission from soot).  Further, Heskestad's flame height correlation is one among many such correlations (see, e.g., \cite{SFPE:Heskestad,Steward:1970,Becker:1978,Cox:1985,Hasemi:1984,Cetegen:1984,Delichatsios:1984}), and the reported variation is significant, especially at low values of $Q^*$ where the details of the burner configuration (shape of the burner, etc.) become important.  To illustrate the uncertainty one can expect from FDS calculations and to test the sensitivity of the reported FDS results to the flame height definition, Fig.~\ref{Flame_Height2} shows two different FDS flame height predictions, one at 99~\% fuel consumption (as in Fig.~\ref{Flame_Height})---the red curve---and one using 95~\% fuel consumption---the blue curve.  Three different grid resolutions were run for each flame height definition.  For 99~\% fuel consumption, the red dashed line is the maximum flame height from the three resolutions.  For 95~\% fuel consumption, the blue dashed line is the minimum flame height from the three resolutions.  We also overlay several different flame height correlations (colored solid lines).  The disagreement between the correlations, which roughly mimics the difference in the FDS results, is $\pm 15$~\% at values values of $Q^* > 1$.  For lower values of $Q^*$ the disagreement is as high as $\pm 65$~\%.
+The flame height definition used in Fig.~\ref{Flame_Height} (99~\% fuel consumption) is admittedly arbitrary and is often questioned when FDS predictions of flame height are compared with experimental values, which are usually based on luminosity (effectively measuring radiation emission from soot).  Further, Heskestad's flame height correlation is one among many such correlations (\cite{SFPE:Heskestad,Steward:1970,Becker:1978,Cox:1985,Hasemi:1984,Cetegen:1984,Delichatsios:1984}), and the reported variation is significant, especially at low values of $Q^*$ where the details of the burner configuration (shape of the burner, etc.) become important.  To illustrate the uncertainty one can expect from FDS calculations and to test the sensitivity of the reported FDS results to the flame height definition, Fig.~\ref{Flame_Height2} shows two different FDS flame height predictions, one at 99~\% fuel consumption (as in Fig.~\ref{Flame_Height})---the red curve---and one using 95~\% fuel consumption---the blue curve.  Three different grid resolutions were run for each flame height definition.  For 99~\% fuel consumption, the red dashed line is the maximum flame height from the three resolutions.  For 95~\% fuel consumption, the blue dashed line is the minimum flame height from the three resolutions.  We also overlay several different flame height correlations (colored solid lines).  The disagreement between the correlations, which roughly mimics the difference in the FDS results, is $\pm 15$~\% at values values of $Q^* > 1$.  For lower values of $Q^*$ the disagreement is as high as $\pm 65$~\%.
 
+Figure~\ref{Flame_Structure} includes comparisons of the predicted HRR as a function of the height of the burner for three different values of $Q^*$. The experimental
+measurements were performed by Tamanini at Factory Mutual~\cite{Tamanini:CF1983}. Both the HRR and height above the burner have been non-dimensionalized by the total HRR and
+the flame height, respectively. These results demonstrate that the predicted spatial distribution of the energy release improves as the numerical grid is refined.
+
+\clearpage
 
 \begin{table}[h!]
 \caption[Summary of parameters for the flame height predictions.]{Summary of parameters for the flame height predictions. The grid cell size, $\dx_{10}$, refers to the case where $D^*/\dx$=10.}
 \begin{center}
-\begin{tabular}{|c|c|c|c|}
+\begin{tabular}{|c|c|c|c|c|c|}
 \hline
-$Q^*$       & $\dot{Q}$~(kW)   & $D^*$ (m)  & $\dx_{10}$ (m)  \\ \hline \hline
-0.1         &   151         & 0.45    &   0.045   \\ \hline
-0.2         &   303         & 0.59    &   0.059   \\ \hline
-0.5         &   756         & 0.86    &   0.086   \\ \hline
-1           &   1513        & 1.13    &   0.113   \\ \hline
-2           &   3025        & 1.49    &   0.149   \\ \hline
-5           &   7564        & 2.15    &   0.215   \\ \hline
-10          &   15127       & 2.84    &   0.284   \\ \hline
-20          &   30255       & 3.75    &   0.375   \\ \hline
-50          &   75636       & 5.40    &   0.540   \\ \hline
-100         &   151273      & 7.13    &   0.713   \\ \hline
-200         &   302545      & 9.41    &   0.941   \\ \hline
-500         &   756363      & 13.6    &   1.36    \\ \hline
-1000        &   1512725     & 17.9    &   1.79    \\ \hline
-2000        &   3025450     & 23.6    &   2.36    \\ \hline
-5000        &   7563625     & 34.1    &   3.41    \\ \hline
-10000       &   15127250    & 45.0    &   4.50    \\ \hline
+$Q^*$       & $\dot{Q}$~(kW) & $D^*$ (m)  & $\dx_5$ (m)  & $\dx_{10}$  & $\dx_{20}$ \\ \hline \hline
+0.1         &   151          & 0.45       & 0.090        & 0.045       &  0.022     \\ \hline
+0.2         &   303          & 0.59       & 0.119        & 0.059       &  0.030     \\ \hline
+0.5         &   756          & 0.86       & 0.171        & 0.086       &  0.043     \\ \hline
+1           &   1513         & 1.13       & 0.226        & 0.113       &  0.057     \\ \hline
+2           &   3025         & 1.49       & 0.298        & 0.149       &  0.075     \\ \hline
+5           &   7564         & 2.15       & 0.430        & 0.215       &  0.108     \\ \hline
+10          &   15127        & 2.84       & 0.568        & 0.284       &  0.142     \\ \hline
+20          &   30255        & 3.75       & 0.749        & 0.375       &  0.187     \\ \hline
+50          &   75636        & 5.40       & 1.081        & 0.540       &  0.270     \\ \hline
+100         &   151273       & 7.13       & 1.426        & 0.713       &  0.356     \\ \hline
+200         &   302545       & 9.41       & 1.882        & 0.941       &  0.470     \\ \hline
+500         &   756363       & 13.6       & 2.715        & 1.357       &  0.679     \\ \hline
+1000        &   1512725      & 17.9       & 3.582        & 1.791       &  0.895     \\ \hline
+2000        &   3025450      & 23.6       & 4.726        & 2.363       &  1.182     \\ \hline
+5000        &   7563625      & 34.1       & 6.819        & 3.409       &  1.705     \\ \hline
+10000       &   15127250     & 45.0       & 8.997        & 4.499       &  2.249     \\ \hline
 \end{tabular}
 \end{center}
 \label{Flame_Height_Parameters}
 \end{table}
 
-\begin{figure}[p]
+\begin{figure}[h!]
 \begin{center}
-\begin{tabular}{c}
-\hspace{-.5in}
-\includegraphics[width=5.0in]{FIGURES/Heskestad/Flame_Height_check_hrr} \\
-\vspace{0.25in} \\
-\end{tabular}
+\includegraphics[width=5.0in]{FIGURES/Heskestad/Flame_Height_check_hrr} 
 \end{center}
-\caption[Check of heat release rate for flame height cases.]
-{Check of heat release rate for flame height cases.}
+\caption[Verification of the heat release rate for Heskestad Flame Height cases.]
+{Verification of the heat release rate for Heskestad Flame Height cases.}
 \label{Flame_Height_check_hrr}
 \end{figure}
 
-\newpage
+\clearpage
 
-\begin{figure}[h]
+\begin{figure}[h!]
 \begin{center}
 \includegraphics[width=5.0in]{FIGURES/Heskestad/Flame_Height}
 \end{center}
@@ -113,11 +114,23 @@ $Q^*$       & $\dot{Q}$~(kW)   & $D^*$ (m)  & $\dx_{10}$ (m)  \\ \hline \hline
 \label{Flame_Height}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[h!]
 \includegraphics[width=\textwidth]{FIGURES/Heskestad/Flame_Height2}
 \caption[Flame height uncertainty, multiple correlations and flame height definitions.]
 {Flame height predictions from various correlations compared with FDS predictions using two different flame height definitions.  Uncertainty (maximum variation) at $Q^*>1$ is $\pm$ 15~\%.  At $Q^*=0.1$, the uncertainty is approximately $\pm$ 65~\%. Correlation references: Steward \cite{Steward:1970}, Becker and Liang \cite{Becker:1978}, Cox and Chitty \cite{Cox:1985}, Heskestad \cite{SFPE:Heskestad}, Hasemi and Tokunaga \cite{Hasemi:1984}, Cetegen \cite{Cetegen:1984}, Delichatsios \cite{Delichatsios:1984}.}
 \label{Flame_Height2}
+\end{figure}
+
+\clearpage
+
+\begin{figure}[h!]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/Heskestad/Flame_Structure_20} &
+\includegraphics[height=2.2in]{FIGURES/Heskestad/Flame_Structure_10} \\
+\multicolumn{2}{c}{\includegraphics[height=2.2in]{FIGURES/Heskestad/Flame_Structure_5}} 
+\end{tabular*}
+\caption[Predicted HRR as a function of height above the burner.]{Predicted HRR as a function of height above the burner compared to measurements.}
+\label{Flame_Structure}
 \end{figure}
 
 
@@ -184,7 +197,7 @@ Plume Temperatures shown here are recorded at approximately 6 m from the floor, 
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_05_Plume_Temperature} &
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_06_Plume_Temperature} \\
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_07_Plume_Temperature} &
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_08_Plume_Temperature} 
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_08_Plume_Temperature}
 \end{tabular*}
 \label{FM_SNL_Plume_1}
 \end{figure}
@@ -198,7 +211,7 @@ Plume Temperatures shown here are recorded at approximately 6 m from the floor, 
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_13_Plume_Temperature} &
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_14_Plume_Temperature} \\
 \includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_15_Plume_Temperature} &
-\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_16_Plume_Temperature} 
+\includegraphics[height=2.2in]{FIGURES/FM_SNL/FM_SNL_16_Plume_Temperature}
 \end{tabular*}
 \label{FM_SNL_Plume_2}
 \end{figure}
