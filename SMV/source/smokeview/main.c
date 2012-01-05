@@ -28,7 +28,6 @@ int main(int argc, char **argv){
   int return_code;
   char *progname;
 
-  //listdir(".");
   initMALLOC();
   initvars();
   if(argc==1)display_version_info();

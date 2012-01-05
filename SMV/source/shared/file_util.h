@@ -7,21 +7,27 @@
 #include <time.h>
 #include "string_util.h"
 
+#ifdef pp_OPEN
+typedef struct {
+  char *file;
+  int type;
+} filelistdata;
+#endif
+
 EXTERNCPP char *get_smokezippath(char *progdir);
 EXTERNCPP int filecat(char *file_in1, char *file_in2, char *file_out);
 EXTERNCPP void make_outfile(char *outfile, char *destdir, char *file1, char *ext);
 EXTERNCPP void fullfile(char *fileout, char *dir, char *file);
 EXTERNCPP char *setdir(char *argdir);
 EXTERNCPP int getfileinfo(char *filename, char *sourcedir, FILE_SIZE *filesize);
-EXTERNCPP int listdir(const char *path);
 EXTERNCPP char *get_zonefilename(char *buffer);
 EXTERNCPP int can_write_to_dir(char *dir);
 EXTERNCPP int file_exists(char *filename);
 EXTERNCPP int getfilesize(char *filename);
 
-EXTERNCPP void free_filelist(char **filelist, int *nfilelist);
+EXTERNCPP void free_filelist(filelistdata *filelist, int *nfilelist);
 EXTERNCPP int get_nfilelist(const char *path, char *key) ;
-EXTERNCPP int get_filelist(const char *path, char *key, int maxfiles, char ***filelist);
+EXTERNCPP int get_filelist(const char *path, char *key, int maxfiles, filelistdata **filelist);
 EXTERNCPP char *which(char *progname);
 EXTERNCPP FILE_SIZE get_filesize(const char *filename);
 EXTERNCPP time_t file_modtime(char *filename);

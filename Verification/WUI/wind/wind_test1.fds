@@ -5,10 +5,7 @@
 
 &TIME T_END=0.0 /  Total simulation time
 
-&CSVF CSVFILE='a111024_exp.csv' /
-&CSVF CSVFILE='a111025_exp.csv' /
-&CSVF CSVFILE='a111026_exp.csv' /
-&CSVF CSVFILE='a111027_exp.csv' /
+&CSVF CSVFILE='a1110*exp.csv' /
 
 
 &VENT XB=  0.0,200.0,0.0,0.0,0.0,200.0,SURF_ID='OPEN'/

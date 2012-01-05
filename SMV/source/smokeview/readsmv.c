@@ -2473,7 +2473,7 @@ int readsmv(char *file, char *file2){
           }
         }
         else{
-          char **filelist;
+          filelistdata *filelist;
           int nfilelist;
 
           nfilelist = get_nfilelist(".",file_ptr);
@@ -2483,8 +2483,8 @@ int readsmv(char *file, char *file2){
             csvi->loaded=0;
             csvi->display=0;
             csvi->type=CSVTYPE_EXT;
-            NewMemory((void **)&csvi->file,strlen(filelist[i])+1);
-            strcpy(csvi->file,filelist[i]);
+            NewMemory((void **)&csvi->file,strlen(filelist[i].file)+1);
+            strcpy(csvi->file,filelist[i].file);
           }
           free_filelist(filelist,&nfilelist);
         }

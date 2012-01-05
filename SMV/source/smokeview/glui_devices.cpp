@@ -31,17 +31,21 @@ extern "C" char glui_device_revision[]="$Revision$";
 #define OPEN_FILTER 4
 #define OPEN_APPLY_FILTER 5
 #define OPEN_UPDATE_LIST 6
+
 void Open_CB(int var);
-int openfile_index=0;
-int nfilelist=0;
-char path_dir[1024],**filelist;
-char open_filter[sizeof(GLUI_String)];
-GLUI_Panel *panel_open=NULL;
-GLUI_Panel *panel_open2=NULL;
-GLUI_Panel *panel_open3=NULL;
-GLUI_Listbox *LISTBOX_open=NULL;
-GLUI_EditText *EDIT_filter=NULL;
-int i;
+
+int gluiopen_file_index=0;
+int gluiopen_nfilelist=0;
+char gluiopen_path_dir[1024];
+filelistdata *gluiopen_filelist;
+char gluiopen_filter[sizeof(GLUI_String)];
+char gluiopen_filter2[sizeof(GLUI_String)];
+
+GLUI_Panel *gluiopen_panel_open=NULL;
+GLUI_Panel *gluiopen_panel_open2=NULL;
+GLUI_Panel *gluiopen_panel_open3=NULL;
+GLUI_Listbox *gluiopen_LISTBOX_open=NULL;
+GLUI_EditText *gluiopen_EDIT_filter=NULL;
 #endif
 
 
@@ -93,21 +97,22 @@ extern "C" void glui_device_setup(int main_window){
   glui_device->add_button_to_panel(panel_label3,_("Close"),DEVICE_close,Device_CB);
 
 #ifdef pp_OPEN
-  panel_open = glui_device->add_panel("Open",true);
-  glui_device->add_button_to_panel(panel_open,_("Up"),OPEN_UP,Open_CB);
-  openfile_index=0;
-  LISTBOX_open=glui_device->add_listbox_to_panel(panel_open,"",&openfile_index,OPEN_FILEINDEX,Open_CB);
-  strcpy(path_dir,".");
+  strcpy(gluiopen_filter,"*.csv");
+  gluiopen_panel_open = glui_device->add_panel("Open",true);
+  glui_device->add_button_to_panel(gluiopen_panel_open,_("Up"),OPEN_UP,Open_CB);
+  gluiopen_file_index=0;
+  gluiopen_LISTBOX_open=glui_device->add_listbox_to_panel(gluiopen_panel_open,"",&gluiopen_file_index,OPEN_FILEINDEX,Open_CB);
+  strcpy(gluiopen_path_dir,".");
   Open_CB(OPEN_UPDATE_LIST);
-  panel_open2 = glui_device->add_panel_to_panel(panel_open,"",false);
-  EDIT_filter=glui_device->add_edittext_to_panel(panel_open2,"filter:",GLUI_EDITTEXT_TEXT,open_filter,OPEN_FILTER,Open_CB);
-  glui_device->add_column_to_panel(panel_open2);
-  glui_device->add_button_to_panel(panel_open2,_("Apply Filter"),OPEN_APPLY_FILTER,Open_CB);
+  gluiopen_panel_open2 = glui_device->add_panel_to_panel(gluiopen_panel_open,"",false);
+  gluiopen_EDIT_filter=glui_device->add_edittext_to_panel(gluiopen_panel_open2,"filter:",GLUI_EDITTEXT_TEXT,gluiopen_filter,OPEN_FILTER,Open_CB);
+  glui_device->add_column_to_panel(gluiopen_panel_open2);
+  glui_device->add_button_to_panel(gluiopen_panel_open2,_("Apply Filter"),OPEN_APPLY_FILTER,Open_CB);
 
-  panel_open3 = glui_device->add_panel_to_panel(panel_open,"",false);
-  glui_device->add_button_to_panel(panel_open3,_("Open"),OPEN_OPEN,Open_CB);
-  glui_device->add_column_to_panel(panel_open3);
-  glui_device->add_button_to_panel(panel_open3,_("Cancel"),OPEN_CANCEL,Open_CB);
+  gluiopen_panel_open3 = glui_device->add_panel_to_panel(gluiopen_panel_open,"",false);
+  glui_device->add_button_to_panel(gluiopen_panel_open3,_("Open"),OPEN_OPEN,Open_CB);
+  glui_device->add_column_to_panel(gluiopen_panel_open3);
+  glui_device->add_button_to_panel(gluiopen_panel_open3,_("Cancel"),OPEN_CANCEL,Open_CB);
 
 #endif
 
@@ -134,29 +139,75 @@ extern "C" void show_glui_device(void){
 
 void Open_CB(int var){
   int i;
+  filelistdata *filei;
+  char *open_filter_ptr;
+
 
   switch (var){
     case OPEN_UP:
+      strcat(gluiopen_path_dir,dirseparator);
+      strcat(gluiopen_path_dir,"..");
+      Open_CB(OPEN_UPDATE_LIST);
       break;
     case OPEN_FILEINDEX:
+      if(gluiopen_filelist==NULL)break;
+      filei = gluiopen_filelist + gluiopen_file_index;
+      if(filei->type==1){
+        strcat(gluiopen_path_dir,dirseparator);
+        strcat(gluiopen_path_dir,filei->file);
+        Open_CB(OPEN_UPDATE_LIST);
+      }
       break;
     case OPEN_OPEN:
+      if(gluiopen_filelist==NULL)break;
+      filei = gluiopen_filelist + gluiopen_file_index;
+      if(filei->type==1){
+        strcat(gluiopen_path_dir,dirseparator);
+        strcat(gluiopen_path_dir,filei->file);
+        Open_CB(OPEN_UPDATE_LIST);
+      }
+      else{
+        printf("opening file: %s\n",filei->file);
+      }
       break;
     case OPEN_CANCEL:
       break;
     case OPEN_FILTER:
       break;
     case OPEN_APPLY_FILTER:
+      strcpy(gluiopen_filter2,gluiopen_filter);
+      trim(gluiopen_filter2);
+      open_filter_ptr = trim_front(gluiopen_filter2);
+      gluiopen_EDIT_filter->set_text(open_filter_ptr);
+      Open_CB(OPEN_UPDATE_LIST);
       break;
     case OPEN_UPDATE_LIST:
-      for(i=0;i<nfilelist;i++){
-        LISTBOX_open->delete_item(filelist[i]);
+      gluiopen_LISTBOX_open->delete_item("");
+      for(i=0;i<gluiopen_nfilelist;i++){
+        char label[1024];
+
+        strcpy(label,"");
+        if(gluiopen_filelist[i].type==1){
+          strcat(label,"> ");
+        }
+        strcat(label,gluiopen_filelist[i].file);
+        gluiopen_LISTBOX_open->delete_item(label);
       }
-      free_filelist(filelist,&nfilelist);
-      nfilelist=get_nfilelist(".","*.csv");
-      get_filelist(path_dir, "*.csv",nfilelist,&filelist);
-      for(i=0;i<nfilelist;i++){
-        LISTBOX_open->add_item(i,filelist[i]);
+      free_filelist(gluiopen_filelist,&gluiopen_nfilelist);
+      gluiopen_nfilelist=get_nfilelist(gluiopen_path_dir,gluiopen_filter);
+      if(gluiopen_nfilelist==0){
+        gluiopen_LISTBOX_open->add_item(0,"");
+      }
+      get_filelist(gluiopen_path_dir, gluiopen_filter,gluiopen_nfilelist,&gluiopen_filelist);
+      for(i=0;i<gluiopen_nfilelist;i++){
+        char label[1024];
+
+        strcpy(label,"");
+        if(gluiopen_filelist[i].type==1){
+          strcat(label,"> ");
+        }
+        strcat(label,gluiopen_filelist[i].file);
+        gluiopen_LISTBOX_open->add_item(i,label);
       }
       break;
     default:

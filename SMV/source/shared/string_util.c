@@ -603,6 +603,8 @@ int match_wild(char *pTameText, char *pWildText){
   char *pAfterLastTame = NULL; // The location in the tame string, from which we started after last wildcard
   char t, w;
 
+  if(*pWildText==cAltTerminator)return 1;
+
         // Walk the text strings one character at a time.
   for(;;){
     t = *pTameText;

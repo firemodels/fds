@@ -273,11 +273,11 @@ int file_exists(char *filename){
 
   /* ------------------ get_filelist ------------------------ */
 
-void free_filelist(char **filelist, int *nfilelist) {
+void free_filelist(filelistdata *filelist, int *nfilelist) {
   int i;
 
   for(i=0;i<*nfilelist;i++){
-    FREEMEMORY(filelist[i]);
+    FREEMEMORY(filelist[i].file);
   }
   FREEMEMORY(filelist);
   *nfilelist=0;
@@ -297,18 +297,22 @@ int get_nfilelist(const char *path, char *key) {
     return 0;
   }
   while( (entry = readdir(dp)) ){
-    if(match_wild(entry->d_name,key)==1)maxfiles++;
+    if((entry->d_type==DT_DIR&&entry->d_name[0]!='.')||(entry->d_type==DT_REG&&match_wild(entry->d_name,key)==1)){
+      maxfiles++;
+      continue;
+    }
   }
+  closedir(dp);
   return maxfiles;
 }
 
  /* ------------------ get_filelist ------------------------ */
 
-int get_filelist(const char *path, char *key, int maxfiles, char ***filelist) {
+int get_filelist(const char *path, char *key, int maxfiles, filelistdata **filelist) {
   struct dirent *entry;
   DIR *dp;
   int nfiles=0;
-  char **flist;
+  filelistdata *flist;
 
   // DT_DIR - is a diretory
   // DT_REG - is a regular file
@@ -324,41 +328,37 @@ int get_filelist(const char *path, char *key, int maxfiles, char ***filelist) {
     *filelist=NULL;
     return 0;
   }
-  NewMemory((void **)&flist,maxfiles*sizeof(char **));
+  NewMemory((void **)&flist,maxfiles*sizeof(filelistdata));
   while( (entry = readdir(dp))&&nfiles<maxfiles ){
-    int isdir=0;
-
-    if(entry->d_type==DT_DIR&&entry->d_name[0]!='.')isdir=1;
-    if(match_wild(entry->d_name,key)==1||isdir==1){
+    if(entry->d_type==DT_DIR&&entry->d_name[0]!='.'){
       char *file;
+      filelistdata *flisti;
 
+      flisti = flist + nfiles;
       NewMemory((void **)&file,strlen(entry->d_name)+1);
       strcpy(file,entry->d_name);
-      flist[nfiles++]=file;
+      flisti->file=file;
+      flisti->type=1;
+      nfiles++;
+    }
+  }
+  rewinddir(dp);
+  while( (entry = readdir(dp))&&nfiles<maxfiles ){
+    if(entry->d_type==DT_REG&&match_wild(entry->d_name,key)==1){
+      char *file;
+      filelistdata *flisti;
+
+      flisti = flist + nfiles;
+      NewMemory((void **)&file,strlen(entry->d_name)+1);
+      strcpy(file,entry->d_name);
+      flisti->file=file;
+      flisti->type=0;
+      nfiles++;
     }
   }
   *filelist=flist;
   closedir(dp);
   return nfiles;
-}
-
-  /* ------------------ listdir ------------------------ */
-
-int listdir(const char *path) {
-  struct dirent *entry;
-  DIR *dp;
- 
-  dp = opendir(path);
-  if (dp == NULL) {
-    perror("opendir");
-    return -1;
-  }
- 
-  while((entry = readdir(dp)))
-    puts(entry->d_name);
- 
-  closedir(dp);
-  return 0;
 }
 
 /* ------------------ getfilesizelabel ------------------------ */
