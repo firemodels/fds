@@ -14,7 +14,6 @@ char string_util_revision[]="$Revision$";
 #include <stdlib.h>
 #include <math.h>
 #ifdef WIN32
-#include <direct.h>
 #include <dirent_win.h>
 #else
 #include <dirent.h>
@@ -450,7 +449,8 @@ int log_base2(float xx){
       \brief returns the log base 2 of the floating point number xx
   */
   int r = 0;
-  int x;
+  unsigned int x;
+
   x=xx;
   while( (x >> r) != 0){
     r++;
@@ -506,7 +506,6 @@ char *getstring(char *buffer){
       \brief return pointer to string contained between a pair of double quotes
   */
   char *begin,*end;
-  int i;
 
   // if buffer contains msgid "string"
   // return a pointer to s in string
@@ -517,9 +516,9 @@ char *getstring(char *buffer){
   end=strrchr(begin,'"');
   if(end==NULL)return NULL;
   end[0]=0;
-  for(i=0;i<strlen(begin);i++){
-    if(begin[i]!=' ')return begin;
-  }
+  trim(begin);
+  begin = trim_front(begin);
+  if(strlen(begin)>0)return begin;
   return NULL;
 }
 

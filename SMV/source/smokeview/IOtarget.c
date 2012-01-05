@@ -341,7 +341,7 @@ int gettargetposition(int itarget, float time_local, float *x, float *y, float *
     if(tp->t[i]<=time_local&&time_local<=tp->t[i+1]){
       denom=tp->t[i+1]-tp->t[i];
       if(denom!=0.0){
-      factor=(time_local-tp->t[i])/denom;
+        factor=(time_local-tp->t[i])/denom;
       }
       else{
         factor=1.0;

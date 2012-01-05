@@ -35,7 +35,7 @@ char menu_revision[]="$Revision$";
 #define MENU_DUMMY -999
 
 void add_scriptlist(char *file, int id);
-void update_glui_render();
+void update_glui_render(void);
 void PropMenu(int value);
 void initcircle(unsigned int nsegs);
 void UnLoadVolSmoke3DMenu(int value);
@@ -5418,7 +5418,7 @@ updatemenu=0;
     glutAddMenuEntry(_("World centered"),0);
     glutAddMenuEntry(_("*Eye centered"),1);
     glutAddMenuEntry(_("World centered, level rotation"),2);
-  break;
+    break;
   case WORLD_CENTERED:
     glutAddMenuEntry(_("*World centered"),0);
     glutAddMenuEntry(_("Eye centered"),1);
@@ -5428,7 +5428,7 @@ updatemenu=0;
     glutAddMenuEntry(_("World centered"),0);
     glutAddMenuEntry(_("Eye centered"),1);
     glutAddMenuEntry(_("*World centered, level rotation"),2);
-  break;
+    break;
   default:
     ASSERT(FFALSE);
     break;
@@ -6458,7 +6458,7 @@ updatemenu=0;
     case 0:
       nvslice0++;
       if(vd->loaded==1)nvsliceloaded0++;
-    break;
+      break;
     case 1:
       nvslice1++;
       if(vd->loaded==1)nvsliceloaded1++;

@@ -593,21 +593,22 @@ void drawplot3d_texture(mesh *meshi){
         dz_yzcopy = dz_yz+j*(kbar+1);
         yzcolor = yzcolorbase + j*(kbar+1);
         for(k=0; k<=kbar; k+=vectorskip){
-        colorindex=*yzcolor;
-        vector_color = rgb_plot3d + 4*colorindex;
-        if((iblank==NULL||iblank[ijknode(plotx,j,k)]==1)&&vector_color[3]>0.5){
-          glColor4fv(vector_color);
-          dx=*dx_yzcopy/2.0;
-          dy=*dy_yzcopy/2.0;
-          dz=*dz_yzcopy/2.0;
-          glVertex3f(xplt[plotx]-dx,yplt[j]-dy,zplt[k]-dz);
-          glVertex3f(xplt[plotx]+dx,yplt[j]+dy,zplt[k]+dz);
+          colorindex=*yzcolor;
+          vector_color = rgb_plot3d + 4*colorindex;
+          if((iblank==NULL||iblank[ijknode(plotx,j,k)]==1)&&vector_color[3]>0.5){
+            glColor4fv(vector_color);
+            dx=*dx_yzcopy/2.0;
+            dy=*dy_yzcopy/2.0;
+            dz=*dz_yzcopy/2.0;
+            glVertex3f(xplt[plotx]-dx,yplt[j]-dy,zplt[k]-dz);
+            glVertex3f(xplt[plotx]+dx,yplt[j]+dy,zplt[k]+dz);
+          }
+          dx_yzcopy+=vectorskip;
+          dy_yzcopy+=vectorskip;
+          dz_yzcopy+=vectorskip;
+          yzcolor+=vectorskip;
         }
-        dx_yzcopy+=vectorskip;
-        dy_yzcopy+=vectorskip;
-        dz_yzcopy+=vectorskip;
-        yzcolor+=vectorskip;
-      }} 
+      } 
       glEnd();
       antialias(0);
 
@@ -625,21 +626,22 @@ void drawplot3d_texture(mesh *meshi){
         dz_yzcopy = dz_yz+j*(kbar+1);
         yzcolor = yzcolorbase + j*(kbar+1);
         for(k=0; k<=kbar; k+=vectorskip){
-        colorindex=*yzcolor;
-        vector_color = rgb_plot3d + 4*colorindex;
-        if((iblank==NULL||iblank[ijknode(plotx,j,k)]==1)&&vector_color[3]>0.5){
-          glColor4fv(vector_color);
-          glVertex3f(
-            xplt[plotx]+*dx_yzcopy/(float)2.0,
-            yplt[j]+*dy_yzcopy/(float)2.0,
-            zplt[k]+*dz_yzcopy/(float)2.0
-            );
+          colorindex=*yzcolor;
+          vector_color = rgb_plot3d + 4*colorindex;
+          if((iblank==NULL||iblank[ijknode(plotx,j,k)]==1)&&vector_color[3]>0.5){
+            glColor4fv(vector_color);
+            glVertex3f(
+              xplt[plotx]+*dx_yzcopy/(float)2.0,
+              yplt[j]+*dy_yzcopy/(float)2.0,
+              zplt[k]+*dz_yzcopy/(float)2.0
+              );
+          }
+          dx_yzcopy+=vectorskip;
+          dy_yzcopy+=vectorskip;
+          dz_yzcopy+=vectorskip;
+          yzcolor+=vectorskip;
         }
-        dx_yzcopy+=vectorskip;
-        dy_yzcopy+=vectorskip;
-        dz_yzcopy+=vectorskip;
-        yzcolor+=vectorskip;
-      }} 
+      } 
       glEnd();
     }
   }
@@ -706,21 +708,22 @@ void drawplot3d_texture(mesh *meshi){
         dz_xzcopy=dz_xz+i*(kbar+1);
         xzcolor = xzcolorbase + i*(kbar+1);
         for(k=0; k<=kbar; k+=vectorskip){
-        colorindex=*xzcolor;
-        vector_color = rgb_plot3d + 4*colorindex;
-        if((iblank==NULL||iblank[ijknode(i,ploty,k)]==1)&&vector_color[3]>0.5){
-          glColor4fv(vector_color);
-          dx=*dx_xzcopy/2.0;
-          dy=*dy_xzcopy/2.0;
-          dz=*dz_xzcopy/2.0;
-          glVertex3f(xplt[i]-dx,yplt[ploty]-dy,zplt[k]-dz);
-          glVertex3f(xplt[i]+dx,yplt[ploty]+dy,zplt[k]+dz);
+          colorindex=*xzcolor;
+          vector_color = rgb_plot3d + 4*colorindex;
+          if((iblank==NULL||iblank[ijknode(i,ploty,k)]==1)&&vector_color[3]>0.5){
+            glColor4fv(vector_color);
+            dx=*dx_xzcopy/2.0;
+            dy=*dy_xzcopy/2.0;
+            dz=*dz_xzcopy/2.0;
+            glVertex3f(xplt[i]-dx,yplt[ploty]-dy,zplt[k]-dz);
+            glVertex3f(xplt[i]+dx,yplt[ploty]+dy,zplt[k]+dz);
+          }
+          dx_xzcopy+=vectorskip;
+          dy_xzcopy+=vectorskip;
+          dz_xzcopy+=vectorskip;
+          xzcolor+=vectorskip;
         }
-        dx_xzcopy+=vectorskip;
-        dy_xzcopy+=vectorskip;
-        dz_xzcopy+=vectorskip;
-        xzcolor+=vectorskip;
-      }} 
+      } 
       glEnd();
       antialias(0);
 
@@ -808,21 +811,22 @@ void drawplot3d_texture(mesh *meshi){
         dz_xycopy=dz_xy+i*(jbar+1);
         xycolor = xycolorbase + i*(jbar+1);
         for(j=0; j<=jbar; j+=vectorskip){
-        colorindex=*xycolor;
-        vector_color = rgb_plot3d + 4*colorindex;
-        if((iblank==NULL||iblank[ijknode(i,j,plotz)]==1)&&vector_color[3]>0.5){
-          glColor4fv(vector_color);
-          dx=*dx_xycopy/2.0;
-          dy=*dy_xycopy/2.0;
-          dz=*dz_xycopy/2.0;
-          glVertex3f(xplt[i]-dx,yplt[j]-dy,zplt[plotz]-dz);
-          glVertex3f(xplt[i]+dx,yplt[j]+dy,zplt[plotz]+dz);
+          colorindex=*xycolor;
+          vector_color = rgb_plot3d + 4*colorindex;
+          if((iblank==NULL||iblank[ijknode(i,j,plotz)]==1)&&vector_color[3]>0.5){
+            glColor4fv(vector_color);
+            dx=*dx_xycopy/2.0;
+            dy=*dy_xycopy/2.0;
+            dz=*dz_xycopy/2.0;
+            glVertex3f(xplt[i]-dx,yplt[j]-dy,zplt[plotz]-dz);
+            glVertex3f(xplt[i]+dx,yplt[j]+dy,zplt[plotz]+dz);
+          }
+          dx_xycopy+=vectorskip;
+          dy_xycopy+=vectorskip;
+          dz_xycopy+=vectorskip;
+          xycolor+=vectorskip;
         }
-        dx_xycopy+=vectorskip;
-        dy_xycopy+=vectorskip;
-        dz_xycopy+=vectorskip;
-        xycolor+=vectorskip;
-      }} 
+      } 
       glEnd();
       antialias(0);
 
@@ -837,21 +841,22 @@ void drawplot3d_texture(mesh *meshi){
         dz_xycopy=dz_xy+i*(jbar+1);
         xycolor = xycolorbase + i*(jbar+1);
         for(j=0; j<=jbar; j+=vectorskip){
-        colorindex=*xycolor;
-        vector_color = rgb_plot3d + 4*colorindex;
-        if((iblank==NULL||iblank[ijknode(i,j,plotz)]==1)&&vector_color[3]>0.5){
-          glColor4fv(vector_color);
-          glVertex3f(
-            xplt[i]+*dx_xycopy/(float)2.0,
-            yplt[j]+*dy_xycopy/(float)2.0,
-            zplt[plotz]+*dz_xycopy/(float)2.0
-            );
+          colorindex=*xycolor;
+          vector_color = rgb_plot3d + 4*colorindex;
+          if((iblank==NULL||iblank[ijknode(i,j,plotz)]==1)&&vector_color[3]>0.5){
+            glColor4fv(vector_color);
+            glVertex3f(
+              xplt[i]+*dx_xycopy/(float)2.0,
+              yplt[j]+*dy_xycopy/(float)2.0,
+              zplt[plotz]+*dz_xycopy/(float)2.0
+              );
+          }
+          dx_xycopy+=vectorskip;
+          dy_xycopy+=vectorskip;
+          dz_xycopy+=vectorskip;
+          xycolor+=vectorskip;
         }
-        dx_xycopy+=vectorskip;
-        dy_xycopy+=vectorskip;
-        dz_xycopy+=vectorskip;
-        xycolor+=vectorskip;
-      }} 
+      } 
       glEnd();
     }
   }
@@ -1022,21 +1027,22 @@ void drawplot3d(mesh *meshi){
         dz_yzcopy = dz_yz+j*(kbar+1);
         yzcolor = yzcolorbase + j*(kbar+1);
         for(k=0; k<=kbar; k+=vectorskip){
-        colorindex=*yzcolor;
-        vector_color = rgb_plot3d + 4*colorindex;
-        if((iblank==NULL||iblank[ijknode(plotx,j,k)]==1)&&vector_color[3]>0.5){
-          glColor4fv(vector_color);
-          dx=*dx_yzcopy/2.0;
-          dy=*dy_yzcopy/2.0;
-          dz=*dz_yzcopy/2.0;
-          glVertex3f(xplt[plotx]-dx,yplt[j]-dy,zplt[k]-dz);
-          glVertex3f(xplt[plotx]+dx,yplt[j]+dy,zplt[k]+dz);
+          colorindex=*yzcolor;
+          vector_color = rgb_plot3d + 4*colorindex;
+          if((iblank==NULL||iblank[ijknode(plotx,j,k)]==1)&&vector_color[3]>0.5){
+            glColor4fv(vector_color);
+            dx=*dx_yzcopy/2.0;
+            dy=*dy_yzcopy/2.0;
+            dz=*dz_yzcopy/2.0;
+            glVertex3f(xplt[plotx]-dx,yplt[j]-dy,zplt[k]-dz);
+            glVertex3f(xplt[plotx]+dx,yplt[j]+dy,zplt[k]+dz);
+          }
+          dx_yzcopy+=vectorskip;
+          dy_yzcopy+=vectorskip;
+          dz_yzcopy+=vectorskip;
+          yzcolor+=vectorskip;
         }
-        dx_yzcopy+=vectorskip;
-        dy_yzcopy+=vectorskip;
-        dz_yzcopy+=vectorskip;
-        yzcolor+=vectorskip;
-      }} 
+      } 
       glEnd();
       antialias(0);
 
@@ -1054,21 +1060,22 @@ void drawplot3d(mesh *meshi){
         dz_yzcopy = dz_yz+j*(kbar+1);
         yzcolor = yzcolorbase + j*(kbar+1);
         for(k=0; k<=kbar; k+=vectorskip){
-        colorindex=*yzcolor;
-        vector_color = rgb_plot3d + 4*colorindex;
-        if((iblank==NULL||iblank[ijknode(plotx,j,k)]==1)&&vector_color[3]>0.5){
-          glColor4fv(vector_color);
-          glVertex3f(
-            xplt[plotx]+*dx_yzcopy/(float)2.0,
-            yplt[j]+*dy_yzcopy/(float)2.0,
-            zplt[k]+*dz_yzcopy/(float)2.0
-            );
+          colorindex=*yzcolor;
+          vector_color = rgb_plot3d + 4*colorindex;
+          if((iblank==NULL||iblank[ijknode(plotx,j,k)]==1)&&vector_color[3]>0.5){
+            glColor4fv(vector_color);
+            glVertex3f(
+              xplt[plotx]+*dx_yzcopy/(float)2.0,
+              yplt[j]+*dy_yzcopy/(float)2.0,
+              zplt[k]+*dz_yzcopy/(float)2.0
+              );
+          }
+          dx_yzcopy+=vectorskip;
+          dy_yzcopy+=vectorskip;
+          dz_yzcopy+=vectorskip;
+          yzcolor+=vectorskip;
         }
-        dx_yzcopy+=vectorskip;
-        dy_yzcopy+=vectorskip;
-        dz_yzcopy+=vectorskip;
-        yzcolor+=vectorskip;
-      }} 
+      } 
       glEnd();
     }
   }
@@ -1135,21 +1142,22 @@ void drawplot3d(mesh *meshi){
         dz_xzcopy=dz_xz+i*(kbar+1);
         xzcolor = xzcolorbase + i*(kbar+1);
         for(k=0; k<=kbar; k+=vectorskip){
-        colorindex=*xzcolor;
-        vector_color = rgb_plot3d + 4*colorindex;
-        if((iblank==NULL||iblank[ijknode(i,ploty,k)]==1)&&vector_color[3]>0.5){
-          glColor4fv(vector_color);
-          dx=*dx_xzcopy/2.0;
-          dy=*dy_xzcopy/2.0;
-          dz=*dz_xzcopy/2.0;
-          glVertex3f(xplt[i]-dx,yplt[ploty]-dy,zplt[k]-dz);
-          glVertex3f(xplt[i]+dx,yplt[ploty]+dy,zplt[k]+dz);
+          colorindex=*xzcolor;
+          vector_color = rgb_plot3d + 4*colorindex;
+          if((iblank==NULL||iblank[ijknode(i,ploty,k)]==1)&&vector_color[3]>0.5){
+            glColor4fv(vector_color);
+            dx=*dx_xzcopy/2.0;
+            dy=*dy_xzcopy/2.0;
+            dz=*dz_xzcopy/2.0;
+            glVertex3f(xplt[i]-dx,yplt[ploty]-dy,zplt[k]-dz);
+            glVertex3f(xplt[i]+dx,yplt[ploty]+dy,zplt[k]+dz);
+          }
+          dx_xzcopy+=vectorskip;
+          dy_xzcopy+=vectorskip;
+          dz_xzcopy+=vectorskip;
+          xzcolor+=vectorskip;
         }
-        dx_xzcopy+=vectorskip;
-        dy_xzcopy+=vectorskip;
-        dz_xzcopy+=vectorskip;
-        xzcolor+=vectorskip;
-      }} 
+      } 
       glEnd();
       antialias(0);
 
@@ -1237,21 +1245,22 @@ void drawplot3d(mesh *meshi){
         dz_xycopy=dz_xy+i*(jbar+1);
         xycolor = xycolorbase + i*(jbar+1);
         for(j=0; j<=jbar; j+=vectorskip){
-        colorindex=*xycolor;
-        vector_color = rgb_plot3d + 4*colorindex;
-        if(iblank[ijknode(i,j,plotz)]==1&&vector_color[3]>0.5){
-          glColor4fv(vector_color);
-          dx=*dx_xycopy/2.0;
-          dy=*dy_xycopy/2.0;
-          dz=*dz_xycopy/2.0;
-          glVertex3f(xplt[i]-dx,yplt[j]-dy,zplt[plotz]-dz);
-          glVertex3f(xplt[i]+dx,yplt[j]+dy,zplt[plotz]+dz);
+          colorindex=*xycolor;
+          vector_color = rgb_plot3d + 4*colorindex;
+          if(iblank[ijknode(i,j,plotz)]==1&&vector_color[3]>0.5){
+            glColor4fv(vector_color);
+            dx=*dx_xycopy/2.0;
+            dy=*dy_xycopy/2.0;
+            dz=*dz_xycopy/2.0;
+            glVertex3f(xplt[i]-dx,yplt[j]-dy,zplt[plotz]-dz);
+            glVertex3f(xplt[i]+dx,yplt[j]+dy,zplt[plotz]+dz);
+          }
+          dx_xycopy+=vectorskip;
+          dy_xycopy+=vectorskip;
+          dz_xycopy+=vectorskip;
+          xycolor+=vectorskip;
         }
-        dx_xycopy+=vectorskip;
-        dy_xycopy+=vectorskip;
-        dz_xycopy+=vectorskip;
-        xycolor+=vectorskip;
-      }} 
+      } 
       glEnd();
       antialias(0);
 
@@ -1266,21 +1275,22 @@ void drawplot3d(mesh *meshi){
         dz_xycopy=dz_xy+i*(jbar+1);
         xycolor = xycolorbase + i*(jbar+1);
         for(j=0; j<=jbar; j+=vectorskip){
-        colorindex=*xycolor;
-        vector_color = rgb_plot3d + 4*colorindex;
-        if((iblank==NULL||iblank[ijknode(i,j,plotz)]==1)&&vector_color[3]>0.5){
-          glColor4fv(vector_color);
-          glVertex3f(
-            xplt[i]+*dx_xycopy/(float)2.0,
-            yplt[j]+*dy_xycopy/(float)2.0,
-            zplt[plotz]+*dz_xycopy/(float)2.0
-            );
+          colorindex=*xycolor;
+          vector_color = rgb_plot3d + 4*colorindex;
+          if((iblank==NULL||iblank[ijknode(i,j,plotz)]==1)&&vector_color[3]>0.5){
+            glColor4fv(vector_color);
+            glVertex3f(
+              xplt[i]+*dx_xycopy/(float)2.0,
+              yplt[j]+*dy_xycopy/(float)2.0,
+              zplt[plotz]+*dz_xycopy/(float)2.0
+              );
+          }
+          dx_xycopy+=vectorskip;
+          dy_xycopy+=vectorskip;
+          dz_xycopy+=vectorskip;
+          xycolor+=vectorskip;
         }
-        dx_xycopy+=vectorskip;
-        dy_xycopy+=vectorskip;
-        dz_xycopy+=vectorskip;
-        xycolor+=vectorskip;
-      }} 
+      } 
       glEnd();
     }
   }

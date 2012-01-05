@@ -1142,7 +1142,7 @@ void drawsmoke3d(smoke3d *smoke3di){
   int skip_local;
     int iterm, jterm, kterm,nxy;
   float x11[3], x12[3], x22[3], x21[3];
-  int n11, n12, n22, n21;
+  unsigned int n11, n12, n22, n21;
   int ipj,jpk,ipk,jmi,kmi,kmj;
   int iii, jjj, kkk;
   int slice_end,slice_beg;

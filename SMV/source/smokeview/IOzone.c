@@ -1282,22 +1282,22 @@ void drawzonesmokeGPU(roomdata *roomi){
             z2 = z1 + dz;
 
             if(roomi->zoneinside==0){
-            glVertex3f(x1,yy1,z1);
-            glVertex3f(x2,yy1,z1);
-            glVertex3f(x2,yy1,z2);
+              glVertex3f(x1,yy1,z1);
+              glVertex3f(x2,yy1,z1);
+              glVertex3f(x2,yy1,z2);
 
-            glVertex3f(x1,yy1,z1);
-            glVertex3f(x2,yy1,z2);
-            glVertex3f(x1,yy1,z2);
+              glVertex3f(x1,yy1,z1);
+              glVertex3f(x2,yy1,z2);
+              glVertex3f(x1,yy1,z2);
             }
             else{
-            glVertex3f(x1,yy1,z1);
-            glVertex3f(x2,yy1,z2);
-            glVertex3f(x2,yy1,z1);
+              glVertex3f(x1,yy1,z1);
+              glVertex3f(x2,yy1,z2);
+              glVertex3f(x2,yy1,z1);
 
-            glVertex3f(x1,yy1,z1);
-            glVertex3f(x1,yy1,z2);
-            glVertex3f(x2,yy1,z2);
+              glVertex3f(x1,yy1,z1);
+              glVertex3f(x1,yy1,z2);
+              glVertex3f(x2,yy1,z2);
             }
           }
         }
@@ -1320,22 +1320,22 @@ void drawzonesmokeGPU(roomdata *roomi){
             yy2 = yy1 + dy;
 
             if(roomi->zoneinside==0){
-            glVertex3f(x1,yy1,z1);
-            glVertex3f(x2,yy1,z1);
-            glVertex3f(x2,yy2,z1);
+              glVertex3f(x1,yy1,z1);
+              glVertex3f(x2,yy1,z1);
+              glVertex3f(x2,yy2,z1);
 
-            glVertex3f(x1,yy1,z1);
-            glVertex3f(x2,yy2,z1);
-            glVertex3f(x1,yy2,z1);
+              glVertex3f(x1,yy1,z1);
+              glVertex3f(x2,yy2,z1);
+              glVertex3f(x1,yy2,z1);
             }
             else{
-            glVertex3f(x1,yy1,z1);
-            glVertex3f(x2,yy2,z1);
-            glVertex3f(x2,yy1,z1);
+              glVertex3f(x1,yy1,z1);
+              glVertex3f(x2,yy2,z1);
+              glVertex3f(x2,yy1,z1);
 
-            glVertex3f(x1,yy1,z1);
-            glVertex3f(x1,yy2,z1);
-            glVertex3f(x2,yy2,z1);
+              glVertex3f(x1,yy1,z1);
+              glVertex3f(x1,yy2,z1);
+              glVertex3f(x2,yy2,z1);
             }
           }
         }

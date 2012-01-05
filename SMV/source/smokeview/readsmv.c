@@ -10684,8 +10684,8 @@ void writeini(int flag){
   fprintf(fileout,"\nMISC\n");
   fprintf(fileout,"----\n\n");
   if(use_nistlogo==1){
-  fprintf(fileout,"USENISTLOGO\n");
-  fprintf(fileout," %i\n",use_nistlogo);
+    fprintf(fileout,"USENISTLOGO\n");
+    fprintf(fileout," %i\n",use_nistlogo);
   }
   if(trainer_mode==1){
     fprintf(fileout,"TRAINERMODE\n");
