@@ -25,12 +25,16 @@ extern "C" char glui_device_revision[]="$Revision$";
 
 #ifdef pp_OPEN
 #define OPEN_UP 0
-#define OPEN_FILEINDEX 1
-#define OPEN_OPEN 2
-#define OPEN_CANCEL 3
-#define OPEN_FILTER 4
-#define OPEN_APPLY_FILTER 5
-#define OPEN_UPDATE_LIST 6
+#define OPEN_DOWN 1
+#define OPEN_FILEINDEX 2
+#define OPEN_OPEN 3
+#define OPEN_CANCEL 4
+#define OPEN_FILTER 5
+#define OPEN_APPLY_FILTER 6
+#define OPEN_UPDATE_LIST 7
+
+class CGluiOpen {
+};
 
 void Open_CB(int var);
 
@@ -41,11 +45,13 @@ filelistdata *gluiopen_filelist;
 char gluiopen_filter[sizeof(GLUI_String)];
 char gluiopen_filter2[sizeof(GLUI_String)];
 
+GLUI_Button *gluiopen_open_down=NULL ;
 GLUI_Panel *gluiopen_panel_open=NULL;
 GLUI_Panel *gluiopen_panel_open2=NULL;
 GLUI_Panel *gluiopen_panel_open3=NULL;
 GLUI_Listbox *gluiopen_LISTBOX_open=NULL;
 GLUI_EditText *gluiopen_EDIT_filter=NULL;
+
 #endif
 
 
@@ -85,7 +91,6 @@ extern "C" void glui_device_setup(int main_window){
       Device_CB(SHOWDEVICEVALS);
       Device_CB(DEVICE_devicetypes);
     }
-
   }
 
   panel_label3 = glui_device->add_panel("",false);
@@ -99,7 +104,10 @@ extern "C" void glui_device_setup(int main_window){
 #ifdef pp_OPEN
   strcpy(gluiopen_filter,"*.csv");
   gluiopen_panel_open = glui_device->add_panel("Open",true);
-  glui_device->add_button_to_panel(gluiopen_panel_open,_("Up"),OPEN_UP,Open_CB);
+  gluiopen_panel_open3 = glui_device->add_panel_to_panel(gluiopen_panel_open,"",false);
+  glui_device->add_button_to_panel(gluiopen_panel_open3,_("Up"),OPEN_UP,Open_CB);
+  glui_device->add_column_to_panel(gluiopen_panel_open3);
+  gluiopen_open_down=glui_device->add_button_to_panel(gluiopen_panel_open3,_("Down"),OPEN_DOWN,Open_CB);
   gluiopen_file_index=0;
   gluiopen_LISTBOX_open=glui_device->add_listbox_to_panel(gluiopen_panel_open,"",&gluiopen_file_index,OPEN_FILEINDEX,Open_CB);
   strcpy(gluiopen_path_dir,".");
@@ -149,13 +157,24 @@ void Open_CB(int var){
       strcat(gluiopen_path_dir,"..");
       Open_CB(OPEN_UPDATE_LIST);
       break;
-    case OPEN_FILEINDEX:
+    case OPEN_DOWN:
       if(gluiopen_filelist==NULL)break;
       filei = gluiopen_filelist + gluiopen_file_index;
       if(filei->type==1){
         strcat(gluiopen_path_dir,dirseparator);
         strcat(gluiopen_path_dir,filei->file);
         Open_CB(OPEN_UPDATE_LIST);
+      }
+      break;
+    case OPEN_FILEINDEX:
+      printf("in OPEN_FILEINDEX\n");
+      if(gluiopen_filelist==NULL)break;
+      filei = gluiopen_filelist + gluiopen_file_index;
+      if(filei->type==1){
+        gluiopen_open_down->enable();
+      }
+      else{
+        gluiopen_open_down->disable();
       }
       break;
     case OPEN_OPEN:
@@ -199,6 +218,12 @@ void Open_CB(int var){
         gluiopen_LISTBOX_open->add_item(0,"");
       }
       get_filelist(gluiopen_path_dir, gluiopen_filter,gluiopen_nfilelist,&gluiopen_filelist);
+      if(gluiopen_nfilelist>0&&gluiopen_filelist[0].type==1){
+        gluiopen_open_down->enable();
+      }
+      else{
+        gluiopen_open_down->disable();
+      }
       for(i=0;i<gluiopen_nfilelist;i++){
         char label[1024];
 
