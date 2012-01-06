@@ -4817,7 +4817,6 @@ SELECT CASE(IND)
                            CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR,TMPA)
                            H_G = CPBAR*TMPA
                            HMFAC = RHO(I,J,K)*(H_G_SUM-H_G)*0.001_EB
-                           !HMFAC = RHO(I,J,K)*E(I,J,K)*0.001_EB ! test
                         ELSE
                            TMP_TC = TMP(IP,JP,KP)
                            IF (N_TRACKED_SPECIES>0) &    
@@ -4827,7 +4826,6 @@ SELECT CASE(IND)
                            CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR,TMPA)
                            H_G = CPBAR*TMPA
                            HMFAC = RHO(IP,JP,KP)*(H_G_SUM-H_G)*0.001_EB
-                           !HMFAC = RHO(IP,JP,KP)*E(IP,JP,KP)*0.001_EB ! test
                         ENDIF
                   
                      ELSE LIMITER_IF2
