@@ -287,9 +287,9 @@ Note that $\overline{W} \sum_\alpha (Y_\alpha/W_\alpha) = 1$ and also $\overline
 where $\overline{W}_b$ is the molecular weight of the bulk mixture prior to its introduction into the fluid mixture.  Equation (\ref{eqn_divconstraint3}) thus simplifies to
 \begin{eqnarray}
 \label{eqn_divconstraint_final}
-\Div\mathbf{u}  &=& \left(\frac{1}{\rho c_p T}  -  \frac{1}{\overline{p}_i}\right) \frac{\mbox{D}\overline{p}_i}{\mbox{D} t} + \frac{1}{\rho} \left[ \dot{m}_b^{\tripleprime} \frac{\overline{W}}{\overline{W}_b} +  \overline{W}\sum_\alpha \frac{1}{W_\alpha} \left\{  \dot{m}_\alpha^{\tripleprime}
-- \Div\mathbf{J}_{\alpha} \right\} \right] \nonumber \vspace{0.3cm}\\
-&+&  \frac{1}{\rho c_p T} \left[ - \sum_\alpha \Delta h^0_\alpha \dot{m}_\alpha^{\tripleprime} - \sum_\alpha h_{s,\alpha}\left(  \dot{m}_\alpha^{\tripleprime} - \Div \mathbf{J}_{\alpha} \right) - \Div \dot{\mathbf{q}}^{\prime\prime} -\dq_b''' + \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2 \right] \,\mbox{.} \nonumber \vspace{0.3cm}\\
+\Div\mathbf{u}  &=& \left(\frac{1}{\rho c_p T}  -  \frac{1}{\overline{p}_i}\right) \frac{\mbox{D}\overline{p}_i}{\mbox{D} t} + \frac{1}{\rho} \left[ \dot{m}_b^{\tripleprime} \frac{\overline{W}}{\overline{W}_b} +  \sum_\alpha \left( \frac{\overline{W}}{W_\alpha} - \frac{h_{s,\alpha}}{c_p T} \right)  \left\{  \dot{m}_\alpha^{\tripleprime}
+- \Div\mathbf{J}_{\alpha} \right\} \right] \nonumber \\ [0.3cm]
+&+&  \frac{1}{\rho c_p T} \left[ - \sum_\alpha \Delta h^0_\alpha \dot{m}_\alpha^{\tripleprime} - \Div \dot{\mathbf{q}}^{\prime\prime} -\dq_b''' + \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2 \right] \,\mbox{.} 
 \end{eqnarray}
 
 
@@ -330,21 +330,20 @@ and
 \begin{eqnarray}
 \label{eqn_fdsD}
 \mathcal{D} &=& \frac{\dot{m}_b^\tripleprime}{\rho}\frac{\overline{W}}{\overline{W}_b} +
-                \frac{\overline{W}}{\rho} \sum_\alpha \Div \left( \rho D_\alpha \nabla[Y_\alpha/W_\alpha] \right) +
-                \frac{1}{\rho}\sum_\alpha \left( \frac{\overline{W}}{W_\alpha} - \frac{h_{s,\alpha}}{c_p T} \right) \dot{m}_{\alpha}^\tripleprime  +
-                \mathcal{P} w \rho_i g \nonumber \vspace{0.3cm} \\
-&+& \frac{\mathcal{R}}{\overline{W} c_p \overline{p}_i} \left[ \dot{q}^\tripleprime - \dq_b''' - \Div \dot{\mathbf{q}}^{\prime\prime} -
-                \sum_\alpha h_{s,\alpha} \Div \rho D_\alpha \nabla Y_\alpha + \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) +
-                \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2  \right] \nonumber \vspace{0.3cm} \\
+                \frac{1}{\rho}\sum_\alpha \left( \frac{\overline{W}}{W_\alpha} - \frac{h_{s,\alpha}}{c_p T} \right) \left( \dot{m}_{\alpha}^\tripleprime + \Div \rho D_\alpha \nabla Y_\alpha \right) +
+                \mathcal{P} w \rho_i g \nonumber  \\ [0.3cm]
+&+& \frac{\mathcal{R}}{\overline{W} c_p \overline{p}_i} \left[ \dot{q}^\tripleprime - \dq_b''' - \Div \dot{\mathbf{q}}^{\prime\prime} + 
+                \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) +
+                \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2  \right]
 \end{eqnarray}
 Equations (\ref{eqn_fdsP}) and (\ref{eqn_fdsD}) correspond to (\ref{eqn_fdsP1}) and (\ref{eqn_fdsD1}) in the FDS Tech Guide.  Though, note that at present the bulk kinetic energy term is not included in the code.
 
-A brief remark on the of the sensible enthalpy $h_{s,\alpha}$ vs. the [chemical + sensible] enthalpy $h_\alpha = \Delta h_\alpha^0 + h_{s,\alpha}$:
+A brief remark on the of the sensible enthalpy $h_{s,\alpha}$ versus the [chemical + sensible] enthalpy, $h_\alpha = \Delta h_\alpha^0 + h_{s,\alpha}$.
 The definition of the heat flux vector $\dot{\mathbf{q}}^{\prime\prime}$ can be a key source of confusion.
 When transporting the sensible enthalpy only, as we are doing here, the heat flux vector does not account for the molecular transport of the
 chemical enthalpy (the enthalpy of formation).  If we were working in terms of the [chemical + sensible] enthalpy we would not have
-a ``heat of reaction'' $\dot{q}^{\tripleprime}$, the heat flux vector would account for the transport of both the chemical and the sensible enthalpies,
-and the sensible enthalpies in (\ref{eqn_fdsD}) would be replaced by the [chemical + sensible] enthalpy $h_{\alpha}$.
+a ``heat of reaction'' $\dot{q}^{\tripleprime}$, the heat flux vector would account for the transport of both the chemical and the sensible enthalpy,
+and the sensible enthalpy in (\ref{eqn_fdsD}) would be replaced by the [chemical + sensible] enthalpy, $h_{\alpha}$.
 
 
 
