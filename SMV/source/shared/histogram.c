@@ -2,6 +2,8 @@
 // $Revision$
 // $Author$
 
+#include "lint.h"
+
 // svn revision character string
 char histogram_revision[]="$Revision$";
 

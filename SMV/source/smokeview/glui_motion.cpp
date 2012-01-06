@@ -2,11 +2,12 @@
 // $Revision$
 // $Author$
 
+#define CPP
+#include "options.h"
+
 // svn revision character string
 extern "C" char glui_motion_revision[]="$Revision$";
 
-#define CPP
-#include "options.h"
 #include <string.h>
 #ifdef pp_OSX
 #include <GLUT/glut.h>

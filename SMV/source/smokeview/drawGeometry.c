@@ -4686,7 +4686,7 @@ void snap_view_angles(void){
   else{
     iaz = (*az-DELTA/2.0)/DELTA;
   }
-  *az = (int)DELTA*iaz;
+  *az = (int)(DELTA*iaz);
 
   if(*elev>0.0){
     ielev = (*elev+DELTA/2.0)/DELTA;
@@ -4694,7 +4694,7 @@ void snap_view_angles(void){
   else{
     ielev = (*elev-DELTA/2.0)/DELTA;
   }
-  *elev = (int)DELTA*ielev;
+  *elev = (int)(DELTA*ielev);
   update_trainer_moves();
   camera_current->dirty=1;
 

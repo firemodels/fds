@@ -141,4 +141,6 @@
 #else
 #define EXTERNCPP
 #endif
+
+#include "lint.h"
 #endif

@@ -2,11 +2,12 @@
 // $Revision$
 // $Author$
 
+#define CPP
+#include "options.h"
+
 // svn revision character string
 extern "C" char glui_3dsmoke_revision[]="$Revision$";
 
-#define CPP
-#include "options.h"
 #include <string.h>
 #ifdef pp_OSX
 #include <GLUT/glut.h>
@@ -432,16 +433,16 @@ extern "C" void SMOKE_3D_CB(int var){
   
   case TEMP_MIN:
     temp_min = 20.0;
-    temp_max = (float)(10*(int)(temperature_cutoff)/10-10);
+    temp_max = (float)(10.0*(int)(temperature_cutoff/10.0)-10.0);
     SPINNER_temperature_min->set_float_limits(temp_min,temp_max);
     break;
   case TEMP_CUTOFF:
-    temp_min = (float)(10*(int)(temperature_min)/10 + 10);
-    temp_max = (float)(10*(int)(temperature_max)/10 - 10);
+    temp_min = (float)(10*(int)(temperature_min/10.0) + 10.0);
+    temp_max = (float)(10*(int)(temperature_max/10.0) - 10.0);
     SPINNER_temperature_cutoff->set_float_limits(temp_min,temp_max);
     break;
   case TEMP_MAX:
-    temp_min = (float)(10*(int)(temperature_cutoff)/10+10);
+    temp_min = (float)(10*(int)(temperature_cutoff/10.0)+10.0);
     temp_max = 1800.0;
     SPINNER_temperature_max->set_float_limits(temp_min,temp_max);
     break;

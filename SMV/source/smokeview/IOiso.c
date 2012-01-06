@@ -433,7 +433,7 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
 	      else{
           skip += (ntriangles_i*4);
         }
-        {EGZ_FSEEK(isostream,skip,SEEK_CUR);}
+        EGZ_FSEEK(isostream,skip,SEEK_CUR);
         continue;
       }
       

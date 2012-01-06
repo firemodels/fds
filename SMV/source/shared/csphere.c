@@ -55,7 +55,7 @@ void initspherepoints(spherepoints *sphereinfo, int n){
   sphereinfo->vallist[0]=1;
   sphereinfo->nlong[0]=1;
   for(i=1;i<n;i++){
-    sphereinfo->nlong[i]=2*n*sin(i*sphereinfo->dphi)+0.5;
+    sphereinfo->nlong[i]=(int)(2.0*n*sin(i*sphereinfo->dphi)+0.5);
     sphereinfo->dtheta[i]=2.0*pi/sphereinfo->nlong[i];
     sphereinfo->vallist[i]=sphereinfo->vallist[i-1]+sphereinfo->nlong[i];
   }
@@ -220,7 +220,7 @@ unsigned int getnormalindex2(spherepoints *sphereinfo, float *normal){
 unsigned int getnormalindex(spherepoints *sphereinfo, float *normal){
   float norm;
   float x, y, z;
-  int i;
+  unsigned int i;
   unsigned int returnval;
   float mindist2;
   float dist2;

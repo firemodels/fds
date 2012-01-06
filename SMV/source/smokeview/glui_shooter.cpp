@@ -2,11 +2,12 @@
 // $Revision$
 // $Author$
 
+#define CPP
+#include "options.h"
+
 // svn revision character string
 extern "C" char glui_shooter_revision[]="$Revision$";
 
-#define CPP
-#include "options.h"
 #ifdef pp_SHOOTER
 #include <string.h>
 #ifdef pp_OSX

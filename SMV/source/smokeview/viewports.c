@@ -385,7 +385,7 @@ void TIMEBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLs
       int ihrrcut;
       float xxl, xxr, yyl, yyu, ddx=0.03, ddy=0.2;
 
-      ihrrcut = current_mesh->hrrpuv_cutoff;
+      ihrrcut = (int)current_mesh->hrrpuv_cutoff;
 
       sprintf(hrrcut_label,">%i (kW/m3)",ihrrcut);
       outputText((float)(xtimeright+0.06),0.56f, hrrcut_label);
@@ -603,14 +603,14 @@ void TITLE_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
       fontWoffset+titlesafe_offset,(int)(screenHeight-1.1f*ntitles*dwinH/4.f-fontHoffset)-titlesafe_offset,screenWidth-dwinWW-fontWoffset-2*titlesafe_offset,(int)(ntitles*dwinH/4),
       0.,1.,0.,(double)(ntitles*ratio),
       s_left, s_down, s_width, s_height)==0)return;
-    left=(float)75/(float)(screenWidth-dwinWW);
+    left=(int)((float)75/(float)(screenWidth-dwinWW));
   }
   else{
     if(SUB_portortho(quad,
       fontWoffset+titlesafe_offset,(int)(screenHeight-1.1f*ntitles*dwinH/4.f-fontHoffset)-titlesafe_offset,screenWidth-dwinWW-fontWoffset-2*titlesafe_offset,(int)(ntitles*dwinH/4),
       0.,1.,0.,(double)(ntitles*ratio),
       s_left, s_down, s_width, s_height)==0)return;
-    left=(float)75/(float)(screenWidth-dwinWW)*ratio;
+    left=(int)((float)75/(float)(screenWidth-dwinWW)*ratio);
   }
   textdown=ratio/5.0;
 

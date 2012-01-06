@@ -6791,7 +6791,7 @@ void parsedatabase(char *file){
       if(start!=NULL)nsurfids++;
       surf_id=NULL;
       surf_id2=NULL;
-      for(c=start;*c!='\0';c++){
+      for(c=start;c!=NULL&&*c!='\0';c++){
         if(surf_id==NULL&&*c=='\''){
           surf_id=c+1;
           continue;

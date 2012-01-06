@@ -1615,8 +1615,8 @@ void drawtsphere(int texture_index,float diameter, unsigned char *rgbcolor){
       for(i=0;i<NLONG;i++){
         float x, y, z;
 
-        ti = 1.0-(float)i/NLONG;
-        tip1 = 1.0-(float)(i+1)/NLONG;
+        ti = 1.0-(float)i/(float)NLONG;
+        tip1 = 1.0-(float)(i+1)/(float)NLONG;
 
         x = cos_long[i]*cos_lat[j];
         y = sin_long[i]*cos_lat[j];

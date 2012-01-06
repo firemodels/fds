@@ -22,8 +22,8 @@ void UpdateTimeLabels(void){
   if(times!=NULL)time0 = timeoffset + times[itimes];
   if(vishmsTimelabel==1){
     hour = time0/3600;
-    min = time0/60.0 - 60*hour;
-    sec10 = 10*(time0 -  60*min - 3600*hour);
+    min = (int)(time0/60.0 - 60.0*hour);
+    sec10 = (int)(10*(time0 -  60.0*min - 3600.0*hour));
     sec = sec10/10;
     sec10 = sec10 - 10*sec;
     sprintf(timelabel,"  %i:%.2i:%.2i.%i",hour,min,sec,sec10);

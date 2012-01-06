@@ -120,7 +120,7 @@ void initcontours(contour **ci_ptr, float **rgbptr, int ncontours,float constval
 
   dval = 0.0;
 
-  if(nlevels>1&&level_min!=level_max){
+  if(nlevels>1){
     dval = (level_max-level_min)/(int)(nlevels-1);
   }
 
