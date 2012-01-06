@@ -2490,6 +2490,7 @@ CALL ChkMemErr('READ','D_Z',IZERO)
 D_Z = 0._EB   
 
 ! Adjust reference enthalpy to 0 K if a RAMP_CP is given
+
 DO N=1,N_SPECIES
    SS => SPECIES(N)
    IF(SS%RAMP_CP_INDEX > 0) THEN
@@ -2507,7 +2508,8 @@ END DO
 
 
 ! Loop through temperatures from 1 K to 5000 K to get temperature-specific gas properties.  Data from JANAF 4
-DO J = 1,5000
+
+TABLE_LOOP: DO J=1,5000
 
    ! For each primitive species, get its property values at temperature J
 
@@ -2522,6 +2524,7 @@ DO J = 1,5000
       IF (SS%RAMP_K_INDEX>0)  K_TMP(N) = EVALUATE_RAMP(REAL(J,EB),1._EB,SS%RAMP_K_INDEX)/SS%MW
       IF (SS%RAMP_MU_INDEX>0) MU_TMP(N) = EVALUATE_RAMP(REAL(J,EB),1._EB,SS%RAMP_MU_INDEX)/SS%MW
    ENDDO
+
    ! For each tracked species, store the mass-weighted property values
 
    DO N=0,N_TRACKED_SPECIES
@@ -2536,7 +2539,8 @@ DO J = 1,5000
          CPBAR_Z(J,N) = CPBAR_Z(0,N) + CP_Z(J,N)
       ENDIF
    ENDDO
-ENDDO
+
+ENDDO TABLE_LOOP
 
 DEALLOCATE(D_TMP)
 DEALLOCATE(MU_TMP)

@@ -2447,7 +2447,7 @@ SPEC_LOOP: DO N=1,N_SPECIES
    END SELECT
    IF (SS%SMIX_COMPONENT_ONLY) WRITE(LU_OUTPUT,'( 3X,A)') 'Lumped species component only'
    WRITE(LU_OUTPUT,'(A,F11.5)')   '   Molecular Weight (g/mol)    ',SS%MW
-   WRITE(LU_OUTPUT,'(A,F7.3)')    '   Ambient Density (kg/m^3)    ',SS%MW*P_INF/(TMPA*R0)
+   WRITE(LU_OUTPUT,'(A,F8.3)')    '   Ambient Density (kg/m^3)    ',SS%MW*P_INF/(TMPA*R0)
 ENDDO SPEC_LOOP
 
 ! Write lumped species summary
@@ -2459,7 +2459,7 @@ DO N=0,N_TRACKED_SPECIES
    WRITE(LU_OUTPUT,'(/3X,A)') SM%ID
    IF(N==0) WRITE(LU_OUTPUT,'( 3X,A)') 'Background Species'
    WRITE(LU_OUTPUT,'(A,F11.5)')   '   Molecular Weight (g/mol)    ',SM%MW
-   WRITE(LU_OUTPUT,'(A,F7.3)')    '   Ambient Density (kg/m^3)    ',SM%MW*P_INF/(TMPA*R0)
+   WRITE(LU_OUTPUT,'(A,F8.3)')    '   Ambient Density (kg/m^3)    ',SM%MW*P_INF/(TMPA*R0)
    WRITE(LU_OUTPUT,'(A,F8.3)')    '   Initial Mass Fraction       ',SM%ZZ0
    WRITE(LU_OUTPUT,'(/3X,A)') 'Sub Species                    Mass Fraction     Mole Fraction'
    DO NN = 1,N_SPECIES
@@ -2497,7 +2497,7 @@ REACTION_LOOP: DO N=1,N_REACTIONS
    
    SELECT CASE(RN%MODE)
       CASE(FINITE_RATE)
-         WRITE(LU_OUTPUT,'(3X,A)')  'Finite Rate Reaction'
+         WRITE(LU_OUTPUT,'(/3X,A)') 'Finite Rate Reaction'
          WRITE(LU_OUTPUT,'(/3X,A)') 'Tracked Species'
          WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'         
          DO NN=0,N_TRACKED_SPECIES
@@ -2520,13 +2520,13 @@ REACTION_LOOP: DO N=1,N_REACTIONS
          WRITE(LU_OUTPUT,'(/A)') '   Fuel                           Heat of Combustion (kJ/kg)'    
          WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') RN%FUEL,RN%HEAT_OF_COMBUSTION/1000._EB
       CASE (EDDY_DISSIPATION)
-         WRITE(LU_OUTPUT,'(3X,A)')  'Eddy Dissipation Reaction'
-         WRITE(LU_OUTPUT,'(//3X,A)') 'Tracked Species'
+         WRITE(LU_OUTPUT,'(/3X,A)')  'Eddy Dissipation Reaction'
+         WRITE(LU_OUTPUT,'(/3X,A)') 'Tracked Species'
          WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'
          DO NN=0,N_TRACKED_SPECIES
             IF (ABS(RN%NU(NN))>ZERO_P) WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') SPECIES_MIXTURE(NN)%ID,RN%NU(NN) 
          ENDDO        
-         WRITE(LU_OUTPUT,'(//3X,A)') 'Detailed Species'
+         WRITE(LU_OUTPUT,'(/3X,A)') 'Detailed Species'
          WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'
          DO NN=1,N_SPECIES
             IF (ABS(RN%NU_SPECIES(NN))>ZERO_P) WRITE(LU_OUTPUT,'(3X,A,1X,F9.4)') SPECIES(NN)%ID,RN%NU_SPECIES(NN)
@@ -3121,7 +3121,6 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
    READ(LU_RESTART(NM)) M2%RHO,M2%RHOS,M2%U,M2%V,M2%W,M2%H
    IF (N_TRACKED_SPECIES>0) READ(LU_RESTART(NM)) M2%ZZ,M2%ZZS
    READ(LU_RESTART(NM)) M2%IJKW
-   
 ENDDO OTHER_MESH_LOOP
 
 CLOSE(LU_RESTART(NM))
