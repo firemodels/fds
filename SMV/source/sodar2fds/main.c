@@ -96,9 +96,11 @@ int main(int argc, char **argv){
     }
     if(argin==NULL){
       argin=arg;
+      continue;
     }
     if(argout==NULL){
       argout=arg;
+      continue;
     }
   }
 
