@@ -46,7 +46,7 @@ int gettokens(char *tokens, char **tokenptrs){
 
 int main(int argc, char **argv){
   char *prog;
-  char *arg,*csv,*argin=NULL;
+  char *arg,*csv,*argin=NULL,*argout=NULL;
   char file_in[256],file_out[256];
   FILE *stream_in, *stream_out;
   int buffer_len, nrows, ncols;
@@ -62,6 +62,7 @@ int main(int argc, char **argv){
   char coffset[255];
 
   strcpy(percen,"%");
+  strcpy(prefix,"");
 
   prog=argv[0];
 
@@ -93,7 +94,12 @@ int main(int argc, char **argv){
       strcat(prefix,"_");
       continue;
     }
-    argin=arg;
+    if(argin==NULL){
+      argin=arg;
+    }
+    if(argout==NULL){
+      argout=arg;
+    }
   }
 
   if(argin==NULL){
@@ -104,8 +110,13 @@ int main(int argc, char **argv){
   if(csv!=NULL)*csv=0;
   strcpy(file_in,argin);
   strcat(file_in,".csv");
-  strcpy(file_out,argin);
-  strcat(file_out,"_exp.csv");
+  if(argout==NULL){
+    strcpy(file_out,argin);
+    strcat(file_out,"_exp.csv");
+  }
+  else{
+    strcpy(file_out,argout);
+  }
 
   stream_in=fopen(file_in,"r");
   if(stream_in==NULL){
