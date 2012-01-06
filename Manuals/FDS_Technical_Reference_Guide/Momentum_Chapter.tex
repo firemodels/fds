@@ -347,12 +347,12 @@ For rough walls we employ the log law presented in Pope \cite{Pope:2000},
 \label{eqn_roughwallloglaw}
 u^+ = \frac{1}{\kappa} \ln \left(\frac{z}{z_0}\right) + \tilde{B}
 \end{equation}
-The von K\'{a}rm\'{a}n constant is $\kappa=0.41$.  The dimensional roughness height is denoted $z_0$ (prescribed by setting {\tt ROUGHNESS} [in meters] on the {\tt SURF} line). The distance to the wall $z$ is taken as $\delta z/2$ for the first off-wall grid cell (in the wall-normal direction).  Pope notes that the parameter $\tilde{B}$ varies with $z_0/\ell$ but attains a constant value in the fully rough limit.  Experiments suggest this limiting value is 8.5.  However, in order for FDS to reproduce the friction law over a broad range of Reynolds numbers, roughness heights, and grid resolutions, this parameter is adjusted to $\tilde{B} = 7.44$ (see the FDS Verification Guide).
+The von K\'{a}rm\'{a}n constant is $\kappa=0.41$.  The dimensional roughness height is denoted $z_0$ (prescribed by setting {\tt ROUGHNESS} [in meters] on the {\tt SURF} line). The distance to the wall $z$ is taken as $\delta z/2$ for the first off-wall grid cell (in the wall-normal direction).  Pope notes that the parameter $\tilde{B}$ varies with $z_0/\ell$ but attains a constant value $\tilde{B}=8.5$ in the fully rough limit.
 
 With these parameters set, the stress for the rough wall case may be obtained from
 \begin{equation}
 \label{eqn_roughwall_stress}
-\tau_w = \bar{\rho} \left( \frac{u}{2.44 \ln (0.5\,\delta z/z_0) + 7.44} \right)^2
+\tau_w = \bar{\rho} \left( \frac{u}{2.44 \ln (0.5\,\delta z/z_0) + 8.5} \right)^2
 \end{equation}
 where $u$ is the streamwise velocity stored at $\delta z/2$.
 
