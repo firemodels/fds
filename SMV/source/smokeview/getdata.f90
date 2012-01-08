@@ -2,6 +2,53 @@
 ! $Revision$
 ! $Author$
 
+
+!  WRITE(LU_GEOM) ONE
+!  WRITE(LU_GEOM) VERSION
+!  WRITE(LU_GEOM) STIME  ! first time step
+!  WRITE(LU_GEOM) N_VERT_S, NFACE_S, NVERT_D, N_FACE_D
+!  IF (N_VERT_S>0)  WRITE(LU_GEOM) (Xvert_S(I),Yvert_S(I),Zvert_S(I),I=1,N_VERT_S)
+!  IF (N_VERT_D>0)  WRITE(LU_GEOM) (Xvert_D(I),Yvert_D(I),Zvert_D(I),I=1,N_VERT_D)
+!  IF (N_FACE_S>0)  WRITE(LU_GEOM) (FACE1_S(I),FACE2_S(I),FACE3_S(I),I=1,N_FACE_S)
+!  IF (N_FACE_D>0)  WRITE(LU_GEOM) (FACE1_D(I),FACE2_D(I),FACE3_D(I),I=1,N_FACE_D)
+!  IF (N_FACE_S>0)  WRITE(LU_GEOM) (SURF_S(I),I=1,N_FACE_S)
+!  IF (N_FACE_D>0)  WRITE(LU_GEOM) (SURF_D(I),I=1,N_FACE_D)
+
+!  ------------------ geomout ------------------------ 
+
+subroutine geomout(verts, N_VERT_S, faces, N_FACE_S)
+#ifdef pp_cvf
+#ifndef X64
+!DEC$ ATTRIBUTES ALIAS:'_geomout@16' :: geomout
+#endif
+#endif
+implicit none
+integer, intent(in) :: N_VERT_S, N_FACE_S
+real, intent(in), dimension(3*N_VERT_S) :: verts
+integer, intent(in), dimension(3*N_FACE_S) :: faces;
+integer :: LU_GEOM, ONE
+real :: STIME
+integer :: dummy, VERSION, N_VERT_D, N_FACE_D
+integer :: I
+
+ONE=1
+LU_GEOM = 40
+STIME = 0.0
+dummy = 0
+VERSION=0
+N_VERT_D=0
+N_FACE_D=0
+
+OPEN(LU_GEOM,FILE="terrain.geom",FORM='UNFORMATTED')
+WRITE(LU_GEOM) ONE
+WRITE(LU_GEOM) VERSION
+WRITE(LU_GEOM) STIME  ! first time step
+WRITE(LU_GEOM) N_VERT_S, N_FACE_S, N_VERT_D, N_FACE_D
+IF (N_VERT_S>0)  WRITE(LU_GEOM) (verts(3*I-2),verts(3*I-1),verts(3*I),I=1,N_VERT_S)
+IF (N_FACE_S>0)  WRITE(LU_GEOM) (faces(3*I-2),faces(3*I-1),faces(3*I),I=1,N_FACE_S)
+IF (N_FACE_S>0)  WRITE(LU_GEOM) (1,I=1,N_FACE_S)
+close(LU_GEOM)
+end subroutine geomout
 !  ------------------ getembeddata ------------------------ 
 
 subroutine getembeddata(filename,endian,ntimes,nvals,times,nstatics,ndynamics,vals,error)

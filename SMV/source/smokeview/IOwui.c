@@ -18,6 +18,10 @@ char IOwui_revision[]="$Revision$";
 
 #include "smokeviewvars.h"
 
+#ifdef pp_TERRAIN2GEOM
+void terrain2geom(float xmin, float xmax, float ymin, float ymax, int nx, int ny, float (*comp_func)(float, float));
+#endif
+float get_z_terrain(float x, float y);
 void init_tnode(terraindata *terri);
 void init_tnorm(terraindata *terri);
 void init_terraincell(terraindata *terri);
@@ -127,8 +131,10 @@ float get_zcell_val(mesh *meshi,float xval, float yval, float *zval_offset, int 
   int nxcell;
   float *zcell,zval,zval_return;
   int imesh;
+  int meshstart=-1;
 
-  for(imesh=-1;imesh<nmeshes;imesh++){
+  if(meshi==NULL)meshstart=0;
+  for(imesh=meshstart;imesh<nmeshes;imesh++){
     if(imesh==-1){
       meshj=meshi;
     }
@@ -163,7 +169,6 @@ float get_zcell_val(mesh *meshi,float xval, float yval, float *zval_offset, int 
   return 0.0;
 }
 
-
 /* ------------------ get_zcell_offset ------------------------ */
 
 float get_zcell_val_offset(mesh *meshi,float xval, float yval, int *loc){
@@ -177,8 +182,11 @@ float get_zcell_val_offset(mesh *meshi,float xval, float yval, int *loc){
   float *zcell,zval;
   int imesh;
   float zvaloffset;
+  int meshstart=-1;
 
-  for(imesh=-1;imesh<nmeshes;imesh++){
+  if(meshi==NULL)meshstart=0;
+
+  for(imesh=meshstart;imesh<nmeshes;imesh++){
     if(imesh==-1){
       meshj=meshi;
     }
@@ -443,6 +451,17 @@ void initterrain_all(void){
       &meshi->terrain_contour);
 
   }
+
+#ifdef pp_TERRAIN2GEOM
+  {
+    int nx, ny;
+
+    nx = (xbarORIG-xbar0ORIG)/(meshinfo[0].xplt_orig[1]-meshinfo[0].xplt_orig[0])+1;
+    ny = (ybarORIG-ybar0ORIG)/(meshinfo[0].yplt_orig[1]-meshinfo[0].yplt_orig[0])+1;
+
+    terrain2geom(xbar0ORIG, xbarORIG, ybar0ORIG, ybarORIG, nx, ny,get_z_terrain);
+  }
+#endif
 
 
 }
@@ -1251,3 +1270,83 @@ void update_mesh_terrain(void){
   }
 }
 
+/* ------------------ get_z_terrain ------------------------ */
+
+float get_z_terrain(float x, float y){
+  int loc;
+  float zterrain,zoffset;
+
+  zterrain = get_zcell_val(NULL,x,y,NULL,&loc);
+  return zterrain;
+}
+
+/* ------------------ terrain2geom ------------------------ */
+
+/*  
+  WRITE(LU_GEOM) ONE
+  WRITE(LU_GEOM) VERSION
+  WRITE(LU_GEOM) STIME  ! first time step
+  WRITE(LU_GEOM) N_VERT_S, NFACE_S, NVERT_D, N_FACE_D
+  IF (N_VERT_S>0)  WRITE(LU_GEOM) (Xvert_S(I),Yvert_S(I),Zvert_S(I),I=1,N_VERT_S)
+  IF (N_VERT_D>0)  WRITE(LU_GEOM) (Xvert_D(I),Yvert_D(I),Zvert_D(I),I=1,N_VERT_D)
+  IF (N_FACE_S>0)  WRITE(LU_GEOM) (FACE1_S(I),FACE2_S(I),FACE3_S(I),I=1,N_FACE_S)
+  IF (N_FACE_D>0)  WRITE(LU_GEOM) (FACE1_D(I),FACE2_D(I),FACE3_D(I),I=1,N_FACE_D)
+  IF (N_FACE_S>0)  WRITE(LU_GEOM) (SURF_S(I),I=1,N_FACE_S)
+  IF (N_FACE_D>0)  WRITE(LU_GEOM) (SURF_D(I),I=1,N_FACE_D)
+  */
+
+void terrain2geom(float xmin, float xmax, float ymin, float ymax, int nx, int ny, float (*comp_func)(float, float)){
+  int i, j;
+  float dx, dy;
+  float x, y, z;
+  int nverts, nfaces;
+  float *verts;
+  int *faces;
+  int ivert, iface;
+
+  if(nx<2||ny<2)return;
+  dx = (xmax-xmin)/(nx-1);
+  dy = (ymax-ymin)/(ny-1);
+
+  nverts = nx*ny;
+  nfaces = 2*(nx-1)*(ny-1);
+
+  NewMemory((void **)&verts,3*nverts*sizeof(float));
+  NewMemory((void **)&faces,3*nfaces*sizeof(int));
+
+  ivert=0;
+  for(j=0;j<ny;j++){
+    y = ymin + j*dy;
+    for(i=0;i<nx;i++){
+      x = xmin + i*dx;
+      z = comp_func(x,y);
+      printf("%f %f %f\n",x,y,z);
+      verts[ivert++]=x;
+      verts[ivert++]=y;
+      verts[ivert++]=z;
+    }
+  }
+#define IJgeom(i,j) (1+(i) + (j)*nx)
+
+  iface=0;
+  for(j=0;j<ny-1;j++){
+    for(i=0;i<nx-1;i++){
+      int i11, i12, i22, i21;
+
+      i11 = IJgeom(i,j);
+      i12 = IJgeom(i,j+1);
+      i22 = IJgeom(i+1,j+1);
+      i21 = IJgeom(i,j+1);
+      faces[iface++]=i11;
+      faces[iface++]=i21;
+      faces[iface++]=i22;
+      faces[iface++]=i11;
+      faces[iface++]=i22;
+      faces[iface++]=i12;
+    }
+  }
+  FORTgeomout(verts,&nverts,faces,&nfaces);
+  FREEMEMORY(verts);
+  FREEMEMORY(faces);
+}
+ 
