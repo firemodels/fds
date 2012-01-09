@@ -974,7 +974,7 @@ typedef struct _slice {
   int loaded, display, benchvis;
   int num_memblocks;
   float position_orig;
-  char *c_iblank;
+  char *c_iblank, *n_iblank;
   int blocknumber;
   int firstshort;
   int vec_comp;

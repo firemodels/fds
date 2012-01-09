@@ -5355,6 +5355,7 @@ typedef struct {
       sd->slicedata=NULL;
       sd->slicetimeslist=NULL;
       sd->c_iblank=NULL;
+      sd->n_iblank=NULL;
       sd->blocknumber=blocknumber;
       sd->vloaded=0;
       sd->reload=0;

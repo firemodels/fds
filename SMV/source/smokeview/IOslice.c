@@ -293,6 +293,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     FREEMEMORY(sd->slicetimes  );
     FREEMEMORY(sd->slicelevel  );
     FREEMEMORY(sd->c_iblank);
+    FREEMEMORY(sd->n_iblank);
     FREEMEMORY(sd->compindex);
     FREEMEMORY(sd->qslicedata_compressed);
     FREEMEMORY(sd->slicecomplevel);
@@ -565,7 +566,10 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     sd->nsliceii = sd->nslicei*sd->nslicej*sd->nslicek;
     sd->nslicetotal=sd->nsteps*sd->nsliceii;
     if(use_iblank==1){
-      if(NewMemory((void **)&sd->c_iblank,sd->nslicei*sd->nslicej*sd->nslicek*sizeof(char))==0){
+      if( //xxx
+        NewMemory((void **)&sd->c_iblank,sd->nslicei*sd->nslicej*sd->nslicek*sizeof(char))==0||
+        NewMemory((void **)&sd->n_iblank,(sd->nslicei+1)*(sd->nslicej+1)*(sd->nslicek+1)*sizeof(char))==0
+        ){
         readslice("",ifile,UNLOAD,&error);
         *errorcode=1;
         return;
@@ -600,6 +604,19 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
               sd->c_iblank[ii++]=meshi->c_iblank_x[IJK(i,j,k)];
             }
           }
+        }//xxx
+        ii=0;
+        for(k=sd->ks1;k<=sd->ks2;k++){
+          for(j=sd->js1;j<=sd->js2;j++){
+            for(i=sd->is1;i<=sd->is1+sd->nslicei;i++){
+              if(k==sd->ks2||j==sd->js2||i==sd->is1+sd->nslicei){
+                sd->n_iblank[ii++]=0;
+              }
+              else{
+                sd->n_iblank[ii++]=meshi->c_iblank_x[IJK(i,j,k)];
+              }
+            }
+          }
         }
         break;
       case 2:
@@ -611,6 +628,19 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
             }
           }
         }
+        ii=0;
+        for(k=sd->ks1;k<=sd->ks2;k++){
+          for(j=sd->js1;j<=sd->js1+sd->nslicej;j++){
+            for(i=sd->is1;i<=sd->is2;i++){
+              if(k==sd->ks2||j==sd->js1+sd->nslicej||i==sd->is2){
+                sd->n_iblank[ii++]=0;
+              }
+              else{
+                sd->n_iblank[ii++]=meshi->c_iblank_y[IJK(i,j,k)];
+              }
+            }
+          }
+        }
         break;
       case 3:
         ii=0;
@@ -618,6 +648,19 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
           for(j=sd->js1;j<sd->js2;j++){
             for(i=sd->is1;i<sd->is2;i++){
               sd->c_iblank[ii++]=meshi->c_iblank_z[IJK(i,j,k)];
+            }
+          }
+        }
+        ii=0;
+        for(k=sd->ks1;k<=sd->ks1+sd->nslicek;k++){
+          for(j=sd->js1;j<=sd->js2;j++){
+            for(i=sd->is1;i<=sd->is2;i++){
+              if(k==sd->ks1+sd->nslicek||j==sd->js2||i==sd->is2){
+                sd->n_iblank[ii++]=0;
+              }
+              else{
+                sd->n_iblank[ii++]=meshi->c_iblank_z[IJK(i,j,k)];
+              }
             }
           }
         }
@@ -1977,17 +2020,18 @@ void getslicedatabounds(const slice *sd, float *pmin, float *pmax){
   float *pdata;
   int ndata;
   int n;
-  int frame_number,point_local;
   int first=1;
 
   pdata = sd->qslicedata;
   ndata = sd->nslicetotal;
-
+//xxx
   for (n=0;n<ndata;n++){
-    frame_number = n/(sd->nsliceii);
-    point_local = n - frame_number*sd->nsliceii;
-    if(sd->c_iblank!=NULL&&sd->c_iblank[point_local]==0){
+    if(sd->n_iblank!=NULL&&sd->n_iblank[n%sd->nsliceii]==0){
+      printf("n=%i\n",n);
       continue;
+    }
+    if(n>sd->nsliceii){
+      printf("next slice\n");
     }
     if(first==1){
       *pmin=pdata[n];
