@@ -6069,10 +6069,6 @@ typedef struct {
     }
   }
 
-// compute triangle norms
-  update_triangles();
-
-
 #ifdef pp_SHOOTER
   shooter_xyz[0]=xbar/2.0;
   shooter_xyz[1] = 0.0;
@@ -6676,6 +6672,7 @@ typedef struct {
   update_mesh_terrain();
 
   read_all_geom();
+  update_triangles();
   get_faceinfo();
 
   printf("%s",_("wrap up completed"));

@@ -39,14 +39,14 @@ VERSION=0
 N_VERT_D=0
 N_FACE_D=0
 
-OPEN(LU_GEOM,FILE="terrain.geom",FORM='UNFORMATTED')
+OPEN(UNIT=LU_GEOM,FILE="terrain.geom",FORM='UNFORMATTED')
 WRITE(LU_GEOM) ONE
 WRITE(LU_GEOM) VERSION
 WRITE(LU_GEOM) STIME  ! first time step
 WRITE(LU_GEOM) N_VERT_S, N_FACE_S, N_VERT_D, N_FACE_D
 IF (N_VERT_S>0)  WRITE(LU_GEOM) (verts(3*I-2),verts(3*I-1),verts(3*I),I=1,N_VERT_S)
 IF (N_FACE_S>0)  WRITE(LU_GEOM) (faces(3*I-2),faces(3*I-1),faces(3*I),I=1,N_FACE_S)
-IF (N_FACE_S>0)  WRITE(LU_GEOM) (1,I=1,N_FACE_S)
+!IF (N_FACE_S>0)  WRITE(LU_GEOM) (1,I=1,N_FACE_S)
 close(LU_GEOM)
 end subroutine geomout
 !  ------------------ getembeddata ------------------------ 

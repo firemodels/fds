@@ -1320,7 +1320,6 @@ void terrain2geom(float xmin, float xmax, float ymin, float ymax, int nx, int ny
     for(i=0;i<nx;i++){
       x = xmin + i*dx;
       z = comp_func(x,y);
-      printf("%f %f %f\n",x,y,z);
       verts[ivert++]=x;
       verts[ivert++]=y;
       verts[ivert++]=z;
@@ -1336,7 +1335,7 @@ void terrain2geom(float xmin, float xmax, float ymin, float ymax, int nx, int ny
       i11 = IJgeom(i,j);
       i12 = IJgeom(i,j+1);
       i22 = IJgeom(i+1,j+1);
-      i21 = IJgeom(i,j+1);
+      i21 = IJgeom(i+1,j);
       faces[iface++]=i11;
       faces[iface++]=i21;
       faces[iface++]=i22;

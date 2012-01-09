@@ -327,13 +327,7 @@ void draw_geom(int flag){
           xyz2[1] = xyz1[1] + 0.1*xyznorm[1];
           xyz2[2] = xyz1[2] + 0.1*xyznorm[2];
 
-          if(trianglei->fdsnorm==1){
-            color = black;
-          }
-          else{
-            color=blue;
-          }
-          glColor3fv(color);
+          glColor3fv(blue);
           glVertex3fv(xyz1);
           glVertex3fv(xyz2);
         }
@@ -362,13 +356,7 @@ void draw_geom(int flag){
           xyz2[1] = xyz1[1] + 0.1*xyznorm[1];
           xyz2[2] = xyz1[2] + 0.1*xyznorm[2];
 
-          if(trianglei->fdsnorm==1){
-            color = black;
-          }  
-          else{
-            color=blue;
-          }
-          glColor3fv(color);
+          glColor3fv(blue);
           glVertex3fv(xyz2);
         }
         glEnd();
@@ -388,9 +376,9 @@ void draw_geom(int flag){
           xyznorm = pointi->norm;       
           xyz1 = pointi->xyz;
 
-          xyz2[0] = xyz1[0] + 0.1*xyznorm[0];
-          xyz2[1] = xyz1[1] + 0.1*xyznorm[1];
-          xyz2[2] = xyz1[2] + 0.1*xyznorm[2];
+          xyz2[0] = xyz1[0] + 0.1*xyzmaxdiff*xyznorm[0];
+          xyz2[1] = xyz1[1] + 0.1*xyzmaxdiff*xyznorm[1];
+          xyz2[2] = xyz1[2] + 0.1*xyzmaxdiff*xyznorm[2];
 
           color = black;
           glColor3fv(color);
@@ -410,9 +398,9 @@ void draw_geom(int flag){
           xyznorm = pointi->norm;       
           xyz1 = pointi->xyz;
 
-          xyz2[0] = xyz1[0] + 0.1*xyznorm[0];
-          xyz2[1] = xyz1[1] + 0.1*xyznorm[1];
-          xyz2[2] = xyz1[2] + 0.1*xyznorm[2];
+          xyz2[0] = xyz1[0] + 0.1*xyzmaxdiff*xyznorm[0];
+          xyz2[1] = xyz1[1] + 0.1*xyzmaxdiff*xyznorm[1];
+          xyz2[2] = xyz1[2] + 0.1*xyzmaxdiff*xyznorm[2];
 
           color = black;
           glColor3fv(color);
@@ -442,25 +430,16 @@ void update_triangles(void){
     if(geomi->loaded==0||geomi->display==0)continue;
     geomlisti = geomi->geomlistinfo;
     
-    for(i=0;i<geomlisti->npoints;i++){
-      xyz = geomlisti->points[i].xyz;
-      xyz[0] = (xyz[0] - xbar0)/xyzmaxdiff;
-      xyz[1] = (xyz[1] - ybar0)/xyzmaxdiff;
-      xyz[2] = (xyz[2] - zbar0)/xyzmaxdiff;
-      xyz += 3;
-    }
-    
     for(i=0;i<geomlisti->ntriangles;i++){
       triangle *trianglei;
 
       trianglei = geomlisti->triangles+i;
-      if(geomlisti->triangles[i].fdsnorm==0){
-        xyzptr[0] = trianglei->points[0]->xyz;
-        xyzptr[1] = trianglei->points[1]->xyz;
-        xyzptr[2] = trianglei->points[2]->xyz;
-        xyznorm = trianglei->normal;
-        CalcTriNormal(xyzptr[0],xyzptr[1],xyzptr[2],xyznorm);
-      }
+
+      xyzptr[0] = trianglei->points[0]->xyz;
+      xyzptr[1] = trianglei->points[1]->xyz;
+      xyzptr[2] = trianglei->points[2]->xyz;
+      xyznorm = trianglei->normal;
+      CalcTriNormal(xyzptr[0],xyzptr[1],xyzptr[2],xyznorm);
     }
 
     for(i=0;i<geomlisti->npoints;i++){
@@ -560,6 +539,7 @@ void get_geom_header(char *file, int *ntimes_local){
       if(nvertfaces[1]!=0)fseek(stream,4+3*nvertfaces[1]*4+4,SEEK_CUR);    
       if(nvertfaces[2]!=0)fseek(stream,4+3*nvertfaces[2]*4+4,SEEK_CUR);    
       if(nvertfaces[3]!=0)fseek(stream,4+3*nvertfaces[3]*4+4,SEEK_CUR);    
+      first=0;
     }
     else{
       int *geom_type;
@@ -774,8 +754,8 @@ void read_geom(int ifile, int flag, int *errorcode){
         triangles[ii].points[0]=points+ijk[3*ii]-1;
         triangles[ii].points[1]=points+ijk[3*ii+1]-1;
         triangles[ii].points[2]=points+ijk[3*ii+2]-1;
-        //triangles[i].surf=surfaceinfo + surf_ind[i] - 1;
-        triangles[i].surf=surfacedefault;
+        //triangles[ii].surf=surfaceinfo + surf_ind[ii] - 1;
+        triangles[ii].surf=surfacedefault;
       }
       FREEMEMORY(ijk);
       FREEMEMORY(surf_ind);
