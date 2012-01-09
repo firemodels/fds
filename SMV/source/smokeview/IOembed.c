@@ -813,16 +813,16 @@ void read_geomdata(int ifile, int flag, int *errorcode){
 
   FORTgetembeddatasize(file, &endian_smv, &ntimes_local, &nvals, &error, lenfile);
 
-  if(nvals>0){
-    NewMemory((void **)&patchi->geom_nstatics,ntimes*sizeof(int));
-    NewMemory((void **)&patchi->geom_ndynamics,ntimes*sizeof(int));
-    NewMemory((void **)&patchi->geom_times,ntimes*sizeof(float));
-    NewMemory((void **)&patchi->geom_ivals_static,ntimes*sizeof(int *));
-    NewMemory((void **)&patchi->geom_ivals_dynamic,ntimes*sizeof(int *));
+  if(nvals>0&&ntimes_local>0){
+    NewMemory((void **)&patchi->geom_nstatics,ntimes_local*sizeof(int));
+    NewMemory((void **)&patchi->geom_ndynamics,ntimes_local*sizeof(int));
+    NewMemory((void **)&patchi->geom_times,ntimes_local*sizeof(float));
+    NewMemory((void **)&patchi->geom_ivals_static,ntimes_local*sizeof(int *));
+    NewMemory((void **)&patchi->geom_ivals_dynamic,ntimes_local*sizeof(int *));
     NewMemory((void **)&patchi->geom_vals,nvals*sizeof(float));
     NewMemory((void **)&patchi->geom_ivals,nvals*sizeof(char));
   }
-  FORTgetembeddata(file, &endian_smv, &ntimes, &nvals, patchi->geom_times, 
+  FORTgetembeddata(file, &endian_smv, &ntimes_local, &nvals, patchi->geom_times, 
     patchi->geom_nstatics, patchi->geom_ndynamics, patchi->geom_vals, &error, lenfile);
 
   init_histogram(patchi->histogram);
@@ -831,11 +831,11 @@ void read_geomdata(int ifile, int flag, int *errorcode){
 
   complete_histogram(patchi->histogram);
 
-  patchi->geom_ntimes=ntimes;
+  patchi->geom_ntimes=ntimes_local;
   patchi->geom_nvals=nvals;
   patchi->geom_ivals_static[0] = patchi->geom_ivals;
   patchi->geom_ivals_dynamic[0] = patchi->geom_ivals_static[0]+patchi->geom_nstatics[0];
-  for(i=1;i<ntimes;i++){
+  for(i=1;i<ntimes_local;i++){
     patchi->geom_ivals_static[i] = patchi->geom_ivals_dynamic[i-1]+patchi->geom_ndynamics[i-1];
     patchi->geom_ivals_dynamic[i] = patchi->geom_ivals_static[i] + patchi->geom_nstatics[i];
   }
