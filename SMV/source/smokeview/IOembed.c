@@ -252,6 +252,8 @@ void draw_geom(int flag){
     return;
   }
 
+#define VECFACTOR 0.01
+
   for(i=0;i<ngeominfo;i++){
     geomdata *geomi;
     geomlistdata *geomlisti;
@@ -323,9 +325,9 @@ void draw_geom(int flag){
           xyz1[0] = (p1[0] + p2[0] + p3[0])/3.0;
           xyz1[1] = (p1[1] + p2[1] + p3[1])/3.0;
           xyz1[2] = (p1[2] + p2[2] + p3[2])/3.0;
-          xyz2[0] = xyz1[0] + 0.1*xyznorm[0];
-          xyz2[1] = xyz1[1] + 0.1*xyznorm[1];
-          xyz2[2] = xyz1[2] + 0.1*xyznorm[2];
+          xyz2[0] = xyz1[0] + VECFACTOR*xyzmaxdiff*xyznorm[0];
+          xyz2[1] = xyz1[1] + VECFACTOR*xyzmaxdiff*xyznorm[1];
+          xyz2[2] = xyz1[2] + VECFACTOR*xyzmaxdiff*xyznorm[2];
 
           glColor3fv(blue);
           glVertex3fv(xyz1);
@@ -352,9 +354,9 @@ void draw_geom(int flag){
           xyz1[0] = (p1[0] + p2[0] + p3[0])/3.0;
           xyz1[1] = (p1[1] + p2[1] + p3[1])/3.0;
           xyz1[2] = (p1[2] + p2[2] + p3[2])/3.0;
-          xyz2[0] = xyz1[0] + 0.1*xyznorm[0];
-          xyz2[1] = xyz1[1] + 0.1*xyznorm[1];
-          xyz2[2] = xyz1[2] + 0.1*xyznorm[2];
+          xyz2[0] = xyz1[0] + VECFACTOR*xyzmaxdiff*xyznorm[0];
+          xyz2[1] = xyz1[1] + VECFACTOR*xyzmaxdiff*xyznorm[1];
+          xyz2[2] = xyz1[2] + VECFACTOR*xyzmaxdiff*xyznorm[2];
 
           glColor3fv(blue);
           glVertex3fv(xyz2);
@@ -376,9 +378,9 @@ void draw_geom(int flag){
           xyznorm = pointi->norm;       
           xyz1 = pointi->xyz;
 
-          xyz2[0] = xyz1[0] + 0.1*xyzmaxdiff*xyznorm[0];
-          xyz2[1] = xyz1[1] + 0.1*xyzmaxdiff*xyznorm[1];
-          xyz2[2] = xyz1[2] + 0.1*xyzmaxdiff*xyznorm[2];
+          xyz2[0] = xyz1[0] + VECFACTOR*xyzmaxdiff*xyznorm[0];
+          xyz2[1] = xyz1[1] + VECFACTOR*xyzmaxdiff*xyznorm[1];
+          xyz2[2] = xyz1[2] + VECFACTOR*xyzmaxdiff*xyznorm[2];
 
           color = black;
           glColor3fv(color);
@@ -398,9 +400,9 @@ void draw_geom(int flag){
           xyznorm = pointi->norm;       
           xyz1 = pointi->xyz;
 
-          xyz2[0] = xyz1[0] + 0.1*xyzmaxdiff*xyznorm[0];
-          xyz2[1] = xyz1[1] + 0.1*xyzmaxdiff*xyznorm[1];
-          xyz2[2] = xyz1[2] + 0.1*xyzmaxdiff*xyznorm[2];
+          xyz2[0] = xyz1[0] + VECFACTOR*xyzmaxdiff*xyznorm[0];
+          xyz2[1] = xyz1[1] + VECFACTOR*xyzmaxdiff*xyznorm[1];
+          xyz2[2] = xyz1[2] + VECFACTOR*xyzmaxdiff*xyznorm[2];
 
           color = black;
           glColor3fv(color);
