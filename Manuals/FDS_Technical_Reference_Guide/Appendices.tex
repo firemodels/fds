@@ -280,8 +280,10 @@ where in the second step the EOS (\ref{eqn_idealgaslaw}) is used to simplify the
 Using (\ref{eqn_transportexpression}) and (\ref{eqn_DTDt}) in (\ref{eqn_divconstraint2}) yields
 \begin{eqnarray}
 \label{eqn_divconstraint3}
-\Div\mathbf{u} &=& \frac{1}{\rho} \,\dot{m}_b^{\tripleprime} -  \frac{1}{\overline{p}_i} \frac{\mbox{D}\overline{p}_i}{\mbox{D} t} + \overline{W} \left[\frac{1}{\rho} \sum_\alpha \frac{1}{W_\alpha} \left\{  \dot{m}_\alpha^{\tripleprime} + \dot{m}_{b}^{\tripleprime}[Y_{b,\alpha} - Y_\alpha] - \Div \mathbf{J}_{\alpha} \right\} \right] \nonumber \vspace{0.3cm}\\
-&+&  \frac{1}{T} \left[ \frac{1}{\rho c_p} \left\{ \frac{\mbox{D} \overline{p}_i }{\mbox{D} t} - \Div\dot{\mathbf{q}}^{\prime\prime} -\dq_b''' - \sum_\alpha \Delta h^0_\alpha \dot{m}_\alpha^{\tripleprime} - \sum_\alpha h_{s,\alpha}\left(  \dot{m}_\alpha^{\tripleprime} - \Div \mathbf{J}_{\alpha} \right) + \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2 \right\} \right] \,\mbox{.} \nonumber \vspace{0.3cm}\\
+\Div\mathbf{u} &=& \frac{1}{\rho} \,\dot{m}_b^{\tripleprime} \nonumber\\
+&-& \frac{1}{\overline{p}_i} \frac{\mbox{D}\overline{p}_i}{\mbox{D} t} \nonumber\\
+&+& \overline{W} \left[\frac{1}{\rho} \sum_\alpha \frac{1}{W_\alpha} \left\{  \dot{m}_\alpha^{\tripleprime} + \dot{m}_{b}^{\tripleprime}[Y_{b,\alpha} - Y_\alpha] - \Div \mathbf{J}_{\alpha} \right\} \right] \nonumber \vspace{0.3cm}\\
+&+& \frac{1}{T} \left[ \frac{1}{\rho c_p} \left\{ \frac{\mbox{D} \overline{p}_i }{\mbox{D} t} - \Div\dot{\mathbf{q}}^{\prime\prime} -\dq_b''' - \sum_\alpha \Delta h^0_\alpha \dot{m}_\alpha^{\tripleprime} - \sum_\alpha h_{s,\alpha}\left(  \dot{m}_\alpha^{\tripleprime} - \Div \mathbf{J}_{\alpha} \right) + \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) + \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2 \right\} \right] \,\mbox{.} \nonumber \vspace{0.3cm}\\
 \end{eqnarray}
 Note that $\overline{W} \sum_\alpha (Y_\alpha/W_\alpha) = 1$ and also $\overline{W} \sum_\alpha (Y_{b,\alpha}/W_\alpha) = \overline{W}/\overline{W}_b$,
 where $\overline{W}_b$ is the molecular weight of the bulk mixture prior to its introduction into the fluid mixture.  Equation (\ref{eqn_divconstraint3}) thus simplifies to
@@ -315,8 +317,7 @@ Thus, the material derivative of the background pressure may be written as
 \label{eqn_expandp0}
 \frac{\mbox{D}\overline{p}_i}{\mbox{D}t} &=& \frac{\partial \overline{p}_i}{\partial t} - w \rho_i g \,\mbox{.}
 \end{eqnarray}
-Hence, utilizing (\ref{eqn_fickslaw}), (\ref{eqn_heatrelease}), and (\ref{eqn_expandp0}), and noting $1/(\rho T) = \mathcal{R}/(\overline{W} \overline{p}_i)$ from the EOS,
-for the $i$th zone we may write the divergence (\ref{eqn_divconstraint_final}) as
+Hence, utilizing (\ref{eqn_fickslaw}), (\ref{eqn_heatrelease}), and (\ref{eqn_expandp0}), for the $i$th zone we may write the divergence (\ref{eqn_divconstraint_final}) as
 \begin{equation}
 \label{eqn_fds_divcontraint}
 \Div \mathbf{u} = \mathcal{D} - \mathcal{P} \frac{\partial \overline{p}_i}{\partial t}
@@ -324,18 +325,19 @@ for the $i$th zone we may write the divergence (\ref{eqn_divconstraint_final}) a
 where
 \begin{equation}
 \label{eqn_fdsP}
-\mathcal{P} = \frac{1}{\overline{p}_i}\left( 1 - \frac{\overline{p}_i}{\rho \,c_p T} \right) = \frac{1}{\overline{p}_i}\left( 1 - \frac{\mathcal{R}}{\overline{W} c_p}  \right)
+\mathcal{P} = \frac{1}{\overline{p}_i}\left( 1 - \frac{\overline{p}_i}{\rho \,c_p T} \right)
 \end{equation}
 and
 \begin{eqnarray}
 \label{eqn_fdsD}
-\mathcal{D} &=& \frac{\dot{m}_b^\tripleprime}{\rho}\frac{\overline{W}}{\overline{W}_b} +
-                \frac{1}{\rho}\sum_\alpha \left( \frac{\overline{W}}{W_\alpha} - \frac{h_{s,\alpha}}{c_p T} \right) \left( \dot{m}_{\alpha}^\tripleprime + \Div \rho D_\alpha \nabla Y_\alpha \right) +
-                \mathcal{P} w \rho_i g \nonumber  \\ [0.3cm]
-&+& \frac{\mathcal{R}}{\overline{W} c_p \overline{p}_i} \left[ \dot{q}^\tripleprime - \dq_b''' - \Div \dot{\mathbf{q}}^{\prime\prime} + 
-                \dot{m}_{b}^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) +
-                \frac{\dot{m}_{b}^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2  \right]
+\mathcal{D} &=& \frac{1}{\rho c_p T} \left[ \Div \sum_{n=1}^{N_z} (h_{s,n}-h_{s,0}) \rho D_n \nabla Y_n +  \Div(k \nabla T)  + \dot{q}^\tripleprime - \Div\dot{\mathbf{q}}^{\prime\prime}_{r} \right] \nonumber\\ [.3cm]
+&+& \frac{1}{\rho}\sum_{n=1}^{N_z} \left[\overline{W}\left(\frac{1}{W_n} - \frac{1}{W_0}\right) - \frac{(h_{s,n}-h_{s,0})}{c_p T} \right] \Div \rho D_\alpha \nabla Y_\alpha \nonumber\\ [.3cm]
+&+& \underbrace{\frac{1}{\rho}\sum_{n=1}^{N_z} \left[\overline{W}\left(\frac{1}{W_n} - \frac{1}{W_0}\right) - \frac{(h_{s,n}-h_{s,0})}{c_p T} \right] \dot{m}_{\alpha}^\tripleprime}_{\mbox{\ct D\_REACTION}} \nonumber\\ [.3cm]
+&+& \underbrace{\frac{\dot{m}_b^\tripleprime}{\rho}\frac{\overline{W}}{\overline{W}_b} + \frac{1}{\rho c_p T} \left[ - \dot{q}_b^{\tripleprime} + \dot{m}_b^{\tripleprime} \sum_\alpha Y_{b,\alpha} c_{p,\alpha}(T_b-T) + \frac{\dot{m}_b^{\tripleprime}}{2}\left|\mathbf{u}_b-\mathbf{u}\right|^2  \right]}_{\mbox{\ct D\_LAGRANGIAN}} \nonumber\\ [.3cm]
+&+& \mathcal{P} w \rho_i g
 \end{eqnarray}
+
+
 Equations (\ref{eqn_fdsP}) and (\ref{eqn_fdsD}) correspond to (\ref{eqn_fdsP1}) and (\ref{eqn_fdsD1}) in the FDS Tech Guide.  Though, note that at present the bulk kinetic energy term is not included in the code.
 
 A brief remark on the of the sensible enthalpy $h_{s,\alpha}$ versus the [chemical + sensible] enthalpy, $h_\alpha = \Delta h_\alpha^0 + h_{s,\alpha}$.
