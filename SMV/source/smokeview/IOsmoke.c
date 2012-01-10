@@ -66,7 +66,7 @@ if(show_smoketest==0){\
   ivalue[1]=n12<<2;  \
   ivalue[2]=n22<<2;  \
   ivalue[3]=n21<<2;  \
-  if(abs(value[0]-value[2])<abs(value[1]-value[3])){     \
+  if(ABS(value[0]-value[2])<ABS(value[1]-value[3])){     \
     xyzindex=xyzindex1;                                  \
   }                                                      \
   else{                                                  \
@@ -119,7 +119,7 @@ if(show_smoketest==0){\
   ivalue[1]=n12<<2;  \
   ivalue[2]=n22<<2;  \
   ivalue[3]=n21<<2;  \
-  if(abs(value[0]-value[2])<abs(value[1]-value[3])){     \
+  if(ABS(value[0]-value[2])<ABS(value[1]-value[3])){     \
     xyzindex=xyzindex1;                                  \
   }                                                      \
   else{                                                  \
@@ -174,7 +174,7 @@ if(show_smoketest==0){\
   ivalue[1]=n12<<2;  \
   ivalue[2]=n22<<2;  \
   ivalue[3]=n21<<2;  \
-  if(abs(value[0]-value[2])<abs(value[1]-value[3])){     \
+  if(ABS(value[0]-value[2])<ABS(value[1]-value[3])){     \
     xyzindex=xyzindex1;                                  \
   }                                                      \
   else{                                                  \
@@ -230,7 +230,7 @@ else{\
     if(iblank_smoke3d[n21]==0)value[3]=0;\
   }\
   if(value[0]==0&&value[1]==0&&value[2]==0&&value[3]==0)continue;\
-  if(abs(value[0]-value[2])<abs(value[1]-value[3])){     \
+  if(ABS(value[0]-value[2])<ABS(value[1]-value[3])){     \
     xyzindex=xyzindex1;                                  \
   }                                                      \
   else{                                                  \
@@ -273,7 +273,7 @@ else{\
     if(iblank_smoke3d[n21]==0)value[3]=0;\
   }\
   if(value[0]==0&&value[1]==0&&value[2]==0&&value[3]==0)continue;\
-  if(abs(value[0]-value[2])<abs(value[1]-value[3])){     \
+  if(ABS(value[0]-value[2])<ABS(value[1]-value[3])){     \
     xyzindex=xyzindex1;                                  \
   }                                                      \
   else{                                                  \
@@ -792,7 +792,7 @@ int getsmoke3d_sizes(char *smokefile, int version, float **timelist_found, int *
           fprintf(TEXTFILE,"%f %i %i %i %i \n",time_local,nframeboth,-1,nchars[1],nlightdata);
         }
       }
-      skip_local = abs(nchars[1]);
+      skip_local = ABS(nchars[1]);
       EGZ_FSEEK(SMOKE3DFILE,skip_local,SEEK_CUR);
     }
 
@@ -1368,7 +1368,7 @@ void drawsmoke3d(smoke3d *smoke3di){
 //        n22 = (i-is1)   + (j+1-js1)*nx + (k+1-ks1)*nx*ny;
 //        n21 = (i-is1)   + (j-js1)*nx   + (k+1-ks1)*nx*ny;
 
-          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+          if(nterraininfo>0&&ABS(vertical_factor-1.0)>0.01){
             int m11, m12, m22, m21;
 
             m11 = iterm + jterm;
@@ -1529,7 +1529,7 @@ void drawsmoke3d(smoke3d *smoke3di){
 //        n22 = (i+1-is1) + (j-js1)*nx   + (k+1-ks1)*nx*ny;
 //        n21 = (i-is1)   + (j-js1)*nx   + (k+1-ks1)*nx*ny;
 
-          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+          if(nterraininfo>0&&ABS(vertical_factor-1.0)>0.01){
             int m11, m12, m22, m21;
 
             m11 = iterm + jterm;
@@ -1680,7 +1680,7 @@ void drawsmoke3d(smoke3d *smoke3di){
           n22 = n12+nx;
           n21 = n22-1;
 
-          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+          if(nterraininfo>0&&ABS(vertical_factor-1.0)>0.01){
             int m11, m12, m22, m21;
 
             m11 = iterm + jterm;
@@ -1880,7 +1880,7 @@ void drawsmoke3d(smoke3d *smoke3di){
 //        n22 = (j-1-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
 //        n21 = (j-js1)*nx   + (i-is1)   + (k+1-ks1)*nx*ny;
 
-          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+          if(nterraininfo>0&&ABS(vertical_factor-1.0)>0.01){
             int m11, m12, m22, m21;
 
             m11 = iterm + jterm;
@@ -2084,7 +2084,7 @@ void drawsmoke3d(smoke3d *smoke3di){
         //    n22 = (j+1-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
         //    n21 = (j-js1)*nx + (i-is1) + (k+1-ks1)*nx*ny;
 
-          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+          if(nterraininfo>0&&ABS(vertical_factor-1.0)>0.01){
             int m11, m12, m22, m21;
 
             m11 = iterm + jterm;
@@ -2284,7 +2284,7 @@ void drawsmoke3d(smoke3d *smoke3di){
 //        n22 = (i+1-is1) + (j+1-js1)*nx + (k-1-ks1)*nx*ny;
 //        n21 = (i+1-is1) + (j-js1)*nx   + (k-ks1)*nx*ny;
 
-          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+          if(nterraininfo>0&&ABS(vertical_factor-1.0)>0.01){
             int m11, m12, m22, m21;
 
             m11 = iterm + jterm;
@@ -2486,7 +2486,7 @@ void drawsmoke3d(smoke3d *smoke3di){
         //    n22 = (i+1-is1) + (j+1-js1)*nx  + (k+1-ks1)*nx*ny;
         //    n21 = (i+1-is1) + (j-js1)*nx    + (k-ks1)*nx*ny;
 
-          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+          if(nterraininfo>0&&ABS(vertical_factor-1.0)>0.01){
             int m11, m12, m22, m21;
 
             m11 = iterm + jterm;
@@ -2687,7 +2687,7 @@ void drawsmoke3d(smoke3d *smoke3di){
 //        n22 = (i+1-is1) + (j+1-js1)*nx + (k-1-ks1)*nx*ny;
 //        n21 = (i-is1)   + (j+1-js1)*nx + (k-ks1)*nx*ny;
 
-          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+          if(nterraininfo>0&&ABS(vertical_factor-1.0)>0.01){
             int m11, m12, m22, m21;
 
             m11 = iterm + jterm;
@@ -2889,7 +2889,7 @@ void drawsmoke3d(smoke3d *smoke3di){
         //    n22 = (i+1-is1) + (j+1-js1)*nx + (k+1-ks1)*nx*ny;
         //    n21 = (i-is1)   + (j+1-js1)*nx + (k-ks1)*nx*ny;
 
-          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+          if(nterraininfo>0&&ABS(vertical_factor-1.0)>0.01){
             int m11, m12, m22, m21;
 
             m11 = iterm + jterm;
@@ -3101,7 +3101,7 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
 //        n22 = (i-is1)   + (j+1-js1)*nx + (k+1-ks1)*nx*ny;
 //        n21 = (i-is1)   + (j-js1)*nx   + (k+1-ks1)*nx*ny;
 
-          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+          if(nterraininfo>0&&ABS(vertical_factor-1.0)>0.01){
             int m11, m12, m22, m21;
 
             m11 = iterm + jterm;
@@ -3199,7 +3199,7 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
 //        n22 = (i+1-is1) + (j-js1)*nx   + (k+1-ks1)*nx*ny;
 //        n21 = (i-is1)   + (j-js1)*nx   + (k+1-ks1)*nx*ny;
 
-          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+          if(nterraininfo>0&&ABS(vertical_factor-1.0)>0.01){
             int m11, m12, m22, m21;
 
             m11 = iterm + jterm;
@@ -3292,7 +3292,7 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
           n22 = n12+nx;
           n21 = n22-1;
 
-          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+          if(nterraininfo>0&&ABS(vertical_factor-1.0)>0.01){
             int m11, m12, m22, m21;
 
             m11 = iterm + jterm;
@@ -3409,7 +3409,7 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
 //        n22 = (j-1-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
 //        n21 = (j-js1)*nx   + (i-is1)   + (k+1-ks1)*nx*ny;
 
-          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+          if(nterraininfo>0&&ABS(vertical_factor-1.0)>0.01){
             int m11, m12, m22, m21;
 
             m11 = iterm + jterm;
@@ -3532,7 +3532,7 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
         //    n22 = (j+1-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
         //    n21 = (j-js1)*nx + (i-is1) + (k+1-ks1)*nx*ny;
 
-          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+          if(nterraininfo>0&&ABS(vertical_factor-1.0)>0.01){
             int m11, m12, m22, m21;
 
             m11 = iterm + jterm;
@@ -3650,7 +3650,7 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
 //        n22 = (i+1-is1) + (j+1-js1)*nx + (k-1-ks1)*nx*ny;
 //        n21 = (i+1-is1) + (j-js1)*nx   + (k-ks1)*nx*ny;
 
-          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+          if(nterraininfo>0&&ABS(vertical_factor-1.0)>0.01){
             int m11, m12, m22, m21;
 
             m11 = iterm + jterm;
@@ -3772,7 +3772,7 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
         //    n22 = (i+1-is1) + (j+1-js1)*nx  + (k+1-ks1)*nx*ny;
         //    n21 = (i+1-is1) + (j-js1)*nx    + (k-ks1)*nx*ny;
 
-          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+          if(nterraininfo>0&&ABS(vertical_factor-1.0)>0.01){
             int m11, m12, m22, m21;
 
             m11 = iterm + jterm;
@@ -3889,7 +3889,7 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
 //        n22 = (i+1-is1) + (j+1-js1)*nx + (k-1-ks1)*nx*ny;
 //        n21 = (i-is1)   + (j+1-js1)*nx + (k-ks1)*nx*ny;
 
-          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+          if(nterraininfo>0&&ABS(vertical_factor-1.0)>0.01){
             int m11, m12, m22, m21;
 
             m11 = iterm + jterm;
@@ -4011,7 +4011,7 @@ void drawsmoke3dGPU(smoke3d *smoke3di){
         //    n22 = (i+1-is1) + (j+1-js1)*nx + (k+1-ks1)*nx*ny;
         //    n21 = (i-is1)   + (j+1-js1)*nx + (k-ks1)*nx*ny;
 
-          if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+          if(nterraininfo>0&&ABS(vertical_factor-1.0)>0.01){
             int m11, m12, m22, m21;
 
             m11 = iterm + jterm;
@@ -4264,7 +4264,7 @@ void drawsmoke3dCULL(void){
 //        n22 = (i-is1)   + (j+1-js1)*nx + (k+1-ks1)*nx*ny;
 //        n21 = (i-is1)   + (j-js1)*nx   + (k+1-ks1)*nx*ny;
 
-            if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+            if(nterraininfo>0&&ABS(vertical_factor-1.0)>0.01){
               int m, m11, m12, m22, m21;
 
               m = iterm+jterm;
@@ -4320,7 +4320,7 @@ void drawsmoke3dCULL(void){
 //        n22 = (i+1-is1) + (j-js1)*nx   + (k+1-ks1)*nx*ny;
 //        n21 = (i-is1)   + (j-js1)*nx   + (k+1-ks1)*nx*ny;
 
-            if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+            if(nterraininfo>0&&ABS(vertical_factor-1.0)>0.01){
               int m, m11, m12, m22, m21;
 
               m = iterm+jterm;
@@ -4376,7 +4376,7 @@ void drawsmoke3dCULL(void){
 //        n22 = (i+1-is1) + (j+1-js1)*nx   + (k-ks1)*nx*ny;
 //        n21 = (i-is1)   + (j+1-js1)*nx   + (k-ks1)*nx*ny;
 
-            if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+            if(nterraininfo>0&&ABS(vertical_factor-1.0)>0.01){
               int m, m11, m12, m22, m21;
 
               m = iterm+jterm;
@@ -4437,7 +4437,7 @@ void drawsmoke3dCULL(void){
 //        n22 = (j-1-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
 //        n21 = (j-js1)*nx   + (i-is1)   + (k+1-ks1)*nx*ny;
 
-            if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+            if(nterraininfo>0&&ABS(vertical_factor-1.0)>0.01){
               int m, m11, m12, m22, m21;
 
               m = iterm+jterm;
@@ -4498,7 +4498,7 @@ void drawsmoke3dCULL(void){
         //    n22 = (j+1-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
         //    n21 = (j-js1)*nx + (i-is1) + (k+1-ks1)*nx*ny;
 
-            if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+            if(nterraininfo>0&&ABS(vertical_factor-1.0)>0.01){
               int m, m11, m12, m22, m21;
 
               m = iterm+jterm;
@@ -4561,7 +4561,7 @@ void drawsmoke3dCULL(void){
         //    n22 = (j-1-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
         //    n21 = (j-1-js1)*nx + (i-is1) + (k+1-ks1)*nx*ny;
 
-            if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+            if(nterraininfo>0&&ABS(vertical_factor-1.0)>0.01){
               int m, m11, m12, m22, m21;
 
               m = iterm+jterm;
@@ -4624,7 +4624,7 @@ void drawsmoke3dCULL(void){
         //    n22 = (j+1-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
         //    n21 = (j+1-js1)*nx + (i-is1) + (k+1-ks1)*nx*ny;
 
-            if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+            if(nterraininfo>0&&ABS(vertical_factor-1.0)>0.01){
               int m, m11, m12, m22, m21;
 
               m = iterm+jterm;
@@ -4685,7 +4685,7 @@ void drawsmoke3dCULL(void){
         //    n22 = (j+1-js1)*nx + (i+1-is1) + (k-1-ks1)*nx*ny;
         //    n21 = (j+1-js1)*nx + (i-is1) + (k-ks1)*nx*ny;
 
-            if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+            if(nterraininfo>0&&ABS(vertical_factor-1.0)>0.01){
               int m, m11, m12, m22, m21;
 
               m = iterm+jterm;
@@ -4746,7 +4746,7 @@ void drawsmoke3dCULL(void){
         //    n22 = (j+1-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
         //    n21 = (j-js1)*nx + (i+1-is1) + (k+1-ks1)*nx*ny;
 
-            if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+            if(nterraininfo>0&&ABS(vertical_factor-1.0)>0.01){
               int m, m11, m12, m22, m21;
 
               m = iterm+jterm;

@@ -1388,7 +1388,7 @@ void script_loadplot3d(scriptdata *scripti){
     plot3d *plot3di;
 
     plot3di = plot3dinfo + i;
-    if(plot3di->blocknumber==blocknum&&fabs(plot3di->time-time_local)<0.5){
+    if(plot3di->blocknumber==blocknum&&ABS(plot3di->time-time_local)<0.5){
       LoadPlot3dMenu(i);
     }
   }

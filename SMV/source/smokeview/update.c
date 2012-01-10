@@ -1225,7 +1225,7 @@ void updatetimes(void){
   n2=1;
   ntimes2=ntimes;
   for(n=1;n<ntimes;n++){
-    if(fabs(times[n]-times[n-1])>dt_MIN/10.0){
+    if(ABS(times[n]-times[n-1])>dt_MIN/10.0){
       times[n2]=times[n];
       n2++;
     }

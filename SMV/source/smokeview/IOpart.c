@@ -1485,7 +1485,7 @@ void drawPart5(const particle *parti){
   int offset_terrain;
   propdata *prop;
 
-  if(nterraininfo>0&&fabs(vertical_factor-1.0)>0.01){
+  if(nterraininfo>0&&ABS(vertical_factor-1.0)>0.01){
     offset_terrain=1;
   }
   else{

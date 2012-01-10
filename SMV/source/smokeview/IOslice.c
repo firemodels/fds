@@ -1290,7 +1290,7 @@ int hide_slice2(slice *sdi,slice *sdj){
 
 int new_multi(slice *sdold,slice *sd){
 
-  if(sdold->volslice!=sd->volslice==1)return 1;
+  if(sdold->volslice!=sd->volslice)return 1;
   if(sd->volslice==0){
     float delta_orig;
     float delta;
@@ -1300,22 +1300,22 @@ int new_multi(slice *sdold,slice *sd){
   // convert from physical to scaled units using xyzmaxdiff 
     delta_orig = MAX(sdold->delta_orig,sd->delta_orig);
     delta = delta_orig/xyzmaxdiff;
-    if(fabs(sd->xmin-sdold->xmin)<delta&&fabs(sd->xmax-sdold->xmax)<delta // test whether two slices are identical
-	   &&fabs(sd->ymin-sdold->ymin)<delta&&fabs(sd->ymax-sdold->ymax)<delta
-	   &&fabs(sd->zmin-sdold->zmin)<delta&&fabs(sd->zmax-sdold->zmax)<delta
+    if(ABS(sd->xmin-sdold->xmin)<delta&&ABS(sd->xmax-sdold->xmax)<delta // test whether two slices are identical
+	   &&ABS(sd->ymin-sdold->ymin)<delta&&ABS(sd->ymax-sdold->ymax)<delta
+	   &&ABS(sd->zmin-sdold->zmin)<delta&&ABS(sd->zmax-sdold->zmax)<delta
         ){
 	    return 1;
 	  }
 	  
     if(strcmp(sd->label.shortlabel,sdold->label.shortlabel)!=0
       ||sd->idir!=sdold->idir
-      ||fabs(sd->position_orig-sdold->position_orig)>delta_orig
+      ||ABS(sd->position_orig-sdold->position_orig)>delta_orig
       ||sd->mesh_type!=sdold->mesh_type
         ){
       return 1;
     }
   }
-  if(sd->volslice==1){
+  else{
     if(strcmp(sd->label.shortlabel,sdold->label.shortlabel)!=0
       ||sd->mesh_type!=sdold->mesh_type
         ){
@@ -2368,7 +2368,7 @@ void drawslice(const slice *sd){
        i33 = 4*sd->slicepoint[n2+1];
        z1 = zplt[k];
        z3 = zplt[k+1];
-       if(abs(i11-i33)<abs(i13-i31)){
+       if(ABS(i11-i33)<ABS(i13-i31)){
          glColor4fv(&rgb_ptr[i11]);
          glVertex3f(constval,yy1,z1);
          glColor4fv(&rgb_ptr[i31]);
@@ -2421,7 +2421,7 @@ void drawslice(const slice *sd){
        i33 = 4*sd->slicepoint[n2+1];
        z1 = zplt[k];
        z3 = zplt[k+1];
-       if(abs(i11-i33)<abs(i13-i31)){
+       if(ABS(i11-i33)<ABS(i13-i31)){
          glColor4fv(&rgb_ptr[i11]);
          glVertex3f(x1,constval,z1);
          glColor4fv(&rgb_ptr[i31]);
@@ -2472,7 +2472,7 @@ void drawslice(const slice *sd){
        i33 = 4*sd->slicepoint[n2+1];
        yy1 = yplt[j];
        y3 = yplt[j+1];
-       if(abs(i11-i33)<abs(i13-i31)){
+       if(ABS(i11-i33)<ABS(i13-i31)){
          glColor4fv(&rgb_ptr[i11]);
          glVertex3f(x1,yy1,constval);
          glColor4fv(&rgb_ptr[i31]);
@@ -4075,7 +4075,7 @@ void drawvolslice(const slice *sd){
        n+1 (y1,z3) n2+1 (y3,z3)
          n (y1,z1)     n2 (y3,z1)
        */
-       if(abs(i11-i33)<abs(i13-i31)){
+       if(ABS(i11-i33)<ABS(i13-i31)){
          glColor4fv(&rgb_ptr[i11]);glVertex3f(constval,yy1,z1);
          glColor4fv(&rgb_ptr[i31]);glVertex3f(constval,y3,z1);
          glColor4fv(&rgb_ptr[i33]);glVertex3f(constval,y3,z3);
@@ -4126,7 +4126,7 @@ void drawvolslice(const slice *sd){
 
         val(i,j,k) = di*nj*nk + dj*nk + dk
        */
-       if(abs(i11-i33)<abs(i13-i31)){
+       if(ABS(i11-i33)<ABS(i13-i31)){
          glColor4fv(&rgb_ptr[i11]);glVertex3f(x1,constval,z1);
          glColor4fv(&rgb_ptr[i31]);glVertex3f(x3,constval,z1);
          glColor4fv(&rgb_ptr[i33]);glVertex3f(x3,constval,z3);
@@ -4177,7 +4177,7 @@ void drawvolslice(const slice *sd){
 
         val(i,j,k) = di*nj*nk + dj*nk + dk
        */
-       if(abs(i11-i33)<abs(i13-i31)){
+       if(ABS(i11-i33)<ABS(i13-i31)){
          glColor4fv(&rgb_ptr[i11]);glVertex3f(x1,yy1,constval);
          glColor4fv(&rgb_ptr[i31]);glVertex3f(x3,yy1,constval);
          glColor4fv(&rgb_ptr[i33]);glVertex3f(x3,y3,constval);

@@ -820,7 +820,7 @@ extern "C" void TRANSLATE_CB(int var){
     case ZOOM:
       zoomindex=-1;
       for(i=0;i<5;i++){
-        if(fabs(zoom-zooms[i])<0.001){
+        if(ABS(zoom-zooms[i])<0.001){
           zoomindex=i;
           zoom=zooms[i];
           break;
@@ -840,7 +840,7 @@ extern "C" void TRANSLATE_CB(int var){
       }
       zoomindex=-1;
       for(i=0;i<5;i++){
-        if(fabs(zoom-zooms[i])<0.001){
+        if(ABS(zoom-zooms[i])<0.001){
           zoomindex=i;
           zoom=zooms[i];
           aperture_glui=zoom2aperture(zoom);

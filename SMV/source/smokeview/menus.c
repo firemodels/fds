@@ -3566,7 +3566,7 @@ void Plot3DListMenu(int value){
   }
   for(i=0;i<nplot3dinfo;i++){
     plot3di = plot3dinfo + i;
-    if(fabs(plot3di->time-plot3dtimelist[value])<0.5){
+    if(ABS(plot3di->time-plot3dtimelist[value])<0.5){
       LoadPlot3dMenu(i);
     }
   }
@@ -7876,7 +7876,7 @@ updatemenu=0;
         im1 = plot3dorderindex[ii-1];
         plot3di = plot3dinfo + i;
         plot3dim1 = plot3dinfo + im1;
-        if(fabs(plot3di->time-plot3dim1->time)>0.1)nloadsubplot3dmenu++;
+        if(ABS(plot3di->time-plot3dim1->time)>0.1)nloadsubplot3dmenu++;
       }
       NewMemory((void **)&loadsubplot3dmenu,nloadsubplot3dmenu*sizeof(int));
       for(i=0;i<nloadsubplot3dmenu;i++){
@@ -7902,7 +7902,7 @@ updatemenu=0;
         im1 = plot3dorderindex[ii-1];
         plot3di = plot3dinfo + i;
         plot3dim1 = plot3dinfo + im1;
-        if(fabs(plot3di->time-plot3dim1->time)>0.1){
+        if(ABS(plot3di->time-plot3dim1->time)>0.1){
           if(nmeshes>1)glutAddMenuEntry("  All meshes",-100000+nloadsubplot3dmenu-1);
           CREATEMENU(loadsubplot3dmenu[nloadsubplot3dmenu],LoadPlot3dMenu);
           nloadsubplot3dmenu++;
@@ -7950,7 +7950,7 @@ updatemenu=0;
           if(strcmp(plot3di->longlabel,plot3dim1->longlabel)!=0){
             glutAddMenuEntry(plot3di->longlabel,997);
           }
-          if(fabs(plot3di->time-plot3dim1->time)>0.1){
+          if(ABS(plot3di->time-plot3dim1->time)>0.1){
             sprintf(menulabel,"  %f",plot3di->time);
             trimzeros(menulabel);
             strcat(menulabel," s");

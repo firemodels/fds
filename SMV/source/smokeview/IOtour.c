@@ -1040,9 +1040,9 @@ void init_circulartour(void){
   key_view[0]=(xbar0+xbarORIG)/2.0;
   key_view[1]=(ybar0+ybarORIG)/2.0;
   key_view[2]=(zbar0+zbarORIG)/2.0;
-  dx = fabs(xbarORIG - xbar0)/2.0;
-  dy = fabs(ybarORIG - ybar0)/2.0;
-  dz = fabs(zbarORIG-zbar0)/2.0;
+  dx = ABS(xbarORIG - xbar0)/2.0;
+  dy = ABS(ybarORIG - ybar0)/2.0;
+  dz = ABS(zbarORIG-zbar0)/2.0;
   max_xyz=dx;
   if(dy>max_xyz)max_xyz=dy;
   if(dz>max_xyz)max_xyz=dz;

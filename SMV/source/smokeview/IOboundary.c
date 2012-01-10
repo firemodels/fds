@@ -1355,7 +1355,7 @@ void drawpatch_texture(const mesh *meshi){
             r12 = (float)(*(ipq1+1))/255.0;
             r21 = (float)(*ipq2)/255.0;
             r22 = (float)(*(ipq2+1))/255.0;
-            if(abs(r11-r22)<abs(r12-r21)){
+            if(ABS(r11-r22)<ABS(r12-r21)){
               glTexCoord1f(r11);glVertex3fv(xyzp1);
               glTexCoord1f(r12);glVertex3fv(xyzp1+3);
               glTexCoord1f(r22);glVertex3fv(xyzp2+3);
@@ -1436,7 +1436,7 @@ void drawpatch_texture(const mesh *meshi){
             r12 = (float)(*(ipq1+1))/255.0;
             r21 = (float)(*ipq2)/255.0;
             r22 = (float)(*(ipq2+1))/255.0;
-            if(abs(*ipq1-*(ipq2+1))<abs(*(ipq1+1)-*ipq2)){
+            if(ABS(*ipq1-*(ipq2+1))<ABS(*(ipq1+1)-*ipq2)){
               glTexCoord1f(r11);glVertex3fv(xyzp1);
               glTexCoord1f(r12);glVertex3fv(xyzp1+3);
               glTexCoord1f(r22);glVertex3fv(xyzp2+3);
@@ -1514,7 +1514,7 @@ void drawpatch_texture(const mesh *meshi){
             r12 = (float)(*(ipq1+1))/255.0;
             r21 = (float)(*ipq2)/255.0;
             r22 = (float)(*(ipq2+1))/255.0;
-            if(abs(*ipq1-*(ipq2+1))<abs(*(ipq1+1)-*ipq2)){
+            if(ABS(*ipq1-*(ipq2+1))<ABS(*(ipq1+1)-*ipq2)){
               glTexCoord1f(r11);glVertex3fv(xyzp1);
               glTexCoord1f(r22);glVertex3fv(xyzp2+3);
               glTexCoord1f(r12);glVertex3fv(xyzp1+3);
@@ -1663,7 +1663,7 @@ void drawpatch_texture_threshold(const mesh *meshi){
               glTexCoord1f(r21);glVertex3fv(xyzp2);
             }
             else{
-             if(abs(r11-r22)<abs(r12-r21)){
+             if(ABS(r11-r22)<ABS(r12-r21)){
                glTexCoord1f(r11);glColor4fv(color11);glVertex3fv(xyzp1);
                glTexCoord1f(r12);glColor4fv(color12);glVertex3fv(xyzp1+3);
                glTexCoord1f(r22);glColor4fv(color22);glVertex3fv(xyzp2+3);
@@ -1747,7 +1747,7 @@ void drawpatch_texture_threshold(const mesh *meshi){
               glTexCoord1f(r21);glVertex3fv(xyzp2);
             }
             else{
-              if(abs(*ipq1-*(ipq2+1))<abs(*(ipq1+1)-*ipq2)){
+              if(ABS(*ipq1-*(ipq2+1))<ABS(*(ipq1+1)-*ipq2)){
                 glTexCoord1f(r11);glColor4fv(color11);glVertex3fv(xyzp1);
                 glTexCoord1f(r12);glColor4fv(color12);glVertex3fv(xyzp1+3);
                 glTexCoord1f(r22);glColor4fv(color22);glVertex3fv(xyzp2+3);
@@ -1827,7 +1827,7 @@ void drawpatch_texture_threshold(const mesh *meshi){
               glTexCoord1f(r22);glVertex3fv(xyzp2+3);
             }
             else{
-              if(abs(*ipq1-*(ipq2+1))<abs(*(ipq1+1)-*ipq2)){
+              if(ABS(*ipq1-*(ipq2+1))<ABS(*(ipq1+1)-*ipq2)){
                 glTexCoord1f(r11);glColor4fv(color11);glVertex3fv(xyzp1);
                 glTexCoord1f(r22);glColor4fv(color22);glVertex3fv(xyzp2+3);
                 glTexCoord1f(r12);glColor4fv(color12);glVertex3fv(xyzp1+3);
@@ -2223,7 +2223,7 @@ void drawpatch(const mesh *meshi){
               if(meshi->thresholdtime[nn2+icol  ]>=0.0&&times[itimes]>meshi->thresholdtime[nn2+icol  ])color21=&char_color[0];
               if(meshi->thresholdtime[nn2+icol+1]>=0.0&&times[itimes]>meshi->thresholdtime[nn2+icol+1])color22=&char_color[0];
             }
-            if(abs(*ipq1-*(ipq2+1))<abs(*(ipq1+1)-*ipq2)){
+            if(ABS(*ipq1-*(ipq2+1))<ABS(*(ipq1+1)-*ipq2)){
               glColor4fv(color11); 
               glVertex3fv(xyzp1);
 
@@ -2336,7 +2336,7 @@ void drawpatch(const mesh *meshi){
               if(meshi->thresholdtime[nn2+icol  ]>=0.0&&times[itimes]>meshi->thresholdtime[nn2+icol  ])color21=&char_color[0];
               if(meshi->thresholdtime[nn2+icol+1]>=0.0&&times[itimes]>meshi->thresholdtime[nn2+icol+1])color22=&char_color[0];
             }
-            if(abs(*ipq1-*(ipq2+1))<abs(*(ipq1+1)-*ipq2)){
+            if(ABS(*ipq1-*(ipq2+1))<ABS(*(ipq1+1)-*ipq2)){
               glColor4fv(color11); 
               glVertex3fv(xyzp1);
 
@@ -2447,7 +2447,7 @@ void drawpatch(const mesh *meshi){
               if(meshi->thresholdtime[nn2+icol  ]>=0.0&&times[itimes]>meshi->thresholdtime[nn2+icol  ])color21=&char_color[0];
               if(meshi->thresholdtime[nn2+icol+1]>=0.0&&times[itimes]>meshi->thresholdtime[nn2+icol+1])color22=&char_color[0];
             }
-            if(abs(*ipq1-*(ipq2+1))<abs(*(ipq1+1)-*ipq2)){
+            if(ABS(*ipq1-*(ipq2+1))<ABS(*(ipq1+1)-*ipq2)){
               glColor4fv(color11); 
               glVertex3fv(xyzp1);
 

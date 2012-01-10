@@ -19,6 +19,7 @@ char string_util_revision[]="$Revision$";
 #include <dirent.h>
 #endif
 #include "MALLOC.h"
+#include "datadefs.h"
 #include "string_util.h"
 
 /* ----------------------- fparsecsv ----------------------------- */
@@ -328,7 +329,7 @@ void num2string(char *string, float tval,float range){
   float tval2,mant10;
   int exp10;
 
-  //if(fabs((double)tval)<fabs((double)range)/100.0f)tval=0.0f;
+  //if(ABS((double)tval)<ABS((double)range)/100.0f)tval=0.0f;
   tval2=tval; 
   if(tval2<0.0)tval2=-tval2;
   if(0.01<=tval2&&tval2<0.1){
@@ -486,7 +487,7 @@ void array2string(float *vals, int nvals, char *string){
 float frexp10(float x, int *exp10){
   float xabs, mantissa;
 
-  xabs = fabs((double)x);
+  xabs = ABS((double)x);
   if(x==0.0f){
     *exp10=0;
     return 0.0f;

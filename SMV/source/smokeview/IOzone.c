@@ -761,7 +761,7 @@ void get_dpT(float *yy, int n, roomdata *r1, roomdata *r2, float *delp, float *d
         itslab=r2->itl;
       }
     }
-    delp[i]=fsign*sqrt(fabs(p1-p2));
+    delp[i]=fsign*sqrt(ABS(p1-p2));
     iT[i]=itslab;
   }
   *dpmin=delp[0];

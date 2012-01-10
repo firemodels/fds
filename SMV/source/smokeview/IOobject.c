@@ -1280,7 +1280,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
       glTranslatef(0.0,0.0,arg[0]);
       break;
     case SV_IF:
-      if(fabs(arg[0])<=0.001){
+      if(ABS(arg[0])<=0.001){
         toknext=toki->elsenext;
       }
       break;
@@ -1288,7 +1288,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
     case SV_ENDIF:
       break;
     case SV_AND:
-      if(fabs(arg[0])>=0.001&&fabs(arg[1])>=0.001){
+      if(ABS(arg[0])>=0.001&&ABS(arg[1])>=0.001){
         *argptr=1.0;
       }
       else{
@@ -1296,7 +1296,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
       }
       break;
     case SV_OR:
-      if(fabs(arg[0])>=0.001||fabs(arg[1])>=0.001){
+      if(ABS(arg[0])>=0.001||ABS(arg[1])>=0.001){
         *argptr=1.0;
       }
       else{
@@ -4961,9 +4961,9 @@ void setup_device_data(void){
       if(devj->filetype!=CSV_EXP)continue;
       xyz = devj->xyz;
       if(strcmp(devj->quantity,"VELOCITY")!=0)continue;
-      if(fabs(xyz[0]-xyzval[0])>EPSDEV)continue;
-      if(fabs(xyz[1]-xyzval[1])>EPSDEV)continue;
-      if(fabs(xyz[2]-xyzval[2])>EPSDEV)continue;
+      if(ABS(xyz[0]-xyzval[0])>EPSDEV)continue;
+      if(ABS(xyz[1]-xyzval[1])>EPSDEV)continue;
+      if(ABS(xyz[2]-xyzval[2])>EPSDEV)continue;
       vdevi->veldev=devj;
       vdevi->filetype=CSV_EXP;
       break;
@@ -4977,9 +4977,9 @@ void setup_device_data(void){
       if(devj->filetype!=CSV_EXP)continue;
       xyz = devj->xyz;
       if(strcmp(devj->quantity,"SD_VELOCITY")!=0)continue;
-      if(fabs(xyz[0]-xyzval[0])>EPSDEV)continue;
-      if(fabs(xyz[1]-xyzval[1])>EPSDEV)continue;
-      if(fabs(xyz[2]-xyzval[2])>EPSDEV)continue;
+      if(ABS(xyz[0]-xyzval[0])>EPSDEV)continue;
+      if(ABS(xyz[1]-xyzval[1])>EPSDEV)continue;
+      if(ABS(xyz[2]-xyzval[2])>EPSDEV)continue;
       vdevi->sd_veldev=devj;
       vdevi->filetype=CSV_EXP;
       break;
@@ -4993,9 +4993,9 @@ void setup_device_data(void){
       if(devj->filetype!=CSV_EXP)continue;
       xyz = devj->xyz;
       if(strcmp(devj->quantity,"ANGLE")!=0)continue;
-      if(fabs(xyz[0]-xyzval[0])>EPSDEV)continue;
-      if(fabs(xyz[1]-xyzval[1])>EPSDEV)continue;
-      if(fabs(xyz[2]-xyzval[2])>EPSDEV)continue;
+      if(ABS(xyz[0]-xyzval[0])>EPSDEV)continue;
+      if(ABS(xyz[1]-xyzval[1])>EPSDEV)continue;
+      if(ABS(xyz[2]-xyzval[2])>EPSDEV)continue;
       vdevi->angledev=devj;
       vdevi->filetype=CSV_EXP;
       break;
@@ -5009,9 +5009,9 @@ void setup_device_data(void){
       if(devj->filetype!=CSV_EXP)continue;
       xyz = devj->xyz;
       if(strcmp(devj->quantity,"SD_ANGLE")!=0)continue;
-      if(fabs(xyz[0]-xyzval[0])>EPSDEV)continue;
-      if(fabs(xyz[1]-xyzval[1])>EPSDEV)continue;
-      if(fabs(xyz[2]-xyzval[2])>EPSDEV)continue;
+      if(ABS(xyz[0]-xyzval[0])>EPSDEV)continue;
+      if(ABS(xyz[1]-xyzval[1])>EPSDEV)continue;
+      if(ABS(xyz[2]-xyzval[2])>EPSDEV)continue;
       vdevi->sd_angledev=devj;
       vdevi->filetype=CSV_EXP;
       break;
@@ -5025,9 +5025,9 @@ void setup_device_data(void){
       if(devj->filetype!=CSV_FDS)continue;
       xyz = devj->xyz;
       if(strcmp(devj->quantity,"U-VELOCITY")!=0)continue;
-      if(fabs(xyz[0]-xyzval[0])>EPSDEV)continue;
-      if(fabs(xyz[1]-xyzval[1])>EPSDEV)continue;
-      if(fabs(xyz[2]-xyzval[2])>EPSDEV)continue;
+      if(ABS(xyz[0]-xyzval[0])>EPSDEV)continue;
+      if(ABS(xyz[1]-xyzval[1])>EPSDEV)continue;
+      if(ABS(xyz[2]-xyzval[2])>EPSDEV)continue;
       vdevi->udev=devj;
       vdevi->filetype=CSV_FDS;
       break;
@@ -5041,9 +5041,9 @@ void setup_device_data(void){
       if(devj->filetype!=CSV_FDS)continue;
       xyz = devj->xyz;
       if(strcmp(devj->quantity,"V-VELOCITY")!=0)continue;
-      if(fabs(xyz[0]-xyzval[0])>EPSDEV)continue;
-      if(fabs(xyz[1]-xyzval[1])>EPSDEV)continue;
-      if(fabs(xyz[2]-xyzval[2])>EPSDEV)continue;
+      if(ABS(xyz[0]-xyzval[0])>EPSDEV)continue;
+      if(ABS(xyz[1]-xyzval[1])>EPSDEV)continue;
+      if(ABS(xyz[2]-xyzval[2])>EPSDEV)continue;
       vdevi->vdev=devj;
       vdevi->filetype=CSV_FDS;
       break;
@@ -5057,9 +5057,9 @@ void setup_device_data(void){
       if(devj->filetype!=CSV_FDS)continue;
       xyz = devj->xyz;
       if(strcmp(devj->quantity,"W-VELOCITY")!=0)continue;
-      if(fabs(xyz[0]-xyzval[0])>EPSDEV)continue;
-      if(fabs(xyz[1]-xyzval[1])>EPSDEV)continue;
-      if(fabs(xyz[2]-xyzval[2])>EPSDEV)continue;
+      if(ABS(xyz[0]-xyzval[0])>EPSDEV)continue;
+      if(ABS(xyz[1]-xyzval[1])>EPSDEV)continue;
+      if(ABS(xyz[2]-xyzval[2])>EPSDEV)continue;
       vdevi->wdev=devj;
       vdevi->filetype=CSV_FDS;
       break;
@@ -5085,9 +5085,9 @@ void setup_device_data(void){
       vdevj = vdeviceinfo + j;
       if(vdevj->unique==0)continue;
       xyzj = vdevj->valdev->xyz;
-      if(fabs(xyzi[0]-xyzj[0])>EPSDEV)continue;
-      if(fabs(xyzi[1]-xyzj[1])>EPSDEV)continue;
-      if(fabs(xyzi[2]-xyzj[2])>EPSDEV)continue;
+      if(ABS(xyzi[0]-xyzj[0])>EPSDEV)continue;
+      if(ABS(xyzi[1]-xyzj[1])>EPSDEV)continue;
+      if(ABS(xyzi[2]-xyzj[2])>EPSDEV)continue;
       vdevj->unique=0;
     }
   }

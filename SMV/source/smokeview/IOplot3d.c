@@ -554,7 +554,7 @@ void drawplot3d_texture(mesh *meshi){
         color2t=color1t+nz;
         for(k=0; k<kbar; k++){
           if(iblank_x==NULL||iblank_x[ijknode(plotx,j,k)]==2){
-            if(abs(color1t[k]-color2t[k+1])<abs(color1t[k+1]-color2t[k])){
+            if(ABS(color1t[k]-color2t[k+1])<ABS(color1t[k+1]-color2t[k])){
               glTexCoord1f(color1t[k]);  glVertex3f(xplt[plotx],yplt[j],zplt[k]);
               glTexCoord1f(color2t[k]);  glVertex3f(xplt[plotx],yplt[j+1],zplt[k]);
               glTexCoord1f(color2t[k+1]);glVertex3f(xplt[plotx],yplt[j+1],zplt[k+1]);
@@ -669,7 +669,7 @@ void drawplot3d_texture(mesh *meshi){
           color2t=color1t+nz;
           for(k=0; k<kbar; k++){
             if(iblank==NULL||iblank_y[ijknode(i,ploty,k)]==2){
-              if(abs(color1t[k]-color2t[k+1])<abs(color1t[k+1]-color2t[k])){
+              if(ABS(color1t[k]-color2t[k+1])<ABS(color1t[k+1]-color2t[k])){
                 glTexCoord1f(color1t[k]);  glVertex3f(xplt[i],yplt[ploty],zplt[k]);
                 glTexCoord1f(color2t[k]);  glVertex3f(xplt[i+1],yplt[ploty],zplt[k]);
                 glTexCoord1f(color2t[k+1]);glVertex3f(xplt[i+1],yplt[ploty],zplt[k+1]);
@@ -772,7 +772,7 @@ void drawplot3d_texture(mesh *meshi){
         color2t=color1t+ny;
         for(j=0; j<jbar; j++){
           if(iblank_z==NULL||iblank_z[ijknode(i,j,plotz)]==2){
-            if(abs(color1t[j]-color2t[j+1])<abs(color1t[j+1]-color2t[j])){
+            if(ABS(color1t[j]-color2t[j+1])<ABS(color1t[j+1]-color2t[j])){
               glTexCoord1f(  color1t[j]);glVertex3f(  xplt[i],  yplt[j],zplt[plotz]);
               glTexCoord1f(  color2t[j]);glVertex3f(xplt[i+1],  yplt[j],zplt[plotz]);
               glTexCoord1f(color2t[j+1]);glVertex3f(xplt[i+1],yplt[j+1],zplt[plotz]);
@@ -988,7 +988,7 @@ void drawplot3d(mesh *meshi){
         color2=color1+nz;
         for(k=0; k<kbar; k++){
           if(iblank==NULL||iblank_x[ijknode(plotx,j,k)]==2){
-            if(abs(color1[k]-color2[k+1])<abs(color1[k+1]-color2[k])){
+            if(ABS(color1[k]-color2[k+1])<ABS(color1[k+1]-color2[k])){
               glColor4fv(rgb_plot3d+4*color1[k]);  glVertex3f(xplt[plotx],yplt[j],zplt[k]);
               glColor4fv(rgb_plot3d+4*color2[k]);  glVertex3f(xplt[plotx],yplt[j+1],zplt[k]);
               glColor4fv(rgb_plot3d+4*color2[k+1]);glVertex3f(xplt[plotx],yplt[j+1],zplt[k+1]);
@@ -1103,7 +1103,7 @@ void drawplot3d(mesh *meshi){
           color2=color1+nz;
           for(k=0; k<kbar; k++){
             if(iblank_y==NULL||iblank_y[ijknode(i,ploty,k)]==2){
-              if(abs(color1[k]-color2[k+1])<abs(color1[k+1]-color2[k])){
+              if(ABS(color1[k]-color2[k+1])<ABS(color1[k+1]-color2[k])){
                 glColor4fv(rgb_plot3d+4*color1[k]);  glVertex3f(xplt[i],yplt[ploty],zplt[k]);
                 glColor4fv(rgb_plot3d+4*color2[k]);  glVertex3f(xplt[i+1],yplt[ploty],zplt[k]);
                 glColor4fv(rgb_plot3d+4*color2[k+1]);glVertex3f(xplt[i+1],yplt[ploty],zplt[k+1]);
@@ -1206,7 +1206,7 @@ void drawplot3d(mesh *meshi){
         color2=color1+ny;
         for(j=0; j<jbar; j++){
           if(iblank==NULL||iblank_z[ijknode(i,j,plotz)]==2){
-            if(abs(color1[j]-color2[j+1])<abs(color1[j+1]-color2[j])){
+            if(ABS(color1[j]-color2[j+1])<ABS(color1[j+1]-color2[j])){
               glColor4fv(rgb_plot3d+4*color1[j]);glVertex3f(xplt[i],yplt[j],zplt[plotz]);
               glColor4fv(rgb_plot3d+4*color2[j]);glVertex3f(xplt[i+1],yplt[j],zplt[plotz]);
               glColor4fv(rgb_plot3d+4*color2[j+1]);glVertex3f(xplt[i+1],yplt[j+1],zplt[plotz]);
@@ -1421,10 +1421,10 @@ int get_plot3d_index(mesh *meshi, int dir, float val){
   }
   
   ivalmin=0;
-  valmin = fabs(xyz[0]- val);
+  valmin = ABS(xyz[0]- val);
   for(i=1;i<=nvals;i++){
-    if(fabs(xyz[i]-val)<valmin){
-      valmin = fabs(xyz[i]-val);
+    if(ABS(xyz[i]-val)<valmin){
+      valmin = ABS(xyz[i]-val);
       ivalmin = i;
     }
   }
@@ -2040,7 +2040,7 @@ void init_plot3dtimelist(void){
   lasttime_local=-999999.0;
   for(i=0;i<nplot3dinfo;i++){
     val=plot3dtimelist[i];
-    if(fabs((double)(val-lasttime_local))>0.1){
+    if(ABS((double)(val-lasttime_local))>0.1){
       nplot3dtimelist++;
       plot3dtimelist[nplot3dtimelist-1]=val;
       lasttime_local=val;

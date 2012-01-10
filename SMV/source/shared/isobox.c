@@ -1500,10 +1500,10 @@ void CCisosurface2file(char *isofile, float *t, float *data, int *iblank,
     dlevel=-1.0;
     if(*nlevels>1){
       if(i==0){
-        dlevel=abs(level[1]-level[0]);
+        dlevel=ABS(level[1]-level[0]);
       }
       else if(i==*nlevels-1){
-        dlevel=abs(level[*nlevels-1]-level[*nlevels-2]);
+        dlevel=ABS(level[*nlevels-1]-level[*nlevels-2]);
       }
       else{
         dlevel=MIN(ABS(level[i+1]-level[i]),ABS(level[i]-level[i-1]));
@@ -1568,10 +1568,10 @@ void CCisosurfacet2file(char *isofile, float *t, float *data, int *data2flag, fl
     
     if(*nlevels>1){
       if(i==0){
-        dlevel=abs(level[1]-level[0]);
+        dlevel=ABS(level[1]-level[0]);
       }
       else if(i==*nlevels-1){
-        dlevel=abs(level[*nlevels-1]-level[*nlevels-2]);
+        dlevel=ABS(level[*nlevels-1]-level[*nlevels-2]);
       }
       else{
         float val1, val2;
