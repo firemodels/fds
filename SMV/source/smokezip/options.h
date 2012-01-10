@@ -73,7 +73,7 @@
 
 #ifdef pp_BETA
 #undef pp_release
-#define SMZVERSION "test"
+#define PROGVERSION "test"
 #define pp_PART2
 #endif
 
@@ -83,7 +83,7 @@
 #endif
 
 #ifdef pp_release
-#define SMZVERSION "1.4.2"
+#define PROGVERSION "1.4.2"
 #endif
 
 #ifdef X64

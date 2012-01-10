@@ -177,12 +177,6 @@ int getmaxrevision(void){
   return max_revision;
 }
 
-/* ------------------ getSMVversion ------------------------ */
-
-void getPROGversion(char *SMZversion){
-  strcpy(SMZversion,SMZVERSION);
-}
-
 /* ------------------ atan3 ------------------------ */
 
 float atan3(float dy,float dx){
