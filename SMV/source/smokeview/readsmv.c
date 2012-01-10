@@ -11136,11 +11136,13 @@ void writeini(int flag){
   }
   {
     int svn_num;
+    char version[256];
 
+    getPROGversion(version);
     svn_num=getmaxrevision();    // get svn revision number
     fprintf(fileout,"\n\n# Development Environment\n");
     fprintf(fileout,"# -----------------------\n\n");
-    fprintf(fileout,"# Smokeview Version: %s\n",SMVVERSION);
+    fprintf(fileout,"# Smokeview Version: %s\n",version);
     fprintf(fileout,"# Smokeview Revision Number: %i\n",svn_num);
     fprintf(fileout,"# Smokeview Compile Date: %s\n",__DATE__);
     if(use_graphics==1){

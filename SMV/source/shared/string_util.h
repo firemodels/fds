@@ -14,7 +14,7 @@
 #define STRDECL(var,val)  var
 #endif
 
-
+EXTERNCPP void getPROGversion(char *PROGversion);
 EXTERNCPP int match_wild(char *pTameText, char *pWildText);
 EXTERNCPP int match(char *buffer, const char *key);
 EXTERNCPP int match_upper(char *buffer, const char *key);

@@ -546,11 +546,13 @@ void parse_commandline(int argc, char **argv){
 
 void display_version_info(void){
     int svn_num;
+    char version[256];
 
+    getPROGversion(version);
     svn_num=getmaxrevision();    // get svn revision number
     printf("\n");
     printf("%s\n\n",TITLERELEASE);
-    printf("Version: %s\n",SMVVERSION);
+    printf("Version: %s\n",version);
 #ifdef BIT64
     printf("Smokeview (64 bit) Revision Number: %i\n",svn_num);
 #else

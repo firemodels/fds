@@ -14,11 +14,11 @@
 
 //VVVVVVVVVVVVVVVVVVVVVVVVVVVVV  define smokeview title VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 #ifdef pp_BETA
-#define SMVVERSION "Test"
+#define PROGVERSION "Test"
 #undef pp_release
 #endif
 #ifdef pp_release
-#define SMVVERSION "5.6.3"
+#define PROGVERSION "5.6.3"
 #endif
 
 //VVVVVVVVVVVVVVVVVVVVVVVVVVVVV  turn on options available on all platforms VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV

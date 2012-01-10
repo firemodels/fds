@@ -671,3 +671,10 @@ void remove_comment(char *buffer){
   if(comment!=NULL)comment[0]=0;
   return;
 }
+
+/* ------------------ getPROGversion ------------------------ */
+
+void getPROGversion(char *PROGversion){
+  strcpy(PROGversion,PROGVERSION);
+}
+

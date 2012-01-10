@@ -1977,7 +1977,7 @@ void initvars(void){
 // construct string of the form:
 //   5.x.y_#
 
-    strcpy(version,SMVVERSION);
+    getPROGversion(version);
 
     strcpy(TITLEBASE,"Smokeview ");
 
