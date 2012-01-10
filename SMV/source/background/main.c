@@ -535,9 +535,3 @@ int getmaxrevision(void){
   MAXREV(main_revision);
   return max_revision;
 }
-
-/* ------------------ getPROGversion ------------------------ */
-
-void getPROGversion(char *PROGversion){
-  strcpy(PROGversion,PROGVERSION);
-}
