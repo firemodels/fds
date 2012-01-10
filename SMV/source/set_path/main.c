@@ -413,7 +413,6 @@ void usage(void){
 
 /* ------------------ getmaxrev ------------------------ */
 
-#define MAXREV(cval) rev=getrevision(cval);max_revision=MAX(rev,max_revision)
 int getmaxrevision(void){
   int max_revision=0,rev;
 

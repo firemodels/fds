@@ -77,7 +77,7 @@ void version(void){
     char smv_version[100];
     int svn_num;
 
-    getSMDiffversion(smv_version);  // get Smokeview version (ie 5.x.z)
+    getPROGversion(smv_version);  // get Smokeview version (ie 5.x.z)
     svn_num=getmaxrevision();    // get svn revision number
     printf("\n");
     printf("Smokediff\n\n");
@@ -114,7 +114,6 @@ void version(void){
 
 /* ------------------ getmaxrev ------------------------ */
 
-#define MAXREV(cval) rev=getrevision(cval);max_revision=MAX(rev,max_revision)
 int getmaxrevision(void){
   int max_revision=0,rev;
 
@@ -132,7 +131,7 @@ int getmaxrevision(void){
 
 /* ------------------ getSMVversion ------------------------ */
 
-void getSMDiffversion(char *SMDiffversion){
+void getPROGversion(char *SMDiffversion){
   strcpy(SMDiffversion,SMDiffVERSION);
 }
 

@@ -116,7 +116,7 @@ typedef struct {
 //************************** headers ****************************************
 
 int getendian(void);
-void getSMDiffversion(char *SMDiffversion);
+void getPROGversion(char *SMDiffversion);
 int getmaxrevision(void);
 void version(void);
 void usage(void);

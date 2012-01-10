@@ -1318,8 +1318,6 @@ void initvars(void){
   show_transparent_vents=1;
   maxtourframes=500;
   blockageSelect=0;
-  ntourknots=0;
-  itourknots=-1;
   stretch_var_black=0; 
   stretch_var_white=0; 
   move_var=0;
@@ -2153,7 +2151,6 @@ void initvars(void){
 
 /* ------------------ getmaxrevision ------------------------ */
 
-#define MAXREV(cval) rev=getrevision(cval);max_revision=MAX(rev,max_revision)
 int getmaxrevision(void){
   int max_revision=0,rev;
 

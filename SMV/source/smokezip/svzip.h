@@ -258,7 +258,7 @@ void rand_3d(float xyz[3], float xmin, float xmax, float ymin, float ymax, float
 void get_startup_slice(int seq_id);
 void get_startup_smoke(int seq_id);
 void get_startup_patch(int seq_id);
-void getSMZversion(char *SMZversion);
+void getPROGversion(char *SMZversion);
 int getmaxrevision(void);
 void version(void);
 unsigned int irle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer_out);

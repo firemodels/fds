@@ -52,4 +52,8 @@
 #define IJ(i,j) ((i)+(j)*nx)
 #endif
 
+#ifndef MAXREV
+#define MAXREV(cval) rev=getrevision(cval);max_revision=MAX(rev,max_revision)
+#endif
+
 #endif

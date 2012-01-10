@@ -223,7 +223,7 @@ void usage(void){
   char smv_version[100];
   int svn_num;
 
-  getSMDiffversion(smv_version);  // get Smokeview version (ie 5.x.z)
+  getPROGversion(smv_version);  // get Smokeview version (ie 5.x.z)
   svn_num=getmaxrevision();    // get svn revision number
 
   printf("\n");

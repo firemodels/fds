@@ -11,6 +11,7 @@
 #include <math.h>
 #include "svn_revision.h"
 #include "blockaid.h"
+#include "datadefs.h"
 #include "ASSERT.h"
 
 // svn revision character string
@@ -22,7 +23,7 @@ void usage(void){
   char group_version[100];
   int svn_num;
 
-  getBLOCKAIDversion(group_version);  // get Blockaid version (ie 5.x.z)
+  getPROGversion(group_version);  // get Blockaid version (ie 5.x.z)
   svn_num=getmaxrevision();    // get svn revision number
 
     printf("\n");
@@ -50,7 +51,7 @@ void version(void){
     char blockaid_version[100];
     int svn_num;
 
-    getBLOCKAIDversion(blockaid_version);  // get Sblockaid verson (ie x,y,z)
+    getPROGversion(blockaid_version);  // get Sblockaid verson (ie x,y,z)
     svn_num=getmaxrevision();    // get svn revision number
     printf("\n");
     printf("Blockaid\n\n");
@@ -71,9 +72,8 @@ void version(void){
 
 /* ------------------ getmaxrevision ------------------------ */
 
-#define MAXREV(cval) max_revision=MAX(getrevision(cval),max_revision)
 int getmaxrevision(void){
-  int max_revision=0;
+  int max_revision=0, rev;
 
   MAXREV(assert_revision);
   MAXREV(dmalloc_revision);
@@ -86,7 +86,7 @@ int getmaxrevision(void){
 
 /* ------------------ getSMVversion ------------------------ */
 
-void getBLOCKAIDversion(char *BLOCKAIDversion){
+void getPROGversion(char *BLOCKAIDversion){
   strcpy(BLOCKAIDversion,BLOCKAIDVERSION);
 }
 

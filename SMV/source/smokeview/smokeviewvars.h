@@ -341,8 +341,8 @@ SVEXTERN float slice_average_interval;
 SVEXTERN float SVDECL(angle_global,0.0), SVDECL(dang_global,0.025f), SVDECL(tourangle_global,0.0);
 SVEXTERN int maxtourframes;
 SVEXTERN int blockageSelect;
-SVEXTERN unsigned int ntourknots;
-SVEXTERN int itourknots;
+SVEXTERN int SVDECL(ntourknots,0);
+SVEXTERN int SVDECL(itourknots,-1);
 SVEXTERN int stretch_var_black, stretch_var_white, move_var;
 
 SVEXTERN int showhide_option;
