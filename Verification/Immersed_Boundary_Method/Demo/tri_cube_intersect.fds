@@ -1,6 +1,6 @@
 &HEAD CHID='tri_cube_intersect', TITLE='test of tri cube intersection' /
 
-&MESH IJK=3,3,3, XB=0,3,0,3,0,3 /
+&MESH IJK=3,3,3, XB=-1,2,-1,2,-1,2 /
   
 &TIME T_END=1 /
 
@@ -22,6 +22,75 @@ VERT X=2.4,1.6,1.5 /
 &VERT X=1.25,.75,2.25 /
 &VERT X=2.25,.75,1.25 /
 &VERT X=2.25,1.75,2.25 /
+
+&MISC CUTCELL_TEST=0 /
+! The following are 12 examples to test the cut-cell algorithm
+
+! example 1
+&VERT X=0.5,0,1/
+&VERT X=1,0.5,0/
+&VERT X=0.5,1.0/
+
+! example 2
+&VERT X=1,0.5,1/
+&VERT X=1,1,0.5/
+&VERT X=0.5,1,1/
+
+! example 3
+&VERT X=0.5,0,0.5/
+&VERT X=1,0.5,0.5/
+&VERT X=0,1,0.5/
+
+
+! example 4
+&VERT X=0.3,0,0/
+&VERT X=0,0,0.3/
+&VERT X=0,0.9,1/
+
+! example 5
+&VERT X=0,0,0/
+&VERT X=0,-1,1/
+&VERT X=-1,0,1/
+
+! example 6
+&VERT X=0.5,0,1/
+&VERT X=1,1,0.5/
+&VERT X=0,1,0.5/
+
+! example 7
+&VERT X=0,0,1/
+&VERT X=1,0,1/
+&VERT X=0.5,1,0/
+
+! example 8
+&VERT X=0.5,0,1/
+&VERT X=1,0.6,1/
+&VERT X=0,0.5,1/
+
+! example 9
+&VERT X=0,0,1/
+&VERT X=1,0,1/
+&VERT X=0.5,1,2/
+
+! example 10
+&VERT X=0.3,-0.1,0/
+&VERT X=-0.1,0,0.5/
+&VERT X=0.1,1.1,1.1/
+
+! example 11
+&VERT X=-0.4,0.5,0.5/
+&VERT X=0.5,0.5,1.4/
+&VERT X=1.4,0.5,-0.4/
+
+! example 12
+&VERT X=1.25,-0.25,0.5 /
+&VERT X=-0.25,0.5,1.25 /
+&VERT X=0.5,1.25,-0.25 /
+
+! example 12a, x,y,z+1
+&VERT X=2.25,0.75,1.5 /
+&VERT X=0.75,1.5,2.25 /
+&VERT X=1.5,2.25,0.75 /
 
 ! Facets with vertices, N(3), ordered so that with right-hand rule
 ! the surface normal points toward the gas phase (out of the solid).
