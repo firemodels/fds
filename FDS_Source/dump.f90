@@ -3203,13 +3203,16 @@ SUBROUTINE DUMP_PART(T,NM)
 ! Dump Lagrangian particle data to CHID.prt5
  
 USE MEMORY_FUNCTIONS, ONLY:CHKMEMERR 
+USE PHYSICAL_FUNCTIONS, ONLY : SURFACE_DENSITY
+
 INTEGER, INTENT(IN)  :: NM
 REAL(EB), INTENT(IN) :: T
 REAL(FB) :: STIME
-INTEGER  :: NPP,NPLIM,I,N,NN,IPC,IZERO
+INTEGER  :: NPP,NPLIM,I,N,NN,IPC,IZERO,IBC,IW
 REAL(FB), ALLOCATABLE, DIMENSION(:) :: XP,YP,ZP
 REAL(FB), ALLOCATABLE, DIMENSION(:,:) :: QP
 INTEGER, ALLOCATABLE, DIMENSION(:) :: TA
+TYPE (SURFACE_TYPE), POINTER :: SF=>NULL()
  
 IF (EVACUATION_ONLY(NM)) RETURN
 CALL POINT_TO_MESH(NM)
@@ -3272,7 +3275,21 @@ PARTICLE_CLASS_LOOP: DO N=1,N_PART
             CASE(437)  ! PARTICLE TEMPERATURE
                QP(NPP,NN) = LP%TMP - TMPM
             CASE(438)  ! PARTICLE MASS
-               QP(NPP,NN) = 1.E9_EB*PC%FTPR*LP%R**3
+               IBC = PC%SURF_INDEX
+               IF (IBC<1) THEN
+                  QP(NPP,NN) = 1.E3_EB*PC%FTPR*LP%R**3
+               ELSE
+                  SF => SURFACE(IBC)
+                  IW = LP%WALL_INDEX
+                  SELECT CASE(SF%GEOMETRY)
+                  CASE(SURF_CARTESIAN)
+                     QP(NPP,NN) = 1.E3_EB*2._EB*SF%LENGTH*SF%WIDTH*LP%R   *SURFACE_DENSITY(NM,IW,1) 
+                  CASE(SURF_CYLINDRICAL)
+                     QP(NPP,NN) = 1.E3_EB*PI*   SF%LENGTH         *LP%R**2*SURFACE_DENSITY(NM,IW,1)
+                  CASE(SURF_SPHERICAL)
+                     QP(NPP,NN) = 1.E3_EB*FOTH*PI                 *LP%R**3*SURFACE_DENSITY(NM,IW,1)
+                  END SELECT
+               ENDIF            
             CASE(439)  ! PARTICLE AGE
                QP(NPP,NN) = T-LP%T
             CASE(440)  ! PARTICLE WEIGHTING FACTOR
@@ -3304,13 +3321,15 @@ SUBROUTINE DUMP_PART_EB(T,NM)
 ! Dump Lagrangian particle data to CHID.prt5
  
 USE MEMORY_FUNCTIONS, ONLY:CHKMEMERR 
+USE PHYSICAL_FUNCTIONS, ONLY : SURFACE_DENSITY
 INTEGER, INTENT(IN)  :: NM
 REAL(EB), INTENT(IN) :: T
 REAL(EB) :: STIME
-INTEGER  :: NPP,NPLIM,I,N,NN,IPC,IZERO
+INTEGER  :: NPP,NPLIM,I,N,NN,IPC,IZERO,IBC,IW
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: XP,YP,ZP
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: QP
 INTEGER, ALLOCATABLE, DIMENSION(:) :: TA
+TYPE (SURFACE_TYPE), POINTER :: SF=>NULL()
  
 IF (EVACUATION_ONLY(NM)) RETURN
 CALL POINT_TO_MESH(NM)
@@ -3373,7 +3392,21 @@ PARTICLE_CLASS_LOOP: DO N=1,N_PART
             CASE(437)  ! PARTICLE TEMPERATURE
                QP(NPP,NN) = LP%TMP - TMPM
             CASE(438)  ! PARTICLE MASS
-               QP(NPP,NN) = 1.E9_EB*PC%FTPR*LP%R**3
+               IBC = PC%SURF_INDEX
+               IF (IBC<1) THEN
+                  QP(NPP,NN) = 1.E3_EB*PC%FTPR*LP%R**3
+               ELSE
+                  SF => SURFACE(IBC)
+                  IW = LP%WALL_INDEX
+                  SELECT CASE(SF%GEOMETRY)
+                  CASE(SURF_CARTESIAN)
+                     QP(NPP,NN) = 1.E3_EB*2._EB*SF%LENGTH*SF%WIDTH*LP%R   *SURFACE_DENSITY(NM,IW,1) 
+                  CASE(SURF_CYLINDRICAL)
+                     QP(NPP,NN) = 1.E3_EB*PI*   SF%LENGTH         *LP%R**2*SURFACE_DENSITY(NM,IW,1)
+                  CASE(SURF_SPHERICAL)
+                     QP(NPP,NN) = 1.E3_EB*FOTH*PI                 *LP%R**3*SURFACE_DENSITY(NM,IW,1)
+                  END SELECT
+               ENDIF            
             CASE(439)  ! PARTICLE AGE
                QP(NPP,NN) = T-LP%T
             CASE(440)  ! PARTICLE WEIGHTING FACTOR
