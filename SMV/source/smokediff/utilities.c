@@ -129,12 +129,6 @@ int getmaxrevision(void){
   return max_revision;
 }
 
-/* ------------------ getSMVversion ------------------------ */
-
-void getPROGversion(char *SMDiffversion){
-  strcpy(SMDiffversion,SMDiffVERSION);
-}
-
 /* ------------------ similar_grid ------------------------ */
 
 int similar_grid(mesh *mesh1, mesh *mesh2, int *factor){

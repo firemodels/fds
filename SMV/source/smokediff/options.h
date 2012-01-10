@@ -100,7 +100,7 @@
 
 #ifdef pp_BETA
 #undef pp_release
-#define SMDiffVERSION "test"
+#define PROGVERSION "test"
 #endif
 
 #ifdef WIN32
@@ -109,7 +109,7 @@
 #endif
 
 #ifdef pp_release
-#define SMDiffVERSION "1.0.3"
+#define PROGVERSION "1.0.3"
 #endif
 
 #ifdef CPP
