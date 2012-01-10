@@ -83,13 +83,6 @@ int getmaxrevision(void){
   return max_revision;
 }
 
-
-/* ------------------ getSMVversion ------------------------ */
-
-void getPROGversion(char *BLOCKAIDversion){
-  strcpy(BLOCKAIDversion,BLOCKAIDVERSION);
-}
-
 /* ------------------ getrevision ------------------------ */
 
 int getrevision(char *svn){

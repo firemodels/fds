@@ -46,7 +46,6 @@ void subst_string(char *string, int ibeg, int iend, char *replace);
 void int2string(int *ib, int nib, char *ibstring);
 void float2string(float *xb, int nxb, char *xbstring);
 int getrevision(char *svn);
-void getPROGversion(char *SMZversion);
 int getmaxrevision(void);
 void version(void);
 char *trim_front(char *line);
