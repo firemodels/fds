@@ -566,10 +566,15 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     sd->nsliceii = sd->nslicei*sd->nslicej*sd->nslicek;
     sd->nslicetotal=sd->nsteps*sd->nsliceii;
     if(use_iblank==1){
-      if( //xxx
-        NewMemory((void **)&sd->c_iblank,sd->nslicei*sd->nslicej*sd->nslicek*sizeof(char))==0||
-        NewMemory((void **)&sd->n_iblank,(sd->nslicei+1)*(sd->nslicej+1)*(sd->nslicek+1)*sizeof(char))==0
-        ){
+      int return_val;
+       
+      if(sd->cellcenter==1){
+        return_val=NewMemory((void **)&sd->n_iblank,sd->nslicei*sd->nslicej*sd->nslicek*sizeof(char));
+      }
+      else{
+        return_val=NewMemory((void **)&sd->c_iblank,sd->nslicei*sd->nslicej*sd->nslicek*sizeof(char));
+      }
+      if( return_val==0){
         readslice("",ifile,UNLOAD,&error);
         *errorcode=1;
         return;
@@ -597,69 +602,81 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     if(use_iblank==1){
       switch (sd->idir){
       case 1:
-        ii=0;
-        for(k=sd->ks1;k<sd->ks2;k++){
-          for(j=sd->js1;j<sd->js2;j++){
-            for(i=sd->is1;i<sd->is1+sd->nslicei;i++){
-              sd->c_iblank[ii++]=meshi->c_iblank_x[IJK(i,j,k)];
+        if(sd->c_iblank!=NULL){
+          ii=0;
+          for(k=sd->ks1;k<sd->ks2;k++){
+            for(j=sd->js1;j<sd->js2;j++){
+              for(i=sd->is1;i<sd->is1+sd->nslicei;i++){
+                sd->c_iblank[ii++]=meshi->c_iblank_x[IJK(i,j,k)];
+              }
             }
           }
-        }//xxx
-        ii=0;
-        for(k=sd->ks1;k<=sd->ks2;k++){
-          for(j=sd->js1;j<=sd->js2;j++){
-            for(i=sd->is1;i<=sd->is1+sd->nslicei;i++){
-              if(k==sd->ks2||j==sd->js2||i==sd->is1+sd->nslicei){
-                sd->n_iblank[ii++]=0;
-              }
-              else{
-                sd->n_iblank[ii++]=meshi->c_iblank_x[IJK(i,j,k)];
+        }
+        if(sd->n_iblank!=NULL){
+          ii=0;
+          for(k=sd->ks1;k<=sd->ks2;k++){
+            for(j=sd->js1;j<=sd->js2;j++){
+              for(i=sd->is1;i<=sd->is1+sd->nslicei;i++){
+                if(k==0||j==0){
+                  sd->n_iblank[ii++]=0;
+                }
+                else{
+                  sd->n_iblank[ii++]=meshi->c_iblank_x[IJK(i,j-1,k-1)];
+                }
               }
             }
           }
         }
         break;
       case 2:
-        ii=0;
-        for(k=sd->ks1;k<sd->ks2;k++){
-          for(j=sd->js1;j<sd->js1+sd->nslicej;j++){
-            for(i=sd->is1;i<sd->is2;i++){
-              sd->c_iblank[ii++]=meshi->c_iblank_y[IJK(i,j,k)];
+        if(sd->c_iblank!=NULL){
+          ii=0;
+          for(k=sd->ks1;k<sd->ks2;k++){
+            for(j=sd->js1;j<sd->js1+sd->nslicej;j++){
+              for(i=sd->is1;i<sd->is2;i++){
+                sd->c_iblank[ii++]=meshi->c_iblank_y[IJK(i,j,k)];
+              }
             }
           }
         }
-        ii=0;
-        for(k=sd->ks1;k<=sd->ks2;k++){
-          for(j=sd->js1;j<=sd->js1+sd->nslicej;j++){
-            for(i=sd->is1;i<=sd->is2;i++){
-              if(k==sd->ks2||j==sd->js1+sd->nslicej||i==sd->is2){
-                sd->n_iblank[ii++]=0;
-              }
-              else{
-                sd->n_iblank[ii++]=meshi->c_iblank_y[IJK(i,j,k)];
+        if(sd->n_iblank!=NULL){
+          ii=0;
+          for(k=sd->ks1;k<=sd->ks2;k++){
+            for(j=sd->js1;j<sd->js1+sd->nslicej;j++){
+              for(i=sd->is1;i<=sd->is2;i++){
+                if(k==0||i==0){
+                  sd->n_iblank[ii++]=0;
+                }
+                else{
+                  sd->n_iblank[ii++]=meshi->c_iblank_y[IJK(i-1,j,k-1)];
+                }
               }
             }
           }
         }
         break;
       case 3:
-        ii=0;
-        for(k=sd->ks1;k<sd->ks1+sd->nslicek;k++){
-          for(j=sd->js1;j<sd->js2;j++){
-            for(i=sd->is1;i<sd->is2;i++){
-              sd->c_iblank[ii++]=meshi->c_iblank_z[IJK(i,j,k)];
+        if(sd->c_iblank!=NULL){
+          ii=0;
+          for(k=sd->ks1;k<sd->ks1+sd->nslicek;k++){
+            for(j=sd->js1;j<sd->js2;j++){
+              for(i=sd->is1;i<sd->is2;i++){
+                sd->c_iblank[ii++]=meshi->c_iblank_z[IJK(i,j,k)];
+              }
             }
           }
         }
-        ii=0;
-        for(k=sd->ks1;k<=sd->ks1+sd->nslicek;k++){
-          for(j=sd->js1;j<=sd->js2;j++){
-            for(i=sd->is1;i<=sd->is2;i++){
-              if(k==sd->ks1+sd->nslicek||j==sd->js2||i==sd->is2){
-                sd->n_iblank[ii++]=0;
-              }
-              else{
-                sd->n_iblank[ii++]=meshi->c_iblank_z[IJK(i,j,k)];
+        if(sd->n_iblank!=NULL){
+          ii=0;
+          for(k=sd->ks1;k<=sd->ks1+sd->nslicek;k++){
+            for(j=sd->js1;j<=sd->js2;j++){
+              for(i=sd->is1;i<=sd->is2;i++){
+                if(j==0||i==0){
+                  sd->n_iblank[ii++]=0;
+                }
+                else{
+                  sd->n_iblank[ii++]=meshi->c_iblank_z[IJK(i-1,j-1,k)];
+                }
               }
             }
           }
@@ -2024,15 +2041,10 @@ void getslicedatabounds(const slice *sd, float *pmin, float *pmax){
 
   pdata = sd->qslicedata;
   ndata = sd->nslicetotal;
-//xxx
-  for (n=0;n<ndata;n++){
-    if(sd->n_iblank!=NULL&&sd->n_iblank[n%sd->nsliceii]==0){
-      printf("n=%i\n",n);
-      continue;
-    }
-    if(n>sd->nsliceii){
-      printf("next slice\n");
-    }
+
+  for(n=0;n<ndata;n++){
+    if(sd->n_iblank!=NULL&&sd->n_iblank[n%sd->nsliceii]==0)continue;
+    if(sd->c_iblank!=NULL&&sd->c_iblank[n%sd->nsliceii]==0)continue;
     if(first==1){
       *pmin=pdata[n];
       *pmax=pdata[n];
