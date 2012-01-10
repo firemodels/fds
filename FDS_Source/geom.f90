@@ -17,7 +17,7 @@ CHARACTER(255), PARAMETER :: geomdate='$Date$'
 
 PRIVATE
 PUBLIC :: INIT_IBM,TRILINEAR,GETX,GETU,GETGRAD,INIT_FACE,GET_REV_geom, &
-          READ_GEOM,READ_VERT,READ_FACE,READ_VOLU,GET_VELO_IBM
+          READ_GEOM,READ_VERT,READ_FACE,READ_VOLU,GET_VELO_IBM,GET_CUTCELL_AREA
  
 CONTAINS
 
@@ -1307,6 +1307,527 @@ ENDIF
 IERR=1
 
 END SUBROUTINE GET_VELO_IBM
+
+!!! Cut-cell subroutines by Charles Luo
+SUBROUTINE TRI_PLANE_BOX_INTERSECT(NP,PC,V1,V2,V3,BB)
+USE MATH_FUNCTIONS
+IMPLICIT NONE
+! get the intersection points (cooridnates) of the BB's 12 edges and the plane of the trianlge
+! regular intersection polygons with 0, 3, 4, 5, or 6 corners
+! irregular intersection case (corner, edge, or face intersection) should also be ok.
+
+INTEGER, INTENT(OUT) :: NP
+REAL(EB), INTENT(OUT) :: PC(18) ! max 6 points but maybe repeated at the vertices
+REAL(EB), INTENT(IN) :: V1(3),V2(3),V3(3),BB(6)
+REAL(EB) :: P0(3),P1(3),Q(3),PC_TMP(24)
+INTEGER :: I,J,IERR,IERR2
+
+NP = 0
+EDGE_LOOP: DO I=1,12
+    SELECT CASE(I) 
+        CASE(1)
+            P0(1)=BB(1)
+            P0(2)=BB(3)
+            P0(3)=BB(5)
+            P1(1)=BB(2)
+            P1(2)=BB(3)
+            P1(3)=BB(5)
+        CASE(2)
+            P0(1)=BB(2)
+            P0(2)=BB(3)
+            P0(3)=BB(5)
+            P1(1)=BB(2)
+            P1(2)=BB(4)
+            P1(3)=BB(5)
+        CASE(3)
+            P0(1)=BB(2)
+            P0(2)=BB(4)
+            P0(3)=BB(5)
+            P1(1)=BB(1)
+            P1(2)=BB(4)
+            P1(3)=BB(5)
+        CASE(4)
+            P0(1)=BB(1)
+            P0(2)=BB(4)
+            P0(3)=BB(5)
+            P1(1)=BB(1)
+            P1(2)=BB(3)
+            P1(3)=BB(5)
+        CASE(5)
+            P0(1)=BB(1)
+            P0(2)=BB(3)
+            P0(3)=BB(6)
+            P1(1)=BB(2)
+            P1(2)=BB(3)
+            P1(3)=BB(6)
+        CASE(6)
+            P0(1)=BB(2)
+            P0(2)=BB(3)
+            P0(3)=BB(6)
+            P1(1)=BB(2)
+            P1(2)=BB(4)
+            P1(3)=BB(6)
+        CASE(7)
+            P0(1)=BB(2)
+            P0(2)=BB(4)
+            P0(3)=BB(6)
+            P1(1)=BB(1)
+            P1(2)=BB(4)
+            P1(3)=BB(6)
+        CASE(8)
+            P0(1)=BB(1)
+            P0(2)=BB(4)
+            P0(3)=BB(6)
+            P1(1)=BB(1)
+            P1(2)=BB(3)
+            P1(3)=BB(6)
+        CASE(9)
+            P0(1)=BB(1)
+            P0(2)=BB(3)
+            P0(3)=BB(5)
+            P1(1)=BB(1)
+            P1(2)=BB(3)
+            P1(3)=BB(6)
+        CASE(10)
+            P0(1)=BB(2)
+            P0(2)=BB(3)
+            P0(3)=BB(5)
+            P1(1)=BB(2)
+            P1(2)=BB(3)
+            P1(3)=BB(6)
+        CASE(11)
+            P0(1)=BB(2)
+            P0(2)=BB(4)
+            P0(3)=BB(5)
+            P1(1)=BB(2)
+            P1(2)=BB(4)
+            P1(3)=BB(6)
+        CASE(12)
+            P0(1)=BB(1)
+            P0(2)=BB(4)
+            P0(3)=BB(5)
+            P1(1)=BB(1)
+            P1(2)=BB(4)
+            P1(3)=BB(6)
+    END SELECT 
+    CALL LINE_SEG_TRI_PLANE_INTERSECT(IERR,IERR2,Q,V1,V2,V3,P0,P1)
+    
+    IF (IERR==1) THEN
+        NP=NP+1
+        DO J=1,3
+            PC_TMP((NP-1)*3+J)=Q(J)
+        ENDDO
+    ENDIF
+ENDDO EDGE_LOOP
+
+! For more than 3 intersection points
+! they have to be sorted in order to create a convex polygon
+CALL ELIMATE_REPEATED_POINTS(NP,PC_TMP)
+DO I=1,NP*3
+   PC(I) = PC_TMP(I)
+ENDDO
+IF (NP > 3) THEN 
+    CALL SORT_POLYGON_CORNERS(NP,V1,V2,V3,PC)
+ENDIF
+
+RETURN
+END SUBROUTINE TRI_PLANE_BOX_INTERSECT
+
+
+SUBROUTINE SORT_POLYGON_CORNERS(NP,V1,V2,V3,PC)
+USE MATH_FUNCTIONS, ONLY: CROSS_PRODUCT
+IMPLICIT NONE
+! Sort all the corners of a polygon
+! Ref: Gernot Hoffmann, Cube Plane Intersection.
+
+INTEGER, INTENT(IN) :: NP
+REAL(EB), INTENT(INOUT) :: PC(3*NP)
+REAL(EB), INTENT(IN) :: V1(3),V2(3),V3(3)
+REAL(EB) :: MEAN_VALUE(3),POLY_NORM(3),R1,R2,TMP(3),U(3),W(3)
+INTEGER :: I,J,K,IOR,NA,NB
+
+IF (NP <=3 ) RETURN
+
+U = V2-V1
+W = V3-V1
+CALL CROSS_PRODUCT(POLY_NORM,U,W)
+
+DO I=1,3
+    MEAN_VALUE(I) = 0._EB
+    DO J=1,NP
+        MEAN_VALUE(I) = MEAN_VALUE(I) + PC((J-1)*3+I)/REAL(NP)
+    ENDDO
+ENDDO
+
+!get normal of ploygan 
+IF (ABS(POLY_NORM(1)) >= ABS(POLY_NORM(2)) .AND. ABS(POLY_NORM(1)) >= ABS(POLY_NORM(2)) ) THEN
+    IOR = 1
+    NA = 2
+    NB = 3
+ELSE IF (ABS(POLY_NORM(2)) >= ABS(POLY_NORM(3)) ) THEN
+    IOR = 2
+    NA = 1
+    NB = 3
+ELSE
+    IOR = 3
+    NA = 1
+    NB = 2
+ENDIF
+
+DO I=1,NP-1
+    R1 = ATAN2(PC((I-1)*3+NB)-MEAN_VALUE(NB), PC((I-1)*3+NA)-MEAN_VALUE(NA))
+    DO J=I+1, NP
+        R2 = ATAN2(PC((J-1)*3+NB)-MEAN_VALUE(NB), PC((J-1)*3+NA)-MEAN_VALUE(NA))
+        IF (R2 < R1) THEN
+            DO K=1,3
+                TMP(K) = PC((J-1)*3+K)
+                PC((J-1)*3+K) = PC((I-1)*3+K)
+                PC((I-1)*3+K) = TMP(K)
+                R1 = R2
+            ENDDO
+        ENDIF
+    ENDDO
+ENDDO
+    
+RETURN
+END SUBROUTINE SORT_POLYGON_CORNERS
+
+
+SUBROUTINE TRIANGLE_POLYGON_POINTS(IERR,NXP,XPC,V1,V2,V3,NP,PC,BB)
+IMPLICIT NONE
+! Calculate the intersection points of a triangle and a polygon, if intersected.
+! http://softsurfer.com/Archive/algorithm_0106/algorithm_0106.htm
+
+INTEGER, INTENT(IN) :: NP
+INTEGER, INTENT(OUT) :: NXP,IERR
+REAL(EB), INTENT(OUT) :: XPC(27)
+REAL(EB), INTENT(IN) :: V1(3),V2(3),V3(3),PC(18),BB(6)
+INTEGER :: I,J,K
+REAL(EB) :: U(3),V(3),W(3),S1P0(3),XC(3)
+REAL(EB) :: A,B,C,D,E,DD,SC,TC
+REAL(EB), PARAMETER :: EPS=1.E-10_EB
+!LOGICAL :: POINT_IN_BB, POINT_IN_TRIANGLE
+
+IERR = 0
+SC = 0._EB
+TC = 0._EB
+NXP = 0
+TRIANGLE_LOOP: DO I=1,3
+    SELECT CASE(I)
+    CASE(1)
+        U = V2-V1
+        S1P0 = V1
+    CASE(2)
+        U = V3-V2
+        S1P0 = V2
+    CASE(3)
+        U = V1-V3
+        S1P0 = V3
+    END SELECT
+    
+    POLYGON_LOOP: DO J=1,NP
+        IF (J < NP) THEN
+            DO K=1,3
+                V(K) = PC(J*3+K)-PC((J-1)*3+K)
+            ENDDO
+        ELSE IF (J == NP) THEN        
+            DO K=1,3
+                V(K) = PC(K)-PC((J-1)*3+K)
+            ENDDO
+        ENDIF
+        
+        DO K=1,3
+            W(K) = S1P0(K)-PC((J-1)*3+K)
+        ENDDO
+        
+        A = DOT_PRODUCT(U,U)
+        B = DOT_PRODUCT(U,V)
+        C = DOT_PRODUCT(V,V)
+        D = DOT_PRODUCT(U,W)
+        E = DOT_PRODUCT(V,W)
+        DD = A*C-B*B
+        
+        IF (DD < EPS) THEN ! almost parallel
+            IERR = 0
+            EXIT
+        ELSE 
+            SC = (B*E-C*D)/DD
+            TC = (A*E-B*D)/DD
+            IF (SC>0._EB .AND. SC<1._EB .AND. TC>0._EB .AND. TC<1._EB ) THEN
+                NXP = NXP+1
+                XC = S1P0+SC*U
+                DO K=1,3
+                    XPC((NXP-1)*3+K) = XC(K)
+                ENDDO
+            ENDIF
+        ENDIF
+                
+    ENDDO POLYGON_LOOP
+ENDDO TRIANGLE_LOOP
+
+!WRITE(LU_ERR,*) 'A', NXP
+! add triangle vertices in polygon
+DO I=1,3
+    SELECT CASE(I)
+    CASE(1)
+        V = V1
+    CASE(2)
+        V = V2
+    CASE(3)
+        V = V3
+    END SELECT
+    
+    IF (POINT_IN_BB(V,BB)) THEN
+        NXP = NXP+1
+        DO K=1,3
+            XPC((NXP-1)*3+K) = V(K)
+        ENDDO
+    ENDIF
+ENDDO
+
+!WRITE(LU_ERR,*) 'B', NXP
+! add polygon vertices in triangle
+DO I=1,NP
+    DO J=1,3
+        V(J) = PC((I-1)*3+J)
+    ENDDO
+    IF (POINT_IN_TRIANGLE(V,V1,V2,V3)) THEN
+        NXP = NXP+1
+        DO J=1,3
+            XPC((NXP-1)*3+J) = V(J)
+        ENDDO
+    ENDIF
+ENDDO
+
+!WRITE(LU_ERR,*) 'C', NXP
+
+CALL ELIMATE_REPEATED_POINTS(NXP,XPC)
+
+!WRITE(LU_ERR,*) 'D', NXP
+
+IF (NXP > 3) THEN 
+    CALL SORT_POLYGON_CORNERS(NXP,V1,V2,V3,XPC)
+ENDIF
+
+!WRITE(LU_ERR,*) 'E', NXP
+
+IF (NXP >= 1) THEN
+    IERR = 1 ! index for intersecting
+ELSE
+    IERR = 0
+ENDIF
+
+RETURN
+END SUBROUTINE TRIANGLE_POLYGON_POINTS
+
+
+SUBROUTINE ELIMATE_REPEATED_POINTS(NP,PC)
+USE MATH_FUNCTIONS, ONLY:NORM2
+IMPLICIT NONE
+
+INTEGER, INTENT(INOUT):: NP
+REAL(EB), INTENT(INOUT) :: PC(3*NP)
+INTEGER :: NP2,I,J,K
+REAL(EB), PARAMETER :: EPS=1.E-6_EB
+REAL(EB) :: U(3),V(3),W(3)
+
+I = 1
+DO WHILE (I <= NP-1)
+    DO K=1,3
+        U(K) = PC(3*(I-1)+K)
+    ENDDO
+    
+    J = I+1
+    NP2 = NP
+    DO WHILE (J <= NP2)
+        DO K=1,3
+            V(K) = PC(3*(J-1)+K)
+        ENDDO
+        W = U-V
+        IF (NORM2(W) <= EPS) THEN
+            DO K=3*J+1,3*NP
+                PC(K-3) = PC(K)
+            ENDDO
+            NP = NP-1
+            J = J-1
+        ENDIF
+        J = J+1
+        IF (J > NP) EXIT
+    ENDDO
+    I = I+1
+ENDDO
+
+RETURN
+END SUBROUTINE ELIMATE_REPEATED_POINTS
+
+
+
+LOGICAL FUNCTION POINT_IN_BB(V1,BB)
+IMPLICIT NONE
+
+REAL(EB), INTENT(IN) :: V1(3),BB(6)
+
+POINT_IN_BB=.FALSE.
+IF ( V1(1)>=BB(1).AND.V1(1)<=BB(2) .AND. &
+     V1(2)>=BB(3).AND.V1(2)<=BB(4) .AND. &
+     V1(3)>=BB(5).AND.V1(3)<=BB(6) ) THEN
+   POINT_IN_BB=.TRUE.
+   RETURN
+ENDIF
+
+RETURN
+END FUNCTION POINT_IN_BB
+
+
+SUBROUTINE LINE_SEG_TRI_PLANE_INTERSECT(IERR,IERR2,Q,V1,V2,V3,P0,P1)
+USE MATH_FUNCTIONS, ONLY:CROSS_PRODUCT
+IMPLICIT NONE
+
+INTEGER, INTENT(OUT) :: IERR
+REAL(EB), INTENT(OUT) :: Q(3)
+REAL(EB), INTENT(IN) :: V1(3),V2(3),V3(3),P0(3),P1(3)
+REAL(EB) :: E1(3),E2(3),S(3),U,V,TMP,T,D(3),P(3)
+REAL(EB), PARAMETER :: EPS=1.E-10_EB
+INTEGER :: IERR2
+
+IERR  = 0
+IERR2 = 1
+! IERR=1:  line segment intersect with the plane
+! IERR2=1: the intersection point is in the triangle
+
+! Schneider and Eberly, Section 11.1
+
+D = P1-P0
+
+E1 = V2-V1
+E2 = V3-V1
+
+CALL CROSS_PRODUCT(P,D,E2)
+
+TMP = DOT_PRODUCT(P,E1)
+
+IF ( ABS(TMP)<EPS ) RETURN
+
+TMP = 1._EB/TMP
+S = P0-V1
+
+U = TMP*DOT_PRODUCT(S,P)
+IF (U<0._EB .OR. U>1._EB) IERR2=0
+
+CALL CROSS_PRODUCT(Q,S,E1)
+V = TMP*DOT_PRODUCT(D,Q)
+IF (V<0._EB .OR. (U+V)>1._EB) IERR2=0
+
+T = TMP*DOT_PRODUCT(E2,Q)
+Q = P0 + T*D ! the intersection point
+
+IF (T>=0._EB .AND. T<=1._EB) IERR=1
+
+END SUBROUTINE LINE_SEG_TRI_PLANE_INTERSECT
+
+
+REAL(EB) FUNCTION POLYGON_AREA(NP,PC)
+IMPLICIT NONE
+! Calculate the area of a polygon
+
+INTEGER, INTENT(IN) :: NP
+REAL(EB), INTENT(IN) :: PC(3*NP)
+INTEGER :: I,K
+REAL(EB) :: V1(3),V2(3),V3(3)
+    
+POLYGON_AREA = 0._EB
+V3 = 0._EB ! mean of the polygon
+
+DO I=1,NP
+    DO K=1,3
+        V3(K) = V3(K)+PC((I-1)*3+K)/NP
+    ENDDO
+ENDDO
+DO I=1,NP
+    IF (I < NP) THEN
+        DO K=1,3
+            V1(K) = PC((I-1)*3+K)
+            V2(K) = PC(I*3+K)
+        ENDDO
+    ELSE IF (I == NP) THEN        
+        DO K=1,3
+            V1(K) = PC((I-1)*3+K)
+            V2(K) = PC(K)
+        ENDDO
+    ENDIF
+    POLYGON_AREA = POLYGON_AREA+TRIANGLE_AREA(V1,V2,V3)
+ENDDO
+
+RETURN
+END FUNCTION POLYGON_AREA
+
+
+SUBROUTINE GET_CUTCELL_AREA()
+IMPLICIT NONE
+
+REAL(EB) :: V1(3),V2(3),V3(3),BB(6)
+REAL(EB) :: PC(18), AREA,AREA0, XPCTMP(27)
+INTEGER :: IERR,NP,NXP
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: XPC
+TYPE (MESH_TYPE), POINTER :: M
+
+V1(1) = VERTEX(FACET(1)%VERTEX(1))%X
+V1(2) = VERTEX(FACET(1)%VERTEX(1))%Y
+V1(3) = VERTEX(FACET(1)%VERTEX(1))%Z
+
+V2(1) = VERTEX(FACET(1)%VERTEX(2))%X
+V2(2) = VERTEX(FACET(1)%VERTEX(2))%Y
+V2(3) = VERTEX(FACET(1)%VERTEX(2))%Z
+
+V3(1) = VERTEX(FACET(1)%VERTEX(3))%X
+V3(2) = VERTEX(FACET(1)%VERTEX(3))%Y
+V3(3) = VERTEX(FACET(1)%VERTEX(3))%Z
+
+M => MESHES(1)
+BB(1) = M%X(1)
+BB(2) = M%X(2)
+BB(3) = M%Y(1)
+BB(4) = M%Y(2)
+BB(5) = M%Z(1)
+BB(6) = M%Z(2)
+
+AREA0 = TRIANGLE_AREA(V1,V2,V3)
+    
+CALL TRIANGLE_BOX_INTERSECT(IERR,V1,V2,V3,BB)
+
+IF (IERR == 0) THEN
+    WRITE(LU_ERR,*) 'The triangle is not intersecting with the BBox'
+    
+ELSE IF (IERR == 1) THEN
+    ! if the triangle intersects with the BB
+    ! next to determine the in intersection points
+    
+    CALL TRI_PLANE_BOX_INTERSECT(NP,PC,V1,V2,V3,BB)
+    WRITE(LU_ERR,*) 'The intermeidate polygon has NP vertices, NP=', NP
+!    DO I=1,NP
+!        WRITE(LU_ERR,*) (PC((I-1)*3+J),J=1,3)
+!    ENDDO
+    
+    ! get the intersection points, then calculate the area
+    CALL TRIANGLE_POLYGON_POINTS(IERR,NXP,XPCTMP,V1,V2,V3,NP,PC,BB)
+    WRITE(LU_ERR,*) 'The final polygon has NXP vertices,    NXP = ', NXP
+    ALLOCATE(XPC(3*NXP))
+    XPC = XPCTMP
+!    INTP_LOOP: DO I=1,NXP
+!        WRITE(LU_ERR,*) (XPC((I-1)*3+J),J=1,3)
+!    ENDDO INTP_LOOP
+    
+    IF (IERR == 1)  AREA = POLYGON_AREA(NXP,XPC)
+    WRITE(LU_ERR,*) 'The intersection area is = ', AREA
+
+    WRITE(LU_ERR,*) 'The triangle     area is = ', AREA0
+    
+!    CALL WRITE_MATLAB_VISU(V1,V2,V3,NXP,XPC,NP,PC)
+ENDIF
+
+RETURN
+END SUBROUTINE GET_CUTCELL_AREA
+!!!!!!
 
 
 SUBROUTINE GET_REV_geom(MODULE_REV,MODULE_DATE)
