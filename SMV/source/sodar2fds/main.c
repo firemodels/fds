@@ -19,7 +19,6 @@ char main_revision[]="$Revision$";
 
 void usage(char *prog);
 void version(char *prog);
-void getPROGversion(char *PROGversion);
 int getmaxrevision(void);
 
 /* ------------------ gettokrns ------------------------ */
@@ -357,12 +356,6 @@ void version(char *prog){
     printf("Version: %s\n",version_local);
     printf("SVN Revision Number: %i\n",svn_num);
     printf("Compile Date: %s\n",__DATE__);
-}
-
-/* ------------------ getPROGversion ------------------------ */
-
-void getPROGversion(char *PROGversion){
-  strcpy(PROGversion,PROGVERSION);
 }
 
 /* ------------------ getmaxrev ------------------------ */
