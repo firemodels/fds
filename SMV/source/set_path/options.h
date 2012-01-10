@@ -4,6 +4,7 @@
 
 #define _CRT_SECURE_NO_DEPRECATE
 #define _CRT_SECURE_NO_WARNING
+#define PROGVERSION "1.0"
 
 
  /* ------------------ options ------------------------ */

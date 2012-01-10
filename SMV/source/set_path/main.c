@@ -377,11 +377,14 @@ int reg_path(int setget, int pathtype, char *path){
 
 void version(void){
     int svn_num;
+    char version[256];
+
+    getPROGversion(version);
 
     svn_num=getmaxrevision();    // get svn revision number
     printf("\n");
-    printf("set_path %s - %s\n\n",VERSION,__DATE__);
-    printf("Version: %s\n",VERSION);
+    printf("set_path %s - %s\n\n",version,__DATE__);
+    printf("Version: %s\n",version);
     printf("Revision Number: %i\n",svn_num);
     printf("Build Date: %s\n",__DATE__);
 }
