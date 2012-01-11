@@ -7,6 +7,7 @@
 #include "contourdefs.h"
 #include "isodefs.h"
 #include "histogram.h"
+#include "string_util.h"
 
 /* --------------------------  csvdata ------------------------------------ */
 
@@ -172,12 +173,6 @@ typedef struct {
   float *x1, *y1, *z1;
   float *x2, *y2, *z2;
 } outline;
-
-/* --------------------------  flowlabels ------------------------------------ */
-
-typedef struct {
-  char *longlabel, *shortlabel, *unit;
-} flowlabels;
 
 /* --------------------------  labeldata ------------------------------------ */
 

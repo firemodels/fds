@@ -599,7 +599,6 @@ EXTERNCPP void Reshape(int width, int height);
 EXTERNCPP void UpdateTimeLabels(void);
 EXTERNCPP void Idle(void);
 EXTERNCPP void RenderFrame(int view_mode);
-EXTERNCPP int readlabels(flowlabels *label, FILE *stream);
 EXTERNCPP int readlabels_terrain(flowlabels *label, FILE *stream);
 EXTERNCPP int readlabels_cellcenter(flowlabels *label, FILE *stream);
 EXTERNCPP void update_terrain(int allocate_memory, float vertical_factor);
