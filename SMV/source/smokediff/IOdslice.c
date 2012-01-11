@@ -9,6 +9,7 @@
 #include <math.h>
 #include "svdiff.h"
 #include "MALLOC.h"
+#include "datadefs.h"
 #include "file_util.h"
 
 // svn revision character string
@@ -59,12 +60,12 @@ slice *getslice(slice *slicein, casedata *case2){
     sliceout = case2->sliceinfo + i;
     if(slicein->slicetype!=sliceout->slicetype)continue;
     if(strcmp(slicein->label.longlabel,sliceout->label.longlabel)!=0)continue;
-    if(fabs(slicein->xmin-sliceout->xmin)>dx)continue;
-    if(fabs(slicein->xmax-sliceout->xmax)>dx)continue;
-    if(fabs(slicein->ymin-sliceout->ymin)>dy)continue;
-    if(fabs(slicein->ymax-sliceout->ymax)>dy)continue;
-    if(fabs(slicein->zmin-sliceout->zmin)>dz)continue;
-    if(fabs(slicein->zmax-sliceout->zmax)>dz)continue;
+    if(ABS(slicein->xmin-sliceout->xmin)>dx)continue;
+    if(ABS(slicein->xmax-sliceout->xmax)>dx)continue;
+    if(ABS(slicein->ymin-sliceout->ymin)>dy)continue;
+    if(ABS(slicein->ymax-sliceout->ymax)>dy)continue;
+    if(ABS(slicein->zmin-sliceout->zmin)>dz)continue;
+    if(ABS(slicein->zmax-sliceout->zmax)>dz)continue;
     if(similar_grid(slicein->slicemesh,sliceout->slicemesh,slicein->factor)==0)continue;
     return sliceout;
   }

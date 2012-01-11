@@ -3,6 +3,8 @@
 // $Author$
 #ifndef OPTIONS_H_DEFINED
 #define OPTIONS_H_DEFINED
+
+#include "lint.h"
 #define _CRT_SECURE_NO_WARNINGS
 
  /* ------------------ options ------------------------ */

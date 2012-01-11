@@ -10,7 +10,6 @@
 #include <math.h>
 #include "svdiff.h"
 #include "MALLOC.h"
-#include "string_util.h"
 #include "file_util.h"
 
 //dummy change to bump version number to 1.0.3
@@ -53,6 +52,7 @@ int main(int argc, char **argv){
     return 1;
   }
 
+/* -e{850} loop index i is modified within loop */
   for(i=1;i<argc;i++){
     int lenarg;
 

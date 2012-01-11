@@ -9,6 +9,7 @@
 #include <math.h>
 #include "svdiff.h"
 #include "MALLOC.h"
+#include "datadefs.h"
 #include "file_util.h"
 
 // svn revision character string
@@ -65,18 +66,18 @@ plot3d *getplot3d(plot3d *plot3din, casedata *case2){
 
     plot3dout_local = case2->plot3dinfo + i;
     meshout = plot3dout_local->plot3dmesh;
-    if(fabs(plot3din->time-plot3dout_local->time)>0.05)continue;
+    if(ABS(plot3din->time-plot3dout_local->time)>0.05)continue;
     if(strcmp(plot3din->labels[0].longlabel,plot3dout_local->labels[0].longlabel)!=0)continue;
     if(strcmp(plot3din->labels[1].longlabel,plot3dout_local->labels[1].longlabel)!=0)continue;
     if(strcmp(plot3din->labels[2].longlabel,plot3dout_local->labels[2].longlabel)!=0)continue;
     if(strcmp(plot3din->labels[3].longlabel,plot3dout_local->labels[3].longlabel)!=0)continue;
     if(strcmp(plot3din->labels[4].longlabel,plot3dout_local->labels[4].longlabel)!=0)continue;
-    if(fabs(meshin->xbar0-meshout->xbar0)>dx)continue;
-    if(fabs(meshin->xbar-meshout->xbar)>dx)continue;
-    if(fabs(meshin->ybar0-meshout->ybar0)>dy)continue;
-    if(fabs(meshin->ybar-meshout->ybar)>dy)continue;
-    if(fabs(meshin->zbar0-meshout->zbar0)>dz)continue;
-    if(fabs(meshin->zbar-meshout->zbar)>dz)continue;
+    if(ABS(meshin->xbar0-meshout->xbar0)>dx)continue;
+    if(ABS(meshin->xbar-meshout->xbar)>dx)continue;
+    if(ABS(meshin->ybar0-meshout->ybar0)>dy)continue;
+    if(ABS(meshin->ybar-meshout->ybar)>dy)continue;
+    if(ABS(meshin->zbar0-meshout->zbar0)>dz)continue;
+    if(ABS(meshin->zbar-meshout->zbar)>dz)continue;
     return plot3dout_local;
   }
   return NULL;

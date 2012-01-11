@@ -14,6 +14,8 @@
 #define EXTERN extern
 #endif
 
+#include "string_util.h"
+
 
 #ifdef WIN32
 #define STDCALL extern void _stdcall
@@ -46,12 +48,6 @@
 #endif
 
 //************************** data structures ****************************************
-
-/* --------------------------  flowlabels ------------------------------------ */
-
-typedef struct {
-  char *longlabel, *shortlabel, *unit;
-} flowlabels;
 
 typedef struct {
   int ibar, jbar, kbar;
@@ -120,7 +116,6 @@ int getmaxrevision(void);
 void version(void);
 void usage(void);
 int mesh_match(mesh *mesh1, mesh *mesh2);
-int readlabels(flowlabels *flowlabel, FILE *stream);
 int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase);
 void setup_boundary(FILE *stream_out);
 void setup_slice(FILE *stream_out);

@@ -12,7 +12,6 @@
 #include "svn_revision.h"
 #include "MALLOC.h"
 #include "datadefs.h"
-#include "string_util.h"
 
 // svn revision character string
 char utilities_revision[]="$Revision$";
@@ -28,47 +27,13 @@ int mesh_match(mesh *mesh1, mesh *mesh2){
   ibar=mesh1->ibar;
   jbar=mesh1->jbar;
   kbar=mesh1->kbar;
-  if(fabs(mesh1->xplt[0]-mesh2->xplt[0])>mesh1->dx)return 0;
-  if(fabs(mesh1->yplt[0]-mesh2->yplt[0])>mesh1->dy)return 0;
-  if(fabs(mesh1->zplt[0]-mesh2->zplt[0])>mesh1->dz)return 0;
-  if(fabs(mesh1->xplt[ibar]-mesh2->xplt[ibar])>mesh1->dx)return 0;
-  if(fabs(mesh1->yplt[jbar]-mesh2->yplt[jbar])>mesh1->dy)return 0;
-  if(fabs(mesh1->zplt[kbar]-mesh2->zplt[kbar])>mesh1->dz)return 0;
+  if(ABS(mesh1->xplt[0]-mesh2->xplt[0])>mesh1->dx)return 0;
+  if(ABS(mesh1->yplt[0]-mesh2->yplt[0])>mesh1->dy)return 0;
+  if(ABS(mesh1->zplt[0]-mesh2->zplt[0])>mesh1->dz)return 0;
+  if(ABS(mesh1->xplt[ibar]-mesh2->xplt[ibar])>mesh1->dx)return 0;
+  if(ABS(mesh1->yplt[jbar]-mesh2->yplt[jbar])>mesh1->dy)return 0;
+  if(ABS(mesh1->zplt[kbar]-mesh2->zplt[kbar])>mesh1->dz)return 0;
   return 1;
-}
-
-/* ------------------ readlabels ------------------------ */
-
-int readlabels(flowlabels *flowlabel, FILE *stream){
-  char buffer2[255],*buffer;
-  unsigned int len;
-
-  flowlabel->longlabel=NULL;
-  flowlabel->shortlabel=NULL;
-  flowlabel->unit=NULL;
-
-  if(fgets(buffer2,255,stream)==NULL)return 2;
-  trim(buffer2);
-  buffer=trim_front(buffer2);
-  len=strlen(buffer);
-  if(NewMemory((void **)&flowlabel->longlabel,(unsigned int)(len+1))==0)return 2;
-  STRCPY(flowlabel->longlabel,buffer);
-
-
-  if(fgets(buffer2,255,stream)==NULL)return 2;
-  trim(buffer2);
-  buffer=trim_front(buffer2);
-  len=strlen(buffer);
-  if(NewMemory((void **)&flowlabel->shortlabel,(unsigned int)(len+1))==0)return 2;
-  STRCPY(flowlabel->shortlabel,buffer);
-
-  if(fgets(buffer2,255,stream)==NULL)return 2;
-  trim(buffer2);
-  buffer=trim_front(buffer2);
-  len=strlen(buffer);
-  if(NewMemory((void *)&flowlabel->unit,(unsigned int)(len+1))==0)return 2;
-  STRCPY(flowlabel->unit,buffer);
-  return 0;
 }
 
 /* ------------------ version ------------------------ */
@@ -137,12 +102,12 @@ int similar_grid(mesh *mesh1, mesh *mesh2, int *factor){
   factor[1]=1;
   factor[2]=1;
   
-  if(fabs( mesh1->xbar0-mesh2->xbar0)>mesh1->dx/2.0)return 0;
-  if(fabs( mesh1->xbar- mesh2->xbar )>mesh1->dx/2.0)return 0;
-  if(fabs( mesh1->ybar0-mesh2->ybar0)>mesh1->dy/2.0)return 0;
-  if(fabs( mesh1->ybar- mesh2->ybar )>mesh1->dy/2.0)return 0;
-  if(fabs( mesh1->zbar0-mesh2->zbar0)>mesh1->dz/2.0)return 0;
-  if(fabs( mesh1->zbar- mesh2->zbar )>mesh1->dz/2.0)return 0;
+  if(ABS( mesh1->xbar0-mesh2->xbar0)>mesh1->dx/2.0)return 0;
+  if(ABS( mesh1->xbar- mesh2->xbar )>mesh1->dx/2.0)return 0;
+  if(ABS( mesh1->ybar0-mesh2->ybar0)>mesh1->dy/2.0)return 0;
+  if(ABS( mesh1->ybar- mesh2->ybar )>mesh1->dy/2.0)return 0;
+  if(ABS( mesh1->zbar0-mesh2->zbar0)>mesh1->dz/2.0)return 0;
+  if(ABS( mesh1->zbar- mesh2->zbar )>mesh1->dz/2.0)return 0;
 
   factor[0] = mesh2->ibar/mesh1->ibar;
   if(mesh1->ibar*factor[0]!=mesh2->ibar)return 0;
@@ -165,10 +130,10 @@ int exact_grid(mesh *mesh1, mesh *mesh2, int *factor){
   factor[1]=1;
   factor[2]=1;
   eps = mesh1->dx/1000.0;
-  if(fabs(mesh1->dx-mesh2->dx)>eps)return 0;
+  if(ABS(mesh1->dx-mesh2->dx)>eps)return 0;
   eps = mesh1->dy/1000.0;
-  if(fabs(mesh1->dy-mesh2->dy)>eps)return 0;
+  if(ABS(mesh1->dy-mesh2->dy)>eps)return 0;
   eps = mesh1->dz/1000.0;
-  if(fabs(mesh1->dz-mesh2->dz)>eps)return 0;
+  if(ABS(mesh1->dz-mesh2->dz)>eps)return 0;
   return 1;
 }
