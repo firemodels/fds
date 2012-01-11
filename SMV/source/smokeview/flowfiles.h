@@ -216,7 +216,6 @@ typedef struct {
   int nx, ny;
   float xmin, xmax, ymin, ymax;
   float *x, *y;
-  float *x_scaled, *y_scaled;
   float levels[13];
   float *zcell, *znode, *znode_scaled, *znode_offset;
   unsigned char *uc_znormal;

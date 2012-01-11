@@ -347,7 +347,11 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
         case 1:
         case 2:
           if(cullfaces==1)glDisable(GL_CULL_FACE);
+          glPushMatrix();
+          glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+          glTranslatef(-xbar0,-ybar0,-zbar0);
           DrawContours(&meshinfo[i].terrain_contour);
+          glPopMatrix();
           if(cullfaces==1)glEnable(GL_CULL_FACE);
           break;
         case 0:

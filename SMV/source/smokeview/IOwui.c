@@ -253,6 +253,7 @@ void initterrain_all(void){
   int imesh;
   float denom;
   unsigned char *uc_znormal;
+  float zmin, zmax, dz;
 
   for(imesh=0;imesh<nmeshes;imesh++){
     mesh *meshi;
@@ -412,22 +413,31 @@ void initterrain_all(void){
       }
     }
   }
+
+
+  zmin = meshinfo->terrain->znode[0];
+  zmax = zmin;
   for(imesh=0;imesh<nmeshes;imesh++){
     mesh *meshi;
     terraindata *terri;
     int i, j;
-    float zmin, zmax, dz;
     
     meshi = meshinfo + imesh;
     terri = meshi->terrain;
 
-    zmin = terri->znode[0];
-    zmax = zmin;
-    for(i=1;i<(terri->nx+1)*(terri->ny+1);i++){
+    for(i=0;i<(terri->nx+1)*(terri->ny+1);i++){
       if(terri->znode[i]<zmin)zmin=terri->znode[i];
       if(terri->znode[i]>zmax)zmax=terri->znode[i];
     }
-    dz = (zmax - zmin)/12.0;
+  }
+  dz = (zmax - zmin)/12.0;
+  for(imesh=0;imesh<nmeshes;imesh++){
+    mesh *meshi;
+    terraindata *terri;
+    int i, j;
+
+    meshi = meshinfo + imesh;
+    terri = meshi->terrain;
     for(i=0;i<13;i++){
       terri->levels[i]=zmin + i*dz;
     }
@@ -439,14 +449,7 @@ void initterrain_all(void){
     meshi->terrain_contour.idir=3;
     meshi->terrain_contour.xyzval=zmin;
 
-    for(i=0;i<=terri->nx;i++){
-      terri->x_scaled[i] = (meshi->xplt_orig[i]-xbar0)/xyzmaxdiff;
-    }
-    for(j=0;j<=terri->ny;j++){
-      terri->y_scaled[j] = (meshi->yplt_orig[j]-ybar0)/xyzmaxdiff;
-    }
-
-    getcontours(terri->x_scaled,terri->y_scaled,terri->nx+1,terri->ny+1,
+    getcontours(meshi->xplt_orig,meshi->yplt_orig,terri->nx+1,terri->ny+1,
       terri->znode, NULL, terri->levels,
       &meshi->terrain_contour);
 
@@ -510,8 +513,6 @@ void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, 
   if(allocate_memory==1){
     NewMemory((void **)&terri->x,(nx+1)*sizeof(float));
     NewMemory((void **)&terri->y,(ny+1)*sizeof(float));
-    NewMemory((void **)&terri->x_scaled,(nx+1)*sizeof(float));
-    NewMemory((void **)&terri->y_scaled,(ny+1)*sizeof(float));
     NewMemory((void **)&terri->zcell,nx*ny*sizeof(float));
     NewMemory((void **)&terri->state,nx*ny);
     NewMemory((void **)&terri->znode,(nx+1)*(ny+1)*sizeof(float));
