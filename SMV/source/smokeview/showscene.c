@@ -350,7 +350,12 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
           glPushMatrix();
           glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
           glTranslatef(-xbar0,-ybar0,-zbar0);
-          DrawContours(&meshinfo[i].terrain_contour);
+          if(visTerrainType==1){
+            DrawContours(&meshinfo[i].terrain_contour);
+          }
+          else{
+            DrawLineContours(&meshinfo[i].terrain_contour,1.0);
+          }
           glPopMatrix();
           if(cullfaces==1)glEnable(GL_CULL_FACE);
           break;
