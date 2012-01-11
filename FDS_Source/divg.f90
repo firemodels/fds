@@ -496,8 +496,7 @@ DO N=1,N_TRACKED_SPECIES
             ITMP = MIN(5000,NINT(TMP(I,J,K)))
             DP(I,J,K) = DP(I,J,K) + &
                         ( (SM%RCON-SM0%RCON)/RSUM(I,J,K) - &
-                          (H_S_Z(ITMP,N)-H_S_Z(ITMP,0))/(CP(I,J,K)*TMP(I,J,K)) )* &
-                        DEL_RHO_D_DEL_Z(I,J,K,N)/RHOP(I,J,K)
+                          (H_S_Z(ITMP,N)-H_S_Z(ITMP,0))/(CP(I,J,K)*TMP(I,J,K)) )*DEL_RHO_D_DEL_Z(I,J,K,N)/RHOP(I,J,K)
          ENDDO
       ENDDO
    ENDDO
@@ -552,7 +551,7 @@ IF (STRATIFICATION .AND. .NOT.EVACUATION_ONLY(NM)) THEN
       DO J=1,JBAR
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            DP(I,J,K) = DP(I,J,K) + (RTRM(I,J,K)-R_PBAR(K,PRESSURE_ZONE(I,J,K)))*0.5_EB*(W(I,J,K)+W(I,J,K-1))*GVEC(3)*RHO_0(K)
+            DP(I,J,K) = DP(I,J,K) - (R_PBAR(K,PRESSURE_ZONE(I,J,K))-RTRM(I,J,K))*0.5_EB*(W(I,J,K)+W(I,J,K-1))*RHO_0(K)*GVEC(3)
          ENDDO
       ENDDO
    ENDDO
@@ -804,7 +803,7 @@ PRESSURE_ZONE_LOOP: DO IPZ=1,N_ZONE
          DO I=1,IBAR
             IF (PRESSURE_ZONE(I,J,K) /= IPZ) CYCLE 
             IF (SOLID(CELL_INDEX(I,J,K)))    CYCLE
-            DP(I,J,K) = DP(I,J,K) + (RTRM(I,J,K)-R_PBAR(K,IPZ))*D_PBAR_DT_P(IPZ)
+            DP(I,J,K) = DP(I,J,K) - (R_PBAR(K,IPZ)-RTRM(I,J,K))*D_PBAR_DT_P(IPZ)
          ENDDO
       ENDDO
    ENDDO
