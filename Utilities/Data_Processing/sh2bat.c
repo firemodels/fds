@@ -86,7 +86,7 @@ int main(int argc, char **argv){
     if(buffer[0]=='$'){
       char *comm_beg, *comm_end, *data;
       
-      comm_beg=buffer;
+      comm_beg=buffer+1;
       comm_end=strchr(buffer,' ');
       data = comm_end+1;
       *comm_end=0;
