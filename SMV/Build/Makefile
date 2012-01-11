@@ -38,10 +38,11 @@ SYSTEMLIBS = -lpthread -lXmu -lGLU -lGL -lm
 #OSX64FORTLIBDIR  = /opt/intel/composerxe/lib
 OSX32FORTLIBDIR  = /opt/intel/Compiler/11.1/080/lib
 OSX64FORTLIBDIR  = /opt/intel/Compiler/11.1/080/lib
-#LINUX32FORTLIBDIR  = /opt/intel/composerxe/lib/ia32
-#LINUX64FORTLIBDIR  = /opt/intel/composerxe/lib/intel64
-LINUX32FORTLIBDIR  = /opt/intel/Compiler/11.1/069/lib/ia32
-LINUX64FORTLIBDIR  = /opt/intel/Compiler/11.1/069/lib/intel64
+#OSX32FORTLIBDIR  = $IFORT_COMPILER/lib
+#OSX64FORTLIBDIR  = $IFORT_COMPILER/lib
+
+LINUX32FORTLIBDIR  = $IFORT_COMPILER/lib/ia32
+LINUX64FORTLIBDIR  = $IFORT_COMPILER/lib/intel64
 
 # Definition of the object variables
 
