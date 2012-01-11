@@ -468,7 +468,7 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
  
 ENDIF ENERGY
 
-! Compute RTRM = R*sum(Z_i/M_i)/(PBAR*C_P) and multiply it by divergence terms already summed up
+! Compute RTRM = 1/(rho*c_p*T) and multiply it by divergence terms already summed up
  
 RTRM => WORK1
 
@@ -477,7 +477,7 @@ DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
          IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-         RTRM(I,J,K) = R_PBAR(K,PRESSURE_ZONE(I,J,K))*RSUM(I,J,K)/CP(I,J,K)
+         RTRM(I,J,K) = 1._EB/(RHOP(I,J,K)*CP(I,J,K)*TMP(I,J,K))
          DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
       ENDDO
    ENDDO 
