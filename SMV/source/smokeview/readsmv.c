@@ -2457,7 +2457,6 @@ int readsmv(char *file, char *file2){
 
       csvi = csvinfo + ncsvinfo;
 
-      ncsvinfo+=nfiles;  // update ncsvnfo AFTER definining csvi
       csvi->loaded=0;
       csvi->display=0;
 
