@@ -2424,8 +2424,6 @@ int readsmv(char *file, char *file2){
       char *type_ptr, *file_ptr;
       int nfiles=1;
 
-      csvi = csvinfo + ncsvinfo;
-
       if(fgets(buffer,255,stream)==NULL){
         BREAK;
       }
@@ -2437,7 +2435,29 @@ int readsmv(char *file, char *file2){
       }
       trim(buffer2);
       file_ptr=trim_front(buffer2);
+      nfiles=1;
+      if(strcmp(type_ptr,"hrr")==0){
+        if(file_exists(file_ptr)==0)nfiles=0;
+      }
+      else if(strcmp(type_ptr,"devc")==0){
+        if(file_exists(file_ptr)==0)nfiles=0;
+      }
+      else if(strcmp(type_ptr,"ext")==0){
+        if(strchr(file_ptr,'*')==NULL){
+          if(file_exists(file_ptr)==0)nfiles=0;
+        }
+        else{
+          nfiles = get_nfilelist(".",file_ptr);
+        }
+      }
+      else{
+        nfiles=0;
+      }
+      if(nfiles==0)continue;
 
+      csvi = csvinfo + ncsvinfo;
+
+      ncsvinfo+=nfiles;  // update ncsvnfo AFTER definining csvi
       csvi->loaded=0;
       csvi->display=0;
 
