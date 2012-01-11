@@ -2473,6 +2473,10 @@ ALLOCATE(CPBAR_Z(0:5000,0:N_TRACKED_SPECIES))
 CALL ChkMemErr('READ','CPBAR_Z',IZERO)    
 CPBAR_Z = 0._EB   
 
+ALLOCATE(H_S_Z(0:5000,0:N_TRACKED_SPECIES))   
+CALL ChkMemErr('READ','H_S_Z',IZERO)    
+H_S_Z = 0._EB   
+
 ALLOCATE(K_Z(0:5000,0:N_TRACKED_SPECIES))
 CALL ChkMemErr('READ','K_Z',IZERO)    
 K_Z = 0._EB   
@@ -2532,6 +2536,7 @@ TABLE_LOOP: DO J=1,5000
       CP_Z(J,N) = SUM(Z2Y(:,N) * CP_TMP(:))
       MU_Z(J,N) = SUM(Z2Y(:,N) * MU_TMP(:))
       K_Z(J,N)  = SUM(Z2Y(:,N) * K_TMP(:))
+      H_S_Z(J,N) = H_S_Z(J-1,N) + 0.5_EB*(CP_Z(J,N)+CP_Z(J-1,N))
       IF (J>1) THEN      
          CPBAR_Z(J,N) = (CPBAR_Z(J-1,N)*(REAL(J,EB)-1._EB)+0.5_EB*(CP_Z(J,N)+CP_Z(J-1,N)))/REAL(J,EB)
       ELSE
