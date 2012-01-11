@@ -10,9 +10,7 @@
 #include <string.h>
 #include <math.h>
 #include "svzip.h"
-#include "string_util.h"
 #include "MALLOC.h"
-#include "file_util.h"
 
 //dummy change to bump version number to 1.4.2
 

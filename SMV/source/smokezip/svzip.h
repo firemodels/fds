@@ -3,6 +3,7 @@
 // $Author$
 #ifndef SVZIP_H_DEFINED
 #define SVZIP_H_DEFINED
+#include "lint.h"
 //***********************
 //************* #definess
 //***********************
@@ -12,6 +13,7 @@
 #define EXTERN extern
 #endif
 #include "csphere.h"
+#include "file_util.h"
 
 #define UNLINK unlink
 
@@ -75,12 +77,6 @@ typedef struct _mesh {
   float dxx, dyy, dzz;
   volrenderdata volrenderinfo;
 } mesh;
-
-/* --------------------------  flowlabels ------------------------------------ */
-
-typedef struct {
-  char *longlabel, *shortlabel, *unit;
-} flowlabels;
 
 /* --------------------------  patch ------------------------------------ */
 

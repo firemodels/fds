@@ -12,55 +12,12 @@
 #include "svzip.h"
 #include "MALLOC.h"
 #include "datadefs.h"
-#include "string_util.h"
 #include "svn_revision.h"
 
 // svn revision character string
 char utilities_revision[]="$Revision$";
 
 int iseed=0;
-
-/* ------------------ readlabels ------------------------ */
-
-int readlabels(flowlabels *flowlabel, FILE *stream){
-#define BUFFERSIZE 255
-  char buffer[BUFFERSIZE];
-  unsigned int len;
-  char *buffer2;
-
-  flowlabel->longlabel=NULL;
-  flowlabel->shortlabel=NULL;
-  flowlabel->unit=NULL;
-
-  if(fgets(buffer,BUFFERSIZE,stream)==NULL)return 2;
-
-  len=strlen(buffer);
-  buffer[len-1]='\0';
-  buffer2=trim_front(buffer);
-  trim(buffer2);
-  len=strlen(buffer2);
-  if(NewMemory((void **)&flowlabel->longlabel,(unsigned int)(len+1))==0)return 2;
-  STRCPY(flowlabel->longlabel,buffer2);
-
-  if(fgets(buffer,BUFFERSIZE,stream)==NULL)return 2;
-  len=strlen(buffer);
-  buffer[len-1]='\0';
-  buffer2=trim_front(buffer);
-  trim(buffer2);
-  len=strlen(buffer2);
-  if(NewMemory((void **)&flowlabel->shortlabel,(unsigned int)(len+1))==0)return 2;
-  STRCPY(flowlabel->shortlabel,buffer2);
-
-  if(fgets(buffer,BUFFERSIZE,stream)==NULL)return 2;
-  len=strlen(buffer);
-  buffer[len-1]='\0';
-  buffer2=trim_front(buffer);
-  trim(buffer2);
-  len=strlen(buffer2);
-  if(NewMemory((void *)&flowlabel->unit,(unsigned int)(len+1))==0)return 2;
-  STRCPY(flowlabel->unit,buffer2);
-  return 0;
-}
 
   /* ------------------ smoothlabel ------------------------ */
 
@@ -106,8 +63,6 @@ void Normal(unsigned short *v1, unsigned short *v2, unsigned short *v3, float *n
   normal[0]/=norm2;
   normal[1]/=norm2;
   normal[2]/=norm2;
-
-
 }
 
 /* ------------------ version ------------------------ */
@@ -232,7 +187,7 @@ void rand_cone_dir(float xyz[3], float conedir[3], float mincosangle){
 
 void rand_sphere_dir(float xyz[3]){
   float x=1.0, y=1.0, z=1.0;
-  float sum;
+  float sum,sqsum;
 
   sum=x*x+y*y+z*z;
   while(sum>1.0||sum==0.0){
@@ -241,9 +196,10 @@ void rand_sphere_dir(float xyz[3]){
     z = rand_1d(-1.0,1.0);
     sum=x*x+y*y+z*z;
   }
-  xyz[0]=x/sqrt(sum);
-  xyz[1]=y/sqrt(sum);
-  xyz[2]=z/sqrt(sum);
+  sqsum=sqrt(sum);
+  xyz[0]=x/sqsum;
+  xyz[1]=y/sqsum;
+  xyz[2]=z/sqsum;
 }
 
 /* ------------------ rand_1d ------------------------ */

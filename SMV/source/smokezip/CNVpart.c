@@ -15,7 +15,6 @@ char CNVpart_revision[]="$Revision$";
 #include "svzip.h"
 #include "MALLOC.h"
 #include "isodefs.h"
-#include "file_util.h"
 
 
 

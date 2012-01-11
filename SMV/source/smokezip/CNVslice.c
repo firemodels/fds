@@ -11,9 +11,7 @@
 #include "egz_stdio.h"
 #include "svzip.h"
 #include "MALLOC.h"
-#include "string_util.h"
 #include "compress.h"
-#include "file_util.h"
 
 // svn revision character string
 char CNVslice_revision[]="$Revision$";

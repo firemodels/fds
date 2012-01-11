@@ -14,6 +14,17 @@
 #define STRDECL(var,val)  var
 #endif
 
+#include <stdio.h>
+
+/* --------------------------  flowlabels ------------------------------------ */
+
+typedef struct {
+  char *longlabel, *shortlabel, *unit;
+} flowlabels;
+
+EXTERNCPP int readlabels_cellcenter(flowlabels *flowlabel, FILE *stream);
+EXTERNCPP int readlabels_terrain(flowlabels *flowlabel, FILE *stream);
+EXTERNCPP int readlabels(flowlabels *label, FILE *stream);
 EXTERNCPP void getPROGversion(char *PROGversion);
 EXTERNCPP int match_wild(char *pTameText, char *pWildText);
 EXTERNCPP int match(char *buffer, const char *key);

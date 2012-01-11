@@ -3,6 +3,8 @@
 // $Author$
 #ifndef OPTIONS_H_DEFINED
 #define OPTIONS_H_DEFINED
+
+#include "lint.h"
 #ifdef CPP
 #define CCC "C"
 #define EXTERNCPP extern "C"

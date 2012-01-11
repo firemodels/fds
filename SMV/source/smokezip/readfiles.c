@@ -10,8 +10,6 @@
 #include <math.h>
 #include "svzip.h"
 #include "MALLOC.h"
-#include "string_util.h"
-#include "file_util.h"
 
 // svn revision character string
 char readfiles_revision[]="$Revision$";
