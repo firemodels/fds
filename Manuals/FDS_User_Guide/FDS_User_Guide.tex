@@ -2637,7 +2637,7 @@ FDS from removing the obstruction if it is embedded within another, like a door 
 \item Obstructions can be made semi-transparent by assigning a {\ct TRANSPARENCY} on the {\ct OBST} line. This real parameter ranges from
 0 to 1, with 0 being fully transparent. The parameter should always be set along with either {\ct COLOR} or an {\ct RGB} triplet. It can
 also be specified on the appropriate {\ct SURF} line, along with a color indicator. If you want the obstruction to be invisible, set {\ct COLOR='INVISBLE'}.
-\item Obstructions are drawn solid in Smokeview. To draw an outline representation, set {\ct OUTLINE=.TRUE.} 
+\item Obstructions are drawn solid in Smokeview. To draw an outline representation, set {\ct OUTLINE=.TRUE.}
 \end{itemize}
 
 
@@ -3031,8 +3031,8 @@ REYNOLDS_STRESS(3,3) = VEL_RMS**2
 
 \noindent and all other components of {\ct REYNOLDS\_STRESS} are zero.
 
-In Chapter 7 of Jarrin's thesis \cite{Jarrin:2008}, he introduces the Modified Synthetic Eddy Method in which the eddy length scales are anisotropic.  
-This allows more realistic characterization of streamwise vortices in a turbulent boundary layer.  
+In Chapter 7 of Jarrin's thesis \cite{Jarrin:2008}, he introduces the Modified Synthetic Eddy Method in which the eddy length scales are anisotropic.
+This allows more realistic characterization of streamwise vortices in a turbulent boundary layer.
 To specify the length scales corresponding to the $\sigma_{ij}$ values in Jarrin's Eq.~(7.1) use {\ct L\_EDDY\_IJ(3,3)}.  For example,
 
 \footnotesize
@@ -9290,6 +9290,17 @@ of 1, 2 or 3 to indicate that the velocity ought to have the same sign as $u$, $
 with measurements. For Plot3D files, add {\ct PLOT3D\_VELO\_INDEX(N)=...} to the {\ct DUMP} line, where {\ct N} refers to the Plot3D quantity 1, 2, 3, 4 or 5.
 
 
+\subsection{Enthalpy}
+\label{info:enthalpy}
+
+There are several outputs that report the enthalpy of the gas mixture. First, the {\ct 'SPECIFIC ENTHALPY'} and the {\ct 'SPECIFIC SENSIBLE ENTHALPY'} are defined:
+\be
+   h = h^0 + \int_0^{T'} c_p \, dT'  \quad ; \quad h_s = \int_0^{T'} c_p \, dT'
+\ee
+Both have units of kJ/kg.
+The quantities {\ct 'ENTHALPY'} and {\ct SPECIFIC ENTHALPY'} are $H=\rho h$ and $H_s=\rho h_s$, respectively, in units of kJ/m$^3$. 
+
+
 \subsection{Computer Performance}
 \label{info:TIMING}
 
@@ -9562,89 +9573,92 @@ remember that all output quantity names ought to be in single quotes.
 \endhead
 {\ct ABSORPTION COEFFICIENT}                    & $\kappa$ (Section~\ref{info:RADI})            & 1/m            & D,I,P,S      \\ \hline
 {\ct ACTUATED SPRINKLERS}                       & Number of actuated sprinklers                 &                & D            \\ \hline
-{\ct ADIABATIC SURFACE TEMPERATURE}             & Section~\ref{info:AST}                    & $^\circ$C      & B,D          \\ \hline
-{\ct AMPUA}$^{**}$                              & Section~\ref{info:part_output}            & kg/m$^2$       & B,D          \\ \hline
-{\ct ASPIRATION}                                & Section~\ref{info:aspiration_detector}    & \%             & D            \\ \hline
+{\ct ADIABATIC SURFACE TEMPERATURE}             & Section~\ref{info:AST}                        & $^\circ$C      & B,D          \\ \hline
+{\ct AMPUA}$^{**}$                              & Section~\ref{info:part_output}                & kg/m$^2$       & B,D          \\ \hline
+{\ct ASPIRATION}                                & Section~\ref{info:aspiration_detector}        & \%             & D            \\ \hline
 {\ct AVERAGE SPECIFIC HEAT}                     & $\bar{c_p}$                                   & kJ/kg/K        & D,I,P,S      \\ \hline
-{\ct BACK WALL TEMPERATURE}                     & Section~\ref{info:PROF}                   & $^\circ$C      & B,D          \\ \hline
+{\ct BACK WALL TEMPERATURE}                     & Section~\ref{info:PROF}                       & $^\circ$C      & B,D          \\ \hline
 {\ct BURNING RATE}                              & $\dm_f''$                                     & kg/m$^2$/s     & B,D          \\ \hline
-{\ct CHAMBER OBSCURATION}                       & Section~\ref{info:smoke_detector}         & \%/m           & D            \\ \hline
+{\ct CHAMBER OBSCURATION}                       & Section~\ref{info:smoke_detector}             & \%/m           & D            \\ \hline
 {\ct CONDUCTIVITY}                              & $k$                                           & W/m/k          & D,I,P,S      \\ \hline
-{\ct CONTROL}                                   & Section~\ref{info:CTRL}                   &                & D            \\ \hline
+{\ct CONTROL}                                   & Section~\ref{info:CTRL}                       &                & D            \\ \hline
 {\ct CONVECTIVE HEAT FLUX}                      & $\dq_c''$ (Section~\ref{info:heat_flux})      & kW/m$^2$       & B,D          \\ \hline
-{\ct CPUA}$^{**}$                               & Section~\ref{info:part_output}            & kW/m$^2$       & B,D          \\ \hline
+{\ct CPUA}$^{**}$                               & Section~\ref{info:part_output}                & kW/m$^2$       & B,D          \\ \hline
 {\ct CPU TIME}                                  & Elapsed CPU time                              & s              & D            \\ \hline
 {\ct DENSITY}                                   & $\rho$ or $\rho Y_\alpha$ with {\ct SPEC\_ID} & kg/m$^3$       & D,I,P,S      \\ \hline
 {\ct DIVERGENCE}                                & $\nabla \cdot \bu$                            & s$^{-1}$       & D,I,P,S      \\ \hline
-{\ct ENTHALPY}                                  & $\sum \rho Y_\alpha \int_0^T c_{p,\alpha}(T') \, dT'$  & kJ/m$^3$ & D,I,P,S   \\ \hline
-{\ct FED}                                       & Section~\ref{info:FED}                    &                & D            \\ \hline
-{\ct FIC}                                       & Section~\ref{info:FED}                    &                & D,S          \\ \hline
-{\ct GAUGE HEAT FLUX}                           & Section~\ref{info:heat_flux}              & kW/m$^2$       & B,D          \\ \hline
+{\ct ENTHALPY}                                  & Section~\ref{info:enthalpy}                   & kJ/m$^3$       & D,I,P,S      \\ \hline
+{\ct FED}                                       & Section~\ref{info:FED}                        &                & D            \\ \hline
+{\ct FIC}                                       & Section~\ref{info:FED}                        &                & D,S          \\ \hline
+{\ct GAUGE HEAT FLUX}                           & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
 {\ct H}                                         & $H=|\bu|^2/2 + \tp/\rho_0$                    & (m/s)$^2$      & D,I,P,S      \\ \hline
-{\ct HEAT FLOW}                                 & Section~\ref{info:flows}                  & kW             & D            \\ \hline
-{\ct NET HEAT FLUX}                             & Section~\ref{info:heat_flux}              & kW/m$^2$       & B,D          \\ \hline
+{\ct HEAT FLOW}                                 & Section~\ref{info:flows}                      & kW             & D            \\ \hline
+{\ct NET HEAT FLUX}                             & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
 {\ct HRR}                                       & $\int \dq''' \; dV$                           & kW             & D            \\ \hline
 {\ct HRRPUV}                                    & $\dq'''$                                      & kW/m$^3$       & D,I,P,S      \\ \hline
-{\ct INCIDENT HEAT FLUX}                        & Section~\ref{info:heat_flux}              & kW/m$^2$       & B,D          \\ \hline
-{\ct INSIDE WALL TEMPERATURE}                   & Section~\ref{info:PROF}                   & $^\circ$C      & D            \\ \hline
+{\ct HRRPUA}                                    & $\dq''$                                       & kW/m$^2$       & D            \\ \hline
+{\ct INCIDENT HEAT FLUX}                        & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
+{\ct INSIDE WALL TEMPERATURE}                   & Section~\ref{info:PROF}                       & $^\circ$C      & D            \\ \hline
 {\ct ITERATION}                                 & Number of time steps                          &                & D            \\ \hline
-{\ct LAYER HEIGHT}                              & Section~\ref{info:layerheight}            & m              & D            \\ \hline
-{\ct LINK TEMPERATURE}                          & Section~\ref{info:heat_detectors}         & $^\circ$C      & D            \\ \hline
-{\ct LOWER TEMPERATURE}                         & Section~\ref{info:layerheight}            & $^\circ$C      & D            \\ \hline
-{\ct MASS FLOW}                                 & Section~\ref{info:flows}                  & kg/s           & D            \\ \hline
+{\ct LAYER HEIGHT}                              & Section~\ref{info:layerheight}                & m              & D            \\ \hline
+{\ct LINK TEMPERATURE}                          & Section~\ref{info:heat_detectors}             & $^\circ$C      & D            \\ \hline
+{\ct LOWER TEMPERATURE}                         & Section~\ref{info:layerheight}                & $^\circ$C      & D            \\ \hline
+{\ct MASS FLOW}                                 & Section~\ref{info:flows}                      & kg/s           & D            \\ \hline
 {\ct MASS FLUX}$^*$                             & Mass flux at solid surface                    & kg/m$^2$/s     & B,D          \\ \hline
 {\ct MASS FLUX X}$^*$                           & $\rho u Y_\alpha$                             & kg/m$^2$/s     & D,I,P,S      \\ \hline
 {\ct MASS FLUX Y}$^*$                           & $\rho v Y_\alpha$                             & kg/m$^2$/s     & D,I,P,S      \\ \hline
 {\ct MASS FLUX Z}$^*$                           & $\rho w Y_\alpha$                             & kg/m$^2$/s     & D,I,P,S      \\ \hline
 {\ct MASS FRACTION}$^*$                         & $Y_\alpha$                                    & kg/kg          & D,I,P,S      \\ \hline
 {\ct MIXTURE FRACTION}                          & $Z$                                           & kg/kg          & D,I,P,S      \\ \hline
-{\ct MPUA}$^{**}$                               & Section~\ref{info:part_output}            & kg/m$^2$       & B,D          \\ \hline
-{\ct MPUV}$^{**}$                               & Section~\ref{info:part_output}            & kg/m$^3$       & D,P,S        \\ \hline
+{\ct MPUA}$^{**}$                               & Section~\ref{info:part_output}                & kg/m$^2$       & B,D          \\ \hline
+{\ct MPUV}$^{**}$                               & Section~\ref{info:part_output}                & kg/m$^3$       & D,P,S        \\ \hline
 {\ct NORMAL VELOCITY}                           & Wall normal velocity                          & m/s            & D,B          \\ \hline
 {\ct OPEN NOZZLES}                              & Number of open nozzles                        &                & D            \\ \hline
 {\ct OPTICAL DENSITY}                           & $K/2.3$ (Section~\ref{info:visibility})       & 1/m            & D,I,P,S      \\ \hline
 {\ct EXTINCTION COEFFICIENT}                    & $K$ (Section~\ref{info:visibility})           & 1/m            & D,I,P,S      \\ \hline
-{\ct PATH OBSCURATION}                          & Section~\ref{info:beam_detector}          & \%             & D            \\ \hline
-{\ct PARTICLE AGE}                               & $t_d$                                         & s              & PA           \\ \hline
-{\ct PARTICLE DIAMETER}                          & $2 r_d$                                       & $\mu$m         & PA           \\ \hline
-{\ct PARTICLE FLUX X}$^{**}$                     & Section~\ref{info:part_output}            & kg/m$^2$/s     & P,S          \\ \hline
-{\ct PARTICLE FLUX Y}$^{**}$                     & Section~\ref{info:part_output}            & kg/m$^2$/s     & P,S          \\ \hline
-{\ct PARTICLE FLUX Z}$^{**}$                     & Section~\ref{info:part_output}            & kg/m$^2$/s     & P,S          \\ \hline
-{\ct PARTICLE MASS}                              & $m_d$                                         & kg             & PA           \\ \hline
-{\ct PARTICLE TEMPERATURE}                       & $T_d$                                         & $^\circ$C      & PA           \\ \hline
-{\ct PARTICLE VELOCITY}                          & $|\bu_d|$                                     & m/s            & PA           \\ \hline
+{\ct PATH OBSCURATION}                          & Section~\ref{info:beam_detector}              & \%             & D            \\ \hline
+{\ct PARTICLE AGE}                              & $t_d$                                         & s              & PA           \\ \hline
+{\ct PARTICLE DIAMETER}                         & $2 r_d$                                       & $\mu$m         & PA           \\ \hline
+{\ct PARTICLE FLUX X}$^{**}$                    & Section~\ref{info:part_output}                & kg/m$^2$/s     & P,S          \\ \hline
+{\ct PARTICLE FLUX Y}$^{**}$                    & Section~\ref{info:part_output}                & kg/m$^2$/s     & P,S          \\ \hline
+{\ct PARTICLE FLUX Z}$^{**}$                    & Section~\ref{info:part_output}                & kg/m$^2$/s     & P,S          \\ \hline
+{\ct PARTICLE MASS}                             & $m_d$                                         & kg             & PA           \\ \hline
+{\ct PARTICLE TEMPERATURE}                      & $T_d$                                         & $^\circ$C      & PA           \\ \hline
+{\ct PARTICLE VELOCITY}                         & $|\bu_d|$                                     & m/s            & PA           \\ \hline
 {\ct PRESSURE}                                  & Perturbation pressure, $\tp$                  & Pa             & D,I,P,S      \\ \hline
 {\ct PRESSURE COEFFICIENT}                      & $C_p$ (Section~\ref{info:wind})               &                & B,D          \\ \hline
-{\ct PRESSURE ZONE}                             & Section~\ref{info:ZONE}                   &                & D,S          \\ \hline
-{\ct RADIATIVE HEAT FLUX}                       & Section~\ref{info:heat_flux}              & kW/m$^2$       & B,D          \\ \hline
-{\ct RADIATIVE HEAT FLUX GAS}                   & Section~\ref{info:heat_flux}              & kW/m$^2$       & D            \\ \hline
-{\ct RADIOMETER}                                & Section~\ref{info:heat_flux}              & kW/m$^2$       & B,D          \\ \hline
+{\ct PRESSURE ZONE}                             & Section~\ref{info:ZONE}                       &                & D,S          \\ \hline
+{\ct RADIATIVE HEAT FLUX}                       & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
+{\ct RADIATIVE HEAT FLUX GAS}                   & Section~\ref{info:heat_flux}                  & kW/m$^2$       & D            \\ \hline
+{\ct RADIOMETER}                                & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
 {\ct RELATIVE HUMIDITY}                         & Relative humidity                             & \%             & D,I,P,S      \\ \hline
-{\ct SCALAR RESOLUTION}$^{*****}$               &  Section~\ref{info:meshquality}           &                & S            \\ \hline
+{\ct SCALAR RESOLUTION}$^{*****}$               &  Section~\ref{info:meshquality}               &                & S            \\ \hline
+{\ct SENSIBLE ENTHALPY}                         & Section~\ref{info:enthalpy}                   & kJ/m$^3$       & D,I,P,S      \\ \hline
 {\ct SOOT VOLUME FRACTION}                      & $\rho Y_s(Z)/\rho_s$                          & mol/mol        & D,I,P,S      \\ \hline
-{\ct SPECIFIC ENTHALPY}                         & $\sum Y_\alpha \int_0^T c_{p,\alpha}(T') \, dT'$  & kJ/kg    & D,I,P,S        \\ \hline
+{\ct SPECIFIC ENTHALPY}                         & Section~\ref{info:enthalpy}                   & kJ/kg          & D,I,P,S      \\ \hline
+{\ct SPECIFIC SENSIBLE ENTHALPY}                & Section~\ref{info:enthalpy}                   & kJ/kg          & D,I,P,S      \\ \hline
 {\ct SPECIFIC HEAT}                             & $c_p$                                         & kJ/kg/K        & D,I,P,S      \\ \hline
-{\ct SPRINKLER LINK TEMPERATURE}                & Section~\ref{info:sprinklers}             & $^\circ$C      & D            \\ \hline
-{\ct SOLID DENSITY}                             & Section~\ref{info:material_components}    & kg/m$^3$       & D            \\ \hline
-{\ct SURFACE DENSITY}                           & Section~\ref{info:material_components}    & kg/m$^2$       & B,D          \\ \hline
+{\ct SPRINKLER LINK TEMPERATURE}                & Section~\ref{info:sprinklers}                 & $^\circ$C      & D            \\ \hline
+{\ct SOLID DENSITY}                             & Section~\ref{info:material_components}        & kg/m$^3$       & D            \\ \hline
+{\ct SURFACE DENSITY}                           & Section~\ref{info:material_components}        & kg/m$^2$       & B,D          \\ \hline
 {\ct TEMPERATURE}                               & $T$ (Section~\ref{info:THERMOCOUPLE})         & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct THERMOCOUPLE}                              & $T_{TC}$ (Section~\ref{info:THERMOCOUPLE})    & $^\circ$C      & D            \\ \hline
 {\ct TIME}                                      & $t$ (Section~\ref{info:DEVC})                 & s              & D            \\ \hline
 {\ct TIME STEP}                                 & $\delta t$, Numerical time step               & s              & D            \\ \hline
-{\ct TURBULENCE RESOLUTION}                     & Section~\ref{info:meshquality}            &                & D,S          \\ \hline
+{\ct TURBULENCE RESOLUTION}                     & Section~\ref{info:meshquality}                &                & D,S          \\ \hline
 {\ct U-VELOCITY}                                & $u$                                           & m/s            & D,I,P,S      \\ \hline
 {\ct V-VELOCITY}                                & $v$                                           & m/s            & D,I,P,S      \\ \hline
 {\ct W-VELOCITY}                                & $w$                                           & m/s            & D,I,P,S      \\ \hline
-{\ct UPPER TEMPERATURE}                         & Section~\ref{info:layerheight}            & $^\circ$C      & D            \\ \hline
+{\ct UPPER TEMPERATURE}                         & Section~\ref{info:layerheight}                & $^\circ$C      & D            \\ \hline
 {\ct VELOCITY}$^{***}$                          & $\sqrt{u^2+v^2+w^2}$                          & m/s            & D,I,P,S      \\ \hline
 {\ct VISCOSITY}                                 & $\mu$                                         & kg/m/s         & D,I,P,S      \\ \hline
 {\ct VISIBILITY}                                & $S=C/K$ (Section~\ref{info:visibility})       & m              & D,I,P,S      \\ \hline
-{\ct VOLUME FLOW}                               & Section~\ref{info:flows}                  & m$^3$/s        & D            \\ \hline
+{\ct VOLUME FLOW}                               & Section~\ref{info:flows}                      & m$^3$/s        & D            \\ \hline
 {\ct VOLUME FRACTION}$^{****}$                  & $X_\alpha$                                    & mol/mol        & D,I,P,S      \\ \hline
 {\ct WALL CLOCK TIME}                           & Elapsed wall clock time                       & s              & D            \\ \hline
 {\ct WALL TEMPERATURE}                          & $T_w$                                         & $^\circ$C      & B,D          \\ \hline
-{\ct WALL THICKNESS}                            & Section~\ref{info:material_components}    & m              & B,D          \\ \hline
-{\ct WAVELET ERROR}$^{*****}$                   & Section~\ref{info:meshquality}            &                & S            \\ \hline
+{\ct WALL THICKNESS}                            & Section~\ref{info:material_components}        & m              & B,D          \\ \hline
+{\ct WAVELET ERROR}$^{*****}$                   & Section~\ref{info:meshquality}                &                & S            \\ \hline
 \end{longtable}
 
 \noindent
