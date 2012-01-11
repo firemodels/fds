@@ -1214,7 +1214,7 @@ void update_faces(void){
     faceptr = meshi->faceinfo;
     for(j=0;j<meshi->nbptrs;j++){
       bc = meshi->blockageinfoptrs[j];
-      if(visTerrainType!=4&&bc->is_wuiblock==1)continue;
+      if(visTerrainType!=TERRAIN_HIDDEN&&bc->is_wuiblock==1)continue;
       obst_or_vent2faces(meshi,bc,NULL,faceptr,BLOCK_face);
       faceptr += 6;
     }

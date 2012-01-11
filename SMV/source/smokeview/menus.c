@@ -4247,7 +4247,7 @@ void GeometryMenu(int value){
     //  BlockageMenu(visBLOCKHide);
     }
     visTerrainType=value-17;
-    if(visTerrainType==0){
+    if(visTerrainType==TERRAIN_3D){
       planar_terrain_slice=0;
     }
     else{
@@ -5133,19 +5133,18 @@ updatemenu=0;
 /* --------------------------------terrain_showmenu -------------------------- */
 
   CREATEMENU(terrain_showmenu,GeometryMenu);
-
-  if(visTerrainType==0)glutAddMenuEntry(_("*3D surface"),17);
-  if(visTerrainType!=0)glutAddMenuEntry(_("3D surface"),17);
-  if(visTerrainType==1)glutAddMenuEntry(_("*2D stepped"),18);
-  if(visTerrainType!=1)glutAddMenuEntry(_("2D stepped"),18);
-  if(visTerrainType==2)glutAddMenuEntry(_("*2D lines"),19);
-  if(visTerrainType!=2)glutAddMenuEntry(_("2D lines"),19);
+  if(visTerrainType==TERRAIN_3D)glutAddMenuEntry(_("*3D surface"),17+TERRAIN_3D);
+  if(visTerrainType!=TERRAIN_3D)glutAddMenuEntry(_("3D surface"),17+TERRAIN_3D);
+  if(visTerrainType==TERRAIN_2D_STEPPED)glutAddMenuEntry(_("*2D stepped"),17+TERRAIN_2D_STEPPED);
+  if(visTerrainType!=TERRAIN_2D_STEPPED)glutAddMenuEntry(_("2D stepped"),17+TERRAIN_2D_STEPPED);
+  if(visTerrainType==TERRAIN_2D_LINE)glutAddMenuEntry(_("*2D lines"),17+TERRAIN_2D_LINE);
+  if(visTerrainType!=TERRAIN_2D_LINE)glutAddMenuEntry(_("2D lines"),17+TERRAIN_2D_LINE);
   if(terrain_texture!=NULL&&terrain_texture->loaded==1){
-    if(visTerrainType==3)glutAddMenuEntry(_("*Image"),20);
-    if(visTerrainType!=3)glutAddMenuEntry(_("Image"),20);
+    if(visTerrainType==TERRAIN_3D_MAP)glutAddMenuEntry(_("*Image"),17+TERRAIN_3D_MAP);
+    if(visTerrainType!=TERRAIN_3D_MAP)glutAddMenuEntry(_("Image"),17+TERRAIN_3D_MAP);
   }
-  if(visTerrainType==4)glutAddMenuEntry(_("*Hidden"),21);
-  if(visTerrainType!=4)glutAddMenuEntry(_("Hidden"),21);
+  if(visTerrainType==TERRAIN_HIDDEN)glutAddMenuEntry(_("*Hidden"),17+TERRAIN_HIDDEN);
+  if(visTerrainType!=TERRAIN_HIDDEN)glutAddMenuEntry(_("Hidden"),17+TERRAIN_HIDDEN);
     
   if(nobject_defs>0){
     multiprop=0;

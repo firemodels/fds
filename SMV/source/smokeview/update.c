@@ -290,7 +290,7 @@ void updateShow(void){
       }
     }
   }
-  if(visTerrainType!=4){
+  if(visTerrainType!=TERRAIN_HIDDEN){
     for(i=0;i<nterraininfo;i++){
       terraindata *terri;
 
@@ -929,7 +929,7 @@ void updatetimes(void){
   updateShow();  
   CheckMemory;
   ntimes = 0;
-  if(visTerrainType!=4){
+  if(visTerrainType!=TERRAIN_HIDDEN){
     for(i=0;i<nterraininfo;i++){
       terraindata *terri;
 
@@ -1025,7 +1025,7 @@ void updatetimes(void){
   if(ntimes>0)NewMemory((void **)&times,ntimes*sizeof(float));
   timescopy=times;
 
-  if(visTerrainType!=4){
+  if(visTerrainType!=TERRAIN_HIDDEN){
     for(i=0;i<nterraininfo;i++){
       terraindata *terri;
 
@@ -1250,7 +1250,7 @@ void updatetimes(void){
     FREEMEMORY(touri->path_timeslist);
     if(ntimes>0)NewMemory((void **)&touri->path_timeslist,ntimes*sizeof(int));
   }
-  if(visTerrainType!=4){
+  if(visTerrainType!=TERRAIN_HIDDEN){
     for(i=0;i<nterraininfo;i++){
       terraindata *terri;
 
@@ -1494,7 +1494,7 @@ void updatetimes(void){
     updateGluiTimeBounds(times[0],times[ntimes-1]);
   }
   show_slice_terrain=0;
-  if(visTerrainType==3){
+  if(visTerrainType==TERRAIN_3D_MAP){
     for(i=0;i<nsliceinfo;i++){
       sd = sliceinfo + i;
       if(sd->loaded==0||sd->display==0||sd->terrain==0)continue;
@@ -1549,7 +1549,7 @@ int getplotstate(int choice){
         return DYNAMIC_PLOTS;
       }
       if(visGrid==0)stept = 1;
-      if(visTerrainType!=4){
+      if(visTerrainType!=TERRAIN_HIDDEN){
         for(i=0;i<nterraininfo;i++){
           terraindata *terri;
 

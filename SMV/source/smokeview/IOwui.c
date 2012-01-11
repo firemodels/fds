@@ -866,7 +866,7 @@ void readterrain(char *file, int ifile, int flag, int *errorcode){
     return;
   }
   terri->loaded=1;
-  visTerrainType=0;
+  visTerrainType=TERRAIN_3D;
   plotstate=getplotstate(DYNAMIC_PLOTS);
   updatetimes();
 #ifdef _DEBUG

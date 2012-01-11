@@ -11,6 +11,12 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#define TERRAIN_3D 0
+#define TERRAIN_2D_STEPPED 1
+#define TERRAIN_2D_LINE 2
+#define TERRAIN_3D_MAP 3
+#define TERRAIN_HIDDEN 4
+
 #define CSV_FDS 0
 #define CSV_CFAST 1
 #define CSV_EXP 2

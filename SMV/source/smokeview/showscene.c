@@ -323,7 +323,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
 /* ++++++++++++++++++++++++ draw terrain +++++++++++++++++++++++++ */
 
-  if(visTerrainType!=4){
+  if(visTerrainType!=TERRAIN_HIDDEN){
     int i;
     
     //shaded 17 0
@@ -344,24 +344,27 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
         only_geom=1;
       }
       switch (visTerrainType){
-        case 1:
-        case 2:
+        case TERRAIN_3D:
+          drawterrain(terri,only_geom);
+          break;
+        case TERRAIN_2D_STEPPED:
           if(cullfaces==1)glDisable(GL_CULL_FACE);
           glPushMatrix();
           glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
           glTranslatef(-xbar0,-ybar0,-zbar0);
-          if(visTerrainType==1){
-            DrawContours(&meshinfo[i].terrain_contour);
-          }
-          else{
-            DrawLineContours(&meshinfo[i].terrain_contour,1.0);
-          }
+          DrawContours(&meshinfo[i].terrain_contour);
           glPopMatrix();
           if(cullfaces==1)glEnable(GL_CULL_FACE);
           break;
-        case 0:
-        case 3:
-          if(visTerrainType==3&&terrain_texture!=NULL&&terrain_texture->loaded==1){
+        case TERRAIN_2D_LINE:
+          glPushMatrix();
+          glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+          glTranslatef(-xbar0,-ybar0,-zbar0);
+          DrawLineContours(&meshinfo[i].terrain_contour,1.0);
+          glPopMatrix();
+          break;
+        case TERRAIN_3D_MAP:
+          if(terrain_texture!=NULL&&terrain_texture->loaded==1){
             drawterrain_texture(terri,only_geom);
           }
           else{

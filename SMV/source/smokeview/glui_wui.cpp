@@ -202,7 +202,7 @@ extern "C" void WUI_CB(int var){
       update_terrain(0,vertical_factor);
       break;
     case TERRAIN_TYPE:
-      if(visTerrainType==0){
+      if(visTerrainType==TERRAIN_3D){
         planar_terrain_slice=0;
       }
       else{
