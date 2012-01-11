@@ -260,9 +260,13 @@ OUTPUT_QUANTITY(47)%NAME = 'ENTHALPY'
 OUTPUT_QUANTITY(47)%UNITS = 'kJ/m3'                 
 OUTPUT_QUANTITY(47)%SHORT_NAME = 'H'
 
-OUTPUT_QUANTITY(48)%NAME = 'AVERAGE SPECIFIC HEAT'                       
-OUTPUT_QUANTITY(48)%UNITS = 'kJ/kg/K'                 
-OUTPUT_QUANTITY(48)%SHORT_NAME = 'c_p_bar'
+OUTPUT_QUANTITY(48)%NAME = 'SPECIFIC SENSIBLE ENTHALPY'                       
+OUTPUT_QUANTITY(48)%UNITS = 'kJ/kg'                 
+OUTPUT_QUANTITY(48)%SHORT_NAME = 'h_s'
+
+OUTPUT_QUANTITY(49)%NAME = 'SENSIBLE ENTHALPY'                       
+OUTPUT_QUANTITY(49)%UNITS = 'kJ/m3'                 
+OUTPUT_QUANTITY(49)%SHORT_NAME = 'H_s'
 
 ! Measures of turbulence resolution (diagnostics)
 
@@ -810,6 +814,10 @@ OUTPUT_QUANTITY(-7)%SHORT_NAME = 'burn'
 OUTPUT_QUANTITY(-8)%NAME = 'HRRPUM'            
 OUTPUT_QUANTITY(-8)%UNITS = 'kW/kg'                 
 OUTPUT_QUANTITY(-8)%SHORT_NAME = 'hrrpum'
+
+OUTPUT_QUANTITY(-9)%NAME = 'HRRPUA'            
+OUTPUT_QUANTITY(-9)%UNITS = 'kW/m2'                 
+OUTPUT_QUANTITY(-9)%SHORT_NAME = 'hrrpua'
 
 OUTPUT_QUANTITY(-10)%NAME= 'NET HEAT FLUX'               
 OUTPUT_QUANTITY(-10)%UNITS= 'kW/m2'                   
