@@ -319,7 +319,7 @@ REAL(FB) :: DUMMY_FB_REAL
 
 M => MESHES(NM)
 
-CUT_CELL_TEST: IF (ABS(T-T_BEGIN)<ZERO_P) THEN
+CUTCELL_TEST: IF (ABS(T-T_BEGIN)<ZERO_P) THEN
 
 FACE_LOOP: DO N=1,N_FACE
 
@@ -355,37 +355,7 @@ FACE_LOOP: DO N=1,N_FACE
             BB(5) = M%Z(K-1)
             BB(6) = M%Z(K)
             CALL TRIANGLE_BOX_INTERSECT(IERR,V1,V2,V3,BB)
-            IF (IERR==1) CALL INSERT(IC,FACET(N)%P_CELL_LIST)
-
-            BB(1) = M%XC(I)
-            BB(2) = M%XC(I+1)
-            BB(3) = M%Y(J-1)
-            BB(4) = M%Y(J)
-            BB(5) = M%Z(K-1)
-            BB(6) = M%Z(K)
-            IERR=0
-            CALL TRIANGLE_BOX_INTERSECT(IERR,V1,V2,V3,BB)
-            IF (IERR==1) CALL INSERT(IC,FACET(N)%U_CELL_LIST)
-
-            BB(1) = M%X(I-1)
-            BB(2) = M%X(I)
-            BB(3) = M%YC(J)
-            BB(4) = M%YC(J+1)
-            BB(5) = M%Z(K-1)
-            BB(6) = M%Z(K)
-            IERR=0
-            CALL TRIANGLE_BOX_INTERSECT(IERR,V1,V2,V3,BB)
-            IF (IERR==1) CALL INSERT(IC,FACET(N)%V_CELL_LIST)
-
-            BB(1) = M%X(I-1)
-            BB(2) = M%X(I)
-            BB(3) = M%Y(J-1)
-            BB(4) = M%Y(J)
-            BB(5) = M%ZC(K)
-            BB(6) = M%ZC(K+1)
-            IERR=0
-            CALL TRIANGLE_BOX_INTERSECT(IERR,V1,V2,V3,BB)
-            IF (IERR==1) CALL INSERT(IC,FACET(N)%W_CELL_LIST)
+            IF (IERR==1) CALL CUTCELL_INSERT(IC,FACET(N)%CUTCELL_LIST)
 
          ENDDO
       ENDDO
@@ -393,14 +363,14 @@ FACE_LOOP: DO N=1,N_FACE
 
 ENDDO FACE_LOOP
 
-ENDIF CUT_CELL_TEST
+ENDIF CUTCELL_TEST
 
 !print *
 !LL=>FACET(1)%CUTCELL_LIST
 !IF ( ASSOCIATED(LL) ) THEN
 !    END_OF_LIST=.FALSE.
 !    DO WHILE (.NOT.END_OF_LIST)
-!       print *, LL%INDEX
+!       print *, LL%INDEX, LL%AREA
 !       LL=>LL%NEXT
 !       IF ( .NOT.ASSOCIATED(LL) ) THEN
 !          print *,'done printing linked list!'
@@ -500,7 +470,23 @@ RECURSIVE SUBROUTINE INSERT(ITEM,ROOT)
    ELSE 
       CALL INSERT(ITEM,ROOT%NEXT) 
    ENDIF 
-END SUBROUTINE 
+END SUBROUTINE INSERT
+
+
+RECURSIVE SUBROUTINE CUTCELL_INSERT(ITEM,ROOT) 
+   IMPLICIT NONE 
+   TYPE(CUTCELL_LINKED_LIST_TYPE), POINTER :: ROOT 
+   INTEGER :: ITEM,IZERO
+   IF (.NOT.ASSOCIATED(ROOT)) THEN 
+      ALLOCATE(ROOT,STAT=IZERO)
+      CALL ChkMemErr('GEOM','ROOT',IZERO)
+      NULLIFY(ROOT%NEXT) 
+      ROOT%INDEX = ITEM
+      ROOT%AREA = 1._EB ! Charles Luo call here, cutcell AREA of FACET(N) with cell index ITEM
+   ELSE 
+      CALL CUTCELL_INSERT(ITEM,ROOT%NEXT) 
+   ENDIF 
+END SUBROUTINE CUTCELL_INSERT
 
 
 SUBROUTINE TRIANGLE_BOX_INTERSECT(IERR,V1,V2,V3,BB)
@@ -1308,7 +1294,9 @@ IERR=1
 
 END SUBROUTINE GET_VELO_IBM
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! Cut-cell subroutines by Charles Luo
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE TRI_PLANE_BOX_INTERSECT(NP,PC,V1,V2,V3,BB)
 USE MATH_FUNCTIONS
 IMPLICIT NONE
@@ -1827,7 +1815,9 @@ ENDIF
 
 RETURN
 END SUBROUTINE GET_CUTCELL_AREA
-!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! End Cut-cell subroutines by Charles Luo
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 SUBROUTINE GET_REV_geom(MODULE_REV,MODULE_DATE)
