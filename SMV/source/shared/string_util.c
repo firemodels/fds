@@ -157,10 +157,10 @@ int randint(int min, int max){
   int return_val;
 
   if (min>max){
-    return_val = max+((min-max+1)*(float)rand()/(float)(RAND_MAX+1));
+    return_val = max+((min-max+1)*(float)rand()/((float)RAND_MAX+1.0));
   }
   else{
-    return_val = min+((max-min+1)*(float)rand()/(float)(RAND_MAX+1));
+    return_val = min+((max-min+1)*(float)rand()/((float)RAND_MAX+1.0));
   }
   return return_val;
 }
