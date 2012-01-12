@@ -270,8 +270,8 @@ int file_exists(char *filename){
     return 0;
   }
 }
-#ifdef pp_OPEN
-  /* ------------------ get_filelist ------------------------ */
+
+/* ------------------ get_filelist ------------------------ */
 
 void free_filelist(filelistdata *filelist, int *nfilelist) {
   int i;
@@ -282,7 +282,6 @@ void free_filelist(filelistdata *filelist, int *nfilelist) {
   FREEMEMORY(filelist);
   *nfilelist=0;
 }
-#endif
 
   /* ------------------ get_filelist ------------------------ */
 
@@ -306,7 +305,6 @@ int get_nfilelist(const char *path, char *key) {
   return maxfiles;
 }
 
-#ifdef pp_OPEN
  /* ------------------ get_filelist ------------------------ */
 
 int get_filelist(const char *path, char *key, int maxfiles, filelistdata **filelist) {
@@ -361,7 +359,6 @@ int get_filelist(const char *path, char *key, int maxfiles, filelistdata **filel
   closedir(dp);
   return nfiles;
 }
-#endif
 
 /* ------------------ getfilesizelabel ------------------------ */
 

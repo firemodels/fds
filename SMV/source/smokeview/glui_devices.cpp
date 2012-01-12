@@ -24,7 +24,6 @@ extern "C" char glui_device_revision[]="$Revision$";
 #define SAVE_SETTINGS 99
 #define DEVICE_close 3
 
-#ifdef pp_OPEN
 #define OPEN_UP 0
 #define OPEN_DOWN 1
 #define OPEN_FILEINDEX 2
@@ -52,9 +51,6 @@ GLUI_Panel *gluiopen_panel_open2=NULL;
 GLUI_Panel *gluiopen_panel_open3=NULL;
 GLUI_Listbox *gluiopen_LISTBOX_open=NULL;
 GLUI_EditText *gluiopen_EDIT_filter=NULL;
-
-#endif
-
 
 GLUI *glui_device=NULL;
 GLUI_Panel *panel_objects=NULL;
@@ -141,8 +137,6 @@ extern "C" void hide_glui_device(void){
 extern "C" void show_glui_device(void){
   if(glui_device!=NULL)glui_device->show();
 }
-
-#ifdef pp_OPEN
 
 /* ------------------ Device_CB ------------------------ */
 
@@ -241,7 +235,6 @@ void Open_CB(int var){
       break;
   }
 }
-#endif
 
 /* ------------------ Device_CB ------------------------ */
 
