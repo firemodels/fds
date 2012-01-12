@@ -33,13 +33,11 @@ INC_DIR = $(SOURCE_DIR)/include2
 SYSTEMLIBS = -lpthread -lXmu -lGLU -lGL -lm
 
 # FORTRAN Library directories for various platforms
+# Define IFORT_COMPILER and IFORT_COMPILER2 in a startup file to point
+#  compiler distribution location.
 
-#OSX32FORTLIBDIR  = /opt/intel/composerxe/lib
-#OSX64FORTLIBDIR  = /opt/intel/composerxe/lib
-OSX32FORTLIBDIR  = /opt/intel/Compiler/11.1/080/lib
-OSX64FORTLIBDIR  = /opt/intel/Compiler/11.1/080/lib
-#OSX32FORTLIBDIR  = $IFORT_COMPILER/lib
-#OSX64FORTLIBDIR  = $IFORT_COMPILER/lib
+OSX32FORTLIBDIR  = $(IFORT_COMPILER2)/lib
+OSX64FORTLIBDIR  = ${IFORT_COMPILER2}/lib
 
 LINUX32FORTLIBDIR  = $IFORT_COMPILER/lib/ia32
 LINUX64FORTLIBDIR  = $IFORT_COMPILER/lib/intel64
