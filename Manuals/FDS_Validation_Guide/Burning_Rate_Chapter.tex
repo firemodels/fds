@@ -192,17 +192,29 @@ Gas 2 Combustion Efficiency &               & 0.75 $\pm$ 0.03                   
 \subsection{Poly(aryl ether ether ketone)) (PEEK) in the Cone Calorimeter}
 
 Table~\ref{Properties_PEEK} lists the measured properties of poly(aryl ether ether ketone). Its trade name is VICTREX PEEK 450G.
-These values have been input directly into FDS, and the predicted heat release rates
+It has been thoroughly dried. Its property values have been input directly into FDS, and the predicted heat release rates
 are compared with measured values from the Cone
 Calorimeter. The results for 3.9~mm samples at imposed heat fluxes of 50~kW/m$^2$, 70~kW/m$^2$, and 90~kW/m$^2$ are shown in Fig.~\ref{HRR_PEEK}.
 A 1~cm layer of Kaowool insulation was placed under the sample. Its properties are given in Ref.~\cite{Stoliarov:CF2010}.
 
-It is assumed that the polymer decomposes via a two-step reaction:
+It is assumed that the polymer decomposes via a four-step reaction:
 \begin{eqnarray}
    \hbox{Polymer} &\to& \hbox{Char 1} + \hbox{Gas 1}  \\
-   \hbox{Char 1}  &\to& \hbox{Char 2} + \hbox{Gas 2}
+   \hbox{Char 1}  &\to& \hbox{Char 2} + \hbox{Gas 2}  \\
+   \hbox{Char 2}  &\to& \hbox{Char 3} + \hbox{Gas 2}  \\
+   \hbox{Char 3}  &\to& \hbox{Gas 2}
 \end{eqnarray}
 It is also assumed that the gaseous fuel molecule is C$_{19}$H$_{12}$O$_3$.
+
+\begin{figure}[h]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_PEEK_50} &
+\includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_PEEK_70} \\
+\multicolumn{2}{c}{\includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_PEEK_90}}
+\end{tabular*}
+\caption[Heat release rate of poly(aryl ether ether ketone) (PEEK).]{Comparison of predicted and measured heat release rates for poly(aryl ether ether ketone) (PEEK).}
+\label{HRR_PEEK}
+\end{figure}
 
 
 \begin{table}[h!]
@@ -218,12 +230,12 @@ Polymer Specific Heat       & kJ/kg/K       & 2.05                              
 Polymer Emissivity          &               & 0.90                              & Fit to cone data          &  \cite{Oztekin:CF2012}                  \\ \hline
 Polymer Absorption Coef.    & m$^{-1}$      & 1690                              & Fit to cone data          &  \cite{Oztekin:CF2012}                  \\ \hline
 Char 1 Density              & kg/m$^3$      & 810                               & Assumed constant volume   &  \cite{Oztekin:CF2012}                  \\ \hline
-Char 1 Conductivity         & W/m/K         & 0.36                              & Fit to cone data          &  \cite{Oztekin:CF2012}                  \\ \hline
+Char 1 Conductivity         & W/m/K         & 0.37                              & Fit to cone data          &  \cite{Oztekin:CF2012}                  \\ \hline
 Char 1 Specific Heat        & kJ/kg/K       & 0.24                              & Assumed                   &  \cite{Oztekin:CF2012}                  \\ \hline
 Char 1 Emissivity           &               & 1                                 & Assumed                   &  \cite{Oztekin:CF2012}                  \\ \hline
 Char 1 Absorption Coef.     & m$^{-1}$      & 81000                             & Assumed opaque            &  \cite{Oztekin:CF2012}                  \\ \hline
 Char 2 Density              & kg/m$^3$      & 710                               & Assumed constant volume   &  \cite{Oztekin:CF2012}                  \\ \hline
-Char 2 Conductivity         & W/m/K         & 0.36                              & Fit to cone data          &  \cite{Oztekin:CF2012}                  \\ \hline
+Char 2 Conductivity         & W/m/K         & 0.37                              & Fit to cone data          &  \cite{Oztekin:CF2012}                  \\ \hline
 Char 2 Specific Heat        & kJ/kg/K       & 0.27                              & Assumed                   &  \cite{Oztekin:CF2012}                  \\ \hline
 Char 2 Emissivity           &               & 1                                 & Assumed                   &  \cite{Oztekin:CF2012}                  \\ \hline
 Char 2 Absorption Coef.     & m$^{-1}$      & 71000                             & Assumed opaque            &  \cite{Oztekin:CF2012}                  \\ \hline
@@ -233,24 +245,25 @@ Reac 1 Char Yield           &               & 0.62                              
 Reac 1 Heat of Reaction     & kJ/kg         & 350                               & Fit to cone data          &  \cite{Oztekin:CF2012}                  \\ \hline
 Gas 1 Heat of Combustion    & kJ/kg         & 16000                             & Cone calorimetry          &  \cite{Oztekin:CF2012}                  \\ \hline
 Gas 1 Combustion Efficiency &               & 1                                 & Assumed                   &  \cite{Oztekin:CF2012}                  \\ \hline
-Reac 2 Pre-Exp.~Factor      & s$^{-1}$      & 1000                              & TGA                       &  \cite{Oztekin:CF2012}                  \\ \hline
+Reac 2 Pre-Exp.~Factor      & s$^{-1}$      & $1.0 \times 10^3$                 & TGA                       &  \cite{Oztekin:CF2012}                  \\ \hline
 Reac 2 Activation Energy    & kJ/kmol       & $8.9 \times 10^4$                 & TGA                       &  \cite{Oztekin:CF2012}                  \\ \hline
 Reac 2 Char Yield           &               & 0.88                              & TGA                       &  \cite{Oztekin:CF2012}                  \\ \hline
 Reac 2 Heat of Reaction     & kJ/kg         & 0                                 & Assumed                   &  \cite{Oztekin:CF2012}                  \\ \hline
 Gas 2 Heat of Combustion    & kJ/kg         & 27000                             & Cone Calorimetry          &  \cite{Oztekin:CF2012}                  \\ \hline
 Gas 2 Combustion Efficiency &               & 1                                 & Assumed                   &  \cite{Oztekin:CF2012}                  \\ \hline
+Reac 3 Pre-Exp.~Factor      & s$^{-1}$      & $1.0 \times 10^5$                 & TGA                       &  \cite{Oztekin:CF2012}                  \\ \hline
+Reac 3 Activation Energy    & kJ/kmol       & $1.47 \times 10^5$                & TGA                       &  \cite{Oztekin:CF2012}                  \\ \hline
+Reac 3 Char Yield           &               & 0.88                              & TGA                       &  \cite{Oztekin:CF2012}                  \\ \hline
+Reac 3 Heat of Reaction     & kJ/kg         & 0                                 & Assumed                   &  \cite{Oztekin:CF2012}                  \\ \hline
+Reac 4 Pre-Exp.~Factor      & s$^{-1}$      & $1.0 \times 10^3$                 & TGA                       &  \cite{Oztekin:CF2012}                  \\ \hline
+Reac 4 Activation Energy    & kJ/kmol       & $1.29 \times 10^5$                & TGA                       &  \cite{Oztekin:CF2012}                  \\ \hline
+Reac 4 Char Yield           &               & 0                                 & TGA                       &  \cite{Oztekin:CF2012}                  \\ \hline
+Reac 4 Heat of Reaction     & kJ/kg         & 0                                 & Assumed                   &  \cite{Oztekin:CF2012}                  \\ \hline
 \end{tabular}
 \end{center}
 \label{Properties_PEEK}
 \end{table}
 
-\begin{figure}[p]
-\begin{tabular*}{\textwidth}{c}
-\includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_PEEK_50} \\ \includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_PEEK_70} \\
-\includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_PEEK_90} \end{tabular*}
-\caption[Heat release rate of poly(aryl ether ether ketone) (PEEK).]{Comparison of predicted and measured heat release rates for poly(aryl ether ether ketone) (PEEK).}
-\label{HRR_PEEK}
-\end{figure}
 
 \clearpage
 

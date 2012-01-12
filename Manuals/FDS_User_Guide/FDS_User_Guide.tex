@@ -1130,8 +1130,7 @@ sensitivity, and so on.}
 \hline
 Feature & Description & Symptom of Problem & Recommendation \\
 \hline \hline
-{\ct CO\_PRODUCTION} & Algorithm to predict CO production    & Inaccuracies found in comparison to experiments       & Research usage only    \\ \hline
-Liquid Fuels         & Pyrolysis model of evaporating liquid fuel  & Inaccuracies found in comparison to experiments; physical and numerical sensitivity  & Research usage only    \\ \hline
+Liquid Fuels    & Pyrolysis model of evaporating liquid fuel  & Inaccuracies found in comparison to experiments; physical and numerical sensitivity  & Research usage only    \\ \hline
 Solid Fuels     & Pyrolysis model of solid fuel  & Results in FDS 5.4 and beyond different than previous versions  & Read Section \ref{info:solid_pyrolysis}   \\ \hline
 \end{tabular}
 \end{sidewaystable}
@@ -6157,26 +6156,6 @@ must resort to either of the alternatives. For a mixing-controlled reaction(s), 
 species approach is preferable because the reaction rates are typically tabulated in terms of individual species, not mixtures.
 
 
-%\subsection{Special Topic: CO Production}
-%
-%\label{info:CO}
-%
-%An algorithm has been implemented that computes the combustion as a two step reaction that
-%predicts the formation and destruction of CO.  The Technical Reference Guide~\cite{FDS_Math_Guide}
-%contains more details about how the mechanism works. This algorithm is used when
-%{\ct CO\_PRODUCTION} is set to {\ct .TRUE.} on the {\ct MISC} line. Even though the algorithm predicts
-%CO formation and its eventual oxidation at elevated temperature, it cannot predict the post-flame
-%yield of CO. For example, within a flashed over compartment, the algorithm predicts the elevated
-%CO levels, but it cannot predict the CO concentration of the exhaust gases that exit the flaming region.
-%Thus, even if using this model, you must specify the {\ct CO\_YIELD} that is expected of a well-ventilated fire.
-%
-%\begin{warning}
-%\noindent
-%Note that when active, this algorithm requires the use of three lumped species compared to the default two and will therefore
-%increase run times and memory usage accordingly.  If the simulation you are
-%performing will not result in an under-ventilated fire, then there will be of
-%little if any benefit to enabling the CO production algorithm.
-%\end{warning}
 
 
 
@@ -9298,7 +9277,7 @@ There are several outputs that report the enthalpy of the gas mixture. First, th
    h = h^0 + \int_0^{T'} c_p \, dT'  \quad ; \quad h_s = \int_0^{T'} c_p \, dT'
 \ee
 Both have units of kJ/kg.
-The quantities {\ct 'ENTHALPY'} and {\ct SPECIFIC ENTHALPY'} are $H=\rho h$ and $H_s=\rho h_s$, respectively, in units of kJ/m$^3$. 
+The quantities {\ct 'ENTHALPY'} and {\ct SPECIFIC ENTHALPY'} are $H=\rho h$ and $H_s=\rho h_s$, respectively, in units of kJ/m$^3$.
 
 
 \subsection{Computer Performance}
@@ -9576,7 +9555,6 @@ remember that all output quantity names ought to be in single quotes.
 {\ct ADIABATIC SURFACE TEMPERATURE}             & Section~\ref{info:AST}                        & $^\circ$C      & B,D          \\ \hline
 {\ct AMPUA}$^{**}$                              & Section~\ref{info:part_output}                & kg/m$^2$       & B,D          \\ \hline
 {\ct ASPIRATION}                                & Section~\ref{info:aspiration_detector}        & \%             & D            \\ \hline
-{\ct AVERAGE SPECIFIC HEAT}                     & $\bar{c_p}$                                   & kJ/kg/K        & D,I,P,S      \\ \hline
 {\ct BACK WALL TEMPERATURE}                     & Section~\ref{info:PROF}                       & $^\circ$C      & B,D          \\ \hline
 {\ct BURNING RATE}                              & $\dm_f''$                                     & kg/m$^2$/s     & B,D          \\ \hline
 {\ct CHAMBER OBSCURATION}                       & Section~\ref{info:smoke_detector}             & \%/m           & D            \\ \hline
@@ -10741,7 +10719,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct BETA\_EDC}                           & Real        & Section~\ref{info:turbulent_combustion}   &                   & 1.0    \\ \hline
 {\ct C}                                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 3    \\ \hline
 {\ct CHECK\_ATOM\_BALANCE}                & Logical     & Section~\ref{info:REAC_Diagnostics}       &                   & {\ct .TRUE.}    \\ \hline
-%{\ct CO\_PRODUCTION}                      & Logical     & Section~\ref{info:CO}                     &                   & {\ct .FALSE.}     \\ \hline
 {\ct CO\_YIELD}                           & Real        & Section~\ref{info:simple_chemistry}       & kg/kg             & 0        \\ \hline
 {\ct CRITICAL\_FLAME\_TEMPERATURE}        & Real        & Section~\ref{info:extinction}             &   $^\circ$C       & 1427    \\ \hline
 {\ct E}                                   & Real        & Section~\ref{info:finite}                 &   kJ/kmol         &     \\ \hline
@@ -11175,7 +11152,7 @@ Namelist  & FDS 5 Parameter & Namelist  & FDS 6 Parameter & Notes \\ \hline \hli
 {\ct MATL}    & {\ct RESIDUE}                       &  {\ct MATL}  & {\ct MATL\_ID}                              & Section~\ref{info:solid_pyrolysis}       \\ \hline
 {\ct MISC}    & {\ct BACKGROUND\_SPECIES}           &  {\ct SPEC}  & {\ct BACKGROUND=.TRUE.}                     & Section~\ref{info:SPEC}                  \\ \hline
 {\ct MISC}    & {\ct CONDUCTIVITY}                  &  {\ct SPEC}  & {\ct CONDUCTIVITY}                          & Section~\ref{info:SPEC}                  \\ \hline
-{\ct MISC}    & {\ct CO\_PRODUCTION}                &  {\ct REAC}  & {\ct CO\_PRODUCTION}                        & Section~\ref{info:CO}                    \\ \hline
+{\ct MISC}    & {\ct CO\_PRODUCTION}                &              & Eliminated                                  &                                          \\ \hline
 {\ct MISC}    & {\ct CSMAG}                         &  {\ct MISC}  & {\ct C\_SMAGORINSKY}                        & Same functionality                           \\ \hline
 {\ct MISC}    & {\ct HUMIDITY}                      &  {\ct SPEC}  & {\ct HUMIDITY}                              & Section~\ref{info:SPEC}                  \\ \hline
 {\ct MISC}    & {\ct ISOTHERMAL}                    &              & Eliminated                                  &                                              \\ \hline
