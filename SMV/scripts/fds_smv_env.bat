@@ -17,7 +17,6 @@ Rem ---------- User/Host names -----------------
 
 set linux_hostname=smokevis.nist.gov
 set osx_hostname=bluesky.cfr.nist.gov
-set LINUXCOMPILE=smokevis.nist.gov
 
 set linux_username=%username%
 set svn_logon=%linux_username%@%linux_hostname%
