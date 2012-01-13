@@ -1489,23 +1489,34 @@ TYPE(ELEMENT_TYPE):: ELEMENT(118)
 
 CONTAINS
 
+
 SUBROUTINE JANAF_TABLE (I_TMP,CP,H,SPEC_ID,RCON,FUEL)
-USE GLOBAL_CONSTANTS, ONLY: GAMMA,Y_O2_INFTY
-!CP data in this subroutine is taken from 4th Edition of the NIST-JANAF Thermochemical Tables
-!The tabulated data in the tables have been curve fit
-!For gas species that result from liquid evaporation, H is set at the 0 K reference temperature to obtain the correct H_V
-!at the H_V reference temperature for that liquid.
-!For each species CP is first computed in kJ/mol/K and then converted to J/kg-K
+
+! CP data in this subroutine is taken from 4th Edition of the NIST-JANAF Thermochemical Tables.
+! The tabulated data in the tables have been curve fit.
+! For gas species that result from liquid evaporation, H is set at the 0 K reference temperature to obtain the correct H_V 
+! at the H_V reference temperature for that liquid.
+! For each species CP is first computed in kJ/mol/K and then converted to J/kg/K.
+
+USE GLOBAL_CONSTANTS, ONLY: GAMMA,Y_O2_INFTY,IDEAL_GAS
 CHARACTER(30),INTENT(IN) ::SPEC_ID
 INTEGER,INTENT(IN) :: I_TMP
 REAL(EB),INTENT(IN) :: RCON
 REAL(EB),INTENT(OUT) :: CP,H
 LOGICAL,INTENT(OUT) :: FUEL
 REAL(EB) :: CP2,TE
+CHARACTER(30) :: SPEC_ID_USE
 
-TE = REAL(I_TMP,EB)
+IF (IDEAL_GAS) THEN
+   SPEC_ID_USE = 'XXX' ! Force the use of the ideal gas law to get CP.
+ELSE
+   SPEC_ID_USE = SPEC_ID
+ENDIF
+
+TE   = REAL(I_TMP,EB)
 FUEL = .FALSE.
-SELECT CASE (SPEC_ID)
+
+SELECT CASE (SPEC_ID_USE)
    CASE DEFAULT
       CP = RCON*GAMMA/(GAMMA-1._EB) !J/kg/K
       H = 0._EB !J/kg     
