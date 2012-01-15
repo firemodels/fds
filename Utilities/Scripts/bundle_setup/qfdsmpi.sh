@@ -1,4 +1,4 @@
-#!/bin/bash -f
+#!/bin/bash
 EXPECTED_ARGS=3
 
 if [ $# -ne $EXPECTED_ARGS ]
@@ -9,7 +9,7 @@ then
   echo "PBS/SGE qsub batch queuing command"
   echo ""
   echo " -q queue     - optional parameter used to specify the name of the queue"
-  echo                  choices: batch (default), vis,fire60s, fire70s"
+  echo "                choices: batch (default), vis,fire60s, fire70s"
   echo "    nthreads - number of threads (usually number of &mesh lines)"
   echo " fds_command - full path to fds command name"
   echo "casename.fds - FDS input file"
@@ -18,7 +18,8 @@ then
 fi
 queue=batch
 ARGS=("$@")
-for ((argi=0,i=0;i<$ARGC;i++)) ; do
+for ((argi=0,i=0;i<$#;i++))
+do
 arg=${ARGS[$i]}
 case $arg in
  -q)
@@ -87,6 +88,6 @@ echo Directory: \`pwd\`
 mpirun -np $nthreads $fds $in
 EOF
 chmod +x $scriptfile
-echo Running $in 
+echo Running $in using $queue queue
 qsub -q $queue $scriptfile
 rm $scriptfile
