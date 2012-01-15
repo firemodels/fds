@@ -252,7 +252,7 @@ Utilizing (\ref{eqn_matdermassfrac}) and (\ref{eqn_enthalpytransport}) in (\ref{
 & &  \quad\quad\,\, \left. - \sum_\alpha h_{s,\alpha} \left( \dot{m}_\alpha^{\tripleprime} + \dot{m}_{b}^{\tripleprime}[Y_{b,\alpha} - Y_\alpha] - \Div \mathbf{J}_{\alpha} \right)  \right]
 \label{eqn_DTDt2}
 \end{eqnarray}
-Note that
+The following combination of terms may be rearranged in terms of the latent heat $\Delta h_{v,\alpha}$ and is therefore responsible for evaporative cooling:
 \begin{eqnarray}
 \label{eqn_latent_heat}
 \dot{m}_{b}^{\tripleprime} ( h_{s,b} - h_s ) - \sum_\alpha h_{s,\alpha} \dot{m}_{b}^{\tripleprime}[Y_{b,\alpha} - Y_\alpha] &=&  \dot{m}_{b}^{\tripleprime} \left[ ( h_{s,b} - h_s ) - \sum_\alpha h_{s,\alpha} (Y_{b,\alpha} - Y_\alpha) \right] \nonumber\\ [.3cm]
@@ -264,7 +264,10 @@ Note that
 &=&  -\dot{m}_{b}^{\tripleprime} \left[ \sum_\alpha Y_{b,\alpha} \left( \Delta h_{v,\alpha} + \int_{T_b}^{T} c_{p,\alpha}(T^\prime) \,\mbox{d}T^\prime \right) \right] \,\mbox{.}
 \end{eqnarray}
 \vspace{0.3cm}\newpage
-\noindent The temperature equation then becomes
+
+\noindent Note the minus sign on the RHS in the last step of (\ref{eqn_latent_heat}).  This group of terms says that the heat needed to vaporize $\alpha$ and raise its temperature from $T_b$ to $T$ must be subtracted from the local gas mixture.
+
+The temperature equation may now be written as
 \begin{eqnarray}
 \label{eqn_DTDt}
 \frac{\mbox{D} T}{\mbox{D} t} &=& \frac{1}{\rho c_p} \left[\frac{\mbox{D} \overline{p}_i }{\mbox{D} t}
@@ -310,7 +313,7 @@ where $\overline{W}_b$ is the molecular weight of the bulk mixture prior to its 
 
 The following relationships are used to rearrange (\ref{eqn_divconstraint_final}) into the form shown in the FDS Technical Reference Guide.
 
-Using the requirements that mass fractions sum to unity and that diffusive fluxes sum to zero, for computatinal convenience we make the following rearrangements of the summation terms:
+As discussed in Sec.~\ref{sec_lumped_species}, FDS stores arrays and solves transport equations for $N_z$ independent lumped species.  The background species (usually air) is given a computational index of 0.  Because of this convention, we find it computationally convenient to make the following rearrangements to the summation terms:
 \begin{eqnarray}
 \label{eqn_hdiff_1}
 \sum_\alpha h_{s,\alpha} \mathbf{J}_\alpha &=& h_{s,0} \mathbf{J}_0  + \sum_{n=1}^{N_z} h_{s,n} \mathbf{J}_n  \nonumber\\ [0.3cm]
@@ -322,7 +325,7 @@ Using the requirements that mass fractions sum to unity and that diffusive fluxe
 \sum_\alpha \left( \frac{\overline{W}}{W_\alpha} - \frac{h_{s,\alpha}}{c_p T} \right)  \left(\dot{m}_\alpha^{\tripleprime} - \Div\mathbf{J}_{\alpha} \right)
 &=& \left( \frac{\overline{W}}{W_0} - \frac{h_{s,0}}{c_p T} \right)  \left(\dot{m}_0^\tripleprime - \Div\mathbf{J}_0 \right) + \sum_{n=1}^{N_z} \left( \frac{\overline{W}}{W_n} - \frac{h_{s,n}}{c_p T} \right)  \left(\dot{m}_n^\tripleprime - \Div\mathbf{J}_n \right) \nonumber\\ [0.3cm]
 &=& \left( \frac{\overline{W}}{W_0} - \frac{h_{s,0}}{c_p T} \right)  \left((-\sum_{n=1}^{N_z}\dot{m}_n^\tripleprime) - \Div(-\sum_{n=1}^{N_z}\mathbf{J}_n) \right) + \sum_{n=1}^{N_z} \left( \frac{\overline{W}}{W_n} - \frac{h_{s,n}}{c_p T} \right)  \left(\dot{m}_n^\tripleprime - \Div\mathbf{J}_n \right) \nonumber\\ [0.3cm]
-&=& \sum_{n=1}^{N_z} \left[ \overline{W}(1/W_n - 1/W_0) - \frac{(h_{s,n}-h_{s,0})}{c_p T} \right]  \left(\dot{m}_n^\tripleprime - \Div\mathbf{J}_n \right)
+&=& \sum_{n=1}^{N_z} \left[ \overline{W}\left(\frac{1}{W_n} - \frac{1}{W_0}\right) - \frac{(h_{s,n}-h_{s,0})}{c_p T} \right]  \left(\dot{m}_n^\tripleprime - \Div\mathbf{J}_n \right)
 \end{eqnarray}
 \vspace{0.3cm}
 
