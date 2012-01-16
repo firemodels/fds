@@ -35,7 +35,7 @@
       NU_MATL=0.88
       HEAT_OF_REACTION=0.
       HEAT_OF_COMBUSTION=27000.
-      CONDUCTIVITY = 0.36
+      CONDUCTIVITY_RAMP='k_char'
       SPECIFIC_HEAT = 0.24 /
 
 &MATL ID='CHAR 2'
@@ -51,7 +51,7 @@
       NU_MATL=0.88
       HEAT_OF_REACTION=0.
       HEAT_OF_COMBUSTION=27000.
-      CONDUCTIVITY = 0.37
+      CONDUCTIVITY_RAMP='k_char'
       SPECIFIC_HEAT = 0.27 /
 
 &MATL ID='CHAR 3'
@@ -65,8 +65,22 @@
       NU_SPEC=1.
       HEAT_OF_REACTION=0.
       HEAT_OF_COMBUSTION=27000.
-      CONDUCTIVITY = 0.37
+      CONDUCTIVITY_RAMP='k_char'
       SPECIFIC_HEAT = 0.31 /
+
+&RAMP ID='k_char', T=  20., F=0.06 /
+&RAMP ID='k_char', T= 100., F=0.07 /
+&RAMP ID='k_char', T= 200., F=0.09 /
+&RAMP ID='k_char', T= 300., F=0.13 /
+&RAMP ID='k_char', T= 400., F=0.17 /
+&RAMP ID='k_char', T= 500., F=0.23 /
+&RAMP ID='k_char', T= 600., F=0.32 /
+&RAMP ID='k_char', T= 700., F=0.42 /
+&RAMP ID='k_char', T= 800., F=0.54 /
+&RAMP ID='k_char', T= 900., F=0.70 /
+&RAMP ID='k_char', T=1000., F=0.88 /
+&RAMP ID='k_char', T=1100., F=1.09 /
+&RAMP ID='k_char', T=1200., F=1.33 /
 
 &MATL ID='Kaowool'
       CONDUCTIVITY = 0.08
