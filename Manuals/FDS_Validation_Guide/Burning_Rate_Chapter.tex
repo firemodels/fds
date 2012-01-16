@@ -191,13 +191,9 @@ Gas 2 Combustion Efficiency &               & 0.75 $\pm$ 0.03                   
 
 \subsection{Poly(aryl ether ether ketone)) (PEEK) in the Cone Calorimeter}
 
-Table~\ref{Properties_PEEK} lists the measured properties of poly(aryl ether ether ketone). Its trade name is VICTREX PEEK 450G.
-It has been thoroughly dried. Its property values have been input directly into FDS, and the predicted heat release rates
-are compared with measured values from the Cone
-Calorimeter. The results for 3.9~mm samples at imposed heat fluxes of 50~kW/m$^2$, 70~kW/m$^2$, and 90~kW/m$^2$ are shown in Fig.~\ref{HRR_PEEK}.
-A 1~cm layer of Kaowool insulation was placed under the sample. Its properties are given in Ref.~\cite{Stoliarov:CF2010}.
-
-It is assumed that the polymer decomposes via a four-step reaction:
+Table~\ref{Properties_PEEK} lists the measured properties of poly(aryl ether ether ketone)\footnote{Trade name VICTREX PEEK 450G.
+The sample has been thoroughly dried.}. Its property values have been input directly into FDS, and the predicted heat release rates
+are compared with measured values from the Cone Calorimeter. It is assumed that the polymer decomposes via a four-step reaction:
 \begin{eqnarray}
    \hbox{Polymer} &\to& \hbox{Char 1} + \hbox{Gas 1}  \\
    \hbox{Char 1}  &\to& \hbox{Char 2} + \hbox{Gas 2}  \\
@@ -205,17 +201,11 @@ It is assumed that the polymer decomposes via a four-step reaction:
    \hbox{Char 3}  &\to& \hbox{Gas 2}
 \end{eqnarray}
 It is also assumed that the gaseous fuel molecule is C$_{19}$H$_{12}$O$_3$.
+A 1~cm layer of Kaowool insulation was placed under the sample. Its properties are given in Ref.~\cite{Stoliarov:CF2010}.
 
-\begin{figure}[h]
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_PEEK_50} &
-\includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_PEEK_70} \\
-\multicolumn{2}{c}{\includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_PEEK_90}}
-\end{tabular*}
-\caption[Heat release rate of poly(aryl ether ether ketone) (PEEK).]{Comparison of predicted and measured heat release rates for poly(aryl ether ether ketone) (PEEK).}
-\label{HRR_PEEK}
-\end{figure}
-
+The results for 3.9~mm samples at imposed heat fluxes of 50~kW/m$^2$, 70~kW/m$^2$, and 90~kW/m$^2$ are shown in Fig.~\ref{HRR_PEEK}. Note that the plots on the left 
+are the results of simulations of the solid phase only, where the heat feedback from the fire is assumed to be 15~kW/m$^2$ and it is applied at the time of ignition. The
+plots on the right are from 3-D simulations of the solid sample and the fire. In these cases, the radiative feedback is not specified but rather calculated. 
 
 \begin{table}[h!]
 \caption[Properties of poly(aryl ether ether ketone) (PEEK).]{Properties of poly(aryl ether ether ketone) (PEEK). Courtesy E.~Oztekin, U.S.~FAA and S.~Stoliarov,
@@ -264,6 +254,20 @@ Reac 4 Heat of Reaction     & kJ/kg         & 0                                 
 \label{Properties_PEEK}
 \end{table}
 
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_PEEK_50_solid_only} &
+\includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_PEEK_50} \\
+\includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_PEEK_70_solid_only} &
+\includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_PEEK_70} \\
+\includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_PEEK_90_solid_only} &
+\includegraphics[height=2.2in]{FIGURES/FAA_Polymers/FAA_Polymers_PEEK_90}
+\end{tabular*}
+\caption[Heat release rate of poly(aryl ether ether ketone) (PEEK).]{Comparison of predicted and measured heat release rates for poly(aryl ether ether ketone) (PEEK). The plots on the left
+include only a simulation of the solid phase with an added heat flux of 15~kW/m$^2$ to account for the radiative feedback from the flame. The plots on the right are 3-D simulations of the
+solid sample and the fire.}
+\label{HRR_PEEK}
+\end{figure}
 
 \clearpage
 
