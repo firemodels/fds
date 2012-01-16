@@ -1,4 +1,8 @@
 #!/bin/bash
+# $Date$ 
+# $Revision$
+# $Author$
+
 EXPECTED_ARGS=1
 
 if [ $# -lt $EXPECTED_ARGS ]
