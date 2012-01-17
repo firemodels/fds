@@ -1975,7 +1975,10 @@ as opposed to the default Large Eddy Simulation (LES). This feature is appropria
 on the order of a millimeter or less in size, or for diagnostic purposes.
 \item[{\ct GAMMA}] Ratio of specific heats. Normally, FDS derives gas properties using look-up tables for known gases. However, sometimes there
 are declared gaseous species with no known properties, in which case FDS uses this parameter to estimate the specific heat and other properties. The default is
-1.4, based on an assumption of a perfect diatomic molecule like nitrogen.
+1.4, based on an assumption of a perfect diatomic molecule like nitrogen. If you want FDS to assume that the specific heats of the gases are independent of 
+temperature and equal to 
+\be c_{p,\alpha} = \frac{\gamma}{\gamma-1} \frac{\cal R}{W_\alpha} \ee
+set {\ct CONSTANT\_SPECIFIC\_HEAT=.TRUE.}
 \item[{\ct GVEC}] The 3 components of gravity, in m/s$^2$. The default is {\ct GVEC=0,0,-9.81}.
 \item[{\ct NOISE}] FDS initializes the flow field with a very small amount of ``noise'' to prevent the
 development of a perfectly symmetric flow when the boundary
@@ -10286,6 +10289,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct C\_HORIZONTAL}                             & Real          & Section~\ref{info:convection}                         &               & 1.52             \\ \hline
 {\ct C\_VERTICAL}                               & Real          & Section~\ref{info:convection}                         &               & 1.31             \\ \hline
 {\ct C\_VREMAN}                                 & Real          & Section~\ref{info:LES}                                &               & 0.07              \\ \hline
+{\ct CONSTANT\_SPECIFIC\_HEAT}                  & Real          & Section~\ref{info:MISC_Basics}                        &               & {\ct .FALSE.}               \\ \hline
 %{\ct DEBUG\_OPENMP}                             & Logical       & Debug flag for OpenMP                                     &               & {\ct .FALSE.}     \\ \hline
 {\ct DNS}                                       & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .FALSE.}     \\ \hline
 {\ct EVACUATION\_DRILL}                         & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
