@@ -106,11 +106,16 @@ else
  in=$1
 fi
 
+infile=${in%.*}
+
 # if there is more than 1 process then use the mpirun command
 
 if [ $nprocesses -gt 1 ]
 then
 MPIRUN="mpirun -np $nprocesses"
+TITLE="$infile(MPI)"
+else
+TITLE="$infile"
 fi
 
 nnodes=$(echo "($nprocesses-1)/$nprocesses_per_node+1" | bc)
@@ -119,7 +124,6 @@ then
 nnodes=1
 fi
 
-infile=${in%.*}
 fulldir=`pwd`
 
 out=$fulldir/$infile.err
@@ -147,11 +151,11 @@ fi
 scriptfile=/tmp/script.$$
 cat << EOF > $scriptfile
 #!/bin/bash -f
-#PBS -N $infile(MPI)
+#PBS -N $TITLE
 #PBS -e $out
 #PBS -o $outlog
 #PBS -l nodes=$nnodes:ppn=$nprocesses_per_node
-#\$ -N $infile(MPI)
+#\$ -N $TITLE
 #\$ -e $out
 #\$ -o $outlog
 #\$ -l nodes=$nnodes:ppn=$nprocesses_per_node
