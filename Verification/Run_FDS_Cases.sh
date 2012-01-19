@@ -6,8 +6,13 @@
 export SVNROOT=`pwd`/..
 export FDS=$SVNROOT/FDS_Compilation/intel_linux_64/fds_intel_linux_64
 export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_linux_64/fds_mpi_intel_linux_64
+
 export RUNFDS=$SVNROOT/Utilities/Scripts/runfds.sh
 export RUNFDSMPI=$SVNROOT/Utilities/Scripts/runfdsmpi.sh
+# to run on fire70s comment two lines above and uncomment two lines below
+#export RUNFDS=$SVNROOT/Utilities/Scripts/runfds7.sh
+#export RUNFDSMPI=$SVNROOT/Utilities/Scripts/runfdsmpi7.sh
+
 export BASEDIR=`pwd`
 
 # uncomment following line to stop all cases
