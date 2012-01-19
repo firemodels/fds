@@ -9,26 +9,22 @@ Cluster/FDS Usage Notes
 
 
 <a name="top">
-<h2>Cluster/FDS Usage Notes</h2>
-<p><hr>
-<h3>Cluster</h3>
-<ul>
+<h2>Cluster Usage Notes</h2>
 
-<li>Adding a user account
+<h3>Adding a user account</h3>
+If user has an account on the old cluster use uid from there
 <pre>
 cuseradd -u uid  user
-<ul>
-<li> if user has an account on the old cluster use uid from there
-<li> set /home/user as home directory in /etc/passwd
-<li> set /bin/tcsh as shell in /etc/passwd
-</ul>
+</pre>
+<p>Set password, synchronize and add samba account:
+<pre>
 passwd user
 pwconv
 passsync
 smbpasswd -a user
 </pre>
 
-<li>Powering down the cluster<br>
+<h3>Powering down the cluster</h3>
 <ul>
 <li>su to root
 <li>Power off the compute nodes.  Type: <b>POWEROFF</b><br>
@@ -38,16 +34,16 @@ This script powers down nodes: node001->node032 .
 <li>Power off the switches
 <li>Turn off the UPS at the bottom of the cabinet
 </ul>
-<li>Powering up the cluster (reverse of power down instructions)<br>
+<h3>Powering up the cluster (reverse of power down instructions)</h3>
 <ul>
 <li>Power up the switches
 <li>Power up the UPS
 <li>Power up the head node. (wait until head node boots up before proceeding)
 <li>Power up the compute nodes
 </ul>
-<li>Setting clocks to the correct time<br>
+<h3>Setting clocks to the correct time</h3>
 
-<b>Head node: </b>
+<h4>Head node</h4>
 <ol>
 <li>/etc/init.d/ntpd stop
 <li>ntpdate "0.centos.pool.ntp.org"<br>
@@ -56,7 +52,7 @@ Type the above several times until the offset displayed is close to 0.<br>
 <li>hwclock --systohc
 <li>/etc/init.d/ntpd start
 </ol>
-<b>Compute nodes:</b>
+<h4>Compute nodes</h4>
 <ol>
 <li>fornodesp "/etc/init.d/ntpd stop"
 <li>fornodesp "ntpdate blaze"<br>
@@ -66,24 +62,19 @@ type the above several times until the offset displayed is close to 0
 </ol>
 
 
-</ul>
-
-<h3>FDS</h3>
-<ul>
-<li>Running a serial FDS case<br>
+<h2>FDS Usage Notes</h2>
+<h3>Running a serial FDS case</h3>
 qfds.sh path_to_fds casename.fds
+(user specified FDS)<br>
+qfds.sh -r casename.fds
+(repository FDS)
 
-<li>Running a parallel FDS case<br>
-qfdsmpi.sh nprocs path_to_fds casename.fds
+<h3>Running a parallel FDS case</h3>
+qfds.sh -p nprocs path_to_fds casename.fds
 
-<li>Creating a PBS script file<br>
-qmake.sh nprocs nprocs_per_node path_to_fds casename.fds
-<li>Examining run queues<br>
-qstat
-<li>Setting up a FDS/Smokeview repository
-</ul>
-
-
+<h3>Examining run queues</h3>
+qstat -a (all jobs)<br>
+qstat -u user (all jobs by user)<br>
 
 </body>
 
