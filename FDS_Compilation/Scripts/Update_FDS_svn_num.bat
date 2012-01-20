@@ -32,11 +32,11 @@ set fds_builddir=%linux_svn_root%/FDS_Compilation
 echo.
 echo Updating %fds_sourcedir% in the Linux repository on %linux_hostname$ to SVN revision: %fds_revision%
 plink %svn_logon% %scriptdir%/UPDATE_fds_onhost.csh  %fds_sourcedir% %fds_revision% %linux_hostname%
-plink %svn_logon% %scriptdir%/UPDATE_fds_onhost.csh  %fds_builddir% %fds_revision% %linux_hostname%
+plink %svn_logon% %scriptdir%/UPDATE_fds_onhost_file.csh  %fds_builddir% makefile %fds_revision% %linux_hostname%
 
 echo.
 echo Updating %fds_sourcedir% in the OSX repository on %osx_hostname% to SVN revision: %fds_revision%
 plink %svn_logon% %scriptdir%/UPDATE_fds_onhost.csh  %fds_sourcedir% %fds_revision% %osx_hostname%
-plink %svn_logon% %scriptdir%/UPDATE_fds_onhost.csh  %fds_builddir% %fds_revision% %osx_hostname%
+plink %svn_logon% %scriptdir%/UPDATE_fds_onhost_file.csh  %fds_builddir% makefile %fds_revision% %osx_hostname%
 
 pause
