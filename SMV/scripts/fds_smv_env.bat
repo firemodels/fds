@@ -15,7 +15,7 @@ set linux_svn_root=FDS-SMV
 
 Rem ---------- User/Host names -----------------
 
-set linux_hostname=smokevis.nist.gov
+set linux_hostname=blaze.nist.gov
 set osx_hostname=bluesky.cfr.nist.gov
 
 set linux_username=%username%
