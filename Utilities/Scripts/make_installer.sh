@@ -306,15 +306,15 @@ nlines=\$(grep bashrc_fds ~/.bash_profile | wc -l)
 if [ \$nlines -eq 0 ]
 then
 echo Updating .bash_profile
-echo source .bashrc_fds $ossize
-echo source .bashrc_fds $ossize >> ~/.bash_profile
+echo source ~/.bashrc_fds $ossize
+echo source ~/.bashrc_fds $ossize >> ~/.bash_profile
 fi
 touch ~/.cshrc
 nlines=\$(grep cshrc_fds ~/.cshrc | wc -l)
 if [ \$nlines -eq 0 ]
 then
 echo Updating .cshrc
-echo source .cshrc_fds $ossize >> ~/.cshrc
+echo source ~/.cshrc_fds $ossize >> ~/.cshrc
 fi
 echo ""
 echo "Installation complete."
