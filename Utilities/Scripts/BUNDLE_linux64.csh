@@ -4,9 +4,8 @@
 #
 setenv fds_smvroot $1
 setenv bundlebase $2
-setenv runhost $3
-setenv fdshost leo.cfr.nist.gov
-setenv smvhost leo.cfr.nist.gov
+setenv fdshost $3
+setenv smvhost $3
 setenv PLATFORM LINUX64
 
 setenv manifest manifest_linux_64.html
