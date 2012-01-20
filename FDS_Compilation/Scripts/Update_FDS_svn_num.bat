@@ -26,14 +26,17 @@ echo.
 echo *** Use Smartsvn to update %win_fdsdir% in the Windows repository to SVN revision: %fds_revision%
 
 set scriptdir=%linux_svn_root%/FDS_Compilation/Scripts/
-set linux_fdsdir=%linux_svn_root%/FDS_Source
+set fds_sourcedir=%linux_svn_root%/FDS_Source
+set fds_builddir=%linux_svn_root%/FDS_Compilation
 
 echo.
-echo Updating %linux_fdsdir% in the Linux repository on %linux_hostname$ to SVN revision: %fds_revision%
-plink %svn_logon% %scriptdir%/UPDATE_fds_onhost.csh  %linux_fdsdir% %fds_revision% %linux_hostname%
+echo Updating %fds_sourcedir% in the Linux repository on %linux_hostname$ to SVN revision: %fds_revision%
+plink %svn_logon% %scriptdir%/UPDATE_fds_onhost.csh  %fds_sourcedir% %fds_revision% %linux_hostname%
+plink %svn_logon% %scriptdir%/UPDATE_fds_onhost.csh  %fds_builddir% %fds_revision% %linux_hostname%
 
 echo.
-echo Updating %linux_fdsdir% in the OSX repository on %osx_hostname% to SVN revision: %fds_revision%
-plink %svn_logon% %scriptdir%/UPDATE_fds_onhost.csh  %linux_fdsdir% %fds_revision% %osx_hostname%
+echo Updating %fds_sourcedir% in the OSX repository on %osx_hostname% to SVN revision: %fds_revision%
+plink %svn_logon% %scriptdir%/UPDATE_fds_onhost.csh  %fds_sourcedir% %fds_revision% %osx_hostname%
+plink %svn_logon% %scriptdir%/UPDATE_fds_onhost.csh  %fds_builddir% %fds_revision% %osx_hostname%
 
 pause
