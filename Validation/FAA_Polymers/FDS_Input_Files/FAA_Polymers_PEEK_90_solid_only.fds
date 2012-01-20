@@ -2,7 +2,8 @@
 
 &MESH IJK=3,3,4, XB=-0.015,0.015,-0.015,0.015,0.0,0.04 /
 
-&TIME T_END=600. / 
+&TIME T_END=600., DT=0.01, WALL_INCREMENT=1 /
+&MISC SOLID_PHASE_ONLY=.TRUE. /
 
 &REAC FUEL='PEEK GAS', C=19., H=12., O=3., SOOT_YIELD=0.02, Y_O2_INFTY=0.001 / 
 
@@ -11,7 +12,7 @@
       N_REACTIONS=1
       A(1) = 1.0E32
       E(1) = 5.57E5
-      EMISSIVITY=0.90
+      EMISSIVITY=0.84
       DENSITY=1300.
       SPEC_ID='PEEK GAS'
       NU_SPEC=0.38
@@ -27,7 +28,6 @@
       N_REACTIONS=1
       A(1) = 1.0E3
       E(1) = 8.9E4
-      EMISSIVITY=1.0
       DENSITY=810.
       SPEC_ID='PEEK GAS'
       NU_SPEC=0.12
@@ -35,7 +35,7 @@
       NU_MATL=0.88
       HEAT_OF_REACTION=0.
       HEAT_OF_COMBUSTION=27000.
-      CONDUCTIVITY_RAMP='k_char'
+      CONDUCTIVITY=0.36
       SPECIFIC_HEAT = 0.24 /
 
 &MATL ID='CHAR 2'
@@ -43,7 +43,6 @@
       N_REACTIONS=1
       A(1) = 1.0E5
       E(1) = 1.47E5
-      EMISSIVITY=1.0
       DENSITY=710.
       SPEC_ID='PEEK GAS'
       NU_SPEC=0.12
@@ -51,7 +50,7 @@
       NU_MATL=0.88
       HEAT_OF_REACTION=0.
       HEAT_OF_COMBUSTION=27000.
-      CONDUCTIVITY_RAMP='k_char'
+      CONDUCTIVITY=0.36
       SPECIFIC_HEAT = 0.27 /
 
 &MATL ID='CHAR 3'
@@ -59,13 +58,12 @@
       N_REACTIONS=1
       A(1) = 1.0E3
       E(1) = 1.29E5
-      EMISSIVITY=1.0
       DENSITY=620.
       SPEC_ID='PEEK GAS'
       NU_SPEC=1.
       HEAT_OF_REACTION=0.
       HEAT_OF_COMBUSTION=27000.
-      CONDUCTIVITY_RAMP='k_char'
+      CONDUCTIVITY=0.36
       SPECIFIC_HEAT = 0.31 /
 
 &RAMP ID='k_char', T=  20., F=0.06 /
@@ -83,6 +81,7 @@
 &RAMP ID='k_char', T=1200., F=1.33 /
 
 &MATL ID='Kaowool'
+      EMISSIVITY=0.
       CONDUCTIVITY = 0.08
       SPECIFIC_HEAT = 0.80
       DENSITY = 48. /
@@ -91,13 +90,16 @@
       COLOR='BLACK'
       MATL_ID='PEEK','Kaowool'
       THICKNESS=0.0039,0.015
-      EXTERNAL_FLUX_RAMP='flux ramp' 
+      CELL_SIZE_FACTOR=0.1
+      REGRID_FACTOR=1.
+      H_FIXED=0.
+      EXTERNAL_FLUX_RAMP='FluxRamp' 
       EXTERNAL_FLUX=90. / 
-&RAMP ID='flux ramp', T=  0., F=1. /
-&RAMP ID='flux ramp', T= 70., F=1. /
-&RAMP ID='flux ramp', T= 71., F=1.17 /
-&RAMP ID='flux ramp', T=220., F=1.17 /
-&RAMP ID='flux ramp', T=221., F=1.   /
+&RAMP ID='FluxRamp', T=0., F=1.00 /
+&RAMP ID='FluxRamp', T=15., F=0.965 /
+&RAMP ID='FluxRamp', T=67., F=0.943 /
+&RAMP ID='FluxRamp', T=68., F=1.167 /
+&RAMP ID='FluxRamp', T=1000., F=1.167 /
 
 &VENT XB=-0.005,0.005,-0.005,0.005,0.0,0.00, SURF_ID='SAMPLE' /
 
