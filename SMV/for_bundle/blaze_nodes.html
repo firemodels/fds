@@ -25,73 +25,18 @@
 <a href=http://www.nist.gov/el target="_top"><img src="./assets/images/el.jpg" border=0 width=980 class="header2"></a><br>
 
 <a name="top">
-<h2>Cluster Usage Notes</h2>
+<h2>Fire Cluster Node Properties</h2>
+<table border=on>
+<tr><th>nodes</th><th>queue</th><th>Cores</th><th>Relative<br>Performance</th><th>Memory</th></tr>
+<tr align=center><td align=left>node001->node016</td><td rowspan=2>batch</td><td>8</td><td>1.0</td><td>32GB</td></td>
+<tr align=center><td align=left>node017->node032</td><td>8</td><td>1.0</td><td>16GB</td></tr>
+<tr align=center><td align=left>firevis/smokevis</td><td>vis</td><td>4</td><td>1.04</td><td>24GB</td></tr>
+<tr align=center><td align=left>fire70->fire79</td><td>fire70s</td><td>8</td><td>0.95</td><td>8GB</td></tr>
+<tr align=center><td align=left>fire62</td><td rowspan=2>fire60s</td><td>8</td><td>0.69</td><td>8GB</td></tr>
+<tr align=center><td align=left >fire61,fire63->fire68</td><td>4</td><td>0.76</td><td>4GB</td></tr>
+</table>
 
-<ul>
-<p><li>Adding a user account<br>
-If user has an account on the old cluster then use the uid defined in /etc/passwd.BAK on leo.cfr.nist.gov
-<p>cuseradd -u uid  user<br>
-<p>Set password, synchronize and add samba account:
-<p>passwd user<br>
-pwconv<br>
-passsync<br>
-<p>Set up a samba account
-<p>smbpasswd -a user<br>
 
-<p><li>Powering down the cluster
-<ul>
-<li>su to root
-<li>Power off the compute nodes.  Type: <br>
-<p><b>POWEROFF</b> (all CAPS)<br>
-you will be given one chance to change your mind.
-This script powers down nodes: node001->node032 .
-<li>Power off the head node.  Type:<br>
-<p> <b>poweroff</b> (lowercase)
-<li>Turn off the switches
-<li>Turn off the UPS at the bottom of the cabinet
-</ul>
-<p><li>Powering up the cluster (reverse of power down instructions)
-<ul>
-<li>Power up the switches
-<li>Power up the UPS
-<li>Power up the head node. (wait until head node boots up before proceeding)
-<li>Power up the compute nodes
-</ul>
-<p><li>Setting clocks to the correct time
-
-<h4>Head node</h4>
-<ol>
-<li>/etc/init.d/ntpd stop
-<li>ntpdate "0.centos.pool.ntp.org"<br>
-Type the above several times until the offset displayed is close to 0.<br>
-<em>Note: you may need to wait a few minutes after blaze boots up before this command will work.  </em>
-<li>hwclock --systohc
-<li>/etc/init.d/ntpd start
-</ol>
-<h4>Compute nodes</h4>
-<ol>
-<li>fornodesp "/etc/init.d/ntpd stop"
-<li>fornodesp "ntpdate blaze"<br>
-type the above several times until the offset displayed is close to 0
-<li>fornodesp "hwclock --systohc"
-<li>fornodesp "/etc/init.d/ntpd start"
-</ol>
-</ul>
-
-<h2>FDS Usage Notes</h2>
-<ul>
-<p><li>Running a serial FDS case<br>
-qfds.sh path_to_fds casename.fds
-(user specified FDS)<br>
-qfds.sh -r casename.fds
-(repository FDS)
-
-<p><li>Running a parallel FDS case<br>
-qfds.sh -p nprocs path_to_fds casename.fds
-
-<p><li>Examining run queues<br>
-qstat -a (all jobs)<br>
-qstat -u user (all jobs by user)<br>
 
 <p class=footer-wrapper>The National Institute of Standards and Technology (NIST) is an agency of the U.S. Commerce Department.</p>
 <p class=footer-wrapper2>
