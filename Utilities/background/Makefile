@@ -8,8 +8,8 @@ bin = .
 
 # Definition of the object variables
 
-objwin = main.obj string_util.obj
-obj = main.o string_util.o
+objwin = main.obj string_util.obj dmalloc.obj
+obj = main.o string_util.o dmalloc.o
 
 #*** General Purpose Rules ***
 
