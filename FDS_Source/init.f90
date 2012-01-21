@@ -180,6 +180,14 @@ IF (N_REACTIONS > 0) THEN
    M%D_REACTION = 0._EB
 ENDIF
 
+! Enthalpy arrays (experimental)
+
+IF (ENTHALPY_TRANSPORT) THEN
+   ALLOCATE(M%RHO_H_S_0(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
+   CALL ChkMemErr('INIT','RHO_H_S_0',IZERO) 
+   M%RHO_H_S_0 = 0._EB ! initialized in DENSITY 
+ENDIF
+
 ! Allocate water mass arrays if sprinklers are present
  
 IF (PARTICLE_FILE) PARTICLE_TAG = NM
