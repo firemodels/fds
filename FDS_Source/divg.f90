@@ -19,7 +19,7 @@ SUBROUTINE DIVERGENCE_PART_1(T,NM)
 
 USE COMP_FUNCTIONS, ONLY: SECOND 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
-USE PHYSICAL_FUNCTIONS, ONLY: GET_CONDUCTIVITY,GET_SPECIFIC_HEAT,GET_SENSIBLE_ENTHALPY_DIFF
+USE PHYSICAL_FUNCTIONS, ONLY: GET_CONDUCTIVITY,GET_SPECIFIC_HEAT,GET_SENSIBLE_ENTHALPY_DIFF,GET_SENSIBLE_ENTHALPY
 USE EVAC, ONLY: EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, EMESH_NFIELDS, EVAC_FDS6
 USE TURBULENCE, ONLY: TENSOR_DIFFUSIVITY_MODEL
 
@@ -27,12 +27,13 @@ USE TURBULENCE, ONLY: TENSOR_DIFFUSIVITY_MODEL
  
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX,KDTDY,KDTDZ,DP,KP, &
-          RHO_D_DZDX,RHO_D_DZDY,RHO_D_DZDZ,RHO_D,RHOP,H_RHO_D_DZDX,H_RHO_D_DZDY,H_RHO_D_DZDZ,RTRM,CP
+          RHO_D_DZDX,RHO_D_DZDY,RHO_D_DZDZ,RHO_D,RHOP,H_RHO_D_DZDX,H_RHO_D_DZDY,H_RHO_D_DZDZ,RTRM,CP, &
+          RHO_H_S_X,RHO_H_S_Y,RHO_H_S_Z,U_DOT_DEL_RHO_H_S,RHO_H_S_P,UU,VV,WW
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
 REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P
 REAL(EB) :: DELKDELT,VC,DTDX,DTDY,DTDZ,TNOW,ZZ_GET(0:N_TRACKED_SPECIES), &
             HDIFF,DZDX,DZDY,DZDZ,T,RDT,RHO_D_DZDN,TSI,TIME_RAMP_FACTOR,ZONE_VOLUME,DELTA_P,PRES_RAMP_FACTOR,&
-            TMP_G,TMP_WGT,DIV_DIFF_HEAT_FLUX
+            TMP_G,TMP_WGT,DIV_DIFF_HEAT_FLUX,H_S,UBAR,VBAR,WBAR,DRHDX,DRHDY,DRHDZ,D_RHO_H_S_DT
 TYPE(SURFACE_TYPE), POINTER :: SF
 TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM,SM0
 INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,I,J,K,IPZ,IOPZ
@@ -468,39 +469,142 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
  
 ENDIF ENERGY
 
-! Compute RTRM = 1/(rho*c_p*T) and multiply it by divergence terms already summed up
- 
-RTRM => WORK1
+! New form of divergence expression
 
-IF (N_TRACKED_SPECIES>0 .AND. EVACUATION_ONLY(NM)) ZZ_GET(1:N_TRACKED_SPECIES) = 0._EB
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-         RTRM(I,J,K) = 1._EB/(RHOP(I,J,K)*CP(I,J,K)*TMP(I,J,K))
-         DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
+ENTHALPY_TRANSPORT_IF: IF (ENTHALPY_TRANSPORT) THEN
+
+   RHO_H_S_P=>WORK1;         RHO_H_S_P=0._EB
+   RHO_H_S_X=>WORK2;         RHO_H_S_X=0._EB
+   RHO_H_S_Y=>WORK3;         RHO_H_S_Y=0._EB
+   RHO_H_S_Z=>WORK4;         RHO_H_S_Z=0._EB
+   U_DOT_DEL_RHO_H_S=>WORK5; U_DOT_DEL_RHO_H_S=0._EB
+
+   DO K=0,KBP1
+      DO J=0,JBP1
+         DO I=0,IBP1
+            IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
+            CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP(I,J,K))
+            RHO_H_S_P(I,J,K) = RHOP(I,J,K)*H_S
+         ENDDO
       ENDDO
-   ENDDO 
-ENDDO
+   ENDDO
 
-! Compute (Wbar/rho) Sum (1/W_n) del dot rho*D del Z_n
+   DO K=0,KBAR
+      DO J=0,JBAR
+         DO I=0,IBAR
+            RHO_H_S_X(I,J,K) = 0.5_EB*( RHO_H_S_P(I+1,J,K) + RHO_H_S_P(I,J,K) )
+            RHO_H_S_Y(I,J,K) = 0.5_EB*( RHO_H_S_P(I,J+1,K) + RHO_H_S_P(I,J,K) )
+            RHO_H_S_Z(I,J,K) = 0.5_EB*( RHO_H_S_P(I,J,K+1) + RHO_H_S_P(I,J,K) )
+         ENDDO
+      ENDDO
+   ENDDO
 
-DO N=1,N_TRACKED_SPECIES
-   IF (EVACUATION_ONLY(NM)) CYCLE
-   SM  => SPECIES_MIXTURE(N)
-   SM0 => SPECIES_MIXTURE(0)
+   ! Correct rho*h_s at boundaries
+
+   CORRECTION_LOOP_2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+      WC => WALL(IW)
+      IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .OR. &
+          WC%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. &
+          WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) CYCLE CORRECTION_LOOP_2
+      II  = WC%II
+      JJ  = WC%JJ
+      KK  = WC%KK
+      IOR = WC%IOR
+      IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = WC%ZZ_F(1:N_TRACKED_SPECIES)
+      CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,WC%TMP_F)
+      SELECT CASE(IOR)
+         CASE( 1)
+            RHO_H_S_X(II,JJ,KK)   = WC%RHO_F*H_S
+         CASE(-1)
+            RHO_H_S_X(II-1,JJ,KK) = WC%RHO_F*H_S
+         CASE( 2)
+            RHO_H_S_Y(II,JJ,KK)   = WC%RHO_F*H_S
+         CASE(-2)
+            RHO_H_S_Y(II,JJ-1,KK) = WC%RHO_F*H_S
+         CASE( 3)
+            RHO_H_S_Z(II,JJ,KK)   = WC%RHO_F*H_S
+         CASE(-3)
+            RHO_H_S_Z(II,JJ,KK-1) = WC%RHO_F*H_S
+      END SELECT
+   ENDDO CORRECTION_LOOP_2
+
+   IF (PREDICTOR) THEN
+      UU=>U
+      VV=>V
+      WW=>W
+   ELSE
+      UU=>US
+      VV=>VS
+      WW=>WS
+   ENDIF
+
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+
+            UBAR = 0.5_EB*(UU(I,J,K)+UU(I-1,J,K))
+            VBAR = 0.5_EB*(VV(I,J,K)+VV(I,J-1,K))
+            WBAR = 0.5_EB*(WW(I,J,K)+WW(I,J,K-1))
+
+            DRHDX = (RHO_H_S_X(I,J,K)-RHO_H_S_X(I-1,J,K))*RDX(I)
+            DRHDY = (RHO_H_S_Y(I,J,K)-RHO_H_S_Y(I,J-1,K))*RDY(J)
+            DRHDZ = (RHO_H_S_Z(I,J,K)-RHO_H_S_Z(I,J,K-1))*RDZ(K)
+
+            U_DOT_DEL_RHO_H_S(I,J,K) = UBAR*DRHDX + VBAR*DRHDY + WBAR*DRHDZ
+
+         ENDDO
+      ENDDO 
+   ENDDO
+
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            CALL GET_SENSIBLE_ENTHALPY_DIFF(N,TMP(I,J,K),HDIFF)
-            DP(I,J,K) = DP(I,J,K) + &
-                        ( (SM%RCON-SM0%RCON)/RSUM(I,J,K) - &
-                          HDIFF/(CP(I,J,K)*TMP(I,J,K)) )*DEL_RHO_D_DEL_Z(I,J,K,N)/RHOP(I,J,K)
+
+            D_RHO_H_S_DT = ( RHO_H_S_P(I,J,K) - RHO_H_S_0(I,J,K) )/DT
+
+            DP(I,J,K) = ( DP(I,J,K) - (D_RHO_H_S_DT + U_DOT_DEL_RHO_H_S(I,J,K)) )/RHO_H_S_P(I,J,K)
+         ENDDO
+      ENDDO 
+   ENDDO
+
+ELSE ENTHALPY_TRANSPORT_IF
+
+   ! Compute RTRM = 1/(rho*c_p*T) and multiply it by divergence terms already summed up
+ 
+   RTRM => WORK1
+
+   IF (N_TRACKED_SPECIES>0 .AND. EVACUATION_ONLY(NM)) ZZ_GET(1:N_TRACKED_SPECIES) = 0._EB
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            RTRM(I,J,K) = 1._EB/(RHOP(I,J,K)*CP(I,J,K)*TMP(I,J,K))
+            DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
+         ENDDO
+      ENDDO 
+   ENDDO
+
+   ! Compute (Wbar/rho) Sum (1/W_n) del dot rho*D del Z_n
+
+   DO N=1,N_TRACKED_SPECIES
+      IF (EVACUATION_ONLY(NM)) CYCLE
+      SM  => SPECIES_MIXTURE(N)
+      SM0 => SPECIES_MIXTURE(0)
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               CALL GET_SENSIBLE_ENTHALPY_DIFF(N,TMP(I,J,K),HDIFF)
+               DP(I,J,K) = DP(I,J,K) + &
+                           ( (SM%RCON-SM0%RCON)/RSUM(I,J,K) - &
+                             HDIFF/(CP(I,J,K)*TMP(I,J,K)) )*DEL_RHO_D_DEL_Z(I,J,K,N)/RHOP(I,J,K)
+            ENDDO
          ENDDO
       ENDDO
    ENDDO
-ENDDO
+
+ENDIF ENTHALPY_TRANSPORT_IF
 
 ! Remove numerical diffusion before using DEL_RHO_D_DEL_Z in scalar transport
 
@@ -521,7 +625,7 @@ ENDIF NUMERICAL_DIFFUSION_IF
 
 ! Add contribution of reactions
  
-IF (N_REACTIONS > 0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
+IF (N_REACTIONS > 0 .AND. .NOT.EVACUATION_ONLY(NM) .AND. .NOT.ENTHALPY_TRANSPORT) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -534,7 +638,7 @@ ENDIF
 
 ! Add contribution of evaporating PARTICLEs
 
-IF (NLP>0 .AND. N_EVAP_INDICES > 0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
+IF (NLP>0 .AND. N_EVAP_INDICES > 0 .AND. .NOT.EVACUATION_ONLY(NM) .AND. .NOT.ENTHALPY_TRANSPORT) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -546,7 +650,7 @@ ENDIF
  
 ! Atmospheric Stratification Term
 
-IF (STRATIFICATION .AND. .NOT.EVACUATION_ONLY(NM)) THEN
+IF (STRATIFICATION .AND. .NOT.EVACUATION_ONLY(NM) .AND. .NOT.ENTHALPY_TRANSPORT) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
