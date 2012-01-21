@@ -4,6 +4,7 @@
 #
 setenv fds_smvroot $1
 setenv bundlebase $2
+setenv runhost $3
 setenv fdshost $3
 setenv smvhost $3
 setenv PLATFORM LINUX32
