@@ -8,13 +8,28 @@
 
 %\usepackage{wrapfig}
 \usepackage[pdftex]{graphicx}
-\usepackage{hyperref}
+\usepackage[pdftex,
+        colorlinks=true,
+        urlcolor=linkblue,     % \href{...}{...} external (URL)
+        citecolor=linkred,     % citation number colors
+        linkcolor=linknavy,    % \ref{...} and \pageref{...}
+        pdftitle={Smokeview (Version 5) - A Tool for Visualizing Fire Dynamics Simulation Data Volume II: Technical Reference Guide},
+        pdfauthor={Glenn Forney},
+        pdfsubject={Technical Guide},
+        pdfkeywords={Smokeview, visualization, NIST, EL},
+        pdfproducer={pdflatex},
+        pagebackref,
+        pdfpagemode=UseNone,
+        bookmarksopen=true,
+        plainpages=false]{hyperref}
+\definecolor{linknavy}{rgb}{0,0,0.50196}
+\definecolor{linkred}{rgb}{1,0,0}
+\definecolor{linkblue}{rgb}{0,0,1}
 \pdfcompresslevel=9
 \DeclareGraphicsExtensions{.jpg,.pdf,.png}
 \usepackage{setspace,moreverb}
 
 \usepackage{color}
-%\usepackage{pdfsync}
 
 \pagestyle{plain}
 
@@ -829,7 +844,7 @@ partially transparent slice plane\\
 opaque slice plane\\
 \end{tabular}
 \end{center}
-\caption {A slice file drawn transparently mixes 
+\caption {A slice file drawn transparently mixes
 slice colors with those in the background.  When drawn opaquely,
 any portion of the scene behind the slice file is hidden. }
 \label{figtransparent}
