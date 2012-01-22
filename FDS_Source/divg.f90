@@ -28,12 +28,12 @@ USE TURBULENCE, ONLY: TENSOR_DIFFUSIVITY_MODEL
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX,KDTDY,KDTDZ,DP,KP, &
           RHO_D_DZDX,RHO_D_DZDY,RHO_D_DZDZ,RHO_D,RHOP,H_RHO_D_DZDX,H_RHO_D_DZDY,H_RHO_D_DZDZ,RTRM,CP, &
-          RHO_H_S_X,RHO_H_S_Y,RHO_H_S_Z,U_DOT_DEL_RHO_H_S,RHO_H_S_P,UU,VV,WW
+          U_DOT_DEL_RHO_H_S,RHO_H_S_P,UU,VV,WW,UDRHDX,VDRHDY,WDRHDZ
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
 REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P
 REAL(EB) :: DELKDELT,VC,DTDX,DTDY,DTDZ,TNOW,ZZ_GET(0:N_TRACKED_SPECIES), &
             HDIFF,DZDX,DZDY,DZDZ,T,RDT,RHO_D_DZDN,TSI,TIME_RAMP_FACTOR,ZONE_VOLUME,DELTA_P,PRES_RAMP_FACTOR,&
-            TMP_G,TMP_WGT,DIV_DIFF_HEAT_FLUX,H_S,UBAR,VBAR,WBAR,DRHDX,DRHDY,DRHDZ,D_RHO_H_S_DT,RHO_GZ
+            TMP_G,TMP_WGT,DIV_DIFF_HEAT_FLUX,H_S,D_RHO_H_S_DT
 TYPE(SURFACE_TYPE), POINTER :: SF
 TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM,SM0
 INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,I,J,K,IPZ,IOPZ
@@ -474,11 +474,20 @@ ENDIF ENERGY
 ENTHALPY_TRANSPORT_IF: IF (ENTHALPY_TRANSPORT) THEN
 
    RHO_H_S_P=>WORK1;         RHO_H_S_P=0._EB
-   RHO_H_S_X=>WORK2;         RHO_H_S_X=0._EB
-   RHO_H_S_Y=>WORK3;         RHO_H_S_Y=0._EB
-   RHO_H_S_Z=>WORK4;         RHO_H_S_Z=0._EB
+   UDRHDX=>WORK2;            UDRHDX=0._EB
+   VDRHDY=>WORK3;            VDRHDY=0._EB
+   WDRHDZ=>WORK4;            WDRHDZ=0._EB
    U_DOT_DEL_RHO_H_S=>WORK5; U_DOT_DEL_RHO_H_S=0._EB
-   RHO_GZ=0._EB
+
+   IF (PREDICTOR) THEN
+      UU=>U
+      VV=>V
+      WW=>W
+   ELSE
+      UU=>US
+      VV=>VS
+      WW=>WS
+   ENDIF
 
    DO K=0,KBP1
       DO J=0,JBP1
@@ -493,14 +502,14 @@ ENTHALPY_TRANSPORT_IF: IF (ENTHALPY_TRANSPORT) THEN
    DO K=0,KBAR
       DO J=0,JBAR
          DO I=0,IBAR
-            RHO_H_S_X(I,J,K) = 0.5_EB*( RHO_H_S_P(I+1,J,K) + RHO_H_S_P(I,J,K) )
-            RHO_H_S_Y(I,J,K) = 0.5_EB*( RHO_H_S_P(I,J+1,K) + RHO_H_S_P(I,J,K) )
-            RHO_H_S_Z(I,J,K) = 0.5_EB*( RHO_H_S_P(I,J,K+1) + RHO_H_S_P(I,J,K) )
+            UDRHDX(I,J,K) = RDX(I)*( RHO_H_S_P(I+1,J,K) - RHO_H_S_P(I,J,K) )*UU(I,J,K)
+            VDRHDY(I,J,K) = RDY(J)*( RHO_H_S_P(I,J+1,K) - RHO_H_S_P(I,J,K) )*VV(I,J,K)
+            WDRHDZ(I,J,K) = RDZ(K)*( RHO_H_S_P(I,J,K+1) - RHO_H_S_P(I,J,K) )*WW(I,J,K)
          ENDDO
       ENDDO
    ENDDO
 
-   ! Correct rho*h_s at boundaries
+   ! Correct u_n*d(rho*h_s)/dn at boundaries
 
    CORRECTION_LOOP_2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       WC => WALL(IW)
@@ -510,50 +519,42 @@ ENTHALPY_TRANSPORT_IF: IF (ENTHALPY_TRANSPORT) THEN
       II  = WC%II
       JJ  = WC%JJ
       KK  = WC%KK
+      IIG = WC%IIG
+      JJG = WC%JJG
+      KKG = WC%KKG
       IOR = WC%IOR
       IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = WC%ZZ_F(1:N_TRACKED_SPECIES)
       CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,WC%TMP_F)
       SELECT CASE(IOR)
          CASE( 1)
-            RHO_H_S_X(II,JJ,KK)   = WC%RHO_F*H_S
+            UDRHDX(II,JJ,KK)   = 2._EB*WC%RDN*(RHO_H_S_P(IIG,JJG,KKG)-WC%RHO_F*H_S)*UU(II,JJ,KK)
          CASE(-1)
-            RHO_H_S_X(II-1,JJ,KK) = WC%RHO_F*H_S
+            UDRHDX(II-1,JJ,KK) = 2._EB*WC%RDN*(RHO_H_S_P(IIG,JJG,KKG)-WC%RHO_F*H_S)*UU(II-1,JJ,KK)
          CASE( 2)
-            RHO_H_S_Y(II,JJ,KK)   = WC%RHO_F*H_S
+            VDRHDY(II,JJ,KK)   = 2._EB*WC%RDN*(RHO_H_S_P(IIG,JJG,KKG)-WC%RHO_F*H_S)*VV(II,JJ,KK)
          CASE(-2)
-            RHO_H_S_Y(II,JJ-1,KK) = WC%RHO_F*H_S
+            VDRHDY(II,JJ-1,KK) = 2._EB*WC%RDN*(RHO_H_S_P(IIG,JJG,KKG)-WC%RHO_F*H_S)*VV(II,JJ-1,KK)
          CASE( 3)
-            RHO_H_S_Z(II,JJ,KK)   = WC%RHO_F*H_S
+            WDRHDZ(II,JJ,KK)   = 2._EB*WC%RDN*(RHO_H_S_P(IIG,JJG,KKG)-WC%RHO_F*H_S)*WW(II,JJ,KK)
          CASE(-3)
-            RHO_H_S_Z(II,JJ,KK-1) = WC%RHO_F*H_S
+            WDRHDZ(II,JJ,KK-1) = 2._EB*WC%RDN*(RHO_H_S_P(IIG,JJG,KKG)-WC%RHO_F*H_S)*WW(II,JJ,KK-1)
       END SELECT
    ENDDO CORRECTION_LOOP_2
-
-   IF (PREDICTOR) THEN
-      UU=>U
-      VV=>V
-      WW=>W
-   ELSE
-      UU=>US
-      VV=>VS
-      WW=>WS
-   ENDIF
 
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
 
-            UBAR = 0.5_EB*(UU(I,J,K)+UU(I-1,J,K))
-            VBAR = 0.5_EB*(VV(I,J,K)+VV(I,J-1,K))
-            WBAR = 0.5_EB*(WW(I,J,K)+WW(I,J,K-1))
+            ! This form of averaging enforces exact discrete conservation of (rho*h_s).  When the discrete divergence is
+            ! factored out of the DIV(rho*h_s*u) term (numerically) one ends up with AVE(u dot GRAD(rho*h_s)) + DIV(u)
 
-            DRHDX = (RHO_H_S_X(I,J,K)-RHO_H_S_X(I-1,J,K))*RDX(I)
-            DRHDY = (RHO_H_S_Y(I,J,K)-RHO_H_S_Y(I,J-1,K))*RDY(J)
-            DRHDZ = (RHO_H_S_Z(I,J,K)-RHO_H_S_Z(I,J,K-1))*RDZ(K)
+            U_DOT_DEL_RHO_H_S(I,J,K) = 0.5_EB*( UDRHDX(I,J,K)+UDRHDX(I-1,J,K) + &
+                                                VDRHDY(I,J,K)+VDRHDY(I,J-1,K) + &
+                                                WDRHDZ(I,J,K)+WDRHDZ(I,J,K-1) )
 
-            IF (STRATIFICATION) RHO_GZ = RHOP(I,J,K)*GVEC(3)
-
-            U_DOT_DEL_RHO_H_S(I,J,K) = UBAR*DRHDX + VBAR*DRHDY + WBAR*(DRHDZ - RHO_GZ)
+            IF (STRATIFICATION) THEN
+               U_DOT_DEL_RHO_H_S(I,J,K) = U_DOT_DEL_RHO_H_S(I,J,K) - 0.5_EB*(W(I,J,K)+W(I,J,K-1))*RHOP(I,J,K)*GVEC(3)
+            ENDIF
 
          ENDDO
       ENDDO 
@@ -564,7 +565,8 @@ ENTHALPY_TRANSPORT_IF: IF (ENTHALPY_TRANSPORT) THEN
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
 
-            D_RHO_H_S_DT = ( RHO_H_S_P(I,J,K) - RHO_H_S_0(I,J,K) )/DT
+            IF (PREDICTOR) D_RHO_H_S_DT = ( RHO_H_S_P(I,J,K) - RHO_H_S_0(I,J,K) )/DT
+            IF (CORRECTOR) D_RHO_H_S_DT = ( RHO_H_S_P(I,J,K) - RHO_H_S_0(I,J,K) )/(DT/2._EB)
 
             DP(I,J,K) = ( DP(I,J,K) - (D_RHO_H_S_DT + U_DOT_DEL_RHO_H_S(I,J,K)) )/RHO_H_S_P(I,J,K)
          ENDDO

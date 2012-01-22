@@ -435,7 +435,7 @@ USE GLOBAL_CONSTANTS, ONLY: N_TRACKED_SPECIES,TMPMAX,TMPMIN,EVACUATION_ONLY, &
                             PREDICTOR,CORRECTOR,CHANGE_TIME_STEP,TMPA,N_ZONE, &
                             GAS_SPECIES, R0,SOLID_PHASE_ONLY,TUSED, &
                             DEBUG_OPENMP,CLIP_MASS_FRACTION,ENTHALPY_TRANSPORT
-REAL(EB) :: DTRATIO,OMDTRATIO,TNOW,ZZ_GET(0:N_TRACKED_SPECIES)
+REAL(EB) :: DTRATIO,OMDTRATIO,TNOW,ZZ_GET(0:N_TRACKED_SPECIES),H_S
 INTEGER  :: I,J,K,N
 INTEGER, INTENT(IN) :: NM
  
@@ -464,6 +464,22 @@ CASE(.TRUE.) PREDICTOR_STEP
    !       DIVERGENCE_PART_1 is inside the loop.  The source terms are then applied to the next substep in
    !       MASS_FINITE_DIFFERENCES.
 
+      ! Store enthalpy for time derivative in divergence
+
+      IF (ENTHALPY_TRANSPORT) THEN
+         !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I,ZZ_GET)
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR   
+                  IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)
+                  CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP(I,J,K))
+                  RHO_H_S_0(I,J,K) = RHO(I,J,K)*H_S
+               ENDDO
+            ENDDO
+         ENDDO
+         !$OMP END DO
+      ENDIF
+
       !$OMP DO COLLAPSE(4) SCHEDULE(DYNAMIC) PRIVATE(N,K,J,I) 
       DO N=1,N_TRACKED_SPECIES
          DO K=1,KBAR
@@ -476,22 +492,6 @@ CASE(.TRUE.) PREDICTOR_STEP
          ENDDO
       ENDDO
       !$OMP END DO NOWAIT
-
-      ! Store enthalpy for time derivative in divergence
-
-      IF (ENTHALPY_TRANSPORT) THEN
-         !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I,ZZ_GET)
-         DO K=1,KBAR
-            DO J=1,JBAR
-               DO I=1,IBAR   
-                  IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)
-                  CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,RHO_H_S_0(I,J,K),TMP(I,J,K))
-                  RHO_H_S_0(I,J,K) = RHO(I,J,K)*RHO_H_S_0(I,J,K)
-               ENDDO
-            ENDDO
-         ENDDO
-         !$OMP END DO
-      ENDIF
 
    ELSE
 
@@ -603,6 +603,22 @@ CASE(.TRUE.) PREDICTOR_STEP
 ! The CORRECTOR step
    
 CASE(.FALSE.) PREDICTOR_STEP
+
+   ! Store enthalpy for time derivative in divergence
+
+   IF (ENTHALPY_TRANSPORT) THEN
+      !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I,ZZ_GET)
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR   
+               IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = ZZS(I,J,K,1:N_TRACKED_SPECIES)
+               CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP(I,J,K))
+               RHO_H_S_0(I,J,K) = 0.5_EB*(RHO_H_S_0(I,J,K) + RHOS(I,J,K)*H_S)
+            ENDDO
+         ENDDO
+      ENDDO
+      !$OMP END DO
+   ENDIF
 
    ! Correct species mass fraction at next time step (ZZ here actually means ZZ*RHO)
 
