@@ -1975,8 +1975,8 @@ as opposed to the default Large Eddy Simulation (LES). This feature is appropria
 on the order of a millimeter or less in size, or for diagnostic purposes.
 \item[{\ct GAMMA}] Ratio of specific heats. Normally, FDS derives gas properties using look-up tables for known gases. However, sometimes there
 are declared gaseous species with no known properties, in which case FDS uses this parameter to estimate the specific heat and other properties. The default is
-1.4, based on an assumption of a perfect diatomic molecule like nitrogen. If you want FDS to assume that the specific heats of the gases are independent of 
-temperature and equal to 
+1.4, based on an assumption of a perfect diatomic molecule like nitrogen. If you want FDS to assume that the specific heats of the gases are independent of
+temperature and equal to
 \be c_{p,\alpha} = \frac{\gamma}{\gamma-1} \frac{\cal R}{W_\alpha} \ee
 set {\ct CONSTANT\_SPECIFIC\_HEAT=.TRUE.}
 \item[{\ct GVEC}] The 3 components of gravity, in m/s$^2$. The default is {\ct GVEC=0,0,-9.81}.
@@ -11794,7 +11794,7 @@ These files are written out from {\bf dump.f} with lines equivalent to the follo
   WRITE(LU_GEOM) ONE
   WRITE(LU_GEOM) VERSION
   WRITE(LU_GEOM) STIME  ! first time step
-  WRITE(LU_GEOM) N_VERT_S, NFACE_S, NVERT_D, N_FACE_D
+  WRITE(LU_GEOM) N_VERT_S, N_FACE_S, N_VERT_D, N_FACE_D
   IF (N_VERT_S>0)  WRITE(LU_GEOM) (Xvert_S(I),Yvert_S(I),Zvert_S(I),I=1,N_VERT_S)
   IF (N_VERT_D>0)  WRITE(LU_GEOM) (Xvert_D(I),Yvert_D(I),Zvert_D(I),I=1,N_VERT_D)
   IF (N_FACE_S>0)  WRITE(LU_GEOM) (FACE1_S(I),FACE2_S(I),FACE3_S(I),I=1,N_FACE_S)
@@ -11806,9 +11806,9 @@ These files are written out from {\bf dump.f} with lines equivalent to the follo
   WRITE(LU_GEOM) STIME, GEOM_TYPE  ! each successive time step (if there is time dependent geometry)
   IF(GEOM_TYPE.EQ.0)THEN
     WRITE(LU_GEOM) N_VERT_D, N_FACE_D
-    IF (N_VERT_D>0) WRITE(LU_GEOM) (Xvert_D(I),Yvert_D(I),Zvert_D(I),SURF_S(I),I=1,NVERT_D)
-    IF (N_FACE_D>0) WRITE(LU_GEOM) (FACE1_D(I),FACE2_D(I),FACE3_D(I),I=1,NFACE_D)
-    IF (N_FACE_D>0) WRITE(LU_GEOM) (SURF_D(I),I=1,NFACE_D)
+    IF (N_VERT_D>0) WRITE(LU_GEOM) (Xvert_D(I),Yvert_D(I),Zvert_D(I),I=1,N_VERT_D)
+    IF (N_FACE_D>0) WRITE(LU_GEOM) (FACE1_D(I),FACE2_D(I),FACE3_D(I),I=1,N_FACE_D)
+    IF (N_FACE_D>0) WRITE(LU_GEOM) (SURF_D(I),I=1,N_FACE_D)
   ELSE IF(GEOM_TYPE.EQ.1)THEN
     WRITE(LU_GEOM) Xtran, Ytran, Ztran, Xrot0, Yrot0, Zrot0, rot_az, rot_elev
   ENDIF
@@ -11855,7 +11855,7 @@ Geometry data files are written out from {\bf dump.f} with the lines equivalent 
   WRITE(LU_GEOM_DATA) ONE
   WRITE(LU_GEOM_DATA) VERSION
   WRITE(LU_GEOM_DATA) STIME
-  WRITE(LU_GEOM_DATA) N_VERT_S_VALS,N_VERT_D_VALS,N_FACE_S_VALS,NFACE_D_VALS
+  WRITE(LU_GEOM_DATA) N_VERT_S_VALS,N_VERT_D_VALS,N_FACE_S_VALS,N_FACE_D_VALS
   IF (N_VERT_S_VALS>0)  WRITE(LU_GEOM_DATA) (ValVertStatic(I)), I=1,N_VERT_S_VALS)
   IF (N_VERT_D_VALS>0)  WRITE(LU_GEOM_DATA) (ValVertDynamic(I)),I=1,N_VERT_D_VALS)
   IF (N_FACE_S_VALS>0)  WRITE(LU_GEOM_DATA) (ValFaceStatic(I)), I=1,N_VERT_S_VALS)
