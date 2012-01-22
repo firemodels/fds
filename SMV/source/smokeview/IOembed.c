@@ -263,8 +263,13 @@ void draw_geom(int flag, int frameflag){
 
     geomi = geominfo + i;
     if(geomi->loaded==0||geomi->display==0)continue;
-    if(frameflag==1&&geomi->iframe==0)continue;
-    geomlisti = geomi->geomlistinfo+geomi->iframe;
+    if(frameflag==0){
+      geomlisti = geomi->geomlistinfo;
+    }
+    else{
+      if(geomi->iframe==0)continue;
+      geomlisti = geomi->geomlistinfo+geomi->iframe;
+    }
     ntris = geomlisti->ntriangles;
     npoints = geomlisti->npoints;
     if(showtrioutline==1){
@@ -1007,8 +1012,17 @@ void Sort_Embedded_Geometry(float *mm){
     if(geomi->loaded==0||geomi->display==0)continue;
 
     for(itime=0;itime<2;itime++){
-      if(itime==1&&geomi->iframe==0)continue;
-      geomlisti = geomi->geomlistinfo+geomi->iframe;
+      int iiframe;
+
+      if(itime==0){
+        iiframe=0;
+      }
+      else{
+        if(geomi->iframe==0)continue;
+        iiframe=geomi->iframe;
+      }
+
+      geomlisti = geomi->geomlistinfo+iiframe;
 
       count_all+=geomlisti->ntriangles;
       if(use_transparency_data==0)continue;
@@ -1055,12 +1069,20 @@ void Sort_Embedded_Geometry(float *mm){
     geomlistdata *geomlisti;
     int j;
     geomdata *geomi;
-
     geomi = geominfo + i;
     if(geomi->loaded==0||geomi->display==0)continue;
     for(itime=0;itime<2;itime++){
-      if(itime==1&&geomi->iframe==0)continue;
-      geomlisti = geomi->geomlistinfo+geomi->iframe;
+      int iiframe;
+      
+      if(itime==0){
+        iiframe=0;
+      }
+      else{
+        if(geomi->iframe==0)continue;
+        iiframe=geomi->iframe;
+      }
+
+      geomlisti = geomi->geomlistinfo+iiframe;
       for(j=0;j<geomlisti->ntriangles;j++){
         triangle *tri;
 
