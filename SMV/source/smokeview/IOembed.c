@@ -163,7 +163,7 @@ void get_faceinfo(void){
 
 /* ------------------ draw_geom ------------------------ */
 
-void draw_geom(int flag){
+void draw_geom(int flag, int frameflag){
   int i;
   float black[]={0.0,0.0,0.0,1.0};
   float blue[]={0.0,0.0,1.0,1.0};
@@ -171,7 +171,7 @@ void draw_geom(int flag){
   float *last_color=NULL;
 
 
-  if(patchembedded==0&&showtrisurface==1){
+  if(patchembedded==0&&showtrisurface==1&&frameflag==0){
     int ntris;
     triangle **tris;
     float *color;
@@ -246,10 +246,10 @@ void draw_geom(int flag){
     glDisable(GL_COLOR_MATERIAL);
     glDisable(GL_LIGHTING);
     glPopMatrix();
-  }
-  if(flag==DRAW_TRANSPARENT){
-    if(use_transparency_data==1)transparentoff();
-    return;
+    if(flag==DRAW_TRANSPARENT){
+      if(use_transparency_data==1)transparentoff();
+      return;
+    }
   }
 
 #define VECFACTOR 0.01
@@ -263,7 +263,8 @@ void draw_geom(int flag){
 
     geomi = geominfo + i;
     if(geomi->loaded==0||geomi->display==0)continue;
-    geomlisti = geomi->geomlistinfo;
+    if(frameflag==1&&geomi->iframe==0)continue;
+    geomlisti = geomi->geomlistinfo+geomi->iframe;
     ntris = geomlisti->ntriangles;
     npoints = geomlisti->npoints;
     if(showtrioutline==1){
@@ -623,6 +624,7 @@ void read_geom(int ifile, int flag, int *errorcode){
   triangle *triangles;
   int first=1;
   int version;
+  int nverts[4];
 
   // 1
   // version
@@ -671,13 +673,14 @@ void read_geom(int ifile, int flag, int *errorcode){
   FORTREAD(&version,1,stream);
 
   geomi->ntimes=ntimes_local;
+  geomi->iframe=0;
   NewMemory((void **)&geomi->geomlistinfo,ntimes_local*sizeof(geomlistdata));
+  NewMemory((void **)&geomi->times,ntimes_local*sizeof(float));
 
   for(i=0;i<ntimes_local;i++){
     float times_local[2];
     geomlistdata *geomlisti;
     int *geom_typeptr,geom_type=0;
-    int nverts[4];
     int nvert_s, nvert_d, ntri_s, ntri_d;
 
     geomlisti = geomi->geomlistinfo+i;
@@ -686,18 +689,22 @@ void read_geom(int ifile, int flag, int *errorcode){
       FORTREADBR(nverts,4,stream);
       geom_typeptr=&geom_type;
       first=0;
+      nvert_s=nverts[0];
+      ntri_s=nverts[1];
+      nvert_d=nverts[2];
+      ntri_d=nverts[3];
+      geomi->times[i]=times_local[0];
     }
     else{
+      FORTREADBR(times_local,2,stream);
+      FORTREADBR(nverts,2,stream);
+      geom_typeptr=(int *)(times_local+1);
       nvert_s=0;
       ntri_s=0;
-      FORTREADBR(times_local,2,stream);
-      FORTREADBR(nverts+2,2,stream);
-      geom_typeptr=(int *)(times_local+1);
+      nvert_d=nverts[0];
+      ntri_d=nverts[1];
+      geomi->times[i]=times_local[0];
     }
-    nvert_s=nverts[0];
-    ntri_s=nverts[1];
-    nvert_d=nverts[2];
-    ntri_d=nverts[3];
     geomlisti->points=NULL;
     if(*geom_typeptr==0&&nvert_s+nvert_d>0){
       int nvert;
@@ -983,12 +990,14 @@ int compare_transparent_triangles( const void *arg1, const void *arg2 ){
 void Sort_Embedded_Geometry(float *mm){
   int i;
   int count_transparent,count_all;
+  int itime;
 
   CheckMemory;
   count_transparent=0;
   count_all=0;
   ntransparent_triangles=count_transparent;
   nopaque_triangles=count_all-count_transparent;
+
   for(i=0;i<ngeominfo;i++){
     geomlistdata *geomlisti;
     int j;
@@ -996,36 +1005,40 @@ void Sort_Embedded_Geometry(float *mm){
 
     geomi = geominfo + i;
     if(geomi->loaded==0||geomi->display==0)continue;
-    geomlisti = geomi->geomlistinfo;
 
-    count_all+=geomlisti->ntriangles;
-    if(use_transparency_data==0)continue;
-    for(j=0;j<geomlisti->ntriangles;j++){
-      triangle *tri;
-      float xyz[3];
-      float *xyz1, *xyz2, *xyz3;
-      float xyzeye[3];
+    for(itime=0;itime<2;itime++){
+      if(itime==1&&geomi->iframe==0)continue;
+      geomlisti = geomi->geomlistinfo+geomi->iframe;
 
-      tri = geomlisti->triangles + j;
-      if(hilight_skinny==1&&tri->skinny==1)continue;
-      if(tri->surf->color[3]>=1.0)continue;
-      count_transparent++;
-      if(sort_embedded_geometry==0)continue;
-      xyz1 = tri->points[0]->xyz;
-      xyz2 = tri->points[1]->xyz;
-      xyz3 = tri->points[2]->xyz;
-      xyz[0] = xyz1[0]+xyz2[0]+xyz3[0];
-      xyz[1] = xyz1[1]+xyz2[1]+xyz3[1];
-      xyz[2] = xyz1[2]+xyz2[2]+xyz3[2];
+      count_all+=geomlisti->ntriangles;
+      if(use_transparency_data==0)continue;
+      for(j=0;j<geomlisti->ntriangles;j++){
+        triangle *tri;
+        float xyz[3];
+        float *xyz1, *xyz2, *xyz3;
+        float xyzeye[3];
 
-      xyzeye[0] = mm[0]*xyz[0] + mm[4]*xyz[1] +   mm[8]*xyz[2] + mm[12];
-      xyzeye[1] = mm[1]*xyz[0] + mm[5]*xyz[1] +   mm[9]*xyz[2] + mm[13];
-      xyzeye[2] = mm[2]*xyz[0] + mm[6]*xyz[1] +  mm[10]*xyz[2] + mm[14];
-      xyzeye[0]/=mscale[0];
-      xyzeye[1]/=mscale[1];
-      xyzeye[2]/=mscale[2];
-      tri->distance=xyzeye[0]*xyzeye[0]+xyzeye[1]*xyzeye[1]+xyzeye[2]*xyzeye[2];
-      CheckMemory;
+        tri = geomlisti->triangles + j;
+        if(hilight_skinny==1&&tri->skinny==1)continue;
+        if(tri->surf->color[3]>=1.0)continue;
+        count_transparent++;
+        if(sort_embedded_geometry==0)continue;
+        xyz1 = tri->points[0]->xyz;
+        xyz2 = tri->points[1]->xyz;
+        xyz3 = tri->points[2]->xyz;
+        xyz[0] = xyz1[0]+xyz2[0]+xyz3[0];
+        xyz[1] = xyz1[1]+xyz2[1]+xyz3[1];
+        xyz[2] = xyz1[2]+xyz2[2]+xyz3[2];
+
+        xyzeye[0] = mm[0]*xyz[0] + mm[4]*xyz[1] +   mm[8]*xyz[2] + mm[12];
+        xyzeye[1] = mm[1]*xyz[0] + mm[5]*xyz[1] +   mm[9]*xyz[2] + mm[13];
+        xyzeye[2] = mm[2]*xyz[0] + mm[6]*xyz[1] +  mm[10]*xyz[2] + mm[14];
+        xyzeye[0]/=mscale[0];
+        xyzeye[1]/=mscale[1];
+        xyzeye[2]/=mscale[2];
+        tri->distance=xyzeye[0]*xyzeye[0]+xyzeye[1]*xyzeye[1]+xyzeye[2]*xyzeye[2];
+        CheckMemory;
+      }
     }
   }
   CheckMemory;
@@ -1045,16 +1058,19 @@ void Sort_Embedded_Geometry(float *mm){
 
     geomi = geominfo + i;
     if(geomi->loaded==0||geomi->display==0)continue;
-    geomlisti = geomi->geomlistinfo;
-    for(j=0;j<geomlisti->ntriangles;j++){
-      triangle *tri;
+    for(itime=0;itime<2;itime++){
+      if(itime==1&&geomi->iframe==0)continue;
+      geomlisti = geomi->geomlistinfo+geomi->iframe;
+      for(j=0;j<geomlisti->ntriangles;j++){
+        triangle *tri;
 
-      tri = geomlisti->triangles + j;
-      if(use_transparency_data==0||(hilight_skinny==1&&tri->skinny==1)||tri->surf->color[3]>=1.0){
-        opaque_triangles[count_all++]=tri;
-      }
-      else{
-        transparent_triangles[count_transparent++]=tri;
+        tri = geomlisti->triangles + j;
+        if(use_transparency_data==0||(hilight_skinny==1&&tri->skinny==1)||tri->surf->color[3]>=1.0){
+          opaque_triangles[count_all++]=tri;
+        }
+        else{
+          transparent_triangles[count_transparent++]=tri;
+        }
       }
     }
   }

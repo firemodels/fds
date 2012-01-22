@@ -119,6 +119,14 @@ void update_framenumber(int changetime){
         }
       }
     }
+    for(i=0;i<ngeominfo;i++){
+      geomdata *geomi;
+
+      geomi = geominfo + i;
+      if(geomi->loaded==0)continue;
+      if(geomi->timeslist==NULL)continue;
+      geomi->iframe=geomi->timeslist[itimes];
+    }
     if(showslice==1||showvslice==1){
       for(ii=0;ii<nslice_loaded;ii++){
         slice *sd;
@@ -605,9 +613,6 @@ void updateShow(void){
 void synctimes(void){
   int n,i,istart;
   int j,igrid,jj;
-  slice *sd;
-  particle *parti;
-  mesh *meshi;
 
 
   /* synchronize smooth blockage times */
@@ -616,6 +621,8 @@ void synctimes(void){
     //       meshi->blockagesurfaces
   if(ntotal_smooth_blockages>0){
     for(igrid=0;igrid<nmeshes;igrid++){
+      mesh *meshi;
+
       meshi=meshinfo+igrid;
       if(meshi->showsmoothtimelist==NULL)continue;
       for(n=0;n<ntimes;n++){
@@ -692,9 +699,34 @@ void synctimes(void){
       hrrinfo->timeslist[n]=i;
     }
 
+  /* synchronize geometry times */
+
+    for(j=0;j<ngeominfo;j++){
+      geomdata *geomi;
+
+      geomi = geominfo + j;
+      if(geomi->loaded==0)continue;
+      if(n==0){
+        istart=0;
+      }
+      else{
+        istart=geomi->timeslist[n-1];
+      }
+      i=istart;
+      while(geomi->times[i]<times[n]&&i<geomi->ntimes){
+        i++;
+      }
+      if(i>=geomi->ntimes){
+        i--;
+      }
+      geomi->timeslist[n]=i;
+    }
+
   /* synchronize particle times */
 
     for(j=0;j<npartinfo;j++){
+      particle *parti;
+
       parti=partinfo+j;
       if(parti->loaded==0)continue;
       if(n==0){
@@ -712,7 +744,8 @@ void synctimes(void){
       }
       parti->ptimeslist[n]=i;
     }
-       /* synchronize target times */
+
+    /* synchronize target times */
 
     if(ntarginfo>0){
       if(n==0){
@@ -754,6 +787,8 @@ void synctimes(void){
   /* synchronize slice times */
 
     for(jj=0;jj<nslice_loaded;jj++){
+      slice *sd;
+
       j = slice_loaded_list[jj];
       sd = sliceinfo + j;
       if(n==0){
@@ -821,6 +856,7 @@ void synctimes(void){
     }
     for(j=0;j<nmeshes;j++){
       patch *patchi;
+      mesh *meshi;
 
       meshi=meshinfo+j;
       if(meshi->patchfilenum<0||meshi->patchtimes==NULL)continue;
@@ -845,6 +881,8 @@ void synctimes(void){
   /* synchronize isosurface times */
 
     for(igrid=0;igrid<nmeshes;igrid++){
+      mesh *meshi;
+
       meshi=meshinfo+igrid;
       if(meshi->isotimes==NULL)continue;
       if(n==0){
@@ -868,6 +906,7 @@ void synctimes(void){
     if(nvolrenderinfo>0){
       for(igrid=0;igrid<nmeshes;igrid++){
         volrenderdata *vr;
+        mesh *meshi;
 
         meshi=meshinfo+igrid;
         vr = &meshi->volrenderinfo;
@@ -926,9 +965,19 @@ void updatetimes(void){
   int filenum;
   float dt_MIN=100000.0;
 
+  // pass 1 - determine ntimes
+
   updateShow();  
   CheckMemory;
   ntimes = 0;
+
+  for(i=0;i<ngeominfo;i++){
+    geomdata *geomi;
+
+    geomi = geominfo + i;
+    if(geomi->loaded==0||geomi->display==0)continue;
+    ntimes+=geomi->ntimes;
+  }
   if(visTerrainType!=TERRAIN_HIDDEN){
     for(i=0;i<nterraininfo;i++){
       terraindata *terri;
@@ -1020,11 +1069,30 @@ void updatetimes(void){
     }
   }
 
+  // end pass 1
+
   CheckMemory;
   FREEMEMORY(times);
   if(ntimes>0)NewMemory((void **)&times,ntimes*sizeof(float));
   timescopy=times;
 
+  // pass 2 - merge times arrays
+
+  for(i=0;i<ngeominfo;i++){
+    geomdata *geomi;
+
+    geomi = geominfo + i;
+    if(geomi->loaded==0||geomi->display==0)continue;
+    for(n=0;n<geomi->ntimes;n++){
+      float t_diff;
+
+      *timescopy++=geomi->times[n];
+      t_diff = timescopy[-1]-timescopy[-2];
+      if(n>0&&t_diff<dt_MIN&&t_diff>0.0){
+        dt_MIN=t_diff;
+      }
+    }
+  }
   if(visTerrainType!=TERRAIN_HIDDEN){
     for(i=0;i<nterraininfo;i++){
       terraindata *terri;
@@ -1221,6 +1289,10 @@ void updatetimes(void){
     }
   }
 
+  // end pass 2
+
+  // sort times array and remove duplicates
+
   if(ntimes>0)qsort( (float *)times, (size_t)ntimes, sizeof( float ), compare_float );
   n2=1;
   ntimes2=ntimes;
@@ -1234,10 +1306,22 @@ void updatetimes(void){
     }
   }
   ntimes=ntimes2;
+
+  // pass 3 - allocate memory for individual times array
+
   if(ntimes>ntimes_old){
     ntimes_old=ntimes;
     FREEMEMORY(render_frame);
     if(ntimes>0)NewMemory((void **)&render_frame,ntimes*sizeof(int));
+  }
+
+  for(i=0;i<ngeominfo;i++){
+    geomdata *geomi;
+
+    geomi = geominfo + i;
+    if(geomi->loaded==0||geomi->display==0)continue;
+    FREEMEMORY(geomi->timeslist);
+    if(ntimes>0)NewMemory((void **)&geomi->timeslist,ntimes*sizeof(int));
   }
   for(i=0;i<npartinfo;i++){
     parti=partinfo+i;
@@ -1375,6 +1459,10 @@ void updatetimes(void){
     }
   }
 
+  // end pass 3
+
+  // reset render_fram array
+
   if(current_script_command!=NULL&&current_script_command->command==SCRIPT_VOLSMOKERENDERALL){
     if(current_script_command->first==1){
       for(n=0;n<ntimes;n++){
@@ -1388,13 +1476,25 @@ void updatetimes(void){
       render_frame[n]=0;
     }
   }
+
+  // reallocate times array
+
   if(ntimes==0){
     FREEMEMORY(times);
   }
   if(ntimes>0)ResizeMemory((void **)&times,ntimes*sizeof(float));
   
+  // pass 4 - initialize individual time pointers
+
   izone=0; 
   reset_itimes0();
+  for(i=0;i<ngeominfo;i++){
+    geomdata *geomi;
+
+    geomi = geominfo + i;
+    if(geomi->loaded==0||geomi->display==0)continue;
+    geomi->iframe=0;
+  }
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
 

@@ -310,7 +310,8 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   /* ++++++++++++++++++++++++ draw triangles +++++++++++++++++++++++++ */
   
   if(ngeominfo>0){
-    draw_geom(DRAW_OPAQUE);
+    draw_geom(DRAW_OPAQUE,0);
+    draw_geom(DRAW_OPAQUE,1);
   }
 
 #ifdef pp_SHOOTER
@@ -431,7 +432,8 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
   /* ++++++++++++++++++++++++ draw triangles +++++++++++++++++++++++++ */
   
   if(ngeominfo>0){
-    draw_geom(DRAW_TRANSPARENT);
+    draw_geom(DRAW_TRANSPARENT,0);
+    draw_geom(DRAW_TRANSPARENT,1);
   }
 
   if(showiso==1){

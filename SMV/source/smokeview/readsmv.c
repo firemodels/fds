@@ -2538,6 +2538,7 @@ int readsmv(char *file, char *file2){
       geomi->times=NULL;
       geomi->ntimes=0;
       geomi->times=NULL;
+      geomi->timeslist=NULL;
 
       ngeominfo++;
       continue;

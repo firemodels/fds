@@ -51,7 +51,7 @@ typedef struct {
   int loaded, display;
   geomlistdata *geomlistinfo;
   float *times;
-  int ntimes;
+  int ntimes,iframe,*timeslist;
 } geomdata;
 
 /* --------------------------  bounds ------------------------------------ */
