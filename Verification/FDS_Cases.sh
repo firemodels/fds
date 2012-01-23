@@ -183,10 +183,10 @@ $RUNFDS Species ReactionRate_Arrhenius_2Order_1Step
 $RUNFDS Species ReactionRate_Arrhenius_1p75Order_2Step
 $RUNFDS Species ReactionRate_Arrhenius_1p75Order_2StepR
 $RUNFDS Species ReactionRate_Arrhenius_Equilibrium
-$RUNFDS Species ReactionRate_MixCtrl_O2lim_1Step
-$RUNFDS Species ReactionRate_MixCtrl_Flim_1Step
-$RUNFDS Species ReactionRate_MixCtrl_O2lim_2Step
-$RUNFDS Species ReactionRate_MixCtrl_Flim_2Step
+$RUNFDS Species ReactionRate_EDM_O2lim_1Step
+$RUNFDS Species ReactionRate_EDM_Flim_1Step
+$RUNFDS Species ReactionRate_EDM_O2lim_2Step
+$RUNFDS Species ReactionRate_EDM_Flim_2Step
 
 $RUNFDS Sprinklers_and_Sprays activate_sprinklers
 $RUNFDS Sprinklers_and_Sprays bucket_test_2

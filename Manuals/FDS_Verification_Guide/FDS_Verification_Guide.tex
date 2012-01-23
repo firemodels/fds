@@ -1789,16 +1789,16 @@ mass of the three combustion products. The figure compares the simple chemistry 
 
 \section{Reaction Rates (ReactionRate\_)}
 
-This section describes a series of test cases designed to check the reaction rate mechanism for mixing-controlled, finite-rate, and mixed-mode reaction schemes.
+This section describes a series of test cases designed to check the reaction rate mechanism for eddy dissipation, finite-rate, and mixed-mode reaction schemes.
 
-\subsection{Mixing-Controlled Reactions (ReactionRate\_MixCtrl\_)}
+\subsection{Eddy Dissipation Model (EDM) Reactions (ReactionRate\_EDM\_)}
 
-The mixing-controlled (mixed is burned) reaction model with local extinction is the default reaction mechanism in FDS. The reaction rate is determined by the eddy dissipation model (EDM). The EDM assumes that the consumption rate of fuel for each reaction is determined from the local fuel, oxidizer, and product mass fractions and the turbulent mixing time by the following equation \cite{Poinsot:TNC}:
+The eddy dissipation (mixed is burned) reaction model with local extinction is the default reaction mechanism in FDS. The reaction rate is determined by assuming that the consumption rate of fuel for each reaction is determined from the local fuel, oxidizer, and product mass fractions and the turbulent mixing time by the following equation \cite{Poinsot:TNC}:
 
 \begin{equation}\label{eq:EDM}
-\dot{m}^{\prime\prime\prime}_{fuel,i} = \frac{C_{EDC}}{\tau_{mix}} \, \min \left( Y_F,\frac{Y_\OTWO}{s},\beta_{EDC}\frac{Y_P}{(1+s)} \right)
+\dot{m}^{\prime\prime\prime}_{fuel,i} = \frac{C_{EDM}}{\tau_{mix}} \, \min \left( Y_F,\frac{Y_\OTWO}{s},\beta_{EDM}\frac{Y_P}{(1+s)} \right)
 \end{equation}
-where $C_{EDC}$ is a model constant related to the turbulent subgrid model, $\beta_{EDC}$ is a model constant related to combustion, and $s$ is the mass stoichiometric coefficient. This model can be considered a deficient model as the consumption rate is found by the limiting species. To determine species evolution for the reaction, a system of ordinary differential equations is solved for each participating species ($\alpha$):
+where $C_{EDM}$ is a model constant related to the turbulent subgrid model, $\beta_{EDM}$ is a model constant related to combustion, and $s$ is the mass stoichiometric coefficient. This model can be considered a deficient model as the consumption rate is found by the limiting species. To determine species evolution for the reaction, a system of ordinary differential equations is solved for each participating species ($\alpha$):
 \begin{equation}\label{eq:spec_ode}
 \frac{dY_{\alpha}}{dt}= \frac{\nu_{\alpha} \, W_{\alpha}}{W_F} \, \dot{m}^{\prime\prime\prime}_{F}
 \end{equation}
@@ -1806,15 +1806,15 @@ To test this implementation, a one-step methane reaction
 \begin{equation}\label{eq:1step_methane}
 \mathrm{CH_4 + 2 \, O_2 \rightarrow  CO_2 + 2\, H_2O}
 \end{equation}
-is considered for both a fuel-limiting and oxygen-limiting case with a fixed mixing time, $\tau_{mix}=0.1$~s (Figure \ref{fig:MixCtrl_1Step}).
+is considered for both a fuel-limiting and oxygen-limiting case with a fixed mixing time, $\tau_{mix}=0.1$~s (Figure \ref{fig:EDM_1Step}).
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_MixCtrl_Flim_1Step} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_MixCtrl_O2lim_1Step}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDM_Flim_1Step} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDM_O2lim_1Step}
 \end{tabular*}
 \caption[Species Evolution in Mixing Controlled Reaction]{Time evolution of species mass fraction for a one-step mixing controlled reaction with a fixed mixing time of $\tau_{mix}=0.1$~s. (Left) Fuel-limited reaction. (Right) Oxygen-limited reaction.}
-\label{fig:MixCtrl_1Step}
+\label{fig:EDM_1Step}
 \end{figure}
 
 The EDM reaction implementation is also tested for a two-step methane reaction:
@@ -1827,11 +1827,11 @@ for both fuel-limited and oxygen-limited conditions with a fixed mixing time, $\
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_MixCtrl_Flim_2Step} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_MixCtrl_O2lim_2Step}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDM_Flim_2Step} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDM_O2lim_2Step}
 \end{tabular*}
-\caption[Species Evolution in Mixing Controlled Reaction]{Time evolution of species mass fraction for a two-step mixing controlled reaction with a fixed mixing time of $\tau_{mix}=0.1$~s. (Left) Fuel-limited reaction. (Right) Oxygen-limited reaction.}
-\label{fig:MixCtrl_2Step}
+\caption[Species Evolution in EDM Reaction]{Time evolution of species mass fraction for a two-step EDM reaction with a fixed mixing time of $\tau_{mix}=0.1$~s. (Left) Fuel-limited reaction. (Right) Oxygen-limited reaction.}
+\label{fig:EDM_2Step}
 \end{figure}
 
 \subsection{Finite Rate Reactions (ReactionRate\_Arrhenius\_)}
