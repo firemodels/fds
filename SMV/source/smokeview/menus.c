@@ -3862,79 +3862,53 @@ void VentMenu(int value){
 
 
 /* ------------------ ImmersedMenu ------------------------ */
-
+#define IMMERSED_SOLID 0
+#define IMMERSED_OUTLINE 1
+#define IMMERSED_SOLIDOUTLINE 2
+#define IMMERSED_HIDE 7
 void ImmersedMenu(int value){
   updatemenu=1;
   switch (value){
-    case 0:
-      if(showtrisurface==1&&showtrioutline==1){
-        showtrisurface=0;
-        showtrioutline=1;
-      }
-      else if(showtrisurface==1&&showtrioutline==0){
-        showtrisurface=0;
-        showtrioutline=0;
-      }
-      else if(showtrisurface==0&&showtrioutline==1){
-        showtrisurface=1;
-        showtrioutline=0;
-      }
-      else{
-        showtrisurface=1;
-        showtrioutline=0;
-      }
-      break;
-    case 1:
+    case IMMERSED_SOLIDOUTLINE:
       if(showtrisurface==1&&showtrioutline==1){
         showtrisurface=1;
         showtrioutline=0;
-      }
-      else if(showtrisurface==1&&showtrioutline==0){
-        showtrisurface=0;
-        showtrioutline=1;
-      }
-      else if(showtrisurface==0&&showtrioutline==1){
-        showtrisurface=0;
-        showtrioutline=0;
-      }
-      else{
-        showtrisurface=0;
-        showtrioutline=1;
-      }
-      break;
-    case 2:
-      if(showtrisurface==1&&showtrioutline==1){
-        showtrisurface=1;
-        showtrioutline=0;
-      }
-      else if(showtrisurface==1&&showtrioutline==0){
-        showtrisurface=1;
-        showtrioutline=1;
-      }
-      else if(showtrisurface==0&&showtrioutline==1){
-        showtrisurface=1;
-        showtrioutline=1;
       }
       else{
         showtrisurface=1;
         showtrioutline=1;
       }
       break;
-      case 3:
-        showtrinormal=1-showtrinormal;
-        break;
-      case 4:
-        smoothtrinormal=1-smoothtrinormal;
-        break;
-      case 5:
-        hilight_skinny = 1 - hilight_skinny;
-        break;
-      case 6:
-        sort_embedded_geometry=1-sort_embedded_geometry;
-        break;
-      default:
-        ASSERT(0);
-        break;
+    case IMMERSED_SOLID:
+      showtrisurface=1-showtrisurface;
+      break;
+    case IMMERSED_OUTLINE:
+      showtrioutline=1-showtrioutline;
+      break;
+    case 3:
+      showtrinormal=1-showtrinormal;
+      break;
+    case 4:
+      smoothtrinormal=1-smoothtrinormal;
+      break;
+    case 5:
+      hilight_skinny = 1 - hilight_skinny;
+      break;
+    case 6:
+      sort_embedded_geometry=1-sort_embedded_geometry;
+      break;
+    case IMMERSED_HIDE:
+      if(showtrisurface==0&&showtrioutline==0){
+        showtrisurface=1;
+      }
+      else{
+        showtrisurface=0;
+        showtrioutline=0;
+      }
+      break;
+    default:
+      ASSERT(0);
+      break;
   }
   glutPostRedisplay();
 }
@@ -4660,17 +4634,29 @@ updatemenu=0;
 
   CREATEMENU(immersedmenu,ImmersedMenu);
   glutAddMenuEntry(_("View Method:"),999);
-  if(showtrisurface==1){
-    glutAddMenuEntry(_(" *Solid"),0);
+  if(showtrisurface==1&&showtrioutline==1){
+    glutAddMenuEntry(_(" *Solid and Outline"),IMMERSED_SOLIDOUTLINE);
   }
   else{
-    glutAddMenuEntry(_(" Solid"),0);
+    glutAddMenuEntry(_(" Solid and Outline"),IMMERSED_SOLIDOUTLINE);
+  }
+  if(showtrisurface==1){
+    glutAddMenuEntry(_(" *Solid"),IMMERSED_SOLID);
+  }
+  else{
+    glutAddMenuEntry(_(" Solid"),IMMERSED_SOLID);
   }
   if(showtrioutline==1){
-    glutAddMenuEntry(_(" *Outline"),1);
+    glutAddMenuEntry(_(" *Outline"),IMMERSED_OUTLINE);
   }
   else{
-    glutAddMenuEntry(_(" Outline"),1);
+    glutAddMenuEntry(_(" Outline"),IMMERSED_OUTLINE);
+  }
+  if(showtrisurface==0&&showtrioutline==0){
+    glutAddMenuEntry(_(" *Hide"),IMMERSED_HIDE);
+  }
+  else{
+    glutAddMenuEntry(_(" Hide"),IMMERSED_HIDE);
   }
   if(sort_embedded_geometry==1){
     glutAddMenuEntry(_(" *Sort faces"),6);
