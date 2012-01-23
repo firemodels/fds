@@ -1,34 +1,27 @@
 Test Case to examine fixed reaction rates
 C3H8+5*O2=4*H2O+3*CO2
-
 ------------------------------------------------
-# Labels and Meshes
--------------------------------------------------
+
 &HEAD CHID='ReactionRate_Arrhenius_2Order_1Step', TITLE='Finite_Rate_2nd_Order' /
 &MESH IJK=8,8,8, XB=0.0,0.1,0.0,0.1,0.0,0.1 /
 &MISC GVEC=0.0, 0.0, 0.0 / 
 
 &TIME T_END=5 /
 
-------------------------------------------------
-# Reaction Rate Parameters
--------------------------------------------------
-
-&SPEC ID = 'NITROGEN',         SMIX_COMPONENT_ONLY = .TRUE./
-&SPEC ID = 'OXYGEN',           SMIX_COMPONENT_ONLY = .TRUE./
-&SPEC ID = 'PROPANE'           SMIX_COMPONENT_ONLY = .TRUE./
+&SPEC ID = 'NITROGEN',         SMIX_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'OXYGEN',           SMIX_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'PROPANE',          SMIX_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'CARBON MONOXIDE',  SMIX_COMPONENT_ONLY = .TRUE. /
 &SPEC ID = 'WATER VAPOR',      SMIX_COMPONENT_ONLY = .TRUE. /
 &SPEC ID = 'CARBON DIOXIDE',   SMIX_COMPONENT_ONLY = .TRUE. /
 
 &INIT MASS_FRACTION(1)=0.219, SPEC_ID(1)='OXYGEN',MASS_FRACTION(2)=0.06,SPEC_ID(2)='PROPANE'
 
-&SMIX ID = 'NITROGEN', SPEC_ID ='NITROGEN', 
-      VOLUME_FRACTION = 1.0, 
-      BACKGROUND = .TRUE. /
+&SMIX ID = 'NITROGEN', SPEC_ID ='NITROGEN', VOLUME_FRACTION = 1.0, BACKGROUND = .TRUE. /
 &SMIX ID = 'OXYGEN', SPEC_ID='OXYGEN', VOLUME_FRACTION=1.0/
 &SMIX ID = 'PROPANE', SPEC_ID='PROPANE', VOLUME_FRACTION=1.0/
-&SMIX ID = 'WATER_VAPOR', SPEC_ID='WATER VAPOR', VOLUME_FRACTION=1.0/
-&SMIX ID = 'CARBON_DIOXIDE', SPEC_ID='CARBON DIOXIDE', VOLUME_FRACTION=1.0/
+&SMIX ID = 'WATER VAPOR', SPEC_ID='WATER VAPOR', VOLUME_FRACTION=1.0/
+&SMIX ID = 'CARBON DIOXIDE', SPEC_ID='CARBON DIOXIDE', VOLUME_FRACTION=1.0/
 
 &REAC ID = 'R1'
       FUEL = 'PROPANE'
@@ -39,13 +32,10 @@ C3H8+5*O2=4*H2O+3*CO2
       NU= -1,-5,4,3
       N_S = 1,1
       HEAT_OF_COMBUSTION=46460.
-      ODE_SOLVER='IMPLICIT TRAPEZOID'  /
+      ODE_SOLVER= 'RUNGE-KUTTA 2' /
 
 # Note: The values of A and E are not typical for a reaction and are used purely for verification.
 
--------------------------------------------------
-# Devices and Slices
--------------------------------------------------
 &DEVC XB=0.0,0.1,0.0,0.1,0.0,0.1, QUANTITY='MASS FRACTION', STATISTICS='MEAN', SPEC_ID='OXYGEN',  ID='O2' /
 &DEVC XB=0.0,0.1,0.0,0.1,0.0,0.1, QUANTITY='MASS FRACTION', STATISTICS='MEAN', SPEC_ID='PROPANE',  ID='C3H8' /
 &DEVC XB=0.0,0.1,0.0,0.1,0.0,0.1, QUANTITY='MASS FRACTION', STATISTICS='MEAN', SPEC_ID='CARBON DIOXIDE',  ID='CO2' /
