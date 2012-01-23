@@ -165,15 +165,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
    ! Tensor diffusivity model (experimental)
 
    IF (TENSOR_DIFFUSIVITY .AND. LES) CALL TENSOR_DIFFUSIVITY_MODEL(NM,N)
-   
-   ! Numerical diffusion (experimental)
-   
-   IF (INCLUDE_NUMERICAL_DIFFUSION) THEN
-      RHO_D_DZDX = RHO_D_DZDX - DFX(:,:,:,N)
-      RHO_D_DZDY = RHO_D_DZDY - DFY(:,:,:,N)
-      RHO_D_DZDZ = RHO_D_DZDZ - DFZ(:,:,:,N)
-   ENDIF
-
+ 
    ! Correct rho*D del Z at boundaries and store rho*D at boundaries
 
    WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
@@ -545,20 +537,27 @@ ENTHALPY_TRANSPORT_IF: IF (ENTHALPY_TRANSPORT) THEN
       DO J=1,JBAR
          DO I=1,IBAR
 
-            ! This form of averaging enforces exact discrete conservation of (rho*h_s).  When the discrete divergence is
-            ! factored out of the DIV(rho*h_s*u) term (numerically) one ends up with AVE(u dot GRAD(rho*h_s)) + DIV(u)
+            ! This form of averaging is needed to enforce exact discrete conservation of (rho*h_s).  
+            ! When the discrete divergence is factored out of the DIV(rho*h_s*u) term (numerically)
+            ! we end up with AVE(u dot GRAD(rho*h_s)) + (rho*h_s)*DIV(u).
 
             U_DOT_DEL_RHO_H_S(I,J,K) = 0.5_EB*( UDRHDX(I,J,K)+UDRHDX(I-1,J,K) + &
                                                 VDRHDY(I,J,K)+VDRHDY(I,J-1,K) + &
                                                 WDRHDZ(I,J,K)+WDRHDZ(I,J,K-1) )
 
-            IF (STRATIFICATION) THEN
-               U_DOT_DEL_RHO_H_S(I,J,K) = U_DOT_DEL_RHO_H_S(I,J,K) - 0.5_EB*(W(I,J,K)+W(I,J,K-1))*RHOP(I,J,K)*GVEC(3)
-            ENDIF
-
          ENDDO
       ENDDO 
    ENDDO
+
+   IF (STRATIFICATION) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               U_DOT_DEL_RHO_H_S(I,J,K) = U_DOT_DEL_RHO_H_S(I,J,K) - 0.5_EB*(W(I,J,K)+W(I,J,K-1))*RHO_0(K)*GVEC(3)
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
 
    DO K=1,KBAR
       DO J=1,JBAR
@@ -611,23 +610,6 @@ ELSE ENTHALPY_TRANSPORT_IF
 
 ENDIF ENTHALPY_TRANSPORT_IF
 
-! Remove numerical diffusion before using DEL_RHO_D_DEL_Z in scalar transport
-
-NUMERICAL_DIFFUSION_IF: IF (INCLUDE_NUMERICAL_DIFFUSION) THEN
-   DO N=1,N_TRACKED_SPECIES
-      IF (EVACUATION_ONLY(NM)) CYCLE
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               DEL_RHO_D_DEL_Z(I,J,K,N) = DEL_RHO_D_DEL_Z(I,J,K,N) + (DFX(I,J,K,N)-DFX(I-1,J,K,N))*RDX(I) &
-                                                                   + (DFY(I,J,K,N)-DFY(I,J-1,K,N))*RDY(J) &
-                                                                   + (DFZ(I,J,K,N)-DFZ(I,J,K-1,N))*RDZ(K)
-            ENDDO
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF NUMERICAL_DIFFUSION_IF
-
 ! Add contribution of reactions
  
 IF (N_REACTIONS > 0 .AND. .NOT.EVACUATION_ONLY(NM) .AND. .NOT.ENTHALPY_TRANSPORT) THEN
@@ -639,7 +621,6 @@ IF (N_REACTIONS > 0 .AND. .NOT.EVACUATION_ONLY(NM) .AND. .NOT.ENTHALPY_TRANSPORT
       ENDDO
    ENDDO
 ENDIF
-
 
 ! Add contribution of evaporating PARTICLEs
 
