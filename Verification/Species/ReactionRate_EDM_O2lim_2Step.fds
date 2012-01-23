@@ -1,25 +1,21 @@
-Test Case to examine fixed mixing reaction - Limiting O2
+Test Case to examine fixed mixing reaction
 CH4+1.5*O2->CO+2*H2O
 CO+0.5*O2->CO2
-
 ------------------------------------------------
-# Labels and Meshes
--------------------------------------------------
-&HEAD CHID='ReactionRate_MixCtrl_O2lim_2Step', TITLE='Fixed_Mixing_Time_Test_Case' /
+
+&HEAD CHID='ReactionRate_EDM_O2lim_2Step', TITLE='Fixed_Mixing_Time_Test_Case' /
 &MESH IJK=8,8,8, XB=0.0,0.1,0.0,0.1,0.0,0.1 /
 &MISC GVEC=0.0, 0.0, 0.0 /
 &TIME T_END=2   /
 
-------------------------------------------------
-# Reaction Rate Parameters
--------------------------------------------------
-
 &SPEC ID='NITROGEN', BACKGROUND=.TRUE./
-&SPEC ID='METHANE', MASS_FRACTION_0=0.4 /
-&SPEC ID='OXYGEN', MASS_FRACTION_0 = 0.1 /
-&SPEC ID='CARBON MONOXIDE', MASS_FRACTION_0 = 0.4 /
-&SPEC ID='WATER VAPOR', MASS_FRACTION_0=0.0 /
-&SPEC ID='CARBON DIOXIDE', MASS_FRACTION_0 = 0.0 /
+&SPEC ID='METHANE'/
+&SPEC ID='OXYGEN' /
+&SPEC ID='CARBON MONOXIDE' /
+&SPEC ID='WATER VAPOR' /
+&SPEC ID='CARBON DIOXIDE' /
+
+&INIT XB = 0.0,0.1,0.0,0.1,0.0,0.1, SPEC_ID(1)='METHANE', MASS_FRACTION(1) = 0.4, SPEC_ID(2)='OXYGEN', MASS_FRACTION(2)= 0.1, SPEC_ID(3)='CARBON MONOXIDE', MASS_FRACTION(3)=0.4 /
 
 &REAC FUEL='METHANE'
       SMIX_ID='METHANE','OXYGEN','CARBON MONOXIDE','WATER VAPOR' 
@@ -38,10 +34,6 @@ CO+0.5*O2->CO2
       SUPPRESSION=.FALSE.
       HEAT_OF_COMBUSTION=283
       ODE_SOLVER= 'RUNGE-KUTTA 2'  /
-
--------------------------------------------------
-# Devices and Slices
--------------------------------------------------
 
 &DEVC XB=0.0,0.1,0.0,0.1,0.0,0.1, QUANTITY='MASS FRACTION', STATISTICS='MEAN', SPEC_ID='OXYGEN',  ID='O2' /
 &DEVC XB=0.0,0.1,0.0,0.1,0.0,0.1, QUANTITY='MASS FRACTION', STATISTICS='MEAN', SPEC_ID='METHANE',  ID='CH4' /
