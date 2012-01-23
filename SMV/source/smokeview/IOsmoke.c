@@ -332,7 +332,7 @@ void drawsmoke_frame(void){
         smoke3di = smoke3dinfo + i;
         if(smoke3di->loaded==0||smoke3di->display==0)continue;
         if(smoke3di->d_display==0)continue;
-        if(smoke3di->smoke_state_list[smoke3di->iframe]==0)continue;
+        //if(smoke3di->smoke_all_zeros[smoke3di->iframe]==1)continue;
 
 #ifdef pp_GPU
         if(usegpu==1){
@@ -452,7 +452,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
   CheckMemory;
   if(
      NewMemory((void **)&smoke3di->smokeframe_comp_list,smoke3di->n_times_full*sizeof(unsigned char *))==0||
-     NewMemory((void **)&smoke3di->smoke_state_list,smoke3di->n_times_full*sizeof(unsigned char))==0||
+     NewMemory((void **)&smoke3di->smoke_all_zeros,smoke3di->n_times_full*sizeof(unsigned char))==0||
      NewMemory((void **)&smoke3di->smokeframe_in,smoke3di->nchars_uncompressed*sizeof(unsigned char))==0||
      NewMemory((void **)&smoke3di->smokeview_tmp,smoke3di->nchars_uncompressed*sizeof(unsigned char))==0||
      NewMemory((void **)&smoke3di->smokeframe_out,smoke3di->nchars_uncompressed*sizeof(unsigned char))==0||
@@ -470,7 +470,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
     smoke3di->lightframe_in=NULL;
   }
   for(i=0;i<smoke3di->n_times_full;i++){
-    smoke3di->smoke_state_list[i]=2;
+    smoke3di->smoke_all_zeros[i]=2;
   }
 
   ncomp_smoke_total=0;
@@ -893,7 +893,7 @@ void freesmoke3d(smoke3d *smoke3di){
   FREEMEMORY(smoke3di->use_smokeframe);
   FREEMEMORY(smoke3di->nchars_compressed_smoke_full);
   FREEMEMORY(smoke3di->nchars_compressed_smoke);
-  FREEMEMORY(smoke3di->smoke_state_list);
+  FREEMEMORY(smoke3di->smoke_all_zeros);
   FREEMEMORY(smoke3di->smoke_comp_all);
   FREEMEMORY(smoke3di->smokeframe_comp_list);
   FREEMEMORY(smoke3di->smokeview_tmp);
@@ -928,15 +928,15 @@ void updatesmoke3d(smoke3d *smoke3di){
     ASSERT(FFALSE);
     break;
   }
-  if(smoke3di->smoke_state_list[iframe_local]==2){
+  if(smoke3di->smoke_all_zeros[iframe_local]==2){
     int i;
     unsigned char *smokeframe_in;
 
     smokeframe_in = smoke3di->smokeframe_in;
-    smoke3di->smoke_state_list[iframe_local]=0;
+    smoke3di->smoke_all_zeros[iframe_local]=1;
     for(i=0;i<smoke3di->nchars_uncompressed;i++){
       if(smokeframe_in[i]==0)continue;
-      smoke3di->smoke_state_list[iframe_local]=1;
+      smoke3di->smoke_all_zeros[iframe_local]=0;
       break;
     }
   }
@@ -1051,27 +1051,26 @@ void mergesmoke3dcolors(smoke3d *smoke3dset){
             int index;
 
             index = 129+128*(float)(firecolor[j]-i_hrrpuv_cutoff)/(float)(255-i_hrrpuv_cutoff);
-            if(index<129)index=129;
-            if(index>255)index=255;
+            index=CLAMP(index,129,255);
             fire=rgb_smokecolormap+4*index;
             *mergecolor++=255*fire[0];
             *mergecolor++=255*fire[1];
             *mergecolor++=255*fire[2];
-            *mergealpha++=3*(sootcolor[j]>>smoke3d_thick);
+             mergecolor++;
+            *mergealpha++=fire_alpha;
           }
           else{
             int index;
 
             index = 128*(float)(firecolor[j]-i_hrrpuv_cutoff)/(float)(255-i_hrrpuv_cutoff);
-            if(index<0)index=0;
-            if(index>128)index=128;
+            index=CLAMP(index,0,128);
             smoke=rgb_smokecolormap+4*index;
             *mergecolor++=255*smoke[0];
             *mergecolor++=255*smoke[1];
             *mergecolor++=255*smoke[2];
+             mergecolor++;
             *mergealpha++=(sootcolor[j]>>smoke3d_thick);
           }
-          mergecolor++;
         }
         continue;
       }
@@ -1094,8 +1093,7 @@ void mergesmoke3dcolors(smoke3d *smoke3dset){
             int index;
 
             index = 129+128*(float)(firecolor[j]-i_hrrpuv_cutoff)/(float)(255-i_hrrpuv_cutoff);
-            if(index<129)index=129;
-            if(index>255)index=255;
+            index=CLAMP(index,129,255);
             fire=rgb_smokecolormap+4*index;
             *mergecolor++=255*fire[0];
             *mergecolor++=255*fire[1];
@@ -4225,7 +4223,7 @@ void drawsmoke3dCULL(void){
       glBegin(GL_TRIANGLES);
     }
 
-    if(smoke3di->smoke_state_list[smoke3di->iframe]==0)continue;
+    if(smoke3di->smoke_all_zeros[smoke3di->iframe]==1)continue;
     switch (meshi->smokedir){
 
   // +++++++++++++++++++++++++++++++++++ DIR 1 +++++++++++++++++++++++++++++++++++++++
