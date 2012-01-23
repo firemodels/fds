@@ -105,16 +105,16 @@ TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 IF (VEG_LEVEL_SET) RETURN
 
 IF (PREDICTOR) THEN
-   UU => U
-   VV => V
-   WW => W
+   UU => US
+   VV => VS
+   WW => WS
    RHOP => RHOS
    ZZP  => ZZS
    PBAR_P => PBAR_S
 ELSE
-   UU => US
-   VV => VS
-   WW => WS
+   UU => U
+   VV => V
+   WW => W
    RHOP => RHO
    ZZP  => ZZ   
    PBAR_P => PBAR
@@ -156,6 +156,8 @@ HEAT_FLUX_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS+N_VIRTUAL_WA
          WC%TMP_F  = TMP(IIG,JJG,KKG)
 
       CASE (INFLOW_OUTFLOW) METHOD_OF_HEAT_TRANSFER 
+
+         ! Base inflow/outflow decision on velocity component with same predictor/corrector attribute
  
          INFLOW = .FALSE.
          SELECT CASE(IOR)
