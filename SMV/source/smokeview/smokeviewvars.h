@@ -118,7 +118,7 @@ SVEXTERN int SVDECL(usegpu,0);
 SVEXTERN int SVDECL(usegpu,0),SVDECL(gpuactive,0);
 SVEXTERN int GPU_aspectratio;
 SVEXTERN int GPU_smoke3d_rthick, GPU_skip, GPU_hrrcutoff, GPU_hrr, GPU_hrrpuv_max_smv, GPU_hrrpuv_cutoff;
-SVEXTERN int GPU_firecolor, GPU_is_smoke, GPU_smokecolormap;
+SVEXTERN int GPU_fire_alpha, GPU_firecolor, GPU_have_smoke, GPU_smokecolormap;
 SVEXTERN int GPU_smokeshade,GPU_smokealpha;
 SVEXTERN int GPU_adjustalphaflag;
 
