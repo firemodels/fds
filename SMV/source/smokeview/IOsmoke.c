@@ -222,14 +222,14 @@ else{\
   value[1]=alphaf_in[n12];\
   value[2]=alphaf_in[n22];\
   value[3]=alphaf_in[n21];\
-  if(value[0]==0&&value[1]==0&&value[2]==0&&value[3]==0)continue;\
+  if(firecolor==NULL&&value[0]==0&&value[1]==0&&value[2]==0&&value[3]==0)continue;\
   if((adjustalphaflag==2||adjustalphaflag==3)&&iblank_smoke3d!=NULL){\
     if(iblank_smoke3d[n11]==0)value[0]=0;\
     if(iblank_smoke3d[n12]==0)value[1]=0;\
     if(iblank_smoke3d[n22]==0)value[2]=0;\
     if(iblank_smoke3d[n21]==0)value[3]=0;\
   }\
-  if(value[0]==0&&value[1]==0&&value[2]==0&&value[3]==0)continue;\
+  if(firecolor==NULL&&value[0]==0&&value[1]==0&&value[2]==0&&value[3]==0)continue;\
   if(ABS(value[0]-value[2])<ABS(value[1]-value[3])){     \
     xyzindex=xyzindex1;                                  \
   }                                                      \
@@ -241,6 +241,7 @@ else{\
     fvalue[1]=firecolor[n12];\
     fvalue[2]=firecolor[n22];\
     fvalue[3]=firecolor[n21];\
+    if(fvalue[0]==0.0&&fvalue[1]==0.0&&fvalue[2]==0.0&&fvalue[3]==0.0)continue;\
   }\
   else{\
     fvalue[0]=0.0;\
@@ -298,6 +299,31 @@ else{\
     glVertex3f(XX,YY,ZZ+z_offset[mm]);                                \
   }
 
+/* ------------------ is_fire_or_soot ------------------------ */
+
+int is_fire_or_soot(smoke3d *smoke3di){
+  smoke3d *soot=NULL, *fire=NULL;
+  int is_fire, is_soot;
+  int return_val;
+
+  is_soot=0;
+  if(smoke3di->soot_index!=-1)soot = smoke3dinfo + smoke3di->soot_index;
+  if(soot!=NULL&&soot->loaded==1&&soot->display==1){
+    is_soot=1;
+    if(soot->frame_all_zeros[soot->iframe]==1)is_soot=0;
+  }
+
+  is_fire=0;
+  if(smoke3di->hrrpuv_index!=-1)fire = smoke3dinfo + smoke3di->hrrpuv_index;
+  if(fire!=NULL&&fire->loaded==1&&fire->display==1){
+    is_fire=1;
+    if(fire->frame_all_zeros[fire->iframe]==1)is_fire=0;
+  }
+  return_val=0;
+  if(is_soot==1||is_fire==1)return_val=1;
+  return return_val;
+}
+
 /* ------------------ drawsmoke_frame ------------------------ */
 
 void drawsmoke_frame(void){
@@ -332,7 +358,7 @@ void drawsmoke_frame(void){
         smoke3di = smoke3dinfo + i;
         if(smoke3di->loaded==0||smoke3di->display==0)continue;
         if(smoke3di->d_display==0)continue;
-        //if(smoke3di->smoke_all_zeros[smoke3di->iframe]==1)continue;
+        if(is_fire_or_soot(smoke3di)==0)continue;
 
 #ifdef pp_GPU
         if(usegpu==1){
@@ -452,7 +478,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
   CheckMemory;
   if(
      NewMemory((void **)&smoke3di->smokeframe_comp_list,smoke3di->n_times_full*sizeof(unsigned char *))==0||
-     NewMemory((void **)&smoke3di->smoke_all_zeros,smoke3di->n_times_full*sizeof(unsigned char))==0||
+     NewMemory((void **)&smoke3di->frame_all_zeros,smoke3di->n_times_full*sizeof(unsigned char))==0||
      NewMemory((void **)&smoke3di->smokeframe_in,smoke3di->nchars_uncompressed*sizeof(unsigned char))==0||
      NewMemory((void **)&smoke3di->smokeview_tmp,smoke3di->nchars_uncompressed*sizeof(unsigned char))==0||
      NewMemory((void **)&smoke3di->smokeframe_out,smoke3di->nchars_uncompressed*sizeof(unsigned char))==0||
@@ -470,7 +496,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
     smoke3di->lightframe_in=NULL;
   }
   for(i=0;i<smoke3di->n_times_full;i++){
-    smoke3di->smoke_all_zeros[i]=2;
+    smoke3di->frame_all_zeros[i]=2;
   }
 
   ncomp_smoke_total=0;
@@ -688,7 +714,17 @@ void setsmokecolorflags(void){
       if(smoke3di->water_color!=NULL)smoke3dj->water_loaded=1;
       if(smoke3di->hrrpuv_color!=NULL)smoke3dj->hrrpuv_loaded=1;
     }
-      
+
+    for(i=0;i<nsmoke3dinfo;i++){
+      int j;
+      smoke3d *smoke3di;
+
+      smoke3di = smoke3dinfo + i;
+      if(smoke3di->loaded==0||smoke3di->display==0||smoke3di->frame_all_zeros==NULL)continue;
+      for(j=0;j<smoke3di->n_times_full;j++){
+        smoke3di->frame_all_zeros[j]=2;
+      }
+    }
   }
 }
 
@@ -893,7 +929,7 @@ void freesmoke3d(smoke3d *smoke3di){
   FREEMEMORY(smoke3di->use_smokeframe);
   FREEMEMORY(smoke3di->nchars_compressed_smoke_full);
   FREEMEMORY(smoke3di->nchars_compressed_smoke);
-  FREEMEMORY(smoke3di->smoke_all_zeros);
+  FREEMEMORY(smoke3di->frame_all_zeros);
   FREEMEMORY(smoke3di->smoke_comp_all);
   FREEMEMORY(smoke3di->smokeframe_comp_list);
   FREEMEMORY(smoke3di->smokeview_tmp);
@@ -928,16 +964,17 @@ void updatesmoke3d(smoke3d *smoke3di){
     ASSERT(FFALSE);
     break;
   }
-  if(smoke3di->smoke_all_zeros[iframe_local]==2){
+  if(smoke3di->frame_all_zeros[iframe_local]==2){
     int i;
     unsigned char *smokeframe_in;
 
     smokeframe_in = smoke3di->smokeframe_in;
-    smoke3di->smoke_all_zeros[iframe_local]=1;
+    smoke3di->frame_all_zeros[iframe_local]=1;
     for(i=0;i<smoke3di->nchars_uncompressed;i++){
-      if(smokeframe_in[i]==0)continue;
-      smoke3di->smoke_all_zeros[iframe_local]=0;
-      break;
+      if(smokeframe_in[i]!=0){
+        smoke3di->frame_all_zeros[iframe_local]=0;
+        break;
+      }
     }
   }
   ASSERT(countout==smoke3di->nchars_uncompressed);
@@ -4225,7 +4262,7 @@ void drawsmoke3dCULL(void){
       glBegin(GL_TRIANGLES);
     }
 
-    if(smoke3di->smoke_all_zeros[smoke3di->iframe]==1)continue;
+    if(is_fire_or_soot(smoke3di)==0)continue;
     switch (meshi->smokedir){
 
   // +++++++++++++++++++++++++++++++++++ DIR 1 +++++++++++++++++++++++++++++++++++++++

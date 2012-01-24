@@ -1102,7 +1102,7 @@ typedef struct _smoke3d {
   unsigned char *smokeframe_in, *lightframe_in, *smokeframe_out, **smokeframe_comp_list;
   unsigned char *smokeview_tmp;
   unsigned char *smoke_comp_all;
-  unsigned char *smoke_all_zeros;
+  unsigned char *frame_all_zeros;
   smokedata smoke, light;
   unsigned char *hrrpuv_color, *water_color, *soot_color;
   int hrrpuv_index, water_index, soot_index;
