@@ -10378,7 +10378,7 @@ void writeini(int flag){
     }
 
     fprintf(fileout,"SHOWDEVICEVALS\n");
-    fprintf(fileout,"%i %i %i\n",showdeviceval,showvdeviceval,devicetypes_index);
+    fprintf(fileout," %i %i %i\n",showdeviceval,showvdeviceval,devicetypes_index);
     put_startup_smoke3d(fileout);
     fprintf(fileout,"LOADFILESATSTARTUP\n");
     fprintf(fileout," %i\n",loadfiles_at_startup);
@@ -10390,7 +10390,7 @@ void writeini(int flag){
         propi = part5propinfo + i;
         fprintf(fileout," ");
         for(j=0;j<npartclassinfo;j++){
-          fprintf(fileout,"%i ",propi->class_vis[j]);
+          fprintf(fileout," %i ",propi->class_vis[j]);
         }
         fprintf(fileout,"\n");
       }
@@ -10540,9 +10540,9 @@ void writeini(int flag){
   fprintf(fileout,"SHOWTERRAIN\n");
   fprintf(fileout," %i\n",visTerrainType);
   fprintf(fileout,"TERRAINPARMS\n");
-  fprintf(fileout,"%i %i %i\n",terrain_rgba_zmin[0],terrain_rgba_zmin[1],terrain_rgba_zmin[2]);
-  fprintf(fileout,"%i %i %i\n",terrain_rgba_zmax[0],terrain_rgba_zmax[1],terrain_rgba_zmax[2]);
-  fprintf(fileout,"%f\n",vertical_factor);
+  fprintf(fileout," %i %i %i\n",terrain_rgba_zmin[0],terrain_rgba_zmin[1],terrain_rgba_zmin[2]);
+  fprintf(fileout," %i %i %i\n",terrain_rgba_zmax[0],terrain_rgba_zmax[1],terrain_rgba_zmax[2]);
+  fprintf(fileout," %f\n",vertical_factor);
   fprintf(fileout,"OFFSETSLICE\n");
   fprintf(fileout," %i\n",offset_slice);
   fprintf(fileout,"SHOWTRIANGLES\n");
@@ -10663,7 +10663,7 @@ void writeini(int flag){
           fprintf(fileout,"NULL\n");
         }
         else{
-          fprintf(fileout,"%s\n",filei);
+          fprintf(fileout," %s\n",filei);
         }
       }
     }
@@ -10672,7 +10672,7 @@ void writeini(int flag){
   fprintf(fileout,"UNITCLASSES\n");
   fprintf(fileout," %i\n",nunitclasses);
   for(i=0;i<nunitclasses;i++){
-    fprintf(fileout, "%i\n",unitclasses[i].active);
+    fprintf(fileout," %i\n",unitclasses[i].active);
   }
   if(flag==LOCAL_INI){
     fprintf(fileout,"MSCALE\n");
@@ -10699,7 +10699,7 @@ void writeini(int flag){
 
       fprintf(fileout,"LABEL\n");
       fprintf(fileout," %f %f %f %f %f %f %f %f\n",xyz[0],xyz[1],xyz[2],rgbtemp[0],rgbtemp[1],rgbtemp[2],tstart_stop[0],tstart_stop[1]);
-      fprintf(fileout,"%s\n",labeli->label);
+      fprintf(fileout," %s\n",labeli->label);
     }
 
     
@@ -10722,7 +10722,7 @@ void writeini(int flag){
   }
   if(fds_filein!=NULL&&strlen(fds_filein)>0){
     fprintf(fileout,"INPUT_FILE\n");
-    fprintf(fileout,"%s\n",fds_filein);
+    fprintf(fileout," %s\n",fds_filein);
   }
 
   fprintf(fileout,"EYEX\n");
@@ -10809,7 +10809,7 @@ void writeini(int flag){
         fprintf(fileout," %f %f %f %f %f %f\n",
             ca->clip_x_val,ca->clip_y_val,ca->clip_z_val,
             ca->clip_X_val,ca->clip_Y_val,ca->clip_Z_val);
-        fprintf(fileout,"%s\n",ca->name);
+        fprintf(fileout," %s\n",ca->name);
       }
     }
   }
@@ -10877,7 +10877,7 @@ void writeini(int flag){
     fprintf(fileout," %i\n",ncolorbars-ndefaultcolorbars);
     for(n=ndefaultcolorbars;n<ncolorbars;n++){
       cbi = colorbarinfo + n;
-      fprintf(fileout,"%s\n",cbi->label);
+      fprintf(fileout," %s\n",cbi->label);
       fprintf(fileout," %i %i\n",cbi->nnodes,cbi->nodehilight);
       for(i=0;i<cbi->nnodes;i++){
         rrgb = cbi->rgb_node+3*i;
@@ -10954,7 +10954,7 @@ void writeini(int flag){
           if(ii==0&&touri->startup==1)continue;
 
           trim(touri->label);
-          fprintf(fileout,"%s\n",touri->label);
+          fprintf(fileout," %s\n",touri->label);
           fprintf(fileout," %i %i %f %i %i\n",
             touri->nkeyframes,touri->global_tension_flag,touri->global_tension,touri->glui_avatar_index,touri->display);
           for(framei=&touri->first_frame;framei!=&touri->last_frame;framei=framei->next){
@@ -10965,7 +10965,7 @@ void writeini(int flag){
               ybar0+framei->nodeval.eye[1]*xyzmaxdiff,
               zbar0+framei->nodeval.eye[2]*xyzmaxdiff);
             trimmzeros(buffer);
-            fprintf(fileout,"%s %i ",buffer,framei->viewtype);
+            fprintf(fileout," %s %i ",buffer,framei->viewtype);
             if(framei->viewtype==0){
               sprintf(buffer,"%f %f %f %f %f %f %f ",
                 framei->az_path,framei->nodeval.elev_path,framei->bank,
@@ -10981,7 +10981,7 @@ void writeini(int flag){
                 framei->nodeval.zoom);
             }
             trimmzeros(buffer);
-            fprintf(fileout,"%s %i\n",buffer,uselocalspeed);
+            fprintf(fileout," %s %i\n",buffer,uselocalspeed);
           }
         }
       }
