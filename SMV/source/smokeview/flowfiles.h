@@ -811,7 +811,7 @@ typedef struct _camera {
 
   int view_id;
   struct _camera *next,*prev;
-  char name[32];
+  char name[256];
 } camera;
 
 /* --------------------------  partclass ------------------------------------ */
