@@ -4936,12 +4936,13 @@ If the node is connected to the FDS domain, then do not specify {\ct XYZ}.  FDS 
 
 A duct node must either have two or more ducts attached to it or it must have either {\ct AMBIENT = .TRUE.} or a {\ct VENT\_ID} specified.  When defining a {\ct VENT} as a component of an HVAC system you must set {\ct SURF\_ID = 'HVAC'} and you must set the {\ct ID}.  Note that you cannot give more than one  {\ct VENT} the same {\ct ID}.
 
-\subsection{'HVAC Fan Parameters}
+\subsection{HVAC Fan Parameters}
 \label{info:HVACfan}
 \footnotesize
 \begin{verbatim}
-&HVAC TYPE='FAN', ID='fanname', RAMP_ID='rampname',  DEVC_ID='devicename', CTRL_ID='ctrlname', VOLUME_FLOW=volumeflow, MAX_FLOW=maxflow,
-MAX_PRESSURE=maxpressure, LOSS=offloss /
+&HVAC TYPE='FAN', ID='fanname', RAMP_ID='rampname',  DEVC_ID='devicename', 
+      CTRL_ID='ctrlname', VOLUME_FLOW=volumeflow, MAX_FLOW=maxflow,
+      MAX_PRESSURE=maxpressure, LOSS=offloss /
 \end{verbatim}\normalsize
 
 
@@ -4999,7 +5000,8 @@ More complicated fan curves can be specified by defining a {\ct RAMP}.
 
 Here is an example how fans can be specified.  In it, two simple
 compartments share a common wall. Both compartments are considered as
-separate ``pressure zones.'' Two HVAC ducts are defined.  One is a quadratic fan with a maximum volumetric flow of 0.16 $m^3$/s and a stall pressure of 10 Pa.  The second is open duct with a flow loss of 10. The relevant input lines are:
+separate ``pressure zones.'' Two HVAC ducts are defined.  One is a quadratic fan with a maximum volumetric flow of 0.16 m$^3$/s and a stall pressure of 10~Pa.  
+The second is open duct with a flow loss of 10. The relevant input lines are:
 
 \footnotesize
 \begin{verbatim}
@@ -5015,13 +5017,15 @@ separate ``pressure zones.'' Two HVAC ducts are defined.  One is a quadratic fan
 &VENT XB= 0.15, 0.15,-0.2, 0.2, 1.4, 1.6, COLOR='YELLOW', ID='BLOW RIGHT 2',
       SURF_ID='HVAC',IOR=1/
 
-&HVAC ID='LEFT 1',TYPE_ID='NODE',DUCT_ID='LEFT',VENT_ID='BLOW LEFT 1'/
-&HVAC ID='LEFT 2',TYPE_ID='NODE',DUCT_ID='LEFT',VENT_ID='BLOW LEFT 2'/
-&HVAC ID='RIGHT 1',TYPE_ID='NODE',DUCT_ID='RIGHT',VENT_ID='BLOW RIGHT 1'/
-&HVAC ID='RIGHT 2',TYPE_ID='NODE',DUCT_ID='RIGHT',VENT_ID='BLOW RIGHT 2'/
+&HVAC ID='LEFT 1',  TYPE_ID='NODE', DUCT_ID='LEFT',  VENT_ID='BLOW LEFT 1' /
+&HVAC ID='LEFT 2',  TYPE_ID='NODE', DUCT_ID='LEFT',  VENT_ID='BLOW LEFT 2' /
+&HVAC ID='RIGHT 1', TYPE_ID='NODE', DUCT_ID='RIGHT', VENT_ID='BLOW RIGHT 1' /
+&HVAC ID='RIGHT 2', TYPE_ID='NODE', DUCT_ID='RIGHT', VENT_ID='BLOW RIGHT 2' /
 
-&HVAC ID='LEFT',TYPE_ID='DUCT',NODE_ID='LEFT 1','LEFT 2',LENGTH=1,AREA=0.04,FAN_ID='LEFT',REVERSE=.TRUE.,LOSS=0,0/
-&HVAC ID='RIGHT',TYPE_ID='DUCT',NODE_ID='RIGHT 1','RIGHT 2',LENGTH=1,AREA=0.04,LOSS=10,10/
+&HVAC ID='LEFT',  TYPE_ID='DUCT', NODE_ID='LEFT 1','LEFT 2',   
+      LENGTH=1, AREA=0.04, FAN_ID='LEFT', REVERSE=.TRUE., LOSS=0,0 /
+&HVAC ID='RIGHT', TYPE_ID='DUCT', NODE_ID='RIGHT 1','RIGHT 2', 
+      LENGTH=1, AREA=0.04, LOSS=10,10 /
 
 &HVAC ID='LEFT',TYPE_ID='FAN',MAX_FLOW=0.16,MAX_PRESSURE=10./
 \end{verbatim}
@@ -5036,12 +5040,15 @@ where $\dot{V}_{\hbox{\footnotesize max}}$ is the maximum output of the fan ~(0.
 Zone~1 to Zone~2 and 0.2~m/s from Zone~2 to Zone~1), and $\Delta p_{\hbox{\footnotesize max}}$ is the maximum pressure difference the fan can operate
 upon (in this case 10~Pa).
 
-In steady state, the volume flow from compartment to compartment (or Zone to Zone) should be equal and opposite in sign.  This occurs when the positive pressure added by the fan equals the pressure drop due to the flow loss through the return duct.
+In steady state, the volume flow from compartment to compartment (or Zone to Zone) should be equal and opposite in sign.  
+This occurs when the positive pressure added by the fan equals the pressure drop due to the flow loss through the return duct.
 
- \be  \sqrt{\frac {2 |p_2-p_1|}{ (1.2 \hbox{kg/$m^3$}) 10}} (0.4 \hbox{m/s}) =
-   (0.16 \hbox{$m^3$/s})  \;
+ \be  \sqrt{\frac {2 |p_2-p_1|}{ (1.2 \; \hbox{kg/m$^3$}) 10}} (0.4 \; \hbox{m/s}) =
+   (0.16 \; \hbox{m$^3$/s})  \;
    \sqrt{ \frac{ |p_1-p_2-10 \; \hbox{Pa}|}{10 \; \hbox{Pa}}  } \ee
-The solution is $p_2=4.5$~Pa and $p_1=-4.5$~Pa (see Fig.~\ref{fan_test}). Note that the sign of the Volume Flow of a duct in FDS has to do with whether the flow is moving from the first node to the second (postive) or the second node to the first (negative). This convention can make these types of calculations a bit tricky.
+The solution is $p_2=4.5$~Pa and $p_1=-4.5$~Pa (see Fig.~\ref{fan_test}). 
+Note that the sign of the Volume Flow of a duct in FDS has to do with whether the flow is moving from the first node to the second (positive) or the second node to the first (negative). 
+This convention can make these types of calculations a bit tricky.
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
@@ -5205,21 +5212,22 @@ the ideal values.
 \label{zone_break_example}
 
 In this example, three simple compartments are initially isolated from each other and from the ambient environment outside. Each compartment is a separate pressure zone. Air
-is blown into Zone~1 at a constant rate for 5~s, increasing its pressure approximately 9500~Pa. At 10~s, Zone~1 is opened to Zone~2, decreasing the
+is blown into Zone~1 at a constant rate of 0.1~kg/s, increasing its pressure approximately 1970~Pa by 10~s, at which time Zone~1 is opened to Zone~2, decreasing the
 overall pressure in the two zones to roughly one-third the original value because the volume of the combined pressure zone has been roughly tripled.
 At 15~s, the pressure is further decreased by opening a door to Zone~3, and, finally, at 20~s the pressure returns to ambient following the opening
 of a door to the outside. Figure~\ref{zone_break} displays the pressure within each compartment.
 
 \begin{figure}[ht]
-\begin{center}
-\includegraphics[width=3.1in]{SCRIPT_FIGURES/zone_break}
-\end{center}
-\caption[Output of {\bf zone\_break} test case.]{Output of {\bf zone\_break} test case.}
+\includegraphics[width=3.1in]{SCRIPT_FIGURES/zone_break_p2}
+\includegraphics[width=3.1in]{SCRIPT_FIGURES/zone_break_p5}
+\caption[Output of {\bf zone\_break} test cases.]{Output of {\bf zone\_break} test cases. The figure on the left results from using a pressure relaxation factor of 0.2. The
+figure on the right uses 0.5, which tends to bring the pressure into equilibrium more quickly.}
 \label{zone_break}
 \end{figure}
 
 \noindent
-Notice that the pressure within each compartment does not come to equilibrium instantaneously. Rather, a relaxation factor is applied by FDS to bring the zones
+Notice that the pressure within each compartment does not come to equilibrium instantaneously. Rather, a relaxation factor ({\ct PRESSURE\_RELAX\_FACTOR} on the {\ct PRES} line) 
+is applied to bring the zones
 into equilibrium over several seconds. This is done for several reasons. First, in reality doors and windows do not magically disappear as they do in FDS. It takes
 a finite amount of time to fully open them, and the slowing of the pressure increase/decrease is a simple way to simulate the effect.
 Second, relatively large pressure differences between zones wreak havoc with flow solvers, especially ones like FDS that
