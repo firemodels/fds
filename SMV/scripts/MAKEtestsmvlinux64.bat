@@ -1,4 +1,6 @@
 @echo off
+Title Building test Smokeview for 64 bit Linux
+
 
 Rem  Windows batch file to build a test Smokeview for 64 bit Linux
 

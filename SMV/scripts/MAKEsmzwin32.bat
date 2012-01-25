@@ -1,4 +1,5 @@
 @echo off
+Title Building Smokezip for 32 bit Windows
 
 Rem  Windows batch file to copy smokediffset SVNROOT=~/FDS-SMV
 

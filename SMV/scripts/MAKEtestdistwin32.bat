@@ -1,4 +1,6 @@
 @echo off
+Title Packaging test Smokeview for 32 bit Windows
+
 
 Rem  Windows batch file to create a test Smokeview for 32 bit Windows
 

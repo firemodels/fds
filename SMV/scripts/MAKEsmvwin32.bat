@@ -1,4 +1,5 @@
 @echo off
+Title Building Smokeview for 23 bit Windows
 
 Rem  Windows batch file to build a release Smokeview for Windows 32.
 

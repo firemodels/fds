@@ -1,4 +1,6 @@
 @echo off
+Title Building test Smokeview for 32 bit OSX
+
 
 Rem  Windows batch file to build a test Smokeview for OSX.
 

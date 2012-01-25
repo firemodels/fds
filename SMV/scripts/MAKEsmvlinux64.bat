@@ -1,4 +1,5 @@
 @echo off
+Title Building Smokeview for 64 bit Linuux
 
 Rem  Windows batch file to build a release Smokeview for Linux 64.
 

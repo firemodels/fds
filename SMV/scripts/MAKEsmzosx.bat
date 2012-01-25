@@ -1,4 +1,5 @@
 @echo off
+Title Building Smokezip for OSX
 
 Rem  Windows batch file to build 32 and 64 bit OSX versions of smokezip
 

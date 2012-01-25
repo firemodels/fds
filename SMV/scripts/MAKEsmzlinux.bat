@@ -1,4 +1,5 @@
 @echo off
+Title Building Smokezip for Linux
 
 Rem  Windows batch file to build linux 32 and 64 bit versions of smokezip
 

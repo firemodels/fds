@@ -1,4 +1,5 @@
 @echo off
+Title Building test Smokeview for 32 bit Windows
 
 Rem  Windows batch file to build a test Smokeview for Windows 32.
 
