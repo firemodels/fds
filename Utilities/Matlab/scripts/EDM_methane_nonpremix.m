@@ -10,12 +10,6 @@ clear all
 close all
 
 %-----------------------
-% Setup necessary file directories
-%-----------------------
-addpath('/../Volumes/cgw/') % fillpage.m lives here and is used for plotting
-addpath('/../Volumes/cgw/FDS-SMV/Verification/Species/')
-
-%-----------------------
 % Initialize species
 %-----------------------
 
