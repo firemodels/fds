@@ -28,6 +28,7 @@ ns2d;                     display('ns2d complete...')
 wall_internal_radiation;  display('wall_internal_radiation complete...')
 ashrae_7;                 display('ashrae_7 complete...')
 flame_species;            display('flame_species complete...')
+EDM_species;              display('EDM_species complete...')
 
 % The main plotting routine is dataplot
 
