@@ -714,16 +714,15 @@ void setsmokecolorflags(void){
       if(smoke3di->water_color!=NULL)smoke3dj->water_loaded=1;
       if(smoke3di->hrrpuv_color!=NULL)smoke3dj->hrrpuv_loaded=1;
     }
+  }
+  for(i=0;i<nsmoke3dinfo;i++){
+    int j;
+    smoke3d *smoke3di;
 
-    for(i=0;i<nsmoke3dinfo;i++){
-      int j;
-      smoke3d *smoke3di;
-
-      smoke3di = smoke3dinfo + i;
-      if(smoke3di->loaded==0||smoke3di->display==0||smoke3di->frame_all_zeros==NULL)continue;
-      for(j=0;j<smoke3di->n_times_full;j++){
-        smoke3di->frame_all_zeros[j]=2;
-      }
+    smoke3di = smoke3dinfo + i;
+    if(smoke3di->loaded==0||smoke3di->display==0||smoke3di->frame_all_zeros==NULL)continue;
+    for(j=0;j<smoke3di->n_times_full;j++){
+      smoke3di->frame_all_zeros[j]=2;
     }
   }
 }
