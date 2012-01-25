@@ -449,7 +449,7 @@ CASE(.TRUE.) PREDICTOR_STEP
                DO I=1,IBAR   
                   IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)
                   CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP(I,J,K))
-                  RHO_H_S_0(I,J,K) = RHO(I,J,K)*H_S
+                  RHO_H_S_OVER_PBAR(I,J,K) = RHO(I,J,K)*H_S/PBAR(K,PRESSURE_ZONE(I,J,K))
                ENDDO
             ENDDO
          ENDDO
@@ -589,7 +589,7 @@ CASE(.FALSE.) PREDICTOR_STEP
             DO I=1,IBAR   
                IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = ZZS(I,J,K,1:N_TRACKED_SPECIES)
                CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP(I,J,K))
-               RHO_H_S_0(I,J,K) = 0.5_EB*(RHO_H_S_0(I,J,K) + RHOS(I,J,K)*H_S)
+               RHO_H_S_OVER_PBAR(I,J,K) = 0.5_EB*( RHO_H_S_OVER_PBAR(I,J,K) + RHOS(I,J,K)*H_S/PBAR_S(K,PRESSURE_ZONE(I,J,K)) )
             ENDDO
          ENDDO
       ENDDO
