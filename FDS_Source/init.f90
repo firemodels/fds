@@ -171,9 +171,9 @@ ENDIF
 ! Enthalpy arrays (experimental)
 
 IF (ENTHALPY_TRANSPORT) THEN
-   ALLOCATE(M%RHO_H_S_0(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
-   CALL ChkMemErr('INIT','RHO_H_S_0',IZERO) 
-   M%RHO_H_S_0 = 0._EB ! initialized in DENSITY 
+   ALLOCATE(M%RHO_H_S_OVER_PBAR(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
+   CALL ChkMemErr('INIT','RHO_H_S_OVER_PBAR',IZERO) 
+   M%RHO_H_S_OVER_PBAR = 0._EB ! initialized in DENSITY 
 ENDIF
 
 ! Allocate water mass arrays if sprinklers are present
