@@ -6,10 +6,13 @@
 #define LINT_H_DEFINED
 
 /*lint -e438 */
+/*lint -e459 */
 /*lint -e506 */
 /*lint -e509 */
 /*lint -e524 */
+/*lint -e525 */
 /*lint -e534 */
+/*lint -e539 */
 /*lint -e550 */
 /*lint -e570 */
 /*lint -e613 */
@@ -17,6 +20,7 @@
 /*lint -e645 */
 /*lint -e713 */
 /*lint -e715 */
+/*lint -e725 */
 /*lint -e732 */ 
 /*lint -e734 */
 /*lint -e736 */
