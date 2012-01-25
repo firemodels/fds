@@ -217,7 +217,7 @@ Because only species 1 through $N_s$ are explicitly computed
 
 \be Z_0 =  1 -  \sum_{\alpha=0}^{N_s} (Z_{\alpha,ijk} \ee
 
-The molecular weight, $\bW_\alpha$, of the lumped speices $Z_\alpha$ is computed as
+The molecular weight, $\bW_\alpha$, of the lumped species $Z_\alpha$ is computed as
 
 \be \bW_\alpha =  \sum_{n=0}^{N_s} \frac{Y_n}{W_n} \ee
 
@@ -230,7 +230,7 @@ can be extracted from the average molecular weight
    (\rho Z_\alpha)_{ijk} \ee
 
 
-To descibe how the background pressure of the $m$th pressure zone, $\bp_m$, is updated in time, consider the expression for the
+To describe how the background pressure of the $m$th pressure zone, $\bp_m$, is updated in time, consider the expression for the
 divergence written in compact notation:
 \begin{equation}
 \label{eqn_divfromeos2}
@@ -247,20 +247,30 @@ pressure zone is found by integrating Eq.~(\ref{eqn_divfromeos2}) over the zone 
 Equation~(\ref{concon2}) is essentially a consistency condition, ensuring that blowing air or starting a fire within a sealed
 compartment leads to an appropriate decrease in the divergence within the volume.
 
+
+\subsubsection{Combining Pressure Zones}
+
 In the event that a barrier separating two pressure zones should rupture, Eq.~(\ref{concon2}) is modified so that the pressure in the
 newly connected zones is driven towards an equilibrium pressure:
 \be
-  \bp_{eq} = \sum_m \bp_m \int_{\Omega_m} {\cal P} \, dV  \Big/  \sum_m \int_{\Omega_m} {\cal P} \, dV \approx \frac{ \sum_m V_m }{ \sum_m (V_m/\bp_m) }
+  \bp_{eq} = \sum_m \left( \bp_m \int_{\Omega_m} {\cal P} \, dV  \right)  \Big/  \sum_m \int_{\Omega_m} {\cal P} \, dV \approx \frac{ \sum_m V_m }{ \sum_m (V_m/\bp_m) }
 \ee
 Note that
 \be
   \int_{\Omega_m} {\cal P} \, dV \approx  \frac{ V_m}{\gamma \bp_m }
 \ee
-The net volume term in Eq.~(\ref{concon2}) is modified to force the pressure within each connected zone towards equilibrium:
+To drive the pressure within the connected zones towards each other, a volume flow, $\dot{V}_m^*$, is applied to each zone. This flow is intended to move gas
+from zones with the higher pressures towards zones with lower pressures. Eq.~(\ref{concon2}) now becomes:
 \be
-\int_{\partial \Omega_m} \bu \cdot d\bS = \int_{\partial \Omega_m'} \bu \cdot d\bS + r \, \frac{ \bp_m - \bp_{eq} }{ \dt} \; \int_{\Omega_m} {\cal P} \, dV
+   \dod{\bp_{eq}}{t} - r \, \frac{ \bp_m - \bp_{eq} }{ \dt} = 
+   \left( \int_{\Omega_m} {\cal D} \, dV - \int_{\partial \Omega_m} \bu \cdot d\bS - \dot{V}_m^* \right) \Big/ \int_{\Omega_m} {\cal P} \, dV
 \ee
-The term $\partial \Omega_m'$ indicates the portion of the boundary of the pressure zone that is not an interface to another pressure zone.
+This equation is solved for $\dot{V}_m^*$. 
+The first term on the left is the change in the equilibrium pressure with time:
+\be \dod{\bp_{eq}}{t} = \left( \sum_m \int_{\Omega_m} {\cal D} \, dV - \sum_m \int_{\partial \Omega_m} \bu \cdot d\bS \right) \Big/ \sum_m \int_{\Omega_m} {\cal P} \, dV \ee
+The summation is over all connected zones, and it is essentially the net change in pressure with time for the entire connected region. If there is any opening to the
+exterior of the computational domain, this term is set to zero and all connected zone pressures are driven towards ambient.
+The second term on the left forces the pressure in the $m$th pressure zone towards the equilibrium. 
 The constant, $r$, is a relaxation factor of 0.2, a somewhat arbitrary value designed to slow down the fairly rapid pressure equilibration.
 
 
