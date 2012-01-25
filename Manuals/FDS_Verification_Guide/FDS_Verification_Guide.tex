@@ -1802,28 +1802,73 @@ where $C_{EDM}$ is a model constant related to the turbulent subgrid model, $\be
 \begin{equation}\label{eq:spec_ode}
 \frac{dY_{\alpha}}{dt}= \frac{\nu_{\alpha} \, W_{\alpha}}{W_F} \, \dot{m}^{\prime\prime\prime}_{F}
 \end{equation}
-To test this implementation, a one-step methane reaction
-\begin{equation}\label{eq:1step_methane}
-\mathrm{CH_4 + 2 \, O_2 \rightarrow  CO_2 + 2\, H_2O}
-\end{equation}
-is considered for both a fuel-limiting and oxygen-limiting case with a fixed mixing time, $\tau_{mix}=0.1$~s (Figure \ref{fig:EDM_1Step}).
+To test this implementation, consider both a one-step methane and a one-step propane reaction:
+\begin{eqnarray}\label{eq:1step_reacs}
+\mathrm{CH_4 + 2\, O_2 \rightarrow  CO_2 + 2\, H_2O} \\
+\mathrm{C_3H_8 + 5\, O_2 \rightarrow  3\, CO_2 + 4\, H_2O}
+\end{eqnarray}
+In both cases the reactants are premixed and react in a constant volume, adiabatic enclosure under stoichiometric conditions with a fixed mixing time, $\tau_{mix}=0.125$~s (Figure \ref{fig:EDM_1Step}). Using Equations \ref{eq:EDM} and \ref{eq:spec_ode}, species evolutions from FDS simulations are compared to expected values.
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDM_Flim_1Step} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDM_O2lim_1Step}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDM_Flim_1Step_CH4_Spec} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDM_Flim_1Step_C3H8_Spec}
 \end{tabular*}
-\caption[Species Evolution in Mixing Controlled Reaction]{Time evolution of species mass fraction for a one-step mixing controlled reaction with a fixed mixing time of $\tau_{mix}=0.1$~s. (Left) Fuel-limited reaction. (Right) Oxygen-limited reaction.}
+\caption[Species Evolution in Mixing Controlled Reaction]{Time evolution of species mass fraction for a one-step EDM reaction with a fixed mixing time of $\tau_{mix}=0.125$~s. (Left) Methane reaction (Right) Propane reaction}
 \label{fig:EDM_1Step}
 \end{figure}
+We also want to compare FDS predictions for temperature and pressure. For this reacting system, the internal energy remains constant, so temperature can be found from:
+\begin{equation}\label{eq:del_u}
+\overline{u}_{P,\alpha} - \overline{u}_{R,\alpha} = 0
+\end{equation} 
+where $P$ is products, $R$ is reactants, and $\overline{u}_{\alpha}=\overline{h}_{\alpha}-\overline{R}T$. In this case, $\overline{h}_{\alpha}$ is defined as the sum of the enthalpy of formation ($\overline{h}_{f}^{\circ}$) and sensible enthalpy ($\Delta \overline{h}$) for each of the $\alpha$ species. Assuming the products behave like an ideal gas, the final pressure can be found using the equation of state for an ideal gas:
+\begin{equation}\label{eq:ideal_gas}
+PV = n\overline{R}T
+\end{equation} 
 
-The EDM reaction implementation is also tested for a two-step methane reaction:
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDM_Flim_1Step_CH4_Temp} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDM_Flim_1Step_CH4_Pres}
+\end{tabular*}
+\caption[Temperature Evolution in Mixing Controlled Reaction]{Temperature (left) and pressure (right) evolution for a one-step methane EDM reaction with a fixed mixing time of $\tau_{mix}=0.125$~s.}
+\label{fig:EDM_Methane_TempPres}
+\end{figure}
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDM_Flim_1Step_C3H8_Temp} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDM_Flim_1Step_C3H8_Pres}
+\end{tabular*}
+\caption[Temperature Evolution in Mixing Controlled Reaction]{Temperature (left) and pressure (right) evolution for a one-step propane EDM reaction with a fixed mixing time of $\tau_{mix}=0.125$~s.}
+\label{fig:EDM_Propane_TempPres}
+\end{figure}
+A non-premixed, fuel-rich case is also analyzed for the one-step methane reaction. Figures \ref{fig:EDM_methan_nonpremix_spec} and \ref{fig:EDM_methan_nonpremix_TempPres} show the species concentrations, temperature, and pressure from FDS and the expected values. The figures show that the only difference is that the final state is not reached until approximately 35 seconds compared to 1 second for the premixed cases.
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDM_1Step_Nonpremix_Spec}
+\caption[Species Evolution in Mixing Controlled Reaction]{Time evolution of species mass fraction for a non-premixed one-step methane EDM reaction with a fixed mixing time of $\tau_{mix}=0.001$~s. }
+\label{fig:EDM_methan_nonpremix_spec}
+\end{center}
+\end{figure}
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDM_1Step_Nonpremix_Temp} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ReactionRate_EDM_1Step_Nonpremix_Pres}
+\end{tabular*}
+\caption[Temperature Evolution in Mixing Controlled Reaction]{Temperature (left) and pressure (right) evolution for a non-premixed one-step methane EDM reaction with a fixed mixing time of $\tau_{mix}=0.001$~s.}
+\label{fig:EDM_methan_nonpremix_TempPres}
+\end{figure}
+
+Additionally, the EDM reaction implementation is tested to check species evolution for a two-step methane reaction:
 
 \begin{eqnarray}\label{eq:2step_methane}
 \mathrm{CH_4 + 1.5 \, O_2 \rightarrow  CO + 2 \, H_2O} \\
 \nonumber \mathrm{CO + 0.5 \, O_2 \rightarrow CO_2}
 \end{eqnarray}
-for both fuel-limited and oxygen-limited conditions with a fixed mixing time, $\tau_{mix}=0.1$~s (Figure \ref{fig:MixCtrl_2Step}).
+for both fuel-limited and oxygen-limited conditions with a fixed mixing time, $\tau_{mix}=0.1$~s (Figure \ref{fig:EDM_2Step}).
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
