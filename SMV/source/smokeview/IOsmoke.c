@@ -643,10 +643,11 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
 /* ------------------ setsmokecolorflags ------------------------ */
 
 void setsmokecolorflags(void){
-  int i,j;
-  smoke3d *smoke3dj,*smoke3di;
+  int i;
 
   for(i=0;i<nsmoke3dinfo;i++){
+    smoke3d *smoke3di;
+
     smoke3di = smoke3dinfo + i;
     smoke3di->soot_loaded=0;
     smoke3di->water_loaded=0;
@@ -654,6 +655,9 @@ void setsmokecolorflags(void){
   }
   
   for(i=0;i<nsmoke3dinfo;i++){
+    smoke3d *smoke3di;
+    int j;
+
     smoke3di=smoke3dinfo + i;
     smoke3di->water_color=NULL;
     smoke3di->hrrpuv_color=NULL;
@@ -682,6 +686,8 @@ void setsmokecolorflags(void){
     }
 
     for(j=0;j<nsmoke3dinfo;j++){
+      smoke3d *smoke3dj;
+
       if(i==j)continue;
       smoke3dj = smoke3dinfo + j;
       if(smoke3dj->loaded==0)continue;

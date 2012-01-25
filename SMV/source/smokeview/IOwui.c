@@ -39,7 +39,6 @@ int getterrain_data(char *file,terraindata *terri);
 int getterrain_size(char *file,float *xmin, float *xmax, int *nx, float *ymin, float *ymax, int *ny, int *ntimes);
 void drawcone(float d1, float height, float *rgbcolor);
 void drawdisk(float diameter, float height, float *rgbcolor);
-static float specular[4]={0.4,0.4,0.4,1.0};
 
     /*
 typedef struct {
@@ -420,7 +419,7 @@ void initterrain_all(void){
   for(imesh=0;imesh<nmeshes;imesh++){
     mesh *meshi;
     terraindata *terri;
-    int i, j;
+    int i;
     
     meshi = meshinfo + imesh;
     terri = meshi->terrain;
@@ -434,7 +433,7 @@ void initterrain_all(void){
   for(imesh=0;imesh<nmeshes;imesh++){
     mesh *meshi;
     terraindata *terri;
-    int i, j;
+    int i;
 
     meshi = meshinfo + imesh;
     terri = meshi->terrain;
@@ -1275,7 +1274,7 @@ void update_mesh_terrain(void){
 
 float get_z_terrain(float x, float y){
   int loc;
-  float zterrain,zoffset;
+  float zterrain;
 
   zterrain = get_zcell_val(NULL,x,y,NULL,&loc);
   return zterrain;
