@@ -331,8 +331,8 @@ void usage(char *prog){
   svn_num=getmaxrevision();    // get svn revision number
 
   printf("\n");
-  printf("sodar2fds %s(%i) - %s\n",prog_version,svn_num,__DATE__);
-  printf("  Convert a sodar spreadsheet data file for use by Smokeview:\n\n");
+  printf("wind2fds %s(%i) - %s\n",prog_version,svn_num,__DATE__);
+  printf("  Convert spreadheets containing wind data to files compatible with Smokeview:\n\n");
   printf("  %s",prog);
   printf(" prog [-prefix label] [-offset x y z] datafile\n\n");
 
