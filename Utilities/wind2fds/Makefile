@@ -1,12 +1,12 @@
 SOURCE_DIR = ../../../SMV/source/
 BUILD_DIR = $(SOURCE_DIR)/../Build
 LIB_DIR = $(BUILD_DIR)/LIBS
-INC2_DIR = -I $(SOURCE_DIR)/include2  -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/sodar2fds 
-INC_DIR =  -I $(SOURCE_DIR)/include -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/sodar2fds 
+INC2_DIR = -I $(SOURCE_DIR)/include2  -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/wind2fds 
+INC_DIR =  -I $(SOURCE_DIR)/include -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/wind2fds 
 FILTERC =
 FILTERF =
 
-VPATH = $(SOURCE_DIR)/sodar2fds $(SOURCE_DIR)/shared 
+VPATH = $(SOURCE_DIR)/wind2fds $(SOURCE_DIR)/shared 
 bin = .
 
 #LINUX32FORTLIBDIR = /opt/intel/fc/10.1.021/lib
@@ -55,7 +55,7 @@ intel_win_64 : FFLAGS    = -Od /Qvec_report0 /nologo -fpp -D pp_cvf -D X64 /ifac
 intel_win_64 : CC        = icl
 intel_win_64 : CPP       = icl
 intel_win_64 : FC        = ifort
-intel_win_64 : exe       = sodar2fds_win_64.exe
+intel_win_64 : exe       = wind2fds_win_64.exe
 
 intel_win_64 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_64/pthreadVC2_x64.lib
@@ -69,7 +69,7 @@ intel_linux_64 : FORTLIBDIR = $(LINUX64FORTLIBDIR)
 intel_linux_64 : CC        = icc
 intel_linux_64 : CPP       = icc
 intel_linux_64 : FC        = ifort
-intel_linux_64 : exe       = sodar2fds_linux_64
+intel_linux_64 : exe       = wind2fds_linux_64
 
 intel_linux_64 : $(obj)
 	$(CPP) -o $(bin)/$(exe) $(obj)
@@ -84,7 +84,7 @@ intel_osx_64 : FORTLIBDIR = $(OSX64FORTLIBDIR)
 intel_osx_64 : CC        = icc
 intel_osx_64 : CPP       = icc
 intel_osx_64 : FC        = ifort
-intel_osx_64 : exe       = sodar2fds_osx_64
+intel_osx_64 : exe       = wind2fds_osx_64
 
 intel_osx_64 : $(obj)
 	$(CPP) -o $(bin)/$(exe) -m64 $(obj)
