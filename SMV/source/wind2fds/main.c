@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "svn_revision.h"
 #include "datadefs.h"
 #include "string_util.h"
@@ -41,6 +42,56 @@ int gettokens(char *tokens, char **tokenptrs){
   return ntokenptrs;
 }
 
+/* ------------------ daytime2sec ------------------------ */
+
+int daytime2sec(char *token){          
+  char *hour=NULL, *min=NULL, *sec=NULL;
+  char *month=NULL, *day=NULL, *year=NULL;
+  int imonth, iday, iyear, ileap;
+  int time_local;
+  int days_local;
+  int month2days[]={0,31,59,90,120,151,181,212,243,273,304,334};
+#define SECS_IN_DAY 86400
+
+  if(strchr(token,'/')!=NULL){
+    month=strtok(token,"/");
+    day=strtok(NULL,"/");
+    year=strtok(NULL," ");
+  }
+  days_local=0;
+  time_local=0;
+  if(month!=NULL){
+    iyear = atoi(year)-2000;
+    imonth = atoi(month) - 1;
+    iday = atoi(day) - 1;
+    ileap = iyear/4 + 1;
+    if(iyear%4==0&&imonth<2)ileap--;
+    days_local += iyear*365;
+    days_local += month2days[imonth];
+    days_local += iday+ileap;
+    time_local += SECS_IN_DAY*days_local;
+    hour=strtok(token,":");
+  }
+  else{
+    hour=strtok(NULL,":");  
+  }
+  min=strtok(NULL,":");
+  sec=strtok(NULL,":");
+  if(hour!=NULL)time_local+=3600*atoi(hour);
+  if(min!=NULL)time_local+=60*atoi(min);
+  if(sec!=NULL)time_local+=atoi(sec);
+  return time_local;
+}
+
+/* ------------------ diffdate ------------------------ */
+
+int diffdate(char *token, char *tokenbase){
+  int difftime;
+
+  difftime = daytime2sec(token) - daytime2sec(tokenbase);
+  return difftime;
+}
+
 /* ------------------ main ------------------------ */
 
 int main(int argc, char **argv){
@@ -60,6 +111,7 @@ int main(int argc, char **argv){
   int useprefix=0;
   char coffset[255];
   int is_sodar_file=1;
+  char tokenbase[256], *tokenbaseptr=NULL;
 
   strcpy(percen,"%");
   strcpy(prefix,"");
@@ -308,15 +360,16 @@ int main(int argc, char **argv){
       token=datalabelptrs[i];
       if(transfer[i]==1){
         if(strchr(token,':')!=NULL){
-          char *hour, *min, *sec;
           int time_local=0;
 
-          hour=strtok(token,":");
-          min=strtok(NULL,":");
-          sec=strtok(NULL,":");
-          if(hour!=NULL)time_local+=3600*atoi(hour);
-          if(min!=NULL)time_local+=60*atoi(min);
-          if(sec!=NULL)time_local+=atoi(sec);
+          if(tokenbaseptr==NULL){
+            tokenbaseptr=tokenbase;
+            strcpy(tokenbase,token);
+            time_local=0;
+          }
+          else{
+            time_local = diffdate(token,tokenbaseptr);
+          }
           fprintf(stream_out,"%i",time_local);
         }
         else{
