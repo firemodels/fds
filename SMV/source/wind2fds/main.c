@@ -44,39 +44,81 @@ int gettokens(char *tokens, char **tokenptrs){
 
 /* ------------------ daytime2sec ------------------------ */
 
-int daytime2sec(char *token){          
+int daytime2sec(char *tokenorig){          
+  char token[256];
   char *hour=NULL, *min=NULL, *sec=NULL;
   char *month=NULL, *day=NULL, *year=NULL;
-  int imonth, iday, iyear, ileap;
+  int imonth, iday, iyear=2000, ileap;
   int time_local;
   int days_local;
   int month2days[]={0,31,59,90,120,151,181,212,243,273,304,334};
 #define SECS_IN_DAY 86400
+  char *slash1=NULL, *slash2=NULL, *colen1=NULL, *colen2=NULL;
 
-  if(strchr(token,'/')!=NULL){
-    month=strtok(token,"/");
-    day=strtok(NULL,"/");
-    year=strtok(NULL," ");
+  strcpy(token,tokenorig); 
+
+  slash1=strchr(token,'/');
+  if(slash1!=NULL)slash2=strchr(slash1+1,'/');
+  colen1=strchr(token,':');
+  if(colen1!=NULL)colen2=strchr(colen1+1,':');
+
+  if(slash1==NULL){
+    hour=token;
   }
+  else if(slash1!=NULL&&slash2==NULL){
+    char *dayend;
+
+    month=token;
+    day=slash1+1;
+    dayend=strchr(day,' ');
+    if(dayend!=NULL)*dayend=0;
+    hour=dayend+1;
+  }
+  else{
+    char *yearend;
+
+    month=token;
+    day=slash1+1;
+    year=slash2+1;
+    yearend=strchr(year,' ');
+    if(yearend!=NULL)*yearend=0;
+    hour=yearend+1;
+  }
+  if(colen1!=NULL){
+    min=colen1+1;
+    if(colen2==NULL){
+      char *minend;
+
+      minend=strchr(min,' ');
+      if(minend!=NULL)*minend=0;
+    }
+    else{
+      char *secend;
+
+      sec=colen2+1;
+      secend=strchr(sec,' ');
+      if(secend!=NULL)*secend=0;
+    }
+  }
+  if(slash1!=NULL)*slash1=0;
+  if(slash2!=NULL)*slash2=0;
+  if(colen1!=NULL)*colen1=0;
+  if(colen2!=NULL)*colen2=0;
+
+
   days_local=0;
   time_local=0;
   if(month!=NULL){
     iyear = atoi(year)-2000;
-    imonth = atoi(month) - 1;
-    iday = atoi(day) - 1;
+    imonth = atoi(month);
+    iday = atoi(day);
     ileap = iyear/4 + 1;
-    if(iyear%4==0&&imonth<2)ileap--;
+    if(iyear%4==0&&imonth<3)ileap--;
     days_local += iyear*365;
-    days_local += month2days[imonth];
-    days_local += iday+ileap;
+    days_local += month2days[imonth-1];
+    days_local += iday - 1 +ileap;
     time_local += SECS_IN_DAY*days_local;
-    hour=strtok(token,":");
   }
-  else{
-    hour=strtok(NULL,":");  
-  }
-  min=strtok(NULL,":");
-  sec=strtok(NULL,":");
   if(hour!=NULL)time_local+=3600*atoi(hour);
   if(min!=NULL)time_local+=60*atoi(min);
   if(sec!=NULL)time_local+=atoi(sec);
