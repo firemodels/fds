@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include "svn_revision.h"
 #include "datadefs.h"
 #include "string_util.h"
@@ -128,10 +127,10 @@ int daytime2sec(char *tokenorig){
 /* ------------------ diffdate ------------------------ */
 
 int diffdate(char *token, char *tokenbase){
-  int difftime;
+  int difft;
 
-  difftime = daytime2sec(token) - daytime2sec(tokenbase);
-  return difftime;
+  difft = daytime2sec(token) - daytime2sec(tokenbase);
+  return difft;
 }
 
 /* ------------------ main ------------------------ */
