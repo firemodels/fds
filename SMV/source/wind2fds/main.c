@@ -59,6 +59,7 @@ int main(int argc, char **argv){
   char prefix[256],percen[2];
   int useprefix=0;
   char coffset[255];
+  int is_sodar_file=1;
 
   strcpy(percen,"%");
   strcpy(prefix,"");
@@ -75,6 +76,10 @@ int main(int argc, char **argv){
 
     arg=argv[i];
     lenarg=strlen(arg);
+    if(strcmp(arg,"-wv")==0){
+      is_sodar_file=0;
+      continue;
+    }
     if(strcmp(arg,"-offset")==0){
       i++;
       if(i>=argc)continue;
@@ -148,7 +153,15 @@ int main(int argc, char **argv){
     printf("***error: The file %s is empty\n",file_in);
     return 1;
   }
-  while(strncmp(labels,"Sodar",5)==0){
+  if(is_sodar_file==1){
+    while(strncmp(labels,"Sodar",5)==0){
+      if(fgets(labels,buffer_len,stream_in)==NULL){
+        printf("***error: The file %s is empty\n",file_in);
+        return 1;
+      }
+    }
+  }
+  else{
     if(fgets(labels,buffer_len,stream_in)==NULL){
       printf("***error: The file %s is empty\n",file_in);
       return 1;
@@ -165,13 +178,27 @@ int main(int argc, char **argv){
       transfer[i]=1;
       ntransfer++;
     }
+    else if(strcmp(token,"TIMESTAMP")==0){
+      transfer[i]=1;
+      ntransfer++;
+    }
     else if(strncmp(token,"ws",2)==0){
       transfer[i]=2;
       zdev[i]=(float)atof(token+2);
       ntransfer++;
     }
+    else if(strncmp(token,"WS",2)==0){
+      transfer[i]=2;
+      zdev[i]=0.0;
+      ntransfer++;
+    }
     else if(strncmp(token,"wd",2)==0){
       zdev[i]=(float)atof(token+2);
+      transfer[i]=3;
+      ntransfer++;
+    }
+    else if(strcmp(token,"WindDir")==0){
+      zdev[i]=0.0;
       transfer[i]=3;
       ntransfer++;
     }
