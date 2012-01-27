@@ -153,6 +153,7 @@ int main(int argc, char **argv){
   char coffset[255];
   int is_sodar_file=1;
   char tokenbase[256], *tokenbaseptr=NULL;
+  char *datelabelptr=NULL, datelabel[256];
 
   strcpy(percen,"%");
   strcpy(prefix,"");
@@ -180,6 +181,14 @@ int main(int argc, char **argv){
       if(strlen(arg)>1){
         sscanf(arg,"%f %f %f",xyzoffset,xyzoffset+1,xyzoffset+2);
       }
+      continue;
+    }
+    else if(strcmp(arg,"-date")==0){
+      datelabelptr=datelabel;
+      i++;
+      if(i>=argc)continue;
+      arg=argv[i];
+      strcpy(datelabel,arg);
       continue;
     }
     else if(strcmp(arg,"-prefix")==0){
