@@ -41,98 +41,6 @@ int gettokens(char *tokens, char **tokenptrs){
   return ntokenptrs;
 }
 
-/* ------------------ daytime2sec ------------------------ */
-
-int daytime2sec(char *tokenorig){          
-  char token[256];
-  char *hour=NULL, *min=NULL, *sec=NULL;
-  char *month=NULL, *day=NULL, *year=NULL;
-  int imonth, iday, iyear=2000, ileap;
-  int time_local;
-  int days_local;
-  int month2days[]={0,31,59,90,120,151,181,212,243,273,304,334};
-#define SECS_IN_DAY 86400
-  char *slash1=NULL, *slash2=NULL, *colen1=NULL, *colen2=NULL;
-
-  strcpy(token,tokenorig); 
-
-  slash1=strchr(token,'/');
-  if(slash1!=NULL)slash2=strchr(slash1+1,'/');
-  colen1=strchr(token,':');
-  if(colen1!=NULL)colen2=strchr(colen1+1,':');
-
-  if(slash1==NULL){
-    hour=token;
-  }
-  else if(slash1!=NULL&&slash2==NULL){
-    char *dayend;
-
-    month=token;
-    day=slash1+1;
-    dayend=strchr(day,' ');
-    if(dayend!=NULL)*dayend=0;
-    hour=dayend+1;
-  }
-  else{
-    char *yearend;
-
-    month=token;
-    day=slash1+1;
-    year=slash2+1;
-    yearend=strchr(year,' ');
-    if(yearend!=NULL)*yearend=0;
-    hour=yearend+1;
-  }
-  if(colen1!=NULL){
-    min=colen1+1;
-    if(colen2==NULL){
-      char *minend;
-
-      minend=strchr(min,' ');
-      if(minend!=NULL)*minend=0;
-    }
-    else{
-      char *secend;
-
-      sec=colen2+1;
-      secend=strchr(sec,' ');
-      if(secend!=NULL)*secend=0;
-    }
-  }
-  if(slash1!=NULL)*slash1=0;
-  if(slash2!=NULL)*slash2=0;
-  if(colen1!=NULL)*colen1=0;
-  if(colen2!=NULL)*colen2=0;
-
-
-  days_local=0;
-  time_local=0;
-  if(month!=NULL){
-    iyear = atoi(year)-2000;
-    imonth = atoi(month);
-    iday = atoi(day);
-    ileap = iyear/4 + 1;
-    if(iyear%4==0&&imonth<3)ileap--;
-    days_local += iyear*365;
-    days_local += month2days[imonth-1];
-    days_local += iday - 1 +ileap;
-    time_local += SECS_IN_DAY*days_local;
-  }
-  if(hour!=NULL)time_local+=3600*atoi(hour);
-  if(min!=NULL)time_local+=60*atoi(min);
-  if(sec!=NULL)time_local+=atoi(sec);
-  return time_local;
-}
-
-/* ------------------ diffdate ------------------------ */
-
-int diffdate(char *token, char *tokenbase){
-  int difft;
-
-  difft = daytime2sec(token) - daytime2sec(tokenbase);
-  return difft;
-}
-
 /* ------------------ main ------------------------ */
 
 int main(int argc, char **argv){
@@ -154,6 +62,7 @@ int main(int argc, char **argv){
   int is_sodar_file=1;
   char tokenbase[256], *tokenbaseptr=NULL;
   char *datelabelptr=NULL, datelabel[256];
+  int lendatelabel=0;
 
   strcpy(percen,"%");
   strcpy(prefix,"");
@@ -189,6 +98,7 @@ int main(int argc, char **argv){
       if(i>=argc)continue;
       arg=argv[i];
       strcpy(datelabel,arg);
+      lendatelabel=strlen(datelabel);
       continue;
     }
     else if(strcmp(arg,"-prefix")==0){
@@ -398,11 +308,13 @@ int main(int argc, char **argv){
   }
   fprintf(stream_out,"\n");
   while(!feof(stream_in)){
+    int skip_time;
 
     CheckMemory;
     if(fgets(datalabels,buffer_len,stream_in)==NULL)break;
     ndatalabelptrs=gettokens(datalabels,datalabelptrs);
     itransfer=0;
+    skip_time=0;
     for(i=0;i<ndatalabelptrs;i++){
       char *token;
 
@@ -412,6 +324,10 @@ int main(int argc, char **argv){
         if(strchr(token,':')!=NULL){
           int time_local=0;
 
+          if(datelabelptr!=NULL&&strncmp(datelabelptr,token,lendatelabel)!=0){
+            skip_time=1;
+            break;
+          }
           if(tokenbaseptr==NULL){
             tokenbaseptr=tokenbase;
             strcpy(tokenbase,token);
@@ -445,6 +361,7 @@ int main(int argc, char **argv){
       itransfer++;
       if(itransfer!=ntransfer)fprintf(stream_out,",");
     }
+    if(skip_time==1)continue;
     fprintf(stream_out,"\n");
   }
 
