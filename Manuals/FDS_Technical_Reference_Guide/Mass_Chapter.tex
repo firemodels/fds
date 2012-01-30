@@ -154,15 +154,15 @@ The limiter function $B(r)$ depends on the upstream-to-local data ratio, $r=\del
 \item[]{\tt FLUX\_LIMITER=1\,\,\,} First-order Upwinding (Godunov's Scheme) \begin{equation} B(r) = 0 \end{equation}
 \item[]{\tt FLUX\_LIMITER=2\,\,\,} Superbee (recommended for LES) \begin{equation} B(r) = \max(0,\min(2r,1),\min(r,2)) \end{equation}
 \item[]{\tt FLUX\_LIMITER=3\,\,\,} MINMOD \begin{equation} B(r) = \max(0,\min(1,r)) \end{equation}
-\end{enumerate}
+\item[]
 Once $B(r)$ has been determined, the scalar face value is found from
 \begin{equation}
 \label{eqn_flux_limiter}
 \overline{\phi}^{FL}_{i+1/2} = \left\{ \begin{array}{lcll} \phi_i &+& B(r) \,\frac{1}{2}(\phi_{i+1}-\phi_i) & \mbox{if} \quad u_i>0 \vspace{0.2 cm}\\
 \phi_{i+1} &+& B(r) \,\frac{1}{2}(\phi_i-\phi_{i+1}) & \mbox{if} \quad u_i<0 \end{array} \right.
 \end{equation}
-
-\paragraph{Special Case} [{\tt FLUX\_LIMITER=4}] CHARM (recommended for DNS) For this limiter the FDS implementation uses the reciprocal definition of the data ratio, $r = \delta C_{loc}/\delta C_{up}$.  The limiter function is given by \cite{Zhou:1995,Kempf:2003}
+\item[]{\tt FLUX\_LIMITER=4\,\,\,} CHARM
+\item[] For this limiter the FDS implementation uses the reciprocal definition of the data ratio, $r = \delta C_{loc}/\delta C_{up}$.  The limiter function is given by \cite{Zhou:1995,Kempf:2003}
 \begin{equation}
 B(r) = \frac{r(3r+1)}{(r+1)^2}
 \end{equation}
@@ -172,11 +172,15 @@ and the scalar face value is then determined from
 \overline{\phi}^{FL}_{i+1/2} = \left\{ \begin{array}{lcll} \phi_i &+& B(r) \,\frac{1}{2}(\phi_i-\phi_{i-1}) & \mbox{if} \quad u_i>0 \vspace{0.2 cm}\\
 \phi_{i+1} &+& B(r) \,\frac{1}{2}(\phi_{i+1}-\phi_{i+2}) & \mbox{if} \quad u_i<0 \end{array} \right.
 \end{equation}
+\item[]{\tt FLUX\_LIMITER=5\,\,\,} Monotonicity-Preserving 5th-Order (MP5)
+\item[] The MP5 scheme of Suresh and Huynh \cite{Suresh:1997} is based on the keen observation that three points cannot distinguish between extrema and discontinuities.  The functional form of the limiter is not a simple as the three-point schemes described above, so we refer the reader to the original paper or the FDS source code for details.  But the basic idea behind the method is to use a five-point stencil, three upwind and two downwind, to reconstruct the cell face value, considering both accuracy and monotonicity-preserving constraints.  An additional benefit of the MP5 scheme is that it was designed specifically with strong stability-preserving (SSP) Runge-Kutta time discretizations in mind.  The predictor-corrector scheme used by FDS is similar to the second-order SSP scheme described in \cite{Gottlieb:2001}.
+\end{enumerate}
 
-\paragraph{Remark} In practice, we set $r=0$ initially and only compute $r$ if the denominator is not zero.  Note that for $\delta \phi_{loc}=0$ it does not matter which limiter (0-3) is used: all the limiters yield the same scalar face value.  For CHARM, we set both $r=0$ and $B=0$ initially and only compute $B$ if $r>0$ (this requires data variations to have the same sign), else CHARM reduces to Godunov's scheme.
+\subsection*{Notes on Implementation}
 
-\paragraph{Remark} Central differencing ({\ct FLUX\_LIMITER=0}), Godunov's scheme ({\ct FLUX\_LIMITER=1}), and MINMOD ({\ct FLUX\_LIMITER=3}) are essentially included for completeness, debugging, and educational purposes.  These schemes have little utility in practice.
+In practice, we set $r=0$ initially and only compute $r$ if the denominator is not zero.  Note that for $\delta \phi_{loc}=0$ it does not matter which limiter (0-3) is used: all the limiters yield the same scalar face value.  For CHARM, we set both $r=0$ and $B=0$ initially and only compute $B$ if $r>0$ (this requires data variations to have the same sign), else CHARM reduces to Godunov's scheme.
 
+Central differencing ({\tt FLUX\_LIMITER=0}), Godunov's scheme ({\tt FLUX\_LIMITER=1}), and MINMOD ({\tt FLUX\_LIMITER=3}) are essentially included for completeness, debugging, and educational purposes.  These schemes have little utility in practice.
 
 \subsection{Time Splitting for Mass Source Terms}
 \label{sec_time_splitting}
