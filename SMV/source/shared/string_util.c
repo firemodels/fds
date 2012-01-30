@@ -938,9 +938,8 @@ unsigned int date2sec(char *tokenorig){
     date=NULL;
     tim=tokenptr;
   }
-  local_time=0;
-  days=date2day(date);
-  secs=time2sec(tim);
+  if(date!=NULL)days=date2day(date);
+  if(tim!=NULL)secs=time2sec(tim);
   local_time=86400*days+secs;
   return local_time;
 }
