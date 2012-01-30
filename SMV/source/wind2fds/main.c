@@ -61,12 +61,12 @@ int main(int argc, char **argv){
   char coffset[255];
   int is_sodar_file=1;
   char tokenbase[256], *tokenbaseptr=NULL;
-  char *datelabelptr=NULL, datelabel[256];
+  char *c_dateptr=NULL, c_date[256];
   char *c_mindateptr=NULL, c_mindate[256];
   char *c_maxdateptr=NULL, c_maxdate[256];
   int have_mintime=0, have_maxtime=0;
   unsigned int i_mindate, i_maxdate;
-  int lendatelabel=0;
+  int lendate=0;
 
   strcpy(percen,"%");
   strcpy(prefix,"");
@@ -97,12 +97,12 @@ int main(int argc, char **argv){
       continue;
     }
     else if(strcmp(arg,"-date")==0){
-      datelabelptr=datelabel;
+      c_dateptr=c_date;
       i++;
       if(i>=argc)continue;
       arg=argv[i];
-      strcpy(datelabel,arg);
-      lendatelabel=strlen(datelabel);
+      strcpy(c_date,arg);
+      lendate=strlen(c_date);
       continue;
     }
     else if(strcmp(arg,"-mindate")==0){
@@ -111,11 +111,11 @@ int main(int argc, char **argv){
       arg=argv[i];
       c_mindateptr=c_mindate;
       strcpy(c_mindateptr,arg);
-      if(strchr(c_mindateptr,':')==NULL){
+      if(strchr(c_mindateptr,':')!=NULL){
+        have_mintime=1;
         i_mindate=date2sec(c_mindateptr);
       }
       else{
-        have_mintime=1;
         i_mindate=date2day(c_mindateptr);
       }
       continue;
@@ -126,11 +126,11 @@ int main(int argc, char **argv){
       arg=argv[i];
       c_maxdateptr=c_maxdate;
       strcpy(c_maxdateptr,arg);
-      if(strchr(c_maxdateptr,':')==NULL){
+      if(strchr(c_maxdateptr,':')!=NULL){
+        have_maxtime=1;
         i_maxdate=date2sec(c_maxdateptr);
       }
       else{
-        have_maxtime=1;
         i_maxdate=date2day(c_maxdateptr);
       }
       continue;
@@ -267,6 +267,15 @@ int main(int argc, char **argv){
     }
   }
   fprintf(stream_out,"//HEADER\n");
+  if(c_dateptr!=NULL){
+    fprintf(stream_out,"  //  date: %s\n",c_dateptr);
+  }
+  if(c_mindateptr!=NULL){
+    fprintf(stream_out,"  //  mindate: %s\n",c_mindateptr);
+  }
+  if(c_maxdateptr!=NULL){
+    fprintf(stream_out,"  //  maxdate: %s\n",c_maxdateptr);
+  }
   for(i=0;i<nlabelptrs;i++){
     char token2[256];
 
@@ -300,7 +309,7 @@ int main(int argc, char **argv){
   itransfer=0;
   for(i=0;i<nlabelptrs;i++){
     if(transfer[i]==1){
-      fprintf(stream_out,"s");
+      fprintf(stream_out,"s,s");
       itransfer++;
       if(itransfer!=ntransfer)fprintf(stream_out,",");
     }
@@ -335,7 +344,7 @@ int main(int argc, char **argv){
     strcat(token2,labelptrs[i]);
     if(transfer[i]!=0){
       if(transfer[i]==1){
-        fprintf(stream_out,"%s",labelptrs[i]);
+        fprintf(stream_out,"%s,time_orig",labelptrs[i]);
       }
       else{
         fprintf(stream_out,"%s",token2);
@@ -372,7 +381,7 @@ int main(int argc, char **argv){
         if(strchr(token,':')!=NULL){
           unsigned int time_local=0;
 
-          if(datelabelptr!=NULL&&strncmp(datelabelptr,token,lendatelabel)!=0){
+          if(c_dateptr!=NULL&&strncmp(c_dateptr,token,lendate)!=0){
             skip_time=1;
             break;
           }
@@ -396,7 +405,7 @@ int main(int argc, char **argv){
           else{
             time_local = diffdate(token,tokenbaseptr);
           }
-          fprintf(stream_out,"%i",time_local);
+          fprintf(stream_out,"%i,%s",time_local,token);
         }
         else{
           fprintf(stream_out,"%s",token);
