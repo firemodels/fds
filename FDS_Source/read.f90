@@ -1603,8 +1603,8 @@ IF (RESTART) NOISE  = .FALSE.
  
 ! Min and Max values of species
  
-IF (FLUX_LIMITER<0 .OR. FLUX_LIMITER>4) THEN
-   WRITE(MESSAGE,'(A)')  'ERROR on MISC: Permissible values for FLUX_LIMITER=0,1,2,3,4'
+IF (FLUX_LIMITER<0 .OR. FLUX_LIMITER>5) THEN
+   WRITE(MESSAGE,'(A)')  'ERROR on MISC: Permissible values for FLUX_LIMITER=0:5'
    CALL SHUTDOWN(MESSAGE)
 ENDIF
 
