@@ -22,8 +22,10 @@ typedef struct {
   char *longlabel, *shortlabel, *unit;
 } flowlabels;
 
-EXTERNCPP int diffdate(char *token, char *tokenbase);
-EXTERNCPP int daytime2sec(char *tokenorig);
+EXTERNCPP unsigned int diffdate(char *token, char *tokenbase);
+EXTERNCPP unsigned int time2sec(char *tokenorig);
+EXTERNCPP unsigned int date2sec(char *tokenorig);
+EXTERNCPP unsigned int date2day(char *tokenorig);
 EXTERNCPP int readlabels_cellcenter(flowlabels *flowlabel, FILE *stream);
 EXTERNCPP int readlabels_terrain(flowlabels *flowlabel, FILE *stream);
 EXTERNCPP int readlabels(flowlabels *label, FILE *stream);

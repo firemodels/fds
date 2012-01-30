@@ -62,6 +62,10 @@ int main(int argc, char **argv){
   int is_sodar_file=1;
   char tokenbase[256], *tokenbaseptr=NULL;
   char *datelabelptr=NULL, datelabel[256];
+  char *c_mindateptr=NULL, c_mindate[256];
+  char *c_maxdateptr=NULL, c_maxdate[256];
+  int have_mintime=0, have_maxtime=0;
+  unsigned int i_mindate, i_maxdate;
   int lendatelabel=0;
 
   strcpy(percen,"%");
@@ -70,7 +74,7 @@ int main(int argc, char **argv){
   prog=argv[0];
 
   if(argc==1){
-   version("devconvert");
+   version("wind2fds");
    return 1;
   }
 
@@ -101,6 +105,36 @@ int main(int argc, char **argv){
       lendatelabel=strlen(datelabel);
       continue;
     }
+    else if(strcmp(arg,"-mindate")==0){
+      i++;
+      if(i>argc)continue;
+      arg=argv[i];
+      c_mindateptr=c_mindate;
+      strcpy(c_mindateptr,arg);
+      if(strchr(c_mindateptr,':')==NULL){
+        i_mindate=date2sec(c_mindateptr);
+      }
+      else{
+        have_mintime=1;
+        i_mindate=date2day(c_mindateptr);
+      }
+      continue;
+    }
+    else if(strcmp(arg,"-maxdate")==0){
+      i++;
+      if(i>argc)continue;
+      arg=argv[i];
+      c_maxdateptr=c_maxdate;
+      strcpy(c_maxdateptr,arg);
+      if(strchr(c_maxdateptr,':')==NULL){
+        i_maxdate=date2sec(c_maxdateptr);
+      }
+      else{
+        have_maxtime=1;
+        i_maxdate=date2day(c_maxdateptr);
+      }
+      continue;
+    }
     else if(strcmp(arg,"-prefix")==0){
       useprefix=1;
       i++;
@@ -109,6 +143,10 @@ int main(int argc, char **argv){
       strcpy(prefix,arg);
       strcat(prefix,"_");
       continue;
+    }
+    else if(strcmp(arg,"-h")==0){
+      usage(prog);
+      exit(0);
     }
     if(argin==NULL){
       argin=arg;
@@ -306,6 +344,16 @@ int main(int argc, char **argv){
       if(itransfer!=ntransfer)fprintf(stream_out,",");
     }
   }
+  if(is_sodar_file==0){
+    if(fgets(labels,buffer_len,stream_in)==NULL){
+      printf("***error: The file %s is empty\n",file_in);
+      return 1;
+    }
+    if(fgets(labels,buffer_len,stream_in)==NULL){
+      printf("***error: The file %s is empty\n",file_in);
+      return 1;
+    }
+  }
   fprintf(stream_out,"\n");
   while(!feof(stream_in)){
     int skip_time;
@@ -322,11 +370,23 @@ int main(int argc, char **argv){
       token=datalabelptrs[i];
       if(transfer[i]==1){
         if(strchr(token,':')!=NULL){
-          int time_local=0;
+          unsigned int time_local=0;
 
           if(datelabelptr!=NULL&&strncmp(datelabelptr,token,lendatelabel)!=0){
             skip_time=1;
             break;
+          }
+          if(c_mindateptr!=NULL){
+            if(have_mintime==0&&date2day(token)<i_mindate||have_mintime==1&&date2sec(token)<i_mindate){
+              skip_time=1;
+              break;
+            }
+          }
+          if(c_maxdateptr!=NULL){
+            if(have_maxtime==0&&date2day(token)>i_maxdate||have_maxtime==1&&date2sec(token)>i_maxdate){
+              skip_time=1;
+              break;
+            }
           }
           if(tokenbaseptr==NULL){
             tokenbaseptr=tokenbase;
@@ -343,7 +403,7 @@ int main(int argc, char **argv){
         }
       }
       if(transfer[i]==2||transfer[i]==4){
-        if(strcmp(token,"99.99")==0){
+        if(strcmp(token,"99.99")==0||strcmp(token,"NAN")==0){
           fprintf(stream_out,"NULL");
         }
         else{
@@ -351,7 +411,7 @@ int main(int argc, char **argv){
         }
       }
       if(transfer[i]==3||transfer[i]==5){
-        if(strcmp(token,"9999")==0){
+        if(strcmp(token,"9999")==0||strcmp(token,"NAN")==0){
           fprintf(stream_out,"NULL");
         }
         else{
@@ -385,8 +445,13 @@ void usage(char *prog){
 
   printf("where\n\n");
 
+  printf("  -h             - displays this message\n");
   printf("  -prefix label  - prefix column headers with label\n");
   printf("  -offset x y z  - offset sensor locations by (x,y,z)\n");
+  printf("  -wv            - converting a non-sodar file\n");
+  printf("  -date mm/dd/yyyy - only convert data recorded on the mm/dd/yyyy\n");
+  printf("  -mindate \"mm/dd/yyyy [hh:mm:ss]\" - ignore data recorded before specified date\n");
+  printf("  -maxdate \"mm/dd/yyyy [hh:mm:ss]\" - ignore data recorded after specified date\n");
   printf("  datafile.csv   - spreadsheet file to be converted\n");
 }
 
