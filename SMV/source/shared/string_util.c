@@ -911,35 +911,51 @@ unsigned int time2sec(char *tokenorig){
   return time_local;
 }
 
+/* ------------------ STRCHRR ------------------------ */
+
+char *STRCHRR(char *strbeg, char *searchbeg, int c){
+  char *cc;
+
+  if(searchbeg>strbeg){
+    for(cc=searchbeg;cc>=strbeg;cc--){
+      if(*cc==c)return cc+1;
+    }
+    return strbeg;
+  }
+  else{
+    for(cc=searchbeg;cc<=strbeg;cc++){
+      if(*cc==c)return cc-1;
+    }
+    return strbeg;
+  }
+}
+
 /* ------------------ date2sec ------------------------ */
 
 unsigned int date2sec(char *tokenorig){
-  char token[256], *tokenptr, *date, *tim;
+  char token[256], *tokenptr;
   char *slash, *colen;
-  char *dateend;
+  char *date=NULL,*dateend=NULL;
+  char *tim=NULL,*timend=NULL;
   int days=0, secs=0;
   int local_time;
 
   strcpy(token,tokenorig);
-  trim(token);
-  tokenptr=trim_front(token);
-  if(strchr(tokenptr,'/')!=NULL){
-    date=tokenptr;
-    dateend=strchr(date,' ');
-    if(dateend==NULL){
-      tim=NULL;
-    }
-    else{
-      *dateend=0;
-      tim=trim_front(dateend+1);
-    }
+  slash=strchr(token,'/');
+  colen=strchr(token,':');
+  if(slash!=NULL)date=STRCHRR(token,slash,' ');
+  if(colen!=NULL)tim=STRCHRR(token,colen,' ');
+
+  if(date!=NULL){
+    dateend=strchr(slash,' ');
+    if(dateend!=NULL)*dateend=0;
+    days=date2day(date);
   }
-  else{
-    date=NULL;
-    tim=tokenptr;
+  if(tim!=NULL){
+    timend=strchr(tim,' ');
+    if(timend!=NULL)*timend=0;
+    secs=time2sec(tim);
   }
-  if(date!=NULL)days=date2day(date);
-  if(tim!=NULL)secs=time2sec(tim);
   local_time=86400*days+secs;
   return local_time;
 }

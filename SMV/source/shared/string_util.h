@@ -22,6 +22,7 @@ typedef struct {
   char *longlabel, *shortlabel, *unit;
 } flowlabels;
 
+EXTERNCPP char *STRCHRR(char *strbeg, char *searchbeg, int c);
 EXTERNCPP unsigned int diffdate(char *token, char *tokenbase);
 EXTERNCPP unsigned int time2sec(char *tokenorig);
 EXTERNCPP unsigned int date2sec(char *tokenorig);
