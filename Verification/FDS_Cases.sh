@@ -247,6 +247,10 @@ $RUNFDS Scalar_Analytical_Solution compression_wave_FL4_16
 $RUNFDS Scalar_Analytical_Solution compression_wave_FL4_32
 $RUNFDS Scalar_Analytical_Solution compression_wave_FL4_64
 $RUNFDS Scalar_Analytical_Solution compression_wave_FL4_128
+$RUNFDS Scalar_Analytical_Solution compression_wave_FL5_16
+$RUNFDS Scalar_Analytical_Solution compression_wave_FL5_32
+$RUNFDS Scalar_Analytical_Solution compression_wave_FL5_64
+$RUNFDS Scalar_Analytical_Solution compression_wave_FL5_128
 
 $RUNFDS Scalar_Analytical_Solution move_slug
 $RUNFDS Scalar_Analytical_Solution move_slug_fl1
