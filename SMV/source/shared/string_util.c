@@ -918,13 +918,13 @@ char *STRCHRR(char *strbeg, char *searchbeg, int c){
 
   if(searchbeg>strbeg){
     for(cc=searchbeg;cc>=strbeg;cc--){
-      if(*cc==c)return cc+1;
+      if(*cc==c||*cc==0)return cc+1;
     }
     return strbeg;
   }
   else{
     for(cc=searchbeg;cc<=strbeg;cc++){
-      if(*cc==c)return cc-1;
+      if(*cc==c||*cc==0)return cc-1;
     }
     return strbeg;
   }
