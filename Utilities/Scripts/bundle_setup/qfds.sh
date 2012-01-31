@@ -3,11 +3,33 @@
 # $Revision$
 # $Author$
 
+PROG=$0
+
 EXPECTED_ARGS=1
+
+# setup default queue name
+
+progname=qfds.sh
+queue=batch
+if [ "$PROG" == "/usr/local/bin/qfds7.sh" ]
+then
+progname=qfds7.sh
+queue=fire70s
+fi
+if [ "$PROG" == "/usr/local/bin/qfds6.sh" ]
+then
+progname=qfds6.sh
+queue=fire60s
+fi
+if [ "$PROG" == "/usr/local/bin/qfdsv.sh" ]
+then
+progname=qfdsv.sh
+queue=vis
+fi
 
 if [ $# -lt $EXPECTED_ARGS ]
 then
-  echo "Usage: qfds.sh [-f repository root] [-n processes per node] [-q queue]"
+  echo "Usage: $progname [-f repository root] [-n processes per node] [-q queue]"
   echo "               [-r] [-p nprocesses] [fds_command] casename.fds"
   echo ""
   echo "This script runs 64 bit serial or parallel versions of FDS using an executable"
@@ -18,7 +40,7 @@ then
   echo " -n processes per node - maximum number of processes per node [default: 8,"
   echo "    (4 for the fire60s and vis queues)]"
   echo " -p nprocesses - number of processes used to run a case [default: 1] "
-  echo " -q queue - name of the queue. choices: [default: batch (other choices:"  
+  echo " -q queue - name of the queue. choices: [default: $queue (other choices:"  
   echo "    vis, fire60s and fire70s)"
   echo " -r - use FDS located in repository"
   echo " -f repository root - name and location of repository where FDS is located"
@@ -32,7 +54,6 @@ fi
 
 # default parameter settings
 
-queue=batch
 nprocesses=1
 use_repository=0
 nprocesses_per_node=8
