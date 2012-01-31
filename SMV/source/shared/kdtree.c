@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include "datadefs.h"
 #include "kdtree.h"
+#include "string.h"
 #include "MALLOC.h"
 
   // svn revision character string
@@ -357,4 +358,70 @@ void free_kdtree(kd_data *kdtree){
   if(kdtree->left!=NULL)free_kdtree(kdtree->left);
   if(kdtree->right!=NULL)free_kdtree(kdtree->right);
   FREEMEMORY(kdtree);
+}
+
+/* ----------------------- avltreedata ----------------------------- */
+
+typedef struct _avltreedata {
+  struct _avltreedata *left, *right;
+  void *key, *data;
+  int count;
+} avltreedata;
+
+/* ----------------------- avltree_new ----------------------------- */
+
+avltreedata *avltree_new(void *key, void *data){
+  avltreedata *bt;
+
+  NewMemory((void **)&bt,sizeof(avltreedata));
+  if(bt!=NULL){
+    bt->left=NULL;
+    bt->right=NULL;
+    bt->key=key;
+    bt->data=data;
+    bt->count=1;
+  }
+  return bt;
+}
+
+/* ----------------------- avltree_compare ----------------------------- */
+
+int avltree_compare(void *key1, void *key2){
+  int return_val;
+
+  return_val=strcmp(key1,key2);
+  return return_val;
+}
+
+/* ----------------------- avltree_insert ----------------------------- */
+
+void avltree_insert(avltreedata **parent_handle, void *key, void *data){
+  if(*parent_handle==NULL){
+    *parent_handle=avltree_new(key,data);
+  }
+  else{
+    avltreedata *parent_ptr, *left, *right;
+    int side;
+
+    parent_ptr=*parent_handle;
+    left=parent_ptr->left;
+    right=parent_ptr->right;
+    side=avltree_compare(parent_ptr->key,key);
+    if(side<0){
+      avltree_insert(&left,key,data);
+    }
+    else if(side>0){
+      avltree_insert(&right,key,data);
+    }
+    if(right->count-left->count>1){
+      *parent_handle=right;
+      right->left=parent_ptr;
+    }
+    else if(left->count-right->count>1){
+      *parent_handle=left;
+      left->right=parent_ptr;
+    }
+    else{
+    }
+  }
 }
