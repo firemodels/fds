@@ -3192,7 +3192,6 @@ UNSTRUCTURED_GEOMETRY_LOOP: DO TRI_INDEX=1,N_FACE
 
       CALL GET_VELO_IBM(U_IBM,IERR,1,XV,TRI_INDEX,IMMERSED_BOUNDARY_METHOD,DXC,NM)
       IF (IERR==0) THEN
-         !if (i==67 .and. j==32 .and. k==22) print *,u_ibm
          IF (PREDICTOR) DUUDT = (U_IBM-U(I,J,K))/DT
          IF (CORRECTOR) DUUDT = (2._EB*U_IBM-(U(I,J,K)+US(I,J,K)))/DT
          FVX(I,J,K) = -RDXN(I)*(HP(I+1,J,K)-HP(I,J,K)) - DUUDT
