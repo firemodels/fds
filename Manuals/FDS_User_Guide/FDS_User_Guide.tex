@@ -8909,6 +8909,7 @@ A summary of the available PDPA quantities is shown in Table~\ref{tbl:pdpa}.
 ${}^*$ $T_m$ is the melting temperature of the associated species.
 \end{table}
 
+It is also possible to output histograms of PDPA output quantities. When {\ct PDPA\_HISTOGRAM} is set to {\ct .TRUE.} histogram bin counts are output to  a csv file from all devices associated with this {\ct PROP}. The number of bins and the limits of the histogram are controlled by parameters on the {\ct PROP} line. The value used in creating the histogram is $d_i^m x$. Note that when making a histogram of diameters, the limits must be given in meters, not microns.  The output file contains raw bin counts. Values falling outside the histogram limits are included in the counts of the first and last bins.  
 The properties of the PDPA device are defined using the following keywords on the {\ct PROP} line:
 \begin{description}
 \item[{\ct PART\_ID}] Name of the particle group to limit the computation to. Do not specify to account for all particles.
@@ -8919,6 +8920,9 @@ As the spray simulation may contain some initial transient phase, it may be usef
 \item[{\ct PDPA\_RADIUS}] Radius (m) of the sphere, centered at the device location, inside which the particles are monitored.
 \item[{\ct PDPA\_NORMALIZE}] Can be set {\ct .FALSE.} to force $V = 1$ in the formula for $f_2(t)$.
 \item[{\ct QUANTITY}] Specified on {\ct PROP} line for choosing the variable $x$.
+\item[{\ct PDPA\_HISTOGRAM\_NBINS}] Number of bins used for the histogram. 
+\item[{\ct PDPA\_HISTOGRAM\_MIN}] Lower limit of the histogram. 
+\item[{\ct PDPA\_HISTOGRAM\_MAX}] Upper limit of the histogram.
 \end{description}
 
 \noindent The following example is used to measure the Sauter mean diameter, $D_{32}$, of the particle type {\ct 'water drops'}, starting from
@@ -8932,6 +8936,23 @@ time 5~s.
       PDPA_RADIUS=0.01
       PDPA_START=5. /
 &DEVC XYZ=0.0,0.0,1.0, QUANTITY='PDPA', PROP_ID='pdpa_d32' /
+\end{verbatim}
+\normalsize
+
+\noindent The following example is used to write out a histogram of droplet size using 20 equally sized bins between 0 and 2000 $\mu$m.
+\footnotesize
+\begin{verbatim}
+&PROP ID='pdpa_d'
+      PART_ID='water drops'
+      QUANTITY="DIAMETER"
+      PDPA_RADIUS=0.01
+      PDPA_START=0.0
+      PDPA_M=1
+      PDPA_HISTOGRAM=.TRUE.
+      PDPA_HISTOGRAM_NBINS=20
+      PDPA_HISTOGRAM_LIMITS=0,2000E-6
+      /
+&DEVC XYZ=0.0,0.0,1.0, QUANTITY='PDPA', PROP_ID='pdpa_d' /
 \end{verbatim}
 
 \normalsize
@@ -10467,12 +10488,14 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct BREAKUP}                       & Logical         & Section~\ref{info:secondary_breakup}    &           & {\ct .FALSE.} \\ \hline
 {\ct BREAKUP\_CHILD\_DIAMETER}      & Real            & Section~\ref{info:secondary_breakup}    &           & $\frac{3}{7}$ \\ \hline
 {\ct BREAKUP\_CHILD\_GAMMA\_D}      & Real            & Section~\ref{info:secondary_breakup}    &           & 2.56          \\ \hline
+{\ct CNF\_RAMP\_ID}                 & Character       & Section~\ref{info:particle_size}        &           &  \\ \hline
 {\ct COLOR}                         & Character       & Section~\ref{info:particle_quantities}  &           & {\ct 'BLACK'} \\ \hline
 {\ct COMPLEX\_REFRACTIVE\_INDEX}    & Real            & Section~\ref{radiative_part_props}      &           & 0.01          \\ \hline
 {\ct CTRL\_ID}                      & Character       & Section~\ref{info:particle_flux}        &           &               \\ \hline
 {\ct DENSITY}                       & Real            & Section~\ref{thermal_part_props}        & kg/m$^3$  & 1000.         \\ \hline
 {\ct DEVC\_ID}                      & Character       & Section~\ref{info:particle_flux}        &           &               \\ \hline
 {\ct DIAMETER}                      & Real            & Section~\ref{info:particle_size}        & $\mu$m    & 500.          \\ \hline
+{\ct DISTRIBUTION}                  & Character       & Section~\ref{info:particle_size}        &           & {\ct 'ROSIN-RAMMLER-LOGNORMAL'} \\ \hline
 {\ct DRAG\_LAW}                     & Character       & Section~\ref{info:particle_drag}        &           & {\ct 'SPHERE'}\\ \hline
 {\ct EVAPORATE}                     & Logical         & Section~\ref{thermal_part_props}        &           & {\ct .TRUE.}  \\ \hline
 {\ct GAMMA}                         & Real            & Section~\ref{thermal_part_props}        &           & 1.4           \\ \hline
@@ -10627,6 +10650,10 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct PDPA\_NORMALIZE}                   & Logical       & Section~\ref{PDPA}                        &                       & {\ct .TRUE.}         \\ \hline
 {\ct PDPA\_RADIUS}                      & Real          & Section~\ref{PDPA}                        & m                     & 0.        \\ \hline
 {\ct PDPA\_START}                       & Real          & Section~\ref{PDPA}                        & s                     & 0.        \\ \hline
+{\ct PDPA\_HISTOGRAM}                   & Logical       & Section~\ref{PDPA}                        &                       & .FALSE.   \\ \hline
+{\ct PDPA\_HISTOGRAM\_NBINS}            & Integer       & Section~\ref{PDPA}                        &                       & 10        \\ \hline
+{\ct PDPA\_HISTOGRAM\_MIN}              & Real          & Section~\ref{PDPA}                        &                       & 0         \\ \hline
+{\ct PDPA\_HISTOGRAM\_MAX}              & Real          & Section~\ref{PDPA}                        &                       & 0         \\ \hline
 {\ct PRESSURE\_RAMP}                    & Character     & Section~\ref{info:sprinklers}             &                       &           \\ \hline
 {\ct QUANTITY}                          & Character     & Section~\ref{info:sprinklers}             &                       &           \\ \hline
 {\ct RTI}                               & Real          & Section~\ref{info:sprinklers}             & $\sqrt{\hbox{m~s}}$   & 100.      \\ \hline
