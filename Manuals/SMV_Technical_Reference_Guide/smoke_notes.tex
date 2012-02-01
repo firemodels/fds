@@ -123,14 +123,15 @@ which is the Beer-Lambert law.
 \newcommand{\Chatjj}[1]{\hat{C}_{#1}^N}
 \newcommand{\Leii}[1]{\hat{C}_{e,#1}}
 
-The approximate RTE solution given in (\ref{eq:rte_simp}) is discretized by converting integral terms to Riemann sums. Figure \ref{fig:smokediscretesetup}\ illustrates the terms used to perform these discretizations.  The path is split into $N$ parts each with length $\Delta x=(x_N-x_0)/N$.  The coordinate system is setup so that the initial radiance, $C_0$, is located at $x_0$, most distant from the observer and the final radiance, $C_N$, is located at $x_N$ closest to the observer.
+The approximate RTE solution given in (\ref{eq:rte_simp}) is discretized by converting integral terms into Riemann sums. Figure \ref{fig:smokediscretesetup}\ illustrates the terms used to perform these discretizations.  The path is split into $N$ parts each with length $\Delta x=(x_N-x_0)/N$.  The coordinate system is setup so that the initial radiance, $C_0$, is located at $x_0$, most distant from the observer and the final radiance, $C_N$, is located at $x_N$ closest to the observer.
 
 \begin{figure}[\figoptions]
 \begin{center}
 \includegraphics[width=3.5in]{figures/smoke_discrete_setup}
 \end{center}
-\caption {Setup for discretizing the equations used to model
-radiance within a column of 3D smoke data.}
+\caption[Setup for discretizing the equations used to model
+radiance within a column of 3D smoke data.]{Setup for discretizing the equations used to model
+radiance within a column of 3D smoke data. The transparency across the interval from $x_i$ to $x_{i+1}$ is $\tau_i$. The transparency across the intervals from $x_i$ to the observer is the product of individual transparencies or $\tau_i\tau_{i+1}\cdots\tau_{N-1}$}
 \label{fig:smokediscretesetup}
 \end{figure}
 
@@ -217,26 +218,26 @@ for the merger of these intervals.}
 \label{figsmokesetup3}
 \end{figure}
 
-Let $C$ be a radiance computed on $[x_0,x_N]$ and $C_1$ and $C_2$ be radiances computed on two sub-intervals of $[x_0,x_N]$.  Likewise, let $\alpha$ be an optical depth computed on $[x_0,x_N]$ and $\alpha_1$ and $\alpha_2$ be optical depths computed on two sub-intervals of $[x_0,x_N]$.
-From (\ref{eq:rte_simp}) and (\ref{eq:optdepth}), the radiance $C$ and optical depth $\alpha$ are given by
+Let $C$ be a radiance computed on $[x_0,x_N]$ and $C_1$ and $C_2$ be radiances computed on two sub-intervals of $[x_0,x_N]$.  Likewise, let $\tau$ be an optical depth computed on $[x_0,x_N]$ and $\tau_1$ and $\tau_2$ be optical depths computed on two sub-intervals of $[x_0,x_N]$.
+From (\ref{eq:rte_simp}) and (\ref{eq:optdepth}), the radiance $C$ and optical depth $\tau$ are given by
 
 \begin{eqnarray*}
 C&=&\int_{x_0}^{x_N}\tau(x,x_N)\sigma_a(x)C_e(x)dx\\
-\alpha&=&\tau(x_0,x_N)
+\tau&=&\tau(x_0,x_N)
 \end{eqnarray*}
 
-Likewise, the radiances $C_1$ and $C_2$ and optical depths $\alpha_1$ and $\alpha_2$ for the intervals $[x_0,D]$ and $[D,x_N]$ are given by
+Likewise, the radiances $C_1$ and $C_2$ and optical depths $\tau_1$ and $\tau_2$ for the intervals $[x_0,D]$ and $[D,x_N]$ are given by
 
 \begin{eqnarray*}
 C_1&=&\int_{x_0}^{D}\tau(x,D)\sigma_a(x)C_e(x)dx\\
 C_2&=&\int_{D}^{x_N}\tau(x,x_N)\sigma_a(x)C_e(x)dx\\
-\alpha_1&=&\tau(x_0,D)\\
-\alpha_2&=&\tau(D,x_N)
+\tau_1&=&\tau(x_0,D)\\
+\tau_2&=&\tau(D,x_N)
 \end{eqnarray*}
 
-The optical depth $\alpha$ can be split into two parts giving
+The optical depth $\tau$ can be split into two parts giving
 \begin{eqnarray*}
-\alpha&=&\tau(x_0,x_N)=\tau(x_0,D)\tau(D,x_N)=\alpha_1\alpha_2
+\tau&=&\tau(x_0,x_N)=\tau(x_0,D)\tau(D,x_N)=\tau_1\tau_2
 \end{eqnarray*}
 since from (\ref{eq:optdepth}) it can be shown that for any $x$, $\tau(a,b)=\tau(a,x)\tau(x,b)$.
 The radiance $C$ can also be split into two parts giving
@@ -244,16 +245,16 @@ The radiance $C$ can also be split into two parts giving
 C&=&\int_{x_0}^{x_N}\tau(x,x_N)\sigma_a(x)C_e(x)dx\\
 &=&\int_{x_0}^{D}\tau(x,x_N)\sigma_a(x)C_e(x)dx+\int_{D}^{x_N}\tau(x,x_N)\sigma_a(x)C_e(x)dx\\
 &=&\tau(D,x_N)\int_{x_0}^{D}\tau(x,D)\sigma_a(x)C_e(x)dx+\int_{D}^{x_N}\tau(x,x_N)\sigma_a(x)C_e(x)dx\\
-&=&\alpha_2C_1+C_2
+&=&\tau_2C_1+C_2
 \end{eqnarray*}
 
 Summarizing, full-interval values $C$ and $\alpha$ may be written in terms of sub-interval values $C_1$, $C_2$, $\alpha_1$ and $\alpha_2$ using
 
 \begin{eqnarray}
 \label{eq:alpha_summary}
-\alpha&=&\alpha_1\alpha_2\\
+\tau&=&\tau_1\tau_2\\
 \label{eq:C_summary}
-C&=&\alpha_2C_1+C_2
+C&=&\tau_2C_1+C_2
 \end{eqnarray}
 
 Equations (\ref{eq:alpha_summary}) and (\ref{eq:C_summary}) may then be used to draw smoke and fire one mesh at a time.  These two equations are also the basis for combining RTE solutions obtained on multiple slice planes, which is discussed next.
@@ -281,7 +282,9 @@ Computing opacity at slice plane nodes is illustrated in Figure \ref{figsmokeset
 \begin{center}
 \includegraphics[width=4.0in]{figures/smoke_setup}
 \end{center}
-\caption {Opacity, $\alpha_i$, computed at node $i$ using soot density, $S_i$ and grid spacing $\Delta x$.}
+\caption[Light emitted from the background is obscured by intervening smoke.]
+{Light emitted from the background is obscured by intervening smoke.
+}
 \label{figsmokesetup}
 \end{figure}
 
@@ -296,10 +299,11 @@ The absorption parameter, $\alpha$, needs to be adjusted for view directions not
 \begin{figure}[\figoptions]
 \centerline{\includegraphics[width=3.5in]{figures/forney_figure4}}
 \caption [Diagram illustrating the adjustment required to the opaqueness parameter, $\alpha$,
-for non-axis aligned views.] { Diagram
-illustrating the adjustment required to the opaqueness parameter, $\alpha$,
-for non axis aligned views. The $\hat{\alpha}$ value along the $\Delta\hat{x}$ segment needs to account for
-the longer path length. } \label{figray}
+for non-axis aligned views.] 
+{ Diagram illustrating the adjustment required to the opaqueness parameter, $\alpha$,
+for non axis aligned views. 
+The adjusted opacity $\hat{\alpha}$ along the $\Delta\hat{x}$ segment is related to $\alpha$ value along the $\Delta x$ segment using $(1-\hat{\alpha})=(1-\alpha)^{\Delta \hat{x}/\Delta x}$}
+\label{figray}
 \end{figure}
 
 Ten million exponential operations per second are required to display smoke with corrected $\alpha$'s at 10 frames per second if the simulation has grid dimensions of $100\times 100\times 100$. Recent advances in CPU and video hardware makes these types of visualizations possible. These corrections may also be performed in the video card (GPU), resulting in increased display rates because the GPU performs the corrections simultaneously at all or many of the grid nodes rather than one at a time as the CPU would.
