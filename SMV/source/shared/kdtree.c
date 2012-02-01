@@ -365,7 +365,7 @@ void free_kdtree(kd_data *kdtree){
 typedef struct _avltreedata {
   struct _avltreedata *left, *right;
   void *key, *data;
-  int count;
+  int level;
 } avltreedata;
 
 /* ----------------------- avltree_new ----------------------------- */
@@ -379,7 +379,7 @@ avltreedata *avltree_new(void *key, void *data){
     bt->right=NULL;
     bt->key=key;
     bt->data=data;
-    bt->count=1;
+    bt->level=1;
   }
   return bt;
 }
@@ -393,6 +393,17 @@ int avltree_compare(void *key1, void *key2){
   return return_val;
 }
 
+/* ----------------------- avltree_getlevel ----------------------------- */
+
+int avltree_getlevel(avltreedata *tree){
+  int left_level=0, right_level=0, level;
+
+  if(tree->left!=NULL)left_level=tree->left->level;
+  if(tree->right!=NULL)right_level=tree->right->level;
+  level = 1 + MAX(left_level,right_level);
+  return level;
+}
+
 /* ----------------------- avltree_insert ----------------------------- */
 
 void avltree_insert(avltreedata **parent_handle, void *key, void *data){
@@ -400,28 +411,58 @@ void avltree_insert(avltreedata **parent_handle, void *key, void *data){
     *parent_handle=avltree_new(key,data);
   }
   else{
-    avltreedata *parent_ptr, *left, *right;
-    int side;
+    avltreedata *parent_ptr;
+    int side,left_level=0,right_level=0;
 
     parent_ptr=*parent_handle;
-    left=parent_ptr->left;
-    right=parent_ptr->right;
     side=avltree_compare(parent_ptr->key,key);
+    if(side==0)return;
     if(side<0){
-      avltree_insert(&left,key,data);
+      avltree_insert(&(parent_ptr->left),key,data);
     }
     else if(side>0){
-      avltree_insert(&right,key,data);
+      avltree_insert(&(parent_ptr->right),key,data);
     }
-    if(right->count-left->count>1){
-      *parent_handle=right;
-      right->left=parent_ptr;
+    if(parent_ptr->left!=NULL)left_level=parent_ptr->left->level;
+    if(parent_ptr->right!=NULL)right_level=parent_ptr->right->level;
+    if(left_level-right_level>1){
+      avltreedata *old_left=NULL,*old_right=NULL,*old_parent=NULL;
+      avltreedata *new_left=NULL,*new_right=NULL,*new_parent=NULL;
+
+      old_parent=parent_ptr;
+      old_left=old_parent->left;
+      old_right=old_left->right;
+
+      new_parent=old_left;
+      new_right=old_parent;
+      new_left=old_right;
+
+      new_parent->right=new_right;
+      new_right->left=new_left;
+
+      parent_ptr=new_parent;
+      *parent_handle=parent_ptr;
+      new_right->level=avltree_getlevel(new_right);
     }
-    else if(left->count-right->count>1){
-      *parent_handle=left;
-      left->right=parent_ptr;
+    else if(right_level-left_level>1){
+      avltreedata *old_left=NULL,*old_right=NULL,*old_parent=NULL;
+      avltreedata *new_left=NULL,*new_right=NULL,*new_parent=NULL;
+
+      old_parent=parent_ptr;
+      old_right=old_parent->right;
+      old_left=old_right->left;
+
+      new_parent=old_right;
+      new_left=old_parent;
+      new_right=old_left;
+
+      new_parent->left=new_left;
+      new_left->right=new_right;
+
+      parent_ptr=new_parent;
+      *parent_handle=parent_ptr;
+      new_left->level=avltree_getlevel(new_left);
     }
-    else{
-    }
+    parent_ptr->level=avltree_getlevel(parent_ptr);
   }
 }
