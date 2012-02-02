@@ -642,11 +642,11 @@ M%WALL%TW = T_BEGIN
 
 NOT_EVAC_IF_2: IF (.NOT.EVACUATION_ONLY(NM)) THEN 
    M%WALL%EW = 0._EB
-   M%WALL%KW = 1._EB
+   M%WALL%KW = 0._EB
    DO IW=1,N_TOTAL_WALL_CELLS
       ALLOCATE(M%WALL(IW)%RHODW(N_TRACKED_SPECIES),STAT=IZERO)
       CALL ChkMemErr('INIT','WALL(IW)%RHODW',IZERO) 
-      M%WALL(IW)%RHODW = 1._EB
+      M%WALL(IW)%RHODW = 0.1_EB ! Do not initialize to zero to avoid divide by zero in the first time step
    ENDDO
    M%WALL%AREA_ADJUST = 1._EB
    DO IW=1,N_TOTAL_WALL_CELLS
