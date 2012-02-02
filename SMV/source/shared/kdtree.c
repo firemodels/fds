@@ -406,6 +406,27 @@ int avltree_getlevel(avltreedata *tree){
 
 /* ----------------------- avltree_insert ----------------------------- */
 
+avltreedata *avltree_getnode(avltreedata *parent_ptr, void *key){
+  avltreedata *return_node=NULL;
+  int side;
+
+  if(parent_ptr==NULL)return NULL;
+
+  side=avltree_compare(parent_ptr->key,key);
+  if(side==0){
+    return_node=parent_ptr;
+  }
+  else if(side<0){
+    return_node=avltree_getnode(parent_ptr->left,key);
+  }
+  else if(side>0){
+    return_node=avltree_getnode(parent_ptr->right,key);
+  }
+  return return_node;
+}
+
+/* ----------------------- avltree_insert ----------------------------- */
+
 void avltree_insert(avltreedata **parent_handle, void *key, void *data){
   if(*parent_handle==NULL){
     *parent_handle=avltree_new(key,data);
