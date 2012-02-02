@@ -2,6 +2,8 @@
 
 $RUNFDS Atmospheric_Effects lee_waves
 $RUNFDS Atmospheric_Effects stack_effect
+$RUNFDS Atmospheric_Effects stratified_mixing_layer_2d
+$RUNFDS Atmospheric_Effects stratified_mixing_layer
 
 $RUNFDS Controls activate_vents
 $RUNFDS Controls control_test
@@ -15,6 +17,7 @@ $RUNFDS Detectors beam_detector
 $RUNFDS Energy_Budget energy_budget_adiabatic_walls
 $RUNFDS Energy_Budget energy_budget_cold_walls
 $RUNFDS Energy_Budget energy_budget_dns_100
+$RUNFDS Energy_Budget energy_budget_tmix
 
 $RUNFDS Fires box_burn_away1
 $RUNFDS Fires box_burn_away2
