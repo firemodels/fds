@@ -3198,7 +3198,15 @@ READ_PART_LOOP: DO N=1,N_PART
 
    ! Backward compatibility
 
-   IF (FUEL)  SPEC_ID = REACTION(1)%FUEL
+   IF (FUEL) THEN
+      IF (N_REACTIONS>0) THEN
+         SPEC_ID = REACTION(1)%FUEL
+      ELSE
+         WRITE(MESSAGE,'(A)') 'ERROR: Cannot have FUEL particles without a REAC line.'
+         CALL SHUTDOWN(MESSAGE)
+      ENDIF
+   ENDIF
+         
    IF (WATER) SPEC_ID = 'WATER VAPOR'
 
    ! Miscellaneous consequences of input parameters
