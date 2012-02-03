@@ -143,6 +143,11 @@
 \newcommand{\yy}{{\tiny \hbox{y}}}
 \newcommand{\zz}{{\tiny \hbox{z}}}
 
+\newcommand{\dif}{\mathrm{d}}
+\newcommand{\Div}{\nabla\cdot}
+\newcommand{\mhalf}{\mbox{$\frac{1}{2}$}}
+\newcommand{\tripleprime}{{\prime\prime\prime}}
+
 \newcommand{\figheight}{1.5in}
 \newcommand{\figwidth}{3.333333in}
 \newcommand{\figwidthb}{2.0in}
@@ -8552,66 +8557,32 @@ of the output quantities can be produced in a variety of ways.
 \label{info:HRR}
 
 Quantities associated with the overall energy budget are reported in
-the comma delimited file {\bf CHID\_hrr.csv}.  This file is
+the comma delimited file {\ct CHID\_hrr.csv}.  This file is
 automatically generated; the only input parameter associated with it
-is {\ct DT\_HRR} on the {\ct DUMP} line. The file consists of six
-columns.  The first column contains the time in seconds. The second
-through fifth columns contain integrated energy gains and losses, all
-in units of kW. The second column contains the total heat release
-rate, the third contains the radiative heat loss to all the boundaries
-(solid and open), the fourth contains the convective and radiative
-heat loss to the boundaries ({\em i.e.} the energy flowing out of or
-into the domain by either convection or radiation), and the fifth contains the energy conducted into the
-solid surfaces.  The sixth column contains the total burning rate of
+is {\ct DT\_HRR} on the {\ct DUMP} line. The columns in this file record the time history of various terms in the enthalpy transport equation.
+Neglecting the mass and energy gains and losses from particles, the transport equation for the sensible enthalpy is
+\begin{equation}
+\label{eqn_enthalpytransport}
+\frac{\partial (\rho h_s) }{\partial t} + \nabla \cdot \left( \rho \bu h_s - k \nabla T - \sum_\alpha h_{s,\alpha} \, \rho D_\alpha \nabla Y_\alpha +
+     \dot{\mathbf{q}}^{\prime\prime}_{r} \right) = \dot{q}'''  + \frac{d \overline{p} }{dt}
+\end{equation}
+The first column in the file contains the time in seconds. The second
+through sixth columns contain integrated energy gains and losses, all
+in units of kW. The second column, {\ct HRR}, contains the total heat release
+rate, the volume integral of $\dot{q}'''$. The third column, {\ct Q\_RAD}, contains the radiative heat loss to all the boundaries
+(solid and open), the volume integral of $\nabla \cdot \dot{\mathbf{q}}^{\prime\prime}_{r}$. The fourth and fifth columns, {\ct Q\_OPEN} and {\ct Q\_WALL}, 
+contains the volume integral of conduction and diffusion terms, calculated as a surface integral over the open and solid parts of the boundary, respectively. 
+The sixth column, {\ct Q\_TOTAL}, is just the sum of {\ct Q\_RAD}, {\ct Q\_OPEN}, and {\ct Q\_WALL}. Ideally, this should equal {\ct HRR}.
+
+The seventh column contains the total burning rate of
 fuel, in units of kg/s. Note that the reported value of the burning rate is not adjusted to account for the possibility that each individual
 material might have a different heat of combustion. For this reason, it is not always the case that the reported total
 burning rate multiplied by the gas phase heat of combustion is equal to the reported heat release rate.
 
-Let $\Omega$ denote the unblocked computational domain, {\em i.e.} the
-volume within the bounding rectangle occupied by gas. Let $\partial
-\Omega$ by the boundary of $\Omega$. The boundary can be divided into
-two parts $\partial \Omega = \partial \Omega_1 + \partial
-\Omega_2$. The first part $\partial \Omega_1$ consists of all the
-solid walls. The second part $\partial \Omega_2$ consists of openings
-from outside the domain through which gases may flow. This could be an
-open window to the exterior, or a forced vent.
 
-The total heat release rate is given by
-\be \dot{Q} = \int_\Omega \; \dq''' \; dV \ee
-The radiative loss to the
-boundaries can be computed with either a volume or boundary integral
-\be \dot{Q}_r = \int_\Omega \; \nabla \cdot \bq_r \; dV =
-\int_{\partial \Omega} \; \bq_r \cdot \dS = \int_{\partial \Omega} \; \dq_r'' \; \dA \ee
-It represents the energy radiating away from the fire and hot gases into
-the solid boundaries or out of the computational domain. The convective/radiative
-loss to open boundaries is
-\be \dot{Q}_{conv} =  \int_{\partial \Omega} \; c_p \; \rho \; (T-T_\infty) \; \bu \cdot \dS
-   + \int_{\partial \Omega_2} \; \dq_r'' \; \dA  \ee
-where the integral is positive if the flow and radiative flux are going out of the domain.
-The conductive loss to solid surfaces is given by
-\be \dot{Q}_{cond} = \int_{\partial \Omega_1} \; \dq_r'' + \dq_c'' \; \dA  \ee
-where the integral is positive if heat is being lost into a wall colder
-than the gas.
 
-For scenarios in which the fire is the primary source of energy, after
-the gas temperatures within the computational domain reach a nearly
-steady state
-\be \dot{Q} \approx \dot{Q}_{conv} + \dot{Q}_{cond}  \ee
-This is merely a check of the global energy balance, that is, the
-energy generated within the space heats up the gases and solid
-surfaces, and then a balance between heat input and output is
-achieved.
 
-Note that, in axially symmetric simulations, the coordinates {\ct
-XB(3)} and {\ct XB(4)} refer to the width of the cylindrical sector
-at 1 m distance from the cylinder axis, and the volume $\Omega$ is
-the volume of the cylindrical sector
-\be
-\Omega = \frac{1}{2 R_1}\left({\ct XB(2)^2-XB(1)^2}\right)
-            \left({\ct XB(4)-XB(3)}\right)
-            \left({\ct XB(6)-XB(5)}\right)
-\ee
-where $R_1 = $~1~m.
+
 
 
 \subsection{Visibility and Obscuration}
@@ -11145,6 +11116,19 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 This section describes the changes in the input parameters between FDS version~5 and version~6. Table~\ref{tbl:Changes} lists in alphabetical order parameters from
 FDS~5 that have changed. Note that this table does not list new parameters in FDS~6.
 
+There has been a limited amount of backward compatibility programmed into FDS 6. In other words, several commonly used parameters and conventions from previous versions still
+work, but you are encouraged to gradually modify your input files to conform to the new conventions. Gradually, obsolescent features will be removed. Some of the more notable changes
+in FDS 6 are:
+\begin{itemize}
+\item If you want to model a fire, you {\em must} include a {\ct REAC} line with a specified {\ct FUEL}. See Chapter~\ref{info:REAC} for details.
+\item The output quantity {\ct 'MIXTURE\_FRACTION'} no longer exists and there is no substitute in FDS 6.
+\item The {\ct ISOTHERMAL} feature is no longer an option.
+\item There is no longer a {\ct STATE\_FILE} because there is no longer a simple mixture fraction model.
+\item {\ct PRESSURE\_CORRECTION} has been eliminated. See Section~\ref{info:PRES} for ways to improve the performance of the pressure solver.
+\item Species mass and volume fraction outputs are no longer invoked using {\ct QUANTITY='species name'}. Use {\ct QUANTITY='MASS FRACTION'} or {\ct QUANTITY='VOLUME FRACTION'} along with
+{\ct SPEC\_ID} instead.
+\end{itemize}
+
 
 \begin{sidewaystable}[p]
 \caption[List of changes to input parameters for FDS 6]{Changes to input parameters, FDS version 5 to 6.}
@@ -11413,8 +11397,8 @@ called {\bf CHID\_hrr.csv}. The format of the file is as follows
 
 \footnotesize
 \begin{verbatim}
-s,kW,kW,kW,kW,kg/s,Pa,Pa, ...
-FDS_HRR_Time,HRR,RAD_LOSS,CONV_LOSS,COND_LOSS,BURN_RATE,ZONE_01,ZONE_02, ...
+s,kW,kW,kW,kW,kW,kg/s,Pa,Pa, ...
+Time,HRR,Q_RAD,Q_OPEN,Q_WALL,Q_TOTAL,BURN_RATE,ZONE_01,ZONE_02, ...
  0.0000000E+000, 0.0000000E+000, ...
  3.5355338E-001, 0.0000000E+000, ...
  .
@@ -11424,12 +11408,13 @@ FDS_HRR_Time,HRR,RAD_LOSS,CONV_LOSS,COND_LOSS,BURN_RATE,ZONE_01,ZONE_02, ...
 \normalsize
 
 \noindent
-{\ct HRR} is the total heat release rate, {\ct RAD\_LOSS} is the amount of thermal radiation lost to the boundaries,
-{\ct CONV\_LOSS} is the rate of energy that is flowing out of (positive) or into (negative) the computational domain by either convection or radiation,
-{\ct COND\_LOSS} is the rate of energy that is being conducted into (positive) or out of (negative) the solid surfaces,
+{\ct HRR} is the total heat release rate, {\ct Q\_RAD} is the rate of thermal radiation lost to the boundaries,
+{\ct Q\_OPEN} is the sensible enthalpy flow rate out of (positive) or into (negative) the computational domain,
+{\ct Q\_WALL} is the sensible enthalpy flow into (positive) or out of (negative) the solid surfaces, {\ct Q\_TOTAL} is the
+sum of {\ct Q\_RAD}, {\ct Q\_OPEN}, and {\ct Q\_WALL}, and typically equals {\ct HRR}.  
 {\ct BURN\_RATE} is the total mass loss rate of fuel, and {\ct ZONE\_01}, {\em etc.}, are the background pressures of the various
 pressure {\ct ZONE}s. Note that the reported {\ct BURN\_RATE} is not adjusted to account for the possibility that each individual
-material might have a different heat of combustion.
+material might have a different heat of combustion. It is the actual burning rate of the fuel as predicted by FDS or specified by the user.
 
 Details of the integrated energy quantities can be found in Section~\ref{info:HRR}. The background pressure is discussed in
 Section~\ref{info:ZONE}.
