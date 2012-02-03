@@ -248,11 +248,13 @@ both at NIST and beyond. This volume provides a survey of verification work cond
 
 \chapter{About the Authors}
 
+\input{../Bibliography/authors}
+
 \begin{description}
-\item[Randall McDermott] joined the research staff of the Building and Fire Research Lab in 2008. He received a B.S.~degree from the University of Tulsa in Chemical Engineering in 1994 and a doctorate at the University of Utah in 2005. His research interests include subgrid-scale models and numerical methods for large-eddy simulation, adaptive mesh refinement, Lagrangian particle methods, and immersed boundary methods.
-\item[Kevin McGrattan] is a mathematician in the Building and Fire Research Laboratory (BFRL) of NIST. He received a bachelors of science degree from the School of Engineering and Applied Science of Columbia University in 1987 and a doctorate at the Courant Institute of New York University in 1991. He joined the NIST staff in 1992 and has since worked on the development of fire models, most notably the Fire Dynamics Simulator.
-\item[Simo Hostikka] is a Senior Research Scientist at VTT Technical Research Centre of Finland. He received a master of science (technology) degree in 1997 and a doctorate in 2008 from the Department of Engineering Physics and Mathematics of the Helsinki University of Technology.  He is the principal developer of the radiation and solid phase sub-models within FDS.
-\item[Jason Floyd] is a Senior Engineer at Hughes Associates, Inc., in Baltimore, Maryland. He received a bachelors of science and Ph.D. in the Nuclear Engineering Program of the University of Maryland. After graduating, he won a National Research Council Post-Doctoral Fellowship at the Building and Fire Research Laboratory of NIST, where he developed the combustion algorithm within FDS. He is currently funded by NIST under grant 70NANB8H8161 from the Fire Research Grants Program (15 USC 278f). He is the principal developer of the multi-parameter mixture fraction combustion model and control logic within FDS.
+\rmcdermottbio
+\kmcgrattanbio
+\shostikkabio
+\jfloydbio
 \end{description}
 
 
@@ -879,7 +881,7 @@ where the mixed number $m$ is between 0.12 and 0.20.
 
 In the transition region, viscous mixing spreads over the entire jet flow and the flow velocity along the axis decreases. The mean flow velocity at the jet centerline $u_{max}(x)$ is calculate by
 \begin{equation}
-u_{max}(x) = 	\frac{x_0}{x}\sqrt{\frac{b}{h}} = \frac{1}{mx} \sqrt{bh}
+u_{max}(x) =    \frac{x_0}{x}\sqrt{\frac{b}{h}} = \frac{1}{mx} \sqrt{bh}
 \end{equation}
 
 Four turublence models are tested: (1) Constant Smagorinsky (csmag), (2) Dynamic Smagorinsky (dsmag), (3) Deardorff (FDS default), and (4) Vreman.  The results are plotted in Fig.~\ref{fig_jet_decay}. For each model, two grid resolutions are run, corresponding to $h/\delta x = 8$ (colored dotted lines) and $h/\delta x=16$ (colored solid lines).
@@ -2848,7 +2850,7 @@ If a single droplet having a constant drag coefficient falls through a stationar
 This is the ``terminal velocity'' case. The particle starts from rest and falls under the influence of gravity and drag in 1D.
 FDS runs until a steady-state solution is reached. The equation governing this motion is
 \[
-	\dot{u} = K u^2 - g \quad ; \quad K \equiv \frac{\rho_a C_d A}{2 m}
+    \dot{u} = K u^2 - g \quad ; \quad K \equiv \frac{\rho_a C_d A}{2 m}
 \]
 $\rho_a$ is the ambient air density, $C_d$ is the drag coefficient of the droplet, $A$ is the cross-sectional area of the droplet, and $m$ is the mass of the droplet.
 Defining $\rho_d$ as the density of the droplet and $D_d$ as the diameter of the droplet and solving this ODE with zero ICs,
@@ -2857,9 +2859,9 @@ the solution below and equivalent definition of $K$ for a droplet is found.
 % Cd = 1.0
 % g = -9.8 m/s^2
 \be
-	u = \frac{d x}{d t} = - \sqrt{\frac{g}{K}} \text{tanh}\left(\sqrt{g K} t\right) \quad ; \quad
-	x = - \frac{\text{ln}\left[\text{cosh}\left(\sqrt{g K} t \right)\right]}{K} \quad ; \quad
-	K \equiv \frac{3 \rho_a C_d}{4 \rho_d D_d}
+    u = \frac{d x}{d t} = - \sqrt{\frac{g}{K}} \text{tanh}\left(\sqrt{g K} t\right) \quad ; \quad
+    x = - \frac{\text{ln}\left[\text{cosh}\left(\sqrt{g K} t \right)\right]}{K} \quad ; \quad
+    K \equiv \frac{3 \rho_a C_d}{4 \rho_d D_d}
 \ee
 The terminal velocity case is run over several time steps. The precise configuration of the scenario is detailed in the table below.
 The $L_\infty$ error of the terminal velocity and position are computed and plotted for each time step.
@@ -2889,30 +2891,30 @@ FDS demonstrated second-order convergence in the terminal velocity case for both
 %\section{Accuracy of Fluid-Particle Momentum Transfer}
 %In Appendix G of the Technical Reference Guide the numerical scheme FDS uses to compute these trajectories is detailed. The equation for particle velocities is
 %\begin{equation}
-%	\mathbf{u}_p^{n+1} = \frac{\mathbf{u}_p^n}{1 + \beta_p \Delta t} + \frac{(\mathbf{u}_p^n + \alpha_p \mathbf{U}_p^n)\beta_p \Delta t}{(1 + \beta_p \Delta t)(1 + \alpha_p)} + \mathbf{g} \Delta t - \frac{\alpha_p \beta_p (\Delta t)^2}{2 (1 + \alpha_p)} \left[\mathbf{u}_r^n \left(\frac{\mathbf{u}_r^n \cdot \mathbf{g}}{|\mathbf{u}_r^n|^2}\right) + \mathbf{g}\right] \,.
+%   \mathbf{u}_p^{n+1} = \frac{\mathbf{u}_p^n}{1 + \beta_p \Delta t} + \frac{(\mathbf{u}_p^n + \alpha_p \mathbf{U}_p^n)\beta_p \Delta t}{(1 + \beta_p \Delta t)(1 + \alpha_p)} + \mathbf{g} \Delta t - \frac{\alpha_p \beta_p (\Delta t)^2}{2 (1 + \alpha_p)} \left[\mathbf{u}_r^n \left(\frac{\mathbf{u}_r^n \cdot \mathbf{g}}{|\mathbf{u}_r^n|^2}\right) + \mathbf{g}\right] \,.
 %\end{equation}
 %And the equation for particle positions is
 %\begin{equation}
-%	\mathbf{x}_p^{n+1} = \mathbf{x}_p^n + \left(\frac{\mathbf{u}_p^n + \alpha_p \mathbf{U}_p^n}{1 + \alpha_p}\right) \Delta t + \frac{\alpha_p (\mathbf{u}_p^n - \mathbf{U}_p^n)}{\beta_p (1 + \alpha_p)} \text{ln}(\beta_p \Delta t + 1) + \frac{\mathbf{g} (\Delta t)^2}{2} - \frac{\alpha_p \beta_p (\Delta t)^3}{6 (1 + \alpha_p)} \left[\mathbf{u}_p^n \left(\frac{\mathbf{u}_p^n \cdot \mathbf{g}}{|\mathbf{u}_p^n|^2}\right) + \mathbf{g}\right] \,.
+%   \mathbf{x}_p^{n+1} = \mathbf{x}_p^n + \left(\frac{\mathbf{u}_p^n + \alpha_p \mathbf{U}_p^n}{1 + \alpha_p}\right) \Delta t + \frac{\alpha_p (\mathbf{u}_p^n - \mathbf{U}_p^n)}{\beta_p (1 + \alpha_p)} \text{ln}(\beta_p \Delta t + 1) + \frac{\mathbf{g} (\Delta t)^2}{2} - \frac{\alpha_p \beta_p (\Delta t)^3}{6 (1 + \alpha_p)} \left[\mathbf{u}_p^n \left(\frac{\mathbf{u}_p^n \cdot \mathbf{g}}{|\mathbf{u}_p^n|^2}\right) + \mathbf{g}\right] \,.
 %\end{equation}
 %The particle velocities are second-order accurate in time. In other words, they are accurate to an order-of-magnitude of $\Delta t^2$. The error committed each time step as shown in Appendix G is
 %\begin{equation}
-%	\epsilon = \mathcal{O}(\Delta t^3) \,.
+%   \epsilon = \mathcal{O}(\Delta t^3) \,.
 %\end{equation}
 %This error is accumulated over many time steps. The allows us to define the total error $E \equiv n \epsilon$ where $n = T/\Delta T$ is the number of time steps and $T$ is the final time iterated out to. The total error can be found to be
 %\begin{equation}
-%	E = n \epsilon = \frac{T}{\Delta t} \mathcal{O}(\Delta t^3) = \mathcal{O}(\Delta t^2) \,.
+%   E = n \epsilon = \frac{T}{\Delta t} \mathcal{O}(\Delta t^3) = \mathcal{O}(\Delta t^2) \,.
 %\end{equation}
 %The particle velocities should be second-order accurate, as has been shown in FDS.
 %
 %
 %The accuracy of the particle positions, $\mathbf{x}$ is less obvious and finding their accuracy requires knowledge of the accuracy of $\mathbf{u}$. The natural log term of the position equation reduces the order of accuracy. Note that
 %\begin{equation}
-%	\frac{\alpha_p (\mathbf{u}_p^n - \mathbf{U}_p^n)}{\beta_p (1 + \alpha_p)} \text{ln}(\beta_p \Delta t + 1) = \frac{\alpha_p (\mathbf{u}_p^n - \mathbf{U}_p^n)}{1 + \alpha_p} \left(\Delta t - \frac{\beta_p \Delta t^2}{2} + \cdots \right) \quad \text{ for } \beta_p t < 1 \,.
+%   \frac{\alpha_p (\mathbf{u}_p^n - \mathbf{U}_p^n)}{\beta_p (1 + \alpha_p)} \text{ln}(\beta_p \Delta t + 1) = \frac{\alpha_p (\mathbf{u}_p^n - \mathbf{U}_p^n)}{1 + \alpha_p} \left(\Delta t - \frac{\beta_p \Delta t^2}{2} + \cdots \right) \quad \text{ for } \beta_p t < 1 \,.
 %\end{equation}
 %Also note that $\mathbf{u}_p^n = \mathbf{u}_{p,\text{exact}}^n + \mathcal{O}(\Delta t^2)$ in general. This error propagates through the natural log term. If only the relevant parts of the term are extracted we can see that
 %\begin{equation}
-%	\frac{\mathbf{u}_p^n}{\beta_p} \text{ln}(\beta_p \Delta t + 1) = (\mathbf{u}_{p,\text{exact}}^n + \mathcal{O}(\Delta t^2)) \left(\Delta t - \frac{\beta_p \Delta t^2}{2} + \cdots \right) = \frac{\mathbf{u}_{p,\text{exact}}^n \text{ln}(\beta_p \Delta t + 1)}{\beta_p} + \mathcal{O}(\Delta t^3) \,.
+%   \frac{\mathbf{u}_p^n}{\beta_p} \text{ln}(\beta_p \Delta t + 1) = (\mathbf{u}_{p,\text{exact}}^n + \mathcal{O}(\Delta t^2)) \left(\Delta t - \frac{\beta_p \Delta t^2}{2} + \cdots \right) = \frac{\mathbf{u}_{p,\text{exact}}^n \text{ln}(\beta_p \Delta t + 1)}{\beta_p} + \mathcal{O}(\Delta t^3) \,.
 %\end{equation}
 %This third-order error per time step becomes an accumulated second-order error, and consequently the position scheme is only second-order accurate as has been shown numerically.
 %
@@ -2931,18 +2933,18 @@ There are no known solutions of the drag equations in multiple dimensions. Howev
 
 %In 2D, this approximation decouples the $x$ equation of motion from the $y$ equation of motion and reduces the $y$ equation of motion to a linear ODE.
 %\begin{align*}
-%	\ddot{x} = -K \dot{x} \sqrt{\dot{x}^2 + \dot{y}^2} \quad &; \quad \ddot{y} = -K \dot{y} \sqrt{\dot{x}^2 + \dot{y^2}} - g \\
-%	&\Downarrow \\
-%	\ddot{x} = -K \dot{x}^2 \quad &; \quad \ddot{y} = -K \dot{y} \dot{x} - g
+%   \ddot{x} = -K \dot{x} \sqrt{\dot{x}^2 + \dot{y}^2} \quad &; \quad \ddot{y} = -K \dot{y} \sqrt{\dot{x}^2 + \dot{y^2}} - g \\
+%   &\Downarrow \\
+%   \ddot{x} = -K \dot{x}^2 \quad &; \quad \ddot{y} = -K \dot{y} \dot{x} - g
 %\end{align*}
 To ensure that the flat fire assumption is valid, the following ICs are used: $x(0) = 0$, $\dot{x}(0) = u(0) = V_0$, $z(0) = h$, $\dot{z}(0) = w(0) = 0$. The exact solution to this system is below.
 \be
-	x = \frac{\text{log}(V_0 K t + 1)}{K} \quad ; \quad
-	z = h + \frac{g \text{log}(V_0 K t + 1)}{2 (V_0 K)^2} - \frac{g t^2}{4} - \frac{g t}{2 V_0 K} \quad ; \quad
-	K \equiv \frac{3 \rho_a C_d}{4 \rho_d D_d}
+    x = \frac{\text{log}(V_0 K t + 1)}{K} \quad ; \quad
+    z = h + \frac{g \text{log}(V_0 K t + 1)}{2 (V_0 K)^2} - \frac{g t^2}{4} - \frac{g t}{2 V_0 K} \quad ; \quad
+    K \equiv \frac{3 \rho_a C_d}{4 \rho_d D_d}
 \ee
 \be
-	u = \frac{\mbox{d} x}{\mbox{d} t} = \frac{V_0}{V_0 K t + 1} \quad ; \quad w = \frac{\mbox{d} z}{\mbox{d} t} = \frac{g}{2 V_0 K (V_0 K t + 1)} - \frac{g t}{2} - \frac{g}{2 V_0 K}
+    u = \frac{\mbox{d} x}{\mbox{d} t} = \frac{V_0}{V_0 K t + 1} \quad ; \quad w = \frac{\mbox{d} z}{\mbox{d} t} = \frac{g}{2 V_0 K (V_0 K t + 1)} - \frac{g t}{2} - \frac{g}{2 V_0 K}
 \ee
 The following case was run in FDS and compared against the approximate solution:
 \begin{center}
