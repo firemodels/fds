@@ -59,6 +59,9 @@
 
 \bibliographystyle{unsrt}
 
+% include commands for bios, titles etc used in multiple documents
+\input{../Bibliography/commoncommands}
+
 \newcommand{\dod}[2]{\frac{\partial #1}{\partial #2}}
 \newcommand{\DoD}[2]{\frac{D #1}{D #2}}
 \newcommand{\dsods}[2]{\frac{\partial^2 #1}{\partial #2^2}}
@@ -206,7 +209,7 @@ $SVN Repository$~$Revision$}
 
 \flushright{\includegraphics[width=1in]{FIGURES/doc} }
 
-\input{../Bibliography/docnistsig}
+\titlesigs
 
 \end{minipage}
 
@@ -247,8 +250,6 @@ both at NIST and beyond. This volume provides a survey of verification work cond
 
 
 \chapter{About the Authors}
-
-\input{../Bibliography/authors}
 
 \begin{description}
 \rmcdermottbio
