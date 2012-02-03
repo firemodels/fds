@@ -330,13 +330,7 @@ $SVN Repository$~$Revision$}
 
 \flushright{\includegraphics[width=1in]{FIGURES/doc.pdf} }
 
-\small
-\flushright{U.S. Department of Commerce \\
-{\em Gary Locke, Secretary} \\
-\hspace{1in} \\
-National Institute of Standards and Technology \\
-{\em Patrick Gallagher, Director} }
-
+\input{../Bibliography/docnistsig}
 
 \end{minipage}
 
@@ -4940,7 +4934,7 @@ A duct node must either have two or more ducts attached to it or it must have ei
 \label{info:HVACfan}
 \footnotesize
 \begin{verbatim}
-&HVAC TYPE='FAN', ID='fanname', RAMP_ID='rampname',  DEVC_ID='devicename', 
+&HVAC TYPE='FAN', ID='fanname', RAMP_ID='rampname',  DEVC_ID='devicename',
       CTRL_ID='ctrlname', VOLUME_FLOW=volumeflow, MAX_FLOW=maxflow,
       MAX_PRESSURE=maxpressure, LOSS=offloss /
 \end{verbatim}\normalsize
@@ -5000,7 +4994,7 @@ More complicated fan curves can be specified by defining a {\ct RAMP}.
 
 Here is an example how fans can be specified.  In it, two simple
 compartments share a common wall. Both compartments are considered as
-separate ``pressure zones.'' Two HVAC ducts are defined.  One is a quadratic fan with a maximum volumetric flow of 0.16 m$^3$/s and a stall pressure of 10~Pa.  
+separate ``pressure zones.'' Two HVAC ducts are defined.  One is a quadratic fan with a maximum volumetric flow of 0.16 m$^3$/s and a stall pressure of 10~Pa.
 The second is open duct with a flow loss of 10. The relevant input lines are:
 
 \footnotesize
@@ -5022,9 +5016,9 @@ The second is open duct with a flow loss of 10. The relevant input lines are:
 &HVAC ID='RIGHT 1', TYPE_ID='NODE', DUCT_ID='RIGHT', VENT_ID='BLOW RIGHT 1' /
 &HVAC ID='RIGHT 2', TYPE_ID='NODE', DUCT_ID='RIGHT', VENT_ID='BLOW RIGHT 2' /
 
-&HVAC ID='LEFT',  TYPE_ID='DUCT', NODE_ID='LEFT 1','LEFT 2',   
+&HVAC ID='LEFT',  TYPE_ID='DUCT', NODE_ID='LEFT 1','LEFT 2',
       LENGTH=1, AREA=0.04, FAN_ID='LEFT', REVERSE=.TRUE., LOSS=0,0 /
-&HVAC ID='RIGHT', TYPE_ID='DUCT', NODE_ID='RIGHT 1','RIGHT 2', 
+&HVAC ID='RIGHT', TYPE_ID='DUCT', NODE_ID='RIGHT 1','RIGHT 2',
       LENGTH=1, AREA=0.04, LOSS=10,10 /
 
 &HVAC ID='LEFT',TYPE_ID='FAN',MAX_FLOW=0.16,MAX_PRESSURE=10./
@@ -5040,14 +5034,14 @@ where $\dot{V}_{\hbox{\footnotesize max}}$ is the maximum output of the fan ~(0.
 Zone~1 to Zone~2 and 0.2~m/s from Zone~2 to Zone~1), and $\Delta p_{\hbox{\footnotesize max}}$ is the maximum pressure difference the fan can operate
 upon (in this case 10~Pa).
 
-In steady state, the volume flow from compartment to compartment (or Zone to Zone) should be equal and opposite in sign.  
+In steady state, the volume flow from compartment to compartment (or Zone to Zone) should be equal and opposite in sign.
 This occurs when the positive pressure added by the fan equals the pressure drop due to the flow loss through the return duct.
 
  \be  \sqrt{\frac {2 |p_2-p_1|}{ (1.2 \; \hbox{kg/m$^3$}) 10}} (0.4 \; \hbox{m/s}) =
    (0.16 \; \hbox{m$^3$/s})  \;
    \sqrt{ \frac{ |p_1-p_2-10 \; \hbox{Pa}|}{10 \; \hbox{Pa}}  } \ee
-The solution is $p_2=4.5$~Pa and $p_1=-4.5$~Pa (see Fig.~\ref{fan_test}). 
-Note that the sign of the Volume Flow of a duct in FDS has to do with whether the flow is moving from the first node to the second (positive) or the second node to the first (negative). 
+The solution is $p_2=4.5$~Pa and $p_1=-4.5$~Pa (see Fig.~\ref{fan_test}).
+Note that the sign of the Volume Flow of a duct in FDS has to do with whether the flow is moving from the first node to the second (positive) or the second node to the first (negative).
 This convention can make these types of calculations a bit tricky.
 
 \begin{figure}[ht]
@@ -5226,7 +5220,7 @@ figure on the right uses 0.5, which tends to bring the pressure into equilibrium
 \end{figure}
 
 \noindent
-Notice that the pressure within each compartment does not come to equilibrium instantaneously. Rather, a relaxation factor ({\ct PRESSURE\_RELAX\_FACTOR} on the {\ct PRES} line) 
+Notice that the pressure within each compartment does not come to equilibrium instantaneously. Rather, a relaxation factor ({\ct PRESSURE\_RELAX\_FACTOR} on the {\ct PRES} line)
 is applied to bring the zones
 into equilibrium over several seconds. This is done for several reasons. First, in reality doors and windows do not magically disappear as they do in FDS. It takes
 a finite amount of time to fully open them, and the slowing of the pressure increase/decrease is a simple way to simulate the effect.
@@ -8909,7 +8903,7 @@ A summary of the available PDPA quantities is shown in Table~\ref{tbl:pdpa}.
 ${}^*$ $T_m$ is the melting temperature of the associated species.
 \end{table}
 
-It is also possible to output histograms of PDPA output quantities. When {\ct PDPA\_HISTOGRAM} is set to {\ct .TRUE.} histogram bin counts are output to  a csv file from all devices associated with this {\ct PROP}. The number of bins and the limits of the histogram are controlled by parameters on the {\ct PROP} line. The value used in creating the histogram is $d_i^m x$. Note that when making a histogram of diameters, the limits must be given in meters, not microns.  The output file contains raw bin counts. Values falling outside the histogram limits are included in the counts of the first and last bins.  
+It is also possible to output histograms of PDPA output quantities. When {\ct PDPA\_HISTOGRAM} is set to {\ct .TRUE.} histogram bin counts are output to  a csv file from all devices associated with this {\ct PROP}. The number of bins and the limits of the histogram are controlled by parameters on the {\ct PROP} line. The value used in creating the histogram is $d_i^m x$. Note that when making a histogram of diameters, the limits must be given in meters, not microns.  The output file contains raw bin counts. Values falling outside the histogram limits are included in the counts of the first and last bins.
 The properties of the PDPA device are defined using the following keywords on the {\ct PROP} line:
 \begin{description}
 \item[{\ct PART\_ID}] Name of the particle group to limit the computation to. Do not specify to account for all particles.
@@ -8920,8 +8914,8 @@ As the spray simulation may contain some initial transient phase, it may be usef
 \item[{\ct PDPA\_RADIUS}] Radius (m) of the sphere, centered at the device location, inside which the particles are monitored.
 \item[{\ct PDPA\_NORMALIZE}] Can be set {\ct .FALSE.} to force $V = 1$ in the formula for $f_2(t)$.
 \item[{\ct QUANTITY}] Specified on {\ct PROP} line for choosing the variable $x$.
-\item[{\ct PDPA\_HISTOGRAM\_NBINS}] Number of bins used for the histogram. 
-\item[{\ct PDPA\_HISTOGRAM\_MIN}] Lower limit of the histogram. 
+\item[{\ct PDPA\_HISTOGRAM\_NBINS}] Number of bins used for the histogram.
+\item[{\ct PDPA\_HISTOGRAM\_MIN}] Lower limit of the histogram.
 \item[{\ct PDPA\_HISTOGRAM\_MAX}] Upper limit of the histogram.
 \end{description}
 
