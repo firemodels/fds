@@ -2657,7 +2657,7 @@ SURFLOOP: DO N=0,N_SURF
    DO NN=0,N_TRACKED_SPECIES
       IF (SF%MASS_FRACTION(NN)>ZERO_P) WRITE(LU_OUTPUT,'(A,I2,A,8X,F6.3)') &
                '     Mixture ',NN,' Mass Fraction',SF%MASS_FRACTION(NN)
-      IF (ABS(SF%MASS_FLUX(NN))>ZERO_P) WRITE(LU_OUTPUT,'(A,I2,A,2X,F6.3)') &
+      IF (ABS(SF%MASS_FLUX(NN))>ZERO_P) WRITE(LU_OUTPUT,'(A,I2,A,2X,ES9.2)') &
                '     Mixture ',NN,' Mass Flux (kg/s/m2)',SF%MASS_FLUX(NN)
    ENDDO
    
