@@ -206,12 +206,7 @@ $SVN Repository$~$Revision$}
 
 \flushright{\includegraphics[width=1in]{FIGURES/doc} }
 
-\small
-\flushright{U.S. Department of Commerce \\
-{\em Gary Locke, Secretary} \\
-\hspace{1in} \\
-National Institute of Standards and Technology \\
-{\em Patrick Gallagher, Director} }
+\input{../Bibliography/docnistsig}
 
 \end{minipage}
 
@@ -1231,15 +1226,15 @@ this test case confirms that relatively low levels of diffusion are incurred at 
 
 \section{Mass Conservation}
 
-This section describes tests of global mass conservation. 
+This section describes tests of global mass conservation.
 
-\subsection{Flow of a Gas through a Simple Duct (\texorpdfstring{{\bf simple\_duct}}{simple\_duct})} 
+\subsection{Flow of a Gas through a Simple Duct (\texorpdfstring{{\bf simple\_duct}}{simple\_duct})}
 
-In this example, a closed chamber with a simple recirculating duct is used to demonstrate that a gas like carbon dioxide can be transported 
-through multiple meshes and its mass is conserved. An obstruction is created that leaks 0.5~kg of CO$_2$ over a time span of 10~s. 
+In this example, a closed chamber with a simple recirculating duct is used to demonstrate that a gas like carbon dioxide can be transported
+through multiple meshes and its mass is conserved. An obstruction is created that leaks 0.5~kg of CO$_2$ over a time span of 10~s.
 
 \begin{figure}[h]
-      \includegraphics[width=3in]{SCRIPT_FIGURES/simple_duct_mass} 
+      \includegraphics[width=3in]{SCRIPT_FIGURES/simple_duct_mass}
    \caption[The \bf{simple\_duct} test case.]{The mass of CO$_2$ contained in a simple room connected with a recirculating duct.}
    \label{simple_duct}
 \end{figure}
@@ -1820,11 +1815,11 @@ In both cases the reactants are premixed and react in a constant volume, adiabat
 We also want to compare FDS predictions for temperature and pressure. For this reacting system, the internal energy remains constant, so temperature can be found from:
 \begin{equation}\label{eq:del_u}
 \overline{u}_{P,\alpha} - \overline{u}_{R,\alpha} = 0
-\end{equation} 
+\end{equation}
 where $P$ is products, $R$ is reactants, and $\overline{u}_{\alpha}=\overline{h}_{\alpha}-\overline{R}T$. In this case, $\overline{h}_{\alpha}$ is defined as the sum of the enthalpy of formation ($\overline{h}_{f}^{\circ}$) and sensible enthalpy ($\Delta \overline{h}$) for each of the $\alpha$ species. Assuming the products behave like an ideal gas, the final pressure can be found using the equation of state for an ideal gas:
 \begin{equation}\label{eq:ideal_gas}
 PV = n\overline{R}T
-\end{equation} 
+\end{equation}
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
