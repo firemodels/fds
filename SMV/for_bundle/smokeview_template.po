@@ -1,3 +1,10 @@
+// Suggested translation priority
+// 1.  translate terms in menus, e.g. Load/Unload, 
+//     Show/Hide etc.
+// 2.  translate terms in dialog boxes.
+// 3.  Now go through the following list and translate terms.
+//     that are left.  
+// Terms that are not translated will remain in English when displayed
 msgid "2D contours"
 msgstr ""
 
@@ -425,6 +432,9 @@ msgid "display all"
 msgstr ""
 
 msgid "Display...  ALT+d"
+msgstr ""
+
+msgid "Display data as b/w"
 msgstr ""
 
 msgid "Distance to zero parallax plane (m"
@@ -964,6 +974,9 @@ msgstr ""
 msgid "Mouse motion"
 msgstr ""
 
+msgid "Move"
+msgstr ""
+
 msgid "Near depth"
 msgstr ""
 
@@ -1097,6 +1110,9 @@ msgid "Path"
 msgstr ""
 
 msgid "Path length (m"
+msgstr ""
+
+msgid "Pause"
 msgstr ""
 
 msgid "percentile max"
@@ -1253,6 +1269,9 @@ msgid "r: render the current scene to an image file"
 msgstr ""
 
 msgid "R:   (same as r but at twice the resolution"
+msgstr ""
+
+msgid "Run"
 msgstr ""
 
 msgid "Run script"
@@ -1453,6 +1472,9 @@ msgstr ""
 msgid "Show velocity vectors"
 msgstr ""
 
+msgid "Show walls"
+msgstr ""
+
 msgid "Single mesh"
 msgstr ""
 
@@ -1475,6 +1497,9 @@ msgid "Slice Render Settings"
 msgstr ""
 
 msgid "slices"
+msgstr ""
+
+msgid "Slices"
 msgstr ""
 
 msgid "small font"
@@ -1712,6 +1737,9 @@ msgid "Titles"
 msgstr ""
 
 msgid "toggle line anti-aliasing (draw lines smoothly"
+msgstr ""
+
+msgid "Toggle View"
 msgstr ""
 
 msgid "Tour label"

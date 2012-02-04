@@ -51,8 +51,8 @@ int main(int argc, char **argv){
     return 1;
   }
   if(add_comments==1){
-    printf("// Translate phrases following msgid and place them \n");
-    printf("// on the following line containing msgstr as in:\n");
+    printf("// Translate the phrase after each msgid and place\n");
+    printf("// it on the following line after msgstr, as in:\n");
     printf("// msgid \"original phrase\"\n");
     printf("// msgstr \"translated phrase\"\n");
     printf("// \n");
@@ -60,13 +60,12 @@ int main(int argc, char **argv){
     printf("// to ask.  It is also OK to leave troublesome terms\n");
     printf("// untranslated, they will be output in English\n");
     printf("// \n");
-    printf("// Suggested translation priority\n");
+    printf("// Suggested translation priorities:\n");
     printf("// 1.  translate terms in menus, e.g. Load/Unload, \n");
     printf("//     Show/Hide etc.\n");
     printf("// 2.  translate terms in dialog boxes.\n");
     printf("// 3.  Now go through the following list and translate terms.\n");
     printf("//     that are left.  \n");
-    printf("// Terms that are not translated will remain in English when displayed\n");
     printf("// \n");
   }
   if(file_lang!=NULL&&file_template!=NULL){
