@@ -4635,10 +4635,10 @@ updatemenu=0;
   CREATEMENU(immersedmenu,ImmersedMenu);
   glutAddMenuEntry(_("View Method:"),999);
   if(showtrisurface==1&&showtrioutline==1){
-    glutAddMenuEntry(_(" *Solid and Outline"),IMMERSED_SOLIDOUTLINE);
+    glutAddMenuEntry(_(" *Solid and outline"),IMMERSED_SOLIDOUTLINE);
   }
   else{
-    glutAddMenuEntry(_(" Solid and Outline"),IMMERSED_SOLIDOUTLINE);
+    glutAddMenuEntry(_(" Solid and outline"),IMMERSED_SOLIDOUTLINE);
   }
   if(showtrisurface==1){
     glutAddMenuEntry(_(" *Solid"),IMMERSED_SOLID);
@@ -5428,15 +5428,15 @@ updatemenu=0;
       glutAddMenuEntry(_("  2D smoke colored by:"),999);
       switch (sethazardcolor){
         case 0:
-          glutAddMenuEntry(_("    *temperature"),6);
+          glutAddMenuEntry(_("    *Temperature"),6);
           glutAddMenuEntry(_("    hazard"),5);
           break;
         case 1:
-          glutAddMenuEntry(_("    temperature"),6);
+          glutAddMenuEntry(_("    Temperature"),6);
           glutAddMenuEntry(_("    *hazard"),5);
           break;
         case 2:
-          glutAddMenuEntry(_("    temperature"),6);
+          glutAddMenuEntry(_("    Temperature"),6);
           glutAddMenuEntry(_("    hazard"),5);
           break;
         default:
