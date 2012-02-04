@@ -2,6 +2,7 @@
 // $Revision: 8273 $
 // $Author: gforney $
 
+#define PROGVERSION "1.0"
 
  /* ------------------ options ------------------------ */
 #ifdef WIN32
