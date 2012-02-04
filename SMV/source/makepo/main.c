@@ -8,6 +8,7 @@
 #include "string_util.h"
      
 int add_msgstring=0;
+int add_comments=0;
 void usage(char *prog);
 
 /* ------------------ main ------------------------ */
@@ -31,6 +32,9 @@ int main(int argc, char **argv){
       case 'a':
         add_msgstring=1;
         break;
+      case 'c':
+        add_comments=1;
+        break;
       default:
         usage(prog);
         return 1;
@@ -40,6 +44,15 @@ int main(int argc, char **argv){
       usage(prog);
       return 1;
     }
+  }
+  if(add_comments==1){
+    printf("// Suggested translation priority\n");
+    printf("// 1.  translate terms in menus, e.g. Load/Unload, \n");
+    printf("//     Show/Hide etc.\n");
+    printf("// 2.  translate terms in dialog boxes.\n");
+    printf("// 3.  Now go through the following list and translate terms.\n");
+    printf("//     that are left.  \n");
+    printf("// Terms that are not translated will remain in English when displayed\n");
   }
   if(add_msgstring==0){
     while(!feof(stream)){

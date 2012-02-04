@@ -6,5 +6,5 @@ set SMVDIR=../source/smokeview
 set SHAREDDIR=../source/shared
 
 echo updating smokeview_template.po
-cat $SMVDIR/*.c $SMVDIR/*.cpp $SHAREDDIR/*.c $SHAREDDIR/*.cpp | $MAKEPO | sort -u | $MAKEPO -a > smokeview_template.po
+cat $SMVDIR/*.c $SMVDIR/*.cpp $SHAREDDIR/*.c $SHAREDDIR/*.cpp | $MAKEPO | sort -u | $MAKEPO -c -a > smokeview_template.po
 
