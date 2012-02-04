@@ -166,7 +166,7 @@ extern "C" void glui_shooter_setup(int main_window){
 
     panel_shooter_frameC=glui_shooter->add_panel_to_panel(panel_shooter_velocity,"PLOT3D");
     shooter_loadplot3d=glui_shooter->add_button_to_panel(panel_shooter_frameC,_("Load"),SHOOTER_LOADPLOT3D,SHOOTER_CB);
-    shooter_timelist = glui_shooter->add_listbox_to_panel(panel_shooter_frameC,_("time:"),
+    shooter_timelist = glui_shooter->add_listbox_to_panel(panel_shooter_frameC,_("Time:"),
       &shooter_itime,SHOOTER_TIME,SHOOTER_CB);
     for(i=0;i<nplot3dtimelist;i++){
       char label[255];
@@ -200,7 +200,7 @@ extern "C" void glui_shooter_setup(int main_window){
     GLUI_SPINNER_FLOAT,&shooter_v_inf,SHOOTER_TERMINAL_VEL,SHOOTER_CB);
   glui_shooter->add_button_to_panel(panel_shooter_frameG,_("Compute tracks"),SHOOTER_APPLY,SHOOTER_CB);
 
-  glui_shooter->add_spinner_to_panel(panel_shooter_frameH,_("particle size"),GLUI_SPINNER_FLOAT,&shooterpointsize);
+  glui_shooter->add_spinner_to_panel(panel_shooter_frameH,_("Particle size"),GLUI_SPINNER_FLOAT,&shooterpointsize);
   SPINNER_shooter_nparts=glui_shooter->add_spinner_to_panel(panel_shooter_frameH,_("number of particles"),
     GLUI_SPINNER_INT,&shooter_nparts,SHOOTER_NPARTS,SHOOTER_CB);
 

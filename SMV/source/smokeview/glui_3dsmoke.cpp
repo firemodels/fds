@@ -310,11 +310,11 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Load data only at render times"),&load_at_rendertimes);
 
     panel_colormap2 = glui_3dsmoke->add_panel_to_panel(panel_volume,"Temp->Colormap");
-    SPINNER_temperature_min=glui_3dsmoke->add_spinner_to_panel(panel_colormap2,_("min"),GLUI_SPINNER_FLOAT,
+    SPINNER_temperature_min=glui_3dsmoke->add_spinner_to_panel(panel_colormap2,_("Min"),GLUI_SPINNER_FLOAT,
                           &temperature_min,TEMP_MIN,SMOKE_3D_CB);
     SPINNER_temperature_cutoff=glui_3dsmoke->add_spinner_to_panel(panel_colormap2,_("cutoff"),GLUI_SPINNER_FLOAT,
                           &temperature_cutoff,TEMP_CUTOFF,SMOKE_3D_CB);
-    SPINNER_temperature_max=glui_3dsmoke->add_spinner_to_panel(panel_colormap2,_("max"),GLUI_SPINNER_FLOAT,
+    SPINNER_temperature_max=glui_3dsmoke->add_spinner_to_panel(panel_colormap2,_("Max"),GLUI_SPINNER_FLOAT,
                           &temperature_max,TEMP_MAX,SMOKE_3D_CB);
     SMOKE_3D_CB(TEMP_MIN);
     SMOKE_3D_CB(TEMP_CUTOFF);

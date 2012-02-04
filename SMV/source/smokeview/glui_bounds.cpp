@@ -620,7 +620,7 @@ extern "C" void glui_bounds_setup(int main_window){
   glui_bounds->add_separator();
   panel_time = glui_bounds->add_rollout("Time",false);
   panel_time1a = glui_bounds->add_panel_to_panel(panel_time,"",false);
-  SPINNER_timebounds=glui_bounds->add_spinner_to_panel(panel_time1a,_("time:"),GLUI_SPINNER_FLOAT,&glui_time);
+  SPINNER_timebounds=glui_bounds->add_spinner_to_panel(panel_time1a,_("Time:"),GLUI_SPINNER_FLOAT,&glui_time);
   glui_bounds->add_column_to_panel(panel_time1a,false);
   SPINNER_timebounds->set_float_limits(0.0,3600.0*24);
   BUTTON_SETTIME=glui_bounds->add_button_to_panel(panel_time1a,_("Set"),SET_TIME,Time_CB);

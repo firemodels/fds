@@ -195,9 +195,9 @@ extern "C" void glui_labels_setup(int main_window){
   panel_tick2 = glui_labels->add_panel_to_panel(panel_user_tick,_("Parameters"),true);
   glui_labels->add_statictext_to_panel(panel_tick2,"                    x");
   SPINNER_tick_x0=glui_labels->add_spinner_to_panel(panel_tick2,_("origin"),GLUI_SPINNER_FLOAT,user_tick_origin);
-  SPINNER_tick_xmin=glui_labels->add_spinner_to_panel(panel_tick2,_("min"),GLUI_SPINNER_FLOAT,user_tick_min);
-  SPINNER_tick_xmax=glui_labels->add_spinner_to_panel(panel_tick2,_("max"),GLUI_SPINNER_FLOAT,user_tick_max);
-  SPINNER_tick_dx0=glui_labels->add_spinner_to_panel(panel_tick2,_("step"),GLUI_SPINNER_FLOAT,user_tick_step);
+  SPINNER_tick_xmin=glui_labels->add_spinner_to_panel(panel_tick2,_("Min"),GLUI_SPINNER_FLOAT,user_tick_min);
+  SPINNER_tick_xmax=glui_labels->add_spinner_to_panel(panel_tick2,_("Max"),GLUI_SPINNER_FLOAT,user_tick_max);
+  SPINNER_tick_dx0=glui_labels->add_spinner_to_panel(panel_tick2,_("Step"),GLUI_SPINNER_FLOAT,user_tick_step);
 
   glui_labels->add_column_to_panel(panel_tick2,false);
 

@@ -127,7 +127,11 @@ extern "C" void warning_message(char *message){
   if(glui_warning==NULL)return;
 
   if(show_glui_warning==1){
-    warning_text2->set_name(_("*** Additional warnings have occurred.  See command shell for details."));
+    char label[256];
+
+    strcpy(label,_("*** Additional warnings have occurred."));
+    strcat(label,_("See command shell for details."));
+    warning_text2->set_name(label);
   }
   else{
     warning_text->set_name(message2);
@@ -152,7 +156,11 @@ extern "C" void error_message(char *message){
   if(glui_error==NULL)return;
 
   if(show_glui_error==1){
-    error_text2->set_name(_("*** Additional errors have occurred.  See command shell for details."));
+    char label[256];
+
+    strcpy(label,_("*** Additional errors have occurred."));
+    strcat(label,_("See command shell for details."));
+    error_text2->set_name(label);
   }
   else{
     error_text->set_name(message2);
