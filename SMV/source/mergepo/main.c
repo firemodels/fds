@@ -18,6 +18,7 @@ void usage(char *prog);
 int main(int argc, char **argv){
   int i;
   char *arg,*prog, *file_lang=NULL, *file_template=NULL;
+  int add_comments=0;
 
   initMALLOC();
   prog=argv[0];
@@ -27,8 +28,14 @@ int main(int argc, char **argv){
     arg=argv[i];
     lenarg=strlen(arg);
     if(arg[0]=='-'&&lenarg>1){
-      usage(prog);
-      return 1;
+      switch(arg[1]){
+      case 'c':
+        add_comments=1;
+        break;
+      default:
+        usage(prog);
+        return 1;
+      }
     }
     else{
       if(file_lang==NULL){
@@ -42,6 +49,25 @@ int main(int argc, char **argv){
   if(file_lang==NULL||file_template==NULL){
     usage(prog);
     return 1;
+  }
+  if(add_comments==1){
+    printf("// Translate phrases following msgid and place them \n");
+    printf("// on the following line containing msgstr as in:\n");
+    printf("// msgid \"original phrase\"\n");
+    printf("// msgstr \"translated phrase\"\n");
+    printf("// \n");
+    printf("// If you have trouble with some of the terms feel free\n");
+    printf("// to ask.  It is also OK to leave troublesome terms\n");
+    printf("// untranslated, they will be output in English\n");
+    printf("// \n");
+    printf("// Suggested translation priority\n");
+    printf("// 1.  translate terms in menus, e.g. Load/Unload, \n");
+    printf("//     Show/Hide etc.\n");
+    printf("// 2.  translate terms in dialog boxes.\n");
+    printf("// 3.  Now go through the following list and translate terms.\n");
+    printf("//     that are left.  \n");
+    printf("// Terms that are not translated will remain in English when displayed\n");
+    printf("// \n");
   }
   if(file_lang!=NULL&&file_template!=NULL){
     int return1, return2;
