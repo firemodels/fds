@@ -192,23 +192,23 @@ extern "C" void glui_trainer_setup(int main_window){
       if(ca->view_id>=1)ntrainer_viewpoints++;
     }
   }
-  BUTTON_toggle_view = glui_trainer->add_button_to_panel(panel_explore,"Toggle View",TOGGLE_VIEW,TRAINER_CB);
+  BUTTON_toggle_view = glui_trainer->add_button_to_panel(panel_explore,_("Toggle View"),TOGGLE_VIEW,TRAINER_CB);
   if(ntrainer_viewpoints<=2)BUTTON_toggle_view->disable();
 
-  CHECKBOX_outline = glui_trainer->add_checkbox_to_panel(panel_explore,"Show walls",&trainer_outline,TRAINEROUTLINE,TRAINER_CB);
-  CHECKBOX_pause = glui_trainer->add_checkbox_to_panel(panel_explore,"Pause",&trainer_pause,TRAINER_PAUSE,TRAINER_CB);
+  CHECKBOX_outline = glui_trainer->add_checkbox_to_panel(panel_explore,_("Show walls"),&trainer_outline,TRAINEROUTLINE,TRAINER_CB);
+  CHECKBOX_pause = glui_trainer->add_checkbox_to_panel(panel_explore,_("Pause"),&trainer_pause,TRAINER_PAUSE,TRAINER_CB);
 
   update_trainer_outline();
-  panel_move = glui_trainer->add_panel_to_panel(panel_explore,"Move",false);
-  TRANS_leftright_inout = glui_trainer->add_translation_to_panel(panel_move,"Horizontal",
+  panel_move = glui_trainer->add_panel_to_panel(panel_explore,_("Move"),false);
+  TRANS_leftright_inout = glui_trainer->add_translation_to_panel(panel_move,_("Horizontal"),
     GLUI_TRANSLATION_XY,trainer_xzy,TRAINER_LEFTRIGHT_INOUT,ROTATE_CB);
   glui_trainer->add_column_to_panel(panel_move,false);
 
-  TRANS_updown = glui_trainer->add_translation_to_panel(panel_move,"Vertical",
+  TRANS_updown = glui_trainer->add_translation_to_panel(panel_move,_("Vertical"),
     GLUI_TRANSLATION_Y,trainer_xzy+2,TRAINER_UPDOWN,ROTATE_CB);
   glui_trainer->add_column_to_panel(panel_move,false);
 
-  TRANS_az_elev = glui_trainer->add_translation_to_panel(panel_move,"Rotate",
+  TRANS_az_elev = glui_trainer->add_translation_to_panel(panel_move,_("Rotate"),
     GLUI_TRANSLATION_XY,trainer_ab,TRAINER_AZ_ELEV,ROTATE_CB);
 
   update_trainer_moves();

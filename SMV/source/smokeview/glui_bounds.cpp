@@ -722,7 +722,7 @@ extern "C" void glui_bounds_setup(int main_window){
   BUTTON_script_stop->disable();
 
   panel_script1b = glui_bounds->add_panel_to_panel(panel_script1,"",false);
-  BUTTON_script_runscript=glui_bounds->add_button_to_panel(panel_script1b,"Run script",SCRIPT_RUNSCRIPT,Script_CB);
+  BUTTON_script_runscript=glui_bounds->add_button_to_panel(panel_script1b,_("Run script"),SCRIPT_RUNSCRIPT,Script_CB);
   glui_bounds->add_column_to_panel(panel_script1b,false);
   LIST_scriptlist = glui_bounds->add_listbox_to_panel(panel_script1b,_("Select:"),&script_index,SCRIPT_LIST,Script_CB);
     {
@@ -1265,11 +1265,11 @@ extern "C"  void glui_script_disable(void){
         strcpy(script_renderfile,fdsprefix);
         strcat(script_renderfile,"_");
         strcat(script_renderfile,suffix);
-        strcpy(label,"Render: ");
+        strcpy(label,_("Render: "));
         strcat(label,script_renderfile);
       }
       else{
-        strcpy(label,"Render");
+        strcpy(label,_("Render"));
       }
       BUTTON_script_render->set_name(label);
     }
@@ -1298,7 +1298,7 @@ extern "C"  void glui_script_disable(void){
       id = LIST_scriptlist->get_int_val();
       name = get_scriptfilename(id);
       if(name!=NULL&&strlen(name)>0){
-        strcpy(label,"Run: ");
+        strcpy(label,_("Run: "));
         strcat(label,name);
         BUTTON_script_runscript->set_name(label);
       }
@@ -1345,7 +1345,7 @@ extern "C"  void glui_script_disable(void){
       }
       break;
     case SCRIPT_EDIT_INI:
-      strcpy(label,"Save ");
+      strcpy(label,_("Save "));
       strcat(label,fdsprefix);
       trim(script_inifile_suffix);
       if(strlen(script_inifile_suffix)>0){

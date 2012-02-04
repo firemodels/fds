@@ -292,7 +292,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   glui_3dsmoke->add_column_to_panel(panel_overall,false);
 
   if(nvolrenderinfo>0){
-    panel_volume = glui_3dsmoke->add_panel_to_panel(panel_overall,"Volume Render Settings");
+    panel_volume = glui_3dsmoke->add_panel_to_panel(panel_overall,_("Volume Render Settings"));
     if(have_volcompressed==1){
       loadvolgroup = glui_3dsmoke->add_radiogroup_to_panel(panel_volume,&glui_load_volcompressed,LOAD_COMPRESSED_DATA,SMOKE_3D_CB);
         glui_3dsmoke->add_radiobutton_to_group(loadvolgroup,_("Load full data"));
@@ -303,7 +303,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     if(have_volcompressed==1){
       SMOKE_3D_CB(LOAD_COMPRESSED_DATA);
     }
-    glui_3dsmoke->add_checkbox_to_panel(panel_volume,"Display data as b/w",&volbw);
+    glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Display data as b/w"),&volbw);
 #ifdef pp_MOUSEDOWN
     glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Show data while moving scene"),&show_volsmoke_moving);
 #endif
@@ -335,7 +335,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   }
 
   if(nsmoke3dinfo>0){
-    panel_slices = glui_3dsmoke->add_panel_to_panel(panel_overall,"Slices");
+    panel_slices = glui_3dsmoke->add_panel_to_panel(panel_overall,_("Slices"));
     panel_slices->set_alignment(GLUI_ALIGN_LEFT);
  
 #ifdef pp_GPU
