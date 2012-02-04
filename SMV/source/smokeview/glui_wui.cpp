@@ -82,7 +82,7 @@ extern "C" void glui_wui_setup(int main_window){
 //  glui_labels->add_statictext_to_panel(panel_tick2,"                    x");
 //  glui_labels->add_column_to_panel(panel_tick2,false);
 
-    glui_wui->add_statictext_to_panel(panel_terrain_color,_("                  min"));
+    glui_wui->add_statictext_to_panel(panel_terrain_color,_("                  Min"));
     SPINNER_red_min=glui_wui->add_spinner_to_panel(panel_terrain_color,_("red"),GLUI_SPINNER_INT,
       terrain_rgba_zmin,TERRAIN_COLORS,WUI_CB);
     SPINNER_green_min=glui_wui->add_spinner_to_panel(panel_terrain_color,_("green"),GLUI_SPINNER_INT,
@@ -91,7 +91,7 @@ extern "C" void glui_wui_setup(int main_window){
       terrain_rgba_zmin+2,TERRAIN_COLORS,WUI_CB);
     glui_wui->add_column_to_panel(panel_terrain_color,false);
 
-    glui_wui->add_statictext_to_panel(panel_terrain_color,_("                  max"));
+    glui_wui->add_statictext_to_panel(panel_terrain_color,_("                  Max"));
     SPINNER_red_max=glui_wui->add_spinner_to_panel(panel_terrain_color,"",GLUI_SPINNER_INT,
       terrain_rgba_zmax,TERRAIN_COLORS,WUI_CB);
     SPINNER_green_max=glui_wui->add_spinner_to_panel(panel_terrain_color,"",GLUI_SPINNER_INT,

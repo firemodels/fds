@@ -123,7 +123,7 @@ extern "C" void glui_labels_setup(int main_window){
   if(showdisplay_dialog==0)glui_labels->hide();
 
   panel_label1 = glui_labels->add_rollout("General Settings",true);
-  CHECKBOX_labels_colorbar=glui_labels->add_checkbox_to_panel(panel_label1,_("Color bar"),&visColorLabels,LABELS_label,Labels_CB);
+  CHECKBOX_labels_colorbar=glui_labels->add_checkbox_to_panel(panel_label1,_("Colorbar"),&visColorLabels,LABELS_label,Labels_CB);
   CHECKBOX_labels_timebar=glui_labels->add_checkbox_to_panel(panel_label1,_("Time bar"),&visTimeLabels,LABELS_label,Labels_CB);
   CHECKBOX_labels_timelabel=glui_labels->add_checkbox_to_panel(panel_label1,_("Time label"),&visTimelabel,LABELS_label,Labels_CB);
   CHECKBOX_labels_framelabel=glui_labels->add_checkbox_to_panel(panel_label1,_("Frame label"),&visFramelabel,FRAME_label,Labels_CB);

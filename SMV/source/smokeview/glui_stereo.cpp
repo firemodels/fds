@@ -64,7 +64,7 @@ extern "C" void glui_stereo_setup(int main_window){
   panel_stereo_method = glui_stereo->add_panel(_("Stereo Method"));
   RADIO_showstereo = glui_stereo->add_radiogroup_to_panel(panel_stereo_method,&showstereo,STEREO_SHOW,STEREO_CB);
   glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Off"));
-  RADIO_seq=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Sucessive frames"));
+  RADIO_seq=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Successive frames"));
   if(videoSTEREO==0)RADIO_seq->disable();
   glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Left/Right"));
   glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Red/Blue"));

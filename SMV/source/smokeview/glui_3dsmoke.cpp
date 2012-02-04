@@ -395,7 +395,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     panel_absorption = glui_3dsmoke->add_panel_to_panel(panel_overall,_("Absorption adjustments"));
     panel_absorption->set_alignment(GLUI_ALIGN_LEFT);
     alphagroup = glui_3dsmoke->add_radiogroup_to_panel(panel_absorption,&adjustalphaflag);
-    glui_3dsmoke->add_radiobutton_to_group(alphagroup,_("none"));
+    glui_3dsmoke->add_radiobutton_to_group(alphagroup,_("None"));
     glui_3dsmoke->add_radiobutton_to_group(alphagroup,_("adjust off-center"));
     glui_3dsmoke->add_radiobutton_to_group(alphagroup,_("zero at boundaries"));
     glui_3dsmoke->add_radiobutton_to_group(alphagroup,_("both"));

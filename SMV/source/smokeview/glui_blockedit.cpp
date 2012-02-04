@@ -97,7 +97,7 @@ extern "C" void glui_edit_setup(int main_window){
       }
     }
     else{
-      surfacelists[NOT_USED]->add_item(0,_("none"));
+      surfacelists[NOT_USED]->add_item(0,_("None"));
       surface_indices[NOT_USED]=0;
       surface_indices_bak[NOT_USED]=surface_indices[NOT_USED];
     }

@@ -5329,8 +5329,8 @@ updatemenu=0;
       if(visTitle1==0){glutAddMenuEntry(_("User title 1"),1);}
     }
     if(strlen(TITLE2)!=0){
-      if(visTitle2==1){glutAddMenuEntry(_("*User Title 2"),2);}
-      if(visTitle2==0){glutAddMenuEntry(_("User Title 2"),2);}
+      if(visTitle2==1){glutAddMenuEntry(_("*User title 2"),2);}
+      if(visTitle2==0){glutAddMenuEntry(_("User title 2"),2);}
     }
     glutAddMenuEntry(_("Show all"),3);
     glutAddMenuEntry(_("Hide all"),4);
@@ -5339,8 +5339,8 @@ updatemenu=0;
 /* --------------------------------label menu -------------------------- */
 
   CREATEMENU(labelmenu,LabelMenu);
-  if(visColorLabels==1)glutAddMenuEntry(_("*Color bars"),0);
-  if(visColorLabels==0)glutAddMenuEntry(_("Color bars"),0);
+  if(visColorLabels==1)glutAddMenuEntry(_("*Colorbars"),0);
+  if(visColorLabels==0)glutAddMenuEntry(_("Colorbars"),0);
   if(visTimeLabels==1)glutAddMenuEntry(_("*Time bars"),1);
   if(visTimeLabels==0)glutAddMenuEntry(_("Time bars"),1);
   if(nticks>0){
@@ -5594,10 +5594,10 @@ updatemenu=0;
               if(partclassj->col_length>=0||partclassj->device_name!=NULL||
                 (partclassj->col_u_vel>=0&&partclassj->col_v_vel>=0&&partclassj->col_w_vel>=0)){
                 if(partclassj->vis_type==PART_LINES){
-                  glutAddMenuEntry(_("    *lines"),-10-5*j-PART_LINES);
+                  glutAddMenuEntry(_("    *Lines"),-10-5*j-PART_LINES);
                 }
                 else{
-                  glutAddMenuEntry(_("    lines"),-10-5*j-PART_LINES);
+                  glutAddMenuEntry(_("    Lines"),-10-5*j-PART_LINES);
                 }
               }
             }
@@ -6335,8 +6335,15 @@ updatemenu=0;
   if(nvolsmoke3dloaded>0){
     CREATEMENU(showvolsmoke3dmenu,ShowVolSmoke3DMenu);
     if(nvolsmoke3dloaded>1){
-      glutAddMenuEntry(_("3D smoke (volume rendered) - Show All"),SHOW_ALL);
-      glutAddMenuEntry(_("3D smoke (volume rendered) - Hide All"),HIDE_ALL);
+      char vlabel[256];
+
+      strcpy(vlabel,_("3D smoke (volume rendered)"));
+      strcat(vlabel,_(" - Show all"));
+      glutAddMenuEntry(vlabel,SHOW_ALL);
+
+      strcpy(vlabel,_("3D smoke (volume rendered)"));
+      strcat(vlabel,_(" - Hide all"));
+      glutAddMenuEntry(vlabel,HIDE_ALL);
       glutAddMenuEntry("-",999);
     }
     for(i=0;i<nmeshes;i++){
@@ -6429,7 +6436,10 @@ updatemenu=0;
       glutAddSubMenu(_("3D smoke"),smoke3dshowmenu);
   }
   if(nvolsmoke3dloaded>0){
-    glutAddSubMenu("3D smoke (volume rendered)",showvolsmoke3dmenu);
+    char vlabel[256];
+
+    strcpy(vlabel,_("3D smoke (volume rendered)"));
+    glutAddSubMenu(vlabel,showvolsmoke3dmenu);
   }
 
   nvslice0=0, nvslice1=0, nvslice2=0;
@@ -7668,7 +7678,13 @@ updatemenu=0;
 
     if(nvolsmoke3dloaded>0){
       CREATEMENU(unloadvolsmoke3dmenu,UnLoadVolSmoke3DMenu);
-      if(nvolsmoke3dloaded>1) glutAddMenuEntry(_("3D smoke (volume rendered) - all meshes"),UNLOAD_ALL);
+      if(nvolsmoke3dloaded>1){
+        char vlabel[256];
+
+        strcpy(vlabel,_("3D smoke (volume rendered)"));
+        strcat(vlabel,_(" - All meshes"));
+        glutAddMenuEntry(vlabel,UNLOAD_ALL);
+      }
       for(i=0;i<nmeshes;i++){
         mesh *meshi;
         volrenderdata *vr;
@@ -7683,7 +7699,11 @@ updatemenu=0;
     if(nvolrenderinfo>0){
       CREATEMENU(loadvolsmoke3dmenu,LoadVolSmoke3DMenu);
       if(nvolrenderinfo>1){
-        glutAddMenuEntry("3D smoke (volume rendered) - all meshes",LOAD_ALL);
+        char vlabel[256];
+
+        strcpy(vlabel,_("3D smoke (volume rendered)"));
+        strcat(vlabel,_(" - All meshes"));
+        glutAddMenuEntry(vlabel,LOAD_ALL);
         glutAddMenuEntry("-",999);
       }
       for(i=0;i<nmeshes;i++){
@@ -8366,7 +8386,10 @@ updatemenu=0;
         glutAddSubMenu(loadmenulabel,loadsmoke3dmenu);
       }
       if(nvolrenderinfo>0){
-        glutAddSubMenu("3D smoke (volume rendered)",loadvolsmoke3dmenu);
+        char vlabel[256];
+
+        strcpy(vlabel,_("3D smoke (volume rendered)"));
+        glutAddSubMenu(vlabel,loadvolsmoke3dmenu);
       }
       if(manual_terrain==1&&nterraininfo>0){
         glutAddSubMenu(_("Terrain"),loadterrainmenu);

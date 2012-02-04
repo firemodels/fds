@@ -53,7 +53,13 @@ int main(int argc, char **argv){
         char c;
    
         c = *beg2;
-        if((c<'a'||c>'z')&&(c<'A'||c>'Z'))continue;
+        if((c<'a'||c>'z')&&(c<'A'||c>'Z')){
+          if((c=='1'||c=='2'||c=='3')&&(*(beg2+1)=='D'||*(beg2+1)=='d')){
+          }
+          else{
+            continue;
+          }
+        }
         beg=beg2-1;
         *beg='"';
         break;
