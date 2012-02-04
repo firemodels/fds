@@ -1,16 +1,12 @@
 SOURCE_DIR = ../../source/
-INC_DIR = -I $(SOURCE_DIR)/makepo  -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/include
+INC_DIR = -I $(SOURCE_DIR)/makepo  -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/include2
 FILTERC =
 FILTERF =
 
 VPATH = $(SOURCE_DIR)/makepo:$(SOURCE_DIR)/shared
 bin = .
 
-#LINUX32FORTLIBDIR = /opt/intel/fc/10.1.021/lib
-LINUX32FORTLIBDIR = /opt/intel/11/lib/ia32
-LINUX64FORTLIBDIR = /opt/intel/11/lib/intel64
-OSX32FORTLIBDIR = /opt/intel/Compiler/11.1/080/lib
-OSX64FORTLIBDIR = /opt/intel/Compiler/11.1/080/lib
+LINUX64FORTLIBDIR = $(IFORT_COMPILER)/lib/intel64
 
 # Definition of the object variables
 
