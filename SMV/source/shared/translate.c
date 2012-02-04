@@ -170,8 +170,12 @@ char *translate(char *string){
   // find leading non-alpha characters
 
   for(i=0;i<len;i++){
+    char C,D;
+
     c=string[i];
-    if((c>='a'&&c<='z')||(c>='A'&&c<='Z')){
+    C=toupper(c);
+    D=toupper(string[i+1]);
+    if((C>='A'&&C<='Z')||( (c=='1'||c=='2'||c=='3') && D=='D' ) ){
       nchars_before=i;
       string_in=string+i;
       if(nchars_before>0){
