@@ -2,7 +2,7 @@
 #
 set here=`pwd`
 set SOURCEDIR=../source/smokeview
-set MAKEPO=../makepo/INTEL_LINUX_64/makepo_linux_64
+set MAKEPO=../makepo/intel_linux_64/makepo_linux_64
 
 foreach lang (de fr it se)
 echo
