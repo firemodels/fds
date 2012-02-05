@@ -1126,6 +1126,10 @@ void ApertureMenu(int value){
 /* ------------------ LanguageMenu ------------------------ */
 #ifdef pp_LANG
 void LanguageMenu(int value){
+  updatemenu=1;
+  if(opengldefined==1){
+    glutPostRedisplay();
+  }
   if(value==-1){
     strcpy(startup_lang_code,"en");
   }
@@ -6831,14 +6835,38 @@ updatemenu=0;
 
 /* --------------------------------languagemenu -------------------------- */
 #ifdef pp_LANG
-  if(nlanglistinfo>0){
+  if(show_lang_menu==1&&nlanglistinfo>0){
     CREATEMENU(languagemenu,LanguageMenu);
-    glutAddMenuEntry(_("English"),-1);
+    glutAddMenuEntry(_("Select language for current case"),-999);
+    glutAddMenuEntry(_("  (Restart Smokeview to activate)"),-999);
+    glutAddMenuEntry(_("To use with all cases, add two letter code to"),-999);
+    glutAddMenuEntry(_("   global smokeview.ini (keyword: STARTUPLANG)"),-999);
+    strcpy(menulabel,"");
+    if(strcmp(startup_lang_code,"en")==0){
+      strcat(menulabel,"*");
+    }
+    strcat(menulabel,_("English"));
+    strcat(menulabel," (en)");
+    glutAddMenuEntry(menulabel,-1);
     for(i=0;i<nlanglistinfo;i++){
       langlistdata *langi;
 
       langi = langlistinfo + i;
-      glutAddMenuEntry(langi->lang_name,i);
+      strcpy(menulabel,"");
+      if(strcmp(langi->lang_code,startup_lang_code)==0){
+        strcat(menulabel,"*");
+      }
+      if(strcmp(langi->lang_name,langi->lang_code)==0){
+        strcat(menulabel,_("Language code: "));
+        strcat(menulabel,langi->lang_code);
+      }
+      else{
+        strcat(menulabel,langi->lang_name);
+        strcat(menulabel," (");
+        strcat(menulabel,langi->lang_code);
+        strcat(menulabel,")");
+      }
+      glutAddMenuEntry(menulabel,i);
     }
   }
 #endif
@@ -6858,7 +6886,7 @@ updatemenu=0;
 #endif
   if(trainer_active==1)glutAddMenuEntry(_("Trainer menu"),2);
 #ifdef pp_LANG
-  if(nlanglistinfo>0)glutAddSubMenu(_("Language"),languagemenu);
+  if(show_lang_menu==1&&nlanglistinfo>0)glutAddSubMenu(_("Language"),languagemenu);
 #endif
 
   /* --------------------------------reset menu -------------------------- */

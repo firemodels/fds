@@ -211,8 +211,7 @@ void init_lang(void){
       strcpy(langi->lang_name,_("Spanish"));
     }
     else{
-      strcpy(langi->lang_name,"Language code: ");
-      strcat(langi->lang_name,langi->lang_code);
+      strcpy(langi->lang_name,langi->lang_code);
     }
     nlanglistinfo++;
   }

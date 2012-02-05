@@ -486,6 +486,7 @@ void parse_commandline(int argc, char **argv){
         langlen=strlen(lang);
         NewMemory((void **)&tr_name,langlen+48+1);
         strcpy(tr_name,lang);
+        show_lang_menu=1;
       }
     }
 #endif    

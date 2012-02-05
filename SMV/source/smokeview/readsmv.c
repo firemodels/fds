@@ -7710,6 +7710,9 @@ int readini2(char *inifile, int localfile){
       bufptr=trim_front(buffer);
       strncpy(startup_lang_code,bufptr,2);
       startup_lang_code[2]='\0';
+      if(strcmp(startup_lang_code,"en")!=0){
+        show_lang_menu=1;
+      }
       if(tr_name==NULL){
         int langlen;
 

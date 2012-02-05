@@ -23,7 +23,7 @@
 
 #ifdef pp_LANG
 SVEXTERN langlistdata SVDECL(*langlistinfo,NULL);
-SVEXTERN int nlanglistinfo;
+SVEXTERN int nlanglistinfo,SVDECL(show_lang_menu,0);
 SVEXTERN char startup_lang_code[3];
 #endif
 
