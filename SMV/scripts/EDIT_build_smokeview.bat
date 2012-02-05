@@ -23,4 +23,4 @@ call %envfile%
 
 %svn_drive%
 cd %svn_root%\SMV\
-start wordpad build_smokeview.html
+start notepad build_smokeview.html
