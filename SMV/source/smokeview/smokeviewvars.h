@@ -21,6 +21,12 @@
 #include "update.h"
 #include "smv_endian.h"
 
+#ifdef pp_LANG
+SVEXTERN langlistdata SVDECL(*langlistinfo,NULL);
+SVEXTERN int nlanglistinfo;
+SVEXTERN char startup_lang_code[3];
+#endif
+
 #ifdef pp_GPUTHROTTLE
   SVEXTERN float SVDECL(thisGPUtime,0.0), SVDECL(lastGPUtime,0.0);
   SVEXTERN float SVDECL(thisMOTIONtime,0.0), SVDECL(lastMOTIONtime,0.0);

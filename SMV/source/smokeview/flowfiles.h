@@ -9,6 +9,15 @@
 #include "histogram.h"
 #include "string_util.h"
 
+
+/* --------------------------  langlistdata ------------------------------------ */
+
+typedef struct {
+  char *file;
+  char lang_code[3];
+  char lang_name[32];
+} langlistdata;
+
 /* --------------------------  csvdata ------------------------------------ */
 
 typedef struct {

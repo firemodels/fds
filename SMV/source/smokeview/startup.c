@@ -155,6 +155,71 @@ void Init(void){
   updateShow();
 }
 
+/* ------------------ init_lang ------------------------ */
+
+#ifdef pp_LANG
+void init_lang(void){
+  int maxlangs, nlangs;
+  filelistdata *filelistinfo;
+  int i;
+
+  nlanglistinfo=0;
+  maxlangs = get_nfilelist(smokeview_bindir,"*.po");
+  if(maxlangs==0)return;
+  nlangs = get_filelist(smokeview_bindir,"*.po", maxlangs, &filelistinfo);
+  if(nlangs==0)return;
+  for(i=0;i<nlangs;i++){
+    char *file;
+    filelistdata *filelisti;
+
+    filelisti = filelistinfo + i;
+    file=filelisti->file;
+    if(strstr(file,"template")!=NULL||filelisti->type==1)continue;
+    nlanglistinfo++;
+  }
+  if(nlanglistinfo==0)return;
+  NewMemory((void **)&langlistinfo,nlanglistinfo*sizeof(langlistdata));
+  nlanglistinfo=0;
+  for(i=0;i<nlangs;i++){
+    char *file;
+    filelistdata *filelisti;
+    langlistdata *langi;
+    int len;
+    char *lang_code, lang_name[32];
+
+    langi = langlistinfo + nlanglistinfo;
+    filelisti = filelistinfo + i;
+    file=filelisti->file;
+    if(strstr(file,"template")!=NULL||filelisti->type==1)continue;
+    trim(file);
+    file=trim_front(file);
+    len=strlen(file);
+    langi->file=file;
+    strncpy(langi->lang_code,file+len-5,2);
+    langi->lang_code[2]='\0';
+    lang_code=langi->lang_code;
+    if(strcmp(lang_code,"fr")==0){
+      strcpy(langi->lang_name,_("French"));
+    }
+    else if(strcmp(lang_code,"it")==0){
+      strcpy(langi->lang_name,_("Italian"));
+    }
+    else if(strcmp(lang_code,"de")==0){
+      strcpy(langi->lang_name,_("German"));
+    }
+    else if(strcmp(lang_code,"es")==0){
+      strcpy(langi->lang_name,_("Spanish"));
+    }
+    else{
+      strcpy(langi->lang_name,"Language code: ");
+      strcat(langi->lang_name,langi->lang_code);
+    }
+    nlanglistinfo++;
+  }
+  init_translate(smokeview_bindir,tr_name);
+}
+#endif
+
 /* ------------------ setup_case ------------------------ */
 
 int setup_case(int argc, char **argv){
@@ -231,6 +296,9 @@ int setup_case(int argc, char **argv){
   readini(0);
   readboundini();
   if(use_graphics==0)return 0;
+#ifdef pp_LANG
+  init_lang();
+#endif
 
   if(sb_atstart==1)smooth_blockages();
 
@@ -368,7 +436,6 @@ void setup_glut(int argc, char **argv){
   }
   rgb_plot3d_contour[nrgb-2]=&rgb_full[0][0];
   rgb_plot3d_contour[nrgb-1]=&rgb_full[255][0];
-  init_translate(smokeview_bindir,tr_name);
 }
 
 /* ------------------ get_opengl_version ------------------------ */
@@ -1090,6 +1157,9 @@ void init_texturedir(void){
 void initvars(void){
   int i;
 
+#ifdef pp_LANG
+  strcpy(startup_lang_code,"en");
+#endif
   mat_specular_orig[0]=0.5f;
   mat_specular_orig[1]=0.5f;
   mat_specular_orig[2]=0.2f;

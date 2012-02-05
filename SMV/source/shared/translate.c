@@ -45,6 +45,7 @@ int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr){
   int doit;
 
   ntrinfo_local=0;
+  if(file==NULL)return 0;
   stream=fopen(file,"r");
   if(stream==NULL)return 0;
 
@@ -147,13 +148,13 @@ void init_translate(char *bindir, char *tr_name){
     }
     tr_otherlang=parse_lang(smokeview_lang,&trinfo,&ntrinfo);
     if(tr_otherlang==1){
-      printf(_("Using translation file: %s"),smokeview_lang);
+      printf("Using translation file: %s",smokeview_lang);
       printf("\n");
     }
     else{
-      printf(_("Failed to parse translation file: %s"),smokeview_lang);
+      printf("Failed to parse translation file: %s",smokeview_lang);
       printf("\n");
-      printf("%s\n",_("Menus will be in English"));
+      printf("%s\n","Menus will be in English");
     }
   }
 }

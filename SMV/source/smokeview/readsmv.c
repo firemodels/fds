@@ -7701,6 +7701,25 @@ int readini2(char *inifile, int localfile){
       }
       continue;
     }
+#ifdef pp_LANG
+    if(match(buffer,"STARTUPLANG")==1){
+      char *bufptr;
+
+      fgets(buffer,255,stream);
+      trim(buffer);
+      bufptr=trim_front(buffer);
+      strncpy(startup_lang_code,bufptr,2);
+      startup_lang_code[2]='\0';
+      if(tr_name==NULL){
+        int langlen;
+
+        langlen=strlen(bufptr);
+        NewMemory((void **)&tr_name,langlen+48+1);
+        strcpy(tr_name,bufptr);
+      }
+      continue;
+    }
+#endif
     if(match(buffer,"MESHVIS")==1){
       int nm;
       mesh *meshi;
@@ -10575,6 +10594,10 @@ void writeini(int flag){
     fprintf(fileout,"TRAINERMODE\n");
     fprintf(fileout," %i\n",trainer_mode);
   }
+#ifdef pp_LANG
+  fprintf(fileout,"STARTUPLANG\n");
+  fprintf(fileout," %s\n",startup_lang_code);
+#endif
   fprintf(fileout,"SHOWOPENVENTS\n");
   fprintf(fileout," %i %i\n",visOpenVents,visOpenVentsAsOutline);
   fprintf(fileout,"SHOWDUMMYVENTS\n");

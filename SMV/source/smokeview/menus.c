@@ -1123,6 +1123,24 @@ void ApertureMenu(int value){
   aperture=apertures[apertureindex];
 }
 
+/* ------------------ LanguageMenu ------------------------ */
+#ifdef pp_LANG
+void LanguageMenu(int value){
+  if(value==-1){
+    strcpy(startup_lang_code,"en");
+  }
+  else{
+    langlistdata *langi;
+
+    if(value>=0&&value<nlanglistinfo){
+      langi = langlistinfo + value;
+
+      strcpy(startup_lang_code,langi->lang_code);
+    }
+  }
+  writeini(LOCAL_INI);
+}
+#endif
 /* ------------------ FontMenu ------------------------ */
 
 void FontMenu(int value){
@@ -4326,7 +4344,7 @@ static int showhideslicemenu=0,showvslicemenu=0;
 static int plot3dshowmenu=0, staticvariablemenu=0, helpmenu=0;
 static int vectorskipmenu=0,unitsmenu=0;
 static int isosurfacemenu=0, isovariablemenu=0, levelmenu=0;
-static int fontmenu=0, aperturemenu=0,dialogmenu=0,zoommenu=0;
+static int fontmenu=0, aperturemenu=0,dialogmenu=0,zoommenu=0,languagemenu=0;
 static int gridslicemenu=0, blockagemenu=0, immersedmenu=0, loadpatchmenu=0, ventmenu=0;
 static int loadisomenu=0, isosurfacetypemenu=0;
 static int geometrymenu=0, loadunloadmenu=0, reloadmenu=0, disclaimermenu=0, terrain_showmenu=0;
@@ -6811,6 +6829,19 @@ updatemenu=0;
     glutAddMenuEntry(_("Reset"),-1);
   }
 
+/* --------------------------------languagemenu -------------------------- */
+#ifdef pp_LANG
+  if(nlanglistinfo>0){
+    CREATEMENU(languagemenu,LanguageMenu);
+    glutAddMenuEntry(_("English"),-1);
+    for(i=0;i<nlanglistinfo;i++){
+      langlistdata *langi;
+
+      langi = langlistinfo + i;
+      glutAddMenuEntry(langi->lang_name,i);
+    }
+  }
+#endif
 /* --------------------------------option menu -------------------------- */
 
   CREATEMENU(optionmenu,OptionMenu);
@@ -6826,7 +6857,10 @@ updatemenu=0;
   glutAddMenuEntry("Benchmark",1);
 #endif
   if(trainer_active==1)glutAddMenuEntry(_("Trainer menu"),2);
-  
+#ifdef pp_LANG
+  if(nlanglistinfo>0)glutAddSubMenu(_("Language"),languagemenu);
+#endif
+
   /* --------------------------------reset menu -------------------------- */
 
   CREATEMENU(resetmenu,ResetMenu);
