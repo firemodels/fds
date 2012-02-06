@@ -16,6 +16,7 @@ char IOtour_revision[]="$Revision$";
 #include <GL/glut.h>
 #endif
 
+#include "string_util.h"
 #include "smokeviewvars.h"
 
 void drawcir(float *center, float rad, float *color);

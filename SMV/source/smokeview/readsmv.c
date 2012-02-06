@@ -24,6 +24,7 @@ char readsmv_revision[]="$Revision$";
 #endif
 #include <pthread.h>
 
+#include "string_util.h"
 #include "smokeviewvars.h"
 
 #define BREAK \

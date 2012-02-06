@@ -16,6 +16,7 @@ extern "C" char glui_wui_revision[]="$Revision$";
 #endif
 #include <math.h>
 
+#include "string_util.h"
 #include "smokeviewvars.h"
 
 GLUI_Panel *panel_terrain=NULL;

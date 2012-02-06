@@ -14,6 +14,7 @@ char IOzone_revision[]="$Revision$";
 #include "glew.h"
 #endif
 
+#include "string_util.h"
 #include "smokeviewvars.h"
 
 void drawtrunccone(float d1, float d2, float height, unsigned char *rgbcolor);

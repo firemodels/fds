@@ -11,6 +11,7 @@ char IOobject_revision[]="$Revision$";
 #include <math.h>
 #include <string.h>
 
+#include "string_util.h"
 #include "smokeviewvars.h"
 
 #define CIRCLE_SEGS 12

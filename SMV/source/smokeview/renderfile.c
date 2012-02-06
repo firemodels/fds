@@ -12,6 +12,7 @@ char renderfile_revision[]="$Revision$";
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include "string_util.h"
 #include "smokeviewvars.h"
 
 #ifdef pp_OSX

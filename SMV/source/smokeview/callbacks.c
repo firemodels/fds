@@ -17,6 +17,7 @@ char callbacks_revision[]="$Revision$";
 #include <GL/glut.h>
 #endif
 
+#include "string_util.h"
 #include "smokeviewvars.h"
 
 #define KEY_ALT 0

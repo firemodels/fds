@@ -13,6 +13,7 @@ char getdatacolors_revision[]="$Revision$";
 #include <string.h>
 #include <math.h>
 
+#include "string_util.h"
 #include "smokeviewvars.h"
 
 #define EXPMIN -2

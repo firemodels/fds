@@ -14,7 +14,6 @@
 #include "smokeviewdefs.h"
 #include "smokeheaders.h"
 #include "threader.h"
-#include "string_util.h"
 #include "file_util.h"
 #include "IOvolsmoke.h"
 #include "MALLOC.h"
@@ -23,7 +22,7 @@
 
 #ifdef pp_LANG
 SVEXTERN langlistdata SVDECL(*langlistinfo,NULL);
-SVEXTERN int nlanglistinfo,SVDECL(show_lang_menu,0);
+SVEXTERN int nlanglistinfo,SVDECL(show_lang_menu,1);
 SVEXTERN char startup_lang_code[3];
 #endif
 

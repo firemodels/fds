@@ -10,6 +10,7 @@ char getdatabounds_revision[]="$Revision$";
 #include <stdlib.h>
 #include <math.h>
 
+#include "string_util.h"
 #include "smokeviewvars.h"
 
 /* ------------------ adjustdatabounds ------------------------ */

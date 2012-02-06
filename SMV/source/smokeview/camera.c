@@ -11,6 +11,7 @@ char camera_revision[]="$Revision$";
 #include <stdio.h>
 #include <string.h>
 
+#include "string_util.h"
 #include "smokeviewvars.h"
 
 /* ------------------ zoom2aperture ------------------------ */

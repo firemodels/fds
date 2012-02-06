@@ -19,6 +19,7 @@ char update_revision[]="$Revision$";
 #include <GL/glut.h>
 #endif
 
+#include "string_util.h"
 #include "smokeviewvars.h"
 #include "compress.h"
 

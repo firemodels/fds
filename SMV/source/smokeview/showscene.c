@@ -18,6 +18,7 @@
 // svn revision character string
 char showscene_revision[]="$Revision$";
 
+#include "string_util.h"
 #include "smokeviewvars.h"
 #include "viewports.h"
 

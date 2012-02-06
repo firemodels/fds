@@ -15,6 +15,7 @@ extern "C" char glui_blockedit_revision[]="$Revision$";
 #include <GL/glut.h>
 #endif
 
+#include "string_util.h"
 #include "smokeviewvars.h"
 
 #define XMIN_SPIN 20

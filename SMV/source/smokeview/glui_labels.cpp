@@ -16,6 +16,7 @@ extern "C" char glui_labels_revision[]="$Revision$";
 #endif
 #include <math.h>
 
+#include "string_util.h"
 #include "smokeviewvars.h"
 
 int nevacloaded,nplot3dloaded,nsmoke3dloaded,nisoloaded,nsliceloaded,nvsliceloaded,npartloaded,npatchloaded;

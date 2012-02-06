@@ -17,6 +17,7 @@ char IOboundary_revision[]="$Revision$";
 #endif
 
 #include "egz_stdio.h"
+#include "string_util.h"
 #include "smokeviewvars.h"
 
 int getpatchfacedir(mesh *gb, int i1, int i2, int j1, int j2, int k1, int k2, 

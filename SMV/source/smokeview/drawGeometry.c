@@ -16,6 +16,7 @@ char drawGeometry_revision[]="$Revision$";
 #include <GL/glut.h>
 #endif
 
+#include "string_util.h"
 #include "smokeviewvars.h"
 
 cadgeom *current_cadgeom;

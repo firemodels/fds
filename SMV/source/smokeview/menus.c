@@ -18,6 +18,7 @@ char menu_revision[]="$Revision$";
 #include <GL/glut.h>
 #endif
 
+#include "string_util.h"
 #include "smokeviewvars.h"
 
 /* dummy change to bump revision number to 5.1.5 */

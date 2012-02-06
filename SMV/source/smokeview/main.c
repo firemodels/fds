@@ -16,6 +16,7 @@ char main_revision[]="$Revision$";
 #include <GL/glut.h>
 #endif
 
+#include "string_util.h"
 #include "smokeviewvars.h"
 
 //  dummy change to update version to  5.6.3

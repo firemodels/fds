@@ -16,6 +16,7 @@ extern "C" char glui_message_revision[]="$Revision$";
 #endif
 #include <math.h>
 
+#include "string_util.h"
 #include "smokeviewvars.h"
 
 #ifdef pp_MESSAGE

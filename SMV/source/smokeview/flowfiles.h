@@ -7,7 +7,6 @@
 #include "contourdefs.h"
 #include "isodefs.h"
 #include "histogram.h"
-#include "string_util.h"
 
 
 /* --------------------------  langlistdata ------------------------------------ */

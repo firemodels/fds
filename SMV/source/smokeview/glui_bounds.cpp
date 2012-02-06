@@ -16,6 +16,7 @@ extern "C" char glui_bounds_revision[]="$Revision$";
 #endif
 #include <math.h>
 
+#include "string_util.h"
 #include "smokeviewvars.h"
 
 extern "C" void colorbar_global2local(void);

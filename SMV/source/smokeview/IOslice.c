@@ -18,6 +18,7 @@ char IOslice_revision[]="$Revision$";
 #endif
 
 #include "compress.h"
+#include "string_util.h"
 #include "smokeviewvars.h"
 #include "interp.h"
 

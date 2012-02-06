@@ -16,6 +16,7 @@ extern "C" char glui_colorbar_revision[]="$Revision$";
 #endif
 #include <math.h>
 
+#include "string_util.h"
 #include "smokeviewvars.h"
 
 //
@@ -39,6 +40,7 @@ GLUI_Panel *panel_cb6=NULL;
 GLUI_Panel *panel_cb7=NULL;
 GLUI_Panel *panel_cb8=NULL;
 GLUI_Panel *panel_cb9=NULL;
+GLUI_Panel *panel_cb10=NULL;
 
 GLUI_Listbox *LISTBOX_colorbar=NULL;
 GLUI *glui_colorbar=NULL;
@@ -265,10 +267,10 @@ extern "C" void glui_colorbar_setup(int main_window){
 
   colorbar_global2local();
 
-  panel_cb8 = glui_colorbar->add_panel("",GLUI_PANEL_NONE);
-  BUTTON_colorbar_save=glui_colorbar->add_button_to_panel(panel_cb8,_("Save settings"),COLORBAR_SAVE,COLORBAR_CB);
-  glui_colorbar->add_column_to_panel(panel_cb8,false);
-  BUTTON_colorbar_close=glui_colorbar->add_button_to_panel(panel_cb8,_("Close"),COLORBAR_CLOSE,COLORBAR_CB);
+  panel_cb10 = glui_colorbar->add_panel("",GLUI_PANEL_NONE);
+  BUTTON_colorbar_save=glui_colorbar->add_button_to_panel(panel_cb10,_("Save settings"),COLORBAR_SAVE,COLORBAR_CB);
+  glui_colorbar->add_column_to_panel(panel_cb10,false);
+  BUTTON_colorbar_close=glui_colorbar->add_button_to_panel(panel_cb10,_("Close"),COLORBAR_CLOSE,COLORBAR_CB);
 
   glui_colorbar->set_main_gfx_window( main_window );
 }
