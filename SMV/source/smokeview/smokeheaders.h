@@ -11,11 +11,13 @@
 #include "egz_stdio.h"
 #endif
 
+EXTERNCPP void glui_wui_rename(void);
 EXTERNCPP void glui_motion_rename(void);
 EXTERNCPP void glui_device_rename(void);
 EXTERNCPP void glui_edit_rename(void);
 EXTERNCPP void glui_stereo_rename(void);
 EXTERNCPP void glui_clip_rename(void);
+EXTERNCPP void glui_shooter_rename(void);
 EXTERNCPP void glui_colorbar_rename(void);
 EXTERNCPP void glui_tour_rename(void);
 EXTERNCPP void glui_labels_rename(void);

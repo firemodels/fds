@@ -58,12 +58,45 @@ GLUI_Spinner *SPINNER_blue_max=NULL;
 GLUI_Spinner *SPINNER_vertical_factor=NULL;
 GLUI_Spinner *SPINNER_fire_line_min=NULL;
 GLUI_Spinner *SPINNER_fire_line_max=NULL;
+GLUI_StaticText *STATIC_wui_1=NULL;
+GLUI_StaticText *STATIC_wui_2=NULL;
+GLUI_Button *BUTTON_wui_1=NULL;
+GLUI_Button *BUTTON_wui_2=NULL;
+GLUI_RadioButton *RADIObutton_wui_1a=NULL;
+GLUI_RadioButton *RADIObutton_wui_1b=NULL;
+GLUI_RadioButton *RADIObutton_wui_1c=NULL;
+GLUI_RadioButton *RADIObutton_wui_1d=NULL;
 
 /* ------------------ update_glui_wui ------------------------ */
 
 extern "C" void update_glui_wui(void){
   if(RADIO_terrain_type!=NULL){
     RADIO_terrain_type->set_int_val(visTerrainType);
+  }
+}
+
+/* ------------------ glui_wui_rename ------------------------ */
+
+extern "C" void glui_wui_rename(void){
+  if(nterraininfo>0){
+    panel_terrain_color=glui_wui->add_panel_to_panel(panel_terrain,_("3D surface color"));
+    STATIC_wui_1=glui_wui->add_statictext_to_panel(panel_terrain_color,_("                  Min"));
+    SPINNER_red_min=glui_wui->add_spinner_to_panel(panel_terrain_color,_("red"),GLUI_SPINNER_INT,terrain_rgba_zmin,TERRAIN_COLORS,WUI_CB);
+    SPINNER_green_min=glui_wui->add_spinner_to_panel(panel_terrain_color,_("green"),GLUI_SPINNER_INT,terrain_rgba_zmin+1,TERRAIN_COLORS,WUI_CB);
+    SPINNER_blue_min=glui_wui->add_spinner_to_panel(panel_terrain_color,_("blue"),GLUI_SPINNER_INT,terrain_rgba_zmin+2,TERRAIN_COLORS,WUI_CB);
+    STATIC_wui_2=glui_wui->add_statictext_to_panel(panel_terrain_color,_("                  Max"));
+    panel_terrain_type=glui_wui->add_panel_to_panel(panel_terrain_hidden1,_("Surface view"));
+    RADIObutton_wui_1a=glui_wui->add_radiobutton_to_group(RADIO_terrain_type,_("3D surface"));
+    RADIObutton_wui_1b=glui_wui->add_radiobutton_to_group(RADIO_terrain_type,_("2D stepped"));
+    RADIObutton_wui_1c=glui_wui->add_radiobutton_to_group(RADIO_terrain_type,_("2D lines"));
+    RADIO_texture=glui_wui->add_radiobutton_to_group(RADIO_terrain_type,_("Image"));
+    RADIObutton_wui_1d=glui_wui->add_radiobutton_to_group(RADIO_terrain_type,_("Hidden"));
+    panel_fire_line=glui_wui->add_panel_to_panel(panel_terrain_hidden1,_("Fire line"));
+    SPINNER_fire_line_min=glui_wui->add_spinner_to_panel(panel_fire_line,"chop below:",GLUI_SPINNER_FLOAT,&fire_line_min,TERRAIN_MIN,WUI_CB);
+    SPINNER_fire_line_max=glui_wui->add_spinner_to_panel(panel_fire_line,"color red above:",GLUI_SPINNER_FLOAT,&fire_line_max,TERRAIN_MAX,WUI_CB);
+    SPINNER_vertical_factor=glui_wui->add_spinner_to_panel(panel_terrain_hidden1,"vertical exaggeration",GLUI_SPINNER_FLOAT,&vertical_factor,TERRAIN_VERT,WUI_CB);
+    BUTTON_wui_1=glui_wui->add_button("Save settings",SAVE_SETTINGS,WUI_CB);
+    BUTTON_wui_2=glui_wui->add_button("Close",WUI_CLOSE,WUI_CB);
   }
 }
 
@@ -82,22 +115,16 @@ extern "C" void glui_wui_setup(int main_window){
 //  glui_labels->add_statictext_to_panel(panel_tick2,"                    x");
 //  glui_labels->add_column_to_panel(panel_tick2,false);
 
-    glui_wui->add_statictext_to_panel(panel_terrain_color,_("                  Min"));
-    SPINNER_red_min=glui_wui->add_spinner_to_panel(panel_terrain_color,_("red"),GLUI_SPINNER_INT,
-      terrain_rgba_zmin,TERRAIN_COLORS,WUI_CB);
-    SPINNER_green_min=glui_wui->add_spinner_to_panel(panel_terrain_color,_("green"),GLUI_SPINNER_INT,
-      terrain_rgba_zmin+1,TERRAIN_COLORS,WUI_CB);
-    SPINNER_blue_min=glui_wui->add_spinner_to_panel(panel_terrain_color,_("blue"),GLUI_SPINNER_INT,
-      terrain_rgba_zmin+2,TERRAIN_COLORS,WUI_CB);
+    STATIC_wui_1=glui_wui->add_statictext_to_panel(panel_terrain_color,_("                  Min"));
+    SPINNER_red_min=glui_wui->add_spinner_to_panel(panel_terrain_color,_("red"),GLUI_SPINNER_INT,terrain_rgba_zmin,TERRAIN_COLORS,WUI_CB);
+    SPINNER_green_min=glui_wui->add_spinner_to_panel(panel_terrain_color,_("green"),GLUI_SPINNER_INT,terrain_rgba_zmin+1,TERRAIN_COLORS,WUI_CB);
+    SPINNER_blue_min=glui_wui->add_spinner_to_panel(panel_terrain_color,_("blue"),GLUI_SPINNER_INT,terrain_rgba_zmin+2,TERRAIN_COLORS,WUI_CB);
     glui_wui->add_column_to_panel(panel_terrain_color,false);
 
-    glui_wui->add_statictext_to_panel(panel_terrain_color,_("                  Max"));
-    SPINNER_red_max=glui_wui->add_spinner_to_panel(panel_terrain_color,"",GLUI_SPINNER_INT,
-      terrain_rgba_zmax,TERRAIN_COLORS,WUI_CB);
-    SPINNER_green_max=glui_wui->add_spinner_to_panel(panel_terrain_color,"",GLUI_SPINNER_INT,
-      terrain_rgba_zmax+1,TERRAIN_COLORS,WUI_CB);
-    SPINNER_blue_max=glui_wui->add_spinner_to_panel(panel_terrain_color,"",GLUI_SPINNER_INT,
-      terrain_rgba_zmax+2,TERRAIN_COLORS,WUI_CB);
+    STATIC_wui_2=glui_wui->add_statictext_to_panel(panel_terrain_color,_("                  Max"));
+    SPINNER_red_max=glui_wui->add_spinner_to_panel(panel_terrain_color,"",GLUI_SPINNER_INT,terrain_rgba_zmax,TERRAIN_COLORS,WUI_CB);
+    SPINNER_green_max=glui_wui->add_spinner_to_panel(panel_terrain_color,"",GLUI_SPINNER_INT,terrain_rgba_zmax+1,TERRAIN_COLORS,WUI_CB);
+    SPINNER_blue_max=glui_wui->add_spinner_to_panel(panel_terrain_color,"",GLUI_SPINNER_INT,terrain_rgba_zmax+2,TERRAIN_COLORS,WUI_CB);
 
       SPINNER_red_min->set_int_limits(0,255,GLUI_LIMIT_CLAMP);
     SPINNER_green_min->set_int_limits(0,255,GLUI_LIMIT_CLAMP);
@@ -108,13 +135,12 @@ extern "C" void glui_wui_setup(int main_window){
 
     panel_terrain_hidden1=glui_wui->add_panel_to_panel(panel_terrain,"",GLUI_PANEL_NONE);
     panel_terrain_type=glui_wui->add_panel_to_panel(panel_terrain_hidden1,_("Surface view"));
-    RADIO_terrain_type=glui_wui->add_radiogroup_to_panel(panel_terrain_type,&visTerrainType,
-      TERRAIN_TYPE,WUI_CB);
-    glui_wui->add_radiobutton_to_group(RADIO_terrain_type,_("3D surface"));
-    glui_wui->add_radiobutton_to_group(RADIO_terrain_type,_("2D stepped"));
-    glui_wui->add_radiobutton_to_group(RADIO_terrain_type,_("2D lines"));
+    RADIO_terrain_type=glui_wui->add_radiogroup_to_panel(panel_terrain_type,&visTerrainType,TERRAIN_TYPE,WUI_CB);
+    RADIObutton_wui_1a=glui_wui->add_radiobutton_to_group(RADIO_terrain_type,_("3D surface"));
+    RADIObutton_wui_1b=glui_wui->add_radiobutton_to_group(RADIO_terrain_type,_("2D stepped"));
+    RADIObutton_wui_1c=glui_wui->add_radiobutton_to_group(RADIO_terrain_type,_("2D lines"));
     RADIO_texture=glui_wui->add_radiobutton_to_group(RADIO_terrain_type,_("Image"));
-    glui_wui->add_radiobutton_to_group(RADIO_terrain_type,_("Hidden"));
+    RADIObutton_wui_1d=glui_wui->add_radiobutton_to_group(RADIO_terrain_type,_("Hidden"));
 
     if(terrain_texture==NULL||terrain_texture->loaded==0){
       RADIO_texture->disable();
@@ -123,19 +149,15 @@ extern "C" void glui_wui_setup(int main_window){
     glui_wui->add_column_to_panel(panel_terrain_hidden1,false);
 
     panel_fire_line=glui_wui->add_panel_to_panel(panel_terrain_hidden1,_("Fire line"));
-    SPINNER_fire_line_min=glui_wui->add_spinner_to_panel(panel_fire_line,
-      "chop below:",GLUI_SPINNER_FLOAT,&fire_line_min,TERRAIN_MIN,WUI_CB);
-    SPINNER_fire_line_max=glui_wui->add_spinner_to_panel(panel_fire_line,
-      "color red above:",GLUI_SPINNER_FLOAT,&fire_line_max,TERRAIN_MAX,WUI_CB);
+    SPINNER_fire_line_min=glui_wui->add_spinner_to_panel(panel_fire_line,"chop below:",GLUI_SPINNER_FLOAT,&fire_line_min,TERRAIN_MIN,WUI_CB);
+    SPINNER_fire_line_max=glui_wui->add_spinner_to_panel(panel_fire_line,"color red above:",GLUI_SPINNER_FLOAT,&fire_line_max,TERRAIN_MAX,WUI_CB);
     glui_wui->add_button_to_panel(panel_fire_line,_("Update"),TERRAIN_FIRE_LINE_UPDATE,WUI_CB);
 
-    SPINNER_vertical_factor=glui_wui->add_spinner_to_panel(panel_terrain_hidden1,
-      "vertical exaggeration",GLUI_SPINNER_FLOAT,&vertical_factor,TERRAIN_VERT,WUI_CB);
+    SPINNER_vertical_factor=glui_wui->add_spinner_to_panel(panel_terrain_hidden1,"vertical exaggeration",GLUI_SPINNER_FLOAT,&vertical_factor,TERRAIN_VERT,WUI_CB);
      SPINNER_vertical_factor->set_float_limits(0.25,4.0,GLUI_LIMIT_CLAMP);
 
-    glui_wui->add_button("Save settings",SAVE_SETTINGS,WUI_CB);
-
-    glui_wui->add_button("Close",WUI_CLOSE,WUI_CB);
+    BUTTON_wui_1=glui_wui->add_button("Save settings",SAVE_SETTINGS,WUI_CB);
+    BUTTON_wui_2=glui_wui->add_button("Close",WUI_CLOSE,WUI_CB);
 
   }
 

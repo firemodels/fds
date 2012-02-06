@@ -1862,6 +1862,8 @@ void update_glui_names(void){
   glui_edit_rename();
   glui_device_rename();
   glui_motion_rename();
+  glui_wui_rename();
+  glui_shooter_rename();
 }
 
 

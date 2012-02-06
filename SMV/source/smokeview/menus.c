@@ -6838,10 +6838,6 @@ updatemenu=0;
 #ifdef pp_LANG
   if(show_lang_menu==1&&nlanglistinfo>0){
     CREATEMENU(languagemenu,LanguageMenu);
-    glutAddMenuEntry(_("Select language for current case"),-999);
-    glutAddMenuEntry(_("  (Restart Smokeview to activate)"),-999);
-    glutAddMenuEntry(_("To use with all cases, add two letter code to"),-999);
-    glutAddMenuEntry(_("   global smokeview.ini (keyword: STARTUPLANG)"),-999);
     strcpy(menulabel,"");
     if(strcmp(startup_lang_code,"en")==0){
       strcat(menulabel,"*");
