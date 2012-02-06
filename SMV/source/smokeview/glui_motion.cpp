@@ -104,6 +104,15 @@ GLUI_Spinner *SPINNER_scaley=NULL;
 GLUI_Spinner *SPINNER_scalez=NULL;
 GLUI_Spinner *SPINNER_nearclip=NULL;
 GLUI_Spinner *SPINNER_farclip=NULL;
+GLUI_RadioButton *RADIO_button_1a=NULL;
+GLUI_RadioButton *RADIO_button_1b=NULL;
+GLUI_RadioButton *RADIO_button_1c=NULL;
+GLUI_RadioButton *RADIO_button_1d=NULL;
+GLUI_RadioButton *RADIO_button_1e=NULL;
+GLUI_RadioButton *RADIO_button_1f=NULL;
+GLUI_RadioButton *RADIO_button_1g=NULL;
+GLUI_Button *BUTTON_motion_1=NULL;
+GLUI_Button *BUTTON_motion_2=NULL;
 
 void RENDER_CB(int var);
 void enable_disable_views(void);
@@ -152,7 +161,7 @@ extern "C" void reset_glui_view(int ival){
   }
 }
 
-/* ------------------ glui_motion_setup ------------------------ */
+/* ------------------ enable_reset_saved_view ------------------------ */
 
 extern "C" void enable_reset_saved_view(void){
   if(reset_saved_view!=NULL)reset_saved_view->enable();
@@ -208,6 +217,58 @@ extern "C" void update_view_gluilist(void){
 
 }
 
+/* ------------------ glui_motion_rename ------------------------ */
+
+extern "C" void glui_motion_rename(void){
+  panel_motion->set_name(_("Motion"));
+  translate_xy->set_name(_("Horizontal"));
+  translate_z->set_name(_("Vertical"));
+  rotate_zx->set_name(_("Rotate"));
+  eyerotate_z->set_name(_("first person"));
+  RADIO_button_1c->set_name(_("general rotations"));
+  RADIO_button_1d->set_name(_("first person movement"));
+  RADIO_button_1e->set_name(_("level rotations"));
+  if(nmeshes>1){
+    meshlist1->set_name(_("Rotate about:"));
+  }
+  button_snap->set_name(_("Snap"));
+  if(nmeshes>1){
+    panel_blockageview->set_name(_("Blockage View"));
+  }
+  panel_projection->set_name(_("Window properties"));
+  RADIO_button_1a->set_name(_("Perspective"));
+  RADIO_button_1b->set_name(_("Size preserving"));
+  SPINNER_zoom->set_name(_("Zoom"));
+  SPINNER_aperture->set_name(_("aperture"));
+  LIST_windowsize->set_name(_("Size:"));
+  SPINNER_window_width->set_name(_("width"));
+  SPINNER_window_height->set_name(_("height"));
+  window_update->set_name(_("Apply"));
+  render_panel->set_name(_("Render"));
+  RADIO_button_1f->set_name(_("frame number"));
+  RADIO_button_1g->set_name(_("time (s)"));
+  render_size_list->set_name(_("Size:"));
+  render_skip_list->set_name(_("Frames:"));
+  render_start->set_name(_("Start"));
+  render_stop->set_name(_("Stop"));
+  reset_panel->set_name(_("Viewpoints"));
+  delete_view->set_name(_("Delete"));
+  startup_button->set_name(_("view at startup"));
+  cycle_views_button->set_name(_("Cycle"));
+  replace_view->set_name(_("Replace"));
+  add_view->set_name(_("Add"));
+  edit_view_label->set_name(_("View name"));
+  panel_scale->set_name(_("Scaling/Depth params"));
+  SPINNER_scalex->set_name(_("Scale x"));
+  SPINNER_scaley->set_name(_("Scale y"));
+  SPINNER_scalez->set_name(_("Scale z"));
+  SPINNER_nearclip->set_name(_("Near depth"));
+  SPINNER_farclip->set_name(_("Far depth"));
+  cursor_checkbox->set_name(_("Map cursor keys for Plot3D use"));
+  BUTTON_motion_1->set_name(_("Save settings"));
+  BUTTON_motion_2->set_name(_("Close"));
+}
+
 /* ------------------ glui_motion_setup ------------------------ */
 
 extern "C" void glui_motion_setup(int main_window){
@@ -253,15 +314,14 @@ extern "C" void glui_motion_setup(int main_window){
   rotate_zx=glui_motion->add_translation_to_panel(panel_rotatebuttons,_("Rotate"),GLUI_TRANSLATION_XY,motion_ab,ROTATE_ZX,TRANSLATE_CB);
   glui_motion->add_column_to_panel(panel_rotatebuttons,false);
 
-  eyerotate_z=glui_motion->add_translation_to_panel(panel_rotatebuttons,_("first person"),GLUI_TRANSLATION_X,
-    motion_dir,EYE_ROTATE,TRANSLATE_CB);
+  eyerotate_z=glui_motion->add_translation_to_panel(panel_rotatebuttons,_("first person"),GLUI_TRANSLATION_X,motion_dir,EYE_ROTATE,TRANSLATE_CB);
   eyerotate_z->set_speed(180.0/(float)screenWidth);
   eyerotate_z->disable();
  
   eyeview_radio=glui_motion->add_radiogroup_to_panel(panel_motion,&eyeview,0,EYEVIEW_CB);
-  glui_motion->add_radiobutton_to_group(eyeview_radio,_("general rotations"));
-  glui_motion->add_radiobutton_to_group(eyeview_radio,_("first person movement"));
-  glui_motion->add_radiobutton_to_group(eyeview_radio,_("level rotations"));
+  RADIO_button_1c=glui_motion->add_radiobutton_to_group(eyeview_radio,_("general rotations"));
+  RADIO_button_1d=glui_motion->add_radiobutton_to_group(eyeview_radio,_("first person movement"));
+  RADIO_button_1e=glui_motion->add_radiobutton_to_group(eyeview_radio,_("level rotations"));
 
   rotation_index=&camera_current->rotation_index;
   *rotation_index=nmeshes;
@@ -307,10 +367,9 @@ extern "C" void glui_motion_setup(int main_window){
 
   panel_projection = glui_motion->add_rollout(_("Window properties"),false);
   projection_radio=glui_motion->add_radiogroup_to_panel(panel_projection,&projection_type,PROJECTION,TRANSLATE_CB);
-  glui_motion->add_radiobutton_to_group(projection_radio,_("Perspective"));
-  glui_motion->add_radiobutton_to_group(projection_radio,_("Size preserving"));
-  SPINNER_zoom=glui_motion->add_spinner_to_panel(panel_projection,_("Zoom"),GLUI_SPINNER_FLOAT,&zoom,
-    ZOOM,TRANSLATE_CB);
+  RADIO_button_1a=glui_motion->add_radiobutton_to_group(projection_radio,_("Perspective"));
+  RADIO_button_1b=glui_motion->add_radiobutton_to_group(projection_radio,_("Size preserving"));
+  SPINNER_zoom=glui_motion->add_spinner_to_panel(panel_projection,_("Zoom"),GLUI_SPINNER_FLOAT,&zoom,ZOOM,TRANSLATE_CB);
   SPINNER_zoom->set_float_limits(0.10,10.0,GLUI_LIMIT_CLAMP);
   aperture_glui=zoom2aperture(zoom);
   SPINNER_aperture=glui_motion->add_spinner_to_panel(panel_projection,_("aperture"),GLUI_SPINNER_FLOAT,&aperture_glui,
@@ -345,8 +404,8 @@ extern "C" void glui_motion_setup(int main_window){
 #endif
   glui_motion->add_separator_to_panel(render_panel);
   render_label_radio=glui_motion->add_radiogroup_to_panel(render_panel,&renderfilelabel,RENDER_LABEL,RENDER_CB);
-  glui_motion->add_radiobutton_to_group(render_label_radio,"frame number");
-  glui_motion->add_radiobutton_to_group(render_label_radio,"time (s)");
+  RADIO_button_1f=glui_motion->add_radiobutton_to_group(render_label_radio,"frame number");
+  RADIO_button_1g=glui_motion->add_radiobutton_to_group(render_label_radio,"time (s)");
   update_glui_filelabel(renderfilelabel);
 
 
@@ -409,11 +468,11 @@ extern "C" void glui_motion_setup(int main_window){
   cursor_checkbox=glui_motion->add_checkbox(_("Map cursor keys for Plot3D use"),&cursorPlot3D,CURSOR,TRANSLATE_CB);
   panel_close = glui_motion->add_panel("",GLUI_PANEL_NONE);
 
-  glui_motion->add_button_to_panel(panel_close,_("Save settings"),SAVE_SETTINGS,BUTTON_hide2_CB);
+  BUTTON_motion_1=glui_motion->add_button_to_panel(panel_close,_("Save settings"),SAVE_SETTINGS,BUTTON_hide2_CB);
 
   glui_motion->add_column_to_panel(panel_close,false);
 
-  glui_motion->add_button_to_panel(panel_close,_("Close"),1,BUTTON_hide2_CB);
+  BUTTON_motion_2=glui_motion->add_button_to_panel(panel_close,_("Close"),1,BUTTON_hide2_CB);
 
   showhide_translate(eyeview);
   glui_motion->set_main_gfx_window( main_window );

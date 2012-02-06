@@ -61,6 +61,8 @@ GLUI_Button *BUTTON_addpoint=NULL;
 GLUI_Button *BUTTON_deletepoint=NULL;
 GLUI_Button *BUTTON_savesettings=NULL;
 GLUI_Button *BUTTON_update=NULL;
+GLUI_Button *BUTTON_colorbar_save=NULL;
+GLUI_Button *BUTTON_colorbar_close=NULL;
 GLUI_Checkbox *CHECKBOX_usebounds=NULL;
 GLUI_Spinner *SPINNER_valmin=NULL;
 GLUI_Spinner *SPINNER_valmax=NULL;
@@ -145,6 +147,37 @@ extern "C" void show_glui_colorbar(void){
   }
 }
 
+
+/* ------------------ glui_colorbar_setup ------------------------ */
+
+extern "C" void glui_colorbar_rename(void){
+  BUTTON_new->set_name(_("New colorbar"));
+  BUTTON_delete->set_name(_("Delete colorbar"));
+  CHECKBOX_hidesv->set_name(_("Hide scene"));
+  EDITTEXT_colorbar_label->set_name(_("Label"));  
+  BUTTON_update->set_name(_("Update label"));
+  panel_point->set_name(_("Node"));
+  BUTTON_prev->set_name(_("Previous"));
+  BUTTON_deletepoint->set_name(_("Delete"));
+  BUTTON_next->set_name(_("Next"));
+  BUTTON_addpoint->set_name(_("Insert"));
+  SPINNER_colorindex->set_name(_("node index"));
+  SPINNER_right_red->set_name(_("red"));
+  SPINNER_right_green->set_name(_("green"));
+  SPINNER_right_blue->set_name(_("blue"));
+  panel_cb8->set_name(_("Below specified min"));
+  SPINNER_down_red->set_name(_("red"));
+  SPINNER_down_green->set_name(_("green"));
+  SPINNER_down_blue->set_name(_("blue"));
+  panel_cb7->set_name(_("Above specified max"));
+  SPINNER_up_red->set_name(_("red"));
+  SPINNER_up_green->set_name(_("green"));
+  SPINNER_up_blue->set_name(_("blue"));
+  BUTTON_colorbar_save->set_name(_("Save settings"));
+  BUTTON_colorbar_close->set_name(_("Close"));
+  CHECKBOX_usebounds->set_name(_("Highlight extreme data"));
+}
+
 /* ------------------ glui_colorbar_setup ------------------------ */
 
 extern "C" void glui_colorbar_setup(int main_window){
@@ -190,7 +223,7 @@ extern "C" void glui_colorbar_setup(int main_window){
   BUTTON_update=glui_colorbar->add_button_to_panel(panel_cb1,_("Update label"),COLORBAR_UPDATE,COLORBAR_CB);
   glui_colorbar->add_column_to_panel(panel_cb1,false);
 
-  panel_point = glui_colorbar->add_panel("Node");
+  panel_point = glui_colorbar->add_panel(_("Node"));
   
   panel_cb5 = glui_colorbar->add_panel_to_panel(panel_point,"",GLUI_PANEL_NONE);
 
@@ -233,9 +266,9 @@ extern "C" void glui_colorbar_setup(int main_window){
   colorbar_global2local();
 
   panel_cb8 = glui_colorbar->add_panel("",GLUI_PANEL_NONE);
-  glui_colorbar->add_button_to_panel(panel_cb8,_("Save settings"),COLORBAR_SAVE,COLORBAR_CB);
+  BUTTON_colorbar_save=glui_colorbar->add_button_to_panel(panel_cb8,_("Save settings"),COLORBAR_SAVE,COLORBAR_CB);
   glui_colorbar->add_column_to_panel(panel_cb8,false);
-  glui_colorbar->add_button_to_panel(panel_cb8,_("Close"),COLORBAR_CLOSE,COLORBAR_CB);
+  BUTTON_colorbar_close=glui_colorbar->add_button_to_panel(panel_cb8,_("Close"),COLORBAR_CLOSE,COLORBAR_CB);
 
   glui_colorbar->set_main_gfx_window( main_window );
 }

@@ -1851,6 +1851,19 @@ void updateclip(int slicedir){
   }
 }
 
+/* ------------------ update_glui_names ------------------------ */
+
+void update_glui_names(void){
+  glui_colorbar_rename();
+  glui_labels_rename();
+  glui_clip_rename();
+  glui_stereo_rename();
+  glui_tour_rename();
+  glui_edit_rename();
+  glui_device_rename();
+  glui_motion_rename();
+}
+
 
 
 

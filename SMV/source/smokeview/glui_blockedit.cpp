@@ -37,11 +37,34 @@ GLUI_EditText *edittext_xmin=NULL, *edittext_ymin=NULL, *edittext_zmin=NULL;
 GLUI_EditText *edittext_xmax=NULL, *edittext_ymax=NULL, *edittext_zmax=NULL;
 GLUI_Listbox *surfacelists[7]={NULL,NULL,NULL,NULL,NULL,NULL,NULL};
 GLUI_Checkbox *blockage_checkbox=NULL;
+GLUI_Button *BUTTON_blockage_1=NULL;
 
 void BUTTON_hide3_CB(int var);
 
 char a_updatelabel[1000];
 char *updatelabel=NULL;
+
+/* ------------------ glui_edit_rename ------------------------ */
+
+extern "C" void glui_edit_rename(void){
+    surfacelists[DOWN_X]->set_name(_("Left"));
+    surfacelists[UP_X]->set_name(_("Right"));
+    surfacelists[DOWN_Y]->set_name(_("Front"));
+    surfacelists[UP_Y]->set_name(_("Back"));
+    surfacelists[DOWN_Z]->set_name(_("Down"));
+    surfacelists[UP_Z]->set_name(_("Up"));
+  panel_obj_stretch2->set_name(_("Coordinates"));
+  blockage_checkbox->set_name(_("Dimensions snapped to grid"));
+
+  if(nmeshes>1){
+    char meshlabel[255];
+
+    strcpy(meshlabel,_("Mesh label:"));
+    strcat(meshlabel,meshinfo->label);
+    statictext_mesh_index->set_name(meshlabel);
+  }
+  BUTTON_blockage_1->set_name(_("Close"));
+}
 
 /* ------------------ glui_edit_setup ------------------------ */
 
@@ -74,8 +97,7 @@ extern "C" void glui_edit_setup(int main_window){
 
     glui_edit->add_statictext_to_panel(panel_surface,"");
 
-    surfacelists[NOT_USED] = glui_edit->add_listbox_to_panel(panel_surface,_("Unused SURFs"),
-      surface_indices+NOT_USED,UPDATE_LIST,OBJECT_CB);
+    surfacelists[NOT_USED] = glui_edit->add_listbox_to_panel(panel_surface,_("Unused SURFs"),surface_indices+NOT_USED,UPDATE_LIST,OBJECT_CB);
     surfacelists[NOT_USED]->set_w(260);
     for(i=0;i<nsurfaces;i++){
       surfi = surfaceinfo + sorted_surfidlist[i];
@@ -213,7 +235,7 @@ extern "C" void glui_edit_setup(int main_window){
   statictext_blockage_index=glui_edit->add_statictext_to_panel(panel_obj_stretch4,"&OBST number: ");
   statictext_label=glui_edit->add_statictext_to_panel(panel_obj_stretch4,"&OBST label:");
   glui_edit->add_separator_to_panel(panel_obj_stretch4);
-  glui_edit->add_button_to_panel(panel_obj_stretch4,_("Close"),CLOSE_WINDOW,BUTTON_hide3_CB);
+  BUTTON_blockage_1=glui_edit->add_button_to_panel(panel_obj_stretch4,_("Close"),CLOSE_WINDOW,BUTTON_hide3_CB);
 
   glui_edit->set_main_gfx_window( main_window );
 }

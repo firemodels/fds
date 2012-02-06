@@ -1142,7 +1142,8 @@ void LanguageMenu(int value){
       strcpy(startup_lang_code,langi->lang_code);
     }
   }
-  writeini(LOCAL_INI);
+  init_translate(smokeview_bindir,startup_lang_code);
+  update_glui_names();
 }
 #endif
 /* ------------------ FontMenu ------------------------ */

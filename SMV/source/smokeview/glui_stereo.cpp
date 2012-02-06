@@ -22,8 +22,16 @@ GLUI_Panel *panel_stereo_method=NULL;
 GLUI_RadioGroup *RADIO_showstereo=NULL;
 GLUI_RadioGroup *RADIO_showstereo_frame=NULL;
 GLUI_RadioButton *RADIO_seq=NULL;
+GLUI_RadioButton *RADIO_button_1=NULL;
+GLUI_RadioButton *RADIO_button_2=NULL;
+GLUI_RadioButton *RADIO_button_3=NULL;
+GLUI_RadioButton *RADIO_button_4=NULL;
+GLUI_RadioButton *RADIO_button_5=NULL;
 GLUI *glui_stereo=NULL;
 GLUI_Spinner *SPINNER_zero_parallax=NULL, *SPINNER_right_green2=NULL, *SPINNER_right_blue2=NULL;
+GLUI_Button *BUTTON_stereo_1=NULL;
+GLUI_Button *BUTTON_stereo_2=NULL;
+GLUI_Button *BUTTON_stereo_3=NULL;
 
 
 #define STEREO_CLOSE 0
@@ -54,6 +62,25 @@ extern "C" void update_glui_stereo(void){
   }
 }
 
+/* ------------------ glui_stereo_rename ------------------------ */
+
+extern "C" void glui_stereo_rename(void){
+  panel_stereo_method->set_name(_("Stereo Method"));
+  RADIO_button_1->set_name(_("Off"));
+  RADIO_seq->set_name(_("Successive frames"));
+  RADIO_button_2->set_name(_("Left/Right"));
+  RADIO_button_3->set_name(_("Red/Blue"));
+  RADIO_button_4->set_name(_("Red/Cyan"));
+  RADIO_button_5->set_name(_("Custom Red/Custom Blue"));
+  SPINNER_right_green2->set_name(_("green"));
+  SPINNER_right_blue2->set_name(_("blue"));
+  
+  SPINNER_zero_parallax->set_name(_("Distance to zero parallax plane (m)"));
+  BUTTON_stereo_1->set_name(_("Reset"));
+  BUTTON_stereo_2->set_name(_("Save settings"));
+  BUTTON_stereo_3->set_name(_("Close"));
+}
+
 /* ------------------ glui_stereo_setup ------------------------ */
 
 extern "C" void glui_stereo_setup(int main_window){
@@ -63,18 +90,17 @@ extern "C" void glui_stereo_setup(int main_window){
   
   panel_stereo_method = glui_stereo->add_panel(_("Stereo Method"));
   RADIO_showstereo = glui_stereo->add_radiogroup_to_panel(panel_stereo_method,&showstereo,STEREO_SHOW,STEREO_CB);
-  glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Off"));
+  RADIO_button_1=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Off"));
   RADIO_seq=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Successive frames"));
   if(videoSTEREO==0)RADIO_seq->disable();
-  glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Left/Right"));
-  glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Red/Blue"));
-  glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Red/Cyan"));
-  glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Custom Red/Custom Blue"));
-  SPINNER_right_green2=glui_stereo->add_spinner_to_panel(panel_stereo_method,_("green"),GLUI_SPINNER_FLOAT,&right_green,
-    STEREO_GREEN,STEREO_CB);
+  RADIO_button_2=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Left/Right"));
+  RADIO_button_3=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Red/Blue"));
+  RADIO_button_4=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Red/Cyan"));
+  RADIO_button_5=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Custom Red/Custom Blue"));
+  SPINNER_right_green2=glui_stereo->add_spinner_to_panel(panel_stereo_method,_("green"),GLUI_SPINNER_FLOAT,&right_green,STEREO_GREEN,STEREO_CB);
+  SPINNER_right_blue2= glui_stereo->add_spinner_to_panel(panel_stereo_method, _("blue"),GLUI_SPINNER_FLOAT,&right_blue,STEREO_BLUE,STEREO_CB);
+  
   SPINNER_right_green2->set_float_limits(0.0,1.0,GLUI_LIMIT_CLAMP);
-  SPINNER_right_blue2= glui_stereo->add_spinner_to_panel(panel_stereo_method, _("blue"),GLUI_SPINNER_FLOAT,&right_blue,
-    STEREO_BLUE,STEREO_CB);
   SPINNER_right_blue2->set_float_limits(0.0,1.0,GLUI_LIMIT_CLAMP);
 
   fzero*=xyzmaxdiff;
@@ -90,9 +116,9 @@ extern "C" void glui_stereo_setup(int main_window){
   STEREO_CB(STEREO_SHOW);
   update_glui_stereo();
 
-  glui_stereo->add_button(_("Reset"),STEREO_RESET,STEREO_CB);
-  glui_stereo->add_button(_("Save settings"),SAVE_SETTINGS,STEREO_CB);
-  glui_stereo->add_button(_("Close"),STEREO_CLOSE,STEREO_CB);
+  BUTTON_stereo_1=glui_stereo->add_button(_("Reset"),STEREO_RESET,STEREO_CB);
+  BUTTON_stereo_2=glui_stereo->add_button(_("Save settings"),SAVE_SETTINGS,STEREO_CB);
+  BUTTON_stereo_3=glui_stereo->add_button(_("Close"),STEREO_CLOSE,STEREO_CB);
   
   glui_stereo->set_main_gfx_window( main_window );
 }

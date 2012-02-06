@@ -71,6 +71,9 @@ GLUI_Checkbox *CHECKBOX_user_ticks_show_y=NULL;
 GLUI_Checkbox *CHECKBOX_user_ticks_show_z=NULL;
 GLUI_Checkbox *CHECKBOX_tick_auto=NULL;
 
+GLUI_Checkbox *CHECKBOX_label_1=NULL;
+GLUI_Checkbox *CHECKBOX_label_2=NULL;
+
 GLUI_Checkbox *CHECKBOX_labels_flip=NULL;
 GLUI_Checkbox *CHECKBOX_labels_shade=NULL;
 GLUI_Checkbox *CHECKBOX_labels_transparent_override=NULL;
@@ -85,6 +88,12 @@ GLUI_Button *Button_3DSMOKE=NULL;
 GLUI_Button *Button_BOUNDARY=NULL;
 GLUI_Button *Button_ISO=NULL;
 GLUI_Button *Button_BENCHMARK=NULL;
+GLUI_Button *BUTTON_label_1=NULL;
+GLUI_Button *BUTTON_label_2=NULL;
+GLUI_Button *BUTTON_label_3=NULL;
+GLUI_Button *BUTTON_label_4=NULL;
+GLUI_RadioButton *RADIOBUTTON_label_1a=NULL;
+GLUI_RadioButton *RADIOBUTTON_label_1b=NULL;
 
 GLUI_Panel *panel_showhide=NULL;
 
@@ -114,6 +123,79 @@ GLUI_Panel *panel_showhide=NULL;
 #define LABELS_HMS 18
 #define SAVE_SETTINGS 99
 
+/* ------------------ glui_labels_rename ------------------------ */
+
+extern "C" void glui_labels_rename(void){
+
+  panel_label1->set_name(_("General Settings"));
+  CHECKBOX_labels_colorbar->set_name(_("Colorbar"));
+  CHECKBOX_labels_timebar->set_name(_("Time bar"));
+  CHECKBOX_labels_timelabel->set_name(_("Time label"));
+  CHECKBOX_labels_framelabel->set_name(_("Frame label"));
+  CHECKBOX_labels_hrrlabel->set_name(_("HRR label"));
+  CHECKBOX_labels_hrrcutoff->set_name(_("HRRPUV cutoff"));
+  CHECKBOX_labels_ticks->set_name(_("FDS Ticks"));
+  if(ntotal_blockages>0||isZoneFireModel==0){
+    CHECKBOX_labels_gridloc->set_name(_("Grid loc"));
+  }
+  if(nsliceinfo>0)CHECKBOX_labels_average->set_name(_("Average"));
+
+  CHECKBOX_labels_title->set_name(_("Title"));
+  CHECKBOX_labels_axis->set_name(_("Axis"));
+  CHECKBOX_labels_framerate->set_name(_("Frame rate"));
+#ifdef pp_memstatus
+  CHECKBOX_labels_availmemory->set_name(_("Memory load"));
+#endif
+  CHECKBOX_labels_labels->set_name(_("Text labels"));
+  
+  CHECKBOX_label_1->set_name(_("Fast blockage drawing"));
+  CHECKBOX_label_2->set_name(_("Sort transparent faces"));
+  BUTTON_label_1->set_name(_("Show all"));
+  BUTTON_label_2->set_name(_("Hide all"));
+
+  CHECKBOX_labels_flip->set_name(_("Flip background"));
+  CHECKBOX_labels_shade->set_name(_("Shades of grey"));
+
+  if(nface_transparent>0){
+    panel_transparency->set_name(_("Geometry transparency"));
+    CHECKBOX_labels_transparent_override->set_name(_("Use level:"));
+  }
+
+
+  CHECKBOX_labels_hms->set_name(_("hms time label"));
+
+  RADIOBUTTON_label_1a->set_name(_("small font"));
+  RADIOBUTTON_label_1b->set_name(_("large font"));
+
+
+  panel_user_tick->set_name("User tick settings");
+
+  panel_tick1->set_name(_("Display"));
+
+  CHECKBOX_vis_user_ticks->set_name(_("Show user ticks"));
+  SPINNER_subtick->set_name(_("sub-intervals")); 
+  CHECKBOX_tick_auto->set_name(_("Auto place (2D)"));
+
+  panel_tick2->set_name(_("Parameters"));
+  SPINNER_tick_x0->set_name(_("origin"));
+  SPINNER_tick_xmin->set_name(_("Min"));
+  SPINNER_tick_xmax->set_name(_("Max"));
+  SPINNER_tick_dx0->set_name(_("Step"));
+
+  if((npartinfo>0)||nsliceinfo>0||nvslice>0||nisoinfo>0||npatchinfo||nsmoke3dinfo>0||nplot3dinfo>0){
+    panel_showhide->set_name(_("Show/Hide Loaded Files"));
+  }
+
+//    glui_labels->add_radiobutton_to_group(RADIO_showhide,_("Show"));
+//    glui_labels->add_radiobutton_to_group(RADIO_showhide,_("Show Only"));
+//    glui_labels->add_radiobutton_to_group(RADIO_showhide,_("Hide"));
+
+  Button_BENCHMARK->set_name(_("Benchmark"));
+  BUTTON_label_3->set_name(_("Save settings"));
+  BUTTON_label_4->set_name(_("Close"));
+}
+
+
 /* ------------------ glui_labels_setup ------------------------ */
 
 extern "C" void glui_labels_setup(int main_window){
@@ -122,7 +204,7 @@ extern "C" void glui_labels_setup(int main_window){
   glui_labels = GLUI_Master.create_glui("Display",0,0,0);
   if(showdisplay_dialog==0)glui_labels->hide();
 
-  panel_label1 = glui_labels->add_rollout("General Settings",true);
+  panel_label1 = glui_labels->add_rollout(_("General Settings"),true);
   CHECKBOX_labels_colorbar=glui_labels->add_checkbox_to_panel(panel_label1,_("Colorbar"),&visColorLabels,LABELS_label,Labels_CB);
   CHECKBOX_labels_timebar=glui_labels->add_checkbox_to_panel(panel_label1,_("Time bar"),&visTimeLabels,LABELS_label,Labels_CB);
   CHECKBOX_labels_timelabel=glui_labels->add_checkbox_to_panel(panel_label1,_("Time label"),&visTimelabel,LABELS_label,Labels_CB);
@@ -144,10 +226,10 @@ extern "C" void glui_labels_setup(int main_window){
   CHECKBOX_labels_availmemory=glui_labels->add_checkbox_to_panel(panel_label1,_("Memory load"),&visAvailmemory,LABELS_label,Labels_CB);
 #endif
   CHECKBOX_labels_labels=glui_labels->add_checkbox_to_panel(panel_label1,_("Text labels"),&visLabels,LABELS_label,Labels_CB);
-  glui_labels->add_checkbox_to_panel(panel_label1,_("Fast blockage drawing"),&use_new_drawface,LABELS_drawface,Labels_CB);
-  glui_labels->add_checkbox_to_panel(panel_label1,_("Sort transparent faces"),&sort_transparent_faces,LABELS_drawface,Labels_CB);
-  glui_labels->add_button_to_panel(panel_label1,_("Show all"),LABELS_showall,Labels_CB);
-  glui_labels->add_button_to_panel(panel_label1,_("Hide all"),LABELS_hideall,Labels_CB);
+  CHECKBOX_label_1=glui_labels->add_checkbox_to_panel(panel_label1,_("Fast blockage drawing"),&use_new_drawface,LABELS_drawface,Labels_CB);
+  CHECKBOX_label_2=glui_labels->add_checkbox_to_panel(panel_label1,_("Sort transparent faces"),&sort_transparent_faces,LABELS_drawface,Labels_CB);
+  BUTTON_label_1=glui_labels->add_button_to_panel(panel_label1,_("Show all"),LABELS_showall,Labels_CB);
+  BUTTON_label_2=glui_labels->add_button_to_panel(panel_label1,_("Hide all"),LABELS_hideall,Labels_CB);
 
 
   glui_labels->add_column_to_panel(panel_label1,true);
@@ -167,8 +249,8 @@ extern "C" void glui_labels_setup(int main_window){
   CHECKBOX_labels_hms=glui_labels->add_checkbox_to_panel(panel_label1,_("hms time label"),&vishmsTimelabel,LABELS_HMS,Labels_CB);
 
   RADIO_fontsize = glui_labels->add_radiogroup_to_panel(panel_label1,&fontindex,LABELS_fontsize,Labels_CB);
-  glui_labels->add_radiobutton_to_group(RADIO_fontsize,_("small font"));
-  glui_labels->add_radiobutton_to_group(RADIO_fontsize,_("large font"));
+  RADIOBUTTON_label_1a=glui_labels->add_radiobutton_to_group(RADIO_fontsize,_("small font"));
+  RADIOBUTTON_label_1b=glui_labels->add_radiobutton_to_group(RADIO_fontsize,_("large font"));
 
 
   panel_user_tick = glui_labels->add_rollout("User tick settings",false);
@@ -242,10 +324,10 @@ extern "C" void glui_labels_setup(int main_window){
   Button_BENCHMARK=glui_labels->add_button_to_panel(panel_label2,_("Benchmark"),LABELS_BENCHMARK,Labels_CB);
   glui_labels->add_column_to_panel(panel_label2,false);
 
-  glui_labels->add_button_to_panel(panel_label2,_("Save settings"),SAVE_SETTINGS,Labels_CB);
+  BUTTON_label_3=glui_labels->add_button_to_panel(panel_label2,_("Save settings"),SAVE_SETTINGS,Labels_CB);
   glui_labels->add_column_to_panel(panel_label2,false);
 
-  glui_labels->add_button_to_panel(panel_label2,_("Close"),LABELS_close,Labels_CB);
+  BUTTON_label_4=glui_labels->add_button_to_panel(panel_label2,_("Close"),LABELS_close,Labels_CB);
 
   glui_labels->set_main_gfx_window( main_window );
 }

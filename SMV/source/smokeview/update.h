@@ -9,6 +9,7 @@
 #define UPEXTERN extern CCC
 #endif
 
+UPEXTERN void update_glui_names(void);
 UPEXTERN void updateclip(int slicedir);
 UPEXTERN void updateclipbounds(int set_i0, int *i0, int set_i1, int *i1, int maxi);
 UPEXTERN int compare_float( const void *arg1, const void *arg2 );

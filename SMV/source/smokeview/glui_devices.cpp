@@ -58,9 +58,43 @@ GLUI_Spinner *SPINNER_sensorrelsize=NULL;
 GLUI_Panel *panel_devicevis=NULL;
 GLUI_RadioGroup *RADIO_devicetypes=NULL;
 GLUI_Panel *panel_label3=NULL;
+GLUI_Checkbox *CHECKBOX_device_1=NULL;
+GLUI_Checkbox *CHECKBOX_device_2=NULL;
+GLUI_Checkbox *CHECKBOX_device_3=NULL;
+GLUI_Button *BUTTON_device_1=NULL;
+GLUI_Button *BUTTON_device_2=NULL;
+GLUI_Button *BUTTON_device_3=NULL;
+GLUI_Button *BUTTON_device_4=NULL;
+GLUI_Button *BUTTON_device_5=NULL;
+GLUI_Button *BUTTON_device_6=NULL;
+
 
 void Device_CB(int var);
 
+
+/* ------------------ glui_device_rename ------------------------ */
+
+extern "C" void glui_device_rename(void){
+  if(ndeviceinfo>0){
+    SPINNER_sensorrelsize->set_name(_("Scaling"));
+    if(ndevicetypes>0){
+      CHECKBOX_device_1->set_name(_("Show velocity vectors"));
+      CHECKBOX_device_2->set_name(_("Show values"));
+      CHECKBOX_device_3->set_name(_("Outline"));
+    }
+  }
+  BUTTON_device_1->set_name(_("Save settings"));
+  BUTTON_device_2->set_name(_("Close"));
+#ifdef pp_OPEN
+  gluiopen_panel_open->set_name(_("Open"));
+  BUTTON_device_6->set_name(_("Up"));
+  gluiopen_open_down->set_name(_("Down"));
+  gluiopen_EDIT_filter->set_name(_("filter:"));
+  BUTTON_device_3->set_name(_("Apply Filter"));
+  BUTTON_device_4->set_name(_("Open"));
+  BUTTON_device_5->set_name(_("Cancel"));
+#endif
+}
 
 /* ------------------ glui_device_setup ------------------------ */
 
@@ -77,9 +111,9 @@ extern "C" void glui_device_setup(int main_window){
     panel_objects = glui_device->add_panel("Devices/Objects",false);
     SPINNER_sensorrelsize=glui_device->add_spinner_to_panel(panel_objects,_("Scaling"),GLUI_SPINNER_FLOAT,&sensorrelsize,DEVICE_sensorsize,Device_CB);
     if(ndevicetypes>0){
-      glui_device->add_checkbox_to_panel(panel_objects,_("Show velocity vectors"),&showvdeviceval);
-      glui_device->add_checkbox_to_panel(panel_objects,_("Show values"),&showdeviceval,SHOWDEVICEVALS,Device_CB);
-      glui_device->add_checkbox_to_panel(panel_objects,_("Outline"),&object_outlines);
+      CHECKBOX_device_1=glui_device->add_checkbox_to_panel(panel_objects,_("Show velocity vectors"),&showvdeviceval);
+      CHECKBOX_device_2=glui_device->add_checkbox_to_panel(panel_objects,_("Show values"),&showdeviceval,SHOWDEVICEVALS,Device_CB);
+      CHECKBOX_device_3=glui_device->add_checkbox_to_panel(panel_objects,_("Outline"),&object_outlines);
       panel_devicevis=glui_device->add_panel_to_panel(panel_objects,"",false);
       RADIO_devicetypes=glui_device->add_radiogroup_to_panel(panel_devicevis,&devicetypes_index,DEVICE_devicetypes,Device_CB);
       for(i=0;i<ndevicetypes;i++){
@@ -93,16 +127,16 @@ extern "C" void glui_device_setup(int main_window){
   panel_label3 = glui_device->add_panel("",false);
   glui_device->add_column_to_panel(panel_label3,false);
 
-  glui_device->add_button_to_panel(panel_label3,_("Save settings"),SAVE_SETTINGS,Device_CB);
+  BUTTON_device_1=glui_device->add_button_to_panel(panel_label3,_("Save settings"),SAVE_SETTINGS,Device_CB);
   glui_device->add_column_to_panel(panel_label3,false);
 
-  glui_device->add_button_to_panel(panel_label3,_("Close"),DEVICE_close,Device_CB);
+  BUTTON_device_2=glui_device->add_button_to_panel(panel_label3,_("Close"),DEVICE_close,Device_CB);
 
 #ifdef pp_OPEN
   strcpy(gluiopen_filter,"*.csv");
-  gluiopen_panel_open = glui_device->add_panel("Open",true);
+  gluiopen_panel_open = glui_device->add_panel(_("Open"),true);
   gluiopen_panel_open3 = glui_device->add_panel_to_panel(gluiopen_panel_open,"",false);
-  glui_device->add_button_to_panel(gluiopen_panel_open3,_("Up"),OPEN_UP,Open_CB);
+  BUTTON_device_6=glui_device->add_button_to_panel(gluiopen_panel_open3,_("Up"),OPEN_UP,Open_CB);
   glui_device->add_column_to_panel(gluiopen_panel_open3);
   gluiopen_open_down=glui_device->add_button_to_panel(gluiopen_panel_open3,_("Down"),OPEN_DOWN,Open_CB);
   gluiopen_file_index=0;
@@ -110,14 +144,14 @@ extern "C" void glui_device_setup(int main_window){
   strcpy(gluiopen_path_dir,".");
   Open_CB(OPEN_UPDATE_LIST);
   gluiopen_panel_open2 = glui_device->add_panel_to_panel(gluiopen_panel_open,"",false);
-  gluiopen_EDIT_filter=glui_device->add_edittext_to_panel(gluiopen_panel_open2,"filter:",GLUI_EDITTEXT_TEXT,gluiopen_filter,OPEN_FILTER,Open_CB);
+  gluiopen_EDIT_filter=glui_device->add_edittext_to_panel(gluiopen_panel_open2,_("filter:"),GLUI_EDITTEXT_TEXT,gluiopen_filter,OPEN_FILTER,Open_CB);
   glui_device->add_column_to_panel(gluiopen_panel_open2);
-  glui_device->add_button_to_panel(gluiopen_panel_open2,_("Apply Filter"),OPEN_APPLY_FILTER,Open_CB);
+  BUTTON_device_3=glui_device->add_button_to_panel(gluiopen_panel_open2,_("Apply Filter"),OPEN_APPLY_FILTER,Open_CB);
 
   gluiopen_panel_open3 = glui_device->add_panel_to_panel(gluiopen_panel_open,"",false);
-  glui_device->add_button_to_panel(gluiopen_panel_open3,_("Open"),OPEN_OPEN,Open_CB);
+  BUTTON_device_4=glui_device->add_button_to_panel(gluiopen_panel_open3,_("Open"),OPEN_OPEN,Open_CB);
   glui_device->add_column_to_panel(gluiopen_panel_open3);
-  glui_device->add_button_to_panel(gluiopen_panel_open3,_("Cancel"),OPEN_CANCEL,Open_CB);
+  BUTTON_device_5=glui_device->add_button_to_panel(gluiopen_panel_open3,_("Cancel"),OPEN_CANCEL,Open_CB);
 
 #endif
 

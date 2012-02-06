@@ -39,6 +39,12 @@ GLUI_Spinner *SPINNER_moveclip_y=NULL;
 GLUI_Spinner *SPINNER_moveclip_z=NULL;
 GLUI_Listbox *LIST_mesh=NULL;
 
+GLUI_RadioButton *RADIOBUTTON_clip_1a=NULL;
+GLUI_RadioButton *RADIOBUTTON_clip_1b=NULL;
+GLUI_RadioButton *RADIOBUTTON_clip_1c=NULL;
+
+GLUI_Button *BUTTON_clip_1=NULL;
+GLUI_Button *BUTTON_clip_2=NULL;
 
 #define CLIP_xlower 0
 #define CLIP_ylower 1
@@ -70,6 +76,22 @@ void set_clip_controls(int val);
 
 /* ------------------ glui_clip_setup ------------------------ */
 
+extern "C" void glui_clip_rename(void){
+
+  panel_clip_lower->set_name(_("Clip Lower"));
+
+  RADIOBUTTON_clip_1a->set_name(_("Clipping disabled"));
+  RADIOBUTTON_clip_1b->set_name(_("Clip blockages and data"));
+  RADIOBUTTON_clip_1c->set_name(_("Clip blockages"));
+
+  panel_clip_upper->set_name(_("Clip upper"));
+  BUTTON_clip_1->set_name(_("Save settings"));
+  BUTTON_clip_2->set_name(_("Close"));
+
+}
+
+/* ------------------ glui_clip_setup ------------------------ */
+
 extern "C" void glui_clip_setup(int main_window){
 
   if(glui_clip!=NULL)glui_clip->close();
@@ -98,9 +120,9 @@ extern "C" void glui_clip_setup(int main_window){
   CHECKBOX_clip_zlower=glui_clip->add_checkbox_to_panel(panel_clipz,"",&clip_z,CLIP_zlower,CLIP_CB);
 
   radio_clip = glui_clip->add_radiogroup_to_panel(panel_clip,&xyz_clipplane,CLIP_all,CLIP_CB);
-  glui_clip->add_radiobutton_to_group(radio_clip,_("Clipping disabled"));
-  glui_clip->add_radiobutton_to_group(radio_clip,_("Clip blockages and data"));
-  glui_clip->add_radiobutton_to_group(radio_clip,_("Clip blockages"));
+  RADIOBUTTON_clip_1a=glui_clip->add_radiobutton_to_group(radio_clip,_("Clipping disabled"));
+  RADIOBUTTON_clip_1b=glui_clip->add_radiobutton_to_group(radio_clip,_("Clip blockages and data"));
+  RADIOBUTTON_clip_1c=glui_clip->add_radiobutton_to_group(radio_clip,_("Clip blockages"));
 
   glui_clip->add_column_to_panel(panel_clip,false);
 
@@ -128,11 +150,11 @@ extern "C" void glui_clip_setup(int main_window){
 
   glui_clip->add_column_to_panel(panel_wrapup,false);
 
-  glui_clip->add_button_to_panel(panel_wrapup,_("Save settings"),SAVE_SETTINGS,CLIP_CB);
+  BUTTON_clip_1=glui_clip->add_button_to_panel(panel_wrapup,_("Save settings"),SAVE_SETTINGS,CLIP_CB);
 
   glui_clip->add_column_to_panel(panel_wrapup,false);
 
-  glui_clip->add_button_to_panel(panel_wrapup,_("Close"),CLIP_CLOSE,CLIP_CB);
+  BUTTON_clip_2=glui_clip->add_button_to_panel(panel_wrapup,_("Close"),CLIP_CLOSE,CLIP_CB);
 
   if(updateclipvals==1){
     set_clip_controls(INI_VALS);  // clip vals from ini file

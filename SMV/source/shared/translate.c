@@ -44,6 +44,21 @@ int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr){
   int ntrinfo_local;
   int doit;
 
+  ntrinfo_local=*ntrinfoptr;
+  trinfo_local=*trinfoptr;
+  if(ntrinfo_local>0){
+    int i;
+
+    for(i=0;i<ntrinfo_local;i++){
+      trdata *tri;
+  
+      tri = trinfo_local + i;
+      FREEMEMORY(tri->key);
+      FREEMEMORY(tri->value);
+    }
+    FREEMEMORY(trinfo_local);
+  }
+
   ntrinfo_local=0;
   if(file==NULL)return 0;
   stream=fopen(file,"r");
@@ -135,6 +150,7 @@ void init_translate(char *bindir, char *tr_name){
     lang[1]=tolower(LANG[1]);
     lang[2]=0;
     lensmokebindir=strlen(bindir);
+    FREEMEMORY(smokeview_lang);
     NewMemory((void **)&smokeview_lang,(unsigned int)(lensmokebindir+15+1));
     STRCPY(smokeview_lang,bindir);
     STRCAT(smokeview_lang,"smokeview_");
