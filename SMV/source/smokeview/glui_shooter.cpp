@@ -93,62 +93,36 @@ extern "C" void Plot3DListMenu(int val);
 
 /* ------------------ hide_glui_shooter ------------------------ */
 
-extern "C" void hide_shooter(void){
+extern "C" void hide_glui_shooter(void){
   if(glui_shooter!=NULL){
     glui_shooter->hide();
-    showshooterDLG=0;
+    showshooter_dialog_save=showshooter_dialog;
+    showshooter_dialog=0;
     updatemenu=1;
   }
 }
 
-/* ------------------ show_shooter ------------------------ */
+/* ------------------ show_glui_shooter ------------------------ */
 
-extern "C" void show_shooter(void){
+extern "C" void show_glui_shooter(void){
   if(glui_shooter!=NULL){
     glui_shooter->show();
-    showshooterDLG=1;
+    showshooter_dialog=1;
     updatemenu=1;
   }
-}
-
-/* ------------------ glui_shooter_rename ------------------------ */
-
-extern "C" void glui_shooter_rename(void){  
-  panel_shooter_frame->set_name(_("Starting locations/velocities"));
-  panel_shooter_frameE->set_name(_("Positions"));
-  panel_shooter_frameA->set_name(_("Center"));
-  panel_shooter_frameB->set_name(_("Size"));
-  panel_shooter_frameF->set_name(_("Velocities"));
-  panel_shooter_velocity->set_name(_("Background velocity field"));
-  RADIObutton_shooter_1->set_name(_("Power law"));
-  if(nplot3dtimelist>0&&plot3dtimelist!=NULL){
-    shooter_loadplot3d->set_name(_("Load"));
-    shooter_timelist->set_name(_("Time:"));
-  }
-  panel_shooter_frameD->set_name(_("Power law"));
-  SPINNER_shooter_u0->set_name(_("reference velocity, U0 (m/s)"));
-  SPINNER_shooter_z0->set_name(_("reference elevation, Z0 (m)"));
-  SPINNER_shooter_p->set_name(_("decay, p"));
-  SPINNER_shooter_veldir->set_name(_("velocity direction (deg)"));
-  panel_shooter_misc->set_name(_("Misc"));
-  CHECKBOX_shooter_1->set_name(_("Show particles"));
-  CHECKBOX_shooter_2->set_name(_("Update continuously"));
-  CHECKBOX_shooter_3->set_name(_("Show only first frame"));
-  BUTTON_shooter_1->set_name(_("Compute tracks"));
-  SPINNER_shooter_1->set_name(_("Particle size"));
-  SPINNER_shooter_nparts->set_name(_("number of particles"));
-  SPINNER_shooter_fps->set_name(_("frames per second"));
-  SPINNER_shooter_duration->set_name(_("duration (s)"));
-  BUTTON_shooter_2->set_name(_("Save settings"));
-  BUTTON_shooter_3->set_name(_("Close"));
 }
 
 /* ------------------ glui_shooter_setup ------------------------ */
 
 extern "C" void glui_shooter_setup(int main_window){  
 
+  update_glui_shooter=0;
+  if(glui_shooter!=NULL){
+    glui_shooter->close();
+    glui_shooter=NULL;
+  }
   glui_shooter = GLUI_Master.create_glui(_("Particle tracking"),0,0,0 );
-  if(showshooterDLG==0)glui_shooter->hide();
+  if(showshooter_dialog==0)glui_shooter->hide();
 
   panel_shooter_frame=glui_shooter->add_panel(_("Starting locations/velocities"));
 
@@ -377,7 +351,7 @@ void SHOOTER_CB(int var){
       writeini(LOCAL_INI);
       break;
     case SHOOTER_CLOSE:
-      hide_shooter();
+      hide_glui_shooter();
       break;
     default:
       ASSERT(0);

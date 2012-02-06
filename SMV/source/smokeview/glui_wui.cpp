@@ -70,7 +70,7 @@ GLUI_RadioButton *RADIObutton_wui_1d=NULL;
 
 /* ------------------ update_glui_wui ------------------------ */
 
-extern "C" void update_glui_wui(void){
+extern "C" void Update_Glui_Wui(void){
   if(RADIO_terrain_type!=NULL){
     RADIO_terrain_type->set_int_val(visTerrainType);
   }
@@ -104,8 +104,11 @@ extern "C" void glui_wui_rename(void){
 /* ------------------ glui_wui_setup ------------------------ */
 
 extern "C" void glui_wui_setup(int main_window){
-
-  if(glui_wui!=NULL)glui_wui->close();
+  update_glui_wui=0;
+  if(glui_wui!=NULL){
+    glui_wui->close();
+    glui_wui=NULL;
+  }
   glui_wui = GLUI_Master.create_glui(_("Terrain"),0,0,0);
   if(showwui_dialog==0)glui_wui->hide();
 
@@ -169,6 +172,7 @@ extern "C" void glui_wui_setup(int main_window){
 
 extern "C" void hide_glui_wui(void){
   if(glui_wui!=NULL)glui_wui->hide();
+  showwui_dialog_save=showwui_dialog;
   showwui_dialog=0;
   updatemenu=1;
 }
@@ -176,6 +180,7 @@ extern "C" void hide_glui_wui(void){
 /* ------------------ show_glui_wui ------------------------ */
 
 extern "C" void show_glui_wui(void){
+  showwui_dialog=1;
   if(glui_wui!=NULL)glui_wui->show();
 }
 

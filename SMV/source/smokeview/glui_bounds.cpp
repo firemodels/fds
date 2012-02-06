@@ -308,9 +308,14 @@ extern "C" void glui_bounds_setup(int main_window){
   int i;
   int nradio;
 
+  update_glui_bounds=0;
+  if(glui_bounds!=NULL){
+    glui_bounds->close();
+    glui_bounds=NULL;
+  }
   overwrite_all=0;
   glui_bounds = GLUI_Master.create_glui( "File/Bounds Settings",0,0,0 );
-  if(showbound_dialog==0)glui_bounds->hide();
+  if(showbounds_dialog==0)glui_bounds->hide();
 
   /*  3d smoke   */
 
@@ -2208,7 +2213,7 @@ void BUTTON_hide_CB(int var){
   switch (var){
   case CLOSE:
     glui_bounds->hide();
-    showbound_dialog=0;
+    showbounds_dialog=0;
     updatemenu=1;
     break;
   case SAVE_SETTINGS:
@@ -2227,6 +2232,7 @@ void BUTTON_hide_CB(int var){
 
 extern "C" void show_glui_bounds(void){
   int islice, ipatch;
+  showbounds_dialog=1;
   if(nsliceinfo>0){
     islice=slice_rlist->get_int_val();
     setslicebounds(islice);
@@ -2279,7 +2285,8 @@ extern "C" void update_overwrite(void){
 
 extern "C" void hide_glui_bounds(void){
   if(glui_bounds!=NULL)glui_bounds->hide();
-  showbound_dialog=0;
+  showbounds_dialog_save=showbounds_dialog;
+  showbounds_dialog=0;
 }
 
 /* ------------------ update_plot3d_display ------------------------ */

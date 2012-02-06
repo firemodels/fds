@@ -53,24 +53,37 @@ GLUI_Translation *TRANS_az_elev=NULL;
 GLUI_StaticText *STATIC_alert=NULL;
 GLUI *glui_alert=NULL;
 
+/* ------------------ update_glui_viewlist ------------------------ */
+
 extern "C" void update_glui_viewlist(void){
   if(trainer_viewpoints!=-1){
     LIST_viewpoint->set_int_val(-1);
   }
 }
 
-extern "C" void show_load_alert(void){
-  showalert=1;
+/* ------------------ show_glui_alert ------------------------ */
+
+extern "C" void show_glui_alert(void){
+  showalert_dialog=1;
   if(glui_alert!=NULL)glui_alert->show();
 }
-extern "C" void hide_load_alert(void){
-  showalert=0;
+
+/* ------------------ hide_glui_alert ------------------------ */
+
+extern "C" void hide_glui_alert(void){
+  showalert_dialog_save=showalert_dialog;
+  showalert_dialog=0;
   if(glui_alert!=NULL)glui_alert->hide();
 }
-/* ------------------ glui_tour_setup ------------------------ */
+
+/* ------------------ glui_alert_setup ------------------------ */
 
 extern "C" void glui_alert_setup(int main_window){
-  if(glui_alert!=NULL)glui_alert->close();
+  update_glui_alert=0;
+  if(glui_alert!=NULL){
+    glui_alert->close();
+    glui_alert=NULL;
+  }
   glui_alert = GLUI_Master.create_glui("",0,screenWidth/2,screenHeight/2);
   glui_alert->hide();
   STATIC_alert = glui_alert->add_statictext(_("Loading smoke and fire data"));
@@ -78,20 +91,21 @@ extern "C" void glui_alert_setup(int main_window){
 
 /* ------------------ hide_glui_trainer ------------------------ */
 
-extern "C" void hide_trainer(void){
+extern "C" void hide_glui_trainer(void){
   if(glui_trainer!=NULL){
     glui_trainer->hide();
-    showtrainer=0;
+    showtrainer_dialog=0;
     updatemenu=1;
   }
 }
 
-/* ------------------ show_trainer ------------------------ */
+/* ------------------ show_glui_trainer ------------------------ */
 
-extern "C" void show_trainer(void){
+extern "C" void show_glui_trainer(void){
+  showtrainer_dialog=1;
   if(glui_trainer!=NULL){
     glui_trainer->show();
-    showtrainer=1;
+    showtrainer_dialog=1;
     updatemenu=1;
   }
 }
@@ -142,6 +156,11 @@ extern "C" void update_trainer_moves(void){
 
 extern "C" void glui_trainer_setup(int main_window){
 
+  update_glui_trainer=0;
+  if(glui_trainer!=NULL){
+    glui_trainer->close();
+    glui_trainer=NULL;
+  }
   if(glui_trainer!=NULL)glui_trainer->close();
   glui_trainer = GLUI_Master.create_glui(_("Demonstrator"),0,screenWidth+12,0);
   if(showgluitrainer==0)glui_trainer->hide();

@@ -923,20 +923,20 @@ void DialogMenu(int value){
   switch (value){
 #ifdef pp_SHOOTER
   case 27:
-    showshooterDLG=1-showshooterDLG;
-    if(showshooterDLG==1)show_shooter();
-    if(showshooterDLG==0)hide_shooter();
+    showshooter_dialog=1-showshooter_dialog;
+    if(showshooter_dialog==1)show_glui_shooter();
+    if(showshooter_dialog==0)hide_glui_shooter();
     break;
 #endif
   case 25:
-    showtrainer=1-showtrainer;
-    if(showtrainer==1)show_trainer();
-    if(showtrainer==0)hide_trainer();
+    showtrainer_dialog=1-showtrainer_dialog;
+    if(showtrainer_dialog==1)show_glui_trainer();
+    if(showtrainer_dialog==0)hide_glui_trainer();
     break;
   case 22:
     showdisplay_dialog=1-showdisplay_dialog;
-    if(showdisplay_dialog==1)show_glui_labels();
-    if(showdisplay_dialog==0)hide_glui_labels();
+    if(showdisplay_dialog==1)show_glui_display();
+    if(showdisplay_dialog==0)hide_glui_display();
     break;
   case 28:
     showdevice_dialog=1-showdevice_dialog;
@@ -944,18 +944,18 @@ void DialogMenu(int value){
     if(showdevice_dialog==0)hide_glui_device();
     break;
   case 14:
-    showbound_dialog=1-showbound_dialog;
-    if(showbound_dialog==1)show_glui_bounds();
-    if(showbound_dialog==0){
-      showglui3dsmoke=0;
+    showbounds_dialog=1-showbounds_dialog;
+    if(showbounds_dialog==1)show_glui_bounds();
+    if(showbounds_dialog==0){
+      show3dsmoke_dialog=0;
       showgluizip=0;
       hide_glui_bounds();
     }
     break;
   case 20:
-    showglui3dsmoke=1-showglui3dsmoke;
-    if(showglui3dsmoke==1){
-      if(showbound_dialog==0)DialogMenu(14);
+    show3dsmoke_dialog=1-show3dsmoke_dialog;
+    if(show3dsmoke_dialog==1){
+      if(showbounds_dialog==0)DialogMenu(14);
       open_smokepanel();
     }
     else{
@@ -965,7 +965,7 @@ void DialogMenu(int value){
   case 24:
     showgluizip=1-showgluizip;
     if(showgluizip==1){
-      if(showbound_dialog==0)DialogMenu(14);
+      if(showbounds_dialog==0)DialogMenu(14);
       open_smokezippanel();
     }
     else{
@@ -978,9 +978,9 @@ void DialogMenu(int value){
     if(showmotion_dialog==0)hide_glui_motion();
     break;
   case 21:
-   showgluitour=1-showgluitour;
-   if(showgluitour==1)show_glui_tour();
-   if(showgluitour==0)hide_glui_tour();
+   showtour_dialog=1-showtour_dialog;
+   if(showtour_dialog==1)show_glui_tour();
+   if(showtour_dialog==0)hide_glui_tour();
    break;
   case 18:
     showclip_dialog=1-showclip_dialog;
@@ -1030,15 +1030,15 @@ void DialogMenu(int value){
     break;
   case -2:
     showdisplay_dialog=0;
-    hide_glui_labels();
-    showbound_dialog=0;
-    showglui3dsmoke=0;
+    hide_glui_display();
+    showbounds_dialog=0;
+    show3dsmoke_dialog=0;
     showgluivol3dsmoke=0;
     showgluizip=0;
     hide_glui_bounds();
     showmotion_dialog=0;
     hide_glui_motion();
-    showgluitour=0;
+    showtour_dialog=0;
     hide_glui_tour();
     showclip_dialog=0;
     hide_glui_clip();
@@ -1049,8 +1049,8 @@ void DialogMenu(int value){
     showcolorbar_dialog=0;
     hide_glui_colorbar();
     if(showedit_dialog==1)DialogMenu(16);
-    showtrainer=0;
-    hide_trainer();
+    showtrainer_dialog=0;
+    hide_glui_trainer();
     showdevice_dialog=0;
     hide_glui_device();
     break;
@@ -1225,9 +1225,9 @@ void OptionMenu(int value){
   }
   if(value==2){
     trainer_mode=1;
-    if(showtrainer==0){
-      showtrainer=1;
-      show_trainer();
+    if(showtrainer_dialog==0){
+      showtrainer_dialog=1;
+      show_glui_trainer();
     }
     FontMenu(1);
   }
@@ -2345,8 +2345,8 @@ void TourMenu(int value){
   switch (value){
   case -12:
     add_new_tour();
-    if(showgluitour==0){
-      showgluitour=1;
+    if(showtour_dialog==0){
+      showtour_dialog=1;
       show_glui_tour();
     }
     break;
@@ -2390,8 +2390,8 @@ void TourMenu(int value){
     break;
   case -4:
     edittour=1-edittour;
-    if(edittour==1&&showgluitour==0){
-      showgluitour=1;
+    if(edittour==1&&showtour_dialog==0){
+      showtour_dialog=1;
       show_glui_tour();
     }
     break;
@@ -4251,7 +4251,7 @@ void GeometryMenu(int value){
     else{
       planar_terrain_slice=1;
     }
-    update_glui_wui();
+    Update_Glui_Wui();
     break;
   case 11:
     if(isZoneFireModel)visFrame=1;
@@ -6727,25 +6727,25 @@ updatemenu=0;
     if(showedit_dialog==1)glutAddMenuEntry(_("*Examine blockages...  ALT+e"),16);
     if(showedit_dialog==0)glutAddMenuEntry(_("Examine blockages...  ALT+e"),16);
   }
-  if(showbound_dialog==1)glutAddMenuEntry(_("*File/Bound/Script settings...  ALT+f"),14);
-  if(showbound_dialog==0)glutAddMenuEntry(_("File/Bound/Script settings...  ALT+f"),14);
+  if(showbounds_dialog==1)glutAddMenuEntry(_("*File/Bound/Script settings...  ALT+f"),14);
+  if(showbounds_dialog==0)glutAddMenuEntry(_("File/Bound/Script settings...  ALT+f"),14);
   if(showmotion_dialog==1)glutAddMenuEntry(_("*Motion/View/Render...  ALT+m"),15);
   if(showmotion_dialog==0)glutAddMenuEntry(_("Motion/View/Render...  ALT+m"),15);
 #ifdef pp_SHOOTER
-  if(showshooterDLG==1)glutAddMenuEntry(_("*Particle tracking..."),27);
-  if(showshooterDLG==0)glutAddMenuEntry(_("Particle tracking..."),27);
+  if(showshooter_dialog==1)glutAddMenuEntry(_("*Particle tracking..."),27);
+  if(showshooter_dialog==0)glutAddMenuEntry(_("Particle tracking..."),27);
 #endif
   if(nsmoke3dinfo>0||nvolrenderinfo>0){
-    if(showglui3dsmoke==1)glutAddMenuEntry(_("*3D smoke...  ALT+s"),20);
-    if(showglui3dsmoke==0)glutAddMenuEntry(_("3D smoke...  ALT+s"),20);
+    if(show3dsmoke_dialog==1)glutAddMenuEntry(_("*3D smoke...  ALT+s"),20);
+    if(show3dsmoke_dialog==0)glutAddMenuEntry(_("3D smoke...  ALT+s"),20);
   }
   if(showstereo_dialog==1)glutAddMenuEntry(_("*Stereo parameters..."),19);
   if(showstereo_dialog==0)glutAddMenuEntry(_("Stereo parameters..."),19);
-  if(showgluitour==1)glutAddMenuEntry(_("*Tours...  ALT+t"),21);
-  if(showgluitour==0)glutAddMenuEntry(_("Tours...  ALT+t"),21);
+  if(showtour_dialog==1)glutAddMenuEntry(_("*Tours...  ALT+t"),21);
+  if(showtour_dialog==0)glutAddMenuEntry(_("Tours...  ALT+t"),21);
   if(trainer_active==1){
-    if(showtrainer==1)glutAddMenuEntry(_("*Trainer..."),25);
-    if(showtrainer==0)glutAddMenuEntry(_("Trainer..."),25);
+    if(showtrainer_dialog==1)glutAddMenuEntry(_("*Trainer..."),25);
+    if(showtrainer_dialog==0)glutAddMenuEntry(_("Trainer..."),25);
   }
   glutAddMenuEntry("-",-1);
   glutAddMenuEntry(_("Close all dialogs  ALT+x"),-2);

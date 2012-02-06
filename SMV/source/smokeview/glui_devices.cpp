@@ -72,36 +72,15 @@ GLUI_Button *BUTTON_device_6=NULL;
 
 void Device_CB(int var);
 
-
-/* ------------------ glui_device_rename ------------------------ */
-
-extern "C" void glui_device_rename(void){
-  if(ndeviceinfo>0){
-    SPINNER_sensorrelsize->set_name(_("Scaling"));
-    if(ndevicetypes>0){
-      CHECKBOX_device_1->set_name(_("Show velocity vectors"));
-      CHECKBOX_device_2->set_name(_("Show values"));
-      CHECKBOX_device_3->set_name(_("Outline"));
-    }
-  }
-  BUTTON_device_1->set_name(_("Save settings"));
-  BUTTON_device_2->set_name(_("Close"));
-#ifdef pp_OPEN
-  gluiopen_panel_open->set_name(_("Open"));
-  BUTTON_device_6->set_name(_("Up"));
-  gluiopen_open_down->set_name(_("Down"));
-  gluiopen_EDIT_filter->set_name(_("filter:"));
-  BUTTON_device_3->set_name(_("Apply Filter"));
-  BUTTON_device_4->set_name(_("Open"));
-  BUTTON_device_5->set_name(_("Cancel"));
-#endif
-}
-
 /* ------------------ glui_device_setup ------------------------ */
 
 extern "C" void glui_device_setup(int main_window){
 
-  if(glui_device!=NULL)glui_device->close();
+  update_glui_device=0;
+  if(glui_device!=NULL){
+    glui_device->close();
+    glui_device=NULL;
+  }
   glui_device = GLUI_Master.create_glui("Device/Ojbects",0,0,0);
   if(showdevice_dialog==0)glui_device->hide();
 
@@ -163,6 +142,7 @@ extern "C" void glui_device_setup(int main_window){
 
 extern "C" void hide_glui_device(void){
   if(glui_device!=NULL)glui_device->hide();
+  showdevice_dialog_save=showdevice_dialog;
   showdevice_dialog=0;
   updatemenu=1;
 }
@@ -170,6 +150,7 @@ extern "C" void hide_glui_device(void){
 /* ------------------ show_glui_device ------------------------ */
 
 extern "C" void show_glui_device(void){
+  showdevice_dialog=1;
   if(glui_device!=NULL)glui_device->show();
 }
 

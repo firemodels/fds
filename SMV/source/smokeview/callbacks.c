@@ -833,12 +833,12 @@ void keyboard_2(unsigned char key, int x, int y){
     if(trainer_active==1){
       printf("Trainer mode active\n");
       trainer_mode=1;
-      show_trainer();
+      show_glui_trainer();
     }
     if(trainer_active==0){
       printf("Trainer mode inactive\n");
       trainer_mode=0;
-      hide_trainer();
+      hide_glui_trainer();
     }
     return;
   }
@@ -847,7 +847,7 @@ void keyboard_2(unsigned char key, int x, int y){
     showstereo++;
     if(showstereo>5)showstereo=0;
     if(showstereo==1&&videoSTEREO!=1)showstereo=2;
-    update_glui_stereo();
+    Update_Glui_Stereo();
     return;
   }
   if(strncmp((const char *)&key2,"T",1)==0){
@@ -1456,13 +1456,13 @@ void handle_eyeview(int flag){
   switch (eyeview){
   case WORLD_CENTERED:
       if(trainer_mode==0)printf("world centered\n");
-      if(showtrainer==0&&flag==0&&eyeview_old==EYE_CENTERED){
+      if(showtrainer_dialog==0&&flag==0&&eyeview_old==EYE_CENTERED){
         ResetView(RESTORE_EXTERIOR_VIEW);
       }
       break;
   case EYE_CENTERED:
        angle_zx[1]=0.0;
-       if(showtrainer==0&&flag==0&&eyeview_old!=EYE_CENTERED){
+       if(showtrainer_dialog==0&&flag==0&&eyeview_old!=EYE_CENTERED){
          ResetView(RESTORE_EXTERIOR_VIEW);
        }
       if(trainer_mode==0)printf("eye centered\n");
@@ -1470,7 +1470,7 @@ void handle_eyeview(int flag){
   case WORLD_CENTERED_LEVEL:
     angle_zx[1]=0.0;
     if(trainer_mode==0)printf("world centered, level rotations\n");
-    if(showtrainer==0&&flag==0&&eyeview_old==EYE_CENTERED){
+    if(showtrainer_dialog==0&&flag==0&&eyeview_old==EYE_CENTERED){
       ResetView(RESTORE_EXTERIOR_VIEW);
     }
     break;
@@ -2249,6 +2249,25 @@ void Display(void){
   int dostereo;
 
   DoScript();
+  if(update_glui_dialogs!=0){
+    switch (update_glui_dialogs){
+      case 1:
+        update_glui_dialogs=2;
+        break;
+      case 2:
+        Update_Glui_Dialogs();
+        update_glui_dialogs=0;
+        update_glui_dialogs=3;
+        break;
+      case 3:
+        Show_Glui_Dialogs();
+        update_glui_dialogs=0;
+        break;
+      default:
+        ASSERT(0);
+        break;
+    }
+  }
   if(update_fire_line==1){
     WUI_CB(TERRAIN_FIRE_LINE_UPDATE);
     update_fire_line=0;

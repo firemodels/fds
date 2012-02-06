@@ -218,58 +218,6 @@ extern "C" void update_view_gluilist(void){
 
 }
 
-/* ------------------ glui_motion_rename ------------------------ */
-
-extern "C" void glui_motion_rename(void){
-  panel_motion->set_name(_("Motion"));
-  translate_xy->set_name(_("Horizontal"));
-  translate_z->set_name(_("Vertical"));
-  rotate_zx->set_name(_("Rotate"));
-  eyerotate_z->set_name(_("first person"));
-  RADIO_button_1c->set_name(_("general rotations"));
-  RADIO_button_1d->set_name(_("first person movement"));
-  RADIO_button_1e->set_name(_("level rotations"));
-  if(nmeshes>1){
-    meshlist1->set_name(_("Rotate about:"));
-  }
-  button_snap->set_name(_("Snap"));
-  if(nmeshes>1){
-    panel_blockageview->set_name(_("Blockage View"));
-  }
-  panel_projection->set_name(_("Window properties"));
-  RADIO_button_1a->set_name(_("Perspective"));
-  RADIO_button_1b->set_name(_("Size preserving"));
-  SPINNER_zoom->set_name(_("Zoom"));
-  SPINNER_aperture->set_name(_("aperture"));
-  LIST_windowsize->set_name(_("Size:"));
-  SPINNER_window_width->set_name(_("width"));
-  SPINNER_window_height->set_name(_("height"));
-  window_update->set_name(_("Apply"));
-  render_panel->set_name(_("Render"));
-  RADIO_button_1f->set_name(_("frame number"));
-  RADIO_button_1g->set_name(_("time (s)"));
-  render_size_list->set_name(_("Size:"));
-  render_skip_list->set_name(_("Frames:"));
-  render_start->set_name(_("Start"));
-  render_stop->set_name(_("Stop"));
-  reset_panel->set_name(_("Viewpoints"));
-  delete_view->set_name(_("Delete"));
-  startup_button->set_name(_("view at startup"));
-  cycle_views_button->set_name(_("Cycle"));
-  replace_view->set_name(_("Replace"));
-  add_view->set_name(_("Add"));
-  edit_view_label->set_name(_("View name"));
-  panel_scale->set_name(_("Scaling/Depth params"));
-  SPINNER_scalex->set_name(_("Scale x"));
-  SPINNER_scaley->set_name(_("Scale y"));
-  SPINNER_scalez->set_name(_("Scale z"));
-  SPINNER_nearclip->set_name(_("Near depth"));
-  SPINNER_farclip->set_name(_("Far depth"));
-  cursor_checkbox->set_name(_("Map cursor keys for Plot3D use"));
-  BUTTON_motion_1->set_name(_("Save settings"));
-  BUTTON_motion_2->set_name(_("Close"));
-}
-
 /* ------------------ glui_motion_setup ------------------------ */
 
 extern "C" void glui_motion_setup(int main_window){
@@ -287,7 +235,11 @@ extern "C" void glui_motion_setup(int main_window){
 
   eye_xyz=camera_current->eye;
 
-  if(glui_motion!=NULL)glui_motion->close();
+  update_glui_motion=0;
+  if(glui_motion!=NULL){
+    glui_motion->close();
+    glui_motion=NULL;
+  }
   glui_motion = GLUI_Master.create_glui(_("Motion/View/Render"),0,0,0);
   if(showmotion_dialog==0)glui_motion->hide();
 
@@ -1007,12 +959,14 @@ extern "C" void update_meshlist1(int val){
 
 extern "C" void hide_glui_motion(void){
   if(glui_motion!=NULL)glui_motion->hide();
+  showmotion_dialog_save=showmotion_dialog;
   showmotion_dialog=0;
 }
 
 /* ------------------ show_glui_motion_setup ------------------------ */
 
 extern "C" void show_glui_motion(void){
+  showmotion_dialog=1;
   if(glui_motion!=NULL)glui_motion->show();
 }
 

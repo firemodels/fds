@@ -77,25 +77,13 @@ void set_clip_controls(int val);
 
 /* ------------------ glui_clip_setup ------------------------ */
 
-extern "C" void glui_clip_rename(void){
-
-  panel_clip_lower->set_name(_("Clip Lower"));
-
-  RADIOBUTTON_clip_1a->set_name(_("Clipping disabled"));
-  RADIOBUTTON_clip_1b->set_name(_("Clip blockages and data"));
-  RADIOBUTTON_clip_1c->set_name(_("Clip blockages"));
-
-  panel_clip_upper->set_name(_("Clip upper"));
-  BUTTON_clip_1->set_name(_("Save settings"));
-  BUTTON_clip_2->set_name(_("Close"));
-
-}
-
-/* ------------------ glui_clip_setup ------------------------ */
-
 extern "C" void glui_clip_setup(int main_window){
 
-  if(glui_clip!=NULL)glui_clip->close();
+  update_glui_clip=0;
+  if(glui_clip!=NULL){
+    glui_clip->close();
+    glui_clip=NULL;
+  }
   glui_clip = GLUI_Master.create_glui("clip",0,0,0);
   if(showclip_dialog==0)glui_clip->hide();
 
@@ -176,6 +164,7 @@ extern "C" void glui_clip_setup(int main_window){
 
 extern "C" void hide_glui_clip(void){
   if(glui_clip!=NULL)glui_clip->hide();
+  showclip_dialog_save=showclip_dialog;
   showclip_dialog=0;
   updatemenu=1;
 }
@@ -183,13 +172,14 @@ extern "C" void hide_glui_clip(void){
 /* ------------------ show_glui_clip ------------------------ */
 
 extern "C" void show_glui_clip(void){
+  showclip_dialog=1;
   if(glui_clip!=NULL)glui_clip->show();
 }
 
 
-/* ------------------ update_glui_clip ------------------------ */
+/* ------------------ Update_Glui_Clip ------------------------ */
 
-extern "C" void update_glui_clip(void){
+extern "C" void Update_Glui_Clip(void){
   if(CHECKBOX_clip_xlower!=NULL&&CHECKBOX_clip_ylower!=NULL&&CHECKBOX_clip_zlower!=NULL&&
      CHECKBOX_clip_xupper!=NULL&&CHECKBOX_clip_yupper!=NULL&&CHECKBOX_clip_zupper!=NULL){
 

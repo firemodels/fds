@@ -7823,7 +7823,7 @@ int readini2(char *inifile, int localfile){
       if(showstereo<0)showstereo=0;
       if(showstereo>5)showstereo=5;
       if(showstereo==1&&videoSTEREO!=1)showstereo=0;
-      update_glui_stereo();
+      Update_Glui_Stereo();
       continue;
     }
     if(match(buffer,"TERRAINPARMS")==1){

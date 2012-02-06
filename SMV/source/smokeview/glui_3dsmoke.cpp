@@ -182,6 +182,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
 
   
   if(nsmoke3dinfo<=0&&nvolrenderinfo<=0)return;
+  if(SPINNER_smoke3d_hrrpuv_cutoffptr!=NULL)FREEMEMORY(SPINNER_smoke3d_hrrpuv_cutoffptr);
   NewMemory((void **)&SPINNER_smoke3d_hrrpuv_cutoffptr,(nmeshes+1)*sizeof(GLUI_Spinner *));
   
   glui_3dsmoke=glui_bounds;
@@ -413,13 +414,15 @@ extern "C" void glui_3dsmoke_setup(int main_window){
 
 extern "C" void hide_glui_3dsmoke(void){
   if(glui_3dsmoke!=NULL)glui_3dsmoke->hide();
-  showglui3dsmoke=0;
+  show3dsmoke_dialog_save=show3dsmoke_dialog;
+  show3dsmoke_dialog=0;
   updatemenu=1;
 }
 
 /* ------------------ show_glui_3dsmoke ------------------------ */
 
 extern "C" void show_glui_3dsmoke(void){
+  show3dsmoke_dialog=1;
   if(glui_3dsmoke!=NULL)glui_3dsmoke->show();
 }
 

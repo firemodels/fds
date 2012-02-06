@@ -11,16 +11,6 @@
 #include "egz_stdio.h"
 #endif
 
-EXTERNCPP void glui_wui_rename(void);
-EXTERNCPP void glui_motion_rename(void);
-EXTERNCPP void glui_device_rename(void);
-EXTERNCPP void glui_edit_rename(void);
-EXTERNCPP void glui_stereo_rename(void);
-EXTERNCPP void glui_clip_rename(void);
-EXTERNCPP void glui_shooter_rename(void);
-EXTERNCPP void glui_colorbar_rename(void);
-EXTERNCPP void glui_tour_rename(void);
-EXTERNCPP void glui_labels_rename(void);
 EXTERNCPP device *getdevice(char *label, int index);
 EXTERNCPP void setup_glut(int argc, char **argv);
 EXTERNCPP int get_ndevices(char *file);
@@ -125,7 +115,7 @@ EXTERNCPP void LoadVolSmokeShaders(void);
 EXTERNCPP void UnLoadShaders(void);
 #endif
 EXTERNCPP void initspheresegs(int nlat, int nlong);
-EXTERNCPP void update_glui_wui(void);
+EXTERNCPP void Update_Glui_Wui(void);
 EXTERNCPP int have_terrain_slice(void);
 EXTERNCPP float get_zcell_val_offset(mesh *meshi,float xval, float yval, int *loc);
 EXTERNCPP void update_camera_ypos(camera *camera_data);
@@ -168,7 +158,7 @@ EXTERNCPP void update_colorbar_splits(colorbardata *cbi);
 EXTERNCPP void remapcolorbar(colorbardata *cbi);
 EXTERNCPP void adjust_colorbar_splits(colorbardata *cbi);
 EXTERNCPP void freecolorbars(void);
-EXTERNCPP void update_glui_stereo(void);
+EXTERNCPP void Update_Glui_Stereo(void);
 EXTERNCPP void escape_blanks(char *dirfrom, int maxlen);
 EXTERNCPP void InitOpenGL(void);
 EXTERNCPP void TextureShowMenu(int value);
@@ -225,8 +215,8 @@ EXTERNCPP void update_windowsizelist(void);
 EXTERNCPP void ResizeWindow(int width, int height);
 EXTERNCPP void update_glui_streakvalue(float rvalue);
 EXTERNCPP void glui_alert_setup(int main_window);
-EXTERNCPP void show_load_alert(void);
-EXTERNCPP void hide_load_alert(void);
+EXTERNCPP void show_glui_alert(void);
+EXTERNCPP void hide_glui_alert(void);
 EXTERNCPP void update_trainer_outline(void);
 EXTERNCPP void update_trainer_moves(void);
 EXTERNCPP mesh *getmesh(float *xyz);
@@ -244,12 +234,12 @@ EXTERNCPP void snap_view_angles(void);
 EXTERNCPP void get_plot3d_uvw(float xyz[3], float uvw[3]);
 EXTERNCPP void solve_shooter_data(void);
 EXTERNCPP void increment_shooter_data(shootpointdata *pold, shootpointdata *pnew, float dt);
-EXTERNCPP void show_shooter(void);
-EXTERNCPP void hide_shooter(void);
+EXTERNCPP void show_glui_shooter(void);
+EXTERNCPP void hide_glui_shooter(void);
 EXTERNCPP void draw_shooter(void);
 #endif
-EXTERNCPP void show_trainer(void);
-EXTERNCPP void hide_trainer(void);
+EXTERNCPP void show_glui_trainer(void);
+EXTERNCPP void hide_glui_trainer(void);
 EXTERNCPP int get_trainee_location(void);
 EXTERNCPP void set_trainer_controls(void);
 EXTERNCPP void load_startup_smoke(void);
@@ -441,19 +431,20 @@ EXTERNCPP void update_whichface(int which_face);
 EXTERNCPP void update_blockvals(int flag);
 EXTERNCPP void show_glui_colorbar(void);
 EXTERNCPP void hide_glui_colorbar(void);
+EXTERNCPP void hide_glui_message(void);
 EXTERNCPP void show_glui_motion(void);
 EXTERNCPP void hide_glui_motion(void);
 EXTERNCPP void show_glui_clip(void);
-EXTERNCPP void update_glui_clip(void);
+EXTERNCPP void Update_Glui_Clip(void);
 
 EXTERNCPP void hide_glui_clip(void);
 EXTERNCPP void show_glui_wui(void);
 EXTERNCPP void hide_glui_wui(void);
-EXTERNCPP void show_glui_labels(void);
+EXTERNCPP void show_glui_display(void);
 EXTERNCPP void show_glui_device(void);
 EXTERNCPP void hide_glui_device(void);
 EXTERNCPP void set_labels_controls(void);
-EXTERNCPP void hide_glui_labels(void);
+EXTERNCPP void hide_glui_display(void);
 
 EXTERNCPP void create_tourlist(void);
 EXTERNCPP void delete_tourlist(void);

@@ -20,6 +20,22 @@
 #include "update.h"
 #include "smv_endian.h"
 
+SVEXTERN int SVDECL(update_glui_wui,0);
+SVEXTERN int SVDECL(update_glui_stereo,0);
+SVEXTERN int SVDECL(update_glui_trainer,0);
+SVEXTERN int SVDECL(update_glui_alert,0);
+SVEXTERN int SVDECL(update_glui_tour,0);
+SVEXTERN int SVDECL(update_glui_motion,0);
+SVEXTERN int SVDECL(update_glui_message,0);
+SVEXTERN int SVDECL(update_glui_labels,0);
+SVEXTERN int SVDECL(update_glui_device,0);
+SVEXTERN int SVDECL(update_glui_clip,0);
+SVEXTERN int SVDECL(update_glui_edit,0);
+SVEXTERN int SVDECL(update_glui_colorbar,0);
+SVEXTERN int SVDECL(update_glui_bounds,0);
+SVEXTERN int SVDECL(update_glui_shooter,0);
+
+SVEXTERN int SVDECL(update_glui_dialogs,0);
 #ifdef pp_LANG
 SVEXTERN langlistdata SVDECL(*langlistinfo,NULL);
 SVEXTERN int nlanglistinfo,SVDECL(show_lang_menu,1);
@@ -336,7 +352,6 @@ SVEXTERN float trainer_xzy[3],trainer_ab[2];
 SVEXTERN float motion_ab[2], motion_dir[2];
 SVEXTERN int SVDECL(trainerload,0),SVDECL(trainerload_old,0);
 SVEXTERN int fontsize_save;
-SVEXTERN int showtrainer;
 SVEXTERN int trainer_mode;
 SVEXTERN int trainer_active;
 SVEXTERN int slice_average_flag,slice_turbprop_flag;
@@ -458,12 +473,19 @@ SVEXTERN int p3dsurfacetype;
 SVEXTERN int parttype;
 SVEXTERN int allexterior,showexterior;
 SVEXTERN int allinterior;
-SVEXTERN int SVDECL(showbound_dialog,0),SVDECL(showmotion_dialog,0),SVDECL(showedit_dialog,0), SVDECL(showclip_dialog,0);
-SVEXTERN int SVDECL(showstereo_dialog,0), SVDECL(showtour_dialog,0), SVDECL(showdisplay_dialog,0), SVDECL(showcolorbar_dialog,0);
-SVEXTERN int SVDECL(showwui_dialog,0), SVDECL(showdevice_dialog,0);
+SVEXTERN int SVDECL(showbounds_dialog,0),SVDECL(showmotion_dialog,0),SVDECL(showedit_dialog,0), SVDECL(showclip_dialog,0);
+SVEXTERN int SVDECL(showstereo_dialog,0), SVDECL(showdisplay_dialog,0), SVDECL(showcolorbar_dialog,0);
+SVEXTERN int SVDECL(showwui_dialog,0), SVDECL(showdevice_dialog,0),SVDECL(show3dsmoke_dialog,0);
+SVEXTERN int SVDECL(showtour_dialog,0),SVDECL(showalert_dialog,0),SVDECL(showtrainer_dialog,0);
+
+SVEXTERN int SVDECL(showbounds_dialog_save,0),SVDECL(showmotion_dialog_save,0),SVDECL(showedit_dialog_save,0), SVDECL(showclip_dialog_save,0);
+SVEXTERN int SVDECL(showstereo_dialog_save,0), SVDECL(showtour_dialog_save,0), SVDECL(showdisplay_dialog_save,0), SVDECL(showcolorbar_dialog_save,0);
+SVEXTERN int SVDECL(showwui_dialog_save,0), SVDECL(showdevice_dialog_save,0),SVDECL(show3dsmoke_dialog_save,0);
+SVEXTERN int SVDECL(showalert_dialog_save,0),SVDECL(showtrainer_dialog_save,0);
 
 #ifdef pp_SHOOTER
-SVEXTERN int showshooterDLG;
+SVEXTERN int SVDECL(showshooter_dialog,0);
+SVEXTERN int SVDECL(showshooter_dialog_save,0);
 SVEXTERN float shooter_xyz[3], shooter_dxyz[3], shooter_uvw[3], shooterpointsize;
 SVEXTERN float shooter_velx, shooter_vely, shooter_velz, shooter_time, shooter_time_max;
 SVEXTERN int shooter_cont_update,shooter_firstframe;
@@ -735,9 +757,7 @@ SVEXTERN float xtimeleft, xtimeright;
 SVEXTERN int showstereo, showstereoOLD, show_parallax, showstereo_frame;
 
 SVEXTERN int SVDECL(show_hrrcutoff,1), SVDECL(show_hrrcutoff_active,0),SVDECL(hrrpuv_loaded,0);
-SVEXTERN int SVDECL(showglui3dsmoke,0),SVDECL(showgluivol3dsmoke,0),SVDECL(showgluizip,0);
-SVEXTERN int showgluitour;
-SVEXTERN int showalert;
+SVEXTERN int SVDECL(showgluivol3dsmoke,0),SVDECL(showgluizip,0);
 SVEXTERN int trainerview;
 SVEXTERN int stereoactive;
 SVEXTERN int apertureindex;

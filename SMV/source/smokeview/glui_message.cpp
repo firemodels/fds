@@ -35,11 +35,35 @@ GLUI_StaticText *abort_text=NULL;
 GLUI_StaticText *abort_text2=NULL;
 
 
+
+/* ------------------ hide_glui_message ------------------------ */
+
+extern "C" void hide_glui_message(void){
+  if(glui_warning!=NULL){
+    glui_warning->hide();
+  }
+  if(glui_error!=NULL){
+    glui_error->hide();
+  }
+  if(glui_abort!=NULL){
+    glui_abort->hide();
+  }
+  updatemenu=1;
+}
+
 /* ------------------ glui_message_setup ------------------------ */
 
 extern "C" void glui_message_setup(int main_window){
 
-  if(glui_warning!=NULL)glui_warning->close();
+  update_glui_message=0;
+  if(glui_warning!=NULL){
+    glui_warning->close();
+    glui_warning=NULL;
+  }
+  if(glui_warning!=NULL){
+    glui_warning->close();
+    glui_warning=NULL;
+  }
   glui_warning = GLUI_Master.create_glui(_("Warning:"),0,0,0);
   glui_warning->add_statictext("");
   warning_text=glui_warning->add_statictext("");
@@ -49,7 +73,10 @@ extern "C" void glui_message_setup(int main_window){
   glui_warning->set_main_gfx_window( main_window );
   glui_warning->hide();
 
-  if(glui_error!=NULL)glui_error->close();
+  if(glui_error!=NULL){
+    glui_error->close();
+    glui_error=NULL;
+  }
   glui_error = GLUI_Master.create_glui(_("Error"),0,0,0);
   glui_error->add_statictext("");
   error_text=glui_error->add_statictext("");
@@ -59,7 +86,10 @@ extern "C" void glui_message_setup(int main_window){
   glui_error->set_main_gfx_window( main_window );
   glui_error->hide();
 
-  if(glui_abort!=NULL)glui_abort->close();
+  if(glui_abort!=NULL){
+    glui_abort->close();
+    glui_abort=NULL;
+  }
   glui_abort = GLUI_Master.create_glui(_("Abort"),0,0,0);
   glui_abort->add_statictext("");
   abort_text=glui_abort->add_statictext("");

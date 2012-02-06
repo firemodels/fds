@@ -246,8 +246,8 @@ int setup_case(int argc, char **argv){
     }
     return_code=readsmv(input_file,smvisofilename);
     if(return_code==0){
-      show_trainer();
-      show_load_alert();
+      show_glui_trainer();
+      show_glui_alert();
     }
   }
   else{
@@ -333,8 +333,8 @@ int setup_case(int argc, char **argv){
   InitMenus(LOAD);
   glutAttachMenu(GLUT_RIGHT_BUTTON);
   if(trainer_mode==1){
-    show_trainer();
-    show_load_alert();
+    show_glui_trainer();
+    show_glui_alert();
   }
   /*
   if(visTerrain==1){
@@ -1047,7 +1047,7 @@ void InitOpenGL(void){
     int i;
     int errorcode;
 
-//    show_load_alert();
+//    show_glui_alert();
     for(i=0;i<nplot3dinfo;i++){
       plot3d *plot3di;
 
@@ -1126,7 +1126,7 @@ void InitOpenGL(void){
     update_framenumber(0);
     updatemenu=1;
     update_load_startup=0;
-    hide_load_alert();
+    hide_glui_alert();
     TrainerViewMenu(trainerview);
   }
 
@@ -1369,7 +1369,6 @@ void initvars(void){
   motion_dir[0]=0.0;
   motion_dir[1]=0.0;
   fontsize_save=0;
-  showtrainer=0;
   trainer_mode=0;
   trainer_active=0;
   slice_average_flag=0;
@@ -1505,9 +1504,6 @@ void initvars(void){
   parttype=0;
   allexterior=1,showexterior=1;
   allinterior=1;
-#ifdef pp_SHOOTER
-  showshooterDLG=0;
-#endif
 #ifdef pp_MESSAGE
   show_glui_warning=0;
   show_glui_error=0;
@@ -1804,8 +1800,6 @@ void initvars(void){
   showstereoOLD=showstereo;
   showstereo_frame=2;
   show_parallax=0;
-  showgluitour=0;
-  showalert=0;
   stereoactive=0;
   apertureindex=2;
   zoomindex=2;

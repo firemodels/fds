@@ -194,7 +194,7 @@ void init_camera(camera *camera_data,char *name){
     clip_X_val = cam->clip_X_val;
     clip_Y_val = cam->clip_Y_val;
     clip_Z_val = cam->clip_Z_val;
-    update_glui_clip();
+    Update_Glui_Clip();
 
   }
 

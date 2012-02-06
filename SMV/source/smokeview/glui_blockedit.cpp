@@ -45,28 +45,6 @@ void BUTTON_hide3_CB(int var);
 char a_updatelabel[1000];
 char *updatelabel=NULL;
 
-/* ------------------ glui_edit_rename ------------------------ */
-
-extern "C" void glui_edit_rename(void){
-    surfacelists[DOWN_X]->set_name(_("Left"));
-    surfacelists[UP_X]->set_name(_("Right"));
-    surfacelists[DOWN_Y]->set_name(_("Front"));
-    surfacelists[UP_Y]->set_name(_("Back"));
-    surfacelists[DOWN_Z]->set_name(_("Down"));
-    surfacelists[UP_Z]->set_name(_("Up"));
-  panel_obj_stretch2->set_name(_("Coordinates"));
-  blockage_checkbox->set_name(_("Dimensions snapped to grid"));
-
-  if(nmeshes>1){
-    char meshlabel[255];
-
-    strcpy(meshlabel,_("Mesh label:"));
-    strcat(meshlabel,meshinfo->label);
-    statictext_mesh_index->set_name(meshlabel);
-  }
-  BUTTON_blockage_1->set_name(_("Close"));
-}
-
 /* ------------------ glui_edit_setup ------------------------ */
 
 extern "C" void glui_edit_setup(int main_window){
@@ -83,7 +61,11 @@ extern "C" void glui_edit_setup(int main_window){
   yplt_orig=current_mesh->yplt_orig;
   zplt_orig=current_mesh->zplt_orig;
 
-  if(glui_edit!=NULL)glui_edit->close();
+  update_glui_edit=0;
+  if(glui_edit!=NULL){
+    glui_edit->close();
+    glui_edit=NULL;
+  }
   glui_edit = GLUI_Master.create_glui("Blockage Info",0,0,0);
   if(showedit_dialog==0)glui_edit->hide();
 
@@ -246,6 +228,7 @@ extern "C" void glui_edit_setup(int main_window){
 extern "C" void hide_glui_edit(void){
   blockageSelect=0;
   if(glui_edit!=NULL)glui_edit->hide();
+  showedit_dialog_save=showedit_dialog;
   showedit_dialog=0;
   updatemenu=1;
   editwindow_status=CLOSE_WINDOW;
@@ -254,6 +237,7 @@ extern "C" void hide_glui_edit(void){
 /* ------------------ show_glui_edit ------------------------ */
 
 extern "C" void show_glui_edit(void){
+  showedit_dialog=1;
   blockageSelect=1;
   update_blockvals(0);
   glui_edit->show();

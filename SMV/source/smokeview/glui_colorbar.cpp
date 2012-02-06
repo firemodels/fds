@@ -128,6 +128,7 @@ extern "C" void update_colorbar_label(void){
 /* ------------------ hide_glui_colorbar ------------------------ */
 
 extern "C" void hide_glui_colorbar(void){
+  showcolorbar_dialog_save=showcolorbar_dialog;
   showcolorbar_dialog=0;
   if(glui_colorbar!=NULL){
     copy_camera(camera_external,camera_external_save);
@@ -142,42 +143,12 @@ extern "C" void hide_glui_colorbar(void){
 
 extern "C" void show_glui_colorbar(void){
 // show colorbar dialog box and redefine initial view point
+  showcolorbar_dialog=1;
   if(glui_colorbar!=NULL){
     Reshape(screenWidth,screenHeight);
     ResetView(RESTORE_EXTERIOR_VIEW);
     glui_colorbar->show();
   }
-}
-
-
-/* ------------------ glui_colorbar_setup ------------------------ */
-
-extern "C" void glui_colorbar_rename(void){
-  BUTTON_new->set_name(_("New colorbar"));
-  BUTTON_delete->set_name(_("Delete colorbar"));
-  CHECKBOX_hidesv->set_name(_("Hide scene"));
-  EDITTEXT_colorbar_label->set_name(_("Label"));  
-  BUTTON_update->set_name(_("Update label"));
-  panel_point->set_name(_("Node"));
-  BUTTON_prev->set_name(_("Previous"));
-  BUTTON_deletepoint->set_name(_("Delete"));
-  BUTTON_next->set_name(_("Next"));
-  BUTTON_addpoint->set_name(_("Insert"));
-  SPINNER_colorindex->set_name(_("node index"));
-  SPINNER_right_red->set_name(_("red"));
-  SPINNER_right_green->set_name(_("green"));
-  SPINNER_right_blue->set_name(_("blue"));
-  panel_cb8->set_name(_("Below specified min"));
-  SPINNER_down_red->set_name(_("red"));
-  SPINNER_down_green->set_name(_("green"));
-  SPINNER_down_blue->set_name(_("blue"));
-  panel_cb7->set_name(_("Above specified max"));
-  SPINNER_up_red->set_name(_("red"));
-  SPINNER_up_green->set_name(_("green"));
-  SPINNER_up_blue->set_name(_("blue"));
-  BUTTON_colorbar_save->set_name(_("Save settings"));
-  BUTTON_colorbar_close->set_name(_("Close"));
-  CHECKBOX_usebounds->set_name(_("Highlight extreme data"));
 }
 
 /* ------------------ glui_colorbar_setup ------------------------ */
@@ -197,7 +168,11 @@ extern "C" void glui_colorbar_setup(int main_window){
   NewMemory((void **)&colorbar_label,sizeof(GLUI_String));
   strcpy(colorbar_label,_("New colorbar"));
 
-  if(glui_colorbar!=NULL)glui_colorbar->close();
+  update_glui_colorbar=0;
+  if(glui_colorbar!=NULL){
+    glui_colorbar->close();
+    glui_colorbar=NULL;
+  }
   glui_colorbar = GLUI_Master.create_glui(_("Colorbar editor"),0,0,0);
   if(showcolorbar_dialog==0)glui_colorbar->hide();
 

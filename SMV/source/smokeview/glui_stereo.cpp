@@ -44,7 +44,7 @@ GLUI_Button *BUTTON_stereo_3=NULL;
 
 void STEREO_CB(int var);
 
-extern "C" void update_glui_stereo(void){
+extern "C" void Update_Glui_Stereo(void){
   if(RADIO_showstereo!=NULL){
     RADIO_showstereo->set_int_val(showstereo);
   }
@@ -63,28 +63,14 @@ extern "C" void update_glui_stereo(void){
   }
 }
 
-/* ------------------ glui_stereo_rename ------------------------ */
-
-extern "C" void glui_stereo_rename(void){
-  panel_stereo_method->set_name(_("Stereo Method"));
-  RADIO_button_1->set_name(_("Off"));
-  RADIO_seq->set_name(_("Successive frames"));
-  RADIO_button_2->set_name(_("Left/Right"));
-  RADIO_button_3->set_name(_("Red/Blue"));
-  RADIO_button_4->set_name(_("Red/Cyan"));
-  RADIO_button_5->set_name(_("Custom Red/Custom Blue"));
-  SPINNER_right_green2->set_name(_("green"));
-  SPINNER_right_blue2->set_name(_("blue"));
-  
-  SPINNER_zero_parallax->set_name(_("Distance to zero parallax plane (m)"));
-  BUTTON_stereo_1->set_name(_("Reset"));
-  BUTTON_stereo_2->set_name(_("Save settings"));
-  BUTTON_stereo_3->set_name(_("Close"));
-}
-
 /* ------------------ glui_stereo_setup ------------------------ */
 
 extern "C" void glui_stereo_setup(int main_window){
+  update_glui_stereo=0;
+  if(glui_stereo!=NULL){
+    glui_stereo->close();
+    glui_stereo=NULL;
+  }
   if(glui_stereo!=NULL)glui_stereo->close();
   glui_stereo = GLUI_Master.create_glui("stereo",0,0,0);
   if(showstereo_dialog==0)glui_stereo->hide();
@@ -115,7 +101,7 @@ extern "C" void glui_stereo_setup(int main_window){
 #endif
   //SPINNER_zero_parallax->set_float_limits(0.1*xyzmaxdiff,2.0*xyzmaxdiff,GLUI_LIMIT_CLAMP);
   STEREO_CB(STEREO_SHOW);
-  update_glui_stereo();
+  Update_Glui_Stereo();
 
   BUTTON_stereo_1=glui_stereo->add_button(_("Reset"),STEREO_RESET,STEREO_CB);
   BUTTON_stereo_2=glui_stereo->add_button(_("Save settings"),SAVE_SETTINGS,STEREO_CB);
@@ -128,6 +114,7 @@ extern "C" void glui_stereo_setup(int main_window){
 
 extern "C" void hide_glui_stereo(void){
   if(glui_stereo!=NULL)glui_stereo->hide();
+  showstereo_dialog_save=showstereo_dialog;
   showstereo_dialog=0;
   updatemenu=1;
 }
@@ -135,6 +122,7 @@ extern "C" void hide_glui_stereo(void){
 /* ------------------ show_glui_stereo ------------------------ */
 
 extern "C" void show_glui_stereo(void){
+  showstereo_dialog=1;
   if(glui_stereo!=NULL)glui_stereo->show();
 }
 
@@ -153,7 +141,7 @@ void STEREO_CB(int var){
     break;
   case STEREO_SHOW:
     if(showstereoOLD!=showstereo){
-      update_glui_stereo();
+      Update_Glui_Stereo();
       showstereoOLD=showstereo;
     }
     if(showstereo==5){

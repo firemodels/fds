@@ -117,57 +117,6 @@ extern "C" void add_new_tour(void){
   TOUR_CB(TOUR_INSERT);
 }
 
-
-/* ------------------ glui_tour_rename ------------------------ */
-
-extern "C" void glui_tour_rename(void){
-  panel_settings->set_name(_("Tour settings"));
-  view_checkbox->set_name(_("View from tour path"));
-  snap_checkbox->set_name(_("View from selected keyframe"));
-  CHECKBOX_constantvel->set_name(_("Constant speed"));
-  showtourroute_checkbox->set_name(_("Edit tour path"));
-  CHECKBOXshowtourlocus->set_name(_("Show avatar"));
-  CHECKBOXshowintermediate->set_name(_("Show intermediate path nodes"));
-  BUTTON_tour_1->set_name(_("New tour"));
-  BUTTONnext_tour->set_name(_("Next tour"));
-  BUTTONprev_tour->set_name(_("Previous tour"));
-  if(ntours>0){
-    LISTBOX_tour->set_name(_("Select tour:"));
-  }
-  BUTTON_tour_2->set_name(_("Update tour label"));
-  EDITlabel->set_name(_("Tour label"));
-  if(navatar_types>0){
-    LISTBOX_avatar->set_name(_("Avatar:"));
-  }
-  panel_keyframe->set_name(_("Keyframe"));
-  BUTTON_tour_3->set_name(_("Next"));
-  BUTTON_tour_4->set_name(_("Previous"));
-  BUTTON_tour_5->set_name(_("Add"));
-  BUTTON_tour_6->set_name(_("Delete"));
-  STATIC_tour_1->set_name(_("Position"));
-  STATIC_tour_2->set_name(_("View Direction"));
-  SPINNER_az_path->set_name(_("Azimuth:"));
-  SPINNER_elev_path->set_name(_("Elevation:"));
-  SPINNER_tourzoom->set_name(_("Zoom:"));
-  BUTTON_tour_7->set_name(_("Advanced settings"));
-  BUTTON_settings->set_name(_("Save settings"));
-  BUTTON_tour_8->set_name(_("Close"));
-
-  panel_advanced->set_name(_("Advanced Settings"));
-  panel_path->set_name(_("Duration/Points (all tours)"));
-  SPINNER_tour_a1->set_name(_("start time"));
-  SPINNER_tour_a2->set_name(_("stop time:"));
-  SPINNER_tour_a3->set_name(_("points"));
-  panel_advancedkeyframe->set_name(_("Edit keyframe's view/tension"));
-  BUTTON_tour_a1->set_name(_("Next"));
-  BUTTON_tour_a2->set_name(_("Previous"));
-  panel_spline->set_name(_("Tension"));
-  CHECKBOXglobaltension_flag->set_name(_("Global"));
-  SPINNER_globaltourtension->set_name(_("All keyframes"));
-  SPINNER_tourtension->set_name(_("Selected keyframe"));
-  BUTTON_tour_a3->set_name(_("Close"));
-}
-
 /* ------------------ glui_tour_setup ------------------------ */
 
 extern "C" void glui_tour_setup(int main_window){
@@ -175,9 +124,13 @@ extern "C" void glui_tour_setup(int main_window){
   tourdata *touri;
   int i;
 
-  if(glui_tour!=NULL)glui_tour->close();
+  update_glui_tour=0;
+  if(glui_tour!=NULL){
+    glui_tour->close();
+    glui_tour=NULL;
+  }
   glui_tour = GLUI_Master.create_glui(_("Edit tours"),0,0,0);
-  if(showgluitour==0)glui_tour->hide();
+  if(showtour_dialog==0)glui_tour->hide();
 
 
   panel_settings = glui_tour->add_panel(_("Tour settings"));
@@ -284,7 +237,10 @@ extern "C" void glui_tour_setup(int main_window){
 
 extern "C" void glui_advancedtour_setup(int main_window){
 
-  if(glui_advancedtour!=NULL)glui_advancedtour->close();
+  if(glui_advancedtour!=NULL){
+    glui_advancedtour->close();
+    glui_advancedtour->close();
+  }
   glui_advancedtour = GLUI_Master.create_glui("Advanced Settings",0,0,0);
   glui_advancedtour->hide();
 
@@ -338,13 +294,14 @@ extern "C" void hide_glui_advancedtour(void){
 extern "C" void hide_glui_tour(void){
   if(glui_tour!=NULL)glui_tour->hide();
   hide_glui_advancedtour();
-  showgluitour=0;
+  showtour_dialog=0;
   updatemenu=1;
 }
 
 /* ------------------ show_glui_tour ------------------------ */
 
 extern "C" void show_glui_tour(void){
+  showtour_dialog=1;
   if(glui_tour!=NULL)glui_tour->show();
 }
 

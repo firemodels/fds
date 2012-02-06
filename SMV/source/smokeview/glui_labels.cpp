@@ -201,7 +201,11 @@ extern "C" void glui_labels_rename(void){
 
 extern "C" void glui_labels_setup(int main_window){
 
-  if(glui_labels!=NULL)glui_labels->close();
+  update_glui_labels=0;
+  if(glui_labels!=NULL){
+    glui_labels->close();
+    glui_labels=NULL;
+  }
   glui_labels = GLUI_Master.create_glui("Display",0,0,0);
   if(showdisplay_dialog==0)glui_labels->hide();
 
@@ -482,17 +486,19 @@ extern "C" void update_showhidebuttons(void){
   }
 }
 
-/* ------------------ hide_glui_labels ------------------------ */
+/* ------------------ hide_glui_display ------------------------ */
 
-extern "C" void hide_glui_labels(void){
+extern "C" void hide_glui_display(void){
   if(glui_labels!=NULL)glui_labels->hide();
+  showdisplay_dialog_save=showdisplay_dialog;
   showdisplay_dialog=0;
   updatemenu=1;
 }
 
-/* ------------------ show_glui_labels ------------------------ */
+/* ------------------ show_glui_display ------------------------ */
 
-extern "C" void show_glui_labels(void){
+extern "C" void show_glui_display(void){
+  showdisplay_dialog=1;
   if(glui_labels!=NULL)glui_labels->show();
 }
 
@@ -563,7 +569,7 @@ extern "C" void Labels_CB(int var){
   case LABELS_transparent:
     break;
   case LABELS_close:
-    hide_glui_labels();
+    hide_glui_display();
     break;
   case LABELS_fontsize:
     FontMenu(fontindex);
