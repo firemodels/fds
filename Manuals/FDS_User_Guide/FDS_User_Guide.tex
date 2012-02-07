@@ -8559,23 +8559,25 @@ of the output quantities can be produced in a variety of ways.
 Quantities associated with the overall energy budget are reported in
 the comma delimited file {\ct CHID\_hrr.csv}.  This file is
 automatically generated; the only input parameter associated with it
-is {\ct DT\_HRR} on the {\ct DUMP} line. The columns in this file record the time history of various terms in the enthalpy transport equation.
-Neglecting the mass and energy gains and losses from particles, the transport equation for the sensible enthalpy is
-\begin{equation}
+is {\ct DT\_HRR} on the {\ct DUMP} line. The columns in this file record the time history of the integrals of the terms in the enthalpy transport equation.
+The columns are defined as follows:
+\begin{eqnarray}
 \label{eqn_enthalpytransport}
-\frac{\partial (\rho h_s) }{\partial t} + \nabla \cdot \left( \rho \bu h_s - k \nabla T - \sum_\alpha h_{s,\alpha} \, \rho D_\alpha \nabla Y_\alpha +
-     \dot{\mathbf{q}}^{\prime\prime}_{r} \right) = \dot{q}'''  + \frac{d \overline{p} }{dt}
-\end{equation}
-The first column in the file contains the time in seconds. The second
-through sixth columns contain integrated energy gains and losses, all
-in units of kW. The second column, {\ct HRR}, contains the total heat release
-rate, the volume integral of $\dot{q}'''$. The third column, {\ct Q\_RAD}, contains the radiative heat loss to all the boundaries
-(solid and open), the volume integral of $\nabla \cdot \dot{\mathbf{q}}^{\prime\prime}_{r}$. The fourth and fifth columns, {\ct Q\_OPEN} and {\ct Q\_WALL}, 
-contains the volume integral of conduction and diffusion terms, calculated as a surface integral over the open and solid parts of the boundary, respectively. 
-The sixth column, {\ct Q\_TOTAL}, is just the sum of {\ct Q\_RAD}, {\ct Q\_OPEN}, and {\ct Q\_WALL}. Ideally, this should equal {\ct HRR}.
+\underbrace{\frac{\partial}{\partial t} \int \rho h_s \, dV }_{\hbox{\ct Q\_ENTH}} &=& 
+\underbrace{- \int \rho \bu h_s \cdot \dS}_{\hbox{\ct Q\_CONV}} 
++\underbrace{\int k \nabla T \cdot \dS}_{\hbox{\ct Q\_COND}} 
++\underbrace{\sum_\alpha \int h_{s,\alpha} \, \rho D_\alpha \nabla Y_\alpha \cdot \dS}_{\hbox{\ct Q\_DIFF}}  \nonumber \\
+&&
+-\underbrace{\int \dot{\mathbf{q}}^{\prime\prime}_{r} \cdot \dS}_{\hbox{\ct Q\_RADI}}  
++\underbrace{\int \dot{q}''' dV}_{\hbox{\ct HRR}}  
++\underbrace{\int \frac{d \overline{p} }{dt} dV}_{\hbox{\ct Q\_PRES}}
++\underbrace{\int \left( -\dq_b''' + \dm_b'''(h_{s,b}-h_s)  \right) \, dV}_{\hbox{\ct Q\_PART}}
+\end{eqnarray}
+An additional column, {\ct Q\_TOTAL}, includes the sum of the terms on the right hand side of the equation. Ideally, this sum should equal {\ct Q\_ENTH}. All terms
+are reported in units of kW.
 
-The seventh column contains the total burning rate of
-fuel, in units of kg/s. Note that the reported value of the burning rate is not adjusted to account for the possibility that each individual
+The other columns in the file contain the total burning rate of
+fuel, in units of kg/s, and the zone pressures. Note that the reported value of the burning rate is not adjusted to account for the possibility that each individual
 material might have a different heat of combustion. For this reason, it is not always the case that the reported total
 burning rate multiplied by the gas phase heat of combustion is equal to the reported heat release rate.
 
@@ -11397,8 +11399,8 @@ called {\bf CHID\_hrr.csv}. The format of the file is as follows
 
 \footnotesize
 \begin{verbatim}
-s,kW,kW,kW,kW,kW,kg/s,Pa,Pa, ...
-Time,HRR,Q_RAD,Q_OPEN,Q_WALL,Q_TOTAL,BURN_RATE,ZONE_01,ZONE_02, ...
+s,kW,kW,kW,kW,...,kg/s,Pa,Pa, ...
+Time,HRR,Q_RADI,Q_CONV,Q_COND,...,BURN_RATE,ZONE_01,ZONE_02, ...
  0.0000000E+000, 0.0000000E+000, ...
  3.5355338E-001, 0.0000000E+000, ...
  .
@@ -11408,16 +11410,11 @@ Time,HRR,Q_RAD,Q_OPEN,Q_WALL,Q_TOTAL,BURN_RATE,ZONE_01,ZONE_02, ...
 \normalsize
 
 \noindent
-{\ct HRR} is the total heat release rate, {\ct Q\_RAD} is the rate of thermal radiation lost to the boundaries,
-{\ct Q\_OPEN} is the sensible enthalpy flow rate out of (positive) or into (negative) the computational domain,
-{\ct Q\_WALL} is the sensible enthalpy flow into (positive) or out of (negative) the solid surfaces, {\ct Q\_TOTAL} is the
-sum of {\ct Q\_RAD}, {\ct Q\_OPEN}, and {\ct Q\_WALL}, and typically equals {\ct HRR}.  
+Details of the integrated energy quantities can be found in Section~\ref{info:HRR}.
 {\ct BURN\_RATE} is the total mass loss rate of fuel, and {\ct ZONE\_01}, {\em etc.}, are the background pressures of the various
 pressure {\ct ZONE}s. Note that the reported {\ct BURN\_RATE} is not adjusted to account for the possibility that each individual
 material might have a different heat of combustion. It is the actual burning rate of the fuel as predicted by FDS or specified by the user.
-
-Details of the integrated energy quantities can be found in Section~\ref{info:HRR}. The background pressure is discussed in
-Section~\ref{info:ZONE}.
+The background pressure is discussed in Section~\ref{info:ZONE}.
 
 
 
