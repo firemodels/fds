@@ -1,3 +1,12 @@
+// Translate phrases following msgid and place them 
+// on the following line containing msgstr as in:
+// msgid "original phrase"
+// msgstr "translated phrase"
+// 
+// If you have trouble with some of the terms feel free
+// to ask.  It is also OK to leave troublesome terms
+// untranslated, they will be output in English
+// 
 // Suggested translation priority
 // 1.  translate terms in menus, e.g. Load/Unload, 
 //     Show/Hide etc.
@@ -5,6 +14,7 @@
 // 3.  Now go through the following list and translate terms.
 //     that are left.  
 // Terms that are not translated will remain in English when displayed
+// 
 msgid "2D contours"
 msgstr ""
 
@@ -476,6 +486,9 @@ msgstr ""
 msgid "Elevation"
 msgstr ""
 
+msgid "English"
+msgstr ""
+
 msgid "Erase compressed files"
 msgstr ""
 
@@ -551,9 +564,6 @@ msgstr ""
 msgid "failed"
 msgstr ""
 
-msgid "Failed to parse translation file: %s"
-msgstr ""
-
 msgid "Far depth"
 msgstr ""
 
@@ -576,6 +586,9 @@ msgid "FDS Ticks"
 msgstr ""
 
 msgid "File/Bound/Script settings...  ALT+f"
+msgstr ""
+
+msgid "filter"
 msgstr ""
 
 msgid "fire color"
@@ -632,6 +645,9 @@ msgstr ""
 msgid "Freeze"
 msgstr ""
 
+msgid "French"
+msgstr ""
+
 msgid "Frequency"
 msgstr ""
 
@@ -641,10 +657,16 @@ msgstr ""
 msgid "general rotations"
 msgstr ""
 
+msgid "General Settings"
+msgstr ""
+
 msgid "Geometry"
 msgstr ""
 
 msgid "Geometry transparency"
+msgstr ""
+
+msgid "German"
 msgstr ""
 
 msgid "Global"
@@ -815,6 +837,9 @@ msgstr ""
 msgid "Issue tracker"
 msgstr ""
 
+msgid "Italian"
+msgstr ""
+
 msgid "i: toggle iso-surface visibility"
 msgstr ""
 
@@ -825,6 +850,12 @@ msgid "Label"
 msgstr ""
 
 msgid "Labels"
+msgstr ""
+
+msgid "Language"
+msgstr ""
+
+msgid "Language code"
 msgstr ""
 
 msgid "Large"
@@ -947,9 +978,6 @@ msgstr ""
 msgid "Memory load"
 msgstr ""
 
-msgid "Menus will be in English"
-msgstr ""
-
 msgid "Mesh label"
 msgstr ""
 
@@ -996,6 +1024,9 @@ msgid "Next tour"
 msgstr ""
 
 msgid "ng_ini        - No graphics version of -ini"
+msgstr ""
+
+msgid "Node"
 msgstr ""
 
 msgid "node index"
@@ -1418,6 +1449,9 @@ msgstr ""
 msgid "Show/Hide blockage types"
 msgstr ""
 
+msgid "Show/Hide Loaded Files"
+msgstr ""
+
 msgid "Show intermediate path nodes"
 msgstr ""
 
@@ -1587,6 +1621,9 @@ msgid "Sort transparent surfaces"
 msgstr ""
 
 msgid "space bar: increment time step, 2D contour planes, 3D contour levels"
+msgstr ""
+
+msgid "Spanish"
 msgstr ""
 
 msgid "Specify"
@@ -1872,9 +1909,6 @@ msgid "Use transparency"
 msgstr ""
 
 msgid "using"
-msgstr ""
-
-msgid "Using translation file: %s"
 msgstr ""
 
 msgid "Variations"
