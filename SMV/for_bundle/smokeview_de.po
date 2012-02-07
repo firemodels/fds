@@ -16,40 +16,40 @@
 // 
 
 msgid "2D contours"
-msgstr ""
+msgstr "2D Konturen"
 
 msgid "2D lines"
-msgstr ""
+msgstr "2D Linien"
 
 msgid "2D smoke colored by"
-msgstr ""
+msgstr "2D Rauch koloriert durch"
 
 msgid "2D smoke drawn"
-msgstr ""
+msgstr "2D Rauch gezeichnet"
 
 msgid "2D stepped"
-msgstr ""
+msgstr "2D abgestuft"
 
 msgid "3D contours"
-msgstr ""
+msgstr "3D Konturen"
 
 msgid "3D smoke"
-msgstr ""
+msgstr "3D Rauch"
 
 msgid "3D smoke (volume rendered"
-msgstr ""
+msgstr "3D Rauch (Volumen gerendert"
 
 msgid "3D smoke frame skip"
-msgstr ""
+msgstr "3D Rauch-Rahmen ueberspringen"
 
 msgid "3D smoke...  ALT+s"
-msgstr ""
+msgstr "3D Rauch... ALT+s"
 
 msgid "3D surface"
-msgstr ""
+msgstr "3D Oberflaeche"
 
 msgid "3D surface color"
-msgstr ""
+msgstr "3D Oberflaechenfarbe"
 
 msgid "a: change flow vector lengths"
 msgstr "a: Laenge der Stroemungsvektoren aendern"
@@ -76,10 +76,10 @@ msgid "Add"
 msgstr "Hinzufuegen"
 
 msgid "Additional errors have occurred"
-msgstr ""
+msgstr "Zusaetzliche Fehler sind aufgetreten"
 
 msgid "Additional warnings have occurred"
-msgstr ""
+msgstr "Zusaetzliche Warnungen sind aufgetreten"
 
 msgid "adjust off-center"
 msgstr "Off-Center Anpassung"
@@ -160,7 +160,7 @@ msgid "Apply"
 msgstr "Anwenden"
 
 msgid "Apply Filter"
-msgstr ""
+msgstr "Wende Filter an"
 
 msgid "Auto load"
 msgstr "Automatisch laden"
@@ -214,7 +214,7 @@ msgid "both"
 msgstr "beide"
 
 msgid "Both eyes"
-msgstr ""
+msgstr "Beide Augen"
 
 msgid "Bound data"
 msgstr "Daten begrenzen"
@@ -223,7 +223,7 @@ msgid "Boundary file frame skip"
 msgstr "Boundary-File Frame ueberspringen"
 
 msgid "build         - show directives used in this build of Smokeview"
-msgstr ""
+msgstr "Version - zeige die in dieser Version von Smokeview verwendeten Direktiven"
 
 msgid "c: toggle between continuous and 2D stepped contours"
 msgstr "c: Umschalten zwischen kontinuierlichen und unterbrochenen 2D-Konturen"
@@ -232,13 +232,13 @@ msgid "Cad"
 msgstr "CAD"
 
 msgid "CAD geometry file: %s could not be opened"
-msgstr ""
+msgstr "CAD Geometrie File: %s konnte nicht geoeffnet werden"
 
 msgid "Cancel"
 msgstr "Abbrechen"
 
 msgid "casename       - project id (file names without the extension"
-msgstr ""
+msgstr "Fallname - Projekt-ID (Filename ohne Erweiterung"
 
 msgid "Center"
 msgstr "Mittig"
@@ -289,19 +289,19 @@ msgid "Colorbar editor"
 msgstr "Farbbalken Editor"
 
 msgid "Colorbar shade type"
-msgstr ""
+msgstr "Farbauswahl Schattierung"
 
 msgid "Colorbars"
-msgstr ""
+msgstr "Farbauswahl"
 
 msgid "colormap"
 msgstr "Farbtabelle"
 
 msgid "completed"
-msgstr ""
+msgstr "fertig"
 
 msgid "Compress data while loading"
-msgstr ""
+msgstr "Komprimiere Daten während des Ladens"
 
 msgid "Compress files (Smokezip"
 msgstr "Komprimieren von Dateien (Smokezip"
@@ -337,7 +337,7 @@ msgid "Constant speed"
 msgstr "Konstante Geschwindigkeit"
 
 msgid "Continuous"
-msgstr ""
+msgstr "Kontinuierlich"
 
 msgid "Continuous contours"
 msgstr "Kontinuierliche Konturen"
@@ -346,7 +346,7 @@ msgid "Create script"
 msgstr "Skript erstellen"
 
 msgid "creating window"
-msgstr ""
+msgstr "Fenster erstellen"
 
 msgid "CTRL: translate along x, y axis"
 msgstr "CTRL: entlang der x-, y-Achse verschieben"
@@ -379,7 +379,7 @@ msgid "Customize colorbar...  ALT+c"
 msgstr "Farbbalken anpassen ... ALT + c"
 
 msgid "cutoff"
-msgstr ""
+msgstr "Ausschalten"
 
 msgid "Cycle"
 msgstr "Ueberspringen"
@@ -415,7 +415,7 @@ msgid "Delete colorbar"
 msgstr "Farbbalken loeschen"
 
 msgid "demo          - use demonstrator mode of Smokeview"
-msgstr ""
+msgstr "Demo - benutze Demo-Modus von Smokeview"
 
 msgid "Demonstrator"
 msgstr "Demonstration"
@@ -424,7 +424,7 @@ msgid "Depth"
 msgstr "Tiefe"
 
 msgid "Devices/Objects"
-msgstr ""
+msgstr "Devices/Objekte"
 
 msgid "Dialogs"
 msgstr "Dialoge"
@@ -442,7 +442,7 @@ msgid "display all"
 msgstr "Alle Anzeigen"
 
 msgid "Display data as b/w"
-msgstr ""
+msgstr "Daten-Anzeige als b/w"
 
 msgid "Display...  ALT+d"
 msgstr "Anzeige ... Alt + d"
@@ -454,7 +454,7 @@ msgid "Documentation"
 msgstr "Dokumentation"
 
 msgid "does not exist"
-msgstr ""
+msgstr "existiert nicht"
 
 msgid "Down"
 msgstr "Runter"
@@ -490,7 +490,7 @@ msgid "Elevation"
 msgstr "Hoehe"
 
 msgid "English"
-msgstr ""
+msgstr "Englisch"
 
 msgid "Erase compressed files"
 msgstr "Loesche komprimierten Dateien"
@@ -499,7 +499,7 @@ msgid "Error"
 msgstr "Fehler"
 
 msgid "error allocating render image"
-msgstr ""
+msgstr "Fehler beim Allokieren des Render-Images"
 
 msgid "error: steplabel not defined"
 msgstr "Fehler: steplabel nicht definiert"
@@ -562,7 +562,7 @@ msgid "Facets"
 msgstr "Facetten"
 
 msgid "failed"
-msgstr ""
+msgstr "fehlgeschlagen"
 
 msgid "Far depth"
 msgstr "Weite Tiefe"
@@ -589,7 +589,7 @@ msgid "File/Bound/Script settings...  ALT+f"
 msgstr "Datei/Bound/Script-Einstellungen ... ALT + f"
 
 msgid "filter"
-msgstr ""
+msgstr "Filter"
 
 msgid "fire color"
 msgstr "Farbe des Feuers"
@@ -601,7 +601,7 @@ msgid "Fire opacity multiplier"
 msgstr ""
 
 msgid "Fire/Smoke colormap"
-msgstr ""
+msgstr "Feuer/Rauch Farbauswahl"
 
 msgid "Fires"
 msgstr "Feuer"
@@ -643,10 +643,10 @@ msgid "Free memory after coloring data"
 msgstr "Freier Speicher nach dem Einfaerben der Daten"
 
 msgid "Freeze"
-msgstr ""
+msgstr "Einfrieren"
 
 msgid "French"
-msgstr ""
+msgstr "Franzoesisch"
 
 msgid "Frequency"
 msgstr "Frequenz"
@@ -661,7 +661,7 @@ msgid "general rotations"
 msgstr "allgemeine Rotationen"
 
 msgid "General Settings"
-msgstr ""
+msgstr "Allgemeine Einstellungen"
 
 msgid "Geometry"
 msgstr "Geometrie"
@@ -670,7 +670,7 @@ msgid "Geometry transparency"
 msgstr "Geometry Transparenz"
 
 msgid "German"
-msgstr ""
+msgstr "Deutsch"
 
 msgid "Global"
 msgstr "Global"
@@ -691,10 +691,10 @@ msgid "GPU not available"
 msgstr "GPU nicht verfuegbar"
 
 msgid "GPU shader initialization failed"
-msgstr ""
+msgstr "Initialisierung des GPU-Shaders fehlgeschlagen"
 
 msgid "GPU shader initialization succeeded"
-msgstr ""
+msgstr "Initialisierung des GPU-Shaders erfolgreich"
 
 msgid "green"
 msgstr "gruen"
@@ -721,7 +721,7 @@ msgid "Help"
 msgstr "Hilfe"
 
 msgid "help          - display this message"
-msgstr ""
+msgstr "Hilfe - zeige diese Meldung an"
 
 msgid "Hidden"
 msgstr "Ausblenden"
@@ -753,8 +753,8 @@ msgstr "Szene verbergen"
 msgid "Highlight extreme data"
 msgstr "extreme Daten hervorheben"
 
-msgid "Hilight skinny triangles"
-msgstr ""
+msgid "Higlight skinny triangles"
+msgstr "Hebe smale Dreiecke hervor"
 
 msgid "hms time label"
 msgstr "hms Zeitbeschriftung"
@@ -796,28 +796,28 @@ msgid "Immersed Solids"
 msgstr ""
 
 msgid "ini           - output default smokeview parameters to smokeview.ini"
-msgstr ""
+msgstr "ini - gebe Standard Smokeview-Parameter in smokeview.ini aus"
 
 msgid "initialized"
-msgstr ""
+msgstr "initialisiert"
 
 msgid "Initializing callbacks"
-msgstr ""
+msgstr "Initialisiere Rueckruf"
 
 msgid "Initializing Glut"
-msgstr ""
+msgstr "Initialisiere Glut"
 
 msgid "Initializing Glut display mode"
-msgstr ""
+msgstr "Initialisiere Glut Anzeige-Modus"
 
 msgid "Initializing OpenGL"
-msgstr ""
+msgstr "Initialisiere OpenGL"
 
 msgid "Initializing Smokeview graphics window"
-msgstr ""
+msgstr "Initialisiere Smokeview Grafik-Fenster"
 
 msgid "Input file"
-msgstr ""
+msgstr "Eingabe File"
 
 msgid "Insert"
 msgstr "Einfuegen"
@@ -841,7 +841,7 @@ msgid "Issue tracker"
 msgstr "Issue Tracker"
 
 msgid "Italian"
-msgstr ""
+msgstr "Italienisch"
 
 msgid "Keyboard motion"
 msgstr "Keyboard Bewegung"
@@ -856,10 +856,10 @@ msgid "Labels"
 msgstr "Bezeichnungen"
 
 msgid "Language"
-msgstr ""
+msgstr "Sprache"
 
 msgid "Language code"
-msgstr ""
+msgstr "Sprach-Code"
 
 msgid "Large"
 msgstr "gross"
@@ -874,7 +874,7 @@ msgid "Left"
 msgstr "Links"
 
 msgid "Left eye"
-msgstr ""
+msgstr "Linkes Auge"
 
 msgid "Left/Right"
 msgstr "Links/Rechts"
@@ -895,7 +895,7 @@ msgid "Lighting"
 msgstr "Beleuchtung"
 
 msgid "Line"
-msgstr ""
+msgstr "Linie"
 
 msgid "Line Contours"
 msgstr "Linienkonturen"
@@ -922,31 +922,31 @@ msgid "Load All z"
 msgstr "Alle z-Slice laden"
 
 msgid "Load compressed data"
-msgstr ""
+msgstr "Lade komprimierte Daten"
 
 msgid "Load data in background"
-msgstr ""
+msgstr "Lade Daten im Hintergrund"
 
 msgid "Load data only at render times"
-msgstr ""
+msgstr "Lade Daten nur zu Render-Zeiten"
 
 msgid "Load full data"
-msgstr ""
+msgstr "Lade Daten vollstaendig"
 
 msgid "Load/Unload"
 msgstr "Laden/Entladen"
 
 msgid "Loading colorbar texture"
-msgstr ""
+msgstr "Lade Farbauswahl-Textur"
 
 msgid "Loading smoke and fire data"
 msgstr "Lade Daten von Rauch und Feuer"
 
 msgid "Loading terrain texture"
-msgstr ""
+msgstr "Lade Gelaende Textur "
 
 msgid "Loading textures"
-msgstr ""
+msgstr "Lade Texturen"
 
 msgid "Locations"
 msgstr "Standorte"
@@ -958,7 +958,7 @@ msgid "Map cursor keys for Plot3D use"
 msgstr "Tasten fuer Plot3D-Nutzung"
 
 msgid "Mass extinction coeff"
-msgstr ""
+msgstr "Massenextinktionskoeffizient"
 
 msgid "Mass extinction coeff (m2/g"
 msgstr "Massenextinktionskoeffizient (m2/g"
@@ -973,7 +973,7 @@ msgid "Maximum level solid"
 msgstr "Oberste Ebene als Solid"
 
 msgid "memory allocation error"
-msgstr ""
+msgstr "Speicherbelegungsfehler"
 
 msgid "Memory load"
 msgstr "Speicherauslastung"
@@ -1003,7 +1003,7 @@ msgid "Mouse motion"
 msgstr "Mausbewegung"
 
 msgid "Move"
-msgstr ""
+msgstr "Bewege"
 
 msgid "Near depth"
 msgstr "nahe Tiefe"
