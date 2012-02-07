@@ -10,11 +10,6 @@ char IOembed_revision[]="$Revision$";
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
-#ifdef pp_OSX
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
 
 #include "string_util.h"
 #include "smokeviewvars.h"
@@ -432,7 +427,6 @@ void update_triangles(void){
     geomdata *geomi;
     float *xyzptr[3];
     float *xyznorm;
-    float *xyz;
     int i;
 
     geomi = geominfo + j;

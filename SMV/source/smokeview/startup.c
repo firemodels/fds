@@ -186,7 +186,7 @@ void init_lang(void){
     filelistdata *filelisti;
     langlistdata *langi;
     int len;
-    char *lang_code, lang_name[32];
+    char *lang_code;
 
     langi = langlistinfo + nlanglistinfo;
     filelisti = filelistinfo + i;

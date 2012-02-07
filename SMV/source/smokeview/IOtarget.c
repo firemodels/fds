@@ -189,7 +189,6 @@ void readtarget2(const char *file, int ifile, int flag, int *errorcode){
   float vals_local[6];
   float *vals,valmin,valmax,val;
   unsigned char *color;
-  int doit;
 
   CheckMemory;
   *errorcode=0;
@@ -217,7 +216,8 @@ void readtarget2(const char *file, int ifile, int flag, int *errorcode){
     return;
   }
 
-  if( (stream=fopen(file,"r"))==NULL)return;
+  stream=fopen(file,"r");
+  if(stream==NULL)return;
 
   fgets(buffer,255,stream);
   fgets(buffer,255,stream);
@@ -238,15 +238,16 @@ void readtarget2(const char *file, int ifile, int flag, int *errorcode){
   CheckMemory;
 
   n=0;
-  doit=1;
-  if(fgets(buffer,255,stream)==NULL)doit=0;
-  if(doit==1){
-    sscanf(buffer,"%i ",&nsteps);
-    if(nsteps<=0)doit=0;
-  }
-  if(doit==0){
+  if(fgets(buffer,255,stream)==NULL){
     fclose(stream);
     readtarget2("", ifile, UNLOAD, errorcode);
+    return;
+  }
+  sscanf(buffer,"%i ",&nsteps);
+  if(nsteps<=0){
+    fclose(stream);
+    readtarget2("", ifile, UNLOAD, errorcode);
+    return;
   }
   target_positions[n].nsteps=nsteps;
   t=NULL;

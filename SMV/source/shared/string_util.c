@@ -879,9 +879,8 @@ unsigned int time2sec(char *tokenorig){
   char token[256];
   char *colen1, *colen2;
   char *hour=NULL,*min=NULL,*sec=NULL;
-  char *hourend, *minend, *secend;
+  char *minend, *secend;
   int time_local;
-  int ihour=0, imin=0, isec=0;
 
   strcpy(token,tokenorig);
   colen1=strchr(token,':');
@@ -933,7 +932,7 @@ char *STRCHRR(char *strbeg, char *searchbeg, int c){
 /* ------------------ date2sec ------------------------ */
 
 unsigned int date2sec(char *tokenorig){
-  char token[256], *tokenptr;
+  char token[256];
   char *slash, *colen;
   char *date=NULL,*dateend=NULL;
   char *tim=NULL,*timend=NULL;
