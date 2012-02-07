@@ -4350,7 +4350,7 @@ static int showhideslicemenu=0,showvslicemenu=0;
 static int plot3dshowmenu=0, staticvariablemenu=0, helpmenu=0;
 static int vectorskipmenu=0,unitsmenu=0;
 static int isosurfacemenu=0, isovariablemenu=0, levelmenu=0;
-static int fontmenu=0, aperturemenu=0,dialogmenu=0,zoommenu=0,languagemenu=0;
+static int fontmenu=0, aperturemenu=0,dialogmenu=0,zoommenu=0,languagemenu=0,fonttestmenu=0;
 static int gridslicemenu=0, blockagemenu=0, immersedmenu=0, loadpatchmenu=0, ventmenu=0;
 static int loadisomenu=0, isosurfacetypemenu=0;
 static int geometrymenu=0, loadunloadmenu=0, reloadmenu=0, disclaimermenu=0, terrain_showmenu=0;
@@ -6837,7 +6837,37 @@ updatemenu=0;
 
 /* --------------------------------languagemenu -------------------------- */
 #ifdef pp_LANG
+#define FONTFILL(IBEG,IEND) \
+    for(i=IBEG;i<=IEND;i++){\
+      fonttest[i-IBEG]=i;\
+    };\
+    fonttest[IEND+1-IBEG]=0;\
+    strcat(menulabel,"***");\
+    strcat(menulabel,fonttest);\
+    strcat(menulabel,"***");\
+    glutAddMenuEntry(menulabel,-999)
+
   if(show_lang_menu==1&&nlanglistinfo>0){
+    char fonttest[256];
+
+    CREATEMENU(fonttestmenu,LanguageMenu);
+    strcpy(menulabel,"   1-32: ");
+    FONTFILL(1,32);
+    strcpy(menulabel,"  33-64: ");
+    FONTFILL(33,64);
+    strcpy(menulabel,"  65-96: ");
+    FONTFILL(65,96);
+    strcpy(menulabel," 97-128: ");
+    FONTFILL(97,128);
+    strcpy(menulabel,"129-160: ");
+    FONTFILL(129,160);
+    strcpy(menulabel,"161-192: ");
+    FONTFILL(161,192);
+    strcpy(menulabel,"193-224: ");
+    FONTFILL(193,224);
+    strcpy(menulabel,"225-255: ");
+    FONTFILL(225,255);
+
     CREATEMENU(languagemenu,LanguageMenu);
     strcpy(menulabel,"");
     if(strcmp(startup_lang_code,"en")==0){
@@ -6866,6 +6896,7 @@ updatemenu=0;
       }
       glutAddMenuEntry(menulabel,i);
     }
+    //glutAddSubMenu("Font Test",fonttestmenu);
   }
 #endif
 /* --------------------------------option menu -------------------------- */
