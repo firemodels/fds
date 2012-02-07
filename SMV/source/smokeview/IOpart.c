@@ -1476,6 +1476,33 @@ void drawEvac(const particle *parti){
   drawPart(parti);
 }
 
+/* ------------------ get_evacpart_color ------------------------ */
+
+void get_evacpart_color(float **color_handle,part5data *datacopy, int show_default, int j, int itype){
+  int is_human_color;
+  float *colorptr;
+  unsigned char *color;
+
+
+  is_human_color=0;
+  if(current_property!=NULL&&strcmp(current_property->label->longlabel,"HUMAN_COLOR")==0&&navatar_colors>0){
+    is_human_color=1;
+  }
+  if(show_default==1){
+    colorptr=datacopy->partclassbase->rgb;
+  }
+  else{
+    color = datacopy->irvals+itype*datacopy->npoints;
+    if(is_human_color==1){
+      colorptr = avatar_colors + 3*color[j];
+    }
+    else{
+      colorptr=rgb_full[color[j]];
+    } 
+  }
+  *color_handle=colorptr;
+}
+
 /* ------------------ drawPart5 ------------------------ */
 
 void drawPart5(const particle *parti){
@@ -1572,23 +1599,7 @@ void drawPart5(const particle *parti){
 
               rgbobject = datacopy->partclassbase->rgb;
 
-              is_human_color=0;
-
-              if(current_property!=NULL&&strcmp(current_property->label->longlabel,"HUMAN_COLOR")==0&&navatar_colors>0){
-                is_human_color=1;
-              }
-              if(show_default==1){
-                colorptr=datacopy->partclassbase->rgb;
-              }
-              else{
-                color = datacopy->irvals+itype*datacopy->npoints;
-                if(is_human_color==1){
-                  colorptr = avatar_colors + 3*color[j];
-                }
-                else{
-                  colorptr=rgb_full[color[j]];
-                }
-              }
+              get_evacpart_color(&colorptr,datacopy,show_default,j,itype);
               
               //  :W :D :H1 :SX :SY :SZ :R :G :B :HX :HY :HZ
               //  class color: rgbobject[0], rgbobject[1], rgbobject[2]
@@ -1842,6 +1853,7 @@ void drawPart5(const particle *parti){
     unsigned char *vis;
     int k;
     int show_default;
+    float *colorptr;
 
     part5class *partclassi;
     int partclass_index, itype, vistype, class_vis;
@@ -1874,10 +1886,13 @@ void drawPart5(const particle *parti){
 
       // draw the streak line
 
-      glColor4fv(datacopy->partclassbase->rgb);
+      get_evacpart_color(&colorptr,datacopy,show_default,j,itype);
+      glColor4fv(colorptr);
+
       glLineWidth(streaklinewidth);
       for(j=0;j<datacopy->npoints;j++){
         int tagval;
+        
         tagval=datacopy->tags[j];
         if(vis[j]==0)continue;
         glBegin(GL_LINE_STRIP);
@@ -1912,7 +1927,8 @@ void drawPart5(const particle *parti){
         if(vis[j]==0)continue;
         
         glBegin(GL_LINE_STRIP);
-        glColor4fv(rgb_full[color[j]]);
+        get_evacpart_color(&colorptr,datacopy,show_default,j,itype);
+        glColor4fv(colorptr);
         glVertex3f(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
         for(k=1;k<streak5step;k++){
           int jj;
@@ -1926,7 +1942,8 @@ void drawPart5(const particle *parti){
           szz = datapast->sz;
           color=datapast->irvals+itype*datapast->npoints;
 
-          glColor4fv(rgb_full[color[jj]]);
+          get_evacpart_color(&colorptr,datacopy,show_default,jj,itype);
+          glColor4fv(colorptr);
           glVertex3f(xplts[sxx[jj]],yplts[syy[jj]],zplts[szz[jj]]);
         }
         glEnd();
