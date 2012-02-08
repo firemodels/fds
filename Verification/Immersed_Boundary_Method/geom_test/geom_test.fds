@@ -1,9 +1,6 @@
 &HEAD CHID='geom_test',TITLE='geometry test case SVN $Revision: 9488 $' /
 
-  same as plume5a except there is a blockage in the middle of the scene to block the flow
-  The purpose of this case is to demonstrate the curved flow (via streak lines) that results.
-
-&MESH IJK=64,64,64, XB=0.0,16,0.0,16,0.0,16 /
+&MESH IJK=32,32,32, XB=0.0,16,0.0,16,0.0,16 /
 
 &MISC HRRPUV_MAX_SMV=1300.0 /
 
@@ -14,12 +11,10 @@
 &TIME T_END=40. /  Total simulation time
 
 
-&SURF ID             = 'COVER'
-      FYI            = 'Properties completely fabricated'
-      RGB            = 151,96,88
-/
+&SURF ID='TEST1', RGB=200,20,20 /
+&SURF ID='TEST2', RGB=20,20,200 /
 
-&OBST XB=0.0,1.0,0.0,1.0,0.0,1.0,SURF_ID='COVER' /
+&OBST XB=0.0,1.0,0.0,1.0,0.0,1.0,SURF_ID='TEST1' /
 
 &VENT XB= 0,16, 0, 0, 0,16,SURF_ID='OPEN'/
 &VENT XB=16,16, 0,16, 0,16,SURF_ID='OPEN'/
