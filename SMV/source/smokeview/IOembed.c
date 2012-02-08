@@ -538,22 +538,32 @@ void get_geom_header(char *file, int *ntimes_local){
     if(first==1){
       FORTREADBR(times_local,1,stream);
       FORTREADBR(&nvertfaces,4,stream);
-      if(nvertfaces[0]!=0)fseek(stream,4+3*nvertfaces[0]*4+4,SEEK_CUR);    
-      if(nvertfaces[1]!=0)fseek(stream,4+3*nvertfaces[1]*4+4,SEEK_CUR);    
-      if(nvertfaces[2]!=0)fseek(stream,4+3*nvertfaces[2]*4+4,SEEK_CUR);    
-      if(nvertfaces[3]!=0)fseek(stream,4+3*nvertfaces[3]*4+4,SEEK_CUR);    
+#define N_VERT_S 0
+#define N_FACE_S 1
+#define N_VERT_D 2
+#define N_FACE_D 3
+      if(nvertfaces[N_VERT_S]!=0)fseek(stream,4+3*nvertfaces[N_VERT_S]*4+4,SEEK_CUR);//xvert_s,yvert_s,zvert_s
+      if(nvertfaces[N_VERT_D]!=0)fseek(stream,4+3*nvertfaces[N_VERT_D]*4+4,SEEK_CUR);//xvert_d,yvert_d,zvert_d    
+      if(nvertfaces[N_FACE_S]!=0)fseek(stream,4+3*nvertfaces[N_FACE_S]*4+4,SEEK_CUR);//face1_s,face2_s,face3_s    
+      if(nvertfaces[N_FACE_D]!=0)fseek(stream,4+3*nvertfaces[N_FACE_D]*4+4,SEEK_CUR);//face1_d,faced_d,face3_d 
+      if(nvertfaces[N_FACE_S]!=0)fseek(stream,4+1*nvertfaces[N_FACE_S]*4+4,SEEK_CUR);//surf_s
+      if(nvertfaces[N_FACE_D]!=0)fseek(stream,4+1*nvertfaces[N_FACE_D]*4+4,SEEK_CUR);//surf_d 
       first=0;
     }
     else{
       int *geom_type;
-
+#undef N_VERT_D
+#undef N_FACE_D
+#define N_VERT_D 0
+#define N_FACE_D 1
       FORTREADBR(times_local,2,stream);
       geom_type = (int *)(times_local+1);
 
       if(*geom_type==0){
         FORTREADBR(&nvertfaces,2,stream);
-        if(nvertfaces[0]!=0)fseek(stream,4+3*nvertfaces[0]*4+4,SEEK_CUR);    
-        if(nvertfaces[1]!=0)fseek(stream,4+3*nvertfaces[1]*4+4,SEEK_CUR);    
+        if(nvertfaces[N_VERT_D]!=0)fseek(stream,4+3*nvertfaces[N_VERT_D]*4+4,SEEK_CUR);//xvert_d,yvert_d,zvert_d        
+        if(nvertfaces[N_FACE_D]!=0)fseek(stream,4+3*nvertfaces[N_FACE_D]*4+4,SEEK_CUR);//face1_d,faced_d,face3_d     
+        if(nvertfaces[N_FACE_D]!=0)fseek(stream,4+1*nvertfaces[N_FACE_D]*4+4,SEEK_CUR);//surf_d 
       }
       else{
         fseek(stream,4+8*4+4,SEEK_CUR);
@@ -753,18 +763,18 @@ void read_geom(int ifile, int flag, int *errorcode){
       if(ntri_d>0){
         FORTREADBR(ijk+3*ntri_s,3*ntri_d,stream);
       }
-     // if(ntri_s>0){
-     //   FORTREADBR(surf_ind,ntri_s,stream);
-     // }
-     // if(ntri_d>0){
-     //   FORTREADBR(ijk+ntri_s,ntri_d,stream);
-     // }
+      if(ntri_s>0){
+        FORTREADBR(surf_ind,ntri_s,stream);
+      }
+      if(ntri_d>0){
+        FORTREADBR(surf_ind+ntri_s,ntri_d,stream);
+      }
       for(ii=0;ii<ntris;ii++){
         triangles[ii].points[0]=points+ijk[3*ii]-1;
         triangles[ii].points[1]=points+ijk[3*ii+1]-1;
         triangles[ii].points[2]=points+ijk[3*ii+2]-1;
-        //triangles[ii].surf=surfaceinfo + surf_ind[ii] - 1;
-        triangles[ii].surf=surfacedefault;
+        triangles[ii].surf=surfaceinfo + surf_ind[ii] - 1;
+        //triangles[ii].surf=surfacedefault;
       }
       FREEMEMORY(ijk);
       FREEMEMORY(surf_ind);
