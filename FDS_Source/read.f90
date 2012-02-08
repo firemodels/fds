@@ -2783,7 +2783,7 @@ SOOT_YIELD                  = 0.0_EB
 SMIX_ID                     = 'null'
 SPEC_ID                     = 'null'
 THRESHOLD_TEMPERATURE       = 300._EB   ! For SIMPLE_CHEMSITRY w/ CO_PRODUCTION
-TOL_INT                     = -999._EB
+TOL_INT                     = 1.e-2_EB
  
 END SUBROUTINE SET_REAC_DEFAULTS
 
@@ -3020,8 +3020,8 @@ REAC_LOOP: DO NR=1,N_REACTIONS
             COMBUSTION_ODE = RUNGE_KUTTA_2
          !CASE ('RUNGE-KUTTA 4')
          !   COMBUSTION_ODE = RUNGE_KUTTA_4
-         CASE ('IMPLICIT TRAPEZOID')
-            COMBUSTION_ODE = IMPLICIT_TRAPEZOID
+         CASE ('RK2 RICHARDSON')
+            COMBUSTION_ODE = RK2_RICHARDSON
          CASE DEFAULT
             WRITE(MESSAGE,'(A)') 'ERROR: Problem with REAC. Name of ODE_SOLVER is not recognized.'
             CALL SHUTDOWN(MESSAGE)
