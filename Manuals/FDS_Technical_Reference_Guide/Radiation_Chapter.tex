@@ -148,17 +148,14 @@ defined in Eq.~(\ref{emission_source_term}) requires special treatment in the fl
 use grid cells that are tens of centimeters in size, and consequently the computed temperatures constitute a bulk average and are considerably lower than
 one would expect in a diffusion flame.
 Because of its fourth-power dependence on the temperature,
-the source term must be modeled in those grid cells that are expected to contain flames. Elsewhere, there is greater confidence in the computed temperature,
-and the source term can be computed directly. 
-It is assumed that this ``flaming region'' is where the radiative fraction of the local heat release rate per unit volume, $\chi_r \dq'''$, exceeds
-that which is calculated using the emission source term given in Eq.~(\ref{emission_source_term}), $4 \kappa \sigma T^4$. In this region, we
-replace the emission source term with the following:   
-\be I_{b,f}(\bx) = \frac{C \, \sigma \, T(\bx)^4}{\pi} + \frac{U(\bx)}{4\pi}  \quad ; \quad  
-    C = \frac{\int \chi_r \, \dq''' \, dV}{\int 4 \kappa \sigma T^4 \, dV} \label{corrected_emission_source_term} 
+the source term must be modeled in those grid cells that are expected to contain flames. Elsewhere, the computed temperature is used directly.
+It is assumed that this ``flaming region'' is where the local heat release rate is non-zero, $\dq'''>0$. In this region, we
+multiply the emission source term by a corrective factor:
+\be I_{b,f}(\bx) = C \frac{\sigma \, T(\bx)^4}{\pi}   \quad ; \quad
+    C = \frac{\int \left( \chi_r \, \dq''' + \kappa U \right) \, dV}{\int 4 \kappa \sigma T^4 \, dV} \label{corrected_emission_source_term}
 \ee
 When the source term defined in Eq.~(\ref{corrected_emission_source_term}) is
-substituted into Eq.~(\ref{net_emission}), we assert that the net radiative emission from the flaming region is simply the
-specified radiative fraction of the rate of heat released within this region.
+substituted into Eq.~(\ref{net_emission}), the net radiative emission from the flaming region becomes the desired fraction of the total heat release rate.
 
 The radiative
 fraction, $\chi_r$, is a useful quantity in fire science. It is the nominal fraction of the heat release rate is emitted as thermal radiation. For most combustibles, $\chi_r$
@@ -168,7 +165,7 @@ region.  For a small fire ($D<1$~m), the local $\chi_r$ is
 approximately equal to its global counterpart. However, as the fire
 increases in size, the global value will typically decrease due to a
 net re-absorption of the thermal radiation by the increasing smoke
-mantle.  
+mantle.
 
 \newpage
 
