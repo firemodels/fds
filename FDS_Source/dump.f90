@@ -6462,8 +6462,12 @@ STATIC_IF: IF (ABS(T-T_BEGIN)<ZERO_P) THEN
    STATIC_LOOP: DO N=1,1
       WRITE(LU_GEOM(N)) STIME
       WRITE(LU_GEOM(N)) N_VERT,N_FACE,0,0
-      IF (N_VERT>0) WRITE(LU_GEOM(N)) (REAL(VERTEX(I)%X,FB),REAL(VERTEX(I)%Y,FB),REAL(VERTEX(I)%Z,FB),I=1,N_VERT)
-      IF (N_FACE>0) WRITE(LU_GEOM(N)) (FACET(I)%VERTEX,I=1,N_FACE) 
+      IF (N_VERT>0) WRITE(LU_GEOM(N)) (REAL(VERTEX(I)%X,FB),REAL(VERTEX(I)%Y,FB),REAL(VERTEX(I)%Z,FB),I=1,N_VERT) ! static vertices
+      ! output dynamic vertices here
+      IF (N_FACE>0) WRITE(LU_GEOM(N)) (FACET(I)%VERTEX,I=1,N_FACE)  ! static faces
+      ! output dynamic faces here
+      IF (N_FACE>0) WRITE(LU_GEOM(N)) (FACET(I)%SURF_INDEX,I=1,N_FACE) ! static SURF indices - need
+      ! output dynamic SURF indices here
    ENDDO STATIC_LOOP
 ENDIF STATIC_IF
 
