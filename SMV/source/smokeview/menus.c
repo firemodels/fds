@@ -6896,7 +6896,9 @@ updatemenu=0;
       }
       glutAddMenuEntry(menulabel,i);
     }
-    //glutAddSubMenu("Font Test",fonttestmenu);
+#ifdef pp_BETA
+    glutAddSubMenu("Font Test",fonttestmenu);
+#endif
   }
 #endif
 /* --------------------------------option menu -------------------------- */
