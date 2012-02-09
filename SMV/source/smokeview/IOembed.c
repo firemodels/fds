@@ -773,7 +773,7 @@ void read_geom(int ifile, int flag, int *errorcode){
         triangles[ii].points[0]=points+ijk[3*ii]-1;
         triangles[ii].points[1]=points+ijk[3*ii+1]-1;
         triangles[ii].points[2]=points+ijk[3*ii+2]-1;
-        triangles[ii].surf=surfaceinfo + surf_ind[ii] - 1;
+        triangles[ii].surf=surfaceinfo + surf_ind[ii];
         //triangles[ii].surf=surfacedefault;
       }
       FREEMEMORY(ijk);
