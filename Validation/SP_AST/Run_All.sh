@@ -11,8 +11,8 @@ export INDIR=Current_Results
 
 /bin/sh -c "cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR"
 
-$RUNFDS $INDIR SP2009_AST_Test_1 
-$RUNFDS $INDIR SP2009_AST_Test_2
-$RUNFDS $INDIR SP2009_AST_Test_3
+$RUNFDS $INDIR SP_AST_Test_1 
+$RUNFDS $INDIR SP_AST_Test_2
+$RUNFDS $INDIR SP_AST_Test_3
 
 echo FDS cases submitted

@@ -20,7 +20,7 @@ WTC Wall and Ceiling Temperatures,Measured Temperature Rise ($^\circ$C),Predicte
 HGL Temperature Steckler Compartment,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,300,0.03 0.95,SouthEast,4,14,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/HGL_Temperature_Steckler
 Doorway Velocity Steckler Compartment,Measured Velocity (m/s),Predicted Velocity (m/s),0,5,0.03 0.95,SouthEast,4,10,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Velocity_Steckler
 Hydrogen/Helium Concentration,Measured Volume Fraction,Predicted Volume Fraction,0,1,0.03 0.95,SouthEast,4,10,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Hydrogen
-Temperatures (SP 2009 AST Experiments),Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,1000,0.03 0.95,SouthEast,4,10,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/SP_Temperature
+Temperatures (SP AST Experiments),Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,1000,0.03 0.95,SouthEast,4,10,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/SP_Temperature
 UL/NFPRF Actuations,Measured Actuations,Predicted Actuations,0,40,0.03 0.95,SouthEast,4,0,no,FDS_Validation_Guide/FIGURES/ScatterPlots/UL_NFPRF_Actuations
 "Oxygen, NIST FSE 2008",Measured Drop in Volume Fraction,Predicted Drop in Volume Fraction,0,0.25,0.03 0.95,SouthEast,4,9,no,FDS_Validation_Guide/FIGURES/ScatterPlots/NIST_FSE_2008_Oxygen_Concentration
 "Carbon Monoxide, NIST FSE 2008",Measured Change in Volume Fraction,Predicted Change in Volume Fraction,0,0.1,0.03 0.95,SouthEast,4,9,no,FDS_Validation_Guide/FIGURES/ScatterPlots/NIST_FSE_2008_Carbon_Monoxide_Concentration
