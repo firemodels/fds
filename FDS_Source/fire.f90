@@ -563,10 +563,8 @@ INTEGRATION_LOOP: DO WHILE (DT_ITER < DT)
          IF (Q4 + Q_SUM*(DT_SUB/REAL(SUB_DT4,EB)) > Q_UPPER*DT) THEN
             DT_SUB_NEW = MAX(0._EB,(Q_UPPER*DT - Q4))/Q_SUM
             Q4 = Q4+Q_SUM*DT_SUB_NEW
-            Q_OUT = Q4/DT
             A4 = ZZ_0 + 0.5_EB*(DZZDT+DZZDT2)*DT_SUB_NEW
-            ZZ_GET = A4
-            EXIT INTEGRATION_LOOP
+            EXIT ODE_LOOP4
          ENDIF   
          A4 = ZZ_0 + 0.5_EB*(DZZDT+DZZDT2)*(DT_SUB/REAL(SUB_DT4,EB))
          Q4 = Q4+Q_SUM*(DT_SUB/REAL(SUB_DT4,EB))    
@@ -582,9 +580,17 @@ INTEGRATION_LOOP: DO WHILE (DT_ITER < DT)
          ERR_EST = MAXVAL(ABS((4._EB*A4-A2) - (4._EB*A2-A1)))/45._EB  ! Estimate Error
          DT_SUB_NEW = DT_SUB*(ERR_TOL/(ERR_EST+1.E-14_EB))**(0.25_EB) ! Determine New Time Step
       ENDIF
-
+      
    ENDDO RICH_EX_LOOP
-  
+    
+!   IF (MAXVAL(ABS((4._EB*A4-A2)/3._EB - ZZ_GET)) < 0.1_EB*ERR_TOL) THEN
+!      ITER = ITER + 1
+!      MAX_CHEM_SUBIT = MAX(MAX_CHEM_SUBIT,ITER)
+!      ZZ_GET = (4._EB*A4-A2)/3._EB  
+!      Q_OUT = ((4._EB*Q4-Q2)/3._EB)/DT
+!      EXIT INTEGRATION_LOOP
+!   ENDIF
+
    ITER = ITER + 1
    MAX_CHEM_SUBIT = MAX(MAX_CHEM_SUBIT,ITER)
    ZZ_GET = (4._EB*A4-A2)/3._EB  
