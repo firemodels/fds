@@ -685,7 +685,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                KFST4(I,J,K) = OMWGT*KFST4(I,J,K) + WGT*KAPPA(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4
-               IF (Q(I,J,K)>Q_MINIMUM) THEN
+               IF (RADIATIVE_FRACTION*Q(I,J,K)>Q_MINIMUM) THEN
                   VOL       = R(I)*DX(I)*DY(J)*DZ(K)
                   RAD_Q_SUM = RAD_Q_SUM + (RADIATIVE_FRACTION*Q(I,J,K)+KAPPA(I,J,K)*UII(I,J,K))*VOL
                   KFST4_SUM = KFST4_SUM + KFST4(I,J,K)*VOL
@@ -703,7 +703,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          DO J=1,JBAR
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               IF (Q(I,J,K)>Q_MINIMUM) KFST4(I,J,K) = KFST4(I,J,K)*RTE_SOURCE_CORRECTION_FACTOR
+               IF (RADIATIVE_FRACTION*Q(I,J,K)>Q_MINIMUM) KFST4(I,J,K) = KFST4(I,J,K)*RTE_SOURCE_CORRECTION_FACTOR
             ENDDO
          ENDDO
       ENDDO
