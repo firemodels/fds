@@ -2361,7 +2361,7 @@ IF (     USE_MPI .AND. .NOT.USE_OPENMP) WRITE(LU_ERR,'(/A,A,A)')" Version: ",TRI
 IF (.NOT.USE_MPI .AND.      USE_OPENMP) WRITE(LU_ERR,'(/A,A,A)')" Version: ",TRIM(VERSION_STRING),"; MPI Disabled; OpenMP Enabled"
 IF (     USE_MPI .AND.      USE_OPENMP) WRITE(LU_ERR,'(/A,A,A)')" Version: ",TRIM(VERSION_STRING),"; MPI Enabled; OpenMP Enabled"
 IF (USE_OPENMP .AND. .NOT.USE_MPI) WRITE(LU_ERR,'(A,I3/)')           ' Number of available threads: ',OPENMP_AVAILABLE_THREADS
-WRITE(LU_ERR,'(A,I4/)')    ' SVN Revision No. : ',SVN_REVISION_NUMBER
+WRITE(LU_ERR,'(A,I5/)')    ' SVN Revision No. : ',SVN_REVISION_NUMBER
 WRITE(LU_ERR,'(A,A)')      ' Job TITLE        : ',TRIM(TITLE)
 WRITE(LU_ERR,'(A,A/)')     ' Job ID string    : ',TRIM(CHID)
 
@@ -2386,7 +2386,7 @@ IF (.NOT. USE_OPENMP) WRITE (LU_OUTPUT,'(/A/)')      ' OpenMP Disabled'
 IF (USE_OPENMP) WRITE(LU_OUTPUT,'(/A/)')             ' OpenMP Enabled'
 IF (USE_OPENMP) WRITE(LU_OUTPUT,'(A,I3/)')           ' Number of OpenMP threads: ',OPENMP_AVAILABLE_THREADS
 
-WRITE(LU_OUTPUT,'(A,I4/)')    ' SVN Revision No. : ',SVN_REVISION_NUMBER
+WRITE(LU_OUTPUT,'(A,I5/)')    ' SVN Revision No. : ',SVN_REVISION_NUMBER
 WRITE(LU_OUTPUT,'(A,A)')      ' Job TITLE        : ',TRIM(TITLE)
 WRITE(LU_OUTPUT,'(A,A/)')     ' Job ID string    : ',TRIM(CHID)
  
