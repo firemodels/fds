@@ -3,6 +3,8 @@
 * domain dimensions, 2.1 x 1 x 1 m, cell dimensions, 0.1 x 0.1 x 0.1 m, 2,100 cells 
 &MESH IJK=21,10,10, XB=0.0,2.1,0.0,1.0,0.0,1.0 /
 
+&RADI RADIATION=.FALSE./
+
 * initial time step = 0.05 s, time when finished = 20 s
 &TIME DT=0.05, T_END=20. /
 

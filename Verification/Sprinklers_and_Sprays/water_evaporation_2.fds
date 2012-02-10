@@ -5,7 +5,7 @@ This case tests conservation of mass and energy.
 
 &MESH IJK=4,4,4, XB=0.0,0.4,0.0,0.4,0.0,0.4 / 
 
-&TIME T_END=28800.0/ 
+&TIME T_END=50000.0/ 
 
 &MISC TMPA=500., GVEC=0,0,0, STRATIFICATION=.FALSE./
 
