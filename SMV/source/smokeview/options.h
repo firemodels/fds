@@ -53,9 +53,7 @@
 #endif
 #define pp_SLICECONTOURS
 #define pp_SHOWLIGHT
-#ifndef pp_OSX
 #define pp_LANG
-#endif
 #define pp_SHOOTER
 #define pp_FREEZE_VOLSMOKE
 #endif
@@ -122,6 +120,9 @@
 
 #ifndef pp_OSX
 #define pp_JPEG
+#endif
+#ifdef pp_OSX
+#undef pp_LANG
 #endif
 
 // VVVVVVVVVVVVVVVVVVVVVVVVV  set defines used by various headers VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
