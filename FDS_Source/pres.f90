@@ -11,6 +11,7 @@ PRIVATE
 CHARACTER(255), PARAMETER :: presid='$Id$'
 CHARACTER(255), PARAMETER :: presrev='$Revision$'
 CHARACTER(255), PARAMETER :: presdate='$Date$'
+
 PUBLIC PRESSURE_SOLVER,COMPUTE_VELOCITY_ERROR,GET_REV_PRES,COMPUTE_A_B,COMPUTE_CORRECTION_PRESSURE
  
 CONTAINS
@@ -243,7 +244,7 @@ ENDDO WALL_CELL_LOOP
 !$OMP END DO
 
 ! Compute the RHS of the Poisson equation
- 
+
 SELECT CASE(IPS)
 
    CASE(:1,4,7)
@@ -343,7 +344,6 @@ END SELECT
 ! In case of ScaRC-method leave routine
 
 IF (PRES_METHOD == 'SCARC') RETURN
-
 
 ! Call the Poisson solver
  

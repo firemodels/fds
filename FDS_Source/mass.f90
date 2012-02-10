@@ -187,7 +187,7 @@ WLOOP_FL: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
           IF (CORRECTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%UW
        ENDIF
    ENDIF
-   
+
    ! Compute flux on the face of the wall cell
 
    SELECT CASE(IOR)
@@ -234,7 +234,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       FX=0._EB
       FY=0._EB
       FZ=0._EB
-   
+        
       !$OMP PARALLEL DEFAULT(NONE) &
       !$OMP SHARED(N,KBAR,JBAR,IBAR,KBM1,JBM1,IBM1,RHOP,ZZP,FX,FY,FZ,UU,VV,WW,FLUX_LIMITER,R, &
       !$OMP        N_EXTERNAL_WALL_CELLS,N_INTERNAL_WALL_CELLS, &
@@ -364,7 +364,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
               ANY(SURFACE(SURF_INDEX)%LEAK_PATH>0._EB)) .AND. WC%UWS<0._EB) .AND. WC%ZZ_F(N)>0._EB) THEN
             ! recreate diffusive flux from divg b/c UWP based on old RHODW
             RHO_D_DZDN = 2._EB*WC%RHODW(N)*(ZZP(IIG,JJG,KKG,N)-WC%ZZ_F(N))*WC%RDN
-            UN = SIGN(1._EB,REAL(IOR,EB))*(WC%MASSFLUX(N) + RHO_D_DZDN)/(WC%RHO_F*WC%ZZ_F(N))
+            UN = SIGN(1._EB,REAL(IOR,EB))*(WC%ONE_D%MASSFLUX(N) + RHO_D_DZDN)/(WC%RHO_F*WC%ZZ_F(N))
          ENDIF
 
          ! Compute species mass flux on the face of the wall cell
@@ -593,7 +593,7 @@ CASE(.FALSE.) PREDICTOR_STEP
       !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I,ZZ_GET)
       DO K=1,KBAR
          DO J=1,JBAR
-            DO I=1,IBAR   
+            DO I=1,IBAR    
                IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = ZZS(I,J,K,1:N_TRACKED_SPECIES)
                CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP(I,J,K))
                RHO_H_S_OVER_PBAR(I,J,K) = 0.5_EB*( RHO_H_S_OVER_PBAR(I,J,K) + RHOS(I,J,K)*H_S/PBAR_S(K,PRESSURE_ZONE(I,J,K)) )

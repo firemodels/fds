@@ -30,7 +30,7 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX,KDTDY,KDTDZ,DP,KP, &
           RHO_D_DZDX,RHO_D_DZDY,RHO_D_DZDZ,RHO_D,RHOP,H_RHO_D_DZDX,H_RHO_D_DZDY,H_RHO_D_DZDZ,RTRM,CP, &
           U_DOT_DEL_RHO_H_S,RHO_H_S_P,UU,VV,WW,UDRHDX,VDRHDY,WDRHDZ
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
-REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P
+REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P            
 REAL(EB) :: DELKDELT,VC,DTDX,DTDY,DTDZ,TNOW,ZZ_GET(0:N_TRACKED_SPECIES), &
             HDIFF,DZDX,DZDY,DZDZ,T,RDT,RHO_D_DZDN,TSI,TIME_RAMP_FACTOR,ZONE_VOLUME,DELTA_P,PRES_RAMP_FACTOR,&
             TMP_G,TMP_WGT,DIV_DIFF_HEAT_FLUX,H_S,PBAR_D_RHO_H_S_DT,DT_SUBSTEP,UN
@@ -51,13 +51,13 @@ RDT = 1._EB/DT
  
 SELECT CASE(PREDICTOR)
    CASE(.TRUE.)  
-      DP     => DS   
-      PBAR_P => PBAR_S
-      RHOP   => RHOS
+      DP => DS   
+      PBAR_P => PBAR_S      
+      RHOP => RHOS
    CASE(.FALSE.) 
-      DP     => DDDT 
+      DP => DDDT 
       PBAR_P => PBAR
-      RHOP   => RHO
+      RHOP => RHO
 END SELECT
 
 R_PBAR = 1._EB/PBAR_P
@@ -161,7 +161,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
    ! Tensor diffusivity model (experimental)
 
    IF (TENSOR_DIFFUSIVITY .AND. LES) CALL TENSOR_DIFFUSIVITY_MODEL(NM,N)
- 
+   
    ! Correct rho*D del Z at boundaries and store rho*D at boundaries
 
    WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
@@ -274,7 +274,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
             ENDDO
          ENDDO
    END SELECT CYLINDER
-   
+  
    ! Compute del dot rho*D del Z_n
 
    CYLINDER2: SELECT CASE(CYLINDRICAL)
@@ -408,10 +408,11 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
       IIG = WC%IIG
       JJG = WC%JJG
       KKG = WC%KKG
-      WC%KW = KP(IIG,JJG,KKG)
       IF (WC%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
          WC%KW = 0.5_EB*(KP(IIG,JJG,KKG)+KP(II,JJ,KK))
          CYCLE CORRECTION_LOOP
+      ELSE
+         WC%KW = KP(IIG,JJG,KKG)
       ENDIF
       IOR = WC%IOR
       SELECT CASE(IOR)
@@ -428,7 +429,7 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
          CASE(-3)
             KDTDZ(II,JJ,KK-1) = 0._EB
       END SELECT
-      DP(IIG,JJG,KKG) = DP(IIG,JJG,KKG) - WC%QCONF*WC%RDN
+      DP(IIG,JJG,KKG) = DP(IIG,JJG,KKG) - WC%ONE_D%QCONF*WC%RDN
    ENDDO CORRECTION_LOOP
 
    ! Compute (q + del dot k del T) and add to the divergence
@@ -456,12 +457,12 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
                ENDDO 
             ENDDO
          ENDDO
-   END SELECT CYLINDER3
- 
+      END SELECT CYLINDER3
+      
 ENDIF ENERGY
 
 ! New form of divergence expression
-
+ 
 ENTHALPY_TRANSPORT_IF: IF (ENTHALPY_TRANSPORT) THEN
 
    RHO_H_S_P=>WORK1;         RHO_H_S_P=0._EB
@@ -517,7 +518,7 @@ ENTHALPY_TRANSPORT_IF: IF (ENTHALPY_TRANSPORT) THEN
       IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = WC%ZZ_F(1:N_TRACKED_SPECIES)
       CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,WC%TMP_F)
       IF (PREDICTOR) UN = -WC%UWS
-      IF (CORRECTOR) UN = -WC%UW    
+      IF (CORRECTOR) UN = -WC%UW          
       SELECT CASE(IOR)
          CASE( 1)
             UDRHDX(II,JJ,KK)   = 2._EB*WC%RDN*(RHO_H_S_P(IIG,JJG,KKG)-WC%RHO_F*H_S)*UN
@@ -545,7 +546,6 @@ ENTHALPY_TRANSPORT_IF: IF (ENTHALPY_TRANSPORT) THEN
             U_DOT_DEL_RHO_H_S(I,J,K) = 0.5_EB*( UDRHDX(I,J,K)+UDRHDX(I-1,J,K) + &
                                                 VDRHDY(I,J,K)+VDRHDY(I,J-1,K) + &
                                                 WDRHDZ(I,J,K)+WDRHDZ(I,J,K-1) )
-
          ENDDO
       ENDDO 
    ENDDO
@@ -556,7 +556,7 @@ ENTHALPY_TRANSPORT_IF: IF (ENTHALPY_TRANSPORT) THEN
             DO I=1,IBAR
                U_DOT_DEL_RHO_H_S(I,J,K) = U_DOT_DEL_RHO_H_S(I,J,K) - 0.5_EB*(WW(I,J,K)+WW(I,J,K-1))*RHO_0(K)*GVEC(3)
             ENDDO
-         ENDDO
+         ENDDO 
       ENDDO
    ENDIF
 
@@ -570,7 +570,7 @@ ENTHALPY_TRANSPORT_IF: IF (ENTHALPY_TRANSPORT) THEN
 
             PBAR_D_RHO_H_S_DT = PBAR_P(K,PRESSURE_ZONE(I,J,K))* &
                                 ( RHO_H_S_P(I,J,K)/PBAR_P(K,PRESSURE_ZONE(I,J,K)) - RHO_H_S_OVER_PBAR(I,J,K) )/DT_SUBSTEP
-
+            
             DP(I,J,K) = ( DP(I,J,K) - (PBAR_D_RHO_H_S_DT + U_DOT_DEL_RHO_H_S(I,J,K)) )/RHO_H_S_P(I,J,K)
          ENDDO
       ENDDO 
@@ -606,7 +606,7 @@ ELSE ENTHALPY_TRANSPORT_IF
                CALL GET_SENSIBLE_ENTHALPY_DIFF(N,TMP(I,J,K),HDIFF)
                DP(I,J,K) = DP(I,J,K) + &
                            ( (SM%RCON-SM0%RCON)/RSUM(I,J,K) - &
-                             HDIFF/(CP(I,J,K)*TMP(I,J,K)) )*DEL_RHO_D_DEL_Z(I,J,K,N)/RHOP(I,J,K)
+                           HDIFF/(CP(I,J,K)*TMP(I,J,K)) )*DEL_RHO_D_DEL_Z(I,J,K,N)/RHOP(I,J,K)
             ENDDO
          ENDDO
       ENDDO
@@ -628,7 +628,7 @@ ENDIF
 
 ! Add contribution of evaporating PARTICLEs
 
-IF (NLP>0 .AND. N_EVAP_INDICES > 0 .AND. .NOT.EVACUATION_ONLY(NM) .AND. .NOT.ENTHALPY_TRANSPORT) THEN
+IF (NLP>0 .AND. N_LP_ARRAY_INDICES > 0 .AND. .NOT.EVACUATION_ONLY(NM) .AND. .NOT.ENTHALPY_TRANSPORT) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -637,7 +637,7 @@ IF (NLP>0 .AND. N_EVAP_INDICES > 0 .AND. .NOT.EVACUATION_ONLY(NM) .AND. .NOT.ENT
       ENDDO
    ENDDO
 ENDIF
- 
+
 ! Atmospheric Stratification Term
 
 IF (STRATIFICATION .AND. .NOT.EVACUATION_ONLY(NM) .AND. .NOT.ENTHALPY_TRANSPORT) THEN
@@ -825,10 +825,10 @@ RDT = 1._EB/DT
 
 SELECT CASE(PREDICTOR)
    CASE(.TRUE.)
-      DP     => DS
+      DP => DS
       PBAR_P => PBAR_S
    CASE(.FALSE.)
-      DP     => DDDT
+      DP => DDDT
       PBAR_P => PBAR
 END SELECT
 

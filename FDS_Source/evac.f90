@@ -15642,7 +15642,7 @@ CONTAINS
     ! Local variables
     !
 
-    WRITE(MODULE_DATE,'(A)') evacrev(INDEX(evacrev,':')+1:LEN_TRIM(evacrev)-2)
+    WRITE(MODULE_DATE,'(A)') evacrev(INDEX(evacrev,':')+2:LEN_TRIM(evacrev)-2)
     READ (MODULE_DATE,'(I5)') MODULE_REV
     WRITE(MODULE_DATE,'(A)') evacdate
 
