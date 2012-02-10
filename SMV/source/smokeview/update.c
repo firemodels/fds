@@ -1881,9 +1881,11 @@ void update_glui_names(void){
   
   hide_glui_motion();
   update_glui_motion=1;
-  
+
+#ifdef pp_SHOOTER
   hide_glui_shooter();
   update_glui_shooter=1;
+#endif
   
   hide_glui_tour();
   update_glui_tour=1;
@@ -1932,7 +1934,9 @@ void Update_Glui_Dialogs(void){
   if(update_glui_labels==1)glui_labels_setup(mainwindow_id);
   if(update_glui_message==1)glui_message_setup(mainwindow_id);
   if(update_glui_motion==1)glui_motion_setup(mainwindow_id);
+#ifdef pp_SHOOTER
   if(update_glui_shooter==1)glui_shooter_setup(mainwindow_id);
+#endif
   if(update_glui_tour==1){
     glui_tour_setup(mainwindow_id);
     glui_advancedtour_setup(mainwindow_id);
