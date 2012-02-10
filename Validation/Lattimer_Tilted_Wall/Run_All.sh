@@ -10,7 +10,7 @@ export INDIR=Current_Results
 source ~/.bashrc_fds intel64
 
 # uncomment following line to stop all cases
-# export STOPFDS=1
+#export STOPFDS=1
 
 /bin/sh -c "cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR"
 
@@ -18,6 +18,6 @@ source ~/.bashrc_fds intel64
 
 $RUNFDSMPI 27 $INDIR Lattimer_20_kW_0_degree_coarse
 $RUNFDSMPI 27 $INDIR Lattimer_20_kW_0_degree
-$RUNFDSMPI 125 $INDIR Lattimer_20_kW_0_degree_fine
+$RUNFDSMPI 27 $INDIR Lattimer_20_kW_0_degree_fine
 
 echo FDS cases submitted
