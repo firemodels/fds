@@ -1,7 +1,7 @@
 &HEAD CHID='distributions_and_histograms', TITLE='Test new droplet distributions and PDPA histogram output' /
 
 &TIME T_END=2.0 /
-
+&RADI RADIATION=.FALSE./
 &MESH IJK=4,4,4, XB=-1.0,1.0,-1.0,1.0,-1.0,1.0 /
 
 &VENT MB='XMIN',SURF_ID='OPEN'/

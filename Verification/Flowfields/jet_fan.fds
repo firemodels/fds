@@ -4,7 +4,7 @@ A simple example of a jet fan consisting of a rectangular shroud pushing smoke t
 
 &MESH IJK=50,20,20, XB=0.0,10.0,-2.0,2.0,0.0,4.0 /
 
-&TIME T_END=30.0 /
+&TIME T_END=10.0 /
 
 &SURF ID='FIRE', HRRPUA=1000., COLOR='YELLOW' /
 &REAC C=3,H=8,SOOT_YIELD=0.01,FUEL='PROPANE'/
