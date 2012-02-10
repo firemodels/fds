@@ -70,7 +70,7 @@ IF (FN_INPUT(1:1)==' ') THEN
    IF (USE_OPENMP .and. .NOT.USE_MPI) &
       WRITE(LU_ERR,'(A,I3)') 'Number of available OpenMP threads: ',OPENMP_AVAILABLE_THREADS
    IF (MYID==0) THEN
-      WRITE(LU_ERR,'(A,I4)') "SVN Revision Number: ",SVN_REVISION_NUMBER
+      WRITE(LU_ERR,'(A,I5)') "SVN Revision Number: ",SVN_REVISION_NUMBER
       WRITE(LU_ERR,'(A,A)') "Compile Date: ",TRIM(COMPILE_DATE)
       WRITE(LU_ERR,'(/A)')  "Consult FDS Users Guide Chapter, Running FDS, for further instructions."
       WRITE(LU_ERR,'(/A)')  "Hit Enter to Escape..."
@@ -10307,7 +10307,7 @@ SUBROUTINE GET_REV_read(MODULE_REV,MODULE_DATE)
 INTEGER,INTENT(INOUT) :: MODULE_REV
 CHARACTER(255),INTENT(INOUT) :: MODULE_DATE
 
-WRITE(MODULE_DATE,'(A)') readrev(INDEX(readrev,':')+1:LEN_TRIM(readrev)-2)
+WRITE(MODULE_DATE,'(A)') readrev(INDEX(readrev,':')+2:LEN_TRIM(readrev)-2)
 READ (MODULE_DATE,'(I5)') MODULE_REV
 WRITE(MODULE_DATE,'(A)') readdate
 
