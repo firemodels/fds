@@ -11845,10 +11845,10 @@ Geometry data files are written out from {\bf dump.f} with the lines equivalent 
   WRITE(LU_GEOM_DATA) VERSION
   WRITE(LU_GEOM_DATA) STIME
   WRITE(LU_GEOM_DATA) N_VERT_S_VALS,N_VERT_D_VALS,N_FACE_S_VALS,N_FACE_D_VALS
-  IF (N_VERT_S_VALS>0)  WRITE(LU_GEOM_DATA) (ValVertStatic(I)), I=1,N_VERT_S_VALS)
-  IF (N_VERT_D_VALS>0)  WRITE(LU_GEOM_DATA) (ValVertDynamic(I)),I=1,N_VERT_D_VALS)
-  IF (N_FACE_S_VALS>0)  WRITE(LU_GEOM_DATA) (ValFaceStatic(I)), I=1,N_VERT_S_VALS)
-  IF (N_FACE_D_VALS>0)  WRITE(LU_GEOM_DATA) (ValFaceDynamic(I)),I=1,N_FACE_D_VALS)
+  IF (N_VERT_S_VALS>0)  WRITE(LU_GEOM_DATA) (ValVertStatic(I), I=1,N_VERT_S_VALS)
+  IF (N_VERT_D_VALS>0)  WRITE(LU_GEOM_DATA) (ValVertDynamic(I),I=1,N_VERT_D_VALS)
+  IF (N_FACE_S_VALS>0)  WRITE(LU_GEOM_DATA) (ValFaceStatic(I), I=1,N_VERT_S_VALS)
+  IF (N_FACE_D_VALS>0)  WRITE(LU_GEOM_DATA) (ValFaceDynamic(I),I=1,N_FACE_D_VALS)
               .
               .
               .
