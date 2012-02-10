@@ -26,4 +26,6 @@ The purpose of this case is to test functionality of the droplet routine.
 
 &BNDF QUANTITY='MPUA', PART_ID='WATER PARTICLES' /
 
+&RADI RADIATION=.FALSE./
+
 &TAIL /
