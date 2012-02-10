@@ -5102,7 +5102,7 @@ CONTAINS
 
     ! Write program info
 
-    WRITE(EVAC_COMPILE_DATE,'(A)') evacrev(INDEX(evacrev,':')+1:LEN_TRIM(evacrev)-2)
+    WRITE(EVAC_COMPILE_DATE,'(A)') evacrev(INDEX(evacrev,':')+2:LEN_TRIM(evacrev)-2)
     READ (EVAC_COMPILE_DATE,'(I5)') EVAC_MODULE_REV
     WRITE(EVAC_COMPILE_DATE,'(A)') evacdate
     CALL GET_REV_EVAC(EVAC_MODULE_REV,EVAC_COMPILE_DATE)
