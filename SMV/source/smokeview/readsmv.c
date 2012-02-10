@@ -3425,7 +3425,7 @@ int readsmv(char *file, char *file2){
       char *filename;
       zonedata *zonei;
       char buffer_csv[1000],*buffer_csvptr;
-      char *period;
+      char *period=NULL;
 
       zonei = zoneinfo + izone_local;
       if(fgets(buffer,255,stream)==NULL){
@@ -3440,7 +3440,7 @@ int readsmv(char *file, char *file2){
       buffer_csvptr=buffer_csv;
       strcpy(buffer_csv,bufferptr);
       filename=get_zonefilename(buffer_csvptr);
-      period=strrchr(filename,".");
+      if(filename!=NULL)period=strrchr(filename,".");
       if(filename!=NULL&&period!=NULL&&strcmp(period,".csv")==0){
         zonei->csv=1;
         zonecsv=1;
