@@ -16,31 +16,24 @@ goto:eof
 
 :endif_envexist
 
-  set level=Release-4_Test
-  set upload_win32=1
-  set upload_linux32=0
-  set upload_osx32=0
+set level=Release-4_Test
 
 call %envfile%
-
-echo Uploading Smokeview %level% version=test revision=%smv_revision%
 
 %svn_drive%
 cd %svn_root%\smv\for_bundle\to_google
 
 Rem --------------- 32 bit Windows ----------------
-if not %upload_win32% == 1 goto endif_win32
-  set glabels=Type-Installer,Opsys-Windows,%level%
-  set dplatform=32 bit Windows
-  set platform=win32
-  set summary=Smokeview test for %dplatform% (SVN r%smv_revision%)
-  set exe=smv_test_%smv_revision%_%platform%.exe
-  echo.
-  echo Uploading %summary% - %exe%
-  echo %upload% --passwd-file-dir "%google_password_dir%" --config-dir none -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
-       %upload% --passwd-file-dir %google_password_dir% --config-dir none -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
-:endif_win32
+
+set glabels=Type-Installer,Opsys-Windows,%level%
+set dplatform=32 bit Windows
+set platform=win32
+set summary=Smokeview test for %dplatform% (SVN r%smv_revision%)
+set exe=smv_test_%smv_revision%_%platform%.exe
+echo.
+echo Uploading %exe% 
+     %upload% --passwd-file-dir %google_password_dir% --config-dir none -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
 
 echo.
-echo Uploads complete
+echo Upload complete
 pause

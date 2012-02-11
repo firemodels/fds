@@ -26,8 +26,6 @@ Rem should not need to edit any lines below
 
 set level=Release-4_Test
 
-echo Uploading Smokeview %level% version=test revision=%smv_revision%
-
 Rem --------------- 64 bit Linux ----------------
 
   set glabels=Type-Archive,Opsys-Linux_64,%level%
@@ -36,11 +34,10 @@ Rem --------------- 64 bit Linux ----------------
   set summary=Smokeview test for %dplatform% (SVN r%smv_revision%)
   set exe=smv_test_%smv_revision%_%platform%.tar.gz
   echo.
-  echo Uploading %summary% - %exe%
-  echo googlecode_upload.py --passwd-file-dir %google_password_dir% --config-dir none  -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
+  echo Uploading %exe% 
        %upload% --passwd-file-dir %google_password_dir% --config-dir none  -s "%summary%" -p fds-smv -u %google_username% -l %glabels% %exe%
 
 
 echo.
-echo Uploads complete
+echo Upload complete
 pause
