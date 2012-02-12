@@ -292,8 +292,12 @@ int edgelist2[15][16]={
     closestnodes[n]=0;
   }
   for(n=1;n<8;n++){
-    if(vals[n]<vmin){vmin=vals[n];}
-    if(vals[n]>vmax){vmax=vals[n];}
+    if(vals[n]<vmin){
+      vmin=vals[n];
+    }
+    if(vals[n]>vmax){
+      vmax=vals[n];
+    }
   }
 
 /* if the iso-surface level is not bounded by the vals data then there is nothing to do */
@@ -353,18 +357,30 @@ int edgelist2[15][16]={
   type = case2[8];
   if(type==0)return *ntriangles;
 
-  if(compcase[type]==-1){thistype=sign;}
-  else{thistype=1;}
+  if(compcase[type]==-1){
+    thistype=sign;
+  }
+  else{
+    thistype=1;
+  }
  
   if(thistype!=-1){
     edges = &(edgelist[type][1]);
-    if(sign>0)path = &(pathcclist[type][1]);   /* construct triangles clock wise */
-     else{path = &(pathccwlist[type][1]);}     /* construct triangles counter clockwise */
+    if(sign>0){
+      path = &(pathcclist[type][1]);   /* construct triangles clock wise */
+    }
+    else{
+      path = &(pathccwlist[type][1]); /* construct triangles counter clockwise */
+    }     
   }
   else{
     edges = &(edgelist2[type][1]);
-    if(sign>0)path = &(pathcclist2[type][1]);   /* construct triangles clock wise */
-     else{path = &(pathccwlist2[type][1]);}     /* construct triangles counter clockwise */
+    if(sign>0){
+      path = &(pathcclist2[type][1]);   /* construct triangles clock wise */
+    }
+    else{
+      path = &(pathccwlist2[type][1]);  /* construct triangles counter clockwise */
+    }     
   }
   npath = path[-1];
   nedges = edges[-1];
@@ -413,7 +429,7 @@ int edgelist2[15][16]={
       printf("%f ",vals[n]);
     }
     printf("\n");
-    printf("x=%f %f y=%f %f z=%f %f\n\n",x[0],x[1],y[0],y[1],z[1],z[2]);
+    printf("x=%f %f y=%f %f z=%f %f\n\n",x[0],x[1],y[0],y[1],z[0],z[1]);
   }
 
   /* copy coordinates to output array */
