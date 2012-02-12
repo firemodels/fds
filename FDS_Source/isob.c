@@ -904,12 +904,12 @@ void GetIsobox(float *x, float *y, float *z, float *vals, float *tvals, int *nod
  
   if(thistype!=-1){
     edges = &(edgelist[type][1]);
-    if(sign>0)path = &(pathcclist[type][1]);   /* construct triangles clock wise */
+    if(sign>0){path = &(pathcclist[type][1]);}   /* construct triangles clock wise */
      else{path = &(pathccwlist[type][1]);}     /* construct triangles counter clockwise */
   }
   else{
     edges = &(edgelist2[type][1]);
-    if(sign>0)path = &(pathcclist2[type][1]);   /* construct triangles clock wise */
+    if(sign>0){path = &(pathcclist2[type][1]);}   /* construct triangles clock wise */
      else{path = &(pathccwlist2[type][1]);}     /* construct triangles counter clockwise */
   }
   npath = path[-1];
@@ -945,7 +945,7 @@ void GetIsobox(float *x, float *y, float *z, float *vals, float *tvals, int *nod
     printf("values=");
     for(n=0;n<8;n++){printf("%f ",vals[n]);}
     printf("\n");
-    printf("x=%f %f y=%f %f z=%f %f\n\n",x[0],x[1],y[0],y[1],z[1],z[2]);
+    printf("x=%f %f y=%f %f z=%f %f\n\n",x[0],x[1],y[0],y[1],z[0],z[1]);
   }
 
   /* copy coordinates to output array */
