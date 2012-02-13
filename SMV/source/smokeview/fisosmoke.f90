@@ -2,202 +2,289 @@
 ! $Revision$
 ! $Author$
 
+! ------------------ FISOSURFACE2FILE ------------------------
 
-!  ------------------ FGetIsosurface ------------------------ 
-
-integer function FGetIsosurface(vdata, have_tdata, tdata, have_iblank, iblank_cell, level, &
-     xplt, nx, yplt, ny, zplt, nz,&
-     xyzverts, nxyzverts, triangles, ntriangles)
-
-  implicit none
-     
-  integer, intent(in) :: nx, ny, nz
-  integer, intent(in) :: have_tdata, have_iblank
-  real, dimension(0:nx,0:ny,0:nz), intent(in) :: vdata, tdata
-  integer, dimension(0:nx-1,0:ny-1,0:nz-1), intent(in) :: iblank_cell
-  real, intent(in) :: level
-  real, intent(in), dimension(0:nx) :: xplt
-  real, intent(in), dimension(0:ny) :: yplt
-  real, intent(in), dimension(0:nz) :: zplt
-     
-  real, dimension(:), pointer, intent(out) :: xyzverts
-  integer, dimension(:), pointer, intent(out) :: triangles
-  integer, intent(out) :: ntriangles, nxyzverts
-  
-  
-  real, dimension(0:1) :: xx, yy, zz
-  integer, dimension(0:23) :: nodeindexes
-  integer, dimension(0:35) :: closestnodes
-  real, dimension(0:7) :: vals, tvals
-  real, dimension(0:35) :: xyzv,tv
-  integer :: nxyzv
-  integer, dimension(0:11) :: tris
-  integer :: ntris
-  integer :: nxyzverts_MAX, ntriangles_MAX
-  real :: vmin, vmax
-  
-  integer :: i, j, k, n
-  integer :: returnval
-  integer :: FGetIsobox,UpdateIsosurface
-     
-  integer, dimension(0:3) :: ixmin=(/0,1,4,5/), ixmax=(/2,3,6,7/)
-  integer, dimension(0:3) :: iymin=(/0,3,4,7/), iymax=(/1,2,5,6/)
-  integer, dimension(0:3) :: izmin=(/0,1,2,3/), izmax=(/4,5,6,7/)
-  
-  nullify(xyzverts)
-  nullify(triangles)
-  ntriangles=0
-  nxyzverts=0
-  nxyzverts_MAX=1000
-  ntriangles_MAX=1000
-  allocate(xyzverts(3*nxyzverts_MAX))
-  allocate(triangles(3*ntriangles_MAX))
-     
-  do i=0, nx-2
-    xx(0)=xplt(i)
-    xx(1)=xplt(i+1)
-    do j=0,ny-2
-      yy(0)=yplt(j);
-      yy(1)=yplt(j+1);
-      do k=0,nz-2
-        if(have_iblank.eq.1.and.iblank_cell(i,j,k).eq.0)continue
-        
-        vals(0)=vdata(  i,  j,  k)
-        vals(1)=vdata(  i,j+1,  k)
-        vals(2)=vdata(i+1,j+1,  k)
-        vals(3)=vdata(i+1,  j,  k)
-        vals(4)=vdata(  i,  j,k+1)
-        vals(5)=vdata(  i,j+1,k+1)
-        vals(6)=vdata(i+1,j+1,k+1)
-        vals(7)=vdata(i+1,  j,k+1)
-
-        vmin=min(vals(0),vals(1),vals(2),vals(3),vals(4),vals(5),vals(6),vals(7))
-        vmax=max(vals(0),vals(1),vals(2),vals(3),vals(4),vals(5),vals(6),vals(7))
-        if(vmin.gt.level.or.vmax.lt.level)continue
+SUBROUTINE FISOSURFACE2FILE(LU_ISO,T,FIRST,VDATA,HAVE_TDATA,TDATA,HAVE_IBLANK,IBLANK,&
+           LEVEL, NLEVELS, XPLT, NX, YPLT, NY, ZPLT, NZ, ERROR)
+  IMPLICIT NONE
            
-        zz(0)=zplt(k);
-        zz(1)=zplt(k+1);
-
-        do n=0, 3
-          nodeindexes(3*ixmin(n))=i
-          nodeindexes(3*ixmax(n))=i+1
-          nodeindexes(3*iymin(n)+1)=j
-          nodeindexes(3*iymax(n)+1)=j+1
-          nodeindexes(3*izmin(n)+2)=k
-          nodeindexes(3*izmax(n)+2)=k+1
-        end do
-
-        if(have_tdata.eq.1)then
-          tvals(0)=tdata(  i,  j,  k)
-          tvals(1)=tdata(  i,j+1,  k)
-          tvals(2)=tdata(i+1,j+1,  k)
-          tvals(3)=tdata(i+1,  j,  k)
-          tvals(4)=tdata(  i,  j,k+1)
-          tvals(5)=tdata(  i,j+1,k+1)
-          tvals(6)=tdata(i+1,j+1,k+1)
-          tvals(7)=tdata(i+1,  j,k+1)
-        endif
-
-        returnval=FGetIsobox(xx,yy,zz,vals,have_tdata,tvals,nodeindexes,level,xyzv,tv,nxyzv,tris,ntris,closestnodes)
-
-        if(nxyzv.gt.0.or.ntris.gt.0)then
-          if(UpdateIsosurface(xyzv, nxyzv, tris, ntris, closestnodes, xyzverts, nxyzverts, nxyzverts_MAX, triangles, ntriangles, ntriangles_MAX).ne.0)then
-            FGetIsosurface=1
-            return
-          endif
-        endif
-      end do
-    end do
-  end do
-  FGetIsosurface=0
-  return     
-end function FGetIsosurface
-
-!  ------------------ UpdateIsosurface ------------------------ 
-
-integer function UpdateIsosurface(xyzv, nxyzv, tris, ntris, closestnodes, xyzverts, nxyzverts, nxyzverts_MAX, triangles, ntriangles, ntriangles_MAX)
-  real, intent(in), dimension(0:3*nxyzv-1) :: xyzv
-  integer, intent(in), dimension(0:3*ntris-1) :: tris
-  integer, intent(in), dimension(:) :: closestnodes
-  real, intent(inout), pointer, dimension(:) :: xyzverts
-  integer, intent(inout) :: nxyzverts, nxyzverts_MAX, ntriangles, ntriangles_MAX
-  integer, intent(inout), pointer, dimension(:) :: triangles
-  real, dimension(:), pointer :: xyzverts_temp
-  integer, dimension(:), pointer :: triangles_temp
+  INTEGER, INTENT(IN) :: LU_ISO, FIRST
+  REAL, INTENT(IN) :: T
+  INTEGER, INTENT(IN) :: HAVE_TDATA, HAVE_IBLANK
+  REAL, INTENT(IN), DIMENSION(0:NX,0:NY,0:NZ) :: VDATA,TDATA
+  INTEGER, INTENT(IN), DIMENSION(0:NX-1,0:NY-1,0:NZ-1) :: IBLANK
+  INTEGER, INTENT(IN) :: NLEVELS
+  REAL, INTENT(IN), DIMENSION(0:NLEVELS-1) :: LEVEL
+  INTEGER, INTENT(IN) :: NX, NY, NZ
+  REAL, INTENT(IN), DIMENSION(0:NX) :: XPLT
+  REAL, INTENT(IN), DIMENSION(0:NY) :: YPLT
+  REAL, INTENT(IN), DIMENSION(0:NZ) :: ZPLT
+  INTEGER, INTENT(OUT) :: ERROR
   
-  if(nxyzverts+nxyzv.gt.nxyzverts_MAX)then
-    nxyzverts_MAX=nxyzverts_MAX+1000
+           
+  INTEGER :: I
+  INTEGER :: FGETISOSURFACE
+  INTEGER :: NXYZVERTS, NTRIANGLES
+  REAL, DIMENSION(:), POINTER :: XYZVERTS
+  INTEGER, DIMENSION(:), POINTER :: TRIANGLES
+  
+  ERROR=0
+  DO I =0, NLEVELS-1
+    IF(FGETISOSURFACE(VDATA, HAVE_TDATA, TDATA, HAVE_IBLANK, IBLANK, LEVEL(I), &
+          XPLT, NX, YPLT, NY, ZPLT, NZ,XYZVERTS, NXYZVERTS, TRIANGLES, NTRIANGLES)==1)THEN
+      ERROR=1
+      RETURN
+    ENDIF
+    !IF(COMPRESSISOSURFACE(&SURFACE,*REDUCE_TRIANGLES,
+    !  XPLT[0],XPLT[*NX-1],YPLT[0],YPLT[*NY-1],ZPLT[0],ZPLT[*NZ-1]).NE.0)THEN
+    !  ERROR=1;
+    !  RETURN;
+    !ENDIF
+    CALL FISOOUT(LU_ISO,FIRST,T,I,XYZVERTS,NXYZVERTS,TRIANGLES,NTRIANGLES)
+    IF(NXYZVERTS.GT.0)THEN
+      DEALLOCATE(XYZVERTS)
+    ENDIF
+    IF(NTRIANGLES.GT.0)THEN
+      DEALLOCATE(TRIANGLES)
+    ENDIF
+  END DO
+  RETURN
+END SUBROUTINE FISOSURFACE2FILE
+
+! ------------------ FISOSURFACE2FILE ------------------------
+
+SUBROUTINE FISOOUT(ISOFILE,FIRST,STIME,ILEVEL,XYZVERTS,NXYZVERTS,TRIANGLES,NTRIANGLES,ERROR)
+  IMPLICIT NONE
+  CHARACTER(LEN=*), INTENT(IN) :: ISOFILE
+  INTEGER, INTENT(IN) :: FIRST
+  REAL, INTENT(IN) :: STIME
+  INTEGER, INTENT(IN) :: ILEVEL
+  INTEGER, INTENT(OUT) :: ERROR
+  INTEGER, INTENT(IN) :: NXYZVERTS, NTRIANGLES
+  REAL, INTENT(IN), DIMENSION(:), POINTER :: XYZVERTS
+  INTEGER, INTENT(IN), DIMENSION(:), POINTER :: TRIANGLES
+  
+  INTEGER :: LU_GEOM=10
+  INTEGER :: VERSION=1
+  INTEGER :: GEOM_TYPE=0
+  INTEGER :: I
+  INTEGER :: ONE=1
+
+  IF(FIRST.EQ.1)THEN  
+    WRITE(LU_GEOM) ONE
+    WRITE(LU_GEOM) VERSION
+    WRITE(LU_GEOM) STIME ! first time step
+    WRITE(LU_GEOM) 0,0,NXYZVERTS,NTRIANGLES
+    IF (NXYZVERTS>0) WRITE(LU_GEOM) (XYZVERTS(I),I=0,3*NXYZVERTS-1)
+    IF (NTRIANGLES>0) WRITE(LU_GEOM) (TRIANGLES(I),I=0,3*NTRIANGLES-1)
+    IF (NTRIANGLES>0) WRITE(LU_GEOM) (ILEVEL,I=0,NTRIANGLES-1)
+  ELSE
+    WRITE(LU_GEOM) STIME, GEOM_TYPE ! each successive time step (if there is time dependent geometry)
+    WRITE(LU_GEOM) NXYZVERTS,NTRIANGLES
+    IF (NXYZVERTS>0) WRITE(LU_GEOM) (XYZVERTS(I),I=0,3*NXYZVERTS-1)
+    IF (NTRIANGLES>0) WRITE(LU_GEOM) (TRIANGLES(I),I=0,3*NTRIANGLES-1)
+    IF (NTRIANGLES>0) WRITE(LU_GEOM) (ILEVEL,I=0,NTRIANGLES-1)
+  ENDIF
+  ERROR=0
+          
+  RETURN
+END SUBROUTINE FISOOUT           
+
+!  ------------------ FGETISOSURFACE ------------------------ 
+
+INTEGER FUNCTION FGETISOSURFACE(VDATA, HAVE_TDATA, TDATA, HAVE_IBLANK, IBLANK_CELL, LEVEL, &
+     XPLT, NX, YPLT, NY, ZPLT, NZ,&
+     XYZVERTS, NXYZVERTS, TRIANGLES, NTRIANGLES)
+
+  IMPLICIT NONE
+     
+  INTEGER, INTENT(IN) :: NX, NY, NZ
+  INTEGER, INTENT(IN) :: HAVE_TDATA, HAVE_IBLANK
+  REAL, DIMENSION(0:NX,0:NY,0:NZ), INTENT(IN) :: VDATA, TDATA
+  INTEGER, DIMENSION(0:NX-1,0:NY-1,0:NZ-1), INTENT(IN) :: IBLANK_CELL
+  REAL, INTENT(IN) :: LEVEL
+  REAL, INTENT(IN), DIMENSION(0:NX) :: XPLT
+  REAL, INTENT(IN), DIMENSION(0:NY) :: YPLT
+  REAL, INTENT(IN), DIMENSION(0:NZ) :: ZPLT
+     
+  REAL, DIMENSION(:), POINTER, INTENT(OUT) :: XYZVERTS
+  INTEGER, DIMENSION(:), POINTER, INTENT(OUT) :: TRIANGLES
+  INTEGER, INTENT(OUT) :: NTRIANGLES, NXYZVERTS
+  
+  
+  REAL, DIMENSION(0:1) :: XX, YY, ZZ
+  INTEGER, DIMENSION(0:23) :: NODEINDEXES
+  INTEGER, DIMENSION(0:35) :: CLOSESTNODES
+  REAL, DIMENSION(0:7) :: VALS, TVALS
+  REAL, DIMENSION(0:35) :: XYZV,TV
+  INTEGER :: NXYZV
+  INTEGER, DIMENSION(0:11) :: TRIS
+  INTEGER :: NTRIS
+  INTEGER :: NXYZVERTS_MAX, NTRIANGLES_MAX
+  REAL :: VMIN, VMAX
+  
+  INTEGER :: I, J, K, N
+  INTEGER :: RETURNVAL
+  INTEGER :: FGETISOBOX,UPDATEISOSURFACE
+     
+  INTEGER, DIMENSION(0:3) :: IXMIN=(/0,1,4,5/), IXMAX=(/2,3,6,7/)
+  INTEGER, DIMENSION(0:3) :: IYMIN=(/0,3,4,7/), IYMAX=(/1,2,5,6/)
+  INTEGER, DIMENSION(0:3) :: IZMIN=(/0,1,2,3/), IZMAX=(/4,5,6,7/)
+  
+  NULLIFY(XYZVERTS)
+  NULLIFY(TRIANGLES)
+  NTRIANGLES=0
+  NXYZVERTS=0
+  NXYZVERTS_MAX=1000
+  NTRIANGLES_MAX=1000
+  ALLOCATE(XYZVERTS(3*NXYZVERTS_MAX))
+  ALLOCATE(TRIANGLES(3*NTRIANGLES_MAX))
+     
+  DO I=0, NX-2
+    XX(0)=XPLT(I)
+    XX(1)=XPLT(I+1)
+    DO J=0,NY-2
+      YY(0)=YPLT(J);
+      YY(1)=YPLT(J+1);
+      DO K=0,NZ-2
+        IF(HAVE_IBLANK.EQ.1.AND.IBLANK_CELL(I,J,K).EQ.0)CONTINUE
+        
+        VALS(0)=VDATA(  I,  J,  K)
+        VALS(1)=VDATA(  I,J+1,  K)
+        VALS(2)=VDATA(I+1,J+1,  K)
+        VALS(3)=VDATA(I+1,  J,  K)
+        VALS(4)=VDATA(  I,  J,K+1)
+        VALS(5)=VDATA(  I,J+1,K+1)
+        VALS(6)=VDATA(I+1,J+1,K+1)
+        VALS(7)=VDATA(I+1,  J,K+1)
+
+        VMIN=MIN(VALS(0),VALS(1),VALS(2),VALS(3),VALS(4),VALS(5),VALS(6),VALS(7))
+        VMAX=MAX(VALS(0),VALS(1),VALS(2),VALS(3),VALS(4),VALS(5),VALS(6),VALS(7))
+        IF(VMIN.GT.LEVEL.OR.VMAX.LT.LEVEL)CONTINUE
+           
+        ZZ(0)=ZPLT(K);
+        ZZ(1)=ZPLT(K+1);
+
+        DO N=0, 3
+          NODEINDEXES(3*IXMIN(N))=I
+          NODEINDEXES(3*IXMAX(N))=I+1
+          NODEINDEXES(3*IYMIN(N)+1)=J
+          NODEINDEXES(3*IYMAX(N)+1)=J+1
+          NODEINDEXES(3*IZMIN(N)+2)=K
+          NODEINDEXES(3*IZMAX(N)+2)=K+1
+        END DO
+
+        IF(HAVE_TDATA.EQ.1)THEN
+          TVALS(0)=TDATA(  I,  J,  K)
+          TVALS(1)=TDATA(  I,J+1,  K)
+          TVALS(2)=TDATA(I+1,J+1,  K)
+          TVALS(3)=TDATA(I+1,  J,  K)
+          TVALS(4)=TDATA(  I,  J,K+1)
+          TVALS(5)=TDATA(  I,J+1,K+1)
+          TVALS(6)=TDATA(I+1,J+1,K+1)
+          TVALS(7)=TDATA(I+1,  J,K+1)
+        ENDIF
+
+        RETURNVAL=FGETISOBOX(XX,YY,ZZ,VALS,HAVE_TDATA,TVALS,NODEINDEXES,LEVEL,XYZV,TV,NXYZV,TRIS,NTRIS,CLOSESTNODES)
+
+        IF(NXYZV.GT.0.OR.NTRIS.GT.0)THEN
+          IF(UPDATEISOSURFACE(XYZV, NXYZV, TRIS, NTRIS, CLOSESTNODES, XYZVERTS, NXYZVERTS, NXYZVERTS_MAX, TRIANGLES, NTRIANGLES, NTRIANGLES_MAX).NE.0)THEN
+            FGETISOSURFACE=1
+            RETURN
+          ENDIF
+        ENDIF
+      END DO
+    END DO
+  END DO
+  FGETISOSURFACE=0
+  RETURN     
+END FUNCTION FGETISOSURFACE
+
+!  ------------------ UPDATEISOSURFACE ------------------------ 
+
+INTEGER FUNCTION UPDATEISOSURFACE(XYZV, NXYZV, TRIS, NTRIS, CLOSESTNODES, XYZVERTS, NXYZVERTS, NXYZVERTS_MAX, TRIANGLES, NTRIANGLES, NTRIANGLES_MAX)
+  REAL, INTENT(IN), DIMENSION(0:3*NXYZV-1) :: XYZV
+  INTEGER, INTENT(IN), DIMENSION(0:3*NTRIS-1) :: TRIS
+  INTEGER, INTENT(IN), DIMENSION(:) :: CLOSESTNODES
+  REAL, INTENT(INOUT), POINTER, DIMENSION(:) :: XYZVERTS
+  INTEGER, INTENT(INOUT) :: NXYZVERTS, NXYZVERTS_MAX, NTRIANGLES, NTRIANGLES_MAX
+  INTEGER, INTENT(INOUT), POINTER, DIMENSION(:) :: TRIANGLES
+  REAL, DIMENSION(:), POINTER :: XYZVERTS_TEMP
+  INTEGER, DIMENSION(:), POINTER :: TRIANGLES_TEMP
+  
+  IF(NXYZVERTS+NXYZV.GT.NXYZVERTS_MAX)THEN
+    NXYZVERTS_MAX=NXYZVERTS_MAX+1000
     
-    if(nxyzverts.gt.0)then
-      allocate(xyzverts_temp(0:3*nxyzverts-1))
-      xyzverts_temp(0:3*nxyzverts-1)=xyzverts(0:3*nxyzverts-1)
-      deallocate(xyzverts)    
-      allocate(xyzverts(0:3*nxyzverts_MAX-1))
-      xyzverts(0:3*nxyzverts-1)=xyzverts_temp(0:3*nxyzverts-1)
-      deallocate(xyzverts_temp)
-    endif
-  endif
-  if(ntriangles+ntris.gt.ntriangles_MAX)then
-    ntriangles_MAX=ntriangles_MAX+1000
+    IF(NXYZVERTS.GT.0)THEN
+      ALLOCATE(XYZVERTS_TEMP(0:3*NXYZVERTS-1))
+      XYZVERTS_TEMP(0:3*NXYZVERTS-1)=XYZVERTS(0:3*NXYZVERTS-1)
+      DEALLOCATE(XYZVERTS)    
+      ALLOCATE(XYZVERTS(0:3*NXYZVERTS_MAX-1))
+      XYZVERTS(0:3*NXYZVERTS-1)=XYZVERTS_TEMP(0:3*NXYZVERTS-1)
+      DEALLOCATE(XYZVERTS_TEMP)
+    ENDIF
+  ENDIF
+  IF(NTRIANGLES+NTRIS.GT.NTRIANGLES_MAX)THEN
+    NTRIANGLES_MAX=NTRIANGLES_MAX+1000
     
-    if(ntriangles.gt.0)then
-      allocate(triangles_temp(0:3*ntriangles-1))
-      triangles_temp(0:3*ntriangles-1)=triangles(0:3*ntriangles-1)
-      deallocate(triangles)    
-      allocate(triangles(0:3*ntriangles_MAX-1))
-      triangles(0:3*ntriangles-1)=triangles_temp(0:3*ntriangles-1)
-      deallocate(triangles_temp)
-    endif
-  endif
-  xyzverts(3*nxyzverts:3*nxyzverts+3*nxyzv-1)=xyzv(0:3*nxyzv-1)
-  triangles(3*ntriangles:3*ntriangles+3*ntris-1)=tris(0:3*ntris-1)
-  UpdateIsosurface=0
-  return
-end function UpdateIsosurface
+    IF(NTRIANGLES.GT.0)THEN
+      ALLOCATE(TRIANGLES_TEMP(0:3*NTRIANGLES-1))
+      TRIANGLES_TEMP(0:3*NTRIANGLES-1)=TRIANGLES(0:3*NTRIANGLES-1)
+      DEALLOCATE(TRIANGLES)    
+      ALLOCATE(TRIANGLES(0:3*NTRIANGLES_MAX-1))
+      TRIANGLES(0:3*NTRIANGLES-1)=TRIANGLES_TEMP(0:3*NTRIANGLES-1)
+      DEALLOCATE(TRIANGLES_TEMP)
+    ENDIF
+  ENDIF
+  XYZVERTS(3*NXYZVERTS:3*NXYZVERTS+3*NXYZV-1)=XYZV(0:3*NXYZV-1)
+  TRIANGLES(3*NTRIANGLES:3*NTRIANGLES+3*NTRIS-1)=TRIS(0:3*NTRIS-1)
+  UPDATEISOSURFACE=0
+  RETURN
+END FUNCTION UPDATEISOSURFACE
 
 !  ------------------ FMIX ------------------------ 
 
-real function FMIX(f,a,b)
-  implicit none
-  real, intent(in) :: f, a, b
+REAL FUNCTION FMIX(F,A,B)
+  IMPLICIT NONE
+  REAL, INTENT(IN) :: F, A, B
   
     
-  FMIX = (1.0-f)*a + f*b
-  return
-end function fMIX
+  FMIX = (1.0-F)*A + F*B
+  RETURN
+END FUNCTION FMIX
 
-!  ------------------ FGetIsobox ------------------------ 
+!  ------------------ FGETISOBOX ------------------------ 
 
-integer function FGetIsobox(x,y,z,vals,have_tvals,tvals,nodeindexes,level,xyzv,tv,nxyzv,tris,ntris,closestnodes)
-implicit none
-real, dimension(0:1), intent(in) :: x, y, z
-integer, intent(in) :: have_tvals
-real, dimension(0:7), intent(in) :: vals,tvals
-integer, dimension(0:23), intent(in) :: nodeindexes
-real, intent(in) :: level
-real, intent(out), dimension(0:60) :: xyzv,tv
-integer, intent(out) :: nxyzv
-integer, intent(out), dimension(0:60) :: tris
-integer, intent(out) :: ntris
-integer, dimension(0:35), intent(out) :: closestnodes
-real :: FMIX
+INTEGER FUNCTION FGETISOBOX(X,Y,Z,VALS,HAVE_TVALS,TVALS,NODEINDEXES,LEVEL,XYZV,TV,NXYZV,TRIS,NTRIS,CLOSESTNODES)
+IMPLICIT NONE
+REAL, DIMENSION(0:1), INTENT(IN) :: X, Y, Z
+INTEGER, INTENT(IN) :: HAVE_TVALS
+REAL, DIMENSION(0:7), INTENT(IN) :: VALS,TVALS
+INTEGER, DIMENSION(0:23), INTENT(IN) :: NODEINDEXES
+REAL, INTENT(IN) :: LEVEL
+REAL, INTENT(OUT), DIMENSION(0:60) :: XYZV,TV
+INTEGER, INTENT(OUT) :: NXYZV
+INTEGER, INTENT(OUT), DIMENSION(0:60) :: TRIS
+INTEGER, INTENT(OUT) :: NTRIS
+INTEGER, DIMENSION(0:35), INTENT(OUT) :: CLOSESTNODES
+REAL :: FMIX
 
-integer, dimension(0:14) :: compcase=(/0,0,0,-1,0,0,-1,-1,0,0,0,0,-1,-1,0/)
-!int compcase[]=                      {0,0,0,-1,0,0,-1,-1,0,0,0,0,-1,-1,0};
+INTEGER, DIMENSION(0:14) :: COMPCASE=(/0,0,0,-1,0,0,-1,-1,0,0,0,0,-1,-1,0/)
+!INT COMPCASE[]=                      {0,0,0,-1,0,0,-1,-1,0,0,0,0,-1,-1,0};
 
-integer, dimension(0:11,0:1) :: edge2vertex                                              
-integer, dimension(0:1,0:11) :: edge2vertexT=(/0,1,1,2,2,3,0,3,&
+INTEGER, DIMENSION(0:11,0:1) :: EDGE2VERTEX                                              
+INTEGER, DIMENSION(0:1,0:11) :: EDGE2VERTEXT=(/0,1,1,2,2,3,0,3,&
                                               0,4,1,5,2,6,3,7,&
                                               4,5,5,6,6,7,4,7/)
-!int edge2vertex[12][2]={
+!INT EDGE2VERTEX[12][2]={
 !  {0,1},{1,2},{2,3},{0,3},
 !  {0,4},{1,5},{2,6},{3,7},
 !  {4,5},{5,6},{6,7},{4,7}
 !};
 
-integer, pointer, dimension(:) :: case2
-integer, target,dimension(0:255,0:9) :: cases
-integer, dimension(0:9,0:255) :: casesT=(/&
+INTEGER, POINTER, DIMENSION(:) :: CASE2
+INTEGER, TARGET,DIMENSION(0:255,0:9) :: CASES
+INTEGER, DIMENSION(0:9,0:255) :: CASEST=(/&
 0,0,0,0,0,0,0,0, 0,  0,0,1,2,3,4,5,6,7, 1,  1,1,2,3,0,5,6,7,4, 1,  2,&
 1,2,3,0,5,6,7,4, 2,  3,2,3,0,1,6,7,4,5, 1,  4,0,4,5,1,3,7,6,2, 3,  5,&
 2,3,0,1,6,7,4,5, 2,  6,3,0,1,2,7,4,5,6, 5,  7,3,0,1,2,7,4,5,6, 1,  8,&
@@ -286,7 +373,7 @@ integer, dimension(0:9,0:255) :: casesT=(/&
 0,0,0,0,0,0,0,0, 0,  0&
 /)
 
-!int cases[256][10]={
+!INT CASES[256][10]={
 !{0,0,0,0,0,0,0,0, 0,  0},{0,1,2,3,4,5,6,7, 1,  1},{1,2,3,0,5,6,7,4, 1,  2},
 !{1,2,3,0,5,6,7,4, 2,  3},{2,3,0,1,6,7,4,5, 1,  4},{0,4,5,1,3,7,6,2, 3,  5},
 !{2,3,0,1,6,7,4,5, 2,  6},{3,0,1,2,7,4,5,6, 5,  7},{3,0,1,2,7,4,5,6, 1,  8},
@@ -375,8 +462,8 @@ integer, dimension(0:9,0:255) :: casesT=(/&
 !{0,0,0,0,0,0,0,0, 0,  0}
 !};
 
-integer, target,dimension(0:14,0:12) :: pathcclist
-integer, dimension(0:12,0:14) :: pathcclistT=(/&
+INTEGER, TARGET,DIMENSION(0:14,0:12) :: PATHCCLIST
+INTEGER, DIMENSION(0:12,0:14) :: PATHCCLISTT=(/&
    0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,&
    3, 0, 1, 2,-1,-1,-1,-1,-1,-1,-1,-1,-1,&
    6,0,1,2,2,3,0,-1,-1,-1,-1,-1,-1,&
@@ -393,7 +480,7 @@ integer, dimension(0:12,0:14) :: pathcclistT=(/&
   12,0,1,2,3,4,5,6,7,8,9,10,11,&
   12,0,1,5,1,4,5,1,2,4,2,3,4&
   /)
-!int pathcclist[15][13]={
+!INT PATHCCLIST[15][13]={
 !  { 0},
 !  { 3,0,1,2},
 !  { 6,0,1,2,2,3,0},
@@ -410,8 +497,8 @@ integer, dimension(0:12,0:14) :: pathcclistT=(/&
 !  {12,0,1,2,3,4,5,6,7,8,9,10,11},
 !  {12,0,1,5,1,4,5,1,2,4,2,3,4}
 !};
-integer, target,dimension(0:14,0:19) :: pathcclist2
-integer, dimension(0:19,0:14) :: pathcclist2T=(/&
+INTEGER, TARGET,DIMENSION(0:14,0:19) :: PATHCCLIST2
+INTEGER, DIMENSION(0:19,0:14) :: PATHCCLIST2T=(/&
     0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,&
     0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,&
     0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,&
@@ -429,7 +516,7 @@ integer, dimension(0:19,0:14) :: pathcclist2T=(/&
     0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1&
    /)
 
-!int pathcclist2[15][19]={
+!INT PATHCCLIST2[15][19]={
 !  { 0},
 !  { 0},
 !  { 0},
@@ -447,9 +534,9 @@ integer, dimension(0:19,0:14) :: pathcclist2T=(/&
 !  { 0}
 !};
 
-integer, pointer,dimension(:) :: path
-integer, target,dimension(0:12,0:14) :: pathccwlist
-integer, dimension(0:14,0:12) :: pathccwlistT=(/&
+INTEGER, POINTER,DIMENSION(:) :: PATH
+INTEGER, TARGET,DIMENSION(0:12,0:14) :: PATHCCWLIST
+INTEGER, DIMENSION(0:14,0:12) :: PATHCCWLISTT=(/&
    0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,&
    3, 0, 2, 1,-1,-1,-1,-1,-1,-1,-1,-1,-1,&
    6, 0, 2, 1, 0, 3, 2,-1,-1,-1,-1,-1,-1,&
@@ -467,7 +554,7 @@ integer, dimension(0:14,0:12) :: pathccwlistT=(/&
   12, 0, 5, 1, 1, 5, 4, 1, 4, 2, 2, 4, 3&
    /)
 
-!int pathccwlist[15][13]={
+!INT PATHCCWLIST[15][13]={
 !  { 0},
 !  { 3,0,2,1},
 !  { 6,0,2,1,0,3,2},
@@ -485,8 +572,8 @@ integer, dimension(0:14,0:12) :: pathccwlistT=(/&
 !  {12,0,5,1,1,5,4,1,4,2,2,4,3}
 !};
 
-integer, target,dimension(0:18,0:14) :: pathccwlist2
-integer, dimension(0:14,0:18) :: pathccwlist2T=(/&
+INTEGER, TARGET,DIMENSION(0:18,0:14) :: PATHCCWLIST2
+INTEGER, DIMENSION(0:14,0:18) :: PATHCCWLIST2T=(/&
    0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,&
    0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,&
    0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,&
@@ -504,7 +591,7 @@ integer, dimension(0:14,0:18) :: pathccwlist2T=(/&
    0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1&
   /)
 
-!int pathccwlist2[15][19]={
+!INT PATHCCWLIST2[15][19]={
 !  { 0},
 !  { 0},
 !  { 0},
@@ -522,9 +609,9 @@ integer, dimension(0:14,0:18) :: pathccwlist2T=(/&
 !  { 0}
 !};
 
-integer, pointer,dimension(:) :: edges
-integer, target,dimension(0:12,0:14) :: edgelist
-integer, dimension(0:14,0:12) :: edgelistT=(/&
+INTEGER, POINTER,DIMENSION(:) :: EDGES
+INTEGER, TARGET,DIMENSION(0:12,0:14) :: EDGELIST
+INTEGER, DIMENSION(0:14,0:12) :: EDGELISTT=(/&
    0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,&
    3, 0, 4, 3,-1,-1,-1,-1,-1,-1,-1,-1,-1,&
    4, 0, 4, 7, 2,-1,-1,-1,-1,-1,-1,-1,-1,&
@@ -542,7 +629,7 @@ integer, dimension(0:14,0:12) :: edgelistT=(/&
    6, 3, 7, 6, 9, 8, 0,-1,-1,-1,-1,-1,-1&
   /)
 
-!int edgelist[15][13]={
+!INT EDGELIST[15][13]={
 !  { 0                             },
 !  { 3,0,4, 3                      },
 !  { 4,0,4, 7, 2                   },
@@ -560,8 +647,8 @@ integer, dimension(0:14,0:12) :: edgelistT=(/&
 !  { 6,3,7, 6, 9, 8, 0             }
 !};
 
-integer, target,dimension(0:15,0:14) :: edgelist2
-integer, dimension(0:14,0:15) :: edgelist2T=(/&
+INTEGER, TARGET,DIMENSION(0:15,0:14) :: EDGELIST2
+INTEGER, DIMENSION(0:14,0:15) :: EDGELIST2T=(/&
    0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,&
    0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,&
    0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,&
@@ -579,7 +666,7 @@ integer, dimension(0:14,0:15) :: edgelist2T=(/&
    0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1&
   /)
   
-!int edgelist2[15][16]={
+!INT EDGELIST2[15][16]={
 !  { 0                             },
 !  { 0},
 !  { 0},
@@ -596,67 +683,67 @@ integer, dimension(0:14,0:15) :: edgelist2T=(/&
 !  { 12,4,11,8,0,5,1,7,3,2,9,10,6},
 !  { 0}
 
-integer :: vmin, vmax
-integer :: casenum, bigger, sign, n
-integer, dimension(0:7) :: prods=(/1,2,4,8,16,32,64,128/);
-real, dimension(0:7) :: xxval,yyval,zzval
-integer, dimension(0:3) :: ixmin=(/0,1,4,5/), ixmax=(/2,3,6,7/)
-integer, dimension(0:3) :: iymin=(/0,3,4,7/), iymax=(/1,2,5,6/)
-integer, dimension(0:3) :: izmin=(/0,1,2,3/), izmax=(/4,5,6,7/)
-integer :: type2,thistype2
-integer :: nedges,npath
-integer :: outofbounds, edge, v1, v2
-real :: val1, val2, denom, factor
-real :: xx, yy, zz
+INTEGER :: VMIN, VMAX
+INTEGER :: CASENUM, BIGGER, SIGN, N
+INTEGER, DIMENSION(0:7) :: PRODS=(/1,2,4,8,16,32,64,128/);
+REAL, DIMENSION(0:7) :: XXVAL,YYVAL,ZZVAL
+INTEGER, DIMENSION(0:3) :: IXMIN=(/0,1,4,5/), IXMAX=(/2,3,6,7/)
+INTEGER, DIMENSION(0:3) :: IYMIN=(/0,3,4,7/), IYMAX=(/1,2,5,6/)
+INTEGER, DIMENSION(0:3) :: IZMIN=(/0,1,2,3/), IZMAX=(/4,5,6,7/)
+INTEGER :: TYPE2,THISTYPE2
+INTEGER :: NEDGES,NPATH
+INTEGER :: OUTOFBOUNDS, EDGE, V1, V2
+REAL :: VAL1, VAL2, DENOM, FACTOR
+REAL :: XX, YY, ZZ
 
-edge2vertex=transpose(edge2vertexT)
-cases=transpose(casesT)
-pathcclist=transpose(pathcclistT)
-pathcclist2=transpose(pathcclist2T)
-pathccwlist=transpose(pathccwlistT)
-pathccwlist2=transpose(pathccwlist2T)
-edgelist=transpose(edgelistT)
-edgelist2=transpose(edgelist2T)
+EDGE2VERTEX=TRANSPOSE(EDGE2VERTEXT)
+CASES=TRANSPOSE(CASEST)
+PATHCCLIST=TRANSPOSE(PATHCCLISTT)
+PATHCCLIST2=TRANSPOSE(PATHCCLIST2T)
+PATHCCWLIST=TRANSPOSE(PATHCCWLISTT)
+PATHCCWLIST2=TRANSPOSE(PATHCCWLIST2T)
+EDGELIST=TRANSPOSE(EDGELISTT)
+EDGELIST2=TRANSPOSE(EDGELIST2T)
 
-closestnodes=0
-vmin=min(vals(0),vals(1),vals(2),vals(3),vals(4),vals(5),vals(6),vals(7))
-vmax=max(vals(0),vals(1),vals(2),vals(3),vals(4),vals(5),vals(6),vals(7))
+CLOSESTNODES=0
+VMIN=MIN(VALS(0),VALS(1),VALS(2),VALS(3),VALS(4),VALS(5),VALS(6),VALS(7))
+VMAX=MAX(VALS(0),VALS(1),VALS(2),VALS(3),VALS(4),VALS(5),VALS(6),VALS(7))
 
 
-nxyzv=0
-ntris=0
+NXYZV=0
+NTRIS=0
 
-if(vmin>level.or.vmax<level)then
-  FGetIsobox=ntris
-  return
-endif
+IF(VMIN>LEVEL.OR.VMAX<LEVEL)THEN
+  FGETISOBOX=NTRIS
+  RETURN
+ENDIF
 
-casenum=0
-bigger=0
-sign=1
+CASENUM=0
+BIGGER=0
+SIGN=1
 
-do n = 0, 7
-  if(vals(n)>level)then
-    bigger=bigger+1
-    casenum = casenum + prods(n);
-  endif
-end do
+DO N = 0, 7
+  IF(VALS(N)>LEVEL)THEN
+    BIGGER=BIGGER+1
+    CASENUM = CASENUM + PRODS(N);
+  ENDIF
+END DO
 
-! there are more nodes greater than the iso-surface level than below, so 
-!   solve the complementary problem 
+! THERE ARE MORE NODES GREATER THAN THE ISO-SURFACE LEVEL THAN BELOW, SO 
+!   SOLVE THE COMPLEMENTARY PROBLEM 
 
-if(bigger.gt.4)then
-  sign=-1
-  casenum=0
-  do n=0, 7
-    if(vals(n)<level)then
-      casenum = casenum + prods(n)
-    endif
-  end do
-endif
+IF(BIGGER.GT.4)THEN
+  SIGN=-1
+  CASENUM=0
+  DO N=0, 7
+    IF(VALS(N)<LEVEL)THEN
+      CASENUM = CASENUM + PRODS(N)
+    ENDIF
+  END DO
+ENDIF
 
-! stuff min and max grid data into a more convenient form 
-!  assuming the following grid numbering scheme
+! STUFF MIN AND MAX GRID DATA INTO A MORE CONVENIENT FORM 
+!  ASSUMING THE FOLLOWING GRID NUMBERING SCHEME
 
 !       5-------6
 !     / |      /| 
@@ -669,113 +756,113 @@ endif
 !  0--X-----3     
 
 
-do n=0, 3
-  xxval(ixmin(n)) = x(0);
-  xxval(ixmax(n)) = x(1);
-  yyval(iymin(n)) = y(0);
-  yyval(iymax(n)) = y(1);
-  zzval(izmin(n)) = z(0);
-  zzval(izmax(n)) = z(1);
-end do
+DO N=0, 3
+  XXVAL(IXMIN(N)) = X(0);
+  XXVAL(IXMAX(N)) = X(1);
+  YYVAL(IYMIN(N)) = Y(0);
+  YYVAL(IYMAX(N)) = Y(1);
+  ZZVAL(IZMIN(N)) = Z(0);
+  ZZVAL(IZMAX(N)) = Z(1);
+END DO
 
- if(casenum<=0.or.casenum>=255)then ! no iso-surface 
-   FGetIsobox=0
-   return
- endif
+ IF(CASENUM<=0.OR.CASENUM>=255)THEN ! NO ISO-SURFACE 
+   FGETISOBOX=0
+   RETURN
+ ENDIF
 
-  case2 => cases(casenum,0:9)
-  type2 = case2(8);
-  if(type2==0)then
-    FGetIsobox=ntris
-    return
-  endif
+  CASE2 => CASES(CASENUM,0:9)
+  TYPE2 = CASE2(8);
+  IF(TYPE2==0)THEN
+    FGETISOBOX=NTRIS
+    RETURN
+  ENDIF
 
-  if(compcase(type2).eq.-1)then
-    thistype2=sign
-  else
-    thistype2=1
-  endif
+  IF(COMPCASE(TYPE2).EQ.-1)THEN
+    THISTYPE2=SIGN
+  ELSE
+    THISTYPE2=1
+  ENDIF
   
-  if(thistype2.ne.-1)then
-    !edges = &(edgelist[type][1]);
-    edges => edgelist(type2,1:14)
-    if(sign.ge.0)then
-     ! path = &(pathcclist[type][1])   !  construct triangles clock wise
-      path => pathcclist(type2,1:12)
-    else
-     ! path = &(pathccwlist[type][1])  !  construct triangles counter clockwise 
-      path => pathccwlist(type2,1:14)
-    endif
-  else
-    !edges = &(edgelist2[type][1]);
-    edges => edgelist2(type2,1:14)
-    if(sign.gt.0)then
-     ! path = &(pathcclist2[type][1])  !  construct triangles clock wise
-      path => pathcclist2(type2,1:19)
-    else
-     ! path = &(pathccwlist2[type][1]) !  construct triangles counter clockwise
-      path => pathccwlist2(type2,1:14)
-    endif   
-  endif
-  npath = path(-1);
-  nedges = edges(-1);
+  IF(THISTYPE2.NE.-1)THEN
+    !EDGES = &(EDGELIST[TYPE][1]);
+    EDGES => EDGELIST(TYPE2,1:14)
+    IF(SIGN.GE.0)THEN
+     ! PATH = &(PATHCCLIST[TYPE][1])   !  CONSTRUCT TRIANGLES CLOCK WISE
+      PATH => PATHCCLIST(TYPE2,1:12)
+    ELSE
+     ! PATH = &(PATHCCWLIST[TYPE][1])  !  CONSTRUCT TRIANGLES COUNTER CLOCKWISE 
+      PATH => PATHCCWLIST(TYPE2,1:14)
+    ENDIF
+  ELSE
+    !EDGES = &(EDGELIST2[TYPE][1]);
+    EDGES => EDGELIST2(TYPE2,1:14)
+    IF(SIGN.GT.0)THEN
+     ! PATH = &(PATHCCLIST2[TYPE][1])  !  CONSTRUCT TRIANGLES CLOCK WISE
+      PATH => PATHCCLIST2(TYPE2,1:19)
+    ELSE
+     ! PATH = &(PATHCCWLIST2[TYPE][1]) !  CONSTRUCT TRIANGLES COUNTER CLOCKWISE
+      PATH => PATHCCWLIST2(TYPE2,1:14)
+    ENDIF   
+  ENDIF
+  NPATH = PATH(-1);
+  NEDGES = EDGES(-1);
   
-  outofbounds=0
-  do n=0,nedges-1
-    edge = edges(n)
-    v1 = case2(edge2vertex(edge,0));
-    v2 = case2(edge2vertex(edge,1));
-    val1 = vals(v1)-level
-    val2 = vals(v2)-level
-    denom = val2 - val1
-    factor = 0.5
-    if(denom.ne.0.0)factor = -val1/denom
-    if(factor.lt.0.5)then
-      closestnodes(3*n)=nodeindexes(3*v1)
-      closestnodes(3*n+1)=nodeindexes(3*v1+1)
-      closestnodes(3*n+2)=nodeindexes(3*v1+2)
-    else
-      closestnodes(3*n)=nodeindexes(3*v2)
-      closestnodes(3*n+1)=nodeindexes(3*v2+1)
-      closestnodes(3*n+2)=nodeindexes(3*v2+2)
-    endif
-    if(factor.gt.1.0)then
-      ! factor=1.0
-      outofbounds=1
-    endif
-    if(factor.lt.0.0)then
-      ! factor=0.0
-      outofbounds=1
-    endif
-    xx = FMIX(factor,xxval(v2),xxval(v1));
-    yy = FMIX(factor,yyval(v2),yyval(v1));
-    zz = FMIX(factor,zzval(v2),zzval(v1));
-    xyzv(3*n) = xx;
-    xyzv(3*n+1) = yy;
-    xyzv(3*n+2) = zz;
-    if(have_tvals.eq.1)then
-      tv(n) = FMIX(factor,tvals(v2),tvals(v1));
-    endif
+  OUTOFBOUNDS=0
+  DO N=0,NEDGES-1
+    EDGE = EDGES(N)
+    V1 = CASE2(EDGE2VERTEX(EDGE,0));
+    V2 = CASE2(EDGE2VERTEX(EDGE,1));
+    VAL1 = VALS(V1)-LEVEL
+    VAL2 = VALS(V2)-LEVEL
+    DENOM = VAL2 - VAL1
+    FACTOR = 0.5
+    IF(DENOM.NE.0.0)FACTOR = -VAL1/DENOM
+    IF(FACTOR.LT.0.5)THEN
+      CLOSESTNODES(3*N)=NODEINDEXES(3*V1)
+      CLOSESTNODES(3*N+1)=NODEINDEXES(3*V1+1)
+      CLOSESTNODES(3*N+2)=NODEINDEXES(3*V1+2)
+    ELSE
+      CLOSESTNODES(3*N)=NODEINDEXES(3*V2)
+      CLOSESTNODES(3*N+1)=NODEINDEXES(3*V2+1)
+      CLOSESTNODES(3*N+2)=NODEINDEXES(3*V2+2)
+    ENDIF
+    IF(FACTOR.GT.1.0)THEN
+      ! FACTOR=1.0
+      OUTOFBOUNDS=1
+    ENDIF
+    IF(FACTOR.LT.0.0)THEN
+      ! FACTOR=0.0
+      OUTOFBOUNDS=1
+    ENDIF
+    XX = FMIX(FACTOR,XXVAL(V2),XXVAL(V1));
+    YY = FMIX(FACTOR,YYVAL(V2),YYVAL(V1));
+    ZZ = FMIX(FACTOR,ZZVAL(V2),ZZVAL(V1));
+    XYZV(3*N) = XX;
+    XYZV(3*N+1) = YY;
+    XYZV(3*N+2) = ZZ;
+    IF(HAVE_TVALS.EQ.1)THEN
+      TV(N) = FMIX(FACTOR,TVALS(V2),TVALS(V1));
+    ENDIF
 
-  end do
-  if(outofbounds.eq.1)then
-    write(6,*)"*** warning - computed isosurface vertices are out of bounds for :"
-    write(6,*)"case number=",casenum," level=",level
-    write(6,*)"values="
-    do n=0,7
-      write(6,*)vals(n)
-    end do
-    write(6,*)"x=",x(0),x(1),"y=",y(0),y(1),"z=",z(0),z(1)
-  endif
+  END DO
+  IF(OUTOFBOUNDS.EQ.1)THEN
+    WRITE(6,*)"*** WARNING - COMPUTED ISOSURFACE VERTICES ARE OUT OF BOUNDS FOR :"
+    WRITE(6,*)"CASE NUMBER=",CASENUM," LEVEL=",LEVEL
+    WRITE(6,*)"VALUES="
+    DO N=0,7
+      WRITE(6,*)VALS(N)
+    END DO
+    WRITE(6,*)"X=",X(0),X(1),"Y=",Y(0),Y(1),"Z=",Z(0),Z(1)
+  ENDIF
 
-! copy coordinates to output array
+! COPY COORDINATES TO OUTPUT ARRAY
 
-  nxyzv = nedges;
-  ntris = npath;
-  do n=0,npath-1
-    tris(n) = path(n)
-  end do
-  FGetIsobox=ntris
-  return
-end function FGetIsobox
+  NXYZV = NEDGES;
+  NTRIS = NPATH;
+  DO N=0,NPATH-1
+    TRIS(N) = PATH(N)
+  END DO
+  FGETISOBOX=NTRIS
+  RETURN
+END FUNCTION FGETISOBOX
 
