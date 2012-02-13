@@ -346,9 +346,10 @@ REAL(EB),INTENT(INOUT) :: ZZ_GET(0:N_TRACKED_SPECIES)
 REAL(EB) :: ZZ_0(0:N_TRACKED_SPECIES),DZZDT(0:N_TRACKED_SPECIES),DZZDT2(0:N_TRACKED_SPECIES),RATE_CONSTANT(1:N_REACTIONS),&
             Q_NR(1:N_REACTIONS),Q_NR2(1:N_REACTIONS),Q_SUM,ERR_EST,TOL_INT_VECTOR(1:N_REACTIONS),Q1,Q2,Q4,ERR_TOL,&
             A1(0:N_TRACKED_SPECIES),A2(0:N_TRACKED_SPECIES),A4(0:N_TRACKED_SPECIES),DT_SUB,DT_SUB_NEW,DT_ITER,&
-            DT_A1,DT_A2,DT_A4,Q_OUT2
-INTEGER :: COUNTER,I_TS,NR,NS,ITER
+            DT_A1,DT_A2,DT_A4,Q_OUT2,ZZ_STORE(0:3),TV(0:2),ZZ_DIFF(0:2)
+INTEGER :: I_TS,NR,NS,NSS,ITER,TVI
 INTEGER, PARAMETER :: NODETS=20,SUB_DT1=1,SUB_DT2=2,SUB_DT4=4
+LOGICAL :: REALIZABLE
 TYPE(REACTION_TYPE),POINTER :: RN=>NULL()
 
 Q_OUT = 0._EB
@@ -370,7 +371,7 @@ ENDDO
 ERR_TOL = MINVAL(ABS(TOL_INT_VECTOR))
 
 INTEGRATION_LOOP: DO WHILE (DT_ITER < DT)
-
+   REALIZABLE = .TRUE.
    ERR_EST = 10._EB*ERR_TOL
    RICH_EX_LOOP: DO WHILE (ERR_EST > ERR_TOL)
 
@@ -395,48 +396,50 @@ INTEGRATION_LOOP: DO WHILE (DT_ITER < DT)
          REACTION_LOOP: DO NR = 1, N_REACTIONS   
             RN => REACTION(NR)      
             CALL COMPUTE_RATE_CONSTANT(NR,RN%MODE,I_TS,Q1,RATE_CONSTANT(NR),ZZ_0,I,J,K)
-            IF (RATE_CONSTANT(NR) < ZERO_P) CYCLE REACTION_LOOP
+            IF (RATE_CONSTANT(NR) <= 0.0_EB) CYCLE REACTION_LOOP
             Q_NR(NR) = RATE_CONSTANT(NR)*RN%HEAT_OF_COMBUSTION*RHO(I,J,K)
             DZZDT = DZZDT + RN%NU*SPECIES_MIXTURE%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW*RATE_CONSTANT(NR)
          END DO REACTION_LOOP   
-         IF (ALL(DZZDT < ZERO_P)) EXIT INTEGRATION_LOOP    
+         IF (ALL(DZZDT < 0._EB)) EXIT INTEGRATION_LOOP    
          A1 = ZZ_0 + DZZDT*DT_SUB
-         COUNTER = 1
-         DO WHILE (ANY(A1 < 0._EB)) ! Shrinks time step if negative mass fractions
-            DT_SUB_NEW = DT_SUB / (1.1_EB**REAL(COUNTER,EB))
-            A1 = ZZ_0 + DZZDT*DT_SUB_NEW ! Updates species
-            COUNTER = COUNTER+1
-         ENDDO
-         IF (COUNTER > 1) THEN
-            DT_SUB = DT_SUB_NEW
-         ENDIF
-      
+
+         IF (ANY(A1 < 0._EB)) THEN
+            DO NSS=0,N_TRACKED_SPECIES
+               IF (A1(NSS) < 0._EB .AND. ABS(DZZDT(NSS))>ZERO_P) THEN
+                  DT_SUB = MIN(DT_SUB,-ZZ_0(NSS)/DZZDT(NSS))
+                  REALIZABLE = .FALSE.
+               ENDIF
+            ENDDO
+            A1 = ZZ_0 + DZZDT*DT_SUB
+         ENDIF  
+         
          REACTION_LOOP2: DO NR = 1, N_REACTIONS   
             RN => REACTION(NR)      
             CALL COMPUTE_RATE_CONSTANT(NR,RN%MODE,I_TS,Q1,RATE_CONSTANT(NR),A1,I,J,K)
-            IF (RATE_CONSTANT(NR) < ZERO_P) CYCLE REACTION_LOOP2
+            IF (RATE_CONSTANT(NR) <= 0.0_EB) CYCLE REACTION_LOOP2
             Q_NR2(NR) = RATE_CONSTANT(NR)*RN%HEAT_OF_COMBUSTION*RHO(I,J,K)
             DZZDT2 = DZZDT2 + RN%NU*SPECIES_MIXTURE%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW*RATE_CONSTANT(NR)
          END DO REACTION_LOOP2    
-         IF (ALL(DZZDT2 < ZERO_P)) EXIT INTEGRATION_LOOP
-         A1 = ZZ_0 + 0.5_EB*(DZZDT+DZZDT2)*DT_SUB
-         COUNTER = 1
-         DO WHILE (ANY(A1 < 0._EB)) ! Shrinks time step if negative mass fractions
-            DT_SUB_NEW = DT_SUB / (1.1_EB**REAL(COUNTER,EB))
-            A1 = ZZ_0 + 0.5_EB*(DZZDT+DZZDT2)*DT_SUB_NEW ! Updates species
-            COUNTER = COUNTER+1
-         ENDDO 
-         IF (COUNTER > 1) THEN
-            DT_SUB = DT_SUB_NEW
+         IF (ALL(DZZDT2 < 0._EB)) EXIT INTEGRATION_LOOP
+         A1 = ZZ_0 + 0.5_EB*(DZZDT+DZZDT2)*DT_SUB 
+     
+         IF (ANY(A1 < 0._EB)) THEN
+            DO NSS=0,N_TRACKED_SPECIES
+               IF (A1(NSS) < 0._EB .AND. ABS(DZZDT(NSS)+DZZDT2(NSS))>ZERO_P) THEN
+                  DT_SUB = MIN(DT_SUB,-2._EB*ZZ_0(NSS)/(DZZDT(NSS)+DZZDT2(NSS)))
+                  REALIZABLE = .FALSE.
+               ENDIF
+            ENDDO
+            A1 = ZZ_0 + 0.5_EB*(DZZDT+DZZDT2)*DT_SUB
          ENDIF      
-      
+
          Q_SUM = SUM(0.5_EB*(Q_NR+Q_NR2))
-         IF (Q1 + Q_SUM*DT_SUB > Q_UPPER*DT) THEN
-            DT_SUB_NEW = MAX(0._EB,(Q_UPPER*DT - Q1))/Q_SUM
-            Q1 = Q1+Q_SUM*DT_SUB_NEW
-            A1 = ZZ_0 + 0.5_EB*(DZZDT+DZZDT2)*DT_SUB_NEW
-            EXIT ODE_LOOP1
-         ENDIF   
+!         IF (Q1 + Q_SUM*DT_SUB > Q_UPPER*DT) THEN
+!             DT_SUB_NEW = MAX(0._EB,(Q_UPPER*DT - Q1))/Q_SUM
+!             Q1 = Q1+Q_SUM*DT_SUB_NEW
+!             A1 = ZZ_0 + 0.5_EB*(DZZDT+DZZDT2)*DT_SUB_NEW
+!             EXIT ODE_LOOP1
+!         ENDIF   
          A1 = ZZ_0 + 0.5_EB*(DZZDT+DZZDT2)*DT_SUB
          Q1 = Q1+Q_SUM*DT_SUB
          I_TS = I_TS + 1
@@ -459,55 +462,58 @@ INTEGRATION_LOOP: DO WHILE (DT_ITER < DT)
          REACTION_LOOP_2: DO NR = 1, N_REACTIONS   
             RN => REACTION(NR)      
             CALL COMPUTE_RATE_CONSTANT(NR,RN%MODE,I_TS,Q2,RATE_CONSTANT(NR),ZZ_0,I,J,K)
-            IF (RATE_CONSTANT(NR) < ZERO_P) CYCLE REACTION_LOOP_2
+            IF (RATE_CONSTANT(NR) <= 0.0_EB) CYCLE REACTION_LOOP_2
             Q_NR(NR) = RATE_CONSTANT(NR)*RN%HEAT_OF_COMBUSTION*RHO(I,J,K)
             DZZDT = DZZDT + RN%NU*SPECIES_MIXTURE%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW*RATE_CONSTANT(NR)
          END DO REACTION_LOOP_2   
-         IF (ALL(DZZDT < ZERO_P)) EXIT INTEGRATION_LOOP    
          A2 = ZZ_0 + DZZDT*(DT_SUB/REAL(SUB_DT2,EB))
-         COUNTER = 1
-         DO WHILE (ANY(A2 < 0._EB)) ! Shrinks time step if negative mass fractions
-            DT_SUB_NEW = (DT_SUB/REAL(SUB_DT2,EB)) / (1.1_EB**REAL(COUNTER,EB))
-            A2 = ZZ_0 + DZZDT*(DT_SUB_NEW/REAL(SUB_DT2,EB)) ! Updates species
-            COUNTER = COUNTER+1
-         ENDDO
-         IF (COUNTER > 1) THEN
-            DT_SUB = DT_SUB_NEW
-         ENDIF
-      
+
+         IF (ANY(A2 < 0._EB)) THEN
+            DO NSS=0,N_TRACKED_SPECIES
+               IF (A2(NSS) < 0._EB .AND. ABS(DZZDT(NSS))>ZERO_P) THEN
+                  DT_SUB = MIN(DT_SUB,-ZZ_0(NSS)/DZZDT(NSS))
+                  REALIZABLE = .FALSE.
+               ENDIF
+            ENDDO
+            A2 = ZZ_0 + DZZDT*(DT_SUB/REAL(SUB_DT2,EB))
+         ENDIF  
+         
          REACTION_LOOP2_2: DO NR = 1, N_REACTIONS   
             RN => REACTION(NR)      
             CALL COMPUTE_RATE_CONSTANT(NR,RN%MODE,I_TS,Q2,RATE_CONSTANT(NR),A2,I,J,K)
-            IF (RATE_CONSTANT(NR) < ZERO_P) CYCLE REACTION_LOOP2_2
+            IF (RATE_CONSTANT(NR) <= 0.0_EB) CYCLE REACTION_LOOP2_2
             Q_NR2(NR) = RATE_CONSTANT(NR)*RN%HEAT_OF_COMBUSTION*RHO(I,J,K)
             DZZDT2 = DZZDT2 + RN%NU*SPECIES_MIXTURE%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW*RATE_CONSTANT(NR)
          END DO REACTION_LOOP2_2    
-         IF (ALL(DZZDT2 < ZERO_P)) EXIT INTEGRATION_LOOP
          A2 = ZZ_0 + 0.5_EB*(DZZDT+DZZDT2)*(DT_SUB/REAL(SUB_DT2,EB))
-         COUNTER = 1
-         DO WHILE (ANY(A2 < 0._EB)) ! Shrinks time step if negative mass fractions
-            DT_SUB_NEW = (DT_SUB/REAL(SUB_DT2,EB)) / (1.1_EB**REAL(COUNTER,EB))
-            A2 = ZZ_0 + 0.5_EB*(DZZDT+DZZDT2)*(DT_SUB_NEW/REAL(SUB_DT2,EB)) ! Updates species
-            COUNTER = COUNTER+1
-         ENDDO
-         IF (COUNTER > 1) THEN
-            DT_SUB = DT_SUB_NEW
-         ENDIF
-      
+         
+         IF (ANY(A2 < 0._EB)) THEN
+            DO NSS=0,N_TRACKED_SPECIES
+               IF (A2(NSS) < 0._EB .AND. ABS(DZZDT(NSS)+DZZDT2(NSS))>ZERO_P) THEN
+                  DT_SUB = MIN(DT_SUB,-2._EB*ZZ_0(NSS)/(DZZDT(NSS)+DZZDT2(NSS)))
+                  REALIZABLE = .FALSE.
+               ENDIF
+            ENDDO
+            A2 = ZZ_0 + 0.5_EB*(DZZDT+DZZDT2)*(DT_SUB/REAL(SUB_DT2,EB))
+         ENDIF  
          Q_SUM = SUM(0.5_EB*(Q_NR+Q_NR2))
-         IF (Q2 + Q_SUM*(DT_SUB/REAL(SUB_DT2,EB)) > Q_UPPER*DT) THEN
-            DT_SUB_NEW = MAX(0._EB,(Q_UPPER*DT - Q2))/Q_SUM
-            Q2 = Q2+Q_SUM*DT_SUB_NEW
-            A2 = ZZ_0 + 0.5_EB*(DZZDT+DZZDT2)*DT_SUB_NEW
-            EXIT ODE_LOOP2
-         ENDIF   
+!         IF (Q2 + Q_SUM*(DT_SUB/REAL(SUB_DT2,EB)) > Q_UPPER*DT) THEN
+!            DT_SUB_NEW = MAX(0._EB,(Q_UPPER*DT - Q2))/Q_SUM
+!            Q2 = Q2+Q_SUM*DT_SUB_NEW
+!            A2 = ZZ_0 + 0.5_EB*(DZZDT+DZZDT2)*DT_SUB_NEW
+!            EXIT ODE_LOOP2
+!         ENDIF
          A2 = ZZ_0 + 0.5_EB*(DZZDT+DZZDT2)*(DT_SUB/REAL(SUB_DT2,EB))
          Q2 = Q2+Q_SUM*(DT_SUB/REAL(SUB_DT2,EB))
          I_TS = I_TS + 1
          ZZ_0 = A2
       ENDDO ODE_LOOP2
       DT_A2 = DT_SUB
-   
+      IF (DT_A2 < DT_A1) THEN
+         DT_SUB_NEW = DT_A2
+         CYCLE RICH_EX_LOOP
+      ENDIF
+      
       !--------------------
       ! Calculate A4 term
       ! Time step = DT_SUB/4
@@ -524,72 +530,89 @@ INTEGRATION_LOOP: DO WHILE (DT_ITER < DT)
          REACTION_LOOP_4: DO NR = 1, N_REACTIONS   
             RN => REACTION(NR)      
             CALL COMPUTE_RATE_CONSTANT(NR,RN%MODE,I_TS,Q4,RATE_CONSTANT(NR),ZZ_0,I,J,K)
-            IF (RATE_CONSTANT(NR) < ZERO_P) CYCLE REACTION_LOOP_4
+            IF (RATE_CONSTANT(NR) <= 0.0_EB) CYCLE REACTION_LOOP_4
             Q_NR(NR) = RATE_CONSTANT(NR)*RN%HEAT_OF_COMBUSTION*RHO(I,J,K)
             DZZDT = DZZDT + RN%NU*SPECIES_MIXTURE%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW*RATE_CONSTANT(NR)
          END DO REACTION_LOOP_4   
-         IF (ALL(DZZDT < ZERO_P)) EXIT INTEGRATION_LOOP    
          A4 = ZZ_0 + DZZDT*(DT_SUB/REAL(SUB_DT4,EB))
-         COUNTER = 1
-         DO WHILE (ANY(A4 < 0._EB)) ! Shrinks time step if negative mass fractions
-            DT_SUB_NEW = (DT_SUB/REAL(SUB_DT4,EB)) / (1.1_EB**REAL(COUNTER,EB))
-            A4 = ZZ_0 + DZZDT*(DT_SUB_NEW/REAL(SUB_DT4,EB)) ! Updates species
-            COUNTER = COUNTER+1
-         ENDDO
-         IF (COUNTER > 1) THEN
-            DT_SUB = DT_SUB_NEW
-         ENDIF
 
+         IF (ANY(A4 < 0._EB)) THEN
+            DO NSS=0,N_TRACKED_SPECIES
+               IF (A4(NSS) < 0._EB .AND. ABS(DZZDT(NSS))>ZERO_P) THEN
+                  DT_SUB = MIN(DT_SUB,-ZZ_0(NSS)/DZZDT(NSS))
+                  REALIZABLE = .FALSE.
+               ENDIF
+            ENDDO
+            A4 = ZZ_0 + DZZDT*(DT_SUB/REAL(SUB_DT4,EB))
+         ENDIF
+         
          REACTION_LOOP2_4: DO NR = 1, N_REACTIONS   
             RN => REACTION(NR)      
             CALL COMPUTE_RATE_CONSTANT(NR,RN%MODE,I_TS,Q4,RATE_CONSTANT(NR),A4,I,J,K)
-            IF (RATE_CONSTANT(NR) < ZERO_P) CYCLE REACTION_LOOP2_4
+            IF (RATE_CONSTANT(NR) <= 0.0_EB) CYCLE REACTION_LOOP2_4
             Q_NR2(NR) = RATE_CONSTANT(NR)*RN%HEAT_OF_COMBUSTION*RHO(I,J,K)
             DZZDT2 = DZZDT2 + RN%NU*SPECIES_MIXTURE%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW*RATE_CONSTANT(NR)
          END DO REACTION_LOOP2_4    
-         IF (ALL(DZZDT2 < ZERO_P)) EXIT INTEGRATION_LOOP
          A4 = ZZ_0 + 0.5_EB*(DZZDT+DZZDT2)*(DT_SUB/REAL(SUB_DT4,EB))
-         COUNTER = 1
-         DO WHILE (ANY(A4 < 0._EB)) ! Shrinks time step if negative mass fractions
-            DT_SUB_NEW = (DT_SUB/REAL(SUB_DT4,EB)) / (1.1_EB**REAL(COUNTER,EB))
-            A4 = ZZ_0 + 0.5_EB*(DZZDT+DZZDT2)*(DT_SUB_NEW/REAL(SUB_DT4,EB)) ! Updates species
-            COUNTER = COUNTER+1
-         ENDDO
-         IF (COUNTER > 1) THEN
-            DT_SUB = DT_SUB_NEW
-         ENDIF
-      
+
+         IF (ANY(A4 < 0._EB)) THEN
+            DO NSS=0,N_TRACKED_SPECIES
+               IF (A4(NSS) < 0._EB .AND. ABS(DZZDT(NSS)+DZZDT2(NSS))>ZERO_P) THEN
+                  DT_SUB = MIN(DT_SUB,-2._EB*ZZ_0(NSS)/(DZZDT(NSS)+DZZDT2(NSS)))
+                  REALIZABLE = .FALSE.
+               ENDIF
+            ENDDO
+            A4 = ZZ_0 + 0.5_EB*(DZZDT+DZZDT2)*(DT_SUB/REAL(SUB_DT4,EB))
+         ENDIF  
          Q_SUM = SUM(0.5_EB*(Q_NR+Q_NR2))
-         IF (Q4 + Q_SUM*(DT_SUB/REAL(SUB_DT4,EB)) > Q_UPPER*DT) THEN
-            DT_SUB_NEW = MAX(0._EB,(Q_UPPER*DT - Q4))/Q_SUM
-            Q4 = Q4+Q_SUM*DT_SUB_NEW
-            A4 = ZZ_0 + 0.5_EB*(DZZDT+DZZDT2)*DT_SUB_NEW
-            EXIT ODE_LOOP4
-         ENDIF   
+!         IF (Q4 + Q_SUM*(DT_SUB/REAL(SUB_DT4,EB)) > Q_UPPER*DT) THEN
+!            DT_SUB_NEW = MAX(0._EB,(Q_UPPER*DT - Q4))/Q_SUM
+!            Q4 = Q4+Q_SUM*DT_SUB_NEW
+!            A4 = ZZ_0 + 0.5_EB*(DZZDT+DZZDT2)*DT_SUB_NEW
+!            EXIT ODE_LOOP4
+!!            Q_OUT = (Q4+Q_SUM*DT_SUB_NEW)/DT
+!!            ZZ_GET = ZZ_0 + 0.5_EB*(DZZDT+DZZDT2)*DT_SUB_NEW
+!!            EXIT INTEGRATION_LOOP
+!         ENDIF
          A4 = ZZ_0 + 0.5_EB*(DZZDT+DZZDT2)*(DT_SUB/REAL(SUB_DT4,EB))
          Q4 = Q4+Q_SUM*(DT_SUB/REAL(SUB_DT4,EB))    
          I_TS = I_TS + 1
          ZZ_0 = A4
       ENDDO ODE_LOOP4
       DT_A4 = DT_SUB
-   
-      !Error Analysis
-      IF (DT_A4 < DT_A1 .OR. DT_A2 < DT_A1) THEN
-         DT_SUB_NEW = MIN(DT_A2,DT_A4)
-      ELSE
-         ERR_EST = MAXVAL(ABS((4._EB*A4-A2) - (4._EB*A2-A1)))/45._EB  ! Estimate Error
-         DT_SUB_NEW = DT_SUB*(ERR_TOL/(ERR_EST+1.E-14_EB))**(0.25_EB) ! Determine New Time Step
+      IF (DT_A4 < DT_A2) THEN
+         DT_SUB_NEW = DT_A4
+         CYCLE RICH_EX_LOOP
       ENDIF
       
+      ! Error Analysis
+      ERR_EST = MAXVAL(ABS((4._EB*A4-A2) - (4._EB*A2-A1)))/45._EB  ! Estimate Error
+      IF (ERR_EST <= 0.0_EB) THEN
+         DT_SUB_NEW = DT
+      ELSE
+         DT_SUB_NEW = DT_SUB*(ERR_TOL/(ERR_EST))**(0.25_EB) ! Determine New Time Step
+      ENDIF     
+     
    ENDDO RICH_EX_LOOP
-    
-!   IF (MAXVAL(ABS((4._EB*A4-A2)/3._EB - ZZ_GET)) < 0.1_EB*ERR_TOL) THEN
-!      ITER = ITER + 1
-!      MAX_CHEM_SUBIT = MAX(MAX_CHEM_SUBIT,ITER)
-!      ZZ_GET = (4._EB*A4-A2)/3._EB  
-!      Q_OUT = ((4._EB*Q4-Q2)/3._EB)/DT
-!      EXIT INTEGRATION_LOOP
-!   ENDIF
+
+   ! Total Variation Scheme
+      DO TVI = 0,2
+         ZZ_STORE(TVI)=ZZ_STORE(TVI+1)
+      ENDDO
+      ZZ_STORE(3) = (4._EB*A4(5)-A2(5))/3._EB  
+   
+   DO TVI = 0,2
+      TV(TVI) = ABS(ZZ_STORE(TVI+1)-ZZ_STORE(TVI))
+      ZZ_DIFF(TVI) = ZZ_STORE(TVI+1)-ZZ_STORE(TVI)
+   ENDDO
+
+   IF (SUM(TV) /= 0.0_EB .AND. SUM(TV) >= ABS(2.5_EB*SUM(ZZ_DIFF))) THEN
+      ITER = ITER + 1
+      MAX_CHEM_SUBIT = MAX(MAX_CHEM_SUBIT,ITER)
+      Q_OUT = ((4._EB*Q4-Q2)/3._EB)/DT
+      ZZ_GET = (4._EB*A4-A2)/3._EB
+      EXIT INTEGRATION_LOOP
+   ENDIF
 
    ITER = ITER + 1
    MAX_CHEM_SUBIT = MAX(MAX_CHEM_SUBIT,ITER)
