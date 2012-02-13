@@ -2,55 +2,8 @@
 ! $Revision$
 ! $Author$
 
-integer function UpdateIsosurface(xyzv, nxyzv, tris, ntris, closestnodes, xyzverts, nxyzverts, nxyzverts_MAX, triangles, ntriangles, ntriangles_MAX)
-  real, intent(in), dimension(0:3*nxyzv-1) :: xyzv
-  integer, intent(in), dimension(0:3*ntris-1) :: tris
-  integer, intent(in), dimension(:) :: closestnodes
-  real, intent(inout), pointer, dimension(:) :: xyzverts
-  integer, intent(inout) :: nxyzverts, nxyzverts_MAX, ntriangles, ntriangles_MAX
-  integer, intent(inout), pointer, dimension(:) :: triangles
-  real, dimension(:), pointer :: xyzverts_temp
-  integer, dimension(:), pointer :: triangles_temp
-  
-  if(nxyzverts+nxyzv.gt.nxyzverts_MAX)then
-    nxyzverts_MAX=nxyzverts_MAX+1000
-    
-    if(nxyzverts.gt.0)then
-      allocate(xyzverts_temp(0:nxyzverts-1))
-      xyzverts_temp(0:3*nxyzverts-1)=xyzverts(0:3*nxyzverts-1)
-      deallocate(xyzverts)    
-      allocate(xyzverts(0:nxyzverts_MAX-1))
-      xyzverts(0:3*nxyzverts-1)=xyzverts_temp(0:3*nxyzverts-1)
-      deallocate(xyzverts_temp)
-    endif
-  endif
-  if(ntriangles+ntris.gt.ntriangles_MAX)then
-    ntriangles_MAX=ntriangles_MAX+1000
-    
-    if(ntriangles.gt.0)then
-      allocate(triangles_temp(0:3*ntriangles-1))
-      triangles_temp(0:3*ntriangles-1)=triangles(0:3*ntriangles-1)
-      deallocate(triangles)    
-      allocate(triangles(0:3*ntriangles_MAX-1))
-      triangles(0:3*ntriangles-1)=triangles_temp(0:3*ntriangles-1)
-      deallocate(triangles_temp)
-    endif
-  endif
-  xyzverts(3*nxyzverts:3*nxyzverts+3*nxyzv-1)=xyzv(0:3*nxyzv-1)
-  triangles(3*ntriangles:3*ntriangles+3*ntris-1)=tris(0:3*ntris-1)
-  UpdateIsosurface=0
-  return
-end function UpdateIsosurface
 
-!int GetIsosurface(isosurface *surface, 
-!                  const float *data, 
-!                  const float *tdata, 
-!                  const char *iblank_cell, 
-!                  float level, float dlevel,
-!                  const float *xplt, int nx, 
-!                  const float *yplt, int ny, 
-!                  const float *zplt, int nz
-!                   ){
+!  ------------------ FGetIsosurface ------------------------ 
 
 integer function FGetIsosurface(vdata, have_tdata, tdata, have_iblank, iblank_cell, level, &
      xplt, nx, yplt, ny, zplt, nz,&
@@ -76,16 +29,21 @@ integer function FGetIsosurface(vdata, have_tdata, tdata, have_iblank, iblank_ce
   integer, dimension(0:23) :: nodeindexes
   integer, dimension(0:35) :: closestnodes
   real, dimension(0:7) :: vals, tvals
-  real, dimension(0:35) :: xyzv
+  real, dimension(0:35) :: xyzv,tv
   integer :: nxyzv
   integer, dimension(0:11) :: tris
   integer :: ntris
   integer :: nxyzverts_MAX, ntriangles_MAX
+  real :: vmin, vmax
   
-  integer :: i, j, k
+  integer :: i, j, k, n
   integer :: returnval
   integer :: FGetIsobox,UpdateIsosurface
      
+  integer, dimension(0:3) :: ixmin=(/0,1,4,5/), ixmax=(/2,3,6,7/)
+  integer, dimension(0:3) :: iymin=(/0,3,4,7/), iymax=(/1,2,5,6/)
+  integer, dimension(0:3) :: izmin=(/0,1,2,3/), izmax=(/4,5,6,7/)
+  
   nullify(xyzverts)
   nullify(triangles)
   ntriangles=0
@@ -113,45 +71,21 @@ integer function FGetIsosurface(vdata, have_tdata, tdata, have_iblank, iblank_ce
         vals(6)=vdata(i+1,j+1,k+1)
         vals(7)=vdata(i+1,  j,k+1)
 
-        if(vals(0)>level.and.vals(1)>level.and.vals(2)>level.and.vals(3)>level.and.&
-           vals(4)>level.and.vals(5)>level.and.vals(6)>level.and.vals(7)>level)continue
-        if(vals(0)<level.and.vals(1)<level.and.vals(2)<level.and.vals(3)<level.and.&
-           vals(4)<level.and.vals(5)<level.and.vals(6)<level.and.vals(7)<level)continue
+        vmin=min(vals(0),vals(1),vals(2),vals(3),vals(4),vals(5),vals(6),vals(7))
+        vmax=max(vals(0),vals(1),vals(2),vals(3),vals(4),vals(5),vals(6),vals(7))
+        if(vmin.gt.level.or.vmax.lt.level)continue
            
         zz(0)=zplt(k);
         zz(1)=zplt(k+1);
 
-        nodeindexes(0)=i
-        nodeindexes(1)=j
-        nodeindexes(2)=k
-        
-        nodeindexes(3)=i
-        nodeindexes(4)=j+1
-        nodeindexes(5)=k
-        
-        nodeindexes(6)=i+1
-        nodeindexes(7)=j+1
-        nodeindexes(8)=k
-        
-        nodeindexes(9)=i+1;
-        nodeindexes(10)=j
-        nodeindexes(11)=k
-        
-        nodeindexes(12)=i;
-        nodeindexes(13)=j
-        nodeindexes(14)=k+1
-        
-        nodeindexes(15)=i;
-        nodeindexes(16)=j+1
-        nodeindexes(17)=k+1
-        
-        nodeindexes(18)=i+1
-        nodeindexes(19)=j+1
-        nodeindexes(20)=k+1
-        
-        nodeindexes(21)=i+1
-        nodeindexes(22)=j
-        nodeindexes(23)=k+1
+        do n=0, 3
+          nodeindexes(3*ixmin(n))=i
+          nodeindexes(3*ixmax(n))=i+1
+          nodeindexes(3*iymin(n)+1)=j
+          nodeindexes(3*iymax(n)+1)=j+1
+          nodeindexes(3*izmin(n)+2)=k
+          nodeindexes(3*izmax(n)+2)=k+1
+        end do
 
         if(have_tdata.eq.1)then
           tvals(0)=tdata(  i,  j,  k)
@@ -164,7 +98,7 @@ integer function FGetIsosurface(vdata, have_tdata, tdata, have_iblank, iblank_ce
           tvals(7)=tdata(i+1,  j,k+1)
         endif
 
-        returnval=FGetIsobox(xx,yy,zz,vals,nodeindexes,level,xyzv,nxyzv,tris,ntris,closestnodes)
+        returnval=FGetIsobox(xx,yy,zz,vals,have_tdata,tvals,nodeindexes,level,xyzv,tv,nxyzv,tris,ntris,closestnodes)
 
         if(nxyzv.gt.0.or.ntris.gt.0)then
           if(UpdateIsosurface(xyzv, nxyzv, tris, ntris, closestnodes, xyzverts, nxyzverts, nxyzverts_MAX, triangles, ntriangles, ntriangles_MAX).ne.0)then
@@ -178,6 +112,49 @@ integer function FGetIsosurface(vdata, have_tdata, tdata, have_iblank, iblank_ce
   FGetIsosurface=0
   return     
 end function FGetIsosurface
+
+!  ------------------ UpdateIsosurface ------------------------ 
+
+integer function UpdateIsosurface(xyzv, nxyzv, tris, ntris, closestnodes, xyzverts, nxyzverts, nxyzverts_MAX, triangles, ntriangles, ntriangles_MAX)
+  real, intent(in), dimension(0:3*nxyzv-1) :: xyzv
+  integer, intent(in), dimension(0:3*ntris-1) :: tris
+  integer, intent(in), dimension(:) :: closestnodes
+  real, intent(inout), pointer, dimension(:) :: xyzverts
+  integer, intent(inout) :: nxyzverts, nxyzverts_MAX, ntriangles, ntriangles_MAX
+  integer, intent(inout), pointer, dimension(:) :: triangles
+  real, dimension(:), pointer :: xyzverts_temp
+  integer, dimension(:), pointer :: triangles_temp
+  
+  if(nxyzverts+nxyzv.gt.nxyzverts_MAX)then
+    nxyzverts_MAX=nxyzverts_MAX+1000
+    
+    if(nxyzverts.gt.0)then
+      allocate(xyzverts_temp(0:3*nxyzverts-1))
+      xyzverts_temp(0:3*nxyzverts-1)=xyzverts(0:3*nxyzverts-1)
+      deallocate(xyzverts)    
+      allocate(xyzverts(0:3*nxyzverts_MAX-1))
+      xyzverts(0:3*nxyzverts-1)=xyzverts_temp(0:3*nxyzverts-1)
+      deallocate(xyzverts_temp)
+    endif
+  endif
+  if(ntriangles+ntris.gt.ntriangles_MAX)then
+    ntriangles_MAX=ntriangles_MAX+1000
+    
+    if(ntriangles.gt.0)then
+      allocate(triangles_temp(0:3*ntriangles-1))
+      triangles_temp(0:3*ntriangles-1)=triangles(0:3*ntriangles-1)
+      deallocate(triangles)    
+      allocate(triangles(0:3*ntriangles_MAX-1))
+      triangles(0:3*ntriangles-1)=triangles_temp(0:3*ntriangles-1)
+      deallocate(triangles_temp)
+    endif
+  endif
+  xyzverts(3*nxyzverts:3*nxyzverts+3*nxyzv-1)=xyzv(0:3*nxyzv-1)
+  triangles(3*ntriangles:3*ntriangles+3*ntris-1)=tris(0:3*ntris-1)
+  UpdateIsosurface=0
+  return
+end function UpdateIsosurface
+
 !  ------------------ FMIX ------------------------ 
 
 real function FMIX(f,a,b)
@@ -189,43 +166,16 @@ real function FMIX(f,a,b)
   return
 end function fMIX
 
-!  ===================================================================
-!  ========================== isosurface code ========================
-
-!int GetIsobox(const float *x,const float *y,const float *z, 
-!               const float *vals,const float *tvals,const int *nodeindexes, 
-!               float level,float *xvert,float *yvert,float *zvert, 
-!               float *tvert, int *closestnodes, int *nvert,
-!               int *triangles, int *ntriangles){
-!       INPUT
-!       -----
-!       x - x[0] = min x value
-!           x[1] = max x value
-!       y - y[0] = min y value
-!           y[1] = max y value
-!       z - z[0] = min z value
-!           z[1] = max z value
-!
-!      vals - values at box formed by x,y,z
-!      level - desired iso-surface level
-!
-!       OUTPUT
-!       -----
-!       xvert, yvert, zvert - array of x,y,z coordinates that have iso-surface value 
-!       nvert - number of vertices
-!       triangles - set of 3 integer indices for each triangle pointing into xvert, yvert, zvert arrays
-!       ntriangles - number of indices in triangles
-
 !  ------------------ FGetIsobox ------------------------ 
 
-integer function FGetIsobox(x,y,z,vals,nodeindexes,level,&
-           xyzv,nxyzv,tris,ntris,closestnodes)
+integer function FGetIsobox(x,y,z,vals,have_tvals,tvals,nodeindexes,level,xyzv,tv,nxyzv,tris,ntris,closestnodes)
 implicit none
 real, dimension(0:1), intent(in) :: x, y, z
-real, dimension(0:7), intent(in) :: vals
+integer, intent(in) :: have_tvals
+real, dimension(0:7), intent(in) :: vals,tvals
 integer, dimension(0:23), intent(in) :: nodeindexes
 real, intent(in) :: level
-real, intent(out), dimension(0:60) :: xyzv
+real, intent(out), dimension(0:60) :: xyzv,tv
 integer, intent(out) :: nxyzv
 integer, intent(out), dimension(0:60) :: tris
 integer, intent(out) :: ntris
@@ -803,9 +753,9 @@ end do
     xyzv(3*n) = xx;
     xyzv(3*n+1) = yy;
     xyzv(3*n+2) = zz;
-!    if(tvert!=NULL){
-!      tvert(n) = MIX(factor,tvals(v2),tvals(v1));
-!    endif
+    if(have_tvals.eq.1)then
+      tv(n) = FMIX(factor,tvals(v2),tvals(v1));
+    endif
 
   end do
   if(outofbounds.eq.1)then
