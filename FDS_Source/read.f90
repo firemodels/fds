@@ -8652,12 +8652,12 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
          IF (EVACUATION_ONLY(NM)) CYCLE MESH_LOOP
          M=>MESHES(NM)
          IF (XYZ(1)>=M%XS .AND. XYZ(1)<=M%XF .AND. XYZ(2)>=M%YS .AND. XYZ(2)<=M%YF .AND. XYZ(3)>=M%ZS .AND. XYZ(3)<=M%ZF) THEN
-            IF (ABS(XYZ(1)-M%XS)>ZERO_P) XYZ(1) = XYZ(1) + 0.01_EB*M%DX(1)
-            IF (ABS(XYZ(1)-M%XF)>ZERO_P) XYZ(1) = XYZ(1) - 0.01_EB*M%DX(M%IBAR)
-            IF (ABS(XYZ(2)-M%YS)>ZERO_P) XYZ(2) = XYZ(2) + 0.01_EB*M%DY(1)
-            IF (ABS(XYZ(2)-M%YF)>ZERO_P) XYZ(2) = XYZ(2) - 0.01_EB*M%DY(M%JBAR)
-            IF (ABS(XYZ(3)-M%ZS)>ZERO_P) XYZ(3) = XYZ(3) + 0.01_EB*M%DZ(1)
-            IF (ABS(XYZ(3)-M%ZF)>ZERO_P) XYZ(3) = XYZ(3) - 0.01_EB*M%DZ(M%KBAR)
+            IF (ABS(XYZ(1)-M%XS)<ZERO_P) XYZ(1) = XYZ(1) + 0.01_EB*M%DX(1)
+            IF (ABS(XYZ(1)-M%XF)<ZERO_P) XYZ(1) = XYZ(1) - 0.01_EB*M%DX(M%IBAR)
+            IF (ABS(XYZ(2)-M%YS)<ZERO_P) XYZ(2) = XYZ(2) + 0.01_EB*M%DY(1)
+            IF (ABS(XYZ(2)-M%YF)<ZERO_P) XYZ(2) = XYZ(2) - 0.01_EB*M%DY(M%JBAR)
+            IF (ABS(XYZ(3)-M%ZS)<ZERO_P) XYZ(3) = XYZ(3) + 0.01_EB*M%DZ(1)
+            IF (ABS(XYZ(3)-M%ZF)<ZERO_P) XYZ(3) = XYZ(3) - 0.01_EB*M%DZ(M%KBAR)
             MESH_NUMBER = NM
             BAD = .FALSE.
             EXIT MESH_LOOP
