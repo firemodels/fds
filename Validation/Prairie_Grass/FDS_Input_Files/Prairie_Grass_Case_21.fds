@@ -1,5 +1,7 @@
 &HEAD CHID='Prairie_Grass_Case_21', TITLE='Prairie Grass 21, Non-extended domain, no wind temp profile' /
 
+--test for committed change
+
 -8 meshes, 4m res (x,y,z), Regular domain
 &MESH IJK=50,18,12, XB=0,200,0,75,0,48/
 &MESH IJK=50,18,12, XB=0,200,75,150,0,48/
