@@ -590,22 +590,6 @@ CASE(.TRUE.) PREDICTOR_STEP
    
 CASE(.FALSE.) PREDICTOR_STEP
 
-   ! Store enthalpy for time derivative in divergence
-
-   IF (ENTHALPY_TRANSPORT) THEN
-      !$OMP DO COLLAPSE(3) SCHEDULE(STATIC) PRIVATE(K,J,I,ZZ_GET)
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR    
-               IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = ZZS(I,J,K,1:N_TRACKED_SPECIES)
-               CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP(I,J,K))
-               RHO_H_S_OVER_PBAR(I,J,K) = 0.5_EB*( RHO_H_S_OVER_PBAR(I,J,K) + RHOS(I,J,K)*H_S/PBAR_S(K,PRESSURE_ZONE(I,J,K)) )
-            ENDDO
-         ENDDO
-      ENDDO
-      !$OMP END DO
-   ENDIF
-
    ! Correct species mass fraction at next time step (ZZ here actually means ZZ*RHO)
 
    !$OMP PARALLEL DEFAULT(NONE) &
