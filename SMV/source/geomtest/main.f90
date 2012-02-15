@@ -24,8 +24,40 @@ real :: xoffset, yoffset, zoffset
 integer :: itime
 real :: twfin, dt, dx
 integer :: nsteps
-
+integer :: pos
 real(fb), pointer, dimension(:) :: test
+real(fb), dimension(0:7) :: vals,tvals
+real(fb) :: level
+real(fb), dimension(0:1) :: x=(/0.0,1.0/),y=(/0.0,1.0/),z=(/0.0,1.0/)
+integer :: HAVE_TVALS=0
+  INTEGER, DIMENSION(0:23) :: NODEINDEXES=(/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23/)
+  REAL(FB), DIMENSION(0:35) :: XYZV_LOCAL,TV_LOCAL
+  INTEGER, DIMENSION(0:11) :: TRIS
+  INTEGER :: NXYZV
+  INTEGER :: NTRIS
+  INTEGER, DIMENSION(0:35) :: CLOSESTNODES
+  INTEGER :: j
+
+level=0.75
+
+do i = 0, 255
+  do pos = 0, 7
+    if(btest(i,pos))then
+      vals(pos)=1
+    else
+      vals(pos)=0
+    endif
+  end do
+!  SUBROUTINE FGETISOBOX(X,Y,Z,VALS,HAVE_TVALS,TVALS,NODEINDEXES,LEVEL,XYZV_LOCAL,TV_LOCAL,NXYZV,TRIS,NTRIS,CLOSESTNODES)
+  call FGETISOBOX(x,y,z,vals,HAVE_TVALS,tvals,NODEINDEXES,level,XYZV_LOCAL,TV_LOCAL,NXYZV,TRIS,NTRIS,CLOSESTNODES)
+  write(6,*)"case ",i
+  do j = 0, nxyzv-1
+    write(6,*)xyzv_local(3*j),xyzv_local(3*j+1),xyzv_local(3*j+2)
+  end do
+  do j = 0, ntris-1
+    write(6,*)tris(3*j),tris(3*j+1),tris(3*j+2)
+  end do
+end do
 
 call REALLOCATE_F(test,0,10)
 do i = 1, 10
