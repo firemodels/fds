@@ -1,6 +1,6 @@
 program main
-USE REALLOCATE_ROUTINES
-USE RLE_F_ROUTINE
+USE PRECISION_PARAMETERS
+USE ISOSMOKE
 implicit none
 
 integer :: LU_GEOM, LU_GEOM_DATA
@@ -8,9 +8,9 @@ integer :: ONE,VERSION
 real :: STIME
 integer :: N_VERT_S, N_FACE_S, N_VERT_D, N_FACE_D
 integer :: N_VERT_S_VALS, N_FACE_S_VALS, N_VERT_D_VALS, N_FACE_D_VALS
-real, dimension(4) :: Xvert_S, Yvert_S, Zvert_S
-real, dimension(4) :: Xvert_D, Yvert_D, Zvert_D
-real, dimension(4) :: ValVertStatic, ValVertDynamic, ValFaceStatic, ValFaceDynamic
+real(fb), dimension(4) :: Xvert_S, Yvert_S, Zvert_S
+real(fb), dimension(4) :: Xvert_D, Yvert_D, Zvert_D
+real(fb), dimension(4) :: ValVertStatic, ValVertDynamic, ValFaceStatic, ValFaceDynamic
 integer, dimension(4) :: FACE1_S, FACE2_S, FACE3_S
 integer, dimension(4) :: FACE1_D, FACE2_D, FACE3_D
 integer, dimension(4) :: SURF_S, SURF_D
@@ -25,7 +25,7 @@ integer :: itime
 real :: twfin, dt, dx
 integer :: nsteps
 
-real, pointer, dimension(:) :: test
+real(fb), pointer, dimension(:) :: test
 
 call REALLOCATE_F(test,0,10)
 do i = 1, 10
