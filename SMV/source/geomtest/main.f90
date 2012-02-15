@@ -1,4 +1,5 @@
 program main
+USE ISOSMOKE_ROUTINES
 implicit none
 
 integer :: LU_GEOM, LU_GEOM_DATA
@@ -25,11 +26,11 @@ integer :: nsteps
 
 real, pointer, dimension(:) :: test
 
-call reallocate_f(test,0,10)
+call REALLOCATE_F(test,0,10)
 do i = 1, 10
   test(i)=float(i)
 end do
-call reallocate_f(test,10,20)
+call REALLOCATE_F(test,10,20)
 do i = 11,20
   test(i)=float(2*i)
 end do
