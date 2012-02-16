@@ -36,7 +36,7 @@ integer :: HAVE_TVALS=0
   INTEGER :: NXYZV
   INTEGER :: NTRIS
   INTEGER, DIMENSION(0:35) :: CLOSESTNODES
-integer, parameter :: nx=17, ny=17, nz=33
+integer, parameter :: nx=16, ny=16, nz=32
 real(fb), dimension(0:nx) :: xplt
 real(fb), dimension(0:ny) :: yplt
 real(fb), dimension(0:nz) :: zplt
@@ -46,7 +46,10 @@ integer :: have_iblank=0, have_tdata=0
 real(fb), dimension(:), pointer :: xyzverts
 integer, dimension(:), pointer :: triangles
 integer :: nxyzverts, ntriangles
-real(fb) :: vmax
+real(fb) :: vmin,vmax,t
+integer :: error
+integer :: first, lu_iso=10,nlevels=1
+real(fb), dimension(1) :: levels
 
 level=0.75
 
@@ -77,14 +80,16 @@ do j=0,ny
 yplt(j) = 1.6*float(j)/float(ny)
 end do
 do k=0,nz
-zplt(j) = 3.2*float(k)/float(nz)
+zplt(k) = 3.2*float(k)/float(nz)
 end do
 vmax=0.0
+vmin=1000000.0
 do i =0,nx
 do j=0,ny
 do k=0,nz
-vdata(i,j,k) = sqrt(xplt(i)**2+yplt(i)**2+zplt(i)**2)
+vdata(i,j,k) = sqrt((xplt(i)-0.8)**2+(yplt(j)-0.8)**2+(zplt(k)-1.6)**2)
 if(vdata(i,j,k)>vmax)vmax=vdata(i,j,k)
+if(vdata(i,j,k)<vmin)vmin=vdata(i,j,k)
 end do
 end do
 end do
@@ -92,20 +97,20 @@ level=1.0
 call FGETISOSURFACE(VDATA, HAVE_TDATA, TDATA, HAVE_IBLANK, IBLANK_CELL, LEVEL, &
      XPLT, NX, YPLT, NY, ZPLT, NZ,&
      XYZVERTS, NXYZVERTS, TRIANGLES, NTRIANGLES)
+first=1
+open(unit=lu_iso,file='plume5c.geo',form='unformatted')
+nlevels=1
 
-!  INTEGER, INTENT(IN) :: NX, NY, NZ
-!  INTEGER, INTENT(IN) :: HAVE_TDATA, HAVE_IBLANK
-!  REAL(FB), DIMENSION(NX+1,NY+1,NZ+1), INTENT(IN) :: VDATA, TDATA
-!  INTEGER, DIMENSION(NX,NY,NZ), INTENT(IN) :: IBLANK_CELL
-!  REAL(FB), INTENT(IN) :: LEVEL
-!  REAL(FB), INTENT(IN), DIMENSION(NX+1) :: XPLT
-!  REAL(FB), INTENT(IN), DIMENSION(NY+1) :: YPLT
-!  REAL(FB), INTENT(IN), DIMENSION(NZ+1) :: ZPLT
+NSTEPS=401
+do i = 0,NSTEPS
+  levels(1)=(float(NSTEPS-i)*vmin+float(i)*vmax)/float(NSTEPS)
+  t=float(i)/10.0
+  call FISOSURFACE2FILE(LU_ISO,T,FIRST,VDATA,HAVE_TDATA,TDATA,HAVE_IBLANK,IBLANK_cell,&
+           LEVELS, NLEVELS, XPLT, NX, YPLT, NY, ZPLT, NZ, ERROR)
+  first=0
+end do  
+close(lu_iso)
      
-!  REAL(FB), DIMENSION(:), POINTER, INTENT(OUT) :: XYZVERTS
-!  INTEGER, DIMENSION(:), POINTER, INTENT(OUT) :: TRIANGLES
-!  INTEGER, INTENT(OUT) :: NTRIANGLES, NXYZVERTS
-
 
 call REALLOCATE_F(test,0,10)
 do i = 1, 10
