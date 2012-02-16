@@ -746,6 +746,7 @@ void read_geom(int ifile, int flag, int *errorcode){
       memcpy(geomlisti->rot0,tran_rot+3,3*sizeof(float));
       memcpy(geomlisti->rot,tran_rot+6,2*sizeof(float));
     }
+    geomlisti->ntriangles=0;
     if(*geom_typeptr==0&&ntri_s+ntri_d>0){
       int ntris;
       int *surf_ind=NULL,*ijk=NULL;
