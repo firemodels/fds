@@ -15,7 +15,7 @@ integer, dimension(4) :: FACE1_S, FACE2_S, FACE3_S
 integer, dimension(4) :: FACE1_D, FACE2_D, FACE3_D
 integer, dimension(4) :: SURF_S, SURF_D
 integer :: GEOM_TYPE
-integer :: I
+integer :: I,J,K
 real :: XTRAN, YTRAN, ZTRAN
 real :: XTRAN0, YTRAN0, ZTRAN0
 real :: ROT_AZ, ROT_ELEV
@@ -36,7 +36,17 @@ integer :: HAVE_TVALS=0
   INTEGER :: NXYZV
   INTEGER :: NTRIS
   INTEGER, DIMENSION(0:35) :: CLOSESTNODES
-  INTEGER :: j
+integer, parameter :: nx=17, ny=17, nz=33
+real(fb), dimension(0:nx) :: xplt
+real(fb), dimension(0:ny) :: yplt
+real(fb), dimension(0:nz) :: zplt
+real(fb), dimension(0:nx,0:ny,0:nz) :: vdata, tdata
+integer, dimension(0:nx-1,0:ny-1,0:nz-1) :: iblank_cell
+integer :: have_iblank=0, have_tdata=0
+real(fb), dimension(:), pointer :: xyzverts
+integer, dimension(:), pointer :: triangles
+integer :: nxyzverts, ntriangles
+real(fb) :: vmax
 
 level=0.75
 
@@ -59,6 +69,43 @@ do i = 0,255
     write(6,*)tris(3*j),tris(3*j+1),tris(3*j+2)
   end do
 end do
+
+do i =0,nx
+xplt(i) = 1.6*float(i)/float(nx)
+end do
+do j=0,ny
+yplt(j) = 1.6*float(j)/float(ny)
+end do
+do k=0,nz
+zplt(j) = 3.2*float(k)/float(nz)
+end do
+vmax=0.0
+do i =0,nx
+do j=0,ny
+do k=0,nz
+vdata(i,j,k) = sqrt(xplt(i)**2+yplt(i)**2+zplt(i)**2)
+if(vdata(i,j,k)>vmax)vmax=vdata(i,j,k)
+end do
+end do
+end do
+level=1.0
+call FGETISOSURFACE(VDATA, HAVE_TDATA, TDATA, HAVE_IBLANK, IBLANK_CELL, LEVEL, &
+     XPLT, NX, YPLT, NY, ZPLT, NZ,&
+     XYZVERTS, NXYZVERTS, TRIANGLES, NTRIANGLES)
+
+!  INTEGER, INTENT(IN) :: NX, NY, NZ
+!  INTEGER, INTENT(IN) :: HAVE_TDATA, HAVE_IBLANK
+!  REAL(FB), DIMENSION(NX+1,NY+1,NZ+1), INTENT(IN) :: VDATA, TDATA
+!  INTEGER, DIMENSION(NX,NY,NZ), INTENT(IN) :: IBLANK_CELL
+!  REAL(FB), INTENT(IN) :: LEVEL
+!  REAL(FB), INTENT(IN), DIMENSION(NX+1) :: XPLT
+!  REAL(FB), INTENT(IN), DIMENSION(NY+1) :: YPLT
+!  REAL(FB), INTENT(IN), DIMENSION(NZ+1) :: ZPLT
+     
+!  REAL(FB), DIMENSION(:), POINTER, INTENT(OUT) :: XYZVERTS
+!  INTEGER, DIMENSION(:), POINTER, INTENT(OUT) :: TRIANGLES
+!  INTEGER, INTENT(OUT) :: NTRIANGLES, NXYZVERTS
+
 
 call REALLOCATE_F(test,0,10)
 do i = 1, 10
