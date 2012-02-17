@@ -49,7 +49,7 @@ integer :: nxyzverts, ntriangles
 real(fb) :: vmin,vmax,t
 integer :: error
 integer :: first, lu_iso=10,nlevels=1
-real(fb), dimension(1) :: levels
+real(fb), dimension(2) :: levels
 
 level=0.75
 
@@ -99,11 +99,12 @@ call FGETISOSURFACE(VDATA, HAVE_TDATA, TDATA, HAVE_IBLANK, IBLANK_CELL, LEVEL, &
      XYZVERTS, NXYZVERTS, TRIANGLES, NTRIANGLES)
 first=1
 open(unit=lu_iso,file='plume5c.geo',form='unformatted')
-nlevels=1
+nlevels=2
 
 NSTEPS=401
 do i = 0,NSTEPS
   levels(1)=(float(NSTEPS-i)*vmin+float(i)*vmax)/float(NSTEPS)
+  levels(2)=levels(1)+.25
   t=float(i)/10.0
   call FISOSURFACE2FILE(LU_ISO,T,FIRST,VDATA,HAVE_TDATA,TDATA,HAVE_IBLANK,IBLANK_cell,&
            LEVELS, NLEVELS, XPLT, NX, YPLT, NY, ZPLT, NZ, ERROR)
