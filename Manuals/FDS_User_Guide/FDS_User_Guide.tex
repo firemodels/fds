@@ -4891,6 +4891,18 @@ function named by {\ct CTRL\_ID} or {\ct DEVC\_ID}.  Only one of either {\ct DAM
 \item[{\ct VOLUME\_FLOW}] defines a fixed volumetric flow rate (m$^3$/s) in the duct.  {\ct VOLUME\_FLOW} cannot be used in conjunction with {\ct FAN\_ID}.
 \end{description}
 
+To reduce the computational cost of the HVAC solver, a duct should be considered as any length of duct that connects either a terminal (e.g. a connection to the FDS domain or the ambient) to either a filter or a node with more than two ducts attached.  For example the top of Figure~\ref{fig:HVAC_Simplify} shows a segment of an HVAC system where flow from a tee goes through an expansion fitting, two elbows, an expansion fitting, and a straight length of duct before it terminates as a connection to the FDS domain.  This could be input as each individual fitting or duct with its associated area and loss as shown in the middle of the figure; however, this would result in five duct segments (one for each component) with six node connections resulting in eleven parameters (five velocities and six pressures) which must be solved for.  This is not needed since whatever the flow rate is in any one segment of the duct, that same flow rate exists in all other segments and, thus, the velocties in any segment can be found by taking the area ratios, $v_1/v_2=A_2/A_1$.  Since flow losses are proportional to the square of the velocity, an equivelant duct can be constructed using the total length of the duct, a representative diameter, and summing the losses. Similarly, the pressure drops through the entire duct can be found by summing all of the fitting, $K$, and wall losses, $f$, through the duct as follows:
+
+\be K_{eff} = \sum_i {K_i \frac {A_{eff}}{A_i}} \ee
+\be f_{eff} = \sum_j {f_j \frac {d_{eff} A_{eff}}{d_j A_j}} \ee
+
+where i is a fitting, j is a duct segment, A is the area of the duct or fitting, and d is the diameter of the duct.  
+
+\begin{figure}[ht]
+\includegraphics[width=5in]{FIGURES/hvac-simplify.png}
+\caption{An example simplifying a complex duct.}
+\label{fig:HVAC_Simplify}
+\end{figure}
 
 
 \subsection{HVAC Node Parameters}
@@ -4905,13 +4917,15 @@ function named by {\ct CTRL\_ID} or {\ct DEVC\_ID}.  Only one of either {\ct DAM
 \item[{\ct AMBIENT}] is a logical value.  If {\ct .TRUE.}, then the node is connected to the ambient ({\em i.e.} it is equivalent to the {\ct OPEN} boundary condition on a {\ct SURF} line).
 \item[{\ct DUCT\_ID}] gives the {\ct ID}s of the ducts connected to the node.  Up to 10 ducts can be connected to a node.
 \item[{\ct FILTER\_ID}] gives the {\ct ID} a filter located at the node.  A node with a filter can only have two connected ducts.
-\item[{\ct LOSS}] is an $n$ by $n$ array of real numbers giving the flow losses for the node.  {\ct LOSS(I,J)} is the loss for flow from from duct {\ct I} to duct {\ct J}.  For a terminal node ({\em e.g.} a node connected to the ambient or to a {\ct VENT}) the {\ct LOSS} is entered as a pair of numbers representing loss for flow entering the HVAC system and for flow exiting the HVAC system.
+\item[{\ct LOSS}] is an $n$ by $n$ array of real numbers giving the flow losses for the node.  {\ct LOSS(I,J)} is the loss for flow from from duct {\ct I} to duct {\ct J} expressed in terms of the downstream duct area (see discussion in ~\ref{HVACduct} on how to adjust losses for area changes).  For a terminal node ({\em e.g.} a node connected to the ambient or to a {\ct VENT}) the {\ct LOSS} is entered as a pair of numbers representing loss for flow entering the HVAC system and for flow exiting the HVAC system.
 \item[{\ct VENT\_ID}] is the name of the {\ct VENT} where the node connects to the FDS computational domain.
 \item[{\ct XYZ}] is a triplet of real numbers giving the coordinates of the node.  This location is used to compute buoyancy heads.
 If the node is connected to the FDS domain, then do not specify {\ct XYZ}.  FDS will compute it as the centroid of the {\ct VENT}.
 \end{description}
 
 A duct node must either have two or more ducts attached to it or it must have either {\ct AMBIENT = .TRUE.} or a {\ct VENT\_ID} specified.  When defining a {\ct VENT} as a component of an HVAC system you must set {\ct SURF\_ID = 'HVAC'} and you must set the {\ct ID}.  Note that you cannot give more than one  {\ct VENT} the same {\ct ID}.
+
+
 
 \subsection{HVAC Fan Parameters}
 \label{info:HVACfan}
@@ -6503,15 +6517,20 @@ Sometimes it is convenient to introduce droplets or particles at the start of th
 \end{verbatim} \normalsize
 
 \noindent
-It is also possible to initialize monodisperse droplets pointwise by specifying the droplet position (m), velocity (m/s), diameter (microns), and temperature ($^\circ$C).  This feature allows the user to specify an arbitrary droplet distribution by using a sufficient number of {\ct INIT} lines.
+It is also possible to initialize monodisperse particles pointwise by specifying the droplet position (m), velocity (m/s), diameter (microns), and temperature ($^\circ$C).  This feature allows the user to specify an arbitrary droplet distribution.  This is done by specifying a {\ct TABL} that defines all the particles to be inserted. 
 
 \footnotesize
 \begin{verbatim}
 &PART ID='water drops', SPEC_ID='WATER VAPOR', EVAPORATE=.TRUE., SAMPLING_FACTOR=1,
       QUANTITIES(1:3)='PARTICLE_DIAMETER','PARTICLE_VELOCITY','PARTICLE_TEMPERATURE' /
-&INIT XYZ=..., UVW=..., DIAMETER=200., TEMPERATURE=27.,
-      MASS_PER_TIME=3.E-6, DT_INSERT=0.005, PART_ID='water drops' /
+&INIT TABL_ID='drops', DT_INSERT=0.005, PART_ID='water drops' /
+&TABL ID='drops',TABLE_DATA=x1,y1,z1,u1,v1,w1,d1,t1,m1/
+&TABL ID='drops',TABLE_DATA=x2,y2,z2,u2,v2,w2,d2,t2,m2/
+...
+&TABL ID='drops',TABLE_DATA=xn,yn,zn,un,vn,wn,dn,tn,mn/
 \end{verbatim} \normalsize
+
+where x,y, and z are the particle location; u, v, and w are the initial particle velocity; d is the initial diameter; t is the initial temperature; and m is the mass per time.  The temperature and mass per time are optional.  If temperature is omitted the particle will be initialized to the ambient temperature, and mass per time is omitted only one particle will be inserted.
 
 \noindent
 If you want to introduce droplets or particles within a given volume periodically in time and not just at the initial time, set {\ct DT\_INSERT} on the {\ct INIT} line to a positive value indicating the time increment (s) for insertion. The parameter {\ct NUMBER\_INITIAL\_PARTICLES} now indicates the number of droplets/particles inserted every {\ct DT\_INSERT} seconds. If the droplets/particles have mass, use {\ct MASS\_PER\_TIME} (kg/s) instead of {\ct MASS\_PER\_VOLUME} to indicate how much mass is to be introduced per second.  In the case of pointwise particle insertion (specification of {\ct XYZ,UVW}), a single particle is tracked but weighted based on {\ct MASS\_PER\_TIME} and {\ct DT\_INSERT} for the purposes of computing bulk source terms for mass and momentum (evaporation and drag).
@@ -6614,7 +6633,7 @@ over-ride this feature.
 The larger the value of $\gamma$, the narrower the droplet size is
 distributed about the median value. Note that you can prevent droplets or particles from
 exceeding {\ct MAXIMUM\_DIAMETER}, which is infinitely large by default. Also note that
-droplets less than {\ct MINIMUM\_DIAMETER} are assumed to evaporate in a single time step. The default {\ct MINIMUM\_DIAMETER} is set to 0.005 the value of {\ct DIAMETER}.
+droplets less than {\ct MINIMUM\_DIAMETER} are assumed to evaporate in a single time step. The default {\ct MINIMUM\_DIAMETER} is set to 0.005 the value of {\ct DIAMETER}. The droplet distribution is divided into a series of bins for picking particle size.  To avoid very small particle weights, the distribution is clipped at the cummulative fractions of {\ct CDF\_CUTOFF} and 1 - {\ct CDF\_CUTOFF}.
 To prevent FDS from generating a distribution of droplets/particles altogether, set
 {\ct MONODISPERSE=.TRUE.} on the {\ct PART} line, in which case every droplet or particle will be assigned the
 same {\ct DIAMETER}.
@@ -7778,6 +7797,11 @@ Function Type                     & Description   \\ \hline \hline
 {\ct DEADBAND}                    & Behaves like a thermostat     \\ \hline
 {\ct KILL}                        & Terminates code execution if its sole {\ct INPUT} is {\ct .TRUE.}  \\ \hline
 {\ct RESTART}                     & Dumps restart files if its sole {\ct INPUT} is {\ct .TRUE.} \\ \hline
+{\ct SUM}                         & Sums the outputs of the {\ct INPUT}s \\ \hline
+{\ct SUBTRACT}                    & Subtracts the second {\ct INPUT} from the first \\ \hline
+{\ct MULTIPLY}                    & Multiplies the outputs of the {\ct INPUT}s \\ \hline
+{\ct DIVIDE}                      & Divides the first {\ct INPUT} by the second \\ \hline
+{\ct POWER}                       & The first {\ct INPUT} to the power of the second \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -8006,6 +8030,18 @@ The above will have the obstacle initially removed, then added at 60 s, and remo
 Experiment with these combinations using a simple
 case before trying a case to make sure that FDS indeed is doing what is intended.
 
+\subsection{Control Function: Math Operations }
+\label{info:CONTROL_MATH}
+
+The control functions that perform simple math operations (\ct {SUM}, \ct {SUBTRACT}, \ct {MULTIPLY}, \ct {DIVIDE}, and \ct {POWER}) can have a constant value specified as one of their inputs.  This is done by specifying one of the \ct {INPUT\_ID}s as {\ct 'CONSTANT'} and providing the value using the input \ct {CONSTANT}. For example, the inputs below represent a control function whose state would change when the square of the velocity exceeded 10 (see ~\ref{info:basic_control} for {\ct TRIP\_DIRECTION}.  
+
+\footnotesize
+\begin{verbatim}
+&DEVC ID='SPEED SENSOR', XYZ=..., QUANTITY='VELOCITY'/
+&CTRL ID='multiplier', FUNCTION_TYPE='POWER',
+      INPUT_ID='SPEED SENSOR', 'CONSTANT', CONSTANT = 2., SETPOINT = 10.,
+      TRIP_DIRECTION = 1 /
+\end{verbatim}
 
 \subsection{Combining Control Functions: A Pre-Action Sprinkler System}
 
@@ -9798,6 +9834,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 \endhead
 %{\ct CYCLE\_TIME}    & Real         & Periodicity                                 & s  &                           \\ \hline
 %{\ct CYCLES}         & Integer      & Number of times to cycle output             &    &                           \\ \hline
+{\ct CONSTANT}        & Real        & Section~\ref{info:CONTROL_MATH}         &    &                         \\ \hline
 {\ct DELAY}          & Real         & Section~\ref{info:dry_pipe}             & s  &  0.                       \\ \hline
 {\ct EVACUATION}     & Logical      & Reference~\cite{FDS_Evac_Users_Guide}   &    & {\ct .FALSE.}    \\ \hline
 {\ct FUNCTION\_TYPE} & Character    & Section~\ref{info:basic_control}        &    &                           \\ \hline
@@ -9809,6 +9846,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct ON\_BOUND}      & Character    & Section~\ref{info:DEADBAND}             &    & {\ct LOWER}               \\ \hline
 {\ct RAMP\_ID}       & Character    & Section~\ref{info:CUSTOM}               &    &                           \\ \hline
 {\ct SETPOINT(2)}    & Real         & Section~\ref{info:basic_control}        &    &                           \\ \hline
+{\ct TRIP\_DIRECTION}& Integer      & Section~\ref{info:basic_control}        &    &   1                        \\ \hline
 \end{longtable}
 
 
@@ -10246,6 +10284,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct \footnotesize ASSUMED\_GAS\_TEMPERATURE}   & Real          & Section~\ref{solid_phase_verification}                &               &                   \\ \hline
 {\ct BAROCLINIC}                                & Logical       & Section~\ref{baroclinic_torque}                       &               & {\ct .TRUE.}     \\ \hline
 {\ct BNDF\_DEFAULT}                             & Logical       & Section~\ref{info:BNDF}                               &               & {\ct .TRUE.}      \\ \hline
+{\ct CDF\_CUTOFF}                               & Real          & Section~\ref{info:particle_size}                                &               & 0.01               \\ \hline
 {\ct CFL\_MAX}                                  & Real          & Section~\ref{info:CFL}                                &               & 1.0               \\ \hline
 {\ct CFL\_MIN}                                  & Real          & Section~\ref{info:CFL}                                &               & 0.8               \\ \hline
 {\ct CFL\_VELOCITY\_NORM}                       & Integer       & Section~\ref{info:CFL}                                &               & 1                \\ \hline
