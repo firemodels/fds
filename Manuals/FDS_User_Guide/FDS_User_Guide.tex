@@ -8033,7 +8033,7 @@ case before trying a case to make sure that FDS indeed is doing what is intended
 \subsection{Control Function: Math Operations }
 \label{info:CONTROL_MATH}
 
-The control functions that perform simple math operations (\ct {SUM}, \ct {SUBTRACT}, \ct {MULTIPLY}, \ct {DIVIDE}, and \ct {POWER}) can have a constant value specified as one of their inputs.  This is done by specifying one of the \ct {INPUT\_ID}s as {\ct 'CONSTANT'} and providing the value using the input \ct {CONSTANT}. For example, the inputs below represent a control function whose state would change when the square of the velocity exceeded 10 (see ~\ref{info:basic_control} for {\ct TRIP\_DIRECTION}.
+The control functions that perform simple math operations ( {\ct SUM},  {\ct SUBTRACT},  {\ct MULTIPLY},  {\ct DIVIDE}, and  {\ct POWER}) can have a constant value specified as one of their inputs.  This is done by specifying one of the {\ct INPUT\_ID}s as {\ct 'CONSTANT'} and providing the value using the input {\ct CONSTANT}. For example, the inputs below represent a control function whose state would change when the square of the velocity exceeded 10 (see ~\ref{info:basic_control} for {\ct TRIP\_DIRECTION}.
 
 \footnotesize
 \begin{verbatim}
@@ -11825,7 +11825,7 @@ These files are written out from {\bf dump.f} with lines equivalent to the follo
   IF(N_FLOATS>0)WRITE(LU_GEOM) WRITE(LU_GEOM) (FLOAT_HEADER(I),I=1,N_FLOATS)
   WRITE(LU_GEOM) N_INTS
   IF(N_INTS>0)WRITE(LU_GEOM) WRITE(LU_GEOM) (INT_HEADER(I),I=1,N_INTS)
-  
+
   WRITE(LU_GEOM) STIME  ! first time step
   WRITE(LU_GEOM) N_VERT_S, N_FACE_S, N_VERT_D, N_FACE_D
   IF (N_VERT_S>0)  WRITE(LU_GEOM) (Xvert_S(I),Yvert_S(I),Zvert_S(I),I=1,N_VERT_S)
