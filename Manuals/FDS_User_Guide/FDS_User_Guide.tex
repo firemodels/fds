@@ -4896,7 +4896,7 @@ To reduce the computational cost of the HVAC solver, a duct should be considered
 \be K_{eff} = \sum_i {K_i \frac {A_{eff}}{A_i}} \ee
 \be f_{eff} = \sum_j {f_j \frac {d_{eff} A_{eff}}{d_j A_j}} \ee
 
-where i is a fitting, j is a duct segment, A is the area of the duct or fitting, and d is the diameter of the duct.  
+where i is a fitting, j is a duct segment, A is the area of the duct or fitting, and d is the diameter of the duct.
 
 \begin{figure}[ht]
 \includegraphics[width=5in]{FIGURES/hvac-simplify.png}
@@ -6517,7 +6517,7 @@ Sometimes it is convenient to introduce droplets or particles at the start of th
 \end{verbatim} \normalsize
 
 \noindent
-It is also possible to initialize monodisperse particles pointwise by specifying the droplet position (m), velocity (m/s), diameter (microns), and temperature ($^\circ$C).  This feature allows the user to specify an arbitrary droplet distribution.  This is done by specifying a {\ct TABL} that defines all the particles to be inserted. 
+It is also possible to initialize monodisperse particles pointwise by specifying the droplet position (m), velocity (m/s), diameter (microns), and temperature ($^\circ$C).  This feature allows the user to specify an arbitrary droplet distribution.  This is done by specifying a {\ct TABL} that defines all the particles to be inserted.
 
 \footnotesize
 \begin{verbatim}
@@ -8033,7 +8033,7 @@ case before trying a case to make sure that FDS indeed is doing what is intended
 \subsection{Control Function: Math Operations }
 \label{info:CONTROL_MATH}
 
-The control functions that perform simple math operations (\ct {SUM}, \ct {SUBTRACT}, \ct {MULTIPLY}, \ct {DIVIDE}, and \ct {POWER}) can have a constant value specified as one of their inputs.  This is done by specifying one of the \ct {INPUT\_ID}s as {\ct 'CONSTANT'} and providing the value using the input \ct {CONSTANT}. For example, the inputs below represent a control function whose state would change when the square of the velocity exceeded 10 (see ~\ref{info:basic_control} for {\ct TRIP\_DIRECTION}.  
+The control functions that perform simple math operations (\ct {SUM}, \ct {SUBTRACT}, \ct {MULTIPLY}, \ct {DIVIDE}, and \ct {POWER}) can have a constant value specified as one of their inputs.  This is done by specifying one of the \ct {INPUT\_ID}s as {\ct 'CONSTANT'} and providing the value using the input \ct {CONSTANT}. For example, the inputs below represent a control function whose state would change when the square of the velocity exceeded 10 (see ~\ref{info:basic_control} for {\ct TRIP\_DIRECTION}.
 
 \footnotesize
 \begin{verbatim}
@@ -8599,13 +8599,13 @@ is {\ct DT\_HRR} on the {\ct DUMP} line. The columns in this file record the tim
 The columns are defined as follows:
 \begin{eqnarray}
 \label{eqn_enthalpytransport}
-\underbrace{\frac{\partial}{\partial t} \int \rho h_s \, dV }_{\hbox{\ct Q\_ENTH}} &=& 
-\underbrace{- \int \rho \bu h_s \cdot \dS}_{\hbox{\ct Q\_CONV}} 
-+\underbrace{\int k \nabla T \cdot \dS}_{\hbox{\ct Q\_COND}} 
+\underbrace{\frac{\partial}{\partial t} \int \rho h_s \, dV }_{\hbox{\ct Q\_ENTH}} &=&
+\underbrace{- \int \rho \bu h_s \cdot \dS}_{\hbox{\ct Q\_CONV}}
++\underbrace{\int k \nabla T \cdot \dS}_{\hbox{\ct Q\_COND}}
 +\underbrace{\sum_\alpha \int h_{s,\alpha} \, \rho D_\alpha \nabla Y_\alpha \cdot \dS}_{\hbox{\ct Q\_DIFF}}  \nonumber \\
 &&
--\underbrace{\int \dot{\mathbf{q}}^{\prime\prime}_{r} \cdot \dS}_{\hbox{\ct Q\_RADI}}  
-+\underbrace{\int \dot{q}''' dV}_{\hbox{\ct HRR}}  
+-\underbrace{\int \dot{\mathbf{q}}^{\prime\prime}_{r} \cdot \dS}_{\hbox{\ct Q\_RADI}}
++\underbrace{\int \dot{q}''' dV}_{\hbox{\ct HRR}}
 +\underbrace{\int \frac{d \overline{p} }{dt} dV}_{\hbox{\ct Q\_PRES}}
 +\underbrace{\int \left( -\dq_b''' + \dm_b'''(h_{s,b}-h_s)  \right) \, dV}_{\hbox{\ct Q\_PART}}
 \end{eqnarray}
@@ -11821,6 +11821,11 @@ These files are written out from {\bf dump.f} with lines equivalent to the follo
 
   WRITE(LU_GEOM) ONE
   WRITE(LU_GEOM) VERSION
+  WRITE(LU_GEOM) N_FLOATS
+  IF(N_FLOATS>0)WRITE(LU_GEOM) WRITE(LU_GEOM) (FLOAT_HEADER(I),I=1,N_FLOATS)
+  WRITE(LU_GEOM) N_INTS
+  IF(N_INTS>0)WRITE(LU_GEOM) WRITE(LU_GEOM) (INT_HEADER(I),I=1,N_INTS)
+  
   WRITE(LU_GEOM) STIME  ! first time step
   WRITE(LU_GEOM) N_VERT_S, N_FACE_S, N_VERT_D, N_FACE_D
   IF (N_VERT_S>0)  WRITE(LU_GEOM) (Xvert_S(I),Yvert_S(I),Zvert_S(I),I=1,N_VERT_S)
@@ -11852,6 +11857,10 @@ determine whether the computer creating the geometry file and the
 computer viewing the geometry file use the same or different byte
 swap (endian) conventions for storing floating point numbers.
 \item {\ct VERSION}\ currently has value 0 and indicates the version number of this file format.
+\item {\ct N\_FLOATS, N\_INTS} The number of floating point and integer data items stored at
+the beginning of the file.
+\item {\ct FLOAT\_HEADER, INT\_HEADER} Floating point and integer data stored at
+the beginning of the file.
 \item {\ct STIME} is the FDS simulation time.
 \item {\ct N\_VERT\_S, N\_FACE\_S, N\_VERT\_D, N\_FACE\_D}\ are the number of static and dynamic vertices and faces.
 \item {\ct Xvert\_S, Yvert\_S, Zvert\_S, Xvert\_D, Yvert\_D, Zvert\_D}\ are the static and dynamic vertex coordinates.
