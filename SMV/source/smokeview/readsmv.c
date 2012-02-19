@@ -1126,12 +1126,12 @@ void init_textures(void){
   int i;
 
   ntextures = 0;
-  for(i=0;i<nsurfaces;i++){
-    surface *surfi;
+  for(i=0;i<nsurfinfo;i++){
+    surfdata *surfi;
     texture *texti;
     int len;
 
-    surfi = surfaceinfo + i;
+    surfi = surfinfo + i;
     if(surfi->texturefile==NULL)continue;
     texti = textureinfo + ntextures;
     len = strlen(surfi->texturefile);
@@ -1392,7 +1392,6 @@ int readsmv(char *file, char *file2){
   ventdata *vinfo,*vi;
   int colorindex, blocktype;
   int ventindex,venttype;
-  int dataflag;
   int roomnumber;
   float width,ventoffset,bottom,top;
   blockagedata *bc;
@@ -1416,7 +1415,7 @@ int readsmv(char *file, char *file2){
   int i, j, k;
   STRUCTSTAT statbuffer,statbuffer2;
   cadgeom *cd;
-  surface *surfi;
+  surfdata *surfi;
   int version;
   
   int nn_smoke3d=0;
@@ -1631,7 +1630,7 @@ int readsmv(char *file, char *file2){
 
   ntarginfo=0;
 
-  FREEMEMORY(surfaceinfo);
+  FREEMEMORY(surfinfo);
 
 
   //*** free slice data
@@ -1703,7 +1702,7 @@ int readsmv(char *file, char *file2){
   nvent=0;
   nobst=0;
   noffset=0;
-  nsurfaces=0;
+  nsurfinfo=0;
   nvent_transparent=0;
 
   nvents=0; 
@@ -1734,7 +1733,7 @@ int readsmv(char *file, char *file2){
   FREEMEMORY(zventinfo);
 
   FREEMEMORY(textureinfo);
-  FREEMEMORY(surfaceinfo);
+  FREEMEMORY(surfinfo);
   FREEMEMORY(terrain_texture);
 
   if(cadgeominfo!=NULL)freecadinfo();
@@ -1928,22 +1927,6 @@ int readsmv(char *file, char *file2){
       }
       continue;
     }
-    if(match(buffer,"DATABASE")==1){
-      if(fgets(buffer,255,stream)==NULL){
-        BREAK;
-      }
-      buffer3=trim_front(buffer);
-      trim(buffer3);
-      len=strlen(buffer3);
-      if(STAT(buffer3,&statbuffer)==0){
-        FREEMEMORY(databasefilename);
-        if(NewMemory((void **)&databasefilename,(unsigned int)(len+1))==0){
-          BREAK;
-        }
-        strcpy(databasefilename,buffer3);
-      }
-      continue;
-    }
     if(match(buffer,"REVISION")==1){
       revision_fds=-1;
       if(fgets(buffer,255,stream)==NULL){
@@ -2021,7 +2004,7 @@ int readsmv(char *file, char *file2){
       continue;
     }
     if(match(buffer,"SURFACE") ==1){
-      nsurfaces++;
+      nsurfinfo++;
       continue;
     }
     if(match(buffer,"GRID") == 1){
@@ -2083,7 +2066,10 @@ int readsmv(char *file, char *file2){
       npatchinfo++;
       continue;
     }
-    if(match(buffer,"ISOF") == 1||match(buffer,"TISOF")==1){
+    if(
+      match(buffer,"ISOF") == 1||match(buffer,"TISOF")==1||
+      match(buffer,"ISOG") == 1||match(buffer,"TISOG")==1
+      ){
       nisoinfo++;
       continue;
     }
@@ -2336,10 +2322,8 @@ int readsmv(char *file, char *file2){
   nzvvents=0;
 
   FREEMEMORY(textureinfo);
-  FREEMEMORY(surfaceinfo);
-  if(nsurfaces>0){
-    if(NewMemory((void **)&surfaceinfo,nsurfaces*sizeof(surface))==0)return 2;
-  }
+  FREEMEMORY(surfinfo);
+  if(NewMemory((void **)&surfinfo,(nsurfinfo+10)*sizeof(surfdata))==0)return 2;
 
   if(cadgeominfo!=NULL)freecadinfo();
   if(ncadgeom>0){
@@ -2386,7 +2370,7 @@ int readsmv(char *file, char *file2){
   ioffset=0;
   iobst=0;
   ncadgeom=0;
-  nsurfaces=0;
+  nsurfinfo=0;
   noutlineinfo=0;
   if(noffset==0)ioffset=1;
   rewind(stream1);
@@ -2533,13 +2517,7 @@ int readsmv(char *file, char *file2){
       NewMemory((void **)&geomi->file,strlen(buff2)+1);
       strcpy(geomi->file,buff2);
 
-      geomi->display=0;
-      geomi->loaded=0;
-      geomi->geomlistinfo=NULL;
-      geomi->times=NULL;
-      geomi->ntimes=0;
-      geomi->times=NULL;
-      geomi->timeslist=NULL;
+      init_geom(geomi);
 
       ngeominfo++;
       continue;
@@ -3235,7 +3213,7 @@ int readsmv(char *file, char *file2){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"SURFACE") ==1){
-      surfi = surfaceinfo + nsurfaces;
+      surfi = surfinfo + nsurfinfo;
       initsurface(surfi);
       fgets(buffer,255,stream);
       trim(buffer);
@@ -3248,7 +3226,7 @@ int readsmv(char *file, char *file2){
         surfi->obst_surface=0;
       }
       if(strstr(surfi->surfacelabel,"INERT")!=NULL){
-        surfaceinfo[0].obst_surface=1;
+        surfinfo[0].obst_surface=1;
       }
 
       temp_ignition=TEMP_IGNITION_MAX;
@@ -3321,7 +3299,7 @@ int readsmv(char *file, char *file2){
           warning_message(message);
         }
       }
-      nsurfaces++;
+      nsurfinfo++;
       continue;
     }
   /*
@@ -3967,11 +3945,11 @@ int readsmv(char *file, char *file2){
     devicecopy2=deviceinfo;
   }
 
-  // define texture data structures by constructing a list of unique file names from surfaceinfo and devices   
+  // define texture data structures by constructing a list of unique file names from surfinfo and devices   
 
   update_device_textures();
-  if(nsurfaces>0||ndevice_texture_list>0){
-    if(NewMemory((void **)&textureinfo,(nsurfaces+ndevice_texture_list)*sizeof(texture))==0)return 2;
+  if(nsurfinfo>0||ndevice_texture_list>0){
+    if(NewMemory((void **)&textureinfo,(nsurfinfo+ndevice_texture_list)*sizeof(texture))==0)return 2;
   }
   init_textures();
 
@@ -3984,24 +3962,24 @@ int readsmv(char *file, char *file2){
   */
 
   surfacedefault=&sdefault;
-  for(k=0;k<nsurfaces;k++){
-    if(strcmp(surfacedefaultlabel,surfaceinfo[k].surfacelabel)==0){
-      surfacedefault=surfaceinfo+k;
+  for(k=0;k<nsurfinfo;k++){
+    if(strcmp(surfacedefaultlabel,surfinfo[k].surfacelabel)==0){
+      surfacedefault=surfinfo+k;
       break;
     }
   }
   vent_surfacedefault=&v_surfacedefault;
-  for(k=0;k<nsurfaces;k++){
-    if(strcmp(vent_surfacedefault->surfacelabel,surfaceinfo[k].surfacelabel)==0){
-      vent_surfacedefault=surfaceinfo+k;
+  for(k=0;k<nsurfinfo;k++){
+    if(strcmp(vent_surfacedefault->surfacelabel,surfinfo[k].surfacelabel)==0){
+      vent_surfacedefault=surfinfo+k;
       break;
     }
   }
 
   exterior_surfacedefault=&e_surfacedefault;
-  for(k=0;k<nsurfaces;k++){
-    if(strcmp(exterior_surfacedefault->surfacelabel,surfaceinfo[k].surfacelabel)==0){
-      exterior_surfacedefault=surfaceinfo+k;
+  for(k=0;k<nsurfinfo;k++){
+    if(strcmp(exterior_surfacedefault->surfacelabel,surfinfo[k].surfacelabel)==0){
+      exterior_surfacedefault=surfinfo+k;
       break;
     }
   }
@@ -4581,8 +4559,8 @@ typedef struct {
         strcpy(bc->label,buffer);
 
         for(i=0;i<6;i++){
-          if(surfaceinfo==NULL||s_num[i]<0||s_num[i]>=nsurfaces)continue;
-          surfi=surfaceinfo+s_num[i];
+          if(surfinfo==NULL||s_num[i]<0||s_num[i]>=nsurfinfo)continue;
+          surfi=surfinfo+s_num[i];
           bc->surf[i]=surfi;
         }
         for(i=0;i<6;i++){
@@ -4837,8 +4815,8 @@ typedef struct {
             vi->surf[0]=exterior_surfacedefault;
           }
         }
-        if(surfaceinfo!=NULL&&s_num[0]>=0&&s_num[0]<nsurfaces){
-          vi->surf[0]=surfaceinfo+s_num[0];
+        if(surfinfo!=NULL&&s_num[0]>=0&&s_num[0]<nsurfinfo){
+          vi->surf[0]=surfinfo+s_num[0];
           if(vi->surf[0]!=NULL&&strncmp(vi->surf[0]->surfacelabel,"OPEN",4)==0){
             vi->isOpenvent=1;
           }
@@ -5556,14 +5534,18 @@ typedef struct {
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
 
-    if(match(buffer,"ISOF") == 1||match(buffer,"TISOF")==1){
+    if(
+      match(buffer,"ISOF") == 1||match(buffer,"TISOF")==1||
+      match(buffer,"ISOG") == 1||match(buffer,"TISOG")==1
+      ){
       iso *isoi;
       int get_isolevels;
+      int dataflag=0,geomflag=0;
 
       isoi = isoinfo + iiso;
       nn_iso++;
-      dataflag=0;
-      if(match(buffer,"TISOF")==1)dataflag=1;
+      if(match(buffer,"TISOF")==1||match(buffer,"TISOG")==1)dataflag=1;
+      if(match(buffer,"ISOG")==1||match(buffer,"TISOG")==1)geomflag=1;
       trim(buffer);
       len=strlen(buffer);
 
@@ -5594,6 +5576,7 @@ typedef struct {
       isoi->loaded=0;
       isoi->display=0;
       isoi->dataflag=dataflag;
+      isoi->geomflag=geomflag;
       isoi->nlevels=0;
       isoi->levels=NULL;
 
@@ -5601,6 +5584,9 @@ typedef struct {
       isoi->color_label.longlabel=NULL;
       isoi->color_label.shortlabel=NULL;
       isoi->color_label.unit=NULL;
+      isoi->geominfo=NULL;
+      NewMemory((void **)&isoi->geominfo,sizeof(geomdata));
+      init_geom(isoi->geominfo);
 
       bufferptr=trim_string(buffer);
 
@@ -5617,7 +5603,30 @@ typedef struct {
         get_isolevels=1;
         isoi->file=isoi->reg_file;
         if(readlabels(&isoi->surface_label,stream)==2)return 2;
-        getisolevels(isoi->file,dataflag,&isoi->levels,&isoi->colorlevels,&isoi->nlevels);
+        if(geomflag==1){
+          int ntimes_local;
+          geomdata *geomi;
+          float **colorlevels,*levels;
+
+          isoi->geominfo->file=isoi->file;
+          geomi = isoi->geominfo;
+          geomi->file=isoi->file;
+          read_geom_header(geomi,&ntimes_local);
+          isoi->nlevels=geomi->nfloat_vals;
+          if(isoi->nlevels>0){
+            NewMemory((void **)&levels,isoi->nlevels*sizeof(float));
+            NewMemory((void **)&colorlevels,isoi->nlevels*sizeof(float *));
+            for(i=0;i<isoi->nlevels;i++){
+              colorlevels[i]=NULL;
+              levels[i]=geomi->float_vals[i];
+            }
+            isoi->levels=levels;
+            isoi->colorlevels=colorlevels;
+          }
+        }
+        else{
+          getisolevels(isoi->file,dataflag,&isoi->levels,&isoi->colorlevels,&isoi->nlevels);
+        }
         if(dataflag==1){
           if(readlabels(&isoi->color_label,stream)==2)return 2;
         }
@@ -5876,6 +5885,14 @@ typedef struct {
    ************************ wrap up *************************************** 
    ************************************************************************
  */
+
+  surfinfo[nsurfinfo].color=getcolorptr(hrrpuv_iso_color);
+  for(i=nsurfinfo+1;i<nsurfinfo+n_iso_ambient+1;i++){
+    surfdata *surfi;
+
+    surfi = surfinfo + i;
+    surfi->color=getcolorptr(iso_ambient+4*(i-nsurfinfo-1));
+  }
 
   if(arg_iblank==0){
     if(autoterrain==1){
@@ -6719,7 +6736,7 @@ void parsedatabase(char *file){
   char *surf_id=NULL,*start,*surf_id2;
   char *c;
   int i,j;
-  surface *surfj;
+  surfdata *surfj;
   char *labeli, *labelj;
   int nexti;
   int nsurfids_shown;
@@ -6839,8 +6856,8 @@ void parsedatabase(char *file){
   for(i=0;i<nsurfids;i++){
     labeli = surfids[i].label;
     nexti = 0;
-    for(j=0;j<nsurfaces;j++){
-      surfj = surfaceinfo + j;
+    for(j=0;j<nsurfinfo;j++){
+      surfj = surfinfo + j;
       labelj = surfj->surfacelabel;
       if(strcmp(labeli,labelj)==0){
         nexti = 1;
@@ -6869,34 +6886,34 @@ void parsedatabase(char *file){
   /* add surfaces found in database to those surfaces defined in previous SURF lines */
 
   if(nsurfids_shown>0){
-    if(nsurfaces==0){
-      FREEMEMORY(surfaceinfo);
+    if(nsurfinfo==0){
+      FREEMEMORY(surfinfo);
       FREEMEMORY(textureinfo);
-      NewMemory((void **)&surfaceinfo,nsurfids_shown*sizeof(surface));
-      NewMemory((void **)&textureinfo,nsurfids_shown*sizeof(surface));
+      NewMemory((void **)&surfinfo,nsurfids_shown*sizeof(surfdata));
+      NewMemory((void **)&textureinfo,nsurfids_shown*sizeof(surfdata));
     }
-    if(nsurfaces>0){
-      if(surfaceinfo==NULL){
-        NewMemory((void **)&surfaceinfo,(nsurfids_shown+nsurfaces)*sizeof(surface));
+    if(nsurfinfo>0){
+      if(surfinfo==NULL){
+        NewMemory((void **)&surfinfo,(nsurfids_shown+nsurfinfo)*sizeof(surfdata));
       }
       else{
-        ResizeMemory((void **)&surfaceinfo,(nsurfids_shown+nsurfaces)*sizeof(surface));
+        ResizeMemory((void **)&surfinfo,(nsurfids_shown+nsurfinfo)*sizeof(surfdata));
       }
       if(textureinfo==NULL){
-        NewMemory((void **)&textureinfo,(nsurfids_shown+nsurfaces)*sizeof(surface));
+        NewMemory((void **)&textureinfo,(nsurfids_shown+nsurfinfo)*sizeof(surfdata));
       }
       else{
-        ResizeMemory((void **)&textureinfo,(nsurfids_shown+nsurfaces)*sizeof(surface));
+        ResizeMemory((void **)&textureinfo,(nsurfids_shown+nsurfinfo)*sizeof(surfdata));
       }
     }
-    surfj = surfaceinfo + nsurfaces - 1;
+    surfj = surfinfo + nsurfinfo - 1;
     for(j=0;j<nsurfids;j++){
       if(surfids[j].show==0)continue;
       surfj++;
       initsurface(surfj);
       surfj->surfacelabel=surfids[j].label;
     }
-    nsurfaces += nsurfids_shown;
+    nsurfinfo += nsurfids_shown;
   }
   update_sorted_surfidlist();
 }
@@ -6904,14 +6921,14 @@ void parsedatabase(char *file){
 /* ------------------ surfid_compare ------------------------ */
 
 int surfid_compare( const void *arg1, const void *arg2 ){
-  surface *surfi, *surfj;
+  surfdata *surfi, *surfj;
 
   int i, j;
   i=*(int *)arg1;
   j=*(int *)arg2;
 
-  surfi = surfaceinfo + i;
-  surfj = surfaceinfo + j;
+  surfi = surfinfo + i;
+  surfj = surfinfo + j;
 
   return(strcmp(surfi->surfacelabel,surfj->surfacelabel));
 }
@@ -6923,17 +6940,17 @@ void update_sorted_surfidlist(void){
 
   FREEMEMORY(sorted_surfidlist);
   FREEMEMORY(inv_sorted_surfidlist);
-  NewMemory((void **)&sorted_surfidlist,nsurfaces*sizeof(int));
-  NewMemory((void **)&inv_sorted_surfidlist,nsurfaces*sizeof(int));
+  NewMemory((void **)&sorted_surfidlist,nsurfinfo*sizeof(int));
+  NewMemory((void **)&inv_sorted_surfidlist,nsurfinfo*sizeof(int));
 
 
-  nsorted_surfidlist=nsurfaces;
+  nsorted_surfidlist=nsurfinfo;
   for(i=0;i<nsorted_surfidlist;i++){
     sorted_surfidlist[i]=i;
   }
 
 
-  qsort( (int *)sorted_surfidlist, (size_t)nsurfaces, sizeof(int), surfid_compare );
+  qsort( (int *)sorted_surfidlist, (size_t)nsurfinfo, sizeof(int), surfid_compare );
   for(i=0;i<nsorted_surfidlist;i++){
     inv_sorted_surfidlist[sorted_surfidlist[i]]=i;
   }
@@ -7070,7 +7087,7 @@ void updateusetextures(void){
 
 /* ------------------ initsurface ------------------------ */
 
-void initsurface(surface *surf){
+void initsurface(surfdata *surf){
   surf->used_by_obst=0;
   surf->used_by_vent=0;
   surf->emis=1.0;
@@ -7090,7 +7107,7 @@ void initsurface(surface *surf){
 
 /* ------------------ initventsurface ------------------------ */
 
-void initventsurface(surface *surf){
+void initventsurface(surfdata *surf){
   surf->emis=1.0;
   surf->temp_ignition=TEMP_IGNITION_MAX;
   surf->surfacelabel=NULL;
@@ -7108,7 +7125,7 @@ void initventsurface(surface *surf){
 
 void setsurfaceindex(blockagedata *bc){
   int i,j,jj;
-  surface *surfj;
+  surfdata *surfj;
   char *surflabel, *bclabel;
   int *surf_index;
   int wall_flag;
@@ -7117,10 +7134,10 @@ void setsurfaceindex(blockagedata *bc){
     bc->surf_index[i]=-1;
     bclabel=bc->surf[i]->surfacelabel;
     if(bc->surf[i]==NULL)continue;
-    for(jj=1;jj<nsurfaces+1;jj++){
+    for(jj=1;jj<nsurfinfo+1;jj++){
       j=jj;
-      if(jj==nsurfaces)j=0;
-      surfj = surfaceinfo + j;
+      if(jj==nsurfinfo)j=0;
+      surfj = surfinfo + j;
       surflabel=surfj->surfacelabel;
       if(strcmp(bclabel,surflabel)!=0)continue;
       bc->surf_index[i]=j;
@@ -7156,7 +7173,7 @@ void setsurfaceindex(blockagedata *bc){
 
 /* ------------------ initobst ------------------------ */
 
-void initobst(blockagedata *bc, surface *surf,int index,int meshindex){
+void initobst(blockagedata *bc, surfdata *surf,int index,int meshindex){
   int colorindex, blocktype;
   int i;
   char blocklabel[255];
@@ -11265,13 +11282,13 @@ void init_evac_prop(void){
 
 /* ------------------ init_evac_prop ------------------------ */
 
-surface *get_surface(char *label){
+surfdata *get_surface(char *label){
   int i;
   
-  for(i=0;i<nsurfaces;i++){
-    surface *surfi;
+  for(i=0;i<nsurfinfo;i++){
+    surfdata *surfi;
 
-    surfi = surfaceinfo + i;
+    surfi = surfinfo + i;
     if(strcmp(surfi->surfacelabel,label)==0)return surfi;
   }
   return surfacedefault;

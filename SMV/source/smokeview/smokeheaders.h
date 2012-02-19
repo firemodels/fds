@@ -11,6 +11,8 @@
 #include "egz_stdio.h"
 #endif
 
+EXTERNCPP void get_faceinfo(void);
+EXTERNCPP void GetGeomInfoPtrs(geomdata ***geominfoptrs_local,int *ngeominfoptrs_local);
 EXTERNCPP device *getdevice(char *label, int index);
 EXTERNCPP void setup_glut(int argc, char **argv);
 EXTERNCPP int get_ndevices(char *file);
@@ -497,7 +499,7 @@ EXTERNCPP void updateplot3dlistindex(void);
 EXTERNCPP void transparentoff(void);
 EXTERNCPP void transparenton(void);
 EXTERNCPP void getobstlabels(const char *filein);
-EXTERNCPP void initobst(blockagedata *bc,surface *surf,int index,int meshindex);
+EXTERNCPP void initobst(blockagedata *bc,surfdata *surf,int index,int meshindex);
 EXTERNCPP void setsurfaceindex(blockagedata *bc);
 EXTERNCPP void updateusetextures(void);
 EXTERNCPP int updatergbhist(int width, int height,int maketable, int *colortable, int nrgb);
@@ -639,8 +641,8 @@ EXTERNCPP void writeboundini(void);
 EXTERNCPP void readboundini(void);
 EXTERNCPP int readini2(char *inifile, int localfile);
 EXTERNCPP void obst_or_vent2faces(const mesh *gb,blockagedata *bc, ventdata *vi, facedata *faceptr,int facetype);
-EXTERNCPP void initsurface(surface *surf);
-EXTERNCPP void initventsurface(surface *surf);
+EXTERNCPP void initsurface(surfdata *surf);
+EXTERNCPP void initventsurface(surfdata *surf);
 EXTERNCPP void update_hidden_faces(void);
 EXTERNCPP void update_selectfaces(void);
 EXTERNCPP void update_selectblocks(void);
@@ -693,8 +695,10 @@ EXTERNCPP void draw_geomdata(patch *patchi);
 EXTERNCPP char *newtextptr(char ***texture_list,int *n_texture_list,char *texturebuffer,char *lastbuffer);
 
 EXTERNCPP void readplot3d(char *file, int ifile, int flag,int *errorcode);
+EXTERNCPP void read_geom_header(geomdata *geomi, int *ntimes_local);
 EXTERNCPP void read_all_geom(void);
-EXTERNCPP void read_geom(int ifile, int flag, int *errorcode);
+EXTERNCPP void read_geom(geomdata *geomi, int flag, int *errorcode);
+EXTERNCPP void init_geom(geomdata *geomi);
 EXTERNCPP void read_geomdata(int ifile, int flag, int *errorcode);
 EXTERNCPP void readpatch(int ifile, int flag, int *errorcode);
 EXTERNCPP void readpart(char *file, int ifile, int flag, int *errorcode);
@@ -791,7 +795,7 @@ EXTERNCPP void getIsoLabels(float tmin, float tmax, int nlevel,
 EXTERNCPP int SVimage2file(char *GIFfilename, int rendertype, int width, int height);
 EXTERNCPP void update_showhidebuttons(void);
 EXTERNCPP void update_fileload(void);
-EXTERNCPP surface *get_surface(char *label);
+EXTERNCPP surfdata *get_surface(char *label);
 EXTERNCPP void CalcTriNormal(float *v1, float *v2, float *v3, float *norm);
 EXTERNCPP void update_triangles(void);
 

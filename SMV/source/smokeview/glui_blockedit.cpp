@@ -50,7 +50,7 @@ char *updatelabel=NULL;
 extern "C" void glui_edit_setup(int main_window){
   int ibar,jbar,kbar;
   float *xplt_orig, *yplt_orig, *zplt_orig;
-  surface *surfi;
+  surfdata *surfi;
   char *surfacelabel;
   int i;
 
@@ -75,23 +75,23 @@ extern "C" void glui_edit_setup(int main_window){
 
   glui_edit->add_column_to_panel(panel_surface,false);
 
-  if(nsurfaces>0){
+  if(nsurfinfo>0){
     int not_used=0;
 
     glui_edit->add_statictext_to_panel(panel_surface,"");
 
     surfacelists[NOT_USED] = glui_edit->add_listbox_to_panel(panel_surface,_("Unused SURFs"),surface_indices+NOT_USED,UPDATE_LIST,OBJECT_CB);
     surfacelists[NOT_USED]->set_w(260);
-    for(i=0;i<nsurfaces;i++){
-      surfi = surfaceinfo + sorted_surfidlist[i];
+    for(i=0;i<nsurfinfo;i++){
+      surfi = surfinfo + sorted_surfidlist[i];
       if(surfi->used_by_obst==1)continue;
       if(surfi->used_by_vent==1)continue;
       if(surfi->obst_surface==0)continue;
       not_used++;
     }
     if(not_used>0){
-      for(i=0;i<nsurfaces;i++){
-        surfi = surfaceinfo + sorted_surfidlist[i];
+      for(i=0;i<nsurfinfo;i++){
+        surfi = surfinfo + sorted_surfidlist[i];
         if(surfi->used_by_obst==1)continue;
         if(surfi->used_by_vent==1)continue;
         if(surfi->obst_surface==0)continue;
@@ -110,8 +110,8 @@ extern "C" void glui_edit_setup(int main_window){
 
     surfacelists[DOWN_X] = glui_edit->add_listbox_to_panel(panel_surface,_("Left"),surface_indices+DOWN_X,UPDATE_LIST,OBJECT_CB);
     surfacelists[DOWN_X]->set_w(260);
-    for(i=0;i<nsurfaces;i++){
-      surfi = surfaceinfo + sorted_surfidlist[i];
+    for(i=0;i<nsurfinfo;i++){
+      surfi = surfinfo + sorted_surfidlist[i];
       if(surfi->used_by_obst!=1)continue;
       if(surfi->obst_surface==0)continue;
       surfacelabel = surfi->surfacelabel;
@@ -120,8 +120,8 @@ extern "C" void glui_edit_setup(int main_window){
 
     surfacelists[UP_X] = glui_edit->add_listbox_to_panel(panel_surface,_("Right"),surface_indices+UP_X,UPDATE_LIST,OBJECT_CB);
     surfacelists[UP_X]->set_w(260);
-    for(i=0;i<nsurfaces;i++){
-      surfi = surfaceinfo + sorted_surfidlist[i];
+    for(i=0;i<nsurfinfo;i++){
+      surfi = surfinfo + sorted_surfidlist[i];
       if(surfi->used_by_obst!=1)continue;
       if(surfi->obst_surface==0)continue;
       surfacelabel = surfi->surfacelabel;
@@ -130,8 +130,8 @@ extern "C" void glui_edit_setup(int main_window){
 
     surfacelists[DOWN_Y] = glui_edit->add_listbox_to_panel(panel_surface,_("Front"),surface_indices+DOWN_Y,UPDATE_LIST,OBJECT_CB);
     surfacelists[DOWN_Y]->set_w(260);
-    for(i=0;i<nsurfaces;i++){
-      surfi = surfaceinfo + sorted_surfidlist[i];
+    for(i=0;i<nsurfinfo;i++){
+      surfi = surfinfo + sorted_surfidlist[i];
       if(surfi->used_by_obst!=1)continue;
       if(surfi->obst_surface==0)continue;
       surfacelabel = surfi->surfacelabel;
@@ -140,8 +140,8 @@ extern "C" void glui_edit_setup(int main_window){
 
     surfacelists[UP_Y] = glui_edit->add_listbox_to_panel(panel_surface,_("Back"),surface_indices+UP_Y,UPDATE_LIST,OBJECT_CB);
     surfacelists[UP_Y]->set_w(260);
-    for(i=0;i<nsurfaces;i++){
-      surfi = surfaceinfo + sorted_surfidlist[i];
+    for(i=0;i<nsurfinfo;i++){
+      surfi = surfinfo + sorted_surfidlist[i];
       if(surfi->used_by_obst!=1)continue;
       if(surfi->obst_surface==0)continue;
       surfacelabel = surfi->surfacelabel;
@@ -150,8 +150,8 @@ extern "C" void glui_edit_setup(int main_window){
 
     surfacelists[DOWN_Z] = glui_edit->add_listbox_to_panel(panel_surface,_("Down"),surface_indices+DOWN_Z,UPDATE_LIST,OBJECT_CB);
     surfacelists[DOWN_Z]->set_w(260);
-    for(i=0;i<nsurfaces;i++){
-      surfi = surfaceinfo + sorted_surfidlist[i];
+    for(i=0;i<nsurfinfo;i++){
+      surfi = surfinfo + sorted_surfidlist[i];
       if(surfi->used_by_obst!=1)continue;
       if(surfi->obst_surface==0)continue;
       surfacelabel = surfi->surfacelabel;
@@ -160,8 +160,8 @@ extern "C" void glui_edit_setup(int main_window){
 
     surfacelists[UP_Z] = glui_edit->add_listbox_to_panel(panel_surface,_("Up"),surface_indices+UP_Z,UPDATE_LIST,OBJECT_CB);
     surfacelists[UP_Z]->set_w(260);
-    for(i=0;i<nsurfaces;i++){
-      surfi = surfaceinfo + sorted_surfidlist[i];
+    for(i=0;i<nsurfinfo;i++){
+      surfi = surfinfo + sorted_surfidlist[i];
       if(surfi->used_by_obst!=1)continue;
       if(surfi->obst_surface==0)continue;
       surfacelabel = surfi->surfacelabel;
@@ -295,7 +295,7 @@ extern "C" void update_blockvals(int flag){
   edittext_ymax->set_float_val(ymax);
   edittext_zmin->set_float_val(zmin);
   edittext_zmax->set_float_val(zmax);
-  if(bchighlight!=NULL&&nsurfaces>0){
+  if(bchighlight!=NULL&&nsurfinfo>0){
     wall_case=bchighlight->walltype;
 #ifdef pp_WALLGROUP
     wallgroup->set_int_val(wall_case);
@@ -339,7 +339,7 @@ extern "C" void update_blockvals(int flag){
         break;
       }
 
-      if(nsurfaces>0){
+      if(nsurfinfo>0){
         for(i=0;i<6;i++){
           surface_indices[i] = inv_sorted_surfidlist[bchighlight->surf_index[i]];
           surface_indices_bak[i] = inv_sorted_surfidlist[bchighlight->surf_index[i]];
@@ -348,7 +348,7 @@ extern "C" void update_blockvals(int flag){
       }
     }
     else{
-      if(nsurfaces>0){
+      if(nsurfinfo>0){
         for(i=0;i<6;i++){
           surface_indices[i]=inv_sorted_surfidlist[0];
           surface_indices_bak[i]=inv_sorted_surfidlist[0];
@@ -372,7 +372,7 @@ extern "C" void OBJECT_CB(int var){
       switch (wall_case){
       case WALL_1:
         temp=surface_indices_bak[UP_Z];
-        if(nsurfaces>0){
+        if(nsurfinfo>0){
           for(i=0;i<6;i++){
             surface_indices[i]=temp;
             surfacelists[i]->set_int_val(temp);
@@ -380,7 +380,7 @@ extern "C" void OBJECT_CB(int var){
         }
         break;
       case WALL_3:
-        if(nsurfaces>0){
+        if(nsurfinfo>0){
           for(i=0;i<6;i++){
             temp=surface_indices_bak[i];
             surface_indices[i]=temp;
@@ -389,7 +389,7 @@ extern "C" void OBJECT_CB(int var){
         }
         break;
       case WALL_6:
-        if(nsurfaces>0){
+        if(nsurfinfo>0){
           for(i=0;i<6;i++){
             temp=surface_indices_bak[i];
             surface_indices[i]=temp;
@@ -404,7 +404,7 @@ extern "C" void OBJECT_CB(int var){
 
       if(bchighlight!=NULL){
         for(i=0;i<6;i++){
-          bchighlight->surf[i]=surfaceinfo+sorted_surfidlist[surface_indices_bak[i]];
+          bchighlight->surf[i]=surfinfo+sorted_surfidlist[surface_indices_bak[i]];
           bchighlight->surf_index[i]=sorted_surfidlist[surface_indices_bak[i]];
         }
         bchighlight->changed_surface=1;
@@ -417,7 +417,7 @@ extern "C" void OBJECT_CB(int var){
       }
       break;
     case RADIO_WALL:
-      if(nsurfaces==0)break;
+      if(nsurfinfo==0)break;
       if(bchighlight!=NULL){
         bchighlight->walltype=wall_case;
       }

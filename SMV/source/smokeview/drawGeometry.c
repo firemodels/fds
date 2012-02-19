@@ -31,15 +31,15 @@ void UpdateIndexColors(void){
   int j;
   ventdata *vi;
   float s_color[4];
-  surface *surfi;
+  surfdata *surfi;
 
   updateindexcolors=0;
 
   if(strcmp(surfacedefault->surfacelabel,"INERT")==0){
     surfacedefault->color=block_ambient2;
   }
-  for(i=0;i<nsurfaces;i++){
-    surfi = surfaceinfo + i;
+  for(i=0;i<nsurfinfo;i++){
+    surfi = surfinfo + i;
     if(strcmp(surfi->surfacelabel,"INERT")==0){
       surfi->color=block_ambient2;
     }
@@ -1287,7 +1287,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
   float t_width, t_height;
   float *xstart, *ystart;
 
-  surface *surfinfo;
+  surfdata *surfinfo;
 
   ASSERT((bc==NULL&&vi!=NULL)||(bc!=NULL&&vi==NULL));
 
@@ -1360,7 +1360,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
       faceptr->showtimelist_handle=&bc->showtimelist;
       faceptr->del=bc->del;
       faceptr->invisible=bc->invisible;
-      faceptr->surfaceinfo=bc->surf[j];
+      faceptr->surfinfo=bc->surf[j];
       faceptr->texture_origin=bc->texture_origin;
       faceptr->transparent=bc->transparent;
     }
@@ -1379,9 +1379,9 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
         faceptr->linewidth=&ventlinewidth;
       }
       faceptr->showtimelist_handle=&vi->showtimelist;
-      faceptr->surfaceinfo=vi->surf[j];
+      faceptr->surfinfo=vi->surf[j];
     }
-    surfinfo = faceptr->surfaceinfo;
+    surfinfo = faceptr->surfinfo;
     if(surfinfo!=NULL){
       t_width =surfinfo->t_width;
       t_height=surfinfo->t_height;

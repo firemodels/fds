@@ -942,7 +942,10 @@ void readpatch(int ifile, int flag, int *errorcode){
 
   patchi = patchinfo + ifile;
   if(patchi->filetype==2){
-    read_geom(ifile,flag,errorcode);
+    geomdata *geomi;
+
+    geomi = geominfo + ifile;
+    read_geom(geomi,flag,errorcode);
     read_geomdata(ifile,flag,errorcode);
   }
   else{

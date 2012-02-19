@@ -36,7 +36,7 @@ typedef struct {
 /* --------------------------  triangle ------------------------------------ */
 
 typedef struct _triangle {
-  struct _surface *surf;
+  struct _surfdata *surf;
   unsigned char interior, skinny;
   float distance, *color;
   point *points[3];
@@ -58,6 +58,8 @@ typedef struct {
   char *file;
   int loaded, display;
   geomlistdata *geomlistinfo;
+  float *float_vals;
+  int *int_vals, nfloat_vals, nint_vals;
   float *times;
   int ntimes,iframe,*timeslist;
 } geomdata;
@@ -228,9 +230,9 @@ typedef struct {
   int ntimes;
 } terraindata;
 
-/* --------------------------  surface ------------------------------------ */
+/* --------------------------  surfdata ------------------------------------ */
 
-typedef struct _surface {
+typedef struct _surfdata {
   char *surfacelabel,*texturefile;
   int type; /* 
                0 - regular block non-textured 
@@ -247,7 +249,7 @@ typedef struct _surface {
   int location;
   int transparent;
   int used_by_obst,used_by_vent;
-} surface;
+} surfdata;
 
 /* --------------------------  facedata ------------------------------------ */
 
@@ -276,7 +278,7 @@ typedef struct {
   int thinface;
   int show_bothsides, is_interior;
   struct _blockagedata *bc;
-  surface *surfaceinfo;
+  surfdata *surfinfo;
   texture *textureinfo;
 } facedata;
 
@@ -294,7 +296,7 @@ typedef struct _blockagedata {
   int ijk[6],ijkORIG[6];
   float xmin, xmax, ymin, ymax, zmin, zmax, xyzORIG[6];
   float xyzEXACT[6];
-  surface *surf[6],*surfORIG[6];
+  surfdata *surf[6],*surfORIG[6];
   propdata *prop;
   int walltype,walltypeORIG;
   int surf_index[6],surf_indexORIG[6];
@@ -380,7 +382,7 @@ typedef struct {
   int transparent;
   int colorindex;
   int usecolorindex;
-  surface *surf[1];
+  surfdata *surf[1];
   texture *textureinfo[1];
   float texture_origin[3];
   float *linewidth;
@@ -403,13 +405,14 @@ typedef struct {
   short *normaltable;
   int nnormaltable; 
   char *file;
-  int dataflag;
+  int dataflag,geomflag;
   int type;
   int num_memblocks;
   int setvalmin, setvalmax;
   float valmin, valmax;
   int firstshort;
   flowlabels surface_label, color_label;
+  geomdata *geominfo;
   int blocknumber,display,loaded;
   float tmin,tmax;
   float valmin_data, valmax_data;

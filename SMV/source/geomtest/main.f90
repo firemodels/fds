@@ -36,19 +36,19 @@ integer :: HAVE_TVALS=0
   INTEGER :: NXYZV
   INTEGER :: NTRIS
   INTEGER, DIMENSION(0:35) :: CLOSESTNODES
-integer, parameter :: nx=16, ny=16, nz=32
-real(fb), dimension(0:nx) :: xplt
-real(fb), dimension(0:ny) :: yplt
-real(fb), dimension(0:nz) :: zplt
-real(fb), dimension(0:nx,0:ny,0:nz) :: vdata, tdata
-integer, dimension(0:nx-1,0:ny-1,0:nz-1) :: iblank_cell
+integer, parameter :: nx=17, ny=17, nz=33
+real(fb), dimension(nx) :: xplt
+real(fb), dimension(ny) :: yplt
+real(fb), dimension(nz) :: zplt
+real(fb), dimension(nx,ny,nz) :: vdata, tdata
+integer, dimension(nx-1,ny-1,nz-1) :: iblank_cell
 integer :: have_iblank=0, have_tdata=0
 real(fb), dimension(:), pointer :: xyzverts
 integer, dimension(:), pointer :: triangles
 integer :: nxyzverts, ntriangles
 real(fb) :: vmin,vmax,t
 integer :: error
-integer :: first, lu_iso=10,nlevels=1
+integer :: first, lu_iso=-10,nlevels=1
 real(fb), dimension(2) :: levels
 
 level=0.75
@@ -73,20 +73,20 @@ do i = 0,255
   end do
 end do
 
-do i =0,nx
-xplt(i) = 1.6*float(i)/float(nx)
+do i =1,nx
+xplt(i) = 1.6*float(i-1)/float(nx-1)
 end do
-do j=0,ny
-yplt(j) = 1.6*float(j)/float(ny)
+do j=1,ny
+yplt(j) = 1.6*float(j-1)/float(ny-1)
 end do
-do k=0,nz
-zplt(k) = 3.2*float(k)/float(nz)
+do k=1,nz
+zplt(k) = 3.2*float(k-1)/float(nz-1)
 end do
 vmax=0.0
 vmin=1000000.0
-do i =0,nx
-do j=0,ny
-do k=0,nz
+do i =1,nx
+do j=1,ny
+do k=1,nz
 vdata(i,j,k) = sqrt((xplt(i)-0.8)**2+(yplt(j)-0.8)**2+(zplt(k)-1.6)**2)
 if(vdata(i,j,k)>vmax)vmax=vdata(i,j,k)
 if(vdata(i,j,k)<vmin)vmin=vdata(i,j,k)
@@ -98,15 +98,15 @@ call FGETISOSURFACE(VDATA, HAVE_TDATA, TDATA, HAVE_IBLANK, IBLANK_CELL, LEVEL, &
      XPLT, NX, YPLT, NY, ZPLT, NZ,&
      XYZVERTS, NXYZVERTS, TRIANGLES, NTRIANGLES)
 first=1
-open(unit=lu_iso,file='plume5c.geo',form='unformatted')
+open(unit=abs(lu_iso),file='plume5c.geo',form='unformatted')
 nlevels=2
 
 NSTEPS=401
 do i = 0,NSTEPS
   levels(1)=(float(NSTEPS-i)*vmin+float(i)*vmax)/float(NSTEPS)
-  levels(2)=levels(1)+.25
+  levels(2)=levels(1)+1.0
   t=float(i)/10.0
-  call FISOSURFACE2FILE(LU_ISO,T,FIRST,VDATA,HAVE_TDATA,TDATA,HAVE_IBLANK,IBLANK_cell,&
+  call FISOSURFACE2FILE(LU_ISO,T,VDATA,HAVE_TDATA,TDATA,HAVE_IBLANK,IBLANK_cell,&
            LEVELS, NLEVELS, XPLT, NX, YPLT, NY, ZPLT, NZ, ERROR)
   first=0
 end do  

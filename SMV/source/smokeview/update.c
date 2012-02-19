@@ -120,10 +120,10 @@ void update_framenumber(int changetime){
         }
       }
     }
-    for(i=0;i<ngeominfo;i++){
+    for(i=0;i<ngeominfoptrs;i++){
       geomdata *geomi;
 
-      geomi = geominfo + i;
+      geomi = geominfoptrs[i];
       if(geomi->loaded==0)continue;
       if(geomi->timeslist==NULL)continue;
       geomi->iframe=geomi->timeslist[itimes];
@@ -618,8 +618,6 @@ void synctimes(void){
 
   /* synchronize smooth blockage times */
 
-    //       meshi->nsmoothcolors;
-    //       meshi->blockagesurfaces
   if(ntotal_smooth_blockages>0){
     for(igrid=0;igrid<nmeshes;igrid++){
       mesh *meshi;
@@ -702,11 +700,11 @@ void synctimes(void){
 
   /* synchronize geometry times */
 
-    for(j=0;j<ngeominfo;j++){
+    for(j=0;j<ngeominfoptrs;j++){
       geomdata *geomi;
 
-      geomi = geominfo + j;
-      if(geomi->loaded==0)continue;
+      geomi = geominfoptrs[j];
+      if(geomi->loaded==0||geomi->display==0)continue;
       if(n==0){
         istart=0;
       }
@@ -966,16 +964,20 @@ void updatetimes(void){
   int filenum;
   float dt_MIN=100000.0;
 
+  FREEMEMORY(geominfoptrs);
+  ngeominfoptrs=0;
+  GetGeomInfoPtrs(&geominfoptrs,&ngeominfoptrs);
+
   // pass 1 - determine ntimes
 
   updateShow();  
   CheckMemory;
   ntimes = 0;
 
-  for(i=0;i<ngeominfo;i++){
+  for(i=0;i<ngeominfoptrs;i++){
     geomdata *geomi;
 
-    geomi = geominfo + i;
+    geomi = geominfoptrs[i];
     if(geomi->loaded==0||geomi->display==0)continue;
     ntimes+=geomi->ntimes;
   }
@@ -1079,10 +1081,10 @@ void updatetimes(void){
 
   // pass 2 - merge times arrays
 
-  for(i=0;i<ngeominfo;i++){
+  for(i=0;i<ngeominfoptrs;i++){
     geomdata *geomi;
 
-    geomi = geominfo + i;
+    geomi = geominfoptrs[i];
     if(geomi->loaded==0||geomi->display==0)continue;
     for(n=0;n<geomi->ntimes;n++){
       float t_diff;
@@ -1257,7 +1259,7 @@ void updatetimes(void){
       mesh *meshi;
 
       ib = isoinfo+i;
-      if(ib->loaded==0)continue;
+      if(ib->geomflag==0||ib->loaded==0)continue;
       meshi=meshinfo + ib->blocknumber;
       for(n=0;n<meshi->nisosteps;n++){
         float t_diff;
@@ -1316,10 +1318,10 @@ void updatetimes(void){
     if(ntimes>0)NewMemory((void **)&render_frame,ntimes*sizeof(int));
   }
 
-  for(i=0;i<ngeominfo;i++){
+  for(i=0;i<ngeominfoptrs;i++){
     geomdata *geomi;
 
-    geomi = geominfo + i;
+    geomi = geominfoptrs[i];
     if(geomi->loaded==0||geomi->display==0)continue;
     FREEMEMORY(geomi->timeslist);
     if(ntimes>0)NewMemory((void **)&geomi->timeslist,ntimes*sizeof(int));
@@ -1489,10 +1491,10 @@ void updatetimes(void){
 
   izone=0; 
   reset_itimes0();
-  for(i=0;i<ngeominfo;i++){
+  for(i=0;i<ngeominfoptrs;i++){
     geomdata *geomi;
 
-    geomi = geominfo + i;
+    geomi = geominfoptrs[i];
     if(geomi->loaded==0||geomi->display==0)continue;
     geomi->iframe=0;
   }

@@ -310,7 +310,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
   /* ++++++++++++++++++++++++ draw triangles +++++++++++++++++++++++++ */
   
-  if(ngeominfo>0){
+  if(ngeominfoptrs>0){
     draw_geom(DRAW_OPAQUE,0);
     draw_geom(DRAW_OPAQUE,1);
   }
@@ -432,7 +432,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
   /* ++++++++++++++++++++++++ draw triangles +++++++++++++++++++++++++ */
   
-  if(ngeominfo>0){
+  if(ngeominfoptrs>0){
     draw_geom(DRAW_TRANSPARENT,0);
     draw_geom(DRAW_TRANSPARENT,1);
   }

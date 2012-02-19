@@ -107,14 +107,14 @@ float get_minangle(triangle *trii){
 void get_faceinfo(void){
   int i;
 
-  for(i=0;i<ngeominfo;i++){
+  for(i=0;i<ngeominfoptrs;i++){
     geomdata *geomi;
     geomlistdata *geomlisti;
     point **points;
     int j;
     int ndups=0,nused=0,nskinny=0;
 
-    geomi = geominfo + i;
+    geomi = geominfoptrs[i];
     geomlisti = geomi->geomlistinfo;
 
     if(geomlisti->npoints>0){
@@ -122,6 +122,14 @@ void get_faceinfo(void){
       for(j=0;j<geomlisti->npoints;j++){
         points[j]=geomlisti->points+j;
         points[j]->nused=0;
+      }
+      for(j=0;j<geomlisti->ntriangles;j++){
+        triangle *trii;
+
+        trii = geomlisti->triangles + j;
+        trii->points[0]->nused=0;
+        trii->points[1]->nused=0;
+        trii->points[2]->nused=0;
       }
       qsort(points,geomlisti->npoints,sizeof(point *),compare_verts);
       for(j=1;j<geomlisti->npoints;j++){
@@ -141,7 +149,6 @@ void get_faceinfo(void){
         else{
           trii->skinny=0;
         }
-
       }
       for(j=0;j<geomlisti->npoints;j++){
         if(points[j]->nused>0)nused++;
@@ -250,14 +257,14 @@ void draw_geom(int flag, int frameflag){
 
 #define VECFACTOR 0.01
 
-  for(i=0;i<ngeominfo;i++){
+  for(i=0;i<ngeominfoptrs;i++){
     geomdata *geomi;
     geomlistdata *geomlisti;
     int ntris,npoints;
     int j;
     float *color;
 
-    geomi = geominfo + i;
+    geomi = geominfoptrs[i];
     if(geomi->loaded==0||geomi->display==0)continue;
     if(frameflag==0){
       geomlisti = geomi->geomlistinfo;
@@ -513,9 +520,9 @@ void update_triangles(void){
 
 #define FORTREADBR(var,count,STREAM) FORTREAD(var,(count),STREAM);if(returncode==0)break;
 
-/* ------------------ get_geom_header ------------------------ */
+/* ------------------ read_geom_header ------------------------ */
 
-void get_geom_header(char *file, int *ntimes_local){
+void read_geom_header(geomdata *geomi, int *ntimes_local){
   FILE *stream;
   int one=0,endianswitch=0;
   int nvertfaces[4];
@@ -524,8 +531,12 @@ void get_geom_header(char *file, int *ntimes_local){
   int nt;
   int returncode;
   int version;
+  int nfloat_vals, nint_vals;
+  int *int_vals;
+  float *float_vals;
 
-  stream = fopen(file,"rb");
+
+  stream = fopen(geomi->file,"rb");
   if(stream==NULL){
     *ntimes_local=-1;
     return;
@@ -533,6 +544,21 @@ void get_geom_header(char *file, int *ntimes_local){
   fseek(stream,4,SEEK_CUR);fread(&one,4,1,stream);fseek(stream,4,SEEK_CUR);
   if(one!=1)endianswitch=1;
   FORTREAD(&version,1,stream);
+
+  FORTREAD(&nfloat_vals,1,stream);
+  if(nfloat_vals>0){
+    NewMemory((void **)&float_vals,nfloat_vals*sizeof(float));
+    FORTREAD(float_vals,nfloat_vals,stream);
+    geomi->float_vals=float_vals;
+    geomi->nfloat_vals=nfloat_vals;
+  }
+  FORTREAD(&nint_vals,1,stream);
+  if(nint_vals>0){
+    NewMemory((void **)&int_vals,nint_vals*sizeof(float));
+    FORTREAD(int_vals,nint_vals,stream);
+    geomi->int_vals=int_vals;
+    geomi->nint_vals=nint_vals;
+  }
   nt=0;
   for(;;){
     if(first==1){
@@ -615,15 +641,16 @@ void read_all_geom(void){
   int i, errorcode;
 
   for(i=0;i<ngeominfo;i++){
-    read_geom(i,LOAD,&errorcode);
+    geomdata *geomi;
+
+    geomi = geominfo + i;
+    read_geom(geomi,LOAD,&errorcode);
   }
 }
 
 /* ------------------ read_geom ------------------------ */
 
-void read_geom(int ifile, int flag, int *errorcode){
-  geomdata *geomi;
-  char *file;
+void read_geom(geomdata *geomi, int flag, int *errorcode){
   FILE *stream;
   int one=1, endianswitch=0;
   int returncode;
@@ -635,6 +662,7 @@ void read_geom(int ifile, int flag, int *errorcode){
   int first=1;
   int version;
   int nverts[4];
+  int nfloat_vals, nint_vals;
 
   // 1
   // version
@@ -653,34 +681,42 @@ void read_geom(int ifile, int flag, int *errorcode){
   //   xtran, ytran, ztran, xrot0, yrot0, zrot0, rot_az, rot_elev
 
 
-  geomi = geominfo + ifile;
-
   if(geomi->ntimes>0){
     for(i=0;i<geomi->ntimes;i++){
       geomlistdata *geomlisti;
 
       geomlisti = geomi->geomlistinfo+i;
-      FREEMEMORY(geomlisti->points);
-      FREEMEMORY(geomlisti->triangles);
+      if(geomi->geomlistinfo!=NULL){
+        FREEMEMORY(geomlisti->points);
+        FREEMEMORY(geomlisti->triangles);
+      }
     }
     FREEMEMORY(geomi->times);
     FREEMEMORY(geomi->geomlistinfo);
+    FREEMEMORY(geomi->float_vals);
+    FREEMEMORY(geomi->int_vals);
+    geomi->nfloat_vals=0;
+    geomi->nint_vals=0;
   }
   if(flag==UNLOAD){
     geomi->loaded=0;
     geomi->display=0;
+    return;
   }
 
-  file = geomi->file;
-
-  get_geom_header(file,&ntimes_local);
+  read_geom_header(geomi,&ntimes_local);
   if(ntimes_local<0)return;
-  stream = fopen(file,"rb");
+  stream = fopen(geomi->file,"rb");
   if(stream==NULL)return;
 
   fseek(stream,4,SEEK_CUR);fread(&one,4,1,stream);fseek(stream,4,SEEK_CUR);
   if(one!=1)endianswitch=1;
   FORTREAD(&version,1,stream);
+
+  FORTREAD(&nfloat_vals,1,stream);
+  if(nfloat_vals>0)fseek(stream,4+nfloat_vals*4+4,SEEK_CUR);
+  FORTREAD(&nint_vals,1,stream);
+  if(nint_vals>0)fseek(stream,4+nint_vals*4+4,SEEK_CUR);
 
   geomi->ntimes=ntimes_local;
   geomi->iframe=0;
@@ -694,6 +730,8 @@ void read_geom(int ifile, int flag, int *errorcode){
     int nvert_s, nvert_d, ntri_s, ntri_d;
 
     geomlisti = geomi->geomlistinfo+i;
+    geomlisti->points=NULL;
+    geomlisti->triangles=NULL;
     if(first==1){
       FORTREADBR(times_local,1,stream);
       FORTREADBR(nverts,4,stream);
@@ -704,6 +742,7 @@ void read_geom(int ifile, int flag, int *errorcode){
       nvert_d=nverts[2];
       ntri_d=nverts[3];
       geomi->times[i]=times_local[0];
+      printf("time=%.2f triangles: %i\n",times_local[0],ntri_s+ntri_d);
     }
     else{
       FORTREADBR(times_local,2,stream);
@@ -714,6 +753,7 @@ void read_geom(int ifile, int flag, int *errorcode){
       nvert_d=nverts[0];
       ntri_d=nverts[1];
       geomi->times[i]=times_local[0];
+      printf("time=%.2f triangles: %i\n",times_local[0],ntri_d);
     }
     geomlisti->points=NULL;
     if(*geom_typeptr==0&&nvert_s+nvert_d>0){
@@ -774,8 +814,7 @@ void read_geom(int ifile, int flag, int *errorcode){
         triangles[ii].points[0]=points+ijk[3*ii]-1;
         triangles[ii].points[1]=points+ijk[3*ii+1]-1;
         triangles[ii].points[2]=points+ijk[3*ii+2]-1;
-        triangles[ii].surf=surfaceinfo + surf_ind[ii];
-        //triangles[ii].surf=surfacedefault;
+        triangles[ii].surf=surfinfo + surf_ind[ii]+nsurfinfo;
       }
       FREEMEMORY(ijk);
       FREEMEMORY(surf_ind);
@@ -996,6 +1035,58 @@ int compare_transparent_triangles( const void *arg1, const void *arg2 ){
   return 0;
 }
 
+/* ------------------ GetGeomInfoPtrs ------------------------ */
+
+void GetGeomInfoPtrs(geomdata ***geominfoptrs_local,int *ngeominfoptrs_local){
+  geomdata **gptr;
+  int i,count=0;
+
+  count=0;
+  for(i=0;i<ngeominfo;i++){
+    geomdata *geomi;
+
+    geomi = geominfo + i;
+    if(geomi->loaded==0||geomi->display==0)continue;
+    count++;
+  }
+  for(i=0;i<nisoinfo;i++){
+    iso *isoi;
+    geomdata *geomi;
+    
+    isoi = isoinfo + i;
+    if(isoi->loaded==0||isoi->display==0)continue;
+    geomi = isoi->geominfo;
+    if(geomi->loaded==0||geomi->display==0)continue;
+    count++;
+  }
+  *ngeominfoptrs_local=count;
+  if(count>0){
+    NewMemory((void **)&gptr,count*sizeof(geomdata *));
+  }
+  else{
+    *geominfoptrs_local=NULL;
+    return;
+  }
+  *geominfoptrs_local=gptr;
+  for(i=0;i<ngeominfo;i++){
+    geomdata *geomi;
+
+    geomi = geominfo + i;
+    if(geomi->loaded==0||geomi->display==0)continue;
+    *gptr++=geomi;
+  }
+  for(i=0;i<nisoinfo;i++){
+    iso *isoi;
+    geomdata *geomi;
+    
+    isoi = isoinfo + i;
+    if(isoi->loaded==0||isoi->display==0)continue;
+    geomi = isoi->geominfo;
+    if(geomi->loaded==0||geomi->display==0)continue;
+    *gptr++=geomi;
+  }
+}
+
 /* ------------------ sort_triangles ------------------------ */
 
 void Sort_Embedded_Geometry(float *mm){
@@ -1009,14 +1100,12 @@ void Sort_Embedded_Geometry(float *mm){
   ntransparent_triangles=count_transparent;
   nopaque_triangles=count_all-count_transparent;
 
-  for(i=0;i<ngeominfo;i++){
+  for(i=0;i<ngeominfoptrs;i++){
     geomlistdata *geomlisti;
     int j;
     geomdata *geomi;
 
-    geomi = geominfo + i;
-    if(geomi->loaded==0||geomi->display==0)continue;
-
+    geomi = geominfoptrs[i];
     for(itime=0;itime<2;itime++){
       int iiframe;
 
@@ -1071,12 +1160,12 @@ void Sort_Embedded_Geometry(float *mm){
   nopaque_triangles=count_all-count_transparent;
   count_transparent=0;
   count_all=0;
-  for(i=0;i<ngeominfo;i++){
+  for(i=0;i<ngeominfoptrs;i++){
     geomlistdata *geomlisti;
     int j;
     geomdata *geomi;
-    geomi = geominfo + i;
-    if(geomi->loaded==0||geomi->display==0)continue;
+
+    geomi = geominfoptrs[i];
     for(itime=0;itime<2;itime++){
       int iiframe;
       
@@ -1107,4 +1196,19 @@ void Sort_Embedded_Geometry(float *mm){
   }
 }
 
+/* ------------------ init_geom ------------------------ */
+
+void init_geom(geomdata *geomi){
+  geomi->display=0;
+  geomi->loaded=0;
+  geomi->geomlistinfo=NULL;
+  geomi->times=NULL;
+  geomi->ntimes=0;
+  geomi->times=NULL;
+  geomi->timeslist=NULL;
+  geomi->float_vals=NULL;
+  geomi->int_vals=NULL;
+  geomi->nfloat_vals=0;
+  geomi->nint_vals=0;
+}
 

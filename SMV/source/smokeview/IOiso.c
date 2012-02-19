@@ -23,90 +23,6 @@ char IOiso_revision[]="$Revision$";
 void sync_isobounds(int isottype);
 void unloadiso(mesh *gb);
 
-/* ------------------ getisoheader ------------------------ */
-
-void getisoheader(const char *isofile, EGZ_FILE **isostreamptr,
-                  const char *isosizefile, int *nvertices, int *ntriangles, int *nbuffer, int *maxfullbuffer, int *maxcompbuffer,
-                  float **levelsptr, int *nisolevels, int *nisosteps, int isoframestep_local, short **normaltable, int *nnormaltable){
-  FILE *isosizestream=NULL;
-  float time_local, time_max;
-  int nvert, ntri, nbuf;
-  char buffer[1024];
-  int istep=0;
-  int one,nnn;
-  int mfullbuffer;
-  int mcompbuffer;
-  int nfull;
-
-  isosizestream=fopen(isosizefile,"r");
-  *nisosteps=0;
-  *nisolevels=0;
-  *nvertices=0;
-  *ntriangles=0;
-  *nbuffer=0;
-  *maxfullbuffer=0;
-  if(isosizestream==NULL)return;
-  if(fgets(buffer,255,isosizestream)==NULL)return;
-  sscanf(buffer,"%i",nisolevels);
-
-  time_max=-1000000.0;
-  for(;;){
-    int i;
-    int skip_frame;
-    
-    if(fgets(buffer,255,isosizestream)==NULL)break;
-    sscanf(buffer,"%f",&time_local);
-    skip_frame=1;
-    if(time_local>time_max){
-      skip_frame=0;
-      time_max=time_local;
-    }
-
-    mfullbuffer=0;
-    mcompbuffer=0;
-    for(i=0;i<*nisolevels;i++){
-      if(fgets(buffer,255,isosizestream)==NULL)break;
-      if(istep%isoframestep_local!=0||(settmin_i==1&&time_local<tmin_i)||(settmax_i==1&&time_local>tmax_i)||skip_frame==1){
-      }
-      else{
-        sscanf(buffer,"%i %i %i %i ",&nvert,&ntri,&nfull,&nbuf);
-        *nvertices+=nvert;
-        *ntriangles+=ntri;
-        *nbuffer+=nbuf;
-        mcompbuffer+=nbuf;
-        mfullbuffer+=nfull;
-        time_max=time_local;
-      }
-    }
-    if(istep%isoframestep_local!=0||(settmin_i==1&&time_local<tmin_i)||(settmax_i==1&&time_local>tmax_i)||skip_frame==1){
-    }
-    else{
-      (*nisosteps)++;
-      if(mfullbuffer>(*maxfullbuffer))*maxfullbuffer=mfullbuffer;
-      if(mcompbuffer>(*maxcompbuffer))*maxcompbuffer=mcompbuffer;
-    }
-    istep++;
-  }
-
-#ifdef EGZ
-  *isostreamptr=EGZ_FOPEN(isofile,"rb",0,2);
-#else
-  *isostreamptr=EGZ_FOPEN(isofile,"rb");
-#endif
-  if(*levelsptr==NULL){
-    if(NewMemory((void **)levelsptr,*nisolevels*sizeof(float))==0)return;
-  }
-  else{
-    if(ResizeMemory((void **)levelsptr,*nisolevels*sizeof(float))==0)return;
-  }
-  EGZ_FREAD(&one,4,1,*isostreamptr);
-  EGZ_FREAD(&nnn,4,1,*isostreamptr);
-  EGZ_FREAD(*levelsptr,4,(unsigned int)(*nisolevels),*isostreamptr);
-  EGZ_FREAD(nnormaltable,4,1,*isostreamptr);
-  NewMemory((void **)normaltable,3*(*nnormaltable)*sizeof(short));
-  EGZ_FREAD(*normaltable,2,3*(*nnormaltable),*isostreamptr);
-}
-
 /* ------------------ getisolevels ------------------------ */
 
 void getisolevels(const char *isofile, int dataflag, float **levelsptr, float ***colorlevelsptr, int *nisolevels){
@@ -250,9 +166,78 @@ void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostreamptr, int
   }
 }
 
-/* ------------------ readiso ------------------------ */
+/* ------------------ readiso_geom ------------------------ */
 
-void readiso(const char *file, int ifile, int flag, int *errorcode){
+void readiso_geom(const char *file, int ifile, int flag, int *errorcode){
+  iso *isoi;
+  geomdata *geomi;
+  int ilevel,error;
+  mesh *meshi;
+  int i;
+
+  isoi = isoinfo + ifile;
+  meshi = meshinfo + isoi->blocknumber;
+  geomi = isoi->geominfo;
+  unloadiso(meshi);
+
+  read_geom(geomi,flag,errorcode);
+  if(flag==UNLOAD){
+    FREEMEMORY(meshi->isotimes);
+    FREEMEMORY(meshi->showlevels);
+    meshi->isofilenum=-1;
+    return;
+  }
+
+  meshi->isofilenum=ifile;
+  meshi->nisosteps=geomi->ntimes;
+  if(NewMemory((void **)&meshi->isotimes,sizeof(float)*meshi->nisosteps)==0){
+    readiso("",ifile,UNLOAD,&error);
+    *errorcode=1;
+    return;
+  }
+  for(i=0;i<geomi->ntimes;i++){
+    meshi->isotimes[i]=geomi->times[i];
+  }
+
+  meshi->nisolevels=geomi->nfloat_vals;
+  FREEMEMORY(meshi->isolevels);
+  if(
+    NewMemory((void **)&meshi->showlevels,sizeof(int)*meshi->nisolevels)==0||
+    NewMemory((void **)&meshi->isolevels,sizeof(int)*meshi->nisolevels)==0
+    ){
+    *errorcode=1;
+    readiso("",ifile,UNLOAD,&error);
+    return;
+  }
+  for(ilevel=0;ilevel<meshi->nisolevels;ilevel++){
+    meshi->showlevels[ilevel]=1;
+    meshi->isolevels[ilevel]=geomi->float_vals[ilevel];
+  }
+  isoi->loaded=1;
+  isoi->display=1;
+  loaded_isomesh=get_loaded_isomesh();
+  update_iso_showlevels();
+  ReadIsoFile=1;
+  plotstate=getplotstate(DYNAMIC_PLOTS);
+  updatemenu=1;
+  iisotype=getisotype(isoi);
+
+  updatetimes();
+  get_faceinfo();
+#ifdef _DEBUG
+  printf("After iso load: ");
+  PrintMemoryInfo;
+#endif
+  Idle();
+
+  glutPostRedisplay();
+  CheckMemory;
+
+}
+
+/* ------------------ readiso_orig ------------------------ */
+
+void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
   extern int isoframestep;
   int itime,ilevel,itri,ivert,iitime;
   isosurface *asurface;
@@ -334,13 +319,11 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
     *errorcode=1;
     return;
   }               
-  ASSERT(meshi->isotimes==NULL);
   if(NewMemory((void **)&meshi->isotimes,sizeof(float)*meshi->nisosteps)==0){
     readiso("",ifile,UNLOAD,&error);
     *errorcode=1;
     return;
   }
-  ASSERT(meshi->showlevels==NULL);
   if(NewMemory((void **)&meshi->showlevels,sizeof(int)*meshi->nisolevels)==0){
     *errorcode=1;
     readiso("",ifile,UNLOAD,&error);
@@ -695,6 +678,22 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
   CheckMemory;
 }
 
+/* ------------------ readiso ------------------------ */
+
+void readiso(const char *file, int ifile, int flag, int *errorcode){
+  iso *isoi;
+
+  if(ifile>=0&&ifile<nisoinfo){
+    isoi = isoinfo + ifile;
+    if(isoi->geomflag==1){
+      readiso_geom(file,ifile,flag,errorcode);
+    }
+    else{
+      readiso_orig(file,ifile,flag,errorcode);
+    }
+  }
+}
+
 /* ------------------ unloadiso_iso_trans ------------------------ */
 
 void unload_iso_trans(void){
@@ -733,10 +732,12 @@ void unloadiso(mesh *meshi){
   if(meshi->isofilenum==-1)return;
   ib = isoinfo + meshi->isofilenum;
   if(meshi->nisosteps>0&&meshi->nisolevels>0){
-    for(i=0;i<meshi->nisosteps*meshi->nisolevels;i++){
-      asurface=meshi->animatedsurfaces+i;
-      FREEMEMORY(asurface->iso_triangles);
-      FREEMEMORY(asurface->iso_vertices);
+    if(meshi->animatedsurfaces!=NULL){
+      for(i=0;i<meshi->nisosteps*meshi->nisolevels;i++){
+        asurface=meshi->animatedsurfaces+i;
+        FREEMEMORY(asurface->iso_triangles);
+        FREEMEMORY(asurface->iso_vertices);
+      }
     }
     CheckMemoryOff;
     FREEMEMORY(meshi->isotimes);
@@ -767,9 +768,15 @@ void unloadiso(mesh *meshi){
   return;
 }
 
+/* ------------------ drawiso_geom ------------------------ */
+
+void drawiso_geom(int tranflag){
+  draw_geom(tranflag,1);
+}
+
 /* ------------------ drawiso ------------------------ */
 
-void drawiso(int tranflag){
+void drawiso_orig(int tranflag){
   int i;
   isosurface *asurface;
   float *iso_colors;
@@ -780,7 +787,6 @@ void drawiso(int tranflag){
   mesh *meshi;
 
   meshi = loaded_isomesh;
-
 
   CheckMemory;
   if(tranflag==DRAW_TRANSPARENT&&visAIso!=1)return;
@@ -1012,6 +1018,24 @@ void drawiso(int tranflag){
     }
     glEnd();
     antialias(0);
+  }
+}
+
+/* ------------------ drawiso ------------------------ */
+
+void drawiso(int tranflag){
+  if(niso_opaques>0||niso_trans>0){
+    drawiso_orig(tranflag);
+  }
+  else{
+    int i;
+
+    for(i=0;i<nisoinfo;i++){
+      iso *isoi;
+
+      isoi = isoinfo + i;
+      if(isoi->geomflag==0)continue;
+    }
   }
 }
 
@@ -1665,7 +1689,7 @@ void Update_Isotris(int flag){
         int ilev;
     
         isoi = isoinfo+i;
-        if(isoi->loaded==0||isoi->display==0)continue;
+        if(isoi->geomflag==1||isoi->loaded==0||isoi->display==0)continue;
 
         meshi = meshinfo + isoi->blocknumber;
         asurface = meshi->animatedsurfaces + iitime*meshi->nisolevels;
@@ -1709,7 +1733,7 @@ void Update_Isotris(int flag){
       iso *isoi;
     
       isoi = isoinfo+i;
-      if(isoi->loaded==0||isoi->display==0)continue;
+      if(isoi->geomflag==1||isoi->loaded==0||isoi->display==0)continue;
   
       CheckMemory;
       meshi = meshinfo + isoi->blocknumber;

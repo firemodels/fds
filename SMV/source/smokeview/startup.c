@@ -2162,11 +2162,11 @@ void initvars(void){
    iso_ambient[4] = 0.75;
    iso_ambient[5] = 0.80;
    iso_ambient[6] = 0.80;
-   iso_ambient[7] = 3.00;
+   iso_ambient[7] = 1.00;
    iso_ambient[8] = 0.00;
    iso_ambient[9] = 0.96;
   iso_ambient[10] = 0.28;
-  iso_ambient[11] = 0.80;
+  iso_ambient[11] = 1.0;
 
 
   iso_transparency=0.8;

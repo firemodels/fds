@@ -20,6 +20,8 @@
 #include "update.h"
 #include "smv_endian.h"
 
+SVEXTERN geomdata SVDECL(**geominfoptrs,NULL);
+SVEXTERN int SVDECL(ngeominfoptrs,0);
 SVEXTERN int SVDECL(update_glui_wui,0);
 SVEXTERN int SVDECL(update_glui_stereo,0);
 SVEXTERN int SVDECL(update_glui_trainer,0);
@@ -988,12 +990,12 @@ SVEXTERN int bw_colorbar_index;
 SVEXTERN int viscolorbarpath;
 SVEXTERN int SVDECL(*sortedblocklist,NULL),SVDECL(*changed_idlist,NULL),SVDECL(nchanged_idlist,0);
 SVEXTERN int nselectblocks;
-SVEXTERN surface SVDECL(*surfaceinfo,NULL),sdefault,v_surfacedefault,e_surfacedefault;
+SVEXTERN surfdata SVDECL(*surfinfo,NULL),sdefault,v_surfacedefault,e_surfacedefault;
 SVEXTERN int surface_indices[7],surface_indices_bak[7];
 SVEXTERN int wall_case;
-SVEXTERN surface SVDECL(*surfacedefault,NULL), SVDECL(*vent_surfacedefault,NULL), SVDECL(*exterior_surfacedefault,NULL);
+SVEXTERN surfdata SVDECL(*surfacedefault,NULL), SVDECL(*vent_surfacedefault,NULL), SVDECL(*exterior_surfacedefault,NULL);
 SVEXTERN char surfacedefaultlabel[256];
-SVEXTERN int nsurfaces;
+SVEXTERN int nsurfinfo;
 SVEXTERN int ntotalfaces;
 SVEXTERN colordata SVDECL(*firstcolor,NULL);
 SVEXTERN texture SVDECL(*textureinfo,NULL), SVDECL(*terrain_texture,NULL);
