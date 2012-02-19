@@ -50,6 +50,8 @@ real(fb) :: vmin,vmax,t
 integer :: error
 integer :: first, lu_iso=-10,nlevels=1
 real(fb), dimension(2) :: levels
+integer :: imin, imax, jmin, jmax, kmin, kmax
+integer :: lu_smoke
 
 level=0.75
 
@@ -273,6 +275,38 @@ IF (N_FACE_S_VALS>0) WRITE(LU_GEOM_DATA) (ValFaceStatic(I), I=1,N_VERT_S_VALS)
 IF (N_FACE_D_VALS>0) WRITE(LU_GEOM_DATA) (ValFaceDynamic(I),I=1,N_FACE_D_VALS)
 
 end do
+
+do itime=1, nsteps
+stime=(itime-1)*dt
+
+imin=mod(int(stime),nx)+1
+if(imin<1)imin=1
+if(imin>nx)imin=nx
+imax=imin+5
+if(imax>nx)imax=nx
+
+jmin=mod(int(stime),ny)+1
+if(jmin<1)jmin=1
+if(jmin>ny)jmin=ny
+jmax=jmin+5
+if(jmax>ny)jmax=ny
+
+kmin=mod(int(stime),nz)+1
+if(kmin<1)kmin=1
+if(kmin>nz)kmin=nz
+kmax=kmin+5
+if(kmax>nz)kmax=nz
+
+vdata = 0.0
+vdata(imin:imax,jmin:jmax,kmin:kmax) = 1.5/10000.0
+dx=xplt(2)-xplt(1)
+
+!SUBROUTINE FSMOKE3D2FILE(FUNIT1,FUNIT2,TIME,DX,EXTCOEF,SMOKE_TYPE,VALS,NVALS,HRRPUV_MAX_SMV)
+
+end do
+
+
+
 write(6,*)"test geometry output complete"
 
 

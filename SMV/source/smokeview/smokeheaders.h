@@ -709,7 +709,7 @@ EXTERNCPP void smooth_blockages(void);
 EXTERNCPP void freesmoke3d(smoke3d *smoke3di);
 EXTERNCPP void readsmoke(int ifile,int flag, int *errorcode);
 EXTERNCPP void readsmoke3d(int ifile,int flag, int *errorcode);
-EXTERNCPP int getsmoke3d_sizes(char *smokefile, int version, 
+EXTERNCPP int getsmoke3d_sizes(int skip, char *smokefile, int version, 
                       float **timelist, int **use_smokeframe,
                       int *nchars_uncompressed, 
                       int **nchars_compressed,

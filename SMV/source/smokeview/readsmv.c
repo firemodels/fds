@@ -2049,8 +2049,12 @@ int readsmv(char *file, char *file2){
       nsliceinfo++;
       continue;
     }
-    if(match(buffer,"SMOKE3D") == 1||
-       match(buffer,"VSMOKE3D") == 1){
+    if(
+      match(buffer,"SMOKE3D") == 1||
+      match(buffer,"VSMOKE3D") == 1||
+      match(buffer,"SMOKF3D") == 1||
+      match(buffer,"VSMOKF3D") == 1
+      ){
       nsmoke3dinfo++;
       continue;
     }
@@ -3096,13 +3100,23 @@ int readsmv(char *file, char *file2){
     ++++++++++++++++++++++ SMOKE3D ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"SMOKE3D") == 1||
-       match(buffer,"VSMOKE3D") == 1){
+    if(
+      match(buffer,"SMOKE3D") == 1||
+      match(buffer,"VSMOKE3D") == 1||
+      match(buffer,"SMOKF3D") == 1||
+      match(buffer,"VSMOKF3D") == 1
+      ){
+
       size_t lenbuffer;
       float temp_val=-1.0;
       char *buffer_temp;
+      int filetype=0;
 
-      if(match(buffer,"VSMOKE3D") == 1){
+      if(match(buffer,"SMOKF3D") == 1||match(buffer,"VSMOKF3D") == 1){
+        filetype=1;
+      }
+
+      if(match(buffer,"VSMOKE3D") == 1||match(buffer,"VSMOKF3D") == 1){
         buffer_temp=buffer+8;
         sscanf(buffer_temp,"%i %f",&idummy,&temp_val);
         if(temp_val>0.0)hrrpuv_max_smv=temp_val;
@@ -3136,6 +3150,7 @@ int readsmv(char *file, char *file2){
         if(NewMemory((void **)&smoke3di->reg_file,(unsigned int)(len+1))==0)return 2;
         STRCPY(smoke3di->reg_file,bufferptr);
 
+        smoke3di->filetype=filetype;
         smoke3di->is_zlib=0;
         smoke3di->seq_id=nn_smoke3d;
         smoke3di->autoload=0;

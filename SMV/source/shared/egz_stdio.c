@@ -38,7 +38,7 @@ int EGZ_FCLOSE(EGZ_FILE *egz_stream){
 
 /* ------------------ EGZ_FOPEN ------------------------ */
 
-EGZ_FILE *EGZ_FOPEN(const char *file, const char *mode, int compress_flag, int endian){
+EGZ_FILE *EGZ_FOPEN(const char *file, const char *mode2, int compress_flag, int endian){
   /*
   endian - format (big or little endian) used in file.
            endian=0 ==> little endian (LINUX, Windows PC's)
@@ -48,6 +48,7 @@ EGZ_FILE *EGZ_FOPEN(const char *file, const char *mode, int compress_flag, int e
 
   EGZ_FILE *egz_stream;
   int testval;
+  const char *mode;
 
 #ifdef USE_ZLIB
   gzFile *stream;
@@ -59,6 +60,15 @@ EGZ_FILE *EGZ_FOPEN(const char *file, const char *mode, int compress_flag, int e
   int native_endian;
   int endianswitch_save;
   int one=1;
+  int is_fortran=0;
+
+  if(*mode2=='f'){
+    is_fortran=1;
+    mode=mode2+1;
+  }
+  else{
+    mode=mode2;
+  }
 
   egz_stream=NULL;
   if(NewMemory((void **)&egz_stream,sizeof(EGZ_FILE))==0)return NULL;
@@ -103,11 +113,25 @@ EGZ_FILE *EGZ_FOPEN(const char *file, const char *mode, int compress_flag, int e
     if(endian==2){
       egz_stream->endianswitch=0;
       testval=0;
-      EGZ_FREAD( &testval, sizeof(int), 1, egz_stream );
+      if(is_fortran==1){
+        EGZ_FSEEK( egz_stream, 4, SEEK_CUR);
+        EGZ_FREAD( &testval, sizeof(int), 1, egz_stream );
+        EGZ_FSEEK( egz_stream, 4, SEEK_CUR);
+      }
+      else{
+        EGZ_FREAD( &testval, sizeof(int), 1, egz_stream );
+      }
       EGZ_REWIND(egz_stream);
       if(testval==1)return egz_stream;
       egz_stream->endianswitch=1;
-      EGZ_FREAD( &testval, sizeof(int), 1, egz_stream );
+      if(is_fortran==1){
+        EGZ_FSEEK( egz_stream, 4, SEEK_CUR);
+        EGZ_FREAD( &testval, sizeof(int), 1, egz_stream );
+        EGZ_FSEEK( egz_stream, 4, SEEK_CUR);
+      }
+      else{
+        EGZ_FREAD( &testval, sizeof(int), 1, egz_stream );
+      }
       EGZ_REWIND(egz_stream);
       if(testval==1)return egz_stream;
       FREEMEMORY(egz_stream);

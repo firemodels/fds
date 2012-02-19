@@ -1092,6 +1092,7 @@ typedef struct _smoke3d {
   int seq_id,autoload;
   char *file;
   char *comp_file, *reg_file;
+  int filetype;
   int loaded, display, d_display;
   int is_zlib;
   int soot_loaded,water_loaded,hrrpuv_loaded;

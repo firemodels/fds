@@ -570,10 +570,10 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       int return_val;
        
       if(sd->cellcenter==1){
-        return_val=NewMemory((void **)&sd->n_iblank,sd->nslicei*sd->nslicej*sd->nslicek*sizeof(char));
+        return_val=NewMemory((void **)&sd->n_iblank,(sd->nslicei+1)*(sd->nslicej+1)*(sd->nslicek+1)*sizeof(char));
       }
       else{
-        return_val=NewMemory((void **)&sd->c_iblank,sd->nslicei*sd->nslicej*sd->nslicek*sizeof(char));
+        return_val=NewMemory((void **)&sd->c_iblank,(sd->nslicei+1)*(sd->nslicej+1)*(sd->nslicek+1)*sizeof(char));
       }
       if( return_val==0){
         readslice("",ifile,UNLOAD,&error);
