@@ -789,7 +789,7 @@ void drawiso_orig(int tranflag){
   meshi = loaded_isomesh;
 
   CheckMemory;
-  if(tranflag==DRAW_TRANSPARENT&&visAIso!=1)return;
+  if(tranflag==DRAW_TRANSPARENT&&((visAIso&1)==0))return;
   if(meshi->isofilenum>=0){
     isoi = isoinfo + meshi->isofilenum;
   }
@@ -808,7 +808,7 @@ void drawiso_orig(int tranflag){
     n_iso_colors=n_iso_ambient_ini;
   }
 
-  if(visAIso==1){
+  if((visAIso&1)==1){
     isotri **iso_list_start;
     int niso_list_start;
 
@@ -901,7 +901,7 @@ void drawiso_orig(int tranflag){
     CheckMemory;
   }
 
-  if(visAIso==2){
+  if((visAIso&2)==2){
     asurface = meshi->animatedsurfaces + meshi->iiso*meshi->nisolevels;
 
     glPushAttrib(GL_LIGHTING_BIT);
@@ -967,7 +967,7 @@ void drawiso_orig(int tranflag){
     glPopAttrib();
   }
 
-  if(visAIso==3){
+  if((visAIso&4)==4){
     asurface = meshi->animatedsurfaces + meshi->iiso*meshi->nisolevels;
 
     antialias(1);

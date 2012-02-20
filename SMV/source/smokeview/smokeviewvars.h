@@ -56,7 +56,7 @@ SVEXTERN int SVDECL(show_volsmoke_moving,0);
 #ifdef pp_FREEZE_VOLSMOKE
 SVEXTERN int SVDECL(freeze_volsmoke,0);
 #endif
-SVEXTERN int SVDECL(showtrisurface,1),SVDECL(showtrioutline,1);
+SVEXTERN int SVDECL(showtrisurface,1),SVDECL(showtrioutline,1),SVDECL(showtripoints,0);
 SVEXTERN int SVDECL(showtrinormal,0),SVDECL(showpointnormal,0),SVDECL(smoothtrinormal,0);
 SVEXTERN geomlistdata SVDECL(*geomlistinfo,NULL);
 SVEXTERN int SVDECL(have_volcompressed,0);

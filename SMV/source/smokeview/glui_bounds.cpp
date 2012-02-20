@@ -47,6 +47,9 @@ void boundmenu(GLUI_Rollout **rollout_bound, GLUI_Rollout **rollout_chop, GLUI_P
 GLUI_Rollout *rollout_slice_bound=NULL;
 GLUI_Rollout *rollout_slice_chop=NULL;
 
+#define ISO_SURFACE 1
+#define ISO_OUTLINE 2
+#define ISO_POINTS 3
 #define SETVALMIN 1
 #define SETVALMAX 2
 #define VALMIN 3
@@ -183,6 +186,10 @@ GLUI_EditText *con_patch_chopmin=NULL, *con_patch_chopmax=NULL;
 GLUI_EditText *con_part_chopmin=NULL, *con_part_chopmax=NULL;
 GLUI_RadioGroup *con_slice_setmin=NULL, *con_slice_setmax=NULL;
 GLUI_Checkbox *showchar_checkbox=NULL, *showonlychar_checkbox;
+GLUI_Checkbox *CHECKBOX_showtrisurface=NULL;
+GLUI_Checkbox *CHECKBOX_showtrioutline=NULL;
+GLUI_Checkbox *CHECKBOX_showtripoints=NULL;
+
 GLUI_Checkbox *CHECKBOX_show_evac_slices=NULL;
 GLUI_Checkbox *CHECKBOX_constant_coloring=NULL;
 GLUI_Checkbox *CHECKBOX_show_evac_color=NULL;
@@ -384,13 +391,11 @@ extern "C" void glui_bounds_setup(int main_window){
       &isolinewidth);
     SPINNER_isolinewidth->set_float_limits(1.0,10.0);
 
-    iso_isotype = glui_bounds->add_radiogroup_to_panel(panel_iso,&visAIso);
+    visAIso=showtrisurface*1+showtrioutline*2+showtripoints*4;
+    CHECKBOX_showtrisurface=glui_bounds->add_checkbox_to_panel(panel_iso,_("Solid"),&showtrisurface,ISO_SURFACE,Iso_CB);
+    CHECKBOX_showtrioutline=glui_bounds->add_checkbox_to_panel(panel_iso,_("Outline"),&showtrioutline,ISO_OUTLINE,Iso_CB);
+    CHECKBOX_showtripoints=glui_bounds->add_checkbox_to_panel(panel_iso,_("Points"),&showtripoints,ISO_POINTS,Iso_CB);
 
-    glui_bounds->add_radiobutton_to_group(iso_isotype,_("Hidden"));
-    glui_bounds->add_radiobutton_to_group(iso_isotype,_("Solid"));
-    glui_bounds->add_radiobutton_to_group(iso_isotype,_("Outline"));
-    glui_bounds->add_radiobutton_to_group(iso_isotype,_("Points"));
-    
   }
 
   /* Particle File Bounds  */
@@ -1084,7 +1089,9 @@ extern "C" void updatetracers(void){
 /* ------------------ update_glui_isotype ------------------------ */
 
 extern "C" void update_glui_isotype(void){
-  iso_isotype->set_int_val(visAIso);
+  CHECKBOX_showtrisurface->set_int_val(visAIso&1);
+  CHECKBOX_showtrioutline->set_int_val((visAIso&2)/2);
+  CHECKBOX_showtripoints->set_int_val((visAIso&4)/4);
 }
 
 
@@ -1155,6 +1162,12 @@ void Iso_CB(int var){
   case FRAMELOADING:
     isoframestep=isoframeskip+1;
     isozipstep=isozipskip+1;
+    updatemenu=1;
+    break;
+  case ISO_SURFACE:
+  case  ISO_OUTLINE:
+  case ISO_POINTS:
+    visAIso= 1*showtrisurface + 2*showtrioutline + 4*showtripoints;
     updatemenu=1;
     break;
   default:

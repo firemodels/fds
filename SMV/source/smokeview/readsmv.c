@@ -7823,14 +7823,16 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"SHOWTRIANGLES")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i %i",&showtrisurface,&showtrioutline,&showtrinormal);
+      sscanf(buffer,"%i %i %i %i",&showtrisurface,&showtrioutline,&showtrinormal,&showtripoints);
       if(showtrisurface!=0)showtrisurface=1;
       if(showtrioutline!=0)showtrioutline=1;
+      if(showtripoints!=0)showtripoints=1;
 #ifdef pp_BETA
       if(showtrinormal!=0)showtrinormal=1;
 #else
       showtrinormal=0;
 #endif
+      visAIso=showtrisurface*1+showtrioutline*2+showtripoints*4;
       continue;
     }
     if(match(buffer,"SHOWSTREAK")==1){
@@ -9214,9 +9216,10 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"SHOWISO")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&visAIso);
-      if(visAIso<0||visAIso>3){
-        visAIso=1;
-      }
+      visAIso&=7;
+      showtrisurface=(visAIso&1)/1;
+      showtrioutline=(visAIso&2)/2;
+      showtripoints=(visAIso&4)/4;
       continue;
       }
     if(trainer_mode==0&&windowresized==0){
@@ -10603,7 +10606,7 @@ void writeini(int flag){
   fprintf(fileout,"OFFSETSLICE\n");
   fprintf(fileout," %i\n",offset_slice);
   fprintf(fileout,"SHOWTRIANGLES\n");
-  fprintf(fileout," %i %i %i\n",showtrisurface,showtrioutline,showtrinormal);
+  fprintf(fileout," %i %i %i %i\n",showtrisurface,showtrioutline,showtrinormal,showtripoints);
   fprintf(fileout,"SHOWSTREAK\n");
   fprintf(fileout," %i %i %i %i\n",streak5show,streak5step,showstreakhead,streak_index);
   fprintf(fileout,"VECLENGTH\n");

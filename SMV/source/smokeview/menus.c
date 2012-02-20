@@ -573,7 +573,16 @@ void IsoShowMenu(int value){
    case 1:
    case 2:
    case 3:
-    visAIso=value;
+    if(value==1){
+      showtrisurface=1-showtrisurface;
+    }
+    if(value==2){
+      showtrioutline=1-showtrioutline;
+    }
+    if(value==3){
+      showtripoints=1-showtripoints;
+    }
+    visAIso=showtrisurface*1+showtrioutline*2+showtripoints*4;
     if(visAIso!=0){
       plotstate=DYNAMIC_PLOTS;
     }
@@ -592,11 +601,19 @@ void IsoShowMenu(int value){
     transparent_state=MAX_SOLID;
     break;
    case 98:
+    showtrisurface=0;
+    showtrioutline=0;
+    showtripoints=0;
+    visAIso=showtrisurface*1+showtrioutline*2+showtripoints*4;
     for(i=0;i<nisolevels;i++){
       showlevels[i]=0;
     }
     break;
    case 99:
+    showtrisurface=1;
+    showtrioutline=0;
+    showtripoints=0;
+    visAIso=showtrisurface*1+showtrioutline*2+showtripoints*4;
     for(i=0;i<nisolevels;i++){
       showlevels[i]=1;
     }
@@ -3934,6 +3951,7 @@ void ImmersedMenu(int value){
       ASSERT(0);
       break;
   }
+  visAIso=showtrisurface*1+showtrioutline*2+showtripoints*4;
   glutPostRedisplay();
 }
 
@@ -6038,12 +6056,12 @@ updatemenu=0;
         glutAddMenuEntry(menulabel,10002);
       }
       glutAddMenuEntry("-",999);
-      if(visAIso==1)glutAddMenuEntry(_("*Solid"),1);
-      if(visAIso!=1)glutAddMenuEntry(_("Solid"),1);
-      if(visAIso==2)glutAddMenuEntry(_("*Outline"),2);
-      if(visAIso!=2)glutAddMenuEntry(_("Outline"),2);
-      if(visAIso!=3)glutAddMenuEntry(_("Points"),3);
-      if(visAIso==3)glutAddMenuEntry(_("*Points"),3);
+      if((visAIso&1)==1)glutAddMenuEntry(_("*Solid"),1);
+      if((visAIso&1)!=1)glutAddMenuEntry(_("Solid"),1);
+      if((visAIso&2)==2)glutAddMenuEntry(_("*Outline"),2);
+      if((visAIso&2)!=2)glutAddMenuEntry(_("Outline"),2);
+      if((visAIso&4)==4)glutAddMenuEntry(_("*Points"),3);
+      if((visAIso&4)!=4)glutAddMenuEntry(_("Points"),3);
       hmesh=meshinfo+highlight_mesh;
       if(hmesh->isofilenum!=-1){
         STRCPY(levellabel,isoinfo[hmesh->isofilenum].surface_label.shortlabel);

@@ -311,6 +311,32 @@ void draw_geom(int flag, int frameflag){
       glEnd();
       glPopMatrix();
     }
+    if(showtripoints==1){
+      glPushMatrix();
+      glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+      glTranslatef(-xbar0,-ybar0,-zbar0);
+      glPointSize(6.0);
+      glBegin(GL_POINTS);
+      for(j=0;j<geomlisti->npoints;j++){
+        float *xyznorm;
+        point *pointi;
+        float *xyz1, xyz2[3];
+
+        pointi = geomlisti->points+j;
+        xyznorm = pointi->norm;       
+        xyz1 = pointi->xyz;
+
+        xyz2[0] = xyz1[0] + VECFACTOR*xyzmaxdiff*xyznorm[0];
+        xyz2[1] = xyz1[1] + VECFACTOR*xyzmaxdiff*xyznorm[1];
+        xyz2[2] = xyz1[2] + VECFACTOR*xyzmaxdiff*xyznorm[2];
+
+        color = black;
+        glColor3fv(color);
+        glVertex3fv(xyz2);
+      }
+      glEnd();
+      glPopMatrix();
+    }
     if(showtrinormal==1){
       if(smoothtrinormal==0){
         glPushMatrix();
