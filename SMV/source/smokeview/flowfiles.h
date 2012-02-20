@@ -242,6 +242,7 @@ typedef struct _surfdata {
                4 - invisible
              */
   float *color, emis, temp_ignition;
+  float transparent_level;
   float t_width, t_height;
   texture  *textureinfo;
   int obst_surface;

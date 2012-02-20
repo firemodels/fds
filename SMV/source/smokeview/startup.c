@@ -1667,7 +1667,6 @@ void initvars(void){
   nrgb_full=256;
   nrgb_cad=256;
   eyexfactor=0.5f, eyeyfactor=-0.9f, eyezfactor=0.5f;
-  transparent_state=4;
 
   frameinterval=1.0;
 

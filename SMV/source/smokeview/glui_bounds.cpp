@@ -47,6 +47,7 @@ void boundmenu(GLUI_Rollout **rollout_bound, GLUI_Rollout **rollout_chop, GLUI_P
 GLUI_Rollout *rollout_slice_bound=NULL;
 GLUI_Rollout *rollout_slice_chop=NULL;
 
+#define SORT_SURFACES 401
 #define ISO_SURFACE 1
 #define ISO_OUTLINE 2
 #define ISO_POINTS 3
@@ -682,9 +683,9 @@ extern "C" void glui_bounds_setup(int main_window){
     COLORBAR_EXTREME2,Slice_CB);
   CHECKBOX_transparentflag=glui_bounds->add_checkbox_to_panel(panel_colorbar,_("Use transparency:"),&use_transparency_data,DATA_transparent,Slice_CB);
 #ifdef pp_BETA
-  glui_bounds->add_checkbox_to_panel(panel_colorbar,_("Sort transparent surfaces:"),&sort_iso_triangles);
+  glui_bounds->add_checkbox_to_panel(panel_colorbar,_("Sort transparent surfaces:"),&sort_iso_triangles,SORT_SURFACES,Slice_CB);
 #endif
-  SPINNER_labels_transparency_data=glui_bounds->add_spinner_to_panel(panel_colorbar,_("transparency level"),GLUI_SPINNER_FLOAT,&transparentlevel,DATA_transparent,Slice_CB);
+  SPINNER_labels_transparency_data=glui_bounds->add_spinner_to_panel(panel_colorbar,_("transparency level"),GLUI_SPINNER_FLOAT,&transparentlevel,TRANSPARENTLEVEL,Slice_CB);
   SPINNER_labels_transparency_data->set_w(0);
   SPINNER_labels_transparency_data->set_float_limits(0.0,1.0,GLUI_LIMIT_CLAMP);
 
@@ -1918,6 +1919,15 @@ extern "C" void Slice_CB(int var){
     return;
   }
   switch (var){
+    case SORT_SURFACES:
+      sort_embedded_geometry=sort_iso_triangles;
+      for(i=nsurfinfo;i<nsurfinfo+n_iso_ambient+1;i++){
+        surfdata *surfi;
+
+        surfi = surfinfo + i;
+        surfi->transparent_level=transparentlevel;
+      }
+      break;
     case SHOW_EVAC_SLICES:
       data_evac_coloring = 1-constant_evac_coloring;
       update_slice_menu_show();
@@ -1929,7 +1939,15 @@ extern "C" void Slice_CB(int var){
       if(CHECKBOX_constant_coloring!=NULL)CHECKBOX_constant_coloring->set_int_val(constant_evac_coloring);
       break;
     case TRANSPARENTLEVEL:
+      for(i=nsurfinfo;i<nsurfinfo+n_iso_ambient+1;i++){
+        surfdata *surfi;
+
+        surfi = surfinfo + i;
+        surfi->transparent_level=transparentlevel;
+      }
       updatecolors(-1);
+      SPINNER_transparentlevel->set_float_val(transparentlevel);
+      SPINNER_labels_transparency_data->set_float_val(transparentlevel);
       break;
 #ifdef pp_SLICECONTOURS
     case LINE_CONTOUR_VALUE:

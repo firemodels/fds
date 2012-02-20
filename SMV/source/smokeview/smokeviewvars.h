@@ -640,7 +640,7 @@ SVEXTERN int antialiasflag;
 SVEXTERN int nrgb_full;
 SVEXTERN int nrgb_cad;
 SVEXTERN float eyexfactor, eyeyfactor, eyezfactor;
-SVEXTERN int transparent_state;
+SVEXTERN int SVDECL(transparent_state,ALL_SOLID);
 SVEXTERN float tload_begin, tload_end;
 SVEXTERN int tload_skip;
 SVEXTERN int use_tload_begin,use_tload_end,use_tload_skip;

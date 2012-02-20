@@ -172,6 +172,8 @@ void draw_geom(int flag, int frameflag){
   float blue[]={0.0,0.0,1.0,1.0};
   float skinny_color[]={1.0,0.0,0.0,1.0};
   float *last_color=NULL;
+  float last_transparent_level=-1.0;
+  float color_local[4];
 
 
   if(patchembedded==0&&showtrisurface==1&&frameflag==0){
@@ -201,18 +203,22 @@ void draw_geom(int flag, int frameflag){
       triangle *trianglei;
       float *xyzptr[3];
       float *xyznorm;
+      float transparent_level;
 
       trianglei = tris[i];
 
       if(hilight_skinny==1&&trianglei->skinny==1){
         color=skinny_color;
+        transparent_level=1.0;
       }
       else{
         color = trianglei->surf->color;
+        transparent_level=trianglei->surf->transparent_level;
       }
-      if(color!=last_color){
-        glColor4fv(color);
+      if(color!=last_color||ABS(last_transparent_level-transparent_level)>0.001){
+        glColor4f(color[0],color[1],color[2],transparent_level);
         last_color=color;
+        last_transparent_level=transparent_level;
       }
       if(smoothtrinormal==0){
 
@@ -1155,7 +1161,7 @@ void Sort_Embedded_Geometry(float *mm){
 
         tri = geomlisti->triangles + j;
         if(hilight_skinny==1&&tri->skinny==1)continue;
-        if(tri->surf->color[3]>=1.0)continue;
+        if(tri->surf->transparent_level>=1.0)continue;
         count_transparent++;
         if(sort_embedded_geometry==0)continue;
         xyz1 = tri->points[0]->xyz;
@@ -1208,7 +1214,7 @@ void Sort_Embedded_Geometry(float *mm){
         triangle *tri;
 
         tri = geomlisti->triangles + j;
-        if(use_transparency_data==0||(hilight_skinny==1&&tri->skinny==1)||tri->surf->color[3]>=1.0){
+        if(use_transparency_data==0||(hilight_skinny==1&&tri->skinny==1)||tri->surf->transparent_level>=1.0){
           opaque_triangles[count_all++]=tri;
         }
         else{

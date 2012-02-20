@@ -3274,6 +3274,7 @@ int readsmv(char *file, char *file2){
       if(s_color[3]<0.99){
         surfi->transparent=1;
       }
+      surfi->transparent_level=1.0;
       surfi->temp_ignition=temp_ignition;
       surfi->emis=emis;
       surfi->t_height=t_height;
@@ -5901,12 +5902,17 @@ typedef struct {
    ************************************************************************
  */
 
-  surfinfo[nsurfinfo].color=getcolorptr(hrrpuv_iso_color);
-  for(i=nsurfinfo+1;i<nsurfinfo+n_iso_ambient+1;i++){
+  for(i=nsurfinfo;i<nsurfinfo+n_iso_ambient+1;i++){
     surfdata *surfi;
 
     surfi = surfinfo + i;
-    surfi->color=getcolorptr(iso_ambient+4*(i-nsurfinfo-1));
+    if(i==nsurfinfo){
+      surfi->color=getcolorptr(hrrpuv_iso_color);
+    }
+    else{
+      surfi->color=getcolorptr(iso_ambient+4*(i-nsurfinfo-1));
+    }
+    surfi->transparent_level=0.8;
   }
 
   if(arg_iblank==0){
