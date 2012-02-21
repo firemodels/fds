@@ -561,14 +561,14 @@ void IsoShowMenu(int value){
   nisolevels=loaded_isomesh->nisolevels;
   showlevels=loaded_isomesh->showlevels;
 
-  ASSERTFLAG(isonormtype);
-  ASSERTFLAG(showisonormals);
+  ASSERTFLAG(smoothtrinormal);
+  ASSERTFLAG(showtrinormal);
   switch (value){
    case  4:
-    isonormtype = 1 - isonormtype;
+    smoothtrinormal=1-smoothtrinormal;
     break;
    case 5:
-    showisonormals = 1 - showisonormals;
+    showtrinormal = 1 - showtrinormal;
     break;
    case 1:
    case 2:
@@ -590,15 +590,49 @@ void IsoShowMenu(int value){
     break;
    case 94:
     transparent_state=ALL_SOLID;
+    if(loaded_isomesh==NULL)break;
+    for(i=0;i<loaded_isomesh->nisolevels;i++){
+      surfdata *surfi;
+
+      surfi = surfinfo + nsurfinfo + 1 + i;
+      surfi->transparent_level=1.0;
+    }
+    use_transparency_data=0;
     break;
    case 95:
     transparent_state=ALL_TRANSPARENT;
+    if(loaded_isomesh==NULL)break;
+    for(i=0;i<loaded_isomesh->nisolevels;i++){
+      surfdata *surfi;
+
+      surfi = surfinfo + nsurfinfo + 1 + i;
+      surfi->transparent_level=transparent_level;
+    }
+    use_transparency_data=1;
     break;
    case 96:
     transparent_state=MIN_SOLID;
+    if(loaded_isomesh==NULL)break;
+    for(i=0;i<loaded_isomesh->nisolevels;i++){
+      surfdata *surfi;
+
+      surfi = surfinfo + nsurfinfo + 1 + i;
+      surfi->transparent_level=transparent_level;
+    }
+    surfinfo[nsurfinfo+1].transparent_level=1.0;
+    use_transparency_data=1;
     break;
    case 97:
     transparent_state=MAX_SOLID;
+    if(loaded_isomesh==NULL)break;
+    for(i=0;i<loaded_isomesh->nisolevels;i++){
+      surfdata *surfi;
+
+      surfi = surfinfo + nsurfinfo + 1 + i;
+      surfi->transparent_level=transparent_level;
+    }
+    use_transparency_data=1;
+    surfinfo[nsurfinfo+1+loaded_isomesh->nisolevels-1].transparent_level=1.0;
     break;
    case 98:
     showtrisurface=0;
@@ -6070,11 +6104,11 @@ updatemenu=0;
         glutAddSubMenu(levellabel,isolevelmenu);
       }
       if(niso_compressed==0){
-        if(isonormtype==1)glutAddMenuEntry(_("*Smooth"),4);
-        if(isonormtype==0)glutAddMenuEntry(_("Smooth"),4);
+        if(smoothtrinormal==1)glutAddMenuEntry(_("*Smooth"),4);
+        if(smoothtrinormal==0)glutAddMenuEntry(_("Smooth"),4);
       }
-      if(showisonormals==1)glutAddMenuEntry(_("*Show normals"),5);
-      if(showisonormals==0)glutAddMenuEntry(_("Show normals"),5);
+      if(showtrinormal==1)glutAddMenuEntry(_("*Show normals"),5);
+      if(showtrinormal==0)glutAddMenuEntry(_("Show normals"),5);
     }
   }
 

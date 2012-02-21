@@ -190,8 +190,13 @@ void draw_geom(int flag, int frameflag){
       ntris=ntransparent_triangles;
       tris=transparent_triangles;
     }
+    
+    if(cullfaces==1)glDisable(GL_CULL_FACE);
+    glEnable(GL_NORMALIZE);
+    glShadeModel(GL_SMOOTH);
     glEnable(GL_LIGHTING);
-    glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,iso_specular);
+    glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,iso_shininess);
     glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
     glEnable(GL_COLOR_MATERIAL);
     
@@ -206,7 +211,6 @@ void draw_geom(int flag, int frameflag){
       float transparent_level;
 
       trianglei = tris[i];
-
       if(hilight_skinny==1&&trianglei->skinny==1){
         color=skinny_color;
         transparent_level=1.0;
@@ -259,6 +263,7 @@ void draw_geom(int flag, int frameflag){
       if(use_transparency_data==1)transparentoff();
       return;
     }
+    if(cullfaces==1)glEnable(GL_CULL_FACE);
   }
 
 #define VECFACTOR 0.01
@@ -324,21 +329,12 @@ void draw_geom(int flag, int frameflag){
       glPointSize(6.0);
       glBegin(GL_POINTS);
       for(j=0;j<geomlisti->npoints;j++){
-        float *xyznorm;
         point *pointi;
-        float *xyz1, xyz2[3];
 
         pointi = geomlisti->points+j;
-        xyznorm = pointi->norm;       
-        xyz1 = pointi->xyz;
-
-        xyz2[0] = xyz1[0] + VECFACTOR*xyzmaxdiff*xyznorm[0];
-        xyz2[1] = xyz1[1] + VECFACTOR*xyzmaxdiff*xyznorm[1];
-        xyz2[2] = xyz1[2] + VECFACTOR*xyzmaxdiff*xyznorm[2];
-
         color = black;
         glColor3fv(color);
-        glVertex3fv(xyz2);
+        glVertex3fv(pointi->xyz);
       }
       glEnd();
       glPopMatrix();
@@ -459,88 +455,91 @@ void draw_geom(int flag, int frameflag){
 /* ------------------ update_triangles ------------------------ */
 
 void update_triangles(void){
-  int j;
-
-  for(j=0;j<ngeominfo;j++){
+  int ii,j;
+   
+  for(j=0;j<ngeominfoptrs;j++){
     geomlistdata *geomlisti;
     geomdata *geomi;
     float *xyzptr[3];
     float *xyznorm;
     int i;
 
-    geomi = geominfo + j;
+    geomi = geominfoptrs[j];
     if(geomi->loaded==0||geomi->display==0)continue;
-    geomlisti = geomi->geomlistinfo;
+
+    for(ii=0;ii<geomi->ntimes;ii++){
+      geomlisti = geomi->geomlistinfo+ii;
     
-    for(i=0;i<geomlisti->ntriangles;i++){
-      triangle *trianglei;
-
-      trianglei = geomlisti->triangles+i;
-
-      xyzptr[0] = trianglei->points[0]->xyz;
-      xyzptr[1] = trianglei->points[1]->xyz;
-      xyzptr[2] = trianglei->points[2]->xyz;
-      xyznorm = trianglei->normal;
-      CalcTriNormal(xyzptr[0],xyzptr[1],xyzptr[2],xyznorm);
-    }
-
-    for(i=0;i<geomlisti->npoints;i++){
-      point *pointi;
-
-      pointi = geomlisti->points + i;
-      pointi->ntriangles=0;
-      pointi->itriangle=0;
-    }
-    for(i=0;i<geomlisti->ntriangles;i++){
-      triangle *trianglei;
-
-      trianglei = geomlisti->triangles+i;
-      trianglei->points[0]->ntriangles++;
-      trianglei->points[1]->ntriangles++;
-      trianglei->points[2]->ntriangles++;
-    }
-    for(i=0;i<geomlisti->npoints;i++){
-      point *pointi;
-
-      pointi = geomlisti->points + i;
-      if(pointi->ntriangles>0){
-        NewMemory((void **)&pointi->triangles,pointi->ntriangles*sizeof(triangle *));
-      }
-    }
-    for(i=0;i<geomlisti->ntriangles;i++){
-      triangle *trianglei;
-      point *pointi;
-
-      trianglei = geomlisti->triangles+i;
-      pointi = trianglei->points[0];
-      pointi->triangles[pointi->itriangle++]=trianglei;
-      pointi = trianglei->points[1];
-      pointi->triangles[pointi->itriangle++]=trianglei;
-      pointi = trianglei->points[2];
-      pointi->triangles[pointi->itriangle++]=trianglei;
-    }
-    for(i=0;i<geomlisti->npoints;i++){
-      point *pointi;
-      int k;
-      float *norm;
-
-      pointi = geomlisti->points + i;
-      norm=pointi->norm;
-      norm[0]=0.0;
-      norm[1]=0.0;
-      norm[2]=0.0;
-      for(k=0;k<pointi->ntriangles;k++){
-        float *norm2;
+      for(i=0;i<geomlisti->ntriangles;i++){
         triangle *trianglei;
 
-        trianglei = pointi->triangles[k];
-        norm2 = trianglei->normal;
-        norm[0]+=norm2[0];
-        norm[1]+=norm2[1];
-        norm[2]+=norm2[2];
+        trianglei = geomlisti->triangles+i;
+
+        xyzptr[0] = trianglei->points[0]->xyz;
+        xyzptr[1] = trianglei->points[1]->xyz;
+        xyzptr[2] = trianglei->points[2]->xyz;
+        xyznorm = trianglei->normal;
+        CalcTriNormal(xyzptr[0],xyzptr[1],xyzptr[2],xyznorm);
       }
-      ReduceToUnit(norm);
-    }
+
+      for(i=0;i<geomlisti->npoints;i++){
+        point *pointi;
+
+        pointi = geomlisti->points + i;
+        pointi->ntriangles=0;
+        pointi->itriangle=0;
+      }
+      for(i=0;i<geomlisti->ntriangles;i++){
+        triangle *trianglei;
+
+        trianglei = geomlisti->triangles+i;
+        trianglei->points[0]->ntriangles++;
+        trianglei->points[1]->ntriangles++;
+        trianglei->points[2]->ntriangles++;
+      }
+      for(i=0;i<geomlisti->npoints;i++){
+        point *pointi;
+
+        pointi = geomlisti->points + i;
+        if(pointi->ntriangles>0){
+          NewMemory((void **)&pointi->triangles,pointi->ntriangles*sizeof(triangle *));
+        }
+      }
+      for(i=0;i<geomlisti->ntriangles;i++){
+        triangle *trianglei;
+        point *pointi;
+
+        trianglei = geomlisti->triangles+i;
+        pointi = trianglei->points[0];
+        pointi->triangles[pointi->itriangle++]=trianglei;
+        pointi = trianglei->points[1];
+        pointi->triangles[pointi->itriangle++]=trianglei;
+        pointi = trianglei->points[2];
+        pointi->triangles[pointi->itriangle++]=trianglei;
+      }
+      for(i=0;i<geomlisti->npoints;i++){
+        point *pointi;
+        int k;
+        float *norm;
+
+        pointi = geomlisti->points + i;
+        norm=pointi->norm;
+        norm[0]=0.0;
+        norm[1]=0.0;
+        norm[2]=0.0;
+        for(k=0;k<pointi->ntriangles;k++){
+          float *norm2;
+          triangle *trianglei;
+
+          trianglei = pointi->triangles[k];
+          norm2 = trianglei->normal;
+          norm[0]+=norm2[0];
+          norm[1]+=norm2[1];
+          norm[2]+=norm2[2];
+        }
+        ReduceToUnit(norm);
+      }
+    }  
   }
 }
 
@@ -1054,16 +1053,16 @@ void draw_geomdata(patch *patchi){
 
 }
 
-/* ------------------ compare_trdata ------------------------ */
+/* ------------------ compare_transparent_triangles ------------------------ */
 
 int compare_transparent_triangles( const void *arg1, const void *arg2 ){
   triangle *tri, *trj;
 
-  tri = (triangle *)arg1; 
-  trj = (triangle *)arg2;
+  tri = *(triangle **)arg1; 
+  trj = *(triangle **)arg2;
 
-  if(tri->distance<trj->distance)return -1;
-  if(tri->distance>trj->distance)return 1;
+  if(tri->distance<trj->distance)return 1;
+  if(tri->distance>trj->distance)return -1;
   return 0;
 }
 
@@ -1125,12 +1124,14 @@ void Sort_Embedded_Geometry(float *mm){
   int i;
   int count_transparent,count_all;
   int itime;
+  int *showlevels;
 
   CheckMemory;
   count_transparent=0;
   count_all=0;
   ntransparent_triangles=count_transparent;
   nopaque_triangles=count_all-count_transparent;
+  showlevels=loaded_isomesh->showlevels;
 
   for(i=0;i<ngeominfoptrs;i++){
     geomlistdata *geomlisti;
@@ -1158,18 +1159,24 @@ void Sort_Embedded_Geometry(float *mm){
         float xyz[3];
         float *xyz1, *xyz2, *xyz3;
         float xyzeye[3];
+        int isurf;
 
         tri = geomlisti->triangles + j;
         if(hilight_skinny==1&&tri->skinny==1)continue;
         if(tri->surf->transparent_level>=1.0)continue;
+        isurf=tri->surf-surfinfo-nsurfinfo-1;
+        if(showlevels[isurf]==0||tri->surf->transparent_level<=0.0){
+          count_all--;
+          continue;
+        }
         count_transparent++;
         if(sort_embedded_geometry==0)continue;
         xyz1 = tri->points[0]->xyz;
         xyz2 = tri->points[1]->xyz;
         xyz3 = tri->points[2]->xyz;
-        xyz[0] = xyz1[0]+xyz2[0]+xyz3[0];
-        xyz[1] = xyz1[1]+xyz2[1]+xyz3[1];
-        xyz[2] = xyz1[2]+xyz2[2]+xyz3[2];
+        xyz[0] = ((xyz1[0]+xyz2[0]+xyz3[0])/3.0-xbar0)/xyzmaxdiff;
+        xyz[1] = ((xyz1[1]+xyz2[1]+xyz3[1])/3.0-ybar0)/xyzmaxdiff;
+        xyz[2] = ((xyz1[2]+xyz2[2]+xyz3[2])/3.0-zbar0)/xyzmaxdiff;
 
         xyzeye[0] = mm[0]*xyz[0] + mm[4]*xyz[1] +   mm[8]*xyz[2] + mm[12];
         xyzeye[1] = mm[1]*xyz[0] + mm[5]*xyz[1] +   mm[9]*xyz[2] + mm[13];
@@ -1212,8 +1219,14 @@ void Sort_Embedded_Geometry(float *mm){
       geomlisti = geomi->geomlistinfo+iiframe;
       for(j=0;j<geomlisti->ntriangles;j++){
         triangle *tri;
+        int isurf;
 
         tri = geomlisti->triangles + j;
+
+        isurf=tri->surf-surfinfo-nsurfinfo-1;
+        if(showlevels[isurf]==0){
+          continue;
+        }
         if(use_transparency_data==0||(hilight_skinny==1&&tri->skinny==1)||tri->surf->transparent_level>=1.0){
           opaque_triangles[count_all++]=tri;
         }

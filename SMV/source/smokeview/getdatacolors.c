@@ -2019,9 +2019,9 @@ void update_texturebar(void){
 void initrgb(void){
   float *rgb_ptr;
   int n,nn;
-  float transparentlevel_local=1.0;
+  float transparent_level_local=1.0;
 
-  if(use_transparency_data==1)transparentlevel_local=transparentlevel;
+  if(use_transparency_data==1)transparent_level_local=transparent_level;
 
   if(setbw==0){
     colorconvert(TO_COLOR);
@@ -2033,7 +2033,7 @@ void initrgb(void){
         rgb[n][0] = rgb_ptr[nn*3];
         rgb[n][1] = rgb_ptr[nn*3+1];
         rgb[n][2] = rgb_ptr[nn*3+2];
-        rgb[n][3] = transparentlevel_local;
+        rgb[n][3] = transparent_level_local;
       }
     }   
     else{
@@ -2042,7 +2042,7 @@ void initrgb(void){
         rgb[n][0] = rgb_base[nn][0];
         rgb[n][1] = rgb_base[nn][1];
         rgb[n][2] = rgb_base[nn][2];
-        rgb[n][3] = transparentlevel_local;
+        rgb[n][3] = transparent_level_local;
       }
     }
   }
@@ -2053,7 +2053,7 @@ void initrgb(void){
       rgb[n][0] = bw_base[nn][0];
       rgb[n][1] = bw_base[nn][1];
       rgb[n][2] = bw_base[nn][2];
-      rgb[n][3] = transparentlevel_local;
+      rgb[n][3] = transparent_level_local;
     }
   }
 }
@@ -2069,9 +2069,9 @@ void updatecolors(int changecolorindex){
   mesh *meshi;
   int vent_offset, outline_offset;
   facedata *facej;
-  float transparentlevel_local=1.0;
+  float transparent_level_local=1.0;
 
-  if(use_transparency_data==1)transparentlevel_local=transparentlevel;
+  if(use_transparency_data==1)transparent_level_local=transparent_level;
 
   initcadcolors();
   initrgb();
@@ -2099,7 +2099,7 @@ void updatecolors(int changecolorindex){
         rgb_full[n][3]=0.0;
       }
       else{
-        rgb_full[n][3]=transparentlevel_local;
+        rgb_full[n][3]=transparent_level_local;
       }
       rgb_smokecolormap[4*n]=fire_cb[3*n];
       rgb_smokecolormap[4*n+1]=fire_cb[3*n+1];
@@ -2108,7 +2108,7 @@ void updatecolors(int changecolorindex){
         rgb_smokecolormap[4*n+3]=0.0;
       }
       else{
-        rgb_smokecolormap[4*n+3]=transparentlevel_local;
+        rgb_smokecolormap[4*n+3]=transparent_level_local;
       }
     } 
   }
@@ -2117,7 +2117,7 @@ void updatecolors(int changecolorindex){
       rgb_full[n][0]=(float)n/(float)(nrgb_full);
       rgb_full[n][1]=(float)n/(float)(nrgb_full);
       rgb_full[n][2]=(float)n/(float)(nrgb_full);
-      rgb_full[n][3]=transparentlevel_local;
+      rgb_full[n][3]=transparent_level_local;
     } 
   }
   if(colorbarcycle!=0){
@@ -2215,7 +2215,7 @@ void updatecolors(int changecolorindex){
         rgb_full[cci+n][0]=1.;
         rgb_full[cci+n][1]=0.;
         rgb_full[cci+n][2]=0.;
-        rgb_full[cci+n][3]=transparentlevel_local;
+        rgb_full[cci+n][3]=transparent_level_local;
       }
     }
     else{
@@ -2225,7 +2225,7 @@ void updatecolors(int changecolorindex){
         rgb_full[cci+n][0]=0.;
         rgb_full[cci+n][1]=0.;
         rgb_full[cci+n][2]=0.;
-        rgb_full[cci+n][3]=transparentlevel_local;
+        rgb_full[cci+n][3]=transparent_level_local;
       }
     }
   }
@@ -2249,14 +2249,14 @@ void updatecolors(int changecolorindex){
       rgb[n][0] = rgb_full[nn][0];
       rgb[n][1] = rgb_full[nn][1];
       rgb[n][2] = rgb_full[nn][2];
-      rgb[n][3] = transparentlevel_local;
+      rgb[n][3] = transparent_level_local;
     }
   }
   for(n=nrgb;n<nrgb+nrgb2;n++){
     rgb[n][0]=rgb2ptr[3*(n-nrgb)];
     rgb[n][1]=rgb2ptr[3*(n-nrgb)+1];
     rgb[n][2]=rgb2ptr[3*(n-nrgb)+2];
-    rgb[n][3]=transparentlevel_local;
+    rgb[n][3]=transparent_level_local;
   }
   rgb_white=nrgb;
   rgb_yellow=nrgb+1;
@@ -2317,9 +2317,9 @@ void updatechopcolors(void){
   int ichopmin=0,ichopmax=nrgb_full;
 #define NCHOP 8  
   int ii;
-  float transparentlevel_local=1.0;
+  float transparent_level_local=1.0;
 
-  if(use_transparency_data==1)transparentlevel_local=transparentlevel;
+  if(use_transparency_data==1)transparent_level_local=transparent_level;
 
   last_particle_type=current_particle_type;
   for(i=0;i<nrgb_full;i++){
@@ -2327,7 +2327,7 @@ void updatechopcolors(void){
     rgb_iso[4*i+1]=rgb_full[i][1];
     rgb_iso[4*i+2]=rgb_full[i][2];
     if(rgb_full[i][3]>0.001){
-      rgb_iso[4*i+3]=transparentlevel_local;
+      rgb_iso[4*i+3]=transparent_level_local;
     }
     else{
       rgb_iso[4*i+3]=0.0;
@@ -2337,7 +2337,7 @@ void updatechopcolors(void){
     rgb_slice[4*i+1]=rgb_full[i][1];
     rgb_slice[4*i+2]=rgb_full[i][2];
     if(rgb_full[i][3]>0.001){
-      rgb_slice[4*i+3]=transparentlevel_local;
+      rgb_slice[4*i+3]=transparent_level_local;
     }
     else{
       rgb_slice[4*i+3]=0.0;
@@ -2348,7 +2348,7 @@ void updatechopcolors(void){
     rgb_part[4*i+2]=rgb_full[i][2];
     rgb_part[4*i+3]=rgb_full[i][3];
     if(rgb_full[i][3]>0.001){
-      rgb_part[4*i+3]=transparentlevel_local;
+      rgb_part[4*i+3]=transparent_level_local;
     }
     else{
       rgb_part[4*i+3]=0.0;
@@ -2359,7 +2359,7 @@ void updatechopcolors(void){
     rgb_plot3d[4*i+2]=rgb_full[i][2];
     rgb_plot3d[4*i+3]=rgb_full[i][3];
     if(rgb_full[i][3]>0.001){
-      rgb_plot3d[4*i+3]=transparentlevel_local;
+      rgb_plot3d[4*i+3]=transparent_level_local;
     }
     else{
       rgb_plot3d[4*i+3]=0.0;
@@ -2369,7 +2369,7 @@ void updatechopcolors(void){
     rgb_patch[4*i+1]=rgb_full[i][1];
     rgb_patch[4*i+2]=rgb_full[i][2];
     if(rgb_full[i][3]>0.001){
-      rgb_patch[4*i+3]=transparentlevel_local;
+      rgb_patch[4*i+3]=transparent_level_local;
     }
     else{
       rgb_patch[4*i+3]=0.0;
@@ -2393,7 +2393,7 @@ void updatechopcolors(void){
         if(i>nrgb_full-1)continue;
         ii = i - (ichopmin-NCHOP);
         if(ii>NCHOP-1)continue;
-        rgb_patch[4*i+3]=transparentlevel_local*(float)ii/(float)(NCHOP-1);
+        rgb_patch[4*i+3]=transparent_level_local*(float)ii/(float)(NCHOP-1);
       }
     }
     if(setpatchchopmax==1){
@@ -2408,7 +2408,7 @@ void updatechopcolors(void){
         if(i>nrgb_full-1)continue;
         ii = NCHOP-1-(i - ichopmax);
         if(ii>NCHOP-1)continue;
-        rgb_patch[4*i+3]=transparentlevel_local*(float)ii/(float)(NCHOP-1);
+        rgb_patch[4*i+3]=transparent_level_local*(float)ii/(float)(NCHOP-1);
       }
     }
   }
@@ -2430,7 +2430,7 @@ void updatechopcolors(void){
         if(i>nrgb_full-1)continue;
         ii = i - (ichopmin-NCHOP);
         if(ii>NCHOP-1)continue;
-        rgb_slice[4*i+3]=transparentlevel_local*(float)ii/(float)(NCHOP-1);
+        rgb_slice[4*i+3]=transparent_level_local*(float)ii/(float)(NCHOP-1);
       }
     }
     if(setslicechopmax==1){
@@ -2445,7 +2445,7 @@ void updatechopcolors(void){
         if(i>nrgb_full-1)continue;
         ii = NCHOP-1-(i - ichopmax);
         if(ii>NCHOP-1)continue;
-        rgb_slice[4*i+3]=transparentlevel_local*(float)ii/(float)(NCHOP-1);
+        rgb_slice[4*i+3]=transparent_level_local*(float)ii/(float)(NCHOP-1);
       }
     }
   }
@@ -2463,7 +2463,7 @@ void updatechopcolors(void){
         if(i>nrgb_full-1)continue;
         ii = i - (ichopmin-NCHOP);
         if(ii>NCHOP-1)continue;
-        rgb_part[4*i+3]=transparentlevel_local*(float)ii/(float)(NCHOP-1);
+        rgb_part[4*i+3]=transparent_level_local*(float)ii/(float)(NCHOP-1);
       }
     }
     if(setpartchopmax==1){
@@ -2478,7 +2478,7 @@ void updatechopcolors(void){
         if(i>nrgb_full-1)continue;
         ii = NCHOP-1-(i - ichopmax);
         if(ii>NCHOP-1)continue;
-        rgb_part[4*i+3]=transparentlevel_local*(float)ii/(float)(NCHOP-1);
+        rgb_part[4*i+3]=transparent_level_local*(float)ii/(float)(NCHOP-1);
       }
     } 
   }
@@ -2495,7 +2495,7 @@ void updatechopcolors(void){
         if(i>nrgb_full-1)continue;
         ii = i - (ichopmin-NCHOP);
         if(ii>NCHOP-1)continue;
-        rgb_plot3d[4*i+3]=transparentlevel_local*(float)ii/(float)(NCHOP-1);
+        rgb_plot3d[4*i+3]=transparent_level_local*(float)ii/(float)(NCHOP-1);
       }
     }
     if(setp3chopmax_temp==1){
@@ -2510,7 +2510,7 @@ void updatechopcolors(void){
         if(i>nrgb_full-1)continue;
         ii = NCHOP-1-(i - ichopmax);
         if(ii>NCHOP-1)continue;
-        rgb_plot3d[4*i+3]=transparentlevel_local*(float)ii/(float)(NCHOP-1);
+        rgb_plot3d[4*i+3]=transparent_level_local*(float)ii/(float)(NCHOP-1);
       }
     } 
   }

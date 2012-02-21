@@ -20,6 +20,7 @@
 #include "update.h"
 #include "smv_endian.h"
 
+SVEXTERN int SVDECL(debug_count,0);
 SVEXTERN geomdata SVDECL(**geominfoptrs,NULL);
 SVEXTERN int SVDECL(ngeominfoptrs,0);
 SVEXTERN int SVDECL(update_glui_wui,0);
@@ -394,7 +395,6 @@ SVEXTERN int windowsize_pointer;
 SVEXTERN int sethazardcolor;
 SVEXTERN int mxframepoints;
 SVEXTERN int timedrag,colordrag,colorsplitdrag;
-SVEXTERN int isonormtype,showisonormals;
 SVEXTERN int global_changecolorindex;
 SVEXTERN int fontindex,fontWoffset,fontHoffset;
 
@@ -634,7 +634,7 @@ SVEXTERN int numColorbars;
 SVEXTERN int setbw,colorbarflip;
 SVEXTERN int setbwSAVE;
 SVEXTERN int background_flip;
-SVEXTERN float SVDECL(transparentlevel,0.8);
+SVEXTERN float SVDECL(transparent_level,0.8);
 SVEXTERN int SVDECL(use_transparency_data,1);
 SVEXTERN int antialiasflag;
 SVEXTERN int nrgb_full;

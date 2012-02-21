@@ -4745,6 +4745,7 @@ void draw_facesOLD(){
   int faces_drawn=0;
 #endif
   if(nface_normals_single>0){
+    glEnable(GL_CULL_FACE);
     glEnable(GL_LIGHTING);
     glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
     glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);

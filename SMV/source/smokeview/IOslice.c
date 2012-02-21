@@ -283,10 +283,11 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
   if(flag!=RESETBOUNDS){
     if(sd->loaded==0&&flag==UNLOAD)return;
     sd->display=0;
+#ifdef pp_MEMDEBUG    
     if(sd->qslicedata!=NULL){
       ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicetotal));
     }
-
+#endif
     if(sd->qslicedata!=NULL){
       FreeMemory(sd->qslicedata);
       sd->qslicedata=NULL;
@@ -456,14 +457,18 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
         readslice("",ifile,UNLOAD,&error);
         return;
       }
+#ifdef pp_MEMDEBUG      
       ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicei*sd->nslicej*sd->nslicek*sd->nsteps));
+#endif      
       FORTget_file_unit(&file_unit,&file_unit);
       FORTgetslicedata(&file_unit,file,slicelonglabels,sliceshortlabels,sliceunits,
                    &sd->is1,&sd->is2,&sd->js1,&sd->js2,&sd->ks1,&sd->ks2,&sd->idir,
                    &qmin,&qmax,sd->qslicedata,sd->slicetimes,&sd->nsteps,&sliceframestep, &endian_smv,
                    &settmin_s,&settmax_s,&tmin_s,&tmax_s,
                    slicefilelen,labellen,labellen,labellen);
+#ifdef pp_MEMDEBUG                   
       ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicei*sd->nslicej*sd->nslicek*sd->nsteps));
+#endif      
     }
     local_stoptime = glutGet(GLUT_ELAPSED_TIME);
     delta_time = (local_stoptime-local_starttime)/1000.0;    
@@ -688,9 +693,11 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
         break;
       }
     }
+#ifdef pp_MEMDEBUG
     if(sd->compression_type==0){
       ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicetotal));
     }
+#endif
   }  /* RESETBOUNDS */
 
  /* convert slice points into integers pointing to an rgb color table */
@@ -740,10 +747,10 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
   updateslicelist(list_slice_index);
   updateslicelistindex(slicefilenum);
   updateglui();
+#ifdef pp_MEMDEBUG
   if(sd->compression_type==0){
     ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicei*sd->nslicej*sd->nslicek*sd->nsteps));
   }
-#ifdef pp_MEMDEBUG
   printf("After slice file load: ");
   GetMemoryInfo(sd->num_memblocks,num_memblocks_load);
   PrintMemoryInfo;
@@ -2154,9 +2161,11 @@ void drawslice_frame(){
         sd->slicepoint = sd->slicelevel + sd->islice*sd->nsliceii;
       }
       sd->slicedata=NULL;
+#ifdef pp_MEMDEBUG
       if(sd->compression_type==0){
         ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicetotal));
       }
+#endif
 
       if(sd->qslicedata!=NULL)sd->slicedata = sd->qslicedata + sd->islice*sd->nsliceii;
 #ifdef pp_SLICECONTOURS

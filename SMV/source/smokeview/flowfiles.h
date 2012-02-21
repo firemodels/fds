@@ -243,6 +243,7 @@ typedef struct _surfdata {
              */
   float *color, emis, temp_ignition;
   float transparent_level;
+  int iso_level;
   float t_width, t_height;
   texture  *textureinfo;
   int obst_surface;

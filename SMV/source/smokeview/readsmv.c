@@ -5913,6 +5913,7 @@ typedef struct {
       surfi->color=getcolorptr(iso_ambient+4*(i-nsurfinfo-1));
     }
     surfi->transparent_level=0.8;
+    surfi->iso_level=i-nsurfinfo;
   }
 
   if(arg_iblank==0){
@@ -7109,6 +7110,7 @@ void updateusetextures(void){
 /* ------------------ initsurface ------------------------ */
 
 void initsurface(surfdata *surf){
+  surf->iso_level=-1;
   surf->used_by_obst=0;
   surf->used_by_vent=0;
   surf->emis=1.0;
@@ -8967,7 +8969,7 @@ int readini2(char *inifile, int localfile){
       }
     if(match(buffer,"TRANSPARENT")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f",&use_transparency_data,&transparentlevel);
+      sscanf(buffer,"%i %f",&use_transparency_data,&transparent_level);
       continue;
       }
     if(match(buffer,"VENTCOLOR")==1){
@@ -9215,8 +9217,8 @@ int readini2(char *inifile, int localfile){
       }
     if(match(buffer,"SHOWISONORMALS")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&showisonormals);
-      if(showisonormals!=1)showisonormals=0;
+      sscanf(buffer,"%i",&showtrinormal);
+      if(showtrinormal!=1)showtrinormal=0;
       continue;
     }
     if(match(buffer,"SHOWISO")==1){
@@ -10524,7 +10526,7 @@ void writeini(int flag){
     }
   }
   fprintf(fileout,"TRANSPARENT\n");
-  fprintf(fileout," %i %f\n",use_transparency_data,transparentlevel);
+  fprintf(fileout," %i %f\n",use_transparency_data,transparent_level);
   fprintf(fileout,"SURFINC\n");
   fprintf(fileout," %i\n",surfincrement);
   fprintf(fileout,"P3DSURFACETYPE\n");
@@ -10622,7 +10624,7 @@ void writeini(int flag){
   fprintf(fileout,"SHOWISO\n");
   fprintf(fileout," %i\n",visAIso);
   fprintf(fileout,"SHOWISONORMALS\n");
-  fprintf(fileout," %i\n",showisonormals);
+  fprintf(fileout," %i\n",showtrinormal);
   fprintf(fileout,"SMOKESENSORS\n");
   fprintf(fileout," %i %i\n",show_smokesensors,test_smokesensors);
   fprintf(fileout,"VOLSMOKE\n");

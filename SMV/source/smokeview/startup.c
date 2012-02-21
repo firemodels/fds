@@ -1432,7 +1432,6 @@ void initvars(void){
   windowsize_pointer=0;
   sethazardcolor=0;
   timedrag=0,colordrag=0,colorsplitdrag=0;
-  isonormtype=1,showisonormals=0;
   global_changecolorindex=-1;
   fontindex=0,fontWoffset=0,fontHoffset=0;
 

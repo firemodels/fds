@@ -222,6 +222,11 @@ void readiso_geom(const char *file, int ifile, int flag, int *errorcode){
   updatemenu=1;
   iisotype=getisotype(isoi);
 
+  FREEMEMORY(geominfoptrs);
+  ngeominfoptrs=0;
+  GetGeomInfoPtrs(&geominfoptrs,&ngeominfoptrs);
+  update_triangles();
+
   updatetimes();
   get_faceinfo();
 #ifdef _DEBUG
@@ -1230,7 +1235,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
     glPopMatrix();
   }
 
-  if(showisonormals==1){
+  if(showtrinormal==1){
 
     glPushMatrix();
     antialias(1);
@@ -1250,7 +1255,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
         vv3[k]=xyzmin[k]+xyzmaxdiff_local*v3[k]/65535.;
       }
 
-      if(isonormtype==1){
+      if(smoothtrinormal==1){
         norm1 = vertexnorm+i1;
         norm2 = vertexnorm+i2;
 		    norm3 = vertexnorm+i3;
@@ -1752,7 +1757,7 @@ void Update_Isotris(int flag){
               *iso_trans_tmp++=asurfi->iso_triangles+itri;
             }
             colorptr=isoi->colorlevels[ilev];
-            colorptr[3]=transparentlevel;
+            colorptr[3]=transparent_level;
           }
         }
       }
@@ -1780,7 +1785,7 @@ void Update_Isotris(int flag){
               *iso_trans_tmp++=asurfi->iso_triangles+itri;
             }
             colorptr=isoi->colorlevels[ilev];
-            colorptr[3]=transparentlevel;
+            colorptr[3]=transparent_level;
           }
         }
       }
@@ -1796,7 +1801,7 @@ void Update_Isotris(int flag){
               *iso_trans_tmp++=asurfi->iso_triangles+itri;
             } 
             colorptr=isoi->colorlevels[ilev];
-            colorptr[3]=transparentlevel;
+            colorptr[3]=transparent_level;
           }
         }
         for(ilev=meshi->nisolevels-1;ilev<meshi->nisolevels;ilev++){

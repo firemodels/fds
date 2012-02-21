@@ -47,6 +47,7 @@ void boundmenu(GLUI_Rollout **rollout_bound, GLUI_Rollout **rollout_chop, GLUI_P
 GLUI_Rollout *rollout_slice_bound=NULL;
 GLUI_Rollout *rollout_slice_chop=NULL;
 
+#define SMOOTH_SURFACES 402
 #define SORT_SURFACES 401
 #define ISO_SURFACE 1
 #define ISO_OUTLINE 2
@@ -128,6 +129,7 @@ GLUI_Rollout *rollout_slice_chop=NULL;
 GLUI_Button *BUTTON_compress=NULL;
 GLUI_Panel *panel_evac_direction=NULL;
 GLUI_Spinner *SPINNER_labels_transparency_data=NULL;
+GLUI_Spinner *SPINNER_labels_transparency_data2=NULL;
 GLUI_Panel *panel_pan1=NULL;
 GLUI_Panel *panel_pan2=NULL;
 GLUI_Panel *panel_pan3=NULL;
@@ -135,7 +137,7 @@ GLUI_Panel *panel_contours=NULL;
 GLUI_Panel *panel_isosurface=NULL;
 GLUI_Panel *panel_vector=NULL;
 GLUI_Panel *panel_slice_vector=NULL;
-GLUI_Spinner *SPINNER_transparentlevel=NULL;
+GLUI_Spinner *SPINNER_transparent_level=NULL;
 #ifdef pp_SLICECONTOURS
 GLUI_Panel *panel_line_contour=NULL;
 GLUI_Spinner *SPINNER_line_contour_num=NULL;
@@ -196,6 +198,12 @@ GLUI_Checkbox *CHECKBOX_constant_coloring=NULL;
 GLUI_Checkbox *CHECKBOX_show_evac_color=NULL;
 GLUI_Checkbox *CHECKBOX_data_coloring=NULL;
 GLUI_Checkbox *CHECKBOX_transparentflag=NULL;
+GLUI_Checkbox *CHECKBOX_transparentflag2=NULL;
+GLUI_Checkbox *CHECKBOX_sort=NULL;
+GLUI_Checkbox *CHECKBOX_smooth=NULL;
+GLUI_Checkbox *CHECKBOX_sort2=NULL;
+GLUI_Checkbox *CHECKBOX_smooth2=NULL;
+
 GLUI_Checkbox *CHECKBOX_axissmooth=NULL;
 GLUI_Checkbox *CHECKBOX_extreme2=NULL;
 GLUI_Checkbox *startup_checkbox=NULL;
@@ -397,6 +405,15 @@ extern "C" void glui_bounds_setup(int main_window){
     CHECKBOX_showtrioutline=glui_bounds->add_checkbox_to_panel(panel_iso,_("Outline"),&showtrioutline,ISO_OUTLINE,Iso_CB);
     CHECKBOX_showtripoints=glui_bounds->add_checkbox_to_panel(panel_iso,_("Points"),&showtripoints,ISO_POINTS,Iso_CB);
 
+    CHECKBOX_transparentflag2=glui_bounds->add_checkbox_to_panel(panel_iso,_("Use transparency:"),&use_transparency_data,DATA_transparent,Slice_CB);
+#ifdef pp_BETA 
+    CHECKBOX_sort2=glui_bounds->add_checkbox_to_panel(panel_iso,_("Sort transparent surfaces:"),&sort_iso_triangles,SORT_SURFACES,Slice_CB);
+    CHECKBOX_smooth2=glui_bounds->add_checkbox_to_panel(panel_iso,_("Smooth surfaces:"),&smoothtrinormal,SMOOTH_SURFACES,Slice_CB);
+#endif
+    SPINNER_labels_transparency_data2=glui_bounds->add_spinner_to_panel(panel_iso,
+        _("transparency level"),GLUI_SPINNER_FLOAT,&transparent_level,TRANSPARENTLEVEL,Slice_CB);
+    SPINNER_labels_transparency_data2->set_w(0);
+    SPINNER_labels_transparency_data2->set_float_limits(0.0,1.0,GLUI_LIMIT_CLAMP);
   }
 
   /* Particle File Bounds  */
@@ -582,8 +599,8 @@ extern "C" void glui_bounds_setup(int main_window){
       &slicechopmin, &slicechopmax,
       UPDATEBOUNDS,DONT_TRUNCATEBOUNDS,
       Slice_CB);
-    SPINNER_transparentlevel=glui_bounds->add_spinner_to_panel(panel_slice,_("Transparent level"),GLUI_SPINNER_FLOAT,&transparentlevel,TRANSPARENTLEVEL,Slice_CB);
-    SPINNER_transparentlevel->set_float_limits(0.0,1.0);
+    SPINNER_transparent_level=glui_bounds->add_spinner_to_panel(panel_slice,_("Transparent level"),GLUI_SPINNER_FLOAT,&transparent_level,TRANSPARENTLEVEL,Slice_CB);
+    SPINNER_transparent_level->set_float_limits(0.0,1.0);
     CHECKBOX_average_slice=glui_bounds->add_checkbox_to_panel(panel_slice,_("Averaged slice data"),&slice_average_flag,AVERAGE_DATA,Slice_CB);
     //CHECKBOX_turb_slice=glui_bounds->add_checkbox_to_panel(panel_slice,"Turbulence Resolution",&slice_turbprop_flag,TURB_DATA,Slice_CB);
     SPINNER_sliceaverage=glui_bounds->add_spinner_to_panel(panel_slice,_("Time interval"),GLUI_SPINNER_FLOAT,&slice_average_interval);
@@ -683,9 +700,10 @@ extern "C" void glui_bounds_setup(int main_window){
     COLORBAR_EXTREME2,Slice_CB);
   CHECKBOX_transparentflag=glui_bounds->add_checkbox_to_panel(panel_colorbar,_("Use transparency:"),&use_transparency_data,DATA_transparent,Slice_CB);
 #ifdef pp_BETA
-  glui_bounds->add_checkbox_to_panel(panel_colorbar,_("Sort transparent surfaces:"),&sort_iso_triangles,SORT_SURFACES,Slice_CB);
+  CHECKBOX_sort=glui_bounds->add_checkbox_to_panel(panel_colorbar,_("Sort transparent surfaces:"),&sort_iso_triangles,SORT_SURFACES,Slice_CB);
+  CHECKBOX_smooth=glui_bounds->add_checkbox_to_panel(panel_colorbar,_("Smooth surfaces:"),&smoothtrinormal,SMOOTH_SURFACES,Slice_CB);
 #endif
-  SPINNER_labels_transparency_data=glui_bounds->add_spinner_to_panel(panel_colorbar,_("transparency level"),GLUI_SPINNER_FLOAT,&transparentlevel,TRANSPARENTLEVEL,Slice_CB);
+  SPINNER_labels_transparency_data=glui_bounds->add_spinner_to_panel(panel_colorbar,_("transparency level"),GLUI_SPINNER_FLOAT,&transparent_level,TRANSPARENTLEVEL,Slice_CB);
   SPINNER_labels_transparency_data->set_w(0);
   SPINNER_labels_transparency_data->set_float_limits(0.0,1.0,GLUI_LIMIT_CLAMP);
 
@@ -1900,6 +1918,8 @@ extern "C" void Slice_CB(int var){
 
   updatemenu=1;
   if(var==DATA_transparent){
+    CHECKBOX_transparentflag->set_int_val(use_transparency_data);
+    CHECKBOX_transparentflag2->set_int_val(use_transparency_data);
     updatechopcolors();
     return;
   }
@@ -1919,14 +1939,20 @@ extern "C" void Slice_CB(int var){
     return;
   }
   switch (var){
+    case SMOOTH_SURFACES:
+      CHECKBOX_smooth->set_int_val(smoothtrinormal);
+      CHECKBOX_smooth2->set_int_val(smoothtrinormal);
+      break;
     case SORT_SURFACES:
       sort_embedded_geometry=sort_iso_triangles;
       for(i=nsurfinfo;i<nsurfinfo+n_iso_ambient+1;i++){
         surfdata *surfi;
 
         surfi = surfinfo + i;
-        surfi->transparent_level=transparentlevel;
+        surfi->transparent_level=transparent_level;
       }
+      CHECKBOX_sort->set_int_val(sort_iso_triangles);
+      CHECKBOX_sort2->set_int_val(sort_iso_triangles);
       break;
     case SHOW_EVAC_SLICES:
       data_evac_coloring = 1-constant_evac_coloring;
@@ -1943,11 +1969,12 @@ extern "C" void Slice_CB(int var){
         surfdata *surfi;
 
         surfi = surfinfo + i;
-        surfi->transparent_level=transparentlevel;
+        surfi->transparent_level=transparent_level;
       }
       updatecolors(-1);
-      SPINNER_transparentlevel->set_float_val(transparentlevel);
-      SPINNER_labels_transparency_data->set_float_val(transparentlevel);
+      SPINNER_transparent_level->set_float_val(transparent_level);
+      SPINNER_labels_transparency_data->set_float_val(transparent_level);
+      SPINNER_labels_transparency_data2->set_float_val(transparent_level);
       break;
 #ifdef pp_SLICECONTOURS
     case LINE_CONTOUR_VALUE:
