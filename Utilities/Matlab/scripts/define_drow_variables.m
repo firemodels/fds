@@ -54,6 +54,7 @@ Flip_Axis         = char(parameters(find(strcmp(headers,'Flip_Axis'))));
 Title_Position    = str2num(char(parameters(find(strcmp(headers,'Title_Position')))));
 Key_Position      = char(parameters(find(strcmp(headers,'Key_Position'))));
 Legend_XYWidthHeight = str2num(char(parameters(find(strcmp(headers,'Legend_XYWidthHeight')))));
+Paper_Width_Factor   = str2num(char(parameters(find(strcmp(headers,'Paper_Width_Factor')))));
 Plot_Type         = char(parameters(find(strcmp(headers,'Plot_Type'))));
 Plot_Filename     = char(parameters(find(strcmp(headers,'Plot_Filename'))));
 
