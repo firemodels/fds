@@ -266,11 +266,13 @@ for i=2:2000
         end
         
         % print to pdf
+		
+		PDF_Paper_Width = Paper_Width_Factor*Paper_Width;
         
         set(gcf,'Visible',Figure_Visibility);
         set(gcf,'PaperUnits',Paper_Units);
-        set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-        set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]); 
+        set(gcf,'PaperSize',[PDF_Paper_Width Paper_Height]);
+        set(gcf,'PaperPosition',[0 0 PDF_Paper_Width Paper_Height]); 
         display(['Printing plot ',num2str(i),'...'])
         print(gcf,'-dpdf',[plotdir,Plot_Filename])
         
