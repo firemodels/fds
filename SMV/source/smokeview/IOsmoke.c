@@ -81,12 +81,12 @@ if(show_smoketest==0){\
     int mm;\
     mm = xyzindex[node];                                 \
     alphabyte = value[mm];                               \
-    if(skip==2){\
+    if(skip_global==2){\
       alphaval=alphabyte/255.0; \
       alphaval=alphaval*(2.0-alphaval);                  \
       alphabyte=alphaval*255.0;\
     }\
-    else if(skip==3){\
+    else if(skip_global==3){\
       alphaval=alphabyte/255.0;                              \
       alphaval = alphaval*(3.0-alphaval*(3.0-alphaval));\
       alphabyte = 255*alphaval; \
@@ -189,12 +189,12 @@ if(show_smoketest==0){\
     int mm;\
     mm = xyzindex[node];                                 \
     alphabyte = value[mm];                               \
-    if(skip==2){\
+    if(skip_global==2){\
       alphaval=alphabyte/255.0; \
       alphaval=alphaval*(2.0-alphaval);                  \
       alphabyte=alphaval*255.0;\
     }\
-    else if(skip==3){\
+    else if(skip_global==3){\
       alphaval=alphabyte/255.0;                              \
       alphaval = alphaval*(3.0-alphaval*(3.0-alphaval));\
       alphabyte = 255*alphaval; \
@@ -474,7 +474,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
     return;
   }
   CheckMemory;
-  if(getsmoke3d_sizes(skip,smoke3di->file,smoke3di->version,&smoke3di->times, &smoke3di->use_smokeframe,
+  if(getsmoke3d_sizes(skip_global,smoke3di->file,smoke3di->version,&smoke3di->times, &smoke3di->use_smokeframe,
                  &smoke3di->nchars_uncompressed, 
                  &smoke3di->nchars_compressed_smoke,
                  &smoke3di->nchars_compressed_smoke_full,

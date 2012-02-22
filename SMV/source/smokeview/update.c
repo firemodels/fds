@@ -1259,7 +1259,7 @@ void updatetimes(void){
       mesh *meshi;
 
       ib = isoinfo+i;
-      if(ib->geomflag==0||ib->loaded==0)continue;
+      if(ib->geomflag==1||ib->loaded==0)continue;
       meshi=meshinfo + ib->blocknumber;
       for(n=0;n<meshi->nisosteps;n++){
         float t_diff;

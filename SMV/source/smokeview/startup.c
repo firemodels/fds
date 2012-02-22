@@ -1455,8 +1455,6 @@ void initvars(void){
   exportdata=0;
   nspr=0;
   RenderGif=0, RenderSkip=1;
-  isoframestep=1;
-  isoframeskip=0;
   smoke3dframestep=1;
   smoke3dframeskip=0;
   vectorskip=1;
@@ -1497,7 +1495,6 @@ void initvars(void){
   visSmokePart=2, visSprinkPart=1, havesprinkpart=0;
   visaxislabels=0;
   numplot3dvars=0;
-  skip=1;
   p3dsurfacesmooth=1;
   p3dsurfacetype=1;
   parttype=0;

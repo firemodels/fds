@@ -8573,8 +8573,8 @@ updatemenu=0;
       }
       if(nisoinfo>0){
         strcpy(loadmenulabel,"Isosurface file");
-        if(isoframeskip>0){
-          sprintf(steplabel,"/Skip %i",isoframeskip);
+        if(isoframeskip_global>0){
+          sprintf(steplabel,"/Skip %i",isoframeskip_global);
           strcat(loadmenulabel,steplabel);
         }
         glutAddSubMenu(loadmenulabel,loadisomenu);

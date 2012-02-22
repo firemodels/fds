@@ -1350,8 +1350,8 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   skip_local=0;
   if(staticframe0==1)skip_local=parti->sframe[0];
   tcopy=parti->tpart+skip_local;
-  tmin=1000000000.0;
-  tmax=-tmin;
+  tmin_global=1000000000.0;
+  tmax_global=-tmin_global;
   isprinkcopy=parti->isprink;
   for(n=skip_local;n<nmax;n++){
     if(*isprinkcopy==0&&parti->particle_type==0){
@@ -1365,8 +1365,8 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
       havesprinkpart=1;
       continue;
     }
-    if(*tcopy<tmin)tmin=*tcopy;
-    if(*tcopy>tmax)tmax=*tcopy;
+    if(*tcopy<tmin_global)tmin_global=*tcopy;
+    if(*tcopy>tmax_global)tmax_global=*tcopy;
     if(*isprinkcopy==1){
       havesprinkpart=1;
     }
@@ -1378,16 +1378,16 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   printf("computing particle color levels \n");
   if(parti->particle_type!=0||parti->droplet_type!=0){
     adjustpartbounds(parti->tpart,parti->particle_type,parti->droplet_type,parti->isprink,
-      skip_local,nmax,setpartmin,&tmin,setpartmax,&tmax);
+      skip_local,nmax,setpartmin,&tmin_global,setpartmax,&tmax_global);
   }
   if(setpartmin == SET_MIN){
-    tmin = partmin;
+    tmin_global = partmin;
   }
   if(setpartmax == SET_MAX){
-    tmax = partmax;
+    tmax_global = partmax;
   }
-  partmin=tmin;
-  partmax=tmax;
+  partmin=tmin_global;
+  partmax=tmax_global;
   if(NewMemory((void **)&colorlabelpart,MAXRGB*sizeof(char *))==0){
     FORTclosefortranfile(&file_unit);
     readpart("",ifile,UNLOAD,&error);
@@ -1405,7 +1405,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   }
   getPartColors(parti->tpart, skip_local, nmax, 
     parti->itpart,parti->isprink,parti->particle_type,parti->droplet_type,
-    &tmin, &tmax, nrgb, colorlabelpart, partscale,partlevels256);
+    &tmin_global, &tmax_global, nrgb, colorlabelpart, partscale,partlevels256);
   for(n=0;n<skip_local;n++){
     parti->itpart[n]=0;
   }

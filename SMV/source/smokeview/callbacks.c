@@ -1371,7 +1371,7 @@ void keyboard_2(unsigned char key, int x, int y){
   }
 
   skip2=key2-one+1;
-  if(skip2>0&&skip2<10)skip=skip2;
+  if(skip2>0&&skip2<10)skip_global=skip2;
 
   /* if not a directional key then return */
 
@@ -1388,12 +1388,12 @@ void keyboard_2(unsigned char key, int x, int y){
     if(strncmp((const char *)&key2,"<",1)==0||strncmp((const char *)&key2,",",1)==0){ClipDir=-1;}
      else if(strncmp((const char *)&key2,">",1)==0||strncmp((const char *)&key2,".",1)==0){ClipDir=1;}
 
-    if(stepclip_x==1  )clip_i += skip*ClipDir;
-    if(stepclip_y==1  )clip_j += skip*ClipDir;
-    if(stepclip_z==1  )clip_k += skip*ClipDir;
-    if(stepclip_X==1  )clip_I += skip*ClipDir;
-    if(stepclip_Y==1  )clip_J += skip*ClipDir;
-    if(stepclip_Z==1  )clip_K += skip*ClipDir;
+    if(stepclip_x==1  )clip_i += skip_global*ClipDir;
+    if(stepclip_y==1  )clip_j += skip_global*ClipDir;
+    if(stepclip_z==1  )clip_k += skip_global*ClipDir;
+    if(stepclip_X==1  )clip_I += skip_global*ClipDir;
+    if(stepclip_Y==1  )clip_J += skip_global*ClipDir;
+    if(stepclip_Z==1  )clip_K += skip_global*ClipDir;
 
     updateclipbounds(clip_x,&clip_i,clip_X,&clip_I,current_mesh->ibar);
     updateclipbounds(clip_y,&clip_j,clip_Y,&clip_J,current_mesh->jbar);
@@ -1412,22 +1412,22 @@ void keyboard_2(unsigned char key, int x, int y){
    }
 
   if(plotstate==DYNAMIC_PLOTS){
-    if(timedrag==0)itimes += skip*FlowDir;
+    if(timedrag==0)itimes += skip_global*FlowDir;
     checktimebound();
     Idle();
 
     return;
   }
   if(current_mesh->visx != 0 && current_mesh->slicedir==1){
-    current_mesh->plotx += skip*FlowDir;
+    current_mesh->plotx += skip_global*FlowDir;
     updateplotslice(1);
   }
   if(current_mesh->visy != 0 && current_mesh->slicedir==2){
-    current_mesh->ploty += skip*FlowDir;
+    current_mesh->ploty += skip_global*FlowDir;
     updateplotslice(2);
   }
   if(current_mesh->visz != 0 && current_mesh->slicedir==3){
-    current_mesh->plotz += skip*FlowDir;
+    current_mesh->plotz += skip_global*FlowDir;
     updateplotslice(3);
   }
   if(ReadPlot3dFile==1&&visiso !=0 && current_mesh->slicedir==4){
@@ -1593,10 +1593,10 @@ void handle_plot3d_keys(int  key){
     }
     updateshowstep(1,DIRX);
     if(key==GLUT_KEY_LEFT){
-      current_mesh->plotx -= skip;
+      current_mesh->plotx -= skip_global;
     }
     if(key==GLUT_KEY_RIGHT){
-      current_mesh->plotx += skip;
+      current_mesh->plotx += skip_global;
     }
     updateplotslice(1);
     break;
@@ -1604,10 +1604,10 @@ void handle_plot3d_keys(int  key){
   case GLUT_KEY_UP:
     updateshowstep(1,DIRY);
     if(key==GLUT_KEY_UP){
-      current_mesh->ploty += skip;
+      current_mesh->ploty += skip_global;
     }
     if(key==GLUT_KEY_DOWN){
-      current_mesh->ploty -= skip;
+      current_mesh->ploty -= skip_global;
     }
     updateplotslice(2);
     break;
@@ -1615,10 +1615,10 @@ void handle_plot3d_keys(int  key){
   case GLUT_KEY_PAGE_DOWN:
     updateshowstep(1,DIRZ);
     if(key==GLUT_KEY_PAGE_UP){
-      current_mesh->plotz += skip;
+      current_mesh->plotz += skip_global;
     }
     if(key==GLUT_KEY_PAGE_DOWN){
-      current_mesh->plotz -= skip;
+      current_mesh->plotz -= skip_global;
     }
     updateplotslice(3);
     break;

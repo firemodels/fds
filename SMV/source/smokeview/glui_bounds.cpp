@@ -1179,7 +1179,7 @@ extern "C" void updateplot3dlistindex(void){
 void Iso_CB(int var){
   switch (var) {
   case FRAMELOADING:
-    isoframestep=isoframeskip+1;
+    isoframestep_global=isoframeskip_global+1;
     isozipstep=isozipskip+1;
     updatemenu=1;
     break;
@@ -2441,7 +2441,7 @@ extern "C" void update_tbounds(void){
   if(use_tload_skip==1){
     smoke3dframeskip=tload_skip;
     boundframeskip=tload_skip;
-    isoframeskip=tload_skip;
+    isoframeskip_global=tload_skip;
     partframeskip=tload_skip;
     evacframeskip=tload_skip;
     sliceframeskip=tload_skip;
@@ -2449,7 +2449,7 @@ extern "C" void update_tbounds(void){
   else{
     smoke3dframeskip=0;
     boundframeskip=0;
-    isoframeskip=0;
+    isoframeskip_global=0;
     partframeskip=0;
     evacframeskip=0;
     sliceframeskip=0;

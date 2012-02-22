@@ -67,7 +67,7 @@ void getisolevels(const char *isofile, int dataflag, float **levelsptr, float **
 /* ------------------ getisosizes ------------------------ */
 
 void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostreamptr, int *nvertices, int *ntriangles, 
-                 float **levelsptr, int *nisolevels, int *nisosteps, int isoframestep_local, 
+                 float **levelsptr, int *nisolevels, int *nisosteps, 
                  float *tmin_local, float *tmax_local, int endian_local){
 	int len[3],labellengths=0;
 	int nlevels, n;
@@ -148,11 +148,11 @@ void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostreamptr, int
       else{
 	      skip_local+=ntriangles_i*4;
       }
-      {EGZ_FSEEK(*isostreamptr,skip,SEEK_CUR);}
+      {EGZ_FSEEK(*isostreamptr,skip_local,SEEK_CUR);}
     }
     if(skip_frame==1)continue;
     i++;
-    if(i%isoframestep_local!=0)continue;
+    if(i%isoframestep_global!=0)continue;
     if((settmin_i==1&&time_local<tmin_i))continue;
     if((settmax_i==1&&time_local>tmax_i))continue;
 
@@ -243,7 +243,6 @@ void readiso_geom(const char *file, int ifile, int flag, int *errorcode){
 /* ------------------ readiso_orig ------------------------ */
 
 void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
-  extern int isoframestep;
   int itime,ilevel,itri,ivert,iitime;
   isosurface *asurface;
   int nisopoints, nisotriangles;
@@ -253,6 +252,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
   float time_local, time_max;
   EGZ_FILE *isostream;
   int break_frame;
+  int skip_local;
 
   int blocknumber;
   int error;
@@ -314,7 +314,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
   }
 
   getisosizes(file, ib->dataflag, &isostream, &nisopoints, &nisotriangles, 
-    &meshi->isolevels, &meshi->nisolevels, &meshi->nisosteps, isoframestep, 
+    &meshi->isolevels, &meshi->nisolevels, &meshi->nisosteps, 
     &ib->tmin, &ib->tmax, endian_data);
 
   file_size=get_filesize(file);
@@ -384,7 +384,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
       time_max=time_local;
     }
     meshi->isotimes[itime]=time_local;
-    if(iitime%isoframestep!=0||(settmin_i==1&&time_local<tmin_i)||(settmax_i==1&&time_local>tmax_i)||skip_frame==1){
+    if(iitime%isoframestep_global!=0||(settmin_i==1&&time_local<tmin_i)||(settmax_i==1&&time_local>tmax_i)||skip_frame==1){
     }
     else{
       printf("isosurface time=%f\n",time_local);
@@ -408,21 +408,21 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
       asurface->niso_triangles=ntriangles_i/3;
       asurface->niso_vertices=nvertices_i;
         
-      if(iitime%isoframestep!=0||(settmin_i==1&&time_local<tmin_i)||(settmax_i==1&&time_local>tmax_i)||skip_frame==1){
-        skip=0;
+      if(iitime%isoframestep_global!=0||(settmin_i==1&&time_local<tmin_i)||(settmax_i==1&&time_local>tmax_i)||skip_frame==1){
+        skip_local=0;
         if(nvertices_i<=0||ntriangles_i<=0)continue;
-        skip += (6*nvertices_i);
-        if(ib->dataflag==1)skip += (8 + 2*nvertices_i);
+        skip_local += (6*nvertices_i);
+        if(ib->dataflag==1)skip_local += (8 + 2*nvertices_i);
   	    if(nvertices_i<256){
-  	      skip += (ntriangles_i);
+  	      skip_local += (ntriangles_i);
         }
         else if(nvertices_i>=256&&nvertices_i<65536){
-  	      skip += (ntriangles_i*2);
+  	      skip_local += (ntriangles_i*2);
         }
 	      else{
-          skip += (ntriangles_i*4);
+          skip_local += (ntriangles_i*4);
         }
-        EGZ_FSEEK(isostream,skip,SEEK_CUR);
+        EGZ_FSEEK(isostream,skip_local,SEEK_CUR);
         continue;
       }
       
@@ -619,7 +619,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
       meshi->nisosteps=itime;
       break;
     }
-    if(skip_frame==1||iitime%isoframestep!=0||(settmin_i==1&&time_local<tmin_i)||(settmax_i==1&&time_local>tmax_i)){
+    if(skip_frame==1||iitime%isoframestep_global!=0||(settmin_i==1&&time_local<tmin_i)||(settmax_i==1&&time_local>tmax_i)){
     }
     else{
       itime++;
