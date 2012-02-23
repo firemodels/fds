@@ -2072,7 +2072,7 @@ int readsmv(char *file, char *file2){
     }
     if(
       match(buffer,"ISOF") == 1||match(buffer,"TISOF")==1||
-      match(buffer,"ISOG") == 1||match(buffer,"TISOG")==1
+      match(buffer,"ISOG") == 1||match(buffer,"TISOGG")==1  // turn off TISOG for now
       ){
       nisoinfo++;
       continue;
@@ -5552,7 +5552,7 @@ typedef struct {
 
     if(
       match(buffer,"ISOF") == 1||match(buffer,"TISOF")==1||
-      match(buffer,"ISOG") == 1||match(buffer,"TISOG")==1
+      match(buffer,"ISOG") == 1||match(buffer,"TISOGG")==1  // turn off TISOG for now
       ){
       iso *isoi;
       int get_isolevels;
@@ -5560,8 +5560,8 @@ typedef struct {
 
       isoi = isoinfo + iiso;
       nn_iso++;
-      if(match(buffer,"TISOF")==1||match(buffer,"TISOG")==1)dataflag=1;
-      if(match(buffer,"ISOG")==1||match(buffer,"TISOG")==1)geomflag=1;
+      if(match(buffer,"TISOF")==1||match(buffer,"TISOGG")==1)dataflag=1;
+      if(match(buffer,"ISOG")==1||match(buffer,"TISOGG")==1)geomflag=1;
       trim(buffer);
       len=strlen(buffer);
 
@@ -7831,10 +7831,13 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"SHOWTRIANGLES")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i %i %i",&showtrisurface,&showtrioutline,&showtrinormal,&showtripoints);
+      sscanf(buffer,"%i %i %i %i %i %i",&showtrisurface,&showtrioutline,&showtripoints,&showtrinormal,&showpointnormal,&smoothtrinormal);
       if(showtrisurface!=0)showtrisurface=1;
       if(showtrioutline!=0)showtrioutline=1;
       if(showtripoints!=0)showtripoints=1;
+      if(showtrinormal!=0)showtrinormal=1;
+      if(showpointnormal!=0)showpointnormal=1;
+      if(smoothtrinormal!=0)smoothtrinormal=1;
 #ifdef pp_BETA
       if(showtrinormal!=0)showtrinormal=1;
 #else
@@ -10614,7 +10617,7 @@ void writeini(int flag){
   fprintf(fileout,"OFFSETSLICE\n");
   fprintf(fileout," %i\n",offset_slice);
   fprintf(fileout,"SHOWTRIANGLES\n");
-  fprintf(fileout," %i %i %i %i\n",showtrisurface,showtrioutline,showtrinormal,showtripoints);
+  fprintf(fileout," %i %i %i %i %i %i\n",showtrisurface,showtrioutline,showtripoints,showtrinormal,showpointnormal,smoothtrinormal);
   fprintf(fileout,"SHOWSTREAK\n");
   fprintf(fileout," %i %i %i %i\n",streak5show,streak5step,showstreakhead,streak_index);
   fprintf(fileout,"VECLENGTH\n");

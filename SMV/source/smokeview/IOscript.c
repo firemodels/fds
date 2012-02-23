@@ -297,7 +297,12 @@ void free_script(void){
 
 /* ------------------ init_scripti ------------------------ */
 
-void init_scripti(scriptdata *scripti, int command){
+void init_scripti(scriptdata *scripti, int command,char *label){
+  char *label2;
+
+  trim(label);
+  label2 = trim_front(label);
+  strcpy(scripti->command_label,label2);
   scripti->command=command;
   scripti->cval=NULL;
   scripti->fval=0.0;
@@ -475,7 +480,7 @@ int compile_script(char *scriptfile){
 
     if(match_upper(buffer,"UNLOADALL") == 1){
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_UNLOADALL);
+      init_scripti(scripti,SCRIPT_UNLOADALL,buffer);
 
       nscriptinfo++;
       continue;
@@ -484,7 +489,7 @@ int compile_script(char *scriptfile){
       int len;
 
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_RENDERDIR);
+      init_scripti(scripti,SCRIPT_RENDERDIR,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
       cleanbuffer(buffer,buffer2);
       len = strlen(buffer);
@@ -514,7 +519,7 @@ int compile_script(char *scriptfile){
       int len;
 
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_RENDERONCE);
+      init_scripti(scripti,SCRIPT_RENDERONCE,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
       cleanbuffer(buffer,buffer2);
       len = strlen(buffer);
@@ -530,7 +535,7 @@ int compile_script(char *scriptfile){
       int len;
 
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_RENDERDOUBLEONCE);
+      init_scripti(scripti,SCRIPT_RENDERDOUBLEONCE,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
       cleanbuffer(buffer,buffer2);
       len = strlen(buffer);
@@ -546,7 +551,7 @@ int compile_script(char *scriptfile){
       int len;
 
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_RENDERALL);
+      init_scripti(scripti,SCRIPT_RENDERALL,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
       cleanbuffer(buffer,buffer2);
       sscanf(buffer,"%i",&scripti->ival);
@@ -568,7 +573,7 @@ int compile_script(char *scriptfile){
       int len;
 
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_VOLSMOKERENDERALL);
+      init_scripti(scripti,SCRIPT_VOLSMOKERENDERALL,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
       cleanbuffer(buffer,buffer2);
       sscanf(buffer,"%i",&scripti->ival);
@@ -593,7 +598,7 @@ int compile_script(char *scriptfile){
       int len;
 
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_LOADINIFILE);
+      init_scripti(scripti,SCRIPT_LOADINIFILE,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
       cleanbuffer(buffer,buffer2);
       len=strlen(buffer);
@@ -607,7 +612,7 @@ int compile_script(char *scriptfile){
       int len;
 
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_LOADFILE);
+      init_scripti(scripti,SCRIPT_LOADFILE,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
       cleanbuffer(buffer,buffer2);
       len=strlen(buffer);
@@ -621,7 +626,7 @@ int compile_script(char *scriptfile){
       int len;
 
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_LOADVFILE);
+      init_scripti(scripti,SCRIPT_LOADVFILE,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
       cleanbuffer(buffer,buffer2);
       len=strlen(buffer);
@@ -633,7 +638,7 @@ int compile_script(char *scriptfile){
     }
     if(match_upper(buffer,"EXIT") == 1){
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_EXIT);
+      init_scripti(scripti,SCRIPT_EXIT,buffer);
 
       nscriptinfo++;
       continue;
@@ -642,7 +647,7 @@ int compile_script(char *scriptfile){
       int len;
 
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_LOADBOUNDARY);
+      init_scripti(scripti,SCRIPT_LOADBOUNDARY,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
       cleanbuffer(buffer,buffer2);
       len=strlen(buffer);
@@ -656,7 +661,7 @@ int compile_script(char *scriptfile){
       int len;
 
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_PARTCLASSCOLOR);
+      init_scripti(scripti,SCRIPT_PARTCLASSCOLOR,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
       cleanbuffer(buffer,buffer2);
       len=strlen(buffer);
@@ -670,7 +675,7 @@ int compile_script(char *scriptfile){
       int len;
 
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_PARTCLASSTYPE);
+      init_scripti(scripti,SCRIPT_PARTCLASSTYPE,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
       cleanbuffer(buffer,buffer2);
       len=strlen(buffer);
@@ -682,7 +687,7 @@ int compile_script(char *scriptfile){
     }
     if(match_upper(buffer,"PLOT3DPROPS") == 1){
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_PLOT3DPROPS);
+      init_scripti(scripti,SCRIPT_PLOT3DPROPS,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
       cleanbuffer(buffer,buffer2);
       sscanf(buffer2,"%i %i %i %i",&scripti->ival,&scripti->ival2,&scripti->ival3,&scripti->ival4);
@@ -692,7 +697,7 @@ int compile_script(char *scriptfile){
     }
     if(match_upper(buffer,"SHOWPLOT3DDATA") == 1){
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_SHOWPLOT3DDATA);
+      init_scripti(scripti,SCRIPT_SHOWPLOT3DDATA,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
       cleanbuffer(buffer,buffer2);
       sscanf(buffer2,"%i %i %i %i %f",&scripti->ival,&scripti->ival2,&scripti->ival3,&scripti->ival4,&scripti->fval);
@@ -707,7 +712,7 @@ int compile_script(char *scriptfile){
       int len;
 
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_LOADTOUR);
+      init_scripti(scripti,SCRIPT_LOADTOUR,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
       cleanbuffer(buffer,buffer2);
       len=strlen(buffer);
@@ -719,7 +724,7 @@ int compile_script(char *scriptfile){
     }
     if(match_upper(buffer,"UNLOADTOUR") == 1){
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_UNLOADTOUR);
+      init_scripti(scripti,SCRIPT_UNLOADTOUR,buffer);
 
       nscriptinfo++;
       continue;
@@ -728,7 +733,7 @@ int compile_script(char *scriptfile){
       int len;
 
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_LOAD3DSMOKE);
+      init_scripti(scripti,SCRIPT_LOAD3DSMOKE,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
       cleanbuffer(buffer,buffer2);
       len=strlen(buffer);
@@ -740,7 +745,7 @@ int compile_script(char *scriptfile){
     }
     if(match_upper(buffer,"LOADVOLSMOKE") == 1){
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_LOADVOLSMOKE);
+      init_scripti(scripti,SCRIPT_LOADVOLSMOKE,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
       cleanbuffer(buffer,buffer2);
       sscanf(buffer,"%i",&scripti->ival);
@@ -750,7 +755,7 @@ int compile_script(char *scriptfile){
     }
     if(match_upper(buffer,"LOADVOLSMOKEFRAME") == 1){
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_LOADVOLSMOKEFRAME);
+      init_scripti(scripti,SCRIPT_LOADVOLSMOKEFRAME,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
       cleanbuffer(buffer,buffer2);
       sscanf(buffer,"%i %i",&scripti->ival,&scripti->ival2);
@@ -762,7 +767,7 @@ int compile_script(char *scriptfile){
       int len;
 
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_LOADSLICE);
+      init_scripti(scripti,SCRIPT_LOADSLICE,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
       cleanbuffer(buffer,buffer2);
       len=strlen(buffer);
@@ -782,7 +787,7 @@ int compile_script(char *scriptfile){
       int len;
 
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_LOADVSLICE);
+      init_scripti(scripti,SCRIPT_LOADVSLICE,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
       cleanbuffer(buffer,buffer2);
       len=strlen(buffer);
@@ -802,7 +807,7 @@ int compile_script(char *scriptfile){
       int len;
 
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_LOADISO);
+      init_scripti(scripti,SCRIPT_LOADISO,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
       cleanbuffer(buffer,buffer2);
       len=strlen(buffer);
@@ -814,14 +819,14 @@ int compile_script(char *scriptfile){
     }
     if(match_upper(buffer,"LOADPARTICLES") == 1){
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_LOADPARTICLES);
+      init_scripti(scripti,SCRIPT_LOADPARTICLES,buffer);
 
       nscriptinfo++;
       continue;
     }
     if(match_upper(buffer,"LOADPLOT3D") == 1){
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_LOADPLOT3D);
+      init_scripti(scripti,SCRIPT_LOADPLOT3D,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
       cleanbuffer(buffer,buffer2);
       sscanf(buffer," %i %f",&scripti->ival,&scripti->fval);
@@ -831,7 +836,7 @@ int compile_script(char *scriptfile){
     }
     if(match_upper(buffer,"SETTIMEVAL") == 1){
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_SETTIMEVAL);
+      init_scripti(scripti,SCRIPT_SETTIMEVAL,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
       cleanbuffer(buffer,buffer2);
       sscanf(buffer,"%f",&scripti->fval);
@@ -844,7 +849,7 @@ int compile_script(char *scriptfile){
       int len;
 
       scripti = scriptinfo + nscriptinfo;
-      init_scripti(scripti,SCRIPT_SETVIEWPOINT);
+      init_scripti(scripti,SCRIPT_SETVIEWPOINT,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
       cleanbuffer(buffer,buffer2);
       len=strlen(buffer);
@@ -1518,9 +1523,7 @@ int run_script(void){
     return returnval;
   }
   scripti = current_script_command;
-#ifdef _DEBUG
-  printf("executing script command %i\n",scripti->command);
-#endif
+  printf("\n ******* running: %s *******\n\n",scripti->command_label);
   switch (scripti->command){
     case SCRIPT_UNLOADALL:
       LoadUnloadMenu(UNLOADALL);

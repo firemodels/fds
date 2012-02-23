@@ -131,6 +131,7 @@ typedef struct _scriptfiledata {
 
 typedef struct {
   int command;
+  char command_label[32];
   int ival,ival2,ival3,ival4,ival5;
   char *cval;
   float fval;
