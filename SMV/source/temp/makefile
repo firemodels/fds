@@ -11,13 +11,15 @@
 
 VPATH = ../FDS_Source
 
-# Definition of the non-MPI or MPI object variables
+# Definition of the non-MPI object variables
 
 obj_serial = prec.o mpis.o cons.o devc.o data.o type.o mesh.o func.o smvv.o irad.o \
              ieva.o pois.o scrc.o radi.o evac.o part.o vege.o ctrl.o turb.o geom.o dump.o hvac.o read.o \
              mass.o wall.o fire.o divg.o init.o velo.o pres.o main.o
 
 objwin_serial = $(obj_serial:.o=.obj)
+
+# Definition of the MPI object variables
 
 obj_mpi = prec.o mpip.o cons.o devc.o data.o type.o mesh.o func.o smvv.o irad.o \
           ieva.o pois.o scrc.o radi.o evac.o part.o vege.o ctrl.o turb.o geom.o dump.o hvac.o read.o \
@@ -76,7 +78,6 @@ mpi_intel_win_32 : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwin_mpi) $(MPILIB)
 
  #*** note: the following scripts (located in ..\Scripts directory) must be run before running make with this target
- #    ..\Scripts\iclvars intel64
  #    ..\Scripts\ifortvars intel64
 
 intel_win_64 : FFLAGS = -O2 /Qvec_report0 
