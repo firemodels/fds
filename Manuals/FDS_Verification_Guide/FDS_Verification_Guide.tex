@@ -3107,6 +3107,21 @@ where K is the loss coefficient for the duct and $\Delta P$ is the pressure drop
 
 \clearpage
 
+\section{Node Flow Losses (HVAC\_tee\_loss\_1 and HVAC\_tee\_loss\_2)}
+
+Node flow losses are implemented by partitioning the node loss to upstream and downstream ducts connected to a node as a function of the combination of flow directions present.  These two cases replicate the duct flow loss geometry and HVAC system ((HVAC\_flow\_loss.fds)) . However, instead of losses assigned to the ducts, the losses are assigned to the duct nodes.  In the first test case, HVAC\_tee\_loss\_1.fds, flow is into the main leg of the tee and out the two secondary legs.  The secondary branches of the tee are given losses of 15 and 3 and the nodes discharing to the FDS domain are assigned losses of 1.  This gives total losses of 16 and 4, the same as in the duct loss example.  In the second case, HVAC\_tee\_loss\_2.fds, flow is out the main leg of the tee and in the two secondary legs of the tee.  Duct directions are reversed so the sign on velocity remains the same as in the first case.  The same flow losses are assigned.  It is expected that the duct velocities in both cases should be 3~m/s, 2~m/s, and 1~m/s.
+
+\begin{figure}[ht]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_tee_loss_1} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_tee_loss_2} }
+   \end{tabular*}
+   \caption{Duct velocities with varied node loss. HVAC\_tee\_loss\_1 (left) and (HVAC\_tee\_loss\_2 (right)}
+   \label{fig_HVAC_node}
+\end{figure}
+
+\clearpage
+
 
 \section{HVAC Mass Conservation (HVAC\_mass\_conservation)}
 
