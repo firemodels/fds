@@ -23,7 +23,7 @@ char getdatacolors_revision[]="$Revision$";
 
 void getBoundaryColors(float *t, int nt, unsigned char *it, 
               int settmin, float *ttmin, int settmax, float *ttmax,
-              float *tmin_global, float *tmax_global,
+              float *tmin_arg, float *tmax_arg,
               int ndatalevel, int nlevel,
               char **labels, char *scale, float *tvals256,
               int *extreme_min, int *extreme_max
@@ -45,8 +45,8 @@ void getBoundaryColors(float *t, int nt, unsigned char *it,
     if(*tcopy>tmax2)tmax2=*tcopy;
     tcopy++;
   }
-  *tmin_global = tmin2;
-  *tmax_global = tmax2;
+  *tmin_arg = tmin2;
+  *tmax_arg = tmax2;
   *extreme_min=0;
   *extreme_max=0;
   local_skip=0;
@@ -121,7 +121,7 @@ void getBoundaryColors(float *t, int nt, unsigned char *it,
 
 void getBoundaryColors2(float *t, int nt, unsigned char *it, 
               int settmin, float *ttmin, int settmax, float *ttmax,
-              float *tmin_global, float *tmax_global,
+              float *tmin_arg, float *tmax_arg,
               int ndatalevel,
               int *extreme_min, int *extreme_max
               ){
@@ -140,8 +140,8 @@ void getBoundaryColors2(float *t, int nt, unsigned char *it,
     if(*tcopy>tmax2)tmax2=*tcopy;
     tcopy++;
   }
-  *tmin_global = tmin2;
-  *tmax_global = tmax2;
+  *tmin_arg = tmin2;
+  *tmax_arg = tmax2;
   local_skip=0;
   adjustdatabounds(t,local_skip,nt,settmin,&tmin2,settmax,&tmax2);
   if(settmin!=SET_MIN){
@@ -256,7 +256,7 @@ void update_patch_bounds(patch *patchi){
 
 void getBoundaryColors3(patch *patchi, float *t, int nt, unsigned char *it, 
               int settmin, float *ttmin, int settmax, float *ttmax,
-              float *tmin_global, float *tmax_global,
+              float *tmin_arg, float *tmax_arg,
               int nlevel,
               char **labels, char *scale, float *tvals256,
               int *extreme_min, int *extreme_max
@@ -273,8 +273,8 @@ void getBoundaryColors3(patch *patchi, float *t, int nt, unsigned char *it,
   tmin2=patchi->bounds.global_min;
   tmax2=patchi->bounds.global_max;
 
-  *tmin_global = tmin2;
-  *tmax_global = tmax2;
+  *tmin_arg = tmin2;
+  *tmax_arg = tmax2;
   *extreme_min=0;
   *extreme_max=0;
   if(settmin==PERCENTILE_MIN){

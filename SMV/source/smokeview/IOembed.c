@@ -173,8 +173,6 @@ void draw_geom(int flag, int frameflag){
   float skinny_color[]={1.0,0.0,0.0,1.0};
   float *last_color=NULL;
   float last_transparent_level=-1.0;
-  float color_local[4];
-
 
   if(patchembedded==0&&showtrisurface==1&&frameflag==0){
     int ntris;
@@ -208,21 +206,21 @@ void draw_geom(int flag, int frameflag){
       triangle *trianglei;
       float *xyzptr[3];
       float *xyznorm;
-      float transparent_level;
+      float transparent_level_local;
 
       trianglei = tris[i];
       if(hilight_skinny==1&&trianglei->skinny==1){
         color=skinny_color;
-        transparent_level=1.0;
+        transparent_level_local=1.0;
       }
       else{
         color = trianglei->surf->color;
-        transparent_level=trianglei->surf->transparent_level;
+        transparent_level_local=trianglei->surf->transparent_level;
       }
-      if(color!=last_color||ABS(last_transparent_level-transparent_level)>0.001){
-        glColor4f(color[0],color[1],color[2],transparent_level);
+      if(color!=last_color||ABS(last_transparent_level-transparent_level_local)>0.001){
+        glColor4f(color[0],color[1],color[2],transparent_level_local);
         last_color=color;
-        last_transparent_level=transparent_level;
+        last_transparent_level=transparent_level_local;
       }
       if(smoothtrinormal==0){
 
@@ -763,6 +761,8 @@ void read_geom(geomdata *geomi, int flag, int *errorcode){
     geomlisti = geomi->geomlistinfo+i;
     geomlisti->points=NULL;
     geomlisti->triangles=NULL;
+    geomlisti->npoints=0;
+    geomlisti->ntriangles=0;
     if(first==1){
       FORTREADBR(times_local,1,stream);
       FORTREADBR(nverts,4,stream);
@@ -786,7 +786,6 @@ void read_geom(geomdata *geomi, int flag, int *errorcode){
       geomi->times[i]=times_local[0];
       printf("time=%.2f triangles: %i\n",times_local[0],ntri_d);
     }
-    geomlisti->points=NULL;
     if(*geom_typeptr==0&&nvert_s+nvert_d>0){
       int nvert;
       int ii;
@@ -817,7 +816,6 @@ void read_geom(geomdata *geomi, int flag, int *errorcode){
       memcpy(geomlisti->rot0,tran_rot+3,3*sizeof(float));
       memcpy(geomlisti->rot,tran_rot+6,2*sizeof(float));
     }
-    geomlisti->ntriangles=0;
     if(*geom_typeptr==0&&ntri_s+ntri_d>0){
       int ntris;
       int *surf_ind=NULL,*ijk=NULL;

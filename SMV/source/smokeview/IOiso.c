@@ -120,6 +120,8 @@ void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostreamptr, int
       skip_frame=0;
       time_max=time_local;
     }
+    nvertices_i=0;
+    ntriangles_i=0;
     if(EGZ_FEOF(*isostreamptr)!=0)break;
     for(n=0;n<nlevels;n++){
       {EGZ_FREAD(&nvertices_i,4,1,*isostreamptr);}

@@ -30,8 +30,8 @@ int compare_float( const void *arg1, const void *arg2 ){
   x=*(float *)arg1;
   y=*(float *)arg2;
   if( x< y)return -1;
-  if( x==y)return 0;
-  return 1;
+  if( x> y)return 1;
+  return 0;
 }
 
 /* ------------------ update_framenumber ------------------------ */
@@ -1918,7 +1918,6 @@ void glui_message_setup(int main_window);
 void glui_motion_setup(int main_window);
 void glui_shooter_setup(int main_window);
 void glui_trainer_setup(int main_window);
-void glui_alert_setup(int main_window);
 void glui_stereo_setup(int main_window);
 void glui_wui_setup(int main_window);
 

@@ -1415,7 +1415,6 @@ int readsmv(char *file, char *file2){
   int i, j, k;
   STRUCTSTAT statbuffer,statbuffer2;
   cadgeom *cd;
-  surfdata *surfi;
   int version;
   
   int nn_smoke3d=0;
@@ -3228,6 +3227,8 @@ int readsmv(char *file, char *file2){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"SURFACE") ==1){
+      surfdata *surfi;
+
       surfi = surfinfo + nsurfinfo;
       initsurface(surfi);
       fgets(buffer,255,stream);
@@ -3434,7 +3435,7 @@ int readsmv(char *file, char *file2){
       buffer_csvptr=buffer_csv;
       strcpy(buffer_csv,bufferptr);
       filename=get_zonefilename(buffer_csvptr);
-      if(filename!=NULL)period=strrchr(filename,".");
+      if(filename!=NULL)period=strrchr(filename,'.');
       if(filename!=NULL&&period!=NULL&&strcmp(period,".csv")==0){
         zonei->csv=1;
         zonecsv=1;
@@ -4575,6 +4576,8 @@ typedef struct {
         strcpy(bc->label,buffer);
 
         for(i=0;i<6;i++){
+          surfdata *surfi;
+
           if(surfinfo==NULL||s_num[i]<0||s_num[i]>=nsurfinfo)continue;
           surfi=surfinfo+s_num[i];
           bc->surf[i]=surfi;
