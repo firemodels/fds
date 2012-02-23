@@ -4840,13 +4840,13 @@ There are occasions where simply defining fixed flow and fixed species boundary 
 Air Conditioning) system.
 If the ability to transport heat and combustion products through a duct network or the ability to fully account for the pressurization of a compartment
 due to a fire on the flows in a duct network is important, you can make use of a coupled HVAC network solver.  The solver computes the flows through a
-duct network described as a mapping of duct segments and nodes where a node is either the joining of two or more ducts or where a duct segment connects to the FDS computational domain.
+duct network described as a mapping of duct segments and nodes where a node is either the joining of two or more ducts (a tee for example) or where a duct segment connects to the FDS computational domain.
 The current HVAC solver does not allow for mass storage in the duct network ({\em i.e.} what goes in during a time step, goes out during a time step).
 HVAC components such as fans and binary dampers (fully open or fully closed) can be included in the HVAC network and are coupled to the FDS control function capability.  The
 user can select from three fan models.
 
 The HVAC solver is invoked if there is an {\ct HVAC} namelist group present in the input file.
-An HVAC network is defined by providing inputs for the ducts, duct nodes, and any fans or dampers present in the system.
+An HVAC network is defined by providing inputs for the ducts; duct nodes; and any fans, dampers, filters, or heating and coiling coils present in the system.
 Additionally you must define the locations where the HVAC network joins the computational domain.  The basic syntax for an {\ct HVAC} component is:
 
 \footnotesize
@@ -4891,12 +4891,11 @@ function named by {\ct CTRL\_ID} or {\ct DEVC\_ID}.  Only one of either {\ct DAM
 \item[{\ct VOLUME\_FLOW}] defines a fixed volumetric flow rate (m$^3$/s) in the duct.  {\ct VOLUME\_FLOW} cannot be used in conjunction with {\ct FAN\_ID}.
 \end{description}
 
-To reduce the computational cost of the HVAC solver, a duct should be considered as any length of duct that connects either a terminal (e.g. a connection to the FDS domain or the ambient) to either a filter or a node with more than two ducts attached.  For example the top of Figure~\ref{fig:HVAC_Simplify} shows a segment of an HVAC system where flow from a tee goes through an expansion fitting, two elbows, an expansion fitting, and a straight length of duct before it terminates as a connection to the FDS domain.  This could be input as each individual fitting or duct with its associated area and loss as shown in the middle of the figure; however, this would result in five duct segments (one for each component) with six node connections resulting in eleven parameters (five velocities and six pressures) which must be solved for.  This is not needed since whatever the flow rate is in any one segment of the duct, that same flow rate exists in all other segments and, thus, the velocties in any segment can be found by taking the area ratios, $v_1/v_2=A_2/A_1$.  Since flow losses are proportional to the square of the velocity, an equivelant duct can be constructed using the total length of the duct, a representative diameter, and summing the losses. Similarly, the pressure drops through the entire duct can be found by summing all of the fitting, $K$, and wall losses, $f$, through the duct as follows:
+To reduce the computational cost of the HVAC solver, a duct should be considered as any length of duct that connects two items that must be defined as nodes ({\em i.e.} a connection to the FDS domain, a filter, or a location where more than two ducts join).  That is a duct should be considered as any portion of the HVAC system where flow can only be in one direction.  For example the top of Figure~\ref{fig:HVAC_Simplify} shows a segment of an HVAC system where flow from a tee goes through an expansion fitting, two elbows, an expansion fitting, and a straight length of duct before it terminates as a connection to the FDS domain.  This could be input as each individual fitting or duct with its associated area and loss as shown in the middle of the figure; however, this would result in five duct segments (one for each component) with six node connections resulting in eleven parameters (five velocities and six pressures) which must be solved for.  This is not needed since whatever the flow rate is in any one segment of the duct, that same flow rate exists in all other segments and, thus, the velocties in any segment can be found by taking the area ratios, $v_1/v_2=A_2/A_1$.  Since flow losses are proportional to the square of the velocity, an equivelant duct can be constructed using the total length of the duct, a representative area or diameter.  The pressure losses associated with all the segments of the duct can be collapsed in to in single loss by summing all of the fitting, $K$, losses through the duct as follows:
 
 \be K_{eff} = \sum_i {K_i \frac {A_{eff}}{A_i}} \ee
-\be f_{eff} = \sum_j {f_j \frac {d_{eff} A_{eff}}{d_j A_j}} \ee
 
-where i is a fitting, j is a duct segment, A is the area of the duct or fitting, and d is the diameter of the duct.
+where $i$ is a fitting, $j$ is a duct segment, and $A$ is the area of the duct or fitting.
 
 \begin{figure}[ht]
 \includegraphics[width=5in]{FIGURES/hvac-simplify.png}
@@ -4923,9 +4922,7 @@ where i is a fitting, j is a duct segment, A is the area of the duct or fitting,
 If the node is connected to the FDS domain, then do not specify {\ct XYZ}.  FDS will compute it as the centroid of the {\ct VENT}.
 \end{description}
 
-A duct node must either have two or more ducts attached to it or it must have either {\ct AMBIENT = .TRUE.} or a {\ct VENT\_ID} specified.  When defining a {\ct VENT} as a component of an HVAC system you must set {\ct SURF\_ID = 'HVAC'} and you must set the {\ct ID}.  Note that you cannot give more than one  {\ct VENT} the same {\ct ID}.
-
-
+A duct node must either have two or more ducts attached to it or it must have either {\ct AMBIENT = .TRUE.} or a {\ct VENT\_ID} specified.  When defining a {\ct VENT} as a component of an HVAC system you must set {\ct SURF\_ID = 'HVAC'} and you must set the {\ct ID} for the {\ct VENT}.  Note that you cannot give more than one  {\ct VENT} the same {\ct ID}.
 
 \subsection{HVAC Fan Parameters}
 \label{info:HVACfan}
