@@ -8789,12 +8789,12 @@ It is possible to record various properties of droplets and particles. Some of t
 {\ct 'MPUA'} is the \underline{M}ass \underline{P}er \underline{U}nit \underline{A}rea of the droplets named {\ct PART\_ID}.
 Likewise, {\ct 'AMPUA'} is the \underline{A}ccumulated \underline{M}ass \underline{P}er \underline{U}nit \underline{A}rea.
 Both of these are given in units of kg/m$^2$. Think of these outputs as measures of the instantaneous mass density per unit area,
-and the accumulated total, respectively. The accumulated total is analogous to a ``bucket test,'' where the droplets are collected
-in buckets\footnote{Be aware of the fact that the default behavior for droplets hitting the ``floor,'' that is, the plane $z=\hbox{\ct ZMIN}$,
+and the accumulated total, respectively.  It should be noted that these quantities are not indentical measures.  AMPUA is analogous to a ``bucket test,'' where the droplets are collected in buckets and the total mass determined at the end of a given time period.  In this case case each grid cell on the floor is considered its own bucket.  AMPUA will only count each particle or droplet once and only count the particle or droplet when it reaches the floor.  \footnote{Be aware of the fact that the default behavior for droplets hitting the ``floor,'' that is, the plane $z=\hbox{\ct ZMIN}$,
 is to disappear ({\ct POROUS\_FLOOR=.TRUE.} on the {\ct MISC} line).
 In this case, {\ct 'MPUA'} will be zero, but {\ct 'AMPUA'} will not. FDS stores the droplet mass just before removing the droplet from
-the simulation for the purpose of saving CPU time.} and the total mass determined at the end of a given time period. The cooling of a solid surface by droplets of a
-given type is given by {\ct 'CPUA'}, the \underline{C}ooling \underline{P}er \underline{U}nit \underline{A}rea in units of kW/m$^2$.
+the simulation for the purpose of saving CPU time.} MPUA counts a particle whenever it is on any solid surface, including the walls.  If the particle or droplet moves from one solid wall
+cell to another, then it will be counted again.  The cooling of a solid surface by droplets of a
+given type is given by {\ct 'CPUA'}, the \underline{C}ooling \underline{P}er \underline{U}nit \underline{A}rea in units of kW/m$^2$.  Since a typical sprinkler simulation only tracks a small fraction of the droplets emitted from a sprinkler, both MPUA and CPUA also perform an exponential smoothing.  This avoids having spotted distributions on surfaces due to the infrequent arrival of particles that likely have a high weighting factor.
 
 In the test case {\bf bucket\_test}, a single sprinkler is
 mounted 10~cm below a 5~m ceiling. Water flows for 30~s at a constant

@@ -80,7 +80,38 @@ The solution scheme is as follows.  Determine the boundary conditions at all poi
 Compute the extrapolated pressures for each pressure zone using the previous iteration (previous time step if the first iteration).
 Assemble the linear set of equations for conservation of momentum and conservation of mass.
 Solve the equation and check the solution for errors in mass conservation, flow reversal over the time step, and the magnitude of change in the velocity solution for each duct.
-If any convergence check fails, the solution is re-iterated with new extrapolated pressures.  Density and enthalpy values are taken as the upwind values in each iteration.
+If any convergence check fails, the solution is re-iterated with new extrapolated pressures.  Density and enthalpy values are taken as the upwind values in each iteration.  After each iteration, the temperature and density of each node are update using the velocity and pressure soultion.  The node temperature is computed by summing the enthalpy flows into the node and computing the average temperature that represents the total enthalpy.  Density is then updated using the equation of state and the new temperature.
+
+\subsection{Filtration}
+
+Filters have two effects on the flow in an HVAC network.  First, a filter causes a flow loss whose magnitude depends on the loading of the filter.  Second, a filter removes mass from flow going through the filter as function of the filter's efficiency.
+
+Filter losses are evaluated using the begining of time step flter loading.  This loss is applied to the upstream duct.  The filter loss is computed as a function of the total filter loading using either a linear ramp or a user defined table.  The total loading of the filter is determiend by summing the mass of each species trapped times a weighting factor for that species.
+
+The filter is assumed to remove a fixed fraction (the filter's efficiency) of the species being trapped by the filter.  Each species can be given its own removal efficiency.   Eq.~(\ref{HVACmass}) for a filter is therefore given as:
+
+\be u_{out} \rho_{out} A_{out} = u_{in} \rho_{in} A_{in} - \sum_j u_{in} \rho_{in} A_{in} Y_{j,in} E_j = u_{in} \rho_{in} A_{in}  \left(1 - \sum_j Y_{j,in} E_j \right) \ee
+
+where $j$ is a species being filtered and $E_j$ is its removal efficiency.  
+
+\subsection{Node Losses}
+
+As seen in Eq.~(\ref{HVACfullexpansion}), flow loss terms appear ionly in the equations for a duct.  This means that losses that occur in a duct node must be expressed in terms of losses in the ducts attached to the node.  The losses need to be applied in a manner that represents the flow conditions within the node.  For example if a tee has flow in one leg and out two legs, it would not make sense to apply the loss to the upstream leg as there would be no ability to distinguish losses due to changing of the flow splitting in the down stream legs.  Loss terms are applied as follows:
+
+\begin{enumerate}
+\item If there is no flow at the node, then each duct connected to the node is assigned the average of all the losses for flows to the duct from all other ducts. 
+\item If there is flow into only one connected duct, then each outflowing duct is assigned the flow loss for flow from the inlet duct to the outlet duct.
+\item If there is flow out of only one connected duct, then each inflowing duct is assigned the flow loss for flow from the inlet duct to the outlet duct corrected for any change in duct area from inlet to outlet (node losses are input as a function of the downstream duct area).
+\item If there is flow into multiple ducts and out of multiple ducts, then each outgoing duct is given the average loss from the inflowing ducts weighted by the volume flow.
+\end{enumerate}
+
+\subsection{Heating and Coiling Coils}
+
+A duct can contain a heating or cooling coil.  These either add or remove heat from the mass flowing in a duct.  This enthalpy change is then added to the duct enthalpy flow at the downstream node prior to computing the node temperature.  Two models are available.  The first model is a constant heat model that adds or removes heat at a fixed rate as long as the coil is operating.  The second model is an effectivness type heat exchanger model where four parameters are specified: the enthalpy of the working fluid ($c_{p,fl}$), the temperature of the working fluid, ($T_{fl}$), the mass flow rate of the working fluid ($\dot{m}_{fl}$), and the effectiveness ($\eta$).  The rate of enthalpy change is then computed as follows:
+
+\be T_{out} = \frac{\dot{m}_{duct} c_{p,duct in} T_{duct in} + \dot{m}_{fl} c_{p,fl} T_{fl}}{\dot{m}_{duct} c_{p,duct in} + \dot{m}_{fl} c_{p,fl}} \ee
+
+\be \dot{q}_{coil}= \dot{m}_{fl} c_{p,fl} \left(T_{fl} -T_{out} \right) \eta \ee
 
 \section{Surface Leakage}
 
