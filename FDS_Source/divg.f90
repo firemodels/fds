@@ -465,6 +465,18 @@ ENDIF ENERGY
  
 ENTHALPY_TRANSPORT_IF: IF (ENTHALPY_TRANSPORT) THEN
 
+   ! Add contribution of evaporating PARTICLEs
+
+   IF (NLP>0 .AND. N_LP_ARRAY_INDICES > 0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               DP(I,J,K) = DP(I,J,K) + D_LAGRANGIAN(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
+
    RHO_H_S_P=>WORK1;         RHO_H_S_P=0._EB
    UDRHDX=>WORK2;            UDRHDX=0._EB
    VDRHDY=>WORK3;            VDRHDY=0._EB
