@@ -1044,7 +1044,7 @@ void updatetimes(void){
       meshi=meshinfo+i;
       if(meshi->isofilenum<0)continue;
       ib = isoinfo + meshi->isofilenum;
-      if(ib->loaded==0)continue;
+      if(ib->geomflag==1||ib->loaded==0)continue;
       ntimes+=meshi->nisosteps;
     }
   }

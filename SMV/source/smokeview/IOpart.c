@@ -1579,7 +1579,6 @@ void drawPart5(const particle *parti){
             float az_angle;
             float *rgbobject;
             float *colorptr;
-            int is_human_color;
 
             if(vis[j]==1){
               int save_use_displaylist;

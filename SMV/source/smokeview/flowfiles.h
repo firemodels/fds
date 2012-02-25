@@ -57,7 +57,7 @@ typedef struct {
 typedef struct {
   char *file;
   int loaded, display;
-  geomlistdata *geomlistinfo;
+  geomlistdata *geomlistinfo,*geomlistinfo_0;
   float *float_vals;
   int *int_vals, nfloat_vals, nint_vals;
   float *times;
