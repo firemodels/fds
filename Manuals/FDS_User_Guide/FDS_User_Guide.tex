@@ -1,6 +1,6 @@
 \documentclass[11pt]{book}
 \usepackage{times,mathptm}
-\usepackage[pdftex]{graphicx}
+\usepackage[pdftex,demo]{graphicx}
 \usepackage[pdftex,
         colorlinks=true,
         urlcolor=linkblue,     % \href{...}{...} external (URL)
@@ -11743,66 +11743,43 @@ component density.
 3-D smoke files contain alpha values used by Smokeview to draw
 semi-transparent planes representing smoke and fire.
 FDS outputs 3-D smoke data at fixed time
-intervals, but unlike other output data, the file format is C, not Fortran. Note that char's are one byte, and ``int's'' and
-float's are four bytes. A {\em pseudo-code} representation of the 3-D
+intervals.  A {\em pseudo-code} representation of the 3-D
 smoke file is given by:
 
 \footnotesize
 \begin{verbatim}
-endian flag (int)
-is1, is2, js1, js2, ks1, ks2 (6*int)
-version (int)
-for each time:
-   time  (float)
-   chars_uncompressed, chars_compressed (2*int)
-   compressed_data (chars_compressed*char)
-end time
+
+! header
+
+  WRITE(LU_SMOKE3D)ONE,VERSION,0,NX-1,0,NY-1,0,NZ-1
+  
+! time depended data
+
+  WRITE(LU_SMOKE3D_SIZE,*)TIME,NCHARS_IN,NCHARS_OUT
+  WRITE(LU_SMOKE3D)TIME
+  WRITE(LU_SMOKE3D)NCHARS_IN,NCHARS_OUT
+  IF (NCHARS_OUT > 0)WRITE(LU_SMOKE3D)(BUFFER_OUT(I),I=1,NCHARS_OUT)
+
 \end{verbatim}
 \normalsize
 
 \noindent
-The endian flag is an integer one.  Smokeview uses this number to
+The first {\em ONE}\ is an endian flag.  Smokeview uses this number to
 determine whether the computer creating the 3-D smoke file and the
 computer viewing the 3-D smoke file use the same or different byte
 swap (endian) conventions for storing floating point numbers.  The
 opacity data is compressed using run-length encoding (RLE).
 
-\section{Isosurface Files}
-\label{out:ISOF}
 
-Iso-surface files are used to store one or more surfaces where the specified {\ct QUANTITY} is a specified value. FDS outputs iso-surface data at fixed
-time intervals.  As with 3-D smoke, the file format is C, not Fortran. Note that char's are one byte, short's are two bytes and ``int's'' and float's are four bytes.
-A {\em pseudo-code} representation of the iso-surface file is given by:
-
-\footnotesize
-\begin{verbatim}
-version                                   (int)
-len1,len2,len3                            (3*int)
-label1,label2,label3                      ((len1+len2+len3+4)*char)
-nlevels                                   (int)
-level_1, level_2, ..., level_nlevels      (nlevels*float)
-for each time:
-  time                                    (float)
-  for each level
-    nvertices                             (int)
-    ntriangles                            (int)
-    vertices_1, ..., vertex_nvertices     (3*short*nvertices)
-    triangles_1, ..., triangle_ntriangles (3*(byte/short/float)*ntriangles)
-  end level
-end time
-\end{verbatim}
-\normalsize
-
-\noindent
-The length of each {\ct triangles\_i} node is one byte if
-the number of triangles, {\ct ntriangles}, is between zero
-and 255 (inclusive), two bytes if {\ct ntriangles} is
-between 256 and 65536 (inclusive) and four bytes if {\ct ntriangles} is greater than or equal to 65536.
-
-\section{Geometry Files}
+\section{Geometry, Isosurface Files}
 \label{out:GEOMETRY}
 
-The geometry file contains a description of immersed geometrical objects.  These objects are
+Geometrical objects, either immersed geometry or isosurfaces are stored using a file format described in this section.
+Iso-surface files are used to store one or more surfaces where the specified {\ct QUANTITY} is a specified value. 
+FDS outputs iso-surface data at fixed
+time intervals.
+
+Geometrical objects are
 defined in terms of nodes and triangles.  A node consists of an $(x,y,z)$ coordinate.
 A triangle
 consists of 3 nodes.  The file format allows one to specify objects that change with time.
@@ -11832,7 +11809,7 @@ These files are written out from {\bf dump.f90} using lines equivalent to the fo
 
 ! dynamic geometry - geometry specified and appearing for each time step
 
-  WRITE(LU_GEOM) STIME, GEOM_TYPE  
+  WRITE(LU_GEOM) STIME, GEOM_TYPE
   IF (GEOM_TYPE.EQ.0) THEN
     WRITE(LU_GEOM) N_VERT_D, N_FACE_D
     IF (N_VERT_D>0) WRITE(LU_GEOM) (Xvert_D(I),Yvert_D(I),Zvert_D(I),I=1,N_VERT_D)
