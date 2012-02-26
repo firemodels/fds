@@ -14,5 +14,8 @@ export INDIR=Current_Results
 $RUNFDS $INDIR SP_AST_Test_1 
 $RUNFDS $INDIR SP_AST_Test_2
 $RUNFDS $INDIR SP_AST_Test_3
+$RUNFDS $INDIR SP_AST_Diesel_1p1
+$RUNFDS $INDIR SP_AST_Diesel_1p9
+$RUNFDS $INDIR SP_AST_Heptane_1p1
 
 echo FDS cases submitted
