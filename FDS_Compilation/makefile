@@ -60,7 +60,7 @@ setup_win:
  #    ..\Scripts\iclvars ia32
  #    ..\Scripts\ifortvars ia32
 
-intel_win_32_db : FFLAGS = /Qvec_report0 /nologo /debug:full /Od /extend_source:132 /warn:all /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f95
+intel_win_32_db : FFLAGS = /Qvec_report0 /nologo /debug:full /Od /extend_source:132 /warn:all /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f03
 intel_win_32_db : CFLAGS = -Dpp_noappend
 intel_win_32_db : FCOMPL = ifort
 #intel_win_32_db : CCOMPL = cl
@@ -106,7 +106,7 @@ intel_win_64 : obj = fds_win_64
 intel_win_64 : setup_win $(objwinf_serial)
 	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwinf_serial) ../win64lib/isob.obj
 
-intel_win_64_db : FFLAGS = /Qvec_report0 /nologo /debug:full /Od /extend_source:132 /warn:all /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f95
+intel_win_64_db : FFLAGS = /Qvec_report0 /nologo /debug:full /Od /extend_source:132 /warn:all /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f03
 intel_win_64_db : CFLAGS = -O2 -Dpp_noappend
 intel_win_64_db : FCOMPL = ifort
 #intel_win_64_db : CCOMPL = cl
@@ -194,7 +194,7 @@ intel_linux_32_db : obj = fds_intel_linux_32_db
 intel_linux_32_db : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
 
-intel_linux_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0 -stand f95
+intel_linux_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0 -stand f03
 intel_linux_64_db : CFLAGS = -m64 -Dpp_noappend -vec_report0
 intel_linux_64_db : LFLAGS = -static-intel
 intel_linux_64_db : FCOMPL = ifort
