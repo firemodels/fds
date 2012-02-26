@@ -4,8 +4,6 @@
 
 &TIME DT=0.1, T_END=70. /
 
-&DUMP DT_PL3D = 100000. /
-
 &SPEC ID='WATER VAPOR', HUMIDITY=100. /
 
 &PART ID='water drops', 

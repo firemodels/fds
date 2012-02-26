@@ -45,6 +45,8 @@ $RUNFDS HVAC HVAC_mass_conservation
 $RUNFDS HVAC HVAC_energy_pressure
 $RUNFDS HVAC leak_test_2
 $RUNFDS HVAC leak_test
+$RUNFDS HVAC HVAC_tee_loss_1
+$RUNFDS HVAC HVAC_tee_loss_2
 
 $RUNFDS Heat_Transfer adiabatic_net_flux
 $RUNFDS Heat_Transfer heat_conduction_a
