@@ -19,8 +19,8 @@
       BACKING                   = 'INSULATED'
       COLOR                     = 'IVORY BLACK'
       MATL_ID(1,1)            	= 'PINE'
-	LENGTH 			= 0.05
-	WIDTH			= 0.05
+      LENGTH 			= 0.05
+      WIDTH			= 0.05
       THICKNESS                 = 0.01
       EXTERNAL_FLUX 		= 50. /
       
