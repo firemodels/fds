@@ -767,11 +767,11 @@ void read_geom(geomdata *geomi, int flag, int *errorcode){
         printf("time=%.2f triangles: %i\n",times_local[0],ntris);
       }
       else{
-        printf("time=%.2f\n",times_local[0]);
       }
       if(nverts>0){
         int ii;
 
+        if(i<0)printf("static geometry\n");
         NewMemory((void **)&xyz,3*nverts*sizeof(float));
         NewMemory((void **)&points,nverts*sizeof(point));
         geomlisti->points=points;
