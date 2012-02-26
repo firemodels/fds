@@ -11280,7 +11280,7 @@ compiled single processor program for a 32 bit Windows-based PC;
 thus PC users do not need a
 Fortran compiler and do not need to compile the source code.
 For machines for which an executable has not been compiled, you must
-compile the code. Fortran 90/95 and C compilers are needed for compilation.
+compile the code. Fortran 90/95 compilers are needed for compilation.
 
 \section{FDS Source Code}
 
@@ -11293,16 +11293,8 @@ For Unix/Linux users, {\bf Makefiles} for various platforms are available
 that assist in the compilation. Compiler options differ from platform to platform.
 Note the following:
 \begin{itemize}
-\item The source code consists mainly of Fortran 90
-statements organized into about 25 files, plus an extra file containing
-some additional C routines needed for output to Smokeview.
-All of the C code is contained within the file called {\bf isob.c}.
-\item Be aware that different
-compilers handle the names of C subroutines differently. Some compilers
-append an underscore to the names of the C routines called by the Fortran
-code. If the compiler produces an error involving the names of routines
-that are not recognized, invoke the C compiler pre-processing directive {\ct pp\_noappend} to stop
-the compiler from appending the underscore to the names of the C routines.
+\item The source code consists entirely of Fortran 90
+statements organized into about 25 files.
 \item There is only one non-standard call in the Fortran code. The non-standard call is {\ct GETARG},
 in {\bf func.f90}. This routine reads the name of the input file off of the command line. This call cannot
 be simply commented out; a suitable alternative must be found.
@@ -11325,7 +11317,6 @@ necessary organizations who have developed free MPI libraries.
 \begin{tabular}{|l|l|}
 \hline
 File Name  & Description  \\ \hline \hline
-isob.c     & C Routine for computing isosurfaces and 3D smoke \\ \hline \hline
 cons.f90   & Global arrays and constants \\ \hline
 ctrl.f90   & Definitions and routines for control functions \\ \hline
 data.f90   & Data for output quantities and thermophysical properties\\ \hline
@@ -11349,7 +11340,7 @@ prec.f90   & Specification of numerical precision \\ \hline
 pres.f90   & Spatial discretization of pressure (Poisson) equation \\ \hline
 radi.f90   & Radiation solver  \\ \hline
 read.f90   & Read input parameters \\ \hline
-smvv.f90   & Interfaces for C routines used for Smokeview output \\ \hline
+smvv.f90   & Routines for computing and outputting 3D smoke and isosurfaces \\ \hline
 turb.f90   & Experimental routines, mostly involving the turbulence model \\ \hline
 type.f90   & Derived type definitions \\ \hline
 vege.f90   & Experimental vegetation model \\ \hline
@@ -11752,7 +11743,7 @@ smoke file is given by:
 ! header
 
   WRITE(LU_SMOKE3D)ONE,VERSION,0,NX-1,0,NY-1,0,NZ-1
-  
+
 ! time depended data
 
   WRITE(LU_SMOKE3D_SIZE,*)TIME,NCHARS_IN,NCHARS_OUT
@@ -11774,15 +11765,13 @@ opacity data is compressed using run-length encoding (RLE).
 \section{Geometry, Isosurface Files}
 \label{out:GEOMETRY}
 
-Geometrical objects, either immersed geometry or isosurfaces are stored using a file format described in this section.
-Iso-surface files are used to store one or more surfaces where the specified {\ct QUANTITY} is a specified value. 
+Both immersed geometric surfaces (generalized obstructions) and FDS generated isosurfaces are stored using a file format described in this section.
+Iso-surface files are used to store one or more surfaces where the specified {\ct QUANTITY} is a specified value.
 FDS outputs iso-surface data at fixed
-time intervals.
-
-Geometrical objects are
-defined in terms of nodes and triangles.  A node consists of an $(x,y,z)$ coordinate.
+time intervals.  These surfaces are
+defined in terms of vertices and triangles.  A vertex consists of an $(x,y,z)$ coordinate.
 A triangle
-consists of 3 nodes.  The file format allows one to specify objects that change with time.
+consists of 3 connected vertices.  The file format allows one to specify objects that change with time.
 Static geometry is defined once and displayed by Smokeview unchanged at each time step.
 Dynamic geometry is defined at each time step either in terms of nodes and faces
 or in terms of a translation and two rotations (azimuthal and elevation) of dynamic geometry defined
