@@ -3085,6 +3085,20 @@ As opposed to the other cases above, this case tests the predicted rate of evapo
 \label{water_evaporation_4_plots}
 \end{figure}
 
+\section{Flow Rate and Pipe Networks (\texorpdfstring{{\textbf{flow\_rate\_2}}}{flow\_rate\_2}) }
+\label{flow_rate_2}
+
+In this test case 4 sprinklers are placed in a box.  Three of the sprinklers are on one pipe network ({\ct PIPE\_INDEX = 1}) and the fourh sprinkler is on a second pipe network ({\ct PIPE\_INDEX = 2}).  The sprinklers are defined with a pressure ramp such that all the sprinklers within a pipe network will flow a total of 10 l/min for any number of open heads.  The sprinklers are set to open every 15 s and to close at 60 s.  The first three sprinklers are one the first pipe and the fourth sprinkler is on the second pipe.  At 45 s, there will have been three sprinklers flowing 10 l /min total for an accumulated flow of 7.5 kg.  At 60 s, there will have been the additional of the fourth sprinkler flowing 10 l/min plus the 10 l/min from the other three sprinklers for a total accumulated mass of 12.5 kg.
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/flow_rate_2_open_nozzles} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/flow_rate_2_water_mass}
+\end{tabular*}
+\caption[Output of the flow rate test case.]{Output of the {\bf flow\_rate\_2} test case.}
+\label{flow_rate_2}
+\end{figure}
+
 \clearpage
 
 \newpage

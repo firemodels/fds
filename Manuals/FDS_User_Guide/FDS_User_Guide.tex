@@ -7225,6 +7225,21 @@ table. The median diameter of the particle size distribution is scaled as
 $d_m(p) = d_m(p_o)(p_o/p)^{1/3}$, where $p_o$ is the {\ct OPERATING\_PRESSURE}
 and $d_m(p_o)$ is specified by parameter {\ct DIAMETER} on the corresponding {\ct PART} line.
 
+For some simulations there may be groups of independent sprinklers or nozzles.  For example one might have one set of nozzles for a fuel spray and a second set for water spray.  In this case the flow of water would not be impacted by how many fuel spray nozzles are open.  To have the {\ct PRESSURE\_RAMP} only count a subset of sprinklers or nozzles, the keyword {\ct PIPE\_INDEX} can be used on the {\ct DEVC} line. For example:
+
+\footnotesize
+\begin{verbatim}
+&DEVC ID='Spr_1', XYZ=2.00,2.00,8.00, PROP_ID='My nozzle',PIPE_INDEX=1/
+&DEVC ID='Spr_2', XYZ=1.00,1.00,8.00, PROP_ID='My nozzle',PIPE_INDEX=1 / 
+&DEVC ID='Fuel_1', XYZ=2.00,2.00,1.00, PROP_ID='Fuel Spray',PIPE_INDEX=2 /
+&DEVC ID='Fuel_2', XYZ=1.00,1.00,1.00, PROP_ID='Fuel Spray',PIPE_INDEX=2 / 
+\end{verbatim}
+\normalsize
+
+\noindent
+
+These lines indicate that the fuel spray nozzles are a seperate pipe network from the water sprinklers.  With these inputs, the {\ct PRESSURE\_RAMP} for the water sprinklers would not count any active fuel spray nozzles.
+
 \subsection{Nozzles}
 \label{info:nozzles}
 
@@ -7253,7 +7268,7 @@ designate two nozzles of the same type, one which activates at time zero, the ot
 This example demonstrates the use of pressure ramps and control logic for opening and closing nozzles. It also serves as a verification test for
 the water flow rate. There are four nozzles that open at designated times: 0 s, 15 s, 30 s and 45 s. At time 60 s, all the nozzles are closed.
 The number of open nozzles is measured using a device with quantity {\ct 'OPEN NOZZLES'}. A comparison of the FDS result and the exact, intended values
-is shown in left part of Figure~\ref{flow_rate}.
+is shown in left part of Figure~\ref{flow_rate}.  Note that {\ct 'OPEN NOZZLES'} counts only nozzles belonging to the specified {\ct PIPE\_INDEX}.
 
 The pressure ramp has been designed to deliver a total flow rate of 10 l/min at all values of open nozzles. Mathematically this means that
 \be
@@ -9888,6 +9903,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct ORIENTATION}           & Real Triplet    & Section~\ref{info:DEVC}                                      &       & 0,0,-1        \\ \hline
 {\ct OUTPUT}                & Logical         & Section~\ref{info:out:DEVC}                                  &       & {\ct .TRUE.}  \\ \hline
 {\ct PART\_ID}              & Character       & Section~\ref{info:outputquantities}                          &       &               \\ \hline
+{\ct PIPE\_INDEX}           & Integer         & Section~\ref{info:pressureramp}                          &       &  1            \\ \hline
 {\ct POINTS}                & Integer         & Section~\ref{info:line_file}                                 &       & 1             \\ \hline
 {\ct PROP\_ID}              & Character       & Section~\ref{info:DEVC}                                      &       &               \\ \hline
 {\ct QUANTITY}              & Character       & Section~\ref{info:DEVC}                                      &       &               \\ \hline
