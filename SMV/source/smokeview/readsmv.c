@@ -5893,7 +5893,7 @@ typedef struct {
 
   printf("%s",_("reading input file completed"));
   printf("\n");
-  printf("%s",_("beginning wrap up - "));
+  printf("%s",_("beginning wrap up "));
   printf("\n");
 #ifdef _DEBUG
   PrintMemoryInfo;

@@ -1587,9 +1587,8 @@ void updatevslices(void){
   multivslice *mvslicei;
 
 
-#ifdef _DEBUG
-  printf("updating vslices\n");
-#endif
+
+  printf("updating vslices ");
   getsliceparams();
 
   /* update vector slices */
@@ -1624,63 +1623,6 @@ void updatevslices(void){
       nvslice++;
     }
   }
-  /*
-  for(i=0;i<nslice;i++){
-    vd = vsliceinfo + nvslice;
-    sdi = sliceinfo+i;
-    vd->iu=-1;
-    vd->iv=-1;
-    vd->iw=-1;
-    vd->ival=i;
-    vd->type=sliceinfo[i].type;
-    if(strncmp(sdi->label.shortlabel,"FLUX_X",6)==0)sdi->vec_comp=1;
-    if(strncmp(sdi->label.shortlabel,"FLUX_Y",6)==0)sdi->vec_comp=2;
-    if(strncmp(sdi->label.shortlabel,"FLUX_Z",6)==0)sdi->vec_comp=3;
-    for(j=0;j<nslice;j++){
-      sdj = sliceinfo+j;
-      if(sdi->blocknumber!=sdj->blocknumber)continue;
-      if(sdi->is1!=sdj->is1||sdi->is2!=sdj->is2||sdi->js1!=sdj->js1)continue;
-      if(sdi->js2!=sdj->js2||sdi->ks1!=sdj->ks1||sdi->ks2!=sdj->ks2)continue;
-      if(strncmp(sdj->label.shortlabel,"FLUX_X",6)==0)vd->iu=j;
-      if(strncmp(sdj->label.shortlabel,"FLUX_Y",6)==0)vd->iv=j;
-      if(strncmp(sdj->label.shortlabel,"FLUX_Z",6)==0)vd->iw=j;
-    }
-    if(vd->iu!=-1||vd->iv!=-1||vd->iw!=-1){
-      vd->display=0;
-      vd->loaded=0;
-      vd->vec_type=1;
-      nvslice++;
-    }
-  }
-  for(i=0;i<nslice;i++){
-    vd = vsliceinfo + nvslice;
-    sdi = sliceinfo+i;
-    vd->iu=-1;
-    vd->iv=-1;
-    vd->iw=-1;
-    vd->ival=i;
-    vd->type=sliceinfo[i].type;
-    if(strncmp(sdi->label.shortlabel,"VORT_X",6)==0)sdi->vec_comp=1;
-    if(strncmp(sdi->label.shortlabel,"VORT_Y",6)==0)sdi->vec_comp=2;
-    if(strncmp(sdi->label.shortlabel,"VORT_Z",6)==0)sdi->vec_comp=3;
-    for(j=0;j<nslice;j++){
-      sdj = sliceinfo+j;
-      if(sdi->blocknumber!=sdj->blocknumber)continue;
-      if(sdi->is1!=sdj->is1||sdi->is2!=sdj->is2||sdi->js1!=sdj->js1)continue;
-      if(sdi->js2!=sdj->js2||sdi->ks1!=sdj->ks1||sdi->ks2!=sdj->ks2)continue;
-      if(strncmp(sdj->label.shortlabel,"VORT_X",6)==0)vd->iu=j;
-      if(strncmp(sdj->label.shortlabel,"VORT_Y",6)==0)vd->iv=j;
-      if(strncmp(sdj->label.shortlabel,"VORT_Z",6)==0)vd->iw=j;
-    }
-    if(vd->iu!=-1||vd->iv!=-1||vd->iw!=-1){
-      vd->display=0;
-      vd->loaded=0;
-      vd->vec_type=2;
-      nvslice++;
-    }
-  }
-  */
-
   if(nvslice>0){
     FREEMEMORY(vsliceorderindex);
     NewMemory((void **)&vsliceorderindex,sizeof(int)*nvslice);
@@ -1741,6 +1683,7 @@ void updatevslices(void){
     }
   }
   updatevslicemenulabels();
+  printf(" complete\n");
   
 }
 
