@@ -9676,7 +9676,7 @@ READ_ISOF_LOOP: DO N=1,N_ISOF
    SPEC_ID          = 'null'
    COLOR_SPEC_ID    = 'null'
    VALUE            = -999._EB
-   REDUCE_TRIANGLES = 0
+   REDUCE_TRIANGLES = 1
    VELO_INDEX       = 0
    AUTO_HRRPUV_VALUE      = .FALSE.
  
