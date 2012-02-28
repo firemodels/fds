@@ -4112,15 +4112,15 @@ DEVICE_LOOP: DO N=1,N_DEVC
                               CASE(1)
                                  STAT_VALUE = STAT_VALUE + RC(I)*DY(J)*DZ(K)* &
                                               GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                               DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM)                              
+                                                               DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM)
                               CASE(2)
                                  STAT_VALUE = STAT_VALUE + DX(I)*DZ(K)* &
                                               GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                               DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM)                              
+                                                               DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM)
                               CASE(3)
                                  STAT_VALUE = STAT_VALUE + DX(I)*RC(I)*DY(J)* &
                                               GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                               DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM)                              
+                                                               DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM)
                            END SELECT
                         CASE('TENSOR SURFACE INTEGRAL')
                            ! similar to 'AREA INTEGRAL' but multiplies by outward unit normal and sums along outside of volume XB
