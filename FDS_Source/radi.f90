@@ -33,45 +33,12 @@ INTEGER  :: N,I,J,K,IZERO,NN,NI,II,JJ,IIM,JJM,IBND,NS,NRA,NSB
 FOUR_SIGMA = 4._EB*SIGMA
 RPI_SIGMA  = RPI*SIGMA
  
-! Determine the number of polar angles (theta)
-
 NRA = NUMBER_RADIATION_ANGLES
-IF (CYLINDRICAL) THEN
-   NRT = NINT(SQRT(REAL(NRA)))
-ELSEIF (TWO_D) THEN
-   NRT = 1
-ELSE
-   NRT = 2*NINT(0.5_EB*1.17*REAL(NRA)**(1._EB/2.26))
-ENDIF      
- 
-ALLOCATE(NRP(1:NRT),STAT=IZERO)
-CALL ChkMemErr('INIT','NRP',IZERO)
- 
-! Determine number of azimuthal angles (phi)
- 
-N = 0
-DO I=1,NRT
-   IF (CYLINDRICAL) THEN
-      NRP(I) = NINT(REAL(NRA)/(REAL(NRT)))
-      ELSEIF (TWO_D) THEN
-      NRP(I) = 4*NINT(0.25_EB*REAL(NRA))
-      ELSE
-      THETALOW = PI*REAL(I-1)/REAL(NRT)
-      THETAUP  = PI*REAL(I)/REAL(NRT)
-      NRP(I) = NINT(0.5_EB*REAL(NRA)*(COS(THETALOW)-COS(THETAUP)))
-      NRP(I) = MAX(4,NRP(I))
-      NRP(I) = 4*NINT(0.25_EB*REAL(NRP(I)))
-      ENDIF
-   N = N + NRP(I)
-ENDDO
-NRA = N
-NUMBER_RADIATION_ANGLES = NRA
+NSB = NUMBER_SPECTRAL_BANDS 
  
 ! Set the opening angle of the cylindrical geometry equal to the azimuthal angle
  
 IF (CYLINDRICAL) DPHI0 = PI/REAL(NRP(1))
- 
-NSB = NUMBER_SPECTRAL_BANDS
  
 ALLOCATE(RSA(1:NRA),STAT=IZERO)
 CALL ChkMemErr('INIT','RSA',IZERO)

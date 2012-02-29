@@ -37,10 +37,12 @@ INTEGER :: NRT,NCO,UIIDIM,NLAMBDAT,NKAPPAT,NKAPPAZ
 !     NDG       Number of PARTICLE radii in WQABS and WQSCA arrays
 !     NLMBDMIE  Number of wave lengths in Mie calculations
 !     NMIEANG   Number of angle bins in forward scattering integration
+!     NUMBER_RADIATION_ANGLES
 !     NRA       Total number of radiation control angles
 !     NRDMIE    Number of PARTICLE radii in Mie calculations
 !     NRT       Number of radiation theta angles
 !     NRP       Number of radiation phi angles on each theta band
+!     NUMBER_SPECTRA_BANDS
 !     NSB       Number of spectral bands (1=gray, 6=wide band, 9=wide band w. CH4)
 !     OUTRAD_W  Emitted intensity from a wall (OUTRAD_W = QRADOUT/PI)
 !     PHIUP     Upper limit of solid angle component PHI
@@ -64,8 +66,6 @@ INTEGER :: NRT,NCO,UIIDIM,NLAMBDAT,NKAPPAT,NKAPPAZ
 !
 !     PATH_LENGTH             Mean path length for the gray gas abs. coef.
 !     ANGLE_INCREMENT         How many angles are skipped on each update
-!     NUMBER_RADIATION_ANGLES Input for NRA
-!     NUMBER_SPECTRAL_BANDS   Input for NSB
 !     TIME_STEP_INCREMENT     How often is the radiation solver called
 !
 !************************************************************************************************************
