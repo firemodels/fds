@@ -17,6 +17,7 @@ extern "C" char glui_tour_revision[]="$Revision$";
 #include <math.h>
 
 #include "string_util.h"
+#include "update.h"
 #include "smokeviewvars.h"
 
 static int viewtype=0;

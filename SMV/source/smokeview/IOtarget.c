@@ -15,6 +15,7 @@ char IOtarget_revision[]="$Revision$";
 #endif
 
 #include "string_util.h"
+#include "update.h"
 #include "smokeviewvars.h"
 
 /* ------------------ readtarget ------------------------ */

@@ -18,6 +18,7 @@ char IOiso_revision[]="$Revision$";
 
 #include "egz_stdio.h"
 #include "string_util.h"
+#include "update.h"
 #include "smokeviewvars.h"
 
 void sync_isobounds(int isottype);

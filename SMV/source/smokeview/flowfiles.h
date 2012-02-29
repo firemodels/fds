@@ -4,9 +4,6 @@
 
 #ifndef FLOWFILES_H_DEFINED
 #define FLOWFILES_H_DEFINED
-#include "contourdefs.h"
-#include "isodefs.h"
-#include "histogram.h"
 
 
 /* --------------------------  langlistdata ------------------------------------ */

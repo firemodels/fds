@@ -21,6 +21,7 @@ char startup_revision[]="$Revision$";
 
 #include "string_util.h"
 #include "smokeviewvars.h"
+#include "update.h"
 #include "svn_revision.h"
 
 void glui_colorbar_setup(int main_window);

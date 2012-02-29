@@ -20,6 +20,8 @@ char IOpart_revision[]="$Revision$";
 #include <math.h>
 
 #include "string_util.h"
+#include "smv_endian.h"
+#include "update.h"
 #include "smokeviewvars.h"
 
 int tagscompare( const void *arg1, const void *arg2 );

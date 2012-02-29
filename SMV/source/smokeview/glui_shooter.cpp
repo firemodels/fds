@@ -18,6 +18,7 @@ extern "C" char glui_shooter_revision[]="$Revision$";
 #include <math.h>
 
 #include "string_util.h"
+#include "update.h"
 #include "smokeviewvars.h"
 
 GLUI *glui_shooter=NULL;

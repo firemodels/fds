@@ -19,7 +19,9 @@ char menu_revision[]="$Revision$";
 #endif
 
 #include "string_util.h"
+#include "update.h"
 #include "smokeviewvars.h"
+#include "IOvolsmoke.h"
 
 /* dummy change to bump revision number to 5.1.5 */
 

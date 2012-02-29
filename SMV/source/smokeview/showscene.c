@@ -19,6 +19,7 @@
 char showscene_revision[]="$Revision$";
 
 #include "string_util.h"
+#include "update.h"
 #include "smokeviewvars.h"
 #include "viewports.h"
 

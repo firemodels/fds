@@ -24,7 +24,9 @@ char IOsmoke_revision[]="$Revision$";
 
 #include "egz_stdio.h"
 #include "string_util.h"
+#include "update.h"
 #include "smokeviewvars.h"
+#include "IOvolsmoke.h"
 #include "compress.h"
 
 #define SKIP EGZ_FSEEK( SMOKE3DFILE, fortran_skip, SEEK_CUR)

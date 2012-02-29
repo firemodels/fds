@@ -18,6 +18,7 @@ extern "C" char glui_motion_revision[]="$Revision$";
 
 #include "string_util.h"
 #include "smokeviewvars.h"
+#include "IOvolsmoke.h"
 
 #define TRANSLATE_XY 101
 #define ROTATE_ZX 102

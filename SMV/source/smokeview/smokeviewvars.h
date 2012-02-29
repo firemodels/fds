@@ -12,13 +12,17 @@
 #include "translate.h"
 #include "csphere.h"
 #include "smokeviewdefs.h"
+#include "isodefs.h"
+#include "contourdefs.h"
+#include "histogram.h"
+#include "flowfiles.h"
+#ifndef CPP
+#include "egz_stdio.h"
+#endif
 #include "smokeheaders.h"
 #include "threader.h"
 #include "file_util.h"
-#include "IOvolsmoke.h"
 #include "MALLOC.h"
-#include "update.h"
-#include "smv_endian.h"
 
 SVEXTERN int SVDECL(debug_count,0);
 SVEXTERN geomdata SVDECL(**geominfoptrs,NULL);

@@ -18,7 +18,9 @@ char callbacks_revision[]="$Revision$";
 #endif
 
 #include "string_util.h"
+#include "update.h"
 #include "smokeviewvars.h"
+#include "IOvolsmoke.h"
 
 #define KEY_ALT 0
 #define KEY_CTRL 1

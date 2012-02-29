@@ -5,10 +5,6 @@
 #ifndef SMOKEFORTHEADERS_H_DEFINED
 #define SMOKEFORTHEADERS_H_DEFINED
 
-#include "isodefs.h"
-#include "flowfiles.h"
-#include "egz_stdio.h"
-
 #ifdef WIN32
 #define STDCALL extern void _stdcall
 #else

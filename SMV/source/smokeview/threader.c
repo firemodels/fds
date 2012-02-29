@@ -12,6 +12,7 @@ char threader_revision[]="$Revision$";
 
 #include "string_util.h"
 #include "smokeviewvars.h"
+#include "IOvolsmoke.h"
 
 /* ------------------ init_all_threads ------------------------ */
 

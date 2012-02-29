@@ -12,6 +12,8 @@ char IOembed_revision[]="$Revision$";
 #include <math.h>
 
 #include "string_util.h"
+#include "smv_endian.h"
+#include "update.h"
 #include "smokeviewvars.h"
 
 /* ------------------ CalcTriNormal ------------------------ */

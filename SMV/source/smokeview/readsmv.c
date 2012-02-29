@@ -25,7 +25,10 @@ char readsmv_revision[]="$Revision$";
 #include <pthread.h>
 
 #include "string_util.h"
+#include "smv_endian.h"
+#include "update.h"
 #include "smokeviewvars.h"
+#include "IOvolsmoke.h"
 
 #define BREAK \
       if((stream==stream1&&stream2==NULL)||stream==stream2)break;\

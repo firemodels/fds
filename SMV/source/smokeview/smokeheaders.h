@@ -5,12 +5,6 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
-#include "isodefs.h"
-#include "flowfiles.h"
-#ifndef CPP
-#include "egz_stdio.h"
-#endif
-
 EXTERNCPP void get_faceinfo(void);
 EXTERNCPP void GetGeomInfoPtrs(geomdata ***geominfoptrs_local,int *ngeominfoptrs_local);
 EXTERNCPP device *getdevice(char *label, int index);

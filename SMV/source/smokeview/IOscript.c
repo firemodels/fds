@@ -18,7 +18,9 @@ char IOscript_revision[]="$Revision$";
 #endif
 
 #include "string_util.h"
+#include "update.h"
 #include "smokeviewvars.h"
+#include "IOvolsmoke.h"
 
 void update_menu(void);
 

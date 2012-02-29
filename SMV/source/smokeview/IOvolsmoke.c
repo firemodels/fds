@@ -20,7 +20,10 @@ char IOvolsmoke_revision[]="$Revision$";
 #endif
 
 #include "string_util.h"
+#include "smv_endian.h"
+#include "update.h"
 #include "smokeviewvars.h"
+#include "IOvolsmoke.h"
 #include "compress.h"
 
 /* ----------------------- interp3d ----------------------------- */

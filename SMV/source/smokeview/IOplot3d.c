@@ -17,6 +17,7 @@ char IOplot3d_revision[]="$Revision$";
 #endif
 
 #include "string_util.h"
+#include "update.h"
 #include "smokeviewvars.h"
 
 void update_glui_plot3d(void);

@@ -17,6 +17,8 @@ char IOwui_revision[]="$Revision$";
 #endif
 
 #include "string_util.h"
+#include "update.h"
+#include "smv_endian.h"
 #include "smokeviewvars.h"
 
 #ifdef pp_TERRAIN2GEOM

@@ -17,6 +17,7 @@ char IOtour_revision[]="$Revision$";
 #endif
 
 #include "string_util.h"
+#include "update.h"
 #include "smokeviewvars.h"
 
 void drawcir(float *center, float rad, float *color);
