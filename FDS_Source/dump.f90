@@ -2833,11 +2833,15 @@ WRITE_RADIATION: IF (RADIATION) THEN
       WRITE(LU_OUTPUT,'(I6,A,I6,F6.2)') I,':   ',NRP(I),RSA(N)
       N = N + NRP(I)
    ENDDO
-   IF (NUMBER_SPECTRAL_BANDS>1) THEN
-      WRITE(LU_OUTPUT,'(A,I4)')  '   Number of spectral bands is ', NUMBER_SPECTRAL_BANDS
+   IF (PATH_LENGTH>0._EB) THEN
+      IF (NUMBER_SPECTRAL_BANDS>1) THEN
+         WRITE(LU_OUTPUT,'(A,I4)')  '   Number of spectral bands is ', NUMBER_SPECTRAL_BANDS
+      ELSE
+         WRITE(LU_OUTPUT,'(A,I4)')  '   Using gray gas absorption.'
+         WRITE(LU_OUTPUT,'(A,F6.3,A)')'   Mean beam length ',PATH_LENGTH,' m'
+      ENDIF
    ELSE
-      WRITE(LU_OUTPUT,'(A,I4)')  '   Using gray gas absorption.'
-      WRITE(LU_OUTPUT,'(A,F6.3,A)')'   Mean beam length ',PATH_LENGTH,' m'
+      WRITE(LU_OUTPUT,'(A,F7.3,A)')'   Using constant absorption coefficient of ',KAPPA0,' 1/m'
    ENDIF
 ENDIF WRITE_RADIATION
  
