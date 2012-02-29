@@ -355,8 +355,8 @@ ALLOCATE(LU_XYZ(NMESHES))
 ALLOCATE(FN_PL3D(NMESHES))
 ALLOCATE(LU_PL3D(NMESHES))
 
-ALLOCATE(FN_ISOF(N_ISOF,NMESHES))
-ALLOCATE(LU_ISOF(N_ISOF,NMESHES))
+ALLOCATE(FN_ISOF(2*N_ISOF,NMESHES))
+ALLOCATE(LU_ISOF(2*N_ISOF,NMESHES))
 ALLOCATE(FN_SLCF(N_SLCF_MAX,NMESHES))
 ALLOCATE(LU_SLCF(N_SLCF_MAX,NMESHES))
 ALLOCATE(FN_GEOM(1)) ! later each geometry group may have a serparate file
@@ -398,9 +398,12 @@ MESH_LOOP: DO NM=1,NMESHES
    ! routine "knows" when it is called the first time
    
    DO N=1,N_ISOF
-      LU_ISOF(N,NM) = -GET_FILE_NUMBER() ! initially negative, so that the isosurface output
-      IF (NMESHES >1) WRITE(FN_ISOF(N,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.iso'
-      IF (NMESHES==1) WRITE(FN_ISOF(N,NM),'(A,A,I2.2,A)')        TRIM(CHID),'_',N,'.iso'
+      LU_ISOF(2*N-1,NM) = -GET_FILE_NUMBER() ! initially negative, so that the isosurface output
+      IF (NMESHES >1) WRITE(FN_ISOF(2*N-1,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.iso'
+      IF (NMESHES==1) WRITE(FN_ISOF(2*N-1,NM),'(A,A,I2.2,A)')        TRIM(CHID),'_',N,'.iso'
+      LU_ISOF(2*N,NM) = -GET_FILE_NUMBER() ! initially negative, so that the isosurface output
+      IF (NMESHES >1) WRITE(FN_ISOF(2*N,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.tiso'
+      IF (NMESHES==1) WRITE(FN_ISOF(2*N,NM),'(A,A,I2.2,A)')        TRIM(CHID),'_',N,'.tiso'
    ENDDO
 
    ! Allocate unit numbers and file names for 3d smoke files
@@ -813,9 +816,15 @@ ENDIF
    DO N=1,N_ISOF
       IS => ISOSURFACE_FILE(N)
       IF (APPEND .OR. EVACUATION_ONLY(NM)) THEN
-        OPEN(ABS(LU_ISOF(N,NM)),FILE=FN_ISOF(N,NM),FORM='UNFORMATTED',STATUS='OLD',POSITION='APPEND')
+        OPEN(ABS(LU_ISOF(2*N-1,NM)),FILE=FN_ISOF(2*N-1,NM),FORM='UNFORMATTED',STATUS='OLD',POSITION='APPEND')
+        IF(IS%INDEX2.NE.0)THEN
+          OPEN(ABS(LU_ISOF(2*N,NM)),FILE=FN_ISOF(2*N,NM),FORM='UNFORMATTED',STATUS='OLD',POSITION='APPEND')
+        ENDIF
       ELSE
-        OPEN(ABS(LU_ISOF(N,NM)),FILE=FN_ISOF(N,NM),FORM='UNFORMATTED',STATUS='REPLACE')
+        OPEN(ABS(LU_ISOF(2*N-1,NM)),FILE=FN_ISOF(2*N-1,NM),FORM='UNFORMATTED',STATUS='REPLACE')
+        IF(IS%INDEX2.NE.0)THEN
+          OPEN(ABS(LU_ISOF(2*N,NM)),FILE=FN_ISOF(2*N,NM),FORM='UNFORMATTED',STATUS='REPLACE')
+        ENDIF
         IF (M%N_STRINGS+5>M%N_STRINGS_MAX) CALL RE_ALLOCATE_STRINGS(NM)
         M%N_STRINGS = M%N_STRINGS + 1
         IF (IS%INDEX2==0) THEN
@@ -824,8 +833,12 @@ ENDIF
            WRITE(M%STRING(M%N_STRINGS),'(A,I6)') 'TISOG',NM
         ENDIF
         M%N_STRINGS = M%N_STRINGS + 1
-        WRITE(M%STRING(M%N_STRINGS),'(1X,A)') TRIM(FN_ISOF(N,NM))
+        WRITE(M%STRING(M%N_STRINGS),'(1X,A)') TRIM(FN_ISOF(2*N-1,NM))
         M%N_STRINGS = M%N_STRINGS + 1
+        IF (IS%INDEX2.NE.0) THEN
+          WRITE(M%STRING(M%N_STRINGS),'(1X,A)') TRIM(FN_ISOF(2*N,NM))
+          M%N_STRINGS = M%N_STRINGS + 1
+        ENDIF
         WRITE(M%STRING(M%N_STRINGS),'(1X,A)') TRIM(IS%SMOKEVIEW_LABEL)
         M%N_STRINGS = M%N_STRINGS + 1
         WRITE(M%STRING(M%N_STRINGS),'(1X,A)') TRIM(IS%SMOKEVIEW_BAR_LABEL)
@@ -3428,7 +3441,7 @@ INTEGER  :: ISOOFFSET,DATAFLAG,I,J,K,N,ERROR
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: QUANTITY=>NULL(),B=>NULL(),S=>NULL()
 INTEGER :: HAVE_TDATA
-REAL(FB), DIMENSION(:,:,:,:), ALLOCATABLE :: QTEMP
+REAL(FB), DIMENSION(:,:,:), ALLOCATABLE :: QTEMP, QTEMP2
 
 IF (EVACUATION_ONLY(NM)) RETURN
 STIME = T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR
@@ -3491,11 +3504,11 @@ ISOF_LOOP: DO N=1,N_ISOF
 
    ! Average the data (which is assumed to be cell-centered) at cell corners
 
-   ALLOCATE(QTEMP(IBAR+1,JBAR+1,KBAR+1,1))
+   ALLOCATE(QTEMP(IBAR+1,JBAR+1,KBAR+1))
    DO K=0,KBAR
       DO J=0,JBAR
          DO I=0,IBAR
-            QTEMP(I+1,J+1,K+1,1) = S(I,J,K)*(QUANTITY(I,J,K)*B(I,J,K)+ QUANTITY(I+1,J,K)*B(I+1,J,K)+ &
+            QTEMP(I+1,J+1,K+1) = S(I,J,K)*(QUANTITY(I,J,K)*B(I,J,K)+ QUANTITY(I+1,J,K)*B(I+1,J,K)+ &
                                     QUANTITY(I,J,K+1)*B(I,J,K+1)+ QUANTITY(I+1,J,K+1)*B(I+1,J,K+1)+ &
                                     QUANTITY(I,J+1,K)*B(I,J+1,K)+ QUANTITY(I+1,J+1,K)*B(I+1,J+1,K)+ &
                                     QUANTITY(I,J+1,K+1)*B(I,J+1,K+1)+ QUANTITY(I+1,J+1,K+1)*B(I+1,J+1,K+1))
@@ -3506,14 +3519,13 @@ ISOF_LOOP: DO N=1,N_ISOF
    
       HAVE_TDATA=0
       
-      CALL ISO_TO_FILE(LU_ISOF(N,NM),IS%REDUCE_TRIANGLES,STIME,QTEMP,HAVE_TDATA,QTEMP,IBLK,&
-           IS%VALUE(1:IS%N_VALUES), IS%N_VALUES, XPLT, IBP1, YPLT, JBP1, ZPLT, KBP1)
-
-
+      CALL ISO_TO_FILE(LU_ISOF(2*N-1,NM),LU_ISOF(2*N,NM),IS%REDUCE_TRIANGLES,STIME,QTEMP,HAVE_TDATA,QTEMP,&
+           IS%VALUE(1:IS%N_VALUES), IS%N_VALUES, IBLK, XPLT, IBP1, YPLT, JBP1, ZPLT, KBP1)
    ELSE
 
       ! Fill up the dummy array QUANTITY with the appropriate gas phase output for coloring isosurface
 
+      ALLOCATE(QTEMP2(IBAR+1,JBAR+1,KBAR+1))
       DO K=0,KBP1
          DO J=0,JBP1
             DO I=0,IBP1
@@ -3525,19 +3537,20 @@ ISOF_LOOP: DO N=1,N_ISOF
       DO K=0,KBAR
          DO J=0,JBAR
             DO I=0,IBAR
-               QQ(I,J,K,2) = S(I,J,K)*(QUANTITY(I,J,K)*B(I,J,K)+ QUANTITY(I+1,J,K)*B(I+1,J,K)+ &
+               QTEMP2(I+1,J+1,K+1) = S(I,J,K)*(QUANTITY(I,J,K)*B(I,J,K)+ QUANTITY(I+1,J,K)*B(I+1,J,K)+ &
                                        QUANTITY(I,J,K+1)*B(I,J,K+1)+ QUANTITY(I+1,J,K+1)*B(I+1,J,K+1)+ &
                                        QUANTITY(I,J+1,K)*B(I,J+1,K)+ QUANTITY(I+1,J+1,K)*B(I+1,J+1,K)+ &
                                        QUANTITY(I,J+1,K+1)*B(I,J+1,K+1)+ QUANTITY(I+1,J+1,K+1)*B(I+1,J+1,K+1))
             ENDDO
          ENDDO
       ENDDO
-     ! Routine to assign value based color to isosurface is not implemented yet.
+     ! Routine to assign value based color to isosurface - not fully implemented yet.
 
       HAVE_TDATA=1
       
-!      CALL ISO_TO_FILE(LU_ISOF(N,NM),IS%REDUCE_TRIANGLES,STIME,QTEMP,HAVE_TDATA,QTEMP2,IBLK,&
-!           IS%VALUE(1:IS%N_VALUES), IS%N_VALUES, XPLT, IBP1, YPLT, JBP1, ZPLT, KBP1, ERROR)
+     ! CALL ISO_TO_FILE(LU_ISOF(2*N-1,NM),LU_ISOF(2*N,NM),IS%REDUCE_TRIANGLES,STIME,QTEMP,HAVE_TDATA,QTEMP2,&
+     !      IS%VALUE(1:IS%N_VALUES), IS%N_VALUES, IBLK, XPLT, IBP1, YPLT, JBP1, ZPLT, KBP1)
+      DEALLOCATE(QTEMP2)
 
    ENDIF
    DEALLOCATE(QTEMP)
@@ -6658,10 +6671,16 @@ DO N=1,MESHES(NM)%N_SLCF
 ENDDO
 
 DO N=1,N_ISOF
-   INQUIRE(FILE=FN_ISOF(N,NM),EXIST=EX)
+   INQUIRE(FILE=FN_ISOF(2*N-1,NM),EXIST=EX)
    IF (EX) THEN
-      CLOSE(ABS(LU_ISOF(N,NM)))
-      OPEN(ABS(LU_ISOF(N,NM)),FILE=FN_ISOF(N,NM),FORM='UNFORMATTED',STATUS='OLD',POSITION='APPEND')
+      CLOSE(ABS(LU_ISOF(2*N-1,NM)))
+      OPEN(ABS(LU_ISOF(2*N-1,NM)),FILE=FN_ISOF(2*N-1,NM),FORM='UNFORMATTED',STATUS='OLD',POSITION='APPEND')
+   ENDIF
+   
+   INQUIRE(FILE=FN_ISOF(2*N,NM),EXIST=EX)
+   IF (EX) THEN
+      CLOSE(ABS(LU_ISOF(2*N,NM)))
+      OPEN(ABS(LU_ISOF(2*N,NM)),FILE=FN_ISOF(2*N,NM),FORM='UNFORMATTED',STATUS='OLD',POSITION='APPEND')
    ENDIF
 ENDDO
 
