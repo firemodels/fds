@@ -5560,6 +5560,7 @@ typedef struct {
       iso *isoi;
       int get_isolevels;
       int dataflag=0,geomflag=0;
+      char tbuffer[255], *tbufferptr;
 
       isoi = isoinfo + iiso;
       nn_iso++;
@@ -5589,6 +5590,7 @@ typedef struct {
         BREAK;
       }
 
+      isoi->tfile=NULL;
       isoi->seq_id=nn_iso;
       isoi->autoload=0;
       isoi->blocknumber=blocknumber;
@@ -5617,6 +5619,17 @@ typedef struct {
       NewMemory((void **)&isoi->size_file,(unsigned int)(len+3+1));
       STRCPY(isoi->size_file,bufferptr);
       STRCAT(isoi->size_file,".sz");
+
+      if(dataflag==1&&geomflag==1){
+        if(fgets(tbuffer,255,stream)==NULL){
+          nisoinfo--;
+          BREAK;
+        }
+        trim(tbuffer);
+        tbufferptr=trim_front(tbuffer);
+        NewMemory((void **)&isoi->tfile,strlen(tbufferptr)+1);
+        strcpy(isoi->tfile,tbufferptr);
+      }
 
       if(STAT(isoi->reg_file,&statbuffer2)==0){
         get_isolevels=1;

@@ -407,7 +407,7 @@ typedef struct {
   char *reg_file, *size_file;
   short *normaltable;
   int nnormaltable; 
-  char *file;
+  char *file,*tfile;
   int dataflag,geomflag;
   int type;
   int num_memblocks;
