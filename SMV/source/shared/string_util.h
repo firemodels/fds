@@ -4,7 +4,6 @@
 
 #ifndef STRING_UTIL_H_DEFINED
 #define STRING_UTIL_H_DEFINED
-#include <time.h>
 
 #ifdef IN_STRING_UTIL
 #define STREXTERN

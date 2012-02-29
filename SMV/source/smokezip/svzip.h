@@ -13,6 +13,7 @@
 #define EXTERN extern
 #endif
 #include "csphere.h"
+#include "string_util.h"
 #include "file_util.h"
 
 #define UNLINK unlink
