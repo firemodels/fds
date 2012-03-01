@@ -4832,54 +4832,21 @@ SELECT CASE(IND)
                            CALL GET_MASS_FRACTION(ZZ_GET,Y_INDEX,Y_SPECIES2)      
                         ENDIF   
                      ENDIF      
-
-                     LIMITER_IF1: IF (FLUX_LIMITER==1) THEN
-                        IF (VEL>ZERO_P) THEN
-                           HMFAC = Y_SPECIES*RHO(I,J,K)
-                        ELSE
-                           HMFAC = Y_SPECIES2*RHO(IP,JP,KP)
-                        ENDIF
-                     ELSE LIMITER_IF1
-                        HMFAC = 0.5_EB*(Y_SPECIES*RHO(I,J,K)+Y_SPECIES2*RHO(IP,JP,KP))
-                     ENDIF LIMITER_IF1
-                     
+                     HMFAC = 0.5_EB*(Y_SPECIES*RHO(I,J,K)+Y_SPECIES2*RHO(IP,JP,KP))
                   CASE(3)
-                  
-                     LIMITER_IF2: IF (FLUX_LIMITER==1) THEN
-                     
-                        IF (VEL>ZERO_P) THEN
-                           TMP_TC = TMP(I,J,K)
-                           IF (N_TRACKED_SPECIES>0) &    
-                              ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)
-                           CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR,TMP_TC)
-                           H_G_SUM = CPBAR*TMP_TC
-                           CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR,TMPA)
-                           H_G = CPBAR*TMPA
-                           HMFAC = RHO(I,J,K)*(H_G_SUM-H_G)*0.001_EB
-                        ELSE
-                           TMP_TC = TMP(IP,JP,KP)
-                           IF (N_TRACKED_SPECIES>0) &    
-                              ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(IP,JP,KP,1:N_TRACKED_SPECIES)
-                           CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR,TMP_TC)
-                           H_G_SUM = CPBAR*TMP_TC
-                           CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR,TMPA)
-                           H_G = CPBAR*TMPA
-                           HMFAC = RHO(IP,JP,KP)*(H_G_SUM-H_G)*0.001_EB
-                        ENDIF
-                  
-                     ELSE LIMITER_IF2
-                  
-                        TMP_TC = 0.5_EB*(TMP(I,J,K)+TMP(IP,JP,KP))
-                        IF (N_TRACKED_SPECIES>0) &    
-                           ZZ_GET(1:N_TRACKED_SPECIES) = 0.5_EB*(ZZ(I,J,K,1:N_TRACKED_SPECIES)+ZZ(IP,JP,KP,1:N_TRACKED_SPECIES))
+                     TMP_TC = 0.5_EB*(TMP(I,J,K)+TMP(IP,JP,KP))
+                     IF (N_TRACKED_SPECIES>0) &    
+                        ZZ_GET(1:N_TRACKED_SPECIES) = 0.5_EB*(ZZ(I,J,K,1:N_TRACKED_SPECIES)+ZZ(IP,JP,KP,1:N_TRACKED_SPECIES))
+                     IF (ENTHALPY_TRANSPORT) THEN
+                        CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_G_SUM,TMP_TC)
+                        CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_G,TMPA)
+                     ELSE
                         CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR,TMP_TC)
                         H_G_SUM = CPBAR*TMP_TC
                         CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR,TMPA)
                         H_G = CPBAR*TMPA
-                        HMFAC = 0.5_EB*(RHO(I,J,K)+RHO(IP,JP,KP))*(H_G_SUM-H_G)*0.001_EB
-                     
-                     ENDIF LIMITER_IF2
-                     
+                     ENDIF
+                     HMFAC = 0.5_EB*(RHO(I,J,K)+RHO(IP,JP,KP))*(H_G_SUM-H_G)*0.001_EB
                END SELECT
                
                SELECT CASE(IND)
