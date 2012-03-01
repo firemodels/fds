@@ -118,10 +118,10 @@ for i=2:2000
         
         if ~exist(d1_Filename,'file')
            disp(['Warning: File ' d1_Filename ' does not exist.'])
+		   hold off
            continue
         end
         [H M] = dvcread(d1_Filename,d1_Col_Name_Row);
-        %d1_Ind_Col = find(strcmp(H,d1_Ind_Col_Name));
         R1 = parse(d1_Ind_Col_Name);
         S1 = parse(d1_Dep_Col_Name);
         style = parse(d1_Style);
@@ -159,10 +159,10 @@ for i=2:2000
        
         if ~exist(d2_Filename,'file')
            disp(['Warning: File ' d2_Filename ' does not exist.'])
+		   hold off
            continue
         end
         [H M] = dvcread(d2_Filename,d2_Col_Name_Row);
-        %d2_Ind_Col = find(strcmp(H,d2_Ind_Col_Name));
         R2 = parse(d2_Ind_Col_Name);
         S2 = parse(d2_Dep_Col_Name);
         style = parse(d2_Style);
