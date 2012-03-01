@@ -8,5 +8,5 @@ echo Setting up compiler environment
 call %intelbin%\ifortvars ia32
 
 :envexist
-make -j4 VPATH="../../FDS_Source" -f ..\makefile intel_win_32
+make -j4 VPATH="../../FDS_Source" -f ..\makefile intel_win_32_db
 pause
