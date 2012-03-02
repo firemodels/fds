@@ -31,12 +31,12 @@ value of dT should be equal to the time averaged Q_abs.
       DEFAULT=.TRUE.
       TMP_FRONT = 1000.
       TAU_T = 0.0 /
+
 &SPEC ID='WATER VAPOR'
       VAPORIZATION_TEMPERATURE = 1000.
       MELTING_TEMPERATURE = -273.15
       SPECIFIC_HEAT_LIQUID = 1.0
-      HEAT_OF_VAPORIZATION = 0.01
-      /
+      HEAT_OF_VAPORIZATION = 0.01 /
 
 &PART ID='drops'
       STATIC = .TRUE.
@@ -46,17 +46,13 @@ value of dT should be equal to the time averaged Q_abs.
       MINIMUM_DIAMETER=10.
       SAMPLING_FACTOR=1 /
 
-	
-&INIT 	NUMBER_INITIAL_PARTICLES = 100, 
-	MASS_PER_VOLUME = 0.01
-        XB = 1,2,1,2,1,2
-	PART_ID = 'drops' /
+&INIT NUMBER_INITIAL_PARTICLES = 100, 
+      MASS_PER_VOLUME = 0.01
+      XB = 1,2,1,2,1,2
+      PART_ID = 'drops' /
 
-
-&DEVC QUANTITY='PARTICLE RADIATION LOSS', ID = 'Absorption'
-	STATISTICS = 'VOLUME INTEGRAL', XB = 0,3,0,3,0,3 /
-&DEVC QUANTITY='ADT', PART_ID='drops', ID = 'ADT'
-	STATISTICS = 'VOLUME MEAN', XB = 1,2,1,2,1,2 /
+&DEVC QUANTITY='PARTICLE RADIATION LOSS', ID='Absorption', STATISTICS='VOLUME INTEGRAL', XB=0,3,0,3,0,3 /
+&DEVC QUANTITY='ADT', PART_ID='drops', ID='ADT', STATISTICS='VOLUME MEAN', XB=1,2,1,2,1,2 /
 
 &TAIL /
 
