@@ -1,6 +1,6 @@
-&HEAD CHID='ASTM_E_648_07', TITLE='Flooring Radiant Panel Apparatus, 1.33 cm, 20% Moisture, 550 degrees, Hot Walls' /
+&HEAD CHID='ASTM_E_648_07', TITLE='Flooring Radiant Panel Apparatus, 1.5 cm, 20% Moisture, 550 degrees, Hot Walls' /
 
-&MESH IJK=105,15,60, XB=0.00,1.40,-0.25,0.25,-0.09,0.71 /
+&MESH IJK=93,15,53, XB=0.00,1.40,-0.25,0.25,-0.09,0.71 /
 
 &TIME T_END = 2000. /
 
@@ -167,7 +167,7 @@ Point Output
 &DEVC XYZ=0.3,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.3 m'/
 &DEVC XYZ=0.25,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.25 m'/
 &DEVC XYZ=0.2,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.2 m'/
-&DEVC XYZ=0.15,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.15 m'/
+
 &DEVC XYZ=0.1,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.1 m'/
 
 
