@@ -6450,13 +6450,13 @@ value of {\ct DT\_INSERT} is 0.01~s and {\ct NPPC} is 1. As an example, the foll
 
 \footnotesize
 \begin{verbatim}
-&PART ID='particles', DIAMETER=750., DENSITY=1000., EVAPORATE=.FALSE. /
+&PART ID='particles', ... /
 &SURF ID='SLOT', PART_ID='particles', VEL=-5., PARTICLE_MASS_FLUX=0.1 /
 &OBST XB=-0.2,0.2,-0.2,0.2,4.0,4.4, SURF_IDS='INERT','SLOT','INERT' /
 \end{verbatim} \normalsize
 
 \noindent
-creates an obstruction that ejects non-evaporating particles with a mean volumetric diameter of 750~$\mu$m and density of 1000~kg/m$^3$ out of its sides at a rate
+creates an obstruction that ejects particles out of its sides at a rate
 of 0.1~kg/m$^2$/s and a velocity of 5~m/s (the minus sign indicates the particles are ejected from the surface).
 FDS will adjust the mass flux if the obstruction or vent dimensions are changed to conform to the numerical grid. The
 {\ct ID}s have no meaning other than as identifiers. The surface on which particles are specified must have a non-zero normal velocity directed into the
@@ -6484,6 +6484,8 @@ information on devices and controls, see Sections~\ref{info:basic_control}~and~\
 
 \label{info:sprinkler_droplets}
 
+A sprinkler or nozzle is added to the simulation using a {\ct PROP} line to describe the features of the device and a {\ct DEVC} line to position and orient the
+device within the computational domain. 
 {\ct PARTICLES\_PER\_SECOND} is the  number of droplets inserted every
 second per active sprinkler or nozzle (Default 5000). It is listed on the {\ct PROP} line that includes other properties of
 the sprinkler or nozzle. Note that this parameter only affects sprinklers and nozzles.
@@ -6504,33 +6506,26 @@ droplets created per second than the number that can be simulated.
 
 
 Sometimes it is convenient to introduce droplets or particles at the start of the simulation. For this purpose, use an {\ct INIT} line with the parameter
-{\ct NUMBER\_INITIAL\_PARTICLES} to indicate the number of particles/droplets within the computational domain at the start of the simulation. Its default value is 0, meaning that initially there are no particles or droplets present. If non-zero, also specify {\ct MASS\_PER\_VOLUME} (kg/m$^3$) which specifies the particle/droplet mass per unit volume (Default 1~kg/m$^3$). Do not confuse this parameter with {\ct DENSITY}, explained in the next section. For example, water has a {\ct DENSITY} of 1000~kg/m$^3$, whereas a liter of water broken up into droplets and spread over a cubic meter has a {\ct MASS\_PER\_VOLUME} of 1~kg/m$^3$. Also, to limit the particles/droplets to a certain region of the domain, add the real sextuplet {\ct XB} to designate the coordinates of a rectangular volume. The format for {\ct XB} is the same as that used on the {\ct OBST} line. You can only introduce a cloud of particles within a rectangular block, and the volume of the block is calculated according to the dimensions {\ct XB}, regardless of whether there are solid obstructions within this volume.
+{\ct NUMBER\_INITIAL\_PARTICLES} to indicate the number of particles/droplets within the computational domain at the start of the simulation. 
+Its default value is 0, meaning that initially there are no particles or droplets present. If non-zero, also specify {\ct MASS\_PER\_VOLUME} (kg/m$^3$) which 
+specifies the particle/droplet mass per unit volume (Default 1~kg/m$^3$). Do not confuse this parameter with {\ct DENSITY}, explained in the next section. 
+For example, water has a {\ct DENSITY} of 1000~kg/m$^3$, whereas a liter of water broken up into droplets and spread over a cubic meter has a {\ct MASS\_PER\_VOLUME} of 1~kg/m$^3$. 
+Also, to limit the particles/droplets to a certain region of the domain, add the real sextuplet {\ct XB} to designate the coordinates of a rectangular volume. 
+The format for {\ct XB} is the same as that used on the {\ct OBST} line. You can only introduce a cloud of particles within a rectangular block, 
+and the volume of the block is calculated according to the dimensions {\ct XB}, regardless of whether there are solid obstructions within this volume.
 
 \footnotesize
 \begin{verbatim}
-&PART ID='drops', DIAMETER=750., SAMPLING_FACTOR=1, COLOR='RED', EVAPORATE=.FALSE. /
+&PART ID='drops', DIAMETER=750., SAMPLING_FACTOR=1, COLOR='RED' /
 &INIT PART_ID='drops', XB=..., NUMBER_INITIAL_PARTICLES=1000, MASS_PER_VOLUME=3.5 /
 &INIT PART_ID='drops', XB=..., NUMBER_INITIAL_PARTICLES=2000, MASS_PER_VOLUME=2.5 /
 \end{verbatim} \normalsize
 
 \noindent
-It is also possible to initialize monodisperse particles pointwise by specifying the droplet position (m), velocity (m/s), diameter (microns), and temperature ($^\circ$C).  This feature allows the user to specify an arbitrary droplet distribution.  This is done by specifying a {\ct TABL} that defines all the particles to be inserted.
-
-\footnotesize
-\begin{verbatim}
-&PART ID='water drops', SPEC_ID='WATER VAPOR', EVAPORATE=.TRUE., SAMPLING_FACTOR=1,
-      QUANTITIES(1:3)='PARTICLE_DIAMETER','PARTICLE_VELOCITY','PARTICLE_TEMPERATURE' /
-&INIT TABL_ID='drops', DT_INSERT=0.005, PART_ID='water drops' /
-&TABL ID='drops',TABLE_DATA=x1,y1,z1,u1,v1,w1,d1,t1,m1/
-&TABL ID='drops',TABLE_DATA=x2,y2,z2,u2,v2,w2,d2,t2,m2/
-...
-&TABL ID='drops',TABLE_DATA=xn,yn,zn,un,vn,wn,dn,tn,mn/
-\end{verbatim} \normalsize
-
-where x,y, and z are the particle location; u, v, and w are the initial particle velocity; d is the initial diameter; t is the initial temperature; and m is the mass per time.  The temperature and mass per time are optional.  If temperature is omitted the particle will be initialized to the ambient temperature, and mass per time is omitted only one particle will be inserted.
-
-\noindent
-If you want to introduce droplets or particles within a given volume periodically in time and not just at the initial time, set {\ct DT\_INSERT} on the {\ct INIT} line to a positive value indicating the time increment (s) for insertion. The parameter {\ct NUMBER\_INITIAL\_PARTICLES} now indicates the number of droplets/particles inserted every {\ct DT\_INSERT} seconds. If the droplets/particles have mass, use {\ct MASS\_PER\_TIME} (kg/s) instead of {\ct MASS\_PER\_VOLUME} to indicate how much mass is to be introduced per second.  In the case of pointwise particle insertion (specification of {\ct XYZ,UVW}), a single particle is tracked but weighted based on {\ct MASS\_PER\_TIME} and {\ct DT\_INSERT} for the purposes of computing bulk source terms for mass and momentum (evaporation and drag).
+If you want to introduce droplets or particles within a given volume periodically in time and not just at the initial time, set {\ct DT\_INSERT} on 
+the {\ct INIT} line to a positive value indicating the time increment (s) for insertion. The parameter {\ct NUMBER\_INITIAL\_PARTICLES} now indicates the 
+number of droplets/particles inserted every {\ct DT\_INSERT} seconds. If the droplets/particles have mass, use {\ct MASS\_PER\_TIME} (kg/s) instead of {\ct MASS\_PER\_VOLUME} to 
+indicate how much mass is to be introduced per second.  
 
 If you want to delay the insertion of droplets, you can use either a {\ct DEVC\_ID} or a {\ct CTRL\_ID} on the {\ct INIT} line to name the controlling device.
 See Section~\ref{info:basic_control} for more information on controlling devices.
@@ -6544,13 +6539,13 @@ parameters for controlling their number:
 \begin{description}
 \item[{\ct DT\_INSERT}] Time increment in seconds between the introduction of a ``batch'' of particles or droplets from {\ct SURF}
 or {\ct INIT}. The number per ``batch'' depends on how they are introduced. The default value is 0.01~s. Note that this
-parameter should be specified on the {\ct SURF} or {\ct INIT} line, depending on whether the particles/droplets
-originate at a surface or a volume. Note that if you introduce particles or droplets via an {\ct INIT} line,
+parameter should be specified on the {\ct SURF} or {\ct INIT} line, depending on whether the particles
+originate at a surface or a volume. Note that if you introduce particles via an {\ct INIT} line,
 you must specify a value for {\ct DT\_INSERT}. Otherwise, particles or droplets will only be introduced initially.
 \item[{\ct SAMPLING\_FACTOR}]     Sampling factor for the output
-file {\bf CHID.prt5}. This parameter can be used to reduce the size
-of the particle output file used to animate the simulation. The default value is 1 for {\ct MASSLESS} particles, meaning that every particle or droplet will be shown in Smokeview. The default
-is 10 for all other types of particles. {\ct MASSLESS} particles are discussed in Section~\ref{part_type}.
+file {\ct CHID.prt5}. This parameter can be used to reduce the size
+of the particle output file used to animate the simulation. The default value is 1 for {\ct MASSLESS} particles, meaning that every particle or droplet will be shown in Smokeview. 
+The default is 10 for all other types of particles. {\ct MASSLESS} particles are discussed in Section~\ref{part_type}.
 \item[{\ct AGE}]  Number of seconds the particle or droplet exists, after which time it is removed from the calculation. This is a useful parameter to use when
 trying to reduce the number of droplets or particles in a simulation.
 \end{description}
@@ -6569,43 +6564,39 @@ a particular type of particle or droplet.
 
 \label{thermal_part_props}
 
-For Lagrangian particles that are not {\ct MASSLESS}, the following parameters should be
-included on the {\ct SPEC} line to indicate how they heat up and possibly evaporate. It is assumed by default that non-massless particles are
-liquid droplets, but you can specify {\ct EVAPORATE=.FALSE.} to indicate that the droplets do not evaporate. If the droplets do evaporate, then
-provide a {\ct SPEC\_ID} of the gaseous species. If the liquid properties of the {\ct SPEC\_ID} are included in Table~\ref{tab:gasspecies},
+To simulate liquid droplets, you must include a {\ct SPEC\_ID} on the {\ct PART} line to indicate the gas species formed as the droplets evaporate. The following parameters should be
+included on the {\ct SPEC} line to control the evaporation. If the liquid properties of the {\ct SPEC\_ID} are included in Table~\ref{tab:gasspecies},
 then no further inputs are required. Otherwise, you must provide all of the following properties of the liquid:
 \begin{description}
-\item[{\ct DENSITY\_LIQUID}] The density of the liquid or solid droplet/particle.
-\item[{\ct SPECIFIC\_HEAT\_LIQUID}] Specific heat of liquid or solid droplet/particle.
-\item[{\ct VAPORIZATION\_TEMPERATURE}] Boiling temperature of liquid droplet.
-\item[{\ct MELTING\_TEMPERATURE}] Melting (solidification) temperature of liquid droplet.
-\item[{\ct INITIAL\_TEMPERATURE}] Initial temperature of liquid droplet.
-\item[{\ct HEAT\_OF\_VAPORIZATION}] Latent heat of vaporization of liquid droplet.
-\item[{\ct H\_V\_REFERENCE\_TEMPERATURE}] The temperature corresponding to the provided {\ct HEAT\_OF\_VAPORIZATION}.
+\item[{\ct DENSITY\_LIQUID}] The density of the liquid or solid droplet/particle (kg/m$^3$).
+\item[{\ct SPECIFIC\_HEAT\_LIQUID}] Specific heat of liquid or solid droplet/particle (kJ/kg/K).
+\item[{\ct VAPORIZATION\_TEMPERATURE}] Boiling temperature of liquid droplet ($^\circ$C).
+\item[{\ct MELTING\_TEMPERATURE}] Melting (solidification) temperature of liquid droplet ($^\circ$C).
+\item[{\ct INITIAL\_TEMPERATURE}] Initial temperature of liquid droplet; assumed ambient, {\ct TMPA} ($^\circ$C).
+\item[{\ct HEAT\_OF\_VAPORIZATION}] Latent heat of vaporization of liquid droplet (kJ/kg).
+\item[{\ct H\_V\_REFERENCE\_TEMPERATURE}] The temperature corresponding to the provided {\ct HEAT\_OF\_VAPORIZATION} ($^\circ$C).
 \end{description}
-
-Note that if a particle is to have mass but not evaporate, just the parameter {\ct DENSITY} can be provided on the {\ct PART} line.
 
 \subsection{Radiative properties}
 
 \label{radiative_part_props}
 
-The radiative properties of the water and fuel droplets are determined automatically.
-For fuel, the properties of Heptane are assumed. For other types of particles, the
+The radiative properties of water and fuel droplets are determined automatically.
+For fuel, the properties of heptane are assumed. For other types of particles, the
 radiative properties can be given by specifying the components of the material refractive index on the corresponding {\ct PART} line, using keywords
 {\ct REAL\_REFRACTIVE\_INDEX} and {\ct COMPLEX\_REFRACTIVE\_INDEX}. Alternatively, wavelength dependent values of these two quantities can be specified using
 a spectral property {\ct TABLE} and specifying the {\ct ID} of that table is {\ct RADIATIVE\_PROPERTY\_TABLE} property on the {\ct PART} line.
 Each row of a spectral property table contains three real numbers: wavelength ($\mu$m), real and complex components of the refractive index.
-The real part of the refractive index should be a positive number. If it is greater than 10.0, the particles are treated as perfectly reflecting spheres. The complex part should be a non-negative number. Values less than 1.0E-6 are treated as non-absorbing.
+The real part of the refractive index should be a positive number. If it is greater than 10.0, the particles are treated as perfectly reflecting spheres. 
+The complex part should be a non-negative number. Values less than $10^{-6}$ are treated as non-absorbing.
 Below is an example of the use of spectral property table, listing the properties at wavelengths 1, 5 and 10 $\mu$m.
 
 \footnotesize
 \begin{verbatim}
-&PART ID='particles', DIAMETER=750., DENSITY=1000.,
-      EVAPORATE=.FALSE., RADIATIVE_PROPERTY_TABLE = 'table' /
-&TABL ID = 'table' TABLE_DATA=  1.0,1.33,0.0001 /
-&TABL ID = 'table' TABLE_DATA=  5.0,1.33,0.002 /
-&TABL ID = 'table' TABLE_DATA= 10.0,1.33,0.001 /
+&PART ID='particles',..., RADIATIVE_PROPERTY_TABLE='table' /
+&TABL ID='table', TABLE_DATA= 1.0,1.33,0.0001 /
+&TABL ID='table', TABLE_DATA= 5.0,1.33,0.002  /
+&TABL ID='table', TABLE_DATA=10.0,1.33,0.001  /
 \end{verbatim} \normalsize
 \normalsize
 
@@ -6613,7 +6604,7 @@ Below is an example of the use of spectral property table, listing the propertie
 \subsection{Size Distribution}
 \label{info:particle_size}
 
-The {\ct DIAMETER} is the median volumetric diameter of the droplets or particles, with the
+For liquid droplets, the specified {\ct DIAMETER} (in units of $\mu$m) on the {\ct PART} line is the median volumetric diameter of the droplets or particles, with the
 distribution assumed to be a combination of Rosin-Rammler and log-normal (Default 500~$\mu$m). The
 width of the distribution is controlled by the parameter {\ct GAMMA\_D} (default 2.4)
 The Rosin-Rammler/log-normal distribution is given by
@@ -6630,7 +6621,9 @@ over-ride this feature.
 The larger the value of $\gamma$, the narrower the droplet size is
 distributed about the median value. Note that you can prevent droplets or particles from
 exceeding {\ct MAXIMUM\_DIAMETER}, which is infinitely large by default. Also note that
-droplets less than {\ct MINIMUM\_DIAMETER} are assumed to evaporate in a single time step. The default {\ct MINIMUM\_DIAMETER} is set to 0.005 the value of {\ct DIAMETER}. The droplet distribution is divided into a series of bins for picking particle size.  To avoid very small particle weights, the distribution is clipped at the cummulative fractions of {\ct CDF\_CUTOFF} and 1 - {\ct CDF\_CUTOFF}.
+droplets less than {\ct MINIMUM\_DIAMETER} are assumed to evaporate in a single time step. The default {\ct MINIMUM\_DIAMETER} is set to 0.005 the value of {\ct DIAMETER}. 
+The droplet distribution is divided into a series of bins for picking particle size.  To avoid very small particle weights, the distribution is clipped at the cumulative 
+fractions of {\ct CDF\_CUTOFF} and (1 - {\ct CDF\_CUTOFF}).
 To prevent FDS from generating a distribution of droplets/particles altogether, set
 {\ct MONODISPERSE=.TRUE.} on the {\ct PART} line, in which case every droplet or particle will be assigned the
 same {\ct DIAMETER}.
@@ -6646,7 +6639,7 @@ In this case the user should also specify {\ct SURFACE\_TENSION} of the liquid a
 \label{info:particle_drag}
 
 For massive particles the default drag law (i.e., the drag coefficient correlation as a function of Reynolds number [based on particle diameter]) is that of a sphere.
-To invoke the cylinder drag law set {\ct DRAG\_LAW} to {\ct `CYLINDER'} on the {\ct PART} line.  If neither of these options is applicable,
+To invoke the cylinder drag law set {\ct DRAG\_LAW} to {\ct 'CYLINDER'} on the {\ct PART} line.  If neither of these options is applicable,
 the user may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct USER\_DRAG\_COEFFICIENT} on {\ct PART}.
 The {\ct USER\_DRAG\_COEFFICIENT} trumps the {\ct DRAG\_LAW}.
 
@@ -6670,7 +6663,7 @@ Be aware that when droplets hit obstructions, the vertical direction is assumed 
 \end{warning}
 
 \noindent
-A useful sample case to demonstrate various features of droplet motion on solid obstructions is the test case called {\bf cascade.fds}. Figure~\ref{cascade} shows a stream
+A useful sample case to demonstrate various features of droplet motion on solid obstructions is the test case called {\ct cascade.fds}. Figure~\ref{cascade} shows a stream
 of water droplets impinging on the top of a box followed by the cascading of water droplets over the top edge.
 
 \begin{figure}[ht]
@@ -6735,7 +6728,7 @@ defined via the line
 \noindent
 Note that if the particles are {\ct MASSLESS}, it is not appropriate to color them according to any particular property.
 Particles are not colored by gas phase quantities, but rather by properties of the particle itself. For example,
-{\ct 'PARTICLE\_TEMPERATURE'} for a non-massless particle refers to the temperature of the particle itself
+{\ct 'PARTICLE TEMPERATURE'} for a non-massless particle refers to the temperature of the particle itself
 rather than the local gas temperature.
 
 Also note that if {\ct MASSLESS=.TRUE.}, the {\ct SAMPLING\_FACTOR} is set to 1 unless you say otherwise, which would be pointless
@@ -6774,7 +6767,7 @@ in the same way as those for a sprinkler.  If the fuel species is present in the
 
 Controlled fire experiments are often conducted using a spray burner,
 where a liquid fuel is sprayed out of a nozzle and ignited. In this
-example ({\bf spray\_burner.fds}), heptane from two nozzles is
+example ({\ct spray\_burner.fds}), heptane from two nozzles is
 sprayed downwards into a steel pan.  The flow rate is increased
 linearly so that the fire grows to 2~MW in 20 s, burns steadily for
 another 20 s, and then ramps down linearly in 20 s. The key input
@@ -6788,7 +6781,7 @@ parameters are given here:
 &DEVC ID='nozzle_2', XYZ=4.0,0.3,0.5, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=0. /
 
 &PART ID='heptane droplets', SPEC_ID='N-HEPTANE',
-      QUANTITIES(1:2)='DIAMETER','PARTICLE_TEMPERATURE',
+      QUANTITIES(1:2)='PARTICLE DIAMETER','PARTICLE TEMPERATURE',
       DIAMETER=1000., HEAT_OF_COMBUSTION=44500., SAMPLING_FACTOR=1 /
 
 &PROP ID='nozzle', CLASS='NOZZLE', PART_ID='heptane droplets',
@@ -6829,22 +6822,12 @@ fuel and the amount of fuel being ejected from the
 nozzle. Always test your burner at the resolution of your overall simulation.
 
 
-\subsection{Solid Particles that do not Evaporate}
-
-Unless you declare {\ct MASSLESS=.TRUE.} on the {\ct PART} line, it is assumed that the particle or droplet has mass and thermal properties that govern its
-heating and evaporation. To prevent evaporation, set {\ct EVAPORATE=.FALSE.} The particles will still heat up due to convection, but they will not
-shrink and no additional gaseous species need to be declared.
-
-Note that the absorption of thermal radiation by water or fuel droplets is
-handled in FDS with fairly well-established physical sub-models, the details
-of which are contained in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
-However, for arbitrary particles or droplets, there is no assumed radiative absorption.
-
-
 \subsection{Assigning Complex Properties to Particles}
 \label{info:PART_SURF}
 
-Typically, droplets are assumed to be relatively small, thermally-thin spheres. However, it is possible to assign arbitrary surface properties to
+Unless you declare {\ct MASSLESS=.TRUE.} on the {\ct PART} line, it is assumed that the particle has mass and thermal properties that govern its
+heating and evaporation. If you specify a {\ct SPEC\_ID}, then FDS automatically assumes that you want relatively small, thermally-thin evaporating liquid droplets. 
+However, it is possible to assign arbitrary surface properties to
 ``particles'' that represent subgrid-scale objects, like office clutter or vegetation. To do this, you add a {\ct SURF\_ID} to the {\ct PART} line. The
 {\ct SURF} properties then over-ride the default properties assigned to particles and droplets. For example, the following input lines create a collection
 of hot spheres:
@@ -6869,19 +6852,24 @@ The {\ct SURF} line establishes the particle {\ct GEOMETRY}. Options are {\ct 'S
 the {\ct LENGTH}, {\ct WIDTH}, and {\ct THICKNESS} of the plate. Note that the heat conduction calculation will be done in the appropriate coordinate
 system.
 
-If you want to monitor the properties of a given particle, you can use Smokeview to visualize the {\ct QUANTITIES} on the {\ct PART} line, or you can use a device as follows:
+%If you want to monitor the properties of a given particle, you can use Smokeview to visualize the {\ct QUANTITIES} on the {\ct PART} line, or you can use a device as follows:
+%
+%\footnotesize
+%\begin{verbatim}
+%&DEVC ID='temp', XYZ=0.1,0.1,0.1, QUANTITY='WALL TEMPERATURE', VIRTUAL_INDEX=1 /
+%\end{verbatim}
+%\normalsize
+%
+%\noindent
+%This line tells FDS to look for the first particle within the mesh that contains the point {\ct XYZ} and record its surface temperature in the device output file. More on
+%pointwise output can be found in Section~\ref{info:DEVC}.
 
-\footnotesize
-\begin{verbatim}
-&DEVC ID='temp', XYZ=0.1,0.1,0.1, QUANTITY='WALL TEMPERATURE', VIRTUAL_INDEX=1 /
-\end{verbatim}
-\normalsize
-
-\noindent
-This line tells FDS to look for the first particle within the mesh that contains the point {\ct XYZ} and record its surface temperature in the device output file. More on
-pointwise output can be found in Section~\ref{info:DEVC}.
-
-
+\begin{warning}
+Note that the absorption of thermal radiation by water or fuel droplets is
+handled in FDS with fairly well-established physical sub-models, the details
+of which are contained in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
+However, for arbitrary particles or droplets, there is no assumed radiative absorption.
+\end{warning}
 
 
 
@@ -7230,9 +7218,9 @@ For some simulations there may be groups of independent sprinklers or nozzles.  
 \footnotesize
 \begin{verbatim}
 &DEVC ID='Spr_1', XYZ=2.00,2.00,8.00, PROP_ID='My nozzle',PIPE_INDEX=1/
-&DEVC ID='Spr_2', XYZ=1.00,1.00,8.00, PROP_ID='My nozzle',PIPE_INDEX=1 / 
+&DEVC ID='Spr_2', XYZ=1.00,1.00,8.00, PROP_ID='My nozzle',PIPE_INDEX=1 /
 &DEVC ID='Fuel_1', XYZ=2.00,2.00,1.00, PROP_ID='Fuel Spray',PIPE_INDEX=2 /
-&DEVC ID='Fuel_2', XYZ=1.00,1.00,1.00, PROP_ID='Fuel Spray',PIPE_INDEX=2 / 
+&DEVC ID='Fuel_2', XYZ=1.00,1.00,1.00, PROP_ID='Fuel Spray',PIPE_INDEX=2 /
 \end{verbatim}
 \normalsize
 
