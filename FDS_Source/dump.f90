@@ -2831,7 +2831,7 @@ ENDIF
  
 ! Write out radiation info
  
-WRITE_RADIATION: IF (RADIATION) THEN
+WRITE_RADIATION: IF (RADIATION .AND. ALLOCATED(RSA)) THEN
    WRITE(LU_OUTPUT,'(//A/)')   ' Radiation Model Information'
    WRITE(LU_OUTPUT,'(A,I4)')   '   Number of control angles ', NUMBER_RADIATION_ANGLES
    WRITE(LU_OUTPUT,'(A,I4)')   '   Time step increment      ', TIME_STEP_INCREMENT
