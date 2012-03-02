@@ -201,6 +201,7 @@ $RUNFDS Sprinklers_and_Sprays bucket_test_2
 $RUNFDS Sprinklers_and_Sprays bucket_test
 $RUNFDS Sprinklers_and_Sprays cascade
 $RUNFDS Sprinklers_and_Sprays flow_rate
+$RUNFDS Sprinklers_and_Sprays flow_rate_2
 $RUNFDS Sprinklers_and_Sprays fuel_evaporation
 $RUNFDS Sprinklers_and_Sprays particle_colors
 $RUNFDS Sprinklers_and_Sprays particle_drag_U10_N16
