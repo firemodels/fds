@@ -70,7 +70,6 @@
 &ISOF QUANTITY='TEMPERATURE',VALUE(1)=100.0 /  Show 3D contours of temperature at 100 C
 &ISOF QUANTITY='TEMPERATURE',VALUE(1)=200.0 /  Show 3D contours of temperature at 200 C
 &ISOF QUANTITY='TEMPERATURE',VALUE(1)=620.0 /  Show 3D contours of temperature at 620 C
-&ISOF QUANTITY='TEMPERATURE',VALUE(1)=200.0, COLOR_QUANTITY='VELOCITY' /  Show 3D contours of temperature at 200 C
 
 &PROP ID='lava_props'   SMOKEVIEW_PARAMETERS(1:5)='D=0.2','L=0.3','VELMAX=4.5','W=.1','H=.1' SMOKEVIEW_ID(1:4)='sphere','veltube','velegg','face_eye' /
 &PROP ID='bubble_props' SMOKEVIEW_PARAMETERS(1:5)='D=0.2','L=0.3','VELMAX=4.5','W=.1','H=.1' SMOKEVIEW_ID(1:4)='sphere','veltube','velegg','face_eye' /
