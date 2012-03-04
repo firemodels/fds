@@ -2072,10 +2072,7 @@ int readsmv(char *file, char *file2){
       npatchinfo++;
       continue;
     }
-    if(
-      match(buffer,"ISOF") == 1||match(buffer,"TISOF")==1||
-      match(buffer,"ISOG") == 1||match(buffer,"TISOGG")==1  // turn off TISOG for now
-      ){
+    if(match(buffer,"ISOF") == 1||match(buffer,"TISOF")==1||match(buffer,"ISOG") == 1){
       nisoinfo++;
       continue;
     }
@@ -5556,10 +5553,7 @@ typedef struct {
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
 
-    if(
-      match(buffer,"ISOF") == 1||match(buffer,"TISOF")==1||
-      match(buffer,"ISOG") == 1||match(buffer,"TISOGG")==1  // turn off TISOG for now
-      ){
+    if(match(buffer,"ISOF") == 1||match(buffer,"TISOF")==1||match(buffer,"ISOG") == 1){
       iso *isoi;
       int get_isolevels;
       int dataflag=0,geomflag=0;
@@ -5567,8 +5561,8 @@ typedef struct {
 
       isoi = isoinfo + iiso;
       nn_iso++;
-      if(match(buffer,"TISOF")==1||match(buffer,"TISOGG")==1)dataflag=1;
-      if(match(buffer,"ISOG")==1||match(buffer,"TISOGG")==1)geomflag=1;
+      if(match(buffer,"TISOF")==1)dataflag=1;
+      if(match(buffer,"ISOG")==1)geomflag=1;
       trim(buffer);
       len=strlen(buffer);
 

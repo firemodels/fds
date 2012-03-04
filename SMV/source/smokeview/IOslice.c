@@ -6,7 +6,10 @@
 char IOslice_revision[]="$Revision$";
 
 #include "options.h"
-#include <stdio.h>  
+#include <stdio.h>
+#ifdef WIN32
+#include <share.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -40,6 +43,12 @@ int getslicecompresseddata(char *file,
                             float *times, unsigned char *compressed_data, compinfo *compindex, float *valmin, float *valmax);
 
 int makeslicesizefile(char *file, char *sizefile, int compression_type);
+
+#ifdef WIN32
+#define FOPEN(file,mode) _fsopen(file,mode,_SH_DENYNO)
+#else
+#define FOPEN(file,mode) fopen(file,mode)
+#endif
 
 #define FORTRLESLICEREAD(var,size) fseek(RLESLICEFILE,4,SEEK_CUR);\
                            returncode=fread(var,4,size,RLESLICEFILE);\
@@ -5185,10 +5194,10 @@ int getsliceheader0(char *comp_file, char *size_file, int compression_type, int 
   FILE *stream;
   char buffer[255];
 
-  stream=fopen(size_file,"r");
+  stream=FOPEN(size_file,"r");
   if(stream==NULL){
     if(makeslicesizefile(comp_file,size_file, compression_type)==0)return 0;
-    stream=fopen(size_file,"r");
+    stream=FOPEN(size_file,"r");
     if(stream==NULL)return 0;
   }
 
@@ -5219,7 +5228,7 @@ int getsliceheader(char *comp_file, char *size_file, int compression_type,
   char buffer[256];
   int ncompressed_rle, ncompressed_zlib;
 
-  stream=fopen(size_file,"r");
+  stream=FOPEN(size_file,"r");
   if(stream==NULL){
     if(makeslicesizefile(comp_file,size_file,compression_type)==0)return 0;
     stream=fopen(size_file,"r");
@@ -5261,9 +5270,6 @@ int getsliceheader(char *comp_file, char *size_file, int compression_type,
   }
   fclose(stream);
   return 2 + *nsteps;
-
-
-
 }
 
   //*** header
@@ -5309,7 +5315,7 @@ int getslicezlibdata(char *file,
   cd=compressed_data;
   compindex[0].offset=0;
 
-  stream=fopen(file,"rb");
+  stream=FOPEN(file,"rb");
   if(stream==NULL)return 0;
   
   // read header
@@ -5392,7 +5398,7 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type){
   int count;
   size_t returncode;
 
-  stream=fopen(file,"rb");
+  stream=FOPEN(file,"rb");
   if(stream==NULL)return 0;
   RLESLICEFILE=stream;
 
