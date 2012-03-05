@@ -109,14 +109,14 @@ WLOOP_FL: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    WC=>WALL(IW)
    IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WLOOP_FL
        
-   II  = WC%II 
-   JJ  = WC%JJ
-   KK  = WC%KK
-   IOR = WC%IOR
+   II  = WC%ONE_D%II 
+   JJ  = WC%ONE_D%JJ
+   KK  = WC%ONE_D%KK
+   IOR = WC%ONE_D%IOR
    SURF_INDEX = WC%SURF_INDEX
-   IIG = WC%IIG
-   JJG = WC%JJG
-   KKG = WC%KKG
+   IIG = WC%ONE_D%IIG
+   JJG = WC%ONE_D%JJG
+   KKG = WC%ONE_D%KKG
    
    ! overwrite first off-wall advective flux if flow is away from the wall and if the face is not also a wall cell
 
@@ -186,8 +186,8 @@ WLOOP_FL: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
        IF (SURFACE(SURF_INDEX)%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX     .OR. &
            SURFACE(SURF_INDEX)%SPECIES_BC_INDEX==SPECIFIED_MASS_FRACTION) THEN ! .OR. &
            !SURFACE(SURF_INDEX)%SPECIES_BC_INDEX==HVAC_BOUNDARY                 ) THEN
-          IF (PREDICTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%UWS
-          IF (CORRECTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%UW
+          IF (PREDICTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
+          IF (CORRECTOR) UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
        ENDIF
    ENDIF
 
@@ -284,14 +284,14 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          WC=>WALL(IW)
          IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WLOOP2_FL
              
-         II  = WC%II 
-         JJ  = WC%JJ
-         KK  = WC%KK
-         IOR = WC%IOR
+         II  = WC%ONE_D%II 
+         JJ  = WC%ONE_D%JJ
+         KK  = WC%ONE_D%KK
+         IOR = WC%ONE_D%IOR
          SURF_INDEX = WC%SURF_INDEX
-         IIG = WC%IIG
-         JJG = WC%JJG
-         KKG = WC%KKG
+         IIG = WC%ONE_D%IIG
+         JJG = WC%ONE_D%JJG
+         KKG = WC%ONE_D%KKG
          
          ! overwrite first off-wall advective flux if flow is away from the wall and if the face is not also a wall cell
 
@@ -364,7 +364,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          
          IF ((SURFACE(SURF_INDEX)%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .OR. &
              (SURFACE(SURF_INDEX)%SPECIES_BC_INDEX==HVAC_BOUNDARY       .OR. &
-              ANY(SURFACE(SURF_INDEX)%LEAK_PATH>0._EB)) .AND. WC%UWS<0._EB) .AND. WC%ZZ_F(N)>0._EB) THEN
+              ANY(SURFACE(SURF_INDEX)%LEAK_PATH>0._EB)) .AND. WC%ONE_D%UWS<0._EB) .AND. WC%ZZ_F(N)>0._EB) THEN
             ! recreate diffusive flux from divg b/c UWP based on old RHODW
             RHO_D_DZDN = 2._EB*WC%RHODW(N)*(ZZP(IIG,JJG,KKG,N)-WC%ZZ_F(N))*WC%RDN
             UN = SIGN(1._EB,REAL(IOR,EB))*(WC%ONE_D%MASSFLUX(N) + RHO_D_DZDN)/(WC%RHO_F*WC%ZZ_F(N))

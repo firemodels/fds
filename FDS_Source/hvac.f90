@@ -1298,10 +1298,10 @@ LEAKAGE_BC: IF (LEAK_DUCTS > 0) THEN
          IZ1 = SF%LEAK_PATH(2)
          IZ2 = SF%LEAK_PATH(1)
       ENDIF
-      IOR = WC%IOR      
-      II = WC%IIG
-      JJ = WC%JJG
-      KK = WC%KKG
+      IOR = WC%ONE_D%IOR      
+      II = WC%ONE_D%IIG
+      JJ = WC%ONE_D%JJG
+      KK = WC%ONE_D%KKG
       AREA = WC%AW
       FDS_LEAK_AREA(IZ1,IZ2,NM) = FDS_LEAK_AREA(IZ1,IZ2,NM) + AREA
       LEAK_RHO(IZ1,IZ2,NM) = LEAK_RHO(IZ1,IZ2,NM) + RHOP(II,JJ,KK)*AREA

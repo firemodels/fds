@@ -71,12 +71,12 @@ DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    IF (WC%BOUNDARY_TYPE/=NULL_BOUNDARY .AND. WC%BOUNDARY_TYPE/=OPEN_BOUNDARY .AND. &
       WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE
    IF (EVACUATION_ONLY(NM)) CYCLE
-   II  = WC%II
-   JJ  = WC%JJ
-   KK  = WC%KK
-   IIG = WC%IIG
-   JJG = WC%JJG
-   KKG = WC%KKG
+   II  = WC%ONE_D%II
+   JJ  = WC%ONE_D%JJ
+   KK  = WC%ONE_D%KK
+   IIG = WC%ONE_D%IIG
+   JJG = WC%ONE_D%JJG
+   KKG = WC%ONE_D%KKG
    IF (SOLID(CELL_INDEX(IIG,JJG,KKG))) CYCLE
    IPZ  = PRESSURE_ZONE(IIG,JJG,KKG)
    IOPZ = PRESSURE_ZONE(II,JJ,KK)
@@ -168,11 +168,11 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       WC => WALL(IW)
       IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .OR. &
           WC%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP
-      IIG = WC%IIG 
-      JJG = WC%JJG
-      KKG = WC%KKG
+      IIG = WC%ONE_D%IIG 
+      JJG = WC%ONE_D%JJG
+      KKG = WC%ONE_D%KKG
       RHO_D_DZDN  = 2._EB*WC%RHODW(N)*(ZZP(IIG,JJG,KKG,N)-WC%ZZ_F(N))*WC%RDN
-      IOR = WC%IOR
+      IOR = WC%ONE_D%IOR
       SELECT CASE(IOR) 
          CASE( 1)
             RHO_D_DZDX(IIG-1,JJG,KKG) =  RHO_D_DZDN
@@ -224,11 +224,11 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       WC => WALL(IW)
       IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .OR. &
           WC%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP2
-      IIG = WC%IIG
-      JJG = WC%JJG
-      KKG = WC%KKG
-      IOR = WC%IOR
-      CALL GET_SENSIBLE_ENTHALPY_DIFF(N,WC%TMP_F,HDIFF)
+      IIG = WC%ONE_D%IIG
+      JJG = WC%ONE_D%JJG
+      KKG = WC%ONE_D%KKG
+      IOR = WC%ONE_D%IOR
+      CALL GET_SENSIBLE_ENTHALPY_DIFF(N,WC%ONE_D%TMP_F,HDIFF)
       RHO_D_DZDN = 2._EB*WC%RHODW(N)*(ZZP(IIG,JJG,KKG,N)-WC%ZZ_F(N))*WC%RDN
       SELECT CASE(IOR)
          CASE( 1) 
@@ -341,12 +341,12 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
 
       BOUNDARY_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
          WC=>WALL(IW)
-         II  = WC%II
-         JJ  = WC%JJ
-         KK  = WC%KK
-         IIG = WC%IIG
-         JJG = WC%JJG
-         KKG = WC%KKG
+         II  = WC%ONE_D%II
+         JJ  = WC%ONE_D%JJ
+         KK  = WC%ONE_D%KK
+         IIG = WC%ONE_D%IIG
+         JJG = WC%ONE_D%JJG
+         KKG = WC%ONE_D%KKG
          KP(II,JJ,KK) = KP(IIG,JJG,KKG)
       ENDDO BOUNDARY_LOOP
 
@@ -365,12 +365,12 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
 
          BOUNDARY_LOOP2: DO IW=1,N_EXTERNAL_WALL_CELLS
             WC => WALL(IW)
-            II  = WC%II
-            JJ  = WC%JJ
-            KK  = WC%KK
-            IIG = WC%IIG
-            JJG = WC%JJG
-            KKG = WC%KKG
+            II  = WC%ONE_D%II
+            JJ  = WC%ONE_D%JJ
+            KK  = WC%ONE_D%KK
+            IIG = WC%ONE_D%IIG
+            JJG = WC%ONE_D%JJG
+            KKG = WC%ONE_D%KKG
             KP(II,JJ,KK) = KP(IIG,JJG,KKG)
          ENDDO BOUNDARY_LOOP2
 
@@ -402,19 +402,19 @@ ENERGY: IF (.NOT.EVACUATION_ONLY(NM)) THEN
    CORRECTION_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       WC => WALL(IW)
       IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .OR. WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) CYCLE CORRECTION_LOOP
-      II  = WC%II
-      JJ  = WC%JJ
-      KK  = WC%KK
-      IIG = WC%IIG
-      JJG = WC%JJG
-      KKG = WC%KKG
+      II  = WC%ONE_D%II
+      JJ  = WC%ONE_D%JJ
+      KK  = WC%ONE_D%KK
+      IIG = WC%ONE_D%IIG
+      JJG = WC%ONE_D%JJG
+      KKG = WC%ONE_D%KKG
       IF (WC%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
          WC%KW = 0.5_EB*(KP(IIG,JJG,KKG)+KP(II,JJ,KK))
          CYCLE CORRECTION_LOOP
       ELSE
          WC%KW = KP(IIG,JJG,KKG)
       ENDIF
-      IOR = WC%IOR
+      IOR = WC%ONE_D%IOR
       SELECT CASE(IOR)
          CASE( 1)
             KDTDX(II,JJ,KK)   = 0._EB
@@ -521,17 +521,17 @@ ENTHALPY_TRANSPORT_IF: IF (ENTHALPY_TRANSPORT) THEN
       IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .OR. &
           WC%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. &
           WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) CYCLE CORRECTION_LOOP_2
-      II  = WC%II
-      JJ  = WC%JJ
-      KK  = WC%KK
-      IIG = WC%IIG
-      JJG = WC%JJG
-      KKG = WC%KKG
-      IOR = WC%IOR
+      II  = WC%ONE_D%II
+      JJ  = WC%ONE_D%JJ
+      KK  = WC%ONE_D%KK
+      IIG = WC%ONE_D%IIG
+      JJG = WC%ONE_D%JJG
+      KKG = WC%ONE_D%KKG
+      IOR = WC%ONE_D%IOR
       IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = WC%ZZ_F(1:N_TRACKED_SPECIES)
-      CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,WC%TMP_F)
-      IF (PREDICTOR) UN = -WC%UWS
-      IF (CORRECTOR) UN = -WC%UW          
+      CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,WC%ONE_D%TMP_F)
+      IF (PREDICTOR) UN = -WC%ONE_D%UWS
+      IF (CORRECTOR) UN = -WC%ONE_D%UW          
       SELECT CASE(IOR)
          CASE( 1)
             UDRHDX(II,JJ,KK)   = 2._EB*WC%RDN*(RHO_H_S_P(IIG,JJG,KKG)-WC%RHO_F*H_S)*UN
@@ -689,66 +689,66 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
  
    WALL_LOOP3: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       WC => WALL(IW)
-      IOR = WC%IOR
+      IOR = WC%ONE_D%IOR
       
       WALL_CELL_TYPE: SELECT CASE (WC%BOUNDARY_TYPE)         
          CASE (NULL_BOUNDARY)
-            WC%UWS = 0._EB
+            WC%ONE_D%UWS = 0._EB
          CASE (SOLID_BOUNDARY)
             SF => SURFACE(WC%SURF_INDEX)
             EVAC_IF_NOT: IF (.NOT.EVACUATION_ONLY(NM)) THEN
             IF (SF%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .OR. SF%SPECIES_BC_INDEX==INTERPOLATED_BC .OR. &
                 SF%SPECIES_BC_INDEX==HVAC_BOUNDARY .OR. ANY(SF%LEAK_PATH>0._EB)) CYCLE WALL_LOOP3
             ENDIF EVAC_IF_NOT
-            IF (ABS(WC%TW-T_BEGIN) < SPACING(WC%TW) .AND. SF%RAMP_INDEX(TIME_VELO)>=1) THEN
+            IF (ABS(WC%ONE_D%T-T_BEGIN) < SPACING(WC%ONE_D%T) .AND. SF%RAMP_INDEX(TIME_VELO)>=1) THEN
                TSI = T + DT
             ELSE
-               TSI = T + DT - WC%TW
+               TSI = T + DT - WC%ONE_D%T
                IF (TSI<0._EB) THEN
-                  WC%UWS = 0._EB
+                  WC%ONE_D%UWS = 0._EB
                   CYCLE WALL_LOOP3
                ENDIF
             ENDIF
             TIME_RAMP_FACTOR = EVALUATE_RAMP(TSI,SF%TAU(TIME_VELO),SF%RAMP_INDEX(TIME_VELO))
-            KK               = WC%KK
+            KK               = WC%ONE_D%KK
             DELTA_P          = PBAR_P(KK,SF%DUCT_PATH(1)) - PBAR_P(KK,SF%DUCT_PATH(2))
             PRES_RAMP_FACTOR = SIGN(1._EB,SF%MAX_PRESSURE-DELTA_P)*SQRT(ABS((DELTA_P-SF%MAX_PRESSURE)/SF%MAX_PRESSURE))
             SELECT CASE(IOR) 
                CASE( 1)
-                  WC%UWS =-U0 + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*(WC%UW0+U0)
+                  WC%ONE_D%UWS =-U0 + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*(WC%UW0+U0)
                CASE(-1)
-                  WC%UWS = U0 + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*(WC%UW0-U0)
+                  WC%ONE_D%UWS = U0 + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*(WC%UW0-U0)
                CASE( 2)
-                  WC%UWS =-V0 + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*(WC%UW0+V0)
+                  WC%ONE_D%UWS =-V0 + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*(WC%UW0+V0)
                CASE(-2)
-                  WC%UWS = V0 + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*(WC%UW0-V0)
+                  WC%ONE_D%UWS = V0 + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*(WC%UW0-V0)
                CASE( 3)
-                  WC%UWS =-W0 + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*(WC%UW0+W0)
+                  WC%ONE_D%UWS =-W0 + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*(WC%UW0+W0)
                CASE(-3)
-                  WC%UWS = W0 + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*(WC%UW0-W0)
+                  WC%ONE_D%UWS = W0 + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*(WC%UW0-W0)
             END SELECT          
             ! Special Cases
-            IF (EVACUATION_ONLY(NM) .AND. .NOT.EVAC_FDS6) WC%UWS = TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*WC%UW0
-            IF (ABS(SURFACE(WC%SURF_INDEX)%MASS_FLUX_TOTAL)>=ZERO_P) WC%UWS = WC%UWS*RHOA/WC%RHO_F
+            IF (EVACUATION_ONLY(NM) .AND. .NOT.EVAC_FDS6) WC%ONE_D%UWS = TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*WC%UW0
+            IF (ABS(SURFACE(WC%SURF_INDEX)%MASS_FLUX_TOTAL)>=ZERO_P) WC%ONE_D%UWS = WC%ONE_D%UWS*RHOA/WC%RHO_F
             IF (WC%VENT_INDEX>0) THEN 
                VT=>VENTS(WC%VENT_INDEX)
                IF (VT%N_EDDY>0) THEN ! Synthetic Eddy Method
-                  II = WC%II
-                  JJ = WC%JJ
-                  KK = WC%KK
+                  II = WC%ONE_D%II
+                  JJ = WC%ONE_D%JJ
+                  KK = WC%ONE_D%KK
                   SELECT CASE(IOR)
                      CASE( 1)
-                        WC%UWS = WC%UWS - TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*VT%U_EDDY(JJ,KK)
+                        WC%ONE_D%UWS = WC%ONE_D%UWS - TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*VT%U_EDDY(JJ,KK)
                      CASE(-1)
-                        WC%UWS = WC%UWS + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*VT%U_EDDY(JJ,KK)
+                        WC%ONE_D%UWS = WC%ONE_D%UWS + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*VT%U_EDDY(JJ,KK)
                      CASE( 2)
-                        WC%UWS = WC%UWS - TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*VT%V_EDDY(II,KK)
+                        WC%ONE_D%UWS = WC%ONE_D%UWS - TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*VT%V_EDDY(II,KK)
                      CASE(-2)
-                        WC%UWS = WC%UWS + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*VT%V_EDDY(II,KK)
+                        WC%ONE_D%UWS = WC%ONE_D%UWS + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*VT%V_EDDY(II,KK)
                      CASE( 3)
-                        WC%UWS = WC%UWS - TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*VT%W_EDDY(II,JJ)
+                        WC%ONE_D%UWS = WC%ONE_D%UWS - TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*VT%W_EDDY(II,JJ)
                      CASE(-3)
-                        WC%UWS = WC%UWS + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*VT%W_EDDY(II,JJ)
+                        WC%ONE_D%UWS = WC%ONE_D%UWS + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*VT%W_EDDY(II,JJ)
                   END SELECT
                ENDIF
                EVAC_IF: IF (EVACUATION_ONLY(NM) .AND. EVACUATION_GRID(NM) .AND. EVAC_FDS6) THEN
@@ -759,35 +759,39 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                   ELSE
                      TIME_RAMP_FACTOR = 0.0_EB
                   END IF
-                  WC%UWS = TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*WC%UW0
+                  WC%ONE_D%UWS = TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*WC%UW0
                END IF EVAC_IF
             ENDIF
          CASE(OPEN_BOUNDARY,INTERPOLATED_BOUNDARY)
-            II = WC%II
-            JJ = WC%JJ
-            KK = WC%KK
+            II = WC%ONE_D%II
+            JJ = WC%ONE_D%JJ
+            KK = WC%ONE_D%KK
             SELECT CASE(IOR)
                CASE( 1)
-                  WC%UWS = -U(II,JJ,KK)
+                  WC%ONE_D%UWS = -U(II,JJ,KK)
                CASE(-1)
-                  WC%UWS =  U(II-1,JJ,KK)
+                  WC%ONE_D%UWS =  U(II-1,JJ,KK)
                CASE( 2)
-                  WC% UWS = -V(II,JJ,KK)
+                  WC%ONE_D%UWS = -V(II,JJ,KK)
                CASE(-2)
-                  WC%UWS =  V(II,JJ-1,KK)
+                  WC%ONE_D%UWS =  V(II,JJ-1,KK)
                CASE( 3)
-                  WC% UWS = -W(II,JJ,KK)
+                  WC%ONE_D%UWS = -W(II,JJ,KK)
                CASE(-3)
-                  WC%UWS =  W(II,JJ,KK-1)
+                  WC%ONE_D%UWS =  W(II,JJ,KK-1)
             END SELECT
       END SELECT WALL_CELL_TYPE
    ENDDO WALL_LOOP3
 
-   DUWDT(1:N_EXTERNAL_WALL_CELLS) = RDT*(WALL(1:N_EXTERNAL_WALL_CELLS)%UWS-WALL(1:N_EXTERNAL_WALL_CELLS)%UW)
+   DO IW=1,N_EXTERNAL_WALL_CELLS
+      DUWDT(IW) = RDT*(WALL(IW)%ONE_D%UWS-WALL(IW)%ONE_D%UW)
+   ENDDO
    
 ELSE PREDICT_NORMALS
    
-   WALL%UW = WALL%UWS
+   DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+      WALL(IW)%ONE_D%UW = WALL(IW)%ONE_D%UWS
+   ENDDO
 
 ENDIF PREDICT_NORMALS
 
@@ -821,7 +825,7 @@ PRESSURE_ZONE_LOOP: DO IPZ=1,N_ZONE
    WALL_LOOP4: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       IF (WALL(IW)%PRESSURE_ZONE_WALL/=IPZ)     CYCLE WALL_LOOP4
       IF (WALL(IW)%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE WALL_LOOP4
-      USUM(IPZ,NM) = USUM(IPZ,NM) + WALL(IW)%UWS*WALL(IW)%AW
+      USUM(IPZ,NM) = USUM(IPZ,NM) + WALL(IW)%ONE_D%UWS*WALL(IW)%AW
    ENDDO WALL_LOOP4
    
 ENDDO PRESSURE_ZONE_LOOP
@@ -952,31 +956,31 @@ ENDDO SOLID_LOOP
 BC_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    WC => WALL(IW)
    IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE BC_LOOP
-   II = WC%II
-   JJ = WC%JJ
-   KK = WC%KK
+   II = WC%ONE_D%II
+   JJ = WC%ONE_D%JJ
+   KK = WC%ONE_D%KK
    SELECT CASE (WC%BOUNDARY_TYPE)
       CASE (SOLID_BOUNDARY)
          IF (.NOT.SOLID(CELL_INDEX(II,JJ,KK))) CYCLE BC_LOOP
-         IOR = WC%IOR
+         IOR = WC%ONE_D%IOR
          SELECT CASE(IOR)
             CASE( 1)
-               DP(II,JJ,KK) = DP(II,JJ,KK) - WC%UWS*RDX(II)*RRN(II)*R(II)
+               DP(II,JJ,KK) = DP(II,JJ,KK) - WC%ONE_D%UWS*RDX(II)*RRN(II)*R(II)
             CASE(-1)
-               DP(II,JJ,KK) = DP(II,JJ,KK) - WC%UWS*RDX(II)*RRN(II)*R(II-1)
+               DP(II,JJ,KK) = DP(II,JJ,KK) - WC%ONE_D%UWS*RDX(II)*RRN(II)*R(II-1)
             CASE( 2)
-               DP(II,JJ,KK) = DP(II,JJ,KK) - WC%UWS*RDY(JJ)
+               DP(II,JJ,KK) = DP(II,JJ,KK) - WC%ONE_D%UWS*RDY(JJ)
             CASE(-2)
-               DP(II,JJ,KK) = DP(II,JJ,KK) - WC%UWS*RDY(JJ)
+               DP(II,JJ,KK) = DP(II,JJ,KK) - WC%ONE_D%UWS*RDY(JJ)
             CASE( 3)
-               DP(II,JJ,KK) = DP(II,JJ,KK) - WC%UWS*RDZ(KK)
+               DP(II,JJ,KK) = DP(II,JJ,KK) - WC%ONE_D%UWS*RDZ(KK)
             CASE(-3)
-               DP(II,JJ,KK) = DP(II,JJ,KK) - WC%UWS*RDZ(KK)
+               DP(II,JJ,KK) = DP(II,JJ,KK) - WC%ONE_D%UWS*RDZ(KK)
          END SELECT
       CASE (OPEN_BOUNDARY,MIRROR_BOUNDARY,INTERPOLATED_BOUNDARY)
-         IIG = WC%IIG
-         JJG = WC%JJG
-         KKG = WC%KKG
+         IIG = WC%ONE_D%IIG
+         JJG = WC%ONE_D%JJG
+         KKG = WC%ONE_D%KKG
          DP(II,JJ,KK) = DP(IIG,JJG,KKG)
    END SELECT
 ENDDO BC_LOOP
@@ -1028,9 +1032,9 @@ ELSE TRUE_PROJECTION
    NO_SCARC_IF: IF (PRES_METHOD /='SCARC') THEN
       DO IW=1,N_EXTERNAL_WALL_CELLS
          IF (WALL(IW)%NOM==0) CYCLE
-         IIG = WALL(IW)%IIG
-         JJG = WALL(IW)%JJG
-         KKG = WALL(IW)%KKG
+         IIG = WALL(IW)%ONE_D%IIG
+         JJG = WALL(IW)%ONE_D%JJG
+         KKG = WALL(IW)%ONE_D%KKG
          IF (PREDICTOR) DDDT(IIG,JJG,KKG) = DDDT(IIG,JJG,KKG) + DS_CORR(IW)*RDT
          IF (CORRECTOR) DDDT(IIG,JJG,KKG) = DDDT(IIG,JJG,KKG) + (2._EB*D_CORR(IW)-DS_CORR(IW))*RDT
       ENDDO

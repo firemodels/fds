@@ -45,7 +45,6 @@ Mesh 2: 4x2 times 0.05 long cylinders without splits
 Mesh 3: 4x2 times 0.05 long cylinders, split in two
 
 &PART ID='Wood_part_005_split', SAMPLING_FACTOR=1,SURF_ID='Wood_005_40', PROP_ID='image_005' 
-      NUMBER_RADIATION_ANGLES = 2
       ORIENTATION(1,1:3)=0,0,1,
       ORIENTATION(2,1:3)=0,0,-1 ,STATIC=.TRUE./
 &INIT PART_ID='Wood_part_005_split', 
