@@ -1378,6 +1378,7 @@ int readsmv(char *file, char *file2){
   int s_type;
   int errorcode;
   int noGRIDpresent=1,startpass;
+  int nslicefiles=0;
 
   int ipart=0, islice=0, ipatch=0, iroom=0,izone_local=0,ifire=0,iiso=0;
   int ismoke3d=0;
@@ -2049,6 +2050,19 @@ int readsmv(char *file, char *file2){
         (match(buffer,"SLCT") == 1)
       ){
       nsliceinfo++;
+      nslicefiles=nsliceinfo;
+      if(fgets(buffer,255,stream)==NULL){
+        BREAK;
+      }
+      if(fgets(buffer,255,stream)==NULL){
+        BREAK;
+      }
+      if(fgets(buffer,255,stream)==NULL){
+        BREAK;
+      }
+      if(fgets(buffer,255,stream)==NULL){
+        BREAK;
+      }
       continue;
     }
     if(
@@ -2388,7 +2402,6 @@ int readsmv(char *file, char *file2){
     if(feof(stream)!=0){
       BREAK;
     }
-
     if(noGRIDpresent==1&&startpass==1){
       strcpy(buffer,"GRID");
       startpass=0;
@@ -3527,6 +3540,10 @@ int readsmv(char *file, char *file2){
    ************************************************************************
  */
 
+  printf("%s",_("   pass 2 "));
+  printf("%s",_("completed"));
+  printf("\n");
+
   CheckMemory;
   parsedatabase(databasefilename);
 
@@ -3600,9 +3617,6 @@ int readsmv(char *file, char *file2){
   rewind(stream1);
   if(stream2!=NULL)rewind(stream2);
   stream=stream1;
-  printf("%s",_("   pass 2 "));
-  printf("%s",_("completed"));
-  printf("\n");
   printf("%s",_("   pass 3"));
   printf("\n");
 
@@ -5405,6 +5419,10 @@ typedef struct {
       else{
         if(readlabels(&sd->label,stream)==2)return 2;
         nsliceinfo--;
+        nslicefiles--;
+      }
+      if(nslicefiles>100&&(islice%100==1||nslicefiles==islice)){
+        printf(" slice file %i/%i setup\n",islice,nslicefiles);
       }
       continue;
     }

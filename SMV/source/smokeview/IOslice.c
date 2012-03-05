@@ -1361,6 +1361,11 @@ void getsliceparams(void){
 
   for(i=0;i<nsliceinfo;i++){
     sd = sliceinfo + i;
+
+    if(nsliceinfo>100&&(i%100==0||i==nsliceinfo-1)){
+        printf(" Obtaining slice file parameters: %i/%i\n",i+1,nsliceinfo);
+    }
+
     file = sd->file;
     lenfile = strlen(file);
     if(sd->compression_type==0){
@@ -1606,6 +1611,26 @@ void updatevslices(void){
 
   nvslice=0;
   for(i=0;i<nsliceinfo;i++){
+    sdi = sliceinfo+i;
+
+    sdi->vec_comp=0;
+    if(strncmp(sdi->label.shortlabel,"U-VEL",5)==0){
+       sdi->vec_comp=1;
+       continue;
+    }
+    if(strncmp(sdi->label.shortlabel,"V-VEL",5)==0){
+      sdi->vec_comp=2;
+      continue;
+    }
+    if(strncmp(sdi->label.shortlabel,"W-VEL",5)==0){
+      sdi->vec_comp=3;
+      continue;
+    }
+  }
+  for(i=0;i<nsliceinfo;i++){
+    if(nsliceinfo>100&&(i%100==0||i==nsliceinfo-1)){
+        printf(" examing slice file %i/%i for vector slice setup\n",i,nsliceinfo);
+    }
     vd = vsliceinfo + nvslice;
     sdi = sliceinfo+i;
     vd->iu=-1;
@@ -1613,18 +1638,14 @@ void updatevslices(void){
     vd->iw=-1;
     vd->ival=i;
     vd->type=sliceinfo[i].type;
-    sdi->vec_comp=0;
-    if(strncmp(sdi->label.shortlabel,"U-VEL",5)==0)sdi->vec_comp=1;
-    if(strncmp(sdi->label.shortlabel,"V-VEL",5)==0)sdi->vec_comp=2;
-    if(strncmp(sdi->label.shortlabel,"W-VEL",5)==0)sdi->vec_comp=3;
     for(j=0;j<nsliceinfo;j++){
       sdj = sliceinfo+j;
       if(sdi->blocknumber!=sdj->blocknumber)continue;
       if(sdi->is1!=sdj->is1||sdi->is2!=sdj->is2||sdi->js1!=sdj->js1)continue;
       if(sdi->js2!=sdj->js2||sdi->ks1!=sdj->ks1||sdi->ks2!=sdj->ks2)continue;
-      if(strncmp(sdj->label.shortlabel,"U-VEL",5)==0)vd->iu=j;
-      if(strncmp(sdj->label.shortlabel,"V-VEL",5)==0)vd->iv=j;
-      if(strncmp(sdj->label.shortlabel,"W-VEL",5)==0)vd->iw=j;
+      if(sdj->vec_comp==1)vd->iu=j;
+      if(sdj->vec_comp==2)vd->iv=j;
+      if(sdj->vec_comp==3)vd->iw=j;
     }
     if(vd->iu!=-1||vd->iv!=-1||vd->iw!=-1){
       vd->display=0;
@@ -1634,6 +1655,7 @@ void updatevslices(void){
       nvslice++;
     }
   }
+  printf(" %i vector slices found\n",nvslice);
   if(nvslice>0){
     FREEMEMORY(vsliceorderindex);
     NewMemory((void **)&vsliceorderindex,sizeof(int)*nvslice);
@@ -1693,6 +1715,7 @@ void updatevslices(void){
       vslicei->autoload=0;
     }
   }
+  printf("updating vector menus");
   updatevslicemenulabels();
   printf(" complete\n");
   
