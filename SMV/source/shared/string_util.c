@@ -59,10 +59,16 @@ void parsecsv(char *buffer, char **tokens, int ncols, int *ntokens){
   int nt=0;
   int i;
   int lenbuffer;
+  int inside_quote=0;
 
   lenbuffer=strlen(buffer);
   for(i=0;i<lenbuffer;i++){
-    if(buffer[i]==',')buffer[i]=0;
+    if(buffer[i]=='"'){
+      buffer[i]=' ';
+      inside_quote=1-inside_quote;
+      continue;
+    }
+    if(inside_quote==0&&buffer[i]==',')buffer[i]=0;
   }
   tokens[nt++]=buffer;
   for(i=1;i<lenbuffer;i++){
@@ -82,17 +88,20 @@ int getrowcols(FILE *stream, int *nrows, int *ncols){
        of the longest line
   */
   int nnrows=0,nncols=1,maxcols=0,linelength=0,maxlinelength=0;
+  int inside_quote=0;
 
   while(!feof(stream)){
     char ch;
 
     ch = getc(stream);
+    if(ch=='"')inside_quote=1-inside_quote;
     linelength++;
-    if(ch == ',')nncols++;
+    if(inside_quote==0&&ch == ',')nncols++;
     if(ch=='\n'){
       if(linelength>maxlinelength)maxlinelength=linelength;
       if(nncols>maxcols)maxcols=nncols;
       linelength=0;
+      inside_quote=0;
       nncols=1;
       nnrows++;
     }

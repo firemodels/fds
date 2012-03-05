@@ -4866,7 +4866,6 @@ void read_device_data(char *file, int filetype, int loadstatus){
   }
 
   fgets(buffer2,buffer_len,stream);
-  stripquotes(buffer2);
   parsecsv(buffer2,devclabels,ncols,&ntokens);
   for(i=0;i<ntokens;i++){
     trim(devclabels[i]);
