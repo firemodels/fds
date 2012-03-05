@@ -713,6 +713,7 @@ void read_geom(geomdata *geomi, int flag, int *errorcode){
   }
   FREEMEMORY(geomi->times);
   FREEMEMORY(geomi->geomlistinfo_0);
+  geomi->geomlistinfo=NULL;
   FREEMEMORY(geomi->float_vals);
   FREEMEMORY(geomi->int_vals);
   geomi->nfloat_vals=0;
