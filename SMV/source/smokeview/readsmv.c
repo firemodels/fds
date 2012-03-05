@@ -1380,8 +1380,8 @@ int readsmv(char *file, char *file2){
   int noGRIDpresent=1,startpass;
   int nslicefiles=0;
 
-  int ipart=0, islice=0, ipatch=0, iroom=0,izone_local=0,ifire=0,iiso=0;
-  int ismoke3d=0;
+  int ipart=0, islice=0, islicecount=1, ipatch=0, iroom=0,izone_local=0,ifire=0,iiso=0;
+  int ismoke3d=0,ismoke3dcount=1;
   int  itarg=0;
   int factor=256*128;
   int setGRID=0;
@@ -3158,6 +3158,11 @@ int readsmv(char *file, char *file2){
         smoke3d *smoke3di;
         
         smoke3di = smoke3dinfo + ismoke3d;
+    
+        if(nsmoke3dinfo>50&&(ismoke3d%10==0||ismoke3d==nsmoke3dinfo-1)){
+          printf(" examining 3D smoke file %i \n",ismoke3dcount);
+        }
+        ismoke3dcount++;
 
         if(NewMemory((void **)&smoke3di->reg_file,(unsigned int)(len+1))==0)return 2;
         STRCPY(smoke3di->reg_file,bufferptr);
@@ -5326,17 +5331,67 @@ typedef struct {
 
       bufferptr=trim_string(buffer);
       len=strlen(bufferptr);
+
+      
       sd = sliceinfo+islice;
       sd->slicetype=0;
       if(terrain==1)sd->slicetype=1;
       if(fire_line==1)sd->slicetype=2;
       if(cellcenter==1)sd->slicetype=3;
+
+      if(nslicefiles>100&&(islicecount%100==1||nslicefiles==islicecount)){
+        printf(" examining slice file %i\n",islicecount);
+      }
+      islicecount++;
+      strcpy(buffer2,bufferptr);
+      strcat(buffer2,".svz");
+      if(STAT(bufferptr,&statbuffer)!=0&&STAT(buffer2,&statbuffer)!=0){
+        if(fgets(buffer,255,stream)==NULL){
+          nsliceinfo--;
+          nslicefiles--;
+          BREAK;
+        }
+        if(fgets(buffer,255,stream)==NULL){
+          nsliceinfo--;
+          nslicefiles--;
+          BREAK;
+        }
+        if(fgets(buffer,255,stream)==NULL){
+          nsliceinfo--;
+          nslicefiles--;
+          BREAK;
+        }
+        nsliceinfo--;
+        nslicefiles--;
+        continue;
+      }
+
       NewMemory((void **)&sd->reg_file,(unsigned int)(len+1));
       STRCPY(sd->reg_file,bufferptr);
 
       NewMemory((void **)&sd->comp_file,(unsigned int)(len+4+1));
       STRCPY(sd->comp_file,bufferptr);
       STRCAT(sd->comp_file,".svz");
+
+      sd->compression_type=0;
+      if(STAT(sd->comp_file,&statbuffer)==0){
+        sd->compression_type=1;
+        sd->file=sd->comp_file;
+      }
+      if(sd->compression_type==0){
+        sd->file=sd->reg_file;
+      }
+
+      if(sd->terrain==1){
+        if(readlabels_terrain(&sd->label,stream)==2)return 2;
+      }
+      else if(sd->cellcenter==1){
+        if(readlabels_cellcenter(&sd->label,stream)==2)return 2;
+      }
+      else{
+        if(readlabels(&sd->label,stream)==2)return 2;
+      }
+      
 
       {
         char volfile[1024];
@@ -5355,14 +5410,6 @@ typedef struct {
       STRCPY(sd->size_file,bufferptr);
       STRCAT(sd->size_file,".sz");
 
-      sd->compression_type=0;
-      if(STAT(sd->comp_file,&statbuffer)==0){
-        sd->compression_type=1;
-        sd->file=sd->comp_file;
-      }
-      if(sd->compression_type==0){
-        sd->file=sd->reg_file;
-      }
       sd->slicelabel=NULL;
       if(slicelabelptr!=NULL){
         int lenslicelabel;
@@ -5404,26 +5451,7 @@ typedef struct {
         meshi = meshinfo + blocknumber;
         sd->mesh_type=meshi->mesh_type;
       }
-      if(STAT(sd->file,&statbuffer)==0){
-        if(sd->terrain==1){
-          if(readlabels_terrain(&sd->label,stream)==2)return 2;
-        }
-        else if(sd->cellcenter==1){
-          if(readlabels_cellcenter(&sd->label,stream)==2)return 2;
-        }
-        else{
-          if(readlabels(&sd->label,stream)==2)return 2;
-        }
-        islice++;
-      }
-      else{
-        if(readlabels(&sd->label,stream)==2)return 2;
-        nsliceinfo--;
-        nslicefiles--;
-      }
-      if(nslicefiles>100&&(islice%100==1||nslicefiles==islice)){
-        printf(" slice file %i/%i setup\n",islice,nslicefiles);
-      }
+      islice++;
       continue;
     }
   /*
@@ -5921,7 +5949,9 @@ typedef struct {
 
   printf("%s",_("reading input file completed"));
   printf("\n");
+  printf("\n");
   printf("%s",_("beginning wrap up "));
+  printf("\n");
   printf("\n");
 #ifdef _DEBUG
   PrintMemoryInfo;

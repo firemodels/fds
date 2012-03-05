@@ -1363,7 +1363,7 @@ void getsliceparams(void){
     sd = sliceinfo + i;
 
     if(nsliceinfo>100&&(i%100==0||i==nsliceinfo-1)){
-        printf(" Obtaining slice file parameters: %i/%i\n",i+1,nsliceinfo);
+        printf(" obtaining slice file parameters: %i/%i\n",i+1,nsliceinfo);
     }
 
     file = sd->file;
@@ -1604,7 +1604,7 @@ void updatevslices(void){
 
 
 
-  printf("updating vslices ");
+  printf("updating vslices\n");
   getsliceparams();
 
   /* update vector slices */
@@ -1629,7 +1629,7 @@ void updatevslices(void){
   }
   for(i=0;i<nsliceinfo;i++){
     if(nsliceinfo>100&&(i%100==0||i==nsliceinfo-1)){
-        printf(" examing slice file %i/%i for vector slice setup\n",i,nsliceinfo);
+        printf(" examining slice file %i/%i for vector slice setup\n",i+1,nsliceinfo);
     }
     vd = vsliceinfo + nvslice;
     sdi = sliceinfo+i;
@@ -1715,9 +1715,9 @@ void updatevslices(void){
       vslicei->autoload=0;
     }
   }
-  printf("updating vector menus");
+  printf(" updating vector menus\n");
   updatevslicemenulabels();
-  printf(" complete\n");
+  printf("vslices update complete\n");
   
 }
 
