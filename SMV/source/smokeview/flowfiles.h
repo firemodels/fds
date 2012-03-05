@@ -81,9 +81,9 @@ typedef struct {
   struct _sv_object *smv_object, **smv_objects;
   int ntextures;
   char **texturefiles, **vars_indep, **svals;
-  int vars_indep_index[PROPVARMAX], vars_dep_index[PROPVARMAX], fvars_evac_index[PROPVARMAX];
+  int *vars_indep_index, vars_dep_index[PROPVARMAX], fvars_evac_index[PROPVARMAX];
   int nvars_indep,      nvars_dep,                   nvars_evac;
-  float fvals[PROPVARMAX], fvars_evac[PROPVARMAX], fvars_dep[PROPVARMAX];
+  float *fvals, fvars_evac[PROPVARMAX], fvars_dep[PROPVARMAX];
   int draw_evac;
 } propdata;
 

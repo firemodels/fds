@@ -596,7 +596,7 @@ void read_geom_header(geomdata *geomi, int *ntimes_local){
 
 // static verts
 
-  FORTREAD(&nvertfaces,2,stream);
+  FORTREAD(nvertfaces,2,stream);
   nverts=nvertfaces[0];
   if(nverts>0){
     fseek(stream,4+3*nverts*4+4,SEEK_CUR);
@@ -618,7 +618,7 @@ void read_geom_header(geomdata *geomi, int *ntimes_local){
     geom_type = *((int *)(times_local+1));
 
     if(geom_type==0){
-      FORTREADBR(&nvertfaces,2,stream);
+      FORTREADBR(nvertfaces,2,stream);
 
       nverts=nvertfaces[0];
       ntris=nvertfaces[1];
