@@ -6506,23 +6506,25 @@ droplets created per second than the number that can be simulated.
 
 
 Sometimes it is convenient to introduce droplets or particles at the start of the simulation. For this purpose, use an {\ct INIT} line with the parameter
-{\ct NUMBER\_INITIAL\_PARTICLES} to indicate the number of particles/droplets within the computational domain at the start of the simulation.
-Its default value is 0, meaning that initially there are no particles or droplets present. If non-zero, also specify {\ct MASS\_PER\_VOLUME} (kg/m$^3$) which
-specifies the particle/droplet mass per unit volume (Default 1~kg/m$^3$). Do not confuse this parameter with {\ct DENSITY}, explained in the next section.
+{\ct NUMBER\_INITIAL\_PARTICLES} to indicate the number of particles within the computational domain at the start of the simulation.
+Its default value is 0, meaning that initially there are no particles present. If non-zero, you may also specify {\ct MASS\_PER\_VOLUME} (kg/m$^3$) if the
+particles have mass. Do not confuse this parameter with {\ct DENSITY}, explained in the next section.
 For example, water has a {\ct DENSITY} of 1000~kg/m$^3$, whereas a liter of water broken up into droplets and spread over a cubic meter has a {\ct MASS\_PER\_VOLUME} of 1~kg/m$^3$.
-Also, to limit the particles/droplets to a certain region of the domain, add the real sextuplet {\ct XB} to designate the coordinates of a rectangular volume.
+Also, to limit the particles to a certain region of the domain, add the real sextuplet {\ct XB} to designate the coordinates of a rectangular volume.
 The format for {\ct XB} is the same as that used on the {\ct OBST} line. You can only introduce a cloud of particles within a rectangular block,
-and the volume of the block is calculated according to the dimensions {\ct XB}, regardless of whether there are solid obstructions within this volume.
+and the volume of the block is calculated according to the dimensions {\ct XB}, regardless of whether there are solid obstructions within this volume. If you introduce
+only a single particle, which is often a handy way of creating a target, you may use the real triplet {\ct XYZ} rather than {\ct XB} to designate the particle's position.
 
 \footnotesize
 \begin{verbatim}
-&PART ID='drops', DIAMETER=750., SAMPLING_FACTOR=1, COLOR='RED' /
-&INIT PART_ID='drops', XB=..., NUMBER_INITIAL_PARTICLES=1000, MASS_PER_VOLUME=3.5 /
-&INIT PART_ID='drops', XB=..., NUMBER_INITIAL_PARTICLES=2000, MASS_PER_VOLUME=2.5 /
+&PART ID='droplets', DIAMETER=750., SPEC_ID='WATER VAPOR' /
+&PART ID='target', SURF_ID='...' /
+&INIT PART_ID='droplets', XB=..., NUMBER_INITIAL_PARTICLES=1000, MASS_PER_VOLUME=3.5 /
+&INIT PART_ID='target',  XYZ=..., NUMBER_INITIAL_PARTICLES=1 /
 \end{verbatim} \normalsize
 
 \noindent
-If you want to introduce droplets or particles within a given volume periodically in time and not just at the initial time, set {\ct DT\_INSERT} on
+If you want to introduce particles within a given volume periodically in time and not just initially, set {\ct DT\_INSERT} on
 the {\ct INIT} line to a positive value indicating the time increment (s) for insertion. The parameter {\ct NUMBER\_INITIAL\_PARTICLES} now indicates the
 number of droplets/particles inserted every {\ct DT\_INSERT} seconds. If the droplets/particles have mass, use {\ct MASS\_PER\_TIME} (kg/s) instead of {\ct MASS\_PER\_VOLUME} to
 indicate how much mass is to be introduced per second.
@@ -6858,7 +6860,7 @@ particle, use lines like the following:
 \footnotesize
 \begin{verbatim}
 &INIT ID='my particle', PART_ID='...', XB=..., NUMBER_INITIAL_PARTICLES=1 /
-&DEVC ID='...', INIT_ID='my particle', QUANTITY='WALL TEMPERATURE' / 
+&DEVC ID='...', INIT_ID='my particle', QUANTITY='WALL TEMPERATURE' /
 \end{verbatim}
 \normalsize
 
