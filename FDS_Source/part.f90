@@ -585,11 +585,13 @@ SUBROUTINE VOLUME_PARTICLE_INSERT
 
 ! Loop over all INIT lines and look for particles inserted within a specified volume
 
+INTEGER :: NN
+
 VOLUME_INSERT_LOOP: DO IB=1,N_INIT
 
    IN => INITIALIZATION(IB)
 
-   ! Determine if the INITIALIZATION type involves particles or PARTICLEs. If not, cycle.
+   ! Determine if the INITIALIZATION type involves particles. If not, cycle.
 
    ILPC = IN%PART_INDEX
    IF (ILPC<1) CYCLE VOLUME_INSERT_LOOP
@@ -647,19 +649,37 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
       CALL ALLOCATE_STORAGE(NM,LAGRANGIAN_PARTICLE_CLASS(ILPC)%SURF_INDEX,LPC_INDEX=ILPC,LP_INDEX=NLP,TAG=PARTICLE_TAG)
       LAGRANGIAN_PARTICLE => MESHES(NM)%LAGRANGIAN_PARTICLE
       LP=>MESHES(NM)%LAGRANGIAN_PARTICLE(NLP)
+
+      ! If the INITIALIZATION group has an ID, match it with a device
+
+      IF (IN%ID/='null') THEN
+         DO NN=1,N_DEVC
+            DV => DEVICE(NN)
+            IF (IN%ID==DV%INIT_ID) THEN
+               DV%LP_TAG = PARTICLE_TAG
+               DV%PART_INDEX = ILPC
+            ENDIF
+         ENDDO
+      ENDIF
       
+      ! Get particle coordinates by randomly choosing within the designated volume
+
       BLOCK_OUT_LOOP:  DO
-      !!  CALL RANDOM_CONE(LP%X,LP%Y,LP%Z,0.5_EB*(X2+X1),0.5_EB*(Y2+Y1),Z1,0.25_EB,0.5_EB)
          CALL RANDOM_RECTANGLE(LP%X,LP%Y,LP%Z,X1,X2,Y1,Y2,Z1,Z2)
          CALL GET_IJK(LP%X,LP%Y,LP%Z,NM,XI,YJ,ZK,II,JJ,KK)
          IF (.NOT.SOLID(CELL_INDEX(II,JJ,KK))) EXIT BLOCK_OUT_LOOP
       ENDDO BLOCK_OUT_LOOP
+
+      ! Initialize particle indices and velocity
+
       LP%ONE_D%IIG = II
       LP%ONE_D%JJG = JJ
       LP%ONE_D%KKG = KK
-      LP%U   = IN%U0                     ! Initial velocity (default zero)
+      LP%U   = IN%U0
       LP%V   = IN%V0
       LP%W   = IN%W0
+
+      ! Process particle and set more initial values
 
       CALL MAKE_PARTICLE
 
@@ -2191,7 +2211,7 @@ PARTICLE_LOOP: DO I=1,NLP
          CYCLE PARTICLE_LOOP
       ENDIF
    ELSE
-      IF (LP%ONE_D%X(1) <= LPC%KILL_RADIUS .AND. .NOT. LPC%MASSLESS) THEN
+      IF (LPC%SURF_INDEX==DROPLET_SURF_INDEX .AND. LP%ONE_D%X(1)<=LPC%KILL_RADIUS) THEN
          IKILL = IKILL + 1
          KILL_PARTICLE_INDEX(IKILL) = I
          CYCLE PARTICLE_LOOP
