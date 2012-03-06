@@ -20,7 +20,7 @@ void UpdateTimeLabels(void){
   int hour, min, sec,sec10;
  
   time0 = timeoffset;
-  if(times!=NULL)time0 = timeoffset + times[itimes];
+  if(global_times!=NULL)time0 = timeoffset + global_times[itimes];
   if(vishmsTimelabel==1){
     hour = time0/3600;
     min = (int)(time0/60.0 - 60.0*hour);
@@ -33,8 +33,8 @@ void UpdateTimeLabels(void){
     float dt;
     char timeval[30], *timevalptr;
 
-    if(ntimes>1){
-      dt=times[1]-times[0];
+    if(nglobal_times>1){
+      dt=global_times[1]-global_times[0];
     }
     else{
       dt=0.0;
@@ -80,8 +80,8 @@ void drawTimeBar(void){
   glVertex2f(xleft,ytop);
   glEnd();
 
-  if(ntimes != 1){
-    xxright = xleft + (float)itimes*(xright-xleft)/(ntimes-1);
+  if(nglobal_times != 1){
+    xxright = xleft + (float)itimes*(xright-xleft)/(nglobal_times-1);
   }
   else{
     xxright=xright;

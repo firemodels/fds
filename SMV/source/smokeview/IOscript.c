@@ -1438,11 +1438,11 @@ void script_settimeval(scriptdata *scripti){
   timeval = scripti->fval;
   printf("Script: set time to %f",timeval);
   printf("\n");
-  if(times!=NULL&&ntimes>0){
-    if(timeval<times[0])timeval=times[0];
-    if(timeval>times[ntimes-1]-0.0001)timeval=times[ntimes-1]-0.0001;
-    for(i=0;i<ntimes-1;i++){
-      if(times[i]<=timeval&&timeval<times[i+1]){
+  if(global_times!=NULL&&nglobal_times>0){
+    if(timeval<global_times[0])timeval=global_times[0];
+    if(timeval>global_times[nglobal_times-1]-0.0001)timeval=global_times[nglobal_times-1]-0.0001;
+    for(i=0;i<nglobal_times-1;i++){
+      if(global_times[i]<=timeval&&timeval<global_times[i+1]){
         itimes=i;
         script_itime=i;
         stept=1;
@@ -1460,23 +1460,23 @@ void script_settimeval(scriptdata *scripti){
 void settimeval(float timeval){
   int i;
 
-  if(times!=NULL&&ntimes>0){
-    if(timeval<times[0])timeval=times[0];
-    if(timeval>times[ntimes-1]-0.0001)timeval=times[ntimes-1]-0.0001;
-    for(i=0;i<ntimes;i++){
+  if(global_times!=NULL&&nglobal_times>0){
+    if(timeval<global_times[0])timeval=global_times[0];
+    if(timeval>global_times[nglobal_times-1]-0.0001)timeval=global_times[nglobal_times-1]-0.0001;
+    for(i=0;i<nglobal_times;i++){
       float tlow, thigh;
 
       if(i==0){
-        tlow = times[i];
-        thigh = (times[i]+times[i+1])/2.0;
+        tlow = global_times[i];
+        thigh = (global_times[i]+global_times[i+1])/2.0;
       }
-      else if(i==ntimes-1){
-        tlow = (times[i-1]+times[i])/2.0;
-        thigh = times[i];
+      else if(i==nglobal_times-1){
+        tlow = (global_times[i-1]+global_times[i])/2.0;
+        thigh = global_times[i];
       }
       else{
-        tlow=(times[i-1]+times[i])/2.0;
-        thigh=(times[i]+times[i+1])/2.0;
+        tlow=(global_times[i-1]+global_times[i])/2.0;
+        thigh=(global_times[i]+global_times[i+1])/2.0;
       }
       if(tlow<=timeval&&timeval<thigh){
         itimes=i;

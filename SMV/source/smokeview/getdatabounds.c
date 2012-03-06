@@ -101,7 +101,7 @@ void adjustpart5bounds(particle *parti){
   // compute global min and max
 
   datacopy = parti->data5;
-  for(i=0;i<parti->nframes;i++){
+  for(i=0;i<parti->ntimes;i++){
     for(j=0;j<parti->nclasses;j++){
       part5class *partclassi;
       float *rvals;
@@ -136,7 +136,7 @@ void adjustpart5bounds(particle *parti){
   // generate data histogram (buckets) in order to determine percentile min and max
 
   datacopy = parti->data5;
-  for(i=0;i<parti->nframes;i++){
+  for(i=0;i<parti->ntimes;i++){
     for(j=0;j<parti->nclasses;j++){
       part5class *partclassi;
       float *rvals;

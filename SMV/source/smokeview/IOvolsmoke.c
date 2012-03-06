@@ -217,7 +217,7 @@ void init_volrender(void){
 
     meshi = meshinfo + i;
     vr = &(meshi->volrenderinfo);
-    vr->nframes=0;
+    vr->ntimes=0;
     vr->firedata_full=NULL;
     vr->smokedata_full=NULL;
     vr->c_firedata_view=NULL;
@@ -226,7 +226,7 @@ void init_volrender(void){
       int nx, ny, nz, j;
 
       nvolrenderinfo++;
-      vr->nframes=get_volsmoke_nframes(vr);
+      vr->ntimes=get_volsmoke_nframes(vr);
       nx = ijkbarmax+1;
       ny = ijkbarmax+1;
       nz = ijkbarmax+1;
@@ -236,16 +236,16 @@ void init_volrender(void){
       NewMemory((void **)&vr->smokecolor_xz1,4*nx*nz*sizeof(float));
       NewMemory((void **)&vr->smokecolor_xy0,4*nx*ny*sizeof(float));
       NewMemory((void **)&vr->smokecolor_xy1,4*nx*ny*sizeof(float));
-      if(vr->nframes>0){
-        NewMemory((void **)&vr->times,vr->nframes*sizeof(float));
-        NewMemory((void **)&vr->firepos,vr->nframes*sizeof(long int));
-        NewMemory((void **)&vr->smokepos,vr->nframes*sizeof(long int));
-        NewMemory((void **)&vr->firedataptrs,vr->nframes*sizeof(float *));
-        NewMemory((void **)&vr->smokedataptrs,vr->nframes*sizeof(float *));
-        NewMemory((void **)&vr->dataready,vr->nframes*sizeof(int));
-        NewMemory((void **)&vr->nfiredata_compressed,vr->nframes*sizeof(int));
-        NewMemory((void **)&vr->nsmokedata_compressed,vr->nframes*sizeof(int));
-        for(j=0;j<vr->nframes;j++){
+      if(vr->ntimes>0){
+        NewMemory((void **)&vr->times,vr->ntimes*sizeof(float));
+        NewMemory((void **)&vr->firepos,vr->ntimes*sizeof(long int));
+        NewMemory((void **)&vr->smokepos,vr->ntimes*sizeof(long int));
+        NewMemory((void **)&vr->firedataptrs,vr->ntimes*sizeof(float *));
+        NewMemory((void **)&vr->smokedataptrs,vr->ntimes*sizeof(float *));
+        NewMemory((void **)&vr->dataready,vr->ntimes*sizeof(int));
+        NewMemory((void **)&vr->nfiredata_compressed,vr->ntimes*sizeof(int));
+        NewMemory((void **)&vr->nsmokedata_compressed,vr->ntimes*sizeof(int));
+        for(j=0;j<vr->ntimes;j++){
           vr->firedataptrs[j]=NULL;
           vr->smokedataptrs[j]=NULL;
           vr->nfiredata_compressed[j]=0;
@@ -1257,7 +1257,7 @@ float get_volsmoke_frame_time(volrenderdata *vr, int framenum){
   int endianswitch=0;
   int skip_local;
 
-  if(framenum<0||framenum>=vr->nframes)return time_local;
+  if(framenum<0||framenum>=vr->ntimes)return time_local;
   smokeslice=vr->smoke;
   framesize = smokeslice->nslicei*smokeslice->nslicej*smokeslice->nslicek;
 
@@ -1289,7 +1289,7 @@ void get_volsmoke_all_times(volrenderdata *vr){
   }
 
   if(volstream==NULL){
-    for(i=0;i<vr->nframes;i++){
+    for(i=0;i<vr->ntimes;i++){
       vr->times[i]=get_volsmoke_frame_time(vr,i);
     }
   }
@@ -1299,7 +1299,7 @@ void get_volsmoke_all_times(volrenderdata *vr){
 // 1,completion,version
 // 1,version,n_data_compressedm32,nbytes,n_data_in,time,valmin,valmax,data ....
     fseek(volstream,12,SEEK_SET);
-    for(ii=0;ii<vr->nframes;ii++){
+    for(ii=0;ii<vr->ntimes;ii++){
       int ncompressed;
       float *time_local;
 
@@ -1315,7 +1315,7 @@ void get_volsmoke_all_times(volrenderdata *vr){
     if(vr->fire->vol_file!=NULL)volstream=fopen(vr->fire->vol_file,"rb");
     if(volstream!=NULL){
       fseek(volstream,12,SEEK_SET);
-      for(ii=0;ii<vr->nframes;ii++){
+      for(ii=0;ii<vr->ntimes;ii++){
         int ncompressed;
 
         vr->firepos[ii]=ftell(volstream);
@@ -1343,7 +1343,7 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
   unsigned int size_before=0, size_after=0;
   FILE *volstream=NULL;
 
-  if(framenum<0||framenum>=vr->nframes)return;
+  if(framenum<0||framenum>=vr->ntimes)return;
   meshlabel=vr->rendermesh->label;
   smokeslice=vr->smoke;
   fireslice=vr->fire;
@@ -1397,7 +1397,7 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
     returncode=fseek(SLICEFILE,skip_local,SEEK_SET); // skip from beginning of file
 
     FORTSLICEREAD(&time_local,1);
-    if(times!=NULL&&times[itimes]>time_local)restart_time=1;
+    if(global_times!=NULL&&global_times[itimes]>time_local)restart_time=1;
     if(*first==1){
       *first=0;
       printf("time=%.2f %s: ",time_local,meshlabel);
@@ -1546,7 +1546,7 @@ void unload_volsmoke_allframes(volrenderdata *vr){
   int i;
 
   printf("Unloading smoke %s - ",vr->rendermesh->label);
-  for(i=0;i<vr->nframes;i++){
+  for(i=0;i<vr->ntimes;i++){
     FREEMEMORY(vr->firedataptrs[i]);
     FREEMEMORY(vr->smokedataptrs[i]);
     vr->dataready[i]=0;
@@ -1565,7 +1565,7 @@ void read_volsmoke_allframes(volrenderdata *vr){
   int i;
   int first=1;
 
-  nframes = vr->nframes;
+  nframes = vr->ntimes;
   for(i=0;i<nframes;i++){
     read_volsmoke_frame(vr, i, &first);
   }
@@ -1637,8 +1637,8 @@ void *read_volsmoke_allframes_allmeshes2(void *arg){
     vr = &meshi->volrenderinfo;
     if(vr->fire==NULL||vr->smoke==NULL)continue;
     if(read_vol_mesh!=-1&&read_vol_mesh!=i)continue;
-    if(vr->nframes>0){
-      nframes=vr->nframes;
+    if(vr->ntimes>0){
+      nframes=vr->ntimes;
       break;
     }
   }

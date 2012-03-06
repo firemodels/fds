@@ -682,10 +682,10 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
   {
     tourdata *touri;
     pathdata *pj;
-    if(plotstate==DYNAMIC_PLOTS&&selected_tour!=NULL&&selected_tour->path_timeslist!=NULL){
+    if(plotstate==DYNAMIC_PLOTS&&selected_tour!=NULL&&selected_tour->timeslist!=NULL){
       if((viewtourfrompath==1&&selectedtour_index>=0)||keyframe_snap==1){
         touri = tourinfo + selectedtour_index;
-        iframe = touri->path_timeslist[itimes];
+        iframe = touri->timeslist[itimes];
         if(keyframe_snap==1&&selected_frame!=NULL){
           pj=&selected_frame->nodeval;
         }
@@ -737,10 +737,10 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     tourdata *touri;
     pathdata *pj;
 
-    if(plotstate==DYNAMIC_PLOTS&&selected_tour!=NULL&&selected_tour->path_timeslist!=NULL){
+    if(plotstate==DYNAMIC_PLOTS&&selected_tour!=NULL&&selected_tour->timeslist!=NULL){
       if((viewtourfrompath==1&&selectedtour_index>=0)||keyframe_snap==1){
         touri = tourinfo + selectedtour_index;
-        iframe = touri->path_timeslist[itimes];
+        iframe = touri->timeslist[itimes];
         if(keyframe_snap==1&&selected_frame!=NULL){
           pj=&selected_frame->nodeval;
         }
@@ -827,10 +827,10 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
       tourdata *touri;
       pathdata *pj;
 
-      if(plotstate==DYNAMIC_PLOTS&&selected_tour!=NULL&&selected_tour->path_timeslist!=NULL){
+      if(plotstate==DYNAMIC_PLOTS&&selected_tour!=NULL&&selected_tour->timeslist!=NULL){
         if((viewtourfrompath==1&&selectedtour_index>=0)||keyframe_snap==1){
           touri = tourinfo + selectedtour_index;
-          iframe = touri->path_timeslist[itimes];
+          iframe = touri->timeslist[itimes];
           if(keyframe_snap==1&&selected_frame!=NULL){
             pj=&selected_frame->nodeval;
           }

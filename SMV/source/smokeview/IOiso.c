@@ -68,7 +68,7 @@ void getisolevels(const char *isofile, int dataflag, float **levelsptr, float **
 /* ------------------ getisosizes ------------------------ */
 
 void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostreamptr, int *nvertices, int *ntriangles, 
-                 float **levelsptr, int *nisolevels, int *nisosteps, 
+                 float **levelsptr, int *nisolevels, int *niso_times, 
                  float *tmin_local, float *tmax_local, int endian_local){
 	int len[3],labellengths=0;
 	int nlevels, n;
@@ -108,7 +108,7 @@ void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostreamptr, int
     if(ResizeMemory((void **)levelsptr,*nisolevels*sizeof(float))==0)return;
   }
   EGZ_FREAD(*levelsptr,4,(unsigned int)(nlevels),*isostreamptr);
-  *nisosteps=0; *nvertices=0; *ntriangles=0;
+  *niso_times=0; *nvertices=0; *ntriangles=0;
   beg=EGZ_FTELL(*isostreamptr);
   i=0;
   time_max=-1000000.0;
@@ -161,7 +161,7 @@ void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostreamptr, int
 
     *nvertices += nvertices_i;
 	  *ntriangles += ntriangles_i;
-	  *nisosteps += 1;
+	  *niso_times += 1;
   }
   EGZ_FSEEK(*isostreamptr,beg,SEEK_SET);
   if(dataflag==1&&axissmooth==1){
@@ -185,21 +185,21 @@ void readiso_geom(const char *file, int ifile, int flag, int *errorcode){
 
   read_geom(geomi,flag,errorcode);
   if(flag==UNLOAD){
-    FREEMEMORY(meshi->isotimes);
+    FREEMEMORY(meshi->iso_times);
     FREEMEMORY(meshi->showlevels);
     meshi->isofilenum=-1;
     return;
   }
 
   meshi->isofilenum=ifile;
-  meshi->nisosteps=geomi->ntimes;
-  if(NewMemory((void **)&meshi->isotimes,sizeof(float)*meshi->nisosteps)==0){
+  meshi->niso_times=geomi->ntimes;
+  if(NewMemory((void **)&meshi->iso_times,sizeof(float)*meshi->niso_times)==0){
     readiso("",ifile,UNLOAD,&error);
     *errorcode=1;
     return;
   }
   for(i=0;i<geomi->ntimes;i++){
-    meshi->isotimes[i]=geomi->times[i];
+    meshi->iso_times[i]=geomi->times[i];
   }
 
   meshi->nisolevels=geomi->nfloat_vals;
@@ -317,7 +317,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
   }
 
   getisosizes(file, ib->dataflag, &isostream, &nisopoints, &nisotriangles, 
-    &meshi->isolevels, &meshi->nisolevels, &meshi->nisosteps, 
+    &meshi->isolevels, &meshi->nisolevels, &meshi->niso_times, 
     &ib->tmin, &ib->tmax, endian_data);
 
   file_size=get_filesize(file);
@@ -327,7 +327,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
     *errorcode=1;
     return;
   }               
-  if(NewMemory((void **)&meshi->isotimes,sizeof(float)*meshi->nisosteps)==0){
+  if(NewMemory((void **)&meshi->iso_times,sizeof(float)*meshi->niso_times)==0){
     readiso("",ifile,UNLOAD,&error);
     *errorcode=1;
     return;
@@ -355,12 +355,12 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
     }
   }
   ASSERT(meshi->animatedsurfaces==NULL);
-  if(NewMemory((void **)&meshi->animatedsurfaces,meshi->nisolevels*meshi->nisosteps*sizeof(isosurface))==0){
+  if(NewMemory((void **)&meshi->animatedsurfaces,meshi->nisolevels*meshi->niso_times*sizeof(isosurface))==0){
     *errorcode=1;
     readiso("",ifile,UNLOAD,&error);
     return;
   }
-  if(ResizeMemory((void **)&meshi->isotimes,sizeof(float)*meshi->nisosteps)==0){
+  if(ResizeMemory((void **)&meshi->iso_times,sizeof(float)*meshi->niso_times)==0){
     *errorcode=1;
     readiso("",ifile,UNLOAD,&error);
     return;
@@ -386,7 +386,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
       skip_frame=0;
       time_max=time_local;
     }
-    meshi->isotimes[itime]=time_local;
+    meshi->iso_times[itime]=time_local;
     if(iitime%isoframestep_global!=0||(settmin_i==1&&time_local<tmin_i)||(settmax_i==1&&time_local>tmax_i)||skip_frame==1){
     }
     else{
@@ -619,14 +619,14 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
    
     if(break_frame==1){
       printf("*** warning: memory allocation attempt failed at time step: %i while reading isosurface file\n",itime);
-      meshi->nisosteps=itime;
+      meshi->niso_times=itime;
       break;
     }
     if(skip_frame==1||iitime%isoframestep_global!=0||(settmin_i==1&&time_local<tmin_i)||(settmax_i==1&&time_local>tmax_i)){
     }
     else{
       itime++;
-      if(itime>=meshi->nisosteps)break;
+      if(itime>=meshi->niso_times)break;
     }
   }
 #ifdef _DEBUG
@@ -739,20 +739,20 @@ void unloadiso(mesh *meshi){
 
   if(meshi->isofilenum==-1)return;
   ib = isoinfo + meshi->isofilenum;
-  if(meshi->nisosteps>0&&meshi->nisolevels>0){
+  if(meshi->niso_times>0&&meshi->nisolevels>0){
     if(meshi->animatedsurfaces!=NULL){
-      for(i=0;i<meshi->nisosteps*meshi->nisolevels;i++){
+      for(i=0;i<meshi->niso_times*meshi->nisolevels;i++){
         asurface=meshi->animatedsurfaces+i;
         FREEMEMORY(asurface->iso_triangles);
         FREEMEMORY(asurface->iso_vertices);
       }
     }
     CheckMemoryOff;
-    FREEMEMORY(meshi->isotimes);
+    FREEMEMORY(meshi->iso_times);
     FREEMEMORY(meshi->animatedsurfaces);
     FREEMEMORY(meshi->showlevels);
   }
-  meshi->nisosteps=0;
+  meshi->niso_times=0;
   FREEMEMORY(ib->normaltable);
 
   unload_iso_trans();
@@ -1544,7 +1544,7 @@ void sync_isobounds(int isottype){
     meshi = meshinfo + isoi->blocknumber;
     asurface=meshi->animatedsurfaces;
 
-    for(ii=0;ii<meshi->nisosteps;ii++){
+    for(ii=0;ii<meshi->niso_times;ii++){
       for(j=0;j<meshi->nisolevels;j++){
         float tcolor, tcolor0, tcolorfactor;
 
@@ -1669,7 +1669,7 @@ void Update_Isotris(int flag){
   if(iso_trans_list==NULL||iso_opaques_list==NULL){
     int iitime;
 
-    niso_timesteps=loaded_isomesh->nisosteps;
+    niso_timesteps=loaded_isomesh->niso_times;
     if(iso_trans_list==NULL){
       int i;
 
@@ -1864,9 +1864,9 @@ mesh *get_loaded_isomesh(void){
     isoi = isoinfo + i;
     if(isoi->loaded==0)continue;
     mesh2 = meshinfo + isoi->blocknumber;
-    if(nsteps==-1||mesh2->nisosteps<nsteps){
+    if(nsteps==-1||mesh2->niso_times<nsteps){
       return_mesh = mesh2;
-      nsteps=mesh2->nisosteps;
+      nsteps=mesh2->niso_times;
     }
   }
   return return_mesh;

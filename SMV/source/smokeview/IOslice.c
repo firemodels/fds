@@ -303,7 +303,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       FreeMemory(sd->qslicedata);
       sd->qslicedata=NULL;
     }
-    FREEMEMORY(sd->slicetimes  );
+    FREEMEMORY(sd->times  );
     FREEMEMORY(sd->slicelevel  );
     FREEMEMORY(sd->c_iblank);
     FREEMEMORY(sd->n_iblank);
@@ -314,7 +314,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
 
     if(flag==UNLOAD){
 
-      sd->nsteps=0;
+      sd->ntimes=0;
       updatemenu=1;
       sd->loaded=0;
       sd->vloaded=0;
@@ -401,7 +401,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       statfile=STAT(file,&statbuffer);
     }
     if(sd->compression_type==0){
-      FORTgetslicesizes(file, &sd->nslicei, &sd->nslicej, &sd->nslicek, &sd->nsteps, &sliceframestep, &endian_smv,&error,
+      FORTgetslicesizes(file, &sd->nslicei, &sd->nslicej, &sd->nslicek, &sd->ntimes, &sliceframestep, &endian_smv,&error,
         &settmin_s, &settmax_s, &tmin_s, &tmax_s, &headersize, &framesize, &statfile,
         slicefilelen);
     }
@@ -409,7 +409,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       if(
         getsliceheader(sd->comp_file,sd->size_file,sd->compression_type,
                        sliceframestep,settmin_s,settmax_s,tmin_s,tmax_s,
-                       &sd->nslicei, &sd->nslicej, &sd->nslicek, &sd->nsteps, &sd->ncompressed, &sd->valmin, &sd->valmax)==0){
+                       &sd->nslicei, &sd->nslicej, &sd->nslicek, &sd->ntimes, &sd->ncompressed, &sd->valmin, &sd->valmax)==0){
         readslice("",ifile,UNLOAD,&error);
         *errorcode=1;
         return;
@@ -427,10 +427,10 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     if(settmax_s==0&&settmin_s==0&&statfile==0
       &&sd->compression_type==0
       ){
-      sd->nsteps = (statbuffer.st_size-headersize)/framesize;
-      if(sliceframestep>1)sd->nsteps/=sliceframestep;
+      sd->ntimes = (statbuffer.st_size-headersize)/framesize;
+      if(sliceframestep>1)sd->ntimes/=sliceframestep;
     }
-    if(error!=0||sd->nsteps<1){
+    if(error!=0||sd->ntimes<1){
       readslice("",ifile,UNLOAD,&error);
       *errorcode=1;
       return;
@@ -442,8 +442,8 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       char *datafile;
 
       if(NewMemory((void **)&sd->qslicedata_compressed,sd->ncompressed)==0||
-         NewMemory((void **)&sd->slicetimes,sizeof(float)*sd->nsteps)==0||
-         NewMemory((void **)&sd->compindex,sizeof(compinfo)*(1+sd->nsteps))==0
+         NewMemory((void **)&sd->times,sizeof(float)*sd->ntimes)==0||
+         NewMemory((void **)&sd->compindex,sizeof(compinfo)*(1+sd->ntimes))==0
          ){
         *errorcode=1;
         readslice("",ifile,UNLOAD,&error);
@@ -451,8 +451,8 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       }
       datafile = sd->comp_file;
       if(getslicecompresseddata(datafile,
-        settmin_s,settmax_s,tmin_s,tmax_s,sd->ncompressed,sliceframestep,sd->nsteps,
-        sd->slicetimes,sd->qslicedata_compressed,sd->compindex,&sd->globalmin,&sd->globalmax)==0){
+        settmin_s,settmax_s,tmin_s,tmax_s,sd->ncompressed,sliceframestep,sd->ntimes,
+        sd->times,sd->qslicedata_compressed,sd->compindex,&sd->globalmin,&sd->globalmax)==0){
         readslice("",ifile,UNLOAD,&error);
         *errorcode=1;
         return;
@@ -462,23 +462,23 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       FILE_SIZE labellen=LABELLEN;
       int file_unit=15;
 
-      if(NewMemory((void **)&sd->qslicedata,sizeof(float)*sd->nslicei*sd->nslicej*sd->nslicek*sd->nsteps)==0||
-         NewMemory((void **)&sd->slicetimes,sizeof(float)*sd->nsteps)==0){
+      if(NewMemory((void **)&sd->qslicedata,sizeof(float)*sd->nslicei*sd->nslicej*sd->nslicek*sd->ntimes)==0||
+         NewMemory((void **)&sd->times,sizeof(float)*sd->ntimes)==0){
         *errorcode=1;
         readslice("",ifile,UNLOAD,&error);
         return;
       }
 #ifdef pp_MEMDEBUG      
-      ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicei*sd->nslicej*sd->nslicek*sd->nsteps));
+      ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicei*sd->nslicej*sd->nslicek*sd->ntimes));
 #endif      
       FORTget_file_unit(&file_unit,&file_unit);
       FORTgetslicedata(&file_unit,file,slicelonglabels,sliceshortlabels,sliceunits,
                    &sd->is1,&sd->is2,&sd->js1,&sd->js2,&sd->ks1,&sd->ks2,&sd->idir,
-                   &qmin,&qmax,sd->qslicedata,sd->slicetimes,&sd->nsteps,&sliceframestep, &endian_smv,
+                   &qmin,&qmax,sd->qslicedata,sd->times,&sd->ntimes,&sliceframestep, &endian_smv,
                    &settmin_s,&settmax_s,&tmin_s,&tmax_s,
                    slicefilelen,labellen,labellen,labellen);
 #ifdef pp_MEMDEBUG                   
-      ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicei*sd->nslicej*sd->nslicek*sd->nsteps));
+      ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicei*sd->nslicej*sd->nslicek*sd->ntimes));
 #endif      
     }
     local_stoptime = glutGet(GLUT_ELAPSED_TIME);
@@ -490,14 +490,14 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       int ntimes_local;
 
       data_per_timestep=sd->nslicei*sd->nslicej*sd->nslicek;
-      ntimes_local=sd->nsteps;
+      ntimes_local=sd->ntimes;
       ndata = data_per_timestep*ntimes_local;
       show_slice_average=1;
 
       if(
         sd->compression_type==1||
         sd->compression_type==2||
-        average_slice_data(sd->qslicedata,sd->qslicedata,ndata,data_per_timestep,sd->slicetimes,ntimes_local,slice_average_interval)==1
+        average_slice_data(sd->qslicedata,sd->qslicedata,ndata,data_per_timestep,sd->times,ntimes_local,slice_average_interval)==1
         ){
         show_slice_average=0; // averaging failed
       }
@@ -508,14 +508,14 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       int ntimes_local;
 
       data_per_timestep=sd->nslicei*sd->nslicej*sd->nslicek;
-      ntimes_local=sd->nsteps;
+      ntimes_local=sd->ntimes;
       ndata = data_per_timestep*ntimes_local;
       show_slice_average=1;
 
       if(
         sd->compression_type==1||
         sd->compression_type==2||
-        auto_turbprop_slice_data(sd->qslicedata,sd->qslicedata,ndata,data_per_timestep,sd->slicetimes,ntimes_local,slice_average_interval)==1
+        auto_turbprop_slice_data(sd->qslicedata,sd->qslicedata,ndata,data_per_timestep,sd->times,ntimes_local,slice_average_interval)==1
         ){
         show_slice_average=0; // averaging failed
       }
@@ -525,7 +525,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
 
     sd->nslicetotal=0;
     sd->nsliceii = 0;
-    if(sd->nsteps==0)return;
+    if(sd->ntimes==0)return;
 
   /* estimate the slice offset, the distance to move a slice so
      that it does not "interfere" with an adjacent block */
@@ -581,7 +581,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     }
 
     sd->nsliceii = sd->nslicei*sd->nslicej*sd->nslicek;
-    sd->nslicetotal=sd->nsteps*sd->nsliceii;
+    sd->nslicetotal=sd->ntimes*sd->nsliceii;
     if(use_iblank==1){
       int return_val;
        
@@ -760,7 +760,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
   updateglui();
 #ifdef pp_MEMDEBUG
   if(sd->compression_type==0){
-    ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicei*sd->nslicej*sd->nslicek*sd->nsteps));
+    ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicei*sd->nslicej*sd->nslicek*sd->ntimes));
   }
   printf("After slice file load: ");
   GetMemoryInfo(sd->num_memblocks,num_memblocks_load);
@@ -1823,7 +1823,7 @@ void update_slice_contours(int slice_type_index, float line_min, float line_max,
     }
 
     freecontours(sd->line_contours,sd->nline_contours);
-    sd->nline_contours=sd->nsteps;
+    sd->nline_contours=sd->ntimes;
     initcontours(&sd->line_contours,sd->rgb_slice_ptr,sd->nline_contours,constval,sd->idir,line_min,line_max,nline_values);
     for(i=0;i<sd->nline_contours;i++){
       float *vals;
@@ -2127,7 +2127,7 @@ void drawslice_frame(){
       i=slice_loaded_list[ii];
       sd = sliceinfo + i;
       if(sd->display==0||sd->type!=islicetype)continue;
-      if(sd->slicetimes[0]>times[itimes])continue;
+      if(sd->times[0]>global_times[itimes])continue;
       if(sd->compression_type==1||sd->compression_type==2){
 #ifdef USE_ZLIB
         uncompress_slicedataframe(sd,sd->islice);
@@ -2217,7 +2217,7 @@ void drawvslice_frame(void){
     v = vd->v;
     w = vd->w;
     if(u==NULL&&v==NULL&&w==NULL)continue;
-    if(sliceinfo[vd->ival].slicetimes[0]>times[itimes])continue;
+    if(sliceinfo[vd->ival].times[0]>global_times[itimes])continue;
 #define VAL val
     if(VAL->compression_type==1){
 #ifdef USE_ZLIB
@@ -2924,7 +2924,7 @@ void drawslice_texture(const slice *sd){
   else if(sd->idir==2){
    if(meshi->mesh_offset_ptr!=NULL){
      glPushMatrix();
-     glTranslatef(times[itimes]/10.0,0.0,0.0);
+     glTranslatef(global_times[itimes]/10.0,0.0,0.0);
    }
    constval = yplt[sd->js1]+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
@@ -4957,7 +4957,7 @@ void output_Slicedata(void){
     i=slice_loaded_list[ii];
     sd = sliceinfo + i;
     if(sd->display==0||sd->type!=islicetype)continue;
-    if(sd->slicetimes[0]>times[itimes])continue;
+    if(sd->times[0]>global_times[itimes])continue;
 
     if(sd->qslicedata==NULL){
       printf("  Slice data unavailble for output\n");
@@ -4976,7 +4976,7 @@ void output_Slicedata(void){
     strcat(datafile,".csv");
     fileout = fopen(datafile,"a");
     if(fileout==NULL)continue;
-    if(times!=NULL)fprintf(fileout,"%f\n",times[itimes]);
+    if(global_times!=NULL)fprintf(fileout,"%f\n",global_times[itimes]);
     switch (sd->idir){
       case 1:
         fprintf(fileout,"%i,%i\n",sd->ks2+1-sd->ks1,sd->js2+1-sd->js1);
@@ -5037,7 +5037,7 @@ void init_Slicedata(void){
     i=slice_loaded_list[ii];
     sd = sliceinfo + i;
     if(sd->display==0||sd->type!=islicetype)continue;
-    if(sd->slicetimes[0]>times[itimes])continue;
+    if(sd->times[0]>global_times[itimes])continue;
 
     strcpy(datafile,sd->file);
     ext = strstr(datafile,".");

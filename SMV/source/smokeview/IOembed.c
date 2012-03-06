@@ -894,7 +894,7 @@ void read_geomdata(int ifile, int flag, int *errorcode){
 
   complete_histogram(patchi->histogram);
 
-  patchi->geom_ntimes=ntimes_local;
+  patchi->ngeom_times=ntimes_local;
   patchi->geom_nvals=nvals;
   patchi->geom_ivals_static[0] = patchi->geom_ivals;
   patchi->geom_ivals_dynamic[0] = patchi->geom_ivals_static[0]+patchi->geom_nstatics[0];

@@ -124,7 +124,7 @@ void freeallpart5data(particle *parti){
 
   if(parti->data5==NULL)return;
   datacopy = parti->data5;
-  for(i=0;i<parti->nframes*parti->nclasses;i++){
+  for(i=0;i<parti->ntimes*parti->nclasses;i++){
     freepart5data(datacopy);
     datacopy++;
   }
@@ -580,7 +580,7 @@ void update_all_partvis(particle *parti){
   int firstframe=1;
 
   datacopy = parti->data5;
-  for(i=0;i<parti->nframes;i++){
+  for(i=0;i<parti->ntimes;i++){
     for(j=0;j<parti->nclasses;j++){
       update_partvis(firstframe,parti,datacopy,parti->nclasses);
       datacopy++;
@@ -785,7 +785,7 @@ void getpart5header(particle *parti, int partframestep_local, int *nf_all){
 
   // if size file doesn't exist then generate it
 
-  parti->nframes=0;
+  parti->ntimes=0;
 
   stat_sizefile=STAT(size_file,&stat_sizefile_buffer);
   stat_regfile=STAT(reg_file,&stat_regfile_buffer);
@@ -840,15 +840,15 @@ void getpart5header(particle *parti, int partframestep_local, int *nf_all){
        (settmax_p!=0&&time_local>tmax_p+TEPS)){
        continue;
     }
-    (parti->nframes)++;
+    (parti->ntimes)++;
   }
   rewind(stream);
   *nf_all = nframes_all;
 
   // allocate memory for number of time steps * number of classes
 
-  NewMemory((void **)&parti->data5,parti->nclasses*parti->nframes*sizeof(part5data));
-  NewMemory((void **)&parti->ptimes,parti->nframes*sizeof(float));
+  NewMemory((void **)&parti->data5,parti->nclasses*parti->ntimes*sizeof(part5data));
+  NewMemory((void **)&parti->ptimes,parti->ntimes*sizeof(float));
 
   // free memory for x, y, z frame data 
 
@@ -932,7 +932,7 @@ void getpart5header(particle *parti, int partframestep_local, int *nf_all){
       }
       if(fail==1)break;
     }
-    if(fail==1)parti->nframes=i;
+    if(fail==1)parti->ntimes=i;
     fclose(stream);
   }
 
@@ -1327,20 +1327,20 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   FORTgetdata2(&file_unit,
     parti->xparts,parti->yparts,parti->zparts,
     parti->tpart,&parti->droplet_type,parti->isprink,
-    tspr,parti->bframe,parti->sframe,parti->sprframe,parti->ptimes,&nspr,&npartpoints,&npartframes,&parti->nframes,
+    tspr,parti->bframe,parti->sframe,parti->sprframe,parti->ptimes,&nspr,&npartpoints,&npartframes,&parti->ntimes,
     &settmin_p,&settmax_p,&tmin_p,&tmax_p,&partframestep,&partpointstep, 
     &xbar0, &xbox, &ybar0, &ybox, &zbar0, &zbox,
     &offset_x, &offset_y, &offset_z,
     &error,1);
-  if(error!=0||parti->nframes==0){
+  if(error!=0||parti->ntimes==0){
     if(error!=0)printf("*** warning: problem reading %s\n",file);
     *errorcode=1;
     readpart("",ifile,UNLOAD,&error);
     return;
   }
   
-  nmax = parti->bframe[parti->nframes-1]+parti->sframe[parti->nframes-1];
-  printf("loaded: points=%i, size=%i KBytes, frames=%i\n",nmax,nmax*bytesperpoint/1024,parti->nframes);
+  nmax = parti->bframe[parti->ntimes-1]+parti->sframe[parti->ntimes-1];
+  printf("loaded: points=%i, size=%i KBytes, frames=%i\n",nmax,nmax*bytesperpoint/1024,parti->ntimes);
 
   if(parttype==-1||parttype==-3){
     parti->particle_type=1;  /*  only color temperature */
@@ -2023,7 +2023,7 @@ void drawPart(const particle *parti){
   ipframe=parti->iframe;
   rgb_smoke = rgb_part;
 
-  if(parti->ptimes[0]>times[itimes])return;
+  if(parti->ptimes[0]>global_times[itimes])return;
 
   if(parti->version==1){
     drawPart5(parti);

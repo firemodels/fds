@@ -644,7 +644,7 @@ void output_device_val(device *devicei){
   float val;
   int valid;
 
-  val=get_device_val(times[itimes],devicei,&valid);
+  val=get_device_val(global_times[itimes],devicei,&valid);
   if(valid==1){
     sprintf(label,"%s: %.1f %s",devicei->quantity,val,devicei->unit);
     output3Text(foregroundcolor,0.0,0.0,0.0,label);
@@ -678,7 +678,7 @@ void draw_devices(void){
     }
   }
 
-  if(showtime==1&&itimes>=0&&itimes<ntimes&&showvdeviceval==1&&nvdeviceinfo>0){
+  if(showtime==1&&itimes>=0&&itimes<nglobal_times&&showvdeviceval==1&&nvdeviceinfo>0){
     glEnable(GL_LIGHTING);
     glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
     glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
@@ -700,7 +700,7 @@ void draw_devices(void){
       vdevi = vdeviceinfo + i;
       if(vdevi->unique==0)continue;
       xyz=vdevi->valdev->xyz;
-      get_vdevice_vel(times[itimes], vdevi, vel, &angle, &dvel, &dangle, &valid);
+      get_vdevice_vel(global_times[itimes], vdevi, vel, &angle, &dvel, &dangle, &valid);
       if(valid==1){
         float xxx1[3], xxx2[3];
 
@@ -835,7 +835,7 @@ void draw_devices(void){
         prop->vars_indep_index[j]=j;
       }
     }
-    if(showtime==1&&itimes>=0&&itimes<ntimes&&showdeviceval==1&&ndevicetypes>0){
+    if(showtime==1&&itimes>=0&&itimes<nglobal_times&&showdeviceval==1&&ndevicetypes>0){
       int type,vistype=0;
 
       type=devicei->type2;
@@ -844,7 +844,7 @@ void draw_devices(void){
         output_device_val(devicei);
       }
     }
-    if(showtime==1&&itimes>=0&&itimes<ntimes&&devicei->showstatelist!=NULL){
+    if(showtime==1&&itimes>=0&&itimes<nglobal_times&&devicei->showstatelist!=NULL){
       int state;
 
       state=devicei->showstatelist[itimes];
@@ -1165,8 +1165,8 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
         float val_result;
         float time_val=0.0;
 
-        if(ntimes>0){
-          time_val=times[itimes];
+        if(nglobal_times>0){
+          time_val=global_times[itimes];
         }
 
         val_result=time_val;
@@ -1182,8 +1182,8 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
         val1=arg[0];
         val2=arg[1];
 
-        if(ntimes>0){
-          time_val=times[itimes];
+        if(nglobal_times>0){
+          time_val=global_times[itimes];
         }
 
         val_result=val1*time_val+val2;

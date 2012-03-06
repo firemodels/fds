@@ -370,7 +370,7 @@ void drawTargets(void){
   int i, j;
 
   time_val=0.0;
-  if(times!=NULL)time_val = times[itimes];
+  if(global_times!=NULL)time_val = global_times[itimes];
   for(j=0;j<ntarginfo;j++){
     if(targinfo[j].loaded==0||targinfo[j].display==0)continue;
     switch (targinfo[j].type){

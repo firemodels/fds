@@ -532,7 +532,7 @@ SVEXTERN int nlabels,visLabels,nlabelssmv;
 SVEXTERN int SVDECL(ntarginfo,0);
 SVEXTERN int showallslicevectors;
 SVEXTERN float framerate;
-SVEXTERN int ntimes, SVDECL(ntimes_old,0), itimes, itime_save, itimeold, seqnum,RenderTime,RenderTimeOld;
+SVEXTERN int nglobal_times, SVDECL(ntimes_old,0), itimes, itime_save, itimeold, seqnum,RenderTime,RenderTimeOld;
 SVEXTERN int npqq, nopart;
 SVEXTERN int uindex, vindex, windex;
 
@@ -902,7 +902,7 @@ SVEXTERN int SVDECL(hilight_skinny,0);
 SVEXTERN int minfill, maxfill;
 
 SVEXTERN int SVDECL(*plotiso,NULL);
-SVEXTERN float SVDECL(*times,NULL),cputimes[20];
+SVEXTERN float SVDECL(*global_times,NULL),cputimes[20];
 SVEXTERN int cpuframe;
 
 SVEXTERN float eyexINI, eyeyINI, eyezINI;

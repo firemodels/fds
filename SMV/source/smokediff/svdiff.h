@@ -173,7 +173,7 @@ STDCALL FORToutboundaryheader(char *outfile, int *unit3, int *npatches,
                               int *pi1, int *pi2, int *pj1, int *pj2, int *pk1, int *pk2,
                               int *patchdir, int *error1, FILE_SIZE len);
 STDCALL FORTgetpatchdata(int *lunit, int *npatch,int *pi1,int *pi2,int *pj1,int *pj2,int *pk1,int *pk2,
-                         float *patchtimes,float *pqq, int *npqq, int *error);
+                         float *patch_times,float *pqq, int *npqq, int *error);
 STDCALL FORTopenboundary(char *boundaryfilename, int *boundaryunitnumber, 
                          int *endian, int *version, int *error, FILE_SIZE len);
 STDCALL FORTgetboundaryheader1(char *boundaryfilename, int *boundaryunitnumber, 

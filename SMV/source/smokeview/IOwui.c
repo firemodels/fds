@@ -72,10 +72,10 @@ void drawtrees(void){
     treei = treeinfo + i;
 
     state=0;
-    if(showtime==1&&times!=NULL){
+    if(showtime==1&&global_times!=NULL){
       ASSERT(itimes>=0)
-      if(treei->time_char>0.0&&times[itimes]>treei->time_char)state=1;
-      if(treei->time_complete>0.0&&times[itimes]>treei->time_complete)state=2;
+      if(treei->time_char>0.0&&global_times[itimes]>treei->time_char)state=1;
+      if(treei->time_complete>0.0&&global_times[itimes]>treei->time_complete)state=2;
     }
 
     glPushMatrix();
@@ -770,12 +770,12 @@ float *get_terraincolor(terraincell *ti){
 
   if(ti==NULL)return getcolorptr(wuicolor);
 
-  if(times==NULL||ti->time==NULL){
+  if(global_times==NULL||ti->time==NULL){
     index = ti->state[0]%10;
     return rgb_terrain[index];
   }
   
-  sv_time = times[itimes];
+  sv_time = global_times[itimes];
   ter_time = ti->time;
   ileft = ti->interval;
 
@@ -831,7 +831,7 @@ void readterrain(char *file, int ifile, int flag, int *errorcode){
   }
   if(terri==NULL)return;
 
-  if(getterrain_size(file,&xmin, &xmax, &nx, &ymin, &ymax, &ny, &ntimes)!=0)return;
+  if(getterrain_size(file,&xmin, &xmax, &nx, &ymin, &ymax, &ny, &nglobal_times)!=0)return;
 
   terri->xmin = xmin;
   terri->xmax = xmax;
@@ -839,9 +839,9 @@ void readterrain(char *file, int ifile, int flag, int *errorcode){
   terri->ymin = ymin;
   terri->ymax = ymax;
   terri->ny = ny;
-  terri->ntimes=ntimes;
+  terri->ntimes=nglobal_times;
 
-  NewMemory((void **)&terri->times,ntimes*sizeof(float));
+  NewMemory((void **)&terri->times,nglobal_times*sizeof(float));
   NewMemory((void **)&terri->x,(nx+1)*sizeof(float));
   NewMemory((void **)&terri->y,(ny+1)*sizeof(float));
   NewMemory((void **)&terri->zcell,nx*ny*sizeof(float));

@@ -448,7 +448,7 @@ typedef struct _volrenderdata {
   int *nsmokedata_compressed, *nfiredata_compressed;
   float *times;
   int *dataready;
-  int iframe, nframes, times_defined;
+  int iframe, ntimes, times_defined;
   int *timeslist;
   float *smokecolor_yz0, *smokecolor_xz0, *smokecolor_xy0;
   float *smokecolor_yz1, *smokecolor_xz1, *smokecolor_xy1;
@@ -533,9 +533,9 @@ typedef struct _mesh {
   int nisolevels, *showlevels;
   float *isolevels;
   int isomin_index, isomax_index;
-  int nisosteps;
-  float *isotimes;
-  int *isotimeslist;
+  int niso_times;
+  float *iso_times;
+  int *iso_timeslist;
   int iiso;
   int smokedir,smokedir_old;
   float dx, dy, dz, dxy,dxz,dyz;
@@ -555,12 +555,12 @@ typedef struct _mesh {
   float *xyzpatch, *xyzpatch_threshold;
   unsigned char *ipqq_zlib, *ipqqi_zlib;
   unsigned char *ipqq, *ipqqi;
-  float *patchtimes, *patchtimesi, *pqq, *pqqi;
+  float *patch_times, *patch_timesi, *pqq, *pqqi;
   float *thresholdtime;
   int *patchblank;
-  int npatch_frames,npatches;
+  int npatch_times,npatches;
   int ipatch;
-  int *patchtimeslist;
+  int *patch_timeslist;
   int npatchsize;
   int patchfacevis2;
   int visInteriorPatches;
@@ -677,8 +677,8 @@ typedef struct _tourdata {
   int glui_avatar_index, display2;
   float *path_times,*keyframe_times;
   float global_dist, local_dist;
-  int *path_timeslist;
-  int npath,nkeyframes;
+  int *timeslist;
+  int ntimes,nkeyframes;
   int display,periodic,global_tension_flag;
   int startup;
   int isDefault;
@@ -901,13 +901,13 @@ typedef struct {
   int blocknumber;
   int num_memblocks;
   float *ptimes;
-  int *ptimeslist;
+  int *timeslist;
   float *xpart, *ypart, *zpart, *tpart;
   short *xparts, *yparts, *zparts;
   unsigned char *xpartb, *ypartb, *zpartb;
 
   unsigned char *itpart,*isprink;
-  int *sframe, *sprframe, *bframe, nframes, iframe;
+  int *sframe, *sprframe, *bframe, ntimes, iframe;
   int particle_type, droplet_type;
 
   flowlabels label;
@@ -989,7 +989,7 @@ typedef struct _slice {
   float valmin_data, valmax_data;
   float diff_valmin,  diff_valmax;
   flowlabels label;
-  float *qslicedata, *slicetimes, *qslice;
+  float *qslicedata, *times, *qslice;
   unsigned char *qslicedata_compressed;
   unsigned char *slicecomplevel;
   contour *line_contours;
@@ -999,7 +999,7 @@ typedef struct _slice {
   char menulabel[128];
   char menulabel2[128];
   float *rgb_slice_ptr[256];
-  int nsteps,islice;
+  int ntimes,islice;
   float *slicedata;
   unsigned char *slicepoint;
   float above_ground_level;
@@ -1007,7 +1007,7 @@ typedef struct _slice {
   int is1, is2, js1, js2, ks1, ks2;
   float xmin,xmax,ymin,ymax,zmin,zmax;
   int nsliceii;
-  int *slicetimeslist;
+  int *timeslist;
   int idir;
   float sliceoffset;
   int nslicei, nslicej, nslicek;
@@ -1106,7 +1106,7 @@ typedef struct _smoke3d {
   int *use_smokeframe;
   int fire_alpha;
   int *timeslist;
-  int n_times,iframe,lastiframe,n_times_full;
+  int ntimes,iframe,lastiframe,ntimes_full;
   int nchars_uncompressed;
 
   int ncomp_smoke_total;
@@ -1152,7 +1152,7 @@ typedef struct {
   unsigned char *geom_ival_static, *geom_ival_dynamic;
   int geom_nval_static, geom_nval_dynamic;
   int *geom_nstatics, *geom_ndynamics;
-  int geom_nvals, geom_ntimes;
+  int geom_nvals, ngeom_times;
   flowlabels label;
   char scale[31];
   char menulabel[128];

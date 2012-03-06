@@ -5097,7 +5097,7 @@ typedef struct {
       parti->sframe=NULL; 
       parti->bframe=NULL;
       parti->sprframe=NULL;
-      parti->ptimeslist=NULL;
+      parti->timeslist=NULL;
       parti->particle_type=0;
       parti->droplet_type=0;
 
@@ -5431,11 +5431,11 @@ typedef struct {
       sd->slicecomplevel=NULL;
       sd->qslicedata_compressed=NULL;
       sd->volslice=0;
-      sd->slicetimes=NULL;
+      sd->times=NULL;
       sd->slicelevel=NULL;
       sd->slicepoint=NULL;
       sd->slicedata=NULL;
-      sd->slicetimeslist=NULL;
+      sd->timeslist=NULL;
       sd->c_iblank=NULL;
       sd->n_iblank=NULL;
       sd->blocknumber=blocknumber;
@@ -7399,8 +7399,8 @@ void initmesh(mesh *meshi){
   meshi->showlevels=NULL;
   meshi->isolevels=NULL;
   meshi->nisolevels=0;
-  meshi->isotimes=NULL;
-  meshi->isotimeslist=NULL;
+  meshi->iso_times=NULL;
+  meshi->iso_timeslist=NULL;
   meshi->isofilenum=-1;
   meshi->nvents=0;
   meshi->ndummyvents=0;
@@ -7427,11 +7427,11 @@ void initmesh(mesh *meshi){
   meshi->xyzpatch_threshold=NULL;
   meshi->ipqq=NULL, meshi->ipqqi=NULL;
   meshi->ipqqi_zlib=NULL, meshi->ipqq_zlib=NULL;
-  meshi->patchtimes=NULL, meshi->pqq=NULL, meshi->pqqi=NULL;
+  meshi->patch_times=NULL, meshi->pqq=NULL, meshi->pqqi=NULL;
   meshi->thresholdtime=NULL;
   meshi->patchblank=NULL;
   meshi->patch_contours=NULL;
-  meshi->patchtimeslist=NULL;
+  meshi->patch_timeslist=NULL;
   meshi->ntc=0;
   meshi->nspr=0;
   meshi->xsprplot=NULL;

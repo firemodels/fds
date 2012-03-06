@@ -290,7 +290,7 @@ void checktimebound(void){
   blockagedata *bc;
   particle *parti;
 
-  if(timedrag==0&&itimes>ntimes-1||timedrag==1&&itimes<0){
+  if(timedrag==0&&itimes>nglobal_times-1||timedrag==1&&itimes<0){
     izone=0;
     itimes=0;
     iframe=iframebeg;
@@ -304,29 +304,29 @@ void checktimebound(void){
     }
     for(i=0;i<nmeshes;i++){
       meshi=meshinfo+i;
-      if(meshi->isotimes==NULL)continue;
+      if(meshi->iso_times==NULL)continue;
       meshi->iiso=0;
     }
   }
-  if(timedrag==0&&itimes<0||timedrag==1&&itimes>ntimes-1){
+  if(timedrag==0&&itimes<0||timedrag==1&&itimes>nglobal_times-1){
     izone=nzonet-1;
-    itimes=ntimes-1;
+    itimes=nglobal_times-1;
     for(i=0;i<npartinfo;i++){
       parti=partinfo+i;
-      parti->iframe=parti->nframes-1;
+      parti->iframe=parti->ntimes-1;
     }
     for(i=0;i<nsliceinfo;i++){
       sd=sliceinfo+i;
-      sd->islice=sd->nsteps-1;
+      sd->islice=sd->ntimes-1;
     }
     for(i=0;i<nmeshes;i++){
       meshi=meshinfo+i;
-      meshi->ipatch=meshi->npatch_frames-1;
+      meshi->ipatch=meshi->npatch_times-1;
     }
     for(i=0;i<nmeshes;i++){
       meshi=meshinfo+i;
-      if(meshi->isotimes==NULL)continue;
-      meshi->iiso=meshi->nisosteps-1;
+      if(meshi->iso_times==NULL)continue;
+      meshi->iiso=meshi->niso_times-1;
     }
   }
   /* set blockage visibility */
@@ -433,7 +433,7 @@ void mouse(int button, int state, int x, int y){
         return;
       }
     }
-    if(screenHeight-y<50&&ntimes>0&&visTimeLabels==1&&showtime==1){
+    if(screenHeight-y<50&&nglobal_times>0&&visTimeLabels==1&&showtime==1){
       float xleft;
 
       if(fontindex==LARGE_FONT){
@@ -442,7 +442,7 @@ void mouse(int button, int state, int x, int y){
       else{
         xleft=xtimeleft;
       }
-      itimes=(int)((xtemp*x/((screenWidth-dwinWW))-xleft)*(ntimes-1)/(xtimeright-xleft));
+      itimes=(int)((xtemp*x/((screenWidth-dwinWW))-xleft)*(nglobal_times-1)/(xtimeright-xleft));
       checktimebound();
       timedrag=1;
       stept=0;
@@ -582,8 +582,8 @@ void motion(int xm, int ym){
 
 	  xxleft = xtimeleft;
     if(fontindex==LARGE_FONT)xxleft=xtimeleft+0.11;
-    if(screenHeight-ym<50&&ntimes>0&&visTimeLabels==1&&showtime==1){
-      itimes=(int)((xtemp*xm/((screenWidth-dwinWW))-xxleft)*(ntimes-1)/(xtimeright-xxleft));
+    if(screenHeight-ym<50&&nglobal_times>0&&visTimeLabels==1&&showtime==1){
+      itimes=(int)((xtemp*xm/((screenWidth-dwinWW))-xxleft)*(nglobal_times-1)/(xtimeright-xxleft));
       checktimebound();
       timedrag=1;
     }
@@ -1288,10 +1288,10 @@ void keyboard_2(unsigned char key, int x, int y){
       }
     }
     if(scriptoutstream!=NULL){
-      if(ntimes>0){
+      if(nglobal_times>0){
         float timeval;
 
-        timeval=times[itimes];
+        timeval=global_times[itimes];
         fprintf(scriptoutstream,"SETTIMEVAL\n");
         fprintf(scriptoutstream," %f\n",timeval);
         if(nvolrenderinfo>0&&load_at_rendertimes==1){
@@ -1308,7 +1308,7 @@ void keyboard_2(unsigned char key, int x, int y){
             if(vr->loaded==0||vr->display==0)continue;
             timediffmin = ABS(timeval-vr->times[0]);
             framenum=0;
-            for(j=1;j<vr->nframes;j++){
+            for(j=1;j<vr->ntimes;j++){
               float timediff;
 
               timediff = ABS(vr->times[j]-timeval);
@@ -1889,9 +1889,9 @@ void UpdateFrame(float thisinterval, int *changetime, int *redisplay){
     }
     if(benchmark==1||benchmark_flag==1){
       if(itimes==0)bench_starttime=thistime/1000.0;
-      if(itimes==ntimes-1){
+      if(itimes==nglobal_times-1){
         bench_stoptime=thistime/1000.0;
-        ibenchrate=10*((float)ntimes/(bench_stoptime-bench_starttime))+0.5;
+        ibenchrate=10*((float)nglobal_times/(bench_stoptime-bench_starttime))+0.5;
         framerate=(float)ibenchrate/10.0;
         sprintf(buffer,"%f",framerate);
         trim(buffer);
@@ -1906,21 +1906,21 @@ void UpdateFrame(float thisinterval, int *changetime, int *redisplay){
     last_frame_count=frame_count;
     frame_count=1;
     lasttime = thistime;
-    if(ntimes>0){
+    if(nglobal_times>0){
       *changetime=1;
       if(stept ==1 && plotstate == DYNAMIC_PLOTS && timedrag==0 && RenderGif==0){
         /*  skip frames here if displaying in real time and frame rate is too slow*/
-        if(times!=NULL&&realtime_flag!=0&&FlowDir>0){
+        if(global_times!=NULL&&realtime_flag!=0&&FlowDir>0){
           elapsed_time = (float)thistime/1000.0 - reset_time;
           elapsed_time *= (float)realtime_flag;
-          elapsed_time += times[reset_frame];
-          if(ntimes>1&&
-            times[ntimes-1]>times[0]&&
-            (elapsed_time>times[ntimes-1]||elapsed_time<0.0)
+          elapsed_time += global_times[reset_frame];
+          if(nglobal_times>1&&
+            global_times[nglobal_times-1]>global_times[0]&&
+            (elapsed_time>global_times[nglobal_times-1]||elapsed_time<0.0)
             ){
-            elapsed_time = gmod(elapsed_time,times[ntimes-1]-times[0])+times[0];
+            elapsed_time = gmod(elapsed_time,global_times[nglobal_times-1]-global_times[0])+global_times[0];
           }
-          itimes = isearch(times,ntimes,elapsed_time,itimes);
+          itimes = isearch(global_times,nglobal_times,elapsed_time,itimes);
         }
         else{
           if(script_render_flag==0){
@@ -2041,9 +2041,9 @@ void reset_gltime(void){
   reset_frame=itimes;
   inttime  = glutGet(GLUT_ELAPSED_TIME);
   reset_time = (float)inttime/1000.0;
-  if(times!=NULL&&ntimes>0){
-    start_frametime=times[0];
-    stop_frametime=times[ntimes-1];
+  if(global_times!=NULL&&nglobal_times>0){
+    start_frametime=global_times[0];
+    stop_frametime=global_times[nglobal_times-1];
   }
 }
 
@@ -2355,8 +2355,8 @@ void Display(void){
           renderdoublenow=1;
         }
     
-        if(plotstate==DYNAMIC_PLOTS && ntimes > 0){
-          if(itimes>=0&&itimes<ntimes&&
+        if(plotstate==DYNAMIC_PLOTS && nglobal_times>0){
+          if(itimes>=0&&itimes<nglobal_times&&
             ((render_frame[itimes] == 0&&showstereo==0)||(render_frame[itimes]<2&&showstereo!=0))
             ){
             render_frame[itimes]++;
@@ -2408,8 +2408,8 @@ void Display(void){
   }
   if(touring == 1 ){
     if(RenderGif != 0){
-      if(ntimes>0)angle_global += 2.0*PI/((float)ntimes/(float)RenderSkip);
-      if(ntimes==0)angle_global += 2.0*PI/((float)maxtourframes/(float)RenderSkip);
+      if(nglobal_times>0)angle_global += 2.0*PI/((float)nglobal_times/(float)RenderSkip);
+      if(nglobal_times==0)angle_global += 2.0*PI/((float)maxtourframes/(float)RenderSkip);
     }
 //    if(RenderGif == 0)angle += dang/lastcount;
     if(RenderGif == 0)angle_global += dang_global;

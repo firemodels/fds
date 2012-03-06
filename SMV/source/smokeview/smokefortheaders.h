@@ -74,7 +74,7 @@ STDCALL FORTgetpatchsizes2(int *file_unit,int *version, int *npatch,int *npatchs
                            int *pi1,int *pi2,int *pj1,int *pj2,int *pk1,int *pk2, int *patchdir,
                            int *headersize, int *framesize);
 STDCALL FORTgetpatchdata(int *lunit, int *npatch,int *pi1,int *pi2,int *pj1,int *pj2,int *pk1,int *pk2,
-                         float *patchtimes,float *pqq, int *npqq, int *error);
+                         float *patch_times,float *pqq, int *npqq, int *error);
 STDCALL FORTgetdata1(int *file_unit, int *ipart, int *error);
 STDCALL FORTgetdata2(int *file_unit,
                      short *xparts, short *yparts, short *zparts,
@@ -100,7 +100,7 @@ STDCALL FORTgetslicesizes(char *slicefilename, int *nslicei, int *nslicej, int *
 STDCALL FORTgetslicedata(int *file_unit,char *slicefilename, char *longlabels, char *shortlabels, 
                          char *units, int *is1,int *is2,int *js1,int *js2, int *ks1,int *ks2,
                          int *idir, float *qslicemin,float *qslicemax,
-                         float *qslicedata,float *slicetimes, int *nsteps, int *sliceframestep, int *endian,
+                         float *qslicedata,float *times, int *nsteps, int *sliceframestep, int *endian,
                          int *settime_p, int *settmax_p, float *tmin_p, float *tmax_p,
                          FILE_SIZE slicefilelen, FILE_SIZE longlableslen, FILE_SIZE shortlabelslen, FILE_SIZE unitslen);
 STDCALL FORTgetplot3dq(char *qfilename, int *nx, int *ny, int *nz, float *qq, int *error, int *endian, int *isotest, FILE_SIZE filelen);

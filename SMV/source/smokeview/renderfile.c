@@ -50,8 +50,8 @@ void Render(int view_mode){
   if(RenderOnceNow==0&&RenderGif !=0
     &&render_double==0
     ){
-    if(plotstate==DYNAMIC_PLOTS && ntimes > 0){
-     if(itimes>=0&&itimes<ntimes&&
+    if(plotstate==DYNAMIC_PLOTS && nglobal_times>0){
+     if(itimes>=0&&itimes<nglobal_times&&
        ((render_frame[itimes] == 0&&showstereo==0)||(render_frame[itimes]<2&&showstereo!=0))
        ){
        render_frame[itimes]++;
@@ -63,11 +63,11 @@ void Render(int view_mode){
        RenderSkip=1;
      }
     }
-    if(touring == 1 && ntimes == 0){
+    if(touring == 1 && nglobal_times == 0){
       if(rendertourcount % RenderSkip == 0)RenderFrame(view_mode);
       rendertourcount++;
-      if(ntimes>0)tourangle_global += (float)(2.0*PI/((float)ntimes/(float)RenderSkip));
-      if(ntimes==0)tourangle_global += (float)(2.0*PI/((float)maxtourframes/(float)RenderSkip));
+      if(nglobal_times>0)tourangle_global += (float)(2.0*PI/((float)nglobal_times/(float)RenderSkip));
+      if(nglobal_times==0)tourangle_global += (float)(2.0*PI/((float)maxtourframes/(float)RenderSkip));
       if(tourangle_global>2.0*PI){
         RenderState(0);
         RenderSkip=1;
@@ -187,8 +187,8 @@ void RenderFrame(int view_mode){
       char timelabel_local[20], *timelabelptr;
       float dt;
 
-      time_local = times[itimes];
-      dt = times[1]-times[0];
+      time_local = global_times[itimes];
+      dt = global_times[1]-global_times[0];
       if(dt<0.0)dt=-dt;
       timelabelptr = time2timelabel(time_local,dt,timelabel_local);
       strcpy(suffix,timelabelptr);

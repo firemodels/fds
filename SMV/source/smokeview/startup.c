@@ -1549,7 +1549,7 @@ void initvars(void){
   ntarginfo=0;
   showallslicevectors=0;
   framerate=-1.0;
-  ntimes=0, itimes=0, itimeold=-999, seqnum=0,RenderTime=0; RenderTimeOld=0; itime_save=-1;
+  itimes=0, itimeold=-999, seqnum=0,RenderTime=0; RenderTimeOld=0; itime_save=-1;
   npqq=0, nopart=1;
   uindex=-1, vindex=-1, windex=-1;
 

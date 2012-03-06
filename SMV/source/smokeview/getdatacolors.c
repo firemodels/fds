@@ -191,7 +191,7 @@ void remap_patchdata(patch *patchi,float valmin, float valmax, int *extreme_min,
 
   meshi = meshinfo + patchi->blocknumber;
   ipqq = meshi->ipqq;
-  npqq_local = meshi->npatch_frames*meshi->npatchsize;
+  npqq_local = meshi->npatch_times*meshi->npatchsize;
   for(i=0;i<npqq_local;i++){
     float val;
     int ival;
@@ -422,7 +422,7 @@ void updatePart5extremes(void){
     parti = partinfo + ii;
     if(parti->loaded==0||parti->display==0)continue;
     datacopy = parti->data5;
-    for(i=0;i<parti->nframes;i++){
+    for(i=0;i<parti->ntimes;i++){
       for(j=0;j<parti->nclasses;j++){
         part5class *partclassi;
         unsigned char *irvals;
@@ -463,7 +463,7 @@ void getPart5Colors(particle *parti, int nlevel){
   float *u_vel_data, *v_vel_data, *w_vel_data;
 
   datacopy = parti->data5;
-  for(i=0;i<parti->nframes;i++){
+  for(i=0;i<parti->ntimes;i++){
     for(j=0;j<parti->nclasses;j++){
       float valmin, valmax, dval;
       part5class *partclassi;
@@ -606,7 +606,7 @@ void getPart5Colors(particle *parti, int nlevel){
   }
 // erase data memory in a separate loop (so all "columns" are available when doing any conversions)
   datacopy = parti->data5;
-  for(i=0;i<parti->nframes;i++){
+  for(i=0;i<parti->ntimes;i++){
     for(j=0;j<parti->nclasses;j++){
       FREEMEMORY(datacopy->rvals);
       datacopy++;

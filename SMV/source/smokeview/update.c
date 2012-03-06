@@ -50,8 +50,8 @@ void update_framenumber(int changetime){
 
         parti = partinfo+i;
         if(parti->loaded==1){
-          if(parti->ptimeslist==NULL)continue;
-          parti->iframe=parti->ptimeslist[itimes];
+          if(parti->timeslist==NULL)continue;
+          parti->iframe=parti->timeslist[itimes];
         }
       }
     }
@@ -135,8 +135,8 @@ void update_framenumber(int changetime){
 
         i = slice_loaded_list[ii];
         sd = sliceinfo+i;
-        if(sd->slicetimeslist==NULL)continue;
-        sd->islice=sd->slicetimeslist[itimes];
+        if(sd->timeslist==NULL)continue;
+        sd->islice=sd->timeslist[itimes];
       }
     }
     if(show3dsmoke==1){
@@ -174,9 +174,9 @@ void update_framenumber(int changetime){
         meshi = meshinfo+i;
         patchi=patchinfo + meshi->patchfilenum;
         if(patchi->filetype==2)continue;
-        if(meshi->patchtimes==NULL)continue;
-        if(meshi->patchtimeslist==NULL)continue;
-        meshi->ipatch=meshi->patchtimeslist[itimes];
+        if(meshi->patch_times==NULL)continue;
+        if(meshi->patch_timeslist==NULL)continue;
+        meshi->ipatch=meshi->patch_timeslist[itimes];
         if(patchi->compression_type==0){
           meshi->ipqqi = meshi->ipqq + meshi->ipatch*meshi->npatchsize;
         }
@@ -197,9 +197,9 @@ void update_framenumber(int changetime){
         if(isoi->loaded==0)continue;
         meshi = meshinfo + isoi->blocknumber;
 
-        if(meshi->isotimes==NULL)continue;
-        if(meshi->isotimeslist==NULL)continue;
-        meshi->iiso=meshi->isotimeslist[itimes];
+        if(meshi->iso_times==NULL)continue;
+        if(meshi->iso_timeslist==NULL)continue;
+        meshi->iiso=meshi->iso_timeslist[itimes];
       }
     }
     if(ntotal_smooth_blockages>0){
@@ -269,21 +269,21 @@ void updateShow(void){
   visTimeSmoke=1; visTimeSlice=1; visTimePatch=1; visTimeZone=1; visTimeIso=1;
 
   RenderTime=0;
-  if(times!=NULL){
-    if(settmin_p==1&&times[itimes]<tmin_p)visTimeSmoke=0;
-    if(settmax_p==1&&times[itimes]>tmax_p)visTimeSmoke=0;
+  if(global_times!=NULL){
+    if(settmin_p==1&&global_times[itimes]<tmin_p)visTimeSmoke=0;
+    if(settmax_p==1&&global_times[itimes]>tmax_p)visTimeSmoke=0;
 
-    if(settmin_s==1&&times[itimes]<tmin_s)visTimeSlice=0;
-    if(settmax_s==1&&times[itimes]>tmax_s)visTimeSlice=0;
+    if(settmin_s==1&&global_times[itimes]<tmin_s)visTimeSlice=0;
+    if(settmax_s==1&&global_times[itimes]>tmax_s)visTimeSlice=0;
 
-    if(settmin_i==1&&times[itimes]<tmin_i)visTimeIso=0;
-    if(settmax_i==1&&times[itimes]>tmax_i)visTimeIso=0;
+    if(settmin_i==1&&global_times[itimes]<tmin_i)visTimeIso=0;
+    if(settmax_i==1&&global_times[itimes]>tmax_i)visTimeIso=0;
 
-    if(settmin_b==1&&times[itimes]<tmin_b)visTimePatch=0;
-    if(settmax_b==1&&times[itimes]>tmax_b)visTimePatch=0;
+    if(settmin_b==1&&global_times[itimes]<tmin_b)visTimePatch=0;
+    if(settmax_b==1&&global_times[itimes]>tmax_b)visTimePatch=0;
 
-    if(settmin_z==1&&times[itimes]<tmin_z)visTimeZone=0;
-    if(settmax_z==1&&times[itimes]>tmax_z)visTimeZone=0;
+    if(settmin_z==1&&global_times[itimes]<tmin_z)visTimeZone=0;
+    if(settmax_z==1&&global_times[itimes]>tmax_z)visTimeZone=0;
 
   }
 
@@ -344,7 +344,7 @@ void updateShow(void){
       i=slice_loaded_list[ii];
       sd = sliceinfo+i;
       if(sd->display==0||sd->type!=islicetype)continue;
-      if(sd->nsteps>0){
+      if(sd->ntimes>0){
         sliceflag=1;
         break;
       }
@@ -359,7 +359,7 @@ void updateShow(void){
       if(sd->display==0||sd->type!=islicetype)continue;
       if(sd->constant_color==NULL&&show_evac_colorbar==0&&slicemesh->mesh_type!=0)continue;
       if(sd->constant_color!=NULL)continue;
-      if(sd->nsteps>0){
+      if(sd->ntimes>0){
         slicecolorbarflag=1;
         break;
       }
@@ -533,7 +533,7 @@ void updateShow(void){
         mesh *meshi;
 
         meshi=meshinfo+i;
-        if(meshi->patchtimes==NULL)continue;
+        if(meshi->patch_times==NULL)continue;
         patchi = patchinfo+meshi->patchfilenum;
         if(patchi->loaded==1&&patchi->display==1&&patchi->type==ipatchtype){
           meshi->visInteriorPatches=1;
@@ -625,16 +625,16 @@ void synctimes(void){
 
       meshi=meshinfo+igrid;
       if(meshi->showsmoothtimelist==NULL)continue;
-      for(n=0;n<ntimes;n++){
+      for(n=0;n<nglobal_times;n++){
         smoothblockage *sb;
 
-        sb = getsmoothblockage(meshi,times[n]);
+        sb = getsmoothblockage(meshi,global_times[n]);
         meshi->showsmoothtimelist[n] = sb;
       }
     }
   }
 
-  for(n=0;n<ntimes;n++){
+  for(n=0;n<nglobal_times;n++){
 
   /* synchronize tour times */
 
@@ -647,16 +647,16 @@ void synctimes(void){
           istart=0;
         }
         else{
-          istart=tourj->path_timeslist[n-1];
+          istart=tourj->timeslist[n-1];
         }
         i=istart;
-        while(tourj->path_times[i]<times[n]&&i<tourj->npath){
+        while(tourj->path_times[i]<global_times[n]&&i<tourj->ntimes){
           i++;
         }
-        if(i>=tourj->npath){
+        if(i>=tourj->ntimes){
           i--;
         }
-        tourj->path_timeslist[n]=i;
+        tourj->timeslist[n]=i;
       }
     }
 
@@ -674,7 +674,7 @@ void synctimes(void){
         istart=terri->timeslist[n-1];
       }
       i=istart;
-      while(terri->times[i]<times[n]&&i<terri->ntimes){
+      while(terri->times[i]<global_times[n]&&i<terri->ntimes){
         i++;
       }
       if(i>=terri->ntimes){
@@ -690,7 +690,7 @@ void synctimes(void){
         istart=hrrinfo->timeslist[n-1];
       }
       i=istart;
-      while(hrrinfo->times[i]<times[n]&&i<hrrinfo->ntimes){
+      while(hrrinfo->times[i]<global_times[n]&&i<hrrinfo->ntimes){
         i++;
       }
       if(i>=hrrinfo->ntimes){
@@ -713,7 +713,7 @@ void synctimes(void){
         istart=geomi->timeslist[n-1];
       }
       i=istart;
-      while(geomi->times[i]<times[n]&&i<geomi->ntimes){
+      while(geomi->times[i]<global_times[n]&&i<geomi->ntimes){
         i++;
       }
       if(i>=geomi->ntimes){
@@ -733,16 +733,16 @@ void synctimes(void){
         istart=0;
       }
       else{
-        istart=parti->ptimeslist[n-1];
+        istart=parti->timeslist[n-1];
       }
       i=istart;
-      while(parti->ptimes[i]<times[n]&&i<parti->nframes){
+      while(parti->ptimes[i]<global_times[n]&&i<parti->ntimes){
         i++;
       }
-      if(i>=parti->nframes){
+      if(i>=parti->ntimes){
         i--;
       }
-      parti->ptimeslist[n]=i;
+      parti->timeslist[n]=i;
     }
 
     /* synchronize target times */
@@ -755,7 +755,7 @@ void synctimes(void){
         istart=targtimeslist[n-1];
       }
       i=istart;
-      while(targtimes[i]<times[n]&&i<ntargtimes){
+      while(targtimes[i]<global_times[n]&&i<ntargtimes){
         i++;
       }
       if(i>=ntargtimes){
@@ -774,7 +774,7 @@ void synctimes(void){
         istart=shooter_timeslist[n-1];
       }
       i=istart;
-      while(shoottimeinfo[i].time<times[n]&&i<nshooter_frames){
+      while(shoottimeinfo[i].time<global_times[n]&&i<nshooter_frames){
         i++;
       }
       if(i>=nshooter_frames){
@@ -795,16 +795,16 @@ void synctimes(void){
         istart=0;
       }
       else{
-        istart=sd->slicetimeslist[n-1];
+        istart=sd->timeslist[n-1];
       }
       i=istart;
-      while(sd->slicetimes[i]<times[n]&&i<sd->nsteps){
+      while(sd->times[i]<global_times[n]&&i<sd->ntimes){
         i++;
       }
-      if(i>=sd->nsteps){
-        i=sd->nsteps-1;
+      if(i>=sd->ntimes){
+        i=sd->ntimes-1;
       }
-      sd->slicetimeslist[n]=i;
+      sd->timeslist[n]=i;
     }
 
   /* synchronize smoke times */
@@ -821,11 +821,11 @@ void synctimes(void){
           istart=smoke3di->timeslist[n-1];
         }
         i=istart;
-        while(smoke3di->times[i]<times[n]&&i<smoke3di->n_times){
+        while(smoke3di->times[i]<global_times[n]&&i<smoke3di->ntimes){
           i++;
         }
-        if(i>=smoke3di->n_times){
-          i=smoke3di->n_times-1;
+        if(i>=smoke3di->ntimes){
+          i=smoke3di->ntimes-1;
         }
         smoke3di->timeslist[n]=i;
       }
@@ -846,11 +846,11 @@ void synctimes(void){
         istart=patchi->geom_timeslist[n-1];
       }
       i=istart;
-      while(patchi->geom_times[i]<times[n]&&i<patchi->geom_ntimes){
+      while(patchi->geom_times[i]<global_times[n]&&i<patchi->ngeom_times){
         i++;
       }
-      if(i>=patchi->geom_ntimes){
-        i=patchi->geom_ntimes-1;
+      if(i>=patchi->ngeom_times){
+        i=patchi->ngeom_times-1;
       }
       patchi->geom_timeslist[n]=i;
     }
@@ -859,23 +859,23 @@ void synctimes(void){
       mesh *meshi;
 
       meshi=meshinfo+j;
-      if(meshi->patchfilenum<0||meshi->patchtimes==NULL)continue;
+      if(meshi->patchfilenum<0||meshi->patch_times==NULL)continue;
       patchi=patchinfo+meshi->patchfilenum;
       if(patchi->filetype==2)continue;
       if(n==0){
         istart=0;
       }
       else{
-        istart=meshi->patchtimeslist[n-1];
+        istart=meshi->patch_timeslist[n-1];
       }
       i=istart;
-      while(meshi->patchtimes[i]<times[n]&&i<meshi->npatch_frames){
+      while(meshi->patch_times[i]<global_times[n]&&i<meshi->npatch_times){
         i++;
       }
-      if(i>=meshi->npatch_frames){
-        i=meshi->npatch_frames-1;
+      if(i>=meshi->npatch_times){
+        i=meshi->npatch_times-1;
       }
-      meshi->patchtimeslist[n]=i;
+      meshi->patch_timeslist[n]=i;
     }
 
   /* synchronize isosurface times */
@@ -884,21 +884,21 @@ void synctimes(void){
       mesh *meshi;
 
       meshi=meshinfo+igrid;
-      if(meshi->isotimes==NULL)continue;
+      if(meshi->iso_times==NULL)continue;
       if(n==0){
         istart=0;
       }
       else{
-        istart=meshi->isotimeslist[n-1];
+        istart=meshi->iso_timeslist[n-1];
       }
       i=istart;
-      while(meshi->isotimes[i]<times[n]&&i<meshi->nisosteps){
+      while(meshi->iso_times[i]<global_times[n]&&i<meshi->niso_times){
         i++;
       }
-      if(i>=meshi->nisosteps){
-        i=meshi->nisosteps-1;
+      if(i>=meshi->niso_times){
+        i=meshi->niso_times-1;
       }
-      meshi->isotimeslist[n]=i;
+      meshi->iso_timeslist[n]=i;
     }
 
   /* synchronize volume render times */
@@ -920,11 +920,11 @@ void synctimes(void){
           istart=vr->timeslist[n-1];
         }
         i=istart;
-        while(vr->times[i]<times[n]&&i<vr->nframes){
+        while(vr->times[i]<global_times[n]&&i<vr->ntimes){
           i++;
         }
-        if(i>=vr->nframes){
-          i=vr->nframes-1;
+        if(i>=vr->ntimes){
+          i=vr->ntimes-1;
         }
         vr->timeslist[n]=i;
       }
@@ -939,7 +939,7 @@ void synctimes(void){
         istart=zonetlist[n-1];
       }
       i=istart;
-      while(zonet[i]<times[n]&&i<nzonet){
+      while(zonet[i]<global_times[n]&&i<nzonet){
         i++;
       }
       if(i>=nzonet)i=nzonet-1;
@@ -973,53 +973,53 @@ void updatetimes(void){
 
   updateShow();  
   CheckMemory;
-  ntimes = 0;
+  nglobal_times = 0;
 
   for(i=0;i<ngeominfoptrs;i++){
     geomdata *geomi;
 
     geomi = geominfoptrs[i];
     if(geomi->loaded==0||geomi->display==0)continue;
-    ntimes+=geomi->ntimes;
+    nglobal_times+=geomi->ntimes;
   }
   if(visTerrainType!=TERRAIN_HIDDEN){
     for(i=0;i<nterraininfo;i++){
       terraindata *terri;
 
       terri = terraininfo + i;
-      if(terri->loaded==1)ntimes+=terri->ntimes;
+      if(terri->loaded==1)nglobal_times+=terri->ntimes;
     }
   }
 #ifdef pp_SHOOTER
   if(visShooter!=0&&shooter_active==1){
-    ntimes+=nshooter_frames;
+    nglobal_times+=nshooter_frames;
   }
 #endif
   for(i=0;i<ntours;i++){
     touri = tourinfo + i;
     if(touri->display==0)continue;
-    ntimes += touri->npath;
+    nglobal_times+= touri->ntimes;
   }
   for(i=0;i<npartinfo;i++){
     parti = partinfo + i;
     if(parti->loaded==0)continue;
-    ntimes += parti->nframes;
+    nglobal_times+= parti->ntimes;
   }
   for(i=0;i<nsliceinfo;i++){
     sd=sliceinfo+i;
     if(sd->loaded==1||sd->vloaded==1){
-      ntimes+=sd->nsteps;
+      nglobal_times+=sd->ntimes;
     }
   }
   if(ReadTargFile==1&&visTarg==1){
-    ntimes+=ntargtimes;
+    nglobal_times+=ntargtimes;
   }
   for(i=0;i<npatchinfo;i++){
     patch *patchi;
 
     patchi = patchinfo + i;
     if(patchi->loaded==1&&patchi->filetype==2){
-      ntimes+=patchi->geom_ntimes;
+      nglobal_times+=patchi->ngeom_times;
     }
   }
   for(i=0;i<nmeshes;i++){
@@ -1031,12 +1031,12 @@ void updatetimes(void){
     if(filenum!=-1){
       patchi=patchinfo+filenum;
       if(patchi->loaded==1&&patchi->filetype!=2){
-        ntimes+=meshi->npatch_frames;
+        nglobal_times+=meshi->npatch_times;
       }
     }
   }
   if(ReadZoneFile==1&&visZone==1){
-    ntimes+=nzonet;
+    nglobal_times+=nzonet;
   }
   if(ReadIsoFile==1&&visAIso!=0){
     for(i=0;i<nmeshes;i++){
@@ -1046,7 +1046,7 @@ void updatetimes(void){
       if(meshi->isofilenum<0)continue;
       ib = isoinfo + meshi->isofilenum;
       if(ib->geomflag==1||ib->loaded==0)continue;
-      ntimes+=meshi->nisosteps;
+      nglobal_times+=meshi->niso_times;
     }
   }
   if(nvolrenderinfo>0){
@@ -1058,7 +1058,7 @@ void updatetimes(void){
       vr = &meshi->volrenderinfo;
       if(vr->fire==NULL||vr->smoke==NULL)continue;
       if(vr->loaded==0||vr->display==0)continue;
-      ntimes+=vr->nframes;
+      nglobal_times+=vr->ntimes;
     }
   }
   {
@@ -1068,7 +1068,7 @@ void updatetimes(void){
       for(i=0;i<nsmoke3dinfo;i++){
         smoke3di = smoke3dinfo + i;
         if(smoke3di->loaded==0)continue;
-        ntimes += smoke3di->n_times;
+        nglobal_times+= smoke3di->ntimes;
       }
     }
   }
@@ -1076,9 +1076,9 @@ void updatetimes(void){
   // end pass 1
 
   CheckMemory;
-  FREEMEMORY(times);
-  if(ntimes>0)NewMemory((void **)&times,ntimes*sizeof(float));
-  timescopy=times;
+  FREEMEMORY(global_times);
+  if(nglobal_times>0)NewMemory((void **)&global_times,nglobal_times*sizeof(float));
+  timescopy=global_times;
 
   // pass 2 - merge times arrays
 
@@ -1133,7 +1133,7 @@ void updatetimes(void){
   for(i=0;i<ntours;i++){
     touri = tourinfo + i;
     if(touri->display==0)continue;
-    for(n=0;n<touri->npath;n++){
+    for(n=0;n<touri->ntimes;n++){
       float t_diff;
 
       *timescopy++=touri->path_times[n];
@@ -1147,7 +1147,7 @@ void updatetimes(void){
   for(i=0;i<npartinfo;i++){
     parti = partinfo + i;
     if(parti->loaded==0)continue;
-    for(n=0;n<parti->nframes;n++){
+    for(n=0;n<parti->ntimes;n++){
       float t_diff;
 
       *timescopy++=parti->ptimes[n];
@@ -1161,10 +1161,10 @@ void updatetimes(void){
   for(i=0;i<nsliceinfo;i++){
     sd = sliceinfo + i;
     if(sd->loaded==1||sd->vloaded==1){
-      for(n=0;n<sd->nsteps;n++){
+      for(n=0;n<sd->ntimes;n++){
         float t_diff;
 
-        *timescopy++=sd->slicetimes[n];
+        *timescopy++=sd->times[n];
         t_diff = timescopy[-1]-timescopy[-2];
         if(n>0&&t_diff<dt_MIN&&t_diff>0.0){
           dt_MIN=t_diff;
@@ -1189,7 +1189,7 @@ void updatetimes(void){
 
     patchi = patchinfo + i;
     if(patchi->loaded==1&&patchi->filetype==2){
-      for(n=0;n<patchi->geom_ntimes;n++){
+      for(n=0;n<patchi->ngeom_times;n++){
         float t_diff;
 
         *timescopy++=patchi->geom_times[n];
@@ -1209,10 +1209,10 @@ void updatetimes(void){
     if(filenum!=-1){
       patchi = patchinfo + filenum;
       if(patchi->loaded==1&&patchi->filetype!=2){
-        for(n=0;n<meshi->npatch_frames;n++){
+        for(n=0;n<meshi->npatch_times;n++){
           float t_diff;
 
-          *timescopy++=meshi->patchtimes[n];
+          *timescopy++=meshi->patch_times[n];
           t_diff = timescopy[-1]-timescopy[-2];
           if(n>0&&t_diff<dt_MIN&&t_diff>0.0){
             dt_MIN=t_diff;
@@ -1231,7 +1231,7 @@ void updatetimes(void){
       vr = &meshi->volrenderinfo;
       if(vr->smoke==NULL)continue;
       if(vr->loaded==0||vr->display==0)continue;
-      for(n=0;n<vr->nframes;n++){
+      for(n=0;n<vr->ntimes;n++){
         float t_diff;
 
         *timescopy++=vr->times[n];
@@ -1262,10 +1262,10 @@ void updatetimes(void){
       ib = isoinfo+i;
       if(ib->geomflag==1||ib->loaded==0)continue;
       meshi=meshinfo + ib->blocknumber;
-      for(n=0;n<meshi->nisosteps;n++){
+      for(n=0;n<meshi->niso_times;n++){
         float t_diff;
 
-        *timescopy++=meshi->isotimes[n];
+        *timescopy++=meshi->iso_times[n];
         t_diff = timescopy[-1]-timescopy[-2];
         if(n>0&&t_diff<dt_MIN&&t_diff>0.0){
           dt_MIN=t_diff;
@@ -1280,7 +1280,7 @@ void updatetimes(void){
       for(i=0;i<nsmoke3dinfo;i++){
         smoke3di = smoke3dinfo + i;
         if(smoke3di->loaded==0)continue;
-        for(n=0;n<smoke3di->n_times;n++){
+        for(n=0;n<smoke3di->ntimes;n++){
           float t_diff;
 
           *timescopy++=smoke3di->times[n];
@@ -1297,26 +1297,26 @@ void updatetimes(void){
 
   // sort times array and remove duplicates
 
-  if(ntimes>0)qsort( (float *)times, (size_t)ntimes, sizeof( float ), compare_float );
+  if(nglobal_times>0)qsort( (float *)global_times, (size_t)nglobal_times, sizeof( float ), compare_float );
   n2=1;
-  ntimes2=ntimes;
-  for(n=1;n<ntimes;n++){
-    if(ABS(times[n]-times[n-1])>dt_MIN/10.0){
-      times[n2]=times[n];
+  ntimes2=nglobal_times;
+  for(n=1;n<nglobal_times;n++){
+    if(ABS(global_times[n]-global_times[n-1])>dt_MIN/10.0){
+      global_times[n2]=global_times[n];
       n2++;
     }
     else{
       ntimes2--;
     }
   }
-  ntimes=ntimes2;
+  nglobal_times=ntimes2;
 
   // pass 3 - allocate memory for individual times array
 
-  if(ntimes>ntimes_old){
-    ntimes_old=ntimes;
+  if(nglobal_times>ntimes_old){
+    ntimes_old=nglobal_times;
     FREEMEMORY(render_frame);
-    if(ntimes>0)NewMemory((void **)&render_frame,ntimes*sizeof(int));
+    if(nglobal_times>0)NewMemory((void **)&render_frame,nglobal_times*sizeof(int));
   }
 
   for(i=0;i<ngeominfoptrs;i++){
@@ -1325,18 +1325,18 @@ void updatetimes(void){
     geomi = geominfoptrs[i];
     if(geomi->loaded==0||geomi->display==0)continue;
     FREEMEMORY(geomi->timeslist);
-    if(ntimes>0)NewMemory((void **)&geomi->timeslist,ntimes*sizeof(int));
+    if(nglobal_times>0)NewMemory((void **)&geomi->timeslist,nglobal_times*sizeof(int));
   }
   for(i=0;i<npartinfo;i++){
     parti=partinfo+i;
-    FREEMEMORY(parti->ptimeslist);
-    if(ntimes>0)NewMemory((void **)&parti->ptimeslist,ntimes*sizeof(int));
+    FREEMEMORY(parti->timeslist);
+    if(nglobal_times>0)NewMemory((void **)&parti->timeslist,nglobal_times*sizeof(int));
   }
   for(i=0;i<ntours;i++){
     touri=tourinfo + i;
     if(touri->display==0)continue;
-    FREEMEMORY(touri->path_timeslist);
-    if(ntimes>0)NewMemory((void **)&touri->path_timeslist,ntimes*sizeof(int));
+    FREEMEMORY(touri->timeslist);
+    if(nglobal_times>0)NewMemory((void **)&touri->timeslist,nglobal_times*sizeof(int));
   }
   if(visTerrainType!=TERRAIN_HIDDEN){
     for(i=0;i<nterraininfo;i++){
@@ -1345,33 +1345,33 @@ void updatetimes(void){
       terri = terraininfo + i;
       if(terri->loaded==0)continue;
       FREEMEMORY(terri->timeslist);
-      if(ntimes>0)NewMemory((void **)&terri->timeslist,ntimes*sizeof(int));
+      if(nglobal_times>0)NewMemory((void **)&terri->timeslist,nglobal_times*sizeof(int));
     }
   }
   if(hrrinfo!=NULL){
     FREEMEMORY(hrrinfo->timeslist);
     FREEMEMORY(hrrinfo->times);
     FREEMEMORY(hrrinfo->hrrval);
-    if(hrrinfo->loaded==1&&hrrinfo->display==1&&ntimes>0){
+    if(hrrinfo->loaded==1&&hrrinfo->display==1&&nglobal_times>0){
       int jstart=0;
 
-      NewMemory((void **)&hrrinfo->timeslist,ntimes*sizeof(int));
-      NewMemory((void **)&hrrinfo->times,ntimes*sizeof(float));
-      NewMemory((void **)&hrrinfo->hrrval,ntimes*sizeof(float));
-      hrrinfo->ntimes=ntimes;
-      for(i=0;i<ntimes;i++){
+      NewMemory((void **)&hrrinfo->timeslist,nglobal_times*sizeof(int));
+      NewMemory((void **)&hrrinfo->times,nglobal_times*sizeof(float));
+      NewMemory((void **)&hrrinfo->hrrval,nglobal_times*sizeof(float));
+      hrrinfo->ntimes=nglobal_times;
+      for(i=0;i<nglobal_times;i++){
         int j, foundit;
 
         foundit=0;
-        hrrinfo->times[i]=times[i];
+        hrrinfo->times[i]=global_times[i];
         for(j=jstart;j<hrrinfo->ntimes_csv-1;j++){
-          if(hrrinfo->times_csv[j]<=times[i]&&times[i]<hrrinfo->times_csv[j+1]){
+          if(hrrinfo->times_csv[j]<=global_times[i]&&global_times[i]<hrrinfo->times_csv[j+1]){
             float f1, tbot;
 
             foundit=1;
             tbot = hrrinfo->times_csv[j+1]-hrrinfo->times_csv[j];
             if(tbot>0.0){
-              f1 = (times[i]-hrrinfo->times_csv[j])/tbot;
+              f1 = (global_times[i]-hrrinfo->times_csv[j])/tbot;
             }
             else{
               f1=0.0;
@@ -1396,8 +1396,8 @@ void updatetimes(void){
 
   for(i=0;i<nsliceinfo;i++){
     sd = sliceinfo + i;
-    FREEMEMORY(sd->slicetimeslist);
-    if(ntimes>0)NewMemory((void **)&sd->slicetimeslist,ntimes*sizeof(int));
+    FREEMEMORY(sd->timeslist);
+    if(nglobal_times>0)NewMemory((void **)&sd->timeslist,nglobal_times*sizeof(int));
   }
   if(nvolrenderinfo>0){
     for(i=0;i<nmeshes;i++){
@@ -1409,7 +1409,7 @@ void updatetimes(void){
       if(vr->fire==NULL||vr->smoke==NULL)continue;
       if(vr->loaded==0||vr->display==0)continue;
       FREEMEMORY(vr->timeslist);
-      if(ntimes>0)NewMemory((void **)&vr->timeslist,ntimes*sizeof(int));
+      if(nglobal_times>0)NewMemory((void **)&vr->timeslist,nglobal_times*sizeof(int));
     }
   }
   {
@@ -1418,16 +1418,16 @@ void updatetimes(void){
     for(i=0;i<nsmoke3dinfo;i++){
       smoke3di = smoke3dinfo + i;
       FREEMEMORY(smoke3di->timeslist);
-      if(ntimes>0)NewMemory((void **)&smoke3di->timeslist,ntimes*sizeof(int));
+      if(nglobal_times>0)NewMemory((void **)&smoke3di->timeslist,nglobal_times*sizeof(int));
     }
   }
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
 
     meshi=meshinfo+i;
-    if(meshi->isotimes==NULL)continue;
-    FREEMEMORY(meshi->isotimeslist);
-    if(ntimes>0)NewMemory((void **)&meshi->isotimeslist,  ntimes*sizeof(int));  
+    if(meshi->iso_times==NULL)continue;
+    FREEMEMORY(meshi->iso_timeslist);
+    if(nglobal_times>0)NewMemory((void **)&meshi->iso_timeslist,  nglobal_times*sizeof(int));  
   }
 
   for(i=0;i<npatchinfo;i++){
@@ -1437,21 +1437,21 @@ void updatetimes(void){
     FREEMEMORY(patchi->geom_timeslist);
     if(patchi->filetype!=2)continue;
     if(patchi->geom_times==NULL)continue;
-    if(ntimes>0)NewMemory((void **)&patchi->geom_timeslist,ntimes*sizeof(int));
+    if(nglobal_times>0)NewMemory((void **)&patchi->geom_timeslist,nglobal_times*sizeof(int));
   }
   for(i=0;i<nmeshes;i++){
-    FREEMEMORY(meshinfo[i].patchtimeslist); 
+    FREEMEMORY(meshinfo[i].patch_timeslist); 
   }
   for(i=0;i<nmeshes;i++){
-    if(meshinfo[i].patchtimes==NULL)continue;
-    if(ntimes>0)NewMemory((void **)&meshinfo[i].patchtimeslist,ntimes*sizeof(int));
+    if(meshinfo[i].patch_times==NULL)continue;
+    if(nglobal_times>0)NewMemory((void **)&meshinfo[i].patch_timeslist,nglobal_times*sizeof(int));
   }
 
   FREEMEMORY(zonetlist); 
-  if(ntimes>0)NewMemory((void **)&zonetlist,     ntimes*sizeof(int));
+  if(nglobal_times>0)NewMemory((void **)&zonetlist,     nglobal_times*sizeof(int));
 
   FREEMEMORY(targtimeslist);
-  if(ntimes>0)NewMemory((void **)&targtimeslist,  ntimes*sizeof(int));
+  if(nglobal_times>0)NewMemory((void **)&targtimeslist,  nglobal_times*sizeof(int));
 
   if(ntotal_smooth_blockages>0){
     for(i=0;i<nmeshes;i++){
@@ -1459,7 +1459,7 @@ void updatetimes(void){
 
       meshi=meshinfo+i;
       FREEMEMORY(meshi->showsmoothtimelist);
-      if(ntimes>0)NewMemory((void **)&meshi->showsmoothtimelist,ntimes*sizeof(smoothblockage *));
+      if(nglobal_times>0)NewMemory((void **)&meshi->showsmoothtimelist,nglobal_times*sizeof(smoothblockage *));
     }
   }
 
@@ -1469,24 +1469,24 @@ void updatetimes(void){
 
   if(current_script_command!=NULL&&current_script_command->command==SCRIPT_VOLSMOKERENDERALL){
     if(current_script_command->first==1){
-      for(n=0;n<ntimes;n++){
+      for(n=0;n<nglobal_times;n++){
         render_frame[n]=0;
       }
       current_script_command->first=0;
     }
   }
   else{
-    for(n=0;n<ntimes;n++){
+    for(n=0;n<nglobal_times;n++){
       render_frame[n]=0;
     }
   }
 
   // reallocate times array
 
-  if(ntimes==0){
-    FREEMEMORY(times);
+  if(nglobal_times==0){
+    FREEMEMORY(global_times);
   }
-  if(ntimes>0)ResizeMemory((void **)&times,ntimes*sizeof(float));
+  if(nglobal_times>0)ResizeMemory((void **)&global_times,nglobal_times*sizeof(float));
   
   // pass 4 - initialize individual time pointers
 
@@ -1514,7 +1514,7 @@ void updatetimes(void){
     mesh *meshi;
 
     meshi=meshinfo+i;
-    if(meshi->isotimes==NULL)continue;
+    if(meshi->iso_times==NULL)continue;
     meshi->iiso=0;
   }
   for(i=0;i<npartinfo;i++){
@@ -1533,13 +1533,13 @@ void updatetimes(void){
       bc = meshi->blockageinfoptrs[j];
       if(bc->showtime==NULL)continue;
       FREEMEMORY(bc->showtimelist);
-      if(ntimes>0){
-        NewMemory((void **)&bc->showtimelist,ntimes*sizeof(int));
-        for(k=0;k<ntimes;k++){
+      if(nglobal_times>0){
+        NewMemory((void **)&bc->showtimelist,nglobal_times*sizeof(int));
+        for(k=0;k<nglobal_times;k++){
           int listindex;
 
           bc->showtimelist[k]=1;
-          listindex=getindex(times[k],bc->showtime,bc->nshowtime);
+          listindex=getindex(global_times[k],bc->showtime,bc->nshowtime);
           bc->showtimelist[k]=bc->showhide[listindex];
         }
       }
@@ -1555,12 +1555,12 @@ void updatetimes(void){
     if(devicei->object->visible==0)continue;
     if(devicei->nstate_changes==0)continue;
     FREEMEMORY(devicei->showstatelist);
-    if(ntimes>0){
-      NewMemory((void **)&devicei->showstatelist,ntimes*sizeof(int));
-      for(k=0;k<ntimes;k++){
+    if(nglobal_times>0){
+      NewMemory((void **)&devicei->showstatelist,nglobal_times*sizeof(int));
+      for(k=0;k<nglobal_times;k++){
         int listindex;
 
-        listindex=getindex(times[k],devicei->act_times,devicei->nstate_changes);
+        listindex=getindex(global_times[k],devicei->act_times,devicei->nstate_changes);
         devicei->showstatelist[k]=devicei->state_values[listindex];
       }
     }
@@ -1578,24 +1578,24 @@ void updatetimes(void){
       vi = meshi->ventinfo+j;
       if(vi->showtime==NULL)continue;
       FREEMEMORY(vi->showtimelist);
-      if(ntimes>0){
-        NewMemory((void **)&vi->showtimelist,ntimes*sizeof(int));
-        for(k=0;k<ntimes;k++){
+      if(nglobal_times>0){
+        NewMemory((void **)&vi->showtimelist,nglobal_times*sizeof(int));
+        for(k=0;k<nglobal_times;k++){
           int listindex;
 
           vi->showtimelist[k]=1;
-          listindex=getindex(times[k],vi->showtime,vi->nshowtime);
+          listindex=getindex(global_times[k],vi->showtime,vi->nshowtime);
           vi->showtimelist[k]=vi->showhide[listindex];
         }
       }
     }
   }
 
-  if(ntimes>0)synctimes();
+  if(nglobal_times>0)synctimes();
   updatefaces=1;
-  if(ntimes>0){
+  if(nglobal_times>0){
     UpdateTimeLabels();
-    updateGluiTimeBounds(times[0],times[ntimes-1]);
+    updateGluiTimeBounds(global_times[0],global_times[nglobal_times-1]);
   }
   show_slice_terrain=0;
   if(visTerrainType==TERRAIN_3D_MAP){

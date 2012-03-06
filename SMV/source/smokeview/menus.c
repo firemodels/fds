@@ -1469,7 +1469,7 @@ void RenderMenu(int value){
     UpdateTimeLabels();
     RenderSkip=value;
     FlowDir=1;
-    for(n=0;n<ntimes;n++){
+    for(n=0;n<nglobal_times;n++){
       render_frame[n]=0;
     }
     if(scriptoutstream!=NULL){
@@ -1681,18 +1681,18 @@ void FrameRateMenu(int value){
   if(value > 0){
     switch (value){
     case 2001:
-      if(ntimes>0){
-        if(times!=NULL)frameinterval=1000.*(times[ntimes-1]-times[0])/ntimes;
+      if(nglobal_times>0){
+        if(global_times!=NULL)frameinterval=1000.*(global_times[nglobal_times-1]-global_times[0])/nglobal_times;
       }
       realtime_flag=1;
       break;
     case 2002:
-      if(times!=NULL)frameinterval=1000.*(times[ntimes-1]-times[0])/ntimes;
+      if(global_times!=NULL)frameinterval=1000.*(global_times[nglobal_times-1]-global_times[0])/nglobal_times;
       frameinterval /= 2.0;
       realtime_flag=2;
       break;
     case 2004:
-      if(times!=NULL)frameinterval=1000.*(times[ntimes-1]-times[0])/ntimes;
+      if(global_times!=NULL)frameinterval=1000.*(global_times[nglobal_times-1]-global_times[0])/nglobal_times;
       frameinterval /= 4.0;
       realtime_flag=4;
       break;
@@ -1701,7 +1701,7 @@ void FrameRateMenu(int value){
       if(frameinterval<1.0){frameinterval = 0.0;}
       break;
     }
-    if(times==NULL&&realtime_flag!=0)updateUpdateFrameRateMenu=1;
+    if(global_times==NULL&&realtime_flag!=0)updateUpdateFrameRateMenu=1;
   }
   else{
     keyboard('t',0,0);
@@ -2631,8 +2631,8 @@ void update_streakvalue(float value){
     parti = partinfo + i;
     if(parti->loaded==1)break;
   }
-  if(parti!=NULL&&parti->nframes>1){
-    for(i=0;i<parti->nframes-1;i++){
+  if(parti!=NULL&&parti->ntimes>1){
+    for(i=0;i<parti->ntimes-1;i++){
       if(parti->ptimes[i]<=value&&value<parti->ptimes[i+1]){
         streak5step=i;
         break;

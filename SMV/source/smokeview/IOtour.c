@@ -39,7 +39,7 @@ void freetour(tourdata *touri){
   FREEMEMORY(touri->pathnodes);
   FREEMEMORY(touri->keyframe_list);
   FREEMEMORY(touri->keyframe_times);
-  FREEMEMORY(touri->path_timeslist);
+  FREEMEMORY(touri->timeslist);
   FREEMEMORY(touri->path_times);
 }
 
@@ -63,11 +63,11 @@ void inittour(tourdata *touri){
   touri->last_frame.disp_time=touri->last_frame.noncon_time;
 
   touri->nkeyframes=0;
-  touri->npath=view_ntimes;
+  touri->ntimes=view_ntimes;
   touri->pathnodes=NULL;
   touri->keyframe_times=NULL;
   touri->keyframe_list=NULL;
-  touri->path_timeslist=NULL;
+  touri->timeslist=NULL;
   touri->path_times=NULL;
 
   touri->global_dist=0.0;
@@ -295,9 +295,9 @@ void drawtours(void){
 
           touri = tourinfo + i;
           if(touri->display==0||touri->nkeyframes<=1)continue;
-          if(touri->path_timeslist==NULL)continue;
+          if(touri->timeslist==NULL)continue;
 
-          iframe_local = touri->path_timeslist[itimes];
+          iframe_local = touri->timeslist[itimes];
           pj = touri->pathnodes + iframe_local;
           if(keyframe_snap==1)pj = pj->keysnap;
 
@@ -316,9 +316,9 @@ void drawtours(void){
         for(i=0;i<ntours;i++){
           touri = tourinfo + i;
           if(touri->display==0||touri->nkeyframes<=1)continue;
-          if(touri->path_timeslist==NULL)continue;
+          if(touri->timeslist==NULL)continue;
 
-          iframe_local = touri->path_timeslist[itimes];
+          iframe_local = touri->timeslist[itimes];
           pj = touri->pathnodes + iframe_local;
           if(keyframe_snap==1)pj = pj->keysnap;
 
@@ -334,9 +334,9 @@ void drawtours(void){
 
           touri = tourinfo + i;
           if(touri->display==0||touri->nkeyframes<=1)continue;
-          if(touri->path_timeslist==NULL)continue;
+          if(touri->timeslist==NULL)continue;
 
-          iframe_local = touri->path_timeslist[itimes];
+          iframe_local = touri->timeslist[itimes];
           pj = touri->pathnodes + iframe_local;
           if(keyframe_snap==1)pj = pj->keysnap;
           eye = pj->eye;
@@ -1226,7 +1226,7 @@ void ReallocTourMemory(void){
       FREEMEMORY(touri->path_times);
       NewMemory((void **)&touri->pathnodes,view_ntimes*sizeof(pathdata));
       NewMemory((void **)&touri->path_times,view_ntimes*sizeof(float));
-      touri->npath=view_ntimes;
+      touri->ntimes=view_ntimes;
       }
     FREEMEMORY(tour_t);
     FREEMEMORY(tour_t2);

@@ -1488,7 +1488,7 @@ void drawfiredata(void){
   int i;
   float *zoneqfirebase, *zonefheightbase, *zonefdiambase, *zonefbasebase;
 
-  if(zonet[0]>times[itimes])return;
+  if(zonet[0]>global_times[itimes])return;
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
   zoneqfirebase = zoneqfire + izone*nfires;
@@ -1556,7 +1556,7 @@ void drawroomdata(void){
   unsigned char *izonetubase;
   int i;
 
-  if(zonet[0]>times[itimes])return;
+  if(zonet[0]>global_times[itimes])return;
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
   if(use_transparency_data==1)transparenton();

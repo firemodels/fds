@@ -247,7 +247,7 @@ void drawLabels(void){
       if(plotstate!=DYNAMIC_PLOTS||showtime==0)drawlabel=1;
       if(drawlabel==0&&plotstate==DYNAMIC_PLOTS&&showtime==1){
         if(tstart_stop[0]<0.0||tstart_stop[1]<0.0)drawlabel=1;
-        if(drawlabel==0&&times[itimes]>=tstart_stop[0]-0.05&&times[itimes]<=tstart_stop[1]+0.05)drawlabel=1;
+        if(drawlabel==0&&global_times[itimes]>=tstart_stop[0]-0.05&&global_times[itimes]<=tstart_stop[1]+0.05)drawlabel=1;
       }
       if(drawlabel==1){
         {
