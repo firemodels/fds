@@ -369,7 +369,7 @@ TYPE HUMAN_TYPE
                X_old=0._EB,Y_old=0._EB,X_group=0._EB,Y_group=0._EB
    REAL(EB) :: UBAR=0._EB, VBAR=0._EB, UBAR_Center=0._EB, VBAR_Center=0._EB
    REAL(EB) :: Speed=1.25_EB, Radius=0.255_EB, Mass=80.0_EB, Tpre=1._EB, Tau=1._EB, &
-               Eta=0._EB, Ksi=0._EB, Tdet=0._EB
+               Eta=0._EB, Ksi=0._EB, Tdet=0._EB, Speed_ave=0._EB, T_Speed_ave=0._EB
    REAL(EB) :: r_torso=0.15_EB, r_shoulder=0.095_EB, d_shoulder=0.055_EB, angle=0._EB, &
                torque=0._EB, m_iner=4._EB
    REAL(EB) :: tau_iner=0.2_EB, angle_old=0._EB, omega=0._EB

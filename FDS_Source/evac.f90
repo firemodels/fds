@@ -7,7 +7,7 @@
 ! appeared in an ACM publication and it is subject to their algorithms policy,
 ! see the comments at the start of the DCDFLIB in ieva.f90.
 !
-! Author: Timo Korhonen, VTT Technical Research Centre of Finland, 2007-2010
+! Author: Timo Korhonen, VTT Technical Research Centre of Finland, 2007-2011
 !
 !!!!!!!!!!!!!!
 !
@@ -128,7 +128,8 @@ MODULE EVAC
      REAL(EB) :: Tdet_mean=0._EB, Tdet_para=0._EB, Tdet_para2=0._EB, Tdet_low=0._EB, Tdet_high=0._EB
      REAL(EB) :: A=0._EB,B=0._EB,Lambda=0._EB,C_Young=0._EB,Gamma=0._EB,Kappa=0._EB
      REAL(EB) :: r_torso=0._EB,r_shoulder=0._EB,d_shoulder=0._EB,m_iner=0._EB, Tau_iner=0._EB
-     REAL(EB) :: FAC_V0_UP=-1._EB, FAC_V0_DOWN=-1._EB, FAC_V0_HORI=-1._EB
+     REAL(EB) :: FAC_V0_UP=-1._EB, FAC_V0_DOWN=-1._EB, FAC_V0_HORI=-1._EB, MAXIMUM_V0_FACTOR=-1.0_EB
+     !Issue1547: Added MAXIMUM_V0_FACTOR to person class type (structured type).
      CHARACTER(60) :: ID='null'
      INTEGER :: I_DIA_DIST=0, I_VEL_DIST=0, I_PRE_DIST=0, I_DET_DIST=0, I_TAU_DIST=0
      INTEGER :: Avatar_Color_Index=0
@@ -470,15 +471,19 @@ CONTAINS
          TAU_MEAN,TAU_PARA,TAU_PARA2,TAU_LOW,TAU_HIGH, &
          FCONST_A,FCONST_B,L_NON_SP,C_YOUNG,GAMMA,KAPPA,ANGLE, &
          D_TORSO_MEAN,D_SHOULDER_MEAN, TAU_ROT, M_INERTIA, TARGET_X, TARGET_Y, &
-         DELTA_X, DELTA_Y
+         DELTA_X, DELTA_Y, MAXIMUM_V0_FACTOR
+    !Issue1547: The MAXIMUM_V0_FACTOR should be difined as a variable in Fortran, because it is used
+    !Issue1547: in a namelist (PERS-namelist) to read an user input, if given.
     INTEGER :: MAX_HUMANS_INSIDE, n_max_in_corrs, COLOR_INDEX, MAX_HUMANS, AGENT_TYPE
     REAL(EB) :: MAX_FLOW, WIDTH, TIME_START, TIME_STOP, WIDTH1, &
          WIDTH2, EFF_WIDTH, EFF_LENGTH, FAC_SPEED, TIME_OPEN, TIME_CLOSE
     REAL(EB) :: UBAR0, VBAR0, TIME_DELAY, TRAVEL_TIME
     LOGICAL :: CHECK_FLOW, COUNT_ONLY, AFTER_REACTION_TIME, EXIT_SIGN, KEEP_XY, USE_V0, SHOW, COUNT_DENSITY, GLOBAL
-    LOGICAL :: OUTPUT_SPEED, OUTPUT_MOTIVE_FORCE, OUTPUT_FED, OUTPUT_OMEGA, OUTPUT_DENSITY, &
-         OUTPUT_ANGLE, OUTPUT_CONTACT_FORCE, OUTPUT_TOTAL_FORCE, OUTPUT_MOTIVE_ANGLE, OUTPUT_ACCELERATION, &
+    LOGICAL :: OUTPUT_SPEED, OUTPUT_MOTIVE_FORCE, OUTPUT_FED, OUTPUT_OMEGA, OUTPUT_DENSITY, OUTPUT_ANGLE, &
+         OUTPUT_CONTACT_FORCE, OUTPUT_TOTAL_FORCE, OUTPUT_MOTIVE_ANGLE, OUTPUT_ACCELERATION, OUTPUT_NERVOUSNESS, &
          LOCKED_WHEN_CLOSED, TARGET_WHEN_CLOSED, WAIT_AT_XYZ, ELEVATOR
+    !Issue1547: Added new output keyword for the PERS namelist, here is the definition
+    !Issue1547: of the variable (OUTPUT_NERVOUSNES) that is needed by Fortran.
     INTEGER, DIMENSION(3) :: RGB, AVATAR_RGB
     CHARACTER(30) :: VENT_FFIELD, MESH_ID, EVAC_MESH, PROP_ID
     REAL(EB) :: FAC_V0_UP, FAC_V0_DOWN, FAC_V0_HORI, HEIGHT, HEIGHT0, ESC_SPEED, PROB
@@ -561,7 +566,7 @@ CONTAINS
          FC_DAMPING, V_MAX, V_ANGULAR_MAX, V_ANGULAR, &
          OUTPUT_SPEED, OUTPUT_MOTIVE_FORCE, OUTPUT_FED, OUTPUT_OMEGA, OUTPUT_DENSITY, &
          OUTPUT_MOTIVE_ANGLE, OUTPUT_ANGLE, OUTPUT_CONTACT_FORCE, OUTPUT_TOTAL_FORCE, &
-         OUTPUT_ACCELERATION, COLOR_INDEX, DEAD_RGB, DEAD_COLOR, &
+         OUTPUT_ACCELERATION, OUTPUT_NERVOUSNESS, COLOR_INDEX, DEAD_RGB, DEAD_COLOR, &
          SMOKE_MIN_SPEED, SMOKE_MIN_SPEED_VISIBILITY, &
          TAU_CHANGE_DOOR, RGB, COLOR, AVATAR_COLOR, AVATAR_RGB, HUMAN_SMOKE_HEIGHT, &
          TAU_CHANGE_V0, THETA_SECTOR, CONST_DF, FAC_DF, CONST_CF, FAC_CF, &
@@ -573,7 +578,11 @@ CONTAINS
          MAX_HUMANS_DIM, C_HAWK, R_HAWK_DOVE, A_HAWK_T_FACTOR, HERDING_TAU_FACTOR, &
          ALPHA_HAWK, DELTA_HAWK, EPSILON_HAWK, THETA_HAWK, T_STOP_HD_GAME, A_HAWK_T_START, &
          F_MIN_FALL, F_MAX_FALL, D_OVERLAP_FALL, TAU_FALL_DOWN, A_FAC_FALLEN, PROB_FALL_DOWN, &
-         T_ASET_HAWK, T_0_HAWK, T_ASET_TFAC_HAWK
+         T_ASET_HAWK, T_0_HAWK, T_ASET_TFAC_HAWK, &
+         MAXIMUM_V0_FACTOR
+    !Issue1547: Added new output keyword for the PERS namelist, here the new output
+    !Issue1547: keyword OUTPUT_NERVOUSNES is added to the namelist. Also the user input
+    !Issue1547: for the social force MAXIMUM_V0_FACTO is added to the namelist.
     !
     NAMELIST /EDEV/ FYI, ID, TIME_DELAY, GLOBAL, EVAC_ID, PERS_ID, MESH_ID, INPUT_ID, &
          PRE_EVAC_DIST, PRE_MEAN, PRE_PARA, PRE_PARA2, PRE_LOW, PRE_HIGH, PROB
@@ -1582,6 +1591,10 @@ CONTAINS
       OUTPUT_ACCELERATION  = .FALSE.
       OUTPUT_CONTACT_FORCE = .FALSE.
       OUTPUT_TOTAL_FORCE   = .FALSE.
+      OUTPUT_NERVOUSNESS   = .FALSE.
+      !Issue1547: This subroutine reads the PERS namelists. All the namelist entries should
+      !Issue1547: have some default values that are used if no value is given in the input.
+      !Issue1547: This way you will not have any uninitialized variables in Fortran.
       DEAD_COLOR           = 'null'
       ! 
       ! Read the PERS lines (no read for default n=0 case)
@@ -1643,6 +1656,13 @@ CONTAINS
          FAC_V0_UP   = -1.0_EB
          FAC_V0_DOWN = -1.0_EB
          FAC_V0_HORI = -1.0_EB
+
+         !Issue1547: Nervousness dependet social force parameter (desired velocity is changed)
+         !Issue1547: This is read for each PERS line separately. Above the OUTPUT_NERVOUSNESS
+         !Issue1547: is outside the read PERS loop, so just the last value read in will be
+         !Issue1547: used. The read in value of MAXIMUM_V0_FACTOR is saved in the corresponding
+         !Issue1547: structured data type (later PCP => EVAC_PERSON_CLASSES(N) is a pointer).
+         MAXIMUM_V0_FACTOR    = -1.0_EB ! If less than zero, do not use nervousness algorithm
          !
          ! No read for default values
          IF (N > 0) THEN
@@ -2044,6 +2064,9 @@ CONTAINS
          PCP%FAC_V0_UP = FAC_V0_UP
          PCP%FAC_V0_DOWN = FAC_V0_DOWN
          PCP%FAC_V0_HORI = FAC_V0_HORI
+
+         !Issue1547: Save the read in value in the structured type of the person types.
+         PCP%MAXIMUM_V0_FACTOR = MAXIMUM_V0_FACTOR
          !
       END DO READ_PERS_LOOP
 24    REWIND(LU_INPUT)
@@ -2091,6 +2114,8 @@ CONTAINS
       IF (OUTPUT_ACCELERATION) EVAC_N_QUANTITIES = EVAC_N_QUANTITIES + 1
       IF (OUTPUT_CONTACT_FORCE) EVAC_N_QUANTITIES = EVAC_N_QUANTITIES + 1
       IF (OUTPUT_TOTAL_FORCE) EVAC_N_QUANTITIES = EVAC_N_QUANTITIES + 1
+      !Issue1547: Add the counter of the special quantities that are stored in the .prt5 files.
+      IF (OUTPUT_NERVOUSNESS) EVAC_N_QUANTITIES = EVAC_N_QUANTITIES + 1
 
       IF (EVAC_N_QUANTITIES > 0) THEN
          ALLOCATE(EVAC_QUANTITIES_INDEX(EVAC_N_QUANTITIES),STAT=IZERO)
@@ -2135,6 +2160,13 @@ CONTAINS
          END IF
          IF (OUTPUT_DENSITY) THEN
             EVAC_QUANTITIES_INDEX(n)=249
+            n = n + 1
+         END IF
+         !Issue1547: The output quantities are numbered in "data.f90", see it also (search for NERVOUSNESS)
+         !Issue1547: Here "the value" of OUTPUT_NERVOUSNES is saved for later use, the variable
+         !Issue1547: OUTPUT_NERVOUSNES is defined only for this subroutine.
+         IF (OUTPUT_NERVOUSNESS) THEN
+            EVAC_QUANTITIES_INDEX(n)=250
             n = n + 1
          END IF
 
@@ -5918,6 +5950,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: ISTOP
     !
     ! Local variables
+    REAL :: RN_REAL
     REAL(EB) RN, simoDX, simoDY, TNOW
     REAL(EB) VOL1, VOL2, X1, X2, Y1, Y2, Z1, Z2, &
          dist, d_max, G_mean, G_sd, G_high, G_low, x1_old, y1_old
@@ -6112,7 +6145,8 @@ CONTAINS
        
        INITIALIZATION_LOOP: DO I=1,HPT%N_INITIAL
           !
-          CALL RANDOM_NUMBER(RN)
+          CALL RANDOM_NUMBER(RN_REAL)
+          RN = REAL(RN_REAL,EB)
           group_size = HPT%GN_MIN - 1 +  INT((HPT%GN_MAX-HPT%GN_MIN+1)*RN+0.5_EB)
           group_size = MAX(MIN(group_size, HPT%GN_MAX),HPT%GN_MIN)
 
@@ -6158,13 +6192,15 @@ CONTAINS
              CALL CLASS_PROPERTIES(HR,PCP,HR%IEL)
              HR%I_Target = 0
              HR%I_DoorAlgo = HPT%I_AGENT_TYPE
-             CALL RANDOM_NUMBER(RN)
+             CALL RANDOM_NUMBER(RN_REAL)
+             RN = REAL(RN_REAL,EB)
              HR%F_FallDown = F_MIN_FALL + RN*(F_MAX_FALL - F_MIN_FALL) 
              HR%T_FallenDown = HPT%TIME_FALL_DOWN
              ! HR%T_FallenDown = HUGE(HR%T_FallenDown)
              HR%Angle_FallenDown = 0.0_EB
              HR%SizeFac_FallenDown = 0.0_EB
-             CALL RANDOM_NUMBER(RN)
+             CALL RANDOM_NUMBER(RN_REAL)
+             RN = REAL(RN_REAL,EB)
              HR%T_CheckFallDown = T_BEGIN + RN
 
              !
@@ -6187,10 +6223,12 @@ CONTAINS
                       END IF
                       IF (I_DX >  FLOOR(0.5_EB*(X2-X1)/HPT%DELTA_X)) I_DX = -1
                    ELSE
-                      CALL RANDOM_NUMBER(RN)
+                      CALL RANDOM_NUMBER(RN_REAL)
+                      RN = REAL(RN_REAL,EB)
                       HR%X = X1 + RN*(X2-X1)
                       x1_old = HR%X
-                      CALL RANDOM_NUMBER(RN)
+                      CALL RANDOM_NUMBER(RN_REAL)
+                      RN = REAL(RN_REAL,EB)
                       HR%Y = Y1 + RN*(Y2-Y1)
                       y1_old = HR%Y
                    END IF
@@ -6201,7 +6239,8 @@ CONTAINS
                    G_high = 6.0_EB  ! units (m) cut-off
                    G_low  = -6.0_EB ! units (m) cut-off
                    ! First the angle, then the radial distance
-                   CALL RANDOM_NUMBER(rn)
+                   CALL RANDOM_NUMBER(RN_REAL)
+                   RN = REAL(RN_REAL,EB)
                    simoDX = SIN(2.0_EB*Pi*rn)
                    simoDY = COS(2.0_EB*Pi*rn)
                    G_mean = (2.0_EB/3.0_EB)*SQRT(group_size/(Pi*GROUP_DENS))
@@ -6219,7 +6258,8 @@ CONTAINS
                 IF (HPT%Angle > -999.9_EB) THEN
                    HR%Angle = HPT%Angle
                 ELSE
-                   CALL RANDOM_NUMBER(RN)
+                   CALL RANDOM_NUMBER(RN_REAL)
+                   RN = REAL(RN_REAL,EB)
                    HR%Angle = 2.0_EB*Pi*rn
                 END IF
                 DO WHILE (HR%Angle >= 2.0_EB*Pi)
@@ -7242,7 +7282,8 @@ CONTAINS
     REAL(EB) DTSP,UBAR,VBAR,X1,Y1,XI,YJ,ZK, WSPA, WSPB
     INTEGER ICN,I,J,IIN,JJN,KKN,II,JJ,KK,IIX,JJY,KKZ,ICX, ICY, N, J1, I_OBST, I_OBSTX, I_OBSTY
     INTEGER  IE, TIM_IC, TIM_IW, TIM_IWX, TIM_IWY, TIM_IW2, TIM_IC2, SURF_INDEX, NM_SEE
-    REAL(EB) :: P2P_DIST, P2P_DIST_MAX, P2P_U, P2P_V, EVEL, TIM_DIST, EVEL2
+    REAL(EB) :: P2P_DIST, P2P_DIST_MAX, P2P_U, P2P_V, EVEL, TIM_DIST, EVEL2, MAX_V0_FAC
+    !Issue1547: MAX_V0_FAC is declared as a real variable.
     REAL(EB), DIMENSION(4) :: D_XY
     LOGICAL, DIMENSION(4) :: FOUNDWALL_XY
     INTEGER :: ISTAT, STRS_INDX, I_TARGET, COLOR_INDEX, I_NEW_FFIELD, I_TARGET_OLD
@@ -7257,6 +7298,7 @@ CONTAINS
     LOGICAL L_EFF_READ, L_EFF_SAVE, L_DEAD
     REAL(EB) :: COS_X, COS_Y, SPEED_XM, SPEED_XP, SPEED_YM, SPEED_YP, HR_Z, HR_A, HR_B, HR_TAU, HR_TAU_INER
     !
+    REAL :: RN_REAL
     REAL(EB) :: RN, RNCF
     REAL(EB) :: GAME, GATH, GACM, TARGET_X, TARGET_Y
     !
@@ -7292,6 +7334,8 @@ CONTAINS
     REAL(EB) :: U_i_Hawk, U_I_Dove, x_o, y_o, T_tmp, T_tmp1, Width, p_i, HR_GAMMA, HR_KAPPA
     INTEGER :: N_queue, N_i_Hawk, N_I_Dove, N_i_Hawk2, N_I_Dove2
     LOGICAL :: L_DO_GAME, L_FALLEN_DOWN, L_HRE_FALLEN_DOWN, L_FALLDOWN_THIS_TIME_STEP
+    !Issue1547: Some variables that are needed
+    REAL(EB) :: Eta_Nervous, Speed_Nervous, HR_Speed
 
     TYPE (MESH_TYPE),        POINTER :: MFF=>NULL()
     TYPE (EVAC_STRS_TYPE),   POINTER :: STRP=>NULL()
@@ -7620,7 +7664,8 @@ CONTAINS
                 END IF
                 IF (J == 0 .AND. T < HR%TPRE+HR%TDET .AND. HR%I_Target/=0) CYCLE CHANGE_DOOR_LOOP   ! LONELY AGENTS
                 IF (J > 0 .AND. T < GROUP_LIST(J)%TPRE + GROUP_LIST(J)%TDOOR) CYCLE CHANGE_DOOR_LOOP ! GROUPS
-                CALL RANDOM_NUMBER(RN)
+                CALL RANDOM_NUMBER(RN_REAL)
+                RN = REAL(RN_REAL,EB)
                 IF (RN > EXP(-DTSP/DT_GROUP_DOOR) ) THEN
                    I_TARGET_OLD = HR%I_TARGET 
                    N_CHANGE_TRIALS = N_CHANGE_TRIALS + 1
@@ -7765,7 +7810,8 @@ CONTAINS
                             IF (HERDING_LIST_DOORS(II)>0.0_EB) THEN
                                ! Make it symmetrical with respect the doors. 
                                ! The order of the doors is now random if they are equal.
-                               CALL RANDOM_NUMBER(RN)
+                               CALL RANDOM_NUMBER(RN_REAL)
+                               RN = REAL(RN_REAL,EB)
                                HERDING_LIST_DOORS(II) = HERDING_LIST_DOORS(II) + 0.0001_EB*RN
                             END IF
                          END DO
@@ -7802,7 +7848,8 @@ CONTAINS
                             END IF
                          END IF
                          IF (I_TARGET_OLD==0 .AND. I_TMP==0 .AND. ABS(HR%I_Target2) > 0 .AND. T > HR%TPRE+HR%TDET) THEN
-                            CALL RANDOM_NUMBER(RN)
+                            CALL RANDOM_NUMBER(RN_REAL)
+                            RN = REAL(RN_REAL,EB)
                             IF (RN <= HERDING_TAU_FACTOR) I_TMP = HR%I_Target2
                          END IF
                          IF (ABS(I_TMP) > 0) THEN  ! Found neighbors
@@ -7979,10 +8026,26 @@ CONTAINS
           LAMBDAW = LAMBDA_WALL
           A_WALL  = FAC_A_WALL*HR%A
           B_WALL  = FAC_B_WALL*HR%B
+
+          !Issue1547: Nervousness related parameter is taken from the agent's person type.
+          !Issue1547: Later just the MAX_V0_FAC can be used inside this EVAC_MOVE_LOOP.
+          HR_Speed = HR%SPEED
+          MAX_V0_FAC = EVAC_PERSON_CLASSES(HR%IPC)%MAXIMUM_V0_FACTOR
+          IF (MAX_V0_FAC>0.0_EB .AND. T > TPRE) THEN
+             !Issue1547: Nervousness related parameter is taken from the agent's person type.
+             !Issue1547: Later just the MAX_V0_FAC can be used inside this EVAC_FORCE_LOOP.
+             !Issue1547: Nervousness related calculation: average speed is saved as HR%Speed_ave= vi_ave/vi_0
+             !Issue1547: HR%Speed_ave is almost the nervousness parameter (1 - vi_ave/vi_0)
+             Eta_Nervous = MIN(MAX(1.0_EB -  HR%Speed_ave, 0.0_EB),1.0_EB) ! To be sure that 0 <= Eta <= 1
+             Speed_Nervous = (1.0_EB-Eta_Nervous)*HR%Speed + Eta_Nervous*MAX_V0_FAC
+             HR_Speed = Speed_Nervous
+          END IF
+
           GAME    = NOISEME
           GATH    = NOISETH
           GACM    = NOISECM
           EVEL = SQRT(HR%U**2 + HR%V**2)
+
           L_FALLEN_DOWN = .FALSE.
           IF (HR%T_FallenDown < T) THEN
              ! This agent has already fallen down
@@ -8169,10 +8232,10 @@ CONTAINS
           !           coordinates are projected on the (x,y) plane
           COS_X = 1.0_EB
           COS_Y = 1.0_EB
-          SPEED_XM = HR%SPEED
-          SPEED_XP = HR%SPEED
-          SPEED_YM = HR%SPEED
-          SPEED_YP = HR%SPEED
+          SPEED_XM = HR_SPEED
+          SPEED_XP = HR_SPEED
+          SPEED_YM = HR_SPEED
+          SPEED_YP = HR_SPEED
           IF (NM_STRS_MESH) THEN
              STRS_INDX = N
              STRP=>EVAC_STRS(N)     
@@ -8226,35 +8289,35 @@ CONTAINS
              END IF
              SELECT CASE (ESS%IOR)
              CASE(-1)
-                SPEED_XM = COS_X*HR%SPEED*FAC_V0_DOWN
-                SPEED_XP = COS_X*HR%SPEED*FAC_V0_UP
-                SPEED_YM = HR%SPEED*FAC_V0_HORI
-                SPEED_YP = HR%SPEED*FAC_V0_HORI
+                SPEED_XM = COS_X*HR_SPEED*FAC_V0_DOWN
+                SPEED_XP = COS_X*HR_SPEED*FAC_V0_UP
+                SPEED_YM = HR_SPEED*FAC_V0_HORI
+                SPEED_YP = HR_SPEED*FAC_V0_HORI
                 HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + (ESS%H-ESS%H0)*ABS(ESS%X1-HR%X)/ABS(ESS%X1-ESS%X2)
              CASE(+1)
-                SPEED_XM = COS_X*HR%SPEED*FAC_V0_UP
-                SPEED_XP = COS_X*HR%SPEED*FAC_V0_DOWN
-                SPEED_YM = HR%SPEED*FAC_V0_HORI
-                SPEED_YP = HR%SPEED*FAC_V0_HORI
+                SPEED_XM = COS_X*HR_SPEED*FAC_V0_UP
+                SPEED_XP = COS_X*HR_SPEED*FAC_V0_DOWN
+                SPEED_YM = HR_SPEED*FAC_V0_HORI
+                SPEED_YP = HR_SPEED*FAC_V0_HORI
                 HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + (ESS%H-ESS%H0)*ABS(ESS%X2-HR%X)/ABS(ESS%X1-ESS%X2)
              CASE(-2)
-                SPEED_XM = HR%SPEED*FAC_V0_HORI
-                SPEED_XP = HR%SPEED*FAC_V0_HORI
-                SPEED_YM = COS_Y*HR%SPEED*FAC_V0_DOWN
-                SPEED_YP = COS_Y*HR%SPEED*FAC_V0_UP
+                SPEED_XM = HR_SPEED*FAC_V0_HORI
+                SPEED_XP = HR_SPEED*FAC_V0_HORI
+                SPEED_YM = COS_Y*HR_SPEED*FAC_V0_DOWN
+                SPEED_YP = COS_Y*HR_SPEED*FAC_V0_UP
                 HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + (ESS%H-ESS%H0)*ABS(ESS%Y1-HR%Y)/ABS(ESS%Y1-ESS%Y2)
              CASE(+2)
-                SPEED_XM = HR%SPEED*FAC_V0_HORI
-                SPEED_XP = HR%SPEED*FAC_V0_HORI
-                SPEED_YM = COS_Y*HR%SPEED*FAC_V0_UP
-                SPEED_YP = COS_Y*HR%SPEED*FAC_V0_DOWN
+                SPEED_XM = HR_SPEED*FAC_V0_HORI
+                SPEED_XP = HR_SPEED*FAC_V0_HORI
+                SPEED_YM = COS_Y*HR_SPEED*FAC_V0_UP
+                SPEED_YP = COS_Y*HR_SPEED*FAC_V0_DOWN
                 HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + (ESS%H-ESS%H0)*ABS(ESS%Y2-HR%Y)/ABS(ESS%Y1-ESS%Y2)
              END SELECT
           END DO SS_LOOP1
 
           ! Set height and speed for an agent in stairs
           IF (NM_STRS_MESH) THEN 
-             CALL GETSTAIRSPEEDANDZ(SPEED_XM, SPEED_XP, SPEED_YM, SPEED_YP, STRP, HR)
+             CALL GETSTAIRSPEEDANDZ(SPEED_XM, SPEED_XP, SPEED_YM, SPEED_YP, HR_SPEED, STRP, HR)
           END IF
 
           ! ========================================================
@@ -8276,13 +8339,33 @@ CONTAINS
              SPEED_X = SPEED_X*HR%V0_FAC*(UBAR/EVEL)
              SPEED_Y = SPEED_YP*(0.5_EB + SIGN(0.5_EB,VBAR)) + SPEED_YM*(0.5_EB - SIGN(0.5_EB,VBAR)) 
              SPEED_Y = SPEED_Y*HR%V0_FAC*(VBAR/EVEL)
-             TAU_FAC = MAX(0.1_EB,SQRT(SPEED_X**2 + SPEED_Y**2)/MAX(0.1_EB,HR%SPEED))
+             TAU_FAC = MAX(0.1_EB,SQRT(SPEED_X**2 + SPEED_Y**2)/MAX(0.1_EB,HR_SPEED))
              HR_TAU  = HR_TAU*TAU_FAC
              U_NEW = U_NEW + 0.5_EB*(DTSP/HR_TAU)*(SPEED_X - HR%U)
              HR%UBAR = UBAR
              V_NEW = V_NEW + 0.5_EB*(DTSP/HR_TAU)*(SPEED_Y - HR%V)
              HR%VBAR = VBAR
 
+             !Issue1547: Nervousness related calculation: average speed as vi_ave/vi_0
+             !Issue1547: HR%Speed_ave is almost the nervousness parameter (1 - vi_ave/vi_0)
+             !Issue1547: The vi_0 above is the current desired velocity of an agent.
+             !Issue1547: The Speed_ave is declared in "type.f90" as a compenent in the human_type.
+             !Issue1547: Pointer HR => HUMAN(I), I is the evac_move_loop agent index.
+             !Issue1547: The agent movement algorithm consist of two loops over all agents
+             !Issue1547: at a mesh, but it is enough to calculate the nervousness value here
+             !Issue1547: at the move loop only. The later loop is the force calculation loop.
+             !Issue1547: But the change of the current v0_i for an agent should be done in
+             !Issue1547: both loops.  Note that the agent may have different desired velocity
+             !Issue1547: due to: Inclines (HR%Speed is along the inclines, HR%U,HR%V are plane
+             !Issue1547: projected velocities, FAC_V0_DOWN etc also may be given), Smoke (smoke
+             !Issue1547: reduces desired velocity)
+             IF (MAX_V0_FAC>0.0_EB .AND. T > TPRE) THEN
+                EVEL2 = SQRT(SPEED_X**2 + SPEED_Y**2) ! Initial desired velocity projected to (x,y) plane
+                HR%Speed_ave = (HR%T_Speed_ave*HR%Speed_ave + DTSP*(SQRT(HR%U**2+HR%V**2)/EVEL2)) / &
+                     (HR%T_Speed_ave+DTSP)
+                HR%T_Speed_ave = HR%T_Speed_ave + DTSP
+             END IF
+             
              IF (VBAR >= 0.0_EB) THEN
                 ANGLE = ACOS(UBAR/EVEL)
              ELSE
@@ -8322,15 +8405,17 @@ CONTAINS
           ! Poisson distribution, i.e., the agents do not have memory.
           ! P[NO CHANGE DURING DT] = EXP(-DTSP/HR%TAU)
           IF (GATH > 0.0_EB .AND. T > T_BEGIN) THEN
-             CALL RANDOM_NUMBER(RN)
+             CALL RANDOM_NUMBER(RN_REAL)
+             RN = REAL(RN_REAL,EB)
              IF (RN > EXP(-DTSP/(0.2_EB*HR_TAU))) HR%NEWRND = .TRUE.
              IF (HR%NEWRND) THEN
                 HR%NEWRND = .FALSE.
                 IF (EVEL<0.001_EB) GATH=GATH/100._EB  ! No prefered direction, stand still
-                GATH = GATH*(HR%SPEED/1.3_EB)**2
+                GATH = GATH*(HR_SPEED/1.3_EB)**2
                 ! GATH is found to be more or less nice for speeds about 1.3 m/s
                 HR%KSI = (GAUSSRAND(GAME, GATH, GACM))
-                CALL RANDOM_NUMBER(RN)
+                CALL RANDOM_NUMBER(RN_REAL)
+                RN = REAL(RN_REAL,EB)
                 HR%ETA = 2.0_EB*PI*RN
                 EVEL = SQRT(HR%U**2 + HR%V**2)
                 ! Random noice variance: GATH = MAX( GATH, GATH*(100.0_EB-110.0_EB*ABS(EVEL/HR%SPEED)) )
@@ -8338,7 +8423,7 @@ CONTAINS
                 ! Scale the random force by the current target speed V0 (Note: SQRT(GATH) = STD.DEV.)
                 ! NOTE: Speed reduction due to smoke is treated elsewhere.
                 HR%KSI = ABS(HR%KSI)
-                HR%KSI = MAX(HR%KSI, HR%KSI*10.0_EB*(1.0_EB-MIN(0.9_EB,EVEL/HR%SPEED)))
+                HR%KSI = MAX(HR%KSI, HR%KSI*10.0_EB*(1.0_EB-MIN(0.9_EB,EVEL/HR_SPEED)))
              END IF
           END IF
 
@@ -8718,9 +8803,20 @@ CONTAINS
           HR_A =  HR_A*MAX(0.5_EB,(SQRT(HR%U**2+HR%V**2)/HR%SPEED))
           A_WALL = MIN(A_WALL, FAC_A_WALL*HR_A)
 
+          HR_Speed = HR%SPEED
+          MAX_V0_FAC = EVAC_PERSON_CLASSES(HR%IPC)%MAXIMUM_V0_FACTOR
+          IF (MAX_V0_FAC>0.0_EB .AND. T > TPRE) THEN
+             !Issue1547: Nervousness related parameter is taken from the agent's person type.
+             !Issue1547: Later just the MAX_V0_FAC can be used inside this EVAC_FORCE_LOOP.
+             !Issue1547: Nervousness related speed change, read the comments in the evac_move_loop above.
+             Eta_Nervous = MIN(MAX(1.0_EB -  HR%Speed_ave, 0.0_EB),1.0_EB) ! To be sure that 0 <= Eta <= 1
+             Speed_Nervous = (1.0_EB-Eta_Nervous)*HR%Speed + Eta_Nervous*MAX_V0_FAC
+             HR_Speed = Speed_Nervous
+          END IF
+
           ! Counterflow: increase motivation to go ahead and decrease social force
           IF (HR%COMMITMENT > 0.01_EB) THEN
-             EVEL = MIN(1.0_EB,SQRT(HR%U**2+HR%V**2)/HR%SPEED)
+             EVEL = MIN(1.0_EB,SQRT(HR%U**2+HR%V**2)/HR_SPEED)
              EVEL = HR%COMMITMENT*EVEL + (1.0_EB-HR%COMMITMENT)*1.0_EB
              HR_TAU      = MAX(CF_MIN_TAU, &
                   HR%COMMITMENT*CF_FAC_TAUS*HR_TAU + (1.0_EB-HR%COMMITMENT)*HR_TAU)
@@ -8738,7 +8834,8 @@ CONTAINS
           IF (.NOT. L_FALLEN_DOWN .AND. TAU_FALL_DOWN >= 0.0_EB .AND. T-HR%T_CheckFallDown > 0.1_EB) THEN
              ! Check later if this agent falls down, do not do it at every time step
              HR%T_CheckFallDown = T ! Do the check at this time step, save the check time
-             CALL RANDOM_NUMBER(RN)
+             CALL RANDOM_NUMBER(RN_REAL)
+             RN = REAL(RN_REAL,EB)
              ! P[falls down during Delta_t] = 1 - exp(-lambda*Delta_t), now Delta_t = 0.1 s
              IF (1.0_EB - EXP(-PROB_FALL_DOWN*0.1_EB) > RN) L_FALLDOWN_THIS_TIME_STEP = .TRUE.
           END IF
@@ -8803,7 +8900,8 @@ CONTAINS
           ! Do not do collision avoidance on every time step, do it every 0.1 s on the average by default.
           ! No need for collision avoidance if the target velocity is zero.
           IF (TAU_CHANGE_V0 > 1.0E-12_EB .AND. EVEL > 0.0_EB) THEN
-             CALL RANDOM_NUMBER(RNCF)
+             CALL RANDOM_NUMBER(RN_REAL)
+             RNCF = REAL(RN_REAL,EB)
           ELSE
              RNCF = -1.0_EB ; ANGLE_OLD = 0.0_EB ; COMMITMENT = 0.0_EB
           END IF
@@ -8821,7 +8919,8 @@ CONTAINS
           N_i_Hawk2 = 0      ; N_i_Dove2 = 0
           Hawk_Dove_Game: IF (C_HAWK >= 0.0_EB .AND. T > HR%TPRE+HR%TDET .AND. HR%I_Target>0 .AND. HR%I_DoorAlgo==1) THEN
              ! Hawk - Dove game, only for visible target doors/exits (i_target>0)
-             CALL RANDOM_NUMBER(RN)
+             CALL RANDOM_NUMBER(RN_REAL)
+             RN = REAL(RN_REAL,EB)
              IF (L_DEAD .OR. L_FALLEN_DOWN .OR. T > T_STOP_HD_GAME) RN = -1.0_EB ! Do not play
              Play_This_Time_Step: IF (RN > EXP(-DTSP/DT_GROUP_DOOR)) THEN
                 L_DO_GAME = .TRUE.
@@ -8850,16 +8949,16 @@ CONTAINS
                    ! T_tmp1 is the estimated queueing time, maximum is 3 p/m2 density and a semi circle
                    IF (FAC_DOOR_QUEUE < -0.001_EB) THEN
                       ! Estimated time is the longer one of the queueing and walking times
-                      T_tmp = MAX((T_tmp/HR%Speed), T_tmp1)
+                      T_tmp = MAX((T_tmp/HR_Speed), T_tmp1)
                    ELSE
                       ! Estimated time is the queueing time plus the walking time
                       ! Door selection algorithm: alpha*t_walk + (1-alpha)*t_queue
-                      T_tmp = (FAC_DOOR_ALPHA*(T_tmp/HR%Speed) +  (1.0_EB-FAC_DOOR_ALPHA)*T_tmp1) / &
+                      T_tmp = (FAC_DOOR_ALPHA*(T_tmp/HR_Speed) +  (1.0_EB-FAC_DOOR_ALPHA)*T_tmp1) / &
                            MAX(1.0_EB-FAC_DOOR_ALPHA,FAC_DOOR_ALPHA)
                    END IF
                 ELSE
                    ! No queueing time, just the walking time
-                   T_tmp = SQRT((x_o-X1)**2 + (y_o-Y1)**2) / HR%Speed
+                   T_tmp = SQRT((x_o-X1)**2 + (y_o-Y1)**2) / HR_Speed
                 END IF
              END IF Play_This_Time_Step
           END IF Hawk_Dove_Game
@@ -8895,10 +8994,10 @@ CONTAINS
           ! =======================================================
           COS_X = 1.0_EB
           COS_Y = 1.0_EB
-          SPEED_XM = HR%SPEED
-          SPEED_XP = HR%SPEED
-          SPEED_YM = HR%SPEED
-          SPEED_YP = HR%SPEED
+          SPEED_XM = HR_SPEED
+          SPEED_XP = HR_SPEED
+          SPEED_YM = HR_SPEED
+          SPEED_YP = HR_SPEED
           IF (NM_STRS_MESH) THEN
              STRS_INDX = N
              STRP=>EVAC_STRS(N)     
@@ -8944,28 +9043,28 @@ CONTAINS
                 END IF
                 SELECT CASE (ESS%IOR)
                 CASE(-1)
-                   SPEED_XM = COS_X*HR%SPEED*FAC_V0_DOWN
-                   SPEED_XP = COS_X*HR%SPEED*FAC_V0_UP
-                   SPEED_YM = HR%SPEED*FAC_V0_HORI
-                   SPEED_YP = HR%SPEED*FAC_V0_HORI
+                   SPEED_XM = COS_X*HR_SPEED*FAC_V0_DOWN
+                   SPEED_XP = COS_X*HR_SPEED*FAC_V0_UP
+                   SPEED_YM = HR_SPEED*FAC_V0_HORI
+                   SPEED_YP = HR_SPEED*FAC_V0_HORI
                    HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + (ESS%H-ESS%H0)*ABS(ESS%X1-HR%X)/ABS(ESS%X1-ESS%X2)
                 CASE(+1)
-                   SPEED_XM = COS_X*HR%SPEED*FAC_V0_UP
-                   SPEED_XP = COS_X*HR%SPEED*FAC_V0_DOWN
-                   SPEED_YM = HR%SPEED*FAC_V0_HORI
-                   SPEED_YP = HR%SPEED*FAC_V0_HORI
+                   SPEED_XM = COS_X*HR_SPEED*FAC_V0_UP
+                   SPEED_XP = COS_X*HR_SPEED*FAC_V0_DOWN
+                   SPEED_YM = HR_SPEED*FAC_V0_HORI
+                   SPEED_YP = HR_SPEED*FAC_V0_HORI
                    HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + (ESS%H-ESS%H0)*ABS(ESS%X2-HR%X)/ABS(ESS%X1-ESS%X2)
                 CASE(-2)
-                   SPEED_XM = HR%SPEED*FAC_V0_HORI
-                   SPEED_XP = HR%SPEED*FAC_V0_HORI
-                   SPEED_YM = COS_Y*HR%SPEED*FAC_V0_DOWN
-                   SPEED_YP = COS_Y*HR%SPEED*FAC_V0_UP
+                   SPEED_XM = HR_SPEED*FAC_V0_HORI
+                   SPEED_XP = HR_SPEED*FAC_V0_HORI
+                   SPEED_YM = COS_Y*HR_SPEED*FAC_V0_DOWN
+                   SPEED_YP = COS_Y*HR_SPEED*FAC_V0_UP
                    HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + (ESS%H-ESS%H0)*ABS(ESS%Y1-HR%Y)/ABS(ESS%Y1-ESS%Y2)
                 CASE(+2)
-                   SPEED_XM = HR%SPEED*FAC_V0_HORI
-                   SPEED_XP = HR%SPEED*FAC_V0_HORI
-                   SPEED_YM = COS_Y*HR%SPEED*FAC_V0_UP
-                   SPEED_YP = COS_Y*HR%SPEED*FAC_V0_DOWN
+                   SPEED_XM = HR_SPEED*FAC_V0_HORI
+                   SPEED_XP = HR_SPEED*FAC_V0_HORI
+                   SPEED_YM = COS_Y*HR_SPEED*FAC_V0_UP
+                   SPEED_YP = COS_Y*HR_SPEED*FAC_V0_DOWN
                    HR%Z = 0.5_EB*(ESS%Z1+ESS%Z2) + ESS%H0 + (ESS%H-ESS%H0)*ABS(ESS%Y2-HR%Y)/ABS(ESS%Y1-ESS%Y2)
                 END SELECT
              END IF
@@ -8978,7 +9077,7 @@ CONTAINS
           ! Set height and speed for an agent in stairs
           ! =======================================================
           IF (NM_STRS_MESH) THEN 
-            CALL GETSTAIRSPEEDANDZ(SPEED_XM, SPEED_XP, SPEED_YM, SPEED_YP,STRP,HR)
+            CALL GETSTAIRSPEEDANDZ(SPEED_XM, SPEED_XP, SPEED_YM, SPEED_YP, HR_SPEED, STRP, HR)
           END IF
 
           ! ========================================================
@@ -8994,10 +9093,10 @@ CONTAINS
           ! ========================================================
           CHANGE_V0_RNCF0: IF ( RNCF > EXP(-DTSP/TAU_CHANGE_V0) ) THEN
 
-             V_HR = MAX(0.1_EB,MIN(1.0_EB,SQRT(HR%U**2 + HR%V**2)/HR%SPEED))
+             V_HR = MAX(0.1_EB,MIN(1.0_EB,SQRT(HR%U**2 + HR%V**2)/HR_SPEED))
              THETA_START = -ABS(THETA_SECTOR)
              THETA_STEP = 2.0_EB*ABS(THETA_START)/REAL(N_SECTORS-1,EB)
-             EVEL = MAX(0.0_EB,MIN(1.0_EB,(HR%U**2+HR%V**2)/HR%SPEED))
+             EVEL = MAX(0.0_EB,MIN(1.0_EB,(HR%U**2+HR%V**2)/HR_SPEED))
              THETA_START = THETA_START - 0.5_EB*(1.0_EB-EVEL)*MAX(0.0_EB,(90.0_EB+THETA_START-0.5_EB*THETA_STEP))
              THETA_STEP = 2.0_EB*ABS(THETA_START)/REAL(N_SECTORS-1,EB)
              IF (HR%UBAR**2 + HR%VBAR**2 < 0.1_EB) THEN
@@ -9010,7 +9109,8 @@ CONTAINS
                 SIN_THETA(III) = SIN(PI*THETAS(III)/180._EB)
                 U_THETA(III) = COS_THETA(III)*UBAR - SIN_THETA(III)*VBAR
                 V_THETA(III) = SIN_THETA(III)*UBAR + COS_THETA(III)*VBAR
-                CALL RANDOM_NUMBER(RN)
+                CALL RANDOM_NUMBER(RN_REAL)
+                RN = REAL(RN_REAL,EB)
                 SUM_SUUNTA(III) = 0.000001_EB*RN ! left/right symmetry trick. Now the order of the sectors do not matter.
              END DO
              SUM_SUUNTA(N_SECTORS+1) = 0.1_EB ! prefer straight ahead a little bit
@@ -9101,7 +9201,7 @@ CONTAINS
                 END IF
                 IF (ANGLE_HR == 2.0_EB*PI) ANGLE_HR = 0.0_EB  ! Agent HR angle is [0,2PI)
                 
-                D_SHIFT = 2.0_EB*(0.5_EB-MIN(1.0_EB,SQRT(HR%U**2+HR%V**2)/HR%SPEED))*HR%RADIUS
+                D_SHIFT = 2.0_EB*(0.5_EB-MIN(1.0_EB,SQRT(HR%U**2+HR%V**2)/HR_SPEED))*HR%RADIUS
                 HR_X = HR%X - UBAR*D_SHIFT
                 HR_Y = HR%Y - VBAR*D_SHIFT
                 D_NEW = SQRT((HRE%X-HR_X)**2 + (HRE%Y-HR_Y)**2)
@@ -9125,9 +9225,9 @@ CONTAINS
                    V_HRE = (HRE%X-HR%X)*UBAR + (HRE%Y-HR%Y)*VBAR
                    V_HRE = V_HRE/SQRT((HRE%X-HR%X)**2+(HRE%Y-HR%Y)**2) ! COS R_HRE VS V0
                    V_HRE = MAX(0.5_EB,V_HRE)  ! Look further ahead than sideways
-                   EVEL = MAX(0.2_EB,MIN(1.0_EB,SQRT(HR%U**2+HR%V**2)/HR%SPEED))
+                   EVEL = MAX(0.2_EB,MIN(1.0_EB,SQRT(HR%U**2+HR%V**2)/HR_SPEED))
                    TIM_DIST = MAX(0.2_EB,MIN(EVEL,V_HRE))*P2P_SUUNTA_MAX + HR%RADIUS + HRE%RADIUS
-                   EVEL = MAX(0.5_EB,MIN(1.0_EB,SQRT(HR%U**2+HR%V**2)/HR%SPEED))
+                   EVEL = MAX(0.5_EB,MIN(1.0_EB,SQRT(HR%U**2+HR%V**2)/HR_SPEED))
                    V_HRE = MAX(0.5_EB,MIN(EVEL,V_HRE))*P2P_SUUNTA_MAX ! Look further ahead than sideways
                    IF (P2P_DIST < (V_HRE+HR%RADIUS+HRE%RADIUS) ) THEN
                       VR_2R = HRE%UBAR*UBAR + HRE%VBAR*VBAR ! Counterflow or not?
@@ -9140,8 +9240,8 @@ CONTAINS
                          IF (VR_2R > 0.0_EB) THEN ! Same direction
                             V_HRE = HRE%U*UBAR + HRE%V*VBAR  ! HRE speed along the v0 direction
                             V_HR  = MAX(0.0_EB,HR%U*UBAR + HR%V*VBAR)  ! HR speed along the v0 direction
-                            V_HRE = CONST_DF + FAC_DF*(MIN(HR%V0_FAC*HR%SPEED,V_HRE) - &
-                                 MIN(HR%V0_FAC*HR%SPEED,V_HR))
+                            V_HRE = CONST_DF + FAC_DF*(MIN(HR%V0_FAC*HR_SPEED,V_HRE) - &
+                                 MIN(HR%V0_FAC*HR_SPEED,V_HR))
                          ELSE ! Counterflow
                             V_HRE = HRE%U*UBAR + HRE%V*VBAR  ! HRE SPEED ALONG THE V0 DIRECTION
                             V_HRE = -1.0_EB*(CONST_CF + FAC_CF*MAX(0.0_EB,-V_HRE))
@@ -9425,7 +9525,7 @@ CONTAINS
           ! Collision avoidance, counterflow, etc.
           ! ========================================================
           CHANGE_V0_RNCF2: IF ( RNCF > EXP(-DTSP/TAU_CHANGE_V0) ) THEN
-             V_HR  = MAX(0.1_EB,SQRT(HR%U**2+HR%V**2)/HR%SPEED)
+             V_HR  = MAX(0.1_EB,SQRT(HR%U**2+HR%V**2)/HR_SPEED)
              TIM_DIST = 0.0_EB
              DO III = 1, N_SECTORS
                 ! Avoid walls, do not take a direction where there is a wall closer than
@@ -9621,8 +9721,8 @@ CONTAINS
                 IF ( (TIM_IWX==0).AND.(TIM_IWY==0).AND.(TIM_IW/=0 .OR. TIM_IW2/=0) ) THEN
                    IF (TIM_IW/=0) THEN
                       ! First y-direction then x-direction
-                      X11 = WALL(TIM_IW)%XW                 ! Corner point x
-                      Y11 = WALL(TIM_IW)%YW-0.5_EB*DY(JJ+1) ! Corner point y
+                      X11 = WALL(TIM_IW )%XW                 ! Corner point x
+                      Y11 = WALL(TIM_IW )%YW-0.5_EB*DY(JJ+1) ! Corner point y
                    ELSE
                       ! First x-direction then y-direction
                       X11 = WALL(TIM_IW2)%XW-0.5_EB*DX(II+1) ! Corner point x
@@ -9672,8 +9772,8 @@ CONTAINS
                 IF ( (TIM_IWX==0).AND.(TIM_IWY==0).AND.(TIM_IW/=0 .OR. TIM_IW2/=0) ) THEN
                    IF (TIM_IW/=0) THEN
                       ! First y-direction then x-direction
-                      X11 = WALL(TIM_IW)%XW                 ! Corner point x
-                      Y11 = WALL(TIM_IW)%YW-0.5_EB*DY(JJ+1) ! Corner point y
+                      X11 = WALL(TIM_IW )%XW                 ! Corner point x
+                      Y11 = WALL(TIM_IW )%YW-0.5_EB*DY(JJ+1) ! Corner point y
                    ELSE
                       ! First x-direction then y-direction
                       X11 = WALL(TIM_IW2)%XW+0.5_EB*DX(II-1) ! Corner point x
@@ -9723,8 +9823,8 @@ CONTAINS
                 IF ( (TIM_IWX==0).AND.(TIM_IWY==0).AND.(TIM_IW/=0 .OR. TIM_IW2/=0) ) THEN
                    IF (TIM_IW/=0) THEN
                       ! First y-direction then x-direction
-                      X11 = WALL(TIM_IW)%XW                 ! Corner point x
-                      Y11 = WALL(TIM_IW)%YW+0.5_EB*DY(JJ-1) ! Corner point y
+                      X11 = WALL(TIM_IW )%XW                 ! Corner point x
+                      Y11 = WALL(TIM_IW )%YW+0.5_EB*DY(JJ-1) ! Corner point y
                    ELSE
                       ! First x-direction then y-direction
                       X11 = WALL(TIM_IW2)%XW-0.5_EB*DX(II+1) ! Corner point x
@@ -9774,8 +9874,8 @@ CONTAINS
                 IF ( (TIM_IWX==0).AND.(TIM_IWY==0).AND.(TIM_IW/=0 .OR. TIM_IW2/=0) ) THEN
                    IF (TIM_IW/=0) THEN
                       ! First y-direction then x-direction
-                      X11 = WALL(TIM_IW)%XW                 ! Corner point x
-                      Y11 = WALL(TIM_IW)%YW+0.5_EB*DY(JJ-1) ! Corner point y
+                      X11 = WALL(TIM_IW )%XW                 ! Corner point x
+                      Y11 = WALL(TIM_IW )%YW+0.5_EB*DY(JJ-1) ! Corner point y
                    ELSE
                       ! First x-direction then y-direction
                       X11 = WALL(TIM_IW2)%XW+0.5_EB*DX(II-1) ! Corner point x
@@ -9849,7 +9949,7 @@ CONTAINS
                    TAU_FAC = (SPEED*(VBAR/EVEL))**2
                    SPEED = SPEED_XP*(0.5_EB + SIGN(0.5_EB,UBAR)) + SPEED_XM*(0.5_EB - SIGN(0.5_EB,UBAR)) 
                    SPEED = SPEED*HR%V0_FAC
-                   TAU_FAC = MAX(0.1_EB,SQRT(TAU_FAC + (SPEED*(UBAR/EVEL))**2)/MAX(0.1_EB,HR%SPEED))
+                   TAU_FAC = MAX(0.1_EB,SQRT(TAU_FAC + (SPEED*(UBAR/EVEL))**2)/MAX(0.1_EB,HR_SPEED))
                    HR_TAU=HR_TAU*TAU_FAC
                    P2P_U = P2P_U + (HR%MASS/HR_TAU)*SPEED*(UBAR/EVEL)
                    SPEED = SPEED_YP*(0.5_EB + SIGN(0.5_EB,VBAR)) + SPEED_YM*(0.5_EB - SIGN(0.5_EB,VBAR)) 
@@ -9868,7 +9968,7 @@ CONTAINS
              TAU_FAC = (SPEED*(VBAR/EVEL))**2
              SPEED = SPEED_XP*(0.5_EB + SIGN(0.5_EB,UBAR)) + SPEED_XM*(0.5_EB - SIGN(0.5_EB,UBAR)) 
              SPEED = SPEED*HR%V0_FAC
-             TAU_FAC = MAX(0.1_EB,SQRT(TAU_FAC + (SPEED*(UBAR/EVEL))**2)/MAX(0.1_EB,HR%SPEED))
+             TAU_FAC = MAX(0.1_EB,SQRT(TAU_FAC + (SPEED*(UBAR/EVEL))**2)/MAX(0.1_EB,HR_SPEED))
              HR_TAU=HR_TAU*TAU_FAC
           END IF
 
@@ -9879,12 +9979,14 @@ CONTAINS
           IF (EVEL > 0.0001_EB) THEN
              SPEED = SPEED_XP*(0.5_EB + SIGN(0.5_EB,UBAR)) + SPEED_XM*(0.5_EB - SIGN(0.5_EB,UBAR)) 
              SPEED = SPEED*HR%V0_FAC
+             SPEED_X = SPEED
              U_NEW = (U_NEW + 0.5_EB*(DTSP/HR_TAU)*SPEED*(UBAR/EVEL)) / FAC_TIM
              HR%UBAR = UBAR
              P2P_U = P2P_U + (HR%MASS/HR_TAU)*(SPEED*(UBAR/EVEL) - HR%U)
 
              SPEED = SPEED_YP*(0.5_EB + SIGN(0.5_EB,VBAR)) + SPEED_YM*(0.5_EB - SIGN(0.5_EB,VBAR)) 
              SPEED = SPEED*HR%V0_FAC
+             SPEED_Y = SPEED
              V_NEW = (V_NEW + 0.5_EB*(DTSP/HR_TAU)*SPEED*(VBAR/EVEL)) / FAC_TIM
              HR%VBAR = VBAR
              P2P_V = P2P_V + (HR%MASS/HR_TAU)*(SPEED*(VBAR/EVEL) - HR%V)
@@ -10094,10 +10196,6 @@ CONTAINS
             ic  = M%CELL_INDEX(xt,yt,1)
             iw  = M%OBST_INDEX_C(ic) 
             walkability(xt-1,yt-1) = iw
-!!$            IF(iw>0) THEN
-!!$               WRITE(LU_ERR,*) xt-1
-!!$               WRITE(LU_ERR,*) yt-1
-!!$            END IF
          END DO
       END DO
 
@@ -10539,7 +10637,8 @@ CONTAINS
          RN = 2.0_EB
          IF (HR%I_TARGET > 0 .AND. STRAIGHT_LINE_TO_TARGET) THEN
             ! The agent is at the final landing and has already chosen the closest door once
-            CALL RANDOM_NUMBER(RN)
+            CALL RANDOM_NUMBER(RN_REAL)
+            RN = REAL(RN_REAL,EB)
          END IF
          If_StraightLineNewDoor: IF (STRAIGHT_LINE_TO_TARGET .AND. RN > EXP(-DTSP/TAU_CHANGE_DOOR)) THEN
             ! Find the target among the nodes leading out of the strs (doors and exits)
@@ -11132,11 +11231,12 @@ CONTAINS
     END SUBROUTINE FIND_PREFERRED_DIRECTION
 
 
-    SUBROUTINE GETSTAIRSPEEDANDZ(SPEED_XM,SPEED_XP, SPEED_YM,SPEED_YP,SP,HP)
+    SUBROUTINE GETSTAIRSPEEDANDZ(SPEED_XM, SPEED_XP, SPEED_YM, SPEED_YP, HP_SPEED, SP, HP)
       IMPLICIT NONE
       !
       ! Passed variables
       REAL(EB), INTENT(OUT) :: SPEED_XM, SPEED_XP, SPEED_YM, SPEED_YP
+      REAL(EB), INTENT(IN)  :: HP_SPEED
       TYPE (EVAC_STRS_TYPE), POINTER ::  SP
       TYPE (HUMAN_TYPE), POINTER :: HP
       !
@@ -11181,25 +11281,25 @@ CONTAINS
             !            SELECT CASE (SP%NODE_IOR(J)*HP%STRS_DIRECTION)
             SELECT CASE (SP%NODE_IOR(J))
             CASE(-1)
-               SPEED_XM = COS_X* HP%SPEED* SP%FAC_V0_UP
-               SPEED_XP = COS_X* HP%SPEED* SP%FAC_V0_DOWN
-               SPEED_YM =        HP%SPEED* SP%FAC_V0_HORI
-               SPEED_YP =        HP%SPEED* SP%FAC_V0_HORI
+               SPEED_XM = COS_X* HP_SPEED* SP%FAC_V0_UP
+               SPEED_XP = COS_X* HP_SPEED* SP%FAC_V0_DOWN
+               SPEED_YM =        HP_SPEED* SP%FAC_V0_HORI
+               SPEED_YP =        HP_SPEED* SP%FAC_V0_HORI
             CASE(+1)
-               SPEED_XM = COS_X* HP%SPEED* SP%FAC_V0_DOWN
-               SPEED_XP = COS_X* HP%SPEED* SP%FAC_V0_UP
-               SPEED_YM =        HP%SPEED* SP%FAC_V0_HORI
-               SPEED_YP =        HP%SPEED* SP%FAC_V0_HORI
+               SPEED_XM = COS_X* HP_SPEED* SP%FAC_V0_DOWN
+               SPEED_XP = COS_X* HP_SPEED* SP%FAC_V0_UP
+               SPEED_YM =        HP_SPEED* SP%FAC_V0_HORI
+               SPEED_YP =        HP_SPEED* SP%FAC_V0_HORI
             CASE(-2)
-               SPEED_XM =        HP%SPEED* SP%FAC_V0_HORI
-               SPEED_XP =        HP%SPEED* SP%FAC_V0_HORI
-               SPEED_YM = COS_Y* HP%SPEED* SP%FAC_V0_UP
-               SPEED_YP = COS_Y* HP%SPEED* SP%FAC_V0_DOWN
+               SPEED_XM =        HP_SPEED* SP%FAC_V0_HORI
+               SPEED_XP =        HP_SPEED* SP%FAC_V0_HORI
+               SPEED_YM = COS_Y* HP_SPEED* SP%FAC_V0_UP
+               SPEED_YP = COS_Y* HP_SPEED* SP%FAC_V0_DOWN
             CASE(+2)
-               SPEED_XM =        HP%SPEED* SP%FAC_V0_HORI
-               SPEED_XP =        HP%SPEED* SP%FAC_V0_HORI
-               SPEED_YM = COS_Y* HP%SPEED* SP%FAC_V0_DOWN
-               SPEED_YP = COS_Y* HP%SPEED* SP%FAC_V0_UP
+               SPEED_XM =        HP_SPEED* SP%FAC_V0_HORI
+               SPEED_XP =        HP_SPEED* SP%FAC_V0_HORI
+               SPEED_YM = COS_Y* HP_SPEED* SP%FAC_V0_DOWN
+               SPEED_YP = COS_Y* HP_SPEED* SP%FAC_V0_UP
             END SELECT
          ELSE
             HP%Z = 0.5_EB*(SP%XB_NODE(J,5)+SP%XB_NODE(J,6))      
@@ -12123,6 +12223,7 @@ CONTAINS
       TYPE (HUMAN_TYPE), POINTER :: HR
       !
       ! Local variables
+      REAL :: RN_REAL
       REAL(EB) RN, X1, X2, Y1, Y2, Z1, Z2, D_MAX, DIST, WIDTH, &
            XX1,YY1, MAX_FED, AVE_K
       INTEGER  II, JJ, KK, IOR, IRNMAX, IRN, IE, IZERO, J1
@@ -12214,7 +12315,8 @@ CONTAINS
             CASE(-1,1)
                ! 180 or 0 degrees, i.e., pi or 0 radians
                angle = (0.5_EB-(ior/2.0_EB))*Pi
-               CALL RANDOM_NUMBER(rn)
+               CALL RANDOM_NUMBER(RN_REAL)
+               RN = REAL(RN_REAL,EB)
                IF (keep_xy) THEN
                   yy = HR%Y + (irn/MAX(irn,1))*(rn-0.5_EB)*0.25_EB*HR%Radius
                   xx = x1 + ior*(1.0_EB*HR%B + HR%Radius)
@@ -12226,7 +12328,8 @@ CONTAINS
             CASE(-2,2)
                ! 270 or 90 degrees, i.e., 3pi/2 or pi/2 radians
                angle = (1.0_EB-(ior/4.0_EB))*Pi
-               CALL RANDOM_NUMBER(rn)
+               CALL RANDOM_NUMBER(RN_REAL)
+               RN = REAL(RN_REAL,EB)
                IF (keep_xy) THEN
                   xx = HR%X + (irn/MAX(irn,1))*(rn-0.5_EB)*0.25_EB*HR%Radius
                   yy = y1 + (ior/ABS(ior))*(1.0_EB*HR%B + HR%Radius)
@@ -12236,9 +12339,11 @@ CONTAINS
                   yy = y1 + (ior/ABS(ior))*(1.0_EB*HR%B + HR%r_torso)
                END IF
             CASE(0,3)
-               CALL RANDOM_NUMBER(rn)
+               CALL RANDOM_NUMBER(RN_REAL)
+               RN = REAL(RN_REAL,EB)
                yy = 0.5_EB*(y1+y2) + (rn-0.5_EB)*MAX(0.0_EB,(y2-y1)-2.0_EB*HR%Radius-2.0_EB*HR%B)
-               CALL RANDOM_NUMBER(rn)
+               CALL RANDOM_NUMBER(RN_REAL)
+               RN = REAL(RN_REAL,EB)
                xx = 0.5_EB*(x1+x2) + (rn-0.5_EB)*MAX(0.0_EB,(x2-x1)-2.0_EB*HR%Radius-2.0_EB*HR%B)
             END SELECT
             zz = 0.5_EB*(z1+z2)
@@ -12443,7 +12548,8 @@ CONTAINS
             CASE(-1,1)
                ! 180 or 0 degrees, i.e., pi or 0 radians
                angle = (0.5_EB-(ior/2.0_EB))*Pi
-               CALL RANDOM_NUMBER(rn)
+               CALL RANDOM_NUMBER(RN_REAL)
+               RN = REAL(RN_REAL,EB)
                IF (keep_xy2) THEN
                   yy = HR%Y + (irn/MAX(irn,1))*(rn-0.5_EB)*0.25_EB*HR%Radius
                   xx = x1 + ior*(1.0_EB*HR%B + HR%Radius)
@@ -12455,7 +12561,8 @@ CONTAINS
             CASE(-2,2)
                ! 270 or 90 degrees, i.e., 3pi/2 or pi/2 radians
                angle = (1.0_EB-(ior/4.0_EB))*Pi
-               CALL RANDOM_NUMBER(rn)
+               CALL RANDOM_NUMBER(RN_REAL)
+               RN = REAL(RN_REAL,EB)
                IF (keep_xy2) THEN
                   xx = HR%X + (irn/MAX(irn,1))*(rn-0.5_EB)*0.25_EB*HR%Radius
                   yy = y1 + (ior/ABS(ior))*(1.0_EB*HR%B + HR%Radius)
@@ -12465,9 +12572,11 @@ CONTAINS
                   yy = y1 + (ior/ABS(ior))*(1.0_EB*HR%B + HR%r_torso)
                END IF
             CASE(0,3)
-               CALL RANDOM_NUMBER(rn)
+               CALL RANDOM_NUMBER(RN_REAL)
+               RN = REAL(RN_REAL,EB)
                yy = 0.5_EB*(y1+y2) + (rn-0.5_EB)* MAX(0.0_EB,(y2-y1)-2.0_EB*HR%Radius-2.0_EB*HR%B)
-               CALL RANDOM_NUMBER(rn)
+               CALL RANDOM_NUMBER(RN_REAL)
+               RN = REAL(RN_REAL,EB)
                xx = 0.5_EB*(x1+x2) + (rn-0.5_EB)* MAX(0.0_EB,(x2-x1)-2.0_EB*HR%Radius-2.0_EB*HR%B)
             END SELECT
             II = FLOOR( MFF%CELLSI(FLOOR((xx-MFF%XS)*MFF%RDXINT)) + 1.0_EB )
@@ -12583,6 +12692,7 @@ CONTAINS
       INTEGER, INTENT(OUT) :: istat
       !
       ! Local variables
+      REAL :: RN_REAL
       REAL(EB) RN, x1, x2, y1, y2, z1, z2, d_max, dist, xx, yy, zz, xx1, yy1
       INTEGER  II, JJ, KK, ior, irnmax, irn, ie, NR
       REAL(EB), DIMENSION(6) ::y_tmp, x_tmp, r_tmp
@@ -12631,7 +12741,8 @@ CONTAINS
       HR%I_Target = 0
       HR%I_DoorAlgo = PNX%I_AGENT_TYPE
       HR%I_Door_Mode = 0 ! Default, no target door yet
-      CALL RANDOM_NUMBER(RN)
+      CALL RANDOM_NUMBER(RN_REAL)
+      RN = REAL(RN_REAL,EB)
       HR%F_FallDown = F_MIN_FALL + RN*(F_MAX_FALL - F_MIN_FALL) 
       HR%T_FallenDown = HUGE(HR%T_FallenDown)
       HR%Angle_FallenDown = 0.0_EB
@@ -12647,21 +12758,26 @@ CONTAINS
       CheckPPForce: DO WHILE (irn < irnmax)
          SELECT CASE (ior)
          CASE(-1,1)
-            CALL RANDOM_NUMBER(rn)
+            CALL RANDOM_NUMBER(RN_REAL)
+            RN = REAL(RN_REAL,EB)
             yy = 0.5_EB*(y1+y2) + (rn-0.5_EB)*MAX(0.0_EB,PNX%Width-2.0_EB*HR%Radius-2.0_EB*HR%B)
             xx = x1 + ior*5.0_EB*HR%B
             HR%Angle = (1-ior)*Pi/2.0_EB  ! ior=1: 0,  ior=-1: pi
          CASE(-2,2)
-            CALL RANDOM_NUMBER(rn)
+            CALL RANDOM_NUMBER(RN_REAL)
+            RN = REAL(RN_REAL,EB)
             xx = 0.5_EB*(x1+x2) + (rn-0.5_EB)*MAX(0.0_EB,PNX%Width-2.0_EB*HR%Radius-2.0_EB*HR%B)
             yy = y1 + (ior/ABS(ior))*5.0_EB*HR%B
             HR%Angle = Pi/2.0_EB + (2-ior)*Pi/4.0_EB  ! ior=2: (3/2)pi,  ior=-2: pi/2
          CASE(0,3)
-            CALL RANDOM_NUMBER(rn)
+            CALL RANDOM_NUMBER(RN_REAL)
+            RN = REAL(RN_REAL,EB)
             yy = 0.5_EB*(y1+y2) + (rn-0.5_EB)*MAX(0.0_EB,(y2-y1)-2.0_EB*HR%Radius-2.0_EB*HR%B)
-            CALL RANDOM_NUMBER(rn)
+            CALL RANDOM_NUMBER(RN_REAL)
+            RN = REAL(RN_REAL,EB)
             xx = 0.5_EB*(x1+x2) + (rn-0.5_EB)*MAX(0.0_EB,(x2-x1)-2.0_EB*HR%Radius-2.0_EB*HR%B)
-            CALL RANDOM_NUMBER(rn)
+            CALL RANDOM_NUMBER(RN_REAL)
+            RN = REAL(RN_REAL,EB)
             HR%Angle = 2.0_EB*Pi*rn
          END SELECT
          DO WHILE (HR%Angle >= 2.0_EB*Pi)
@@ -13807,6 +13923,11 @@ CONTAINS
     HR%Torque = 0.0_EB
     HR%angle_old = 0.0_EB  ! rad
     HR%Omega = 0.0_EB  ! rad/s
+    !Issue1547: Nervousness parameter initialization, put one minute non-nervous time as default.
+    !Issue1547: Some time is needed, because the agents are initially at rest, so the initial
+    !Issue1547: acceleration time is not counted. Time units are seconds, so 60 seconds.
+    HR%Speed_ave = 1.0_EB
+    HR%T_Speed_ave = 60.0_EB
     !
   END SUBROUTINE CLASS_PROPERTIES
 
@@ -14082,6 +14203,10 @@ CONTAINS
                 QP(NPP,NN) = REAL(angle_hr*180.0_EB/Pi,FB)
              CASE(249)  ! DENSITY, agent density, 1/m2
                 QP(NPP,NN) = REAL(HR%Density ,FB)
+             CASE(250)  !Issue1547: Nervousness parameter
+                !Issue1547: Speed_ave is average speed versus v0_i (v_ave/v0_i)
+                !Issue1547: Nervousness = 1 - (v_ave/v0_i)
+                QP(NPP,NN) = REAL(MAX(1.0_EB - HR%Speed_ave,0.0_EB), FB)
              END SELECT
           END DO
 
@@ -14128,7 +14253,8 @@ CONTAINS
     REAL(EB) gmean, gtheta, gcutmult
 
     ! Local variables
-    REAL(EB) v1,v2,rsq,fac, rn
+    REAL :: RN_REAL
+    REAL(EB) v1,v2,rsq,fac, RN
 
     IF ( (GaussFlag == 1)  .AND. (ABS(GaussSet2-gmean) <= gcutmult*SQRT(gtheta)) ) THEN
        GaussFlag = 0
@@ -14136,15 +14262,19 @@ CONTAINS
     ELSE
        GaussFlag = 0
        DO 
-          CALL RANDOM_NUMBER(rn)
+          CALL RANDOM_NUMBER(RN_REAL)
+          RN = REAL(RN_REAL,EB)
           v1 = 1.0_EB - 2.0_EB*rn
-          CALL RANDOM_NUMBER(rn)
+          CALL RANDOM_NUMBER(RN_REAL)
+          RN = REAL(RN_REAL,EB)
           v2 = 1.0_EB - 2.0_EB*rn
           rsq = v1*v1 + v2*v2
           DO WHILE (rsq >= 1.0 )
-             CALL RANDOM_NUMBER(rn)
+             CALL RANDOM_NUMBER(RN_REAL)
+             RN = REAL(RN_REAL,EB)
              v1 = 1.0_EB - 2.0_EB*rn
-             CALL RANDOM_NUMBER(rn)
+             CALL RANDOM_NUMBER(RN_REAL)
+             RN = REAL(RN_REAL,EB)
              v2 = 1.0_EB - 2.0_EB*rn
              rsq=v1*v1+v2*v2
           END DO
@@ -14184,7 +14314,8 @@ CONTAINS
     REAL(EB) gmean, gsigma, glow, ghigh
 
     ! Local variables
-    REAL(EB) v1, v2, rsq, fac, rn
+    REAL :: RN_REAL
+    REAL(EB) v1, v2, rsq, fac, RN
 
     IF ( (GTrunFlag == 1)  .AND. (GTrunSet2 >= glow) .AND. (GTrunSet2 <= ghigh) ) THEN
        GTrunFlag = 0
@@ -14192,15 +14323,19 @@ CONTAINS
     ELSE
        GTrunFlag = 0
        DO 
-          CALL RANDOM_NUMBER(rn)
+          CALL RANDOM_NUMBER(RN_REAL)
+          RN = REAL(RN_REAL,EB)
           v1 = 1.0_EB - 2.0_EB*rn
-          CALL RANDOM_NUMBER(rn)
+          CALL RANDOM_NUMBER(RN_REAL)
+          RN = REAL(RN_REAL,EB)
           v2 = 1.0_EB - 2.0_EB*rn
           rsq = v1*v1 + v2*v2
           DO WHILE (rsq >= 1.0 )
-             CALL RANDOM_NUMBER(rn)
+             CALL RANDOM_NUMBER(RN_REAL)
+             RN = REAL(RN_REAL,EB)
              v1 = 1.0_EB - 2.0_EB*rn
-             CALL RANDOM_NUMBER(rn)
+             CALL RANDOM_NUMBER(RN_REAL)
+             RN = REAL(RN_REAL,EB)
              v2 = 1.0_EB - 2.0_EB*rn
              rsq = v1*v1 + v2*v2
           END DO
@@ -14399,13 +14534,13 @@ CONTAINS
           iw  = M%WALL_INDEX(ic, isy*2) ! main direction
           iw1 = M%WALL_INDEX(ic ,isx*1) ! sideways
           iw2 = M%WALL_INDEX(ic2,isy*2) ! side + main direction
-          IF (iw >0) THEN
-             IF (M%OBSTRUCTION(M%WALL(IW)%OBST_INDEX)%HIDDEN .AND. M%WALL(IW)%OBST_INDEX>0) iw  = 0
+          IF (IW >0) THEN
+             IF (M%OBSTRUCTION(M%WALL(IW )%OBST_INDEX)%HIDDEN .AND. M%WALL(IW )%OBST_INDEX>0) iw  = 0
           END IF
-          IF (iw1>0) THEN
+          IF (IW1>0) THEN
              IF (M%OBSTRUCTION(M%WALL(IW1)%OBST_INDEX)%HIDDEN .AND. M%WALL(IW1)%OBST_INDEX>0) iw1 = 0
           END IF
-          IF (iw2>0) THEN
+          IF (IW2>0) THEN
              IF (M%OBSTRUCTION(M%WALL(IW2)%OBST_INDEX)%HIDDEN .AND. M%WALL(IW2)%OBST_INDEX>0) iw2 = 0
           END IF
           ! iw is zero, if there is no solid boundary
@@ -14432,13 +14567,13 @@ CONTAINS
           iw  = M%WALL_INDEX(ic, isx*1) ! main direction
           iw1 = M%WALL_INDEX(ic ,isy*2) ! sideways
           iw2 = M%WALL_INDEX(ic2,isx*1) ! side + main direction
-          IF (iw >0) THEN
-             IF (M%OBSTRUCTION(M%WALL(IW)%OBST_INDEX)%HIDDEN .AND. M%WALL(IW)%OBST_INDEX>0) iw  = 0
+          IF (IW >0) THEN
+             IF (M%OBSTRUCTION(M%WALL(IW )%OBST_INDEX)%HIDDEN .AND. M%WALL(IW )%OBST_INDEX>0) iw  = 0
           END IF
-          IF (iw1>0) THEN
+          IF (IW1>0) THEN
              IF (M%OBSTRUCTION(M%WALL(IW1)%OBST_INDEX)%HIDDEN .AND. M%WALL(IW1)%OBST_INDEX>0) iw1 = 0
           END IF
-          IF (iw2>0) THEN
+          IF (IW2>0) THEN
              IF (M%OBSTRUCTION(M%WALL(IW2)%OBST_INDEX)%HIDDEN .AND. M%WALL(IW2)%OBST_INDEX>0) iw2 = 0
           END IF
           ! iw is zero, if there is no solid boundary
@@ -14525,13 +14660,13 @@ CONTAINS
           iw  = MFF%WALL_INDEX(ic, isy*2) ! main direction
           iw1 = MFF%WALL_INDEX(ic ,isx*1) ! sideways
           iw2 = MFF%WALL_INDEX(ic2,isy*2) ! side + main direction
-          IF (iw >0) THEN
-             IF (MFF%OBSTRUCTION(MFF%WALL(IW)%OBST_INDEX)%HIDDEN .AND. MFF%WALL(IW)%OBST_INDEX>0) iw  = 0
+          IF (IW >0) THEN
+             IF (MFF%OBSTRUCTION(MFF%WALL(IW )%OBST_INDEX)%HIDDEN .AND. MFF%WALL(IW )%OBST_INDEX>0) iw  = 0
           END IF
-          IF (iw1>0) THEN
+          IF (IW1>0) THEN
              IF (MFF%OBSTRUCTION(MFF%WALL(IW1)%OBST_INDEX)%HIDDEN .AND. MFF%WALL(IW1)%OBST_INDEX>0) iw1 = 0
           END IF
-          IF (iw2>0) THEN
+          IF (IW2>0) THEN
              IF (MFF%OBSTRUCTION(MFF%WALL(IW2)%OBST_INDEX)%HIDDEN .AND. MFF%WALL(IW2)%OBST_INDEX>0) iw2 = 0
           END IF
           ! iw is zero, if there is no solid boundary
@@ -14566,13 +14701,13 @@ CONTAINS
           iw  = MFF%WALL_INDEX(ic, isx*1) ! main direction
           iw1 = MFF%WALL_INDEX(ic ,isy*2) ! sideways
           iw2 = MFF%WALL_INDEX(ic2,isx*1) ! side + main direction
-          IF (iw >0) THEN
-             IF (MFF%OBSTRUCTION(MFF%WALL(IW)%OBST_INDEX)%HIDDEN .AND. MFF%WALL(IW)%OBST_INDEX>0) iw  = 0
+          IF (IW >0) THEN
+             IF (MFF%OBSTRUCTION(MFF%WALL(IW )%OBST_INDEX)%HIDDEN .AND. MFF%WALL(IW )%OBST_INDEX>0) iw  = 0
           END IF
-          IF (iw1>0) THEN
+          IF (IW1>0) THEN
              IF (MFF%OBSTRUCTION(MFF%WALL(IW1)%OBST_INDEX)%HIDDEN .AND. MFF%WALL(IW1)%OBST_INDEX>0) iw1 = 0
           END IF
-          IF (iw2>0) THEN
+          IF (IW2>0) THEN
              IF (MFF%OBSTRUCTION(MFF%WALL(IW2)%OBST_INDEX)%HIDDEN .AND. MFF%WALL(IW2)%OBST_INDEX>0) iw2 = 0
           END IF
           ! iw is zero, if there is no solid boundary
@@ -14658,14 +14793,14 @@ CONTAINS
           RETURN
        END IF
        iw = M%wall_index(ic, is*1)      ! wall index
-       IF (iw>0) THEN
+       IF (IW>0) THEN
           IF (M%OBSTRUCTION(M%WALL(IW)%OBST_INDEX)%HIDDEN .AND. M%WALL(IW)%OBST_INDEX>0) iw = 0
        END IF
        DO WHILE (iw==0 .AND. ii/=i_end)
           ii = ii + is
           ic = M%cell_index(ii,jjn,kkn)  ! cell index
           iw = M%wall_index(ic, is*1)      ! wall index
-          IF (iw>0) THEN
+          IF (IW>0) THEN
              IF (M%OBSTRUCTION(M%WALL(IW)%OBST_INDEX)%HIDDEN .AND. M%WALL(IW)%OBST_INDEX>0) iw = 0
           END IF
        END DO
@@ -14707,14 +14842,14 @@ CONTAINS
           RETURN
        END IF
        iw = M%wall_index(ic, is*1)      ! wall index
-       IF (iw>0) THEN
+       IF (IW>0) THEN
           IF (M%OBSTRUCTION(M%WALL(IW)%OBST_INDEX)%HIDDEN .AND. M%WALL(IW)%OBST_INDEX>0) iw = 0
        END IF
        DO WHILE (iw==0 .AND. ii/=i_end)
           ii = ii + is
           ic = M%cell_index(ii,jjn,kkn)  ! cell index
           iw = M%wall_index(ic, is*1)      ! wall index
-          IF (iw>0) THEN
+          IF (IW>0) THEN
              IF (M%OBSTRUCTION(M%WALL(IW)%OBST_INDEX)%HIDDEN .AND. M%WALL(IW)%OBST_INDEX>0) iw = 0
           END IF
        END DO
@@ -14756,14 +14891,14 @@ CONTAINS
           RETURN
        END IF
        iw = M%wall_index(ic, is*2)      ! wall index
-       IF (iw>0) THEN
+       IF (IW>0) THEN
           IF (M%OBSTRUCTION(M%WALL(IW)%OBST_INDEX)%HIDDEN .AND. M%WALL(IW)%OBST_INDEX>0) iw = 0
        END IF
        DO WHILE (iw==0 .AND. jj/=i_end)
           jj = jj + is
           ic = M%cell_index(iin,jj,kkn)  ! cell index
           iw = M%wall_index(ic, is*2)      ! wall index
-          IF (iw>0) THEN
+          IF (IW>0) THEN
              IF (M%OBSTRUCTION(M%WALL(IW)%OBST_INDEX)%HIDDEN .AND. M%WALL(IW)%OBST_INDEX>0) iw = 0
           END IF
        END DO
@@ -14805,14 +14940,14 @@ CONTAINS
           RETURN
        END IF
        iw = M%wall_index(ic, is*2)      ! wall index
-       IF (iw>0) THEN
+       IF (IW>0) THEN
           IF (M%OBSTRUCTION(M%WALL(IW)%OBST_INDEX)%HIDDEN .AND. M%WALL(IW)%OBST_INDEX>0) iw = 0
        END IF
        DO WHILE (iw==0 .AND. jj/=i_end)
           jj = jj + is
           ic = M%cell_index(iin,jj,kkn)  ! cell index
           iw = M%wall_index(ic, is*2)      ! wall index
-          IF (iw>0) THEN
+          IF (IW>0) THEN
              IF (M%OBSTRUCTION(M%WALL(IW)%OBST_INDEX)%HIDDEN .AND. M%WALL(IW)%OBST_INDEX>0) iw = 0
           END IF
        END DO
@@ -14900,7 +15035,8 @@ CONTAINS
     TYPE (HUMAN_TYPE), POINTER :: HR
     !
     ! Local variables
-    REAL(EB) :: L2_min, max_fed, ave_K, L2_tmp, rn, max_fed2, ave_K2
+    REAL :: RN_REAL
+    REAL(EB) :: L2_min, max_fed, ave_K, L2_tmp, RN, max_fed2, ave_K2
     REAL(EB) :: x1_old, y1_old, Speed, X11, Y11, x_o, y_o, XBx, XBy
     REAL(EB) :: X1, Y1, X2, Y2, DOOR_WIDTH, X_XYZ, Y_XYZ
     INTEGER :: i_old_ffield, i_tmp, i_new_ffield, IEL, color_index, DOOR_IOR
@@ -15016,7 +15152,8 @@ CONTAINS
                 i_tmp = N_DOORS + EVAC_Node_List(HPT%I_DOOR_NODES(i))%Node_Index 
              END IF
              IF (HPT%P_VENT_FFIELDS(i) < 1.0_EB) THEN
-                CALL RANDOM_NUMBER(RN)
+                CALL RANDOM_NUMBER(RN_REAL)
+                RN = REAL(RN_REAL,EB)
                 IF ( RN < HPT%P_VENT_FFIELDS(i) ) THEN
                    Is_Known_Door(i_tmp) = .TRUE.
                 ELSE
