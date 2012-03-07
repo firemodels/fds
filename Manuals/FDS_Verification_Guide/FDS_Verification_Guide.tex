@@ -3074,6 +3074,26 @@ In this test case 4 sprinklers are placed in a box.  Three of the sprinklers are
 \label{flow_rate_2}
 \end{figure}
 
+\section{Turbulent Dispersion (\texorpdfstring{{\textbf{random\_walk}}}{random\_walk}) }
+\label{flow_rate_2}
+
+Two cases are set up to test the turbulent dispersion of tracer particles.  Tracer particles are injected into a channel with a steady laminar flow with mean velocity 1 m/s.  In the first case (random\_walk\_1) the diffusivity is set to $D=0.1$ m$^2$/s.  In the second case (random\_walk\_2) the diffusivity is set to $D=0.01$ m$^2$/s.  The results are compared with Einstein's classic result for Brownian motion \cite{Gardiner:2004}:
+\begin{equation}
+\label{eqn_number_density}
+f(z,t) = \frac{n}{4\pi D} \frac{e^{-z^2/4Dt}}{\sqrt{t}}
+\end{equation}
+where $f(z,t)$ is the particle number density at lateral distance $z$ from the source at time $t$, $n$ is the total number of particles in the system.  A PDPA is set up to measure the number concentration at the outlet of the channel as a function of height, $z$.  The outlet is 15 m downstream of the point source of tracer particles.  With a mean velocity of 1 m/s, the time is taken as $t = 15$ s.  The FDS results are compared with Eq.~(\ref{eqn_number_density}) in Fig.~\ref{random_walk}.
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/random_walk_1} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/random_walk_2}
+\end{tabular*}
+\caption[Turbulent dispersion of tracer particles.]{Turbulent dispersion of tracer particles {\bf random\_walk} test cases.}
+\label{random_walk}
+\end{figure}
+
+
 \clearpage
 
 \newpage
