@@ -5289,6 +5289,7 @@ typedef struct {
       float above_ground_level=0.0;
       slice *sd;
       char *slicelabelptr, slicelabel[256];
+      int has_reg, has_comp;
 
       nn_slice++;
       slicelabelptr=strchr(buffer,'%');
@@ -5345,7 +5346,15 @@ typedef struct {
       islicecount++;
       strcpy(buffer2,bufferptr);
       strcat(buffer2,".svz");
-      if(STAT(bufferptr,&statbuffer)!=0&&STAT(buffer2,&statbuffer)!=0){
+      has_reg=0;
+      has_comp=0;
+      if(STAT(bufferptr,&statbuffer)==0){
+        has_reg=1;
+      }
+      if(STAT(buffer2,&statbuffer)==0){
+        has_comp=1;
+      }
+      if(has_reg==0&&has_comp==0){
         if(fgets(buffer,255,stream)==NULL){
           nsliceinfo--;
           nslicefiles--;
@@ -5374,7 +5383,7 @@ typedef struct {
       STRCAT(sd->comp_file,".svz");
 
       sd->compression_type=0;
-      if(STAT(sd->comp_file,&statbuffer)==0){
+      if(has_comp==1){
         sd->compression_type=1;
         sd->file=sd->comp_file;
       }

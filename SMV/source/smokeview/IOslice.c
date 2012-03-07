@@ -1358,6 +1358,17 @@ void getsliceparams(void){
   int iblock;
   mesh *meshi;
   multislice *mslicei;
+  int build_cache=0;
+  FILE *stream;
+
+  if(is_file_newer(sliceinfofilename,smvfilename)!=1){
+    build_cache=1;
+    stream=fopen(sliceinfofilename,"w");
+  }
+  else{
+    build_cache=0;
+    stream=fopen(sliceinfofilename,"r");
+  }
 
   for(i=0;i<nsliceinfo;i++){
     sd = sliceinfo + i;
@@ -1369,8 +1380,18 @@ void getsliceparams(void){
     file = sd->file;
     lenfile = strlen(file);
     if(sd->compression_type==0){
-      FORTgetsliceparms(file,&endian_smv,
-        &is1,&is2,&js1,&js2,&ks1,&ks2,&ni,&nj,&nk,&sd->volslice,&error,lenfile);
+      if(build_cache==1||stream==NULL){
+        FORTgetsliceparms(file,&endian_smv,
+          &is1,&is2,&js1,&js2,&ks1,&ks2,&ni,&nj,&nk,&sd->volslice,&error,lenfile);
+        if(stream!=NULL)fprintf(stream,"%i %i %i %i %i %i %i %i %i %i %i\n",sd->seq_id,is1,is2,js1,js2,ks1,ks2,ni,nj,nk,sd->volslice);
+      }
+      else{
+        int seq=-1;
+
+        while(seq!=sd->seq_id){
+          fscanf(stream,"%i %i %i %i %i %i %i %i %i %i %i",&seq,&is1,&is2,&js1,&js2,&ks1,&ks2,&ni,&nj,&nk,&sd->volslice);
+        }
+      }
     }
     else if(sd->compression_type==1){
       error=0;
@@ -1484,6 +1505,7 @@ void getsliceparams(void){
       sd->zmax = zplt[sd->ks2];
     }
   }
+  if(stream!=NULL)fclose(stream);
   if(nsliceinfo>0){
     FREEMEMORY(sliceorderindex);
     NewMemory((void **)&sliceorderindex,sizeof(int)*nsliceinfo);

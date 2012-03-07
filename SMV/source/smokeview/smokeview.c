@@ -411,6 +411,11 @@ void parse_commandline(int argc, char **argv){
       FREEMEMORY(fds_filein);
     }
   }
+  if(sliceinfofilename==NULL){
+    NewMemory((void **)&sliceinfofilename,strlen(fdsprefix)+11+1);
+    STRCPY(sliceinfofilename,fdsprefix);
+    STRCAT(sliceinfofilename,"_slice.info");
+  }
 
   // if smokezip created part2iso files then concatenate .smv entries found in the .isosmv file 
   // to the end of the .smv file creating a new .smv file.  Then read in that .smv file.
