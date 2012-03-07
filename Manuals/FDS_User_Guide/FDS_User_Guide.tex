@@ -1,6 +1,6 @@
 \documentclass[11pt]{book}
 \usepackage{times,mathptm}
-\usepackage[pdftex,demo]{graphicx}
+\usepackage[pdftex]{graphicx}
 \usepackage[pdftex,
         colorlinks=true,
         urlcolor=linkblue,     % \href{...}{...} external (URL)
@@ -6003,7 +6003,7 @@ Section~\ref{info:heat_of_combustion} for more details on the heat of combustion
 The {\ct HEAT\_OF\_COMBUSTION} (kJ/kg) is the amount of
 energy released per unit mass of fuel consumed. Note that if the heat of combustion is not
 specified, it is assumed to be
-\be \Delta H \approx \frac{\nu_{OTWO} \; W_{\OTWO} } { W_{f} } \; \; \hbox{\ct EPUMO2}  \quad \quad \hbox{kJ/kg}  \label{EPUMO2} \ee
+\be \Delta H \approx \frac{\nu_{\OTWO} \; W_{\OTWO} } { W_{f} } \; \; \hbox{\ct EPUMO2}  \quad \quad \hbox{kJ/kg}  \label{EPUMO2} \ee
 The quantity {\ct EPUMO2} (kJ/kg) is the amount of energy released per unit mass of oxygen consumed.
 Its default is 13,100~kJ/kg.  Note that if both {\ct EPUMO2} and {\ct HEAT\_OF\_COMBUSTION} are
 specified that FDS will ignore the value for {\ct EPUMO2}.
@@ -6153,6 +6153,18 @@ Since the lumped species for {\ct AIR} is 21 \% oxygen, taking 21 \% of the 9.60
 Obviously, for this example, the first {\ct REAC} line above is preferable. However, there are many situations where you cannot use the simple chemistry model and
 must resort to either of the alternatives. For a mixing-controlled reaction(s), the lumped species approach is preferable. For a finite-rate reaction(s), the primitive
 species approach is preferable because the reaction rates are typically tabulated in terms of individual species, not mixtures.
+
+
+\subsubsection{Example: A Single-Step, Mixing-Controlled Reaction Involving a Complex Fuel Molecule}
+
+It is often the case that fires involve fuels that do not just consist of C, H, N, and O. For example, chlorine is commonly found in building and household materials, and because
+of its propensity to form the acid gas HCl, we may want to account for it in the basic reaction scheme. Suppose the predominant fuel in the fire is polyvinyl chloride (PVC). Regardless
+of its detailed polymeric structure, it can be regarded as C$_2$H$_3$Cl for the purpose of modeling. To use PVC as the fuel molecule on the {\ct REAC} line, and assuming
+that all of the Cl in the fuel is converted into HCl, do the following:
+
+
+
+\subsubsection{Example: A Two-Step, Reaction Involving the Formation of CO}
 
 
 
