@@ -2130,12 +2130,12 @@ void drawslice_frame(){
       if(sd->times[0]>global_times[itimes])continue;
       if(sd->compression_type==1||sd->compression_type==2){
 #ifdef USE_ZLIB
-        uncompress_slicedataframe(sd,sd->islice);
+        uncompress_slicedataframe(sd,sd->itime);
 #endif
         sd->slicepoint=sd->slicecomplevel;
       }
       else{
-        sd->slicepoint = sd->slicelevel + sd->islice*sd->nsliceii;
+        sd->slicepoint = sd->slicelevel + sd->itime*sd->nsliceii;
       }
       sd->slicedata=NULL;
 #ifdef pp_MEMDEBUG
@@ -2144,10 +2144,10 @@ void drawslice_frame(){
       }
 #endif
 
-      if(sd->qslicedata!=NULL)sd->slicedata = sd->qslicedata + sd->islice*sd->nsliceii;
+      if(sd->qslicedata!=NULL)sd->slicedata = sd->qslicedata + sd->itime*sd->nsliceii;
 #ifdef pp_SLICECONTOURS
       if(vis_slice_contours==1&&sd->line_contours!=NULL){
-        DrawLineContours(sd->line_contours+sd->islice, 3.0);
+        DrawLineContours(sd->line_contours+sd->itime, 3.0);
         continue;
       }
 #endif            
@@ -2221,24 +2221,24 @@ void drawvslice_frame(void){
 #define VAL val
     if(VAL->compression_type==1){
 #ifdef USE_ZLIB
-      uncompress_slicedataframe(VAL,VAL->islice);
+      uncompress_slicedataframe(VAL,VAL->itime);
 #endif
       VAL->slicepoint=VAL->slicecomplevel;
     }
     else{
-      if(VAL!=NULL)VAL->slicepoint = VAL->slicelevel + VAL->islice*VAL->nsliceii;
+      if(VAL!=NULL)VAL->slicepoint = VAL->slicelevel + VAL->itime*VAL->nsliceii;
     }
 #undef VAL
 #define VAL u
     if(VAL!=NULL){
       if(VAL->compression_type==1){
 #ifdef USE_ZLIB
-        uncompress_slicedataframe(VAL,VAL->islice);
+        uncompress_slicedataframe(VAL,VAL->itime);
 #endif
         VAL->slicepoint=VAL->slicecomplevel;
       }
       else{
-        if(VAL!=NULL)VAL->slicepoint = VAL->slicelevel + VAL->islice*VAL->nsliceii;
+        if(VAL!=NULL)VAL->slicepoint = VAL->slicelevel + VAL->itime*VAL->nsliceii;
       }
     }
 #undef VAL
@@ -2246,12 +2246,12 @@ void drawvslice_frame(void){
     if(VAL!=NULL){
       if(VAL->compression_type==1){
 #ifdef USE_ZLIB
-        uncompress_slicedataframe(VAL,VAL->islice);
+        uncompress_slicedataframe(VAL,VAL->itime);
 #endif
         VAL->slicepoint=VAL->slicecomplevel;
       }
       else{
-        if(VAL!=NULL)VAL->slicepoint = VAL->slicelevel + VAL->islice*VAL->nsliceii;
+        if(VAL!=NULL)VAL->slicepoint = VAL->slicelevel + VAL->itime*VAL->nsliceii;
       }
     }
 #undef VAL
@@ -2259,22 +2259,22 @@ void drawvslice_frame(void){
     if(VAL!=NULL){
       if(VAL->compression_type==1){
 #ifdef USE_ZLIB
-        uncompress_slicedataframe(VAL,VAL->islice);
+        uncompress_slicedataframe(VAL,VAL->itime);
 #endif
         VAL->slicepoint=VAL->slicecomplevel;
       }
       else{
-        if(VAL!=NULL)VAL->slicepoint = VAL->slicelevel + VAL->islice*VAL->nsliceii;
+        if(VAL!=NULL)VAL->slicepoint = VAL->slicelevel + VAL->itime*VAL->nsliceii;
       }
     }
     if(u!=NULL&&u->compression_type==0){
-      u->qslice = u->qslicedata + u->islice*u->nsliceii;
+      u->qslice = u->qslicedata + u->itime*u->nsliceii;
     }
     if(v!=NULL&&v->compression_type==0){
-      v->qslice = v->qslicedata + v->islice*v->nsliceii;
+      v->qslice = v->qslicedata + v->itime*v->nsliceii;
     }
     if(w!=NULL&&w->compression_type==0){
-      w->qslice = w->qslicedata + w->islice*w->nsliceii;
+      w->qslice = w->qslicedata + w->itime*w->nsliceii;
     }
     if(vd->volslice==1){
       if(val->terrain==1){
@@ -4963,7 +4963,7 @@ void output_Slicedata(void){
       printf("  Slice data unavailble for output\n");
       continue;
     }
-    data = sd->qslicedata + sd->islice*sd->nsliceii;
+    data = sd->qslicedata + sd->itime*sd->nsliceii;
     strcpy(datafile,sd->file);
     ext = strstr(datafile,".");
     if(ext!=NULL){

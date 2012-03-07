@@ -1523,7 +1523,7 @@ void drawPart5(const particle *parti){
   }
 
   if(current_property==NULL)return;
-  ipframe=parti->iframe;
+  ipframe=parti->itime;
   if(ipframe<0){
     ipframe=0;
     } //xxx need to check this - why is ipframe < 0 ???
@@ -2020,7 +2020,7 @@ void drawPart(const particle *parti){
   int droplet_type, particle_type;
   float *rgb_smoke, *rgb_ismoke;
 
-  ipframe=parti->iframe;
+  ipframe=parti->itime;
   rgb_smoke = rgb_part;
 
   if(parti->ptimes[0]>global_times[itimes])return;

@@ -315,14 +315,14 @@ int is_fire_or_soot(smoke3d *smoke3di){
   if(smoke3di->soot_index!=-1)soot = smoke3dinfo + smoke3di->soot_index;
   if(soot!=NULL&&soot->loaded==1&&soot->display==1){
     is_soot=1;
-    if(soot->frame_all_zeros[soot->iframe]==1)is_soot=0;
+    if(soot->frame_all_zeros[soot->itime]==1)is_soot=0;
   }
 
   is_fire=0;
   if(smoke3di->hrrpuv_index!=-1)fire = smoke3dinfo + smoke3di->hrrpuv_index;
   if(fire!=NULL&&fire->loaded==1&&fire->display==1){
     is_fire=1;
-    if(fire->frame_all_zeros[fire->iframe]==1)is_fire=0;
+    if(fire->frame_all_zeros[fire->itime]==1)is_fire=0;
   }
   return_val=0;
   if(is_soot==1||is_fire==1)return_val=1;
@@ -983,7 +983,7 @@ void updatesmoke3d(smoke3d *smoke3di){
   int countout;
 #endif
 
-  iframe_local = smoke3di->iframe;
+  iframe_local = smoke3di->itime;
   countin = smoke3di->nchars_compressed_smoke[iframe_local];
   countout=smoke3di->nchars_uncompressed;
   switch(smoke3di->version){

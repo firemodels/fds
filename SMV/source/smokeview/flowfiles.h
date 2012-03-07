@@ -58,7 +58,7 @@ typedef struct {
   float *float_vals;
   int *int_vals, nfloat_vals, nint_vals;
   float *times;
-  int ntimes,iframe,*timeslist;
+  int ntimes,itime,*timeslist;
 } geomdata;
 
 /* --------------------------  bounds ------------------------------------ */
@@ -448,7 +448,7 @@ typedef struct _volrenderdata {
   int *nsmokedata_compressed, *nfiredata_compressed;
   float *times;
   int *dataready;
-  int iframe, ntimes, times_defined;
+  int itime, ntimes, times_defined;
   int *timeslist;
   float *smokecolor_yz0, *smokecolor_xz0, *smokecolor_xy0;
   float *smokecolor_yz1, *smokecolor_xz1, *smokecolor_xy1;
@@ -536,7 +536,7 @@ typedef struct _mesh {
   int niso_times;
   float *iso_times;
   int *iso_timeslist;
-  int iiso;
+  int iso_itime;
   int smokedir,smokedir_old;
   float dx, dy, dz, dxy,dxz,dyz;
   float norm[3];
@@ -559,7 +559,7 @@ typedef struct _mesh {
   float *thresholdtime;
   int *patchblank;
   int npatch_times,npatches;
-  int ipatch;
+  int patch_itime;
   int *patch_timeslist;
   int npatchsize;
   int patchfacevis2;
@@ -907,7 +907,7 @@ typedef struct {
   unsigned char *xpartb, *ypartb, *zpartb;
 
   unsigned char *itpart,*isprink;
-  int *sframe, *sprframe, *bframe, ntimes, iframe;
+  int *sframe, *sprframe, *bframe, ntimes, itime;
   int particle_type, droplet_type;
 
   flowlabels label;
@@ -999,7 +999,7 @@ typedef struct _slice {
   char menulabel[128];
   char menulabel2[128];
   float *rgb_slice_ptr[256];
-  int ntimes,islice;
+  int ntimes,itime;
   float *slicedata;
   unsigned char *slicepoint;
   float above_ground_level;
@@ -1106,7 +1106,7 @@ typedef struct _smoke3d {
   int *use_smokeframe;
   int fire_alpha;
   int *timeslist;
-  int ntimes,iframe,lastiframe,ntimes_full;
+  int ntimes,itime,lastiframe,ntimes_full;
   int nchars_uncompressed;
 
   int ncomp_smoke_total;
@@ -1147,7 +1147,7 @@ typedef struct {
   float diff_valmin, diff_valmax;
   int blocknumber,loaded,display;
   float *geom_times, *geom_vals;
-  int *geom_timeslist,geom_ipatch;
+  int *geom_timeslist,geom_itime;
   unsigned char *geom_ivals, **geom_ivals_static, **geom_ivals_dynamic;
   unsigned char *geom_ival_static, *geom_ival_dynamic;
   int geom_nval_static, geom_nval_dynamic;

@@ -281,7 +281,7 @@ void draw_geom(int flag, int frameflag){
       geomlisti = geomi->geomlistinfo-1;
     }
     else{
-      geomlisti = geomi->geomlistinfo+geomi->iframe;
+      geomlisti = geomi->geomlistinfo+geomi->itime;
     }
     ntris = geomlisti->ntriangles;
     npoints = geomlisti->npoints;
@@ -740,7 +740,7 @@ void read_geom(geomdata *geomi, int flag, int *errorcode){
   if(nint_vals>0)fseek(stream,4+nint_vals*4+4,SEEK_CUR);
 
   geomi->ntimes=ntimes_local;
-  geomi->iframe=0;
+  geomi->itime=0;
   NewMemory((void **)&geomi->geomlistinfo_0,(ntimes_local+1)*sizeof(geomlistdata));
   geomi->geomlistinfo=geomi->geomlistinfo_0+1;
   NewMemory((void **)&geomi->times,ntimes_local*sizeof(float));
@@ -1117,7 +1117,7 @@ void Sort_Embedded_Geometry(float *mm){
         geomlisti = geomi->geomlistinfo-1;
       }
       else{
-        geomlisti = geomi->geomlistinfo+geomi->iframe;
+        geomlisti = geomi->geomlistinfo+geomi->itime;
       }
 
       count_all+=geomlisti->ntriangles;
@@ -1178,7 +1178,7 @@ void Sort_Embedded_Geometry(float *mm){
         geomlisti = geomi->geomlistinfo-1;
       }
       else{
-        geomlisti = geomi->geomlistinfo+geomi->iframe;
+        geomlisti = geomi->geomlistinfo+geomi->itime;
       }
 
       for(j=0;j<geomlisti->ntriangles;j++){

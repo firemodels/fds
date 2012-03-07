@@ -296,16 +296,16 @@ void checktimebound(void){
     iframe=iframebeg;
     for(i=0;i<nsliceinfo;i++){
       sd=sliceinfo+i;
-      sd->islice=0;
+      sd->itime=0;
     }
     for(i=0;i<nmeshes;i++){
       meshi=meshinfo+i;
-      meshi->ipatch=0;
+      meshi->patch_itime=0;
     }
     for(i=0;i<nmeshes;i++){
       meshi=meshinfo+i;
       if(meshi->iso_times==NULL)continue;
-      meshi->iiso=0;
+      meshi->iso_itime=0;
     }
   }
   if(timedrag==0&&itimes<0||timedrag==1&&itimes>nglobal_times-1){
@@ -313,20 +313,20 @@ void checktimebound(void){
     itimes=nglobal_times-1;
     for(i=0;i<npartinfo;i++){
       parti=partinfo+i;
-      parti->iframe=parti->ntimes-1;
+      parti->itime=parti->ntimes-1;
     }
     for(i=0;i<nsliceinfo;i++){
       sd=sliceinfo+i;
-      sd->islice=sd->ntimes-1;
+      sd->itime=sd->ntimes-1;
     }
     for(i=0;i<nmeshes;i++){
       meshi=meshinfo+i;
-      meshi->ipatch=meshi->npatch_times-1;
+      meshi->patch_itime=meshi->npatch_times-1;
     }
     for(i=0;i<nmeshes;i++){
       meshi=meshinfo+i;
       if(meshi->iso_times==NULL)continue;
-      meshi->iiso=meshi->niso_times-1;
+      meshi->iso_itime=meshi->niso_times-1;
     }
   }
   /* set blockage visibility */

@@ -820,7 +820,7 @@ void drawiso_orig(int tranflag){
     isotri **iso_list_start;
     int niso_list_start;
 
-    asurface = meshi->animatedsurfaces + meshi->iiso*meshi->nisolevels;
+    asurface = meshi->animatedsurfaces + meshi->iso_itime*meshi->nisolevels;
     if(cullfaces==1)glDisable(GL_CULL_FACE);
 
     iso_specular[3] = 1.0;
@@ -910,7 +910,7 @@ void drawiso_orig(int tranflag){
   }
 
   if((visAIso&2)==2){
-    asurface = meshi->animatedsurfaces + meshi->iiso*meshi->nisolevels;
+    asurface = meshi->animatedsurfaces + meshi->iso_itime*meshi->nisolevels;
 
     glPushAttrib(GL_LIGHTING_BIT);
     antialias(1);
@@ -976,7 +976,7 @@ void drawiso_orig(int tranflag){
   }
 
   if((visAIso&4)==4){
-    asurface = meshi->animatedsurfaces + meshi->iiso*meshi->nisolevels;
+    asurface = meshi->animatedsurfaces + meshi->iso_itime*meshi->nisolevels;
 
     antialias(1);
     glPointSize(isopointsize);
@@ -1724,10 +1724,10 @@ void Update_Isotris(int flag){
     }
   }
 
-  iso_trans=iso_trans_list[loaded_isomesh->iiso];
-  iso_opaques=iso_opaques_list[loaded_isomesh->iiso];
-  niso_trans=niso_trans_list[loaded_isomesh->iiso];
-  niso_opaques=niso_opaques_list[loaded_isomesh->iiso];
+  iso_trans=iso_trans_list[loaded_isomesh->iso_itime];
+  iso_opaques=iso_opaques_list[loaded_isomesh->iso_itime];
+  niso_trans=niso_trans_list[loaded_isomesh->iso_itime];
+  niso_opaques=niso_opaques_list[loaded_isomesh->iso_itime];
 
   if(niso_trans==-1||niso_opaques==-1){
     int i;
@@ -1745,7 +1745,7 @@ void Update_Isotris(int flag){
   
       CheckMemory;
       meshi = meshinfo + isoi->blocknumber;
-      asurface = meshi->animatedsurfaces + meshi->iiso*meshi->nisolevels;
+      asurface = meshi->animatedsurfaces + meshi->iso_itime*meshi->nisolevels;
       showlevels=meshi->showlevels;
   
       if(transparent_state==ALL_TRANSPARENT){
@@ -1843,8 +1843,8 @@ void Update_Isotris(int flag){
   if(sort_iso_triangles==1&&niso_trans>0){
     Sort_Iso_Triangles(modelview_scratch);
   }
-  niso_trans_list[loaded_isomesh->iiso]=niso_trans;
-  niso_opaques_list[loaded_isomesh->iiso]=niso_opaques;
+  niso_trans_list[loaded_isomesh->iso_itime]=niso_trans;
+  niso_opaques_list[loaded_isomesh->iso_itime]=niso_opaques;
 
   CheckMemory;
 }

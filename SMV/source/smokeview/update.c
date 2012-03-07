@@ -51,7 +51,7 @@ void update_framenumber(int changetime){
         parti = partinfo+i;
         if(parti->loaded==1){
           if(parti->timeslist==NULL)continue;
-          parti->iframe=parti->timeslist[itimes];
+          parti->itime=parti->timeslist[itimes];
         }
       }
     }
@@ -75,18 +75,18 @@ void update_framenumber(int changetime){
         vr->firedataptr=NULL;
         if(fire==NULL||smoke==NULL)continue;
         if(vr->loaded==0||vr->display==0)continue;
-        vr->iframe = vr->timeslist[itimes];
-        for(j=vr->iframe;j>=0;j--){
+        vr->itime = vr->timeslist[itimes];
+        for(j=vr->itime;j>=0;j--){
           if(vr->dataready[j]==1)break;
         }
-        vr->iframe=j;
-        if(smoke!=NULL&&vr->iframe>=0){
+        vr->itime=j;
+        if(smoke!=NULL&&vr->itime>=0){
           if(vr->is_compressed==1||load_volcompressed==1){
             unsigned char *c_smokedata_compressed;
             uLongf framesize;
             float timeval;
 
-            c_smokedata_compressed = vr->smokedataptrs[vr->iframe];
+            c_smokedata_compressed = vr->smokedataptrs[vr->itime];
             framesize = smoke->nslicei*smoke->nslicej*smoke->nslicek;
             uncompress_volsliceframe(c_smokedata_compressed,
                            vr->smokedata_view, framesize, &timeval,
@@ -95,17 +95,17 @@ void update_framenumber(int changetime){
             vr->smokedataptr = vr->smokedata_view;
           }
           else{
-            vr->smokedataptr = vr->smokedataptrs[vr->iframe];
+            vr->smokedataptr = vr->smokedataptrs[vr->itime];
           }
           CheckMemory;
         }
-        if(fire!=NULL&&vr->iframe>=0){
+        if(fire!=NULL&&vr->itime>=0){
           if(vr->is_compressed==1||load_volcompressed==1){
             unsigned char *c_firedata_compressed;
             uLongf framesize;
             float timeval;
 
-            c_firedata_compressed = vr->firedataptrs[vr->iframe];
+            c_firedata_compressed = vr->firedataptrs[vr->itime];
             framesize = fire->nslicei*fire->nslicej*fire->nslicek;
             uncompress_volsliceframe(c_firedata_compressed,
                            vr->firedata_view, framesize, &timeval,
@@ -115,7 +115,7 @@ void update_framenumber(int changetime){
             CheckMemory;
           }
           else{
-            vr->firedataptr = vr->firedataptrs[vr->iframe];
+            vr->firedataptr = vr->firedataptrs[vr->itime];
           }
           CheckMemory;
         }
@@ -127,7 +127,7 @@ void update_framenumber(int changetime){
       geomi = geominfoptrs[i];
       if(geomi->loaded==0)continue;
       if(geomi->timeslist==NULL)continue;
-      geomi->iframe=geomi->timeslist[itimes];
+      geomi->itime=geomi->timeslist[itimes];
     }
     if(showslice==1||showvslice==1){
       for(ii=0;ii<nslice_loaded;ii++){
@@ -136,7 +136,7 @@ void update_framenumber(int changetime){
         i = slice_loaded_list[ii];
         sd = sliceinfo+i;
         if(sd->timeslist==NULL)continue;
-        sd->islice=sd->timeslist[itimes];
+        sd->itime=sd->timeslist[itimes];
       }
     }
     if(show3dsmoke==1){
@@ -145,9 +145,9 @@ void update_framenumber(int changetime){
 
         smoke3di = smoke3dinfo + i;
         if(smoke3di->loaded==0||smoke3di->display==0)continue;
-        smoke3di->iframe=smoke3di->timeslist[itimes];
-        if(smoke3di->iframe!=smoke3di->lastiframe){
-          smoke3di->lastiframe=smoke3di->iframe;
+        smoke3di->itime=smoke3di->timeslist[itimes];
+        if(smoke3di->itime!=smoke3di->lastiframe){
+          smoke3di->lastiframe=smoke3di->itime;
           updatesmoke3d(smoke3di);
         }
       }
@@ -161,11 +161,11 @@ void update_framenumber(int changetime){
         if(patchi->filetype!=2)continue;
         if(patchi->geom_times==NULL)continue;
         if(patchi->geom_timeslist==NULL)continue;
-        patchi->geom_ipatch=patchi->geom_timeslist[itimes];
-        patchi->geom_ival_static = patchi->geom_ivals_static[patchi->geom_ipatch];
-        patchi->geom_ival_dynamic = patchi->geom_ivals_dynamic[patchi->geom_ipatch];
-        patchi->geom_nval_static = patchi->geom_nstatics[patchi->geom_ipatch];
-        patchi->geom_nval_dynamic = patchi->geom_ndynamics[patchi->geom_ipatch];
+        patchi->geom_itime=patchi->geom_timeslist[itimes];
+        patchi->geom_ival_static = patchi->geom_ivals_static[patchi->geom_itime];
+        patchi->geom_ival_dynamic = patchi->geom_ivals_dynamic[patchi->geom_itime];
+        patchi->geom_nval_static = patchi->geom_nstatics[patchi->geom_itime];
+        patchi->geom_nval_dynamic = patchi->geom_ndynamics[patchi->geom_itime];
       }
       for(i=0;i<nmeshes;i++){
         patch *patchi;
@@ -176,13 +176,13 @@ void update_framenumber(int changetime){
         if(patchi->filetype==2)continue;
         if(meshi->patch_times==NULL)continue;
         if(meshi->patch_timeslist==NULL)continue;
-        meshi->ipatch=meshi->patch_timeslist[itimes];
+        meshi->patch_itime=meshi->patch_timeslist[itimes];
         if(patchi->compression_type==0){
-          meshi->ipqqi = meshi->ipqq + meshi->ipatch*meshi->npatchsize;
+          meshi->ipqqi = meshi->ipqq + meshi->patch_itime*meshi->npatchsize;
         }
         else{
 #ifdef USE_ZLIB
-          uncompress_patchdataframe(meshi,meshi->ipatch);
+          uncompress_patchdataframe(meshi,meshi->patch_itime);
 #endif
         }
       }
@@ -199,7 +199,7 @@ void update_framenumber(int changetime){
 
         if(meshi->iso_times==NULL)continue;
         if(meshi->iso_timeslist==NULL)continue;
-        meshi->iiso=meshi->iso_timeslist[itimes];
+        meshi->iso_itime=meshi->iso_timeslist[itimes];
       }
     }
     if(ntotal_smooth_blockages>0){
@@ -1497,17 +1497,17 @@ void updatetimes(void){
 
     geomi = geominfoptrs[i];
     if(geomi->loaded==0||geomi->display==0)continue;
-    geomi->iframe=0;
+    geomi->itime=0;
   }
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
 
     meshi=meshinfo+i;
-    meshi->ipatch=0;
+    meshi->patch_itime=0;
   }
   for(i=0;i<nsliceinfo;i++){
     sd = sliceinfo + i;
-    sd->islice=0; 
+    sd->itime=0; 
   }
   iframe=iframebeg; 
   for(i=0;i<nmeshes;i++){
@@ -1515,11 +1515,11 @@ void updatetimes(void){
 
     meshi=meshinfo+i;
     if(meshi->iso_times==NULL)continue;
-    meshi->iiso=0;
+    meshi->iso_itime=0;
   }
   for(i=0;i<npartinfo;i++){
     parti = partinfo + i;
-    parti->iframe=0;
+    parti->itime=0;
   }
 
   /* determine visibility of each blockage at each time step */

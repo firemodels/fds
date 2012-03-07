@@ -1459,12 +1459,12 @@ void RenderMenu(int value){
     reset_itimes0();
     for(i=0;i<nsliceinfo;i++){
       sd=sliceinfo+i;
-      sd->islice=0;
+      sd->itime=0;
     }
     iframe=iframebeg;
     for(i=0;i<nmeshes;i++){
       meshi=meshinfo+i;
-      meshi->ipatch=0;
+      meshi->patch_itime=0;
     }
     UpdateTimeLabels();
     RenderSkip=value;
