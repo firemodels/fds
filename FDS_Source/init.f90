@@ -746,7 +746,7 @@ DO K=0,KBP1
    ENDDO
 ENDDO
  
-IF (.NOT.EVACUATION_ONLY(NM)) THEN
+NOT_EVAC_IF_2: IF (.NOT.EVACUATION_ONLY(NM)) THEN
 DO J=0,JBP1
    DO I=0,IBP1
       K   = 0
@@ -779,7 +779,7 @@ DO J=0,JBP1
       IF (IERR>0) RETURN
    ENDDO
 ENDDO
-ENDIF
+ENDIF NOT_EVAC_IF_2
 
 ! Go through all obstructions and decide which cell faces ought to be given a wall cell index and initialized
 
@@ -1787,14 +1787,14 @@ IF (ABS(IOR)==1) THEN
       XW     = M%X(I)
       IIG    = I+1
       RDN    = M%RDXN(I) 
-      IF (.NOT.EVACUATION_ONLY(NM)) AW     = M%R(I)*M%DY(J)*M%DZ(K)
+      AW     = M%R(I)*M%DY(J)*M%DZ(K)
       UW     = -U0
    ENDIF
    IF (IOR==-1) THEN
       XW     = M%X(I-1)
       IIG    = I-1
       RDN    = M%RDXN(I-1) 
-      IF (.NOT.EVACUATION_ONLY(NM)) AW     = M%R(I-1)*M%DY(J)*M%DZ(K)
+      AW     = M%R(I-1)*M%DY(J)*M%DZ(K)
       UW     = U0
    ENDIF
    JJG    = J
@@ -1819,7 +1819,7 @@ IF (ABS(IOR)==2) THEN
    KKG    = K   
    XW = M%XC(I)
    ZW = M%ZC(K)
-   IF (.NOT.EVACUATION_ONLY(NM)) AW = M%DX(I)*M%DZ(K)
+   AW = M%DX(I)*M%DZ(K)
 ENDIF
 IF (ABS(IOR)==3) THEN
    IF (IOR== 3) THEN
@@ -1838,7 +1838,7 @@ IF (ABS(IOR)==3) THEN
    JJG    = J   
    XW = M%XC(I)
    YW = M%YC(J)
-   IF (.NOT.EVACUATION_ONLY(NM)) AW = M%DX(I)*M%RC(I)*M%DY(J)
+   AW = M%DX(I)*M%RC(I)*M%DY(J)
 ENDIF
  
 IF (IOR==0) THEN
@@ -2229,7 +2229,7 @@ IF (.NOT.EVACUATION_ONLY(NM)) WC%NPPCW  = SF%NPPC      ! Number of particles per
 
 ! Allocate vegetation arrays
 
-IF (SF%VEGETATION) THEN
+IF (SF%VEGETATION .AND. .NOT.EVACUATION_ONLY(NM)) THEN
 
    ALLOCATE(WC%VEG_FUELMASS_L(SF%NVEG_L),STAT=IZERO)
    CALL ChkMemErr('FUNC','VEG_FUELMASS_L',IZERO)
