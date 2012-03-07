@@ -6748,6 +6748,10 @@ rather than the local gas temperature.
 Also note that if {\ct MASSLESS=.TRUE.}, the {\ct SAMPLING\_FACTOR} is set to 1 unless you say otherwise, which would be pointless
 since {\ct MASSLESS} particles are for visualization only.
 
+\subsection{Turbulent Dispersion}
+\label{info:DISPERSION}
+
+For {\ct MASSLESS} tracer particles it is possible to account for the dispersion due to unresolved turbulent fluctuations.  Set {\ct TURBULENT\_DISPERSION=.TRUE.} on the {\ct PART} line.  The tracer particles will undergo a random walk based on the local turbulent diffusivity (based on the viscosity and the Schmidt number, $D = \mu/\mbox{Sc}$).
 
 \subsection{Static Particles or Droplets}
 \label{info:STATIC}
@@ -10515,6 +10519,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct STATIC}                        & Logical         & Section~\ref{info:STATIC}               &           & {\ct .FALSE.} \\ \hline
 {\ct SURFACE\_TENSION}              & Real            & Section~\ref{info:secondary_breakup}    &   N/m     & 72.8$\cdot 10^3$  \\ \hline
 {\ct SURF\_ID}                      & Character       & Section~\ref{info:PART_SURF}            &           &               \\ \hline
+{\ct TURBULENT\_DISPERSION}         & Logical         & Section~\ref{info:DISPERSION}           &           & .FALSE.       \\ \hline
 {\ct USER\_DRAG\_COEFFICIENT}       & Real            & Section~\ref{info:particle_drag}        &           & -1.           \\ \hline
 {\ct VERTICAL\_VELOCITY}            & Real            & Section~\ref{info:surface_droplets}     & m/s       &  0.5          \\ \hline
 \end{longtable}
