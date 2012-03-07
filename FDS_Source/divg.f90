@@ -602,7 +602,7 @@ ENTHALPY_TRANSPORT_IF: IF (ENTHALPY_TRANSPORT) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE         
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             DP(I,J,K) = ( DP(I,J,K) - (PBAR_D_RHSOP_DT(I,J,K) + U_DOT_DEL_RHO_H_S(I,J,K)) )/RHO_H_S_P(I,J,K)
          ENDDO
       ENDDO 
