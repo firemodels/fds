@@ -309,7 +309,7 @@ void checktimebound(void){
     }
   }
   if(timedrag==0&&itimes<0||timedrag==1&&itimes>nglobal_times-1){
-    izone=nzonet-1;
+    izone=nzone_times-1;
     itimes=nglobal_times-1;
     for(i=0;i<npartinfo;i++){
       parti=partinfo+i;

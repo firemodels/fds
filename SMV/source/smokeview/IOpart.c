@@ -227,7 +227,7 @@ void getpart5data(particle *parti, int partframestep_local, int partpointstep_lo
     if(returncode==0)break;
     if(doit==1){
       printf("particle time=%.2f",time_local);
-      parti->ptimes[count2]=time_local;
+      parti->times[count2]=time_local;
     }
     for(i=0;i<nclasses;i++){
       part5class *partclassi;
@@ -848,7 +848,7 @@ void getpart5header(particle *parti, int partframestep_local, int *nf_all){
   // allocate memory for number of time steps * number of classes
 
   NewMemory((void **)&parti->data5,parti->nclasses*parti->ntimes*sizeof(part5data));
-  NewMemory((void **)&parti->ptimes,parti->ntimes*sizeof(float));
+  NewMemory((void **)&parti->times,parti->ntimes*sizeof(float));
 
   // free memory for x, y, z frame data 
 
@@ -988,7 +988,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
   plotstate=getplotstate(DYNAMIC_PLOTS);
   updatemenu=1;
 
-  FREEMEMORY(parti->ptimes); 
+  FREEMEMORY(parti->times); 
 
   if(colorlabelpart!=NULL){
     int n;
@@ -1168,7 +1168,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   plotstate=getplotstate(DYNAMIC_PLOTS);
   updatemenu=1;
 
-  FREEMEMORY(parti->ptimes); 
+  FREEMEMORY(parti->times); 
   FREEMEMORY(parti->xpart);  FREEMEMORY(parti->ypart);  FREEMEMORY(parti->zpart);  
   FREEMEMORY(parti->xpartb); FREEMEMORY(parti->ypartb); FREEMEMORY(parti->zpartb); 
   FREEMEMORY(parti->xparts); FREEMEMORY(parti->yparts); FREEMEMORY(parti->zparts); 
@@ -1263,7 +1263,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     }
   }
 
-  if(NewMemory((void **)&parti->ptimes,sizeof(float)*npartframes)==0){
+  if(NewMemory((void **)&parti->times,sizeof(float)*npartframes)==0){
     *errorcode=1;
     FORTclosefortranfile(&file_unit);
     readpart("",ifile,UNLOAD,&error);
@@ -1327,7 +1327,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   FORTgetdata2(&file_unit,
     parti->xparts,parti->yparts,parti->zparts,
     parti->tpart,&parti->droplet_type,parti->isprink,
-    tspr,parti->bframe,parti->sframe,parti->sprframe,parti->ptimes,&nspr,&npartpoints,&npartframes,&parti->ntimes,
+    tspr,parti->bframe,parti->sframe,parti->sprframe,parti->times,&nspr,&npartpoints,&npartframes,&parti->ntimes,
     &settmin_p,&settmax_p,&tmin_p,&tmax_p,&partframestep,&partpointstep, 
     &xbar0, &xbox, &ybar0, &ybox, &zbar0, &zbox,
     &offset_x, &offset_y, &offset_z,
@@ -2023,7 +2023,7 @@ void drawPart(const particle *parti){
   ipframe=parti->itime;
   rgb_smoke = rgb_part;
 
-  if(parti->ptimes[0]>global_times[itimes])return;
+  if(parti->times[0]>global_times[itimes])return;
 
   if(parti->version==1){
     drawPart5(parti);

@@ -5081,7 +5081,7 @@ typedef struct {
       parti->sort_tags_loaded=0;
       parti->loaded=0;
       parti->display=0;
-      parti->ptimes=NULL; 
+      parti->times=NULL; 
       parti->xpart=NULL;  
       parti->ypart=NULL;  
       parti->zpart=NULL;  

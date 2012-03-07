@@ -900,7 +900,7 @@ typedef struct {
   float zoffset;
   int blocknumber;
   int num_memblocks;
-  float *ptimes;
+  float *times;
   int *timeslist;
   float *xpart, *ypart, *zpart, *tpart;
   short *xparts, *yparts, *zparts;

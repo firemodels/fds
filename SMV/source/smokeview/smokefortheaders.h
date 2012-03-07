@@ -62,9 +62,9 @@ STDCALL FORTfcreate_part5sizefile(char *part5file, char *part5sizefile, int *ang
 
 STDCALL FORTgetsliceparms(char *file,int *endian,
                           int *is1,int *is2,int *js1,int *js2,int *ks1, int *ks2,int *ni, int *nj, int *nk, int *slice3d, int *error,FILE_SIZE lenfile);
-STDCALL FORTgetzonesize(char *zonefilename, int *nzonet, int *nrooms, int *nfires, int *endian, int *error, FILE_SIZE len);
-STDCALL FORTgetzonedata(char *zonefilename, int *nzonet, int *nrooms, int *nfires, 
-                        float *zonet, float *zoneqfire, float *zonepr, float *zoneylay,float *zonetl,float *zonetu, int *endian,
+STDCALL FORTgetzonesize(char *zonefilename, int *nzone_times, int *nrooms, int *nfires, int *endian, int *error, FILE_SIZE len);
+STDCALL FORTgetzonedata(char *zonefilename, int *nzone_times, int *nrooms, int *nfires, 
+                        float *zone_times, float *zoneqfire, float *zonepr, float *zoneylay,float *zonetl,float *zonetu, int *endian,
                         int *error, FILE_SIZE len);
 STDCALL FORTgetxyzdata(int *iblank,int *nx,int *ny,int *nz,int *error);
 STDCALL FORTgetpatchsizes1(int *file_unit,char *patchfilename,char *patchlonglabel,char *patchshortlabel,char *patchunit,
@@ -80,7 +80,7 @@ STDCALL FORTgetdata2(int *file_unit,
                      short *xparts, short *yparts, short *zparts,
                      float *t,
                      int *sprinkflag, unsigned char *isprink, float *tspr, int *bframe,int *sframe,int *sprframe,
-                     float *ptimes,int *nspr,int *nmax,int *mxframes,int *nframes,
+                     float *times,int *nspr,int *nmax,int *mxframes,int *nframes,
                      int *settime_p, int *settmax_p, float *tmin_p, float *tmax_p, int *partframestep, int *partpointstep, 
                      float *xbox0, float *xbox, float *ybox0, float *ybox, float *zbox0, float *zbox, 
                      float *offset_x, float *offset_y, float *offset_z,

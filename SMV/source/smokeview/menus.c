@@ -2633,7 +2633,7 @@ void update_streakvalue(float value){
   }
   if(parti!=NULL&&parti->ntimes>1){
     for(i=0;i<parti->ntimes-1;i++){
-      if(parti->ptimes[i]<=value&&value<parti->ptimes[i+1]){
+      if(parti->times[i]<=value&&value<parti->times[i+1]){
         streak5step=i;
         break;
       }
