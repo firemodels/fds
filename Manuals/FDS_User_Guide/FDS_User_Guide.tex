@@ -480,11 +480,13 @@ water droplet transport on solid objects.\\
 \setlength{\cftfignumwidth}{0.45in}
 \setlength{\cfttabnumwidth}{0.45in}
 
-\clearpage
+\cleardoublepage
 \tableofcontents
-\clearpage
+
+\cleardoublepage
 \listoffigures
-\clearpage
+
+\cleardoublepage
 \listoftables
 
 \mainmatter
@@ -532,12 +534,7 @@ enough. LES is the default mode of operation.
 \item[Combustion Model]
 For most applications, FDS uses a single step, mixing-controlled chemical reaction which uses three lumped species (a species representing a group of species).
 These lumped species are air, fuel, and products. By default the last two lumped species are explicitly
-computed. A two-step chemical reaction with an additional lumped species can also be used with the first step being oxidation of fuel to
-carbon monoxide and the second step the oxidation of carbon monoxide to carbon dioxide.
-The four lumped species for the two step reaction are air, fuel plus an optional diluent, and products of incomplete combustion
-({\em i.e.} products of the first step), and products of complete combustion (i.e. products of the second step).  The mass fractions of all of the major
-reactants and products can be derived from the lumped species by means of
-``state relations.''  Lastly, a multiple-step finite rate model is also available.
+computed. Options are available to include multiple reactions and reactions that not necessarily mixing-controlled.  
 
 \item[Radiation Transport] Radiative heat transfer is included in the
 model via the solution of the radiation transport equation for a
@@ -653,8 +650,7 @@ compile FDS for other versions of OS X (See Appendix~\ref{info:compilation} for 
 Pre-compiled executables are available that can be installed in an appropriate directory. Note that
 the installation package is simply an archive and no path variables are set. If the pre-compiled
 FDS executable does not work (usually because of library incompatibilities),
-the FDS source code can be downloaded and compiled using a Fortran 90 and
-C compiler (See Appendix~\ref{info:compilation} for details). If Smokeview
+the FDS Fortran source code can be downloaded and compiled (See Appendix~\ref{info:compilation} for details). If Smokeview
 does not work on the Linux workstation, you can use the Windows version to view FDS output.
 
 \item[{\bf Unix}]
@@ -1129,12 +1125,12 @@ Solid Fuels     & Pyrolysis model of solid fuel  & Results in FDS 5.4 and beyond
 \section{Naming the Job}
 
 The operation of FDS is based on a single ASCII\footnote{ASCII -- American Standard Code
-for Information Interchange. There are 256 characters that make up the standard ASCII text.} text file containing parameters organized into {\em namelist}
-\footnote{A {\em namelist} is a Fortran input record.} groups.
+for Information Interchange. There are 256 characters that make up the standard ASCII text.} text file containing parameters organized into 
+{\em namelist}\footnote{A {\em namelist} is a Fortran input record.} groups.
 The input file provides FDS  with all of the necessary information to
 describe the scenario.
-The input file is saved with a name such as {\bf job\_name.fds},
-where {\bf job\_name} is any character string that helps to identify
+The input file is saved with a name such as {\ct job\_name.fds},
+where {\ct job\_name} is any character string that helps to identify
 the simulation. If this same string is repeated under the {\ct HEAD} namelist group within the
 input file, then all of the output files associated with the calculation will then have this common name.
 
@@ -1385,7 +1381,7 @@ two parameters, as in this example:
 
 \begin{description}
 \item {\ct CHID} is a string of 30 characters or less used to tag the output files.
-If, for example, {\ct CHID='WTC\_05\_v5'}, it is convenient to
+If, for example, {\ct CHID='WTC\_05'}, it is convenient to
 name the input data file {\ct WTC\_05\_v5.fds} so that the input file
 can be associated with the output files. No periods or spaces are allowed in
 {\ct CHID} because the output files are tagged with suffixes that
@@ -1950,12 +1946,6 @@ guide.
 \item[{\ct DNS}] A logical parameter that, if {\ct .TRUE.}, directs FDS to perform a Direct Numerical Simulation,
 as opposed to the default Large Eddy Simulation (LES). This feature is appropriate only for simulations that use mesh cells that are
 on the order of a millimeter or less in size, or for diagnostic purposes.
-\item[{\ct GAMMA}] Ratio of specific heats. Normally, FDS derives gas properties using look-up tables for known gases. However, sometimes there
-are declared gaseous species with no known properties, in which case FDS uses this parameter to estimate the specific heat and other properties. The default is
-1.4, based on an assumption of a perfect diatomic molecule like nitrogen. If you want FDS to assume that the specific heats of the gases are independent of
-temperature and equal to
-\be c_{p,\alpha} = \frac{\gamma}{\gamma-1} \frac{\cal R}{W_\alpha} \ee
-set {\ct CONSTANT\_SPECIFIC\_HEAT=.TRUE.}
 \item[{\ct GVEC}] The 3 components of gravity, in m/s$^2$. The default is {\ct GVEC=0,0,-9.81}.
 \item[{\ct NOISE}] FDS initializes the flow field with a very small amount of ``noise'' to prevent the
 development of a perfectly symmetric flow when the boundary
@@ -2255,7 +2245,7 @@ Below we examine the necessary conditions for stability in the presence of advec
 
 The well-known CFL constraint given by
 \begin{equation}
-\mbox{CFL} = \delta t \frac{\|\mathbf{u}\|}{\delta x} \approx 1
+\mbox{CFL} = \delta t \frac{\|\mathbf{u}\|}{\delta x} < 1
 \end{equation}
 places a restriction on the time step due to the advection velocity.  The limits for the CFL are set by {\ct CFL\_MIN} and {\ct CFL\_MAX} on {\ct MISC}.
 Physically, the constraint says that a fluid element should not traverse more than one cell within a time step.
@@ -2263,7 +2253,7 @@ For LES, this constraint has the added advantage of keeping the implicit tempora
 In other words, in order to resolve an eddy of size $\delta x$, the time step needs to be in concert with the CFL.
 If one were to employ an implicit scheme for purpose of taking time steps say 10 times larger than the CFL limit, the smallest resolvable turbulent motions
 would then be roughly 10 times the grid spacing, which would severely limit the benefit of the LES.  In most cases, if one wishes the simulation to run faster,
-a better strategy is to coarsen the grid resolution while keeping the CFL $\approx 1$.
+a better strategy is to coarsen the grid resolution while keeping the CFL close to 1.
 
 The exact CFL needed to maintain stability depends on the order (as well as other properties) of the time integration scheme and the choice of velocity norm.
 Three choices for velocity norm are available in FDS (set on {\ct MISC}):
@@ -5720,6 +5710,11 @@ its molecular weight, {\ct MW} (g/mol),
 its {\ct VISCOSITY} (kg/m/s), its (thermal) {\ct CONDUCTIVITY} (W/m/K), and its
 {\ct DIFFUSIVITY} (m$^2$/s). The diffusivity is assumed to be the binary diffusion coefficient between the given species
 and the background species. If any of these properties are omitted, FDS will assume the properties of air.
+The specific heat of the gas will be calculated from its molecular weight using the relation:
+\be c_{p,\alpha} = \frac{\gamma}{\gamma-1} \frac{\cal R}{W_\alpha} \ee
+The ratio of specific heats, {\ct GAMMA}, is 1.4 by default and can be changed on the {\ct MISC} line. If you want all the gas specific heats to 
+follow this relation,
+set {\ct CONSTANT\_SPECIFIC\_HEAT=.TRUE.} on the {\ct MISC} line.
 
 \subsubsection{Additional Parameters}
 
@@ -10328,7 +10323,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct FLUX\_LIMITER}                             & Integer       & Reference~\cite{FDS_Tech_Guide}                       &               & 4                 \\ \hline
 {\ct FORCE\_VECTOR(3)}                          & Real          & Section~\ref{info:force_vector}                       &               & 0.                \\ \hline
 {\ct FREEZE\_VELOCITY}                          & Logical       & Constant velocity                                         &               & {\ct .FALSE.}     \\ \hline
-{\ct GAMMA}                                     & Real          & Section~\ref{info:MISC_Basics}                        &               & 1.4               \\ \hline
+{\ct GAMMA}                                     & Real          & Section~\ref{gas_species_props}                       &               & 1.4               \\ \hline
 {\ct GROUND\_LEVEL}                             & Real          & Section~\ref{info:stratification}                     & m             & 0.                \\ \hline
 {\ct GVEC}                                      & Real triplet  & Section~\ref{info:GVEC}                               & m/s$^2$       & 0,0,-9.81         \\ \hline
 %{\ct IMMERSED\_BOUNDARY\_METHOD}                & Logical       &                                                           &               & {\ct .FALSE.}     \\ \hline
@@ -10498,7 +10493,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DISTRIBUTION}                  & Character       & Section~\ref{info:particle_size}        &           & {\ct 'ROSIN-RAMMLER-LOGNORMAL'} \\ \hline
 {\ct DRAG\_LAW}                     & Character       & Section~\ref{info:particle_drag}        &           & {\ct 'SPHERE'}\\ \hline
 {\ct EVAPORATE}                     & Logical         & Section~\ref{thermal_part_props}        &           & {\ct .TRUE.}  \\ \hline
-{\ct GAMMA}                         & Real            & Section~\ref{thermal_part_props}        &           & 1.4           \\ \hline
 {\ct GAMMA\_D}                      & Real            & Section~\ref{info:particle_size}        &           & 2.4           \\ \hline
 {\ct HEAT\_OF\_COMBUSTION}          & Real            & Section~\ref{info:fuel_droplets}        & kJ/kg     &               \\ \hline
 {\ct HORIZONTAL\_VELOCITY}          & Real            & Section~\ref{info:surface_droplets}     & m/s       &  0.2          \\ \hline
@@ -10528,7 +10522,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %               VEG_BURNING_RATE_MAX,VEG_DEHYDRATION_RATE_MAX,VEG_INITIAL_TEMPERATURE,VEG_FUEL_MPV_MIN,
 %               VEG_MOIST_MPV_MIN,VEG_REMOVE_CHARRED,VEG_STEM,VEG_DEGRADATION,VEG_CHAR_OXIDATION
 
-% Undocumented: SURFACE_TENSION,BREAKUP,BREAKUP_CHILD_DIAMETER,BREAKUP_CHILD_GAMMA_D,BREAKUP_CHILD_SIGMA_D,
+% Undocumented: SURFACE_TENSION,BREAKUP,BREAKUP_CHILD_DIAMETER,BREAKUP_CHILD_SIGMA_D,
 %               DENSE_VOLUME_FRACTION,NUMBER_RADIATION_ANGLES,ORIENTATION
 
 
