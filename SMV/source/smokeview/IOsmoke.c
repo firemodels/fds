@@ -475,8 +475,14 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
 #endif
     return;
   }
+  
+  if(smoke3di->compression_type==UNKNOWN){
+    smoke3di->compression_type=getsmoke3d_version(smoke3di);
+    updatesmoke3dmenulabels();
+  }
+
   CheckMemory;
-  if(getsmoke3d_sizes(skip_global,smoke3di->file,smoke3di->version,&smoke3di->times, &smoke3di->use_smokeframe,
+  if(getsmoke3d_sizes(skip_global,smoke3di->file,smoke3di->compression_type,&smoke3di->times, &smoke3di->use_smokeframe,
                  &smoke3di->nchars_uncompressed, 
                  &smoke3di->nchars_compressed_smoke,
                  &smoke3di->nchars_compressed_smoke_full,
@@ -570,7 +576,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
   smoke3di->js2=nxyz[5];
   smoke3di->ks1=nxyz[6];
   smoke3di->ks2=nxyz[7];
-  smoke3di->version=nxyz[1];
+  smoke3di->compression_type=nxyz[1];
 
   // read smoke data
 
@@ -986,11 +992,11 @@ void updatesmoke3d(smoke3d *smoke3di){
   iframe_local = smoke3di->itime;
   countin = smoke3di->nchars_compressed_smoke[iframe_local];
   countout=smoke3di->nchars_uncompressed;
-  switch(smoke3di->version){
-  case 0:
+  switch(smoke3di->compression_type){
+  case RLE:
     countout = irle(smoke3di->smokeframe_comp_list[iframe_local],countin,smoke3di->smokeframe_in);
     break;
-  case 1:
+  case ZLIB:
 #ifdef USE_ZLIB
     uncompress(
       smoke3di->smokeframe_in,&countout,
@@ -4861,16 +4867,18 @@ void updatesmoke3dmenulabels(void){
   for(i=0;i<nsmoke3dinfo;i++){
     smoke3di = smoke3dinfo + i;
     STRCPY(smoke3di->menulabel,smoke3di->label.longlabel);
-    smoke3di->version=getsmoke3d_version(smoke3di);
     if(showfiles==1){
       STRCAT(smoke3di->menulabel,", ");
       STRCAT(smoke3di->menulabel,smoke3di->file);
     }
-    switch(smoke3di->version){
-    case 0:
+    switch(smoke3di->compression_type){
+    case UNKNOWN:
+      // compression type not determined yet
+      break;
+    case RLE:
       STRCAT(smoke3di->menulabel," (RLE) ");
       break;
-    case 1:
+    case ZLIB:
       STRCAT(smoke3di->menulabel," (ZLIB) ");
       break;
     default:
@@ -5150,35 +5158,29 @@ void makeiblank_smoke3d(void){
  int getsmoke3d_version(smoke3d *smoke3di){
 
    STRUCTSTAT statbuffer;
-   EGZ_FILE *SMOKE3DFILE=NULL;
+   EGZ_FILE *SMOKE3DFILE=NULL,*SMOKE3D_REGFILE=NULL, *SMOKE3D_COMPFILE=NULL;
    int nxyz[8];
-   char *file;
+   char *file,mode[16];
    int fortran_skip=0;
+
+   strcpy(mode,"");
+   if(fortran_skip!=0)strcat(mode,"f");
+   strcat(mode,"rb");
 
    if(smoke3di->filetype==1)fortran_skip=4;
 
    smoke3di->have_light=0;
-   if(STAT(smoke3di->comp_file,&statbuffer)==0){
-     smoke3di->file=smoke3di->comp_file;
+   file=smoke3di->comp_file;
+   SMOKE3D_COMPFILE=EGZ_FOPEN(file,mode,0,2);
+   if(SMOKE3D_COMPFILE==NULL){
+     file=smoke3di->reg_file;
+     SMOKE3D_REGFILE=EGZ_FOPEN(file,mode,0,2);
    }
-   else{
-     if(STAT(smoke3di->reg_file,&statbuffer)==0){
-       smoke3di->file=smoke3di->reg_file;
-     }
-     else{
-       return -1;
-     }
-   }
-   file = smoke3di->file;
-
-   if(fortran_skip==0){
-     SMOKE3DFILE=EGZ_FOPEN(file,"rb",0,2);
-   }
-   else{
-     SMOKE3DFILE=EGZ_FOPEN(file,"frb",0,2);
-   }
-   if(SMOKE3DFILE==NULL)return -1;
-
+   if(SMOKE3D_REGFILE==NULL&&SMOKE3D_COMPFILE==NULL)return -1;
+   if(SMOKE3D_COMPFILE!=NULL)SMOKE3DFILE=SMOKE3D_COMPFILE;
+   if(SMOKE3D_REGFILE!=NULL)SMOKE3DFILE=SMOKE3D_REGFILE;
+   smoke3di->file=file;
+  
    SKIP;EGZ_FREAD(nxyz,4,8,SMOKE3DFILE);SKIP;
 #ifdef pp_LIGHT
    {

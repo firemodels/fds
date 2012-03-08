@@ -1099,7 +1099,7 @@ typedef struct _smoke3d {
   int blocknumber;
   int type;
   int is1, is2, js1, js2, ks1, ks2;
-  int version, have_light;
+  int compression_type, have_light;
   flowlabels label;
   char menulabel[128];
   float *times;

@@ -3171,7 +3171,7 @@ int readsmv(char *file, char *file2){
         smoke3di->is_zlib=0;
         smoke3di->seq_id=nn_smoke3d;
         smoke3di->autoload=0;
-        smoke3di->version=-1;
+        smoke3di->compression_type=UNKNOWN;
         smoke3di->hrrpuv_color=NULL;
         smoke3di->water_color=NULL;
         smoke3di->soot_color=NULL;
@@ -3204,14 +3204,14 @@ int readsmv(char *file, char *file2){
         if(NewMemory((void **)&smoke3di->comp_file,(unsigned int)(len+1))==0)return 2;
         STRCPY(smoke3di->comp_file,buffer2);
 
-        if(STAT(smoke3di->comp_file,&statbuffer)==0){
+        if(file_exists(smoke3di->comp_file)==1){
           smoke3di->file=smoke3di->comp_file;
           smoke3di->is_zlib=1;
         }
         else{
           smoke3di->file=smoke3di->reg_file;
         }
-        if(STAT(smoke3di->file,&statbuffer)==0){
+        if(file_exists(smoke3di->file)==1){
           if(readlabels(&smoke3di->label,stream)==2)return 2;
           if(strcmp(smoke3di->label.longlabel,"HRRPUV")==0){
             show_hrrcutoff_active=1;
@@ -3222,7 +3222,6 @@ int readsmv(char *file, char *file2){
           if(readlabels(&smoke3di->label,stream)==2)return 2;
           nsmoke3dinfo--;
         }
-        smoke3di->version=getsmoke3d_version(smoke3di);
         if(smoke3di->have_light==1)have_lighting=1;
         if(strncmp(smoke3di->label.shortlabel,"soot",4)==0){
           smoke3di->type=1;
@@ -5332,7 +5331,6 @@ typedef struct {
 
       bufferptr=trim_string(buffer);
       len=strlen(bufferptr);
-
       
       sd = sliceinfo+islice;
       sd->slicetype=0;
@@ -5341,19 +5339,20 @@ typedef struct {
       if(cellcenter==1)sd->slicetype=3;
 
       if(nslicefiles>100&&(islicecount%100==1||nslicefiles==islicecount)){
-        printf(" examining slice file %i\n",islicecount);
+        if(islicecount==1){
+          printf(" examining %i'st slice file for menus\n",islicecount);
+        }
+        else{
+          printf(" examining %i'th slice file for menus\n",islicecount);
+        }
       }
       islicecount++;
       strcpy(buffer2,bufferptr);
       strcat(buffer2,".svz");
       has_reg=0;
       has_comp=0;
-      if(STAT(bufferptr,&statbuffer)==0){
-        has_reg=1;
-      }
-      if(STAT(buffer2,&statbuffer)==0){
-        has_comp=1;
-      }
+      if(file_exists(buffer2)==1)has_comp=1;
+      if(has_comp==0&&file_exists(bufferptr)==1)has_reg=1;
       if(has_reg==0&&has_comp==0){
         if(fgets(buffer,255,stream)==NULL){
           nsliceinfo--;
@@ -5379,8 +5378,7 @@ typedef struct {
       STRCPY(sd->reg_file,bufferptr);
 
       NewMemory((void **)&sd->comp_file,(unsigned int)(len+4+1));
-      STRCPY(sd->comp_file,bufferptr);
-      STRCAT(sd->comp_file,".svz");
+      STRCPY(sd->comp_file,buffer2);
 
       sd->compression_type=0;
       if(has_comp==1){

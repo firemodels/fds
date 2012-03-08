@@ -6,13 +6,14 @@
 char file_util_revision[]="$Revision$";
 
 #include "options.h"
-#include <stdio.h>  
+#include <stdio.h> 
 #include <string.h>
 #include <sys/stat.h>
 #include <ctype.h>
 #include <stdlib.h>
 #include <math.h>
 #ifdef WIN32
+#include <io.h>
 #include <direct.h>
 #include <dirent_win.h>
 #else
@@ -261,6 +262,14 @@ int file_exists(char *filename){
   /*! \fn int file_exists(char *filename)
       \brief returns 1 if the file filename exists, 0 otherwise
   */
+#ifdef WIN32
+  if(_access(filename,0)==-1){
+    return 0;
+  }
+  else{
+    return 1;
+  }
+#else
   STRUCTSTAT statbuffer;
 
   if(STAT(filename,&statbuffer)==0){
@@ -269,6 +278,7 @@ int file_exists(char *filename){
   else{
     return 0;
   }
+#endif
 }
 
 /* ------------------ get_filelist ------------------------ */

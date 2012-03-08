@@ -1360,6 +1360,7 @@ void getsliceparams(void){
   multislice *mslicei;
   int build_cache=0;
   FILE *stream;
+  int doit_anyway;
 
   if(is_file_newer(sliceinfofilename,smvfilename)!=1){
     build_cache=1;
@@ -1374,23 +1375,36 @@ void getsliceparams(void){
     sd = sliceinfo + i;
 
     if(nsliceinfo>100&&(i%100==0||i==nsliceinfo-1)){
-        printf(" obtaining slice file parameters: %i/%i\n",i+1,nsliceinfo);
+      if(i==0){
+        printf(" obtaining parameters from %i'st slice file\n",i+1);
+      }
+      else{
+        printf(" obtaining parameters from %i'th slice file\n",i+1);
+      }
     }
 
     file = sd->file;
     lenfile = strlen(file);
     if(sd->compression_type==0){
-      if(build_cache==1||stream==NULL){
-        FORTgetsliceparms(file,&endian_smv,
-          &is1,&is2,&js1,&js2,&ks1,&ks2,&ni,&nj,&nk,&sd->volslice,&error,lenfile);
-        if(stream!=NULL)fprintf(stream,"%i %i %i %i %i %i %i %i %i %i %i\n",sd->seq_id,is1,is2,js1,js2,ks1,ks2,ni,nj,nk,sd->volslice);
-      }
-      else{
+      doit_anyway=0;
+      if(build_cache==0&&stream!=NULL){
         int seq=-1;
 
         while(seq!=sd->seq_id){
-          fscanf(stream,"%i %i %i %i %i %i %i %i %i %i %i",&seq,&is1,&is2,&js1,&js2,&ks1,&ks2,&ni,&nj,&nk,&sd->volslice);
+          char buffer[255];
+
+          if(fgets(buffer,255,stream)==NULL){
+            doit_anyway=1;
+            break;
+          }
+          sscanf(buffer,"%i %i %i %i %i %i %i %i %i %i %i",&seq,&is1,&is2,&js1,&js2,&ks1,&ks2,&ni,&nj,&nk,&sd->volslice);
         }
+        error=0;
+      }
+      if(build_cache==1||stream==NULL||doit_anyway==1){
+        FORTgetsliceparms(file,&endian_smv,
+          &is1,&is2,&js1,&js2,&ks1,&ks2,&ni,&nj,&nk,&sd->volslice,&error,lenfile);
+        if(stream!=NULL&&doit_anyway==0)fprintf(stream,"%i %i %i %i %i %i %i %i %i %i %i\n",sd->seq_id,is1,is2,js1,js2,ks1,ks2,ni,nj,nk,sd->volslice);
       }
     }
     else if(sd->compression_type==1){
@@ -1651,7 +1665,12 @@ void updatevslices(void){
   }
   for(i=0;i<nsliceinfo;i++){
     if(nsliceinfo>100&&(i%100==0||i==nsliceinfo-1)){
-        printf(" examining slice file %i/%i for vector slice setup\n",i+1,nsliceinfo);
+      if(i==0){
+        printf(" examining %i'st slice file for vectors\n",i+1);
+      }
+      else{
+        printf(" examining %i'th slice file for vectors\n",i+1);
+      }
     }
     vd = vsliceinfo + nvslice;
     sdi = sliceinfo+i;

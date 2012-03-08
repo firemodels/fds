@@ -11,6 +11,10 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#define UNKNOWN -1
+#define RLE 0
+#define ZLIB 1
+
 #define TERRAIN_3D 0
 #define TERRAIN_2D_STEPPED 1
 #define TERRAIN_2D_LINE 2
