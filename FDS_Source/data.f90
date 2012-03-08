@@ -1573,8 +1573,9 @@ SELECT CASE (SPEC_ID_USE)
       FUEL = .TRUE.
    CASE('CARBON') !NIST webbook
       TE = MIN(5727._EB,MAX(25._EB,TE))
-      CP = -0.013103_EB/TE**2-0.043256_EB*TE**3+0.448537_EB*TE**2-0.812428_EB*TE+21.17510_EB
-      CP = CP /  12.0107*1000_EB!J/kg/K
+      CP = -0.013103_EB/(TE/1000._EB)**2-0.043256_EB*(TE/1000._EB)**3+0.448537_EB*(TE/1000._EB)**2-0.812428_EB*(TE/1000._EB) &
+           +21.17510_EB
+      CP = CP /  12.0107!J/kg/K
       
    CASE('CARBON DIOXIDE')
       IF (TE<100._EB) THEN
@@ -1736,8 +1737,9 @@ SELECT CASE (SPEC_ID_USE)
       H = 147389.82301_EB !J/kg     
    CASE('NITROGEN ATOM')
       TE = MIN(6000._EB,MAX(298._EB,TE))
-      CP = 21.13581_EB - 0.388842_EB*TE + 0.043545_EB*TE**2 + 0.024685_EB*TE**3 - 0.025678/TE**2 !kJ/mol/K
-      CP = CP / 14.0067_EB * 1000._EB ! J/kg/K
+      CP = 21.13581_EB - 0.388842_EB*(TE/1000._EB) + 0.043545_EB*(TE/1000._EB)**2 + 0.024685_EB*(TE/1000._EB)**3 &
+           - 0.025678/(TE/1000._EB)**2 !J/mol/K
+      CP = CP / 14.0067_EB ! J/kg/K
    
    CASE('NITROGEN DIOXIDE')
       IF (TE<100._EB) THEN
@@ -1770,11 +1772,11 @@ SELECT CASE (SPEC_ID_USE)
      IF (TE<100._EB) THEN
         CP = 0.237_EB*TE + 3.0E-15_EB
      ELSEIF (TE >= 100._EB .AND. TE < 600._EB) THEN
-        CP = -1E-8_EB*TE**3 + 2E-5_EB*TE**2 - 0.017*TE + 25.001
+        CP = -1E-8_EB*TE**3 + 2E-5_EB*TE**2 - 0.017_EB*TE + 25.001_EB
      ELSE
-        CP = -1E-11_EB*TE**3 + 2E-7_EB*TE**2 - 0.0007*TE +21.455 !kJ/mol/K
+        CP = -1E-11_EB*TE**3 + 2E-7_EB*TE**2 - 0.0007_EB*TE +21.455_EB !J/mol/K
      ENDIF
-     CP = CP / 15.9994*1000._EB !J/kg
+     CP = CP / 15.9994 !J/kg
      
    CASE('PROPANE') !NIST webbook
       TE = MIN(1500._EB,MAX(100._EB,TE))
