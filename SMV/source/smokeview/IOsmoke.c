@@ -5163,11 +5163,11 @@ void makeiblank_smoke3d(void){
    char *file,mode[16];
    int fortran_skip=0;
 
+   if(smoke3di->filetype==1)fortran_skip=4;
+
    strcpy(mode,"");
    if(fortran_skip!=0)strcat(mode,"f");
    strcat(mode,"rb");
-
-   if(smoke3di->filetype==1)fortran_skip=4;
 
    smoke3di->have_light=0;
    file=smoke3di->comp_file;
