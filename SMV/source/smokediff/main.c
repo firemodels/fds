@@ -12,7 +12,7 @@
 #include "MALLOC.h"
 #include "file_util.h"
 
-//dummy change to bump version number to 1.0.3
+//dummy change to bump version number to 1.0.4
 
 // svn revision character string
 char main_revision[]="$Revision$";

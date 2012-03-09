@@ -85,7 +85,7 @@
 #endif
 
 #ifdef pp_release
-#define PROGVERSION "1.4.2"
+#define PROGVERSION "1.4.3"
 #endif
 
 #ifdef X64
