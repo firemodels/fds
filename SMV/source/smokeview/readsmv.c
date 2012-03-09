@@ -1235,7 +1235,7 @@ void init_textures(void){
 
   // define colobar textures
 
-  printf("%s",_("      Loading colorbar texture: "));
+  printf("%s",_("     Loading colorbar texture: "));
 
  // glActiveTexture(GL_TEXTURE0);
   glGenTextures(1,&texture_colorbar_id);
@@ -1764,8 +1764,7 @@ int readsmv(char *file, char *file2){
 
   smv_modtime=file_modtime(file);
   
-  printf("%s",_("reading: "));
-  printf("%s\n",file);
+  printf(_("processing smokeview file %s started\n"),file);
 
 /* 
    ************************************************************************
@@ -1779,9 +1778,7 @@ int readsmv(char *file, char *file2){
   ntc_total=0;
   nspr_total=0;
   nheat_total=0;
-  printf("%s",_("reading input file"));
-  printf("\n");
-  printf("%s",_("   pass 1"));
+  printf("%s",_("   pass 1 started"));
   printf("\n");
   for(;;){
     if(feof(stream)!=0){
@@ -2396,7 +2393,7 @@ int readsmv(char *file, char *file2){
   printf("%s",_("   pass 1"));
   printf("%s",_(" completed"));
   printf("\n");
-  printf("%s",_("   pass 2"));
+  printf("%s",_("   pass 2 started"));
   printf("\n");
   for(;;){
     if(feof(stream)!=0){
@@ -3160,7 +3157,12 @@ int readsmv(char *file, char *file2){
         smoke3di = smoke3dinfo + ismoke3d;
     
         if(nsmoke3dinfo>50&&(ismoke3d%10==0||ismoke3d==nsmoke3dinfo-1)){
-          printf(" examining 3D smoke file %i \n",ismoke3dcount);
+          if(ismoke3dcount==11){
+            printf("     examining %i'th 3D smoke file\n",ismoke3dcount);
+          }
+          else{
+            printf("     examining %i'st 3D smoke file\n",ismoke3dcount);
+          }
         }
         ismoke3dcount++;
 
@@ -3621,7 +3623,7 @@ int readsmv(char *file, char *file2){
   rewind(stream1);
   if(stream2!=NULL)rewind(stream2);
   stream=stream1;
-  printf("%s",_("   pass 3"));
+  printf("%s",_("   pass 3 started"));
   printf("\n");
 
   /* 
@@ -4037,7 +4039,7 @@ int readsmv(char *file, char *file2){
   printf("%s",_("   pass 3 "));
   printf("%s",_("completed"));
   printf("\n");
-  printf("%s",_("   pass 4"));
+  printf("%s",_("   pass 4 started"));
   printf("\n");
   startpass=1;
 
@@ -5339,11 +5341,11 @@ typedef struct {
       if(cellcenter==1)sd->slicetype=3;
 
       if(nslicefiles>100&&(islicecount%100==1||nslicefiles==islicecount)){
-        if(islicecount==1){
-          printf(" examining %i'st slice file for menus\n",islicecount);
+        if(islicecount==11){
+          printf("     examining %i'th slice file\n",islicecount);
         }
         else{
-          printf(" examining %i'th slice file for menus\n",islicecount);
+          printf("     examining %i'st slice file\n",islicecount);
         }
       }
       islicecount++;
@@ -5828,7 +5830,7 @@ typedef struct {
   printf("%s",_("completed"));
   printf("\n");
   if(do_pass4==1||autoterrain==1){
-    printf("%s",_("   pass 5"));
+    printf("%s",_("   pass 5 started"));
     printf("\n");
   }
 
@@ -5954,8 +5956,7 @@ typedef struct {
     printf("\n");
   }
 
-  printf("%s",_("reading input file completed"));
-  printf("\n");
+  printf("%s processing complete\n",file);
   printf("\n");
   printf("%s",_("beginning wrap up "));
   printf("\n");
@@ -6808,7 +6809,7 @@ typedef struct {
   get_faceinfo();
 
   printf("%s",_("wrap up completed"));
-  printf("\n");
+  printf("\n\n");
 #ifdef _DEBUG
   PrintMemoryInfo;
 #endif
@@ -7571,13 +7572,13 @@ int readini(int scriptconfigfile){
   // check if config files read in earlier were modifed later
 
   if(is_file_newer(smvprogini_ptr,INIfile)==1){
-    printf("*** warning: The config file, %s, is newer than %s \n",smvprogini_ptr,INIfile);
+    printf("*** warning: The config file,\n  %s, is newer than\n  %s \n\n",smvprogini_ptr,INIfile);
   }
   if(is_file_newer(smvprogini_ptr,caseinifilename)==1){
-    printf("*** warning: The config file, %s, is newer than %s \n",smvprogini_ptr,caseinifilename);
+    printf("*** warning: The config file,\n  %s, is newer than\n  %s \n\n",smvprogini_ptr,caseinifilename);
   }
   if(is_file_newer(INIfile,caseinifilename)==1){
-    printf("*** warning: The conig file, %s, is newer than  %s \n",INIfile,caseinifilename);
+    printf("*** warning: The conig file,\n  %s, is newer than\n  %s \n\n",INIfile,caseinifilename);
   }
 
   // read in config files if they exist

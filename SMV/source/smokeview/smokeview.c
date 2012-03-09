@@ -598,12 +598,11 @@ void display_version_info(void){
       printf("FDS Revision Number: %i\n",revision_fds);
     }
     if(smokeviewpath!=NULL){
-      printf("Smokeview: %s\n",smokeviewpath);
+      printf("Smokeview path: %s\n",smokeviewpath);
     }
     if(smokezippath!=NULL){
-      printf("Smokezip: %s\n",smokezippath);
+      printf("Smokezip path: %s\n",smokezippath);
     }
-  printf("\n");
 }
 
 /* ------------------ usage ------------------------ */

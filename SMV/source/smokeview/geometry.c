@@ -1013,7 +1013,7 @@ int makeiblank(void){
   float *fblank_cell=NULL;
   char *iblank=NULL,*iblank_cell=NULL,*iblank_x=NULL,*iblank_y=NULL,*iblank_z=NULL;
 
-  printf("initializing blanking array");
+  printf("initializing blanking array\n");
   if(use_iblank==0)return 0;
   for(ig=0;ig<nmeshes;ig++){
     meshi = meshinfo+ig;
@@ -1180,7 +1180,7 @@ int makeiblank(void){
     }
   }
   init_blockage_distance();
-  printf(" complete\n");
+  printf("blanking array initialization complete\n");
   return 0;
 }
 
