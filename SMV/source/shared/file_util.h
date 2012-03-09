@@ -5,6 +5,8 @@
 #ifndef FILE_UTIL_H_DEFINED
 #define FILE_UTIL_H_DEFINED
 
+#include <time.h>
+
 typedef struct {
   char *file;
   int type;

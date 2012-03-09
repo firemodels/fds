@@ -3,7 +3,7 @@
 // $Author$
 #ifndef SMOKEVIEWVARS_H_DEFINED
 #define SMOKEVIEWVARS_H_DEFINED
-#include <time.h>
+//#include <time.h>
 
 #ifdef CPP
 #include "glui.h"

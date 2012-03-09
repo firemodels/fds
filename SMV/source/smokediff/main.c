@@ -13,6 +13,7 @@
 #include "file_util.h"
 
 //dummy change to bump version number to 1.0.4
+//dummy change to force revision change
 
 // svn revision character string
 char main_revision[]="$Revision$";
