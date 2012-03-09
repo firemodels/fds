@@ -1808,6 +1808,8 @@ void HelpMenu(int value){
       ShellExecute(NULL, "open", "http://fire.nist.gov/fds/", NULL, NULL, SW_SHOWNORMAL);
 #endif
       break;
+    case 999:
+      break;
     default:
       ASSERT(0);
       break;
@@ -2205,9 +2207,9 @@ void ReloadMenu(int value){
 }
 
 
-/* ------------------ DisclaimerMenu ------------------------ */
+/* ------------------ AboutMenu ------------------------ */
 
-void DisclaimerMenu(int value){
+void AboutMenu(int value){
 }
 
 /* ------------------ LoadUnloadMenu ------------------------ */
@@ -4401,13 +4403,13 @@ static int resetmenu=0, frameratemenu=0, rendermenu=0, smokeviewinimenu=0, inisu
 static int compressmenu=0;
 #endif
 static int showhideslicemenu=0,showvslicemenu=0;
-static int plot3dshowmenu=0, staticvariablemenu=0, helpmenu=0;
+static int plot3dshowmenu=0, staticvariablemenu=0, helpmenu=0, webhelpmenu=0, keyboardhelpmenu=0, mousehelpmenu=0;
 static int vectorskipmenu=0,unitsmenu=0;
 static int isosurfacemenu=0, isovariablemenu=0, levelmenu=0;
 static int fontmenu=0, aperturemenu=0,dialogmenu=0,zoommenu=0,languagemenu=0,fonttestmenu=0;
 static int gridslicemenu=0, blockagemenu=0, immersedmenu=0, loadpatchmenu=0, ventmenu=0;
 static int loadisomenu=0, isosurfacetypemenu=0;
-static int geometrymenu=0, loadunloadmenu=0, reloadmenu=0, disclaimermenu=0, terrain_showmenu=0;
+static int geometrymenu=0, loadunloadmenu=0, reloadmenu=0, aboutmenu=0, disclaimermenu=0, terrain_showmenu=0;
 static int scriptmenu=0;
 static int loadplot3dmenu=0, unloadvslicemenu=0, unloadslicemenu=0;
 static int loadterrainmenu=0, unloadterrainmenu=0;
@@ -7018,9 +7020,30 @@ updatemenu=0;
     glutAddMenuEntry(_("Time"),MENU_TIMEVIEW);
   }
 
-/* -------------------------------- disclaimer menu -------------------------- */
 
-  CREATEMENU(disclaimermenu,DisclaimerMenu);
+/* -------------------------------- about menu -------------------------- */
+
+  CREATEMENU(disclaimermenu,AboutMenu);
+  glutAddMenuEntry("The US Department of Commerce makes no warranty, expressed or",1);
+  glutAddMenuEntry("implied, to users of Smokeview, and accepts no responsibility",1);
+  glutAddMenuEntry("for its use. Users of Smokeview assume sole responsibility under",1);
+  glutAddMenuEntry("Federal law for determining the appropriateness of its use in any",1);
+  glutAddMenuEntry("particular application; for any conclusions drawn from the results",1); 
+  glutAddMenuEntry("of its use; and for any actions taken or not taken as a result of",1); 
+  glutAddMenuEntry("analysis performed using this tools.",1);
+  glutAddMenuEntry("",1);
+  glutAddMenuEntry("Smokeview and the companion program FDS is intended for use only",1);
+  glutAddMenuEntry("by those competent in the fields of fluid dynamics, thermodynamics,",1);
+  glutAddMenuEntry("combustion, and heat transfer, and is intended only to supplement",1);
+  glutAddMenuEntry("the informed judgment of the qualified user. These software packages",1);
+  glutAddMenuEntry("may or may not have predictive capability when applied to a specific",1);
+  glutAddMenuEntry("set of factual circumstances.  Lack of accurate predictions could lead",1);
+  glutAddMenuEntry("to erroneous conclusions with regard to fire safety.  All results",1);
+  glutAddMenuEntry("should be evaluated by an informed user.",1);
+
+/* -------------------------------- about menu -------------------------- */
+
+  CREATEMENU(aboutmenu,AboutMenu);
   glutAddMenuEntry(TITLERELEASE,1);
   {
 #ifdef pp_GPU
@@ -7073,58 +7096,38 @@ updatemenu=0;
     }
     glutAddMenuEntry(menulabel,1);
 #endif
+    glutAddSubMenu(_("Disclaimer"),disclaimermenu);
   }
-  glutAddMenuEntry("-",1);
-  glutAddMenuEntry("The US Department of Commerce makes no warranty, expressed or",1);
-  glutAddMenuEntry("implied, to users of Smokeview, and accepts no responsibility",1);
-  glutAddMenuEntry("for its use. Users of Smokeview assume sole responsibility under",1);
-  glutAddMenuEntry("Federal law for determining the appropriateness of its use in any",1);
-  glutAddMenuEntry("particular application; for any conclusions drawn from the results",1); 
-  glutAddMenuEntry("of its use; and for any actions taken or not taken as a result of",1); 
-  glutAddMenuEntry("analysis performed using this tools.",1);
-  glutAddMenuEntry("",1);
-  glutAddMenuEntry("Smokeview and the companion program FDS is intended for use only",1);
-  glutAddMenuEntry("by those competent in the fields of fluid dynamics, thermodynamics,",1);
-  glutAddMenuEntry("combustion, and heat transfer, and is intended only to supplement",1);
-  glutAddMenuEntry("the informed judgment of the qualified user. These software packages",1);
-  glutAddMenuEntry("may or may not have predictive capability when applied to a specific",1);
-  glutAddMenuEntry("set of factual circumstances.  Lack of accurate predictions could lead",1);
-  glutAddMenuEntry("to erroneous conclusions with regard to fire safety.  All results",1);
-  glutAddMenuEntry("should be evaluated by an informed user.",1);
 
-/* --------------------------------help menu -------------------------- */
+  /* --------------------------------web help menu -------------------------- */
 
-  {
-    int displayblank=0;
-  CREATEMENU(helpmenu,HelpMenu);
+  CREATEMENU(webhelpmenu,HelpMenu);
 #ifdef WIN32
-  glutAddMenuEntry(_("Web links"),1);
-  glutAddMenuEntry(_("  Documentation"),-3);
-  glutAddMenuEntry(_("  Issue tracker"),-1);
-  glutAddMenuEntry(_("  Updates"),-2);
-  glutAddMenuEntry(_("  FDS/Smokeview website"),-4);
-  glutAddMenuEntry("",1);
+  glutAddMenuEntry(_("Documentation"),-3);
+  glutAddMenuEntry(_("Issue tracker"),-1);
+  glutAddMenuEntry(_("Updates"),-2);
+  glutAddMenuEntry(_("FDS/Smokeview website"),-4);
 #endif
 #ifdef pp_OSX
-  glutAddMenuEntry(_("Web links"),1);
-  glutAddMenuEntry(_("  Documentation"),-3);
-  glutAddMenuEntry(_("  Issue tracker"),-1);
-  glutAddMenuEntry(_("  Updates"),-2);
-  glutAddMenuEntry(_("  FDS/Smokeview website"),-4);
-  glutAddMenuEntry("",1);
+  glutAddMenuEntry(_("Documentation"),-3);
+  glutAddMenuEntry(_("Issue tracker"),-1);
+  glutAddMenuEntry(_("Updates"),-2);
+  glutAddMenuEntry(_("FDS/Smokeview website"),-4);
 #endif
 #ifndef WIN32
 #ifndef PP_OSX
-  glutAddMenuEntry(_("Web resources"),1);
-  glutAddMenuEntry(_("*** Download documentation at  http://fire.nist.gov/fds/documentation.html"),1);
-  glutAddMenuEntry(_("*** Report a problem at http://code.google.com/p/fds-smv/issues/"),1);
-  glutAddMenuEntry(_("*** Check for updates at http://code.google.com/p/fds-smv/downloads/"),1);
-  glutAddMenuEntry(_("*** FDS/Smokeview website: http://fire.nist.gov/fds"),1);
-  glutAddMenuEntry("-",1);
+  glutAddMenuEntry(_("Download documentation at  http://fire.nist.gov/fds/documentation.html"),1);
+  glutAddMenuEntry(_("Report a problem at http://code.google.com/p/fds-smv/issues/"),1);
+  glutAddMenuEntry(_("Check for updates at http://code.google.com/p/fds-smv/downloads/"),1);
+  glutAddMenuEntry(_("FDS/Smokeview website: http://fire.nist.gov/fds"),1);
 #endif
 #endif
+
+  /* --------------------------------keyboard help menu -------------------------- */
+
+  CREATEMENU(keyboardhelpmenu,HelpMenu);
   if(plotstate==DYNAMIC_PLOTS){
-    glutAddMenuEntry(_("Animation keyboard commands"),1);
+    glutAddMenuEntry(_("Animation"),1);
     glutAddMenuEntry(_("  t: set/unset single time step mode"),6);
     glutAddMenuEntry(_("  o: reset animation to the initial time"),6);
     glutAddMenuEntry(_("  T: toggle method for interpolating data color"),6);
@@ -7134,11 +7137,19 @@ updatemenu=0;
     glutAddMenuEntry(_("  u: reload files"),6);
     glutAddMenuEntry(_("  L: unload last slice file loaded"),6);
     glutAddMenuEntry(_("1-9: number of frames to skip"),6);
-    displayblank=1;
+  }
+  if(eyeview==EYE_CENTERED){
+    glutAddMenuEntry(_("Motion"),1);
+    glutAddMenuEntry(_("   left/right cursor: rotate left/right"),1);
+    glutAddMenuEntry(_("      up/down cursor: move forward/backward"),1);
+    glutAddMenuEntry(_(" CTRL:up/down cursor: move forward/backward 5 times slower"),1);
+    glutAddMenuEntry(_(" SHIFT: left/right cursor: rotate 90 degrees"),1);
+    glutAddMenuEntry(_("    ALT:left/right cursor: slide left/right"),1);
+    glutAddMenuEntry(_("    ALT:   up/down cursor: slide up/down"),1);
+    glutAddMenuEntry(_("     INSERT/HOME/PageUP: tilt down/reset/tilt up"),1);
   }
   if(plotstate==STATIC_PLOTS){
-    if(displayblank==1)glutAddMenuEntry("",1);
-    glutAddMenuEntry(_("Plot3D keyboard commands"),1);
+    glutAddMenuEntry(_("Plot3D"),1);
     glutAddMenuEntry(_("  x,y,z: toggle contour plot visibility along x, y and z axis"),3);
     glutAddMenuEntry(_("  p: increment plot3d variable"),2);
     glutAddMenuEntry(_("  P: toggle cursor key mappings"),2);
@@ -7147,10 +7158,8 @@ updatemenu=0;
     glutAddMenuEntry(_("  s: change interval between adjacent vectors"),3);
     glutAddMenuEntry(_("  c: toggle between continuous and 2D stepped contours"),3);
     glutAddMenuEntry(_("  i: toggle iso-surface visibility"),2);
-    displayblank=1;
   }
-  if(displayblank==1)glutAddMenuEntry("",1);
-  glutAddMenuEntry(_("Misc keyboard commands"),1);
+  glutAddMenuEntry(_("Misc"),1);
   glutAddMenuEntry(_("  r: render the current scene to an image file"),7);
   glutAddMenuEntry(_("  R:   (same as r but at twice the resolution)"),7);
   if(ntotal_blockages>0||isZoneFireModel==0){
@@ -7179,23 +7188,20 @@ updatemenu=0;
   }
   glutAddMenuEntry(_("  !: snap scene's view angles"),2);
   glutAddMenuEntry(_("  &: toggle line anti-aliasing (draw lines smoothly)"),2);
-  glutAddMenuEntry("",1);
-  glutAddMenuEntry(_("Mouse motion"),1);
-  glutAddMenuEntry(_("      : rotate around z, x axis"),1);
-  glutAddMenuEntry(_("  CTRL: translate along x, y axis"),1);
-  glutAddMenuEntry(_("   ALT: translate along z axis"),1);
-  if(eyeview==EYE_CENTERED){
-    glutAddMenuEntry("",1);
-    glutAddMenuEntry(_("Keyboard motion"),1);
-    glutAddMenuEntry(_("   left/right cursor: rotate left/right"),1);
-    glutAddMenuEntry(_("      up/down cursor: move forward/backward"),1);
-    glutAddMenuEntry(_(" CTRL:up/down cursor: move forward/backward 5 times slower"),1);
-    glutAddMenuEntry(_(" SHIFT: left/right cursor: rotate 90 degrees"),1);
-    glutAddMenuEntry(_("    ALT:left/right cursor: slide left/right"),1);
-    glutAddMenuEntry(_("    ALT:   up/down cursor: slide up/down"),1);
-    glutAddMenuEntry(_("     INSERT/HOME/PageUP: tilt down/reset/tilt up"),1);
-  }
-  }
+
+  /* --------------------------------mouse help menu -------------------------- */
+
+  CREATEMENU(mousehelpmenu,HelpMenu);
+  glutAddMenuEntry(_("       horizontal/vertical: rotate about z, x axis"),1);
+  glutAddMenuEntry(_("  CTRL horizontal/vertical: translate along x, y axis"),1);
+  glutAddMenuEntry(_("   ALT horizontal/vertical: translate along z axis"),1);
+
+  /* --------------------------------help menu -------------------------- */
+
+  CREATEMENU(helpmenu,HelpMenu);
+  glutAddSubMenu("Web",webhelpmenu);
+  glutAddSubMenu("Keyboard",keyboardhelpmenu);
+  glutAddSubMenu("Mouse",mousehelpmenu);
 
   /* -------------------------------- target menu -------------------------- */
 
@@ -8675,7 +8681,9 @@ updatemenu=0;
       glutAddSubMenu(_("Dialogs"),dialogmenu);
       glutAddSubMenu(_("Tours"),tourmenu);
       glutAddSubMenu(_("View"),resetmenu);
+      glutAddMenuEntry(_("Quit"),3);
       glutAddSubMenu(_("Help"),helpmenu);
+      glutAddSubMenu(_("About Smokeview"),aboutmenu);
     }
     if(trainer_active==1){
       if(trainer_mode==1){
@@ -8685,9 +8693,7 @@ updatemenu=0;
         glutAddMenuEntry(_("Trainer menus"),997);
       }
     }
-  glutAddMenuEntry(_("Quit"),3);
-  glutAddSubMenu(_("About Smokeview..."),disclaimermenu);
-  updatemenu=0;
+    updatemenu=0;
 #ifdef _DEBUG
   in_menu=0;
 #endif
