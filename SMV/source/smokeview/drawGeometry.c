@@ -1288,7 +1288,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
   float t_width, t_height;
   float *xstart, *ystart;
 
-  surfdata *surfinfo_local;
+  surfdata *face_surf;
 
   ASSERT((bc==NULL&&vi!=NULL)||(bc!=NULL&&vi==NULL));
 
@@ -1382,24 +1382,24 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
       faceptr->showtimelist_handle=&vi->showtimelist;
       faceptr->surfinfo=vi->surf[j];
     }
-    surfinfo_local = faceptr->surfinfo;
-    if(surfinfo_local!=NULL){
-      t_width =surfinfo->t_width;
-      t_height=surfinfo->t_height;
+    face_surf = faceptr->surfinfo;
+    if(face_surf!=NULL){
+      t_width =face_surf->t_width;
+      t_height=face_surf->t_height;
       if(bc!=NULL){
         if(bc->type==-1){
-          faceptr->type=surfinfo_local->type;
+          faceptr->type=face_surf->type;
         }
         else{
           faceptr->type=bc->type;
         }
-        if(surfinfo->textureinfo!=NULL){
-          faceptr->type=surfinfo_local->type;
+        if(face_surf->textureinfo!=NULL){
+          faceptr->type=face_surf->type;
         }
       }
       if(vi!=NULL){
         if(vi->type==99||vi->type==-99){
-          faceptr->type=surfinfo_local->type;
+          faceptr->type=face_surf->type;
         }
         else{
           faceptr->type=vi->type;
