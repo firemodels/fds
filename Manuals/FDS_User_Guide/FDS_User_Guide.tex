@@ -6156,9 +6156,68 @@ It is often the case that fires involve fuels that do not just consist of C, H, 
 of its propensity to form the acid gas HCl, we may want to account for it in the basic reaction scheme. Suppose the predominant fuel in the fire is polyvinyl chloride (PVC). Regardless
 of its detailed polymeric structure, it can be regarded as C$_2$H$_3$Cl for the purpose of modeling. To use PVC as the fuel molecule on the {\ct REAC} line, and assuming
 that all of the Cl in the fuel is converted into HCl, do the following:
+Define the governing chemical reaction in terms of the primitive (or individual) species in the reaction.
+\begin{eqnarray}\label{eq:PVC_reac}
+\mathrm{C_2H_3Cl + \nu_{ox} \, (O_2+(^{.79}/_{.21}) \, N_2)} \rightarrow \\ 
+\nonumber \mathrm{\nu_{HCl} \, HCl + \nu_{H_2O}\, H_2O + \nu_{CO}\, CO + \nu_{CO_2}\, CO_2 + \nu_{soot}\, C + \nu_{ox} \,(^{.79}/_{.21}) \, N_2}
+\end{eqnarray}
+As a user, you need to determine the appropriate soot and CO yields for the specified fuel. In this example, the SFPE Handbook \cite{SFPE:Tewarson} was used to find soot and CO yields for PVC which are 0.172 and 0.063 respectively. For simple chemistry, the stoichiometric coefficient of species $i$ can be found from its yield following:
+\begin{equation}\label{eq:stoic_yield}
+\nu_{i}=\frac{W_{f}}{W_{i}}y_{i}
+\end{equation}
+Since it was assumed that all of the Cl goes to HCL, the remainder of the stoichiometric coefficients come from an atom balance. Equation \ref{eq:PVC_reac} can now be rewritten to include the appropriate numerical values for the stoichiometric coefficients.
+\begin{eqnarray}\label{eq:PVC_reac2}
+\mathrm{C_2H_3Cl + 1.53462 \, (O_2+(^{.79}/_{.21}) \, N_2)} \rightarrow \\
+\nonumber \mathrm{HCl +  H_2O + 0.140582\, CO + 0.96433\, CO_2 + 0.895087\, C + 1.53462\,(^{.79}/_{.21}) \, N_2}
+\end{eqnarray}
+The choice of fuel in this example, PVC, is not defined in Table {tab:gasspecies}, therefore its properties must be defined on a {\ct SPEC} line. In this example, we use the Lennard-Jones Potential parameters and molecular weight to define the fuel. The example will also use the lumped species formulation to minimize the number of scalar transport equations that need to be solved. Therefore, each species that does not transport by itself will have an SMIX\_COMPONENT\_ONLY = .TRUE. designation.
+\footnotesize
+\begin{verbatim}
+&SPEC ID = 'NITROGEN',          SMIX_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'OXYGEN',            SMIX_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'WATER VAPOR',       SMIX_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'CARBON DIOXIDE',    SMIX_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'CARBON MONOXIDE',   SMIX_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'SOOT',              SMIX_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'HYDROGEN CHLORIDE', SMIX_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'PVC', MW = 62.5036, SIGMALJ = 4.898, EPSILONKLJ = 300/
+\end{verbatim} \normalsize
+
+Looking at Equation \ref{eq:PVC_reac} we can group the fuel, oxidizer, and products together:
+\begin{eqnarray}\label{eq:PVC_reac3}
+\mathrm{\underbrace{C_2H_3Cl}_\text{Fuel} + \underbrace{1.53462 \, (O_2+(^{.79}/_{.21}) \, N_2)}_\text{Oxidizer}} \rightarrow \\
+\nonumber \mathrm{\underbrace{HCl +  H_2O + 0.140582\, CO + 0.96433\, CO_2 + 0.895087\, C + 1.53462\,(^{.79}/_{.21}) \, N_2}_\text{Products}}
+\end{eqnarray}
+For the oxidizer and products, which are both composed of multiple primitive species, {\ct SMIX} lines are needed to define the composition of the lumped species. As the user, you can define the {\ct SMIX} by either the MASS\_FRACTIONS of the component gases or the VOLUME\_FRACTIONS. For this case, VOLUME\_FRACTIONS will be used. To determine the volume fractions, we can find the total number of moles by summing the stoichiometric coefficients in the lumped species and then dividing each species' stoichiometric coefficient by that sum.
+\footnotesize
+\begin{verbatim}
+&SMIX ID = 'AIR', SPEC_ID ='NITROGEN','OXYGEN', VOLUME_FRACTION =0.79,0.21, BACKGROUND=.TRUE. /
+&SMIX ID = 'PRODUCTS', SPEC_ID ='NITROGEN','CARBON DIOXIDE','CARBON MONOXIDE',
+           'WATER VAPOR','SOOT','HYDROGEN CHLORIDE', 
+           VOLUME_FRACTION = 0.590713,0.098672,0.014384,0.102322,0.091587,0.102322 /
+\end{verbatim} \normalsize
+Note: the order of which the {\ct SPEC\_ID}s are defined must be the same order as which you defined your VOLUME\_FRACTIONS or MASS\_FRACTIONS. To set the initial concentration of fuel, an {\ct INIT} line is used:
+\footnotesize
+\begin{verbatim}
+&INIT MASS_FRACTION(1)=0.228671,SPEC_ID(1)='PVC' /
+\end{verbatim} \normalsize
+In this mixing-controlled example, the user is responsible for defining the fuel, heat of combustion of that fuel, species participating the reaction, and the stoichiometric coefficients that describe the reaction. The heat of combustion for `PVC' was found from the SFPE Handbook \cite{SFPE:Tewarson}. If this reaction were all primitive species then the coefficients would be those in Equation \ref{eq:PVC_reac2}. In the lumped species approach, the stoichiometric coefficients for the {\ct SMIX}s become the sum of the coefficients of the primitive species.
+\footnotesize
+\begin{verbatim}
+&REAC FUEL = 'PVC', HEAT_OF_COMBUSTION=16400,
+      SMIX_ID = 'PVC','AIR','PRODUCTS', NU=-1,-7.30771,9.77309
+      FIXED_MIX_TIME=0.1,
+      ODE_SOLVER= 'SINGLE EXACT' /
+\end{verbatim} \normalsize
+Note: The sign on NU corresponds to whether that species is consumed (-) or produced (+). The results, Figure \ref{pvc_combustion}, from this example problem are compared to expected results with both cases using a fixed turbulent mixing time of 0.1s.
 
 
-
+\begin{figure}[ht]
+\centering \includegraphics[width=3.2in]{SCRIPT_FIGURES/PVC_Combustion_Spec}
+\caption{Product species mass fractions for model PVC example.}
+\label{pvc_combustion}
+\end{figure}
+ 
 \subsubsection{Example: A Two-Step, Reaction Involving the Formation of CO}
 
 
@@ -6743,10 +6802,6 @@ rather than the local gas temperature.
 Also note that if {\ct MASSLESS=.TRUE.}, the {\ct SAMPLING\_FACTOR} is set to 1 unless you say otherwise, which would be pointless
 since {\ct MASSLESS} particles are for visualization only.
 
-\subsection{Turbulent Dispersion}
-\label{info:DISPERSION}
-
-For {\ct MASSLESS} tracer particles it is possible to account for the dispersion due to unresolved turbulent fluctuations.  Set {\ct TURBULENT\_DISPERSION=.TRUE.} on the {\ct PART} line.  The tracer particles will undergo a random walk based on the local turbulent diffusivity (based on the viscosity and the Schmidt number, $D = \mu/\mbox{Sc}$).
 
 \subsection{Static Particles or Droplets}
 \label{info:STATIC}
@@ -10513,7 +10568,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct STATIC}                        & Logical         & Section~\ref{info:STATIC}               &           & {\ct .FALSE.} \\ \hline
 {\ct SURFACE\_TENSION}              & Real            & Section~\ref{info:secondary_breakup}    &   N/m     & 72.8$\cdot 10^3$  \\ \hline
 {\ct SURF\_ID}                      & Character       & Section~\ref{info:PART_SURF}            &           &               \\ \hline
-{\ct TURBULENT\_DISPERSION}         & Logical         & Section~\ref{info:DISPERSION}           &           & .FALSE.       \\ \hline
 {\ct USER\_DRAG\_COEFFICIENT}       & Real            & Section~\ref{info:particle_drag}        &           & -1.           \\ \hline
 {\ct VERTICAL\_VELOCITY}            & Real            & Section~\ref{info:surface_droplets}     & m/s       &  0.5          \\ \hline
 \end{longtable}
