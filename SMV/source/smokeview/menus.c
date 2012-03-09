@@ -7136,7 +7136,7 @@ updatemenu=0;
     }
     glutAddMenuEntry(_("  u: reload files"),6);
     glutAddMenuEntry(_("  L: unload last slice file loaded"),6);
-    glutAddMenuEntry(_("1-9: number of frames to skip"),6);
+    glutAddMenuEntry(_("  1-9: number of frames to skip"),6);
   }
   if(eyeview==EYE_CENTERED){
     glutAddMenuEntry(_("Motion"),1);
