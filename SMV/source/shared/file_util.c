@@ -23,6 +23,83 @@ char file_util_revision[]="$Revision$";
 #include "string_util.h"
 #include "file_util.h"
 
+/* ------------------ filecopy ------------------------ */
+
+#define FILE_BUFFER 1000000
+void filecopy(char *destdir, char *file_in, char *file_out){
+  char buffer[FILE_BUFFER];
+  FILE *streamin;
+  FILE *streamout;
+  char *full_file_out=NULL;
+  size_t chars_in;
+
+  if(destdir==NULL||file_in==NULL)return;
+  streamin=fopen(file_in,"rb");
+  if(streamin==NULL)return;
+
+  full_file_out=NULL;
+  NewMemory((void **)&full_file_out,strlen(file_out)+strlen(destdir)+1+1);
+  strcpy(full_file_out,destdir);
+  if(destdir[strlen(destdir)-1]!=*dirseparator){
+    strcat(full_file_out,dirseparator);
+  }
+  strcat(full_file_out,file_out);
+
+  streamout=fopen(full_file_out,"rb");
+  if(streamout!=NULL){
+    printf("  Warning: will not overwrite %s%s\n",destdir,file_in);
+    fclose(streamout);
+    fclose(streamin);
+    return;
+  }
+  streamout=fopen(full_file_out,"wb");
+  if(streamout==NULL){
+    fclose(streamin);
+    return;
+  }
+  for(;;){
+    int eof;
+       
+    eof=0;
+    chars_in=fread(buffer,1,FILE_BUFFER,streamin);
+    if(chars_in!=FILE_BUFFER)eof=1;
+    if(chars_in>0)fwrite(buffer,chars_in,1,streamout);
+    if(eof==1)break;
+  }
+  fclose(streamin);
+  fclose(streamout);
+}
+
+/* ------------------ copyfile ------------------------ */
+
+void copyfile(char *destfile, char *sourcefile){
+  char buffer[FILE_BUFFER];
+  FILE *streamin;
+  FILE *streamout;
+  size_t chars_in;
+
+  streamin=fopen(sourcefile,"rb");
+  if(streamin==NULL)return;
+
+  streamout=fopen(destfile,"wb");
+  if(streamout==NULL){
+    fclose(streamin);
+    return;
+  }
+  printf("  Copying %s to %s\n",sourcefile,destfile);
+  for(;;){
+    int eof;
+       
+    eof=0;
+    chars_in=fread(buffer,1,FILE_BUFFER,streamin);
+    if(chars_in!=FILE_BUFFER)eof=1;
+    if(chars_in>0)fwrite(buffer,chars_in,1,streamout);
+    if(eof==1)break;
+  }
+  fclose(streamin);
+  fclose(streamout);
+}
+
 /* ------------------ get_smokezippath ------------------------ */
 
 char *get_smokezippath(char *progdir){
@@ -79,21 +156,20 @@ char *setdir(char *argdir){
 
 /* ------------------ fullfile ------------------------ */
 
-void fullfile(char *fileout, char *dir, char *file){
+void fullfile(char *file_out, char *dir, char *file){
   char *file2;
 
   trim(file);
   file2=trim_front(file);
-  strcpy(fileout,"");
-  if(dir!=NULL)strcat(fileout,dir);
-  strcat(fileout,file2);
+  strcpy(file_out,"");
+  if(dir!=NULL)strcat(file_out,dir);
+  strcat(file_out,file2);
 }
 
 /* ------------------ filecat ------------------------ */
 
 int filecat(char *file_in1, char *file_in2, char *file_out){
-#define SIZEBUFFER 10000
-  char buffer[SIZEBUFFER];
+  char buffer[FILE_BUFFER];
   FILE *stream_in1, *stream_in2, *stream_out;
   int chars_in;
 
@@ -120,8 +196,8 @@ int filecat(char *file_in1, char *file_in2, char *file_out){
     int eof;
        
     eof=0;
-    chars_in=fread(buffer,1,SIZEBUFFER,stream_in1);
-    if(chars_in!=SIZEBUFFER)eof=1;
+    chars_in=fread(buffer,1,FILE_BUFFER,stream_in1);
+    if(chars_in!=FILE_BUFFER)eof=1;
     if(chars_in>0)fwrite(buffer,chars_in,1,stream_out);
     if(eof==1)break;
   }
@@ -131,8 +207,8 @@ int filecat(char *file_in1, char *file_in2, char *file_out){
     int eof;
        
     eof=0;
-    chars_in=fread(buffer,1,SIZEBUFFER,stream_in2);
-    if(chars_in!=SIZEBUFFER)eof=1;
+    chars_in=fread(buffer,1,FILE_BUFFER,stream_in2);
+    if(chars_in!=FILE_BUFFER)eof=1;
     if(chars_in>0)fwrite(buffer,chars_in,1,stream_out);
     if(eof==1)break;
   }
@@ -142,21 +218,21 @@ int filecat(char *file_in1, char *file_in2, char *file_out){
 
 }
 
-/* ------------------ make_fileout ------------------------ */
+/* ------------------ make_outfile ------------------------ */
 
 void make_outfile(char *outfile, char *destdir, char *file1, char *ext){
-  char filecopy[1024], *file1_noext;
+  char filename_buffer[1024], *file1_noext;
 
   trim(file1);
-  strcpy(filecopy,trim_front(file1));
-  file1_noext=strstr(filecopy,ext);
+  strcpy(filename_buffer,trim_front(file1));
+  file1_noext=strstr(filename_buffer,ext);
   strcpy(outfile,"");
   if(file1_noext==NULL)return;
   file1_noext[0]='\0';
   if(destdir!=NULL){
     strcpy(outfile,destdir);
   }
-  strcat(outfile,filecopy);
+  strcat(outfile,filename_buffer);
   strcat(outfile,"_diff");
   strcat(outfile,ext);
 }

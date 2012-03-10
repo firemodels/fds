@@ -12,6 +12,9 @@ typedef struct {
   int type;
 } filelistdata;
 
+EXTERNCPP void getfilesizelabel(int size, char *sizelabel);
+EXTERNCPP void filecopy(char *destdir, char *file, char *filebase);
+EXTERNCPP void copyfile(char *destfile, char *sourcefile);
 EXTERNCPP char *get_smokezippath(char *progdir);
 EXTERNCPP int filecat(char *file_in1, char *file_in2, char *file_out);
 EXTERNCPP void make_outfile(char *outfile, char *destdir, char *file1, char *ext);
