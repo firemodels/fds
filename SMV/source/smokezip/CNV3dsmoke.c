@@ -11,6 +11,7 @@
 #include "egz_stdio.h"
 #include "svzip.h"
 #include "lightsmoke.h"
+#include "file_util.h"
 #include "MALLOC.h"
 
 // svn revision character string

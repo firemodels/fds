@@ -517,126 +517,27 @@ void *compress_all(void *arg){
 #endif
   return NULL;
 }
-
-/* ------------------ filecopy ------------------------ */
-
-#define SIZEBUFFER 1000000
-void filecopy(char *destdir, char *file, char *filebase){
-  char buffer[SIZEBUFFER];
-  FILE *streamin;
-  FILE *streamout;
-  char *fileout=NULL;
-  size_t chars_in;
-
-  if(destdir==NULL||file==NULL)return;
-  streamin=fopen(file,"rb");
-  if(streamin==NULL)return;
-
-  fileout=NULL;
-  NewMemory((void **)&fileout,strlen(filebase)+strlen(destdir)+1);
-  strcpy(fileout,destdir);
-  strcat(fileout,filebase);
-
-  streamout=fopen(fileout,"rb");
-  if(streamout!=NULL){
-    printf("  Warning: will not overwrite %s%s\n",destdir,file);
-    fclose(streamout);
-    fclose(streamin);
-    return;
-  }
-  streamout=fopen(fileout,"wb");
-  if(streamout==NULL){
-    fclose(streamin);
-    return;
-  }
-  for(;;){
-    int eof;
-       
-    eof=0;
-    chars_in=fread(buffer,1,SIZEBUFFER,streamin);
-    if(chars_in!=SIZEBUFFER)eof=1;
-    if(chars_in>0)fwrite(buffer,chars_in,1,streamout);
-    if(eof==1)break;
-  }
-  fclose(streamin);
-  fclose(streamout);
-}
-       
-/* ------------------ copyfile ------------------------ */
-
-void copyfile(char *destfile, char *sourcefile){
-  char buffer[SIZEBUFFER];
-  FILE *streamin;
-  FILE *streamout;
-  size_t chars_in;
-
-  streamin=fopen(sourcefile,"rb");
-  if(streamin==NULL)return;
-
-  streamout=fopen(destfile,"wb");
-  if(streamout==NULL){
-    fclose(streamin);
-    return;
-  }
-  printf("  Copying %s to %s\n",sourcefile,destfile);
-  for(;;){
-    int eof;
-       
-    eof=0;
-    chars_in=fread(buffer,1,SIZEBUFFER,streamin);
-    if(chars_in!=SIZEBUFFER)eof=1;
-    if(chars_in>0)fwrite(buffer,chars_in,1,streamout);
-    if(eof==1)break;
-  }
-  fclose(streamin);
-  fclose(streamout);
-}
        
 /* ------------------ makesvd ------------------------ */
 
-void makesvd(char *destdir, char *smvfile){
-  char buffer[SIZEBUFFER];
-  FILE *streamin;
-  FILE *streamout;
-  char *fileout=NULL;
-  size_t chars_in;
-  char *svd;
+void makesvd(char *in_dir, char *smvfile){
+  char *file_out=NULL,*svd;
 
   if(smvfile==NULL)return;
-  streamin=fopen(smvfile,"rb");
-  if(streamin==NULL)return;
+  svd=strrchr(smvfile,".");
+  if(svd==NULL)return;
 
-  fileout=NULL;
-  if(destdir==NULL){
-    NewMemory((void **)&fileout,strlen(smvfile)+2+1);
-    strcpy(fileout,".");
-    strcat(fileout,dirseparator);
-  }
-  else{
-    NewMemory((void **)&fileout,strlen(smvfile)+strlen(destdir)+1);
-    strcpy(fileout,destdir);
-  }
-  strcat(fileout,smvfile);
-  svd = fileout + strlen(fileout) - 4;
+  NewMemory((void **)&file_out,(svd-smvfile)+4+1);
+  strcat(file_out,smvfile);
   strcpy(svd,".svd");
 
-  streamout=fopen(fileout,"wb");
-  if(streamout==NULL){
-    fclose(streamin);
-    return;
+  if(in_dir==NULL){
+    filecopy(".",smvfile,file_out);
   }
-  printf("  Copying %s to %s\n",smvfile,fileout);
-  for(;;){
-    int eof;
-       
-    eof=0;
-    chars_in=fread(buffer,1,SIZEBUFFER,streamin);
-    if(chars_in!=SIZEBUFFER)eof=1;
-    if(chars_in>0)fwrite(buffer,chars_in,1,streamout);
-    if(eof==1)break;
+  else{
+    filecopy(in_dir,smvfile,file_out);
   }
-  fclose(streamout);
-  fclose(streamin);
+
 }
        
 /* ------------------ usage ------------------------ */
