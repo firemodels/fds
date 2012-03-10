@@ -177,6 +177,7 @@ void readiso_geom(const char *file, int ifile, int flag, int *errorcode){
   int ilevel,error;
   mesh *meshi;
   int i;
+  surfdata *surfi;
 
   isoi = isoinfo + ifile;
   meshi = meshinfo + isoi->blocknumber;
@@ -189,6 +190,14 @@ void readiso_geom(const char *file, int ifile, int flag, int *errorcode){
     FREEMEMORY(meshi->showlevels);
     meshi->isofilenum=-1;
     return;
+  }
+
+  surfi = surfinfo + nsurfinfo+1;
+  if(strcmp(isoi->surface_label.shortlabel,"hrrpuv")==0){
+    surfi->color=getcolorptr(hrrpuv_iso_color);
+  }
+  else{
+    surfi->color=getcolorptr(iso_ambient);
   }
 
   meshi->isofilenum=ifile;

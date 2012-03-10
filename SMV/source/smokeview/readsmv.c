@@ -5971,16 +5971,11 @@ typedef struct {
    ************************************************************************
  */
 
-  for(i=nsurfinfo;i<nsurfinfo+n_iso_ambient+1;i++){
+  for(i=nsurfinfo+1;i<nsurfinfo+n_iso_ambient+1;i++){
     surfdata *surfi;
 
     surfi = surfinfo + i;
-    if(i==nsurfinfo){
-      surfi->color=getcolorptr(hrrpuv_iso_color);
-    }
-    else{
-      surfi->color=getcolorptr(iso_ambient+4*(i-nsurfinfo-1));
-    }
+    surfi->color=getcolorptr(iso_ambient+4*(i-(nsurfinfo+1)));
     surfi->transparent_level=0.8;
     surfi->iso_level=i-nsurfinfo;
   }
