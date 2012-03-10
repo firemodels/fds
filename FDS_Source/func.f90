@@ -435,17 +435,29 @@ ENDIF
 STORAGE_INDEX_OLD  = 0
 STORAGE_INDEX_OPEN = 1000000
 
-DO I=1,OS%N_STORAGE_SLOTS
-   IF (PRESENT(TAG)) THEN
+! If there is a specified particle TAG, find its storage slot
+
+IF (PRESENT(TAG)) THEN
+   DO I=1,OS%N_STORAGE_SLOTS
       IF (OS%INTEGERS(1,I)==TAG) THEN
          STORAGE_INDEX_OLD = I
          EXIT
       ENDIF
-   ENDIF
-   IF (OS%INTEGERS(1,I)==0) THEN
-      STORAGE_INDEX_OPEN = MIN(I,STORAGE_INDEX_OPEN)
-   ENDIF
-ENDDO
+   ENDDO
+ENDIF
+
+! Look for the first available storage slot
+
+IF (STORAGE_INDEX_OLD==0) THEN
+   DO I=OS%N_STORAGE_SLOTS,1,-1
+      IF (OS%INTEGERS(1,I)==0) THEN
+         STORAGE_INDEX_OPEN = MIN(I,STORAGE_INDEX_OPEN)
+         EXIT
+      ENDIF
+   ENDDO
+ENDIF
+
+! Decide which storage index to use
 
 IF (STORAGE_INDEX_OLD>0) THEN
    STORAGE_INDEX = STORAGE_INDEX_OLD
