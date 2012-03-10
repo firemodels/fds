@@ -163,7 +163,7 @@ void CCsmoke3dtofile(char *file, float *smoke_time, float *dx, int *type, float 
   }
 }
 
-/* ------------------ compreess_svzip2 ------------------------ */
+/* ------------------ compress_svzip2 ------------------------ */
 
 void compress_svzip2(void){
   char shellcommand[1024];

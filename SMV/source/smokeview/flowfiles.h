@@ -1119,7 +1119,6 @@ typedef struct _smoke3d {
   unsigned char *hrrpuv_color, *water_color, *soot_color;
   int hrrpuv_index, water_index, soot_index;
   int dir;
-
 } smoke3d;
 
 /* --------------------------  patch ------------------------------------ */
