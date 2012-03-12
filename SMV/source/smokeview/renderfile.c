@@ -539,7 +539,7 @@ int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
 
 /* ------------------ readpicture ------------------------ */
 
-unsigned char *readpicture(char *filename, int *width, int *height){
+unsigned char *readpicture(char *filename, int *width, int *height, int printflag){
   char *ext;
   unsigned char *returncode;
   char *filebuffer=NULL;
@@ -555,7 +555,9 @@ unsigned char *readpicture(char *filename, int *width, int *height){
     size_t lenbuffer;
 
     if(texturedir==NULL){
-      printf("Texture file:%s unavailable\n",filename);
+      if(printflag==1){
+        printf("Texture file: %s unavailable\n",filename);
+      }
       return NULL;
     }
     else{
@@ -569,8 +571,10 @@ unsigned char *readpicture(char *filename, int *width, int *height){
       strcat(filebuffer,filename);
       stream=fopen(filebuffer,"rb");
       if(stream==NULL){
+        if(printflag==1){
+          printf("Texture file: %s unavailable\n",filebuffer);
+        }
         FREEMEMORY(filebuffer);
-        printf("Texture file:%s unavailable\n",filebuffer);
         return NULL;
       }
       else{
@@ -580,7 +584,7 @@ unsigned char *readpicture(char *filename, int *width, int *height){
   }
 
   
-  printf("Loading texture:%s ",filebuffer);
+  if(printflag==1)printf("Loading texture:%s ",filebuffer);
   ext = filebuffer + strlen(filebuffer) - 4;
 #ifdef pp_JPEG
   if(strncmp(ext,".jpg",4)==0||strncmp(ext,".JPG",4)==0){
@@ -603,11 +607,13 @@ unsigned char *readpicture(char *filename, int *width, int *height){
   if(allocated==1){
     FREEMEMORY(filebuffer);
   }
-  if(returncode!=NULL){
-    printf(" completed\n");
-  }
-  else{
-    printf(" failed\n");
+  if(printflag==1){
+    if(returncode!=NULL){
+      printf(" - completed\n");
+    }
+    else{
+      printf(" - failed\n");
+    }
   }
   return returncode;
 

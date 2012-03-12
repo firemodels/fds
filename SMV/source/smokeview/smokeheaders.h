@@ -5,6 +5,7 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+EXTERNCPP void update_isocolors(void);
 EXTERNCPP void get_faceinfo(void);
 EXTERNCPP void GetGeomInfoPtrs(geomdata ***geominfoptrs_local,int *ngeominfoptrs_local);
 EXTERNCPP device *getdevice(char *label, int index);
@@ -217,12 +218,10 @@ EXTERNCPP void update_trainer_outline(void);
 EXTERNCPP void update_trainer_moves(void);
 EXTERNCPP mesh *getmesh(float *xyz);
 
-#ifdef pp_MESSAGE
 EXTERNCPP void message_message(char *message);
 EXTERNCPP void warning_message(char *message);
 EXTERNCPP void error_message(char *message);
 EXTERNCPP void abort_message(char *message);
-#endif
 EXTERNCPP sv_object *get_object(char *label);
 EXTERNCPP void get_labels(char *buffer, int type, char **label1, char **label2, char prop_buffer[255]);
 EXTERNCPP void snap_view_angles(void);
@@ -417,7 +416,7 @@ EXTERNCPP void handle_eyeview(int flag);
 
 EXTERNCPP void init_texturedir(void);
 EXTERNCPP void getrgb(unsigned int val, unsigned char *rr, unsigned char *gg, unsigned char *bb);
-EXTERNCPP unsigned char *readpicture(char *filename, int *width, int *height);
+EXTERNCPP unsigned char *readpicture(char *filename, int *width, int *height, int printflag);
 #ifdef pp_JPEG
 EXTERNCPP unsigned char *readjpeg(const char *filename,int *width, int *height, int skip);
 #endif
@@ -427,7 +426,9 @@ EXTERNCPP void update_whichface(int which_face);
 EXTERNCPP void update_blockvals(int flag);
 EXTERNCPP void show_glui_colorbar(void);
 EXTERNCPP void hide_glui_colorbar(void);
+#ifdef pp_MESSAGE
 EXTERNCPP void hide_glui_message(void);
+#endif
 EXTERNCPP void show_glui_motion(void);
 EXTERNCPP void hide_glui_motion(void);
 EXTERNCPP void show_glui_clip(void);

@@ -1774,7 +1774,7 @@ void init_volsmoke_texture(mesh *meshi){
 #endif
 
   glActiveTexture(GL_TEXTURE0);
-  printf("complete\n");
+  printf("completed\n");
   fflush(stdout);
 }
 

@@ -5194,7 +5194,7 @@ int read_object_defs(char *file){
   
   stream=fopen(file,"r");
   if(stream==NULL)return 0;
-  printf("Reading smokeview object definitions from:\n  %s\n\n",file);
+  printf("Processing object file:  %s\n\n",file);
 
   firstdef=-1;
   buffer_ptr=NULL;

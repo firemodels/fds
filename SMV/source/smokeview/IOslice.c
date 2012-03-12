@@ -1376,10 +1376,10 @@ void getsliceparams(void){
 
     if(nsliceinfo>100&&(i%100==0||i==nsliceinfo-1)){
       if(i==10){
-        printf("  obtaining parameters from %i'th slice file\n",i+1);
+        printf("    obtaining parameters from %i'th slice file\n",i+1);
       }
       else{
-        printf("  obtaining parameters from %i'st slice file\n",i+1);
+        printf("    obtaining parameters from %i'st slice file\n",i+1);
       }
     }
 
@@ -1638,7 +1638,7 @@ void updatevslices(void){
   vslice *vsd, *vsdold;
   multivslice *mvslicei;
 
-  printf("updating vector slices\n");
+  printf("  updating vector slices\n");
   getsliceparams();
 
   /* update vector slices */
@@ -1664,10 +1664,10 @@ void updatevslices(void){
   for(i=0;i<nsliceinfo;i++){
     if(nsliceinfo>100&&(i%100==0||i==nsliceinfo-1)){
       if(i==10){
-        printf("  examining %i'th slice file for vectors\n",i+1);
+        printf("    examining %i'th slice file for vectors\n",i+1);
       }
       else{
-        printf("  examining %i'st slice file for vectors\n",i+1);
+        printf("    examining %i'st slice file for vectors\n",i+1);
       }
     }
     vd = vsliceinfo + nvslice;
@@ -1694,7 +1694,7 @@ void updatevslices(void){
       nvslice++;
     }
   }
-  printf("  %i vector slices found\n",nvslice);
+  printf("    %i vector slices found\n",nvslice);
   if(nvslice>0){
     FREEMEMORY(vsliceorderindex);
     NewMemory((void **)&vsliceorderindex,sizeof(int)*nvslice);
@@ -1754,9 +1754,9 @@ void updatevslices(void){
       vslicei->autoload=0;
     }
   }
-  printf("  updating vector slice menus\n");
+  if(nvslice>0)printf("    updating vector slice menus\n");
   updatevslicemenulabels();
-  printf("vector slices update complete\n\n");
+  printf("  vector slices update completed\n\n");
   
 }
 

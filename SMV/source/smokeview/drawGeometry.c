@@ -732,6 +732,7 @@ void readcad2geom(cadgeom *cd){
   float *rrgb;
   int iquad;
   float *xyzpoints;
+  int have_textures=0;
 
   if( (stream=fopen(cd->file,"r"))==NULL){
     return;
@@ -811,10 +812,14 @@ void readcad2geom(cadgeom *cd){
       int texwid, texht;
       unsigned char *floortex;
 
-      printf("    Loading texture: ");
+      if(have_textures==0){
+        printf("     Loading CAD textures\n");
+        have_textures=1;
+      }
+      printf("       Loading texture: %s",texti->file);
       glGenTextures(1,&texti->name);
       glBindTexture(GL_TEXTURE_2D,texti->name);
-      floortex=readpicture(texti->file,&texwid,&texht);
+      floortex=readpicture(texti->file,&texwid,&texht,0);
       if(floortex==NULL){
         printf(" - failed\n");
         continue;
@@ -885,7 +890,9 @@ void readcad2geom(cadgeom *cd){
   current_cadgeom=cd;
   qsort(cd->order,(size_t)cd->nquads,sizeof(int),quadcompare);
   fclose(stream);
-
+  if(have_textures==1){
+    printf("     CAD textures loading completed\n");
+  }
 }
 
 /* ------------------ updaate_cadtextcoords ------------------------ */

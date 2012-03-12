@@ -1128,6 +1128,7 @@ void init_textures(void){
   // get texture filename from SURF and device info
   int i;
 
+  printf("     Loading surface textures\n");
   ntextures = 0;
   for(i=0;i<nsurfinfo;i++){
     surfdata *surfi;
@@ -1176,10 +1177,7 @@ void init_textures(void){
 
     texti = textureinfo + i;
     texti->loaded=0;
-    if(texti->file!=NULL){
-      printf("%s",_("      Loading textures: "));
-    }
-    else{
+    if(texti->file==NULL){
       continue;
     }
     dup_texture=0;
@@ -1195,16 +1193,24 @@ void init_textures(void){
       }
     }
     if(dup_texture==1){
-      printf("%s - duplicate\n",texti->file);
       continue;
     }
     if(use_graphics==1){
       int errorcode;
+      char *filename;
 
       CheckMemory;
+      filename=strrchr(texti->file,*dirseparator);
+      if(filename!=NULL){
+        filename++;
+      }
+      else{
+        filename=texti->file;
+      }
+      printf("       Loading texture: %s",filename);
       glGenTextures(1,&texti->name);
       glBindTexture(GL_TEXTURE_2D,texti->name);
-      floortex=readpicture(texti->file,&texwid,&texht);
+      floortex=readpicture(texti->file,&texwid,&texht,0);
       if(floortex==NULL){
          printf("%s",_(" - failed"));
          printf("\n");
@@ -1223,8 +1229,8 @@ void init_textures(void){
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
       texti->loaded=1;
-         printf("%s",_(" - completed"));
-         printf("\n");
+      printf("%s",_(" - completed"));
+      printf("\n");
     }
   }
   
@@ -1235,7 +1241,7 @@ void init_textures(void){
 
   // define colobar textures
 
-  printf("%s",_("     Loading colorbar texture: "));
+  printf("%s",_("       Loading colorbar texture"));
 
  // glActiveTexture(GL_TEXTURE0);
   glGenTextures(1,&texture_colorbar_id);
@@ -1311,8 +1317,7 @@ void init_textures(void){
 #endif
   CheckMemory;
 
-  printf("%s",_(" - completed"));
-  printf("\n");
+  printf("%s"," - completed\n");
 #ifdef pp_GPU
 #ifdef pp_GPUDEPTH
   if(use_graphics==1){
@@ -1327,37 +1332,38 @@ void init_textures(void){
     int texwid, texht;
     int errorcode;
 
-    printf("%s",_("      Loading terrain texture: "));
     tt = terrain_texture;
     tt->loaded=0;
     tt->used=0;
     tt->display=0;
+    printf("%s","     Loading terrain texture");
 
     glGenTextures(1,&tt->name);
     glBindTexture(GL_TEXTURE_2D,tt->name);
     floortex=NULL;
     errorcode=1;
     if(tt->file!=NULL){
-      floortex=readpicture(tt->file,&texwid,&texht);
+      printf(": %s",tt->file);
+      floortex=readpicture(tt->file,&texwid,&texht,0);
     }
     if(floortex!=NULL){
       errorcode=gluBuild2DMipmaps(GL_TEXTURE_2D,4, texwid, texht, GL_RGBA, GL_UNSIGNED_BYTE, floortex);
     }
     if(errorcode!=0){
-      printf("%s",_(" - failed"));
-      printf("\n");
+      printf("%s"," - failed\n");
     }
     FREEMEMORY(floortex);
-    if(errorcode==0&&use_graphics==1){
+    if(errorcode==0){
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
       tt->loaded=1;
-      printf("%s",_(" - completed"));
-      printf("\n");
+      printf("%s"," - completed\n");
     }
+
   }
+  printf("     Surface texture loading completed\n");
 }
 
 /* ------------------ readsmv ------------------------ */
@@ -1764,7 +1770,7 @@ int readsmv(char *file, char *file2){
 
   smv_modtime=file_modtime(file);
   
-  printf(_("processing smokeview file %s started\n"),file);
+  printf(_("processing smokeview file: %s\n"),file);
 
 /* 
    ************************************************************************
@@ -3071,15 +3077,14 @@ int readsmv(char *file, char *file2){
       if(STAT(bufferptr,&statbuffer)==0){
         if(NewMemory((void **)&cadgeominfo[ncadgeom].file,(unsigned int)(len+1))==0)return 2;
         STRCPY(cadgeominfo[ncadgeom].file,bufferptr);
-        printf("%s %s",_("   reading cad file: "),bufferptr);
+        printf("%s %s",_("     reading cad file: "),bufferptr);
         printf("%s\n",bufferptr);
         readcadgeom(cadgeominfo+ncadgeom);
-        printf("%s",_("   completed"));
-        printf("\n");
+        printf("     CAD file reading completed\n");
         ncadgeom++;
       }
       else{
-        printf("%s %s",_("   CAD geometry file: %s could not be opened"),bufferptr);
+        printf(_("   CAD geometry file: %s could not be opened"),bufferptr);
         printf("\n");
       }
       continue;
@@ -3310,8 +3315,9 @@ int readsmv(char *file, char *file2){
         char texturebuffer[1024];
 
         found_texture=0;
-        if(smokeview_bindir!=NULL&&STAT(buffer3,&statbuffer)!=0){
-          STRCPY(texturebuffer,smokeview_bindir);
+        if(texturedir!=NULL&&STAT(buffer3,&statbuffer)!=0){
+          STRCPY(texturebuffer,texturedir);
+          STRCAT(texturebuffer,dirseparator);
           STRCAT(texturebuffer,buffer3);
           if(STAT(texturebuffer,&statbuffer)==0){
             if(NewMemory((void **)&surfi->texturefile,strlen(texturebuffer)+1)==0)return 2;
@@ -3330,8 +3336,7 @@ int readsmv(char *file, char *file2){
 
           strcpy(message,"The texture file: ");
           strcat(message,buffer3);
-          strcat(message," was not found in either the current working directory or in ");
-          strcat(message,smokeview_bindir);
+          strcat(message," was not found.");
           warning_message(message);
         }
       }
@@ -5950,16 +5955,20 @@ typedef struct {
     }
   }
 
+  if(do_pass4==1||autoterrain==1){
+    printf("%s",_("   pass 5 "));
+    printf("%s",_("completed"));
+    printf("\n");
+  }
   if(do_pass4==1){
     printf("%s",_("   pass 5 "));
     printf("%s",_("completed"));
     printf("\n");
   }
 
-  printf("%s processing complete\n",file);
+  printf("%s processing completed\n",file);
   printf("\n");
   printf("%s",_("beginning wrap up "));
-  printf("\n");
   printf("\n");
 #ifdef _DEBUG
   PrintMemoryInfo;
@@ -5971,15 +5980,7 @@ typedef struct {
    ************************************************************************
  */
 
-  for(i=nsurfinfo+1;i<nsurfinfo+n_iso_ambient+1;i++){
-    surfdata *surfi;
-
-    surfi = surfinfo + i;
-    surfi->color=getcolorptr(iso_ambient+4*(i-(nsurfinfo+1)));
-    surfi->transparent_level=0.8;
-    surfi->iso_level=i-nsurfinfo;
-  }
-
+  update_isocolors();
   if(arg_iblank==0){
     if(autoterrain==1){
       use_iblank=0;
@@ -7756,7 +7757,7 @@ int readini2(char *inifile, int localfile){
     update_inilist();
   }
 
-  printf("%s",_("reading: "));
+  printf("%s",_("processing config file: "));
   printf("%s\n",inifile);
   if(localfile==1){
     update_selectedtour_index=0;
@@ -9554,9 +9555,12 @@ int readini2(char *inifile, int localfile){
 
         }
         if(is_viewpoint4==1){
+          char *bufferptr;
+          
   		    fgets(buffer,255,stream);
           trim(buffer);
-          strcpy(camera_ini->name,buffer);
+          bufferptr=trim_front(buffer);
+          strcpy(camera_ini->name,bufferptr);
           init_camera_list();
           {
             //*** following code shouldn't be here but leaving it here commented
@@ -9564,7 +9568,7 @@ int readini2(char *inifile, int localfile){
 
             //  camera *cam;
 
-            insert_camera(&camera_list_first,camera_ini,buffer);
+            insert_camera(&camera_list_first,camera_ini,bufferptr);
            // if(cam!=NULL){
            //   cam->view_id=camera_ini->view_id;
            // }
@@ -9595,6 +9599,7 @@ int readini2(char *inifile, int localfile){
         }
         iso_ambient_ini[3]=1.0;
       }
+      update_isocolors();
       continue;
     }
     if(match(buffer,"UNITCLASSES")==1){

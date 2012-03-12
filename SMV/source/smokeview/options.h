@@ -33,7 +33,7 @@
 #define pp_CULL
 #endif
 #define pp_LIGHT
-#define pp_MESSAGE
+//#define pp_MESSAGE
 #define pp_DRAWISO
 #define EGZ
 #define USE_ZLIB

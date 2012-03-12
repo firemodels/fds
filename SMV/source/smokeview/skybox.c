@@ -38,7 +38,7 @@ void loadskytexture(char *filebase, texture *texti){
 
   glGenTextures(1,&texti->name);
   glBindTexture(GL_TEXTURE_2D,texti->name);
-  floortex=readpicture(filebuffer,&texwid,&texht);
+  floortex=readpicture(filebuffer,&texwid,&texht,0);
   if(floortex==NULL){
     FREEMEMORY(filebuffer);
     return;

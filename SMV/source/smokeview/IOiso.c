@@ -193,11 +193,9 @@ void readiso_geom(const char *file, int ifile, int flag, int *errorcode){
   }
 
   surfi = surfinfo + nsurfinfo+1;
+  update_isocolors();
   if(strcmp(isoi->surface_label.shortlabel,"hrrpuv")==0){
     surfi->color=getcolorptr(hrrpuv_iso_color);
-  }
-  else{
-    surfi->color=getcolorptr(iso_ambient);
   }
 
   meshi->isofilenum=ifile;
@@ -1880,3 +1878,29 @@ mesh *get_loaded_isomesh(void){
   }
   return return_mesh;
 }
+
+/* ------------------ update_isocolors ------------------------ */
+
+void update_isocolors(void){
+  int i;
+  float *iso_colors;
+
+  if(iso_ambient_ini==NULL){
+    iso_colors=iso_ambient;
+  }
+  else{
+    iso_colors=iso_ambient_ini;
+  }
+
+  for(i=nsurfinfo+1;i<nsurfinfo+n_iso_ambient+1;i++){
+    surfdata *surfi;
+    float *color;
+
+    surfi = surfinfo + i;
+    color=iso_colors+4*(i-(nsurfinfo+1));
+    surfi->color=getcolorptr(color);
+    surfi->transparent_level=0.8;
+    surfi->iso_level=i-nsurfinfo;
+  }
+}
+

@@ -4863,7 +4863,7 @@ void updatesmoke3dmenulabels(void){
   smoke3d *smoke3di;
   char meshlabel[128];
 
-  printf("updating smoke3d menu labels\n");
+  printf("  updating smoke3d menu labels\n");
   for(i=0;i<nsmoke3dinfo;i++){
     smoke3di = smoke3dinfo + i;
     STRCPY(smoke3di->menulabel,smoke3di->label.longlabel);
@@ -4895,7 +4895,7 @@ void updatesmoke3dmenulabels(void){
       STRCAT(smoke3di->menulabel,meshlabel);
     }
   } 
-  printf("update complete\n\n");
+  printf("  update completed\n");
 }
 
 /* ------------------ adjustalpha ------------------------ */

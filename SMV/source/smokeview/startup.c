@@ -391,7 +391,7 @@ void setup_glut(int argc, char **argv){
     printf("\n");
     printf("%s",_("Initializing Glut\n"));
     glutInit(&argc, argv);
-    printf("%s\n",_("Glut initialization complete\n"));
+    printf("%s\n",_("Glut initialization completed\n"));
   }
 #ifdef pp_OSX
   chdir(workingdir);
@@ -591,7 +591,7 @@ void InitOpenGL(void){
     if(nblueshift<0)nblueshift=0;
   }
   opengldefined=1;
-  printf("%s",_("OpenGL initialization complete\n\n"));
+  printf("%s",_("OpenGL initialization completed\n\n"));
 }
 
 /* ------------------ set_3dsmoke_startup ------------------------ */
