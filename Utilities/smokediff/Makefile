@@ -45,12 +45,13 @@ no_target:
 # ------------- MS Win 32 ----------------
 #  32 bit windows (ms visual studio C compiler)
 
-ms_win_32 : CFLAGS    = -O2 -D WIN32
-ms_win_32 : FFLAGS    = -O2 -fpp -D pp_cvf -D pp_PART5
+ms_win_32 : CFLAGS    = -O2 -D WIN32 -D _CONSOLE
+ms_win_32 : FFLAGS    = -O2 -fpp -D pp_cvf /iface:stdref
 ms_win_32 : CC        = cl
 ms_win_32 : CPP       = cl
 ms_win_32 : FC        = ifort
-ms_win_32 : exe       = smokediff.exe
+ms_win_32 : exe       = smokediff_win_32.exe
+
 ms_win_32 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(objwin)
 
@@ -69,6 +70,16 @@ intel_win_32 : $(objwin)
 
 # ------------- Win 64 ----------------
 #  64 bit windows
+
+ms_win_64 : CFLAGS    = -O2 -D WIN32 -D _CONSOLE -D X64
+ms_win_64 : FFLAGS    =  -O2 -fpp -D pp_cvf -D X64 /iface:stdref
+ms_win_64 : CC        = cl
+ms_win_64 : CPP       = cl
+ms_win_64 : FC        = ifort
+ms_win_64 : exe       = smokediff_win_64.exe
+
+ms_win_64 : $(objwin)
+	$(CPP) -o $(bin)/$(exe) $(objwin)
 
 intel_win_64 : CFLAGS    = -O2 /Qvec_report0 /nologo -D X64 -D WIN32
 intel_win_64 : FFLAGS    = -O2 /Qvec_report0 /nologo -fpp -D pp_cvf -D X64 /iface:stdref
