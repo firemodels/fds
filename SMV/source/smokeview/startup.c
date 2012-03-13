@@ -2279,6 +2279,7 @@ int getmaxrevision(void){
   MAXREV(skybox_revision);
   MAXREV(smokeview_revision);
   MAXREV(smv_endian_revision);
+  MAXREV(smv_geometry_revision);
   MAXREV(startup_revision);
   MAXREV(string_util_revision);
   MAXREV(threader_revision);

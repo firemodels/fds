@@ -3,7 +3,7 @@
 // $Author$
 
 // svn revision character string
-char geometry_revision[]="$Revision$";
+char smv_geometry_revision[]="$Revision$";
 
 #include "options.h"
 #include <stdio.h>  
