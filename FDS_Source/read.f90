@@ -2775,7 +2775,7 @@ NU                          = 0._EB
 N_S                         = -999._EB
 N_T                         = 0._EB
 O                           = 0._EB
-ODE_SOLVER                  = 'EXPLICIT EULER'
+ODE_SOLVER                  = 'null'
 REAC_ATOM_ERROR             = 1.E-4_EB
 REAC_MASS_ERROR             = 1.E-4_EB
 REVERSIBLE                  = .FALSE.
@@ -3032,7 +3032,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       IF (N_REACTIONS ==1 .AND. REACTION(1)%MODE==EDDY_DISSIPATION) THEN
          COMBUSTION_ODE = SINGLE_EXACT
       ELSE
-         COMBUSTION_ODE = EXPLICIT_EULER
+         COMBUSTION_ODE = RK2_RICHARDSON
       ENDIF
    ENDIF
    
