@@ -6193,7 +6193,7 @@ Looking at Equation \ref{eq:PVC_reac} we can group the fuel, oxidizer, and produ
 \mathrm{\underbrace{C_2H_3Cl}_\text{Fuel} + \underbrace{1.53462 \, (O_2+(^{.79}/_{.21}) \, N_2)}_\text{Oxidizer}} \rightarrow \\
 \nonumber \mathrm{\underbrace{HCl +  H_2O + 0.140582\, CO + 0.96433\, CO_2 + 0.895087\, C + 1.53462\,(^{.79}/_{.21}) \, N_2}_\text{Products}}
 \end{eqnarray}
-For the oxidizer and products, which are both composed of multiple primitive species, {\ct SMIX} lines are needed to define the composition of the lumped species. As the user, you can define the {\ct SMIX} by either the MASS\_FRACTIONS of the component gases or the VOLUME\_FRACTIONS. For this case, VOLUME\_FRACTIONS will be used. To determine the volume fractions, we can find the total number of moles by summing the stoichiometric coefficients in the lumped species and then dividing each species' stoichiometric coefficient by that sum.
+For the oxidizer and products, which are both composed of multiple primitive species, {\ct SMIX} lines are needed to define the composition of the lumped species. As the user, you can define the {\ct SMIX} by either the MASS\_FRACTIONS of the component gases or the VOLUME\_FRACTIONS. For this case, volume fractions will be used. To determine the volume fractions, we can find the total number of moles by summing the stoichiometric coefficients in the lumped species and then dividing each species' stoichiometric coefficient by that sum.
 \footnotesize
 \begin{verbatim}
 &SMIX ID = 'AIR', SPEC_ID ='NITROGEN','OXYGEN', VOLUME_FRACTION =0.79,0.21, BACKGROUND=.TRUE. /
@@ -6201,12 +6201,12 @@ For the oxidizer and products, which are both composed of multiple primitive spe
            'WATER VAPOR','SOOT','HYDROGEN CHLORIDE', 
            VOLUME_FRACTION = 0.590713,0.098672,0.014384,0.102322,0.091587,0.102322 /
 \end{verbatim} \normalsize
-Note: the order of which the {\ct SPEC\_ID}s are defined must be the same order as which you defined your VOLUME\_FRACTIONS or MASS\_FRACTIONS. To set the initial concentration of fuel, an {\ct INIT} line is used:
+Note: the order of which the {\ct SPEC\_ID}s are defined must be the same order as which you defined your volume fractions or mass fractions. To set the initial concentration of fuel, an {\ct INIT} line is used:
 \footnotesize
 \begin{verbatim}
 &INIT MASS_FRACTION(1)=0.228671,SPEC_ID(1)='PVC' /
 \end{verbatim} \normalsize
-In this mixing-controlled example, the user is responsible for defining the fuel, heat of combustion of that fuel, species participating the reaction, and the stoichiometric coefficients that describe the reaction. The heat of combustion for `PVC' was found from the SFPE Handbook \cite{SFPE:Tewarson}. If this reaction were all primitive species then the coefficients would be those in Equation \ref{eq:PVC_reac2}. In the lumped species approach, the stoichiometric coefficients for the {\ct SMIX}s become the sum of the coefficients of the primitive species.
+In this mixing-controlled example, the user is responsible for defining the fuel, heat of combustion of that fuel, species participating the reaction, and the stoichiometric coefficients that describe the reaction. The heat of combustion for `PVC' was found from the SFPE Handbook \cite{SFPE:Tewarson}. In the lumped species approach, the stoichiometric coefficients for the {\ct SMIX}s become the sum of the coefficients of the primitive species.
 \footnotesize
 \begin{verbatim}
 &REAC FUEL = 'PVC', HEAT_OF_COMBUSTION=16400,
@@ -6224,11 +6224,74 @@ Note: The sign on NU corresponds to whether that species is consumed (-) or prod
 \end{figure}
  
 \subsubsection{Example: A Two-Step, Reaction Involving the Formation of CO}
+For a more complicated example, consider Equation \ref{eq:2step_methane_rev}, which is a simplified two-step methane oxidation reaction developed by Westbrook and Dryer \cite{Westbrook:1}.
 
+\begin{eqnarray}\label{eq:2step_methane_rev}
+\mathrm{CH_4+1.5 \, O_2}&\rightarrow&  \mathrm{CO+2 \, H_2O} \\
+\nonumber \mathrm{CO + 0.5 \, O_2} &\leftrightharpoons& \mathrm{CO_2}
+\end{eqnarray}
+Typically air is the oxidizer for fires, not pure oxygen. In this case, if we use all primitive species and select nitrogen as the background species, Equation \ref{eq:2step_methane_rev} can be used without modification. Each of the species in the reactions, plus the background species must be defined on the {\ct SPEC} line.
+\footnotesize
+\begin{verbatim} 
+&SPEC ID='NITROGEN',        BACKGROUND=.TRUE./
+&SPEC ID='METHANE',         MASS_FRACTION_0 = 0.0 /
+&SPEC ID='OXYGEN',          MASS_FRACTION_0 = 0.23 /
+&SPEC ID='CARBON MONOXIDE', MASS_FRACTION_0 = 0.0 /
+&SPEC ID='WATER VAPOR',     MASS_FRACTION_0 = 0.0 /
+&SPEC ID='CARBON DIOXIDE',  MASS_FRACTION_0 = 0.0 /
+\end{verbatim} \normalsize
+The ambient gas in this example is defined as air by setting the initial mass fraction of oxygen to 0.23 with the remainder being the background, nitrogen. To define the reactions from Equation \ref{eq:2step_methane_rev}, we must have a {\ct REAC} line for each reaction, including the reversible reaction.
+\footnotesize
+\begin{verbatim}
+&REAC ID = 'FWD_METHANE'
+      FUEL='METHANE'
+      SMIX_ID='METHANE','OXYGEN','CARBON MONOXIDE','WATER VAPOR' 
+      NU=-1,-1.5,1,2
+      HEAT_OF_COMBUSTION=32370.7
+      ODE_SOLVER= 'RK2 RICHARDSON' /
+      
+&REAC ID = 'FWD_CO'
+      FUEL = 'CARBON MONOXIDE'
+      SMIX_ID='CARBON MONOXIDE','OXYGEN','CARBON DIOXIDE'
+      NU= -1,-0.5,1
+      HEAT_OF_COMBUSTION=10102.6
+      ODE_SOLVER= 'RK2 RICHARDSON' /
+      
+&REAC ID = 'REV_CO2'
+      FUEL = 'CARBON DIOXIDE'
+      SMIX_ID= 'CARBON DIOXIDE','OXYGEN','CARBON MONOXIDE'
+      NU= -1,0.5,1
+      HEAT_OF_COMBUSTION=0
+      FWD_ID = 'FWD_CO'
+      REVERSIBLE=.TRUE.
+      ODE_SOLVER= 'RK2 RICHARDSON' /            
+\end{verbatim} \normalsize
+When using primitive species, the primitive species are the SMIXs therefore the SMIX\_IDs correspond directly to the the {\ct SPEC} lines. The stoichiometric coefficients (NU) can be taken directly from reactions (see Equation \ref{eq:2step_methane_rev} coefficients). A heat of combustion must be specified for each reaction. The heat of combustion is found by using the enthalpy of formation of each species: (http://kinetics.nist.gov/janaf/)
 
+\begin{eqnarray}
+\overline{\Delta h_c} &=& \overline{h}_{products} - \overline{h}_{reactants} \\
+\nonumber &=& (\overline{h_f^{\circ}}+\overline{\Delta h})_{products} - (\overline{h_f^{\circ}}+\overline{\Delta h})_{reactants}
+\end{eqnarray}
+If the reference temperature is set as the ambient temperature, $\overline{\Delta h}$ drops out of the equation. As an example, the heat of combustion for the `FWD\_METHANE' reaction can be calculated by:
 
+\begin{eqnarray}
+\overline{\Delta h_c} &=& \nu_{CO}\overline{h_f^{\circ}}_{CO}+\nu_{H_2O}\overline{h_f^{\circ}}_{H_2O} - \nu_{CH_4}\overline{h_f^{\circ}}_{CH_4}-\nu_{O_2}\overline{h_f^{\circ}}_{O_2} \\
+\nonumber &=& (-110.527 \,[\mathrm{kJ/mol}])+2\,(-241.826 \,[\mathrm{kJ/mol}])-(-74.873 \,[\mathrm{kJ/mol}])-(0.0 \,[\mathrm{kJ/mol}]) \\
+\nonumber &=& -519.306 \,[\mathrm{kJ/mol}]
+\end{eqnarray}
+To comply with input file needs, we change the units to [{kJ}/{kg}] by dividing by the molecular weight of the fuel. The heat of combustion becomes 32,370.7 [{kJ}/{kg}]. 
 
+Note: In the third (reversible) reaction, the HEAT\_OF\_COMBUSTION is set to 0.0. The actual value is not 0.0, but is set to 0.0 for purposes of this example. Below HEAT\_OF\_COMBUSTION, you will notice two inputs unique to reversible reactions: FWD\_ID and REVERSIBLE=.TRUE.. These parameters tell FDS that the reaction is reversible and what its forward counterpart is. FDS the calculates the heat of combustion for the reverse reaction (determined from the product of the ratio of the molecular weights of the fuels and the heat of combustion of the forward reaction), applies the appropriate sign, and over writes the value from the input file. As a user, you can also directly specify the heat of combustion on the reversible line and the third {\ct REAC} line will instead look like this:
 
+\footnotesize
+\begin{verbatim}
+&REAC ID = 'REV_CO2'
+      FUEL = 'CARBON DIOXIDE'
+      SMIX_ID= 'CARBON DIOXIDE','OXYGEN','CARBON MONOXIDE'
+      NU= -1,0.5,1
+      HEAT_OF_COMBUSTION=-6429.85802
+      ODE_SOLVER= 'RK2 RICHARDSON' /            
+\end{verbatim} \normalsize
 
 \newpage
 
