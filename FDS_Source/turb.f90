@@ -1070,12 +1070,30 @@ VENT_LOOP: DO NV=1,MESHES(NM)%N_VENT
    VT => MESHES(NM)%VENTS(NV)
    IF (VT%N_EDDY==0) CYCLE VENT_LOOP
    
-   VT%X_EDDY_MIN = VT%X1-MAXVAL(VT%SIGMA_IJ(:,1))
-   VT%X_EDDY_MAX = VT%X2+MAXVAL(VT%SIGMA_IJ(:,1))
-   VT%Y_EDDY_MIN = VT%Y1-MAXVAL(VT%SIGMA_IJ(:,2))
-   VT%Y_EDDY_MAX = VT%Y2+MAXVAL(VT%SIGMA_IJ(:,2))
-   VT%Z_EDDY_MIN = VT%Z1-MAXVAL(VT%SIGMA_IJ(:,3))
-   VT%Z_EDDY_MAX = VT%Z2+MAXVAL(VT%SIGMA_IJ(:,3))
+   SELECT CASE(ABS(VT%IOR))
+      CASE(1)
+         VT%X_EDDY_MIN = VT%X1-MAXVAL(VT%SIGMA_IJ(:,1))
+         VT%X_EDDY_MAX = VT%X2+MAXVAL(VT%SIGMA_IJ(:,1))
+         VT%Y_EDDY_MIN = VT%Y1
+         VT%Y_EDDY_MAX = VT%Y2
+         VT%Z_EDDY_MIN = VT%Z1
+         VT%Z_EDDY_MAX = VT%Z2
+      CASE(2)
+         VT%X_EDDY_MIN = VT%X1
+         VT%X_EDDY_MAX = VT%X2
+         VT%Y_EDDY_MIN = VT%Y1-MAXVAL(VT%SIGMA_IJ(:,2))
+         VT%Y_EDDY_MAX = VT%Y2+MAXVAL(VT%SIGMA_IJ(:,2))
+         VT%Z_EDDY_MIN = VT%Z1
+         VT%Z_EDDY_MAX = VT%Z2
+      CASE(3)
+         VT%X_EDDY_MIN = VT%X1
+         VT%X_EDDY_MAX = VT%X2
+         VT%Y_EDDY_MIN = VT%Y1
+         VT%Y_EDDY_MAX = VT%Y2
+         VT%Z_EDDY_MIN = VT%Z1-MAXVAL(VT%SIGMA_IJ(:,3))
+         VT%Z_EDDY_MAX = VT%Z2+MAXVAL(VT%SIGMA_IJ(:,3))
+   END SELECT
+
    VT%EDDY_BOX_VOLUME = (VT%X_EDDY_MAX-VT%X_EDDY_MIN)*(VT%Y_EDDY_MAX-VT%Y_EDDY_MIN)*(VT%Z_EDDY_MAX-VT%Z_EDDY_MIN)
    
    EDDY_LOOP: DO NE=1,VT%N_EDDY
@@ -1135,34 +1153,34 @@ VENT_LOOP: DO NV=1,N_VENT
       TSI=T-SF%T_IGN
    ENDIF
    PROFILE_FACTOR = 1._EB
-   IF (SF%PROFILE==ATMOSPHERIC) PROFILE_FACTOR = (MAX(0._EB,ZC(KK)-GROUND_LEVEL)/SF%Z0)**SF%PLE
    RAMP_T = EVALUATE_RAMP(TSI,SF%TAU(TIME_VELO),SF%RAMP_INDEX(TIME_VELO))
    
    IOR_SELECT: SELECT CASE(ABS(VT%IOR))
       CASE(1)
          EDDY_LOOP_1: DO NE=1,VT%N_EDDY ! loop over eddies
-            VT%X_EDDY(NE) = VT%X_EDDY(NE)-DT*SF%VEL*SIGN(1._EB,REAL(VT%IOR,EB))*PROFILE_FACTOR*RAMP_T
-            VT%Y_EDDY(NE) = VT%Y_EDDY(NE)+DT*SF%VEL_T(1)*PROFILE_FACTOR*RAMP_T
-            VT%Z_EDDY(NE) = VT%Z_EDDY(NE)+DT*SF%VEL_T(2)*PROFILE_FACTOR*RAMP_T
+            IF (SF%PROFILE==ATMOSPHERIC) PROFILE_FACTOR = (MAX(0._EB,VT%Z_EDDY(NE)-GROUND_LEVEL)/SF%Z0)**SF%PLE
+            VT%X_EDDY(NE) = VT%X_EDDY(NE) - DT*SF%VEL*SIGN(1._EB,REAL(VT%IOR,EB))*PROFILE_FACTOR*RAMP_T
+            VT%Y_EDDY(NE) = VT%Y_EDDY(NE) + DT*SF%VEL_T(1)*PROFILE_FACTOR*RAMP_T
+            VT%Z_EDDY(NE) = VT%Z_EDDY(NE) + DT*SF%VEL_T(2)*PROFILE_FACTOR*RAMP_T
             IERROR=0;      CALL EDDY_POSITION(NE,NV,NM,IERROR)
             IF (IERROR==1) CALL EDDY_AMPLITUDE(NE,NV,NM)
             DO KK=VT%K1+1,VT%K2 ! this block can be made more efficient
                DO JJ=VT%J1+1,VT%J2
-                  XX = (        VT%X1     - VT%X_EDDY(NE))/VT%SIGMA_IJ(1,1)
-                  YY = (MESHES(NM)%YC(JJ) - VT%Y_EDDY(NE))/VT%SIGMA_IJ(1,2)
-                  ZZ = (MESHES(NM)%ZC(KK) - VT%Z_EDDY(NE))/VT%SIGMA_IJ(1,3)
+                  XX = (VT%X1  - VT%X_EDDY(NE))/VT%SIGMA_IJ(1,1)
+                  YY = (YC(JJ) - VT%Y_EDDY(NE))/VT%SIGMA_IJ(1,2)
+                  ZZ = (ZC(KK) - VT%Z_EDDY(NE))/VT%SIGMA_IJ(1,3)
                   SHAPE_FACTOR = SHAPE_FUNCTION(XX,1)*SHAPE_FUNCTION(YY,1)*SHAPE_FUNCTION(ZZ,1)
                   VT%U_EDDY(JJ,KK) = VT%U_EDDY(JJ,KK) + VT%CU_EDDY(NE)*SHAPE_FACTOR
                   
-                  XX = (        VT%X1     - VT%X_EDDY(NE))/VT%SIGMA_IJ(2,1)
-                  YY = (MESHES(NM)%YC(JJ) - VT%Y_EDDY(NE))/VT%SIGMA_IJ(2,2)
-                  ZZ = (MESHES(NM)%ZC(KK) - VT%Z_EDDY(NE))/VT%SIGMA_IJ(2,3)
+                  XX = (VT%X1  - VT%X_EDDY(NE))/VT%SIGMA_IJ(2,1)
+                  YY = (YC(JJ) - VT%Y_EDDY(NE))/VT%SIGMA_IJ(2,2)
+                  ZZ = (ZC(KK) - VT%Z_EDDY(NE))/VT%SIGMA_IJ(2,3)
                   SHAPE_FACTOR = SHAPE_FUNCTION(XX,1)*SHAPE_FUNCTION(YY,1)*SHAPE_FUNCTION(ZZ,1)
                   VT%V_EDDY(JJ,KK) = VT%V_EDDY(JJ,KK) + VT%CV_EDDY(NE)*SHAPE_FACTOR
                   
-                  XX = (        VT%X1     - VT%X_EDDY(NE))/VT%SIGMA_IJ(3,1)
-                  YY = (MESHES(NM)%YC(JJ) - VT%Y_EDDY(NE))/VT%SIGMA_IJ(3,2)
-                  ZZ = (MESHES(NM)%ZC(KK) - VT%Z_EDDY(NE))/VT%SIGMA_IJ(3,3)
+                  XX = (VT%X1  - VT%X_EDDY(NE))/VT%SIGMA_IJ(3,1)
+                  YY = (YC(JJ) - VT%Y_EDDY(NE))/VT%SIGMA_IJ(3,2)
+                  ZZ = (ZC(KK) - VT%Z_EDDY(NE))/VT%SIGMA_IJ(3,3)
                   SHAPE_FACTOR = SHAPE_FUNCTION(XX,1)*SHAPE_FUNCTION(YY,1)*SHAPE_FUNCTION(ZZ,1)
                   VT%W_EDDY(JJ,KK) = VT%W_EDDY(JJ,KK) + VT%CW_EDDY(NE)*SHAPE_FACTOR
                ENDDO
@@ -1170,28 +1188,29 @@ VENT_LOOP: DO NV=1,N_VENT
          ENDDO EDDY_LOOP_1
       CASE(2)
          EDDY_LOOP_2: DO NE=1,VT%N_EDDY
-            VT%X_EDDY(NE) = VT%X_EDDY(NE)+DT*SF%VEL_T(2)*PROFILE_FACTOR*RAMP_T
-            VT%Y_EDDY(NE) = VT%Y_EDDY(NE)-DT*SF%VEL*SIGN(1._EB,REAL(VT%IOR,EB))*PROFILE_FACTOR*RAMP_T
-            VT%Z_EDDY(NE) = VT%Z_EDDY(NE)+DT*SF%VEL_T(1)*PROFILE_FACTOR*RAMP_T
+            IF (SF%PROFILE==ATMOSPHERIC) PROFILE_FACTOR = (MAX(0._EB,VT%Z_EDDY(NE)-GROUND_LEVEL)/SF%Z0)**SF%PLE
+            VT%X_EDDY(NE) = VT%X_EDDY(NE) + DT*SF%VEL_T(2)*PROFILE_FACTOR*RAMP_T
+            VT%Y_EDDY(NE) = VT%Y_EDDY(NE) - DT*SF%VEL*SIGN(1._EB,REAL(VT%IOR,EB))*PROFILE_FACTOR*RAMP_T
+            VT%Z_EDDY(NE) = VT%Z_EDDY(NE) + DT*SF%VEL_T(1)*PROFILE_FACTOR*RAMP_T
             IERROR=0;      CALL EDDY_POSITION(NE,NV,NM,IERROR)
             IF (IERROR==1) CALL EDDY_AMPLITUDE(NE,NV,NM)
             DO KK=VT%K1+1,VT%K2
                DO II=VT%I1+1,VT%I2
-                  XX = (MESHES(NM)%XC(II) - VT%X_EDDY(NE))/VT%SIGMA_IJ(1,1)
-                  YY = (        VT%Y1     - VT%Y_EDDY(NE))/VT%SIGMA_IJ(1,2)
-                  ZZ = (MESHES(NM)%ZC(KK) - VT%Z_EDDY(NE))/VT%SIGMA_IJ(1,3)
+                  XX = (XC(II) - VT%X_EDDY(NE))/VT%SIGMA_IJ(1,1)
+                  YY = (VT%Y1  - VT%Y_EDDY(NE))/VT%SIGMA_IJ(1,2)
+                  ZZ = (ZC(KK) - VT%Z_EDDY(NE))/VT%SIGMA_IJ(1,3)
                   SHAPE_FACTOR = SHAPE_FUNCTION(XX,1)*SHAPE_FUNCTION(YY,1)*SHAPE_FUNCTION(ZZ,1)
                   VT%U_EDDY(II,KK) = VT%U_EDDY(II,KK) + VT%CU_EDDY(NE)*SHAPE_FACTOR
                   
-                  XX = (MESHES(NM)%XC(II) - VT%X_EDDY(NE))/VT%SIGMA_IJ(2,1)
-                  YY = (        VT%Y1     - VT%Y_EDDY(NE))/VT%SIGMA_IJ(2,2)
-                  ZZ = (MESHES(NM)%ZC(KK) - VT%Z_EDDY(NE))/VT%SIGMA_IJ(2,3)
+                  XX = (XC(II) - VT%X_EDDY(NE))/VT%SIGMA_IJ(2,1)
+                  YY = (VT%Y1  - VT%Y_EDDY(NE))/VT%SIGMA_IJ(2,2)
+                  ZZ = (ZC(KK) - VT%Z_EDDY(NE))/VT%SIGMA_IJ(2,3)
                   SHAPE_FACTOR = SHAPE_FUNCTION(XX,1)*SHAPE_FUNCTION(YY,1)*SHAPE_FUNCTION(ZZ,1)
                   VT%V_EDDY(II,KK) = VT%V_EDDY(II,KK) + VT%CV_EDDY(NE)*SHAPE_FACTOR
                   
-                  XX = (MESHES(NM)%XC(II) - VT%X_EDDY(NE))/VT%SIGMA_IJ(3,1)
-                  YY = (        VT%Y1     - VT%Y_EDDY(NE))/VT%SIGMA_IJ(3,2)
-                  ZZ = (MESHES(NM)%ZC(KK) - VT%Z_EDDY(NE))/VT%SIGMA_IJ(3,3)
+                  XX = (XC(II) - VT%X_EDDY(NE))/VT%SIGMA_IJ(3,1)
+                  YY = (VT%Y1  - VT%Y_EDDY(NE))/VT%SIGMA_IJ(3,2)
+                  ZZ = (ZC(KK) - VT%Z_EDDY(NE))/VT%SIGMA_IJ(3,3)
                   SHAPE_FACTOR = SHAPE_FUNCTION(XX,1)*SHAPE_FUNCTION(YY,1)*SHAPE_FUNCTION(ZZ,1)
                   VT%W_EDDY(II,KK) = VT%W_EDDY(II,KK) + VT%CW_EDDY(NE)*SHAPE_FACTOR 
                ENDDO
@@ -1199,28 +1218,29 @@ VENT_LOOP: DO NV=1,N_VENT
          ENDDO EDDY_LOOP_2
       CASE(3)
          EDDY_LOOP_3: DO NE=1,VT%N_EDDY
-            VT%X_EDDY(NE) = VT%X_EDDY(NE)+DT*SF%VEL_T(1)*PROFILE_FACTOR*RAMP_T
-            VT%Y_EDDY(NE) = VT%Y_EDDY(NE)+DT*SF%VEL_T(2)*PROFILE_FACTOR*RAMP_T
-            VT%Z_EDDY(NE) = VT%Z_EDDY(NE)-DT*SF%VEL*SIGN(1._EB,REAL(VT%IOR,EB))*PROFILE_FACTOR*RAMP_T
+            IF (SF%PROFILE==ATMOSPHERIC) PROFILE_FACTOR = (MAX(0._EB,VT%Z_EDDY(NE)-GROUND_LEVEL)/SF%Z0)**SF%PLE
+            VT%X_EDDY(NE) = VT%X_EDDY(NE) + DT*SF%VEL_T(1)*PROFILE_FACTOR*RAMP_T
+            VT%Y_EDDY(NE) = VT%Y_EDDY(NE) + DT*SF%VEL_T(2)*PROFILE_FACTOR*RAMP_T
+            VT%Z_EDDY(NE) = VT%Z_EDDY(NE) - DT*SF%VEL*SIGN(1._EB,REAL(VT%IOR,EB))*PROFILE_FACTOR*RAMP_T
             IERROR=0;      CALL EDDY_POSITION(NE,NV,NM,IERROR)
             IF (IERROR==1) CALL EDDY_AMPLITUDE(NE,NV,NM)
             DO JJ=VT%J1+1,VT%J2
                DO II=VT%I1+1,VT%I2
-                  XX = (MESHES(NM)%XC(II) - VT%X_EDDY(NE))/VT%SIGMA_IJ(1,1)
-                  YY = (MESHES(NM)%YC(JJ) - VT%Y_EDDY(NE))/VT%SIGMA_IJ(1,2)
-                  ZZ = (        VT%Z1     - VT%Z_EDDY(NE))/VT%SIGMA_IJ(1,3)
+                  XX = (XC(II) - VT%X_EDDY(NE))/VT%SIGMA_IJ(1,1)
+                  YY = (YC(JJ) - VT%Y_EDDY(NE))/VT%SIGMA_IJ(1,2)
+                  ZZ = (VT%Z1  - VT%Z_EDDY(NE))/VT%SIGMA_IJ(1,3)
                   SHAPE_FACTOR = SHAPE_FUNCTION(XX,1)*SHAPE_FUNCTION(YY,1)*SHAPE_FUNCTION(ZZ,1)
                   VT%U_EDDY(II,JJ) = VT%U_EDDY(II,JJ) + VT%CU_EDDY(NE)*SHAPE_FACTOR
                   
-                  XX = (MESHES(NM)%XC(II) - VT%X_EDDY(NE))/VT%SIGMA_IJ(2,1)
-                  YY = (MESHES(NM)%YC(JJ) - VT%Y_EDDY(NE))/VT%SIGMA_IJ(2,2)
-                  ZZ = (        VT%Z1     - VT%Z_EDDY(NE))/VT%SIGMA_IJ(2,3)
+                  XX = (XC(II) - VT%X_EDDY(NE))/VT%SIGMA_IJ(2,1)
+                  YY = (YC(JJ) - VT%Y_EDDY(NE))/VT%SIGMA_IJ(2,2)
+                  ZZ = (VT%Z1  - VT%Z_EDDY(NE))/VT%SIGMA_IJ(2,3)
                   SHAPE_FACTOR = SHAPE_FUNCTION(XX,1)*SHAPE_FUNCTION(YY,1)*SHAPE_FUNCTION(ZZ,1)
                   VT%V_EDDY(II,JJ) = VT%V_EDDY(II,JJ) + VT%CV_EDDY(NE)*SHAPE_FACTOR
                   
-                  XX = (MESHES(NM)%XC(II) - VT%X_EDDY(NE))/VT%SIGMA_IJ(3,1)
-                  YY = (MESHES(NM)%YC(JJ) - VT%Y_EDDY(NE))/VT%SIGMA_IJ(3,2)
-                  ZZ = (        VT%Z1     - VT%Z_EDDY(NE))/VT%SIGMA_IJ(3,3)
+                  XX = (XC(II) - VT%X_EDDY(NE))/VT%SIGMA_IJ(3,1)
+                  YY = (YC(JJ) - VT%Y_EDDY(NE))/VT%SIGMA_IJ(3,2)
+                  ZZ = (VT%Z1  - VT%Z_EDDY(NE))/VT%SIGMA_IJ(3,3)
                   SHAPE_FACTOR = SHAPE_FUNCTION(XX,1)*SHAPE_FUNCTION(YY,1)*SHAPE_FUNCTION(ZZ,1)
                   VT%W_EDDY(II,JJ) = VT%W_EDDY(II,JJ) + VT%CW_EDDY(NE)*SHAPE_FACTOR 
                ENDDO
