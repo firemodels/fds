@@ -2356,7 +2356,7 @@ USE SCRC, ONLY: SCARC_METHOD, SCARC_KRYLOV, SCARC_MULTIGRID, SCARC_SMOOTH, SCARC
 
 INTEGER :: NM,I,NN,N,NR,NL,NS,ITMP
 REAL(EB) :: SD
-CHARACTER(30) :: QUANTITY,DATE
+CHARACTER(30) :: QUANTITY,DATE,ODE_SOLVER
 TYPE(SPECIES_MIXTURE_TYPE),POINTER :: SM=>NULL()
  
 ! Write out preliminary stuff to error file (unit 0)
@@ -2503,12 +2503,25 @@ IF (N_REACTIONS>0) WRITE(LU_OUTPUT,'(//A)') ' Gas Phase Reaction Information'
 
 REACTION_LOOP: DO N=1,N_REACTIONS
    RN => REACTION(N)
+   
+   SELECT CASE (COMBUSTION_ODE)
+      CASE (SINGLE_EXACT)
+         ODE_SOLVER = 'SINGLE EXACT'      
+      CASE (EXPLICIT_EULER)
+         ODE_SOLVER = 'EXPLICIT EULER'
+      CASE (RUNGE_KUTTA_2)
+         ODE_SOLVER = 'RUNGE-KUTTA 2'
+      CASE (RK2_RICHARDSON)
+            ODE_SOLVER = 'RK2 RICHARDSON'
+   END SELECT
+   
    IF (RN%FYI/='null') WRITE(LU_OUTPUT,'(/3X,A)') RN%FYI
    IF (RN%ID/='null')  WRITE(LU_OUTPUT,'(/3X,A)') RN%ID
    
    SELECT CASE(RN%MODE)
       CASE(FINITE_RATE)
          WRITE(LU_OUTPUT,'(/3X,A)')  'Finite Rate Reaction'
+         WRITE(LU_OUTPUT,'(3X,A,A)')  'ODE Solver:  ', ODE_SOLVER
          WRITE(LU_OUTPUT,'(/3X,A)') 'Tracked Species'
          WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'         
          DO NN=0,N_TRACKED_SPECIES
@@ -2532,6 +2545,7 @@ REACTION_LOOP: DO N=1,N_REACTIONS
          WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') RN%FUEL,RN%HEAT_OF_COMBUSTION/1000._EB
       CASE (EDDY_DISSIPATION)
          WRITE(LU_OUTPUT,'(/3X,A)')  'Eddy Dissipation Reaction'
+         WRITE(LU_OUTPUT,'(3X,A,A)')  'ODE Solver:  ', ODE_SOLVER
          WRITE(LU_OUTPUT,'(/3X,A)') 'Tracked Species'
          WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'
          DO NN=0,N_TRACKED_SPECIES
@@ -2545,6 +2559,7 @@ REACTION_LOOP: DO N=1,N_REACTIONS
          WRITE(LU_OUTPUT,'(A,F12.3)')  '   Heat of Combustion (kJ/kg)  ',RN%HEAT_OF_COMBUSTION/1000._EB
       CASE (EDDY_DISSIPATION_CONCEPT)
          WRITE(LU_OUTPUT,'(/3X,A)')  'Eddy Dissipation Concept Reaction'
+         WRITE(LU_OUTPUT,'(3X,A,A)')  'ODE Solver:  ', ODE_SOLVER
          WRITE(LU_OUTPUT,'(/3X,A)') 'Tracked Species'
          WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'         
          DO NN=0,N_TRACKED_SPECIES
