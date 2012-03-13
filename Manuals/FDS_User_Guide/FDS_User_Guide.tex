@@ -2181,28 +2181,33 @@ If the interior temperature of a building is at a different temperature than the
 downward air flows within shafts
 or stairwells connected to the ambient via leakage paths will occur.
 This phenomena is known as the {\em stack effect}.  The {\bf stack\_effect} test case
-is a 2D simulation of a 304~m tall building initialized to a temperature of 20~$^\circ$C with the surrounding ambient
+is a 2D simulation of a 100~m tall building initialized to a temperature of 20~$^\circ$C with the surrounding ambient
 temperature initialized to
 10~$^\circ$C. Two small openings in the building are defined 2.5~m above the ground floor of the building
-and 2.5~m below the roof of the building.
+and 2.5~m below the roof of the building using the HVAC solver.  Each opening is given an area of 0.01~$m^2$ and a flow loss of 2.
 The initial density stratification is defined by assuming a lapse rate of 0~$^\circ$C/m.
 \be
-   \rho_0(z) = \rho_\infty \, \exp \left( \frac{g W}{{\cal R}_0 T_0} z \right)
+   \rho_0(z) = \rho_\infty \, \exp \left(- \frac{g W}{{\cal R}_0 T_0} z \right)
 \ee
-Applying this to the external and internal locations at the lower and upper vents results in densities of 1.2392, 1.1969, 1.1954, and
-1.1546~kg/m$^3$, respectively.  FDS computes the same values to within machine precision.  Since the openings in the building
-are equally spaced over
+Applying this to the external and internal locations at the lower and upper vents results in densities of 1.2412, 1.1989, 1.2272, and
+1.1857~kg/m$^3$, respectively.  FDS computes the same values to within machine precision.  Since the openings in the building are equally spaced over
 its height, the neutral plane of the building will be close to its midpoint.
 The pressure gradient across the building's wall can be computed as
 \be
-   \delta P = \frac{W P_0 g} {R_{0}} \left( \frac {1}{T_{ambient}} - \frac {1}{T_{building}} \right) h
+   \delta P = \frac{W P_0 g} {R_{0}} \left( \frac{1}{T_{ambient}} - \frac{1}{T_{building}} \right) h
 \ee
 where $h$ is the distance from the neutral plane.  Using this pressure gradient in
-Bernoulli's equation (and assuming it remains constant) results
-in a velocity of 10.09~m/s through the vent.  FDS computes a peak velocity of 10.13~m/s, an error of 0.5~\%.
+Bernoulli's equation with a discharge coefficient of 0.707 (equivalent to the sum of an entrance loss of 1 and an exit loss of 1) results in a velocity equation for both the top and the bottom vent.  The neutral plane is located where the velocities result in a balanced mass flow and is given by
 
+\be h/H = \frac{1}{1+\frac{T_{ambient}}{T_{building}}} \ee
 
+where $h$ is the neutral plane height above the lower vent and $H$ is the height between the vents.  This gives a neutral plan of 46.79 m above the lower vent.  This is a neutral plane at 49.18 m.  Using the neutral plane location to determine the pressure differences at the vents, the inflow velocity at the bottom is 4.0 m/s and an outflow velocity at the top is 4.1 m/s.  Results are shown in Figure~\ref{stack_effect}.
 
+\begin{figure}[ht]
+\includegraphics[width=3.1in]{SCRIPT_FIGURES/stack_effect.pdf}
+\caption[Output of {\bf stack\_effect} test case.]{Output of {\bf stack\_effect} test case. }
+\label{stack_effect}
+\end{figure}
 
 \subsection{Special Topic: Large Eddy Simulation Parameters}
 \label{info:LES}
@@ -11951,6 +11956,6 @@ data values located at nodes, located at the center of faces, both or neither (i
 \backmatter
 \nopart %To Fix TOC in PDF output.
 
-\bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
+%\bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
 
 \end{document}
