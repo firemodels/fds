@@ -2818,6 +2818,7 @@ void ParticleMenu(int value){
       fprintf(scriptoutstream,"LOADFILE\n");
       fprintf(scriptoutstream," %s\n",partfile);
     }
+    npartframes_max=get_min_partframes();
     readpart(partfile,value,LOAD,&errorcode);
   }
   else{
