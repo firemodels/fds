@@ -361,7 +361,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          ! Special handling of normal component of velocity at surfaces with a specified mass flux.
          
          IF ((SURFACE(SURF_INDEX)%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .OR. &
-             (&!SURFACE(SURF_INDEX)%SPECIES_BC_INDEX==HVAC_BOUNDARY       .OR. &
+             (SURFACE(SURF_INDEX)%SPECIES_BC_INDEX==HVAC_BOUNDARY       .OR. &
               ANY(SURFACE(SURF_INDEX)%LEAK_PATH>0._EB)) .AND. WC%ONE_D%UWS<0._EB) .AND. WC%ZZ_F(N)>0._EB) THEN
             ! recreate diffusive flux from divg b/c UWP based on old RHODW
             RHO_D_DZDN = 2._EB*WC%RHODW(N)*(ZZP(IIG,JJG,KKG,N)-WC%ZZ_F(N))*WC%RDN
