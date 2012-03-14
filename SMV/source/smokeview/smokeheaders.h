@@ -638,7 +638,7 @@ EXTERNCPP int readini2(char *inifile, int localfile);
 EXTERNCPP void obst_or_vent2faces(const mesh *gb,blockagedata *bc, ventdata *vi, facedata *faceptr,int facetype);
 EXTERNCPP void initsurface(surfdata *surf);
 EXTERNCPP void initventsurface(surfdata *surf);
-EXTERNCPP void update_hidden_faces(void);
+EXTERNCPP void UpdateHiddenFaces(void);
 EXTERNCPP void update_selectfaces(void);
 EXTERNCPP void update_selectblocks(void);
 EXTERNCPP void draw_faces(void);

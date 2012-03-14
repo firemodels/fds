@@ -1848,8 +1848,6 @@ void initvars(void){
   strcpy(part_ext,".part");
   strcpy(ini_ext,".ini");
 
-  updatehiddenfaces=0;
-
   start_xyz0[0]=0.0;
   start_xyz0[1]=0.0;
   start_xyz0[2]=0.0;

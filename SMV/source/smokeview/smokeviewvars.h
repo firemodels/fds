@@ -852,7 +852,7 @@ SVEXTERN int SVDECL(renderfilelabel,0);
 SVEXTERN char part_ext[6];
 SVEXTERN char ini_ext[5];
 
-SVEXTERN int updatehiddenfaces;
+SVEXTERN int SVDECL(updatehiddenfaces,1),SVDECL(hide_overlaps,1);
 SVEXTERN int SVDECL(nsurfids,0);
 SVEXTERN surfid SVDECL(*surfids,NULL);
 SVEXTERN int key_state;

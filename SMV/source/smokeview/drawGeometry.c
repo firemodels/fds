@@ -1246,7 +1246,7 @@ void update_faces(void){
     }
     meshi->nfaces=faceptr-meshi->faceinfo;
   }
-  update_hidden_faces();
+  UpdateHiddenFaces();
   update_facelists();
   update_selectfaces();
   update_selectblocks();
@@ -1978,7 +1978,7 @@ void update_facelists(void){
 
   get_drawing_parms(&drawing_smooth, &drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
 
-  if(updatehiddenfaces==1)update_hidden_faces();
+  if(updatehiddenfaces==1)UpdateHiddenFaces();
   updatefacelists=0;
   nface_normals_single=0;
   nface_normals_double=0;
@@ -2806,216 +2806,49 @@ void draw_transparent_faces(){
   if(drawing_transparent==1)transparentoff();
 }
 
-/* ------------------ update_hidden_faces ------------------------ */
+/* ------------------ UpdateHiddenFaces ------------------------ */
 
-void update_hidden_faces(){
-#ifdef DEADCODE
-  int i,j,k;
-  facedata *facej;
-  mesh *meshi;
-  blockagedata *bc;
-  int iobst;
-  int totalcount=0, hiddencount=0,hiddenblockcount=0, totalblockcount=0;
-  int bcount;
-  int *blank=NULL;
-  int nnodes;
-  int ibar, jbar, kbar;
-  int ii, jj, kk;
-  int node2index,nodeindex, jval, kval;
-  int hidden_face;
-#endif
+void UpdateHiddenFaces(){
+  int i;
+
 
   updatehiddenfaces=0;
-  /* there is a bug in update_hidden_faces which is fixed by not calling it .
-     fixing the bug this way to preserve where update_hidden_faces() is being called
-     in case it is needed in the future
-     */
-  return;
-#ifdef DEADCODE
-#ifdef _DEBUG
   printf("  updating hidden faces - ");
-#endif
   for(i=0;i<nmeshes;i++){
+    int j;
+    mesh *meshi;
+
     meshi=meshinfo + i;
-    ibar = meshi->ibar+1;
-    jbar = meshi->jbar+1;
-    kbar = meshi->kbar+1;
-    totalblockcount += meshi->nbptrs;
-    nnodes = ibar*jbar*kbar;
-    FREEMEMORY(blank);
-    if(NewMemory((void **)&blank,nnodes*sizeof(int))==0)return;
-    for(j=0;j<nnodes;j++){
-      blank[j]=0;
-    }
-#define ijknode(i,j,k) (ibar*((k)*jbar + (j)) + (i))
-
-   /* increment blank array for each blockage */
-
-    for(j=0;j<meshi->nbptrs;j++){
-      bc = meshi->blockageinfoptrs[j];
-      if(bc->hidden==1||bc->del==1||bc->invisible==1||bc->nshowtime!=0)continue;
-      for(kk=bc->ijk[4];kk<=bc->ijk[5];kk++){
-        kval = kk*ibar*jbar;
-        for(jj=bc->ijk[2];jj<=bc->ijk[3];jj++){
-          jval = kval + jj*ibar;
-          nodeindex = jval + bc->ijk[0] - 1;
-          for(ii=bc->ijk[0];ii<=bc->ijk[1];ii++){
-            nodeindex++;
-            blank[nodeindex]++;
-          }
-        }
-      }
-    }
 
     for(j=0;j<6*meshi->nbptrs;j++){
-      iobst = j/6;
-      facej = meshi->faceinfo+j;
-      totalcount++;
-      facej->hidden=0;
-      bc=meshi->blockageinfoptrs[iobst];
-      if(facej->thinface==1)continue;
-      if(bc->hidden==1||bc->del==1||bc->invisible==1||(visBlocks==visBLOCKAsInput&&facej->invisible==1)){
-        facej->hidden=1;
-        hiddencount++;
-        continue;
-      }
-      switch (facej->dir){
-      case DOWN_X:
-        hidden_face=0;
-        if(bc->ijk[0]!=0){
-          ii=bc->ijk[0];
-          for(kk=bc->ijk[4];kk<=bc->ijk[5];kk++){
-            for(jj=bc->ijk[2];jj<=bc->ijk[3];jj++){
-              nodeindex = ijknode(ii,jj,kk);
-              node2index = ijknode(ii-1,jj,kk);
-              if(blank[nodeindex]<=1
-                ||blank[node2index]==0
-                )goto end_imin_loop;
-            }
-          }
-          hidden_face=1;
-          hiddencount++;
-        }
-end_imin_loop:
-        facej->hidden=hidden_face;
-        break;
-      case UP_X:
-        hidden_face=0;
-        if(bc->ijk[1]!=ibar-1){
-          ii=bc->ijk[1];
-          for(kk=bc->ijk[4];kk<=bc->ijk[5];kk++){
-            for(jj=bc->ijk[2];jj<=bc->ijk[3];jj++){
-              nodeindex = ijknode(ii,jj,kk);
-              node2index = ijknode(ii+1,jj,kk);
-              if(blank[nodeindex]<=1
-                ||blank[node2index]==0
-                )goto end_imax_loop;
-            }
-          }
-          hidden_face=1;
-          hiddencount++;
-        }
-end_imax_loop:
-        facej->hidden=hidden_face;
-        break;
-      case DOWN_Y:
-        hidden_face=0;
-        if(bc->ijk[2]!=0){
-          jj=bc->ijk[2];
-          for(kk=bc->ijk[4];kk<=bc->ijk[5];kk++){
-            for(ii=bc->ijk[0];ii<=bc->ijk[1];ii++){
-              nodeindex = ijknode(ii,jj,kk);
-              node2index = ijknode(ii,jj-1,kk);
-              if(blank[nodeindex]<=1
-                ||blank[node2index]==0
-                )goto end_jmin_loop;
-            }
-          }
-          hidden_face=1;
-          hiddencount++;
-        }
-end_jmin_loop:
-        facej->hidden=hidden_face;
-        break;
-      case UP_Y:
-        hidden_face=0;
-        if(bc->ijk[3]!=jbar-1){
-          jj=bc->ijk[3];
-          for(kk=bc->ijk[4];kk<=bc->ijk[5];kk++){
-            for(ii=bc->ijk[0];ii<=bc->ijk[1];ii++){
-              nodeindex = ijknode(ii,jj,kk);
-              node2index = ijknode(ii,jj+1,kk);
-              if(blank[nodeindex]<=1
-                ||blank[node2index]==0
-                )goto end_jmax_loop;
-            }
-          }
-          hidden_face=1;
-          hiddencount++;
-        }
-end_jmax_loop:
-        facej->hidden=hidden_face;
-        break;
-      case DOWN_Z:
-        hidden_face=0;
-        if(bc->ijk[4]!=0){
-          kk=bc->ijk[4];
-          for(jj=bc->ijk[2];jj<=bc->ijk[3];jj++){
-            for(ii=bc->ijk[0];ii<=bc->ijk[1];ii++){
-              nodeindex = ijknode(ii,jj,kk);
-              node2index = ijknode(ii,jj,kk-1);
-              if(blank[nodeindex]<=1
-                ||blank[node2index]==0
-                )goto end_kmin_loop;
-            }
-          }
-          hidden_face=1;
-          hiddencount++;
-        }
-end_kmin_loop:
-        facej->hidden=hidden_face;
-        break;
-      case UP_Z:
-        hidden_face=0;
-        if(bc->ijk[5]!=kbar-1){
-          kk=bc->ijk[5];
-          for(jj=bc->ijk[2];jj<=bc->ijk[3];jj++){
-            for(ii=bc->ijk[0];ii<=bc->ijk[1];ii++){
-              nodeindex = ijknode(ii,jj,kk);
-              node2index = ijknode(ii,jj,kk+1);
-              if(blank[nodeindex]<=1
-                ||blank[node2index]==0
-                )goto end_kmax_loop;
-            }
-          }
-          hidden_face=1;
-          hiddencount++;
-        }
-end_kmax_loop:
-        facej->hidden=hidden_face;
-        break;
-      default:
-        ASSERT(FFALSE);
-      }
-    }
-    FREEMEMORY(blank);
+      int k;
+      facedata *facej;
 
-    for(j=0;j<meshi->nbptrs;j++){
-      bcount = 0;
-      for(k=0;k<6;k++){
-        facej = meshi->faceinfo + 6*j + k;
-        if(facej->hidden==1)bcount++;
+      facej = meshi->faceinfo+j;
+      facej->hidden=0;
+
+    }
+    if(hide_overlaps==0)return;
+    for(j=0;j<6*meshi->nbptrs;j++){
+      int k;
+      facedata *facej;
+
+      facej = meshi->faceinfo+j;
+
+      for(k=0;k<6*meshi->nbptrs;k++){
+        facedata *facek;
+
+        if(j==k)continue;
+        facek = meshi->faceinfo+k;
+        if(facek->hidden==1)continue;
+        if(facej->xmin<facek->xmin||facej->xmax>facek->xmax)continue;
+        if(facej->ymin<facek->ymin||facej->ymax>facek->ymax)continue;
+        if(facej->zmin<facek->zmin||facej->zmax>facek->zmax)continue;
+        facej->hidden=1;
+        break;
       }
-      if(bcount==6)hiddenblockcount++;
-      
     }
   }
-#ifdef _DEBUG
-  printf("completed\n");
-  printf("  %i faces hidden out of %i\n",hiddencount,totalcount);
-  printf("  %i hidden blocks out of %i\n",hiddenblockcount,totalblockcount);
-#endif
-#endif
 }
 
 /* ------------------ allocate_faces ------------------------ */

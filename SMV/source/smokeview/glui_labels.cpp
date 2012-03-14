@@ -74,6 +74,7 @@ GLUI_Checkbox *CHECKBOX_tick_auto=NULL;
 
 GLUI_Checkbox *CHECKBOX_label_1=NULL;
 GLUI_Checkbox *CHECKBOX_label_2=NULL;
+GLUI_Checkbox *CHECKBOX_label_3=NULL;
 
 GLUI_Checkbox *CHECKBOX_labels_flip=NULL;
 GLUI_Checkbox *CHECKBOX_labels_shade=NULL;
@@ -111,6 +112,7 @@ GLUI_Panel *panel_showhide=NULL;
 #define LABELS_fontsize 7
 #define LABELS_ticks 8
 #define LABELS_drawface 24
+#define LABELS_hide_overlaps 25
 
 #define LABELS_particleshow    10
 #define LABELS_sliceshow       11
@@ -151,6 +153,7 @@ extern "C" void glui_labels_rename(void){
   
   CHECKBOX_label_1->set_name(_("Fast blockage drawing"));
   CHECKBOX_label_2->set_name(_("Sort transparent faces"));
+  CHECKBOX_label_3->set_name(_("Hide overlaps"));
   BUTTON_label_1->set_name(_("Show all"));
   BUTTON_label_2->set_name(_("Hide all"));
 
@@ -233,6 +236,7 @@ extern "C" void glui_labels_setup(int main_window){
   CHECKBOX_labels_labels=glui_labels->add_checkbox_to_panel(panel_label1,_("Text labels"),&visLabels,LABELS_label,Labels_CB);
   CHECKBOX_label_1=glui_labels->add_checkbox_to_panel(panel_label1,_("Fast blockage drawing"),&use_new_drawface,LABELS_drawface,Labels_CB);
   CHECKBOX_label_2=glui_labels->add_checkbox_to_panel(panel_label1,_("Sort transparent faces"),&sort_transparent_faces,LABELS_drawface,Labels_CB);
+  CHECKBOX_label_3=glui_labels->add_checkbox_to_panel(panel_label1,_("Hide overlaps"),&hide_overlaps,LABELS_hide_overlaps,Labels_CB);
   BUTTON_label_1=glui_labels->add_button_to_panel(panel_label1,_("Show all"),LABELS_showall,Labels_CB);
   BUTTON_label_2=glui_labels->add_button_to_panel(panel_label1,_("Hide all"),LABELS_hideall,Labels_CB);
 
@@ -507,6 +511,12 @@ extern "C" void show_glui_display(void){
 extern "C" void Labels_CB(int var){
   updatemenu=1;
   switch (var){
+  case LABELS_hide_overlaps:
+    updatefacelists=1;
+    updatehiddenfaces=1;
+    UpdateHiddenFaces();
+    glutPostRedisplay();
+    break;
 #ifdef pp_BETA
   case LABELS_drawface:
     /*
