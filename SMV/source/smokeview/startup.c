@@ -255,7 +255,6 @@ int setup_case(int argc, char **argv){
     input_file=smvfilename;
     return_code=readsmv(input_file,smvisofilename);
   }
-  readsmv_dynamic(input_file);
   switch (return_code){
     case 1:
       {
@@ -276,12 +275,13 @@ int setup_case(int argc, char **argv){
       {
         char message[256];
 
-        strcpy(message,_("memory allocation error"));
+        strcpy(message,_("problem reading Smokeview file"));
         abort_message(message);
       }
       pauseSV();
       return 2;
     case 0:
+      readsmv_dynamic(input_file);
       break;
     default:
       ASSERT(FFALSE);
