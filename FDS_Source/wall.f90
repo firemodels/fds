@@ -939,6 +939,7 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       MFT = -DUCTNODE(DN2)%DIR(1)*DUCT_U(DU,1)*NODE_RHO(DN,1)/FDS_LEAK_AREA(IZ1,IZ2,1)
    ENDIF
    WC%RHO_F = PBAR_P(KK,WC%PRESSURE_ZONE_WALL)/(RSUM_F*WC%ONE_D%TMP_F)  
+   WC%RHO_F = NODE_RHO(DN,1)
    UN =  -MFT/WC%RHO_F
    ! Iterate to get the appropriate normal velocity and density
 
@@ -950,15 +951,14 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          WC%ONE_D%MASSFLUX(0) = -MFT - SUM(WC%ONE_D%MASSFLUX(1:N_TRACKED_SPECIES))
       ENDIF
    ENDIF SPECIES_IF_1
-
-
-   ITER = .TRUE.
-   DO WHILE (ITER)
-      ITER = .FALSE.
-      RHO_0 = WC%RHO_F
-      ZZ_0  = WC%ZZ_F
-      UW_0 = -UN
-      UN    = -MFT/WC%RHO_F
+   
+   !ITER = .TRUE.
+   !DO WHILE (ITER)
+   !   ITER = .FALSE.
+   !   RHO_0 = WC%RHO_F
+   !   ZZ_0  = WC%ZZ_F
+   !   UW_0 = -UN
+   !   UN    = -MFT/WC%RHO_F
       IF (PREDICTOR) WC%ONE_D%UWS = -UN
       IF (CORRECTOR) WC%ONE_D%UW  = -UN
       SPECIES_IF: IF (N_TRACKED_SPECIES==0) THEN
@@ -971,26 +971,26 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             DO N=1,N_TRACKED_SPECIES
                DD = 2._EB*WC%RHODW(N)*WC%RDN
                WC%ZZ_F(N) = ( WC%ONE_D%MASSFLUX(N) + DD*ZZ_G(N) ) / ( DD + UN*WC%RHO_F )
-               IF (ZZ_0(N) > 1.E-10_EB) ZZ_ERR = MAX(ZZ_ERR,ABS(WC%ZZ_F(N)-ZZ_0(N))/ZZ_0(N))
+   !            IF (ZZ_0(N) > 1.E-10_EB) ZZ_ERR = MAX(ZZ_ERR,ABS(WC%ZZ_F(N)-ZZ_0(N))/ZZ_0(N))
             ENDDO
          ENDIF
-         IF (COUNTER > 5) WC%ZZ_F(:) = 0.4_EB*WC%ZZ_F(:)+0.6_EB*ZZ_0(:)
-         ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,WC%ZZ_F(1:N_TRACKED_SPECIES))
-         CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM_F)
-         IF (ZZ_ERR > 1.E-6_EB) ITER = .TRUE.
+   !      IF (COUNTER > 5) WC%ZZ_F(:) = 0.4_EB*WC%ZZ_F(:)+0.6_EB*ZZ_0(:)
+   !      ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,WC%ZZ_F(1:N_TRACKED_SPECIES))
+   !      CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM_F)
+   !      IF (ZZ_ERR > 1.E-6_EB) ITER = .TRUE.
       ENDIF SPECIES_IF
-      WC%RHO_F = PBAR_P(KK,WC%PRESSURE_ZONE_WALL)/(RSUM_F*WC%ONE_D%TMP_F)      
+   !   WC%RHO_F = PBAR_P(KK,WC%PRESSURE_ZONE_WALL)/(RSUM_F*WC%ONE_D%TMP_F)      
       ! Decide to continue iterating
 
-      IF (ABS(RHO_0 - WC%RHO_F)/RHO_0 > 1.E-6_EB ) ITER = .TRUE.
-      IF (ABS(UW_0)>0._EB) THEN
-          IF (ABS(UW_0 + UN)/ABS(UW_0) > 1.E-6_EB) ITER = .TRUE.
-      ENDIF
-      
-      COUNTER = COUNTER + 1
-      IF (COUNTER > 20) ITER = .FALSE.
-      
-   ENDDO
+   !   IF (ABS(RHO_0 - WC%RHO_F)/RHO_0 > 1.E-6_EB ) ITER = .TRUE.
+   !   IF (ABS(UW_0)>0._EB) THEN
+   !       IF (ABS(UW_0 + UN)/ABS(UW_0) > 1.E-6_EB) ITER = .TRUE.
+   !   ENDIF
+   !   
+   !   COUNTER = COUNTER + 1
+   !   IF (COUNTER > 20) ITER = .FALSE.
+   !   
+   !ENDDO
    
 ENDDO WALL_CELL_LOOP
 
