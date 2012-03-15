@@ -1,6 +1,6 @@
-// $Date: 2011-12-18 20:22:57 -0500 (Sun, 18 Dec 2011) $ 
-// $Revision: 9635 $
-// $Author: gforney $
+// $Date$ 
+// $Revision$
+// $Author$
 
 #ifndef LINT_H_DEFINED
 #define LINT_H_DEFINED

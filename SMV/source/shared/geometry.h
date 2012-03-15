@@ -1,6 +1,6 @@
-// $Date: 2012-03-10 17:31:20 -0500 (Sat, 10 Mar 2012) $ 
-// $Revision: 10233 $
-// $Author: gforney $
+// $Date$ 
+// $Revision$
+// $Author$
 
 // svn revision character string
 
