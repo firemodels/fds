@@ -5839,6 +5839,8 @@ SURF_GRID_LOOP: DO SURF_INDEX=0,N_SURF
 
 ! Initialize the material densities of the solid
 
+   SF%RHO_0 = 0._EB
+
    DO II=0,SF%N_CELLS+1
       IL = SF%LAYER_INDEX(II)
       IF (SF%TMP_INNER(IL)<=0._EB) SF%TMP_INNER(IL) = TMPA
