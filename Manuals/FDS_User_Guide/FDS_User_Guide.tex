@@ -534,7 +534,7 @@ enough. LES is the default mode of operation.
 \item[Combustion Model]
 For most applications, FDS uses a single step, mixing-controlled chemical reaction which uses three lumped species (a species representing a group of species).
 These lumped species are air, fuel, and products. By default the last two lumped species are explicitly
-computed. Options are available to include multiple reactions and reactions that not necessarily mixing-controlled.  
+computed. Options are available to include multiple reactions and reactions that not necessarily mixing-controlled.
 
 \item[Radiation Transport] Radiative heat transfer is included in the
 model via the solution of the radiation transport equation for a
@@ -1125,7 +1125,7 @@ Solid Fuels     & Pyrolysis model of solid fuel  & Results in FDS 5.4 and beyond
 \section{Naming the Job}
 
 The operation of FDS is based on a single ASCII\footnote{ASCII -- American Standard Code
-for Information Interchange. There are 256 characters that make up the standard ASCII text.} text file containing parameters organized into 
+for Information Interchange. There are 256 characters that make up the standard ASCII text.} text file containing parameters organized into
 {\em namelist}\footnote{A {\em namelist} is a Fortran input record.} groups.
 The input file provides FDS  with all of the necessary information to
 describe the scenario.
@@ -4650,19 +4650,18 @@ and after 10~minutes, the flames can be seen flowing out.
 
 This chapter explains how to model a ventilation system. There are two ways to do this. First, if you only want to specify air flow rates into and out of
 compartments, read Section~\ref{info:Velocity_BC} for a description of simple velocity boundary conditions. However, if you want to
-model the interaction of the entire HVAC system with the fire, read Section~\ref{info:HVAC} for a description of the parameters that
-describe the components of the entire HVAC system.
+model the entire HVAC system, read Section~\ref{info:HVAC}.
 
 
 \section{Simple Vents, Fans and Heaters}
 \label{info:Velocity_BC}
 
-For most applications, the ventilation system of a building is described in FDS using
+The ventilation system of individual compartments within a building is described using
 velocity {\em boundary conditions}. For example, fresh air can be blown into, and smoke can
 be drawn from, a compartment by specifying a velocity in the {\em normal} direction to a solid
 surface. However, there are various other facets of velocity boundary conditions that are described below.
 
-\subsection{Supply and Exhaust Vents}
+\subsection{Simple Supply and Exhaust Vents}
 
 The easiest way to describe a supply or exhaust fan is to specify a {\ct VENT} on a solid surface, and designate
 a {\ct SURF\_ID} with some form of specified velocity or volume flow rate.
@@ -4717,8 +4716,7 @@ given vent, or whether the given volume flux is desired.
 
 Most often, you specify a simple supply or exhaust vent by setting either a normal velocity or volume flux at
 a solid surface. However, you may wish to control the mass flow rate (kg/s), as opposed to the volume flow
-rate (m$^3$/s), via the parameter {\ct MASS\_FLUX\_TOTAL}.
-{\ct MASS\_FLUX\_TOTAL} uses the same sign convention as {\ct VEL} above.  In fact, the value entered for
+rate (m$^3$/s), via the parameter {\ct MASS\_FLUX\_TOTAL}. This parameter uses the same sign convention as {\ct VEL} above.  In fact, the value entered for
 {\ct MASS\_FLUX\_TOTAL} is converted internally into a velocity boundary condition whose value
 for an outflow is adjusted based on the local density.
 
@@ -4773,7 +4771,7 @@ opening. In these cases, you might consider simply specifying a flat plate obstr
 {\ct VENT} with an offset of one mesh cell. The plate will simply redirect the air flow in all lateral
 directions.
 
-If the louvered vent is part of an HVAC system, please see \ref{info:HVAClouvers} for details on how to specify the louver.
+If the louvered vent is part of an HVAC system, see \ref{info:HVAClouvers} for details on how to specify the louver.
 
 \subsection{Special Topic: Tangential Velocity Boundary Conditions at Solid Surfaces}
 \label{info:WALL_MODEL}
@@ -4785,7 +4783,7 @@ For a DNS (Direct Numerical Simulation), the velocity gradient at the wall is co
 For an LES (Large Eddy Simulation), the Werner-Wengle wall model is applied for smooth walls and a log law is applied for rough walls.
 The surface roughness (in meters) is set by {\ct ROUGHNESS} on {\ct SURF}. See the FDS Technical Reference Guide~\cite{FDS_Math_Guide} for wall model details.
 To force a solid boundary to have a free-slip condition, set {\ct FREE\_SLIP=.TRUE.} on the {\ct SURF} line.
-In LES, to override the wall model and force a no-slip boundary condition, set {\ct NO\_SLIP=.TRUE.} on {\ct SURF}.
+In LES, to override the wall model and force a no-slip boundary condition, set {\ct NO\_SLIP=.TRUE.} on the {\ct SURF} line.
 
 
 \subsection{Species and Species Mass Flux Boundary Conditions}
@@ -4794,29 +4792,27 @@ In LES, to override the wall model and force a no-slip boundary condition, set {
 
 There are two species boundary conditions that can be specified
 (see Section~\ref{info:SPEC} for details on inputting and using species).
-These boundary conditions are {\ct MASS\_FLUX(N)} and {\ct MASS\_FRACTION(N)}
-where {\ct N} refers to a given species is via its place in the
-input file. For example, the second listed species is {\ct N=2}.
+These boundary conditions are {\ct MASS\_FLUX(:)} and {\ct MASS\_FRACTION(:)}
 If a simple no-flux condition is desired at a solid wall, do not set
-anything. If the mass fraction of the {\ct N}th species is to be some
+anything. If the mass fraction of the species is to be some
 value at a forced flow boundary ({\ct VEL} or {\ct MASS\_FLUX\_TOTAL}) set
-{\ct MASS\_FRACTION(N)} equal to the desired mass fraction on the appropriate
+{\ct MASS\_FRACTION(:)} equal to the desired mass fraction on the appropriate
 {\ct SURF} line.
-If the mass flux of the {\ct N}th species is desired, set
-{\ct MASS\_FLUX(N)} instead of {\ct MASS\_FRACTION(N)}.
-If {\ct MASS\_FLUX(N)}
+If the mass flux of the species is desired, set
+{\ct MASS\_FLUX(:)} instead of {\ct MASS\_FRACTION(:)}.
+If {\ct MASS\_FLUX(:)}
 is set, no {\ct VEL} should be set. It is automatically
 calculated based on the mass flux.
-The inputs {\ct MASS\_FLUX(N)} (and typically {\ct MASS\_FRACTION(N)}) should only be used
-for inflow boundary conditions.  {\ct MASS\_FLUX(N)} should be positive with
+The inputs {\ct MASS\_FLUX(:)} (and typically {\ct MASS\_FRACTION(:)}) should only be used
+for inflow boundary conditions.  {\ct MASS\_FLUX(:)} should be positive with
 units of kg/m$^2$/s.
 
 \begin{warning}
 \noindent
-Note that specifying {\ct MASS\_FRACTION(N)}, sets the "ghost" cell values for the species
+Note that specifying {\ct MASS\_FRACTION(:)}, sets the ``ghost'' cell values for the species
 mass fractions.  Since the mass conservation equation is an advection-diffusion equation,
 if the specified velocity is small, then the diffusion term can dominate resulting in an unintended
-mass flux of species.  To obtain a guaranteed mass flux of a species, you should use {\ct MASS\_FLUX(N)}
+mass flux of species.  To obtain a guaranteed mass flux of a species, you should use {\ct MASS\_FLUX(:)}
 \end{warning}
 
 
@@ -4837,8 +4833,7 @@ If the ability to transport heat and combustion products through a duct network 
 due to a fire on the flows in a duct network is important, you can make use of a coupled HVAC network solver.  The solver computes the flows through a
 duct network described as a mapping of duct segments and nodes where a node is either the joining of two or more ducts (a tee for example) or where a duct segment connects to the FDS computational domain.
 The current HVAC solver does not allow for mass storage in the duct network ({\em i.e.} what goes in during a time step, goes out during a time step).
-HVAC components such as fans and binary dampers (fully open or fully closed) can be included in the HVAC network and are coupled to the FDS control function capability.  The
-user can select from three fan models.
+HVAC components such as fans and binary dampers (fully open or fully closed) can be included in the HVAC network and are coupled to the FDS control function capability.  You can select from three fan models.
 
 The HVAC solver is invoked if there is an {\ct HVAC} namelist group present in the input file.
 An HVAC network is defined by providing inputs for the ducts; duct nodes; and any fans, dampers, filters, or heating and coiling coils present in the system.
@@ -4852,44 +4847,38 @@ Additionally you must define the locations where the HVAC network joins the comp
 
 \begin{description}
 \item[{\ct TYPE\_ID}] is a character string that indicates the type of component that the namelist group is defining.   {\ct TYPE\_ID} can be {\ct 'DUCT'}, {\ct 'NODE'}, {\ct 'FAN'}, {\ct 'FILTER'}, or {\ct 'AIRCOIL'}.
-\item[{\ct ID}] is a character string giving a name to the component.  The name must be unique amongst all other components of that type; however, the same name can be given to components of different types ({\em i.e.} a duct and a node could have the same name but two ducts could not).
+\item[{\ct ID}] is a character string giving a name to the component.  The name must be unique amongst all other components of that type; however, the same name can be given to components of different types ({\em i.e.} a duct and a node can have the same name but two ducts cannot).
 \end{description}
-
 A number of examples of simple HVAC systems are given in the HVAC folder of the sample cases and are discussed in the FDS Verification Guide.
 
 
 \subsection{HVAC Duct Parameters}
 \label{info:HVACduct}
 
+A typical input line specifying a duct is as follows:
+
 \footnotesize
 \begin{verbatim}
-&HVAC TYPE_ID='DUCT', ID='ductname', NODE_ID='node 1','node 2', DIAMETER=2., AREA=3.14,
-      LOSS=1.,1., ROUGHNESS=0.001, VOLUME_FLOW=1., DAMPER=.FALSE., FAN='FAN_ID',
-      REVERSE=.FALSE., DEVC_ID='DEVCname', CTRL_ID='ctrlname' /
+&HVAC TYPE_ID='DUCT', ID='ductname', NODE_ID='node 1','node 2', AREA=3.14,
+      LOSS=1.,1., ROUGHNESS=0.001, FAN='FAN_ID', DEVC_ID='DEVCname' /
 \end{verbatim}\normalsize
 
 \begin{description}
 \item[{\ct AIRCOIL\_ID}] is the {\ct ID} of an aircoil located in the duct.
-\item[{\ct AREA}] is the area of the duct in m$^2$. Either {\ct AREA} or {\ct DIAMETER} must be defined.
-\item[{\ct CTRL\_ID}] is the {\ct ID} of a {\ct CTRL} function for a damper (open/closed) or fan (on/off) in the duct.  Only one of {\ct CTRL\_ID} or {\ct DEVC\_ID} can be defined.
-\item[{\ct DAMPER}] is a logical variable indicating the presence of a damper in the duct.  The state of the damper is controlled by
-function named by {\ct CTRL\_ID} or {\ct DEVC\_ID}.  Only one of either {\ct DAMPER} or {\ct FAN\_ID} can be specified for a single duct.
-\item[{\ct DEVC\_ID}]  is the {\ct ID} of a {\ct DEVC} for a damper or fan in the duct.  Only one of {\ct CTRL\_ID} or {\ct DEVC\_ID} can be defined.
-\item[{\ct DIAMETER}]  is the diameter (m) of the duct. Either {\ct AREA} or {\ct DIAMETER} must be defined.
-\item[{\ct FAN\_ID}] is the {\ct ID} of a fan located in the duct. Only one of either {\ct DAMPER} or {\ct FAN\_ID} can be specified for a single duct.
+\item[{\ct AREA}] is the cross sectional area of the duct in m$^2$. {\ct DIAMETER} (m) can be used instead.
+\item[{\ct DEVC\_ID}]  is the {\ct ID} of a {\ct DEVC} for a damper or fan in the duct. {\ct CTRL\_ID} can be used instead.
+\item[{\ct FAN\_ID}] is the {\ct ID} of a fan located in the duct. Instead of
+specifying a {\ct FAN\_ID}, you could specify the {\ct VOLUME\_FLOW} rate (m$^3$/s) through the duct. If you specify {\ct VOLUME\_FLOW}, you can change its value in time either using the characteristic time, {\ct TAU\_VF},  to define a tanh ({\ct TAU\_VF} > 0) or t$^2$ ramp ({\ct TAU\_VF} < 0); or you can specify a {\ct RAMP\_ID}.
+
+As an alternative to a fan, you can specify the logical parameter {\ct DAMPER} indicating the presence of a damper in the duct.  The state of the damper is controlled by
+the function named by {\ct CTRL\_ID} or {\ct DEVC\_ID}.  {\ct DAMPER} cannot be used with a {\ct FAN\_ID} in a single duct.
 \item[{\ct LOSS}] is a pair of real numbers giving the forward and reverse flow loss in the duct.  Forward is flow from the first node listed in {\ct NODE\_ID} to the second node listed in {\ct NODE\_ID}.
-\item[{\ct NODE\_ID}] gives the {\ct ID}s of the nodes on either end of the duct segment.  Positive velocity in a duct is defined as flow from the first node to second node.
-\item[{\ct RAMP\_ID}] gives the {\ct ID} of a {\ct RAMP} giving a time-dependent multiplier to {\ct VOLUME\_FLOW}.
-\item[{\ct REVERSE}]  is a logical variable that when {\ct .TRUE.} indicates that the specified {\ct FAN\_ID} or {\ct VOLUME\_FLOW} blows from the second node to the first node.
+\item[{\ct NODE\_ID}] gives the {\ct ID}s of the nodes on either end of the duct segment.  Positive velocity in a duct is defined as flow from the first node to second node. 
+{\ct REVERSE}  is a logical parameter that when {\ct .TRUE.} indicates that the specified {\ct FAN\_ID} or {\ct VOLUME\_FLOW} blows from the second node to the first.
 \item[{\ct ROUGHNESS}]  is the absolute roughness in m of the duct that is used to compute the friction factor for the duct.
-\item[{\ct TAU\_VF}]  defines a tanh ({\ct TAU\_VF} > 0) or t$^2$ ramp ({\ct TAU\_VF} < 0) for the {\ct VOLUME\_FLOW}.
-\item[{\ct VOLUME\_FLOW}] defines a fixed volumetric flow rate (m$^3$/s) in the duct.  {\ct VOLUME\_FLOW} cannot be used in conjunction with {\ct FAN\_ID}.
 \end{description}
-
-To reduce the computational cost of the HVAC solver, a duct should be considered as any length of duct that connects two items that must be defined as nodes ({\em i.e.} a connection to the FDS domain, a filter, or a location where more than two ducts join).  That is a duct should be considered as any portion of the HVAC system where flow can only be in one direction.  For example the top of Figure~\ref{fig:HVAC_Simplify} shows a segment of an HVAC system where flow from a tee goes through an expansion fitting, two elbows, an expansion fitting, and a straight length of duct before it terminates as a connection to the FDS domain.  This could be input as each individual fitting or duct with its associated area and loss as shown in the middle of the figure; however, this would result in five duct segments (one for each component) with six node connections resulting in eleven parameters (five velocities and six pressures) which must be solved for.  This is not needed since whatever the flow rate is in any one segment of the duct, that same flow rate exists in all other segments and, thus, the velocties in any segment can be found by taking the area ratios, $v_1/v_2=A_2/A_1$.  Since flow losses are proportional to the square of the velocity, an equivelant duct can be constructed using the total length of the duct, a representative area or diameter.  The pressure losses associated with all the segments of the duct can be collapsed in to in single loss by summing all of the fitting, $K$, losses through the duct as follows:
-
+To reduce the computational cost of the HVAC solver, a duct should be considered as any length of duct that connects two items that must be defined as nodes ({\em i.e.} a connection to the FDS domain, a filter, or a location where more than two ducts join).  That is a duct should be considered as any portion of the HVAC system where flow can only be in one direction.  For example the top of Figure~\ref{fig:HVAC_Simplify} shows a segment of an HVAC system where flow from a tee goes through an expansion fitting, two elbows, an expansion fitting, and a straight length of duct before it terminates as a connection to the FDS domain.  This could be input as each individual fitting or duct with its associated area and loss as shown in the middle of the figure; however, this would result in five duct segments (one for each component) with six node connections resulting in eleven parameters (five velocities and six pressures) which must be solved for.  This is not needed since whatever the flow rate is in any one segment of the duct, that same flow rate exists in all other segments and, thus, the velocities in any segment can be found by taking the area ratios, $v_1/v_2=A_2/A_1$.  Since flow losses are proportional to the square of the velocity, an equivalent duct can be constructed using the total length of the duct, a representative area or diameter.  The pressure losses associated with all the segments of the duct can be collapsed in to in single loss by summing all of the fitting, $K$, losses through the duct as follows:
 \be K_{eff} = \sum_i {K_i \frac {A_{eff}}{A_i}} \ee
-
 where $i$ is a fitting, $j$ is a duct segment, and $A$ is the area of the duct or fitting.
 
 \begin{figure}[ht]
@@ -4901,6 +4890,7 @@ where $i$ is a fitting, $j$ is a duct segment, and $A$ is the area of the duct o
 
 \subsection{HVAC Node Parameters}
 \label{info:HVACnode}
+
 \footnotesize
 \begin{verbatim}
 &HVAC TYPE_ID='NODE', ID='nodename', DUCT_ID='duct 1','duct 2',..'duct n', VENT_ID='vent',
@@ -4911,7 +4901,7 @@ where $i$ is a fitting, $j$ is a duct segment, and $A$ is the area of the duct o
 \item[{\ct AMBIENT}] is a logical value.  If {\ct .TRUE.}, then the node is connected to the ambient ({\em i.e.} it is equivalent to the {\ct OPEN} boundary condition on a {\ct SURF} line).
 \item[{\ct DUCT\_ID}] gives the {\ct ID}s of the ducts connected to the node.  Up to 10 ducts can be connected to a node.
 \item[{\ct FILTER\_ID}] gives the {\ct ID} a filter located at the node.  A node with a filter can only have two connected ducts.
-\item[{\ct LOSS}] is an $n$ by $n$ array of real numbers giving the flow losses for the node.  {\ct LOSS(I,J)} is the loss for flow from from duct {\ct I} to duct {\ct J} expressed in terms of the downstream duct area (see discussion in ~\ref{HVACduct} on how to adjust losses for area changes).  For a terminal node ({\em e.g.} a node connected to the ambient or to a {\ct VENT}) the {\ct LOSS} is entered as a pair of numbers representing loss for flow entering the HVAC system and for flow exiting the HVAC system.
+\item[{\ct LOSS}] is an $n$ by $n$ array of real numbers giving the flow losses for the node.  {\ct LOSS(I,J)} is the loss for flow from from duct {\ct I} to duct {\ct J} expressed in terms of the downstream duct area (see discussion in ~\ref{info:HVACduct} on how to adjust losses for area changes).  For a terminal node ({\em e.g.} a node connected to the ambient or to a {\ct VENT}) the {\ct LOSS} is entered as a pair of numbers representing loss for flow entering the HVAC system and for flow exiting the HVAC system.
 \item[{\ct VENT\_ID}] is the name of the {\ct VENT} where the node connects to the FDS computational domain.
 \item[{\ct XYZ}] is a triplet of real numbers giving the coordinates of the node.  This location is used to compute buoyancy heads.
 If the node is connected to the FDS domain, then do not specify {\ct XYZ}.  FDS will compute it as the centroid of the {\ct VENT}.
@@ -5717,7 +5707,7 @@ its {\ct VISCOSITY} (kg/m/s), its (thermal) {\ct CONDUCTIVITY} (W/m/K), and its
 and the background species. If any of these properties are omitted, FDS will assume the properties of air.
 The specific heat of the gas will be calculated from its molecular weight using the relation:
 \be c_{p,\alpha} = \frac{\gamma}{\gamma-1} \frac{\cal R}{W_\alpha} \ee
-The ratio of specific heats, {\ct GAMMA}, is 1.4 by default and can be changed on the {\ct MISC} line. If you want all the gas specific heats to 
+The ratio of specific heats, {\ct GAMMA}, is 1.4 by default and can be changed on the {\ct MISC} line. If you want all the gas specific heats to
 follow this relation,
 set {\ct CONSTANT\_SPECIFIC\_HEAT=.TRUE.} on the {\ct MISC} line.
 
@@ -6163,7 +6153,7 @@ of its detailed polymeric structure, it can be regarded as C$_2$H$_3$Cl for the 
 that all of the Cl in the fuel is converted into HCl, do the following:
 Define the governing chemical reaction in terms of the primitive (or individual) species in the reaction.
 \begin{eqnarray}\label{eq:PVC_reac}
-\mathrm{C_2H_3Cl + \nu_{ox} \, (O_2+(^{.79}/_{.21}) \, N_2)} \rightarrow \\ 
+\mathrm{C_2H_3Cl + \nu_{ox} \, (O_2+(^{.79}/_{.21}) \, N_2)} \rightarrow \\
 \nonumber \mathrm{\nu_{HCl} \, HCl + \nu_{H_2O}\, H_2O + \nu_{CO}\, CO + \nu_{CO_2}\, CO_2 + \nu_{soot}\, C + \nu_{ox} \,(^{.79}/_{.21}) \, N_2}
 \end{eqnarray}
 As a user, you need to determine the appropriate soot and CO yields for the specified fuel. In this example, the SFPE Handbook \cite{SFPE:Tewarson} was used to find soot and CO yields for PVC which are 0.172 and 0.063 respectively. For simple chemistry, the stoichiometric coefficient of species $i$ can be found from its yield following:
@@ -6198,7 +6188,7 @@ For the oxidizer and products, which are both composed of multiple primitive spe
 \begin{verbatim}
 &SMIX ID = 'AIR', SPEC_ID ='NITROGEN','OXYGEN', VOLUME_FRACTION =0.79,0.21, BACKGROUND=.TRUE. /
 &SMIX ID = 'PRODUCTS', SPEC_ID ='NITROGEN','CARBON DIOXIDE','CARBON MONOXIDE',
-           'WATER VAPOR','SOOT','HYDROGEN CHLORIDE', 
+           'WATER VAPOR','SOOT','HYDROGEN CHLORIDE',
            VOLUME_FRACTION = 0.590713,0.098672,0.014384,0.102322,0.091587,0.102322 /
 \end{verbatim} \normalsize
 Note: the order of which the {\ct SPEC\_ID}s are defined must be the same order as which you defined your volume fractions or mass fractions. To set the initial concentration of fuel, an {\ct INIT} line is used:
@@ -6222,7 +6212,7 @@ Note: The sign on NU corresponds to whether that species is consumed (-) or prod
 \caption{Product species mass fractions for model PVC example.}
 \label{pvc_combustion}
 \end{figure}
- 
+
 \subsubsection{Example: A Two-Step, Reaction Involving the Formation of CO}
 For a more complicated example, consider Equation \ref{eq:2step_methane_rev}, which is a simplified two-step methane oxidation reaction developed by Westbrook and Dryer \cite{Westbrook:1}.
 
@@ -6232,7 +6222,7 @@ For a more complicated example, consider Equation \ref{eq:2step_methane_rev}, wh
 \end{eqnarray}
 Typically air is the oxidizer for fires, not pure oxygen. In this case, if we use all primitive species and select nitrogen as the background species, Equation \ref{eq:2step_methane_rev} can be used without modification. Each of the species in the reactions, plus the background species must be defined on the {\ct SPEC} line.
 \footnotesize
-\begin{verbatim} 
+\begin{verbatim}
 &SPEC ID='NITROGEN',        BACKGROUND=.TRUE./
 &SPEC ID='METHANE',         MASS_FRACTION_0 = 0.0 /
 &SPEC ID='OXYGEN',          MASS_FRACTION_0 = 0.23 /
@@ -6245,18 +6235,18 @@ The ambient gas in this example is defined as air by setting the initial mass fr
 \begin{verbatim}
 &REAC ID = 'FWD_METHANE'
       FUEL='METHANE'
-      SMIX_ID='METHANE','OXYGEN','CARBON MONOXIDE','WATER VAPOR' 
+      SMIX_ID='METHANE','OXYGEN','CARBON MONOXIDE','WATER VAPOR'
       NU=-1,-1.5,1,2
       HEAT_OF_COMBUSTION=32370.7
       ODE_SOLVER= 'RK2 RICHARDSON' /
-      
+
 &REAC ID = 'FWD_CO'
       FUEL = 'CARBON MONOXIDE'
       SMIX_ID='CARBON MONOXIDE','OXYGEN','CARBON DIOXIDE'
       NU= -1,-0.5,1
       HEAT_OF_COMBUSTION=10102.6
       ODE_SOLVER= 'RK2 RICHARDSON' /
-      
+
 &REAC ID = 'REV_CO2'
       FUEL = 'CARBON DIOXIDE'
       SMIX_ID= 'CARBON DIOXIDE','OXYGEN','CARBON MONOXIDE'
@@ -6264,7 +6254,7 @@ The ambient gas in this example is defined as air by setting the initial mass fr
       HEAT_OF_COMBUSTION=0
       FWD_ID = 'FWD_CO'
       REVERSIBLE=.TRUE.
-      ODE_SOLVER= 'RK2 RICHARDSON' /            
+      ODE_SOLVER= 'RK2 RICHARDSON' /
 \end{verbatim} \normalsize
 When using primitive species, the primitive species are the SMIXs therefore the SMIX\_IDs correspond directly to the the {\ct SPEC} lines. The stoichiometric coefficients (NU) can be taken directly from reactions (see Equation \ref{eq:2step_methane_rev} coefficients). A heat of combustion must be specified for each reaction. The heat of combustion is found by using the enthalpy of formation of each species: (http://kinetics.nist.gov/janaf/)
 
@@ -6279,7 +6269,7 @@ If the reference temperature is set as the ambient temperature, $\overline{\Delt
 \nonumber &=& (-110.527 \,[\mathrm{kJ/mol}])+2\,(-241.826 \,[\mathrm{kJ/mol}])-(-74.873 \,[\mathrm{kJ/mol}])-(0.0 \,[\mathrm{kJ/mol}]) \\
 \nonumber &=& -519.306 \,[\mathrm{kJ/mol}]
 \end{eqnarray}
-To comply with input file needs, we change the units to [{kJ}/{kg}] by dividing by the molecular weight of the fuel. The heat of combustion becomes 32,370.7 [{kJ}/{kg}]. 
+To comply with input file needs, we change the units to [{kJ}/{kg}] by dividing by the molecular weight of the fuel. The heat of combustion becomes 32,370.7 [{kJ}/{kg}].
 
 Note: In the third (reversible) reaction, the HEAT\_OF\_COMBUSTION is set to 0.0. The actual value is not 0.0, but is set to 0.0 for purposes of this example. Below HEAT\_OF\_COMBUSTION, you will notice two inputs unique to reversible reactions: FWD\_ID and REVERSIBLE=.TRUE.. These parameters tell FDS that the reaction is reversible and what its forward counterpart is. FDS the calculates the heat of combustion for the reverse reaction (determined from the product of the ratio of the molecular weights of the fuels and the heat of combustion of the forward reaction), applies the appropriate sign, and over writes the value from the input file. As a user, you can also directly specify the heat of combustion on the reversible line and the third {\ct REAC} line will instead look like this:
 
@@ -6290,7 +6280,7 @@ Note: In the third (reversible) reaction, the HEAT\_OF\_COMBUSTION is set to 0.0
       SMIX_ID= 'CARBON DIOXIDE','OXYGEN','CARBON MONOXIDE'
       NU= -1,0.5,1
       HEAT_OF_COMBUSTION=-6429.85802
-      ODE_SOLVER= 'RK2 RICHARDSON' /            
+      ODE_SOLVER= 'RK2 RICHARDSON' /
 \end{verbatim} \normalsize
 
 \newpage
