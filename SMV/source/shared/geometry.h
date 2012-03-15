@@ -8,10 +8,10 @@
 
 typedef struct _vertdata {
   float xyz[3];
-  int nvertring,ntris;
+  int nvertring,ntrifan;
   struct _vertdata **vertring;
   struct _edgedata **edgering;
-  struct _tridata **tris;
+  struct _tridata **trifan;
   float best_xyz[3], best_norm[3];
 } vertdata;
 
@@ -19,6 +19,7 @@ typedef struct _vertdata {
 
 typedef struct _edgedata {
   vertdata *verts[2];
+  struct _tridata **tris;
   int ntris;
   float center[3];
 } edgedata;
@@ -36,6 +37,7 @@ typedef struct _tridata {
 typedef struct _geomdata {
   vertdata *verts;
   tridata *tris;
-  int nverts, ntris;
+  edgedata *edges;
+  int nverts, ntris, nedges;
 } geomdata;
 

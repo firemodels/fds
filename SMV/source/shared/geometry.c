@@ -33,18 +33,18 @@ void MakeVertRing(vertdata *vert){
   tridata *tri;
   int nvertring;
 
-  if(vert->ntris==0)return;
-  NewMemory((void **)&vert->vertring,vert->ntris*sizeof(vertdata *));
+  if(vert->ntrifan==0)return;
+  NewMemory((void **)&vert->vertring,vert->ntrifan*sizeof(vertdata *));
 
-  for(i=0;i<vert->ntris;i++){
+  for(i=0;i<vert->ntrifan;i++){
     tridata *trii;
 
-    trii = vert->tris[i];
+    trii = vert->trifan[i];
     trii->examined=0;
   }
   vertring=vert->vertring;
   nvertring=0;
-  tri=vert->tris[0];
+  tri=vert->trifan[0];
   tri->examined=1;
   if(tri->verts[0]==vert){
     vertring[nvertring++]=tri->verts[1];
@@ -58,14 +58,14 @@ void MakeVertRing(vertdata *vert){
     vertring[nvertring++]=tri->verts[0];
     vertring[nvertring++]=tri->verts[1];
   }
-  for(i=1;i<vert->ntris;i++){
+  for(i=1;i<vert->ntrifan;i++){
     int j;
 
-    for(j=1;j<vert->ntris;j++){
+    for(j=1;j<vert->ntrifan;j++){
       tridata *trij;
       vertdata *other;
 
-      trij = vert->tris[j];
+      trij = vert->trifan[j];
       if(trij->examined==1)continue;
       other=get_other_vertex(trij,vert,vertring[nvertring-1]);
       if(other==NULL)continue;
@@ -78,6 +78,36 @@ void MakeVertRing(vertdata *vert){
 
 /* ------------------ getVertInfo ------------------------ */
 
+void Insert_Edge(edgedata *edges, int *nedges, vertdata *vert1, vertdata *vert2){
+  vertdata *vertmin, *vertmax;
+  int i;
+  int haveit=0;
+
+  vertmin=vert1;
+  vertmax=vert2;
+  if(vert2<vert1)vertmin=vert2;
+  if(vert2>vert1)vertmax=vert2;
+  for(i=0;i<*nedges;i++){
+    edgedata *edgei;
+
+    edgei = edges+i;
+    if(edgei->verts[0]==vertmin&&edgei->verts[1]==vertmax){
+      haveit=1;
+      break;
+    }
+  }
+  if(haveit==0){
+    edgedata *edgei;
+
+    edgei = edges + *nedges;
+    edgei->verts[0]=vertmin;
+    edgei->verts[1]=vertmax;
+    (*nedges)++;
+  }
+}
+
+/* ------------------ getVertInfo ------------------------ */
+
 void getVertInfo(geomdata *geom){
   int i;
 
@@ -85,46 +115,70 @@ void getVertInfo(geomdata *geom){
     vertdata *verti;
 
     verti = geom->verts+i;
-    verti->ntris=0;
-    verti->tris=NULL;
+    verti->ntrifan=0;
+    verti->trifan=NULL;
   }
+  
+  // count triangles connected to each vertex
+
   for(i=0;i<geom->ntris;i++){
     tridata *trii;
     int j;
 
     trii = geom->tris+i;
-    for(j=0;j<3;j++){
-      vertdata *verti;
-
-      verti = trii->verts[j];
-      verti->ntris++;
-    }
+    trii->verts[0]->ntrifan++;
+    trii->verts[1]->ntrifan++;
+    trii->verts[2]->ntrifan++;
   }
   for(i=0;i<geom->nverts;i++){
     vertdata *verti;
 
     verti = geom->verts+i;
-    if(verti->ntris>0)NewMemory((void **)&verti->tris,verti->ntris*sizeof(tridata *));
-    verti->ntris=0;
+    if(verti->ntrifan>0)NewMemory((void **)&verti->trifan,verti->ntrifan*sizeof(tridata *));
+    verti->ntrifan=0;
   }
+
+  //  assign triangle connected to each vertex
+
   for(i=0;i<geom->ntris;i++){
     tridata *trii;
+    vertdata *verti;
     int j;
 
     trii = geom->tris+i;
-    for(j=0;j<3;j++){
-      vertdata *verti;
-
-      verti = trii->verts[j];
-      verti->tris[verti->ntris]=trii;
-      verti->ntris++;
-    }
+    verti = trii->verts[0];
+    verti->trifan[verti->ntrifan++]=trii;
+    verti = trii->verts[1];
+    verti->trifan[verti->ntrifan++]=trii;
+    verti = trii->verts[2];
+    verti->trifan[verti->ntrifan++]=trii;
   }
   for(i=0;i<geom->nverts;i++){
     vertdata *verti;
 
     verti = geom->verts+i;
     MakeVertRing(verti);  
+  }
+  if(geom->ntris>0)NewMemory((void **)&geom->edges,3*geom->ntris*sizeof(edgedata *));
+  geom->nedges=0;
+  for(i=0;i<geom->ntris;i++){
+    tridata *tri;
+
+    tri = geom->tris+i;
+    Insert_Edge(geom->edges,&geom->nedges,tri->verts[0],tri->verts[1]);
+    Insert_Edge(geom->edges,&geom->nedges,tri->verts[1],tri->verts[2]);
+    Insert_Edge(geom->edges,&geom->nedges,tri->verts[2],tri->verts[0]);
+  }
+  if(geom->nedges>0)ResizeMemory((void **)&geom->edges,geom->nedges*sizeof(edgedata *));
+  for(i=0;i<geom->nedges;i++){
+    edgedata *edgei;
+
+    edgei = geom->edges+i;
+    edgei->ntris=0;
+  }
+  for(i=0;i<geom->ntris;i++){
+    tridata *trii;
+
   }
 }
 /* ------------------ calcNormal3 ------------------------ */
@@ -134,8 +188,8 @@ void getNormal(float *v1, float *v2, float *v3, float *area, float *normal){
   int i;
 
   for(i=0;i<3;i++){
-    u[i]=v2[i]-v1[i];
-    v[i]=v3[i]-v1[i];
+    u[i]=v3[i]-v2[i];
+    v[i]=v1[i]-v2[i];
   }
 
   normal[0] = u[1]*v[2] - u[2]*v[1];
@@ -177,18 +231,18 @@ void GetBestPlane(vertdata *vert){
     best_norm[i]=0.0;
     best_xyz[i]=0.0;
   }
-  for(i=0;i<vert->ntris;i++){
+  for(i=0;i<vert->ntrifan;i++){
     int j;
     tridata *tri;
 
-    tri = vert->tris[i];
+    tri = vert->trifan[i];
     for(j=0;j<3;j++){
       best_norm[j] += tri->area*tri->norm[j];
       best_xyz[j] += tri->area*tri->center[j];
     }
   }
   for(i=0;i<3;i++){
-    best_norm[i]/=vert->ntris;
-    best_xyz[i]/=vert->ntris;
+    best_norm[i]/=vert->ntrifan;
+    best_xyz[i]/=vert->ntrifan;
   }
 }
