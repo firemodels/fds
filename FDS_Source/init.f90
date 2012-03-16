@@ -2022,7 +2022,6 @@ WC%NPPCW = 1
 WC%BACK_INDEX = 0
 WC%VENT_INDEX = 0
 WC%PRESSURE_BC_INDEX = NEUMANN
-WC%SURF_INDEX_ORIG = 0
 
 ! Assign the ZONE number to all boundary cells
 
