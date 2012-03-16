@@ -6163,8 +6163,8 @@ As a user, you need to determine the appropriate soot and CO yields for the spec
 \end{equation}
 Since it was assumed that all of the Cl goes to HCL, the remainder of the stoichiometric coefficients come from an atom balance. Equation \ref{eq:PVC_reac} can now be rewritten to include the appropriate numerical values for the stoichiometric coefficients.
 \begin{eqnarray}\label{eq:PVC_reac2}
-\underbrace{\mathrm{C_2H_3Cl}}_\text{Fuel} + \underbrace{\mathrm{1.53 \, (O_2+(^{.79}/_{.21}) \, N_2})}_\text{Oxidizer} \rightarrow \\
-\nonumber \underbrace{\mathrm{HCl +  H_2O + 0.14\, CO + 0.96\, CO_2 + 0.90\, C + 1.53\,(^{.79}/_{.21}) \, N_2}}_\text{Products}
+\underbrace{\mathrm{1\,(C_2H_3Cl)}}_\text{Fuel} + \underbrace{\mathrm{1\,(1.53 \, O_2+1.53 \,(^{.79}/_{.21}) \, N_2})}_\text{Oxidizer} \rightarrow \\
+\nonumber \underbrace{\mathrm{1\,(HCl +  H_2O + 0.14\, CO + 0.96\, CO_2 + 0.90\, C + 1.53\,(^{.79}/_{.21}) \, N_2)}}_\text{Products}
 \end{eqnarray}
 The choice of fuel in this example, PVC, is not defined in Table \ref{tab:gasspecies}, therefore its properties must be defined on a {\ct SPEC} line. In this example, we use the species' chemical formula. The example will also use the lumped species formulation to minimize the number of scalar transport equations that need to be solved. Therefore, each species that does not transport by itself will have an SMIX\_COMPONENT\_ONLY = .TRUE. designation.
 \footnotesize
@@ -6193,11 +6193,11 @@ Note: the order of which the {\ct SPEC\_ID}s are defined must be the same order 
 &INIT MASS_FRACTION(1)=0.229,SPEC_ID(1)='PVC' /
 \end{verbatim} \normalsize
 
-In this mixing-controlled example, the user is responsible for defining the fuel, heat of combustion of that fuel, species participating the reaction, and the stoichiometric coefficients that describe the reaction. The heat of combustion for `PVC' was found from the SFPE Handbook \cite{SFPE:Tewarson}. In the lumped species approach, the stoichiometric coefficients for the {\ct SMIX}s are the sum of the coefficients of the primitive species.
+In this mixing-controlled example, the user is responsible for defining the fuel, heat of combustion of that fuel, species participating the reaction, and the stoichiometric coefficients that describe the reaction. The heat of combustion for `PVC' was found from the SFPE Handbook \cite{SFPE:Tewarson}. In the lumped species approach, the stoichiometric coefficients for the {\ct SMIX}s are the coefficients of the lumped species themselves.
 \footnotesize
 \begin{verbatim}
 &REAC FUEL = 'PVC', HEAT_OF_COMBUSTION=16400,
-      SMIX_ID = 'PVC','AIR','PRODUCTS', NU=-1,-7.29,9.76
+      SMIX_ID = 'PVC','AIR','PRODUCTS', NU=-1,-1,1
       FIXED_MIX_TIME=0.1,
       ODE_SOLVER= 'SINGLE EXACT' /
 \end{verbatim} \normalsize
