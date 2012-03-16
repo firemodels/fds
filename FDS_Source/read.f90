@@ -2948,6 +2948,20 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       CALL SHUTDOWN(MESSAGE)
    ENDIF
 
+   ! Compute the primitive species reaction coefficients
+
+   ALLOCATE(RN%NU_SPECIES(N_SPECIES))
+   RN%NU_SPECIES = 0._EB
+   DO NS=0,N_TRACKED_SPECIES
+      SM => SPECIES_MIXTURE(NS)
+      RN%NU(NS) = RN%NU(NS)*SM%ADJUST_NU
+      DO NS2 = 1,N_SPECIES
+         RN%NU_SPECIES(NS2) =  RN%NU_SPECIES(NS2) + RN%NU(NS)*SM%VOLUME_FRACTION(NS2)
+      ENDDO
+      IF (SM%ID=='WATER VAPOR')  I_WATER = NS
+      IF (SM%ID=='CARBON DIOXIDE') I_CO2 = NS
+   ENDDO
+
    ! Check atom balance of the reaction
    IF (.NOT. SIMPLE_CHEMISTRY .AND. RN%CHECK_ATOM_BALANCE) THEN
       SKIP_ATOM_BALANCE = .FALSE.
@@ -2979,20 +2993,6 @@ REAC_LOOP: DO NR=1,N_REACTIONS
          ', does not equal mass of reactants,',-MASS_REACTANT
       CALL SHUTDOWN(MESSAGE)
    ENDIF
-
-   ! Compute the primitive species reaction coefficients
-
-   ALLOCATE(RN%NU_SPECIES(N_SPECIES))
-   RN%NU_SPECIES = 0._EB
-   DO NS=0,N_TRACKED_SPECIES
-      SM => SPECIES_MIXTURE(NS)
-      RN%NU(NS) = RN%NU(NS)*SM%ADJUST_NU
-      DO NS2 = 1,N_SPECIES
-         RN%NU_SPECIES(NS2) =  RN%NU_SPECIES(NS2) + RN%NU(NS)*SM%VOLUME_FRACTION(NS2)
-      ENDDO
-      IF (SM%ID=='WATER VAPOR')  I_WATER = NS
-      IF (SM%ID=='CARBON DIOXIDE') I_CO2 = NS
-   ENDDO
 
    ! Heat of Combustion calculation for SIMPLE_CHEMISTRY
 
