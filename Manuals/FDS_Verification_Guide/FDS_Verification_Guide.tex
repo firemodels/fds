@@ -2747,13 +2747,12 @@ We set up three separate tests, one for each coordinate direction.  These are la
 As the case proceeds momentum is exchanged between the fluid and the particles.  The momenta relax toward equilibrium.  The results for all three tests are shown in Figure \ref{fig_fluid_part_mom}.  On the left, the green symbols represent the total momentum of the system, which, as can be seen, is conserved.  The fluid (blue) and the particle (red) momenta are closely following the analytical solution (solid lines) which is the basis of the scheme.  The plot on the right shows the fluid (blue) and particle (red) velocities compared to the system equilibrium velocity (greeen dashed line).  By construction of the method, both the fluid and the particle velocities are approaching the equilibrium velocity at long times.
 
 \begin{figure}[h]
-\noindent
-\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/fluid_part_momentum} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/fluid_part_velocity}
-\end{tabular*}
-\caption[Test of fluid-particle momentum transfer for nonstationary particles.]{Outputs of the {\bf fluid\_part\_mom} cases.  (Left) The fluid momentum (blue), the particle momentum (red), and the total momentum (green) are plotted for each coordinate direction, $x$ (circles), $y$ (inverted triangles), and $z$ (plus symbols). (Right) The fluid (blue) and particle (red) velocities are plotted for each direction.  Also, the equilibrium velocity (total momentum [fluid plus particles] divided by the total mass) is shown as a dashed green line.  Stability of the momentum exchange is guaranteed because by construction the fluid velocity cannot overshoot the equilibrium velocity; the fluid velocity relaxes toward it.}
+\begin{center}
+\includegraphics[width=.9\textwidth]{SCRIPT_FIGURES/fluid_part_momentum}\\
+\includegraphics[width=.9\textwidth]{SCRIPT_FIGURES/fluid_part_velocity}
+\caption[Test of fluid-particle momentum transfer for nonstationary particles.]{Outputs of the {\bf fluid\_part\_mom} cases.  (Top) The fluid momentum (blue), the particle momentum (red), and the total momentum (green) are plotted for each coordinate direction, $x$ (circles), $y$ (inverted triangles), and $z$ (plus symbols).  The analytical solutions for the fluid and particle equations are shown by the solid blue and red lines, respectively. The total momentum should be constant, as indicated by the green symbols. (Bottom) The fluid (blue) and particle (red) velocities are plotted for each direction.  Also, the equilibrium velocity (total momentum [fluid plus particles] divided by the total mass) is shown as a dashed green line.  Stability of the momentum exchange is guaranteed because, by construction, the fluid velocity cannot overshoot the equilibrium velocity; the fluid velocity relaxes toward it.}
 \label{fig_fluid_part_mom}
+\end{center}
 \end{figure}
 
 \clearpage
