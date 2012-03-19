@@ -12,6 +12,6 @@ export INDIR=Current_Results
 
 /bin/sh -c "cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR"
 
-$RUNFDS $INDIR ASTM_E_648_09 
+$RUNFDS $INDIR ASTM_E_648_10 
 
 echo FDS cases submitted
