@@ -3243,11 +3243,13 @@ ASRHAE sample problem 7~\cite{ASHRAE} is a simple HVAC system that represents a 
 
 \newpage
 
-\chapter{Unstructured Geometry for Fluid-Structure Interaction}
+\chapter{Unstructured Geometry}
 
-\section{Cut-cell Algorithm for Calculating the Intersecting Area}
+\section{Fluid-Structure Interaction}
 
-To study the fluid-structure interaction with unstructured geometries, an immersed boundary method is implemented in FDS. The approach is to develop triangular surface (TRIS) elements for a coupling interface. A cut-cell algorithm is developed for calculating the intersection area between a triangle and a bounding box (e.g., Cartesian grid cell). It's difficult to directly calculate the intersection area, because the intersection shape is generally an irregular polygon. The area calculation can be divided into three steps. The first step is to obtain the points that the triangle-determined plane intersects with the bounding box edges. These points are sorted to give an intermediate polygon. Please note this intermediate polygon is in the same plane as the blue-edge triangle. The second step is to determine all vertices of the final intersection polygon, by checking whether the triangle edges are intersecting with the edges of the intermediate polygon. Lastly, the area can be easily calculated for the final polygon, which is always convex in this study.
+\section{Cut-cell Algorithm}
+
+A cut-cell algorithm is developed for calculating the intersection area between a triangle and a bounding box (e.g., Cartesian grid cell). It is difficult to directly calculate the intersection area, because the intersection shape is generally an irregular polygon. The area calculation can be divided into three steps. The first step is to obtain the points that the triangle-determined plane intersects with the bounding box edges. These points are sorted to give an intermediate polygon. Please note this intermediate polygon is in the same plane as the blue-edge triangle. The second step is to determine all vertices of the final intersection polygon, by checking whether the triangle edges are intersecting with the edges of the intermediate polygon. Lastly, the area can be easily calculated for the final polygon, which is always convex in this study.
 
 \begin{table}[ht]
 \begin{center}
@@ -3272,7 +3274,7 @@ Case Number &  Triangle Area & NXP & Cutting Area \\ \hline
 \label{tab_cutcell_areas}
 \end{table}
 
-Table ~\ref{tab_cutcell_areas} summarizes the 12 testing examples in which different triangles intersect with a bounding box. NP is the number of the vertices of the intermediate polygon, and NXP is the vertices of the intersection polygon, whose area is calculated as shown. Examples (1) through (4) and (6) through (8) have a regular triangle intersection. Examples (5) and (9) have a point and line intersection, both with zero area. Examples (10), (11), and (12) are more complicated cases. The intersection polygon has six (6), seven (7), and nine (9) vertices, respectively.
+Table ~\ref{tab_cutcell_areas} summarizes the 12 testing examples in which different triangles intersect with a bounding box.  NXP is the vertices of the intersection polygon, whose area is calculated as shown. Examples (1) through (4) and (6) through (8) have a regular triangle intersection. Examples (5) and (9) have a point and line intersection, both with zero area. Examples (10), (11), and (12) are more complicated cases. The intersection polygon has six (6), seven (7), and nine (9) vertices, respectively.
 \newpage
 
 \bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_general,../Bibliography/FDS_mathcomp}
