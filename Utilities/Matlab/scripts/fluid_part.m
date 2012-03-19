@@ -116,16 +116,33 @@ end
 H(10)=plot(t_soln,MX(1)*U_soln,'b-');
 H(11)=plot(t_soln,n*pwt*m_p*u_soln,'r-');
 
+plot_handle = gca;
+plot_position = get(plot_handle,'Position');
+
 axis([min(tx) max(tx) 0 150])
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 xlabel('Time (s)','Interpreter','LaTeX','FontSize',Label_Font_Size)
 ylabel('Momentum (kg m/s)','Interpreter','LaTeX','FontSize',Label_Font_Size)
 
-legend(H(1:11),'FDS fluid U','FDS fluid V','FDS fluid W', ...
+legend_handle = legend(H(1:11),'FDS fluid U','FDS fluid V','FDS fluid W', ...
               'FDS particle U','FDS particle V','FDS particle W', ...
               'FDS total U','FDS total V','FDS total W', ...
-              'analytical fluid','analytical particle')
+              'analytical fluid','analytical particle','Location','EastOutside');
+		  
+set(legend_handle,'Interpreter','LaTeX')
+plot_outerposition = get(plot_handle,'OuterPosition');
+legend_position=get(legend_handle,'Position');
+
+set(plot_handle,'Position',plot_position)
+set(plot_handle,'OuterPosition',plot_outerposition)
+
+Legend_XYWidthHeight = legend_position;
+Legend_XYWidthHeight(1) = plot_position(1)+plot_position(3)+.2;
+Legend_XYWidthHeight(2) = plot_position(2);
+Legend_XYWidthHeight(3) = 2.8;
+Legend_XYWidthHeight(4) = plot_position(4);
+set(legend_handle,'Position',Legend_XYWidthHeight)
           
 % add SVN if file is available
 
@@ -139,6 +156,8 @@ if exist(SVN_Filename,'file')
     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
         'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
 end
+
+Paper_Width=1.5*Paper_Width;
 
 set(gcf,'Visible','on');
 set(gcf,'PaperUnits',Paper_Units);
@@ -176,15 +195,32 @@ H(7)=plot(tx,U_eq,'g--');
 H(7)=plot(ty,V_eq,'g--');
 H(7)=plot(tz,W_eq,'g--');
 
+plot_handle = gca;
+plot_position = get(plot_handle,'Position');
+
 axis([min(tx) max(tx) 0 10])
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 xlabel('Time (s)','Interpreter','LaTeX','FontSize',Label_Font_Size)
 ylabel('Velocity (m/s)','Interpreter','LaTeX','FontSize',Label_Font_Size)
 
-legend(H(1:7),'FDS fluid U','FDS fluid V','FDS fluid W',...
+legend_handle = legend(H(1:7),'FDS fluid U','FDS fluid V','FDS fluid W',...
               'FDS particle U','FDS particle V','FDS particle W',...
-              'equilibrium velocity')
+              'equilibrium velocity','Location','EastOutside');
+
+set(legend_handle,'Interpreter','LaTeX')
+plot_outerposition = get(plot_handle,'OuterPosition');
+legend_position=get(legend_handle,'Position');
+
+set(plot_handle,'Position',plot_position)
+set(plot_handle,'OuterPosition',plot_outerposition)
+
+Legend_XYWidthHeight = legend_position;
+Legend_XYWidthHeight(1) = plot_position(1)+plot_position(3)+.2;
+Legend_XYWidthHeight(2) = plot_position(2)+.5;
+Legend_XYWidthHeight(3) = 3.0;
+Legend_XYWidthHeight(4) = 2.4;
+set(legend_handle,'Position',Legend_XYWidthHeight)
           
 % add SVN if file is available
 
