@@ -1236,9 +1236,10 @@ In this example, a closed chamber with a simple recirculating duct is used to de
 through multiple meshes and its mass is conserved. An obstruction is created that leaks 0.5~kg of CO$_2$ over a time span of 10~s.
 
 \begin{figure}[h]
-      \includegraphics[width=3in]{SCRIPT_FIGURES/simple_duct_mass}
-   \caption[The \bf{simple\_duct} test case.]{The mass of CO$_2$ contained in a simple room connected with a recirculating duct.}
-   \label{simple_duct}
+\centering
+\includegraphics[width=3in]{SCRIPT_FIGURES/simple_duct_mass}
+\caption[The \bf{simple\_duct} test case.]{The mass of CO$_2$ contained in a simple room connected with a recirculating duct.}
+\label{simple_duct}
 \end{figure}
 
 
@@ -1289,12 +1290,14 @@ door or ceiling vent. The plot in Fig.~\ref{energy_budget_adiabatic_walls} shows
 Next, the same compartment with the same fire is now assumed to have cold (20~$^\circ$C) walls, and the radiation is switched back on. After a few minutes of simulation, the net enthalpy outflow is approximately 470~kW and the heat losses to the wall (both radiative and convective) are approximately 730~kW. The plot is shown in Fig.~\ref{energy_budget_cold_walls}.
 
 \begin{figure}[ht]
+\centering
 \includegraphics[width=.9\textwidth]{SCRIPT_FIGURES/energy_budget_adiabatic_walls}
 \caption[Energy Budget (adiabatic walls).]{The energy budget for a simple compartment fire with adiabatic walls.}
 \label{energy_budget_adiabatic_walls}
 \end{figure}
 
 \begin{figure}[ht]
+\centering
 \includegraphics[width=.9\textwidth]{SCRIPT_FIGURES/energy_budget_cold_walls}
 \caption[Energy Budget (cold walls).]{The energy budget for a simple compartment fire with cold walls.}
 \label{energy_budget_cold_walls}
@@ -1363,19 +1366,31 @@ In this example, two fictitious gases are forced through tiny ducts (1~mm by 1~m
 \be \int h_s \, \rho \bu \cdot d\bS \equiv \int c_p \, (T-T_\infty) \, \rho \bu \cdot d\bS \ee
 With this definition, the specific enthalpy flow is $6.063 \times 10^{-6}$~kW at Inlet~1 and 0 at Inlet~2. Because of the large difference in specific heats, the average velocity of the gas mixture flowing out, $U_3$, is not simply the sum of the velocities at the two inlets, $U_1+U_2$. In fact, in order to have the proper enthalpy flow at the outlet, the volume integral of the divergence should be:
 \be \int \nabla \cdot \bu \; dV \equiv -A \, (U_1 + U_2 - U_3) = -A \, \frac{ (U_1-U_2) \, (c_{p,2}-c_{p,1}) }{ c_{p,1}+c_{p,2} } = -1.357 \times 10^{-8} \; \hbox{m}^3/\hbox{s} \label{div2} \ee
-The plots in Fig.~\ref{energy_budget_dns} show the resulting enthalpy flow (left) and integrated divergence or net volume flow (right).
+The plot in Fig.~\ref{energy_budget_dns} shows the resulting and integrated divergence or net volume flow.
 
 \begin{figure}[ht]
-\begin{tabular*}{\textwidth}{lr}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/energy_budget_dns_heat} &
+\centering
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/energy_budget_dns_div}
-\end{tabular*}
 \caption[Energy conservation for a DNS case.]{Inlet and outlet enthalpy flow for a simple DNS gas mixing case.}
 \label{energy_budget_dns}
 \end{figure}
 
+\clearpage
+
+
+\subsection{Mixing with Variable Specific Heats (\texorpdfstring{{\bf energy\_budget\_tmix}}{energy\_budget\_tmix})}
+
+This case tests the ability of FDS to properly account for temperature dependent specific heats.  A coarse 2D channel mixing case is presented where hot gas at 900 $^\circ$C with a constant specific heat of $c_p=1$ kJ/(kg K) enters from the bottom left vent with a flux of 2 kg/(m$^2$ s) and cold gas at 20 $^\circ$C with a constant specific heat of $c_p=10$ kJ/(kg K) enters from a top left vent with the same mass flux.  The gases mix in a center channel and exit the domain flowing to the right.
+
+The enthalpy of the mixture at the outlet is $2 \times 1 \times (900+273.15) + 2 \times 10 \times (20+273.15) = 8209.3$ kJ/(m$^2$ s).  The mixture heat capacity at the outlet is 5.5 kJ/(kg K) and the flux is 4 kg/(m2 s).  Therefore the outlet temperature is $8209.3/4/5.5 - 273.15 = 100$ $^\circ$C.
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/energy_budget_tmix.pdf}
+\caption{\label{fig_outlet_temperature} Outlet temperature for energy\_budget\_tmix case.  Black circles represent the correct result of 100 $^\circ$C.}
+\end{figure}
 
 \clearpage
+
 
 \section{Checking for Coding Errors (\texorpdfstring{{\bf symmetry\_test}}{symmetry\_test})}
 
