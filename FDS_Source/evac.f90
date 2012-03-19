@@ -45,10 +45,14 @@ MODULE EVAC
        EVACUATION_TYPE, EVAC_HOLE_TYPE, EVAC_EVACS, EVAC_HOLES, N_CO_EXITS, N_DOOR_MESHES, N_STRS
   PUBLIC EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, EMESH_ID, EMESH_IJK, EMESH_XB, EMESH_NM, EMESH_NFIELDS, &
        EMESH_INDEX, EVAC_FDS6, HUMAN_SMOKE_HEIGHT, EVAC_DELTA_SEE, EVAC_EMESH_STAIRS_TYPE, EMESH_STAIRS
+  PUBLIC NO_EVAC_MESHES, INPUT_EVAC_GRIDS
   !
   CHARACTER(255):: EVAC_VERSION = '2.4.1'
   CHARACTER(255) :: EVAC_COMPILE_DATE
   INTEGER :: EVAC_MODULE_REV
+
+  INTEGER :: INPUT_EVAC_GRIDS
+  LOGICAL :: NO_EVAC_MESHES
   !
   ! This is a group of persons, who are initialized together, i.e., they have same mass, speed, 
   ! etc distributions and they are all put in the given rectangle.
@@ -503,15 +507,11 @@ CONTAINS
 
     INTEGER :: ii,jj,kk
 
-    INTEGER :: IJK(3), MPI_PROCESS, LEVEL, NMESHES_READ
-    LOGICAL :: EVACUATION, EVAC_HUMANS, SYNCHRONIZE, CYLINDRICAL, NO_EVAC_MESHES
+    INTEGER :: IJK(3)
     REAL(EB) :: EVAC_Z_OFFSET
-    CHARACTER(30) :: MULT_ID
-    INTEGER :: N_EGRIDS_TMP, NM, N_CORES
+    INTEGER :: N_CORES
     INTEGER :: N_AVATAR_TYPE
 
-    NAMELIST /MESH/ IJK, FYI, ID, SYNCHRONIZE, EVACUATION, EVAC_HUMANS, CYLINDRICAL, XB, RGB, COLOR, EVAC_Z_OFFSET, &
-         MPI_PROCESS, LEVEL, MULT_ID
     NAMELIST /EXIT/ ID, XB, IOR, FLOW_FIELD_ID, CHECK_FLOW, &
          MAX_FLOW, FYI, COUNT_ONLY, WIDTH, XYZ, VENT_FFIELD, COUNT_DENSITY, &
          MESH_ID, COLOR_INDEX, XYZ_SMOKE, EVAC_ID, PERS_ID, &
@@ -594,108 +594,19 @@ CONTAINS
           RETURN ! skip evacuation calculation
        END IF
 
-       N_EGRIDS_TMP   = 0
-       NMESHES_READ   = 0
-       !NMESHES_TMP    = 0
-       NO_EVAC_MESHES = .TRUE.
-       REWIND(LU_INPUT)
-       COUNT_MESH_LOOP: DO
-          CALL CHECKREAD('MESH', LU_INPUT, IOS)
-          IF (IOS==1) EXIT COUNT_MESH_LOOP
-          EVACUATION   = .FALSE.
-          EVAC_HUMANS  = .FALSE.
-          READ(LU_INPUT, MESH, END=15, ERR=16, IOSTAT=IOS)
-          NMESHES_READ = NMESHES_READ + 1
-          IF (EVACUATION_DRILL .AND. .NOT.EVACUATION)   CYCLE COUNT_MESH_LOOP ! skip fire meshes
-          IF (EVACUATION_MC_MODE .AND. .NOT.EVACUATION) CYCLE COUNT_MESH_LOOP ! skip fire meshes
-          IF (.NOT.EVAC_HUMANS .AND. EVACUATION)        CYCLE COUNT_MESH_LOOP ! skip additional evac meshes
-          IF (EVAC_HUMANS) NO_EVAC_MESHES = .FALSE.
-          IF (EVAC_HUMANS) N_EGRIDS_TMP = N_EGRIDS_TMP + 1
-16        IF (IOS > 0) CALL SHUTDOWN('ERROR: Problem with MESH line.')
-       ENDDO COUNT_MESH_LOOP
-15     CONTINUE
-       REWIND(LU_INPUT)
-       IF (NO_EVAC_MESHES) THEN
-          NO_EVACUATION      = .TRUE.
-          EVACUATION_DRILL   = .FALSE.
-          EVACUATION_MC_MODE = .FALSE.
-          N_EVAC             = 0
-          RETURN ! No evacuation meshes in the input file
-       END IF
-
        CALL COUNT_EVAC_NODES(1)
-       ALLOCATE(EMESH_ID(     MAX(1,N_EGRIDS_TMP)), STAT=IZERO)
-       CALL ChkMemErr('READ_EVAC','EMESH_ID',IZERO) 
-       ALLOCATE(EMESH_NM(     MAX(1,N_EGRIDS_TMP)), STAT=IZERO)
+
+       ALLOCATE(EMESH_NM(     MAX(1,INPUT_EVAC_GRIDS)), STAT=IZERO)
        CALL ChkMemErr('READ_EVAC','EMESH_NM',IZERO) 
-       ALLOCATE(EMESH_NFIELDS(MAX(1,N_EGRIDS_TMP+N_STRS)), STAT=IZERO)
+       ALLOCATE(EMESH_NFIELDS(MAX(1,INPUT_EVAC_GRIDS+N_STRS)), STAT=IZERO)
        CALL ChkMemErr('READ_EVAC','EMESH_NFIELDS',IZERO) 
        EMESH_NFIELDS = 0
-       ALLOCATE(EMESH_XB(6,   MAX(1,N_EGRIDS_TMP)), STAT=IZERO)
-       CALL ChkMemErr('READ_EVAC','EMESH_XB',IZERO) 
-       ALLOCATE(EMESH_IJK(3,  MAX(1,N_EGRIDS_TMP)), STAT=IZERO)
-       CALL ChkMemErr('READ_EVAC','EMESH_IJK',IZERO) 
        ! Array for the exit+door information (not for the count only exits)
        ALLOCATE(EMESH_EXITS(MAX(1,N_EXITS-N_CO_EXITS+N_DOORS)), STAT=IZERO)
        CALL ChkMemErr('READ_EVAC','EMESH_EXITS',IZERO)
        ! Array for the strs information 
        ALLOCATE(EMESH_STAIRS(MAX(1,N_STRS)), STAT=IZERO)
        CALL ChkMemErr('READ_EVAC','EMESH_STAIRS',IZERO)
-
-       NM = 0
-       MESH_LOOP: DO N = 1, NMESHES_READ
-          ! Set MESH defaults
-          IJK(1)= 10
-          IJK(2)= 10
-          IJK(3)= 1
-          !TWO_D = .FALSE.
-          XB(1) = 0._EB
-          XB(2) = 1._EB
-          XB(3) = 0._EB
-          XB(4) = 1._EB
-          XB(5) = 0._EB
-          XB(6) = 1._EB
-          RGB   = -1
-          COLOR   = 'null'
-          ID      = 'null'
-          !MULT_ID = 'null'
-          !CYLINDRICAL = .FALSE.
-          !SYNCHRONIZE = .FALSE.
-          EVACUATION  = .FALSE.
-          EVAC_HUMANS = .FALSE.
-          !MPI_PROCESS   = -1
-          !EVAC_Z_OFFSET = 1.0_EB
-          !LEVEL         = 0
-
-          ! Read the MESH line
-
-          CALL CHECKREAD('MESH', LU_INPUT, IOS)
-          IF (IOS==1) EXIT MESH_LOOP
-          READ(LU_INPUT, MESH)
-
-          IF (.NOT.EVACUATION)                   CYCLE MESH_LOOP ! skip fire meshes
-          IF (.NOT.EVAC_HUMANS .AND. EVACUATION) CYCLE MESH_LOOP ! skip additional evac meshes
-
-          ! Increase the main evacuation MESH counter by 1
-          NM = NM + 1
-
-          ! Reorder XB coordinates if necessary
-          CALL CHECK_XB(XB)
-
-          EMESH_ID(NM)    = TRIM(ID)
-          EMESH_IJK(1,NM) = IJK(1)
-          EMESH_IJK(2,NM) = IJK(2)
-          EMESH_IJK(3,NM) = IJK(3)
-          EMESH_XB(1,NM)  = XB(1)
-          EMESH_XB(2,NM)  = XB(2)
-          EMESH_XB(3,NM)  = XB(3)
-          EMESH_XB(4,NM)  = XB(4)
-          EMESH_XB(5,NM)  = XB(5)
-          EMESH_XB(6,NM)  = XB(6)
-
-       END DO MESH_LOOP
-       REWIND(LU_INPUT)
-
 
        ! Read the STRS line
        READ_STRS_LOOP: DO N = 1, N_STRS
@@ -828,9 +739,9 @@ CONTAINS
           ! Reorder XB coordinates if necessary
           CALL CHECK_XB(XB)
 
-          ! Check which evacuation mesh, NM is the number of main evacuation meshes.
+          ! Check which evacuation mesh, INPUT_EVAC_GRIDS is the number of main evacuation meshes.
           II = 0
-          PEX_MeshLoop_0: DO I = 1, NM
+          PEX_MeshLoop_0: DO I = 1, INPUT_EVAC_GRIDS
              IF (Is_Within_Bounds(XB(1), XB(2), XB(3), XB(4), XB(5), XB(6), &
                   EMESH_XB(1,I), EMESH_XB(2,I), EMESH_XB(3,I), EMESH_XB(4,I), EMESH_XB(5,I), EMESH_XB(6,I), &
                   0._EB, 0._EB, 0._EB)) THEN
@@ -952,9 +863,9 @@ CONTAINS
           ! Reorder XB coordinates if necessary
           CALL CHECK_XB(XB)
 
-          ! Check which evacuation mesh, NM is the number of main evacuation meshes.
+          ! Check which evacuation mesh, INPUT_EVAC_GRIDS is the number of main evacuation meshes.
           II = 0
-          PDX_MeshLoop_0: DO I = 1, NM
+          PDX_MeshLoop_0: DO I = 1, INPUT_EVAC_GRIDS
              IF (Is_Within_Bounds(XB(1), XB(2), XB(3), XB(4), XB(5), XB(6), &
                   EMESH_XB(1,I), EMESH_XB(2,I), EMESH_XB(3,I), EMESH_XB(4,I), EMESH_XB(5,I), EMESH_XB(6,I), &
                   0._EB, 0._EB, 0._EB)) THEN
@@ -1713,7 +1624,7 @@ CONTAINS
                FAC_V0_DOWN = 0.598_EB
                FAC_V0_HORI = 1.0_EB
                DEFAULT_PROPERTIES='Male' ! Male body size etc.
-            CASE ('IMO_Male>50MI1','imo_male>50mi1','IMO_MALE>50IM1')
+            CASE ('IMO_Male>50MI1','imo_male>50mi1','IMO_MALE>50MI1')
                IF (VELOCITY_DIST < 0) THEN
                   VELOCITY_DIST = 1
                   VEL_LOW  = 0.64_EB
@@ -1726,7 +1637,7 @@ CONTAINS
                FAC_V0_DOWN = 0.598_EB
                FAC_V0_HORI = 1.0_EB
                DEFAULT_PROPERTIES='Male' ! Male body size etc.
-            CASE ('IMO_Male>50MI2','imo_male>50mi2','IMO_MALE>50IM2')
+            CASE ('IMO_Male>50MI2','imo_male>50mi2','IMO_MALE>50MI2')
                IF (VELOCITY_DIST < 0) THEN
                   VELOCITY_DIST = 1
                   VEL_LOW  = 0.55_EB
@@ -15395,6 +15306,10 @@ CONTAINS
           IF (ABS(HR%I_Target) == i .AND. Is_Visible_Door(i)) Is_Known_Door(i) = .TRUE.
        END DO
     END IF
+
+    ! If the target door has been visible before, it is considered to be visible still.
+    IF (HR%I_Target > 0) Is_Visible_Door(HR%I_Target) = .TRUE.
+
     ! If no visible nor known doors then the present target door is the only option so it 
     ! is set to be known.
     IF (ABS(HR%I_Target)>0 .AND. .NOT.(ANY(Is_Visible_Door) .OR. ANY(Is_Known_Door))) &
