@@ -26,9 +26,9 @@ L = 9*2*pi/100; % box length (m)
 k0 = 2*pi/L;
 kc = 1/2*N*k0;
 
-uvw_file1 = [chid,'_uvw_000.csv'];
-uvw_file2 = [chid,'_uvw_001.csv'];
-uvw_file3 = [chid,'_uvw_002.csv'];
+uvw_file1 = [chid,'_uvw_001.csv'];
+uvw_file2 = [chid,'_uvw_002.csv'];
+uvw_file3 = [chid,'_uvw_003.csv'];
 
 % Plot the FDS data
 H(1) = plotspec_uvw(uvw_file1,'k.-'); hold on
