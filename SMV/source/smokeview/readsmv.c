@@ -5777,6 +5777,15 @@ typedef struct {
  */
 
   if(autoterrain==1){
+    float zbarmin;
+
+    zbarmin=meshinfo->zbar0;
+    for(i=1;i<nmeshes;i++){
+      mesh *meshi;
+
+      meshi = meshinfo + i;
+      if(meshi->zbar0<zbarmin)zbarmin=meshi->zbar0;
+    }
     nobst=0;
     iobst=0;
     for(i=0;i<nmeshes;i++){
@@ -5792,7 +5801,7 @@ typedef struct {
         NewMemory((void **)&meshi->zcell,ibar*jbar*sizeof(float));
         zcell = meshi->zcell;
         for(j=0;j<ibar*jbar;j++){
-          zcell[j]=meshi->zbar0; // assume initially that zcell (terrain height) is at base of the domain
+          zcell[j]=zbarmin; // assume initially that zcell (terrain height) is at base of the domain
         }
       }
     }
@@ -5956,11 +5965,6 @@ typedef struct {
   }
 
   if(do_pass4==1||autoterrain==1){
-    printf("%s",_("   pass 5 "));
-    printf("%s",_("completed"));
-    printf("\n");
-  }
-  if(do_pass4==1){
     printf("%s",_("   pass 5 "));
     printf("%s",_("completed"));
     printf("\n");
@@ -6359,7 +6363,7 @@ typedef struct {
     char *label;
 
     devicei = deviceinfo + i;
-    devicei->device_mesh=get_mesh(devicei->xyz);
+    devicei->device_mesh=getmesh(devicei->xyz);
     label = devicei->object->label;
     if(strcmp(label,"smokesensor")==0){
       active_smokesensors=1;

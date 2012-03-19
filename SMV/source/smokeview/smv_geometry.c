@@ -21,6 +21,37 @@ char smv_geometry_revision[]="$Revision$";
 #include "string_util.h"
 #include "smokeviewvars.h"
 
+/* ------------------ getmesh_zcell ------------------------ */
+
+float getmesh_zcell(mesh *meshi, float xval, float yval, int *valid){
+  float *xplt, *yplt,*zcell;
+  float dx, dy;
+  int ibar, jbar;
+  int ival, jval;
+  float zval;
+  int nxcell;
+
+  xplt = meshi->xplt_orig;
+  yplt = meshi->yplt_orig;
+  ibar = meshi->ibar;
+  jbar = meshi->jbar;
+  nxcell=ibar;
+  *valid=0;
+  if(xval<xplt[0]||xval>xplt[ibar])return 0.0;
+  if(yval<yplt[0]||yval>yplt[jbar])return 0.0;
+
+  dx = xplt[1]-xplt[0];
+  dy = yplt[1]-yplt[0];
+  ival = (xval-xplt[0])/dx;
+  if(ival>=ibar)ival=ibar-1;
+  jval = (yval-yplt[0])/dy;
+  if(jval>=jbar)jval=jbar-1;
+  zcell = meshi->zcell;
+  zval = zcell[IJCELL2(ival,jval)];
+  *valid=1;
+  return zval;
+}
+
 /* ------------------ getmesh ------------------------ */
 
 mesh *getmesh(float *xyz){

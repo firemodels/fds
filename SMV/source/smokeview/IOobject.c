@@ -275,37 +275,6 @@ static float specular[4]={0.4,0.4,0.4,1.0};
 unsigned char *rgbimage=NULL;
 int rgbsize=0;
 
-/* ------------------ get_mesh ------------------------ */
-
- mesh *get_mesh(float xyz[3]){
-  int i;
-  mesh *meshi;
-  int ibar, jbar, kbar;
-  float xmin, ymin, zmin;
-  float xmax, ymax, zmax;
-
-  for(i=0;i<nmeshes;i++){
-    meshi = meshinfo + i;
-
-    ibar=meshi->ibar;
-    jbar=meshi->jbar;
-    kbar=meshi->kbar;
-    xmin=meshi->xplt_orig[0];
-    ymin=meshi->yplt_orig[0];
-    zmin=meshi->zplt_orig[0];
-    xmax=meshi->xplt_orig[ibar];
-    ymax=meshi->yplt_orig[jbar];
-    zmax=meshi->zplt_orig[kbar];
-
-    if(xmin<=xyz[0]&&xyz[0]<=xmax&&
-       ymin<=xyz[1]&&xyz[1]<=ymax&&
-       zmin<=xyz[2]&&xyz[2]<=zmax){
-         return meshi;
-    }
-  }
-  return NULL;
-}
-
 /* ------------------ get_world_eyepos ------------------------ */
 
 void get_world_eyepos(float *mm, float user_eyepos[3],float scaled_eyepos_local[3]){

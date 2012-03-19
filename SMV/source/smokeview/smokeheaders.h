@@ -512,7 +512,6 @@ EXTERNCPP GLubyte *getscreenbuffer(void);
 EXTERNCPP void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height);
 EXTERNCPP int  inblockage(const mesh *gb,float x, float y, float z);
 EXTERNCPP int inmesh_smoke(float x, float y, float z, int n, int flag);
-EXTERNCPP mesh *get_mesh(float xyz[3]);
 EXTERNCPP void initmesh(mesh *gb);
 EXTERNCPP void updateglui(void);
 EXTERNCPP void updateslicelist(int index);
