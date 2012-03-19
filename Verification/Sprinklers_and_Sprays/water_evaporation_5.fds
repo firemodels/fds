@@ -1,10 +1,10 @@
 A test for evaluating the rate of evaporation for one single droplet in an ambient air 
 Comparison of the droplet diameter versus time with experimental data extracted
-from Ranz and Marshall "Evaporation from drops - Part II" Chemical Engineering Progress, 48(4) :173–180 (1952)
+from Ranz and Marshall "Evaporation from drops - Part II" Chemical Engineering Progress, 48(4):173-180 (1952)
  
 &HEAD CHID='water_evaporation_5' /
 
-&MESH IJK=4 4 4, XB=0. 1.0 0. 1.0 0.0 1.0 /
+&MESH IJK=4,4,4, XB=0.,1.0,0.,1.0,0.0,1.0 /
 
 &TIME T_END = 712. /
 
@@ -16,15 +16,15 @@ from Ranz and Marshall "Evaporation from drops - Part II" Chemical Engineering P
 
 &DUMP DT_DEVC = 2, MASS_FILE=.TRUE./
 
-&PART ID='water_drops', STATIC = .TRUE., SPEC_ID = 'WATER VAPOR', DIAMETER = 1048.8, SAMPLING_FACTOR = 1, MONODISPERSE  = .true.,
-MINIMUM_DIAMETER = 5, MAXIMUM_DIAMETER = 2000, INITIAL_TEMPERATURE = 9.11 /
+&PART ID='water_drops', STATIC = .TRUE., SPEC_ID = 'WATER VAPOR', DIAMETER = 1048.8, SAMPLING_FACTOR = 1, MONODISPERSE = .TRUE.,
+      MINIMUM_DIAMETER = 5, MAXIMUM_DIAMETER = 2000, INITIAL_TEMPERATURE = 9.11 /
   
 &INIT PART_ID = 'water_drops', MASS_PER_VOLUME = 0.075506905, XB = 0.48 0.5 0.48 0.5 0.48 0.5, NUMBER_INITIAL_PARTICLES= 1 /
  
 SLCF PBY=0.5, QUANTITY='TEMPERATURE' /
 SLCF PBY=0.5, QUANTITY='PRESSURE' /
 SLCF PBY=0.5, QUANTITY='VELOCITY', VECTOR=.TRUE. /
-SLCF PBY=0.5,QUANTITY='water_drops_MPUV' /
+SLCF PBY=0.5, QUANTITY='water_drops_MPUV' /
 
 DEVC XYZ=0.5,0.5,0.5, QUANTITY='TEMPERATURE',ID='Temp', STATISTICS='VOLUME MEAN' /
 DEVC XYZ=0.5,0.5,0.5, QUANTITY='DENSITY' ,ID='dens', STATISTICS='VOLUME MEAN', RELATIVE=.TRUE. / concentration en vapeur d'eau 
