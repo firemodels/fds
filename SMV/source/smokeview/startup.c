@@ -1403,11 +1403,6 @@ void initvars(void){
   showlightmenu=0;
 #endif
 
-  VECFRACTION=1.0;
-  vecfactor=0.25f;
-  veclength=0.0f;
-  iveclengths=0;
-
   glui_active=0;
 
   drawColorLabel=0;
@@ -1641,7 +1636,6 @@ void initvars(void){
   isolinewidth=2.0;
   plot3dpointsize=4.0;
   plot3dlinewidth=2.0;
-  vectorpointsize=2.0, vectorlinewidth=1.0;
   sprinklerabssize=0.076f, sensorabssize=0.038f, heatabssize=0.076f;
   sensorrelsize=1.0;
   sensorrelsizeMIN=0.0;

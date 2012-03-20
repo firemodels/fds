@@ -1193,6 +1193,8 @@ void script_plot3dprops(scriptdata *scripti){
   updateplot3dlistindex();
 
   vecfactor = get_vecfactor(&iveclengths);
+  update_vector_widgets();
+
   printf("iveclengths=%i\n",iveclengths);
 
   contour_type=CLAMP(scripti->ival4,0,2);

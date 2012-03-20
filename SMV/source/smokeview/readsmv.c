@@ -7886,13 +7886,17 @@ int readini2(char *inifile, int localfile){
       if(offset_slice!=0)offset_slice=1;
       continue;
     }
-
     if(match(buffer,"VECLENGTH")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&iveclengths);
       vecfactor = get_vecfactor(&iveclengths);
       continue;
     }
+    if(match(buffer,"VECTORLENGTH")==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f",&vecfactor);
+      continue;
+      }
     if(match(buffer,"ISOTRAN2")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i ",&transparent_state);
@@ -9196,11 +9200,6 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%i",&p3cont3dsmooth);
       continue;
       }
-    if(match(buffer,"VECTORLENGTH")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f",&VECFRACTION);
-      continue;
-      }
     if(match(buffer,"SURFINC")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&surfincrement);
@@ -10292,12 +10291,16 @@ void writeini(int flag){
   fprintf(fileout," %f\n",vectorpointsize);
   fprintf(fileout,"VECTORLINEWIDTH\n");
   fprintf(fileout," %f\n",vectorlinewidth);
+  fprintf(fileout,"VECLENGTH\n");
+  fprintf(fileout," %i\n",iveclengths);
+  fprintf(fileout,"VECTORLENGTH\n");
+  fprintf(fileout," %f\n",vecfactor);
+  fprintf(fileout,"VECTORPOINTSIZE\n");
+  fprintf(fileout," %f\n",vectorpointsize);
   fprintf(fileout,"PARTPOINTSIZE\n");
   fprintf(fileout," %f\n",partpointsize);
   fprintf(fileout,"STREAKLINEWIDTH\n");
   fprintf(fileout," %f\n",streaklinewidth);
-  fprintf(fileout,"VECTORPOINTSIZE\n");
-  fprintf(fileout," %f\n",vectorpointsize);
   fprintf(fileout,"ISOPOINTSIZE\n");
   fprintf(fileout," %f\n",isopointsize);
   fprintf(fileout,"ISOLINEWIDTH\n");
@@ -10306,8 +10309,6 @@ void writeini(int flag){
   fprintf(fileout," %f\n",plot3dpointsize);
   fprintf(fileout,"PLOT3DLINEWIDTH\n");
   fprintf(fileout," %f\n",plot3dlinewidth);
-  fprintf(fileout,"VECTORLENGTH\n");
-  fprintf(fileout," %f\n",VECFRACTION);
   fprintf(fileout,"SENSORABSSIZE\n");
   fprintf(fileout," %f\n",sensorabssize);
   fprintf(fileout,"SENSORRELSIZE\n");
@@ -10693,8 +10694,6 @@ void writeini(int flag){
   fprintf(fileout," %i %i %i %i %i %i\n",showtrisurface,showtrioutline,showtripoints,showtrinormal,showpointnormal,smoothtrinormal);
   fprintf(fileout,"SHOWSTREAK\n");
   fprintf(fileout," %i %i %i %i\n",streak5show,streak5step,showstreakhead,streak_index);
-  fprintf(fileout,"VECLENGTH\n");
-  fprintf(fileout," %i\n",iveclengths);
   fprintf(fileout,"ISOTRAN2\n");
   fprintf(fileout," %i\n",transparent_state);
   fprintf(fileout,"SHOWISO\n");

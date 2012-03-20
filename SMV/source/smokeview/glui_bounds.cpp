@@ -236,7 +236,7 @@ GLUI_Panel *panel_time2c=NULL;
 GLUI_Button *BUTTON_RELOAD=NULL;
 GLUI_Button *BUTTON_SETTIME=NULL;
 
-GLUI_Spinner *SPINNER_plot3d_vectorpointsize=NULL,*SPINNER_plot3d_vectorlinewidth=NULL;
+GLUI_Spinner *SPINNER_plot3d_vectorpointsize=NULL,*SPINNER_plot3d_vectorlinewidth=NULL,*SPINNER_plot3d_vectorlinelength=NULL;
 GLUI_Spinner *SPINNER_sliceaverage=NULL;
 GLUI_Spinner *SPINNER_partpointstep=NULL;
 GLUI_Spinner *SPINNER_smoke3dzipstep=NULL;
@@ -252,8 +252,7 @@ GLUI_Spinner *SPINNER_plot3dlinewidth=NULL;
 GLUI_Spinner *SPINNER_streaklinewidth=NULL;
 GLUI_Spinner *SPINNER_vectorpointsize=NULL;
 GLUI_Spinner *SPINNER_vectorlinewidth=NULL;
-
-
+GLUI_Spinner *SPINNER_vectorlinelength=NULL;
 
 GLUI_EditText *con_patch_min=NULL, *con_patch_max=NULL;
 GLUI_RadioGroup *con_patch_setmin=NULL, *con_patch_setmax=NULL;
@@ -392,12 +391,10 @@ extern "C" void glui_bounds_setup(int main_window){
   if(nisoinfo>0){
     panel_iso = glui_bounds->add_rollout("Isosurface",false);
     
-    SPINNER_isopointsize=glui_bounds->add_spinner_to_panel(panel_iso,_("Point size"),GLUI_SPINNER_FLOAT,
-      &isopointsize);
+    SPINNER_isopointsize=glui_bounds->add_spinner_to_panel(panel_iso,_("Point size"),GLUI_SPINNER_FLOAT,&isopointsize);
     SPINNER_isopointsize->set_float_limits(1.0,10.0);
 
-    SPINNER_isolinewidth=glui_bounds->add_spinner_to_panel(panel_iso,_("Line width"),GLUI_SPINNER_FLOAT,
-      &isolinewidth);
+    SPINNER_isolinewidth=glui_bounds->add_spinner_to_panel(panel_iso,_("Line width"),GLUI_SPINNER_FLOAT,&isolinewidth);
     SPINNER_isolinewidth->set_float_limits(1.0,10.0);
 
     visAIso=showtrisurface*1+showtrioutline*2+showtripoints*4;
@@ -526,6 +523,8 @@ extern "C" void glui_bounds_setup(int main_window){
     SPINNER_plot3d_vectorpointsize->set_float_limits(1.0,10.0);
     SPINNER_plot3d_vectorlinewidth=glui_bounds->add_spinner_to_panel(panel_vector,_("Line width"),GLUI_SPINNER_FLOAT,&vectorlinewidth,UPDATE_VECTOR,PLOT3D_CB);
     SPINNER_plot3d_vectorlinewidth->set_float_limits(1.0,10.0);
+    SPINNER_plot3d_vectorlinelength=glui_bounds->add_spinner_to_panel(panel_vector,_("Line length"),GLUI_SPINNER_FLOAT,&vecfactor,UPDATE_VECTOR,PLOT3D_CB);
+    SPINNER_plot3d_vectorlinelength->set_float_limits(0.0,20.0);
 
     panel_isosurface = glui_bounds->add_panel_to_panel(panel_plot3d,"Isosurface");
     panel_pan1 = glui_bounds->add_panel_to_panel(panel_isosurface,"",GLUI_PANEL_NONE);
@@ -615,9 +614,10 @@ extern "C" void glui_bounds_setup(int main_window){
     SPINNER_vectorpointsize=glui_bounds->add_spinner_to_panel(panel_slice_vector,_("Point size"),GLUI_SPINNER_FLOAT,
       &vectorpointsize,UPDATE_VECTOR,Slice_CB);
     SPINNER_vectorpointsize->set_float_limits(1.0,10.0);
-    SPINNER_vectorlinewidth=glui_bounds->add_spinner_to_panel(panel_slice_vector,_("Line width"),GLUI_SPINNER_FLOAT,
-      &vectorlinewidth,UPDATE_VECTOR,Slice_CB);
+    SPINNER_vectorlinewidth=glui_bounds->add_spinner_to_panel(panel_slice_vector,_("Line width"),GLUI_SPINNER_FLOAT,&vectorlinewidth,UPDATE_VECTOR,Slice_CB);
     SPINNER_vectorlinewidth->set_float_limits(1.0,10.0);
+    SPINNER_vectorlinelength=glui_bounds->add_spinner_to_panel(panel_slice_vector,_("Line length"),GLUI_SPINNER_FLOAT,&vecfactor,UPDATE_VECTOR,Slice_CB);
+    SPINNER_vectorlinelength->set_float_limits(0.0,20.0);
 
 #ifdef pp_SLICECONTOURS
 
@@ -949,9 +949,10 @@ void PLOT3D_CB(int var){
     }
     break;
   case UPDATE_VECTOR:
-    if(SPINNER_vectorpointsize!=NULL&&SPINNER_vectorlinewidth!=NULL){
+    if(SPINNER_vectorpointsize!=NULL&&SPINNER_vectorlinewidth!=NULL&&SPINNER_vectorlinelength!=NULL){
       SPINNER_vectorpointsize->set_float_val(vectorpointsize);
       SPINNER_vectorlinewidth->set_float_val(vectorlinewidth);
+      SPINNER_vectorlinelength->set_float_val(vecfactor);
     }
     break;
   case CHOPUPDATE:
@@ -2007,9 +2008,10 @@ extern "C" void Slice_CB(int var){
     }
     break;
   case UPDATE_VECTOR:
-    if(SPINNER_plot3d_vectorpointsize!=NULL&&SPINNER_plot3d_vectorlinewidth!=NULL){
+    if(SPINNER_plot3d_vectorpointsize!=NULL&&SPINNER_plot3d_vectorlinewidth!=NULL&&SPINNER_plot3d_vectorlinelength!=NULL){
       SPINNER_plot3d_vectorpointsize->set_float_val(vectorpointsize);
       SPINNER_plot3d_vectorlinewidth->set_float_val(vectorlinewidth);
+      SPINNER_plot3d_vectorlinelength->set_float_val(vecfactor);
     }
     break;
   case FRAMELOADING:
@@ -2345,6 +2347,13 @@ extern "C" void hide_glui_bounds(void){
   if(glui_bounds!=NULL)glui_bounds->hide();
   showbounds_dialog_save=showbounds_dialog;
   showbounds_dialog=0;
+}
+
+/* ------------------ update_vector_widgets ------------------------ */
+
+extern "C" void update_vector_widgets(void){
+  PLOT3D_CB(UPDATE_VECTOR);
+  Slice_CB(UPDATE_VECTOR);
 }
 
 /* ------------------ update_plot3d_display ------------------------ */

@@ -379,8 +379,8 @@ SVEXTERN int which_face;
 SVEXTERN int showfontmenu;
 SVEXTERN int showlightmenu;
 
-SVEXTERN float VECFRACTION,vecfactor,veclength;
-SVEXTERN int iveclengths;
+SVEXTERN float SVDECL(vecfactor,1.0),SVDECL(veclength,0.0);
+SVEXTERN int SVDECL(iveclengths,0);
 
 SVEXTERN int glui_active;
 
@@ -615,10 +615,13 @@ SVEXTERN float clip_x_val, clip_y_val, clip_z_val;
 SVEXTERN float clip_X_val, clip_Y_val, clip_Z_val;
 SVEXTERN int stepclip_x,stepclip_y,stepclip_z;
 SVEXTERN int stepclip_X,stepclip_Y,stepclip_Z;
-SVEXTERN float partpointsize,vectorpointsize,streaklinewidth;
+SVEXTERN float partpointsize,SVDECL(vectorpointsize,2.0),streaklinewidth;
 SVEXTERN float isopointsize, isolinewidth;
 SVEXTERN float plot3dpointsize, plot3dlinewidth;
-SVEXTERN float vectorlinewidth;
+SVEXTERN float SVDECL(vectorlinewidth,1.0);
+SVEXTERN void update_vector_widgets(void);
+
+
 SVEXTERN float sprinklerabssize, sensorabssize, heatabssize;
 SVEXTERN float sensorrelsize,sensorrelsizeMIN;
 

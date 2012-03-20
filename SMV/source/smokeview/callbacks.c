@@ -692,7 +692,7 @@ float get_vecfactor(int *ivec){
   float vec;
   if(*ivec>NVECLENGTHS-1)*ivec=0;
   if(*ivec<0)*ivec=NVECLENGTHS-1;
-  vec=VECFRACTION*veclengths[*ivec];
+  vec=veclengths[*ivec];
   return vec;
 }
 
@@ -1114,6 +1114,8 @@ void keyboard_2(unsigned char key, int x, int y){
     else{
       iveclengths += FlowDir;
       vecfactor = get_vecfactor(&iveclengths);
+      update_vector_widgets();
+
       if(isZoneFireModel==1){
         if(iveclengths==0){
           zone_ventfactor=1.0;
