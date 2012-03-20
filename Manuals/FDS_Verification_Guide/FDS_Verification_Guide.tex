@@ -1591,7 +1591,7 @@ of loosely and densely packed radiating spheres.}
 
 \clearpage
 
-\section{Radiation Absorbed by Liquid Droplets (\texorpdfstring{{\bf droplet\_absorption}}{droplet\_absorption}) }
+\section{Radiation Absorbed by Particles (\texorpdfstring{{\bf droplet\_absorption}}{droplet\_absorption}) }
 \label{droplet_absorption}
 
 This case tests the conservation of energy that is absorbed by liquid droplets. We want to make sure that the
@@ -1618,6 +1618,19 @@ coordinate systems.
 \end{tabular*}
 \caption[Radiation absorption by liquid droplets]{Transfer of absorbed thermal radiation energy into increased average droplet temperature.}
 \label{droplet_absorption_figures}
+\end{figure}
+
+Similar test for droplets with surface in different geometries is tested. All the previously used values are the same, except the mass ($m_{cartesian} = 6.26\cdot 10^{-4}$~kg, $m_{cylindrical} = 1.96\cdot 10^{-3}$~kg, $m_{spherical} = 6.54\cdot 10^{-4}$~kg). It is also necessary to define a high thermal conductivity $k = 1\cdot 10^{9}$~W/m/K for the surface. Figure~\ref{droplet_absorption_surface_figures} shows comparisons of the predicted average droplet temperature and the expected value in cartesian coordinate system. The droplets have surface either in cartesian, cylindrical or spherical geometries. Splitting the radiation angles has been tested in x-, y- and z- directions (except for cartesian particles only in z-direction).
+
+\begin{figure}[h]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/droplet_absorption_cart_surf_cart} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/droplet_absorption_cart_surf_cyl}\\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/droplet_absorption_cart_surf_sph}
+\end{tabular*}
+\caption[Radiation absorbed by surface particles]{Transfer of absorbed thermal radiation energy into increased average droplet temperature with surface droplets.}
+\label{droplet_absorption_surface_figures}
 \end{figure}
 
 \clearpage
