@@ -1217,6 +1217,7 @@ void update_terrain_options(void){
 void update_mesh_terrain(void){
   int i;
 
+  if(nterraininfo<=0)return;
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
     mesh *meshj;
