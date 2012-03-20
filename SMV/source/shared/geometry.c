@@ -24,59 +24,8 @@ vertdata *get_other_vertex(tridata *tri, vertdata *vert1, vertdata *vert2){
   if(vert1==verts[1]&&vert2==verts[2]||vert1==verts[2]&&vert2==verts[1])return verts[0];
   return NULL;
 }
- 
-/* --------------------------  MakeVertRing ------------------------------------ */
 
-void MakeVertRing(vertdata *vert){
-  int i;
-  vertdata **vertring;
-  tridata *tri;
-  int nvertring;
-
-  if(vert->ntrifan==0)return;
-  NewMemory((void **)&vert->vertring,vert->ntrifan*sizeof(vertdata *));
-
-  for(i=0;i<vert->ntrifan;i++){
-    tridata *trii;
-
-    trii = vert->trifan[i];
-    trii->examined=0;
-  }
-  vertring=vert->vertring;
-  nvertring=0;
-  tri=vert->trifan[0];
-  tri->examined=1;
-  if(tri->verts[0]==vert){
-    vertring[nvertring++]=tri->verts[1];
-    vertring[nvertring++]=tri->verts[2];
-  }
-  else if(tri->verts[1]==vert){
-    vertring[nvertring++]=tri->verts[2];
-    vertring[nvertring++]=tri->verts[0];
-  }
-  else{
-    vertring[nvertring++]=tri->verts[0];
-    vertring[nvertring++]=tri->verts[1];
-  }
-  for(i=1;i<vert->ntrifan;i++){
-    int j;
-
-    for(j=1;j<vert->ntrifan;j++){
-      tridata *trij;
-      vertdata *other;
-
-      trij = vert->trifan[j];
-      if(trij->examined==1)continue;
-      other=get_other_vertex(trij,vert,vertring[nvertring-1]);
-      if(other==NULL)continue;
-      trij->examined=1;
-      vertring[nvertring++]=other;
-    }
-  }
-  vert->nvertring=nvertring;
-}
-
-/* ------------------ getVertInfo ------------------------ */
+/* ------------------ Insert_Edge ------------------------ */
 
 void Insert_Edge(edgedata *edges, int *nedges, vertdata *vert1, vertdata *vert2){
   vertdata *vertmin, *vertmax;
@@ -84,7 +33,7 @@ void Insert_Edge(edgedata *edges, int *nedges, vertdata *vert1, vertdata *vert2)
   int haveit=0;
 
   vertmin=vert1;
-  vertmax=vert2;
+  vertmax=vert1;
   if(vert2<vert1)vertmin=vert2;
   if(vert2>vert1)vertmax=vert2;
   for(i=0;i<*nedges;i++){
@@ -92,6 +41,9 @@ void Insert_Edge(edgedata *edges, int *nedges, vertdata *vert1, vertdata *vert2)
 
     edgei = edges+i;
     if(edgei->verts[0]==vertmin&&edgei->verts[1]==vertmax){
+      edgei->ntris++;
+      vertmin->nedges++;
+      vertmax->nedges++;
       haveit=1;
       break;
     }
@@ -102,7 +54,28 @@ void Insert_Edge(edgedata *edges, int *nedges, vertdata *vert1, vertdata *vert2)
     edgei = edges + *nedges;
     edgei->verts[0]=vertmin;
     edgei->verts[1]=vertmax;
+    vertmin->nedges=1;
+    vertmax->nedges=1;
+    edgei->ntris=1;
     (*nedges)++;
+  }
+}
+
+/* ------------------ InsertVert ------------------------ */
+
+void InsertVert(vertdata **verts, int *nverts,vertdata *vert){
+  int i;
+  int have_vert=0;
+
+  for(i=0;i<*nverts;i++){
+    if(verts[i]==vert){
+      have_vert=1;
+      break;
+    }
+  }
+  if(have_vert==1){
+    verts[i]=vert;
+    (*nverts)++;
   }
 }
 
@@ -115,8 +88,8 @@ void getVertInfo(geomdata *geom){
     vertdata *verti;
 
     verti = geom->verts+i;
-    verti->ntrifan=0;
-    verti->trifan=NULL;
+    verti->ntris=0;
+    verti->tris=NULL;
   }
   
   // count triangles connected to each vertex
@@ -126,19 +99,27 @@ void getVertInfo(geomdata *geom){
     int j;
 
     trii = geom->tris+i;
-    trii->verts[0]->ntrifan++;
-    trii->verts[1]->ntrifan++;
-    trii->verts[2]->ntrifan++;
+    trii->verts[0]->ntris++;
+    trii->verts[1]->ntris++;
+    trii->verts[2]->ntris++;
   }
+
+  // allocate memory for triangle pointers connected to vertices
+
   for(i=0;i<geom->nverts;i++){
     vertdata *verti;
 
     verti = geom->verts+i;
-    if(verti->ntrifan>0)NewMemory((void **)&verti->trifan,verti->ntrifan*sizeof(tridata *));
-    verti->ntrifan=0;
+    if(verti->ntris>0){
+      NewMemory((void **)&verti->tris,verti->ntris*sizeof(tridata *));
+      NewMemory((void **)&verti->verts,2*verti->ntris*sizeof(vertdata *));
+      NewMemory((void **)&verti->verts_temp,2*verti->ntris*sizeof(vertdata *));
+    }
+    verti->ntris=0;
+    verti->type=GEOM_INTERIOR;
   }
 
-  //  assign triangle connected to each vertex
+  //  associate triangles connected to each vertex
 
   for(i=0;i<geom->ntris;i++){
     tridata *trii;
@@ -147,19 +128,19 @@ void getVertInfo(geomdata *geom){
 
     trii = geom->tris+i;
     verti = trii->verts[0];
-    verti->trifan[verti->ntrifan++]=trii;
+    verti->tris[verti->ntris++]=trii;
     verti = trii->verts[1];
-    verti->trifan[verti->ntrifan++]=trii;
+    verti->tris[verti->ntris++]=trii;
     verti = trii->verts[2];
-    verti->trifan[verti->ntrifan++]=trii;
+    verti->tris[verti->ntris++]=trii;
   }
-  for(i=0;i<geom->nverts;i++){
-    vertdata *verti;
 
-    verti = geom->verts+i;
-    MakeVertRing(verti);  
-  }
+  // allocate memory for edges (at most 3 * number of triangles)
+
   if(geom->ntris>0)NewMemory((void **)&geom->edges,3*geom->ntris*sizeof(edgedata *));
+
+  // insert triangles edge pointers into edges data structure
+
   geom->nedges=0;
   for(i=0;i<geom->ntris;i++){
     tridata *tri;
@@ -170,16 +151,47 @@ void getVertInfo(geomdata *geom){
     Insert_Edge(geom->edges,&geom->nedges,tri->verts[2],tri->verts[0]);
   }
   if(geom->nedges>0)ResizeMemory((void **)&geom->edges,geom->nedges*sizeof(edgedata *));
+
+  // determine vertex type
+
+  //   interior: all connected edges are connected to exactly two triangles
+  //   exterior: at least one connected edge is connected to only one triangle and
+  //                    all other connected edges are connected to two triangles
+  //    complex: at least one edge is connected to more than two triangles
+
   for(i=0;i<geom->nedges;i++){
     edgedata *edgei;
+    vertdata *vert1,*vert2;
 
-    edgei = geom->edges+i;
-    edgei->ntris=0;
+    edgei = geom->edges + i;
+    vert1 = edgei->verts[0];
+    vert2 = edgei->verts[1];
+    if(edgei->ntris==1){
+      if(vert1->type==GEOM_INTERIOR)vert1->type=GEOM_EXTERIOR;
+      if(vert2->type==GEOM_INTERIOR)vert2->type=GEOM_EXTERIOR;
+    }
+    else if(edgei->ntris>2){
+      vert1->type=GEOM_COMPLEX;
+      vert2->type=GEOM_COMPLEX;
+    }
   }
-  for(i=0;i<geom->ntris;i++){
-    tridata *trii;
+
+  for(i=0;i<geom->nverts;i++){
+    int j;
+    vertdata *verti;
+
+    verti = geom->verts + i;
+    for(j=0;j<verti->ntris;j++){
+      tridata *trij;
+
+      trij = verti->tris[j];
+      if(trij->verts[0]!=verti)InsertVert(verti->verts_temp,&(verti->nverts),trij->verts[0]);
+      if(trij->verts[1]!=verti)InsertVert(verti->verts_temp,&(verti->nverts),trij->verts[1]);
+      if(trij->verts[2]!=verti)InsertVert(verti->verts_temp,&(verti->nverts),trij->verts[2]);
+    }
 
   }
+
 }
 /* ------------------ calcNormal3 ------------------------ */
 
@@ -231,18 +243,18 @@ void GetBestPlane(vertdata *vert){
     best_norm[i]=0.0;
     best_xyz[i]=0.0;
   }
-  for(i=0;i<vert->ntrifan;i++){
+  for(i=0;i<vert->ntris;i++){
     int j;
     tridata *tri;
 
-    tri = vert->trifan[i];
+    tri = vert->tris[i];
     for(j=0;j<3;j++){
       best_norm[j] += tri->area*tri->norm[j];
       best_xyz[j] += tri->area*tri->center[j];
     }
   }
   for(i=0;i<3;i++){
-    best_norm[i]/=vert->ntrifan;
-    best_xyz[i]/=vert->ntrifan;
+    best_norm[i]/=vert->ntris;
+    best_xyz[i]/=vert->ntris;
   }
 }

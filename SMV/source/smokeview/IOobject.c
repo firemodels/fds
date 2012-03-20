@@ -5163,7 +5163,7 @@ int read_object_defs(char *file){
   
   stream=fopen(file,"r");
   if(stream==NULL)return 0;
-  printf("Processing object file:  %s\n\n",file);
+  printf("Processing object file:  %s\n",file);
 
   firstdef=-1;
   buffer_ptr=NULL;
@@ -5330,6 +5330,7 @@ int read_object_defs(char *file){
       objecti=objecti->next;
     }
   }
+  printf("Object file processing complete\n\n");
   return ndevices;
 }
 

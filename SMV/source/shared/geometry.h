@@ -3,15 +3,19 @@
 // $Author$
 
 // svn revision character string
+#define GEOM_INTERIOR 0
+#define GEOM_EXTERIOR 1
+#define GEOM_COMPLEX 2
 
 /* --------------------------  vertdata ------------------------------------ */
 
 typedef struct _vertdata {
   float xyz[3];
-  int nvertring,ntrifan;
-  struct _vertdata **vertring;
-  struct _edgedata **edgering;
-  struct _tridata **trifan;
+  int nedges,nverts,ntris;
+  int type;
+  struct _vertdata **verts,**verts_temp;
+  struct _edgedata **edges;
+  struct _tridata **tris;
   float best_xyz[3], best_norm[3];
 } vertdata;
 
@@ -19,9 +23,7 @@ typedef struct _vertdata {
 
 typedef struct _edgedata {
   vertdata *verts[2];
-  struct _tridata **tris;
   int ntris;
-  float center[3];
 } edgedata;
 
 /* --------------------------  tridata ------------------------------------ */
