@@ -28,6 +28,11 @@ INTEGER, PARAMETER :: NO_MASS_FLUX=1,SPECIFIED_MASS_FRACTION=2,SPECIFIED_MASS_FL
                       INFLOW_OUTFLOW_MASS_FLUX=4                                            ! Mass transfer BC
 INTEGER, PARAMETER :: NULL_BOUNDARY=0,SOLID_BOUNDARY=1,OPEN_BOUNDARY=2,MIRROR_BOUNDARY=3, &
                       INTERPOLATED_BOUNDARY=6,PERIODIC_BOUNDARY=7                           ! Boundary Type
+INTEGER, PARAMETER :: FISHPAK_BC_PERIODIC=0, &                                              ! Fishpak (FFT Poisson solver)
+                      FISHPAK_BC_DIRICHLET_DIRICHLET=1, &
+                      FISHPAK_BC_DIRICHLET_NEUMANN=2, &
+                      FISHPAK_BC_NEUMANN_NEUMANN=3, &
+                      FISHPAK_BC_NEUMANN_DIRICHLET=4
 INTEGER, PARAMETER :: HVAC_BOUNDARY=42                      
 INTEGER, PARAMETER :: NULL_EDGE=0,SOLID_EDGE=1,OPEN_EDGE=2,MIRROR_EDGE=3,SMOOTH_EDGE=4, &
                       INTERPOLATED_EDGE=6,PERIODIC_EDGE=7                                   ! Edge Type
@@ -46,6 +51,7 @@ INTEGER :: FUEL_INDEX=0,O2_INDEX=0,N2_INDEX=0,H2O_INDEX=0,CO2_INDEX=0,CO_INDEX=0
            H2_INDEX=0,SOOT_INDEX=0,OTHER_INDEX=0,SM_FUEL_INDEX = 0                          ! Lumped Species Sub-species
 
 ! Species components used in FED calculations
+
 INTEGER :: HCN_INDEX=0,NO_INDEX=0,NO2_INDEX=0
 
 ! Program Status Code
