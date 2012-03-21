@@ -34,16 +34,22 @@ int get_tagindex(const particle *parti, part5data **data, int tagval);
 #define READPASS 1
 #define READFAIL 0
 
+#ifdef X64
+#define FSEEK(a,b,c) _fseeki64(a,b,c)
+#else
+#define FSEEK(a,b,c) fseek(a,b,c)
+#endif
+
 #define FORTPART5READ(var,size) \
 returncode=READPASS;\
-fseek(PART5FILE,4,SEEK_CUR);if(ferror(PART5FILE)==1||feof(PART5FILE)==1)returncode=READFAIL;\
+FSEEK(PART5FILE,4,SEEK_CUR);if(ferror(PART5FILE)==1||feof(PART5FILE)==1)returncode=READFAIL;\
 if(returncode==READPASS){\
   fread(var,4,size,PART5FILE);\
   if(ferror(PART5FILE)==1||feof(PART5FILE)==1)returncode=READFAIL;\
 }\
 if(returncode==READPASS){\
   if(endianswitch==1)endian_switch(var,size);\
-  fseek(PART5FILE,4,SEEK_CUR);\
+  FSEEK(PART5FILE,4,SEEK_CUR);\
   if(ferror(PART5FILE)==1||feof(PART5FILE)==1)returncode=READFAIL;\
 }
 
@@ -182,7 +188,7 @@ void getpart5data(particle *parti, int partframestep_local, int partpointstep_lo
   if(PART5FILE==NULL)return;
 
   *file_size=get_filesize(reg_file);
-  fseek(PART5FILE,4,SEEK_CUR);fread(&one,4,1,PART5FILE);fseek(PART5FILE,4,SEEK_CUR);
+  FSEEK(PART5FILE,4,SEEK_CUR);fread(&one,4,1,PART5FILE);FSEEK(PART5FILE,4,SEEK_CUR);
   if(one!=1)endianswitch=1;
 
   FORTPART5READ(&version,1);if(returncode==0)goto wrapup;
@@ -199,7 +205,7 @@ void getpart5data(particle *parti, int partframestep_local, int partpointstep_lo
     *numtypescopy++=numtypes_temp[0];
     *numtypescopy++=numtypes_temp[1];
     skip_local = 2*(numtypes_temp[0]+numtypes_temp[1])*(8 + 30);
-    returncode=fseek(PART5FILE,skip_local,SEEK_CUR);
+    returncode=FSEEK(PART5FILE,skip_local,SEEK_CUR);
     if(returncode!=0)goto wrapup;
   }
   CheckMemory;
@@ -228,6 +234,9 @@ void getpart5data(particle *parti, int partframestep_local, int partpointstep_lo
     if(doit==1){
       printf("particle time=%.2f",time_local);
       parti->times[count2]=time_local;
+      if(time_local>13.8){
+        printf("step before\n");
+      }
     }
     for(i=0;i<nclasses;i++){
       part5class *partclassi;
@@ -235,6 +244,7 @@ void getpart5data(particle *parti, int partframestep_local, int partpointstep_lo
 
       partclassi = parti->partclassptr[i];
       FORTPART5READ(&nparts,1);
+      printf("  nparts=%i\n",nparts);
       if(returncode==0)goto wrapup;
       numpoints[i]=nparts;
       skip_local=0;
@@ -337,7 +347,7 @@ void getpart5data(particle *parti, int partframestep_local, int partpointstep_lo
       
       returncode=0;
       if(skip_local>0){
-        returncode=fseek(PART5FILE,skip_local,SEEK_CUR);
+        returncode=FSEEK(PART5FILE,skip_local,SEEK_CUR);
         if(returncode!=0)goto wrapup;
       }
       CheckMemory;

@@ -2813,7 +2813,7 @@ void UpdateHiddenFaces(){
 
 
   updatehiddenfaces=0;
-  printf("  updating hidden faces - ");
+  printf("  updating hidden faces -");
   for(i=0;i<nmeshes;i++){
     int j;
     mesh *meshi;
@@ -2828,7 +2828,7 @@ void UpdateHiddenFaces(){
       facej->hidden=0;
 
     }
-    if(hide_overlaps==0)return;
+    if(hide_overlaps==0)continue;
     for(j=0;j<6*meshi->nbptrs;j++){
       int k;
       facedata *facej;
@@ -2849,6 +2849,7 @@ void UpdateHiddenFaces(){
       }
     }
   }
+  printf(" complete\n");
 }
 
 /* ------------------ allocate_faces ------------------------ */

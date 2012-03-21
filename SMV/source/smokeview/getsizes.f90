@@ -166,6 +166,8 @@ do i = 1, nclasses
 end do
 do
   read(lu20,iostat=error)time
+  	  write(6,10)time
+10    format("sizing particle time=",f9.2)
   if(error.ne.0)go to 999
   do i = 1, nclasses
     read(lu20,iostat=error)numpoints(i)
