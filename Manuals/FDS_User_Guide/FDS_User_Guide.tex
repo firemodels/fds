@@ -2159,56 +2159,6 @@ An example of an axially-symmetric helium plume is shown in Figure~\ref{helium_p
 \label{helium_plume}
 \end{figure}
 
-
-
-
-
-
-
-\subsection{Special Topic: Stack Effect}
-\label{info:stackeffect}
-
-Tall buildings often experience buoyancy-induced air movement due to temperature differences
-between inside and outside, known as {\em stack effect}. To simulate this phenomenon in FDS, you must
-include the entire building, or a substantial fraction of it, both inside and out, in the computational domain. It
-is important to capture the pressure and density decrease in the atmosphere based on the specified
-temperature {\ct LAPSE\_RATE} ($^\circ$C/m) that is entered on the {\ct MISC} line. Experiment with different meshing
-strategies before including any fire or HVAC functionality. Slowly build in complexity.
-
-\subsubsection{Example Case: Atmospheric\_Effects/stack\_effect}
-
-If the interior and exterior temperatures of a tall building are not the same, upward or downward air flows within shafts
-or stairwells connected to the ambient via leakage paths can occur.
-This phenomena is known as the {\em stack effect}.  The {\ct stack\_effect} test case
-is a two-dimensional simulation of a 100~m tall building with an interior temperature, $T_b$, initially set to 20~$^\circ$C, and an exterior temperature, $T_\infty$, set to 
-10~$^\circ$C. The {\ct LAPSE\_RATE} is set to 0~$^\circ$C/m; thus, $T_0(z)=T_\infty$ outside the building and $T_0(z)=T_b$ inside the building. Two small leakage openings are defined 2.5~m above the ground floor and 2.5~m below the roof using the HVAC solver.  Each opening is given an area of 0.01~m$^2$ and a flow loss of 2.
-The initial density stratification inside and outside the building can be calculated using the relation:
-\be
-   \frac{\rho_0(z)}{\rho_\infty} = \exp \left(- \frac{g \overline{W}}{{\cal R} T_0} z \right)
-\ee
-where $\cal R$ is the universal gas constant, $g$ is the acceleration of gravity, and $\overline{W}$ is the average molecular weight of the air.
-Applying this formula to the external and internal locations at the lower and upper vents results in densities of 1.2412, 1.1989, 1.2272, and
-1.1857~kg/m$^3$, respectively.  FDS computes the same values to within machine precision.  
-
-Since the openings in the building are equally spaced over
-its height, the neutral plane should be close to its midpoint.
-The pressure difference across the building's wall can be computed
-\be
-   \Delta p = \frac{\overline{W} \, p_0(z) \, g \, h} {\cal R} \left( \frac{1}{T_\infty} - \frac{1}{T_b} \right) 
-\ee
-where $h$ is the distance from the neutral plane.  Using this pressure difference in
-Bernoulli's equation with a discharge coefficient of 0.707 (equivalent to the sum of an entrance loss of 1 and an exit loss of 1) results in a velocity equation for both the top and the bottom vent.  The neutral plane is located where the velocities result in a balanced mass flow and is given by
-\be \frac{H}{h} = 1 + \frac{T_\infty}{T_b} \ee
-where $h$ is the neutral plane height above the lower vent and $H$ is the height between the vents.  This gives a neutral plane of 46.79~m above the lower vent.  This is a neutral plane at 49.18~m.  Using the neutral plane location to determine the pressure differences at the vents, the inflow velocity at the bottom is 4.0~m/s and an outflow velocity at the top is~4.1 m/s.  Results are shown in Figure~\ref{stack_effect}.
-
-\begin{figure}[ht]
-\begin{center}
-\includegraphics[width=3.1in]{SCRIPT_FIGURES/stack_effect.pdf}
-\end{center}
-\caption[Output of {\bf stack\_effect} test case.]{Output of {\bf stack\_effect} test case. }
-\label{stack_effect}
-\end{figure}
-
 \subsection{Special Topic: Large Eddy Simulation Parameters}
 \label{info:LES}
 
@@ -4860,23 +4810,28 @@ A typical input line specifying a duct is as follows:
 \footnotesize
 \begin{verbatim}
 &HVAC TYPE_ID='DUCT', ID='ductname', NODE_ID='node 1','node 2', AREA=3.14,
-      LOSS=1.,1., ROUGHNESS=0.001, FAN='FAN_ID', DEVC_ID='DEVCname' /
+      LOSS=1.,1., ROUGHNESS=0.001, FAN_ID='fan 1', DEVC_ID='device 1' /
 \end{verbatim}\normalsize
 
-\begin{description}
-\item[{\ct AIRCOIL\_ID}] is the {\ct ID} of an aircoil located in the duct.
-\item[{\ct AREA}] is the cross sectional area of the duct in m$^2$. {\ct DIAMETER} (m) can be used instead.
-\item[{\ct DEVC\_ID}]  is the {\ct ID} of a {\ct DEVC} for a damper or fan in the duct. {\ct CTRL\_ID} can be used instead.
-\item[{\ct FAN\_ID}] is the {\ct ID} of a fan located in the duct. Instead of
-specifying a {\ct FAN\_ID}, you could specify the {\ct VOLUME\_FLOW} rate (m$^3$/s) through the duct. If you specify {\ct VOLUME\_FLOW}, you can change its value in time either using the characteristic time, {\ct TAU\_VF},  to define a tanh ({\ct TAU\_VF} > 0) or t$^2$ ramp ({\ct TAU\_VF} < 0); or you can specify a {\ct RAMP\_ID}.
+All possible duct inputs are  given below:
 
-As an alternative to a fan, you can specify the logical parameter {\ct DAMPER} indicating the presence of a damper in the duct.  The state of the damper is controlled by
-the function named by {\ct CTRL\_ID} or {\ct DEVC\_ID}.  {\ct DAMPER} cannot be used with a {\ct FAN\_ID} in a single duct.
+\begin{description}
+\item[{\ct AIRCOIL\_ID}] is the {\ct ID} of an aircoil located in the duct.  The operation of the aircoil can be controlled by either a device or a control function.  
+\item[{\ct AREA}] is the cross sectional area of the duct in m$^2$. {\ct DIAMETER} (m) can be used instead.
+\item[{\ct CTRL\_ID] is the {\ct ID} for a {\ct CTRL} for a damper, fan, or aircoil in the duct.
+\item[{\ct DAMPER}] is a logical parameter indicating the presence of a damper in the duct.   The state of the damper is controlled by either a device or a control function. 
+\item[{\ct DEVC\_ID}]  is the {\ct ID} of a {\ct DEVC} for a damper, fan, or aircoil in the duct. 
+\item[{\ct FAN\_ID}] is the {\ct ID} of a fan located in the duct. Instead of
+specifying a {\ct FAN\_ID}, you could specify the {\ct VOLUME\_FLOW} rate (m$^3$/s) through the duct. If you specify {\ct VOLUME\_FLOW}, you can change its value in time either using the characteristic time, {\ct TAU\_VF},  to define a tanh ({\ct TAU\_VF} > 0) or t$^2$ ramp ({\ct TAU\_VF} < 0); or you can specify a {\ct RAMP\_ID}.  The operation of the fan can be controlled by either a device or a control function.
 \item[{\ct LOSS}] is a pair of real numbers giving the forward and reverse flow loss in the duct.  Forward is flow from the first node listed in {\ct NODE\_ID} to the second node listed in {\ct NODE\_ID}.
 \item[{\ct NODE\_ID}] gives the {\ct ID}s of the nodes on either end of the duct segment.  Positive velocity in a duct is defined as flow from the first node to second node.
 {\ct REVERSE}  is a logical parameter that when {\ct .TRUE.} indicates that the specified {\ct FAN\_ID} or {\ct VOLUME\_FLOW} blows from the second node to the first.
-\item[{\ct ROUGHNESS}]  is the absolute roughness in m of the duct that is used to compute the friction factor for the duct.
+\item[{\ct ROUGHNESS}] is the absolute roughness in m of the duct that is used to compute the friction factor for the duct.
 \end{description}
+
+\noindent
+Note that only one of {\ct AIRCOIL\_ID}, {\ct DAMPER\_ID}, or {\ct FAN\_ID} should be specified for a duct.
+
 To reduce the computational cost of the HVAC solver, a duct should be considered as any length of duct that connects two items that must be defined as nodes ({\em i.e.} a connection to the FDS domain, a filter, or a location where more than two ducts join).  That is a duct should be considered as any portion of the HVAC system where flow can only be in one direction.  For example the top of Figure~\ref{fig:HVAC_Simplify} shows a segment of an HVAC system where flow from a tee goes through an expansion fitting, two elbows, an expansion fitting, and a straight length of duct before it terminates as a connection to the FDS domain.  This could be input as each individual fitting or duct with its associated area and loss as shown in the middle of the figure; however, this would result in five duct segments (one for each component) with six node connections resulting in eleven parameters (five velocities and six pressures) which must be solved for.  This is not needed since whatever the flow rate is in any one segment of the duct, that same flow rate exists in all other segments and, thus, the velocities in any segment can be found by taking the area ratios, $v_1/v_2=A_2/A_1$.  Since flow losses are proportional to the square of the velocity, an equivalent duct can be constructed using the total length of the duct, a representative area or diameter.  The pressure losses associated with all the segments of the duct can be collapsed in to in single loss by summing all of the fitting, $K$, losses through the duct as follows:
 \be K_{eff} = \sum_i {K_i \frac {A_{eff}}{A_i}} \ee
 where $i$ is a fitting, $j$ is a duct segment, and $A$ is the area of the duct or fitting.
@@ -4891,11 +4846,19 @@ where $i$ is a fitting, $j$ is a duct segment, and $A$ is the area of the duct o
 \subsection{HVAC Node Parameters}
 \label{info:HVACnode}
 
+Below are three example duct node inputs representing a typical tee-type connection (mutiple ducts being joined), a connection to the FDS domain, and a connection to the ambeint outside the FDS domain.
 \footnotesize
+
 \begin{verbatim}
-&HVAC TYPE_ID='NODE', ID='nodename', DUCT_ID='duct 1','duct 2',..'duct n', VENT_ID='vent',
-      LOSS_ARRAY=lossarray, AMBIENT=.FALSE., XYZ=x,y,z /
+&HVAC TYPE_ID='NODE', ID='tee', DUCT_ID='duct 1','duct 2',..'duct n', 
+      LOSS_ARRAY=lossarray, XYZ=x,y,z /
+&HVAC TYPE_ID='NODE', ID='FDS connection', DUCT_ID='duct 1', VENT_ID='vent',
+      LOSS_ARRAY=enter,exit /
+&HVAC TYPE_ID='NODE', ID='ambient', DUCT_ID='duct 1', LOSS_ARRAY=enter,exit,
+      XYZ=x,y,z /
 \end{verbatim}\normalsize
+
+All possible duct node inputs are given below.
 
 \begin{description}
 \item[{\ct AMBIENT}] is a logical value.  If {\ct .TRUE.}, then the node is connected to the ambient ({\em i.e.} it is equivalent to the {\ct OPEN} boundary condition on a {\ct SURF} line).
@@ -4907,17 +4870,23 @@ where $i$ is a fitting, $j$ is a duct segment, and $A$ is the area of the duct o
 If the node is connected to the FDS domain, then do not specify {\ct XYZ}.  FDS will compute it as the centroid of the {\ct VENT}.
 \end{description}
 
+\noindent
 A duct node must either have two or more ducts attached to it or it must have either {\ct AMBIENT = .TRUE.} or a {\ct VENT\_ID} specified.  When defining a {\ct VENT} as a component of an HVAC system you must set {\ct SURF\_ID = 'HVAC'} and you must set the {\ct ID} for the {\ct VENT}.  Note that you cannot give more than one  {\ct VENT} the same {\ct ID}.
 
 \subsection{HVAC Fan Parameters}
 \label{info:HVACfan}
+
+Below are given sample inputs for the three types of fans supported by FDS.
+
 \footnotesize
 \begin{verbatim}
-&HVAC TYPE='FAN', ID='fanname', RAMP_ID='rampname',  DEVC_ID='devicename',
-      CTRL_ID='ctrlname', VOLUME_FLOW=volumeflow, MAX_FLOW=maxflow,
-      MAX_PRESSURE=maxpressure, LOSS=offloss /
+&HVAC TYPE='FAN', ID='constant volume', DEVC_ID='device 1', VOLUME_FLOW=1.0, LOSS=2./
+&HVAC TYPE='FAN', ID='quadratic', DEVC_ID='device 1',
+      MAX_FLOW=1., MAX_PRESSURE=1000., LOSS=2. /
+&HVAC TYPE='FAN', ID='user fan curve', RAMP_ID='fan curve',  DEVC_ID='device 1', LOSS=2. /
 \end{verbatim}\normalsize
 
+All fan inputs are described below.
 
 \begin{description}
 \item[{\ct CTRL\_ID}] Name of a control function controlling the operation of the fan.
@@ -4925,7 +4894,8 @@ A duct node must either have two or more ducts attached to it or it must have ei
 \item[{\ct LOSS}] is the flow loss through the fan when it is not operational.
 \item[{\ct MAX\_FLOW}] is the maximum volumetric flow of the fan in m$^3$/s.  This input activates a quadratic fan model.
 \item[{\ct MAX\_PRESSURE}] is the stall pressure of the fan in Pa.  This input activates a quadratic fan model.
-\item[{\ct RAMP\_ID}] identifies the {\ct RAMP} that contains a table of pressure drop across the fan (Pa) versus the volumetric flow rates (m$^3$/s) .
+\item[{\ct RAMP\_ID}] identifies the {\ct RAMP} that contains a table of pressure drop across the fan (Pa) versus the volumetric flow rates (m$^3$/s) for a user defined fan curve or is an
+optional table of time versus volumetric flow rates (m$^3$/s) for a constant volume fan. 
 \item[{\ct TAU\_FAN}]  defines a tanh ({\ct TAU\_FAN} > 0) or t$^2$ ramp ({\ct TAU\_FAN} < 0) for the fan.  This is applied to the flowrate computed by any of the three types (constant flow, quadratic, or user defined ramp) of fans.
 \item[{\ct VOLUME\_FLOW}] is the fixed volumetric flow of the fan (m$^3$/s).
 \end{description}
@@ -5049,35 +5019,42 @@ fan itself can be positioned about halfway along the passage.
 
 \subsection{HVAC Filter Parameters}
 \label{info:HVACfilter}
+
+A sample input for a filter is given below.
+
 \footnotesize
 \begin{verbatim}
-&HVAC TYPE='FILTER', ID='filtername', LOADING=initial loading, SPEC_ID='speciesname',
-      EFFICIENCY=species filtering efficiency, MULTIPLIER=multiplier for species loading,
-      CLEAN_LOSS=clean flow loss, RAMP_ID='rampname', LOSS=loading loss/
+&HVAC TYPE='FILTER', ID='filter 1', LOADING=0., SPEC_ID='SOOT',
+      EFFICIENCY=0.99, MULTIPLIER=1,CLEAN_LOSS=2., LOSS=100./
 \end{verbatim}\normalsize
 
+All possible filter inputs are discussed below.
 
 \begin{description}
 \item[{\ct CLEAN\_LOSS}] is the flow loss through the filter when it is new (zero loading).
-\item[{\ct EFFICIENCY}] is an array of the species removal efficiency from 0 to 1 where 0 is no removal of that species and 1 is complete filtration of the species.
-\item[{\ct LOADING}] The initial loading (kg) of the filter
+\item[{\ct EFFICIENCY}] is an array of the species removal efficiency from 0 to 1 where 0 is no removal of that species and 1 is complete filtration of the species.  The species are identified using {\ct SPEC\_ID}
+\item[{\ct LOADING}] An array of the initial loading (kg) of the filter for each species being filtered.
 \item[{\ct LOSS}] Invokes a linear flow loss model where the flow loss is given as a linear function of the total loading, $K_{filter}=K_{CLEAN\_LOSS}+K_{LOSS} \sum \left( L_i M_i \right)$, where L$_i$ is the species loading and M$_i$ is a multiplier.  Only one of {\ct LOSS} or {\ct RAMP\_ID} should be specified.
 \item[{\ct MULTIPLIER}] is an array of the species multiplier, M$_i$, used in computing the total filter loading when computing loss.
 \item[{\ct RAMP\_ID}] identifies the {\ct RAMP} that contains a table of pressure drop across the filter as a function of total loading (see summation in {\ct LOSS}.   Only one of {\ct LOSS} or {\ct RAMP\_ID} should be specified.
 \item[{\ct SPEC\_ID}] identifies the tracked species for the inputs of {\ct MULTIPLIER} and {\ct LOADING}.
 \end{description}
 
+\noindent
+Note that a filter input refers to a class of aircoils and that multiple ducts can reference the same filter definition.
+
 \subsection{HVAC Aircoil Parameters}
 \label{info:HVACaircoil}
 \footnotesize
+
+An aircoil refers to a device that either adds or removes heat from air flowing through a duct.  In a typical HVAC system this is done by blowing the air over a heat exchanger (hence the term aircoil) containing a working fluid such as chilled water or a refrigerant.  A sample input is provided below.
+
 \begin{verbatim}
-&HVAC TYPE='AIRCOIL', ID='aircoilname', DEVC_ID='devicename', CTRL_ID='ctrlname',
-      EFFICIENCY=aircoil efficiency, FIXED_Q=fixed heat exchange,
-      COOLANT_CP=working fluid specific heat,
-      COOLANT_TEMPERATURE= working fluid inlet temperature,
-      COOLANT_MDOT=working fluid flow rate/
+&HVAC TYPE='AIRCOIL', ID='aircoil 1', DEVC_ID='device 1', EFFICIENCY=0.5,
+      COOLANT_CP=4.186, COOLANT_TEMPERATURE= 10., COOLANT_MDOT= 1./
 \end{verbatim}\normalsize
 
+All possible aircoil inputs are shown below.
 
 \begin{description}
 \item[{\ct COOLANT\_CP}] The specific heat (kJ/kg/K) of the working fluid.
@@ -5089,13 +5066,17 @@ fan itself can be positioned about halfway along the passage.
 \item[{\ct FIXED\_Q}] Constant heat exchange rate.  Negative is heat removal from the duct.
 \end{description}
 
-Either {\ct FIXED\_Q} or the set {\ct COOLANT\_CP}, {\ct COOLANT\_MDOT}, {\ct COOLANT\_TEMPERATURE}, and {\ct EFFICIENCY} should be specified.  In the later case the heat exchange is computed as:
+\noindent
+Note that either {\ct FIXED\_Q} or the set {\ct COOLANT\_CP}, {\ct COOLANT\_MDOT}, {\ct COOLANT\_TEMPERATURE}, and {\ct EFFICIENCY} should be specified.  In the later case the heat exchange is computed as:
 
 \be T_{fluid,out}=\frac{c_{p,gas} u_{duct} A_{duct} \rho_{duct} T_{duct,in} + c_{p,fluid} \dm_{fluid} T_{fluid,in}}{c_{p,gas} u_{duct} A_{duct} \rho_{duct} + c_{p,fluid} \dm_{fluid}}
 \ee
 
 \be \dq_{coil}=\eta  c_{p,fluid} \dm_{fluid} \left( T_{fluid,in} - T_{fluid,out} \right)
 \ee
+
+\noindent
+Note that an aircoil input refers to a class of aircoils and that multiple ducts can reference the same aircoil definition.
 
 \subsection{Louvered HVAC Vents}
 \label{info:HVAClouvers}
@@ -5267,6 +5248,57 @@ leakage over these areas. The order of the two pressure zones designated by {\ct
 The HVAC output quantities can be used to determine the leakage flows.  FDS give the duct connecting Zone A with Zone B the name {\ct 'LEAK A B'} and the duct nodes will be named {\ct 'LEAK A B'} for the Zone A side of the leak and {\ct 'LEAK B A'} for the Zone B side of the leak.  Note that for the duct names, FDS will use the lower numbered zone as Zone A.
 
 \clearpage
+
+\subsection{Special Topic: Stack Effect}
+\label{info:stackeffect}
+
+Tall buildings often experience buoyancy-induced air movement due to temperature differences
+between inside and outside, known as {\em stack effect}. The different temperatures result in different densities and hence different pressure gradients inside the building comparted to outside the building.  This can result in inducing flow in vertical shafts (stairwells, atriums, elevator shafts, etc.) through leakage paths or openings at the top and bottom of the building.  To simulate this phenomenon in FDS, you must
+include the entire building, or a substantial fraction of it, both inside and out, in the computational domain. It
+is important to capture the pressure and density decrease in the atmosphere based on the specified
+temperature {\ct LAPSE\_RATE} ($^\circ$C/m) that is entered on the {\ct MISC} line. 
+
+For the case where the stack flow is through small leakage paths, it is recommended to define the building using a pressure {\ct ZONE}.  The leakage paths can then be defined as individual HVAC systems.  Note that the leakage model would aggregate all leaky surfaces over the entire height of the building and as a result average out the pressure gradients.  For doing stack effect calculations individual leakage paths should be defined. In the section that follows is a simple example.
+
+\subsubsection{Example Case: Atmospheric\_Effects/stack\_effect}
+
+This subsection contains a simple example demonstrating the stack effect.  A detailed discussion of the stack effect can be found in \cite{Klote_Milke}.
+
+The {\ct stack\_effect} test case is a two-dimensional simulation of a building with an interior hotter than the exterior and two leakage paths at the top and the bottom of the building.  Since the inside is hotter, it will have a smaller pressure gradient than the outside resulting in higher pressure inside the top of the buiding than the outside.  This will cause flow out the upper leakage path and in the bottom leakage path.
+
+The building 100~m tall building with an interior temperature, $T_b$, initially set to 20~$^\circ$C, and an exterior temperature, $T_\infty$, set to 
+10~$^\circ$C. The {\ct LAPSE\_RATE} is set to 0~$^\circ$C/m; thus, $T_0(z)=T_\infty$ outside the building and $T_0(z)=T_b$ inside the building. Two small leakage openings are defined 2.5~m above the ground floor and 2.5~m below the roof using the HVAC solver.  Each opening is given an area of 0.01~m$^2$ and a flow loss of 2 (e.g. an entrance loss into the leak path of 1 and and exit loss out of the leak path of 1 both of which represent a sharp edge opening).
+
+The initial density stratification inside and outside the building can be calculated using the relation:
+\be
+   \frac{\rho_0(z)}{\rho_\infty} = \exp \left(- \frac{g \overline{W}}{{\cal R} T_0} z \right)
+\ee
+
+where $\cal R$ is the universal gas constant, $g$ is the acceleration of gravity, and $\overline{W}$ is the average molecular weight of the air, $z$ is the height above the {\ct GROUND\_LEVEL}, and $T_0$ is the ambient temperature.
+Applying this formula to the external and internal locations at the lower and upper vents results in densities of 1.2412, 1.1989, 1.2272, and
+1.1858~kg/m$^3$, respectively.  
+
+Since the openings in the building are equally spaced over its height, the neutral plane should be close to its midpoint. By making some simple assumptions including using only the ground level ambient pressure for the equation of state and that the densities are constant with height, a hand calculation can be done to determine the flows through the leakage paths.  Note that in actuality both pressure and desnsity will change with height; however, as seen in the above densities, this changes are small.
+
+The pressure difference across the building's wall can be computed as
+\be
+   \Delta p = \frac{\overline{W} \, p_0(z) \, g \, h} {\cal R} \left( \frac{1}{T_\infty} - \frac{1}{T_b} \right) 
+\ee
+where $h$ is the distance from the neutral plane.  The pressure gradient will cause flow in and out of the leaks and the neutral plane is located where the mass flows in and out are balanced.  This can be computed using:
+
+\be \frac{H}{H_n} = 1 + \frac{T_\infty}{T_b} \ee
+where $H_n$ is the neutral plane height above the bottom of the shaft and $H$ is the height between the vents.  This gives a neutral plane of 46.79~m and pressure differences of 44.3 Pa and 50.7 Pa at the top and bottom of the vent.  Using the loss of 2 and the pressure difference in the HVAC momentum equation results in an steady-state velocity of inflow velocity at the bottom is 3.85~m/s and an outflow velocity at the top is~4.21 m/s.  
+
+Results for velocity and density are shown in Figure~\ref{fig_stack_effect}.
+
+\begin{figure}[t]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \scalebox{1}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/stack_effect_v.pdf} } &
+      \scalebox{1}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/stack_effect_rho.pdf} }
+   \end{tabular*}
+   \caption[Stack effect]{(Left) Velocity at the upper and lower vents for the stack\_effect case.  (Right) Upper and lower exterior and interior densities for the stack\_effect case.}
+   \label{fig_stack_effect}
+\end{figure}
 
 \section{Special Topic: Pressure Boundary Conditions}
 \label{info:pressure_boundary}
