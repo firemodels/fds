@@ -2813,7 +2813,7 @@ void UpdateHiddenFaces(){
 
 
   updatehiddenfaces=0;
-  printf("  updating hidden faces -");
+  if(hide_overlaps!=0)printf("  identifying hidden faces -");
   for(i=0;i<nmeshes;i++){
     int j;
     mesh *meshi;
@@ -2849,7 +2849,7 @@ void UpdateHiddenFaces(){
       }
     }
   }
-  printf(" complete\n");
+  if(hide_overlaps!=0)printf(" complete\n");
 }
 
 /* ------------------ allocate_faces ------------------------ */
