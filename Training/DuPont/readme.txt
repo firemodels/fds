@@ -11,5 +11,14 @@ HEAT_OF_REACTION = -361000.)
 HEAT_OF_REACTION = -361000.)
 *_08- 1cm grid, 20% Moisture, 700 C TMP_INNER Panel (Hot Surroundings, 
 HEAT_OF_REACTION = -361000.)
+*_10 = 2 cm grid, 20% Moisture, No panel, Calibration with 1000 C panel initial
+*_11 = 1 cm grid, 20% Moisture, No panel, Calibration with 1000 C panel initial
+
+*_12 - 2 cm grid, 00% Moisture, 550 C Panel (HEAT_OF_REACTION = -361000.)
+*_13 - 2 cm grid, 05% Moisture, 550 C Panel (HEAT_OF_REACTION = -361000.)
+*_14 - 2 cm grid, 10% Moisture, 550 C Panel (HEAT_OF_REACTION = -361000.)
+*_15 - 2 cm grid, 15% Moisture, 550 C Panel (HEAT_OF_REACTION = -361000.)
+*_16 - 2 cm grid, 20% Moisture, 550 C Panel (HEAT_OF_REACTION = -361000.)
+*_17 - 2 cm grid, 25% Moisture, 550 C Panel (HEAT_OF_REACTION = -361000.)
 
 
