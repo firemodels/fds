@@ -21,7 +21,7 @@ char CNVplot3d_revision[]="$Revision$";
 #define FORTgetplot3dq getplot3dq
 #endif
 
-STDCALL FORTgetplot3dq(char *qfilename, int *nx, int *ny, int *nz, float *qq, int *error, int *endian, int *isotest, FILE_SIZE filelen);
+STDCALLF FORTgetplot3dq(char *qfilename, int *nx, int *ny, int *nz, float *qq, int *error, int *endian, int *isotest, FILE_SIZE filelen);
 
 /* ------------------ convert_plot3d ------------------------ */
 
