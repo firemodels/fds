@@ -78,6 +78,11 @@ no_target:
 
 # ********  rules for each platform supported *************
 
+
+# VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+# VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV  Windows VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+# VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+
 # ------------- ms_win_32 ----------------
 
 ms_win_32 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
@@ -95,9 +100,20 @@ ms_win_32 : exe       = smokeview_win_32
 ms_win_32 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WINLIBS) $(SMVLIBS)
 
-# VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-# VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV  Windows VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-# VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+# ------------- gcc_win_32 ----------------
+
+gcc_win_32 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
+gcc_win_32 : IMAGELIBDIR = $(LIB_DIR)/lib_win_intel_32
+gcc_win_32 : SMVLIBS = $(IMAGELIBDIR)\pthreadVC.lib $(IMAGELIBDIR)\glui.lib $(IMAGELIBDIR)\glut32.lib $(IMAGELIBDIR)\gd.lib $(IMAGELIBDIR)\jpeg.lib $(IMAGELIBDIR)\png.lib $(IMAGELIBDIR)\zlib.lib
+gcc_win_32 : FFLAGS    = -O2 -m32 -D pp_noappend -ffree-form
+gcc_win_32 : CFLAGS    = -O2 -m32 -D WIN32
+gcc_win_32 : CC        = gcc
+gcc_win_32 : CPP       = g++
+gcc_win_32 : FC        = gfortran
+gcc_win_32 : exe       = smokeview_win_32
+
+gcc_win_32 : $(obj)
+	$(CPP) -m32 -o $(bin)/$(exe) $(obj) $(SMVLIBS)
 
 # ------------- intel_win_32 ----------------
 
@@ -114,7 +130,7 @@ intel_win_32 : FC        = ifort
 intel_win_32 : exe       = smokeview_win_32
 
 intel_win_32 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WINLIBS) $(SMVLIBS)
+	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WINLIBS) $(SMVLIBS) opengl32.lib
 
 # ------------- intel_win_test_32 ----------------
 
