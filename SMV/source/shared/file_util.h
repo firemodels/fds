@@ -12,6 +12,16 @@ typedef struct {
   int type;
 } filelistdata;
 
+#ifdef BIT64
+#ifdef X64
+#define FSEEK(a,b,c) _fseeki64(a,b,c)
+#else
+#define FSEEK(a,b,c) fseeko(a,b,c)
+#endif
+#else
+#define FSEEK(a,b,c) fseek(a,b,c)
+#endif
+
 EXTERNCPP void getfilesizelabel(int size, char *sizelabel);
 EXTERNCPP void filecopy(char *destdir, char *file, char *filebase);
 EXTERNCPP void copyfile(char *destfile, char *sourcefile);
