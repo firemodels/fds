@@ -1,3 +1,7 @@
+# $Date$ 
+# $Revision$
+# $Author$
+
 #*** Smokeview, Version 5, Makefile ***
 
 #To use this Makefile, you will need to provide a make target at the command line.
