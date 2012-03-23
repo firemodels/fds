@@ -210,7 +210,7 @@ int convert_plot3d(plot3d *plot3di){
   FREEMEMORY(plot3dframe_uncompressed);
 
   fclose(PLOT3DFILE);
-  fseek(plot3dstream,4,SEEK_SET);
+  FSEEK(plot3dstream,4,SEEK_SET);
   fwrite(&one,4,1,plot3dstream);  // write completion code
   fclose(plot3dstream);
 

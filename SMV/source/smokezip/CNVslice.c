@@ -18,10 +18,10 @@ char CNVslice_revision[]="$Revision$";
 
 void mt_update_slice_hist(void);
 
-#define FORTSLICEREAD(var,size) fseek(SLICEFILE,4,SEEK_CUR);\
+#define FORTSLICEREAD(var,size) FSEEK(SLICEFILE,4,SEEK_CUR);\
                            returncode=fread(var,4,size,SLICEFILE);\
                            if(endianswitch==1)endian_switch(var,size);\
-                           fseek(SLICEFILE,4,SEEK_CUR)
+                           FSEEK(SLICEFILE,4,SEEK_CUR)
 
 /* ------------------ convert_volslice ------------------------ */
 
@@ -127,7 +127,7 @@ int convert_volslice(slice *slicei, int *thread_index){
     int skip;
 
     skip = 3*(4+30+4);  // skip over 3 records each containing a 30 byte FORTRAN character string
-    returncode=fseek(SLICEFILE,skip,SEEK_CUR);
+    returncode=FSEEK(SLICEFILE,skip,SEEK_CUR);
     sizebefore=skip;
   }
 
@@ -232,7 +232,7 @@ int convert_volslice(slice *slicei, int *thread_index){
   {
     int completion=1;
 
-    fseek(slicestream,4,SEEK_SET);    
+    FSEEK(slicestream,4,SEEK_SET);    
     fwrite(&completion,4,1,slicestream);
   }
   fclose(SLICEFILE);
@@ -527,7 +527,7 @@ int convert_slice(slice *slicei, int *thread_index){
     int skip;
 
     skip = 3*(4+30+4);  // skip over 3 records each containing a 30 byte FORTRAN character string
-    returncode=fseek(SLICEFILE,skip,SEEK_CUR);
+    returncode=FSEEK(SLICEFILE,skip,SEEK_CUR);
     sizebefore=skip;
   }
 
@@ -691,7 +691,7 @@ wrapup:
   FREEMEMORY(sliceframe_uncompressed_rle);
 
   fclose(SLICEFILE);
-  fseek(slicestream,4,SEEK_SET);
+  FSEEK(slicestream,4,SEEK_SET);
   fwrite(&one,4,1,slicestream);  // write completion code
   fclose(slicestream);
   fclose(slicesizestream);
@@ -1023,10 +1023,10 @@ void getsliceparms_c(char *file, int *ni, int *nj, int *nk){
     if(stream==NULL)return;
 
     skip = 3*(4+30+4);  // skip over 3 records each containing a 30 byte FORTRAN character string
-    fseek(stream,skip,SEEK_CUR);
+    FSEEK(stream,skip,SEEK_CUR);
 
     skip=4;
-    fseek(stream,skip,SEEK_CUR);
+    FSEEK(stream,skip,SEEK_CUR);
     fread(ijkbar,sizeof(int),6,stream);
     *ni=ijkbar[1]+1-ijkbar[0];
     *nj=ijkbar[3]+1-ijkbar[2];
