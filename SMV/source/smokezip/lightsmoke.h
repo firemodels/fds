@@ -1,6 +1,6 @@
-// $Date: 2011-05-01 14:44:51 -0400 (Sun, 01 May 2011) $ 
-// $Revision: 8236 $
-// $Author: gforney $
+// $Date$ 
+// $Revision$
+// $Author$
 
 #ifndef LIGHTSMOKE_H_DEFINED
 #define LIGHTSMOKE_H_DEFINED
