@@ -115,6 +115,12 @@ $RUNFDS Pyrolysis surf_mass_vent_nonchar_cyl_fuel
 $RUNFDS Pyrolysis surf_mass_vent_nonchar_cyl_gas
 $RUNFDS Pyrolysis surf_mass_vent_nonchar_spher_fuel
 $RUNFDS Pyrolysis surf_mass_vent_nonchar_spher_gas
+$RUNFDS Pyrolysis surf_mass_part_char_cart_fuel_split
+$RUNFDS Pyrolysis surf_mass_part_char_cyl_fuel_split
+$RUNFDS Pyrolysis surf_mass_part_char_spher_fuel_split
+$RUNFDS Pyrolysis surf_mass_part_nonchar_cart_fuel_split
+$RUNFDS Pyrolysis surf_mass_part_nonchar_cyl_fuel_split
+$RUNFDS Pyrolysis surf_mass_part_nonchar_spher_fuel_split
 $RUNFDS Pyrolysis two_step_solid_reaction
 $RUNFDS Pyrolysis water_ice_water
 $RUNFDS Pyrolysis pcm_slab
