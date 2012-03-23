@@ -34,16 +34,6 @@ int get_tagindex(const particle *parti, part5data **data, int tagval);
 #define READPASS 1
 #define READFAIL 0
 
-#ifdef BIT64
-#ifdef X64
-#define FSEEK(a,b,c) _fseeki64(a,b,c)
-#else
-#define FSEEK(a,b,c) fseeko(a,b,c)
-#endif
-#else
-#define FSEEK(a,b,c) fseek(a,b,c)
-#endif
-
 #define FORTPART5READ(var,size) \
 returncode=READPASS;\
 FSEEK(PART5FILE,4,SEEK_CUR);if(ferror(PART5FILE)==1||feof(PART5FILE)==1)returncode=READFAIL;\

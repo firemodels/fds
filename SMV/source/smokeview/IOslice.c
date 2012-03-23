@@ -50,10 +50,10 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type);
 #define FOPEN(file,mode) fopen(file,mode)
 #endif
 
-#define FORTRLESLICEREAD(var,size) fseek(RLESLICEFILE,4,SEEK_CUR);\
+#define FORTRLESLICEREAD(var,size) FSEEK(RLESLICEFILE,4,SEEK_CUR);\
                            returncode=fread(var,4,size,RLESLICEFILE);\
                            if(endianswitch==1)endian_switch(var,size);\
-                           fseek(RLESLICEFILE,4,SEEK_CUR)
+                           FSEEK(RLESLICEFILE,4,SEEK_CUR)
 
 #define GET_VEC_DXYZ(U,DU) \
          DU=0.0;           \
@@ -5420,7 +5420,7 @@ int getslicezlibdata(char *file,
     fread(&ttime,4,1,stream);
     fread(&nncomp,4,1,stream);
     if(count++%sliceskip!=0||set_tmin==1&&ttime<tmin_local||set_tmax==1&&ttime>tmax_local){
-      fseek(stream,nncomp,SEEK_CUR);
+      FSEEK(stream,nncomp,SEEK_CUR);
       continue;
     }
     times_local[ns++]=ttime;
@@ -5472,7 +5472,7 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type){
   count=0;
   if(compression_type==1){
     fread(&endian_fromfile,4,1,stream);
-    fseek(stream,12,SEEK_CUR);
+    FSEEK(stream,12,SEEK_CUR);
     fread(minmax,4,2,stream);
     fread(ijkbar,4,6,stream);
 
@@ -5485,7 +5485,7 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type){
       fread(&ncompressed,4,1,stream);
       fprintf(sizestream,"%f %i\n",time_local,ncompressed);
       count++;
-      fseek(stream,ncompressed,SEEK_CUR);
+      FSEEK(stream,ncompressed,SEEK_CUR);
     }
   }
   //  endian
@@ -5502,12 +5502,12 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type){
   if(compression_type==2){
     int one;
 
-    fseek(stream,4,SEEK_CUR);fread(&one,4,1,stream);fseek(stream,4,SEEK_CUR);
+    FSEEK(stream,4,SEEK_CUR);fread(&one,4,1,stream);FSEEK(stream,4,SEEK_CUR);
     
     endianswitch=0;
     if(one!=1)endianswitch=1;
 
-    fseek(stream,4*4,SEEK_CUR);
+    FSEEK(stream,4*4,SEEK_CUR);
     FORTRLESLICEREAD(minmax,2);
     FORTRLESLICEREAD(ijkbar,6);
     fprintf(sizestream,"%i %i %i %i %i %i\n",ijkbar[0],ijkbar[1],ijkbar[2],ijkbar[3],ijkbar[4],ijkbar[5]);
@@ -5518,7 +5518,7 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type){
       if(returncode==0)break;
       FORTRLESLICEREAD(&ncompressed,1);
       if(returncode==0)break;
-      returncode=fseek(stream,8+ncompressed,SEEK_CUR);
+      returncode=FSEEK(stream,8+ncompressed,SEEK_CUR);
       if(returncode!=0)break;
       fprintf(sizestream,"%f %i %i\n",time_local,0,ncompressed);
       count++;

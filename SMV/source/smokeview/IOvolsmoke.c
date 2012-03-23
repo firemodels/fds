@@ -1194,10 +1194,10 @@ void drawsmoke3dGPUVOL(void){
 
 #define HEADER_SIZE 4
 #define TRAILER_SIZE 4
-#define FORTSLICEREAD(var,size) fseek(SLICEFILE,HEADER_SIZE,SEEK_CUR);\
+#define FORTSLICEREAD(var,size) FSEEK(SLICEFILE,HEADER_SIZE,SEEK_CUR);\
                            returncode=fread(var,4,size,SLICEFILE);\
                            if(endianswitch==1)endian_switch(var,size);\
-                           fseek(SLICEFILE,TRAILER_SIZE,SEEK_CUR)
+                           FSEEK(SLICEFILE,TRAILER_SIZE,SEEK_CUR)
 
 /* ------------------ get_volsmoke_sizes ------------------------ */
 
@@ -1234,13 +1234,13 @@ int get_volsmoke_nframes(volrenderdata *vr){
     unsigned char buffer[32];
 // 1,completion,version
 // 1,version,n_data_compressedm32,nbytes,n_data_in,time,valmin,valmax,data ....
-    fseek(volstream,12,SEEK_SET);
+    FSEEK(volstream,12,SEEK_SET);
     for(nframes=0;;nframes++){
       int ncompressed;
 
       if(fread(buffer,1,32,volstream)!=32)break;
       ncompressed=*(int *)(buffer+8)-32;
-      if(fseek(volstream,ncompressed,SEEK_CUR)!=0)break;
+      if(FSEEK(volstream,ncompressed,SEEK_CUR)!=0)break;
     }
     fclose(volstream);
   }
@@ -1271,7 +1271,7 @@ float get_volsmoke_frame_time(volrenderdata *vr, int framenum){
   SLICEFILE=fopen(smokeslice->reg_file,"rb");
   if(SLICEFILE==NULL)return time_local;
 
-  returncode=fseek(SLICEFILE,skip_local,SEEK_SET); // skip from beginning of file
+  returncode=FSEEK(SLICEFILE,skip_local,SEEK_SET); // skip from beginning of file
 
   FORTSLICEREAD(&time_local,1);
   fclose(SLICEFILE);
@@ -1298,7 +1298,7 @@ void get_volsmoke_all_times(volrenderdata *vr){
     int ii;
 // 1,completion,version
 // 1,version,n_data_compressedm32,nbytes,n_data_in,time,valmin,valmax,data ....
-    fseek(volstream,12,SEEK_SET);
+    FSEEK(volstream,12,SEEK_SET);
     for(ii=0;ii<vr->ntimes;ii++){
       int ncompressed;
       float *time_local;
@@ -1307,21 +1307,21 @@ void get_volsmoke_all_times(volrenderdata *vr){
       if(fread(buffer,1,32,volstream)!=32)break;
       ncompressed=*(int *)(buffer+8)-32;
       time_local=(float *)(buffer+20);
-      if(fseek(volstream,ncompressed,SEEK_CUR)!=0)break;
+      if(FSEEK(volstream,ncompressed,SEEK_CUR)!=0)break;
       vr->times[ii]=*time_local;
     }
     fclose(volstream);
     volstream=NULL;
     if(vr->fire->vol_file!=NULL)volstream=fopen(vr->fire->vol_file,"rb");
     if(volstream!=NULL){
-      fseek(volstream,12,SEEK_SET);
+      FSEEK(volstream,12,SEEK_SET);
       for(ii=0;ii<vr->ntimes;ii++){
         int ncompressed;
 
         vr->firepos[ii]=ftell(volstream);
         if(fread(buffer,1,32,volstream)!=32)break;
         ncompressed=*(int *)(buffer+8)-32;
-        if(fseek(volstream,ncompressed,SEEK_CUR)!=0)break;
+        if(FSEEK(volstream,ncompressed,SEEK_CUR)!=0)break;
       }
       fclose(volstream);
     }
@@ -1394,7 +1394,7 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
     SLICEFILE=fopen(smokeslice->reg_file,"rb");
     if(SLICEFILE==NULL)return;
 
-    returncode=fseek(SLICEFILE,skip_local,SEEK_SET); // skip from beginning of file
+    returncode=FSEEK(SLICEFILE,skip_local,SEEK_SET); // skip from beginning of file
 
     FORTSLICEREAD(&time_local,1);
     if(global_times!=NULL&&global_times[itimes]>time_local)restart_time=1;
@@ -1435,11 +1435,11 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
 
 // 1,completion,version
 // 1,version,n_data_compressedm32,nbytes,n_data_in,time,valmin,valmax,data ....
-    fseek(volstream,vr->smokepos[framenum],SEEK_SET);
+    FSEEK(volstream,vr->smokepos[framenum],SEEK_SET);
     fread(buffer,8,4,volstream);
     ncompressed=*(int *)(buffer+8);
     time_local = *(float *)(buffer+20);
-    fseek(volstream,vr->smokepos[framenum],SEEK_SET);
+    FSEEK(volstream,vr->smokepos[framenum],SEEK_SET);
     NewMemory((void **)&c_smokedata_compressed,ncompressed);
     fread(c_smokedata_compressed,1,ncompressed,volstream);
     vr->smokedataptrs[framenum]=c_smokedata_compressed;
@@ -1467,7 +1467,7 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
     if(volstream==NULL){
       SLICEFILE=fopen(fireslice->reg_file,"rb");
       if(SLICEFILE!=NULL){
-        returncode=fseek(SLICEFILE,skip_local,SEEK_SET); // skip from beginning of file
+        returncode=FSEEK(SLICEFILE,skip_local,SEEK_SET); // skip from beginning of file
 
         FORTSLICEREAD(&time_local,1);
         vr->times[framenum]=time_local;
@@ -1496,11 +1496,11 @@ void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
 
 // 1,completion,version
 // 1,version,n_data_compressedm32,nbytes,n_data_in,time_local,valmin,valmax,data ....
-      fseek(volstream,vr->firepos[framenum],SEEK_SET);
+      FSEEK(volstream,vr->firepos[framenum],SEEK_SET);
       fread(buffer,8,4,volstream);
       ncompressed=*(int *)(buffer+8);
       time_local = *(float *)(buffer+20);
-      fseek(volstream,vr->firepos[framenum],SEEK_SET);
+      FSEEK(volstream,vr->firepos[framenum],SEEK_SET);
       NewMemory((void **)&c_firedata_compressed,ncompressed);
       fread(c_firedata_compressed,1,ncompressed,volstream);
       vr->firedataptrs[framenum]=c_firedata_compressed;

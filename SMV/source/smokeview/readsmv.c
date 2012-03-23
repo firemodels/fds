@@ -5246,7 +5246,7 @@ typedef struct {
       ENDIANfile = fopen(endianfilename,"rb");
       if(ENDIANfile!=NULL){
         endian_native = getendian();
-        fseek(ENDIANfile,4,SEEK_SET);
+        FSEEK(ENDIANfile,4,SEEK_SET);
         fread(&endian_data,4,1,ENDIANfile);
         fclose(ENDIANfile);
         endian_smv=endian_native;

@@ -32,10 +32,10 @@ void free_terraincell(terraindata *terri);
 
 #define ijnode2(i,j) ((nxcell+1)*(j) + (i))
 #define ijnode3(i,j) ((nycell+1)*(i) + (j))
-#define FORTWUIREAD(var,size) fseek(WUIFILE,4,SEEK_CUR);\
+#define FORTWUIREAD(var,size) FSEEK(WUIFILE,4,SEEK_CUR);\
                            returncode=fread(var,4,size,WUIFILE);\
                            if(endianswitch==1)endian_switch(var,size);\
-                           fseek(WUIFILE,4,SEEK_CUR)
+                           FSEEK(WUIFILE,4,SEEK_CUR)
 
 float *get_terraincolor(terraincell *ti);
 int getterrain_data(char *file,terraindata *terri);
@@ -871,7 +871,7 @@ int getterrain_size(char *file,float *xmin, float *xmax, int *nx, float *ymin, f
   WUIFILE = fopen(file,"rb");
   if(WUIFILE==NULL)return 1;
 
-  fseek(WUIFILE,4,SEEK_CUR);fread(&one,4,1,WUIFILE);fseek(WUIFILE,4,SEEK_CUR);
+  FSEEK(WUIFILE,4,SEEK_CUR);fread(&one,4,1,WUIFILE);FSEEK(WUIFILE,4,SEEK_CUR);
   if(one!=1)endianswitch=1;
 
   FORTWUIREAD(&version,1);
@@ -885,7 +885,7 @@ int getterrain_size(char *file,float *xmin, float *xmax, int *nx, float *ymin, f
   *nx=nxy[0];
   *ny=nxy[1];
   
-  fseek(WUIFILE,16+5*(*nx)*(*ny),SEEK_CUR); // skip over zelev and state
+  FSEEK(WUIFILE,16+5*(*nx)*(*ny),SEEK_CUR); // skip over zelev and state
 
   for(;;){
     
@@ -895,7 +895,7 @@ int getterrain_size(char *file,float *xmin, float *xmax, int *nx, float *ymin, f
     FORTWUIREAD(&nchanges,1);
     if(returncode==0)break;
 
-    if(nchanges>0)fseek(WUIFILE,16+5*nchanges,SEEK_CUR);
+    if(nchanges>0)FSEEK(WUIFILE,16+5*nchanges,SEEK_CUR);
 
     nt++;
 
@@ -928,12 +928,12 @@ int getterrain_data(char *file,terraindata *terri){
   WUIFILE = fopen(file,"rb");
   if(WUIFILE==NULL)return 1;
 
-  fseek(WUIFILE,4,SEEK_CUR);fread(&one,4,1,WUIFILE);fseek(WUIFILE,4,SEEK_CUR);
+  FSEEK(WUIFILE,4,SEEK_CUR);fread(&one,4,1,WUIFILE);FSEEK(WUIFILE,4,SEEK_CUR);
   if(one!=1)endianswitch=1;
 
-  fseek(WUIFILE,12,SEEK_CUR);    // skip over version
-  fseek(WUIFILE,8+4*4,SEEK_CUR); // skip over xmin,xmax,ymin,ymax
-  fseek(WUIFILE,8+2*4,SEEK_CUR); // skip over nx, ny
+  FSEEK(WUIFILE,12,SEEK_CUR);    // skip over version
+  FSEEK(WUIFILE,8+4*4,SEEK_CUR); // skip over xmin,xmax,ymin,ymax
+  FSEEK(WUIFILE,8+2*4,SEEK_CUR); // skip over nx, ny
 
   nx = terri->nx;
   ny = terri->ny;
@@ -945,7 +945,7 @@ int getterrain_data(char *file,terraindata *terri){
 
 
   FORTWUIREAD(terri->zcell,ntotal); 
-  fseek(WUIFILE,4,SEEK_CUR);fread(terri->state,1,ntotal,WUIFILE);fseek(WUIFILE,4,SEEK_CUR);
+  FSEEK(WUIFILE,4,SEEK_CUR);fread(terri->state,1,ntotal,WUIFILE);FSEEK(WUIFILE,4,SEEK_CUR);
   init_tnode(terri);
   init_tnorm(terri);
   
@@ -964,7 +964,7 @@ int getterrain_data(char *file,terraindata *terri){
 
       FORTWUIREAD(cellindex_buffer,nchanges);
       if(returncode==0)break;
-      fseek(WUIFILE,4,SEEK_CUR);returncode=fread(cellstate_buffer,1,nchanges,WUIFILE);fseek(WUIFILE,4,SEEK_CUR);
+      FSEEK(WUIFILE,4,SEEK_CUR);returncode=fread(cellstate_buffer,1,nchanges,WUIFILE);fseek(WUIFILE,4,SEEK_CUR);
       if(returncode==0)break;
       for(i=0;i<nchanges;i++){
         terraincell *ti;

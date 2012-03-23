@@ -546,7 +546,7 @@ void update_triangles(void){
                            returncode=fread(var,4,count,STREAM);\
                            if(returncode!=count)returncode=0;\
                            if(endianswitch==1&&returncode!=0)endian_switch(var,count);\
-                           fseek(STREAM,4,SEEK_CUR)
+                           FSEEK(STREAM,4,SEEK_CUR)
 
 #define FORTREADBR(var,count,STREAM) FORTREAD(var,(count),STREAM);if(returncode==0)break;
 
@@ -570,7 +570,7 @@ void read_geom_header(geomdata *geomi, int *ntimes_local){
     *ntimes_local=-1;
     return;
   }
-  fseek(stream,4,SEEK_CUR);fread(&one,4,1,stream);fseek(stream,4,SEEK_CUR);
+  FSEEK(stream,4,SEEK_CUR);fread(&one,4,1,stream);FSEEK(stream,4,SEEK_CUR);
   if(one!=1)endianswitch=1;
   FORTREAD(&version,1,stream);
 
@@ -599,15 +599,15 @@ void read_geom_header(geomdata *geomi, int *ntimes_local){
   FORTREAD(nvertfaces,2,stream);
   nverts=nvertfaces[0];
   if(nverts>0){
-    fseek(stream,4+3*nverts*4+4,SEEK_CUR);
+    FSEEK(stream,4+3*nverts*4+4,SEEK_CUR);
   }
 
 // static triangles
 
   ntris=nvertfaces[1];
   if(ntris>0){
-    fseek(stream,4+3*ntris*4+4,SEEK_CUR);
-    fseek(stream,4+ntris*4+4,SEEK_CUR);
+    FSEEK(stream,4+3*ntris*4+4,SEEK_CUR);
+    FSEEK(stream,4+ntris*4+4,SEEK_CUR);
   }
 
   nt=0;
@@ -624,15 +624,15 @@ void read_geom_header(geomdata *geomi, int *ntimes_local){
       ntris=nvertfaces[1];
 
       if(nverts>0){
-        fseek(stream,4+3*nverts*4+4,SEEK_CUR);
+        FSEEK(stream,4+3*nverts*4+4,SEEK_CUR);
       }
       if(ntris>0){
-        fseek(stream,4+3*ntris*4+4,SEEK_CUR);
-        fseek(stream,4+ntris*4+4,SEEK_CUR);
+        FSEEK(stream,4+3*ntris*4+4,SEEK_CUR);
+        FSEEK(stream,4+ntris*4+4,SEEK_CUR);
       }
     }
     else{
-      fseek(stream,4+8*4+4,SEEK_CUR);
+      FSEEK(stream,4+8*4+4,SEEK_CUR);
     }
 
     nt++;
@@ -656,16 +656,16 @@ void get_geomdata_header(char *file, int *ntimes_local, int *nvals){
     *ntimes_local=-1;
     return;
   }
-  fseek(stream,4,SEEK_CUR);fread(&one,4,1,stream);fseek(stream,4,SEEK_CUR);
+  FSEEK(stream,4,SEEK_CUR);fread(&one,4,1,stream);FSEEK(stream,4,SEEK_CUR);
   if(one!=1)endianswitch=1;
   nt=-1;
   nv=0;
   for(;;){
     FORTREADBR(&time_local,1,stream);
     FORTREADBR(&nface_static,1,stream);
-    if(nface_static!=0)fseek(stream,4+nface_static*4+4,SEEK_CUR);    
+    if(nface_static!=0)FSEEK(stream,4+nface_static*4+4,SEEK_CUR);    
     FORTREADBR(&nface_dynamic,1,stream);
-    if(nface_dynamic!=0)fseek(stream,4+nface_dynamic*4+4,SEEK_CUR);    
+    if(nface_dynamic!=0)FSEEK(stream,4+nface_dynamic*4+4,SEEK_CUR);    
     nt++;
     nv+=(nface_static+nface_dynamic);
   }
@@ -730,14 +730,14 @@ void read_geom(geomdata *geomi, int flag, int *errorcode){
   stream = fopen(geomi->file,"rb");
   if(stream==NULL)return;
 
-  fseek(stream,4,SEEK_CUR);fread(&one,4,1,stream);fseek(stream,4,SEEK_CUR);
+  FSEEK(stream,4,SEEK_CUR);fread(&one,4,1,stream);FSEEK(stream,4,SEEK_CUR);
   if(one!=1)endianswitch=1;
   FORTREAD(&version,1,stream);
 
   FORTREAD(&nfloat_vals,1,stream);
-  if(nfloat_vals>0)fseek(stream,4+nfloat_vals*4+4,SEEK_CUR);
+  if(nfloat_vals>0)FSEEK(stream,4+nfloat_vals*4+4,SEEK_CUR);
   FORTREAD(&nint_vals,1,stream);
-  if(nint_vals>0)fseek(stream,4+nint_vals*4+4,SEEK_CUR);
+  if(nint_vals>0)FSEEK(stream,4+nint_vals*4+4,SEEK_CUR);
 
   geomi->ntimes=ntimes_local;
   geomi->itime=0;
