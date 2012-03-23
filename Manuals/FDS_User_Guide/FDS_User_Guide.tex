@@ -5025,7 +5025,7 @@ A sample input for a filter is given below.
 \footnotesize
 \begin{verbatim}
 &HVAC TYPE='FILTER', ID='filter 1', LOADING=0., SPEC_ID='SOOT',
-      EFFICIENCY=0.99, MULTIPLIER=1,CLEAN_LOSS=2., LOSS=100./
+      EFFICIENCY=0.99, LOADING_MULTIPLIER=1,CLEAN_LOSS=2., LOSS=100./
 \end{verbatim}\normalsize
 
 All possible filter inputs are discussed below.
@@ -5034,16 +5034,16 @@ All possible filter inputs are discussed below.
 \item[{\ct CLEAN\_LOSS}] is the flow loss through the filter when it is new (zero loading).
 \item[{\ct EFFICIENCY}] is an array of the species removal efficiency from 0 to 1 where 0 is no removal of that species and 1 is complete filtration of the species.  The species are identified using {\ct SPEC\_ID}
 \item[{\ct LOADING}] An array of the initial loading (kg) of the filter for each species being filtered.
+\item[{\ct LOADING\_MULTIPLIER}] is an array of the species multiplier, M$_i$, used in computing the total filter loading when computing loss.
 \item[{\ct LOSS}] Invokes a linear flow loss model where the flow loss is given as a linear function of the total loading, $K_{filter}=K_{CLEAN\_LOSS}+K_{LOSS} \sum \left( L_i M_i \right)$, where L$_i$ is the species loading and M$_i$ is a multiplier.  Only one of {\ct LOSS} or {\ct RAMP\_ID} should be specified.
-\item[{\ct MULTIPLIER}] is an array of the species multiplier, M$_i$, used in computing the total filter loading when computing loss.
 \item[{\ct RAMP\_ID}] identifies the {\ct RAMP} that contains a table of pressure drop across the filter as a function of total loading (see summation in {\ct LOSS}.   Only one of {\ct LOSS} or {\ct RAMP\_ID} should be specified.
-\item[{\ct SPEC\_ID}] identifies the tracked species for the inputs of {\ct MULTIPLIER} and {\ct LOADING}.
+\item[{\ct SPEC\_ID}] identifies the tracked species for the inputs of {\ct LOADING\_MULTIPLIER} and {\ct LOADING}.
 \end{description}
 
 \noindent
-Note that a filter input refers to a class of aircoils and that multiple ducts can reference the same filter definition.
+Note that a filter input refers to a class of filters and that multiple ducts can reference the same filter definition.
 
-\subsection{HVAC Aircoil Parameters}
+\subsection{HVAC Aircoil Parameters: {\bf HVAC\_aircoil}}
 \label{info:HVACaircoil}
 \footnotesize
 
@@ -5077,6 +5077,17 @@ Note that either {\ct FIXED\_Q} or the set {\ct COOLANT\_CP}, {\ct COOLANT\_MDOT
 
 \noindent
 Note that an aircoil input refers to a class of aircoils and that multiple ducts can reference the same aircoil definition.
+
+The sample case {\bf HVAC\_aircoil} demonstrates the use of the aircoil inputs.  A constant flow duct removes air (defined as 28 g/mol with a specific heat of 1 kJ/kg/K) from the floor and injects in through the ceiling at a volume flow rate of 1~$m^3/s$.  An aircoil is defined with a working fluid flowsing at 10~kg/s and 100~\textcelsius with a specific heat of 4 kJ/kg/K.  The aircoil has an efficiency of 50~\%.  Using the above equations the aircoil will add 45.2 kW of heat to the gas flowing through the duct resulting in a duct exit temperature of 332~K. These results are shown in  Figure~\ref{fig_aircoil}.
+
+\begin{figure}[t]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \scalebox{1}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_aircoil_Q.pdf} } &
+      \scalebox{1}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_aircoil_T.pdf} }
+   \end{tabular*}
+   \caption[Duct Aircoil]{(Left) Heat addition and (Right) duct exit temperature for the HVAC\_aircoil case.}
+   \label{fig_aircoil}
+\end{figure}
 
 \subsection{Louvered HVAC Vents}
 \label{info:HVAClouvers}
@@ -5264,7 +5275,7 @@ For the case where the stack flow is through small leakage paths, it is recommen
 
 This subsection contains a simple example demonstrating the stack effect.  A detailed discussion of the stack effect can be found in \cite{Klote_Milke}.
 
-The {\ct stack\_effect} test case is a two-dimensional simulation of a building with an interior hotter than the exterior and two leakage paths at the top and the bottom of the building.  Since the inside is hotter, it will have a smaller pressure gradient than the outside resulting in higher pressure inside the top of the buiding than the outside.  This will cause flow out the upper leakage path and in the bottom leakage path.
+The {\bf stack\_effect} test case is a two-dimensional simulation of a building with an interior hotter than the exterior and two leakage paths at the top and the bottom of the building.  Since the inside is hotter, it will have a smaller pressure gradient than the outside resulting in higher pressure inside the top of the buiding than the outside.  This will cause flow out the upper leakage path and in the bottom leakage path.
 
 The building 100~m tall building with an interior temperature, $T_b$, initially set to 20~$^\circ$C, and an exterior temperature, $T_\infty$, set to 
 10~$^\circ$C. The {\ct LAPSE\_RATE} is set to 0~$^\circ$C/m; thus, $T_0(z)=T_\infty$ outside the building and $T_0(z)=T_b$ inside the building. Two small leakage openings are defined 2.5~m above the ground floor and 2.5~m below the roof using the HVAC solver.  Each opening is given an area of 0.01~m$^2$ and a flow loss of 2 (e.g. an entrance loss into the leak path of 1 and and exit loss out of the leak path of 1 both of which represent a sharp edge opening).
