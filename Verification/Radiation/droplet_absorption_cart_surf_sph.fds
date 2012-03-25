@@ -78,7 +78,7 @@ value of dT should be equal to the time averaged Q_abs.
 
 &MATL ID			= 'drop_matl'
 	DENSITY		= 100
-	CONDUCTIVITY 	= 1E9
+	CONDUCTIVITY 	= 100
 	SPECIFIC_HEAT 	= 1.0
 	EMISSIVITY		= 1.0 / 
 
