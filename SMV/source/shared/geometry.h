@@ -13,10 +13,9 @@ typedef struct _vertdata {
   float xyz[3];
   int nedges,nverts,ntris;
   int type;
-  struct _vertdata **verts,**verts_temp;
+  struct _vertdata **verts;
   struct _edgedata **edges;
   struct _tridata **tris;
-  float best_xyz[3], best_norm[3];
 } vertdata;
 
 /* --------------------------  tridata ------------------------------------ */
