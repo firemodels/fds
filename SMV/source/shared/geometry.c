@@ -8,6 +8,7 @@ char geometry_revision[]="$Revision$";
 #include "options.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 #include "MALLOC.h"
 #include "geometry.h"
@@ -322,9 +323,91 @@ float VertOffset(vertdata *vert){
   return sum;
 }
 
-/* --------------------------  RemoveVert ------------------------------------ */
+/* --------------------------  InitGeom ------------------------------------ */
 
-void RemoveVert(geomdata *geomi,vertdata *verti){
+void InitGeom(geomdata *geomi, float *xyz, int nxyz, int *tris, int ntris){
+  int i;
+  vertdata *verti;
+  tridata *trii;
+
+  geomi->verts=NULL;
+  geomi->tris=NULL;
+  geomi->nverts=nxyz;
+  geomi->ntris=nxyz;
+  if(geomi->nverts>0)NewMemory((void **)&geomi->verts,(geomi->nverts+2)*sizeof(vertdata));
+  if(geomi->ntris>0)NewMemory((void **)&geomi->tris,(geomi->ntris+2)*sizeof(tridata));
+
+  geomi->verts++;
+  geomi->first_vert=geomi->verts-1;
+  geomi->last_vert=geomi->verts+geomi->nverts;
+  for(i=0;i<geomi->nverts;i++){
+    verti = geomi->verts + i;
+    verti->next=verti+1;
+    verti->prev=verti-1;
+    verti->xyz[0]=xyz[3*i];
+    verti->xyz[1]=xyz[3*i+1];
+    verti->xyz[2]=xyz[3*i+2];
+    verti->active=1;
+  }
+  verti=geomi->verts-1;
+  verti->prev=NULL;
+  verti->next=verti+1;
+  verti=geomi->verts+geomi->nverts;
+  verti->prev=verti-1;
+  verti->next=NULL;
+
+  geomi->tris++;
+  geomi->first_tri=geomi->tris-1;
+  geomi->last_tri=geomi->tris+geomi->ntris+1;
+  for(i=0;i<geomi->ntris;i++){
+    trii = geomi->tris+i;
+    trii->verts[0]=geomi->verts+tris[3*i]-1;
+    trii->verts[1]=geomi->verts+tris[3*i+1]-1;
+    trii->verts[2]=geomi->verts+tris[3*i+2]-1;
+    trii->prev=trii-1;
+    trii->next=trii+1;
+    trii->active=1;
+  }
+  trii=geomi->tris-1;
+  trii->prev=NULL;
+  trii->next=trii+1;
+  trii=geomi->tris+geomi->nverts;
+  trii->prev=trii-1;
+  trii->next=NULL;
+}
+
+/* --------------------------  DeleteTri ------------------------------------ */
+
+void RemoveTri(tridata *trii){
+  tridata *prev, *next;
+
+  prev=trii->prev;
+  next=trii->next;
+  prev->next=next;
+  next->prev=prev;
+  trii->active=0;
+}
+
+/* --------------------------  DeleteVert ------------------------------------ */
+
+void RemoveVert(vertdata *verti){
+  int i;
+  vertdata *prev,*next;
+
+  for(i=0;i<verti->ntris;i++){
+    tridata *trii;
+
+    trii = verti->tris[i];
+    RemoveTri(trii);
+  }
+  prev=verti->prev;
+  next=verti->next;
+  prev->next=next;
+  next->prev=prev;
+  verti->active=0;
+}
+
+void Retriangulate(vertdata **verts, int nverts, tridata **tris){
 }
 
 /* --------------------------  DecimateMesh ------------------------------------ */
@@ -345,7 +428,11 @@ void DecimateMesh(geomdata *geomi, float delta){
       vert_offset = VertOffset(verti);
 
       vert_offset_max=MAX(vert_offset_max,vert_offset);
-      if(vert_offset>delta)RemoveVert(geomi,verti);
+      if(vert_offset>delta){
+        RemoveVert(verti);
+        Retriangulate(verti->verts,verti->nverts,verti->tris);
+
+      }
     }
   }
 }

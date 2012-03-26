@@ -12,7 +12,8 @@
 typedef struct _vertdata {
   float xyz[3];
   int nedges,nverts,ntris;
-  int type;
+  int type,active,seq_id;
+  struct _vertdata *prev,*next;
   struct _vertdata **verts;
   struct _edgedata **edges;
   struct _tridata **tris;
@@ -28,16 +29,17 @@ typedef struct _edgedata {
 /* --------------------------  tridata ------------------------------------ */
 
 typedef struct _tridata {
+  struct _tridata *prev,*next;
   vertdata *verts[3];
-  int examined;
+  int examined,active,seq_id;
   float area,center[3],norm[3];
 } tridata;
 
 /* --------------------------  tridata ------------------------------------ */
 
 typedef struct _geomdata {
-  vertdata *verts;
-  tridata *tris;
+  vertdata *verts,*first_vert,*last_vert;
+  tridata *tris,*first_tri,*last_tri;
   edgedata *edges;
   int nverts, ntris, nedges;
 } geomdata;
