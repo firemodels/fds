@@ -968,7 +968,6 @@ typedef struct _slice {
   char *size_file;
   char *comp_file, *reg_file, *vol_file;
   char *slicelabel;
-  int terrain, cellcenter, fire_line;
   int compression_type;
   int ncompressed;
   int slicetype;

@@ -15,6 +15,11 @@ void _Sniff_Errors(char *whereat);
 #define RLE 0
 #define ZLIB 1
 
+#define SLICE_NODE 1
+#define SLICE_CENTER 2
+#define SLICE_FIRELINE 3
+#define SLICE_TERRAIN 4
+
 #define TERRAIN_3D 0
 #define TERRAIN_2D_STEPPED 1
 #define TERRAIN_2D_LINE 2

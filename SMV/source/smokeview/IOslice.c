@@ -585,7 +585,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     if(use_iblank==1){
       int return_val;
        
-      if(sd->cellcenter==1){
+      if(sd->slicetype==SLICE_CENTER){
         return_val=NewMemory((void **)&sd->n_iblank,(sd->nslicei+1)*(sd->nslicej+1)*(sd->nslicek+1)*sizeof(char));
       }
       else{
@@ -732,7 +732,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     sd->qval256[i] = (qmin*(255-i) + qmax*i)/255;
   }
 
-  if(sd->cellcenter==1){
+  if(sd->slicetype==SLICE_CENTER){
     usetexturebar=0;
   }
   sd->loaded=1;
@@ -1435,7 +1435,7 @@ void getsliceparams(void){
         ){
         sd->idir=1;
         position = meshi->xplt_orig[is1];
-        if(sd->cellcenter==1){
+        if(sd->slicetype==SLICE_CENTER){
           float *xp;
 
           is2=is1-1;
@@ -1459,7 +1459,7 @@ void getsliceparams(void){
       if(sd->js1==sd->js2){
         sd->idir=2;
         position = meshi->yplt_orig[js1];
-        if(sd->cellcenter==1){
+        if(sd->slicetype==SLICE_CENTER){
           float *yp;
 
           js2=js1-1;
@@ -1478,7 +1478,7 @@ void getsliceparams(void){
       if(sd->ks1==sd->ks2){
         sd->idir=3;
         position = meshi->zplt_orig[ks1];
-        if(sd->cellcenter==1){
+        if(sd->slicetype==SLICE_CENTER){
           float *zp;
 
           ks2=ks1-1;
@@ -1492,7 +1492,7 @@ void getsliceparams(void){
         else{
           sd->delta_orig=(meshi->zplt_orig[ks1+1]-meshi->zplt_orig[ks1])/2.0;
         }
-        if(sd->terrain==1){
+        if(sd->slicetype==SLICE_TERRAIN){
           position=sd->above_ground_level;
           sprintf(sd->slicedir,"AGL=%f",position);
         }
@@ -2078,6 +2078,9 @@ void getslicedatabounds(const slice *sd, float *pmin, float *pmax){
       if(pdata[n]<*pmin)*pmin=pdata[n];
       if(pdata[n]>*pmax)*pmax=pdata[n];
     }
+    if(pdata[n]<-0.5){
+      printf("n=%i in=%i pdata=%f\n",n,n%sd->nsliceii,pdata[n]);
+    }
   }
   if(first==1){
     *pmin=0.0;
@@ -2192,7 +2195,7 @@ void drawslice_frame(){
 #endif            
       if(usetexturebar!=0){
         if(sd->volslice==1){
-          if(sd->terrain==1){
+          if(sd->slicetype==SLICE_TERRAIN){
             drawvolslice_terrain(sd);
           }
           else{
@@ -2200,7 +2203,7 @@ void drawslice_frame(){
           }
         }
         else{
-          if(sd->terrain==1){
+          if(sd->slicetype==SLICE_TERRAIN){
             drawslice_terrain(sd);
           }
           else{
@@ -2210,7 +2213,7 @@ void drawslice_frame(){
       }
       else{
         if(sd->volslice==1){
-          if(sd->cellcenter==1){
+          if(sd->slicetype==SLICE_CENTER){
             if(cellcenter_interp==1){
               drawvolslice_cellcenter_interp(sd);
             }
@@ -2223,7 +2226,7 @@ void drawslice_frame(){
           }
         }
         else{
-          if(sd->cellcenter==1){
+          if(sd->slicetype==SLICE_CENTER){
             if(cellcenter_interp==1){
               drawslice_cellcenter_interp(sd);
             }
@@ -2316,7 +2319,7 @@ void drawvslice_frame(void){
       w->qslice = w->qslicedata + w->itime*w->nsliceii;
     }
     if(vd->volslice==1){
-      if(val->terrain==1){
+      if(val->slicetype==SLICE_TERRAIN){
         drawvvolslice_terrain(vd);
       }
       else{
@@ -2324,7 +2327,7 @@ void drawvslice_frame(void){
       }
     }
     else{
-      if(val->terrain==1){
+      if(val->slicetype==SLICE_TERRAIN){
         drawvslice_terrain(vd);
       }
       else{
@@ -5670,15 +5673,16 @@ void update_slicedir_count(void){
 
     slicei = sliceinfo + i;
     if(slicei->idir<1)continue;
-	if(slicei->volslice==1)continue;
-	for(j=0;j<nsliceinfo;j++){
-	  slicej = sliceinfo + j;
-	  if(slicej->idir<1)continue;
-	  if(slicej->volslice==1)continue;
+	  if(slicei->volslice==1)continue;
+	  for(j=0;j<nsliceinfo;j++){
+	    slicej = sliceinfo + j;
+	    if(slicej->idir<1)continue;
+	    if(slicej->volslice==1)continue;
       if(strcmp(slicej->label.longlabel,slicei->label.longlabel)!=0)continue;
-	  if(slicej->cellcenter!=slicei->cellcenter)continue;
+	    //if(slicej->cellcenter!=slicei->cellcenter)continue;
+      if(slicej->slicetype==SLICE_CENTER&&slicei->slicetype!=SLICE_CENTER||slicej->slicetype!=SLICE_CENTER&&slicei->slicetype==SLICE_CENTER)continue;
       slicei->ndirxyz[slicej->idir]++;
-	}
+  	}
   }
 }
 

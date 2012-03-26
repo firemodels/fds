@@ -1195,7 +1195,7 @@ int have_terrain_slice(void){
 
     slicei = sliceinfo + i;
 
-    if(slicei->loaded==1&&slicei->terrain==1)return 1;
+    if(slicei->loaded==1&&slicei->slicetype==SLICE_TERRAIN)return 1;
 
   }
   return 0;

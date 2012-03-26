@@ -1439,7 +1439,7 @@ void updatetimes(void){
   if(visTerrainType==TERRAIN_3D_MAP){
     for(i=0;i<nsliceinfo;i++){
       sd = sliceinfo + i;
-      if(sd->loaded==0||sd->display==0||sd->terrain==0)continue;
+      if(sd->loaded==0||sd->display==0||sd->slicetype!=SLICE_TERRAIN)continue;
       show_slice_terrain=1;
       break;
     }

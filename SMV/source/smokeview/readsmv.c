@@ -5340,10 +5340,14 @@ typedef struct {
       len=strlen(bufferptr);
       
       sd = sliceinfo+islice;
-      sd->slicetype=0;
-      if(terrain==1)sd->slicetype=1;
-      if(fire_line==1)sd->slicetype=2;
-      if(cellcenter==1)sd->slicetype=3;
+      sd->slicetype=SLICE_NODE;
+      if(terrain==1){
+        sd->slicetype=SLICE_TERRAIN;
+      }
+      if(fire_line==1)sd->slicetype=SLICE_FIRELINE;
+      if(cellcenter==1){
+        sd->slicetype=SLICE_CENTER;
+      }
 
       if(nslicefiles>100&&(islicecount%100==1||nslicefiles==islicecount)){
         if(islicecount==11){
@@ -5396,10 +5400,10 @@ typedef struct {
         sd->file=sd->reg_file;
       }
 
-      if(sd->terrain==1){
+      if(sd->slicetype==SLICE_TERRAIN){
         if(readlabels_terrain(&sd->label,stream)==2)return 2;
       }
-      else if(sd->cellcenter==1){
+      else if(sd->slicetype==SLICE_CENTER){
         if(readlabels_cellcenter(&sd->label,stream)==2)return 2;
       }
       else{
@@ -5432,9 +5436,6 @@ typedef struct {
         NewMemory((void **)&sd->slicelabel,lenslicelabel);
         strcpy(sd->slicelabel,slicelabel);
       }
-      sd->fire_line=fire_line;
-      sd->terrain=terrain;
-      sd->cellcenter=cellcenter;
       sd->above_ground_level=above_ground_level;
       sd->seq_id=nn_slice;
       sd->autoload=0;
