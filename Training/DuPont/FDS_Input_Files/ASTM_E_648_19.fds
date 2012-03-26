@@ -1,0 +1,238 @@
+&HEAD CHID='ASTM_E_648_19', TITLE='Flooring Radiant Panel Apparatus, 2 cm, 25% Moisture, 550 degrees, Hot Walls, Mass Flux'/
+
+&MESH IJK=70,10,40, XB=0.00,1.40,-0.25,0.25,-0.09,0.71 /
+
+&TIME T_BEGIN= -4000.0, T_END = 3000.0 /
+
+&MISC SURF_DEFAULT='Marinite'/
+
+&INIT XB= 0.00,1.40,-0.25,0.25,-0.09,0.71, TEMPERATURE= 100./
+
+Radiant Panels
+
+&MULT ID='30 degrees', DXB=-.01,-.01,0.00,0.00,0.0058,0.0058, N_LOWER=0, N_UPPER=40 /
+
+&OBST XB= 1.35, 1.36,-0.15, 0.15, 0.14, 0.18, SURF_IDS='SHEET METAL','SHEET METAL','PANEL', MULT_ID='30 degrees' /  
+
+Line Burners
+
+&SURF ID='Burner_1', COLOR='ORANGE', HRRPUA=400., RAMP_Q = 'fire_ramp_1' /
+&OBST XB= 1.350, 1.370, -.15, 0.15, 0.01, 0.02, SURF_IDS='Burner_1','SHEET METAL','SHEET METAL' /  
+
+&RAMP ID='fire_ramp_1', T= 0.0,   F=0.0 /
+&RAMP ID='fire_ramp_1', T= 1.0,   F=1.0 /
+&RAMP ID='fire_ramp_1', T= 300.0, F=1.0 /
+&RAMP ID='fire_ramp_1', T= 301.0, F=0.0 /
+
+&SURF ID='Burner_2', COLOR='ORANGE', HRRPUA=400., RAMP_Q = 'fire_ramp_2' /
+&OBST XB= 1.300, 1.320, -.15, 0.15, 0.01, 0.02, SURF_IDS='Burner_2','SHEET METAL','SHEET METAL' /  
+
+&RAMP ID='fire_ramp_2', T= 0.0,   F=0.0 /
+&RAMP ID='fire_ramp_2', T= 301.0, F=0.0 /
+&RAMP ID='fire_ramp_2', T= 302.0, F=1.0 /
+&RAMP ID='fire_ramp_2', T= 602.0, F=1.0 /
+&RAMP ID='fire_ramp_2', T= 603.0, F=0.0 /
+
+
+Specimen
+
+&REAC ID                    = 'Whatever'
+      C                     = 2.
+      H                     = 2.
+      SOOT_YIELD            = 0.1 /
+
+&MATL ID                    = 'Green Carpet'
+      CONDUCTIVITY          = 0.2
+      SPECIFIC_HEAT         = 1.8
+      DENSITY               = 546.
+      N_REACTIONS           = 1
+      HEAT_OF_REACTION      = 450.
+      HEAT_OF_COMBUSTION    = 22700.
+	A		    = 2.3E12
+	E		    = 1.75E5
+      RESIDUE               = 'CHAR'
+      NU_RESIDUE            = 0.51
+      NU_FUEL               = 0.49 /
+
+&MATL ID                    = 'water'
+      CONDUCTIVITY          = 0.2
+      SPECIFIC_HEAT         = 4.184
+      DENSITY               = 1000.
+      N_REACTIONS           = 1
+      HEAT_OF_REACTION      = 2500.
+      REFERENCE_TEMPERATURE = 100.
+      PYROLYSIS_RANGE       = 10.
+      HEATING_RATE          = 5.
+      NU_WATER              = 1.0 /
+
+&MATL ID                    = 'CHAR'
+      CONDUCTIVITY          = 0.25
+      SPECIFIC_HEAT         = 1.5
+      DENSITY               = 500. /
+
+&SURF ID                    = 'Specimen'
+      COLOR                 = 'IVORY BLACK'
+      THICKNESS             = 0.0059
+      MATL_ID(1,1:2)        = 'Green Carpet','water'      
+      MATL_MASS_FRACTION(1,1:2) = 0.75,0.25
+      BACKING               = 'INSULATED' /
+
+Holder
+
+&MATL ID            = 'STEEL'
+      FYI           = 'Quintiere, Fire Behavior'
+      EMISSIVITY    = 0.8
+      DENSITY       = 7850.
+      CONDUCTIVITY  = 45.8
+      SPECIFIC_HEAT = 0.46 /
+
+&SURF ID        = 'SHEET METAL'
+      MATL_ID   = 'STEEL'
+      COLOR     = 'GRAY 50'
+      BACKING   = 'EXPOSED'
+      THICKNESS = 0.0013 
+      TMP_INNER = 50.0/
+
+Panel
+
+
+&MATL ID            = 'BRICK'
+      FYI           = 'FDS MANUAL'
+      EMISSIVITY    = 1.0
+      DENSITY       = 1600.
+      CONDUCTIVITY  = 0.69
+      SPECIFIC_HEAT = 0.84
+      N_REACTIONS           = 1
+      HEAT_OF_REACTION      = -361000.
+	 A		    = 1.0E-06
+	 E		    = 0.
+	 NU_FUEL       = 1.0 /
+
+&SURF ID        = 'PANEL'
+      MATL_ID   = 'BRICK'
+      COLOR     = 'PINK'
+      BACKING   = 'INSULATED'
+      THICKNESS = 0.05 
+      TMP_INNER = 800.0/
+
+
+&OBST XB= 0.10, 1.30,-0.15, 0.15,-0.02, 0.00, SURF_IDS='Specimen','Marinite','Marinite', DEVC_ID='timer' /
+
+&DEVC XYZ=0.0,0.0,0.0, ID='timer', SETPOINT= 0.0, QUANTITY='TIME', INITIAL_STATE=.FALSE./
+
+&OBST XB= 0.05, 1.35,-0.20, 0.20,-0.05,-0.02, SURF_ID='Marinite' /
+
+
+Walls
+
+&MATL ID            = 'Calcium Silicate'
+      DENSITY       = 740.
+      CONDUCTIVITY  = 0.128
+      SPECIFIC_HEAT = 1. /
+
+&SURF ID='Marinite'
+      MATL_ID='Calcium Silicate'
+      THICKNESS=0.013
+      COLOR='BEIGE' /
+
+External Boundaries
+
+&VENT MB='ZMIN', SURF_ID='OPEN' /
+
+&SURF ID='EXHAUST', MASS_FLUX_TOTAL=0.058, COLOR='BLUE' /
+&VENT XB=0.050,0.150,-0.190,0.190,0.710,0.710, SURF_ID='EXHAUST' /
+
+
+Output
+
+&DEVC XYZ=0.25,0.0,0.69, QUANTITY='THERMOCOUPLE', ID='TC-1' /
+&DEVC XYZ=1.15,0.0,0.256, QUANTITY='WALL TEMPERATURE', IOR=-3, ID='TC-2' /
+&DEVC XYZ=0.1,0.0,0.700, QUANTITY='W-VELOCITY', ID='VENT VELOCITY' /
+
+&DEVC XYZ=1.2,0.0,0.0, QUANTITY='GAUGE HEAT FLUX', IOR=3, ID='HFG_1' /
+&DEVC XYZ=1.1,0.0,0.0, QUANTITY='GAUGE HEAT FLUX', IOR=3, ID='HFG_2' /
+&DEVC XYZ=1.0,0.0,0.0, QUANTITY='GAUGE HEAT FLUX', IOR=3, ID='HFG_3' /
+&DEVC XYZ=0.9,0.0,0.0, QUANTITY='GAUGE HEAT FLUX', IOR=3, ID='HFG_4' /
+&DEVC XYZ=0.8,0.0,0.0, QUANTITY='GAUGE HEAT FLUX', IOR=3, ID='HFG_5' /
+&DEVC XYZ=0.7,0.0,0.0, QUANTITY='GAUGE HEAT FLUX', IOR=3, ID='HFG_6' /
+&DEVC XYZ=0.6,0.0,0.0, QUANTITY='GAUGE HEAT FLUX', IOR=3, ID='HFG_7' /
+&DEVC XYZ=0.5,0.0,0.0, QUANTITY='GAUGE HEAT FLUX', IOR=3, ID='HFG_8' /
+&DEVC XYZ=0.4,0.0,0.0, QUANTITY='GAUGE HEAT FLUX', IOR=3, ID='HFG_9' /
+&DEVC XYZ=0.3,0.0,0.0, QUANTITY='GAUGE HEAT FLUX', IOR=3, ID='HFG_10' /
+
+&DEVC XYZ=1.2,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 1.2 m'/
+&DEVC XYZ=1.19,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 1.19 m'/
+&DEVC XYZ=1.18,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 1.18 m'/
+&DEVC XYZ=1.17,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 1.17 m'/
+&DEVC XYZ=1.16,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 1.16 m'/
+&DEVC XYZ=1.15,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 1.15 m'/
+&DEVC XYZ=1.14,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 1.14 m'/
+&DEVC XYZ=1.13,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 1.13 m'/
+&DEVC XYZ=1.12,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 1.12 m'/
+&DEVC XYZ=1.11,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 1.11 m'/
+&DEVC XYZ=1.1,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 1.1 m'/
+&DEVC XYZ=1.09,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 1.09 m'/
+&DEVC XYZ=1.08,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 1.08 m'/
+&DEVC XYZ=1.07,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 1.07 m'/
+&DEVC XYZ=1.06,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 1.06 m'/
+&DEVC XYZ=1.05,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 1.05 m'/
+&DEVC XYZ=1.04,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 1.04 m'/
+&DEVC XYZ=1.03,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 1.03 m'/
+&DEVC XYZ=1.02,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 1.02 m'/
+&DEVC XYZ=1.01,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 1.01 m'/
+&DEVC XYZ=1.0,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 1.0 m'/
+&DEVC XYZ=0.99,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.99 m'/
+&DEVC XYZ=0.98,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.98 m'/
+&DEVC XYZ=0.97,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.97 m'/
+&DEVC XYZ=0.96,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.96 m'/
+&DEVC XYZ=0.95,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.95 m'/
+&DEVC XYZ=0.94,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.94 m'/
+&DEVC XYZ=0.93,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.93 m'/
+&DEVC XYZ=0.92,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.92 m'/
+&DEVC XYZ=0.91,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.91 m'/
+&DEVC XYZ=0.9,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.9 m'/
+&DEVC XYZ=0.89,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.89 m'/
+&DEVC XYZ=0.88,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.88 m'/
+&DEVC XYZ=0.87,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.87 m'/
+&DEVC XYZ=0.86,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.86 m'/
+&DEVC XYZ=0.85,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.85 m'/
+&DEVC XYZ=0.84,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.84 m'/
+&DEVC XYZ=0.83,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.83 m'/
+&DEVC XYZ=0.82,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.82 m'/
+&DEVC XYZ=0.81,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.81 m'/
+&DEVC XYZ=0.8,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.8 m'/
+&DEVC XYZ=0.75,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.75 m'/
+&DEVC XYZ=0.7,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.7 m'/
+&DEVC XYZ=0.65,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.65 m'/
+&DEVC XYZ=0.6,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.6 m'/
+&DEVC XYZ=0.55,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.55 m'/
+&DEVC XYZ=0.5,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.5 m'/
+&DEVC XYZ=0.45,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.45 m'/
+&DEVC XYZ=0.4,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.4 m'/
+&DEVC XYZ=0.35,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.35 m'/
+&DEVC XYZ=0.3,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.3 m'/
+&DEVC XYZ=0.25,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.25 m'/
+&DEVC XYZ=0.2,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.2 m'/
+&DEVC XYZ=0.15,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.15 m'/
+&DEVC XYZ=0.1,0.0,0.0, QUANTITY='SURFACE DENSITY', IOR=3, ID='Density, 0.1 m'/
+
+
+Line Output
+
+&DEVC XB=0.105,1.295,0.0,0.0,0.0,0.0, POINTS=120, QUANTITY='SURFACE DENSITY', IOR=3, ID='Mass per Area' /
+&DEVC XB=0.1,1.2,0.0,0.0,0.0,0.0, POINTS=12, QUANTITY='GAUGE HEAT FLUX', IOR=3, ID='Incident Heat Flux' /
+
+Smokeview Output
+
+&SLCF PBY=0.0, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
+&SLCF PBY=0.0, QUANTITY='HRRPUV' /
+&SLCF PBY=0.0, QUANTITY='VELOCITY', VECTOR=.TRUE. /
+
+&BNDF QUANTITY='GAUGE HEAT FLUX' /
+&BNDF QUANTITY='WALL TEMPERATURE' /
+
+&DUMP DT_RESTART= 100 /
+
+&TAIL /
+
+
