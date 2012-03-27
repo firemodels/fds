@@ -128,8 +128,8 @@ $RUNFDS Pyrolysis pcm_slab
 $RUNFDS Radiation droplet_absorption_cart
 $RUNFDS Radiation droplet_absorption_cyl
 $RUNFDS Radiation particle_absorption_cart_surf_cart
-$RUNFDS Radiation droplet_absorption_cart_surf_cyl
-$RUNFDS Radiation droplet_absorption_cart_surf_sph
+$RUNFDS Radiation particle_absorption_cart_surf_cyl
+$RUNFDS Radiation particle_absorption_cart_surf_sph
 $RUNFDS Radiation emissivity
 $RUNFDS Radiation hot_spheres
 $RUNFDS Radiation part_attenuation
