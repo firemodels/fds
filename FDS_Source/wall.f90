@@ -1723,9 +1723,14 @@ WALL_ITERATE: DO
             TMP_W_NEW = ONE_D%TMP(0:NWP+1)
          ENDIF
       ENDIF
-      TMP_F  = 0.5_EB*(TMP_W_NEW(0)+TMP_W_NEW(1))
+      IF (NWP == 1) THEN
+         TMP_F = TMP_W_NEW(1)
+         TMP_B = TMP_F
+      ELSE
+         TMP_F  = 0.5_EB*(TMP_W_NEW(0)+TMP_W_NEW(1))
+         TMP_B  = 0.5_EB*(TMP_W_NEW(NWP)+TMP_W_NEW(NWP+1))
+      ENDIF
       TMP_F  = MIN(TMPMAX,MAX(TMPMIN,TMP_F))
-      TMP_B  = 0.5_EB*(TMP_W_NEW(NWP)+TMP_W_NEW(NWP+1))
       TMP_B  = MIN(TMPMAX,MAX(TMPMIN,TMP_B))
    ENDDO SUB_TIME
    IF (.NOT. ITERATE) EXIT WALL_ITERATE
