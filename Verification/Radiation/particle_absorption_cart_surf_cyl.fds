@@ -1,0 +1,160 @@
+
+The particle tempererature is increased by the absorption of thermal radiation.
+Considering the total mass of absorbing particles, the ode for average 
+particle temperature is
+
+m c_p dT/dt = Q_abs
+
+With constant conditions, the average particle temperature in the end should be
+
+dT = dt Q_abs / (m c_p)
+
+By setting dt = 0.01 s, m = 0.01 kg and c_p = 1.0 kJ/kg, the numerical 
+value of dT should be equal to the time averaged Q_abs.
+
+--------------------FDS Data-----------------------------
+&HEAD CHID='particle_absorption_cart_surf_cyl',TITLE='Cartesian particle absorption test case $Revision: $' /
+
+MESH 1 has particles with cartesian surf.
+MESH 2 has particles with cartesian surf and split = 2 (x)
+MESH 2 has particles with cartesian surf and split = 2 (y)
+MESH 2 has particles with cartesian surf and split = 2 (z)
+
+&MESH IJK=3,3,3, XB=0,3,0,3,0,3/ 
+&MESH IJK=3,3,3, XB=4,7,0,3,0,3/ 
+&MESH IJK=3,3,3, XB=8,11, 0,3,0,3/ 
+&MESH IJK=3,3,3, XB=12,15,0,3,0,3/ 
+
+&TIME T_END=.01 DT = 0.00001 /
+
+&MISC GVEC=0,0,0, PR=100., RUN_AVG_FAC=0. /
+
+&DUMP NFRAMES=100 /
+
+&RADI RADTMP=1000.
+      ANGLE_INCREMENT=1
+      TIME_STEP_INCREMENT=1 /
+
+&SURF ID='HOT'
+      DEFAULT=.TRUE.
+      EMISSIVITY = 1.
+      TMP_FRONT = 1000.
+      TAU_T = 0.0 /
+
+&SURF ID='REALLY HOT'
+      EMISSIVITY = 1.
+      TMP_FRONT = 1500.
+      TAU_T = 0.0 /
+
+&VENT XB = 4,7,0,3,3,3 SURF_ID = 'REALLY HOT' /
+
+&PART ID='part_1'
+     	STATIC = .TRUE.
+     	INITIAL_TEMPERATURE = 0.
+     	SAMPLING_FACTOR=1
+	SURF_ID = 'part_surf'
+	QUANTITIES = 'PARTICLE TEMPERATURE', 'PARTICLE DIAMETER', 'PARTICLE MASS'/
+
+&PART ID='part_2'
+     	STATIC = .TRUE.
+     	INITIAL_TEMPERATURE = 0.
+     	SAMPLING_FACTOR=1
+	SURF_ID = 'part_surf'
+	QUANTITIES = 'PARTICLE TEMPERATURE', 'PARTICLE DIAMETER', 'PARTICLE MASS'
+	ORIENTATION(1,1:3)=1,0,0,
+	ORIENTATION(2,1:3)=-1,0,0 /
+
+&PART ID='part_3'
+     	STATIC = .TRUE.
+     	INITIAL_TEMPERATURE = 0.
+     	SAMPLING_FACTOR=1
+	SURF_ID = 'part_surf'
+	QUANTITIES = 'PARTICLE TEMPERATURE', 'PARTICLE DIAMETER', 'PARTICLE MASS'
+	ORIENTATION(1,1:3)=0,1,0,
+	ORIENTATION(2,1:3)=0,-1,0 /
+
+&PART ID='part_4'
+     	STATIC = .TRUE.
+     	INITIAL_TEMPERATURE = 0.
+     	SAMPLING_FACTOR=1
+	SURF_ID = 'part_surf'
+	QUANTITIES = 'PARTICLE TEMPERATURE', 'PARTICLE DIAMETER', 'PARTICLE MASS'
+	ORIENTATION(1,1:3)=0,0,1,
+	ORIENTATION(2,1:3)=0,0,-1 /
+
+Particle volume is 0.01^2 x pi x 0.3183 m3 = 1E-4 m3.
+
+&SURF ID 		= 'part_surf'
+	MATL_ID 	= 'part_matl'
+    	H_FIXED         = 0.
+	GEOMETRY 	= 'CYLINDRICAL'
+     	BACKING         = 'INSULATED'
+	THICKNESS 	= 0.01
+	TMP_INNER 	= 0
+	LENGTH	        = 0.3183 /
+
+&MATL ID		= 'part_matl'
+	DENSITY		= 100
+	CONDUCTIVITY 	= 100
+	SPECIFIC_HEAT 	= 1.0
+	EMISSIVITY	= 1.0 / 
+	
+&INIT 	NUMBER_INITIAL_PARTICLES = 1, 
+        XB = 1.5,1.5,1.5,1.5,1.5,1.5
+        ID = 'init_1'
+	PART_ID = 'part_1'/
+
+&INIT 	NUMBER_INITIAL_PARTICLES = 1, 
+        XB = 5.5,5.5,1.5,1.5,1.5,1.5
+        ID = 'init_2'
+	PART_ID = 'part_2'/
+
+&INIT 	NUMBER_INITIAL_PARTICLES = 1, 
+        XB = 9.5,9.5,1.5,1.5,1.5,1.5
+        ID = 'init_3'
+	PART_ID = 'part_3'/
+
+&INIT 	NUMBER_INITIAL_PARTICLES = 1, 
+        XB = 13.5,13.5,1.5,1.5,1.5,1.5
+        ID = 'init_4'
+	PART_ID = 'part_4'/
+
+mesh 1
+&DEVC QUANTITY='PARTICLE RADIATION LOSS', ID = 'Absorption_1'
+	STATISTICS = 'VOLUME INTEGRAL', XB = 0,3,0,3,0,3 /
+&DEVC QUANTITY='ADT', PART_ID='part_1', ID = 'ADT_1' 
+	STATISTICS = 'VOLUME MEAN', XB = 1,2,1,2,1,2 / 
+&DEVC QUANTITY='MPUV', PART_ID='part_1', ID = 'MPUV_1'
+	STATISTICS = 'VOLUME INTEGRAL', XB = 0,3,0,3,0,3 /
+&DEVC QUANTITY = 'WALL TEMPERATURE', INIT_ID = 'init_1' ID = 'TMP_1', XYZ = 1.5,1.5,1.5/
+
+mesh 2
+&DEVC QUANTITY='PARTICLE RADIATION LOSS', ID = 'Absorption_2'
+	STATISTICS = 'VOLUME INTEGRAL', XB = 4,7,0,3,0,3 /
+&DEVC QUANTITY='ADT', PART_ID='part_2', ID = 'ADT_2'
+	STATISTICS = 'VOLUME MEAN', XB = 5,6,1,2,1,2 /
+&DEVC QUANTITY='MPUV', PART_ID='part_2', ID = 'MPUV_2'
+	STATISTICS = 'VOLUME INTEGRAL', XB = 4,7,0,3,0,3 /
+&DEVC QUANTITY = 'WALL TEMPERATURE', INIT_ID = 'init_2' ID = 'TMP_2', XYZ = 5.5,1.5,1.5/
+
+mesh 3
+&DEVC QUANTITY='PARTICLE RADIATION LOSS', ID = 'Absorption_3'
+	STATISTICS = 'VOLUME INTEGRAL', XB = 8,11,0,3,0,3 /
+&DEVC QUANTITY='ADT', PART_ID='part_3', ID = 'ADT_3'
+	STATISTICS = 'VOLUME MEAN', XB = 9,10,0,3,1,2 /
+&DEVC QUANTITY='MPUV', PART_ID='part_3', ID = 'MPUV_3'
+	STATISTICS = 'VOLUME INTEGRAL', XB = 8,11,0,3,0,3 /
+&DEVC QUANTITY = 'WALL TEMPERATURE', INIT_ID = 'init_3' ID = 'TMP_3', XYZ = 9.5,1.5,1.5/
+
+mesh 4
+&DEVC QUANTITY='PARTICLE RADIATION LOSS', ID = 'Absorption_4'
+	STATISTICS = 'VOLUME INTEGRAL', XB = 12,15,0,3,0,3/
+&DEVC QUANTITY='ADT', PART_ID='part_4', ID = 'ADT_4'
+	STATISTICS = 'VOLUME MEAN', XB = 13,14,0,3,1,2  /
+&DEVC QUANTITY='MPUV', PART_ID='part_4', ID = 'MPUV_4'
+	STATISTICS = 'VOLUME INTEGRAL', XB = 12,15,0,3,0,3 /
+&DEVC QUANTITY = 'WALL TEMPERATURE', INIT_ID = 'init_4' ID = 'TMP_4', XYZ = 13.5,1.5,1.5/
+
+&TAIL /
+
+
