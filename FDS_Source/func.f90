@@ -446,6 +446,15 @@ IF (PRESENT(TAG)) THEN
    ENDDO
 ENDIF
 
+IF (PRESENT(WALL_INDEX)) THEN
+   DO I=1,OS%N_STORAGE_SLOTS
+      IF (OS%INTEGERS(1,I)==WALL_INDEX) THEN
+         STORAGE_INDEX_OLD = I
+         EXIT
+      ENDIF
+   ENDDO
+ENDIF
+
 ! Look for the first available storage slot
 
 IF (STORAGE_INDEX_OLD==0) THEN
