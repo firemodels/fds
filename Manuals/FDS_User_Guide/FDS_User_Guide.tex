@@ -4816,11 +4816,11 @@ A typical input line specifying a duct is as follows:
 All possible duct inputs are  given below:
 
 \begin{description}
-\item[{\ct AIRCOIL\_ID}] is the {\ct ID} of an aircoil located in the duct.  The operation of the aircoil can be controlled by either a device or a control function.  
+\item[{\ct AIRCOIL\_ID}] is the {\ct ID} of an aircoil located in the duct.  The operation of the aircoil can be controlled by either a device or a control function.
 \item[{\ct AREA}] is the cross sectional area of the duct in m$^2$. {\ct DIAMETER} (m) can be used instead.
-\item[{\ct CTRL\_ID] is the {\ct ID} for a {\ct CTRL} for a damper, fan, or aircoil in the duct.
-\item[{\ct DAMPER}] is a logical parameter indicating the presence of a damper in the duct.   The state of the damper is controlled by either a device or a control function. 
-\item[{\ct DEVC\_ID}]  is the {\ct ID} of a {\ct DEVC} for a damper, fan, or aircoil in the duct. 
+\item[{\ct CTRL\_ID}] is the {\ct ID} for a {\ct CTRL} for a damper, fan, or aircoil in the duct.
+\item[{\ct DAMPER}] is a logical parameter indicating the presence of a damper in the duct.   The state of the damper is controlled by either a device or a control function.
+\item[{\ct DEVC\_ID}]  is the {\ct ID} of a {\ct DEVC} for a damper, fan, or aircoil in the duct.
 \item[{\ct FAN\_ID}] is the {\ct ID} of a fan located in the duct. Instead of
 specifying a {\ct FAN\_ID}, you could specify the {\ct VOLUME\_FLOW} rate (m$^3$/s) through the duct. If you specify {\ct VOLUME\_FLOW}, you can change its value in time either using the characteristic time, {\ct TAU\_VF},  to define a tanh ({\ct TAU\_VF} > 0) or t$^2$ ramp ({\ct TAU\_VF} < 0); or you can specify a {\ct RAMP\_ID}.  The operation of the fan can be controlled by either a device or a control function.
 \item[{\ct LOSS}] is a pair of real numbers giving the forward and reverse flow loss in the duct.  Forward is flow from the first node listed in {\ct NODE\_ID} to the second node listed in {\ct NODE\_ID}.
@@ -4850,7 +4850,7 @@ Below are three example duct node inputs representing a typical tee-type connect
 \footnotesize
 
 \begin{verbatim}
-&HVAC TYPE_ID='NODE', ID='tee', DUCT_ID='duct 1','duct 2',..'duct n', 
+&HVAC TYPE_ID='NODE', ID='tee', DUCT_ID='duct 1','duct 2',..'duct n',
       LOSS_ARRAY=lossarray, XYZ=x,y,z /
 &HVAC TYPE_ID='NODE', ID='FDS connection', DUCT_ID='duct 1', VENT_ID='vent',
       LOSS_ARRAY=enter,exit /
@@ -4895,7 +4895,7 @@ All fan inputs are described below.
 \item[{\ct MAX\_FLOW}] is the maximum volumetric flow of the fan in m$^3$/s.  This input activates a quadratic fan model.
 \item[{\ct MAX\_PRESSURE}] is the stall pressure of the fan in Pa.  This input activates a quadratic fan model.
 \item[{\ct RAMP\_ID}] identifies the {\ct RAMP} that contains a table of pressure drop across the fan (Pa) versus the volumetric flow rates (m$^3$/s) for a user defined fan curve or is an
-optional table of time versus volumetric flow rates (m$^3$/s) for a constant volume fan. 
+optional table of time versus volumetric flow rates (m$^3$/s) for a constant volume fan.
 \item[{\ct TAU\_FAN}]  defines a tanh ({\ct TAU\_FAN} > 0) or t$^2$ ramp ({\ct TAU\_FAN} < 0) for the fan.  This is applied to the flowrate computed by any of the three types (constant flow, quadratic, or user defined ramp) of fans.
 \item[{\ct VOLUME\_FLOW}] is the fixed volumetric flow of the fan (m$^3$/s).
 \end{description}
@@ -5267,7 +5267,7 @@ Tall buildings often experience buoyancy-induced air movement due to temperature
 between inside and outside, known as {\em stack effect}. The different temperatures result in different densities and hence different pressure gradients inside the building comparted to outside the building.  This can result in inducing flow in vertical shafts (stairwells, atriums, elevator shafts, etc.) through leakage paths or openings at the top and bottom of the building.  To simulate this phenomenon in FDS, you must
 include the entire building, or a substantial fraction of it, both inside and out, in the computational domain. It
 is important to capture the pressure and density decrease in the atmosphere based on the specified
-temperature {\ct LAPSE\_RATE} ($^\circ$C/m) that is entered on the {\ct MISC} line. 
+temperature {\ct LAPSE\_RATE} ($^\circ$C/m) that is entered on the {\ct MISC} line.
 
 For the case where the stack flow is through small leakage paths, it is recommended to define the building using a pressure {\ct ZONE}.  The leakage paths can then be defined as individual HVAC systems.  Note that the leakage model would aggregate all leaky surfaces over the entire height of the building and as a result average out the pressure gradients.  For doing stack effect calculations individual leakage paths should be defined. In the section that follows is a simple example.
 
@@ -5277,7 +5277,7 @@ This subsection contains a simple example demonstrating the stack effect.  A det
 
 The {\bf stack\_effect} test case is a two-dimensional simulation of a building with an interior hotter than the exterior and two leakage paths at the top and the bottom of the building.  Since the inside is hotter, it will have a smaller pressure gradient than the outside resulting in higher pressure inside the top of the buiding than the outside.  This will cause flow out the upper leakage path and in the bottom leakage path.
 
-The building 100~m tall building with an interior temperature, $T_b$, initially set to 20~$^\circ$C, and an exterior temperature, $T_\infty$, set to 
+The building 100~m tall building with an interior temperature, $T_b$, initially set to 20~$^\circ$C, and an exterior temperature, $T_\infty$, set to
 10~$^\circ$C. The {\ct LAPSE\_RATE} is set to 0~$^\circ$C/m; thus, $T_0(z)=T_\infty$ outside the building and $T_0(z)=T_b$ inside the building. Two small leakage openings are defined 2.5~m above the ground floor and 2.5~m below the roof using the HVAC solver.  Each opening is given an area of 0.01~m$^2$ and a flow loss of 2 (e.g. an entrance loss into the leak path of 1 and and exit loss out of the leak path of 1 both of which represent a sharp edge opening).
 
 The initial density stratification inside and outside the building can be calculated using the relation:
@@ -5287,18 +5287,18 @@ The initial density stratification inside and outside the building can be calcul
 
 where $\cal R$ is the universal gas constant, $g$ is the acceleration of gravity, and $\overline{W}$ is the average molecular weight of the air, $z$ is the height above the {\ct GROUND\_LEVEL}, and $T_0$ is the ambient temperature.
 Applying this formula to the external and internal locations at the lower and upper vents results in densities of 1.2412, 1.1989, 1.2272, and
-1.1858~kg/m$^3$, respectively.  
+1.1858~kg/m$^3$, respectively.
 
 Since the openings in the building are equally spaced over its height, the neutral plane should be close to its midpoint. By making some simple assumptions including using only the ground level ambient pressure for the equation of state and that the densities are constant with height, a hand calculation can be done to determine the flows through the leakage paths.  Note that in actuality both pressure and desnsity will change with height; however, as seen in the above densities, this changes are small.
 
 The pressure difference across the building's wall can be computed as
 \be
-   \Delta p = \frac{\overline{W} \, p_0(z) \, g \, h} {\cal R} \left( \frac{1}{T_\infty} - \frac{1}{T_b} \right) 
+   \Delta p = \frac{\overline{W} \, p_0(z) \, g \, h} {\cal R} \left( \frac{1}{T_\infty} - \frac{1}{T_b} \right)
 \ee
 where $h$ is the distance from the neutral plane.  The pressure gradient will cause flow in and out of the leaks and the neutral plane is located where the mass flows in and out are balanced.  This can be computed using:
 
 \be \frac{H}{H_n} = 1 + \frac{T_\infty}{T_b} \ee
-where $H_n$ is the neutral plane height above the bottom of the shaft and $H$ is the height between the vents.  This gives a neutral plane of 46.79~m and pressure differences of 44.3 Pa and 50.7 Pa at the top and bottom of the vent.  Using the loss of 2 and the pressure difference in the HVAC momentum equation results in an steady-state velocity of inflow velocity at the bottom is 3.85~m/s and an outflow velocity at the top is~4.21 m/s.  
+where $H_n$ is the neutral plane height above the bottom of the shaft and $H$ is the height between the vents.  This gives a neutral plane of 46.79~m and pressure differences of 44.3 Pa and 50.7 Pa at the top and bottom of the vent.  Using the loss of 2 and the pressure difference in the HVAC momentum equation results in an steady-state velocity of inflow velocity at the bottom is 3.85~m/s and an outflow velocity at the top is~4.21 m/s.
 
 Results for velocity and density are shown in Figure~\ref{fig_stack_effect}.
 
@@ -6219,7 +6219,7 @@ The choice of fuel in this example, PVC, is not defined in Table \ref{tab:gasspe
 For the oxidizer and products, which are both composed of multiple primitive species, {\ct SMIX} lines are needed to define the composition of the lumped species. As the user, you can define the {\ct SMIX} by either the {\ct MASS\_FRACTIONS} of the component gases or the {\ct VOLUME\_FRACTIONS}. For this case, volume fractions will be used. If Equation \ref{eq:PVC_reac2} is properly balanced, you can directly use the stoichiometric coefficients of the primitive species to define the lumped species.
 \footnotesize
 \begin{verbatim}
-&SMIX ID = 'AIR', SPEC_ID = 'OXYGEN','NITROGEN', VOLUME_FRACTION =1.53,5.76, 
+&SMIX ID = 'AIR', SPEC_ID = 'OXYGEN','NITROGEN', VOLUME_FRACTION =1.53,5.76,
            BACKGROUND=.TRUE. /
 &SMIX ID = 'PRODUCTS', SPEC_ID ='HYDROGEN CHLORIDE','WATER VAPOR','CARBON MONOXIDE',
            'CARBON DIOXIDE','SOOT','NITROGEN',
