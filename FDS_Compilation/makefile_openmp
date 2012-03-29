@@ -13,20 +13,18 @@ VPATH = ../FDS_Source
 
 # Definition of the non-MPI or MPI object variables
 
-# note: objf_serial and objf_mpi contain only Fortran routines ie not isob.c
-
-objf_serial = prec.o mpis.o smvv.o cons.o devc.o data.o type.o mesh.o func.o irad.o \
-             ieva.o pois.o scrc.o radi.o evac.o part.o vege.o ctrl.o turb.o geom.o dump.o hvac.o read.o \
-             mass.o wall.o fire.o divg.o init.o velo.o pres.o main.o
-obj_serial = isob.o $(objf_serial)
+objf_serial = prec.o mpis.o cons.o devc.o data.o type.o mesh.o func.o smvv.o irad.o \
+              ieva.o pois.o scrc.o radi.o evac.o part.o vege.o ctrl.o turb.o geom.o dump.o hvac.o read.o \
+              mass.o wall.o fire.o divg.o init.o velo.o pres.o main.o
+obj_serial = $(objf_serial)
 
 objwinf_serial = $(objf_serial:.o=.obj)
 objwin_serial = $(obj_serial:.o=.obj)
 
-objf_mpi = prec.o mpip.o smvv.o cons.o devc.o data.o type.o mesh.o func.o irad.o \
-          ieva.o pois.o scrc.o radi.o evac.o part.o vege.o ctrl.o turb.o geom.o dump.o hvac.o read.o \
-          mass.o wall.o fire.o divg.o init.o velo.o pres.o main.o
-obj_mpi = isob.o $(objf_mpi)
+objf_mpi = prec.o mpip.o cons.o devc.o data.o type.o mesh.o func.o smvv.o irad.o \
+           ieva.o pois.o scrc.o radi.o evac.o part.o vege.o ctrl.o turb.o geom.o dump.o hvac.o read.o \
+           mass.o wall.o fire.o divg.o init.o velo.o pres.o main.o
+obj_mpi = $(objf_mpi)
 
 objwinf_mpi = $(objf_mpi:.o=.obj)
 objwin_mpi = $(obj_mpi:.o=.obj)
@@ -76,10 +74,6 @@ read.obj: FOPTIMIZATIONFLAGS = -Od
 	$(FCOMPL) -c $(FOPTIMIZATIONFLAGS) $(FFLAGS) $<
 .f90.obj:
 	$(FCOMPL) -c $(FOPTIMIZATIONFLAGS) $(FFLAGS) $<
-.c.o:
-	$(CCOMPL) -c $(CFLAGS) $<
-.c.obj:
-	$(CCOMPL) -c $(CFLAGS) $<
 
 #*** Compiler Specific Rules ***
 
@@ -90,7 +84,6 @@ read.obj: FOPTIMIZATIONFLAGS = -Od
  #    ..\Scripts\ifortvars ia32
 
 openmp_intel_win_32 : FFLAGS = /Qvec_report0
-openmp_intel_win_32 : CFLAGS = -O2 -Dpp_noappend
 openmp_intel_win_32 : FCOMPL = ifort
 openmp_intel_win_32 : CCOMPL = icl
 openmp_intel_win_32 : FOPENMPFLAGS = /Qopenmp /Qopenmp-link:static
@@ -102,7 +95,6 @@ openmp_intel_win_32 : setup_win $(objwin_serial)
 openmp_mpi_intel_win_32 : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
 openmp_mpi_intel_win_32 : MPIINCLUDE = "c:\program files\mpich2\include"
 openmp_mpi_intel_win_32 : FFLAGS = /Qvec_report0 /I $(MPIINCLUDE) 
-openmp_mpi_intel_win_32 : CFLAGS = -O2 -Dpp_noappend
 openmp_mpi_intel_win_32 : FOPENMPFLAGS = /Qopenmp /Qopenmp-link:static
 openmp_mpi_intel_win_32 : FOPTIMIZATIONFLAGS = -O2
 openmp_mpi_intel_win_32 : FCOMPL = ifort
@@ -112,7 +104,6 @@ openmp_mpi_intel_win_32 : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) /F100000000 $(objwin_mpi) $(MPILIB)
 
 openmp_intel_win_64 : FFLAGS = /Qvec_report0 /nologo
-openmp_intel_win_64 : CFLAGS = -O2 -Dpp_noappend
 openmp_intel_win_64 : FCOMPL = ifort
 openmp_intel_win_64 : CCOMPL = icl
 openmp_intel_win_64 : FOPENMPFLAGS = /Qopenmp
@@ -122,7 +113,6 @@ openmp_intel_win_64 : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) /F100000000 $(objwin_serial)
 
 openmp_intel_win_64_db : FFLAGS = /Qvec_report0 /nologo /debug:all /Od /extend_source:132 /warn:all /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f95 /Z7
-openmp_intel_win_64_db : CFLAGS = -O2 -Dpp_noappend
 openmp_intel_win_64_db : FCOMPL = ifort
 openmp_intel_win_64_db : CCOMPL = icl
 openmp_intel_win_64_db : FOPENMPFLAGS = /Qopenmp /Qopenmp-link:static
@@ -134,9 +124,8 @@ openmp_intel_win_64_db : setup_win $(objwin_serial)
 # Intel Compiler for Linux, version 11
 
 openmp_intel_linux_32 : FFLAGS = -m32 -static -vec_report0
-openmp_intel_linux_32 : CFLAGS = -m32 -O -Dpp_noappend -vec_report0
 openmp_intel_linux_32 : FOPENMPFLAGS = -openmp -openmp-link static
-openmp_intel_linux_32 : FOPTIMIZATIONFLAGS = -O3
+openmp_intel_linux_32 : FOPTIMIZATIONFLAGS = -O2
 openmp_intel_linux_32 : FCOMPL = ifort
 openmp_intel_linux_32 : CCOMPL = icc
 openmp_intel_linux_32 : obj = fds_openmp_intel_linux_32
@@ -145,7 +134,6 @@ openmp_intel_linux_32 : setup $(obj_serial)
 
 ### -check produces a runtime-error in the debug version
 openmp_intel_linux_32_db : FFLAGS = -m32 -static -vec_report0 -warn unused -auto -WB -traceback -g -fltconsistency
-openmp_intel_linux_32_db : CFLAGS = -m32 -O -Dpp_noappend -vec_report0
 openmp_intel_linux_32_db : FOPENMPFLAGS = -openmp -openmp-link static
 openmp_intel_linux_32_db : FOPTIMIZATIONFLAGS = -O0
 openmp_intel_linux_32_db : FCOMPL = ifort
@@ -155,7 +143,6 @@ openmp_intel_linux_32_db : setup $(obj_serial)
 	$(FCOMPL) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
 openmp_intel_linux_32_tcheck : FFLAGS = -m32 -g
-openmp_intel_linux_32_tcheck : CFLAGS = -m32 -O -Dpp_noappend -vec_report0
 openmp_intel_linux_32_tcheck : FOPENMPFLAGS = -openmp -tcheck 
 openmp_intel_linux_32_tcheck : FOPTIMIZATIONFLAGS = -O0
 openmp_intel_linux_32_tcheck : FCOMPL = ifort
@@ -165,9 +152,8 @@ openmp_intel_linux_32_tcheck : setup $(obj_serial)
 	$(FCOMPL) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
 openmp_mpi_intel_linux_32 : FFLAGS = -m32 -vec_report0
-openmp_mpi_intel_linux_32 : CFLAGS = -m32 -O -Dpp_noappend -vec_report0
 openmp_mpi_intel_linux_32 : FOPENMPFLAGS = -openmp -openmp-link static
-openmp_mpi_intel_linux_32 : FOPTIMIZATIONFLAGS = -O3
+openmp_mpi_intel_linux_32 : FOPTIMIZATIONFLAGS = -O2
 openmp_mpi_intel_linux_32 : FCOMPL = mpif90 -fc=ifort
 openmp_mpi_intel_linux_32 : CCOMPL = icc
 openmp_mpi_intel_linux_32 : obj = fds_openmp_mpi_intel_linux_32
@@ -176,9 +162,8 @@ openmp_mpi_intel_linux_32 : setup $(obj_mpi)
 
 openmp_intel_linux_64 : FFLAGS = -m64 -static -vec_report0
 #openmp_intel_linux_64 : FFLAGS = -m64 -vec_report0
-openmp_intel_linux_64 : CFLAGS = -m64 -O -Dpp_noappend -vec_report0
 openmp_intel_linux_64 : FOPENMPFLAGS = -openmp -openmp-link static
-openmp_intel_linux_64 : FOPTIMIZATIONFLAGS = -O3
+openmp_intel_linux_64 : FOPTIMIZATIONFLAGS = -O2
 openmp_intel_linux_64 : FCOMPL = ifort
 openmp_intel_linux_64 : CCOMPL = icc
 openmp_intel_linux_64 : obj = fds_openmp_intel_linux_64
@@ -187,7 +172,6 @@ openmp_intel_linux_64 : setup $(obj_serial)
 
 ### -check produces a runtime-error in the debug version
 openmp_intel_linux_64_db : FFLAGS = -m64 -static -vec_report0 -warn unused -auto -WB -traceback -g -fltconsistency
-openmp_intel_linux_64_db : CFLAGS = -m64 -O0 -Dpp_noappend -vec_report0
 openmp_intel_linux_64_db : FOPENMPFLAGS = -openmp -openmp-link static
 openmp_intel_linux_64_db : FOPTIMIZATIONFLAGS = -O0
 openmp_intel_linux_64_db : FCOMPL = ifort
@@ -197,7 +181,6 @@ openmp_intel_linux_64_db : setup $(obj_serial)
 	$(FCOMPL) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
 openmp_intel_linux_64_tcheck : FFLAGS = -m64 -g
-openmp_intel_linux_64_tcheck : CFLAGS = -m64 -O -Dpp_noappend -vec_report0
 openmp_intel_linux_64_tcheck : FOPENMPFLAGS = -openmp -tcheck
 openmp_intel_linux_64_tcheck : FOPTIMIZATIONFLAGS = -O0
 openmp_intel_linux_64_tcheck : FCOMPL = ifort
@@ -207,9 +190,8 @@ openmp_intel_linux_64_tcheck : setup $(obj_serial)
 	$(FCOMPL) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
 openmp_mpi_intel_linux_64 : FFLAGS = -m64 -vec_report0
-openmp_mpi_intel_linux_64 : CFLAGS = -m64 -O -Dpp_noappend -vec_report0
 openmp_mpi_intel_linux_64 : FOPENMPFLAGS = -openmp -openmp-link static
-openmp_mpi_intel_linux_64 : FOPTIMIZATIONFLAGS = -O3
+openmp_mpi_intel_linux_64 : FOPTIMIZATIONFLAGS = -O2
 openmp_mpi_intel_linux_64 : FCOMPL = mpif90 -fc=ifort
 openmp_mpi_intel_linux_64 : CCOMPL = icc
 openmp_mpi_intel_linux_64 : obj = fds_openmp_mpi_intel_linux_64
@@ -217,7 +199,6 @@ openmp_mpi_intel_linux_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FOPTIMIZATIONFLAGS) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 
 openmp_sun_linux_64 : FFLAGS = -m64 -Bstatic
-openmp_sun_linux_64 : CFLAGS = -O2 -m64
 openmp_sun_linux_64 : FOPENMPFLAGS = -openmp
 #openmp_sun_linux_64 : FOPENMPFLAGS = -openmp -vpara -XlistMP -xloopinfo
 openmp_sun_linux_64 : FOPTIMIZATIONFLAGS = -O0
@@ -232,7 +213,7 @@ openmp_sun_linux_64 : setup $(obj_serial)
 
 # *** Object Dependencies ***
 
-smvv.o : isob.o
+smvv.o : prec.o func.o
 cons.o : prec.o
 mpis.o : prec.o
 type.o : prec.o cons.o
@@ -260,10 +241,10 @@ part.o : func.o prec.o cons.o type.o mesh.o devc.o data.o
 vege.o : func.o prec.o cons.o type.o mesh.o devc.o part.o
 read.o : func.o prec.o cons.o type.o mesh.o devc.o ctrl.o irad.o evac.o hvac.o scrc.o data.o geom.o
 init.o : func.o prec.o cons.o type.o mesh.o devc.o irad.o pois.o data.o evac.o
-dump.o : func.o prec.o cons.o type.o mesh.o devc.o evac.o smvv.o isob.c turb.o scrc.o data.o
-main.o : func.o prec.o cons.o type.o mesh.o devc.o smvv.o isob.c mass.o divg.o velo.o wall.o fire.o irad.o ieva.o radi.o evac.o part.o vege.o dump.o read.o init.o pres.o pois.o ctrl.o turb.o hvac.o scrc.o data.o geom.o
+dump.o : func.o prec.o cons.o type.o mesh.o devc.o evac.o smvv.o turb.o scrc.o data.o
+main.o : func.o prec.o cons.o type.o mesh.o devc.o smvv.o mass.o divg.o velo.o wall.o fire.o irad.o ieva.o radi.o evac.o part.o vege.o dump.o read.o init.o pres.o pois.o ctrl.o turb.o hvac.o scrc.o data.o geom.o
 
-smvv.obj : isob.obj
+smvv.obj : prec.obj func.obj
 cons.obj : prec.obj
 mpis.obj : prec.obj
 type.obj : prec.obj cons.obj
@@ -291,8 +272,8 @@ part.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj data.obj
 vege.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj part.obj
 read.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj ctrl.obj irad.obj evac.obj hvac.obj scrc.obj data.obj geom.obj
 init.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj irad.obj pois.obj data.obj evac.obj
-dump.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj evac.obj smvv.obj isob.c turb.obj scrc.obj data.obj 
-main.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj smvv.obj isob.c mass.obj divg.obj velo.obj wall.obj fire.obj irad.obj ieva.obj radi.obj evac.obj part.obj vege.obj dump.obj read.obj init.obj pres.obj pois.obj ctrl.obj turb.obj hvac.obj scrc.obj data.obj geom.obj
+dump.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj evac.obj smvv.obj turb.obj scrc.obj data.obj 
+main.obj : func.obj prec.obj cons.obj type.obj mesh.obj devc.obj smvv.obj mass.obj divg.obj velo.obj wall.obj fire.obj irad.obj ieva.obj radi.obj evac.obj part.obj vege.obj dump.obj read.obj init.obj pres.obj pois.obj ctrl.obj turb.obj hvac.obj scrc.obj data.obj geom.obj
 
 
 #*** Clean Target to remove Object and Module files ***
