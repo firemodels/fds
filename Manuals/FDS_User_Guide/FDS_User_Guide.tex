@@ -4801,6 +4801,7 @@ Additionally you must define the locations where the HVAC network joins the comp
 \end{description}
 A number of examples of simple HVAC systems are given in the HVAC folder of the sample cases and are discussed in the FDS Verification Guide.
 
+Note: It is recommended that for anything but the most simple HVAC systems (where a constant flow is explicitly specified), that you keep {\ct STRATIFICATION=.TRUE.}.
 
 \subsection{HVAC Duct Parameters}
 \label{info:HVACduct}
@@ -5017,7 +5018,7 @@ fan itself can be positioned about halfway along the passage.
 
 \clearpage
 
-\subsection{HVAC Filter Parameters}
+\subsection{HVAC Filter Parameters {\bf HVAC\_filter}}
 \label{info:HVACfilter}
 
 A sample input for a filter is given below.
@@ -5042,6 +5043,19 @@ All possible filter inputs are discussed below.
 
 \noindent
 Note that a filter input refers to a class of filters and that multiple ducts can reference the same filter definition.
+
+The sample case {\bf HVAC\_filter} demonstrates the use of the filter input.  A 1~m$^3$ compartment is initialized with a particulate species with a mass fraction of 0.001.  A 100 \% efficient filter with a clean loss of 1 and a loading loss of 7732.446~/kg (gives a total loss of 10 when all the soot in the compartment is filtered).  A quadratic fan in a 0.01 m$^2$ duct with a maximimum pressure of 20~Pa and a maximum flow of 0.2~m$^3$/s takes suction from one side of the compartment and discharges into the other.  Over time, the filter removes the particulate from the compartment.  However, since the filter loss increases with the mass of particulate filtered, the rate of removal will decrease over time.  Applying the conservation of energy to the compartment and the steady state duct momentum equation to the duct, we can solve for the compartment temperature and pressure and the duct velocity.  These results along with the loading of the filter and the mass of particulate in the compartment are shown in Figure~\ref{fig_filter}.
+
+\begin{figure}[t]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_filter_p} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_filter_t} } \\
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_filter_v} } &
+      \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_filter_kg} }
+   \end{tabular*}
+   \caption[Results for the HVAC\_filter sample case]{Compartment pressure (upper left), compartment temperature (upper right), duct velocity (lower left), and particulate mass in the compartment and on the filter (lower right)}
+   \label{fig_filter}
+\end{figure}
 
 \subsection{HVAC Aircoil Parameters: {\bf HVAC\_aircoil}}
 \label{info:HVACaircoil}
