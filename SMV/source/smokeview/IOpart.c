@@ -228,9 +228,6 @@ void getpart5data(particle *parti, int partframestep_local, int partpointstep_lo
     if(doit==1){
       printf("particle time=%.2f",time_local);
       parti->times[count2]=time_local;
-      if(time_local>13.8){
-        printf("step before\n");
-      }
     }
     for(i=0;i<nclasses;i++){
       part5class *partclassi;
@@ -238,7 +235,6 @@ void getpart5data(particle *parti, int partframestep_local, int partpointstep_lo
 
       partclassi = parti->partclassptr[i];
       FORTPART5READ(&nparts,1);
-      printf("  nparts=%i\n",nparts);
       if(returncode==0)goto wrapup;
       numpoints[i]=nparts;
       skip_local=0;
