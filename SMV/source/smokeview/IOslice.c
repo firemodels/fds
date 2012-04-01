@@ -2337,6 +2337,30 @@ void drawvslice_frame(void){
   }
 }
 
+#ifdef pp_GSLICE
+/* ------------------ drawgslice ------------------------ */
+
+void drawgslice(const slice *sd){
+  glPushMatrix();
+  glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+  glTranslatef(-xbar0,-ybar0,-zbar0);
+  printf("xyz=%f %f %f\n",gslice_xyz[0],gslice_xyz[1],gslice_xyz[2]);
+  printf("norm=%f %f %f\n",-gslice_rotation[2],-gslice_rotation[6],gslice_rotation[10]);
+  glTranslatef(gslice_xyz[0],gslice_xyz[1],gslice_xyz[2]);
+  glMultMatrixf(gslice_rotation);
+  glBegin(GL_LINES);
+  glVertex3f(0.0,0.0,0.0);
+  glVertex3f(0.0,0.0,1.0);
+  glEnd();
+  glPointSize(20.0);
+  glBegin(GL_POINTS);
+  glVertex3f(0.0,0.0,0.0);
+  glVertex3f(0.0,0.0,1.0);
+  glEnd();
+
+  glPopMatrix();
+}
+#endif
 /* ------------------ drawslice ------------------------ */
 
 void drawslice(const slice *sd){

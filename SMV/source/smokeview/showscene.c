@@ -383,6 +383,11 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
 /* ++++++++++++++++++++++++ draw slice files +++++++++++++++++++++++++ */
 
+#ifdef pp_GSLICE
+  if(show_gslice==1){
+    drawgslice(NULL);
+  }
+#endif
   if(showslice==1&&use_transparency_data==0){
     drawslice_frame();
   } 

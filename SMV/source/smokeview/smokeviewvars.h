@@ -664,6 +664,10 @@ SVEXTERN int mainwindow_id,dwinWW,SVDECL(showcolorbar_gtge,1);
 SVEXTERN int rendertourcount;
 
 SVEXTERN float vecyz[4];
+#ifdef pp_GSLICE
+SVEXTERN float gslice_rotation[16],gslice_xyz[3];
+SVEXTERN int SVDECL(show_gslice,0);
+#endif
 
 
 SVEXTERN float ventcolor_orig[4];

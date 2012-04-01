@@ -46,6 +46,11 @@ extern "C" char glui_motion_revision[]="$Revision$";
 #define WINDOWSIZE_LIST 17
 #define SNAPVIEW 21
 #define SET_VIEW_XYZ 22
+#ifdef pp_GSLICE
+#define GSLICE_ROTATE 23
+#define GSLICE_HTRANSLATE 24
+#define GSLICE_VTRANSLATE 25
+#endif
 
 #define RENDER_TYPE 0
 #define RENDER_SIZE_LIST 1
@@ -57,6 +62,9 @@ extern "C" char glui_motion_revision[]="$Revision$";
 void EYEVIEW_CB(int var);
 void BUTTON_hide2_CB(int var);
 void BUTTON_Reset_CB(int var);
+#ifdef pp_GSLICE
+void GSLICE_CB(int var);
+#endif
 
 GLUI_Listbox *meshlist1=NULL;
 GLUI_Listbox *render_size_list=NULL;
@@ -66,6 +74,12 @@ GLUI_Button *render_stop=NULL ;
 
 GLUI *glui_motion=NULL;
 GLUI_Panel *panel_rotatebuttons=NULL, *panel_translate=NULL,*panel_close=NULL;
+#ifdef pp_GSLICE
+GLUI_Panel *panel_gslice=NULL;
+GLUI_Rotation *gslice_rotate;
+GLUI_Translation *gslice_htranslate=NULL, *gslice_vtranslate=NULL;
+GLUI_Checkbox *CHECKBOX_show_gslice=NULL;
+#endif
 GLUI_Panel *panel_blockageview=NULL;
 GLUI_Panel *panel_rotate=NULL;
 GLUI_Panel *panel_speed=NULL;
@@ -244,7 +258,11 @@ extern "C" void glui_motion_setup(int main_window){
   glui_motion = GLUI_Master.create_glui(_("Motion/View/Render"),0,0,0);
   if(showmotion_dialog==0)glui_motion->hide();
 
+#ifdef pp_GSLICE
+  panel_motion = glui_motion->add_rollout(_("Scene Motion"));
+#else
   panel_motion = glui_motion->add_rollout(_("Motion"));
+#endif
 
   panel_translate2 = glui_motion->add_panel_to_panel(panel_motion,"",GLUI_PANEL_NONE);
   d_eye_xyz[0]=0.0;
@@ -318,6 +336,25 @@ extern "C" void glui_motion_setup(int main_window){
   SPINNER_set_view_z=glui_motion->add_spinner_to_panel(panel_specify,"z:",GLUI_SPINNER_FLOAT,set_view_xyz+2,SET_VIEW_XYZ,TRANSLATE_CB);
 #endif
 
+#ifdef pp_GSLICE
+  panel_gslice = glui_motion->add_rollout(_("Slice Motion"),false);
+  for(i=0;i<16;i++){
+    if(i%5==0){
+      gslice_rotation[i]=1.0;
+    }
+    else{
+      gslice_rotation[i]=0.0;
+    }
+  }
+  gslice_xyz[0]=0.0;
+  gslice_xyz[1]=0.0;
+  gslice_xyz[2]=0.0;
+  gslice_rotate =glui_motion->add_rotation_to_panel(panel_gslice,"rotate slice",gslice_rotation,GSLICE_ROTATE,GSLICE_CB);
+  gslice_htranslate=glui_motion->add_translation_to_panel(panel_gslice,"horizontal translation",GLUI_TRANSLATION_XY,gslice_xyz,GSLICE_HTRANSLATE,GSLICE_CB);
+  gslice_vtranslate=glui_motion->add_translation_to_panel(panel_gslice,"vertical translation",GLUI_TRANSLATION_Z,gslice_xyz+2,GSLICE_VTRANSLATE,GSLICE_CB);
+  CHECKBOX_show_gslice=glui_motion->add_checkbox_to_panel(panel_gslice,"show gslice",&show_gslice);
+  
+#endif
 
   panel_projection = glui_motion->add_rollout(_("Window properties"),false);
   projection_radio=glui_motion->add_radiogroup_to_panel(panel_projection,&projection_type,PROJECTION,TRANSLATE_CB);
@@ -667,6 +704,23 @@ extern "C" void showhide_translate(int var){
   }
 
 }
+
+#ifdef pp_GSLICE
+/* ------------------ GSLICE_CB ------------------------ */
+
+void GSLICE_CB(int var){
+  switch(var){
+    case GSLICE_ROTATE:
+    break;
+    case GSLICE_HTRANSLATE:
+    case GSLICE_VTRANSLATE:
+      gslice_xyz[0]=CLAMP(gslice_xyz[0],xbar0,xbar0+xbar*xyzmaxdiff);
+      gslice_xyz[1]=CLAMP(gslice_xyz[1],ybar0,ybar0+ybar*xyzmaxdiff);
+      gslice_xyz[2]=CLAMP(gslice_xyz[2],zbar0,zbar0+zbar*xyzmaxdiff);
+    break;
+  }
+}
+#endif
 
 /* ------------------ TRANSLATE_CB ------------------------ */
 
