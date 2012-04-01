@@ -1409,6 +1409,9 @@ void Bound_CB(int var){
   int i;
 
   switch (var) {
+  case VALMAX:
+  case VALMIN:
+    break;
   case HIDEPATCHSURFACE:
     updatefacelists=1;
     break;
