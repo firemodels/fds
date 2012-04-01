@@ -895,6 +895,7 @@ void drawColorBars(void){
   float right[3],left[3],bottom[4];
   int ileft=0;
   int leftzone, leftsmoke, leftslice, leftpatch, leftiso;
+  int lastzone, lastsmoke, lastslice, lastpatch, lastiso;
   float yy,yy2;
   int iposition;
   float position;
@@ -1017,7 +1018,6 @@ void drawColorBars(void){
         float *rgb_plot3d_local;
 
         rgb_plot3d_local = rgb_plot3d_contour[nrgb-2];
-
         barmid = (barleft+barright)/2.0;
         i=-1;
         yy = MIX2(i+0.5,nrgb-3,tophat,barbot);
@@ -1120,27 +1120,37 @@ void drawColorBars(void){
       if(show_extreme_below==1||show_extreme_above==1)glDisable(GL_POLYGON_SMOOTH);
     }
   }
+  lastsmoke=0;
+  lastslice=0;
+  lastpatch=0;
+  lastzone=0;
+  lastiso=0;
   leftsmoke=0;
   leftslice=0;
   leftpatch=0;
   leftzone=0;
   leftiso=0;
+  ileft=0;
+  if(showiso_colorbar==1){
+    leftiso=ileft;
+    lastsmoke=0;lastslice=0;lastpatch=0;lastzone=0;lastiso=1;
+    ileft++;
+  }
   if(showevac_colorbar==1||showsmoke==1){
     if(parttype!=0){
       leftsmoke=ileft;
+      lastsmoke=1;lastslice=0;lastpatch=0;lastzone=0;lastiso=0;
       ileft++;
     }
   }
   if(showslice==1||(showvslice==1&&vslicecolorbarflag==1)){
     leftslice=ileft;
-    ileft++;
-  }
-  if(showiso_colorbar==1){
-    leftiso=ileft;
+    lastsmoke=0;lastslice=1;lastpatch=0;lastzone=0;lastiso=0;
     ileft++;
   }
   if(showpatch==1){
     leftpatch=ileft;
+    lastsmoke=0;lastslice=0;lastpatch=1;lastzone=0;lastiso=0;
   }
 
   strcpy(partshortlabel2,"");
@@ -1343,7 +1353,7 @@ void drawColorBars(void){
     }
     for (i=0; i<nrgb-1; i++){
       float vert_position;
-      char partcolorlabel[256];
+      char partcolorlabel[256],partcolorlabel2[256];
       char *partcolorlabel_ptr=NULL;
 
       vert_position = (float)(i)*(float)(nrgb+DYFONT)/(float)(nrgb-2) + barbot-dyfont/2.0;
@@ -1364,6 +1374,18 @@ void drawColorBars(void){
         scalefloat2string(val,partcolorlabel, partfactor, partrange);
         scalestring(partcolorlabel_ptr,partcolorlabel, partfactor, partrange);
         partcolorlabel_ptr=partcolorlabel;
+      }
+      if(lastsmoke==1&&showcolorbar_gtge==1){
+        if(show_extreme_below==1&&i==0){
+          strcpy(partcolorlabel2,"<=");
+          strcat(partcolorlabel2,partcolorlabel_ptr);
+          partcolorlabel_ptr=partcolorlabel2;
+        }
+        if(show_extreme_above==1&&i==nrgb-2){
+          strcpy(partcolorlabel2,">=");
+          strcat(partcolorlabel2,partcolorlabel_ptr);
+          partcolorlabel_ptr=partcolorlabel2;
+        }
       }
       outputBarText(right[leftsmoke],vert_position,color1,partcolorlabel_ptr);
     }
@@ -1391,7 +1413,7 @@ void drawColorBars(void){
     }
     for (i=0; i<nrgb-1; i++){
       float vert_position;
-      char slicecolorlabel[256];
+      char slicecolorlabel[256],slicecolorlabel2[256];
       char *slicecolorlabel_ptr=NULL;
 
       vert_position = (float)(i)*(float)(nrgb+DYFONT)/(float)(nrgb-2) + barbot-dyfont/2.0;
@@ -1401,6 +1423,18 @@ void drawColorBars(void){
         val = tttmin + i*slicerange/(nrgb-2);
         scalefloat2string(val,slicecolorlabel, slicefactor, slicerange);
         slicecolorlabel_ptr=slicecolorlabel;
+      }
+      if(lastslice==1&&showcolorbar_gtge==1){
+        if(show_extreme_below==1&&i==0){
+          strcpy(slicecolorlabel2,"<=");
+          strcat(slicecolorlabel2,slicecolorlabel_ptr);
+          slicecolorlabel_ptr=slicecolorlabel2;
+        }
+        if(show_extreme_above==1&&i==nrgb-2){
+          strcpy(slicecolorlabel2,">=");
+          strcat(slicecolorlabel2,slicecolorlabel_ptr);
+          slicecolorlabel_ptr=slicecolorlabel2;
+        }
       }
       outputBarText(right[leftslice],vert_position,color1,slicecolorlabel_ptr);
     }
@@ -1427,7 +1461,7 @@ void drawColorBars(void){
       outputBarText(right[leftpatch],position,color2,patchcolorlabel_ptr);
     }
     for (i=0; i<nrgb-1; i++){
-      char patchcolorlabel[256];
+      char patchcolorlabel[256],patchcolorlabel2[256];
       char *patchcolorlabel_ptr=NULL;
       float vert_position;
 
@@ -1439,6 +1473,18 @@ void drawColorBars(void){
         val = tttmin + i*patchrange/(nrgb-2);
         scalefloat2string(val,patchcolorlabel, patchfactor, patchrange);
         patchcolorlabel_ptr=patchcolorlabel;
+      }
+      if(lastpatch==1&&showcolorbar_gtge==1){
+        if(show_extreme_below==1&&i==0){
+          strcpy(patchcolorlabel2,"<=");
+          strcat(patchcolorlabel2,patchcolorlabel_ptr);
+          patchcolorlabel_ptr=patchcolorlabel2;
+        }
+        if(show_extreme_above==1&&i==nrgb-2){
+          strcpy(patchcolorlabel2,">=");
+          strcat(patchcolorlabel2,patchcolorlabel_ptr);
+          patchcolorlabel_ptr=patchcolorlabel2;
+        }
       }
       outputBarText(right[leftpatch],vert_position,color1,patchcolorlabel_ptr);
     }
@@ -1479,7 +1525,6 @@ void drawColorBars(void){
       outputBarText(right[leftzone],vert_position,color1,zonecolorlabel_ptr);
     }
   }
-
   if(showplot3d==1){
     iposition=-1;
     p3lev = p3levels256[plotn-1];
@@ -1517,6 +1562,7 @@ void drawColorBars(void){
 
       for (i=0; i<nrgb-1; i++){
         char plot3dcolorlabel[256];
+        char plot3dcolorlabel2[256];
         char *plot3dcolorlabel_ptr=NULL;
 
         vert_position = (float)(i)*ddbar+bar0;
@@ -1526,6 +1572,18 @@ void drawColorBars(void){
           val = tttmin + i*plot3drange/(nrgb-2);
           scalefloat2string(val,plot3dcolorlabel, plot3dfactor, plot3drange);
           plot3dcolorlabel_ptr=plot3dcolorlabel;
+        }
+        if(showcolorbar_gtge==1){
+          if((show_extremedata==0||show_extreme_below==0)&&i==0){
+            strcpy(plot3dcolorlabel2,"<=");
+            strcat(plot3dcolorlabel2,plot3dcolorlabel);
+            plot3dcolorlabel_ptr=plot3dcolorlabel2;
+          }  
+          if((show_extremedata==0||show_extreme_above==0)&&i==nrgb-2){
+            strcpy(plot3dcolorlabel2,">=");
+            strcat(plot3dcolorlabel2,plot3dcolorlabel);
+            plot3dcolorlabel_ptr=plot3dcolorlabel2;
+          }
         }
         outputBarText(right[0],vert_position,color1,plot3dcolorlabel_ptr);
       }
@@ -1557,6 +1615,7 @@ void drawColorBars(void){
         }
       }
     }
+
   }
 }
 

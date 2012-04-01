@@ -2067,8 +2067,8 @@ void getslicedatabounds(const slice *sd, float *pmin, float *pmax){
   ndata = sd->nslicetotal;
 
   for(n=0;n<ndata;n++){
-    if(sd->n_iblank!=NULL&&sd->n_iblank[n%sd->nsliceii]==0)continue;
-    if(sd->c_iblank!=NULL&&sd->c_iblank[n%sd->nsliceii]==0)continue;
+    //if(sd->n_iblank!=NULL&&sd->n_iblank[n%sd->nsliceii]==0)continue;
+    //if(sd->c_iblank!=NULL&&sd->c_iblank[n%sd->nsliceii]==0)continue;
     if(first==1){
       *pmin=pdata[n];
       *pmax=pdata[n];
@@ -2078,9 +2078,9 @@ void getslicedatabounds(const slice *sd, float *pmin, float *pmax){
       if(pdata[n]<*pmin)*pmin=pdata[n];
       if(pdata[n]>*pmax)*pmax=pdata[n];
     }
-    if(pdata[n]<-0.5){
-      printf("n=%i in=%i pdata=%f\n",n,n%sd->nsliceii,pdata[n]);
-    }
+   // if(pdata[n]<-0.5){
+   //   printf("n=%i in=%i pdata=%f\n",n,n%sd->nsliceii,pdata[n]);
+   // }
   }
   if(first==1){
     *pmin=0.0;

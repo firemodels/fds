@@ -431,7 +431,6 @@ void DecimateMesh(geomdata *geomi, float delta){
       if(vert_offset>delta){
         RemoveVert(verti);
         Retriangulate(verti->verts,verti->nverts,verti->tris);
-
       }
     }
   }
