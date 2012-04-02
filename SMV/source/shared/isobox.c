@@ -21,6 +21,22 @@ char isobox_revision[]="$Revision$";
 #include "isodefs.h"
 #include "datadefs.h"
 
+/* ------------------ getisobox ------------------------ */
+
+void getisobox(float x[2], float y[2], float z[3], float *vals, float level, 
+               float *xyzverts, int *nvert, int *triangles, int *ntriangles){
+  int nodeindexes[8]={0,1,2,3,4,5,6,7};
+  float xvert[6], yvert[6], zvert[6];
+  int i;
+
+  GetIsobox(x,y,z,vals,NULL,nodeindexes,level,xvert,yvert,zvert,NULL,NULL,nvert,triangles,ntriangles);
+  for(i=0;i<*nvert;i++){
+    xyzverts[3*i]=xvert[i];
+    xyzverts[3*i+1]=yvert[i];
+    xyzverts[3*i+2]=zvert[i];
+  }
+}
+
 /* ------------------ GetIsobox ------------------------ */
 
 int GetIsobox(const float *x, 
@@ -288,8 +304,10 @@ int edgelist2[15][16]={
 
   vmin = vals[0]; 
   vmax = vals[0];
-  for(n=0;n<12;n++){
-    closestnodes[n]=0;
+  if(closestnodes!=NULL){
+    for(n=0;n<12;n++){
+      closestnodes[n]=0;
+    }
   }
   for(n=1;n<8;n++){
     if(vals[n]<vmin){
@@ -396,11 +414,13 @@ int edgelist2[15][16]={
     denom = val2 - val1;
     factor = 0.5;
     if(denom!=0.0)factor = -val1/denom;
-    if(factor<0.5){
-      closestnodes[n]=nodeindexes[v1];
-    }
-    else{
-      closestnodes[n]=nodeindexes[v2];
+    if(closestnodes!=NULL){
+      if(factor<0.5){
+        closestnodes[n]=nodeindexes[v1];
+      }
+      else{
+        closestnodes[n]=nodeindexes[v2];
+      }
     }
     if(factor>1.0){
       /*factor=1;*/

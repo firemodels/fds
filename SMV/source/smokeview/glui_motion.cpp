@@ -76,7 +76,7 @@ GLUI *glui_motion=NULL;
 GLUI_Panel *panel_rotatebuttons=NULL, *panel_translate=NULL,*panel_close=NULL;
 #ifdef pp_GSLICE
 GLUI_Panel *panel_gslice=NULL;
-GLUI_Rotation *gslice_rotate;
+GLUI_Translation *TRANSLATE_gslice_azelev=NULL;
 GLUI_Translation *gslice_htranslate=NULL, *gslice_vtranslate=NULL;
 GLUI_Checkbox *CHECKBOX_show_gslice=NULL;
 #endif
@@ -338,18 +338,12 @@ extern "C" void glui_motion_setup(int main_window){
 
 #ifdef pp_GSLICE
   panel_gslice = glui_motion->add_rollout(_("Slice Motion"),false);
-  for(i=0;i<16;i++){
-    if(i%5==0){
-      gslice_rotation[i]=1.0;
-    }
-    else{
-      gslice_rotation[i]=0.0;
-    }
-  }
   gslice_xyz[0]=0.0;
   gslice_xyz[1]=0.0;
   gslice_xyz[2]=0.0;
-  gslice_rotate =glui_motion->add_rotation_to_panel(panel_gslice,"rotate slice",gslice_rotation,GSLICE_ROTATE,GSLICE_CB);
+  gslice_azelev[0]=0.0;
+  gslice_azelev[1]=90.0;
+  TRANSLATE_gslice_azelev=glui_motion->add_translation_to_panel(panel_gslice,"normal az/elev",GLUI_TRANSLATION_XY,gslice_azelev,GSLICE_ROTATE,GSLICE_CB);
   gslice_htranslate=glui_motion->add_translation_to_panel(panel_gslice,"horizontal translation",GLUI_TRANSLATION_XY,gslice_xyz,GSLICE_HTRANSLATE,GSLICE_CB);
   gslice_vtranslate=glui_motion->add_translation_to_panel(panel_gslice,"vertical translation",GLUI_TRANSLATION_Z,gslice_xyz+2,GSLICE_VTRANSLATE,GSLICE_CB);
   CHECKBOX_show_gslice=glui_motion->add_checkbox_to_panel(panel_gslice,"show gslice",&show_gslice);
@@ -711,6 +705,8 @@ extern "C" void showhide_translate(int var){
 void GSLICE_CB(int var){
   switch(var){
     case GSLICE_ROTATE:
+      gslice_azelev[0]=CLAMP(gslice_azelev[0],-180.0,180.0);
+      gslice_azelev[1]=CLAMP(gslice_azelev[1],-90.0,90.0);
     break;
     case GSLICE_HTRANSLATE:
     case GSLICE_VTRANSLATE:

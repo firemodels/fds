@@ -132,6 +132,8 @@ SV_EXTERN void DrawIsosurface(const isosurface *isodata);
 SV_EXTERN void freesurface(isosurface *surfacedata);
 SV_EXTERN void InitIsosurface(isosurface *surfacedata, float level, float *color, int colorindex);
 SV_EXTERN int ResizeSurface(isosurface *surfacedata, int incvert, int inctrilist, int incnorm);
+SV_EXTERN void getisobox(float x[2], float y[2], float z[2], float *vals, float level, 
+               float *xyzverts, int *nvert, int *triangles, int *ntriangles);
 SV_EXTERN int GetIsobox(const float *x, 
                const float *y, 
                const float *z, 

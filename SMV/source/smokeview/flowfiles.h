@@ -606,6 +606,11 @@ typedef struct _mesh {
 
   volrenderdata volrenderinfo;
 
+#ifdef pp_GSLICE
+  float gslice_verts[6*3];
+  int gslice_nverts,gslice_triangles[4*3],gslice_ntriangles;
+#endif
+
 } mesh;
 
 /* --------------------------  volfacelistdata ------------------------------------ */

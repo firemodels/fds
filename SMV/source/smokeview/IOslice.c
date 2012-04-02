@@ -2338,24 +2338,132 @@ void drawvslice_frame(void){
 }
 
 #ifdef pp_GSLICE
+
+/* ------------------ plane_dist ------------------------ */
+
+float plane_dist(float *norm, float *xyz0, float *xyz){
+  float dist=0.0;
+  float dx;
+  int i;
+
+  for(i=0;i<3;i++){
+    dx = xyz[i]-xyz0[i];
+    dist += dx*norm[i];
+  }
+  return dist;
+}
+
+/* ------------------ update_gslice_planes ------------------------ */
+
+void update_gslice_planes(void){
+  int i;
+  float *norm;
+  float *xyz0;
+
+  /* stuff min and max grid data into a more convenient form 
+  assuming the following grid numbering scheme
+
+       5-------6
+     / |      /| 
+   /   |     / | 
+  4 -------7   |
+  |    |   |   |  
+  Z    1---|---2
+  |  Y     |  /
+  |/       |/
+  0--X-----3     
+
+  */
+  int ix[8]={0,0,1,1,0,0,1,1};
+  int iy[8]={0,1,1,0,0,1,1,0};
+  int iz[8]={0,0,0,0,1,1,1,1};
+  float az, elev;
+
+// plane equation: (x-xyz0) .dot. norm = 0
+  az=gslice_azelev[0]*3.14159/180.0;
+  elev=gslice_azelev[1]*3.14159/180.0;
+  norm=gslice_norm;
+  norm[0]=cos(az)*cos(elev);
+  norm[1]=sin(az)*cos(elev);
+  norm[2]=sin(elev);
+  xyz0 = gslice_xyz;
+
+
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    int j;
+    float vals[8],xx[2],yy[2],zz[2];
+    float *xyzmin, *xyzmax;
+    float level;
+
+    meshi = meshinfo + i;
+
+    xyzmin = meshi->boxmin;
+    xyzmax = meshi->boxmax;
+    xx[0]=xyzmin[0];
+    yy[0]=xyzmin[1];
+    zz[0]=xyzmin[2];
+    xx[1]=xyzmax[0];
+    yy[1]=xyzmax[1];
+    zz[1]=xyzmax[2];
+    for(j=0;j<8;j++){
+      float xyz[3];
+
+      xyz[0] = xx[ix[j]];
+      xyz[1] = yy[iy[j]];
+      xyz[2] = zz[iz[j]];
+      vals[j] = plane_dist(norm,xyz0,xyz);
+    }
+    level=0.0;
+    getisobox(xx,yy,zz,vals,level,
+      meshi->gslice_verts,&meshi->gslice_nverts,meshi->gslice_triangles,&meshi->gslice_ntriangles);
+      meshi->gslice_ntriangles/=3;
+  }
+}
+
 /* ------------------ drawgslice ------------------------ */
 
 void drawgslice(const slice *sd){
+  int i;
+  void getNormal(float *v1, float *v2, float *v3, float *area, float *normal);
+
   glPushMatrix();
   glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
   glTranslatef(-xbar0,-ybar0,-zbar0);
-  printf("xyz=%f %f %f\n",gslice_xyz[0],gslice_xyz[1],gslice_xyz[2]);
-  printf("norm=%f %f %f\n",-gslice_rotation[2],-gslice_rotation[6],gslice_rotation[10]);
-  glTranslatef(gslice_xyz[0],gslice_xyz[1],gslice_xyz[2]);
-  glMultMatrixf(gslice_rotation);
+
   glBegin(GL_LINES);
-  glVertex3f(0.0,0.0,0.0);
-  glVertex3f(0.0,0.0,1.0);
+  glColor3f(1.0,0.0,0.0);
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    int j;
+
+    meshi = meshinfo + i;
+    if(meshi->gslice_nverts==0||meshi->gslice_ntriangles==0)continue;
+    for(j=0;j<meshi->gslice_ntriangles;j++){
+      float *xyz1, *xyz2, *xyz3, area, normal[3];
+      float xe[3];
+
+      xyz1 = meshi->gslice_verts + 3*meshi->gslice_triangles[3*j];
+      xyz2 = meshi->gslice_verts + 3*meshi->gslice_triangles[3*j+1];
+      xyz3 = meshi->gslice_verts + 3*meshi->gslice_triangles[3*j+2];
+      glVertex3fv(xyz1);
+      glVertex3fv(xyz2);
+      glVertex3fv(xyz2);
+      glVertex3fv(xyz3);
+      glVertex3fv(xyz3);
+      glVertex3fv(xyz1);
+    }
+  }
+  glEnd();
+
+  glBegin(GL_LINES);
+  glVertex3fv(gslice_xyz);
+  glVertex3f(gslice_xyz[0]+gslice_norm[0],gslice_xyz[1]+gslice_norm[1],gslice_xyz[2]+gslice_norm[2]);
   glEnd();
   glPointSize(20.0);
   glBegin(GL_POINTS);
-  glVertex3f(0.0,0.0,0.0);
-  glVertex3f(0.0,0.0,1.0);
+  glVertex3fv(gslice_xyz);
+  glVertex3f(gslice_xyz[0]+gslice_norm[0],gslice_xyz[1]+gslice_norm[1],gslice_xyz[2]+gslice_norm[2]);
   glEnd();
 
   glPopMatrix();

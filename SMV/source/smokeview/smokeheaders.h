@@ -730,6 +730,7 @@ EXTERNCPP void getzonebounds(const float *pdata, int ndata, int setpmin, float *
 EXTERNCPP void updatechar(void);
 EXTERNCPP void updatetracers(void);
 #ifdef pp_GSLICE
+void update_gslice_planes(void);
 void drawgslice(const slice *sd);
 #endif
 
