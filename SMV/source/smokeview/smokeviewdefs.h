@@ -11,6 +11,8 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#define STEPS_PER_DEG 10.0
+
 #define UNKNOWN -1
 #define RLE 0
 #define ZLIB 1

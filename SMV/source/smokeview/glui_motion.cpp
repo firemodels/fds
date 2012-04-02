@@ -338,11 +338,11 @@ extern "C" void glui_motion_setup(int main_window){
 
 #ifdef pp_GSLICE
   panel_gslice = glui_motion->add_rollout(_("Slice Motion"),false);
-  gslice_xyz[0]=0.0;
-  gslice_xyz[1]=0.0;
-  gslice_xyz[2]=0.0;
-  gslice_azelev[0]=0.0;
-  gslice_azelev[1]=90.0;
+  gslice_xyz[0]=0.0*STEPS_PER_DEG;
+  gslice_xyz[1]=0.0*STEPS_PER_DEG;
+  gslice_xyz[2]=0.0*STEPS_PER_DEG;
+  gslice_azelev[0]=0.0*STEPS_PER_DEG;
+  gslice_azelev[1]=90.0*STEPS_PER_DEG;
   TRANSLATE_gslice_azelev=glui_motion->add_translation_to_panel(panel_gslice,"normal az/elev",GLUI_TRANSLATION_XY,gslice_azelev,GSLICE_ROTATE,GSLICE_CB);
   gslice_htranslate=glui_motion->add_translation_to_panel(panel_gslice,"horizontal translation",GLUI_TRANSLATION_XY,gslice_xyz,GSLICE_HTRANSLATE,GSLICE_CB);
   gslice_vtranslate=glui_motion->add_translation_to_panel(panel_gslice,"vertical translation",GLUI_TRANSLATION_Z,gslice_xyz+2,GSLICE_VTRANSLATE,GSLICE_CB);
@@ -705,14 +705,14 @@ extern "C" void showhide_translate(int var){
 void GSLICE_CB(int var){
   switch(var){
     case GSLICE_ROTATE:
-      gslice_azelev[0]=CLAMP(gslice_azelev[0],-180.0,180.0);
-      gslice_azelev[1]=CLAMP(gslice_azelev[1],-90.0,90.0);
+      gslice_azelev[0]=fmod(gslice_azelev[0]+180.0*STEPS_PER_DEG,360.0*STEPS_PER_DEG)-180.0*STEPS_PER_DEG;
+      gslice_azelev[1]=fmod(gslice_azelev[1]+180.0*STEPS_PER_DEG,360.0*STEPS_PER_DEG)-180.0*STEPS_PER_DEG;
     break;
     case GSLICE_HTRANSLATE:
     case GSLICE_VTRANSLATE:
-      gslice_xyz[0]=CLAMP(gslice_xyz[0],xbar0,xbar0+xbar*xyzmaxdiff);
-      gslice_xyz[1]=CLAMP(gslice_xyz[1],ybar0,ybar0+ybar*xyzmaxdiff);
-      gslice_xyz[2]=CLAMP(gslice_xyz[2],zbar0,zbar0+zbar*xyzmaxdiff);
+      gslice_xyz[0]=CLAMP(gslice_xyz[0],xbar0*STEPS_PER_DEG,(xbar0+xbar*xyzmaxdiff)*STEPS_PER_DEG);
+      gslice_xyz[1]=CLAMP(gslice_xyz[1],ybar0*STEPS_PER_DEG,(ybar0+ybar*xyzmaxdiff)*STEPS_PER_DEG);
+      gslice_xyz[2]=CLAMP(gslice_xyz[2],zbar0*STEPS_PER_DEG,(zbar0+zbar*xyzmaxdiff)*STEPS_PER_DEG);
     break;
   }
 }

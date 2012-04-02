@@ -2380,8 +2380,9 @@ void update_gslice_planes(void){
   float az, elev;
 
 // plane equation: (x-xyz0) .dot. norm = 0
-  az=gslice_azelev[0]*3.14159/180.0;
-  elev=gslice_azelev[1]*3.14159/180.0;
+#define GFACTOR (3.14159/(180.0*STEPS_PER_DEG))
+  az=gslice_azelev[0]*GFACTOR;
+  elev=gslice_azelev[1]*GFACTOR;
   norm=gslice_norm;
   norm[0]=cos(az)*cos(elev);
   norm[1]=sin(az)*cos(elev);
@@ -2457,13 +2458,13 @@ void drawgslice(const slice *sd){
   glEnd();
 
   glBegin(GL_LINES);
-  glVertex3fv(gslice_xyz);
-  glVertex3f(gslice_xyz[0]+gslice_norm[0],gslice_xyz[1]+gslice_norm[1],gslice_xyz[2]+gslice_norm[2]);
+  glVertex3f(gslice_xyz[0]/STEPS_PER_DEG,gslice_xyz[1]/STEPS_PER_DEG,gslice_xyz[2]/STEPS_PER_DEG);
+  glVertex3f(gslice_xyz[0]/STEPS_PER_DEG+gslice_norm[0],gslice_xyz[1]/STEPS_PER_DEG+gslice_norm[1],gslice_xyz[2]/STEPS_PER_DEG+gslice_norm[2]);
   glEnd();
   glPointSize(20.0);
   glBegin(GL_POINTS);
-  glVertex3fv(gslice_xyz);
-  glVertex3f(gslice_xyz[0]+gslice_norm[0],gslice_xyz[1]+gslice_norm[1],gslice_xyz[2]+gslice_norm[2]);
+  glVertex3f(gslice_xyz[0]/STEPS_PER_DEG,gslice_xyz[1]/STEPS_PER_DEG,gslice_xyz[2]/STEPS_PER_DEG);
+  glVertex3f(gslice_xyz[0]/STEPS_PER_DEG+gslice_norm[0],gslice_xyz[1]/STEPS_PER_DEG+gslice_norm[1],gslice_xyz[2]/STEPS_PER_DEG+gslice_norm[2]);
   glEnd();
 
   glPopMatrix();
