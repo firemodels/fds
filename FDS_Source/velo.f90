@@ -50,7 +50,7 @@ USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY
 USE TURBULENCE, ONLY: VARDEN_DYNSMAG,TEST_FILTER,EX2G3D
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: ZZ_GET(0:N_TRACKED_SPECIES),NU_EDDY,DELTA,KSGS,NU_G,GRAD_RHO(3),U2,V2,W2,AA,A_IJ(3,3),BB,B_IJ(3,3),&
-            DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ,MU_DNS
+            DUDX,DUDY,DUDZ,DVDX,DVDY,DVDZ,DWDX,DWDY,DWDZ
 INTEGER :: I,J,K,IIG,JJG,KKG,II,JJ,KK,IW,TURB_MODEL_TMP,IOR
 REAL(EB), POINTER, DIMENSION(:,:,:) :: RHOP=>NULL(),UP=>NULL(),VP=>NULL(),WP=>NULL(), &
                                        UP_HAT=>NULL(),VP_HAT=>NULL(),WP_HAT=>NULL(), &
@@ -82,7 +82,7 @@ ENDIF
 !$OMP        N_EXTERNAL_WALL_CELLS,N_INTERNAL_WALL_CELLS,KRES, &
 !$OMP        IBP1,JBP1,KBP1,TURB_MODEL_TMP,TURB_MODEL,PREDICTOR,STRAIN_RATE,UP,VP,WP,WORK1,WORK2,WORK3,WC,WALL,U_GHOST,V_GHOST, &
 !$OMP        W_GHOST,UP_HAT,VP_HAT,WP_HAT,WORK4,WORK5,WORK6,DELTA,KSGS,NU_EDDY,C_DEARDORFF,DUDX,DVDY,DWDZ,DUDY,DUDZ,DVDX,DVDZ,  &
-!$OMP        DWDX,DWDY,II,JJ,KK,A_IJ,AA,B_IJ,BB,C_VREMAN,GRAV_VISC,GRAD_RHO,NU_G,C_G,GVEC,IOR,MU_DNS) &
+!$OMP        DWDX,DWDY,II,JJ,KK,A_IJ,AA,B_IJ,BB,C_VREMAN,GRAV_VISC,GRAD_RHO,NU_G,C_G,GVEC,IOR) &
 !$OMP PRIVATE(ZZ_GET)
 
 IF (N_TRACKED_SPECIES>0 .AND. EVACUATION_ONLY(NM)) ZZ_GET(1:N_TRACKED_SPECIES) = 0._EB
@@ -307,19 +307,6 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    
    SELECT CASE(WC%BOUNDARY_TYPE)
       CASE(SOLID_BOUNDARY)
-         IF (LES) THEN
-            IF (N_TRACKED_SPECIES>0 .AND. .NOT.EVACUATION_ONLY(NM)) &
-               ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(IIG,JJG,KKG,1:N_TRACKED_SPECIES)
-            CALL GET_VISCOSITY(ZZ_GET,MU_DNS,TMP(IIG,JJG,KKG))
-            SELECT CASE (IOR)
-               CASE ( 1); MU(IIG,JJG,KKG) = MAX(MU_DNS,ONTH*MU(IIG+1,JJG,KKG))
-               CASE (-1); MU(IIG,JJG,KKG) = MAX(MU_DNS,ONTH*MU(IIG-1,JJG,KKG))
-               CASE ( 2); MU(IIG,JJG,KKG) = MAX(MU_DNS,ONTH*MU(IIG,JJG+1,KKG))
-               CASE (-2); MU(IIG,JJG,KKG) = MAX(MU_DNS,ONTH*MU(IIG,JJG-1,KKG))
-               CASE ( 3); MU(IIG,JJG,KKG) = MAX(MU_DNS,ONTH*MU(IIG,JJG,KKG+1))
-               CASE (-3); MU(IIG,JJG,KKG) = MAX(MU_DNS,ONTH*MU(IIG,JJG,KKG-1))
-            END SELECT
-         ENDIF
          IF (SOLID(CELL_INDEX(II,JJ,KK))) MU(II,JJ,KK) = MU(IIG,JJG,KKG)
       CASE(OPEN_BOUNDARY,MIRROR_BOUNDARY)
          MU(II,JJ,KK) = MU(IIG,JJG,KKG)
@@ -1407,6 +1394,7 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),U_Y=>NUL
 TYPE (SURFACE_TYPE), POINTER :: SF=>NULL()
 TYPE (OMESH_TYPE), POINTER :: OM=>NULL()
 TYPE (VENTS_TYPE), POINTER :: VT
+TYPE (WALL_TYPE), POINTER :: WCM,WCP
 
 IF (SOLID_PHASE_ONLY) RETURN
 
@@ -1609,10 +1597,25 @@ EDGE_LOOP: DO IE=1,N_EDGES
             JJGP = J_CELL(ICPP)
             KKGP = K_CELL(ICPP)
          ENDIF
-         
+
          ! Throw out edge orientations that need not be processed
-         BOUNDARY_TYPE_M = WALL(IWM)%BOUNDARY_TYPE
-         BOUNDARY_TYPE_P = WALL(IWP)%BOUNDARY_TYPE
+
+         IF (IWM==0 .AND. IWP==0) CYCLE ORIENTATION_LOOP
+    
+         IF (IWM>0) THEN
+            WCM => WALL(IWM)
+         ELSE
+            WCM => WALL(IWP)
+         ENDIF
+
+         IF (IWP>0) THEN
+            WCP => WALL(IWP)
+         ELSE
+            WCP => WALL(IWM)
+         ENDIF
+
+         BOUNDARY_TYPE_M = WCM%BOUNDARY_TYPE
+         BOUNDARY_TYPE_P = WCP%BOUNDARY_TYPE
 
          IF (BOUNDARY_TYPE_M==NULL_BOUNDARY .AND. BOUNDARY_TYPE_P==NULL_BOUNDARY) CYCLE ORIENTATION_LOOP
 
@@ -1625,10 +1628,8 @@ EDGE_LOOP: DO IE=1,N_EDGES
             ! side of the edge, choose the one with the specified velocity, if there is one. If not, choose the max value of
             ! boundary condition index, simply for consistency.
 
-            SURF_INDEXM = 0
-            SURF_INDEXP = 0
-            IF (IWM>0) SURF_INDEXM = WALL(IWM)%SURF_INDEX
-            IF (IWP>0) SURF_INDEXP = WALL(IWP)%SURF_INDEX
+            SURF_INDEXM = WCM%SURF_INDEX
+            SURF_INDEXP = WCP%SURF_INDEX
             IF (SURFACE(SURF_INDEXM)%SPECIFIED_NORMAL_VELOCITY) THEN
                SF=>SURFACE(SURF_INDEXM)
             ELSEIF (SURFACE(SURF_INDEXP)%SPECIFIED_NORMAL_VELOCITY) THEN
@@ -1647,9 +1648,9 @@ EDGE_LOOP: DO IE=1,N_EDGES
             SYNTHETIC_EDDY_METHOD = .FALSE.
             HVAC_TANGENTIAL = .FALSE.
             IF (IWM>0 .AND. IWP>0) THEN
-               IF (WALL(IWM)%VENT_INDEX==WALL(IWP)%VENT_INDEX) THEN
-                  IF (WALL(IWM)%VENT_INDEX>0) THEN
-                     VT=>VENTS(WALL(IWM)%VENT_INDEX)
+               IF (WCM%VENT_INDEX==WCP%VENT_INDEX) THEN
+                  IF (WCM%VENT_INDEX>0) THEN
+                     VT=>VENTS(WCM%VENT_INDEX)
                      IF (VT%N_EDDY>0) SYNTHETIC_EDDY_METHOD=.TRUE.
                      IF (ALL(VT%UVW > -1.E12_EB) .AND. VT%NODE_INDEX > 0) HVAC_TANGENTIAL = .TRUE.
                   ENDIF
@@ -1700,19 +1701,19 @@ EDGE_LOOP: DO IE=1,N_EDGES
                   TSI=T-SF%T_IGN
                ENDIF
                PROFILE_FACTOR = 1._EB
-               IF (HVAC_TANGENTIAL .AND. 0.5*(WALL(IWM)%ONE_D%UWS+WALL(IWP)%ONE_D%UWS) > 0._EB) HVAC_TANGENTIAL = .FALSE.
+               IF (HVAC_TANGENTIAL .AND. 0.5*(WCM%ONE_D%UWS+WCP%ONE_D%UWS) > 0._EB) HVAC_TANGENTIAL = .FALSE.
                IF (HVAC_TANGENTIAL) THEN
                   VEL_T = 0._EB
                   IEC_SELECT: SELECT CASE(IEC) ! edge orientation
                      CASE (1)
-                        IF (ICD==1) VEL_T = 0.5*(WALL(IWM)%ONE_D%UWS+WALL(IWP)%ONE_D%UWS)/VT%UVW(ABS(VT%IOR))*VT%UVW(3)
-                        IF (ICD==2) VEL_T = 0.5*(WALL(IWM)%ONE_D%UWS+WALL(IWP)%ONE_D%UWS)/VT%UVW(ABS(VT%IOR))*VT%UVW(2)
+                        IF (ICD==1) VEL_T = 0.5*(WCM%ONE_D%UWS+WCP%ONE_D%UWS)/VT%UVW(ABS(VT%IOR))*VT%UVW(3)
+                        IF (ICD==2) VEL_T = 0.5*(WCM%ONE_D%UWS+WCP%ONE_D%UWS)/VT%UVW(ABS(VT%IOR))*VT%UVW(2)
                      CASE (2)
-                        IF (ICD==1) VEL_T = 0.5*(WALL(IWM)%ONE_D%UWS+WALL(IWP)%ONE_D%UWS)/VT%UVW(ABS(VT%IOR))*VT%UVW(1)
-                        IF (ICD==2) VEL_T = 0.5*(WALL(IWM)%ONE_D%UWS+WALL(IWP)%ONE_D%UWS)/VT%UVW(ABS(VT%IOR))*VT%UVW(3)
+                        IF (ICD==1) VEL_T = 0.5*(WCM%ONE_D%UWS+WCP%ONE_D%UWS)/VT%UVW(ABS(VT%IOR))*VT%UVW(1)
+                        IF (ICD==2) VEL_T = 0.5*(WCM%ONE_D%UWS+WCP%ONE_D%UWS)/VT%UVW(ABS(VT%IOR))*VT%UVW(3)
                      CASE (3)                     
-                        IF (ICD==1) VEL_T = 0.5*(WALL(IWM)%ONE_D%UWS+WALL(IWP)%ONE_D%UWS)/VT%UVW(ABS(VT%IOR))*VT%UVW(2)
-                        IF (ICD==2) VEL_T = 0.5*(WALL(IWM)%ONE_D%UWS+WALL(IWP)%ONE_D%UWS)/VT%UVW(ABS(VT%IOR))*VT%UVW(1)
+                        IF (ICD==1) VEL_T = 0.5*(WCM%ONE_D%UWS+WCP%ONE_D%UWS)/VT%UVW(ABS(VT%IOR))*VT%UVW(2)
+                        IF (ICD==2) VEL_T = 0.5*(WCM%ONE_D%UWS+WCP%ONE_D%UWS)/VT%UVW(ABS(VT%IOR))*VT%UVW(1)
                   END SELECT IEC_SELECT
                   IF (VT%IOR > 0) VEL_T = -VEL_T
                ELSE
@@ -1724,6 +1725,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
             ENDIF VEL_T_IF
  
             ! Choose the appropriate boundary condition to apply
+
             IF (HVAC_TANGENTIAL)  THEN
 
                VEL_GHOST = 2._EB*VEL_T - VEL_GAS
