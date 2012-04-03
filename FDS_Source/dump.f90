@@ -408,6 +408,7 @@ MESH_LOOP: DO NM=1,NMESHES
    
    DO N=1,N_ISOF
       LU_ISOF(N,NM) = -GET_FILE_NUMBER() 
+      IF (RESTART) LU_ISOF(N,NM) = ABS(LU_ISOF(N,NM))
       IF (NMESHES >1) WRITE(FN_ISOF(N,NM),'(A,A,I4.4,A,I2.2,A)') TRIM(CHID),'_',NM,'_',N,'.iso'
       IF (NMESHES==1) WRITE(FN_ISOF(N,NM),'(A,A,I2.2,A)')        TRIM(CHID),'_',N,'.iso'
    ENDDO
@@ -416,19 +417,23 @@ MESH_LOOP: DO NM=1,NMESHES
    ! The unit numbers are intially negative so that the 3d smoke output
    ! routine "knows" when it is called the first time
    
-   LU_SMOKE3D(1,NM) = -GET_FILE_NUMBER()  ! 
+   LU_SMOKE3D(1,NM) = -GET_FILE_NUMBER()
+   IF (RESTART) LU_SMOKE3D(1,NM) = ABS(LU_SMOKE3D(1,NM))
    IF (NMESHES >1) WRITE(FN_SMOKE3D(1,NM),'(A,A,I4.4,A)') TRIM(CHID),'_',NM,'_01.s3d'
    IF (NMESHES==1) WRITE(FN_SMOKE3D(1,NM),'(A,A)')        TRIM(CHID),       '_01.s3d'
 
    LU_SMOKE3D(2,NM) = -GET_FILE_NUMBER()
+   IF (RESTART) LU_SMOKE3D(2,NM) = ABS(LU_SMOKE3D(2,NM))
    IF (NMESHES >1) WRITE(FN_SMOKE3D(2,NM),'(A,A,I4.4,A)') TRIM(CHID),'_',NM,'_02.s3d'
    IF (NMESHES==1) WRITE(FN_SMOKE3D(2,NM),'(A,A)')        TRIM(CHID),       '_02.s3d'
 
    LU_SMOKE3D(3,NM) = -GET_FILE_NUMBER() ! size file unit number for LU_SMOKE3D(1,NM)
+   IF (RESTART) LU_SMOKE3D(3,NM) = ABS(LU_SMOKE3D(3,NM))
    IF (NMESHES >1) WRITE(FN_SMOKE3D(3,NM),'(A,A,I4.4,A)') TRIM(CHID),'_',NM,'_01.s3d.sz'
    IF (NMESHES==1) WRITE(FN_SMOKE3D(3,NM),'(A,A)')        TRIM(CHID),       '_01.s3d.sz'
 
    LU_SMOKE3D(4,NM) = -GET_FILE_NUMBER() ! size file unit number for LU_SMOKE3D(2,NM)
+   IF (RESTART) LU_SMOKE3D(4,NM) = ABS(LU_SMOKE3D(4,NM))
    IF (NMESHES >1) WRITE(FN_SMOKE3D(4,NM),'(A,A,I4.4,A)') TRIM(CHID),'_',NM,'_02.s3d.sz'
    IF (NMESHES==1) WRITE(FN_SMOKE3D(4,NM),'(A,A)')        TRIM(CHID),       '_02.s3d.sz'
 
