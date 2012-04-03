@@ -1989,9 +1989,9 @@ void updateplot3dmenulabels(void){
         STRCAT(plot3di->menulabel,label);
       }
       if(nmeshes>1){
-	    mesh *plot3dmesh;
+        mesh *plot3dmesh;
 
-		plot3dmesh = meshinfo + plot3di->blocknumber;
+        plot3dmesh = meshinfo + plot3di->blocknumber;
         sprintf(label,"%s",plot3dmesh->label);
         if(plot3di->time>=0.0)STRCAT(plot3di->menulabel,", ");
         sprintf(label,"%s",plot3dmesh->label);

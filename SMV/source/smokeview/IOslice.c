@@ -1637,12 +1637,10 @@ void update_fedinfo(void){
   for(i=0;i<nsliceinfo;i++){
     slicedata *slicei;
     feddata *fedi;
-    flowlabels *label;
     int j;
 
     fedi = fedinfo + nfedinfo;
     slicei = sliceinfo + i;
-    label = &(slicei->label);
 
     fedi->co=NULL;
     fedi->co2=NULL;
@@ -1650,36 +1648,78 @@ void update_fedinfo(void){
     fedi->fed=NULL;
     fedi->loaded=0;
     fedi->display=0;
-    if(strcmp(label->shortlabel,"CO2")!=0)continue;
-    // get slice plane info
+    if(strcmp(slicei->label.longlabel,"CARBON DIOXIDE VOLUME FRACTION")!=0)continue;
     fedi->co2=slicei;
     for(j=0;j<nsliceinfo;j++){
       slicedata *slicej;
 
       slicej = sliceinfo + j;
-      label = &(slicej->label);
-      if(strcmp(label->shortlabel,"CO")!=0)continue;
-      // get slice plane info
-      // continue if not the same as CO2 info
+      if(strcmp(slicej->label.longlabel,"CARBON MONOXIDE VOLUME FRACTION")!=0)continue;
+	  if(slicei->is1!=slicej->is1||slicei->is2!=slicej->is2)continue;
+	  if(slicei->js1!=slicej->js1||slicei->js2!=slicej->js2)continue;
+	  if(slicei->ks1!=slicej->ks1||slicei->ks2!=slicej->ks2)continue; // skip if not the same size
       fedi->co=sliceinfo + j;
+	  break;
     }
+	if(fedi->co==NULL)continue;
     for(j=0;j<nsliceinfo;j++){
       slicedata *slicej;
 
       slicej = sliceinfo + j;
-      label = &(slicej->label);
-      if(strcmp(label->shortlabel,"O2")!=0)continue;
-      // get slice plane info
-      // continue if not the same as CO2 info
+      if(strcmp(slicej->label.longlabel,"OXYGEN VOLUME FRACTION")!=0)continue;
+	  if(slicei->is1!=slicej->is1||slicei->is2!=slicej->is2)continue;
+	  if(slicei->js1!=slicej->js1||slicei->js2!=slicej->js2)continue;
+	  if(slicei->ks1!=slicej->ks1||slicei->ks2!=slicej->ks2)continue; // skip if not the same size
       fedi->o2=sliceinfo + j;
+	  break;
     }
+	if(fedi->co==NULL)continue;
     nfedinfo++;
   }
   if(nfedinfo==0){
     FREEMEMORY(fedinfo);
+	return;
   }
   else{
     ResizeMemory((void **)&fedinfo,nfedinfo*sizeof(feddata));
+    ResizeMemory((void **)&sliceinfo,(nsliceinfo+nfedinfo)*sizeof(slicedata));
+  }
+  for(i=0;i<nfedinfo;i++){
+    slicedata *slicei;
+    char *flowlabel;
+    char label[256];
+    int len;
+    slicedata *co2;
+
+    slicei = sliceinfo + nsliceinfo + i;
+
+    flowlabel = slicei->label.longlabel;
+    strcpy(label,"Fractional effective dose");
+    len=strlen(label);
+    NewMemory((void **)&flowlabel,len+1);
+    strcpy(flowlabel,label);
+
+    flowlabel = slicei->label.shortlabel;
+    strcpy(label,"FED");
+    len=strlen(label);
+    NewMemory((void **)&flowlabel,len+1);
+    strcpy(flowlabel,label);
+
+    flowlabel = slicei->label.unit;
+    strcpy(label," ");
+    len=strlen(label);
+    NewMemory((void **)&flowlabel,len+1);
+    strcpy(flowlabel,label);
+
+    co2 = fedinfo[i].co2;
+    slicei->is1=co2->is1;
+    slicei->is2=co2->is2;
+    slicei->js1=co2->js1;
+    slicei->js2=co2->js2;
+    slicei->ks1=co2->ks1;
+    slicei->ks2=co2->ks2;
+
+
   }
 }
 
