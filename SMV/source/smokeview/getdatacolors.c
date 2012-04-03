@@ -417,7 +417,7 @@ void updatePart5extremes(void){
 
 
   for(ii=0;ii<npartinfo;ii++){
-    particle *parti;
+    partdata *parti;
 
     parti = partinfo + ii;
     if(parti->loaded==0||parti->display==0)continue;
@@ -455,7 +455,7 @@ void updatePart5extremes(void){
 
 /* ------------------ getPart5Colors ------------------------ */
 
-void getPart5Colors(particle *parti, int nlevel){
+void getPart5Colors(partdata *parti, int nlevel){
   int i,j,k,m;
   part5data *datacopy;
   // float *diameter_data;

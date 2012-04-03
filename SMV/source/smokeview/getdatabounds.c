@@ -74,7 +74,7 @@ void adjustdatabounds(const float *pdata, int local_skip, int ndata,
 
 /* ------------------ adjustpart5bounds ------------------------ */
 
-void adjustpart5bounds(particle *parti){
+void adjustpart5bounds(partdata *parti){
   int i,j,k,m;
   part5data *datacopy;
   int alpha05;

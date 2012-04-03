@@ -1409,7 +1409,7 @@ int readsmv(char *file, char *file2){
   int ioffset;
   float *xplttemp,*yplttemp,*zplttemp;
   float *xplt_origtemp,*yplt_origtemp,*zplt_origtemp;
-  particle *parti;
+  partdata *parti;
   int itrnx, itrny, itrnz, ipdim, iobst, ivent;
   int ibartemp=2, jbartemp=2, kbartemp=2;
   size_t len;
@@ -2261,7 +2261,7 @@ int readsmv(char *file, char *file2){
 
   FREEMEMORY(partinfo);
   if(npartinfo!=0){
-    if(NewMemory((void **)&partinfo,npartinfo*sizeof(particle))==0)return 2;
+    if(NewMemory((void **)&partinfo,npartinfo*sizeof(partdata))==0)return 2;
   }
 
   FREEMEMORY(targinfo);

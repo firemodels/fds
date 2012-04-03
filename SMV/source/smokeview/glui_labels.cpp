@@ -345,7 +345,7 @@ extern "C" void glui_labels_setup(int main_window){
 
 extern "C" void update_fileload(void){
   int i;
-  particle *parti;
+  partdata *parti;
   slicedata *slicei;
   isodata *isoi;
   patchdata *patchi;

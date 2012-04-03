@@ -892,7 +892,7 @@ typedef struct {
   unsigned char **cvals;
 } part5data;
 
-/* --------------------------  particle ------------------------------------ */
+/* --------------------------  partdata ------------------------------------ */
 
 typedef struct {
   int seq_id, autoload;
@@ -921,8 +921,7 @@ typedef struct {
   int nclasses;
   part5class **partclassptr;
   part5data *data5;
-
-} particle;
+} partdata;
 
 /* --------------------------  targ ------------------------------------ */
 

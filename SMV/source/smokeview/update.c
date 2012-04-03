@@ -45,7 +45,7 @@ void update_framenumber(int changetime){
     itimeold=itimes;
     if(showsmoke==1||showevac==1){
       for(i=0;i<npartinfo;i++){
-        particle *parti;
+        partdata *parti;
 
         parti = partinfo+i;
         if(parti->loaded==0||parti->timeslist==NULL)continue;
@@ -225,7 +225,7 @@ void updateShow(void){
   vslicedata *vd;
   isodata *isoi;
   patchdata *patchi;
-  particle *parti;
+  partdata *parti;
   showtime=0; 
   showtime2=0; 
   showplot3d=0; 
@@ -678,7 +678,7 @@ void synctimes(void){
   /* synchronize particle times */
 
     for(j=0;j<npartinfo;j++){
-      particle *parti;
+      partdata *parti;
 
       parti=partinfo+j;
       if(parti->loaded==0)continue;
@@ -798,7 +798,7 @@ void updatetimes(void){
   isodata *ib;
   blockagedata *bc;
   ventdata *vi;
-  particle *parti;
+  partdata *parti;
   tourdata *touri;
   int filenum;
   float dt_MIN=100000.0;
@@ -1454,7 +1454,7 @@ int getplotstate(int choice){
   slicedata *slicei;
   vslicedata *vslicei;
   patchdata *patchi;
-  particle *parti;
+  partdata *parti;
   targ *targi;
   isodata *isoi;
   zonedata *zonei;

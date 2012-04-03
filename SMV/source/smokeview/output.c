@@ -118,7 +118,7 @@ void outputBarText(float x, float y, const GLfloat *color, const char *string){
 void bench_out(float localframerate){
   FILE *fileout;
   int i;
-  particle *parti;
+  partdata *parti;
   slicedata *slicei,*u,*v,*w,*val;
   vslicedata *vd;
   smoke3d *smoke3di;

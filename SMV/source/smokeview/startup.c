@@ -612,7 +612,7 @@ void InitOpenGL(void){
       }
     }
     for(i=0;i<npartinfo;i++){
-      particle *parti;
+      partdata *parti;
 
       parti = partinfo + i;
 
@@ -699,7 +699,7 @@ void InitOpenGL(void){
     }
 
     for(i=0;i<npartinfo;i++){
-      particle *parti;
+      partdata *parti;
 
       parti = partinfo + i;
 
@@ -759,7 +759,7 @@ void InitOpenGL(void){
 
    nstartup=0;
    for(i=0;i<npartinfo;i++){
-      particle *parti;
+      partdata *parti;
 
       parti = partinfo + i;
 
@@ -769,7 +769,7 @@ void InitOpenGL(void){
      fprintf(fileout,"PARTAUTO\n");
      fprintf(fileout," %i \n",nstartup);
      for(i=0;i<npartinfo;i++){
-        particle *parti;
+        partdata *parti;
 
         parti = partinfo + i;
 
@@ -937,7 +937,7 @@ void InitOpenGL(void){
   void get_startup_part(int seq_id){
     int i;
     for(i=0;i<npartinfo;i++){
-      particle *parti;
+      partdata *parti;
 
       parti = partinfo + i;
       if(parti->seq_id==seq_id){
@@ -1063,14 +1063,14 @@ void InitOpenGL(void){
     }
     npartframes_max=get_min_partframes();
     for(i=0;i<npartinfo;i++){
-      particle *parti;
+      partdata *parti;
 
       parti = partinfo + i;
       if(parti->autoload==0&&parti->loaded==1)readpart(parti->file,i,UNLOAD,&errorcode);
       if(parti->autoload==1)readpart(parti->file,i,UNLOAD,&errorcode);
     }
     for(i=0;i<npartinfo;i++){
-      particle *parti;
+      partdata *parti;
 
       parti = partinfo + i;
       if(parti->autoload==0&&parti->loaded==1)readpart(parti->file,i,UNLOAD,&errorcode);

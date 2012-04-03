@@ -901,7 +901,7 @@ void script_loadparticles(scriptdata *scripti){
 
   npartframes_max=get_min_partframes();
   for(i=0;i<npartinfo;i++){
-    particle *parti;
+    partdata *parti;
 
     parti = partinfo + i;
     if(parti->evac==1)continue;
@@ -910,7 +910,7 @@ void script_loadparticles(scriptdata *scripti){
     }
   }
   for(i=0;i<npartinfo;i++){
-    particle *parti;
+    partdata *parti;
 
     parti = partinfo + i;
     if(parti->evac==1)continue;
@@ -1332,7 +1332,7 @@ void script_loadfile(scriptdata *scripti){
   }
   npartframes_max=get_min_partframes();
   for(i=0;i<npartinfo;i++){
-    particle *parti;
+    partdata *parti;
 
     parti = partinfo + i;
     if(strcmp(parti->file,scripti->cval)==0){

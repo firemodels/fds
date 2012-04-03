@@ -1484,7 +1484,7 @@ void RenderMenu(int value){
 /* ------------------ EvacShowMenu ------------------------ */
 
 void EvacShowMenu(int value){
-  particle *parti;
+  partdata *parti;
   int i;
 
   if(nevac==0)return;
@@ -1547,7 +1547,7 @@ void EvacShowMenu(int value){
 /* ------------------ ParticleShowMenu ------------------------ */
 
 void ParticleShowMenu(int value){
-  particle *parti;
+  partdata *parti;
   int i;
 
   if(npartinfo==0)return;
@@ -2565,7 +2565,7 @@ void EvacMenu(int value){
     int i;
 
     for(i=0;i<npartinfo;i++){
-      particle *parti;
+      partdata *parti;
 
       parti=partinfo + i;
       if(parti->evac==0)continue;
@@ -2573,7 +2573,7 @@ void EvacMenu(int value){
     }
     npartframes_max=get_min_partframes();
     for(i=0;i<npartinfo;i++){
-      particle *parti;
+      partdata *parti;
 
       parti=partinfo + i;
       if(parti->evac==0)continue;
@@ -2613,7 +2613,7 @@ void EvacMenu(int value){
 /* ------------------ update_streakvalue ------------------------ */
 
 void update_streakvalue(float value){
-  particle *parti=NULL;
+  partdata *parti=NULL;
   int i;
 
   streak_index=-1;
@@ -2806,7 +2806,7 @@ void ParticlePropShowMenu(int value){
 void ParticleMenu(int value){
   int errorcode,i;
   int whichpart;
-  particle *parti, *partj;
+  partdata *parti, *partj;
 
   glutSetCursor(GLUT_CURSOR_WAIT);
   if(value>=0){
@@ -4542,7 +4542,7 @@ updatemenu=0;
   npartloaded=0;
   nevacloaded=0;
   for(i=0;i<npartinfo;i++){
-    particle *parti;
+    partdata *parti;
 
     parti = partinfo+i;
     if(parti->loaded==1&&parti->evac==0)npartloaded++;
@@ -5851,7 +5851,7 @@ updatemenu=0;
   if(npartinfo>0&&nevac!=npartinfo){
     CREATEMENU(particleshowmenu,ParticleShowMenu);
     for(ii=0;ii<npartinfo;ii++){
-      particle *parti;
+      partdata *parti;
 
       i = partorderindex[ii];
       parti = partinfo + i;
@@ -5918,7 +5918,7 @@ updatemenu=0;
   if(nevac>0){
     CREATEMENU(evacshowmenu,EvacShowMenu);
     for(ii=0;ii<npartinfo;ii++){
-      particle *parti;
+      partdata *parti;
 
       i = partorderindex[ii];
       parti = partinfo + i;
@@ -6458,7 +6458,7 @@ updatemenu=0;
 
     if(npart5loaded>0){
       for(ii=0;ii<npartinfo;ii++){
-        particle *parti;
+        partdata *parti;
 
         parti = partinfo + ii;
         if(parti->loaded==0)continue;
@@ -7225,7 +7225,7 @@ updatemenu=0;
   if(npartinfo>0&&nevac!=npartinfo){
     CREATEMENU(unloadpartmenu,UnloadPartMenu);
     for(ii=0;ii<npartinfo;ii++){
-      particle *parti;
+      partdata *parti;
 
       i = partorderindex[ii];
       parti = partinfo + i;
@@ -7257,7 +7257,7 @@ updatemenu=0;
     {
       int useitem;
       int atleastone=0;
-      particle *parti, *partj;
+      partdata *parti, *partj;
 
       if(nmeshes>1){
         CREATEMENU(particlemenu,ParticleMenu);
@@ -7315,7 +7315,7 @@ updatemenu=0;
   if(nevac>0){
     CREATEMENU(unloadevacmenu,UnloadEvacMenu);
     for(ii=0;ii<npartinfo;ii++){
-      particle *parti;
+      partdata *parti;
 
       i = partorderindex[ii];
       parti = partinfo + i;
@@ -7331,7 +7331,7 @@ updatemenu=0;
       int nevacs=0,nevacloaded2=0;
 
       for(ii=0;ii<npartinfo;ii++){
-        particle *parti;
+        partdata *parti;
 
         parti = partinfo + ii;
         if(parti->evac==1){

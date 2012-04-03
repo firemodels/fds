@@ -1029,7 +1029,7 @@ SVEXTERN roomdata SVDECL(*roominfo,NULL);
 SVEXTERN zvent SVDECL(*zventinfo,NULL);
 SVEXTERN zonedata SVDECL(*zoneinfo,NULL);
 SVEXTERN zonedata SVDECL(*activezone,NULL);
-SVEXTERN particle SVDECL(*partinfo,NULL);
+SVEXTERN partdata SVDECL(*partinfo,NULL);
 SVEXTERN int update_screensize;
 SVEXTERN int part5show;
 SVEXTERN int streak5show,streak5value, streak5step, showstreakhead;

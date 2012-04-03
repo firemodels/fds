@@ -28,9 +28,9 @@ int tagscompare( const void *arg1, const void *arg2 );
 void copy_dep_vals(part5class *partclassi, part5data *datacopy, float *colorptr, propdata *prop, int j);
 
 void draw_SVOBJECT(sv_object *object, int iframe, propdata *prop, int recurse_level);
-void update_all_partvis(particle *parti);
-void update_partvis(int first_frame,particle *parti, part5data *datacopy, int nclasses);
-int get_tagindex(const particle *parti, part5data **data, int tagval);
+void update_all_partvis(partdata *parti);
+void update_partvis(int first_frame,partdata *parti, part5data *datacopy, int nclasses);
+int get_tagindex(const partdata *parti, part5data **data, int tagval);
 #define READPASS 1
 #define READFAIL 0
 
@@ -50,7 +50,7 @@ if(returncode==READPASS){\
 /* ------------------ drawpart_frame ------------------------ */
 
 void drawpart_frame(void){
-  particle *parti;
+  partdata *parti;
 
   if(staticframe0==0||iframe!=0){
     int i;
@@ -86,7 +86,7 @@ void drawevac_frame(void){
   int i;
 
   for(i=0;i<npartinfo;i++){
-    particle *parti;
+    partdata *parti;
 
     parti = partinfo + i;
     if(parti->loaded==0||parti->display==0||parti->evac==0)continue;
@@ -118,7 +118,7 @@ void freepart5data(part5data *datacopy){
 
 /* ------------------ freeallpart5data ------------------------ */
 
-void freeallpart5data(particle *parti){
+void freeallpart5data(partdata *parti){
   int i;
   part5data *datacopy;
 
@@ -156,7 +156,7 @@ void initpart5data(part5data *datacopy, part5class *partclassi){
 
 /* ------------------ getpart5data ------------------------ */
 
-void getpart5data(particle *parti, int partframestep_local, int partpointstep_local, int nf_all, float *delta_time, FILE_SIZE *file_size){
+void getpart5data(partdata *parti, int partframestep_local, int partpointstep_local, int nf_all, float *delta_time, FILE_SIZE *file_size){
   FILE *PART5FILE;
   int one;
   int endianswitch=0;
@@ -574,7 +574,7 @@ void init_part5prop(void){
 
 /* ------------------ update_partvis ------------------------ */
 
-void update_all_partvis(particle *parti){
+void update_all_partvis(partdata *parti){
   part5data *datacopy;
   int i,j;
   int firstframe=1;
@@ -592,7 +592,7 @@ void update_all_partvis(particle *parti){
 
 /* ------------------ update_partvis ------------------------ */
 
-void update_partvis(int first_frame,particle *parti, part5data *datacopy, int nclasses){
+void update_partvis(int first_frame,partdata *parti, part5data *datacopy, int nclasses){
   int nparts;
   unsigned char *vis_part;
 
@@ -644,13 +644,13 @@ void update_partvis(int first_frame,particle *parti, part5data *datacopy, int nc
 
 /* ------------------ get_tagindex ------------------------ */
 
-int get_tagindex(const particle *partin, part5data **datain, int tagval){
+int get_tagindex(const partdata *partin, part5data **datain, int tagval){
   int *returnval;
   part5data *data;
   int i;
 
   for(i=-1;i<npartinfo;i++){
-    const particle *parti;
+    const partdata *parti;
 
     if(i==-1){
       parti=partin;
@@ -676,7 +676,7 @@ int get_tagindex(const particle *partin, part5data **datain, int tagval){
 
 /* ------------------ getpart5nframes ------------------------ */
 
-int getpart5nframes(particle *parti){
+int getpart5nframes(partdata *parti){
   FILE *stream;
   char buffer[256];
   float time_local;
@@ -750,7 +750,7 @@ int get_min_partframes(void){
   int min_frames=-1;
 
   for(i=0;i<npartinfo;i++){
-    particle *parti;
+    partdata *parti;
     int nframes;
 
     parti = partinfo + i;
@@ -769,7 +769,7 @@ int get_min_partframes(void){
 
 /* ------------------ getpart5header ------------------------ */
 
-void getpart5header(particle *parti, int partframestep_local, int *nf_all){
+void getpart5header(partdata *parti, int partframestep_local, int *nf_all){
   FILE *stream;
   char buffer[256];
   float time_local;
@@ -960,7 +960,7 @@ void getpart5header(particle *parti, int partframestep_local, int *nf_all){
 void readpart5(char *file, int ifile, int flag, int *errorcode){
   size_t lenfile;
   int error=0;
-  particle *parti;
+  partdata *parti;
   int nf_all;
   int local_starttime0, local_stoptime0;
   float delta_time0, delta_time;
@@ -1104,7 +1104,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
 /* ------------------ update_all_partvis2 ------------------------ */
 
 void update_all_partvis2(void){
-  particle *parti;
+  partdata *parti;
   int i;
   for(i=0;i<npartinfo;i++){
     parti = partinfo + i;
@@ -1133,7 +1133,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   int ibar,jbar,kbar;
   int nb,nv;
   float xbox, ybox, zbox;
-  particle *parti;
+  partdata *parti;
   int blocknumber;
   mesh *meshi;
   float offset_x, offset_y, offset_z;
@@ -1461,7 +1461,7 @@ void drawselect_avatars(void){
   int i;
 
   for(i=0;i<npartinfo;i++){
-    particle *parti;
+    partdata *parti;
 
     parti = partinfo + i;
     if(parti->loaded==0||parti->display==0)continue;
@@ -1474,7 +1474,7 @@ void drawselect_avatars(void){
 
 /* ------------------ drawEvac ------------------------ */
 
-void drawEvac(const particle *parti){
+void drawEvac(const partdata *parti){
   drawPart(parti);
 }
 
@@ -1507,7 +1507,7 @@ void get_evacpart_color(float **color_handle,part5data *datacopy, int show_defau
 
 /* ------------------ drawPart5 ------------------------ */
 
-void drawPart5(const particle *parti){
+void drawPart5(const partdata *parti){
   int ipframe;
   part5data *datacopy,*datapast;
   int nclasses;
@@ -2009,7 +2009,7 @@ void copy_dep_vals(part5class *partclassi, part5data *datacopy, float *colorptr,
 
 /* ------------------ drawPart ------------------------ */
 
-void drawPart(const particle *parti){
+void drawPart(const partdata *parti){
   short *xpoints, *ypoints, *zpoints;
   unsigned char *itpoint=NULL;
 
@@ -2089,7 +2089,7 @@ void drawPart(const particle *parti){
 
 /* ------------------ drawStaticPart ------------------------ */
 
-void drawStaticPart(const particle *parti){
+void drawStaticPart(const partdata *parti){
 
   short *xpoints, *ypoints, *zpoints;
 
@@ -2140,7 +2140,7 @@ int tagscompare( const void *arg1, const void *arg2 ){
 /* ------------------ partcompare ------------------------ */
 
 int partcompare( const void *arg1, const void *arg2 ){
-  particle *parti, *partj;
+  partdata *parti, *partj;
   int i, j;
 
   i = *(int *)arg1;
@@ -2166,7 +2166,7 @@ int partcompare( const void *arg1, const void *arg2 ){
 
 void updatepartmenulabels(void){
   int i;
-  particle *parti;
+  partdata *parti;
   char label[128];
   int lenlabel;
 

@@ -288,7 +288,7 @@ void checktimebound(void){
   slicedata *sd;
   mesh *meshi;
   blockagedata *bc;
-  particle *parti;
+  partdata *parti;
 
   if(timedrag==0&&itimes>nglobal_times-1||timedrag==1&&itimes<0){
     izone=0;

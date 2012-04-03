@@ -583,9 +583,9 @@ EXTERNCPP void drawvslice(const vslicedata *vd);
 EXTERNCPP void drawvslice_terrain(const vslicedata *vd);
 EXTERNCPP void drawTimeBar(void);
 EXTERNCPP void drawColorBars(void);
-EXTERNCPP void drawPart(const particle *parti);
-EXTERNCPP void drawEvac(const particle *parti);
-EXTERNCPP void drawStaticPart(const particle *parti);
+EXTERNCPP void drawPart(const partdata *parti);
+EXTERNCPP void drawEvac(const partdata *parti);
+EXTERNCPP void drawStaticPart(const partdata *parti);
 EXTERNCPP void drawgrid(const mesh *gb);
 EXTERNCPP void drawroomgeom(void);
 EXTERNCPP void drawfiredata(void);
@@ -664,7 +664,7 @@ EXTERNCPP int ispatchtype(int type);
 EXTERNCPP void adjustdatabounds(const float *pdata, int skip, int ndata, int setpmin, float *pmin, int setpmax, float *pmax);
 EXTERNCPP void adjustpartbounds(const float *pdata, int particle_type, int droplet_type, const unsigned char *isprink, 
                       int skip, int ndata, int setpmin, float *pmin, int setpmax, float *pmax);
-EXTERNCPP void adjustpart5bounds(particle *parti);
+EXTERNCPP void adjustpart5bounds(partdata *parti);
 EXTERNCPP void adjustPlot3Dbounds(int iplot3d, int setpmin, float *pmin, int setpmax, float *pmax);
 EXTERNCPP void adjustslicebounds(const slicedata *sd, float *pmin, float *pmax);
 EXTERNCPP void getslicedatabounds(const slicedata *sd, float *pmin, float *pmax);
@@ -735,7 +735,7 @@ void update_gslice_planes(void);
 void drawgslice(const slicedata *sd);
 #endif
 
-EXTERNCPP void getPart5Colors(particle *parti, int nlevels);
+EXTERNCPP void getPart5Colors(partdata *parti, int nlevels);
 EXTERNCPP void getPartColors(const float *t, int skip, int nt, unsigned char *it,
                    const unsigned char *isprink, int particle_type, int droplet_type,
               const float *tmin, const float *tmax, int nlevel,
