@@ -3,12 +3,12 @@ INC_DIR = -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/set_path
 FILTERC =
 FILTERF =
 
-VPATH = $(SOURCE_DIR)/set_path $(SOURCE_DIR)/shared
+VPATH = $(SOURCE_DIR)/set_path:$(SOURCE_DIR)/shared
 bin = .
 
 # Definition of the object variables
 
-obj = main.o string_util.o
+obj = main.o string_util.o dmalloc.o
 objwin = $(obj:.o=.obj)
 
 #*** General Purpose Rules ***
