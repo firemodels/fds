@@ -2273,9 +2273,11 @@ int readsmv(char *file, char *file2){
   FREEMEMORY(sliceinfo);
   FREEMEMORY(slicetypes);
   FREEMEMORY(vslicetypes);
+  FREEMEMORY(fedinfo);
   if(nsliceinfo>0){
     if(NewMemory( (void **)&vsliceinfo, 3*nsliceinfo*sizeof(vslice) )==0||
        NewMemory( (void **)&sliceinfo,  nsliceinfo*sizeof(slice)    )==0||
+       NewMemory( (void **)&fedinfo,  nsliceinfo*sizeof(feddata)    )==0||
        NewMemory( (void **)&slicetypes, nsliceinfo*sizeof(int)      )==0||
        NewMemory( (void **)&slice_loadstack, nsliceinfo*sizeof(int)      )==0||
        NewMemory( (void **)&vslice_loadstack, nsliceinfo*sizeof(int)      )==0||
@@ -5350,12 +5352,7 @@ typedef struct {
       }
 
       if(nslicefiles>100&&(islicecount%100==1||nslicefiles==islicecount)){
-        if(islicecount==11){
-          printf("     examining %i'th slice file\n",islicecount);
-        }
-        else{
-          printf("     examining %i'st slice file\n",islicecount);
-        }
+        printf("     examining %i'th slice file\n",islicecount);
       }
       islicecount++;
       strcpy(buffer2,bufferptr);
@@ -11395,4 +11392,3 @@ surfdata *get_surface(char *label){
   }
   return surfacedefault;
 }
-

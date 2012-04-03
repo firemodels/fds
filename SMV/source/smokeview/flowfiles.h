@@ -1028,6 +1028,13 @@ typedef struct _slice {
 /* --------------------------  multislice ------------------------------------ */
 
 typedef struct {
+  slice *co,*co2,*o2,*fed;
+  int loaded,display;
+} feddata;
+
+/* --------------------------  multislice ------------------------------------ */
+
+typedef struct {
   int mesh_type;
   int seq_id, autoload;
   int loaded,display,type;

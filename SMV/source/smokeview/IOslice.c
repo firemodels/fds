@@ -1628,6 +1628,61 @@ void getsliceparams2(void){
   }
 }
 
+/* ------------------ update_fedinfo ------------------------ */
+
+void update_fedinfo(void){
+  int i;
+
+  nfedinfo=0;
+  for(i=0;i<nsliceinfo;i++){
+    slice *slicei;
+    feddata *fedi;
+    flowlabels *label;
+    int j;
+
+    fedi = fedinfo + nfedinfo;
+    slicei = sliceinfo + i;
+    label = &(slicei->label);
+
+    fedi->co=NULL;
+    fedi->co2=NULL;
+    fedi->o2=NULL;
+    fedi->fed=NULL;
+    fedi->loaded=0;
+    fedi->display=0;
+    if(strcmp(label->shortlabel,"CO2")!=0)continue;
+    // get slice plane info
+    fedi->co2=slicei;
+    for(j=0;j<nsliceinfo;j++){
+      slice *slicej;
+
+      slicej = sliceinfo + j;
+      label = &(slicej->label);
+      if(strcmp(label->shortlabel,"CO")!=0)continue;
+      // get slice plane info
+      // continue if not the same as CO2 info
+      fedi->co=sliceinfo + j;
+    }
+    for(j=0;j<nsliceinfo;j++){
+      slice *slicej;
+
+      slicej = sliceinfo + j;
+      label = &(slicej->label);
+      if(strcmp(label->shortlabel,"O2")!=0)continue;
+      // get slice plane info
+      // continue if not the same as CO2 info
+      fedi->o2=sliceinfo + j;
+    }
+    nfedinfo++;
+  }
+  if(nfedinfo==0){
+    FREEMEMORY(fedinfo);
+  }
+  else{
+    ResizeMemory((void **)&fedinfo,nfedinfo*sizeof(feddata));
+  }
+}
+
 /* ------------------ updatevslices ------------------------ */
 
 void updatevslices(void){
@@ -1640,6 +1695,8 @@ void updatevslices(void){
 
   printf("  updating vector slices\n");
   getsliceparams();
+
+  update_fedinfo();
 
   /* update vector slices */
 
@@ -5818,5 +5875,7 @@ void update_slicedir_count(void){
   	}
   }
 }
+
+
 
 

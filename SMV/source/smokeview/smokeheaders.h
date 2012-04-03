@@ -729,6 +729,7 @@ EXTERNCPP void outputBarText(float x, float y, const GLfloat *color, const char 
 EXTERNCPP void getzonebounds(const float *pdata, int ndata, int setpmin, float *pmin, int setpmax, float *pmax);
 EXTERNCPP void updatechar(void);
 EXTERNCPP void updatetracers(void);
+EXTERNCPP void update_fedinfo(void);
 #ifdef pp_GSLICE
 void update_gslice_planes(void);
 void drawgslice(const slice *sd);
