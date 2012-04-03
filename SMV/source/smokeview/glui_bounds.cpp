@@ -1405,7 +1405,7 @@ extern "C"  void glui_script_disable(void){
 /* ------------------ Bound_CB ------------------------ */
 
 void Bound_CB(int var){
-  patch *pi;
+  patchdata *pi;
   int i;
 
   switch (var) {

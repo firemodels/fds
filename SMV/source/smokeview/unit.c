@@ -69,7 +69,7 @@ void set_unit_vis(void){
     if(uci->visible==1)continue;
   
     for(j=0;j<npatchinfo;j++){
-      patch *patchj;
+      patchdata *patchj;
       
       patchj = patchinfo + j;
       if(strlen(patchj->label.unit)!=strlen(uci->units->unit))continue;
@@ -160,7 +160,7 @@ void init_unit_defs(void){
     }
   }
   for(j=0;j<npatchinfo;j++){
-    patch *patchj;
+    patchdata *patchj;
       
     patchj = patchinfo + j;
     unitclass = get_unit_class(patchj->label.unit);
@@ -195,7 +195,7 @@ void update_unit_defs(void){
 
     firstpatch=1;
     for(j=0;j<npatchinfo;j++){
-      patch *patchj;
+      patchdata *patchj;
       
       patchj = patchinfo + j;
       if(patchj->loaded==0||patchj->display==0)continue;

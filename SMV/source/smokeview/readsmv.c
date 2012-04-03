@@ -2305,9 +2305,9 @@ int readsmv(char *file, char *file2){
   FREEMEMORY(patchinfo);
   FREEMEMORY(patchtypes);
   if(npatchinfo!=0){
-    if(NewMemory((void **)&patchinfo,npatchinfo*sizeof(patch))==0)return 2;
+    if(NewMemory((void **)&patchinfo,npatchinfo*sizeof(patchdata))==0)return 2;
     for(i=0;i<npatchinfo;i++){
-      patch *patchi;
+      patchdata *patchi;
 
       patchi = patchinfo + i;
       patchi->reg_file=NULL;
@@ -2320,7 +2320,7 @@ int readsmv(char *file, char *file2){
   FREEMEMORY(isoinfo);
   FREEMEMORY(isotypes);
   if(nisoinfo>0){
-    if(NewMemory((void **)&isoinfo,nisoinfo*sizeof(iso))==0)return 2;
+    if(NewMemory((void **)&isoinfo,nisoinfo*sizeof(isodata))==0)return 2;
     if(NewMemory((void **)&isotypes,nisoinfo*sizeof(int))==0)return 2;
   }
   FREEMEMORY(roominfo);
@@ -5472,7 +5472,7 @@ typedef struct {
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"BNDF") == 1||match(buffer,"BNDC") == 1||match(buffer,"BNDE") == 1){
-      patch *patchi;
+      patchdata *patchi;
 
       nn_patch++;
 
@@ -5612,7 +5612,7 @@ typedef struct {
   */
 
     if(match(buffer,"ISOF") == 1||match(buffer,"TISOF")==1||match(buffer,"ISOG") == 1){
-      iso *isoi;
+      isodata *isoi;
       int get_isolevels;
       int dataflag=0,geomflag=0;
       char tbuffer[255], *tbufferptr;
@@ -5871,7 +5871,7 @@ typedef struct {
       sscanf(buffer,"%f %f %f %f",&valmin,&valmax,&percentile_min,&percentile_max);
 
       for(i=0;i<npatchinfo;i++){
-        patch *patchi;
+        patchdata *patchi;
 
         patchi = patchinfo + i;
         if(strcmp(file_ptr,patchi->file)==0){
@@ -6604,7 +6604,7 @@ typedef struct {
     if(NewMemory((void*)&isobounds,nisoinfo*sizeof(databounds))==0)return 2;
     niso_bounds=0;
     for(i=0;i<nisoinfo;i++){
-      iso *isoi;
+      isodata *isoi;
 
       isoi = isoinfo + i;
       if(isoi->dataflag==0)continue;
@@ -6626,7 +6626,7 @@ typedef struct {
       isobounds[niso_bounds].label=&isoi->color_label;
       niso_bounds++;
       for(n=0;n<i;n++){
-        iso *ison;
+        isodata *ison;
 
         ison = isoinfo + n;
         if(ison->dataflag==0)continue;
@@ -7658,7 +7658,7 @@ void readboundini(void){
       buffer2ptr=trim_front(buffer2);
       lenbuffer2=strlen(buffer2ptr);
       for(i=0;i<npatchinfo;i++){
-        patch *patchi;
+        patchdata *patchi;
 
         patchi = patchinfo +i;
         if(lenbuffer2!=0&&strcmp(patchi->label.shortlabel,buffer2ptr)==0&&patchi->filetype==filetype&&is_file_newer(boundinifilename,patchi->file)==1){
@@ -7697,7 +7697,7 @@ void writeboundini(void){
   if(boundinifilename==NULL)return;
   for(i=0;i<npatchinfo;i++){
     bounddata *boundi;
-    patch *patchi;
+    patchdata *patchi;
     int skipi;
     int j;
 
@@ -7705,7 +7705,7 @@ void writeboundini(void){
     patchi = patchinfo + i;
     if(patchi->bounds.defined==0)continue;
     for(j=0;j<i-1;j++){
-      patch *patchj;
+      patchdata *patchj;
 
       patchj = patchinfo + j;
       if(patchi->type==patchj->type&&patchi->filetype==patchj->filetype){
@@ -10431,7 +10431,7 @@ void writeini(int flag){
   }
   for(i=0;i<npatch2;i++){
     int ii;
-    patch *patchi;
+    patchdata *patchi;
 
     ii = patchlabellist_index[i];
     patchi = patchinfo + ii;
@@ -11241,7 +11241,7 @@ void writeini(int flag){
 void update_loaded_lists(void){
   int i;
   slicedata *slicei;
-  patch *patchi;
+  patchdata *patchi;
 
   nslice_loaded=0;
   for(i=0;i<nsliceinfo;i++){

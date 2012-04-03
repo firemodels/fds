@@ -347,8 +347,8 @@ extern "C" void update_fileload(void){
   int i;
   particle *parti;
   slicedata *slicei;
-  iso *isoi;
-  patch *patchi;
+  isodata *isoi;
+  patchdata *patchi;
   smoke3d *smoke3di;
   plot3d *plot3di;
   vslicedata *vslicei;

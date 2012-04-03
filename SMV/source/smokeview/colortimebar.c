@@ -905,7 +905,7 @@ void drawColorBars(void){
   char unitlabel[256];
   float *p3lev;
   databounds *sb;
-  patch *patchi;
+  patchdata *patchi;
 
   int sliceunitclass,sliceunittype;
   int sliceflag=0;

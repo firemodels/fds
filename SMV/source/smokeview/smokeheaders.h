@@ -25,10 +25,10 @@ EXTERNCPP void Update_Isotris(int flag);
 EXTERNCPP void update_evac_parms(void);
 EXTERNCPP void update_slice_menu_show(void);
 EXTERNCPP void update_slicedir_count(void);
-EXTERNCPP void update_patch_bounds(patch *patchi);
+EXTERNCPP void update_patch_bounds(patchdata *patchi);
 EXTERNCPP void Update_All_Patch_Bounds(void);
 EXTERNCPP void Update_All_Patch_Bounds_st(void);
-EXTERNCPP int update_patch_hist(patch *patchi);
+EXTERNCPP int update_patch_hist(patchdata *patchi);
 EXTERNCPP void update_hidepatchsurface(void);
 EXTERNCPP int last_slice_loadstack(void);
 EXTERNCPP void push_slice_loadstack(int sliceindex);
@@ -272,9 +272,9 @@ EXTERNCPP void loadskytexture(char *filebase, texture *texti);
 EXTERNCPP void uncompress_slicedataframe(slicedata *sd,int iframe);
 EXTERNCPP void uncompress_patchdataframe(mesh *meshi,int iframe);
 #endif
-EXTERNCPP void getpatchdata_zlib(patch *patchi,unsigned char *data,int ndata, 
+EXTERNCPP void getpatchdata_zlib(patchdata *patchi,unsigned char *data,int ndata, 
                        float *times, unsigned int *zipoffset, unsigned int *zipsize, int ntimes);
-EXTERNCPP void getpatchsizeinfo(patch *patchi, int *nframes, int *buffersize);
+EXTERNCPP void getpatchsizeinfo(patchdata *patchi, int *nframes, int *buffersize);
 EXTERNCPP void getpatchheader2(char *file, int *version, int *i1, int *i2, int *j1, int *j2, int *k1, int *k2, int *patchdir);
 EXTERNCPP void getpatchheader(char *file,int *npatches,float *valmin, float *valmax);
 EXTERNCPP int getsmoke3d_version(smoke3d *smoke3di);
@@ -541,12 +541,12 @@ EXTERNCPP int getslicetype_fromlabel(char *label);
 EXTERNCPP void updateslicetypes(void);
 EXTERNCPP int getsliceindex(const slicedata *sd);
 EXTERNCPP void updatesliceboundlabels(void);
-EXTERNCPP int getisotype(const iso *isoi);
-EXTERNCPP int getisottype(const iso *isoi);
-EXTERNCPP int getisoindex(const iso *isoi);
+EXTERNCPP int getisotype(const isodata *isoi);
+EXTERNCPP int getisottype(const isodata *isoi);
+EXTERNCPP int getisoindex(const isodata *isoi);
 EXTERNCPP void update_isotype(void);
 EXTERNCPP void updateisotypes(void);
-EXTERNCPP int getpatchtype(const patch *patchi);
+EXTERNCPP int getpatchtype(const patchdata *patchi);
 EXTERNCPP void update_patchtype(void);
 EXTERNCPP void updatepatchtypes(void);
 
@@ -565,7 +565,7 @@ EXTERNCPP void ZoomMenu(int value);
 EXTERNCPP void setClipPlanes(int mode);
 EXTERNCPP void unsetClipPlanes(void);
 EXTERNCPP void setslicecolors(float slicemin, float slicemax, slicedata *sd, int *errorcode);
-EXTERNCPP void setisocolors(float isomin, float isomax, iso *sd, int *errorcode);
+EXTERNCPP void setisocolors(float isomin, float isomax, isodata *sd, int *errorcode);
 EXTERNCPP void drawslice(const slicedata *sd);
 EXTERNCPP void drawslice_cellcenter(const slicedata *sd);
 EXTERNCPP void drawslice_texture(const slicedata *sd);
@@ -685,7 +685,7 @@ EXTERNCPP void readcadgeom(cadgeom *cd);
 EXTERNCPP void drawcadgeom(const cadgeom *cd);
 EXTERNCPP void drawcad2geom_opaque(const cadgeom *cd,int trans_flag);
 
-EXTERNCPP void draw_geomdata(patch *patchi);
+EXTERNCPP void draw_geomdata(patchdata *patchi);
 EXTERNCPP char *newtextptr(char ***texture_list,int *n_texture_list,char *texturebuffer,char *lastbuffer);
 
 EXTERNCPP void readplot3d(char *file, int ifile, int flag,int *errorcode);
@@ -752,7 +752,7 @@ EXTERNCPP void getBoundaryColors2(float *t, int nt, unsigned char *it,
               int ndatalevel,
               int *extreme_min, int *extreme_max
               );
-EXTERNCPP void getBoundaryColors3(patch *patchi, float *t, int nt, unsigned char *it, 
+EXTERNCPP void getBoundaryColors3(patchdata *patchi, float *t, int nt, unsigned char *it, 
               int settmin, float *tmin, int settmax, float *tmax, 
               float *tmin_global, float *tmax_global,
               int nlevel,
@@ -789,7 +789,7 @@ EXTERNCPP void getSliceColors(const float *t, int nt, unsigned char *it,
 EXTERNCPP mesh *get_loaded_isomesh(void);
 EXTERNCPP void unload_iso_trans(void);
 EXTERNCPP void setisolabels(float smin, float smax, 
-                    iso *sd, int *errorcode);
+                    isodata *sd, int *errorcode);
 EXTERNCPP void getIsoLabels(float tmin, float tmax, int nlevel,
               char labels[12][11],char **scale, float *tlevels256);
 EXTERNCPP int SVimage2file(char *GIFfilename, int rendertype, int width, int height);

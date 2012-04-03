@@ -151,7 +151,7 @@ void update_framenumber(int changetime){
     }
     if(showpatch==1){
       for(i=0;i<npatchinfo;i++){
-        patch *patchi;
+        patchdata *patchi;
 
         patchi = patchinfo + i;
         if(patchi->filetype!=2||patchi->geom_times==NULL||patchi->geom_timeslist==NULL)continue;
@@ -162,7 +162,7 @@ void update_framenumber(int changetime){
         patchi->geom_nval_dynamic = patchi->geom_ndynamics[patchi->geom_itime];
       }
       for(i=0;i<nmeshes;i++){
-        patch *patchi;
+        patchdata *patchi;
         mesh *meshi;
 
         meshi = meshinfo+i;
@@ -180,7 +180,7 @@ void update_framenumber(int changetime){
       }
     }
     if(showiso==1){
-      iso *isoi;
+      isodata *isoi;
       mesh *meshi;
 
       CheckMemory;
@@ -223,8 +223,8 @@ void updateShow(void){
 #endif
   int ii;
   vslicedata *vd;
-  iso *isoi;
-  patch *patchi;
+  isodata *isoi;
+  patchdata *patchi;
   particle *parti;
   showtime=0; 
   showtime2=0; 
@@ -735,7 +735,7 @@ void synctimes(void){
   /* synchronize patch times */
 
     for(j=0;j<npatchinfo;j++){
-      patch *patchi;
+      patchdata *patchi;
 
       patchi = patchinfo + j;
       if(patchi->loaded==0)continue;
@@ -743,7 +743,7 @@ void synctimes(void){
       patchi->geom_timeslist[n]=get_itime(n,patchi->geom_timeslist,patchi->geom_times,patchi->ngeom_times);
     }
     for(j=0;j<nmeshes;j++){
-      patch *patchi;
+      patchdata *patchi;
       mesh *meshi;
 
       meshi=meshinfo+j;
@@ -795,7 +795,7 @@ void updatetimes(void){
   float *timescopy;
   int i,k;
   slicedata *sd;
-  iso *ib;
+  isodata *ib;
   blockagedata *bc;
   ventdata *vi;
   particle *parti;
@@ -853,7 +853,7 @@ void updatetimes(void){
     nglobal_times+=ntargtimes;
   }
   for(i=0;i<npatchinfo;i++){
-    patch *patchi;
+    patchdata *patchi;
 
     patchi = patchinfo + i;
     if(patchi->loaded==1&&patchi->filetype==2){
@@ -861,7 +861,7 @@ void updatetimes(void){
     }
   }
   for(i=0;i<nmeshes;i++){
-    patch *patchi;
+    patchdata *patchi;
     mesh *meshi;
 
     meshi=meshinfo+i;
@@ -1023,7 +1023,7 @@ void updatetimes(void){
     }
   }
   for(i=0;i<npatchinfo;i++){
-    patch *patchi;
+    patchdata *patchi;
 
     patchi = patchinfo + i;
     if(patchi->loaded==1&&patchi->filetype==2){
@@ -1039,7 +1039,7 @@ void updatetimes(void){
     }
   }
   for(i=0;i<nmeshes;i++){
-    patch *patchi;
+    patchdata *patchi;
     mesh *meshi;
 
     meshi=meshinfo + i;
@@ -1269,7 +1269,7 @@ void updatetimes(void){
   }
 
   for(i=0;i<npatchinfo;i++){
-    patch *patchi;
+    patchdata *patchi;
 
     patchi = patchinfo + i;
     FREEMEMORY(patchi->geom_timeslist);
@@ -1453,10 +1453,10 @@ int getplotstate(int choice){
   plot3d *ploti;
   slicedata *slicei;
   vslicedata *vslicei;
-  patch *patchi;
+  patchdata *patchi;
   particle *parti;
   targ *targi;
-  iso *isoi;
+  isodata *isoi;
   zonedata *zonei;
   smoke3d *smoke3di;
   tourdata *touri;

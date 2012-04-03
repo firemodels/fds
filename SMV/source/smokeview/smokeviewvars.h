@@ -1093,8 +1093,8 @@ SVEXTERN int SVDECL(*slicetypes,NULL), SVDECL(*isotypes,NULL), SVDECL(*vslicetyp
 SVEXTERN plot3d SVDECL(*plot3dinfo,NULL);
 SVEXTERN float SVDECL(*plot3dtimelist,NULL);
 SVEXTERN int nplot3dtimelist;
-SVEXTERN patch SVDECL(*patchinfo,NULL);
-SVEXTERN iso SVDECL(*isoinfo,NULL);
+SVEXTERN patchdata SVDECL(*patchinfo,NULL);
+SVEXTERN isodata SVDECL(*isoinfo,NULL);
 SVEXTERN targpos SVDECL(*target_positions,NULL);
 
 SVEXTERN blockagedata SVDECL(*bchighlight,NULL),SVDECL(*bchighlight_old,NULL);

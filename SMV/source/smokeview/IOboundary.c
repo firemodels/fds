@@ -26,7 +26,7 @@ int getpatchfacedir(mesh *gb, int i1, int i2, int j1, int j2, int k1, int k2,
                     int *blockonpatch, mesh **meshonpatch);
 int getpatchface2dir(mesh *gb, int i1, int i2, int j1, int j2, int k1, int k2, int patchdir,
                     int *blockonpatch, mesh **meshonpatch);
-int getpatchindex(const patch *patchi);
+int getpatchindex(const patchdata *patchi);
 
 /* ------------------ readpatch_bndf ------------------------ */
 
@@ -48,7 +48,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   int ibartemp,jbartemp,kbartemp;
   float *xplttemp,*yplttemp,*zplttemp;
   int blocknumber;
-  patch *pi,*patchbase,*patchi;
+  patchdata *pi,*patchbase,*patchi;
   mesh *meshi;
   float patchmin_global, patchmax_global;
   int local_first,nsize,iblock;
@@ -137,7 +137,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
       int enableflag=1;
 
       for(i=0;i<npatchinfo;i++){
-        patch *patchii;
+        patchdata *patchii;
 
         patchii = patchinfo + i;
         if(patchii->loaded==1&&patchii->compression_type==1){
@@ -940,7 +940,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
 /* ------------------ readpatch ------------------------ */
 
 void readpatch(int ifile, int flag, int *errorcode){
-  patch *patchi;
+  patchdata *patchi;
 
   patchi = patchinfo + ifile;
   if(patchi->filetype==2){
@@ -1279,7 +1279,7 @@ void drawpatch_texture(const mesh *meshi){
   unsigned char *ipqqi;
   int iblock;
   blockagedata *bc;
-  patch *patchi;
+  patchdata *patchi;
   mesh *meshblock;
   float dboundx,dboundy,dboundz;
   float *xplt, *yplt, *zplt;
@@ -1575,7 +1575,7 @@ void drawpatch_texture_threshold(const mesh *meshi){
   unsigned char *ipqqi;
   int iblock;
   blockagedata *bc;
-  patch *patchi;
+  patchdata *patchi;
   float *color11, *color12, *color21, *color22;
   mesh *meshblock;
   float burn_color[4]={0.0,0.0,0.0,1.0};
@@ -1879,7 +1879,7 @@ void drawpatch_threshold_cellcenter(const mesh *meshi){
   int *patchblank;
   int iblock;
   blockagedata *bc;
-  patch *patchi;
+  patchdata *patchi;
   float *color11;
   mesh *meshblock;
   float burn_color[4]={0.0,0.0,0.0,1.0};
@@ -2072,7 +2072,7 @@ void drawpatch_frame(void){
   int i;
 
   for(i=0;i<npatchinfo;i++){
-    patch *patchi;
+    patchdata *patchi;
 
     patchi = patchinfo + i;
     if(patchi->filetype!=2)continue;
@@ -2086,7 +2086,7 @@ void drawpatch_frame(void){
 
       filenum=meshi->patchfilenum;
       if(filenum!=-1){
-        patch *patchi;
+        patchdata *patchi;
 
         patchi = patchinfo + filenum;
         if(patchi->loaded==0||patchi->display==0||patchi->type!=ipatchtype)continue;
@@ -2141,7 +2141,7 @@ void drawpatch(const mesh *meshi){
   unsigned char *ipqqi;
   int iblock;
   blockagedata *bc;
-  patch *patchi;
+  patchdata *patchi;
   float *color11, *color12, *color21, *color22;
   mesh *meshblock;
   float dboundx,dboundy,dboundz;
@@ -2529,7 +2529,7 @@ void drawpatch_cellcenter(const mesh *meshi){
   unsigned char *ipqqi;
   int iblock;
   blockagedata *bc;
-  patch *patchi;
+  patchdata *patchi;
   float *color11;
   mesh *meshblock;
 
@@ -2801,7 +2801,7 @@ void drawonlythreshold(const mesh *meshi){
   int *patchblank;
   int iblock;
   blockagedata *bc;
-  patch *patchi;
+  patchdata *patchi;
   float *color11, *color12, *color21, *color22;
   float *color_black;
   mesh *meshblock;
@@ -3282,7 +3282,7 @@ int getpatchface2dir(mesh *meshi, int i1, int i2, int j1, int j2, int k1, int k2
 
 void updatepatchtypes(void){
   int i;
-  patch *patchi;
+  patchdata *patchi;
 
   npatchtypes = 0;
   for(i=0;i<npatchinfo;i++){
@@ -3297,8 +3297,8 @@ void updatepatchtypes(void){
 
 /* ------------------ getpatchindex ------------------------ */
 
-int getpatchindex(const patch *patchi){
-  patch *patchi2;
+int getpatchindex(const patchdata *patchi){
+  patchdata *patchi2;
   int j;
 
   for(j=0;j<npatchtypes;j++){
@@ -3310,8 +3310,8 @@ int getpatchindex(const patch *patchi){
 
 /* ------------------ getpatchtype ------------------------ */
 
-int getpatchtype(const patch *patchi){
-  patch *patchi2;
+int getpatchtype(const patchdata *patchi){
+  patchdata *patchi2;
   int j;
 
   for(j=0;j<npatchtypes;j++){
@@ -3327,14 +3327,14 @@ void update_patchtype(){
   int i;
 
   for(i=0;i<npatchinfo;i++){
-    patch *patchi;
+    patchdata *patchi;
 
     patchi = patchinfo + i;
     if(patchi->loaded==1&&patchi->display==1&&patchi->type==ipatchtype)return;
   }
 
   for(i=0;i<npatchinfo;i++){
-    patch *patchi;
+    patchdata *patchi;
 
     patchi = patchinfo + i;
     if(patchi->loaded==1&&patchi->display==1){
@@ -3350,7 +3350,7 @@ void update_patchtype(){
 /* ------------------ patchcompare ------------------------ */
 
 int patchcompare( const void *arg1, const void *arg2 ){
-  patch *patchi, *patchj;
+  patchdata *patchi, *patchj;
 
   patchi = patchinfo + *(int *)arg1;
   patchj = patchinfo + *(int *)arg2;
@@ -3366,7 +3366,7 @@ int patchcompare( const void *arg1, const void *arg2 ){
 
 void updatepatchmenulabels(void){
   int i;
-  patch *patchi;
+  patchdata *patchi;
   char label[128];
   STRUCTSTAT statbuffer;
 
@@ -3496,7 +3496,7 @@ void getpatchheader2(char *file,
 
 /* ------------------ getpatchsizeinfo ------------------------ */
 
-void getpatchsizeinfo(patch *patchi, int *nframes, int *buffersize){
+void getpatchsizeinfo(patchdata *patchi, int *nframes, int *buffersize){
   FILE *streamsize;
   EGZ_FILE *stream;
   int nf=0, bsize=0;
@@ -3609,7 +3609,7 @@ void getpatchsizeinfo(patch *patchi, int *nframes, int *buffersize){
 
 /* ------------------ getpatchdata_zlib ------------------------ */
 
-void getpatchdata_zlib(patch *patchi,unsigned char *data,int ndata, 
+void getpatchdata_zlib(patchdata *patchi,unsigned char *data,int ndata, 
                        float *local_times, unsigned int *zipoffset, unsigned int *zipsize, int ntimes_local){
   EGZ_FILE *stream;
   float local_time;
@@ -3733,7 +3733,7 @@ void Update_All_Patch_Bounds_st(void){
 
   LOCK_COMPRESS;
   for(i=0;i<npatchinfo;i++){
-    patch *patchi;
+    patchdata *patchi;
 
     patchi = patchinfo + i;
     total+=update_patch_hist(patchi);
@@ -3750,7 +3750,7 @@ void Update_All_Patch_Bounds_st(void){
 
 /* ------------------ update_patch_hist ------------------------ */
 
-int update_patch_hist(patch *patchj){
+int update_patch_hist(patchdata *patchj){
   int i;
   int endiandata;
   int first=1;
@@ -3761,7 +3761,7 @@ int update_patch_hist(patch *patchj){
 
   for(i=0;i<npatchinfo;i++){
     int endian_local, npatches, error;
-    patch *patchi;
+    patchdata *patchi;
     int unit1;
     FILE_SIZE lenfile;
     int error1;

@@ -648,7 +648,7 @@ void InitOpenGL(void){
       }
     }
     for(i=0;i<npatchinfo;i++){
-      patch *patchi;
+      patchdata *patchi;
 
       patchi = patchinfo + i;
 
@@ -660,7 +660,7 @@ void InitOpenGL(void){
       }
     }
     for(i=0;i<nisoinfo;i++){
-      iso *isoi;
+      isodata *isoi;
 
       isoi = isoinfo + i;
 
@@ -723,7 +723,7 @@ void InitOpenGL(void){
     }
 
     for(i=0;i<npatchinfo;i++){
-      patch *patchi;
+      patchdata *patchi;
 
       patchi = patchinfo + i;
 
@@ -731,7 +731,7 @@ void InitOpenGL(void){
     }
 
     for(i=0;i<nisoinfo;i++){
-      iso *isoi;
+      isodata *isoi;
 
       isoi = isoinfo + i;
 
@@ -803,7 +803,7 @@ void InitOpenGL(void){
 
    nstartup=0;
    for(i=0;i<nisoinfo;i++){
-      iso *isoi;
+      isodata *isoi;
 
       isoi = isoinfo + i;
 
@@ -813,7 +813,7 @@ void InitOpenGL(void){
      fprintf(fileout,"ISOAUTO\n");
      fprintf(fileout," %i \n",nstartup);
      for(i=0;i<nisoinfo;i++){
-        iso *isoi;
+        isodata *isoi;
 
         isoi = isoinfo + i;
 
@@ -911,7 +911,7 @@ void InitOpenGL(void){
 
    nstartup=0;
    for(i=0;i<npatchinfo;i++){
-      patch *patchi;
+      patchdata *patchi;
 
       patchi = patchinfo + i;
 
@@ -921,7 +921,7 @@ void InitOpenGL(void){
      fprintf(fileout,"PATCHAUTO\n");
      fprintf(fileout," %i \n",nstartup);
      for(i=0;i<npatchinfo;i++){
-        patch *patchi;
+        patchdata *patchi;
 
         patchi = patchinfo + i;
 
@@ -967,7 +967,7 @@ void InitOpenGL(void){
   void get_startup_patch(int seq_id){
     int i;
     for(i=0;i<npatchinfo;i++){
-      patch *patchi;
+      patchdata *patchi;
 
       patchi = patchinfo + i;
       if(patchi->seq_id==seq_id){
@@ -999,7 +999,7 @@ void InitOpenGL(void){
   void get_startup_iso(int seq_id){
     int i;
     for(i=0;i<nisoinfo;i++){
-      iso *isoi;
+      isodata *isoi;
 
       isoi = isoinfo + i;
 
@@ -1077,7 +1077,7 @@ void InitOpenGL(void){
       if(parti->autoload==1)readpart(parti->file,i,LOAD,&errorcode);
     }
     for(i=0;i<nisoinfo;i++){
-      iso *isoi;
+      isodata *isoi;
 
       isoi = isoinfo + i;
       if(isoi->autoload==0&&isoi->autoload==1)readiso(isoi->file,i,UNLOAD,&errorcode);
@@ -1117,7 +1117,7 @@ void InitOpenGL(void){
       if(smoke3di->autoload==1)readsmoke3d(i,LOAD,&errorcode);
     }
     for(i=0;i<npatchinfo;i++){
-      patch *patchi;
+      patchdata *patchi;
 
       patchi = patchinfo + i;
       if(patchi->autoload==0&&patchi->loaded==1)readpatch(i,UNLOAD,&errorcode);

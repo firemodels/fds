@@ -122,8 +122,8 @@ void bench_out(float localframerate){
   slicedata *slicei,*u,*v,*w,*val;
   vslicedata *vd;
   smoke3d *smoke3di;
-  patch *patchi;
-  iso *isoi;
+  patchdata *patchi;
+  isodata *isoi;
 #ifdef pp_memstatus
   unsigned int memused, tmem;
 #endif

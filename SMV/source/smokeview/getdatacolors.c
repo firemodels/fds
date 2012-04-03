@@ -183,7 +183,7 @@ void getBoundaryColors2(float *t, int nt, unsigned char *it,
 
 /* ------------------ remap_patchdata ------------------------ */
 
-void remap_patchdata(patch *patchi,float valmin, float valmax, int *extreme_min, int *extreme_max){
+void remap_patchdata(patchdata *patchi,float valmin, float valmax, int *extreme_min, int *extreme_max){
   int i;
   mesh *meshi;
   unsigned char *ipqq;
@@ -216,7 +216,7 @@ void remap_patchdata(patch *patchi,float valmin, float valmax, int *extreme_min,
 
 /* ------------------ update_patch_bounds ------------------------ */
 
-void update_patch_bounds(patch *patchi){
+void update_patch_bounds(patchdata *patchi){
   histogramdata full_histogram;
   bounddata *boundi;
   int j;
@@ -226,7 +226,7 @@ void update_patch_bounds(patch *patchi){
   init_histogram(&full_histogram);
 
   for(j=0;j<npatchinfo;j++){
-    patch *patchj;
+    patchdata *patchj;
 
     patchj=patchinfo+j;
     if(patchj->type!=patchi->type||patchj->filetype!=patchi->filetype)continue;
@@ -241,7 +241,7 @@ void update_patch_bounds(patch *patchi){
 
   for(j=0;j<npatchinfo;j++){
     bounddata *boundj;
-    patch *patchj;
+    patchdata *patchj;
 
     patchj=patchinfo+j;
     if(patchi==patchj||patchj->type!=patchi->type||patchj->filetype!=patchi->filetype)continue;
@@ -254,7 +254,7 @@ void update_patch_bounds(patch *patchi){
 
 /* ------------------ getBoundaryColors3 ------------------------ */
 
-void getBoundaryColors3(patch *patchi, float *t, int nt, unsigned char *it, 
+void getBoundaryColors3(patchdata *patchi, float *t, int nt, unsigned char *it, 
               int settmin, float *ttmin, int settmax, float *ttmax,
               float *tmin_arg, float *tmax_arg,
               int nlevel,

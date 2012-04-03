@@ -172,7 +172,7 @@ void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostreamptr, int
 /* ------------------ readiso_geom ------------------------ */
 
 void readiso_geom(const char *file, int ifile, int flag, int *errorcode){
-  iso *isoi;
+  isodata *isoi;
   geomdata *geomi;
   int ilevel,error;
   mesh *meshi;
@@ -271,7 +271,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
   int n_iso_colors;
   
   mesh *meshi;
-  iso *ib;
+  isodata *ib;
 
   int local_starttime=0, local_stoptime=0;
   FILE_SIZE file_size=0;
@@ -696,7 +696,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
 /* ------------------ readiso ------------------------ */
 
 void readiso(const char *file, int ifile, int flag, int *errorcode){
-  iso *isoi;
+  isodata *isoi;
 
   if(ifile>=0&&ifile<nisoinfo){
     isoi = isoinfo + ifile;
@@ -739,7 +739,7 @@ void unload_iso_trans(void){
 
 void unloadiso(mesh *meshi){
   isosurface *asurface;
-  iso *ib;
+  isodata *ib;
   int nloaded=0;
   int i;
   mesh *meshi2;
@@ -797,7 +797,7 @@ void drawiso_orig(int tranflag){
   float *iso_colors;
   int n_iso_colors;
   int *showlevels, nisolevels;
-  iso *isoi=NULL;
+  isodata *isoi=NULL;
   int iso_lighting;
   mesh *meshi;
 
@@ -1046,7 +1046,7 @@ void drawiso(int tranflag){
     int i;
 
     for(i=0;i<nisoinfo;i++){
-      iso *isoi;
+      isodata *isoi;
 
       isoi = isoinfo + i;
       if(isoi->geomflag==0)continue;
@@ -1308,7 +1308,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
 
 void updateisotypes(void){
   int i;
-  iso *isoi;
+  isodata *isoi;
 
   nisotypes = 0;
   for(i=0;i<nisoinfo;i++){
@@ -1323,8 +1323,8 @@ void updateisotypes(void){
 
 /* ------------------ getisoindex ------------------------ */
 
-int getisoindex(const iso *isoi){
-  iso *isoi2;
+int getisoindex(const isodata *isoi){
+  isodata *isoi2;
   int j;
 
   for(j=0;j<nisotypes;j++){
@@ -1336,8 +1336,8 @@ int getisoindex(const iso *isoi){
 
 /* ------------------ getisotype ------------------------ */
 
-int getisotype(const iso *isoi){
-  iso *isoi2;
+int getisotype(const isodata *isoi){
+  isodata *isoi2;
   int j;
 
   for(j=0;j<nisotypes;j++){
@@ -1350,8 +1350,8 @@ int getisotype(const iso *isoi){
 
 /* ------------------ getisottype ------------------------ */
 
-int getisottype(const iso *isoi){
-  iso *isoi2;
+int getisottype(const isodata *isoi){
+  isodata *isoi2;
   int j;
   int jj;
 
@@ -1372,7 +1372,7 @@ int getisottype(const iso *isoi){
 
 void update_isotype(void){
   int i;
-  iso *isoi;
+  isodata *isoi;
 
 
   for(i=0;i<nisoinfo;i++){
@@ -1398,7 +1398,7 @@ void update_isotype(void){
 /* ------------------ isocompare ------------------------ */
 
 int isocompare( const void *arg1, const void *arg2 ){
-  iso *isoi, *isoj;
+  isodata *isoi, *isoj;
 
   isoi = isoinfo + *(int *)arg1;
   isoj = isoinfo + *(int *)arg2;
@@ -1414,7 +1414,7 @@ int isocompare( const void *arg1, const void *arg2 ){
 
 void updateisomenulabels(void){
   int i;
-  iso *isoi;
+  isodata *isoi;
   char label[128];
 
   if(nisoinfo>0){
@@ -1469,7 +1469,7 @@ void update_iso_showlevels(void){
 /* ------------------ setisolabels ------------------------ */
 
 void setisolabels(float smin, float smax, 
-                    iso *sd, int *errorcode){
+                    isodata *sd, int *errorcode){
   char *scale;
   int isotype;
   databounds *sb;
@@ -1498,7 +1498,7 @@ void sync_isobounds(int isottype){
 
   ncount=0;
   for(i=0;i<nisoinfo;i++){
-    iso *isoi;
+    isodata *isoi;
 
     isoi = isoinfo + i;
     if(isoi->loaded==0||isoi->type!=iisotype||isoi->dataflag==0)continue;
@@ -1510,7 +1510,7 @@ void sync_isobounds(int isottype){
   // find min and max bounds for valued iso-surfaces
 
   for(i=0;i<nisoinfo;i++){
-    iso *isoi;
+    isodata *isoi;
 
     isoi = isoinfo + i;
     if(isoi->loaded==0||isoi->type!=iisotype||isoi->dataflag==0)continue;
@@ -1529,7 +1529,7 @@ void sync_isobounds(int isottype){
   // set min and max bounds for valued iso-surfaces
 
   for(i=0;i<nisoinfo;i++){
-    iso *isoi;
+    isodata *isoi;
 
     isoi = isoinfo + i;
     if(isoi->loaded==0||isoi->type!=iisotype||isoi->dataflag==0)continue;
@@ -1541,7 +1541,7 @@ void sync_isobounds(int isottype){
   // rescale all data
 
   for(i=0;i<nisoinfo;i++){
-    iso *isoi;
+    isodata *isoi;
     mesh *meshi;
 
     isoi = isoinfo + i;
@@ -1668,7 +1668,7 @@ void Update_Isotris(int flag){
   float *colorptr;
   isosurface *asurface;
   int ntris;
-  iso *loaded_iso;
+  isodata *loaded_iso;
 
   if(loaded_isomesh==NULL||loaded_isomesh->isofilenum==-1)return;
   loaded_iso=isoinfo + loaded_isomesh->isofilenum;
@@ -1700,7 +1700,7 @@ void Update_Isotris(int flag){
 
       ntris=0;
       for(i=0;i<nisoinfo;i++){
-        iso *isoi;
+        isodata *isoi;
         int ilev;
     
         isoi = isoinfo+i;
@@ -1745,7 +1745,7 @@ void Update_Isotris(int flag){
     niso_trans=0;
     niso_opaques=0;
     for(i=0;i<nisoinfo;i++){
-      iso *isoi;
+      isodata *isoi;
     
       isoi = isoinfo+i;
       if(isoi->geomflag==1||isoi->loaded==0||isoi->display==0)continue;
@@ -1866,7 +1866,7 @@ mesh *get_loaded_isomesh(void){
   return_mesh=NULL;
   for(i=0;i<nisoinfo;i++){
     mesh *mesh2;
-    iso *isoi;
+    isodata *isoi;
 
     isoi = isoinfo + i;
     if(isoi->loaded==0)continue;

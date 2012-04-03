@@ -422,7 +422,7 @@ typedef struct {
   int nlevels;
   char menulabel[128];
 
-} iso;
+} isodata;
 
 /* --------------------------  smoothblockage ------------------------------------ */
 
@@ -1169,8 +1169,7 @@ typedef struct {
   int extreme_min, extreme_max;
   histogramdata *histogram;
   bounddata bounds;
-
-} patch;
+} patchdata;
 
 /* --------------------------  plot3d ------------------------------------ */
 

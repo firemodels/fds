@@ -933,7 +933,7 @@ void script_loadiso(scriptdata *scripti){
   printf("\n");
 
   for(i=0;i<nisoinfo;i++){
-    iso *isoi;
+    isodata *isoi;
     int len;
     int imatch;
 
@@ -1135,7 +1135,7 @@ void script_loadboundary(scriptdata *scripti){
   printf("\n");
 
   for(i=0;i<npatchinfo;i++){
-    patch *patchi;
+    patchdata *patchi;
 
     patchi = patchinfo + i;
     if(strcmp(patchi->label.longlabel,scripti->cval)==0){
@@ -1322,7 +1322,7 @@ void script_loadfile(scriptdata *scripti){
 
   }
   for(i=0;i<npatchinfo;i++){
-    patch *patchi;
+    patchdata *patchi;
 
     patchi = patchinfo + i;
     if(strcmp(patchi->file,scripti->cval)==0){
@@ -1341,7 +1341,7 @@ void script_loadfile(scriptdata *scripti){
     }
   }
   for(i=0;i<nisoinfo;i++){
-    iso *isoi;
+    isodata *isoi;
 
     isoi = isoinfo + i;
     if(strcmp(isoi->file,scripti->cval)==0){

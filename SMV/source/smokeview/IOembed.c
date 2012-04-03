@@ -831,7 +831,7 @@ void read_geom(geomdata *geomi, int flag, int *errorcode){
 /* ------------------ read_geomdata ------------------------ */
 
 void read_geomdata(int ifile, int flag, int *errorcode){
-  patch *patchi;
+  patchdata *patchi;
   char *file;
   int ntimes_local;
   int i;
@@ -939,7 +939,7 @@ void read_geomdata(int ifile, int flag, int *errorcode){
 
 /* ------------------ draw_geomdata ------------------------ */
 
-void draw_geomdata(patch *patchi){
+void draw_geomdata(patchdata *patchi){
   int i;
 
   for(i=0;i<ngeominfoptrs;i++){
@@ -1054,7 +1054,7 @@ void GetGeomInfoPtrs(geomdata ***geominfoptrs_local,int *ngeominfoptrs_local){
     count++;
   }
   for(i=0;i<nisoinfo;i++){
-    iso *isoi;
+    isodata *isoi;
     geomdata *geomi;
     
     isoi = isoinfo + i;
@@ -1080,7 +1080,7 @@ void GetGeomInfoPtrs(geomdata ***geominfoptrs_local,int *ngeominfoptrs_local){
     *gptr++=geomi;
   }
   for(i=0;i<nisoinfo;i++){
-    iso *isoi;
+    isodata *isoi;
     geomdata *geomi;
     
     isoi = isoinfo + i;

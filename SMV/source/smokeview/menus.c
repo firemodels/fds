@@ -558,7 +558,7 @@ void Smoke3DShowMenu(int value){
 void IsoShowMenu(int value){
   int i;
   int nisolevels, *showlevels;
-  iso *isoi;
+  isodata *isoi;
 
   nisolevels=loaded_isomesh->nisolevels;
   showlevels=loaded_isomesh->showlevels;
@@ -2340,7 +2340,7 @@ void LoadUnloadMenu(int value){
       }
     }
     for(i=0;i<nisoinfo;i++){
-      iso *isoi;
+      isodata *isoi;
 
       isoi = isoinfo + i;
       if(isoi->loaded==0)continue;
@@ -3395,7 +3395,7 @@ void ShowAllSmoke(void){
     if(smoke3di->loaded==1)smoke3di->display=1;
   }
   for(i=0;i<nisoinfo;i++){
-    iso *isoi;
+    isodata *isoi;
 
     isoi = isoinfo + i;
     if(isoi->loaded==1)isoi->display=1;
@@ -3413,7 +3413,7 @@ void HideAllSmoke(void){
     if(smoke3di->loaded==1)smoke3di->display=0;
   }
   for(i=0;i<nisoinfo;i++){
-    iso *isoi;
+    isodata *isoi;
 
     isoi = isoinfo + i;
     if(isoi->loaded==1)isoi->display=0;
@@ -3702,7 +3702,7 @@ void LoadIsoMenu(int value){
   int errorcode;
   int i;
   int ii;
-  iso *isoii, *isoi;
+  isodata *isoii, *isoi;
 
   if(value==-2)return;
   glutSetCursor(GLUT_CURSOR_WAIT);
@@ -3749,7 +3749,7 @@ void LoadPatchMenu(int value){
   int errorcode;
   int i,ii;
   int patchtypenew;
-  patch *patchi;
+  patchdata *patchi;
 
   glutSetCursor(GLUT_CURSOR_WAIT);
   if(value>=0){
@@ -3773,7 +3773,7 @@ void LoadPatchMenu(int value){
     UNLOCK_COMPRESS
   }
   else if(value<=-10){
-    patch *patchj;
+    patchdata *patchj;
 
     value = -(value + 10);
     patchj = patchinfo + value;
@@ -3811,7 +3811,7 @@ void ShowPatchMenu(int value){
   int val=0,n,i,ii;
 //  int sum=0;
   mesh *meshi;
-  patch *patchi;
+  patchdata *patchi;
   meshi=current_mesh;
 
   updatemenu=1;  
@@ -4563,7 +4563,7 @@ updatemenu=0;
 
   nisoloaded=0;
   for(i=0;i<nisoinfo;i++){
-    iso *isoi;
+    isodata *isoi;
 
     isoi = isoinfo + i;
     if(isoi->loaded==1)nisoloaded++;
@@ -4571,7 +4571,7 @@ updatemenu=0;
 
   npatchloaded=0;
   for(i=0;i<npatchinfo;i++){
-    patch *patchi;
+    patchdata *patchi;
 
     patchi = patchinfo + i;
     if(patchi->loaded==1)npatchloaded++;
@@ -4623,7 +4623,7 @@ updatemenu=0;
       int local_do_threshold=0;
 
       for(ii=0;ii<npatchinfo;ii++){
-        patch *patchi;
+        patchdata *patchi;
 
         i = patchorderindex[ii];
         patchi = patchinfo+i;
@@ -6056,12 +6056,12 @@ updatemenu=0;
 
     if(nisoinfo>0&&ReadIsoFile==1){
       mesh *hmesh;
-      iso *iso2;
+      isodata *iso2;
 
       CREATEMENU(isoshowmenu,IsoShowMenu);
       iso2=NULL;
       for(ii=0;ii<nisoinfo;ii++){
-        iso *isoi;
+        isodata *isoi;
 
         i = isoorderindex[ii];
         isoi = isoinfo + i;
@@ -6500,7 +6500,7 @@ updatemenu=0;
   if(ReadIsoFile==1){
     int niso_loaded=0;
     for(i=0;i<nisoinfo;i++){
-      iso *isoi;
+      isodata *isoi;
 
       isoi = isoinfo + i;
       if(isoi->loaded==1)niso_loaded++;
@@ -8142,7 +8142,7 @@ updatemenu=0;
       nloadpatchsubmenus=0;
       CREATEMENU(unloadpatchmenu,UnloadPatchMenu);
       for(ii=0;ii<npatchinfo;ii++){
-        patch *patchi;
+        patchdata *patchi;
 
         i = patchorderindex[ii];
         patchi = patchinfo + i;
@@ -8165,7 +8165,7 @@ updatemenu=0;
       }
 
       for(ii=0;ii<npatchinfo;ii++){
-        patch *patch1, *patch2;
+        patchdata *patch1, *patch2;
 
         i = patchorderindex[ii];
         patch2 = patchinfo + i;
@@ -8193,7 +8193,7 @@ updatemenu=0;
 
       {
         int useitem;
-        patch *patchi, *patchj;
+        patchdata *patchi, *patchj;
 
         if(nmeshes>1){
           for(i=0;i<npatchinfo;i++){
@@ -8215,7 +8215,7 @@ updatemenu=0;
           }
           glutAddMenuEntry("-",-2);
           for(ii=0;ii<npatchinfo;ii++){
-            patch *patch1, *patch2;
+            patchdata *patch1, *patch2;
 
             i = patchorderindex[ii];
             patch2 = patchinfo + i;
@@ -8254,7 +8254,7 @@ updatemenu=0;
     if(nisoinfo>0){
       CREATEMENU(unloadisomenu,UnloadIsoMenu);
       for(ii=0;ii<nisoinfo;ii++){
-        iso *isoi;
+        isodata *isoi;
 
         i = isoorderindex[ii];
         isoi = isoinfo + i;
@@ -8278,7 +8278,7 @@ updatemenu=0;
         CREATEMENU(loadisomenu,LoadIsoMenu);
       }
       for(ii=0;ii<nisoinfo;ii++){
-        iso *iso1, *iso2;
+        isodata *iso1, *iso2;
 
         i = isoorderindex[ii];
         if(ii>0){
@@ -8301,7 +8301,7 @@ updatemenu=0;
 
       {
         int useitem;
-        iso *isoi, *isoj;
+        isodata *isoi, *isoj;
 
         if(nmeshes>1){
          CREATEMENU(loadisomenu,LoadIsoMenu);
@@ -8325,7 +8325,7 @@ updatemenu=0;
           glutAddMenuEntry("-",-2);
 
           for(ii=0;ii<nisoinfo;ii++){
-            iso *iso1, *iso2;
+            isodata *iso1, *iso2;
 
             i = isoorderindex[ii];
             iso1 = isoinfo + i;

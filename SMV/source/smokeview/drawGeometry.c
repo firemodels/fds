@@ -1964,7 +1964,7 @@ void update_facelists(void){
   mesh *meshi;
   facedata *facej;
   int local_showpatch, loadpatch;
-  patch *patchi;
+  patchdata *patchi;
   int patchfilenum;
   int patch_dir[6]={2,1,3,0,4,5};
   int vent_offset, outline_offset, exteriorsurface_offset;
