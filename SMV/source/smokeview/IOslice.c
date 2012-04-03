@@ -87,8 +87,8 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type);
 /* ------------------ readvslice ------------------------ */
 
 void readvslice(int ivslice, int flag, int *errorcode){
-  vslice *vd,*vslicei;
-  slice *u=NULL,*v=NULL,*w=NULL,*val=NULL;
+  vslicedata *vd,*vslicei;
+  slicedata *u=NULL,*v=NULL,*w=NULL,*val=NULL;
   float valmin, valmax;
   int display;
   int i;
@@ -263,8 +263,8 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
   int headersize, framesize, statfile;
   STRUCTSTAT statbuffer;
   char slicelonglabels[31], sliceshortlabels[31], sliceunits[31];
-  slice *sd;
-  vslice *vd;
+  slicedata *sd;
+  vslicedata *vd;
   int flag2=0;
   mesh *meshi;
   int local_starttime=0, local_stoptime=0;
@@ -322,14 +322,14 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       plotstate = getplotstate(DYNAMIC_PLOTS);
       ReadVolSlice=0;
       for(ii=0;ii<nslice_loaded;ii++){
-        slice *sdi;
+        slicedata *sdi;
 
         i = slice_loaded_list[ii];
         sdi = sliceinfo+i;
         if(sdi->volslice==1)ReadVolSlice=1;
       }
       for(ii=0;ii<nslice_loaded;ii++){
-        slice *sdi;
+        slicedata *sdi;
 
         i = slice_loaded_list[ii];
         sdi = sliceinfo+i;
@@ -341,7 +341,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       }
       if(flag2==0){
         for(ii=0;ii<nslice_loaded;ii++){
-          slice *sdi;
+          slicedata *sdi;
 
           i = slice_loaded_list[ii];
           sdi = sliceinfo+i;
@@ -809,7 +809,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
 /*
 void outputslicebounds(void){
   int i;
-  slice *sd;
+  slicedata *sd;
   databounds *db;
 
   for(i=0;i<nslice;i++){
@@ -835,7 +835,7 @@ void outputslicebounds(void){
 /* ------------------ updateslicefilenum ------------------------ */
 
 void updateslicefilenum(void){
-  slice *sd;
+  slicedata *sd;
   int i;
   int ii;
 
@@ -915,7 +915,7 @@ void updateallslicelabels(int slicetype, int *errorcode){
   float valmin, valmax;
   int setvalmin, setvalmax;
   int ii;
-  slice *sd;
+  slicedata *sd;
 
   *errorcode=0;
 
@@ -953,7 +953,7 @@ void updateallslicecolors(int slicetype, int *errorcode){
   float valmin, valmax;
   int setvalmin, setvalmax;
   int ii;
-  slice *sd;
+  slicedata *sd;
 
   *errorcode=0;
 
@@ -987,7 +987,7 @@ void updateallslicecolors(int slicetype, int *errorcode){
 /* ------------------ slicecompare ------------------------ */
 
 int slicecompare( const void *arg1, const void *arg2 ){
-  slice *slicei, *slicej;
+  slicedata *slicei, *slicej;
   float delta_orig;
 
   slicei = sliceinfo + *(int *)arg1;
@@ -1035,8 +1035,8 @@ int slicecompare( const void *arg1, const void *arg2 ){
 /* ------------------ vslicecompare ------------------------ */
 
 int vslicecompare( const void *arg1, const void *arg2 ){
-  slice *slicei, *slicej;
-  vslice *vslicei, *vslicej;
+  slicedata *slicei, *slicej;
+  vslicedata *vslicei, *vslicej;
   float delta_orig;
 
   vslicei = vsliceinfo + *(int *)arg1;
@@ -1084,7 +1084,7 @@ void update_slice_menu_show(void){
 
   for(i=0;i<nsliceinfo;i++){
 	mesh *slicemesh;
-    slice *sd;
+    slicedata *sd;
 
     sd = sliceinfo + i;
 	slicemesh = meshinfo + sd->blocknumber;
@@ -1106,8 +1106,8 @@ void update_slice_menu_show(void){
 void updateslicemenulabels(void){
   int i;
   char label[128];
-  multislice *mslicei;
-  slice *sd,*sdold;
+  multislicedata *mslicei;
+  slicedata *sd,*sdold;
 
   update_slice_menu_show();
   if(nsliceinfo>0){
@@ -1204,9 +1204,9 @@ void updateslicemenulabels(void){
 
 void updatevslicemenulabels(void){
   int i;
-  slice *sd, *sdold;
-  vslice *vsd, *vsdold;
-  multivslice *mvslicei;
+  slicedata *sd, *sdold;
+  vslicedata *vsd, *vsdold;
+  multivslicedata *mvslicei;
   char label[128];
 
 
@@ -1270,7 +1270,7 @@ void updatevslicemenulabels(void){
 
 /* ------------------ hide_slice ------------------------ */
 
-int hide_slice2(slice *sdi,slice *sdj){
+int hide_slice2(slicedata *sdi,slicedata *sdj){
   float delta_orig;
   float dx, dy, dz, aslice, aintersect;
 
@@ -1307,7 +1307,7 @@ int hide_slice2(slice *sdi,slice *sdj){
 
 /* ------------------ new_multi ------------------------ */
 
-int new_multi(slice *sdold,slice *sd){
+int new_multi(slicedata *sdold,slicedata *sd){
 
   if(sdold->volslice!=sd->volslice)return 1;
   if(sd->volslice==0){
@@ -1349,7 +1349,7 @@ int new_multi(slice *sdold,slice *sd){
 void getsliceparams(void){
   int i;
   char *file;
-  slice *sd,*sdold;
+  slicedata *sd,*sdold;
   int error;
   FILE_SIZE  lenfile;
   float position;
@@ -1357,7 +1357,7 @@ void getsliceparams(void){
   int ni, nj, nk;
   int iblock;
   mesh *meshi;
-  multislice *mslicei;
+  multislicedata *mslicei;
   int build_cache=0;
   FILE *stream;
   int doit_anyway;
@@ -1535,7 +1535,7 @@ void getsliceparams(void){
     FREEMEMORY(multisliceinfo);
     nmultislices=0;
 
-    NewMemory((void **)&multisliceinfo,sizeof(multislice)*nsliceinfo);
+    NewMemory((void **)&multisliceinfo,sizeof(multislicedata)*nsliceinfo);
 
     nmultislices=1;
     mslicei = multisliceinfo;
@@ -1568,7 +1568,7 @@ void getsliceparams(void){
 
     mslicei = multisliceinfo + iii;
     for(i=0;i<mslicei->nslices;i++){
-      slice *sdi, *sdj;
+      slicedata *sdi, *sdj;
       int j;
 
       if(mslicei->islices[i]==-1)continue;
@@ -1608,11 +1608,11 @@ void getsliceparams2(void){
     NewMemory((void **)&trainer_oxy_indexes,nmultislices*sizeof(int));
   }
   for(i=0;i<nmultislices;i++){
-    multislice *mslicei;
+    multislicedata *mslicei;
 
     mslicei = multisliceinfo + i;
     if(mslicei->autoload==1){
-      slice *slicei;
+      slicedata *slicei;
       char *longlabel;
 
       slicei = sliceinfo + mslicei->islices[0];
@@ -1635,7 +1635,7 @@ void update_fedinfo(void){
 
   nfedinfo=0;
   for(i=0;i<nsliceinfo;i++){
-    slice *slicei;
+    slicedata *slicei;
     feddata *fedi;
     flowlabels *label;
     int j;
@@ -1654,7 +1654,7 @@ void update_fedinfo(void){
     // get slice plane info
     fedi->co2=slicei;
     for(j=0;j<nsliceinfo;j++){
-      slice *slicej;
+      slicedata *slicej;
 
       slicej = sliceinfo + j;
       label = &(slicej->label);
@@ -1664,7 +1664,7 @@ void update_fedinfo(void){
       fedi->co=sliceinfo + j;
     }
     for(j=0;j<nsliceinfo;j++){
-      slice *slicej;
+      slicedata *slicej;
 
       slicej = sliceinfo + j;
       label = &(slicej->label);
@@ -1687,11 +1687,11 @@ void update_fedinfo(void){
 
 void updatevslices(void){
   int i,j;
-  slice *sdi,*sdj;
-  slice *sd, *sdold;
-  vslice *vd;
-  vslice *vsd, *vsdold;
-  multivslice *mvslicei;
+  slicedata *sdi,*sdj;
+  slicedata *sd, *sdold;
+  vslicedata *vd;
+  vslicedata *vsd, *vsdold;
+  multivslicedata *mvslicei;
 
   printf("  updating vector slices\n");
   getsliceparams();
@@ -1767,7 +1767,7 @@ void updatevslices(void){
     FREEMEMORY(multivsliceinfo);
     nmultivslices=0;
 
-    NewMemory((void **)&multivsliceinfo,sizeof(multislice)*nvslice);
+    NewMemory((void **)&multivsliceinfo,sizeof(multislicedata)*nvslice);
 
     nmultivslices=1;
     mvslicei = multivsliceinfo;
@@ -1799,8 +1799,8 @@ void updatevslices(void){
     // define sequence id's for auto file loading
 
     for(i=0;i<nvslice;i++){
-      vslice *vslicei;
-      slice *sliceval;
+      vslicedata *vslicei;
+      slicedata *sliceval;
       int seq_id;
 
       vslicei = vsliceinfo + i;
@@ -1820,7 +1820,7 @@ void updatevslices(void){
 /* ------------------ updatevslicetypes ------------------------ */
 void updatevslicetypes(void){
   int i;
-  vslice *vd;
+  vslicedata *vd;
 
   nvslicetypes = 0;
   for(i=0;i<nvslice;i++){
@@ -1854,7 +1854,7 @@ void update_slice_contours(int slice_type_index, float line_min, float line_max,
 
   sb = slicebounds + slice_type_index;
   for(j=0;j<nsliceinfo;j++){
-    slice *sd;
+    slicedata *sd;
 
     sd = sliceinfo + j;
     if(sd->loaded==0)continue;
@@ -1952,7 +1952,7 @@ void update_slice_contours(int slice_type_index, float line_min, float line_max,
 
 void updateslicetypes(void){
   int i;
-  slice *sd;
+  slicedata *sd;
 
   nslicetypes = 0;
   for(i=0;i<nsliceinfo;i++){
@@ -1967,8 +1967,8 @@ void updateslicetypes(void){
 
 /* ------------------ getvsliceindex ------------------------ */
 
-int getvsliceindex(const vslice *vd){
-  vslice *vd2;
+int getvsliceindex(const vslicedata *vd){
+  vslicedata *vd2;
   int j;
 
   for(j=0;j<nvslicetypes;j++){
@@ -1980,8 +1980,8 @@ int getvsliceindex(const vslice *vd){
 
 /* ------------------ getvsliceindex ------------------------ */
 
-int getvslicetype(const vslice *vd){
-  vslice *vd2;
+int getvslicetype(const vslicedata *vd){
+  vslicedata *vd2;
   int j;
 
   for(j=0;j<nvslicetypes;j++){
@@ -1994,8 +1994,8 @@ int getvslicetype(const vslice *vd){
 
 /* ------------------ getsliceindex ------------------------ */
 
-int getsliceindex(const slice *sd){
-  slice *sd2;
+int getsliceindex(const slicedata *sd){
+  slicedata *sd2;
   int j;
 
   for(j=0;j<nslicetypes;j++){
@@ -2007,8 +2007,8 @@ int getsliceindex(const slice *sd){
 
 /* ------------------ getslicetype ------------------------ */
 
-int getslicetype(const slice *sd){
-  slice *sd2;
+int getslicetype(const slicedata *sd){
+  slicedata *sd2;
   int j;
 
   for(j=0;j<nslicetypes;j++){
@@ -2021,7 +2021,7 @@ int getslicetype(const slice *sd){
 /* ------------------ getslicetype_fromlabel ------------------------ */
 
 int getslicetype_fromlabel(char *label){
-  slice *sd2;
+  slicedata *sd2;
   int j;
 
   for(j=0;j<nslicetypes;j++){
@@ -2037,7 +2037,7 @@ int getslicetype_fromlabel(char *label){
 void updatesliceboundlabels(){
   int i,j;
   databounds *sb;
-  slice *sd;
+  slicedata *sd;
 
   for(i=0;i<nsliceinfo;i++){
     sd = sliceinfo + i;
@@ -2050,7 +2050,7 @@ void updatesliceboundlabels(){
 /* ------------------ setslicecolors ------------------------ */
 
 void setslicecolors(float smin, float smax, 
-                    slice *sd, int *errorcode){
+                    slicedata *sd, int *errorcode){
   char *scale;
   int slicetype;
   databounds *sb;
@@ -2075,7 +2075,7 @@ void setslicecolors(float smin, float smax,
 /* ------------------ setslicelabels ------------------------ */
 
 void setslicelabels(float smin, float smax, 
-                    slice *sd, int *errorcode){
+                    slicedata *sd, int *errorcode){
   char *scale;
   int slicetype;
   databounds *sb;
@@ -2113,7 +2113,7 @@ void setslicebounds(int slicetype){
 
 /* ------------------ getslicedatabounds ------------------------ */
 
-void getslicedatabounds(const slice *sd, float *pmin, float *pmax){
+void getslicedatabounds(const slicedata *sd, float *pmin, float *pmax){
 
   float *pdata;
   int ndata;
@@ -2149,7 +2149,7 @@ void getslicedatabounds(const slice *sd, float *pmin, float *pmax){
 
 /* ------------------ adjustslicebounds ------------------------ */
 
-void adjustslicebounds(const slice *sd, float *pmin, float *pmax){
+void adjustslicebounds(const slicedata *sd, float *pmin, float *pmax){
 
     int nsmall, nbig, *buckets=NULL, n, level, total, alpha05;
     float dp;
@@ -2220,7 +2220,7 @@ void drawslice_frame(){
     int ii;
 
     for(ii=0;ii<nslice_loaded;ii++){
-      slice *sd;
+      slicedata *sd;
       int i;
 
       i=slice_loaded_list[ii];
@@ -2305,8 +2305,8 @@ void drawvslice_frame(void){
   int i;
 
   for(i=0;i<nvslice;i++){
-    vslice *vd;
-    slice *u, *v, *w, *val;
+    vslicedata *vd;
+    slicedata *u, *v, *w, *val;
 
     vd = vsliceinfo + i;
     if(vd->loaded==0||vd->display==0||sliceinfo[vd->ival].type!=islicetype)continue;
@@ -2481,7 +2481,7 @@ void update_gslice_planes(void){
 
 /* ------------------ drawgslice ------------------------ */
 
-void drawgslice(const slice *sd){
+void drawgslice(const slicedata *sd){
   int i;
   void getNormal(float *v1, float *v2, float *v3, float *area, float *normal);
 
@@ -2529,7 +2529,7 @@ void drawgslice(const slice *sd){
 #endif
 /* ------------------ drawslice ------------------------ */
 
-void drawslice(const slice *sd){
+void drawslice(const slicedata *sd){
   int i,j,k,n,n2;
   int i11, i31, i13, i33;
   float constval,x1,x3,yy1,y3,z1,z3;
@@ -2732,7 +2732,7 @@ void drawslice(const slice *sd){
 
 /* ------------------ drawslice_cellcenter ------------------------ */
 
-void drawslice_cellcenter(const slice *sd){
+void drawslice_cellcenter(const slicedata *sd){
   int i,j,k,n,n2;
   int i33;
   float constval,x1,x3,yy1,y3,z1,z3;
@@ -2875,7 +2875,7 @@ void drawslice_cellcenter(const slice *sd){
 
 /* ------------------ drawslice_cellcenter_interp ------------------------ */
 
-void drawslice_cellcenter_interp(const slice *sd){
+void drawslice_cellcenter_interp(const slicedata *sd){
   int i,j,k,n,n2;
   float r11, r13, r31, r33;
   float constval,x1,x3,yy1,y3,z1,z3;
@@ -3069,7 +3069,7 @@ void drawslice_cellcenter_interp(const slice *sd){
 
 /* ------------------ drawslice_texture ------------------------ */
 
-void drawslice_texture(const slice *sd){
+void drawslice_texture(const slicedata *sd){
   int i,j,k,n,n2;
   float r11, r13, r31, r33;
   float constval,x1,x3,yy1,y3,z1,z3;
@@ -3260,7 +3260,7 @@ void drawslice_texture(const slice *sd){
 
 #define ijnode2(i,j) ((nycell+1)*(i) + (j))
 
-void drawslice_terrain(const slice *sd){
+void drawslice_terrain(const slicedata *sd){
   int i,j,n,n2;
   float r11, r13, r31, r33;
   float constval,x1,x3,yy1,y3;
@@ -3350,7 +3350,7 @@ void drawslice_terrain(const slice *sd){
 
 /* ------------------ drawvolslice_texture ------------------------ */
 
-void drawvolslice_texture(const slice *sd){
+void drawvolslice_texture(const slicedata *sd){
   int i,j,k,n,n2;
   float r11, r31, r13, r33;
   float constval,x1,x3,yy1,y3,z1,z3;
@@ -3569,7 +3569,7 @@ void drawvolslice_texture(const slice *sd){
 
 /* ------------------ drawvolslice_terrain ------------------------ */
 
-void drawvolslice_terrain(const slice *sd){
+void drawvolslice_terrain(const slicedata *sd){
   int i,j,k,n,n2;
   float r11, r31, r13, r33;
   float constval,x1,x3,yy1,y3,z1,z3;
@@ -3820,7 +3820,7 @@ void drawvolslice_terrain(const slice *sd){
 
 /* ------------------ drawvolslice ------------------------ */
 
-void drawvolslice_cellcenter(const slice *sd){
+void drawvolslice_cellcenter(const slicedata *sd){
   int i,j,k,n,n2;
   int i33;
   float constval,x1,x3,yy1,y3,z1,z3;
@@ -3994,7 +3994,7 @@ void drawvolslice_cellcenter(const slice *sd){
 
 /* ------------------ drawvolslice_cellcenter_interp ------------------------ */
 
-void drawvolslice_cellcenter_interp(const slice *sd){
+void drawvolslice_cellcenter_interp(const slicedata *sd){
   int i,j,k,n,n2;
   float r11, r31, r13, r33;
   float constval,x1,x3,yy1,y3,z1,z3;
@@ -4225,7 +4225,7 @@ void drawvolslice_cellcenter_interp(const slice *sd){
 
 /* ------------------ drawvolslice ------------------------ */
 
-void drawvolslice(const slice *sd){
+void drawvolslice(const slicedata *sd){
   int i,j,k,n,n2;
   int i11, i31, i13, i33;
   float constval,x1,x3,yy1,y3,z1,z3;
@@ -4425,12 +4425,12 @@ void drawvolslice(const slice *sd){
 
 /* ------------------ drawvvolslice ------------------------ */
 
-void drawvvolslice(const vslice *vd){
+void drawvvolslice(const vslicedata *vd){
   int i,j,k,n;
   int i11;
   float constval,x1,yy1,z1;
   int maxj;
-  slice *u, *v, *w,*sd;
+  slicedata *u, *v, *w,*sd;
   float dx, dy, dz;
   float vrange;
   mesh *meshi;
@@ -4647,12 +4647,12 @@ void drawvvolslice(const vslice *vd){
 
 /* ------------------ drawvvolslice_terrain ------------------------ */
 
-void drawvvolslice_terrain(const vslice *vd){
+void drawvvolslice_terrain(const vslicedata *vd){
   int i,j,k,n;
   int i11;
   float constval,x1,yy1,z1;
   int maxj;
-  slice *u, *v, *w,*sd;
+  slicedata *u, *v, *w,*sd;
   float dx, dy, dz;
   float vrange;
   mesh *meshi;
@@ -4878,12 +4878,12 @@ void drawvvolslice_terrain(const vslice *vd){
 
 /* ------------------ drawvslice ------------------------ */
 
-void drawvslice(const vslice *vd){
+void drawvslice(const vslicedata *vd){
   int i,j,k,n;
   int i11;
   float constval,x1,yy1,z1;
   int maxj;
-  slice *u, *v, *w,*sd;
+  slicedata *u, *v, *w,*sd;
   float dx, dy, dz;
   float vrange;
   mesh *meshi;
@@ -5090,11 +5090,11 @@ void drawvslice(const vslice *vd){
 
 /* ------------------ drawvslice_terrain ------------------------ */
 
-void drawvslice_terrain(const vslice *vd){
+void drawvslice_terrain(const vslicedata *vd){
   int i,j,n;
   int i11;
   float constval,x1,yy1;
-  slice *u, *v, *w,*sd;
+  slicedata *u, *v, *w,*sd;
   float dx, dy, dz;
   float vrange;
   mesh *meshi;
@@ -5178,7 +5178,7 @@ void output_Slicedata(void){
   char datafile[1024];
   int i, ii, n;
   float *data;
-  slice *sd;
+  slicedata *sd;
   int row,col;
   char *ext;
   char flabel[256];
@@ -5260,7 +5260,7 @@ void init_Slicedata(void){
   char datafile[1024];
   int i, j, k, ii;
   float *xplt, *yplt, *zplt;
-  slice *sd;
+  slicedata *sd;
   mesh *meshi;
   char *ext;
   char flabel[256];
@@ -5726,7 +5726,7 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type){
 #ifdef USE_ZLIB
 /* ------------------ uncompress_slicedataframe ------------------------ */
 
-void uncompress_slicedataframe(slice *sd,int iframe_local){
+void uncompress_slicedataframe(slicedata *sd,int iframe_local){
   unsigned int countin;
   uLongf countout;
   unsigned char *compressed_data;
@@ -5747,7 +5747,7 @@ void uncompress_slicedataframe(slice *sd,int iframe_local){
 
 /* ------------------ getsliceval ------------------------ */
 
-float getsliceval(slice *sd, unsigned char ival){
+float getsliceval(slicedata *sd, unsigned char ival){
   float returnval;
 
   returnval = (sd->valmax*ival + sd->valmin*(255-ival))/255.0;
@@ -5850,7 +5850,7 @@ void update_slicedir_count(void){
   int i,j;
 
   for(i=0;i<nsliceinfo;i++){
-	slice *slicei;
+	slicedata *slicei;
 
     slicei = sliceinfo + i;
 	slicei->ndirxyz[0]=0;
@@ -5859,7 +5859,7 @@ void update_slicedir_count(void){
 	slicei->ndirxyz[3]=0;
   }
   for(i=0;i<nsliceinfo;i++){
-    slice *slicei, *slicej;
+    slicedata *slicei, *slicej;
 
     slicei = sliceinfo + i;
     if(slicei->idir<1)continue;

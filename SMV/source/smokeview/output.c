@@ -119,8 +119,8 @@ void bench_out(float localframerate){
   FILE *fileout;
   int i;
   particle *parti;
-  slice *slicei,*u,*v,*w,*val;
-  vslice *vd;
+  slicedata *slicei,*u,*v,*w,*val;
+  vslicedata *vd;
   smoke3d *smoke3di;
   patch *patchi;
   iso *isoi;

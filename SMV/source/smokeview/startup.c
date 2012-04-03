@@ -600,7 +600,7 @@ void InitOpenGL(void){
    int i;
 
     for(i=0;i<nvslice;i++){
-      vslice *vslicei;
+      vslicedata *vslicei;
 
       vslicei = vsliceinfo + i;
 
@@ -672,7 +672,7 @@ void InitOpenGL(void){
       }
     }
     for(i=0;i<nsliceinfo;i++){
-      slice *slicei;
+      slicedata *slicei;
 
       slicei = sliceinfo + i;
 
@@ -691,7 +691,7 @@ void InitOpenGL(void){
    int i;
 
     for(i=0;i<nvslice;i++){
-      vslice *vslicei;
+      vslicedata *vslicei;
 
       vslicei = vsliceinfo + i;
 
@@ -738,7 +738,7 @@ void InitOpenGL(void){
       isoi->autoload=0;
     }
     for(i=0;i<nsliceinfo;i++){
-      slice *slicei;
+      slicedata *slicei;
 
       slicei = sliceinfo + i;
 
@@ -825,7 +825,7 @@ void InitOpenGL(void){
 
    nstartup=0;
    for(i=0;i<nvslice;i++){
-      vslice *vslicei;
+      vslicedata *vslicei;
 
       vslicei = vsliceinfo + i;
 
@@ -835,7 +835,7 @@ void InitOpenGL(void){
      fprintf(fileout,"VSLICEAUTO\n");
      fprintf(fileout," %i \n",nstartup);
      for(i=0;i<nvslice;i++){
-        vslice *vslicei;
+        vslicedata *vslicei;
 
         vslicei = vsliceinfo + i;
 
@@ -847,7 +847,7 @@ void InitOpenGL(void){
 
    nstartup=0;
    for(i=0;i<nsliceinfo;i++){
-      slice *slicei;
+      slicedata *slicei;
 
       slicei = sliceinfo + i;
 
@@ -857,7 +857,7 @@ void InitOpenGL(void){
      fprintf(fileout,"SLICEAUTO\n");
      fprintf(fileout," %i \n",nstartup);
      for(i=0;i<nsliceinfo;i++){
-        slice *slicei;
+        slicedata *slicei;
 
         slicei = sliceinfo + i;
         if(slicei->loaded==1)fprintf(fileout," %i\n",slicei->seq_id);
@@ -868,7 +868,7 @@ void InitOpenGL(void){
 
    nstartup=0;
    for(i=0;i<nmultislices;i++){
-      multislice *mslicei;
+      multislicedata *mslicei;
 
       mslicei = multisliceinfo + i;
 
@@ -878,7 +878,7 @@ void InitOpenGL(void){
      fprintf(fileout,"MSLICEAUTO\n");
      fprintf(fileout," %i \n",nstartup);
      for(i=0;i<nmultislices;i++){
-        multislice *mslicei;
+        multislicedata *mslicei;
 
         mslicei = multisliceinfo + i;
         if(mslicei->loaded==1)fprintf(fileout," %i\n",i);
@@ -1015,7 +1015,7 @@ void InitOpenGL(void){
   void get_startup_slice(int seq_id){
     int i;
     for(i=0;i<nsliceinfo;i++){
-      slice *slicei;
+      slicedata *slicei;
 
       slicei = sliceinfo + i;
 
@@ -1031,7 +1031,7 @@ void InitOpenGL(void){
   void get_startup_vslice(int seq_id){
     int i;
     for(i=0;i<nvslice;i++){
-      vslice *vslicei;
+      vslicedata *vslicei;
 
       vslicei = vsliceinfo + i;
 
@@ -1084,7 +1084,7 @@ void InitOpenGL(void){
       if(isoi->autoload==1)readiso(isoi->file,i,LOAD,&errorcode);
     }
     for(i=0;i<nvslice;i++){
-      vslice *vslicei;
+      vslicedata *vslicei;
 
       vslicei = vsliceinfo + i;
       if(vslicei->autoload==0&&vslicei->loaded==1)readvslice(i,UNLOAD,&errorcode);
@@ -1094,7 +1094,7 @@ void InitOpenGL(void){
     }
     // note:  only slices that are NOT a part of a vector slice will be loaded here
     for(i=0;i<nsliceinfo;i++){
-      slice *slicei;
+      slicedata *slicei;
 
       slicei = sliceinfo + i;
       if(slicei->autoload==0&&slicei->loaded==1)readslice(slicei->file,i,UNLOAD,&errorcode);

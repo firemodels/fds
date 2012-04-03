@@ -61,7 +61,7 @@ void update_framenumber(int changetime){
       for(imesh=0;imesh<nmeshes;imesh++){
         mesh *meshi;
         volrenderdata *vr;
-        slice *fire, *smoke;
+        slicedata *fire, *smoke;
         int j;
 
         meshi = meshinfo + imesh;
@@ -127,7 +127,7 @@ void update_framenumber(int changetime){
     }
     if(showslice==1||showvslice==1){
       for(ii=0;ii<nslice_loaded;ii++){
-        slice *sd;
+        slicedata *sd;
 
         i = slice_loaded_list[ii];
         sd = sliceinfo+i;
@@ -222,7 +222,7 @@ void updateShow(void){
   int shooter_flag;
 #endif
   int ii;
-  vslice *vd;
+  vslicedata *vd;
   iso *isoi;
   patch *patchi;
   particle *parti;
@@ -328,7 +328,7 @@ void updateShow(void){
   slicecolorbarflag=0;
   if(visTimeSlice==1){
     for(ii=0;ii<nslice_loaded;ii++){
-      slice *sd;
+      slicedata *sd;
 
       i=slice_loaded_list[ii];
       sd = sliceinfo+i;
@@ -340,7 +340,7 @@ void updateShow(void){
     }
     for(ii=0;ii<nslice_loaded;ii++){
       mesh *slicemesh;
-      slice *sd;
+      slicedata *sd;
 
       i=slice_loaded_list[ii];
       sd = sliceinfo+i;
@@ -355,7 +355,7 @@ void updateShow(void){
     }
     if(show_extreme_above==0){
       for(ii=0;ii<nslice_loaded;ii++){
-        slice *sd;
+        slicedata *sd;
 
         i=slice_loaded_list[ii];
         sd = sliceinfo+i;
@@ -368,7 +368,7 @@ void updateShow(void){
     }
     if(show_extreme_below==0){
       for(ii=0;ii<nslice_loaded;ii++){
-        slice *sd;
+        slicedata *sd;
 
         i=slice_loaded_list[ii];
         sd = sliceinfo+i;
@@ -407,7 +407,7 @@ void updateShow(void){
     }
     for(i=0;i<nvslice;i++){
       mesh *slicemesh;
-      slice *sd;
+      slicedata *sd;
 
       vd = vsliceinfo+i;
       sd = sliceinfo + vd->ival;
@@ -714,7 +714,7 @@ void synctimes(void){
   /* synchronize slice times */
 
     for(jj=0;jj<nslice_loaded;jj++){
-      slice *sd;
+      slicedata *sd;
 
       j = slice_loaded_list[jj];
       sd = sliceinfo + j;
@@ -794,7 +794,7 @@ void updatetimes(void){
   int n,n2,ntimes2;
   float *timescopy;
   int i,k;
-  slice *sd;
+  slicedata *sd;
   iso *ib;
   blockagedata *bc;
   ventdata *vi;
@@ -1451,8 +1451,8 @@ void updatetimes(void){
 int getplotstate(int choice){
   int i;
   plot3d *ploti;
-  slice *slicei;
-  vslice *vslicei;
+  slicedata *slicei;
+  vslicedata *vslicei;
   patch *patchi;
   particle *parti;
   targ *targi;

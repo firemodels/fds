@@ -1191,7 +1191,7 @@ int have_terrain_slice(void){
   int i;
 
   for(i=0;i<nsliceinfo;i++){
-    slice *slicei;
+    slicedata *slicei;
 
     slicei = sliceinfo + i;
 

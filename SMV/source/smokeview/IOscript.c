@@ -1050,8 +1050,8 @@ void script_loadslice(scriptdata *scripti){
   printf("\n");
 
   for(i=0;i<nmultislices;i++){
-    multislice *mslicei;
-    slice *slicei;
+    multislicedata *mslicei;
+    slicedata *slicei;
     int j;
     float delta_orig;
 
@@ -1081,9 +1081,9 @@ void script_loadvslice(scriptdata *scripti){
   printf("\n");
 
   for(i=0;i<nmultivslices;i++){
-    multivslice *mvslicei;
+    multivslicedata *mvslicei;
     int j;
-    slice *slicei;
+    slicedata *slicei;
 
     mvslicei = multivsliceinfo + i;
     if(mvslicei->nvslices<=0)continue;
@@ -1312,7 +1312,7 @@ void script_loadfile(scriptdata *scripti){
   printf("Script: loading file %s",scripti->cval);
   printf("\n");
   for(i=0;i<nsliceinfo;i++){
-    slice *sd;
+    slicedata *sd;
 
     sd = sliceinfo + i;
     if(strcmp(sd->file,scripti->cval)==0){
@@ -1416,8 +1416,8 @@ void script_loadvfile(scriptdata *scripti){
   printf("Script: loading vector slice file %s",scripti->cval);
   printf("\n");
   for(i=0;i<nvslice;i++){
-    slice *val;
-    vslice *vslicei;
+    slicedata *val;
+    vslicedata *vslicei;
 
     vslicei = vsliceinfo + i;
     val = sliceinfo + vslicei->ival;

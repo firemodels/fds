@@ -1646,7 +1646,7 @@ int readsmv(char *file, char *file2){
 
   if(nsliceinfo>0){
     for(i=0;i<nsliceinfo;i++){
-      slice *sd;
+      slicedata *sd;
       sd = sliceinfo + i;
       freelabels(&sliceinfo[i].label);
       FREEMEMORY(sd->reg_file);
@@ -1655,7 +1655,7 @@ int readsmv(char *file, char *file2){
     }
     FREEMEMORY(sliceorderindex);
     for(i=0;i<nmultislices;i++){
-      multislice *mslicei;
+      multislicedata *mslicei;
 
       mslicei = multisliceinfo + i;
       FREEMEMORY(mslicei->islices);
@@ -1671,7 +1671,7 @@ int readsmv(char *file, char *file2){
   if(nvslice>0){
     FREEMEMORY(vsliceorderindex);
     for(i=0;i<nmultivslices;i++){
-      multivslice *mvslicei;
+      multivslicedata *mvslicei;
 
       mvslicei = multivsliceinfo + i;
       FREEMEMORY(mvslicei->ivslices);
@@ -2275,8 +2275,8 @@ int readsmv(char *file, char *file2){
   FREEMEMORY(vslicetypes);
   FREEMEMORY(fedinfo);
   if(nsliceinfo>0){
-    if(NewMemory( (void **)&vsliceinfo, 3*nsliceinfo*sizeof(vslice) )==0||
-       NewMemory( (void **)&sliceinfo,  nsliceinfo*sizeof(slice)    )==0||
+    if(NewMemory( (void **)&vsliceinfo, 3*nsliceinfo*sizeof(vslicedata) )==0||
+       NewMemory( (void **)&sliceinfo,  nsliceinfo*sizeof(slicedata)    )==0||
        NewMemory( (void **)&fedinfo,  nsliceinfo*sizeof(feddata)    )==0||
        NewMemory( (void **)&slicetypes, nsliceinfo*sizeof(int)      )==0||
        NewMemory( (void **)&slice_loadstack, nsliceinfo*sizeof(int)      )==0||
@@ -5295,7 +5295,7 @@ typedef struct {
       ){
       int terrain=0, cellcenter=0, fire_line=0;
       float above_ground_level=0.0;
-      slice *sd;
+      slicedata *sd;
       char *slicelabelptr, slicelabel[256];
       int has_reg, has_comp;
 
@@ -5897,7 +5897,7 @@ typedef struct {
       sscanf(buffer,"%f %f %f %f",&valmin,&valmax,&percentile_min,&percentile_max);
 
       for(i=0;i<nsliceinfo;i++){
-        slice *slicei;
+        slicedata *slicei;
 
         slicei = sliceinfo + i;
         if(strcmp(file_ptr,slicei->file)==0){
@@ -6644,7 +6644,7 @@ typedef struct {
     if(NewMemory((void*)&slicebounds,nsliceinfo*sizeof(databounds))==0)return 2;
     nslice2=0;
     for(i=0;i<nsliceinfo;i++){
-      slice *slicei;
+      slicedata *slicei;
 
       slicei = sliceinfo + i;
       slicei->firstshort=1;
@@ -6668,7 +6668,7 @@ typedef struct {
 #endif
       nslice2++;
       for(n=0;n<i;n++){
-        slice *slicen;
+        slicedata *slicen;
 
         slicen = sliceinfo + n;
         if(strcmp(slicei->label.shortlabel,slicen->label.shortlabel)==0){
@@ -8229,7 +8229,7 @@ int readini2(char *inifile, int localfile){
         sscanf(buffer,"%i",&seq_id);
 
         if(seq_id>=0&&seq_id<nmultislices){
-          multislice *mslicei;
+          multislicedata *mslicei;
   
           mslicei = multisliceinfo + seq_id;
           mslicei->autoload=1;
@@ -11240,7 +11240,7 @@ void writeini(int flag){
 
 void update_loaded_lists(void){
   int i;
-  slice *slicei;
+  slicedata *slicei;
   patch *patchi;
 
   nslice_loaded=0;

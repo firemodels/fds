@@ -437,7 +437,7 @@ typedef struct {
 
 typedef struct _volrenderdata {
   struct _mesh *rendermesh;
-  struct _slice *smoke, *fire;
+  struct _slicedata *smoke, *fire;
   int is_compressed;
   unsigned char *c_smokedata_view, *c_firedata_view;
   float *smokedata_full, *firedata_full;
@@ -955,7 +955,7 @@ typedef struct {
   char label[256];
 } menudata;
 
-/* --------------------------  slice ------------------------------------ */
+/* --------------------------  hrrdata ------------------------------------ */
 
 typedef struct {
   char *file, hrrlabel[256];
@@ -966,7 +966,7 @@ typedef struct {
 
 /* --------------------------  slice ------------------------------------ */
 
-typedef struct _slice {
+typedef struct _slicedata {
   int mesh_type;
   int seq_id, autoload;
   char *file;
@@ -1023,12 +1023,12 @@ typedef struct _slice {
   int reload;
   float delta_orig;
   int extreme_min, extreme_max;
-} slice;
+} slicedata;
 
 /* --------------------------  multislice ------------------------------------ */
 
 typedef struct {
-  slice *co,*co2,*o2,*fed;
+  slicedata *co,*co2,*o2,*fed;
   int loaded,display;
 } feddata;
 
@@ -1042,7 +1042,7 @@ typedef struct {
   int *islices;
   char menulabel[128];
   char menulabel2[128];
-} multislice;
+} multislicedata;
 
 /* --------------------------  multivslice ------------------------------------ */
 
@@ -1054,7 +1054,7 @@ typedef struct {
   int *ivslices;
   char menulabel[128];
   char menulabel2[128];
-} multivslice;
+} multivslicedata;
 
 /* --------------------------  databounds ------------------------------------ */
 
@@ -1081,7 +1081,7 @@ typedef struct {
 
 typedef struct {
   int seq_id, autoload;
-  slice *u,*v,*w,*val;
+  slicedata *u,*v,*w,*val;
   int volslice;
   int iu, iv, iw, ival;
   int loaded,display;
@@ -1089,7 +1089,7 @@ typedef struct {
   int type,vec_type;
   char menulabel[128];
   char menulabel2[128];
-} vslice;
+} vslicedata;
 
 typedef struct {
   int ncomp_total;

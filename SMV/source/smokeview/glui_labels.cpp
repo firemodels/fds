@@ -346,12 +346,12 @@ extern "C" void glui_labels_setup(int main_window){
 extern "C" void update_fileload(void){
   int i;
   particle *parti;
-  slice *slicei;
+  slicedata *slicei;
   iso *isoi;
   patch *patchi;
   smoke3d *smoke3di;
   plot3d *plot3di;
-  vslice *vslicei;
+  vslicedata *vslicei;
 
   npartloaded=0;
   nevacloaded=0;

@@ -1918,7 +1918,7 @@ void Time_CB(int var){
 extern "C" void Slice_CB(int var){
   int error,i;
   int ii;
-  slice *sd;
+  slicedata *sd;
 
   updatemenu=1;
   if(var==DATA_transparent){
@@ -2241,7 +2241,7 @@ extern "C" void updateslicelist(int index){
 extern "C" void updateslicelistindex(int sfn){
   int i;
   int slicefiletype;
-  slice *sd;
+  slicedata *sd;
   if(sfn<0){
     updateslicefilenum();
     sfn=slicefilenum;

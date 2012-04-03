@@ -285,7 +285,7 @@ void mouse_select_avatar(int button, int state, int x, int y){
 
 void checktimebound(void){
   int i,j;
-  slice *sd;
+  slicedata *sd;
   mesh *meshi;
   blockagedata *bc;
   particle *parti;
@@ -1221,13 +1221,13 @@ void keyboard_2(unsigned char key, int x, int y){
     int nslice_loaded_local=0, nvslice_loaded_local=0;
 
     for(i=0;i<nsliceinfo;i++){
-      slice *sd;
+      slicedata *sd;
 
       sd = sliceinfo + i;
       if(sd->loaded==1)nslice_loaded_local++;
     }
     for(i=0;i<nvslice;i++){
-      vslice *vd;
+      vslicedata *vd;
 
       vd = vsliceinfo + i;
       if(vd->loaded==1)nvslice_loaded_local++;

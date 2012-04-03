@@ -58,7 +58,7 @@ void set_unit_vis(void){
     uci->visible=0;
 
     for(j=0;j<nsliceinfo;j++){
-      slice *slicej;
+      slicedata *slicej;
 
       slicej = sliceinfo + j;
       if(strlen(slicej->label.unit)!=strlen(uci->units->unit))continue;
@@ -151,7 +151,7 @@ void init_unit_defs(void){
   }
   if(smokediff==0)return;
   for(j=0;j<nsliceinfo;j++){
-    slice *slicej;
+    slicedata *slicej;
       
     slicej = sliceinfo + j;
     unitclass = get_unit_class(slicej->label.unit);
@@ -213,7 +213,7 @@ void update_unit_defs(void){
 
     firstslice=1;
     for(j=0;j<nsliceinfo;j++){
-      slice *slicej;
+      slicedata *slicej;
       
       slicej = sliceinfo + j;
       if(slicej->loaded==0||slicej->display==0)continue;

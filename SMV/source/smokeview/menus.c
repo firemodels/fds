@@ -703,8 +703,8 @@ void IsoShowMenu(int value){
 /* ------------------ ShowVSliceMenu ------------------------ */
 
 void ShowVSliceMenu(int value){
-  vslice *vd;
-  slice *sd;
+  vslicedata *vd;
+  slicedata *sd;
   int i;
   updatemenu=1;  
   glutPostRedisplay();
@@ -807,7 +807,7 @@ void ShowHideSliceMenu(int value){
     }
   }
   else{
-    slice *sd;
+    slicedata *sd;
 
     sd = sliceinfo + value;
     ASSERTFLAG(sd->display);
@@ -837,8 +837,8 @@ void ShowHideSliceMenu(int value){
 /* ------------------ ShowMultiSliceMenu ------------------------ */
 
 void ShowMultiSliceMenu(int value){
-  multislice *mslicei;
-  slice *sd;
+  multislicedata *mslicei;
+  slicedata *sd;
   int mdisplay;
   int i;
 
@@ -1367,7 +1367,7 @@ void RenderState(int onoff){
 /* ------------------ RenderMenu ------------------------ */
 
 void RenderMenu(int value){
-  slice *sd;
+  slicedata *sd;
   int i,n;
   mesh *meshi;
 
@@ -3012,8 +3012,8 @@ void LoadVSliceMenu(int value){
     glutPostRedisplay();
   }
   else if(value>=0){
-    vslice *vslicei;
-    slice *slicei;
+    vslicedata *vslicei;
+    slicedata *slicei;
 
     readvslice(value, LOAD, &errorcode);
     vslicei = vsliceinfo + value;
@@ -3029,8 +3029,8 @@ void LoadVSliceMenu(int value){
   else{
     int submenutype;
     char *submenulabel;
-    vslice *vslicei;
-    slice *slicei;
+    vslicedata *vslicei;
+    slicedata *slicei;
     int dir;
 
     value = -(1000 + value);
@@ -3085,7 +3085,7 @@ void UnloadSliceMenu(int value){
 
 void UnloadMultiVSliceMenu(int value){
   int i;
-  multivslice *mvslicei;
+  multivslicedata *mvslicei;
 
   if(value>=0){
     mvslicei = multivsliceinfo + value;
@@ -3103,7 +3103,7 @@ void UnloadMultiVSliceMenu(int value){
 
 void UnloadMultiSliceMenu(int value){
   int i;
-  multislice *mslicei;
+  multislicedata *mslicei;
 
   if(value>=0){
     mslicei = multisliceinfo + value;
@@ -3196,7 +3196,7 @@ void UnLoadVolSmoke3DMenu(int value){
   else{
     mesh *meshi;
     volrenderdata *vr;
-    slice *fire, *smoke;
+    slicedata *fire, *smoke;
 
     meshi = meshinfo + value;
     vr = &(meshi->volrenderinfo);
@@ -3220,7 +3220,7 @@ void LoadVolSmoke3DMenu(int value){
   if(value>=0){
     mesh *meshi;
     volrenderdata *vr;
-    slice *fire, *smoke;
+    slicedata *fire, *smoke;
 
     meshi = meshinfo + value;
     vr = &(meshi->volrenderinfo);
@@ -3540,7 +3540,7 @@ void LoadSliceMenu(int value){
     else{
       int submenutype;
       char *submenulabel;
-      slice *slicei;
+      slicedata *slicei;
       int dir;
 
       value = -(1000 + value);
@@ -3569,7 +3569,7 @@ void LoadSliceMenu(int value){
 
 void LoadMultiVSliceMenu(int value){
   int i;
-  multivslice *mvslicei;
+  multivslicedata *mvslicei;
 
   if(value==-999)return;
   if(value==-20){
@@ -3582,7 +3582,7 @@ void LoadMultiVSliceMenu(int value){
     mvslicei = multivsliceinfo + value;
     if(scriptoutstream!=NULL){
       if(mvslicei->nvslices>0){
-        slice *slicei;
+        slicedata *slicei;
 
         slicei = sliceinfo + mvslicei->ivslices[0];
         fprintf(scriptoutstream,"LOADVSLICE\n");
@@ -3606,14 +3606,14 @@ void LoadMultiVSliceMenu(int value){
 
 void LoadMultiSliceMenu(int value){
   int i;
-  multislice *mslicei;
+  multislicedata *mslicei;
 
   if(value==-999)return;
   if(value>=0){
     mslicei = multisliceinfo + value;
     if(scriptoutstream!=NULL){
       if(mslicei->nslices>0){
-        slice *slicei;
+        slicedata *slicei;
 
         slicei = sliceinfo + mslicei->islices[0];
         fprintf(scriptoutstream,"LOADSLICE\n");
@@ -4342,8 +4342,8 @@ void GeometryMenu(int value){
 
 void MENU_vslice(int vec_type){
   int ii,i;
-  slice *sd;
-  vslice *vd;
+  slicedata *sd;
+  vslicedata *vd;
   char check[]="*";
   char *menulabel;
   char a_menulabel[1000];
@@ -4389,8 +4389,8 @@ void InitMenus(int unload){
   int nvsliceloaded0;
   int nvsliceloaded1;
   char check[]="*";
-  multislice *mslicei;
-  multivslice *mvslicei;
+  multislicedata *mslicei;
+  multivslicedata *mvslicei;
   mesh *cmesh;
   char menulabel[1024];
   int j;
@@ -4452,7 +4452,7 @@ updatemenu=0;
 
   nsliceloaded=0;
   for(i=0;i<nsliceinfo;i++){
-    slice *sd;
+    slicedata *sd;
 
     sd = sliceinfo + i;
     if(sd->loaded==1)nsliceloaded++;
@@ -4481,7 +4481,7 @@ updatemenu=0;
 
   nvsliceloaded=0;
   for(i=0;i<nvslice;i++){
-    vslice *vd;
+    vslicedata *vd;
 
     vd = vsliceinfo + i;
     if(vd->loaded==1)nvsliceloaded++;
@@ -4492,7 +4492,7 @@ updatemenu=0;
     mslicei->loaded=0;
     mslicei->display=0;
     for(j=0;j<mslicei->nslices;j++){
-      slice *sd;
+      slicedata *sd;
 
       sd = sliceinfo + mslicei->islices[j];
       if(sd->loaded==1)mslicei->loaded++;
@@ -4516,7 +4516,7 @@ updatemenu=0;
     mvslicei->loaded=0;
     mvslicei->display=0;
     for(j=0;j<mvslicei->nvslices;j++){
-      vslice *vd;
+      vslicedata *vd;
 
       vd = vsliceinfo + mvslicei->ivslices[j];
       if(vd->loaded==1)mvslicei->loaded++;
@@ -6198,8 +6198,8 @@ updatemenu=0;
     CREATEMENU(showvslicemenu,ShowVSliceMenu);
     nvsliceloaded0=0;
     for(i=0;i<nvslice;i++){
-      vslice *vd;
-      slice *sd;
+      vslicedata *vd;
+      slicedata *sd;
 
       vd = vsliceinfo + i;
       if(vd->loaded==0)continue;
@@ -6240,7 +6240,7 @@ updatemenu=0;
   if(nsliceinfo>0&&nmultislices<nsliceinfo){
     CREATEMENU(showmultislicemenu,ShowMultiSliceMenu);
     for(i=0;i<nmultislices;i++){
-      slice *sd;
+      slicedata *sd;
 
       mslicei = multisliceinfo + i;
       if(mslicei->loaded==0)continue;
@@ -6274,7 +6274,7 @@ updatemenu=0;
   if(nsliceinfo>0&&nsliceloaded>0){
     CREATEMENU(showhideslicemenu,ShowHideSliceMenu);
     for(ii=0;ii<nslice_loaded;ii++){
-      slice *sd;
+      slicedata *sd;
 
       i = slice_loaded_list[ii];
       sd = sliceinfo + i;
@@ -6527,7 +6527,7 @@ updatemenu=0;
   nvsliceloaded0=0, nvsliceloaded1=0;
   nvsliceloaded2=0;
   for(i=0;i<nvslice;i++){
-    vslice *vd;
+    vslicedata *vd;
 
     vd = vsliceinfo+i;
     switch (vd->vec_type){
@@ -7381,8 +7381,8 @@ updatemenu=0;
 
       nloadsubmvslicemenu=1;
       for(i=1;i<nmultivslices;i++){
-        vslice *vi, *vim1;
-        slice *si, *sim1;
+        vslicedata *vi, *vim1;
+        slicedata *si, *sim1;
 
         vi = vsliceinfo + (multivsliceinfo+i)->ivslices[0];
         vim1 = vsliceinfo + (multivsliceinfo+i-1)->ivslices[0];
@@ -7400,8 +7400,8 @@ updatemenu=0;
       nmultisliceloaded=0;
       nloadsubmvslicemenu=0;
       for(i=0;i<nmultivslices;i++){
-        vslice *vi, *vim1;
-        slice *si, *sim1;
+        vslicedata *vi, *vim1;
+        slicedata *si, *sim1;
 
         mvslicei = multivsliceinfo + i;
 
@@ -7437,8 +7437,8 @@ updatemenu=0;
       nloadsubmvslicemenu=0;
       CREATEMENU(loadmultivslicemenu,LoadMultiVSliceMenu);
       for(i=0;i<nmultivslices;i++){
-        vslice *vi, *vim1;
-        slice *si, *sim1;
+        vslicedata *vi, *vim1;
+        slicedata *si, *sim1;
 
         vi = vsliceinfo + (multivsliceinfo+i)->ivslices[0];
         si = sliceinfo + vi->ival;
@@ -7473,7 +7473,7 @@ updatemenu=0;
 
     CREATEMENU(unloadvslicemenu,UnloadVSliceMenu);
     for(ii=0;ii<nvslice;ii++){
-      vslice *vd;
+      vslicedata *vd;
 
       i = vsliceorderindex[ii];
       vd = vsliceinfo + i;
@@ -7485,11 +7485,11 @@ updatemenu=0;
     glutAddMenuEntry(_("Unload all"),-1);
 
     if(nvslice0>0){
-      vslice *vd, *vdim1,*vdip1;
+      vslicedata *vd, *vdim1,*vdip1;
       if(nvslice>0){
         nloadsubvslicemenu=1;
         for(ii=1;ii<nvslice;ii++){
-          slice *sd, *sdm1;
+          slicedata *sd, *sdm1;
 
           i=vsliceorderindex[ii];
           vd = vsliceinfo + i;
@@ -7508,7 +7508,7 @@ updatemenu=0;
         }
         nloadsubvslicemenu=0;
         for(ii=0;ii<nvslice;ii++){
-          slice *sd, *sdm1, *sdp1;
+          slicedata *sd, *sdm1, *sdp1;
 
           i=vsliceorderindex[ii];
           vd = vsliceinfo + i;
@@ -7559,7 +7559,7 @@ updatemenu=0;
         CREATEMENU(vslicemenu,LoadVSliceMenu);
         nloadsubvslicemenu=0;
         for(ii=0;ii<nvslice;ii++){
-          slice *sd, *sdm1;
+          slicedata *sd, *sdm1;
 
           i=vsliceorderindex[ii];
           vd = vsliceinfo + i;
@@ -7657,7 +7657,7 @@ updatemenu=0;
 
         nloadsubmslicemenu=1;
         for(i=1;i<nmultislices;i++){
-          slice *sd, *sdim1;
+          slicedata *sd, *sdim1;
 
           sd = sliceinfo+(multisliceinfo + i)->islices[0];
           sdim1 = sliceinfo+(multisliceinfo + i-1)->islices[0];
@@ -7669,7 +7669,7 @@ updatemenu=0;
         }
         nloadsubmslicemenu=0;
         for(i=0;i<nmultislices;i++){
-          slice *sd, *sdim1;
+          slicedata *sd, *sdim1;
 
           sd = sliceinfo+(multisliceinfo + i)->islices[0];
           if(i>0)sdim1 = sliceinfo+(multisliceinfo + i-1)->islices[0];
@@ -7697,7 +7697,7 @@ updatemenu=0;
         CREATEMENU(loadmultislicemenu,LoadMultiSliceMenu);
         nloadsubmslicemenu=0;
         for(i=0;i<nmultislices;i++){
-          slice *sd, *sdim1;
+          slicedata *sd, *sdim1;
 
           sd = sliceinfo+(multisliceinfo + i)->islices[0];
           if(i>0)sdim1 = sliceinfo+(multisliceinfo + i-1)->islices[0];
@@ -7725,7 +7725,7 @@ updatemenu=0;
       }
       CREATEMENU(unloadslicemenu,UnloadSliceMenu);
       for(i=0;i<nsliceinfo;i++){
-        slice *sd;
+        slicedata *sd;
 
         sd = sliceinfo + sliceorderindex[i];
         if(sd->loaded==1){
@@ -7740,7 +7740,7 @@ updatemenu=0;
 //*** this is where I would put the "sub-slice" menus ordered by type
       nloadsubslicemenu=1;
       for(i=1;i<nsliceinfo;i++){
-        slice *sd,*sdim1;
+        slicedata *sd,*sdim1;
 
         sd = sliceinfo + sliceorderindex[i];
         sdim1 = sliceinfo + sliceorderindex[i-1];
@@ -7752,7 +7752,7 @@ updatemenu=0;
       }
       iloadsubslicemenu=0;
       for(i=0;i<nsliceinfo;i++){
-        slice *sd,*sdim1,*sdip1;
+        slicedata *sd,*sdim1,*sdip1;
 
         if(i!=0){
           sdim1 = sliceinfo + sliceorderindex[i-1];
@@ -7801,7 +7801,7 @@ updatemenu=0;
       CREATEMENU(loadslicemenu,LoadSliceMenu);
       iloadsubslicemenu=0;
       for(i=0;i<nsliceinfo;i++){
-        slice *sd,*sdim1;
+        slicedata *sd,*sdim1;
 
         sd = sliceinfo + sliceorderindex[i];
         if(i>0)sdim1 = sliceinfo + sliceorderindex[i-1];

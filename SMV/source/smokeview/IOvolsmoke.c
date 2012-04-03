@@ -177,7 +177,7 @@ void init_volrender(void){
     vr->times_defined=0;
   }
   for(i=0;i<nsliceinfo;i++){
-    slice *slicei;
+    slicedata *slicei;
     char *shortlabel;
     int blocknumber;
     mesh *meshi;
@@ -1202,7 +1202,7 @@ void drawsmoke3dGPUVOL(void){
 /* ------------------ get_volsmoke_sizes ------------------------ */
 
 int get_volsmoke_nframes(volrenderdata *vr){
-	slice *fireslice, *smokeslice;
+	slicedata *fireslice, *smokeslice;
   FILE *volstream=NULL;
   int framesize,skip_local;
   int nframes,filesize;
@@ -1250,7 +1250,7 @@ int get_volsmoke_nframes(volrenderdata *vr){
 /* ------------------ get_volsmoke_frame_time ------------------------ */
 
 float get_volsmoke_frame_time(volrenderdata *vr, int framenum){
-	slice *smokeslice;
+	slicedata *smokeslice;
   FILE *SLICEFILE;
   int framesize,returncode;
   float time_local=0.0;
@@ -1331,7 +1331,7 @@ void get_volsmoke_all_times(volrenderdata *vr){
 /* ------------------ read_volsmoke_frame ------------------------ */
 #define VOL_OFFSET 32
 void read_volsmoke_frame(volrenderdata *vr, int framenum, int *first){
-	slice *fireslice, *smokeslice;
+	slicedata *fireslice, *smokeslice;
   FILE *SLICEFILE;
   int framesize,framesize2,skip_local,returncode;
   float time_local, *smokeframe_data, *fireframe_data;
