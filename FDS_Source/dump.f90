@@ -595,6 +595,7 @@ IF (N_DEVC_TIME>0) THEN
 ENDIF
 
 ! Define labels for line devices
+
 IF (N_DEVC_LINE>0) THEN
 
    ALLOCATE(LINE_DEVC_LABEL(N_DEVC_LINE))
