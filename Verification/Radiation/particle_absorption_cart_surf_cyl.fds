@@ -41,12 +41,25 @@ MESH 2 has particles with cartesian surf and split = 2 (z)
       TMP_FRONT = 1000.
       TAU_T = 0.0 /
 
-&SURF ID='REALLY HOT'
+&SURF ID='REALLY HOT 1'
+      EMISSIVITY = 1.
+      TMP_FRONT = 1170.
+      TAU_T = 0.0 /
+
+&SURF ID='REALLY HOT 2'
+      EMISSIVITY = 1.
+      TMP_FRONT = 1330.
+      TAU_T = 0.0 /
+
+&SURF ID='REALLY HOT 3'
       EMISSIVITY = 1.
       TMP_FRONT = 1500.
       TAU_T = 0.0 /
 
-&VENT XB = 4,7,0,3,3,3 SURF_ID = 'REALLY HOT' /
+&VENT XB = 7,7,0,3,0,3 SURF_ID = 'REALLY HOT 1' /
+&VENT XB = 8,11,3,3,0,3 SURF_ID = 'REALLY HOT 2' /
+&VENT XB = 12,15,0,3,3,3 SURF_ID = 'REALLY HOT 3' /
+
 
 &PART ID='part_1'
      	STATIC = .TRUE.
