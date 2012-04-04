@@ -23,7 +23,7 @@ void drawtrunccone(float d1, float d2, float height, unsigned char *rgbcolor);
 /* ------------------ getzonesizecsv ------------------------ */
 
 void getzonesizecsv(int *nzone_times_local, int *nroom, int *nfires_local, int *nhvents, int *nvvents, int *error){
-   device *dev;
+   devicedata *dev;
    int nr,nf,nv;
    int i;
    char label[100];
@@ -76,36 +76,36 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
                     float **zoneodlptr, float **zoneoduptr, float *zonehvents_local, float *zonevvents_local,
                     int *error){
   int i,ii,iif, use_od=1, iihv, iivv;
-  device **zoneqfire_devs=NULL;
-  device **zonepr_devs=NULL, **zoneylay_devs=NULL, **zonetl_devs=NULL, **zonetu_devs=NULL, **zoneodl_devs=NULL, **zoneodu_devs=NULL;
-  device **zonefheight_devs=NULL, **zonefbase_devs=NULL, **zonefarea_devs=NULL;
-  device **zonehvents_devs=NULL, **zonevvents_devs=NULL;
+  devicedata **zoneqfire_devs=NULL;
+  devicedata **zonepr_devs=NULL, **zoneylay_devs=NULL, **zonetl_devs=NULL, **zonetu_devs=NULL, **zoneodl_devs=NULL, **zoneodu_devs=NULL;
+  devicedata **zonefheight_devs=NULL, **zonefbase_devs=NULL, **zonefarea_devs=NULL;
+  devicedata **zonehvents_devs=NULL, **zonevvents_devs=NULL;
   float *zoneodl_local, *zoneodu_local;
   float *times_local;
 
   *error=0;
   if(nfires_local>0){
-    NewMemory((void **)&zoneqfire_devs,nfires_local*sizeof(device *));
-    NewMemory((void **)&zonefheight_devs,nfires_local*sizeof(device *));
-    NewMemory((void **)&zonefbase_devs,nfires_local*sizeof(device *));
-    NewMemory((void **)&zonefarea_devs,nfires_local*sizeof(device *));
+    NewMemory((void **)&zoneqfire_devs,nfires_local*sizeof(devicedata *));
+    NewMemory((void **)&zonefheight_devs,nfires_local*sizeof(devicedata *));
+    NewMemory((void **)&zonefbase_devs,nfires_local*sizeof(devicedata *));
+    NewMemory((void **)&zonefarea_devs,nfires_local*sizeof(devicedata *));
   }
 
   if(nrooms_local>0){
-    NewMemory((void **)&zonepr_devs,nrooms_local*sizeof(device *));
-    NewMemory((void **)&zoneylay_devs,nrooms_local*sizeof(device *));
-    NewMemory((void **)&zonetl_devs,nrooms_local*sizeof(device *));
-    NewMemory((void **)&zonetu_devs,nrooms_local*sizeof(device *));
-    NewMemory((void **)&zoneodl_devs,nrooms_local*sizeof(device *));
-    NewMemory((void **)&zoneodu_devs,nrooms_local*sizeof(device *));
+    NewMemory((void **)&zonepr_devs,nrooms_local*sizeof(devicedata *));
+    NewMemory((void **)&zoneylay_devs,nrooms_local*sizeof(devicedata *));
+    NewMemory((void **)&zonetl_devs,nrooms_local*sizeof(devicedata *));
+    NewMemory((void **)&zonetu_devs,nrooms_local*sizeof(devicedata *));
+    NewMemory((void **)&zoneodl_devs,nrooms_local*sizeof(devicedata *));
+    NewMemory((void **)&zoneodu_devs,nrooms_local*sizeof(devicedata *));
   }
 
   if(nzhvents>0){
-    NewMemory((void **)&zonehvents_devs,nzhvents*sizeof(device *));
+    NewMemory((void **)&zonehvents_devs,nzhvents*sizeof(devicedata *));
   }
 
   if(nzvvents>0){
-    NewMemory((void **)&zonevvents_devs,nzvvents*sizeof(device *));
+    NewMemory((void **)&zonevvents_devs,nzvvents*sizeof(devicedata *));
   }
 
   for(i=0;i<nrooms_local;i++){

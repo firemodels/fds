@@ -313,7 +313,7 @@ void getsmokesensors(void){
 
   doit=0;
   for(i=0;i<ndeviceinfo;i++){
-    device *devicei;
+    devicedata *devicei;
     char *label;
 
     devicei = deviceinfo + i;
@@ -335,7 +335,7 @@ void getsmokesensors(void){
   glReadPixels(0,0,width,height, GL_RGB, GL_UNSIGNED_BYTE, rgbimage);
 
   for(i=0;i<ndeviceinfo;i++){
-    device *devicei;
+    devicedata *devicei;
     char *label;
     int row, col;
     int index,val;
@@ -372,7 +372,7 @@ void getdevice_screencoords(void){
 
   doit=0;
   for(i=0;i<ndeviceinfo;i++){
-    device *devicei;
+    devicedata *devicei;
     char *label;
 
     devicei = deviceinfo + i;
@@ -388,7 +388,7 @@ void getdevice_screencoords(void){
   for(i=0;i<ndeviceinfo;i++){
     float *xyz;
     double d_ijk[3];
-    device *devicei;
+    devicedata *devicei;
     int *ijk;
     char *label;
     mesh *device_mesh;
@@ -411,7 +411,7 @@ void getdevice_screencoords(void){
 /* ----------------------- draw_devices_val ----------------------------- */
 
 void draw_devices_val(void){
-  device *devicei;
+  devicedata *devicei;
   int i;
   float *xyz, *xyznorm;
   float white[3]={1.0,1.0,1.0};
@@ -489,9 +489,9 @@ void draw_devices_val(void){
 
 /* ----------------------- get_vdevice_vel ----------------------------- */
 
-void get_vdevice_vel(float time_local, vdevice *vdevicei, float *vel, float *angle_local, float *dvel, float *dangle, int *valid_vel){
+void get_vdevice_vel(float time_local, vdevicedata *vdevicei, float *vel, float *angle_local, float *dvel, float *dangle, int *valid_vel){
   float uvel=0.0, vvel=0.0, wvel=0.0;
-  device *udev, *vdev, *wdev;
+  devicedata *udev, *vdev, *wdev;
   int validu=0,validv=0,validw=0;
 
   udev = vdevicei->udev;
@@ -556,7 +556,7 @@ void get_vdevice_vel(float time_local, vdevice *vdevicei, float *vel, float *ang
     return devicei->val;\
   }
 
-float get_device_val(float time_local, device *devicei, int *valid){
+float get_device_val(float time_local, devicedata *devicei, int *valid){
   int nvals;
   int ival;
   float *times_local;
@@ -608,7 +608,7 @@ float get_device_val(float time_local, device *devicei, int *valid){
 
   /* ----------------------- output_device_val ----------------------------- */
 
-void output_device_val(device *devicei){
+void output_device_val(devicedata *devicei){
   char label[1000];
   float val;
   int valid;
@@ -627,7 +627,7 @@ void output_device_val(device *devicei){
   /* ----------------------- draw_devices ----------------------------- */
 
 void draw_devices(void){
-  device *devicei;
+  devicedata *devicei;
   int i;
 
   if(select_device==0||show_mode!=SELECT){
@@ -660,7 +660,7 @@ void draw_devices(void){
     glColor3fv(foregroundcolor);
     glPointSize(vectorpointsize);
     for(i=0;i<nvdeviceinfo;i++){
-      vdevice *vdevi;
+      vdevicedata *vdevi;
       float vel[3], angle, dvel, dangle;
       float *xyz;
       int j;
@@ -838,7 +838,7 @@ void draw_devices(void){
 
 void drawTargetNorm(void){
   int i;
-  device *devicei;
+  devicedata *devicei;
   float *xyz, *xyznorm;
 
   if(isZoneFireModel==1&&hasSensorNorm==1&&visSensor==1&&visSensorNorm==1){
@@ -4573,14 +4573,14 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
 
 /* ----------------------- getdevice ----------------------------- */
 
-device *getdevice(char *label,int index){
+devicedata *getdevice(char *label,int index){
   int i;
 
   if(strcmp(label,"null")==0&&index>=0&&index<ndeviceinfo){
     return deviceinfo + index;
   }
   for(i=0;i<ndeviceinfo;i++){
-    device *devicei;
+    devicedata *devicei;
 
     devicei = deviceinfo + i;
     if(STRCMP(devicei->label,label)==0)return devicei;
@@ -4656,9 +4656,9 @@ int get_ndevices(char *file){
 
 /* ----------------------- read_device_header ----------------------------- */
 
-void read_device_header(char *file, device *devices, int ndevices){
+void read_device_header(char *file, devicedata *devices, int ndevices){
   FILE *stream;
-  device *devicecopy;
+  devicedata *devicecopy;
   char buffer[BUFFER_LEN],*comma;
   int buffer_len=BUFFER_LEN;
 
@@ -4689,11 +4689,11 @@ void read_device_header(char *file, device *devices, int ndevices){
 /* ------------------ comparevdevices ------------------------ */
 
 int comparevdevices( const void *arg1, const void *arg2 ){
-  vdevice *vdevi, *vdevj;
+  vdevicedata *vdevi, *vdevj;
   float *xyzi, *xyzj;
 
-  vdevi = *(vdevice **)arg1;
-  vdevj = *(vdevice **)arg2;
+  vdevi = *(vdevicedata **)arg1;
+  vdevj = *(vdevicedata **)arg2;
   xyzi = vdevi->valdev->xyz;
   xyzj = vdevj->valdev->xyz;
   if(xyzi[0]<xyzj[0]-EPSDEV)return -1;
@@ -4709,7 +4709,7 @@ int comparevdevices( const void *arg1, const void *arg2 ){
 
 void setup_tree_devices(void){
   int i,nvdevices;
-  treedevice *treei;
+  treedevicedata *treei;
 
   if(nvdeviceinfo==0)return;
   if(ntreedeviceinfo>0){
@@ -4720,9 +4720,9 @@ void setup_tree_devices(void){
     FREEMEMORY(treedeviceinfo);
   }
 
-  qsort((vdevice **)vdeviceptrinfo,(size_t)nvdeviceinfo,sizeof(vdevice *),comparevdevices);
+  qsort((vdevicedata **)vdeviceptrinfo,(size_t)nvdeviceinfo,sizeof(vdevicedata *),comparevdevices);
 
-  NewMemory((void **)&treedeviceinfo,nvdeviceinfo*sizeof(treedevice));
+  NewMemory((void **)&treedeviceinfo,nvdeviceinfo*sizeof(treedevicedata));
   treei = treedeviceinfo;
   nvdevices=1;
   for(i=1;i<nvdeviceinfo;i++){
@@ -4735,13 +4735,13 @@ void setup_tree_devices(void){
       continue;
     }
     treei->nvdevices=nvdevices;
-    NewMemory((void **)&treei->vdevices,nvdevices*sizeof(vdevice **));
+    NewMemory((void **)&treei->vdevices,nvdevices*sizeof(vdevicedata **));
     treei++;
     nvdevices=1;
   }
   treei->nvdevices=nvdevices;
   if(nvdevices>0){
-    NewMemory((void **)&treei->vdevices,nvdevices*sizeof(vdevice **));
+    NewMemory((void **)&treei->vdevices,nvdevices*sizeof(vdevicedata **));
   }
   nvdevices=0;
   treei=treedeviceinfo;
@@ -4771,7 +4771,7 @@ void read_device_data(char *file, int filetype, int loadstatus){
   int i;
   char *buffer, *buffer2;
   char **devcunits=NULL, **devclabels=NULL;
-  device **devices=NULL;
+  devicedata **devices=NULL;
   int ntokens;
   int buffer_len;
   float *times_local;
@@ -4780,7 +4780,7 @@ void read_device_data(char *file, int filetype, int loadstatus){
 
   if(loadstatus==UNLOAD){
     for(i=0;i<ndeviceinfo;i++){
-      device *devicei;
+      devicedata *devicei;
 
       devicei = deviceinfo + i;
       if(devicei->filetype!=filetype)continue;
@@ -4788,7 +4788,7 @@ void read_device_data(char *file, int filetype, int loadstatus){
       FREEMEMORY(devicei->valids);
     }
     for(i=0;i<ndeviceinfo;i++){
-      device *devicei;
+      devicedata *devicei;
       int j;
 
       devicei = deviceinfo + i;
@@ -4796,7 +4796,7 @@ void read_device_data(char *file, int filetype, int loadstatus){
       times_local = devicei->times;
       FREEMEMORY(devicei->times);
       for(j=i+1;j<ndeviceinfo;j++){
-        device *devicej;
+        devicedata *devicej;
 
         devicej = deviceinfo + j;
         if(devicej->filetype!=filetype)continue;
@@ -4825,7 +4825,7 @@ void read_device_data(char *file, int filetype, int loadstatus){
   NewMemory((void **)&valids,ncols*sizeof(int));
   NewMemory((void **)&devcunits,ncols*sizeof(char *));
   NewMemory((void **)&devclabels,ncols*sizeof(char *));
-  NewMemory((void **)&devices,ncols*sizeof(device *));
+  NewMemory((void **)&devices,ncols*sizeof(devicedata *));
 
   fgets(buffer,buffer_len,stream);
   parsecsv(buffer,devcunits,ncols,&ntokens);
@@ -4843,7 +4843,7 @@ void read_device_data(char *file, int filetype, int loadstatus){
 
   NewMemory((void **)&times_local,nrows*sizeof(float));
   for(i=1;i<ntokens;i++){
-    device *devicei;
+    devicedata *devicei;
 
     devicei = getdevice(devclabels[i],i-1);
     devices[i]=devicei;
@@ -4869,7 +4869,7 @@ void read_device_data(char *file, int filetype, int loadstatus){
     fparsecsv(buffer,vals,valids,ncols,&ntokens);
     times_local[irow-2]=vals[icol];
     for(icol=1;icol<ncols;icol++){
-      device *devicei;
+      devicedata *devicei;
 
       devicei = devices[icol];
       if(devicei==NULL)continue;
@@ -4895,17 +4895,17 @@ void setup_device_data(void){
   int *valids=NULL;
   int i;
   char **devcunits=NULL, **devclabels=NULL;
-  device **devices=NULL;
+  devicedata **devices=NULL;
 
   if(ndeviceinfo==0)return;
   FREEMEMORY(vdeviceinfo);
-  NewMemory((void **)&vdeviceinfo,ndeviceinfo*sizeof(vdevice));
+  NewMemory((void **)&vdeviceinfo,ndeviceinfo*sizeof(vdevicedata));
   FREEMEMORY(vdeviceptrinfo);
-  NewMemory((void **)&vdeviceptrinfo,ndeviceinfo*sizeof(vdevice *));
+  NewMemory((void **)&vdeviceptrinfo,ndeviceinfo*sizeof(vdevicedata *));
   nvdeviceinfo=0;
   for(i=0;i<ndeviceinfo;i++){
-    vdevice *vdevi;
-    device *devi;
+    vdevicedata *vdevi;
+    devicedata *devi;
     float *xyzval;
     int j;
 
@@ -4923,7 +4923,7 @@ void setup_device_data(void){
     vdevi->sd_veldev=NULL;
 
     for(j=0;j<ndeviceinfo;j++){
-      device *devj;
+      devicedata *devj;
       float *xyz;
 
       devj = deviceinfo + j;
@@ -4939,7 +4939,7 @@ void setup_device_data(void){
     }
 
     for(j=0;j<ndeviceinfo;j++){
-      device *devj;
+      devicedata *devj;
       float *xyz;
 
       devj = deviceinfo + j;
@@ -4955,7 +4955,7 @@ void setup_device_data(void){
     }
 
     for(j=0;j<ndeviceinfo;j++){
-      device *devj;
+      devicedata *devj;
       float *xyz;
 
       devj = deviceinfo + j;
@@ -4971,7 +4971,7 @@ void setup_device_data(void){
     }
 
     for(j=0;j<ndeviceinfo;j++){
-      device *devj;
+      devicedata *devj;
       float *xyz;
 
       devj = deviceinfo + j;
@@ -4987,7 +4987,7 @@ void setup_device_data(void){
     }
 
     for(j=0;j<ndeviceinfo;j++){
-      device *devj;
+      devicedata *devj;
       float *xyz;
 
       devj = deviceinfo + j;
@@ -5003,7 +5003,7 @@ void setup_device_data(void){
     }
 
     for(j=0;j<ndeviceinfo;j++){
-      device *devj;
+      devicedata *devj;
       float *xyz;
 
       devj = deviceinfo + j;
@@ -5019,7 +5019,7 @@ void setup_device_data(void){
     }
 
     for(j=0;j<ndeviceinfo;j++){
-      device *devj;
+      devicedata *devj;
       float *xyz;
 
       devj = deviceinfo + j;
@@ -5041,14 +5041,14 @@ void setup_device_data(void){
     }
   }
   for(i=0;i<nvdeviceinfo;i++){
-    vdevice *vdevi;
+    vdevicedata *vdevi;
     int j;
     float *xyzi;
 
     vdevi = vdeviceinfo + i;
     xyzi = vdevi->valdev->xyz;
     for(j=i+1;j<nvdeviceinfo;j++){
-      vdevice *vdevj;
+      vdevicedata *vdevj;
       float *xyzj;
 
       vdevj = vdeviceinfo + j;
@@ -5062,15 +5062,15 @@ void setup_device_data(void){
   }
   max_dev_vel=-1.0;
   for(i=0;i<nvdeviceinfo;i++){
-    vdevice *vdevi;
-    device *devval;
+    vdevicedata *vdevi;
+    devicedata *devval;
     int j;
 
     vdevi = vdeviceinfo + i;
     if(vdevi->unique==0)continue;
     devval = vdevi->valdev;
     if(vdevi->filetype==CSV_FDS){
-      device *udev,*vdev,*wdev;
+      devicedata *udev,*vdev,*wdev;
 
       udev=vdevi->udev;
       vdev=vdevi->vdev;
@@ -5087,7 +5087,7 @@ void setup_device_data(void){
       }
     }
     if(vdevi->filetype==CSV_EXP){
-      device *veldev;
+      devicedata *veldev;
 
       veldev=vdevi->veldev;
       if(veldev!=NULL){
@@ -5106,16 +5106,16 @@ void setup_device_data(void){
   if(ndeviceinfo>0){
     ndevicetypes=0;
     FREEMEMORY(devicetypes);
-    NewMemory((void **)&devicetypes,ndeviceinfo*sizeof(device *));
+    NewMemory((void **)&devicetypes,ndeviceinfo*sizeof(devicedata *));
     for(i=0;i<ndeviceinfo;i++){
-      device *devi;
+      devicedata *devi;
 
       devi = deviceinfo + i;
       devi->type2=-1;
     }
     for(i=0;i<ndeviceinfo;i++){
       int j;
-      device *devi;
+      devicedata *devi;
 
       devi = deviceinfo + i;
       if(devi->type2>=0||strlen(devi->quantity)==0)continue;
@@ -5123,7 +5123,7 @@ void setup_device_data(void){
       devi->type2vis=0;
       devicetypes[ndevicetypes++]=devi;
       for(j=i+1;j<ndeviceinfo;j++){
-        device *devj;
+        devicedata *devj;
 
         devj = deviceinfo + j;
         if(devj->type2<0&&strcmp(devi->quantity,devj->quantity)==0){
@@ -5428,7 +5428,7 @@ void update_device_textures(void){
   int i;
 
   for(i=0;i<ndeviceinfo;i++){
-    device *devicei;
+    devicedata *devicei;
 
     devicei = deviceinfo + i;
 
@@ -5443,7 +5443,7 @@ void update_device_textures(void){
   // count device textures
 
   for(i=0;i<ndeviceinfo;i++){
-    device *devicei;
+    devicedata *devicei;
     sv_object *object;
     int j;
 
@@ -5471,7 +5471,7 @@ void update_device_textures(void){
     NewMemory((void **)&device_texture_list_index,ndevice_texture_list*sizeof(int));
     ndevice_texture_list=0;
     for(i=0;i<ndeviceinfo;i++){
-      device *devicei;
+      devicedata *devicei;
       sv_object *object;
       int j;
 
@@ -5838,7 +5838,7 @@ float dist2plane(float x, float y, float z, float xyzp[3], float xyzpn[3]){
 
 /* ----------------------- init_device_plane ------------------------ */
 
-void init_device_plane(device *devicei){
+void init_device_plane(devicedata *devicei){
   int colorindex;
   int i;
   float level=0.0;
@@ -5923,7 +5923,7 @@ void init_device_plane(device *devicei){
 
 /* ----------------------- init_device ----------------------------- */
 
-void init_device(device *devicei, float *xyz, float *xyzn, int state0, int nparams, float *params, char *labelptr){
+void init_device(devicedata *devicei, float *xyz, float *xyzn, int state0, int nparams, float *params, char *labelptr){
   float norm;
   int i;
 

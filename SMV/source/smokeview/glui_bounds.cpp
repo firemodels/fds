@@ -933,7 +933,7 @@ void PLOT3D_CB(int var){
       enable_isosurface=1;
       for(i=0;i<nmeshes;i++){
         mesh *meshi;
-        plot3d *plot3di;
+        plot3ddata *plot3di;
 
         meshi = meshinfo + i;
         if(meshi->plot3dfilenum==-1)continue;

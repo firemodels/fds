@@ -137,7 +137,7 @@ void update_framenumber(int changetime){
     }
     if(show3dsmoke==1){
       for(i=0;i<nsmoke3dinfo;i++){
-        smoke3d *smoke3di;
+        smoke3ddata *smoke3di;
 
         smoke3di = smoke3dinfo + i;
         if(smoke3di->loaded==0||smoke3di->display==0)continue;
@@ -301,7 +301,7 @@ void updateShow(void){
     }
   }
   {
-    smoke3d *smoke3di;
+    smoke3ddata *smoke3di;
 
     for(ii=0;ii<nsmoke3dinfo;ii++){
       smoke3di = smoke3dinfo + ii;
@@ -723,7 +723,7 @@ void synctimes(void){
 
   /* synchronize smoke times */
     {
-      smoke3d *smoke3di;
+      smoke3ddata *smoke3di;
 
       for(jj=0;jj<nsmoke3dinfo;jj++){
         smoke3di = smoke3dinfo + jj;
@@ -900,7 +900,7 @@ void updatetimes(void){
     }
   }
   {
-    smoke3d *smoke3di;
+    smoke3ddata *smoke3di;
 
     if(Read3DSmoke3DFile==1&&vis3DSmoke3D==1){
       for(i=0;i<nsmoke3dinfo;i++){
@@ -1112,7 +1112,7 @@ void updatetimes(void){
     }
   }
   {
-    smoke3d *smoke3di;
+    smoke3ddata *smoke3di;
 
     if(Read3DSmoke3DFile==1&&vis3DSmoke3D==1){
       for(i=0;i<nsmoke3dinfo;i++){
@@ -1251,7 +1251,7 @@ void updatetimes(void){
     }
   }
   {
-    smoke3d *smoke3di;
+    smoke3ddata *smoke3di;
 
     for(i=0;i<nsmoke3dinfo;i++){
       smoke3di = smoke3dinfo + i;
@@ -1387,7 +1387,7 @@ void updatetimes(void){
   /* determine state of each device at each time step */
 
   for(i=0;i<ndeviceinfo;i++){
-    device *devicei;
+    devicedata *devicei;
 
     devicei = deviceinfo + i;
     if(devicei->object->visible==0)continue;
@@ -1450,7 +1450,7 @@ void updatetimes(void){
 
 int getplotstate(int choice){
   int i;
-  plot3d *ploti;
+  plot3ddata *ploti;
   slicedata *slicei;
   vslicedata *vslicei;
   patchdata *patchi;
@@ -1458,7 +1458,7 @@ int getplotstate(int choice){
   targ *targi;
   isodata *isoi;
   zonedata *zonei;
-  smoke3d *smoke3di;
+  smoke3ddata *smoke3di;
   tourdata *touri;
   int ii;
 

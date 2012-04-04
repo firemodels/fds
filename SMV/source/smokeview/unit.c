@@ -80,7 +80,7 @@ void set_unit_vis(void){
     if(uci->visible==1)continue;
 
     for(j=0;j<nplot3dinfo;j++){
-      plot3d *plot3dj;
+      plot3ddata *plot3dj;
       int n;
       
       plot3dj = plot3dinfo + j;
@@ -169,7 +169,7 @@ void init_unit_defs(void){
     }
   }
   for(j=0;j<nplot3dinfo;j++){
-    plot3d *plot3dj;
+    plot3ddata *plot3dj;
     int n;
       
     plot3dj = plot3dinfo + j;
@@ -231,7 +231,7 @@ void update_unit_defs(void){
 
     firstplot3d=1;
     for(j=0;j<nplot3dinfo;j++){
-      plot3d *plot3dj;
+      plot3ddata *plot3dj;
       int n;
       
       plot3dj = plot3dinfo + j;

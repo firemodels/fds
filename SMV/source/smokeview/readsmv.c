@@ -241,7 +241,7 @@ void readsmv_dynamic(char *file){
     int n;
 
     for(i=0;i<nplot3dinfo;i++){
-      plot3d *plot3di;
+      plot3ddata *plot3di;
 
       plot3di = plot3dinfo + i;
       for(n=0;n<6;n++){
@@ -280,7 +280,7 @@ void readsmv_dynamic(char *file){
     }
   }
   for(i=ndeviceinfo_exp;i<ndeviceinfo;i++){
-    device *devicei;
+    devicedata *devicei;
 
     devicei = deviceinfo + i;
     devicei->nstate_changes=0;
@@ -405,7 +405,7 @@ void readsmv_dynamic(char *file){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"DEVICE_ACT") == 1){
-      device *devicei;
+      devicedata *devicei;
       int idevice;
       float act_time;
       int act_state;
@@ -450,7 +450,7 @@ void readsmv_dynamic(char *file){
 
         meshi->theat[nn-1]=time_local;
         for(idev=0;idev<ndeviceinfo;idev++){
-          device *devicei;
+          devicedata *devicei;
 
           devicei = deviceinfo + idev;
           if(devicei->type==DEVICE_HEAT){
@@ -493,7 +493,7 @@ void readsmv_dynamic(char *file){
         meshi->tspr[nn-1]=time_local;
 
         for(idev=0;idev<ndeviceinfo;idev++){
-          device *devicei;
+          devicedata *devicei;
 
           devicei = deviceinfo + idev;
           if(devicei->type==DEVICE_SPRK){
@@ -519,7 +519,7 @@ void readsmv_dynamic(char *file){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %f",&nn,&time_local);
       for(idev=0;idev<ndeviceinfo;idev++){
-        device *devicei;
+        devicedata *devicei;
 
         devicei = deviceinfo + idev;
         if(devicei->type==DEVICE_SMOKE){
@@ -572,14 +572,14 @@ void readsmv_dynamic(char *file){
   }
   if(nplot3dinfo>0){
     if(plot3dinfo==NULL){
-      NewMemory((void **)&plot3dinfo,nplot3dinfo*sizeof(plot3d));
+      NewMemory((void **)&plot3dinfo,nplot3dinfo*sizeof(plot3ddata));
     }
     else{
-      ResizeMemory((void **)&plot3dinfo,nplot3dinfo*sizeof(plot3d));
+      ResizeMemory((void **)&plot3dinfo,nplot3dinfo*sizeof(plot3ddata));
     }
   }
   for(i=0;i<ndeviceinfo;i++){
-    device *devicei;
+    devicedata *devicei;
 
     devicei = deviceinfo + i;
     devicei->istate_changes=0;
@@ -608,7 +608,7 @@ void readsmv_dynamic(char *file){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"PL3D") == 1){
-      plot3d *plot3di;
+      plot3ddata *plot3di;
       int len,blocknumber,blocktemp;
       char *bufferptr;
 
@@ -852,7 +852,7 @@ void readsmv_dynamic(char *file){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"DEVICE_ACT") == 1){
-      device *devicei;
+      devicedata *devicei;
       int idevice;
       float act_time;
       int act_state=1;
@@ -913,7 +913,7 @@ void readsmv_dynamic(char *file){
       }
 
       for(i=0;i<nplot3dinfo;i++){
-        plot3d *plot3di;
+        plot3ddata *plot3di;
 
         plot3di = plot3dinfo + i;
         if(strcmp(file_ptr,plot3di->file)==0){
@@ -935,7 +935,7 @@ void readsmv_dynamic(char *file){
 
 /* ------------------ parse_device_keyword ------------------------ */
 
-void parse_device_keyword(FILE *stream, device *devicei){
+void parse_device_keyword(FILE *stream, devicedata *devicei){
   float xyz[3]={0.0,0.0,0.0}, xyzn[3]={0.0,0.0,0.0};
   int state0=0;
   int nparams=0, nparams_textures=0;
@@ -1373,7 +1373,7 @@ int readsmv(char *file, char *file2){
 /* read the .smv file */
 
   int unit_start=20;
-  device *devicecopy;
+  devicedata *devicecopy;
   int do_pass4=0;
   outline *outlinei;
   int roomdefined=0;
@@ -1612,7 +1612,7 @@ int readsmv(char *file, char *file2){
 
   if(nsmoke3dinfo>0){
     {
-      smoke3d *smoke3di;
+      smoke3ddata *smoke3di;
 
       for(i=0;i<nsmoke3dinfo;i++){
         smoke3di = smoke3dinfo + i;
@@ -2299,7 +2299,7 @@ int readsmv(char *file, char *file2){
        
   }
   if(nsmoke3dinfo>0){
-    if(NewMemory( (void **)&smoke3dinfo, nsmoke3dinfo*sizeof(smoke3d))==0)return 2;
+    if(NewMemory( (void **)&smoke3dinfo, nsmoke3dinfo*sizeof(smoke3ddata))==0)return 2;
   }
 
   FREEMEMORY(patchinfo);
@@ -3159,7 +3159,7 @@ int readsmv(char *file, char *file2){
       len=strlen(buffer);
       lenbuffer=len;
       {
-        smoke3d *smoke3di;
+        smoke3ddata *smoke3di;
         
         smoke3di = smoke3dinfo + ismoke3d;
     
@@ -3623,7 +3623,7 @@ int readsmv(char *file, char *file2){
   }
 
   if(ndeviceinfo>0){
-    if(NewMemory((void **)&deviceinfo,ndeviceinfo*sizeof(device))==0)return 2;
+    if(NewMemory((void **)&deviceinfo,ndeviceinfo*sizeof(devicedata))==0)return 2;
     devicecopy=deviceinfo;;
   }
   ndeviceinfo=0;
@@ -3667,7 +3667,7 @@ int readsmv(char *file, char *file2){
       (match(buffer,"DEVICE") == 1)&&
       (match(buffer,"DEVICE_ACT") != 1)
       ){
-      device *devicei;
+      devicedata *devicei;
 
       devicei = deviceinfo + ndeviceinfo;
       parse_device_keyword(stream,devicei);
@@ -3953,7 +3953,7 @@ int readsmv(char *file, char *file2){
   
   if(ncsvinfo>0){
     int *nexp_devices=NULL;
-    device *devicecopy2;
+    devicedata *devicecopy2;
 
     NewMemory((void **)&nexp_devices,ncsvinfo*sizeof(int));
     for(i=0;i<ncsvinfo;i++){
@@ -3967,11 +3967,11 @@ int readsmv(char *file, char *file2){
     }
     if(ndeviceinfo>0){
       if(ndeviceinfo_exp>0){
-        ResizeMemory((void **)&deviceinfo,(ndeviceinfo_exp+ndeviceinfo)*sizeof(device));
+        ResizeMemory((void **)&deviceinfo,(ndeviceinfo_exp+ndeviceinfo)*sizeof(devicedata));
       }
     }
     else{
-      if(ndeviceinfo_exp>0)NewMemory((void **)&deviceinfo,ndeviceinfo_exp*sizeof(device));
+      if(ndeviceinfo_exp>0)NewMemory((void **)&deviceinfo,ndeviceinfo_exp*sizeof(devicedata));
     }
     devicecopy2 = deviceinfo+ndeviceinfo;
     ndeviceinfo+=ndeviceinfo_exp;
@@ -6357,7 +6357,7 @@ typedef struct {
 
   active_smokesensors=0;
   for(i=0;i<ndeviceinfo;i++){
-    device *devicei;
+    devicedata *devicei;
     char *label;
 
     devicei = deviceinfo + i;

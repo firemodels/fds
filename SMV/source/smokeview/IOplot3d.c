@@ -25,7 +25,7 @@ void update_glui_plot3d(void);
 /* ------------------ plot3dcompare  ------------------------ */
 
 int plot3dcompare( const void *arg1, const void *arg2 ){
-  plot3d *plot3di, *plot3dj;
+  plot3ddata *plot3di, *plot3dj;
 
   plot3di = plot3dinfo + *(int *)arg1;
   plot3dj = plot3dinfo + *(int *)arg2;
@@ -62,7 +62,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
   int error;
   int ibar,jbar,kbar;
   mesh *meshi,*gbb,*gbi;
-  plot3d *p;
+  plot3ddata *p;
   int nloaded=0;
   int nx, ny, nz;
   int pn;
@@ -429,7 +429,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
 
 void update_plot3dtitle(void){
   int filenum;
-  plot3d *plot3di;
+  plot3ddata *plot3di;
   mesh *meshi;
 
   STRCPY(FULLTITLE,TITLEBASE);
@@ -1382,7 +1382,7 @@ void updatesurface(void){
 
 void updateallplotslices(void){
   int i;
-  plot3d *p;
+  plot3ddata *p;
   mesh *gbsave;
   gbsave=current_mesh;
   for(i=0;i<nplot3dinfo;i++){
@@ -1967,7 +1967,7 @@ void drawgrid(const mesh *meshi){
 
 void updateplot3dmenulabels(void){
   int i;
-  plot3d *plot3di;
+  plot3ddata *plot3di;
   char label[128];
 
   if(nplot3dinfo>0){
@@ -2024,7 +2024,7 @@ int plot3dlistcompare( const void *arg1, const void *arg2 ){
 
 void init_plot3dtimelist(void){
   int i;
-  plot3d *plot3di;
+  plot3ddata *plot3di;
   float lasttime_local,val;
 
   FREEMEMORY(plot3dtimelist);
@@ -2127,7 +2127,7 @@ int getplot3dtime(float *time_local){
   int i;
 
   for(i=0;i<nplot3dinfo;i++){
-    plot3d *plot3di;
+    plot3ddata *plot3di;
 
     plot3di = plot3dinfo + i;
     if(plot3di->loaded==0||plot3di->display==0)continue;

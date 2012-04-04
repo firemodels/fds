@@ -226,7 +226,7 @@ void mouse_select_device(int button, int state, int x, int y){
   val = (r << (nbluebits+ngreenbits)) | (g << nbluebits) | b;
   
   if(val>0){
-    device *devicei;
+    devicedata *devicei;
     float *xyz;
 
     selected_device_tag=val;
@@ -1329,7 +1329,7 @@ void keyboard_2(unsigned char key, int x, int y){
 
         for(i=0;i<nmeshes;i++){
           mesh *meshi;
-          plot3d *plot3di;
+          plot3ddata *plot3di;
           float *xp, *yp, *zp;
 
           meshi = meshinfo  + i;

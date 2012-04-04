@@ -513,7 +513,7 @@ void ShadeMenu(int value){
 /* ------------------ Smoke3DShowMenu ------------------------ */
 
 void Smoke3DShowMenu(int value){
-  smoke3d *smoke3di;
+  smoke3ddata *smoke3di;
   int i;
 
   updatemenu=1;  
@@ -3285,7 +3285,7 @@ void LoadVolSmoke3DMenu(int value){
 void UnLoadSmoke3DMenu(int value){
   int errorcode;
   int i;
-  smoke3d *smoke3di;
+  smoke3ddata *smoke3di;
 
   if(value==999)return;
   updatemenu=1;
@@ -3307,7 +3307,7 @@ void UnLoadSmoke3DMenu(int value){
 
 void LoadSmoke3DMenu(int value){
   int i,errorcode;
-  smoke3d *smoke3di, *smoke3dj;
+  smoke3ddata *smoke3di, *smoke3dj;
 
   glutSetCursor(GLUT_CURSOR_WAIT);
   if(value>=0){
@@ -3389,7 +3389,7 @@ void HideAllSlices(void){
 void ShowAllSmoke(void){
   int i;
   for(i=0;i<nsmoke3dinfo;i++){
-    smoke3d *smoke3di;
+    smoke3ddata *smoke3di;
 
     smoke3di = smoke3dinfo + i;
     if(smoke3di->loaded==1)smoke3di->display=1;
@@ -3407,7 +3407,7 @@ void ShowAllSmoke(void){
 void HideAllSmoke(void){
   int i;
   for(i=0;i<nsmoke3dinfo;i++){
-    smoke3d *smoke3di;
+    smoke3ddata *smoke3di;
 
     smoke3di = smoke3dinfo + i;
     if(smoke3di->loaded==1)smoke3di->display=0;
@@ -3636,7 +3636,7 @@ void LoadMultiSliceMenu(int value){
 
 void Plot3DListMenu(int value){
   int i;
-  plot3d *plot3di;
+  plot3ddata *plot3di;
 
   if(value<0||value>=nplot3dtimelist)return;
   LoadPlot3dMenu(-1);
@@ -4460,7 +4460,7 @@ updatemenu=0;
 
   nsmoke3dloaded=0;
   for(i=0;i<nsmoke3dinfo;i++){
-    smoke3d *smoke3di;
+    smoke3ddata *smoke3di;
 
     smoke3di=smoke3dinfo+i;
     if(smoke3di->loaded==1)nsmoke3dloaded++;
@@ -4555,7 +4555,7 @@ updatemenu=0;
 
   nplot3dloaded=0;
   for(i=0;i<nplot3dinfo;i++){
-    plot3d *plot3di;
+    plot3ddata *plot3di;
 
     plot3di = plot3dinfo + i;
     if(plot3di->loaded==1)nplot3dloaded++;
@@ -5069,7 +5069,7 @@ updatemenu=0;
     CREATEMENU(plot3dshowmenu,Plot3DShowMenu);
     if(nplot3dloaded>0){
       for(ii=0;ii<nplot3dinfo;ii++){
-        plot3d *plot3di;
+        plot3ddata *plot3di;
 
         i=plot3dorderindex[ii];
         plot3di = plot3dinfo + i;
@@ -5287,7 +5287,7 @@ updatemenu=0;
       obj_typei->used_by_device=0;
     }
     for(i=0;i<ndeviceinfo;i++){
-      device *devicei;
+      devicedata *devicei;
       propdata *propi;
       int jj;
 
@@ -5982,7 +5982,7 @@ updatemenu=0;
       if(nsmoke3dloaded>0){
         CREATEMENU(smoke3dshowmenu,Smoke3DShowMenu);
         for(i=0;i<nsmoke3dinfo;i++){
-          smoke3d *smoke3di;
+          smoke3ddata *smoke3di;
 
           smoke3di = smoke3dinfo + i;
           if(smoke3di->loaded==0)continue;
@@ -7879,7 +7879,7 @@ updatemenu=0;
     /* --------------------------------unload and load 3d smoke menus -------------------------- */
 
     {
-      smoke3d *smoke3di;
+      smoke3ddata *smoke3di;
       if(nsmoke3dloaded>0){
         CREATEMENU(unloadsmoke3dmenu,UnLoadSmoke3DMenu);
         {
@@ -7916,7 +7916,7 @@ updatemenu=0;
       }
     }
     {
-      smoke3d *smoke3di;
+      smoke3ddata *smoke3di;
       int n_soot_menu=0, n_hrr_menu=0, n_water_menu=0;
 
       if(nsmoke3dinfo>0){
@@ -7970,7 +7970,7 @@ updatemenu=0;
         }
         {
           int useitem;
-          smoke3d *smoke3dj;
+          smoke3ddata *smoke3dj;
 
           if(nmeshes>1){
             for(i=0;i<nsmoke3dinfo;i++){
@@ -8006,7 +8006,7 @@ updatemenu=0;
 /* --------------------------------plot3d menu -------------------------- */
 
     if(nplot3dinfo>0){
-      plot3d *plot3dim1, *plot3di;
+      plot3ddata *plot3dim1, *plot3di;
 
       CREATEMENU(unloadplot3dmenu,UnloadPlot3dMenu);
       for(ii=0;ii<nplot3dinfo;ii++){

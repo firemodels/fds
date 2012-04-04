@@ -1029,7 +1029,7 @@ void script_load3dsmoke(scriptdata *scripti){
   printf("\n");
 
   for(i=0;i<nsmoke3dinfo;i++){
-    smoke3d *smoke3di;
+    smoke3ddata *smoke3di;
 
     smoke3di = smoke3dinfo + i;
     if(match_upper(smoke3di->label.longlabel,scripti->cval)==1){
@@ -1350,7 +1350,7 @@ void script_loadfile(scriptdata *scripti){
     }
   }
   for(i=0;i<nsmoke3dinfo;i++){
-    smoke3d *smoke3di;
+    smoke3ddata *smoke3di;
 
     smoke3di = smoke3dinfo + i;
     if(strcmp(smoke3di->file,scripti->cval)==0){
@@ -1368,7 +1368,7 @@ void script_loadfile(scriptdata *scripti){
     }
   }
   for(i=0;i<nplot3dinfo;i++){
-    plot3d *plot3di;
+    plot3ddata *plot3di;
 
     plot3di = plot3dinfo + i;
     if(strcmp(plot3di->file,scripti->cval)==0){
@@ -1395,7 +1395,7 @@ void script_loadplot3d(scriptdata *scripti){
   blocknum = scripti->ival-1;
 
   for(i=0;i<nplot3dinfo;i++){
-    plot3d *plot3di;
+    plot3ddata *plot3di;
 
     plot3di = plot3dinfo + i;
     if(plot3di->blocknumber==blocknum&&ABS(plot3di->time-time_local)<0.5){

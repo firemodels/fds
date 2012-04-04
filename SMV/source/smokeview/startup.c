@@ -624,7 +624,7 @@ void InitOpenGL(void){
       }
     }
     for(i=0;i<nplot3dinfo;i++){
-      plot3d *plot3di;
+      plot3ddata *plot3di;
 
       plot3di = plot3dinfo + i;
 
@@ -636,7 +636,7 @@ void InitOpenGL(void){
       }
     }
     for(i=0;i<nsmoke3dinfo;i++){
-      smoke3d *smoke3di;
+      smoke3ddata *smoke3di;
 
       smoke3di = smoke3dinfo + i;
 
@@ -707,7 +707,7 @@ void InitOpenGL(void){
     }
 
     for(i=0;i<nplot3dinfo;i++){
-      plot3d *plot3di;
+      plot3ddata *plot3di;
 
       plot3di = plot3dinfo + i;
 
@@ -715,7 +715,7 @@ void InitOpenGL(void){
     }
 
     for(i=0;i<nsmoke3dinfo;i++){
-      smoke3d *smoke3di;
+      smoke3ddata *smoke3di;
 
       smoke3di = smoke3dinfo + i;
 
@@ -781,7 +781,7 @@ void InitOpenGL(void){
 
    nstartup=0;
    for(i=0;i<nplot3dinfo;i++){
-      plot3d *plot3di;
+      plot3ddata *plot3di;
 
       plot3di = plot3dinfo + i;
 
@@ -791,7 +791,7 @@ void InitOpenGL(void){
      fprintf(fileout,"PLOT3DAUTO\n");
      fprintf(fileout," %i \n",nstartup);
      for(i=0;i<nplot3dinfo;i++){
-        plot3d *plot3di;
+        plot3ddata *plot3di;
 
         plot3di = plot3dinfo + i;
 
@@ -889,7 +889,7 @@ void InitOpenGL(void){
 
    nstartup=0;
    for(i=0;i<nsmoke3dinfo;i++){
-      smoke3d *smoke3di;
+      smoke3ddata *smoke3di;
 
       smoke3di = smoke3dinfo + i;
 
@@ -899,7 +899,7 @@ void InitOpenGL(void){
      fprintf(fileout,"S3DAUTO\n");
      fprintf(fileout," %i \n",nstartup);
      for(i=0;i<nsmoke3dinfo;i++){
-        smoke3d *smoke3di;
+        smoke3ddata *smoke3di;
 
         smoke3di = smoke3dinfo + i;
 
@@ -952,7 +952,7 @@ void InitOpenGL(void){
   void get_startup_plot3d(int seq_id){
     int i;
     for(i=0;i<nplot3dinfo;i++){
-      plot3d *plot3di;
+      plot3ddata *plot3di;
 
       plot3di = plot3dinfo + i;
       if(plot3di->seq_id==seq_id){
@@ -982,7 +982,7 @@ void InitOpenGL(void){
   void get_startup_smoke(int seq_id){
     int i;
     for(i=0;i<nsmoke3dinfo;i++){
-      smoke3d *smoke3di;
+      smoke3ddata *smoke3di;
 
       smoke3di = smoke3dinfo + i;
 
@@ -1050,7 +1050,7 @@ void InitOpenGL(void){
 
 //    show_glui_alert();
     for(i=0;i<nplot3dinfo;i++){
-      plot3d *plot3di;
+      plot3ddata *plot3di;
 
       plot3di = plot3dinfo + i;
       if(plot3di->autoload==0&&plot3di->loaded==1){
@@ -1110,7 +1110,7 @@ void InitOpenGL(void){
       if(terri->autoload==1&&terri->loaded==0)readslice(terri->file,i,LOAD,&errorcode);
     }
     for(i=0;i<nsmoke3dinfo;i++){
-      smoke3d *smoke3di;
+      smoke3ddata *smoke3di;
 
       smoke3di = smoke3dinfo + i;
       if(smoke3di->autoload==0&&smoke3di->loaded==1)readsmoke3d(i,UNLOAD,&errorcode);

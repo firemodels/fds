@@ -349,8 +349,8 @@ extern "C" void update_fileload(void){
   slicedata *slicei;
   isodata *isoi;
   patchdata *patchi;
-  smoke3d *smoke3di;
-  plot3d *plot3di;
+  smoke3ddata *smoke3di;
+  plot3ddata *plot3di;
   vslicedata *vslicei;
 
   npartloaded=0;

@@ -477,7 +477,7 @@ int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
     int idev;
 
     for(idev=0;idev<ndeviceinfo;idev++){
-      device *devicei;
+      devicedata *devicei;
       int idev_col, idev_row;
       int col_offset, row_offset;
       unsigned int red=255<<16;

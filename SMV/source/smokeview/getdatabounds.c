@@ -336,7 +336,7 @@ void adjustPlot3Dbounds(int plot3dvar, int setpmin, float *pmin, int setpmax, fl
 {
     int nsmall, nbig, *buckets=NULL, n, level, total, alpha05;
     float dp, pmin2, pmax2;
-    plot3d *p;
+    plot3ddata *p;
     mesh *meshi;
     int i;
     char *iblank;

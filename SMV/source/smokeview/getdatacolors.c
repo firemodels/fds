@@ -914,7 +914,7 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
   int itt;
   float *q;
   unsigned char *iq;
-  plot3d *p;
+  plot3ddata *p;
   mesh *meshi;
   char *iblank;
   int i;

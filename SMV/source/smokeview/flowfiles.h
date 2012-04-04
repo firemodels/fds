@@ -601,7 +601,7 @@ typedef struct _mesh {
   struct _culldata *cullinfo;
   GLuint *cullQueryId;
   int culldefined;
-  struct _smoke3d *cull_smoke3d;
+  struct _smoke3ddata *cull_smoke3d;
 #endif
 
   volrenderdata volrenderinfo;
@@ -764,22 +764,22 @@ typedef struct _device{
   propdata *prop;
   sv_object *object;
   int type;
-} device;
+} devicedata;
 
 /* --------------------------  vdevice ------------------------------------ */
 
 typedef struct {
   int unique;
   int filetype;
-  device *udev,*vdev,*wdev,*valdev,*veldev,*angledev,*sd_veldev,*sd_angledev;
-} vdevice;
+  devicedata *udev,*vdev,*wdev,*valdev,*veldev,*angledev,*sd_veldev,*sd_angledev;
+} vdevicedata;
 
 /* --------------------------  treedevice ------------------------------------ */
 
 typedef struct {
   int nvdevices;
-  vdevice **vdevices;
-} treedevice;
+  vdevicedata **vdevices;
+} treedevicedata;
 
 /* --------------------------  camviewdata ------------------------------------ */
 
@@ -1098,7 +1098,7 @@ typedef struct {
 
 /* --------------------------  smoke3d ------------------------------------ */
 
-typedef struct _smoke3d {
+typedef struct _smoke3ddata {
   int seq_id,autoload;
   char *file;
   char *comp_file, *reg_file;
@@ -1129,7 +1129,7 @@ typedef struct _smoke3d {
   unsigned char *hrrpuv_color, *water_color, *soot_color;
   int hrrpuv_index, water_index, soot_index;
   int dir;
-} smoke3d;
+} smoke3ddata;
 
 /* --------------------------  patch ------------------------------------ */
 
@@ -1184,7 +1184,7 @@ typedef struct {
   int blocknumber,loaded,display;
   flowlabels label[6];
   char menulabel[256],longlabel[256];
-} plot3d;
+} plot3ddata;
 
 /* --------------------------  zone ------------------------------------ */
 
