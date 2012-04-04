@@ -423,12 +423,6 @@ DO NM=1,NMESHES
 ENDDO
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
  
-! Initialize output files containing global data (Master Node Only)
- 
-IF (MYID==0) CALL INITIALIZE_GLOBAL_DUMPS
-CALL INIT_EVAC_DUMPS
-CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
- 
 ! Initialize output files that are mesh-specific
  
 DO NM=1,NMESHES
@@ -440,6 +434,12 @@ DO NM=1,NMESHES
    CALL INITIALIZE_PROFILES(NM)
    CALL INITIALIZE_RAISED_VEG(NM)
 ENDDO
+CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
+
+! Initialize output files containing global data (Master Node Only)
+
+IF (MYID==0) CALL INITIALIZE_GLOBAL_DUMPS
+CALL INIT_EVAC_DUMPS
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 
 ! Initialize EVACuation routines

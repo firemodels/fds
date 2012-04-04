@@ -8264,16 +8264,17 @@ USE PHYSICAL_FUNCTIONS, ONLY: GET_SPECIFIC_GAS_CONSTANT
 USE COMP_FUNCTIONS, ONLY: GET_FILE_NUMBER
 USE DEVICE_VARIABLES, ONLY: DEVICE_TYPE, DEVICE, N_DEVC
 REAL(EB) :: TEMPERATURE,DENSITY,MASS_FRACTION(1:MAX_SPECIES),RR_SUM,ZZ_GET(0:N_TRACKED_SPECIES),MASS_PER_VOLUME, &
-            MASS_PER_TIME,DT_INSERT,UVW(3),HRRPUV,XYZ(3)
-INTEGER  :: N,NN,NNN,II,JJ,KK,NS,NS2,NUMBER_INITIAL_PARTICLES,N_INIT_NEW,N_INIT_READ
+            MASS_PER_TIME,DT_INSERT,UVW(3),HRRPUV,XYZ(3),DX,DY,DZ
+INTEGER  :: N,NN,NNN,II,JJ,KK,NS,NS2,NUMBER_INITIAL_PARTICLES,N_PARTICLES,N_INIT_NEW,N_INIT_READ
+EQUIVALENCE(NUMBER_INITIAL_PARTICLES,N_PARTICLES)
 LOGICAL  :: UNIFORM = .FALSE.
 CHARACTER(30) :: ID,CTRL_ID,DEVC_ID,PART_ID,SHAPE,MULT_ID,ORIGIN='CENTER',PROF_ID,SPEC_ID(1:MAX_SPECIES)
 TYPE(INITIALIZATION_TYPE), POINTER :: IN=>NULL()
 TYPE(MULTIPLIER_TYPE), POINTER :: MR=>NULL()
 TYPE(LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC=>NULL()
 TYPE(DEVICE_TYPE), POINTER :: DV
-NAMELIST /INIT/ CTRL_ID,DENSITY,DEVC_ID,DT_INSERT,HRRPUV,ID,MASS_FRACTION,MASS_PER_TIME,MASS_PER_VOLUME,MULT_ID,&
-                NUMBER_INITIAL_PARTICLES,ORIGIN,PART_ID,PROF_ID,SHAPE,SPEC_ID,TEMPERATURE,UNIFORM,UVW,XB,XYZ
+NAMELIST /INIT/ CTRL_ID,DENSITY,DEVC_ID,DT_INSERT,DX,DY,DZ,HRRPUV,ID,MASS_FRACTION,MASS_PER_TIME,MASS_PER_VOLUME,MULT_ID,&
+                N_PARTICLES,NUMBER_INITIAL_PARTICLES,ORIGIN,PART_ID,PROF_ID,SHAPE,SPEC_ID,TEMPERATURE,UNIFORM,UVW,XB,XYZ
 
 N_INIT = 0
 N_INIT_READ = 0
@@ -8317,13 +8318,16 @@ INIT_LOOP: DO N=1,N_INIT_READ
    DENSITY                   = -1000._EB
    DEVC_ID                   = 'null'
    DT_INSERT                 = -1._EB
+   DX                        =  0._EB
+   DY                        =  0._EB
+   DZ                        =  0._EB
    HRRPUV                    =  0._EB
    ID                        = 'null'
    MASS_FRACTION             =  0._EB
    MASS_PER_TIME             = -1._EB
    MASS_PER_VOLUME           = -1._EB
    MULT_ID                   = 'null'
-   NUMBER_INITIAL_PARTICLES  =  0
+   N_PARTICLES               =  0
    PART_ID                   = 'null'
    PROF_ID                   = 'null'
    SHAPE                     = 'BLOCK'
@@ -8389,6 +8393,9 @@ INIT_LOOP: DO N=1,N_INIT_READ
                IN%Z2 = XB(6) + MR%DZ0 + II*MR%DXB(6)
             ENDIF
 
+            IN%DX            = DX
+            IN%DY            = DY
+            IN%DZ            = DZ
             IN%ID            = ID
             IN%CTRL_ID       = CTRL_ID
             IN%DEVC_ID       = DEVC_ID
@@ -8453,9 +8460,9 @@ INIT_LOOP: DO N=1,N_INIT_READ
          
             ! Special case where INIT is used to introduce a block of particles
          
-            IN%MASS_PER_TIME            = MASS_PER_TIME
-            IN%MASS_PER_VOLUME          = MASS_PER_VOLUME
-            IN%NUMBER_INITIAL_PARTICLES = NUMBER_INITIAL_PARTICLES
+            IN%MASS_PER_TIME   = MASS_PER_TIME
+            IN%MASS_PER_VOLUME = MASS_PER_VOLUME
+            IN%N_PARTICLES     = N_PARTICLES
 
             IF ( (IN%MASS_PER_TIME>0._EB .OR. IN%MASS_PER_VOLUME>0._EB) .AND. IN%VOLUME<=ZERO_P) THEN
                WRITE(MESSAGE,'(A,I4,A)') 'ERROR: INIT ',N,' XB has no volume'
@@ -8486,7 +8493,7 @@ INIT_LOOP: DO N=1,N_INIT_READ
                   CALL SHUTDOWN(MESSAGE)
                ENDIF
                LPC => LAGRANGIAN_PARTICLE_CLASS(IN%PART_INDEX)
-               IN%NUMBER_INITIAL_PARTICLES = NUMBER_INITIAL_PARTICLES*MAX(1,LPC%N_ORIENTATION)
+               IN%N_PARTICLES = N_PARTICLES*MAX(1,LPC%N_ORIENTATION)
                IF (IN%MASS_PER_TIME>0._EB .OR. IN%MASS_PER_VOLUME>0._EB) THEN
                   IF (LPC%DENSITY < 0._EB) THEN
                      WRITE(MESSAGE,'(A,A,A)') 'INIT ERROR: PARTicle class ',TRIM(LPC%ID), &
@@ -8707,7 +8714,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
 
    ! Error statement involving POINTS
 
-   IF (POINTS>1 .AND. ANY(XB<-1.E5_EB)) THEN
+   IF (POINTS>1 .AND. ANY(XB<-1.E5_EB) .AND. INIT_ID=='null') THEN
       WRITE(MESSAGE,'(A,A,A)')  'ERROR: DEVC ',TRIM(ID),' must have coordinates given in terms of XB'
       CALL SHUTDOWN(MESSAGE)
    ENDIF
@@ -8739,7 +8746,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
             XYZ(3) = XB(5) + (XB(6)-XB(5))/2._EB
          ENDIF
       ELSE
-         IF (XYZ(1) < -1.E5_EB .AND. DUCT_ID=='null' .AND. NODE_ID(1)=='null') THEN
+         IF (XYZ(1) < -1.E5_EB .AND. DUCT_ID=='null' .AND. NODE_ID(1)=='null' .AND. INIT_ID=='null') THEN
             WRITE(MESSAGE,'(A,A,A)')  'ERROR: DEVC ',TRIM(ID),' must have coordinates, even if it is not a point quantity'
             CALL SHUTDOWN(MESSAGE)
          ENDIF
@@ -8763,6 +8770,9 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
             EXIT MESH_LOOP
          ENDIF
       ENDDO MESH_LOOP
+
+      ! Process EVAC meshes
+
       EVACUATION_MESH_LOOP: DO NM=1,NMESHES
          IF (.NOT.EVACUATION_ONLY(NM)) CYCLE EVACUATION_MESH_LOOP
          M=>MESHES(NM)
@@ -8782,7 +8792,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
       ENDIF
    
       IF (BAD) THEN
-         IF (DUCT_ID/='null' .OR. NODE_ID(1)/='null') THEN
+         IF (DUCT_ID/='null' .OR. NODE_ID(1)/='null' .OR. INIT_ID/='null') THEN
             XYZ(1) = MESHES(1)%XS
             XYZ(2) = MESHES(1)%YS
             XYZ(3) = MESHES(1)%ZS
