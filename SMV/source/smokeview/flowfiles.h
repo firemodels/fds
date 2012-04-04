@@ -1028,6 +1028,7 @@ typedef struct _slicedata {
 
 typedef struct {
   slicedata *co,*co2,*o2,*fed;
+  int co_index, co2_index, o2_index, fed_index;
   int loaded,display;
 } feddata;
 

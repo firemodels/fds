@@ -1083,21 +1083,21 @@ void update_slice_menu_show(void){
   int i;
 
   for(i=0;i<nsliceinfo;i++){
-	mesh *slicemesh;
+    mesh *slicemesh;
     slicedata *sd;
 
     sd = sliceinfo + i;
-	slicemesh = meshinfo + sd->blocknumber;
-	sd->menu_show=1;
-	if(show_evac_slices==0&&slicemesh->mesh_type!=0){
+    slicemesh = meshinfo + sd->blocknumber;
+    sd->menu_show=1;
+    if(show_evac_slices==0&&slicemesh->mesh_type!=0){
       sd->menu_show=0;
-	}
-	if(strcmp(sd->label.longlabel,"Direction")==0&&constant_evac_coloring==1){
+    }
+    if(strcmp(sd->label.longlabel,"Direction")==0&&constant_evac_coloring==1){
       sd->constant_color=direction_color_ptr;
-	}
-	else{
+    }
+    else{
       sd->constant_color=NULL;
-	}
+    }
   }
 }
 
@@ -1424,6 +1424,12 @@ void getsliceparams(void){
       sd->nslicei=ni;
       sd->nslicej=nj;
       sd->nslicek=nk;
+    }
+  }
+  update_fedinfo();
+  for(i=0;i<nsliceinfo;i++){
+    sd = sliceinfo + i;
+    if(error==0){
       sd->idir=-1;
       iblock = sd->blocknumber;
       meshi = meshinfo + iblock;
@@ -1646,80 +1652,125 @@ void update_fedinfo(void){
     fedi->co2=NULL;
     fedi->o2=NULL;
     fedi->fed=NULL;
+    fedi->co_index=-1;
+    fedi->co2_index=-1;
+    fedi->o2_index=-1;
+    fedi->fed_index=-1;
     fedi->loaded=0;
     fedi->display=0;
     if(strcmp(slicei->label.longlabel,"CARBON DIOXIDE VOLUME FRACTION")!=0)continue;
-    fedi->co2=slicei;
+    fedi->co2_index=i;
     for(j=0;j<nsliceinfo;j++){
       slicedata *slicej;
 
       slicej = sliceinfo + j;
       if(strcmp(slicej->label.longlabel,"CARBON MONOXIDE VOLUME FRACTION")!=0)continue;
-	  if(slicei->is1!=slicej->is1||slicei->is2!=slicej->is2)continue;
-	  if(slicei->js1!=slicej->js1||slicei->js2!=slicej->js2)continue;
-	  if(slicei->ks1!=slicej->ks1||slicei->ks2!=slicej->ks2)continue; // skip if not the same size
-      fedi->co=sliceinfo + j;
-	  break;
+      if(slicei->is1!=slicej->is1||slicei->is2!=slicej->is2)continue;
+      if(slicei->js1!=slicej->js1||slicei->js2!=slicej->js2)continue;
+      if(slicei->ks1!=slicej->ks1||slicei->ks2!=slicej->ks2)continue; // skip if not the same size
+      fedi->co_index=j;
+      break;
     }
-	if(fedi->co==NULL)continue;
+    if(fedi->co_index==-1)continue;
     for(j=0;j<nsliceinfo;j++){
       slicedata *slicej;
 
       slicej = sliceinfo + j;
       if(strcmp(slicej->label.longlabel,"OXYGEN VOLUME FRACTION")!=0)continue;
-	  if(slicei->is1!=slicej->is1||slicei->is2!=slicej->is2)continue;
-	  if(slicei->js1!=slicej->js1||slicei->js2!=slicej->js2)continue;
-	  if(slicei->ks1!=slicej->ks1||slicei->ks2!=slicej->ks2)continue; // skip if not the same size
-      fedi->o2=sliceinfo + j;
-	  break;
+      if(slicei->is1!=slicej->is1||slicei->is2!=slicej->is2)continue;
+      if(slicei->js1!=slicej->js1||slicei->js2!=slicej->js2)continue;
+      if(slicei->ks1!=slicej->ks1||slicei->ks2!=slicej->ks2)continue; // skip if not the same size
+      fedi->o2_index=j;
+      break;
     }
-	if(fedi->co==NULL)continue;
+    if(fedi->o2_index==-1)continue;
+    fedi->fed_index=nsliceinfo+nfedinfo;
     nfedinfo++;
   }
   if(nfedinfo==0){
     FREEMEMORY(fedinfo);
-	return;
+    return;
   }
   else{
+    nsliceinfo+=nfedinfo;
     ResizeMemory((void **)&fedinfo,nfedinfo*sizeof(feddata));
-    ResizeMemory((void **)&sliceinfo,(nsliceinfo+nfedinfo)*sizeof(slicedata));
+    ResizeMemory((void **)&sliceinfo,nsliceinfo*sizeof(slicedata));
+    ResizeMemory( (void **)&vsliceinfo, 3*nsliceinfo*sizeof(vslicedata));
+    ResizeMemory( (void **)&sliceinfo,  nsliceinfo*sizeof(slicedata));
+    ResizeMemory( (void **)&fedinfo,  nsliceinfo*sizeof(feddata));
+    ResizeMemory( (void **)&slicetypes, nsliceinfo*sizeof(int));
+    ResizeMemory( (void **)&slice_loadstack, nsliceinfo*sizeof(int));
+    ResizeMemory( (void **)&vslice_loadstack, nsliceinfo*sizeof(int));
+    ResizeMemory( (void **)&subslice_menuindex, nsliceinfo*sizeof(int));
+    ResizeMemory( (void **)&subvslice_menuindex, nsliceinfo*sizeof(int));
+    ResizeMemory( (void **)&mslice_loadstack, nsliceinfo*sizeof(int));
+    ResizeMemory( (void **)&mvslice_loadstack, nsliceinfo*sizeof(int));
+    ResizeMemory( (void **)&vslicetypes,3*nsliceinfo*sizeof(int));
   }
-  for(i=0;i<nfedinfo;i++){
-    slicedata *slicei;
+  for(i=0;i<nfedinfo;i++){ // define sliceinfo for fed slices
+    slicedata *sd;
     char *flowlabel;
     char label[256];
     int len;
     slicedata *co2;
+    int terrain=0, cellcenter=0, fire_line=0;
+    float above_ground_level=0.0;
+    char *slicelabelptr, slicelabel[256];
+    int has_reg, has_comp;
+    int nn_slice;
+    feddata *fedi;
 
-    slicei = sliceinfo + nsliceinfo + i;
+    sd = sliceinfo + nsliceinfo + (i- nfedinfo);
+    fedi = fedinfo + i;
+    fedi->co=sliceinfo+fedi->co_index;
+    fedi->o2=sliceinfo+fedi->o2_index;
+    fedi->co2=sliceinfo+fedi->co2_index;
+    fedi->fed=sliceinfo+fedi->fed_index;
 
-    flowlabel = slicei->label.longlabel;
-    strcpy(label,"Fractional effective dose");
-    len=strlen(label);
-    NewMemory((void **)&flowlabel,len+1);
-    strcpy(flowlabel,label);
+    setlabels(&(sd->label),"Fractional effective dose","FED"," ");
 
-    flowlabel = slicei->label.shortlabel;
-    strcpy(label,"FED");
-    len=strlen(label);
-    NewMemory((void **)&flowlabel,len+1);
-    strcpy(flowlabel,label);
+    co2 = fedi->co2;
+    sd->is1=co2->is1;
+    sd->is2=co2->is2;
+    sd->js1=co2->js1;
+    sd->js2=co2->js2;
+    sd->ks1=co2->ks1;
+    sd->ks2=co2->ks2;
 
-    flowlabel = slicei->label.unit;
-    strcpy(label," ");
-    len=strlen(label);
-    NewMemory((void **)&flowlabel,len+1);
-    strcpy(flowlabel,label);
+    nn_slice=nsliceinfo+i;
 
-    co2 = fedinfo[i].co2;
-    slicei->is1=co2->is1;
-    slicei->is2=co2->is2;
-    slicei->js1=co2->js1;
-    slicei->js2=co2->js2;
-    slicei->ks1=co2->ks1;
-    slicei->ks2=co2->ks2;
-
-
+    sd->slicetype=co2->slicetype;
+    sd->reg_file=NULL;
+    sd->comp_file=NULL;
+    sd->compression_type=co2->compression_type;
+    sd->vol_file=co2->vol_file;
+    sd->size_file=NULL;
+    sd->slicelabel=NULL;
+    sd->above_ground_level=co2->above_ground_level;
+    sd->seq_id=nn_slice;
+    sd->autoload=0;
+    sd->display=0;
+    sd->loaded=0;
+    sd->qslicedata=NULL;
+    sd->compindex=NULL;
+    sd->slicecomplevel=NULL;
+    sd->qslicedata_compressed=NULL;
+    sd->volslice=0;
+    sd->times=NULL;
+    sd->slicelevel=NULL;
+    sd->slicepoint=NULL;
+    sd->slicedata=NULL;
+    sd->timeslist=NULL;
+    sd->c_iblank=NULL;
+    sd->n_iblank=NULL;
+    sd->blocknumber=co2->blocknumber;
+    sd->vloaded=0;
+    sd->reload=0;
+    sd->nline_contours=0;
+    sd->line_contours=NULL;
+    sd->menu_show=1;
+    sd->constant_color=NULL;
+    sd->mesh_type=co2->mesh_type;
   }
 }
 
@@ -1735,8 +1786,6 @@ void updatevslices(void){
 
   printf("  updating vector slices\n");
   getsliceparams();
-
-  update_fedinfo();
 
   /* update vector slices */
 
