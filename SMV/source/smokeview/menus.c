@@ -2299,9 +2299,12 @@ void LoadUnloadMenu(int value){
       }
     }
     for(ii=0;ii<nslice_loaded;ii++){
-      i = slice_loaded_list[ii];
-      if(sliceinfo[i].reload==1){
-        readslice(sliceinfo[i].file,i,LOAD,&errorcode);
+      slicedata *slicei;
+
+
+      slicei = sliceinfo + slice_loaded_list[ii];
+      if(slicei->reload==1){
+        readslice(slicei->file,i,LOAD,&errorcode);
       }
     }
     islicetype=islicetype_save;
@@ -3529,7 +3532,12 @@ void LoadSliceMenu(int value){
       fprintf(scriptoutstream,"LOADFILE\n");
       fprintf(scriptoutstream," %s\n",file);
     }
-    readslice(file,value,LOAD,&errorcode);
+    if(value<nsliceinfo-nfedinfo){
+      readslice(file,value,LOAD,&errorcode);
+    }
+    else{
+      readfslice(value-(nsliceinfo-nfedinfo),LOAD,&errorcode);
+    }
   }
   else{
     if(value==-1){

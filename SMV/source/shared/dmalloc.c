@@ -408,9 +408,9 @@ static blockinfo *GetBlockInfo(bbyte *pb){
   return (pbi);
 }
 
-/* ------------------ GetMemoryInfo ------------------------ */
+/* ------------------ CountMemoryBlocks ------------------------ */
 
-int _GGetMemoryInfo(void){
+int _CountMemoryBlocks(void){
   blockinfo *pbi;
   int n=0;
 

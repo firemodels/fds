@@ -5433,6 +5433,7 @@ typedef struct {
         NewMemory((void **)&sd->slicelabel,lenslicelabel);
         strcpy(sd->slicelabel,slicelabel);
       }
+      sd->fed=0;
       sd->above_ground_level=above_ground_level;
       sd->seq_id=nn_slice;
       sd->autoload=0;
@@ -5983,6 +5984,7 @@ typedef struct {
  */
 
   update_isocolors();
+  updatevslices();
   if(arg_iblank==0){
     if(autoterrain==1){
       use_iblank=0;
@@ -6761,7 +6763,6 @@ typedef struct {
   }
   update_terrain(1,vertical_factor);
   update_terrain_colors();
-  updatevslices();
   updatesmoke3dmenulabels();
   updatevslicetypes();
   updatepatchmenulabels();

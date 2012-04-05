@@ -975,6 +975,7 @@ typedef struct _slicedata {
   int compression_type;
   int ncompressed;
   int slicetype;
+  int fed;
   int menu_show;
   float *constant_color;
   float qval256[256];

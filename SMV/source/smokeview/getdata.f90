@@ -557,6 +557,58 @@ endif
 return
 end subroutine getdirval
 
+!  ------------------ writeslicedata ------------------------ 
+
+subroutine writeslicedata(file_unit,slicefilename,is1,is2,js1,js2,ks1,ks2,qdata,times,ntimes)
+#ifdef pp_cvf
+#ifndef X64
+!DEC$ ATTRIBUTES ALIAS:'_writeslicedata@48' :: writeslicedata
+#endif
+#endif
+
+implicit none
+
+
+integer, intent(in) :: file_unit
+character(len=*),intent(in) :: slicefilename
+integer, intent(in) :: is1, is2, js1, js2, ks1, ks2
+real, intent(in), dimension(*) :: qdata
+real, intent(in), dimension(*) :: times
+integer, intent(in) :: ntimes
+
+logical :: connected
+integer :: error
+character(len=30) :: longlbl, shortlbl, unitlbl
+integer :: i,ii
+integer :: ibeg, iend, nframe
+
+inquire(unit=file_unit,opened=connected)
+if(connected)close(file_unit)
+
+open(unit=file_unit,file=trim(slicefilename),form="unformatted",action="write")
+
+longlbl=" "
+shortlbl=" "
+unitlbl=" "
+
+write(file_unit,iostat=error)longlbl
+write(file_unit,iostat=error)shortlbl
+write(file_unit,iostat=error)unitlbl
+
+write(file_unit,iostat=error)is1, is2, js1, js2, ks1, ks2
+nframe=(is2+1-is1)*(js2+1-js1)*(ks2+1-ks1)
+do i = 1, ntimes
+  write(file_unit)times(i)
+  ibeg=1+(i-1)*nframe
+  iend=i*nframe
+  write(file_unit)(qdata(ii),ii=ibeg,iend)
+end do
+
+close(file_unit)
+
+return
+end subroutine writeslicedata
+
 !  ------------------ getslicedata ------------------------ 
 
 subroutine getslicedata(file_unit,slicefilename,longlabel,shortlabel,units,&
