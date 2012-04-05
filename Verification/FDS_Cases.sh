@@ -19,6 +19,10 @@ $RUNFDS Energy_Budget energy_budget_cold_walls
 $RUNFDS Energy_Budget energy_budget_dns_100
 $RUNFDS Energy_Budget energy_budget_tmix
 
+$RUNFDS Evacuation evac_smv_testcase0
+$RUNFDS Evacuation evac_smv_testcase1
+$RUNFDS Evacuation evac_smv_testcase2
+
 $RUNFDS Fires box_burn_away1
 $RUNFDS Fires box_burn_away2
 $RUNFDS Fires box_burn_away3
@@ -35,6 +39,14 @@ $RUNFDS Flowfields sawtooth
 $RUNFDS Flowfields symmetry_test
 $RUNFDS Flowfields tangential_velocity
 
+$RUNFDS Heat_Transfer adiabatic_net_flux
+$RUNFDS Heat_Transfer heat_conduction_a
+$RUNFDS Heat_Transfer heat_conduction_b
+$RUNFDS Heat_Transfer heat_conduction_c
+$RUNFDS Heat_Transfer heat_conduction_d
+$RUNFDS Heat_Transfer heat_conduction_kc
+$RUNFDS Heat_Transfer insulated_steel_column
+
 $RUNFDS HVAC ashrae7_fixed_flow
 $RUNFDS HVAC ashrae7_quadratic
 $RUNFDS HVAC ashrae7_table
@@ -50,14 +62,6 @@ $RUNFDS HVAC HVAC_tee_loss_1
 $RUNFDS HVAC HVAC_tee_loss_2
 $RUNFDS HVAC HVAC_aircoil
 $RUNFDS HVAC HVAC_filter
-
-$RUNFDS Heat_Transfer adiabatic_net_flux
-$RUNFDS Heat_Transfer heat_conduction_a
-$RUNFDS Heat_Transfer heat_conduction_b
-$RUNFDS Heat_Transfer heat_conduction_c
-$RUNFDS Heat_Transfer heat_conduction_d
-$RUNFDS Heat_Transfer heat_conduction_kc
-$RUNFDS Heat_Transfer insulated_steel_column
 
 $RUNFDS Miscellaneous pyramid
 
@@ -77,6 +81,7 @@ $RUNFDS Pressure_Effects pressure_rise
 $RUNFDS Pressure_Effects zone_break_p2
 $RUNFDS Pressure_Effects zone_break_p5
 $RUNFDS Pressure_Effects zone_shape
+
 $RUNFDS Pressure_Solver dancing_eddies
 $RUNFDS Pressure_Solver dancing_eddies_1mesh
 $RUNFDS Pressure_Solver dancing_eddies_tol=p1
@@ -294,8 +299,4 @@ $RUNFDS Visualization objects_static
 
 $RUNFDS WUI random_walk_1
 $RUNFDS WUI random_walk_2
-
-$RUNFDS Evacuation evac_smv_testcase0
-$RUNFDS Evacuation evac_smv_testcase1
-$RUNFDS Evacuation evac_smv_testcase2
 
