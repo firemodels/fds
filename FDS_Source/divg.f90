@@ -28,12 +28,12 @@ USE TURBULENCE, ONLY: TENSOR_DIFFUSIVITY_MODEL
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX,KDTDY,KDTDZ,DP,KP, &
           RHO_D_DZDX,RHO_D_DZDY,RHO_D_DZDZ,RHO_D,RHOP,H_RHO_D_DZDX,H_RHO_D_DZDY,H_RHO_D_DZDZ,RTRM,CP, &
-          U_DOT_DEL_RHO_H_S,RHO_H_S_P,UU,VV,WW,UDRHDX,VDRHDY,WDRHDZ,PBAR_D_RHSOP_DT
+          U_DOT_DEL_RHO_H_S,RHO_H_S_P,UU,VV,WW,UDRHDX,VDRHDY,WDRHDZ,U_DOT_DEL_RHO,RHO_Z_P,U_DOT_DEL_RHO_Z
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
 REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P            
 REAL(EB) :: DELKDELT,VC,DTDX,DTDY,DTDZ,TNOW,ZZ_GET(0:N_TRACKED_SPECIES), &
             HDIFF,DZDX,DZDY,DZDZ,T,RDT,RHO_D_DZDN,TSI,TIME_RAMP_FACTOR,ZONE_VOLUME,DELTA_P,PRES_RAMP_FACTOR,&
-            TMP_G,TMP_WGT,DIV_DIFF_HEAT_FLUX,H_S,UN,D_RHSOP_DT,DT_SUBSTEP
+            TMP_G,TMP_WGT,DIV_DIFF_HEAT_FLUX,H_S,UN
 TYPE(SURFACE_TYPE), POINTER :: SF
 TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM,SM0
 INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,I,J,K,IPZ,IOPZ
@@ -463,24 +463,11 @@ END SELECT CYLINDER3
  
 ENTHALPY_TRANSPORT_IF: IF (ENTHALPY_TRANSPORT .AND. .NOT.EVACUATION_ONLY(NM)) THEN
 
-   ! Add contribution of evaporating PARTICLEs
-
-   IF (NLP>0 .AND. N_LP_ARRAY_INDICES > 0) THEN
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               DP(I,J,K) = DP(I,J,K) + D_LAGRANGIAN(I,J,K)
-            ENDDO
-         ENDDO
-      ENDDO
-   ENDIF
-
    RHO_H_S_P=>WORK1;         RHO_H_S_P=0._EB
    UDRHDX=>WORK2;            UDRHDX=0._EB
    VDRHDY=>WORK3;            VDRHDY=0._EB
    WDRHDZ=>WORK4;            WDRHDZ=0._EB
-   U_DOT_DEL_RHO_H_S=>WORK5; U_DOT_DEL_RHO_H_S=0._EB
-   PBAR_D_RHSOP_DT=>WORK6;   PBAR_D_RHSOP_DT=0._EB
+   U_DOT_DEL_RHO_H_S=>WORK6; U_DOT_DEL_RHO_H_S=0._EB
 
    IF (PREDICTOR) THEN
       UU=>U
@@ -529,7 +516,7 @@ ENTHALPY_TRANSPORT_IF: IF (ENTHALPY_TRANSPORT .AND. .NOT.EVACUATION_ONLY(NM)) TH
       IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = WC%ZZ_F(1:N_TRACKED_SPECIES)
       CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,WC%ONE_D%TMP_F)
       IF (PREDICTOR) UN = -WC%ONE_D%UW
-      IF (CORRECTOR) UN = -WC%ONE_D%UWS        
+      IF (CORRECTOR) UN = -WC%ONE_D%UWS
       SELECT CASE(IOR)
          CASE( 1)
             UDRHDX(II,JJ,KK)   = 2._EB*WC%RDN*(RHO_H_S_P(IIG,JJG,KKG)-WC%RHO_F*H_S)*UN
@@ -573,26 +560,180 @@ ENTHALPY_TRANSPORT_IF: IF (ENTHALPY_TRANSPORT .AND. .NOT.EVACUATION_ONLY(NM)) TH
 
    ! Time differencing scheme
 
-   IF (PREDICTOR) DT_SUBSTEP=DT
-   IF (CORRECTOR) DT_SUBSTEP=DT/2._EB
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            D_RHSOP_DT = ( RHO_H_S_P(I,J,K)/PBAR_P(K,PRESSURE_ZONE(I,J,K)) - RHO_H_S_OVER_PBAR(I,J,K) )/DT_SUBSTEP
-            PBAR_D_RHSOP_DT(I,J,K) = PBAR_P(K,PRESSURE_ZONE(I,J,K))*D_RHSOP_DT
+            DP(I,J,K) = ( DP(I,J,K) - ( DTDT(I,J,K) + U_DOT_DEL_RHO_H_S(I,J,K) ) )/RHO_H_S_P(I,J,K)
          ENDDO
       ENDDO 
    ENDDO
 
+   ! Effect of mass transport
+
+   UDRHDX=0._EB ! WORK2
+   VDRHDY=0._EB ! WORK3
+   WDRHDZ=0._EB ! WORK4
+   
+   RHO_Z_P=>WORK5;       RHO_Z_P=0._EB
+   U_DOT_DEL_RHO=>WORK6; U_DOT_DEL_RHO=0._EB
+
+   DO K=0,KBAR
+      DO J=0,JBAR
+         DO I=0,IBAR
+            UDRHDX(I,J,K) = RDX(I)*( RHOP(I+1,J,K) - RHOP(I,J,K) )*UU(I,J,K)
+            VDRHDY(I,J,K) = RDY(J)*( RHOP(I,J+1,K) - RHOP(I,J,K) )*VV(I,J,K)
+            WDRHDZ(I,J,K) = RDZ(K)*( RHOP(I,J,K+1) - RHOP(I,J,K) )*WW(I,J,K)
+         ENDDO
+      ENDDO
+   ENDDO
+
+   ! Correct u_n*d(rho)/dn at boundaries
+
+   CORRECTION_LOOP_3: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+      WC => WALL(IW)
+      IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .OR. &
+          WC%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. &
+          WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) CYCLE CORRECTION_LOOP_3
+      II  = WC%ONE_D%II
+      JJ  = WC%ONE_D%JJ
+      KK  = WC%ONE_D%KK
+      IIG = WC%ONE_D%IIG
+      JJG = WC%ONE_D%JJG
+      KKG = WC%ONE_D%KKG
+      IOR = WC%ONE_D%IOR
+      IF (PREDICTOR) UN = -WC%ONE_D%UW
+      IF (CORRECTOR) UN = -WC%ONE_D%UWS
+      SELECT CASE(IOR)
+         CASE( 1)
+            UDRHDX(II,JJ,KK)   = 2._EB*WC%RDN*(RHOP(IIG,JJG,KKG)-WC%RHO_F)*UN
+         CASE(-1)
+            UDRHDX(II-1,JJ,KK) = 2._EB*WC%RDN*(RHOP(IIG,JJG,KKG)-WC%RHO_F)*UN
+         CASE( 2)
+            VDRHDY(II,JJ,KK)   = 2._EB*WC%RDN*(RHOP(IIG,JJG,KKG)-WC%RHO_F)*UN
+         CASE(-2)
+            VDRHDY(II,JJ-1,KK) = 2._EB*WC%RDN*(RHOP(IIG,JJG,KKG)-WC%RHO_F)*UN
+         CASE( 3)
+            WDRHDZ(II,JJ,KK)   = 2._EB*WC%RDN*(RHOP(IIG,JJG,KKG)-WC%RHO_F)*UN
+         CASE(-3)
+            WDRHDZ(II,JJ,KK-1) = 2._EB*WC%RDN*(RHOP(IIG,JJG,KKG)-WC%RHO_F)*UN
+      END SELECT
+   ENDDO CORRECTION_LOOP_3
+
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            DP(I,J,K) = ( DP(I,J,K) - (PBAR_D_RHSOP_DT(I,J,K) + U_DOT_DEL_RHO_H_S(I,J,K)) )/RHO_H_S_P(I,J,K)
+            U_DOT_DEL_RHO(I,J,K) = 0.5_EB*( UDRHDX(I,J,K)+UDRHDX(I-1,J,K) + &
+                                            VDRHDY(I,J,K)+VDRHDY(I,J-1,K) + &
+                                            WDRHDZ(I,J,K)+WDRHDZ(I,J,K-1) )
          ENDDO
       ENDDO 
    ENDDO
+
+   MT_SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
+
+      U_DOT_DEL_RHO_Z=>WORK7; U_DOT_DEL_RHO_Z=0._EB
+
+      DO K=0,KBP1
+         DO J=0,JBP1
+            DO I=0,IBP1
+               RHO_Z_P(I,J,K) = RHOP(I,J,K)*ZZP(I,J,K,N)
+            ENDDO
+         ENDDO
+      ENDDO
+
+      DO K=0,KBAR
+         DO J=0,JBAR
+            DO I=0,IBAR
+               UDRHDX(I,J,K) = RDX(I)*( RHO_Z_P(I+1,J,K) - RHO_Z_P(I,J,K) )*UU(I,J,K)
+               VDRHDY(I,J,K) = RDY(J)*( RHO_Z_P(I,J+1,K) - RHO_Z_P(I,J,K) )*VV(I,J,K)
+               WDRHDZ(I,J,K) = RDZ(K)*( RHO_Z_P(I,J,K+1) - RHO_Z_P(I,J,K) )*WW(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
+
+      ! Correct u_n*d(rho*Z)/dn at boundaries
+
+      CORRECTION_LOOP_4: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+         WC => WALL(IW)
+         IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .OR. &
+             WC%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. &
+             WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) CYCLE CORRECTION_LOOP_4
+         II  = WC%ONE_D%II
+         JJ  = WC%ONE_D%JJ
+         KK  = WC%ONE_D%KK
+         IIG = WC%ONE_D%IIG
+         JJG = WC%ONE_D%JJG
+         KKG = WC%ONE_D%KKG
+         IOR = WC%ONE_D%IOR
+         IF (PREDICTOR) UN = -WC%ONE_D%UW
+         IF (CORRECTOR) UN = -WC%ONE_D%UWS
+         SELECT CASE(IOR)
+            CASE( 1)
+               UDRHDX(II,JJ,KK)   = 2._EB*WC%RDN*(RHO_Z_P(IIG,JJG,KKG)-WC%RHO_F*WC%ZZ_F(N))*UN
+            CASE(-1)
+               UDRHDX(II-1,JJ,KK) = 2._EB*WC%RDN*(RHO_Z_P(IIG,JJG,KKG)-WC%RHO_F*WC%ZZ_F(N))*UN
+            CASE( 2)
+               VDRHDY(II,JJ,KK)   = 2._EB*WC%RDN*(RHO_Z_P(IIG,JJG,KKG)-WC%RHO_F*WC%ZZ_F(N))*UN
+            CASE(-2)
+               VDRHDY(II,JJ-1,KK) = 2._EB*WC%RDN*(RHO_Z_P(IIG,JJG,KKG)-WC%RHO_F*WC%ZZ_F(N))*UN
+            CASE( 3)
+               WDRHDZ(II,JJ,KK)   = 2._EB*WC%RDN*(RHO_Z_P(IIG,JJG,KKG)-WC%RHO_F*WC%ZZ_F(N))*UN
+            CASE(-3)
+               WDRHDZ(II,JJ,KK-1) = 2._EB*WC%RDN*(RHO_Z_P(IIG,JJG,KKG)-WC%RHO_F*WC%ZZ_F(N))*UN
+         END SELECT
+      ENDDO CORRECTION_LOOP_4
+
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               U_DOT_DEL_RHO_Z(I,J,K) = 0.5_EB*( UDRHDX(I,J,K)+UDRHDX(I-1,J,K) + &
+                                                 VDRHDY(I,J,K)+VDRHDY(I,J-1,K) + &
+                                                 WDRHDZ(I,J,K)+WDRHDZ(I,J,K-1) )
+            ENDDO
+         ENDDO
+      ENDDO
+
+      SM  => SPECIES_MIXTURE(N)
+      SM0 => SPECIES_MIXTURE(0)
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               CALL GET_SENSIBLE_ENTHALPY_DIFF(N,TMP(I,J,K),HDIFF)
+               DP(I,J,K) = DP(I,J,K) + &
+                           ( (SM%RCON-SM0%RCON)/RSUM(I,J,K) - RHOP(I,J,K)*HDIFF/RHO_H_S_P(I,J,K) ) * &
+                           ( DEL_RHO_D_DEL_Z(I,J,K,N) - (U_DOT_DEL_RHO_Z(I,J,K) - ZZP(I,J,K,N)*U_DOT_DEL_RHO(I,J,K)) )/RHOP(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
+
+   ENDDO MT_SPECIES_LOOP
+
+   ! Add contribution of reactions
+ 
+   IF (N_REACTIONS > 0) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+              DP(I,J,K) = DP(I,J,K) + D_REACTION(I,J,K)
+           ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
+
+   ! Add contribution of evaporating PARTICLEs
+
+   IF (NLP>0 .AND. N_LP_ARRAY_INDICES > 0) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               DP(I,J,K) = DP(I,J,K) + D_LAGRANGIAN(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
 
 ELSE ENTHALPY_TRANSPORT_IF
 
@@ -817,7 +958,6 @@ ENDDO PRESSURE_ZONE_LOOP
 
 TUSED(2,NM)=TUSED(2,NM)+SECOND()-TNOW
 END SUBROUTINE DIVERGENCE_PART_1
-
 
 
 SUBROUTINE DIVERGENCE_PART_2(NM)

@@ -170,14 +170,6 @@ IF (N_REACTIONS > 0) THEN
    M%D_REACTION = 0._EB
 ENDIF
 
-! Enthalpy arrays
-
-IF (ENTHALPY_TRANSPORT) THEN
-   ALLOCATE(M%RHO_H_S_OVER_PBAR(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
-   CALL ChkMemErr('INIT','RHO_H_S_OVER_PBAR',IZERO) 
-   M%RHO_H_S_OVER_PBAR = 0._EB ! initialized in DENSITY
-ENDIF
-
 ! Allocate water mass arrays if sprinklers are present
  
 IF (PARTICLE_FILE) PARTICLE_TAG = NM
@@ -306,12 +298,12 @@ DO K=0,M%KBP1
    M%TMP(:,:,K) = M%TMP_0(K)
 ENDDO
 IF (.NOT.EVACUATION_ONLY(NM)) M%FRHO    = 0._EB
-M%U       = U0
-M%V       = V0
-M%W       = W0
-M%US      = U0
-M%VS      = V0
-M%WS      = W0
+M%U     = U0
+M%V     = V0
+M%W     = W0
+M%US    = U0
+M%VS    = V0
+M%WS    = W0
 M%FVX   = 0._EB
 M%FVY   = 0._EB
 M%FVZ   = 0._EB
@@ -323,19 +315,30 @@ M%DDDT  = 0._EB
 M%D     = 0._EB
 M%DS    = 0._EB
 IF (.NOT.EVACUATION_ONLY(NM)) THEN
-   M%Q     = 0._EB
+   M%Q  = 0._EB
 ENDIF
 IF (EVACUATION_ONLY(NM)) THEN
-   M%U       = 0._EB
-   M%V       = 0._EB
-   M%W       = 0._EB
-   M%US      = 0._EB
-   M%VS      = 0._EB
-   M%WS      = 0._EB
-   M%H       = 0._EB
-   M%HS      = 0._EB
+   M%U  = 0._EB
+   M%V  = 0._EB
+   M%W  = 0._EB
+   M%US = 0._EB
+   M%VS = 0._EB
+   M%WS = 0._EB
+   M%H  = 0._EB
+   M%HS = 0._EB
 ENDIF
 IF (N_TRACKED_SPECIES > 0 .AND. .NOT.EVACUATION_ONLY(NM)) M%DEL_RHO_D_DEL_Z = 0._EB
+
+! Enthalpy arrays
+
+IF (ENTHALPY_TRANSPORT) THEN
+   ALLOCATE(M%DTDT(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
+   CALL ChkMemErr('INIT','DTDT',IZERO) 
+   M%DTDT = 0._EB
+   ALLOCATE(M%TMP0(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
+   CALL ChkMemErr('INIT','TMP0',IZERO) 
+   M%TMP0 = M%TMP
+ENDIF
 
 ! Viscosity
 
