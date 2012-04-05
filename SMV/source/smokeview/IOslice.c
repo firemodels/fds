@@ -84,8 +84,8 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type);
          DU *= 0.05*vecfactor/vrange
 
 #define FEDCO(CO) ( 4.607*pow(1000000.0*CO,1.036)/10000000.0 )
-#define FEDO2(O2)  ( exp( -(8.13-0.54*(20.9-O2)) )/60.0 ) 
-#define HVCO2(CO2) (exp(0.1930*CO2+2.0004)/7.1)
+#define FEDO2(O2)  ( exp( -(8.13-0.54*(20.9-100.0*O2)) )/60.0 ) 
+#define HVCO2(CO2) (exp(0.1930*CO2*100.0+2.0004)/7.1)
 
 /* ------------------ out_slice ------------------------ */
 
