@@ -292,7 +292,5 @@ $RUNFDS WUI random_walk_2
 
 $RUNFDS Evacuation evac_smv_testcase0
 $RUNFDS Evacuation evac_smv_testcase1
-cp -f Evacuation/evac_smv_testcase1_evac.fed Evacuation/evac_smv_testcase2_evac.fed
-cp -f Evacuation/evac_smv_testcase1_evac.eff Evacuation/evac_smv_testcase2_evac.eff
 $RUNFDS Evacuation evac_smv_testcase2
 
