@@ -1897,7 +1897,8 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
                            ICPL = ICPL + 1
                            SCF%NCE = SCF%NCE + 1
                            OSCF%NG = OSCF%NG  + 1
-                           IC = (IZ-1+IOFZ)*MESHES(NOM)%IBAR*MESHES(NOM)%JBAR + (IY-1+IOFY)*MESHES(NOM)%IBAR + IX+IOFX
+                           IC = (IZ-1+IOFZ)*MESHES(NOM)%IBAR*MESHES(NOM)%JBAR + &
+                                (IY-1+IOFY)*MESHES(NOM)%IBAR + IX+IOFX
                            SCF%WALL(IWF)%ICN2(ICPL) = IC
                            SCF%WALL(IWF)%ICE2(ICPL) = SCF%NCE
                            SCF%WALL(IWF)%ICG2(ICPL) = OSCF%NG 
@@ -7234,41 +7235,6 @@ R_WEIGHT = VAL
 RETURN 
 END FUNCTION R_WEIGHT
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!! Determine if corresponding coarse point contributes a non-zero interpolation weight or not
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-REAL(EB) FUNCTION P_WEIGHT_NOM(IC, ICP, NM, NOM, NL)
-INTEGER, INTENT(IN):: IC, ICP, NM, NOM, NL
-INTEGER :: ICOL, ICG0, IW0
-REAL(EB) :: VAL
-TYPE (SCARC_COMPACT_TYPE), POINTER :: SC
-TYPE (OSCARC_COMPACT_TYPE), POINTER :: OSC
-
-SC => SCARC(NM)%COMPACT(NL)           
-OSC => SCARC(NM)%OSCARC(NOM)%COMPACT(NL)           
-
-VAL = 0.0_EB
-IF (IC > SC%NC) THEN
-!IF (BDEBUG) WRITE(*,'(a,i3,a,i3,a,i3,a,i3,a,3i3)') '    LOCAL: CALLING P_WEIGHT_NOM FOR IC=',IC,': ICP=',ICP,': NOM=',NOM,': ICG=',ICG,': IW=',IW,OSC%P_ROW(ICG), OSC%P_ROW(ICG+1)
-
-   IW0 = SC%WALL_PTR(IC)
-   ICG0 = SC%WALL(IW0)%ICG(1)
-   P_WEIGHT_LOOP2: DO ICOL = OSC%P_ROW(ICG0), OSC%P_ROW(ICG0+1)-1
-      !IF (BDEBUG) WRITE(*,*) '      ICOL=',ICOL
-      !IF (BDEBUG) WRITE(*,'(a,i3,a,i3,a,i3,a,i3,a,i3,a,3i3)') '    LOCAL: Searching for ICOL=',ICOL ,' for ICG0=',ICG0, ': P_COL(',ICOL,')=',OSC%P_COL(ICOL),': ICP=', ICP, ': IW0=',IW0, OSC%P_ROW(ICG0), OSC%P_ROW(ICG0+1)-1
-      IF (OSC%P_COL(ICOL) /= ICP) CYCLE P_WEIGHT_LOOP2
-      VAL = OSC%P(ICOL)
-      !IF (BDEBUG) WRITE(*,'(a,f12.6)') '                             --------------> found, VAL =',VAL
-      !IF (BDEBUG) WRITE(*,*)
-   ENDDO P_WEIGHT_LOOP2
-    !IF (BDEBUG) WRITE(*,*) 'After P_WEIGHT_LOOP'
-    
-ENDIF
-
-P_WEIGHT_NOM = VAL
-RETURN 
-END FUNCTION P_WEIGHT_NOM
-
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! Interface for the call of ScaRC-solver with requested storage technique
@@ -10706,7 +10672,8 @@ RECEIVE_MESH_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
                               OSC%WALL(IW)%ICN(ICPL) = OS%RECV_BUF(IBUF)
                               IBUF = IBUF + 1
                            ENDDO
-                           IF (NL==NLEVEL_MIN.AND.TYPE_LAYER == NSCARC_LAYER_TWO .AND. TYPE_MULTIGRID == NSCARC_MULTIGRID_ALGEBRAIC) THEN
+                           IF (NL==NLEVEL_MIN.AND.TYPE_LAYER == NSCARC_LAYER_TWO .AND. &
+                               TYPE_MULTIGRID == NSCARC_MULTIGRID_ALGEBRAIC) THEN
                               DO ICPL=1,OSC%WALL(IW)%NCPL
                                  OSC%WALL(IW)%ICN2(ICPL) = OS%RECV_BUF(IBUF)
                                  IBUF = IBUF + 1
@@ -10734,7 +10701,8 @@ RECEIVE_MESH_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
                      DO IW=1,OSC%NW   
                         OSC%WALL(IW)%ICN(1:OSC%WALL(IW)%NCPL) = SOC%WALL(IW)%ICN(1:SOB%WALL(IW)%NCPL)
                      ENDDO
-                     IF (NL==NLEVEL_MIN.AND.TYPE_LAYER == NSCARC_LAYER_TWO .AND. TYPE_MULTIGRID == NSCARC_MULTIGRID_ALGEBRAIC) THEN
+                     IF (NL==NLEVEL_MIN.AND.TYPE_LAYER == NSCARC_LAYER_TWO .AND. &
+                               TYPE_MULTIGRID == NSCARC_MULTIGRID_ALGEBRAIC) THEN
                         DO IW=1,OSC%NW   
                            OSC%WALL(IW)%ICN2(1:OSC%WALL(IW)%NCPL) = SOC%WALL(IW)%ICN2(1:SOB%WALL(IW)%NCPL)
                         ENDDO
@@ -11019,7 +10987,8 @@ EXCHANGE_SEND_LOOP1: DO NM = NMESHES_MIN, NMESHES_MAX
                         OSC%WALL(IW)%ICN(1:OSC%WALL(IW)%NCPL) = SOC%WALL(IW)%ICN(1:SOC%WALL(IW)%NCPL)
                      ENDIF
                   ENDDO
-                  IF (NL==NLEVEL_MIN.AND.TYPE_LAYER == NSCARC_LAYER_TWO .AND. TYPE_MULTIGRID == NSCARC_MULTIGRID_ALGEBRAIC) THEN
+                  IF (NL==NLEVEL_MIN.AND.TYPE_LAYER == NSCARC_LAYER_TWO .AND. &
+                      TYPE_MULTIGRID == NSCARC_MULTIGRID_ALGEBRAIC) THEN
                      DO IW=1,OSC%NW   
                         IF (OSC%WALL(IW)%NOM /= 0) THEN
                            ALLOCATE(OSC%WALL(IW)%ICN2(1:OSC%WALL(IW)%NCPL),STAT=IERR)
@@ -12337,7 +12306,8 @@ SELECT CASE (NTYPE)
                ENDDO
             ELSE
                DO IC = 1, SB%NC
-                  WRITE(SCARC_LU,'(i7,7f13.2)') IC,SB%A(IC,ILZ),SB%A(IC,ILY),SB%A(IC,ILX),SB%A(IC,ID),SB%A(IC,IUX),SB%A(IC,IUY),SB%A(IC,IUZ)
+                  WRITE(SCARC_LU,'(i7,7f13.2)') IC,SB%A(IC,ILZ),SB%A(IC,ILY),SB%A(IC,ILX),SB%A(IC,ID),&
+                                                SB%A(IC,IUX),SB%A(IC,IUY),SB%A(IC,IUZ)
                   IF (MOD(IC,SB%NX)==0) WRITE(SCARC_LU,*) '----------------------------------------------'
                ENDDO
             ENDIF
@@ -12856,10 +12826,14 @@ SELECT CASE (NTYPE)
       SC2 => SCARC(2)%COMPACT(NL)
       OSC1 => SCARC(1)%OSCARC(2)%COMPACT(NL)
       OSC2 => SCARC(2)%OSCARC(1)%COMPACT(NL)
-      WRITE(SCARC_LU,'(7I6,6X,6I6)') SC1%CELLTYPE(16:20),OSC1%CELLTYPE(4),OSC1%CELLTYPE(8), OSC2%CELLTYPE(8),OSC2%CELLTYPE(4),SC2%CELLTYPE(13:16)
-      WRITE(SCARC_LU,'(7I6,6X,6I6)') SC1%CELLTYPE(11:15),OSC1%CELLTYPE(3),OSC1%CELLTYPE(7), OSC2%CELLTYPE(7),OSC2%CELLTYPE(3),SC2%CELLTYPE(9:12)
-      WRITE(SCARC_LU,'(7I6,6X,6I6)') SC1%CELLTYPE(6:10) ,OSC1%CELLTYPE(2),OSC1%CELLTYPE(6), OSC2%CELLTYPE(6),OSC2%CELLTYPE(2),SC2%CELLTYPE(5:8)
-      WRITE(SCARC_LU,'(7I6,6X,6I6)') SC1%CELLTYPE(1:5)  ,OSC1%CELLTYPE(1),OSC1%CELLTYPE(5), OSC2%CELLTYPE(5),OSC2%CELLTYPE(1),SC2%CELLTYPE(1:4)
+      WRITE(SCARC_LU,'(7I6,6X,6I6)') SC1%CELLTYPE(16:20),OSC1%CELLTYPE(4),OSC1%CELLTYPE(8), &
+                                     OSC2%CELLTYPE(8),OSC2%CELLTYPE(4),SC2%CELLTYPE(13:16)
+      WRITE(SCARC_LU,'(7I6,6X,6I6)') SC1%CELLTYPE(11:15),OSC1%CELLTYPE(3),OSC1%CELLTYPE(7), &
+                                     OSC2%CELLTYPE(7),OSC2%CELLTYPE(3),SC2%CELLTYPE(9:12)
+      WRITE(SCARC_LU,'(7I6,6X,6I6)') SC1%CELLTYPE(6:10) ,OSC1%CELLTYPE(2),OSC1%CELLTYPE(6), &
+                                     OSC2%CELLTYPE(6),OSC2%CELLTYPE(2),SC2%CELLTYPE(5:8)
+      WRITE(SCARC_LU,'(7I6,6X,6I6)') SC1%CELLTYPE(1:5)  ,OSC1%CELLTYPE(1),OSC1%CELLTYPE(5), &
+                                     OSC2%CELLTYPE(5),OSC2%CELLTYPE(1),SC2%CELLTYPE(1:4)
       ELSE IF (SCARC(1)%COMPACT(1)%NX == 8) THEN
       WRITE(SCARC_LU,'(9I6,6X,9I6)') SC1%CELLTYPE(57:64),SC1%CELLTYPE(72),SC2%CELLTYPE(72),SC2%CELLTYPE(57:64)
       WRITE(SCARC_LU,'(9I6,6X,9I6)') SC1%CELLTYPE(49:56),SC1%CELLTYPE(71),SC2%CELLTYPE(71),SC2%CELLTYPE(49:56)
