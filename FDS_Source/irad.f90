@@ -1025,6 +1025,12 @@ END SUBROUTINE CH4
 !*******************************************************************************
 
 REAL(EB) FUNCTION PLANCK(A,B)
+!--------------------------------------------------------------------------------
+! COMPUTES BLACKBODY FUNCTION, UNITS: [W/M-2/MICRON/SR]
+! Input:
+! A : TEMPERATURE
+! B : WAVELENGTH
+!--------------------------------------------------------------------------------
 REAL (EB), INTENT(IN):: A,B
 REAL (EB) Q1,Q2,C
 !    COMPUTES BLACKBODY FUNCTION IN UNITS OF W/M-2/MICRON/SR
