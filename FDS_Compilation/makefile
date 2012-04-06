@@ -77,6 +77,14 @@ mpi_intel_win_32 : obj = fds_mpi_win_32
 mpi_intel_win_32 : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwin_mpi) $(MPILIB)
 
+mpi_intel_win_32_db : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
+mpi_intel_win_32_db : MPIINCLUDE = "c:\program files\mpich2\include"
+mpi_intel_win_32_db : FFLAGS = -O2 /I $(MPIINCLUDE) /Qvec_report0 /nologo /debug:full /Od /extend_source:132 /warn:all /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f03
+mpi_intel_win_32_db : FCOMPL = ifort
+mpi_intel_win_32_db : obj = fds_mpi_win_32_db
+mpi_intel_win_32_db : setup_win $(objwin_mpi)
+	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwin_mpi) $(MPILIB)
+
  #*** note: the following scripts (located in ..\Scripts directory) must be run before running make with this target
  #    ..\Scripts\ifortvars intel64
 
@@ -99,6 +107,14 @@ mpi_intel_win_64 : FCOMPL = ifort
 mpi_intel_win_64 : obj = fds_mpi_win_64
 mpi_intel_win_64 : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS)  /F1000000000 $(objwin_mpi) $(MPILIB)
+
+mpi_intel_win_64_db : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
+mpi_intel_win_64_db : MPIINCLUDE = "c:\program files\mpich2\include"
+mpi_intel_win_64_db : FFLAGS = -O2 /I $(MPIINCLUDE) /Qvec_report0 /nologo /debug:full /Od /extend_source:132 /warn:all /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f03
+mpi_intel_win_64_db : FCOMPL = ifort
+mpi_intel_win_64_db : obj = fds_mpi_win_64_db
+mpi_intel_win_64_db : setup_win $(objwin_mpi)
+        $(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwin_mpi) $(MPILIB)
 
 # Intel Compiler for Linux, version 11
 
