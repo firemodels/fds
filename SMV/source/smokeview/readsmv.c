@@ -5984,7 +5984,6 @@ typedef struct {
  */
 
   update_isocolors();
-  updatevslices();
   if(arg_iblank==0){
     if(autoterrain==1){
       use_iblank=0;
@@ -6357,6 +6356,8 @@ typedef struct {
     face_centers[17]=meshi->boxmax_scaled[2];
   }
 
+  updatevslices();
+  
   active_smokesensors=0;
   for(i=0;i<ndeviceinfo;i++){
     devicedata *devicei;

@@ -1460,18 +1460,10 @@ int new_multi(slicedata *sdold,slicedata *sd){
 void getsliceparams(void){
   int i;
   char *file;
-  slicedata *sd,*sdold;
   int error;
   FILE_SIZE  lenfile;
-  float position;
-  int is1, is2, js1, js2, ks1, ks2;
-  int ni, nj, nk;
-  int iblock;
-  mesh *meshi;
-  multislicedata *mslicei;
   int build_cache=0;
   FILE *stream;
-  int doit_anyway;
 
   if(is_file_newer(sliceinfofilename,smvfilename)!=1){
     build_cache=1;
@@ -1483,6 +1475,10 @@ void getsliceparams(void){
   }
 
   for(i=0;i<nsliceinfo;i++){
+    slicedata *sd;
+    int is1, is2, js1, js2, ks1, ks2;
+    int ni, nj, nk;
+
     sd = sliceinfo + i;
 
     if(nsliceinfo>100&&(i%100==0||i==nsliceinfo-1)){
@@ -1497,6 +1493,8 @@ void getsliceparams(void){
     file = sd->file;
     lenfile = strlen(file);
     if(sd->compression_type==0){
+      int doit_anyway;
+      
       doit_anyway=0;
       if(build_cache==0&&stream!=NULL){
         int seq=-1;
@@ -1539,8 +1537,26 @@ void getsliceparams(void){
   }
   update_fedinfo();
   for(i=0;i<nsliceinfo;i++){
+    slicedata *sd;
+    int is1, is2, js1, js2, ks1, ks2;
+    int ni, nj, nk;
+
     sd = sliceinfo + i;
+    is1=sd->is1;
+    is2=sd->is2;
+    js1=sd->js1;
+    js2=sd->js2;
+    ks1=sd->ks1;
+    ks2=sd->ks2;
+    ni=sd->nslicei;
+    nj=sd->nslicej;
+    nk=sd->nslicek;
     if(error==0){
+      int iblock;
+      mesh *meshi;
+      float position;
+
+
       sd->idir=-1;
       iblock = sd->blocknumber;
       meshi = meshinfo + iblock;
@@ -1622,6 +1638,7 @@ void getsliceparams(void){
     }
     {
       float *xplt, *yplt, *zplt;
+      mesh *meshi;
 
       meshi = meshinfo + sd->blocknumber;
       sd->mesh_type=meshi->mesh_type;
@@ -1646,6 +1663,8 @@ void getsliceparams(void){
     qsort( (int *)sliceorderindex, (size_t)nsliceinfo, sizeof(int), slicecompare );
 
     for(i=0;i<nmultislices;i++){
+      multislicedata *mslicei;
+
       mslicei = multisliceinfo + i;
       FREEMEMORY(mslicei->islices);
     }
@@ -1654,29 +1673,36 @@ void getsliceparams(void){
 
     NewMemory((void **)&multisliceinfo,sizeof(multislicedata)*nsliceinfo);
 
-    nmultislices=1;
-    mslicei = multisliceinfo;
-    mslicei->islices=NULL;
-    NewMemory((void **)&mslicei->islices,sizeof(int)*nsliceinfo);
-    mslicei->nslices=1;
-    sd = sliceinfo + sliceorderindex[0];
-    mslicei->islices[0] = sliceorderindex[0];
-    mslicei->type=sd->type;
-    for(i=1;i<nsliceinfo;i++){
-      sdold = sliceinfo + sliceorderindex[i - 1];
-      sd = sliceinfo + sliceorderindex[i];
-      mslicei->autoload=0;
-      if(new_multi(sdold,sd)==1){
-        nmultislices++;
-        mslicei++;
-        mslicei->nslices=0;
-        mslicei->type=sd->type;
-        mslicei->mesh_type=sd->mesh_type;
-        mslicei->islices=NULL;
-        NewMemory((void **)&mslicei->islices,sizeof(int)*nsliceinfo);
+    {
+      multislicedata *mslicei;
+      slicedata *sd;
+      
+      nmultislices=1;
+      mslicei = multisliceinfo;
+      mslicei->islices=NULL;
+      NewMemory((void **)&mslicei->islices,sizeof(int)*nsliceinfo);
+      mslicei->nslices=1;
+      sd = sliceinfo + sliceorderindex[0];
+      mslicei->islices[0] = sliceorderindex[0];
+      mslicei->type=sd->type;
+      for(i=1;i<nsliceinfo;i++){
+        slicedata *sdold;
+
+        sdold = sliceinfo + sliceorderindex[i - 1];
+        sd = sliceinfo + sliceorderindex[i];
+        mslicei->autoload=0;
+        if(new_multi(sdold,sd)==1){
+          nmultislices++;
+          mslicei++;
+          mslicei->nslices=0;
+          mslicei->type=sd->type;
+          mslicei->mesh_type=sd->mesh_type;
+          mslicei->islices=NULL;
+          NewMemory((void **)&mslicei->islices,sizeof(int)*nsliceinfo);
+        }
+        mslicei->nslices++;
+        mslicei->islices[mslicei->nslices-1]=sliceorderindex[i];
       }
-      mslicei->nslices++;
-      mslicei->islices[mslicei->nslices-1]=sliceorderindex[i];
     }
   }
 #ifdef pp_HIDEMULTI
