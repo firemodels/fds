@@ -114,7 +114,7 @@ mpi_intel_win_64_db : FFLAGS = -O2 /I $(MPIINCLUDE) /Qvec_report0 /nologo /debug
 mpi_intel_win_64_db : FCOMPL = ifort
 mpi_intel_win_64_db : obj = fds_mpi_win_64_db
 mpi_intel_win_64_db : setup_win $(objwin_mpi)
-        $(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwin_mpi) $(MPILIB)
+	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwin_mpi) $(MPILIB)
 
 # Intel Compiler for Linux, version 11
 
