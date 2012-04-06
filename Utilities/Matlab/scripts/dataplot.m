@@ -229,6 +229,10 @@ for i=2:2000
         end
         if size(Key_Position)>0
             legend_handle = legend(K,[parse(d1_Key),parse(d2_Key)],'Location',Key_Position);
+            if Key_Position == 'EastOutside'
+               pos = get(legend_handle,'position');
+               set(legend_handle,'position',[6.5 pos(2:4)])
+            end
             set(legend_handle,'Interpreter','LaTeX');
             set(legend_handle,'Fontsize',Key_Font_Size);
             set(legend_handle,'Box','on');

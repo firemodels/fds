@@ -6446,7 +6446,7 @@ For most FDS simulations, thermal radiation transport is computed by default and
 parameters to make this happen. However, there are situations where it is important to be aware of
 issues related to the radiative transport solver.
 
-\section{Radiation Parameters: The \texorpdfstring{{\tt RADI}}{RADI} Namelist Group}
+\section{Basic Radiation Parameters: The \texorpdfstring{{\tt RADI}}{RADI} Namelist Group}
 \label{info:RADI}
 
 {\ct RADI} is the namelist group that contains all of the parameters related to the radiation solver. There can be only one
@@ -6498,6 +6498,31 @@ both set to 1, the radiation field is completely updated in a single
 time step, but the cost of the calculation increases significantly. By default,
 the radiation transport equation is fully updated every 15 time steps.
 
+
+
+\section{Radiative Absorption}
+
+By default FDS employs a gray gas model for the radiation absorption coefficient, a function
+of gas composition and temperature, which are
+tabulated in a look-up table using the routines found in RadCal. 
+
+\subsection{RadCal Issues}
+
+\label{info:RadCal}
+
+There are several issues to keep in mind with regard to RadCal. 
+
+\subsubsection{Path Length}
+
+Because RadCal computes effective absorption coefficients over a range of wavelengths, it requires a user-specified {\ct PATH\_LENGTH} (m).
+Its default value is five times the width of a single grid cell.
+
+\subsubsection{Fuel Species}
+
+The original version of RadCal only included absorption data for methane as a surrogate for any fuel. Thus, the default value
+of {\ct RADCAL\_FUEL} is {\ct 'METHANE'}. Work is currently underway to extend the list of fuels.
+
+
 \subsection{Radiative Absorption and Scattering by Particles}
 
 \label{info:RADI_Absorption}
@@ -6530,16 +6555,14 @@ If the optional six band model is desired,
 set {\ct WIDE\_BAND\_MODEL=.TRUE.} It is recommended that this option
 only be used when the fuel is relatively non-sooting because it
 adds significantly to the cost of the calculation. To add three
-additional fuel bands, set {\ct CH4\_BANDS=.TRUE.}. See FDS Technical
-Reference Guide for more details. Note also that when
+additional fuel bands, set {\ct CH4\_BANDS=.TRUE.} on the {\ct RADI} line. Read the FDS Technical
+Reference Guide~\cite{FDS_Tech_Guide} for more details. Note also that when
 {\ct WIDE\_BAND\_MODEL=.TRUE.}, the {\ct ABSORPTION\_COEFFICIENT}
 output quantity becomes practically useless, because it then
 corresponds to one individual band of the spectrum.
 
-Note that by default FDS employs a gray gas model for the absorption coefficient, which are
-tabulated in a look-up table using the routines found in RadCal. The effective absorption coefficient, a function
-of gas composition and temperature, also requires an effective {\ct PATH\_LENGTH}. Its default value is
-5 times the width of a single grid cell.
+
+
 
 
 
@@ -10884,20 +10907,21 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct RADI} (Radiation Parameters)} \\
 \hline \hline
 \endhead
-{\ct ANGLE\_INCREMENT}              & Integer   & Section~\ref{info:RADI_Resolution}        &                   & 5             \\ \hline
-{\ct CH4\_BANDS          }          & Logical   & Section~\ref{info:RADI_Wide_Band}         &                   & {\ct .FALSE.} \\ \hline
-{\ct KAPPA0                   }     & Real      & Section~\ref{info:RADI_Absorption}        & 1/m               & 0             \\ \hline
-{\ct NMIEANG                  }     & Integer   & Section~\ref{info:RADI_Absorption}        &                   & 15            \\ \hline
-{\ct NUMBER\_RADIATION\_ANGLES}     & Integer   & Section~\ref{info:RADI_Resolution}        &                   & 100           \\ \hline
-{\ct PATH\_LENGTH }                 & Real      & Section~\ref{info:RADI_Wide_Band}         &   m               &               \\ \hline
+{\ct ANGLE\_INCREMENT}              & Integer   & Section~\ref{info:RADI_Resolution}        &                   & 5                 \\ \hline
+{\ct CH4\_BANDS          }          & Logical   & Section~\ref{info:RADI_Wide_Band}         &                   & {\ct .FALSE.}     \\ \hline
+{\ct KAPPA0                   }     & Real      & Section~\ref{info:RADI_Absorption}        & 1/m               & 0                 \\ \hline
+{\ct NMIEANG                  }     & Integer   & Section~\ref{info:RADI_Absorption}        &                   & 15                \\ \hline
+{\ct NUMBER\_RADIATION\_ANGLES}     & Integer   & Section~\ref{info:RADI_Resolution}        &                   & 100               \\ \hline
+{\ct PATH\_LENGTH }                 & Real      & Section~\ref{info:RADI_Wide_Band}         &   m               &                   \\ \hline
+{\ct RADCAL\_FUEL}                  & Character & Section~\ref{info:RadCal}                 &                   & {\ct 'METHANE'}   \\ \hline
 {\ct RADIATION}                     & Logical   & Section~\ref{info:RADI}                   &                   & {\ct .TRUE.}      \\ \hline
-{\ct RADIATIVE\_FRACTION}           & Real      & Section~\ref{info:RADI}                   &                   & 0.35          \\ \hline
-{\ct RADTMP                   }     & Real      & Section~\ref{info:RADI_Absorption}        & $^\circ$C         & 900           \\ \hline
-{\ct TIME\_STEP\_INCREMENT}         & Integer   & Section~\ref{info:RADI_Resolution}        &                   & 3             \\ \hline
-{\ct WIDE\_BAND\_MODEL    }         & Logical   & Section~\ref{info:RADI_Wide_Band}         &                   & {\ct .FALSE.} \\ \hline
+{\ct RADIATIVE\_FRACTION}           & Real      & Section~\ref{info:RADI}                   &                   & 0.35              \\ \hline
+{\ct RADTMP                   }     & Real      & Section~\ref{info:RADI_Absorption}        & $^\circ$C         & 900               \\ \hline
+{\ct TIME\_STEP\_INCREMENT}         & Integer   & Section~\ref{info:RADI_Resolution}        &                   & 3                 \\ \hline
+{\ct WIDE\_BAND\_MODEL    }         & Logical   & Section~\ref{info:RADI_Wide_Band}         &                   & {\ct .FALSE.}     \\ \hline
 \end{longtable}
 
-% Undocumented: RADCAL_FUEL
+
 
 \vspace{\baselineskip}
 
