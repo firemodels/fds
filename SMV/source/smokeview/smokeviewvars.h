@@ -861,7 +861,7 @@ SVEXTERN char part_ext[6];
 SVEXTERN char ini_ext[5];
 
 SVEXTERN float getmesh_zcell(mesh *meshi, float xval, float yval, int *valid);
-SVEXTERN int SVDECL(updatehiddenfaces,1),SVDECL(hide_overlaps,1);
+SVEXTERN int SVDECL(updatehiddenfaces,1),SVDECL(hide_overlaps,0);
 SVEXTERN int SVDECL(nsurfids,0);
 SVEXTERN surfid SVDECL(*surfids,NULL);
 SVEXTERN int key_state;

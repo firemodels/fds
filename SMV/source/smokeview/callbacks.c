@@ -751,7 +751,7 @@ void keyboard_2(unsigned char key, int x, int y){
 
   glutPostRedisplay();
   key2 = (char)key;
-  if(key2!='L'&&key2!='H'&&key2!='N'&&key2!='R'&&key2!='P'&&key2!='T'&&key2!='S'&&key2!='A'
+  if(key2!='L'&&key2!='H'&&key2!='F'&&key2!='N'&&key2!='R'&&key2!='P'&&key2!='T'&&key2!='S'&&key2!='A'
 #ifdef pp_GPU
     &&key2!='G'&&key2!='V'
 #endif
@@ -1216,6 +1216,13 @@ void keyboard_2(unsigned char key, int x, int y){
         break;
     }
     return;
+  }
+  if(strncmp((const char *)&key2,"F",1)==0){
+    hide_overlaps=1-hide_overlaps;
+    updatehiddenfaces=1;
+    UpdateHiddenFaces();
+    update_showhidebuttons();
+    glutPostRedisplay();
   }
   if(strncmp((const char *)&key2,"H",1)==0){
     int nslice_loaded_local=0, nvslice_loaded_local=0;

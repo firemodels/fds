@@ -108,6 +108,7 @@ void readfslice(int ifslice, int flag, int *errorcode){
   feddata *fedi;
   slicedata *fed,*o2,*co2,*co;
   int error;
+  int co_loaded_before, co2_loaded_before, o2_loaded_before;
 
   ASSERT(fedinfo!=NULL);
   ASSERT(ifslice>=0);
@@ -116,18 +117,17 @@ void readfslice(int ifslice, int flag, int *errorcode){
   co2=fedi->co2;
   co=fedi->co;
   fed=fedi->fed;
-  if(o2->loaded==0)readslice(o2->file,fedi->o2_index,flag,&error);
-  if(co2->loaded==0)readslice(co2->file,fedi->co2_index,flag,&error);
-  if(co->loaded==0)readslice(co->file,fedi->co_index,flag,&error);
   if(flag==UNLOAD){
+    if(o2->loaded==1)readslice(o2->file,fedi->o2_index,UNLOAD,&error);
+    if(co2->loaded==1)readslice(co2->file,fedi->co2_index,UNLOAD,&error);
+    if(co->loaded==1)readslice(co->file,fedi->co_index,UNLOAD,&error);
     fedi->loaded=0;
     fedi->display=0;
     return;
   }
-  o2->display=0;
-  co2->display=0;
-  co->display=0;
-  if(file_exists(fed->file)!=1){
+  if(is_file_newer(fed->file,o2->file)!=1|| // if the FED slice file does not exist or is older than
+     is_file_newer(fed->file,co2->file)!=1||// either the CO, CO2 or O2 slice files then create a new
+     is_file_newer(fed->file,co->file)!=1){ // FED slice file
     int i;
     int nframe;
     float *fed_frame,*fed_framem1;
@@ -136,6 +136,22 @@ void readfslice(int ifslice, int flag, int *errorcode){
     float *co_frame,*co_framem1;
     float *times;
 
+    o2->loaded_save=o2->loaded;
+    co2->loaded_save=co2->loaded;
+    co->loaded_save=co->loaded;
+    
+    o2->display_save=o2->display;
+    co2->display_save=co2->display;
+    co->display_save=co->display;
+    
+    readslice(o2->file,fedi->o2_index,LOAD,&error);
+    readslice(co2->file,fedi->co2_index,LOAD,&error);
+    readslice(co->file,fedi->co_index,LOAD,&error);
+    
+    o2->display=0;
+    co2->display=0;
+    co->display=0;
+    
     fed->nslicei=co->nslicei;
     fed->nslicej=co->nslicej;
     fed->nslicek=co->nslicek;
@@ -179,10 +195,17 @@ void readfslice(int ifslice, int flag, int *errorcode){
       }
     }
     out_slicefile(fed);
-   // readslice(fed->file,fedi->fed_index,UNLOAD,&error);
-
-//    FORTout_slice_header();
-//    FORTout_slice_frame();
+    if(o2->loaded_save==0)readslice(o2->file,fedi->o2_index,UNLOAD,&error);
+    if(co2->loaded_save==0)readslice(co2->file,fedi->co2_index,UNLOAD,&error);
+    if(co->loaded_save==0)readslice(co->file,fedi->co_index,UNLOAD,&error);
+    
+    o2->loaded=o2->loaded_save;
+    co2->loaded=co2->loaded_save;
+    co->loaded=co->loaded_save;
+    
+    o2->display=o2->display_save;
+    co2->display=co2->display_save;
+    co->display=co->display_save;
   }
   readslice(fed->file,fedi->fed_index,flag,&error);
   printf("completed\n");

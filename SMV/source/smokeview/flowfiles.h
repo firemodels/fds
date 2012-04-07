@@ -981,6 +981,7 @@ typedef struct _slicedata {
   float qval256[256];
   char slicedir[50];
   int loaded, display, benchvis;
+  int loaded_save, display_save;
   int num_memblocks;
   float position_orig;
   char *c_iblank, *n_iblank;

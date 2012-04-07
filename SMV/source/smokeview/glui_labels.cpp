@@ -419,6 +419,9 @@ extern "C" void update_fileload(void){
 extern "C" void update_showhidebuttons(void){
 
   update_fileload();
+  if(CHECKBOX_label_3!=NULL){
+    CHECKBOX_label_3->set_int_val(hide_overlaps);
+  }
   if(Button_PART!=NULL){
     if(npartloaded==0){
       Button_PART->disable();
