@@ -5298,6 +5298,15 @@ typedef struct {
       slicedata *sd;
       char *slicelabelptr, slicelabel[256];
       int has_reg, has_comp;
+      int i1=-1, i2=-1, j1=-1, j2=-1, k1=-1, k2=-1;
+      char *sliceparms;
+
+      sliceparms=strchr(buffer,'&');
+      if(sliceparms!=NULL){
+        sliceparms++;
+        sliceparms[-1]=0;
+        sscanf(sliceparms,"%i %i %i %i %i %i",&i1,&i2,&j1,&j2,&k1,&k2);
+      }
 
       nn_slice++;
       slicelabelptr=strchr(buffer,'%');
@@ -5433,6 +5442,12 @@ typedef struct {
         NewMemory((void **)&sd->slicelabel,lenslicelabel);
         strcpy(sd->slicelabel,slicelabel);
       }
+      sd->is1=i1;
+      sd->is2=i2;
+      sd->js1=j1;
+      sd->js2=j2;
+      sd->ks1=k1;
+      sd->ks2=k2;
       sd->fed=0;
       sd->above_ground_level=above_ground_level;
       sd->seq_id=nn_slice;
