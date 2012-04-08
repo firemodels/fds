@@ -8,6 +8,7 @@
 // svn revision character string
 extern "C" char glui_shooter_revision[]="$Revision$";
 
+#include <stdio.h>
 #ifdef pp_SHOOTER
 #include <string.h>
 #ifdef pp_OSX

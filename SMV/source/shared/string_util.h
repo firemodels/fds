@@ -13,8 +13,6 @@
 #define STRDECL(var,val)  var
 #endif
 
-#include <stdio.h>
-
 /* --------------------------  flowlabels ------------------------------------ */
 
 typedef struct {

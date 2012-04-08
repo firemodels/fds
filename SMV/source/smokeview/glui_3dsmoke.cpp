@@ -8,6 +8,7 @@
 // svn revision character string
 extern "C" char glui_3dsmoke_revision[]="$Revision$";
 
+#include <stdio.h>
 #include <string.h>
 #ifdef pp_OSX
 #include <GLUT/glut.h>
