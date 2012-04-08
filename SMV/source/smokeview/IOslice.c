@@ -24,8 +24,8 @@ char IOslice_revision[]="$Revision$";
 #include "string_util.h"
 #include "smv_endian.h"
 #include "update.h"
-#include "smokeviewvars.h"
 #include "interp.h"
+#include "smokeviewvars.h"
 
 int endianswitch;
 
@@ -1534,6 +1534,12 @@ void getsliceparams(void){
         error=0;
       }
       if(build_cache==1||stream==NULL||doit_anyway==1){
+        is1=sd->is1;
+        is2=sd->is2;
+        js1=sd->js1;
+        js2=sd->js2;
+        ks1=sd->ks1;
+        ks2=sd->ks2;
         FORTgetsliceparms(file,&endian_smv,
           &is1,&is2,&js1,&js2,&ks1,&ks2,&ni,&nj,&nk,&sd->volslice,&error,lenfile);
         if(stream!=NULL&&doit_anyway==0)fprintf(stream,"%i %i %i %i %i %i %i %i %i %i %i\n",sd->seq_id,is1,is2,js1,js2,ks1,ks2,ni,nj,nk,sd->volslice);
