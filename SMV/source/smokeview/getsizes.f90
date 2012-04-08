@@ -711,8 +711,10 @@ implicit none
 character(len=*) :: slicefilename
 logical :: exists
 
-integer, intent(out) :: ip1, ip2, jp1, jp2, kp1, kp2, ni, nj, nk, slice3d, error
+integer, intent(inout) :: ip1, ip2, jp1, jp2, kp1, kp2
+integer, intent(out) :: ni, nj, nk, slice3d, error
 integer, intent(in) :: endian
+
 integer :: idir, joff, koff
 logical :: connected
 character(len=30) :: longlbl, shortlbl, unitlbl
@@ -720,37 +722,41 @@ character(len=30) :: longlbl, shortlbl, unitlbl
 
 integer :: lu11
 
-ip1 = 0
-ip2 = 0
-jp1 = 0
-jp2 = 0
-kp1 = 0
-kp2 = 0
-error=0
-lu11 = 11
-inquire(unit=lu11,opened=connected)
-if(connected)close(lu11)
+if(ip1.eq.-1.or.ip2.eq.-1.or.jp1.eq.-1.or.jp2.eq.-1.or.kp1.eq.-1.or.kp2.eq.-1)then
+  ip1 = 0
+  ip2 = 0
+  jp1 = 0
+  jp2 = 0
+  kp1 = 0
+  kp2 = 0
+  error=0
+  lu11 = 11
+  inquire(unit=lu11,opened=connected)
+  if(connected)close(lu11)
 
-inquire(file=trim(slicefilename),exist=exists)
-if(exists)then
+  inquire(file=trim(slicefilename),exist=exists)
+  if(exists)then
 #ifdef pp_cvf
-if(endian.eq.1)then
-  open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read",shared,convert="BIG_ENDIAN")
- else
-  open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read",shared)
-endif
+  if(endian.eq.1)then
+    open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read",shared,convert="BIG_ENDIAN")
+   else
+    open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read",shared)
+  endif
 #else
-  open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read")
+    open(unit=lu11,file=trim(slicefilename),form="unformatted",action="read")
 #endif
- else
-  error=1
-  return
-endif
-read(lu11,iostat=error)longlbl
-read(lu11,iostat=error)shortlbl
-read(lu11,iostat=error)unitlbl
+   else
+    error=1
+    return
+  endif
+  read(lu11,iostat=error)longlbl
+  read(lu11,iostat=error)shortlbl
+  read(lu11,iostat=error)unitlbl
 
-read(lu11,iostat=error)ip1, ip2, jp1, jp2, kp1, kp2
+  read(lu11,iostat=error)ip1, ip2, jp1, jp2, kp1, kp2
+  close(lu11)
+endif
+
 ni = ip2 + 1 - ip1
 nj = jp2 + 1 - jp1
 nk = kp2 + 1 - kp1
@@ -761,7 +767,6 @@ if(ip1.eq.ip2.or.jp1.eq.jp2.or.kp1.eq.kp2)then
 endif
 
 call getdirval(ip1,ip2,jp1,jp2,kp1,kp2,idir,joff,koff)
-close(lu11)
 
 return
 end subroutine getsliceparms
