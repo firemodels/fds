@@ -2366,9 +2366,11 @@ The maximum number of iterations per time step is given by {\ct MAX\_PRESSURE\_I
 
 There are two parameters on the {\ct PRES} line that control iterative procedures related to the coupling of velocity and pressure. One is
 called {\ct RELAXATION\_FACTOR} and its default value is 1. When there is an error in the normal component of velocity at a solid boundary, this
-parameter dictates that the correction be applied in 1 time step. If its value were 0.5, the correction would be applied in 2 time steps. A similar
-parameter is called {\ct PRESSURE\_RELAX\_FACTOR}. It controls the rate at which the pressures in adjacent compartments are brought into equilibrium following a
-breach. Its value is 0.2, meaning that equilibrium is achieved in roughly 5 time steps.
+parameter dictates that the correction be applied in 1 time step. If its value were 0.5, the correction would be applied in 2 time steps. 
+
+A similar parameter is the {\ct PRESSURE\_RELAX\_TIME}. It controls the rate at which the pressures in adjacent compartments are brought into equilibrium following a
+breach. Its default value is 1~s, meaning that equilibrium is achieved in roughly a second.
+
 
 \subsubsection{Example Case: Pressure\_Solver/duct\_flow}
 
@@ -5197,17 +5199,17 @@ At 15~s, the pressure is further decreased by opening a door to Zone~3, and, fin
 of a door to the outside. Figure~\ref{zone_break} displays the pressure within each compartment.
 
 \begin{figure}[ht]
-\includegraphics[width=3.1in]{SCRIPT_FIGURES/zone_break_p2}
-\includegraphics[width=3.1in]{SCRIPT_FIGURES/zone_break_p5}
-\caption[Output of {\bf zone\_break} test cases.]{Output of {\bf zone\_break} test cases. The figure on the left results from using a pressure relaxation factor of 0.2. The
-figure on the right uses 0.5, which tends to bring the pressure into equilibrium more quickly.}
+\includegraphics[width=3.1in]{SCRIPT_FIGURES/zone_break_fast}
+\includegraphics[width=3.1in]{SCRIPT_FIGURES/zone_break_slow}
+\caption[Output of {\bf zone\_break} test cases.]{Output of {\bf zone\_break} test cases. The figure on the left results from using a pressure relaxation time of 0.5~s. The
+figure on the right uses 1~s, the default.}
 \label{zone_break}
 \end{figure}
 
 \noindent
-Notice that the pressure within each compartment does not come to equilibrium instantaneously. Rather, a relaxation factor ({\ct PRESSURE\_RELAX\_FACTOR} on the {\ct PRES} line)
+Notice that the pressure within each compartment does not come to equilibrium instantaneously. Rather, the ({\ct PRESSURE\_RELAX\_TIME} on the {\ct PRES} line)
 is applied to bring the zones
-into equilibrium over several seconds. This is done for several reasons. First, in reality doors and windows do not magically disappear as they do in FDS. It takes
+into equilibrium over a specified period of time. This is done for several reasons. First, in reality doors and windows do not magically disappear as they do in FDS. It takes
 a finite amount of time to fully open them, and the slowing of the pressure increase/decrease is a simple way to simulate the effect.
 Second, relatively large pressure differences between zones wreak havoc with flow solvers, especially ones like FDS that
 use a low Mach number approximation. To maintain numerical stability, FDS gradually brings the pressures into equilibrium. This second point ought to be seen as a warning:
@@ -5221,9 +5223,9 @@ between compartments. Real buildings cannot withstand substantially larger press
 \subsection{Leaks}
 \label{info:Leaks}
 
-With a few notable exceptions, like containment buildings for nuclear power plants, real world construction is not air tight.  Small gaps occur along windows and doors and where walls abutt each other and the floors and ceilings.  As a comparment is pressurized by a fire, air will escape through these small gaps.  This is referred to as leakage.
+With a few notable exceptions, like containment buildings for nuclear power plants, real world construction is not air tight.  Small gaps occur along windows and doors and where walls abut each other and the floors and ceilings.  As a compartment is pressurized by a fire, air will escape through these small gaps.  This is referred to as leakage.
 
-Leakage is inherently a subgrid-scale phenomenon because the leakage area is usually very small. In other words, it is not possible to define a leak directly on the
+Leakage is inherently a sub-grid scale phenomenon because the leakage area is usually very small. In other words, it is not possible to define a leak directly on the
 numerical mesh. It is sometimes possible to ``lump'' the leaks into a single mesh-resolvable hole, but this is problematic
 for two reasons. First, the leakage area rarely corresponds neatly to the area of a single mesh cell-sized hole. Second, the
 flow speeds through the hole can be large and cause numerical instabilities.
@@ -5289,7 +5291,7 @@ For the case where the stack flow is through small leakage paths, it is recommen
 
 This subsection contains a simple example demonstrating the stack effect.  A detailed discussion of the stack effect can be found in \cite{Klote_Milke}.
 
-The {\bf stack\_effect} test case is a two-dimensional simulation of a building with an interior hotter than the exterior and two leakage paths at the top and the bottom of the building.  Since the inside is hotter, it will have a smaller pressure gradient than the outside resulting in higher pressure inside the top of the buiding than the outside.  This will cause flow out the upper leakage path and in the bottom leakage path.
+The {\bf stack\_effect} test case is a two-dimensional simulation of a building with an interior hotter than the exterior and two leakage paths at the top and the bottom of the building.  Since the inside is hotter, it will have a smaller pressure gradient than the outside resulting in higher pressure inside the top of the building than the outside.  This will cause flow out the upper leakage path and in the bottom leakage path.
 
 The building 100~m tall building with an interior temperature, $T_b$, initially set to 20~$^\circ$C, and an exterior temperature, $T_\infty$, set to
 10~$^\circ$C. The {\ct LAPSE\_RATE} is set to 0~$^\circ$C/m; thus, $T_0(z)=T_\infty$ outside the building and $T_0(z)=T_b$ inside the building. Two small leakage openings are defined 2.5~m above the ground floor and 2.5~m below the roof using the HVAC solver.  Each opening is given an area of 0.01~m$^2$ and a flow loss of 2 (e.g. an entrance loss into the leak path of 1 and and exit loss out of the leak path of 1 both of which represent a sharp edge opening).
@@ -5303,7 +5305,7 @@ where $\cal R$ is the universal gas constant, $g$ is the acceleration of gravity
 Applying this formula to the external and internal locations at the lower and upper vents results in densities of 1.2412, 1.1989, 1.2272, and
 1.1858~kg/m$^3$, respectively.
 
-Since the openings in the building are equally spaced over its height, the neutral plane should be close to its midpoint. By making some simple assumptions including using only the ground level ambient pressure for the equation of state and that the densities are constant with height, a hand calculation can be done to determine the flows through the leakage paths.  Note that in actuality both pressure and desnsity will change with height; however, as seen in the above densities, this changes are small.
+Since the openings in the building are equally spaced over its height, the neutral plane should be close to its midpoint. By making some simple assumptions including using only the ground level ambient pressure for the equation of state and that the densities are constant with height, a hand calculation can be done to determine the flows through the leakage paths.  Note that in actuality both pressure and density will change with height; however, as seen in the above densities, this changes are small.
 
 The pressure difference across the building's wall can be computed as
 \be
@@ -6504,13 +6506,13 @@ the radiation transport equation is fully updated every 15 time steps.
 
 By default FDS employs a gray gas model for the radiation absorption coefficient, a function
 of gas composition and temperature, which are
-tabulated in a look-up table using the routines found in RadCal. 
+tabulated in a look-up table using the routines found in RadCal.
 
 \subsection{RadCal Issues}
 
 \label{info:RadCal}
 
-There are several issues to keep in mind with regard to RadCal. 
+There are several issues to keep in mind with regard to RadCal.
 
 \subsubsection{Path Length}
 
@@ -10772,11 +10774,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct PRES} (Pressure Solver Parameters)} \\
 \hline \hline
 \endhead
-{\ct CHECK\_POISSON}                & Logical       & Section~\ref{info:PRES}           &               & {\ct .FALSE.}         \\ \hline
-{\ct MAX\_PRESSURE\_ITERATIONS}     & Integer       & Section~\ref{info:PRES}           &               &   10000                \\ \hline
-{\ct PRESSURE\_RELAX\_FACTOR}       & Real          & Section~\ref{info:PRES}           &               & 0.2                       \\ \hline
+{\ct CHECK\_POISSON}                & Logical       & Section~\ref{info:PRES}           &               & {\ct .FALSE.}             \\ \hline
+{\ct MAX\_PRESSURE\_ITERATIONS}     & Integer       & Section~\ref{info:PRES}           &               &   10000                   \\ \hline
+{\ct PRESSURE\_RELAX\_TIME}         & Real          & Section~\ref{info:PRES}           & s             & 1.                        \\ \hline
 {\ct RELAXATION\_FACTOR}            & Real          & Section~\ref{info:PRES}           &               & 1.0                       \\ \hline
-{\ct VELOCITY\_TOLERANCE}           & Real          & Section~\ref{info:PRES}           &  m/s          &                        \\ \hline
+{\ct VELOCITY\_TOLERANCE}           & Real          & Section~\ref{info:PRES}           &  m/s          &                           \\ \hline
 \end{longtable}
 
 % Undocumented: SCARC_METHOD , SCARC_KRYLOV , SCARC_MULTIGRID, SCARC_SMOOTH  , SCARC_PRECON,
