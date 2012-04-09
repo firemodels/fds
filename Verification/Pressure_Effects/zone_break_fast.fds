@@ -1,14 +1,14 @@
 This example case demonstrates how to create pressure ZONEs that can be opened. 
 Each time a ZONE is opened, the pressure of the two connected ZONEs quickly equilibriates.
-The speed of the equilibriation is governed by the PRESSURE_RELAX_FACTOR.
+The speed of the equilibriation is governed by the PRESSURE_RELAX_TIME.
 
-&HEAD CHID='zone_break_p5', TITLE='Test of opening pressure ZONEs, SVN $Revision$' /
+&HEAD CHID='zone_break_fast', TITLE='Test of opening pressure ZONEs, SVN $Revision$' /
 
 &MESH IJK=50,50,12, XB=0.0,10.0,0.0,10.0,0.0,2.4 /
 
 &TIME T_END=30. / 
 
-&PRES PRESSURE_RELAX_FACTOR=0.5 /
+&PRES PRESSURE_RELAX_TIME=0.5 /
 
 &SURF ID='BLOW', SPEC_ID='AIR',MASS_FLUX(1)=0.1, COLOR='RED', RAMP_MF(1)='flow' / 
 &RAMP ID='flow', T= 0.0, F=0. /
