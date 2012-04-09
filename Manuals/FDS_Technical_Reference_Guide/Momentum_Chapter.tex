@@ -579,19 +579,17 @@ each successive approximation of the pressure gradient at the solid wall.
 \label{app_pressure_correction}
 
 The time advancement scheme for multiple meshes involves averaging the normal components of velocity at the mesh interface in
-order to drive the two velocities fields closer into alignment. Because FDS uses a staggered grid, the normal components of velocity co-exist on the mesh interface.
-Consider meshes $(l)$ (left) and $(r)$ (right) which are joined side by side in the $x$ direction. The values $u^{(l)}_{I,jk}$
-and $u^{(r)}_{0,jk}$ live at the same physical location, but are advanced separately (and by different processes)
-during the course of the algorithm.
-Ideally, these velocities should be identical, but they are not because of errors associated with solving the pressure separately on each mesh.
-To improve the speed of our parallel algorithm, our strategy is to minimize the difference between these values.
+order to drive them closer into alignment. Because FDS uses a staggered grid, the normal components of velocity co-exist on the mesh interface.
+Consider two meshes joined side by side in the $x$ direction. The component $u_I \equiv u_{I,jk}$ lives on the right boundary of the left hand mesh, and
+$u_0 \equiv u_{0,jk}$ lives on the left boundary of the right hand mesh.
+Ideally, these velocities should be identical, but they are not because of errors associated with solving the pressure on each mesh separately.
 While the primitive velocity components are indeed unique to a given mesh, for each mesh we may define the
 discrete ``patch-averaged'' field $\bar{\mathbf{u}}$ which is identical at all overlapping mesh points.
 To do this we simply average the coincident values of the normal velocity component at the mesh interfaces.
-For instance, considering the same side-by-side meshes $(l)$ and $(r)$ as before,
+For instance, considering the same side-by-side meshes as before,
 \be
 \label{eqn_patchave_ufield}
-\bar{u}^{(l)}_{I,jk} = \bar{u}^{(r)}_{0,jk} \equiv \frac{1}{2} \left( u^{(l)}_{I,jk} + u^{(r)}_{0,jk} \right)
+\bar{u}_I = \bar{u}_0 \equiv \frac{1}{2} \left( u_{I,jk} + u_{0,jk} \right)
 \ee
 for all patch boundary cells $j$ and $k$. Here, for simplicity, we are only considering the case in which the
 cell sizes are equivalent for the adjoining meshes (coarse-fine mesh interfaces are currently handled by the code,
@@ -610,7 +608,7 @@ derivative of divergence in the pressure equation:
 \be
 \label{eqn_poisson_stg1}
 \nabla^2 {\cH}^n = -\left(\frac{ \nabla\!\cdot \bu^* - \nabla\!\cdot \bu^n - \nabla\!\cdot (\bar{\bu}^n - \bu^n) }{\delta t}\right) -
-  \mathbf{F}(\bar{\mathbf{u}}^n)
+  \mathbf{F}(\bar{\mathbf{u}}^n) 
 \ee
 The extra term in the time derivative, $\nabla\!\cdot (\bar{\bu}^n - \bu^n)$, ``corrects'' the divergence error.
 The benefit to averaging the normal components of velocity at mesh interfaces is that $\mathbf{F}$ is the same on each side of the interface,
@@ -619,9 +617,25 @@ This also means that stress tensors computed at a mesh interface (which are buri
 this symmetry is a requirement for angular momentum conservation.  Thus, the patch-averaging procedure prevents the
 production of spurious vorticity at mesh interfaces.
 
-The boundary condition for the pressure term, $\cal H$, at mesh interfaces is a Dirichlet condition.
+Equation~(\ref{eqn_poisson_stg1}) corrects the error in the divergence resulting from the averaging of normal velocity components, but it still does not guarantee that the
+updated velocity components will be equal. To drive the two normal components of velocity closer together, we use the
+following iterative scheme in the predictor step, again using the $x$ direction interface boundary as an example:
+\begin{enumerate}
+\item Define the pressure term at the mesh interface, $\cH_B$, consistent with a Dirichlet boundary condition. Note that the superscript ``old'' refers to the fact that at this point, the Poisson equation for pressure has not been solved:
 \be
-   \cH_{I+\ha,jk}^{(l)} = \cH_{\ha,jk}^{(r)} \equiv \frac{\cH_{I,jk}^{(l)} + \cH_{1,jk}^{(r)} }{2} + \frac{\dx}{4 \, \dt} ( u_{I,jk}^{(l)} - u_{0,jk}^{(r)} )
+   \cH_B = \frac{\cH_I^{old} + \cH_1^{old} }{2} + \frac{\dx}{4\, \dt} \left( u_I^{*,\,old}-u_0^{*,\,old} \right)
 \ee
-The second term on the right hand side is used in an optional iterative scheme to drive the updated normal velocity components closer together.
+Note also that $\cH$ is cell-centered; thus, $\cH_I$ is at the center of the $I$th grid cell of the left hand mesh, and $\cH_1$ is at the center of the first grid cell of the right hand mesh.
+\item Solve the Poisson equation in each mesh separately and exchange values of $\cH_I$ and $\cH_1$.
+\item Predict the normal component of velocity at the next time step. Note that the boundary condition for interface pressure term effectively yields the following:
+\begin{eqnarray}
+   u_I^* &=& \bar{u}_I^n - \frac{u_I^{*,\, old}-u_0^{*,\, old}}{2} - \dt \left( F_{x,I}^{n} + \frac{ (\cH_I^{old}+\cH_1^{old})/2 - H_I }{ \dx/2} \right) \label{uI} \\
+   u_0^* &=& \bar{u}_0^n + \frac{u_I^{*,\, old}-u_0^{*,\, old}}{2} - \dt \left( F_{x,0}^{n} + \frac{ H_1 - (\cH_I^{old}+\cH_1^{old})/2 }{ \dx/2} \right) \label{u0}
+\end{eqnarray}
+\item Repeat this process until $\left| u_I^* - u_0^* \right|$ falls below a specified tolerance.
+\end{enumerate}
+For the corrector step, the procedure is the same, except the boundary condition for the pressure term is:
+\be
+   \cH_B = \frac{\cH_I^{old} + \cH_1^{old} }{2} + \frac{\dx}{2\, \dt} \left( u_I^{n+1,\,old}-u_0^{n+1,\,old} \right)
+\ee
 
