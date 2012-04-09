@@ -266,16 +266,18 @@ Note that
 To drive the pressure within the connected zones towards each other, a volume flow, $\dot{V}_m^*$, is applied to each zone. This flow is intended to move gas
 from zones with the higher pressures towards zones with lower pressures. Eq.~(\ref{concon2}) now becomes:
 \be
-   \dod{\bp_{eq}}{t} - r \, \frac{ \bp_m - \bp_{eq} }{ \dt} = 
+   \dod{\bp_{eq}}{t} - \frac{ \bp_m - \bp_{eq} }{\tau} =
    \left( \int_{\Omega_m} {\cal D} \, dV - \int_{\partial \Omega_m} \bu \cdot d\bS - \dot{V}_m^* \right) \Big/ \int_{\Omega_m} {\cal P} \, dV
 \ee
-This equation is solved for $\dot{V}_m^*$. 
+This equation is solved for $\dot{V}_m^*$.
 The first term on the left is the change in the equilibrium pressure with time:
 \be \dod{\bp_{eq}}{t} = \left( \sum_m \int_{\Omega_m} {\cal D} \, dV - \sum_m \int_{\partial \Omega_m} \bu \cdot d\bS \right) \Big/ \sum_m \int_{\Omega_m} {\cal P} \, dV \ee
 The summation is over all connected zones, and it is essentially the net change in pressure with time for the entire connected region. If there is any opening to the
 exterior of the computational domain, this term is set to zero and all connected zone pressures are driven towards ambient.
-The second term on the left forces the pressure in the $m$th pressure zone towards the equilibrium. 
-The constant, $r$, is a relaxation factor of 0.2, a somewhat arbitrary value designed to slow down the fairly rapid pressure equilibration.
+The second term on the left forces the pressure in the $m$th pressure zone towards the equilibrium.
+The constant, $\tau$, is a characteristic time for the pressure to come into equilibrium. Its default value is on the order of 1~s. In reality, room pressures typically
+come into equilibrium very rapidly, but air movements associated with rapid changes in pressure can cause numerical instabilities. Because of the low Mach number assumption,
+FDS should not be used for rapid discharge of pressure vessels.
 
 
 \subsection{Enthalpy and Specific Heat}
