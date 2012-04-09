@@ -4559,8 +4559,8 @@ void drawvolslice(const slicedata *sd){
        z1 = zplt[k];
        z3 = zplt[k+1];
        /*
-       n+1 (y1,z3) n2+1 (y3,z3)
-         n (y1,z1)     n2 (y3,z1)
+       n+1 (y1,z3)     n2+1 (y3,z3)
+         n (y1,z1)     n2   (y3,z1)
        */
        if(ABS(i11-i33)<ABS(i13-i31)){
          glColor4fv(&rgb_ptr[i11]);glVertex3f(constval,yy1,z1);
@@ -4635,6 +4635,7 @@ void drawvolslice(const slicedata *sd){
    }
    glEnd();
   }
+  // i*nj*nk + j*nk + k
   if(meshi->visz==1){
    constval = zplt[meshi->plotz]+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);

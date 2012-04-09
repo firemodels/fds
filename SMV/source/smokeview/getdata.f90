@@ -579,9 +579,9 @@ integer, intent(in) :: ntimes
 logical :: connected
 integer :: error
 character(len=30) :: longlbl, shortlbl, unitlbl
-integer :: i,ii
 integer :: ibeg, iend, nframe
-
+integer :: nxsp, nysp, nzsp
+integer :: i,ii,jj,kk
 inquire(unit=file_unit,opened=connected)
 if(connected)close(file_unit)
 
@@ -596,12 +596,17 @@ write(file_unit,iostat=error)shortlbl
 write(file_unit,iostat=error)unitlbl
 
 write(file_unit,iostat=error)is1, is2, js1, js2, ks1, ks2
-nframe=(is2+1-is1)*(js2+1-js1)*(ks2+1-ks1)
+nxsp = is2 + 1 - is1
+nysp = js2 + 1 - js1
+nzsp = ks2 + 1 - ks1
+nframe=nxsp*nysp*nzsp
 do i = 1, ntimes
   write(file_unit)times(i)
   ibeg=1+(i-1)*nframe
   iend=i*nframe
-  write(file_unit)(qdata(ii),ii=ibeg,iend)
+ ! write(file_unit)(qdata(ii),ii=ibeg,iend)
+ !  i*nj*nk + j*nk + k
+  write(file_unit)(((qdata(ibeg+kk-1+(jj-1)*nzsp+(ii-1)*nzsp*nysp),ii=1,nxsp),jj=1,nysp),kk=1,nzsp)
 end do
 
 close(file_unit)
