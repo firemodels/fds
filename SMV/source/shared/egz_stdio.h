@@ -7,7 +7,6 @@
 
 #ifdef EGZ
 
-#include <stdio.h>
 #ifdef USE_ZLIB
 
 #ifdef WIN32
@@ -17,7 +16,10 @@
 /* #define ZLIB_DLL */
 #endif   /* end WIN32 */
 
+#ifndef DEF_ZLIB
+#define DEF_ZLIB
 #include "zlib.h"
+#endif
 #endif   /* end USE_ZLIB */
 
 typedef struct {

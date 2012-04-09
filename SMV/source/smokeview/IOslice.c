@@ -12,7 +12,6 @@ char IOslice_revision[]="$Revision$";
 #endif
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
 #include <math.h>
 #ifdef pp_OSX
 #include <GLUT/glut.h>
@@ -388,7 +387,6 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
   int ii;
   float qmin, qmax;
   int headersize, framesize, statfile;
-  STRUCTSTAT statbuffer;
   char slicelonglabels[31], sliceshortlabels[31], sliceunits[31];
   slicedata *sd;
   vslicedata *vd;
@@ -524,9 +522,6 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     file_size=get_filesize(file);
 
     slicefilelen = strlen(file);
-    if(settmax_s==0&&settmin_s==0){
-      statfile=STAT(file,&statbuffer);
-    }
     if(sd->compression_type==0){
       FORTgetslicesizes(file, &sd->nslicei, &sd->nslicej, &sd->nslicek, &sd->ntimes, &sliceframestep, &endian_smv,&error,
         &settmin_s, &settmax_s, &tmin_s, &tmax_s, &headersize, &framesize, &statfile,
@@ -554,7 +549,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     if(settmax_s==0&&settmin_s==0&&statfile==0
       &&sd->compression_type==0
       ){
-      sd->ntimes = (statbuffer.st_size-headersize)/framesize;
+      sd->ntimes = (getfilesize(file)-headersize)/framesize;
       if(sliceframestep>1)sd->ntimes/=sliceframestep;
     }
     if(error!=0||sd->ntimes<1){

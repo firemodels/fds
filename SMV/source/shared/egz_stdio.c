@@ -7,6 +7,7 @@ char egz_stdio_revision[]="$Revision$";
 
 #include "options.h"
 #ifdef EGZ
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "egz_stdio.h"
