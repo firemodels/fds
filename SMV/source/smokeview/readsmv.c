@@ -5302,7 +5302,7 @@ typedef struct {
       char *sliceparms;
 
       sliceparms=strchr(buffer,'&');
-      if(sliceparms!=NULL){
+      if(1==0&&sliceparms!=NULL){
         sliceparms++;
         sliceparms[-1]=0;
         sscanf(sliceparms,"%i %i %i %i %i %i",&i1,&i2,&j1,&j2,&k1,&k2);
