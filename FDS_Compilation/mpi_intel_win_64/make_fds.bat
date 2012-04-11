@@ -7,5 +7,6 @@ set SETUP_IFORT_COMPILER12=1
 echo Setting up compiler environment
 call %intelbin%\ifortvars intel64
 
+:envexist
 make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_64
 pause
