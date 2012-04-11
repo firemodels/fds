@@ -93,27 +93,24 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type);
 
 void out_slicefile(slicedata *sd){
   int file_unit=20,slicefilelen;
-//  subroutine writeslicedata(file_unit,slicefilename,is1,is2,js1,js2,ks1,ks2,qdata,times,ntimes)
-//STDCALLF FORTwriteslicedata(int *file_unit,char *slicefilename, 
-//                            int *is1,int *is2,int *js1,int *js2,int *ks1,int *ks2,
-//                            float *qdata,float *times,int *ntimes,FILE_SIZE slicefilelen)
+
   slicefilelen=strlen(sd->file);
   FORTwriteslicedata(&file_unit,sd->file,
     &sd->is1,&sd->is2,&sd->js1,&sd->js2,&sd->ks1,&sd->ks2,
     sd->qslicedata,sd->times,&sd->ntimes,slicefilelen);
-
 }
 
-/* ------------------ Creadslice ------------------------ */
+/* ------------------ Creadslice_frame ------------------------ */
 
-void Creadslice(int sd_index,int flag,int *error){
+void Creadslice_frame(int frame_index,int sd_index,int flag,int *error){
   slicedata *sd;
   int slicefilelen;
   int headersize,framesize,statfile;
-  int nframe,i;
+  int frame_size,i;
   int skip_local,returncode;
   FILE *SLICEFILE;
   float *time,*slicevals;
+
 
   sd = sliceinfo + sd_index;
   if(sd->loaded==1)readslice(sd->file,sd_index,UNLOAD,error);
@@ -123,43 +120,51 @@ void Creadslice(int sd_index,int flag,int *error){
     return;
   }
   slicefilelen = strlen(sd->file);
-  if(sd->compression_type==0){
-    FORTgetslicesizes(sd->file, &sd->nslicei, &sd->nslicej, &sd->nslicek, &sd->ntimes, &sliceframestep, &endian_smv,error,
-      &settmin_s, &settmax_s, &tmin_s, &tmax_s, &headersize, &framesize, &statfile,
-      slicefilelen);
-  }
-  else if(sd->compression_type==1){
-    if(
-      getsliceheader(sd->comp_file,sd->size_file,sd->compression_type,
-                     sliceframestep,settmin_s,settmax_s,tmin_s,tmax_s,
-                     &sd->nslicei, &sd->nslicej, &sd->nslicek, &sd->ntimes, &sd->ncompressed, &sd->valmin, &sd->valmax)==0){
-      readslice("",sd_index,UNLOAD,error);
-      *error=1;
-      return;
+  if(frame_index==0){
+    if(sd->compression_type==0){
+
+      FORTgetslicesizes(sd->file, &sd->nslicei, &sd->nslicej, &sd->nslicek, &sd->ntimes, &sliceframestep, &endian_smv,error,
+        &settmin_s, &settmax_s, &tmin_s, &tmax_s, &headersize, &framesize, &statfile,
+        slicefilelen);
+    }
+    else if(sd->compression_type==1){
+      if(
+        getsliceheader(sd->comp_file,sd->size_file,sd->compression_type,
+                       sliceframestep,settmin_s,settmax_s,tmin_s,tmax_s,
+                       &sd->nslicei, &sd->nslicej, &sd->nslicek, &sd->ntimes, &sd->ncompressed, &sd->valmin, &sd->valmax)==0){
+        readslice("",sd_index,UNLOAD,error);
+        *error=1;
+        return;
+      }
     }
   }
   skip_local =           (HEADER_SIZE+30        +TRAILER_SIZE); // long label
   skip_local +=          (HEADER_SIZE+30        +TRAILER_SIZE); // short label
   skip_local +=          (HEADER_SIZE+30        +TRAILER_SIZE); // unit label
   skip_local +=          (HEADER_SIZE+24        +TRAILER_SIZE); // is1, is2, js1, js2, ks1, ks2
-
-  nframe = sd->nslicei*sd->nslicej*sd->nslicek;
+  
+  frame_size = sd->nslicei*sd->nslicej*sd->nslicek;
+  skip_local += frame_index*(HEADER_SIZE + sizeof(float) + TRAILER_SIZE); // 
+  skip_local += frame_index*(HEADER_SIZE + frame_size*sizeof(float) + TRAILER_SIZE); // 
 
   SLICEFILE=fopen(sd->file,"rb");
   if(SLICEFILE==NULL)return;
 
   returncode=FSEEK(SLICEFILE,skip_local,SEEK_SET); // skip from beginning of file
-  NewMemory((void **)&sd->qslicedata,sizeof(float)*nframe*sd->ntimes);
-  NewMemory((void **)&sd->times,sizeof(float)*sd->ntimes);
 
-  slicevals=sd->qslicedata;
-  time=sd->times;
-  for(i=0;i<sd->ntimes;i++){
-    FORTSLICEREAD(time,1);
-    FORTSLICEREAD(slicevals,nframe);
-    slicevals+=nframe;
-    time++;
+  if(frame_index==0){
+    NewMemory((void **)&sd->qslicedata,2*frame_size*sizeof(float));
+    NewMemory((void **)&sd->times,sizeof(float));
   }
+  slicevals=sd->qslicedata;
+  if(frame_index%2!=0){
+    slicevals+=frame_size;
+  }
+  time=sd->times;
+
+  FORTSLICEREAD(time,1);
+  FORTSLICEREAD(slicevals,frame_size);
+  fclose(SLICEFILE);
 }
 
 /* ------------------ readfslice ------------------------ */
@@ -181,68 +186,78 @@ void readfslice(int ifslice, int flag, int *errorcode){
   co2=fedi->co2;
   co=fedi->co;
   fed=fedi->fed;
-  if(1==1||is_file_newer(fed->file,o2->file)!=1|| // if the FED slice file does not exist or is older than
+  readslice(fed->file,fedi->fed_index,UNLOAD,&error);
+  if(regenerate_fed==1||is_file_newer(fed->file,o2->file)!=1|| // if the FED slice file does not exist or is older than
      is_file_newer(fed->file,co2->file)!=1||// either the CO, CO2 or O2 slice files then create a new
      is_file_newer(fed->file,co->file)!=1){ // FED slice file
     int i;
-    int nframe;
+    int frame_size;
     float *fed_frame,*fed_framem1;
-    float *o2_frame,*o2_framem1;
-    float *co2_frame,*co2_framem1;
-    float *co_frame,*co_framem1;
+    float *o2_frame1,*o2_frame2;
+    float *co2_frame1,*co2_frame2;
+    float *co_frame1,*co_frame2;
     float *times;
 
-    Creadslice(fedi->o2_index,LOAD,&error);
-    Creadslice(fedi->co2_index,LOAD,&error);
-    Creadslice(fedi->co_index,LOAD,&error);
-    
+    printf("\n");
+    printf("generating FED slice data\n");
+    Creadslice_frame(0,fedi->o2_index,LOAD,&error);
+    Creadslice_frame(0,fedi->co2_index,LOAD,&error);
+    Creadslice_frame(0,fedi->co_index,LOAD,&error);
+
     fed->nslicei=co->nslicei;
     fed->nslicej=co->nslicej;
     fed->nslicek=co->nslicek;
     fed->ntimes=MIN(co->ntimes,co2->ntimes);
     fed->ntimes=MIN(fed->ntimes,o2->ntimes);
-    nframe = fed->nslicei*fed->nslicej*fed->nslicek;
-    fed->nslicetotal=nframe*fed->ntimes;
+    frame_size = fed->nslicei*fed->nslicej*fed->nslicek;
+    fed->nslicetotal=frame_size*fed->ntimes;
 
-    NewMemory((void **)&fed->qslicedata,sizeof(float)*nframe*fed->ntimes);
+    NewMemory((void **)&fed->qslicedata,sizeof(float)*frame_size*fed->ntimes);
     NewMemory((void **)&fed->times,sizeof(float)*fed->ntimes);
 
     times=fed->times;
     fed_frame=fed->qslicedata;
-    o2_frame=o2->qslicedata;
-    co2_frame=co2->qslicedata;
-    co_frame=co->qslicedata;
+    o2_frame1=o2->qslicedata;
+    o2_frame2=o2_frame1+frame_size;
+
+    co2_frame1=co2->qslicedata;
+    co2_frame2=co2_frame1+frame_size;
+
+    co_frame1=co->qslicedata;
+    co_frame2=co_frame1+frame_size;
+
     times[0]=co2->times[0];
-    for(i=0;i<nframe;i++){
+    for(i=0;i<frame_size;i++){
       fed_frame[i]=0.0;
     }
     for(i=1;i<fed->ntimes;i++){
       int j;
       float dt,valj,valjm1;
 
-      times[i]=co2->times[i];
+      Creadslice_frame(i,fedi->o2_index,LOAD,&error);
+      Creadslice_frame(i,fedi->co2_index,LOAD,&error);
+      Creadslice_frame(i,fedi->co_index,LOAD,&error);
+
+      times[i]=co2->times[0];
+      printf("generating FED time=%.2f\n",times[i]);
       dt = (times[i]-times[i-1]); 
 
       fed_framem1=fed_frame;
-      fed_frame+=nframe;
-      o2_framem1=o2_frame;
-      o2_frame+=nframe;
-      co2_framem1=co2_frame;
-      co2_frame+=nframe;
-      co_framem1=co_frame;
-      co_frame+=nframe;
-      for(j=0;j<nframe;j++){
-        float val_thistime, val_lasttime;
+      fed_frame+=frame_size;
+      for(j=0;j<frame_size;j++){
+        float val1, val2;
 
-        val_thistime=FEDCO(  co_frame[j])*HVCO2(  co2_frame[j])+FEDO2(  o2_frame[j]);
-        val_lasttime=FEDCO(co_framem1[j])*HVCO2(co2_framem1[j])+FEDO2(o2_framem1[j]);
-        fed_frame[j] = fed_framem1[j] + (val_thistime+val_lasttime)*dt/2.0;
+        val1=FEDCO(  co_frame1[j])*HVCO2(  co2_frame1[j])+FEDO2(  o2_frame1[j]);
+        val2=FEDCO(co_frame2[j])*HVCO2(co2_frame2[j])+FEDO2(o2_frame2[j]);
+        fed_frame[j] = fed_framem1[j] + (val1+val2)*dt/2.0;
       }
     }
     out_slicefile(fed);
-    Creadslice(fedi->o2_index,UNLOAD,&error);
-    Creadslice(fedi->co2_index,UNLOAD,&error);
-    Creadslice(fedi->co_index,UNLOAD,&error);
+    FREEMEMORY(fed->qslicedata);
+    FREEMEMORY(fed->times);
+    Creadslice_frame(0,fedi->o2_index,UNLOAD,&error);
+    Creadslice_frame(0,fedi->co2_index,UNLOAD,&error);
+    Creadslice_frame(0,fedi->co_index,UNLOAD,&error);
   }
   readslice(fed->file,fedi->fed_index,flag,&error);
   printf("completed\n");
@@ -1867,7 +1882,7 @@ void update_fedinfo(void){
       if(slicei->blocknumber!=slicej->blocknumber)continue;
       if(slicei->is1!=slicej->is1||slicei->is2!=slicej->is2)continue;
       if(slicei->js1!=slicej->js1||slicei->js2!=slicej->js2)continue;
-      if(slicei->ks1!=slicej->ks1||slicei->ks2!=slicej->ks2)continue; // skip if not the same size
+      if(slicei->ks1!=slicej->ks1||slicei->ks2!=slicej->ks2)continue; // skip if not the same size and in the same mesh
       fedi->co_index=j;
       break;
     }
@@ -1880,7 +1895,7 @@ void update_fedinfo(void){
       if(slicei->blocknumber!=slicej->blocknumber)continue;
       if(slicei->is1!=slicej->is1||slicei->is2!=slicej->is2)continue;
       if(slicei->js1!=slicej->js1||slicei->js2!=slicej->js2)continue;
-      if(slicei->ks1!=slicej->ks1||slicei->ks2!=slicej->ks2)continue; // skip if not the same size
+      if(slicei->ks1!=slicej->ks1||slicei->ks2!=slicej->ks2)continue; // skip if not the same size and in the same mesh
       fedi->o2_index=j;
       break;
     }

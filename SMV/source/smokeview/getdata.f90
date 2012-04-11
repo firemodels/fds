@@ -602,6 +602,8 @@ nzsp = ks2 + 1 - ks1
 nframe=nxsp*nysp*nzsp
 do i = 1, ntimes
   write(file_unit)times(i)
+  write(6,10)times(i)
+10 format("outputting slice time=",f10.2)
   ibeg=1+(i-1)*nframe
   iend=i*nframe
   write(file_unit)(qdata(ii),ii=ibeg,iend)

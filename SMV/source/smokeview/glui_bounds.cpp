@@ -643,6 +643,9 @@ extern "C" void glui_bounds_setup(int main_window){
       CHECKBOX_cellcenter_slice_interp = glui_bounds->add_checkbox_to_panel(panel_slice,_("Interpolate cell centered slices"),
         &cellcenter_interp);
     }
+    if(nfedinfo>0){
+      glui_bounds->add_checkbox_to_panel(panel_slice,"Regenerate FED data",&regenerate_fed);
+    }
     glui_bounds->add_checkbox_to_panel(panel_slice,_("Output data to file"),&output_slicedata);
     Slice_CB(FILETYPEINDEX);
   }
