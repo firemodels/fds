@@ -300,7 +300,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
 ENDDO SPECIES_LOOP
 
-! Get the average specific heat
+! Get the specific heat
 
 CP => WORK5
 
@@ -350,34 +350,8 @@ K_DNS_OR_LES: IF (DNS) THEN
    
 ELSE K_DNS_OR_LES
    
-   CP_FTMP_IF: IF (CP_FTMP) THEN
+   KP = MU*CPOPR
       
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               KP(I,J,K) = MU(I,J,K)*CP(I,J,K)*RPR  
-            ENDDO
-         ENDDO
-      ENDDO
-      
-      BOUNDARY_LOOP2: DO IW=1,N_EXTERNAL_WALL_CELLS
-         WC => WALL(IW)
-         II  = WC%ONE_D%II
-         JJ  = WC%ONE_D%JJ
-         KK  = WC%ONE_D%KK
-         IIG = WC%ONE_D%IIG
-         JJG = WC%ONE_D%JJG
-         KKG = WC%ONE_D%KKG
-         KP(II,JJ,KK) = KP(IIG,JJG,KKG)
-      ENDDO BOUNDARY_LOOP2
-      
-   ELSE CP_FTMP_IF
-      
-      KP = MU*CPOPR
-      
-   ENDIF CP_FTMP_IF
-   
 ENDIF K_DNS_OR_LES
 
 ! Compute k*dT/dx, etc
