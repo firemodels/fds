@@ -8,7 +8,6 @@
       DNS=.TRUE.,
       GVEC=0,0,0, 
       STRATIFICATION=.FALSE.
-      PERIODIC_TEST=100
       U0=50
       /
 
