@@ -4481,13 +4481,7 @@ SELECT CASE(IND)
          IF (N_TRACKED_SPECIES > 0 ) ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(II,JJ,KK,1:N_TRACKED_SPECIES)
          CALL GET_CONDUCTIVITY(ZZ_GET,GAS_PHASE_OUTPUT ,TMP(II,JJ,KK))     
       ELSE
-         IF (CP_FTMP) THEN
-            IF (N_TRACKED_SPECIES > 0) ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(II,JJ,KK,1:N_TRACKED_SPECIES)
-            CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,TMP(II,JJ,KK))
-            GAS_PHASE_OUTPUT = MU(II,JJ,KK)*CP*RPR                       
-         ELSE
-            GAS_PHASE_OUTPUT = MU(II,JJ,KK)*CPOPR
-         ENDIF
+         GAS_PHASE_OUTPUT = MU(II,JJ,KK)*CPOPR
       ENDIF
             
    CASE(40)  ! MOLECULAR WEIGHT
@@ -4753,12 +4747,7 @@ SELECT CASE(IND)
                   IF (DNS) THEN
                      CALL GET_CONDUCTIVITY(ZZ_GET,K_G,TMP(II,JJ,KK))     
                   ELSE
-                     IF (CP_FTMP) THEN
-                        CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,TMP(I,J,K))
-                        K_G = MU(I,J,K)*CP*RPR                       
-                     ELSE
-                        K_G = MU(I,J,K)*CPOPR
-                     ENDIF
+                     K_G = MU(I,J,K)*CPOPR
                   ENDIF
                   FLOW = FLOW - AREA*K_G*(TMP(IP,JP,KP)-TMP(I,J,K))*R_DN*0.001
                ENDIF

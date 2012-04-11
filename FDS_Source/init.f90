@@ -2840,8 +2840,8 @@ IF (EVACUATION_ONLY(NM)) RETURN
 ! Waste a few calls to RANDOM_NUMBER to avoid generating the exact same sequence on each mesh
 
 DO I=1,NM
-   IF (EVACUATION_ONLY(NM)) CYCLE
    CALL RANDOM_NUMBER(RN2)
+   RN = REAL(RN2,EB)
 ENDDO
 
 ! Point to local mesh variables
