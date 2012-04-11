@@ -543,11 +543,8 @@ ENTHALPY_TRANSPORT_IF: IF (ENTHALPY_TRANSPORT .AND. .NOT.EVACUATION_ONLY(NM)) TH
       ENDDO 
    ENDDO
 
+   if (.false.) then
    ! Effect of mass transport
-
-   UDRHDX=0._EB ! WORK2
-   VDRHDY=0._EB ! WORK3
-   WDRHDZ=0._EB ! WORK4
    
    RHO_Z_P=>WORK5;       RHO_Z_P=0._EB
    U_DOT_DEL_RHO=>WORK6; U_DOT_DEL_RHO=0._EB
@@ -684,6 +681,7 @@ ENTHALPY_TRANSPORT_IF: IF (ENTHALPY_TRANSPORT .AND. .NOT.EVACUATION_ONLY(NM)) TH
       ENDDO
 
    ENDDO MT_SPECIES_LOOP
+   endif
 
    ! Add contribution of reactions
  
