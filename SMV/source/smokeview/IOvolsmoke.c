@@ -1278,7 +1278,7 @@ float get_volsmoke_frame_time(volrenderdata *vr, int framenum){
   return time_local;
 }
 
-/* ------------------ get_volsmoke_frame_time ------------------------ */
+/* ------------------ get_volsmoke_all_times ------------------------ */
 
 void get_volsmoke_all_times(volrenderdata *vr){
   int i;

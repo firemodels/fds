@@ -26,6 +26,13 @@ char IOslice_revision[]="$Revision$";
 #include "interp.h"
 #include "smokeviewvars.h"
 
+#define HEADER_SIZE 4
+#define TRAILER_SIZE 4
+#define FORTSLICEREAD(var,size) FSEEK(SLICEFILE,HEADER_SIZE,SEEK_CUR);\
+                           returncode=fread(var,4,size,SLICEFILE);\
+                           if(endianswitch==1)endian_switch(var,size);\
+                           FSEEK(SLICEFILE,TRAILER_SIZE,SEEK_CUR)
+
 int endianswitch;
 
 int getslicezlibdata(char *file,
@@ -82,10 +89,6 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type);
          }                                   \
          DU *= 0.05*vecfactor/vrange
 
-#define FEDCO(CO) ( 4.607*pow(1000000.0*CLAMP(CO,0.0,0.1),1.036)/10000000.0 )
-#define FEDO2(O2)  ( exp( -(8.13-0.54*(20.9-100.0*CLAMP(O2,0.0,0.2))) )/60.0 ) 
-#define HVCO2(CO2) (exp(0.1930*CLAMP(CO2,0.0,0.1)*100.0+2.0004)/7.1)
-
 /* ------------------ out_slice ------------------------ */
 
 void out_slicefile(slicedata *sd){
@@ -101,6 +104,64 @@ void out_slicefile(slicedata *sd){
 
 }
 
+/* ------------------ Creadslice ------------------------ */
+
+void Creadslice(int sd_index,int flag,int *error){
+  slicedata *sd;
+  int slicefilelen;
+  int headersize,framesize,statfile;
+  int nframe,i;
+  int skip_local,returncode;
+  FILE *SLICEFILE;
+  float *time,*slicevals;
+
+  sd = sliceinfo + sd_index;
+  if(sd->loaded==1)readslice(sd->file,sd_index,UNLOAD,error);
+  if(flag==UNLOAD){
+    FREEMEMORY(sd->qslicedata);
+    FREEMEMORY(sd->times);
+    return;
+  }
+  slicefilelen = strlen(sd->file);
+  if(sd->compression_type==0){
+    FORTgetslicesizes(sd->file, &sd->nslicei, &sd->nslicej, &sd->nslicek, &sd->ntimes, &sliceframestep, &endian_smv,error,
+      &settmin_s, &settmax_s, &tmin_s, &tmax_s, &headersize, &framesize, &statfile,
+      slicefilelen);
+  }
+  else if(sd->compression_type==1){
+    if(
+      getsliceheader(sd->comp_file,sd->size_file,sd->compression_type,
+                     sliceframestep,settmin_s,settmax_s,tmin_s,tmax_s,
+                     &sd->nslicei, &sd->nslicej, &sd->nslicek, &sd->ntimes, &sd->ncompressed, &sd->valmin, &sd->valmax)==0){
+      readslice("",sd_index,UNLOAD,error);
+      *error=1;
+      return;
+    }
+  }
+  skip_local =           (HEADER_SIZE+30        +TRAILER_SIZE); // long label
+  skip_local +=          (HEADER_SIZE+30        +TRAILER_SIZE); // short label
+  skip_local +=          (HEADER_SIZE+30        +TRAILER_SIZE); // unit label
+  skip_local +=          (HEADER_SIZE+24        +TRAILER_SIZE); // is1, is2, js1, js2, ks1, ks2
+
+  nframe = sd->nslicei*sd->nslicej*sd->nslicek;
+
+  SLICEFILE=fopen(sd->file,"rb");
+  if(SLICEFILE==NULL)return;
+
+  returncode=FSEEK(SLICEFILE,skip_local,SEEK_SET); // skip from beginning of file
+  NewMemory((void **)&sd->qslicedata,sizeof(float)*nframe*sd->ntimes);
+  NewMemory((void **)&sd->times,sizeof(float)*sd->ntimes);
+
+  slicevals=sd->qslicedata;
+  time=sd->times;
+  for(i=0;i<sd->ntimes;i++){
+    FORTSLICEREAD(time,1);
+    FORTSLICEREAD(slicevals,nframe);
+    slicevals+=nframe;
+    time++;
+  }
+}
+
 /* ------------------ readfslice ------------------------ */
 
 void readfslice(int ifslice, int flag, int *errorcode){
@@ -109,6 +170,10 @@ void readfslice(int ifslice, int flag, int *errorcode){
   int error;
   int co_loaded_before, co2_loaded_before, o2_loaded_before;
 
+#define FEDCO(CO) ( 4.607*pow(1000000.0*CLAMP(CO,0.0,0.1),1.036)/10000000.0 )
+#define FEDO2(O2)  ( exp( -(8.13-0.54*(20.9-100.0*CLAMP(O2,0.0,0.2))) )/60.0 ) 
+#define HVCO2(CO2) (exp(0.1930*CLAMP(CO2,0.0,0.1)*100.0+2.0004)/7.1)
+
   ASSERT(fedinfo!=NULL);
   ASSERT(ifslice>=0);
   fedi = fedinfo + ifslice;
@@ -116,15 +181,7 @@ void readfslice(int ifslice, int flag, int *errorcode){
   co2=fedi->co2;
   co=fedi->co;
   fed=fedi->fed;
-  if(flag==UNLOAD){
-    if(o2->loaded==1)readslice(o2->file,fedi->o2_index,UNLOAD,&error);
-    if(co2->loaded==1)readslice(co2->file,fedi->co2_index,UNLOAD,&error);
-    if(co->loaded==1)readslice(co->file,fedi->co_index,UNLOAD,&error);
-    fedi->loaded=0;
-    fedi->display=0;
-    return;
-  }
-  if(is_file_newer(fed->file,o2->file)!=1|| // if the FED slice file does not exist or is older than
+  if(1==1||is_file_newer(fed->file,o2->file)!=1|| // if the FED slice file does not exist or is older than
      is_file_newer(fed->file,co2->file)!=1||// either the CO, CO2 or O2 slice files then create a new
      is_file_newer(fed->file,co->file)!=1){ // FED slice file
     int i;
@@ -135,30 +192,19 @@ void readfslice(int ifslice, int flag, int *errorcode){
     float *co_frame,*co_framem1;
     float *times;
 
-    o2->loaded_save=o2->loaded;
-    co2->loaded_save=co2->loaded;
-    co->loaded_save=co->loaded;
-    
-    o2->display_save=o2->display;
-    co2->display_save=co2->display;
-    co->display_save=co->display;
-    
-    readslice(o2->file,fedi->o2_index,LOAD,&error);
-    readslice(co2->file,fedi->co2_index,LOAD,&error);
-    readslice(co->file,fedi->co_index,LOAD,&error);
-    
-    o2->display=0;
-    co2->display=0;
-    co->display=0;
+    Creadslice(fedi->o2_index,LOAD,&error);
+    Creadslice(fedi->co2_index,LOAD,&error);
+    Creadslice(fedi->co_index,LOAD,&error);
     
     fed->nslicei=co->nslicei;
     fed->nslicej=co->nslicej;
     fed->nslicek=co->nslicek;
-    fed->ntimes=co->ntimes;
+    fed->ntimes=MIN(co->ntimes,co2->ntimes);
+    fed->ntimes=MIN(fed->ntimes,o2->ntimes);
     nframe = fed->nslicei*fed->nslicej*fed->nslicek;
     fed->nslicetotal=nframe*fed->ntimes;
 
-    NewMemory((void **)&fed->qslicedata,sizeof(float)*fed->nslicei*fed->nslicej*fed->nslicek*fed->ntimes);
+    NewMemory((void **)&fed->qslicedata,sizeof(float)*nframe*fed->ntimes);
     NewMemory((void **)&fed->times,sizeof(float)*fed->ntimes);
 
     times=fed->times;
@@ -194,17 +240,9 @@ void readfslice(int ifslice, int flag, int *errorcode){
       }
     }
     out_slicefile(fed);
-    if(o2->loaded_save==0)readslice(o2->file,fedi->o2_index,UNLOAD,&error);
-    if(co2->loaded_save==0)readslice(co2->file,fedi->co2_index,UNLOAD,&error);
-    if(co->loaded_save==0)readslice(co->file,fedi->co_index,UNLOAD,&error);
-    
-    o2->loaded=o2->loaded_save;
-    co2->loaded=co2->loaded_save;
-    co->loaded=co->loaded_save;
-    
-    o2->display=o2->display_save;
-    co2->display=co2->display_save;
-    co->display=co->display_save;
+    Creadslice(fedi->o2_index,UNLOAD,&error);
+    Creadslice(fedi->co2_index,UNLOAD,&error);
+    Creadslice(fedi->co_index,UNLOAD,&error);
   }
   readslice(fed->file,fedi->fed_index,flag,&error);
   printf("completed\n");
@@ -1826,6 +1864,7 @@ void update_fedinfo(void){
 
       slicej = sliceinfo + j;
       if(strcmp(slicej->label.longlabel,"CARBON MONOXIDE VOLUME FRACTION")!=0)continue;
+      if(slicei->blocknumber!=slicej->blocknumber)continue;
       if(slicei->is1!=slicej->is1||slicei->is2!=slicej->is2)continue;
       if(slicei->js1!=slicej->js1||slicei->js2!=slicej->js2)continue;
       if(slicei->ks1!=slicej->ks1||slicei->ks2!=slicej->ks2)continue; // skip if not the same size
@@ -1838,6 +1877,7 @@ void update_fedinfo(void){
 
       slicej = sliceinfo + j;
       if(strcmp(slicej->label.longlabel,"OXYGEN VOLUME FRACTION")!=0)continue;
+      if(slicei->blocknumber!=slicej->blocknumber)continue;
       if(slicei->is1!=slicej->is1||slicei->is2!=slicej->is2)continue;
       if(slicei->js1!=slicej->js1||slicei->js2!=slicej->js2)continue;
       if(slicei->ks1!=slicej->ks1||slicei->ks2!=slicej->ks2)continue; // skip if not the same size

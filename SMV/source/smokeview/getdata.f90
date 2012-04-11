@@ -604,9 +604,7 @@ do i = 1, ntimes
   write(file_unit)times(i)
   ibeg=1+(i-1)*nframe
   iend=i*nframe
- ! write(file_unit)(qdata(ii),ii=ibeg,iend)
- !  i*nj*nk + j*nk + k
-  write(file_unit)(((qdata(ibeg+kk-1+(jj-1)*nzsp+(ii-1)*nzsp*nysp),ii=1,nxsp),jj=1,nysp),kk=1,nzsp)
+  write(file_unit)(qdata(ii),ii=ibeg,iend)
 end do
 
 close(file_unit)
