@@ -2044,6 +2044,43 @@ to ensure that no sudden or unexpected events occur during the stop and
 restart.
 
 
+\subsection{Special Topic: Initializing a 3D Velocity Field}
+\label{info:velo_restart}
+
+It may be useful to start a calculation from an established flow field.  Usually this can be accomplished with the normal restart functionality.  But in some circumstances restart may be fragile, or the user may want to specify a profile throughout the entire domain.  For such situations we have added the ability to read the velocity field information from a comma-delimited (.csv) file.  The user has the option of creating the velocity file using FDS or creating their own.  To generate the a velocity initialization file with FDS, in the input file add a {\ct DUMP} line with a {\ct UVW\_TIMER} (time in seconds).  The timer will accept up to 10 values, and will write velocity files for each mesh and each timer index to the working directory.  For example, if the user wants to write the simulation velocity field at 10 minutes into the run, they would add the following:
+
+\footnotesize
+\begin{verbatim}
+&DUMP UVW_TIMER(1)=600 /
+\end{verbatim}
+\normalsize
+
+\noindent FDS will then write {\bf CHID\_uvw\_{\it nn}.csv} for each time index and mesh.  The format for this file is
+
+\footnotesize
+\begin{verbatim}
+  WRITE(LU_UVW) IMIN,IMAX,JMIN,JMAX,KMIN,KMAX
+  DO K=KMIN,KMAX
+   DO J=JMIN,JMAX
+    DO I=IMIN,IMAX
+     WRITE(LU_UVW,*) U(I,J,K),',',V(I,J,K),',',W(I,J,K)
+    ENDDO
+   ENDDO
+  ENDDO
+\end{verbatim}
+\normalsize
+
+The user may read in the 3D velocity field using a {\ct CSVF} line.  For example:
+
+\footnotesize
+\begin{verbatim}
+&CSVF UVWFILE='my_velocity_field.csv' /
+\end{verbatim}
+\normalsize
+
+\noindent If multiple meshes are involved, it is assumed that the {\ct CSVF} lines are provided in the input file in the same order as the meshes.
+
+
 \subsection{Special Topic: Defying Gravity}
 \label{info:GVEC}
 
@@ -10042,6 +10079,30 @@ properties be specified as well. Simply prescribing as many properties as possib
 \vspace{\baselineskip}
 
 
+\section{\texorpdfstring{{\tt CSVF}}{CSVF} (Comma Delimited Output Files)}
+
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
+\begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
+\caption[Comma Delimited Output Files]{For more information see Section~\ref{info:CSVF}.}
+\label{tbl:CSVF} \\
+\hline
+\multicolumn{5}{|c|}{{\ct CSVF} (Comma Delimited Output Files)} \\
+\hline \hline
+\endfirsthead
+\caption[]{Continued} \\
+\hline
+\multicolumn{5}{|c|}{{\ct CSVF} (Comma Delimited Output Files)} \\
+\hline \hline
+\endhead
+%{\ct CSVFILE}         & Character      & Section~\ref{info:??}                &            &     \\ \hline
+{\ct UVWFILE}         & Character      & Section~\ref{info:velo_restart}      &            &     \\ \hline
+\end{longtable}
+
+\vspace{\baselineskip}
+
+
+
 \section{\texorpdfstring{{\tt CTRL}}{CTRL} (Control Function Parameters)}
 
 \setlength\LTleft{0pt}
@@ -10058,11 +10119,11 @@ properties be specified as well. Simply prescribing as many properties as possib
 \multicolumn{5}{|c|}{{\ct CTRL} (Control Function Parameters)} \\
 \hline \hline
 \endhead
-%{\ct CYCLE\_TIME}    & Real         & Periodicity                                 & s  &                           \\ \hline
-%{\ct CYCLES}         & Integer      & Number of times to cycle output             &    &                           \\ \hline
-{\ct CONSTANT}        & Real        & Section~\ref{info:CONTROL_MATH}         &    &                         \\ \hline
+%{\ct CYCLE\_TIME}    & Real         & Periodicity                                 & s  &                       \\ \hline
+%{\ct CYCLES}         & Integer      & Number of times to cycle output             &    &                       \\ \hline
+{\ct CONSTANT}        & Real        & Section~\ref{info:CONTROL_MATH}         &    &                           \\ \hline
 {\ct DELAY}          & Real         & Section~\ref{info:dry_pipe}             & s  &  0.                       \\ \hline
-{\ct EVACUATION}     & Logical      & Reference~\cite{FDS_Evac_Users_Guide}   &    & {\ct .FALSE.}    \\ \hline
+{\ct EVACUATION}     & Logical      & Reference~\cite{FDS_Evac_Users_Guide}   &    & {\ct .FALSE.}             \\ \hline
 {\ct FUNCTION\_TYPE} & Character    & Section~\ref{info:basic_control}        &    &                           \\ \hline
 {\ct ID}             & Character    & Section~\ref{info:CTRL}                 &    &                           \\ \hline
 {\ct INITIAL\_STATE} & Logical      & Section~\ref{info:basic_control}        &    & {\ct .FALSE.}             \\ \hline
@@ -10072,7 +10133,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct ON\_BOUND}      & Character    & Section~\ref{info:DEADBAND}             &    & {\ct LOWER}               \\ \hline
 {\ct RAMP\_ID}       & Character    & Section~\ref{info:CUSTOM}               &    &                           \\ \hline
 {\ct SETPOINT(2)}    & Real         & Section~\ref{info:basic_control}        &    &                           \\ \hline
-{\ct TRIP\_DIRECTION}& Integer      & Section~\ref{info:basic_control}        &    &   1                        \\ \hline
+{\ct TRIP\_DIRECTION}& Integer      & Section~\ref{info:basic_control}        &    &   1                       \\ \hline
 \end{longtable}
 
 
@@ -10196,6 +10257,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct SMOKE3D\_SPEC\_ID}             & Character    & Section~\ref{info:SMOKE3D}             &           &                                \\ \hline
 {\ct STATUS\_FILES}                 & Logical      & Section~\ref{info:DUMP}                &           & {\ct .FALSE.}                  \\ \hline
 {\ct TIMING}                        & Logical      & Section~\ref{info:TIMING}              &           & {\ct .FALSE.}                  \\ \hline
+{\ct UVW\_TIMER}                    & Real Vector (10)  & Section~\ref{info:velo_restart}   &  s        &                                \\ \hline
 {\ct VELOCITY\_ERROR\_FILE}         & Logical      & Section~\ref{info:TIMING}              &           & {\ct .FALSE.}                  \\ \hline
 {\ct WRITE\_XYZ}                    & Logical      & Section~\ref{info:PL3D}                &           & {\ct .FALSE.}                  \\ \hline
 \end{longtable}
@@ -10282,14 +10344,14 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct HVAC} (HVAC System Definition)} \\
 \hline \hline
 \endhead
-{\ct AIRCOIL\_ID}               & Character         & Section~\ref{info:HVACduct}                                                   &               &        \\ \hline
+{\ct AIRCOIL\_ID}               & Character         & Section~\ref{info:HVACduct}                                                   &               &                \\ \hline
 {\ct AMBIENT}                   & Logical           & Section~\ref{info:HVACnode}                                                   &               & {\ct .FALSE.}  \\ \hline
-{\ct AREA}                      & Real              & Section~\ref{info:HVACduct}                                                   & m$^2$         &        \\ \hline
-{\ct CLEAN\_LOSS}               & Real              & Section~\ref{info:HVACfilter}                                                 &               &        \\ \hline
-{\ct COOLANT\_CP}               & Real              & Section~\ref{info:HVACaircoil}                                                & kJ/kg/K       &        \\ \hline
-{\ct COOLANT\_MDOT}             & Real              & Section~\ref{info:HVACaircoil}                                                & kg/s          &        \\ \hline
-{\ct COOLANT\_TEMPERATURE}      & Real              & Section~\ref{info:HVACaircoil}                                                & $^\circ$C             &         \\ \hline
-{\ct CTRL\_ID}                  & Character         & Sections~\ref{info:HVACduct}, \ref{info:HVACfan}, and \ref{info:HVACfilter}   &               &        \\ \hline
+{\ct AREA}                      & Real              & Section~\ref{info:HVACduct}                                                   & m$^2$         &                \\ \hline
+{\ct CLEAN\_LOSS}               & Real              & Section~\ref{info:HVACfilter}                                                 &               &                \\ \hline
+{\ct COOLANT\_CP}               & Real              & Section~\ref{info:HVACaircoil}                                                & kJ/kg/K       &                \\ \hline
+{\ct COOLANT\_MDOT}             & Real              & Section~\ref{info:HVACaircoil}                                                & kg/s          &                \\ \hline
+{\ct COOLANT\_TEMPERATURE}      & Real              & Section~\ref{info:HVACaircoil}                                                & $^\circ$C     &                \\ \hline
+{\ct CTRL\_ID}                  & Character         & Sections~\ref{info:HVACduct}, \ref{info:HVACfan}, and \ref{info:HVACfilter}   &               &                \\ \hline
 {\ct DAMPER}                    & Logical           & Section~\ref{info:HVACduct}                                                   &               & {\ct .FALSE.}  \\ \hline
 {\ct DEVC\_ID}                  & Character         & Sections ~\ref{info:HVACduct}, \ref{info:HVACfan}, and \ref{info:HVACfilter}  &               &        \\ \hline
 {\ct DIAMETER}                  & Real              & Section~\ref{info:HVACduct}                                                   &  m            &        \\ \hline
@@ -10300,22 +10362,22 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct FIXED\_Q}                  & Real              & Section ~\ref{info:HVACaircoil}                                               & kW            &        \\ \hline
 {\ct ID}                        & Character         & Section~\ref{info:HVAC}                                                       &               &        \\ \hline
 {\ct LENGTH}                    & Real              & Section~\ref{info:HVACduct}                                                   &  m            &        \\ \hline
-{\ct LOADING}                   & Real Array        &  Section ~\ref{info:HVACfilter}         & kg            & 0.0    \\ \hline
-{\ct LOADING\_MULTIPLIER}       & Real Array        &  Section ~\ref{info:HVACfilter}         & kg            & 0.0    \\ \hline
-{\ct LOSS}                      & Real Array        & Sections ~\ref{info:HVACduct} -- \ref{info:HVACfilter}  &               & 0.0    \\ \hline
-{\ct MAX\_FLOW}                 & Real              & Section ~\ref{info:HVACfan}   &  m$^3$/s      &        \\ \hline
-{\ct MAX\_PRESSURE}             & Real              &  Section ~\ref{info:HVACfan}                 &  Pa           &        \\ \hline
-{\ct NODE\_ID}                  & Character Doublet & Section~\ref{info:HVACduct}                 &               &         \\ \hline
-{\ct RAMP\_ID}                  & Character         & Sections ~\ref{info:HVACduct}, ~\ref{info:HVACfilter}, and~\ref{info:HVACfan}  &               &          \\ \hline
-{\ct REVERSE}                   & Logical           & Section~\ref{info:HVACduct} &               & {\ct .FALSE.}  \\ \hline
-{\ct ROUGHNESS}                 & Real              & Section~\ref{info:HVACduct}                      &  m            & 0.0    \\ \hline
-{\ct SPEC\_ID}                  & Character         & Section ~\ref{info:HVACfilter}            &               &        \\ \hline
-{\ct TAU\_FAN}                  & Real              & Section ~\ref{info:HVACfan}                                & s             & 1.0    \\ \hline
-{\ct TAU\_VF}                   & Real              & Section~\ref{info:HVACduct}                  & s             & 1.0    \\ \hline
-{\ct TYPE\_ID}                  & Character         & Section~\ref{info:HVAC}                                 &               &        \\ \hline
-{\ct VENT\_ID}                  & Character         & Section~\ref{info:HVACnode}   &               &        \\ \hline
-{\ct VOLUME\_FLOW}              & Real              & Section~\ref{info:HVACduct} and ~\ref{info:HVACfan} &  m$^3$/s      &                       \\ \hline
-{\ct XYZ}                       & Real Triplet      & Section~\ref{info:HVACnode}                             &  m            &        \\ \hline
+{\ct LOADING}                   & Real Array        &  Section ~\ref{info:HVACfilter}                                               & kg            & 0.0    \\ \hline
+{\ct LOADING\_MULTIPLIER}       & Real Array        &  Section ~\ref{info:HVACfilter}                                               & kg            & 0.0    \\ \hline
+{\ct LOSS}                      & Real Array        & Sections ~\ref{info:HVACduct} -- \ref{info:HVACfilter}                        &               & 0.0    \\ \hline
+{\ct MAX\_FLOW}                 & Real              & Section ~\ref{info:HVACfan}                                                   &  m$^3$/s      &        \\ \hline
+{\ct MAX\_PRESSURE}             & Real              &  Section ~\ref{info:HVACfan}                                                  &  Pa           &        \\ \hline
+{\ct NODE\_ID}                  & Character Doublet & Section~\ref{info:HVACduct}                                                   &               &        \\ \hline
+{\ct RAMP\_ID}                  & Character         & Sections ~\ref{info:HVACduct}, ~\ref{info:HVACfilter}, and~\ref{info:HVACfan} &               &        \\ \hline
+{\ct REVERSE}                   & Logical           & Section~\ref{info:HVACduct}                                                   &               & {\ct .FALSE.}  \\ \hline
+{\ct ROUGHNESS}                 & Real              & Section~\ref{info:HVACduct}                                                   &  m            & 0.0    \\ \hline
+{\ct SPEC\_ID}                  & Character         & Section ~\ref{info:HVACfilter}                                                &               &        \\ \hline
+{\ct TAU\_FAN}                  & Real              & Section ~\ref{info:HVACfan}                                                   & s             & 1.0    \\ \hline
+{\ct TAU\_VF}                   & Real              & Section~\ref{info:HVACduct}                                                   & s             & 1.0    \\ \hline
+{\ct TYPE\_ID}                  & Character         & Section~\ref{info:HVAC}                                                       &               &        \\ \hline
+{\ct VENT\_ID}                  & Character         & Section~\ref{info:HVACnode}                                                   &               &        \\ \hline
+{\ct VOLUME\_FLOW}              & Real              & Section~\ref{info:HVACduct} and ~\ref{info:HVACfan}                           &  m$^3$/s      &        \\ \hline
+{\ct XYZ}                       & Real Triplet      & Section~\ref{info:HVACnode}                                                   &  m            &        \\ \hline
 \end{longtable}
 
 
@@ -10575,13 +10637,14 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TMPA}                                      & Real          & Section~\ref{info:MISC_Basics}                        & $^\circ$C     & 20.               \\ \hline
 {\ct TURBULENCE\_MODEL}                         & Character     & Section~\ref{info:LES}                                &               & {\ct 'DEARDORFF'} \\ \hline
 {\ct U0,V0,W0}                                  & Reals         & Section~\ref{info:MISC_Basics}                        & m/s           & 0.                \\ \hline
+%{\ct UVW\_FILE}                                 & Character     & See FDS Verification Guide                                &               &                   \\ \hline
 {\ct VISIBILITY\_FACTOR}                        & Real          & Section~\ref{info:visibility}                         &               & 3                 \\ \hline
 {\ct VN\_MAX}                                   & Real          & Section~\ref{info:CFL}                                &               & 1.0               \\ \hline
 {\ct VN\_MIN}                                   & Real          & Section~\ref{info:CFL}                                &               & 0.8               \\ \hline
 %{\ct WIND\_ONLY}                                & Logical       & See Wildland Fire User's Guide                            &               & {\ct .FALSE.}     \\ \hline
 \end{longtable}
 
-%Undocumented: HRRPUVCUT_MAX, THERMOPHORETIC_DEPOSITION, TURBULENT_DEPOSITION, VEG_LEVEL_SET,  HRRPUV_MAX_SMV, TERRAIN_IMAGE, NEW_EVAP, WFDS, UVW_FILE
+%Undocumented: HRRPUVCUT_MAX, THERMOPHORETIC_DEPOSITION, TURBULENT_DEPOSITION, VEG_LEVEL_SET,  HRRPUV_MAX_SMV, TERRAIN_IMAGE, NEW_EVAP, WFDS
 
 
 \vspace{\baselineskip}
