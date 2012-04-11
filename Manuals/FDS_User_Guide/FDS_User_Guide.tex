@@ -969,6 +969,7 @@ might already have addressed your problem, and telling us what version you are u
 
 
 \section{Common Error Statements}
+\label{info:Errors}
 
 An FDS calculation may end before the specified time limit.
 Following is a list of common error statements and how to diagnose the problems:
@@ -990,7 +991,8 @@ change parameters to force you to re-examine old input files.
 \item [{\bf Numerical Instability Errors}:]
 It is possible that during an FDS calculation the flow
 velocity at some location in the domain can increase due to numerical error causing the time step
-size to decrease to a point where logic in the code decides that the results are unphysical
+size to decrease to a point\footnote{By default, the calculation is stopped when the time step drops below 0.0001 of the initial time step. This
+factor can be changed via the {\ct TIME} line by specifying the {\ct DT\_LIMITING\_RATIO}.} where logic in the code decides that the results are unphysical
 and stops the calculation with an error message in the file {\bf CHID.out}.
 In these cases, FDS ends by dumping out one final
 Plot3D file giving the user some means by which to see where the
@@ -2366,7 +2368,7 @@ The maximum number of iterations per time step is given by {\ct MAX\_PRESSURE\_I
 
 There are two parameters on the {\ct PRES} line that control iterative procedures related to the coupling of velocity and pressure. One is
 called {\ct RELAXATION\_FACTOR} and its default value is 1. When there is an error in the normal component of velocity at a solid boundary, this
-parameter dictates that the correction be applied in 1 time step. If its value were 0.5, the correction would be applied in 2 time steps. 
+parameter dictates that the correction be applied in 1 time step. If its value were 0.5, the correction would be applied in 2 time steps.
 
 A similar parameter is the {\ct PRESSURE\_RELAX\_TIME}. It controls the rate at which the pressures in adjacent compartments are brought into equilibrium following a
 breach. Its default value is 1~s, meaning that equilibrium is achieved in roughly a second.
@@ -2417,10 +2419,12 @@ The algorithms in FDS are designed to work within a certain range of values for 
 there are bounds placed on these variables to prevent a single spurious value from causing a numerical instability. It also prevents out of range
 errors from calls to temperature-dependent look-up tables. By default, FDS determines the lowest and highest values of the variables based on user input, but it is not
 possible in all cases to anticipate just how low or high a given value might be. Thus,
-on rare occasions you might need to set upper or lower bounds on the density, temperature, or species mass fractions. These parameters are input under the
+on rare occasions you might need to set upper or lower bounds on the density, temperature, or species mass fractions. Temperature and density bounds are input under the
 namelist group called {\ct CLIP}. The parameters are listed in Table~\ref{tbl:CLIP}. You only need to set these values if you notice that one of them appears to be
 ``cut off'' when examining the results in Smokeview. For typical fire scenarios, you need not set these values, but if you anticipate relatively low or high values in an
 unusual case, take a look at the calculation results to determine if a change in the bounds is needed.
+
+To force the species mass fractions to remain between 0 and 1, set {\ct CLIP\_MASS\_FRACTION=.TRUE.} on the {\ct MISC} line.
 
 
 
@@ -9746,25 +9750,10 @@ The column ``File Type'' lists the allowed output files for the quantities. ``B'
 ``S'' is for Slice ({\ct SLCF}). Be careful
 when specifying complicated quantities for Iso-surface or Plot3D files, as it requires computation in every gas phase cell.
 
-For those output quantities that require a species name via {\ct SPEC\_ID}, the species implicitly defined when doing a mixture
-fraction calculation are as follows:
-
-\footnotesize
-\begin{verbatim}
-fuel
-oxygen
-nitrogen
-water vapor
-carbon dioxide
-carbon monoxide
-hydrogen
-soot
-other
-\end{verbatim}
-\normalsize
-
-\noindent
-As an example of how to use the species names, suppose you want to calculate the integrated mass flux of carbon monoxide
+For those output quantities that require a species name via {\ct SPEC\_ID}, the species implicitly defined when using the simple chemistry
+combustion model are {\ct 'OXYGEN'}, {\ct 'NITROGEN'}, {\ct 'WATER VAPOR'}, and {\ct 'CARBON DIOXIDE'}. If {\ct CO\_YIELD} and/or {\ct SOOT\_YIELD} are
+specified on the {\ct REAC} line, then {\ct 'CARBON MONOXIDE'} and {\ct 'SOOT'} are included as output species. The fuel species can be output via
+the {\ct FUEL} specified on the {\ct REAC} line. As an example of how to use the species names, suppose you want to calculate the integrated mass flux of carbon monoxide
 through a horizontal plane, like the total amount entrained in a fire plume. Use a ``device'' as follows
 
 \footnotesize
@@ -9984,7 +9973,7 @@ of a {\ct DUCT\_ID}, and quantities for a node require the specification of a {\
 {\ct NODE DENSITY}                              & Density of the flow through a node        &  kg/m$^3$             \\ \hline
 {\ct NODE MASS FRACTION}                        & Mass fraction of a species in a node      &  kg/kg                \\ \hline
 {\ct NODE PRESSURE}                             & Pressure of a node                        &       Pa              \\ \hline
-{\ct NODE PRESSURE DIFFERENCE}                  & Pressure difference between two nodes                        &       Pa              \\ \hline
+{\ct NODE PRESSURE DIFFERENCE}                  & Pressure difference between two nodes     &       Pa              \\ \hline
 {\ct NODE TEMPERATURE}                          & Temperature of the flow though a node     & $^\circ$C             \\ \hline
 {\ct NODE VOLUME FRACTION}                      & Volume fraction of a species in a node    &  mol/mol              \\ \hline
 \end{longtable}
@@ -10089,7 +10078,6 @@ properties be specified as well. Simply prescribing as many properties as possib
 
 \vspace{\baselineskip}
 
-\newpage
 
 \section{\texorpdfstring{{\tt DEVC}}{DEVC} (Device Parameters)}
 
@@ -10155,7 +10143,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 
 \vspace{\baselineskip}
 
-\newpage
+
 
 \section{\texorpdfstring{{\tt DUMP}}{DUMP} (Output Parameters)}
 
@@ -10219,7 +10207,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 \vspace{\baselineskip}
 
-\newpage
+
 
 \section{\texorpdfstring{{\tt HEAD}}{HEAD} (Header Parameters)}
 
@@ -10376,8 +10364,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct XYZ(3)}                    & Real Triplet      & Section~\ref{info:initial_droplets}           & m             &               \\ \hline
 \end{longtable}
 
-% Undocumented: PROF_ID, ORIGIN, XYZ, UVW, DIAMETER,UNIFORM
-
 
 \vspace{\baselineskip}
 
@@ -10408,8 +10394,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct VALUE(I)}              & Real Array    & Section~\ref{info:ISOF}                   &       &         \\ \hline
 {\ct VELO\_INDEX}           & Integer       & Section~\ref{info:velocity}               &       &  0      \\ \hline
 \end{longtable}
-
-% Undocumented: AUTO_HRRPUV_VALUE
 
 
 \vspace{\baselineskip}
@@ -10533,8 +10517,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CHECK\_GR}                                 & Logical       & Section~\ref{info:CFL}                                &               & {\ct .TRUE.}     \\ \hline
 {\ct CHECK\_HT}                                 & Logical       & Section~\ref{info:CFL}                                &               & {\ct .TRUE.}     \\ \hline
 {\ct CHECK\_VN}                                 & Logical       & Section~\ref{info:CFL}                                &               & {\ct .TRUE.}     \\ \hline
-%{\ct CLIP\_MASS\_FRACTION}                      & Logical       &                                                           &               & {\ct .FALSE.}     \\ \hline
-%{\ct CP_FTMP}                                   & Logical       &                                                           &               & {\ct .FALSE.}     \\ \hline
+{\ct CLIP\_MASS\_FRACTION}                      & Logical       & Section~\ref{info:CLIP}                               &               & {\ct .FALSE.}     \\ \hline
 {\ct C\_DEARDORFF}                              & Real          & Section~\ref{info:LES}                                &               & 0.1               \\ \hline
 {\ct C\_SMAGORINSKY}                            & Real          & Section~\ref{info:LES}                                &               & 0.20              \\ \hline
 {\ct C\_FORCED}                                 & Real          & Section~\ref{info:convection}                         &               & 0.037             \\ \hline
@@ -10545,7 +10528,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct C\_VERTICAL}                               & Real          & Section~\ref{info:convection}                         &               & 1.31             \\ \hline
 {\ct C\_VREMAN}                                 & Real          & Section~\ref{info:LES}                                &               & 0.07              \\ \hline
 {\ct CONSTANT\_SPECIFIC\_HEAT}                  & Real          & Section~\ref{info:MISC_Basics}                        &               & {\ct .FALSE.}               \\ \hline
-%{\ct DEBUG\_OPENMP}                             & Logical       & Debug flag for OpenMP                                     &               & {\ct .FALSE.}     \\ \hline
 {\ct DNS}                                       & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .FALSE.}     \\ \hline
 {\ct EVACUATION\_DRILL}                         & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
 {\ct EVACUATION\_MC\_MODE}                      & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
@@ -10559,6 +10541,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct GVEC}                                      & Real triplet  & Section~\ref{info:GVEC}                               & m/s$^2$       & 0,0,-9.81         \\ \hline
 %{\ct IMMERSED\_BOUNDARY\_METHOD}                & Logical       &                                                           &               & {\ct .FALSE.}     \\ \hline
 {\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}                     &  $^\circ$C/m  & 0                 \\ \hline
+{\ct LIMITING\_DT\_RATIO}                       & Real          & Section~\ref{info:Errors}                             &               &  0.0001           \\ \hline
 {\ct LES}                                       & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
 {\ct MAXIMUM\_VISIBILITY}                       & Real          & Section~\ref{info:visibility}                         &  m            &  30               \\ \hline
 {\ct MEAN\_FORCING(3)}                          & Logical       & Section~\ref{info:mean_forcing}                       &               & {\ct .FALSE.}     \\ \hline
@@ -10598,9 +10581,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct WIND\_ONLY}                                & Logical       & See Wildland Fire User's Guide                            &               & {\ct .FALSE.}     \\ \hline
 \end{longtable}
 
-%Undocumented: LIMITING_DT_RATIO, HRRPUVCUT_MAX, RUN_AVG_FAC, THERMOPHORETIC_DEPOSITION, TURBULENT_DEPOSITION,
-%               VEG_LEVEL_SET, CP_FTMP, HRRPUV_MAX_SMV, TERRAIN_IMAGE,N EW_EVAP, SCALAR_ENERGY_TOLERANCE, TKE_TOLERANCE, RFAC_FORCING,
-%               WFDS,UVW_FILE
+%Undocumented: HRRPUVCUT_MAX, THERMOPHORETIC_DEPOSITION, TURBULENT_DEPOSITION, VEG_LEVEL_SET,  HRRPUV_MAX_SMV, TERRAIN_IMAGE, NEW_EVAP, WFDS, UVW_FILE
 
 
 \vspace{\baselineskip}
@@ -10753,7 +10734,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %               VEG_MOIST_MPV_MIN,VEG_REMOVE_CHARRED,VEG_STEM,VEG_DEGRADATION,VEG_CHAR_OXIDATION
 
 % Undocumented: SURFACE_TENSION,BREAKUP,BREAKUP_CHILD_DIAMETER,BREAKUP_CHILD_SIGMA_D,
-%               DENSE_VOLUME_FRACTION,NUMBER_RADIATION_ANGLES,ORIENTATION
+%               DENSE_VOLUME_FRACTION,ORIENTATION
 
 
 \vspace{\baselineskip}
@@ -10945,7 +10926,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct RAMP} (Ramp Function Parameters)} \\
 \hline \hline
 \endhead
-%{\ct CTRL\_ID}                      & Character     & Section~\ref{info:CTRL}       &                       &           \\ \hline
+{\ct CTRL\_ID}                      & Character     & Section~\ref{info:RAMPDEVC}   &                       &           \\ \hline
 {\ct DEVC\_ID}                      & Character     & Section~\ref{info:RAMPDEVC}   &                       &           \\ \hline
 {\ct F}                             & Real          & Chapter~\ref{info:RAMP}       &                       &           \\ \hline
 {\ct ID}                            & Character     & Chapter~\ref{info:RAMP}       &                       &           \\ \hline
