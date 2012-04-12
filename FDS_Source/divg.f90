@@ -321,11 +321,11 @@ KDTDY => WORK2
 KDTDZ => WORK3
 KP    => WORK4
    
-KP = K_Z(NINT(TMPA),0)*SPECIES_MIXTURE(0)%MW
-   
 ! Compute thermal conductivity k (KP)
  
 K_DNS_OR_LES: IF (DNS) THEN
+
+   KP = 0._EB
 
    DO K=1,KBAR
       DO J=1,JBAR
