@@ -324,6 +324,8 @@ M => MESHES(NM)
 
 CUTCELL_TEST: IF (ABS(T-T_BEGIN)<ZERO_P) THEN
 
+CALL GET_CUTCELL_AREA()
+
 FACE_LOOP: DO N=1,N_FACE
 
    V1 = (/VERTEX(FACET(N)%VERTEX(1))%X,VERTEX(FACET(N)%VERTEX(1))%Y,VERTEX(FACET(N)%VERTEX(1))%Z/)
@@ -1794,21 +1796,21 @@ AREA0 = TRIANGLE_AREA(V1,V2,V3)
 CALL TRIANGLE_BOX_INTERSECT(IERR,V1,V2,V3,BB)
 
 IF (IERR == 0) THEN
-    WRITE(LU_ERR,*) 'The triangle is not intersecting with the BBox'
+!    WRITE(LU_ERR,*) 'The triangle is not intersecting with the BBox'
     
 ELSE IF (IERR == 1) THEN
     ! if the triangle intersects with the BB
     ! next to determine the in intersection points
     
     CALL TRI_PLANE_BOX_INTERSECT(NP,PC,V1,V2,V3,BB)
-    WRITE(LU_ERR,*) 'The intermeidate polygon has NP vertices, NP=', NP
+!    WRITE(LU_ERR,*) 'The intermeidate polygon has NP vertices, NP=', NP
 !    DO I=1,NP
 !        WRITE(LU_ERR,*) (PC((I-1)*3+J),J=1,3)
 !    ENDDO
     
     ! get the intersection points, then calculate the area
     CALL TRIANGLE_POLYGON_POINTS(IERR,NXP,XPCTMP,V1,V2,V3,NP,PC,BB)
-    WRITE(LU_ERR,*) 'The final polygon has NXP vertices,    NXP = ', NXP
+!    WRITE(LU_ERR,*) 'The final polygon has NXP vertices,    NXP = ', NXP
     ALLOCATE(XPC(3*NXP))
     XPC = XPCTMP
 !    INTP_LOOP: DO I=1,NXP
@@ -1816,9 +1818,9 @@ ELSE IF (IERR == 1) THEN
 !    ENDDO INTP_LOOP
     
     IF (IERR == 1)  AREA = POLYGON_AREA(NXP,XPC)
-    WRITE(LU_ERR,*) 'The intersection area is = ', AREA
+!    WRITE(LU_ERR,*) 'The intersection area is = ', AREA
 
-    WRITE(LU_ERR,*) 'The triangle     area is = ', AREA0
+!    WRITE(LU_ERR,*) 'The triangle     area is = ', AREA0
     
 !    CALL WRITE_MATLAB_VISU(V1,V2,V3,NXP,XPC,NP,PC)
 ENDIF

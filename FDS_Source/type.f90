@@ -295,9 +295,9 @@ TYPE LINKED_LIST_TYPE
 END TYPE LINKED_LIST_TYPE
 
 TYPE CUTCELL_LINKED_LIST_TYPE
-   INTEGER :: INDEX                           ! data
+   INTEGER :: INDEX                                   ! data
    TYPE(CUTCELL_LINKED_LIST_TYPE), POINTER :: NEXT    ! pointer to the next element
-   REAL(EB) :: AREA                           ! cutcell area for index
+   REAL(EB) :: AREA                                   ! cutcell area for index
 END TYPE CUTCELL_LINKED_LIST_TYPE
 
 TYPE FACET_TYPE
