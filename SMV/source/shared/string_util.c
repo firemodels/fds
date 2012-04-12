@@ -687,6 +687,49 @@ void getPROGversion(char *PROGversion){
   strcpy(PROGversion,PROGVERSION);
 }
 
+/* ------------------ setisolabels ------------------------ */
+
+int setlabels_iso(flowlabels *flowlabel, char *longlabel, char *shortlabel, char *unit, float *levels, int nlevels){
+  char buffer[255];
+  size_t len;
+  char clevels[1024];
+
+  array2string(levels,nlevels,clevels);
+  if(longlabel==NULL){
+    strcpy(buffer,"*");
+  }
+  else{
+    strcpy(buffer,longlabel);
+    strcat(buffer,": ");
+    strcat(buffer,clevels);
+  }
+  len=strlen(buffer);
+  if(NewMemory((void **)&flowlabel->longlabel,(unsigned int)(len+1))==0)return 2;
+  STRCPY(flowlabel->longlabel,buffer);
+
+  if(shortlabel==NULL){
+    strcpy(buffer,"*");
+  }
+  else{
+    strcpy(buffer,shortlabel);
+  }
+  len=strlen(buffer);
+  if(NewMemory((void **)&flowlabel->shortlabel,(unsigned int)(len+1))==0)return 2;
+  STRCPY(flowlabel->shortlabel,buffer);
+
+  if(unit==NULL){
+    strcpy(buffer,"*");
+  }
+  else{
+    strcpy(buffer,unit);
+  }
+  len=strlen(buffer);
+  if(NewMemory((void **)&flowlabel->unit,(unsigned int)(len+1))==0)return 2;
+  STRCPY(flowlabel->unit,buffer);
+
+  return 0;
+}
+
 /* ------------------ setlabels ------------------------ */
 
 int setlabels(flowlabels *flowlabel, char *longlabel, char *shortlabel, char *unit){

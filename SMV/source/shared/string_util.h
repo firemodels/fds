@@ -25,6 +25,7 @@ EXTERNCPP unsigned int time2sec(char *tokenorig);
 EXTERNCPP unsigned int date2sec(char *tokenorig);
 EXTERNCPP unsigned int date2day(char *tokenorig);
 EXTERNCPP int setlabels(flowlabels *flowlabel, char *longlabel, char *shortlabel, char *unit);
+EXTERNCPP int setlabels_iso(flowlabels *flowlabel, char *longlabel, char *shortlabel, char *unit, float *levels, int nlevels);
 EXTERNCPP int readlabels_cellcenter(flowlabels *flowlabel, FILE *stream);
 EXTERNCPP int readlabels_terrain(flowlabels *flowlabel, FILE *stream);
 EXTERNCPP int readlabels(flowlabels *label, FILE *stream);
