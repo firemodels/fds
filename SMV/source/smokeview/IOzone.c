@@ -425,6 +425,7 @@ void readzone(int ifile, int flag, int *errorcode){
 
   *errorcode=0;
 
+  ASSERT(ifile>=0&&ifile<nzoneinfo);
   zonei = zoneinfo + ifile;
   file = zonei->file;
   if(zonei->loaded==0&&flag==UNLOAD)return;

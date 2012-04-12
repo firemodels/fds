@@ -521,6 +521,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
   slicefilenumber = ifile;
   slicefilenum=ifile;
 
+  ASSERT(slicefilenumber>=0&&slicefilenumber<nsliceinfo);
   sd = sliceinfo + slicefilenumber;
   CountMemoryBlocks(num_memblocks_load,0);
   if(flag!=RESETBOUNDS){

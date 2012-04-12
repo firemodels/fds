@@ -1596,8 +1596,8 @@ int readsmv(char *file, char *file2){
     noutlineinfo=0;
   }
 
-  if(nzone>0){
-    for(i=0;i<nzone;i++){
+  if(nzoneinfo>0){
+    for(i=0;i<nzoneinfo;i++){
       zonedata *zonei;
 
       zonei = zoneinfo + i;
@@ -1608,7 +1608,7 @@ int readsmv(char *file, char *file2){
     }
     FREEMEMORY(zoneinfo);
   }
-  nzone=0;
+  nzoneinfo=0;
 
   if(nsmoke3dinfo>0){
     {
@@ -2103,7 +2103,7 @@ int readsmv(char *file, char *file2){
       continue;
     }
     if(match(buffer,"ZONE") == 1){
-      nzone++;
+      nzoneinfo++;
       continue;
     }
     if(
@@ -2332,8 +2332,8 @@ int readsmv(char *file, char *file2){
     if(NewMemory((void **)&fireinfo,nfires*sizeof(firedata))==0)return 2;
   }
   FREEMEMORY(zoneinfo);
-  if(nzone>0){
-    if(NewMemory((void **)&zoneinfo,nzone*sizeof(zonedata))==0)return 2;
+  if(nzoneinfo>0){
+    if(NewMemory((void **)&zoneinfo,nzoneinfo*sizeof(zonedata))==0)return 2;
   }
   FREEMEMORY(zventinfo);
   if(nzvents>0){
@@ -3450,7 +3450,7 @@ int readsmv(char *file, char *file2){
 
       zonei = zoneinfo + izone_local;
       if(fgets(buffer,255,stream)==NULL){
-        nzone--;
+        nzoneinfo--;
         BREAK;
       }
       bufferptr=trim_string(buffer);
@@ -3478,7 +3478,7 @@ int readsmv(char *file, char *file2){
             return 2;
           }
         }
-        nzone--;
+        nzoneinfo--;
       }
       else{
         len=strlen(filename);

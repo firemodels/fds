@@ -77,6 +77,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
   STRCPY(FULLTITLE,TITLEBASE);
   *errorcode=0;
 
+  ASSERT(ifile>=0&&ifile<nplot3dinfo);
   p=plot3dinfo+ifile;
   if(flag==UNLOAD&&p->loaded==0)return;
 

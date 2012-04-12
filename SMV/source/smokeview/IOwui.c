@@ -786,25 +786,22 @@ void readterrain(char *file, int ifile, int flag, int *errorcode){
   float dx, dy;
   int i;
 
-  if(ifile>=0&&ifile<nterraininfo)terri = terraininfo + ifile;
+  if(ifile<0||ifile>=nterraininfo)return;
+  terri = terraininfo + ifile;
 
   if(flag==UNLOAD){
-    if(terri!=NULL){
-      FREEMEMORY(terri->x);
-      FREEMEMORY(terri->y);
-      FREEMEMORY(terri->zcell);
-      FREEMEMORY(terri->znode);
-      //FREEMEMORY(terri->znormal);
-      FREEMEMORY(terri->uc_znormal);
-      FREEMEMORY(terri->times);
-      free_terraincell(terri);
-      terri->loaded=0;
-      terri->display=0;
-      updatetimes();
-    }
+    FREEMEMORY(terri->x);
+    FREEMEMORY(terri->y);
+    FREEMEMORY(terri->zcell);
+    FREEMEMORY(terri->znode);
+    FREEMEMORY(terri->uc_znormal);
+    FREEMEMORY(terri->times);
+    free_terraincell(terri);
+    terri->loaded=0;
+    terri->display=0;
+    updatetimes();
     return;
   }
-  if(terri==NULL)return;
 
   if(getterrain_size(file,&xmin, &xmax, &nx, &ymin, &ymax, &ny, &nglobal_times)!=0)return;
 

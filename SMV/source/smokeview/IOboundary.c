@@ -946,11 +946,13 @@ void readpatch(int ifile, int flag, int *errorcode){
   if(patchi->filetype==2){
     geomdata *geomi;
 
+    ASSERT(ifile>=0&&ifile<ngeominfo);
     geomi = geominfo + ifile;
     read_geom(geomi,flag,GEOM_NORMAL,errorcode);
     read_geomdata(ifile,flag,errorcode);
   }
   else{
+    ASSERT(ifile>=0&&ifile<npatchinfo);
     readpatch_bndf(ifile,flag,errorcode);
   }
 }

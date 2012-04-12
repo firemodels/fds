@@ -1358,7 +1358,7 @@ void script_loadfile(scriptdata *scripti){
       return;
     }
   }
-  for(i=0;i<nzone;i++){
+  for(i=0;i<nzoneinfo;i++){
     zonedata *zonei;
 
     zonei = zoneinfo + i;

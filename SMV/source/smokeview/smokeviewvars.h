@@ -389,7 +389,7 @@ SVEXTERN int drawColorLabel,olddrawColorLabel;
 SVEXTERN int staticframe0,visStaticSmoke;
 SVEXTERN int vis3DSmoke3D;
 SVEXTERN int smokeskip,smokeskipm1;
-SVEXTERN int nrooms,nzone, nfires;
+SVEXTERN int nrooms,nzoneinfo, nfires;
 SVEXTERN float ratio, aspect;
 SVEXTERN int visLIGHT0, visLIGHT1, visLIGHTMENU, UpdateLIGHTS;
 

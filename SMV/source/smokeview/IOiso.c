@@ -280,6 +280,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
 
   local_starttime0 = glutGet(GLUT_ELAPSED_TIME);
   
+  ASSERT(ifile>=0&&ifile<nisoinfo);
   ib = isoinfo+ifile;
   if(ib->loaded==0&&flag==UNLOAD)return;
   blocknumber=ib->blocknumber;

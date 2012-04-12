@@ -968,6 +968,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
 
   local_starttime0 = glutGet(GLUT_ELAPSED_TIME);
 
+  ASSERT(ifile>=0&&ifile<npartinfo);
   parti=partinfo+ifile;
 
   freeallpart5data(parti);
@@ -1139,6 +1140,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   float offset_x, offset_y, offset_z;
   int file_unit;
 
+  ASSERT(ifile>=0&&ifile<=npartinfo);
   parti=partinfo+ifile;
   if(parti->version==1){
     readpart5(file,ifile,flag,errorcode);

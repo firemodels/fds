@@ -1413,7 +1413,7 @@ void initvars(void){
   smokeskip=1;
   smokeskipm1=0;
   nrooms=0;
-  nzone=0;
+  nzoneinfo=0;
   nfires=0;
   ratio=1.0;
   aspect=1.;

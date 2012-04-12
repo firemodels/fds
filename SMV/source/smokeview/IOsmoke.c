@@ -432,6 +432,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
   int fortran_skip;
 
   local_starttime0 = glutGet(GLUT_ELAPSED_TIME);
+  ASSERT(ifile>=0&&ifile<nsmoke3dinfo);
   smoke3di = smoke3dinfo + ifile;
   if(smoke3di->filetype==1){
     fortran_skip=4;

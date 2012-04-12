@@ -2258,7 +2258,7 @@ void LoadUnloadMenu(int value){
     for(i=0;i<nisoinfo;i++){
       readiso("",i,UNLOAD,&errorcode);
     }
-    for(i=0;i<nzone;i++){
+    for(i=0;i<nzoneinfo;i++){
       readzone(i,UNLOAD,&errorcode);
     }
     for(i=0;i<nsmoke3dinfo;i++){
@@ -2301,8 +2301,8 @@ void LoadUnloadMenu(int value){
     for(ii=0;ii<nslice_loaded;ii++){
       slicedata *slicei;
 
-
-      slicei = sliceinfo + slice_loaded_list[ii];
+      i = slice_loaded_list[ii];
+      slicei = sliceinfo + i;
       if(slicei->reload==1){
         readslice(slicei->file,i,LOAD,&errorcode);
       }
@@ -2875,7 +2875,7 @@ void ZoneMenu(int value){
     readzone(value,LOAD,&errorcode);
   }
   else{
-    for(i=0;i<nzone;i++){
+    for(i=0;i<nzoneinfo;i++){
       readzone(i,UNLOAD,&errorcode);
     }
   }
@@ -5510,7 +5510,7 @@ updatemenu=0;
 
 /* --------------------------------zone show menu -------------------------- */
 
-  if(nzone>0){
+  if(nzoneinfo>0){
     CREATEMENU(zoneshowmenu,ZoneShowMenu);
     glutAddMenuEntry(_("Layers"),999);
     if(ReadZoneFile==1){
@@ -6573,7 +6573,7 @@ updatemenu=0;
   if(npatchloaded>0){
     glutAddSubMenu("Boundaries",showpatchmenu);
   }
-  if(nzone>0&&(ReadZoneFile==1||nzvents>0))glutAddSubMenu("Zone",zoneshowmenu);
+  if(nzoneinfo>0&&(ReadZoneFile==1||nzvents>0))glutAddSubMenu("Zone",zoneshowmenu);
   if(ReadTargFile==1){
     if(showtarget==1)glutAddMenuEntry(_("*Targets"),2);
     if(showtarget==0)glutAddMenuEntry(_("Targets"),2);
@@ -8368,9 +8368,9 @@ updatemenu=0;
 
 /* --------------------------------zone menu -------------------------- */
 
-    if(nzone>0){
+    if(nzoneinfo>0){
       CREATEMENU(zonemenu,ZoneMenu);
-      for(i=0;i<nzone;i++){
+      for(i=0;i<nzoneinfo;i++){
         zonedata *zonei;
 
         zonei = zoneinfo + i;
@@ -8643,7 +8643,7 @@ updatemenu=0;
         strcpy(loadmenulabel,"Target file");
         glutAddSubMenu(loadmenulabel,targetmenu);
       }
-      if(nzone>0){
+      if(nzoneinfo>0){
         strcpy(loadmenulabel,"Zone fire file");
         glutAddSubMenu(loadmenulabel,zonemenu);
       }
