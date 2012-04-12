@@ -691,7 +691,7 @@ EXTERNCPP char *newtextptr(char ***texture_list,int *n_texture_list,char *textur
 EXTERNCPP void readplot3d(char *file, int ifile, int flag,int *errorcode);
 EXTERNCPP void read_geom_header(geomdata *geomi, int *ntimes_local);
 EXTERNCPP void read_all_geom(void);
-EXTERNCPP void read_geom(geomdata *geomi, int flag, int *errorcode);
+EXTERNCPP void read_geom(geomdata *geomi, int flag, int type, int *errorcode);
 EXTERNCPP void init_geom(geomdata *geomi);
 EXTERNCPP void read_geomdata(int ifile, int flag, int *errorcode);
 EXTERNCPP void readpatch(int ifile, int flag, int *errorcode);

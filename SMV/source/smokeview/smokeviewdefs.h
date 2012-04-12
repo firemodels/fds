@@ -13,6 +13,9 @@ void _Sniff_Errors(char *whereat);
 
 #define STEPS_PER_DEG 10.0
 
+#define GEOM_NORMAL 0
+#define GEOM_ISO 1
+
 #define UNKNOWN -1
 #define RLE 0
 #define ZLIB 1

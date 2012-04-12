@@ -8267,7 +8267,7 @@ updatemenu=0;
         i = isoorderindex[ii];
         isoi = isoinfo + i;
         if(isoi->loaded==0)continue;
-        STRCPY(menulabel,isoinfo[i].menulabel);  
+        STRCPY(menulabel,isoi->menulabel);  
         glutAddMenuEntry(menulabel,i);
       }
       glutAddMenuEntry("Unload all",-1);

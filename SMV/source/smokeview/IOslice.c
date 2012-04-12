@@ -185,7 +185,7 @@ void readfslice(int ifslice, int flag, int *errorcode){
   o2=fedi->o2;
   co2=fedi->co2;
   co=fedi->co;
-  fed=fedi->fed;
+  fed=fedi->fed_slice;
   readslice(fed->file,fedi->fed_index,UNLOAD,&error);
   if(regenerate_fed==1||is_file_newer(fed->file,o2->file)!=1|| // if the FED slice file does not exist or is older than
      is_file_newer(fed->file,co2->file)!=1||// either the CO, CO2 or O2 slice files then create a new
@@ -204,9 +204,21 @@ void readfslice(int ifslice, int flag, int *errorcode){
     Creadslice_frame(0,fedi->co2_index,LOAD,&error);
     Creadslice_frame(0,fedi->co_index,LOAD,&error);
 
+    fed->is1=co->is1; // nx = is2 + 1 - is1
+    fed->is2=co->is2;
+    fed->js1=co->js1;
+    fed->js2=co->js2;
+    fed->ks1=co->ks1;
+    fed->ks2=co->ks2;
     fed->nslicei=co->nslicei;
     fed->nslicej=co->nslicej;
     fed->nslicek=co->nslicek;
+    fed->volslice=co->volslice;
+    if(fed->volslice==1){
+      if(fed->nslicei!=fed->is2+1-fed->is1)fed->is2=fed->nslicei+fed->is1-1;
+      if(fed->nslicej!=fed->js2+1-fed->js1)fed->js2=fed->nslicej+fed->js1-1;
+      if(fed->nslicek!=fed->ks2+1-fed->ks1)fed->ks2=fed->nslicek+fed->ks1-1;
+    }
     fed->ntimes=MIN(co->ntimes,co2->ntimes);
     fed->ntimes=MIN(fed->ntimes,o2->ntimes);
     frame_size = fed->nslicei*fed->nslicej*fed->nslicek;
@@ -253,6 +265,48 @@ void readfslice(int ifslice, int flag, int *errorcode){
       }
     }
     out_slicefile(fed);
+    if(fed->volslice==1){
+      isodata *iso_fed;
+      mesh *meshi;
+      float *xplt, *yplt, *zplt;
+      int ibar, jbar, kbar;
+      char *iblank_cell;
+      char longlabel[50],shortlabel[50],unitlabel[50];
+      char *isofile;
+      int error;
+      int reduce_triangles=1;
+      int *iblank=NULL;
+      isodata *isoi;
+
+      isoi = fedi->fed_iso;
+      strcpy(longlabel,"Fractional effective dose");
+      strcpy(shortlabel,"FED");
+      strcpy(unitlabel," ");
+
+      meshi = meshinfo + fed->blocknumber;
+      xplt = meshi->xplt;
+      yplt = meshi->yplt;
+      zplt = meshi->zplt;
+      ibar = meshi->ibar;
+      jbar = meshi->jbar;
+      kbar = meshi->kbar;
+      iblank_cell = meshi->c_iblank_cell;
+      isofile=isoi->file;
+      CCisoheader(isofile,longlabel,shortlabel,unitlabel,isoi->levels,&isoi->nlevels,&error);
+      printf("generating FED isosurface\n");
+      for(i=0;i<fed->ntimes;i++){
+        float time;
+        float *vals;
+
+        time=times[i];
+        vals = fed->qslicedata + i*frame_size;
+        printf("time=%f\n",time);
+        CCisosurface2file(isofile, &time, vals, iblank, 
+		              isoi->levels, &isoi->nlevels,
+                  xplt, &ibar,  yplt, &jbar, zplt, &kbar, 
+                  &reduce_triangles, &error);
+      }
+    }
     FREEMEMORY(fed->qslicedata);
     FREEMEMORY(fed->times);
     Creadslice_frame(0,fedi->o2_index,UNLOAD,&error);
@@ -1852,6 +1906,7 @@ void getsliceparams2(void){
 
 void update_fedinfo(void){
   int i;
+  int nfediso=0,ifediso=0;
 
   nfedinfo=0;
   for(i=0;i<nsliceinfo;i++){
@@ -1865,7 +1920,8 @@ void update_fedinfo(void){
     fedi->co=NULL;
     fedi->co2=NULL;
     fedi->o2=NULL;
-    fedi->fed=NULL;
+    fedi->fed_slice=NULL;
+    fedi->fed_iso=NULL;
     fedi->co_index=-1;
     fedi->co2_index=-1;
     fedi->o2_index=-1;
@@ -1901,7 +1957,7 @@ void update_fedinfo(void){
     }
     if(fedi->o2_index==-1)continue;
     fedi->fed_index=nsliceinfo+nfedinfo;
-
+    if(sliceinfo[fedi->co_index].volslice==1)nfediso++;
     nfedinfo++;
   }
   if(nfedinfo==0){
@@ -1923,6 +1979,11 @@ void update_fedinfo(void){
     ResizeMemory( (void **)&mslice_loadstack, nsliceinfo*sizeof(int));
     ResizeMemory( (void **)&mvslice_loadstack, nsliceinfo*sizeof(int));
     ResizeMemory( (void **)&vslicetypes,3*nsliceinfo*sizeof(int));
+    if(nfediso>0){
+      nisoinfo+=nfediso;
+      ResizeMemory((void **)&isoinfo,nisoinfo*sizeof(isodata));
+      ResizeMemory((void **)&isotypes,nisoinfo*sizeof(int));
+    }
   }
   for(i=0;i<nfedinfo;i++){ // define sliceinfo for fed slices
     slicedata *sd;
@@ -1943,7 +2004,8 @@ void update_fedinfo(void){
     fedi->co=sliceinfo+fedi->co_index;
     fedi->o2=sliceinfo+fedi->o2_index;
     fedi->co2=sliceinfo+fedi->co2_index;
-    fedi->fed=sliceinfo+fedi->fed_index;
+    fedi->fed_slice=sliceinfo+fedi->fed_index;
+    fedi->fed_iso=NULL;
 
     setlabels(&(sd->label),"Fractional effective dose","FED"," ");
 
@@ -1975,7 +2037,7 @@ void update_fedinfo(void){
     sd->compindex=NULL;
     sd->slicecomplevel=NULL;
     sd->qslicedata_compressed=NULL;
-    sd->volslice=0;
+    sd->volslice=fedi->co->volslice;
     sd->times=NULL;
     sd->slicelevel=NULL;
     sd->slicepoint=NULL;
@@ -1997,10 +2059,62 @@ void update_fedinfo(void){
     *ext=0;
     strcat(filename,"_fed.sf");
     len=strlen(filename);
-    NewMemory((void **)&fedi->fed->reg_file,len+1);
+    NewMemory((void **)&fedi->fed_slice->reg_file,len+1);
     strcpy(sd->reg_file,filename);
     sd->file=sd->reg_file;
+    
+    if(sd->volslice==1){
+      isodata *isoi;
+      int nn_iso,ii;
+
+      isoi = isoinfo + nisoinfo - nfediso + ifediso;
+      fedi->fed_iso=isoi;
+      isoi->tfile=NULL;
+      nn_iso = nisoinfo - nfediso + ifediso + 1;
+      isoi->seq_id=nn_iso;
+      isoi->autoload=0;
+      isoi->blocknumber=sd->blocknumber;
+      isoi->loaded=0;
+      isoi->display=0;
+      isoi->dataflag=0;
+      isoi->geomflag=0;
+      isoi->levels=NULL;
+      setlabels(&(isoi->surface_label),"Fractional effective dose","FED"," ");
+
+      isoi->nlevels=3;
+      NewMemory((void **)&(isoi->levels),3*sizeof(float));
+      NewMemory((void **)&(isoi->colorlevels),3*sizeof(float *));
+      for(ii=0;ii<3;ii++){
+        isoi->colorlevels[i]=NULL;
+      }
+      isoi->levels[0]=0.3;
+      isoi->levels[1]=1.0;
+      isoi->levels[2]=3.0;
+      setlabels_iso(&(isoi->surface_label),"Fractional effective dose","FED"," ",isoi->levels,isoi->nlevels);
+      isoi->normaltable=NULL;
+      isoi->color_label.longlabel=NULL;
+      isoi->color_label.shortlabel=NULL;
+      isoi->color_label.unit=NULL;
+      isoi->geominfo=NULL;
+
+      strcpy(filename,fedi->co->file);
+      ext=strrchr(filename,'.');
+      *ext=0;
+      strcat(filename,"_fed.iso");
+      len=strlen(filename);
+      NewMemory((void **)&isoi->reg_file,len+1);
+      strcpy(isoi->reg_file,filename);
+      isoi->file=isoi->reg_file;
+
+      NewMemory((void **)&isoi->size_file,strlen(isoi->file)+3+1);
+      STRCPY(isoi->size_file,isoi->file);
+      STRCAT(isoi->size_file,".sz");
+
+      ifediso++;
+    }
   }
+  if(nfediso>0)updateisomenulabels();
+
 }
 
 /* ------------------ updatevslices ------------------------ */

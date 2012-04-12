@@ -683,13 +683,13 @@ void read_all_geom(void){
     geomdata *geomi;
 
     geomi = geominfo + i;
-    read_geom(geomi,LOAD,&errorcode);
+    read_geom(geomi,LOAD,GEOM_NORMAL,&errorcode);
   }
 }
 
 /* ------------------ read_geom ------------------------ */
 
-void read_geom(geomdata *geomi, int flag, int *errorcode){
+void read_geom(geomdata *geomi, int flag, int type, int *errorcode){
   FILE *stream;
   int one=1, endianswitch=0;
   int returncode;
@@ -792,6 +792,7 @@ void read_geom(geomdata *geomi, int flag, int *errorcode){
       if(ntris>0){
         int *surf_ind=NULL,*ijk=NULL;
         int ii;
+        int offset=0;
 
         NewMemory((void **)&triangles,ntris*sizeof(triangle));
         NewMemory((void **)&ijk,3*ntris*sizeof(int));
@@ -804,11 +805,12 @@ void read_geom(geomdata *geomi, int flag, int *errorcode){
         if(ntris>0){
           FORTREADBR(surf_ind,ntris,stream);
         }
+        if(type==GEOM_ISO)offset=nsurfinfo;
         for(ii=0;ii<ntris;ii++){
           triangles[ii].points[0]=points+ijk[3*ii]-1;
           triangles[ii].points[1]=points+ijk[3*ii+1]-1;
           triangles[ii].points[2]=points+ijk[3*ii+2]-1;
-          triangles[ii].surf=surfinfo + surf_ind[ii]+nsurfinfo;
+          triangles[ii].surf=surfinfo + surf_ind[ii]+offset;
         }
         FREEMEMORY(ijk);
         FREEMEMORY(surf_ind);
@@ -1097,14 +1099,14 @@ void Sort_Embedded_Geometry(float *mm){
   int i;
   int count_transparent,count_all;
   int itime;
-  int *showlevels;
+  int *showlevels=NULL;
 
   CheckMemory;
   count_transparent=0;
   count_all=0;
   ntransparent_triangles=count_transparent;
   nopaque_triangles=count_all-count_transparent;
-  showlevels=loaded_isomesh->showlevels;
+  if(loaded_isomesh!=NULL)showlevels=loaded_isomesh->showlevels;
 
   for(i=0;i<ngeominfoptrs;i++){
     geomlistdata *geomlisti;
@@ -1133,7 +1135,7 @@ void Sort_Embedded_Geometry(float *mm){
         if(hilight_skinny==1&&tri->skinny==1)continue;
         if(tri->surf->transparent_level>=1.0)continue;
         isurf=tri->surf-surfinfo-nsurfinfo-1;
-        if(showlevels[isurf]==0||tri->surf->transparent_level<=0.0){
+        if((showlevels!=NULL&&showlevels[isurf]==0)||tri->surf->transparent_level<=0.0){
           count_all--;
           continue;
         }
@@ -1188,7 +1190,7 @@ void Sort_Embedded_Geometry(float *mm){
         tri = geomlisti->triangles + j;
 
         isurf=tri->surf-surfinfo-nsurfinfo-1;
-        if(showlevels[isurf]==0){
+        if(showlevels!=NULL&&showlevels[isurf]==0){
           continue;
         }
         if(use_transparency_data==0||(hilight_skinny==1&&tri->skinny==1)||tri->surf->transparent_level>=1.0){

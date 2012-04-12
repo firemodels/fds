@@ -184,7 +184,7 @@ void readiso_geom(const char *file, int ifile, int flag, int *errorcode){
   geomi = isoi->geominfo;
   unloadiso(meshi);
 
-  read_geom(geomi,flag,errorcode);
+  read_geom(geomi,flag,GEOM_ISO,errorcode);
   if(flag==UNLOAD){
     FREEMEMORY(meshi->iso_times);
     FREEMEMORY(meshi->showlevels);

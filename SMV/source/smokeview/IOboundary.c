@@ -947,7 +947,7 @@ void readpatch(int ifile, int flag, int *errorcode){
     geomdata *geomi;
 
     geomi = geominfo + ifile;
-    read_geom(geomi,flag,errorcode);
+    read_geom(geomi,flag,GEOM_NORMAL,errorcode);
     read_geomdata(ifile,flag,errorcode);
   }
   else{
