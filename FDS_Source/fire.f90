@@ -115,13 +115,14 @@ DO K=1,KBAR
                   D_REACTION(I,J,K) = D_REACTION(I,J,K) + ( (SM%RCON-SM0%RCON)/RSUM(I,J,K) - HDIFF/H_S )*DZZ(N)/DT
                ENDDO
             ELSE
-               CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,TMP(I,J,K))
-               DO N=1,N_TRACKED_SPECIES
-                  SM => SPECIES_MIXTURE(N)
-                  CALL GET_SENSIBLE_ENTHALPY_DIFF(N,TMP(I,J,K),HDIFF)
-                  D_REACTION(I,J,K) = D_REACTION(I,J,K) + ( (SM%RCON-SM0%RCON)/RSUM(I,J,K) - &
-                                                            HDIFF/(CP*TMP(I,J,K)) )*DZZ(N)/DT
-               ENDDO
+               IF (.NOT.CONSTANT_SPECIFIC_HEAT) THEN
+                  CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,TMP(I,J,K))
+                  DO N=1,N_TRACKED_SPECIES
+                     SM => SPECIES_MIXTURE(N)
+                     CALL GET_SENSIBLE_ENTHALPY_DIFF(N,TMP(I,J,K),HDIFF)
+                     D_REACTION(I,J,K) = D_REACTION(I,J,K) + ( (SM%RCON-SM0%RCON)/RSUM(I,J,K) - HDIFF/(CP*TMP(I,J,K)) )*DZZ(N)/DT
+                  ENDDO
+               ENDIF
             ENDIF
          ENDIF
 
