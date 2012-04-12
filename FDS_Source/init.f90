@@ -200,6 +200,14 @@ IF (N_LP_ARRAY_INDICES>0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
    CALL ChkMemErr('INIT','D_LAGRANGIAN',IZERO) 
    M%D_LAGRANGIAN = 0._EB
 ENDIF
+
+! Allocate unstructured geometry divergence
+
+IF (N_FACE > 0) THEN
+   ALLOCATE(M%D_GEOMETRY(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
+   CALL ChkMemErr('INIT','D_GEOMETRY',IZERO) 
+   M%D_GEOMETRY = 0._EB
+ENDIF
  
 ! If radiation absorption desired allocate arrays
  
