@@ -953,7 +953,7 @@ void draw_geomdata(patchdata *patchi){
 
     geomi = geominfoptrs[i];
     if(geomi->display==0||geomi->loaded==0)continue;
-    geomlisti = geomi->geomlistinfo;
+    geomlisti = geomi->geomlistinfo-1;//xxx check this
     ntris = geomlisti->ntriangles;
 
     glEnable(GL_LIGHTING);
