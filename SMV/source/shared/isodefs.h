@@ -83,10 +83,6 @@ typedef struct {
   int closest;
 } orderdata;
 
-
-
-#ifndef pp_DRAWISO
-
 #ifndef pp_noappend
 #define CCisosurface2file iso2file_
 #define CCisosurfacet2file isot2file_
@@ -113,7 +109,7 @@ SV_EXTERN void CCisosurfacet2file(char *isofile, float *t, float *data, int *dat
                    float *yplt, int *ny, 
                    float *zplt, int *nz,
                    int *reduce_triangles, int *error);
-#endif
+
 SV_EXTERN int CompressIsosurface(isosurface *surface, int reduce_triangles, 
                         float xmin, float xmax,
                         float ymin, float ymax,

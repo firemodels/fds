@@ -1391,8 +1391,6 @@ int GetNormalSurface(isosurface *surfacedata){
 
 }
 
-#ifndef pp_DRAWISO
-
 /* ------------------ isoheader ------------------------ */
 
 void CCisoheader(char *isofile, 
@@ -1643,7 +1641,6 @@ void CCisosurfacet2file(char *isofile, float *t, float *data, int *data2flag, fl
   fclose(isostream);
   PrintMemoryInfo;
 }
-#endif
 
 /* ------------------ get_tri_area ------------------------ */
 
