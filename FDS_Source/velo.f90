@@ -2539,13 +2539,13 @@ IF (PREDICTOR) THEN
    VV => V
    WW => W
    RHOP=>RHO
-   HP => HS
+   HP => H
 ELSE
    UU => US
    VV => VS
    WW => WS
    RHOP=>RHOS
-   HP => H
+   HP => HS
 ENDIF
 
 !$OMP PARALLEL DEFAULT(NONE) &
