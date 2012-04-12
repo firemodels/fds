@@ -725,73 +725,74 @@ ELSE ENTHALPY_TRANSPORT_IF
 
    ! Compute (Wbar/rho) Sum (1/W_n) del dot rho*D del Z_n
 
-   DO N=1,N_TRACKED_SPECIES
-      IF (EVACUATION_ONLY(NM)) CYCLE
-      SM  => SPECIES_MIXTURE(N)
-      SM0 => SPECIES_MIXTURE(0)
+   IF (.NOT.CONSTANT_SPECIFIC_HEAT) THEN
+      DO N=1,N_TRACKED_SPECIES
+         IF (EVACUATION_ONLY(NM)) CYCLE
+         SM  => SPECIES_MIXTURE(N)
+         SM0 => SPECIES_MIXTURE(0)
+         DO K=1,KBAR
+            DO J=1,JBAR
+               DO I=1,IBAR
+                  IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+                  CALL GET_SENSIBLE_ENTHALPY_DIFF(N,TMP(I,J,K),HDIFF)
+                  DP(I,J,K) = DP(I,J,K) + ( (SM%RCON-SM0%RCON)/RSUM(I,J,K) - HDIFF/(CP(I,J,K)*TMP(I,J,K)) )* &
+                                          DEL_RHO_D_DEL_Z(I,J,K,N)/RHOP(I,J,K)
+               ENDDO
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
+
+   ! Add contribution of reactions
+ 
+   IF (N_REACTIONS > 0 .AND. .NOT.EVACUATION_ONLY(NM) .AND. .NOT.CONSTANT_SPECIFIC_HEAT) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               DP(I,J,K) = DP(I,J,K) + D_REACTION(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
+
+   ! Add contribution of evaporating PARTICLEs
+
+   IF (NLP>0 .AND. N_LP_ARRAY_INDICES>0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               DP(I,J,K) = DP(I,J,K) + D_LAGRANGIAN(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
+   
+   ! Add contribution of unstructured GEOMETRIES
+
+   IF (N_FACE>0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               DP(I,J,K) = DP(I,J,K) + D_GEOMETRY(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
+   ENDIF
+   
+   ! Atmospheric Stratification Term
+   
+   IF (STRATIFICATION .AND. .NOT.EVACUATION_ONLY(NM)) THEN
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-               CALL GET_SENSIBLE_ENTHALPY_DIFF(N,TMP(I,J,K),HDIFF)
-               DP(I,J,K) = DP(I,J,K) + &
-                           ( (SM%RCON-SM0%RCON)/RSUM(I,J,K) - &
-                           HDIFF/(CP(I,J,K)*TMP(I,J,K)) )*DEL_RHO_D_DEL_Z(I,J,K,N)/RHOP(I,J,K)
+               DP(I,J,K) = DP(I,J,K) - (R_PBAR(K,PRESSURE_ZONE(I,J,K))-RTRM(I,J,K))*0.5_EB*(W(I,J,K)+W(I,J,K-1))*RHO_0(K)*GVEC(3)
             ENDDO
          ENDDO
       ENDDO
-   ENDDO
-
+   ENDIF
+   
 ENDIF ENTHALPY_TRANSPORT_IF
-
-! Add contribution of reactions
- 
-IF (N_REACTIONS > 0 .AND. .NOT.ENTHALPY_TRANSPORT .AND. .NOT.EVACUATION_ONLY(NM)) THEN
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            DP(I,J,K) = DP(I,J,K) + D_REACTION(I,J,K)
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF
-
-! Add contribution of evaporating PARTICLEs
-
-IF (NLP>0 .AND. N_LP_ARRAY_INDICES > 0 .AND. .NOT.ENTHALPY_TRANSPORT .AND. .NOT.EVACUATION_ONLY(NM)) THEN
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            DP(I,J,K) = DP(I,J,K) + D_LAGRANGIAN(I,J,K)
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF
-
-! Add contribution of unstructured GEOMETRIES
-
-IF (N_FACE>0 .AND. .NOT.ENTHALPY_TRANSPORT .AND. .NOT.EVACUATION_ONLY(NM)) THEN
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            DP(I,J,K) = DP(I,J,K) + D_GEOMETRY(I,J,K)
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF
-
-! Atmospheric Stratification Term
-
-IF (STRATIFICATION .AND. .NOT.ENTHALPY_TRANSPORT .AND. .NOT.EVACUATION_ONLY(NM)) THEN
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            DP(I,J,K) = DP(I,J,K) - (R_PBAR(K,PRESSURE_ZONE(I,J,K))-RTRM(I,J,K))*0.5_EB*(W(I,J,K)+W(I,J,K-1))*RHO_0(K)*GVEC(3)
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF
 
 ! Compute normal component of velocity at boundaries, UWS
 
