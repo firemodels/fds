@@ -17,7 +17,7 @@ CHARACTER(255), PARAMETER :: geomdate='$Date$'
 
 PRIVATE
 PUBLIC :: INIT_IBM,TRILINEAR,GETX,GETU,GETGRAD,INIT_FACE,GET_REV_geom, &
-          READ_GEOM,READ_VERT,READ_FACE,READ_VOLU,GET_VELO_IBM,GET_CUTCELL_AREA
+          READ_GEOM,READ_VERT,READ_FACE,READ_VOLU,GET_VELO_IBM
  
 CONTAINS
 
@@ -323,8 +323,6 @@ REAL(FB) :: DUMMY_FB_REAL
 M => MESHES(NM)
 
 CUTCELL_TEST: IF (ABS(T-T_BEGIN)<ZERO_P) THEN
-
-CALL GET_CUTCELL_AREA()
 
 FACE_LOOP: DO N=1,N_FACE
 
@@ -1760,73 +1758,6 @@ ENDDO
 
 RETURN
 END FUNCTION POLYGON_AREA
-
-
-SUBROUTINE GET_CUTCELL_AREA()
-IMPLICIT NONE
-
-REAL(EB) :: V1(3),V2(3),V3(3),BB(6)
-REAL(EB) :: PC(18), AREA,AREA0, XPCTMP(27)
-INTEGER :: IERR,NP,NXP
-REAL(EB), ALLOCATABLE, DIMENSION(:) :: XPC
-TYPE (MESH_TYPE), POINTER :: M
-
-V1(1) = VERTEX(FACET(1)%VERTEX(1))%X
-V1(2) = VERTEX(FACET(1)%VERTEX(1))%Y
-V1(3) = VERTEX(FACET(1)%VERTEX(1))%Z
-
-V2(1) = VERTEX(FACET(1)%VERTEX(2))%X
-V2(2) = VERTEX(FACET(1)%VERTEX(2))%Y
-V2(3) = VERTEX(FACET(1)%VERTEX(2))%Z
-
-V3(1) = VERTEX(FACET(1)%VERTEX(3))%X
-V3(2) = VERTEX(FACET(1)%VERTEX(3))%Y
-V3(3) = VERTEX(FACET(1)%VERTEX(3))%Z
-
-M => MESHES(1)
-BB(1) = M%X(1)
-BB(2) = M%X(2)
-BB(3) = M%Y(1)
-BB(4) = M%Y(2)
-BB(5) = M%Z(1)
-BB(6) = M%Z(2)
-
-AREA0 = TRIANGLE_AREA(V1,V2,V3)
-    
-CALL TRIANGLE_BOX_INTERSECT(IERR,V1,V2,V3,BB)
-
-IF (IERR == 0) THEN
-!    WRITE(LU_ERR,*) 'The triangle is not intersecting with the BBox'
-    
-ELSE IF (IERR == 1) THEN
-    ! if the triangle intersects with the BB
-    ! next to determine the in intersection points
-    
-    CALL TRI_PLANE_BOX_INTERSECT(NP,PC,V1,V2,V3,BB)
-!    WRITE(LU_ERR,*) 'The intermeidate polygon has NP vertices, NP=', NP
-!    DO I=1,NP
-!        WRITE(LU_ERR,*) (PC((I-1)*3+J),J=1,3)
-!    ENDDO
-    
-    ! get the intersection points, then calculate the area
-    CALL TRIANGLE_POLYGON_POINTS(IERR,NXP,XPCTMP,V1,V2,V3,NP,PC,BB)
-!    WRITE(LU_ERR,*) 'The final polygon has NXP vertices,    NXP = ', NXP
-    ALLOCATE(XPC(3*NXP))
-    XPC = XPCTMP
-!    INTP_LOOP: DO I=1,NXP
-!        WRITE(LU_ERR,*) (XPC((I-1)*3+J),J=1,3)
-!    ENDDO INTP_LOOP
-    
-    IF (IERR == 1)  AREA = POLYGON_AREA(NXP,XPC)
-!    WRITE(LU_ERR,*) 'The intersection area is = ', AREA
-
-!    WRITE(LU_ERR,*) 'The triangle     area is = ', AREA0
-    
-!    CALL WRITE_MATLAB_VISU(V1,V2,V3,NXP,XPC,NP,PC)
-ENDIF
-
-RETURN
-END SUBROUTINE GET_CUTCELL_AREA
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! End Cut-cell subroutines by Charles Luo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
