@@ -1,14 +1,15 @@
-&HEAD CHID='tri_cube_cut_cell_01', TITLE='test of cut cell area calculation' /
+&HEAD CHID='tri_cube_cut_cell_test_01', TITLE='test of cut cell area calculation' /
 
 &MESH IJK=3,3,3, XB=-1,2,-1,2,-1,2 /
   
 &TIME T_END=1 /
 
+&DUMP CUTCELL_DATA_FILE=.TRUE. /
+
 &MISC IMMERSED_BOUNDARY_METHOD=0 /
 
 &SURF ID='face', COLOR='BLACK' /
 
-&MISC CUTCELL_TEST=0 /
 ! The following are 12 examples to test the cut-cell algorithm
 
 ! example 1
