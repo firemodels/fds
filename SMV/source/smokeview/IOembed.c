@@ -1062,6 +1062,7 @@ void GetGeomInfoPtrs(geomdata ***geominfoptrs_local,int *ngeominfoptrs_local){
     isoi = isoinfo + i;
     if(isoi->loaded==0||isoi->display==0)continue;
     geomi = isoi->geominfo;
+    if(geomi==NULL)continue;
     if(geomi->loaded==0||geomi->display==0)continue;
     count++;
   }

@@ -16,6 +16,9 @@ void _Sniff_Errors(char *whereat);
 #define GEOM_NORMAL 0
 #define GEOM_ISO 1
 
+#define FED_SLICE 0
+#define FED_ISO 1
+
 #define UNKNOWN -1
 #define RLE 0
 #define ZLIB 1

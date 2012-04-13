@@ -5448,7 +5448,7 @@ typedef struct {
       sd->js2=j2;
       sd->ks1=k1;
       sd->ks2=k2;
-      sd->fed=0;
+      sd->is_fed=0;
       sd->above_ground_level=above_ground_level;
       sd->seq_id=nn_slice;
       sd->autoload=0;
@@ -5671,6 +5671,7 @@ typedef struct {
       isoi->geomflag=geomflag;
       isoi->nlevels=0;
       isoi->levels=NULL;
+      isoi->is_fed=0;
 
       isoi->normaltable=NULL;
       isoi->color_label.longlabel=NULL;

@@ -167,9 +167,10 @@ void Creadslice_frame(int frame_index,int sd_index,int flag,int *error){
   fclose(SLICEFILE);
 }
 
-/* ------------------ readfslice ------------------------ */
+/* ------------------ readfed ------------------------ */
 
-void readfslice(int ifslice, int flag, int *errorcode){
+void readiso_orig(const char *file, int ifile, int flag, int *errorcode);
+void readfed(int file_index, int flag, int file_type, int *errorcode){
   feddata *fedi;
   slicedata *fed,*o2,*co2,*co;
   int error;
@@ -180,8 +181,24 @@ void readfslice(int ifslice, int flag, int *errorcode){
 #define HVCO2(CO2) (exp(0.1930*CLAMP(CO2,0.0,0.1)*100.0+2.0004)/7.1)
 
   ASSERT(fedinfo!=NULL);
-  ASSERT(ifslice>=0);
-  fedi = fedinfo + ifslice;
+  ASSERT(file_index>=0);
+  if(file_type==FED_SLICE){
+    slicedata *slicei;
+
+    ASSERT(file_index<nsliceinfo);
+    slicei = sliceinfo + file_index;
+    fedi = slicei->fedptr;
+  }
+  else if(file_type==FED_ISO){
+    isodata *isoi;
+
+    ASSERT(file_index<nisoinfo);
+    isoi = isoinfo + file_index;
+    fedi = isoi->fedptr;
+  }
+  else{
+    return;
+  }
   o2=fedi->o2;
   co2=fedi->co2;
   co=fedi->co;
@@ -300,7 +317,7 @@ void readfslice(int ifslice, int flag, int *errorcode){
 
         time=times[i];
         vals = fed->qslicedata + i*frame_size;
-        printf("time=%f\n",time);
+        printf("outputting isotime time=%.2f\n",time);
         CCisosurface2file(isofile, &time, vals, iblank, 
 		              isoi->levels, &isoi->nlevels,
                   xplt, &ibar,  yplt, &jbar, zplt, &kbar, 
@@ -313,7 +330,12 @@ void readfslice(int ifslice, int flag, int *errorcode){
     Creadslice_frame(0,fedi->co2_index,UNLOAD,&error);
     Creadslice_frame(0,fedi->co_index,UNLOAD,&error);
   }
-  readslice(fed->file,fedi->fed_index,flag,&error);
+  if(file_type==FED_SLICE){
+    readslice(fed->file,fedi->fed_index,flag,&error);
+  }
+  else{
+    readiso_orig(fedi->fed_iso->file,file_index,flag,&error);
+  }
   printf("completed\n");
 }
 
@@ -2021,7 +2043,8 @@ void update_fedinfo(void){
 
     nn_slice=nsliceinfo+i;
 
-    sd->fed=1;
+    sd->is_fed=1;
+    sd->fedptr=fedi;
     sd->slicetype=co2->slicetype;
     sd->reg_file=NULL;
     sd->comp_file=NULL;
@@ -2071,6 +2094,8 @@ void update_fedinfo(void){
       isoi = isoinfo + nisoinfo - nfediso + ifediso;
       fedi->fed_iso=isoi;
       isoi->tfile=NULL;
+      isoi->is_fed=1;
+      isoi->fedptr=fedi;
       nn_iso = nisoinfo - nfediso + ifediso + 1;
       isoi->seq_id=nn_iso;
       isoi->autoload=0;
@@ -2088,9 +2113,13 @@ void update_fedinfo(void){
       for(ii=0;ii<3;ii++){
         isoi->colorlevels[i]=NULL;
       }
-      isoi->levels[0]=0.3;
-      isoi->levels[1]=1.0;
-      isoi->levels[2]=3.0;
+//xxx
+//      isoi->levels[0]=0.3;
+//      isoi->levels[1]=1.0;
+//      isoi->levels[2]=3.0;
+      isoi->levels[0]=0.01;
+      isoi->levels[1]=0.05;
+      isoi->levels[2]=0.1;
       setlabels_iso(&(isoi->surface_label),"Fractional effective dose","FED"," ",isoi->levels,isoi->nlevels);
       isoi->normaltable=NULL;
       isoi->color_label.longlabel=NULL;

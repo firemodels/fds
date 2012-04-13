@@ -397,15 +397,27 @@ typedef struct {
   float width, rgb[3];
 } tickdata;
 
-/* --------------------------  iso ------------------------------------ */
+
+/* --------------------------  feddata ------------------------------------ */
 
 typedef struct {
+  struct _slicedata *co,*co2,*o2,*fed_slice;
+  struct _isodata *fed_iso;
+  int co_index, co2_index, o2_index, fed_index;
+  int loaded,display;
+} feddata;
+
+/* --------------------------  iso ------------------------------------ */
+
+typedef struct _isodata {
   int seq_id, autoload;
   char *reg_file, *size_file;
   short *normaltable;
   int nnormaltable; 
   char *file,*tfile;
   int dataflag,geomflag;
+  int is_fed;
+  feddata *fedptr;
   int type;
   int num_memblocks;
   int setvalmin, setvalmax;
@@ -975,7 +987,8 @@ typedef struct _slicedata {
   int compression_type;
   int ncompressed;
   int slicetype;
-  int fed;
+  int is_fed;
+  feddata *fedptr;
   int menu_show;
   float *constant_color;
   float qval256[256];
@@ -1025,15 +1038,6 @@ typedef struct _slicedata {
   float delta_orig;
   int extreme_min, extreme_max;
 } slicedata;
-
-/* --------------------------  multislice ------------------------------------ */
-
-typedef struct {
-  slicedata *co,*co2,*o2,*fed_slice;
-  isodata *fed_iso;
-  int co_index, co2_index, o2_index, fed_index;
-  int loaded,display;
-} feddata;
 
 /* --------------------------  multislice ------------------------------------ */
 

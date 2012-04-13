@@ -3536,7 +3536,7 @@ void LoadSliceMenu(int value){
       readslice(file,value,LOAD,&errorcode);
     }
     else{
-      readfslice(value-(nsliceinfo-nfedinfo),LOAD,&errorcode);
+      readfed(value,LOAD,FED_SLICE,&errorcode);
     }
   }
   else{

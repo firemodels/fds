@@ -701,11 +701,16 @@ void readiso(const char *file, int ifile, int flag, int *errorcode){
 
   if(ifile>=0&&ifile<nisoinfo){
     isoi = isoinfo + ifile;
-    if(isoi->geomflag==1){
-      readiso_geom(file,ifile,flag,errorcode);
+    if(isoi->is_fed==1){
+      readfed(ifile, flag, FED_ISO, errorcode);
     }
     else{
-      readiso_orig(file,ifile,flag,errorcode);
+      if(isoi->geomflag==1){
+        readiso_geom(file,ifile,flag,errorcode);
+      }
+      else{
+        readiso_orig(file,ifile,flag,errorcode);
+      }
     }
   }
 }
