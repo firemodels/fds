@@ -36,9 +36,10 @@ NIST_RSE
 cfil = [pwd,'/validation_data_config_matlab.csv'];
 vdir = [pwd,'/../../Validation/'];
 plotdir = [pwd,'/../../Manuals/'];
+qfil = [pwd,'/scatterplot_config_matlab.csv'];
 
 [saved_data,drange] = dataplot(cfil,vdir,plotdir);
-scatplot(saved_data,drange)
+scatplot(saved_data,drange,qfil)
 
 % Miscellaneous other scripts for special cases
 

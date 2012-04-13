@@ -33,13 +33,9 @@ Save_Group_Key_Label  = saved_data{:,4};
 Save_Measured_Metric  = saved_data{:,5};
 Save_Predicted_Metric = saved_data{:,6};
 
-qfil = [pwd,'/scatterplot_config_matlab.csv'];
+qfil = varargin{1};
 
-if nargin==3
-    qrange = varargin{1};
-else
-    qrange = [2:100];
-end
+qrange = [2:100];
 
 plot_style
 
