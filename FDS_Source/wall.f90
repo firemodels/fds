@@ -589,7 +589,7 @@ PARTICLE_LOOP: DO IP=1,NLP
    ! In PYROLYSIS, all the mass fluxes are normalized by a virtual area based on the INITIAL radius. 
    ! Here, correct the mass flux using the CURRENT radius. Also, multiply by LP%PWT to account for split particles
 
-   AREA_SCALING = AREA_SCALING*LP%PWT
+   ONE_D%AREA = ONE_D%AREA*LP%PWT
 
    ONE_D%MASSFLUX(0:N_TRACKED_SPECIES)         = ONE_D%MASSFLUX(0:N_TRACKED_SPECIES)       *AREA_SCALING
    ONE_D%MASSFLUX_ACTUAL(0:N_TRACKED_SPECIES)  = ONE_D%MASSFLUX_ACTUAL(0:N_TRACKED_SPECIES)*AREA_SCALING
