@@ -130,11 +130,19 @@ intel_linux_32 : setup $(obj_serial)
 # 1.  build FDS using intel_linux_32_profile target
 # 2.  run case as usual
 # 3.  type: gprof fds_linux_32_profile > results.out
+
 intel_linux_32_profile : FFLAGS = -m32 -O2 -vec_report0 -p
 intel_linux_32_profile : LFLAGS = -static-intel
 intel_linux_32_profile : FCOMPL = ifort
 intel_linux_32_profile : obj = fds_intel_linux_32_profile
 intel_linux_32_profile : setup $(obj_serial)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
+
+intel_linux_64_profile : FFLAGS = -m64 -O2 -vec_report0 -p
+intel_linux_64_profile : LFLAGS = -static-intel
+intel_linux_64_profile : FCOMPL = ifort
+intel_linux_64_profile : obj = fds_intel_linux_64_profile
+intel_linux_64_profile : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
 
 intel_linux_64 : FFLAGS = -m64 -O2 -vec_report0
