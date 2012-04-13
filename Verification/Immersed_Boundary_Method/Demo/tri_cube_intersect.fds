@@ -6,7 +6,7 @@
 
 &MISC IMMERSED_BOUNDARY_METHOD=0 /
 
-&SURF ID='face', COLOR='BLACK' /
+&SURF ID='face', COLOR='BLUE' /
 
 ! tri inside cell
 VERT X=1.1,1.1,1.1 /
@@ -18,7 +18,7 @@ VERT X=1.4,.6,1.5 /
 VERT X=2.4,.6,1.5 /
 VERT X=2.4,1.6,1.5 /
 
-! cell corner pokes through teeri interior
+! cell corner pokes through tri interior
 &VERT X=1.25,.75,2.25 /
 &VERT X=2.25,.75,1.25 /
 &VERT X=2.25,1.75,2.25 /
@@ -27,7 +27,5 @@ VERT X=2.4,1.6,1.5 /
 ! the surface normal points toward the gas phase (out of the solid).
 
 &FACE N=1,2,3, SURF_ID='face' /
-
-&SLCF XB=0,3,0,3,0,3, QUANTITY='P MASK', CELL_CENTERED=.TRUE./
 
 &TAIL /
