@@ -595,16 +595,6 @@ DO K=0,KBAR
          TXY(I,J,K) = MUZ*(DVDX + DUDY)
          TXZ(I,J,K) = MUY*(DUDZ + DWDX)
          TYZ(I,J,K) = MUX*(DVDZ + DWDY)
-         
-         IF (IMMERSED_BOUNDARY_METHOD==2) THEN
-            IBM_SAVE1(I,J,K) = DUDY
-            IBM_SAVE2(I,J,K) = DUDZ
-            IBM_SAVE3(I,J,K) = DVDX
-            IBM_SAVE4(I,J,K) = DVDZ
-            IBM_SAVE5(I,J,K) = DWDX
-            IBM_SAVE6(I,J,K) = DWDY
-         ENDIF
-         
       ENDDO
    ENDDO
 ENDDO
@@ -2744,9 +2734,9 @@ IF (IMMERSED_BOUNDARY_METHOD==2) THEN
    DWDX => IBM_SAVE5
    DWDY => IBM_SAVE6
    
-   DO K=0,KBP1
-      DO J=0,JBP1
-         DO I=0,IBP1
+   DO K=0,KBAR
+      DO J=0,JBAR
+         DO I=0,IBAR
          
             IP1 = MIN(I+1,IBP1)
             JP1 = MIN(J+1,JBP1)
@@ -2763,6 +2753,12 @@ IF (IMMERSED_BOUNDARY_METHOD==2) THEN
                DUDX(I,J,K) = (UU(I,J,K)-UU(IM1,J,K))/DX(I)
                DVDY(I,J,K) = (VV(I,J,K)-VV(I,JM1,K))/DY(J)
                DWDZ(I,J,K) = (WW(I,J,K)-WW(I,J,KM1))/DZ(K)
+               DUDY(I,J,K) = RDYN(J)*(UU(I,JP1,K)-UU(I,J,K))
+               DVDX(I,J,K) = RDXN(I)*(VV(IP1,J,K)-VV(I,J,K))
+               DUDZ(I,J,K) = RDZN(K)*(UU(I,J,KP1)-UU(I,J,K))
+               DWDX(I,J,K) = RDXN(I)*(WW(IP1,J,K)-WW(I,J,K))
+               DVDZ(I,J,K) = RDZN(K)*(VV(I,J,KP1)-VV(I,J,K))
+               DWDY(I,J,K) = RDYN(J)*(WW(I,JP1,K)-WW(I,J,K))
             ENDIF P_MASK_IF
             
             IF (U_MASK(I,J,K)==-1 .AND. U_MASK(I,JP1,K)==-1) DUDY(I,J,K)=0._EB
