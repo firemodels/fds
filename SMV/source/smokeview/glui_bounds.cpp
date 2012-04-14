@@ -193,6 +193,7 @@ GLUI_Checkbox *showchar_checkbox=NULL, *showonlychar_checkbox;
 GLUI_Checkbox *CHECKBOX_showtrisurface=NULL;
 GLUI_Checkbox *CHECKBOX_showtrioutline=NULL;
 GLUI_Checkbox *CHECKBOX_showtripoints=NULL;
+GLUI_Checkbox *CHECKBOX_defer=NULL;
 
 GLUI_Checkbox *CHECKBOX_show_evac_slices=NULL;
 GLUI_Checkbox *CHECKBOX_constant_coloring=NULL;
@@ -266,6 +267,29 @@ GLUI_EditText *con_p3_min=NULL, *con_p3_max=NULL;
 GLUI_EditText *con_p3_chopmin=NULL, *con_p3_chopmax=NULL;
 GLUI_RadioGroup *con_p3_setmin=NULL, *con_p3_setmax=NULL;
 
+/* ------------------ update_script_stop ------------------------ */
+
+extern "C" void update_script_stop(void){
+  if(BUTTON_script_start!=NULL)BUTTON_script_start->enable();
+  if(BUTTON_script_stop!=NULL)BUTTON_script_stop->disable();
+  if(BUTTON_script_runscript!=NULL)BUTTON_script_runscript->enable();
+  if(EDIT_renderdir!=NULL)EDIT_renderdir->enable();
+}
+
+/* ------------------ update_script_start ------------------------ */
+
+extern "C" void update_script_start(void){
+  if(BUTTON_script_start!=NULL)BUTTON_script_start->disable();
+  if(BUTTON_script_stop!=NULL)BUTTON_script_stop->enable();
+  if(BUTTON_script_runscript!=NULL)BUTTON_script_runscript->disable();
+  if(EDIT_renderdir!=NULL)EDIT_renderdir->disable();
+}
+
+/* ------------------ update_defer ------------------------ */
+
+extern "C" void update_defer(void){
+  CHECKBOX_defer->set_int_val(defer_file_loading);
+}
 
 /* ------------------ transparency ------------------------ */
 
@@ -754,6 +778,9 @@ extern "C" void glui_bounds_setup(int main_window){
   glui_bounds->add_column_to_panel(panel_script1a,false);
   BUTTON_script_stop=glui_bounds->add_button_to_panel(panel_script1a,_("Stop recording"),SCRIPT_STOP,Script_CB);
   BUTTON_script_stop->disable();
+
+  CHECKBOX_defer=glui_bounds->add_checkbox_to_panel(panel_script1,_("Turn off file loading while recording"),&defer_file_loading,
+    SCRIPT_FILE_LOADING,Script_CB);
 
   panel_script1b = glui_bounds->add_panel_to_panel(panel_script1,"",false);
   BUTTON_script_runscript=glui_bounds->add_button_to_panel(panel_script1b,_("Run script"),SCRIPT_RUNSCRIPT,Script_CB);
@@ -1318,19 +1345,10 @@ extern "C"  void glui_script_disable(void){
     }
       break;
     case SCRIPT_START:
-      BUTTON_script_start->disable();
-      BUTTON_script_stop->enable();
-      BUTTON_script_runscript->disable();
-      EDIT_renderdir->disable();
-
-      ScriptMenu(START_RECORDING_SCRIPT);
+      ScriptMenu(SCRIPT_START_RECORDING);
       break;
     case SCRIPT_STOP:
-      ScriptMenu(STOP_RECORDING_SCRIPT);
-      BUTTON_script_start->enable();
-      BUTTON_script_stop->disable();
-      BUTTON_script_runscript->enable();
-      EDIT_renderdir->enable();
+      ScriptMenu(SCRIPT_STOP_RECORDING);
       break;
     case SCRIPT_RUNSCRIPT:
       name = 5+BUTTON_script_runscript->name;
@@ -1386,6 +1404,9 @@ extern "C"  void glui_script_disable(void){
           scriptinifilename2=NULL;
         }
       }
+      break;
+    case SCRIPT_FILE_LOADING:
+      updatemenu=1;
       break;
     case SCRIPT_EDIT_INI:
       strcpy(label,_("Save "));

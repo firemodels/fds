@@ -227,8 +227,9 @@ void _Sniff_Errors(char *whereat);
 #define UNLOADALL 1
 #define SHOWFILES 5
 
-#define START_RECORDING_SCRIPT -2
-#define STOP_RECORDING_SCRIPT -3
+#define SCRIPT_START_RECORDING -2
+#define SCRIPT_STOP_RECORDING -3
+#define SCRIPT_FILE_LOADING -4
 
 #define RENDER 1
 #define SELECT 2

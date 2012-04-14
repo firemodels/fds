@@ -24,6 +24,7 @@
 #include "file_util.h"
 #include "MALLOC.h"
 
+SVEXTERN int SVDECL(defer_file_loading,0);
 SVEXTERN int SVDECL(regenerate_fed,1);
 SVEXTERN int SVDECL(debug_count,0);
 SVEXTERN geomdata SVDECL(**geominfoptrs,NULL);

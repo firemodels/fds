@@ -126,7 +126,7 @@ void MainMenu(int value){
 
   if(value==3){
     if(scriptoutstream!=NULL){
-      ScriptMenu(STOP_RECORDING_SCRIPT);
+      ScriptMenu(SCRIPT_STOP_RECORDING);
     }
     exit(0);
   }
@@ -2120,7 +2120,12 @@ void ScriptMenu(int value){
   updatemenu=1;
   glutPostRedisplay();
   switch (value){
-    case START_RECORDING_SCRIPT:
+    case SCRIPT_FILE_LOADING:
+      defer_file_loading = 1 - defer_file_loading;
+      update_defer();
+      break;
+    case SCRIPT_START_RECORDING:
+      update_script_start();
       get_newscriptfilename(newscriptfilename);
 //      strcpy(scriptinifilename,newscriptfilename);
       script_recording = insert_scriptfile(newscriptfilename);
@@ -2153,7 +2158,7 @@ void ScriptMenu(int value){
         }
       }
       break;
-    case STOP_RECORDING_SCRIPT:
+    case SCRIPT_STOP_RECORDING:
       if(script_recording!=NULL){
         script_recording->recording=0;
         add_scriptlist(script_recording->file,script_recording->id);
@@ -2165,6 +2170,7 @@ void ScriptMenu(int value){
         //writeini(SCRIPT_INI);
         printf("Script recorder off\n");
       }
+      update_script_stop();
       break;
     default:
       for(scriptfile=first_scriptfile.next;scriptfile->next!=NULL;scriptfile=scriptfile->next){
@@ -3321,7 +3327,9 @@ void LoadSmoke3DMenu(int value){
       fprintf(scriptoutstream,"LOADFILE\n");
       fprintf(scriptoutstream," %s\n",file);
     }
-    readsmoke3d(value,LOAD,&errorcode);
+    if(scriptoutstream==NULL||defer_file_loading==0){
+      readsmoke3d(value,LOAD,&errorcode);
+    }
   }
   else if(value==-1){
     for(i=0;i<nsmoke3dinfo;i++){
@@ -3329,10 +3337,12 @@ void LoadSmoke3DMenu(int value){
     }
   }
   else if(value==-9){
-    for(i=0;i<nsmoke3dinfo;i++){
-      smoke3di = smoke3dinfo + i;
-      if(smoke3di->loaded==1)continue;
-      readsmoke3d(i,LOAD,&errorcode);
+    if(scriptoutstream==NULL||defer_file_loading==0){
+      for(i=0;i<nsmoke3dinfo;i++){
+        smoke3di = smoke3dinfo + i;
+        if(smoke3di->loaded==1)continue;
+        readsmoke3d(i,LOAD,&errorcode);
+      }
     }
   }
   else if(value<=-10){
@@ -3342,10 +3352,12 @@ void LoadSmoke3DMenu(int value){
       fprintf(scriptoutstream,"LOAD3DSMOKE\n");
       fprintf(scriptoutstream," %s\n",smoke3dj->label.longlabel);
     }
-    for(i=0;i<nsmoke3dinfo;i++){
-      smoke3di = smoke3dinfo + i;
-      if(strcmp(smoke3di->label.shortlabel,smoke3dj->label.shortlabel)==0){
-        readsmoke3d(i,LOAD,&errorcode);
+    if(scriptoutstream==NULL||defer_file_loading==0){
+      for(i=0;i<nsmoke3dinfo;i++){
+        smoke3di = smoke3dinfo + i;
+        if(strcmp(smoke3di->label.shortlabel,smoke3dj->label.shortlabel)==0){
+          readsmoke3d(i,LOAD,&errorcode);
+        }
       }
     }
   }
@@ -3532,11 +3544,13 @@ void LoadSliceMenu(int value){
       fprintf(scriptoutstream,"LOADFILE\n");
       fprintf(scriptoutstream," %s\n",file);
     }
-    if(value<nsliceinfo-nfedinfo){
-      readslice(file,value,LOAD,&errorcode);
-    }
-    else{
-      readfed(value,LOAD,FED_SLICE,&errorcode);
+    if(scriptoutstream==NULL||defer_file_loading==0){
+      if(value<nsliceinfo-nfedinfo){
+        readslice(file,value,LOAD,&errorcode);
+      }
+      else{
+        readfed(value,LOAD,FED_SLICE,&errorcode);
+      }
     }
   }
   else{
@@ -3599,8 +3613,10 @@ void LoadMultiVSliceMenu(int value){
         script_multivslice=1;
       }
     }
-    for(i=0;i<mvslicei->nvslices;i++){
-      LoadVSliceMenu(mvslicei->ivslices[i]);
+    if(scriptoutstream==NULL||defer_file_loading==0){
+      for(i=0;i<mvslicei->nvslices;i++){
+        LoadVSliceMenu(mvslicei->ivslices[i]);
+      }
     }
     script_multivslice=0;
   }
@@ -3630,9 +3646,11 @@ void LoadMultiSliceMenu(int value){
         script_multislice=1;
       }
     }
-    for(i=0;i<mslicei->nslices;i++){
-      LoadSliceMenu(mslicei->islices[i]);
-    } 
+    if(scriptoutstream==NULL||defer_file_loading==0){
+      for(i=0;i<mslicei->nslices;i++){
+        LoadSliceMenu(mslicei->islices[i]);
+      } 
+    }
     script_multislice=0;
   }
   else{
@@ -3686,7 +3704,9 @@ void LoadPlot3dMenu(int value){
       fprintf(scriptoutstream," %i %f\n",
         plot3dinfo[value].blocknumber+1,plot3dinfo[value].time);
     }
-    readplot3d(plot3dfile,value,LOAD,&errorcode);
+    if(scriptoutstream==NULL||defer_file_loading==0){
+      readplot3d(plot3dfile,value,LOAD,&errorcode);
+    }
   }
   else if(value==-1){
     for(i=0;i<nplot3dinfo;i++){
@@ -3723,7 +3743,9 @@ void LoadIsoMenu(int value){
       fprintf(scriptoutstream,"LOADFILE\n");
       fprintf(scriptoutstream," %s\n",file);
     }
-    readiso(file,value,LOAD,&errorcode);
+    if(scriptoutstream==NULL||defer_file_loading==0){
+      readiso(file,value,LOAD,&errorcode);
+    }
   }
   if(value==-1){
     for(i=0;i<nisoinfo;i++){
@@ -3739,10 +3761,12 @@ void LoadIsoMenu(int value){
       fprintf(scriptoutstream,"LOADISO\n");
       fprintf(scriptoutstream," %s\n",isoii->surface_label.longlabel);
     }
-    for(i=0;i<nisoinfo;i++){
-      isoi = isoinfo + i;
-      if(isoii->type!=isoi->type)continue;
-      LoadIsoMenu(i);
+    if(scriptoutstream==NULL||defer_file_loading==0){
+      for(i=0;i<nisoinfo;i++){
+        isoi = isoinfo + i;
+        if(isoii->type!=isoi->type)continue;
+        LoadIsoMenu(i);
+      }
     }
     script_iso=0;
   }
@@ -3776,9 +3800,11 @@ void LoadPatchMenu(int value){
       fprintf(scriptoutstream,"LOADFILE\n");
       fprintf(scriptoutstream," %s\n",file);
     }
-    LOCK_COMPRESS
-    readpatch(value,LOAD,&errorcode);
-    UNLOCK_COMPRESS
+    if(scriptoutstream==NULL||defer_file_loading==0){
+      LOCK_COMPRESS
+      readpatch(value,LOAD,&errorcode);
+      UNLOCK_COMPRESS
+    }
   }
   else if(value<=-10){
     patchdata *patchj;
@@ -3789,12 +3815,14 @@ void LoadPatchMenu(int value){
       fprintf(scriptoutstream,"LOADBOUNDARY\n");
       fprintf(scriptoutstream," %s\n",patchj->label.longlabel);
     }
-    for(i=0;i<npatchinfo;i++){
-      patchi = patchinfo + i;
-      if(strcmp(patchi->label.shortlabel,patchj->label.shortlabel)==0&&patchi->filetype==patchj->filetype){
-        LOCK_COMPRESS
-        readpatch(i,LOAD,&errorcode);
-        UNLOCK_COMPRESS
+    if(scriptoutstream==NULL||defer_file_loading==0){
+      for(i=0;i<npatchinfo;i++){
+        patchi = patchinfo + i;
+        if(strcmp(patchi->label.shortlabel,patchj->label.shortlabel)==0&&patchi->filetype==patchj->filetype){
+          LOCK_COMPRESS
+          readpatch(i,LOAD,&errorcode);
+          UNLOCK_COMPRESS
+        }
       }
     }
     force_redisplay=1;
@@ -8529,8 +8557,14 @@ updatemenu=0;
 
     }
     glutAddMenuEntry(_("Create script:"),-999);
-    if(script_recording==NULL)glutAddMenuEntry(_("  Start recording"),START_RECORDING_SCRIPT);
-    glutAddMenuEntry(_("  Stop recording"),STOP_RECORDING_SCRIPT);
+    if(defer_file_loading==1){
+      glutAddMenuEntry(_("  *Turn off file loading while recording"),SCRIPT_FILE_LOADING);
+    }
+    else{
+      glutAddMenuEntry(_("  Turn off file loading while recording"),SCRIPT_FILE_LOADING);
+    }
+    if(script_recording==NULL)glutAddMenuEntry(_("  Start recording"),SCRIPT_START_RECORDING);
+    glutAddMenuEntry(_("  Stop recording"),SCRIPT_STOP_RECORDING);
 
   /* --------------------------------loadunload menu -------------------------- */
     {
