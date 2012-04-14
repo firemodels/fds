@@ -292,8 +292,9 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
       char *isofile;
       int error;
       int reduce_triangles=1;
-      int *iblank=NULL;
       isodata *isoi;
+      int j;
+      int nx, ny, nz;
 
       isoi = fedi->fed_iso;
       strcpy(longlabel,"Fractional effective dose");
@@ -307,20 +308,30 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
       ibar = meshi->ibar;
       jbar = meshi->jbar;
       kbar = meshi->kbar;
-      iblank_cell = meshi->c_iblank_cell;
+      nx = ibar + 1;
+      ny = jbar + 1;
+      nz = kbar + 1;
       isofile=isoi->file;
+
+      iblank_cell = meshi->c_iblank_cell;
+  
       CCisoheader(isofile,longlabel,shortlabel,unitlabel,isoi->levels,&isoi->nlevels,&error);
       printf("generating FED isosurface\n");
       for(i=0;i<fed->ntimes;i++){
         float time;
         float *vals;
+        int j;
 
         time=times[i];
         vals = fed->qslicedata + i*frame_size;
         printf("outputting isotime time=%.2f\n",time);
-        CCisosurface2file(isofile, &time, vals, iblank, 
+
+//    C_val(i,j,k) = i*nj*nk + j*nk + k
+// Fort_val(i,j,k) = i + j*ni + k*ni*nj
+
+        CCisosurface2file(isofile, &time, vals, iblank_cell, 
 		              isoi->levels, &isoi->nlevels,
-                  xplt, &ibar,  yplt, &jbar, zplt, &kbar, 
+                  xplt, &nx,  yplt, &ny, zplt, &nz, 
                   &reduce_triangles, &error);
       }
     }
@@ -3087,7 +3098,6 @@ void drawslice(const slicedata *sd){
    constval = yplt[sd->js1]+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
    for(i=sd->is1; i<sd->is2; i++){
-
      n = (i-sd->is1)*sd->nslicek -1;
      n2 = n + sd->nslicek;
      x1 = xplt[i];

@@ -101,7 +101,7 @@ SV_EXTERN void CCtisoheader(char *isofile,
                  char *isolonglabel, char *isoshortlabel, char *isounits,
                  float *levels, int *nlevels, int *error);
 SV_EXTERN void isoout(FILE *isostream,float t, int timeindex, isosurface *surface, int *error);
-SV_EXTERN void CCisosurface2file(char *isofile, float *t, float *data, int *iblank, float *level, int *nlevels,
+SV_EXTERN void CCisosurface2file(char *isofile, float *t, float *data, char *iblank, float *level, int *nlevels,
      float *xplt, int *nx, float *yplt, int *ny, float *zplt, int *nz,int *reduce_triangles, int *error);
 SV_EXTERN void CCisosurfacet2file(char *isofile, float *t, float *data, int *data2flag, float *data2, int *iblank, 
 						float *level, int *nlevels,

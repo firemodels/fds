@@ -1512,7 +1512,7 @@ void isoout(FILE *isostream,float t, int timeindex, isosurface *surface, int *er
 
 /* ------------------ CCisosurface2file ------------------------ */
 
-void CCisosurface2file(char *isofile, float *t, float *data, int *iblank, 
+void CCisosurface2file(char *isofile, float *t, float *data, char *iblank, 
 						float *level, int *nlevels,
                    float *xplt, int *nx, 
                    float *yplt, int *ny, 
