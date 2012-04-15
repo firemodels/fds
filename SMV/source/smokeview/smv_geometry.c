@@ -52,6 +52,116 @@ float getmesh_zcell(mesh *meshi, float xval, float yval, int *valid){
   return zval;
 }
 
+/* ------------------ compare_float ------------------------ */
+
+int compare_floats( const void *arg1, const void *arg2 ){
+  float x, y;
+  x=*(float *)arg1;
+  y=*(float *)arg2;
+  if( x< y)return -1;
+  if( x> y)return 1;
+  return 0;
+}
+
+/* ------------------ removedupfloats ------------------------ */
+
+void removedupfloats(float **valsptr, int *nvals,int *ivals, float dval_min){
+  int nv;
+  int i,ii;
+  float *vals,valmid;
+  
+  *ivals=0;
+  if(*nvals==0)return;
+  nv = *nvals;
+  vals = *valsptr;
+  qsort( (float *)vals, (size_t)nv, sizeof( float ), compare_floats );
+  ii=1;
+  for(i=1;i<nv;i++){
+    if(ABS(vals[i]-vals[i-1])<=dval_min)continue;
+    vals[ii]=vals[i];
+    ii++;
+  }
+  valmid=(vals[0]+vals[*nvals-1])/2.0;
+  if(*nvals!=ii){
+    *nvals=ii;
+    ResizeMemory((void **)&vals,*nvals*sizeof(float));
+    *valsptr=vals;
+  }
+  for(i=1;i<*nvals;i++){
+    if(vals[i-1]<=valmid&&valmid<=vals[i]){
+      *ivals=i;
+      break;
+    }
+  }
+}
+
+/* ------------------ update_plot_alls ------------------------ */
+
+void update_plotxyz_all(void){
+  int i;
+  float *xp, *yp, *zp;
+  float dxyz_min=100000.0;
+
+  FREEMEMORY(plotx_all);
+  FREEMEMORY(ploty_all);
+  FREEMEMORY(plotz_all);
+  nplotx_all=0;
+  nploty_all=0;
+  nplotz_all=0;
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+
+    meshi = meshinfo + i;
+    nplotx_all+=(meshi->ibar+1);
+    nploty_all+=(meshi->jbar+1);
+    nplotz_all+=(meshi->kbar+1);
+  }
+  NewMemory((void **)&plotx_all,nplotx_all*sizeof(float));
+  NewMemory((void **)&ploty_all,nploty_all*sizeof(float));
+  NewMemory((void **)&plotz_all,nplotz_all*sizeof(float));
+  xp = plotx_all;
+  yp = ploty_all;
+  zp = plotz_all;
+  for(i=0;i<nmeshes;i++){
+    int j;
+    mesh *meshi;
+
+    meshi = meshinfo + i;
+    for(j=0;j<meshi->ibar+1;j++){
+      *xp++ = meshi->xplt[j];
+    }
+    for(j=0;j<meshi->jbar+1;j++){
+      *yp++ = meshi->yplt[j];
+    }
+    for(j=0;j<meshi->kbar+1;j++){
+      *zp++ = meshi->zplt[j];
+    }
+    for(j=1;j<meshi->ibar+1;j++){
+      float dxyz;
+
+      dxyz = meshi->xplt[j]-meshi->xplt[j-1];
+      dxyz_min = MIN(dxyz_min,dxyz);
+    }
+    for(j=1;j<meshi->jbar+1;j++){
+      float dxyz;
+
+      dxyz = meshi->yplt[j]-meshi->yplt[j-1];
+      dxyz_min = MIN(dxyz_min,dxyz);
+    }
+    for(j=1;j<meshi->kbar+1;j++){
+      float dxyz;
+
+      dxyz = meshi->zplt[j]-meshi->zplt[j-1];
+      dxyz_min = MIN(dxyz_min,dxyz);
+    }
+  }
+  dxyz_min/=10.0;
+  removedupfloats(&plotx_all,&nplotx_all,&iplotx_all,dxyz_min);
+  removedupfloats(&ploty_all,&nploty_all,&iploty_all,dxyz_min);
+  removedupfloats(&plotz_all,&nplotz_all,&iplotz_all,dxyz_min);
+
+}
+
 /* ------------------ getmesh ------------------------ */
 
 mesh *getmesh(float *xyz){

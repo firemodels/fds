@@ -6312,7 +6312,6 @@ typedef struct {
     yplt_cen = meshi->yplt_cen;
     zplt_cen = meshi->zplt_cen;
 
-
     for(i=0;i<ibartemp+1;i++){
       xplt_origtemp[i]=xplttemp[i];
       xplttemp[i]=(xplttemp[i]-xbar0)/xyzmaxdiff;
@@ -6371,6 +6370,8 @@ typedef struct {
     face_centers[14]=meshi->boxmin_scaled[2];
     face_centers[17]=meshi->boxmax_scaled[2];
   }
+
+  update_plotxyz_all();
 
   updatevslices();
   

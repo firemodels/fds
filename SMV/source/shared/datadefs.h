@@ -5,6 +5,10 @@
 #ifndef DATADEFS_H_DEFINED
 #define DATADEFS_H_DEFINED
 
+#define SCALEX(x) ((x)-xbar0)/xyzmaxdiff)
+#define SCALEY(y) ((y)-ybar0)/xyzmaxdiff)
+#define SCALEZ(z) ((z)-zbar0)/xyzmaxdiff)
+
 #ifndef PIFACTOR
 #define PIFACTOR (3.14159/180.0)
 #endif

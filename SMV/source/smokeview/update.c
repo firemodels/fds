@@ -24,7 +24,7 @@ char update_revision[]="$Revision$";
 #include "smokeviewvars.h"
 #include "compress.h"
 
-/* ------------------ compare ------------------------ */
+/* ------------------ compare_float ------------------------ */
 
 int compare_float( const void *arg1, const void *arg2 ){
   float x, y;
