@@ -7793,7 +7793,15 @@ int readini2(char *inifile, int localfile){
     CheckMemory;
     if(fgets(buffer,255,stream)==NULL)break;
 
-    if(match(buffer,"SHOWDEVICEVALS")==1){
+
+   
+   if(match(buffer,"GRIDPARMS")==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i %i %i",&visx_all, &visy_all, &visz_all);
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i %i %i",&iplotx_all, &iploty_all, &iplotz_all);
+   }
+   if(match(buffer,"SHOWDEVICEVALS")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %i %i",&showdeviceval,&showvdeviceval,&devicetypes_index);
     }
@@ -10542,6 +10550,9 @@ void writeini(int flag){
       }
     }
 
+    fprintf(fileout,"GRIDPARMS\n");
+    fprintf(fileout,"%i %i %i\n",visx_all, visy_all, visz_all);
+    fprintf(fileout,"%i %i %i\n",iplotx_all, iploty_all, iplotz_all);
     fprintf(fileout,"SHOWDEVICEVALS\n");
     fprintf(fileout," %i %i %i\n",showdeviceval,showvdeviceval,devicetypes_index);
     put_startup_smoke3d(fileout);
