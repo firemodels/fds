@@ -27,8 +27,8 @@ duct{8} = '7';
  M = csvread(infile{1},6,1);
 
 for n = 2:4
-    m = csvread(infile{n},150,1);
-    pressure(n,1:8) = m(1,1:8);
+    m = csvread(infile{n},2,1);
+    pressure(n,1:8) = m(length(m(:,1)),1:8);
 end
 
 filename = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/ashrae_7.tex';
