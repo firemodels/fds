@@ -144,6 +144,7 @@ void MainMenu(int value){
 
 void StaticVariableMenu(int value){
   mesh *meshi;
+
   meshi=current_mesh;
   plotn=value;
   plotstate=STATIC_PLOTS;
@@ -152,16 +153,16 @@ void StaticVariableMenu(int value){
     updateshowstep(1,ISO);
   }
   updatesurface();
-  if(meshi->visx==1){
+  if(visx_all==1){
     updateshowstep(1,DIRX);
   }
-  if(meshi->visy==1){
+  if(visy_all==1){
     updateshowstep(1,DIRY);
   }
-  if(meshi->visz==1){
+  if(visz_all==1){
     updateshowstep(1,DIRZ);
   }
-  if(meshi->visx==0&&meshi->visy==0&&meshi->visz==0){
+  if(visx_all==0&&visy_all==0&&visz_all==0){
     updateshowstep(1,DIRY);
   }
   updateallplotslices();
@@ -177,9 +178,15 @@ void IsoVariableMenu(int value){
   meshi=current_mesh;
   if(ReadPlot3dFile==1){
     plotn=value;
-    if(meshi->visx==1){updateshowstep(1,DIRX);}
-    if(meshi->visy==1){updateshowstep(1,DIRY);}
-    if(meshi->visz==1){updateshowstep(1,DIRZ);}
+    if(visx_all==1){
+      updateshowstep(1,DIRX);
+    }
+    if(visy_all==1){
+      updateshowstep(1,DIRY);
+    }
+    if(visz_all==1){
+      updateshowstep(1,DIRZ);
+    }
     updateshowstep(1,ISO);
     updatesurface();
     plotstate=STATIC_PLOTS;
@@ -1900,49 +1907,48 @@ void Plot3DShowMenu(int value){
 
   meshi=current_mesh;
   switch (value){
-   case 1:
-    updateshowstep(1-meshi->visz,DIRZ);
-    break;
-   case 2:
-    updateshowstep(1-meshi->visy,DIRY);
-    break;
-   case 3:
-    updateshowstep(1-meshi->visx,DIRX);
-    break;
-   case 4:
-    switch (contour_type){
-     case SHADED_CONTOURS:
-      contour_type=STEPPED_CONTOURS;
+    case 1:
+      visz_all=1-visz_all;
       break;
-     case STEPPED_CONTOURS:
-     case LINE_CONTOURS:
-      contour_type=SHADED_CONTOURS;
+    case 2:
+      visy_all=1-visy_all;
       break;
-     default:
-       ASSERT(FFALSE);
-       break;
-    }
-    break;
-   case 5:
-    meshi->visx=1;
-    meshi->visy=1;
-    meshi->visz=1;
-    break;
-   case 6:
-    meshi->visx=0;
-    meshi->visy=0;
-    meshi->visz=0;
-    plotstate=DYNAMIC_PLOTS;
-    break;
+    case 3:
+      visx_all=1-visx_all;
+      break;
+    case 4:
+      switch (contour_type){
+        case SHADED_CONTOURS:
+          contour_type=STEPPED_CONTOURS;
+          break;
+        case STEPPED_CONTOURS:
+        case LINE_CONTOURS:
+          contour_type=SHADED_CONTOURS;
+          break;
+        default:
+          ASSERT(FFALSE);
+          break;
+      }
+      break;
+    case 5:
+      visx_all=1;
+      visy_all=1;
+      visz_all=1;
+      break;
+    case 6:
+      visx_all=0;
+      visy_all=0;
+      visz_all=0;
+      plotstate=DYNAMIC_PLOTS;
+      break;
    case 7:
-    visVector=1-visVector;
-    if(vectorspresent==0)visVector=0;
-    break;
+      visVector=1-visVector;
+      if(vectorspresent==0)visVector=0;
+      break;
    case HIDEALL_PLOT3D:
      for(i=0;i<nplot3dinfo;i++){
        if(plot3dinfo[i].loaded==1)plot3dinfo[i].display=0;
      }
-
      break;
    case SHOWALL_PLOT3D:
      for(i=0;i<nplot3dinfo;i++){
@@ -1982,36 +1988,36 @@ void GridSliceMenu(int value){
   }
   switch (value){
   case 1:
-    if(justTurnedOn==1&&meshi->visz==1)meshi->visz=0;
-    updateshowstep(1-meshi->visz,DIRZ);
-    if(meshi->visz==1)visGrid=1;
+    if(justTurnedOn==1&&visz_all==1)visz_all=0;
+    updateshowstep(1-visz_all,DIRZ);
+    if(visz_all==1)visGrid=1;
     break;
   case 2:
-    if(justTurnedOn==1&&meshi->visy==1)meshi->visy=0;
-    updateshowstep(1-meshi->visy,DIRY);
-    if(meshi->visy==1)visGrid=1;
+    if(justTurnedOn==1&&visy_all==1)visy_all=0;
+    updateshowstep(1-visy_all,DIRY);
+    if(visy_all==1)visGrid=1;
     break;
   case 3:
-    if(justTurnedOn==1&&meshi->visx==1)meshi->visx=0;
-    updateshowstep(1-meshi->visx,DIRX);
-    if(meshi->visx==1)visGrid=1;
+    if(justTurnedOn==1&&visx_all==1)visx_all=0;
+    updateshowstep(1-visx_all,DIRX);
+    if(visx_all==1)visGrid=1;
     break;
   case 4:
-    meshi->visx=1;
-    meshi->visy=1;
-    meshi->visz=1;
+    visx_all=1;
+    visy_all=1;
+    visz_all=1;
     visGrid=1;
     break;
   case 5:
-    meshi->visx=0;
-    meshi->visy=0;
-    meshi->visz=0;
+    visx_all=0;
+    visy_all=0;
+    visz_all=0;
     break;
   default:
     ASSERT(FFALSE);
     break;
   }
-  if(meshi->visx==0&&meshi->visy==0&&meshi->visz==0){
+  if(visx_all==0&&visy_all==0&&visz_all==0){
     visGrid=0;
   }
   togglegridstate(visGrid);
@@ -5086,12 +5092,12 @@ updatemenu=0;
   if(nplot3dinfo>0){
     CREATEMENU(staticslicemenu,Plot3DShowMenu);
     glutAddSubMenu(_("Solution variable"),staticvariablemenu);
-    if(cmesh->visz==1)glutAddMenuEntry(_("*xy plane"),1);
-    if(cmesh->visz==0)glutAddMenuEntry(_("xy plane"),1);
-    if(cmesh->visy==1)glutAddMenuEntry(_("*xz plane"),2);
-    if(cmesh->visy==0)glutAddMenuEntry(_("xz plane"),2);
-    if(cmesh->visx==1)glutAddMenuEntry(_("*yz plane"),3);
-    if(cmesh->visx==0)glutAddMenuEntry(_("yz plane"),3);
+    if(visz_all==1)glutAddMenuEntry(_("*xy plane"),1);
+    if(visz_all==0)glutAddMenuEntry(_("xy plane"),1);
+    if(visy_all==1)glutAddMenuEntry(_("*xz plane"),2);
+    if(visy_all==0)glutAddMenuEntry(_("xz plane"),2);
+    if(visx_all==1)glutAddMenuEntry(_("*yz plane"),3);
+    if(visx_all==0)glutAddMenuEntry(_("yz plane"),3);
     if(vectorspresent==1)glutAddSubMenu(_("Flow vectors"),vectorskipmenu);
     if(contour_type==SHADED_CONTOURS){
       glutAddMenuEntry(_("*Continuous contours"),4);
@@ -5099,8 +5105,8 @@ updatemenu=0;
     if(contour_type!=SHADED_CONTOURS){
       glutAddMenuEntry(_("Continuous contours"),4);
     }
-    glutAddMenuEntry(_("Show all planes in active mesh"),5);
-    glutAddMenuEntry(_("Hide all planes in active mesh"),6);
+    glutAddMenuEntry(_("Show all planes"),5);
+    glutAddMenuEntry(_("Hide all planes"),6);
 
     CREATEMENU(plot3dshowmenu,Plot3DShowMenu);
     if(nplot3dloaded>0){
@@ -5142,7 +5148,7 @@ updatemenu=0;
 /* --------------------------------grid slice menu -------------------------- */
 
   CREATEMENU(gridslicemenu,GridSliceMenu);
-  if(cmesh->visz==1){
+  if(visz_all==1){
     if(visGrid==1){
       glutAddMenuEntry(_("*xy plane"),1);
     }
@@ -5153,7 +5159,7 @@ updatemenu=0;
   else{
     glutAddMenuEntry(_("xy plane"),1);
   }
-  if(cmesh->visy==1){
+  if(visy_all==1){
     if(visGrid==1){
       glutAddMenuEntry(_("*xz plane"),2);
     }
@@ -5164,7 +5170,7 @@ updatemenu=0;
   else{
     glutAddMenuEntry(_("xz plane"),2);
   }
-  if(cmesh->visx==1){
+  if(visx_all==1){
     if(visGrid==1){
       glutAddMenuEntry(_("*yz plane"),3);
     }

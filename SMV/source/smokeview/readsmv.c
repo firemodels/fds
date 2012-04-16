@@ -7400,12 +7400,6 @@ void initmesh(mesh *meshi){
   meshi->dyz=1.0;
   meshi->label=NULL;
   meshi->mxpatch_frames=0;
-  meshi->visx=0;
-  meshi->visy=1;
-  meshi->visz=0;
-  meshi->visx2=0;
-  meshi->visy2=1;
-  meshi->visz2=0;
   meshi->slicedir=2;
   meshi->visInteriorPatches=0;
   meshi->plot3dfilenum=-1;
@@ -9212,10 +9206,10 @@ int readini2(char *inifile, int localfile){
         meshi = meshinfo + i;
         fgets(buffer,255,stream);
         sscanf(buffer,"%i %i %i %i %i %i",
-          &meshi->visx,&meshi->plotx,&meshi->visy,&meshi->ploty,&meshi->visz,&meshi->plotz);
-        if(meshi->visx!=0)meshi->visx=1;
-        if(meshi->visy!=0)meshi->visy=1;
-        if(meshi->visy!=0)meshi->visz=1;
+          &visx_all,&meshi->plotx,&visy_all,&meshi->ploty,&visz_all,&meshi->plotz);
+        if(visx_all!=0)visx_all=1;
+        if(visy_all!=0)visy_all=1;
+        if(visy_all!=0)visz_all=1;
         if(meshi->plotx<0)meshi->plotx=0;
         if(meshi->plotx>meshi->ibar)meshi->plotx=meshi->ibar;
         if(meshi->ploty>meshi->jbar)meshi->ploty=meshi->jbar;
@@ -10622,7 +10616,7 @@ void writeini(int flag){
     mesh *meshi;
 
     meshi = meshinfo + i;
-    fprintf(fileout," %i %i %i %i %i %i \n",meshi->visx,meshi->plotx,meshi->visy,meshi->ploty,meshi->visz,meshi->plotz);
+    fprintf(fileout," %i %i %i %i %i %i \n",visx_all,meshi->plotx,visy_all,meshi->ploty,visz_all,meshi->plotz);
   }
   for(i=0;i<nmeshes;i++){
     mesh *meshi;

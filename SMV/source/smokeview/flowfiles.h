@@ -501,8 +501,6 @@ typedef struct _mesh {
   int ibar, jbar, kbar;
   int *iplotx_all, *iploty_all, *iplotz_all;
   int plotx, ploty, plotz;
-  int visx, visy, visz;
-  int visx2, visy2, visz2;
   int slicedir;
   int plotn;
   char *c_iblank,*c_iblank_cell,*c_iblank_x,*c_iblank_y,*c_iblank_z;

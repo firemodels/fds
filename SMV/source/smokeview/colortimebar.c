@@ -1576,12 +1576,12 @@ void drawColorBars(void){
         if(showcolorbar_gtge==1){
           if((show_extremedata==0||show_extreme_below==0)&&i==0){
             strcpy(plot3dcolorlabel2,"<=");
-            strcat(plot3dcolorlabel2,plot3dcolorlabel);
+            strcat(plot3dcolorlabel2,plot3dcolorlabel_ptr);
             plot3dcolorlabel_ptr=plot3dcolorlabel2;
           }  
           if((show_extremedata==0||show_extreme_above==0)&&i==nrgb-2){
             strcpy(plot3dcolorlabel2,">=");
-            strcat(plot3dcolorlabel2,plot3dcolorlabel);
+            strcat(plot3dcolorlabel2,plot3dcolorlabel_ptr);
             plot3dcolorlabel_ptr=plot3dcolorlabel2;
           }
         }

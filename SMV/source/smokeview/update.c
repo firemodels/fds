@@ -1474,7 +1474,7 @@ int getplotstate(int choice){
         if(meshi->plot3dfilenum==-1)continue;
         ploti = plot3dinfo + meshi->plot3dfilenum;
         if(ploti->loaded==0||ploti->display==0)continue;
-        if(meshi->visx==0&&meshi->visy==0&&meshi->visz==0&&visiso==0)continue;
+        if(visx_all==0&&visy_all==0&&visz_all==0&&visiso==0)continue;
         return STATIC_PLOTS;
       }
       if(choice!=STATIC_PLOTS_NORECURSE){

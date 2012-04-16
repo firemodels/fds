@@ -929,26 +929,11 @@ void keyboard_2(unsigned char key, int x, int y){
 
     state=glutGetModifiers();
 
-    visx_all=1-visx_all;
-    switch (state){
-
-    case GLUT_ACTIVE_ALT:
+    if(state==GLUT_ACTIVE_ALT){
       DialogMenu(-2); // close all dialogs
-      break;
-    case GLUT_ACTIVE_CTRL:
-      updateshowstep(1-current_mesh->visx,DIRX);
-      break;
-    case GLUT_ACTIVE_SHIFT:
-      current_mesh->visx2 = 1-current_mesh->visx2;
-      updateshowstep(1-current_mesh->visx,DIRX);
-      break;
-    default:
-      for(i=0;i<nmeshes;i++){
-        mesh *meshi;
-        meshi = meshinfo + i;
-        meshi->visx2 = 1 - current_mesh->visx;
-      }
-      updateshowstep(1-current_mesh->visx,DIRX);
+    }
+    else{
+      visx_all=1-visx_all;
     }
     return;
   }
@@ -956,16 +941,12 @@ void keyboard_2(unsigned char key, int x, int y){
     int state;
 
     state=glutGetModifiers();
-    visy_all = 1-visy_all;
-
-    switch (state){
-
-    case GLUT_ACTIVE_ALT:
+    if(state==GLUT_ACTIVE_ALT){
       cellcenter_interp = 1 - cellcenter_interp;
       update_glui_cellcenter_interp();
-      break;
-     default:
-      updateshowstep(1-current_mesh->visy,DIRY);
+    }
+    else{
+      visy_all = 1-visy_all;
     }
     return;
   }
@@ -973,16 +954,11 @@ void keyboard_2(unsigned char key, int x, int y){
     int state;
 
     state=glutGetModifiers();
-    visz_all = 1 - visz_all;
-
-    switch (state){
-    case GLUT_ACTIVE_ALT:
+    if(state==GLUT_ACTIVE_ALT){
       DialogMenu(24); // compress dialog
-      break;
-    case GLUT_ACTIVE_CTRL:
-    case GLUT_ACTIVE_SHIFT:
-    default:
-      updateshowstep(1-current_mesh->visz,DIRZ);
+    }
+    else{
+      visz_all = 1 - visz_all;
     }
     return;
   }
@@ -1352,11 +1328,11 @@ void keyboard_2(unsigned char key, int x, int y){
           yp = meshi->yplt_orig;
           zp = meshi->zplt_orig;
           fprintf(scriptoutstream,"SHOWPLOT3DDATA\n");
-          fprintf(scriptoutstream," %i %i %i %i %f\n",i+1,1, plotn,meshi->visx,xp[meshi->plotx]);
+          fprintf(scriptoutstream," %i %i %i %i %f\n",i+1,1, plotn,visx_all,xp[meshi->plotx]);
           fprintf(scriptoutstream,"SHOWPLOT3DDATA\n");
-          fprintf(scriptoutstream," %i %i %i %i %f\n",i+1,2, plotn,meshi->visy,yp[meshi->ploty]);
+          fprintf(scriptoutstream," %i %i %i %i %f\n",i+1,2, plotn,visy_all,yp[meshi->ploty]);
           fprintf(scriptoutstream,"SHOWPLOT3DDATA\n");
-          fprintf(scriptoutstream," %i %i %i %i %f\n",i+1,3, plotn,meshi->visz,zp[meshi->plotz]);
+          fprintf(scriptoutstream," %i %i %i %i %f\n",i+1,3, plotn,visz_all,zp[meshi->plotz]);
           fprintf(scriptoutstream,"SHOWPLOT3DDATA\n");
           fprintf(scriptoutstream," %i %i %i %i %i\n",i+1,4, plotn,visiso,plotiso[plotn-1]);
 
@@ -1393,7 +1369,7 @@ void keyboard_2(unsigned char key, int x, int y){
      strncmp((const char *)&key2,"+",1)!=0&&strncmp((const char *)&key2,"=",1)!=0&&
      strncmp((const char *)&key2,"<",1)!=0&&strncmp((const char *)&key2,">",1)!=0&&
      strncmp((const char *)&key2,",",1)!=0&&strncmp((const char *)&key2,".",1)!=0&&
-     strncmp((const char *)&key2,"_",1)!=0)return;
+     strncmp((const char *)&key2,"_",1)!=0&&(skip2<=0||skip2>=10))return;
 
   if(xyz_clipplane!=0&&(
     strncmp((const char *)&key2,"<",1)==0||strncmp((const char *)&key2,",",1)==0||
@@ -1418,12 +1394,12 @@ void keyboard_2(unsigned char key, int x, int y){
   if(strncmp((const char *)&key2,"-",1)==0||strncmp((const char *)&key2,"_",1)==0){
     FlowDir=-1;
   }
-   else if(strncmp((const char *)&key2," ",1)==0||
+  else if(strncmp((const char *)&key2," ",1)==0||
      strncmp((const char *)&key2,"=",1)==0||
      strncmp((const char *)&key2,"+",1)==0
      ){
      FlowDir=1;
-   }
+  }
 
   if(plotstate==DYNAMIC_PLOTS){
     if(timedrag==0)itimes += skip_global*FlowDir;
@@ -1432,22 +1408,28 @@ void keyboard_2(unsigned char key, int x, int y){
 
     return;
   }
-  if(current_mesh->visx != 0 && current_mesh->slicedir==1){
-    current_mesh->plotx += skip_global*FlowDir;
-    updateplotslice(1);
-  }
-  if(current_mesh->visy != 0 && current_mesh->slicedir==2){
-    current_mesh->ploty += skip_global*FlowDir;
-    updateplotslice(2);
-  }
-  if(current_mesh->visz != 0 && current_mesh->slicedir==3){
-    current_mesh->plotz += skip_global*FlowDir;
-    updateplotslice(3);
+  switch (iplot_state){
+    case 1:
+      iplotx_all += skip_global*FlowDir;
+      if(iplotx_all<0)iplotx_all=nplotx_all-1;
+      if(iplotx_all>nplotx_all-1)iplotx_all=0;
+      break;
+    case 2:
+      iploty_all += skip_global*FlowDir;
+      if(iploty_all<0)iploty_all=nploty_all-1;
+      if(iploty_all>nploty_all-1)iploty_all=0;
+      break;
+    case 3:
+      iplotz_all += skip_global*FlowDir;
+      if(iplotz_all<0)iplotz_all=nplotz_all-1;
+      if(iplotz_all>nplotz_all-1)iplotz_all=0;
+      break;
   }
   if(ReadPlot3dFile==1&&visiso !=0 && current_mesh->slicedir==4){
     plotiso[plotn-1] += FlowDir; 
     updatesurface(); 
   }
+  if(iplot_state!=0)updateplotslice(iplot_state);
 }
 
 /* ------------------ keyboard ------------------------ */
@@ -1650,87 +1632,13 @@ void handle_plot3d_keys(int  key){
     }
     break;
   default:
+    ASSERT(0);
     break;
   }
+  if(iplot_state!=0)updateplotslice(iplot_state);
+  return;
 
-  switch (key){
-  case GLUT_KEY_LEFT:
-  case GLUT_KEY_RIGHT:
-    if(current_mesh->visx2==0){
-      for(i=0;i<nmeshes;i++){
-        mesh *meshi;
-        meshi = meshinfo+i;
-        if(meshi->visx2==1){
-          update_current_mesh(meshi);
-          break;
-        }
-      }
-    }
-    updateshowstep(1,DIRX);
-    if(key==GLUT_KEY_LEFT){
-      current_mesh->plotx -= skip_global;
-    }
-    if(key==GLUT_KEY_RIGHT){
-      current_mesh->plotx += skip_global;
-    }
-    updateplotslice(1);
-    break;
-  case GLUT_KEY_DOWN:
-  case GLUT_KEY_UP:
-    updateshowstep(1,DIRY);
-    if(key==GLUT_KEY_UP){
-      current_mesh->ploty += skip_global;
-    }
-    if(key==GLUT_KEY_DOWN){
-      current_mesh->ploty -= skip_global;
-    }
-    updateplotslice(2);
-    break;
-  case GLUT_KEY_PAGE_UP:
-  case GLUT_KEY_PAGE_DOWN:
-    updateshowstep(1,DIRZ);
-    if(key==GLUT_KEY_PAGE_UP){
-      current_mesh->plotz += skip_global;
-    }
-    if(key==GLUT_KEY_PAGE_DOWN){
-      current_mesh->plotz -= skip_global;
-    }
-    updateplotslice(3);
-    break;
-  case GLUT_KEY_HOME:
-    if(current_mesh->slicedir==1){
-      current_mesh->plotx=0;
-      updateplotslice(1);
-    }
-    if(current_mesh->slicedir==2){
-      current_mesh->ploty=0;
-      updateplotslice(2);
-    }
-    if(current_mesh->slicedir==3){
-      current_mesh->plotz=0;
-      updateplotslice(3);
-    }
-    break;
-  case GLUT_KEY_END:
-    if(current_mesh->slicedir==1){
-      current_mesh->plotx=current_mesh->ibar;
-      updateplotslice(1);
-    }
-    if(current_mesh->slicedir==2){
-      current_mesh->ploty=current_mesh->jbar;
-      updateplotslice(2);
-    }
-    if(current_mesh->slicedir==3){
-      current_mesh->plotz=current_mesh->kbar;
-      updateplotslice(3);
-    }
-    break;
-  default:
-    printf("warning key stroke=%i not handled\n",key);
-    break;
-  }
-  plotstate=getplotstate(STATIC_PLOTS);
-  //updatemenu=1;
+//  plotstate=getplotstate(STATIC_PLOTS);
 
 } 
 
@@ -2083,25 +1991,9 @@ void Reshape(int width, int height){
 /* ------------------ togglegridstate ------------------------ */
 
 void togglegridstate(int visg){
-  int i;
-  mesh *meshi;
-
   visGrid=visg;
   if(visGrid==1){
-    if(current_mesh->plotx==-1){
-      current_mesh->plotx=current_mesh->ibar/2; 
-    }
-    if(current_mesh->ploty==-1){
-      current_mesh->ploty=current_mesh->jbar/2; 
-    }
-    if(current_mesh->plotz==-1){
-      current_mesh->plotz=current_mesh->kbar/2;
-    }
-    for(i=0;i<nmeshes;i++){
-      meshi=meshinfo + i;
-      if(meshi->visx!=0||meshi->visy!=0||meshi->visz!=0)return;
-    }
-    updateshowstep(1-current_mesh->visy,DIRY);
+    updateshowstep(1-visy_all,DIRY);
   }
 }
 

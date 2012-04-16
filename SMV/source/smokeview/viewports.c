@@ -215,7 +215,7 @@ void BLOCK_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
     mesh_bot=val_top-val_top*large_font_height/(float)(dwinH-fontHoffset);
     outputText(mesh_left,mesh_bot, meshlabel);
   }
-  if((showplot3d==1||visGrid==1)&&current_mesh->visx==1){
+  if((showplot3d==1||visGrid==1)&&visx_all==1){
     {
       float plotval;
       int iplotval;
@@ -246,7 +246,7 @@ void BLOCK_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
       outputText(mesh_left-0.5,0.6f, slicelabel);
     }
   }
-  if((showplot3d==1||visGrid==1)&&current_mesh->visy==1){
+  if((showplot3d==1||visGrid==1)&&visy_all==1){
     {
       float plotval;
       int iplotval;
@@ -275,7 +275,7 @@ void BLOCK_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
     }
     if(visgridloc==1)outputText(mesh_left-0.5,0.35f, slicelabel);
   }
-  if((showplot3d==1||visGrid==1)&&current_mesh->visz==1){
+  if((showplot3d==1||visGrid==1)&&visz_all==1){
     {
       float plotval;
       int iplotval;
