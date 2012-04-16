@@ -7359,6 +7359,9 @@ void initobst(blockagedata *bc, surfdata *surf,int index,int meshindex){
 
 void initmesh(mesh *meshi){
 
+  meshi->iplotx_all=NULL;
+  meshi->iploty_all=NULL;
+  meshi->iplotz_all=NULL;
 #ifdef pp_GPU
   meshi->smoke_texture_buffer=NULL;
   meshi->smoke_texture_id=-1;

@@ -95,6 +95,29 @@ void removedupfloats(float **valsptr, int *nvals,int *ivals, float dval_min){
   }
 }
 
+/* ------------------ closest_nodeindex ------------------------ */
+
+int closest_nodeindex(float val,float *vals,int nvals, float eps){
+  int j;
+  float minval;
+  int minvalindex;
+
+  if(val<vals[0]-eps)return -1;
+  if(val>vals[nvals-1]+eps)return -1;
+  minval=ABS(val-vals[0]);
+  minvalindex=0;
+  for(j=1;j<nvals;j++){
+    float vv;
+
+    vv = ABS(val-vals[j]);
+    if(vv<minval){
+      minval=vv;
+      minvalindex=j;
+    }
+  }
+  return minvalindex;
+}
+
 /* ------------------ update_plot_alls ------------------------ */
 
 void update_plotxyz_all(void){
@@ -159,6 +182,46 @@ void update_plotxyz_all(void){
   removedupfloats(&plotx_all,&nplotx_all,&iplotx_all,dxyz_min);
   removedupfloats(&ploty_all,&nploty_all,&iploty_all,dxyz_min);
   removedupfloats(&plotz_all,&nplotz_all,&iplotz_all,dxyz_min);
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    int j;
+
+    meshi = meshinfo + i;
+    NewMemory((void **)&meshi->iplotx_all,nplotx_all*sizeof(int));
+    NewMemory((void **)&meshi->iploty_all,nploty_all*sizeof(int));
+    NewMemory((void **)&meshi->iplotz_all,nplotz_all*sizeof(int));
+
+    for(j=0;j<nplotx_all;j++){
+      float val;
+      int ival;
+
+      meshi->iplotx_all[j]=-1;
+      val = plotx_all[j];
+      ival = closest_nodeindex(val,meshi->xplt,meshi->ibar+1,dxyz_min);
+      if(ival<0)continue;
+      meshi->iplotx_all[j]=ival;
+    }
+    for(j=0;j<nploty_all;j++){
+      float val;
+      int ival;
+
+      meshi->iploty_all[j]=-1;
+      val = ploty_all[j];
+      ival = closest_nodeindex(val,meshi->yplt,meshi->jbar+1,dxyz_min);
+      if(ival<0)continue;
+      meshi->iploty_all[j]=ival;
+    }
+    for(j=0;j<nplotz_all;j++){
+      float val;
+      int ival;
+
+      meshi->iplotz_all[j]=-1;
+      val = plotz_all[j];
+      ival = closest_nodeindex(val,meshi->zplt,meshi->kbar+1,dxyz_min);
+      if(ival<0)continue;
+      meshi->iplotz_all[j]=ival;
+    }
+  }
 
 }
 

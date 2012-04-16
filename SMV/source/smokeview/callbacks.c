@@ -929,6 +929,7 @@ void keyboard_2(unsigned char key, int x, int y){
 
     state=glutGetModifiers();
 
+    visx_all=1-visx_all;
     switch (state){
 
     case GLUT_ACTIVE_ALT:
@@ -955,6 +956,7 @@ void keyboard_2(unsigned char key, int x, int y){
     int state;
 
     state=glutGetModifiers();
+    visy_all = 1-visy_all;
 
     switch (state){
 
@@ -971,6 +973,7 @@ void keyboard_2(unsigned char key, int x, int y){
     int state;
 
     state=glutGetModifiers();
+    visz_all = 1 - visz_all;
 
     switch (state){
     case GLUT_ACTIVE_ALT:
@@ -1556,9 +1559,7 @@ void specialkeyboard(int key, int x, int y){
       }
       break;
     case 1:
-      if(visGrid==1||plotstate==STATIC_PLOTS
-  ||ReadVolSlice==1
-        ){
+      if(visGrid==1||plotstate==STATIC_PLOTS||ReadVolSlice==1){
         keymode=P3_MODE;
       }
       else{
@@ -1588,6 +1589,69 @@ void specialkeyboard(int key, int x, int y){
 
 void handle_plot3d_keys(int  key){
   int i;
+
+  switch (key){
+  case GLUT_KEY_LEFT:
+    visx_all=1;
+    iplotx_all--;
+    if(iplotx_all<0)iplotx_all=nplotx_all-1;
+    iplot_state=1;
+    break;
+  case GLUT_KEY_RIGHT:
+    visx_all=1;
+    iplotx_all++;
+    if(iplotx_all>nplotx_all-1)iplotx_all=0;
+    iplot_state=1;
+    break;
+  case GLUT_KEY_DOWN:
+    visy_all=1;
+    iploty_all--;
+    if(iploty_all<0)iploty_all=nploty_all-1;
+    iplot_state=2;
+    break;
+  case GLUT_KEY_UP:
+    visy_all=1;
+    iploty_all++;
+    if(iploty_all>nploty_all-1)iploty_all=0;
+    iplot_state=2;
+    break;
+  case GLUT_KEY_PAGE_DOWN:
+    visz_all=1;
+    iplotz_all--;
+    if(iplotz_all<0)iplotz_all=nplotz_all-1;
+    iplot_state=3;
+    break;
+  case GLUT_KEY_PAGE_UP:
+    visz_all=1;
+    iplotz_all++;
+    if(iplotz_all>nplotz_all-1)iplotz_all=0;
+    iplot_state=3;
+    break;
+  case GLUT_KEY_HOME:
+    if(iplot_state==0||iplot_state==1){
+      iplotx_all=0;
+    }
+    else if(iplot_state==2){
+      iploty_all=0;
+    }
+    else{
+      iplotz_all=0;
+    }
+    break;
+  case GLUT_KEY_END:
+    if(iplot_state==0||iplot_state==1){
+      iplotx_all=nplotx_all-1;
+    }
+    else if(iplot_state==2){
+      iploty_all=nploty_all-1;
+    }
+    else{
+      iplotz_all=nplotz_all-1;
+    }
+    break;
+  default:
+    break;
+  }
 
   switch (key){
   case GLUT_KEY_LEFT:

@@ -499,6 +499,7 @@ typedef struct _mesh {
   float hrrpuv_cutoff;
   int plot3dfilenum,isofilenum,patchfilenum;
   int ibar, jbar, kbar;
+  int *iplotx_all, *iploty_all, *iplotz_all;
   int plotx, ploty, plotz;
   int visx, visy, visz;
   int visx2, visy2, visz2;

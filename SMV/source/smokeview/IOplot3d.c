@@ -1886,83 +1886,64 @@ void drawgrid(const mesh *meshi){
   int ibar, jbar, kbar;
   int plotx, ploty, plotz;
 
+  if(meshi->visx==0&&meshi->visy==0&&meshi->visz==0)return;
+
   xplt = meshi->xplt;
   yplt = meshi->yplt;
   zplt = meshi->zplt;
   ibar = meshi->ibar;
   jbar = meshi->jbar;
   kbar = meshi->kbar;
-  plotx = meshi->plotx;
-  ploty = meshi->ploty;
-  plotz = meshi->plotz;
+  plotx = meshi->iplotx_all[iplotx_all];
+  ploty = meshi->iploty_all[iploty_all];
+  plotz = meshi->iplotz_all[iplotz_all];
 
-
-  if(meshi->visx==1||meshi->visy==1||meshi->visz==1){
-    antialias(1);
-    glLineWidth(vectorlinewidth);
-    if(meshi->meshrgb_ptr!=NULL){
-      glColor3fv(meshi->meshrgb);
-    }
-    else{
-      glColor4fv(foregroundcolor);
-    }
-    glBegin(GL_LINES);
-
-    if(meshi->visx==1){
-      for(j=0;j<jbar+1;j++){
-        glVertex3f(xplt[plotx],yplt[j],zplt[0]);
-        glVertex3f(xplt[plotx],yplt[j],zplt[kbar]);
-      }
-      for(k=0;k<kbar+1;k++){
-        glVertex3f(xplt[plotx],yplt[0],zplt[k]);
-        glVertex3f(xplt[plotx],yplt[jbar],zplt[k]);
-      }
-      /*
-      if(plotx>0){
-        for(j=0;j<jbar+1;j++){
-          glVertex3f(xplt[plotx-1],yplt[j],zplt[0]);
-          glVertex3f(xplt[plotx-1],yplt[j],zplt[kbar]);
-        }
-        for(k=0;k<kbar+1;k++){
-          glVertex3f(xplt[plotx-1],yplt[0],zplt[k]);
-          glVertex3f(xplt[plotx-1],yplt[jbar],zplt[k]);
-        }
-        for(j=0;j<jbar+1;j++){
-          for(k=0;k<kbar+1;k++){
-            glVertex3f(xplt[plotx-1],yplt[j],zplt[k]);
-            glVertex3f(xplt[plotx],yplt[j],zplt[k]);
-          }
-        }
-      }
-      */
-    }
-
-    if(meshi->visy==1){
-      for(i=0;i<ibar+1;i++){
-        glVertex3f(xplt[i],yplt[ploty],zplt[0]);
-        glVertex3f(xplt[i],yplt[ploty],zplt[kbar]);
-      }
-      for(k=0;k<kbar+1;k++){
-        glVertex3f(   xplt[0],yplt[ploty],zplt[k]);
-        glVertex3f(xplt[ibar],yplt[ploty],zplt[k]);
-      }
-    }
-    if(meshi->visz==1){
-      for(i=0;i<ibar+1;i++){
-        glVertex3f(xplt[i],   yplt[0],zplt[plotz]);
-        glVertex3f(xplt[i],yplt[jbar],zplt[plotz]);
-      }
-      for(j=0;j<jbar+1;j++){
-        glVertex3f(xplt[0],yplt[j],zplt[plotz]);
-        glVertex3f(xplt[ibar],yplt[j],zplt[plotz]);
-      }
-    }
-
-    glEnd();
-    antialias(0);
+  antialias(1);
+  glLineWidth(vectorlinewidth);
+  if(meshi->meshrgb_ptr!=NULL){
+    glColor3fv(meshi->meshrgb);
   }
-}
+  else{
+    glColor4fv(foregroundcolor);
+  }
+  glBegin(GL_LINES);
 
+  if(visx_all==1&&plotx>=0){
+    for(j=0;j<jbar+1;j++){
+      glVertex3f(xplt[plotx],yplt[j],zplt[0]);
+      glVertex3f(xplt[plotx],yplt[j],zplt[kbar]);
+    }
+    for(k=0;k<kbar+1;k++){
+      glVertex3f(xplt[plotx],yplt[0],zplt[k]);
+      glVertex3f(xplt[plotx],yplt[jbar],zplt[k]);
+    }
+  }
+
+  if(visy_all==1&&ploty>=0){
+    for(i=0;i<ibar+1;i++){
+      glVertex3f(xplt[i],yplt[ploty],zplt[0]);
+      glVertex3f(xplt[i],yplt[ploty],zplt[kbar]);
+    }
+    for(k=0;k<kbar+1;k++){
+      glVertex3f(   xplt[0],yplt[ploty],zplt[k]);
+      glVertex3f(xplt[ibar],yplt[ploty],zplt[k]);
+    }
+  }
+
+  if(visz_all==1&&plotz>=0){
+    for(i=0;i<ibar+1;i++){
+      glVertex3f(xplt[i],   yplt[0],zplt[plotz]);
+      glVertex3f(xplt[i],yplt[jbar],zplt[plotz]);
+    }
+    for(j=0;j<jbar+1;j++){
+      glVertex3f(xplt[0],yplt[j],zplt[plotz]);
+      glVertex3f(xplt[ibar],yplt[j],zplt[plotz]);
+    }
+  }
+
+  glEnd();
+  antialias(0);
+}
 
 /* ------------------ updateplot3dmenulabel ------------------------ */
 

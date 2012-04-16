@@ -26,6 +26,8 @@
 
 SVEXTERN int nplotx_all, nploty_all, nplotz_all;
 SVEXTERN int iplotx_all, iploty_all, iplotz_all;
+SVEXTERN int SVDECL(iplot_state,0);
+SVEXTERN int SVDECL(visx_all,0),SVDECL(visy_all,1),SVDECL(visz_all,0);
 SVEXTERN float SVDECL(*plotx_all,NULL), SVDECL(*ploty_all,NULL), SVDECL(*plotz_all,NULL);
 SVEXTERN int SVDECL(defer_file_loading,0);
 SVEXTERN int SVDECL(regenerate_fed,1);
