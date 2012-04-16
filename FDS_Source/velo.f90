@@ -2439,7 +2439,7 @@ CFL = DT*UVWMAX
  
 ! Determine max Von Neumann Number for fine grid calcs
  
-PARABOLIC_IF: IF (DNS .OR. CHECK_VN) THEN
+PARABOLIC_IF: IF (CHECK_VN) THEN
  
    MU_MAX = 0._EB
    P_MU_MAX = MU_MAX

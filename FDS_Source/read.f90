@@ -1602,10 +1602,9 @@ ENDDO MISC_LOOP
 
 ! FDS 6 options
 
-CFL_VELOCITY_NORM = 1
-
 IF (DNS) THEN
    FLUX_LIMITER  = 4
+   CHECK_VN = .TRUE.
    VN_MIN = 0.4_EB
    VN_MAX = 0.5_EB
    IF (TURBULENCE_MODEL/='null') THEN
@@ -1616,10 +1615,6 @@ ELSE
    FLUX_LIMITER  = 2
    TURBULENCE_MODEL='DEARDORFF'
 ENDIF
-
-CHECK_VN=.TRUE.
-CHECK_GR=.TRUE.
-CHECK_HT=.TRUE.
 
 ! Re-read the line to pick up any user-specified options
 
