@@ -3833,14 +3833,19 @@ void drawvolslice_texture(const slicedata *sd){
   int nx,ny,nxy;
   char *iblank_x, *iblank_y, *iblank_z;
   char *iblank_embed;
+  int plotx, ploty, plotz;
 
   mesh *meshi;
 
   meshi = meshinfo + sd->blocknumber;
+  if(meshi->visx==0&&meshi->visy==0&&meshi->visz==0)return;
 
   xplt=meshi->xplt;
   yplt=meshi->yplt;
   zplt=meshi->zplt;
+  plotx = meshi->iplotx_all[iplotx_all];
+  ploty = meshi->iploty_all[iploty_all];
+  plotz = meshi->iplotz_all[iplotz_all];
   ibar=meshi->ibar;
   jbar=meshi->jbar;
   iblank_x=meshi->c_iblank_x;
@@ -3856,11 +3861,9 @@ void drawvolslice_texture(const slicedata *sd){
   glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
   glEnable(GL_TEXTURE_1D);
   glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
-  if(meshi->visx==1){
-   int iislice;
 
-   iislice = meshi->plotx;
-   constval = xplt[iislice]+offset_slice*sd->sliceoffset;
+  if(plotx>=0&&visx_all==1){
+   constval = xplt[plotx]+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
    maxj = sd->js2;
    if(sd->js1+1>maxj){
@@ -3870,9 +3873,7 @@ void drawvolslice_texture(const slicedata *sd){
      float ymid;
 
      n = (j-sd->js1)*sd->nslicek -1;
-     if(meshi->plotx<sd->is1)break;
-     if(meshi->plotx>=sd->is1+sd->nslicei)break;
-     n += (meshi->plotx-sd->is1)*sd->nslicej*sd->nslicek;
+     n += (plotx-sd->is1)*sd->nslicej*sd->nslicek;
      n2 = n + sd->nslicek;
      yy1 = yplt[j];
      y3 = yplt[j+1];
@@ -3883,8 +3884,8 @@ void drawvolslice_texture(const slicedata *sd){
        float rmid, zmid;
 
        n++; n2++; 
-       if(iblank_x[IJK(iislice,j,k)]!=2)continue;
-       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(iislice,j,k)]==0)continue;
+       if(iblank_x[IJK(plotx,j,k)]!=2)continue;
+       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==0)continue;
        r11 = (float)sd->slicepoint[n]/255.0;
        r31 = (float)sd->slicepoint[n2]/255.0;
        r13 = (float)sd->slicepoint[n+1]/255.0;
@@ -3918,18 +3919,15 @@ void drawvolslice_texture(const slicedata *sd){
    }
    glEnd();
   }
-  if(meshi->visy==1){
-   constval = yplt[meshi->ploty]+offset_slice*sd->sliceoffset;
+  if(ploty>=0&&visy_all==1){
+   constval = yplt[ploty]+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
    for(i=sd->is1; i<sd->is1+sd->nslicei; i++){
      float xmid;
 
      n = (i-sd->is1)*sd->nslicej*sd->nslicek -1;
-     n += (meshi->ploty-sd->js1)*sd->nslicek;
+     n += (ploty-sd->js1)*sd->nslicek;
      n2 = n + sd->nslicej*sd->nslicek;
-
-     if(meshi->ploty<sd->js1)break;
-     if(meshi->ploty>=sd->js1+sd->nslicej)break;
 
      x1 = xplt[i];
      x3 = xplt[i+1];
@@ -3939,8 +3937,8 @@ void drawvolslice_texture(const slicedata *sd){
        float rmid, zmid;
 
        n++; n2++; 
-       if(iblank_y[IJK(i,meshi->ploty,k)]!=2)continue;
-       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,meshi->ploty,k)]==0)continue;
+       if(iblank_y[IJK(i,ploty,k)]!=2)continue;
+       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,ploty,k)]==0)continue;
        r11 = (float)sd->slicepoint[n]/255.0;
        r31 = (float)sd->slicepoint[n2]/255.0;
        r13 = (float)sd->slicepoint[n+1]/255.0;
@@ -3976,18 +3974,16 @@ void drawvolslice_texture(const slicedata *sd){
    }
    glEnd();
   }
-  if(meshi->visz==1){
-   constval = zplt[meshi->plotz]+offset_slice*sd->sliceoffset;
+  if(plotz>=0&&visz_all==1){
+   constval = zplt[plotz]+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
    for(i=sd->is1; i<sd->is1+sd->nslicei; i++){
      float xmid;
 
      n = (i-sd->is1)*sd->nslicej*sd->nslicek -sd->nslicek;
-     n += (meshi->plotz-sd->ks1);
+     n += (plotz-sd->ks1);
      n2 = n + sd->nslicej*sd->nslicek;
 
-     if(meshi->plotz<sd->ks1)break;
-     if(meshi->plotz>=sd->ks1+sd->nslicek)break;
      x1 = xplt[i];
      x3 = xplt[i+1];
      xmid = (x1+x3)/2.0;
@@ -3997,8 +3993,8 @@ void drawvolslice_texture(const slicedata *sd){
 
         n+=sd->nslicek; 
        n2+=sd->nslicek; 
-       if(iblank_z[IJK(i,j,meshi->plotz)]!=2)continue;
-       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,meshi->plotz)]==0)continue;
+       if(iblank_z[IJK(i,j,plotz)]!=2)continue;
+       if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==0)continue;
        r11 = (float)sd->slicepoint[n]/255.0;
        r31 = (float)sd->slicepoint[n2]/255.0;
        r13 = (float)sd->slicepoint[ n+sd->nslicek]/255.0;
