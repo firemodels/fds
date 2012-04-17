@@ -2015,8 +2015,14 @@ void update_fedinfo(void){
     ResizeMemory( (void **)&vslicetypes,3*nsliceinfo*sizeof(int));
     if(nfediso>0){
       nisoinfo+=nfediso;
-      ResizeMemory((void **)&isoinfo,nisoinfo*sizeof(isodata));
-      ResizeMemory((void **)&isotypes,nisoinfo*sizeof(int));
+      if(nisoinfo==nfediso){
+        NewMemory((void **)&isoinfo,nisoinfo*sizeof(isodata));
+        NewMemory((void **)&isotypes,nisoinfo*sizeof(int));
+      }
+      else{
+        ResizeMemory((void **)&isoinfo,nisoinfo*sizeof(isodata));
+        ResizeMemory((void **)&isotypes,nisoinfo*sizeof(int));
+      }
     }
   }
   for(i=0;i<nfedinfo;i++){ // define sliceinfo for fed slices
@@ -2124,13 +2130,9 @@ void update_fedinfo(void){
       for(ii=0;ii<3;ii++){
         isoi->colorlevels[i]=NULL;
       }
-//xxx
-//      isoi->levels[0]=0.3;
-//      isoi->levels[1]=1.0;
-//      isoi->levels[2]=3.0;
-      isoi->levels[0]=0.01;
-      isoi->levels[1]=0.05;
-      isoi->levels[2]=0.1;
+      isoi->levels[0]=0.3;
+      isoi->levels[1]=1.0;
+      isoi->levels[2]=3.0;
       setlabels_iso(&(isoi->surface_label),"Fractional effective dose","FED"," ",isoi->levels,isoi->nlevels);
       isoi->normaltable=NULL;
       isoi->color_label.longlabel=NULL;

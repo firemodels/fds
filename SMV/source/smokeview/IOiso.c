@@ -263,7 +263,8 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
   EGZ_FILE *isostream;
   int break_frame;
   int skip_local;
-
+  float *fed_colors[3];
+  
   int blocknumber;
   int error;
   float factor, offset[3];
@@ -374,6 +375,16 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
     return;
   }
 
+  if(strcmp(ib->surface_label.shortlabel,"FED")==0){
+    float fed_blue[]={0.0,0.0,1.0,1.0};
+    float fed_yellow[]={1.0,1.0,0.0,1.0};
+    float fed_red[]={1.0,0.0,0.0,1.0};
+
+    fed_colors[0]=getcolorptr(fed_blue);
+    fed_colors[1]=getcolorptr(fed_yellow);
+    fed_colors[2]=getcolorptr(fed_red);
+  }
+
   asurface=meshi->animatedsurfaces;
   break_frame=0;
   iitime=0;
@@ -467,6 +478,9 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
           if(ilevel==0&&strcmp(ib->surface_label.shortlabel,"hrrpuv")==0){
             isoverti->color=hrrpuv_iso_color;
           }
+          else if(strcmp(ib->surface_label.shortlabel,"FED")==0){
+            isoverti->color=fed_colors[ilevel%3];
+          }
           else{
             isoverti->color=iso_colors+4*ilevel;
           }
@@ -557,6 +571,9 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
           isotrii->v3=asurface->iso_vertices+triangles_i[3*itri+2];
           if(ilevel==0&&strcmp(ib->surface_label.shortlabel,"hrrpuv")==0){
             ib->colorlevels[ilevel]=hrrpuv_iso_color;
+          }
+          else if(strcmp(ib->surface_label.shortlabel,"FED")==0){
+            ib->colorlevels[ilevel]=fed_colors[ilevel%3];
           }
           else{
             ib->colorlevels[ilevel]=iso_colors+4*ilevel;
