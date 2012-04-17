@@ -409,7 +409,7 @@ void initdefaultcolorbars(void){
   int i;
   colorbardata *cbi;
 
-  ndefaultcolorbars=12;
+  ndefaultcolorbars=13;
   
   FREEMEMORY(colorbarinfo);
   ncolorbars=ndefaultcolorbars;
@@ -557,6 +557,46 @@ void initdefaultcolorbars(void){
   cbi->rgb_node[9]=255;
   cbi->rgb_node[10]=0;
   cbi->rgb_node[11]=0;
+  cbi++;
+
+
+  // blue->yellow->red split
+
+  strcpy(cbi->label,"blue->yellow->red split");
+  cbi->label_ptr=cbi->label;
+
+  cbi->nnodes=6;
+  cbi->nodehilight=0;
+
+  cbi->index_node[0]=0;
+  cbi->rgb_node[0]=0;
+  cbi->rgb_node[1]=0;
+  cbi->rgb_node[2]=255;
+
+  cbi->index_node[1]=35;
+  cbi->rgb_node[3]=0;
+  cbi->rgb_node[4]=0;
+  cbi->rgb_node[5]=255;
+
+  cbi->index_node[2]=35;
+  cbi->rgb_node[6]=255;
+  cbi->rgb_node[7]=255;
+  cbi->rgb_node[8]=0;
+
+  cbi->index_node[3]=85;
+  cbi->rgb_node[9]=255;
+  cbi->rgb_node[10]=255;
+  cbi->rgb_node[11]=0;
+
+  cbi->index_node[4]=85;
+  cbi->rgb_node[12]=255;
+  cbi->rgb_node[13]=0;
+  cbi->rgb_node[14]=0;
+
+  cbi->index_node[5]=255;
+  cbi->rgb_node[15]=255;
+  cbi->rgb_node[16]=0;
+  cbi->rgb_node[17]=0;
   cbi++;
 
   // fire (original)
