@@ -1,4 +1,4 @@
-&HEAD CHID='scarc2d_bicg_64mesh',TITLE='Simple 2D-Test Case for ScaRC-BICGstab with 8x8 meshes' /
+&HEAD CHID='scarc2d_bicggmg_64mesh',TITLE='Simple 2D-Test Case for ScaRC-BICGstab-GMG with 8x8 meshes' /
 
 &MESH IJK=8,1,8, XB=0.0,0.1,-0.01,0.01,0.0,0.1, MULT_ID='mesh' /
 &MULT ID='mesh', DX=0.1, DY=0.02, DZ=0.1, I_UPPER=7, J_UPPER=0, K_UPPER=7 /
@@ -9,7 +9,13 @@
 &PRES SCARC_METHOD             = 'KRYLOV'
       SCARC_KRYLOV             = 'BICG'
       SCARC_KRYLOV_ACCURACY    =  1E-10
-      SCARC_PRECON             = 'SSOR'
+      SCARC_PRECON             = 'MULTIGRID'
+      SCARC_MULTIGRID          = 'GEOMETRIC'
+      SCARC_MULTIGRID_ACCURACY =  2E-1
+      SCARC_MULTIGRID_CYCLE    =  'V'
+      SCARC_SMOOTH             = 'SSOR'
+      SCARC_SMOOTH_ITERATIONS  =   8
+      SCARC_DEBUG              = 'NONE'
       SCARC_SYSTEM             = 'COMPACT' /
 
 &TIME T_END=1.0 /
