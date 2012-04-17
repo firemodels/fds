@@ -284,7 +284,7 @@ mass per unit area, $m_w''$, expressed in units of kg/m$^2$,
 Note that $a$ is an empirical constant.
 
 
-\section{Beyond Droplets -- Using Lagrangian Particles to Model Complex Objects}
+\section{Using Lagrangian Particles to Model Complex Objects}
 
 There are many real objects that participate in a fire that cannot be modeled easily as solid obstructions that conform
 to the rectilinear mesh. For example, electrical cables, dry brush, tree branches and so on, are potential fuels that cannot
@@ -303,6 +303,36 @@ where the summation is over all the particles within the cell. The effective abs
 where $A$ is the surface area of the particle and $\dx \dy \dz$ is the volume of the cell.
 The net radiative heat flux onto the surface of the particle is
 \be \dq_{r,p}'' = \epsilon \left( \frac{U_{ijk}}{4} - \sigma T_p^4 \right) \ee
+
+
+\section{Turbulent Dispersion}
+
+The effect of subgrid-scale turbulent fluid motion on the velocity and position of a Lagrangian particle may be accounted for using a random walk model \cite{Raman:CF}.  The position of a tracer particle obeys the stochastic differential equation
+\be
+\mbox{d}\mathbf{x}^* = \left[ \tilde{\mathbf{u}} + \frac{1}{\bar{\rho}}\nabla (\bar{\rho}\,D_t) \right] \,\mbox{d}t + \sqrt{2D_t} \,\mbox{d}\mbox{\textbf{W}}
+\ee
+where $\mathbf{x}^*$ denotes the particle position (an asterisk signifies a particle property), $\tilde{\mathbf{u}}$ is the resolved LES velocity, $D_t$ is the turbulent diffusivity (taken from an eddy viscosity model, for example), and $\mbox{\textbf{W}}$ is an independent Wiener process.  Notice that if no turbulent diffusion exists the particle follows the resolved flow.  The term added to the resolved velocity accounts for the deterministic mean drift and the random walk term (Wiener process) accounts for the reorientation effect of unresolved turbulent motion.
+
+For those unfamiliar with stochastic differential equations, the Wiener process may be understood numerically as $\mbox{dW}(t) = (\delta t)^{1/2} \, \zeta(t)$ in the limit $\delta t \rightarrow 0$, where $\zeta(t)$ is an independent standardized Gaussian random variable \cite{Pope:2000}.  In FDS, $\zeta(t)$ are generated from a Box-Muller transform \cite{Box-Muller:1958}.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
