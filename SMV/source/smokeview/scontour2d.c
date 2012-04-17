@@ -150,6 +150,7 @@ void initcontour(contour *ci, float **rgbptr, int nlevels){
   ci->nlevels=nlevels;
   ci->rgbptr=rgbptr;
   NewMemory((void **)&ci->levels,nlevels*sizeof(float));
+  NewMemory((void **)&ci->areas,nlevels*sizeof(float));
   NewMemory((void **)&ci->nnodes,nlevels*sizeof(int));
   NewMemory((void **)&ci->npolys,nlevels*sizeof(int));
   NewMemory((void **)&ci->nlines,nlevels*sizeof(int));
@@ -168,7 +169,7 @@ void initcontour(contour *ci, float **rgbptr, int nlevels){
   }
 }
 
-/*  ------------------ freecontour ------------------------ */
+/*  ------------------ freecontours ------------------------ */
 
 void freecontours(contour *contours,int ncontours){
   int i;
@@ -592,6 +593,61 @@ void getlinecontournodes(double linelevel, const double x[4], const double y[4],
     edgenum=contourline_list[casenum][n+1];
     xline[n]=xzero[edgenum];
     yline[n]=yzero[edgenum];
+  }
+}
+
+/*  ------------------ getarea ------------------------ */
+
+float getarea(float *xnodes, float *ynodes, int ind){
+  float v1[3], v2[3];
+  float area;
+
+  v1[0]=xnodes[ind]-xnodes[0];
+  v1[1]=ynodes[ind]-ynodes[0];
+  v1[2]=0.0;
+
+  v2[0]=xnodes[ind+1]-xnodes[0];
+  v2[1]=ynodes[ind+1]-ynodes[0];
+  v2[2]=0.0;
+
+//  i    j    k
+//  v10  v11  0
+//  v20  v21  0
+
+  area = (v1[0]*v2[1]-v2[0]*v1[1])/2.0;
+  if(area<0.0)area=-area;
+  return area;
+}
+
+/*  ------------------ drawcontours ------------------------ */
+
+void AreaContours(const contour *ci){
+  int nlevels, n;
+  float **rgb;
+  float *areas;
+
+  nlevels=ci->nlevels;
+  areas = ci->areas;
+  for(n=0;n<nlevels;n++){
+    float *xnode, *ynode;
+    int ipoly,npolys;
+    int *npolysv, *polysize;
+
+    areas[n]=0.0;
+    xnode=ci->xnode[n];
+    ynode=ci->ynode[n];
+    polysize=ci->polysize[n];
+    npolysv=ci->npolys;
+    npolys=npolysv[n];
+    for(ipoly=0;ipoly<npolys;ipoly++){
+      int j;
+
+      for(j=1;j<polysize[ipoly]-1;j++){
+        areas[n]+=getarea(xnode,ynode,j);
+      }
+      xnode+=polysize[ipoly];
+      ynode+=polysize[ipoly];
+    }
   }
 }
 

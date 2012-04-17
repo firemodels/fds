@@ -2115,6 +2115,7 @@ void update_fedinfo(void){
     if(sd->volslice==1){
       isodata *isoi;
       int nn_iso,ii;
+      float **colorlevels;
 
       isoi = isoinfo + nisoinfo - nfediso + ifediso;
       fedi->fed_iso=isoi;
@@ -2134,9 +2135,10 @@ void update_fedinfo(void){
 
       isoi->nlevels=3;
       NewMemory((void **)&(isoi->levels),3*sizeof(float));
-      NewMemory((void **)&(isoi->colorlevels),3*sizeof(float *));
+      NewMemory((void **)&colorlevels,3*sizeof(float *));
+      isoi->colorlevels=colorlevels;
       for(ii=0;ii<3;ii++){
-        isoi->colorlevels[i]=NULL;
+        colorlevels[ii]=NULL;
       }
       isoi->levels[0]=0.3;
       isoi->levels[1]=1.0;

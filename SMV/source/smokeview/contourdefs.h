@@ -18,7 +18,7 @@
 
 
 typedef struct {
-  float *levels;
+  float *levels,*areas;
   int nlevels, *nnodes, *npolys, *nlines;
   int **polysize;
   float **xnode, **ynode, **xlines, **ylines, xyzval;
@@ -35,6 +35,7 @@ void getlinecontournodes(double linelevel, const double x[4], const double y[4],
                      int *nline_nodes,float *xline, float *yline,
                      int blankit);
 
+void AreaContours(const contour *ci);
 void DrawContours(const contour *ci);
 void DrawLineContours(const contour *ci, float linewidth);
 void setcontourslice(contour *ci,int idir,float xyz);
