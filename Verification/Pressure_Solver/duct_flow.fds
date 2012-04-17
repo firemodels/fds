@@ -2,8 +2,8 @@ Test pressure iteration routine for flow through a duct across meshes
 
 &HEAD CHID='duct_flow', TITLE='Flow through a duct, SVN $Revision: 5278 $' /
 
-&MESH IJK=30,30,30, XB=0.0,3.0,0.0,3.0,0.0,3.0, MULT_ID='mesh' /
-&MULT ID='mesh', DX=3.0, DY=3.0, DZ=3.0, I_UPPER=1, J_UPPER=1, K_UPPER=1 /
+&MESH IJK=32,32,32, XB=-.1,3.1,-.1,3.1,-.1,3.1, MULT_ID='mesh' /
+&MULT ID='mesh', DX=3.2, DY=3.2, DZ=3.2, I_UPPER=1, J_UPPER=1, K_UPPER=1 /
 &RADI RADIATION=.FALSE./
 &TIME T_END=60.0 /
 &PRES VELOCITY_TOLERANCE=0.01 /
