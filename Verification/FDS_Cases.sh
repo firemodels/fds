@@ -90,6 +90,8 @@ $RUNFDS Pressure_Solver scarc2d_fft_64mesh
 $RUNFDS Pressure_Solver scarc2d_cg_64mesh
 $RUNFDS Pressure_Solver scarc2d_bicg_64mesh
 $RUNFDS Pressure_Solver scarc2d_gmg_64mesh
+$RUNFDS Pressure_Solver scarc2d_cggmg_64mesh
+$RUNFDS Pressure_Solver scarc2d_bicggmg_64mesh
 
 $RUNFDS Pyrolysis cable_11_insulation_mcc
 $RUNFDS Pyrolysis cable_23_insulation_mcc
