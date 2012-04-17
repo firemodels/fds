@@ -172,7 +172,8 @@ void Creadslice_frame(int frame_index,int sd_index,int flag,int *error){
 void readiso_orig(const char *file, int ifile, int flag, int *errorcode);
 void readfed(int file_index, int flag, int file_type, int *errorcode){
   feddata *fedi;
-  slicedata *fed,*o2,*co2,*co;
+  slicedata *fed_slice,*o2,*co2,*co;
+  isodata *fed_iso;
   int error;
   int co_loaded_before, co2_loaded_before, o2_loaded_before;
 
@@ -202,11 +203,20 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
   o2=fedi->o2;
   co2=fedi->co2;
   co=fedi->co;
-  fed=fedi->fed_slice;
-  readslice(fed->file,fedi->fed_index,UNLOAD,&error);
-  if(regenerate_fed==1||is_file_newer(fed->file,o2->file)!=1|| // if the FED slice file does not exist or is older than
-     is_file_newer(fed->file,co2->file)!=1||// either the CO, CO2 or O2 slice files then create a new
-     is_file_newer(fed->file,co->file)!=1){ // FED slice file
+  fed_slice=fedi->fed_slice;
+  fed_iso=fedi->fed_iso;
+  readslice(fed_slice->file,fedi->fed_index,UNLOAD,&error);
+
+  // regenerate if either the FED slice or isosurface file does not exist or is older than
+  // either the CO, CO2 or O2 slice files
+  
+  if(regenerate_fed==1||
+     (file_type==FED_SLICE&&(is_file_newer(fed_slice->file,o2->file)!=1||
+                             is_file_newer(fed_slice->file,co2->file)!=1||
+                             is_file_newer(fed_slice->file,co->file)!=1))||
+     (file_type==FED_ISO&&(is_file_newer(fed_iso->file,o2->file)!=1||
+                           is_file_newer(fed_iso->file,co2->file)!=1||
+                           is_file_newer(fed_iso->file,co->file)!=1))){
     int i;
     int frame_size;
     float *fed_frame,*fed_framem1;
@@ -221,31 +231,31 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
     Creadslice_frame(0,fedi->co2_index,LOAD,&error);
     Creadslice_frame(0,fedi->co_index,LOAD,&error);
 
-    fed->is1=co->is1; // nx = is2 + 1 - is1
-    fed->is2=co->is2;
-    fed->js1=co->js1;
-    fed->js2=co->js2;
-    fed->ks1=co->ks1;
-    fed->ks2=co->ks2;
-    fed->nslicei=co->nslicei;
-    fed->nslicej=co->nslicej;
-    fed->nslicek=co->nslicek;
-    fed->volslice=co->volslice;
-    if(fed->volslice==1){
-      if(fed->nslicei!=fed->is2+1-fed->is1)fed->is2=fed->nslicei+fed->is1-1;
-      if(fed->nslicej!=fed->js2+1-fed->js1)fed->js2=fed->nslicej+fed->js1-1;
-      if(fed->nslicek!=fed->ks2+1-fed->ks1)fed->ks2=fed->nslicek+fed->ks1-1;
+    fed_slice->is1=co->is1; // nx = is2 + 1 - is1
+    fed_slice->is2=co->is2;
+    fed_slice->js1=co->js1;
+    fed_slice->js2=co->js2;
+    fed_slice->ks1=co->ks1;
+    fed_slice->ks2=co->ks2;
+    fed_slice->nslicei=co->nslicei;
+    fed_slice->nslicej=co->nslicej;
+    fed_slice->nslicek=co->nslicek;
+    fed_slice->volslice=co->volslice;
+    if(fed_slice->volslice==1){
+      if(fed_slice->nslicei!=fed_slice->is2+1-fed_slice->is1)fed_slice->is2=fed_slice->nslicei+fed_slice->is1-1;
+      if(fed_slice->nslicej!=fed_slice->js2+1-fed_slice->js1)fed_slice->js2=fed_slice->nslicej+fed_slice->js1-1;
+      if(fed_slice->nslicek!=fed_slice->ks2+1-fed_slice->ks1)fed_slice->ks2=fed_slice->nslicek+fed_slice->ks1-1;
     }
-    fed->ntimes=MIN(co->ntimes,co2->ntimes);
-    fed->ntimes=MIN(fed->ntimes,o2->ntimes);
-    frame_size = fed->nslicei*fed->nslicej*fed->nslicek;
-    fed->nslicetotal=frame_size*fed->ntimes;
+    fed_slice->ntimes=MIN(co->ntimes,co2->ntimes);
+    fed_slice->ntimes=MIN(fed_slice->ntimes,o2->ntimes);
+    frame_size = fed_slice->nslicei*fed_slice->nslicej*fed_slice->nslicek;
+    fed_slice->nslicetotal=frame_size*fed_slice->ntimes;
 
-    NewMemory((void **)&fed->qslicedata,sizeof(float)*frame_size*fed->ntimes);
-    NewMemory((void **)&fed->times,sizeof(float)*fed->ntimes);
+    NewMemory((void **)&fed_slice->qslicedata,sizeof(float)*frame_size*fed_slice->ntimes);
+    NewMemory((void **)&fed_slice->times,sizeof(float)*fed_slice->ntimes);
 
-    times=fed->times;
-    fed_frame=fed->qslicedata;
+    times=fed_slice->times;
+    fed_frame=fed_slice->qslicedata;
     o2_frame1=o2->qslicedata;
     o2_frame2=o2_frame1+frame_size;
 
@@ -259,7 +269,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
     for(i=0;i<frame_size;i++){
       fed_frame[i]=0.0;
     }
-    for(i=1;i<fed->ntimes;i++){
+    for(i=1;i<fed_slice->ntimes;i++){
       int j;
       float dt,valj,valjm1;
 
@@ -281,8 +291,8 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
         fed_frame[j] = fed_framem1[j] + (val1+val2)*dt/2.0;
       }
     }
-    out_slicefile(fed);
-    if(fed->volslice==1){
+    out_slicefile(fed_slice);
+    if(fed_slice->volslice==1){
       isodata *iso_fed;
       mesh *meshi;
       float *xplt, *yplt, *zplt;
@@ -292,16 +302,14 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
       char *isofile;
       int error;
       int reduce_triangles=1;
-      isodata *isoi;
       int j;
       int nx, ny, nz;
 
-      isoi = fedi->fed_iso;
       strcpy(longlabel,"Fractional effective dose");
       strcpy(shortlabel,"FED");
       strcpy(unitlabel," ");
 
-      meshi = meshinfo + fed->blocknumber;
+      meshi = meshinfo + fed_slice->blocknumber;
       xplt = meshi->xplt;
       yplt = meshi->yplt;
       zplt = meshi->zplt;
@@ -311,41 +319,41 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
       nx = ibar + 1;
       ny = jbar + 1;
       nz = kbar + 1;
-      isofile=isoi->file;
+      isofile=fed_iso->file;
 
       iblank_cell = meshi->c_iblank_cell;
   
-      CCisoheader(isofile,longlabel,shortlabel,unitlabel,isoi->levels,&isoi->nlevels,&error);
+      CCisoheader(isofile,longlabel,shortlabel,unitlabel,fed_iso->levels,&fed_iso->nlevels,&error);
       printf("generating FED isosurface\n");
-      for(i=0;i<fed->ntimes;i++){
+      for(i=0;i<fed_slice->ntimes;i++){
         float time;
         float *vals;
         int j;
 
         time=times[i];
-        vals = fed->qslicedata + i*frame_size;
+        vals = fed_slice->qslicedata + i*frame_size;
         printf("outputting isotime time=%.2f\n",time);
 
 //    C_val(i,j,k) = i*nj*nk + j*nk + k
 // Fort_val(i,j,k) = i + j*ni + k*ni*nj
 
         CCisosurface2file(isofile, &time, vals, iblank_cell, 
-		              isoi->levels, &isoi->nlevels,
+		              fed_iso->levels, &fed_iso->nlevels,
                   xplt, &nx,  yplt, &ny, zplt, &nz, 
                   &reduce_triangles, &error);
       }
     }
-    FREEMEMORY(fed->qslicedata);
-    FREEMEMORY(fed->times);
+    FREEMEMORY(fed_slice->qslicedata);
+    FREEMEMORY(fed_slice->times);
     Creadslice_frame(0,fedi->o2_index,UNLOAD,&error);
     Creadslice_frame(0,fedi->co2_index,UNLOAD,&error);
     Creadslice_frame(0,fedi->co_index,UNLOAD,&error);
   }
   if(file_type==FED_SLICE){
-    readslice(fed->file,fedi->fed_index,flag,&error);
+    readslice(fed_slice->file,fedi->fed_index,flag,&error);
   }
   else{
-    readiso_orig(fedi->fed_iso->file,file_index,flag,&error);
+    readiso_orig(fed_iso->file,file_index,flag,&error);
   }
   printf("completed\n");
 }
