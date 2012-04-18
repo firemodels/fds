@@ -5793,7 +5793,7 @@ SUBROUTINE UPDATE_HRR(NM)
 ! Q_DOT(4,NM) = int k grad T dot dS
 ! Q_DOT(5,NM) = int sum h_s rho D grad Z dot dS
 ! Q_DOT(6,NM) = int dp/dt dV
-! Q_DOT(7,NM) = int q_part dV (not implemented yet)
+! Q_DOT(7,NM) = int q_part dV 
 ! Q_DOT(8,NM) = int d(rho h_s)/dt dV
 
 USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_HEAT,GET_SENSIBLE_ENTHALPY,GET_SENSIBLE_ENTHALPY_DIFF
@@ -5802,7 +5802,10 @@ INTEGER, INTENT(IN) :: NM
 INTEGER :: IOR,I,J,K,IW,IIG,JJG,KKG,N
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 
-Q_DOT(:,NM) = 0._EB
+! Zero out enthalpy equation right hand terms, except Q_DOT(7,NM), which has been updated in part.f90.
+
+Q_DOT(1:6,NM) = 0._EB
+Q_DOT(  8,NM) = 0._EB
 
 IF (EVACUATION_ONLY(NM)) RETURN
 
