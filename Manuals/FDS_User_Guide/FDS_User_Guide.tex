@@ -5298,7 +5298,7 @@ where $\Delta p$ is the pressure difference between the adjacent compartments (i
 $\rho_\infty$ is the ambient density (in units of kg/m$^3$). The discharge coefficient normally seen in this type of formula is assumed
 to be 1.
 
-Within FDS, leakage flows are handled by the HVAC solver.  A leak between two zones is considered to be a pair of HVAC {\ct VENT}s connected by a duct with a loss coefficient of 1.  To specify a leak between two zones, a solid surface in each of the zones must be given the attribute {\ct LEAK\_PATH}.  Leakage is uniformly distributed over all of the solid surfaces assigned the {\ct LEAK\_PATH}.  In the above example, the leakage from Zone 1 to Zone o requires the attribute
+Within FDS, leakage flows are handled by the HVAC solver.  A leak between two zones is considered to be a pair of HVAC {\ct VENT}s connected by a duct with a loss coefficient of 1.  To specify a leak between two zones, a solid surface in each of the zones must be given the attribute {\ct LEAK\_PATH}.  Leakage is uniformly distributed over all of the solid surfaces assigned the {\ct LEAK\_PATH}.  In the above example, the leakage from Zone 1 to Zone 0 requires the attribute
 {\ct LEAK\_PATH=1,0}, meaning that the leak between Zones 1 and 0 is uniformly distributed
 over solids defined with:
 
