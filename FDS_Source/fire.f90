@@ -98,33 +98,31 @@ DO K=1,KBAR
          END SELECT        
 
          ! Update RSUM and ZZ       
-         IF (ABS(Q(I,J,K)) > ZERO_P) THEN
+         Q_IF: IF (ABS(Q(I,J,K)) > ZERO_P) THEN
             Q_EXISTS = .TRUE.
             CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM(I,J,K)) 
             TMP(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHO(I,J,K))            
             ZZ(I,J,K,1:N_TRACKED_SPECIES) = ZZ_GET(1:N_TRACKED_SPECIES)
-            ! Divergence term
-            DZZ(1:N_TRACKED_SPECIES) = ZZ_GET(1:N_TRACKED_SPECIES) - DZZ(1:N_TRACKED_SPECIES)
-            IF (ENTHALPY_TRANSPORT) THEN
-               CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,TMP(I,J,K))
-               CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP(I,J,K))
-               DTDT(I,J,K) = RHO(I,J,K)*(CP-H_S/TMP(I,J,K))*(TMP(I,J,K)-TMP0(I,J,K))/DT
-               DO N=1,N_TRACKED_SPECIES
-                  SM => SPECIES_MIXTURE(N)
-                  CALL GET_SENSIBLE_ENTHALPY_DIFF(N,TMP(I,J,K),HDIFF)
-                  D_REACTION(I,J,K) = D_REACTION(I,J,K) + ( (SM%RCON-SM0%RCON)/RSUM(I,J,K) - HDIFF/H_S )*DZZ(N)/DT
-               ENDDO
-            ELSE
-               IF (.NOT.CONSTANT_SPECIFIC_HEAT) THEN
+            CP_IF: IF (.NOT.CONSTANT_SPECIFIC_HEAT) THEN
+               ! Divergence term
+               DZZ(1:N_TRACKED_SPECIES) = ZZ_GET(1:N_TRACKED_SPECIES) - DZZ(1:N_TRACKED_SPECIES)
+               ET_IF: IF (ENTHALPY_TRANSPORT) THEN
+                  CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP(I,J,K))
+                  DO N=1,N_TRACKED_SPECIES
+                     SM => SPECIES_MIXTURE(N)
+                     CALL GET_SENSIBLE_ENTHALPY_DIFF(N,TMP(I,J,K),HDIFF)
+                     D_REACTION(I,J,K) = D_REACTION(I,J,K) + ( (SM%RCON-SM0%RCON)/RSUM(I,J,K) - HDIFF/H_S )*DZZ(N)/DT
+                  ENDDO
+               ELSE
                   CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,TMP(I,J,K))
                   DO N=1,N_TRACKED_SPECIES
                      SM => SPECIES_MIXTURE(N)
                      CALL GET_SENSIBLE_ENTHALPY_DIFF(N,TMP(I,J,K),HDIFF)
                      D_REACTION(I,J,K) = D_REACTION(I,J,K) + ( (SM%RCON-SM0%RCON)/RSUM(I,J,K) - HDIFF/(CP*TMP(I,J,K)) )*DZZ(N)/DT
                   ENDDO
-               ENDIF
-            ENDIF
-         ENDIF
+               ENDIF ET_IF
+            ENDIF CP_IF
+         ENDIF Q_IF
 
       ENDDO ILOOP
    ENDDO
