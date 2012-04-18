@@ -23,7 +23,6 @@ void CalcTriNormal(float *v1, float *v2, float *v3, float *norm){
   float u[3], v[3];
   int i;
 
-  sleep(100);
   for(i=0;i<3;i++){
     u[i]=v2[i]-v1[i];
     v[i]=v3[i]-v1[i];

@@ -661,7 +661,7 @@ void drawplot3d_texture(mesh *meshi){
         color1t=xzcolortbase + i*nz;
         color2t=color1t+nz;
         for(k=0; k<kbar; k++){
-          if(iblank==NULL||iblank_y[ijknode(i,ploty,k)]==2){
+          if(iblank_y==NULL||iblank_y[ijknode(i,ploty,k)]==2){
             if(ABS(color1t[k]-color2t[k+1])<ABS(color1t[k+1]-color2t[k])){
               glTexCoord1f(color1t[k]);  glVertex3f(xplt[i],yplt[ploty],zplt[k]);
               glTexCoord1f(color2t[k]);  glVertex3f(xplt[i+1],yplt[ploty],zplt[k]);
@@ -990,7 +990,7 @@ void drawplot3d(mesh *meshi){
         color1=yzcolorbase + j*nz;
         color2=color1+nz;
         for(k=0; k<kbar; k++){
-          if(iblank==NULL||iblank_x[ijknode(plotx,j,k)]==2){
+          if(iblank_x==NULL||iblank_x[ijknode(plotx,j,k)]==2){
             if(ABS(color1[k]-color2[k+1])<ABS(color1[k+1]-color2[k])){
               glColor4fv(rgb_plot3d+4*color1[k]);  glVertex3f(xplt[plotx],yplt[j],zplt[k]);
               glColor4fv(rgb_plot3d+4*color2[k]);  glVertex3f(xplt[plotx],yplt[j+1],zplt[k]);
@@ -1204,7 +1204,7 @@ void drawplot3d(mesh *meshi){
         color1=xycolorbase + i*ny;
         color2=color1+ny;
         for(j=0; j<jbar; j++){
-          if(iblank==NULL||iblank_z[ijknode(i,j,plotz)]==2){
+          if(iblank_z==NULL||iblank_z[ijknode(i,j,plotz)]==2){
             if(ABS(color1[j]-color2[j+1])<ABS(color1[j+1]-color2[j])){
               glColor4fv(rgb_plot3d+4*color1[j]);glVertex3f(xplt[i],yplt[j],zplt[plotz]);
               glColor4fv(rgb_plot3d+4*color2[j]);glVertex3f(xplt[i+1],yplt[j],zplt[plotz]);

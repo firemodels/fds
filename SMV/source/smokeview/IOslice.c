@@ -852,10 +852,10 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       int return_val;
        
       if(sd->slicetype==SLICE_CENTER){
-        return_val=NewMemory((void **)&sd->n_iblank,(sd->nslicei+1)*(sd->nslicej+1)*(sd->nslicek+1)*sizeof(char));
+        return_val=NewMemory((void **)&sd->c_iblank,(sd->nslicei+1)*(sd->nslicej+1)*(sd->nslicek+1)*sizeof(char));
       }
       else{
-        return_val=NewMemory((void **)&sd->c_iblank,(sd->nslicei+1)*(sd->nslicej+1)*(sd->nslicek+1)*sizeof(char));
+        return_val=NewMemory((void **)&sd->n_iblank,(sd->nslicei+1)*(sd->nslicej+1)*(sd->nslicek+1)*sizeof(char));
       }
       if( return_val==0){
         readslice("",ifile,UNLOAD,&error);
@@ -2593,25 +2593,59 @@ void getslicedatabounds(const slicedata *sd, float *pmin, float *pmax){
   int ndata;
   int n;
   int first=1;
+  int i,j,k,nn;
+  int nx, ny, nxy;
+
+  nx = sd->nslicei;
+  ny = sd->nslicej;
+  nxy = nx*ny;
 
   pdata = sd->qslicedata;
   ndata = sd->nslicetotal;
 
-  for(n=0;n<ndata;n++){
-    //if(sd->n_iblank!=NULL&&sd->n_iblank[n%sd->nsliceii]==0)continue;
-    //if(sd->c_iblank!=NULL&&sd->c_iblank[n%sd->nsliceii]==0)continue;
-    if(first==1){
-      *pmin=pdata[n];
-      *pmax=pdata[n];
-      first=0;
+  n=-1;
+ /* for(i=0;i<sd->nslicei;i++){
+    for(j=0;j<sd->nslicej;j++){
+      for(k=0;k<sd->nslicek;k++){
+        n++;
+        printf(" %i %i %i %i\n",i,j,k,sd->n_iblank[IJKNODE(MIN(i+1,sd->nslicei-1),MIN(j+1,sd->nslicej-1),MIN(k+1,sd->nslicek-1))]);
+      }
+      printf("\n");
     }
-    else{
-      if(pdata[n]<*pmin)*pmin=pdata[n];
-      if(pdata[n]>*pmax)*pmax=pdata[n];
+  }*/
+  n=-1;
+  for(nn=0;nn<ndata/sd->nsliceii;nn++){
+  for(i=0;i<sd->nslicei;i++){
+    for(j=0;j<sd->nslicej;j++){
+      for(k=0;k<sd->nslicek;k++){
+        n++;
+        if(sd->c_iblank!=NULL&&((k==0&&sd->nslicek!=1)||(j==0&&sd->nslicej!=1)||(i==0&&sd->nslicei!=1)))continue;
+      //  if(n>=sd->nsliceii){
+      //    printf("at first frame\n");
+      //  }
+        // 0 blocked
+        // 1 partially blocked
+        // 2 unblocked
+        if(sd->n_iblank!=NULL&&sd->n_iblank[IJKNODE(MIN(i+1,sd->nslicei-1),MIN(j+1,sd->nslicej-1),MIN(k+1,sd->nslicek-1))]==0){
+        //  printf("in blockage n=%i %f\n",n,pdata[n]);
+          continue;
+        }
+        if(sd->c_iblank!=NULL&&sd->c_iblank[IJK(MAX(i-1,0),MAX(j-1,0),MAX(k-1,0))]==0){
+        //  printf("in blockage n=%i %f\n",n,pdata[n]);
+          continue;
+        }
+        if(first==1){
+          *pmin=pdata[n];
+          *pmax=pdata[n];
+          first=0;
+        }
+        else{
+          if(pdata[n]<*pmin)*pmin=pdata[n];
+          if(pdata[n]>*pmax)*pmax=pdata[n];
+        }
+       // printf("not in blockage %f\n",pdata[n]);
+      }
     }
-   // if(pdata[n]<-0.5){
-   //   printf("n=%i in=%i pdata=%f\n",n,n%sd->nsliceii,pdata[n]);
-   // }
   }
   if(first==1){
     *pmin=0.0;
@@ -2619,7 +2653,7 @@ void getslicedatabounds(const slicedata *sd, float *pmin, float *pmax){
   }
   //printf(" global min (slice file): %f\n",*pmin);
   //printf(" global max (slice file): %f\n",*pmax);
-}
+  }}
 
 /* ------------------ adjustslicebounds ------------------------ */
 
