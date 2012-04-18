@@ -114,6 +114,7 @@ GLUI_Rollout *rollout_slice_chop=NULL;
 #define TRANSPARENTLEVEL 110
 #define COLORBAR_LIST2 112
 #define COLORBAR_SMOOTH 113
+#define RESEARCH_MODE 114
 
 #define UPDATE_VECTOR 101
 
@@ -206,7 +207,7 @@ GLUI_Checkbox *CHECKBOX_smooth=NULL;
 GLUI_Checkbox *CHECKBOX_sort2=NULL;
 GLUI_Checkbox *CHECKBOX_smooth2=NULL;
 
-GLUI_Checkbox *CHECKBOX_axissmooth=NULL;
+GLUI_Checkbox *CHECKBOX_axislabels_smooth=NULL;
 GLUI_Checkbox *CHECKBOX_extreme2=NULL;
 GLUI_Checkbox *startup_checkbox=NULL;
 GLUI_Checkbox *check_overwrite_all=NULL;
@@ -227,6 +228,7 @@ GLUI_Checkbox *CHECKBOX_unload_qdata=NULL;
 GLUI_Checkbox *CHECKBOX_use_tload_begin=NULL;
 GLUI_Checkbox *CHECKBOX_use_tload_end=NULL;
 GLUI_Checkbox *CHECKBOX_use_tload_skip=NULL;
+GLUI_Checkbox *CHECKBOX_research_mode=NULL;
 GLUI_Spinner *SPINNER_tload_begin=NULL;
 GLUI_Spinner *SPINNER_tload_end=NULL;
 GLUI_Spinner *SPINNER_tload_skip=NULL;
@@ -267,6 +269,12 @@ GLUI_EditText *con_p3_min=NULL, *con_p3_max=NULL;
 GLUI_EditText *con_p3_chopmin=NULL, *con_p3_chopmax=NULL;
 GLUI_RadioGroup *con_p3_setmin=NULL, *con_p3_setmax=NULL;
 
+/* ------------------ update_research_mode ------------------------ */
+
+extern "C" void update_research_mode(void){
+  Slice_CB(RESEARCH_MODE);
+  if(CHECKBOX_research_mode!=NULL)CHECKBOX_research_mode->set_int_val(research_mode);
+}
 /* ------------------ update_script_stop ------------------------ */
 
 extern "C" void update_script_stop(void){
@@ -297,10 +305,10 @@ extern "C" void update_transparency(void){
   CHECKBOX_transparentflag->set_int_val(use_transparency_data);
 }
 
-/* ------------------ update_colorbar_smooth ------------------------ */
+/* ------------------ update_axislabels_smooth ------------------------ */
 
-extern "C" void update_colorbar_smooth(void){
-  CHECKBOX_axissmooth->set_int_val(axissmooth);
+extern "C" void update_axislabels_smooth(void){
+  CHECKBOX_axislabels_smooth->set_int_val(axislabels_smooth);
 }
 
 /* ------------------ update_evac_parms ------------------------ */
@@ -670,6 +678,7 @@ extern "C" void glui_bounds_setup(int main_window){
     if(nfedinfo>0){
       glui_bounds->add_checkbox_to_panel(panel_slice,"Regenerate FED data",&regenerate_fed);
     }
+    CHECKBOX_research_mode=glui_bounds->add_checkbox_to_panel(panel_slice,_("Research display mode"),&research_mode,RESEARCH_MODE,Slice_CB);
     glui_bounds->add_checkbox_to_panel(panel_slice,_("Output data to file"),&output_slicedata);
     Slice_CB(FILETYPEINDEX);
   }
@@ -723,7 +732,7 @@ extern "C" void glui_bounds_setup(int main_window){
   glui_bounds->add_radiobutton_to_group(plot3d_display,_("Continuous"));
   glui_bounds->add_radiobutton_to_group(plot3d_display,_("Stepped"));
   glui_bounds->add_radiobutton_to_group(plot3d_display,_("Line"));
-  CHECKBOX_axissmooth=glui_bounds->add_checkbox_to_panel(panel_colorbar,_("Smooth colorbar labels"),&axissmooth,COLORBAR_SMOOTH,Slice_CB);
+  CHECKBOX_axislabels_smooth=glui_bounds->add_checkbox_to_panel(panel_colorbar,_("Smooth colorbar labels"),&axislabels_smooth,COLORBAR_SMOOTH,Slice_CB);
   CHECKBOX_extreme2=glui_bounds->add_checkbox_to_panel(panel_colorbar,_("Highlight extreme data"),&show_extremedata,
     COLORBAR_EXTREME2,Slice_CB);
   CHECKBOX_transparentflag=glui_bounds->add_checkbox_to_panel(panel_colorbar,_("Use transparency:"),&use_transparency_data,DATA_transparent,Slice_CB);
@@ -1968,6 +1977,42 @@ extern "C" void Slice_CB(int var){
     return;
   }
   switch (var){
+    case RESEARCH_MODE:
+      if(research_mode==1){
+        axislabels_smooth_save=axislabels_smooth;
+        axislabels_smooth=0;
+        visColorbarLabels_save=visColorbarLabels;
+        visColorbarLabels=1;
+        
+        setslicemin_save=setslicemin;
+        slicemin_save=slicemin;
+        setslicemin=GLOBAL_MIN;
+        Slice_CB(SETVALMIN);
+        
+        setslicemax_save=setslicemax;
+        slicemax_save=slicemax;
+        setslicemax=GLOBAL_MAX;
+        Slice_CB(SETVALMAX);
+        printf("resarch mode on\n");
+      }
+      else{
+        axislabels_smooth=axislabels_smooth_save;
+        visColorbarLabels=visColorbarLabels_save;
+
+        setslicemin=setslicemin_save;
+        Slice_CB(SETVALMIN);
+        slicemin=slicemin_save;
+        Slice_CB(VALMIN);
+        
+        setslicemax=setslicemax_save;
+        Slice_CB(SETVALMAX);
+        slicemax=slicemax_save;
+        Slice_CB(VALMAX);
+        printf("resarch mode off\n");
+      }
+      update_axislabels_smooth();
+      Slice_CB(FILEUPDATE);
+      break;
     case SMOOTH_SURFACES:
       CHECKBOX_smooth->set_int_val(smoothtrinormal);
       CHECKBOX_smooth2->set_int_val(smoothtrinormal);

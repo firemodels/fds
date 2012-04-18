@@ -761,8 +761,8 @@ void keyboard_2(unsigned char key, int x, int y){
     &&isupper(key2))key2=tolower(key2); /* map upper case characters to lower */
 
   if(strncmp((const char *)&key2,"A",1)==0){
-    axissmooth=1-axissmooth;
-    update_colorbar_smooth();
+    axislabels_smooth=1-axislabels_smooth;
+    update_axislabels_smooth();
     return;
   }
   if(strncmp((const char *)&key2,"L",1)==0){
@@ -1263,6 +1263,16 @@ void keyboard_2(unsigned char key, int x, int y){
     ||strncmp((const char *)&key2,"R",1)==0
     ){
     int rflag=0;
+    int state;
+
+    state=glutGetModifiers();
+
+    if(state==GLUT_ACTIVE_ALT){
+      research_mode=1-research_mode;
+      update_research_mode();
+      return;
+    }
+
 
     if(strncmp((const char *)&key2,"R",1)==0){
       render_double=2;

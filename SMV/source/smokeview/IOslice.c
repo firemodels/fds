@@ -574,8 +574,6 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     }
     FREEMEMORY(sd->times  );
     FREEMEMORY(sd->slicelevel  );
-    FREEMEMORY(sd->c_iblank);
-    FREEMEMORY(sd->n_iblank);
     FREEMEMORY(sd->compindex);
     FREEMEMORY(sd->qslicedata_compressed);
     FREEMEMORY(sd->slicecomplevel);
@@ -848,21 +846,6 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
 
     sd->nsliceii = sd->nslicei*sd->nslicej*sd->nslicek;
     sd->nslicetotal=sd->ntimes*sd->nsliceii;
-    if(use_iblank==1){
-      int return_val;
-       
-      if(sd->slicetype==SLICE_CENTER){
-        return_val=NewMemory((void **)&sd->c_iblank,(sd->nslicei+1)*(sd->nslicej+1)*(sd->nslicek+1)*sizeof(char));
-      }
-      else{
-        return_val=NewMemory((void **)&sd->n_iblank,(sd->nslicei+1)*(sd->nslicej+1)*(sd->nslicek+1)*sizeof(char));
-      }
-      if( return_val==0){
-        readslice("",ifile,UNLOAD,&error);
-        *errorcode=1;
-        return;
-      }
-    }
     if(sd->compression_type==1||sd->compression_type==2){
       if(NewMemory((void **)&sd->slicecomplevel,sd->nsliceii*sizeof(unsigned char))==0){
         readslice("",ifile,UNLOAD,&error);
@@ -882,94 +865,6 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     ny = meshi->jbar + 1;
     nxy = nx*ny;
 
-    if(use_iblank==1){
-      switch (sd->idir){
-      case 1:
-        if(sd->c_iblank!=NULL){
-          ii=0;
-          for(k=sd->ks1;k<sd->ks2;k++){
-            for(j=sd->js1;j<sd->js2;j++){
-              for(i=sd->is1;i<sd->is1+sd->nslicei;i++){
-                sd->c_iblank[ii++]=meshi->c_iblank_x[IJK(i,j,k)];
-              }
-            }
-          }
-        }
-        if(sd->n_iblank!=NULL){
-          ii=0;
-          for(k=sd->ks1;k<=sd->ks2;k++){
-            for(j=sd->js1;j<=sd->js2;j++){
-              for(i=sd->is1;i<=sd->is1+sd->nslicei;i++){
-                if(k==0||j==0){
-                  sd->n_iblank[ii++]=0;
-                }
-                else{
-                  sd->n_iblank[ii++]=meshi->c_iblank_x[IJK(i,j-1,k-1)];
-                }
-              }
-            }
-          }
-        }
-        break;
-      case 2:
-        if(sd->c_iblank!=NULL){
-          ii=0;
-          for(k=sd->ks1;k<sd->ks2;k++){
-            for(j=sd->js1;j<sd->js1+sd->nslicej;j++){
-              for(i=sd->is1;i<sd->is2;i++){
-                sd->c_iblank[ii++]=meshi->c_iblank_y[IJK(i,j,k)];
-              }
-            }
-          }
-        }
-        if(sd->n_iblank!=NULL){
-          ii=0;
-          for(k=sd->ks1;k<=sd->ks2;k++){
-            for(j=sd->js1;j<sd->js1+sd->nslicej;j++){
-              for(i=sd->is1;i<=sd->is2;i++){
-                if(k==0||i==0){
-                  sd->n_iblank[ii++]=0;
-                }
-                else{
-                  sd->n_iblank[ii++]=meshi->c_iblank_y[IJK(i-1,j,k-1)];
-                }
-              }
-            }
-          }
-        }
-        break;
-      case 3:
-        if(sd->c_iblank!=NULL){
-          ii=0;
-          for(k=sd->ks1;k<sd->ks1+sd->nslicek;k++){
-            for(j=sd->js1;j<sd->js2;j++){
-              for(i=sd->is1;i<sd->is2;i++){
-                sd->c_iblank[ii++]=meshi->c_iblank_z[IJK(i,j,k)];
-              }
-            }
-          }
-        }
-        if(sd->n_iblank!=NULL){
-          ii=0;
-          for(k=sd->ks1;k<=sd->ks1+sd->nslicek;k++){
-            for(j=sd->js1;j<=sd->js2;j++){
-              for(i=sd->is1;i<=sd->is2;i++){
-                if(j==0||i==0){
-                  sd->n_iblank[ii++]=0;
-                }
-                else{
-                  sd->n_iblank[ii++]=meshi->c_iblank_z[IJK(i-1,j-1,k)];
-                }
-              }
-            }
-          }
-        }
-        break;
-      default:
-        ASSERT(FFALSE);
-        break;
-      }
-    }
 #ifdef pp_MEMDEBUG
     if(sd->compression_type==0){
       ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicetotal));
@@ -2081,8 +1976,6 @@ void update_fedinfo(void){
     sd->slicepoint=NULL;
     sd->slicedata=NULL;
     sd->timeslist=NULL;
-    sd->c_iblank=NULL;
-    sd->n_iblank=NULL;
     sd->blocknumber=co2->blocknumber;
     sd->vloaded=0;
     sd->reload=0;
@@ -2594,66 +2487,55 @@ void getslicedatabounds(const slicedata *sd, float *pmin, float *pmax){
   int n;
   int first=1;
   int i,j,k,nn;
-  int nx, ny, nxy;
+  int nx, ny, nxy, ibar, jbar;
+  char *iblank_node, *iblank_cell;
+  mesh *meshi;
 
-  nx = sd->nslicei;
-  ny = sd->nslicej;
+  meshi = meshinfo + sd->blocknumber;
+  iblank_node = meshi->c_iblank;
+  iblank_cell = meshi->c_iblank_cell;
+
+  ibar = meshi->ibar;
+  jbar = meshi->jbar;
+  nx = ibar+1;
+  ny = jbar+1;
   nxy = nx*ny;
 
   pdata = sd->qslicedata;
   ndata = sd->nslicetotal;
 
   n=-1;
- /* for(i=0;i<sd->nslicei;i++){
-    for(j=0;j<sd->nslicej;j++){
-      for(k=0;k<sd->nslicek;k++){
-        n++;
-        printf(" %i %i %i %i\n",i,j,k,sd->n_iblank[IJKNODE(MIN(i+1,sd->nslicei-1),MIN(j+1,sd->nslicej-1),MIN(k+1,sd->nslicek-1))]);
-      }
-      printf("\n");
-    }
-  }*/
-  n=-1;
   for(nn=0;nn<ndata/sd->nsliceii;nn++){
-  for(i=0;i<sd->nslicei;i++){
-    for(j=0;j<sd->nslicej;j++){
-      for(k=0;k<sd->nslicek;k++){
-        n++;
-        if(sd->c_iblank!=NULL&&((k==0&&sd->nslicek!=1)||(j==0&&sd->nslicej!=1)||(i==0&&sd->nslicei!=1)))continue;
-      //  if(n>=sd->nsliceii){
-      //    printf("at first frame\n");
-      //  }
+    for(i=0;i<sd->nslicei;i++){
+      for(j=0;j<sd->nslicej;j++){
+        for(k=0;k<sd->nslicek;k++){
+          n++;
+          if(sd->slicetype==SLICE_CENTER&&((k==0&&sd->nslicek!=1)||(j==0&&sd->nslicej!=1)||(i==0&&sd->nslicei!=1)))continue;
         // 0 blocked
         // 1 partially blocked
         // 2 unblocked
-        if(sd->n_iblank!=NULL&&sd->n_iblank[IJKNODE(MIN(i+1,sd->nslicei-1),MIN(j+1,sd->nslicej-1),MIN(k+1,sd->nslicek-1))]==0){
-        //  printf("in blockage n=%i %f\n",n,pdata[n]);
-          continue;
+          if(sd->slicetype!=SLICE_CENTER&&iblank_node[IJKNODE(sd->is1+i,sd->js1+j,sd->ks1+k)]==0)continue;
+          if(sd->slicetype==SLICE_CENTER&&iblank_cell[IJKCELL(sd->is1+i-1,sd->js1+j-1,sd->ks1+k-1)]==0)continue;
+          if(first==1){
+            *pmin=pdata[n];
+            *pmax=pdata[n];
+            first=0;
+          }
+          else{
+            if(pdata[n]<*pmin)*pmin=pdata[n];
+            if(pdata[n]>*pmax)*pmax=pdata[n];
+          }
         }
-        if(sd->c_iblank!=NULL&&sd->c_iblank[IJK(MAX(i-1,0),MAX(j-1,0),MAX(k-1,0))]==0){
-        //  printf("in blockage n=%i %f\n",n,pdata[n]);
-          continue;
-        }
-        if(first==1){
-          *pmin=pdata[n];
-          *pmax=pdata[n];
-          first=0;
-        }
-        else{
-          if(pdata[n]<*pmin)*pmin=pdata[n];
-          if(pdata[n]>*pmax)*pmax=pdata[n];
-        }
-       // printf("not in blockage %f\n",pdata[n]);
       }
     }
+    if(first==1){
+      *pmin=0.0;
+      *pmax=1.0;
+    }
   }
-  if(first==1){
-    *pmin=0.0;
-    *pmax=1.0;
-  }
-  //printf(" global min (slice file): %f\n",*pmin);
-  //printf(" global max (slice file): %f\n",*pmax);
-  }}
+  printf(" global min (slice file): %f\n",*pmin);
+  printf(" global max (slice file): %f\n",*pmax);
+}
 
 /* ------------------ adjustslicebounds ------------------------ */
 
@@ -2716,7 +2598,7 @@ void adjustslicebounds(const slicedata *sd, float *pmin, float *pmax){
       if(setslicemax==PERCENTILE_MAX)*pmax = ppmin + (nbig+1)*dp;
       
     }
-    if(axissmooth==1){
+    if(axislabels_smooth==1){
       smoothlabel(pmin,pmax,nrgb);
     }
 

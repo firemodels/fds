@@ -67,7 +67,7 @@ void adjustdatabounds(const float *pdata, int local_skip, int ndata,
       if(setpmax==PERCENTILE_MAX)*pmax = pmax2;
       FreeMemory(buckets);
     }
-    if(axissmooth==1){
+    if(axislabels_smooth==1){
       smoothlabel(pmin,pmax,nrgb);
     }
 }
@@ -325,7 +325,7 @@ void adjustpartbounds(const float *pdata, int particle_type, int droplet_type, c
       if(setpmax==PERCENTILE_MAX)*pmax = pmax2;
       FreeMemory(buckets);
     }
-    if(axissmooth==1){
+    if(axislabels_smooth==1){
       smoothlabel(pmin,pmax,nrgb);
     }
 }
@@ -399,7 +399,7 @@ void adjustPlot3Dbounds(int plot3dvar, int setpmin, float *pmin, int setpmax, fl
       if(setpmax==PERCENTILE_MAX)*pmax = pmax2;
       FreeMemory(buckets);
     }
-    if(axissmooth==1&&setpmin!=SET_MIN&&setpmax!=SET_MAX){
+    if(axislabels_smooth==1&&setpmin!=SET_MIN&&setpmax!=SET_MAX){
       smoothlabel(pmin,pmax,nrgb);
     }
 

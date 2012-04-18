@@ -1458,7 +1458,7 @@ void initvars(void){
   eyeview=0,eyeview_level=1;
   eyeview_old=0,eyeview_SAVE=0,eyeview_last=0;
   frameratevalue=1000;
-  setpartmin=PERCENTILE_MIN, setpartmax=PERCENTILE_MAX, setslicemin=PERCENTILE_MIN, setslicemax=PERCENTILE_MAX;
+  setpartmin=PERCENTILE_MIN, setpartmax=PERCENTILE_MAX;
   setpartmin_old=setpartmin;
   setpartmax_old=setpartmax;
   setpatchmin=GLOBAL_MIN, setpatchmax=GLOBAL_MAX, setzonemin=0, setzonemax=0;
@@ -1482,7 +1482,6 @@ void initvars(void){
   zonemin=1.0, zonemax=0.0;
   speedmax=0.0;
   hrrpuv_max_smv=1200.0;
-  axissmooth=1;
   FlowDir=1,ClipDir=1;
   plotn=1;
   stept=0;
@@ -1573,7 +1572,7 @@ void initvars(void){
   setPDIM=0;
   menustatus=GLUT_MENU_NOT_IN_USE;
   visTimeZone=1, visTimeSmoke=1, visTimeSlice=1, visTimePatch=1, visTimeIso=1, visTimeEvac=1;
-  vishmsTimelabel=0, visTimeLabels=1, visColorLabels=1;
+  vishmsTimelabel=0, visTimeLabels=1;
   visTitle=1, visFullTitle=1, visFramerate=0, visFramelabel=1, visTimelabel=1;
 
   vertical_factor=1.0;

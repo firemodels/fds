@@ -426,7 +426,7 @@ void COLORBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GL
   float xnum;
 
 
-  if(visColorLabels==1&&numColorbars!=0){
+  if(visColorbarLabels==1&&numColorbars!=0){
     temp = (int)(1.2f*dwinH);
     xnum=numColorbars;
     if(fontindex==LARGE_FONT)xnum*=1.5;
@@ -660,7 +660,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     left=0.;
     up=screenHeight;
     down=0;
-    if(visColorLabels==1||(visBlocklabel==1&&nmeshes>1))right=screenWidth-dwinWW;
+    if(visColorbarLabels==1||(visBlocklabel==1&&nmeshes>1))right=screenWidth-dwinWW;
     if(visTitle==1)up=screenHeight-1.1*ntitles*dwinH/4.0;
   }
 

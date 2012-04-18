@@ -164,7 +164,7 @@ void getisosizes(const char *isofile, int dataflag, EGZ_FILE **isostreamptr, int
 	  *niso_times += 1;
   }
   EGZ_FSEEK(*isostreamptr,beg,SEEK_SET);
-  if(dataflag==1&&axissmooth==1){
+  if(dataflag==1&&axislabels_smooth==1){
     smoothlabel(tmin_local,tmax_local,nrgb);
   }
 }

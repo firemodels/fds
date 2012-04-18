@@ -996,7 +996,6 @@ typedef struct _slicedata {
   int loaded_save, display_save;
   int num_memblocks;
   float position_orig;
-  char *c_iblank, *n_iblank;
   int blocknumber;
   int firstshort;
   int vec_comp;

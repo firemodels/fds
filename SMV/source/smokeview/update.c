@@ -585,7 +585,7 @@ void updateShow(void){
   dwinWW = numColorbars*dwinW/3;
   if(fontindex==1)dwinWW=(int)(1.5*dwinWW);
   drawColorLabel=0;
-  if((showtime==1||showplot3d==1)&&visColorLabels==1)drawColorLabel=1;
+  if((showtime==1||showplot3d==1)&&visColorbarLabels==1)drawColorLabel=1;
   if(drawColorLabel==1&&olddrawColorLabel==0)updatemenu=1;
   if(drawColorLabel==0&&olddrawColorLabel==1)updatemenu=1;
   olddrawColorLabel=drawColorLabel;

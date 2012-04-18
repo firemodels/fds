@@ -5464,8 +5464,6 @@ typedef struct {
       sd->slicepoint=NULL;
       sd->slicedata=NULL;
       sd->timeslist=NULL;
-      sd->c_iblank=NULL;
-      sd->n_iblank=NULL;
       sd->blocknumber=blocknumber;
       sd->vloaded=0;
       sd->reload=0;
@@ -8871,7 +8869,7 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"AXISSMOOTH")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&axissmooth);
+      sscanf(buffer,"%i ",&axislabels_smooth);
       continue;
     }
     if(match(buffer,"SHOWBLOCKS")==1){
@@ -9360,7 +9358,7 @@ int readini2(char *inifile, int localfile){
       }
     if(match(buffer,"SHOWCOLORBARS")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&visColorLabels);
+      sscanf(buffer,"%i",&visColorbarLabels);
       continue;
       }
     if(match(buffer,"EYEVIEW")==1){
@@ -10652,7 +10650,7 @@ void writeini(int flag){
   fprintf(fileout,"SHOWTITLE\n");
   fprintf(fileout," %i\n",visTitle0);
   fprintf(fileout,"SHOWCOLORBARS\n");
-  fprintf(fileout," %i\n",visColorLabels);
+  fprintf(fileout," %i\n",visColorbarLabels);
   fprintf(fileout,"SHOWBLOCKS\n");
   fprintf(fileout," %i\n",visBlocks);
   fprintf(fileout,"SHOWNORMALWHENSMOOTH\n");
@@ -10791,7 +10789,7 @@ void writeini(int flag){
   fprintf(fileout,"VECTORSKIP\n");
   fprintf(fileout," %i\n",vectorskip);
   fprintf(fileout,"AXISSMOOTH\n");
-  fprintf(fileout," %i\n",axissmooth);
+  fprintf(fileout," %i\n",axislabels_smooth);
   fprintf(fileout,"BLOCKLOCATION\n");
   fprintf(fileout," %i\n",blocklocation);
   fprintf(fileout,"SHOWCADANDGRID\n");

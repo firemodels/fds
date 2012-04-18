@@ -204,7 +204,7 @@ void IsoVariableMenu(int value){
 void LabelMenu(int value){
   updatemenu=1;  
   glutPostRedisplay();
-  ASSERTFLAG(visColorLabels);
+  ASSERTFLAG(visColorbarLabels);
   ASSERTFLAG(visTimeLabels);
   ASSERTFLAG(visTitle0);
   ASSERTFLAG(visFramerate);
@@ -212,7 +212,7 @@ void LabelMenu(int value){
   ASSERTFLAG(vis_slice_average);
   switch (value){
    case 0:
-    visColorLabels=1-visColorLabels;
+    visColorbarLabels=1-visColorbarLabels;
     break;
    case 1:
     visTimeLabels=1-visTimeLabels;
@@ -225,7 +225,7 @@ void LabelMenu(int value){
     break;
    case 4:
     vis_user_ticks=1;
-    visColorLabels=1;
+    visColorbarLabels=1;
     visTimeLabels=1;
     visTitle0=1;
     visTitle1=1;
@@ -255,7 +255,7 @@ void LabelMenu(int value){
     break;
    case 5:
     vis_user_ticks=0;
-    visColorLabels=0;
+    visColorbarLabels=0;
     visTimeLabels=0;
     visTitle0=0;
     visTitle1=0;
@@ -5462,8 +5462,8 @@ updatemenu=0;
 /* --------------------------------label menu -------------------------- */
 
   CREATEMENU(labelmenu,LabelMenu);
-  if(visColorLabels==1)glutAddMenuEntry(_("*Colorbars"),0);
-  if(visColorLabels==0)glutAddMenuEntry(_("Colorbars"),0);
+  if(visColorbarLabels==1)glutAddMenuEntry(_("*Colorbars"),0);
+  if(visColorbarLabels==0)glutAddMenuEntry(_("Colorbars"),0);
   if(visTimeLabels==1)glutAddMenuEntry(_("*Time bars"),1);
   if(visTimeLabels==0)glutAddMenuEntry(_("Time bars"),1);
   if(nticks>0){
