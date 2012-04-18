@@ -206,6 +206,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
   fed_slice=fedi->fed_slice;
   fed_iso=fedi->fed_iso;
   readslice(fed_slice->file,fedi->fed_index,UNLOAD,&error_local);
+  if(flag==UNLOAD)return;
 
   // regenerate if either the FED slice or isosurface file does not exist or is older than
   // either the CO, CO2 or O2 slice files
