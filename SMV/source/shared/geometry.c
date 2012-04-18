@@ -63,7 +63,6 @@ void InsertEdge(edgedata *edges, int *nedges, vertdata *vert1, vertdata *vert2){
 
 void InsertVert(vertdata **verts, int *nverts,vertdata *vert){
   int i;
-  int have_vert=0;
 
   for(i=0;i<*nverts;i++){
     if(verts[i]==vert)return;
@@ -151,7 +150,6 @@ void getVertInfo(geomdata *geom){
 
   for(i=0;i<geom->ntris;i++){
     tridata *trii;
-    int j;
 
     trii = geom->tris+i;
     trii->verts[0]->ntris++;
@@ -177,7 +175,6 @@ void getVertInfo(geomdata *geom){
   for(i=0;i<geom->ntris;i++){
     tridata *trii;
     vertdata *verti;
-    int j;
 
     trii = geom->tris+i;
     verti = trii->verts[0];
@@ -232,7 +229,6 @@ void getVertInfo(geomdata *geom){
   // generate ordered list of connected vertices for each vertex
 
   for(i=0;i<geom->nverts;i++){
-    int j;
     vertdata *verti;
 
     verti = geom->verts + i;
@@ -306,8 +302,10 @@ float VertOffset(vertdata *vert){
       best_xyz[j] += tri->area*tri->center[j];
     }
   }
-  for(i=0;i<3;i++){
-    best_xyz[i]/=sum;
+  if(sum!=0.0){
+    for(i=0;i<3;i++){
+      best_xyz[i]/=sum;
+    }
   }
   normalize_vec3(best_norm);
 

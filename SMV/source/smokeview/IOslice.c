@@ -106,10 +106,10 @@ void Creadslice_frame(int frame_index,int sd_index,int flag,int *error){
   slicedata *sd;
   int slicefilelen;
   int headersize,framesize,statfile;
-  int frame_size,i;
+  int frame_size;
   int skip_local,returncode;
   FILE *SLICEFILE;
-  float *time,*slicevals;
+  float *time_local,*slicevals;
 
 
   sd = sliceinfo + sd_index;
@@ -160,22 +160,22 @@ void Creadslice_frame(int frame_index,int sd_index,int flag,int *error){
   if(frame_index%2!=0){
     slicevals+=frame_size;
   }
-  time=sd->times;
+  time_local=sd->times;
 
-  FORTSLICEREAD(time,1);
+  FORTSLICEREAD(time_local,1);
   FORTSLICEREAD(slicevals,frame_size);
   fclose(SLICEFILE);
 }
 
 /* ------------------ readfed ------------------------ */
 
+
 void readiso_orig(const char *file, int ifile, int flag, int *errorcode);
 void readfed(int file_index, int flag, int file_type, int *errorcode){
   feddata *fedi;
   slicedata *fed_slice,*o2,*co2,*co;
   isodata *fed_iso;
-  int error;
-  int co_loaded_before, co2_loaded_before, o2_loaded_before;
+  int error_local;
 
 #define FEDCO(CO) ( 4.607*pow(1000000.0*CLAMP(CO,0.0,0.1),1.036)/10000000.0 )
 #define FEDO2(O2)  ( exp( -(8.13-0.54*(20.9-100.0*CLAMP(O2,0.0,0.2))) )/60.0 ) 
@@ -205,7 +205,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
   co=fedi->co;
   fed_slice=fedi->fed_slice;
   fed_iso=fedi->fed_iso;
-  readslice(fed_slice->file,fedi->fed_index,UNLOAD,&error);
+  readslice(fed_slice->file,fedi->fed_index,UNLOAD,&error_local);
 
   // regenerate if either the FED slice or isosurface file does not exist or is older than
   // either the CO, CO2 or O2 slice files
@@ -227,9 +227,9 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
 
     printf("\n");
     printf("generating FED slice data\n");
-    Creadslice_frame(0,fedi->o2_index,LOAD,&error);
-    Creadslice_frame(0,fedi->co2_index,LOAD,&error);
-    Creadslice_frame(0,fedi->co_index,LOAD,&error);
+    Creadslice_frame(0,fedi->o2_index,LOAD,&error_local);
+    Creadslice_frame(0,fedi->co2_index,LOAD,&error_local);
+    Creadslice_frame(0,fedi->co_index,LOAD,&error_local);
 
     fed_slice->is1=co->is1; // nx = is2 + 1 - is1
     fed_slice->is2=co->is2;
@@ -271,11 +271,11 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
     }
     for(i=1;i<fed_slice->ntimes;i++){
       int j;
-      float dt,valj,valjm1;
+      float dt;
 
-      Creadslice_frame(i,fedi->o2_index,LOAD,&error);
-      Creadslice_frame(i,fedi->co2_index,LOAD,&error);
-      Creadslice_frame(i,fedi->co_index,LOAD,&error);
+      Creadslice_frame(i,fedi->o2_index,LOAD,&error_local);
+      Creadslice_frame(i,fedi->co2_index,LOAD,&error_local);
+      Creadslice_frame(i,fedi->co_index,LOAD,&error_local);
 
       times[i]=co2->times[0];
       printf("generating FED time=%.2f\n",times[i]);
@@ -293,16 +293,14 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
     }
     out_slicefile(fed_slice);
     if(fed_slice->volslice==1){
-      isodata *iso_fed;
       mesh *meshi;
       float *xplt, *yplt, *zplt;
       int ibar, jbar, kbar;
       char *iblank_cell;
       char longlabel[50],shortlabel[50],unitlabel[50];
       char *isofile;
-      int error;
+      int error_local2;
       int reduce_triangles=1;
-      int j;
       int nx, ny, nz;
 
       strcpy(longlabel,"Fractional effective dose");
@@ -323,37 +321,34 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
 
       iblank_cell = meshi->c_iblank_cell;
   
-      CCisoheader(isofile,longlabel,shortlabel,unitlabel,fed_iso->levels,&fed_iso->nlevels,&error);
+      CCisoheader(isofile,longlabel,shortlabel,unitlabel,fed_iso->levels,&fed_iso->nlevels,&error_local2);
       printf("generating FED isosurface\n");
       for(i=0;i<fed_slice->ntimes;i++){
-        float time;
         float *vals;
-        int j;
 
-        time=times[i];
         vals = fed_slice->qslicedata + i*frame_size;
-        printf("outputting isotime time=%.2f\n",time);
+        printf("outputting isotime time=%.2f\n",times[i]);
 
 //    C_val(i,j,k) = i*nj*nk + j*nk + k
 // Fort_val(i,j,k) = i + j*ni + k*ni*nj
 
-        CCisosurface2file(isofile, &time, vals, iblank_cell, 
+        CCisosurface2file(isofile, times+i, vals, iblank_cell, 
 		              fed_iso->levels, &fed_iso->nlevels,
                   xplt, &nx,  yplt, &ny, zplt, &nz, 
-                  &reduce_triangles, &error);
+                  &reduce_triangles, &error_local2);
       }
     }
     FREEMEMORY(fed_slice->qslicedata);
     FREEMEMORY(fed_slice->times);
-    Creadslice_frame(0,fedi->o2_index,UNLOAD,&error);
-    Creadslice_frame(0,fedi->co2_index,UNLOAD,&error);
-    Creadslice_frame(0,fedi->co_index,UNLOAD,&error);
+    Creadslice_frame(0,fedi->o2_index,UNLOAD,&error_local);
+    Creadslice_frame(0,fedi->co2_index,UNLOAD,&error_local);
+    Creadslice_frame(0,fedi->co_index,UNLOAD,&error_local);
   }
   if(file_type==FED_SLICE){
-    readslice(fed_slice->file,fedi->fed_index,flag,&error);
+    readslice(fed_slice->file,fedi->fed_index,flag,&error_local);
   }
   else{
-    readiso_orig(fed_iso->file,file_index,flag,&error);
+    readiso_orig(fed_iso->file,file_index,flag,&error_local);
   }
   printf("completed\n");
 }
@@ -2035,14 +2030,8 @@ void update_fedinfo(void){
   }
   for(i=0;i<nfedinfo;i++){ // define sliceinfo for fed slices
     slicedata *sd;
-    char *flowlabel;
-    char label[256];
     int len;
     slicedata *co2;
-    int terrain=0, cellcenter=0, fire_line=0;
-    float above_ground_level=0.0;
-    char *slicelabelptr, slicelabel[256];
-    int has_reg, has_comp;
     int nn_slice;
     feddata *fedi;
     char filename[256],*ext;
@@ -2966,9 +2955,9 @@ void update_gslice_planes(void){
 
 /* ------------------ drawgslice ------------------------ */
 
+void getNormal(float *v1, float *v2, float *v3, float *area, float *normal);
 void drawgslice(const slicedata *sd){
   int i;
-  void getNormal(float *v1, float *v2, float *v3, float *area, float *normal);
 
   glPushMatrix();
   glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
@@ -2983,8 +2972,7 @@ void drawgslice(const slicedata *sd){
     meshi = meshinfo + i;
     if(meshi->gslice_nverts==0||meshi->gslice_ntriangles==0)continue;
     for(j=0;j<meshi->gslice_ntriangles;j++){
-      float *xyz1, *xyz2, *xyz3, area, normal[3];
-      float xe[3];
+      float *xyz1, *xyz2, *xyz3;
 
       xyz1 = meshi->gslice_verts + 3*meshi->gslice_triangles[3*j];
       xyz2 = meshi->gslice_verts + 3*meshi->gslice_triangles[3*j+1];
@@ -5360,7 +5348,6 @@ void drawvslice(const vslicedata *vd){
   char *iblank;
   int nx, ny, nxy;
   float *rgb_ptr;
-  int plotx, ploty, plotz;
 
   sd = sliceinfo + vd->ival;
   meshi=meshinfo+sd->blocknumber;

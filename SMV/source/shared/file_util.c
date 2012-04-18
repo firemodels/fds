@@ -59,13 +59,13 @@ void filecopy(char *destdir, char *file_in, char *file_out){
     return;
   }
   for(;;){
-    int eof;
+    int end_of_file;
        
-    eof=0;
+    end_of_file=0;
     chars_in=fread(buffer,1,FILE_BUFFER,streamin);
-    if(chars_in!=FILE_BUFFER)eof=1;
+    if(chars_in!=FILE_BUFFER)end_of_file=1;
     if(chars_in>0)fwrite(buffer,chars_in,1,streamout);
-    if(eof==1)break;
+    if(end_of_file==1)break;
   }
   fclose(streamin);
   fclose(streamout);
@@ -89,13 +89,13 @@ void copyfile(char *destfile, char *sourcefile){
   }
   printf("  Copying %s to %s\n",sourcefile,destfile);
   for(;;){
-    int eof;
+    int end_of_file;
        
-    eof=0;
+    end_of_file=0;
     chars_in=fread(buffer,1,FILE_BUFFER,streamin);
-    if(chars_in!=FILE_BUFFER)eof=1;
+    if(chars_in!=FILE_BUFFER)end_of_file=1;
     if(chars_in>0)fwrite(buffer,chars_in,1,streamout);
-    if(eof==1)break;
+    if(end_of_file==1)break;
   }
   fclose(streamin);
   fclose(streamout);
@@ -194,24 +194,24 @@ int filecat(char *file_in1, char *file_in2, char *file_out){
   }
 
   for(;;){
-    int eof;
+    int end_of_file;
        
-    eof=0;
+    end_of_file=0;
     chars_in=fread(buffer,1,FILE_BUFFER,stream_in1);
-    if(chars_in!=FILE_BUFFER)eof=1;
+    if(chars_in!=FILE_BUFFER)end_of_file=1;
     if(chars_in>0)fwrite(buffer,chars_in,1,stream_out);
-    if(eof==1)break;
+    if(end_of_file==1)break;
   }
   fclose(stream_in1);
 
   for(;;){
-    int eof;
+    int end_of_file;
        
-    eof=0;
+    end_of_file=0;
     chars_in=fread(buffer,1,FILE_BUFFER,stream_in2);
-    if(chars_in!=FILE_BUFFER)eof=1;
+    if(chars_in!=FILE_BUFFER)end_of_file=1;
     if(chars_in>0)fwrite(buffer,chars_in,1,stream_out);
-    if(eof==1)break;
+    if(end_of_file==1)break;
   }
   fclose(stream_in2);
   fclose(stream_out);
@@ -697,8 +697,8 @@ char *which(char *progname){
 
 /* ------------------ get_slice_frame ------------------------ */
 
-size_t get_slice_frame(char *file, int iframe, int framesize, float *time, float *vals){
-  int skip,skip_local;
+size_t get_slice_frame(char *file, int iframe, int framesize, float *time_local, float *vals){
+  int skip_local;
   FILE *FORTSTREAM;
   int returncode;
   int endianswitch=0;
@@ -712,7 +712,7 @@ size_t get_slice_frame(char *file, int iframe, int framesize, float *time, float
   FORTSTREAM=fopen(file,"r");
   if(FORTSTREAM==NULL)return 0;
   FSEEK(FORTSTREAM,skip_local,SEEK_SET); // skip from beginning of file
-  FORTREAD(time,1);
+  FORTREAD(time_local,1);
   FORTREAD(vals,framesize);
   fclose(FORTSTREAM);
   return returncode;

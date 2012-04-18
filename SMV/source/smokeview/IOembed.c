@@ -10,6 +10,7 @@ char IOembed_revision[]="$Revision$";
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 
 #include "string_util.h"
 #include "smv_endian.h"
@@ -22,6 +23,7 @@ void CalcTriNormal(float *v1, float *v2, float *v3, float *norm){
   float u[3], v[3];
   int i;
 
+  sleep(100);
   for(i=0;i<3;i++){
     u[i]=v2[i]-v1[i];
     v[i]=v3[i]-v1[i];
@@ -542,7 +544,7 @@ void update_triangles(void){
   }
 }
 
-#define FORTREAD(var,count,STREAM) fseek(STREAM,4,SEEK_CUR);\
+#define FORTREAD(var,count,STREAM) FSEEK(STREAM,4,SEEK_CUR);\
                            returncode=fread(var,4,count,STREAM);\
                            if(returncode!=count)returncode=0;\
                            if(endianswitch==1&&returncode!=0)endian_switch(var,count);\
