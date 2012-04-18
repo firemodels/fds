@@ -1415,7 +1415,7 @@ PROF_LOOP: DO N=1,N_PROF
    CALL GET_WALL_INDEX(NM,II,JJ,KK,IOR,IW)
    IF (IW>0) THEN
       PF%IW = IW
-      SF => SURFACE(WALL(IW)%SURF_INDEX)
+      SF => SURFACE(M%WALL(IW)%SURF_INDEX)
       IF (.NOT.SF%THERMALLY_THICK) THEN
          WRITE(LU_ERR,'(A,I3,A)') 'ERROR: PROFile ',N, ' must be associated with a heat-conducting surface'
          PROCESS_STOP_STATUS = SETUP_STOP
