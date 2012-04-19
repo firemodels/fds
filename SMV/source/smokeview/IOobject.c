@@ -5815,7 +5815,7 @@ float get_point2box_dist(float boxmin[3], float boxmax[3], float p1[3], float p2
       }
     }
   }
-  ASSERT(FALSE);
+  ASSERT(FFALSE);
   return dist(p1,p2);
 }
 
