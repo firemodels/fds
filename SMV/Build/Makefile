@@ -403,8 +403,8 @@ intel_osx_test_64 : $(obj)
 
 intel_osx_test_64_dbg : IMAGELIBDIR = $(LIB_DIR)/lib_osx_intel_64
 intel_osx_test_64_dbg : FORTLIBDIR  = $(OSX64FORTLIBDIR)
-intel_osx_test_64_dbg : FFLAGS    = -O0 -m64 -traceback -g -fpe0 -fltconsistency -WB -vec_report0 -fpp -D pp_BETA -D pp_OSX64 -D pp_noappend
-intel_osx_test_64_dbg : CFLAGS    = -O0 -g -m64 -vec_report0 -D pp_OSX64 -D pp_BETA
+intel_osx_test_64_dbg : FFLAGS    = -O0 -m64 -traceback -g -fpe0 -fltconsistency -WB -vec_report0 -fpp -D pp_BETA -D pp_OSX64 -D pp_noappend -D _DEBUG
+intel_osx_test_64_dbg : CFLAGS    = -O0 -g -m64 -vec_report0 -D pp_OSX64 -D pp_BETA -D _DEBUG
 #intel_osx_test_64_dbg : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_OSX64 -D pp_BETA
 #intel_osx_test_64_dbg : CFLAGS    = -O2 -m64 -vec_report0 -D pp_OSX64 -D pp_BETA
 intel_osx_test_64_dbg : CC        = icc 
