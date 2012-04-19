@@ -960,18 +960,19 @@ USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 USE PHYSICAL_FUNCTIONS, ONLY: GET_CONDUCTIVITY,GET_SPECIFIC_HEAT,GET_SENSIBLE_ENTHALPY_DIFF,GET_SENSIBLE_ENTHALPY
 USE EVAC, ONLY: EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, EMESH_NFIELDS, EVAC_FDS6
 USE TURBULENCE, ONLY: TENSOR_DIFFUSIVITY_MODEL
+USE MASS, ONLY: SCALAR_FACE_VALUE
 
 ! Compute contributions to the divergence term
  
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX,KDTDY,KDTDZ,DP,KP, &
           RHO_D_DZDX,RHO_D_DZDY,RHO_D_DZDZ,RHO_D,RHOP,H_RHO_D_DZDX,H_RHO_D_DZDY,H_RHO_D_DZDZ,RTRM, &
-          U_DOT_DEL_RHO_H_S,RHO_H_S_P,UU,VV,WW,UDRHDX,VDRHDY,WDRHDZ,U_DOT_DEL_RHO,RHO_Z_P,U_DOT_DEL_RHO_Z
+          U_DOT_DEL_RHO_H_S,RHO_H_S_P,UU,VV,WW,FX,FY,FZ,U_DOT_DEL_RHO,RHO_Z_P,U_DOT_DEL_RHO_Z
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
 REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P            
 REAL(EB) :: DELKDELT,VC,DTDX,DTDY,DTDZ,TNOW,ZZ_GET(0:N_TRACKED_SPECIES), &
             HDIFF,DZDX,DZDY,DZDZ,T,RDT,RHO_D_DZDN,TSI,TIME_RAMP_FACTOR,ZONE_VOLUME,DELTA_P,PRES_RAMP_FACTOR,&
-            TMP_G,TMP_WGT,DIV_DIFF_HEAT_FLUX,H_S,UN,CP
+            TMP_G,TMP_WGT,DIV_DIFF_HEAT_FLUX,H_S,CP,ZZZ(1:4),DU_P,DU_M
 TYPE(SURFACE_TYPE), POINTER :: SF
 TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM,SM0
 INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,I,J,K,IPZ,IOPZ
@@ -1636,83 +1637,82 @@ CONTAINS
 
 SUBROUTINE ENTHALPY_ADVECTION
 
-UDRHDX=>WORK2; UDRHDX=0._EB
-VDRHDY=>WORK3; VDRHDY=0._EB
-WDRHDZ=>WORK4; WDRHDZ=0._EB
+FX=>WORK2; FX=0._EB
+FY=>WORK3; FY=0._EB
+FZ=>WORK4; FZ=0._EB
 U_DOT_DEL_RHO_H_S=>WORK6; U_DOT_DEL_RHO_H_S=0._EB
 
-DO K=0,KBAR
-   DO J=0,JBAR
-      DO I=0,IBAR
-         UDRHDX(I,J,K) = RDX(I)*( RHO_H_S_P(I+1,J,K) - RHO_H_S_P(I,J,K) )*UU(I,J,K)
-         VDRHDY(I,J,K) = RDY(J)*( RHO_H_S_P(I,J+1,K) - RHO_H_S_P(I,J,K) )*VV(I,J,K)
-         WDRHDZ(I,J,K) = RDZ(K)*( RHO_H_S_P(I,J,K+1) - RHO_H_S_P(I,J,K) )*WW(I,J,K)
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBM1
+         ZZZ(1:4) = RHO_H_S_P(I-1:I+2,J,K)
+         FX(I,J,K) = SCALAR_FACE_VALUE(UU(I,J,K),ZZZ,FLUX_LIMITER)
       ENDDO
    ENDDO
 ENDDO
 
-! Correct u_n*d(rho*h_s)/dn at boundaries
+DO K=1,KBAR
+   DO J=1,JBM1
+      DO I=1,IBAR
+         ZZZ(1:4) = RHO_H_S_P(I,J-1:J+2,K)
+         FY(I,J,K) = SCALAR_FACE_VALUE(VV(I,J,K),ZZZ,FLUX_LIMITER)
+      ENDDO
+   ENDDO
+ENDDO
 
-CORRECTION_LOOP_2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-   WC => WALL(IW)
-   IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .OR. &
-       WC%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. &
-       WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) CYCLE CORRECTION_LOOP_2
-   II  = WC%ONE_D%II
+DO K=1,KBM1
+   DO J=1,JBAR
+      DO I=1,IBAR
+         ZZZ(1:4) = RHO_H_S_P(I,J,K-1:K+2)
+         FZ(I,J,K) = SCALAR_FACE_VALUE(WW(I,J,K),ZZZ,FLUX_LIMITER)
+      ENDDO
+   ENDDO
+ENDDO
+
+WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+   WC=>WALL(IW)
+   IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP
+       
+   II  = WC%ONE_D%II 
    JJ  = WC%ONE_D%JJ
    KK  = WC%ONE_D%KK
-   IIG = WC%ONE_D%IIG
-   JJG = WC%ONE_D%JJG
-   KKG = WC%ONE_D%KKG
    IOR = WC%ONE_D%IOR
    IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = WC%ZZ_F(1:N_TRACKED_SPECIES)
    CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,WC%ONE_D%TMP_F)
-   IF (PREDICTOR) UN = -WC%ONE_D%UW
-   IF (CORRECTOR) UN = -WC%ONE_D%UWS
+
    SELECT CASE(IOR)
       CASE( 1)
-         UDRHDX(II,JJ,KK)   = 2._EB*WC%RDN*(RHO_H_S_P(IIG,JJG,KKG)-WC%RHO_F*H_S)*UN
+         FX(II,JJ,KK)   = WC%RHO_F*H_S
       CASE(-1)
-         UDRHDX(II-1,JJ,KK) = 2._EB*WC%RDN*(RHO_H_S_P(IIG,JJG,KKG)-WC%RHO_F*H_S)*UN
+         FX(II-1,JJ,KK) = WC%RHO_F*H_S
       CASE( 2)
-         VDRHDY(II,JJ,KK)   = 2._EB*WC%RDN*(RHO_H_S_P(IIG,JJG,KKG)-WC%RHO_F*H_S)*UN
+         FY(II,JJ,KK)   = WC%RHO_F*H_S
       CASE(-2)
-         VDRHDY(II,JJ-1,KK) = 2._EB*WC%RDN*(RHO_H_S_P(IIG,JJG,KKG)-WC%RHO_F*H_S)*UN
+         FY(II,JJ-1,KK) = WC%RHO_F*H_S
       CASE( 3)
-         WDRHDZ(II,JJ,KK)   = 2._EB*WC%RDN*(RHO_H_S_P(IIG,JJG,KKG)-WC%RHO_F*H_S)*UN
+         FZ(II,JJ,KK)   = WC%RHO_F*H_S
       CASE(-3)
-         WDRHDZ(II,JJ,KK-1) = 2._EB*WC%RDN*(RHO_H_S_P(IIG,JJG,KKG)-WC%RHO_F*H_S)*UN
+         FZ(II,JJ,KK-1) = WC%RHO_F*H_S
    END SELECT
-ENDDO CORRECTION_LOOP_2
-
-!   DO K=1,KBAR
-!      DO J=1,JBAR
-!         DO I=1,IBAR
-!
-!            ! This form of averaging is needed to enforce exact discrete conservation of (rho*h_s).  
-!            ! When the discrete divergence is factored out of the DIV(rho*h_s*u) term (numerically)
-!            ! we end up with AVE(u dot GRAD(rho*h_s)) + (rho*h_s)*DIV(u).
-!
-!            U_DOT_DEL_RHO_H_S(I,J,K) = 0.5_EB*( UDRHDX(I,J,K)+UDRHDX(I-1,J,K) + &
-!                                                VDRHDY(I,J,K)+VDRHDY(I,J-1,K) + &
-!                                                WDRHDZ(I,J,K)+WDRHDZ(I,J,K-1) )
-!         ENDDO
-!      ENDDO 
-!   ENDDO
+      
+ENDDO WALL_LOOP
 
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
          IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
 
-         IF (UU(I,J,K)  <0._EB) U_DOT_DEL_RHO_H_S(I,J,K) = U_DOT_DEL_RHO_H_S(I,J,K) + UDRHDX(I,J,K)
-         IF (UU(I-1,J,K)>0._EB) U_DOT_DEL_RHO_H_S(I,J,K) = U_DOT_DEL_RHO_H_S(I,J,K) + UDRHDX(I-1,J,K)
+         DU_P = (FX(I,J,K)   - RHO_H_S_P(I,J,K))*UU(I,J,K)
+         DU_M = (FX(I-1,J,K) - RHO_H_S_P(I,J,K))*UU(I-1,J,K)
+         U_DOT_DEL_RHO_H_S(I,J,K) = U_DOT_DEL_RHO_H_S(I,J,K) + (DU_P-DU_M)*RDX(I)
 
-         IF (VV(I,J,K)  <0._EB) U_DOT_DEL_RHO_H_S(I,J,K) = U_DOT_DEL_RHO_H_S(I,J,K) + VDRHDY(I,J,K)
-         IF (VV(I,J-1,K)>0._EB) U_DOT_DEL_RHO_H_S(I,J,K) = U_DOT_DEL_RHO_H_S(I,J,K) + VDRHDY(I,J-1,K)
+         DU_P = (FY(I,J,K)   - RHO_H_S_P(I,J,K))*VV(I,J,K)
+         DU_M = (FY(I,J-1,K) - RHO_H_S_P(I,J,K))*VV(I,J-1,K)
+         U_DOT_DEL_RHO_H_S(I,J,K) = U_DOT_DEL_RHO_H_S(I,J,K) + (DU_P-DU_M)*RDY(J)
 
-         IF (WW(I,J,K)  <0._EB) U_DOT_DEL_RHO_H_S(I,J,K) = U_DOT_DEL_RHO_H_S(I,J,K) + WDRHDZ(I,J,K)
-         IF (WW(I,J,K-1)>0._EB) U_DOT_DEL_RHO_H_S(I,J,K) = U_DOT_DEL_RHO_H_S(I,J,K) + WDRHDZ(I,J,K-1)
+         DU_P = (FZ(I,J,K)   - RHO_H_S_P(I,J,K))*WW(I,J,K)
+         DU_M = (FZ(I,J,K-1) - RHO_H_S_P(I,J,K))*WW(I,J,K-1)
+         U_DOT_DEL_RHO_H_S(I,J,K) = U_DOT_DEL_RHO_H_S(I,J,K) + (DU_P-DU_M)*RDZ(K)
 
       ENDDO
    ENDDO 
@@ -1722,76 +1722,80 @@ END SUBROUTINE ENTHALPY_ADVECTION
 
 SUBROUTINE DENSITY_ADVECTION
 
-UDRHDX=>WORK2; UDRHDX=0._EB
-VDRHDY=>WORK3; VDRHDY=0._EB
-WDRHDZ=>WORK4; WDRHDZ=0._EB
+FX=>WORK2; FX=0._EB
+FY=>WORK3; FY=0._EB
+FZ=>WORK4; FZ=0._EB
 U_DOT_DEL_RHO=>WORK6; U_DOT_DEL_RHO=0._EB
 
-DO K=0,KBAR
-   DO J=0,JBAR
-      DO I=0,IBAR
-         UDRHDX(I,J,K) = RDX(I)*( RHOP(I+1,J,K) - RHOP(I,J,K) )*UU(I,J,K)
-         VDRHDY(I,J,K) = RDY(J)*( RHOP(I,J+1,K) - RHOP(I,J,K) )*VV(I,J,K)
-         WDRHDZ(I,J,K) = RDZ(K)*( RHOP(I,J,K+1) - RHOP(I,J,K) )*WW(I,J,K)
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBM1
+         ZZZ(1:4) = RHOP(I-1:I+2,J,K)
+         FX(I,J,K) = SCALAR_FACE_VALUE(UU(I,J,K),ZZZ,FLUX_LIMITER)
       ENDDO
    ENDDO
 ENDDO
 
-! Correct u_n*d(rho)/dn at boundaries
+DO K=1,KBAR
+   DO J=1,JBM1
+      DO I=1,IBAR
+         ZZZ(1:4) = RHOP(I,J-1:J+2,K)
+         FY(I,J,K) = SCALAR_FACE_VALUE(VV(I,J,K),ZZZ,FLUX_LIMITER)
+      ENDDO
+   ENDDO
+ENDDO
 
-CORRECTION_LOOP_3: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-   WC => WALL(IW)
-   IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .OR. &
-       WC%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. &
-       WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) CYCLE CORRECTION_LOOP_3
-   II  = WC%ONE_D%II
+DO K=1,KBM1
+   DO J=1,JBAR
+      DO I=1,IBAR
+         ZZZ(1:4) = RHOP(I,J,K-1:K+2)
+         FZ(I,J,K) = SCALAR_FACE_VALUE(WW(I,J,K),ZZZ,FLUX_LIMITER)
+      ENDDO
+   ENDDO
+ENDDO
+
+WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+   WC=>WALL(IW)
+   IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP
+       
+   II  = WC%ONE_D%II 
    JJ  = WC%ONE_D%JJ
    KK  = WC%ONE_D%KK
-   IIG = WC%ONE_D%IIG
-   JJG = WC%ONE_D%JJG
-   KKG = WC%ONE_D%KKG
    IOR = WC%ONE_D%IOR
-   IF (PREDICTOR) UN = -WC%ONE_D%UW
-   IF (CORRECTOR) UN = -WC%ONE_D%UWS
+
    SELECT CASE(IOR)
       CASE( 1)
-         UDRHDX(II,JJ,KK)   = 2._EB*WC%RDN*(RHOP(IIG,JJG,KKG)-WC%RHO_F)*UN
+         FX(II,JJ,KK)   = WC%RHO_F
       CASE(-1)
-         UDRHDX(II-1,JJ,KK) = 2._EB*WC%RDN*(RHOP(IIG,JJG,KKG)-WC%RHO_F)*UN
+         FX(II-1,JJ,KK) = WC%RHO_F
       CASE( 2)
-         VDRHDY(II,JJ,KK)   = 2._EB*WC%RDN*(RHOP(IIG,JJG,KKG)-WC%RHO_F)*UN
+         FY(II,JJ,KK)   = WC%RHO_F
       CASE(-2)
-         VDRHDY(II,JJ-1,KK) = 2._EB*WC%RDN*(RHOP(IIG,JJG,KKG)-WC%RHO_F)*UN
+         FY(II,JJ-1,KK) = WC%RHO_F
       CASE( 3)
-         WDRHDZ(II,JJ,KK)   = 2._EB*WC%RDN*(RHOP(IIG,JJG,KKG)-WC%RHO_F)*UN
+         FZ(II,JJ,KK)   = WC%RHO_F
       CASE(-3)
-         WDRHDZ(II,JJ,KK-1) = 2._EB*WC%RDN*(RHOP(IIG,JJG,KKG)-WC%RHO_F)*UN
+         FZ(II,JJ,KK-1) = WC%RHO_F
    END SELECT
-ENDDO CORRECTION_LOOP_3
-
-!   DO K=1,KBAR
-!      DO J=1,JBAR
-!         DO I=1,IBAR
-!            U_DOT_DEL_RHO(I,J,K) = 0.5_EB*( UDRHDX(I,J,K)+UDRHDX(I-1,J,K) + &
-!                                            VDRHDY(I,J,K)+VDRHDY(I,J-1,K) + &
-!                                            WDRHDZ(I,J,K)+WDRHDZ(I,J,K-1) )
-!         ENDDO
-!      ENDDO 
-!   ENDDO
+      
+ENDDO WALL_LOOP
 
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
          IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
 
-         IF (UU(I,J,K)  <0._EB) U_DOT_DEL_RHO(I,J,K) = U_DOT_DEL_RHO(I,J,K) + UDRHDX(I,J,K)
-         IF (UU(I-1,J,K)>0._EB) U_DOT_DEL_RHO(I,J,K) = U_DOT_DEL_RHO(I,J,K) + UDRHDX(I-1,J,K)
+         DU_P = (FX(I,J,K)   - RHOP(I,J,K))*UU(I,J,K)
+         DU_M = (FX(I-1,J,K) - RHOP(I,J,K))*UU(I-1,J,K)
+         U_DOT_DEL_RHO(I,J,K) = U_DOT_DEL_RHO(I,J,K) + (DU_P-DU_M)*RDX(I)
 
-         IF (VV(I,J,K)  <0._EB) U_DOT_DEL_RHO(I,J,K) = U_DOT_DEL_RHO(I,J,K) + VDRHDY(I,J,K)
-         IF (VV(I,J-1,K)>0._EB) U_DOT_DEL_RHO(I,J,K) = U_DOT_DEL_RHO(I,J,K) + VDRHDY(I,J-1,K)
+         DU_P = (FY(I,J,K)   - RHOP(I,J,K))*VV(I,J,K)
+         DU_M = (FY(I,J-1,K) - RHOP(I,J,K))*VV(I,J-1,K)
+         U_DOT_DEL_RHO(I,J,K) = U_DOT_DEL_RHO(I,J,K) + (DU_P-DU_M)*RDY(J)
 
-         IF (WW(I,J,K)  <0._EB) U_DOT_DEL_RHO(I,J,K) = U_DOT_DEL_RHO(I,J,K) + WDRHDZ(I,J,K)
-         IF (WW(I,J,K-1)>0._EB) U_DOT_DEL_RHO(I,J,K) = U_DOT_DEL_RHO(I,J,K) + WDRHDZ(I,J,K-1)
+         DU_P = (FZ(I,J,K)   - RHOP(I,J,K))*WW(I,J,K)
+         DU_M = (FZ(I,J,K-1) - RHOP(I,J,K))*WW(I,J,K-1)
+         U_DOT_DEL_RHO(I,J,K) = U_DOT_DEL_RHO(I,J,K) + (DU_P-DU_M)*RDZ(K)
 
       ENDDO
    ENDDO 
@@ -1812,77 +1816,80 @@ DO K=0,KBP1
    ENDDO
 ENDDO
 
-UDRHDX=>WORK2; UDRHDX=0._EB
-VDRHDY=>WORK3; VDRHDY=0._EB
-WDRHDZ=>WORK4; WDRHDZ=0._EB
+FX=>WORK2; FX=0._EB
+FY=>WORK3; FY=0._EB
+FZ=>WORK4; FZ=0._EB
 U_DOT_DEL_RHO_Z=>WORK7; U_DOT_DEL_RHO_Z=0._EB
 
-DO K=0,KBAR
-   DO J=0,JBAR
-      DO I=0,IBAR
-         UDRHDX(I,J,K) = RDX(I)*( RHO_Z_P(I+1,J,K) - RHO_Z_P(I,J,K) )*UU(I,J,K)
-         VDRHDY(I,J,K) = RDY(J)*( RHO_Z_P(I,J+1,K) - RHO_Z_P(I,J,K) )*VV(I,J,K)
-         WDRHDZ(I,J,K) = RDZ(K)*( RHO_Z_P(I,J,K+1) - RHO_Z_P(I,J,K) )*WW(I,J,K)
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBM1
+         ZZZ(1:4) = RHO_Z_P(I-1:I+2,J,K)
+         FX(I,J,K) = SCALAR_FACE_VALUE(UU(I,J,K),ZZZ,FLUX_LIMITER)
       ENDDO
    ENDDO
 ENDDO
 
-! Correct u_n*d(rho*Z)/dn at boundaries
+DO K=1,KBAR
+   DO J=1,JBM1
+      DO I=1,IBAR
+         ZZZ(1:4) = RHO_Z_P(I,J-1:J+2,K)
+         FY(I,J,K) = SCALAR_FACE_VALUE(VV(I,J,K),ZZZ,FLUX_LIMITER)
+      ENDDO
+   ENDDO
+ENDDO
 
-CORRECTION_LOOP_4: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-   WC => WALL(IW)
-   IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY .OR. &
-       WC%BOUNDARY_TYPE==OPEN_BOUNDARY .OR. &
-       WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) CYCLE CORRECTION_LOOP_4
-   II  = WC%ONE_D%II
+DO K=1,KBM1
+   DO J=1,JBAR
+      DO I=1,IBAR
+         ZZZ(1:4) = RHO_Z_P(I,J,K-1:K+2)
+         FZ(I,J,K) = SCALAR_FACE_VALUE(WW(I,J,K),ZZZ,FLUX_LIMITER)
+      ENDDO
+   ENDDO
+ENDDO
+
+WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+   WC=>WALL(IW)
+   IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP
+       
+   II  = WC%ONE_D%II 
    JJ  = WC%ONE_D%JJ
    KK  = WC%ONE_D%KK
-   IIG = WC%ONE_D%IIG
-   JJG = WC%ONE_D%JJG
-   KKG = WC%ONE_D%KKG
    IOR = WC%ONE_D%IOR
-   IF (PREDICTOR) UN = -WC%ONE_D%UW
-   IF (CORRECTOR) UN = -WC%ONE_D%UWS
+
    SELECT CASE(IOR)
       CASE( 1)
-         UDRHDX(II,JJ,KK)   = 2._EB*WC%RDN*(RHO_Z_P(IIG,JJG,KKG)-WC%RHO_F*WC%ZZ_F(N))*UN
+         FX(II,JJ,KK)   = WC%RHO_F*WC%ZZ_F(N)
       CASE(-1)
-         UDRHDX(II-1,JJ,KK) = 2._EB*WC%RDN*(RHO_Z_P(IIG,JJG,KKG)-WC%RHO_F*WC%ZZ_F(N))*UN
+         FX(II-1,JJ,KK) = WC%RHO_F*WC%ZZ_F(N)
       CASE( 2)
-         VDRHDY(II,JJ,KK)   = 2._EB*WC%RDN*(RHO_Z_P(IIG,JJG,KKG)-WC%RHO_F*WC%ZZ_F(N))*UN
+         FY(II,JJ,KK)   = WC%RHO_F*WC%ZZ_F(N)
       CASE(-2)
-         VDRHDY(II,JJ-1,KK) = 2._EB*WC%RDN*(RHO_Z_P(IIG,JJG,KKG)-WC%RHO_F*WC%ZZ_F(N))*UN
+         FY(II,JJ-1,KK) = WC%RHO_F*WC%ZZ_F(N)
       CASE( 3)
-         WDRHDZ(II,JJ,KK)   = 2._EB*WC%RDN*(RHO_Z_P(IIG,JJG,KKG)-WC%RHO_F*WC%ZZ_F(N))*UN
+         FZ(II,JJ,KK)   = WC%RHO_F*WC%ZZ_F(N)
       CASE(-3)
-         WDRHDZ(II,JJ,KK-1) = 2._EB*WC%RDN*(RHO_Z_P(IIG,JJG,KKG)-WC%RHO_F*WC%ZZ_F(N))*UN
+         FZ(II,JJ,KK-1) = WC%RHO_F*WC%ZZ_F(N)
    END SELECT
-ENDDO CORRECTION_LOOP_4
-
-!      DO K=1,KBAR
-!         DO J=1,JBAR
-!            DO I=1,IBAR
-!               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-!               U_DOT_DEL_RHO_Z(I,J,K) = 0.5_EB*( UDRHDX(I,J,K)+UDRHDX(I-1,J,K) + &
-!                                                 VDRHDY(I,J,K)+VDRHDY(I,J-1,K) + &
-!                                                 WDRHDZ(I,J,K)+WDRHDZ(I,J,K-1) )
-!            ENDDO
-!         ENDDO
-!      ENDDO
+      
+ENDDO WALL_LOOP
 
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
          IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
 
-         IF (UU(I,J,K)  <0._EB) U_DOT_DEL_RHO_Z(I,J,K) = U_DOT_DEL_RHO_Z(I,J,K) + UDRHDX(I,J,K)
-         IF (UU(I-1,J,K)>0._EB) U_DOT_DEL_RHO_Z(I,J,K) = U_DOT_DEL_RHO_Z(I,J,K) + UDRHDX(I-1,J,K)
+         DU_P = (FX(I,J,K)   - RHO_Z_P(I,J,K))*UU(I,J,K)
+         DU_M = (FX(I-1,J,K) - RHO_Z_P(I,J,K))*UU(I-1,J,K)
+         U_DOT_DEL_RHO_Z(I,J,K) = U_DOT_DEL_RHO_Z(I,J,K) + (DU_P-DU_M)*RDX(I)
 
-         IF (VV(I,J,K)  <0._EB) U_DOT_DEL_RHO_Z(I,J,K) = U_DOT_DEL_RHO_Z(I,J,K) + VDRHDY(I,J,K)
-         IF (VV(I,J-1,K)>0._EB) U_DOT_DEL_RHO_Z(I,J,K) = U_DOT_DEL_RHO_Z(I,J,K) + VDRHDY(I,J-1,K)
+         DU_P = (FY(I,J,K)   - RHO_Z_P(I,J,K))*VV(I,J,K)
+         DU_M = (FY(I,J-1,K) - RHO_Z_P(I,J,K))*VV(I,J-1,K)
+         U_DOT_DEL_RHO_Z(I,J,K) = U_DOT_DEL_RHO_Z(I,J,K) + (DU_P-DU_M)*RDY(J)
 
-         IF (WW(I,J,K)  <0._EB) U_DOT_DEL_RHO_Z(I,J,K) = U_DOT_DEL_RHO_Z(I,J,K) + WDRHDZ(I,J,K)
-         IF (WW(I,J,K-1)>0._EB) U_DOT_DEL_RHO_Z(I,J,K) = U_DOT_DEL_RHO_Z(I,J,K) + WDRHDZ(I,J,K-1)
+         DU_P = (FZ(I,J,K)   - RHO_Z_P(I,J,K))*WW(I,J,K)
+         DU_M = (FZ(I,J,K-1) - RHO_Z_P(I,J,K))*WW(I,J,K-1)
+         U_DOT_DEL_RHO_Z(I,J,K) = U_DOT_DEL_RHO_Z(I,J,K) + (DU_P-DU_M)*RDZ(K)
 
       ENDDO
    ENDDO 
