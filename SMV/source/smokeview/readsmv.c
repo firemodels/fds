@@ -7515,7 +7515,7 @@ void initmesh(mesh *meshi){
   meshi->plotz=1;
 
   meshi->boxoffset=0.0;
-  meshi->c_iblank=NULL;
+  meshi->c_iblank_node=NULL;
   meshi->ventinfo=NULL;
   meshi->select_min=0;
   meshi->select_max=0;

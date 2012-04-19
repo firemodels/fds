@@ -503,7 +503,7 @@ typedef struct _mesh {
   int plotx, ploty, plotz;
   int slicedir;
   int plotn;
-  char *c_iblank,*c_iblank_cell,*c_iblank_x,*c_iblank_y,*c_iblank_z;
+  char *c_iblank_node,*c_iblank_cell,*c_iblank_x,*c_iblank_y,*c_iblank_z;
   float *f_iblank_cell;
   char *c_iblank_embed;
   float *block_zdist;

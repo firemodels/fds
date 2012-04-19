@@ -2488,11 +2488,12 @@ void getslicedatabounds(const slicedata *sd, float *pmin, float *pmax){
   int first=1;
   int i,j,k,nn;
   int nx, ny, nxy, ibar, jbar;
+  int ntimes;
   char *iblank_node, *iblank_cell;
   mesh *meshi;
 
   meshi = meshinfo + sd->blocknumber;
-  iblank_node = meshi->c_iblank;
+  iblank_node = meshi->c_iblank_node;
   iblank_cell = meshi->c_iblank_cell;
 
   ibar = meshi->ibar;
@@ -2505,7 +2506,8 @@ void getslicedatabounds(const slicedata *sd, float *pmin, float *pmax){
   ndata = sd->nslicetotal;
 
   n=-1;
-  for(nn=0;nn<ndata/sd->nsliceii;nn++){
+  ntimes = ndata/sd->nsliceii;
+  for(nn=0;nn<ntimes;nn++){
     for(i=0;i<sd->nslicei;i++){
       for(j=0;j<sd->nslicej;j++){
         for(k=0;k<sd->nslicek;k++){
@@ -2514,8 +2516,16 @@ void getslicedatabounds(const slicedata *sd, float *pmin, float *pmax){
         // 0 blocked
         // 1 partially blocked
         // 2 unblocked
-          if(sd->slicetype!=SLICE_CENTER&&iblank_node[IJKNODE(sd->is1+i,sd->js1+j,sd->ks1+k)]==0)continue;
-          if(sd->slicetype==SLICE_CENTER&&iblank_cell[IJKCELL(sd->is1+i-1,sd->js1+j-1,sd->ks1+k-1)]==0)continue;
+          if(sd->slicetype!=SLICE_CENTER&&iblank_node[IJKNODE(sd->is1+i,sd->js1+j,sd->ks1+k)]==0){
+//            if(nn==0){
+//              printf("%i %i %i %f blocked\n",i,j,k,pdata[n]);
+//            }
+            continue;
+          }
+          if(sd->slicetype==SLICE_CENTER&&iblank_cell[IJKCELL(sd->is1+i-1,sd->js1+j-1,sd->ks1+k-1)]==0){
+            continue;
+          }
+//          if(nn==0)printf("%i %i %i %f not blocked\n",i,j,k,pdata[n]);
           if(first==1){
             *pmin=pdata[n];
             *pmax=pdata[n];
@@ -4817,7 +4827,7 @@ void drawvvolslice(const vslicedata *vd){
   ploty = meshi->iploty_all[iploty_all];
   plotz = meshi->iplotz_all[iplotz_all];
 
-  iblank = meshi->c_iblank;
+  iblank = meshi->c_iblank_node;
   nx = meshi->ibar+1;
   ny = meshi->jbar+1;
   nxy = nx*ny;
@@ -5044,7 +5054,7 @@ void drawvvolslice_terrain(const vslicedata *vd){
   plotx = meshi->iplotx_all[iplotx_all];
   ploty = meshi->iploty_all[iploty_all];
   plotz = meshi->iplotz_all[iplotz_all];
-  iblank = meshi->c_iblank;
+  iblank = meshi->c_iblank_node;
   nx = meshi->ibar+1;
   ny = meshi->jbar+1;
   nxy = nx*ny;
@@ -5270,7 +5280,7 @@ void drawvslice(const vslicedata *vd){
   xplttemp=meshi->xplt;
   yplttemp=meshi->yplt;
   zplttemp=meshi->zplt;
-  iblank = meshi->c_iblank;
+  iblank = meshi->c_iblank_node;
   nx = meshi->ibar+1;
   ny = meshi->jbar+1;
   nxy = nx*ny;

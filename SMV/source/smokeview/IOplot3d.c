@@ -485,7 +485,7 @@ void drawplot3d_texture(mesh *meshi){
   iblank_x = meshi->c_iblank_x;
   iblank_y = meshi->c_iblank_y;
   iblank_z = meshi->c_iblank_z;
-  iblank = meshi->c_iblank;
+  iblank = meshi->c_iblank_node;
 
 
   nx = ibar+1;
@@ -929,7 +929,7 @@ void drawplot3d(mesh *meshi){
   iblank_x = meshi->c_iblank_x;
   iblank_y = meshi->c_iblank_y;
   iblank_z = meshi->c_iblank_z;
-  iblank = meshi->c_iblank;
+  iblank = meshi->c_iblank_node;
 
 
   nx = ibar+1;
