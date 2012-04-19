@@ -303,15 +303,17 @@ ENDDO SPECIES_LOOP
 
 CP => WORK5
 
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         IF (SOLID(CELL_INDEX(I,J,K)) .OR. EVACUATION_ONLY(NM)) CYCLE
-         IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
-         CALL GET_SPECIFIC_HEAT(ZZ_GET,CP(I,J,K),TMP(I,J,K))
+IF (.NOT.EVACUATION_ONLY(NM)) THEN
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
+            CALL GET_SPECIFIC_HEAT(ZZ_GET,CP(I,J,K),TMP(I,J,K))
+         ENDDO
       ENDDO
    ENDDO
-ENDDO
+ENDIF
 
 ! Compute del dot k del T
  
@@ -436,15 +438,17 @@ END SELECT CYLINDER3
  
 RTRM => WORK1
 
-DO K=1,KBAR
-   DO J=1,JBAR
-      DO I=1,IBAR
-         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-         RTRM(I,J,K) = 1._EB/(RHOP(I,J,K)*CP(I,J,K)*TMP(I,J,K))
-         DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
-      ENDDO
-   ENDDO 
-ENDDO
+IF (.NOT.EVACUATION_ONLY(NM)) THEN
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            RTRM(I,J,K) = 1._EB/(RHOP(I,J,K)*CP(I,J,K)*TMP(I,J,K))
+            DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
+         ENDDO
+      ENDDO 
+   ENDDO
+ENDIF
 
 ! Compute (Wbar/rho) Sum (1/W_n) del dot rho*D del Z_n
 
