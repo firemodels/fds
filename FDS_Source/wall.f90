@@ -636,11 +636,7 @@ PARTICLE_LOOP: DO IP=1,NLP
 
    ! Calculate contribution to divergence term due to convective heat transfer from particle
 
-   IF (ENTHALPY_TRANSPORT) THEN
-      D_LAGRANGIAN(IIG,JJG,KKG) =  D_LAGRANGIAN(IIG,JJG,KKG) - ONE_D%QCONF*ONE_D%AREA*RVC * LP%PWT
-   ELSE
-      D_LAGRANGIAN(IIG,JJG,KKG) =  D_LAGRANGIAN(IIG,JJG,KKG) - ONE_D%QCONF*ONE_D%AREA*RVC/(RHO(IIG,JJG,KKG)*H_G) * LP%PWT
-   ENDIF
+   D_LAGRANGIAN(IIG,JJG,KKG) =  D_LAGRANGIAN(IIG,JJG,KKG) - ONE_D%QCONF*ONE_D%AREA*RVC/(RHO(IIG,JJG,KKG)*H_G) * LP%PWT
 
    ! Calculate the mass flux of fuel gas from particles
 

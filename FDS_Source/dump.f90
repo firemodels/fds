@@ -4746,15 +4746,10 @@ SELECT CASE(IND)
                      TMP_TC = 0.5_EB*(TMP(I,J,K)+TMP(IP,JP,KP))
                      IF (N_TRACKED_SPECIES>0) &    
                         ZZ_GET(1:N_TRACKED_SPECIES) = 0.5_EB*(ZZ(I,J,K,1:N_TRACKED_SPECIES)+ZZ(IP,JP,KP,1:N_TRACKED_SPECIES))
-                     IF (ENTHALPY_TRANSPORT) THEN
-                        CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_G_SUM,TMP_TC)
-                        CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_G,TMPA)
-                     ELSE
-                        CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR,TMP_TC)
-                        H_G_SUM = CPBAR*TMP_TC
-                        CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR,TMPA)
-                        H_G = CPBAR*TMPA
-                     ENDIF
+                     CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR,TMP_TC)
+                     H_G_SUM = CPBAR*TMP_TC
+                     CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR,TMPA)
+                     H_G = CPBAR*TMPA
                      HMFAC = 0.5_EB*(RHO(I,J,K)+RHO(IP,JP,KP))*(H_G_SUM-H_G)*0.001_EB
                END SELECT
                
