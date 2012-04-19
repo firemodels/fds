@@ -399,6 +399,24 @@ intel_osx_test_64 : exe       = smokeview_osx_test_64
 intel_osx_test_64 : $(obj)
 	icpc -m64 -o $(bin)/$(exe) -static-intel $(obj)  -mmacosx-version-min=10.4 -framework OpenGL -framework GLUT -lz $(IMAGELIBDIR)/libpng.a $(IMAGELIBDIR)/libgd.a $(IMAGELIBDIR)/libglui.a $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
 
+# ------------- intel_osx_test_64_db ----------------
+
+intel_osx_test_64_dbg : IMAGELIBDIR = $(LIB_DIR)/lib_osx_intel_64
+intel_osx_test_64_dbg : FORTLIBDIR  = $(OSX64FORTLIBDIR)
+intel_osx_test_64_dbg : FFLAGS    = -O0 -m64 -traceback -g -fpe0 -fltconsistency -WB -vec_report0 -fpp -D pp_BETA -D pp_OSX64 -D pp_noappend
+intel_osx_test_64_dbg : CFLAGS    = -O0 -g -m64 -vec_report0 -D pp_OSX64 -D pp_BETA
+#intel_osx_test_64_dbg : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_OSX64 -D pp_BETA
+#intel_osx_test_64_dbg : CFLAGS    = -O2 -m64 -vec_report0 -D pp_OSX64 -D pp_BETA
+intel_osx_test_64_dbg : CC        = icc 
+intel_osx_test_64_dbg : CPP       = icpc
+intel_osx_test_64_dbg : FC        = ifort
+intel_osx_test_64_dbg : exe       = smokeview_osx_test_64_dbg
+
+intel_osx_test_64_dbg : $(obj)
+	icpc -m64 -o $(bin)/$(exe) -static-intel $(obj)  -mmacosx-version-min=10.4 -framework OpenGL -framework GLUT -lz $(IMAGELIBDIR)/libpng.a $(IMAGELIBDIR)/libgd.a $(IMAGELIBDIR)/libglui.a $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
+
+
+# ------------- make depend ----------------
 # ------------- make depend ----------------
 
 depend : FFLAGS    = -MM 
