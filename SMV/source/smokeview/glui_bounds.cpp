@@ -1978,6 +1978,14 @@ extern "C" void Slice_CB(int var){
   }
   switch (var){
     case RESEARCH_MODE:
+      for(i=0;i<nsliceinfo;i++){
+        slicedata *slicei;
+
+        slicei = sliceinfo + i;
+        if(slicei->loaded==0||slicei->display==0)continue;
+        updateslicelist(getslicetype(slicei));
+        break;
+      }
       if(research_mode==1){
         axislabels_smooth_save=axislabels_smooth;
         axislabels_smooth=0;

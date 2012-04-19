@@ -919,7 +919,6 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
   }
   CheckMemory;
 
-
   updateslicelist(list_slice_index);
   CheckMemory;
   updateslicelistindex(slicefilenum);
