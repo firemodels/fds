@@ -1986,12 +1986,12 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
             H_G_OLD = CP * TMP_G * M_GAS
             ZZ_GET = 0._EB
             ZZ_GET(Z_INDEX) = 1._EB
-            CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP2,TMP_G)
-            DELTA_H_G = H_L + H_V - CP2*TMP_G     
-            IF (CONSTANT_SPECIFIC_HEAT) DELTA_H_G = CP2*(TMP_DROP-TMP_G)
+            CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S_B,TMP_DROP)
+            CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP_G)
+            DELTA_H_G = H_S_B - H_S
             D_LAGRANGIAN(II,JJ,KK) = D_LAGRANGIAN(II,JJ,KK) &
                                    + (MW_RATIO*M_VAP/M_GAS + (M_VAP*DELTA_H_G - Q_CON_GAS)/H_G_OLD) * WGT / DT_SUBSTEP
-            Q_DOT(7,NM) = Q_DOT(7,NM) + (M_VAP*DELTA_H_G - Q_CON_GAS)*WGT/DT_SUBSTEP
+            Q_DOT(7,NM) = Q_DOT(7,NM) + (M_VAP*H_S_B - Q_CON_GAS)*WGT/DT_SUBSTEP
          ENDIF
 
          ! Keep track of total mass evaporated in cell
