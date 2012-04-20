@@ -4,6 +4,7 @@ $RUNSMV Fires room_fire
 $RUNSMV Flowfields helium_2d
 $RUNSMV Flowfields sawtooth
 $RUNSMV Flowfields symmetry_test
+$RUNSMV Flowfields jet_fan
 $RUNSMV HVAC HVAC_mass_conservation
 $RUNSMV HVAC HVAC_energy_pressure
 $RUNSMV HVAC leak_test_2
