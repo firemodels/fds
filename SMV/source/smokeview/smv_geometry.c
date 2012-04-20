@@ -222,6 +222,12 @@ void update_plotxyz_all(void){
       meshi->iplotz_all[j]=ival;
     }
   }
+  iplotx_min=0;
+  iploty_min=0;
+  iplotz_min=0;
+  iplotx_max=nplotx_all-1;
+  iploty_max=nploty_all-1;
+  iplotz_max=nplotz_all-1;
 
 }
 

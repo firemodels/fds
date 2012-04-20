@@ -1586,59 +1586,115 @@ void handle_plot3d_keys(int  key){
   case GLUT_KEY_LEFT:
     visx_all=1;
     iplotx_all--;
-    if(iplotx_all<0)iplotx_all=nplotx_all-1;
+    if(visGrid==1){
+      if(iplotx_all<0)iplotx_all=nplotx_all-1;
+    }
+    else{
+      if(iplotx_all<iplotx_min)iplotx_all=iplotx_max;
+    }
     iplot_state=1;
     break;
   case GLUT_KEY_RIGHT:
     visx_all=1;
     iplotx_all++;
-    if(iplotx_all>nplotx_all-1)iplotx_all=0;
+    if(visGrid==1){
+      if(iplotx_all>nplotx_all-1)iplotx_all=0;
+    }
+    else{
+      if(iplotx_all>iplotx_max)iplotx_all=iplotx_min;
+    }
     iplot_state=1;
     break;
   case GLUT_KEY_DOWN:
     visy_all=1;
     iploty_all--;
-    if(iploty_all<0)iploty_all=nploty_all-1;
+    if(visGrid==1){
+      if(iploty_all<0)iploty_all=nploty_all-1;
+    }
+    else{
+      if(iploty_all<iploty_min)iploty_all=iploty_max;
+    }
     iplot_state=2;
     break;
   case GLUT_KEY_UP:
     visy_all=1;
     iploty_all++;
-    if(iploty_all>nploty_all-1)iploty_all=0;
+    if(visGrid==1){
+      if(iploty_all>nploty_all-1)iploty_all=0;
+    }
+    else{
+      if(iploty_all>iploty_max)iploty_all=iploty_min;
+    }
     iplot_state=2;
     break;
   case GLUT_KEY_PAGE_DOWN:
     visz_all=1;
     iplotz_all--;
-    if(iplotz_all<0)iplotz_all=nplotz_all-1;
+    if(visGrid==1){
+      if(iplotz_all<0)iplotz_all=nplotz_all-1;
+    }
+    else{
+      if(iplotz_all<iplotz_min)iplotz_all=iplotz_max;
+    }
     iplot_state=3;
     break;
   case GLUT_KEY_PAGE_UP:
     visz_all=1;
     iplotz_all++;
-    if(iplotz_all>nplotz_all-1)iplotz_all=0;
+    if(visGrid==1){
+      if(iplotz_all>nplotz_all-1)iplotz_all=0;
+    }
+    else{
+      if(iplotz_all>iplotz_max)iplotz_all=iplotz_min;
+    }
     iplot_state=3;
     break;
   case GLUT_KEY_HOME:
-    if(iplot_state==0||iplot_state==1){
-      iplotx_all=0;
-    }
-    else if(iplot_state==2){
-      iploty_all=0;
+    if(visGrid==1){
+      if(iplot_state==0||iplot_state==1){
+        iplotx_all=0;
+      }
+      else if(iplot_state==2){
+        iploty_all=0;
+      }
+      else{
+        iplotz_all=0;
+      }
     }
     else{
-      iplotz_all=0;
+      if(iplot_state==0||iplot_state==1){
+        iplotx_all=iplotx_min;
+      }
+      else if(iplot_state==2){
+        iploty_all=iploty_min;
+      }
+      else{
+        iplotz_all=iplotz_min;
+      }
     }
     break;
   case GLUT_KEY_END:
-    if(iplot_state==0||iplot_state==1){
-      iplotx_all=nplotx_all-1;
-    }
-    else if(iplot_state==2){
-      iploty_all=nploty_all-1;
+    if(visGrid==1){
+      if(iplot_state==0||iplot_state==1){
+        iplotx_all=nplotx_all-1;
+      }
+      else if(iplot_state==2){
+        iploty_all=nploty_all-1;
+      }
+      else{
+        iplotz_all=nplotz_all-1;
+      }
     }
     else{
-      iplotz_all=nplotz_all-1;
+      if(iplot_state==0||iplot_state==1){
+        iplotx_all=iplotx_max;
+      }
+      else if(iplot_state==2){
+        iploty_all=iploty_max;
+      }
+      else{
+        iplotz_all=iplotz_max;
+      }
     }
     break;
   default:

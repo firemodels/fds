@@ -26,6 +26,9 @@
 
 SVEXTERN int nplotx_all, nploty_all, nplotz_all;
 SVEXTERN int iplotx_all, iploty_all, iplotz_all;
+SVEXTERN int iplotx_min, iplotx_max;
+SVEXTERN int iploty_min, iploty_max;
+SVEXTERN int iplotz_min, iplotz_max;
 SVEXTERN int SVDECL(iplot_state,0);
 SVEXTERN int SVDECL(visx_all,0),SVDECL(visy_all,1),SVDECL(visz_all,0);
 SVEXTERN float SVDECL(*plotx_all,NULL), SVDECL(*ploty_all,NULL), SVDECL(*plotz_all,NULL);
