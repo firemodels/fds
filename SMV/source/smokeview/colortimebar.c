@@ -560,9 +560,9 @@ void initdefaultcolorbars(void){
   cbi++;
 
 
-  // blue->yellow->red split
+  // blue->yellow->orange split
 
-  strcpy(cbi->label,"blue->yellow->red split");
+  strcpy(cbi->label,"blue->yellow->orange split");
   cbi->label_ptr=cbi->label;
 
   cbi->nnodes=6;
@@ -590,12 +590,12 @@ void initdefaultcolorbars(void){
 
   cbi->index_node[4]=85;
   cbi->rgb_node[12]=255;
-  cbi->rgb_node[13]=0;
+  cbi->rgb_node[13]=155;
   cbi->rgb_node[14]=0;
 
   cbi->index_node[5]=255;
   cbi->rgb_node[15]=255;
-  cbi->rgb_node[16]=0;
+  cbi->rgb_node[16]=155;
   cbi->rgb_node[17]=0;
   cbi++;
 
