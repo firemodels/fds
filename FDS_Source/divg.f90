@@ -31,7 +31,7 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX,KDTDY,KDTDZ,DP,KP, &
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
 REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P            
 REAL(EB) :: DELKDELT,VC,DTDX,DTDY,DTDZ,TNOW,ZZ_GET(0:N_TRACKED_SPECIES), &
-            HDIFF,DZDX,DZDY,DZDZ,T,RDT,RHO_D_DZDN,TSI,TIME_RAMP_FACTOR,ZONE_VOLUME,DELTA_P,PRES_RAMP_FACTOR,&
+            HDIFF,DZDX,DZDY,DZDZ,T,RDT,RHO_D_DZDN,TSI,TIME_RAMP_FACTOR,ZONE_VOLUME,&
             TMP_G,TMP_WGT,DIV_DIFF_HEAT_FLUX
 TYPE(SURFACE_TYPE), POINTER :: SF
 TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM,SM0
@@ -547,24 +547,22 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
             ENDIF
             TIME_RAMP_FACTOR = EVALUATE_RAMP(TSI,SF%TAU(TIME_VELO),SF%RAMP_INDEX(TIME_VELO))
             KK               = WC%ONE_D%KK
-            DELTA_P          = PBAR_P(KK,SF%DUCT_PATH(1)) - PBAR_P(KK,SF%DUCT_PATH(2))
-            PRES_RAMP_FACTOR = SIGN(1._EB,SF%MAX_PRESSURE-DELTA_P)*SQRT(ABS((DELTA_P-SF%MAX_PRESSURE)/SF%MAX_PRESSURE))
             SELECT CASE(IOR) 
                CASE( 1)
-                  WC%ONE_D%UWS =-U0 + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*(WC%UW0+U0)
+                  WC%ONE_D%UWS =-U0 + TIME_RAMP_FACTOR*(WC%UW0+U0)
                CASE(-1)
-                  WC%ONE_D%UWS = U0 + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*(WC%UW0-U0)
+                  WC%ONE_D%UWS = U0 + TIME_RAMP_FACTOR*(WC%UW0-U0)
                CASE( 2)
-                  WC%ONE_D%UWS =-V0 + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*(WC%UW0+V0)
+                  WC%ONE_D%UWS =-V0 + TIME_RAMP_FACTOR*(WC%UW0+V0)
                CASE(-2)
-                  WC%ONE_D%UWS = V0 + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*(WC%UW0-V0)
+                  WC%ONE_D%UWS = V0 + TIME_RAMP_FACTOR*(WC%UW0-V0)
                CASE( 3)
-                  WC%ONE_D%UWS =-W0 + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*(WC%UW0+W0)
+                  WC%ONE_D%UWS =-W0 + TIME_RAMP_FACTOR*(WC%UW0+W0)
                CASE(-3)
-                  WC%ONE_D%UWS = W0 + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*(WC%UW0-W0)
+                  WC%ONE_D%UWS = W0 + TIME_RAMP_FACTOR*(WC%UW0-W0)
             END SELECT          
             ! Special Cases
-            IF (EVACUATION_ONLY(NM) .AND. .NOT.EVAC_FDS6) WC%ONE_D%UWS = TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*WC%UW0
+            IF (EVACUATION_ONLY(NM) .AND. .NOT.EVAC_FDS6) WC%ONE_D%UWS = TIME_RAMP_FACTOR*WC%UW0
             IF (ABS(SURFACE(WC%SURF_INDEX)%MASS_FLUX_TOTAL)>=ZERO_P) WC%ONE_D%UWS = WC%ONE_D%UWS*RHOA/WC%RHO_F
             IF (WC%VENT_INDEX>0) THEN 
                VT=>VENTS(WC%VENT_INDEX)
@@ -574,17 +572,17 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                   KK = WC%ONE_D%KK
                   SELECT CASE(IOR)
                      CASE( 1)
-                        WC%ONE_D%UWS = WC%ONE_D%UWS - TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*VT%U_EDDY(JJ,KK)
+                        WC%ONE_D%UWS = WC%ONE_D%UWS - TIME_RAMP_FACTOR*VT%U_EDDY(JJ,KK)
                      CASE(-1)
-                        WC%ONE_D%UWS = WC%ONE_D%UWS + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*VT%U_EDDY(JJ,KK)
+                        WC%ONE_D%UWS = WC%ONE_D%UWS + TIME_RAMP_FACTOR*VT%U_EDDY(JJ,KK)
                      CASE( 2)
-                        WC%ONE_D%UWS = WC%ONE_D%UWS - TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*VT%V_EDDY(II,KK)
+                        WC%ONE_D%UWS = WC%ONE_D%UWS - TIME_RAMP_FACTOR*VT%V_EDDY(II,KK)
                      CASE(-2)
-                        WC%ONE_D%UWS = WC%ONE_D%UWS + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*VT%V_EDDY(II,KK)
+                        WC%ONE_D%UWS = WC%ONE_D%UWS + TIME_RAMP_FACTOR*VT%V_EDDY(II,KK)
                      CASE( 3)
-                        WC%ONE_D%UWS = WC%ONE_D%UWS - TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*VT%W_EDDY(II,JJ)
+                        WC%ONE_D%UWS = WC%ONE_D%UWS - TIME_RAMP_FACTOR*VT%W_EDDY(II,JJ)
                      CASE(-3)
-                        WC%ONE_D%UWS = WC%ONE_D%UWS + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*VT%W_EDDY(II,JJ)
+                        WC%ONE_D%UWS = WC%ONE_D%UWS + TIME_RAMP_FACTOR*VT%W_EDDY(II,JJ)
                   END SELECT
                ENDIF
                EVAC_IF: IF (EVACUATION_ONLY(NM) .AND. EVACUATION_GRID(NM) .AND. EVAC_FDS6) THEN
@@ -595,7 +593,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                   ELSE
                      TIME_RAMP_FACTOR = 0.0_EB
                   END IF
-                  WC%ONE_D%UWS = TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*WC%UW0
+                  WC%ONE_D%UWS = TIME_RAMP_FACTOR*WC%UW0
                END IF EVAC_IF
             ENDIF
          CASE(OPEN_BOUNDARY,INTERPOLATED_BOUNDARY)
@@ -1520,20 +1518,20 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
             PRES_RAMP_FACTOR = SIGN(1._EB,SF%MAX_PRESSURE-DELTA_P)*SQRT(ABS((DELTA_P-SF%MAX_PRESSURE)/SF%MAX_PRESSURE))
             SELECT CASE(IOR) 
                CASE( 1)
-                  WC%ONE_D%UWS =-U0 + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*(WC%UW0+U0)
+                  WC%ONE_D%UWS =-U0 + TIME_RAMP_FACTOR*(WC%UW0+U0)
                CASE(-1)
-                  WC%ONE_D%UWS = U0 + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*(WC%UW0-U0)
+                  WC%ONE_D%UWS = U0 + TIME_RAMP_FACTOR*(WC%UW0-U0)
                CASE( 2)
-                  WC%ONE_D%UWS =-V0 + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*(WC%UW0+V0)
+                  WC%ONE_D%UWS =-V0 + TIME_RAMP_FACTOR*(WC%UW0+V0)
                CASE(-2)
-                  WC%ONE_D%UWS = V0 + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*(WC%UW0-V0)
+                  WC%ONE_D%UWS = V0 + TIME_RAMP_FACTOR*(WC%UW0-V0)
                CASE( 3)
-                  WC%ONE_D%UWS =-W0 + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*(WC%UW0+W0)
+                  WC%ONE_D%UWS =-W0 + TIME_RAMP_FACTOR*(WC%UW0+W0)
                CASE(-3)
-                  WC%ONE_D%UWS = W0 + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*(WC%UW0-W0)
+                  WC%ONE_D%UWS = W0 + TIME_RAMP_FACTOR*(WC%UW0-W0)
             END SELECT          
             ! Special Cases
-            IF (EVACUATION_ONLY(NM) .AND. .NOT.EVAC_FDS6) WC%ONE_D%UWS = TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*WC%UW0
+            IF (EVACUATION_ONLY(NM) .AND. .NOT.EVAC_FDS6) WC%ONE_D%UWS = TIME_RAMP_FACTOR*WC%UW0
             IF (ABS(SURFACE(WC%SURF_INDEX)%MASS_FLUX_TOTAL)>=ZERO_P) WC%ONE_D%UWS = WC%ONE_D%UWS*RHOA/WC%RHO_F
             IF (WC%VENT_INDEX>0) THEN 
                VT=>VENTS(WC%VENT_INDEX)
@@ -1543,17 +1541,17 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                   KK = WC%ONE_D%KK
                   SELECT CASE(IOR)
                      CASE( 1)
-                        WC%ONE_D%UWS = WC%ONE_D%UWS - TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*VT%U_EDDY(JJ,KK)
+                        WC%ONE_D%UWS = WC%ONE_D%UWS - TIME_RAMP_FACTOR*VT%U_EDDY(JJ,KK)
                      CASE(-1)
-                        WC%ONE_D%UWS = WC%ONE_D%UWS + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*VT%U_EDDY(JJ,KK)
+                        WC%ONE_D%UWS = WC%ONE_D%UWS + TIME_RAMP_FACTOR*VT%U_EDDY(JJ,KK)
                      CASE( 2)
-                        WC%ONE_D%UWS = WC%ONE_D%UWS - TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*VT%V_EDDY(II,KK)
+                        WC%ONE_D%UWS = WC%ONE_D%UWS - TIME_RAMP_FACTOR*VT%V_EDDY(II,KK)
                      CASE(-2)
-                        WC%ONE_D%UWS = WC%ONE_D%UWS + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*VT%V_EDDY(II,KK)
+                        WC%ONE_D%UWS = WC%ONE_D%UWS + TIME_RAMP_FACTOR*VT%V_EDDY(II,KK)
                      CASE( 3)
-                        WC%ONE_D%UWS = WC%ONE_D%UWS - TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*VT%W_EDDY(II,JJ)
+                        WC%ONE_D%UWS = WC%ONE_D%UWS - TIME_RAMP_FACTOR*VT%W_EDDY(II,JJ)
                      CASE(-3)
-                        WC%ONE_D%UWS = WC%ONE_D%UWS + TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*VT%W_EDDY(II,JJ)
+                        WC%ONE_D%UWS = WC%ONE_D%UWS + TIME_RAMP_FACTOR*VT%W_EDDY(II,JJ)
                   END SELECT
                ENDIF
                EVAC_IF: IF (EVACUATION_ONLY(NM) .AND. EVACUATION_GRID(NM) .AND. EVAC_FDS6) THEN
@@ -1564,7 +1562,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                   ELSE
                      TIME_RAMP_FACTOR = 0.0_EB
                   END IF
-                  WC%ONE_D%UWS = TIME_RAMP_FACTOR*PRES_RAMP_FACTOR*WC%UW0
+                  WC%ONE_D%UWS = TIME_RAMP_FACTOR*WC%UW0
                END IF EVAC_IF
             ENDIF
          CASE(OPEN_BOUNDARY,INTERPOLATED_BOUNDARY)

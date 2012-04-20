@@ -3284,12 +3284,12 @@ gas flowing past the obstruction. Since the Reynolds number is proportional to t
 characteristic length, $L$, the heat transfer coefficient is weakly
 related to $L$ (for high $\RE$, $h \sim L^{-1/5}$). For this reason, $L$ is taken to be 1~m for most
 calculations. You can change the empirical coefficients using {\ct C\_HORIZONTAL} or {\ct C\_VERTICAL} for $C$ and
-{\ct C\_FORCED}, {\ct C\_FORCED\_CYLINDER}, or {\ct C\_FORCED\_SPHERE} for the constant in the Nusselt number correlation, all of which are input on the {\ct MISC} line.
+{\ct C\_FORCED}, {\ct C\_FORCED\_CYLINDER}, or {\ct C\_FORCED\_SPHERE} for the constant in the Nusselt number correlation, all of which are input on the {\ct MISC} line.  The length scale can be changed for a specific surface by using {\ct CONVECTION\_LENGTH\_SCALE} on the {\ct SURF} line.
 
 \subsubsection{Changing the Convective Heat Transfer Coefficient}
 
 If you want to change the default convective heat transfer coefficient, you can set it to a constant using
-{\ct H\_FIXED} on the {\ct SURF} line in units of W/m$^2$/K.
+{\ct H\_FIXED} on the {\ct SURF} line in units of W/m$^2$/K. 
 
 \subsubsection{Specifying the Heat Flux at a Solid Surface}
 
@@ -7266,10 +7266,7 @@ Each device has a {\ct QUANTITY} associated with it.
 The time history of each {\ct DEVC} quantity is output to a comma-delimited
 ASCII file called {\bf CHID\_devc.csv}
 (See Section~\ref{out:DEVC} for output file format).
-This file can be imported into most spread sheet software packages.
-If the number of {\ct DEVC} lines exceeds 256, the limit of some spreadsheet
-applications, the output file will be split into appropriately sized smaller
-files. To prevent the file splitting, specify {\ct COLUMN\_DUMP\_LIMIT=.FALSE.} on the {\ct DUMP} line.
+This file can be imported into most spread sheet software packages.  Most spreadsheet programs limit the number of columns to some number (for example the 2003 version Microsoft Excel had a 256 column limit).  As a default, FDS places no limit on the amount of columns in a csv file.  If your spreadsheet applicate allows fewer columns than the number of {\ct DEVC} or {\ct CTRL} in your input file then specify {\ct COLUMN\_DUMP\_LIMIT=.TRUE.} on the {\ct DUMP} line.
 Use {\ct DEVC\_COLUMN\_LIMIT} and {\ct CTRL\_COLUMN\_LIMIT} to indicate the limit of columns in the
 device and control output files. Their default values are 254.
 
@@ -7340,12 +7337,12 @@ Properties associated with sprinklers included in the {\ct PROP} group are:
 \item[{\ct C\_FACTOR}] in units of $\sqrt{\hbox{m/s}}$. (Default 0.)
 \item[{\ct ACTIVATION\_TEMPERATURE}] in units of $^\circ$C. (Default 74~$^\circ$C)
 \item[{\ct INITIAL\_TEMPERATURE}] of the link in units of $^\circ$C. (Default {\ct TMPA})
-\item[{\ct FLOW\_RATE}] in units of L/min.
+\item[{\ct FLOW\_RATE or {\ct MASS\_FLOW\_RATE] in units of L/min or kg/s.
 An alternative is to provide the {\ct K\_FACTOR} in units of L/min/bar$^\ha$ and the
 {\ct OPERATING\_PRESSURE} in units of bar.
 The flow rate is then given by $ \dm_w = K \sqrt{p}$. Note that 1 bar is equivalent to
 14.5~psi, 1 gpm is equivalent to 3.785~L/min, 1~gpm/psi$^\ha$ is
-equivalent to 14.41~L/min/bar$^\ha$.
+equivalent to 14.41~L/min/bar$^\ha$.  If {\ct MASS\_FLOW\_RATE} is given then {\ct PARTICLE\_VELOCITY} must also be defined.
 \item[{\ct OFFSET}] Radius of a sphere (m) surrounding the
 sprinkler where the water droplets are initially placed in the simulation. It is assumed that
 at and beyond the {\ct OFFSET} the droplets have completely broken
@@ -8758,9 +8755,7 @@ Any gas phase quantity can animated via iso-surfaces, but use caution. To render
 computed in every mesh cell at every output time step. For quantities like {\ct TEMPERATURE}, this is not a problem, as FDS computes it and saves it
 anyway. However, species volume fractions demand substantial amounts of time to compute at each mesh cell.
 
-Note that if you add the additional parameter {\ct COLOR\_QUANTITY} to the {\ct ISOF} line, then the given isosurface will be colored using
-this extra quantity. Remember to include the {\ct SPEC\_ID} or {\ct COLOR\_SPEC\_ID} corresponding to the given {\ct QUANTITY} or
-{\ct COLOR\_QUANTITY}, if necessary.
+Remember to include the {\ct SPEC\_ID} or {\ct COLOR\_SPEC\_ID} corresponding to the given {\ct QUANTITY} if necessary.
 
 
 
@@ -9190,8 +9185,6 @@ As the spray simulation may contain some initial transient phase, it may be usef
 \item[{\ct PDPA\_NORMALIZE}] Can be set {\ct .FALSE.} to force $V = 1$ in the formula for $f_2(t)$.
 \item[{\ct QUANTITY}] Specified on {\ct PROP} line for choosing the variable $x$.
 \item[{\ct PDPA\_HISTOGRAM\_NBINS}] Number of bins used for the histogram.
-\item[{\ct PDPA\_HISTOGRAM\_MIN}] Lower limit of the histogram.
-\item[{\ct PDPA\_HISTOGRAM\_MAX}] Upper limit of the histogram.
 \end{description}
 
 \noindent The following example is used to measure the Sauter mean diameter, $D_{32}$, of the particle type {\ct 'water drops'}, starting from
@@ -10061,7 +10054,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 
 \vspace{\baselineskip}
 
-
+%Undocumented NAMELIST /BNDE/
 
 \section{\texorpdfstring{{\tt CLIP}}{CLIP} (MIN/MAX Clipping Parameters)}
 
@@ -10128,9 +10121,9 @@ properties be specified as well. Simply prescribing as many properties as possib
 \multicolumn{5}{|c|}{{\ct CTRL} (Control Function Parameters)} \\
 \hline \hline
 \endhead
-%{\ct CYCLE\_TIME}    & Real         & Periodicity                                 & s  &                       \\ \hline
-%{\ct CYCLES}         & Integer      & Number of times to cycle output             &    &                       \\ \hline
 {\ct CONSTANT}        & Real        & Section~\ref{info:CONTROL_MATH}         &    &                           \\ \hline
+%{\ct CYCLES}         & Integer      & Number of times to cycle output             &    &                       \\ \hline
+%{\ct CYCLE\_TIME}    & Real         & Periodicity                                 & s  &                       \\ \hline
 {\ct DELAY}          & Real         & Section~\ref{info:dry_pipe}             & s  &  0.                       \\ \hline
 {\ct EVACUATION}     & Logical      & Reference~\cite{FDS_Evac_Users_Guide}   &    & {\ct .FALSE.}             \\ \hline
 {\ct FUNCTION\_TYPE} & Character    & Section~\ref{info:basic_control}        &    &                           \\ \hline
@@ -10202,7 +10195,6 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct TRIP\_DIRECTION}       & Integer         & Section~\ref{info:basic_control}                             &       &  1            \\ \hline
 {\ct UNITS}                 & Character       & Section~\ref{info:out:DEVC}                                  &       &               \\ \hline
 {\ct VELO\_INDEX}           & Integer         & Section~\ref{info:velocity}                                  &       &  0            \\ \hline
-{\ct VIRTUAL\_INDEX}        & Integer         & Section~\ref{info:PART_SURF}                                 &       &               \\ \hline
 {\ct XB(6)}                 & Real Sextuplet  & Section~\ref{info:statistics}                                & m     &               \\ \hline
 {\ct XYZ(3)}                & Real Triplet    & Section~\ref{info:DEVC}                                      & m     &               \\ \hline
 {\ct X\_ID}                 & Character       & Section~\ref{info:line_file}                                 &       &  {\ct ID-x}   \\ \hline
@@ -10249,7 +10241,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct DT\_RESTART}                   & Real         & Section~\ref{info:DUMP}                &  s        & 1000000.                       \\ \hline
 {\ct DT\_SL3D}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /5}             \\ \hline
 {\ct DT\_SLCF}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
-{\ct DT\_VEG}                       & Real         &                                        &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
+%{\ct DT\_VEG}                       & Real         &                                        &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct FLUSH\_FILE\_BUFFERS}          & Logical      & Section~\ref{info:DUMP}                &           & {\ct .TRUE.}                   \\ \hline
 {\ct MASS\_FILE}                    & Logical      & Section~\ref{info:DUMP}                &           & {\ct .FALSE.}                  \\ \hline
 {\ct MAXIMUM\_PARTICLES}            & Integer      & Section~\ref{info:DUMP}                &           & 500000                         \\ \hline
@@ -10274,7 +10266,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 \noindent
 $\Delta t$={\ct T\_END-T\_BEGIN}
 
-% Undocumented: DT_VEG
+% Undocumented: CUTCELL_DATA_FILE, DT_BNDE, DT_GEOM, DT_VEG
 
 \vspace{\baselineskip}
 
@@ -10414,7 +10406,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CTRL\_ID}                  & Character         & Section~\ref{info:initial_droplets}           &               &               \\ \hline
 {\ct DENSITY}                   & Real              & Section~\ref{info:INIT}                       & kg/m$^3$      & Ambient       \\ \hline
 {\ct DEVC\_ID}                  & Character         & Section~\ref{info:initial_droplets}           &               &               \\ \hline
-{\ct DIAMETER}                  & Real              & Section~\ref{info:initial_droplets}           & microns       &               \\ \hline
 {\ct DT\_INSERT}                & Real              & Section~\ref{info:initial_droplets}           & s             &               \\ \hline
 {\ct DX}                        & Real              & Section~\ref{info:initial_droplets}           & m             & 0.            \\ \hline
 {\ct DY}                        & Real              & Section~\ref{info:initial_droplets}           & m             & 0.            \\ \hline
@@ -10457,7 +10448,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct ISOF} (Isosurface Parameters)} \\
 \hline \hline
 \endhead
-{\ct COLOR\_QUANTITY}       & Character     & Section~\ref{info:ISOF}                   &       &         \\ \hline
 {\ct COLOR\_SPEC\_ID}       & Character     & Section~\ref{info:ISOF}                   &       &         \\ \hline
 {\ct QUANTITY}              & Character     & Section~\ref{info:ISOF}                   &       &         \\ \hline
 {\ct REDUCE\_TRIANGLES}     & Integer       & Reference~\cite{Smokeview_Users_Guide}    &       & 1       \\ \hline
@@ -10540,8 +10530,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endhead
 {\ct COLOR}             & Character                     & Section~\ref{info:multimesh}              &    & {\ct 'BLACK'}    \\ \hline
 {\ct CYLINDRICAL}       & Logical                       & Section~\ref{info:2D}                     &    & {\ct .FALSE.}    \\ \hline
-{\ct EVAC\_HUMANS}      & Logical                       & Reference~\cite{FDS_Evac_Users_Guide}     &    & {\ct .FALSE.}    \\ \hline
 {\ct EVACUATION}        & Logical                       & Reference~\cite{FDS_Evac_Users_Guide}     &    & {\ct .FALSE.}    \\ \hline
+{\ct EVAC\_HUMANS}      & Logical                       & Reference~\cite{FDS_Evac_Users_Guide}     &    & {\ct .FALSE.}    \\ \hline
 {\ct EVAC\_Z\_OFFSET}   & Real                          & Reference~\cite{FDS_Evac_Users_Guide}     & m  & 1                \\ \hline
 {\ct ID}                & Character                     & Reference~\cite{FDS_Evac_Users_Guide}     &    &                  \\ \hline
 {\ct IJK}               & Integer Triplet               & Section~\ref{info:MESH_Basics}            &    & 10,10,10         \\ \hline
@@ -10590,14 +10580,15 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CHECK\_VN}                                 & Logical       & Section~\ref{info:CFL}                                &               & {\ct .TRUE.}     \\ \hline
 {\ct CLIP\_MASS\_FRACTION}                      & Logical       & Section~\ref{info:CLIP}                               &               & {\ct .FALSE.}     \\ \hline
 {\ct C\_DEARDORFF}                              & Real          & Section~\ref{info:LES}                                &               & 0.1               \\ \hline
-{\ct C\_SMAGORINSKY}                            & Real          & Section~\ref{info:LES}                                &               & 0.20              \\ \hline
+{\ct C\_SMAGORINSKY}                            & Real          & Section~\ref{info:LES}                                
+&               & 0.20              \\ \hline
+{\ct C\_VREMAN}                                 & Real          & Section~\ref{info:LES}                                &               & 0.07              \\ \hline
 {\ct C\_FORCED}                                 & Real          & Section~\ref{info:convection}                         &               & 0.037             \\ \hline
 {\ct C\_FORCED\_CYLINDER}                       & Real          & Section~\ref{info:convection}                         &               & 0.664             \\ \hline
 {\ct C\_FORCED\_SPHERE }                        & Real          & Section~\ref{info:convection}                         &               & 0.600             \\ \hline
 {\ct C\_G}                                      & Real          & Section~\ref{info:LES}                                &               & 0.04              \\ \hline
 {\ct C\_HORIZONTAL}                             & Real          & Section~\ref{info:convection}                         &               & 1.52             \\ \hline
 {\ct C\_VERTICAL}                               & Real          & Section~\ref{info:convection}                         &               & 1.31             \\ \hline
-{\ct C\_VREMAN}                                 & Real          & Section~\ref{info:LES}                                &               & 0.07              \\ \hline
 {\ct CONSTANT\_SPECIFIC\_HEAT}                  & Real          & Section~\ref{info:MISC_Basics}                        &               & {\ct .FALSE.}               \\ \hline
 {\ct DNS}                                       & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .FALSE.}     \\ \hline
 {\ct EVACUATION\_DRILL}                         & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
@@ -10612,7 +10603,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct GVEC}                                      & Real triplet  & Section~\ref{info:GVEC}                               & m/s$^2$       & 0,0,-9.81         \\ \hline
 %{\ct IMMERSED\_BOUNDARY\_METHOD}                & Logical       &                                                           &               & {\ct .FALSE.}     \\ \hline
 {\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}                     &  $^\circ$C/m  & 0                 \\ \hline
-{\ct LIMITING\_DT\_RATIO}                       & Real          & Section~\ref{info:Errors}                             &               &  0.0001           \\ \hline
 {\ct LES}                                       & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
 {\ct MAXIMUM\_VISIBILITY}                       & Real          & Section~\ref{info:visibility}                         &  m            &  30               \\ \hline
 {\ct MEAN\_FORCING(3)}                          & Logical       & Section~\ref{info:mean_forcing}                       &               & {\ct .FALSE.}     \\ \hline
@@ -10625,11 +10615,12 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct OVERWRITE}                                 & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
 %{\ct PARTICLE\_CFL}                             & Logical       &                                                           &               & {\ct .FALSE.}    \\ \hline
 %{\ct PARTICLE\_CFL\_MAX}                        & Integer       &                                                           &               & 1                \\ \hline
-{\ct PR}                                        & Real          & Section~\ref{info:LES}                                &               & 0.5               \\ \hline
-{\ct P\_INF}                                    & Real          & Section~\ref{info:MISC_Basics}                        & Pa            & 101325            \\ \hline
 %{\ct PERIODIC\_TEST}                            & Integer       & Initial condition for verification test                    &               & 0                 \\ \hline
 {\ct POROUS\_FLOOR}                             & Logical       & Section~\ref{info:sprinklers}                         &               & {\ct .TRUE.}      \\ \hline
+{\ct PR}                                        & Real          & Section~\ref{info:LES}                                &               & 0.5               \\ \hline
+
 %{\ct PROJECTION}                                & Logical       & Use formal projection method                          &               & {\ct .FALSE.}     \\ \hline
+{\ct P\_INF}                                    & Real          & Section~\ref{info:MISC_Basics}                        & Pa            & 101325            \\ \hline
 {\ct RAMP\_GX}                                  & Character     & Section~\ref{info:GVEC}                               &               &                   \\ \hline
 {\ct RAMP\_GY}                                  & Character     & Section~\ref{info:GVEC}                               &               &                   \\ \hline
 {\ct RAMP\_GZ}                                  & Character     & Section~\ref{info:GVEC}                               &               &                   \\ \hline
@@ -10637,9 +10628,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RESTART\_CHID}                             & Character     & Section~\ref{info:restart}                            &               & {\ct CHID}        \\ \hline
 {\ct SC}                                        & Real          & Section~\ref{info:LES}                                &               & 0.5               \\ \hline
 {\ct SHARED\_FILE\_SYSTEM}                      & Logical       & Section~\ref{info:multimesh}                          &               & {\ct .TRUE.}      \\ \hline
-{\ct SOLID\_PHASE\_ONLY}                        & Logical       & Section~\ref{solid_phase_verification}                &               & {\ct .FALSE.}     \\ \hline
+
 {\ct SMOKE\_ALBEDO}                             & Real          & Reference~\cite{Smokeview_Users_Guide}                &               & 0.3               \\ \hline
-{\ct STRATIFICATION}                            & Logical       & Section~\ref{info:stratification}                     &               & {\ct .TRUE.}      \\ \hline
+{\ct SOLID\_PHASE\_ONLY}                        & Logical       & Section~\ref{solid_phase_verification}                &               & {\ct .FALSE.}     \\ \hline{\ct STRATIFICATION}                            & Logical       & Section~\ref{info:stratification}                     &               & {\ct .TRUE.}      \\ \hline
 %{\ct TERRAIN\_CASE}                             & Logical       & See Wildland Fire User's Guide                            &               & {\ct .FALSE.}     \\ \hline
 {\ct TEXTURE\_ORIGIN(3)}                        & Char.~Triplet & Section~\ref{info:texture_map}                        & m             & (0.,0.,0.)        \\ \hline
 {\ct THICKEN\_OBSTRUCTIONS}                     & Logical       & Section~\ref{info:OBST_Basics}                        &               & {\ct .FALSE.}     \\ \hline
@@ -10653,7 +10644,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct WIND\_ONLY}                                & Logical       & See Wildland Fire User's Guide                            &               & {\ct .FALSE.}     \\ \hline
 \end{longtable}
 
-%Undocumented: HRRPUVCUT_MAX, THERMOPHORETIC_DEPOSITION, TURBULENT_DEPOSITION, VEG_LEVEL_SET,  HRRPUV_MAX_SMV, TERRAIN_IMAGE, NEW_EVAP, WFDS
+%Undocumented: GRAV_VISC, HRRPUVCUT_MAX, HRRPUV_MAX_SMV, NEW_EVAP RUN_AVG_FAC, TENSOR_DIFFUSIVIRY,  TERRAIN_IMAGE, THERMOPHORETIC_DEPOSITION, TURBULENT_DEPOSITION, VEG_LEVEL_SET,  , WFDS
 
 
 \vspace{\baselineskip}
@@ -10801,12 +10792,13 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct VERTICAL\_VELOCITY}            & Real            & Section~\ref{info:surface_droplets}     & m/s       &  0.5          \\ \hline
 \end{longtable}
 
-% Undocumented: TREE,VEG_SV,VEG_MOISTURE,VEG_CHAR_FRACTION,VEG_DRAG_COEFFICIENT,VEG_DENSITY,VEG_BULK_DENSITY,
-%               VEG_BURNING_RATE_MAX,VEG_DEHYDRATION_RATE_MAX,VEG_INITIAL_TEMPERATURE,VEG_FUEL_MPV_MIN,
-%               VEG_MOIST_MPV_MIN,VEG_REMOVE_CHARRED,VEG_STEM,VEG_DEGRADATION,VEG_CHAR_OXIDATION
 
-% Undocumented: SURFACE_TENSION,BREAKUP,BREAKUP_CHILD_DIAMETER,BREAKUP_CHILD_SIGMA_D,
-%               DENSE_VOLUME_FRACTION,ORIENTATION
+% Undocumented: BREAKUP_CHILD_SIGMA_D,CHECK_DISTRIBUTION,CHILD_CNF_RAMP_ID,CHILD_DISTRIBUTION
+% CONSTANT_TEMPERATURE, DENSE_VOLUME_FRACTION, ORIENTATION, TREE, TURBULENT_DEPOSITION, 
+% VEG_BULK_DENSITY, VEG_BURNING_RATE_MAX,VEG_CHAR_FRACTION,VEG_CHAR_OXIDATION,
+% VEG_DEGRADATION, VEG_DEHYDRATION_RATE_MAX, VEG_DENSITY, VEG_DRAG_COEFFICIENT, 
+% VEG_FUEL_MPV_MIN, VEG_INITIAL_TEMPERATURE, VEG_MOISTURE, VEG_MOIST_MPV_MIN,
+% VEG_REMOVE_CHARRED, VEG_STEM, VEG_SV
 
 
 \vspace{\baselineskip}
@@ -10834,7 +10826,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct VELOCITY\_TOLERANCE}           & Real          & Section~\ref{info:PRES}           &  m/s          &                           \\ \hline
 \end{longtable}
 
-% Undocumented: SCARC_METHOD , SCARC_KRYLOV , SCARC_MULTIGRID, SCARC_SMOOTH  , SCARC_PRECON,
+% Undocumented: PRESSIT_ACCELERATOR, PRESSIT_SCALE_FACTOR
+%               SCARC_METHOD , SCARC_KRYLOV , SCARC_MULTIGRID, SCARC_SMOOTH  , SCARC_PRECON,
 %               SCARC_COARSE , SCARC_INITIAL, SCARC_STORAGE  , SCARC_ACCURACY, SCARC_DEBUG ,
 %               SCARC_MULTIGRID_CYCLE, SCARC_MULTIGRID_LEVEL , SCARC_MULTIGRID_COARSENING  ,
 %               SCARC_MULTIGRID_ITERATIONS  , SCARC_MULTIGRID_ACCURACY   ,
@@ -10863,8 +10856,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct PROF} (Wall Profile Parameters)} \\
 \hline \hline
 \endhead
-{\ct IOR}      & Real             & Section~\ref{info:PROF}      &            &     \\ \hline
 {\ct ID}       & Character        & Section~\ref{info:PROF}      &            &     \\ \hline
+{\ct IOR}      & Real             & Section~\ref{info:PROF}      &            &     \\ \hline
 {\ct QUANTITY} & Character        & Section~\ref{info:PROF}      &            &     \\ \hline
 {\ct XYZ}      & Real Triplet     & Section~\ref{info:PROF}      & m          &     \\ \hline
 \end{longtable}
@@ -10912,22 +10905,21 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct INITIAL\_TEMPERATURE}              & Real          & Section~\ref{info:sprinklers}             & $^\circ$C             & {\ct TMPA}\\ \hline
 {\ct K\_FACTOR}                         & Real          & Section~\ref{info:sprinklers}             & L/min/bar$^{1/2}$     & 1.        \\ \hline
 {\ct LENGTH}                            & Real          & Section~\ref{info:smoke_detector}         &                       & 1.8       \\ \hline
+{\ct MASS\_FLOW\_RATE}                  & Real          & Section~\ref{info:sprinklers}             & kg/s                  &           \\ \hline
 {\ct OFFSET}                            & Real          & Section~\ref{info:sprinklers}             & m                     & 0.05      \\ \hline
 {\ct OPERATING\_PRESSURE}               & Real          & Section~\ref{info:sprinklers}             & bar                   & 1.        \\ \hline
 {\ct ORIFICE\_DIAMETER}                 & Real          & Section~\ref{info:sprinklers}             & m                     & 0.       \\ \hline
 {\ct P0,PX(3),PXX(3,3)}                 & Real          & Section~\ref{info:velocity_patch}         & m/s                   &  0.         \\ \hline
 {\ct PART\_ID}                          & Character     & Section~\ref{info:sprinklers}             &                       &           \\ \hline
 {\ct PDPA\_END}                         & Real          & Section~\ref{PDPA}                        & s                     & {\ct T\_END} \\ \hline
+{\ct PDPA\_HISTOGRAM}                   & Logical       & Section~\ref{PDPA}                        &                       & .FALSE.   \\ \hline
+{\ct PDPA\_HISTOGRAM\_NBINS}            & Integer       & Section~\ref{PDPA}                        &                       & 10        \\ \hline
 {\ct PDPA\_INTEGRATE}                   & Logical       & Section~\ref{PDPA}                        &                       & {\ct .TRUE.}         \\ \hline
 {\ct PDPA\_M}                           & Integer       & Section~\ref{PDPA}                        &                       & 0         \\ \hline
 {\ct PDPA\_N}                           & Integer       & Section~\ref{PDPA}                        &                       & 0         \\ \hline
 {\ct PDPA\_NORMALIZE}                   & Logical       & Section~\ref{PDPA}                        &                       & {\ct .TRUE.}         \\ \hline
 {\ct PDPA\_RADIUS}                      & Real          & Section~\ref{PDPA}                        & m                     & 0.        \\ \hline
 {\ct PDPA\_START}                       & Real          & Section~\ref{PDPA}                        & s                     & 0.        \\ \hline
-{\ct PDPA\_HISTOGRAM}                   & Logical       & Section~\ref{PDPA}                        &                       & .FALSE.   \\ \hline
-{\ct PDPA\_HISTOGRAM\_NBINS}            & Integer       & Section~\ref{PDPA}                        &                       & 10        \\ \hline
-{\ct PDPA\_HISTOGRAM\_MIN}              & Real          & Section~\ref{PDPA}                        &                       & 0         \\ \hline
-{\ct PDPA\_HISTOGRAM\_MAX}              & Real          & Section~\ref{PDPA}                        &                       & 0         \\ \hline
 {\ct PRESSURE\_RAMP}                    & Character     & Section~\ref{info:sprinklers}             &                       &           \\ \hline
 {\ct QUANTITY}                          & Character     & Section~\ref{info:sprinklers}             &                       &           \\ \hline
 {\ct RTI}                               & Real          & Section~\ref{info:sprinklers}             & $\sqrt{\hbox{m~s}}$   & 100.      \\ \hline
@@ -10945,7 +10937,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 \vspace{\baselineskip}
 
-
+ 
 \section{\texorpdfstring{{\tt RADI}}{RADI} (Radiation Parameters)}
 
 \setlength\LTleft{0pt}
@@ -11055,9 +11047,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct REAC\_ATOM\_ERROR}                   & Real        & Section~\ref{info:REAC_Diagnostics}       & atoms             & 1.E-5    \\ \hline
 {\ct REAC\_MASS\_ERROR}                   & Real        & Section~\ref{info:REAC_Diagnostics}       & kg/kg             & 1.E-4    \\ \hline
 {\ct SMIX\_ID(:)}                         & Char.~Array & Section~\ref{info:SMIX}                   &                   &     \\ \hline
-{\ct SPEC\_ID(:)}                         & Char.~Array & Section~\ref{info:SMIX}                   &                   &     \\ \hline
 {\ct SOOT\_H\_FRACTION}                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 0.1    \\ \hline
 {\ct SOOT\_YIELD}                         & Real        & Section~\ref{info:simple_chemistry}       & kg/kg             & 0.01    \\ \hline
+{\ct SPEC\_ID(:)}                         & Char.~Array & Section~\ref{info:SMIX}                   &                   &     \\ \hline
 {\ct SUPPRESSION}                         & Logical     & Section~\ref{info:extinction}             &                   & {\ct .TRUE.}      \\ \hline
 {\ct THRESHOLD\_TEMPERATURE}              & Real        & Section~\ref{info:mixedmode}              &   $^\circ$C       & 1427    \\ \hline
 {\ct Y\_CO2\_INFTY}                       & Real        & Section~\ref{info:simple_chemistry}       &  kg/kg            & 0.0058 \\ \hline
@@ -11065,7 +11057,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct Y\_P\_MIN\_EDC}                      & Real        & Section~\ref{info:turbulent_combustion}   &  kg/kg            & 0.0001    \\ \hline
 \end{longtable}
 
-% Not listed: SOOT_DEPOSITION, FIXED_MIX_TIME, TAU_CHEM, TAU_FLAME, ODE_SOLVER
+% Not listed: CO_PRODUCTION, EDCM, FIXED_MIX_TIME, FWD_ID, ODE_SOLVER, REVERSIBLE, SOOT_DEPOSITION, TAU_CHEM, TAU_FLAME, TOL_INT
 
 
 \vspace{\baselineskip}
@@ -11102,7 +11094,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct XB(6)}             & Real Sextuplet    & Section~\ref{info:SLCF}                   & m         &                   \\ \hline
 \end{longtable}
 
-%Undocumented: AGL_SLICE,FIRE_LINE,EVACUATION,LEVEL_SET_FIRE_LINE
+%Undocumented: AGL_SLICE,FIRE_LINE, ID, LEVEL_SET_FIRE_LINE
 
 \vspace{\baselineskip}
 
@@ -11184,7 +11176,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \end{longtable}
 
 \vspace{\baselineskip}
-
+% undefined AEROSOL,CONDUCTIVITY_SOLID,DENSITY_SOLID,MEAN_DIAMETER for testing particle deposition
 \newpage
 
 \section{\texorpdfstring{{\tt SURF}}{SURF} (Surface Properties)}
@@ -11209,13 +11201,14 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CELL\_SIZE\_FACTOR}              & Real            & Section~\ref{info:solid_phase_stability}  &                     & 1.0                     \\ \hline
 {\ct COLOR    }                       & Character       & Section~\ref{info:colors}                 &                     &                         \\ \hline
 {\ct CONVECTIVE\_HEAT\_FLUX}          & Real            & Section~\ref{info:convection}             & kW/m$^2$            & 0.                      \\ \hline
+{\ct CONVECTION\_LENGTH\_SCALE}       & Real            & Section~\ref{info:convection}             & m                   & 1.                      \\ \hline
 {\ct DEFAULT}                         & Logical         & Section~\ref{info:SURF}                   &                     & {\ct .FALSE.}           \\ \hline
 {\ct DT\_INSERT}                      & Real            & Section~\ref{info:particle_flux}          & s                   & 0.01                    \\ \hline
-{\ct DUCT\_PATH}                      & Int.~Pair       & Section~\ref{info:Fan_Curves}             &                     & 0,0                     \\ \hline
 {\ct EMISSIVITY}                      & Real            & Section~\ref{info:convection}             &                     & 0.9                     \\ \hline
 {\ct EMISSIVITY\_BACK}                & Real            & Section~\ref{info:BACKING}                &                     &                         \\ \hline
 {\ct EVAC\_DEFAULT}                   & Logical         & Reference~\cite{FDS_Evac_Users_Guide}     &                     & {\ct .FALSE.}           \\ \hline
 {\ct EXTERNAL\_FLUX}                  & Real            & Section~\ref{solid_phase_verification}    & kW/m$^2$            & 0.                      \\ \hline
+\hline
 {\ct E\_COEFFICIENT}                  & Real            & Section~\ref{info:suppression}            & m$^2$/kg/s          & 0.                      \\ \hline
 {\ct FREE\_SLIP}                      & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct .FALSE.}           \\ \hline
 {\ct GEOMETRY}                        & Character       & Section~\ref{info:GEOMETRY}               &                     & {\ct 'CARTESIAN'}       \\ \hline
@@ -11232,7 +11225,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MASS\_FRACTION(:)}               & Real Array      & Section~\ref{info:MASS_FLUX}              &                     &                         \\ \hline
 {\ct MATL\_ID(NL,NC)}                 & Char.~Array     & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
 {\ct MATL\_MASS\_FRACTION(NL,NC)}     & Real Array      & Section~\ref{info:solid_pyrolysis}        &                     &                         \\ \hline
-{\ct MAX\_PRESSURE }                  & Real            & Section~\ref{info:Fan_Curves}             & Pa                  & 1.E12                   \\ \hline
+{\ct MINIMUM\_LAYER\_THICKNESS}       & Real            & Section~\ref{info:solid_phase_stability}  & m                   & 1.E-6                   \\ \hline
 {\ct MLRPUA }                         & Real            & Section~\ref{info:gas_burner}             & kg/m$^2$s           & 0.                      \\ \hline
 {\ct NET\_HEAT\_FLUX}                 & Real            & Section~\ref{info:convection}             & kW/m$^2$            & 0.                      \\ \hline
 {\ct NO\_SLIP}                        & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct .FALSE.}           \\ \hline
@@ -11248,10 +11241,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RAMP\_Q}                         & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
 {\ct RAMP\_T}                         & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
 {\ct RAMP\_V}                         & Character       & Section~\ref{info:RAMP_Time}              &                     &                         \\ \hline
-{\ct RGB(3)}                          & Int.~Triplet    & Section~\ref{info:colors}                 &                     & \small 255,204,102      \\ \hline
 {\ct REGRID\_FACTOR}                  & Real            & Section~\ref{info:solid_phase_stability}  &                     & 0.9                     \\ \hline
+{\ct RGB(3)}                          & Int.~Triplet    & Section~\ref{info:colors}                 &                     & \small 255,204,102      \\ \hline
 {\ct ROUGHNESS}                       & Real            & Section~\ref{info:WALL_MODEL}             & m                   & 0.                      \\ \hline
-{\ct MINIMUM\_LAYER\_THICKNESS}       & Real            & Section~\ref{info:solid_phase_stability}  & m                   & 1.E-6                   \\ \hline
 {\ct SPEC\_ID}                        & Character       & Section~\ref{info:MASS_FLUX}              &                     &                         \\ \hline
 {\ct SPREAD\_RATE}                    & Real            & Section~\ref{info:spread}                 & m/s                 & 0.                      \\ \hline
 {\ct STRETCH\_FACTOR(:) }             & Real            & Section~\ref{info:solid_phase_stability}  &                     & 2.                      \\ \hline
@@ -11278,12 +11270,13 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct Z0 }                             & Real            & Section~\ref{info:stratification}         & m                   & 10.                     \\ \hline
 \end{longtable}
 
-% Undocumented:  SHRINK
-%                VEGETATION,VEGETATION_CDRAG,VEGETATION_CHAR_FRACTION,VEGETATION_ELEMENT_DENSITY,VEGETATION_HEIGHT, &
-%                VEGETATION_INITIAL_TEMP,VEGETATION_LSET_IGNITE_TIME,VEGETATION_LOAD,VEGETATION_MOISTURE, &
-%                VEGETATION_NO_BURN,VEGETATION_SVRATIO,VEGETATION_LAYERS,CONVECTION_LENGTH_SCALE, &
-%                FIRELINE_MLR_MAX,VEGETATION_GROUND_TEMP,VEGETATION_LINEAR_DEGRAD,VEGETATION_ARRHENIUS_DEGRAD, &
-%                VEG_LSET_ROS_HEAD,VEG_LSET_ROS_FLANK,VEG_LSET_ROS_BACK,VEG_LEVEL_SET_SPREAD,VEG_LSET_WIND_EXP
+% Undocumented:  BOUNDARY_CONDITION_FILENAME, FIRELINE_MLR_MAX, SHRINK, 
+% VEGETATION, VEGETATION_ARRHENIUS_DEGRAD, VEGETATION_CDRAG, VEGETATION_CHAR_FRACTION,
+% VEGETATION_ELEMENT_DENSITY, VEGETATION_GROUND_TEMP, VEGETATION_HEIGHT,
+% VEGETATION_INITIAL_TEMP, VEGETATION_LAYERS, VEGETATION_LINEAR_DEGRAD, VEGETATION_LOAD, 
+% VEGETATION_LSET_IGNITE_TIME, VEGETATION_MOISTURE, VEGETATION_NO_BURN, VEGETATION_SVRATIO,
+% VEG_LEVEL_SET_SPREAD, VEG_LSET_ROS_BACK, VEG_LSET_ROS_FLANK, VEG_LSET_ROS_HEAD, 
+% VEG_LSET_WIND_EXP
 
 \vspace{\baselineskip}
 
@@ -11306,7 +11299,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct ID}                & Character   & Section~\ref{info:TABL}      &             &     \\ \hline
-{\ct TABLE\_DATA(6)}    & Real Array  & Section~\ref{info:TABL}      &             &     \\ \hline
+{\ct TABLE\_DATA(9)}    & Real Array  & Section~\ref{info:TABL}      &             &     \\ \hline
 \end{longtable}
 
 
@@ -11333,6 +11326,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DT}                        & Real       & Section~\ref{info:TIME_Control}           & s           &                 \\ \hline
 {\ct EVAC\_DT\_FLOWFIELD}       & Real       & Reference~\cite{FDS_Evac_Users_Guide}     & s           &  0.01           \\ \hline
 {\ct EVAC\_DT\_STEADY\_STATE}   & Real       & Reference~\cite{FDS_Evac_Users_Guide}     & s           &  0.05           \\ \hline
+{\ct LIMITING\_DT\_RATIO}       & Real       & Section~\ref{info:Errors}                 &               &  0.0001         \\ \hline
 {\ct LOCK\_TIME\_STEP}          & Logical    & Section~\ref{info:TIME_Control}           &             & {\ct .FALSE.}   \\ \hline
 {\ct RESTRICT\_TIME\_STEP}      & Logical    & Section~\ref{info:TIME_Control}           &             & {\ct .TRUE.}    \\ \hline
 {\ct SYNCHRONIZE}               & Logical    & Section~\ref{info:TIME_Control}           &             & {\ct .TRUE.}    \\ \hline
@@ -11343,6 +11337,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \end{longtable}
 
 \vspace{\baselineskip}
+
+%Undocumented: NAMELIST /TREE/
 
 \section{\texorpdfstring{{\tt TRNX, TRNY, TRNZ}}{TRNX, TRNY, TRNZ} (MESH Transformations)}
 
