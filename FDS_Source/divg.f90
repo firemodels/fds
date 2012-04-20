@@ -1383,16 +1383,6 @@ ENDDO
 
 CALL ENTHALPY_ADVECTION ! computes U_DOT_DEL_RHO_H_S (contained below)
 
-IF (STRATIFICATION) THEN
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            U_DOT_DEL_RHO_H_S(I,J,K) = U_DOT_DEL_RHO_H_S(I,J,K) - 0.5_EB*(WW(I,J,K)+WW(I,J,K-1))*RHO_0(K)*GVEC(3)
-         ENDDO
-      ENDDO 
-   ENDDO
-ENDIF
-
 ! Time derivative of temperature term
 
 IF (CORRECTOR .AND. .NOT.CONSTANT_SPECIFIC_HEAT) THEN
@@ -1420,7 +1410,7 @@ DO K=1,KBAR
    ENDDO 
 ENDDO
 
-MASS_TRANSPORT_IF: IF (.NOT.CONSTANT_SPECIFIC_HEAT) THEN
+MASS_TRANSPORT_IF: IF (.NOT.CONSTANT_SPECIFIC_HEAT .AND. N_TRACKED_SPECIES>0) THEN
 
    CALL DENSITY_ADVECTION 
 
@@ -1448,7 +1438,7 @@ ENDIF MASS_TRANSPORT_IF
 
 ! Add contribution of reactions
  
-IF (N_REACTIONS > 0 .AND. .NOT.CONSTANT_SPECIFIC_HEAT) THEN
+IF (N_REACTIONS > 0 .AND. .NOT.EVACUATION_ONLY(NM) .AND. .NOT.CONSTANT_SPECIFIC_HEAT) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -1458,9 +1448,9 @@ IF (N_REACTIONS > 0 .AND. .NOT.CONSTANT_SPECIFIC_HEAT) THEN
    ENDDO
 ENDIF
 
-! Add contribution of evaporating PARTICLEs
+! Add contribution of evaporating particles
 
-IF (NLP>0 .AND. N_LP_ARRAY_INDICES > 0) THEN
+IF (NLP>0 .AND. N_LP_ARRAY_INDICES>0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -1469,14 +1459,30 @@ IF (NLP>0 .AND. N_LP_ARRAY_INDICES > 0) THEN
       ENDDO
    ENDDO
 ENDIF
-
-! Add contribution of unstructured GEOMETRIES
+   
+! Add contribution of unstructured geometry
 
 IF (N_FACE>0 .AND. .NOT.EVACUATION_ONLY(NM)) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
             DP(I,J,K) = DP(I,J,K) + D_GEOMETRY(I,J,K)
+         ENDDO
+      ENDDO
+   ENDDO
+ENDIF
+
+! Atmospheric stratification term
+
+RTRM => WORK1
+RTRM = 1._EB/RHO_H_S_P
+
+IF (STRATIFICATION .AND. .NOT.EVACUATION_ONLY(NM)) THEN
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            DP(I,J,K) = DP(I,J,K) - (R_PBAR(K,PRESSURE_ZONE(I,J,K))-RTRM(I,J,K))*0.5_EB*(W(I,J,K)+W(I,J,K-1))*RHO_0(K)*GVEC(3)
          ENDDO
       ENDDO
    ENDDO
@@ -1604,9 +1610,6 @@ PRESSURE_ZONE_LOOP: DO IPZ=1,N_ZONE
    ZONE_VOLUME  = 0._EB
 
    IF (EVACUATION_ONLY(NM)) CYCLE PRESSURE_ZONE_LOOP
-
-   RTRM => WORK1
-   RTRM = 1._EB/RHO_H_S_P
 
    DO K=1,KBAR
       DO J=1,JBAR
