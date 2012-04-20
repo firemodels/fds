@@ -21,6 +21,7 @@ cd ..\Flowfields
 smokeview -runscript helium_2d
 smokeview -runscript sawtooth
 smokeview -runscript symmetry_test
+smokeview -runscript jet_fan
 
 cd ..\HVAC
 smokeview -runscript HVAC_mass_conservation

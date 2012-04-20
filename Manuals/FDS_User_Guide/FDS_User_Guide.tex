@@ -5053,15 +5053,22 @@ If you just want to blow gases in a particular direction, create an
 {\ct OBST}struction and apply to it {\ct VENT} lines that are
 associated with a simple HVAC system.
 This allows hot, smokey gases to pass through the
-obstruction, much like a free-standing fan.  See the example case {\ct jet\_fan.fds}.
+obstruction, much like a free-standing fan.  See the example case {\ct jet\_fan.fds} which places a louvered fan (blowing diagonally down) near a fire (see Fig.~\ref{fig:Jet_Fan}).
 
 You may also want to construct a {\em shroud} around the fan using four flat plates arranged to form
-a short passageway that draws gases in one side and expels them out the other. The plate representing the
-fan itself can be positioned about halfway along the passage.
+a short passageway that draws gases in one side and expels them out the other. The obstruction representing the fan can be positioned about halfway along the passage (if a louvered fan is being used, place the fan at the end of the passage).
+
+\begin{figure}[ht!]
+\begin{center}
+\includegraphics[width=3.5in]{SCRIPT_FIGURES/jet_fan}
+\caption[Example of a jet fan]{Jet fan with a louvered output {\ct UVW=-1,0,-1}}
+\label{fig:Jet_Fan}
+\end{center}
+\end{figure}
 
 \clearpage
 
-\subsection{HVAC Filter Parameters {\bf HVAC\_filter}}
+\subsection{HVAC Filter Parameters: {\bf HVAC\_filter}}
 \label{info:HVACfilter}
 
 A sample input for a filter is given below.
@@ -5254,6 +5261,8 @@ into equilibrium over a specified period of time. This is done for several reaso
 a finite amount of time to fully open them, and the slowing of the pressure increase/decrease is a simple way to simulate the effect.
 Second, relatively large pressure differences between zones wreak havoc with flow solvers, especially ones like FDS that
 use a low Mach number approximation. To maintain numerical stability, FDS gradually brings the pressures into equilibrium. This second point ought to be seen as a warning:
+
+Since pressure zones are defined using {\ct XB}, it might not be possible to define a complexly shaped set of pressure zones using just the {\ct ZONE} inputs.  A work around for this is to define the complex zone as a series of zones in the same manner you would divide a domain into multiple meshes.  The check for merged pressure zones only works if two zones were initially isolated at the start of the calculation (there must have been a wall that was removed). Therefore, define an obstruction at the boundary of the zones that is removed after the first timestep.  
 
 \begin{warning}
 \noindent Do not use FDS to study the sudden rupture of pressure vessels! Its low Mach number formulation does not allow for high speed, compressible effects that
