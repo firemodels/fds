@@ -39,6 +39,105 @@ char callbacks_revision[]="$Revision$";
 #endif
 #endif
 
+/* ------------------ next_xindex ------------------------ */
+
+void next_xindex(int inc,int flag){
+  int i,j,first;
+
+  first=1;
+  if(flag==1)inc=-1;
+  if(flag==-1)inc=1;
+  for(j=0;j<nplotx_all;j++){
+    if(first==1){
+      first=0;
+      if(flag==1)iplotx_all=nplotx_all-1;
+      if(flag==-1)iplotx_all=0;
+      if(flag==0)iplotx_all+=inc;
+    }
+    else{
+      iplotx_all+=inc;
+    }
+    if(iplotx_all<0)iplotx_all=nplotx_all-1;
+    if(iplotx_all>nplotx_all-1)iplotx_all=0;
+    if(visGrid==1)return;
+    for(i=0;i<nsliceinfo;i++){
+      slicedata *slicei;
+      mesh *meshi;
+
+      slicei = sliceinfo + i;
+      if(slicei->loaded==0||slicei->display==0)continue;
+      meshi = meshinfo + slicei->blocknumber;
+      if(meshi->iplotx_all[iplotx_all]!=-1)return;
+    }
+  }
+}
+
+/* ------------------ next_yindex ------------------------ */
+
+void next_yindex(int inc,int flag){
+  int i,j,first;
+
+  first=1;
+  if(flag==1)inc=-1;
+  if(flag==-1)inc=1;
+  for(j=0;j<nploty_all;j++){
+    if(first==1){
+      first=0;
+      if(flag==1)iploty_all=nploty_all-1;
+      if(flag==-1)iploty_all=0;
+      if(flag==0)iploty_all+=inc;
+    }
+    else{
+      iploty_all+=inc;
+    }
+    if(iploty_all<0)iploty_all=nploty_all-1;
+    if(iploty_all>nploty_all-1)iploty_all=0;
+    if(visGrid==1)return;
+    for(i=0;i<nsliceinfo;i++){
+      slicedata *slicei;
+      mesh *meshi;
+
+      slicei = sliceinfo + i;
+      if(slicei->loaded==0||slicei->display==0)continue;
+      meshi = meshinfo + slicei->blocknumber;
+      if(meshi->iploty_all[iploty_all]!=-1)return;
+    }
+  }
+}
+
+/* ------------------ next_zindex ------------------------ */
+
+void next_zindex(int inc,int flag){
+  int i,j,first;
+
+  first=1;
+  if(flag==1)inc=-1;
+  if(flag==-1)inc=1;
+  for(j=0;j<nplotz_all;j++){
+    if(first==1){
+      first=0;
+      if(flag==1)iplotz_all=nplotz_all-1;
+      if(flag==-1)iplotz_all=0;
+      if(flag==0)iplotz_all+=inc;
+    }
+    else{
+      iplotz_all+=inc;
+    }
+    if(iplotz_all<0)iplotz_all=nplotz_all-1;
+    if(iplotz_all>nplotz_all-1)iplotz_all=0;
+    if(visGrid==1)return;
+    for(i=0;i<nsliceinfo;i++){
+      slicedata *slicei;
+      mesh *meshi;
+
+      slicei = sliceinfo + i;
+      if(slicei->loaded==0||slicei->display==0)continue;
+      meshi = meshinfo + slicei->blocknumber;
+      if(meshi->iplotz_all[iplotz_all]!=-1)return;
+    }
+  }
+}
+
 /* ------------------ WindowStatus ------------------------ */
 
 void WindowStatus(int state){
@@ -1420,19 +1519,13 @@ void keyboard_2(unsigned char key, int x, int y){
   }
   switch (iplot_state){
     case 1:
-      iplotx_all += skip_global*FlowDir;
-      if(iplotx_all<0)iplotx_all=nplotx_all-1;
-      if(iplotx_all>nplotx_all-1)iplotx_all=0;
+      next_xindex(skip_global*FlowDir,0);
       break;
     case 2:
-      iploty_all += skip_global*FlowDir;
-      if(iploty_all<0)iploty_all=nploty_all-1;
-      if(iploty_all>nploty_all-1)iploty_all=0;
+      next_yindex(skip_global*FlowDir,0);
       break;
     case 3:
-      iplotz_all += skip_global*FlowDir;
-      if(iplotz_all<0)iplotz_all=nplotz_all-1;
-      if(iplotz_all>nplotz_all-1)iplotz_all=0;
+      next_zindex(skip_global*FlowDir,0);
       break;
   }
   if(ReadPlot3dFile==1&&visiso !=0 && current_mesh->slicedir==4){
@@ -1585,116 +1678,60 @@ void handle_plot3d_keys(int  key){
   switch (key){
   case GLUT_KEY_LEFT:
     visx_all=1;
-    iplotx_all--;
-    if(visGrid==1){
-      if(iplotx_all<0)iplotx_all=nplotx_all-1;
-    }
-    else{
-      if(iplotx_all<iplotx_min)iplotx_all=iplotx_max;
-    }
+    next_xindex(-1,0);
     iplot_state=1;
     break;
   case GLUT_KEY_RIGHT:
     visx_all=1;
-    iplotx_all++;
-    if(visGrid==1){
-      if(iplotx_all>nplotx_all-1)iplotx_all=0;
-    }
-    else{
-      if(iplotx_all>iplotx_max)iplotx_all=iplotx_min;
-    }
+    next_xindex(1,0);
     iplot_state=1;
     break;
   case GLUT_KEY_DOWN:
     visy_all=1;
-    iploty_all--;
-    if(visGrid==1){
-      if(iploty_all<0)iploty_all=nploty_all-1;
-    }
-    else{
-      if(iploty_all<iploty_min)iploty_all=iploty_max;
-    }
+    next_yindex(-1,0);
     iplot_state=2;
     break;
   case GLUT_KEY_UP:
     visy_all=1;
-    iploty_all++;
-    if(visGrid==1){
-      if(iploty_all>nploty_all-1)iploty_all=0;
-    }
-    else{
-      if(iploty_all>iploty_max)iploty_all=iploty_min;
-    }
+    next_yindex(1,0);
     iplot_state=2;
     break;
   case GLUT_KEY_PAGE_DOWN:
     visz_all=1;
-    iplotz_all--;
-    if(visGrid==1){
-      if(iplotz_all<0)iplotz_all=nplotz_all-1;
-    }
-    else{
-      if(iplotz_all<iplotz_min)iplotz_all=iplotz_max;
-    }
+    next_zindex(-1,0);
     iplot_state=3;
     break;
   case GLUT_KEY_PAGE_UP:
     visz_all=1;
-    iplotz_all++;
-    if(visGrid==1){
-      if(iplotz_all>nplotz_all-1)iplotz_all=0;
-    }
-    else{
-      if(iplotz_all>iplotz_max)iplotz_all=iplotz_min;
-    }
+    next_zindex(1,0);
     iplot_state=3;
     break;
   case GLUT_KEY_HOME:
-    if(visGrid==1){
-      if(iplot_state==0||iplot_state==1){
-        iplotx_all=0;
-      }
-      else if(iplot_state==2){
-        iploty_all=0;
-      }
-      else{
-        iplotz_all=0;
-      }
-    }
-    else{
-      if(iplot_state==0||iplot_state==1){
-        iplotx_all=iplotx_min;
-      }
-      else if(iplot_state==2){
-        iploty_all=iploty_min;
-      }
-      else{
-        iplotz_all=iplotz_min;
-      }
+    switch (iplot_state){
+      case 0:
+      case 1:
+        next_xindex(0,-1);
+        break;
+      case 2:
+        next_yindex(0,-1);
+        break;
+      case 3:
+        next_zindex(0,-1);
+        break;
     }
     break;
   case GLUT_KEY_END:
-    if(visGrid==1){
-      if(iplot_state==0||iplot_state==1){
-        iplotx_all=nplotx_all-1;
-      }
-      else if(iplot_state==2){
-        iploty_all=nploty_all-1;
-      }
-      else{
-        iplotz_all=nplotz_all-1;
-      }
-    }
-    else{
-      if(iplot_state==0||iplot_state==1){
-        iplotx_all=iplotx_max;
-      }
-      else if(iplot_state==2){
-        iploty_all=iploty_max;
-      }
-      else{
-        iplotz_all=iplotz_max;
-      }
+    switch (iplot_state){
+      case 0:
+      case 1:
+        next_xindex(0,1);
+        break;
+      case 2:
+        next_yindex(0,1);
+        break;
+      case 3:
+        next_zindex(0,1);
+        break;
     }
     break;
   default:
