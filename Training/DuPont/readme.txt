@@ -21,4 +21,13 @@ HEAT_OF_REACTION = -361000.)
 *_16 - 2 cm grid, 20% Moisture, 550 C Panel (HEAT_OF_REACTION = -361000.)
 *_17 - 2 cm grid, 25% Moisture, 550 C Panel (HEAT_OF_REACTION = -361000.)
 
+*18 - 2 cm grid, 00% Moisture, 550 C Panel (HEAT_OF_REACTION = -361000.), Mass_Flux_Total condition Added
+*19 - 2 cm grid, 25% Moisture, 550 C Panel (HEAT_OF_REACTION = -361000.), Mass_Flux_Total condition Added
 
+*20 - 1 cm grid, 00% Moisture, 550 C Panel (HEAT_OF_REACTION = -361000.), Mass_Flux_Total condition Added
+*21 - 1 cm grid, 25% Moisture, 550 C Panel (HEAT_OF_REACTION = -361000.), Mass_Flux_Total condition Added
+
+*22 - 2 cm grid, 00% Moisture, 550 C Panel (HEAT_OF_REACTION = -361000.), Mass_Flux_Total fixed, pushed forward burn time by 4 seconds
+*23 - 2 cm grid, 25% Moisture, 550 C Panel (HEAT_OF_REACTION = -361000.), Mass_Flux_Total fixed, pushed forward burn time by 4 seconds
+*24 - 2 cm grid, 25% Moisture, 550 C Panel (HEAT_OF_REACTION = -361000.), 10000 s calibration run
+*25 - 1 cm grid, 16 meshes
