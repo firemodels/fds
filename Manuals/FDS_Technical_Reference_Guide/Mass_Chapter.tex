@@ -1,17 +1,72 @@
-\chapter{Mass and Species Transport Equations}
+\chapter{Mass, Species and Enthalpy Transport}
 
-This chapter describes in detail the finite difference approximation of the mass and species conservation equations.
-Due to the use of the low Mach number approximation, the energy conservation equation is defined implicitly via the divergence of the flow field, which contains the combustion and radiation source terms.
+This chapter describes in detail the equation of state in the low Mach number limit, the finite difference approximation of the mass and species conservation equations, and the role of the flow divergence as a surrogate for the enthalpy transport equation.
+Due to the use of the low Mach number approximation, the energy conservation equation is not solved explicitly but rather is defined implicitly via the divergence of the flow field, which contains the combustion and radiation source terms.
 
-\section{Discretizing the Convective and Diffusive Transport Terms}
 
-The density at the center of the $ijk$th cell is updated in time with the following predictor-corrector scheme. Advection terms are written in ``flux divergence'' form. In the predictor step, the density at the $(n+1)$st time level is estimated based on information at the $n$th level
+\section{The Equation of State}
+
+A distinguishing feature of a CFD model is the regime of
+flow speeds (relative to the speed of sound) for which it is designed. High
+speed flow codes involve compressibility effects and shock waves. Low speed
+solvers, however, explicitly eliminate compressibility effects that give rise
+to acoustic (sound) waves. The Navier-Stokes equations describe the
+propagation of information at speeds comparable to that of the fluid flow (for fire, approximately 10~m/s),
+but also at speeds comparable to that of sound waves (for still air,
+300~m/s). Solving a discretized form of these equations would require extremely small
+time steps in order to account for information traveling at the speed of sound, making
+practical simulations difficult.
+
+Following the work of Rehm and Baum~\cite{Rehm:1}, an approximation to the equation of state is made by decomposing the pressure
+into a ``background'' component and a perturbation. It is assumed that
+the background component of pressure can differ from compartment to compartment. If
+a volume within the computational domain is isolated from other volumes, except via leak paths or ventilation ducts, it is referred to as a ``pressure zone'' and assigned its own background pressure. The pressure within the $m$th zone, for example, is a linear combination
+of its background component and the flow-induced perturbation:
+\be p(\bx,t) = \bp_m(z,t) + \tp(\bx,t) \ee
+Note that the background pressure is a function of $z$, the vertical spatial coordinate, and time. For most
+compartment fire applications, $\bp_m$ changes very little with height or time. However, for situations where the pressure
+increases due to a fire in a tightly sealed enclosure, or when the height of the domain is significant, $\bp_m$ takes these effects into
+account~\cite{Baum:5}. The ambient pressure field is denoted $\bp_0(z)$. Note that the subscript 0 denotes the exterior of the computational domain, not
+time 0. This is the assumed atmospheric pressure stratification that serves as both
+the initial and boundary condition for the governing equations.
+
+The purpose of decomposing the pressure is that for low-Mach number flows, it can be assumed that the temperature and density are inversely
+proportional, and thus the equation of state (in the $m$th pressure zone) can be approximated
+\be \bp_m  =  \rho T \R \sum_\alpha \frac{Z_\alpha}{W_\alpha} = \frac{\rho T \R}{ \bW }  \label{state} \ee
+The pressure, $p$, in the state and energy equations is replaced by the background pressure $\bp_m$ to filter out sound waves
+that travel at speeds that are much faster
+than typical flow speeds expected in fire applications. The low Mach number assumption serves two purposes. First, the filtering of acoustic waves
+means that the time step in the numerical algorithm is bound only by the flow speed as opposed to the speed of sound, and second, the modified state
+equation leads to a reduction in the number of dependent variables in the system of equations by one. The energy equation (\ref{energy}) is never
+explicitly solved, but its source terms are included in the expression for the flow divergence, to be discussed later in the chapter.
+
+The stratification of the atmosphere is derived from the relation
+\be \frac{d \bp_0}{dz} = - \rho_0(z) \, g  \ee
+where $\rho_0$ is the background density and $g=9.8$ m/s$^2$. Using Eq.~(\ref{state}), the background pressure can be written as a function of the background temperature, $T_0(z)$,
+\be \bp_0(z) = p_\infty \; \exp \, \left( -\int^z_{z_\infty} \frac{\bW \, g}{\R \, T_0(z')} dz' \right)  \label{pstrat} \ee
+where the subscript infinity generally refers to the ground. A linear temperature stratification of the atmosphere may be
+specified by the user such that $T_0(z) = T_\infty + \Gamma z$ where $T_\infty$ is the temperature at the ground and
+$\Gamma$ is the lapse rate (e.g., $\Gamma = -0.0098$~K/m is the {\em adiabatic lapse rate}).
+In this case $\bp_0$ and $\rho_0$ are derived from Eqs.~(\ref{pstrat}) and (\ref{state}), respectively.
+It can then be shown that for $\Gamma \ne 0$ the pressure stratification becomes
+\be
+   \bp_0(z) = p_\infty  \left( \frac{T_0(z)}{T_\infty} \right)^{\overline{W}g/\R \Gamma}
+   \label{pstrat2}
+\ee
+
+
+\newpage
+
+\section{Mass and Species Transport}
+
+The density and species transport equations are solved using the same basic predictor-corrector scheme.
+Advection terms are written in ``flux divergence'' form. In the predictor step, the density in cell $ijk$ at time level $(n+1)$ is estimated based on information at the $n$th level
 \be  \frac{\rho_{ijk}^{*}-\rho_{ijk}^n}{\dt}
     + \nabla\!\cdot(\overline{\rho}^{FL} \mathbf{u})_{ijk}^n = 0
 \ee
 The quantity $\overline{\rho}^{FL}$ indicates a \emph{flux limiter} applied to the cell face value, as discussed below in Section \ref{sec_flux_limiters}.
 
-Following the prediction of the velocity and background pressure at the $(n+1)$st time level, the density is corrected via
+Following the prediction of the velocity and background pressure at time level $(n+1)$, the density is corrected via
 \be \frac{\rho_{ijk}^{n+1}-\ha\left(\rho_{ijk}^n
      +\rho_{ijk}^{*}\right)} {\ha \dt}
     + \nabla\!\cdot(\overline{\rho}^{FL} \mathbf{u})_{ijk}^{*}
@@ -92,44 +147,59 @@ Central differencing, Godunov's scheme, and MINMOD are essentially included for 
 
 \subsection{Time Splitting for Mass Source Terms}
 \label{sec_time_splitting}
-After the corrector step for the transport scheme, source terms are applied to the scalars.  The source terms are evaluated using the results from the corrected scalar transport scheme (denoted with an asterisk *):
+
+Following the corrector step of the transport scheme, source terms are applied to the scalars.  The source terms are typically related to particle evaporation or combustion, and these processes are computed at the end of the time step. In the case of combustion, the total mass of a grid cell is not changed; rather the species mass fractions change. For particle evaporation, mass is simply added to the cell, particle by particle, and the species mass fractions are adjusted accordingly.
 \be
-\frac{(\rho Z_\alpha)_{ijk}^{n+1}-(\rho Z_\alpha)_{ijk}^*}{\dt} =  \dm_{\alpha,ijk}'''(\mathbf{Z}^*,T^*)
+   (\rho Z_\alpha)_{ijk}^{n+1} = (\rho Z_\alpha)_{ijk}^{n+1} + \dt \, \left( \dm_{\alpha}''' + \dm_{b,\alpha}''' \right)_{ijk}
 \ee
 
 
-\subsection{Boundary Conditions for Density and Species Mass Fraction}
+\subsection{Boundary Conditions for Temperature, Species Mass Fraction, and Density}
 
-Gas phase temperatures are defined at cell centers; solid surfaces lie at the
-interface of the gas and solid cell. The numerical expression for the heat lost to the boundary is
-equated with the empirical convective heat transfer
-\be k_{\hbox{\tiny LES}} \frac{T_g - T_s}{\ha \dn} = h \; (T_g-T_s)  \label{ebal} \ee
-where $\ha \dn$ is the distance between the center of the gas cell
-and the surface. The convective heat flux coefficient, $h$, is described in Section~\ref{conflux}.
+The gas temperature, species mass fractions, and density are computed at the center of each grid cell. At an exterior boundary, or at
+the boundary of an interior obstruction, these values must be computed at the face of the cell that falls at the boundary interface. In general, the temperature at the boundary, $T_f$, is
+computed first, followed by species mass fractions, $Z_{\alpha,f}$, followed by density, $\rho_f$. The density is typically determined from the equation of state:
+\be  \rho_f = \frac{\overline{p}_m}{ {\cal R} \, T_f \, \sum_\alpha (Z_{\alpha,f}/W_\alpha) }  \ee 
+Here, $\overline{p}_m$ denotes the background pressure of the gas phase region.
 
-At solid walls there is no transfer of mass, thus the boundary condition
-for the species mixture $\alpha$ at a wall is simply
-\be Z_{\alpha,s} = Z_{\alpha,gas} \ee
-The species mixture mass fraction, like temperature, is defined at the cell center.
-At forced flow boundaries, either the species mass fraction or
-the mass flux may be specified.
-For specified mass fraction, the boundary value for $Z_\alpha$ is as specified.
-For specified mass flux, the following equation must be solved iteratively
-\be \dot{m}_\alpha'' = u_n \rho_s Z_{\alpha,s}
-  - \rho D_\alpha \frac{Z_{\alpha,g}-Z_{\alpha,s}}{\ha \dn} \ee
-where $\dot{m}_\alpha''$ is the specified mass flux of species mixture $\alpha$,
-$u_n$ is the normal component of velocity at the wall pointing into
-the flow domain, and $\ha \dn$ is the distance between the center of the gas
-cell and the wall. The reason for the iteration is that the density at the surface, $\rho_s$, is a function of
-the species mixture at the surface.
+When necessary, the boundary value is linearly extrapolated one half
+of a grid cell into the ``ghost'' cell for use by the gas phase solver. In the sections below, the value at the center of the gas phase cell
+adjacent to the boundary is denoted with the subscript ``g'', and the value at the boundary by ``f'' (for face).
 
-Once the temperature and species mass fractions have been defined at the boundary, the density there is computed from the equation of
-state
-\be  \rho_s = \frac{\overline{p}_m}{ {\cal R} \, T_s \, \sum_\alpha (Z_{\alpha,s}/W_\alpha) }  \ee
+\subsubsection{Solid Boundaries}
 
+At a solid boundary, the surface temperature, $T_f$, is either specified or computed as described in Chapter~\ref{chapter:solid_phase}.
+For an LES calculation, the convective heat flux at the surface is determined via an empirical heat transfer coefficient, $h$, and the convective heat flux at the boundary is written:
+\be k \frac{T_g - T_f}{\dn/2} = h \; (T_g-T_f)  \label{ebal} \ee
+where $\dn/2$ is the distance between the center of the gas cell
+and the surface. The convective heat transfer coefficient, $h$, is described in Section~\ref{conflux}. For a DNS calculation, the convective 
+heat transfer is determined directly from the computed or specified surface temperature.
+
+There is no transfer of mass at a solid boundary; thus, the boundary value for the species mixture $\alpha$ is simply
+\be Z_{\alpha,f} = Z_{\alpha,g} \ee
+
+\subsubsection{Open Boundaries}
+
+The term open denotes a non-solid exterior boundary of the computational domain. Gases are allowed to flow freely in and out. At these boundaries, the temperature and species mass fractions take on their respective exterior values if the flow is incoming, and take on their respective values in the grid cell adjacent to the boundary if the flow is outgoing. This is a simple upwind boundary condition.
 
 
-\subsection{Mass and Energy Transfer at Interpolated Mesh Boundaries}
+
+\subsubsection{Specified Mass Flux}
+
+Here, the mass flux of species $\alpha$, $\dot{m}_\alpha''$, is specified or computed as part of the overall solid phase calculation.
+To determine the value of species mixture $\alpha$ at the boundary, $Z_{\alpha,f}$, the following equation must be solved iteratively
+\be \dot{m}_\alpha'' = u_n \rho_s Z_{\alpha,f}
+  - \rho D_\alpha \frac{Z_{\alpha,g}-Z_{\alpha,f}}{\dn/2} \ee
+where $u_n$ is the normal component of velocity at the wall pointing into
+the flow domain, and $\dn/2$ is the distance between the center of the gas
+cell and the wall. The reason for the iteration is that the density at the surface, $\rho_f$, is a function of
+$Z_{\alpha,f}$.
+
+
+
+
+
+\subsubsection{Mesh Interface Boundaries}
 
 In simulations involving more than one numerical mesh, information has to be passed between meshes, even when
 the meshes are being processed by separate computers. If two meshes abut each other, and the mesh cells are aligned and the same size, then
@@ -164,59 +234,10 @@ Rearranging terms in Eq.~(\ref{rhou}) and using the expression for the ghost cel
 \be \rho_{0,j'k'}^{(2)} = -\rho_{1,j'k'}^{(2)} + \frac{1}{u_{0,j'k'}^{(2)} \dy^{(2)} \, \dz^{(2)} } \sum_{j,k}  u_{1,jk}^{(1)} \dy^{(1)} \, \dz^{(1)}
     \left[ 2 \, \rho_{I,jk}^{(1)} +  \frac{2 \, \dx^{(1)}}{\dx^{(1)}+\dx^{(2)}}  \left( \rho_{1,j'k'}^{(2)} - \rho_{I,jk}^{(1)} \right)  \right]  \ee
 
+
+
+
 \newpage
-
-\section{The Equation of State}
-
-A distinguishing feature of a CFD model is the regime of
-flow speeds (relative to the speed of sound) for which it is designed. High
-speed flow codes involve compressibility effects and shock waves. Low speed
-solvers, however, explicitly eliminate compressibility effects that give rise
-to acoustic (sound) waves. The Navier-Stokes equations describe the
-propagation of information at speeds comparable to that of the fluid flow (for fire, approximately 10~m/s),
-but also at speeds comparable to that of sound waves (for still air,
-300~m/s). Solving a discretized form of these equations would require extremely small
-time steps in order to account for information traveling at the speed of sound, making
-practical simulations difficult.
-
-Following the work of Rehm and Baum~\cite{Rehm:1}, an approximation to the equation of state is made by decomposing the pressure
-into a ``background'' component and a perturbation. The original version of FDS assumed that the background component of the pressure
-applied to the entire computational domain, most often a single compartment. Starting in FDS version 5, it is now assumed that
-the background component of pressure can differ from compartment to compartment. If
-a volume within the computational domain is isolated from other volumes, except via leak paths or ventilation ducts, it is referred to as a ``pressure
-zone'' and assigned its own background pressure. The pressure within the $m$th zone, for example, is a linear combination
-of its background component and the flow-induced perturbation:
-\be p(\bx,t) = \bp_m(z,t) + \tp(\bx,t) \ee
-Note that the background pressure is a function of $z$, the vertical spatial coordinate, and time. For most
-compartment fire applications, $\bp_m$ changes very little with height or time. However, for situations where the pressure
-increases due to a fire in a tightly sealed enclosure, or when the height of the domain is significant, $\bp_m$ takes these effects into
-account~\cite{Baum:5}. The ambient pressure field is denoted $\bp_0(z)$. Note that the subscript 0 denotes the exterior of the computational domain, not
-time 0. This is the assumed atmospheric pressure stratification that serves as both
-the initial and boundary condition for the governing equations.
-
-The purpose of decomposing the pressure is that for low-Mach number flows, it can be assumed that the temperature and density are inversely
-proportional, and thus the equation of state (in the $m$th pressure zone) can be approximated
-\be \bp_m  =  \rho T \R \sum_\alpha \frac{Z_\alpha}{W_\alpha} = \frac{\rho T \R}{ \bW }  \label{state} \ee
-The pressure, $p$, in the state and energy equations is replaced by the background pressure $\bp_m$ to filter out sound waves
-that travel at speeds that are much faster
-than typical flow speeds expected in fire applications. The low Mach number assumption serves two purposes. First, the filtering of acoustic waves
-means that the time step in the numerical algorithm is bound only by the flow speed as opposed to the speed of sound, and second, the modified state
-equation leads to a reduction in the number of dependent variables in the system of equations by one. The energy equation (\ref{energy}) is never
-explicitly solved, but its source terms are included in the expression for the flow divergence, to be derived presently.
-
-The stratification of the atmosphere is derived from the relation
-\be \frac{d \bp_0}{dz} = - \rho_0(z) \, g  \ee
-where $\rho_0$ is the background density and $g=9.8$ m/s$^2$. Using Eq.~(\ref{state}), the background pressure can be written as a function of the background temperature, $T_0(z)$,
-\be \bp_0(z) = p_\infty \; \exp \, \left( -\int^z_{z_\infty} \frac{\bW \, g}{\R \, T_0(z')} dz' \right)  \label{pstrat} \ee
-where the subscript infinity generally refers to the ground. A linear temperature stratification of the atmosphere may be
-specified by the user such that $T_0(z) = T_\infty + \Gamma z$ where $T_\infty$ is the temperature at the ground and
-$\Gamma$ is the lapse rate (e.g., $\Gamma = -0.0098$~K/m is the {\em adiabatic lapse rate}).
-In this case $\bp_0$ and $\rho_0$ are derived from Eqs.~(\ref{pstrat}) and (\ref{state}), respectively.
-It can then be shown that for $\Gamma \ne 0$ the pressure stratification becomes
-\be
-   \bp_0(z) = p_\infty  \left( \frac{T_0(z)}{T_\infty} \right)^{\overline{W}g/\R \Gamma}
-   \label{pstrat2}
-\ee
 
 
 \section{The Divergence}
@@ -306,6 +327,13 @@ pressure zone is found by integrating Eq.~(\ref{eqn_divfromeos2}) over the zone 
 Equation~(\ref{concon2}) is essentially a consistency condition, ensuring that blowing air or starting a fire within a sealed
 compartment leads to an appropriate decrease in the divergence within the volume.
 
+The sensible enthalpy is a function of the temperature:
+\be
+  h_s = \sum_\alpha Z_\alpha h_{s,\alpha} \quad;\quad  h_{s,\alpha}=\sum_n Y_n h_{s,n}  \quad; \quad h_{s,n}(T)=\int_{T_0}^T c_{p,n}(T') \,\mbox{d}T'
+\ee
+The values for $h_{s,n}$ and $c_{p,n}$ are obtained by table lookup from the NIST-JANAF tables~\cite{NIST_JANAF}.
+The values are taken to the nearest degree Kelvin.
+
 
 \subsubsection{Combining Pressure Zones}
 
@@ -335,14 +363,6 @@ come into equilibrium very rapidly, but air movements associated with rapid chan
 FDS should not be used for rapid discharge of pressure vessels.
 
 
-\subsubsection{Enthalpy and Specific Heat}
-\label{HandCp}
 
-The sensible enthalpy is a function of the temperature:
-\be
-  h_s = \sum_\alpha Z_\alpha h_{s,\alpha} \quad;\quad  h_{s,\alpha}=\sum_n Y_n h_{s,n}  \quad; \quad h_{s,n}(T)=\int_{T_0}^T c_{p,n}(T') \,\mbox{d}T'
-\ee
-The values for $h_{s,n}$ and $c_{p,n}$ are obtained by table lookup from the NIST-JANAF tables~\cite{NIST_JANAF}.
-The values are taken to the nearest degree Kelvin.
 
 

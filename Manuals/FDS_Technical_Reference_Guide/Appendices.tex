@@ -268,7 +268,7 @@ The temperature equation may now be written as
 \begin{eqnarray}
 \label{eqn_DTDt}
 \frac{\mbox{D} T}{\mbox{D} t} &=& \frac{1}{\rho c_p} \left[\frac{\mbox{D} \overline{p}_i }{\mbox{D} t}
-- \Div\dot{\mathbf{q}}^{\prime\prime} - \sum_\alpha \Delta h^\circ_\alpha \dot{m}_\alpha^{\tripleprime} - \sum_\alpha h_{s,\alpha}\left(  \dot{m}_\alpha^{\tripleprime} - \Div \mathbf{J}_{\alpha} \right) \right. \nonumber\\ [0.3cm] 
+- \Div\dot{\mathbf{q}}^{\prime\prime} - \sum_\alpha \Delta h^\circ_\alpha \dot{m}_\alpha^{\tripleprime} - \sum_\alpha h_{s,\alpha}\left(  \dot{m}_\alpha^{\tripleprime} - \Div \mathbf{J}_{\alpha} \right) \right. \nonumber\\ [0.3cm]
 & & \left. - \dot{q}_b^\tripleprime -\dot{m}_{b}^{\tripleprime} \left\{\sum_\alpha Y_{b,\alpha} \int_{T_b}^{T} c_{p,\alpha}(T^\prime) \,\mbox{d}T^\prime + \mbox{$\frac{1}{2}$}\left|\mathbf{u}_b-\mathbf{u}\right|^2 \right\} \right] \,\mbox{.}
 \end{eqnarray}
 
@@ -291,7 +291,7 @@ Using (\ref{eqn_transportexpression}) and (\ref{eqn_DTDt}) in (\ref{eqn_divconst
 &-& \frac{1}{\overline{p}_i} \frac{\mbox{D}\overline{p}_i}{\mbox{D} t} \nonumber\\ [0.3cm]
 &+& \overline{W} \left[\frac{1}{\rho} \sum_\alpha \frac{1}{W_\alpha} \left(  \dot{m}_\alpha^{\tripleprime} + \dot{m}_{b}^{\tripleprime}[Y_{b,\alpha} - Y_\alpha] - \Div \mathbf{J}_{\alpha} \right) \right] \nonumber\\ [0.3cm]
 &+& \frac{1}{T} \left[ \frac{1}{\rho c_p} \left( \frac{\mbox{D} \overline{p}_i }{\mbox{D} t} - \Div\dot{\mathbf{q}}^{\prime\prime}  - \sum_\alpha \Delta h^\circ_\alpha \dot{m}_\alpha^{\tripleprime} - \sum_\alpha h_{s,\alpha}\left(  \dot{m}_\alpha^{\tripleprime} - \Div \mathbf{J}_{\alpha} \right) \right. \right. \nonumber\\ [0.3cm]
-& & \left. \left. \hspace{0.5cm} - \dot{q}_b^\tripleprime -\dot{m}_{b}^{\tripleprime} \left\{\sum_\alpha Y_{b,\alpha} \int_{T_b}^{T} c_{p,\alpha}(T^\prime) \,\mbox{d}T^\prime  + \mbox{$\frac{1}{2}$}\left|\mathbf{u}_b-\mathbf{u}\right|^2 \right\} \right) \right] \,\mbox{.} 
+& & \left. \left. \hspace{0.5cm} - \dot{q}_b^\tripleprime -\dot{m}_{b}^{\tripleprime} \left\{\sum_\alpha Y_{b,\alpha} \int_{T_b}^{T} c_{p,\alpha}(T^\prime) \,\mbox{d}T^\prime  + \mbox{$\frac{1}{2}$}\left|\mathbf{u}_b-\mathbf{u}\right|^2 \right\} \right) \right] \,\mbox{.}
 \end{eqnarray}
 \vspace{0.3cm}
 
@@ -935,7 +935,7 @@ It can be easily seen that increasing the path-length leads to lower effective a
 
 \subsubsection{Absorption Coefficients of Selected Fuels}
 
-Absorption coefficients are determined from Eqn. \ref{eqn_effcoeff}. The data used in determining the coefficients is listed in Table \ref{tbl_wavnum}. When available, spectrally resolved absorption coefficients are used for determining the total transmitted fraction of radiation according to Eqns. \ref{eqn_beerslaw} and \ref{eqn_totintens}.  The transmission data in Suo-Anttila et al. 2009 \cite{Suo-Anttila:PCT2009} was used for JP-8, ethanol and toluene. The spectrally resolved absorption coefficients from Keefe et al. were used to calculate the total transmission for toluene, benzene, water and methanol. Complex refractive index spectra of diesel reported by Sazhin et al. 2004a \cite{Sazhin:JHT2004a} was used to calculate the transmission.
+Absorption coefficients are determined from Eq.~\ref{eqn_effcoeff}. The data used in determining the coefficients is listed in Table~\ref{tbl_wavnum}. When available, spectrally resolved absorption coefficients are used for determining the total transmitted fraction of radiation according to Eqns. \ref{eqn_beerslaw} and \ref{eqn_totintens}.  The transmission data in Suo-Anttila et al. 2009 \cite{Suo-Anttila:PCT2009} was used for JP-8, ethanol and toluene. The spectrally resolved absorption coefficients from Keefe et al. were used to calculate the total transmission for toluene, benzene, water and methanol. Complex refractive index spectra of diesel reported by Sazhin et al. 2004a \cite{Sazhin:JHT2004a} was used to calculate the transmission.
 
 Figure \ref{fig_trans2} and Figure \ref{fig_trans3} show the transmitted fraction of radiation predicted by the FDS radiation model with the absorption coefficients listed in Table \ref{tbl_abscoeff}, compared with the total transmission calculated from Eqn. \ref{eqn_beerslaw}.
 

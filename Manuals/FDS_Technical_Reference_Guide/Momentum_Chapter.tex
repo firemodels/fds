@@ -8,7 +8,7 @@ pressure.
 \section{Simplifying the Momentum Equation}
 
 First, we start with the non-conservative form of the momentum equation introduced above
-\be \rho \left( \dod{\bu}{t} + (\bu \cdot \nabla)\bu  \right) + \nabla p = \rho \bg + \bof_b + \nabla\!\cdot \btau_{ij}  \ee
+\be \rho \left( \dod{\bu}{t} + (\bu \cdot \nabla)\bu  \right) + \nabla p = \rho \bg + \bof_b + \nabla\!\cdot \btau_{ij}  \label{momentum} \ee
 Next, we make the following substitutions:
 \begin{enumerate}
 \item Subtract the hydrostatic pressure gradient of the $n$th pressure zone, $\rho_n(z,t) \bg$, from both sides. Note that
@@ -123,7 +123,7 @@ which is consistent with the scheme used for the continuity equation.
 \ee
 The subscript $i+\ha$ indicates that a variable is an average of its
 values at the $i$th and the $(i+1)$th cell.
-By construction, the divergence defined in Eq.~(\ref{divdis})
+By construction, the divergence defined in Eq.~(\ref{eqn_divfromeos})
 is identically equal to the divergence defined by
 \be (\nabla\!\cdot \bu)_{ijk} = \frac{u_{ijk}-u_{i-1,jk}}{\dx} +
                                \frac{v_{ijk}-v_{i,j-1,k}}{\dy} +
@@ -168,7 +168,7 @@ the rate at which kinetic energy is converted to thermal energy by viscosity:
    \left(\dod{u}{x}+\dod{v}{y} + \dod{w}{z} \right)^2  \right]  \label{dissipation} \end{align}
 This term is usually neglected in the energy conservation equation because it is very small relative to the heat release rate of
 the fire. To understand where this term originates, form an evolution equation for the kinetic energy of the fluid by
-taking the dot product of the momentum equation (\ref{momentum}) with the velocity vector\footnote{In this section
+taking the dot product of the momentum equation (\ref{momeq}) with the velocity vector\footnote{In this section
 it is convenient to work with the Lagrangian form of the conservation equations. }:
 \be \rho \, \frac{\mbox{D}\bu}{\mbox{D}t} \cdot \bu = \rho  \, \frac{\mbox{D}\left(|\bu|^2/2\right)}{\mbox{D}t} =
     \rho \bof_b \cdot \bu - \nabla p \cdot \bu + \nabla\!\cdot (\btau_{ij} \cdot \bu) - \epsilon \ee
@@ -483,7 +483,7 @@ at the predictor step, and then
          \ha \left[ (\nabla\!\cdot \bu)_{ijk}^*
        + (\nabla\!\cdot \bu)_{ijk}^n \right]}{\dt/2} \ee
 at the corrector step. The discretization of the divergence is
-given in Eq.~(\ref{divdis}).
+given in Eq.~(\ref{eqn_divfromeos}).
 
 
 \subsection{Open Boundary Conditions}
@@ -608,7 +608,7 @@ derivative of divergence in the pressure equation:
 \be
 \label{eqn_poisson_stg1}
 \nabla^2 {\cH}^n = -\left(\frac{ \nabla\!\cdot \bu^* - \nabla\!\cdot \bu^n - \nabla\!\cdot (\bar{\bu}^n - \bu^n) }{\delta t}\right) -
-  \mathbf{F}(\bar{\mathbf{u}}^n) 
+  \mathbf{F}(\bar{\mathbf{u}}^n)
 \ee
 The extra term in the time derivative, $\nabla\!\cdot (\bar{\bu}^n - \bu^n)$, ``corrects'' the divergence error.
 The benefit to averaging the normal components of velocity at mesh interfaces is that $\mathbf{F}$ is the same on each side of the interface,
