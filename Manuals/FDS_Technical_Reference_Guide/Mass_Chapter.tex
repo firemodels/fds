@@ -1,19 +1,185 @@
 \chapter{Mass and Species Transport Equations}
 
+This chapter describes in detail the finite difference approximation of the mass and species conservation equations.
+Due to the use of the low Mach number approximation, the energy conservation equation is defined implicitly via the divergence of the flow field, which contains the combustion and radiation source terms.
+
+\section{Discretizing the Convective and Diffusive Transport Terms}
+
+The density at the center of the $ijk$th cell is updated in time with the following predictor-corrector scheme. Advection terms are written in ``flux divergence'' form. In the predictor step, the density at the $(n+1)$st time level is estimated based on information at the $n$th level
+\be  \frac{\rho_{ijk}^{*}-\rho_{ijk}^n}{\dt}
+    + \nabla\!\cdot(\overline{\rho}^{FL} \mathbf{u})_{ijk}^n = 0
+\ee
+The quantity $\overline{\rho}^{FL}$ indicates a \emph{flux limiter} applied to the cell face value, as discussed below in Section \ref{sec_flux_limiters}.
+
+Following the prediction of the velocity and background pressure at the $(n+1)$st time level, the density is corrected via
+\be \frac{\rho_{ijk}^{n+1}-\ha\left(\rho_{ijk}^n
+     +\rho_{ijk}^{*}\right)} {\ha \dt}
+    + \nabla\!\cdot(\overline{\rho}^{FL} \mathbf{u})_{ijk}^{*}
+    = 0 \ee
+The species conservation equations are differenced the same way, with the addition of the diffusion term (including turbulent diffusion):
+\be  \frac{(\rho Z_\alpha)_{ijk}^{*}-(\rho Z_\alpha)_{ijk}^n}{\dt}
+  + \nabla\!\cdot(\overline{\rho Z_\alpha}^{FL} \mathbf{u})_{ijk}^n
+  = \nabla\!\cdot (\rho D_\alpha \nabla Z_\alpha)_{ijk}^n \ee
+at the predictor step, and
+\be \frac{(\rho Z_\alpha)_{ijk}^{n+1}-\ha\left((\rho Z_\alpha)_{ijk}^n
+     +(\rho Z_\alpha)_{ijk}^{*}\right)} {\ha \dt}
+    + \nabla\!\cdot(\overline{\rho Z_\alpha}^{FL} \mathbf{u})_{ijk}^*
+    = \nabla\!\cdot (\rho D_\alpha \nabla Z_\alpha)_{ijk}^{*} \ee
+at the corrector step.
+
+Mass source terms due to chemistry, evaporation, or pyrolysis are time split and applied after the corrector step (see Section \ref{sec_time_splitting}).
+
+
+\subsection{Flux Limiters}
+\label{sec_flux_limiters}
+
+A \emph{flux limiter} is a form of interpolation scheme which depends on the local state of the flow field and scalar data. Simple linear interpolation of the cell-centered scalar data to the cell face would result in a central differencing scheme.  Such purely centered schemes are known to generate intolerable levels of dispersion error (spurious wiggles) leading to unphysical results such as negative densities or mass fractions outside the range of [0,1].  To address this issue, FDS has relied on a \emph{flux correction} scheme (see Appendix \ref{app_boundedness}) which adds a sufficient amount of numerical diffusion to maintain boundedness.  There is, however, more to the problem.
+
+For uniform flow velocity, a fundamental property of the exact solution to the equations governing scalar transport is that the total variation of the scalar field (the sum of the absolute values of the scalar differences between neighboring cells) is preserved or diminished (never increased).  In other words, no new extrema are created.  Numerical schemes which preserve this property are referred to as total variation diminishing (TVD) schemes.  The practical importance of using a TVD scheme for fire modelling is that such a scheme is able to accurately track coherent vortex structure in turbulent flames and does not develop spurious reaction zones.
+
+FDS employs two popular second-order TVD schemes as options for scalar transport: Superbee and CHARM.  Superbee \cite{Roe:1986} is recommended for LES because it more accurately preserves the scalar variance for coarse grid solutions which are not expected to be smooth.  Due to the gradient steepening applied in Superbee, however, the convergence degrades at small grid spacing for smooth solutions (the method will revert to a stair-step pattern instead of the exact solution).  CHARM \cite{Zhou:1995}, though slightly more dissipative than Superbee, is convergent, and is therefore the better choice for DNS calculations where the flame front is well resolved.
+
+When a flux limiter is chosen for scalar transport, FDS formulates the density and species advection terms in ``flux divergence'' form.  For example, the predictor step of the continuity equation is discretized as
+\be  \frac{\rho_{ijk}^* - \rho_{ijk}^n}{\dt}
+    + \nabla\!\cdot(\overline{\rho}^{FL} \mathbf{u})_{ijk}^n = 0
+\ee
+In 1D, we would have
+\be  \frac{\rho_{i}^* - \rho_{i}^n}{\dt}
+    + \frac{\overline{\rho}^{FL}_{i+\frac{1}{2}} u_{i+\frac{1}{2}} - \overline{\rho}^{FL}_{i-\frac{1}{2}} u_{i-\frac{1}{2}}}{\dx} = 0
+\ee
+Note that the $\ha$ index indicates a face value for a particular cell ($i,j,k$). A flux-limited scalar value (density in this case) premultiplies the staggered, face-centered velocity to form the scalar advective flux.
+
+Consider face $i+\frac{1}{2}$ between cells $i$ and $i+1$ and let $\phi$ denote a general scalar variable.  The local ($loc$) and upstream ($up$) data variations are
+\begin{eqnarray}
+\delta \phi_{loc} &=& \phi_{i+1}-\phi_i \nonumber\\
+\delta \phi_{up}  &=& \left\{ \begin{array}{ll} \phi_i-\phi_{i-1} & \mbox{if} \quad u_i>0 \\ \phi_{i+2}-\phi_{i+1} & \mbox{if} \quad u_i<0 \end{array} \right. \nonumber
+\end{eqnarray}
+The limiter function $B(r)$ depends on the upstream-to-local data ratio, $r=\delta \phi_{up}/\delta \phi_{loc}$ \cite{Toro}.  In FDS, options for this function are:
+
+\begin{description}
+\item[Central Differencing]
+\begin{equation} B(r) = 1 \end{equation}
+\item[First-order Upwinding (Godunov's Scheme)]
+\begin{equation} B(r) = 0 \end{equation}
+\item[Superbee] (default for LES mode)
+\begin{equation} B(r) = \max(0,\min(2r,1),\min(r,2)) \end{equation}
+\item[MINMOD]
+\begin{equation} B(r) = \max(0,\min(1,r)) \end{equation}
+Once $B(r)$ has been determined, the scalar face value is found from
+\begin{equation}
+\label{eqn_flux_limiter}
+\overline{\phi}^{FL}_{i+1/2} = \left\{ \begin{array}{lcll} \phi_i &+& B(r) \,\frac{1}{2}(\phi_{i+1}-\phi_i) & \mbox{if} \quad u_i>0 \vspace{0.2 cm}\\
+\phi_{i+1} &+& B(r) \,\frac{1}{2}(\phi_i-\phi_{i+1}) & \mbox{if} \quad u_i<0 \end{array} \right.
+\end{equation}
+\item[CHARM] (default for DNS mode)
+\begin{equation} B(r) = \frac{r(3r+1)}{(r+1)^2} \end{equation}
+For this limiter~\cite{Zhou:1995,Kempf:2003}, the FDS implementation uses the reciprocal definition of the data ratio, $r = \delta C_{loc}/\delta C_{up}$.  The limiter function is given by and the scalar face value is then determined from
+\begin{equation}
+\label{eqn_charm_limiter}
+\overline{\phi}^{FL}_{i+1/2} = \left\{ \begin{array}{lcll} \phi_i &+& B(r) \,\frac{1}{2}(\phi_i-\phi_{i-1}) & \mbox{if} \quad u_i>0 \vspace{0.2 cm}\\
+\phi_{i+1} &+& B(r) \,\frac{1}{2}(\phi_{i+1}-\phi_{i+2}) & \mbox{if} \quad u_i<0 \end{array} \right.
+\end{equation}
+\item[Monotonicity-Preserving 5th-Order (MP5)]
+The MP5 scheme of Suresh and Huynh \cite{Suresh:1997} is based on the keen observation that three points cannot distinguish between extrema and discontinuities.  The functional form of the limiter is not a simple as the three-point schemes described above, so we refer the reader to the original paper or the FDS source code for details.  But the basic idea behind the method is to use a five-point stencil, three upwind and two downwind, to reconstruct the cell face value, considering both accuracy and monotonicity-preserving constraints.  An additional benefit of the MP5 scheme is that it was designed specifically with strong stability-preserving (SSP) Runge-Kutta time discretizations in mind.  The predictor-corrector scheme used by FDS is similar to the second-order SSP scheme described in \cite{Gottlieb:2001}.
+\end{description}
+
+
+\subsubsection{Notes on Implementation}
+
+In practice, we set $r=0$ initially and only compute $r$ if the denominator is not zero.  Note that for $\delta \phi_{loc}=0$ it does not matter which limiter (0-3) is used: all the limiters yield the same scalar face value.  For CHARM, we set both $r=0$ and $B=0$ initially and only compute $B$ if $r>0$ (this requires data variations to have the same sign), else CHARM reduces to Godunov's scheme.
+
+Central differencing, Godunov's scheme, and MINMOD are essentially included for completeness, debugging, and educational purposes.  These schemes have little utility in practice.
+
+\subsection{Time Splitting for Mass Source Terms}
+\label{sec_time_splitting}
+After the corrector step for the transport scheme, source terms are applied to the scalars.  The source terms are evaluated using the results from the corrected scalar transport scheme (denoted with an asterisk *):
+\be
+\frac{(\rho Z_\alpha)_{ijk}^{n+1}-(\rho Z_\alpha)_{ijk}^*}{\dt} =  \dm_{\alpha,ijk}'''(\mathbf{Z}^*,T^*)
+\ee
+
+
+\subsection{Boundary Conditions for Density and Species Mass Fraction}
+
+Gas phase temperatures are defined at cell centers; solid surfaces lie at the
+interface of the gas and solid cell. The numerical expression for the heat lost to the boundary is
+equated with the empirical convective heat transfer
+\be k_{\hbox{\tiny LES}} \frac{T_g - T_s}{\ha \dn} = h \; (T_g-T_s)  \label{ebal} \ee
+where $\ha \dn$ is the distance between the center of the gas cell
+and the surface. The convective heat flux coefficient, $h$, is described in Section~\ref{conflux}.
+
+At solid walls there is no transfer of mass, thus the boundary condition
+for the species mixture $\alpha$ at a wall is simply
+\be Z_{\alpha,s} = Z_{\alpha,gas} \ee
+The species mixture mass fraction, like temperature, is defined at the cell center.
+At forced flow boundaries, either the species mass fraction or
+the mass flux may be specified.
+For specified mass fraction, the boundary value for $Z_\alpha$ is as specified.
+For specified mass flux, the following equation must be solved iteratively
+\be \dot{m}_\alpha'' = u_n \rho_s Z_{\alpha,s}
+  - \rho D_\alpha \frac{Z_{\alpha,g}-Z_{\alpha,s}}{\ha \dn} \ee
+where $\dot{m}_\alpha''$ is the specified mass flux of species mixture $\alpha$,
+$u_n$ is the normal component of velocity at the wall pointing into
+the flow domain, and $\ha \dn$ is the distance between the center of the gas
+cell and the wall. The reason for the iteration is that the density at the surface, $\rho_s$, is a function of
+the species mixture at the surface.
+
+Once the temperature and species mass fractions have been defined at the boundary, the density there is computed from the equation of
+state
+\be  \rho_s = \frac{\overline{p}_m}{ {\cal R} \, T_s \, \sum_\alpha (Z_{\alpha,s}/W_\alpha) }  \ee
+
+
+
+\subsection{Mass and Energy Transfer at Interpolated Mesh Boundaries}
+
+In simulations involving more than one numerical mesh, information has to be passed between meshes, even when
+the meshes are being processed by separate computers. If two meshes abut each other, and the mesh cells are aligned and the same size, then
+one mesh simply uses the density and species mass fractions of the adjacent mesh as the ``ghost'' cell values. However, in cases where the
+mesh cells are not the same size, the exchange of information must be done more carefully. Consider a case where two meshes meet:
+
+\begin{picture}(200,110)(0,-10)
+\setlength{\unitlength}{0.02in}
+\put(120,10){\framebox(20,20){ }}
+\put(120,30){\framebox(20,20){ }}
+\put(140,10){\framebox(40,40){ }}
+\put(100,30){\makebox(0,0){Mesh 1}}
+\put(200,30){\makebox(0,0){Mesh 2}}
+\thicklines
+\put(140,0){\line(0,1){60}}
+\end{picture}
+
+\noindent
+We want the total and species mass fluxes between meshes to be the same, or as close as possible.
+Let the density in cell $(1,j',k')$ of Mesh 2 be denoted $\rho_{1,j'k'}^{(2)}$. Assume that this cell abuts four cells in Mesh 1. The densities in the four abutting cells
+of Mesh 1 are denoted $\rho_{I,jk}^{(1)}$. Note that $j$ and $k$ are not the same as $j'$ and $k'$. $I$ is the number of cells in the $x$ direction of Mesh 1. The
+ghost cell quantities in Mesh 1 have an $i$ index of $I+1$. The ghost cell quantities in Mesh 2 have an $i$ index of 0.
+We want to assert mass conservation at the mesh interface:
+\be
+   \sum_{j,k} u_{I,jk}^{(1)} \; \frac{\rho_{I+1,jk}^{(1)}+\rho_{I,jk}^{(1)}}{2} \; \dy^{(1)} \, \dz^{(1)}  =
+              u_{0,j'k'}^{(2)} \; \frac{\rho_{1,j'k'}^{(2)}+\rho_{0,j'k'}^{(2)}}{2} \; \dy^{(2)} \, \dz^{(2)}  \label{rhou}
+\ee
+When solving for $\rho_{0,j'k'}^{(2)}$, the ghost cell value for Mesh 2, we have to assume that the ghost cells values for Mesh 1 are simply linearly interpolated
+from the gas phase values of Mesh 1 and Mesh 2:
+\be \rho_{I+1,jk}^{(1)} = \rho_{I,jk}^{(1)} + \frac{2 \, \dx^{(1)}}{\dx^{(1)}+\dx^{(2)}} \left( \rho_{1,j'k'}^{(2)} - \rho_{I,jk}^{(1)} \right)  \label{ghostrho} \ee
+Rearranging terms in Eq.~(\ref{rhou}) and using the expression for the ghost cells from Eq.~(\ref{ghostrho}), we get:
+\be \rho_{0,j'k'}^{(2)} = -\rho_{1,j'k'}^{(2)} + \frac{1}{u_{0,j'k'}^{(2)} \dy^{(2)} \, \dz^{(2)} } \sum_{j,k}  u_{1,jk}^{(1)} \dy^{(1)} \, \dz^{(1)}
+    \left[ 2 \, \rho_{I,jk}^{(1)} +  \frac{2 \, \dx^{(1)}}{\dx^{(1)}+\dx^{(2)}}  \left( \rho_{1,j'k'}^{(2)} - \rho_{I,jk}^{(1)} \right)  \right]  \ee
+
+\newpage
+
+\section{The Equation of State}
+
 A distinguishing feature of a CFD model is the regime of
 flow speeds (relative to the speed of sound) for which it is designed. High
 speed flow codes involve compressibility effects and shock waves. Low speed
 solvers, however, explicitly eliminate compressibility effects that give rise
 to acoustic (sound) waves. The Navier-Stokes equations describe the
-propagation of information at speeds comparable to that of the fluid flow (for fire, 10-20~m/s),
+propagation of information at speeds comparable to that of the fluid flow (for fire, approximately 10~m/s),
 but also at speeds comparable to that of sound waves (for still air,
 300~m/s). Solving a discretized form of these equations would require extremely small
 time steps in order to account for information traveling at the speed of sound, making
 practical simulations difficult.
 
-\section{The Low Mach Number Assumption}
-
-Following the work of Rehm and Baum~\cite{Rehm:1}, an approximation to the equation of state~(\ref{basicstate}) is made by decomposing the pressure
+Following the work of Rehm and Baum~\cite{Rehm:1}, an approximation to the equation of state is made by decomposing the pressure
 into a ``background'' component and a perturbation. The original version of FDS assumed that the background component of the pressure
 applied to the entire computational domain, most often a single compartment. Starting in FDS version 5, it is now assumed that
 the background component of pressure can differ from compartment to compartment. If
@@ -53,7 +219,7 @@ It can then be shown that for $\Gamma \ne 0$ the pressure stratification becomes
 \ee
 
 
-\section{Combination of the Mass and Energy Equations via the Divergence}
+\section{The Divergence}
 
 Because of the low Mach number assumption, the divergence of the flow, $\nabla\!\cdot \bu$, plays a very important role in the overall solution scheme. The divergence is obtained by taking the material (substantial) derivative
 of the modified Equation of State~(\ref{state}), and then substituting terms from the mass
@@ -92,114 +258,11 @@ Equation~(\ref{concon}) is essentially a consistency condition, ensuring that bl
 compartment leads to an appropriate decrease in the divergence within the volume.
 
 
-\clearpage
-\section{Numerical Method}
-
-Due to the use of the low Mach number approximation, the mass and energy equations are combined through the divergence. The divergence of the flow field contains many of the fire-specific source terms described above.
-
-\subsection{Discretizing the Convective and Diffusive Transport Terms}
-
-The density at the center of the $ijk$th cell is updated in time with the following predictor-corrector scheme. Advection terms are written in ``flux divergence'' form. In the predictor step, the density at the $(n+1)$st time level is estimated based on information at the $n$th level
-\be  \frac{\rho_{ijk}^{*}-\rho_{ijk}^n}{\dt}
-    + \nabla\!\cdot(\overline{\rho}^{FL} \mathbf{u})_{ijk}^n = 0
-\ee
-The quantity $\overline{\rho}^{FL}$ indicates a \emph{flux limiter} applied to the cell face value, as discussed below in Section \ref{sec_flux_limiters}.
-
-Following the prediction of the velocity and background pressure at the $(n+1)$st time level, the density is corrected via
-\be \frac{\rho_{ijk}^{n+1}-\ha\left(\rho_{ijk}^n
-     +\rho_{ijk}^{*}\right)} {\ha \dt}
-    + \nabla\!\cdot(\overline{\rho}^{FL} \mathbf{u})_{ijk}^{*}
-    = 0 \ee
-The species conservation equations are differenced the same way, with the addition of the diffusion term (including turbulent diffusion):
-\be  \frac{(\rho Z_\alpha)_{ijk}^{*}-(\rho Z_\alpha)_{ijk}^n}{\dt}
-  + \nabla\!\cdot(\overline{\rho Z_\alpha}^{FL} \mathbf{u})_{ijk}^n
-  = \nabla\!\cdot (\rho D_\alpha \nabla Z_\alpha)_{ijk}^n \ee
-at the predictor step, and
-\be \frac{(\rho Z_\alpha)_{ijk}^{n+1}-\ha\left((\rho Z_\alpha)_{ijk}^n
-     +(\rho Z_\alpha)_{ijk}^{*}\right)} {\ha \dt}
-    + \nabla\!\cdot(\overline{\rho Z_\alpha}^{FL} \mathbf{u})_{ijk}^*
-    = \nabla\!\cdot (\rho D_\alpha \nabla Z_\alpha)_{ijk}^{*} \ee
-at the corrector step.
-
-Mass source terms due to chemistry, evaporation, or pyrolysis are time split and applied after the corrector step (see Section \ref{sec_time_splitting}).
-
-
-\subsection{Flux Limiters}
-\label{sec_flux_limiters}
-
-A \emph{flux limiter} is a form of interpolation scheme which depends on the local state of the flow field and scalar data. Simple linear interpolation of the cell-centered scalar data to the cell face would result in a central differencing scheme.  Such purely centered schemes are known to generate intolerable levels of dispersion error (spurious wiggles) leading to unphysical results such as negative densities or mass fractions outside the range of [0,1].  To address this issue, FDS has relied on a \emph{flux correction} scheme (see Appendix \ref{app_boundedness}) which adds a sufficient amount of numerical diffusion to maintain boundedness.  There is, however, more to the problem.
-
-For uniform flow velocity, a fundamental property of the exact solution to the equations governing scalar transport is that the total variation of the scalar field (the sum of the absolute values of the scalar differences between neighboring cells) is preserved or diminished (never increased).  In other words, no new extrema are created.  Numerical schemes which preserve this property are referred to as total variation diminishing (TVD) schemes.  The practical importance of using a TVD scheme for fire modelling is that such a scheme is able to accurately track coherent vortex structure in turbulent flames and does not develop spurious reaction zones.
-
-FDS employs two popular second-order TVD schemes as options for scalar transport: Superbee and CHARM.  Superbee \cite{Roe:1986} is recommended for LES because it more accurately preserves the scalar variance for coarse grid solutions which are not expected to be smooth.  Due to the gradient steepening applied in Superbee, however, the convergence degrades at small grid spacing for smooth solutions (the method will revert to a stair-step pattern instead of the exact solution).  CHARM \cite{Zhou:1995}, though slightly more dissipative than Superbee, is convergent, and is therefore the better choice for DNS calculations where the flame front is well resolved.
-
-When a flux limiter is chosen for scalar transport (set {\ct FLUX\_LIMITER=1-4} on {\ct MISC}; 2 by default for LES, 4 for DNS), FDS formulates the density and species advection terms in ``flux divergence'' form.  For example, the predictor step of the continuity equation is discretized as
-\be  \frac{\rho_{ijk}^{(n+1)_e}-\rho_{ijk}^n}{\dt}
-    + \nabla\!\cdot(\overline{\rho}^{FL} \mathbf{u})_{ijk}^n = 0
-\ee
-In 1D, we would have
-\be  \frac{\rho_{i}^{(n+1)_e}-\rho_{i}^n}{\dt}
-    + \frac{\overline{\rho}^{FL}_{i+\frac{1}{2}} u_{i+\frac{1}{2}} - \overline{\rho}^{FL}_{i-\frac{1}{2}} u_{i-\frac{1}{2}}}{\dx} = 0
-\ee
-Note that the `1/2' indicates a face value for a particular cell ($i,j,k$). A flux-limited scalar value (density in this case) premultiplies the staggered, face-centered velocity to form the scalar advective flux.
-
-Consider face $i+\frac{1}{2}$ between cells $i$ and $i+1$ and let $\phi$ denote a general scalar variable.  The local ($loc$) and upstream ($up$) data variations are
-\begin{eqnarray}
-\delta \phi_{loc} &=& \phi_{i+1}-\phi_i \nonumber\\
-\delta \phi_{up}  &=& \left\{ \begin{array}{ll} \phi_i-\phi_{i-1} & \mbox{if} \quad u_i>0 \\ \phi_{i+2}-\phi_{i+1} & \mbox{if} \quad u_i<0 \end{array} \right. \nonumber
-\end{eqnarray}
-The limiter function $B(r)$ depends on the upstream-to-local data ratio, $r=\delta \phi_{up}/\delta \phi_{loc}$ \cite{Toro}.  In FDS, options for this function are:
-\begin{enumerate}
-\item[]{\tt FLUX\_LIMITER=0\,\,\,} Central Differencing  \begin{equation} B(r) = 1 \end{equation}
-\item[]{\tt FLUX\_LIMITER=1\,\,\,} First-order Upwinding (Godunov's Scheme) \begin{equation} B(r) = 0 \end{equation}
-\item[]{\tt FLUX\_LIMITER=2\,\,\,} Superbee (recommended for LES) \begin{equation} B(r) = \max(0,\min(2r,1),\min(r,2)) \end{equation}
-\item[]{\tt FLUX\_LIMITER=3\,\,\,} MINMOD \begin{equation} B(r) = \max(0,\min(1,r)) \end{equation}
-\item[]
-Once $B(r)$ has been determined, the scalar face value is found from
-\begin{equation}
-\label{eqn_flux_limiter}
-\overline{\phi}^{FL}_{i+1/2} = \left\{ \begin{array}{lcll} \phi_i &+& B(r) \,\frac{1}{2}(\phi_{i+1}-\phi_i) & \mbox{if} \quad u_i>0 \vspace{0.2 cm}\\
-\phi_{i+1} &+& B(r) \,\frac{1}{2}(\phi_i-\phi_{i+1}) & \mbox{if} \quad u_i<0 \end{array} \right.
-\end{equation}
-\item[]{\tt FLUX\_LIMITER=4\,\,\,} CHARM
-\item[] For this limiter the FDS implementation uses the reciprocal definition of the data ratio, $r = \delta C_{loc}/\delta C_{up}$.  The limiter function is given by \cite{Zhou:1995,Kempf:2003}
-\begin{equation}
-B(r) = \frac{r(3r+1)}{(r+1)^2}
-\end{equation}
-and the scalar face value is then determined from
-\begin{equation}
-\label{eqn_charm_limiter}
-\overline{\phi}^{FL}_{i+1/2} = \left\{ \begin{array}{lcll} \phi_i &+& B(r) \,\frac{1}{2}(\phi_i-\phi_{i-1}) & \mbox{if} \quad u_i>0 \vspace{0.2 cm}\\
-\phi_{i+1} &+& B(r) \,\frac{1}{2}(\phi_{i+1}-\phi_{i+2}) & \mbox{if} \quad u_i<0 \end{array} \right.
-\end{equation}
-\item[]{\tt FLUX\_LIMITER=5\,\,\,} Monotonicity-Preserving 5th-Order (MP5)
-\item[] The MP5 scheme of Suresh and Huynh \cite{Suresh:1997} is based on the keen observation that three points cannot distinguish between extrema and discontinuities.  The functional form of the limiter is not a simple as the three-point schemes described above, so we refer the reader to the original paper or the FDS source code for details.  But the basic idea behind the method is to use a five-point stencil, three upwind and two downwind, to reconstruct the cell face value, considering both accuracy and monotonicity-preserving constraints.  An additional benefit of the MP5 scheme is that it was designed specifically with strong stability-preserving (SSP) Runge-Kutta time discretizations in mind.  The predictor-corrector scheme used by FDS is similar to the second-order SSP scheme described in \cite{Gottlieb:2001}.
-\end{enumerate}
-
-\subsection*{Notes on Implementation}
-
-In practice, we set $r=0$ initially and only compute $r$ if the denominator is not zero.  Note that for $\delta \phi_{loc}=0$ it does not matter which limiter (0-3) is used: all the limiters yield the same scalar face value.  For CHARM, we set both $r=0$ and $B=0$ initially and only compute $B$ if $r>0$ (this requires data variations to have the same sign), else CHARM reduces to Godunov's scheme.
-
-Central differencing ({\tt FLUX\_LIMITER=0}), Godunov's scheme ({\tt FLUX\_LIMITER=1}), and MINMOD ({\tt FLUX\_LIMITER=3}) are essentially included for completeness, debugging, and educational purposes.  These schemes have little utility in practice.
-
-\subsection{Time Splitting for Mass Source Terms}
-\label{sec_time_splitting}
-After the corrector step for the transport scheme, source terms are applied to the scalars.  The source terms are evaluated using the results from the corrected scalar transport scheme (denoted with an asterisk *):
-\be
-\frac{(\rho Z_\alpha)_{ijk}^{n+1}-(\rho Z_\alpha)_{ijk}^*}{\dt} =  \dm_{\alpha,ijk}'''(\mathbf{Z}^*,T^*)
-\ee
-
-
 \subsection{Discretizing the Divergence}
 \label{div_discret}
 
-The divergence (see Eq.~(\ref{eqn_divfromeos})) in the $m$th pressure zone in both the predictor and corrector step
-is discretized
-\be (\nabla\!\cdot \bu)_{ijk} = \frac{\R}{\bW c_p \bp_m} \left( \dq_{ijk}''' + (\nabla\!\cdot k \nabla T)_{ijk}
-    + \ldots \right) + \frac{1}{\bp_n} \left( \frac{\R}{\bW c_p} -1 \right)
-      \left( \dod{\bp_m}{t} - w_{ijk} \rho_{0,k} g \right) \label{divdis} \ee
-The thermal and material diffusion terms are pure central differences,
-with no upwind or downwind bias, thus they are differenced the same
+The thermal and material diffusion terms of Eq.~(\ref{eqn_divfromeos}) are pure second-order central differences,
+with no upwind or downwind bias; thus, they are differenced the same
 way in both the predictor and corrector steps. For example, the thermal
 conduction term is differenced as follows:
 \begin{eqnarray}
@@ -214,25 +277,17 @@ conduction term is differenced as follows:
          \left[k_{ij,k+\ha}\frac{T_{ij,k+1}-T_{ijk}}{\dz}
               -k_{ij,k-\ha}\frac{T_{ijk}-T_{ij,k-1}}{\dz}\right]
 \end{eqnarray}
-The temperature is extracted from the density via the equation of state
+The thermal conductivity at the cell interface, denoted by the $\ha$ cell index, is the average of its values in the two adjacent cells.
+The gas temperature, $T$, is derived from the density and species mass fractions via the equation of state:
 \be T_{ijk} = \frac{\bp_m}{\rho_{ijk} {\cal R}\, \sum_{\alpha=0}^{N_s} (Z_{\alpha,ijk}/W_\alpha)}\ee
-
 Because only species 1 through $N_s$ are explicitly computed
-
-\be Z_0 =  1 -  \sum_{\alpha=0}^{N_s} (Z_{\alpha,ijk} \ee
-
+\be Z_{0,ijk} =  1 -  \sum_{\alpha=1}^{N_s} Z_{\alpha,ijk} \ee
 The molecular weight, $\bW_\alpha$, of the lumped species $Z_\alpha$ is computed as
-
 \be \bW_\alpha =  \sum_{n=0}^{N_s} \frac{Y_n}{W_n} \ee
-
 where $Y_n$ is the mass fraction of species $n$ in the lumped species $Z_\alpha$.
 
-In isothermal calculations involving multiple species, the density
-can be extracted from the average molecular weight
-\be \rho_{ijk} =  \frac{ p_m}{T_\infty {\cal R } \bW } =
-   \frac{W_0\,p_m}{T_\infty {\cal R }} + \sum_{\alpha=1}^{N_s} \left( 1-\frac{W_0}{W_\alpha} \right)
-   (\rho Z_\alpha)_{ijk} \ee
 
+\subsubsection{Computing the Background Pressure Rise}
 
 To describe how the background pressure of the $m$th pressure zone, $\bp_m$, is updated in time, consider the expression for the
 divergence written in compact notation:
@@ -280,7 +335,7 @@ come into equilibrium very rapidly, but air movements associated with rapid chan
 FDS should not be used for rapid discharge of pressure vessels.
 
 
-\subsection{Enthalpy and Specific Heat}
+\subsubsection{Enthalpy and Specific Heat}
 \label{HandCp}
 
 The sensible enthalpy is a function of the temperature:
@@ -291,105 +346,3 @@ The values for $h_{s,n}$ and $c_{p,n}$ are obtained by table lookup from the NIS
 The values are taken to the nearest degree Kelvin.
 
 
-\subsection{Coupling the Gas and Solid Phase}
-
-Gas phase temperatures are defined at cell centers; solid surfaces lie at the
-interface of the bordering gas phase cell and a ``ghost'' cell inside the
-solid. As far as the gas phase calculation is concerned,
-the normal temperature gradient at the surface is expressed in terms of
-the temperature difference between the ``gas'' cell and the ``ghost'' cell.
-The solid surface temperature is not used directly in the gas phase calculation.
-Rather, the ghost cell temperature is used to couple the gas and solid phases.
-The ghost cell temperature
-has no physical meaning on its own. It is purely a numerical construct. It does
-not represent the temperature within the wall, but rather establishes
-a temperature gradient at the solid surface consistent with the empirical
-correlation. Only the difference between ghost and
-gas cell temperatures matters, for this defines the heat transfer to the
-wall.
-
-In a DNS calculation, the solid surface temperature is assumed to be an average of the
-ghost cell temperature and the temperature of the first cell in the gas,
-thus the ghost cell temperature is defined
-\be T_{ghost} =  2 T_s - T_{gas}  \ee
-For an LES calculation, the numerical expression for the heat lost to the boundary is
-equated with the empirical convective heat transfer
-\be k_{\hbox{\tiny LES}} \frac{T_{gas} - T_{ghost}}{\dn} - \bar{\rho} \, u_n \bar{c}_p (\bar{T}) \, \bar{T}
-   = h \; (T_{gas}-T_s) - \bar{\rho} \, u_n  \, \bar{c}_p(T_s) \, T_s  \label{ebal} \ee
-where $\dn$ is the distance between the center of the ghost cell
-and the center of the gas cell, and the bar over the $T$ and $\rho$ indicate the average of the gas and ghost values:
-\be \overline{T} = \frac{T_{gas}+T_{ghost}}{2}  \quad ; \quad \overline{\rho} = \frac{\rho_{gas} + \rho_{ghost}^*}{2} \ee
-The specific heat is defined:
-\be \bar{c}_p (T) = \frac{1}{T} \int_0^T c_p(T') \, dT' \ee
-Equation~(\ref{ebal}) is solved for $T_{ghost}$,
-so that when the conservation equations are updated, the amount of heat
-lost to the wall is equivalent to the empirical expression on the right
-hand side. Note that the asterisk in the equations above denotes that the value is taken from the previous
-time step.
-
-At solid walls there is no transfer of mass, thus the boundary condition
-for the $l$th species at a wall is simply
-\be Z_{l,ghost} = Z_{l,gas} \ee
-where the subscripts ``ghost'' and ``gas'' are the same as above since
-the mass fraction, like temperature, is defined at cell centers.
-At forced flow boundaries either the mass fraction $Y_{l,w}$ or
-the mass flux $\dot{m}_l''$ of species $l$ may be prescribed.
-Then the ghost cell mass fraction can be derived because, as with
-temperature, the normal gradient of mass fraction is needed in the gas phase
-calculation.
-For cases where the mass fraction is prescribed
-\be Z_{l,ghost} = 2 Z_{l,w} - Z_{l,gas}  \ee
-For cases where the mass flux is prescribed,
-the following equation must be solved iteratively
-\be \dot{m}_l'' = u_n \frac{\rho_{ghost} Z_{l,ghost} + \rho_{gas} Z_{l,gas}}{2}
-  - \rho D \frac{Z_{l,gas}-Z_{l,ghost}}{\dn}
-  \mp \frac{\dt \, u_n^2}{2} \frac{\rho_{gas} Z_{l,gas}
-   -\rho_{ghost} Z_{l,ghost}}{\dn} \ee
-where $\dot{m}_l''$ is the mass flux of species $l$ per unit area,
-$u_n$ is the normal component of velocity at the wall pointing into
-the flow domain, and $\dn$ is the distance between the center of the ghost
-cell and the center of the gas cell. Notice that the last term on the
-right hand side is subtracted at the predictor step and added at the
-corrector step, consistent with the biased upwinding introduced earlier.
-
-Once the temperature and species mass fractions have been defined in the
-ghost cell, the density in the ghost cell is computed from the equation of
-state
-\be  \rho_{ghost} = \frac{p_0}{ {\cal R} \, T_{ghost} \, \sum_l (Z_{l,ghost}/W_l) }  \ee
-
-
-
-\subsection{Mass and Energy Transfer at Interpolated Mesh Boundaries}
-
-In simulations involving more than one numerical mesh, information has to be passed between meshes, even when
-the meshes are being processed by separate computers. If two meshes abut each other, and the mesh cells are aligned and the same size, then
-one mesh simply uses the density and species mass fractions of the adjacent mesh as the ``ghost'' cell values. However, in cases where the
-mesh cells are not the same size, the exchange of information must be done more carefully. Consider a case where two meshes meet:
-
-\begin{picture}(200,110)(0,-10)
-\setlength{\unitlength}{0.02in}
-\put(120,10){\framebox(20,20){ }}
-\put(120,30){\framebox(20,20){ }}
-\put(140,10){\framebox(40,40){ }}
-\put(100,30){\makebox(0,0){Mesh 1}}
-\put(200,30){\makebox(0,0){Mesh 2}}
-\thicklines
-\put(140,0){\line(0,1){60}}
-\end{picture}
-
-\noindent
-We want the total and species mass fluxes between meshes to be the same, or as close as possible.
-Let the density in cell $(1,j',k')$ of Mesh 2 be denoted $\rho_{1,j'k'}^{(2)}$. Assume that this cell abuts four cells in Mesh 1. The densities in the four abutting cells
-of Mesh 1 are denoted $\rho_{I,jk}^{(1)}$. Note that $j$ and $k$ are not the same as $j'$ and $k'$. $I$ is the number of cells in the $x$ direction of Mesh 1. The
-ghost cell quantities in Mesh 1 have an $i$ index of $I+1$. The ghost cell quantities in Mesh 2 have an $i$ index of 0.
-We want to assert mass conservation at the mesh interface:
-\be
-   \sum_{j,k} u_{I,jk}^{(1)} \; \frac{\rho_{I+1,jk}^{(1)}+\rho_{I,jk}^{(1)}}{2} \; \dy^{(1)} \, \dz^{(1)}  =
-              u_{0,j'k'}^{(2)} \; \frac{\rho_{1,j'k'}^{(2)}+\rho_{0,j'k'}^{(2)}}{2} \; \dy^{(2)} \, \dz^{(2)}  \label{rhou}
-\ee
-When solving for $\rho_{0,j'k'}^{(2)}$, the ghost cell value for Mesh 2, we have to assume that the ghost cells values for Mesh 1 are simply linearly interpolated
-from the gas phase values of Mesh 1 and Mesh 2:
-\be \rho_{I+1,jk}^{(1)} = \rho_{I,jk}^{(1)} + \frac{2 \, \dx^{(1)}}{\dx^{(1)}+\dx^{(2)}} \left( \rho_{1,j'k'}^{(2)} - \rho_{I,jk}^{(1)} \right)  \label{ghostrho} \ee
-Rearranging terms in Eq.~(\ref{rhou}) and using the expression for the ghost cells from Eq.~(\ref{ghostrho}), we get:
-\be \rho_{0,j'k'}^{(2)} = -\rho_{1,j'k'}^{(2)} + \frac{1}{u_{0,j'k'}^{(2)} \dy^{(2)} \, \dz^{(2)} } \sum_{j,k}  u_{1,jk}^{(1)} \dy^{(1)} \, \dz^{(1)}
-    \left[ 2 \, \rho_{I,jk}^{(1)} +  \frac{2 \, \dx^{(1)}}{\dx^{(1)}+\dx^{(2)}}  \left( \rho_{1,j'k'}^{(2)} - \rho_{I,jk}^{(1)} \right)  \right]  \ee
