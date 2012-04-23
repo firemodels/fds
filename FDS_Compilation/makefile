@@ -57,21 +57,15 @@ intel_win_32_db : obj = fds_win_32_db
 intel_win_32_db : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwin_serial)
 
-intel_win_32 : FFLAGS = -O2 /Qvec_report0
+intel_win_32 : FFLAGS = -O2 /Qvec_report0 /Qipo
 intel_win_32 : FCOMPL = ifort
 intel_win_32 : obj = fds_win_32
 intel_win_32 : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwin_serial)
 
-intel_win_32all : FFLAGS = -O2 /Qvec_report0
-intel_win_32all : FCOMPL = ifort
-intel_win_32all : obj = fds_win_32
-intel_win_32all : setup_win $(objwin_serial)
-	$(FCOMPL) -o $(obj) $(FFLAGS)  /F100000000 $(objwin_serial)
-
 mpi_intel_win_32 : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
 mpi_intel_win_32 : MPIINCLUDE = "c:\program files\mpich2\include"
-mpi_intel_win_32 : FFLAGS = -O2 /I $(MPIINCLUDE)
+mpi_intel_win_32 : FFLAGS = -O2 /Qipo /I $(MPIINCLUDE)
 mpi_intel_win_32 : FCOMPL = ifort
 mpi_intel_win_32 : obj = fds_mpi_win_32
 mpi_intel_win_32 : setup_win $(objwin_mpi)
@@ -88,7 +82,7 @@ mpi_intel_win_32_db : setup_win $(objwin_mpi)
  #*** note: the following scripts (located in ..\Scripts directory) must be run before running make with this target
  #    ..\Scripts\ifortvars intel64
 
-intel_win_64 : FFLAGS = -O2 /Qvec_report0 
+intel_win_64 : FFLAGS = -O2 /Qvec_report0 /Qipo
 intel_win_64 : FCOMPL = ifort
 intel_win_64 : obj = fds_win_64
 intel_win_64 : setup_win $(objwin_serial)
@@ -102,7 +96,7 @@ intel_win_64_db : setup_win $(objwin_serial)
 
 mpi_intel_win_64 : MPILIB = "c:\program files\mpich2\lib\fmpich2.lib"
 mpi_intel_win_64 : MPIINCLUDE = "c:\program files\mpich2\include"
-mpi_intel_win_64 : FFLAGS = -O2 /Qvec_report0 /I $(MPIINCLUDE)
+mpi_intel_win_64 : FFLAGS = -O2 /Qipo /Qvec_report0 /I $(MPIINCLUDE)
 mpi_intel_win_64 : FCOMPL = ifort
 mpi_intel_win_64 : obj = fds_mpi_win_64
 mpi_intel_win_64 : setup_win $(objwin_mpi)
@@ -118,7 +112,7 @@ mpi_intel_win_64_db : setup_win $(objwin_mpi)
 
 # Intel Compiler for Linux, version 11
 
-intel_linux_32 : FFLAGS = -m32 -O2 -vec_report0
+intel_linux_32 : FFLAGS = -m32 -O2 -vec_report0 -ipo
 intel_linux_32 : LFLAGS = -static-intel
 intel_linux_32 : FCOMPL = ifort
 intel_linux_32 : obj = fds_intel_linux_32
@@ -145,32 +139,25 @@ intel_linux_64_profile : obj = fds_intel_linux_64_profile
 intel_linux_64_profile : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
 
-intel_linux_64 : FFLAGS = -m64 -O2 -vec_report0
+intel_linux_64 : FFLAGS = -m64 -O2 -vec_report0 -ipo
 intel_linux_64 : LFLAGS = -static-intel
 intel_linux_64 : FCOMPL = ifort
 intel_linux_64 : obj = fds_intel_linux_64
 intel_linux_64 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
 
-mpi_intel_linux_32 : FFLAGS = -m32 -O2 -vec_report0
+mpi_intel_linux_32 : FFLAGS = -m32 -O2 -vec_report0 -ipo
 mpi_intel_linux_32 : LFLAGS = -static-intel
 mpi_intel_linux_32 : FCOMPL = mpif77
 mpi_intel_linux_32 : obj = fds_mpi_intel_linux_32
 mpi_intel_linux_32 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_mpi)
 
-mpi_intel_linux_64 : FFLAGS = -m64 -O2 -vec_report0
+mpi_intel_linux_64 : FFLAGS = -m64 -O2 -vec_report0 -ipo
 mpi_intel_linux_64 : LFLAGS = -static-intel
 mpi_intel_linux_64 : FCOMPL = mpif77
 mpi_intel_linux_64 : obj = fds_mpi_intel_linux_64
 mpi_intel_linux_64 : setup $(obj_mpi)
-	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_mpi)
-
-mpi_intel_linux_64ib : FFLAGS = -m64 -O2 -vec_report0
-mpi_intel_linux_64ib : LFLAGS = -static-intel
-mpi_intel_linux_64ib : FCOMPL = mpif77
-mpi_intel_linux_64ib : obj = fds_mpi_intel_linux_64ib
-mpi_intel_linux_64ib : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_mpi)
 
 intel_linux_32_db : FFLAGS = -m32 -check all -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0 -ftrapuv -debug full  -stand:f03
@@ -202,14 +189,14 @@ mpi_intel_linux_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_mpi)
 
 # 32 bit
-intel_osx_32 : FFLAGS = -O2  -m32 -heap-arrays -vec_report0
+intel_osx_32 : FFLAGS = -O2  -m32 -heap-arrays -vec_report0 -ipo
 intel_osx_32 : LFLAGS = -static-intel
 intel_osx_32 : FCOMPL = ifort
 intel_osx_32 : obj = fds_intel_osx_32
 intel_osx_32 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
 
-mpi_intel_osx_32 : FFLAGS  = -O2 -m32 -heap-arrays -vec_report0
+mpi_intel_osx_32 : FFLAGS  = -O2 -m32 -heap-arrays -vec_report0 -ipo
 mpi_intel_osx_32 : LFLAGS  = -L$(MPIDIST)/lib -static-intel
 mpi_intel_osx_32 : FCOMPL  = mpif77
 mpi_intel_osx_32 : obj = fds_mpi_intel_osx_32
@@ -230,17 +217,15 @@ mpi_intel_osx_32_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_mpi)
 
 # 64 bit
-# temporary fix for 64 bit osx build problem
-# un-comment following line if building intel_osx_64 target
-#irad.o:	FFLAGS = -O0 -m64 -heap-arrays
-intel_osx_64 : FFLAGS = -O2 -m64 -heap-arrays
+
+intel_osx_64 : FFLAGS = -O2 -m64 -heap-arrays -ipo
 intel_osx_64 : LFLAGS = -static-intel
 intel_osx_64 : FCOMPL = ifort
 intel_osx_64 : obj = fds_intel_osx_64
 intel_osx_64 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
 
-mpi_intel_osx_64 : FFLAGS  = -O2 -m64 -heap-arrays -vec_report0
+mpi_intel_osx_64 : FFLAGS  = -O2 -m64 -heap-arrays -vec_report0 -ipo
 mpi_intel_osx_64 : LFLAGS  = -L$(MPIDIST)/lib -static-intel
 mpi_intel_osx_64 : FCOMPL  = mpif77
 mpi_intel_osx_64 : obj = fds_mpi_intel_osx_64
