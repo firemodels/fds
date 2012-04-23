@@ -295,6 +295,21 @@ intel_linux_test_64 : exe       = smokeview_linux_test_64
 intel_linux_test_64 : $(obj)
 	$(CPP) -m64 -o $(bin)/$(exe) $(obj) -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS)
 
+# ------------- intel_linux_test_64_dbg ----------------
+
+intel_linux_test_64_dbg : IMAGELIBDIR = $(LIB_DIR)/lib_linux_intel_64
+intel_linux_test_64_dbg : FORTLIBDIR  = $(LINUX64FORTLIBDIR)
+intel_linux_test_64_dbg : FFLAGS    = -O0 -m64 -traceback -g -fpe0 -fltconsistency -WB -vec_report0 -fpp -D pp_noappend
+intel_linux_test_64_dbg : CFLAGS    = -O0 -g -m64 -vec_report0 -D pp_LINUX64 -D pp_BETA
+intel_linux_test_64_dbg : CC        = icc 
+intel_linux_test_64_dbg : CPP       = icpc
+intel_linux_test_64_dbg : FC        = ifort
+intel_linux_test_64_dbg : exe       = smokeview_linux_test_64_dbg
+
+intel_linux_test_64_dbg : $(obj)
+	$(CPP) -m64 -o $(bin)/$(exe) $(obj) -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS)
+
+
 # ------------- intel_linux_64_dbg ----------------
 
 intel_linux_64_dbg : IMAGELIBDIR = $(LIB_DIR)/lib_linux_intel_64
