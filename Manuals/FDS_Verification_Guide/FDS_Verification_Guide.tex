@@ -1362,16 +1362,18 @@ Adding in the work due to the pressure yields the change in total enthalpy:
 
 \subsection{Mixing Gases (\texorpdfstring{{\bf energy\_budget\_dns}}{energy\_budget\_dns})}
 
-In this example, two fictitious gases are forced through tiny ducts (1~mm by 1~mm) that meet at a T-joint. The area of all ducts is the same. Gas~1 has an initial temperature of 606.3~$^\circ$C and a constant specific heat of 1~kJ/kg/K. Gas~2 has an initial temperature of 20~$^\circ$C and a constant specific heat of 10~kJ/kg/K. Both gases have a molecular weight of 29~g/mol and a mass flow of $1 \times 10^{-8}$~kg/s. Note that typically gases of the same molecular weight have comparable, but not necessarily the same, specific heats. This is an extreme case. It is expected that the enthalpy flow at the outlet will be equal to the sum of the enthalpy flows at the inlets. The enthalpy flow in this case is defined:
-\be \int h_s \, \rho \bu \cdot d\bS \equiv \int c_p \, (T-T_\infty) \, \rho \bu \cdot d\bS \ee
-With this definition, the specific enthalpy flow is $6.063 \times 10^{-6}$~kW at Inlet~1 and 0 at Inlet~2. Because of the large difference in specific heats, the average velocity of the gas mixture flowing out, $U_3$, is not simply the sum of the velocities at the two inlets, $U_1+U_2$. In fact, in order to have the proper enthalpy flow at the outlet, the volume integral of the divergence should be:
+In this example, two fictitious gases are forced through tiny ducts (1~mm by 1~mm) that meet at a T-joint. The cross sectional areas of all the ducts are the same. Gas~1 has an initial temperature of 606.3~$^\circ$C and a constant specific heat of 1~kJ/kg/K. Gas~2 has an initial temperature of 20~$^\circ$C and a constant specific heat of 10~kJ/kg/K. Both gases have a molecular weight of 29~g/mol and a mass flow of $1 \times 10^{-8}$~kg/s. Typically gases of the same molecular weight have comparable, but not necessarily the same, specific heats. This is an extreme case. In steady state, it is expected that the convection and diffusion of enthalpy at the boundaries will be equal:
+\be \int h_s \, \rho \bu \cdot d\bS = \sum_\alpha \int h_{s,\alpha} \, \rho D_\alpha \nabla Z_\alpha \cdot d\bS \ee
+The plot at left in Fig.~\ref{energy_budget_dns} shows the convective and diffusive enthalpy fluxes at steady state. The quantities are of opposite sign because both quantities are evaluated as source terms in the energy budget.
+
+Because of the large difference in specific heats, the average velocity of the gas mixture flowing out, $U_3$, is not simply the sum of the velocities at the two inlets, $U_1+U_2$. In fact, in order to have the proper enthalpy flow at the outlet, the volume integral of the divergence should be:
 \be \int \nabla \cdot \bu \; dV \equiv -A \, (U_1 + U_2 - U_3) = -A \, \frac{ (U_1-U_2) \, (c_{p,2}-c_{p,1}) }{ c_{p,1}+c_{p,2} } = -1.357 \times 10^{-8} \; \hbox{m}^3/\hbox{s} \label{div2} \ee
-The plot in Fig.~\ref{energy_budget_dns} shows the resulting and integrated divergence or net volume flow.
+The plot at right in Fig.~\ref{energy_budget_dns} shows the resulting and integrated divergence or net volume flow.
 
 \begin{figure}[ht]
-\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/energy_budget_dns_heat}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/energy_budget_dns_div}
-\caption[Energy conservation for a DNS case.]{Inlet and outlet enthalpy flow for a simple DNS gas mixing case.}
+\caption[Energy conservation for a DNS case.]{(Left) Equality of convective and diffusive enthalpy flux at steady state. (Right) The integrated divergence or net volume flow.}
 \label{energy_budget_dns}
 \end{figure}
 
