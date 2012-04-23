@@ -320,7 +320,7 @@ void TIMEBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLs
     (visTimeLabels==1&&showtime==1)||
     (showtime==1&&
       (visFramerate==1||benchmark==1||
-       (vis_slice_average==1&&show_slice_average&&(slice_average_flag==1||slice_turbprop_flag==1))
+       (vis_slice_average==1&&show_slice_average&&slice_average_flag==1)
       )
       ||(hrrpuv_loaded==1&&show_hrrcutoff==1&&current_mesh!=NULL)
     )
@@ -378,7 +378,7 @@ void TIMEBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLs
       }
       outputText((float)(xtimeright+0.025),0.08f, frameratelabel);
     }
-    if(show_slice_average==1&&vis_slice_average==1&&(slice_average_flag==1||slice_turbprop_flag==1)){
+    if(show_slice_average==1&&vis_slice_average==1&&slice_average_flag==1){
       sprintf(frameratelabel," AVG: %4.1f",slice_average_interval);
       outputText((float)(xtimeright+0.025),0.56, frameratelabel); // test print
     }

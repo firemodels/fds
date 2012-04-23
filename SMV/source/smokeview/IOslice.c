@@ -39,7 +39,6 @@ int getslicezlibdata(char *file,
                             int set_tmin, int set_tmax, float tmin, float tmax, int ncompressed, int sliceskip, int nsliceframes,
                             float *times, unsigned char *compressed_data, compinfo *compindex, float *valmin, float *valmax);
 int average_slice_data(float *data_out, float *data_in, int ndata, int data_per_timestep, float *times, int ntimes, float average_time);
-int auto_turbprop_slice_data(float *data_out, float *u, int ndata, int data_per_timestep, float *times, int ntimes, float average_time);
 int getsliceheader(char *comp_file, char *size_file, int compression_type, 
                    int framestep, int set_tmin, int set_tmax, float tmin, float tmax,
                    int *nx, int *ny, int *nz, int *nsteps, int *ntotal, float *valmin, float *valmax);
@@ -827,24 +826,6 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
         sd->compression_type==1||
         sd->compression_type==2||
         average_slice_data(sd->qslicedata,sd->qslicedata,ndata,data_per_timestep,sd->times,ntimes_local,slice_average_interval)==1
-        ){
-        show_slice_average=0; // averaging failed
-      }
-    }
-    if(slice_turbprop_flag==1){
-      int data_per_timestep;
-      int ndata;
-      int ntimes_local;
-
-      data_per_timestep=sd->nslicei*sd->nslicej*sd->nslicek;
-      ntimes_local=sd->ntimes;
-      ndata = data_per_timestep*ntimes_local;
-      show_slice_average=1;
-
-      if(
-        sd->compression_type==1||
-        sd->compression_type==2||
-        auto_turbprop_slice_data(sd->qslicedata,sd->qslicedata,ndata,data_per_timestep,sd->times,ntimes_local,slice_average_interval)==1
         ){
         show_slice_average=0; // averaging failed
       }
@@ -5794,46 +5775,6 @@ void init_Slicedata(void){
     fileout=NULL;
 
   }
-}
-
-/* ------------------ auto_turbprop_slice_data ------------------------ */
-
-int auto_turbprop_slice_data(float *data_out, float *u, int ndata, int data_per_timestep, float *times_local, int ntimes_local, float average_time){
-  float *u_avg, *u_prime;
-  float *uu_avg;
-  int i;
-
-  // <u'v'>/<u><v>
-
-  NewMemory((void **)&u_avg,ndata*sizeof(float));
-  NewMemory((void **)&uu_avg,ndata*sizeof(float));
-  NewMemory((void **)&u_prime,ndata*sizeof(float));
-
-  average_slice_data(u_avg,u, ndata, data_per_timestep, times_local, ntimes_local, average_time);
-
-  for(i=0;i<ndata;i++){
-    uu_avg[i]=u[i]*u[i];
-    u_prime[i]=u[i]-u_avg[i];
-    u_prime[i]*=u_prime[i];
-  }
-
-  average_slice_data(u_prime,u_prime, ndata, data_per_timestep, times_local, ntimes_local, average_time);
-  average_slice_data(uu_avg,uu_avg, ndata, data_per_timestep, times_local, ntimes_local, average_time);
-
-  for(i=0;i<ndata;i++){
-    if(uu_avg[i]==0.0){
-      data_out[i]=0.0;
-    }
-    else{
-      data_out[i]=u_prime[i]/uu_avg[i];
-    }
-  }
-
-  FREEMEMORY(u_avg);
-  FREEMEMORY(u_prime);
-  FREEMEMORY(uu_avg);
-
-  return 0;
 }
 
 /* ------------------ average_slice_data ------------------------ */

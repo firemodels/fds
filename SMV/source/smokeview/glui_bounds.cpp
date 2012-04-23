@@ -78,8 +78,6 @@ GLUI_Rollout *rollout_slice_chop=NULL;
 #endif
 #define HIDEPATCHSURFACE 25
 #define DATA_transparent 26
-#define AVERAGE_DATA 201
-#define TURB_DATA 202
 #define UNLOAD_QDATA 203
 #define SET_TIME 204
 #define TBOUNDS 205
@@ -633,8 +631,7 @@ extern "C" void glui_bounds_setup(int main_window){
       Slice_CB);
     SPINNER_transparent_level=glui_bounds->add_spinner_to_panel(panel_slice,_("Transparent level"),GLUI_SPINNER_FLOAT,&transparent_level,TRANSPARENTLEVEL,Slice_CB);
     SPINNER_transparent_level->set_float_limits(0.0,1.0);
-    CHECKBOX_average_slice=glui_bounds->add_checkbox_to_panel(panel_slice,_("Averaged slice data"),&slice_average_flag,AVERAGE_DATA,Slice_CB);
-    //CHECKBOX_turb_slice=glui_bounds->add_checkbox_to_panel(panel_slice,"Turbulence Resolution",&slice_turbprop_flag,TURB_DATA,Slice_CB);
+    CHECKBOX_average_slice=glui_bounds->add_checkbox_to_panel(panel_slice,_("Averaged slice data"),&slice_average_flag);
     SPINNER_sliceaverage=glui_bounds->add_spinner_to_panel(panel_slice,_("Time interval"),GLUI_SPINNER_FLOAT,&slice_average_interval);
     {
       float tttmax=120.0;
@@ -2076,18 +2073,6 @@ extern "C" void Slice_CB(int var){
       update_slice_contours(list_slice_index,slice_line_contour_min, slice_line_contour_max,slice_line_contour_num);
       break;
 #endif
-  case AVERAGE_DATA:
-    if(slice_average_flag==1&&slice_turbprop_flag==1){
-      slice_turbprop_flag=0;
-      if(CHECKBOX_turb_slice!=NULL)CHECKBOX_turb_slice->set_int_val(slice_turbprop_flag);
-    }
-    break;
-  case TURB_DATA:
-    if(slice_average_flag==1&&slice_turbprop_flag==1){
-      slice_average_flag=0;
-      CHECKBOX_average_slice->set_int_val(slice_average_flag);
-    }
-    break;
   case UPDATE_VECTOR:
     if(SPINNER_plot3d_vectorpointsize!=NULL&&SPINNER_plot3d_vectorlinewidth!=NULL&&SPINNER_plot3d_vectorlinelength!=NULL){
       SPINNER_plot3d_vectorpointsize->set_float_val(vectorpointsize);
