@@ -102,7 +102,7 @@ void out_slicefile(slicedata *sd){
 
 /* ------------------ Creadslice_frame ------------------------ */
 
-void Creadslice_frame(int frame_index,int sd_index,int flag,int *error){
+int Creadslice_frame(int frame_index,int sd_index,int flag){
   slicedata *sd;
   int slicefilelen;
   int headersize,framesize,statfile;
@@ -110,20 +110,20 @@ void Creadslice_frame(int frame_index,int sd_index,int flag,int *error){
   int skip_local,returncode;
   FILE *SLICEFILE;
   float *time_local,*slicevals;
-
+  int error;
 
   sd = sliceinfo + sd_index;
-  if(sd->loaded==1)readslice(sd->file,sd_index,UNLOAD,error);
+  if(sd->loaded==1)readslice(sd->file,sd_index,UNLOAD,&error);
   if(flag==UNLOAD){
     FREEMEMORY(sd->qslicedata);
     FREEMEMORY(sd->times);
-    return;
+    return 0;
   }
   slicefilelen = strlen(sd->file);
   if(frame_index==0){
     if(sd->compression_type==0){
 
-      FORTgetslicesizes(sd->file, &sd->nslicei, &sd->nslicej, &sd->nslicek, &sd->ntimes, &sliceframestep, &endian_smv,error,
+      FORTgetslicesizes(sd->file, &sd->nslicei, &sd->nslicej, &sd->nslicek, &sd->ntimes, &sliceframestep, &endian_smv,&error,
         &settmin_s, &settmax_s, &tmin_s, &tmax_s, &headersize, &framesize, &statfile,
         slicefilelen);
     }
@@ -132,29 +132,32 @@ void Creadslice_frame(int frame_index,int sd_index,int flag,int *error){
         getsliceheader(sd->comp_file,sd->size_file,sd->compression_type,
                        sliceframestep,settmin_s,settmax_s,tmin_s,tmax_s,
                        &sd->nslicei, &sd->nslicej, &sd->nslicek, &sd->ntimes, &sd->ncompressed, &sd->valmin, &sd->valmax)==0){
-        readslice("",sd_index,UNLOAD,error);
-        *error=1;
-        return;
+        readslice("",sd_index,UNLOAD,&error);
+        return -1;
       }
     }
   }
   skip_local =           (HEADER_SIZE+30        +TRAILER_SIZE); // long label
   skip_local +=          (HEADER_SIZE+30        +TRAILER_SIZE); // short label
   skip_local +=          (HEADER_SIZE+30        +TRAILER_SIZE); // unit label
-  skip_local +=          (HEADER_SIZE+24        +TRAILER_SIZE); // is1, is2, js1, js2, ks1, ks2
+  skip_local +=          (HEADER_SIZE+6*4        +TRAILER_SIZE); // is1, is2, js1, js2, ks1, ks2
   
   frame_size = sd->nslicei*sd->nslicej*sd->nslicek;
-  skip_local += frame_index*(HEADER_SIZE + sizeof(float) + TRAILER_SIZE); // 
-  skip_local += frame_index*(HEADER_SIZE + frame_size*sizeof(float) + TRAILER_SIZE); // 
+  skip_local += frame_index*(HEADER_SIZE + 4 + TRAILER_SIZE); // 
+  skip_local += frame_index*(HEADER_SIZE + frame_size*4 + TRAILER_SIZE); // 
 
   SLICEFILE=fopen(sd->file,"rb");
-  if(SLICEFILE==NULL)return;
+  if(SLICEFILE==NULL){
+    return -1;
+  }
 
   returncode=FSEEK(SLICEFILE,skip_local,SEEK_SET); // skip from beginning of file
 
   if(frame_index==0){
-    NewMemory((void **)&sd->qslicedata,2*frame_size*sizeof(float));
-    NewMemory((void **)&sd->times,sizeof(float));
+    if(NewMemory((void **)&sd->qslicedata,2*frame_size*sizeof(float))==0||
+       NewMemory((void **)&sd->times,sizeof(float))==0){
+      return -1;
+    }
   }
   slicevals=sd->qslicedata;
   if(frame_index%2!=0){
@@ -165,6 +168,7 @@ void Creadslice_frame(int frame_index,int sd_index,int flag,int *error){
   FORTSLICEREAD(time_local,1);
   FORTSLICEREAD(slicevals,frame_size);
   fclose(SLICEFILE);
+  return 0;
 }
 
 /* ------------------ readfed ------------------------ */
@@ -253,9 +257,13 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
 
     printf("\n");
     printf("generating FED slice data\n");
-    Creadslice_frame(0,fedi->o2_index,LOAD,&error_local);
-    Creadslice_frame(0,fedi->co2_index,LOAD,&error_local);
-    Creadslice_frame(0,fedi->co_index,LOAD,&error_local);
+    if(Creadslice_frame(0,fedi->o2_index,LOAD)<0||
+       Creadslice_frame(0,fedi->co2_index,LOAD)<0||
+       Creadslice_frame(0,fedi->co_index,LOAD)<0){
+
+       readfed(file_index,UNLOAD, file_type, errorcode);
+       return;
+    }
 
     fed_slice->is1=co->is1; // nx = is2 + 1 - is1
     fed_slice->is2=co->is2;
@@ -277,8 +285,11 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
     frame_size = fed_slice->nslicei*fed_slice->nslicej*fed_slice->nslicek;
     fed_slice->nslicetotal=frame_size*fed_slice->ntimes;
 
-    NewMemory((void **)&fed_slice->qslicedata,sizeof(float)*frame_size*fed_slice->ntimes);
-    NewMemory((void **)&fed_slice->times,sizeof(float)*fed_slice->ntimes);
+    if(NewMemory((void **)&fed_slice->qslicedata,sizeof(float)*frame_size*fed_slice->ntimes)==0||
+       NewMemory((void **)&fed_slice->times,sizeof(float)*fed_slice->ntimes)==0){
+       readfed(file_index,UNLOAD, file_type, errorcode);
+      *errorcode=-1;
+    }
 
     times=fed_slice->times;
     fed_frame=fed_slice->qslicedata;
@@ -302,9 +313,12 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
       int nlevels=6; // 2 extra levels for below 0.0 and above 3.0
       float *areas;
 
-      Creadslice_frame(i,fedi->o2_index,LOAD,&error_local);
-      Creadslice_frame(i,fedi->co2_index,LOAD,&error_local);
-      Creadslice_frame(i,fedi->co_index,LOAD,&error_local);
+      if(Creadslice_frame(i,fedi->o2_index,LOAD)<0||
+         Creadslice_frame(i,fedi->co2_index,LOAD)<0||
+         Creadslice_frame(i,fedi->co_index,LOAD)){
+         readfed(file_index, UNLOAD, file_type,errorcode);
+         return;
+      }
 
       times[i]=co2->times[0];
       printf("generating FED time=%.2f\n",times[i]);
@@ -391,9 +405,9 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
     }
     FREEMEMORY(fed_slice->qslicedata);
     FREEMEMORY(fed_slice->times);
-    Creadslice_frame(0,fedi->o2_index,UNLOAD,&error_local);
-    Creadslice_frame(0,fedi->co2_index,UNLOAD,&error_local);
-    Creadslice_frame(0,fedi->co_index,UNLOAD,&error_local);
+    Creadslice_frame(0,fedi->o2_index,UNLOAD);
+    Creadslice_frame(0,fedi->co2_index,UNLOAD);
+    Creadslice_frame(0,fedi->co_index,UNLOAD);
   }
   if(file_type==FED_SLICE){
     readslice(fed_slice->file,fedi->fed_index,flag,&error_local);
@@ -760,8 +774,8 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
          NewMemory((void **)&sd->times,sizeof(float)*sd->ntimes)==0||
          NewMemory((void **)&sd->compindex,sizeof(compinfo)*(1+sd->ntimes))==0
          ){
-        *errorcode=1;
         readslice("",ifile,UNLOAD,&error);
+        *errorcode=1;
         return;
       }
       datafile = sd->comp_file;
