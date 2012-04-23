@@ -19,9 +19,9 @@ $RUNFDS $INDIR jet_dsmag_dx10cm
 $RUNFDS $INDIR jet_deardorff_dx10cm
 $RUNFDS $INDIR jet_vreman_dx10cm
 
-$RUNFDSMPI 48 $INDIR jet_csmag_dx5cm
-$RUNFDSMPI 48 $INDIR jet_dsmag_dx5cm
-$RUNFDSMPI 48 $INDIR jet_deardorff_dx5cm
-$RUNFDSMPI 48 $INDIR jet_vreman_dx5cm
+$RUNFDSMPI 49 $INDIR jet_csmag_dx5cm
+$RUNFDSMPI 49 $INDIR jet_dsmag_dx5cm
+$RUNFDSMPI 49 $INDIR jet_deardorff_dx5cm
+$RUNFDSMPI 49 $INDIR jet_vreman_dx5cm
 
 echo FDS cases submitted
