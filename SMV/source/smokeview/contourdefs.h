@@ -16,6 +16,8 @@
 #include <GL/glu.h>
 #endif
 
+#define DONT_GET_AREAS 0
+#define GET_AREAS 1
 
 typedef struct {
   float *levels,*areas;
@@ -35,12 +37,12 @@ void getlinecontournodes(double linelevel, const double x[4], const double y[4],
                      int *nline_nodes,float *xline, float *yline,
                      int blankit);
 
-void AreaContours(const contour *ci);
+void GetContourAreas(const contour *ci);
 void DrawContours(const contour *ci);
 void DrawLineContours(const contour *ci, float linewidth);
 void setcontourslice(contour *ci,int idir,float xyz);
 void getcontours(const float *xgrid, const float *ygrid, int nx, int ny,  
-                 const float *vals, const char *iblank, const float *levels,  
+                 const float *vals, const char *iblank, const float *levels,int flag, 
                  const contour *ci);
 void getlinecontours(const  float *xgrid, const float *ygrid, int nx, int ny,  
                  const float *vals, const char *iblank, const float level_min, const float level_max,

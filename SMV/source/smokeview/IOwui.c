@@ -451,7 +451,7 @@ void initterrain_all(void){
     meshi->terrain_contour.xyzval=zmin;
 
     getcontours(meshi->xplt_orig,meshi->yplt_orig,terri->nx+1,terri->ny+1,
-      terri->znode, NULL, terri->levels,
+      terri->znode, NULL, terri->levels,DONT_GET_AREAS,
       &meshi->terrain_contour);
 
   }

@@ -170,12 +170,15 @@ void Creadslice_frame(int frame_index,int sd_index,int flag,int *error){
 /* ------------------ readfed ------------------------ */
 
 
-void readiso_orig(const char *file, int ifile, int flag, int *errorcode);
 void readfed(int file_index, int flag, int file_type, int *errorcode){
   feddata *fedi;
   slicedata *fed_slice,*o2,*co2,*co;
   isodata *fed_iso;
   int error_local;
+  contour *fed_contours=NULL;
+  mesh *meshi;
+  float *xgrid=NULL, *ygrid=NULL;
+  int nx, ny;
 
 #define FEDCO(CO) ( 4.607*pow(1000000.0*CLAMP(CO,0.0,0.1),1.036)/10000000.0 )
 #define FEDO2(O2)  ( exp( -(8.13-0.54*(20.9-100.0*CLAMP(O2,0.0,0.2))) )/60.0 ) 
@@ -205,7 +208,29 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
   co=fedi->co;
   fed_slice=fedi->fed_slice;
   fed_iso=fedi->fed_iso;
+  meshi = meshinfo + fed_slice->blocknumber;
+  switch (fed_slice->idir){
+    case 1:
+      xgrid = meshi->yplt;
+      ygrid = meshi->zplt;
+      nx = meshi->jbar+1;
+      ny = meshi->zbar+1;
+      break;
+    case 2:
+      xgrid = meshi->xplt;
+      ygrid = meshi->zplt;
+      nx = meshi->ibar+1;
+      ny = meshi->zbar+1;
+      break;
+    case 3:
+      xgrid = meshi->xplt;
+      ygrid = meshi->yplt;
+      nx = meshi->ibar+1;
+      ny = meshi->jbar+1;
+      break;
+  }
   readslice(fed_slice->file,fedi->fed_index,UNLOAD,&error_local);
+
   if(flag==UNLOAD)return;
 
   // regenerate if either the FED slice or isosurface file does not exist or is older than
@@ -273,6 +298,9 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
     for(i=1;i<fed_slice->ntimes;i++){
       int j;
       float dt;
+      float levels[6]={0.0,0.3,1.0,3.0};
+      int nlevels=6; // 2 extra levels for below 0.0 and above 3.0
+      float *areas;
 
       Creadslice_frame(i,fedi->o2_index,LOAD,&error_local);
       Creadslice_frame(i,fedi->co2_index,LOAD,&error_local);
@@ -291,10 +319,33 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
         val2=FEDCO(co_frame2[j])*HVCO2(co2_frame2[j])+FEDO2(o2_frame2[j]);
         fed_frame[j] = fed_framem1[j] + (val1+val2)*dt/2.0;
       }
+      if(fed_slice->volslice==0){
+
+      // compute fed areas here
+/* //xxx
+        if(fed_contours==NULL){
+          NewMemory((void **)&fed_contours,sizeof(contour));
+        }
+        else{
+          freecontour(fed_contours);
+        }
+        initcontour(fed_contours,NULL,nlevels);
+        getcontours(xgrid, ygrid, nx, ny, fed_frame, NULL, levels, GET_AREAS, fed_contours);
+        areas = fed_contours->areas;
+        printf("%f",times[i]);
+        for(j=0;j<nlevels;j++){
+          printf(",%f",areas[j]);
+        }
+        printf("\n");
+*/        
+      }
+    }
+    if(fed_contours!=NULL){
+      freecontour(fed_contours);
+      FREEMEMORY(fed_contours);
     }
     out_slicefile(fed_slice);
     if(fed_slice->volslice==1){
-      mesh *meshi;
       float *xplt, *yplt, *zplt;
       int ibar, jbar, kbar;
       char *iblank_cell;
@@ -308,7 +359,6 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
       strcpy(shortlabel,"FED");
       strcpy(unitlabel," ");
 
-      meshi = meshinfo + fed_slice->blocknumber;
       xplt = meshi->xplt;
       yplt = meshi->yplt;
       zplt = meshi->zplt;

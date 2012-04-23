@@ -59,15 +59,14 @@ void to_lower(char *string){
 /* ------------------ Init ------------------------ */
 
 void Init(void){
-  mesh *meshi;
 
-  int n,i;
+  int i;
 
   FREEMEMORY(plotiso);
   NewMemory((void **)&plotiso,mxplot3dvars*sizeof(int));
 
-  for(n=0;n<mxplot3dvars;n++){
-    plotiso[n]=nrgb/2;
+  for(i=0;i<mxplot3dvars;i++){
+    plotiso[i]=nrgb/2;
   }
 
   for(i=0;i<16;i++){
@@ -78,6 +77,8 @@ void Init(void){
   }
 
   for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+
     meshi=meshinfo+i;
     initcontour(&meshi->plot3dcontour1,rgb_plot3d_contour,nrgb);
     initcontour(&meshi->plot3dcontour2,rgb_plot3d_contour,nrgb);
@@ -85,6 +86,8 @@ void Init(void){
   }
 
   for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+
     meshi=meshinfo+i;
     meshi->currentsurf.defined=0;
     meshi->currentsurf2.defined=0;

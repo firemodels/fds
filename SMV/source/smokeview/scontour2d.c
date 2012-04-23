@@ -144,7 +144,6 @@ void initcontours(contour **ci_ptr, float **rgbptr, int ncontours,float constval
 /*  ------------------ initcontour ------------------------ */
 
 void initcontour(contour *ci, float **rgbptr, int nlevels){
-
   int n;
 
   ci->nlevels=nlevels;
@@ -188,6 +187,7 @@ void freecontour(contour *ci){
   int n;
 
   FREEMEMORY(ci->levels);
+  FREEMEMORY(ci->areas);
   FREEMEMORY(ci->nnodes);
   FREEMEMORY(ci->npolys);
   FREEMEMORY(ci->nlines);
@@ -218,7 +218,7 @@ void setcontourslice(contour *ci,int idir,float xyz){
 /*  ------------------ getcontours ------------------------ */
 
 void getcontours(const  float *xgrid, const float *ygrid, int nx, int ny,  
-                 const float *vals, const char *iblank, const float *levels,
+                 const float *vals, const char *iblank, const float *levels,int flag,
                  const contour *ci){
   int n,i,j;
   double x[4],y[4],v[4];
@@ -241,11 +241,12 @@ void getcontours(const  float *xgrid, const float *ygrid, int nx, int ny,
 #define ij(i,j) ((i)*ny+(j))
 #define ijblank(i,j) ((i)*(ny-1)+(j))
 
-
   nlevels=ci->nlevels;
   for(n=0;n<nlevels-2;n++){
     ci->levels[n]=levels[n];
   }
+  // 0 1 2 ... nlevels-3 nlevels-2 nlevels-1
+
   for(n=0;n<nlevels;n++){
     minfill=0;
     maxfill=0;
@@ -253,7 +254,6 @@ void getcontours(const  float *xgrid, const float *ygrid, int nx, int ny,
       contlow=(double)levels[0]-(levels[1]-levels[0]);
       conthigh=(double)levels[0];
       minfill=1;
-
     }
     else if(n==nlevels-1){
       contlow=levels[nlevels-2];
@@ -365,6 +365,7 @@ void getcontours(const  float *xgrid, const float *ygrid, int nx, int ny,
     ci->polysize[n]=polysize;
   }
   /* printf("polygon count=%i\n",npolystotal); */
+  if(flag==GET_AREAS)GetContourAreas(ci);
 
 }
 
@@ -621,7 +622,7 @@ float getarea(float *xnodes, float *ynodes, int ind){
 
 /*  ------------------ drawcontours ------------------------ */
 
-void AreaContours(const contour *ci){
+void GetContourAreas(const contour *ci){
   int nlevels, n;
   float **rgb;
   float *areas;
@@ -654,8 +655,8 @@ void AreaContours(const contour *ci){
 /*  ------------------ drawcontours ------------------------ */
 
 void DrawContours(const contour *ci){
-  int nlevels, n, npolys, *polysize, ipoly,j,nnodes;
-  float *xnode, *ynode,xyzval;
+  int nlevels, n, npolys, *polysize, ipoly, j, nnodes;
+  float *xnode, *ynode, xyzval;
   float **rgb;
 
   int *npolysv;
