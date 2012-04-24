@@ -181,7 +181,13 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
   contour *fed_contours=NULL;
   mesh *meshi;
   float *xgrid=NULL, *ygrid=NULL;
+  char *iblank;
   int nx, ny;
+  float levels[6]={-0.00001,0.3,1.0,3.0};
+  int nlevels=5; // 2 extra levels for below 0.0 and above 3.0
+  float *areas;
+  int ibar, jbar, kbar;
+  int nxy;
 
 #define FEDCO(CO) ( 4.607*pow(1000000.0*CLAMP(CO,0.0,0.1),1.036)/10000000.0 )
 #define FEDO2(O2)  ( exp( -(8.13-0.54*(20.9-100.0*CLAMP(O2,0.0,0.2))) )/60.0 ) 
@@ -212,24 +218,31 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
   fed_slice=fedi->fed_slice;
   fed_iso=fedi->fed_iso;
   meshi = meshinfo + fed_slice->blocknumber;
+  ibar = meshi->ibar;
+  jbar = meshi->jbar;
+  kbar = meshi->kbar;
+
   switch (fed_slice->idir){
     case 1:
       xgrid = meshi->yplt;
       ygrid = meshi->zplt;
       nx = meshi->jbar+1;
       ny = meshi->kbar+1;
+      nxy = nx*ny;
       break;
     case 2:
       xgrid = meshi->xplt;
       ygrid = meshi->zplt;
       nx = meshi->ibar+1;
       ny = meshi->kbar+1;
+      nxy = nx*ny;
       break;
     case 3:
       xgrid = meshi->xplt;
       ygrid = meshi->yplt;
       nx = meshi->ibar+1;
       ny = meshi->jbar+1;
+      nxy = nx*ny;
       break;
   }
   readslice(fed_slice->file,fedi->fed_index,UNLOAD,&error_local);
@@ -246,7 +259,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
      (file_type==FED_ISO&&(is_file_newer(fed_iso->file,o2->file)!=1||
                            is_file_newer(fed_iso->file,co2->file)!=1||
                            is_file_newer(fed_iso->file,co->file)!=1))){
-    int i;
+    int i,j,k;
     int frame_size;
     float *fed_frame,*fed_framem1;
     float *o2_frame1,*o2_frame2;
@@ -257,6 +270,32 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
     FILE *AREA_STREAM=NULL;
     float area_factor;
 
+    switch (fed_slice->idir){
+      case 1:
+        NewMemory((void **)&iblank,jbar*kbar*sizeof(char));
+        for(j=0;j<jbar;j++){
+          for(k=0;k<kbar;k++){
+            iblank[k+j*kbar]=meshi->c_iblank_x[IJKNODE(fed_slice->is1,j,k)];
+          }
+        }
+        break;
+      case 2:
+        NewMemory((void **)&iblank,ibar*kbar*sizeof(char));
+        for(i=0;i<ibar;i++){
+          for(k=0;k<kbar;k++){
+            iblank[k+i*kbar]=meshi->c_iblank_y[IJKNODE(i,fed_slice->js1,k)];
+          }
+        }
+        break;
+      case 3:
+        NewMemory((void **)&iblank,ibar*jbar*sizeof(char));
+        for(i=0;i<ibar;i++){
+          for(j=0;j<jbar;j++){
+            iblank[j+i*jbar]=meshi->c_iblank_z[IJKNODE(i,j,fed_slice->ks1)];
+          }
+        }
+        break;
+    }
     printf("\n");
     printf("generating FED slice data\n");
     strcpy(fed_area_file,fed_slice->file);
@@ -317,15 +356,22 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
       fed_frame[i]=0.0;
     }
     if(AREA_STREAM!=NULL){
+      if(fed_contours==NULL){
+        NewMemory((void **)&fed_contours,sizeof(contour));
+      }
+      else{
+        freecontour(fed_contours);
+      }
+      initcontour(fed_contours,NULL,nlevels);
+      getcontours(xgrid, ygrid, nx, ny, fed_frame, iblank, levels, GET_AREAS, fed_contours);
+      areas = fed_contours->areas;
       fprintf(AREA_STREAM,"\"time\",\"0.0->0.3\",\"0.3->1.0\",\"1.0->3.0\",\"3.0->\"\n");
-      fprintf(AREA_STREAM,"0.0,0.0,0.0,0.0,0.0\n");
+      fprintf(AREA_STREAM,"%f,%f,%f,%f,%f\n",
+        times[0],(areas[3]+areas[0])*area_factor,areas[1]*area_factor,areas[2]*area_factor,areas[4]*area_factor);
     }
     for(i=1;i<fed_slice->ntimes;i++){
       int j;
       float dt;
-      float levels[6]={0.0,0.3,1.0,3.0};
-      int nlevels=5; // 2 extra levels for below 0.0 and above 3.0
-      float *areas;
 
       if(Creadslice_frame(i,fedi->o2_index,LOAD)<0||
          Creadslice_frame(i,fedi->co2_index,LOAD)<0||
@@ -358,14 +404,15 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
           freecontour(fed_contours);
         }
         initcontour(fed_contours,NULL,nlevels);
-        getcontours(xgrid, ygrid, nx, ny, fed_frame, NULL, levels, GET_AREAS, fed_contours);
+        getcontours(xgrid, ygrid, nx, ny, fed_frame, iblank, levels, GET_AREAS, fed_contours);
         areas = fed_contours->areas;
         if(AREA_STREAM!=NULL){
           fprintf(AREA_STREAM,"%f,%f,%f,%f,%f\n",
-            times[i],areas[0]*area_factor,areas[1]*area_factor,areas[2]*area_factor,areas[4]*area_factor);
+            times[i],(areas[3]+areas[0])*area_factor,areas[1]*area_factor,areas[2]*area_factor,areas[4]*area_factor);
         }
       }
     }
+    FREEMEMORY(iblank);
     if(AREA_STREAM!=NULL)fclose(AREA_STREAM);
     if(fed_contours!=NULL){
       freecontour(fed_contours);
