@@ -126,7 +126,6 @@ EXTERNCPP camera *get_camera(char *name);
 EXTERNCPP char *get_camera_label(int index);
 EXTERNCPP void clip2cam(camera *cam);
 EXTERNCPP void cam2clip(camera *cam);
-EXTERNCPP void to_lower(char *string);
 EXTERNCPP void init_object_defs(void);
 EXTERNCPP void update_device_textures(void);
 EXTERNCPP char *get_device_label(char *buffer);

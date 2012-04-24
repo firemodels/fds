@@ -43,18 +43,6 @@ void glui_advancedtour_setup(int main_window);
 void glui_stereo_setup(int main_window);
 void glui_trainer_setup(int main_window);
 void glui_3dsmoke_setup(int main_window);
-//void InitOpenGL(void);
-
-/* ------------------ to_lower ------------------------ */
-
-void to_lower(char *string){
-   char *c;
-
-   if(string==NULL)return;
-   for(c=string;*c!=0;c++){
-     if(*c>='A'&&*c<='Z')*c+='a'-'A';
-   }
-}
 
 /* ------------------ Init ------------------------ */
 

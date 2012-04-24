@@ -961,6 +961,17 @@ unsigned int date2day(char *tokenorig){
   return days_local;
 }
 
+/* ------------------ to_lower ------------------------ */
+
+void to_lower(char *string){
+   char *c;
+
+   if(string==NULL)return;
+   for(c=string;*c!=0;c++){
+     if(*c>='A'&&*c<='Z')*c+='a'-'A';
+   }
+}
+
 /* ------------------ time2sec ------------------------ */
 
 unsigned int time2sec(char *tokenorig){
