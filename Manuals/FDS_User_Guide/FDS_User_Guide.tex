@@ -11119,7 +11119,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ID}                            & Character         & Name of species                                       &                   &               \\ \hline
 {\ct SPEC\_ID(:)}                   & Character Array   & IDs of {\ct SPEC}ies that make up the mixture         &                   &               \\ \hline
 {\ct MASS\_FRACTION(:)}             & Real Array        & Mass fraction of mixture components                   &                   & 0             \\ \hline
-{\ct MASS\_FRACTION\_0}             & Real              & Initial mass fraction of mixture                    &                   & 0             \\ \hline
+{\ct MASS\_FRACTION\_0}             & Real              & Initial mass fraction of mixture                      &                   & 0             \\ \hline
 {\ct VOLUME\_FRACTION(:)}           & Real Array        & Volume fraction of mixture components                 &                   &               \\ \hline
 \end{longtable}
 
@@ -11208,7 +11208,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct EMISSIVITY\_BACK}                & Real            & Section~\ref{info:BACKING}                &                     &                         \\ \hline
 {\ct EVAC\_DEFAULT}                   & Logical         & Reference~\cite{FDS_Evac_Users_Guide}     &                     & {\ct .FALSE.}           \\ \hline
 {\ct EXTERNAL\_FLUX}                  & Real            & Section~\ref{solid_phase_verification}    & kW/m$^2$            & 0.                      \\ \hline
-\hline
 {\ct E\_COEFFICIENT}                  & Real            & Section~\ref{info:suppression}            & m$^2$/kg/s          & 0.                      \\ \hline
 {\ct FREE\_SLIP}                      & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct .FALSE.}           \\ \hline
 {\ct GEOMETRY}                        & Character       & Section~\ref{info:GEOMETRY}               &                     & {\ct 'CARTESIAN'}       \\ \hline
@@ -11308,7 +11307,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 \section{\texorpdfstring{{\tt TIME}}{TIME} (Time Parameters)}
 
-
 \setlength\LTleft{0pt}
 \setlength\LTright{0pt}
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
@@ -11386,19 +11384,19 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct COLOR    }             & Character         & Section~\ref{info:colors}                                 &               &                     \\ \hline
 {\ct CTRL\_ID }             & Character         & Section~\ref{info:activate_deactivate}                    &               &                     \\ \hline
 {\ct DEVC\_ID }             & Character         & Section~\ref{info:activate_deactivate}                    &               &                     \\ \hline
-{\ct DYNAMIC\_PRESSURE}     & Real              & Section~\ref{info:pressure_boundary}                      & Pa            & 0.               \\ \hline
-{\ct EVACUATION    }        & Logical           & Reference~\cite{FDS_Evac_Users_Guide}                     &               &  {\ct .FALSE.}   \\ \hline
+{\ct DYNAMIC\_PRESSURE}     & Real              & Section~\ref{info:pressure_boundary}                      & Pa            & 0.                  \\ \hline
+{\ct EVACUATION    }        & Logical           & Reference~\cite{FDS_Evac_Users_Guide}                     &               &  {\ct .FALSE.}      \\ \hline
 {\ct ID }                   & Character         & Section~\ref{info:VENT_Basics}                            &               &                     \\ \hline
 {\ct IOR}                   & Integer           & Section~\ref{info:VENT_Trouble}                           &               &                     \\ \hline
-{\ct L\_EDDY}               & Real              & Section~\ref{info:synthetic_turbulence}                   & m             & 0.                    \\ \hline
-{\ct L\_EDDY\_IJ(3,3)}      & Real Array        & Section~\ref{info:synthetic_turbulence}                   & m             & 0.                    \\ \hline
+{\ct L\_EDDY}               & Real              & Section~\ref{info:synthetic_turbulence}                   & m             & 0.                  \\ \hline
+{\ct L\_EDDY\_IJ(3,3)}      & Real Array        & Section~\ref{info:synthetic_turbulence}                   & m             & 0.                  \\ \hline
 {\ct MB    }                & Character         & Section~\ref{info:VENT_Basics}                            &               &                     \\ \hline
 {\ct MESH\_ID    }          & Character         & Reference~\cite{FDS_Evac_Users_Guide}                     &               &                     \\ \hline
-{\ct N\_EDDY}               & Integer           & Section~\ref{info:synthetic_turbulence}                   &               & 0                    \\ \hline
+{\ct N\_EDDY}               & Integer           & Section~\ref{info:synthetic_turbulence}                   &               & 0                   \\ \hline
 {\ct OUTLINE}               & Logical           & Section~\ref{info:VENT_Basics}                            & {\ct .FALSE.} &                     \\ \hline
 {\ct PBX, PBY, PBZ  }       & Real              & Section~\ref{info:VENT_Basics}                            &               &                     \\ \hline
 {\ct PRESSURE\_RAMP}        & Character         & Section~\ref{info:pressure_boundary}                      &               &                     \\ \hline
-{\ct REYNOLDS\_STRESS(3,3)} & Real Array        & Section~\ref{info:synthetic_turbulence}                   & m$^2$/s$^2$   & 0.                    \\ \hline
+{\ct REYNOLDS\_STRESS(3,3)} & Real Array        & Section~\ref{info:synthetic_turbulence}                   & m$^2$/s$^2$   & 0.                  \\ \hline
 {\ct RGB(3)   }             & Integer Triplet   & Section~\ref{info:colors}                                 &               &                     \\ \hline
 {\ct SPREAD\_RATE}          & Real              & Section~\ref{info:spread}                                 & m/s           &  0.0                \\ \hline
 {\ct SURF\_ID}              & Character         & Section~\ref{info:VENT_Basics}                            &               &  {\ct 'INERT'}      \\ \hline
@@ -11406,7 +11404,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct TMP\_EXTERIOR}         & Real              & Section~\ref{info:Special_VENTS}                          & $^\circ$C     &                     \\ \hline
 {\ct TRANSPARENCY}          & Real              & Section~\ref{info:colors}                                 &               &   1.0               \\ \hline
 {\ct UVW(3) }               & Real Triplet      & Section~\ref{info:HVAClouvers}                            & m/s           &                     \\ \hline
-{\ct VEL\_RMS}              & Real              & Section~\ref{info:synthetic_turbulence}                   & m/s           & 0.                     \\ \hline
+{\ct VEL\_RMS}              & Real              & Section~\ref{info:synthetic_turbulence}                   & m/s           & 0.                  \\ \hline
 {\ct XB(6) }                & Real Sextuplet    & Section~\ref{info:VENT_Basics}                            & m             &                     \\ \hline
 {\ct XYZ(3) }               & Real Triplet      & Section~\ref{info:spread}                                 & m             &                     \\ \hline
 \end{longtable}
