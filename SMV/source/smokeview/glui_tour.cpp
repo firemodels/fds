@@ -305,6 +305,7 @@ extern "C" void hide_glui_tour(void){
 extern "C" void show_glui_tour(void){
   showtour_dialog=1;
   if(glui_tour!=NULL)glui_tour->show();
+  updatemenu=1;
 }
 
 /* ------------------ show_glui_advancedtour ------------------------ */

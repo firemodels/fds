@@ -2402,6 +2402,9 @@ void AvatarEvacMenu(int value){
   updatemenu=1;
 }
 
+  #define MENU_TOUR_EDIT -14
+  #define MENU_TOUR_NEW -12
+  #define MENU_TOUR_MANUAL -2
 /* ------------------ TourMenu ------------------------ */
 
 void TourMenu(int value){
@@ -2413,25 +2416,23 @@ void TourMenu(int value){
   updatemenu=1;
   glutPostRedisplay();
   switch (value){
-  case -12:
-    add_new_tour();
-    if(showtour_dialog==0){
-      showtour_dialog=1;
-      show_glui_tour();
-    }
+  case MENU_TOUR_EDIT:
+    DialogMenu(21);
     break;
-  case -13:               // clear all tours
-    for(i=0;i<ntours;i++){
+  case MENU_TOUR_NEW:
+    add_new_tour();
+    showtour_dialog=0;
+    DialogMenu(21);
+    break;
+  case -13:               
+    for(i=0;i<ntours;i++){  // clear all tours
       touri = tourinfo + i;
       touri->display=touri->display2;
     }
-    if(viewtourfrompath==1
-//      &&from_glui_trainer==0
-      ){
+    if(viewtourfrompath==1){
       ResetView(RESTORE_EXTERIOR_VIEW);
     }
     from_glui_trainer=0;
-//    viewtourfrompath=0;
     for(i=0;i<ntours;i++){
       touri = tourinfo + i;
       if(touri->display==1){
@@ -2441,22 +2442,21 @@ void TourMenu(int value){
     }
     selected_tour=NULL;
     break;
-  case -2:               // clear all tours
-    for(i=0;i<ntours;i++){
+  case MENU_TOUR_MANUAL:               
+    for(i=0;i<ntours;i++){  // clear all tours
       touri = tourinfo + i;
       touri->display=0;
     }
-    if(viewtourfrompath==1
-//      &&from_glui_trainer==0
-      ){
+    if(viewtourfrompath==1){
       ResetView(RESTORE_EXTERIOR_VIEW);
     }
     from_glui_trainer=0;
-//    viewtourfrompath=0;
     selected_tour=NULL;
     if(scriptoutstream!=NULL){
       fprintf(scriptoutstream,"UNLOADTOUR\n");
     }
+    showtour_dialog=1;
+    DialogMenu(21);
     break;
   case -4:
     edittour=1-edittour;
@@ -6403,10 +6403,38 @@ updatemenu=0;
     }
   }
 
-  /* -------------------------------- showtour menu -------------------------- */
+    /* --------------------------------tour menu -------------------------- */
 
-  CREATEMENU(showtourmenu,TourMenu);
+  CREATEMENU(tourmenu,TourMenu);
+      
+  glutAddMenuEntry(_("New..."),MENU_TOUR_NEW);
+  if(ntours>0){
+    if(showtour_dialog==1){
+      glutAddMenuEntry(_("*Edit..."),MENU_TOUR_EDIT);
+    }
+    else{
+      glutAddMenuEntry(_("Edit..."),MENU_TOUR_EDIT);
+    }
+    if(ntours>0){
+      int use_manual=1;
+      
+      glutAddMenuEntry("-",-999);
+      for(i=0;i<ntours;i++){
+        tourdata *touri;
 
+        touri = tourinfo + i;
+        if(touri->display==1){
+          use_manual=0;
+          break;
+        }
+      }
+      if(use_manual==1){
+        glutAddMenuEntry(_("*Manual"),MENU_TOUR_MANUAL);
+      }
+      else{
+        glutAddMenuEntry(_("Manual"),MENU_TOUR_MANUAL);
+      }
+    }
     for(i=0;i<ntours;i++){
       tourdata *touri;
       int glui_avatar_index_local;
@@ -6434,9 +6462,6 @@ updatemenu=0;
       }
       glutAddMenuEntry(menulabel,i);
     }
-    glutAddMenuEntry("-",-999);
-    glutAddMenuEntry(_("Show all tours"),-3);
-    glutAddMenuEntry(_("Hide all tours"),-2);
     if(selectedtour_index>=0){
       strcpy(menulabel,"");
       if(viewtourfrompath==1)strcat(menulabel,"*");
@@ -6444,17 +6469,13 @@ updatemenu=0;
       strcat(menulabel,tourinfo[selectedtour_index].label);
       glutAddMenuEntry(menulabel,-5);
     }
+    glutAddMenuEntry("-",-999);
+    glutAddMenuEntry(_("Show all"),-3);
+    glutAddMenuEntry(_("Hide all"),-2);
+  }
 
-    /* --------------------------------tour menu -------------------------- */
+ /* --------------------------------Show Volume smoke menu -------------------------- */
 
-    CREATEMENU(tourmenu,TourMenu);
-      
-    glutAddMenuEntry(_("New..."),-12);
-    if(ntours>0){
-      glutAddMenuEntry(_("Manual"),-2);
-      glutAddMenuEntry("-",-999);
-      glutAddSubMenu(_("Show/Hide"),showtourmenu);
-    }
   if(nvolsmoke3dloaded>0){
     CREATEMENU(showvolsmoke3dmenu,ShowVolSmoke3DMenu);
     if(nvolsmoke3dloaded>1){
@@ -6486,9 +6507,78 @@ updatemenu=0;
     glutAddSubMenu(_("Smoke color map"),smokecolorbarmenu);
   }
 
- /* --------------------------------showhide menu -------------------------- */
+  CREATEMENU(aperturemenu,ApertureMenu);
+  if(apertureindex==0)glutAddMenuEntry("*30",0);
+  if(apertureindex!=0)glutAddMenuEntry("30",0);
+  if(apertureindex==1)glutAddMenuEntry("*45",1);
+  if(apertureindex!=1)glutAddMenuEntry("45",1);
+  if(apertureindex==2)glutAddMenuEntry("*60",2);
+  if(apertureindex!=2)glutAddMenuEntry("60",2);
+  if(apertureindex==3)glutAddMenuEntry("*75",3);
+  if(apertureindex!=3)glutAddMenuEntry("75",3);
+  if(apertureindex==4)glutAddMenuEntry("*90",4);
+  if(apertureindex!=4)glutAddMenuEntry("90",4);
+
+  CREATEMENU(zoommenu,ZoomMenu);
+  if(zoomindex==0)glutAddMenuEntry("*0.25",0);
+  if(zoomindex!=0)glutAddMenuEntry("0.25",0);
+  if(zoomindex==1)glutAddMenuEntry("*0.50",1);
+  if(zoomindex!=1)glutAddMenuEntry("0.50",1);
+  if(zoomindex==2)glutAddMenuEntry("*1.0",2);
+  if(zoomindex!=2)glutAddMenuEntry("1.0",2);
+  if(zoomindex==3)glutAddMenuEntry("*2.0",3);
+  if(zoomindex!=3)glutAddMenuEntry("2.0",3);
+  if(zoomindex==4)glutAddMenuEntry("*4.0",4);
+  if(zoomindex!=4)glutAddMenuEntry("4.0",4);
+
+  /* --------------------------------reset menu -------------------------- */
+
+  CREATEMENU(resetmenu,ResetMenu);
+  {
+    char line[256];
+    camera *ca;
+
+    if(trainer_mode==1){
+      if(visBlocks==visBLOCKOutline){
+        glutAddMenuEntry(_("*Outline"),MENU_OUTLINEVIEW);
+      }
+      else{
+        glutAddMenuEntry(_("Outline"),MENU_OUTLINEVIEW);
+      }
+      glutAddMenuEntry("-",MENU_DUMMY);
+    }
+    if(trainer_mode==0){
+      glutAddMenuEntry(_("Save"),MENU_SAVEVIEW);
+      glutAddMenuEntry(_("Set as Startup"),MENU_STARTUPVIEW);
+      glutAddSubMenu(_("Zoom"),zoommenu); //xx
+      if(projection_type==1)glutAddMenuEntry(_("Switch to perspective view       ALT+v"),MENU_SIZEPRESERVING);
+      if(projection_type==0)glutAddMenuEntry(_("Switch to size preserving view   ALT+v"),MENU_SIZEPRESERVING);
+      glutAddMenuEntry("-",MENU_DUMMY);
+    }
+    for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
+      if(trainer_mode==1&&strcmp(ca->name,"internal")==0)continue;
+      strcpy(line,"");
+      if(ca->view_id==selected_view){
+        strcat(line,"*");
+      }
+      if(trainer_mode==1&&strcmp(ca->name,"external")==0){
+        strcat(line,"Outside");
+      }
+      else{
+        strcat(line,ca->name);
+      }
+      glutAddMenuEntry(line,ca->view_id);
+    }
+  }
+  if(trainer_mode==0&&showtime==1){
+    glutAddMenuEntry("-",MENU_DUMMY);
+    glutAddMenuEntry(_("Time"),MENU_TIMEVIEW);
+  }
+
+  /* --------------------------------showhide menu -------------------------- */
 
   CREATEMENU(showhidemenu,ShowHideMenu);
+  glutAddSubMenu(_("Viewpoints"),resetmenu);
   if(ntotal_blockages>0||isZoneFireModel==0){
     glutAddSubMenu(_("Geometry"),geometrymenu);
   }
@@ -6849,30 +6939,6 @@ updatemenu=0;
   glutAddMenuEntry("-",-1);
   glutAddMenuEntry(_("Close all dialogs  ALT+x"),-2);
 
-  CREATEMENU(aperturemenu,ApertureMenu);
-  if(apertureindex==0)glutAddMenuEntry("*30",0);
-  if(apertureindex!=0)glutAddMenuEntry("30",0);
-  if(apertureindex==1)glutAddMenuEntry("*45",1);
-  if(apertureindex!=1)glutAddMenuEntry("45",1);
-  if(apertureindex==2)glutAddMenuEntry("*60",2);
-  if(apertureindex!=2)glutAddMenuEntry("60",2);
-  if(apertureindex==3)glutAddMenuEntry("*75",3);
-  if(apertureindex!=3)glutAddMenuEntry("75",3);
-  if(apertureindex==4)glutAddMenuEntry("*90",4);
-  if(apertureindex!=4)glutAddMenuEntry("90",4);
-
-  CREATEMENU(zoommenu,ZoomMenu);
-  if(zoomindex==0)glutAddMenuEntry("*0.25",0);
-  if(zoomindex!=0)glutAddMenuEntry("0.25",0);
-  if(zoomindex==1)glutAddMenuEntry("*0.50",1);
-  if(zoomindex!=1)glutAddMenuEntry("0.50",1);
-  if(zoomindex==2)glutAddMenuEntry("*1.0",2);
-  if(zoomindex!=2)glutAddMenuEntry("1.0",2);
-  if(zoomindex==3)glutAddMenuEntry("*2.0",3);
-  if(zoomindex!=3)glutAddMenuEntry("2.0",3);
-  if(zoomindex==4)glutAddMenuEntry("*4.0",4);
-  if(zoomindex!=4)glutAddMenuEntry("4.0",4);
-
   /* -------------------------------- font menu -------------------------- */
 
   if(showfontmenu==1){
@@ -7010,6 +7076,7 @@ updatemenu=0;
   glutAddSubMenu(_("Rotation"),rotatetypemenu);
   glutAddSubMenu(_("Max frame rate"),frameratemenu);
   glutAddSubMenu(_("Render"),rendermenu);
+  glutAddSubMenu(_("Tours"),tourmenu);
   if(showfontmenu==1)glutAddSubMenu(_("Font size"),fontmenu);
 #ifdef pp_BENCHMARK
   glutAddMenuEntry("Benchmark",1);
@@ -7018,51 +7085,6 @@ updatemenu=0;
 #ifdef pp_LANG
   if(show_lang_menu==1&&nlanglistinfo>0)glutAddSubMenu(_("Language"),languagemenu);
 #endif
-
-  /* --------------------------------reset menu -------------------------- */
-
-  CREATEMENU(resetmenu,ResetMenu);
-  {
-    char line[256];
-    camera *ca;
-
-    if(trainer_mode==1){
-      if(visBlocks==visBLOCKOutline){
-        glutAddMenuEntry(_("*Outline"),MENU_OUTLINEVIEW);
-      }
-      else{
-        glutAddMenuEntry(_("Outline"),MENU_OUTLINEVIEW);
-      }
-      glutAddMenuEntry("-",MENU_DUMMY);
-    }
-    if(trainer_mode==0){
-      glutAddMenuEntry(_("Save"),MENU_SAVEVIEW);
-      glutAddMenuEntry(_("Set as Startup"),MENU_STARTUPVIEW);
-      glutAddSubMenu(_("Zoom"),zoommenu);
-      if(projection_type==1)glutAddMenuEntry(_("Switch to perspective view       ALT+v"),MENU_SIZEPRESERVING);
-      if(projection_type==0)glutAddMenuEntry(_("Switch to size preserving view   ALT+v"),MENU_SIZEPRESERVING);
-      glutAddMenuEntry("-",MENU_DUMMY);
-    }
-    for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
-      if(trainer_mode==1&&strcmp(ca->name,"internal")==0)continue;
-      strcpy(line,"");
-      if(ca->view_id==selected_view){
-        strcat(line,"*");
-      }
-      if(trainer_mode==1&&strcmp(ca->name,"external")==0){
-        strcat(line,"Outside");
-      }
-      else{
-        strcat(line,ca->name);
-      }
-      glutAddMenuEntry(line,ca->view_id);
-    }
-  }
-  if(trainer_mode==0&&showtime==1){
-    glutAddMenuEntry("-",MENU_DUMMY);
-    glutAddMenuEntry(_("Time"),MENU_TIMEVIEW);
-  }
-
 
 /* -------------------------------- about menu -------------------------- */
 
@@ -7243,7 +7265,7 @@ updatemenu=0;
 
   CREATEMENU(helpmenu,HelpMenu);
   glutAddSubMenu("Web",webhelpmenu);
-  glutAddSubMenu("Keyboard",keyboardhelpmenu);
+  glutAddSubMenu("Shortcuts",keyboardhelpmenu);
   glutAddSubMenu("Mouse",mousehelpmenu);
 
   /* -------------------------------- target menu -------------------------- */
@@ -8728,11 +8750,9 @@ updatemenu=0;
       glutAddSubMenu(_("Show/Hide"),showhidemenu);
       glutAddSubMenu(_("Options"),optionmenu);
       glutAddSubMenu(_("Dialogs"),dialogmenu);
-      glutAddSubMenu(_("Tours"),tourmenu);
-      glutAddSubMenu(_("View"),resetmenu);
-      glutAddMenuEntry(_("Quit"),3);
       glutAddSubMenu(_("Help"),helpmenu);
-      glutAddSubMenu(_("About Smokeview"),aboutmenu);
+      glutAddMenuEntry(_("Quit"),3);
+      glutAddSubMenu(_("About"),aboutmenu);
     }
     if(trainer_active==1){
       if(trainer_mode==1){
