@@ -217,13 +217,13 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
       xgrid = meshi->yplt;
       ygrid = meshi->zplt;
       nx = meshi->jbar+1;
-      ny = meshi->zbar+1;
+      ny = meshi->kbar+1;
       break;
     case 2:
       xgrid = meshi->xplt;
       ygrid = meshi->zplt;
       nx = meshi->ibar+1;
-      ny = meshi->zbar+1;
+      ny = meshi->kbar+1;
       break;
     case 3:
       xgrid = meshi->xplt;
@@ -253,9 +253,20 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
     float *co2_frame1,*co2_frame2;
     float *co_frame1,*co_frame2;
     float *times;
+    char fed_area_file[1024],*ext;
+    FILE *AREA_STREAM=NULL;
+    float area_factor;
 
     printf("\n");
     printf("generating FED slice data\n");
+    strcpy(fed_area_file,fed_slice->file);
+    ext=strrchr(fed_area_file,'.');
+    if(ext!=NULL){
+      *ext=0;
+      strcat(fed_area_file,"_area.csv");
+      AREA_STREAM=fopen(fed_area_file,"w");
+      area_factor=xyzmaxdiff*xyzmaxdiff;
+    }
     if(Creadslice_frame(0,fedi->o2_index,LOAD)<0||
        Creadslice_frame(0,fedi->co2_index,LOAD)<0||
        Creadslice_frame(0,fedi->co_index,LOAD)<0){
@@ -305,11 +316,15 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
     for(i=0;i<frame_size;i++){
       fed_frame[i]=0.0;
     }
+    if(AREA_STREAM!=NULL){
+      fprintf(AREA_STREAM,"\"time\",\"0.0->0.3\",\"0.3->1.0\",\"1.0->3.0\",\"3.0->\"\n");
+      fprintf(AREA_STREAM,"0.0,0.0,0.0,0.0,0.0\n");
+    }
     for(i=1;i<fed_slice->ntimes;i++){
       int j;
       float dt;
       float levels[6]={0.0,0.3,1.0,3.0};
-      int nlevels=6; // 2 extra levels for below 0.0 and above 3.0
+      int nlevels=5; // 2 extra levels for below 0.0 and above 3.0
       float *areas;
 
       if(Creadslice_frame(i,fedi->o2_index,LOAD)<0||
@@ -345,13 +360,13 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
         initcontour(fed_contours,NULL,nlevels);
         getcontours(xgrid, ygrid, nx, ny, fed_frame, NULL, levels, GET_AREAS, fed_contours);
         areas = fed_contours->areas;
-        printf("%f",times[i]);
-        for(j=0;j<nlevels;j++){
-          printf(",%f",areas[j]);
+        if(AREA_STREAM!=NULL){
+          fprintf(AREA_STREAM,"%f,%f,%f,%f,%f\n",
+            times[i],areas[0]*area_factor,areas[1]*area_factor,areas[2]*area_factor,areas[4]*area_factor);
         }
-        printf("\n");
       }
     }
+    if(AREA_STREAM!=NULL)fclose(AREA_STREAM);
     if(fed_contours!=NULL){
       freecontour(fed_contours);
       FREEMEMORY(fed_contours);
