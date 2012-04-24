@@ -334,8 +334,8 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
       }
       if(fed_slice->volslice==0){
 
-      // compute fed areas here
-/* //xxx
+      // compute fed areas 
+
         if(fed_contours==NULL){
           NewMemory((void **)&fed_contours,sizeof(contour));
         }
@@ -350,7 +350,6 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
           printf(",%f",areas[j]);
         }
         printf("\n");
-*/        
       }
     }
     if(fed_contours!=NULL){
@@ -2026,6 +2025,8 @@ void update_fedinfo(void){
     sd->reload=0;
     sd->nline_contours=0;
     sd->line_contours=NULL;
+    sd->contour_areas=NULL;
+    sd->ncontour_areas=NULL;
     sd->menu_show=1;
     sd->constant_color=NULL;
     sd->mesh_type=co2->mesh_type;

@@ -1010,6 +1010,8 @@ typedef struct _slicedata {
   unsigned char *slicecomplevel;
   contour *line_contours;
   int nline_contours;
+  float *contour_areas;
+  int ncontour_areas;
   compinfo *compindex;
   unsigned char *slicelevel;
   char menulabel[128];
