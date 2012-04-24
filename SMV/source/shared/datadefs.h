@@ -44,6 +44,22 @@
 #define IJKNODE(i,j,k) ((i)+(j)*nx+(k)*nxy)
 #endif
 
+#ifndef IJKN
+#define IJKN(i,j,k,n) (IJKNODE(i,j,k)+(n)*nxyz)
+#endif
+
+#ifndef GET_QVAL
+#define GET_QVAL(i,j,k,n) \
+  if(unload_qdata==0){\
+    qval=qdata[IJKN(i,j,k,n)];\
+  }\
+  else{\
+    float *qvals;\
+    qvals=p3levels256[n];\
+    qval=qvals[iqdata[IJKN(i,j,k,n)]];\
+  }
+#endif
+
 #ifndef IJKCELL
 #define IJKCELL(i,j,k) ((i)+ (j)*ibar+(k)*ibar*jbar)
 #endif
