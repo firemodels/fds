@@ -2,7 +2,7 @@
  
 &MESH IJK=540,30,27, XB=-22.5,31.5,-1.5,1.5,-0.6,2.1 /
    
-&MISC TMPA=9, NSTRATA=20 /
+&MISC TMPA=9. /
  
 &TIME T_END=620 T_BEGIN=-20/
 
@@ -91,6 +91,7 @@
       MONODISPERSE   = .FALSE.
       MINIMUM_DIAMETER  = 10
       MAXIMUM_DIAMETER  = 400
+      N_STRATA   = 20
       GAMMA_D    = 2.85 /
 
 &PROP ID    = 'K-1' 
