@@ -60,14 +60,27 @@ void next_xindex(int inc,int flag){
     if(iplotx_all<0)iplotx_all=nplotx_all-1;
     if(iplotx_all>nplotx_all-1)iplotx_all=0;
     if(visGrid==1)return;
-    for(i=0;i<nsliceinfo;i++){
-      slicedata *slicei;
-      mesh *meshi;
+    if(plotstate==DYNAMIC_PLOTS){
+      for(i=0;i<nsliceinfo;i++){
+        slicedata *slicei;
+        mesh *meshi;
 
-      slicei = sliceinfo + i;
-      if(slicei->loaded==0||slicei->display==0)continue;
-      meshi = meshinfo + slicei->blocknumber;
-      if(meshi->iplotx_all[iplotx_all]!=-1)return;
+        slicei = sliceinfo + i;
+        if(slicei->loaded==0||slicei->display==0)continue;
+        meshi = meshinfo + slicei->blocknumber;
+        if(meshi->iplotx_all[iplotx_all]!=-1)return;
+      }
+    }
+    else{
+      for(i=0;i<nplot3dinfo;i++){
+        plot3ddata *plot3di;
+        mesh *meshi;
+
+        plot3di = plot3dinfo + i;
+        if(plot3di->loaded==0||plot3di->display==0)continue;
+        meshi = meshinfo + plot3di->blocknumber;
+        if(meshi->iplotx_all[iplotx_all]!=-1)return;
+      }
     }
   }
 }
@@ -93,14 +106,27 @@ void next_yindex(int inc,int flag){
     if(iploty_all<0)iploty_all=nploty_all-1;
     if(iploty_all>nploty_all-1)iploty_all=0;
     if(visGrid==1)return;
-    for(i=0;i<nsliceinfo;i++){
-      slicedata *slicei;
-      mesh *meshi;
+    if(plotstate==DYNAMIC_PLOTS){
+      for(i=0;i<nsliceinfo;i++){
+        slicedata *slicei;
+        mesh *meshi;
 
-      slicei = sliceinfo + i;
-      if(slicei->loaded==0||slicei->display==0)continue;
-      meshi = meshinfo + slicei->blocknumber;
-      if(meshi->iploty_all[iploty_all]!=-1)return;
+        slicei = sliceinfo + i;
+        if(slicei->loaded==0||slicei->display==0)continue;
+        meshi = meshinfo + slicei->blocknumber;
+        if(meshi->iploty_all[iploty_all]!=-1)return;
+      }
+    }
+    else{
+      for(i=0;i<nplot3dinfo;i++){
+        plot3ddata *plot3di;
+        mesh *meshi;
+
+        plot3di = plot3dinfo + i;
+        if(plot3di->loaded==0||plot3di->display==0)continue;
+        meshi = meshinfo + plot3di->blocknumber;
+        if(meshi->iploty_all[iploty_all]!=-1)return;
+      }
     }
   }
 }
@@ -126,14 +152,27 @@ void next_zindex(int inc,int flag){
     if(iplotz_all<0)iplotz_all=nplotz_all-1;
     if(iplotz_all>nplotz_all-1)iplotz_all=0;
     if(visGrid==1)return;
-    for(i=0;i<nsliceinfo;i++){
-      slicedata *slicei;
-      mesh *meshi;
+    if(plotstate==DYNAMIC_PLOTS){
+      for(i=0;i<nsliceinfo;i++){
+        slicedata *slicei;
+        mesh *meshi;
 
-      slicei = sliceinfo + i;
-      if(slicei->loaded==0||slicei->display==0)continue;
-      meshi = meshinfo + slicei->blocknumber;
-      if(meshi->iplotz_all[iplotz_all]!=-1)return;
+        slicei = sliceinfo + i;
+        if(slicei->loaded==0||slicei->display==0)continue;
+        meshi = meshinfo + slicei->blocknumber;
+        if(meshi->iplotz_all[iplotz_all]!=-1)return;
+      }
+    }
+    else{
+      for(i=0;i<nplot3dinfo;i++){
+        plot3ddata *plot3di;
+        mesh *meshi;
+
+        plot3di = plot3dinfo + i;
+        if(plot3di->loaded==0||plot3di->display==0)continue;
+        meshi = meshinfo + plot3di->blocknumber;
+        if(meshi->iplotz_all[iplotz_all]!=-1)return;
+      }
     }
   }
 }
