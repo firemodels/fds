@@ -56,10 +56,10 @@ for j=qrange
         if i>length(Save_Quantity); break; end
         if strcmp(Save_Quantity(i),Scatter_Plot_Title)
             k = k+1;
-            Measured_Metric(k,:)  = Save_Measured_Metric(i,:);
-            Predicted_Metric(k,:) = Save_Predicted_Metric(i,:);
+            Measured_Metric(k,:,:)  = Save_Measured_Metric(i,:,:);
+            Predicted_Metric(k,:,:) = Save_Predicted_Metric(i,:,:);
             Group_Key_Label(k)  = Save_Group_Key_Label(i);
-            K(k) = plot(nonzeros(Measured_Metric(k,:)),nonzeros(Predicted_Metric(k,:)),...
+            K(k) = plot(nonzeros(Measured_Metric(k,:,:)),nonzeros(Predicted_Metric(k,:,:)),...
                 char(Save_Group_Style(i)),'MarkerFaceColor',char(Save_Fill_Color(i))); hold on
         end
     end

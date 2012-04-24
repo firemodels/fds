@@ -131,13 +131,15 @@ for i=2:2000
             clear indices
             indices = find(d1_Comp_Start<=M(:,d1_Ind_Col) & M(:,d1_Ind_Col)<=d1_Comp_End);
             if strcmp(Metric,'max')
-                Save_Measured_Metric(i,j) = max(M(indices,d1_Dep_Col))-d1_Initial_Value;
+                Save_Measured_Metric(i,j,1) = max(M(indices,d1_Dep_Col))-d1_Initial_Value;
             elseif strcmp(Metric,'min')
-                Save_Measured_Metric(i,j) = d1_Initial_Value-min(M(indices,d1_Dep_Col));
+                Save_Measured_Metric(i,j,1) = d1_Initial_Value-min(M(indices,d1_Dep_Col));
             elseif strcmp(Metric,'mean')
-                Save_Measured_Metric(i,j) = mean(M(indices,d1_Dep_Col));
+                Save_Measured_Metric(i,j,1) = mean(M(indices,d1_Dep_Col));
+            elseif strcmp(Metric,'all')
+                Save_Measured_Metric(i,j,:) = M(indices,d1_Dep_Col);
             else
-                Save_Measured_Metric(i,j) = 0;
+                Save_Measured_Metric(i,j,1) = 0;
             end
             clear indices
             indices = find(d1_Start<=M(:,d1_Ind_Col) & M(:,d1_Ind_Col)<=d1_End);
@@ -172,13 +174,15 @@ for i=2:2000
             clear indices
             indices = find(d2_Comp_Start<=M(:,d2_Ind_Col) & M(:,d2_Ind_Col)<=d2_Comp_End);
             if strcmp(Metric,'max')
-                Save_Predicted_Metric(i,j) = max(M(indices,d2_Dep_Col))-d2_Initial_Value;
+                Save_Predicted_Metric(i,j,1) = max(M(indices,d2_Dep_Col))-d2_Initial_Value;
             elseif strcmp(Metric,'min')
-                Save_Predicted_Metric(i,j) = d2_Initial_Value-min(M(indices,d2_Dep_Col));
+                Save_Predicted_Metric(i,j,1) = d2_Initial_Value-min(M(indices,d2_Dep_Col));
             elseif strcmp(Metric,'mean')
-                Save_Predicted_Metric(i,j) = mean(M(indices,d2_Dep_Col));
+                Save_Predicted_Metric(i,j,1) = mean(M(indices,d2_Dep_Col));
+            elseif strcmp(Metric,'all')
+                Save_Predicted_Metric(i,j,:) = M(indices,d2_Dep_Col);
             else
-                Save_Predicted_Metric(i,j) = 0;
+                Save_Predicted_Metric(i,j,1) = 0;
             end
             clear indices
             indices = find(d2_Start<=M(:,d2_Ind_Col) & M(:,d2_Ind_Col)<=d2_End);
