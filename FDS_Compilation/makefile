@@ -146,6 +146,13 @@ intel_linux_64 : obj = fds_intel_linux_64
 intel_linux_64 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
 
+intel_linux_64_dv : FFLAGS = -m64 -O2 -vec_report0 -traceback
+intel_linux_64_dv : LFLAGS = -static-intel
+intel_linux_64_dv : FCOMPL = ifort
+intel_linux_64_dv : obj = fds_intel_linux_64_dv
+intel_linux_64_dv : setup $(obj_serial)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_serial)
+
 mpi_intel_linux_32 : FFLAGS = -m32 -O2 -vec_report0 -ipo
 mpi_intel_linux_32 : LFLAGS = -static-intel
 mpi_intel_linux_32 : FCOMPL = mpif77
