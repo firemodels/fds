@@ -22,7 +22,7 @@ M = importdata('jet_vreman_dx5cm_line.csv',',',2);     u_vreman_5     = M.data(:
 % analytical solutions
 
 x = M.data(:,1);
-u_0 = 2;
+u_0 = 2.1;
 h = 0.8;
 b = 0.8;
 m_1 = 0.12;
