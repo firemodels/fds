@@ -41,6 +41,9 @@ cd ..\Scalar_Analytical_Solution
 smokeview -runscript move_slug
 smokeview -runscript move_slug_fl1
 
+cd ..\Species
+smokeview -runscript Propane_flame_deposition
+
 cd ..\Sprinklers_and_Sprays
 smokeview -runscript cascade
 

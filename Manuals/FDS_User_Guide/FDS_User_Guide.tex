@@ -6384,6 +6384,56 @@ Note: In the third (reversible) reaction, the {\ct HEAT\_OF\_COMBUSTION} is set 
       ODE_SOLVER= 'RK2 RICHARDSON' /
 \end{verbatim} \normalsize
 
+\subsubsection{Example: A Single-Step, Mixing-Controlled Reaction with Deposition}
+
+This example shows how to define a reaction that invokes an aerosol deposition model in FDS (e.g. soot deposition).  Note, that this model should be considered an expiremental feature. The deposition model is invoked by defining a species with the parameter {\ct AEROSOL=.TRUE.}.  For this example propane will be the fuel with a 5 \% soot yield.  The stoichometric equation is shown below.
+\begin{eqnarray}\label{eq:PROPANE_depo}
+1\,\underbrace{\mathrm{(C_3H_8)}}_\text{Fuel} + 1\,\underbrace{\mathrm{(4.82 \, O_2+4.82 \,(^{.79}/_{.21}) \, N_2})}_\text{Oxidizer} \rightarrow \\
+\nonumber \underbrace{1\,\mathrm{(4\, H_2O + 2.82\, CO_2 + 4.82\,(^{.79}/_{.21}) \, N_2)}+0.1835\,\mathrm{C}}_\text{Products}
+\end{eqnarray}
+
+The example will also use the lumped species formulation to minimize the number of scalar transport equations that need to be solved. Therefore, each species that does not transport by itself will have an {\ct SMIX\_COMPONENT\_ONLY = .TRUE.} designation.  Note that for soot to deposit it must be tracked seperately and it must be given {\ct AEROSOL = .TRUE.}.
+\footnotesize
+\begin{verbatim}
+&SPEC ID = 'PROPANE', FORMULA = 'C2H3Cl' /
+&SPEC ID = 'OXYGEN',            SMIX_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'NITROGEN',          SMIX_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'WATER VAPOR',       SMIX_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'CARBON DIOXIDE',    SMIX_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'SOOT',              AEROSOL = .TRUE./
+\end{verbatim} \normalsize
+
+For the oxidizer and products, which are both composed of multiple primitive species, {\ct SMIX} lines are needed to define the composition of the lumped species. As the user, you can define the {\ct SMIX} by either the {\ct MASS\_FRACTIONS} of the component gases or the {\ct VOLUME\_FRACTIONS}. For this case, volume fractions will be used. If Equation \ref{eq:PROPANE_depo} is properly balanced, you can directly use the stoichiometric coefficients of the primitive species to define the lumped species.
+\footnotesize
+\begin{verbatim}
+&SMIX ID = 'AIR', SPEC_ID ='NITROGEN','OXYGEN',
+      VOLUME_FRACTION = 18.11896,4.816432, BACKGROUND = .TRUE. /
+&SMIX ID = 'PRODUCTS', SPEC_ID ='NITROGEN','CARBON DIOXIDE','WATER VAPOR', 
+      VOLUME_FRACTION = 18.11896,2.816432,4/
+\end{verbatim} \normalsize
+Note: the order of which the {\ct SPEC\_ID}s are defined must be the same order as which you defined your volume fractions or mass fractions.
+
+In this mixing-controlled example, the user is responsible for defining the fuel, heat of combustion of that fuel, species participating the reaction, and the stoichiometric coefficients that describe the reaction. The heat of combustion for PRPOANE was found from the SFPE Handbook \cite{SFPE:Tewarson}. In the lumped species approach, the stoichiometric coefficients for the {\ct SMIX}s are the coefficients of the lumped species themselves.
+\footnotesize
+\begin{verbatim}
+&REAC FUEL = 'PROPANE', HEAT_OF_COMBUSTION=46000,
+      SMIX_ID = 'PROPANE','AIR','PRODUCTS','SOOT', NU=-1.,-1,1,0.183568/
+\end{verbatim} \normalsize
+
+
+Note: The sign on NU corresponds to whether that species is consumed (-) or produced (+). The results, Figure \ref{soot_deposition}, show a boundary file plot, of deposition in kg/m$^2$.  This boundary quantity is given by the input below.
+
+\footnotesize
+\begin{verbatim}
+&BNDF QUANTITY='SURFACE DEPOSITION',SPEC_ID='SOOT'/
+\end{verbatim} \normalsize
+
+\begin{figure}[ht]
+\centering \includegraphics[width=3.2in]{SCRIPT_FIGURES/Propane_flame_deposition}
+\caption{Wall soot deposition for propane flame with deposition example.}
+\label{soot_deposition}
+\end{figure}
+
 \newpage
 
 

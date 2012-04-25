@@ -221,6 +221,7 @@ $RUNFDS Species FED_FIC_SMIX
 $RUNFDS Species Methane_flame_simple
 $RUNFDS Species Methane_flame_primitive
 $RUNFDS Species Methane_flame_lumped
+$RUNFDS Species Propane_flame_deposition
 $RUNFDS Species ReactionRate_Arrhenius_0Order_1Step
 $RUNFDS Species ReactionRate_Arrhenius_2Order_1Step
 $RUNFDS Species ReactionRate_Arrhenius_1p75Order_2Step
