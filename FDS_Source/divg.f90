@@ -963,14 +963,14 @@ USE MASS, ONLY: SCALAR_FACE_VALUE
 ! Compute contributions to the divergence term
  
 INTEGER, INTENT(IN) :: NM
-REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX,KDTDY,KDTDZ,DP,KP, &
+REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX,KDTDY,KDTDZ,DP,KP,CP, &
           RHO_D_DZDX,RHO_D_DZDY,RHO_D_DZDZ,RHO_D,RHOP,H_RHO_D_DZDX,H_RHO_D_DZDY,H_RHO_D_DZDZ,RTRM, &
           U_DOT_DEL_RHO_H_S,RHO_H_S_P,UU,VV,WW,FX,FY,FZ,U_DOT_DEL_RHO,RHO_Z_P,U_DOT_DEL_RHO_Z
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
 REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P            
 REAL(EB) :: DELKDELT,VC,DTDX,DTDY,DTDZ,TNOW,ZZ_GET(0:N_TRACKED_SPECIES), &
             HDIFF,DZDX,DZDY,DZDZ,T,RDT,RHO_D_DZDN,TSI,TIME_RAMP_FACTOR,ZONE_VOLUME,DELTA_P,PRES_RAMP_FACTOR,&
-            TMP_G,TMP_WGT,DIV_DIFF_HEAT_FLUX,H_S,CP,ZZZ(1:4),DU_P,DU_M
+            TMP_G,TMP_WGT,DIV_DIFF_HEAT_FLUX,H_S,ZZZ(1:4),DU_P,DU_M
 TYPE(SURFACE_TYPE), POINTER :: SF
 TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM,SM0
 INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,I,J,K,IPZ,IOPZ
@@ -1237,6 +1237,22 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
 ENDDO SPECIES_LOOP
 
+! Get the specific heat
+
+CP => WORK5
+
+IF (.NOT.EVACUATION_ONLY(NM)) THEN
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
+            CALL GET_SPECIFIC_HEAT(ZZ_GET,CP(I,J,K),TMP(I,J,K))
+         ENDDO
+      ENDDO
+   ENDDO
+ENDIF
+
 ! Compute del dot k del T
  
 KDTDX => WORK1
@@ -1358,15 +1374,6 @@ END SELECT CYLINDER3
 
 ! New form of divergence expression starts here
 
-IF (PREDICTOR) THEN
-   UU=>U
-   VV=>V
-   WW=>W
-ELSE
-   UU=>US
-   VV=>VS
-   WW=>WS
-ENDIF
 RHO_H_S_P=>WORK1
 
 DO K=0,KBP1
@@ -1379,60 +1386,74 @@ DO K=0,KBP1
    ENDDO
 ENDDO
 
-CALL ENTHALPY_ADVECTION ! computes U_DOT_DEL_RHO_H_S (contained below)
-
-! Time derivative of temperature term
-
-IF (CORRECTOR .AND. .NOT.CONSTANT_SPECIFIC_HEAT) THEN
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
-            CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,TMP(I,J,K))
-            CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP(I,J,K))
-            DTDT(I,J,K) = RHOP(I,J,K)*(CP-H_S/TMP(I,J,K))*(TMP(I,J,K)-TMPS(I,J,K))/DT
-         ENDDO
-      ENDDO
-   ENDDO
-   TMPS = TMP
+IF (PREDICTOR) THEN
+   UU=>U
+   VV=>V
+   WW=>W
+ELSE
+   UU=>US
+   VV=>VS
+   WW=>WS
 ENDIF
 
-! See Enthalpy Transport Notes, Eq. (5)
+CALL ENTHALPY_ADVECTION ! computes U_DOT_DEL_RHO_H_S (contained below)
 
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
          IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-         DP(I,J,K) = ( DP(I,J,K) - ( DTDT(I,J,K) + U_DOT_DEL_RHO_H_S(I,J,K) ) )/RHO_H_S_P(I,J,K)
+         DP(I,J,K) = DP(I,J,K) - U_DOT_DEL_RHO_H_S(I,J,K)
       ENDDO
    ENDDO 
 ENDDO
 
-MASS_TRANSPORT_IF: IF (.NOT.CONSTANT_SPECIFIC_HEAT .AND. N_TRACKED_SPECIES>0) THEN
+! Compute RTRM = 1/(rho*c_p*T) and multiply it by divergence terms already summed up
+ 
+RTRM => WORK1
 
-   CALL DENSITY_ADVECTION 
+IF (.NOT.EVACUATION_ONLY(NM)) THEN
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            RTRM(I,J,K) = 1._EB/(RHOP(I,J,K)*CP(I,J,K)*TMP(I,J,K))
+            DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
+         ENDDO
+      ENDDO 
+   ENDDO
+ENDIF
 
-   MT_SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
+! Compute (Wbar/rho) Sum (1/W_n) del dot rho*D del Z_n
 
+IF ( .NOT.EVACUATION_ONLY(NM) .AND. .NOT.CONSTANT_SPECIFIC_HEAT) THEN
+   CALL DENSITY_ADVECTION
+   SM0 => SPECIES_MIXTURE(0)
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            ZZ_GET = 0._EB
+            CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP(I,J,K))
+            DP(I,J,K) = DP(I,J,K) - ( SM0%RCON/RSUM(I,J,K) - H_S/(CP(I,J,K)*TMP(I,J,K)) )* &
+                                    ( U_DOT_DEL_RHO(I,J,K) )/RHOP(I,J,K)
+         ENDDO
+      ENDDO
+   ENDDO
+   DO N=1,N_TRACKED_SPECIES
       CALL SPECIES_ADVECTION
-
       SM  => SPECIES_MIXTURE(N)
-      SM0 => SPECIES_MIXTURE(0)
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                CALL GET_SENSIBLE_ENTHALPY_DIFF(N,TMP(I,J,K),HDIFF)
-               DP(I,J,K) = DP(I,J,K) + &
-                           ( (SM%RCON-SM0%RCON)/RSUM(I,J,K) - RHOP(I,J,K)*HDIFF/RHO_H_S_P(I,J,K) ) * &
-                           ( DEL_RHO_D_DEL_Z(I,J,K,N) - (U_DOT_DEL_RHO_Z(I,J,K) - ZZP(I,J,K,N)*U_DOT_DEL_RHO(I,J,K)) )/RHOP(I,J,K)
+               DP(I,J,K) = DP(I,J,K) + ( (SM%RCON-SM0%RCON)/RSUM(I,J,K) - HDIFF/(CP(I,J,K)*TMP(I,J,K)) )* &
+                                       ( DEL_RHO_D_DEL_Z(I,J,K,N) - U_DOT_DEL_RHO_Z(I,J,K) )/RHOP(I,J,K)
             ENDDO
          ENDDO
       ENDDO
-
-   ENDDO MT_SPECIES_LOOP
-
-ENDIF MASS_TRANSPORT_IF
+   ENDDO
+ENDIF
 
 ! Add contribution of reactions
  
@@ -1472,15 +1493,12 @@ ENDIF
 
 ! Atmospheric stratification term
 
-RTRM => WORK1
-RTRM = 1._EB/RHO_H_S_P
-
 IF (STRATIFICATION .AND. .NOT.EVACUATION_ONLY(NM)) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            DP(I,J,K) = DP(I,J,K) - (R_PBAR(K,PRESSURE_ZONE(I,J,K))-RTRM(I,J,K))*0.5_EB*(W(I,J,K)+W(I,J,K-1))*RHO_0(K)*GVEC(3)
+            DP(I,J,K) = DP(I,J,K) + RTRM(I,J,K)*0.5_EB*(W(I,J,K)+W(I,J,K-1))*RHO_0(K)*GVEC(3)
          ENDDO
       ENDDO
    ENDDO
@@ -1726,7 +1744,7 @@ SUBROUTINE DENSITY_ADVECTION
 FX=>WORK2; FX=0._EB
 FY=>WORK3; FY=0._EB
 FZ=>WORK4; FZ=0._EB
-U_DOT_DEL_RHO=>WORK6; U_DOT_DEL_RHO=0._EB
+U_DOT_DEL_RHO=>WORK8; U_DOT_DEL_RHO=0._EB
 
 DO K=1,KBAR
    DO J=1,JBAR
@@ -1806,7 +1824,7 @@ END SUBROUTINE DENSITY_ADVECTION
 
 SUBROUTINE SPECIES_ADVECTION
 
-RHO_Z_P=>WORK5
+RHO_Z_P=>WORK6
 RHO_Z_P=0._EB
 
 DO K=0,KBP1
