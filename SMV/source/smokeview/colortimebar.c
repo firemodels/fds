@@ -573,12 +573,12 @@ void initdefaultcolorbars(void){
   cbi->rgb_node[1]=0;
   cbi->rgb_node[2]=255;
 
-  cbi->index_node[1]=35;
+  cbi->index_node[1]=26;
   cbi->rgb_node[3]=0;
   cbi->rgb_node[4]=0;
   cbi->rgb_node[5]=255;
 
-  cbi->index_node[2]=35;
+  cbi->index_node[2]=26;
   cbi->rgb_node[6]=255;
   cbi->rgb_node[7]=255;
   cbi->rgb_node[8]=0;
