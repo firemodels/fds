@@ -6428,12 +6428,6 @@ updatemenu=0;
           break;
         }
       }
-      if(use_manual==1){
-        glutAddMenuEntry(_("*Manual"),MENU_TOUR_MANUAL);
-      }
-      else{
-        glutAddMenuEntry(_("Manual"),MENU_TOUR_MANUAL);
-      }
     }
     for(i=0;i<ntours;i++){
       tourdata *touri;
@@ -6578,12 +6572,12 @@ updatemenu=0;
   /* --------------------------------showhide menu -------------------------- */
 
   CREATEMENU(showhidemenu,ShowHideMenu);
-  glutAddSubMenu(_("Viewpoints"),resetmenu);
   if(ntotal_blockages>0||isZoneFireModel==0){
     glutAddSubMenu(_("Geometry"),geometrymenu);
   }
   glutAddSubMenu(_("Labels"),labelmenu);
   glutAddSubMenu(_("Data coloring"),colorbarmenu);
+  glutAddSubMenu(_("Viewpoints"),resetmenu);
   {
     int human_present=0;
     int particle_present=0;

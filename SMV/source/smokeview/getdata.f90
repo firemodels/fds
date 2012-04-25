@@ -113,7 +113,6 @@ do itime=1, ntimes
     if(vals(nvars+i).lt.valmin)valmin=vals(nvars+i)
     if(vals(nvars+i).gt.valmax)valmax=vals(nvars+i)
   end do
-  write(6,*)"valmin=",valmin," valmax=",valmax
   ndynamics(itime)=ntri_d
   if(finish.eq.0.and.ntri_d.ne.0)then
     read(lu20,iostat=finish)(vals(nvars+ntri_s+i),i=1,ntri_d)
@@ -121,6 +120,7 @@ do itime=1, ntimes
   if(finish.ne.0)return
   nvars = nvars + ntri_s + ntri_d
 end do
+write(6,*)"valmin=",valmin," valmax=",valmax
 
 end subroutine getembeddata
 
