@@ -6910,7 +6910,7 @@ Below is an example of the use of spectral property table, listing the propertie
 \end{verbatim} \normalsize
 \normalsize
 
-For calculating the absorption of thermal radiation by particles, FDS uses a running average of particle temperature and density. The default averaging factor, {\ct RUN\_AVG\_FAC}, is set to 0.5. 
+For calculating the absorption of thermal radiation by particles, FDS uses a running average of particle temperature and density. The default averaging factor, {\ct RUN\_AVG\_FAC}, is set to 0.5.
 
 
 \subsection{Size Distribution}
@@ -6940,22 +6940,25 @@ To prevent FDS from generating a distribution of droplets/particles altogether, 
 {\ct MONODISPERSE=.TRUE.} on the {\ct PART} line, in which case every droplet or particle will be assigned the
 same {\ct DIAMETER}.
 
+If you set {\ct CHECK\_DISTRIBUTION=.TRUE.} on the {\ct PART} line, FDS will write out the cumulative distribution function for that particular particle class in a file called {\ct CHID\_PART\_ID\_cdf.csv}.
+
 By default, the range of particle sizes is divided into seven bins, and the sampled particles are divided among these bins. This ensures that a reasonable number of particles is assigned to the entire spectrum of sizes. To change the default number of bins, set {\ct N\_STRATA} on the {\ct PART} line.
 
 \subsection{Secondary breakup}
 \label{info:secondary_breakup}
+
 If {\ct BREAKUP=.TRUE.} is set on the {\ct PART} line, particles may undergo secondary breakup.
-In this case the user should also specify {\ct SURFACE\_TENSION} of the liquid and breakup distribution parameters \\
-{\ct BREAKUP\_CHILD\_DIAMETER} and {\ct BREAKUP\_CHILD\_GAMMA\_D}.
+In this case you should also specify the {\ct SURFACE\_TENSION} (N/m) of the liquid and the resulting ratio of the Sauter mean diameters,
+{\ct BREAKUP\_RATIO}. Its default is 3/7. Optionally, specify the distribution parameters {\ct BREAKUP\_GAMMA\_D} and {\ct BREAKUP\_SIGMA\_D}.
 
 
 \subsection{Drag}
 \label{info:particle_drag}
 
-For massive particles the default drag law (i.e., the drag coefficient correlation as a function of Reynolds number [based on particle diameter]) is that of a sphere.
+For massive particles the default drag law (i.e., the drag coefficient correlation as a function of the Reynolds number based on particle diameter) is that of a sphere.
 To invoke the cylinder drag law set {\ct DRAG\_LAW} to {\ct 'CYLINDER'} on the {\ct PART} line.  If neither of these options is applicable,
 the user may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct USER\_DRAG\_COEFFICIENT} on {\ct PART}.
-The {\ct USER\_DRAG\_COEFFICIENT} trumps the {\ct DRAG\_LAW}.
+The {\ct USER\_DRAG\_COEFFICIENT} over-rides the {\ct DRAG\_LAW}.
 
 \subsection{Velocity on Solid Surfaces}
 \label{info:surface_droplets}
@@ -7184,10 +7187,10 @@ If the {\ct SURF} line that is associated with the particle class calls for it, 
 \begin{verbatim}
 &PART ..., ORIENTATION(1,3)=1., ORIENTATION(2,3)=-1. /
 \end{verbatim}
-\normalsize 
+\normalsize
 
 \noindent
-specifies that half the particle is facing upwards and half is facing downwards. This is useful if the source of heating does not surround the particles. 
+specifies that half the particle is facing upwards and half is facing downwards. This is useful if the source of heating does not surround the particles.
 
 
 
@@ -10811,9 +10814,13 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endhead
 {\ct AGE}                           & Real            & Section~\ref{info:particle_number}      & s         & 100000.       \\ \hline
 {\ct BREAKUP}                       & Logical         & Section~\ref{info:secondary_breakup}    &           & {\ct .FALSE.} \\ \hline
-{\ct BREAKUP\_CHILD\_DIAMETER}      & Real            & Section~\ref{info:secondary_breakup}    &           & $\frac{3}{7}$ \\ \hline
-{\ct BREAKUP\_CHILD\_GAMMA\_D}      & Real            & Section~\ref{info:secondary_breakup}    &           & 2.56          \\ \hline
-{\ct CNF\_RAMP\_ID}                 & Character       & Section~\ref{info:particle_size}        &           &  \\ \hline
+{\ct BREAKUP\_CNF\_RAMP\_ID}        & Character       & Section~\ref{info:secondary_breakup}    &           &               \\ \hline
+{\ct BREAKUP\_DISTRIBUTION}         & Character       & Section~\ref{info:secondary_breakup}    &           & {\ct 'ROSIN-RAMMLER-LOGNORMAL'} \\ \hline
+{\ct BREAKUP\_GAMMA\_D}             & Real            & Section~\ref{info:secondary_breakup}    &           & 2.4           \\ \hline
+{\ct BREAKUP\_RATIO}                & Real            & Section~\ref{info:secondary_breakup}    &           & $\frac{3}{7}$ \\ \hline
+{\ct BREAKUP\_SIGMA\_D}             & Real            & Section~\ref{info:secondary_breakup}    &           &               \\ \hline
+{\ct CHECK\_DISTRIBUTION}           & Logical         & Section~\ref{info:particle_size}        &           & {\ct .FALSE.} \\ \hline
+{\ct CNF\_RAMP\_ID}                 & Character       & Section~\ref{info:particle_size}        &           &               \\ \hline
 {\ct COLOR}                         & Character       & Section~\ref{info:particle_quantities}  &           & {\ct 'BLACK'} \\ \hline
 {\ct COMPLEX\_REFRACTIVE\_INDEX}    & Real            & Section~\ref{radiative_part_props}      &           & 0.01          \\ \hline
 {\ct CTRL\_ID}                      & Character       & Section~\ref{info:particle_flux}        &           &               \\ \hline
@@ -10822,7 +10829,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DIAMETER}                      & Real            & Section~\ref{info:particle_size}        & $\mu$m    & 500.          \\ \hline
 {\ct DISTRIBUTION}                  & Character       & Section~\ref{info:particle_size}        &           & {\ct 'ROSIN-RAMMLER-LOGNORMAL'} \\ \hline
 {\ct DRAG\_LAW}                     & Character       & Section~\ref{info:particle_drag}        &           & {\ct 'SPHERE'}\\ \hline
-{\ct EVAPORATE}                     & Logical         & Section~\ref{thermal_part_props}        &           & {\ct .TRUE.}  \\ \hline
 {\ct GAMMA\_D}                      & Real            & Section~\ref{info:particle_size}        &           & 2.4           \\ \hline
 {\ct HEAT\_OF\_COMBUSTION}          & Real            & Section~\ref{info:fuel_droplets}        & kJ/kg     &               \\ \hline
 {\ct HORIZONTAL\_VELOCITY}          & Real            & Section~\ref{info:surface_droplets}     & m/s       &  0.2          \\ \hline
@@ -10850,8 +10856,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \end{longtable}
 
 
-% Undocumented: BREAKUP_CHILD_SIGMA_D,CHECK_DISTRIBUTION,CHILD_CNF_RAMP_ID,CHILD_DISTRIBUTION
-% DENSE_VOLUME_FRACTION, TREE, 
+% Undocumented: 
+% DENSE_VOLUME_FRACTION, TREE,
 % VEG_BULK_DENSITY, VEG_BURNING_RATE_MAX,VEG_CHAR_FRACTION,VEG_CHAR_OXIDATION,
 % VEG_DEGRADATION, VEG_DEHYDRATION_RATE_MAX, VEG_DENSITY, VEG_DRAG_COEFFICIENT,
 % VEG_FUEL_MPV_MIN, VEG_INITIAL_TEMPERATURE, VEG_MOISTURE, VEG_MOIST_MPV_MIN,
