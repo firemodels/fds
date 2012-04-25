@@ -33,7 +33,7 @@ cutcell_area;             display('cutcell_area complete...')
 
 % The main plotting routine is dataplot
 
-cfil = [pwd,'/verification_data_config_matlab.csv'];
+cfil = [pwd,'/FDS_verification_dataplot_inputs.csv'];
 vdir = [pwd,'/../../Verification/'];
 plotdir = [pwd,'/../../Manuals/'];
 
