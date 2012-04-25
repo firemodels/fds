@@ -2088,7 +2088,7 @@ void update_fedinfo(void){
     sd->nline_contours=0;
     sd->line_contours=NULL;
     sd->contour_areas=NULL;
-    sd->ncontour_areas=NULL;
+    sd->ncontour_areas=0;
     sd->menu_show=1;
     sd->constant_color=NULL;
     sd->mesh_type=co2->mesh_type;
