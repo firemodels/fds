@@ -1,24 +1,37 @@
-MODULE RADCONS
+!------------------------------------------------------------------------------
+! This file contains 4 modules
+! 1 - RADCONS
+! 2 - RADCALV
+! 3 - SPECDATA
+! 4 - MIEV
+!------------------------------------------------------------------------------
 
+
+MODULE RADCONS
+!------------------------------------------------------------------------------
 ! Radiation Parameters
 
 USE PRECISION_PARAMETERS
 IMPLICIT NONE
-LOGICAL :: WIDE_BAND_MODEL,CH4_BANDS
-INTEGER :: TIME_STEP_INCREMENT,NMIEANG
-REAL(EB) :: RADTMP,PATH_LENGTH,RADIATIVE_FRACTION
-REAL(EB), ALLOCATABLE, DIMENSION(:)   :: BBFRAC,WL_LOW,WL_HIGH
-INTEGER  :: NRDMIE, NLMBDMIE, NDG=50
-REAL(EB) DGROUP_A, DGROUP_B, WEIGH_CYL
 
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: DLN
-REAL(EB), ALLOCATABLE, DIMENSION(:)   :: RSA, DLX, DLY, DLZ, DLB
-REAL(EB) :: DPHI0, FOUR_SIGMA, RPI_SIGMA, LTSTEP, RTMPMAX, RTMPMIN
+REAL(EB), ALLOCATABLE, DIMENSION(:)   :: BBFRAC, WL_LOW, WL_HIGH
+REAL(EB), ALLOCATABLE, DIMENSION(:)   :: DLX, DLY, DLZ, DLB, RSA
+
 INTEGER, ALLOCATABLE, DIMENSION(:,:) :: DLM
 INTEGER, ALLOCATABLE, DIMENSION(:)   :: NRP
+
+REAL(EB) :: RADTMP, PATH_LENGTH, RADIATIVE_FRACTION
+REAL(EB) :: DGROUP_A, DGROUP_B, WEIGH_CYL
+REAL(EB) :: DPHI0, FOUR_SIGMA, RPI_SIGMA, LTSTEP, RTMPMAX, RTMPMIN
+
+INTEGER :: TIME_STEP_INCREMENT,NMIEANG
+INTEGER :: NRDMIE, NLMBDMIE, NDG = 50
 INTEGER :: NRT,NCO,UIIDIM,NLAMBDAT,NKAPPAT,NKAPPAZ
 
-!**********************************************************************************************************
+LOGICAL :: WIDE_BAND_MODEL, CH4_BANDS
+
+!------------------------------------------------------------------------------
 !
 !     BBFRAC    Fraction of blackbody radiation
 !     DLX       Mean X-component of the control angle ray vector
@@ -32,8 +45,8 @@ INTEGER :: NRT,NCO,UIIDIM,NLAMBDAT,NKAPPAT,NKAPPAZ
 !     ILW       Radiation intensities on solid mirrors and mesh interfaces.
 !               Intensity integrals (band specific or angle increment) for solid and open walls
 !     INRAD_W   Incident radiative heat flux on a cell (QRADIN = E_WALL*INRAD_W)
-!     R50       Array of PARTICLE radii corresponding to the median diameters of the distributions used in the generation
-!               of WQABS and WQSCA arrays.
+!     R50       Array of PARTICLE radii corresponding to the median diameters 
+!               of the distributions used in the generation of WQABS and WQSCA arrays.
 !     NDG       Number of PARTICLE radii in WQABS and WQSCA arrays
 !     NLMBDMIE  Number of wave lengths in Mie calculations
 !     NMIEANG   Number of angle bins in forward scattering integration
@@ -68,7 +81,7 @@ INTEGER :: NRT,NCO,UIIDIM,NLAMBDAT,NKAPPAT,NKAPPAZ
 !     ANGLE_INCREMENT         How many angles are skipped on each update
 !     TIME_STEP_INCREMENT     How often is the radiation solver called
 !
-!************************************************************************************************************
+!------------------------------------------------------------------------------
 
 END MODULE RADCONS
 
@@ -76,10 +89,20 @@ END MODULE RADCONS
 
 MODULE RADCALV
 
+!------------------------------------------------------------------------------
+! VARIABLES
+! OMMIN : (REAL) MINIMUM WAVE NUMBER IN SPECTRUM, CM-1
+! OMMAX : (REAL) MAXIMUM WAVE NUMBER IN SPECTRUM, CM-1
+! NOM   : (INTEGER) NUMBER OF WAVELENGTH INTERVALS
+! GC    : (REAL) COLLISION BROADENED HALF-WIDTH
+! AMBDA : (REAL) WAVELENGTH, IN MICROMETER 
+
+
+!------------------------------------------------------------------------------
 ! Module wrapper for RadCal subroutine
 
 USE PRECISION_PARAMETERS
-USE GLOBAL_CONSTANTS, ONLY: AL2O3,RADCAL_FUEL
+USE GLOBAL_CONSTANTS, ONLY: AL2O3, RADCAL_FUEL
 IMPLICIT NONE
 
 PRIVATE
@@ -87,85 +110,120 @@ CHARACTER(255), PARAMETER :: iradid='$Id$'
 CHARACTER(255), PARAMETER :: iradrev='$Revision$'
 CHARACTER(255), PARAMETER :: iraddate='$Date$'
 
-PUBLIC OMMAX,OMMIN,DD,SPECIE,SVF,PLANCK,P,RCT,RCALLOC,INIT_RADCAL,RADCAL,RCDEALLOC,GET_REV_irad
-REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: GAMMA,SD15, SD,SD7,SD3
-REAL(EB), ALLOCATABLE, DIMENSION(:) :: SPECIE,QW,TTAU,XT,AB,AMBDA,ATOT,BCNT,P,UUU,GC,X
-REAL(EB) :: OMMIN,OMMAX,TWALL,RCT,AC,AD,DD,XPART,TAU,SVF,TAUS,XTOT,XSTAR
-INTEGER :: NOM
+PUBLIC OMMAX, OMMIN, DD, SPECIE, SVF, PLANCK, P, RCT, RCALLOC,                 &
+       INIT_RADCAL, RADCAL, RCDEALLOC, GET_REV_irad
 
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: GAMMA, SD15, SD, SD7, SD3
+REAL(EB), ALLOCATABLE, DIMENSION(:)   :: SPECIE, QW, TTAU, XT, AB,             &
+                                         AMBDA, ATOT, BCNT, P, UUU, GC, X
+
+REAL(EB) :: OMMIN, OMMAX, TWALL, RCT, AC, AD, DD, XPART, TAU,                  &
+            SVF, TAUS, XTOT, XSTAR
+
+INTEGER :: NOM
 
 CONTAINS
 
-
+!==============================================================================
 SUBROUTINE GET_REV_irad(MODULE_REV,MODULE_DATE)
-INTEGER,INTENT(INOUT) :: MODULE_REV
-CHARACTER(255),INTENT(INOUT) :: MODULE_DATE
+!==============================================================================
+! Variables passed in
 
-WRITE(MODULE_DATE,'(A)') iradrev(INDEX(iradrev,':')+2:LEN_TRIM(iradrev)-2)
-READ (MODULE_DATE,'(I5)') MODULE_REV
-WRITE(MODULE_DATE,'(A)') iraddate
+ INTEGER, INTENT(INOUT) :: MODULE_REV
+ CHARACTER(255),INTENT(INOUT) :: MODULE_DATE
+!------------------------------------------------------------------------------
 
+ WRITE(MODULE_DATE,'(A)') iradrev(INDEX(iradrev,':')+2:LEN_TRIM(iradrev)-2)
+ READ (MODULE_DATE,'(I5)') MODULE_REV
+ WRITE(MODULE_DATE,'(A)') iraddate
+
+!------------------------------------------------------------------------------
 END SUBROUTINE GET_REV_irad
 
 
-
+!==============================================================================
 SUBROUTINE INIT_RADCAL
+!==============================================================================
+! 
+ USE RADCONS, ONLY: RADTMP
+!------------------------------------------------------------------------------
 
-USE RADCONS, ONLY: RADTMP
+ TWALL = RADTMP
 
-TWALL = RADTMP
-
-IF(OMMAX<1100._EB) THEN 
-   NOM=INT((OMMAX-OMMIN)/5._EB)
-ELSEIF(OMMIN>5000._EB) THEN
-   NOM=INT((OMMAX-OMMIN)/50._EB)
-ELSEIF(OMMIN<1100._EB.AND.OMMAX>5000._EB) THEN
-   NOM=INT((1100._EB-OMMIN)/5._EB)+INT((5000._EB-1100._EB)/25._EB) +INT((OMMAX-5000._EB)/50._EB)
-ELSEIF(OMMIN<1100._EB) THEN
-   NOM=INT((1100._EB-OMMIN)/5._EB)+INT((OMMAX-1100._EB)/25._EB)
-ELSEIF(OMMAX>5000._EB) THEN
-   NOM=INT((5000._EB-OMMIN)/25._EB)+INT((OMMAX-5000._EB)/50._EB)
-ELSE
-   NOM=INT((OMMAX-OMMIN)/25._EB)
-ENDIF
-
+ IF(OMMAX<1100._EB) THEN 
+    NOM=INT((OMMAX-OMMIN)/5._EB)
+ ELSEIF(OMMIN>5000._EB) THEN
+    NOM=INT((OMMAX-OMMIN)/50._EB)
+ ELSEIF(OMMIN<1100._EB.AND.OMMAX>5000._EB) THEN
+    NOM=INT((1100._EB-OMMIN)/5._EB)+INT((5000._EB-1100._EB)/25._EB) +INT((OMMAX-5000._EB)/50._EB)
+ ELSEIF(OMMIN<1100._EB) THEN
+    NOM=INT((1100._EB-OMMIN)/5._EB)+INT((OMMAX-1100._EB)/25._EB)
+ ELSEIF(OMMAX>5000._EB) THEN
+    NOM=INT((5000._EB-OMMIN)/25._EB)+INT((OMMAX-5000._EB)/50._EB)
+ ELSE
+    NOM=INT((OMMAX-OMMIN)/25._EB)
+ ENDIF
+!------------------------------------------------------------------------------
 END SUBROUTINE INIT_RADCAL
 
 
-
+!==============================================================================
 SUBROUTINE RADCAL(AMEAN,AP0)
-
+!==============================================================================
+! OUTPUT
+! AMEAN : (REAL) EFFECTIVE ABSORPTION COEFFICIENT IN UNIFORM MEDIUM
+! AP0   : (REAL) PLANCK MEAN ABSORPTION COEFFCIENT IN UNIFORM MEDIUM
+!
+! LOCAL
+! DOM   : (REAL) INCREMENT OF WAVENUMBER
+! OMEGA : (REAL) WAVENUMBER
+!
+!
+! RECALL: CO2: 5 BANDS (4 Modeled, 1 Tabulated)
+!         H2O: 5 BANDS (5 Tabulated)
+!         CO: 1 BANDS (Modeled)
+!        old CH4: 3 BANDS (1 Modeled, 2 Tabulated)
+!------------------------------------------------------------------------------
 USE RADCONS, ONLY:RPI_SIGMA
-INTEGER  :: I,II,KK,NM,N,MM,KMAX,KMIN
-REAL(EB) :: DOM,ABGAS,PTOT,TEMP,UK,XD,YD,XX,ENN,ARG,ARGNEW,RSL,RSS,ABLONG,ABSHRT,ABIL,ABIS,OMEGA,WL,DAMBDA,AP0, &
-            SDWEAK,GDINV,GDDINV,YC,Y,AIWALL,AMEAN,XC,AOM,Q,LTERM,AZORCT,RCT4
+
+! VARIABLES PASSED OUTPUT
+REAL (EB) :: AMEAN, AP0
+
+! LOCAL VARIABLES
+
+REAL(EB) :: DOM, ABGAS, PTOT, TEMP, UK, XD, YD, XX, ENN, ARG, ARGNEW, RSL, RSS,  &
+            ABLONG, ABSHRT, ABIL, ABIS, OMEGA, WL, DAMBDA, SDWEAK, GDINV,        &
+            GDDINV, YC, Y, AIWALL, XC, AOM, Q, LTERM, AZORCT, RCT4
+
+INTEGER  :: I, II, KK, NM, N, MM, KMAX, KMIN
 
 ! [NOTE: THE TOTAL INTENSITY CALCULATED IS THAT WHICH LEAVES INTERVAL J=1.
 ! P(I,J) IS PARTIAL PRESSURE, ATM, OF SPECIES I IN  INTERVAL J.
 ! I=1,2,3,4,5, OR 6 IMPLIES SPECIES IS CO2, H2O, CH4, CO, O2, OR N2, RESP.]
 
-DOM=5.0_EB
-OMEGA=OMMIN-DOM
-NM=NOM-1
+DOM    = 5.0_EB
+OMEGA  = OMMIN-DOM
+NM     = NOM-1
 AZORCT = 273._EB/RCT
-RCT4 = RCT**4
+RCT4   = RCT**4
 
-! LOOP 1000 COMPUTES EACH SPECTRAL CONTRIBUTION
+! LOOP 1000 COMPUTES EACH SPECTRAL CONTRIBUTION, LOOP OVER EACH WAVE NUMBER INTERVALS
 
-L1000: DO KK=1,NOM
+L1000: DO KK=1, NOM
 
    OMEGA=OMEGA+DOM
    IF(OMEGA>1100._EB) OMEGA=OMEGA+20._EB
    IF(OMEGA>5000._EB) OMEGA=OMEGA+25._EB
-   AMBDA(KK)=10000._EB/OMEGA
-   ABGAS=0._EB
+
+   AMBDA(KK) = 10000._EB/OMEGA
+   ABGAS     = 0._EB
  
    ! LOOP 200 COMPUTES THE CONTRIBUTION OF EACH SPECIES TO TAU
    ! IF SPECIE(I) IS SET TO 0., THAT PARTICULAR RADIATING SPECIES IS NOT PRESENT.  THE SPECIES CONSIDERED ARE
    !          I   SPECIES
    !          1     CO2
    !          2     H2O
-   !          3     CH4
+   !          3     FUEL (CH4, C3H8, C7H16, CH3OH, ...)
    !          4     CO
    !          5     PARTICULATES
 
@@ -173,18 +231,23 @@ L1000: DO KK=1,NOM
 
       IF(SPECIE(I) <= ZERO_P) CYCLE L200
  
-      ! LOOP 100 IS FOR EACH ELEMENT ALONG PATH
-      ! (CALCULATION PROCEEDS IN ACCORDANCE WITH THE SLG MODEL, TABLE 5-18, IN NASA SP-3080._EB)
+! LOOP 100 IS FOR EACH ELEMENT ALONG PATH
+! (CALCULATION PROCEEDS IN ACCORDANCE WITH THE SLG MODEL, TABLE 5-18, IN NASA SP-3080._EB)
+! MODEL BASED ON RANDOM BAND MODEL
 
       IF(KK<=1) THEN
-         UUU(I)=AZORCT*P(I)*100.*DD
+         UUU(I)=AZORCT*P(I)*100.*DD ! UUU optical path length? 
          GC(I)=0._EB
-         PTOT=0._EB
+         PTOT=SUM(P(1:6))
+
+! Compute collisional broadening half-width at half height, EQ 5-34 NASA REPORT SP-3080
+! INCLUDE NON-RESONANT FOREIGN AND SELF-BROADENING COLLISIONS
          DO II=1,6
-            PTOT=P(II)+PTOT
             GC(I)=GC(I)+GAMMA(I,II)*P(II)*SQRT(AZORCT)
          ENDDO
-         GC(I)=GC(I)+GAMMA(I,7)*P(I)*AZORCT
+
+! INCLUDE RESONANT SELF-BROADENING COLLISIONS
+         GC(I)=GC(I)+GAMMA(I,7)*P(I)*AZORCT     
       ENDIF
 
       IF(P(I)<=ZERO_P) THEN
@@ -204,12 +267,15 @@ L1000: DO KK=1,NOM
             CASE (4)
                CALL CO(OMEGA,TEMP,GC(4),SDWEAK,GDINV,GDDINV)
          END SELECT
+
          UK=SDWEAK*UUU(I)
          XSTAR=UK+1.E-34_EB
          ABGAS=UK/DD+ABGAS
          AD=GDDINV
          AC=GDINV
+
          IF(XSTAR>=1.E-6_EB) THEN
+
             XD=1.7_EB*AD*SQRT(DLOG(1._EB+(XSTAR/(1.7_EB*AD))**2))
             YD=1._EB-(XD/XSTAR)**2
             XC=XSTAR/SQRT(1._EB+0.25_EB*XSTAR/AC)
@@ -357,11 +423,13 @@ ELSE
    AMEAN=-1._EB/DD*DLOG(LTERM)
 ENDIF
 
+!------------------------------------------------------------------------------
 END SUBROUTINE RADCAL
 
 
-
+!==============================================================================
 SUBROUTINE CO2(OMEGA,TEMP,GC1,SDWEAK,GDINV,GDDINV)
+!==============================================================================
 
 INTEGER I,J,K,L
 REAL(EB) OMEGA,TEMP,GC1,SDWEAK,GDINV,GDDINV,AA,BB,CC,QQ,EE,FF,GG, &
@@ -384,6 +452,7 @@ ELSE
       OM1=1354.91_EB
       OM2=673.0_EB
       OM3=2396.49_EB
+
       BCNT(1)=4860.5_EB
       BCNT(2)=4983.5_EB
       BCNT(3)=5109.0_EB
@@ -779,12 +848,13 @@ ELSEIF((OMEGA<=2474.).AND.(OMEGA>1975.)) THEN
       GDDINV=1._EB
       ENDIF
    ENDIF
+!------------------------------------------------------------------------------
 END SUBROUTINE CO2
 
 
-
+!==============================================================================
 SUBROUTINE H2O(OMEGA,TEMP,GC2,SDWEAK,GDINV,GDDINV)
-
+!==============================================================================
 INTEGER I,J
 REAL(EB) OMEGA,TEMP,GC2,SDWEAK,GDINV,GDDINV,WM,W1,WW,T1,TT,TW, D,B,DINV,TTEMP,GD
 
@@ -820,12 +890,13 @@ IF (OMEGA>=9300..OR.OMEGA<50._EB) THEN
    GDDINV=GD*DINV
    TEMP=TTEMP
 ENDIF
+!------------------------------------------------------------------------------
 END SUBROUTINE H2O
 
 
-
+!==============================================================================
 SUBROUTINE CO(OMEGA,TEMP,GC4,SDWEAK,GDINV,GDDINV)
-
+!==============================================================================
 INTEGER J
 REAL(EB) OMEGA,TEMP,GC4,SDWEAK,GDINV,GDDINV,AA,BB,CC,QQ,EE,FF,GG, &
          SMINUS,SPLUS,SDSTRG,B,ALPHA,A,OME,WX,WY,OMPRIM,T0, &
@@ -881,12 +952,13 @@ ELSE
 !***EXPRESS S/D AT STP, AS IS K IN NASA SP-3080
    SDWEAK=SDWEAK*TOAZ
 ENDIF
+!------------------------------------------------------------------------------
 END SUBROUTINE CO
 
 
-
+!==============================================================================
 SUBROUTINE POD(OMEGA)
-
+!==============================================================================
 ! POD CALCULATES PARTICLE OPTICAL DEPTH, XPART, OF THE VOLUME FRACTION OF SOOT PARTICLES IN GAS CLOUD.  RIN AND RIK ARE
 ! THE REAL AND IMAGINARY PARTS OF THE INDEX OF REFRACTION. THE PARTICLES ARE ASSUMED TO BE IN THE RAYLEIGH LIMIT.
 
@@ -911,13 +983,13 @@ ENDIF
 FF=FF_FAC/LAMBDA
 ABCO=FF*SVF*1.E6_EB
 XPART=ABCO*DD
-
+!------------------------------------------------------------------------------
 END SUBROUTINE POD
 
 
-
+!==============================================================================
 SUBROUTINE CH4(OMEGA,TEMP,PCH4,PTOT,GC3,SDWEAK,GDINV,GDDINV)
-
+!==============================================================================
 INTEGER I,J
 REAL(EB) OMEGA,TEMP,PCH4,PTOT,GC3,SDWEAK,GDINV,GDDINV,BE,Q2, &
       WM,GD,OM1,OM2,OM3,OM4,COM1,COM2,COM3,COM4,DINV,PE,W1,SDB, &
@@ -1020,38 +1092,44 @@ ELSE
       ENDIF
    ENDIF
 ENDIF
+!------------------------------------------------------------------------------
 END SUBROUTINE CH4
 
-!*******************************************************************************
 
-REAL(EB) FUNCTION PLANCK(A,B)
-!--------------------------------------------------------------------------------
-! COMPUTES BLACKBODY FUNCTION, UNITS: [W/M-2/MICRON/SR]
+
+!==============================================================================
+REAL(EB) FUNCTION PLANCK(TEMP,LAMBDA)
+!==============================================================================
+! COMPUTES BLACKBODY FUNCTION IN UNITS OF W/M-2/MICRON/SR
 ! Input:
-! A : TEMPERATURE
-! B : WAVELENGTH
-!--------------------------------------------------------------------------------
-REAL (EB), INTENT(IN):: A,B
-REAL (EB) Q1,Q2,C
-!    COMPUTES BLACKBODY FUNCTION IN UNITS OF W/M-2/MICRON/SR
-Q1=1.19088E8!2._EB*.59544E8_EB
-Q2=14388._EB
-C = A * B
-IF(ABS(A)<ZERO_P) THEN
-   PLANCK=0._EB
-ELSE
-   C = A * B
-   IF (Q2/C >38._EB) THEN
-      PLANCK=0._EB
-   ELSE
-      PLANCK=Q1*(B**(-5))/(EXP(Q2/C)-1._EB)
+! TEMP: TEMPERATURE, UNIT = KELVIN
+! LAMBDA: WAVELENGTH, UNIT = MicroMETERS
+!------------------------------------------------------------------------------
+! Variables passed in
+ REAL (EB), INTENT(IN):: TEMP, LAMBDA
+
+! local variables
+ REAL (EB), PARAMETER :: Q1 = 1.19088E8_EB ! Q1 = 2*SPEED_OF_LIGHT^2*PLANCK_CNST
+ REAL (EB), PARAMETER :: Q2 = 14388._EB    ! Q2 = SPEED_OF_LIGHT*PLANCK_CNS/BOLTZMANN
+ REAL (EB) :: C   ! C = LAMBDA * TEMP
+
+ IF(ABS(TEMP)<ZERO_P) THEN
+    PLANCK = 0._EB
+ ELSE
+    C = TEMP * LAMBDA
+    IF (Q2/C > 38._EB) THEN
+       PLANCK = 0._EB
+    ELSE
+       PLANCK=Q1*(LAMBDA**(-5))/(EXP(Q2/C)-1._EB)
    END IF
-ENDIF
+ ENDIF
+!------------------------------------------------------------------------------
 END FUNCTION PLANCK
 
-
+!==============================================================================
 SUBROUTINE RCALLOC
-  
+!==============================================================================
+
 ALLOCATE(P(6))
 ALLOCATE(SPECIE(5))
 ALLOCATE(QW(600))
@@ -1727,11 +1805,12 @@ SD3(1:3,25:32) = RESHAPE ((/&
 0._EB, 0._EB, 0.06_EB,&
 0._EB, 0._EB, 0.03_EB,&
 0._EB, 0._EB, 0._EB/),(/3,8/))
-
+!------------------------------------------------------------------------------
 END SUBROUTINE RCALLOC
 
+!==============================================================================
 SUBROUTINE RCDEALLOC
-   
+!==============================================================================   
 DEALLOCATE(P)
 DEALLOCATE(SPECIE)
 DEALLOCATE(QW)
@@ -1749,9 +1828,11 @@ DEALLOCATE(SD15)
 DEALLOCATE(SD)
 DEALLOCATE(SD7)
 DEALLOCATE(SD3)
-     
+
+!------------------------------------------------------------------------------   
 END SUBROUTINE RCDEALLOC
 
+!------------------------------------------------------------------------------
 END MODULE RADCALV
 
 
