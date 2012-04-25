@@ -106,7 +106,8 @@ int Creadslice_frame(int frame_index,int sd_index,int flag){
   int slicefilelen;
   int headersize,framesize,statfile;
   int frame_size;
-  int skip_local,returncode;
+  long int skip_local;
+  int returncode;
   FILE *SLICEFILE;
   float *time_local,*slicevals;
   int error;

@@ -961,7 +961,7 @@ int getterrain_data(char *file,terraindata *terri){
 
       FORTWUIREAD(cellindex_buffer,nchanges);
       if(returncode==0)break;
-      FSEEK(WUIFILE,4,SEEK_CUR);returncode=fread(cellstate_buffer,1,nchanges,WUIFILE);fseek(WUIFILE,4,SEEK_CUR);
+      FSEEK(WUIFILE,4,SEEK_CUR);returncode=fread(cellstate_buffer,1,nchanges,WUIFILE);FSEEK(WUIFILE,4,SEEK_CUR);
       if(returncode==0)break;
       for(i=0;i<nchanges;i++){
         terraincell *ti;
