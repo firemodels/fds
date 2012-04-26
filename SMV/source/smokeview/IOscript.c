@@ -1006,7 +1006,7 @@ void script_loadvolsmokeframe(scriptdata *scripti){
   force_redisplay=1;
   update_framenumber(0);
   UpdateTimeLabels();
-  keyboard('r',0,0);
+  keyboard('r',FROM_SMOKEVIEW);
 }
 
 /* ------------------ script_loadvolsmokeframe2 ------------------------ */
@@ -1486,7 +1486,7 @@ void settimeval(float timeval){
         force_redisplay=1;
         update_framenumber(0);
         UpdateTimeLabels();
-        keyboard('t',0,0);
+        keyboard('t',FROM_SMOKEVIEW);
         break;
       }
     }
@@ -1541,11 +1541,11 @@ int run_script(void){
       }
       break;
     case SCRIPT_RENDERONCE:
-      keyboard('r',0,0);
+      keyboard('r',FROM_SMOKEVIEW);
       returnval=1;
       break;
     case SCRIPT_RENDERDOUBLEONCE:
-      keyboard('R',0,0);
+      keyboard('R',FROM_SMOKEVIEW);
       returnval=1;
       break;
     case SCRIPT_RENDERALL:

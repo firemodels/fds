@@ -505,7 +505,7 @@ void InitOpenGL(void){
 #endif
   glutSpecialUpFunc(specialkeyboard_up);
   glutKeyboardUpFunc(keyboard_up);
-  glutKeyboardFunc(keyboard);
+  glutKeyboardFunc(keyboard_CB);
   glutMouseFunc(mouse);
   glutSpecialFunc(specialkeyboard);
   glutMotionFunc(motion);

@@ -1328,7 +1328,7 @@ extern "C"  void glui_script_disable(void){
       }
       break;
     case SCRIPT_RENDER:
-      keyboard('r',0,0);
+      keyboard('r',FROM_SMOKEVIEW);
       break;
     case SCRIPT_RENDER_SUFFIX:
     {

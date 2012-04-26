@@ -1417,10 +1417,10 @@ void RenderMenu(int value){
     if(render_double_menu==1)render_double_state=1;
     if(render_double_state!=0){
       render_double=render_double_state;
-      keyboard('R',0,0);
+      keyboard('R',FROM_SMOKEVIEW);
     }
     else{
-      keyboard('r',0,0);
+      keyboard('r',FROM_SMOKEVIEW);
     }
      break;
   case RenderCancel:
@@ -1460,7 +1460,7 @@ void RenderMenu(int value){
       tourangle_global=0.0;
     }
     if(stept==0){
-      keyboard('t',0,0);
+      keyboard('t',FROM_SMOKEVIEW);
     }
     RenderState(1);
     reset_itimes0();
@@ -1711,7 +1711,7 @@ void FrameRateMenu(int value){
     if(global_times==NULL&&realtime_flag!=0)updateUpdateFrameRateMenu=1;
   }
   else{
-    keyboard('t',0,0);
+    keyboard('t',FROM_SMOKEVIEW);
     RenderState(0);
     FlowDir=1;
   }

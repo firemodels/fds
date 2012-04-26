@@ -291,7 +291,7 @@ void TRAINER_CB(int var){
 
   case TRAINER_PAUSE:
     stept=trainer_pause;
-    keyboard('t',0,0);
+    keyboard('t',FROM_SMOKEVIEW);
     break;
   case TOGGLE_VIEW:
     if(ntrainer_viewpoints<=0)break;

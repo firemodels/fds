@@ -878,15 +878,28 @@ void print_gpu_cull_state(void){
 }
 #endif
 
+/* ------------------ GetModifiers ------------------------ */
+                                                 
+int GetModifiers(int flag){
+  if(flag==FROM_CALLBACK){
+    return glutGetModifiers();
+  }
+  else{
+    return 0;
+  }
+}
+
 /* ------------------ keyboard ------------------------ */
 
-void keyboard_2(unsigned char key, int x, int y){
+void keyboard(unsigned char key, int flag){
   char key2;
   int skip2;
   char one='1';
   mesh *gbsave,*gbi;
   int i;
+  int keystate;
 
+  keystate=GetModifiers(flag);
   glutPostRedisplay();
   key2 = (char)key;
   if(key2!='L'&&key2!='H'&&key2!='F'&&key2!='N'&&key2!='R'&&key2!='P'&&key2!='T'&&key2!='S'&&key2!='A'
@@ -926,11 +939,7 @@ void keyboard_2(unsigned char key, int x, int y){
   }
 #endif
   if(strncmp((const char *)&key2,"u",1)==0){
-    int state;
-
-    state=glutGetModifiers();
-
-    switch (state){
+    switch (keystate){
       case GLUT_ACTIVE_ALT:
         skip_slice_in_embedded_mesh = 1 - skip_slice_in_embedded_mesh;
         update_glui_cellcenter_interp();
@@ -1031,11 +1040,7 @@ void keyboard_2(unsigned char key, int x, int y){
     return;    
   }
   if(strncmp((const char *)&key2,"t",1)==0){
-    int state;
-
-    state=glutGetModifiers();
-
-    switch (state){
+    switch (keystate){
     case GLUT_ACTIVE_ALT:
       DialogMenu(21); // display dialog
       break;
@@ -1063,11 +1068,7 @@ void keyboard_2(unsigned char key, int x, int y){
   }
 
   if(strncmp((const char *)&key2,"x",1)==0){
-    int state;
-
-    state=glutGetModifiers();
-
-    if(state==GLUT_ACTIVE_ALT){
+    if(keystate==GLUT_ACTIVE_ALT){
       DialogMenu(-2); // close all dialogs
     }
     else{
@@ -1076,10 +1077,7 @@ void keyboard_2(unsigned char key, int x, int y){
     return;
   }
   if(strncmp((const char *)&key2,"y",1)==0){
-    int state;
-
-    state=glutGetModifiers();
-    if(state==GLUT_ACTIVE_ALT){
+    if(keystate==GLUT_ACTIVE_ALT){
       cellcenter_interp = 1 - cellcenter_interp;
       update_glui_cellcenter_interp();
     }
@@ -1089,10 +1087,7 @@ void keyboard_2(unsigned char key, int x, int y){
     return;
   }
   if(strncmp((const char *)&key2,"z",1)==0){
-    int state;
-
-    state=glutGetModifiers();
-    if(state==GLUT_ACTIVE_ALT){
+    if(keystate==GLUT_ACTIVE_ALT){
       DialogMenu(24); // compress dialog
     }
     else{
@@ -1107,11 +1102,7 @@ void keyboard_2(unsigned char key, int x, int y){
     return;
   }
   if(strncmp((const char *)&key2,"e",1)==0){
-    int state;
-
-    state=glutGetModifiers();
-
-    switch (state){
+    switch (keystate){
     case GLUT_ACTIVE_ALT:
       DialogMenu(16); // edit geometry
       break;
@@ -1134,11 +1125,7 @@ void keyboard_2(unsigned char key, int x, int y){
     return;
   }
   if(strncmp((const char *)&key2,"f",1)==0){
-    int state;
-
-    state=glutGetModifiers();
-
-    switch (state){
+    switch (keystate){
     case GLUT_ACTIVE_ALT:
       DialogMenu(14); // display dialog
       break;
@@ -1164,11 +1151,7 @@ void keyboard_2(unsigned char key, int x, int y){
     return;
   }
   if(strncmp((const char *)&key2,"m",1)==0){
-    int state;
-
-    state=glutGetModifiers();
-
-    switch (state){
+    switch (keystate){
     case GLUT_ACTIVE_ALT:
       DialogMenu(15); // display dialog
       break;
@@ -1184,10 +1167,7 @@ void keyboard_2(unsigned char key, int x, int y){
     return;
   }
   if(strncmp((const char *)&key2,"c",1)==0){
-    int state;
-
-    state=glutGetModifiers();
-    switch (state){
+    switch (keystate){
     case GLUT_ACTIVE_ALT:
       DialogMenu(18); // clip dialog
       break;
@@ -1202,10 +1182,7 @@ void keyboard_2(unsigned char key, int x, int y){
     return;
   }
   if(strncmp((const char *)&key2,"w",1)==0){
-    int state;
-
-    state=glutGetModifiers();
-    switch (state){
+    switch (keystate){
       case GLUT_ACTIVE_ALT:
         DialogMenu(26); // WUI dialog
         break;
@@ -1263,10 +1240,7 @@ void keyboard_2(unsigned char key, int x, int y){
     return;
   }
   if(strncmp((const char *)&key2,"s",1)==0){
-    int state;
-    state=glutGetModifiers();
-
-    switch (state){
+    switch (keystate){
     case GLUT_ACTIVE_ALT:
       DialogMenu(20); // display dialog
       break;
@@ -1286,11 +1260,7 @@ void keyboard_2(unsigned char key, int x, int y){
     return;
   }
   if(strncmp((const char *)&key2,"d",1)==0){
-    int state;
-
-    state=glutGetModifiers();
-
-    switch (state){
+    switch (keystate){
     case GLUT_ACTIVE_ALT:
       DialogMenu(22); // display dialog
       break;
@@ -1318,10 +1288,7 @@ void keyboard_2(unsigned char key, int x, int y){
     return;
   }
   if(strncmp((const char *)&key2,"v",1)==0){
-    int state;
-    
-    state=glutGetModifiers();
-    switch (state){
+    switch (keystate){
       case GLUT_ACTIVE_ALT:
         projection_type = 1 - projection_type;
         TRANSLATE_CB(PROJECTION);
@@ -1401,11 +1368,8 @@ void keyboard_2(unsigned char key, int x, int y){
     ||strncmp((const char *)&key2,"R",1)==0
     ){
     int rflag=0;
-    int state;
 
-    state=glutGetModifiers();
-
-    if(state==GLUT_ACTIVE_ALT){
+    if(keystate==GLUT_ACTIVE_ALT){
       research_mode=1-research_mode;
       update_research_mode();
       return;
@@ -1576,8 +1540,8 @@ void keyboard_2(unsigned char key, int x, int y){
 
 /* ------------------ keyboard ------------------------ */
 
-void keyboard(unsigned char key, int x, int y){
-  keyboard_2(key,x,y);
+void keyboard_CB(unsigned char key, int x, int y){
+  keyboard(key,FROM_CALLBACK);
   glutPostRedisplay();
   updatemenu=1;
 }
@@ -1782,7 +1746,7 @@ void handle_plot3d_keys(int  key){
 
 //  plotstate=getplotstate(STATIC_PLOTS);
 
-} 
+}
 
 /* ------------------ handle_move_keys ------------------------ */
                                                  
