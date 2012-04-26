@@ -78,6 +78,9 @@ else
     dstring = 'null';
 end
 
+Save_Measured_Metric = zeros(2000,5,5);
+Save_Predicted_Metric = zeros(2000,5,5);
+
 % process the "d" lines one by one
 
 for i=2:2000
