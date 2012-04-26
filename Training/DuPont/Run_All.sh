@@ -14,10 +14,6 @@ source ~/.bashrc_fds intel64
 
 /bin/sh -c "cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR"
 
-$RUNFDS $INDIR ASTM_E_648_22
-$RUNFDS $INDIR ASTM_E_648_23
-$RUNFDS $INDIR ASTM_E_648_24
-
 $RUNFDSMPI 16 $INDIR ASTM_E_648_25
 
 echo FDS cases submitted
