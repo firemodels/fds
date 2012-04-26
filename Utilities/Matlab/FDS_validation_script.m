@@ -33,10 +33,10 @@ NIST_RSE
 
 % dataplot creates most of the plots for the Validation Guide. It must be run before scatplot, which makes the scatter plots.
 
-cfil = [pwd,'/validation_data_config_matlab.csv'];
+cfil = [pwd,'/FDS_validation_dataplot_inputs.csv'];
 vdir = [pwd,'/../../Validation/'];
 plotdir = [pwd,'/../../Manuals/'];
-qfil = [pwd,'/scatterplot_config_matlab.csv'];
+qfil = [pwd,'/FDS_validation_scatterplot_inputs.csv'];
 
 [saved_data,drange] = dataplot(cfil,vdir,plotdir);
 scatplot(saved_data,drange,qfil)
