@@ -655,7 +655,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
   int nx, ny, nxy;
   int ii;
   float qmin, qmax;
-  int headersize, framesize, statfile;
+  int headersize, framesize;
   char slicelonglabels[31], sliceshortlabels[31], sliceunits[31];
   slicedata *sd;
   vslicedata *vd;
@@ -814,9 +814,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       *errorcode=1;
       return;
     }
-    if(settmax_s==0&&settmin_s==0&&statfile==0
-      &&sd->compression_type==0
-      ){
+    if(settmax_s==0&&settmin_s==0&&sd->compression_type==0){
       sd->ntimes = (getfilesize(file)-headersize)/framesize;
       if(sliceframestep>1)sd->ntimes/=sliceframestep;
     }
