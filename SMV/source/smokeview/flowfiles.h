@@ -25,7 +25,7 @@ typedef struct {
 /* --------------------------  point ------------------------------------ */
 
 typedef struct {
-  float xyz[3],norm[3];
+  float xyz[3],point_norm[3];
   int itriangle,ntriangles,nused;
   struct _triangle **triangles;
 } point;
@@ -37,7 +37,7 @@ typedef struct _triangle {
   unsigned char interior, skinny;
   float distance, *color;
   point *points[3];
-  float normal[3];
+  float tri_norm[3];
 } triangle;
 
 /* --------------------------  geomlistdata ------------------------------------ */

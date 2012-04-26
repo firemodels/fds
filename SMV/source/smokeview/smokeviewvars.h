@@ -235,8 +235,7 @@ SVEXTERN GLfloat iso_shininess;
 
 SVEXTERN float block_ambient_orig[4];
 SVEXTERN float SVDECL(*block_ambient2,NULL);
-
-SVEXTERN GLfloat block_shininess;
+SVEXTERN GLfloat SVDECL(block_shininess,100.0);
 
 SVEXTERN GLfloat light_position0[4];
 SVEXTERN GLfloat light_position1[4];

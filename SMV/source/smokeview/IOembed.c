@@ -226,8 +226,7 @@ void draw_geom(int flag, int frameflag){
         last_transparent_level=transparent_level_local;
       }
       if(smoothtrinormal==0){
-
-        xyznorm=trianglei->normal;
+        xyznorm=trianglei->tri_norm;
         glNormal3fv(xyznorm);
 
         xyzptr[0] = trianglei->points[0]->xyz;
@@ -240,17 +239,17 @@ void draw_geom(int flag, int frameflag){
         glVertex3fv(xyzptr[2]);
       }
       else{
-        xyznorm = trianglei->points[0]->norm;
+        xyznorm = trianglei->points[0]->point_norm;
         glNormal3fv(xyznorm);
         xyzptr[0] = trianglei->points[0]->xyz;
         glVertex3fv(xyzptr[0]);
 
-        xyznorm = trianglei->points[1]->norm;
+        xyznorm = trianglei->points[1]->point_norm;
         glNormal3fv(xyznorm);
         xyzptr[1] = trianglei->points[1]->xyz;
         glVertex3fv(xyzptr[1]);
 
-        xyznorm = trianglei->points[2]->norm;
+        xyznorm = trianglei->points[2]->point_norm;
         glNormal3fv(xyznorm);
         xyzptr[2] = trianglei->points[2]->xyz;
         glVertex3fv(xyzptr[2]);
@@ -267,7 +266,7 @@ void draw_geom(int flag, int frameflag){
     if(cullfaces==1)glEnable(GL_CULL_FACE);
   }
 
-#define VECFACTOR 0.01
+#define VECFACTOR 0.03
 
   for(i=0;i<ngeominfoptrs;i++){
     geomdata *geomi;
@@ -298,7 +297,7 @@ void draw_geom(int flag, int frameflag){
 
         trianglei = geomlisti->triangles+j;
        
-        xyznorm=trianglei->normal;
+        xyznorm=trianglei->tri_norm;
         glNormal3fv(xyznorm);
 
         xyzptr[0] = trianglei->points[0]->xyz;
@@ -353,7 +352,7 @@ void draw_geom(int flag, int frameflag){
 
           trianglei = geomlisti->triangles+j;
        
-          xyznorm=trianglei->normal;
+          xyznorm=trianglei->tri_norm;
 
           p1 = trianglei->points[0]->xyz;
           p2 = trianglei->points[1]->xyz;
@@ -382,7 +381,7 @@ void draw_geom(int flag, int frameflag){
 
           trianglei = geomlisti->triangles+j;
        
-          xyznorm=trianglei->normal;
+          xyznorm=trianglei->tri_norm;
 
           p1 = trianglei->points[0]->xyz;
           p2 = trianglei->points[1]->xyz;
@@ -412,7 +411,7 @@ void draw_geom(int flag, int frameflag){
           float *xyz1, xyz2[3];
 
           pointi = geomlisti->points+j;
-          xyznorm = pointi->norm;       
+          xyznorm = pointi->point_norm;       
           xyz1 = pointi->xyz;
 
           xyz2[0] = xyz1[0] + VECFACTOR*xyzmaxdiff*xyznorm[0];
@@ -434,7 +433,7 @@ void draw_geom(int flag, int frameflag){
           float *xyz1, xyz2[3];
 
           pointi = geomlisti->points+j;
-          xyznorm = pointi->norm;       
+          xyznorm = pointi->point_norm;       
           xyz1 = pointi->xyz;
 
           xyz2[0] = xyz1[0] + VECFACTOR*xyzmaxdiff*xyznorm[0];
@@ -478,7 +477,7 @@ void update_triangles(void){
         xyzptr[0] = trianglei->points[0]->xyz;
         xyzptr[1] = trianglei->points[1]->xyz;
         xyzptr[2] = trianglei->points[2]->xyz;
-        xyznorm = trianglei->normal;
+        xyznorm = trianglei->tri_norm;
         CalcTriNormal(xyzptr[0],xyzptr[1],xyzptr[2],xyznorm);
       }
 
@@ -523,7 +522,7 @@ void update_triangles(void){
         float *norm;
 
         pointi = geomlisti->points + i;
-        norm=pointi->norm;
+        norm=pointi->point_norm;
         norm[0]=0.0;
         norm[1]=0.0;
         norm[2]=0.0;
@@ -532,7 +531,7 @@ void update_triangles(void){
           triangle *trianglei;
 
           trianglei = pointi->triangles[k];
-          norm2 = trianglei->normal;
+          norm2 = trianglei->tri_norm;
           norm[0]+=norm2[0];
           norm[1]+=norm2[1];
           norm[2]+=norm2[2];
@@ -957,8 +956,11 @@ void draw_geomdata(patchdata *patchi){
     geomlisti = geomi->geomlistinfo-1;//xxx check this
     ntris = geomlisti->ntriangles;
 
+    glEnable(GL_NORMALIZE);
+    glShadeModel(GL_SMOOTH);
     glEnable(GL_LIGHTING);
-    glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
+    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,iso_specular);
+    glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,iso_shininess);
     glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
     glEnable(GL_COLOR_MATERIAL);
 
@@ -975,7 +977,7 @@ void draw_geomdata(patchdata *patchi){
 
         trianglei = geomlisti->triangles+j;
        
-        xyznorm=trianglei->normal;
+        xyznorm=trianglei->tri_norm;
         glNormal3fv(xyznorm);
 
         color_index = patchi->geom_ival_static[j];
@@ -1005,17 +1007,17 @@ void draw_geomdata(patchdata *patchi){
         color=rgb_patch+4*color_index;
         glColor3fv(color);
 
-        xyznorm = trianglei->points[0]->norm;
+        xyznorm = trianglei->points[0]->point_norm;
         glNormal3fv(xyznorm);
         xyzptr[0] = trianglei->points[0]->xyz;
         glVertex3fv(xyzptr[0]);
 
-        xyznorm = trianglei->points[1]->norm;
+        xyznorm = trianglei->points[1]->point_norm;
         glNormal3fv(xyznorm);
         xyzptr[1] = trianglei->points[1]->xyz;
         glVertex3fv(xyzptr[1]);
 
-        xyznorm = trianglei->points[2]->norm;
+        xyznorm = trianglei->points[2]->point_norm;
         glNormal3fv(xyznorm);
         xyzptr[2] = trianglei->points[2]->xyz;
         glVertex3fv(xyzptr[2]);

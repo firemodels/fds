@@ -948,7 +948,7 @@ void readpatch(int ifile, int flag, int *errorcode){
 
     ASSERT(ifile>=0&&ifile<ngeominfo);
     geomi = geominfo + ifile;
-    read_geom(geomi,flag,GEOM_NORMAL,errorcode);
+  //  read_geom(geomi,flag,GEOM_NORMAL,errorcode); // do not unload geometry when unloading data
     read_geomdata(ifile,flag,errorcode);
   }
   else{

@@ -6822,6 +6822,8 @@ typedef struct {
   update_mesh_terrain();
 
   read_all_geom();
+  ngeominfoptrs=0;
+  GetGeomInfoPtrs(&geominfoptrs,&ngeominfoptrs);
   update_triangles();
   get_faceinfo();
 

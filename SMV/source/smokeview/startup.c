@@ -2089,10 +2089,8 @@ void initvars(void){
   iso_specular[0] = 0.7;
   iso_specular[1] = 0.7;
   iso_specular[2] = 0.7;
-  iso_specular[3] = 1.7;
+  iso_specular[3] = 1.0;
   iso_shininess = 10.0f;
-
-  block_shininess = 100.;
 
   light_position0[0] = 1.0f;
   light_position0[1] = 1.0f;
