@@ -124,7 +124,7 @@ int Creadslice_frame(int frame_index,int sd_index,int flag){
     if(sd->compression_type==0){
 
       FORTgetslicesizes(sd->file, &sd->nslicei, &sd->nslicej, &sd->nslicek, &sd->ntimes, &sliceframestep, &endian_smv,&error,
-        &settmin_s, &settmax_s, &tmin_s, &tmax_s, &headersize, &framesize, &statfile,
+        &settmin_s, &settmax_s, &tmin_s, &tmax_s, &headersize, &framesize,
         slicefilelen);
     }
     else if(sd->compression_type==1){
@@ -792,7 +792,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     slicefilelen = strlen(file);
     if(sd->compression_type==0){
       FORTgetslicesizes(file, &sd->nslicei, &sd->nslicej, &sd->nslicek, &sd->ntimes, &sliceframestep, &endian_smv,&error,
-        &settmin_s, &settmax_s, &tmin_s, &tmax_s, &headersize, &framesize, &statfile,
+        &settmin_s, &settmax_s, &tmin_s, &tmax_s, &headersize, &framesize,
         slicefilelen);
     }
     else if(sd->compression_type==1){

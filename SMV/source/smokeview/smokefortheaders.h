@@ -96,8 +96,7 @@ STDCALLF FORTgetsizes2(int *file_unit,int *settmin_p, float *tmin_p, int *settma
 STDCALLF FORTgetslicesizes(char *slicefilename, int *nslicei, int *nslicej, int *nslicek, 
                           int *nsteps,int *sliceframestep, int *endian, int *error, 
                           int *settime_p, int *settmax_p, float *tmin_p, float *tmax_p,
-                          int *headersize, int *framesize, int *statfile,
-                          FILE_SIZE slicefilelen);
+                          int *headersize, int *framesize,FILE_SIZE slicefilelen);
 STDCALLF FORTwriteslicedata(int *file_unit,char *slicefilename, 
                             int *is1,int *is2,int *js1,int *js2,int *ks1,int *ks2,
                             float *qdata,float *times,int *ntimes,FILE_SIZE slicefilelen);

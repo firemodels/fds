@@ -774,12 +774,11 @@ end subroutine getsliceparms
 !  ------------------ getslicesizes ------------------------ 
 
 subroutine getslicesizes(slicefilename, nslicei, nslicej, nslicek, nsteps, sliceframestep,&
-   endian, error, settmin_s, settmax_s, tmin_s, tmax_s, &
-   headersize, framesize, statfile)
+   endian, error, settmin_s, settmax_s, tmin_s, tmax_s, headersize, framesize)
 
 #ifdef pp_cvf
 #ifndef X64
-!DEC$ ATTRIBUTES ALIAS:'_getslicesizes@64' :: getslicesizes
+!DEC$ ATTRIBUTES ALIAS:'_getslicesizes@60' :: getslicesizes
 #endif
 #endif
 
@@ -790,7 +789,7 @@ logical :: exists
 
 integer, intent(out) :: nslicei, nslicej, nslicek, nsteps, error
 integer, intent(in) :: endian
-integer, intent(in) :: settmin_s, settmax_s, statfile , sliceframestep
+integer, intent(in) :: settmin_s, settmax_s, sliceframestep
 integer, intent(out) :: headersize, framesize
 real, intent(in) :: tmin_s, tmax_s
 
@@ -851,29 +850,28 @@ nslicej = nysp + joff
 nslicek = nzsp + koff
 
 framesize = 4*(1+nxsp*nysp*nzsp)+16
-if(settmin_s.ne.0.or.settmax_s.ne.0.or.statfile.ne.0)then
-  count=-1
-  time_max=-1000000.0
-  do
-    read(lu11,iostat=error)time
-    if(error.ne.0)exit
-    if((settmin_s.ne.0.and.time.lt.tmin_s).or.time.le.time_max)then
-      load=.false.
-     else
-      load = .true.
-      time_max=time
-    endif
-    if(settmax_s.ne.0.and.time.gt.tmax_s)then
-      close(lu11)
-  	return
-    endif
-    read(lu11,iostat=error)(((qq(i,j,k),i=1,nxsp),j=1,nysp),k=1,nzsp)
-	count = count + 1
-	if(mod(count,sliceframestep).ne.0)load = .false.
-    if(error.ne.0)exit
-    if(load)nsteps = nsteps + 1
-  end do
-endif
+
+count=-1
+time_max=-1000000.0
+do
+  read(lu11,iostat=error)time
+  if(error.ne.0)exit
+  if((settmin_s.ne.0.and.time.lt.tmin_s).or.time.le.time_max)then
+    load=.false.
+   else
+    load = .true.
+    time_max=time
+  endif
+  if(settmax_s.ne.0.and.time.gt.tmax_s)then
+    close(lu11)
+    return
+  endif
+  read(lu11,iostat=error)(((qq(i,j,k),i=1,nxsp),j=1,nysp),k=1,nzsp)
+  count = count + 1
+  if(mod(count,sliceframestep).ne.0)load = .false.
+  if(error.ne.0)exit
+  if(load)nsteps = nsteps + 1
+end do
 
 error = 0
 close(lu11)
