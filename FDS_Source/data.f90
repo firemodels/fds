@@ -1518,7 +1518,7 @@ REAL(EB) :: CP2,TE
 CHARACTER(30) :: SPEC_ID_USE
 
 IF (CONSTANT_SPECIFIC_HEAT) THEN
-   SPEC_ID_USE = 'XXX' ! Force the use of the ideal gas law to get CP.
+   SPEC_ID_USE = 'XXX' ! Force the assumption of constant gamma (CP/CV) to get CP.
 ELSE
    SPEC_ID_USE = SPEC_ID
 ENDIF
