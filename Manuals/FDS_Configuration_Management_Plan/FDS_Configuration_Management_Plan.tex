@@ -67,6 +67,8 @@
 
 \bibliographystyle{unsrt}
 
+% include commands for bios, titles etc used in multiple documents
+\input{../Bibliography/commoncommands}
 \newcommand{\dod}[2]{\frac{\partial #1}{\partial #2}}
 \newcommand{\DoD}[2]{\frac{D #1}{D #2}}
 \newcommand{\dsods}[2]{\frac{\partial^2 #1}{\partial #2^2}}
@@ -168,17 +170,6 @@
 
 \Huge \flushright{Fire Dynamics Simulator \\ Technical Reference Guide \\ \Large Volume 4: Software Configuration Management Plan}
 
-\vspace{.5in}
-
-\large
-\flushright{
-Kevin McGrattan \\
-Simo Hostikka}
-
-\vspace{0.5in}
-
-\flushright{In cooperation with: \\
-VTT Technical Research Centre of Finland  }
 
 \vfill
 
@@ -204,26 +195,25 @@ VTT Technical Research Centre of Finland  }
 
 \normalsize
 \flushright{
-Kevin McGrattan \\
-{\em Fire Research Division} \\
-{\em Engineering Laboratory} \\
+Fire Research Division \\
+Engineering Laboratory \\
+Gaithersburg, Maryland, USA \\
 \hspace{1.in} \\
-Simo Hostikka \\
-{\em VTT Technical Research Centre of Finland} \\
+VTT Technical Research Centre of Finland \\
 {\em Espoo, Finland} }
 
 
 \vspace{.25in}
 
 \flushright{\today \\
-FDS Version 5.5 \\
+FDS Version 6.0 \\
 $SVN Repository$~$Revision$}
 
 \vfill
 
 \flushright{\includegraphics[width=1in]{FIGURES/doc} }
 
-\input{../Bibliography/docnistsig}
+\titlesigs
 
 \end{minipage}
 
@@ -264,6 +254,8 @@ Mail: Stop SSOP, Washington, DC 20402-0001 }
 
 \pagestyle{plain}
 
+\input{../Bibliography/authors}
+
 \chapter{Disclaimer}
 
 The US Department of Commerce makes no warranty, expressed or implied,
@@ -297,17 +289,6 @@ as FDS cannot remain static. As progress is made in fire science, the model need
 phenomena for which it was originally designed.
 
 
-\chapter{About the Author}
-
-\begin{description}
-\item[Kevin McGrattan] is a mathematician in the Building and Fire
-Research Laboratory of NIST. He received a bachelors of science degree
-from the School of Engineering and Applied Science of Columbia
-University in 1987 and a doctorate at the Courant Institute of New
-York University in 1991. He joined the NIST staff in 1992 and has
-since worked on the development of fire models, most notably the Fire
-Dynamics Simulator.
-\end{description}
 
 \chapter{Acknowledgments}
 
