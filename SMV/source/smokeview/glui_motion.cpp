@@ -541,14 +541,6 @@ extern "C" void update_windowsizelist(void){
   if(LIST_windowsize!=NULL)LIST_windowsize->set_int_val(windowsize_pointer);
 }
 
-
-/* ------------------ update_blockpath ------------------------ */
-
-extern "C" void update_blockpath(void){
-  if(blockpath_checkbox!=NULL)blockpath_checkbox->set_int_val(pass_through);
-}
-
-
 /* ------------------ update_translate ------------------------ */
 
 extern "C" void update_translate(void){

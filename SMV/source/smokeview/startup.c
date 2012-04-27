@@ -1817,7 +1817,6 @@ void initvars(void){
   velocity_range=0;
   RenderOnceNow=0, RenderOnceNowR=0, RenderOnceNowL=0;
 
-  pass_through=0;
   nsorted_surfidlist=0;
 
   overwrite_all=0,erase_all=0;

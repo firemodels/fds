@@ -822,7 +822,6 @@ SVEXTERN char SVDECL(*endianfilename,NULL);
 SVEXTERN char SVDECL(*targfilename,NULL);
 
 SVEXTERN int SVDECL(update_bounds,0);
-SVEXTERN int pass_through;
 SVEXTERN int SVDECL(*sorted_surfidlist,NULL),SVDECL(*inv_sorted_surfidlist,NULL),nsorted_surfidlist;
 SVEXTERN char SVDECL(*trainer_filename,NULL), SVDECL(*test_filename,NULL);
 SVEXTERN char SVDECL(*filename_sb,NULL);

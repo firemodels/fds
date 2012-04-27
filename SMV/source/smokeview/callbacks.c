@@ -999,12 +999,11 @@ void keyboard(unsigned char key, int flag){
     case 'f':
       switch (keystate){
       case GLUT_ACTIVE_ALT:
-        DialogMenu(14); // display dialog
+        DialogMenu(14); // file/bounds dialog
         break;
       case GLUT_ACTIVE_CTRL:
       default:
-        pass_through=1-pass_through;
-        update_blockpath();
+        break;
       }
       return;
       break;
@@ -1122,7 +1121,7 @@ void keyboard(unsigned char key, int flag){
     case 'M':
       switch (keystate){
       case GLUT_ACTIVE_ALT:
-        DialogMenu(15); // display dialog
+        DialogMenu(15); // motion dialog
         break;
       case GLUT_ACTIVE_CTRL:
       default:
@@ -1300,7 +1299,7 @@ void keyboard(unsigned char key, int flag){
     case 's':
       switch (keystate){
       case GLUT_ACTIVE_ALT:
-        DialogMenu(20); // display dialog
+        DialogMenu(20); // 3d smoke dialog
         break;
       case GLUT_ACTIVE_CTRL:
         snap_view_angles();
@@ -1327,7 +1326,7 @@ void keyboard(unsigned char key, int flag){
     case 't':
       switch (keystate){
       case GLUT_ACTIVE_ALT:
-        DialogMenu(21); // display dialog
+        DialogMenu(21); // tour dialog
         break;
       case GLUT_ACTIVE_CTRL:
       default:
@@ -1445,12 +1444,12 @@ void keyboard(unsigned char key, int flag){
         return;
       }
       break;
-    case '#':
-      writeini(LOCAL_INI);
-      return;
-      break;
     case '!':
       snap_view_angles();
+      return;
+      break;
+    case '#':
+      writeini(LOCAL_INI);
       return;
       break;
     case '$':
@@ -1788,8 +1787,6 @@ void handle_move_keys(int  key){
   switch (state){
   case GLUT_ACTIVE_CTRL:
     key_state = KEY_CTRL;
-    pass_through=1;
-    update_blockpath();
     break;
   case GLUT_ACTIVE_ALT:
     key_state = KEY_ALT;
@@ -1799,10 +1796,6 @@ void handle_move_keys(int  key){
     break;
   default:
     key_state = KEY_NONE;
-    if(pass_through==1){
-      pass_through=0;
-      update_blockpath();
-    }
     break;
   }
   switch (key){
