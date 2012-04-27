@@ -220,8 +220,8 @@ void BLOCK_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
     int iplotval;
     char buff_label[128];
 
-    iplotval = current_mesh->iplotx_all[iplotx_all];
-    plotval=current_mesh->xplt_orig[iplotval];
+    iplotval=iplotx_all;
+    plotval=xbar0+xyzmaxdiff*plotx_all[iplotx_all];
     if(plotval>0.0){
       plotval=(int)(plotval*100+0.5);
     }
@@ -248,8 +248,8 @@ void BLOCK_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
       int iplotval;
       char buff_label[128];
 
-      iplotval = current_mesh->iploty_all[iploty_all];
-      plotval=current_mesh->yplt_orig[iplotval];
+      iplotval=iploty_all;
+      plotval=zbar0+xyzmaxdiff*ploty_all[iploty_all];
       if(plotval>0.0){
         plotval=(int)(plotval*100+0.5);
       }
@@ -277,8 +277,8 @@ void BLOCK_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
       int iplotval;
       char buff_label[128];
 
-      iplotval = current_mesh->iplotz_all[iplotz_all];
-      plotval=current_mesh->zplt_orig[iplotval];
+      iplotval=iplotz_all;
+      plotval=zbar0+xyzmaxdiff*plotz_all[iplotz_all];
       if(plotval>0.0){
         plotval=(int)(plotval*100+0.5);
       }
