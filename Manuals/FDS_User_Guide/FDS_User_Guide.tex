@@ -5974,8 +5974,7 @@ practical for large-scale fire applications. This chapter describes both methods
 commonly used mixing-controlled model. The {\ct REAC} namelist group contains the parameters for both modes of combustion.
 
 
-\section{Mixing-Controlled Combustion}
-
+\section{Single-Step, Mixing-Controlled Combustion}
 
 This approach to combustion considers a single fuel species that is composed primarily of C,H,O, and N that reacts with
 oxygen in one or more mixing-controlled steps to form H$_2$O, CO$_2$, soot, and CO.
@@ -6179,33 +6178,29 @@ cools. The default combustion algorithm in FDS assumes that in every grid cell t
 present.
 
 
-\subsection{More Complicated Stoichiometry}
+\newpage
+
+\section{Complex Stoichiometry}
 
 
 The ``simple chemistry''  inputs described above can only be used when there is a single mixing-controlled reaction and the fuel molecule contains only C, O, H, and N.
 For any other situation, you must specify the reaction stoichiometry in greater detail. This means that you must explicitly specify the gas species, or species mixtures, along with
-the stoichiometry of the reaction. The easiest way to explain this is by way of example. Consider a single reaction involving methane. As seen above, the {\ct REAC} line could be
-specified simply by:
+the stoichiometry of the reaction. The easiest way to explain this is by way of example. Consider a single reaction involving methane. When you specify the {\ct REAC} line to be:
 
 \footnotesize
 \begin{verbatim}
 &REAC FUEL = 'METHANE' /
 \end{verbatim} \normalsize
 
-\noindent But, you could also explicitly list the individual gas species (and track them in the calculation as well):
+\noindent FDS actually assumes the following reaction:
 
-\footnotesize
-\begin{verbatim}
-&SPEC ID='NITROGEN', BACKGROUND=.TRUE./
-&SPEC ID='OXYGEN', MASS_FRACTION_0 = 0.23121 /
-&SPEC ID='WATER VAPOR', MASS_FRACTION_0 = 0.00577 /
-&SPEC ID='CARBON DIOXIDE', MASS_FRACTION_0 = 0.00524 /
-&SPEC_ID='METHANE'/
-&REAC FUEL='METHANE', SMIX_ID='METHANE','OXYGEN','CARBON DIOXIDE','WATER VAPOR',
-      NU=-1,-2,1,2, HEAT_OF_COMBUSTION=50000. /
-\end{verbatim} \normalsize
+\begin{eqnarray}\label{eq:PVC_reac2}
+1\,\underbrace{\mathrm{ (CH_4) }}_\text{Fuel} \; + \;
+9.636 \; \underbrace{ \mathrm{\left( 0.2076 \; O_2 + 0.7825 \; N_2 + 0.0095 \; H_2O + 0.0004 \; CO_2 \right)}}_\text{Air} \rightarrow \\ [0.1in]
+\nonumber 10.636 \; \underbrace{\mathrm{(0.0944 \; CO_2 +  0.1966 \; H_2O + 0.7090 \; N_2)}}_\text{Products}
+\end{eqnarray}
 
-\noindent If you do not want to waste CPU time tracking all those gas species, you can lump them together as follows:
+\noindent By default, there are trace amounts of carbon dioxide and water vapor in the air, which, like the nitrogen, is carried along in the reaction. This is important, because the more complicated way to specify a single step reaction of methane is as follows:
 
 \footnotesize
 \begin{verbatim}
@@ -6214,24 +6209,21 @@ specified simply by:
 &SPEC ID='WATER VAPOR',    SMIX_COMPONENT_ONLY=.TRUE. /
 &SPEC ID='CARBON DIOXIDE', SMIX_COMPONENT_ONLY=.TRUE. /
 &SPEC ID='METHANE' /
-&SMIX ID='AIR', SPEC_ID='NITROGEN','OXYGEN','CARBON DIOXIDE','WATER VAPOR',
-      MASS_FRACTION=0.75778,0.23121,0.00577,0.00524, BACKGROUND=.TRUE. /
-&SMIX ID='PRODUCTS', SPEC_ID='NITROGEN','CARBON DIOXIDE','WATER VAPOR',
-      MASS_FRACTION=0.71637,0.15572,0.12791 /
+&SMIX ID='AIR', SPEC_ID='OXYGEN','NITROGEN','WATER VAPOR','CARBON DIOXIDE',
+      VOLUME_FRACTION=0.2076,0.7825,0.0095,0.0004, BACKGROUND=.TRUE. /
+&SMIX ID='PRODUCTS', SPEC_ID=,'CARBON DIOXIDE','WATER VAPOR','NITROGEN'
+      VOLUME_FRACTION=0.0944,0.1966,0.7090 /
 &REAC FUEL='METHANE', SPEC_ID='METHANE','AIR','PRODUCTS',
-      NU=-1,-9.60825,10.60825, HEAT_OF_COMBUSTION=50000. /
+      NU=-1,-9.636,10.636, HEAT_OF_COMBUSTION=50000. /
 \end{verbatim} \normalsize
 
 \noindent
-Note the stoichiometry for the last case.  It is based upon moles of the lumped species and not moles of the primitive species.
-Since the lumped species for {\ct AIR} is 21 \% oxygen, taking 21 \% of the 9.60825 moles of {\ct AIR} results in 2 moles of oxygen.
-
-Obviously, for this example, the first {\ct REAC} line above is preferable. However, there are many situations where you cannot use the simple chemistry model and
-must resort to either of the alternatives. For a mixing-controlled reaction(s), the lumped species approach is preferable. For a finite-rate reaction(s), the primitive
-species approach is preferable because the reaction rates are typically tabulated in terms of individual species, not mixtures.
+Note that the stoichiometry pertains to the species mixtures, and not the primitive species.
+Obviously, for this example, the first {\ct REAC} line is preferable to the second. However, there are many situations where you cannot use the simple chemistry model and
+must resort to the second formulation. 
 
 
-\subsubsection{Example: A Single-Step, Mixing-Controlled Reaction Involving a Complex Fuel Molecule}
+\subsection{Complex Fuel Molecules}
 
 It is often the case that fires involve fuels that do not just consist of C, H, N, and O. For example, chlorine is commonly found in building and household materials, and because
 of its propensity to form the acid gas HCl, we may want to account for it in the basic reaction scheme. Suppose the predominant fuel in the fire is polyvinyl chloride (PVC). Regardless
@@ -6243,10 +6235,11 @@ Define the governing chemical reaction in terms of the primitive (or individual)
 \end{equation}
 Since it is assumed that all of the Cl goes to HCL, the remainder of the stoichiometric coefficients come from an atom balance. An equation can now be written to include the appropriate numerical values for the stoichiometric coefficients.
 \begin{eqnarray}\label{eq:PVC_reac2}
-1\,\underbrace{\mathrm{(C_2H_3Cl)}}_\text{Fuel} + 1\,\underbrace{\mathrm{(1.53 \, O_2+1.53 \,(^{.79}/_{.21}) \, N_2})}_\text{Oxidizer} \rightarrow \\
+1\,\underbrace{\mathrm{(C_2H_3Cl)}}_\text{Fuel} + 1\,\underbrace{\mathrm{(1.53 \, O_2+1.53 \,(^{.79}/_{.21}) \, N_2})}_\text{Air} \rightarrow \\
 \nonumber 1\,\underbrace{\mathrm{(HCl +  H_2O + 0.14\, CO + 0.96\, CO_2 + 0.90\, C + 1.53\,(^{.79}/_{.21}) \, N_2)}}_\text{Products}
 \end{eqnarray}
 The choice of fuel in this example, PVC, is not defined in Table \ref{tab:gasspecies}, therefore its properties must be defined on a {\ct SPEC} line. In this example, we use the species' chemical formula. The example will also use the lumped species formulation to minimize the number of scalar transport equations that need to be solved. Therefore, each species that does not transport by itself will have an {\ct SMIX\_COMPONENT\_ONLY = .TRUE.} designation.
+
 \footnotesize
 \begin{verbatim}
 &SPEC ID = 'PVC', FORMULA = 'C2H3Cl' /
@@ -6259,7 +6252,8 @@ The choice of fuel in this example, PVC, is not defined in Table \ref{tab:gasspe
 &SPEC ID = 'SOOT',              SMIX_COMPONENT_ONLY = .TRUE. /
 \end{verbatim} \normalsize
 
-For the oxidizer and products, which are both composed of multiple primitive species, {\ct SMIX} lines are needed to define the composition of the lumped species. As the user, you can define the {\ct SMIX} by either the {\ct MASS\_FRACTIONS} of the component gases or the {\ct VOLUME\_FRACTIONS}. For this case, volume fractions will be used. If Equation \ref{eq:PVC_reac2} is properly balanced, you can directly use the stoichiometric coefficients of the primitive species to define the lumped species.
+\noindent For the oxidizer and products, which are both composed of multiple primitive species, {\ct SMIX} lines are needed to define the composition of the lumped species. As the user, you can define the {\ct SMIX} by either the {\ct MASS\_FRACTIONS} of the component gases or the {\ct VOLUME\_FRACTIONS}. For this case, volume fractions will be used. If Equation \ref{eq:PVC_reac2} is properly balanced, you can directly use the stoichiometric coefficients of the primitive species to define the lumped species.
+
 \footnotesize
 \begin{verbatim}
 &SMIX ID = 'AIR', SPEC_ID = 'OXYGEN','NITROGEN', VOLUME_FRACTION =1.53,5.76,
@@ -6268,13 +6262,17 @@ For the oxidizer and products, which are both composed of multiple primitive spe
            'CARBON DIOXIDE','SOOT','NITROGEN',
            VOLUME_FRACTION = 1.0,1.0,0.14,0.96,0.90,5.76 /
 \end{verbatim} \normalsize
+
+\noindent
 Note: the order of which the {\ct SPEC\_ID}s are defined must be the same order as which you defined your volume fractions or mass fractions. To set the initial concentration of fuel, an {\ct INIT} line is used:
+
 \footnotesize
 \begin{verbatim}
 &INIT MASS_FRACTION(1)=0.229,SPEC_ID(1)='PVC' /
 \end{verbatim} \normalsize
 
-In this mixing-controlled example, the user is responsible for defining the fuel, heat of combustion of that fuel, species participating the reaction, and the stoichiometric coefficients that describe the reaction. The heat of combustion for PVC was found from the SFPE Handbook \cite{SFPE:Tewarson}. In the lumped species approach, the stoichiometric coefficients for the {\ct SMIX}s are the coefficients of the lumped species themselves.
+In this mixing-controlled example, you must define the fuel, heat of combustion, species participating the reaction, and the stoichiometric coefficients that describe the reaction. The heat of combustion for PVC was found from the SFPE Handbook \cite{SFPE:Tewarson}. In the lumped species approach, the stoichiometric coefficients for the {\ct SMIX}s are the coefficients of the lumped species themselves.
+
 \footnotesize
 \begin{verbatim}
 &REAC FUEL = 'PVC', HEAT_OF_COMBUSTION=16400,
@@ -6282,6 +6280,8 @@ In this mixing-controlled example, the user is responsible for defining the fuel
       FIXED_MIX_TIME=0.1,
       ODE_SOLVER= 'SINGLE EXACT' /
 \end{verbatim} \normalsize
+
+\noindent
 Note: The sign on NU corresponds to whether that species is consumed (-) or produced (+). The results, Figure \ref{pvc_combustion}, from this example problem are compared to expected results with both cases using a fixed turbulent mixing time of 0.1s.
 
 
@@ -6291,7 +6291,10 @@ Note: The sign on NU corresponds to whether that species is consumed (-) or prod
 \label{pvc_combustion}
 \end{figure}
 
-\subsubsection{Example: A Two-Step, Reaction Involving the Formation of CO}
+
+
+\subsection{Two-Step Reaction Involving the Formation of CO}
+
 For a more complicated example, consider Equation \ref{eq:2step_methane_rev}, which is a simplified two-step methane oxidation reaction developed by Westbrook and Dryer \cite{Westbrook:1}.
 
 \begin{eqnarray}\label{eq:2step_methane_rev}
@@ -6299,6 +6302,7 @@ For a more complicated example, consider Equation \ref{eq:2step_methane_rev}, wh
 \nonumber \mathrm{CO + 0.5 \, O_2} &\leftrightharpoons& \mathrm{CO_2}
 \end{eqnarray}
 Typically air is the oxidizer for fires, not pure oxygen. In this case, if we use all primitive species and select nitrogen as the background species, Equation \ref{eq:2step_methane_rev} can be used without modification. Each of the species in the reactions, plus the background species must be defined on the {\ct SPEC} line.
+
 \footnotesize
 \begin{verbatim}
 &SPEC ID='NITROGEN',        BACKGROUND=.TRUE./
@@ -6308,7 +6312,10 @@ Typically air is the oxidizer for fires, not pure oxygen. In this case, if we us
 &SPEC ID='WATER VAPOR',     MASS_FRACTION_0 = 0.0 /
 &SPEC ID='CARBON DIOXIDE',  MASS_FRACTION_0 = 0.0 /
 \end{verbatim} \normalsize
+
+\noindent
 The ambient gas in this example is defined as air by setting the initial mass fraction of oxygen to 0.23 with the remainder being the background, nitrogen. To define the reactions from Equation \ref{eq:2step_methane_rev}, we must have a {\ct REAC} line for each reaction, including the reversible reaction.
+
 \footnotesize
 \begin{verbatim}
 &REAC ID = 'FWD_METHANE'
@@ -6334,6 +6341,8 @@ The ambient gas in this example is defined as air by setting the initial mass fr
       REVERSIBLE=.TRUE.
       ODE_SOLVER= 'RK2 RICHARDSON' /
 \end{verbatim} \normalsize
+
+\noindent
 When using primitive species, the primitive species are the {\ct SMIXs} therefore the {\ct SMIX\_IDs} correspond directly to the the {\ct SPEC} lines. The stoichiometric coefficients (NU) can be taken directly from reactions (see Equation \ref{eq:2step_methane_rev} coefficients). A heat of combustion must be specified for each reaction. The heat of combustion is found by using the enthalpy of formation of each species: (http://kinetics.nist.gov/janaf/)
 
 \begin{eqnarray}
@@ -6361,15 +6370,17 @@ Note: In the third (reversible) reaction, the {\ct HEAT\_OF\_COMBUSTION} is set 
       ODE_SOLVER= 'RK2 RICHARDSON' /
 \end{verbatim} \normalsize
 
-\subsubsection{Example: A Single-Step, Mixing-Controlled Reaction with Deposition}
 \label{info:deposition}
-This example shows how to define a reaction that invokes an aerosol deposition model in FDS (e.g. soot deposition).  Note, that this model should be considered an expiremental feature. The deposition model is invoked by defining a species with the parameter {\ct AEROSOL=.TRUE.}.  For this example propane will be the fuel with a 5 \% soot yield.  The stoichometric equation is shown below.
+
+\subsection{Soot Deposition}
+
+This example shows how to define a reaction that invokes an aerosol deposition model in FDS (e.g. soot deposition).  Note, that this model should be considered an experimental feature. The deposition model is invoked by defining a species with the parameter {\ct AEROSOL=.TRUE.}.  For this example propane will be the fuel with a 5 \% soot yield.  The stoichiometric equation is shown below.
 \begin{eqnarray}\label{eq:PROPANE_depo}
 1\,\underbrace{\mathrm{(C_3H_8)}}_\text{Fuel} + 1\,\underbrace{\mathrm{(4.82 \, O_2+4.82 \,(^{.79}/_{.21}) \, N_2})}_\text{Oxidizer} \rightarrow \\
 \nonumber \underbrace{1\,\mathrm{(4\, H_2O + 2.82\, CO_2 + 4.82\,(^{.79}/_{.21}) \, N_2)}+0.1835\,\mathrm{C}}_\text{Products}
 \end{eqnarray}
+The example will also use the lumped species formulation to minimize the number of scalar transport equations that need to be solved. Therefore, each species that does not transport by itself will have an {\ct SMIX\_COMPONENT\_ONLY = .TRUE.} designation.  Note that for soot to deposit it must be tracked separately and it must be given {\ct AEROSOL = .TRUE.}.
 
-The example will also use the lumped species formulation to minimize the number of scalar transport equations that need to be solved. Therefore, each species that does not transport by itself will have an {\ct SMIX\_COMPONENT\_ONLY = .TRUE.} designation.  Note that for soot to deposit it must be tracked seperately and it must be given {\ct AEROSOL = .TRUE.}.
 \footnotesize
 \begin{verbatim}
 &SPEC ID = 'PROPANE', FORMULA = 'C2H3Cl' /
@@ -6380,7 +6391,9 @@ The example will also use the lumped species formulation to minimize the number 
 &SPEC ID = 'SOOT',              AEROSOL = .TRUE./
 \end{verbatim} \normalsize
 
+\noindent
 For the oxidizer and products, which are both composed of multiple primitive species, {\ct SMIX} lines are needed to define the composition of the lumped species. As the user, you can define the {\ct SMIX} by either the {\ct MASS\_FRACTIONS} of the component gases or the {\ct VOLUME\_FRACTIONS}. For this case, volume fractions will be used. If Equation \ref{eq:PROPANE_depo} is properly balanced, you can directly use the stoichiometric coefficients of the primitive species to define the lumped species.
+
 \footnotesize
 \begin{verbatim}
 &SMIX ID = 'AIR', SPEC_ID ='NITROGEN','OXYGEN',
@@ -6388,16 +6401,19 @@ For the oxidizer and products, which are both composed of multiple primitive spe
 &SMIX ID = 'PRODUCTS', SPEC_ID ='NITROGEN','CARBON DIOXIDE','WATER VAPOR',
       VOLUME_FRACTION = 18.11896,2.816432,4/
 \end{verbatim} \normalsize
+
+\noindent
 Note: the order of which the {\ct SPEC\_ID}s are defined must be the same order as which you defined your volume fractions or mass fractions.
 
-In this mixing-controlled example, the user is responsible for defining the fuel, heat of combustion of that fuel, species participating the reaction, and the stoichiometric coefficients that describe the reaction. The heat of combustion for PRPOANE was found from the SFPE Handbook \cite{SFPE:Tewarson}. In the lumped species approach, the stoichiometric coefficients for the {\ct SMIX}s are the coefficients of the lumped species themselves.
+In this mixing-controlled example, the user is responsible for defining the fuel, heat of combustion of that fuel, species participating the reaction, and the stoichiometric coefficients that describe the reaction. The heat of combustion for PROPANE was found from the SFPE Handbook~\cite{SFPE:Tewarson}. In the lumped species approach, the stoichiometric coefficients for the {\ct SMIX} lines are the coefficients of the lumped species themselves.
+
 \footnotesize
 \begin{verbatim}
 &REAC FUEL = 'PROPANE', HEAT_OF_COMBUSTION=46000,
       SMIX_ID = 'PROPANE','AIR','PRODUCTS','SOOT', NU=-1.,-1,1,0.183568/
 \end{verbatim} \normalsize
 
-
+\noindent
 Note: The sign on NU corresponds to whether that species is consumed (-) or produced (+). The results, Figure \ref{soot_deposition}, show a boundary file plot, of deposition in kg/m$^2$.  This boundary quantity is given by the input below.
 
 \footnotesize
@@ -6406,13 +6422,16 @@ Note: The sign on NU corresponds to whether that species is consumed (-) or prod
 \end{verbatim} \normalsize
 
 \begin{figure}[ht]
-\centering \includegraphics[width=3.2in]{SCRIPT_FIGURES/Propane_flame_deposition}
+\centering 
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/Propane_flame_deposition}
 \caption{Wall soot deposition for propane flame with deposition example.}
 \label{soot_deposition}
 \end{figure}
 
-\newpage
 
+
+
+\newpage
 
 \section{Finite Rate Combustion}
 \label{info:finite}
