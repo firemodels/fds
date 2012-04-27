@@ -8121,6 +8121,7 @@ Function Type                     & Description   \\ \hline \hline
 {\ct MULTIPLY}                    & Multiplies the outputs of the {\ct INPUT}s \\ \hline
 {\ct DIVIDE}                      & Divides the first {\ct INPUT} by the second \\ \hline
 {\ct POWER}                       & The first {\ct INPUT} to the power of the second \\ \hline
+{\ct PID}                         & PID Controller, see ~\ref{info:PID} \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -8361,6 +8362,19 @@ The control functions that perform simple math operations ( {\ct SUM},  {\ct SUB
       INPUT_ID='SPEED SENSOR', 'CONSTANT', CONSTANT = 2., SETPOINT = 10.,
       TRIP_DIRECTION = 1 /
 \end{verbatim}
+\normalsize
+
+\subsection{PID Control Function: \texorpdfstring{{\tt PID}}{PID}}
+
+\label{info:PID}
+
+A common process control function is a PID controller (Proportional-Integral-Derivatve).  This control function is evaluated as:
+
+\be
+output(t) = K_p error(t) + K_i \int_0^t error(t) \,\mbox{d}t + K_d \frac{d error(t)}{dt}
+\ee
+
+Where K$_p$ is the {\ct PROPORTIONAL\_GAIN}, K$_i$ is the {\ct INTEGRAL\_GAIN}, and K$_d$ is the {\ct DIFFERENTIAL\_GAIN}.  The error is the difference between the input to the control function and it's {\ct TARGET\_VALUE}.
 
 \subsection{Combining Control Functions: A Pre-Action Sprinkler System}
 
@@ -8437,8 +8451,9 @@ multiply-colored vents that activate at different times, depending on the partic
 \section{Controlling a \texorpdfstring{{\tt RAMP}}{RAMP}}
 \label{info:RAMPDEVC}
 
-For any user defined {\ct RAMP}, the normal independent variable, for example time for {\ct RAMP\_V}, can be replaced by the output of a {\ct DEVC}.
-This is done by specifying the input {\ct DEVC\_ID} one on of the {\ct RAMP} input lines.  When this is done, the current output of the {\ct DEVC} is used, see \ref{info:basic_control} as the independent variable for the {\ct RAMP}.
+For any user defined {\ct RAMP}, the normal independent variable, for example time for {\ct RAMP\_V}, can be replaced by the output of a {\ct DEVC} or a {\ct CTRL}. This is done by specifying the input {\ct DEVC\_ID} or {\ct CTRL\_ID} one on of the
+{\ct RAMP} input lines.  When this is done, the current output of the {\ct DEVC} or
+{\ct CTRL} is used, see \ref{info:basic_control} as the independent variable for the {\ct RAMP}.
 In the following example a blower is ramped from 0~\% flow at 20~$^\circ$C, to 50~\% flow when the temperature exceeds 100~$^\circ$C, and to 100~\% flow when the temperature exceeds 200~$^\circ$C.
 This is similar functionality to the {\ct CUSTOM} control function, but it allows for variable response rather than just on or off.
 
@@ -10183,21 +10198,25 @@ properties be specified as well. Simply prescribing as many properties as possib
 \multicolumn{5}{|c|}{{\ct CTRL} (Control Function Parameters)} \\
 \hline \hline
 \endhead
-{\ct CONSTANT}        & Real        & Section~\ref{info:CONTROL_MATH}         &    &                           \\ \hline
-%{\ct CYCLES}         & Integer      & Number of times to cycle output             &    &                       \\ \hline
-%{\ct CYCLE\_TIME}    & Real         & Periodicity                                 & s  &                       \\ \hline
-{\ct DELAY}          & Real         & Section~\ref{info:dry_pipe}             & s  &  0.                       \\ \hline
-{\ct EVACUATION}     & Logical      & Reference~\cite{FDS_Evac_Users_Guide}   &    & {\ct .FALSE.}             \\ \hline
-{\ct FUNCTION\_TYPE} & Character    & Section~\ref{info:basic_control}        &    &                           \\ \hline
-{\ct ID}             & Character    & Section~\ref{info:CTRL}                 &    &                           \\ \hline
-{\ct INITIAL\_STATE} & Logical      & Section~\ref{info:basic_control}        &    & {\ct .FALSE.}             \\ \hline
-{\ct INPUT\_ID}      & Char.~Array  & Section~\ref{info:CTRL}                 &    &                           \\ \hline
-{\ct LATCH}          & Logical      & Section~\ref{info:basic_control}        &    & {\ct .TRUE.}              \\ \hline
-{\ct N}              & Integer      & Section~\ref{info:CTRL}                 &    &   1                       \\ \hline
-{\ct ON\_BOUND}      & Character    & Section~\ref{info:DEADBAND}             &    & {\ct LOWER}               \\ \hline
-{\ct RAMP\_ID}       & Character    & Section~\ref{info:CUSTOM}               &    &                           \\ \hline
-{\ct SETPOINT(2)}    & Real         & Section~\ref{info:basic_control}        &    &                           \\ \hline
-{\ct TRIP\_DIRECTION}& Integer      & Section~\ref{info:basic_control}        &    &   1                       \\ \hline
+{\ct CONSTANT}           & Real         & Section~\ref{info:CONTROL_MATH}         &    &                        \\ \hline
+%{\ct CYCLES}             & Integer      & Number of times to cycle output         &    &                        \\ \hline
+%{\ct CYCLE\_TIME}        & Real         & Periodicity                             & s  &                        \\ \hline
+{\ct DELAY}              & Real         & Section~\ref{info:dry_pipe}             & s  &  0.                    \\ \hline
+{\ct DIFFERENTIAL\_GAIN} & Real         & Section~\ref{info:basic_control}        &    &  0.                    \\ \hline
+{\ct EVACUATION}         & Logical      & Reference~\cite{FDS_Evac_Users_Guide}   &    & {\ct .FALSE.}          \\ \hline
+{\ct FUNCTION\_TYPE}     & Character    & Section~\ref{info:basic_control}        &    &                        \\ \hline
+{\ct ID}                 & Character    & Section~\ref{info:CTRL}                 &    &                        \\ \hline
+{\ct INITIAL\_STATE}     & Logical      & Section~\ref{info:basic_control}        &    & {\ct .FALSE.}          \\ \hline
+{\ct INTEGRAL\_GAIN}     & Real         & Section~\ref{info:basic_control}        &    &  0.                    \\ \hline
+{\ct INPUT\_ID}          & Char.~Array  & Section~\ref{info:CTRL}                 &    &                        \\ \hline
+{\ct LATCH}              & Logical      & Section~\ref{info:basic_control}        &    & {\ct .TRUE.}           \\ \hline
+{\ct N}                  & Integer      & Section~\ref{info:CTRL}                 &    &   1                    \\ \hline
+{\ct ON\_BOUND}          & Character    & Section~\ref{info:DEADBAND}             &    & {\ct LOWER}            \\ \hline
+{\ct PROPORTIONAL\_GAIN} & Real         & Section~\ref{info:basic_control}        &    &  1.                    \\ \hline
+{\ct RAMP\_ID}           & Character    & Section~\ref{info:CUSTOM}               &    &                        \\ \hline
+{\ct SETPOINT(2)}        & Real         & Section~\ref{info:basic_control}        &    &                        \\ \hline
+{\ct TARGET\_VALUE}      & Real         & Section~\ref{info:basic_control}        &    &  1.                    \\ \hline
+{\ct TRIP\_DIRECTION}    & Integer      & Section~\ref{info:basic_control}        &    &   1                    \\ \hline
 \end{longtable}
 
 
