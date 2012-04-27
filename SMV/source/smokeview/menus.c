@@ -7261,6 +7261,7 @@ updatemenu=0;
   glutAddSubMenu("Web",webhelpmenu);
   glutAddSubMenu("Shortcuts",keyboardhelpmenu);
   glutAddSubMenu("Mouse",mousehelpmenu);
+  glutAddSubMenu(_("About"),aboutmenu);
 
   /* -------------------------------- target menu -------------------------- */
 
@@ -8746,7 +8747,6 @@ updatemenu=0;
       glutAddSubMenu(_("Dialogs"),dialogmenu);
       glutAddSubMenu(_("Help"),helpmenu);
       glutAddMenuEntry(_("Quit"),3);
-      glutAddSubMenu(_("About"),aboutmenu);
     }
     if(trainer_active==1){
       if(trainer_mode==1){

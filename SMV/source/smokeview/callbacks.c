@@ -878,601 +878,603 @@ void print_gpu_cull_state(void){
 }
 #endif
 
-/* ------------------ GetModifiers ------------------------ */
-                                                 
-int GetModifiers(int flag){
-  if(flag==FROM_CALLBACK){
-    return glutGetModifiers();
-  }
-  else{
-    return 0;
-  }
-}
-
 /* ------------------ keyboard ------------------------ */
 
 void keyboard(unsigned char key, int flag){
   char key2;
   int skip2;
-  char one='1';
   mesh *gbsave,*gbi;
   int i;
-  int keystate;
+  int keystate=0;
 
-  keystate=GetModifiers(flag);
+  if(flag==FROM_CALLBACK)keystate = glutGetModifiers();
   glutPostRedisplay();
   key2 = (char)key;
-  if(key2!='L'&&key2!='H'&&key2!='F'&&key2!='N'&&key2!='R'&&key2!='P'&&key2!='T'&&key2!='S'&&key2!='A'
-#ifdef pp_GPU
-    &&key2!='G'&&key2!='V'
-#endif
-#ifdef pp_CULL
-    &&key2!='C'
-#endif
-    &&isupper(key2))key2=tolower(key2); /* map upper case characters to lower */
 
-  if(strncmp((const char *)&key2,"A",1)==0){
-    axislabels_smooth=1-axislabels_smooth;
-    update_axislabels_smooth();
-    return;
-  }
-  if(strncmp((const char *)&key2,"L",1)==0){
-    UnloadSliceMenu(-2);
-    return;
-  }
-#ifdef _DEBUG 
-  if(nsmoke3dinfo>0&&strncmp((const char *)&key2,"l",1)==0){
-    smokecullflag=1-smokecullflag;
-    if(smokecullflag==0){
-      smokedrawtest=1-smokedrawtest;
-    }
-    printf("smokecullflag=%i\n smokedrawtest=%i\n",smokecullflag,smokedrawtest);
-    update_smoke3dflags();
-    return;
-  }
-  if(nsmoke3dinfo>0&&strncmp((const char *)&key2,"n",1)==0){
-    adjustalphaflag++;
-    if(adjustalphaflag>3)adjustalphaflag=0;
-    printf("adjustalphaflag=%i\n",adjustalphaflag);
-    update_smoke3dflags();
-    return;
-  }
-#endif
-  if(strncmp((const char *)&key2,"u",1)==0){
-    switch (keystate){
-      case GLUT_ACTIVE_ALT:
-        skip_slice_in_embedded_mesh = 1 - skip_slice_in_embedded_mesh;
-        update_glui_cellcenter_interp();
-        break;
-      default:
-        ReloadMenu(0);
-        break;
-    }
-    return;
-  }
-  if(strncmp((const char *)&key2,"q",1)==0){
-    blocklocation++;
-    if(blocklocation>BLOCKlocation_cad||
-       blocklocation>BLOCKlocation_exact&&ncadgeom==0){
-       blocklocation=BLOCKlocation_grid;
-    }
-    if(showedit_dialog==1){
-      if(blocklocation==BLOCKlocation_exact){
-        blockage_as_input=1;
-      }
-      else{
-        blockage_as_input=0;
-      }
-      OBJECT_CB(BLOCKAGE_AS_INPUT2);
-    }
-    return;
-  }
-
-  if(strncmp((const char *)&key,"#",1)==0){
-    writeini(LOCAL_INI);
-    return;
-  }
-  
-  if(strncmp((const char *)&key2,"!",1)==0){
-    snap_view_angles();
-    return;
-  }
-  if(strncmp((const char *)&key,"$",1)==0){
-    trainer_active=1-trainer_active;
-    if(trainer_active==1){
-      printf("Trainer mode active\n");
-      trainer_mode=1;
-      show_glui_trainer();
-    }
-    if(trainer_active==0){
-      printf("Trainer mode inactive\n");
-      trainer_mode=0;
-      hide_glui_trainer();
-    }
-    return;
-  }
-  if(strncmp((const char *)&key2,"S",1)==0){
-    showstereoOLD=showstereo;
-    showstereo++;
-    if(showstereo>5)showstereo=0;
-    if(showstereo==1&&videoSTEREO!=1)showstereo=2;
-    Update_Glui_Stereo();
-    return;
-  }
-  if(strncmp((const char *)&key2,"T",1)==0){
-    usetexturebar=1-usetexturebar;
-    printf("usetexturebar=%i\n",usetexturebar);
-    return;
-  }
-#ifdef pp_CULL
-  if(strncmp((const char *)&key2,"C",1)==0){
-    if(nsmoke3dinfo>0&&cullactive==1&&gpuactive==1){
-      cullsmoke=1-cullsmoke;
-      update_smoke3dflags();
-      initcull(cullsmoke);
-      print_gpu_cull_state();
-    }
-    if(cullactive==0||gpuactive==0)cullsmoke=0;
-    return;    
-  }
-#endif
-#ifdef pp_GPU
-  if((nsmoke3dinfo>0||nrooms>0)&&strncmp((const char *)&key2,"G",1)==0){
-    if(gpuactive==1){
-      usegpu=1-usegpu;
-    }
-    else{
-      usegpu=0;
-    }
-    if(nsmoke3dinfo>0){
-      update_smoke3dflags();
-    }
-    print_gpu_cull_state();
-    return;    
-  }
-#endif
-  if((nvolrenderinfo>0)&&strncmp((const char *)&key2,"V",1)==0){
-    usevolrender=1-usevolrender;
-    update_smoke3dflags();
-#ifdef pp_GPU
-    print_gpu_cull_state();
-#endif
-    return;    
-  }
-  if(strncmp((const char *)&key2,"t",1)==0){
-    switch (keystate){
-    case GLUT_ACTIVE_ALT:
-      DialogMenu(21); // display dialog
-      break;
-    case GLUT_ACTIVE_CTRL:
-    case GLUT_ACTIVE_SHIFT:
-    default:
-      stept++;
-      if(stept>1)stept=0;
-      if(stept==1){
-        plotstate=getplotstate(DYNAMIC_PLOTS);
-        if(plotstate==DYNAMIC_PLOTS){
-          reset_gltime();
+  switch (key2){
+    case 'a':
+      if((eyeview==EYE_CENTERED||(visVector==1&&ReadPlot3dFile==1)||showvslice==1||isZoneFireModel==1)){
+        if(eyeview==EYE_CENTERED){
+          handle_move_keys(256+key2);
         }
         else{
-          stept=0;
-        }
-      }
-    }
-    return;
-  }
-  if(strncmp((const char *)&key2,"0",1)==0&&plotstate==DYNAMIC_PLOTS){
-    updatetimes();
-    reset_time_flag=1;
-    return;
-  }
+          iveclengths += FlowDir;
+          vecfactor = get_vecfactor(&iveclengths);
+          update_vector_widgets();
 
-  if(strncmp((const char *)&key2,"x",1)==0){
-    if(keystate==GLUT_ACTIVE_ALT){
-      DialogMenu(-2); // close all dialogs
-    }
-    else{
-      visx_all=1-visx_all;
-    }
-    return;
-  }
-  if(strncmp((const char *)&key2,"y",1)==0){
-    if(keystate==GLUT_ACTIVE_ALT){
-      cellcenter_interp = 1 - cellcenter_interp;
-      update_glui_cellcenter_interp();
-    }
-    else{
-      visy_all = 1-visy_all;
-    }
-    return;
-  }
-  if(strncmp((const char *)&key2,"z",1)==0){
-    if(keystate==GLUT_ACTIVE_ALT){
-      DialogMenu(24); // compress dialog
-    }
-    else{
-      visz_all = 1 - visz_all;
-    }
-    return;
-  }
-  if(strncmp((const char *)&key2,"k",1)==0){
-    visTimeLabels = 1 - visTimeLabels;
-    if(visTimeLabels==0)printf("Time bar hidden\n");
-    if(visTimeLabels==1)printf("Time bar visible\n");
-    return;
-  }
-  if(strncmp((const char *)&key2,"e",1)==0){
-    switch (keystate){
-    case GLUT_ACTIVE_ALT:
-      DialogMenu(16); // edit geometry
-      break;
-    case GLUT_ACTIVE_CTRL:
-    case GLUT_ACTIVE_SHIFT:
-    default:
-      eyeview++;
-      if(eyeview>2)eyeview=0;
-      handle_eyeview(0);
-    }
-    return;
-  }
-  if(strncmp((const char *)&key2,"h",1)==0){
-    if(titlesafe_offset==0){
-      titlesafe_offset=titlesafe_offsetBASE;
-    }
-    else{
-      titlesafe_offset=0;
-    }
-    return;
-  }
-  if(strncmp((const char *)&key2,"f",1)==0){
-    switch (keystate){
-    case GLUT_ACTIVE_ALT:
-      DialogMenu(14); // display dialog
-      break;
-    case GLUT_ACTIVE_CTRL:
-    case GLUT_ACTIVE_SHIFT:
-    default:
-      pass_through=1-pass_through;
-      update_blockpath();
-    }
-    return;
-  }
-  if(strncmp((const char *)&key2,"g",1)==0){
-    if(ntotal_blockages>0||isZoneFireModel==0){
-      togglegridstate(1-visGrid);
-    }
-    return;
-  }
-  if(strncmp((const char *)&key2,"o",1)==0){
-    highlight_flag++;
-    if(highlight_flag>2&&noutlineinfo>0)highlight_flag=0;
-    if(highlight_flag>1&&noutlineinfo==0)highlight_flag=0;
-    printf("outline mode=%i\n",highlight_flag);
-    return;
-  }
-  if(strncmp((const char *)&key2,"m",1)==0){
-    switch (keystate){
-    case GLUT_ACTIVE_ALT:
-      DialogMenu(15); // display dialog
-      break;
-    case GLUT_ACTIVE_CTRL:
-    case GLUT_ACTIVE_SHIFT:
-    default:
-      if(nmeshes>1){
-        highlight_mesh++;
-        if(highlight_mesh>nmeshes-1)highlight_mesh=0;
-        update_current_mesh(meshinfo+highlight_mesh);
-      }
-    }
-    return;
-  }
-  if(strncmp((const char *)&key2,"c",1)==0){
-    switch (keystate){
-    case GLUT_ACTIVE_ALT:
-      DialogMenu(18); // clip dialog
-      break;
-    case GLUT_ACTIVE_CTRL:
-    case GLUT_ACTIVE_SHIFT:
-    default:
-      contour_type++;
-      if(contour_type>2)contour_type=0;
-      update_plot3d_display();
-      updatecolors(-1);
-    }
-    return;
-  }
-  if(strncmp((const char *)&key2,"w",1)==0){
-    switch (keystate){
-      case GLUT_ACTIVE_ALT:
-        DialogMenu(26); // WUI dialog
-        break;
-      case GLUT_ACTIVE_CTRL:
-      case GLUT_ACTIVE_SHIFT:
-      default:
-      if(eyeview==EYE_CENTERED){
-        handle_move_keys(GLUT_KEY_UP);
-      }
-      else{
-        xyz_clipplane++;
-        if(xyz_clipplane>2)xyz_clipplane=0;
-        update_clip_all();
-      }
-      break;
-    }
-    return;
-  }
-  if(strncmp((const char *)&key2,"a",1)==0&&(eyeview==EYE_CENTERED||(visVector==1&&ReadPlot3dFile==1)||showvslice==1||isZoneFireModel==1)){
-    if(eyeview==EYE_CENTERED){
-      handle_move_keys(256+key2);
-    }
-    else{
-      iveclengths += FlowDir;
-      vecfactor = get_vecfactor(&iveclengths);
-      update_vector_widgets();
-
-      if(isZoneFireModel==1){
-        if(iveclengths==0){
-          zone_ventfactor=1.0;
-        }
-        else{
-          if(FlowDir>0){
-            zone_ventfactor*=1.5;
-          }
-          else{
-            zone_ventfactor/=1.5;
-          }
-        }
-      }
-      printf("iveclengths=%i\n",iveclengths);
-      if(visVector==1&&ReadPlot3dFile==1){
-        gbsave=current_mesh;
-        for(i=0;i<nmeshes;i++){
-          gbi = meshinfo + i;
-          if(gbi->plot3dfilenum==-1)continue;
-          update_current_mesh(gbi);
-          updateplotslice(1);
-          updateplotslice(2);
-          updateplotslice(3);
-        }
-        update_current_mesh(gbsave);
-      }
-    }
-    return;
-  }
-  if(strncmp((const char *)&key2,"s",1)==0){
-    switch (keystate){
-    case GLUT_ACTIVE_ALT:
-      DialogMenu(20); // display dialog
-      break;
-    case GLUT_ACTIVE_CTRL:
-      snap_view_angles();
-      break;
-    case GLUT_ACTIVE_SHIFT:
-    default:
-      if(eyeview==EYE_CENTERED){
-        handle_move_keys(GLUT_KEY_DOWN);
-      }
-      else{
-        vectorskip++;
-        if(vectorskip>4)vectorskip=1;
-      }
-    }
-    return;
-  }
-  if(strncmp((const char *)&key2,"d",1)==0){
-    switch (keystate){
-    case GLUT_ACTIVE_ALT:
-      DialogMenu(22); // display dialog
-      break;
-    case GLUT_ACTIVE_CTRL:
-    case GLUT_ACTIVE_SHIFT:
-    default:
-      if(eyeview==EYE_CENTERED){
-        handle_move_keys(256+key2);
-      }
-      else{
-        demo_mode++;
-        if(demo_mode>5)demo_mode=0;
-      }
-      break;
-    }
-    return;
-  }
-  if(strncmp((const char *)&key2,"&",1)==0){
-    antialiasflag=1-antialiasflag;
-    printf("antialiasflag=%i\n",antialiasflag);
-    return;
-  }
-  if(strncmp((const char *)&key2,"i",1)==0&&unload_qdata==0){
-    handleiso();
-    return;
-  }
-  if(strncmp((const char *)&key2,"v",1)==0){
-    switch (keystate){
-      case GLUT_ACTIVE_ALT:
-        projection_type = 1 - projection_type;
-        TRANSLATE_CB(PROJECTION);
-        break;
-      default:
-        visVector=1-visVector;
-        if(vectorspresent==0)visVector=0;
-        updateglui();
-        break;
-    }
-    return;
-  }
-  if(strncmp((const char *)&key2,"F",1)==0){
-    hide_overlaps=1-hide_overlaps;
-    updatehiddenfaces=1;
-    UpdateHiddenFaces();
-    update_showhidebuttons();
-    glutPostRedisplay();
-  }
-  if(strncmp((const char *)&key2,"H",1)==0){
-    int nslice_loaded_local=0, nvslice_loaded_local=0;
-
-    for(i=0;i<nsliceinfo;i++){
-      slicedata *sd;
-
-      sd = sliceinfo + i;
-      if(sd->loaded==1)nslice_loaded_local++;
-    }
-    for(i=0;i<nvslice;i++){
-      vslicedata *vd;
-
-      vd = vsliceinfo + i;
-      if(vd->loaded==1)nvslice_loaded_local++;
-    }
-    stept=1;
-    if(nvslice_loaded_local>0){
-      if(show_all_slices==0){
-        ShowVSliceMenu(SHOW_ALL);
-        force_redisplay=1;
-      }
-      else{
-        itime_save=itimes;
-        ShowVSliceMenu(HIDE_ALL);
-      }
-    }
-    if(nvslice_loaded_local==0&&nslice_loaded_local>0){
-      if(show_all_slices==0){
-        ShowHideSliceMenu(SHOW_ALL);
-        force_redisplay=1;
-      }
-      else{
-        itime_save=itimes;
-        ShowHideSliceMenu(HIDE_ALL);
-      }
-    }
-    return;
-  }
-  if(strncmp((const char *)&key2,"P",1)==0){
-    cursorPlot3D=1-cursorPlot3D;
-    update_cursor_checkbox();
-    return;
-  }
-  if(strncmp((const char *)&key2,"p",1)==0){
-    plotn += FlowDir;
-    if(plotn<1){
-      plotn=numplot3dvars;
-    }
-    if(plotn>numplot3dvars){
-      plotn=1;
-    }
-    updateallplotslices();
-    if(visiso==1&&unload_qdata==0)updatesurface();
-    updateplot3dlistindex();
-    return;
-  }
-  if(strncmp((const char *)&key2,"r",1)==0
-    ||strncmp((const char *)&key2,"R",1)==0
-    ){
-    int rflag=0;
-
-    if(keystate==GLUT_ACTIVE_ALT){
-      research_mode=1-research_mode;
-      update_research_mode();
-      return;
-    }
-
-
-    if(strncmp((const char *)&key2,"R",1)==0){
-      render_double=2;
-      rflag=1;
-    }
-    else{
-      render_double=0;
-      if(render_from_menu==0){
-        renderW=0;
-        renderH=0;
-      }
-    }
-    if(scriptoutstream!=NULL){
-      if(nglobal_times>0){
-        float timeval;
-
-        timeval=global_times[itimes];
-        fprintf(scriptoutstream,"SETTIMEVAL\n");
-        fprintf(scriptoutstream," %f\n",timeval);
-        if(nvolrenderinfo>0&&load_at_rendertimes==1){
-          for(i=0;i<nmeshes;i++){
-            mesh *meshi;
-            volrenderdata *vr;
-            int j;
-            int framenum;
-            float timediffmin;
-
-            meshi = meshinfo + i;
-            vr = &meshi->volrenderinfo;
-            if(vr->fire==NULL||vr->smoke==NULL)continue;
-            if(vr->loaded==0||vr->display==0)continue;
-            timediffmin = ABS(timeval-vr->times[0]);
-            framenum=0;
-            for(j=1;j<vr->ntimes;j++){
-              float timediff;
-
-              timediff = ABS(vr->times[j]-timeval);
-              if(timediff<timediffmin){
-                timediffmin=timediff;
-                framenum=j;
+          if(isZoneFireModel==1){
+            if(iveclengths==0){
+              zone_ventfactor=1.0;
+            }
+            else{
+              if(FlowDir>0){
+                zone_ventfactor*=1.5;
+              } 
+              else{
+                zone_ventfactor/=1.5;
               }
             }
-            fprintf(scriptoutstream,"LOADVOLSMOKEFRAME\n");
-            fprintf(scriptoutstream," %i %i\n",i,framenum);
+          }
+          printf("iveclengths=%i\n",iveclengths);
+          if(visVector==1&&ReadPlot3dFile==1){
+            gbsave=current_mesh;
+            for(i=0;i<nmeshes;i++){
+              gbi = meshinfo + i;
+              if(gbi->plot3dfilenum==-1)continue;
+              update_current_mesh(gbi);
+              updateplotslice(1);
+              updateplotslice(2);
+              updateplotslice(3);
+            }
+            update_current_mesh(gbsave);
+          }
+        }
+        return;
+      }
+      break;
+    case 'A':
+      axislabels_smooth=1-axislabels_smooth;
+      update_axislabels_smooth();
+      return;
+      break;
+    case 'c':
+      switch (keystate){
+      case GLUT_ACTIVE_ALT:
+        DialogMenu(18); // clip dialog
+        break;
+      case GLUT_ACTIVE_CTRL:
+      default:
+        contour_type++;
+        if(contour_type>2)contour_type=0;
+        update_plot3d_display();
+        updatecolors(-1);
+      }
+      return;
+      break;
+#ifdef pp_CULL
+    case 'C':
+      if(nsmoke3dinfo>0&&cullactive==1&&gpuactive==1){
+        cullsmoke=1-cullsmoke;
+        update_smoke3dflags();
+        initcull(cullsmoke);
+        print_gpu_cull_state();
+      }
+      if(cullactive==0||gpuactive==0)cullsmoke=0;
+      return;    
+      break;
+#endif
+    case 'd':
+    case 'D':
+      switch (keystate){
+      case GLUT_ACTIVE_ALT:
+        DialogMenu(22); // display dialog
+        break;
+      case GLUT_ACTIVE_CTRL:
+      default:
+        if(eyeview==EYE_CENTERED){
+          handle_move_keys(256+key2);
+        }
+        else{
+          demo_mode++;
+          if(demo_mode>5)demo_mode=0;
+        }
+        break;
+      }
+      return;
+      break;
+    case 'e':
+    case 'E':
+      switch (keystate){
+      case GLUT_ACTIVE_ALT:
+        DialogMenu(16); // edit geometry
+        break;
+      case GLUT_ACTIVE_CTRL:
+      default:
+        eyeview++;
+        if(eyeview>2)eyeview=0;
+        handle_eyeview(0);
+      }
+      return;
+      break;
+    case 'f':
+      switch (keystate){
+      case GLUT_ACTIVE_ALT:
+        DialogMenu(14); // display dialog
+        break;
+      case GLUT_ACTIVE_CTRL:
+      default:
+        pass_through=1-pass_through;
+        update_blockpath();
+      }
+      return;
+      break;
+    case 'F':
+      hide_overlaps=1-hide_overlaps;
+      updatehiddenfaces=1;
+      UpdateHiddenFaces();
+      update_showhidebuttons();
+      glutPostRedisplay();
+      break;
+    case 'g':
+      if(ntotal_blockages>0||isZoneFireModel==0){
+        togglegridstate(1-visGrid);
+      }
+      return;
+      break;
+#ifdef pp_GPU
+    case 'G':
+      if((nsmoke3dinfo>0||nrooms>0)){
+        if(gpuactive==1){
+          usegpu=1-usegpu;
+        }
+        else{
+          usegpu=0;
+        }
+        if(nsmoke3dinfo>0){
+          update_smoke3dflags();
+        }
+        print_gpu_cull_state();
+        return;    
+      }
+      break;
+#endif
+    case 'h':
+      if(titlesafe_offset==0){
+        titlesafe_offset=titlesafe_offsetBASE;
+      }
+      else{
+        titlesafe_offset=0;
+      }
+      return;
+      break;
+    case 'H':
+      {
+        int nslice_loaded_local=0, nvslice_loaded_local=0;
+
+        for(i=0;i<nsliceinfo;i++){
+          slicedata *sd;
+
+          sd = sliceinfo + i;
+          if(sd->loaded==1)nslice_loaded_local++;
+        }
+        for(i=0;i<nvslice;i++){
+          vslicedata *vd;
+
+          vd = vsliceinfo + i;
+          if(vd->loaded==1)nvslice_loaded_local++;
+        }
+        stept=1;
+        if(nvslice_loaded_local>0){
+          if(show_all_slices==0){
+            ShowVSliceMenu(SHOW_ALL);
+            force_redisplay=1;
+          }
+          else{
+            itime_save=itimes;
+            ShowVSliceMenu(HIDE_ALL);
+          }
+        }
+        if(nvslice_loaded_local==0&&nslice_loaded_local>0){
+          if(show_all_slices==0){
+            ShowHideSliceMenu(SHOW_ALL);
+            force_redisplay=1;
+          }
+          else{
+            itime_save=itimes;
+            ShowHideSliceMenu(HIDE_ALL);
+          }
+        }
+        return;
+      }
+      break;
+    case 'i':
+    case 'I':
+      if(unload_qdata==0){
+        handleiso();
+        return;
+      }
+      break;
+    case 'k':
+    case 'K':
+      visTimeLabels = 1 - visTimeLabels;
+      if(visTimeLabels==0)printf("Time bar hidden\n");
+      if(visTimeLabels==1)printf("Time bar visible\n");
+      return;
+      break;
+#ifdef _DEBUG 
+    case 'l':
+      if(nsmoke3dinfo>0){
+        smokecullflag=1-smokecullflag;
+        if(smokecullflag==0){
+          smokedrawtest=1-smokedrawtest;
+        }
+        printf("smokecullflag=%i\n smokedrawtest=%i\n",smokecullflag,smokedrawtest);
+        update_smoke3dflags();
+        return;
+      }
+      break;
+#endif
+    case 'L':
+      UnloadSliceMenu(-2);
+      return;
+      break;
+    case 'm':
+    case 'M':
+      switch (keystate){
+      case GLUT_ACTIVE_ALT:
+        DialogMenu(15); // display dialog
+        break;
+      case GLUT_ACTIVE_CTRL:
+      default:
+        if(nmeshes>1){
+          highlight_mesh++;
+          if(highlight_mesh>nmeshes-1)highlight_mesh=0;
+          update_current_mesh(meshinfo+highlight_mesh);
+        }
+      }
+      return;
+      break;
+#ifdef _DEBUG
+    case 'n':
+    case 'N':
+      if(nsmoke3dinfo>0){
+        adjustalphaflag++;
+        if(adjustalphaflag>3)adjustalphaflag=0;
+        printf("adjustalphaflag=%i\n",adjustalphaflag);
+        update_smoke3dflags();
+        return;
+      }
+      break;
+#endif
+    case 'o':
+    case 'O':
+      highlight_flag++;
+      if(highlight_flag>2&&noutlineinfo>0)highlight_flag=0;
+      if(highlight_flag>1&&noutlineinfo==0)highlight_flag=0;
+      printf("outline mode=%i\n",highlight_flag);
+      return;
+      break;
+    case 'p':
+      plotn += FlowDir;
+      if(plotn<1){
+        plotn=numplot3dvars;
+      }
+      if(plotn>numplot3dvars){
+        plotn=1;
+      }
+      updateallplotslices();
+      if(visiso==1&&unload_qdata==0)updatesurface();
+      updateplot3dlistindex();
+      return;
+      break;
+    case 'P':
+      cursorPlot3D=1-cursorPlot3D;
+      update_cursor_checkbox();
+      return;
+      break;
+    case 'q':
+    case 'Q':
+      blocklocation++;
+      if(blocklocation>BLOCKlocation_cad||
+         blocklocation>BLOCKlocation_exact&&ncadgeom==0){
+         blocklocation=BLOCKlocation_grid;
+      }
+      if(showedit_dialog==1){
+        if(blocklocation==BLOCKlocation_exact){
+          blockage_as_input=1;
+        }
+        else{
+          blockage_as_input=0;
+        }
+        OBJECT_CB(BLOCKAGE_AS_INPUT2);
+      }
+      return;
+      break;
+    case 'r':
+    case 'R':
+      {
+        int rflag=0;
+
+        if(keystate==GLUT_ACTIVE_ALT){
+          research_mode=1-research_mode;
+          update_research_mode();
+          return;
+        }
+
+
+        if(strncmp((const char *)&key2,"R",1)==0){
+          render_double=2;
+          rflag=1;
+        }
+        else{
+          render_double=0;
+          if(render_from_menu==0){
+            renderW=0;
+            renderH=0;
+          }
+        }
+        if(scriptoutstream!=NULL){
+          if(nglobal_times>0){
+            float timeval;
+
+            timeval=global_times[itimes];
+            fprintf(scriptoutstream,"SETTIMEVAL\n");
+            fprintf(scriptoutstream," %f\n",timeval);
+            if(nvolrenderinfo>0&&load_at_rendertimes==1){
+              for(i=0;i<nmeshes;i++){
+                mesh *meshi;
+                volrenderdata *vr;
+                int j;
+                int framenum;
+                float timediffmin;
+
+                meshi = meshinfo + i;
+                vr = &meshi->volrenderinfo;
+                if(vr->fire==NULL||vr->smoke==NULL)continue;
+                if(vr->loaded==0||vr->display==0)continue;
+                timediffmin = ABS(timeval-vr->times[0]);
+                framenum=0;
+                for(j=1;j<vr->ntimes;j++){
+                  float timediff;
+
+                  timediff = ABS(vr->times[j]-timeval);
+                  if(timediff<timediffmin){
+                    timediffmin=timediff;
+                    framenum=j;
+                  }
+                }
+                fprintf(scriptoutstream,"LOADVOLSMOKEFRAME\n");
+                fprintf(scriptoutstream," %i %i\n",i,framenum);
+              }
+            }
+          }
+          else{
+            int show_plot3dkeywords=0;
+
+            for(i=0;i<nmeshes;i++){
+              mesh *meshi;
+              plot3ddata *plot3di;
+              float *xp, *yp, *zp;
+
+              meshi = meshinfo  + i;
+              if(meshi->plot3dfilenum==-1)continue;
+
+              plot3di = plot3dinfo + meshi->plot3dfilenum;
+              if(plot3di->display==0)continue;
+              show_plot3dkeywords=1;
+              xp = meshi->xplt_orig;
+              yp = meshi->yplt_orig;
+              zp = meshi->zplt_orig;
+              fprintf(scriptoutstream,"SHOWPLOT3DDATA\n");
+              fprintf(scriptoutstream," %i %i %i %i %f\n",i+1,1, plotn,visx_all,xp[meshi->plotx]);
+              fprintf(scriptoutstream,"SHOWPLOT3DDATA\n");
+              fprintf(scriptoutstream," %i %i %i %i %f\n",i+1,2, plotn,visy_all,yp[meshi->ploty]);
+              fprintf(scriptoutstream,"SHOWPLOT3DDATA\n");
+              fprintf(scriptoutstream," %i %i %i %i %f\n",i+1,3, plotn,visz_all,zp[meshi->plotz]);
+              fprintf(scriptoutstream,"SHOWPLOT3DDATA\n");
+              fprintf(scriptoutstream," %i %i %i %i %i\n",i+1,4, plotn,visiso,plotiso[plotn-1]);
+            }
+            if(show_plot3dkeywords==1){
+              fprintf(scriptoutstream,"PLOT3DPROPS\n");
+              fprintf(scriptoutstream," %i %i %i %i\n",plotn,visVector,iveclengths,contour_type);
+            }
+          }
+          if(rflag==0){
+            fprintf(scriptoutstream,"RENDERONCE\n");
+          }
+          else{
+            fprintf(scriptoutstream,"RENDERDOUBLEONCE\n");
+          }
+          fprintf(scriptoutstream," %s\n",script_renderfile);
+        }
+        RenderOnceNow=1;
+        if(showstereo!=0){
+          RenderOnceNowL=1;
+          RenderOnceNowR=1;
+        }
+        RenderState(1);
+        render_from_menu=0;
+        return;
+      }
+      break;
+    case 's':
+      switch (keystate){
+      case GLUT_ACTIVE_ALT:
+        DialogMenu(20); // display dialog
+        break;
+      case GLUT_ACTIVE_CTRL:
+        snap_view_angles();
+        break;
+      default:
+        if(eyeview==EYE_CENTERED){
+          handle_move_keys(GLUT_KEY_DOWN);
+        }
+        else{
+          vectorskip++;
+          if(vectorskip>4)vectorskip=1;
+        }
+      }
+      return;
+      break;
+    case 'S':
+      showstereoOLD=showstereo;
+      showstereo++;
+      if(showstereo>5)showstereo=0;
+      if(showstereo==1&&videoSTEREO!=1)showstereo=2;
+      Update_Glui_Stereo();
+      return;
+      break;
+    case 't':
+      switch (keystate){
+      case GLUT_ACTIVE_ALT:
+        DialogMenu(21); // display dialog
+        break;
+      case GLUT_ACTIVE_CTRL:
+      default:
+        stept++;
+        if(stept>1)stept=0;
+        if(stept==1){
+          plotstate=getplotstate(DYNAMIC_PLOTS);
+          if(plotstate==DYNAMIC_PLOTS){
+            reset_gltime();
+          }
+          else{
+            stept=0;
           }
         }
       }
-      else{
-        int show_plot3dkeywords=0;
-
-        for(i=0;i<nmeshes;i++){
-          mesh *meshi;
-          plot3ddata *plot3di;
-          float *xp, *yp, *zp;
-
-          meshi = meshinfo  + i;
-          if(meshi->plot3dfilenum==-1)continue;
-
-          plot3di = plot3dinfo + meshi->plot3dfilenum;
-          if(plot3di->display==0)continue;
-          show_plot3dkeywords=1;
-          xp = meshi->xplt_orig;
-          yp = meshi->yplt_orig;
-          zp = meshi->zplt_orig;
-          fprintf(scriptoutstream,"SHOWPLOT3DDATA\n");
-          fprintf(scriptoutstream," %i %i %i %i %f\n",i+1,1, plotn,visx_all,xp[meshi->plotx]);
-          fprintf(scriptoutstream,"SHOWPLOT3DDATA\n");
-          fprintf(scriptoutstream," %i %i %i %i %f\n",i+1,2, plotn,visy_all,yp[meshi->ploty]);
-          fprintf(scriptoutstream,"SHOWPLOT3DDATA\n");
-          fprintf(scriptoutstream," %i %i %i %i %f\n",i+1,3, plotn,visz_all,zp[meshi->plotz]);
-          fprintf(scriptoutstream,"SHOWPLOT3DDATA\n");
-          fprintf(scriptoutstream," %i %i %i %i %i\n",i+1,4, plotn,visiso,plotiso[plotn-1]);
-
+      return;
+      break;
+    case 'T':
+      usetexturebar=1-usetexturebar;
+      printf("usetexturebar=%i\n",usetexturebar);
+      return;
+      break;
+    case 'u':
+    case 'U':
+      switch (keystate){
+        case GLUT_ACTIVE_ALT:
+          skip_slice_in_embedded_mesh = 1 - skip_slice_in_embedded_mesh;
+          update_glui_cellcenter_interp();
+          break;
+        default:
+          ReloadMenu(0);
+          break;
+      }
+      return;
+      break;
+    case 'v':
+      switch (keystate){
+        case GLUT_ACTIVE_ALT:
+          projection_type = 1 - projection_type;
+          TRANSLATE_CB(PROJECTION);
+          break;
+        default:
+          visVector=1-visVector;
+          if(vectorspresent==0)visVector=0;
+          updateglui();
+          break;
+      }
+      return;
+      break;
+    case 'V':
+      if(nvolrenderinfo>0){
+        usevolrender=1-usevolrender;
+        update_smoke3dflags();
+#ifdef pp_GPU
+        print_gpu_cull_state();
+#endif
+        return;    
+      }
+      break;
+    case 'w':
+    case 'W':
+      switch (keystate){
+        case GLUT_ACTIVE_ALT:
+          DialogMenu(26); // WUI dialog
+          break;
+        case GLUT_ACTIVE_CTRL:
+        default:
+        if(eyeview==EYE_CENTERED){
+          handle_move_keys(GLUT_KEY_UP);
         }
-        if(show_plot3dkeywords==1){
-          fprintf(scriptoutstream,"PLOT3DPROPS\n");
-          fprintf(scriptoutstream," %i %i %i %i\n",plotn,visVector,iveclengths,contour_type);
+        else{
+          xyz_clipplane++;
+          if(xyz_clipplane>2)xyz_clipplane=0;
+          update_clip_all();
         }
+        break;
       }
-      if(rflag==0){
-        fprintf(scriptoutstream,"RENDERONCE\n");
+      return;
+      break;
+    case 'x':
+    case 'X':
+      if(keystate==GLUT_ACTIVE_ALT){
+        DialogMenu(-2); // close all dialogs
       }
       else{
-        fprintf(scriptoutstream,"RENDERDOUBLEONCE\n");
+        visx_all=1-visx_all;
       }
-      fprintf(scriptoutstream," %s\n",script_renderfile);
-    }
-    RenderOnceNow=1;
-    if(showstereo!=0){
-      RenderOnceNowL=1;
-      RenderOnceNowR=1;
-    }
-    RenderState(1);
-    render_from_menu=0;
-    return;
+      return;
+      break;
+    case 'y':
+    case 'Y':
+      if(keystate==GLUT_ACTIVE_ALT){
+        cellcenter_interp = 1 - cellcenter_interp;
+        update_glui_cellcenter_interp();
+      }
+      else{
+        visy_all = 1-visy_all;
+      }
+      return;
+      break;
+    case 'z':
+    case 'Z':
+      if(keystate==GLUT_ACTIVE_ALT){
+        DialogMenu(24); // compress dialog
+      }
+      else{
+        visz_all = 1 - visz_all;
+      }
+      return;
+      break;
+    case '0':
+      if(plotstate==DYNAMIC_PLOTS){
+        updatetimes();
+        reset_time_flag=1;
+        return;
+      }
+      break;
+    case '#':
+      writeini(LOCAL_INI);
+      return;
+      break;
+    case '!':
+      snap_view_angles();
+      return;
+      break;
+    case '$':
+      trainer_active=1-trainer_active;
+      if(trainer_active==1){
+        printf("Trainer mode active\n");
+        trainer_mode=1;
+        show_glui_trainer();
+      }
+      if(trainer_active==0){
+        printf("Trainer mode inactive\n");
+        trainer_mode=0;
+        hide_glui_trainer();
+      }
+      return;
+      break;
+    case '&':
+      antialiasflag=1-antialiasflag;
+      printf("antialiasflag=%i\n",antialiasflag);
+      return;
+      break;
   }
 
-  skip2=key2-one+1;
+  skip2=key2-'1'+1;
   if(skip2>0&&skip2<10)skip_global=skip2;
 
   /* if not a directional key then return */
