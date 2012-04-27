@@ -6362,7 +6362,7 @@ Note: In the third (reversible) reaction, the {\ct HEAT\_OF\_COMBUSTION} is set 
 \end{verbatim} \normalsize
 
 \subsubsection{Example: A Single-Step, Mixing-Controlled Reaction with Deposition}
-
+\label{info:deposition}
 This example shows how to define a reaction that invokes an aerosol deposition model in FDS (e.g. soot deposition).  Note, that this model should be considered an expiremental feature. The deposition model is invoked by defining a species with the parameter {\ct AEROSOL=.TRUE.}.  For this example propane will be the fuel with a 5 \% soot yield.  The stoichometric equation is shown below.
 \begin{eqnarray}\label{eq:PROPANE_depo}
 1\,\underbrace{\mathrm{(C_3H_8)}}_\text{Fuel} + 1\,\underbrace{\mathrm{(4.82 \, O_2+4.82 \,(^{.79}/_{.21}) \, N_2})}_\text{Oxidizer} \rightarrow \\
@@ -11148,12 +11148,12 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct SMIX} (Species Mixture (Lumped Species) Parameters)} \\
 \hline \hline
 \endhead
-{\ct BACKGROUND}                    & Logical           & Mixture is background species                         &                   & {\ct .FALSE.} \\ \hline
-{\ct ID}                            & Character         & Name of species                                       &                   &               \\ \hline
-{\ct SPEC\_ID(:)}                   & Character Array   & IDs of {\ct SPEC}ies that make up the mixture         &                   &               \\ \hline
-{\ct MASS\_FRACTION(:)}             & Real Array        & Mass fraction of mixture components                   &                   & 0             \\ \hline
-{\ct MASS\_FRACTION\_0}             & Real              & Initial mass fraction of mixture                      &                   & 0             \\ \hline
-{\ct VOLUME\_FRACTION(:)}           & Real Array        & Volume fraction of mixture components                 &                   &               \\ \hline
+{\ct BACKGROUND}                    & Logical           & Section~\ref{info:SMIX}                               &                   & {\ct .FALSE.} \\ \hline 
+{\ct ID}                            & Character         & Section~\ref{info:SMIX}                               &                   &               \\ \hline
+{\ct SPEC\_ID(:)}                   & Character Array   & Section~\ref{info:SMIX}                               &                   &               \\ \hline
+{\ct MASS\_FRACTION(:)}             & Real Array        & Section~\ref{info:SMIX}                               &                   & 0             \\ \hline
+{\ct MASS\_FRACTION\_0}             & Real              & Section~\ref{info:SMIX}                               &                   & 0             \\ \hline
+{\ct VOLUME\_FRACTION(:)}           & Real Array        & Section~\ref{info:SMIX}                               &                   &               \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
@@ -11177,6 +11177,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \hline \hline
 \endhead
 {\ct ABSORBING}                     & Logical     & Section~\ref{gas_species_props}         &                   & {\ct .FALSE.} \\ \hline
+{\ct AEROSOL}                       & Logical     & Section~\ref{info:deposition}           &                   & {\ct .FALSE.} \\ \hline
 {\ct BACKGROUND}                    & Logical     & Section~\ref{info:SPEC}                 &                   & {\ct .FALSE.} \\ \hline
 {\ct CONDUCTIVITY}                  & Real        & Section~\ref{gas_species_props}         & W/m/K             &               \\ \hline
 {\ct DENSITY\_LIQUID}               & Real        & Section~\ref{thermal_part_props}        & kg/m$^3$          &               \\ \hline
@@ -11193,11 +11194,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MASS\_FRACTION\_0}             & Real        & Section~\ref{info:SPEC_Basics}          &                   & 0             \\ \hline
 {\ct MELTING\_TEMPERATURE}          & Real        & Section~\ref{thermal_part_props}        & $^\circ$C         &               \\ \hline
 {\ct MW}                            & Real        & Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
-{\ct RAMP\_CP}                      & Character   & Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
-{\ct RAMP\_CP\_L}                   & Character   & Section~\ref{thermal_part_props}        & g/mol             & 29.           \\ \hline
-{\ct RAMP\_D}                       & Character   & Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
-{\ct RAMP\_K}                       & Character   & Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
-{\ct RAMP\_MU}                      & Character   & Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
+{\ct RAMP\_CP}                      & Character   & Section~\ref{gas_species_props}         &                   &               \\ \hline
+{\ct RAMP\_CP\_L}                   & Character   & Section~\ref{thermal_part_props}        &                   &               \\ \hline
+{\ct RAMP\_D}                       & Character   & Section~\ref{gas_species_props}         &                   &               \\ \hline
+{\ct RAMP\_K}                       & Character   & Section~\ref{gas_species_props}         &                   &               \\ \hline
+{\ct RAMP\_MU}                      & Character   & Section~\ref{gas_species_props}         &                   &               \\ \hline
 {\ct REFERENCE\_ENTHALPY}           & Real        & Section~\ref{gas_species_props}         & kJ/kg             &               \\ \hline
 {\ct REFERENCE\_TEMPERATURE}        & Real        & Section~\ref{gas_species_props}         & $^\circ$C         & 25.           \\ \hline
 {\ct SIGMALJ}                       & Real        & Section~\ref{gas_species_props}         &                   & 0             \\ \hline
@@ -11209,7 +11210,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \end{longtable}
 
 \vspace{\baselineskip}
-% undefined AEROSOL,CONDUCTIVITY_SOLID,DENSITY_SOLID,MEAN_DIAMETER for testing particle deposition
+% undefined CONDUCTIVITY_SOLID,DENSITY_SOLID,MEAN_DIAMETER for testing particle deposition
 \newpage
 
 \section{\texorpdfstring{{\tt SURF}}{SURF} (Surface Properties)}
