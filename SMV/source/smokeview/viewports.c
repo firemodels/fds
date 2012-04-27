@@ -216,35 +216,31 @@ void BLOCK_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
     outputText(mesh_left,mesh_bot, meshlabel);
   }
   if((showplot3d==1||visGrid==1)&&visx_all==1){
-    {
-      float plotval;
-      int iplotval;
-      char buff_label[128];
+    float plotval;
+    int iplotval;
+    char buff_label[128];
 
-      iplotval=current_mesh->plotx;
-      plotval=current_mesh->xplt_orig[iplotval];
-      if(plotval>0.0){
-        plotval=(int)(plotval*100+0.5);
-      }
-      else{
-        plotval=(int)(plotval*100-0.5);
-      }
-      plotval/=100;
+    iplotval = current_mesh->iplotx_all[iplotx_all];
+    plotval=current_mesh->xplt_orig[iplotval];
+    if(plotval>0.0){
+      plotval=(int)(plotval*100+0.5);
+    }
+    else{
+      plotval=(int)(plotval*100-0.5);
+    }
+    plotval/=100;
           
-      sprintf(buff_label,"%f",plotval);
-      trimzeros(buff_label);
-      strcat(buff_label," m");
-      if(cursorPlot3D==1){
-        sprintf(slicelabel,"*x: %i, ",iplotval);
-      }
-      else{
-        sprintf(slicelabel,"x: %i, ",iplotval);
-      }
-      strcat(slicelabel,buff_label);
+    sprintf(buff_label,"%f",plotval);
+    trimzeros(buff_label);
+    strcat(buff_label," m");
+    if(cursorPlot3D==1){
+      sprintf(slicelabel,"*x: %i, ",iplotval);
     }
-    if(visgridloc==1){
-      outputText(mesh_left-0.5,0.6f, slicelabel);
+    else{
+      sprintf(slicelabel,"x: %i, ",iplotval);
     }
+    strcat(slicelabel,buff_label);
+    if(visgridloc==1)outputText(mesh_left-0.5,0.6f, slicelabel);
   }
   if((showplot3d==1||visGrid==1)&&visy_all==1){
     {
@@ -252,7 +248,7 @@ void BLOCK_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
       int iplotval;
       char buff_label[128];
 
-      iplotval=current_mesh->ploty;
+      iplotval = current_mesh->iploty_all[iploty_all];
       plotval=current_mesh->yplt_orig[iplotval];
       if(plotval>0.0){
         plotval=(int)(plotval*100+0.5);
@@ -281,7 +277,7 @@ void BLOCK_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
       int iplotval;
       char buff_label[128];
 
-      iplotval=current_mesh->plotz;
+      iplotval = current_mesh->iplotz_all[iplotz_all];
       plotval=current_mesh->zplt_orig[iplotval];
       if(plotval>0.0){
         plotval=(int)(plotval*100+0.5);
