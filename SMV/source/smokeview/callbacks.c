@@ -935,7 +935,6 @@ void keyboard(unsigned char key, int flag){
     case 'A':
       axislabels_smooth=1-axislabels_smooth;
       update_axislabels_smooth();
-      return;
       break;
     case 'c':
       switch (keystate){
@@ -949,7 +948,6 @@ void keyboard(unsigned char key, int flag){
         update_plot3d_display();
         updatecolors(-1);
       }
-      return;
       break;
 #ifdef pp_CULL
     case 'C':
@@ -960,7 +958,6 @@ void keyboard(unsigned char key, int flag){
         print_gpu_cull_state();
       }
       if(cullactive==0||gpuactive==0)cullsmoke=0;
-      return;    
       break;
 #endif
     case 'd':
@@ -980,7 +977,6 @@ void keyboard(unsigned char key, int flag){
         }
         break;
       }
-      return;
       break;
     case 'e':
     case 'E':
@@ -994,7 +990,6 @@ void keyboard(unsigned char key, int flag){
         if(eyeview>2)eyeview=0;
         handle_eyeview(0);
       }
-      return;
       break;
     case 'f':
       switch (keystate){
@@ -1005,7 +1000,6 @@ void keyboard(unsigned char key, int flag){
       default:
         break;
       }
-      return;
       break;
     case 'F':
       hide_overlaps=1-hide_overlaps;
@@ -1035,7 +1029,6 @@ void keyboard(unsigned char key, int flag){
         }
         if(visGrid==GridProbe||visGrid==noGridProbe)visgridloc=1;
       }
-      return;
       break;
 #ifdef pp_GPU
     case 'G':
@@ -1061,7 +1054,6 @@ void keyboard(unsigned char key, int flag){
       else{
         titlesafe_offset=0;
       }
-      return;
       break;
     case 'H':
       {
@@ -1100,7 +1092,6 @@ void keyboard(unsigned char key, int flag){
             ShowHideSliceMenu(HIDE_ALL);
           }
         }
-        return;
       }
       break;
     case 'i':
@@ -1115,7 +1106,6 @@ void keyboard(unsigned char key, int flag){
       visTimeLabels = 1 - visTimeLabels;
       if(visTimeLabels==0)printf("Time bar hidden\n");
       if(visTimeLabels==1)printf("Time bar visible\n");
-      return;
       break;
 #ifdef _DEBUG 
     case 'l':
@@ -1132,7 +1122,6 @@ void keyboard(unsigned char key, int flag){
 #endif
     case 'L':
       UnloadSliceMenu(-2);
-      return;
       break;
     case 'm':
     case 'M':
@@ -1148,7 +1137,6 @@ void keyboard(unsigned char key, int flag){
           update_current_mesh(meshinfo+highlight_mesh);
         }
       }
-      return;
       break;
 #ifdef _DEBUG
     case 'n':
@@ -1168,7 +1156,6 @@ void keyboard(unsigned char key, int flag){
       if(highlight_flag>2&&noutlineinfo>0)highlight_flag=0;
       if(highlight_flag>1&&noutlineinfo==0)highlight_flag=0;
       printf("outline mode=%i\n",highlight_flag);
-      return;
       break;
     case 'p':
       plotn += FlowDir;
@@ -1181,12 +1168,10 @@ void keyboard(unsigned char key, int flag){
       updateallplotslices();
       if(visiso==1&&unload_qdata==0)updatesurface();
       updateplot3dlistindex();
-      return;
       break;
     case 'P':
       cursorPlot3D=1-cursorPlot3D;
       update_cursor_checkbox();
-      return;
       break;
     case 'q':
     case 'Q':
@@ -1204,7 +1189,6 @@ void keyboard(unsigned char key, int flag){
         }
         OBJECT_CB(BLOCKAGE_AS_INPUT2);
       }
-      return;
       break;
     case 'r':
     case 'R':
@@ -1310,7 +1294,6 @@ void keyboard(unsigned char key, int flag){
         }
         RenderState(1);
         render_from_menu=0;
-        return;
       }
       break;
     case 's':
@@ -1330,7 +1313,6 @@ void keyboard(unsigned char key, int flag){
           if(vectorskip>4)vectorskip=1;
         }
       }
-      return;
       break;
     case 'S':
       showstereoOLD=showstereo;
@@ -1338,7 +1320,6 @@ void keyboard(unsigned char key, int flag){
       if(showstereo>5)showstereo=0;
       if(showstereo==1&&videoSTEREO!=1)showstereo=2;
       Update_Glui_Stereo();
-      return;
       break;
     case 't':
       switch (keystate){
@@ -1359,12 +1340,10 @@ void keyboard(unsigned char key, int flag){
           }
         }
       }
-      return;
       break;
     case 'T':
       usetexturebar=1-usetexturebar;
       printf("usetexturebar=%i\n",usetexturebar);
-      return;
       break;
     case 'u':
     case 'U':
@@ -1377,7 +1356,6 @@ void keyboard(unsigned char key, int flag){
           ReloadMenu(0);
           break;
       }
-      return;
       break;
     case 'v':
       switch (keystate){
@@ -1391,7 +1369,6 @@ void keyboard(unsigned char key, int flag){
           updateglui();
           break;
       }
-      return;
       break;
     case 'V':
       if(nvolrenderinfo>0){
@@ -1421,7 +1398,6 @@ void keyboard(unsigned char key, int flag){
         }
         break;
       }
-      return;
       break;
     case 'x':
     case 'X':
@@ -1431,7 +1407,6 @@ void keyboard(unsigned char key, int flag){
       else{
         visx_all=1-visx_all;
       }
-      return;
       break;
     case 'y':
     case 'Y':
@@ -1442,7 +1417,6 @@ void keyboard(unsigned char key, int flag){
       else{
         visy_all = 1-visy_all;
       }
-      return;
       break;
     case 'z':
     case 'Z':
@@ -1452,7 +1426,6 @@ void keyboard(unsigned char key, int flag){
       else{
         visz_all = 1 - visz_all;
       }
-      return;
       break;
     case '0':
       if(plotstate==DYNAMIC_PLOTS){
@@ -1463,11 +1436,9 @@ void keyboard(unsigned char key, int flag){
       break;
     case '!':
       snap_view_angles();
-      return;
       break;
     case '#':
       writeini(LOCAL_INI);
-      return;
       break;
     case '$':
       trainer_active=1-trainer_active;
@@ -1481,12 +1452,10 @@ void keyboard(unsigned char key, int flag){
         trainer_mode=0;
         hide_glui_trainer();
       }
-      return;
       break;
     case '&':
       antialiasflag=1-antialiasflag;
       printf("antialiasflag=%i\n",antialiasflag);
-      return;
       break;
   }
 
@@ -1694,8 +1663,6 @@ void specialkeyboard(int key, int x, int y){
 /* ------------------ handle_plot3d_keys ------------------------ */
 
 void handle_plot3d_keys(int  key){
-  int i;
-
   switch (key){
   case GLUT_KEY_LEFT:
     visx_all=1;

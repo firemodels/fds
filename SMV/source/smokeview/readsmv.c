@@ -2069,7 +2069,6 @@ int readsmv(char *file, char *file2){
   int ipart=0, islice=0, islicecount=1, ipatch=0, iroom=0,izone_local=0,ifire=0,iiso=0;
   int ismoke3d=0,ismoke3dcount=1;
   int  itarg=0;
-  int factor=256*128;
   int setGRID=0;
   int idummy;
   int nvents;
@@ -2077,7 +2076,6 @@ int readsmv(char *file, char *file2){
   int iv1, iv2;
   int jv1, jv2;
   int kv1, kv2;
-  float dxsbar, dysbar, dzsbar;
   ventdata *vinfo,*vi;
   int colorindex, blocktype;
   int ventindex,venttype;
@@ -2087,7 +2085,6 @@ int readsmv(char *file, char *file2){
   int igrid;
   int ioffset;
   float *xplttemp,*yplttemp,*zplttemp;
-  float *xplt_origtemp,*yplt_origtemp,*zplt_origtemp;
   partdata *parti;
   int itrnx, itrny, itrnz, ipdim, iobst, ivent;
   int ibartemp=2, jbartemp=2, kbartemp=2;
@@ -2103,7 +2100,6 @@ int readsmv(char *file, char *file2){
   int nn;
   int i, j, k;
   STRUCTSTAT statbuffer,statbuffer2;
-  cadgeom *cd;
   int version;
   
   int nn_smoke3d=0;

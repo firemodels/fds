@@ -5158,7 +5158,6 @@ void makeiblank_smoke3d(void){
 
  int getsmoke3d_version(smoke3ddata *smoke3di){
 
-   STRUCTSTAT statbuffer;
    EGZ_FILE *SMOKE3DFILE=NULL,*SMOKE3D_REGFILE=NULL, *SMOKE3D_COMPFILE=NULL;
    int nxyz[8];
    char *file,mode[16];

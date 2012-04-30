@@ -624,7 +624,6 @@ float getarea(float *xnodes, float *ynodes, int ind){
 
 void GetContourAreas(const contour *ci){
   int nlevels, n;
-  float **rgb;
   float *areas;
 
   nlevels=ci->nlevels;

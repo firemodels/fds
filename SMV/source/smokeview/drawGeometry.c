@@ -2821,7 +2821,6 @@ void UpdateHiddenFaces(){
     meshi=meshinfo + i;
 
     for(j=0;j<6*meshi->nbptrs;j++){
-      int k;
       facedata *facej;
 
       facej = meshi->faceinfo+j;

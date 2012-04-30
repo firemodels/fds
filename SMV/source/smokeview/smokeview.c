@@ -24,7 +24,6 @@ char smokeview_revision[]="$Revision$";
 /* dummy change to bump revision number to 5.1.5 */
 
 #ifdef WIN32
-#include <Commdlg.h>
 #include <direct.h>
 #endif
 

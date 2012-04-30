@@ -26,7 +26,6 @@ char menu_revision[]="$Revision$";
 /* dummy change to bump revision number to 5.1.5 */
 
 #ifdef WIN32
-#include <Commdlg.h>
 #include <direct.h>
 #endif
 
@@ -1988,8 +1987,6 @@ void Plot3DShowMenu(int value){
 /* ------------------ GridSliceMenu ------------------------ */
 
 void GridSliceMenu(int value){
-  int justTurnedOn=0;
-
   switch (value){
   case GRID_xy:
     visz_all=1-visz_all;
@@ -4503,7 +4500,7 @@ static int particlepropshowmenu=0,humanpropshowmenu=0;
 static int *particlepropshowsubmenu=NULL;
 static int particlestreakshowmenu=0;
 static int tourmenu=0;
-static int showtourmenu=0, avatartourmenu=0,avatarevacmenu=0;
+static int avatartourmenu=0,avatarevacmenu=0;
 static int trainerviewmenu=0,mainmenu=0,zoneshowmenu=0,particleshowmenu=0,evacshowmenu=0,targetmenu=0;
 static int showobjectsmenu=0,spheresegmentmenu=0,propmenu=0;
 static int unloadplot3dmenu=0, unloadpatchmenu=0, unloadisomenu=0;
