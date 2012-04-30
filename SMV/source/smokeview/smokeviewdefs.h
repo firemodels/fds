@@ -11,6 +11,22 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#define NORMALIZE_X(x) (((x)-xbar0)/xyzmaxdiff)
+#define NORMALIZE_Y(y) (((y)-ybar0)/xyzmaxdiff)
+#define NORMALIZE_Z(z) (((z)-zbar0)/xyzmaxdiff)
+
+#define DENORMALIZE_X(x) (xbar0+(x)*xyzmaxdiff)
+#define DENORMALIZE_Y(y) (ybar0+(y)*xyzmaxdiff)
+#define DENORMALIZE_Z(z) (zbar0+(z)*xyzmaxdiff)
+
+#define noGridnoProbe 0
+#define GridnoProbe 1
+#define GridProbe 2
+#define noGridProbe 3
+
+#define FROM_SMOKEVIEW 0
+#define FROM_CALLBACK 1
+
 #define STEPS_PER_DEG 10.0
 
 #define GEOM_NORMAL 0

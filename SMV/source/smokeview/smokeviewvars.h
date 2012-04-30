@@ -288,8 +288,7 @@ SVEXTERN int vis_slice_contours;
 SVEXTERN int update_slicecontours;
 SVEXTERN int showevac_colorbar;
 SVEXTERN int showiso_colorbar;
-SVEXTERN int visgridloc;
-
+SVEXTERN int SVDECL(visgridloc,0);
 SVEXTERN int valindex;
 
 SVEXTERN int fire_colorbar_index,SVDECL(fire_colorbar_index_save,-1);

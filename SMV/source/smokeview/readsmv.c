@@ -6487,13 +6487,25 @@ typedef struct {
     }
   }
 
-  for(nn=0;nn<=255;nn++)  {xpltb[nn]=(xpltb[nn]-xbar0)/xyzmaxdiff;}
-  for(nn=0;nn<=255;nn++)  {ypltb[nn]=(ypltb[nn]-ybar0)/xyzmaxdiff;}
-  for(nn=0;nn<=255;nn++)  {zpltb[nn]=(zpltb[nn]-zbar0)/xyzmaxdiff;}
+  for(nn=0;nn<=255;nn++){
+    xpltb[nn]=(xpltb[nn]-xbar0)/xyzmaxdiff;
+  }
+  for(nn=0;nn<=255;nn++){
+    ypltb[nn]=(ypltb[nn]-ybar0)/xyzmaxdiff;
+  }
+  for(nn=0;nn<=255;nn++){
+    zpltb[nn]=(zpltb[nn]-zbar0)/xyzmaxdiff;
+  }
 
-  for(nn=0;nn<factor;nn++){xplts[nn]=(xplts[nn]-xbar0)/xyzmaxdiff;}
-  for(nn=0;nn<factor;nn++){yplts[nn]=(yplts[nn]-ybar0)/xyzmaxdiff;}
-  for(nn=0;nn<factor;nn++){zplts[nn]=(zplts[nn]-zbar0)/xyzmaxdiff;}
+  for(nn=0;nn<factor;nn++){
+    xplts[nn]=(xplts[nn]-xbar0)/xyzmaxdiff;
+  }
+  for(nn=0;nn<factor;nn++){
+    yplts[nn]=(yplts[nn]-ybar0)/xyzmaxdiff;
+  }
+  for(nn=0;nn<factor;nn++){
+    zplts[nn]=(zplts[nn]-zbar0)/xyzmaxdiff;
+  }
 
   for(n=0;n<nrooms;n++){
     roomdata *roomi;
@@ -7789,13 +7801,14 @@ int readini2(char *inifile, int localfile){
     CheckMemory;
     if(fgets(buffer,255,stream)==NULL)break;
 
-
-   
-   if(match(buffer,"GRIDPARMS")==1){
+    if(match(buffer,"GRIDPARMS")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %i %i",&visx_all, &visy_all, &visz_all);
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %i %i",&iplotx_all, &iploty_all, &iplotz_all);
+      if(iplotx_all>nplotx_all-1)iplotx_all=0;
+      if(iploty_all>nploty_all-1)iploty_all=0;
+      if(iplotz_all>nplotz_all-1)iplotz_all=0;
    }
    if(match(buffer,"SHOWDEVICEVALS")==1){
       fgets(buffer,255,stream);
@@ -8944,11 +8957,6 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%i ",&visgridloc);
       continue;
     }
-//    if(match(buffer,"SHOWCADANDGRID",14)==1){
-//      fgets(buffer,255,stream);
-//      sscanf(buffer,"%i ",&show_cad_and_grid);
-//      continue;
-//    }
     if(match(buffer,"SHOWFLOOR")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i ",&visFloor);

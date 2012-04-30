@@ -59,7 +59,7 @@ void next_xindex(int inc,int flag){
     }
     if(iplotx_all<0)iplotx_all=nplotx_all-1;
     if(iplotx_all>nplotx_all-1)iplotx_all=0;
-    if(visGrid==1)return;
+    if(visGrid!=noGridnoProbe)return;
     if(plotstate==DYNAMIC_PLOTS){
       for(i=0;i<nsliceinfo;i++){
         slicedata *slicei;
@@ -105,7 +105,7 @@ void next_yindex(int inc,int flag){
     }
     if(iploty_all<0)iploty_all=nploty_all-1;
     if(iploty_all>nploty_all-1)iploty_all=0;
-    if(visGrid==1)return;
+    if(visGrid!=noGridnoProbe)return;
     if(plotstate==DYNAMIC_PLOTS){
       for(i=0;i<nsliceinfo;i++){
         slicedata *slicei;
@@ -151,7 +151,7 @@ void next_zindex(int inc,int flag){
     }
     if(iplotz_all<0)iplotz_all=nplotz_all-1;
     if(iplotz_all>nplotz_all-1)iplotz_all=0;
-    if(visGrid==1)return;
+    if(visGrid!=noGridnoProbe)return;
     if(plotstate==DYNAMIC_PLOTS){
       for(i=0;i<nsliceinfo;i++){
         slicedata *slicei;
@@ -1016,7 +1016,24 @@ void keyboard(unsigned char key, int flag){
       break;
     case 'g':
       if(ntotal_blockages>0||isZoneFireModel==0){
-        togglegridstate(1-visGrid);
+        switch (visGrid){
+          case noGridnoProbe:
+            visGrid=GridnoProbe;
+            break;
+          case GridnoProbe:
+            visGrid=GridProbe;
+            break;
+          case GridProbe:
+            visGrid=noGridProbe;
+            break;
+          case noGridProbe:
+            visGrid=noGridnoProbe;
+            break;
+          default:
+            visGrid=noGridnoProbe;
+            break;
+        }
+        if(visGrid==GridProbe||visGrid==noGridProbe)visgridloc=1;
       }
       return;
       break;
@@ -1648,7 +1665,7 @@ void specialkeyboard(int key, int x, int y){
       }
       break;
     case 1:
-      if(visGrid==1||plotstate==STATIC_PLOTS||ReadVolSlice==1){
+      if(visGrid!=noGridnoProbe||plotstate==STATIC_PLOTS||ReadVolSlice==1){
         keymode=P3_MODE;
       }
       else{
@@ -2087,15 +2104,6 @@ void Reshape(int width, int height){
   createDepthTexture();
 #endif
 #endif
-}
-
-/* ------------------ togglegridstate ------------------------ */
-
-void togglegridstate(int visg){
-  visGrid=visg;
-  if(visGrid==1){
-    updateshowstep(1-visy_all,DIRY);
-  }
 }
 
 /* ------------------ reset_gltime ------------------------ */

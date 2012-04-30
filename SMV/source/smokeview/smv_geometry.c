@@ -99,23 +99,13 @@ void removedupfloats(float **valsptr, int *nvals,int *ivals, float dval_min){
 
 int closest_nodeindex(float val,float *vals,int nvals, float eps){
   int j;
-  float minval;
-  int minvalindex;
 
-  if(val<vals[0]-eps)return -1;
-  if(val>vals[nvals-1]+eps)return -1;
-  minval=ABS(val-vals[0]);
-  minvalindex=0;
-  for(j=1;j<nvals;j++){
-    float vv;
-
-    vv = ABS(val-vals[j]);
-    if(vv<minval){
-      minval=vv;
-      minvalindex=j;
-    }
+  if(val<vals[0])return -1;
+  if(val>vals[nvals-1])return -1;
+  for(j=0;j<nvals-1;j++){
+    if(vals[j]<=val&&val<vals[j+1])return j;
   }
-  return minvalindex;
+  return nvals-1;
 }
 
 /* ------------------ update_plot_alls ------------------------ */
@@ -244,10 +234,34 @@ mesh *getmesh(float *xyz){
     yplt = meshi->yplt_orig;
     zplt = meshi->zplt_orig;
 
-    if(xyz[0]<xplt[0]||xyz[0]>xplt[ibar])continue;
-    if(xyz[1]<yplt[0]||xyz[1]>yplt[jbar])continue;
-    if(xyz[2]<zplt[0]||xyz[2]>zplt[kbar])continue;
-    return meshi;
+    if(
+      xplt[0]<=xyz[0]&&xyz[0]<xplt[ibar]&&
+      yplt[0]<=xyz[1]&&xyz[1]<yplt[jbar]&&
+      zplt[0]<=xyz[2]&&xyz[2]<zplt[kbar]){
+      return meshi;
+    }
+  }
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    int ibar, jbar, kbar;
+    float *xplt, *yplt, *zplt;
+
+    meshi = meshinfo+i;
+
+    ibar = meshi->ibar;
+    jbar = meshi->jbar;
+    kbar = meshi->kbar;
+
+    xplt = meshi->xplt_orig;
+    yplt = meshi->yplt_orig;
+    zplt = meshi->zplt_orig;
+
+    if(
+      xplt[0]<=xyz[0]&&xyz[0]<=xplt[ibar]&&
+      yplt[0]<=xyz[1]&&xyz[1]<=yplt[jbar]&&
+      zplt[0]<=xyz[2]&&xyz[2]<=zplt[kbar]){
+      return meshi;
+    }
   }
   return NULL;
 }

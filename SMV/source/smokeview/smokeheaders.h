@@ -119,6 +119,9 @@ EXTERNCPP void LoadZoneSmokeShaders(void);
 EXTERNCPP void LoadVolSmokeShaders(void);
 EXTERNCPP void UnLoadShaders(void);
 #endif
+EXTERNCPP void next_xindex(int inc,int flag);
+EXTERNCPP void next_yindex(int inc,int flag);
+EXTERNCPP void next_zindex(int inc,int flag);
 EXTERNCPP void initspheresegs(int nlat, int nlong);
 EXTERNCPP void Update_Glui_Wui(void);
 EXTERNCPP int have_terrain_slice(void);
@@ -624,7 +627,6 @@ EXTERNCPP void drawcbox(float x, float y, float z, float size);
 EXTERNCPP void specialkeyboard(int key, int x, int y);
 EXTERNCPP void specialkeyboard_up(int key, int x, int y);
 EXTERNCPP void handleiso(void);
-EXTERNCPP void togglegridstate(int visg);
 EXTERNCPP void updatesurface(void);
 EXTERNCPP void WindowStatus(int state);
 EXTERNCPP void mouse(int button, int state, int x, int y);

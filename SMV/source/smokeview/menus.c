@@ -37,6 +37,16 @@ char menu_revision[]="$Revision$";
 #define MENU_SIZEPRESERVING -105
 #define MENU_DUMMY -999
 
+#define GRID_yz 1
+#define GRID_xz 2
+#define GRID_xy 3
+#define GRID_showall 4
+#define GRID_hideall 5
+#define GRID_grid_probe 6
+#define GRID_grid 7
+#define GRID_probe 8
+#define GRID_none 9
+
 void add_scriptlist(char *file, int id);
 void update_glui_render(void);
 void PropMenu(int value);
@@ -1978,49 +1988,70 @@ void Plot3DShowMenu(int value){
 /* ------------------ GridSliceMenu ------------------------ */
 
 void GridSliceMenu(int value){
-  mesh *meshi;
   int justTurnedOn=0;
 
-  meshi=current_mesh;
-  if(visGrid==0){
-    visGrid=1;
-    justTurnedOn=1;
-  }
   switch (value){
-  case 1:
-    if(justTurnedOn==1&&visz_all==1)visz_all=0;
-    updateshowstep(1-visz_all,DIRZ);
-    if(visz_all==1)visGrid=1;
+  case GRID_xy:
+    visz_all=1-visz_all;
+    if(visz_all==1&&visGrid==0)visGrid=1;
     break;
-  case 2:
-    if(justTurnedOn==1&&visy_all==1)visy_all=0;
-    updateshowstep(1-visy_all,DIRY);
-    if(visy_all==1)visGrid=1;
+  case GRID_xz:
+    visy_all=1-visy_all;
+    if(visy_all==1&&visGrid==0)visGrid=1;
     break;
-  case 3:
-    if(justTurnedOn==1&&visx_all==1)visx_all=0;
-    updateshowstep(1-visx_all,DIRX);
-    if(visx_all==1)visGrid=1;
+  case GRID_yz:
+    visx_all=1-visx_all;
+    if(visx_all==1&&visGrid==0)visGrid=1;
     break;
-  case 4:
+  case GRID_showall:
     visx_all=1;
     visy_all=1;
     visz_all=1;
     visGrid=1;
     break;
-  case 5:
+  case GRID_hideall:
     visx_all=0;
     visy_all=0;
     visz_all=0;
+    break;
+  case 999:
+    break;
+  case GRID_grid:
+    switch (visGrid){
+      case GridProbe:
+        visGrid=noGridProbe;
+        break;
+      case GridnoProbe:
+        visGrid=noGridnoProbe;
+        break;
+      case noGridProbe:
+        visGrid=GridProbe;
+        break;
+      case noGridnoProbe:
+        visGrid=GridnoProbe;
+        break;
+    }
+    break;
+  case GRID_probe:
+    switch (visGrid){
+      case GridProbe:
+        visGrid=GridnoProbe;
+        break;
+      case GridnoProbe:
+        visGrid=GridProbe;
+        break;
+      case noGridProbe:
+        visGrid=noGridnoProbe;
+        break;
+      case noGridnoProbe:
+        visGrid=noGridProbe;
+        break;
+    }
     break;
   default:
     ASSERT(FFALSE);
     break;
   }
-  if(visx_all==0&&visy_all==0&&visz_all==0){
-    visGrid=0;
-  }
-  togglegridstate(visGrid);
   updatemenu=1;  
   glutPostRedisplay();
 }
@@ -5148,41 +5179,43 @@ updatemenu=0;
 /* --------------------------------grid slice menu -------------------------- */
 
   CREATEMENU(gridslicemenu,GridSliceMenu);
-  if(visz_all==1){
-    if(visGrid==1){
-      glutAddMenuEntry(_("*xy plane"),1);
-    }
-    else{
-      glutAddMenuEntry(_("*xy plane (grid turned off)"),1);
-    }
+  if(visGrid==GridnoProbe||visGrid==GridProbe){
+    glutAddMenuEntry(_("*show grid"),GRID_grid); 
   }
   else{
-    glutAddMenuEntry(_("xy plane"),1);
+    glutAddMenuEntry(_("show grid"),GRID_grid); 
+  }
+  if(visGrid==GridProbe||visGrid==noGridProbe){
+    glutAddMenuEntry(_("*show grid location"),GRID_probe); 
+  }
+  else{
+    glutAddMenuEntry(_("show grid location"),GRID_probe); 
+  }
+  glutAddMenuEntry("-",999);
+  if(visz_all==1){
+    glutAddMenuEntry(_("*xy plane"),GRID_xy);
+  }
+  else{
+    glutAddMenuEntry(_("xy plane"),GRID_xy);
   }
   if(visy_all==1){
-    if(visGrid==1){
-      glutAddMenuEntry(_("*xz plane"),2);
-    }
-    else{
-      glutAddMenuEntry(_("*xz plane (grid turned off)"),2);
-    }
+    glutAddMenuEntry(_("*xz plane"),GRID_xz);
   }
   else{
-    glutAddMenuEntry(_("xz plane"),2);
+    glutAddMenuEntry(_("xz plane"),GRID_xz);
   }
   if(visx_all==1){
-    if(visGrid==1){
-      glutAddMenuEntry(_("*yz plane"),3);
-    }
-    else{
-      glutAddMenuEntry(_("*yz plane (grid turned off)"),3);
-    }
+    glutAddMenuEntry(_("*yz plane"),GRID_yz);
   }
   else{
-    glutAddMenuEntry(_("yz plane"),3);
+    glutAddMenuEntry(_("yz plane"),GRID_yz);
   }
-  glutAddMenuEntry(_("Show all"),4);
-  if(visGrid==1)glutAddMenuEntry(_("Hide all"),5);
+  if(visx_all==0||visy_all==0||visz_all==0){
+    glutAddMenuEntry(_("Show all planes"),GRID_showall);
+  }
+  if(visx_all==1||visy_all==1||visz_all==1){
+    glutAddMenuEntry(_("Hide all planes"),GRID_hideall);
+  }
 
 /* --------------------------------vent menu -------------------------- */
 
