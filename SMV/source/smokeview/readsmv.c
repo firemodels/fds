@@ -1366,6 +1366,687 @@ void init_textures(void){
   printf("     Surface texture loading completed\n");
 }
 
+/* ------------------ update_bounds ------------------------ */
+
+void update_bound_info(void){
+  int i,n;
+
+  if(nisoinfo>0){
+    FREEMEMORY(isoindex);
+    FREEMEMORY(isobounds);
+    NewMemory((void*)&isoindex,nisoinfo*sizeof(int));
+    NewMemory((void*)&isobounds,nisoinfo*sizeof(databounds));
+    niso_bounds=0;
+    for(i=0;i<nisoinfo;i++){
+      isodata *isoi;
+
+      isoi = isoinfo + i;
+      if(isoi->dataflag==0)continue;
+      isoi->firstshort=1;
+      isoi->setvalmin=0;
+      isoi->setvalmax=0;
+      isoi->valmin=1.0;
+      isoi->valmax=0.0;
+      isoindex[niso_bounds]=i;
+      isobounds[niso_bounds].datalabel=isoi->color_label.shortlabel;
+      isobounds[niso_bounds].setvalmin=0;
+      isobounds[niso_bounds].setvalmax=0;
+      isobounds[niso_bounds].valmin=1.0;
+      isobounds[niso_bounds].valmax=0.0;
+      isobounds[niso_bounds].setchopmax=0;
+      isobounds[niso_bounds].setchopmin=0;
+      isobounds[niso_bounds].chopmax=0.0;
+      isobounds[niso_bounds].chopmin=1.0;
+      isobounds[niso_bounds].label=&isoi->color_label;
+      niso_bounds++;
+      for(n=0;n<i;n++){
+        isodata *ison;
+
+        ison = isoinfo + n;
+        if(ison->dataflag==0)continue;
+        if(strcmp(isoi->color_label.shortlabel,ison->color_label.shortlabel)==0){
+          isoi->firstshort=0;
+          niso_bounds--;
+          break;
+        }
+      }
+    }
+  }
+
+  if(nsliceinfo>0){
+    FREEMEMORY(slicebounds);
+    NewMemory((void*)&slicebounds,nsliceinfo*sizeof(databounds));
+    nslice2=0;
+    for(i=0;i<nsliceinfo;i++){
+      slicedata *slicei;
+
+      slicei = sliceinfo + i;
+      slicei->firstshort=1;
+      slicei->valmin=1.0;
+      slicei->valmax=0.0;
+      slicei->setvalmin=0;
+      slicei->setvalmax=0;
+      slicebounds[nslice2].datalabel=slicei->label.shortlabel;
+      slicebounds[nslice2].setvalmin=0;
+      slicebounds[nslice2].setvalmax=0;
+      slicebounds[nslice2].valmin=1.0;
+      slicebounds[nslice2].valmax=0.0;
+      slicebounds[nslice2].chopmax=0.0;
+      slicebounds[nslice2].chopmin=1.0;
+      slicebounds[nslice2].setchopmax=0;
+      slicebounds[nslice2].setchopmin=0;
+#ifdef pp_SLICECONTOURS
+      slicebounds[nslice2].line_contour_min=0.0;
+      slicebounds[nslice2].line_contour_max=1.0;
+      slicebounds[nslice2].line_contour_num=1;
+#endif
+      nslice2++;
+      for(n=0;n<i;n++){
+        slicedata *slicen;
+
+        slicen = sliceinfo + n;
+        if(strcmp(slicei->label.shortlabel,slicen->label.shortlabel)==0){
+          slicei->firstshort=0;
+          nslice2--;
+          break;
+        }
+      }
+    }
+  }
+  canshow_threshold=0;
+  if(npatchinfo>0){
+    npatch2=0;
+    FREEMEMORY(patchlabellist);
+    FREEMEMORY(patchlabellist_index);
+    NewMemory((void **)&patchlabellist,npatchinfo*sizeof(char *));
+    NewMemory((void **)&patchlabellist_index,npatchinfo*sizeof(int));
+    for(i=0;i<npatchinfo;i++){
+      patchinfo[i].firstshort=1;
+      patchinfo[i].valmin=1.0;
+      patchinfo[i].valmax=0.0;
+      patchinfo[i].setvalmin=0;
+      patchinfo[i].setvalmax=0;
+      if(strncmp(patchinfo[i].label.shortlabel,"temp",4)==0||
+         strncmp(patchinfo[i].label.shortlabel,"TEMP",4)==0){
+        canshow_threshold=1;
+      }
+      patchlabellist[npatch2]=patchinfo[i].label.shortlabel;
+      patchlabellist_index[npatch2]=i;
+      npatch2++;
+      for(n=0;n<i;n++){
+        if(strcmp(patchinfo[i].label.shortlabel,patchinfo[n].label.shortlabel)==0){
+          patchinfo[i].firstshort=0;
+          npatch2--;
+          break;
+        }
+      }
+    }
+  }
+  updatechar();
+}
+
+/* ------------------ update_endian_info ------------------------ */
+
+void update_endian_info(void){
+  if(setendian==0){
+    if(match(LESsystem,"AIX")==1||match(LESsystem,"SGI")==1||match(LESendian,"b")==1||match(LESendian,"B")==1){
+      endian_data=1;
+    }
+    if(match(LESsystem,"DVF")==1||match(LESendian,"l")==1||match(LESendian,"L")==1){
+      endian_data=0;
+    }
+    endian_smv = endian_data;
+  }
+
+#ifndef WIN32
+  if(endian_smv!=getendian()){
+    printf("*** Warning: Smokeview is running on a ");
+    if(getendian()==1){
+      printf(" little endian computer\n");
+    }
+    else{
+      printf(" big endian computer\n");
+    }
+    printf("    but the data being visualized was generated on a ");
+    if(endian_smv==1){
+      printf(" little endian computer\n");
+    }
+    else{
+      printf(" big endian computer\n");
+    }
+  }
+#endif
+}
+
+/* ------------------ update_mesh_coords ------------------------ */
+
+void update_mesh_coords(void){
+  int nn, i,n;
+  float dxsbar, dysbar, dzsbar;
+  int factor;
+  int igrid;
+
+  if(setPDIM==0){
+    for(nn=0;nn<=current_mesh->ibar;nn++){
+      current_mesh->xplt[nn]=xbar0+(float)nn*(xbar-xbar0)/(float)current_mesh->ibar;
+    }
+    for(nn=0;nn<=current_mesh->jbar;nn++){
+      current_mesh->yplt[nn]=ybar0+(float)nn*(ybar-ybar0)/(float)current_mesh->jbar;
+    }
+    for(nn=0;nn<=current_mesh->kbar;nn++){
+      current_mesh->zplt[nn]=zbar0+(float)nn*(zbar-zbar0)/(float)current_mesh->kbar;
+    }
+  }
+
+  /* define highlighted block */
+
+  /* add in offsets */
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    int ii;
+
+    meshi=meshinfo+i;
+    meshi->xbar += meshi->offset[0];
+    meshi->ybar += meshi->offset[1];
+    meshi->zbar += meshi->offset[2];
+    meshi->xbar0 += meshi->offset[0];
+    meshi->ybar0 += meshi->offset[1];
+    meshi->zbar0 += meshi->offset[2];
+    {
+      float dx, dy, dz;
+
+      dx = meshi->xbar - meshi->xbar0;
+      dx /= meshi->ibar;
+      dy = meshi->ybar - meshi->ybar0;
+      dy /= meshi->jbar;
+      dz = meshi->zbar - meshi->zbar0;
+      dz /= meshi->kbar;
+      meshi->cellsize=sqrt(dx*dx+dy*dy+dz*dz);
+    }
+    for(ii=0;ii<meshi->ibar+1;ii++){
+      meshi->xplt[ii] += meshi->offset[0];
+    }
+    for(ii=0;ii<meshi->jbar+1;ii++){
+      meshi->yplt[ii] += meshi->offset[1];
+    }
+    for(ii=0;ii<meshi->kbar+1;ii++){
+      meshi->zplt[ii] += meshi->offset[2];
+    }
+    meshi->xcen+=meshi->offset[0];
+    meshi->ycen+=meshi->offset[1];
+    meshi->zcen+=meshi->offset[2];
+  }
+  for(i=1;i<nmeshes;i++){
+    mesh *meshi;
+
+    meshi=meshinfo+i;
+    if(meshi->zbar0!=meshinfo->zbar0){
+      visFloor=0;
+      updatefacelists=1;
+      updatemenu=1;
+      break;
+    }
+  }
+
+  {
+    mesh *meshi;
+
+    meshi=meshinfo;
+
+    xbar  =  meshi->xbar;   ybar=meshi->ybar;   zbar=meshi->zbar;
+    xbar0 =  meshi->xbar0; ybar0=meshi->ybar0; zbar0=meshi->zbar0;
+  }
+
+  ijkbarmax=meshinfo->ibar;
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+
+    meshi=meshinfo+i;
+
+    if(meshi->ibar>ijkbarmax)ijkbarmax=meshi->ibar;
+    if(meshi->jbar>ijkbarmax)ijkbarmax=meshi->jbar;
+    if(meshi->kbar>ijkbarmax)ijkbarmax=meshi->kbar;
+  }
+
+  for(i=1;i<nmeshes;i++){
+    mesh *meshi;
+
+    meshi=meshinfo+i;
+
+    if(xbar <meshi->xbar )xbar =meshi->xbar;
+    if(ybar <meshi->ybar )ybar =meshi->ybar;
+    if(zbar <meshi->zbar )zbar =meshi->zbar;
+    if(xbar0>meshi->xbar0)xbar0=meshi->xbar0;
+    if(ybar0>meshi->ybar0)ybar0=meshi->ybar0;
+    if(zbar0>meshi->zbar0)zbar0=meshi->zbar0;
+  }
+
+  factor = 256*128;
+  dxsbar = (xbar-xbar0)/factor;
+  dysbar = (ybar-ybar0)/factor;
+  dzsbar = (zbar-zbar0)/factor;
+
+  for(nn=0;nn<factor;nn++){
+    xplts[nn]=xbar0+((float)nn+0.5)*dxsbar;
+  }
+  for(nn=0;nn<factor;nn++){
+    yplts[nn]=ybar0+((float)nn+0.5)*dysbar;
+  }
+  for(nn=0;nn<factor;nn++){
+    zplts[nn]=zbar0+((float)nn+0.5)*dzsbar;
+  }
+
+  /* compute scaling factors */
+
+  {
+    float dxclip, dyclip, dzclip;
+
+    dxclip = (xbar-xbar0)/1000.0;
+    dyclip = (ybar-ybar0)/1000.0;
+    dzclip = (zbar-zbar0)/1000.0;
+    xclip_min = xbar0-dxclip;
+    yclip_min = ybar0-dyclip;
+    zclip_min = zbar0-dzclip;
+    xclip_max = xbar+dxclip;
+    yclip_max = ybar+dyclip;
+    zclip_max = zbar+dzclip;
+  }
+
+  // compute scaling factor used in NORMALIXE_X, NORMALIZE_Y, NORMALIZE_Z macros
+
+  xyzmaxdiff=xbar-xbar0;
+  if(ybar-ybar0>xyzmaxdiff)xyzmaxdiff=ybar-ybar0;
+  if(zbar-zbar0>xyzmaxdiff)xyzmaxdiff=zbar-zbar0;
+
+  // normalize various coordinates.
+
+  for(nn=0;nn<factor;nn++){
+    xplts[nn]=NORMALIZE_X(xplts[nn]);
+  }
+  for(nn=0;nn<factor;nn++){
+    yplts[nn]=NORMALIZE_Y(yplts[nn]);
+  }
+  for(nn=0;nn<factor;nn++){
+    zplts[nn]=NORMALIZE_Z(zplts[nn]);
+  }
+
+  /* rescale both global and local xbar, ybar and zbar */
+
+  xbar0ORIG = xbar0;
+  ybar0ORIG = ybar0;
+  zbar0ORIG = zbar0;
+  xbarORIG = xbar;
+  ybarORIG = ybar;
+  zbarORIG = zbar;
+  xbar = (xbar-xbar0)/xyzmaxdiff;
+  ybar = (ybar-ybar0)/xyzmaxdiff;
+  zbar = (zbar-zbar0)/xyzmaxdiff;
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+
+    meshi=meshinfo+i;
+    /* compute a local scaling factor for each block */
+    meshi->xyzmaxdiff=meshi->xbar-meshi->xbar0;
+    if(meshi->ybar-meshi->ybar0>meshi->xyzmaxdiff)meshi->xyzmaxdiff=meshi->ybar-meshi->ybar0;
+    if(meshi->zbar-meshi->zbar0>meshi->xyzmaxdiff)meshi->xyzmaxdiff=meshi->zbar-meshi->zbar0;
+
+    meshi->xbar = (meshi->xbar-xbar0)/xyzmaxdiff;
+    meshi->ybar = (meshi->ybar-ybar0)/xyzmaxdiff;
+    meshi->zbar = (meshi->zbar-zbar0)/xyzmaxdiff;
+    meshi->xcen = (meshi->xcen-xbar0)/xyzmaxdiff;
+    meshi->ycen = (meshi->ycen-ybar0)/xyzmaxdiff;
+    meshi->zcen = (meshi->zcen-zbar0)/xyzmaxdiff;
+  }
+
+  for(i=0;i<noutlineinfo;i++){
+    outline *outlinei;
+    float *x1, *x2, *yy1, *yy2, *z1, *z2;
+    int j;
+
+    outlinei = outlineinfo + i;
+    x1 = outlinei->x1;
+    x2 = outlinei->x2;
+    yy1 = outlinei->y1;
+    yy2 = outlinei->y2;
+    z1 = outlinei->z1;
+    z2 = outlinei->z2;
+    for(j=0;j<outlinei->nlines;j++){
+      x1[j]=(x1[j]-xbar0)/xyzmaxdiff;
+      x2[j]=(x2[j]-xbar0)/xyzmaxdiff;
+      yy1[j]=(yy1[j]-ybar0)/xyzmaxdiff;
+      yy2[j]=(yy2[j]-ybar0)/xyzmaxdiff;
+      z1[j]=(z1[j]-zbar0)/xyzmaxdiff;
+      z2[j]=(z2[j]-zbar0)/xyzmaxdiff;
+    }
+  }
+
+  {
+    mesh *meshi;
+    meshi=meshinfo;
+    veclength = meshi->xplt[1]-meshi->xplt[0];
+  }
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+
+    meshi=meshinfo+i;
+    if(veclength>meshi->xplt[1]-meshi->xplt[0])veclength=meshi->xplt[1]-meshi->xplt[0];
+    if(veclength>meshi->yplt[1]-meshi->yplt[0])veclength=meshi->yplt[1]-meshi->yplt[0];
+    if(veclength>meshi->zplt[1]-meshi->zplt[0])veclength=meshi->zplt[1]-meshi->zplt[0];
+  }
+  veclength = veclength/xyzmaxdiff;
+  veclength = 0.01;
+
+  for(igrid=0;igrid<nmeshes;igrid++){
+    mesh *meshi;
+    float *face_centers;
+    float *xplt_cen, *yplt_cen, *zplt_cen;
+    int ibar, jbar, kbar;
+    float *xplt_orig, *yplt_orig, *zplt_orig;
+    float *xplt, *yplt, *zplt;
+    int j,k;
+
+    meshi=meshinfo+igrid;
+    ibar=meshi->ibar; 
+    jbar=meshi->jbar; 
+    kbar=meshi->kbar;
+    xplt_orig = meshi->xplt_orig;
+    yplt_orig = meshi->yplt_orig;
+    zplt_orig = meshi->zplt_orig;
+    xplt = meshi->xplt;
+    yplt = meshi->yplt;
+    zplt = meshi->zplt;
+    xplt_cen = meshi->xplt_cen;
+    yplt_cen = meshi->yplt_cen;
+    zplt_cen = meshi->zplt_cen;
+
+    for(i=0;i<ibar+1;i++){
+      xplt_orig[i]=xplt[i];
+      xplt[i]=(xplt[i]-xbar0)/xyzmaxdiff;
+    }
+    for(j=0;j<jbar+1;j++){
+      yplt_orig[j]=yplt[j];
+      yplt[j]=(yplt[j]-ybar0)/xyzmaxdiff;
+    }
+    for(k=0;k<kbar+1;k++){
+      zplt_orig[k]=zplt[k];
+      zplt[k]=(zplt[k]-zbar0)/xyzmaxdiff;
+    }
+
+    for(nn=0;nn<ibar;nn++){
+      xplt_cen[nn]=(xplt[nn]+xplt[nn+1])/2.0;
+    }
+    for(nn=0;nn<jbar;nn++){
+      yplt_cen[nn]=(yplt[nn]+yplt[nn+1])/2.0;
+    }
+    for(nn=0;nn<kbar;nn++){
+      zplt_cen[nn]=(zplt[nn]+zplt[nn+1])/2.0;
+    }
+
+    meshi->boxoffset=-(zplt[1]-zplt[0])/10.0;
+    meshi->boxmin[0]=xplt_orig[0];
+    meshi->boxmin[1]=yplt_orig[0];
+    meshi->boxmin[2]=zplt_orig[0];
+    meshi->boxmax[0]=xplt_orig[ibar];
+    meshi->boxmax[1]=yplt_orig[jbar];
+    meshi->boxmax[2]=zplt_orig[kbar];
+    meshi->boxmin_scaled[0] = (meshi->boxmin[0]-xbar0)/xyzmaxdiff;
+    meshi->boxmin_scaled[1] = (meshi->boxmin[1]-ybar0)/xyzmaxdiff;
+    meshi->boxmin_scaled[2] = (meshi->boxmin[2]-zbar0)/xyzmaxdiff;
+    meshi->boxmax_scaled[0] = (meshi->boxmax[0]-xbar0)/xyzmaxdiff;
+    meshi->boxmax_scaled[1] = (meshi->boxmax[1]-ybar0)/xyzmaxdiff;
+    meshi->boxmax_scaled[2] = (meshi->boxmax[2]-zbar0)/xyzmaxdiff;
+    meshi->x0 = xplt[0];
+    meshi->x1 = xplt[ibar];
+    meshi->y0 = yplt[0];
+    meshi->y1 = yplt[jbar];
+    meshi->z0 = zplt[0];
+    meshi->z1 = zplt[kbar];
+
+    face_centers = meshi->face_centers;
+    for(j=0;j<6;j++){
+      face_centers[0]=meshi->xcen;
+      face_centers[1]=meshi->ycen;
+      face_centers[2]=meshi->zcen;
+      face_centers+=3;
+    }
+    face_centers = meshi->face_centers;
+    face_centers[0]=meshi->boxmin_scaled[0];
+    face_centers[3]=meshi->boxmax_scaled[0];
+    face_centers[7]=meshi->boxmin_scaled[1];
+    face_centers[10]=meshi->boxmax_scaled[1];
+    face_centers[14]=meshi->boxmin_scaled[2];
+    face_centers[17]=meshi->boxmax_scaled[2];
+  }
+
+  nsmoothblocks=0;
+  ntransparentblocks=0;
+  ntransparentvents=0;
+  nopenvents=0;
+  nopenvents_nonoutline=0;
+  ndummyvents=0;
+  for(igrid=0;igrid<nmeshes;igrid++){
+    mesh *meshi;
+
+    meshi=meshinfo+igrid;
+    for(i=0;i<meshi->nbptrs;i++){
+      blockagedata *bc;
+
+      bc=meshi->blockageinfoptrs[i];
+      if(bc->type==BLOCK_smooth)nsmoothblocks++;
+      if(bc->color[3]<0.99)ntransparentblocks++;
+    }
+    for(i=0;i<meshi->nvents;i++){
+      ventdata *vi;
+
+      vi = meshi->ventinfo + i;
+      if(vi->isOpenvent==1){
+        nopenvents++;
+        if(vi->type!=BLOCK_OUTLINE)nopenvents_nonoutline++;
+      }
+      if(vi->dummy==1)ndummyvents++;
+      if(vi->color[3]<0.99)ntransparentvents++;
+    }
+  }
+
+  for(igrid=0;igrid<nmeshes;igrid++){
+    mesh *meshi;
+
+    meshi=meshinfo+igrid;
+    for(i=0;i<meshi->nbptrs;i++){
+      blockagedata *bc;
+
+      bc=meshi->blockageinfoptrs[i];
+      bc->xmin += meshi->offset[0];
+      bc->xmax += meshi->offset[0];
+      bc->ymin += meshi->offset[1];
+      bc->ymax += meshi->offset[1];
+      bc->zmin += meshi->offset[2];
+      bc->zmax += meshi->offset[2];
+      bc->xmin = (bc->xmin-xbar0)/xyzmaxdiff;
+      bc->xmax = (bc->xmax-xbar0)/xyzmaxdiff;
+      bc->ymin = (bc->ymin-ybar0)/xyzmaxdiff;
+      bc->ymax = (bc->ymax-ybar0)/xyzmaxdiff;
+      bc->zmin = (bc->zmin-zbar0)/xyzmaxdiff;
+      bc->zmax = (bc->zmax-zbar0)/xyzmaxdiff;
+      bc->xyzORIG[0]=bc->xmin;
+      bc->xyzORIG[1]=bc->xmax;
+      bc->xyzORIG[2]=bc->ymin;
+      bc->xyzORIG[3]=bc->ymax;
+      bc->xyzORIG[4]=bc->zmin;
+      bc->xyzORIG[5]=bc->zmax;
+      bc->ijkORIG[0]=bc->ijk[0];
+      bc->ijkORIG[1]=bc->ijk[1];
+      bc->ijkORIG[2]=bc->ijk[2];
+      bc->ijkORIG[3]=bc->ijk[3];
+      bc->ijkORIG[4]=bc->ijk[4];
+      bc->ijkORIG[5]=bc->ijk[5];
+    }
+    for(i=0;i<meshi->nvents+12;i++){
+      ventdata *vi;
+
+      vi=meshi->ventinfo+i;
+      vi->xmin = (vi->xmin-xbar0)/xyzmaxdiff;
+      vi->xmax = (vi->xmax-xbar0)/xyzmaxdiff;
+      vi->ymin = (vi->ymin-ybar0)/xyzmaxdiff;
+      vi->ymax = (vi->ymax-ybar0)/xyzmaxdiff;
+      vi->zmin = (vi->zmin-zbar0)/xyzmaxdiff;
+      vi->zmax = (vi->zmax-zbar0)/xyzmaxdiff;
+    }
+  }
+  for(igrid=0;igrid<nmeshes;igrid++){
+    mesh *meshi;
+
+    meshi=meshinfo+igrid;
+    for(i=0;i<meshi->nbptrs;i++){
+      blockagedata *bc;
+
+      bc=meshi->blockageinfoptrs[i];
+      backup_blockage(bc);
+    }
+  }
+
+  for(i=0;i<ncadgeom;i++){
+    cadgeom *cd;
+    int j;
+
+    cd=cadgeominfo+i;
+    for(j=0;j<cd->nquads;j++){
+      int k;
+      cadquad *quadi;
+
+      quadi = cd->quad+j;
+      for(k=0;k<4;k++){
+        quadi->xyzpoints[3*k] = (quadi->xyzpoints[3*k]-xbar0)/xyzmaxdiff;
+        quadi->xyzpoints[3*k+1] = (quadi->xyzpoints[3*k+1]-ybar0)/xyzmaxdiff;
+        quadi->xyzpoints[3*k+2] = (quadi->xyzpoints[3*k+2]-zbar0)/xyzmaxdiff;
+      }
+      if(cd->version==2&&quadi->cadlookq->textureinfo.loaded==1){
+        update_cadtextcoords(quadi);
+      }
+    }
+  }
+  for(n=0;n<nrooms;n++){
+    roomdata *roomi;
+
+    roomi = roominfo + n;
+    roomi->x0=(roomi->x0-xbar0)/xyzmaxdiff;
+    roomi->y0=(roomi->y0-ybar0)/xyzmaxdiff;
+    roomi->z0=(roomi->z0-zbar0)/xyzmaxdiff;
+    roomi->x1=(roomi->x1-xbar0)/xyzmaxdiff;
+    roomi->y1=(roomi->y1-ybar0)/xyzmaxdiff;
+    roomi->z1=(roomi->z1-zbar0)/xyzmaxdiff;
+    roomi->dx=roomi->dx/xyzmaxdiff;
+    roomi->dy=roomi->dy/xyzmaxdiff;
+    roomi->dz=roomi->dz/xyzmaxdiff;
+  }
+  for(n=0;n<nfires;n++){
+    firedata *firen;
+
+    firen = fireinfo + n;
+    firen->absx=(firen->absx-xbar0)/xyzmaxdiff;
+    firen->absy=(firen->absy-ybar0)/xyzmaxdiff;
+    firen->absz=(firen->absz-zbar0)/xyzmaxdiff;
+    firen->dz=firen->dz/xyzmaxdiff;
+  }
+  for(n=0;n<nzvents;n++){
+    zvent *zvi;
+
+    zvi = zventinfo + n;
+
+    switch (zvi->dir){
+    case 1:
+    case 3:
+      zvi->x1 = (zvi->x1-xbar0)/xyzmaxdiff;
+      zvi->x2 = (zvi->x2-xbar0)/xyzmaxdiff;
+      zvi->z1 = (zvi->z1-zbar0)/xyzmaxdiff;
+      zvi->z2 = (zvi->z2-zbar0)/xyzmaxdiff;
+      zvi->yy = (zvi->yy-ybar0)/xyzmaxdiff;
+      break;
+    case 2:
+    case 4:
+      zvi->x1 = (zvi->x1-ybar0)/xyzmaxdiff;
+      zvi->x2 = (zvi->x2-ybar0)/xyzmaxdiff;
+      zvi->z1 = (zvi->z1-zbar0)/xyzmaxdiff;
+      zvi->z2 = (zvi->z2-zbar0)/xyzmaxdiff;
+      zvi->yy = (zvi->yy-xbar0)/xyzmaxdiff;
+      break;
+    case 5:
+    case 6:
+      zvi->x1 = (zvi->x1-xbar0)/xyzmaxdiff;
+      zvi->x2 = (zvi->x2-xbar0)/xyzmaxdiff;
+      zvi->y1 = (zvi->y1-ybar0)/xyzmaxdiff;
+      zvi->y2 = (zvi->y2-ybar0)/xyzmaxdiff;
+      zvi->zz = (zvi->zz-zbar0)/xyzmaxdiff;
+      break;
+    default:
+      ASSERT(FFALSE);
+      break;
+    }
+  }
+
+  /* if we have to create smooth block structures do it now,
+     otherwise postpone job until we view all blockages as smooth */
+
+//  the code below was moved to after readini in startup (so that sb_atstart will be defined)
+//  if(sb_atstart==1){
+//    smooth_blockages();
+//  }
+
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+    float *xspr, *yspr, *zspr;
+    float *xsprplot, *ysprplot, *zsprplot;
+    float *xheat, *yheat, *zheat;
+    float *xheatplot, *yheatplot, *zheatplot;
+    float *offset;
+
+    meshi=meshinfo + i;
+    offset = meshi->offset;
+    xsprplot = meshi->xsprplot;
+    ysprplot = meshi->ysprplot;
+    zsprplot = meshi->zsprplot;
+    xspr = meshi->xspr;
+    yspr = meshi->yspr;
+    zspr = meshi->zspr;
+    xheatplot = meshi->xheatplot;
+    yheatplot = meshi->yheatplot;
+    zheatplot = meshi->zheatplot;
+    xheat = meshi->xheat;
+    yheat = meshi->yheat;
+    zheat = meshi->zheat;
+    for(n=0;n<meshi->nspr;n++){
+      xsprplot[n]=(offset[0]+xspr[n]-xbar0)/xyzmaxdiff;
+      ysprplot[n]=(offset[1]+yspr[n]-ybar0)/xyzmaxdiff;
+      zsprplot[n]=(offset[2]+zspr[n]-zbar0)/xyzmaxdiff;
+    }
+    for(n=0;n<meshi->nheat;n++){
+      xheatplot[n]=(offset[0]+xheat[n]-xbar0)/xyzmaxdiff;
+      yheatplot[n]=(offset[1]+yheat[n]-ybar0)/xyzmaxdiff;
+      zheatplot[n]=(offset[2]+zheat[n]-zbar0)/xyzmaxdiff;
+    }
+    for(n=0;n<meshi->nvents+12;n++){
+      ventdata *vi;
+
+      vi = meshi->ventinfo+n;
+      vi->xvent1plot=(offset[0]+vi->xvent1-xbar0)/xyzmaxdiff;
+      vi->xvent2plot=(offset[0]+vi->xvent2-xbar0)/xyzmaxdiff;
+      vi->yvent1plot=(offset[1]+vi->yvent1-ybar0)/xyzmaxdiff;
+      vi->yvent2plot=(offset[1]+vi->yvent2-ybar0)/xyzmaxdiff;
+      vi->zvent1plot=(offset[2]+vi->zvent1-zbar0)/xyzmaxdiff;
+      vi->zvent2plot=(offset[2]+vi->zvent2-zbar0)/xyzmaxdiff;
+    }
+  }
+
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
+
+    meshi=meshinfo + i;
+    meshi->vent_offset[0] = ventoffset_factor*(meshi->xplt[1]-meshi->xplt[0]);
+    meshi->vent_offset[1] = ventoffset_factor*(meshi->yplt[1]-meshi->yplt[0]);
+    meshi->vent_offset[2] = ventoffset_factor*(meshi->zplt[1]-meshi->zplt[0]);
+  }
+}
+
 /* ------------------ readsmv ------------------------ */
 
 int readsmv(char *file, char *file2){
@@ -1375,7 +2056,6 @@ int readsmv(char *file, char *file2){
   int unit_start=20;
   devicedata *devicecopy;
   int do_pass4=0;
-  outline *outlinei;
   int roomdefined=0;
   float *x1, *x2, *yy1, *yy2, *z1, *z2;
   float temp_ignition, emis, t_width, t_height;
@@ -1397,7 +2077,6 @@ int readsmv(char *file, char *file2){
   int iv1, iv2;
   int jv1, jv2;
   int kv1, kv2;
-  float dxbar, dybar, dzbar;
   float dxsbar, dysbar, dzsbar;
   ventdata *vinfo,*vi;
   int colorindex, blocktype;
@@ -1584,6 +2263,8 @@ int readsmv(char *file, char *file2){
 
   if(noutlineinfo>0){
     for(i=0;i<noutlineinfo;i++){
+      outline *outlinei;
+
       outlinei = outlineinfo + i;
       FREEMEMORY(outlinei->x1);
       FREEMEMORY(outlinei->y1);
@@ -2355,6 +3036,8 @@ int readsmv(char *file, char *file2){
   if(noutlineinfo>0){
     if(NewMemory((void **)&outlineinfo,noutlineinfo*sizeof(outline))==0)return 2;
     for(i=0;i<noutlineinfo;i++){
+      outline *outlinei;
+
       outlinei = outlineinfo + i;
       outlinei->x1=NULL;
       outlinei->x2=NULL;
@@ -3033,6 +3716,8 @@ int readsmv(char *file, char *file2){
   */
 
     if(match(buffer,"OUTLINE") == 1){
+      outline *outlinei;
+
       noutlineinfo++;
       outlinei = outlineinfo + noutlineinfo - 1;
       if(fgets(buffer,255,stream)==NULL){
@@ -6000,14 +6685,6 @@ typedef struct {
  */
 
   update_isocolors();
-  if(arg_iblank==0){
-    if(autoterrain==1){
-      use_iblank=0;
-    }
-    else{
-      use_iblank=1;
-    }
-  }
   CheckMemory;
 
   //remove_dup_blockages(); //xxx remove_dup
@@ -6016,12 +6693,11 @@ typedef struct {
 
   update_inilist();
 
-  if(meshinfo!=NULL&&meshinfo->jbar==1){
-    force_isometric=1;
-  }
-  if(hrr_csvfilename!=NULL){
-    readhrr(LOAD, &errorcode);
-  }
+  if(meshinfo!=NULL&&meshinfo->jbar==1)force_isometric=1;
+
+// update csv data
+
+  if(hrr_csvfilename!=NULL)readhrr(LOAD, &errorcode);
   read_device_data(NULL,CSV_FDS,UNLOAD);
   read_device_data(NULL,CSV_EXP,UNLOAD);
   for(i=0;i<ncsvinfo;i++){
@@ -6034,6 +6710,7 @@ typedef struct {
   setup_device_data();
 
   init_multi_threading();
+
   init_part5prop();
 
   if(noutlineinfo>0){
@@ -6049,6 +6726,8 @@ typedef struct {
   }
   initcadcolors();
 
+  // update loaded lists
+
   FREEMEMORY(slice_loaded_list);
   if(nsliceinfo>0){
     NewMemory((void **)&slice_loaded_list,nsliceinfo*sizeof(int));
@@ -6059,67 +6738,7 @@ typedef struct {
   }
   update_loaded_lists();
 
-  if(setPDIM==0){
-    for(nn=0;nn<=ibartemp;nn++){
-      current_mesh->xplt[nn]=xbar0+(float)nn*(xbar-xbar0)/(float)ibartemp;
-    }
-    for(nn=0;nn<=jbartemp;nn++){
-      current_mesh->yplt[nn]=ybar0+(float)nn*(ybar-ybar0)/(float)jbartemp;
-    }
-    for(nn=0;nn<=kbartemp;nn++){
-      current_mesh->zplt[nn]=zbar0+(float)nn*(zbar-zbar0)/(float)kbartemp;
-    }
-  }
-
-  /* define highlighted block */
-
-  /* add in offsets */
-  for(i=0;i<nmeshes;i++){
-    mesh *meshi;
-    int ii;
-
-    meshi=meshinfo+i;
-    meshi->xbar += meshi->offset[0];
-    meshi->ybar += meshi->offset[1];
-    meshi->zbar += meshi->offset[2];
-    meshi->xbar0 += meshi->offset[0];
-    meshi->ybar0 += meshi->offset[1];
-    meshi->zbar0 += meshi->offset[2];
-    {
-      float dx, dy, dz;
-
-      dx = meshi->xbar - meshi->xbar0;
-      dx /= meshi->ibar;
-      dy = meshi->ybar - meshi->ybar0;
-      dy /= meshi->jbar;
-      dz = meshi->zbar - meshi->zbar0;
-      dz /= meshi->kbar;
-      meshi->cellsize=sqrt(dx*dx+dy*dy+dz*dz);
-    }
-    for(ii=0;ii<meshi->ibar+1;ii++){
-      meshi->xplt[ii] += meshi->offset[0];
-    }
-    for(ii=0;ii<meshi->jbar+1;ii++){
-      meshi->yplt[ii] += meshi->offset[1];
-    }
-    for(ii=0;ii<meshi->kbar+1;ii++){
-      meshi->zplt[ii] += meshi->offset[2];
-    }
-    meshi->xcen+=meshi->offset[0];
-    meshi->ycen+=meshi->offset[1];
-    meshi->zcen+=meshi->offset[2];
-  }
-  for(i=1;i<nmeshes;i++){
-    mesh *meshi;
-
-    meshi=meshinfo+i;
-    if(meshi->zbar0!=meshinfo->zbar0){
-      visFloor=0;
-      updatefacelists=1;
-      updatemenu=1;
-      break;
-    }
-  }
+  update_mesh_coords();
 
   /*
     Associate a surface with each block.
@@ -6128,75 +6747,6 @@ typedef struct {
 
   /* compute global bar's and box's */
 
-  {
-    mesh *meshi;
-
-    meshi=meshinfo;
-
-    xbar  =  meshi->xbar;   ybar=meshi->ybar;   zbar=meshi->zbar;
-    xbar0 =  meshi->xbar0; ybar0=meshi->ybar0; zbar0=meshi->zbar0;
-  }
-
-  ijkbarmax=meshinfo->ibar;
-  for(i=0;i<nmeshes;i++){
-    mesh *meshi;
-
-    meshi=meshinfo+i;
-
-    if(meshi->ibar>ijkbarmax)ijkbarmax=meshi->ibar;
-    if(meshi->jbar>ijkbarmax)ijkbarmax=meshi->jbar;
-    if(meshi->kbar>ijkbarmax)ijkbarmax=meshi->kbar;
-  }
-
-  for(i=1;i<nmeshes;i++){
-    mesh *meshi;
-
-    meshi=meshinfo+i;
-
-    if(xbar <meshi->xbar )xbar =meshi->xbar;
-    if(ybar <meshi->ybar )ybar =meshi->ybar;
-    if(zbar <meshi->zbar )zbar =meshi->zbar;
-    if(xbar0>meshi->xbar0)xbar0=meshi->xbar0;
-    if(ybar0>meshi->ybar0)ybar0=meshi->ybar0;
-    if(zbar0>meshi->zbar0)zbar0=meshi->zbar0;
-  }
-  dxbar = (xbar-xbar0)/(float)256;
-  dybar = (ybar-ybar0)/(float)256;
-  dzbar = (zbar-zbar0)/(float)256;
-
-  factor = 256*128;
-  dxsbar = (xbar-xbar0)/factor;
-  dysbar = (ybar-ybar0)/factor;
-  dzsbar = (zbar-zbar0)/factor;
-
-
-  for(nn=0;nn<=255;nn++)  {xpltb[nn]=xbar0+((float)nn+0.5)*dxbar;}
-  for(nn=0;nn<=255;nn++)  {ypltb[nn]=ybar0+((float)nn+0.5)*dybar;}
-  for(nn=0;nn<=255;nn++)  {zpltb[nn]=zbar0+((float)nn+0.5)*dzbar;}
-  for(nn=0;nn<factor;nn++){xplts[nn]=xbar0+((float)nn+0.5)*dxsbar;}
-  for(nn=0;nn<factor;nn++){yplts[nn]=ybar0+((float)nn+0.5)*dysbar;}
-  for(nn=0;nn<factor;nn++){zplts[nn]=zbar0+((float)nn+0.5)*dzsbar;}
-
-
-  /* compute scaling factors */
-
-  {
-    float dxclip, dyclip, dzclip;
-
-    dxclip = (xbar-xbar0)/1000.0;
-    dyclip = (ybar-ybar0)/1000.0;
-    dzclip = (zbar-zbar0)/1000.0;
-    xclip_min = xbar0-dxclip;
-    yclip_min = ybar0-dyclip;
-    zclip_min = zbar0-dzclip;
-    xclip_max = xbar+dxclip;
-    yclip_max = ybar+dyclip;
-    zclip_max = zbar+dzclip;
-  }
-
-  xyzmaxdiff=xbar-xbar0;
-  if(ybar-ybar0>xyzmaxdiff)xyzmaxdiff=ybar-ybar0;
-  if(zbar-zbar0>xyzmaxdiff)xyzmaxdiff=zbar-zbar0;
 
   for(i=0;i<npartclassinfo;i++){
     part5class *partclassi;
@@ -6231,145 +6781,6 @@ typedef struct {
   shooter_vel_type=1;
 #endif
 
-  /* rescale both global and local xbar, ybar and zbar */
-
-  xbar0ORIG = xbar0;
-  ybar0ORIG = ybar0;
-  zbar0ORIG = zbar0;
-  xbarORIG = xbar;
-  ybarORIG = ybar;
-  zbarORIG = zbar;
-  xbar = (xbar-xbar0)/xyzmaxdiff;
-  ybar = (ybar-ybar0)/xyzmaxdiff;
-  zbar = (zbar-zbar0)/xyzmaxdiff;
-  for(i=0;i<nmeshes;i++){
-    mesh *meshi;
-
-    meshi=meshinfo+i;
-    /* compute a local scaling factor for each block */
-    meshi->xyzmaxdiff=meshi->xbar-meshi->xbar0;
-    if(meshi->ybar-meshi->ybar0>meshi->xyzmaxdiff)meshi->xyzmaxdiff=meshi->ybar-meshi->ybar0;
-    if(meshi->zbar-meshi->zbar0>meshi->xyzmaxdiff)meshi->xyzmaxdiff=meshi->zbar-meshi->zbar0;
-
-    meshi->xbar = (meshi->xbar-xbar0)/xyzmaxdiff;
-    meshi->ybar = (meshi->ybar-ybar0)/xyzmaxdiff;
-    meshi->zbar = (meshi->zbar-zbar0)/xyzmaxdiff;
-    meshi->xcen = (meshi->xcen-xbar0)/xyzmaxdiff;
-    meshi->ycen = (meshi->ycen-ybar0)/xyzmaxdiff;
-    meshi->zcen = (meshi->zcen-zbar0)/xyzmaxdiff;
-  }
-
-  for(i=0;i<noutlineinfo;i++){
-    outlinei = outlineinfo + i;
-    x1 = outlinei->x1;
-    x2 = outlinei->x2;
-    yy1 = outlinei->y1;
-    yy2 = outlinei->y2;
-    z1 = outlinei->z1;
-    z2 = outlinei->z2;
-    for(j=0;j<outlinei->nlines;j++){
-      x1[j]=(x1[j]-xbar0)/xyzmaxdiff;
-      x2[j]=(x2[j]-xbar0)/xyzmaxdiff;
-      yy1[j]=(yy1[j]-ybar0)/xyzmaxdiff;
-      yy2[j]=(yy2[j]-ybar0)/xyzmaxdiff;
-      z1[j]=(z1[j]-zbar0)/xyzmaxdiff;
-      z2[j]=(z2[j]-zbar0)/xyzmaxdiff;
-    }
-  }
-
-  {
-    mesh *meshi;
-    meshi=meshinfo;
-    veclength = meshi->xplt[1]-meshi->xplt[0];
-  }
-  for(i=0;i<nmeshes;i++){
-    mesh *meshi;
-
-    meshi=meshinfo+i;
-    if(veclength>meshi->xplt[1]-meshi->xplt[0])veclength=meshi->xplt[1]-meshi->xplt[0];
-    if(veclength>meshi->yplt[1]-meshi->yplt[0])veclength=meshi->yplt[1]-meshi->yplt[0];
-    if(veclength>meshi->zplt[1]-meshi->zplt[0])veclength=meshi->zplt[1]-meshi->zplt[0];
-  }
-  veclength = veclength/xyzmaxdiff;
-  veclength = 0.01;
-
-  for(igrid=0;igrid<nmeshes;igrid++){
-    mesh *meshi;
-    float *face_centers;
-    float *xplt_cen, *yplt_cen, *zplt_cen;
-
-    meshi=meshinfo+igrid;
-    ibartemp=meshi->ibar; 
-    jbartemp=meshi->jbar; 
-    kbartemp=meshi->kbar;
-    xplt_origtemp = meshi->xplt_orig;
-    yplt_origtemp = meshi->yplt_orig;
-    zplt_origtemp = meshi->zplt_orig;
-    xplttemp = meshi->xplt;
-    yplttemp = meshi->yplt;
-    zplttemp = meshi->zplt;
-    xplt_cen = meshi->xplt_cen;
-    yplt_cen = meshi->yplt_cen;
-    zplt_cen = meshi->zplt_cen;
-
-    for(i=0;i<ibartemp+1;i++){
-      xplt_origtemp[i]=xplttemp[i];
-      xplttemp[i]=(xplttemp[i]-xbar0)/xyzmaxdiff;
-    }
-    for(j=0;j<jbartemp+1;j++){
-      yplt_origtemp[j]=yplttemp[j];
-      yplttemp[j]=(yplttemp[j]-ybar0)/xyzmaxdiff;
-    }
-    for(k=0;k<kbartemp+1;k++){
-      zplt_origtemp[k]=zplttemp[k];
-      zplttemp[k]=(zplttemp[k]-zbar0)/xyzmaxdiff;
-    }
-
-    for(nn=0;nn<ibartemp;nn++){
-      xplt_cen[nn]=(xplttemp[nn]+xplttemp[nn+1])/2.0;
-    }
-    for(nn=0;nn<jbartemp;nn++){
-      yplt_cen[nn]=(yplttemp[nn]+yplttemp[nn+1])/2.0;
-    }
-    for(nn=0;nn<kbartemp;nn++){
-      zplt_cen[nn]=(zplttemp[nn]+zplttemp[nn+1])/2.0;
-    }
-
-    meshi->boxoffset=-(zplttemp[1]-zplttemp[0])/10.0;
-    meshi->boxmin[0]=xplt_origtemp[0];
-    meshi->boxmin[1]=yplt_origtemp[0];
-    meshi->boxmin[2]=zplt_origtemp[0];
-    meshi->boxmax[0]=xplt_origtemp[ibartemp];
-    meshi->boxmax[1]=yplt_origtemp[jbartemp];
-    meshi->boxmax[2]=zplt_origtemp[kbartemp];
-    meshi->boxmin_scaled[0] = (meshi->boxmin[0]-xbar0)/xyzmaxdiff;
-    meshi->boxmin_scaled[1] = (meshi->boxmin[1]-ybar0)/xyzmaxdiff;
-    meshi->boxmin_scaled[2] = (meshi->boxmin[2]-zbar0)/xyzmaxdiff;
-    meshi->boxmax_scaled[0] = (meshi->boxmax[0]-xbar0)/xyzmaxdiff;
-    meshi->boxmax_scaled[1] = (meshi->boxmax[1]-ybar0)/xyzmaxdiff;
-    meshi->boxmax_scaled[2] = (meshi->boxmax[2]-zbar0)/xyzmaxdiff;
-    meshi->x0 = xplttemp[0];
-    meshi->x1 = xplttemp[ibartemp];
-    meshi->y0 = yplttemp[0];
-    meshi->y1 = yplttemp[jbartemp];
-    meshi->z0 = zplttemp[0];
-    meshi->z1 = zplttemp[kbartemp];
-
-    face_centers = meshi->face_centers;
-    for(j=0;j<6;j++){
-      face_centers[0]=meshi->xcen;
-      face_centers[1]=meshi->ycen;
-      face_centers[2]=meshi->zcen;
-      face_centers+=3;
-    }
-    face_centers = meshi->face_centers;
-    face_centers[0]=meshi->boxmin_scaled[0];
-    face_centers[3]=meshi->boxmax_scaled[0];
-    face_centers[7]=meshi->boxmin_scaled[1];
-    face_centers[10]=meshi->boxmax_scaled[1];
-    face_centers[14]=meshi->boxmin_scaled[2];
-    face_centers[17]=meshi->boxmax_scaled[2];
-  }
 
   update_plotxyz_all();
 
@@ -6391,222 +6802,7 @@ typedef struct {
     }
   }
 
-  nsmoothblocks=0;
-  ntransparentblocks=0;
-  ntransparentvents=0;
-  nopenvents=0;
-  nopenvents_nonoutline=0;
-  ndummyvents=0;
-  for(igrid=0;igrid<nmeshes;igrid++){
-    mesh *meshi;
 
-    meshi=meshinfo+igrid;
-    for(i=0;i<meshi->nbptrs;i++){
-      bc=meshi->blockageinfoptrs[i];
-      if(bc->type==BLOCK_smooth)nsmoothblocks++;
-      if(bc->color[3]<0.99)ntransparentblocks++;
-    }
-    for(i=0;i<meshi->nvents;i++){
-      vi = meshi->ventinfo + i;
-      if(vi->isOpenvent==1){
-        nopenvents++;
-        if(vi->type!=BLOCK_OUTLINE)nopenvents_nonoutline++;
-      }
-      if(vi->dummy==1)ndummyvents++;
-      if(vi->color[3]<0.99)ntransparentvents++;
-    }
-  }
-
-  for(igrid=0;igrid<nmeshes;igrid++){
-    mesh *meshi;
-
-    meshi=meshinfo+igrid;
-    for(i=0;i<meshi->nbptrs;i++){
-      bc=meshi->blockageinfoptrs[i];
-      bc->xmin += meshi->offset[0];
-      bc->xmax += meshi->offset[0];
-      bc->ymin += meshi->offset[1];
-      bc->ymax += meshi->offset[1];
-      bc->zmin += meshi->offset[2];
-      bc->zmax += meshi->offset[2];
-      bc->xmin = (bc->xmin-xbar0)/xyzmaxdiff;
-      bc->xmax = (bc->xmax-xbar0)/xyzmaxdiff;
-      bc->ymin = (bc->ymin-ybar0)/xyzmaxdiff;
-      bc->ymax = (bc->ymax-ybar0)/xyzmaxdiff;
-      bc->zmin = (bc->zmin-zbar0)/xyzmaxdiff;
-      bc->zmax = (bc->zmax-zbar0)/xyzmaxdiff;
-      bc->xyzORIG[0]=bc->xmin;
-      bc->xyzORIG[1]=bc->xmax;
-      bc->xyzORIG[2]=bc->ymin;
-      bc->xyzORIG[3]=bc->ymax;
-      bc->xyzORIG[4]=bc->zmin;
-      bc->xyzORIG[5]=bc->zmax;
-      bc->ijkORIG[0]=bc->ijk[0];
-      bc->ijkORIG[1]=bc->ijk[1];
-      bc->ijkORIG[2]=bc->ijk[2];
-      bc->ijkORIG[3]=bc->ijk[3];
-      bc->ijkORIG[4]=bc->ijk[4];
-      bc->ijkORIG[5]=bc->ijk[5];
-    }
-    for(i=0;i<meshi->nvents+12;i++){
-      vi=meshi->ventinfo+i;
-      vi->xmin = (vi->xmin-xbar0)/xyzmaxdiff;
-      vi->xmax = (vi->xmax-xbar0)/xyzmaxdiff;
-      vi->ymin = (vi->ymin-ybar0)/xyzmaxdiff;
-      vi->ymax = (vi->ymax-ybar0)/xyzmaxdiff;
-      vi->zmin = (vi->zmin-zbar0)/xyzmaxdiff;
-      vi->zmax = (vi->zmax-zbar0)/xyzmaxdiff;
-    }
-  }
-  for(igrid=0;igrid<nmeshes;igrid++){
-    mesh *meshi;
-
-    meshi=meshinfo+igrid;
-    for(i=0;i<meshi->nbptrs;i++){
-      bc=meshi->blockageinfoptrs[i];
-      backup_blockage(bc);
-    }
-  }
-
-  {
-    cadquad *quadi;
-
-     for(i=0;i<ncadgeom;i++){
-      cd=cadgeominfo+i;
-      for(j=0;j<cd->nquads;j++){
-        quadi = cd->quad+j;
-        for(k=0;k<4;k++){
-          quadi->xyzpoints[3*k] = (quadi->xyzpoints[3*k]-xbar0)/xyzmaxdiff;
-          quadi->xyzpoints[3*k+1] = (quadi->xyzpoints[3*k+1]-ybar0)/xyzmaxdiff;
-          quadi->xyzpoints[3*k+2] = (quadi->xyzpoints[3*k+2]-zbar0)/xyzmaxdiff;
-        }
-        if(cd->version==2&&quadi->cadlookq->textureinfo.loaded==1){
-          update_cadtextcoords(quadi);
-        }
-      }
-    }
-  }
-
-  for(nn=0;nn<=255;nn++){
-    xpltb[nn]=(xpltb[nn]-xbar0)/xyzmaxdiff;
-  }
-  for(nn=0;nn<=255;nn++){
-    ypltb[nn]=(ypltb[nn]-ybar0)/xyzmaxdiff;
-  }
-  for(nn=0;nn<=255;nn++){
-    zpltb[nn]=(zpltb[nn]-zbar0)/xyzmaxdiff;
-  }
-
-  for(nn=0;nn<factor;nn++){
-    xplts[nn]=(xplts[nn]-xbar0)/xyzmaxdiff;
-  }
-  for(nn=0;nn<factor;nn++){
-    yplts[nn]=(yplts[nn]-ybar0)/xyzmaxdiff;
-  }
-  for(nn=0;nn<factor;nn++){
-    zplts[nn]=(zplts[nn]-zbar0)/xyzmaxdiff;
-  }
-
-  for(n=0;n<nrooms;n++){
-    roomdata *roomi;
-
-    roomi = roominfo + n;
-    roomi->x0=(roomi->x0-xbar0)/xyzmaxdiff;
-    roomi->y0=(roomi->y0-ybar0)/xyzmaxdiff;
-    roomi->z0=(roomi->z0-zbar0)/xyzmaxdiff;
-    roomi->x1=(roomi->x1-xbar0)/xyzmaxdiff;
-    roomi->y1=(roomi->y1-ybar0)/xyzmaxdiff;
-    roomi->z1=(roomi->z1-zbar0)/xyzmaxdiff;
-    roomi->dx=roomi->dx/xyzmaxdiff;
-    roomi->dy=roomi->dy/xyzmaxdiff;
-    roomi->dz=roomi->dz/xyzmaxdiff;
-  }
-  for(n=0;n<nfires;n++){
-    firedata *firen;
-
-    firen = fireinfo + n;
-    firen->absx=(firen->absx-xbar0)/xyzmaxdiff;
-    firen->absy=(firen->absy-ybar0)/xyzmaxdiff;
-    firen->absz=(firen->absz-zbar0)/xyzmaxdiff;
-    firen->dz=firen->dz/xyzmaxdiff;
-  }
-  for(n=0;n<nzvents;n++){
-    zvent *zvi;
-
-    zvi = zventinfo + n;
-
-    switch (zvi->dir){
-    case 1:
-    case 3:
-      zvi->x1 = (zvi->x1-xbar0)/xyzmaxdiff;
-      zvi->x2 = (zvi->x2-xbar0)/xyzmaxdiff;
-      zvi->z1 = (zvi->z1-zbar0)/xyzmaxdiff;
-      zvi->z2 = (zvi->z2-zbar0)/xyzmaxdiff;
-      zvi->yy = (zvi->yy-ybar0)/xyzmaxdiff;
-      break;
-    case 2:
-    case 4:
-      zvi->x1 = (zvi->x1-ybar0)/xyzmaxdiff;
-      zvi->x2 = (zvi->x2-ybar0)/xyzmaxdiff;
-      zvi->z1 = (zvi->z1-zbar0)/xyzmaxdiff;
-      zvi->z2 = (zvi->z2-zbar0)/xyzmaxdiff;
-      zvi->yy = (zvi->yy-xbar0)/xyzmaxdiff;
-      break;
-    case 5:
-    case 6:
-      zvi->x1 = (zvi->x1-xbar0)/xyzmaxdiff;
-      zvi->x2 = (zvi->x2-xbar0)/xyzmaxdiff;
-      zvi->y1 = (zvi->y1-ybar0)/xyzmaxdiff;
-      zvi->y2 = (zvi->y2-ybar0)/xyzmaxdiff;
-      zvi->zz = (zvi->zz-zbar0)/xyzmaxdiff;
-      break;
-    default:
-      ASSERT(FFALSE);
-      break;
-    }
-  }
-
-  /* if we have to create smooth block structures do it now,
-     otherwise postpone job until we view all blockages as smooth */
-
-//  the code below was moved to after readini in startup (so that sb_atstart will be defined)
-//  if(sb_atstart==1){
-//    smooth_blockages();
-//  }
-
-  for(i=0;i<nmeshes;i++){
-    mesh *meshi;
-
-    meshi=meshinfo + i;
-    for(n=0;n<meshi->nspr;n++){
-      meshi->xsprplot[n]=(meshi->offset[0]+meshi->xspr[n]-xbar0)/xyzmaxdiff;
-      meshi->ysprplot[n]=(meshi->offset[1]+meshi->yspr[n]-ybar0)/xyzmaxdiff;
-      meshi->zsprplot[n]=(meshi->offset[2]+meshi->zspr[n]-zbar0)/xyzmaxdiff;
-    }
-    for(n=0;n<meshi->nheat;n++){
-      meshi->xheatplot[n]=(meshi->offset[0]+meshi->xheat[n]-xbar0)/xyzmaxdiff;
-      meshi->yheatplot[n]=(meshi->offset[1]+meshi->yheat[n]-ybar0)/xyzmaxdiff;
-      meshi->zheatplot[n]=(meshi->offset[2]+meshi->zheat[n]-zbar0)/xyzmaxdiff;
-    }
-    for(n=0;n<meshi->nvents+12;n++){
-      vi = meshi->ventinfo+n;
-      vi->xvent1plot=(meshi->offset[0]+vi->xvent1-xbar0)/xyzmaxdiff;
-      vi->xvent2plot=(meshi->offset[0]+vi->xvent2-xbar0)/xyzmaxdiff;
-      vi->yvent1plot=(meshi->offset[1]+vi->yvent1-ybar0)/xyzmaxdiff;
-      vi->yvent2plot=(meshi->offset[1]+vi->yvent2-ybar0)/xyzmaxdiff;
-      vi->zvent1plot=(meshi->offset[2]+vi->zvent1-zbar0)/xyzmaxdiff;
-      vi->zvent2plot=(meshi->offset[2]+vi->zvent2-zbar0)/xyzmaxdiff;
-    }
-  }
-
-  for(i=0;i<nmeshes;i++){
-    mesh *meshi;
-
-    meshi=meshinfo + i;
-    meshi->vent_offset[0] = ventoffset_factor*(meshi->xplt[1]-meshi->xplt[0]);
-    meshi->vent_offset[1] = ventoffset_factor*(meshi->yplt[1]-meshi->yplt[0]);
-    meshi->vent_offset[2] = ventoffset_factor*(meshi->zplt[1]-meshi->zplt[0]);
-  }
   makeiblank();
   makeiblank_carve();
   makeiblank_smoke3d();
@@ -6615,158 +6811,16 @@ typedef struct {
 
   xcenGLOBAL=xbar/2.0;  ycenGLOBAL=ybar/2.0; zcenGLOBAL=zbar/2.0;
 
-  xxmax = xbar;
-  if(ybar>xxmax)xxmax=ybar;
-  if(zbar>xxmax)xxmax=zbar;
+  update_endian_info();
 
-  if(setendian==0){
-    if(match(LESsystem,"AIX")==1||match(LESsystem,"SGI")==1||match(LESendian,"b")==1||match(LESendian,"B")==1){
-      endian_data=1;
-    }
-    if(match(LESsystem,"DVF")==1||match(LESendian,"l")==1||match(LESendian,"L")==1){
-      endian_data=0;
-    }
-    endian_smv = endian_data;
-  }
+  update_bound_info();
 
-  if(nisoinfo>0){
-    FREEMEMORY(isoindex);
-    FREEMEMORY(isobounds);
-    if(NewMemory((void*)&isoindex,nisoinfo*sizeof(int))==0)return 2;
-    if(NewMemory((void*)&isobounds,nisoinfo*sizeof(databounds))==0)return 2;
-    niso_bounds=0;
-    for(i=0;i<nisoinfo;i++){
-      isodata *isoi;
-
-      isoi = isoinfo + i;
-      if(isoi->dataflag==0)continue;
-      isoi->firstshort=1;
-      isoi->setvalmin=0;
-      isoi->setvalmax=0;
-      isoi->valmin=1.0;
-      isoi->valmax=0.0;
-      isoindex[niso_bounds]=i;
-      isobounds[niso_bounds].datalabel=isoi->color_label.shortlabel;
-      isobounds[niso_bounds].setvalmin=0;
-      isobounds[niso_bounds].setvalmax=0;
-      isobounds[niso_bounds].valmin=1.0;
-      isobounds[niso_bounds].valmax=0.0;
-      isobounds[niso_bounds].setchopmax=0;
-      isobounds[niso_bounds].setchopmin=0;
-      isobounds[niso_bounds].chopmax=0.0;
-      isobounds[niso_bounds].chopmin=1.0;
-      isobounds[niso_bounds].label=&isoi->color_label;
-      niso_bounds++;
-      for(n=0;n<i;n++){
-        isodata *ison;
-
-        ison = isoinfo + n;
-        if(ison->dataflag==0)continue;
-        if(strcmp(isoi->color_label.shortlabel,ison->color_label.shortlabel)==0){
-          isoi->firstshort=0;
-          niso_bounds--;
-          break;
-        }
-      }
-    }
-  }
-
-  if(nsliceinfo>0){
-    FREEMEMORY(slicebounds);
-    if(NewMemory((void*)&slicebounds,nsliceinfo*sizeof(databounds))==0)return 2;
-    nslice2=0;
-    for(i=0;i<nsliceinfo;i++){
-      slicedata *slicei;
-
-      slicei = sliceinfo + i;
-      slicei->firstshort=1;
-      slicei->valmin=1.0;
-      slicei->valmax=0.0;
-      slicei->setvalmin=0;
-      slicei->setvalmax=0;
-      slicebounds[nslice2].datalabel=slicei->label.shortlabel;
-      slicebounds[nslice2].setvalmin=0;
-      slicebounds[nslice2].setvalmax=0;
-      slicebounds[nslice2].valmin=1.0;
-      slicebounds[nslice2].valmax=0.0;
-      slicebounds[nslice2].chopmax=0.0;
-      slicebounds[nslice2].chopmin=1.0;
-      slicebounds[nslice2].setchopmax=0;
-      slicebounds[nslice2].setchopmin=0;
-#ifdef pp_SLICECONTOURS
-      slicebounds[nslice2].line_contour_min=0.0;
-      slicebounds[nslice2].line_contour_max=1.0;
-      slicebounds[nslice2].line_contour_num=1;
-#endif
-      nslice2++;
-      for(n=0;n<i;n++){
-        slicedata *slicen;
-
-        slicen = sliceinfo + n;
-        if(strcmp(slicei->label.shortlabel,slicen->label.shortlabel)==0){
-          slicei->firstshort=0;
-          nslice2--;
-          break;
-        }
-      }
-    }
-  }
-  canshow_threshold=0;
-  if(npatchinfo>0){
-    npatch2=0;
-    FREEMEMORY(patchlabellist);
-    FREEMEMORY(patchlabellist_index);
-    if(NewMemory((void **)&patchlabellist,npatchinfo*sizeof(char *))==0||
-       NewMemory((void **)&patchlabellist_index,npatchinfo*sizeof(int))==0)return 2;
-    for(i=0;i<npatchinfo;i++){
-      patchinfo[i].firstshort=1;
-      patchinfo[i].valmin=1.0;
-      patchinfo[i].valmax=0.0;
-      patchinfo[i].setvalmin=0;
-      patchinfo[i].setvalmax=0;
-      if(strncmp(patchinfo[i].label.shortlabel,"temp",4)==0||
-         strncmp(patchinfo[i].label.shortlabel,"TEMP",4)==0){
-        canshow_threshold=1;
-      }
-      patchlabellist[npatch2]=patchinfo[i].label.shortlabel;
-      patchlabellist_index[npatch2]=i;
-      npatch2++;
-      for(n=0;n<i;n++){
-        if(strcmp(patchinfo[i].label.shortlabel,patchinfo[n].label.shortlabel)==0){
-          patchinfo[i].firstshort=0;
-          npatch2--;
-          break;
-        }
-      }
-    }
-  }
-  updatechar();
-
-  /* make static blockage iso-surfaces */
-
-#ifndef WIN32
-  if(endian_smv!=getendian()){
-    printf("*** Warning: Smokeview is running on a ");
-    if(getendian()==1){
-      printf(" little endian computer\n");
-    }
-    else{
-      printf(" big endian computer\n");
-    }
-    printf("    but the data being visualized was generated on a ");
-    if(endian_smv==1){
-      printf(" little endian computer\n");
-    }
-    else{
-      printf(" big endian computer\n");
-    }
-  }
-#endif
-
+  // close .smv file
 
   fclose(stream1);
   if(stream2!=NULL)fclose(stream2);
   stream=NULL;
+
   update_selectfaces();
   updateslicetypes();
   updatesliceboundlabels();

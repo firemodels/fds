@@ -1096,6 +1096,14 @@ int makeiblank_carve(void){
   int nx, ny, nz, nxy;
   char *ib_embed;
 
+  if(arg_iblank==0){
+    if(autoterrain==1){
+      use_iblank=0;
+    }
+    else{
+      use_iblank=1;
+    }
+  }
   n_embedded_meshes=0;
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
