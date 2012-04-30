@@ -348,9 +348,9 @@ extern "C" void set_glui_keyframe(){
   tour_xyz[0] = trim_val(DENORMALIZE_X(eye[0]));
   tour_xyz[1] = trim_val(DENORMALIZE_Y(eye[1]));
   tour_xyz[2] = trim_val(DENORMALIZE_Z(eye[2]));
-  tour_view_xyz[0] = trim_val(xbar0 + xyzmaxdiff*aview[0]);
-  tour_view_xyz[1] = trim_val(ybar0 + xyzmaxdiff*aview[1]);
-  tour_view_xyz[2] = trim_val(zbar0 + xyzmaxdiff*aview[2]);
+  tour_view_xyz[0] = trim_val(DENORMALIZE_X(aview[0]));
+  tour_view_xyz[1] = trim_val(DENORMALIZE_Y(aview[1]));
+  tour_view_xyz[2] = trim_val(DENORMALIZE_Z(aview[2]));
   tour_az_path = selected_frame->az_path;
   tour_continuity=selected_frame->continuity;
   tour_bias=selected_frame->bias;
@@ -676,9 +676,9 @@ void TOUR_CB(int var){
       nextkey=thiskey->next;
       if(nextkey==&thistour->last_frame){
         lastkey=thiskey->prev;
-        key_xyz[0]=xbar0 + xyzmaxdiff*(2*thiskey->nodeval.eye[0]-lastkey->nodeval.eye[0]);
-        key_xyz[1]=ybar0 + xyzmaxdiff*(2*thiskey->nodeval.eye[1]-lastkey->nodeval.eye[1]);
-        key_xyz[2]=zbar0 + xyzmaxdiff*(2*thiskey->nodeval.eye[2]-lastkey->nodeval.eye[2]);
+        key_xyz[0]=DENORMALIZE_X(2*thiskey->nodeval.eye[0]-lastkey->nodeval.eye[0]);
+        key_xyz[1]=DENORMALIZE_Y(2*thiskey->nodeval.eye[1]-lastkey->nodeval.eye[1]);
+        key_xyz[2]=DENORMALIZE_Z(2*thiskey->nodeval.eye[2]-lastkey->nodeval.eye[2]);
         key_az_path = (2*thiskey->az_path-lastkey->az_path);
         key_elev_path=(2*thiskey->nodeval.elev_path-lastkey->nodeval.elev_path);
         key_time_in = thiskey->noncon_time;
@@ -686,9 +686,9 @@ void TOUR_CB(int var){
         key_params[0]=(2*thiskey->bias-lastkey->bias);
         key_params[1]=(2*thiskey->continuity-lastkey->continuity);
         key_params[2]=(2*thiskey->tension-lastkey->tension);
-        key_view[0]=xbar0 + xyzmaxdiff*(2*thiskey->nodeval.aview[0]-lastkey->nodeval.aview[0]);
-        key_view[1]=ybar0 + xyzmaxdiff*(2*thiskey->nodeval.aview[1]-lastkey->nodeval.aview[1]);
-        key_view[2]=zbar0 + xyzmaxdiff*(2*thiskey->nodeval.aview[2]-lastkey->nodeval.aview[2]);
+        key_view[0]=DENORMALIZE_X(2*thiskey->nodeval.aview[0]-lastkey->nodeval.aview[0]);
+        key_view[1]=DENORMALIZE_Y(2*thiskey->nodeval.aview[1]-lastkey->nodeval.aview[1]);
+        key_view[2]=DENORMALIZE_Z(2*thiskey->nodeval.aview[2]-lastkey->nodeval.aview[2]);
         key_zoom = (2*thiskey->nodeval.zoom - lastkey->nodeval.zoom);
         key_bank = (2*thiskey->bank - lastkey->bank);
         viewtype=thiskey->viewtype;

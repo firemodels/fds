@@ -297,9 +297,9 @@ void get_world_eyepos(float *mm, float user_eyepos[3],float scaled_eyepos_local[
   scaled_eyepos_local[0] = -(mm[0]*mm[12]+mm[1]*mm[13]+ mm[2]*mm[14])/mscale[0];
   scaled_eyepos_local[1] = -(mm[4]*mm[12]+mm[5]*mm[13]+ mm[6]*mm[14])/mscale[1];
   scaled_eyepos_local[2] = -(mm[8]*mm[12]+mm[9]*mm[13]+mm[10]*mm[14])/mscale[2];
-  user_eyepos[0] = xbar0 + xyzmaxdiff*scaled_eyepos[0];
-  user_eyepos[1] = ybar0 + xyzmaxdiff*scaled_eyepos[1];
-  user_eyepos[2] = zbar0 + xyzmaxdiff*scaled_eyepos[2];
+  user_eyepos[0] = DENORMALIZE_X(scaled_eyepos[0]);
+  user_eyepos[1] = DENORMALIZE_Y(scaled_eyepos[1]);
+  user_eyepos[2] = DENORMALIZE_Z(scaled_eyepos[2]);
 }
 
 /* ----------------------- getsmokesensors ----------------------------- */
@@ -5884,13 +5884,13 @@ void init_device_plane(devicedata *devicei){
     meshi = meshinfo + i;
 
     xx[0]=meshi->xyz_bar0[XXX];
-    xx[1]=xbar0+xyzmaxdiff*meshi->xyz_bar[XXX];
+    xx[1]=DENORMALIZE_X(meshi->xyz_bar[XXX]);
 
     yy[0]=meshi->xyz_bar0[YYY];
-    yy[1]=ybar0+xyzmaxdiff*meshi->xyz_bar[YYY];
+    yy[1]=DENORMALIZE_Y(meshi->xyz_bar[YYY]);
 
     zz[0]=meshi->xyz_bar0[ZZZ];
-    zz[1]=zbar0+xyzmaxdiff*meshi->xyz_bar[ZZZ];
+    zz[1]=DENORMALIZE_Z(meshi->xyz_bar[ZZZ]);
 
     for(j=0;j<8;j++){
       nodeindexes[j]=j;

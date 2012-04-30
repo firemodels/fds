@@ -207,9 +207,9 @@ void BLOCK_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
   glLoadIdentity();
 
   if((showplot3d==1||visGrid!=noGridnoProbe)&&(visx_all==1||visy_all||visz_all)||visGrid==GridProbe||visGrid==noGridProbe){
-    xyz[0]=xbar0+xyzmaxdiff*plotx_all[iplotx_all];
-    xyz[1]=ybar0+xyzmaxdiff*ploty_all[iploty_all];
-    xyz[2]=zbar0+xyzmaxdiff*plotz_all[iplotz_all];
+    xyz[0]=DENORMALIZE_X(plotx_all[iplotx_all]);
+    xyz[1]=DENORMALIZE_Y(ploty_all[iploty_all]);
+    xyz[2]=DENORMALIZE_Z(plotz_all[iplotz_all]);
     mesh_xyz=getmesh(xyz);
   }
   if(visBlocklabel==1&&nmeshes>1){

@@ -1719,12 +1719,12 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
 
 int clip_face(facedata *facei){
   if(xyz_clipplane==0)return 0;
-  if(clip_x==1&&xbar0+xyzmaxdiff*facei->xmax<clip_x_val)return 1;
-  if(clip_X==1&&xbar0+xyzmaxdiff*facei->xmin>clip_X_val)return 1;
-  if(clip_y==1&&ybar0+xyzmaxdiff*facei->ymax<clip_y_val)return 1;
-  if(clip_Y==1&&ybar0+xyzmaxdiff*facei->ymin>clip_Y_val)return 1;
-  if(clip_z==1&&zbar0+xyzmaxdiff*facei->zmax<clip_z_val)return 1;
-  if(clip_Z==1&&zbar0+xyzmaxdiff*facei->zmin>clip_Z_val)return 1;
+  if(clip_x==1&&DENORMALIZE_X(facei->xmax)<clip_x_val)return 1;
+  if(clip_X==1&&DENORMALIZE_X(facei->xmin)>clip_X_val)return 1;
+  if(clip_y==1&&DENORMALIZE_Y(facei->ymax)<clip_y_val)return 1;
+  if(clip_Y==1&&DENORMALIZE_Y(facei->ymin)>clip_Y_val)return 1;
+  if(clip_z==1&&DENORMALIZE_Z(facei->zmax)<clip_z_val)return 1;
+  if(clip_Z==1&&DENORMALIZE_Z(facei->zmin)>clip_Z_val)return 1;
   return 0;
 }
 
