@@ -5957,64 +5957,54 @@ total mass conservation. To set the properties of the background species, use th
 \section{Surface Deposition of Aerosols}
 \label{info:surface_depo}
 
-Particulates in the flowfield, such as soot, can deposit on surfaces removing them from the flow.  For fire simulations this could result in a delay in detection time or an improvement in the visbility for egress.  The deposition of soot on surfaces results in visible patterns and being able to simulate deposition would allow for the evaluation of a specific cause and origin hypothesis against observed patterns at a fire scene.  Lastly a number of toxicants occur as aerosols (for examle radionuclides or chemical or biological agents), and surface deposition is an important phenomena for evaluating dispersion.  FDS contains an experimental model for computing the deposition of aerosols onto surfaces.
+FDS contains a model for the deposition of particulate matter, like soot, onto surfaces. Soot deposition can affect smoke detection time or visibility. It can also be used in the evaluation of a specific cause and origin hypothesis by comparing actual and simulated soot patterns following a fire.  Lastly a number of toxicants occur as aerosols (for example radionuclides or chemical or biological agents), and surface deposition is an important phenomena for evaluating dispersion.
 
-Aerosol deposition is determined by computing a deposition velocity, u$_dep$, and applying that velocity to the aerosol next to a wall cell to determine a deposition rate.  There are a number of phenomena that result in the deposition velocity: thermophoresis (where temperature gradients push the aerosol towards or away from the wall), gravitional settling, diffusive deposition (where the aerosols move along the boundary layer concentration gradient), and turbulent deposition (essentially impact deposition due to a turbulent boundary layer).  Other phenomena such eletrical fields can also result in deposition but are not considered in FDS.  The deposition velocity is determined by assuming the phenomena are independent, computing a deposition velocity for each (respectively u$_{th}$, u$_g$, and u$_{dt}$ which is a combined diffusion and turbluence velocity), and summing them~\cite{Bixler:1} .  By default FDS will compute all of the phenomena, but they can be selectively disabled with the logical flags {\ct GRAVITATIONAL\_DEPOSITION}, {\ct THERMOPHORETIC\_DEPOSITION}, and {\ct TURBULENT\_DEPOSITION}.
-
+Deposition is determined by applying an empirical deposition velocity to the near-wall aerosols.  There are a number of phenomena that cause deposition: thermophoresis (where temperature gradients push the aerosol towards or away from the wall), gravitational settling, diffusive deposition (where the aerosols move along the boundary layer concentration gradient), and turbulent deposition (essentially impact deposition due to a turbulent boundary layer).  Other phenomena such electrical fields can also result in deposition but are not considered in FDS.  The deposition velocity is determined by assuming the phenomena are independent, computing a deposition velocity for each (respectively u$_{th}$, u$_g$, and u$_{dt}$, a combined diffusion-turbulence velocity), and summing them~\cite{Bixler:1} .  By default FDS will compute all of the phenomena, but they can be selectively disabled with the logical flags {\ct GRAVITATIONAL\_DEPOSITION}, {\ct THERMOPHORETIC\_DEPOSITION}, and {\ct TURBULENT\_DEPOSITION}.
 
 The gravitational velocity is given by~\cite{Davies_Charles}
-
 \be
-u_g = g m_a \frac{Cn}{6 \pi {\chi}_d \mu r_a}
+u_g = g m_a \frac{\text{Cn}}{6 \pi \, \chi_d \, \mu \, r_a}
 \ee
-
 where $\chi_d$ is a shape factor, r$_a$ is the particle radius, Cn is Cunningham's slip factor given by~\cite{Cunningham:1}, and m$_a$ is the particle mass which is computed using the radius and the {\ct DENSITY\_SOLID} (on {\ct SPEC}).
-
 \be
-Cn = 1 + 1.25 Kn + 0.41 Kn e^{-\frac{0.88}{Kn}}
+\text{Cn} = 1 + 1.25 \; \text{Kn} + 0.41 \; \text{Kn} \; e^{-0.88/\text{Kn}}
 \ee
-
 where Kn is the particle Knudsen number given by the ratio of the mean free path of the gas to the particle radius ({\ct MEAN\_DIAMETER} on {\ct SPEC}) .  Since, the mean free path of a gas is proportional to its temperature, Kn is computed as~\cite{Sippola:1}
-
 \be
-Kn = \frac{0.0065~m~at~25~ ^\circ C}{r_a} \frac{T_g}{298.15 K}
+\text{Kn} = \frac{0.0065}{r_a} \frac{T_g}{T_\infty}
 \ee
-
 The thermophoretic velocity is computed as:
-
 \be
-u_{th} = \frac{K_{th} \nu}{T_g} \frac{\mbox{d} T}{\mbox{d}x}
+u_{th} = \frac{K_{th} \nu}{T_g} \; \frac{dT}{dx}
 \ee
-
 This requires the wall temperature gradient which is only resolved in a DNS simulation. For an LES simulation this is computed from the wall heat transfer coefficient.
-
 \be
- \frac{\mbox{d} T}{\mbox{d}x} = \frac{h \left( T_g - T_w \right)}{k_g}
+ \frac{dT}{dx} = \frac{h \left( T_g - T_w \right)}{k_g}
 \ee
-
-K$_{th}$ is the thermophoretic velocity coefficient, and it is calculated using the following correlation~\cite{Brock:1}
-
+$K_{th}$ is the thermophoretic velocity coefficient, and it is calculated using the following correlation~\cite{Brock:1}
 \be
- K_{th} = \frac{2 C_s \left(\alpha + C_t Kn \right) Cn}{\left(1 + 3 C_m Kn \right) \left(1 + 2 \alpha + 2 C_t Kn \right) }
+ K_{th} = \frac{2 \, C_s \left(\alpha + C_t \; \text{Kn} \right) \; \text{Cn}}{\left(1 + 3 \, C_m \; \text{Kn} \right) \left(1 + 2 \, \alpha + 2 \, C_t \, \text{Kn} \right) }
 \ee
-
 where $\alpha$ is the ratio of the gas conductivity to the particle conductivity ({\ct CONDUCTIVITY\_SOLID} on {\ct SPEC}), C$_m$ is the momentum accommodation coefficient (1.14), C$_t$ is the thermal accommodation coefficient (2.18), and C$_s$ is the thermal slip coefficient (1.17).
-
-The diffusive and turbulent deposition velocity depends upon the flow regime (diffusion, diffusion-impaction, or intertia-moderated).  The deposition velocity for these regimes are given below ~\cite{McCoy_Hanratty}.   
-
-\begin{eqnarray}
-u_{dt} &=& 0.086 Sc^{-0.7} u_{\tau} \hspace{1 cm} \mbox{for} \quad \tau^+ < 0.2 \\
-u_{dt} &=& 3.5 \times 10^{-4} {\tau^+}^2 u_{\tau} \hspace{0.62 cm} \mbox{for} \quad 0.2 < \tau^+ < 30 \\
-u_{dt} &=&  0.17 u_{\tau}  \hspace{2.12 cm} \mbox{for} \quad \tau^+ < 30 \\
-\end{eqnarray}
-
-where u$_{\tau}$ is the wall friction velocity computed by the Werner-Wengle model and $\tau^+$ is the dimensionless stopping distance given by~\cite{Ludwig_ICONE}
+The diffusion-turbulence deposition velocity depends upon the flow regime (diffusion, diffusion-impaction, or inertia-moderated).  The deposition velocity for these regimes are given below ~\cite{McCoy_Hanratty}.
 
 \be
- \tau^+=\frac{2 \rho_a r_a}{18 \mu^2}  u_{\tau}^2 \rho_g
+u_{dt} = \left\{ \begin{array}{r@{\quad \quad}c} 
+         0.086 \; \text{Sc}^{-0.7} \; u_{\tau}        &  \tau^+ < 0.2 \\
+         3.5 \times 10^{-4} \; {\tau^+}^2 \; u_{\tau} &  0.2 < \tau^+ < 30 \\
+         0.17 \; u_{\tau}                             &  \tau^+ < 30 
+         \end{array} \right.
 \ee
-
+where u$_{\tau}$ is the wall friction velocity computed by the Werner-Wengle model and $\tau^+$ is the dimensionless stopping distance given by~\cite{Ludwig_ICONE}
+\be
+ \tau^+=\frac{2 \, \rho_a \, r_a}{18 \, \mu^2}  \; u_{\tau}^2 \; \rho_g
+\ee
 A simple example is given in Section~\ref{info:deposition}.
+
+
+
+
+
 
 \chapter{Combustion}
 
@@ -6281,7 +6271,7 @@ the stoichiometry of the reaction. The easiest way to explain this is by way of 
 \noindent
 Note that the stoichiometry pertains to the species mixtures, and not the primitive species.
 Obviously, for this example, the first {\ct REAC} line is preferable to the second. However, there are many situations where you cannot use the simple chemistry model and
-must resort to the second formulation. 
+must resort to the second formulation.
 
 
 \subsection{Complex Fuel Molecules}
@@ -6484,7 +6474,7 @@ Note: The sign on NU corresponds to whether that species is consumed (-) or prod
 \end{verbatim} \normalsize
 
 \begin{figure}[ht]
-\centering 
+\centering
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/Propane_flame_deposition}
 \caption{Wall soot deposition for propane flame with deposition example.}
 \label{soot_deposition}
@@ -10167,7 +10157,6 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct PART\_ID}          & Character   & Section \ref{info:outputquantities}     &           &                 \\ \hline
 {\ct PROP\_ID}          & Character   & Section \ref{info:BNDF}                 &           &                 \\ \hline
 {\ct QUANTITY}          & Character   & Section \ref{info:outputquantities}     &           &                 \\ \hline
-{\ct RECOUNT\_DRIP}     & Logical     & Section \ref{info:heat_flux}            &           & {\ct .FALSE.}   \\ \hline
 {\ct SPEC\_ID}          & Character   & Section \ref{info:outputquantities}     &           &                 \\ \hline
 \end{longtable}
 
@@ -11232,7 +11221,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct SMIX} (Species Mixture (Lumped Species) Parameters)} \\
 \hline \hline
 \endhead
-{\ct BACKGROUND}                    & Logical           & Section~\ref{info:SMIX}                               &                   & {\ct .FALSE.} \\ \hline 
+{\ct BACKGROUND}                    & Logical           & Section~\ref{info:SMIX}                               &                   & {\ct .FALSE.} \\ \hline
 {\ct ID}                            & Character         & Section~\ref{info:SMIX}                               &                   &               \\ \hline
 {\ct SPEC\_ID(:)}                   & Character Array   & Section~\ref{info:SMIX}                               &                   &               \\ \hline
 {\ct MASS\_FRACTION(:)}             & Real Array        & Section~\ref{info:SMIX}                               &                   & 0             \\ \hline
