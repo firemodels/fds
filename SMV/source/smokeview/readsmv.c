@@ -1546,41 +1546,38 @@ void update_mesh_coords(void){
     int ii;
 
     meshi=meshinfo+i;
-    meshi->xbar += meshi->offset[0];
-    meshi->ybar += meshi->offset[1];
-    meshi->zbar += meshi->offset[2];
-    meshi->xbar0 += meshi->offset[0];
-    meshi->ybar0 += meshi->offset[1];
-    meshi->zbar0 += meshi->offset[2];
+    meshi->xyz_bar[XXX] += meshi->offset[XXX];
+    meshi->xyz_bar[YYY] += meshi->offset[YYY];
+    meshi->xyz_bar[ZZZ] += meshi->offset[ZZZ];
+    meshi->xyz_bar0[XXX] += meshi->offset[XXX];
+    meshi->xyz_bar0[YYY] += meshi->offset[YYY];
+    meshi->xyz_bar0[ZZZ] += meshi->offset[ZZZ];
     {
       float dx, dy, dz;
 
-      dx = meshi->xbar - meshi->xbar0;
-      dx /= meshi->ibar;
-      dy = meshi->ybar - meshi->ybar0;
-      dy /= meshi->jbar;
-      dz = meshi->zbar - meshi->zbar0;
-      dz /= meshi->kbar;
+      dx = (meshi->xyz_bar[XXX] - meshi->xyz_bar0[XXX])/meshi->ibar;
+      dy = (meshi->xyz_bar[YYY] - meshi->xyz_bar0[YYY])/meshi->jbar;
+      dz = (meshi->xyz_bar[ZZZ] - meshi->xyz_bar0[ZZZ])/meshi->kbar;
       meshi->cellsize=sqrt(dx*dx+dy*dy+dz*dz);
     }
     for(ii=0;ii<meshi->ibar+1;ii++){
-      meshi->xplt[ii] += meshi->offset[0];
+      meshi->xplt[ii] += meshi->offset[XXX];
     }
     for(ii=0;ii<meshi->jbar+1;ii++){
-      meshi->yplt[ii] += meshi->offset[1];
+      meshi->yplt[ii] += meshi->offset[YYY];
     }
     for(ii=0;ii<meshi->kbar+1;ii++){
-      meshi->zplt[ii] += meshi->offset[2];
+      meshi->zplt[ii] += meshi->offset[ZZZ];
     }
-    meshi->xcen+=meshi->offset[0];
-    meshi->ycen+=meshi->offset[1];
-    meshi->zcen+=meshi->offset[2];
+    meshi->xcen+=meshi->offset[XXX];
+    meshi->ycen+=meshi->offset[YYY];
+    meshi->zcen+=meshi->offset[ZZZ];
   }
   for(i=1;i<nmeshes;i++){
     mesh *meshi;
 
     meshi=meshinfo+i;
-    if(meshi->zbar0!=meshinfo->zbar0){
+    if(meshi->xyz_bar0[ZZZ]!=meshinfo->xyz_bar0[ZZZ]){
       visFloor=0;
       updatefacelists=1;
       updatemenu=1;
@@ -1593,8 +1590,13 @@ void update_mesh_coords(void){
 
     meshi=meshinfo;
 
-    xbar  =  meshi->xbar;   ybar=meshi->ybar;   zbar=meshi->zbar;
-    xbar0 =  meshi->xbar0; ybar0=meshi->ybar0; zbar0=meshi->zbar0;
+    xbar = meshi->xyz_bar[XXX];   
+    ybar = meshi->xyz_bar[YYY];   
+    zbar = meshi->xyz_bar[ZZZ];
+
+    xbar0 = meshi->xyz_bar0[XXX]; 
+    ybar0 = meshi->xyz_bar0[YYY]; 
+    zbar0 = meshi->xyz_bar0[ZZZ];
   }
 
   ijkbarmax=meshinfo->ibar;
@@ -1613,12 +1615,12 @@ void update_mesh_coords(void){
 
     meshi=meshinfo+i;
 
-    if(xbar <meshi->xbar )xbar =meshi->xbar;
-    if(ybar <meshi->ybar )ybar =meshi->ybar;
-    if(zbar <meshi->zbar )zbar =meshi->zbar;
-    if(xbar0>meshi->xbar0)xbar0=meshi->xbar0;
-    if(ybar0>meshi->ybar0)ybar0=meshi->ybar0;
-    if(zbar0>meshi->zbar0)zbar0=meshi->zbar0;
+    if(xbar <meshi->xyz_bar[XXX] )xbar =meshi->xyz_bar[XXX];
+    if(ybar <meshi->xyz_bar[YYY] )ybar =meshi->xyz_bar[YYY];
+    if(zbar <meshi->xyz_bar[ZZZ] )zbar =meshi->xyz_bar[ZZZ];
+    if(xbar0>meshi->xyz_bar0[XXX])xbar0=meshi->xyz_bar0[XXX];
+    if(ybar0>meshi->xyz_bar0[YYY])ybar0=meshi->xyz_bar0[YYY];
+    if(zbar0>meshi->xyz_bar0[ZZZ])zbar0=meshi->xyz_bar0[ZZZ];
   }
 
   factor = 256*128;
@@ -1678,24 +1680,22 @@ void update_mesh_coords(void){
   xbarORIG = xbar;
   ybarORIG = ybar;
   zbarORIG = zbar;
-  xbar = (xbar-xbar0)/xyzmaxdiff;
-  ybar = (ybar-ybar0)/xyzmaxdiff;
-  zbar = (zbar-zbar0)/xyzmaxdiff;
+  xbar = NORMALIZE_X(xbar);
+  ybar = NORMALIZE_Y(ybar);
+  zbar = NORMALIZE_Z(zbar);
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
 
     meshi=meshinfo+i;
     /* compute a local scaling factor for each block */
-    meshi->xyzmaxdiff=meshi->xbar-meshi->xbar0;
-    if(meshi->ybar-meshi->ybar0>meshi->xyzmaxdiff)meshi->xyzmaxdiff=meshi->ybar-meshi->ybar0;
-    if(meshi->zbar-meshi->zbar0>meshi->xyzmaxdiff)meshi->xyzmaxdiff=meshi->zbar-meshi->zbar0;
+    meshi->xyzmaxdiff=meshi->xyz_bar[XXX]-meshi->xyz_bar0[XXX];
+    if(meshi->xyz_bar[YYY]-meshi->xyz_bar0[YYY]>meshi->xyzmaxdiff)meshi->xyzmaxdiff=meshi->xyz_bar[YYY]-meshi->xyz_bar0[YYY];
+    if(meshi->xyz_bar[ZZZ]-meshi->xyz_bar0[ZZZ]>meshi->xyzmaxdiff)meshi->xyzmaxdiff=meshi->xyz_bar[ZZZ]-meshi->xyz_bar0[ZZZ];
 
-    meshi->xbar = (meshi->xbar-xbar0)/xyzmaxdiff;
-    meshi->ybar = (meshi->ybar-ybar0)/xyzmaxdiff;
-    meshi->zbar = (meshi->zbar-zbar0)/xyzmaxdiff;
-    meshi->xcen = (meshi->xcen-xbar0)/xyzmaxdiff;
-    meshi->ycen = (meshi->ycen-ybar0)/xyzmaxdiff;
-    meshi->zcen = (meshi->zcen-zbar0)/xyzmaxdiff;
+    normalize_xyz(meshi->xyz_bar,meshi->xyz_bar);
+    meshi->xcen = NORMALIZE_X(meshi->xcen);
+    meshi->ycen = NORMALIZE_Y(meshi->ycen);
+    meshi->zcen = NORMALIZE_Z(meshi->zcen);
   }
 
   for(i=0;i<noutlineinfo;i++){
@@ -1711,12 +1711,12 @@ void update_mesh_coords(void){
     z1 = outlinei->z1;
     z2 = outlinei->z2;
     for(j=0;j<outlinei->nlines;j++){
-      x1[j]=(x1[j]-xbar0)/xyzmaxdiff;
-      x2[j]=(x2[j]-xbar0)/xyzmaxdiff;
-      yy1[j]=(yy1[j]-ybar0)/xyzmaxdiff;
-      yy2[j]=(yy2[j]-ybar0)/xyzmaxdiff;
-      z1[j]=(z1[j]-zbar0)/xyzmaxdiff;
-      z2[j]=(z2[j]-zbar0)/xyzmaxdiff;
+      x1[j]=NORMALIZE_X(x1[j]);
+      x2[j]=NORMALIZE_X(x2[j]);
+      yy1[j]=NORMALIZE_Y(yy1[j]);
+      yy2[j]=NORMALIZE_Y(yy2[j]);
+      z1[j]=NORMALIZE_Z(z1[j]);
+      z2[j]=NORMALIZE_Z(z2[j]);
     }
   }
 
@@ -1761,15 +1761,15 @@ void update_mesh_coords(void){
 
     for(i=0;i<ibar+1;i++){
       xplt_orig[i]=xplt[i];
-      xplt[i]=(xplt[i]-xbar0)/xyzmaxdiff;
+      xplt[i]=NORMALIZE_X(xplt[i]);
     }
     for(j=0;j<jbar+1;j++){
       yplt_orig[j]=yplt[j];
-      yplt[j]=(yplt[j]-ybar0)/xyzmaxdiff;
+      yplt[j]=NORMALIZE_Y(yplt[j]);
     }
     for(k=0;k<kbar+1;k++){
       zplt_orig[k]=zplt[k];
-      zplt[k]=(zplt[k]-zbar0)/xyzmaxdiff;
+      zplt[k]=NORMALIZE_Z(zplt[k]);
     }
 
     for(nn=0;nn<ibar;nn++){
@@ -1789,12 +1789,8 @@ void update_mesh_coords(void){
     meshi->boxmax[0]=xplt_orig[ibar];
     meshi->boxmax[1]=yplt_orig[jbar];
     meshi->boxmax[2]=zplt_orig[kbar];
-    meshi->boxmin_scaled[0] = (meshi->boxmin[0]-xbar0)/xyzmaxdiff;
-    meshi->boxmin_scaled[1] = (meshi->boxmin[1]-ybar0)/xyzmaxdiff;
-    meshi->boxmin_scaled[2] = (meshi->boxmin[2]-zbar0)/xyzmaxdiff;
-    meshi->boxmax_scaled[0] = (meshi->boxmax[0]-xbar0)/xyzmaxdiff;
-    meshi->boxmax_scaled[1] = (meshi->boxmax[1]-ybar0)/xyzmaxdiff;
-    meshi->boxmax_scaled[2] = (meshi->boxmax[2]-zbar0)/xyzmaxdiff;
+    normalize_xyz(meshi->boxmin_scaled,meshi->boxmin);
+    normalize_xyz(meshi->boxmax_scaled,meshi->boxmax);
     meshi->x0 = xplt[0];
     meshi->x1 = xplt[ibar];
     meshi->y0 = yplt[0];
@@ -1856,18 +1852,18 @@ void update_mesh_coords(void){
       blockagedata *bc;
 
       bc=meshi->blockageinfoptrs[i];
-      bc->xmin += meshi->offset[0];
-      bc->xmax += meshi->offset[0];
-      bc->ymin += meshi->offset[1];
-      bc->ymax += meshi->offset[1];
-      bc->zmin += meshi->offset[2];
-      bc->zmax += meshi->offset[2];
-      bc->xmin = (bc->xmin-xbar0)/xyzmaxdiff;
-      bc->xmax = (bc->xmax-xbar0)/xyzmaxdiff;
-      bc->ymin = (bc->ymin-ybar0)/xyzmaxdiff;
-      bc->ymax = (bc->ymax-ybar0)/xyzmaxdiff;
-      bc->zmin = (bc->zmin-zbar0)/xyzmaxdiff;
-      bc->zmax = (bc->zmax-zbar0)/xyzmaxdiff;
+      bc->xmin += meshi->offset[XXX];
+      bc->xmax += meshi->offset[XXX];
+      bc->ymin += meshi->offset[YYY];
+      bc->ymax += meshi->offset[YYY];
+      bc->zmin += meshi->offset[ZZZ];
+      bc->zmax += meshi->offset[ZZZ];
+      bc->xmin = NORMALIZE_X(bc->xmin);
+      bc->xmax = NORMALIZE_X(bc->xmax);
+      bc->ymin = NORMALIZE_Y(bc->ymin);
+      bc->ymax = NORMALIZE_Y(bc->ymax);
+      bc->zmin = NORMALIZE_Z(bc->zmin);
+      bc->zmax = NORMALIZE_Z(bc->zmax);
       bc->xyzORIG[0]=bc->xmin;
       bc->xyzORIG[1]=bc->xmax;
       bc->xyzORIG[2]=bc->ymin;
@@ -1885,12 +1881,12 @@ void update_mesh_coords(void){
       ventdata *vi;
 
       vi=meshi->ventinfo+i;
-      vi->xmin = (vi->xmin-xbar0)/xyzmaxdiff;
-      vi->xmax = (vi->xmax-xbar0)/xyzmaxdiff;
-      vi->ymin = (vi->ymin-ybar0)/xyzmaxdiff;
-      vi->ymax = (vi->ymax-ybar0)/xyzmaxdiff;
-      vi->zmin = (vi->zmin-zbar0)/xyzmaxdiff;
-      vi->zmax = (vi->zmax-zbar0)/xyzmaxdiff;
+      vi->xmin = NORMALIZE_X(vi->xmin);
+      vi->xmax = NORMALIZE_X(vi->xmax);
+      vi->ymin = NORMALIZE_Y(vi->ymin);
+      vi->ymax = NORMALIZE_Y(vi->ymax);
+      vi->zmin = NORMALIZE_Z(vi->zmin);
+      vi->zmax = NORMALIZE_Z(vi->zmax);
     }
   }
   for(igrid=0;igrid<nmeshes;igrid++){
@@ -1916,9 +1912,7 @@ void update_mesh_coords(void){
 
       quadi = cd->quad+j;
       for(k=0;k<4;k++){
-        quadi->xyzpoints[3*k] = (quadi->xyzpoints[3*k]-xbar0)/xyzmaxdiff;
-        quadi->xyzpoints[3*k+1] = (quadi->xyzpoints[3*k+1]-ybar0)/xyzmaxdiff;
-        quadi->xyzpoints[3*k+2] = (quadi->xyzpoints[3*k+2]-zbar0)/xyzmaxdiff;
+        normalize_xyz(quadi->xyzpoints+3*k,quadi->xyzpoints+3*k);
       }
       if(cd->version==2&&quadi->cadlookq->textureinfo.loaded==1){
         update_cadtextcoords(quadi);
@@ -1929,12 +1923,12 @@ void update_mesh_coords(void){
     roomdata *roomi;
 
     roomi = roominfo + n;
-    roomi->x0=(roomi->x0-xbar0)/xyzmaxdiff;
-    roomi->y0=(roomi->y0-ybar0)/xyzmaxdiff;
-    roomi->z0=(roomi->z0-zbar0)/xyzmaxdiff;
-    roomi->x1=(roomi->x1-xbar0)/xyzmaxdiff;
-    roomi->y1=(roomi->y1-ybar0)/xyzmaxdiff;
-    roomi->z1=(roomi->z1-zbar0)/xyzmaxdiff;
+    roomi->x0=NORMALIZE_X(roomi->x0);
+    roomi->y0=NORMALIZE_Y(roomi->y0);
+    roomi->z0=NORMALIZE_Z(roomi->z0);
+    roomi->x1=NORMALIZE_X(roomi->x1);
+    roomi->y1=NORMALIZE_Y(roomi->y1);
+    roomi->z1=NORMALIZE_Z(roomi->z1);
     roomi->dx=roomi->dx/xyzmaxdiff;
     roomi->dy=roomi->dy/xyzmaxdiff;
     roomi->dz=roomi->dz/xyzmaxdiff;
@@ -1943,9 +1937,9 @@ void update_mesh_coords(void){
     firedata *firen;
 
     firen = fireinfo + n;
-    firen->absx=(firen->absx-xbar0)/xyzmaxdiff;
-    firen->absy=(firen->absy-ybar0)/xyzmaxdiff;
-    firen->absz=(firen->absz-zbar0)/xyzmaxdiff;
+    firen->absx=NORMALIZE_X(firen->absx);
+    firen->absy=NORMALIZE_Y(firen->absy);
+    firen->absz=NORMALIZE_Z(firen->absz);
     firen->dz=firen->dz/xyzmaxdiff;
   }
   for(n=0;n<nzvents;n++){
@@ -1956,27 +1950,27 @@ void update_mesh_coords(void){
     switch (zvi->dir){
     case 1:
     case 3:
-      zvi->x1 = (zvi->x1-xbar0)/xyzmaxdiff;
-      zvi->x2 = (zvi->x2-xbar0)/xyzmaxdiff;
-      zvi->z1 = (zvi->z1-zbar0)/xyzmaxdiff;
-      zvi->z2 = (zvi->z2-zbar0)/xyzmaxdiff;
-      zvi->yy = (zvi->yy-ybar0)/xyzmaxdiff;
+      zvi->x1 = NORMALIZE_X(zvi->x1);
+      zvi->x2 = NORMALIZE_X(zvi->x2);
+      zvi->z1 = NORMALIZE_Z(zvi->z1);
+      zvi->z2 = NORMALIZE_Z(zvi->z2);
+      zvi->yy = NORMALIZE_Y(zvi->yy);
       break;
     case 2:
     case 4:
-      zvi->x1 = (zvi->x1-ybar0)/xyzmaxdiff;
-      zvi->x2 = (zvi->x2-ybar0)/xyzmaxdiff;
-      zvi->z1 = (zvi->z1-zbar0)/xyzmaxdiff;
-      zvi->z2 = (zvi->z2-zbar0)/xyzmaxdiff;
-      zvi->yy = (zvi->yy-xbar0)/xyzmaxdiff;
+      zvi->x1 = NORMALIZE_Y(zvi->x1);
+      zvi->x2 = NORMALIZE_Y(zvi->x2);
+      zvi->z1 = NORMALIZE_Z(zvi->z1);
+      zvi->z2 = NORMALIZE_Z(zvi->z2);
+      zvi->yy = NORMALIZE_X(zvi->yy);
       break;
     case 5:
     case 6:
-      zvi->x1 = (zvi->x1-xbar0)/xyzmaxdiff;
-      zvi->x2 = (zvi->x2-xbar0)/xyzmaxdiff;
-      zvi->y1 = (zvi->y1-ybar0)/xyzmaxdiff;
-      zvi->y2 = (zvi->y2-ybar0)/xyzmaxdiff;
-      zvi->zz = (zvi->zz-zbar0)/xyzmaxdiff;
+      zvi->x1 = NORMALIZE_X(zvi->x1);
+      zvi->x2 = NORMALIZE_X(zvi->x2);
+      zvi->y1 = NORMALIZE_Y(zvi->y1);
+      zvi->y2 = NORMALIZE_Y(zvi->y2);
+      zvi->zz = NORMALIZE_Z(zvi->zz);
       break;
     default:
       ASSERT(FFALSE);
@@ -2015,25 +2009,25 @@ void update_mesh_coords(void){
     yheat = meshi->yheat;
     zheat = meshi->zheat;
     for(n=0;n<meshi->nspr;n++){
-      xsprplot[n]=(offset[0]+xspr[n]-xbar0)/xyzmaxdiff;
-      ysprplot[n]=(offset[1]+yspr[n]-ybar0)/xyzmaxdiff;
-      zsprplot[n]=(offset[2]+zspr[n]-zbar0)/xyzmaxdiff;
+      xsprplot[n]=NORMALIZE_X(offset[XXX]+xspr[n]);
+      ysprplot[n]=NORMALIZE_Y(offset[YYY]+yspr[n]);
+      zsprplot[n]=NORMALIZE_Z(offset[ZZZ]+zspr[n]);
     }
     for(n=0;n<meshi->nheat;n++){
-      xheatplot[n]=(offset[0]+xheat[n]-xbar0)/xyzmaxdiff;
-      yheatplot[n]=(offset[1]+yheat[n]-ybar0)/xyzmaxdiff;
-      zheatplot[n]=(offset[2]+zheat[n]-zbar0)/xyzmaxdiff;
+      xheatplot[n]=NORMALIZE_X(offset[XXX]+xheat[n]);
+      yheatplot[n]=NORMALIZE_Y(offset[YYY]+yheat[n]);
+      zheatplot[n]=NORMALIZE_Z(offset[ZZZ]+zheat[n]);
     }
     for(n=0;n<meshi->nvents+12;n++){
       ventdata *vi;
 
       vi = meshi->ventinfo+n;
-      vi->xvent1plot=(offset[0]+vi->xvent1-xbar0)/xyzmaxdiff;
-      vi->xvent2plot=(offset[0]+vi->xvent2-xbar0)/xyzmaxdiff;
-      vi->yvent1plot=(offset[1]+vi->yvent1-ybar0)/xyzmaxdiff;
-      vi->yvent2plot=(offset[1]+vi->yvent2-ybar0)/xyzmaxdiff;
-      vi->zvent1plot=(offset[2]+vi->zvent1-zbar0)/xyzmaxdiff;
-      vi->zvent2plot=(offset[2]+vi->zvent2-zbar0)/xyzmaxdiff;
+      vi->xvent1plot=NORMALIZE_X(offset[XXX]+vi->xvent1);
+      vi->xvent2plot=NORMALIZE_X(offset[XXX]+vi->xvent2);
+      vi->yvent1plot=NORMALIZE_Y(offset[YYY]+vi->yvent1);
+      vi->yvent2plot=NORMALIZE_Y(offset[YYY]+vi->yvent2);
+      vi->zvent1plot=NORMALIZE_Z(offset[ZZZ]+vi->zvent1);
+      vi->zvent2plot=NORMALIZE_Z(offset[ZZZ]+vi->zvent2);
     }
   }
 
@@ -2041,9 +2035,9 @@ void update_mesh_coords(void){
     mesh *meshi;
 
     meshi=meshinfo + i;
-    meshi->vent_offset[0] = ventoffset_factor*(meshi->xplt[1]-meshi->xplt[0]);
-    meshi->vent_offset[1] = ventoffset_factor*(meshi->yplt[1]-meshi->yplt[0]);
-    meshi->vent_offset[2] = ventoffset_factor*(meshi->zplt[1]-meshi->zplt[0]);
+    meshi->vent_offset[XXX] = ventoffset_factor*(meshi->xplt[1]-meshi->xplt[0]);
+    meshi->vent_offset[YYY] = ventoffset_factor*(meshi->yplt[1]-meshi->yplt[0]);
+    meshi->vent_offset[ZZZ] = ventoffset_factor*(meshi->zplt[1]-meshi->zplt[0]);
   }
 }
 
@@ -2923,14 +2917,14 @@ int readsmv(char *file, char *file2){
       zbar0 = 0.0;    zbar = 1.0; 
     }
     meshi=meshinfo;
-    meshi->xbar0=xbar0;
-    meshi->xbar =xbar;
+    meshi->xyz_bar0[XXX]=xbar0;
+    meshi->xyz_bar[XXX] =xbar;
     meshi->xcen=(xbar+xbar0)/2.0;
-    meshi->ybar0=ybar0;
-    meshi->ybar =ybar;
+    meshi->xyz_bar0[YYY]=ybar0;
+    meshi->xyz_bar[YYY] =ybar;
     meshi->ycen=(ybar+ybar0)/2.0;
-    meshi->zbar0=zbar0;
-    meshi->zbar =zbar;
+    meshi->xyz_bar0[ZZZ]=zbar0;
+    meshi->xyz_bar[ZZZ] =zbar;
     meshi->zcen=(zbar+zbar0)/2.0;
   }
 
@@ -4292,14 +4286,14 @@ int readsmv(char *file, char *file2){
     mesh *meshi;
 
     meshi=meshinfo;
-    meshi->xbar0=xbar0;
-    meshi->xbar =xbar;
+    meshi->xyz_bar0[XXX]=xbar0;
+    meshi->xyz_bar[XXX] =xbar;
     meshi->xcen=(xbar+xbar0)/2.0;
-    meshi->ybar0=ybar0;
-    meshi->ybar =ybar;
+    meshi->xyz_bar0[YYY]=ybar0;
+    meshi->xyz_bar[YYY] =ybar;
     meshi->ycen=(ybar+ybar0)/2.0;
-    meshi->zbar0=zbar0;
-    meshi->zbar =zbar;
+    meshi->xyz_bar0[ZZZ]=zbar0;
+    meshi->xyz_bar[ZZZ] =zbar;
     meshi->zcen=(zbar+zbar0)/2.0;
   }
 
@@ -5025,14 +5019,14 @@ int readsmv(char *file, char *file2){
         meshi->meshrgb_ptr=NULL;
       }
 
-      meshi->xbar0=xbar0;
-      meshi->xbar =xbar;
+      meshi->xyz_bar0[XXX]=xbar0;
+      meshi->xyz_bar[XXX] =xbar;
       meshi->xcen=(xbar+xbar0)/2.0;
-      meshi->ybar0=ybar0;
-      meshi->ybar =ybar;
+      meshi->xyz_bar0[YYY]=ybar0;
+      meshi->xyz_bar[YYY] =ybar;
       meshi->ycen =(ybar+ybar0)/2.0;
-      meshi->zbar0=zbar0;
-      meshi->zbar =zbar;
+      meshi->xyz_bar0[ZZZ]=zbar0;
+      meshi->xyz_bar[ZZZ] =zbar;
       meshi->zcen =(zbar+zbar0)/2.0;
       if(ntrnx==0){
         for(nn=0;nn<=meshi->ibar;nn++){
@@ -5502,12 +5496,12 @@ typedef struct {
           }
         }
         else{
-          vi->xmin=meshi->xbar0+meshi->offset[0];
-          vi->xmax=meshi->xbar +meshi->offset[0];
-          vi->ymin=meshi->ybar0+meshi->offset[1];
-          vi->ymax=meshi->ybar +meshi->offset[1];
-          vi->zmin=meshi->zbar0+meshi->offset[2];
-          vi->zmax=meshi->zbar +meshi->offset[2];
+          vi->xmin=meshi->xyz_bar0[XXX]+meshi->offset[XXX];
+          vi->xmax=meshi->xyz_bar[XXX] +meshi->offset[XXX];
+          vi->ymin=meshi->xyz_bar0[YYY]+meshi->offset[YYY];
+          vi->ymax=meshi->xyz_bar[YYY] +meshi->offset[YYY];
+          vi->zmin=meshi->xyz_bar0[ZZZ]+meshi->offset[ZZZ];
+          vi->zmax=meshi->xyz_bar[ZZZ] +meshi->offset[ZZZ];
           s_num[0]=-1;
           switch (nn-nvents){
           case DOWN_Y:
@@ -6475,12 +6469,12 @@ typedef struct {
   if(autoterrain==1){
     float zbarmin;
 
-    zbarmin=meshinfo->zbar0;
+    zbarmin=meshinfo->xyz_bar0[ZZZ];
     for(i=1;i<nmeshes;i++){
       mesh *meshi;
 
       meshi = meshinfo + i;
-      if(meshi->zbar0<zbarmin)zbarmin=meshi->zbar0;
+      if(meshi->xyz_bar0[ZZZ]<zbarmin)zbarmin=meshi->xyz_bar0[ZZZ];
     }
     nobst=0;
     iobst=0;
@@ -7493,9 +7487,9 @@ void initmesh(mesh *meshi){
   meshi->npatches=0;
   meshi->patchfacevis2=0;
   meshi->patchtype=NULL;
-  meshi->offset[0]=0.0;
-  meshi->offset[1]=0.0;
-  meshi->offset[2]=0.0;
+  meshi->offset[XXX]=0.0;
+  meshi->offset[YYY]=0.0;
+  meshi->offset[ZZZ]=0.0;
   meshi->patchtype=NULL;
 //  meshi->patchfacevis=NULL;
   meshi->patchdir=NULL;
@@ -7563,12 +7557,12 @@ void initmesh(mesh *meshi){
   meshi->c_iblank_y=NULL;
   meshi->c_iblank_z=NULL;
 
-  meshi->xbar=1.0;
-  meshi->xbar0=0.0;
-  meshi->ybar=1.0;
-  meshi->ybar0=0.0;
-  meshi->zbar=1.0;
-  meshi->zbar0=0.0;
+  meshi->xyz_bar[XXX]=1.0;
+  meshi->xyz_bar0[XXX]=0.0;
+  meshi->xyz_bar[YYY]=1.0;
+  meshi->xyz_bar0[YYY]=0.0;
+  meshi->xyz_bar[ZZZ]=1.0;
+  meshi->xyz_bar0[ZZZ]=0.0;
 
   meshi->xyzmaxdiff=1.0;
 

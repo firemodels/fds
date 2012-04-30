@@ -1175,7 +1175,9 @@ void update_terrain(int allocate_memory, float vertical_factor_local){
 
       for(j=0;j<=terri->ny;j++){
         for(i=0;i<=terri->nx;i++){
-          *znode_scaled++ = (*znode++-zbar0)/xyzmaxdiff;
+          *znode_scaled = NORMALIZE_Z(*znode);
+          znode++;
+          znode_scaled++;
         }
       }
     }

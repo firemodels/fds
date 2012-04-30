@@ -5883,12 +5883,15 @@ void init_device_plane(devicedata *devicei){
 
     meshi = meshinfo + i;
 
-    xx[0]=meshi->xbar0;
-    xx[1]=xbar0+xyzmaxdiff*meshi->xbar;
-    yy[0]=meshi->ybar0;
-    yy[1]=ybar0+xyzmaxdiff*meshi->ybar;
-    zz[0]=meshi->zbar0;
-    zz[1]=zbar0+xyzmaxdiff*meshi->zbar;
+    xx[0]=meshi->xyz_bar0[XXX];
+    xx[1]=xbar0+xyzmaxdiff*meshi->xyz_bar[XXX];
+
+    yy[0]=meshi->xyz_bar0[YYY];
+    yy[1]=ybar0+xyzmaxdiff*meshi->xyz_bar[YYY];
+
+    zz[0]=meshi->xyz_bar0[ZZZ];
+    zz[1]=zbar0+xyzmaxdiff*meshi->xyz_bar[ZZZ];
+
     for(j=0;j<8;j++){
       nodeindexes[j]=j;
     }
@@ -5901,12 +5904,12 @@ void init_device_plane(devicedata *devicei){
     vals[6]=dist2plane(xx[1],yy[1],zz[1],devicei->xyz,devicei->xyznorm);
     vals[7]=dist2plane(xx[1],yy[0],zz[1],devicei->xyz,devicei->xyznorm);
 
-    xx[0]=(meshi->xbar0-xbar0)/xyzmaxdiff;
-    xx[1]=meshi->xbar;
-    yy[0]=(meshi->ybar0-ybar0)/xyzmaxdiff;
-    yy[1]=meshi->ybar;
-    zz[0]=(meshi->zbar0-zbar0)/xyzmaxdiff;
-    zz[1]=meshi->zbar;
+    xx[0]=NORMALIZE_X(meshi->xyz_bar0[XXX]);
+    yy[0]=NORMALIZE_Y(meshi->xyz_bar0[YYY]);
+    zz[0]=NORMALIZE_Z(meshi->xyz_bar0[ZZZ]);
+    xx[1]=meshi->xyz_bar[XXX];
+    yy[1]=meshi->xyz_bar[YYY];
+    zz[1]=meshi->xyz_bar[ZZZ];
 
     GetIsobox(xx, yy, zz, vals, NULL, nodeindexes, level,
               xvert, yvert, zvert, NULL, closestnodes, &nvert, triangles, &ntriangles);

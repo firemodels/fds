@@ -62,7 +62,7 @@ void setClipPlanes(int mode){
     clipplane_x[0]=1.0;
     clipplane_x[1]=0.0;
     clipplane_x[2]=0.0;
-    clipplane_x[3]=-(clip_x_val-xbar0)/xyzmaxdiff;
+    clipplane_x[3]=-NORMALIZE_X(clip_x_val);
     glClipPlane(GL_CLIP_PLANE0,clipplane_x);
     glEnable(GL_CLIP_PLANE0);
   }
@@ -74,7 +74,7 @@ void setClipPlanes(int mode){
     clipplane_X[0]=-1.0;
     clipplane_X[1]=0.0;
     clipplane_X[2]=0.0;
-    clipplane_X[3]=(clip_X_val-xbar0)/xyzmaxdiff;
+    clipplane_X[3]=NORMALIZE_X(clip_X_val);
     glClipPlane(GL_CLIP_PLANE3,clipplane_X);
     glEnable(GL_CLIP_PLANE3);
   }
@@ -86,7 +86,7 @@ void setClipPlanes(int mode){
     clipplane_y[0]=0.0;
     clipplane_y[1]=1.0;
     clipplane_y[2]=0.0;
-    clipplane_y[3]=-(clip_y_val-ybar0)/xyzmaxdiff;
+    clipplane_y[3]=-NORMALIZE_Y(clip_y_val);
     glClipPlane(GL_CLIP_PLANE1,clipplane_y);
     glEnable(GL_CLIP_PLANE1);
   }
@@ -98,7 +98,7 @@ void setClipPlanes(int mode){
     clipplane_Y[0]=0.0;
     clipplane_Y[1]=-1.0;
     clipplane_Y[2]=0.0;
-    clipplane_Y[3]=(clip_Y_val-ybar0)/xyzmaxdiff;
+    clipplane_Y[3]=NORMALIZE_Y(clip_Y_val);
     glClipPlane(GL_CLIP_PLANE4,clipplane_Y);
     glEnable(GL_CLIP_PLANE4);
   }
@@ -110,7 +110,7 @@ void setClipPlanes(int mode){
     clipplane_z[0]=0.0;
     clipplane_z[1]=0.0;
     clipplane_z[2]=1.0;
-    clipplane_z[3]=-(clip_z_val-zbar0)/xyzmaxdiff;
+    clipplane_z[3]=-NORMALIZE_Z(clip_z_val);
     glClipPlane(GL_CLIP_PLANE2,clipplane_z);
     glEnable(GL_CLIP_PLANE2);
   }
@@ -122,7 +122,7 @@ void setClipPlanes(int mode){
     clipplane_Z[0]=0.0;
     clipplane_Z[1]=0.0;
     clipplane_Z[2]=-1.0;
-    clipplane_Z[3]=(clip_Z_val-zbar0)/xyzmaxdiff;
+    clipplane_Z[3]=NORMALIZE_X(clip_Z_val);
     glClipPlane(GL_CLIP_PLANE5,clipplane_Z);
     glEnable(GL_CLIP_PLANE5);
   }

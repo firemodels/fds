@@ -940,9 +940,7 @@ extern "C" void TRANSLATE_CB(int var){
   switch (var){
     case SET_VIEW_XYZ:
       reset_glui_view(-1);
-      eye_xyz[0]=(set_view_xyz[0]-xbar0)/xyzmaxdiff;
-      eye_xyz[1]=(set_view_xyz[1]-ybar0)/xyzmaxdiff;
-      eye_xyz[2]=(set_view_xyz[2]-zbar0)/xyzmaxdiff;
+      normalize_xyz(eye_xyz,set_view_xyz);
       eye_xyz0[0]=eye_xyz[0];
       eye_xyz0[1]=eye_xyz[1];
       eye_xyz0[2]=eye_xyz[2];

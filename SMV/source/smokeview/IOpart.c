@@ -267,14 +267,9 @@ void getpart5data(partdata *parti, int partframestep_local, int partpointstep_lo
           for(j=0;j<nparts;j++){
             float xx, yy, zz;
 
-            xx = (xyz[         j]-xbar0)/xyzmaxdiff;
-            xx /= xbar;
-
-            yy = (xyz[  nparts+j]-ybar0)/xyzmaxdiff;
-            yy /= ybar;
-
-            zz = (xyz[2*nparts+j]-zbar0)/xyzmaxdiff;
-            zz /= zbar;
+            xx = NORMALIZE_X(xyz[         j])/xbar;
+            yy = NORMALIZE_Y(xyz[  nparts+j])/ybar;
+            zz = NORMALIZE_Z(xyz[2*nparts+j])/zbar;
 
             sx[j] = factor*xx;
             sy[j] = factor*yy;
@@ -1323,9 +1318,9 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   xbox=xbar0+xbar*xyzmaxdiff;
   ybox=ybar0+ybar*xyzmaxdiff;
   zbox=zbar0+zbar*xyzmaxdiff;
-  offset_x=meshi->offset[0];
-  offset_y=meshi->offset[1];
-  offset_z=meshi->offset[2];
+  offset_x=meshi->offset[XXX];
+  offset_y=meshi->offset[YYY];
+  offset_z=meshi->offset[ZZZ];
   FORTgetdata2(&file_unit,
     parti->xparts,parti->yparts,parti->zparts,
     parti->tpart,&parti->droplet_type,parti->isprink,

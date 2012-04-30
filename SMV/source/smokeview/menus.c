@@ -41,10 +41,8 @@ char menu_revision[]="$Revision$";
 #define GRID_xy 3
 #define GRID_showall 4
 #define GRID_hideall 5
-#define GRID_grid_probe 6
 #define GRID_grid 7
 #define GRID_probe 8
-#define GRID_none 9
 
 void add_scriptlist(char *file, int id);
 void update_glui_render(void);

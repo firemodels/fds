@@ -21,6 +21,15 @@ char smv_geometry_revision[]="$Revision$";
 #include "string_util.h"
 #include "smokeviewvars.h"
 
+
+/* ------------------ normalize_xyz ------------------------ */
+
+void normalize_xyz(float *xyz_out, float *xyz_in){
+  xyz_out[0] = NORMALIZE_X(xyz_in[0]);
+  xyz_out[1] = NORMALIZE_Y(xyz_in[1]);
+  xyz_out[2] = NORMALIZE_Z(xyz_in[2]);
+}
+
 /* ------------------ getmesh_zcell ------------------------ */
 
 float getmesh_zcell(mesh *meshi, float xval, float yval, int *valid){

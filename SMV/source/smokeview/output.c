@@ -250,13 +250,10 @@ void drawLabels(void){
         if(drawlabel==0&&global_times[itimes]>=tstart_stop[0]-0.05&&global_times[itimes]<=tstart_stop[1]+0.05)drawlabel=1;
       }
       if(drawlabel==1){
-        {
-          float xpos,ypos,zpos;
-          xpos = (xyz[0]-xbar0)/xyzmaxdiff;
-          ypos = (xyz[1]-ybar0)/xyzmaxdiff;
-          zpos = (xyz[2]-zbar0)/xyzmaxdiff;
-         output3Text(labelcolor,xpos,ypos,zpos,labelcopy->label);
-        }
+        float xyz_pos[3];
+
+        normalize_xyz(xyz_pos,xyz);
+        output3Text(labelcolor,xyz_pos[0],xyz_pos[1],xyz_pos[2],labelcopy->label);
       }
     }
   }

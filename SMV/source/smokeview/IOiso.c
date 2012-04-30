@@ -312,9 +312,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
   highlight_mesh = blocknumber;
   
   factor = (meshi->xyzmaxdiff/xyzmaxdiff)/65535.0;
-  offset[0]=(meshi->xbar0-xbar0)/xyzmaxdiff;
-  offset[1]=(meshi->ybar0-ybar0)/xyzmaxdiff;
-  offset[2]=(meshi->zbar0-zbar0)/xyzmaxdiff;
+  normalize_xyz(offset,meshi->xyz_bar0);
 
   if(iso_ambient_ini==NULL||n_iso_ambient_ini==0){
     iso_colors=iso_ambient;
@@ -470,9 +468,9 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
             
           isoverti = asurface->iso_vertices+ivert;
           xyz = isoverti->xyz;
-          xyz[0]=offset[0]+factor*(*verti++); 
-          xyz[1]=offset[1]+factor*(*verti++); 
-          xyz[2]=offset[2]+factor*(*verti++); 
+          xyz[0]=offset[XXX]+factor*(*verti++); 
+          xyz[1]=offset[YYY]+factor*(*verti++); 
+          xyz[2]=offset[ZZZ]+factor*(*verti++); 
           isoverti->flag=0;
             
           if(ilevel==0&&strcmp(ib->surface_label.shortlabel,"hrrpuv")==0){

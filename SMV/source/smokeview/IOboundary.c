@@ -988,11 +988,11 @@ int nodeinblockage(const mesh *meshnode, int i,int j,int k, int *imesh, int *ibl
     zplt = meshii->zplt;
 
     xm_min=xplt[0];
-    xm_max=meshii->xbar;
+    xm_max=meshii->xyz_bar[XXX];
     ym_min=yplt[0];
-    ym_max=meshii->ybar;
+    ym_max=meshii->xyz_bar[YYY];
     zm_min=zplt[0];
-    zm_max=meshii->zbar;
+    zm_max=meshii->xyz_bar[ZZZ];
     if(xn<xm_min||xn>xm_max)continue;
     if(yn<ym_min||yn>ym_max)continue;
     if(zn<zm_min||zn>zm_max)continue;

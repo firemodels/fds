@@ -22,8 +22,8 @@ extern "C" char glui_tour_revision[]="$Revision$";
 #include "smokeviewvars.h"
 
 static int viewtype=0;
-static float tour_x=0.0, tour_y=0.0, tour_z=0.0, tour_ttt, tour_az_path=0.0, tour_tension=0.0;
-static float tour_viewx=0.0, tour_viewy=0.0, tour_viewz=0.0, tour_elev_path=0.0;
+static float tour_xyz[3]={0.0,0.0,0.0}, tour_ttt, tour_az_path=0.0, tour_tension=0.0;
+static float tour_view_xyz[3]={0.0,0.0,0.0}, tour_elev_path=0.0;
 static int tour_hide=0;
 static int tour_global_tension_flag=1;
 static float tour_global_tension=0.0;
@@ -200,15 +200,15 @@ extern "C" void glui_tour_setup(int main_window){
 
   panel_movedir = glui_tour->add_panel_to_panel(panel_keyframe,"",GLUI_PANEL_NONE);
   STATIC_tour_1=glui_tour->add_statictext_to_panel(panel_movedir,_("Position"));
-  SPINNER_x=glui_tour->add_spinner_to_panel(panel_movedir,"X:",GLUI_SPINNER_FLOAT,&tour_x,KEYFRAME_tXYZ,TOUR_CB);
-  SPINNER_y=glui_tour->add_spinner_to_panel(panel_movedir,"Y:",GLUI_SPINNER_FLOAT,&tour_y,KEYFRAME_tXYZ,TOUR_CB);
-  SPINNER_z=glui_tour->add_spinner_to_panel(panel_movedir,"Z:",GLUI_SPINNER_FLOAT,&tour_z,KEYFRAME_tXYZ,TOUR_CB);
+  SPINNER_x=glui_tour->add_spinner_to_panel(panel_movedir,"X:",GLUI_SPINNER_FLOAT,tour_xyz,KEYFRAME_tXYZ,TOUR_CB);
+  SPINNER_y=glui_tour->add_spinner_to_panel(panel_movedir,"Y:",GLUI_SPINNER_FLOAT,tour_xyz+1,KEYFRAME_tXYZ,TOUR_CB);
+  SPINNER_z=glui_tour->add_spinner_to_panel(panel_movedir,"Z:",GLUI_SPINNER_FLOAT,tour_xyz+2,KEYFRAME_tXYZ,TOUR_CB);
 
   glui_tour->add_column_to_panel(panel_movedir,false);
   STATIC_tour_2=glui_tour->add_statictext_to_panel(panel_movedir,_("View Direction"));
-  SPINNER_viewx=glui_tour->add_spinner_to_panel(panel_movedir,"X",GLUI_SPINNER_FLOAT,&tour_viewx,KEYFRAME_viewXYZ,TOUR_CB);
-  SPINNER_viewy=glui_tour->add_spinner_to_panel(panel_movedir,"Y",GLUI_SPINNER_FLOAT,&tour_viewy,KEYFRAME_viewXYZ,TOUR_CB);
-  SPINNER_viewz=glui_tour->add_spinner_to_panel(panel_movedir,"Z",GLUI_SPINNER_FLOAT,&tour_viewz,KEYFRAME_viewXYZ,TOUR_CB);
+  SPINNER_viewx=glui_tour->add_spinner_to_panel(panel_movedir,"X",GLUI_SPINNER_FLOAT,&tour_view_xyz,KEYFRAME_viewXYZ,TOUR_CB);
+  SPINNER_viewy=glui_tour->add_spinner_to_panel(panel_movedir,"Y",GLUI_SPINNER_FLOAT,&tour_view_xyz+1,KEYFRAME_viewXYZ,TOUR_CB);
+  SPINNER_viewz=glui_tour->add_spinner_to_panel(panel_movedir,"Z",GLUI_SPINNER_FLOAT,&tour_view_xyz+2,KEYFRAME_viewXYZ,TOUR_CB);
   SPINNER_az_path=glui_tour->add_spinner_to_panel(panel_movedir,_("Azimuth:"),GLUI_SPINNER_FLOAT,&tour_az_path,KEYFRAME_tXYZ,TOUR_CB);
   SPINNER_elev_path=glui_tour->add_spinner_to_panel(panel_movedir,_("Elevation:"),GLUI_SPINNER_FLOAT,&tour_elev_path,KEYFRAME_tXYZ,TOUR_CB);
   SPINNER_elev_path->set_float_limits(-90.0,90.0);
@@ -345,12 +345,12 @@ extern "C" void set_glui_keyframe(){
   aview = selected_frame->nodeval.aview;
 
   tour_ttt = selected_frame->disp_time;
-  tour_x = trim_val(xbar0 + eye[0]*xyzmaxdiff);
-  tour_y = trim_val(ybar0 + eye[1]*xyzmaxdiff);
-  tour_z = trim_val(zbar0 + eye[2]*xyzmaxdiff);
-  tour_viewx = trim_val(xbar0 + xyzmaxdiff*aview[0]);
-  tour_viewy = trim_val(ybar0 + xyzmaxdiff*aview[1]);
-  tour_viewz = trim_val(zbar0 + xyzmaxdiff*aview[2]);
+  tour_xyz[0] = trim_val(xbar0 + eye[0]*xyzmaxdiff);
+  tour_xyz[1] = trim_val(ybar0 + eye[1]*xyzmaxdiff);
+  tour_xyz[2] = trim_val(zbar0 + eye[2]*xyzmaxdiff);
+  tour_view_xyz[0] = trim_val(xbar0 + xyzmaxdiff*aview[0]);
+  tour_view_xyz[1] = trim_val(ybar0 + xyzmaxdiff*aview[1]);
+  tour_view_xyz[2] = trim_val(zbar0 + xyzmaxdiff*aview[2]);
   tour_az_path = selected_frame->az_path;
   tour_continuity=selected_frame->continuity;
   tour_bias=selected_frame->bias;
@@ -394,16 +394,16 @@ extern "C" void set_glui_keyframe(){
     }
   }
 
-  SPINNER_x->set_float_val(tour_x);
-  SPINNER_y->set_float_val(tour_y);
-  SPINNER_z->set_float_val(tour_z);
+  SPINNER_x->set_float_val(tour_xyz[0]);
+  SPINNER_y->set_float_val(tour_xyz[1]);
+  SPINNER_z->set_float_val(tour_xyz[2]);
   if(SPINNER_tourbias!=NULL)SPINNER_tourbias->set_float_val(tour_bias);
   if(SPINNER_tourcontinuity!=NULL)SPINNER_tourcontinuity->set_float_val(tour_continuity);
   SPINNER_tourtension->set_float_val(tour_tension);
   SPINNER_tourzoom->set_float_val(tour_zoom);
-  SPINNER_viewx->set_float_val(tour_viewx);
-  SPINNER_viewy->set_float_val(tour_viewy);
-  SPINNER_viewz->set_float_val(tour_viewz);
+  SPINNER_viewx->set_float_val(tour_view_xyz[0]);
+  SPINNER_viewy->set_float_val(tour_view_xyz[1]);
+  SPINNER_viewz->set_float_val(tour_view_xyz[2]);
   SPINNER_az_path->set_float_val(tour_az_path);
   SPINNER_elev_path->set_float_val(tour_elev_path);
   if(ti!=NULL&&CHECKBOXtourhide!=NULL)CHECKBOXtourhide->set_int_val(tour_hide);
@@ -549,9 +549,7 @@ void TOUR_CB(int var){
       if(selected_tour-tourinfo==0)dirtycircletour=1;
       selected_tour->startup=0;
       aview = selected_frame->nodeval.aview;
-      aview[0]=(tour_viewx-xbar0)/xyzmaxdiff;
-      aview[1]=(tour_viewy-ybar0)/xyzmaxdiff;
-      aview[2]=(tour_viewz-zbar0)/xyzmaxdiff;
+      normalize_xyz(aview,tour_view_xyz);
 
       adjustviewangle(selected_frame,&tour_az_path,&tour_elev_path);
       SPINNER_az_path->set_float_val(tour_az_path);
@@ -592,9 +590,7 @@ void TOUR_CB(int var){
         selected_frame->noncon_time=tour_ttt;
         selected_frame->disp_time=tour_ttt;
       }
-      eye[0]=(tour_x-xbar0)/xyzmaxdiff;
-      eye[1]=(tour_y-ybar0)/xyzmaxdiff;
-      eye[2]=(tour_z-zbar0)/xyzmaxdiff;
+      normalize_xyz(eye,tour_xyz);
       if(viewtype==0){
         tour_az_path = SPINNER_az_path->get_float_val();
       }
@@ -606,9 +602,7 @@ void TOUR_CB(int var){
       selected_frame->continuity=tour_continuity;
       selected_frame->viewtype=viewtype;
       selected_frame->nodeval.zoom=tour_zoom;
-      aview[0]=(tour_viewx-xbar0)/xyzmaxdiff;
-      aview[1]=(tour_viewy-ybar0)/xyzmaxdiff;
-      aview[2]=(tour_viewz-zbar0)/xyzmaxdiff;
+      normalize_xyz(aview,tour_view_xyz);
       createtourpaths();
       selected_frame->selected=1;
       if(viewtype==1){

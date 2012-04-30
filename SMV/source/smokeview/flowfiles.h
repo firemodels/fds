@@ -490,7 +490,7 @@ typedef struct _mesh {
   float boxmin[3], boxmax[3];
   float boxmin_scaled[3], boxmax_scaled[3];
   float *zcell;
-  float xbar0, xbar, ybar0, ybar, zbar0, zbar;
+  float xyz_bar0[3], xyz_bar[3];
   float xcen, ycen, zcen;
   float face_centers[18];
   float offset[3];

@@ -11,6 +11,10 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#define XXX 0
+#define YYY 1
+#define ZZZ 2
+
 #define NORMALIZE_X(x) (((x)-xbar0)/xyzmaxdiff)
 #define NORMALIZE_Y(y) (((y)-ybar0)/xyzmaxdiff)
 #define NORMALIZE_Z(z) (((z)-zbar0)/xyzmaxdiff)

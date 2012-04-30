@@ -352,9 +352,9 @@ int gettargetposition(int itarget, float time_local, float *x, float *y, float *
       *x=MIX(factor,tp->x[i+1],tp->x[i]);
       *y=MIX(factor,tp->y[i+1],tp->y[i]);
       *z=MIX(factor,tp->z[i+1],tp->z[i]);
-      *x = (*x-xbar0)/xyzmaxdiff;
-      *y = (*y-ybar0)/xyzmaxdiff;
-      *z = (*z-zbar0)/xyzmaxdiff;
+      *x = NORMALIZE_X(*x);
+      *y = NORMALIZE_Y(*y);
+      *z = NORMALIZE_Z(*z);
       return VISIBLE;
     }
   }
@@ -392,9 +392,9 @@ void drawTargets(void){
 
          jj = targtimeslist[itimes];
          color = target_positions[i].color;
-         xtarget=(target_positions[i].x[jj]-xbar0)/xyzmaxdiff;;
-         ytarget=(target_positions[i].y[jj]-ybar0)/xyzmaxdiff;
-         ztarget=(target_positions[i].z[jj]-zbar0)/xyzmaxdiff;
+         xtarget=NORMALIZE_X(target_positions[i].x[jj]);
+         ytarget=NORMALIZE_Y(target_positions[i].y[jj]);
+         ztarget=NORMALIZE_Z(target_positions[i].z[jj]);
          glPointSize((float)4.0);
          glBegin(GL_QUADS);
 #define DELTA 0.1f

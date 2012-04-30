@@ -192,12 +192,12 @@ void get_blockvals(  float *xmin, float *xmax,
     *zmax = xyz[5];
   }
   else{
-    *xmin = current_mesh->xplt_orig[bc->ijk[IMIN]]-current_mesh->offset[0];
-    *xmax = current_mesh->xplt_orig[bc->ijk[IMAX]]-current_mesh->offset[0];
-    *ymin = current_mesh->yplt_orig[bc->ijk[JMIN]]-current_mesh->offset[1];
-    *ymax = current_mesh->yplt_orig[bc->ijk[JMAX]]-current_mesh->offset[1];
-    *zmin = current_mesh->zplt_orig[bc->ijk[KMIN]]-current_mesh->offset[2];
-    *zmax = current_mesh->zplt_orig[bc->ijk[KMAX]]-current_mesh->offset[2];
+    *xmin = current_mesh->xplt_orig[bc->ijk[IMIN]]-current_mesh->offset[XXX];
+    *xmax = current_mesh->xplt_orig[bc->ijk[IMAX]]-current_mesh->offset[XXX];
+    *ymin = current_mesh->yplt_orig[bc->ijk[JMIN]]-current_mesh->offset[YYY];
+    *ymax = current_mesh->yplt_orig[bc->ijk[JMAX]]-current_mesh->offset[YYY];
+    *zmin = current_mesh->zplt_orig[bc->ijk[KMIN]]-current_mesh->offset[ZZZ];
+    *zmax = current_mesh->zplt_orig[bc->ijk[KMAX]]-current_mesh->offset[ZZZ];
   }
   *imin = bc->ijk[IMIN];
   *jmin = bc->ijk[JMIN];
@@ -1515,13 +1515,13 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
       if(faceptr->is_interior==1&&show_bothsides_int==1)faceptr->show_bothsides=1;
       if(faceptr->is_interior==0&&show_bothsides_ext==1)faceptr->show_bothsides=1;
     }
-    offset[0]=(float)0.0;
-    offset[1]=(float)0.0;
-    offset[2]=(float)0.0;
+    offset[XXX]=(float)0.0;
+    offset[YYY]=(float)0.0;
+    offset[ZZZ]=(float)0.0;
     switch (faceptr->dir) {
      case DOWN_Y: 
        faceptr->normal[1]=(float)-1.0;
-       if(facetype==VENT_face&&vi!=NULL&&vi->dummy==0)offset[1] = -meshi->vent_offset[1];
+       if(facetype==VENT_face&&vi!=NULL&&vi->dummy==0)offset[YYY] = -meshi->vent_offset[YYY];
        faceptr->jmax=faceptr->jmin;
        if(xminmax2[0]==xminmax2[1]||zminmax2[0]==zminmax2[1])faceptr->thinface=1;
        xtex = xx;
@@ -1533,7 +1533,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
        break;
      case UP_X:    
        faceptr->normal[0]=(float)1.0;
-       if(facetype==VENT_face&&vi!=NULL&&vi->dummy==0)offset[0] = meshi->vent_offset[0];
+       if(facetype==VENT_face&&vi!=NULL&&vi->dummy==0)offset[XXX] = meshi->vent_offset[XXX];
        faceptr->imin=faceptr->imax;
        if(yminmax2[0]==yminmax2[1]||zminmax2[0]==zminmax2[1])faceptr->thinface=1;
        xtex = yy;
@@ -1545,7 +1545,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
        break;
      case UP_Y:   
        faceptr->normal[1]=(float)1.0;
-       if(facetype==VENT_face&&vi!=NULL&&vi->dummy==0)offset[1] = meshi->vent_offset[1];
+       if(facetype==VENT_face&&vi!=NULL&&vi->dummy==0)offset[YYY] = meshi->vent_offset[YYY];
        faceptr->jmin=faceptr->jmax;
        if(xminmax2[0]==xminmax2[1]||zminmax2[0]==zminmax2[1])faceptr->thinface=1;
        xtex = xx;
@@ -1556,7 +1556,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
        ystart = &zbar0;
        break;
      case DOWN_X:  
-       if(facetype==VENT_face&&vi!=NULL&&vi->dummy==0)offset[0] = -meshi->vent_offset[0];
+       if(facetype==VENT_face&&vi!=NULL&&vi->dummy==0)offset[XXX] = -meshi->vent_offset[XXX];
        xtex = yy;
        ytex = zz;
        xtex2 = yy2;
@@ -1568,7 +1568,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
        ystart = &zbar0;
        break;
      case DOWN_Z: 
-       if(facetype==VENT_face&&vi!=NULL&&vi->dummy==0)offset[2] = -meshi->vent_offset[2];
+       if(facetype==VENT_face&&vi!=NULL&&vi->dummy==0)offset[ZZZ] = -meshi->vent_offset[ZZZ];
        xtex = xx;
        ytex = yy;
        xtex2 = xx2;
@@ -1580,7 +1580,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
        ystart = &ybar0;
        break;
      case UP_Z:   
-       if(facetype==VENT_face&&vi!=NULL&&vi->dummy==0)offset[2] = meshi->vent_offset[2];
+       if(facetype==VENT_face&&vi!=NULL&&vi->dummy==0)offset[ZZZ] = meshi->vent_offset[ZZZ];
        xtex = xx;
        ytex = yy;
        xtex2 = xx2;
@@ -1605,20 +1605,20 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
     faceptr->approx_center_coord[1]=0.0;
     faceptr->approx_center_coord[2]=0.0;
     faceptr->dist2eye=0.0;
-    faceptr->xmin=xx2[bfi[0]]+offset[0];
-    faceptr->ymin=yy2[bfi[0]]+offset[1];
-    faceptr->zmin=zz2[bfi[0]]+offset[2];
-    faceptr->xmax=xx2[bfi[0]]+offset[0];
-    faceptr->ymax=yy2[bfi[0]]+offset[1];
-    faceptr->zmax=zz2[bfi[0]]+offset[2];
+    faceptr->xmin=xx2[bfi[0]]+offset[XXX];
+    faceptr->ymin=yy2[bfi[0]]+offset[YYY];
+    faceptr->zmin=zz2[bfi[0]]+offset[ZZZ];
+    faceptr->xmax=xx2[bfi[0]]+offset[XXX];
+    faceptr->ymax=yy2[bfi[0]]+offset[YYY];
+    faceptr->zmax=zz2[bfi[0]]+offset[ZZZ];
     for(k=0;k<4;k++){
       float xvert, yvert, zvert;
 
       jjj = bfi[k];
       
-      xvert=xx[jjj]+offset[0];
-      yvert=yy[jjj]+offset[1];
-      zvert=zz[jjj]+offset[2];
+      xvert=xx[jjj]+offset[XXX];
+      yvert=yy[jjj]+offset[YYY];
+      zvert=zz[jjj]+offset[ZZZ];
       faceptr->approx_vertex_coords[3*k]=xvert;
       faceptr->approx_vertex_coords[3*k+1]=yvert;
       faceptr->approx_vertex_coords[3*k+2]=zvert;
@@ -1628,9 +1628,9 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
       faceptr->approx_center_coord[2]+=zvert;
 
 
-      faceptr->exact_vertex_coords[3*k]=xx2[jjj]+offset[0];
-      faceptr->exact_vertex_coords[3*k+1]=yy2[jjj]+offset[1];
-      faceptr->exact_vertex_coords[3*k+2]=zz2[jjj]+offset[2];
+      faceptr->exact_vertex_coords[3*k]=xx2[jjj]+offset[XXX];
+      faceptr->exact_vertex_coords[3*k+1]=yy2[jjj]+offset[YYY];
+      faceptr->exact_vertex_coords[3*k+2]=zz2[jjj]+offset[ZZZ];
       if(faceptr->exact_vertex_coords[3*k]<faceptr->xmin)faceptr->xmin=faceptr->exact_vertex_coords[3*k];
       if(faceptr->exact_vertex_coords[3*k]>faceptr->xmax)faceptr->xmax=faceptr->exact_vertex_coords[3*k];
       if(faceptr->exact_vertex_coords[3*k+1]<faceptr->ymin)faceptr->ymin=faceptr->exact_vertex_coords[3*k+1];
@@ -1756,12 +1756,12 @@ void set_cull_vis(void){
       culli = meshi->cullgeominfo+iport;
       culli->vis=0;
 
-      xx[0] = (culli->xbeg-xbar0)/xyzmaxdiff;
-      xx[1] = (culli->xend-xbar0)/xyzmaxdiff;
-      yy[0] = (culli->ybeg-ybar0)/xyzmaxdiff;
-      yy[1] = (culli->yend-ybar0)/xyzmaxdiff;
-      zz[0] = (culli->zbeg-zbar0)/xyzmaxdiff;
-      zz[1] = (culli->zend-zbar0)/xyzmaxdiff;
+      xx[0] = NORMALIZE_X(culli->xbeg);
+      xx[1] = NORMALIZE_X(culli->xend);
+      yy[0] = NORMALIZE_Y(culli->ybeg);
+      yy[1] = NORMALIZE_Y(culli->yend);
+      zz[0] = NORMALIZE_Z(culli->zbeg);
+      zz[1] = NORMALIZE_Z(culli->zend);
       
       if(PointInFrustum(xx[0],yy[0],zz[0])==1){
         culli->vis=1;
@@ -4425,12 +4425,8 @@ void drawticks(void){
       xyz2[0]=xyz[0]+dxyz[0];
       xyz2[1]=xyz[1]+dxyz[1];
       xyz2[2]=xyz[2]+dxyz[2];
-      xyz[0] = (xyz[0] - xbar0)/xyzmaxdiff;
-      xyz[1] = (xyz[1] - ybar0)/xyzmaxdiff;
-      xyz[2] = (xyz[2] - zbar0)/xyzmaxdiff;
-      xyz2[0] = (xyz2[0] - xbar0)/xyzmaxdiff;
-      xyz2[1] = (xyz2[1] - ybar0)/xyzmaxdiff;
-      xyz2[2] = (xyz2[2] - zbar0)/xyzmaxdiff;
+      normalize_xyz(xyz,xyz);
+      normalize_xyz(xyz2,xyz2);
       glVertex3fv(xyz);
       glVertex3fv(xyz2);
     }

@@ -171,9 +171,9 @@ if(show_smoketest==0){\
   value[2]=alphaf_ptr[n22]; \
   value[3]=alphaf_ptr[n21]; \
   if(value[0]==0&&value[1]==0&&value[2]==0&&value[3]==0)continue;\
-  z_offset[0]=znode_offset[m11];\
-  z_offset[1]=znode_offset[m12];\
-  z_offset[2]=znode_offset[m22];\
+  z_offset[XXX]=znode_offset[m11];\
+  z_offset[YYY]=znode_offset[m12];\
+  z_offset[ZZZ]=znode_offset[m22];\
   z_offset[3]=znode_offset[m21];\
   ivalue[0]=n11<<2;  \
   ivalue[1]=n12<<2;  \
@@ -208,9 +208,9 @@ if(show_smoketest==0){\
   }\
 }\
 else{\
-  z_offset[0]=znode_offset[m11];\
-  z_offset[1]=znode_offset[m12];\
-  z_offset[2]=znode_offset[m22];\
+  z_offset[XXX]=znode_offset[m11];\
+  z_offset[YYY]=znode_offset[m12];\
+  z_offset[ZZZ]=znode_offset[m22];\
   z_offset[3]=znode_offset[m21];\
   for(node=0;node<6;node++){                             \
     int mm;\
@@ -264,9 +264,9 @@ else{\
 // -------------------------- DRAWVERTEXGPUTERRAIN ----------------------------------
 
 #define DRAWVERTEXGPUTERRAIN(XX,YY,ZZ) \
-  z_offset[0]=znode_offset[m11];\
-  z_offset[1]=znode_offset[m12];\
-  z_offset[2]=znode_offset[m22];\
+  z_offset[XXX]=znode_offset[m11];\
+  z_offset[YYY]=znode_offset[m12];\
+  z_offset[ZZZ]=znode_offset[m22];\
   z_offset[3]=znode_offset[m21];\
   value[0]=alphaf_in[n11];\
   value[1]=alphaf_in[n12];\
