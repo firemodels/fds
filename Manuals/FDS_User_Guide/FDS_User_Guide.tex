@@ -1149,7 +1149,7 @@ before the {\ct \&} except a space and nothing comes between the ampersand
 {\ct \&} and the slash {\ct /} except appropriate parameters corresponding
 to that particular namelist group.
 
-The parameters in the input file can be integers ({\ct T\_END=5400}),
+fThe parameters in the input file can be integers ({\ct T\_END=5400}),
 real numbers ({\ct CO\_YIELD=0.008}), groups of real numbers or integers
 ({\ct XYZ=6.04,0.28,3.65}) or ({\ct IJK=90,36,38}),
 character strings:
@@ -5952,8 +5952,69 @@ $n$ species, FDS only solves transport equations for $n-1$ because it also solve
 total mass conservation. To set the properties of the background species, use the
 {\ct SPEC} or {\ct SMIX} line with {\ct BACKGROUND=.TRUE.} specified.
 
+\clearpage
+
+\section{Surface Deposition of Aerosols}
+\label{info:surface_depo}
+
+Particulates in the flowfield, such as soot, can deposit on surfaces removing them from the flow.  For fire simulations this could result in a delay in detection time or an improvement in the visbility for egress.  The deposition of soot on surfaces results in visible patterns and being able to simulate deposition would allow for the evaluation of a specific cause and origin hypothesis against observed patterns at a fire scene.  Lastly a number of toxicants occur as aerosols (for examle radionuclides or chemical or biological agents), and surface deposition is an important phenomena for evaluating dispersion.  FDS contains an experimental model for computing the deposition of aerosols onto surfaces.
+
+Aerosol deposition is determined by computing a deposition velocity, u$_dep$, and applying that velocity to the aerosol next to a wall cell to determine a deposition rate.  There are a number of phenomena that result in the deposition velocity: thermophoresis (where temperature gradients push the aerosol towards or away from the wall), gravitional settling, diffusive deposition (where the aerosols move along the boundary layer concentration gradient), and turbulent deposition (essentially impact deposition due to a turbulent boundary layer).  Other phenomena such eletrical fields can also result in deposition but are not considered in FDS.  The deposition velocity is determined by assuming the phenomena are independent, computing a deposition velocity for each (respectively u$_{th}$, u$_g$, and u$_{dt}$ which is a combined diffusion and turbluence velocity), and summing them~\cite{Bixler:1} .  By default FDS will compute all of the phenomena, but they can be selectively disabled with the logical flags {\ct GRAVITATIONAL\_DEPOSITION}, {\ct THERMOPHORETIC\_DEPOSITION}, and {\ct TURBULENT\_DEPOSITION}.
 
 
+The gravitational velocity is given by~\cite{Davies_Charles}
+
+\be
+u_g = g m_a \frac{Cn}{6 \pi {\chi}_d \mu r_a}
+\ee
+
+where $\chi_d$ is a shape factor, r$_a$ is the particle radius, Cn is Cunningham's slip factor given by~\cite{Cunningham:1}, and m$_a$ is the particle mass which is computed using the radius and the {\ct DENSITY\_SOLID} (on {\ct SPEC}).
+
+\be
+Cn = 1 + 1.25 Kn + 0.41 Kn e^{-\frac{0.88}{Kn}}
+\ee
+
+where Kn is the particle Knudsen number given by the ratio of the mean free path of the gas to the particle radius ({\ct MEAN\_DIAMETER} on {\ct SPEC}) .  Since, the mean free path of a gas is proportional to its temperature, Kn is computed as~\cite{Sippola:1}
+
+\be
+Kn = \frac{0.0065~m~at~25~ ^\circ C}{r_a} \frac{T_g}{298.15 K}
+\ee
+
+The thermophoretic velocity is computed as:
+
+\be
+u_{th} = \frac{K_{th} \nu}{T_g} \frac{\mbox{d} T}{\mbox{d}x}
+\ee
+
+This requires the wall temperature gradient which is only resolved in a DNS simulation. For an LES simulation this is computed from the wall heat transfer coefficient.
+
+\be
+ \frac{\mbox{d} T}{\mbox{d}x} = \frac{h \left( T_g - T_w \right)}{k_g}
+\ee
+
+K$_{th}$ is the thermophoretic velocity coefficient, and it is calculated using the following correlation~\cite{Brock:1}
+
+\be
+ K_{th} = \frac{2 C_s \left(\alpha + C_t Kn \right) Cn}{\left(1 + 3 C_m Kn \right) \left(1 + 2 \alpha + 2 C_t Kn \right) }
+\ee
+
+where $\alpha$ is the ratio of the gas conductivity to the particle conductivity ({\ct CONDUCTIVITY\_SOLID} on {\ct SPEC}), C$_m$ is the momentum accommodation coefficient (1.14), C$_t$ is the thermal accommodation coefficient (2.18), and C$_s$ is the thermal slip coefficient (1.17).
+
+The diffusive and turbulent deposition velocity depends upon the flow regime (diffusion, diffusion-impaction, or intertia-moderated).  The deposition velocity for these regimes are given below ~\cite{McCoy_Hanratty}.   
+
+\begin{eqnarray}
+u_{dt} &=& 0.086 Sc^{-0.7} u_{\tau} \hspace{1 cm} \mbox{for} \quad \tau^+ < 0.2 \\
+u_{dt} &=& 3.5 \times 10^{-4} {\tau^+}^2 u_{\tau} \hspace{0.62 cm} \mbox{for} \quad 0.2 < \tau^+ < 30 \\
+u_{dt} &=&  0.17 u_{\tau}  \hspace{2.12 cm} \mbox{for} \quad \tau^+ < 30 \\
+\end{eqnarray}
+
+where u$_{\tau}$ is the wall friction velocity computed by the Werner-Wengle model and $\tau^+$ is the dimensionless stopping distance given by~\cite{Ludwig_ICONE}
+
+\be
+ \tau^+=\frac{2 \rho_a r_a}{18 \mu^2}  u_{\tau}^2 \rho_g
+\ee
+
+A simple example is given in Section~\ref{info:deposition}.
 
 \chapter{Combustion}
 
@@ -6370,9 +6431,10 @@ Note: In the third (reversible) reaction, the {\ct HEAT\_OF\_COMBUSTION} is set 
       ODE_SOLVER= 'RK2 RICHARDSON' /
 \end{verbatim} \normalsize
 
-\label{info:deposition}
+
 
 \subsection{Soot Deposition}
+\label{info:deposition}
 
 This example shows how to define a reaction that invokes an aerosol deposition model in FDS (e.g. soot deposition).  Note, that this model should be considered an experimental feature. The deposition model is invoked by defining a species with the parameter {\ct AEROSOL=.TRUE.}.  For this example propane will be the fuel with a 5 \% soot yield.  The stoichiometric equation is shown below.
 \begin{eqnarray}\label{eq:PROPANE_depo}
@@ -10656,6 +10718,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct FORCE\_VECTOR(3)}                          & Real          & Section~\ref{info:force_vector}                       &               & 0.                \\ \hline
 {\ct FREEZE\_VELOCITY}                          & Logical       & Constant velocity                                     &               & {\ct .FALSE.}     \\ \hline
 {\ct GAMMA}                                     & Real          & Section~\ref{gas_species_props}                       &               & 1.4               \\ \hline
+{\ct GRAVITATIONAL\_DEPOSITION}                 & Logical       & Section~\ref{info:surface_depo}                       &               & {\ct .TRUE.}    \\ \hline
 {\ct GROUND\_LEVEL}                             & Real          & Section~\ref{info:stratification}                     & m             & 0.                \\ \hline
 {\ct GVEC}                                      & Real triplet  & Section~\ref{info:GVEC}                               & m/s$^2$       & 0,0,-9.81         \\ \hline
 %{\ct IMMERSED\_BOUNDARY\_METHOD}                & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
@@ -10687,9 +10750,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct STRATIFICATION}                            & Logical       & Section~\ref{info:stratification}                     &               & {\ct .TRUE.}      \\ \hline
 %{\ct TERRAIN\_CASE}                             & Logical       & See Wildland Fire User's Guide                            &               & {\ct .FALSE.}     \\ \hline
 {\ct TEXTURE\_ORIGIN(3)}                        & Char.~Triplet & Section~\ref{info:texture_map}                        & m             & (0.,0.,0.)        \\ \hline
+{\ct THERMOPHORETIC\_DEPOSITION}                & Logical       & Section~\ref{info:surface_depo}                       &               & {\ct .TRUE.}    \\ \hline
 {\ct THICKEN\_OBSTRUCTIONS}                     & Logical       & Section~\ref{info:OBST_Basics}                        &               & {\ct .FALSE.}     \\ \hline
 {\ct TMPA}                                      & Real          & Section~\ref{info:MISC_Basics}                        & $^\circ$C     & 20.               \\ \hline
 {\ct TURBULENCE\_MODEL}                         & Character     & Section~\ref{info:LES}                                &               & {\ct 'DEARDORFF'} \\ \hline
+{\ct TURBULENT\_DEPOSITION}                     & Logical       & Section~\ref{info:surface_depo}                       &               & {\ct .TRUE.}    \\ \hline
 {\ct U0,V0,W0}                                  & Reals         & Section~\ref{info:MISC_Basics}                        & m/s           & 0.                \\ \hline
 %{\ct UVW\_FILE}                                 & Character     & See FDS Verification Guide                                &               &                   \\ \hline
 {\ct VISIBILITY\_FACTOR}                        & Real          & Section~\ref{info:visibility}                         &               & 3                 \\ \hline
@@ -10698,7 +10763,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct WIND\_ONLY}                                & Logical       & See Wildland Fire User's Guide                            &               & {\ct .FALSE.}     \\ \hline
 \end{longtable}
 
-%Undocumented: HRRPUVCUT_MAX, HRRPUV_MAX_SMV, NEW_EVAP, TENSOR_DIFFUSIVIRY,  TERRAIN_IMAGE, THERMOPHORETIC_DEPOSITION, TURBULENT_DEPOSITION, VEG_LEVEL_SET,  , WFDS
+%Undocumented: HRRPUVCUT_MAX, HRRPUV_MAX_SMV, NEW_EVAP, TENSOR_DIFFUSIVIRY,  TERRAIN_IMAGE, VEG_LEVEL_SET, WFDS
 
 
 \vspace{\baselineskip}
@@ -11199,7 +11264,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct AEROSOL}                       & Logical     & Section~\ref{info:deposition}           &                   & {\ct .FALSE.} \\ \hline
 {\ct BACKGROUND}                    & Logical     & Section~\ref{info:SPEC}                 &                   & {\ct .FALSE.} \\ \hline
 {\ct CONDUCTIVITY}                  & Real        & Section~\ref{gas_species_props}         & W/m/K             &               \\ \hline
+{\ct CONDUCTIVITY\_SOLID}           & Real        & Section~\ref{info:surface_depo}         & W/m/K             &  0.26         \\ \hline
 {\ct DENSITY\_LIQUID}               & Real        & Section~\ref{thermal_part_props}        & kg/m$^3$          &               \\ \hline
+{\ct DENSITY\_SOLID}                & Real        & Section~\ref{info:surface_depo}         & kg/m$^3$          &  1800.        \\ \hline
 {\ct DIFFUSIVITY}                   & Real        & Section~\ref{gas_species_props}         & m$^2$/s           &               \\ \hline
 {\ct EPSILONKLJ}                    & Real        & Section~\ref{gas_species_props}         &                   & 0             \\ \hline
 {\ct FIC\_CONCENTRATION}            & Real        & Section~\ref{info:FED}                  & ppm               & 0.            \\ \hline
@@ -11211,6 +11278,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ID }                           & Character   & Section~\ref{info:SPEC_Basics}          &                   &               \\ \hline
 {\ct MASS\_EXTINCTION\_COEFFICIENT} & Real        & Section~\ref{info:alternative_smoke}    &                   & 0             \\ \hline
 {\ct MASS\_FRACTION\_0}             & Real        & Section~\ref{info:SPEC_Basics}          &                   & 0             \\ \hline
+{\ct MEAN\_DIAMETER}                & Real        & Section~\ref{info:surface_depo}         & m                 & 1.E-6         \\ \hline
 {\ct MELTING\_TEMPERATURE}          & Real        & Section~\ref{thermal_part_props}        & $^\circ$C         &               \\ \hline
 {\ct MW}                            & Real        & Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
 {\ct RAMP\_CP}                      & Character   & Section~\ref{gas_species_props}         &                   &               \\ \hline
@@ -11229,7 +11297,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \end{longtable}
 
 \vspace{\baselineskip}
-% undefined CONDUCTIVITY_SOLID,DENSITY_SOLID,MEAN_DIAMETER for testing particle deposition
 \newpage
 
 \section{\texorpdfstring{{\tt SURF}}{SURF} (Surface Properties)}
