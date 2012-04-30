@@ -345,9 +345,9 @@ extern "C" void set_glui_keyframe(){
   aview = selected_frame->nodeval.aview;
 
   tour_ttt = selected_frame->disp_time;
-  tour_xyz[0] = trim_val(xbar0 + eye[0]*xyzmaxdiff);
-  tour_xyz[1] = trim_val(ybar0 + eye[1]*xyzmaxdiff);
-  tour_xyz[2] = trim_val(zbar0 + eye[2]*xyzmaxdiff);
+  tour_xyz[0] = trim_val(DENORMALIZE_X(eye[0]));
+  tour_xyz[1] = trim_val(DENORMALIZE_Y(eye[1]));
+  tour_xyz[2] = trim_val(DENORMALIZE_Z(eye[2]));
   tour_view_xyz[0] = trim_val(xbar0 + xyzmaxdiff*aview[0]);
   tour_view_xyz[1] = trim_val(ybar0 + xyzmaxdiff*aview[1]);
   tour_view_xyz[2] = trim_val(zbar0 + xyzmaxdiff*aview[2]);

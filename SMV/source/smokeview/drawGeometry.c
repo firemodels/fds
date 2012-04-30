@@ -923,9 +923,9 @@ void update_cadtextcoords(cadquad *quadi){
 
 
   for(i=0;i<4;i++){
-    qx=xbar0+xyz[3*i]*xyzmaxdiff - t_origin[0];
-    qy=ybar0+xyz[3*i+1]*xyzmaxdiff - t_origin[1];
-    qz=zbar0+xyz[3*i+2]*xyzmaxdiff - t_origin[2];
+    qx=DENORMALIZE_X(xyz[3*i]) - t_origin[0];
+    qy=DENORMALIZE_Y(xyz[3*i]+1) - t_origin[1];
+    qz=DENORMALIZE_Z(xyz[3*i]+2) - t_origin[2];
 
     if(l1!=0.0){
       txy[2*i]=(ny*qx-nx*qy)/l1;

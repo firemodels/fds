@@ -11185,9 +11185,9 @@ void writeini(int flag){
             if(framei==&touri->first_frame)continue;
             sprintf(buffer,"%f %f %f %f ",
               framei->noncon_time,
-              xbar0+framei->nodeval.eye[0]*xyzmaxdiff,
-              ybar0+framei->nodeval.eye[1]*xyzmaxdiff,
-              zbar0+framei->nodeval.eye[2]*xyzmaxdiff);
+              DENORMALIZE_X(framei->nodeval.eye[0]),
+              DENORMALIZE_Y(framei->nodeval.eye[1]),
+              DENORMALIZE_Z(framei->nodeval.eye[2]));
             trimmzeros(buffer);
             fprintf(fileout," %s %i ",buffer,framei->viewtype);
             if(framei->viewtype==0){
@@ -11198,9 +11198,9 @@ void writeini(int flag){
             }
             else{
               sprintf(buffer,"%f %f %f %f %f %f %f ",
-                xbar0+framei->nodeval.aview[0]*xyzmaxdiff,
-                ybar0+framei->nodeval.aview[1]*xyzmaxdiff,
-                zbar0+framei->nodeval.aview[2]*xyzmaxdiff,
+                DENORMALIZE_X(framei->nodeval.aview[0]),
+                DENORMALIZE_Y(framei->nodeval.aview[1]),
+                DENORMALIZE_Z(framei->nodeval.aview[2]),
                 framei->tension, framei->bias, framei->continuity,
                 framei->nodeval.zoom);
             }

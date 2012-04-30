@@ -198,8 +198,8 @@ float get_zcell_val_offset(mesh *meshi,float xval, float yval, int *loc){
     }
 
 // convert xval and yval to "user" units
-    xval = xbar0 + xval*xyzmaxdiff;
-    yval = ybar0 + yval*xyzmaxdiff;
+    xval = DENORMALIZE_X(xval);
+    yval = DENORMALIZE_Y(yval);
 
     xplt = meshj->xplt_orig;
     yplt = meshj->yplt_orig;

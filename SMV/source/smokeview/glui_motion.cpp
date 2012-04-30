@@ -140,9 +140,9 @@ extern "C" void update_glui_set_view_xyz(float *xyz){
   if(xyz==NULL)return;
   if(SPINNER_set_view_x==NULL||SPINNER_set_view_y==NULL||SPINNER_set_view_z!=NULL)return;
   
-  set_view_xyz[0] = xbar0 + xyz[0]*xyzmaxdiff;
-  set_view_xyz[1] = ybar0 + xyz[1]*xyzmaxdiff;
-  set_view_xyz[2] = zbar0 + xyz[2]*xyzmaxdiff;
+  set_view_xyz[0] = DENORMALIZE_X(xyz[0]);
+  set_view_xyz[1] = DENORMALIZE_Y(xyz[1]);
+  set_view_xyz[2] = DENORMALIZE_Z(xyz[2]);
 
   SPINNER_set_view_x->set_float_val(set_view_xyz[0]);
   SPINNER_set_view_y->set_float_val(set_view_xyz[1]);
@@ -703,9 +703,9 @@ void GSLICE_CB(int var){
     break;
     case GSLICE_HTRANSLATE:
     case GSLICE_VTRANSLATE:
-      gslice_xyz[0]=CLAMP(gslice_xyz[0],xbar0*STEPS_PER_DEG,(xbar0+xbar*xyzmaxdiff)*STEPS_PER_DEG);
-      gslice_xyz[1]=CLAMP(gslice_xyz[1],ybar0*STEPS_PER_DEG,(ybar0+ybar*xyzmaxdiff)*STEPS_PER_DEG);
-      gslice_xyz[2]=CLAMP(gslice_xyz[2],zbar0*STEPS_PER_DEG,(zbar0+zbar*xyzmaxdiff)*STEPS_PER_DEG);
+      gslice_xyz[0]=CLAMP(gslice_xyz[0],xbar0*STEPS_PER_DEG,DENORMALIZE_X(xbar)*STEPS_PER_DEG);
+      gslice_xyz[1]=CLAMP(gslice_xyz[1],ybar0*STEPS_PER_DEG,DENORMALIZE_Y(ybar)*STEPS_PER_DEG);
+      gslice_xyz[2]=CLAMP(gslice_xyz[2],zbar0*STEPS_PER_DEG,DENORMALIZE_Z(zbar)*STEPS_PER_DEG);
     break;
   }
 }

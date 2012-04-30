@@ -1315,9 +1315,9 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     readpart("",ifile,UNLOAD,&error);
     return;
   }
-  xbox=xbar0+xbar*xyzmaxdiff;
-  ybox=ybar0+ybar*xyzmaxdiff;
-  zbox=zbar0+zbar*xyzmaxdiff;
+  xbox=DENORMALIZE_X(xbar);
+  ybox=DENORMALIZE_Y(ybar);
+  zbox=DENORMALIZE_Z(zbar);
   offset_x=meshi->offset[XXX];
   offset_y=meshi->offset[YYY];
   offset_z=meshi->offset[ZZZ];
