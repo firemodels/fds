@@ -3006,16 +3006,60 @@ void drawgslice(const slicedata *sd){
     if(meshi->gslice_nverts==0||meshi->gslice_ntriangles==0)continue;
     for(j=0;j<meshi->gslice_ntriangles;j++){
       float *xyz1, *xyz2, *xyz3;
+      float x12[3], x13[3], x23[3];
+      int jj;
+
+      //        3
+      //     13 23
+      //   1 12  2
+
 
       xyz1 = meshi->gslice_verts + 3*meshi->gslice_triangles[3*j];
       xyz2 = meshi->gslice_verts + 3*meshi->gslice_triangles[3*j+1];
       xyz3 = meshi->gslice_verts + 3*meshi->gslice_triangles[3*j+2];
+
+//      glVertex3fv(xyz1);
+//      glVertex3fv(xyz2);
+//      glVertex3fv(xyz2);
+//      glVertex3fv(xyz3);
+//      glVertex3fv(xyz3);
+//      glVertex3fv(xyz1);
+
+// sub divide triangle
+
+     for(jj=0;jj<3;jj++){
+        x12[jj]= (xyz1[jj]+xyz2[jj])/2.0;
+        x13[jj]= (xyz1[jj]+xyz3[jj])/2.0;
+        x23[jj]= (xyz2[jj]+xyz3[jj])/2.0;
+      }
+      
       glVertex3fv(xyz1);
+      glVertex3fv(x12);
+      glVertex3fv(x12);
+      glVertex3fv(x13);
+      glVertex3fv(x13);
+      glVertex3fv(xyz1);
+
+      glVertex3fv(x12);
       glVertex3fv(xyz2);
       glVertex3fv(xyz2);
+      glVertex3fv(x23);
+      glVertex3fv(x23);
+      glVertex3fv(x12);
+
+      glVertex3fv(x12);
+      glVertex3fv(x23);
+      glVertex3fv(x23);
+      glVertex3fv(x13);
+      glVertex3fv(x13);
+      glVertex3fv(x12);
+
+      glVertex3fv(x13);
+      glVertex3fv(x23);
+      glVertex3fv(x23);
       glVertex3fv(xyz3);
       glVertex3fv(xyz3);
-      glVertex3fv(xyz1);
+      glVertex3fv(x13);
     }
   }
   glEnd();
