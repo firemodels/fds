@@ -2991,6 +2991,7 @@ void update_gslice_planes(void){
 void getNormal(float *v1, float *v2, float *v3, float *area, float *normal);
 void drawgslice(const slicedata *sd){
   int i;
+  float zero[3]={0.0,0.0,0.0};
 
   glPushMatrix();
   glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
@@ -3064,15 +3065,20 @@ void drawgslice(const slicedata *sd){
   }
   glEnd();
 
+  // draw normal vector
+  
+  glPushMatrix();
+  glTranslatef(gslice_xyz[0],gslice_xyz[1],gslice_xyz[2]);
   glBegin(GL_LINES);
-  glVertex3f(gslice_xyz[0]/STEPS_PER_DEG,gslice_xyz[1]/STEPS_PER_DEG,gslice_xyz[2]/STEPS_PER_DEG);
-  glVertex3f(gslice_xyz[0]/STEPS_PER_DEG+gslice_norm[0],gslice_xyz[1]/STEPS_PER_DEG+gslice_norm[1],gslice_xyz[2]/STEPS_PER_DEG+gslice_norm[2]);
+  glVertex3fv(zero);
+  glVertex3fv(gslice_norm);
   glEnd();
   glPointSize(20.0);
   glBegin(GL_POINTS);
-  glVertex3f(gslice_xyz[0]/STEPS_PER_DEG,gslice_xyz[1]/STEPS_PER_DEG,gslice_xyz[2]/STEPS_PER_DEG);
-  glVertex3f(gslice_xyz[0]/STEPS_PER_DEG+gslice_norm[0],gslice_xyz[1]/STEPS_PER_DEG+gslice_norm[1],gslice_xyz[2]/STEPS_PER_DEG+gslice_norm[2]);
+  glVertex3fv(zero);
+  glVertex3fv(gslice_norm);
   glEnd();
+  glPopMatrix();
 
   glPopMatrix();
 }
