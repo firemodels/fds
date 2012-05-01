@@ -171,8 +171,42 @@ int Creadslice_frame(int frame_index,int sd_index,int flag){
   return 0;
 }
 
-/* ------------------ readfed ------------------------ */
+/* ------------------ output_mfed_csv ------------------------ */
 
+void output_mfed_csv(multislicedata *mslicei){
+  FILE *AREA_STREAM=NULL;
+  char fed_area_file[1024],*ext;
+  slicedata *slice0;
+  int nslices;
+  float *areas;
+  int i;
+
+  nslices = mslicei->nslices;
+  if(nslices<=0)return;
+  areas=mslicei->contour_areas;
+  if(areas==NULL)return;
+
+  slice0 = sliceinfo + mslicei->islices[0];
+
+  strcpy(fed_area_file,slice0->file);
+  ext=strrchr(fed_area_file,'.');
+  if(ext!=NULL){
+    *ext=0;
+    strcat(fed_area_file,"_marea.csv");
+    AREA_STREAM=fopen(fed_area_file,"w");
+  }
+  if(AREA_STREAM==NULL)return;
+
+  fprintf(AREA_STREAM,"\"time\",\"0.0->0.3\",\"0.3->1.0\",\"1.0->3.0\",\"3.0->\"\n");
+  for(i=0;i<slice0->ntimes;i++){
+    fprintf(AREA_STREAM,"%f,%f,%f,%f,%f\n",
+    slice0->times[i],areas[0],areas[1],areas[2],areas[3]);
+    areas+=4;
+  }
+  fclose(AREA_STREAM);
+}
+
+/* ------------------ readfed ------------------------ */
 
 void readfed(int file_index, int flag, int file_type, int *errorcode){
   feddata *fedi;
@@ -270,6 +304,8 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
     char fed_area_file[1024],*ext;
     FILE *AREA_STREAM=NULL;
     float area_factor;
+    float *contour_areas,*mslice_contour_areas;
+    multislicedata *mslicei;
 
     switch (fed_slice->idir){
       case 1:
@@ -335,11 +371,23 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
     frame_size = fed_slice->nslicei*fed_slice->nslicej*fed_slice->nslicek;
     fed_slice->nslicetotal=frame_size*fed_slice->ntimes;
 
+    mslicei = fed_slice->mslice;
+    if(mslicei->contour_areas==NULL){
+      NewMemory((void **)&mslicei->contour_areas,4*sizeof(float)*fed_slice->ntimes);
+      for(i=0;i<4*fed_slice->ntimes;i++){
+        mslicei->contour_areas[i]=0.0;
+      }
+    }
+    mslice_contour_areas=mslicei->contour_areas;
+
     if(NewMemory((void **)&fed_slice->qslicedata,sizeof(float)*frame_size*fed_slice->ntimes)==0||
-       NewMemory((void **)&fed_slice->times,sizeof(float)*fed_slice->ntimes)==0){
+       NewMemory((void **)&fed_slice->times,sizeof(float)*fed_slice->ntimes)==0||
+       NewMemory((void **)&fed_slice->contour_areas,4*sizeof(float)*fed_slice->ntimes)==0
+       ){
        readfed(file_index,UNLOAD, file_type, errorcode);
       *errorcode=-1;
     }
+    contour_areas = fed_slice->contour_areas;
 
     times=fed_slice->times;
     fed_frame=fed_slice->qslicedata;
@@ -369,6 +417,16 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
       fprintf(AREA_STREAM,"\"time\",\"0.0->0.3\",\"0.3->1.0\",\"1.0->3.0\",\"3.0->\"\n");
       fprintf(AREA_STREAM,"%f,%f,%f,%f,%f\n",
         times[0],(areas[3]+areas[0])*area_factor,areas[1]*area_factor,areas[2]*area_factor,areas[4]*area_factor);
+      contour_areas[0]=(areas[0]+areas[3])*area_factor;
+      contour_areas[1]=areas[1]*area_factor;
+      contour_areas[2]=areas[2]*area_factor;
+      contour_areas[3]=areas[4]*area_factor;
+      mslice_contour_areas[0]+=contour_areas[0];
+      mslice_contour_areas[1]+=contour_areas[1];
+      mslice_contour_areas[2]+=contour_areas[2];
+      mslice_contour_areas[3]+=contour_areas[3];
+      mslice_contour_areas+=4;
+      contour_areas+=4;
     }
     for(i=1;i<fed_slice->ntimes;i++){
       int j;
@@ -410,6 +468,16 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
         if(AREA_STREAM!=NULL){
           fprintf(AREA_STREAM,"%f,%f,%f,%f,%f\n",
             times[i],(areas[3]+areas[0])*area_factor,areas[1]*area_factor,areas[2]*area_factor,areas[4]*area_factor);
+          contour_areas[0]=(areas[0]+areas[3])*area_factor;
+          contour_areas[1]=areas[1]*area_factor;
+          contour_areas[2]=areas[2]*area_factor;
+          contour_areas[3]=areas[4]*area_factor;
+          mslice_contour_areas[0]+=contour_areas[0];
+          mslice_contour_areas[1]+=contour_areas[1];
+          mslice_contour_areas[2]+=contour_areas[2];
+          mslice_contour_areas[3]+=contour_areas[3];
+          mslice_contour_areas+=4;
+          contour_areas+=4;
         }
       }
     }
@@ -1901,6 +1969,26 @@ void getsliceparams(void){
     mslicei->nslices=ii;
   }
 #endif
+  for(i=0;i<nsliceinfo;i++){
+    slicedata *slicei;
+
+    slicei = sliceinfo + i;
+    slicei->mslice=NULL;
+  }
+  for(i=0;i<nmultislices;i++){
+    int ii;
+    multislicedata *mslicei;
+
+    mslicei = multisliceinfo + i;
+    mslicei->contour_areas=NULL;
+    for(ii=0;ii<mslicei->nslices;ii++){
+      slicedata *slicei;
+
+      slicei = sliceinfo + mslicei->islices[ii];
+      ASSERT(slicei->mslice==NULL);
+      slicei->mslice=mslicei;
+    }
+  }
   updateslicemenulabels();
   update_slicedir_count();
 }

@@ -986,6 +986,7 @@ typedef struct _slicedata {
   int compression_type;
   int ncompressed;
   int slicetype;
+  struct _multislicedata *mslice;
   int is_fed;
   feddata *fedptr;
   int menu_show;
@@ -1041,12 +1042,14 @@ typedef struct _slicedata {
 
 /* --------------------------  multislice ------------------------------------ */
 
-typedef struct {
+typedef struct _multislicedata {
   int mesh_type;
   int seq_id, autoload;
   int loaded,display,type;
   int nslices;
   int *islices;
+  float *contour_areas;
+  int ncontour_areas;
   char menulabel[128];
   char menulabel2[128];
 } multislicedata;

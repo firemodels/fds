@@ -3681,7 +3681,10 @@ void LoadMultiSliceMenu(int value){
     if(scriptoutstream==NULL||defer_file_loading==0){
       for(i=0;i<mslicei->nslices;i++){
         LoadSliceMenu(mslicei->islices[i]);
-      } 
+      }
+      if(mslicei->nslices>0&&mslicei->islices[0]>=nsliceinfo-nfedinfo){
+        output_mfed_csv(mslicei);
+      }
     }
     script_multislice=0;
   }

@@ -82,6 +82,7 @@ EXTERNCPP void drawselect_avatars(void);
 EXTERNCPP void readterrain(char *file, int ifile, int flag, int *errorcode);
 EXTERNCPP void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, int nx, float ymin, float ymax, int ny, 
                                  int allocate_memory);
+EXTERNCPP void output_mfed_csv(multislicedata *mslicei);
 EXTERNCPP void ParticlePropShowMenu(int value);
 EXTERNCPP void glui_script_disable(void);
 EXTERNCPP void update_slice_contours(int slice_type_index, float line_min, float line_max, int nline_values);

@@ -9,6 +9,10 @@
 #define PIFACTOR (3.14159/180.0)
 #endif
 
+#ifndef PERCENT
+#define PERCENT(num,denom)  ((int)(100.0*(float)(num)/(float)(denom)+0.5))
+#endif
+
 #ifndef MAX
 #define MAX(a,b)  ((a)>(b) ? (a) : (b))
 #endif
