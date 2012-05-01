@@ -48,9 +48,9 @@ extern "C" char glui_motion_revision[]="$Revision$";
 #define SNAPVIEW 21
 #define SET_VIEW_XYZ 22
 #ifdef pp_GSLICE
-#define GSLICE_ROTATE 23
 #define GSLICE_HTRANSLATE 24
 #define GSLICE_VTRANSLATE 25
+#define GSLICE_ROTATION 26
 #endif
 
 #define RENDER_TYPE 0
@@ -77,9 +77,9 @@ GLUI *glui_motion=NULL;
 GLUI_Panel *panel_rotatebuttons=NULL, *panel_translate=NULL,*panel_close=NULL;
 #ifdef pp_GSLICE
 GLUI_Panel *panel_gslice=NULL;
-GLUI_Translation *TRANSLATE_gslice_azelev=NULL;
 GLUI_Translation *gslice_htranslate=NULL, *gslice_vtranslate=NULL;
 GLUI_Checkbox *CHECKBOX_show_gslice=NULL;
+GLUI_Rotation *ROTATE_gslice_rotation=NULL;
 #endif
 GLUI_Panel *panel_blockageview=NULL;
 GLUI_Panel *panel_rotate=NULL;
@@ -340,9 +340,10 @@ extern "C" void glui_motion_setup(int main_window){
   gslice_xyz[0]=0.0*STEPS_PER_DEG;
   gslice_xyz[1]=0.0*STEPS_PER_DEG;
   gslice_xyz[2]=0.0*STEPS_PER_DEG;
-  gslice_azelev[0]=0.0*STEPS_PER_DEG;
-  gslice_azelev[1]=90.0*STEPS_PER_DEG;
-  TRANSLATE_gslice_azelev=glui_motion->add_translation_to_panel(panel_gslice,"normal az/elev",GLUI_TRANSLATION_XY,gslice_azelev,GSLICE_ROTATE,GSLICE_CB);
+  ROTATE_gslice_rotation=glui_motion->add_rotation_to_panel(panel_gslice,"rotation",gslice_rotation,GSLICE_ROTATION,GSLICE_CB);
+  ROTATE_gslice_rotation->reset();
+  GSLICE_CB(GSLICE_ROTATION);
+
   gslice_htranslate=glui_motion->add_translation_to_panel(panel_gslice,"horizontal translation",GLUI_TRANSLATION_XY,gslice_xyz,GSLICE_HTRANSLATE,GSLICE_CB);
   gslice_vtranslate=glui_motion->add_translation_to_panel(panel_gslice,"vertical translation",GLUI_TRANSLATION_Z,gslice_xyz+2,GSLICE_VTRANSLATE,GSLICE_CB);
   CHECKBOX_show_gslice=glui_motion->add_checkbox_to_panel(panel_gslice,"show gslice",&show_gslice);
@@ -694,17 +695,26 @@ extern "C" void showhide_translate(int var){
 /* ------------------ GSLICE_CB ------------------------ */
 
 void GSLICE_CB(int var){
+    float sum,*norm;
+
   switch(var){
-    case GSLICE_ROTATE:
-      gslice_azelev[0]=fmod(gslice_azelev[0]+180.0*STEPS_PER_DEG,360.0*STEPS_PER_DEG)-180.0*STEPS_PER_DEG;
-      gslice_azelev[1]=fmod(gslice_azelev[1]+180.0*STEPS_PER_DEG,360.0*STEPS_PER_DEG)-180.0*STEPS_PER_DEG;
-    break;
+    case GSLICE_ROTATION:
+      norm=gslice_norm;
+      norm[0]=-gslice_rotation[2];
+      norm[2]=-gslice_rotation[6];
+      norm[1]=-gslice_rotation[10];
+      sum = norm[0]*norm[0]+norm[1]*norm[1]+norm[2]*norm[2];
+      sum = sqrt(sum);
+      norm[0]/=sum;
+      norm[1]/=sum;
+      norm[2]/=sum;
+      break;
     case GSLICE_HTRANSLATE:
     case GSLICE_VTRANSLATE:
       gslice_xyz[0]=CLAMP(gslice_xyz[0],xbar0*STEPS_PER_DEG,DENORMALIZE_X(xbar)*STEPS_PER_DEG);
       gslice_xyz[1]=CLAMP(gslice_xyz[1],ybar0*STEPS_PER_DEG,DENORMALIZE_Y(ybar)*STEPS_PER_DEG);
       gslice_xyz[2]=CLAMP(gslice_xyz[2],zbar0*STEPS_PER_DEG,DENORMALIZE_Z(zbar)*STEPS_PER_DEG);
-    break;
+      break;
   }
 }
 #endif

@@ -104,7 +104,7 @@ void out_slicefile(slicedata *sd){
 int Creadslice_frame(int frame_index,int sd_index,int flag){
   slicedata *sd;
   int slicefilelen;
-  int headersize,framesize,statfile;
+  int headersize,framesize;
   int frame_size;
   long int skip_local;
   int returncode;
@@ -651,7 +651,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
   int blocknumber;
   int error;
   float offset;
-  int i,j,k;
+  int i;
   int nx, ny, nxy;
   int ii;
   float qmin, qmax;
@@ -2941,16 +2941,9 @@ void update_gslice_planes(void){
   int ix[8]={0,0,1,1,0,0,1,1};
   int iy[8]={0,1,1,0,0,1,1,0};
   int iz[8]={0,0,0,0,1,1,1,1};
-  float az, elev;
 
 // plane equation: (x-xyz0) .dot. norm = 0
-#define GFACTOR (3.14159/(180.0*STEPS_PER_DEG))
-  az=gslice_azelev[0]*GFACTOR;
-  elev=gslice_azelev[1]*GFACTOR;
   norm=gslice_norm;
-  norm[0]=cos(az)*cos(elev);
-  norm[1]=sin(az)*cos(elev);
-  norm[2]=sin(elev);
   xyz0 = gslice_xyz;
 
 
