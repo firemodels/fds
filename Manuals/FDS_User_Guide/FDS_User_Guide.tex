@@ -6428,14 +6428,15 @@ Note: In the third (reversible) reaction, the {\ct HEAT\_OF\_COMBUSTION} is set 
 
 This example shows how to define a reaction that invokes an aerosol deposition model in FDS (e.g. soot deposition).  Note, that this model should be considered an experimental feature. The deposition model is invoked by defining a species with the parameter {\ct AEROSOL=.TRUE.}.  For this example propane will be the fuel with a 5 \% soot yield.  The stoichiometric equation is shown below.
 \begin{eqnarray}\label{eq:PROPANE_depo}
-1\,\underbrace{\mathrm{(C_3H_8)}}_\text{Fuel} + 1\,\underbrace{\mathrm{(4.82 \, O_2+4.82 \,(^{.79}/_{.21}) \, N_2})}_\text{Oxidizer} \rightarrow \\
-\nonumber \underbrace{1\,\mathrm{(4\, H_2O + 2.82\, CO_2 + 4.82\,(^{.79}/_{.21}) \, N_2)}+0.1835\,\mathrm{C}}_\text{Products}
+1\,\underbrace{\mathrm{(C_3H_8)}}_\text{Fuel} \,+\, 4.8164\,\underbrace{\mathrm{(1 \, O_2\,+\, 3.7619 \, N_2})}_\text{Air} \, \rightarrow \\
+\nonumber \underbrace{1\,\mathrm{(18.1190 \, N_2 \, + \, 2.8164\, CO_2 \,+ \, 4\, H_2O)}}_\text{Products} \,+\,
+\underbrace{0.1836\,\mathrm{C}}_\text{Soot}
 \end{eqnarray}
 The example will also use the lumped species formulation to minimize the number of scalar transport equations that need to be solved. Therefore, each species that does not transport by itself will have an {\ct SMIX\_COMPONENT\_ONLY = .TRUE.} designation.  Note that for soot to deposit it must be tracked separately and it must be given {\ct AEROSOL = .TRUE.}.
 
 \footnotesize
 \begin{verbatim}
-&SPEC ID = 'PROPANE', FORMULA = 'C2H3Cl' /
+&SPEC ID = 'PROPANE' /
 &SPEC ID = 'OXYGEN',            SMIX_COMPONENT_ONLY = .TRUE. /
 &SPEC ID = 'NITROGEN',          SMIX_COMPONENT_ONLY = .TRUE. /
 &SPEC ID = 'WATER VAPOR',       SMIX_COMPONENT_ONLY = .TRUE. /
@@ -6449,9 +6450,9 @@ For the oxidizer and products, which are both composed of multiple primitive spe
 \footnotesize
 \begin{verbatim}
 &SMIX ID = 'AIR', SPEC_ID ='NITROGEN','OXYGEN',
-      VOLUME_FRACTION = 18.11896,4.816432, BACKGROUND = .TRUE. /
-&SMIX ID = 'PRODUCTS', SPEC_ID ='NITROGEN','CARBON DIOXIDE','WATER VAPOR',
-      VOLUME_FRACTION = 18.11896,2.816432,4/
+      VOLUME_FRACTION = 3.7619,1.000, BACKGROUND = .TRUE. /
+&SMIX ID = 'PRODUCTS', SPEC_ID ='NITROGEN','CARBON DIOXIDE','WATER VAPOR', 
+      VOLUME_FRACTION = 18.1190,2.8164,4.0000/
 \end{verbatim} \normalsize
 
 \noindent
@@ -6461,8 +6462,9 @@ In this mixing-controlled example, the user is responsible for defining the fuel
 
 \footnotesize
 \begin{verbatim}
-&REAC FUEL = 'PROPANE', HEAT_OF_COMBUSTION=46000,
-      SMIX_ID = 'PROPANE','AIR','PRODUCTS','SOOT', NU=-1.,-1,1,0.183568/
+&REAC FUEL = 'PROPANE', HEAT_OF_COMBUSTION=44715.,
+      SMIX_ID = 'PROPANE','AIR','PRODUCTS','SOOT',
+      NU=-1.,-4.8164,1,0.1836/
 \end{verbatim} \normalsize
 
 \noindent
