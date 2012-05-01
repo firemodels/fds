@@ -297,9 +297,7 @@ void get_world_eyepos(float *mm, float user_eyepos[3],float scaled_eyepos_local[
   scaled_eyepos_local[0] = -(mm[0]*mm[12]+mm[1]*mm[13]+ mm[2]*mm[14])/mscale[0];
   scaled_eyepos_local[1] = -(mm[4]*mm[12]+mm[5]*mm[13]+ mm[6]*mm[14])/mscale[1];
   scaled_eyepos_local[2] = -(mm[8]*mm[12]+mm[9]*mm[13]+mm[10]*mm[14])/mscale[2];
-  user_eyepos[0] = DENORMALIZE_X(scaled_eyepos[0]);
-  user_eyepos[1] = DENORMALIZE_Y(scaled_eyepos[1]);
-  user_eyepos[2] = DENORMALIZE_Z(scaled_eyepos[2]);
+  denormalize_xyz(user_eyepos,scaled_eyepos);
 }
 
 /* ----------------------- getsmokesensors ----------------------------- */

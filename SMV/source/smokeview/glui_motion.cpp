@@ -140,9 +140,7 @@ extern "C" void update_glui_set_view_xyz(float *xyz){
   if(xyz==NULL)return;
   if(SPINNER_set_view_x==NULL||SPINNER_set_view_y==NULL||SPINNER_set_view_z!=NULL)return;
   
-  set_view_xyz[0] = DENORMALIZE_X(xyz[0]);
-  set_view_xyz[1] = DENORMALIZE_Y(xyz[1]);
-  set_view_xyz[2] = DENORMALIZE_Z(xyz[2]);
+  denormalize_xyz(set_view_xyz,xyz);
 
   SPINNER_set_view_x->set_float_val(set_view_xyz[0]);
   SPINNER_set_view_y->set_float_val(set_view_xyz[1]);

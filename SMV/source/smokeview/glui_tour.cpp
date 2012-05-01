@@ -694,18 +694,18 @@ void TOUR_CB(int var){
         viewtype=thiskey->viewtype;
       }
       else{
-        key_xyz[0]=xbar0 + xyzmaxdiff*(thiskey->nodeval.eye[0]+nextkey->nodeval.eye[0])/2.0;
-        key_xyz[1]=ybar0 + xyzmaxdiff*(thiskey->nodeval.eye[1]+nextkey->nodeval.eye[1])/2.0;
-        key_xyz[2]=zbar0 + xyzmaxdiff*(thiskey->nodeval.eye[2]+nextkey->nodeval.eye[2])/2.0;
+        key_xyz[0]=DENORMALIZE_X((thiskey->nodeval.eye[0]+nextkey->nodeval.eye[0])/2.0);
+        key_xyz[1]=DENORMALIZE_Y((thiskey->nodeval.eye[1]+nextkey->nodeval.eye[1])/2.0);
+        key_xyz[2]=DENORMALIZE_Z((thiskey->nodeval.eye[2]+nextkey->nodeval.eye[2])/2.0);
         key_az_path = (thiskey->az_path+nextkey->az_path)/2.0;
         key_elev_path=(thiskey->nodeval.elev_path+nextkey->nodeval.elev_path)/2.0;
         key_time_in = (thiskey->noncon_time+nextkey->noncon_time)/2.0;
         key_params[0]=(thiskey->bias+nextkey->bias)/2.0;
         key_params[1]=(thiskey->continuity+nextkey->continuity)/2.0;
         key_params[2]=(thiskey->tension+nextkey->tension)/2.0;
-        key_view[0]=xbar0 + xyzmaxdiff*(thiskey->nodeval.aview[0]+nextkey->nodeval.aview[0])/2.0;
-        key_view[1]=ybar0 + xyzmaxdiff*(thiskey->nodeval.aview[1]+nextkey->nodeval.aview[1])/2.0;
-        key_view[2]=zbar0 + xyzmaxdiff*(thiskey->nodeval.aview[2]+nextkey->nodeval.aview[2])/2.0;
+        key_view[0]=DENORMALIZE_X((thiskey->nodeval.aview[0]+nextkey->nodeval.aview[0])/2.0);
+        key_view[1]=DENORMALIZE_Y((thiskey->nodeval.aview[1]+nextkey->nodeval.aview[1])/2.0);
+        key_view[2]=DENORMALIZE_Z((thiskey->nodeval.aview[2]+nextkey->nodeval.aview[2])/2.0);
         key_zoom = (thiskey->nodeval.zoom + nextkey->nodeval.zoom)/2.0;
         key_bank = (thiskey->bank + nextkey->bank)/2.0;
         if(thiskey->viewtype==0&&nextkey->viewtype==0){
@@ -714,15 +714,11 @@ void TOUR_CB(int var){
         else{
           viewtype=1;
           if(thiskey->viewtype==1){
-            key_view[0]=xbar0 + xyzmaxdiff*thiskey->nodeval.aview[0];
-            key_view[1]=ybar0 + xyzmaxdiff*thiskey->nodeval.aview[1];
-            key_view[2]=zbar0 + xyzmaxdiff*thiskey->nodeval.aview[2];
+            denormalize_xyz(key_view,thiskey->nodeval.aview);
             key_elev_path = thiskey->nodeval.elev_path;
           }
           if(thiskey->viewtype==0&&nextkey->viewtype==1){
-            key_view[0]=xbar0 + xyzmaxdiff*nextkey->nodeval.aview[0];
-            key_view[1]=ybar0 + xyzmaxdiff*nextkey->nodeval.aview[1];
-            key_view[2]=zbar0 + xyzmaxdiff*nextkey->nodeval.aview[2];
+            denormalize_xyz(key_view,nextkey->nodeval.aview);
             key_elev_path = nextkey->nodeval.elev_path;
           }
         }

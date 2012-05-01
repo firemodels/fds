@@ -22,6 +22,15 @@ char smv_geometry_revision[]="$Revision$";
 #include "smokeviewvars.h"
 
 
+
+/* ------------------ denormalize_xyz ------------------------ */
+
+void denormalize_xyz(float *xyz_out, float *xyz_in){
+  xyz_out[0] = DENORMALIZE_X(xyz_in[0]);
+  xyz_out[1] = DENORMALIZE_Y(xyz_in[1]);
+  xyz_out[2] = DENORMALIZE_Z(xyz_in[2]);
+}
+
 /* ------------------ normalize_xyz ------------------------ */
 
 void normalize_xyz(float *xyz_out, float *xyz_in){
