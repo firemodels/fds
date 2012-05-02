@@ -11134,12 +11134,10 @@ EXCHANGE_SEND_LOOP1: DO NM = NMESHES_MIN, NMESHES_MAX
                      OS%SEND_INT(IPTR+12)=SC%WALL(IW)%NOM
                      OS%SEND_INT(IPTR+13)=SC%WALL(IW)%IOR
                      OS%SEND_INT(IPTR+14)=SC%WALL(IW)%NCPL
-!IF (SC%WALL(IW)%NOM /= 0) WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,a,3i3)') 'NM=',NM,': NOM=',NOM,': SEND WALL( ', IW,')%NOM=',SC%WALL(IW)%NOM, IPTR
                      IPTR = IPTR + 15
                      IF (SC%WALL(IW)%NOM == NOM) THEN
                         DO ICPL=1,SC%WALL(IW)%NCPL
                            OS%SEND_INT(IPTR)=SC%WALL(IW)%ICN(ICPL)
-!WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,a,3i3)') 'NM=',NM,': NOM=',NOM,': SEND WALL( ', IW,')%NCPL=',SC%WALL(IW)%NCPL, OS%SEND_INT(IPTR), IPTR
                            IPTR = IPTR + 1
                         ENDDO
                         IF (NL==NLEVEL_MIN.AND.TYPE_LAYER == NSCARC_LAYER_TWO .AND. &
@@ -11153,7 +11151,6 @@ EXCHANGE_SEND_LOOP1: DO NM = NMESHES_MIN, NMESHES_MAX
                   ENDDO
                   NREQ_SCARC = NREQ_SCARC+1
                   NLEN = 15*OSC%NW+OSC%NWS
-!WRITE(SCARC_LU,*) 'NM=',NM,': NOM=',NOM,': SENDING ', NLEN
                   CALL MPI_ISEND(OS%SEND_INT(1:NLEN),NLEN,MPI_INTEGER,SNODE, &
                                  TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
                ENDIF
@@ -11287,7 +11284,6 @@ EXCHANGE_SEND_LOOP1: DO NM = NMESHES_MIN, NMESHES_MAX
                SELECT_EXCHANGE_COMPACT: SELECT CASE (TYPE_EXCHANGE)
 
                   CASE (NSCARC_EXCHANGE_VECTOR) 
-!WRITE(SCARC_LU,*) '--------------- NOM=',NOM
                      CALL SCARC_PACK_CVECTOR_REAL(BUF_REAL, WALL, TYPE_VECTOR, NLEN, NW, NM, NL)
             
                   CASE (NSCARC_EXCHANGE_BDRY) 
@@ -11453,12 +11449,10 @@ EXCHANGE_SEND_LOOP2: DO NOM = NMESHES_MIN, NMESHES_MAX
                            OSC%WALL(IW)%IOR  = BUF_INT(IPTR +13)
                            OSC%WALL(IW)%NCPL = BUF_INT(IPTR +14)
                            IPTR = IPTR + 15
-   !IF (OSC%WALL(IW)%NOM /= 0) WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,a,3i3)') 'NOM=',NOM,': NM=',NM,':  WALL( ', IW,')%NOM=',OSC%WALL(IW)%NOM, IPTR
                            IF (OSC%WALL(IW)%NOM == NOM) THEN
                               ALLOCATE (OSC%WALL(IW)%ICN(OSC%WALL(IW)%NCPL))
                               DO ICPL=1,OSC%WALL(IW)%NCPL
                                  OSC%WALL(IW)%ICN(ICPL) = BUF_INT(IPTR)
-   !WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,a,3i3)') 'NOM=',NOM,': NM=',NM,':  WALL( ', IW,')%NCPL=',OSC%WALL(IW)%NCPL, BUF_INT(IPTR), IPTR
                                  IPTR = IPTR + 1
                               ENDDO
                               IF (NL==NLEVEL_MIN.AND.TYPE_LAYER == NSCARC_LAYER_TWO .AND. &
@@ -11490,12 +11484,10 @@ EXCHANGE_SEND_LOOP2: DO NOM = NMESHES_MIN, NMESHES_MAX
                         OSC%WALL(IW)%NOM  = SC%WALL(IW)%NOM
                         OSC%WALL(IW)%ICW  = SC%WALL(IW)%ICW
                         OSC%WALL(IW)%NCPL = SC%WALL(IW)%NCPL
-      !IF (SC%WALL(IW)%NOM /= 0) WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,a,3i3)') 'NM=',NM,': NOM=',NOM,': SEND WALL( ', IW,')%NOM=',SC%WALL(IW)%NOM
                            IF (OSC%WALL(IW)%NOM /= 0) THEN
                               ALLOCATE(OSC%WALL(IW)%ICN(1:OSC%WALL(IW)%NCPL),STAT=IERR)
                               CALL ChkMemErr('SCARC_SETUP','ICN',IERR)
                               OSC%WALL(IW)%ICN(1:OSC%WALL(IW)%NCPL) = SC%WALL(IW)%ICN(1:SC%WALL(IW)%NCPL)
-      !WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,a,3i3)') 'NM=',NM,': NOM=',NOM,': SEND WALL( ', IW,')%ICN=',OSC%WALL(IW)%ICN(1)
                            ENDIF
                         ENDDO
                         IF (NL==NLEVEL_MIN.AND.TYPE_LAYER == NSCARC_LAYER_TWO .AND. &
@@ -11557,7 +11549,6 @@ EXCHANGE_SEND_LOOP2: DO NOM = NMESHES_MIN, NMESHES_MAX
                         OSC%NCF =  SCO%NCF0
                      ENDIF
 
-!WRITE(SCARC_LU,*) 'VALUES: ', OSC%NW, OSC%NC, OSC%NCE 
                   CASE (NSCARC_EXCHANGE_VECTOR) 
                      CALL SCARC_UNPACK_CVECTOR_REAL(BUF_REAL, WALL, TYPE_VECTOR, NOM, NL)
       
