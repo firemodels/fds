@@ -6429,7 +6429,7 @@ Note: In the third (reversible) reaction, the {\ct HEAT\_OF\_COMBUSTION} is set 
 This example shows how to define a reaction that invokes an aerosol deposition model in FDS (e.g. soot deposition).  Note, that this model should be considered an experimental feature. The deposition model is invoked by defining a species with the parameter {\ct AEROSOL=.TRUE.}.  For this example propane will be the fuel with a 5 \% soot yield.  The stoichiometric equation is shown below.
 \begin{eqnarray}\label{eq:PROPANE_depo}
 1\,\underbrace{\mathrm{(C_3H_8)}}_\text{Fuel} \,+\, 4.8164\,\underbrace{\mathrm{(1 \, O_2\,+\, 3.7619 \, N_2})}_\text{Air} \, \rightarrow \\
-\nonumber \underbrace{1\,\mathrm{(18.1190 \, N_2 \, + \, 2.8164\, CO_2 \,+ \, 4\, H_2O)}}_\text{Products} \,+\,
+\nonumber \underbrace{1\,\mathrm{(18.1182 \, N_2 \, + \, 2.8164\, CO_2 \,+ \, 4\, H_2O)}}_\text{Products} \,+\,
 \underbrace{0.1836\,\mathrm{C}}_\text{Soot}
 \end{eqnarray}
 The example will also use the lumped species formulation to minimize the number of scalar transport equations that need to be solved. Therefore, each species that does not transport by itself will have an {\ct SMIX\_COMPONENT\_ONLY = .TRUE.} designation.  Note that for soot to deposit it must be tracked separately and it must be given {\ct AEROSOL = .TRUE.}.
@@ -6452,7 +6452,7 @@ For the oxidizer and products, which are both composed of multiple primitive spe
 &SMIX ID = 'AIR', SPEC_ID ='NITROGEN','OXYGEN',
       VOLUME_FRACTION = 3.7619,1.000, BACKGROUND = .TRUE. /
 &SMIX ID = 'PRODUCTS', SPEC_ID ='NITROGEN','CARBON DIOXIDE','WATER VAPOR', 
-      VOLUME_FRACTION = 18.1190,2.8164,4.0000/
+      VOLUME_FRACTION = 18.1182,2.8164,4.0000/
 \end{verbatim} \normalsize
 
 \noindent
