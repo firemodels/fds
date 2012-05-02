@@ -278,7 +278,7 @@
 
 \vfill
 
-\flushright{\includegraphics[width=2.in]{FIGURES/nistident_flright_vec}}
+\flushright{\includegraphics[width=2.in]{../Bibliography/nistident_flright_vec}}
 
 
 \end{minipage}
@@ -308,6 +308,7 @@ Engineering Laboratory \\
 \hspace{1in} \\
 VTT Technical Research Centre of Finland \\
 {\em Espoo, Finland} }
+\flushright{\includegraphics[width=1in]{../Bibliography/VTT_Black_L} }
 
 
 \vspace{.25in}
@@ -318,7 +319,7 @@ $SVN Repository$~$Revision$}
 
 \vfill
 
-\flushright{\includegraphics[width=1in]{FIGURES/doc.pdf} }
+\flushright{\includegraphics[width=1in]{../Bibliography/doc.pdf} }
 
 \titlesigs
 
@@ -413,9 +414,7 @@ when compared to large scale measurements made during fire reconstructions.\\
 \noindent Bryan Klein of Thunderhead Engineering assisted in adding cross-referencing functionality to this document, making it easier to
 view electronically. He also designed the on-line services for revision control, bug reporting, and general discussion of topics related to FDS. \\
 \\
-\noindent At VTT, several people have contributed to the FDS development. Topi Sikanen has implemented new capabilities for
-the droplet computations. Joonas Ryyn\"{a}nen implemented and documented the new FED/FIC routine. Anna Matala has helped with the
-material pyrolysis. Jukka Vaari helped to improve the gas-phase extinction calculations.\\
+\noindent At VTT, Joonas Ryyn\"{a}nen implemented and documented the FED/FIC routine. \\
 \\
 \noindent The US Nuclear Regulatory Commission has provided financial support for the maintenance and development of FDS,
 along with valuable insights into how fire models are used as part of probabilistic risk assessments of nuclear
@@ -443,12 +442,9 @@ water droplet transport on solid objects.\\
 \\
 \noindent Dr.~Chris Lautenberger of University of California, Berkeley, has helped in development and improving the documentation of the pyrolysis models.\\
 \\
-\noindent Prof.~Ofodike Ezekoye and Craig Weinschenk of the University of Texas, Austin, helped to formulate and test the thermocouple model within FDS. This work was based on an earlier analysis by Stephen Welsh and Philip Rubini.\\
-\\
 \noindent Fran\c{c}ois Demouge of the Centre Scientifique et Technique du B\^{a}timent (CSTB) in France assisted with implementation of synthetic turbulence inflow boundary conditions.\\
 \\
-\noindent Elizabeth Marie-France Blanchard, also of CSTB France, has worked on improvements to the droplet evaporation model.\\
-\\
+
 
 
 
@@ -5989,10 +5985,10 @@ where $\alpha$ is the ratio of the gas conductivity to the particle conductivity
 The diffusion-turbulence deposition velocity depends upon the flow regime (diffusion, diffusion-impaction, or inertia-moderated).  The deposition velocity for these regimes are given below ~\cite{McCoy_Hanratty}.
 
 \be
-u_{dt} = \left\{ \begin{array}{r@{\quad \quad}c} 
+u_{dt} = \left\{ \begin{array}{r@{\quad \quad}c}
          0.086 \; \text{Sc}^{-0.7} \; u_{\tau}        &  \tau^+ < 0.2 \\
          3.5 \times 10^{-4} \; {\tau^+}^2 \; u_{\tau} &  0.2 < \tau^+ < 30 \\
-         0.17 \; u_{\tau}                             &  \tau^+ < 30 
+         0.17 \; u_{\tau}                             &  \tau^+ < 30
          \end{array} \right.
 \ee
 where u$_{\tau}$ is the wall friction velocity computed by the Werner-Wengle model and $\tau^+$ is the dimensionless stopping distance given by~\cite{Ludwig_ICONE}
@@ -6451,7 +6447,7 @@ For the oxidizer and products, which are both composed of multiple primitive spe
 \begin{verbatim}
 &SMIX ID = 'AIR', SPEC_ID ='NITROGEN','OXYGEN',
       VOLUME_FRACTION = 3.7619,1.000, BACKGROUND = .TRUE. /
-&SMIX ID = 'PRODUCTS', SPEC_ID ='NITROGEN','CARBON DIOXIDE','WATER VAPOR', 
+&SMIX ID = 'PRODUCTS', SPEC_ID ='NITROGEN','CARBON DIOXIDE','WATER VAPOR',
       VOLUME_FRACTION = 18.1182,2.8164,4.0000/
 \end{verbatim} \normalsize
 
