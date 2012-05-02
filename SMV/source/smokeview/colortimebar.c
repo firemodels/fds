@@ -867,13 +867,6 @@ void initdefaultcolorbars(void){
 
 // construct colormaps from color node info
 
-  rgb_below_min[0]=255-64;
-  rgb_below_min[1]=255-64;
-  rgb_below_min[2]=255-64;
-  rgb_above_max[0]=0;
-  rgb_above_max[1]=0;
-  rgb_above_max[2]=0;
-
   for(i=0;i<ndefaultcolorbars;i++){
     cbi = colorbarinfo + i;
 

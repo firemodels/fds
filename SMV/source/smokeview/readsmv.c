@@ -8163,9 +8163,10 @@ int readini2(char *inifile, int localfile){
         mmin,mmin+1,mmin+2,
         mmax,mmax+1,mmax+2);
       for(i=0;i<3;i++){
-        rgb_below_min[i]=mmin[i];
-        rgb_above_max[i]=mmax[i];
+        rgb_below_min[i]=CLAMP(mmin[i],0,255);
+        rgb_above_max[i]=CLAMP(mmax[i],0,255);
       }
+      continue;
     }
     if(match(buffer,"SLICEAVERAGE")==1){
       fgets(buffer,255,stream);
