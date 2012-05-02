@@ -2070,12 +2070,10 @@ int readsmv(char *file, char *file2){
   int iv1, iv2;
   int jv1, jv2;
   int kv1, kv2;
-  ventdata *vinfo,*vi;
   int colorindex, blocktype;
   int ventindex,venttype;
   int roomnumber;
   float width,ventoffset,bottom,top;
-  blockagedata *bc;
   int igrid;
   int ioffset;
   float *xplttemp,*yplttemp,*zplttemp;
@@ -5210,6 +5208,7 @@ typedef struct {
       nn=-1;
       for(iblock=0;iblock<n_blocks;iblock++){
         int s_num[6];
+        blockagedata *bc;
 
         if(autoterrain==1&&meshi->is_block_terrain!=NULL&&meshi->is_block_terrain[iblock]==1){
           fgets(buffer,255,stream);
@@ -5292,6 +5291,8 @@ typedef struct {
 
       nn=-1;
       for(iblock=0;iblock<n_blocks;iblock++){
+        blockagedata *bc;
+
         if(autoterrain==1&&meshi->is_block_terrain!=NULL&&meshi->is_block_terrain[iblock]==1){
           fgets(buffer,255,stream);
           continue;
@@ -5434,6 +5435,7 @@ typedef struct {
 
     if(match(buffer,"VENT") == 1){
       mesh *meshi;
+      ventdata *vinfo;
 
       ivent++;
       meshi=meshinfo+ivent-1;
@@ -5459,6 +5461,7 @@ typedef struct {
 
       for(nn=0;nn<nvents+12;nn++){
         int s_num[6];
+        ventdata *vi;
 
         vi=vinfo+nn;
         vi->transparent=0;
@@ -5545,6 +5548,8 @@ typedef struct {
         }
       }
       for(nn=0;nn<nvents+12;nn++){
+        ventdata *vi;
+
         vi = vinfo+nn;
         vi->type=vi->surf[0]->type;
         vi->color=vi->surf[0]->color;

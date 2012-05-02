@@ -935,7 +935,6 @@ void drawColorBars(void){
   float right[3],left[3],bottom[4];
   int ileft=0;
   int leftzone, leftsmoke, leftslice, leftpatch, leftiso;
-  int lastzone, lastsmoke, lastslice, lastpatch, lastiso;
   float yy,yy2;
   int iposition;
   float position;
@@ -1160,11 +1159,6 @@ void drawColorBars(void){
       if(show_extreme_below==1||show_extreme_above==1)glDisable(GL_POLYGON_SMOOTH);
     }
   }
-  lastsmoke=0;
-  lastslice=0;
-  lastpatch=0;
-  lastzone=0;
-  lastiso=0;
   leftsmoke=0;
   leftslice=0;
   leftpatch=0;
@@ -1173,24 +1167,20 @@ void drawColorBars(void){
   ileft=0;
   if(showiso_colorbar==1){
     leftiso=ileft;
-    lastsmoke=0;lastslice=0;lastpatch=0;lastzone=0;lastiso=1;
     ileft++;
   }
   if(showevac_colorbar==1||showsmoke==1){
     if(parttype!=0){
       leftsmoke=ileft;
-      lastsmoke=1;lastslice=0;lastpatch=0;lastzone=0;lastiso=0;
       ileft++;
     }
   }
   if(showslice==1||(showvslice==1&&vslicecolorbarflag==1)){
     leftslice=ileft;
-    lastsmoke=0;lastslice=1;lastpatch=0;lastzone=0;lastiso=0;
     ileft++;
   }
   if(showpatch==1){
     leftpatch=ileft;
-    lastsmoke=0;lastslice=0;lastpatch=1;lastzone=0;lastiso=0;
   }
 
   strcpy(partshortlabel2,"");
@@ -1415,18 +1405,6 @@ void drawColorBars(void){
         scalestring(partcolorlabel_ptr,partcolorlabel, partfactor, partrange);
         partcolorlabel_ptr=partcolorlabel;
       }
-      if(lastsmoke==1&&showcolorbar_gtge==1){
-        if(show_extreme_below==1&&i==0){
-          strcpy(partcolorlabel2,"<=");
-          strcat(partcolorlabel2,partcolorlabel_ptr);
-          partcolorlabel_ptr=partcolorlabel2;
-        }
-        if(show_extreme_above==1&&i==nrgb-2){
-          strcpy(partcolorlabel2,">=");
-          strcat(partcolorlabel2,partcolorlabel_ptr);
-          partcolorlabel_ptr=partcolorlabel2;
-        }
-      }
       outputBarText(right[leftsmoke],vert_position,color1,partcolorlabel_ptr);
     }
   }
@@ -1463,18 +1441,6 @@ void drawColorBars(void){
         val = tttmin + i*slicerange/(nrgb-2);
         scalefloat2string(val,slicecolorlabel, slicefactor, slicerange);
         slicecolorlabel_ptr=slicecolorlabel;
-      }
-      if(lastslice==1&&showcolorbar_gtge==1){
-        if(show_extreme_below==1&&i==0){
-          strcpy(slicecolorlabel2,"<=");
-          strcat(slicecolorlabel2,slicecolorlabel_ptr);
-          slicecolorlabel_ptr=slicecolorlabel2;
-        }
-        if(show_extreme_above==1&&i==nrgb-2){
-          strcpy(slicecolorlabel2,">=");
-          strcat(slicecolorlabel2,slicecolorlabel_ptr);
-          slicecolorlabel_ptr=slicecolorlabel2;
-        }
       }
       outputBarText(right[leftslice],vert_position,color1,slicecolorlabel_ptr);
     }
@@ -1513,18 +1479,6 @@ void drawColorBars(void){
         val = tttmin + i*patchrange/(nrgb-2);
         scalefloat2string(val,patchcolorlabel, patchfactor, patchrange);
         patchcolorlabel_ptr=patchcolorlabel;
-      }
-      if(lastpatch==1&&showcolorbar_gtge==1){
-        if(show_extreme_below==1&&i==0){
-          strcpy(patchcolorlabel2,"<=");
-          strcat(patchcolorlabel2,patchcolorlabel_ptr);
-          patchcolorlabel_ptr=patchcolorlabel2;
-        }
-        if(show_extreme_above==1&&i==nrgb-2){
-          strcpy(patchcolorlabel2,">=");
-          strcat(patchcolorlabel2,patchcolorlabel_ptr);
-          patchcolorlabel_ptr=patchcolorlabel2;
-        }
       }
       outputBarText(right[leftpatch],vert_position,color1,patchcolorlabel_ptr);
     }
@@ -1612,18 +1566,6 @@ void drawColorBars(void){
           val = tttmin + i*plot3drange/(nrgb-2);
           scalefloat2string(val,plot3dcolorlabel, plot3dfactor, plot3drange);
           plot3dcolorlabel_ptr=plot3dcolorlabel;
-        }
-        if(showcolorbar_gtge==1){
-          if((show_extremedata==0||show_extreme_below==0)&&i==0){
-            strcpy(plot3dcolorlabel2,"<=");
-            strcat(plot3dcolorlabel2,plot3dcolorlabel_ptr);
-            plot3dcolorlabel_ptr=plot3dcolorlabel2;
-          }  
-          if((show_extremedata==0||show_extreme_above==0)&&i==nrgb-2){
-            strcpy(plot3dcolorlabel2,">=");
-            strcat(plot3dcolorlabel2,plot3dcolorlabel_ptr);
-            plot3dcolorlabel_ptr=plot3dcolorlabel2;
-          }
         }
         outputBarText(right[0],vert_position,color1,plot3dcolorlabel_ptr);
       }

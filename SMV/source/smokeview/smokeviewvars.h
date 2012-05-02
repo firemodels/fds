@@ -673,7 +673,7 @@ SVEXTERN int canrestorelastview;
 SVEXTERN int ntargets;
 SVEXTERN int endian_data, endian_native, setendian;
 
-SVEXTERN int mainwindow_id,dwinWW,SVDECL(showcolorbar_gtge,1);
+SVEXTERN int mainwindow_id,dwinWW;
 SVEXTERN int rendertourcount;
 
 SVEXTERN float vecyz[4];
