@@ -245,7 +245,7 @@ intel_osx_64_db : obj = fds_intel_osx_64_db
 intel_osx_64_db : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
-mpi_intel_osx_64_db : FFLAGS  = -check -warn unused -O0 -m64 -g -traceback -fpe:0 -vec_report0
+mpi_intel_osx_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0 -stand:f03
 mpi_intel_osx_64_db : LFLAGS  = -L$(MPIDIST)/lib -static-intel
 mpi_intel_osx_64_db : FCOMPL  = mpif77
 mpi_intel_osx_64_db : obj = fds_mpi_intel_osx_64_db
