@@ -48,9 +48,8 @@ extern "C" char glui_motion_revision[]="$Revision$";
 #define SNAPVIEW 21
 #define SET_VIEW_XYZ 22
 #ifdef pp_GSLICE
-#define GSLICE_HTRANSLATE 24
-#define GSLICE_VTRANSLATE 25
-#define GSLICE_ROTATION 26
+#define GSLICE_TRANSLATE 24
+#define GSLICE_NORMAL 27
 #endif
 
 #define RENDER_TYPE 0
@@ -77,8 +76,14 @@ GLUI *glui_motion=NULL;
 GLUI_Panel *panel_rotatebuttons=NULL, *panel_translate=NULL,*panel_close=NULL;
 #ifdef pp_GSLICE
 GLUI_Panel *panel_gslice=NULL;
+GLUI_Panel *panel_gslice_center=NULL;
+GLUI_Panel *panel_gslice_normal=NULL;
+GLUI_Spinner *SPINNER_gslice_center_x=NULL;
+GLUI_Spinner *SPINNER_gslice_center_y=NULL;
+GLUI_Spinner *SPINNER_gslice_center_z=NULL;
+GLUI_Spinner *SPINNER_gslice_normal_az=NULL;
+GLUI_Spinner *SPINNER_gslice_normal_elev=NULL;
 GLUI_Translation *gslice_htranslate=NULL, *gslice_vtranslate=NULL;
-GLUI_Rotation *ROTATE_gslice_rotation=NULL;
 #endif
 GLUI_Panel *panel_blockageview=NULL;
 GLUI_Panel *panel_rotate=NULL;
@@ -336,15 +341,28 @@ extern "C" void glui_motion_setup(int main_window){
 
 #ifdef pp_GSLICE
   panel_gslice = glui_motion->add_rollout(_("Slice Motion"),false);
-  gslice_xyz[0]=0.0*STEPS_PER_DEG;
-  gslice_xyz[1]=0.0*STEPS_PER_DEG;
-  gslice_xyz[2]=0.0*STEPS_PER_DEG;
-  ROTATE_gslice_rotation=glui_motion->add_rotation_to_panel(panel_gslice,"rotation",gslice_rotation,GSLICE_ROTATION,GSLICE_CB);
-  ROTATE_gslice_rotation->reset();
-  GSLICE_CB(GSLICE_ROTATION);
+  gslice_xyz[0]=(xbar0+DENORMALIZE_X(xbar))/2.0;
+  gslice_xyz[1]=(ybar0+DENORMALIZE_Y(ybar))/2.0;
+  gslice_xyz[2]=(zbar0+DENORMALIZE_Z(zbar))/2.0;
 
-  gslice_htranslate=glui_motion->add_translation_to_panel(panel_gslice,"horizontal translation",GLUI_TRANSLATION_XY,gslice_xyz,GSLICE_HTRANSLATE,GSLICE_CB);
-  gslice_vtranslate=glui_motion->add_translation_to_panel(panel_gslice,"vertical translation",GLUI_TRANSLATION_Z,gslice_xyz+2,GSLICE_VTRANSLATE,GSLICE_CB);
+  panel_gslice_center = glui_motion->add_panel_to_panel(panel_gslice,_("rotation center"),true);
+  SPINNER_gslice_center_x=glui_motion->add_spinner_to_panel(panel_gslice_center,"x:",GLUI_SPINNER_FLOAT,gslice_xyz,GSLICE_TRANSLATE,GSLICE_CB);
+  SPINNER_gslice_center_y=glui_motion->add_spinner_to_panel(panel_gslice_center,"y:",GLUI_SPINNER_FLOAT,gslice_xyz+1,GSLICE_TRANSLATE,GSLICE_CB);
+  SPINNER_gslice_center_z=glui_motion->add_spinner_to_panel(panel_gslice_center,"z:",GLUI_SPINNER_FLOAT,gslice_xyz+2,GSLICE_TRANSLATE,GSLICE_CB);
+  SPINNER_gslice_center_x->set_float_limits(xbar0,DENORMALIZE_X(xbar),GLUI_LIMIT_CLAMP);
+  SPINNER_gslice_center_y->set_float_limits(ybar0,DENORMALIZE_Y(ybar),GLUI_LIMIT_CLAMP);
+  SPINNER_gslice_center_z->set_float_limits(zbar0,DENORMALIZE_Z(zbar),GLUI_LIMIT_CLAMP);
+  GSLICE_CB(GSLICE_TRANSLATE);
+  
+  panel_gslice_normal = glui_motion->add_panel_to_panel(panel_gslice,_("normal"),true);
+  gslice_normal_xyz[0]=0.0;
+  gslice_normal_xyz[1]=0.0;
+  gslice_normal_xyz[2]=1.0;
+  gslice_normal_azelev[0]=0.0;
+  gslice_normal_azelev[1]=90.0;
+  SPINNER_gslice_normal_az=glui_motion->add_spinner_to_panel(panel_gslice_normal,"az:",GLUI_SPINNER_FLOAT,gslice_normal_azelev,GSLICE_NORMAL,GSLICE_CB);
+  SPINNER_gslice_normal_elev=glui_motion->add_spinner_to_panel(panel_gslice_normal,"elev:",GLUI_SPINNER_FLOAT,gslice_normal_azelev+1,GSLICE_NORMAL,GSLICE_CB);
+  GSLICE_CB(GSLICE_NORMAL);
   glui_motion->add_checkbox_to_panel(panel_gslice,"show gslice data",&show_gslice_data);
   glui_motion->add_checkbox_to_panel(panel_gslice,"show gslice triangles",&show_gslice_outline);
   glui_motion->add_checkbox_to_panel(panel_gslice,"show gslice normal",&show_gslice_normal);
@@ -697,24 +715,36 @@ extern "C" void showhide_translate(int var){
 
 void GSLICE_CB(int var){
     float sum,*norm;
+    float az, elev;
 
   switch(var){
-    case GSLICE_ROTATION:
-      norm=gslice_norm;
-      norm[0]=-gslice_rotation[2];
-      norm[2]=-gslice_rotation[6];
-      norm[1]=-gslice_rotation[10];
-      sum = norm[0]*norm[0]+norm[1]*norm[1]+norm[2]*norm[2];
-      sum = sqrt(sum);
-      norm[0]/=sum;
-      norm[1]/=sum;
-      norm[2]/=sum;
+    case GSLICE_NORMAL:
+      az = gslice_normal_azelev[0];
+      if(az<-180.0||az>180.0){
+        az+=180.0;
+        az=fmod((double)az,360.0);
+        if(az<0.0)az+=360.0;
+        az-=180.0;
+        SPINNER_gslice_normal_az->set_float_val(az);
+      }
+      elev = gslice_normal_azelev[1];
+      if(elev<-180.0||elev>180.0){
+        elev+=180.0;
+        elev=fmod((double)elev,360.0);
+        if(elev<0)elev+=360.0;
+        elev-=180.0;
+        SPINNER_gslice_normal_elev->set_float_val(elev);
+      }
+      az*=(3.14159/180.0);
+      elev*=(3.14159/180.0);
+      gslice_norm[0]=cos(az)*cos(elev);
+      gslice_norm[1]=sin(az)*cos(elev);;
+      gslice_norm[2]=sin(elev);
       break;
-    case GSLICE_HTRANSLATE:
-    case GSLICE_VTRANSLATE:
-      gslice_xyz[0]=CLAMP(gslice_xyz[0],xbar0*STEPS_PER_DEG,DENORMALIZE_X(xbar)*STEPS_PER_DEG);
-      gslice_xyz[1]=CLAMP(gslice_xyz[1],ybar0*STEPS_PER_DEG,DENORMALIZE_Y(ybar)*STEPS_PER_DEG);
-      gslice_xyz[2]=CLAMP(gslice_xyz[2],zbar0*STEPS_PER_DEG,DENORMALIZE_Z(zbar)*STEPS_PER_DEG);
+    case GSLICE_TRANSLATE:
+      gslice_xyz[0]=CLAMP(gslice_xyz[0],xbar0,DENORMALIZE_X(xbar));
+      gslice_xyz[1]=CLAMP(gslice_xyz[1],ybar0,DENORMALIZE_Y(ybar));
+      gslice_xyz[2]=CLAMP(gslice_xyz[2],zbar0,DENORMALIZE_Z(zbar));
       break;
   }
 }
@@ -915,6 +945,10 @@ extern "C" void TRANSLATE_CB(int var){
       }
       camera_current->zoom=zoom;
       if(SPINNER_zoom!=NULL)SPINNER_zoom->set_float_val(zoom);
+      break;
+    case SET_VIEW_XYZ:
+    case TRANSLATE_XY:
+    case GLUI_Z:
       break;
     default:
       ASSERT(0);

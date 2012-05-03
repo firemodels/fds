@@ -3121,29 +3121,32 @@ void drawgslice_outline(void){
   glTranslatef(-xbar0,-ybar0,-zbar0);
 
   glColor3fv(foregroundcolor);
-  glBegin(GL_LINES);
-  for(i=0;i<nmeshes;i++){
-    mesh *meshi;
-    int j;
 
-    meshi = meshinfo + i;
-    if(meshi->gslice_nverts==0||meshi->gslice_ntriangles==0)continue;
-    for(j=0;j<meshi->gslice_ntriangles;j++){
-      float *xyz1, *xyz2, *xyz3;
+  if(show_gslice_outline==1){
+    glBegin(GL_LINES);
+    for(i=0;i<nmeshes;i++){
+      mesh *meshi;
+      int j;
 
-      xyz1 = meshi->gslice_verts + 3*meshi->gslice_triangles[3*j];
-      xyz2 = meshi->gslice_verts + 3*meshi->gslice_triangles[3*j+1];
-      xyz3 = meshi->gslice_verts + 3*meshi->gslice_triangles[3*j+2];
+      meshi = meshinfo + i;
+      if(meshi->gslice_nverts==0||meshi->gslice_ntriangles==0)continue;
+      for(j=0;j<meshi->gslice_ntriangles;j++){
+        float *xyz1, *xyz2, *xyz3;
 
-      glVertex3fv(xyz1);
-      glVertex3fv(xyz2);
-      glVertex3fv(xyz2);
-      glVertex3fv(xyz3);
-      glVertex3fv(xyz3);
-      glVertex3fv(xyz1);
+        xyz1 = meshi->gslice_verts + 3*meshi->gslice_triangles[3*j];
+        xyz2 = meshi->gslice_verts + 3*meshi->gslice_triangles[3*j+1];
+        xyz3 = meshi->gslice_verts + 3*meshi->gslice_triangles[3*j+2];
+
+        glVertex3fv(xyz1);
+        glVertex3fv(xyz2);
+        glVertex3fv(xyz2);
+        glVertex3fv(xyz3);
+        glVertex3fv(xyz3);
+        glVertex3fv(xyz1);
+      }
     }
+    glEnd();
   }
-  glEnd();
 
   // draw normal vector
 
@@ -3241,7 +3244,7 @@ void update_slice3d_texture(mesh *meshi, float *valdata){
   for(i=0;i<nx;i++){
     for(j=0;j<ny;j++){
       for(k=0;k<nz;k++){
-        cbuffer[IJKNODE(i,j,nz-1-k)]=valdata[k+j*nz+i*nz*ny];
+        cbuffer[IJKNODE(nx-1-i,ny-1-j,nz-1-k)]=valdata[k+j*nz+i*nz*ny];
       }
     }
   }
@@ -3259,6 +3262,8 @@ void drawgslice_data(slicedata *slicei){
   int i;
   mesh *meshi;
   int j;
+  databounds *sb;
+  float valmin, valmax;
 
   if(slicei->loaded==0||slicei->display==0||slicei->volslice==0)return;
 
@@ -3273,10 +3278,16 @@ void drawgslice_data(slicedata *slicei){
   if(cullfaces==1)glDisable(GL_CULL_FACE);
   if(use_transparency_data==1)transparenton();
 
+
+  sb=slicebounds+islicetype;
+  valmin = sb->levels256[0];
+  valmax = sb->levels256[255];
+  printf("valmin=%f valmax=%f\n",valmin,valmax);
+
   glUniform1i(GPU3dslice_valtexture,0);
   glUniform1i(GPU3dslice_colormap,2);
-  glUniform1f(GPU3dslice_val_min,20.0);
-  glUniform1f(GPU3dslice_val_max,620.0);
+  glUniform1f(GPU3dslice_val_min,valmin);
+  glUniform1f(GPU3dslice_val_max,valmax);
   glUniform3f(GPU3dslice_boxmin,
     DENORMALIZE_X(meshi->x0),
     DENORMALIZE_Y(meshi->y0),

@@ -683,7 +683,7 @@ SVEXTERN int rendertourcount;
 
 SVEXTERN float vecyz[4];
 #ifdef pp_GSLICE
-SVEXTERN float gslice_xyz[3],gslice_norm[3],gslice_rotation[16];
+SVEXTERN float gslice_xyz[3],gslice_norm[3],gslice_normal_xyz[3],gslice_normal_azelev[2];
 SVEXTERN int SVDECL(show_gslice_data,0),SVDECL(show_gslice_outline,0),SVDECL(show_gslice_normal,0);
 #endif
 
