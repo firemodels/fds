@@ -171,6 +171,11 @@ SVEXTERN int GPUvol_opacity_factor,GPUvol_volbw,GPUvol_mass_extinct;
 SVEXTERN int GPUvol_temperature_min,GPUvol_temperature_cutoff,GPUvol_temperature_max;
 SVEXTERN int GPUvol_boxmin, GPUvol_boxmax;
 SVEXTERN int GPUvol_smokecolormap, GPUvol_dcell, GPUvol_havefire;
+
+SVEXTERN int GPU3dslice_valtexture,GPU3dslice_colormap;
+SVEXTERN int GPU3dslice_val_min,GPU3dslice_val_max;
+SVEXTERN int GPU3dslice_boxmin, GPU3dslice_boxmax;
+
 #ifdef pp_GPUDEPTH
 SVEXTERN int GPUvol_depthtexture, GPUvol_screensize,GPUvol_nearfar;
 SVEXTERN GLuint SVDECL(depthtexture_id,0);
@@ -679,7 +684,7 @@ SVEXTERN int rendertourcount;
 SVEXTERN float vecyz[4];
 #ifdef pp_GSLICE
 SVEXTERN float gslice_xyz[3],gslice_norm[3],gslice_rotation[16];
-SVEXTERN int SVDECL(show_gslice,0);
+SVEXTERN int SVDECL(show_gslice_data,0),SVDECL(show_gslice_outline,0),SVDECL(show_gslice_normal,0);
 #endif
 
 
@@ -1027,8 +1032,9 @@ SVEXTERN int ntotalfaces;
 SVEXTERN colordata SVDECL(*firstcolor,NULL);
 SVEXTERN texture SVDECL(*textureinfo,NULL), SVDECL(*terrain_texture,NULL);
 SVEXTERN GLuint texture_colorbar_id, texture_slice_colorbar_id, texture_patch_colorbar_id, texture_plot3d_colorbar_id, texture_iso_colorbar_id;
-SVEXTERN GLuint smokecolormap_id,volsmokecolormap_id;
-SVEXTERN int SVDECL(volsmokecolormap_id_defined,-1);
+SVEXTERN GLuint smokecolormap_id,volsmoke_colormap_id,slice3d_colormap_id;
+SVEXTERN int SVDECL(volsmoke_colormap_id_defined,-1);
+SVEXTERN int SVDECL(slice3d_colormap_id_defined,-1);
 SVEXTERN float mscale[3];
 SVEXTERN float xclip_min, yclip_min, zclip_min;
 SVEXTERN float xclip_max, yclip_max, zclip_max;

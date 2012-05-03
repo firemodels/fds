@@ -884,7 +884,7 @@ void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, GLsizei
     get_world_eyepos(modelview_scratch, world_eyepos,scaled_eyepos);
 
 #ifdef pp_GSLICE
-    if(show_gslice==1)update_gslice_planes();
+    if(show_gslice_outline==1||show_gslice_data==1)update_gslice_planes();
 #endif
     if(nrooms>0){
       getzonesmokedir(modelview_scratch);

@@ -1746,11 +1746,11 @@ void init_volsmoke_texture(mesh *meshi){
     nx, ny, nz, border_size, 
     GL_RED, GL_FLOAT, meshi->fire_texture_buffer);
 
-  if(volsmokecolormap_id_defined==-1){
-    volsmokecolormap_id_defined=1;
+  if(volsmoke_colormap_id_defined==-1){
+    volsmoke_colormap_id_defined=1;
     glActiveTexture(GL_TEXTURE2);
-    glGenTextures(1,&volsmokecolormap_id);
-    glBindTexture(GL_TEXTURE_1D,volsmokecolormap_id);
+    glGenTextures(1,&volsmoke_colormap_id);
+    glBindTexture(GL_TEXTURE_1D,volsmoke_colormap_id);
     glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,256,0,GL_RGBA,GL_FLOAT,rgb_smokecolormap);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);

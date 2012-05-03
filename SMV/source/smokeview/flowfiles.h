@@ -476,6 +476,8 @@ typedef struct _mesh {
 #ifdef pp_GPU
   GLuint smoke_texture_id,fire_texture_id,blockage_texture_id;
   float *smoke_texture_buffer,*fire_texture_buffer;
+  GLuint slice3d_texture_id;
+  float *slice3d_texture_buffer,*slice3d_c_buffer;
 #endif
   float meshrgb[3], *meshrgb_ptr;
   float mesh_offset[3], *mesh_offset_ptr;
@@ -1006,7 +1008,7 @@ typedef struct _slicedata {
   float valmin_data, valmax_data;
   float diff_valmin,  diff_valmax;
   flowlabels label;
-  float *qslicedata, *times, *qslice;
+  float *qslicedata, *qsliceframe, *times, *qslice;
   unsigned char *qslicedata_compressed;
   unsigned char *slicecomplevel;
   contour *line_contours;
@@ -1019,8 +1021,7 @@ typedef struct _slicedata {
   char menulabel2[128];
   float *rgb_slice_ptr[256];
   int ntimes,itime;
-  float *slicedata;
-  unsigned char *slicepoint;
+  unsigned char *iqsliceframe;
   float above_ground_level;
   int volslice;
   int is1, is2, js1, js2, ks1, ks2;

@@ -6,6 +6,9 @@
 char IOslice_revision[]="$Revision$";
 
 #include "options.h"
+#ifdef pp_GLEW
+#include "glew.h"
+#endif
 #include <stdio.h>
 #ifdef WIN32
 #include <share.h>
@@ -65,7 +68,7 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type);
          if(U!=NULL){       \
            int i11a;  \
            if(U->compression_type==1){\
-             i11a=U->slicepoint[n];\
+             i11a=U->iqsliceframe[n];\
              DU=U->qval256[i11a];\
            }                                  \
            else{                              \
@@ -79,7 +82,7 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type);
          if(U!=NULL){       \
            int i11a;  \
            if(U->compression_type==1){\
-             i11a=f1*U->slicepoint[n1]+f2*U->slicepoint[n2];\
+             i11a=f1*U->iqsliceframe[n1]+f2*U->iqsliceframe[n2];\
              DU=U->qval256[i11a];\
            }                                  \
            else{                              \
@@ -279,6 +282,9 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
       ny = meshi->jbar+1;
       nxy = nx*ny;
       break;
+    default:
+      ASSERT(0);
+      break;
   }
   readslice(fed_slice->file,fedi->fed_index,UNLOAD,&error_local);
 
@@ -331,6 +337,9 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
             iblank[j+i*jbar]=meshi->c_iblank_z[IJKNODE(i,j,fed_slice->ks1)];
           }
         }
+        break;
+      default:
+        ASSERT(0);
         break;
     }
     printf("\n");
@@ -429,7 +438,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
       contour_areas+=4;
     }
     for(i=1;i<fed_slice->ntimes;i++){
-      int j;
+      int jj;
       float dt;
 
       if(Creadslice_frame(i,fedi->o2_index,LOAD)<0||
@@ -445,12 +454,12 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
 
       fed_framem1=fed_frame;
       fed_frame+=frame_size;
-      for(j=0;j<frame_size;j++){
+      for(jj=0;jj<frame_size;jj++){
         float val1, val2;
 
-        val1=FEDCO(  co_frame1[j])*HVCO2(  co2_frame1[j])+FEDO2(  o2_frame1[j]);
-        val2=FEDCO(co_frame2[j])*HVCO2(co2_frame2[j])+FEDO2(o2_frame2[j]);
-        fed_frame[j] = fed_framem1[j] + (val1+val2)*dt/2.0;
+        val1=FEDCO(  co_frame1[jj])*HVCO2(  co2_frame1[jj])+FEDO2(  o2_frame1[jj]);
+        val2=FEDCO(co_frame2[jj])*HVCO2(co2_frame2[jj])+FEDO2(o2_frame2[jj]);
+        fed_frame[jj] = fed_framem1[jj] + (val1+val2)*dt/2.0;
       }
       if(fed_slice->volslice==0){
 
@@ -1144,6 +1153,16 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     }
   }
   push_slice_loadstack(slicefilenumber);
+
+#ifdef pp_GPU
+    if(sd->volslice==1){
+      mesh *meshi;
+
+      meshi = meshinfo + sd->blocknumber;
+      init_slice3d_texture(meshi);
+    }
+#endif
+
   glutPostRedisplay();
 }
 /* ------------------ outputslicebounds ------------------------ */
@@ -2166,8 +2185,8 @@ void update_fedinfo(void){
     sd->volslice=fedi->co->volslice;
     sd->times=NULL;
     sd->slicelevel=NULL;
-    sd->slicepoint=NULL;
-    sd->slicedata=NULL;
+    sd->iqsliceframe=NULL;
+    sd->qsliceframe=NULL;
     sd->timeslist=NULL;
     sd->blocknumber=co2->blocknumber;
     sd->vloaded=0;
@@ -2826,22 +2845,23 @@ void drawslice_frame(){
 #ifdef USE_ZLIB
         uncompress_slicedataframe(sd,sd->itime);
 #endif
-        sd->slicepoint=sd->slicecomplevel;
+        sd->iqsliceframe=sd->slicecomplevel;
       }
       else{
-        sd->slicepoint = sd->slicelevel + sd->itime*sd->nsliceii;
+        sd->iqsliceframe = sd->slicelevel + sd->itime*sd->nsliceii;
       }
-      sd->slicedata=NULL;
+      sd->qsliceframe=NULL;
 #ifdef pp_MEMDEBUG
       if(sd->compression_type==0){
         ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicetotal));
       }
 #endif
 
-      if(sd->qslicedata!=NULL)sd->slicedata = sd->qslicedata + sd->itime*sd->nsliceii;
+      if(sd->qslicedata!=NULL)sd->qsliceframe = sd->qslicedata + sd->itime*sd->nsliceii;
 #ifdef pp_SLICECONTOURS
       if(vis_slice_contours==1&&sd->line_contours!=NULL){
         DrawLineContours(sd->line_contours+sd->itime, 3.0);
+        SNIFF_ERRORS("after DrawLineContours");
         continue;
       }
 #endif            
@@ -2849,17 +2869,21 @@ void drawslice_frame(){
         if(sd->volslice==1){
           if(sd->slicetype==SLICE_TERRAIN){
             drawvolslice_terrain(sd);
+            SNIFF_ERRORS("after drawvolslice_terrain");
           }
           else{
             drawvolslice_texture(sd);
+            SNIFF_ERRORS("after drawvolslice_texture");
           }
         }
         else{
           if(sd->slicetype==SLICE_TERRAIN){
             drawslice_terrain(sd);
+            SNIFF_ERRORS("after drawslice_terrain");
           }
           else{
             drawslice_texture(sd);
+            SNIFF_ERRORS("after drawslice_texture");
           }
         }
       }
@@ -2868,29 +2892,47 @@ void drawslice_frame(){
           if(sd->slicetype==SLICE_CENTER){
             if(cellcenter_interp==1){
               drawvolslice_cellcenter_interp(sd);
+              SNIFF_ERRORS("after drawvolslice_cellcenter_interp");
             }
             else{
               drawvolslice_cellcenter(sd);
+              SNIFF_ERRORS("after drawvolslice_cellcenter");
             }
           }
           else{
             drawvolslice(sd);
+            SNIFF_ERRORS("after drawvolslice");
           }
         }
         else{
           if(sd->slicetype==SLICE_CENTER){
             if(cellcenter_interp==1){
               drawslice_cellcenter_interp(sd);
+              SNIFF_ERRORS("after drawslice_cellcenter_interp");
             }
             else{
               drawslice_cellcenter(sd);
+              SNIFF_ERRORS("after drawslice_cellcener");
             }
           }
           else{
             drawslice(sd);
+            SNIFF_ERRORS("after drawslice");
           }
         }
       }
+#ifdef pp_GPU
+      if(usegpu==1){
+        if(show_gslice_data==1){
+          Load3DSliceShaders();
+          SNIFF_ERRORS("after Load3DSliceShaders");
+          drawgslice_data(sd);
+          SNIFF_ERRORS("after drawgslice_data");
+          UnLoadShaders();
+          SNIFF_ERRORS("after UnLoad3DSliceShaders");
+        }
+      }
+#endif
     }
   }
 
@@ -2917,10 +2959,10 @@ void drawvslice_frame(void){
 #ifdef USE_ZLIB
       uncompress_slicedataframe(VAL,VAL->itime);
 #endif
-      VAL->slicepoint=VAL->slicecomplevel;
+      VAL->iqsliceframe=VAL->slicecomplevel;
     }
     else{
-      if(VAL!=NULL)VAL->slicepoint = VAL->slicelevel + VAL->itime*VAL->nsliceii;
+      if(VAL!=NULL)VAL->iqsliceframe = VAL->slicelevel + VAL->itime*VAL->nsliceii;
     }
 #undef VAL
 #define VAL u
@@ -2929,10 +2971,10 @@ void drawvslice_frame(void){
 #ifdef USE_ZLIB
         uncompress_slicedataframe(VAL,VAL->itime);
 #endif
-        VAL->slicepoint=VAL->slicecomplevel;
+        VAL->iqsliceframe=VAL->slicecomplevel;
       }
       else{
-        if(VAL!=NULL)VAL->slicepoint = VAL->slicelevel + VAL->itime*VAL->nsliceii;
+        if(VAL!=NULL)VAL->iqsliceframe = VAL->slicelevel + VAL->itime*VAL->nsliceii;
       }
     }
 #undef VAL
@@ -2942,10 +2984,10 @@ void drawvslice_frame(void){
 #ifdef USE_ZLIB
         uncompress_slicedataframe(VAL,VAL->itime);
 #endif
-        VAL->slicepoint=VAL->slicecomplevel;
+        VAL->iqsliceframe=VAL->slicecomplevel;
       }
       else{
-        if(VAL!=NULL)VAL->slicepoint = VAL->slicelevel + VAL->itime*VAL->nsliceii;
+        if(VAL!=NULL)VAL->iqsliceframe = VAL->slicelevel + VAL->itime*VAL->nsliceii;
       }
     }
 #undef VAL
@@ -2955,10 +2997,10 @@ void drawvslice_frame(void){
 #ifdef USE_ZLIB
         uncompress_slicedataframe(VAL,VAL->itime);
 #endif
-        VAL->slicepoint=VAL->slicecomplevel;
+        VAL->iqsliceframe=VAL->slicecomplevel;
       }
       else{
-        if(VAL!=NULL)VAL->slicepoint = VAL->slicelevel + VAL->itime*VAL->nsliceii;
+        if(VAL!=NULL)VAL->iqsliceframe = VAL->slicelevel + VAL->itime*VAL->nsliceii;
       }
     }
     if(u!=NULL&&u->compression_type==0){
@@ -3067,10 +3109,10 @@ void update_gslice_planes(void){
   }
 }
 
-/* ------------------ drawgslice ------------------------ */
+/* ------------------ drawgslice_outline ------------------------ */
 
 void getNormal(float *v1, float *v2, float *v3, float *area, float *normal);
-void drawgslice(const slicedata *sd){
+void drawgslice_outline(void){
   int i;
   float zero[3]={0.0,0.0,0.0};
 
@@ -3078,8 +3120,8 @@ void drawgslice(const slicedata *sd){
   glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
   glTranslatef(-xbar0,-ybar0,-zbar0);
 
+  glColor3fv(foregroundcolor);
   glBegin(GL_LINES);
-  glColor3f(1.0,0.0,0.0);
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
     int j;
@@ -3088,79 +3130,178 @@ void drawgslice(const slicedata *sd){
     if(meshi->gslice_nverts==0||meshi->gslice_ntriangles==0)continue;
     for(j=0;j<meshi->gslice_ntriangles;j++){
       float *xyz1, *xyz2, *xyz3;
-      float x12[3], x13[3], x23[3];
-      int jj;
-
-      //        3
-      //     13 23
-      //   1 12  2
-
 
       xyz1 = meshi->gslice_verts + 3*meshi->gslice_triangles[3*j];
       xyz2 = meshi->gslice_verts + 3*meshi->gslice_triangles[3*j+1];
       xyz3 = meshi->gslice_verts + 3*meshi->gslice_triangles[3*j+2];
 
-//      glVertex3fv(xyz1);
-//      glVertex3fv(xyz2);
-//      glVertex3fv(xyz2);
-//      glVertex3fv(xyz3);
-//      glVertex3fv(xyz3);
-//      glVertex3fv(xyz1);
-
-// sub divide triangle
-
-     for(jj=0;jj<3;jj++){
-        x12[jj]= (xyz1[jj]+xyz2[jj])/2.0;
-        x13[jj]= (xyz1[jj]+xyz3[jj])/2.0;
-        x23[jj]= (xyz2[jj]+xyz3[jj])/2.0;
-      }
-      
       glVertex3fv(xyz1);
-      glVertex3fv(x12);
-      glVertex3fv(x12);
-      glVertex3fv(x13);
-      glVertex3fv(x13);
-      glVertex3fv(xyz1);
-
-      glVertex3fv(x12);
       glVertex3fv(xyz2);
       glVertex3fv(xyz2);
-      glVertex3fv(x23);
-      glVertex3fv(x23);
-      glVertex3fv(x12);
-
-      glVertex3fv(x12);
-      glVertex3fv(x23);
-      glVertex3fv(x23);
-      glVertex3fv(x13);
-      glVertex3fv(x13);
-      glVertex3fv(x12);
-
-      glVertex3fv(x13);
-      glVertex3fv(x23);
-      glVertex3fv(x23);
       glVertex3fv(xyz3);
       glVertex3fv(xyz3);
-      glVertex3fv(x13);
+      glVertex3fv(xyz1);
     }
   }
   glEnd();
 
   // draw normal vector
-  
-  glPushMatrix();
-  glTranslatef(gslice_xyz[0],gslice_xyz[1],gslice_xyz[2]);
-  glBegin(GL_LINES);
-  glVertex3fv(zero);
-  glVertex3fv(gslice_norm);
-  glEnd();
-  glPointSize(20.0);
-  glBegin(GL_POINTS);
-  glVertex3fv(zero);
-  glVertex3fv(gslice_norm);
-  glEnd();
-  glPopMatrix();
 
+  if(show_gslice_normal==1){
+    glColor3f(1.0,0.0,0.0);
+    glPushMatrix();
+    glTranslatef(gslice_xyz[0],gslice_xyz[1],gslice_xyz[2]);
+    glBegin(GL_LINES);
+    glVertex3fv(zero);
+    glVertex3fv(gslice_norm);
+    glEnd();
+    glPointSize(20.0);
+    glBegin(GL_POINTS);
+    glVertex3fv(zero);
+    glVertex3fv(gslice_norm);
+    glEnd();
+    glPopMatrix();
+  }
+
+  glPopMatrix();
+}
+
+#ifdef pp_GPU
+
+/* ------------------ init_volsmoke_texture ------------------------ */
+
+void init_slice3d_texture(mesh *meshi){
+  GLint border_size=0;
+  GLsizei nx, ny, nz;
+
+  printf("Defining 3d slice textures for %s ...",meshi->label);
+  fflush(stdout);
+
+  glActiveTexture(GL_TEXTURE0);
+  glGenTextures(1,&meshi->slice3d_texture_id);
+  glBindTexture(GL_TEXTURE_3D,meshi->smoke_texture_id);
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+  nx = meshi->ibar+1;
+  ny = meshi->jbar+1;
+  nz = meshi->kbar+1;
+  if(meshi->slice3d_texture_buffer==NULL){
+    int i;
+
+    NewMemory((void **)&meshi->slice3d_texture_buffer,nx*ny*nz*sizeof(float));
+    for(i=0;i<nx*ny*nz;i++){
+      meshi->slice3d_texture_buffer[i]=0.0;
+    }
+  }
+  if(meshi->slice3d_c_buffer==NULL){
+    int i;
+
+    NewMemory((void **)&meshi->slice3d_c_buffer,nx*ny*nz*sizeof(float));
+  }
+  glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 
+    nx, ny, nz, border_size, 
+    GL_RED, GL_FLOAT, meshi->slice3d_texture_buffer);
+
+
+  if(slice3d_colormap_id_defined==-1){
+    slice3d_colormap_id_defined=1;
+    glActiveTexture(GL_TEXTURE2);
+    glGenTextures(1,&slice3d_colormap_id);
+    glBindTexture(GL_TEXTURE_1D,slice3d_colormap_id);
+    glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,256,0,GL_RGBA,GL_FLOAT,rgb_slice);
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_slice);
+  }
+
+  glActiveTexture(GL_TEXTURE0);
+  printf("completed\n");
+  fflush(stdout);
+}
+#endif
+
+/* ------------------ update_slice3d_texture ------------------------ */
+
+void update_slice3d_texture(mesh *meshi, float *valdata){
+  GLint xoffset=0,yoffset=0,zoffset=0;
+  GLsizei nx, ny, nz, nxy;
+  int i, j, k;
+  float *cbuffer;
+
+//  glGetIntegerv(GL_MAX_TEXTURE_COORDS,&ntextures);
+  nx = meshi->ibar+1;
+  ny = meshi->jbar+1;
+  nz = meshi->kbar+1;
+  nxy = nx*ny;
+  cbuffer = meshi->slice3d_c_buffer;
+  for(i=0;i<nx;i++){
+    for(j=0;j<ny;j++){
+      for(k=0;k<nz;k++){
+        cbuffer[IJKNODE(i,j,nz-1-k)]=valdata[k+j*nz+i*nz*ny];
+      }
+    }
+  }
+
+  glActiveTexture(GL_TEXTURE0);
+  glTexSubImage3D(GL_TEXTURE_3D,0,
+    xoffset,yoffset,zoffset,
+    nx, ny, nz,
+    GL_RED, GL_FLOAT, cbuffer);
+}
+
+/* ------------------ drawgslice_data ------------------------ */
+
+void drawgslice_data(slicedata *slicei){
+  int i;
+  mesh *meshi;
+  int j;
+
+  if(slicei->loaded==0||slicei->display==0||slicei->volslice==0)return;
+
+  meshi = meshinfo + slicei->blocknumber;
+  if(meshi->gslice_nverts==0||meshi->gslice_ntriangles==0)return;
+
+  update_slice3d_texture(meshi, slicei->qsliceframe);
+  glPushMatrix();
+  glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
+  glTranslatef(-xbar0,-ybar0,-zbar0);
+
+  if(cullfaces==1)glDisable(GL_CULL_FACE);
+  if(use_transparency_data==1)transparenton();
+
+  glUniform1i(GPU3dslice_valtexture,0);
+  glUniform1i(GPU3dslice_colormap,2);
+  glUniform1f(GPU3dslice_val_min,20.0);
+  glUniform1f(GPU3dslice_val_max,620.0);
+  glUniform3f(GPU3dslice_boxmin,
+    DENORMALIZE_X(meshi->x0),
+    DENORMALIZE_Y(meshi->y0),
+    DENORMALIZE_Z(meshi->z0)
+    );
+  glUniform3f(GPU3dslice_boxmax,
+    DENORMALIZE_X(meshi->x1),
+    DENORMALIZE_Y(meshi->y1),
+    DENORMALIZE_Z(meshi->z1)
+    );
+  glBegin(GL_TRIANGLES);
+
+  for(j=0;j<meshi->gslice_ntriangles;j++){
+    float *xyz1, *xyz2, *xyz3;
+
+    xyz1 = meshi->gslice_verts + 3*meshi->gslice_triangles[3*j];
+    xyz2 = meshi->gslice_verts + 3*meshi->gslice_triangles[3*j+1];
+    xyz3 = meshi->gslice_verts + 3*meshi->gslice_triangles[3*j+2];
+    glVertex3fv(xyz1);
+    glVertex3fv(xyz2);
+    glVertex3fv(xyz3);
+  }
+  glEnd();
+  if(use_transparency_data==1)transparentoff();
+  if(cullfaces==1)glEnable(GL_CULL_FACE);
   glPopMatrix();
 }
 #endif
@@ -3200,8 +3341,8 @@ void drawslice(const slicedata *sd){
   nxy = nx*ny;
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
-
   if(use_transparency_data==1)transparenton();
+
   if(sd->idir==1){
    constval = xplt[sd->is1]+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
@@ -3218,10 +3359,10 @@ void drawslice(const slicedata *sd){
        n++; n2++; 
        if(show_slice_in_obst==0&&iblank_x[IJK(sd->is1,j,k)]!=2)continue;
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(sd->is1,j,k)]==0)continue;
-       i11 = 4*sd->slicepoint[n];
-       i31 = 4*sd->slicepoint[n2];
-       i13 = 4*sd->slicepoint[n+1];
-       i33 = 4*sd->slicepoint[n2+1];
+       i11 = 4*sd->iqsliceframe[n];
+       i31 = 4*sd->iqsliceframe[n2];
+       i13 = 4*sd->iqsliceframe[n+1];
+       i33 = 4*sd->iqsliceframe[n2+1];
        z1 = zplt[k];
        z3 = zplt[k+1];
        if(ABS(i11-i33)<ABS(i13-i31)){
@@ -3270,10 +3411,10 @@ void drawslice(const slicedata *sd){
        n++; n2++; 
        if(show_slice_in_obst==0&&iblank_y[IJK(i,sd->js1,k)]!=2)continue;
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,sd->js1,k)]==0)continue;
-       i11 = 4*sd->slicepoint[n];
-       i31 = 4*sd->slicepoint[n2];
-       i13 = 4*sd->slicepoint[n+1];
-       i33 = 4*sd->slicepoint[n2+1];
+       i11 = 4*sd->iqsliceframe[n];
+       i31 = 4*sd->iqsliceframe[n2];
+       i13 = 4*sd->iqsliceframe[n+1];
+       i33 = 4*sd->iqsliceframe[n2+1];
        z1 = zplt[k];
        z3 = zplt[k+1];
        if(ABS(i11-i33)<ABS(i13-i31)){
@@ -3321,10 +3462,10 @@ void drawslice(const slicedata *sd){
        n++; n2++; 
        if(show_slice_in_obst==0&&iblank_z[IJK(i,j,sd->ks1)]!=2)continue;
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,sd->ks1)]==0)continue;
-       i11 = 4*sd->slicepoint[n];
-       i31 = 4*sd->slicepoint[n2];
-       i13 = 4*sd->slicepoint[n+1];
-       i33 = 4*sd->slicepoint[n2+1];
+       i11 = 4*sd->iqsliceframe[n];
+       i31 = 4*sd->iqsliceframe[n2];
+       i13 = 4*sd->iqsliceframe[n+1];
+       i33 = 4*sd->iqsliceframe[n2+1];
        yy1 = yplt[j];
        y3 = yplt[j+1];
        if(ABS(i11-i33)<ABS(i13-i31)){
@@ -3425,7 +3566,7 @@ void drawslice_cellcenter(const slicedata *sd){
        n++; n2++; 
        if(show_slice_in_obst==0&&iblank_x[IJK(sd->is1,j,k)]!=2)continue;
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(sd->is1,j,k)]==0)continue;
-       i33 = 4*sd->slicepoint[n2+1];
+       i33 = 4*sd->iqsliceframe[n2+1];
        z1 = zplt[k];
        z3 = zplt[k+1];
        glColor4fv(&rgb_ptr[i33]);
@@ -3458,7 +3599,7 @@ void drawslice_cellcenter(const slicedata *sd){
        n++; n2++; 
        if(show_slice_in_obst==0&&iblank_y[IJK(i,sd->js1,k)]!=2)continue;
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,sd->js1,k)]==0)continue;
-       i33 = 4*sd->slicepoint[n2+1];
+       i33 = 4*sd->iqsliceframe[n2+1];
        z1 = zplt[k];
        z3 = zplt[k+1];
        glColor4fv(&rgb_ptr[i33]);
@@ -3489,7 +3630,7 @@ void drawslice_cellcenter(const slicedata *sd){
        n++; n2++; 
        if(show_slice_in_obst==0&&iblank_z[IJK(i,j,sd->ks1)]!=2)continue;
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,sd->ks1)]==0)continue;
-       i33 = 4*sd->slicepoint[n2+1];
+       i33 = 4*sd->iqsliceframe[n2+1];
        yy1 = yplt[j];
        y3 = yplt[j+1];
          glColor4fv(&rgb_ptr[i33]);
@@ -3570,10 +3711,10 @@ void drawslice_cellcenter_interp(const slicedata *sd){
 
        n++; n2++; 
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(sd->is1,j,k)]==0)continue;
-       r11 = (float)sd->slicepoint[n]/255.0;
-       r31 = (float)sd->slicepoint[n2]/255.0;
-       r13 = (float)sd->slicepoint[n+1]/255.0;
-       r33 = (float)sd->slicepoint[n2+1]/255.0;
+       r11 = (float)sd->iqsliceframe[n]/255.0;
+       r31 = (float)sd->iqsliceframe[n2]/255.0;
+       r13 = (float)sd->iqsliceframe[n+1]/255.0;
+       r33 = (float)sd->iqsliceframe[n2+1]/255.0;
        rmid=(r11+r31+r13+r33)/4.0;
        z1 = (zplt[k]+zplt[k-1])/2.0;
        z3 = (zplt[k+1]+zplt[k])/2.0;
@@ -3619,10 +3760,10 @@ void drawslice_cellcenter_interp(const slicedata *sd){
 
        n++; n2++; 
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,sd->js1,k)]==0)continue;
-       r11 = (float)sd->slicepoint[n]/255;
-       r31 = (float)sd->slicepoint[n2]/255;
-       r13 = (float)sd->slicepoint[n+1]/255;
-       r33 = (float)sd->slicepoint[n2+1]/255;
+       r11 = (float)sd->iqsliceframe[n]/255;
+       r31 = (float)sd->iqsliceframe[n2]/255;
+       r13 = (float)sd->iqsliceframe[n+1]/255;
+       r33 = (float)sd->iqsliceframe[n2+1]/255;
        rmid = (r11+r31+r13+r33)/4.0;
        z1 = (zplt[k]+zplt[k-1])/2.0;
        z3 = (zplt[k+1]+zplt[k])/2.0;
@@ -3669,10 +3810,10 @@ void drawslice_cellcenter_interp(const slicedata *sd){
 
        n++; n2++; 
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,sd->ks1)]==0)continue;
-       r11 = (float)sd->slicepoint[n]/255.0;
-       r31 = (float)sd->slicepoint[n2]/255.0;
-       r13 = (float)sd->slicepoint[n+1]/255.0;
-       r33 = (float)sd->slicepoint[n2+1]/255.0;
+       r11 = (float)sd->iqsliceframe[n]/255.0;
+       r31 = (float)sd->iqsliceframe[n2]/255.0;
+       r13 = (float)sd->iqsliceframe[n+1]/255.0;
+       r33 = (float)sd->iqsliceframe[n2+1]/255.0;
        rmid = (r11+r31+r13+r33)/4.0;
 
        yy1 = (yplt[j]+yplt[j-1])/2.0;
@@ -3762,10 +3903,10 @@ void drawslice_texture(const slicedata *sd){
        n++; n2++; 
        if(show_slice_in_obst==0&&iblank_x!=NULL&&iblank_x[IJK(sd->is1,j,k)]!=2)continue;
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(sd->is1,j,k)]==0)continue;
-       r11 = (float)sd->slicepoint[n]/255.0;
-       r31 = (float)sd->slicepoint[n2]/255.0;
-       r13 = (float)sd->slicepoint[n+1]/255.0;
-       r33 = (float)sd->slicepoint[n2+1]/255.0;
+       r11 = (float)sd->iqsliceframe[n]/255.0;
+       r31 = (float)sd->iqsliceframe[n2]/255.0;
+       r13 = (float)sd->iqsliceframe[n+1]/255.0;
+       r33 = (float)sd->iqsliceframe[n2+1]/255.0;
        rmid=(r11+r31+r13+r33)/4.0;
        z1 = zplt[k];
        z3 = zplt[k+1];
@@ -3810,10 +3951,10 @@ void drawslice_texture(const slicedata *sd){
        n++; n2++; 
        if(show_slice_in_obst==0&&iblank_y!=NULL&&iblank_y[IJK(i,sd->js1,k)]!=2)continue;
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,sd->js1,k)]==0)continue;
-       r11 = (float)sd->slicepoint[n]/255;
-       r31 = (float)sd->slicepoint[n2]/255;
-       r13 = (float)sd->slicepoint[n+1]/255;
-       r33 = (float)sd->slicepoint[n2+1]/255;
+       r11 = (float)sd->iqsliceframe[n]/255;
+       r31 = (float)sd->iqsliceframe[n2]/255;
+       r13 = (float)sd->iqsliceframe[n+1]/255;
+       r33 = (float)sd->iqsliceframe[n2+1]/255;
        rmid = (r11+r31+r13+r33)/4.0;
        z1 = zplt[k];
        z3 = zplt[k+1];
@@ -3858,10 +3999,10 @@ void drawslice_texture(const slicedata *sd){
        n++; n2++; 
        if(show_slice_in_obst==0&&iblank_z!=NULL&&iblank_z[IJK(i,j,sd->ks1)]!=2)continue;
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,sd->ks1)]==0)continue;
-       r11 = (float)sd->slicepoint[n]/255.0;
-       r31 = (float)sd->slicepoint[n2]/255.0;
-       r13 = (float)sd->slicepoint[n+1]/255.0;
-       r33 = (float)sd->slicepoint[n2+1]/255.0;
+       r11 = (float)sd->iqsliceframe[n]/255.0;
+       r31 = (float)sd->iqsliceframe[n2]/255.0;
+       r13 = (float)sd->iqsliceframe[n+1]/255.0;
+       r33 = (float)sd->iqsliceframe[n2+1]/255.0;
        rmid = (r11+r31+r13+r33)/4.0;
 
        yy1 = yplt[j];
@@ -3940,10 +4081,10 @@ void drawslice_terrain(const slicedata *sd){
        float ymid, rmid;
 
        n++; n2++; 
-       r11 = (float)sd->slicepoint[n]/255.0;
-       r31 = (float)sd->slicepoint[n2]/255.0;
-       r13 = (float)sd->slicepoint[n+1]/255.0;
-       r33 = (float)sd->slicepoint[n2+1]/255.0;
+       r11 = (float)sd->iqsliceframe[n]/255.0;
+       r31 = (float)sd->iqsliceframe[n2]/255.0;
+       r13 = (float)sd->iqsliceframe[n+1]/255.0;
+       r33 = (float)sd->iqsliceframe[n2+1]/255.0;
 
        z11 = constval + znode[ijnode2(i,j)];
        z31 = constval + znode[ijnode2(i+1,j)];
@@ -4050,10 +4191,10 @@ void drawvolslice_texture(const slicedata *sd){
        n++; n2++; 
        if(iblank_x[IJK(plotx,j,k)]!=2)continue;
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==0)continue;
-       r11 = (float)sd->slicepoint[n]/255.0;
-       r31 = (float)sd->slicepoint[n2]/255.0;
-       r13 = (float)sd->slicepoint[n+1]/255.0;
-       r33 = (float)sd->slicepoint[n2+1]/255.0;
+       r11 = (float)sd->iqsliceframe[n]/255.0;
+       r31 = (float)sd->iqsliceframe[n2]/255.0;
+       r13 = (float)sd->iqsliceframe[n+1]/255.0;
+       r33 = (float)sd->iqsliceframe[n2+1]/255.0;
        rmid = (r11+r31+r13+r33)/4.0;
 
        z1 = zplt[k];
@@ -4103,10 +4244,10 @@ void drawvolslice_texture(const slicedata *sd){
        n++; n2++; 
        if(iblank_y[IJK(i,ploty,k)]!=2)continue;
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,ploty,k)]==0)continue;
-       r11 = (float)sd->slicepoint[n]/255.0;
-       r31 = (float)sd->slicepoint[n2]/255.0;
-       r13 = (float)sd->slicepoint[n+1]/255.0;
-       r33 = (float)sd->slicepoint[n2+1]/255.0;
+       r11 = (float)sd->iqsliceframe[n]/255.0;
+       r31 = (float)sd->iqsliceframe[n2]/255.0;
+       r13 = (float)sd->iqsliceframe[n+1]/255.0;
+       r33 = (float)sd->iqsliceframe[n2+1]/255.0;
        rmid = (r11+r31+r13+r33)/4.0;
 
        z1 = zplt[k];
@@ -4159,10 +4300,10 @@ void drawvolslice_texture(const slicedata *sd){
        n2+=sd->nslicek; 
        if(iblank_z[IJK(i,j,plotz)]!=2)continue;
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==0)continue;
-       r11 = (float)sd->slicepoint[n]/255.0;
-       r31 = (float)sd->slicepoint[n2]/255.0;
-       r13 = (float)sd->slicepoint[ n+sd->nslicek]/255.0;
-       r33 = (float)sd->slicepoint[n2+sd->nslicek]/255.0;
+       r11 = (float)sd->iqsliceframe[n]/255.0;
+       r31 = (float)sd->iqsliceframe[n2]/255.0;
+       r13 = (float)sd->iqsliceframe[ n+sd->nslicek]/255.0;
+       r33 = (float)sd->iqsliceframe[n2+sd->nslicek]/255.0;
        rmid = (r11+r31+r13+r33)/4.0;
 
        yy1 = yplt[j];
@@ -4272,10 +4413,10 @@ void drawvolslice_terrain(const slicedata *sd){
         n++; n2++; 
         if(iblank_x[IJK(plotx,j,k)]!=2)continue;
         if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==0)continue;
-        r11 = (float)sd->slicepoint[n]/255.0;
-        r31 = (float)sd->slicepoint[n2]/255.0;
-        r13 = (float)sd->slicepoint[n+1]/255.0;
-        r33 = (float)sd->slicepoint[n2+1]/255.0;
+        r11 = (float)sd->iqsliceframe[n]/255.0;
+        r31 = (float)sd->iqsliceframe[n2]/255.0;
+        r13 = (float)sd->iqsliceframe[n+1]/255.0;
+        r33 = (float)sd->iqsliceframe[n2+1]/255.0;
         rmid = (r11+r31+r13+r33)/4.0;
 
         z1 = zplt[k];
@@ -4325,10 +4466,10 @@ void drawvolslice_terrain(const slicedata *sd){
         n++; n2++; 
         if(iblank_y[IJK(i,ploty,k)]!=2)continue;
         if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,ploty,k)]==0)continue;
-        r11 = (float)sd->slicepoint[n]/255.0;
-        r31 = (float)sd->slicepoint[n2]/255.0;
-        r13 = (float)sd->slicepoint[n+1]/255.0;
-        r33 = (float)sd->slicepoint[n2+1]/255.0;
+        r11 = (float)sd->iqsliceframe[n]/255.0;
+        r31 = (float)sd->iqsliceframe[n2]/255.0;
+        r13 = (float)sd->iqsliceframe[n+1]/255.0;
+        r33 = (float)sd->iqsliceframe[n2+1]/255.0;
         rmid = (r11+r31+r13+r33)/4.0;
 
         z1 = zplt[k];
@@ -4393,16 +4534,16 @@ void drawvolslice_terrain(const slicedata *sd){
         if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==0)continue;
 
         n11=i*sd->nslicej*sd->nslicek+j*sd->nslicek;
-        r11 = interp3dsliceindex(sd->slicepoint,zplt,meshi->kbar,n11,z11)/255.0;
+        r11 = interp3dsliceindex(sd->iqsliceframe,zplt,meshi->kbar,n11,z11)/255.0;
 
         n31=n11 + sd->nslicej*sd->nslicek;
-        r31 = interp3dsliceindex(sd->slicepoint,zplt,meshi->kbar,n31,z31)/255.0;
+        r31 = interp3dsliceindex(sd->iqsliceframe,zplt,meshi->kbar,n31,z31)/255.0;
 
         n13=n11 + sd->nslicek;
-        r13 = interp3dsliceindex(sd->slicepoint,zplt,meshi->kbar,n13,z13)/255.0;
+        r13 = interp3dsliceindex(sd->iqsliceframe,zplt,meshi->kbar,n13,z13)/255.0;
 
         n33=n13 + sd->nslicej*sd->nslicek;
-        r33 = interp3dsliceindex(sd->slicepoint,zplt,meshi->kbar,n33,z33)/255.0;
+        r33 = interp3dsliceindex(sd->iqsliceframe,zplt,meshi->kbar,n33,z33)/255.0;
 
         rmid = (r11+r31+r13+r33)/4.0;
 
@@ -4512,7 +4653,7 @@ void drawvolslice_cellcenter(const slicedata *sd){
        n++; n2++; 
        if(iblank_x[IJK(iislice,j,k)]!=2)continue;
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(iislice,j,k)]==0)continue;
-       i33 = 4*sd->slicepoint[n2+1];
+       i33 = 4*sd->iqsliceframe[n2+1];
        z1 = zplt[k];
        z3 = zplt[k+1];
        /*
@@ -4551,7 +4692,7 @@ void drawvolslice_cellcenter(const slicedata *sd){
        n++; n2++; 
        if(iblank_y[IJK(i,jj1,k)]!=2)continue;
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,sd->js1,k)]==0)continue;
-       i33 = 4*sd->slicepoint[n2+1];
+       i33 = 4*sd->iqsliceframe[n2+1];
        z1 = zplt[k];
        z3 = zplt[k+1];
        /*
@@ -4592,7 +4733,7 @@ void drawvolslice_cellcenter(const slicedata *sd){
        n2+=sd->nslicek; 
        if(iblank_z[IJK(i,j,kk1)]!=2)continue;
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,kk1)]==0)continue;
-       i33 = 4*sd->slicepoint[n2+sd->nslicek];
+       i33 = 4*sd->iqsliceframe[n2+sd->nslicek];
        yy1 = yplt[j];
        y3 = yplt[j+1];
        /*
@@ -4687,10 +4828,10 @@ void drawvolslice_cellcenter_interp(const slicedata *sd){
         n++; n2++; 
         if(iblank_x[IJK(plotx,j,k)]!=2)continue;
         if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==0)continue;
-        r11 = (float)sd->slicepoint[n]/255.0;
-        r31 = (float)sd->slicepoint[n2]/255.0;
-        r13 = (float)sd->slicepoint[n+1]/255.0;
-        r33 = (float)sd->slicepoint[n2+1]/255.0;
+        r11 = (float)sd->iqsliceframe[n]/255.0;
+        r31 = (float)sd->iqsliceframe[n2]/255.0;
+        r13 = (float)sd->iqsliceframe[n+1]/255.0;
+        r33 = (float)sd->iqsliceframe[n2+1]/255.0;
         rmid = (r11+r31+r13+r33)/4.0;
 
         z1 = (zplt[k]+zplt[k-1])/2.0;
@@ -4744,10 +4885,10 @@ void drawvolslice_cellcenter_interp(const slicedata *sd){
         n++; n2++; 
         if(iblank_y[IJK(i,ploty,k)]!=2)continue;
         if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,ploty,k)]==0)continue;
-        r11 = (float)sd->slicepoint[n]/255.0;
-        r31 = (float)sd->slicepoint[n2]/255.0;
-        r13 = (float)sd->slicepoint[n+1]/255.0;
-        r33 = (float)sd->slicepoint[n2+1]/255.0;
+        r11 = (float)sd->iqsliceframe[n]/255.0;
+        r31 = (float)sd->iqsliceframe[n2]/255.0;
+        r13 = (float)sd->iqsliceframe[n+1]/255.0;
+        r33 = (float)sd->iqsliceframe[n2+1]/255.0;
         rmid = (r11+r31+r13+r33)/4.0;
 
         z1 = (zplt[k]+zplt[k-1])/2.0;
@@ -4804,10 +4945,10 @@ void drawvolslice_cellcenter_interp(const slicedata *sd){
        n2+=sd->nslicek; 
        if(iblank_z[IJK(i,j,plotz)]!=2)continue;
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==0)continue;
-       r11 = (float)sd->slicepoint[n]/255.0;
-       r31 = (float)sd->slicepoint[n2]/255.0;
-       r13 = (float)sd->slicepoint[ n+sd->nslicek]/255.0;
-       r33 = (float)sd->slicepoint[n2+sd->nslicek]/255.0;
+       r11 = (float)sd->iqsliceframe[n]/255.0;
+       r31 = (float)sd->iqsliceframe[n2]/255.0;
+       r13 = (float)sd->iqsliceframe[ n+sd->nslicek]/255.0;
+       r33 = (float)sd->iqsliceframe[n2+sd->nslicek]/255.0;
        rmid = (r11+r31+r13+r33)/4.0;
 
        yy1 = (yplt[j]+yplt[j-1])/2.0;
@@ -4904,10 +5045,10 @@ void drawvolslice(const slicedata *sd){
        n++; n2++; 
        if(iblank_x[IJK(plotx,j,k)]!=2)continue;
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==0)continue;
-       i11 = 4*sd->slicepoint[n];
-       i31 = 4*sd->slicepoint[n2];
-       i13 = 4*sd->slicepoint[n+1];
-       i33 = 4*sd->slicepoint[n2+1];
+       i11 = 4*sd->iqsliceframe[n];
+       i31 = 4*sd->iqsliceframe[n2];
+       i13 = 4*sd->iqsliceframe[n+1];
+       i33 = 4*sd->iqsliceframe[n2+1];
        z1 = zplt[k];
        z3 = zplt[k+1];
        /*
@@ -4950,10 +5091,10 @@ void drawvolslice(const slicedata *sd){
        n++; n2++; 
        if(iblank_y[IJK(i,ploty,k)]!=2)continue;
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,sd->js1,k)]==0)continue;
-       i11 = 4*sd->slicepoint[n];
-       i31 = 4*sd->slicepoint[n2];
-       i13 = 4*sd->slicepoint[n+1];
-       i33 = 4*sd->slicepoint[n2+1];
+       i11 = 4*sd->iqsliceframe[n];
+       i31 = 4*sd->iqsliceframe[n2];
+       i13 = 4*sd->iqsliceframe[n+1];
+       i33 = 4*sd->iqsliceframe[n2+1];
        z1 = zplt[k];
        z3 = zplt[k+1];
        /*
@@ -5000,10 +5141,10 @@ void drawvolslice(const slicedata *sd){
        n2+=sd->nslicek; 
        if(iblank_z[IJK(i,j,plotz)]!=2)continue;
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==0)continue;
-       i11 = 4*sd->slicepoint[n];
-       i31 = 4*sd->slicepoint[n2];
-       i13 = 4*sd->slicepoint[ n+sd->nslicek];
-       i33 = 4*sd->slicepoint[n2+sd->nslicek];
+       i11 = 4*sd->iqsliceframe[n];
+       i31 = 4*sd->iqsliceframe[n2];
+       i13 = 4*sd->iqsliceframe[ n+sd->nslicek];
+       i33 = 4*sd->iqsliceframe[n2+sd->nslicek];
        yy1 = yplt[j];
        y3 = yplt[j+1];
        /*
@@ -5089,7 +5230,7 @@ void drawvvolslice(const vslicedata *vd){
       for(k=sd->ks1; k<sd->ks2+1; k+=vectorskip){
         n+=vectorskip; 
         if(sd->constant_color==NULL){
-          i11 = sd->slicepoint[n];
+          i11 = sd->iqsliceframe[n];
           rgb_ptr = rgb_slice + 4*i11;
 	      }
 	      else{
@@ -5120,7 +5261,7 @@ void drawvvolslice(const vslicedata *vd){
       for(k=sd->ks1; k<sd->ks2+1; k+=vectorskip){
         n+=vectorskip;
 	      if(sd->constant_color==NULL){
-          i11 = sd->slicepoint[n];
+          i11 = sd->iqsliceframe[n];
           rgb_ptr = rgb_slice + 4*i11;
 	      }
 	      else{
@@ -5152,7 +5293,7 @@ void drawvvolslice(const vslicedata *vd){
       for(k=sd->ks1; k<sd->ks2+1; k+=vectorskip){
         n+=vectorskip; 
 	      if(sd->constant_color==NULL){
-          i11 = sd->slicepoint[n];
+          i11 = sd->iqsliceframe[n];
           rgb_ptr = rgb_slice + 4*i11;
 	      }
 	      else{
@@ -5182,7 +5323,7 @@ void drawvvolslice(const vslicedata *vd){
       for(k=sd->ks1; k<sd->ks2+1; k+=vectorskip){
         n+=vectorskip; 
 	      if(sd->constant_color==NULL){
-          i11 = sd->slicepoint[n];
+          i11 = sd->iqsliceframe[n];
           rgb_ptr = rgb_slice + 4*i11;
 	      }
 	      else{
@@ -5213,7 +5354,7 @@ void drawvvolslice(const vslicedata *vd){
       for(j=sd->js1; j<sd->js2+1; j+=vectorskip){
         n+=vectorskip*sd->nslicek; 
 	      if(sd->constant_color==NULL){
-          i11 = sd->slicepoint[n];
+          i11 = sd->iqsliceframe[n];
           rgb_ptr = rgb_slice + 4*i11;
 	      }
 	      else{
@@ -5243,7 +5384,7 @@ void drawvvolslice(const vslicedata *vd){
       for(j=sd->js1; j<sd->js2+1; j+=vectorskip){
         n+=vectorskip*sd->nslicek; 
 	      if(sd->constant_color==NULL){
-          i11 = sd->slicepoint[n];
+          i11 = sd->iqsliceframe[n];
           rgb_ptr = rgb_slice + 4*i11;
 	      }
 	      else{
@@ -5319,7 +5460,7 @@ void drawvvolslice_terrain(const vslicedata *vd){
       yy1 = yplttemp[j];
       for(k=sd->ks1; k<sd->ks2+1; k+=vectorskip){
         n+=vectorskip;
-        i11 = sd->slicepoint[n];
+        i11 = sd->iqsliceframe[n];
         rgb_ptr = rgb_slice + 4*i11;
         if(iblank[IJK(plotx,j,k)]==1&&rgb_ptr[3]>0.5){
           z1 = zplttemp[k];
@@ -5345,7 +5486,7 @@ void drawvvolslice_terrain(const vslicedata *vd){
       yy1 = yplttemp[j];
       for(k=sd->ks1; k<sd->ks2+1; k+=vectorskip){
         n+=vectorskip;
-        i11 = sd->slicepoint[n];
+        i11 = sd->iqsliceframe[n];
         rgb_ptr = rgb_slice + 4*i11;
         if(iblank[IJK(plotx,j,k)]==1&&rgb_ptr[3]>0.5){
           z1 = zplttemp[k];
@@ -5372,7 +5513,7 @@ void drawvvolslice_terrain(const vslicedata *vd){
 
       for(k=sd->ks1; k<sd->ks2+1; k+=vectorskip){
         n+=vectorskip; 
-        i11 = sd->slicepoint[n];
+        i11 = sd->iqsliceframe[n];
         rgb_ptr = rgb_slice + 4*i11;
         if(iblank[IJK(i,ploty,k)]==1&&rgb_ptr[3]>0.5){
           z1 = zplttemp[k];
@@ -5397,7 +5538,7 @@ void drawvvolslice_terrain(const vslicedata *vd){
 
       for(k=sd->ks1; k<sd->ks2+1; k+=vectorskip){
         n+=vectorskip; 
-        i11 = sd->slicepoint[n];
+        i11 = sd->iqsliceframe[n];
         rgb_ptr = rgb_slice + 4*i11;
         if(iblank[IJK(i,ploty,k)]==1&&rgb_ptr[3]>0.5){
           z1 = zplttemp[k];
@@ -5433,7 +5574,7 @@ void drawvvolslice_terrain(const vslicedata *vd){
         z11 = constval + znode[ij2];
         if(z11>zmax)z11=zmax;
         n11=i*sd->nslicej*sd->nslicek+j*sd->nslicek;
-        rgb_ptr = rgb_slice + 4*interp3dsliceindex(sd->slicepoint,meshi->zplt,meshi->kbar,n11,z11);
+        rgb_ptr = rgb_slice + 4*interp3dsliceindex(sd->iqsliceframe,meshi->zplt,meshi->kbar,n11,z11);
         if(rgb_ptr[3]>0.5){
           float f1, f2;
           int k1, k2;
@@ -5474,7 +5615,7 @@ void drawvvolslice_terrain(const vslicedata *vd){
         z11 = constval + znode[ij2];
         if(z11>zmax)z11=zmax;
         n11=i*sd->nslicej*sd->nslicek+j*sd->nslicek;
-        rgb_ptr = rgb_slice + 4*interp3dsliceindex(sd->slicepoint,meshi->zplt,meshi->kbar,n11,z11);
+        rgb_ptr = rgb_slice + 4*interp3dsliceindex(sd->iqsliceframe,meshi->zplt,meshi->kbar,n11,z11);
         if(rgb_ptr[3]>0.5){
           float f1, f2;
           int k1, k2;
@@ -5541,7 +5682,7 @@ void drawvslice(const vslicedata *vd){
      for(k=sd->ks1; k<sd->ks2+1; k+=vectorskip){
        n+=vectorskip;
 	   if(sd->constant_color==NULL){
-         i11 = sd->slicepoint[n];
+         i11 = sd->iqsliceframe[n];
          rgb_ptr = rgb_slice + 4*i11;
 	   }
 	   else{
@@ -5571,7 +5712,7 @@ void drawvslice(const vslicedata *vd){
      for(k=sd->ks1; k<sd->ks2+1; k+=vectorskip){
        n+=vectorskip;
 	   if(sd->constant_color==NULL){
-         i11 = sd->slicepoint[n];
+         i11 = sd->iqsliceframe[n];
          rgb_ptr = rgb_slice + 4*i11;
 	   }
 	   else{
@@ -5603,7 +5744,7 @@ void drawvslice(const vslicedata *vd){
      for(k=sd->ks1; k<sd->ks2+1; k+=vectorskip){
        n+=vectorskip; 
 	   if(sd->constant_color==NULL){
-         i11 = sd->slicepoint[n];
+         i11 = sd->iqsliceframe[n];
          rgb_ptr = rgb_slice + 4*i11;
 	   }
 	   else{
@@ -5631,7 +5772,7 @@ void drawvslice(const vslicedata *vd){
      for(k=sd->ks1; k<sd->ks2+1; k+=vectorskip){
        n+=vectorskip; 
 	   if(sd->constant_color==NULL){
-         i11 = sd->slicepoint[n];
+         i11 = sd->iqsliceframe[n];
          rgb_ptr = rgb_slice + 4*i11;
 	   }
 	   else{
@@ -5660,7 +5801,7 @@ void drawvslice(const vslicedata *vd){
      for(j=sd->js1; j<sd->js2+1; j+=vectorskip){
        n+=vectorskip;
 	   if(sd->constant_color==NULL){
-         i11 = sd->slicepoint[n];
+         i11 = sd->iqsliceframe[n];
          rgb_ptr = rgb_slice + 4*i11;
 	   }
 	   else{
@@ -5688,7 +5829,7 @@ void drawvslice(const vslicedata *vd){
      for(j=sd->js1; j<sd->js2+1; j+=vectorskip){
        n+=vectorskip;
 	   if(sd->constant_color==NULL){
-         i11 = sd->slicepoint[n];
+         i11 = sd->iqsliceframe[n];
          rgb_ptr = rgb_slice + 4*i11;
 	   }
 	   else{
@@ -5751,7 +5892,7 @@ void drawvslice_terrain(const vslicedata *vd){
        float zz;
 
        n+=vectorskip;
-       i11 = sd->slicepoint[n];
+       i11 = sd->iqsliceframe[n];
        rgb_ptr = rgb_slice + 4*i11;
 
        yy1 = yplttemp[j];
@@ -5776,7 +5917,7 @@ void drawvslice_terrain(const vslicedata *vd){
        float zz;
 
        n+=vectorskip;
-       i11 = sd->slicepoint[n];
+       i11 = sd->iqsliceframe[n];
        rgb_ptr = rgb_slice + 4*i11;
        yy1 = yplttemp[j];
        zz = znode[ijnode2(i,j)];

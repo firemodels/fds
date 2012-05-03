@@ -384,8 +384,8 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 /* ++++++++++++++++++++++++ draw slice files +++++++++++++++++++++++++ */
 
 #ifdef pp_GSLICE
-  if(show_gslice==1){
-    drawgslice(NULL);
+  if(show_gslice_outline==1){
+    drawgslice_outline();
   }
 #endif
   if(showslice==1&&use_transparency_data==0){
@@ -479,8 +479,8 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 
   if(showslice==1&&use_transparency_data==1){
     drawslice_frame();
+    SNIFF_ERRORS("after drawslice_frame");
   } 
-  SNIFF_ERRORS("after drawslice");
 
 /* ++++++++++++++++++++++++ draw transparent blockages +++++++++++++++++++++++++ */
 

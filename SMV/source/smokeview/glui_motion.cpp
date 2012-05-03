@@ -78,7 +78,6 @@ GLUI_Panel *panel_rotatebuttons=NULL, *panel_translate=NULL,*panel_close=NULL;
 #ifdef pp_GSLICE
 GLUI_Panel *panel_gslice=NULL;
 GLUI_Translation *gslice_htranslate=NULL, *gslice_vtranslate=NULL;
-GLUI_Checkbox *CHECKBOX_show_gslice=NULL;
 GLUI_Rotation *ROTATE_gslice_rotation=NULL;
 #endif
 GLUI_Panel *panel_blockageview=NULL;
@@ -346,7 +345,9 @@ extern "C" void glui_motion_setup(int main_window){
 
   gslice_htranslate=glui_motion->add_translation_to_panel(panel_gslice,"horizontal translation",GLUI_TRANSLATION_XY,gslice_xyz,GSLICE_HTRANSLATE,GSLICE_CB);
   gslice_vtranslate=glui_motion->add_translation_to_panel(panel_gslice,"vertical translation",GLUI_TRANSLATION_Z,gslice_xyz+2,GSLICE_VTRANSLATE,GSLICE_CB);
-  CHECKBOX_show_gslice=glui_motion->add_checkbox_to_panel(panel_gslice,"show gslice",&show_gslice);
+  glui_motion->add_checkbox_to_panel(panel_gslice,"show gslice data",&show_gslice_data);
+  glui_motion->add_checkbox_to_panel(panel_gslice,"show gslice triangles",&show_gslice_outline);
+  glui_motion->add_checkbox_to_panel(panel_gslice,"show gslice normal",&show_gslice_normal);
   
 #endif
 

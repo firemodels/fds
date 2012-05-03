@@ -19,13 +19,16 @@ char shaders_revision[]="$Revision$";
 #include "string_util.h"
 #include "smokeviewvars.h"
 
-GLhandleARB v,f,p_smoke, p_zonesmoke, p_volsmoke;
+GLhandleARB p_smoke, p_3dslice, p_zonesmoke, p_volsmoke;
+
 void printInfoLog(GLhandleARB obj);
 
 /* ------------------ setZoneSmokeShaders ------------------------ */
 
 int setZoneSmokeShaders() {
+  GLhandleARB vert_shader, frag_shader;
   GLint error_code;
+    
   const GLchar *FragmentShaderSource[]={
     "uniform int zonedir,zoneinside;"
     "uniform float xyzmaxdiff,zlay,odl,odu;"
@@ -110,23 +113,23 @@ int setZoneSmokeShaders() {
     "}"
   };
 
-  v = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
-  f = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
+  vert_shader = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
+  frag_shader = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
 
-  glShaderSource(v,1, VertexShaderSource,NULL);
-  glCompileShaderARB(v);
+  glShaderSource(vert_shader,1, VertexShaderSource,NULL);
+  glCompileShaderARB(vert_shader);
 
-  glShaderSource(f, 1, FragmentShaderSource,NULL);
-  glCompileShaderARB(f);
+  glShaderSource(frag_shader, 1, FragmentShaderSource,NULL);
+  glCompileShaderARB(frag_shader);
 
 #ifdef _DEBUG
-  printInfoLog(v);
-  printInfoLog(f);
+  printInfoLog(vert_shader);
+  printInfoLog(frag_shader);
 #endif
 
   p_zonesmoke = glCreateProgramObjectARB();
-  glAttachObjectARB(p_zonesmoke,v);
-  glAttachObjectARB(p_zonesmoke,f);
+  glAttachObjectARB(p_zonesmoke,vert_shader);
+  glAttachObjectARB(p_zonesmoke,frag_shader);
 
   glLinkProgram(p_zonesmoke);
   glGetObjectParameterivARB(p_zonesmoke,GL_OBJECT_LINK_STATUS_ARB,&error_code);
@@ -169,10 +172,101 @@ int setZoneSmokeShaders() {
 
 }
 
+/* ------------------ set3DSliceShaders ------------------------ */
+
+int set3DSliceShaders(void){
+  GLhandleARB vert_shader, frag_shader;
+  GLint error_code;
+
+  const GLchar *FragmentShaderSource[]={
+   "  uniform sampler1D colormap;"
+   "  uniform sampler3D val_texture;"
+   "  uniform float val_min,val_max;"
+   "  varying vec3 fragpos;"
+   "  uniform vec3 boxmin,boxmax;"
+   "void main(){"
+   "  vec3 color_val,position;"
+   "  float val,colorindex;"
+
+   "  position = (fragpos-boxmin)/(boxmax-boxmin);"
+   "  val = texture3D(val_texture,position);"
+   "  colorindex = (val-val_min)/(val_max-val_min);"
+   "  colorindex = clamp(colorindex,0.0,1.0);"
+   "  color_val = texture1D(colormap,colorindex).rgb;"
+   "  gl_FragColor = vec4(color_val.rgb,1.0);"
+   "}"
+  };
+
+  const GLchar *VertexShaderSource[]={
+    "varying vec3 fragpos;"
+    "void main(){"
+    "  fragpos=gl_Vertex;"
+    "  gl_Position=ftransform();"
+    "}"
+  };
+
+  vert_shader = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
+  frag_shader = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
+
+  glShaderSource(vert_shader,1, VertexShaderSource,NULL);
+  glCompileShaderARB(vert_shader);
+
+  glShaderSource(frag_shader, 1, FragmentShaderSource,NULL);
+  glCompileShaderARB(frag_shader);
+
+#ifdef _DEBUG
+  printInfoLog(vert_shader);
+  printInfoLog(frag_shader);
+#endif
+
+  p_3dslice = glCreateProgramObjectARB();
+  glAttachObjectARB(p_3dslice,vert_shader);
+  glAttachObjectARB(p_3dslice,frag_shader);
+
+  glLinkProgram(p_3dslice);
+  glGetObjectParameterivARB(p_3dslice,GL_OBJECT_LINK_STATUS_ARB,&error_code);
+#ifdef _DEBUG
+  printf("  3D Slice shader completion code:");
+  switch (error_code){
+  case GL_INVALID_VALUE:
+    printf(" INVALID VALUE\n");
+    break;
+  case GL_INVALID_OPERATION:
+    printf(" INVALID OPERATION\n");
+    break;
+  case GL_INVALID_ENUM:
+    printf(" INVALID ENUM\n");
+    break;
+  case 0:
+    printf(" Link failed\n");
+    break;
+  case 1:
+    printf(" Link succeeded\n");
+    break;
+  default:
+    printf(" unknown error\n");
+    break;
+  }
+  printInfoLog(p_3dslice);
+#endif
+
+  GPU3dslice_valtexture = glGetUniformLocation(p_3dslice,"valtexture");
+  GPU3dslice_colormap = glGetUniformLocation(p_3dslice,"colormap");
+  GPU3dslice_val_min = glGetUniformLocation(p_3dslice,"val_min");
+  GPU3dslice_val_max = glGetUniformLocation(p_3dslice,"val_max");
+  GPU3dslice_boxmin = glGetUniformLocation(p_volsmoke,"boxmin");
+  GPU3dslice_boxmax = glGetUniformLocation(p_volsmoke,"boxmax");
+
+  if(error_code!=1)return error_code;
+  return error_code;
+}
+
 /* ------------------ setVolSmokeShaders ------------------------ */
 
 int setVolSmokeShaders() {
+  GLhandleARB vert_shader, frag_shader;
   GLint error_code;
+
   const GLchar *FragmentShaderSource[]={
     "uniform sampler1D smokecolormap;"
 #ifdef pp_GPUDEPTH
@@ -315,28 +409,28 @@ int setVolSmokeShaders() {
     "}"
   };
 
-  v = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
-  f = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
+  vert_shader = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
+  frag_shader = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
 
-  glShaderSource(v,1, VertexShaderSource,NULL);
-  glCompileShaderARB(v);
+  glShaderSource(vert_shader,1, VertexShaderSource,NULL);
+  glCompileShaderARB(vert_shader);
 
-  glShaderSource(f, 1, FragmentShaderSource,NULL);
-  glCompileShaderARB(f);
+  glShaderSource(frag_shader, 1, FragmentShaderSource,NULL);
+  glCompileShaderARB(frag_shader);
 
 #ifdef _DEBUG
-  printInfoLog(v);
-  printInfoLog(f);
+  printInfoLog(vert_shader);
+  printInfoLog(frag_shader);
 #endif
 
   p_volsmoke = glCreateProgramObjectARB();
-  glAttachObjectARB(p_volsmoke,v);
-  glAttachObjectARB(p_volsmoke,f);
+  glAttachObjectARB(p_volsmoke,vert_shader);
+  glAttachObjectARB(p_volsmoke,frag_shader);
 
   glLinkProgram(p_volsmoke);
   glGetObjectParameterivARB(p_volsmoke,GL_OBJECT_LINK_STATUS_ARB,&error_code);
 #ifdef _DEBUG
-  printf("  Zone Smoke shader completion code:");
+  printf("  Volume Smoke shader completion code:");
   switch (error_code){
   case GL_INVALID_VALUE:
     printf(" INVALID VALUE\n");
@@ -391,6 +485,7 @@ int setVolSmokeShaders() {
 /* ------------------ setSmokeShaders ------------------------ */
 
 int setSmokeShaders() {
+  GLhandleARB vert_shader, frag_shader;
   GLint error_code;
 
   const GLchar *FragmentShaderSource[]={
@@ -451,23 +546,23 @@ int setSmokeShaders() {
     "}"
 };
 
-  v = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
-  f = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
+  vert_shader = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
+  frag_shader = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
 
-  glShaderSource(v,1, VertexShaderSource,NULL);
-  glCompileShaderARB(v);
+  glShaderSource(vert_shader,1, VertexShaderSource,NULL);
+  glCompileShaderARB(vert_shader);
 
-  glShaderSource(f, 1, FragmentShaderSource,NULL);
-  glCompileShaderARB(f);
+  glShaderSource(frag_shader, 1, FragmentShaderSource,NULL);
+  glCompileShaderARB(frag_shader);
 
 #ifdef _DEBUG
-  printInfoLog(v);
-  printInfoLog(f);
+  printInfoLog(vert_shader);
+  printInfoLog(frag_shader);
 #endif
 
   p_smoke = glCreateProgramObjectARB();
-  glAttachObjectARB(p_smoke,v);
-  glAttachObjectARB(p_smoke,f);
+  glAttachObjectARB(p_smoke,vert_shader);
+  glAttachObjectARB(p_smoke,frag_shader);
 
   glLinkProgram(p_smoke);
   glGetObjectParameterivARB(p_smoke,GL_OBJECT_LINK_STATUS_ARB,&error_code);
@@ -508,6 +603,13 @@ int setSmokeShaders() {
   GPU_smokealpha =     glGetAttribLocation(p_smoke,"smoke_alpha");
   return error_code;
 
+}
+
+
+/* ------------------ LoadZoneSmokeShaders ------------------------ */
+
+void Load3DSliceShaders(void){
+  glUseProgramObjectARB(p_3dslice);
 }
 
 /* ------------------ LoadZoneSmokeShaders ------------------------ */
@@ -570,6 +672,18 @@ int init_shaders(void){
     }
     else{
       printf("   *** GPU smoke volume shader failed to load.\n");
+      usegpu=0;
+      err=1;
+    }
+    if(set3DSliceShaders()==1){
+#ifdef _DEBUG
+  		printf("   GPU 3d slice shader successfully compiled, linked and loaded.\n");
+#endif
+      gpuactive=1;
+      err=0;
+    }
+    else{
+      printf("   *** GPU 3d slice shader failed to load.\n");
       usegpu=0;
       err=1;
     }

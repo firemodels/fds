@@ -118,6 +118,7 @@ EXTERNCPP void createDepthTexture( void );
 #endif
 EXTERNCPP int init_shaders(void);
 EXTERNCPP void LoadSmokeShaders(void);
+EXTERNCPP void Load3DSliceShaders(void);
 EXTERNCPP void LoadZoneSmokeShaders(void);
 EXTERNCPP void LoadVolSmokeShaders(void);
 EXTERNCPP void UnLoadShaders(void);
@@ -336,8 +337,12 @@ EXTERNCPP void drawevac_frame(void);
 EXTERNCPP void drawplot3d_frame(void);
 EXTERNCPP void drawvslice_frame(void);
 EXTERNCPP void drawslice_frame(void);
+EXTERNCPP void drawgslice_data(slicedata *slicei);
+EXTERNCPP void drawgslice_outline(void);
 EXTERNCPP void drawpatch_frame(void);
 EXTERNCPP void TRANSLATE_CB(int var);
+EXTERNCPP void init_slice3d_texture(mesh *meshi);
+
 #ifdef pp_GPU
 EXTERNCPP void drawsmoke3dGPU(smoke3ddata *smoke3di);
 #endif
@@ -743,7 +748,6 @@ EXTERNCPP void updatetracers(void);
 EXTERNCPP void update_fedinfo(void);
 #ifdef pp_GSLICE
 void update_gslice_planes(void);
-void drawgslice(const slicedata *sd);
 #endif
 
 EXTERNCPP void getPart5Colors(partdata *parti, int nlevels);

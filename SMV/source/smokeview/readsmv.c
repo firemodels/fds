@@ -6141,8 +6141,8 @@ typedef struct {
       sd->volslice=0;
       sd->times=NULL;
       sd->slicelevel=NULL;
-      sd->slicepoint=NULL;
-      sd->slicedata=NULL;
+      sd->iqsliceframe=NULL;
+      sd->qsliceframe=NULL;
       sd->timeslist=NULL;
       sd->blocknumber=blocknumber;
       sd->vloaded=0;
@@ -7430,6 +7430,9 @@ void initmesh(mesh *meshi){
   meshi->smoke_texture_id=-1;
   meshi->fire_texture_buffer=NULL;
   meshi->fire_texture_id=-1;
+  meshi->slice3d_texture_buffer=NULL;
+  meshi->slice3d_texture_id=-1;
+  meshi->slice3d_c_buffer=NULL;
 #endif
   meshi->mesh_offset_ptr=NULL;
 #ifdef pp_CULL
