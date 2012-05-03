@@ -5,7 +5,7 @@
 
 &MESH IJK=16,16,32, XB=0.0,1.6,0.0,1.6,0.0,3.2 /
 
-&MISC HRRPUV_MAX_SMV=1300.0 /
+&MISC IMMERSED_BOUNDARY_METHOD=1, HRRPUV_MAX_SMV=1300.0 /
 
 &DUMP NFRAMES=400 DT_PL3D=8.0, DT_SL3D=0.1 /
 
@@ -66,9 +66,9 @@
 &FACE N=1,2,3, SURF_ID='roof' /
 &FACE N=1,3,4, SURF_ID='roof' /
 
-&VENT XB=0.5,1.1,0.5,1.1,0.1,0.1,SURF_ID='BURNER' /  fire source on kitchen stove
+&VENT XB=0.1,0.7,0.1,0.7,0.1,0.1,SURF_ID='BURNER' /  fire source on kitchen stove
 
-&OBST XB=0.5,1.1,0.5,1.1,0.0,0.1 /
+&OBST XB=0.1,0.7,0.1,0.7,0.0,0.1 /
 
 &VENT XB=0.0,1.6,0.0,0.0,0.0,3.2,SURF_ID='OPEN'/
 &VENT XB=1.6,1.6,0.0,1.6,0.0,3.2,SURF_ID='OPEN'/
