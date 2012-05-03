@@ -1376,7 +1376,7 @@ void drawColorBars(void){
     }
     for (i=0; i<nrgb-1; i++){
       float vert_position;
-      char partcolorlabel[256],partcolorlabel2[256];
+      char partcolorlabel[256];
       char *partcolorlabel_ptr=NULL;
 
       vert_position = (float)(i)*(float)(nrgb+DYFONT)/(float)(nrgb-2) + barbot-dyfont/2.0;
@@ -1424,7 +1424,7 @@ void drawColorBars(void){
     }
     for (i=0; i<nrgb-1; i++){
       float vert_position;
-      char slicecolorlabel[256],slicecolorlabel2[256];
+      char slicecolorlabel[256];
       char *slicecolorlabel_ptr=NULL;
 
       vert_position = (float)(i)*(float)(nrgb+DYFONT)/(float)(nrgb-2) + barbot-dyfont/2.0;
@@ -1460,7 +1460,7 @@ void drawColorBars(void){
       outputBarText(right[leftpatch],position,color2,patchcolorlabel_ptr);
     }
     for (i=0; i<nrgb-1; i++){
-      char patchcolorlabel[256],patchcolorlabel2[256];
+      char patchcolorlabel[256];
       char *patchcolorlabel_ptr=NULL;
       float vert_position;
 
@@ -1549,7 +1549,6 @@ void drawColorBars(void){
 
       for (i=0; i<nrgb-1; i++){
         char plot3dcolorlabel[256];
-        char plot3dcolorlabel2[256];
         char *plot3dcolorlabel_ptr=NULL;
 
         vert_position = (float)(i)*ddbar+bar0;

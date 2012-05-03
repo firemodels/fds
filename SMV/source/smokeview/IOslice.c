@@ -1156,10 +1156,10 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
 
 #ifdef pp_GPU
     if(sd->volslice==1){
-      mesh *meshi;
+      mesh *meshj;
 
-      meshi = meshinfo + sd->blocknumber;
-      init_slice3d_texture(meshi);
+      meshj = meshinfo + sd->blocknumber;
+      init_slice3d_texture(meshj);
     }
 #endif
 
@@ -3200,8 +3200,6 @@ void init_slice3d_texture(mesh *meshi){
     }
   }
   if(meshi->slice3d_c_buffer==NULL){
-    int i;
-
     NewMemory((void **)&meshi->slice3d_c_buffer,nx*ny*nz*sizeof(float));
   }
   glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 
@@ -3259,7 +3257,6 @@ void update_slice3d_texture(mesh *meshi, float *valdata){
 /* ------------------ drawgslice_data ------------------------ */
 
 void drawgslice_data(slicedata *slicei){
-  int i;
   mesh *meshi;
   int j;
   databounds *sb;
