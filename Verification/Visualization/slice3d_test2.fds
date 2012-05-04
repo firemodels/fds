@@ -18,7 +18,7 @@
 
 &INIT XB=0.2,1.4,0.2,1.4,0.5,2.2  TEMPERATURE=600.0 /
 
-&TIME T_END=40. /  Total simulation time
+&TIME T_END=80. /  Total simulation time
 
 &MATL ID                    = 'FABRIC'
       FYI                   = 'Properties completely fabricated'
@@ -77,11 +77,10 @@
 
 &OBST XB=0.1,0.7,0.1,0.7,0.0,0.1 /
 
-&VENT XB=0.0,1.6,0.0,0.0,0.0,3.2,SURF_ID='OPEN'/
-&VENT XB=1.6,1.6,0.0,1.6,0.0,3.2,SURF_ID='OPEN'/
-&VENT XB=0.0,1.6,1.6,1.6,0.0,3.2,SURF_ID='OPEN'/
-&VENT XB=0.0,0.0,0.0,1.6,0.0,3.2,SURF_ID='OPEN'/
-&VENT XB=0.0,1.6,0.0,1.6,3.2,3.2,SURF_ID='OPEN'/
+&VENT XB=0.0,1.6,0.0,0.0,0.0,1.2,SURF_ID='OPEN'/
+&VENT XB=1.6,1.6,0.0,1.6,0.0,1.2,SURF_ID='OPEN'/
+&VENT XB=0.0,1.6,1.6,1.6,0.0,1.2,SURF_ID='OPEN'/
+&VENT XB=0.0,0.0,0.0,1.6,0.0,1.2,SURF_ID='OPEN'/
 
 &ISOF QUANTITY='TEMPERATURE',VALUE(1)=100.0 /  Show 3D contours of temperature at 100 C
 &ISOF QUANTITY='TEMPERATURE',VALUE(1)=200.0 /  Show 3D contours of temperature at 200 C
