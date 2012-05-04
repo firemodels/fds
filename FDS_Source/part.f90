@@ -582,7 +582,8 @@ SUBROUTINE VOLUME_PARTICLE_INSERT
 
 ! Loop over all INIT lines and look for particles inserted within a specified volume
 
-INTEGER :: NN
+INTEGER :: NN, ND, N_INSERT, I1,J1,K1,I2,J2,K2
+REAL(EB) :: XC1,XC2,YC1,YC2,ZC1,ZC2
 
 VOLUME_INSERT_LOOP: DO IB=1,N_INIT
 
@@ -616,7 +617,7 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
 
    ! Start processing the INITIALIZATION info
 
-   IF (IN%N_PARTICLES==0) CYCLE VOLUME_INSERT_LOOP
+   IF (IN%N_PARTICLES==0 .AND. IN%N_PARTICLES_PER_CELL==0) CYCLE VOLUME_INSERT_LOOP
 
    MASS_PER_VOLUME = IN%MASS_PER_VOLUME
    MASS_PER_TIME   = IN%MASS_PER_TIME
@@ -637,88 +638,186 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
 
    MASS_SUM = 0._EB
 
-   INSERT_PARTICLE_LOOP: DO I=1,IN%N_PARTICLES
+   TOTAL_OR_PER_CELL: IF (IN%N_PARTICLES > 0) THEN
+      INSERT_PARTICLE_LOOP: DO I=1,IN%N_PARTICLES
 
-      IF (NLP+1>MAXIMUM_PARTICLES) THEN
-         CALL REMOVE_OLDEST_PARTICLE(NM,ILPC,NLP)
-      ELSE
-         NLP = NLP+1
-      ENDIF
+         IF (NLP+1>MAXIMUM_PARTICLES) THEN
+            CALL REMOVE_OLDEST_PARTICLE(NM,ILPC,NLP)
+         ELSE
+            NLP = NLP+1
+         ENDIF
 
-      PARTICLE_TAG = PARTICLE_TAG + NMESHES
-      CALL ALLOCATE_STORAGE(NM,LAGRANGIAN_PARTICLE_CLASS(ILPC)%SURF_INDEX,LPC_INDEX=ILPC,LP_INDEX=NLP,TAG=PARTICLE_TAG)
-      LAGRANGIAN_PARTICLE => MESHES(NM)%LAGRANGIAN_PARTICLE
-      LP=>MESHES(NM)%LAGRANGIAN_PARTICLE(NLP)
+         PARTICLE_TAG = PARTICLE_TAG + NMESHES
+         CALL ALLOCATE_STORAGE(NM,LAGRANGIAN_PARTICLE_CLASS(ILPC)%SURF_INDEX,LPC_INDEX=ILPC,LP_INDEX=NLP,TAG=PARTICLE_TAG)
+         LAGRANGIAN_PARTICLE => MESHES(NM)%LAGRANGIAN_PARTICLE
+         LP=>MESHES(NM)%LAGRANGIAN_PARTICLE(NLP)
 
-      ! Get particle coordinates by randomly choosing within the designated volume
+         ! Get particle coordinates by randomly choosing within the designated volume
 
-      BLOCK_OUT_LOOP:  DO
-         CALL RANDOM_RECTANGLE(LP%X,LP%Y,LP%Z,X1,X2,Y1,Y2,Z1,Z2)
-         CALL GET_IJK(LP%X,LP%Y,LP%Z,NM,XI,YJ,ZK,II,JJ,KK)
-         LP%X = LP%X + (I-1)*IN%DX
-         LP%Y = LP%Y + (I-1)*IN%DY
-         LP%Z = LP%Z + (I-1)*IN%DZ
-         IF (.NOT.SOLID(CELL_INDEX(II,JJ,KK))) EXIT BLOCK_OUT_LOOP
-      ENDDO BLOCK_OUT_LOOP
+         BLOCK_OUT_LOOP:  DO
+            CALL RANDOM_RECTANGLE(LP%X,LP%Y,LP%Z,X1,X2,Y1,Y2,Z1,Z2)
+            CALL GET_IJK(LP%X,LP%Y,LP%Z,NM,XI,YJ,ZK,II,JJ,KK)
+            LP%X = LP%X + (I-1)*IN%DX
+            LP%Y = LP%Y + (I-1)*IN%DY
+            LP%Z = LP%Z + (I-1)*IN%DZ
+            IF (.NOT.SOLID(CELL_INDEX(II,JJ,KK))) EXIT BLOCK_OUT_LOOP
+         ENDDO BLOCK_OUT_LOOP
 
-      ! Initialize particle indices and velocity
+         ! Initialize particle indices and velocity
 
-      LP%ONE_D%IIG = II
-      LP%ONE_D%JJG = JJ
-      LP%ONE_D%KKG = KK
-      LP%U   = IN%U0
-      LP%V   = IN%V0
-      LP%W   = IN%W0
+         LP%ONE_D%IIG = II
+         LP%ONE_D%JJG = JJ
+         LP%ONE_D%KKG = KK
+         LP%U   = IN%U0
+         LP%V   = IN%V0
+         LP%W   = IN%W0
 
-      ! If the INITIALIZATION group has an ID, match it with a device
+         ! If the INITIALIZATION group has an ID, match it with a device
 
-      IF (IN%ID/='null') THEN
-         DO NN=1,N_DEVC
-            DV => DEVICE(NN)
-            IF (IN%ID==DV%INIT_ID .AND. I==DV%POINT) THEN
-               DV%LP_TAG = PARTICLE_TAG
-               DV%PART_INDEX = ILPC
-               DV%MESH = NM
-               DV%X = LP%X
-               DV%Y = LP%Y
-               DV%Z = LP%Z
-               IF (DV%LINE>0 .AND. DV%LINE_COORD_CODE==123) THEN
-                  IF (ABS(IN%DX)>ZERO_P .AND. ABS(IN%DY)<ZERO_P .AND. ABS(IN%DZ)<ZERO_P) DV%LINE_COORD_CODE = 1
-                  IF (ABS(IN%DX)<ZERO_P .AND. ABS(IN%DY)>ZERO_P .AND. ABS(IN%DZ)<ZERO_P) DV%LINE_COORD_CODE = 2
-                  IF (ABS(IN%DX)<ZERO_P .AND. ABS(IN%DY)<ZERO_P .AND. ABS(IN%DZ)>ZERO_P) DV%LINE_COORD_CODE = 3
+         IF (IN%ID/='null') THEN
+            DO NN=1,N_DEVC
+               DV => DEVICE(NN)
+               IF (IN%ID==DV%INIT_ID .AND. I==DV%POINT) THEN
+                  DV%LP_TAG = PARTICLE_TAG
+                  DV%PART_INDEX = ILPC
+                  DV%MESH = NM
+                  DV%X = LP%X
+                  DV%Y = LP%Y
+                  DV%Z = LP%Z
+                  IF (DV%LINE>0 .AND. DV%LINE_COORD_CODE==123) THEN
+                     IF (ABS(IN%DX)>ZERO_P .AND. ABS(IN%DY)<ZERO_P .AND. ABS(IN%DZ)<ZERO_P) DV%LINE_COORD_CODE = 1
+                     IF (ABS(IN%DX)<ZERO_P .AND. ABS(IN%DY)>ZERO_P .AND. ABS(IN%DZ)<ZERO_P) DV%LINE_COORD_CODE = 2
+                     IF (ABS(IN%DX)<ZERO_P .AND. ABS(IN%DY)<ZERO_P .AND. ABS(IN%DZ)>ZERO_P) DV%LINE_COORD_CODE = 3
+                  ENDIF
                ENDIF
-            ENDIF
+            ENDDO
+         ENDIF
+
+         ! Process particle and set more initial values
+
+         CALL MAKE_PARTICLE
+
+         LP=>LAGRANGIAN_PARTICLE(NLP)
+      
+         LP%ONE_D%T   = T                       
+         IF (MOD(NLP,LPC%SAMPLING)==0) LP%SHOW = .TRUE.    
+         MASS_SUM = MASS_SUM + LP%PWT*LP%MASS ! if r=0 the sum will stay 0
+   
+         ! Process special particles that are associated with a particular SURFace type
+
+         IF (LPC%N_ORIENTATION>0) THEN
+            LP%ORIENTATION_INDEX = MOD(I-1,LPC%N_ORIENTATION)+1
+            LP%PWT = LP%PWT/REAL(LPC%N_ORIENTATION,EB)
+         ENDIF            
+
+      ENDDO INSERT_PARTICLE_LOOP
+   
+      ! Adjust particle weighting factor PWT so that desired MASS_PER_VOLUME is achieved
+
+      IF (MASS_PER_TIME>0._EB) MASS_PER_VOLUME = MASS_PER_TIME*IN%DT_INSERT/BLOCK_VOLUME
+
+      IF (MASS_PER_VOLUME>0._EB) THEN
+         DO I=NLP-IN%N_PARTICLES+1,NLP
+            LAGRANGIAN_PARTICLE(I)%PWT = LAGRANGIAN_PARTICLE(I)%PWT*MASS_PER_VOLUME*BLOCK_VOLUME/MASS_SUM
          ENDDO
       ENDIF
+   ELSEIF (IN%N_PARTICLES_PER_CELL > 0) THEN TOTAL_OR_PER_CELL
+      N_INSERT = 0
+      BLOCK_VOLUME = 0._EB
+      CALL GET_IJK(X1,Y1,Z1,NM,XI,YJ,ZK,I1,J1,K1)
+      CALL GET_IJK(X2,Y2,Z2,NM,XI,YJ,ZK,I2,J2,K2)
 
-      ! Process particle and set more initial values
+      DO KK=K1,K2
+         DO JJ=J1,J2
+            II_LOOP: DO II=I1,I2
+               IF (SOLID(CELL_INDEX(II,JJ,KK))) CYCLE II_LOOP
+               BLOCK_VOLUME = BLOCK_VOLUME + DX(II)*DY(JJ)*DZ(KK)               
+               INSERT_PARTICLE_LOOP_2: DO NN = 1, IN%N_PARTICLES_PER_CELL
+                  N_INSERT = N_INSERT + 1
 
-      CALL MAKE_PARTICLE
+                  IF (NLP+1>MAXIMUM_PARTICLES) THEN
+                     CALL REMOVE_OLDEST_PARTICLE(NM,ILPC,NLP)
+                  ELSE
+                     NLP = NLP+1
+                  ENDIF
 
-      LP=>LAGRANGIAN_PARTICLE(NLP)
+                  PARTICLE_TAG = PARTICLE_TAG + NMESHES
+                  CALL ALLOCATE_STORAGE(NM,LAGRANGIAN_PARTICLE_CLASS(ILPC)%SURF_INDEX,LPC_INDEX=ILPC,LP_INDEX=NLP,TAG=PARTICLE_TAG)
+                  LAGRANGIAN_PARTICLE => MESHES(NM)%LAGRANGIAN_PARTICLE
+                  LP=>MESHES(NM)%LAGRANGIAN_PARTICLE(NLP)
+
+                  ! Get particle coordinates by randomly choosing within the designated volume
+                  XC1 = X(II-1)
+                  YC1 = Y(JJ-1)
+                  ZC1 = Z(KK-1)
+                  XC2 = X(II)
+                  YC2 = Y(JJ)
+                  ZC2 = Z(KK)
+                  CALL RANDOM_RECTANGLE(LP%X,LP%Y,LP%Z,XC1,XC2,YC1,YC2,ZC1,ZC2)
+
+                  ! Initialize particle indices and velocity
+
+                  LP%ONE_D%IIG = II
+                  LP%ONE_D%JJG = JJ
+                  LP%ONE_D%KKG = KK
+                  LP%U   = IN%U0
+                  LP%V   = IN%V0
+                  LP%W   = IN%W0
+
+                  ! If the INITIALIZATION group has an ID, match it with a device
+
+                  IF (IN%ID/='null') THEN
+                     DO ND=1,N_DEVC
+                        DV => DEVICE(ND)
+                        IF (IN%ID==DV%INIT_ID .AND. I==DV%POINT) THEN
+                           DV%LP_TAG = PARTICLE_TAG
+                           DV%PART_INDEX = ILPC
+                           DV%MESH = NM
+                           DV%X = LP%X
+                           DV%Y = LP%Y
+                           DV%Z = LP%Z
+                           IF (DV%LINE>0 .AND. DV%LINE_COORD_CODE==123) THEN
+                              IF (ABS(IN%DX)>ZERO_P .AND. ABS(IN%DY)<ZERO_P .AND. ABS(IN%DZ)<ZERO_P) DV%LINE_COORD_CODE = 1
+                              IF (ABS(IN%DX)<ZERO_P .AND. ABS(IN%DY)>ZERO_P .AND. ABS(IN%DZ)<ZERO_P) DV%LINE_COORD_CODE = 2
+                              IF (ABS(IN%DX)<ZERO_P .AND. ABS(IN%DY)<ZERO_P .AND. ABS(IN%DZ)>ZERO_P) DV%LINE_COORD_CODE = 3
+                           ENDIF
+                        ENDIF
+                     ENDDO
+                  ENDIF
+
+                  ! Process particle and set more initial values
+
+                  CALL MAKE_PARTICLE
+
+                  LP=>LAGRANGIAN_PARTICLE(NLP)
       
-      LP%ONE_D%T   = T                       
-      IF (MOD(NLP,LPC%SAMPLING)==0) LP%SHOW = .TRUE.    
-      MASS_SUM = MASS_SUM + LP%PWT*LP%MASS ! if r=0 the sum will stay 0
+                  LP%ONE_D%T   = T                       
+                  IF (MOD(NLP,LPC%SAMPLING)==0) LP%SHOW = .TRUE.    
+                  MASS_SUM = MASS_SUM + LP%PWT*LP%MASS ! if r=0 the sum will stay 0
    
-      ! Process special particles that are associated with a particular SURFace type
+                  ! Process special particles that are associated with a particular SURFace type
 
-      IF (LPC%N_ORIENTATION>0) THEN
-         LP%ORIENTATION_INDEX = MOD(I-1,LPC%N_ORIENTATION)+1
-         LP%PWT = LP%PWT/REAL(LPC%N_ORIENTATION,EB)
-      ENDIF            
-
-   ENDDO INSERT_PARTICLE_LOOP
-   
-   ! Adjust particle weighting factor PWT so that desired MASS_PER_VOLUME is achieved
-
-   IF (MASS_PER_TIME>0._EB) MASS_PER_VOLUME = MASS_PER_TIME*IN%DT_INSERT/BLOCK_VOLUME
-
-   IF (MASS_PER_VOLUME>0._EB) THEN
-      DO I=NLP-IN%N_PARTICLES+1,NLP
-         LAGRANGIAN_PARTICLE(I)%PWT = LAGRANGIAN_PARTICLE(I)%PWT*MASS_PER_VOLUME*BLOCK_VOLUME/MASS_SUM
+                  IF (LPC%N_ORIENTATION>0) THEN
+                     LP%ORIENTATION_INDEX = MOD(I-1,LPC%N_ORIENTATION)+1
+                     LP%PWT = LP%PWT/REAL(LPC%N_ORIENTATION,EB)
+                  ENDIF            
+                  
+               ENDDO INSERT_PARTICLE_LOOP_2
+            ENDDO II_LOOP
+         ENDDO
       ENDDO
-   ENDIF
+
+      ! Adjust particle weighting factor PWT so that desired MASS_PER_VOLUME is achieved
+
+      IF (MASS_PER_TIME>0._EB) MASS_PER_VOLUME = MASS_PER_TIME*IN%DT_INSERT/BLOCK_VOLUME
+
+      IF (MASS_PER_VOLUME>0._EB) THEN
+         DO I=NLP-N_INSERT+1,NLP
+            LAGRANGIAN_PARTICLE(I)%PWT = LAGRANGIAN_PARTICLE(I)%PWT*MASS_PER_VOLUME*BLOCK_VOLUME/MASS_SUM
+         ENDDO
+      ENDIF      
+
+   ENDIF TOTAL_OR_PER_CELL
 
    IN%ALREADY_INSERTED = .TRUE.                                             
 
@@ -867,6 +966,7 @@ ENDIF
 ! Move the PARTICLEs/particles, then compute mass and energy transfer, then add PARTICLE momentum to gas
 
 IF (CORRECTOR) CALL MOVE_PARTICLES(T,NM)
+
 IF (CORRECTOR) CALL PARTICLE_MASS_ENERGY_TRANSFER(T,NM)
 CALL PARTICLE_MOMENTUM_TRANSFER(NM)
 
@@ -1768,7 +1868,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
             ENDIF
 
          ENDIF SOLID_OR_GAS_PHASE
-      
+
          ! Compute equilibrium PARTICLE vapor mass fraction, Y_DROP, and its derivative w.r.t. PARTICLE temperature
    
          X_DROP  = MIN(1._EB,EXP(DHOR*(1._EB/TMP_BOIL-1._EB/TMP_DROP)))
@@ -1949,7 +2049,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
          LP%ONE_D%TMP(1) = TMP_DROP_NEW
          LP%ONE_D%TMP_F = TMP_DROP_NEW
          LP%MASS = M_DROP
-         
+
          ! Compute surface cooling
 
          IF (LP%ONE_D%IOR/=0 .AND. LP%WALL_INDEX>0) &
