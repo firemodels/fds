@@ -175,6 +175,7 @@ SVEXTERN int GPUvol_smokecolormap, GPUvol_dcell, GPUvol_havefire;
 SVEXTERN int GPU3dslice_valtexture,GPU3dslice_colormap;
 SVEXTERN int GPU3dslice_val_min,GPU3dslice_val_max;
 SVEXTERN int GPU3dslice_boxmin, GPU3dslice_boxmax;
+SVEXTERN int GPU3dslice_transparent_level;
 
 #ifdef pp_GPUDEPTH
 SVEXTERN int GPUvol_depthtexture, GPUvol_screensize,GPUvol_nearfar;

@@ -182,6 +182,7 @@ int set3DSliceShaders(void){
    "  uniform sampler1D colormap;"
    "  uniform sampler3D val_texture;"
    "  uniform float val_min,val_max;"
+   "  uniform float transparent_level;"
    "  varying vec3 fragpos;"
    "  uniform vec3 boxmin,boxmax;"
    "void main(){"
@@ -193,7 +194,7 @@ int set3DSliceShaders(void){
    "  colorindex = (val-val_min)/(val_max-val_min);"
    "  colorindex = clamp(colorindex,0.0,1.0);"
    "  color_val = texture1D(colormap,colorindex).rgb;"
-   "  gl_FragColor = vec4(color_val.rgb,1.0);"
+   "  gl_FragColor = vec4(color_val.rgb,transparent_level);"
    "}"
   };
 
@@ -254,8 +255,9 @@ int set3DSliceShaders(void){
   GPU3dslice_colormap = glGetUniformLocation(p_3dslice,"colormap");
   GPU3dslice_val_min = glGetUniformLocation(p_3dslice,"val_min");
   GPU3dslice_val_max = glGetUniformLocation(p_3dslice,"val_max");
-  GPU3dslice_boxmin = glGetUniformLocation(p_volsmoke,"boxmin");
-  GPU3dslice_boxmax = glGetUniformLocation(p_volsmoke,"boxmax");
+  GPU3dslice_boxmin = glGetUniformLocation(p_3dslice,"boxmin");
+  GPU3dslice_boxmax = glGetUniformLocation(p_3dslice,"boxmax");
+  GPU3dslice_transparent_level = glGetUniformLocation(p_3dslice,"transparent_level");
 
   if(error_code!=1)return error_code;
   return error_code;

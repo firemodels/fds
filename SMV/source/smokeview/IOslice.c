@@ -3242,7 +3242,7 @@ void update_slice3d_texture(mesh *meshi, float *valdata){
   for(i=0;i<nx;i++){
     for(j=0;j<ny;j++){
       for(k=0;k<nz;k++){
-        cbuffer[IJKNODE(nx-1-i,ny-1-j,nz-1-k)]=valdata[k+j*nz+i*nz*ny];
+        cbuffer[IJKNODE(i,j,k)]=valdata[k+j*nz+i*nz*ny];
       }
     }
   }
@@ -3261,6 +3261,7 @@ void drawgslice_data(slicedata *slicei){
   int j;
   databounds *sb;
   float valmin, valmax;
+  float *boxmin, *boxmax;
 
   if(slicei->loaded==0||slicei->display==0||slicei->volslice==0)return;
 
@@ -3279,22 +3280,16 @@ void drawgslice_data(slicedata *slicei){
   sb=slicebounds+islicetype;
   valmin = sb->levels256[0];
   valmax = sb->levels256[255];
-  printf("valmin=%f valmax=%f\n",valmin,valmax);
+  boxmin=meshi->boxmin;
+  boxmax=meshi->boxmax;
 
   glUniform1i(GPU3dslice_valtexture,0);
   glUniform1i(GPU3dslice_colormap,2);
   glUniform1f(GPU3dslice_val_min,valmin);
   glUniform1f(GPU3dslice_val_max,valmax);
-  glUniform3f(GPU3dslice_boxmin,
-    DENORMALIZE_X(meshi->x0),
-    DENORMALIZE_Y(meshi->y0),
-    DENORMALIZE_Z(meshi->z0)
-    );
-  glUniform3f(GPU3dslice_boxmax,
-    DENORMALIZE_X(meshi->x1),
-    DENORMALIZE_Y(meshi->y1),
-    DENORMALIZE_Z(meshi->z1)
-    );
+  glUniform1f(GPU3dslice_transparent_level,transparent_level);
+  glUniform3f(GPU3dslice_boxmin,boxmin[0],boxmin[1],boxmin[2]);
+  glUniform3f(GPU3dslice_boxmax,boxmax[0],boxmax[1],boxmax[2]);
   glBegin(GL_TRIANGLES);
 
   for(j=0;j<meshi->gslice_ntriangles;j++){
