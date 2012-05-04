@@ -6849,7 +6849,7 @@ droplets created per second than the number that can be simulated.
 
 
 Sometimes it is convenient to introduce droplets or particles at the start of the simulation. For this purpose, use an {\ct INIT} line with the parameter
-{\ct N\_PARTICLES} to indicate the number of particles within the computational domain at the start of the simulation.
+{\ct N\_PARTICLES} to indicate the number of particles within the computational domain at the start of the simulation.  You may also use {\ct N\_PARTICLES\_PER\_CELL} to indicate the number of particles within each grid cell of the computational domain at the start of the simulation.
 Its default value is 0, meaning that initially there are no particles present. If non-zero, you may also specify {\ct MASS\_PER\_VOLUME} (kg/m$^3$) if the
 particles have mass. Do not confuse this parameter with {\ct DENSITY}, explained in the next section.
 For example, water has a {\ct DENSITY} of 1000~kg/m$^3$, whereas a liter of water broken up into droplets and spread over a cubic meter has a {\ct MASS\_PER\_VOLUME} of 1~kg/m$^3$.
@@ -7102,7 +7102,7 @@ since {\ct MASSLESS} particles are for visualization only.
 
 {\ct STATIC} is a logical parameter indicating whether particles move or just serve
 as obstructions or clutter. Setting {\ct STATIC=.TRUE.} only makes sense in conjunction with a non-zero value of
-{\ct N\_PARTICLES} on the {\ct INIT} line. The default value of {\ct STATIC} is {\ct .FALSE.}
+{\ct N\_PARTICLES} or {\ct N\_PARTICLES\_PER\_CELL} on the {\ct INIT} line. The default value of {\ct STATIC} is {\ct .FALSE.}
 
 
 \subsection{Water Droplets}
@@ -10526,6 +10526,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MASS\_PER\_VOLUME}         & Real              & Section~\ref{info:initial_droplets}           & kg/m$^3$      & 1             \\ \hline
 {\ct MULT\_ID }                 & Character         & Section~\ref{info:MULT}                       &               &               \\ \hline
 {\ct N\_PARTICLES}              & Integer           & Section~\ref{info:initial_droplets}           &               & 0             \\ \hline
+{\ct N\_PARTICLES\_PER\_CELL}   & Integer           & Section~\ref{info:initial_droplets}           &               & 0             \\ \hline
 {\ct PART\_ID}                  & Character         & Section~\ref{info:initial_droplets}           &               &               \\ \hline
 {\ct SHAPE}                     & Character         & Section~\ref{info:initial_droplets}           &               & {\ct 'BLOCK'} \\ \hline
 {\ct SPEC\_ID(N)}               & Character Array   & Section~\ref{info:INIT}                       &               &               \\ \hline
