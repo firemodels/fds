@@ -314,6 +314,25 @@ void BLOCK_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
   }
 }
 
+#ifdef pp_MEMDEBUG
+/* ------------------ getMemusage ------------------------ */
+
+void getMemusage(MMsize MMtotalmemory,char *MEMlabel){
+  int size;
+  float rsize;
+
+  if(MMtotalmemory<1000000000){
+    size = MMtotalmemory/1000000;
+    sprintf(MEMlabel,"%i MB",size);
+  }
+  else{
+    rsize = MMtotalmemory/1000000000.0;
+    sprintf(MEMlabel,"%4.2f GB",rsize);
+  }
+
+}
+#endif
+
 /* ------------------------ TIME BAR Viewport ------------------------- */
 
 void TIMEBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height){
@@ -413,7 +432,9 @@ void TIMEBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLs
       glEnd();
     }
 #ifdef pp_memstatus
-    if(visAvailmemory==1){
+    if(visAvailmemory==1
+    ){
+    
       MEMSTATUS(0,&availmemory,NULL,NULL);
       sprintf(frameratelabel," Mem Load:%u%s",availmemory,percen);
       if((benchmark==1||visFramerate==1)&&showtime==1){
@@ -422,6 +443,23 @@ void TIMEBAR_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLs
       else{
         outputText((float)(xtimeright+0.025),0.08f, frameratelabel);
       }
+    }
+#endif
+#ifdef pp_MEMDEBUG
+    if(visUsagememory==1
+#ifdef pp_memstatus
+       &&visAvailmemory==0
+#endif
+      ){
+        char MEMlabel[128];
+
+        getMemusage(MMtotalmemory,MEMlabel);
+        if((benchmark==1||visFramerate==1)&&showtime==1){
+          outputText((float)(xtimeright+0.025),0.32f, MEMlabel);
+        }
+        else{
+          outputText((float)(xtimeright+0.025),0.08f, MEMlabel);
+        }
     }
 #endif
   }

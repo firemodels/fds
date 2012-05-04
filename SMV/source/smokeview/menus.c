@@ -318,6 +318,12 @@ void LabelMenu(int value){
      visAvailmemory = 1 - visAvailmemory;
      break;
 #endif
+#ifdef pp_MEMDEBUG
+   case 19:
+     visUsagememory = 1 - visUsagememory;
+     if(visUsagememory==1)visAvailmemory=0;
+     break;
+#endif
    case 12:
      visTicks=1-visTicks;
      break;
@@ -5536,6 +5542,10 @@ updatemenu=0;
 #ifdef pp_memstatus
   if(visAvailmemory==1)glutAddMenuEntry(_("*Memory load"),11);
   if(visAvailmemory==0)glutAddMenuEntry(_("Memory load"),11);
+#endif
+#ifdef pp_MEMDEBUG
+  if(visUsagememory==1)glutAddMenuEntry(_("*Memory usage"),19);
+  if(visUsagememory==0)glutAddMenuEntry(_("Memory usage"),19);
 #endif
   if(nlabels>0){
     if(visLabels==1)glutAddMenuEntry(_("*Text labels"),7);

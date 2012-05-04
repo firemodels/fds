@@ -682,6 +682,10 @@ SVEXTERN int endian_data, endian_native, setendian;
 SVEXTERN int mainwindow_id,dwinWW;
 SVEXTERN int rendertourcount;
 
+#ifdef pp_MEMDEBUG
+SVEXTERN int list_memcheck_index;
+SVEXTERN int SVDECL(visUsagememory,0);
+#endif
 SVEXTERN float vecyz[4];
 #ifdef pp_GSLICE
 SVEXTERN float gslice_xyz[3],gslice_norm[3],gslice_normal_xyz[3],gslice_normal_azelev[2];

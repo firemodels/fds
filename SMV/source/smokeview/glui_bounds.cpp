@@ -19,9 +19,13 @@ extern "C" char glui_bounds_revision[]="$Revision$";
 
 #include "string_util.h"
 #include "smokeviewvars.h"
+#include "MALLOC.h"
 
 extern "C" void colorbar_global2local(void);
 
+#ifdef pp_MEMDEBUG
+void Memcheck_CB(int val);
+#endif
 void SETslicemax(int setslicemax, float slicemax,int setslicechopmax, float slicechopmax);
 void SETslicemin(int setslicemin, float slicemin, int setslicechopmin, float slicechopmin);
 void BUTTON_hide_CB(int var);
@@ -47,6 +51,10 @@ void boundmenu(GLUI_Rollout **rollout_bound, GLUI_Rollout **rollout_chop, GLUI_P
 
 GLUI_Rollout *rollout_slice_bound=NULL;
 GLUI_Rollout *rollout_slice_chop=NULL;
+
+#ifdef pp_MEMDEBUG
+#define MEMCHECK 1
+#endif
 
 #define SMOOTH_SURFACES 402
 #define SORT_SURFACES 401
@@ -127,6 +135,9 @@ GLUI_Rollout *rollout_slice_chop=NULL;
 #endif
 
 GLUI_Button *BUTTON_compress=NULL;
+#ifdef pp_MEMDEBUG
+GLUI_Rollout *panel_memcheck=NULL;
+#endif
 GLUI_Panel *panel_evac_direction=NULL;
 GLUI_Spinner *SPINNER_labels_transparency_data=NULL;
 GLUI_Spinner *SPINNER_labels_transparency_data2=NULL;
@@ -266,6 +277,9 @@ GLUI_RadioGroup *con_part_setmin=NULL, *con_part_setmax=NULL;
 GLUI_EditText *con_p3_min=NULL, *con_p3_max=NULL;
 GLUI_EditText *con_p3_chopmin=NULL, *con_p3_chopmax=NULL;
 GLUI_RadioGroup *con_p3_setmin=NULL, *con_p3_setmax=NULL;
+#ifdef pp_MEMDEBUG
+GLUI_RadioGroup *RADIO_memcheck=NULL;
+#endif
 
 /* ------------------ update_research_mode ------------------------ */
 
@@ -852,6 +866,19 @@ extern "C" void glui_bounds_setup(int main_window){
   glui_bounds->add_column_to_panel(panel_script2b,false);
   BUTTON_ini_load=glui_bounds->add_button_to_panel(panel_script2b,_("Load"),SCRIPT_LOADINI,Script_CB);
 
+#ifdef pp_MEMDEBUG
+  panel_memcheck = glui_bounds->add_rollout(_("Memory Check"),false);
+  list_memcheck_index=0;
+  RADIO_memcheck = glui_bounds->add_radiogroup_to_panel(panel_memcheck,&list_memcheck_index,MEMCHECK,Memcheck_CB);
+  glui_bounds->add_radiobutton_to_group(RADIO_memcheck,"Unlimited");
+  glui_bounds->add_radiobutton_to_group(RADIO_memcheck,"1 GB");
+  glui_bounds->add_radiobutton_to_group(RADIO_memcheck,"2 GB");
+  #ifdef BIT64
+  glui_bounds->add_radiobutton_to_group(RADIO_memcheck,"4 GB");
+  glui_bounds->add_radiobutton_to_group(RADIO_memcheck,"8 GB");
+  #endif
+#endif
+
   rollout_AUTOLOAD = glui_bounds->add_rollout(_("Auto load"),false);
   glui_bounds->add_checkbox_to_panel(rollout_AUTOLOAD,_("Auto load at startup"),
     &loadfiles_at_startup,STARTUP,Bound_CB);
@@ -1432,6 +1459,39 @@ extern "C"  void glui_script_disable(void){
       break;
     }
   }
+
+#ifdef pp_MEMDEBUG
+/* ------------------ Memcheck_CB ------------------------ */
+
+  void Memcheck_CB(int var){
+  switch(var){
+  case MEMCHECK:
+    switch(list_memcheck_index){
+      case 0:
+        MMmaxmemory=0;
+        break;
+      case 1:
+        MMmaxmemory=1000000000;
+        break;
+      case 2:
+        MMmaxmemory=2000000000;
+        break;
+#ifdef BIT64
+      case 3:
+        MMmaxmemory=4000000000;
+        break;
+      case 4:
+        MMmaxmemory=8000000000;
+        break;
+#endif
+    }
+    break;
+  default:
+    ASSERT(0);
+    break;
+  }
+}
+#endif
 
 /* ------------------ Bound_CB ------------------------ */
 

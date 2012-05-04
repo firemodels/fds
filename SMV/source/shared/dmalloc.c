@@ -18,6 +18,10 @@ static int checkmemoryflag=1;
 // svn revision character string
 char dmalloc_revision[]="$Revision$";
 
+#ifdef pp_MEMDEBUG
+static blockinfo *GetBlockInfo(bbyte *pb);
+#endif
+
 /* ------------------ _memorystatus ------------------------ */
 
 #ifdef pp_memstatus
@@ -59,6 +63,10 @@ void initMALLOC(void){
 #ifdef pp_THREAD
   pthread_mutex_init(&mutexMEM,NULL);
 #endif
+#ifdef pp_MEMDEBUG
+  MMmaxmemory=0;
+  MMtotalmemory=0;
+#endif
 
 }
 
@@ -98,7 +106,16 @@ mallocflag _NewMemoryNOTHREAD(void **ppv, size_t size){
   infoblocksize=(sizeof(MMdata)+3)/4;
   infoblocksize*=4;
 
+#ifdef pp_MEMDEBUG
+  if(MMmaxmemory==0||MMtotalmemory+size<=MMmaxmemory){
+    this_ptr = (void *)malloc(infoblocksize+size+sizeofDebugByte);
+  }
+  else{
+    this_ptr = NULL;
+  }
+#else
   this_ptr = (void *)malloc(infoblocksize+size+sizeofDebugByte);
+#endif
   if(this_ptr!=NULL){
     prev_ptr=MMfirstptr;
     next_ptr=MMfirstptr->next;
@@ -130,6 +147,7 @@ mallocflag _NewMemoryNOTHREAD(void **ppv, size_t size){
         *ppb=NULL;
       }
     }
+    MMtotalmemory+=size;
     ASSERT(*ppb !=NULL);
   }
 #endif
@@ -178,7 +196,11 @@ void FreeMemoryNOTHREAD(void *pv){
   infoblocksize*=4;
 #ifdef pp_MEMDEBUG
   {
+    blockinfo *meminfoblock;
+
     CheckMemoryNOTHREAD;
+    meminfoblock = GetBlockInfo(pv);
+    MMtotalmemory-=meminfoblock->size;
     len_memory=sizeofBlock((char *)pv);
     memset((char *)pv, memGarbage, len_memory);
     FreeBlockInfo((char *)pv);
@@ -288,7 +310,6 @@ mallocflag _ResizeMemoryNOTHREAD(void **ppv, size_t sizeNew){
 #define fPtrLessEq(pLeft, pRight) ((pLeft) <= (pRight))
 #define fPtrGrtrEq(pLeft, pRight) ((pLeft) >= (pRight))
 
-static blockinfo *GetBlockInfo(bbyte *pb);
 mallocflag __NewMemory(void **ppv, size_t size, char *varname, char *file, int linenumber){
   void **ppb=(void **)ppv;
   blockinfo *pbi;
@@ -418,6 +439,12 @@ int _CountMemoryBlocks(void){
     n++;
   }
   return n;
+}
+
+/* ------------------ GetTotalMemory ------------------------ */
+
+MMsize _GetTotalMemory(void){
+  return MMtotalmemory;
 }
 
 /* ------------------ PrintMemoryInfo ------------------------ */

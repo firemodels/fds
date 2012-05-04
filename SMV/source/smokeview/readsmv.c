@@ -3878,6 +3878,7 @@ int readsmv(char *file, char *file2){
         smoke3di->soot_index=-1;
         smoke3di->water_index=-1;
         smoke3di->hrrpuv_index=-1;
+        smoke3di->ismoke3d_time=0;
 
         STRCPY(buffer2,bufferptr);
         STRCAT(buffer2,".svz");

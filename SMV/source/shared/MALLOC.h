@@ -29,6 +29,13 @@ typedef char bbyte;
 #define MMEXTERN extern MMCCC
 #endif
 
+#ifdef pp_MEMDEBUG
+#ifdef BIT64
+#define MMsize unsigned long long
+#else
+#define MMsize unsigned int
+#endif
+#endif
 
 typedef struct {
   unsigned char marker;
@@ -37,6 +44,9 @@ typedef struct {
 
 MMEXTERN MMdata MMfirst, MMlast;
 MMEXTERN MMdata *MMfirstptr, *MMlastptr;
+#ifdef pp_MEMDEBUG
+MMEXTERN MMsize MMtotalmemory,MMmaxmemory;
+#endif
 
 #define debugByte 0xE1
 #define markerByte 0xE1
@@ -85,6 +95,7 @@ void _PrintMemoryInfo(void);
 void _PrintAllMemoryInfo(void);
 int _CountMemoryBlocks(void);
 #define ValidPointer(pv,size) _ValidPointer(pv, size)
+#define GetTotalMemory(size) size=_GetTotalMemory()
 #define CheckMemory _CheckMemory()
 #define CheckMemoryNOTHREAD _CheckMemoryNOTHREAD()
 #define CheckMemoryOn _CheckMemoryOn()
@@ -98,6 +109,7 @@ char *_strcat(char *s1, const char *s2);
 #define STRCAT(f,g) _strcat((f),(g))
 #else
 #define ValidPointer(pv,size)
+#define GetTotalMemory 
 #define CheckMemory
 #define CheckMemoryOn
 #define CheckMemoryOff
@@ -118,6 +130,7 @@ typedef struct BLOCKINFO {
   int linenumber;
 } blockinfo;
 
+MMEXTERN MMsize _GetTotalMemory(void);
 mallocflag CreateBlockInfo(bbyte *pbNew, size_t sizeNew);
 void FreeBlockInfo(bbyte *pb);
 void UpdateBlockInfo(bbyte *pbOld, bbyte *pbNew, size_t sizeNew);

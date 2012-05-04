@@ -141,9 +141,9 @@ void update_framenumber(int changetime){
 
         smoke3di = smoke3dinfo + i;
         if(smoke3di->loaded==0||smoke3di->display==0)continue;
-        smoke3di->itime=smoke3di->timeslist[itimes];
-        if(smoke3di->itime!=smoke3di->lastiframe){
-          smoke3di->lastiframe=smoke3di->itime;
+        smoke3di->ismoke3d_time=smoke3di->timeslist[itimes];
+        if(smoke3di->ismoke3d_time!=smoke3di->lastiframe){
+          smoke3di->lastiframe=smoke3di->ismoke3d_time;
           updatesmoke3d(smoke3di);
         }
       }
