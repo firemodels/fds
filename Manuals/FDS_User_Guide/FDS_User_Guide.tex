@@ -274,12 +274,13 @@
 
 \normalsize
 
-
-
 \vfill
 
-\flushright{\includegraphics[width=2.in]{../Bibliography/nistident_flright_vec}}
-
+\flushright{
+\includegraphics[width=1.3in]{../Bibliography/VTT_Black_L} \\
+VTT Technical Research Centre of Finland \\ [.3in]
+\includegraphics[width=2.in]{../Bibliography/nistident_flright_vec}
+}
 
 \end{minipage}
 
@@ -6393,7 +6394,7 @@ The initial mass fraction of oxygen is 0.23 with the remainder being the backgro
 In this example, the {\ct SMIX\_ID}s refer directly to the {\ct SPEC} lines. The stoichiometric coefficients can be taken directly from Eq.~(\ref{eq:2step_methane_rev}). The heats of combustion are found by using the enthalpy of formation of each species\footnote{http://kinetics.nist.gov/janaf/}:
 
 \be
-\overline{\Delta h_c} = \overline{h}_{products} - \overline{h}_{reactants} = (\overline{h_f^{\circ}}+\overline{\Delta h})_{products} - 
+\overline{\Delta h_c} = \overline{h}_{products} - \overline{h}_{reactants} = (\overline{h_f^{\circ}}+\overline{\Delta h})_{products} -
    (\overline{h_f^{\circ}}+\overline{\Delta h})_{reactants}
 \ee
 If the reference temperature is set as the ambient temperature, $\overline{\Delta h}$ drops out of the equation. As an example, the heat of combustion for the {\ct FWD\_METHANE} reaction can be calculated by:
@@ -7963,12 +7964,12 @@ To use the THIEF model in FDS, add lines similar to the following to the input f
 \footnotesize
 \begin{verbatim}
 &MATL ID='plastic', DENSITY=2535., CONDUCTIVITY=0.2, SPECIFIC_HEAT=1.5 /
-&SURF ID='cylinder', THICKNESS=0.00815, LENGTH=0.1, MATL_ID='plastic', 
+&SURF ID='cylinder', THICKNESS=0.00815, LENGTH=0.1, MATL_ID='plastic',
       GEOMETRY='CYLINDRICAL' /
-&PART ID='Cable Segment', SURF_ID='cylinder', ORIENTATION(1,1:3)=0.,0.,1., 
+&PART ID='Cable Segment', SURF_ID='cylinder', ORIENTATION(1,1:3)=0.,0.,1.,
       STATIC=.TRUE. /
 &INIT ID='Cable', XB=0.01,0.01,0.,0.,0.,0., N_PARTICLES=1, PART_ID='Cable Segment' /
-&DEVC XYZ=0.01,0.00,0.000, ID='Cable Temp', INIT_ID='Cable', 
+&DEVC XYZ=0.01,0.00,0.000, ID='Cable Temp', INIT_ID='Cable',
       QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.00152 /
 \end{verbatim}
 \normalsize
