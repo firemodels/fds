@@ -2041,6 +2041,28 @@ void update_mesh_coords(void){
   }
 }
 
+/* ------------------ is_slice_dup ------------------------ */
+
+int is_slice_dup(slicedata *sd){
+  int i;
+
+  for(i=0;i<nsliceinfo-1;i++){
+    slicedata *slicei;
+
+    slicei = sliceinfo + i;
+    if(slicei->is1!=sd->is1||slicei->is2!=sd->is2)continue;
+    if(slicei->js1!=sd->js1||slicei->js2!=sd->js2)continue;
+    if(slicei->ks1!=sd->ks1||slicei->ks2!=sd->ks2)continue;
+    if(strcmp(slicei->label.longlabel,sd->label.longlabel)!=0)continue;
+    if(slicei->slicetype!=sd->slicetype)continue;
+    if(slicei->blocknumber!=sd->blocknumber)continue;
+    if(slicei->volslice!=sd->volslice)continue;
+    if(slicei->idir!=sd->idir)continue;
+    return 1;
+  }
+  return 0;
+}
+
 /* ------------------ readsmv ------------------------ */
 
 int readsmv(char *file, char *file2){
@@ -6032,6 +6054,10 @@ typedef struct {
       len=strlen(bufferptr);
       
       sd = sliceinfo+islice;
+      sd->reg_file=NULL;
+      sd->comp_file=NULL;
+      sd->vol_file=NULL;
+      sd->slicelabel=NULL;
       sd->slicetype=SLICE_NODE;
       if(terrain==1){
         sd->slicetype=SLICE_TERRAIN;
@@ -6159,6 +6185,16 @@ typedef struct {
 
         meshi = meshinfo + blocknumber;
         sd->mesh_type=meshi->mesh_type;
+      }
+      if(is_slice_dup(sd)==1){
+        FREEMEMORY(sd->reg_file);
+        FREEMEMORY(sd->comp_file);
+        FREEMEMORY(sd->vol_file);
+        FREEMEMORY(sd->slicelabel);
+        
+        nsliceinfo--;
+        nslicefiles--;
+        continue;
       }
       islice++;
       continue;

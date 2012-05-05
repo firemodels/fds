@@ -1695,7 +1695,7 @@ int new_multi(slicedata *sdold,slicedata *sd){
   }
   else{
     if(strcmp(sd->label.shortlabel,sdold->label.shortlabel)!=0
-      ||sd->mesh_type!=sdold->mesh_type
+      ||sd->mesh_type!=sdold->mesh_type||sd->slicetype!=sdold->slicetype
         ){
       return 1;
     }
