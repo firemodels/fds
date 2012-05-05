@@ -4808,7 +4808,7 @@ void drawvolslice_cellcenter_interp(const slicedata *sd){
 
     if(plotx<1)plotx=1;
     plotx2 = plotx-1;
-    constval = (xplt[plotx]+xplt[plotx2]);;
+    constval = (xplt[plotx]+xplt[plotx2])/2.0;
     glBegin(GL_TRIANGLES);
     maxj = sd->js2;
     if(sd->js1+1>maxj){
