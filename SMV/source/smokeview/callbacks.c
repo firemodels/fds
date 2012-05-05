@@ -495,6 +495,7 @@ void mouse(int button, int state, int x, int y){
   glui_move_mode=-1;
   move_gslice=0;
   glutPostRedisplay();
+
   if(state==GLUT_UP){
 #ifdef pp_MOUSEDOWN
     mouse_down=0;
@@ -510,11 +511,15 @@ void mouse(int button, int state, int x, int y){
     update_trainer_moves();
     return;
   }
+
 #ifdef pp_MOUSEDOWN
   mouse_down=1;
 #endif
-  this_mouse_time=glutGet(GLUT_ELAPSED_TIME)/1000.0;
+  
+  // check for double click for translating/rotating 3D slice plane
+
   if(show_gslice_data==1||show_gslice_outline==1){
+    this_mouse_time=glutGet(GLUT_ELAPSED_TIME)/1000.0;
     if(this_mouse_time-last_mouse_time<0.5){
       gslice_xyz0[0]=gslice_xyz[0];
       gslice_xyz0[1]=gslice_xyz[1];
@@ -523,31 +528,21 @@ void mouse(int button, int state, int x, int y){
       gslice_normal_azelev0[1]=gslice_normal_azelev[1];
       move_gslice=1;
     }
+    last_mouse_time=this_mouse_time;
   }
-  last_mouse_time=this_mouse_time;
-  if ((button == GLUT_LEFT_BUTTON || button == GLUT_MIDDLE_BUTTON || button == GLUT_RIGHT_BUTTON)&& state == GLUT_DOWN){
+  if ((
+    button == GLUT_LEFT_BUTTON || 
+    button == GLUT_MIDDLE_BUTTON || 
+    button == GLUT_RIGHT_BUTTON)&& state == GLUT_DOWN){
     glutSetCursor(GLUT_CURSOR_INFO);
 
     /* edit blockages */
 
     if(button==GLUT_LEFT_BUTTON){
-      if(blockageSelect==1){
-        mouse_edit_blockage(button,state,x,y);
-      }
-
-    /* edit tours */
-
-      if(edittour==1&&blockageSelect==0){
-        mouse_edit_tour(button, state, x, y);
-      }
-
-      if(select_avatar==1){
-        mouse_select_avatar(button, state, x, y);
-      }
-
-      if(select_device==1){
-        mouse_select_device(button, state, x, y);
-      }
+      if(blockageSelect==1)mouse_edit_blockage(button,state,x,y);
+      if(edittour==1&&blockageSelect==0)mouse_edit_tour(button,state,x,y);
+      if(select_avatar==1)mouse_select_avatar(button,state,x,y);
+      if(select_device==1)mouse_select_device(button,state,x,y);
     }
     glutPostRedisplay();
     if( showtime==1 || showplot3d==1){
@@ -637,13 +632,87 @@ void mouse(int button, int state, int x, int y){
       touring=0;
       break;
     }
-    xm0=x; 
-    ym0=y;
+    mouse_down_xy0[0]=x; 
+    mouse_down_xy0[1]=y;
   }
   glutPostRedisplay();
   if(blockageSelect==1){
     Display();
   }
+}
+
+/* ------------------ drag_colorbar ------------------------ */
+
+void drag_colorbar(int xm, int ym){
+  int temp;
+  int ifactor;
+  float factor;
+  int valmax=255;
+  int valmin=0;
+
+  temp = (int)(1.2*dwinH);
+  if(xm>screenWidth-dwinWW){
+    float yy;
+
+    yy = screenHeight - ym;
+    factor=(yy-temp)/(screenHeight-temp);
+    factor *= (nrgb+1.0)/(nrgb-0.5);
+    if(screenHeight>screenWidth)factor *= (float)screenHeight/screenWidth;
+    ifactor=(int)(255*factor);
+    if(ifactor<256||ifactor>=0){
+      if(ifactor>valmax)ifactor=valmax;
+      if(ifactor<valmin)ifactor=valmin;
+    }
+    else{
+      ifactor=-1;
+    }
+    colorbar_select_index=ifactor;
+    updatecolors(ifactor);
+  }
+}
+
+/* ------------------ drag_colorsplit ------------------------ */
+
+void drag_colorbarsplit(int xm, int ym){
+  int temp;
+  int ifactor;
+  float factor;
+
+  temp = (int)(1.2*dwinH);
+  if(xm>screenWidth-dwinWW){
+    int ii;
+    float yy;
+
+    yy = screenHeight - ym;
+    factor=(yy-temp)/(screenHeight-temp);
+    factor *= (nrgb+1.0)/(nrgb-0.5);
+    if(screenHeight>screenWidth)factor *= (float)screenHeight/screenWidth;
+    ifactor=(int)(255*factor);
+
+    if(ifactor>250)ifactor=250;
+    if(ifactor<5)ifactor=5;
+    ii=current_colorbar->splits[0];
+    current_colorbar->index_node[ii]=ifactor;
+    current_colorbar->index_node[ii-1]=ifactor;
+    remapcolorbar(current_colorbar);
+    updatecolors(-1);
+    update_colorbar_splits(current_colorbar);
+  }
+}
+
+/* ------------------ drag_timebar ------------------------ */
+
+void drag_timebar(int xm, int ym){
+  float xxleft;
+
+  xxleft = xtimeleft;
+  if(fontindex==LARGE_FONT)xxleft=xtimeleft+0.11;
+  if(screenHeight-ym<50&&nglobal_times>0&&visTimeLabels==1&&showtime==1){
+    itimes=(int)((xtemp*xm/((screenWidth-dwinWW))-xxleft)*(nglobal_times-1)/(xtimeright-xxleft));
+    checktimebound();
+    timedrag=1;
+  }
+  Idle();
 }
 
 /* ------------------ motion ------------------------ */
@@ -653,6 +722,7 @@ void motion(int xm, int ym){
   float *eye_xyz, *angle_zx;
   float direction_angle;
   float elevation_angle;
+  int dxm, dym;
 
 #ifdef pp_GPUTHROTTLE
   if(usegpu==1&&showvolrender==1&&show_volsmoke_moving==1){
@@ -677,119 +747,71 @@ void motion(int xm, int ym){
   glutPostRedisplay();
 
   if( colordrag==1&&(showtime==1 || showplot3d==1)){
-    int temp;
-    int ifactor;
-    float factor;
-    int valmax=255;
-    int valmin=0;
-
-    temp = (int)(1.2*dwinH);
-    if(xm>screenWidth-dwinWW){
-      yy = screenHeight - ym;
-      factor=(yy-temp)/(screenHeight-temp);
-      factor *= (nrgb+1.0)/(nrgb-0.5);
-      if(screenHeight>screenWidth)factor *= (float)screenHeight/screenWidth;
-      ifactor=(int)(255*factor);
-      if(ifactor<256||ifactor>=0){
-        if(ifactor>valmax)ifactor=valmax;
-        if(ifactor<valmin)ifactor=valmin;
-      }
-      else{
-        ifactor=-1;
-      }
-      colorbar_select_index=ifactor;
-      updatecolors(ifactor);
-    }
+    drag_colorbar(xm,ym);
     return;
   }
   if(colorsplitdrag==1&&(showtime==1 || showplot3d==1)&&current_colorbar!=NULL&&current_colorbar->nsplits==1){
-    int temp;
-    int ifactor;
-    float factor;
-
-    temp = (int)(1.2*dwinH);
-    if(xm>screenWidth-dwinWW){
-      int ii;
-
-      yy = screenHeight - ym;
-      factor=(yy-temp)/(screenHeight-temp);
-      factor *= (nrgb+1.0)/(nrgb-0.5);
-      if(screenHeight>screenWidth)factor *= (float)screenHeight/screenWidth;
-      ifactor=(int)(255*factor);
-
-      if(ifactor>250)ifactor=250;
-      if(ifactor<5)ifactor=5;
-      ii=current_colorbar->splits[0];
-      current_colorbar->index_node[ii]=ifactor;
-      current_colorbar->index_node[ii-1]=ifactor;
-      remapcolorbar(current_colorbar);
-      updatecolors(-1);
-      update_colorbar_splits(current_colorbar);
-    }
+    drag_colorbarsplit(xm,ym);
     return;
   }
   if(timedrag==1){
-    float xxleft;
-
-	  xxleft = xtimeleft;
-    if(fontindex==LARGE_FONT)xxleft=xtimeleft+0.11;
-    if(screenHeight-ym<50&&nglobal_times>0&&visTimeLabels==1&&showtime==1){
-      itimes=(int)((xtemp*xm/((screenWidth-dwinWW))-xxleft)*(nglobal_times-1)/(xtimeright-xxleft));
-      checktimebound();
-      timedrag=1;
-    }
-    Idle();
+    drag_timebar(xm,ym);
     return;
   }
   screenWidth2 = screenWidth - dwinWW;
   screenHeight2 = screenHeight - dwinH;
 
+  dxm = xm - start_xyz0[0];
+  dym = ym - start_xyz0[1];
+
   switch (key_state){
     case KEY_NONE:
-      switch (eyeview){
-        case WORLD_CENTERED:
-        case WORLD_CENTERED_LEVEL:
-          if(move_gslice==0){
-            angle_zx[0] += (xm - start_xyz0[0]);
+      if(move_gslice==1){
+        float daz, delev;
+
+        daz = 360.0*dxm/(float)screenWidth2;
+        delev = 360.0*dym/(float)screenHeight2;
+        gslice_normal_azelev[0] += daz;
+        gslice_normal_azelev[1] += delev;
+        update_gslice_parms();
+        start_xyz0[0]=xm;
+        start_xyz0[1]=ym;
+      }
+      else{
+        switch (eyeview){
+          case WORLD_CENTERED:
+          case WORLD_CENTERED_LEVEL:
+            angle_zx[0] += dxm;
             if(eyeview==WORLD_CENTERED){
-              angle_zx[1] += (ym - start_xyz0[1]);
+              angle_zx[1] += dym;
             }
             else{
               angle_zx[1]=0.0;
             }
-          }
-          else{
-            float daz, delev;
-
-            daz = 360.0*(xm - start_xyz0[0])/(float)screenWidth2;
-            delev = 360.0*(ym - start_xyz0[1])/(float)screenHeight2;
-            gslice_normal_azelev[0] += daz;
-            gslice_normal_azelev[1] += delev;
-            update_gslice_parms();
-          }
-          start_xyz0[0]=xm;
-          start_xyz0[1]=ym;
-          break;
-        case EYE_CENTERED:
+            start_xyz0[0]=xm;
+            start_xyz0[1]=ym;
+            break;
+          case EYE_CENTERED:
 #define ANGLE_FACTOR 0.25
-          camera_current->direction_angle += (xm - start_xyz0[0])*ANGLE_FACTOR;
-          direction_angle=camera_current->direction_angle;
-          camera_current->cos_direction_angle = cos(PI*direction_angle/180.0);
-          camera_current->sin_direction_angle = sin(PI*direction_angle/180.0);
-          start_xyz0[0]=xm;
+            camera_current->direction_angle += dxm*ANGLE_FACTOR;
+            direction_angle=camera_current->direction_angle;
+            camera_current->cos_direction_angle = cos(PI*direction_angle/180.0);
+            camera_current->sin_direction_angle = sin(PI*direction_angle/180.0);
+            start_xyz0[0]=xm;
 
-          camera_current->elevation_angle -= (ym - start_xyz0[1])*ANGLE_FACTOR;
-          elevation_angle=camera_current->elevation_angle;
-          if(elevation_angle>80.0)elevation_angle=80.0;
-          if(elevation_angle<-80.0)elevation_angle=-80.0;
-          camera_current->elevation_angle=elevation_angle;
-          camera_current->cos_elevation_angle = cos(PI*elevation_angle/180.0);
-          camera_current->sin_elevation_angle = sin(PI*elevation_angle/180.0);
-          start_xyz0[1]=ym;
-          break;
-        default:
-          ASSERT(FFALSE);
-          break;
+            camera_current->elevation_angle -= dym*ANGLE_FACTOR;
+            elevation_angle=camera_current->elevation_angle;
+            if(elevation_angle>80.0)elevation_angle=80.0;
+            if(elevation_angle<-80.0)elevation_angle=-80.0;
+            camera_current->elevation_angle=elevation_angle;
+            camera_current->cos_elevation_angle = cos(PI*elevation_angle/180.0);
+            camera_current->sin_elevation_angle = sin(PI*elevation_angle/180.0);
+            start_xyz0[1]=ym;
+            break;
+          default:
+            ASSERT(FFALSE);
+            break;
+        }
       }
       break;
 
@@ -798,9 +820,9 @@ void motion(int xm, int ym){
         float dx, dy;
 
         if(move_gslice==0){
-          xx = xm-xm0;
+          xx = xm-mouse_down_xy0[0];
           xx = xx/(float)screenWidth2;
-          yy = ym-ym0;
+          yy = ym-mouse_down_xy0[1];
           yy = yy/(float)screenHeight2;
           if(eyeview==EYE_CENTERED){
             float xx2, yy2;
@@ -817,14 +839,14 @@ void motion(int xm, int ym){
             eye_xyz[1] = eye_xyz0[1] + dy;
             eye_xyz0[0]=eye_xyz[0];
             eye_xyz0[1]=eye_xyz[1];
-            xm0=xm;
-            ym0=ym;
+            mouse_down_xy0[0]=xm;
+            mouse_down_xy0[1]=ym;
           }
         }
         else{
-          xx = xm-xm0;
+          xx = xm-mouse_down_xy0[0];
           xx = xx/(float)screenWidth2;
-          yy = ym-ym0;
+          yy = ym-mouse_down_xy0[1];
           yy = yy/(float)screenHeight2;
           dx = (xyzbox+gslice_xyz0[0])*xx;
           dy = -(xyzbox-gslice_xyz0[1])*yy;
@@ -832,8 +854,8 @@ void motion(int xm, int ym){
           gslice_xyz[1] += dy;
           gslice_xyz0[0] = gslice_xyz[0];
           gslice_xyz0[1] = gslice_xyz[1];
-          xm0=xm;
-          ym0=ym;
+          mouse_down_xy0[0]=xm;
+          mouse_down_xy0[1]=ym;
           update_gslice_parms();
         }
       }
@@ -842,9 +864,9 @@ void motion(int xm, int ym){
     case KEY_ALT:
 
       if(move_gslice==0){
-        xx = xm-xm0;
+        xx = xm-mouse_down_xy0[0];
         xx = xx/(float)screenWidth2;
-        yy = ym-ym0;
+        yy = ym-mouse_down_xy0[1];
         yy = yy/(float)screenHeight2;
 
         eye_xyz[0] = eye_xyz0[0]; /* disable horizontal motion */
@@ -853,7 +875,7 @@ void motion(int xm, int ym){
         viewz = eye_xyz[2] - delz;
       }
       else{
-        yy = ym-ym0;
+        yy = ym-mouse_down_xy0[1];
         yy = yy/(float)screenHeight2;
 
         gslice_xyz[2] = gslice_xyz0[2] - DENORMALIZE_Z(4*(xyzbox-NORMALIZE_Z(gslice_xyz0[2]))*yy);
@@ -1567,6 +1589,9 @@ void keyboard(unsigned char key, int flag){
     case 3:
       next_zindex(skip_global*FlowDir,0);
       break;
+    default:
+      ASSERT(0);
+      break;
   }
   if(ReadPlot3dFile==1&&visiso !=0 && current_mesh->slicedir==4){
     plotiso[plotn-1] += FlowDir; 
@@ -1756,6 +1781,9 @@ void handle_plot3d_keys(int  key){
       case 3:
         next_zindex(0,-1);
         break;
+      default:
+        ASSERT(0);
+        break;
     }
     break;
   case GLUT_KEY_END:
@@ -1769,6 +1797,9 @@ void handle_plot3d_keys(int  key){
         break;
       case 3:
         next_zindex(0,1);
+        break;
+      default:
+        ASSERT(0);
         break;
     }
     break;

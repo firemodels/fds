@@ -727,8 +727,7 @@ extern "C" void showhide_translate(int var){
 /* ------------------ GSLICE_CB ------------------------ */
 
 void GSLICE_CB(int var){
-    float sum,*norm;
-    float az, elev;
+  float az, elev;
 
   switch(var){
     case GSLICE_NORMAL:

@@ -317,16 +317,16 @@ void BLOCK_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
 #ifdef pp_MEMDEBUG
 /* ------------------ getMemusage ------------------------ */
 
-void getMemusage(MMsize MMtotalmemory,char *MEMlabel){
+void getMemusage(MMsize totalmemory,char *MEMlabel){
   int size;
   float rsize;
 
-  if(MMtotalmemory<1000000000){
-    size = MMtotalmemory/1000000;
+  if(totalmemory<1000000000){
+    size = totalmemory/1000000;
     sprintf(MEMlabel,"%i MB",size);
   }
   else{
-    rsize = MMtotalmemory/1000000000.0;
+    rsize = totalmemory/1000000000.0;
     sprintf(MEMlabel,"%4.2f GB",rsize);
   }
 

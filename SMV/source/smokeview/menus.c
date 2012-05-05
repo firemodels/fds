@@ -2036,6 +2036,9 @@ void GridSliceMenu(int value){
       case noGridnoProbe:
         visGrid=GridnoProbe;
         break;
+      default:
+        ASSERT(0);
+        break;
     }
     break;
   case GRID_probe:
@@ -2051,6 +2054,9 @@ void GridSliceMenu(int value){
         break;
       case noGridnoProbe:
         visGrid=noGridProbe;
+        break;
+      default:
+        ASSERT(0);
         break;
     }
     break;
@@ -8822,7 +8828,7 @@ void MenuStatus(int status, int x, int y){
   start_xyz0[0]=x;
   start_xyz0[1]=y;
   /*touring=0;*/
-  xm0=x; ym0=y;
+  mouse_down_xy0[0]=x; mouse_down_xy0[1]=y;
   eye_xyz = camera_current->eye;
   eye_xyz0[0]=eye_xyz[0];
   eye_xyz0[1]=eye_xyz[1];

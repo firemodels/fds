@@ -913,7 +913,7 @@ SVEXTERN float d_eye_xyz[3],dsave_eye_xyz[3];
 SVEXTERN float eyex0, eyey0, eyez0;
 SVEXTERN float viewx, viewy, viewz;
 SVEXTERN float anglexy0,direction_angle0;
-SVEXTERN int xm0, ym0;
+SVEXTERN int mouse_down_xy0[2];
 SVEXTERN int touring;
 SVEXTERN int update_tourlist;
 SVEXTERN float desired_view_height;

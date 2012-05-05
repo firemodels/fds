@@ -499,13 +499,12 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
     out_slicefile(fed_slice);
     if(fed_slice->volslice==1){
       float *xplt, *yplt, *zplt;
-      int ibar, jbar, kbar;
       char *iblank_cell;
       char longlabel[50],shortlabel[50],unitlabel[50];
       char *isofile;
       int error_local2;
       int reduce_triangles=1;
-      int nx, ny, nz;
+      int nz;
 
       strcpy(longlabel,"Fractional effective dose");
       strcpy(shortlabel,"FED");
