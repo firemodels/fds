@@ -913,6 +913,11 @@ void ShowHideMenu(int value){
   updatemenu=1;  
   glutPostRedisplay();
   switch (value){
+#ifdef _DEBUG
+  case 16:
+    PrintMemoryInfo;
+    break;
+#endif
   case 15:
    background_flip = 1-background_flip;
    updatecolors(-1);
@@ -6805,6 +6810,10 @@ updatemenu=0;
   else{
     glutAddMenuEntry(_("Flip background"),15);
   }
+#ifdef _DEBUG
+  glutAddMenuEntry("Show Memory block info",16);
+#endif
+
 
 /* --------------------------------frame rate menu -------------------------- */
 
