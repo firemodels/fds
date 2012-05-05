@@ -5,6 +5,7 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+EXTERNCPP void update_gslice_parms(void);
 EXTERNCPP void readiso_orig(const char *file, int ifile, int flag, int *errorcode);
 EXTERNCPP void update_plotxyz_all(void);
 EXTERNCPP void update_isocolors(void);

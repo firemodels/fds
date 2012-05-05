@@ -493,6 +493,7 @@ void mouse(int button, int state, int x, int y){
     updatemenu=1;
   }
   glui_move_mode=-1;
+  move_gslice=0;
   glutPostRedisplay();
   if(state==GLUT_UP){
 #ifdef pp_MOUSEDOWN
@@ -512,6 +513,18 @@ void mouse(int button, int state, int x, int y){
 #ifdef pp_MOUSEDOWN
   mouse_down=1;
 #endif
+  this_mouse_time=glutGet(GLUT_ELAPSED_TIME)/1000.0;
+  if(show_gslice_data==1||show_gslice_outline==1){
+    if(this_mouse_time-last_mouse_time<0.5){
+      gslice_xyz0[0]=gslice_xyz[0];
+      gslice_xyz0[1]=gslice_xyz[1];
+      gslice_xyz0[2]=gslice_xyz[2];
+      gslice_normal_azelev0[0]=gslice_normal_azelev[0];
+      gslice_normal_azelev0[1]=gslice_normal_azelev[1];
+      move_gslice=1;
+    }
+  }
+  last_mouse_time=this_mouse_time;
   if ((button == GLUT_LEFT_BUTTON || button == GLUT_MIDDLE_BUTTON || button == GLUT_RIGHT_BUTTON)&& state == GLUT_DOWN){
     glutSetCursor(GLUT_CURSOR_INFO);
 
@@ -736,12 +749,23 @@ void motion(int xm, int ym){
       switch (eyeview){
         case WORLD_CENTERED:
         case WORLD_CENTERED_LEVEL:
-          angle_zx[0] += (xm - start_xyz0[0]);
-          if(eyeview==WORLD_CENTERED){
-            angle_zx[1] += (ym - start_xyz0[1]);
+          if(move_gslice==0){
+            angle_zx[0] += (xm - start_xyz0[0]);
+            if(eyeview==WORLD_CENTERED){
+              angle_zx[1] += (ym - start_xyz0[1]);
+            }
+            else{
+              angle_zx[1]=0.0;
+            }
           }
           else{
-            angle_zx[1]=0.0;
+            float daz, delev;
+
+            daz = 360.0*(xm - start_xyz0[0])/(float)screenWidth2;
+            delev = 360.0*(ym - start_xyz0[1])/(float)screenHeight2;
+            gslice_normal_azelev[0] += daz;
+            gslice_normal_azelev[1] += delev;
+            update_gslice_parms();
           }
           start_xyz0[0]=xm;
           start_xyz0[1]=ym;
@@ -773,42 +797,68 @@ void motion(int xm, int ym){
       {
         float dx, dy;
 
-        xx = xm-xm0;
-        xx = xx/(float)screenWidth2;
-        yy = ym-ym0;
-        yy = yy/(float)screenHeight2;
-        if(eyeview==EYE_CENTERED){
-          float xx2, yy2;
+        if(move_gslice==0){
+          xx = xm-xm0;
+          xx = xx/(float)screenWidth2;
+          yy = ym-ym0;
+          yy = yy/(float)screenHeight2;
+          if(eyeview==EYE_CENTERED){
+            float xx2, yy2;
 
-          xx2 = camera_current->cos_direction_angle*xx - camera_current->sin_direction_angle*yy;
-          yy2 = camera_current->sin_direction_angle*xx + camera_current->cos_direction_angle*yy;
-          xx = xx2;
-          yy = yy2;
+            xx2 = camera_current->cos_direction_angle*xx - camera_current->sin_direction_angle*yy;
+            yy2 = camera_current->sin_direction_angle*xx + camera_current->cos_direction_angle*yy;
+            xx = xx2;
+            yy = yy2;
+          }
+          else{
+            dx = (xyzbox+eye_xyz0[0])*xx;
+            dy = -(xyzbox-eye_xyz0[1])*yy;
+            eye_xyz[0] = eye_xyz0[0] + dx;
+            eye_xyz[1] = eye_xyz0[1] + dy;
+            eye_xyz0[0]=eye_xyz[0];
+            eye_xyz0[1]=eye_xyz[1];
+            xm0=xm;
+            ym0=ym;
+          }
         }
         else{
-          dx = (xyzbox+eye_xyz0[0])*xx;
-          dy = -(xyzbox-eye_xyz0[1])*yy;
-          eye_xyz[0] = eye_xyz0[0] + dx;
-          eye_xyz[1] = eye_xyz0[1] + dy;
-          eye_xyz0[0]=eye_xyz[0];
-          eye_xyz0[1]=eye_xyz[1];
+          xx = xm-xm0;
+          xx = xx/(float)screenWidth2;
+          yy = ym-ym0;
+          yy = yy/(float)screenHeight2;
+          dx = (xyzbox+gslice_xyz0[0])*xx;
+          dy = -(xyzbox-gslice_xyz0[1])*yy;
+          gslice_xyz[0] += dx;
+          gslice_xyz[1] += dy;
+          gslice_xyz0[0] = gslice_xyz[0];
+          gslice_xyz0[1] = gslice_xyz[1];
           xm0=xm;
           ym0=ym;
+          update_gslice_parms();
         }
       }
       break;
 
     case KEY_ALT:
 
-      xx = xm-xm0;
-      xx = xx/(float)screenWidth2;
-      yy = ym-ym0;
-      yy = yy/(float)screenHeight2;
+      if(move_gslice==0){
+        xx = xm-xm0;
+        xx = xx/(float)screenWidth2;
+        yy = ym-ym0;
+        yy = yy/(float)screenHeight2;
 
-      eye_xyz[0] = eye_xyz0[0]; /* disable horizontal motion */
-      eye_xyz[2] = eye_xyz0[2] - 4*(xyzbox-eye_xyz0[2])*yy;
-      viewx = eye_xyz[0] - delx;
-      viewz = eye_xyz[2] - delz;
+        eye_xyz[0] = eye_xyz0[0]; /* disable horizontal motion */
+        eye_xyz[2] = eye_xyz0[2] - 4*(xyzbox-eye_xyz0[2])*yy;
+        viewx = eye_xyz[0] - delx;
+        viewz = eye_xyz[2] - delz;
+      }
+      else{
+        yy = ym-ym0;
+        yy = yy/(float)screenHeight2;
+
+        gslice_xyz[2] = gslice_xyz0[2] - DENORMALIZE_Z(4*(xyzbox-NORMALIZE_Z(gslice_xyz0[2]))*yy);
+        update_gslice_parms();
+     }
       break;
     case KEY_SHIFT:
       break;

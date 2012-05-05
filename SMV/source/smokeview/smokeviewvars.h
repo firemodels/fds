@@ -24,6 +24,9 @@
 #include "file_util.h"
 #include "MALLOC.h"
 
+SVEXTERN float this_mouse_time, SVDECL(last_mouse_time,0.0);
+SVEXTERN int move_gslice;
+
 SVEXTERN int nplotx_all, nploty_all, nplotz_all;
 SVEXTERN int iplotx_all, iploty_all, iplotz_all;
 SVEXTERN int SVDECL(iplot_state,0);
@@ -689,6 +692,7 @@ SVEXTERN int SVDECL(visUsagememory,0);
 SVEXTERN float vecyz[4];
 #ifdef pp_GSLICE
 SVEXTERN float gslice_xyz[3],gslice_norm[3],gslice_normal_xyz[3],gslice_normal_azelev[2];
+SVEXTERN float gslice_xyz0[3],gslice_normal_azelev0[2];
 SVEXTERN int SVDECL(show_gslice_data,0),SVDECL(show_gslice_outline,0),SVDECL(show_gslice_normal,0);
 #endif
 

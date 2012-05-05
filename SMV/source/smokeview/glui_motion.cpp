@@ -138,6 +138,19 @@ GLUI_Button *BUTTON_motion_2=NULL;
 void RENDER_CB(int var);
 void enable_disable_views(void);
 
+/* ------------------ update_gslice_parms ------------------------ */
+
+void update_gslice_parms(void){
+  GSLICE_CB(GSLICE_NORMAL);
+  GSLICE_CB(GSLICE_TRANSLATE);
+  SPINNER_gslice_center_x->set_float_val(gslice_xyz[0]);
+  SPINNER_gslice_center_y->set_float_val(gslice_xyz[1]);
+  SPINNER_gslice_center_z->set_float_val(gslice_xyz[2]);
+  SPINNER_gslice_normal_az->set_float_val(gslice_normal_azelev[0]);
+  SPINNER_gslice_normal_elev->set_float_val(gslice_normal_azelev[1]);
+
+}
+
 /* ------------------ update_glui_set_view_xyz ------------------------ */
 
 extern "C" void update_glui_set_view_xyz(float *xyz){
