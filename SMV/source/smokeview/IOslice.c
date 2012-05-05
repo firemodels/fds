@@ -3209,7 +3209,7 @@ void init_slice3d_texture(mesh *meshi){
 
   if(slice3d_colormap_id_defined==-1){
     slice3d_colormap_id_defined=1;
-    glActiveTexture(GL_TEXTURE2);
+    glActiveTexture(GL_TEXTURE4);
     glGenTextures(1,&slice3d_colormap_id);
     glBindTexture(GL_TEXTURE_1D,slice3d_colormap_id);
     glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,256,0,GL_RGBA,GL_FLOAT,rgb_slice);
@@ -3284,7 +3284,7 @@ void drawgslice_data(slicedata *slicei){
   boxmax=meshi->boxmax;
 
   glUniform1i(GPU3dslice_valtexture,0);
-  glUniform1i(GPU3dslice_colormap,2);
+  glUniform1i(GPU3dslice_colormap,4);
   glUniform1f(GPU3dslice_val_min,valmin);
   glUniform1f(GPU3dslice_val_max,valmax);
   glUniform1f(GPU3dslice_transparent_level,transparent_level);

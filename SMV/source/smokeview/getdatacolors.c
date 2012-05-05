@@ -1594,7 +1594,7 @@ void updatecolors(int changecolorindex){
       foregroundcolor[i]=backgroundbasecolor[i];
       backgroundcolor[i]=foregroundbasecolor[i];
     }
-    rgb[rgb_white][0]=0.0;  //xxx fix or take ouit
+    rgb[rgb_white][0]=0.0;  //xxx fix or take out
     rgb[rgb_white][1]=0.0;
     rgb[rgb_white][2]=0.0;
     rgb[rgb_black][0]=1.0;
@@ -1617,6 +1617,12 @@ void updatecolors(int changecolorindex){
   if(gpuactive==1&&nvolrenderinfo>0&&showvolrender==1){
     glActiveTexture(GL_TEXTURE2);
     glTexSubImage1D(GL_TEXTURE_1D,0,0,256,GL_RGBA,GL_FLOAT, rgb_smokecolormap);
+    SNIFF_ERRORS("updatecolors after glTexSubImage1D ");
+    glActiveTexture(GL_TEXTURE0);
+  }
+  if(gpuactive==1&&show_gslice_data==1){
+    glActiveTexture(GL_TEXTURE4);
+    glTexSubImage1D(GL_TEXTURE_1D,0,0,256,GL_RGBA,GL_FLOAT, rgb_slice);
     SNIFF_ERRORS("updatecolors after glTexSubImage1D ");
     glActiveTexture(GL_TEXTURE0);
   }
