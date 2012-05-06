@@ -591,7 +591,7 @@ void updateShow(void){
   olddrawColorLabel=drawColorLabel;
   if(showtime2==1)showtime=1;
   if(plotstate==DYNAMIC_PLOTS&&stept==1){
-    glutIdleFunc(Idle);
+    glutIdleFunc(Idle_CB);
   }
   else{
     glutIdleFunc(NULL);

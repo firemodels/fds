@@ -481,7 +481,7 @@ void checktimebound(void){
 
 /* ------------------ mouse ------------------------ */
 
-void mouse(int button, int state, int x, int y){
+void mouse_CB(int button, int state, int x, int y){
   float *eye_xyz;
 
   if(trainer_mode==1){
@@ -592,7 +592,7 @@ void mouse(int button, int state, int x, int y){
       checktimebound();
       timedrag=1;
       stept=0;
-      Idle();
+      Idle_CB();
 
       return;
     }
@@ -637,7 +637,7 @@ void mouse(int button, int state, int x, int y){
   }
   glutPostRedisplay();
   if(blockageSelect==1){
-    Display();
+    Display_CB();
   }
 }
 
@@ -712,61 +712,23 @@ void drag_timebar(int xm, int ym){
     checktimebound();
     timedrag=1;
   }
-  Idle();
+  Idle_CB();
 }
 
-/* ------------------ motion ------------------------ */
+/* ------------------ Move_Gen_Slice ------------------------ */
 
-void motion(int xm, int ym){
-  float xx, yy;
-  float *eye_xyz, *angle_zx;
-  float direction_angle;
-  float elevation_angle;
+void Move_Gen_Slice(int xm, int ym){
   int dxm, dym;
+  int screenWidth2, screenHeight2;
 
-#ifdef pp_GPUTHROTTLE
-  if(usegpu==1&&showvolrender==1&&show_volsmoke_moving==1){
-    float fps;
-
-    thisMOTIONtime=glutGet(GLUT_ELAPSED_TIME)/1000.0;
-    fps = MOTIONnframes/(thisMOTIONtime-lastMOTIONtime);
-    if(fps>GPU_VOLframemax)return;
-    MOTIONnframes++;
-    if(thisMOTIONtime>lastMOTIONtime+0.25){
-      printf("MOTION: %4.1f fps\n",fps);
-      lastMOTIONtime=thisMOTIONtime;
-      MOTIONnframes=0;
-    }
-  }
-#endif
-  eye_xyz = camera_current->eye;
-  angle_zx = camera_current->angle_zx;
-  
-  reset_glui_view(-1);
-
-  glutPostRedisplay();
-
-  if( colordrag==1&&(showtime==1 || showplot3d==1)){
-    drag_colorbar(xm,ym);
-    return;
-  }
-  if(colorsplitdrag==1&&(showtime==1 || showplot3d==1)&&current_colorbar!=NULL&&current_colorbar->nsplits==1){
-    drag_colorbarsplit(xm,ym);
-    return;
-  }
-  if(timedrag==1){
-    drag_timebar(xm,ym);
-    return;
-  }
   screenWidth2 = screenWidth - dwinWW;
   screenHeight2 = screenHeight - dwinH;
 
   dxm = xm - start_xyz0[0];
   dym = ym - start_xyz0[1];
-
   switch (key_state){
     case KEY_NONE:
-      if(move_gslice==1){
+      {
         float daz, delev;
 
         daz = 360.0*dxm/(float)screenWidth2;
@@ -777,41 +739,98 @@ void motion(int xm, int ym){
         start_xyz0[0]=xm;
         start_xyz0[1]=ym;
       }
-      else{
-        switch (eyeview){
-          case WORLD_CENTERED:
-          case WORLD_CENTERED_LEVEL:
-            angle_zx[0] += dxm;
-            if(eyeview==WORLD_CENTERED){
-              angle_zx[1] += dym;
-            }
-            else{
-              angle_zx[1]=0.0;
-            }
-            start_xyz0[0]=xm;
-            start_xyz0[1]=ym;
-            break;
-          case EYE_CENTERED:
-#define ANGLE_FACTOR 0.25
-            camera_current->direction_angle += dxm*ANGLE_FACTOR;
-            direction_angle=camera_current->direction_angle;
-            camera_current->cos_direction_angle = cos(PI*direction_angle/180.0);
-            camera_current->sin_direction_angle = sin(PI*direction_angle/180.0);
-            start_xyz0[0]=xm;
+      break;
+    case KEY_CTRL:
+      {
+        float xx, yy;
+        float dx, dy;
 
-            camera_current->elevation_angle -= dym*ANGLE_FACTOR;
-            elevation_angle=camera_current->elevation_angle;
-            if(elevation_angle>80.0)elevation_angle=80.0;
-            if(elevation_angle<-80.0)elevation_angle=-80.0;
-            camera_current->elevation_angle=elevation_angle;
-            camera_current->cos_elevation_angle = cos(PI*elevation_angle/180.0);
-            camera_current->sin_elevation_angle = sin(PI*elevation_angle/180.0);
-            start_xyz0[1]=ym;
-            break;
-          default:
-            ASSERT(FFALSE);
-            break;
-        }
+        xx = xm-mouse_down_xy0[0];
+        xx = xx/(float)screenWidth2;
+        yy = ym-mouse_down_xy0[1];
+        yy = yy/(float)screenHeight2;
+        dx = (xyzbox+gslice_xyz0[0])*xx;
+        dy = -(xyzbox-gslice_xyz0[1])*yy;
+        gslice_xyz[0] += dx;
+        gslice_xyz[1] += dy;
+        gslice_xyz0[0] = gslice_xyz[0];
+        gslice_xyz0[1] = gslice_xyz[1];
+        mouse_down_xy0[0]=xm;
+        mouse_down_xy0[1]=ym;
+        update_gslice_parms();
+      }
+      break;
+    case KEY_ALT:
+      {
+        float yy;
+
+        yy = ym-mouse_down_xy0[1];
+        yy = yy/(float)screenHeight2;
+
+        gslice_xyz[2] = gslice_xyz0[2] - DENORMALIZE_Z(4*(xyzbox-NORMALIZE_Z(gslice_xyz0[2]))*yy);
+        update_gslice_parms();
+      }
+      break;
+    case KEY_SHIFT:
+    break;
+    default:
+      ASSERT(0);
+      break;
+  }
+}
+
+/* ------------------ Move_Scene ------------------------ */
+
+void Move_Scene(int xm, int ym){
+  float *eye_xyz, *angle_zx;
+  int screenWidth2, screenHeight2;
+  int dxm, dym;
+  float direction_angle;
+  float elevation_angle;
+  float xx, yy;
+
+  eye_xyz = camera_current->eye;
+  angle_zx = camera_current->angle_zx;
+  screenWidth2 = screenWidth - dwinWW;
+  screenHeight2 = screenHeight - dwinH;
+
+  dxm = xm - start_xyz0[0];
+  dym = ym - start_xyz0[1];
+  switch (key_state){
+    case KEY_NONE:
+      switch (eyeview){
+        case WORLD_CENTERED:
+        case WORLD_CENTERED_LEVEL:
+          angle_zx[0] += dxm;
+          if(eyeview==WORLD_CENTERED){
+            angle_zx[1] += dym;
+          }
+          else{
+            angle_zx[1]=0.0;
+          }
+          start_xyz0[0]=xm;
+          start_xyz0[1]=ym;
+          break;
+        case EYE_CENTERED:
+#define ANGLE_FACTOR 0.25
+          camera_current->direction_angle += dxm*ANGLE_FACTOR;
+          direction_angle=camera_current->direction_angle;
+          camera_current->cos_direction_angle = cos(PI*direction_angle/180.0);
+          camera_current->sin_direction_angle = sin(PI*direction_angle/180.0);
+          start_xyz0[0]=xm;
+
+          camera_current->elevation_angle -= dym*ANGLE_FACTOR;
+          elevation_angle=camera_current->elevation_angle;
+          if(elevation_angle>80.0)elevation_angle=80.0;
+          if(elevation_angle<-80.0)elevation_angle=-80.0;
+          camera_current->elevation_angle=elevation_angle;
+          camera_current->cos_elevation_angle = cos(PI*elevation_angle/180.0);
+          camera_current->sin_elevation_angle = sin(PI*elevation_angle/180.0);
+          start_xyz0[1]=ym;
+          break;
+        default:
+          ASSERT(FFALSE);
+          break;
       }
       break;
 
@@ -819,68 +838,41 @@ void motion(int xm, int ym){
       {
         float dx, dy;
 
-        if(move_gslice==0){
-          xx = xm-mouse_down_xy0[0];
-          xx = xx/(float)screenWidth2;
-          yy = ym-mouse_down_xy0[1];
-          yy = yy/(float)screenHeight2;
-          if(eyeview==EYE_CENTERED){
-            float xx2, yy2;
+        xx = xm-mouse_down_xy0[0];
+        xx = xx/(float)screenWidth2;
+        yy = ym-mouse_down_xy0[1];
+        yy = yy/(float)screenHeight2;
+        if(eyeview==EYE_CENTERED){
+          float xx2, yy2;
 
-            xx2 = camera_current->cos_direction_angle*xx - camera_current->sin_direction_angle*yy;
-            yy2 = camera_current->sin_direction_angle*xx + camera_current->cos_direction_angle*yy;
-            xx = xx2;
-            yy = yy2;
-          }
-          else{
-            dx = (xyzbox+eye_xyz0[0])*xx;
-            dy = -(xyzbox-eye_xyz0[1])*yy;
-            eye_xyz[0] = eye_xyz0[0] + dx;
-            eye_xyz[1] = eye_xyz0[1] + dy;
-            eye_xyz0[0]=eye_xyz[0];
-            eye_xyz0[1]=eye_xyz[1];
-            mouse_down_xy0[0]=xm;
-            mouse_down_xy0[1]=ym;
-          }
+          xx2 = camera_current->cos_direction_angle*xx - camera_current->sin_direction_angle*yy;
+          yy2 = camera_current->sin_direction_angle*xx + camera_current->cos_direction_angle*yy;
+          xx = xx2;
+          yy = yy2;
         }
         else{
-          xx = xm-mouse_down_xy0[0];
-          xx = xx/(float)screenWidth2;
-          yy = ym-mouse_down_xy0[1];
-          yy = yy/(float)screenHeight2;
-          dx = (xyzbox+gslice_xyz0[0])*xx;
-          dy = -(xyzbox-gslice_xyz0[1])*yy;
-          gslice_xyz[0] += dx;
-          gslice_xyz[1] += dy;
-          gslice_xyz0[0] = gslice_xyz[0];
-          gslice_xyz0[1] = gslice_xyz[1];
+          dx = (xyzbox+eye_xyz0[0])*xx;
+          dy = -(xyzbox-eye_xyz0[1])*yy;
+          eye_xyz[0] = eye_xyz0[0] + dx;
+          eye_xyz[1] = eye_xyz0[1] + dy;
+          eye_xyz0[0]=eye_xyz[0];
+          eye_xyz0[1]=eye_xyz[1];
           mouse_down_xy0[0]=xm;
           mouse_down_xy0[1]=ym;
-          update_gslice_parms();
         }
       }
       break;
 
     case KEY_ALT:
+      xx = xm-mouse_down_xy0[0];
+      xx = xx/(float)screenWidth2;
+      yy = ym-mouse_down_xy0[1];
+      yy = yy/(float)screenHeight2;
 
-      if(move_gslice==0){
-        xx = xm-mouse_down_xy0[0];
-        xx = xx/(float)screenWidth2;
-        yy = ym-mouse_down_xy0[1];
-        yy = yy/(float)screenHeight2;
-
-        eye_xyz[0] = eye_xyz0[0]; /* disable horizontal motion */
-        eye_xyz[2] = eye_xyz0[2] - 4*(xyzbox-eye_xyz0[2])*yy;
-        viewx = eye_xyz[0] - delx;
-        viewz = eye_xyz[2] - delz;
-      }
-      else{
-        yy = ym-mouse_down_xy0[1];
-        yy = yy/(float)screenHeight2;
-
-        gslice_xyz[2] = gslice_xyz0[2] - DENORMALIZE_Z(4*(xyzbox-NORMALIZE_Z(gslice_xyz0[2]))*yy);
-        update_gslice_parms();
-     }
+      eye_xyz[0] = eye_xyz0[0]; /* disable horizontal motion */
+      eye_xyz[2] = eye_xyz0[2] - 4*(xyzbox-eye_xyz0[2])*yy;
+      viewx = eye_xyz[0] - delx;
+      viewz = eye_xyz[2] - delz;
       break;
     case KEY_SHIFT:
       break;
@@ -890,9 +882,62 @@ void motion(int xm, int ym){
   }
 }
 
-/* ------------------ keyboard_up ------------------------ */
+/* ------------------ throttle_gpu ------------------------ */
 
-void keyboard_up(unsigned char key, int x, int y){
+int throttle_gpu(void){
+  float fps;
+
+  thisMOTIONtime=glutGet(GLUT_ELAPSED_TIME)/1000.0;
+  fps = MOTIONnframes/(thisMOTIONtime-lastMOTIONtime);
+  if(fps>GPU_VOLframemax)return 1;
+  MOTIONnframes++;
+  if(thisMOTIONtime>lastMOTIONtime+0.25){
+    printf("MOTION: %4.1f fps\n",fps);
+    lastMOTIONtime=thisMOTIONtime;
+    MOTIONnframes=0;
+  }
+  return 0;
+}
+
+/* ------------------ motion ------------------------ */
+
+void motion_CB(int xm, int ym){
+
+#ifdef pp_GPUTHROTTLE
+  if(usegpu==1&&showvolrender==1&&show_volsmoke_moving==1){
+    if(throttle_gpu()==1)return;
+  }
+#endif
+  
+  reset_glui_view(-1);
+
+  glutPostRedisplay();
+
+  if( colordrag==1&&(showtime==1 || showplot3d==1)){
+    drag_colorbar(xm,ym);
+    return;
+  }
+  if(
+    colorsplitdrag==1&&
+    (showtime==1 || showplot3d==1)&&current_colorbar!=NULL&&current_colorbar->nsplits==1){
+    drag_colorbarsplit(xm,ym);
+    return;
+  }
+  if(timedrag==1){
+    drag_timebar(xm,ym);
+    return;
+  }
+  if(move_gslice==1){
+    Move_Gen_Slice(xm,ym);
+    return;
+  }
+
+  Move_Scene(xm,ym);
+}
+
+/* ------------------ keyboard_up_CB ------------------------ */
+
+void keyboard_up_CB(unsigned char key, int x, int y){
   resetclock=1;
 }
 
@@ -1575,7 +1620,7 @@ void keyboard(unsigned char key, int flag){
   if(plotstate==DYNAMIC_PLOTS){
     if(timedrag==0)itimes += skip_global*FlowDir;
     checktimebound();
-    Idle();
+    Idle_CB();
 
     return;
   }
@@ -1685,13 +1730,13 @@ void handleiso(void){
 
 /* ------------------ specialkeyoard ------------------------ */
 
-void specialkeyboard_up(int key, int x, int y){
+void specialkeyboard_up_CB(int key, int x, int y){
   resetclock=1;
 }
 
 /* ------------------ specialkeyoard ------------------------ */
 
-void specialkeyboard(int key, int x, int y){
+void specialkeyboard_CB(int key, int x, int y){
 
 #define EYE_MODE 0
 #define P3_MODE 1
@@ -2104,9 +2149,9 @@ void UpdateFrame(float thisinterval, int *changetime, int *redisplay){
   }
 }
 
-/* ------------------ Idle ------------------------ */
+/* ------------------ Idle_CB ------------------------ */
 
-void Idle(void){
+void Idle_CB(void){
   int changetime=0;
   float thisinterval;
   int redisplay=0;
@@ -2135,7 +2180,9 @@ void Idle(void){
 
 /* ------------------ update_camera_ypos ------------------------ */
 
-void Reshape(int width, int height){
+void Reshape_CB(int width, int height){
+  int screenWidth2, screenHeight2;
+
   updatemenu=1;
   ratio = (float)width/(float)height;
   aspect = ratio;
@@ -2369,7 +2416,7 @@ void DoScript(void){
 
 /* ------------------ Display ------------------------ */
 
-void Display(void){
+void Display_CB(void){
   int dostereo;
 
   DoScript();

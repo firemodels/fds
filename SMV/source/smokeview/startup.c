@@ -122,9 +122,6 @@ void Init(void){
 
   //reset_glui_view(i_view_list);
 
-  screenWidth2 = screenWidth - dwinW;
-  screenHeight2 = screenHeight - dwinH;
-
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_NORMALIZE);
   if(cullfaces==1)glEnable(GL_CULL_FACE);
@@ -503,16 +500,16 @@ void InitOpenGL(void){
 #ifdef _DEBUG
   printf("%s",_("   Initializing callbacks - "));
 #endif
-  glutSpecialUpFunc(specialkeyboard_up);
-  glutKeyboardUpFunc(keyboard_up);
+  glutSpecialUpFunc(specialkeyboard_up_CB);
+  glutKeyboardUpFunc(keyboard_up_CB);
   glutKeyboardFunc(keyboard_CB);
-  glutMouseFunc(mouse);
-  glutSpecialFunc(specialkeyboard);
-  glutMotionFunc(motion);
-  glutReshapeFunc(Reshape);
-  glutDisplayFunc(Display);
+  glutMouseFunc(mouse_CB);
+  glutSpecialFunc(specialkeyboard_CB);
+  glutMotionFunc(motion_CB);
+  glutReshapeFunc(Reshape_CB);
+  glutDisplayFunc(Display_CB);
   glutVisibilityFunc(NULL);
-  glutMenuStatusFunc(MenuStatus);
+  glutMenuStatusFunc(MenuStatus_CB);
 #ifdef _DEBUG
   printf("%s\n",_("initialized"));
 #endif

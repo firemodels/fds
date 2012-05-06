@@ -389,7 +389,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
 #endif
   updatetimes();
   update_unit_defs();
-  Idle();
+  Idle_CB();
   local_stoptime0 = glutGet(GLUT_ELAPSED_TIME);
   delta_time0=(local_stoptime0-local_starttime0)/1000.0;
 

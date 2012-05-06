@@ -847,7 +847,7 @@ void readterrain(char *file, int ifile, int flag, int *errorcode){
   printf("After terrain file load: ");
   PrintMemoryInfo;
 #endif
-  Idle();
+  Idle_CB();
   glutPostRedisplay();
 }
 

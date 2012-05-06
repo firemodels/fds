@@ -5,6 +5,17 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+EXTERNCPP void keyboard_CB(unsigned char key, int x, int y);
+EXTERNCPP void keyboard_up_CB(unsigned char key, int x, int y);
+EXTERNCPP void Reshape_CB(int width, int height);
+EXTERNCPP void Display_CB(void);
+EXTERNCPP void specialkeyboard_CB(int key, int x, int y);
+EXTERNCPP void specialkeyboard_up_CB(int key, int x, int y);
+EXTERNCPP void mouse_CB(int button, int state, int x, int y);
+EXTERNCPP void motion_CB(int xm, int ym);
+EXTERNCPP void MenuStatus_CB(int status, int x, int y);
+EXTERNCPP void Idle_CB(void);
+
 EXTERNCPP void update_gslice_parms(void);
 EXTERNCPP void readiso_orig(const char *file, int ifile, int flag, int *errorcode);
 EXTERNCPP void update_plotxyz_all(void);
@@ -75,8 +86,6 @@ EXTERNCPP char *get_inifilename(int id);
 EXTERNCPP char *get_scriptfilename(int id);
 EXTERNCPP inifiledata *insert_inifile(char *file);
 EXTERNCPP void keyboard(unsigned char key, int flag);
-EXTERNCPP void keyboard_CB(unsigned char key, int x, int y);
-EXTERNCPP void keyboard_up(unsigned char key, int x, int y);
 EXTERNCPP void get_newscriptfilename(char *newscriptfilename);
 EXTERNCPP void init_avatar(void);
 EXTERNCPP void drawselect_avatars(void);
@@ -611,9 +620,7 @@ EXTERNCPP void drawfiredata(void);
 EXTERNCPP void drawroomdata(void);
 EXTERNCPP void drawventdata(void);
 EXTERNCPP void ResetView(int option);
-EXTERNCPP void Reshape(int width, int height);
 EXTERNCPP void UpdateTimeLabels(void);
-EXTERNCPP void Idle(void);
 EXTERNCPP void RenderFrame(int view_mode);
 EXTERNCPP int readlabels_terrain(flowlabels *label, FILE *stream);
 EXTERNCPP int readlabels_cellcenter(flowlabels *label, FILE *stream);
@@ -622,7 +629,6 @@ EXTERNCPP void PART_CB_INIT(void);
 EXTERNCPP void Slice_CB(int var);
 EXTERNCPP void RenderMenu(int value);
 EXTERNCPP void LoadSmoke3DMenu(int value);
-EXTERNCPP void Display(void);
 EXTERNCPP void Visible(int state);
 EXTERNCPP void parse_commandline(int argc, char **argv);
 EXTERNCPP void usage(char **argv);
@@ -633,20 +639,15 @@ EXTERNCPP void draw_demo2(int option);
 EXTERNCPP void init_demo(float rad, int nlat, int nlong);
 EXTERNCPP void drawoutlines(void);
 EXTERNCPP void drawcbox(float x, float y, float z, float size);
-EXTERNCPP void specialkeyboard(int key, int x, int y);
-EXTERNCPP void specialkeyboard_up(int key, int x, int y);
 EXTERNCPP void handleiso(void);
 EXTERNCPP void updatesurface(void);
 EXTERNCPP void WindowStatus(int state);
-EXTERNCPP void mouse(int button, int state, int x, int y);
-EXTERNCPP void motion(int xm, int ym);
 EXTERNCPP void nodein_extvent(
                     int ipatch, 
                     int *patchblankcopy,const mesh *meshi,int i1,int i2, int j1, int j2, int k1, int k2);
 EXTERNCPP void setventdirs(void);
 EXTERNCPP int nodeinblockage(const mesh *meshi, int i,int j,int k, int *imesh, int *iblockage);
 EXTERNCPP int nodeinvent(const mesh *gb, int i,int j,int k, int dir);
-EXTERNCPP void MenuStatus(int status, int x, int y);
 EXTERNCPP void writeboundini(void);
 EXTERNCPP void readboundini(void);
 EXTERNCPP int readini2(char *inifile, int localfile);

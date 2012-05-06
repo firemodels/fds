@@ -653,7 +653,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
 #ifdef pp_CULL
     if(cullactive==1)initcull(cullsmoke);
 #endif
-  Idle();
+  Idle_CB();
   local_stoptime0 = glutGet(GLUT_ELAPSED_TIME);
   delta_time0=(local_stoptime0-local_starttime0)/1000.0;
 

@@ -243,7 +243,7 @@ void readiso_geom(const char *file, int ifile, int flag, int *errorcode){
   printf("After iso load: ");
   PrintMemoryInfo;
 #endif
-  Idle();
+  Idle_CB();
 
   glutPostRedisplay();
   CheckMemory;
@@ -688,7 +688,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
   printf("After iso load: ");
   PrintMemoryInfo;
 #endif
-  Idle();
+  Idle_CB();
 
   local_stoptime0 = glutGet(GLUT_ELAPSED_TIME);
   delta_time0=(local_stoptime0-local_starttime0)/1000.0;
@@ -799,7 +799,7 @@ void unloadiso(mesh *meshi){
 
   updatetimes();
   updatemenu=1;
-  Idle();
+  Idle_CB();
 
   return;
 }

@@ -252,8 +252,6 @@ SVEXTERN GLfloat light_position1[4];
 SVEXTERN GLfloat ambientlight[4];
 SVEXTERN GLfloat diffuselight[4];
 
-SVEXTERN GLint screenWidth2, screenHeight2;
-
 SVEXTERN int list_p3_index,list_slice_index,list_patch_index,list_iso_index;
 SVEXTERN int list_p3_index_old, list_slice_index_old, list_patch_index_old,list_iso_index_old;
 

@@ -206,9 +206,9 @@ extern "C" void glui_tour_setup(int main_window){
 
   glui_tour->add_column_to_panel(panel_movedir,false);
   STATIC_tour_2=glui_tour->add_statictext_to_panel(panel_movedir,_("View Direction"));
-  SPINNER_viewx=glui_tour->add_spinner_to_panel(panel_movedir,"X",GLUI_SPINNER_FLOAT,&tour_view_xyz,KEYFRAME_viewXYZ,TOUR_CB);
-  SPINNER_viewy=glui_tour->add_spinner_to_panel(panel_movedir,"Y",GLUI_SPINNER_FLOAT,&tour_view_xyz+1,KEYFRAME_viewXYZ,TOUR_CB);
-  SPINNER_viewz=glui_tour->add_spinner_to_panel(panel_movedir,"Z",GLUI_SPINNER_FLOAT,&tour_view_xyz+2,KEYFRAME_viewXYZ,TOUR_CB);
+  SPINNER_viewx=glui_tour->add_spinner_to_panel(panel_movedir,"X",GLUI_SPINNER_FLOAT,tour_view_xyz,KEYFRAME_viewXYZ,TOUR_CB);
+  SPINNER_viewy=glui_tour->add_spinner_to_panel(panel_movedir,"Y",GLUI_SPINNER_FLOAT,tour_view_xyz+1,KEYFRAME_viewXYZ,TOUR_CB);
+  SPINNER_viewz=glui_tour->add_spinner_to_panel(panel_movedir,"Z",GLUI_SPINNER_FLOAT,tour_view_xyz+2,KEYFRAME_viewXYZ,TOUR_CB);
   SPINNER_az_path=glui_tour->add_spinner_to_panel(panel_movedir,_("Azimuth:"),GLUI_SPINNER_FLOAT,&tour_az_path,KEYFRAME_tXYZ,TOUR_CB);
   SPINNER_elev_path=glui_tour->add_spinner_to_panel(panel_movedir,_("Elevation:"),GLUI_SPINNER_FLOAT,&tour_elev_path,KEYFRAME_tXYZ,TOUR_CB);
   SPINNER_elev_path->set_float_limits(-90.0,90.0);

@@ -167,7 +167,7 @@ extern "C" void update_glui_set_view_xyz(float *xyz){
 /* ------------------ gluiIdle ------------------------ */
 
 extern "C" void gluiIdle(void){
-  GLUI_Master.set_glutIdleFunc(Idle);
+  GLUI_Master.set_glutIdleFunc(Idle_CB);
 }
 
 /* ------------------ gluiIdelNULL ------------------------ */

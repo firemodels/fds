@@ -653,7 +653,7 @@ void readzone(int ifile, int flag, int *errorcode){
     printf("computing vent bounds\n");
     getzoneventbounds();
   }
-  Idle();
+  Idle_CB();
 
 }
 

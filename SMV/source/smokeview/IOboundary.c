@@ -917,7 +917,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   printf("After boundary file load: ");
   PrintMemoryInfo;
 #endif
-  Idle();
+  Idle_CB();
 
   local_stoptime0 = glutGet(GLUT_ELAPSED_TIME);
   delta_time0=(local_stoptime0-local_starttime0)/1000.0;

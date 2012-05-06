@@ -534,7 +534,7 @@ extern "C" void SMOKE_3D_CB(int var){
     }
     glutPostRedisplay();
     force_redisplay=1;
-    Idle();
+    Idle_CB();
     break;
   case FIRE_RED:
   case FIRE_GREEN:
@@ -561,14 +561,14 @@ extern "C" void SMOKE_3D_CB(int var){
       updatecolors(-1);
     }
     force_redisplay=1;
-    Idle();
+    Idle_CB();
     break;
   case FIRE_HALFDEPTH:
   case FIRE_CUTOFF:
   case FIRE_ALPHA:
     glutPostRedisplay();
     force_redisplay=1;
-    Idle();
+    Idle_CB();
     break;
 #ifdef pp_GPU
   case SMOKE_RTHICK:
@@ -576,13 +576,13 @@ extern "C" void SMOKE_3D_CB(int var){
     smoke3d_thick = log_base2(smoke3d_rthick);
     glutPostRedisplay();
     force_redisplay=1;
-    Idle();
+    Idle_CB();
     break;
 #else
   case SMOKE_THICK:
     glutPostRedisplay();
     force_redisplay=1;
-    Idle();
+    Idle_CB();
     break;
 #endif
 #ifdef pp_CULL

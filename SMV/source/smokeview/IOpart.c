@@ -1076,7 +1076,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
   updatetimes();
   updatePart5extremes();
   updatemenu=1;
-  Idle();
+  Idle_CB();
 
   local_stoptime0 = glutGet(GLUT_ELAPSED_TIME);
   delta_time0 = (local_stoptime0-local_starttime0)/1000.0;
@@ -1447,7 +1447,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   plotstate=getplotstate(DYNAMIC_PLOTS);
   updatetimes();
   updatemenu=1;
-  Idle();
+  Idle_CB();
 
   glutPostRedisplay();
 }

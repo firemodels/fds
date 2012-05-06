@@ -3333,7 +3333,7 @@ void LoadVolSmoke3DMenu(int value){
     }
   }
   updatemenu=1;  
-  Idle();
+  Idle_CB();
   glutPostRedisplay();
   glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 }
@@ -8821,7 +8821,7 @@ updatemenu=0;
 
 /* ------------------ MenuStatus ------------------------ */
 
-void MenuStatus(int status, int x, int y){
+void MenuStatus_CB(int status, int x, int y){
   float *eye_xyz;
   menustatus=status;
   /* keep scene from "bouncing" around when leaving a menu */
