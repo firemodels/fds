@@ -2046,10 +2046,16 @@ void update_mesh_coords(void){
 int is_slice_dup(slicedata *sd){
   int i;
 
+  if(sd->is1<0||sd->is2<0)return 0;
+  if(sd->js1<0||sd->js2<0)return 0;
+  if(sd->ks1<0||sd->ks2<0)return 0;
   for(i=0;i<nsliceinfo-1;i++){
     slicedata *slicei;
 
     slicei = sliceinfo + i;
+    if(slicei->is1<0||slicei->is2<0)continue;
+    if(slicei->js1<0||slicei->js2<0)continue;
+    if(slicei->ks1<0||slicei->ks2<0)continue;
     if(slicei->is1!=sd->is1||slicei->is2!=sd->is2)continue;
     if(slicei->js1!=sd->js1||slicei->js2!=sd->js2)continue;
     if(slicei->ks1!=sd->ks1||slicei->ks2!=sd->ks2)continue;

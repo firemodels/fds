@@ -1514,7 +1514,7 @@ void updateslicemenulabels(void){
       sdold = sliceinfo + sliceorderindex[i - 1];
       sd = sliceinfo + sliceorderindex[i];
       STRCPY(sd->menulabel,sd->slicedir);
-      if(new_multi(sdold,sd)==1){
+      if(new_multi_slice(sdold,sd)==1){
         mslicei++;
         STRCPY(mslicei->menulabel,sd->menulabel);
         STRCPY(mslicei->menulabel2,sd->label.longlabel);
@@ -1598,7 +1598,7 @@ void updatevslicemenulabels(void){
       vsd = vsliceinfo + vsliceorderindex[i];
       sd = sliceinfo + vsd->ival;
       STRCPY(vsd->menulabel,sd->slicedir);
-      if(new_multi(sdold,sd)==1){
+      if(new_multi_slice(sdold,sd)==1){
         mvslicei++;
         STRCPY(mvslicei->menulabel,vsd->menulabel);
         STRCPY(mvslicei->menulabel2,sd->label.longlabel);
@@ -1664,23 +1664,24 @@ int hide_slice2(slicedata *sdi,slicedata *sdj){
   return 1;
 }
 
-/* ------------------ new_multi ------------------------ */
+/* ------------------ new_multi_slice ------------------------ */
 
-int new_multi(slicedata *sdold,slicedata *sd){
+int new_multi_slice(slicedata *sdold,slicedata *sd){
 
   if(sdold->volslice!=sd->volslice)return 1;
   if(sd->volslice==0){
     float delta_orig;
-    float delta;
+    float delta_scaled;
 
-  // sd->delta in physical units
-  // sd->xmin/xmax etc are in scaled units
+  // sd->delta is in FDS physical units
+  // sd->xmin/xmax etc are in Smokeview scaled units
   // convert from physical to scaled units using xyzmaxdiff 
     delta_orig = MAX(sdold->delta_orig,sd->delta_orig);
-    delta = delta_orig/xyzmaxdiff;
-    if(ABS(sd->xmin-sdold->xmin)<delta&&ABS(sd->xmax-sdold->xmax)<delta // test whether two slices are identical
-	   &&ABS(sd->ymin-sdold->ymin)<delta&&ABS(sd->ymax-sdold->ymax)<delta
-	   &&ABS(sd->zmin-sdold->zmin)<delta&&ABS(sd->zmax-sdold->zmax)<delta
+    delta_scaled = delta_orig/xyzmaxdiff;
+    if(ABS(sd->xmin-sdold->xmin)<delta_scaled&&ABS(sd->xmax-sdold->xmax)<delta_scaled // test whether two slices are identical
+	   &&ABS(sd->ymin-sdold->ymin)<delta_scaled&&ABS(sd->ymax-sdold->ymax)<delta_scaled
+	   &&ABS(sd->zmin-sdold->zmin)<delta_scaled&&ABS(sd->zmax-sdold->zmax)<delta_scaled
+     &&sd->blocknumber==sdold->blocknumber
         ){
 	    return 1;
 	  }
@@ -1945,7 +1946,7 @@ void getsliceparams(void){
         sdold = sliceinfo + sliceorderindex[i - 1];
         sd = sliceinfo + sliceorderindex[i];
         mslicei->autoload=0;
-        if(new_multi(sdold,sd)==1){
+        if(new_multi_slice(sdold,sd)==1){
           nmultislices++;
           mslicei++;
           mslicei->nslices=0;
@@ -2364,7 +2365,7 @@ void updatevslices(void){
       sdold = sliceinfo + vsdold->ival;
       vsd = vsliceinfo + vsliceorderindex[i];
       sd = sliceinfo + vsd->ival;
-      if(new_multi(sdold,sd)==1){
+      if(new_multi_slice(sdold,sd)==1){
         nmultivslices++;
         mvslicei++;
         mvslicei->nvslices=0;

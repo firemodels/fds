@@ -602,7 +602,7 @@ EXTERNCPP void drawvolslice_terrain(const slicedata *sd);
 EXTERNCPP void drawvolslice_texture(const slicedata *sd);
 EXTERNCPP void drawvolslice_cellcenter(const slicedata *sd);
 EXTERNCPP void drawvolslice_cellcenter_interp(const slicedata *sd);
-EXTERNCPP int new_multi(slicedata *sdold,slicedata *sd);
+EXTERNCPP int new_multi_slice(slicedata *sdold,slicedata *sd);
 EXTERNCPP int hide_slice2(slicedata *sdi,slicedata *sdj);
 EXTERNCPP void drawvolslice(const slicedata *sd);
 EXTERNCPP void drawvvolslice(const vslicedata *vd);
