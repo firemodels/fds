@@ -32,7 +32,7 @@ void getzonesizecsv(int *nzone_times_local, int *nroom, int *nfires_local, int *
    *error=0;
    nr=0;
    for(i=0;i<ndeviceinfo;i++){
-     sprintf(label,"LLT_%i",i+1);
+     sprintf(label,"ULT_%i",i+1);
      dev=getdevice(label,-1);
      if(dev==NULL)break;
      *nzone_times_local=dev->nvals;
@@ -122,18 +122,20 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
     sprintf(label,"HGT_%i",i+1);
     zoneylay_devs[i]=getdevice(label,-1);
     if(zoneylay_devs[i]==NULL||zoneylay_devs[i]->nvals!=nzone_times_local){
-      *error=1;
-      return;
+      zoneylay_devs[i]=NULL;
     }
-    zoneylay_devs[i]->in_zone_csv=1;
+    else{
+      zoneylay_devs[i]->in_zone_csv=1;
+    }
 
     sprintf(label,"LLT_%i",i+1);
     zonetl_devs[i]=getdevice(label,-1);
     if(zonetl_devs[i]==NULL||zonetl_devs[i]->nvals!=nzone_times_local){
-      *error=1;
-      return;
+      zonetl_devs[i]=NULL;
     }
-    zonetl_devs[i]->in_zone_csv=1;
+    else{
+      zonetl_devs[i]->in_zone_csv=1;
+    }
 
     sprintf(label,"ULT_%i",i+1);
     zonetu_devs[i]=getdevice(label,-1);
@@ -244,13 +246,28 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
     zone_times_local[i]=times_local[i];
     for(j=0;j<nrooms_local;j++){
       zonepr_local[ii]=zonepr_devs[j]->vals[i];
-      zoneylay_local[ii]=zoneylay_devs[j]->vals[i];
-      zonetl_local[ii]=zonetl_devs[j]->vals[i];
+      if(zoneylay_devs[j]==NULL){
+        zoneylay_local[ii]=0.0;
+      }
+      else{
+        zoneylay_local[ii]=zoneylay_devs[j]->vals[i];
+      }
       zonetu_local[ii]=zonetu_devs[j]->vals[i];
+      if(zonetl_devs[j]!=NULL){
+        zonetl_local[ii]=zonetl_devs[j]->vals[i];
+      }
+      else{
+        zonetl_local[ii]=zonetu_devs[j]->vals[i];
+      }
 
       if(use_od==1){
-        zoneodl_local[ii]=zoneodl_devs[j]->vals[i];
         zoneodu_local[ii]=zoneodu_devs[j]->vals[i];
+        if(zoneodl_devs[j]!=NULL){
+          zoneodl_local[ii]=zoneodl_devs[j]->vals[i];
+        }
+        else{
+          zoneodl_local[ii]=zoneodu_devs[j]->vals[i];
+        }
       }
       ii++;
     }
