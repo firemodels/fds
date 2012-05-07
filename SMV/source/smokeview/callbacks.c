@@ -479,6 +479,67 @@ void checktimebound(void){
   }
 }
 
+/* ------------------ setup_colorbar_drag ------------------------ */
+
+int setup_colorbar_drag(int x, int y){
+  int temp;
+  int yy;
+  float factor;
+  int ifactor;
+  int state;
+
+  temp = (int)(1.2*dwinH);
+  if(x>screenWidth-dwinWW){
+    yy = screenHeight - y;
+    factor=((float)(yy-temp)/(screenHeight-temp))*((nrgb+(float)1.0)/(nrgb-(float)0.5));
+    if(screenHeight>screenWidth)factor *= (float)screenHeight/screenWidth;
+    ifactor=(int)(255*factor);
+    if(ifactor>=0&&ifactor<256){
+      int valmax=255;
+      int valmin=0;
+
+      if(ifactor>valmax)ifactor=valmax;
+      if(ifactor<valmin)ifactor=valmin;
+    }
+    else{
+      ifactor=-1;
+    }
+    colorbar_select_index=ifactor;
+    state=glutGetModifiers();
+    if(state==GLUT_ACTIVE_CTRL&&current_colorbar!=NULL&&current_colorbar->nsplits==1){
+      colorsplitdrag=1;
+    }
+    else{
+      colordrag=1;
+      updatecolors(ifactor);
+    }
+    return 1;
+  }
+  return 0;
+}
+
+/* ------------------ setup_timebar_drag ------------------------ */
+
+int setup_timebar_drag(int x, int y){
+  if(screenHeight-y<50&&nglobal_times>0){
+    float xleft;
+
+    if(fontindex==LARGE_FONT){
+      xleft=xtimeleft+0.11;
+    }
+    else{
+      xleft=xtimeleft;
+    }
+    itimes=(int)((xtemp*x/((screenWidth-dwinWW))-xleft)*(nglobal_times-1)/(xtimeright-xleft));
+    checktimebound();
+    timedrag=1;
+    stept=0;
+    Idle_CB();
+    return 1;
+  }
+  return 0;
+}
+
 /* ------------------ mouse ------------------------ */
 
 void mouse_CB(int button, int state, int x, int y){
@@ -500,6 +561,7 @@ void mouse_CB(int button, int state, int x, int y){
 #ifdef pp_MOUSEDOWN
     mouse_down=0;
 #endif
+    show_gslice_normal_keyboard=0;
     eye_xyz0[0]=eye_xyz[0];
     eye_xyz0[1]=eye_xyz[1];
     eye_xyz0[2]=eye_xyz[2];
@@ -527,13 +589,11 @@ void mouse_CB(int button, int state, int x, int y){
       gslice_normal_azelev0[0]=gslice_normal_azelev[0];
       gslice_normal_azelev0[1]=gslice_normal_azelev[1];
       move_gslice=1;
+      show_gslice_normal_keyboard=1;
     }
     last_mouse_time=this_mouse_time;
   }
-  if ((
-    button == GLUT_LEFT_BUTTON || 
-    button == GLUT_MIDDLE_BUTTON || 
-    button == GLUT_RIGHT_BUTTON)&& state == GLUT_DOWN){
+  if(button==GLUT_LEFT_BUTTON||button==GLUT_MIDDLE_BUTTON||button==GLUT_RIGHT_BUTTON){
     glutSetCursor(GLUT_CURSOR_INFO);
 
     /* edit blockages */
@@ -546,55 +606,10 @@ void mouse_CB(int button, int state, int x, int y){
     }
     glutPostRedisplay();
     if( showtime==1 || showplot3d==1){
-      int temp;
-      int yy;
-      float factor;
-      int ifactor;
-
-      temp = (int)(1.2*dwinH);
-      if(x>screenWidth-dwinWW){
-        yy = screenHeight - y;
-        factor=((float)(yy-temp)/(screenHeight-temp))*((nrgb+(float)1.0)/(nrgb-(float)0.5));
-        if(screenHeight>screenWidth)factor *= (float)screenHeight/screenWidth;
-        ifactor=(int)(255*factor);
-        if(ifactor>=0&&ifactor<256){
-          int valmax=255;
-          int valmin=0;
-
-          if(ifactor>valmax)ifactor=valmax;
-          if(ifactor<valmin)ifactor=valmin;
-        }
-        else{
-          ifactor=-1;
-        }
-        colorbar_select_index=ifactor;
-        state=glutGetModifiers();
-        if(state==GLUT_ACTIVE_CTRL&&current_colorbar!=NULL&&current_colorbar->nsplits==1){
-          colorsplitdrag=1;
-        }
-        else{
-          colordrag=1;
-          updatecolors(ifactor);
-        }
-        return;
-      }
+      if(setup_colorbar_drag(x,y)==1)return;
     }
-    if(screenHeight-y<50&&nglobal_times>0&&visTimeLabels==1&&showtime==1){
-      float xleft;
-
-      if(fontindex==LARGE_FONT){
-        xleft=xtimeleft+0.11;
-      }
-      else{
-        xleft=xtimeleft;
-      }
-      itimes=(int)((xtemp*x/((screenWidth-dwinWW))-xleft)*(nglobal_times-1)/(xtimeright-xleft));
-      checktimebound();
-      timedrag=1;
-      stept=0;
-      Idle_CB();
-
-      return;
+    if(visTimeLabels==1&&showtime==1){
+      if(setup_timebar_drag(x,y)==1)return;
     }
     copy_camera(camera_last,camera_current);
     if(canrestorelastview==0){
@@ -602,35 +617,37 @@ void mouse_CB(int button, int state, int x, int y){
       canrestorelastview=1;
       enable_reset_saved_view();
     }
-    if(button==GLUT_MIDDLE_BUTTON){
-      state=GLUT_ACTIVE_CTRL;
-    }
-    else if(button==GLUT_RIGHT_BUTTON){
-      state=GLUT_ACTIVE_ALT;
-    }
-    else{
-      state=glutGetModifiers();
+    switch (button){
+      case GLUT_MIDDLE_BUTTON:
+        state=GLUT_ACTIVE_CTRL;
+        break;
+      case GLUT_RIGHT_BUTTON:
+        state=GLUT_ACTIVE_ALT;
+        break;
+      default:
+        state=glutGetModifiers();
+        break;
     }
     switch (state){
-    case GLUT_ACTIVE_CTRL:
-      key_state = KEY_CTRL;
-      eye_xyz0[0]=eye_xyz[0];
-      eye_xyz0[1]=eye_xyz[1];
-      touring=0;
-      break;
-    case GLUT_ACTIVE_ALT:
-      key_state = KEY_ALT;
-      eye_xyz0[0]=eye_xyz[0];
-      eye_xyz0[2]=eye_xyz[2];
-      touring=0;
-      break;
-    case GLUT_ACTIVE_SHIFT:
-    default:
-      key_state = KEY_NONE;
-      start_xyz0[0]=x;
-      start_xyz0[1]=y;
-      touring=0;
-      break;
+      case GLUT_ACTIVE_CTRL:
+        key_state = KEY_CTRL;
+        eye_xyz0[0]=eye_xyz[0];
+        eye_xyz0[1]=eye_xyz[1];
+        touring=0;
+        break;
+      case GLUT_ACTIVE_ALT:
+        key_state = KEY_ALT;
+        eye_xyz0[0]=eye_xyz[0];
+        eye_xyz0[2]=eye_xyz[2];
+        touring=0;
+        break;
+      case GLUT_ACTIVE_SHIFT:
+      default:
+        key_state = KEY_NONE;
+        start_xyz0[0]=x;
+        start_xyz0[1]=y;
+        touring=0;
+        break;
     }
     mouse_down_xy0[0]=x; 
     mouse_down_xy0[1]=y;
@@ -1126,43 +1143,49 @@ void keyboard(unsigned char key, int flag){
       glutPostRedisplay();
       break;
     case 'g':
-      if(ntotal_blockages>0||isZoneFireModel==0){
-        switch (visGrid){
-          case noGridnoProbe:
-            visGrid=GridnoProbe;
-            break;
-          case GridnoProbe:
-            visGrid=GridProbe;
-            break;
-          case GridProbe:
-            visGrid=noGridProbe;
-            break;
-          case noGridProbe:
-            visGrid=noGridnoProbe;
-            break;
-          default:
-            visGrid=noGridnoProbe;
-            break;
+      switch (keystate){
+      case GLUT_ACTIVE_ALT:
+        show_gslice_data = 1 - show_gslice_data;
+        break;
+      case GLUT_ACTIVE_CTRL:
+      default:
+        if(ntotal_blockages>0||isZoneFireModel==0){
+          switch (visGrid){
+            case noGridnoProbe:
+              visGrid=GridnoProbe;
+              break;
+            case GridnoProbe:
+              visGrid=GridProbe;
+              break;
+            case GridProbe:
+              visGrid=noGridProbe;
+              break;
+            case noGridProbe:
+              visGrid=noGridnoProbe;
+              break;
+            default:
+              visGrid=noGridnoProbe;
+              break;
+          }
+          if(visGrid==GridProbe||visGrid==noGridProbe)visgridloc=1;
         }
-        if(visGrid==GridProbe||visGrid==noGridProbe)visgridloc=1;
+        break;
       }
       break;
 #ifdef pp_GPU
     case 'G':
-      if((nsmoke3dinfo>0||nrooms>0)){
-        if(gpuactive==1){
-          usegpu=1-usegpu;
-        }
-        else{
-          usegpu=0;
-        }
-        if(nsmoke3dinfo>0){
-          update_smoke3dflags();
-        }
-        print_gpu_cull_state();
-        return;    
+      if(gpuactive==1){
+        usegpu=1-usegpu;
+        usegpu_slice=usegpu;
       }
-      break;
+      else{
+        usegpu=0;
+      }
+      if(nsmoke3dinfo>0){
+        update_smoke3dflags();
+      }
+      print_gpu_cull_state();
+      return;    
 #endif
     case 'h':
       if(titlesafe_offset==0){
@@ -2241,7 +2264,8 @@ void ClearBuffers(int mode){
 /* ------------------ DoStereo ------------------------ */
 
 int DoStereo(void){
-    int return_code=0;
+  int return_code=0;
+  
   if(showstereo==1&&videoSTEREO==1){  // temporal stereo (shuttered glasses)
     glDrawBuffer(GL_BACK_LEFT);
     if(showstereo_frame==0||showstereo_frame==2){
@@ -2414,6 +2438,31 @@ void DoScript(void){
   }
 }
 
+/* ------------------ update_smoothblockage_info ------------------------ */
+
+void update_smoothblockage_info(void){
+  int i;
+
+  for(i=0;i<nmeshes;i++){
+    smoothblockage *sb;
+    mesh *meshi;
+
+    meshi = meshinfo+i;
+    meshi->nsmoothblockagecolors=0;
+    meshi->smoothblockagecolors=NULL;
+    meshi->blockagesurfaces=NULL;
+
+    if(meshi->smoothblockages_list!=NULL){
+      sb=meshi->smoothblockages_list;
+      if(sb!=NULL){
+        meshi->nsmoothblockagecolors=sb->nsmoothblockagecolors;
+        meshi->smoothblockagecolors=sb->smoothblockagecolors;
+        meshi->blockagesurfaces=sb->smoothblockagesurfaces;
+      }
+    }
+  }
+}
+
 /* ------------------ Display ------------------------ */
 
 void Display_CB(void){
@@ -2442,8 +2491,7 @@ void Display_CB(void){
   if(update_fire_line==1){
     WUI_CB(TERRAIN_FIRE_LINE_UPDATE);
     update_fire_line=0;
-   }
-
+  }
   if(updatezoommenu==1||first_display>0){
     if(first_display>0)first_display--;
     updatezoommenu=0;
@@ -2455,7 +2503,6 @@ void Display_CB(void){
 #ifdef pp_CULL
   if(update_initcull==1)initcull(cullsmoke);
 #endif
-//   if(update_initcullgeom==1)initcullgeom(cullgeom);
   if(update_streaks==1&&ReadPartFile==1){
     void ParticleStreakShowMenu(int var);
 
@@ -2482,29 +2529,15 @@ void Display_CB(void){
     update_fire_colorbar_index=0;
   }
   if(showtime==0&&ntotal_smooth_blockages>0){
-    int i;
-
-    for(i=0;i<nmeshes;i++){
-      smoothblockage *sb;
-      mesh *meshi;
-
-      meshi = meshinfo+i;
-      meshi->nsmoothblockagecolors=0;
-      meshi->smoothblockagecolors=NULL;
-      meshi->blockagesurfaces=NULL;
-
-      if(meshi->smoothblockages_list!=NULL){
-        sb=meshi->smoothblockages_list;
-        if(sb!=NULL){
-          meshi->nsmoothblockagecolors=sb->nsmoothblockagecolors;
-          meshi->smoothblockagecolors=sb->smoothblockagecolors;
-          meshi->blockagesurfaces=sb->smoothblockagesurfaces;
-        }
-      }
-    }
+    update_smoothblockage_info();
   }
   glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-  dostereo=DoStereo();
+  if(showstereo==0){
+    dostereo=0;
+  }
+  else{
+    dostereo=DoStereo();
+  }
   if(dostereo==0){
     if(benchmark_flag==1){
       glDrawBuffer(GL_FRONT);
@@ -2580,7 +2613,6 @@ void Display_CB(void){
       if(nglobal_times>0)angle_global += 2.0*PI/((float)nglobal_times/(float)RenderSkip);
       if(nglobal_times==0)angle_global += 2.0*PI/((float)maxtourframes/(float)RenderSkip);
     }
-//    if(RenderGif == 0)angle += dang/lastcount;
     if(RenderGif == 0)angle_global += dang_global;
     if(angle_global>PI){angle_global -= -2.0f*PI;}
     if(eyeview==WORLD_CENTERED||eyeview==WORLD_CENTERED_LEVEL){

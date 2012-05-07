@@ -1154,10 +1154,12 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
   push_slice_loadstack(slicefilenumber);
 
 #ifdef pp_GPU
-    if(sd->volslice==1){
+    if(sd->volslice==1&&gpuactive==1){
       mesh *meshj;
 
       meshj = meshinfo + sd->blocknumber;
+      show_gslice_data=1;
+      usegpu_slice=1;
       init_slice3d_texture(meshj);
     }
 #endif
@@ -2922,7 +2924,7 @@ void drawslice_frame(){
         }
       }
 #ifdef pp_GPU
-      if(usegpu==1){
+      if(usegpu_slice==1){
         if(show_gslice_data==1){
           Load3DSliceShaders();
           SNIFF_ERRORS("after Load3DSliceShaders");
@@ -3150,7 +3152,7 @@ void drawgslice_outline(void){
 
   // draw normal vector
 
-  if(show_gslice_normal==1){
+  if(show_gslice_normal==1||show_gslice_normal_keyboard==1){
     glColor3f(1.0,0.0,0.0);
     glPushMatrix();
     glTranslatef(gslice_xyz[0],gslice_xyz[1],gslice_xyz[2]);

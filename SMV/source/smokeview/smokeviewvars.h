@@ -149,11 +149,8 @@ SVEXTERN int opengl_version;
 SVEXTERN char opengl_version_label[256];
 
 SVEXTERN int SVDECL(usevolrender,1);
-#ifndef pp_GPU
-SVEXTERN int SVDECL(usegpu,0);
-#endif
+SVEXTERN int SVDECL(usegpu_slice,0),SVDECL(usegpu,0),SVDECL(gpuactive,0);
 #ifdef pp_GPU
-SVEXTERN int SVDECL(usegpu,0),SVDECL(gpuactive,0);
 SVEXTERN int GPU_aspectratio;
 SVEXTERN int GPU_smoke3d_rthick, GPU_skip, GPU_hrrcutoff, GPU_hrr, GPU_hrrpuv_max_smv, GPU_hrrpuv_cutoff;
 SVEXTERN int GPU_fire_alpha, GPU_firecolor, GPU_have_smoke, GPU_smokecolormap;
@@ -691,7 +688,8 @@ SVEXTERN float vecyz[4];
 #ifdef pp_GSLICE
 SVEXTERN float gslice_xyz[3],gslice_norm[3],gslice_normal_xyz[3],gslice_normal_azelev[2];
 SVEXTERN float gslice_xyz0[3],gslice_normal_azelev0[2];
-SVEXTERN int SVDECL(show_gslice_data,0),SVDECL(show_gslice_outline,0),SVDECL(show_gslice_normal,0);
+SVEXTERN int SVDECL(show_gslice_data,0),SVDECL(show_gslice_outline,0);
+SVEXTERN int SVDECL(show_gslice_normal,0),SVDECL(show_gslice_normal_keyboard,0);
 #endif
 
 
