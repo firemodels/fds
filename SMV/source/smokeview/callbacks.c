@@ -1205,7 +1205,7 @@ void keyboard(unsigned char key, int flag){
           sd = sliceinfo + i;
           if(sd->loaded==1)nslice_loaded_local++;
         }
-        for(i=0;i<nvslice;i++){
+        for(i=0;i<nvsliceinfo;i++){
           vslicedata *vd;
 
           vd = vsliceinfo + i;

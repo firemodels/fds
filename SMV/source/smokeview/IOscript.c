@@ -1415,7 +1415,7 @@ void script_loadvfile(scriptdata *scripti){
 
   printf("Script: loading vector slice file %s",scripti->cval);
   printf("\n");
-  for(i=0;i<nvslice;i++){
+  for(i=0;i<nvsliceinfo;i++){
     slicedata *val;
     vslicedata *vslicei;
 

@@ -398,14 +398,14 @@ void updateShow(void){
   vsliceflag=0;
   vslicecolorbarflag=0;
   if(visTimeSlice==1){
-    for(i=0;i<nvslice;i++){
+    for(i=0;i<nvsliceinfo;i++){
       vd = vsliceinfo+i;
       if(vd->loaded==0||vd->display==0)continue;
       if(sliceinfo[vd->ival].type!=islicetype)continue;
       vsliceflag=1;
       break;
     }
-    for(i=0;i<nvslice;i++){
+    for(i=0;i<nvsliceinfo;i++){
       mesh *slicemesh;
       slicedata *sd;
 
@@ -1501,7 +1501,7 @@ int getplotstate(int choice){
           }
         }
       }
-      for(i=0;i<nvslice;i++){
+      for(i=0;i<nvsliceinfo;i++){
         vslicei = vsliceinfo + i;
         if(vslicei->display==0||vslicei->type!=islicetype)continue;
         return DYNAMIC_PLOTS;

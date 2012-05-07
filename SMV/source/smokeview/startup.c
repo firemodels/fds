@@ -587,7 +587,7 @@ void InitOpenGL(void){
  void set_3dsmoke_startup(void){
    int i;
 
-    for(i=0;i<nvslice;i++){
+    for(i=0;i<nvsliceinfo;i++){
       vslicedata *vslicei;
 
       vslicei = vsliceinfo + i;
@@ -678,7 +678,7 @@ void InitOpenGL(void){
  void clear_3dsmoke_startup(void){
    int i;
 
-    for(i=0;i<nvslice;i++){
+    for(i=0;i<nvsliceinfo;i++){
       vslicedata *vslicei;
 
       vslicei = vsliceinfo + i;
@@ -812,7 +812,7 @@ void InitOpenGL(void){
    // startup vslice
 
    nstartup=0;
-   for(i=0;i<nvslice;i++){
+   for(i=0;i<nvsliceinfo;i++){
       vslicedata *vslicei;
 
       vslicei = vsliceinfo + i;
@@ -822,7 +822,7 @@ void InitOpenGL(void){
    if(nstartup!=0){
      fprintf(fileout,"VSLICEAUTO\n");
      fprintf(fileout," %i \n",nstartup);
-     for(i=0;i<nvslice;i++){
+     for(i=0;i<nvsliceinfo;i++){
         vslicedata *vslicei;
 
         vslicei = vsliceinfo + i;
@@ -1018,7 +1018,7 @@ void InitOpenGL(void){
 
   void get_startup_vslice(int seq_id){
     int i;
-    for(i=0;i<nvslice;i++){
+    for(i=0;i<nvsliceinfo;i++){
       vslicedata *vslicei;
 
       vslicei = vsliceinfo + i;
@@ -1071,7 +1071,7 @@ void InitOpenGL(void){
       if(isoi->autoload==0&&isoi->autoload==1)readiso(isoi->file,i,UNLOAD,&errorcode);
       if(isoi->autoload==1)readiso(isoi->file,i,LOAD,&errorcode);
     }
-    for(i=0;i<nvslice;i++){
+    for(i=0;i<nvsliceinfo;i++){
       vslicedata *vslicei;
 
       vslicei = vsliceinfo + i;
@@ -1519,7 +1519,7 @@ void initvars(void){
   ntc_total=0, nspr_total=0, nheat_total=0;
   n_devices=0;
 
-  npartinfo=0, nsliceinfo=0, nvslice=0, nslice2=0, npatch2=0, nplot3dinfo=0, npatchinfo=0;
+  npartinfo=0, nsliceinfo=0, nvsliceinfo=0, nslice2=0, npatch2=0, nplot3dinfo=0, npatchinfo=0;
   nevac=0;
   current_particle_type=-1,last_particle_type=-2;
   nsmoke3dinfo=0;

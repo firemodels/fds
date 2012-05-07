@@ -536,7 +536,8 @@ SVEXTERN float pref,pamb,tamb;
 SVEXTERN int ntc_total, nspr_total, nheat_total;
 SVEXTERN int n_devices;
 
-SVEXTERN int npartinfo, nsliceinfo, nvslice, nslice2, npatch2, nplot3dinfo, npatchinfo;
+SVEXTERN int npartinfo, nsliceinfo, nvsliceinfo, nslice2, npatch2, nplot3dinfo, npatchinfo;
+SVEXTERN int nslicexyzinfo;
 SVEXTERN int nfedinfo;
 SVEXTERN int nevac;
 SVEXTERN int current_particle_type,last_particle_type;
@@ -1069,7 +1070,7 @@ SVEXTERN part5prop SVDECL(*part5propinfo,NULL), SVDECL(*current_property,NULL);
 SVEXTERN int SVDECL(npart5prop,0),ipart5prop,ipart5prop_old;
 SVEXTERN int prop_index;
 SVEXTERN targ SVDECL(*targinfo,NULL);
-SVEXTERN slicedata SVDECL(*sliceinfo,NULL);
+SVEXTERN slicedata SVDECL(*sliceinfo,NULL),SVDECL(*slicexyzinfo,NULL);;
 SVEXTERN feddata SVDECL(*fedinfo,NULL);
 SVEXTERN camdata SVDECL(*caminfo,NULL);
 SVEXTERN multislicedata SVDECL(*multisliceinfo,NULL);

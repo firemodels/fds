@@ -690,7 +690,7 @@ void readvslice(int ivslice, int flag, int *errorcode){
 
   valmax=-100000.0;
   valmin=100000.0;
-  for(i=0;i<nvslice;i++){
+  for(i=0;i<nvsliceinfo;i++){
     vslicei = vsliceinfo + i;
     if(vslicei->loaded==0)continue;
     if(vslicei->iu!=-1){
@@ -826,7 +826,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
         islicetype=0;
       }
 
-      for(i=0;i<nvslice;i++){
+      for(i=0;i<nvsliceinfo;i++){
         vd = vsliceinfo + i;
         if(vd->iu==ifile)vd->u=NULL;
         if(vd->iv==ifile)vd->v=NULL;
@@ -1571,7 +1571,7 @@ void updatevslicemenulabels(void){
   char label[128];
 
 
-  if(nvslice>0){
+  if(nvsliceinfo>0){
     mvslicei = multivsliceinfo;
     vsd = vsliceinfo + vsliceorderindex[0];
     sd = sliceinfo + vsd->ival;
@@ -1594,7 +1594,7 @@ void updatevslicemenulabels(void){
       STRCAT(vsd->menulabel,", ");
       STRCAT(vsd->menulabel,sd->file);
     }
-    for(i=1;i<nvslice;i++){
+    for(i=1;i<nvsliceinfo;i++){
       vsdold = vsliceinfo + vsliceorderindex[i - 1];
       sdold = sliceinfo + vsdold->ival;
       vsd = vsliceinfo + vsliceorderindex[i];
@@ -1619,7 +1619,7 @@ void updatevslicemenulabels(void){
         STRCAT(vsd->menulabel,sd->file);
       }
     } 
-    for(i=0;i<nvslice;i++){
+    for(i=0;i<nvsliceinfo;i++){
       vsd = vsliceinfo + vsliceorderindex[i];
       sd = sliceinfo + vsd->ival;
       STRCPY(vsd->menulabel2,sd->label.longlabel);
@@ -1725,14 +1725,19 @@ void getsliceparams(void){
     stream=fopen(sliceinfofilename,"r");
   }
 
-  for(i=0;i<nsliceinfo;i++){
+  for(i=0;i<nsliceinfo+nslicexyzinfo;i++){
     slicedata *sd;
     int is1, is2, js1, js2, ks1, ks2;
     int ni, nj, nk;
 
-    sd = sliceinfo + i;
+    if(i<nsliceinfo){
+      sd = sliceinfo + i;
+    }
+    else{
+      sd = slicexyzinfo + i - nsliceinfo;
+    }
 
-    if(nsliceinfo>100&&(i%100==0||i==nsliceinfo-1)){
+    if(nsliceinfo+nslicexyzinfo>100&&(i%100==0||i==nsliceinfo+nslicexyzinfo-1)){
       if(i==10){
         printf("    obtaining parameters from %i'th slice file\n",i+1);
       }
@@ -1793,12 +1798,17 @@ void getsliceparams(void){
     }
   }
   update_fedinfo();
-  for(i=0;i<nsliceinfo;i++){
+  for(i=0;i<nsliceinfo+nslicexyzinfo;i++){
     slicedata *sd;
     int is1, is2, js1, js2, ks1, ks2;
     int ni, nj, nk;
 
-    sd = sliceinfo + i;
+    if(i<nsliceinfo){
+      sd = sliceinfo + i;
+    }
+    else{
+      sd = slicexyzinfo + i-nsliceinfo;
+    }
     is1=sd->is1;
     is2=sd->is2;
     js1=sd->js1;
@@ -2271,21 +2281,23 @@ void update_fedinfo(void){
 /* ------------------ updatevslices ------------------------ */
 
 void updatevslices(void){
-  int i,j;
-  slicedata *sdi,*sdj;
-  slicedata *sd, *sdold;
-  vslicedata *vd;
-  vslicedata *vsd, *vsdold;
-  multivslicedata *mvslicei;
+  int i;
 
   printf("  updating vector slices\n");
   getsliceparams();
 
   /* update vector slices */
 
-  nvslice=0;
-  for(i=0;i<nsliceinfo;i++){
-    sdi = sliceinfo+i;
+  nvsliceinfo=0;
+  for(i=0;i<nsliceinfo+nslicexyzinfo;i++){
+    slicedata *sdi;
+
+    if(i<nsliceinfo){
+      sdi = sliceinfo+i;
+    }
+    else{
+      sdi = slicexyzinfo+i-nsliceinfo;
+    }
 
     sdi->vec_comp=0;
     if(strncmp(sdi->label.shortlabel,"U-VEL",5)==0){
@@ -2302,6 +2314,10 @@ void updatevslices(void){
     }
   }
   for(i=0;i<nsliceinfo;i++){
+    slicedata *sdi;
+    vslicedata *vd;
+    int j;
+
     if(nsliceinfo>100&&(i%100==0||i==nsliceinfo-1)){
       if(i==10){
         printf("    examining %i'th slice file for vectors\n",i+1);
@@ -2310,38 +2326,60 @@ void updatevslices(void){
         printf("    examining %i'st slice file for vectors\n",i+1);
       }
     }
-    vd = vsliceinfo + nvslice;
+    vd = vsliceinfo + nvsliceinfo;
     sdi = sliceinfo+i;
     vd->iu=-1;
     vd->iv=-1;
     vd->iw=-1;
     vd->ival=i;
     vd->type=sliceinfo[i].type;
-    for(j=0;j<nsliceinfo;j++){
-      sdj = sliceinfo+j;
-      if(sdi->blocknumber!=sdj->blocknumber)continue;
-      if(sdi->is1!=sdj->is1||sdi->is2!=sdj->is2||sdi->js1!=sdj->js1)continue;
-      if(sdi->js2!=sdj->js2||sdi->ks1!=sdj->ks1||sdi->ks2!=sdj->ks2)continue;
-      if(sdj->vec_comp==1)vd->iu=j;
-      if(sdj->vec_comp==2)vd->iv=j;
-      if(sdj->vec_comp==3)vd->iw=j;
+    vd->slicetype=sliceinfo[i].slicetype;
+    if(vd->slicetype==SLICE_CENTER&&nslicexyzinfo>0){
+      for(j=0;j<nslicexyzinfo;j++){
+        slicedata *sdj;
+
+        sdj = slicexyzinfo+j;
+        if(sdi->blocknumber!=sdj->blocknumber)continue;
+        if(sdi->is1!=sdj->is1||sdi->is2!=sdj->is2||sdi->js1!=sdj->js1)continue;
+        if(sdi->js2!=sdj->js2||sdi->ks1!=sdj->ks1||sdi->ks2!=sdj->ks2)continue;
+        if(sdj->vec_comp==1)vd->iu=j;
+        if(sdj->vec_comp==2)vd->iv=j;
+        if(sdj->vec_comp==3)vd->iw=j;
+      }
+    }
+    else{
+      for(j=0;j<nsliceinfo;j++){
+        slicedata *sdj;
+
+        sdj = sliceinfo+j;
+        if(sdi->blocknumber!=sdj->blocknumber)continue;
+        if(sdi->is1!=sdj->is1||sdi->is2!=sdj->is2||sdi->js1!=sdj->js1)continue;
+        if(sdi->js2!=sdj->js2||sdi->ks1!=sdj->ks1||sdi->ks2!=sdj->ks2)continue;
+        if(sdj->vec_comp==1)vd->iu=j;
+        if(sdj->vec_comp==2)vd->iv=j;
+        if(sdj->vec_comp==3)vd->iw=j;
+      }
     }
     if(vd->iu!=-1||vd->iv!=-1||vd->iw!=-1){
       vd->display=0;
       vd->loaded=0;
       vd->vec_type=0;
       vd->volslice=sdi->volslice;
-      nvslice++;
+      nvsliceinfo++;
     }
   }
-  printf("    %i vector slices found\n",nvslice);
-  if(nvslice>0){
+  printf("    %i vector slices found\n",nvsliceinfo);
+  if(nvsliceinfo>0){
+    vslicedata *vsd;
+    slicedata *sd;
+    multivslicedata *mvslicei;
+
     FREEMEMORY(vsliceorderindex);
-    NewMemory((void **)&vsliceorderindex,sizeof(int)*nvslice);
-    for(i=0;i<nvslice;i++){
+    NewMemory((void **)&vsliceorderindex,sizeof(int)*nvsliceinfo);
+    for(i=0;i<nvsliceinfo;i++){
       vsliceorderindex[i]=i;
     }
-    qsort( (int *)vsliceorderindex, (size_t)nvslice, sizeof(int), vslicecompare );
+    qsort( (int *)vsliceorderindex, (size_t)nvsliceinfo, sizeof(int), vslicecompare );
 
     for(i=0;i<nmultivslices;i++){
       mvslicei = multivsliceinfo + i;
@@ -2350,19 +2388,20 @@ void updatevslices(void){
     FREEMEMORY(multivsliceinfo);
     nmultivslices=0;
 
-    NewMemory((void **)&multivsliceinfo,sizeof(multislicedata)*nvslice);
+    NewMemory((void **)&multivsliceinfo,sizeof(multislicedata)*nvsliceinfo);
 
     nmultivslices=1;
     mvslicei = multivsliceinfo;
     mvslicei->ivslices=NULL;
-    NewMemory((void **)&mvslicei->ivslices,sizeof(int)*nvslice);
+    NewMemory((void **)&mvslicei->ivslices,sizeof(int)*nvsliceinfo);
     mvslicei->nvslices=1;
     vsd = vsliceinfo + vsliceorderindex[0];
-    sd = sliceinfo + vsd->ival;
     mvslicei->ivslices[0] = vsliceorderindex[0];
+    mvslicei->type=sliceinfo[vsd->ival].type;
+    for(i=1;i<nvsliceinfo;i++){
+      slicedata *sd, *sdold;
+      vslicedata *vsd, *vsdold;
 
-    mvslicei->type=sd->type;
-    for(i=1;i<nvslice;i++){
       vsdold = vsliceinfo + vsliceorderindex[i - 1];
       sdold = sliceinfo + vsdold->ival;
       vsd = vsliceinfo + vsliceorderindex[i];
@@ -2373,7 +2412,7 @@ void updatevslices(void){
         mvslicei->nvslices=0;
         mvslicei->type=sd->type;
         mvslicei->ivslices=NULL;
-        NewMemory((void **)&mvslicei->ivslices,sizeof(int)*nvslice);
+        NewMemory((void **)&mvslicei->ivslices,sizeof(int)*nvsliceinfo);
       }
       mvslicei->nvslices++;
       mvslicei->ivslices[mvslicei->nvslices-1]=vsliceorderindex[i];
@@ -2381,7 +2420,7 @@ void updatevslices(void){
 
     // define sequence id's for auto file loading
 
-    for(i=0;i<nvslice;i++){
+    for(i=0;i<nvsliceinfo;i++){
       vslicedata *vslicei;
       slicedata *sliceval;
       int seq_id;
@@ -2394,7 +2433,7 @@ void updatevslices(void){
       vslicei->autoload=0;
     }
   }
-  if(nvslice>0)printf("    updating vector slice menus\n");
+  if(nvsliceinfo>0)printf("    updating vector slice menus\n");
   updatevslicemenulabels();
   printf("  vector slices update completed\n\n");
   
@@ -2406,11 +2445,11 @@ void updatevslicetypes(void){
   vslicedata *vd;
 
   nvslicetypes = 0;
-  for(i=0;i<nvslice;i++){
+  for(i=0;i<nvsliceinfo;i++){
     vd = vsliceinfo+i;
     if(getvsliceindex(vd)==-1)vslicetypes[nvslicetypes++]=i;
   }
-  for(i=0;i<nvslice;i++){
+  for(i=0;i<nvsliceinfo;i++){
     vd = vsliceinfo+i;
     vd->type=getvslicetype(vd);
   }
@@ -2943,7 +2982,7 @@ void drawslice_frame(){
 void drawvslice_frame(void){
   int i;
 
-  for(i=0;i<nvslice;i++){
+  for(i=0;i<nvsliceinfo;i++){
     vslicedata *vd;
     slicedata *u, *v, *w, *val;
 

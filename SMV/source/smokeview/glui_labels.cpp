@@ -187,7 +187,7 @@ extern "C" void glui_labels_rename(void){
   SPINNER_tick_xmax->set_name(_("Max"));
   SPINNER_tick_dx0->set_name(_("Step"));
 
-  if((npartinfo>0)||nsliceinfo>0||nvslice>0||nisoinfo>0||npatchinfo||nsmoke3dinfo>0||nplot3dinfo>0){
+  if((npartinfo>0)||nsliceinfo>0||nvsliceinfo>0||nisoinfo>0||npatchinfo||nsmoke3dinfo>0||nplot3dinfo>0){
     panel_showhide->set_name(_("Show/Hide Loaded Files"));
   }
 
@@ -307,7 +307,7 @@ extern "C" void glui_labels_setup(int main_window){
   SPINNER_tick_zmax=glui_labels->add_spinner_to_panel(panel_tick2,"",GLUI_SPINNER_FLOAT,user_tick_max+2);
   SPINNER_tick_dz0=glui_labels->add_spinner_to_panel(panel_tick2,"",GLUI_SPINNER_FLOAT,user_tick_step+2);
   
-  if((npartinfo>0)||nsliceinfo>0||nvslice>0||nisoinfo>0||npatchinfo||nsmoke3dinfo>0||nplot3dinfo>0){
+  if((npartinfo>0)||nsliceinfo>0||nvsliceinfo>0||nisoinfo>0||npatchinfo||nsmoke3dinfo>0||nplot3dinfo>0){
     panel_showhide = glui_labels->add_rollout("Show/Hide Loaded Files",false);
 
     RADIO_showhide = glui_labels->add_radiogroup_to_panel(panel_showhide,&showhide_option);
@@ -321,7 +321,7 @@ extern "C" void glui_labels_setup(int main_window){
     if(npartinfo>0&&nevac!=npartinfo)Button_PART=glui_labels->add_button_to_panel(panel_showhide,"Particle",LABELS_particleshow,Labels_CB);
     if(nevac>0)Button_EVAC=glui_labels->add_button_to_panel(panel_showhide,"Evacuation",LABELS_evacshow,Labels_CB);
     if(nsliceinfo>0)Button_SLICE=glui_labels->add_button_to_panel(panel_showhide,"Slice",LABELS_sliceshow,Labels_CB);
-    if(nvslice>0)Button_VSLICE=glui_labels->add_button_to_panel(panel_showhide,"Vector",LABELS_vsliceshow,Labels_CB);
+    if(nvsliceinfo>0)Button_VSLICE=glui_labels->add_button_to_panel(panel_showhide,"Vector",LABELS_vsliceshow,Labels_CB);
     if(nisoinfo>0)Button_ISO=glui_labels->add_button_to_panel(panel_showhide,"Isosurface",LABELS_isosurfaceshow,Labels_CB);
     if(npatchinfo>0)Button_BOUNDARY=glui_labels->add_button_to_panel(panel_showhide,"Boundary",LABELS_boundaryshow,Labels_CB);
     if(nsmoke3dinfo>0)Button_3DSMOKE=glui_labels->add_button_to_panel(panel_showhide,"3D smoke",LABELS_3dsmokeshow,Labels_CB);
@@ -375,7 +375,7 @@ extern "C" void update_fileload(void){
   }
 
   nvsliceloaded=0;
-  for(i=0;i<nvslice;i++){
+  for(i=0;i<nvsliceinfo;i++){
     vslicei = vsliceinfo+i;
     if(vslicei->loaded==1){
       nvsliceloaded++;

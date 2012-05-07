@@ -2087,8 +2087,9 @@ int readsmv(char *file, char *file2){
   int errorcode;
   int noGRIDpresent=1,startpass;
   int nslicefiles=0;
+  slicedata *sliceinfo_copy=NULL, *slicexyzinfo_copy=NULL;
 
-  int ipart=0, islice=0, islicecount=1, ipatch=0, iroom=0,izone_local=0,ifire=0,iiso=0;
+  int ipart=0, islicecount=1, ipatch=0, iroom=0,izone_local=0,ifire=0,iiso=0;
   int ismoke3d=0,ismoke3dcount=1;
   int  itarg=0;
   int setGRID=0;
@@ -2121,6 +2122,8 @@ int readsmv(char *file, char *file2){
   int i, j, k;
   STRUCTSTAT statbuffer,statbuffer2;
   int version;
+  int *slicefile_type;
+  int slicefile_count=0;
   
   int nn_smoke3d=0;
   int nn_patch=0;
@@ -2363,9 +2366,22 @@ int readsmv(char *file, char *file2){
   }
   nsliceinfo=0;
 
+  if(nslicexyzinfo>0){
+    for(i=0;i<nslicexyzinfo;i++){
+      slicedata *sd;
+      sd = slicexyzinfo + i;
+      freelabels(&slicexyzinfo[i].label);
+      FREEMEMORY(sd->reg_file);
+      FREEMEMORY(sd->comp_file);
+      FREEMEMORY(sd->size_file);
+    }
+    FREEMEMORY(slicexyzinfo);
+  }
+  nslicexyzinfo=0;
+
   //*** free multi-vector slice data
 
-  if(nvslice>0){
+  if(nvsliceinfo>0){
     FREEMEMORY(vsliceorderindex);
     for(i=0;i<nmultivslices;i++){
       multivslicedata *mvslicei;
@@ -2749,6 +2765,24 @@ int readsmv(char *file, char *file2){
         (match(buffer,"SLFL") == 1)||
         (match(buffer,"SLCT") == 1)
       ){
+      flowlabels labels_temp;
+
+      if(match(buffer,"SLCC")==1){
+        if(fgets(buffer,255,stream)==NULL){
+          BREAK;
+        }
+        readlabels(&labels_temp,stream);
+        if(strcmp(labels_temp.shortlabel,"U-VEL")==0||
+          strcmp(labels_temp.shortlabel,"V-VEL")==0||
+          strcmp(labels_temp.shortlabel,"W-VEL")==0){
+          nslicexyzinfo++;
+        }
+        else{
+          nsliceinfo++;
+        }
+        freelabels(&labels_temp);
+        continue;
+      }
       nsliceinfo++;
       nslicefiles=nsliceinfo;
       if(fgets(buffer,255,stream)==NULL){
@@ -2971,6 +3005,12 @@ int readsmv(char *file, char *file2){
   FREEMEMORY(slicetypes);
   FREEMEMORY(vslicetypes);
   FREEMEMORY(fedinfo);
+  if(nslicexyzinfo>0){
+    if(NewMemory( (void **)&slicexyzinfo,nslicexyzinfo*sizeof(slicedata))==0){
+       return 2;
+    }
+    slicexyzinfo_copy=slicexyzinfo;
+  }
   if(nsliceinfo>0){
     if(NewMemory( (void **)&vsliceinfo, 3*nsliceinfo*sizeof(vslicedata) )==0||
        NewMemory( (void **)&sliceinfo,  nsliceinfo*sizeof(slicedata)    )==0||
@@ -2985,6 +3025,10 @@ int readsmv(char *file, char *file2){
        NewMemory( (void **)&vslicetypes,3*nsliceinfo*sizeof(int)    )==0){
        return 2;
     }
+    if(nsliceinfo+nslicexyzinfo>0){
+      NewMemory( (void **)&slicefile_type, (nsliceinfo+nslicexyzinfo)*sizeof(int)      );
+    }
+    sliceinfo_copy=sliceinfo;
     nslice_loadstack=nsliceinfo;
     islice_loadstack=0;
     nvslice_loadstack=nsliceinfo;
@@ -3087,6 +3131,7 @@ int readsmv(char *file, char *file2){
    ************************************************************************
  */
 
+  slicefile_count=0;
   startpass=1;
   ioffset=0;
   iobst=0;
@@ -3117,7 +3162,45 @@ int readsmv(char *file, char *file2){
       trim(buffer);
       if(strncmp(buffer," ",1)==0||buffer[0]==0)continue;
     }
+    /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++ CSVF ++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  */
+    if( (match(buffer,"SLCF") == 1)||
+        (match(buffer,"SLCC") == 1)||
+        (match(buffer,"SLFL") == 1)||
+        (match(buffer,"SLCT") == 1)
+      ){
+      flowlabels labels_temp;
 
+      CheckMemory;
+      if(match(buffer,"SLCC")==1){
+        if(fgets(buffer,255,stream)==NULL){
+          BREAK;
+        }
+        readlabels(&labels_temp,stream);
+        if(strcmp(labels_temp.shortlabel,"U-VEL")==0||
+          strcmp(labels_temp.shortlabel,"V-VEL")==0||
+          strcmp(labels_temp.shortlabel,"W-VEL")==0){
+            slicefile_type[slicefile_count++]=1; // exclude staggered "VEL" slices from menus
+            continue;
+        }
+      }
+      slicefile_type[slicefile_count++]=0;
+      if(fgets(buffer,255,stream)==NULL){
+        BREAK;
+      }
+      if(fgets(buffer,255,stream)==NULL){
+        BREAK;
+      }
+      if(fgets(buffer,255,stream)==NULL){
+        BREAK;
+      }
+      if(fgets(buffer,255,stream)==NULL){
+        BREAK;
+      }
+    }
 
     /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -4751,6 +4834,8 @@ int readsmv(char *file, char *file2){
   printf("%s",_("   pass 4 started"));
   printf("\n");
   startpass=1;
+  slicefile_count=0;
+  CheckMemory;
 
   for(;;){
     if(feof(stream)!=0){
@@ -6009,9 +6094,10 @@ typedef struct {
       int has_reg, has_comp;
       int i1=-1, i2=-1, j1=-1, j2=-1, k1=-1, k2=-1;
       char *sliceparms;
+      int xyz_slice;
 
       sliceparms=strchr(buffer,'&');
-      if(1==0&&sliceparms!=NULL){
+      if(1==0&&sliceparms!=NULL){//xxx fix
         sliceparms++;
         sliceparms[-1]=0;
         sscanf(sliceparms,"%i %i %i %i %i %i",&i1,&i2,&j1,&j2,&k1,&k2);
@@ -6059,7 +6145,14 @@ typedef struct {
       bufferptr=trim_string(buffer);
       len=strlen(bufferptr);
       
-      sd = sliceinfo+islice;
+      if(slicefile_type[slicefile_count++]==0){
+        sd = sliceinfo_copy;
+        xyz_slice=0;
+      }
+      else{
+        sd = slicexyzinfo_copy;
+        xyz_slice=1;
+      }
       sd->reg_file=NULL;
       sd->comp_file=NULL;
       sd->vol_file=NULL;
@@ -6084,23 +6177,22 @@ typedef struct {
       if(file_exists(buffer2)==1)has_comp=1;
       if(has_comp==0&&file_exists(bufferptr)==1)has_reg=1;
       if(has_reg==0&&has_comp==0){
-        if(fgets(buffer,255,stream)==NULL){
+        if(xyz_slice==0){
           nsliceinfo--;
           nslicefiles--;
+        }
+        else{
+          nslicexyzinfo--;
+        }
+        if(fgets(buffer,255,stream)==NULL){
           BREAK;
         }
         if(fgets(buffer,255,stream)==NULL){
-          nsliceinfo--;
-          nslicefiles--;
           BREAK;
         }
         if(fgets(buffer,255,stream)==NULL){
-          nsliceinfo--;
-          nslicefiles--;
           BREAK;
         }
-        nsliceinfo--;
-        nslicefiles--;
         continue;
       }
 
@@ -6192,7 +6284,7 @@ typedef struct {
         meshi = meshinfo + blocknumber;
         sd->mesh_type=meshi->mesh_type;
       }
-      if(is_slice_dup(sd)==1){
+      if(xyz_slice==0&&is_slice_dup(sd)==1){
         FREEMEMORY(sd->reg_file);
         FREEMEMORY(sd->comp_file);
         FREEMEMORY(sd->vol_file);
@@ -6202,7 +6294,12 @@ typedef struct {
         nslicefiles--;
         continue;
       }
-      islice++;
+      if(xyz_slice==0){
+        sliceinfo_copy++;
+      }
+      else{
+        slicexyzinfo_copy++;
+      }
       continue;
     }
   /*

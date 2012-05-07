@@ -185,7 +185,7 @@ void bench_out(float localframerate){
     slicei->benchvis=0;
     if(slicei->loaded==1&&slicei->display==1)slicei->benchvis=1;
   }
-  for(i=0;i<nvslice;i++){
+  for(i=0;i<nvsliceinfo;i++){
     vd = vsliceinfo + i;
     if(vd->loaded==0||vd->display==0||sliceinfo[vd->ival].type!=islicetype)continue;
     if(vd->val==NULL)continue;

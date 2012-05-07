@@ -729,7 +729,7 @@ void ShowVSliceMenu(int value){
   updatemenu=1;  
   glutPostRedisplay();
   if(value==SHOW_ALL){
-    for(i=0;i<nvslice;i++){
+    for(i=0;i<nvsliceinfo;i++){
       vd = vsliceinfo + i;
       if(vd->loaded==0)continue;
       vd->display=1;
@@ -739,7 +739,7 @@ void ShowVSliceMenu(int value){
     return;
   }
   if(value==HIDE_ALL){
-    for(i=0;i<nvslice;i++){
+    for(i=0;i<nvsliceinfo;i++){
       vd = vsliceinfo + i;
       if(vd->loaded==0)continue;
       vd->display=0;
@@ -2348,7 +2348,7 @@ void LoadUnloadMenu(int value){
         readterrain(terraininfo[i].file,i,LOAD,&errorcode);
       }
     }
-    for(i=0;i<nvslice;i++){
+    for(i=0;i<nvsliceinfo;i++){
       if(vsliceinfo[i].loaded==1){
         readvslice(i,LOAD,&errorcode);
       }
@@ -2949,7 +2949,7 @@ void UnloadVSliceMenu(int value){
     readvslice(value,UNLOAD,&errorcode);
   }
   else if(value==-1){
-    for(i=0;i<nvslice;i++){
+    for(i=0;i<nvsliceinfo;i++){
       readvslice(i,UNLOAD,&errorcode);
     }
   }
@@ -2957,7 +2957,7 @@ void UnloadVSliceMenu(int value){
     int unload_index;
 
     unload_index=last_vslice_loadstack();
-    if(unload_index>=0&&unload_index<nvslice){
+    if(unload_index>=0&&unload_index<nvsliceinfo){
       readvslice(unload_index,UNLOAD,&errorcode);
     }
   }
@@ -3059,7 +3059,7 @@ void LoadVSliceMenu(int value){
   if(value==-999)return;
   glutSetCursor(GLUT_CURSOR_WAIT);
   if(value==-1){
-    for(i=0;i<nvslice;i++){
+    for(i=0;i<nvsliceinfo;i++){
       readvslice(i,UNLOAD,&errorcode);
     }
     return;
@@ -3098,7 +3098,7 @@ void LoadVSliceMenu(int value){
     vslicei = vsliceinfo + submenutype;
     slicei = sliceinfo + vslicei->ival;
     submenulabel = slicei->label.longlabel;
-    for(i=0;i<nvslice;i++){
+    for(i=0;i<nvsliceinfo;i++){
       char *longlabel;
 
       vslicei = vsliceinfo + i;
@@ -4437,7 +4437,7 @@ void MENU_vslice(int vec_type){
   char a_menulabel[1000];
   menulabel=a_menulabel;
 
-  for(ii=0;ii<nvslice;ii++){
+  for(ii=0;ii<nvsliceinfo;ii++){
     i=vsliceorderindex[ii];
     vd = vsliceinfo + i;
     if(vd->vec_type!=vec_type)continue;
@@ -4568,7 +4568,7 @@ updatemenu=0;
   }
 
   nvsliceloaded=0;
-  for(i=0;i<nvslice;i++){
+  for(i=0;i<nvsliceinfo;i++){
     vslicedata *vd;
 
     vd = vsliceinfo + i;
@@ -6288,10 +6288,10 @@ updatemenu=0;
   if(nvsliceloaded==0){
     vd_shown=NULL;
   }
-  if(nvslice>0&&nvsliceloaded>0){
+  if(nvsliceinfo>0&&nvsliceloaded>0){
     CREATEMENU(showvslicemenu,ShowVSliceMenu);
     nvsliceloaded0=0;
-    for(i=0;i<nvslice;i++){
+    for(i=0;i<nvsliceinfo;i++){
       vslicedata *vd;
       slicedata *sd;
 
@@ -6704,7 +6704,7 @@ updatemenu=0;
   nvslice0=0, nvslice1=0, nvslice2=0;
   nvsliceloaded0=0, nvsliceloaded1=0;
   nvsliceloaded2=0;
-  for(i=0;i<nvslice;i++){
+  for(i=0;i<nvsliceinfo;i++){
     vslicedata *vd;
 
     vd = vsliceinfo+i;
@@ -7290,7 +7290,7 @@ updatemenu=0;
     glutAddMenuEntry(_("  ALT+u: toggle coarse slice display in embedded mesh"),2);
   }
   if(cellcenter_slice_active==1){
-    glutAddMenuEntry(_("  ALT+y: if current slice is cell centered, toggle interpolation on/off"),2);
+    glutAddMenuEntry(_("  ALT+y: if current slice is staggered, toggle interpolation on/off"),2);
   }
   if(caseinifilename!=NULL&&strlen(caseinifilename)>0){
     char inilabel[512];
@@ -7482,9 +7482,9 @@ updatemenu=0;
 
 /* --------------------------------unload and load vslice menus -------------------------- */
 
-  if(nvslice>0){
+  if(nvsliceinfo>0){
 
-    if(nmultivslices<nvslice){
+    if(nmultivslices<nvsliceinfo){
       CREATEMENU(unloadmultivslicemenu,UnloadMultiVSliceMenu);
       for(i=0;i<nmultivslices;i++){
         mvslicei = multivsliceinfo + i;
@@ -7587,7 +7587,7 @@ updatemenu=0;
     }
 
     CREATEMENU(unloadvslicemenu,UnloadVSliceMenu);
-    for(ii=0;ii<nvslice;ii++){
+    for(ii=0;ii<nvsliceinfo;ii++){
       vslicedata *vd;
 
       i = vsliceorderindex[ii];
@@ -7601,9 +7601,9 @@ updatemenu=0;
 
     if(nvslice0>0){
       vslicedata *vd, *vdim1,*vdip1;
-      if(nvslice>0){
+      if(nvsliceinfo>0){
         nloadsubvslicemenu=1;
-        for(ii=1;ii<nvslice;ii++){
+        for(ii=1;ii<nvsliceinfo;ii++){
           slicedata *sd, *sdm1;
 
           i=vsliceorderindex[ii];
@@ -7622,7 +7622,7 @@ updatemenu=0;
           loadsubvslicemenu[i]=0;
         }
         nloadsubvslicemenu=0;
-        for(ii=0;ii<nvslice;ii++){
+        for(ii=0;ii<nvsliceinfo;ii++){
           slicedata *sd, *sdm1, *sdp1;
 
           i=vsliceorderindex[ii];
@@ -7633,7 +7633,7 @@ updatemenu=0;
             vdim1 = vsliceinfo + vsliceorderindex[ii-1];
             sdm1 = sliceinfo + vdim1->ival;
           }
-          if(ii!=nvslice-1){
+          if(ii!=nvsliceinfo-1){
             vdip1 = vsliceinfo + vsliceorderindex[ii+1];
             sdp1 = sliceinfo + vdip1->ival;
           }
@@ -7649,7 +7649,7 @@ updatemenu=0;
             STRCPY(menulabel,sd->menulabel);
           }
           if(sd->vec_comp==0||showallslicevectors==1)glutAddMenuEntry(menulabel,i);
-          if(ii==nvslice-1||strcmp(sd->label.longlabel,sdp1->label.longlabel)!=0){
+          if(ii==nvsliceinfo-1||strcmp(sd->label.longlabel,sdp1->label.longlabel)!=0){
             subvslice_menuindex[nloadsubvslicemenu]=vsliceorderindex[ii];
 			if(sd->ndirxyz[1]+sd->ndirxyz[2]+sd->ndirxyz[3]>1){
               glutAddMenuEntry("-",-999);
@@ -7673,7 +7673,7 @@ updatemenu=0;
         }
         CREATEMENU(vslicemenu,LoadVSliceMenu);
         nloadsubvslicemenu=0;
-        for(ii=0;ii<nvslice;ii++){
+        for(ii=0;ii<nvsliceinfo;ii++){
           slicedata *sd, *sdm1;
 
           i=vsliceorderindex[ii];
@@ -7699,7 +7699,7 @@ updatemenu=0;
         }
       }
     } 
-    if(nvslice>0)glutAddMenuEntry("-",-999);
+    if(nvsliceinfo>0)glutAddMenuEntry("-",-999);
     if(showallslicevectors==0)glutAddMenuEntry(_("Show all vector slice entries"),-20);
     if(showallslicevectors==1)glutAddMenuEntry(_("*Show all vector slice entries"),-20);
     if(nvsliceloaded>1){
@@ -8677,7 +8677,7 @@ updatemenu=0;
         }
         glutAddSubMenu(loadmenulabel,loadmultislicemenu);
       }
-      if(nvslice>0&&nmultivslices<nvslice){
+      if(nvsliceinfo>0&&nmultivslices<nvsliceinfo){
         strcpy(loadmenulabel,"Multi-Vector Slices");
         if(sliceframeskip>0){
           sprintf(steplabel,"/Skip %i",sliceframeskip);
@@ -8693,7 +8693,7 @@ updatemenu=0;
         }
         glutAddSubMenu(loadmenulabel,loadslicemenu);
       }
-      if(nvslice>0){
+      if(nvsliceinfo>0){
         strcpy(loadmenulabel,"Vector slices");
         if(sliceframestep>1){
           sprintf(steplabel,"/Skip %i",sliceframeskip);

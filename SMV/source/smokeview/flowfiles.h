@@ -1098,6 +1098,7 @@ typedef struct {
   int loaded,display;
   float valmin, valmax;
   int type,vec_type;
+  int slicetype;
   char menulabel[128];
   char menulabel2[128];
 } vslicedata;
