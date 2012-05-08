@@ -831,7 +831,7 @@ int readlabels_cellcenter(flowlabels *flowlabel, FILE *stream){
   len=strlen(buffer);
   if(NewMemory((void **)&flowlabel->longlabel,(unsigned int)(len+1+15))==0)return 2;
   STRCPY(flowlabel->longlabel,buffer);
-  STRCAT(flowlabel->longlabel,"(staggered)");
+  STRCAT(flowlabel->longlabel,"(cell centered)");
 
   if(fgets(buffer2,255,stream)==NULL){
     strcpy(buffer2,"**");

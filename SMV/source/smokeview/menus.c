@@ -7290,7 +7290,7 @@ updatemenu=0;
     glutAddMenuEntry(_("  ALT+u: toggle coarse slice display in embedded mesh"),2);
   }
   if(cellcenter_slice_active==1){
-    glutAddMenuEntry(_("  ALT+y: if current slice is staggered, toggle interpolation on/off"),2);
+    glutAddMenuEntry(_("  ALT+y: if current slice is cell centered, toggle interpolation on/off"),2);
   }
   if(caseinifilename!=NULL&&strlen(caseinifilename)>0){
     char inilabel[512];
@@ -7823,7 +7823,23 @@ updatemenu=0;
             STRCPY(mlabel,sd->label.longlabel);
             if(i==0&&sd->mesh_type>0||(i>0&&sd->mesh_type!=sdim1->mesh_type)){
               sprintf(mlabel2,"*** Evac type %i meshes ***",sd->mesh_type);
+              if(sd->slicetype==SLICE_CENTER){
+                flowlabels *label;
+
+                label = &sd->label;
+                if(strcmp(label->shortlabel,"U-VEL")==0||strcmp(label->shortlabel,"V-VEL")==0||strcmp(label->shortlabel,"W-VEL")==0){
+                  continue;
+                }
+              }
               glutAddMenuEntry(mlabel2,-999);
+            }
+            if(sd->slicetype==SLICE_CENTER){
+              flowlabels *label;
+
+              label = &sd->label;
+              if(strcmp(label->shortlabel,"U-VEL")==0||strcmp(label->shortlabel,"V-VEL")==0||strcmp(label->shortlabel,"W-VEL")==0){
+                continue;
+              }
             }
             glutAddSubMenu(mlabel,             loadsubmslicemenu[nloadsubmslicemenu]);
             nloadsubmslicemenu++;
@@ -7928,7 +7944,7 @@ updatemenu=0;
             if(sd->menu_show==1){
               sprintf(mlabel2,"*** Evac type %i mesh ***",sd->mesh_type);
               glutAddMenuEntry(mlabel2,-999);
-			}
+            }
           }
           if(sd->menu_show==1)glutAddSubMenu(mlabel,loadsubslicemenu[iloadsubslicemenu]);
           iloadsubslicemenu++;

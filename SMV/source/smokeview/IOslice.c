@@ -1450,6 +1450,14 @@ void update_slice_menu_show(void){
     sd = sliceinfo + i;
     slicemesh = meshinfo + sd->blocknumber;
     sd->menu_show=1;
+    if(sd->slicetype==SLICE_CENTER){
+      flowlabels *label;
+
+      label = &sd->label;
+      if(strcmp(label->shortlabel,"U-VEL")==0||strcmp(label->shortlabel,"V-VEL")==0||strcmp(label->shortlabel,"W-VEL")==0){
+        sd->menu_show=0;
+      }
+    }
     if(show_evac_slices==0&&slicemesh->mesh_type!=0){
       sd->menu_show=0;
     }
@@ -1725,19 +1733,14 @@ void getsliceparams(void){
     stream=fopen(sliceinfofilename,"r");
   }
 
-  for(i=0;i<nsliceinfo+nslicexyzinfo;i++){
+  for(i=0;i<nsliceinfo;i++){
     slicedata *sd;
     int is1, is2, js1, js2, ks1, ks2;
     int ni, nj, nk;
 
-    if(i<nsliceinfo){
-      sd = sliceinfo + i;
-    }
-    else{
-      sd = slicexyzinfo + i - nsliceinfo;
-    }
+    sd = sliceinfo + i;
 
-    if(nsliceinfo+nslicexyzinfo>100&&(i%100==0||i==nsliceinfo+nslicexyzinfo-1)){
+    if(nsliceinfo>100&&(i%100==0||i==nsliceinfo-1)){
       if(i==10){
         printf("    obtaining parameters from %i'th slice file\n",i+1);
       }
@@ -1798,17 +1801,12 @@ void getsliceparams(void){
     }
   }
   update_fedinfo();
-  for(i=0;i<nsliceinfo+nslicexyzinfo;i++){
+  for(i=0;i<nsliceinfo;i++){
     slicedata *sd;
     int is1, is2, js1, js2, ks1, ks2;
     int ni, nj, nk;
 
-    if(i<nsliceinfo){
-      sd = sliceinfo + i;
-    }
-    else{
-      sd = slicexyzinfo + i-nsliceinfo;
-    }
+    sd = sliceinfo + i;
     is1=sd->is1;
     is2=sd->is2;
     js1=sd->js1;
@@ -2289,16 +2287,10 @@ void updatevslices(void){
   /* update vector slices */
 
   nvsliceinfo=0;
-  for(i=0;i<nsliceinfo+nslicexyzinfo;i++){
+  for(i=0;i<nsliceinfo;i++){
     slicedata *sdi;
 
-    if(i<nsliceinfo){
-      sdi = sliceinfo+i;
-    }
-    else{
-      sdi = slicexyzinfo+i-nsliceinfo;
-    }
-
+    sdi = sliceinfo+i;
     sdi->vec_comp=0;
     if(strncmp(sdi->label.shortlabel,"U-VEL",5)==0){
        sdi->vec_comp=1;
@@ -2334,11 +2326,11 @@ void updatevslices(void){
     vd->ival=i;
     vd->type=sliceinfo[i].type;
     vd->slicetype=sliceinfo[i].slicetype;
-    if(vd->slicetype==SLICE_CENTER&&nslicexyzinfo>0){
-      for(j=0;j<nslicexyzinfo;j++){
+    if(vd->slicetype==SLICE_CENTER){
+      for(j=0;j<nsliceinfo;j++){
         slicedata *sdj;
 
-        sdj = slicexyzinfo+j;
+        sdj = sliceinfo+j;
         if(sdi->blocknumber!=sdj->blocknumber)continue;
         if(sdi->is1!=sdj->is1||sdi->is2!=sdj->is2||sdi->js1!=sdj->js1)continue;
         if(sdi->js2!=sdj->js2||sdi->ks1!=sdj->ks1||sdi->ks2!=sdj->ks2)continue;

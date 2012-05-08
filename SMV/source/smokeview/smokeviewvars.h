@@ -537,7 +537,6 @@ SVEXTERN int ntc_total, nspr_total, nheat_total;
 SVEXTERN int n_devices;
 
 SVEXTERN int npartinfo, nsliceinfo, nvsliceinfo, nslice2, npatch2, nplot3dinfo, npatchinfo;
-SVEXTERN int nslicexyzinfo;
 SVEXTERN int nfedinfo;
 SVEXTERN int nevac;
 SVEXTERN int current_particle_type,last_particle_type;

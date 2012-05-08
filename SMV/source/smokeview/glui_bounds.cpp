@@ -683,7 +683,7 @@ extern "C" void glui_bounds_setup(int main_window){
       CHECKBOX_skip_subslice=glui_bounds->add_checkbox_to_panel(panel_slice,_("Skip coarse sub-slice"),&skip_slice_in_embedded_mesh);
     }
     if(cellcenter_slice_active==1){
-      CHECKBOX_cellcenter_slice_interp = glui_bounds->add_checkbox_to_panel(panel_slice,_("Interpolate staggered slices"),
+      CHECKBOX_cellcenter_slice_interp = glui_bounds->add_checkbox_to_panel(panel_slice,_("Interpolate cell centered slices"),
         &cellcenter_interp);
     }
     if(nfedinfo>0){
