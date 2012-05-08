@@ -250,6 +250,7 @@ INTEGER, PARAMETER :: NSCARC_COARSENING_NONE        = -1, &
                       NSCARC_COARSENING_FDSRS3      =  7, &      ! FDSRS3 : FDS variant similar to RS3
                       NSCARC_COARSENING_FDSA1       =  8, &      ! FDSA1  : FDS variant similar to A1
                       NSCARC_COARSENING_FDSA2       =  9, &      ! FDSA2  : FDS variant similar to A2
+                      NSCARC_COARSENING_GMG         = 10, &      ! GMG    : FDS variant similar to GMG
                       NSCARC_COARSENING_BDRY        = 11         ! own boundary test
 
 INTEGER, PARAMETER :: NSCARC_COARSE_NONE            = -1, &
@@ -315,7 +316,8 @@ INTEGER, PARAMETER :: NSCARC_INTERPOL_NONE          =  0, &
                       NSCARC_INTERPOL_CLASSICAL     =  2, &      ! classical interpolation
                       NSCARC_INTERPOL_DIRECT        =  3, &      ! direct interpolation
                       NSCARC_INTERPOL_DIRECT_BDRY   =  4, &      ! direct interpolation with special boundary
-                      NSCARC_INTERPOL_MULTIPASS     =  5         ! multipass interpolation
+                      NSCARC_INTERPOL_MULTIPASS     =  5, &      ! multipass interpolation
+                      NSCARC_INTERPOL_GMG           =  6         ! GMG-like interpolation
 
 INTEGER, PARAMETER :: NSCARC_LATEX_NONE             = -1, &      ! no latex information requested
                       NSCARC_LATEX_STAGGERED        =  1, &      ! show staggered latex information
@@ -813,6 +815,9 @@ IF (TYPE_METHOD == NSCARC_METHOD_MULTIGRID .OR. TYPE_PRECON == NSCARC_PRECON_MUL
             CASE ('BDRY')
                TYPE_COARSENING = NSCARC_COARSENING_BDRY
                TYPE_LAYER      = NSCARC_LAYER_TWO
+            CASE ('GMG')
+               TYPE_COARSENING = NSCARC_COARSENING_GMG
+               TYPE_LAYER      = NSCARC_LAYER_ONE
             CASE DEFAULT
                WRITE(CMESSAGE,1005) 'coarsening',TRIM(SCARC_MULTIGRID_COARSENING),&
                                     'algebraic multigrid','RS3'   ,'A1'   ,'A2'   ,'PMIS',&
@@ -864,6 +869,8 @@ IF (TYPE_METHOD == NSCARC_METHOD_MULTIGRID .OR. TYPE_PRECON == NSCARC_PRECON_MUL
          TYPE_INTERPOL = NSCARC_INTERPOL_DIRECT_BDRY
       CASE ('MULTIPASS')
          TYPE_INTERPOL = NSCARC_INTERPOL_MULTIPASS
+      CASE ('GMG')
+         TYPE_INTERPOL = NSCARC_INTERPOL_GMG
       CASE DEFAULT
          WRITE(CMESSAGE,1004) 'cycling ',TRIM(SCARC_MULTIGRID_INTERPOL), &
                               'multigrid','STANDARD','DIRECT','DIRECT_BDRY','MULTIPASS'
@@ -1821,12 +1828,20 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
             !!! -----------------------------------------------------------------------------
             !!! Determine boundary type for IWF
             !!! -----------------------------------------------------------------------------
-            IF (M%WALL(IWF)%BOUNDARY_TYPE == OPEN_BOUNDARY) THEN
-               SCF%WALL(IWF)%BTYPE = DIRICHLET
-            ELSE IF (M%WALL(IWF)%NOM /= 0) THEN !****CHECK
-               SCF%WALL(IWF)%BTYPE = INTERNAL
-            !ELSE IF (M%BOUNDARY_TYPE(IWF) == NULL_BOUNDARY) THEN
+            !IF (M%WALL(IWF)%BOUNDARY_TYPE == OPEN_BOUNDARY) THEN
             !   SCF%WALL(IWF)%BTYPE = DIRICHLET
+            !ELSE IF (M%WALL(IWF)%NOM /= 0) THEN !****CHECK
+            !   SCF%WALL(IWF)%BTYPE = INTERNAL
+            !!ELSE IF (M%BOUNDARY_TYPE(IWF) == NULL_BOUNDARY) THEN
+            !!   SCF%WALL(IWF)%BTYPE = DIRICHLET
+            !ELSE
+            !   SCF%WALL(IWF)%BTYPE = NEUMANN
+            !ENDIF
+
+            IF (M%WALL(IWF)%NOM /= 0) THEN 
+               SCF%WALL(IWF)%BTYPE = INTERNAL
+            ELSE IF (M%WALL(IWF)%PRESSURE_BC_INDEX == DIRICHLET) THEN
+               SCF%WALL(IWF)%BTYPE = DIRICHLET
             ELSE
                SCF%WALL(IWF)%BTYPE = NEUMANN
             ENDIF
@@ -1846,6 +1861,9 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
             SCF%WALL(IWF)%IYW =  M%WALL(IWF)%ONE_D%JJG
             SCF%WALL(IWF)%IZW =  M%WALL(IWF)%ONE_D%KKG
 
+!IF (SCF%WALL(IWF)%IXW ==1 .AND. SCF%WALL(IWF)%IYW>6.AND.SCF%WALL(IWF)%IYW<12.AND.SCF%WALL(IWF)%IZW==11) THEN
+!   WRITE(*,*) 'M%WALL(',IWF,')%BOUNDARY_TYPE = ',M%WALL(IWF)%BOUNDARY_TYPE, M%WALL(IWF)%PRESSURE_BC_INDEX,SCF%WALL(IWF)%BTYPE
+!ENDIF
             !!! -----------------------------------------------------------------------------
             !!! Determine neighbor and orientation
             !!! -----------------------------------------------------------------------------
@@ -2637,7 +2655,7 @@ SELECT CASE (TYPE_DIMENSION)
          OSCC => SCARC(NM)%OSCARC(NOMF(1))%COMPACT(NL)
          OSCC%NWS = OSCC%NWS + 1
 !WRITE(SCARC_LU,*) 'OSCC(',NL,')%NWS=',OSCC%NWS
-!WRITE(*,*) 'OSCC(',NL,')%NWS=',OSCC%NWS
+!WRITE(*,*) 'TRUDI: OSCC(',NL,')%NWS=',OSCC%NWS
 
          IY1 = 1
          IY2 = 1
@@ -2770,6 +2788,11 @@ SELECT CASE (TYPE_DIMENSION)
       !!! in case of an internal boundary set WALL(10:15,IWC)
       IF (NOMF(1) > 0) THEN   
    
+         OSCC => SCARC(NM)%OSCARC(NOMF(1))%COMPACT(NL)
+         OSCC%NWS = OSCC%NWS + 1
+!WRITE(SCARC_LU,*) 'OSCC(',NL,')%NWS=',OSCC%NWS
+!WRITE(*,*) 'TRUDI: OSCC(',NL,')%NWS=',OSCC%NWS
+
          SELECT CASE (ABS(IOR0))
             CASE (1)
                JDIFF = WALLF(IWF(2))%IYN1 - WALLF(IWF(1))%IYN1
@@ -5981,17 +6004,115 @@ SUBROUTINE SCARC_SETUP_CELLTYPES(NTYPE, NL)
 INTEGER, PARAMETER  :: NCOUPLINGS = 20, NCYC_MAX=1000
 INTEGER, INTENT(IN) :: NTYPE, NL
 INTEGER  :: NM
-INTEGER  :: IC, JC, KC, ICOL, JCOL, ICYC, ICG
+INTEGER  :: IC, JC, KC, ICOL, JCOL, ICYC, ICG, IX, IY, IZ, IX1, IZ1, IX2, IZ2
+INTEGER  :: IC11, IC12, IC21, IC22
 INTEGER  :: IW
 REAL(EB) :: MEASURE_MAX, MEASURE_LOCAL_MAX, MEASURE_GLOBAL_MAX, EPS
-LOGICAL  :: BIGGEST
+LOGICAL  :: BIGGEST, BX_ODD, BZ_ODD
 TYPE (SCARC_COMPACT_TYPE), POINTER :: SC
+
 
 EPS = 1.0E-12
 MEASURE_MAX = 0.0_EB
 
 !!! Define celltypes for corresponding coarsening strategy
 SELECT CASE (NTYPE)
+
+   !!!-------------------------------------------------------------------------------------------------
+   !!! set celltypes for GMG-like interpolation
+   !!!-------------------------------------------------------------------------------------------------
+   CASE (NSCARC_COARSENING_GMG)
+
+      SELECT_GMG_DIMENSION: SELECT CASE (TYPE_DIMENSION)
+
+         CASE (NSCARC_DIMENSION_TWO)
+
+            GMG_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+
+               SC => SCARC(NM)%COMPACT(NL)
+
+               !!! Analyze grid sizes
+               IF (MOD(SC%NX,2) == 0) THEN
+                  BX_ODD = .FALSE.
+               ELSE
+                  BX_ODD = .TRUE.
+               ENDIF
+
+               IF (MOD(SC%NZ,2) == 0) THEN
+                  BZ_ODD = .FALSE.
+               ELSE
+                  BZ_ODD = .TRUE.
+               ENDIF
+
+               !!! Simulate interpolation of geometric multigrid
+               IF (BZ_ODD) THEN
+
+                  IF (BX_ODD) THEN
+                     DO IZ = 1, SC%NZ
+                        DO IX = 1, SC%NX
+                           WRITE(*,*) 'BZ_ODD = TRUE and BX_ODD = TRUE STILL MISSING!'
+                        ENDDO
+                     ENDDO
+                  ELSE
+                     DO IZ = 1, SC%NZ
+                        DO IX = 2, SC%NX, 2
+                           WRITE(*,*) 'BZ_ODD = TRUE and BX_ODD = FALSE STILL MISSING!'
+                        ENDDO
+                     ENDDO
+                  ENDIF
+
+               ELSE
+                  IF (BX_ODD) THEN
+                     DO IZ = 1, SC%NZ
+                        DO IX = 1, SC%NX
+                           WRITE(*,*) 'BZ_ODD = FALSE and BX_ODD = TRUE STILL MISSING!'
+                        ENDDO
+                     ENDDO
+                  ELSE
+                     IY = 1
+                     DO IZ = 1, SC%NZ, 2
+                        DO IX = 1, SC%NX, 2
+
+WRITE(SCARC_LU,*) '=================================================='
+                           IX1 = IX
+                           IX2 = IX+1
+                           IZ1 = IZ
+                           IZ2 = IZ+1
+
+                           IC11 = (IZ1-1)*SC%NX + IX1
+                           IC12 = (IZ2-1)*SC%NX + IX1
+                           IC21 = (IZ1-1)*SC%NX + IX2
+                           IC22 = (IZ2-1)*SC%NX + IX2
+
+                           SC%CELLTYPE(IC11) = NSCARC_CELLTYPE_COARSE
+                           SC%CELLTYPE(IC12) = NSCARC_CELLTYPE_SFINE
+                           SC%CELLTYPE(IC21) = NSCARC_CELLTYPE_SFINE
+                           SC%CELLTYPE(IC22) = NSCARC_CELLTYPE_SFINE
+
+WRITE(SCARC_LU,'(a,i4,a,i4,a,i4,a,i4)') 'IX1 =', IX1,': IX1 =', IX1,': IZ1 =', IZ1,': IZ2 =', IZ2
+WRITE(SCARC_LU,'(a,i4,a,i4,a,i4,a,i4)') 'IC11=',IC11,': IC12=',IC12,': IC21=',IC21,': IC22=',IC22
+WRITE(SCARC_LU,'(a,i4,a,i4)') 'Celltype(',IC11,')=',SC%CELLTYPE(IC11)
+WRITE(SCARC_LU,'(a,i4,a,i4)') 'Celltype(',IC12,')=',SC%CELLTYPE(IC12)
+WRITE(SCARC_LU,'(a,i4,a,i4)') 'Celltype(',IC21,')=',SC%CELLTYPE(IC21)
+WRITE(SCARC_LU,'(a,i4,a,i4)') 'Celltype(',IC22,')=',SC%CELLTYPE(IC22)
+
+                        ENDDO
+                     ENDDO
+
+                  ENDIF
+
+               ENDIF
+
+            ENDDO GMG_LOOP
+
+         CASE (NSCARC_DIMENSION_THREE)
+
+            WRITE(*,*) 'GMG_COARSENING FOR 3D not yet implemented'
+
+      END SELECT SELECT_GMG_DIMENSION
+
+CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_CELLTYPE', 'GMG_COARSENING ')
+
 
    !!!-------------------------------------------------------------------------------------------------
    !!! first set celltypes for cells in internal boundary layers (adjacent to neighboring meshes)
@@ -6486,13 +6607,14 @@ END FUNCTION GET_WALL_CELL
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_SETUP_PROLONGATION(NL)
 INTEGER , INTENT(IN) :: NL
-INTEGER  :: NM, IP, IC, JC, KC, ICOL, JCOL, ICG, ICA
+INTEGER  :: NM, IP, IC, JC, KC, ICOL, JCOL, ICG, ICA, IMODX, IMODZ, IX, IZ
 INTEGER  :: IW, IW0, IW2, IDIAG, JDIAG, JCO
 REAL(EB) :: SUM_COUPLED, SUM_CPOINTS, SCAL, SUM_COARSE, SUM_DIAG
 REAL(EB) :: VALUES(20), WEIGHTS(20)
 INTEGER  :: NEIGHBOR(20), NWEIGHTS, NWEIGHTS2
 INTEGER  :: COARSE_CELL(20), COARSE_INDEX(20)
 TYPE (SCARC_COMPACT_TYPE), POINTER :: SC
+
 
 SELECT_INTERPOLATION: SELECT CASE (TYPE_INTERPOL)
 
@@ -6505,6 +6627,48 @@ SELECT_INTERPOLATION: SELECT CASE (TYPE_INTERPOL)
          WRITE(*,*) 'Standard interpolatiion not yet implemented'
       ENDDO MESHES_LOOP_STANDARD
       stop
+
+   !!! -------------------------------------------------------------------------------------------------
+   !!! GMG-like interpolation
+   !!! -------------------------------------------------------------------------------------------------
+   CASE (NSCARC_INTERPOL_GMG)
+
+      MESHES_LOOP_GMG: DO NM = NMESHES_MIN, NMESHES_MAX
+         SC => SCARC(NM)%COMPACT(NL)
+WRITE(SCARC_LU,*) 'SIZE(P_ROW)=',SIZE(SC%P_ROW)
+WRITE(SCARC_LU,*) 'SIZE(P_COL)=',SIZE(SC%P_COL)
+WRITE(SCARC_LU,*) 'SIZE(P)=',SIZE(SC%P)
+         IP = 1
+         DO IZ = 1, SC%NZ
+            DO IX = 1, SC%NX
+
+               IMODX = MOD(IX,2)
+               IMODZ = MOD(IZ,2)
+
+               IC = (IZ-1)*SC%NX + IX
+               SC%P_ROW(IC) = IP
+
+               IF (IMODX == 1 .AND. IMODZ == 1) THEN
+                  SC%P_COL(IP) = SC%CELLTYPE(IC)
+               ELSE IF (IMODX == 1 .AND. IMODZ == 0) THEN
+                  SC%P_COL(IP) = SC%CELLTYPE((IZ-2)*SC%NX + IX)
+               ELSE IF (IMODX == 0 .AND. IMODZ == 1) THEN
+                  SC%P_COL(IP) = SC%CELLTYPE((IZ-1)*SC%NX + IX-1)
+               ELSE
+                  SC%P_COL(IP) = SC%CELLTYPE((IZ-2)*SC%NX + IX-1)
+               ENDIF
+               SC%P(IP) = 1.0_EB
+WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,a,i3,a,i3,a,f12.6)') &
+     ' IMODX=',IMODX,': IMODZ=',IMODZ,': P_COL(',IP,')=',SC%P_COL(IP),': P(',IP,')=',SC%P(IP)
+
+               IP = IP + 1
+            ENDDO
+         ENDDO
+         SC%P_ROW(SC%NC+1) = IP
+
+      ENDDO MESHES_LOOP_GMG
+
+   CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_PROLONGATION, NL, 'SETUP_PROLONGATION', 'FINAL PROLONG1')
 
    !!! -------------------------------------------------------------------------------------------------
    !!! Classical interpolation
@@ -7058,78 +7222,127 @@ END SUBROUTINE SCARC_SETUP_PROLONGATION
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_SETUP_RESTRICTION(NL)
 INTEGER , INTENT(IN) :: NL
-INTEGER  :: NM, NOM, ICP, ICP2, IC, IC2, IG, IG0, ICC
+INTEGER  :: NM, NOM, ICP, ICP2, IC, IC2, IG, IG0, ICC, IP, IX, IZ, IC11, IC12, IC21, IC22
 LOGICAL  :: BFIRST
 TYPE (OSCARC_TYPE), POINTER :: OS
 TYPE (SCARC_COMPACT_TYPE) , POINTER :: SC
 TYPE (OSCARC_COMPACT_TYPE), POINTER :: OSC
 
-MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
-
-   SC => SCARC(NM)%COMPACT(NL)
+SELECT CASE (TYPE_INTERPOL)
    
-   IC2 = 1
-   DO ICP = 1, SC%NCCE
-      BFIRST = .TRUE.
-      DO IC = 1, SC%NCE
-         
-         ROW_LOOP: DO ICP2 = SC%P_ROW(IC),SC%P_ROW(IC+1)-1
-            IF (SC%P_COL(ICP2) == ICP) THEN
-               SC%R(IC2) = SC%P(ICP2)
-               IF (BFIRST) THEN
-                  SC%R_ROW(ICP) = IC2
-               ENDIF
-               SC%R_COL(IC2) = IC
-               IC2 = IC2 + 1
-               BFIRST = .FALSE.
-               EXIT ROW_LOOP
-            ENDIF
-         ENDDO ROW_LOOP
-   
-      ENDDO
-   
-   ENDDO
-   SC%R_ROW(SC%NCCE+1)=IC2
+   !!! -------------------------------------------------------------------------------------------------
+   !!! GMG-like interpolation
+   !!! -------------------------------------------------------------------------------------------------
+   CASE (NSCARC_INTERPOL_GMG)
 
-   OTHER_MESHES_LOOP: DO NOM = 1, NMESHES
+      MESHES_LOOP_GMG: DO NM = NMESHES_MIN, NMESHES_MAX
+         SC => SCARC(NM)%COMPACT(NL)
+         IP = 1
+         ICC = 1
+         DO IZ = 1, SC%NZ, 2
+            DO IX = 1, SC%NX, 2
 
-      IF (NOM == NM) CYCLE OTHER_MESHES_LOOP
-      OS  => SCARC(NM)%OSCARC(NOM)      
-      IF (OS%NICMAX_S==0 .AND. OS%NICMAX_R==0) CYCLE OTHER_MESHES_LOOP
-      OSC  => SCARC(NM)%OSCARC(NOM)%COMPACT(NL)      
+               IC11 = (IZ-1)*SC%NX + IX
+               IC12 = (IZ  )*SC%NX + IX
+               IC21 = (IZ-1)*SC%NX + IX+1
+               IC22 = (IZ  )*SC%NX + IX+1
+  
+               SC%R_ROW(ICC) = IP
 
-      IC2 = 1
-      ICC = 0
-      OTHER_GHOSTCELL_LOOP: DO IG0 = 1, OSC%NG
- 
-         ICP = OSC%CELLTYPE(IG0)
-         IF (ICP < NSCARC_CELLTYPE_COARSE) CYCLE OTHER_GHOSTCELL_LOOP
-         ICC = ICC + 1
+               SC%R_COL(IP  ) = IC11
+               SC%R_COL(IP+1) = IC12
+               SC%R_COL(IP+2) = IC21
+               SC%R_COL(IP+3) = IC22
 
-         BFIRST = .TRUE.
-         DO IG = 1, OSC%NG
-         
-            OTHER_ROW_LOOP: DO ICP2 = OSC%P_ROW(IG),OSC%P_ROW(IG+1)-1
-               IF (OSC%P_COL(ICP2) == ICC) THEN
-                  OSC%R(IC2) = OSC%P(ICP2)
-                  IF (BFIRST) THEN
-                     OSC%R_ROW(ICC) = IC2
-                  ENDIF
-                  OSC%R_COL(IC2) = IG
-                  IC2 = IC2 + 1
-                  BFIRST = .FALSE.
-                  EXIT OTHER_ROW_LOOP
-               ENDIF
-            ENDDO OTHER_ROW_LOOP
-   
+               SC%R(IP  ) = 0.25_EB
+               SC%R(IP+1) = 0.25_EB
+               SC%R(IP+2) = 0.25_EB
+               SC%R(IP+3) = 0.25_EB
+
+WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,a,i3,a,i3,a,4i3,a,i3,a,4f12.6)') &
+   'IX=',IX,': IZ=',IZ,': R_ROW(',ICC,')=',SC%R_ROW(ICC), ': R_COL(',IP,'+)=',SC%R_COL(IP:IP+3),': R(',IP,'+)=',SC%R(IP:IP+3)
+               IP = IP + 4
+               ICC = ICC + 1
+            ENDDO
+
          ENDDO
-     
-      ENDDO OTHER_GHOSTCELL_LOOP
-      OSC%R_ROW(ICC+1)=IC2
+         SC%R_ROW(SC%NCC+1) = IP
 
-   ENDDO OTHER_MESHES_LOOP
+      ENDDO MESHES_LOOP_GMG
 
-ENDDO MESHES_LOOP
+   !!! -------------------------------------------------------------------------------------------------
+   !!! DEFAULT
+   !!! -------------------------------------------------------------------------------------------------
+   CASE DEFAULT
+  
+      MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+      
+         SC => SCARC(NM)%COMPACT(NL)
+         
+         IC2 = 1
+         DO ICP = 1, SC%NCCE
+            BFIRST = .TRUE.
+            DO IC = 1, SC%NCE
+               
+               ROW_LOOP: DO ICP2 = SC%P_ROW(IC),SC%P_ROW(IC+1)-1
+                  IF (SC%P_COL(ICP2) == ICP) THEN
+                     SC%R(IC2) = SC%P(ICP2)
+                     IF (BFIRST) THEN
+                        SC%R_ROW(ICP) = IC2
+                     ENDIF
+                     SC%R_COL(IC2) = IC
+                     IC2 = IC2 + 1
+                     BFIRST = .FALSE.
+                     EXIT ROW_LOOP
+                  ENDIF
+               ENDDO ROW_LOOP
+         
+            ENDDO
+         
+         ENDDO
+         SC%R_ROW(SC%NCCE+1)=IC2
+      
+         OTHER_MESHES_LOOP: DO NOM = 1, NMESHES
+      
+            IF (NOM == NM) CYCLE OTHER_MESHES_LOOP
+            OS  => SCARC(NM)%OSCARC(NOM)      
+            IF (OS%NICMAX_S==0 .AND. OS%NICMAX_R==0) CYCLE OTHER_MESHES_LOOP
+            OSC  => SCARC(NM)%OSCARC(NOM)%COMPACT(NL)      
+      
+            IC2 = 1
+            ICC = 0
+            OTHER_GHOSTCELL_LOOP: DO IG0 = 1, OSC%NG
+       
+               ICP = OSC%CELLTYPE(IG0)
+               IF (ICP < NSCARC_CELLTYPE_COARSE) CYCLE OTHER_GHOSTCELL_LOOP
+               ICC = ICC + 1
+      
+               BFIRST = .TRUE.
+               DO IG = 1, OSC%NG
+               
+                  OTHER_ROW_LOOP: DO ICP2 = OSC%P_ROW(IG),OSC%P_ROW(IG+1)-1
+                     IF (OSC%P_COL(ICP2) == ICC) THEN
+                        OSC%R(IC2) = OSC%P(ICP2)
+                        IF (BFIRST) THEN
+                           OSC%R_ROW(ICC) = IC2
+                        ENDIF
+                        OSC%R_COL(IC2) = IG
+                        IC2 = IC2 + 1
+                        BFIRST = .FALSE.
+                        EXIT OTHER_ROW_LOOP
+                     ENDIF
+                  ENDDO OTHER_ROW_LOOP
+         
+               ENDDO
+           
+            ENDDO OTHER_GHOSTCELL_LOOP
+            OSC%R_ROW(ICC+1)=IC2
+      
+         ENDDO OTHER_MESHES_LOOP
+      
+      ENDDO MESHES_LOOP
+
+END SELECT
 
   
 CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_RESTRICTION, NL, 'SETUP_RESTRICTION', 'FINAL RESTRICT')
@@ -7149,78 +7362,163 @@ INTEGER , INTENT(IN) :: NL
 INTEGER :: NM, IC, ICO2, IERR, ICP1, ICP2, IP, ICOL, IDIAG
 REAL (EB), ALLOCATABLE, DIMENSION(:) :: VAL
 !REAL(EB):: MAUX1(50,50)=0.0_EB!, MAUX2(30,30)=0.0_EB
-REAL:: AUX1, AUX2, PW
+REAL:: AUX1, AUX2, PW!, MATRIX(16,16)
 TYPE (SCARC_COMPACT_TYPE), POINTER :: SCF, SCC
 
 IERR = 0
+SELECT CASE (TYPE_COARSENING)
 
-MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+   CASE (NSCARC_COARSENING_GMG)
 
-   SCF => SCARC(NM)%COMPACT(NL)             ! pointer to fine level
-   SCC => SCARC(NM)%COMPACT(NL+1)           ! pointer to coarse level
-   
-   IF (NMESHES==1) THEN
-      ALLOCATE (VAL(SCF%NC), STAT=IERR)
-   ELSE
-      ALLOCATE (VAL(SCF%NCE), STAT=IERR)
-   ENDIF
-   CALL CHKMEMERR ('SCARC_TRANSFER_MATRIX', 'VAL', IERR)
-   VAL = 0.0_EB
-   
-   ICP1_LOOP: DO ICP1 = 1, SCF%NCC
-
-
-      !!! -------------------------------------------------------------------------------------
-      !!! First: loop over the internal coarse cells
-      !!! -------------------------------------------------------------------------------------
-      ICP2_LOOP1: DO ICP2 = 1, SCF%NCCE
-
-         AUX2 = 0.0_EB
+      MESHES_GMG: DO NM = NMESHES_MIN, NMESHES_MAX
+      
+         SCF => SCARC(NM)%COMPACT(NL)             ! pointer to fine level
+         SCC => SCARC(NM)%COMPACT(NL+1)           ! pointer to coarse level
          
-         DO IC = 1, SCF%NC
-   
-            IDIAG = SCF%A_ROW(IC)
-            PW    = P_WEIGHT(IC, ICP2, NM, NL)
-            AUX1  = SCF%A(IDIAG) * PW
-   
-            COUPLINGS_LOOP: DO ICOL = SCF%A_ROW(IC)+1, SCF%A_ROW(IC+1)-1
-               ICO2  = SCF%A_COL(ICOL)
-               PW = P_WEIGHT(ICO2, ICP2, NM, NL)
-               AUX1 = AUX1 + SCF%A(ICOL) * PW
-            ENDDO COUPLINGS_LOOP
-            
-            AUX2 = AUX2 + P_WEIGHT(IC, ICP1, NM, NL) * AUX1
-
-         ENDDO
-         VAL(ICP2) = AUX2
-
-      ENDDO ICP2_LOOP1
-   
-      !!! analyze new matrix line and store it corresponding to compact storage technique:
-      !!! (diagonal entry first)
-      SCC%A(IP)       = VAL(ICP1)
-      SCC%A_ROW(ICP1) = IP
-      SCC%A_COL(IP)   = ICP1
-   
-      IP  = IP + 1
-      ICP2_LOOP3: DO ICP2 = 1, SCF%NCCE
-      !DO ICP2 = 1, SCF%NCC
-         IF (ICP2 /= ICP1 .AND. ABS(VAL(ICP2)) >= 1.0E-12_EB) THEN
-            SCC%A(IP)     = VAL(ICP2)
-            SCC%A_COL(IP) = ICP2
-            IP  = IP + 1
+         IF (NMESHES==1) THEN
+            ALLOCATE (VAL(SCF%NC), STAT=IERR)
+         ELSE
+            ALLOCATE (VAL(SCF%NCE), STAT=IERR)
          ENDIF
-      ENDDO ICP2_LOOP3
-   
-      VAL = 0.0_EB
-   ENDDO ICP1_LOOP
+         CALL CHKMEMERR ('SCARC_TRANSFER_MATRIX', 'VAL', IERR)
+         VAL = 0.0_EB
+         
+WRITE(SCARC_LU,*) 'PRINTING MATRIX'
+         ICP1_GMG_LOOP: DO ICP1 = 1, SCF%NCC
+      
+      
+            !!! -------------------------------------------------------------------------------------
+            !!! First: loop over the internal coarse cells
+            !!! -------------------------------------------------------------------------------------
+            ICP2_GMG_LOOP1: DO ICP2 = 1, SCF%NCC
+      
+               AUX2 = 0.0_EB
+               
+               DO IC = 1, SCF%NC
+         
+                  IDIAG = SCF%A_ROW(IC)
+                  PW    = P_WEIGHT(IC, ICP2, NM, NL)
+                  AUX1  = SCF%A(IDIAG) * PW
+         
+                  COUPLINGS_GMG_LOOP: DO ICOL = SCF%A_ROW(IC)+1, SCF%A_ROW(IC+1)-1
+                     ICO2  = SCF%A_COL(ICOL)
+                     PW = P_WEIGHT(ICO2, ICP2, NM, NL)
+                     AUX1 = AUX1 + SCF%A(ICOL) * PW
+                  ENDDO COUPLINGS_GMG_LOOP
+!MATRIX(IC, ICP2 ) = AUX1
+!WRITE(SCARC_LU,*) 'MATRIX(',IC,',',ICP2,')=',MATRIX(IC,ICP2)
+                  
+                  AUX2 = AUX2 + R_WEIGHT(IC, ICP1, NM, NL) * AUX1
+      
+               ENDDO
+               VAL(ICP2) = AUX2
+      
+            ENDDO ICP2_GMG_LOOP1
+         
+!WRITE(SCARC_LU,'(4f12.6)') ((MATRIX(IC0,ICP0),ICP0=1,4),IC0=1,16)
 
-   SCC%A_ROW(SCC%NC+1) = IP
-   SCC%NA = IP - 1
-   
-   DEALLOCATE(VAL)
-   
-ENDDO MESHES_LOOP
+            !!! analyze new matrix line and store it corresponding to compact storage technique:
+            !!! (diagonal entry first)
+            SCC%A(IP)       = VAL(ICP1)
+            SCC%A_ROW(ICP1) = IP
+            SCC%A_COL(IP)   = ICP1
+         
+            IP  = IP + 1
+            ICP2_GMG_LOOP3: DO ICP2 = 1, SCF%NCCE
+            !DO ICP2 = 1, SCF%NCC
+               IF (ICP2 /= ICP1 .AND. ABS(VAL(ICP2)) >= 1.0E-12_EB) THEN
+                  SCC%A(IP)     = VAL(ICP2)
+                  SCC%A_COL(IP) = ICP2
+                  IP  = IP + 1
+               ENDIF
+            ENDDO ICP2_GMG_LOOP3
+         
+            VAL = 0.0_EB
+         ENDDO ICP1_GMG_LOOP
+      
+         SCC%A_ROW(SCC%NC+1) = IP
+         SCC%NA = IP - 1
+         
+         DEALLOCATE(VAL)
+         
+      ENDDO MESHES_GMG
+
+
+
+
+
+
+   CASE DEFAULT
+
+      MESHES_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
+      
+         SCF => SCARC(NM)%COMPACT(NL)             ! pointer to fine level
+         SCC => SCARC(NM)%COMPACT(NL+1)           ! pointer to coarse level
+         
+         IF (NMESHES==1) THEN
+            ALLOCATE (VAL(SCF%NC), STAT=IERR)
+         ELSE
+            ALLOCATE (VAL(SCF%NCE), STAT=IERR)
+         ENDIF
+         CALL CHKMEMERR ('SCARC_TRANSFER_MATRIX', 'VAL', IERR)
+         VAL = 0.0_EB
+         
+         ICP1_LOOP: DO ICP1 = 1, SCF%NCC
+      
+      
+            !!! -------------------------------------------------------------------------------------
+            !!! First: loop over the internal coarse cells
+            !!! -------------------------------------------------------------------------------------
+            ICP2_LOOP1: DO ICP2 = 1, SCF%NCCE
+      
+               AUX2 = 0.0_EB
+               
+               DO IC = 1, SCF%NC
+         
+                  IDIAG = SCF%A_ROW(IC)
+                  PW    = P_WEIGHT(IC, ICP2, NM, NL)
+                  AUX1  = SCF%A(IDIAG) * PW
+         
+                  COUPLINGS_LOOP: DO ICOL = SCF%A_ROW(IC)+1, SCF%A_ROW(IC+1)-1
+                     ICO2  = SCF%A_COL(ICOL)
+                     PW = P_WEIGHT(ICO2, ICP2, NM, NL)
+                     AUX1 = AUX1 + SCF%A(ICOL) * PW
+                  ENDDO COUPLINGS_LOOP
+                  
+                  AUX2 = AUX2 + P_WEIGHT(IC, ICP1, NM, NL) * AUX1
+      
+               ENDDO
+               VAL(ICP2) = AUX2
+      
+            ENDDO ICP2_LOOP1
+         
+            !!! analyze new matrix line and store it corresponding to compact storage technique:
+            !!! (diagonal entry first)
+            SCC%A(IP)       = VAL(ICP1)
+            SCC%A_ROW(ICP1) = IP
+            SCC%A_COL(IP)   = ICP1
+         
+            IP  = IP + 1
+            ICP2_LOOP3: DO ICP2 = 1, SCF%NCCE
+            !DO ICP2 = 1, SCF%NCC
+               IF (ICP2 /= ICP1 .AND. ABS(VAL(ICP2)) >= 1.0E-12_EB) THEN
+                  SCC%A(IP)     = VAL(ICP2)
+                  SCC%A_COL(IP) = ICP2
+                  IP  = IP + 1
+               ENDIF
+            ENDDO ICP2_LOOP3
+         
+            VAL = 0.0_EB
+         ENDDO ICP1_LOOP
+      
+         SCC%A_ROW(SCC%NC+1) = IP
+         SCC%NA = IP - 1
+         
+         DEALLOCATE(VAL)
+         
+      ENDDO MESHES_LOOP
+      
+END SELECT
 
 CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_MATRIX, NL+1, 'TRANSFER_MATRIX', 'Next coarser matrix1')
 TYPE_MATRIX = NSCARC_MATRIX_SUBDIAG
@@ -7283,6 +7581,7 @@ ENDIF
 R_WEIGHT = VAL
 RETURN 
 END FUNCTION R_WEIGHT
+
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -9871,50 +10170,50 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
                         CASE (1)
                            IF (SC%WALL(IW)%BTYPE==DIRICHLET) THEN
                               SC%F(IC) = SC%F(IC) - 2.0_EB * SC%DXI2 * M%BXS(J,K)         ! Dirichlet
-!WRITE(*,*) 'A:F(',I,',',J,',',K,')=',SC%F(IC)
+!WRITE(*,'(a,i3,a,i3,a,i3,a,f18.10)') 'A:F(',I,',',J,',',K,')=',SC%F(IC)
                            ELSE IF (SC%WALL(IW)%BTYPE==NEUMANN) THEN
                               SC%F(IC) = SC%F(IC) + SC%DXI * M%BXS(J,K)                   ! Neumann
-!WRITE(*,*) 'B:F(',I,',',J,',',K,')=',SC%F(IC)
+!WRITE(*,'(a,i3,a,i3,a,i3,a,f18.10)') 'B:F(',I,',',J,',',K,')=',SC%F(IC)
                            ENDIF
                         CASE (-1)
                            IF (SC%WALL(IW)%BTYPE==DIRICHLET) THEN
                               SC%F(IC) = SC%F(IC) - 2.0_EB * SC%DXI2 *M%BXF(J,K)          ! Dirichlet
-!WRITE(*,*) 'C:F(',I,',',J,',',K,')=',SC%F(IC)
+!WRITE(*,'(a,i3,a,i3,a,i3,a,f18.10)') 'C:F(',I,',',J,',',K,')=',SC%F(IC)
                            ELSE IF (SC%WALL(IW)%BTYPE==NEUMANN) THEN
                               SC%F(IC) = SC%F(IC) - SC%DXI *M%BXF(J,K)                    ! Neumann
-!WRITE(*,*) 'D:F(',I,',',J,',',K,')=',SC%F(IC)
+!WRITE(*,'(a,i3,a,i3,a,i3,a,f18.10)') 'D:F(',I,',',J,',',K,')=',SC%F(IC)
                            ENDIF
                         CASE (2)
                            IF (SC%WALL(IW)%BTYPE==DIRICHLET) THEN
                               SC%F(IC) = SC%F(IC) - 2.0_EB * SC%DYI2 * M%BYS(I,K)         ! Dirichlet
-!WRITE(*,*) 'E:F(',I,',',J,',',K,')=',SC%F(IC)
+!WRITE(*,'(a,i3,a,i3,a,i3,a,f18.10)') 'E:F(',I,',',J,',',K,')=',SC%F(IC)
                            ELSE IF (SC%WALL(IW)%BTYPE==NEUMANN) THEN
                               SC%F(IC) = SC%F(IC) + SC%DYI * M%BYS(I,K)                   ! Neumann
-!WRITE(*,*) 'F:F(',I,',',J,',',K,')=',SC%F(IC)
+!WRITE(*,'(a,i3,a,i3,a,i3,a,f18.10)') 'F:F(',I,',',J,',',K,')=',SC%F(IC)
                            ENDIF
                         CASE (-2)
                            IF (SC%WALL(IW)%BTYPE==DIRICHLET) THEN
                               SC%F(IC) = SC%F(IC) - 2.0_EB * SC%DYI2 *M%BYF(I,K)          ! Dirichlet
-!WRITE(*,*) 'G:F(',I,',',J,',',K,')=',SC%F(IC)
+!WRITE(*,'(a,i3,a,i3,a,i3,a,f18.10)') 'G:F(',I,',',J,',',K,')=',SC%F(IC)
                            ELSE IF (SC%WALL(IW)%BTYPE==NEUMANN) THEN
                               SC%F(IC) = SC%F(IC) - SC%DYI *M%BYF(I,K)                    ! Neumann
-!WRITE(*,*) 'H:F(',I,',',J,',',K,')=',SC%F(IC)
+!WRITE(*,'(a,i3,a,i3,a,i3,a,f18.10)') 'H:F(',I,',',J,',',K,')=',SC%F(IC)
                            ENDIF
                         CASE (3)
                            IF (SC%WALL(IW)%BTYPE==DIRICHLET) THEN
                               SC%F(IC) = SC%F(IC) - 2.0_EB * SC%DZI2 * M%BZS(I,J)         ! Dirichlet
-!WRITE(*,*) 'I:F(',I,',',J,',',K,')=',SC%F(IC)
+!WRITE(*,'(a,i3,a,i3,a,i3,a,f18.10)') 'I:F(',I,',',J,',',K,')=',SC%F(IC)
                            ELSE IF (SC%WALL(IW)%BTYPE==NEUMANN) THEN
                               SC%F(IC) = SC%F(IC) + SC%DZI * M%BZS(I,J)                   ! Neumann
-!WRITE(*,*) 'J:F(',I,',',J,',',K,')=',SC%F(IC)
+!WRITE(*,'(a,i3,a,i3,a,i3,a,f18.10)') 'J:F(',I,',',J,',',K,')=',SC%F(IC)
                            ENDIF
                         CASE (-3)
                            IF (SC%WALL(IW)%BTYPE==DIRICHLET) THEN
                               SC%F(IC) = SC%F(IC) - 2.0_EB * SC%DZI2 * M%BZF(I,J)         ! Dirichlet
-!WRITE(*,*) 'K:F(',I,',',J,',',K,')=',SC%F(IC)
+!WRITE(*,'(a,i3,a,i3,a,i3,a,f18.10)') 'K:F(',I,',',J,',',K,')=',SC%F(IC)
                            ELSE IF (SC%WALL(IW)%BTYPE==NEUMANN) THEN
                               SC%F(IC) = SC%F(IC) - SC%DZI  * M%BZF(I,J)                  ! Neumann
-!WRITE(*,*) 'L:F(',I,',',J,',',K,')=',SC%F(IC)
+!WRITE(*,'(a,i3,a,i3,a,i3,a,f18.10)') 'L:F(',I,',',J,',',K,')=',SC%F(IC)
                            ENDIF
                      END SELECT
                   
@@ -11427,6 +11726,7 @@ EXCHANGE_SEND_LOOP2: DO NOM = NMESHES_MIN, NMESHES_MAX
                      ALLOCATE (OSO%SEND_INT(NLEN))
                      OSO%SEND_INT = 0
 
+!WRITE(*,'(a,i3,a,5i7)') 'LEVEL ', NL,': ALLOCATING SEND_INT in length ', NLEN, OSC%NW, 15*OSC%NW, OSC%NWS
 
                   CASE (NSCARC_EXCHANGE_WALL)
                      IF (RNODE/=SNODE) THEN
