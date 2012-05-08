@@ -608,6 +608,7 @@ EXTERNCPP void drawvolslice(const slicedata *sd);
 EXTERNCPP void drawvvolslice(const vslicedata *vd);
 EXTERNCPP void drawvvolslice_terrain(const vslicedata *vd);
 EXTERNCPP void drawvslice(const vslicedata *vd);
+EXTERNCPP void drawvslice_cellcenter(const vslicedata *vd);
 EXTERNCPP void drawvslice_terrain(const vslicedata *vd);
 EXTERNCPP void drawTimeBar(void);
 EXTERNCPP void drawColorBars(void);
