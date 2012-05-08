@@ -635,7 +635,8 @@ SVEXTERN int stepclip_X,stepclip_Y,stepclip_Z;
 SVEXTERN float partpointsize,SVDECL(vectorpointsize,2.0),streaklinewidth;
 SVEXTERN float isopointsize, isolinewidth;
 SVEXTERN float plot3dpointsize, plot3dlinewidth;
-SVEXTERN float SVDECL(vectorlinewidth,1.0);
+SVEXTERN float SVDECL(vectorlinewidth,3.0);
+SVEXTERN float SVDECL(gridlinewidth,2.0);
 SVEXTERN void update_vector_widgets(void);
 
 

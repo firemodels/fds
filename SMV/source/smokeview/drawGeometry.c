@@ -4746,6 +4746,9 @@ void draw_facesOLD(){
           else{
             glLineWidth(*facei->linewidth);
           }
+          if(visGrid!=0){
+            glLineWidth(5.0);
+          }
           glBegin(GL_LINES);
           glColor3fv(facei->linecolor);
           glVertex3fv(vertices);

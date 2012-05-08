@@ -1853,7 +1853,7 @@ void drawgrid(const mesh *meshi){
   if(visx_all==0&&visy_all==0&&visz_all==0)return;
   if(visGrid==GridProbe||visGrid==GridnoProbe){
     antialias(1);
-    glLineWidth(vectorlinewidth);
+    glLineWidth(gridlinewidth);
     if(meshi->meshrgb_ptr!=NULL){
       glColor3fv(meshi->meshrgb);
     }
