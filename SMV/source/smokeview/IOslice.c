@@ -3052,7 +3052,12 @@ void drawvslice_frame(void){
         drawvvolslice_terrain(vd);
       }
       else{
-        drawvvolslice(vd);
+        if(vd->slicetype==SLICE_CENTER){
+          drawvvolslice(vd);
+        }
+        else{
+          drawvvolslice(vd);
+        }
       }
     }
     else{

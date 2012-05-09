@@ -70,6 +70,15 @@ void next_xindex(int inc,int flag){
         meshi = meshinfo + slicei->blocknumber;
         if(meshi->iplotx_all[iplotx_all]!=-1)return;
       }
+      for(i=0;i<nvsliceinfo;i++){
+        vslicedata *vslicei;
+        mesh *meshi;
+
+        vslicei = vsliceinfo + i;
+        if(vslicei->loaded==0||vslicei->display==0)continue;
+        meshi = meshinfo + vslicei->val->blocknumber;
+        if(meshi->iploty_all[iploty_all]!=-1)return;
+      }
     }
     else{
       for(i=0;i<nplot3dinfo;i++){
@@ -114,6 +123,15 @@ void next_yindex(int inc,int flag){
         slicei = sliceinfo + i;
         if(slicei->loaded==0||slicei->display==0)continue;
         meshi = meshinfo + slicei->blocknumber;
+        if(meshi->iploty_all[iploty_all]!=-1)return;
+      }
+      for(i=0;i<nvsliceinfo;i++){
+        vslicedata *vslicei;
+        mesh *meshi;
+
+        vslicei = vsliceinfo + i;
+        if(vslicei->loaded==0||vslicei->display==0)continue;
+        meshi = meshinfo + vslicei->val->blocknumber;
         if(meshi->iploty_all[iploty_all]!=-1)return;
       }
     }
@@ -161,6 +179,15 @@ void next_zindex(int inc,int flag){
         if(slicei->loaded==0||slicei->display==0)continue;
         meshi = meshinfo + slicei->blocknumber;
         if(meshi->iplotz_all[iplotz_all]!=-1)return;
+      }
+      for(i=0;i<nvsliceinfo;i++){
+        vslicedata *vslicei;
+        mesh *meshi;
+
+        vslicei = vsliceinfo + i;
+        if(vslicei->loaded==0||vslicei->display==0)continue;
+        meshi = meshinfo + vslicei->val->blocknumber;
+        if(meshi->iploty_all[iploty_all]!=-1)return;
       }
     }
     else{

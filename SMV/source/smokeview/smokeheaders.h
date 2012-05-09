@@ -605,6 +605,7 @@ EXTERNCPP void drawvolslice_cellcenter_interp(const slicedata *sd);
 EXTERNCPP int new_multi_slice(slicedata *sdold,slicedata *sd);
 EXTERNCPP int hide_slice2(slicedata *sdi,slicedata *sdj);
 EXTERNCPP void drawvolslice(const slicedata *sd);
+EXTERNCPP void drawvvolslice_cellcenter(const vslicedata *vd);
 EXTERNCPP void drawvvolslice(const vslicedata *vd);
 EXTERNCPP void drawvvolslice_terrain(const vslicedata *vd);
 EXTERNCPP void drawvslice(const vslicedata *vd);
