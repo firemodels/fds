@@ -585,6 +585,7 @@ TYPE OSCARC_TYPE
 
 REAL (EB), POINTER, DIMENSION (:) :: SEND_REAL, RECV_REAL
 INTEGER  , POINTER, DIMENSION (:) :: SEND_INT , RECV_INT 
+INTEGER :: IBUF_SEND(10) , IBUF_RECV(10)
 INTEGER :: NICMAX_R=0, NICMAX_S=0
 INTEGER :: I_MIN_R=-10,I_MAX_R=-10,J_MIN_R=-10,J_MAX_R=-10,K_MIN_R=-10,K_MAX_R=-10,NIC_R=0, &
            I_MIN_S=-10,I_MAX_S=-10,J_MIN_S=-10,J_MAX_S=-10,K_MIN_S=-10,K_MAX_S=-10,NIC_S=0
@@ -1294,6 +1295,7 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
 
             !!! Get global number of grid cells (internal and including ghost cells)
             SC%NC  = SC%NX * SC%NY * SC%NZ 
+
             SELECT CASE (TYPE_DIMENSION)
                CASE (NSCARC_DIMENSION_TWO)
                   SC%NCG = (SC%NX+2) * (SC%NZ+2) 
@@ -1330,8 +1332,9 @@ TYPE (OSCARC_COMPACT_TYPE), POINTER :: OSCF, OSCC
 IERR = 0
 
 !!! Initialize communication counter for ScaRC, use same TAG for all communications
-N_EXCHANGES = 0
-TAG_SCARC  = 99
+NREQ_SCARC  =  0
+N_EXCHANGES =  0
+TAG_SCARC   = 99
 
 !!!----------------------------------------------------------------------------------------------------
 !!! Store communication counters from FDS-code
@@ -1818,6 +1821,8 @@ SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
 
          ALLOCATE(SCF%WALL(SCF%NW), STAT=IERR)
          CALL ChkMemErr('SCARC_SETUP_WALLINFO','WALL',IERR)
+
+!WRITE(SCARC_LU,*) '2: SCARC(',NM,')%COMPACT(',NLEVEL_MIN,')%NC=',SCF%NC
 
          ALLOCATE(SCF%INTERNAL_BDRY_CELL(SCF%NC), STAT=IERR)
          CALL ChkMemErr('SCARC_SETUP_WALLINFO','INTERNAL_BDRY_CELL',IERR)
@@ -3310,12 +3315,15 @@ IF (NMESHES>1) THEN
          TYPE_MATRIX = NSCARC_MATRIX_SUBDIAG
          CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_MATRIX, NLEVEL_MIN)
 
-         IF (TYPE_SYSTEM == NSCARC_SYSTEM_COMPACT) THEN
+         IF (TYPE_SYSTEM == NSCARC_SYSTEM_COMPACT .AND. TYPE_MULTIGRID == NSCARC_MULTIGRID_ALGEBRAIC) THEN
 
             !!! set sizes for matrix stencils on overlapping parts
             TYPE_MATRIX = NSCARC_MATRIX_STENCIL
             CALL SCARC_EXCHANGE (NSCARC_EXCHANGE_MATRIX, NLEVEL_MIN)
             CALL SCARC_SETUP_OVERLAPS (NSCARC_MATRIX_STENCIL, NLEVEL_MIN)
+
+            WRITE(*,*) 'ACHTUNG: HIER GAB ES NOCH EINEN FEHLER FÜR DEN SANDIA-FALL IN UNPACK_CMATRIX !!!'
+            STOP
 
             !!! exchange matrix entries on overlapping parts
             TYPE_MATRIX = NSCARC_MATRIX_SYSTEM
@@ -3326,6 +3334,7 @@ IF (NMESHES>1) THEN
    END SELECT
 
 ENDIF
+
 
 DO NL=NLEVEL_MIN, NLEVEL_MIN
    CALL SCARC_DEBUG_QUANTITY (NSCARC_DEBUG_MATRIX , NL, 'SETUP_SYSTEM', 'MATRIX')
@@ -3342,7 +3351,6 @@ IF ((TYPE_METHOD == NSCARC_METHOD_MULTIGRID .OR. TYPE_PRECON == NSCARC_PRECON_MU
    STOP
    !CALL SCARC_SETUP_COARSE_MATRIX(NLEVEL_MAX)
 ENDIF
-
 
 SELECT CASE (TYPE_MULTIGRID)
    CASE (NSCARC_MULTIGRID_GEOMETRIC)
@@ -11023,7 +11031,7 @@ END SUBROUTINE SCARC_UPDATE_GHOSTCELLS
 SUBROUTINE SCARC_EXCHANGE (NTYPE, NL)
 INTEGER, INTENT(IN):: NTYPE, NL
 
-NREQ_SCARC    = 0
+NREQ_SCARC = 0
 TYPE_EXCHANGE = NTYPE
 
 CALL SCARC_RECEIVE(NL)
@@ -11037,11 +11045,11 @@ END SUBROUTINE SCARC_EXCHANGE
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 SUBROUTINE SCARC_RECEIVE (NL)
 INTEGER, INTENT(IN) :: NL
-INTEGER :: NM, NOM, IERR, NLEN, IPTR, IW, IBUF(10)
+INTEGER :: NM, NOM, IERR, NLEN
 TYPE (SCARC_TYPE)         , POINTER ::  S
 TYPE (OSCARC_TYPE)        , POINTER ::  OS
-TYPE ( SCARC_BANDED_TYPE) , POINTER ::  SB, SOB
-TYPE ( SCARC_COMPACT_TYPE), POINTER ::  SC, SOC
+TYPE ( SCARC_BANDED_TYPE) , POINTER ::  SB
+TYPE ( SCARC_COMPACT_TYPE), POINTER ::  SC
 TYPE (OSCARC_BANDED_TYPE) , POINTER ::  OSB
 TYPE (OSCARC_COMPACT_TYPE), POINTER ::  OSC
 
@@ -11085,24 +11093,16 @@ RECEIVE_MESH_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
             SELECT CASE (TYPE_SYSTEM)
                CASE (NSCARC_SYSTEM_BANDED)
                   OSB => OS%BANDED(NL)
-                  IF (USE_MPI) THEN
-                     NREQ_SCARC = NREQ_SCARC+1
-                     CALL MPI_IRECV(IBUF(1:2),2,MPI_INTEGER,SNODE, &
-                                    TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
-                  ELSE                         
-                     OSB%NW  = SCARC(NOM)%BANDED(NL)%NW
-                     OSB%NWS = SCARC(NOM)%OSCARC(NM)%BANDED(NL)%NWS
-                  ENDIF
+                  NREQ_SCARC = NREQ_SCARC+1
+                  CALL MPI_IRECV(OS%IBUF_RECV(1:2),2,MPI_INTEGER,SNODE, &
+                                 TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
                CASE (NSCARC_SYSTEM_COMPACT)
                   OSC => OS%COMPACT(NL)
-                  IF (USE_MPI) THEN
-                     NREQ_SCARC = NREQ_SCARC+1
-                     CALL MPI_IRECV(IBUF(1:2),2,MPI_INTEGER,SNODE, &
-                                    TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
-                  ELSE                         
-                     OSC%NW  = SCARC(NOM)%COMPACT(NL)%NW
-                     OSC%NWS = SCARC(NOM)%OSCARC(NM)%COMPACT(NL)%NWS
-                  ENDIF
+                  NREQ_SCARC = NREQ_SCARC+1
+                  CALL MPI_IRECV(OS%IBUF_RECV(1),SIZE(OS%IBUF_RECV),MPI_INTEGER,SNODE, &
+                                 TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
+!WRITE(SCARC_LU,'(a,i3,a,4i7)') 'NM=',NM,': ALLOC_INT: TRYING TO RECEIVE FROM ', NOM, SNODE, NREQ_SCARC, TAG_SCARC
+
             END SELECT
 
          !!!-------------------------------------------------------------------------------------------
@@ -11110,86 +11110,20 @@ RECEIVE_MESH_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
          !!!-------------------------------------------------------------------------------------------
          CASE (NSCARC_EXCHANGE_WALL)
 
-
             SELECT CASE (TYPE_SYSTEM)
                CASE (NSCARC_SYSTEM_BANDED)
                   OSB => OS%BANDED(NL)
-                  !IF (NL/=NLEVEL_MIN) THEN  ! for lower levels get neighboring WALL's
-                  IF (USE_MPI) THEN
-                     NREQ_SCARC = NREQ_SCARC+1
-                     NLEN = 15*OSB%NW + OSB%NWS
-                     CALL MPI_IRECV(OS%RECV_INT(1:NLEN),NLEN,MPI_INTEGER,SNODE, &
-                                    TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
-                     IPTR=1
-                     WALL_BANDED_LOOP: DO IW = 1, OSB%NW
-                        OSB%WALL(IW)%IXG  = OS%RECV_INT(IPTR    )
-                        OSB%WALL(IW)%IYG  = OS%RECV_INT(IPTR + 1)
-                        OSB%WALL(IW)%IZG  = OS%RECV_INT(IPTR + 2)
-                        OSB%WALL(IW)%IXW  = OS%RECV_INT(IPTR + 3)
-                        OSB%WALL(IW)%IYW  = OS%RECV_INT(IPTR + 4)
-                        OSB%WALL(IW)%IZW  = OS%RECV_INT(IPTR + 5)
-                        OSB%WALL(IW)%IXN1 = OS%RECV_INT(IPTR + 6)
-                        OSB%WALL(IW)%IXN2 = OS%RECV_INT(IPTR + 7)
-                        OSB%WALL(IW)%IYN1 = OS%RECV_INT(IPTR + 8)
-                        OSB%WALL(IW)%IYN2 = OS%RECV_INT(IPTR + 9)
-                        OSB%WALL(IW)%IZN1 = OS%RECV_INT(IPTR +10)
-                        OSB%WALL(IW)%IZN2 = OS%RECV_INT(IPTR +11)
-                        OSB%WALL(IW)%NOM  = OS%RECV_INT(IPTR +12)
-                        OSB%WALL(IW)%IOR  = OS%RECV_INT(IPTR +13)
-                        OSB%WALL(IW)%NCPL = OS%RECV_INT(IPTR +14)
-                        IPTR = IPTR + 15
-                     ENDDO WALL_BANDED_LOOP
-                  ELSE                         
-                     SOB => SCARC(NOM)%BANDED(NL)
-                     OSB%WALL(1:OSB%NW)%IXG  = SOB%WALL(1:SOB%NW)%IXG
-                     OSB%WALL(1:OSB%NW)%IYG  = SOB%WALL(1:SOB%NW)%IYG
-                     OSB%WALL(1:OSB%NW)%IZG  = SOB%WALL(1:SOB%NW)%IZG
-                     OSB%WALL(1:OSB%NW)%IXW  = SOB%WALL(1:SOB%NW)%IXW
-                     OSB%WALL(1:OSB%NW)%IYW  = SOB%WALL(1:SOB%NW)%IYW
-                     OSB%WALL(1:OSB%NW)%IZW  = SOB%WALL(1:SOB%NW)%IZW
-                     OSB%WALL(1:OSB%NW)%IXN1 = SOB%WALL(1:SOB%NW)%IXN1
-                     OSB%WALL(1:OSB%NW)%IYN1 = SOB%WALL(1:SOB%NW)%IYN1
-                     OSB%WALL(1:OSB%NW)%IZN1 = SOB%WALL(1:SOB%NW)%IZN1
-                     OSB%WALL(1:OSB%NW)%IXN2 = SOB%WALL(1:SOB%NW)%IXN2
-                     OSB%WALL(1:OSB%NW)%IYN2 = SOB%WALL(1:SOB%NW)%IYN2
-                     OSB%WALL(1:OSB%NW)%IZN2 = SOB%WALL(1:SOB%NW)%IZN2
-                     OSB%WALL(1:OSB%NW)%IOR  = SOB%WALL(1:SOB%NW)%IOR
-                     OSB%WALL(1:OSB%NW)%NOM  = SOB%WALL(1:SOB%NW)%NOM
-                  ENDIF
+                  NREQ_SCARC = NREQ_SCARC+1
+                  NLEN = 15*OSB%NW + OSB%NWS
+                  CALL MPI_IRECV(OS%RECV_INT(1),SIZE(OS%RECV_INT),MPI_INTEGER,SNODE, &
+                                 TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
                CASE (NSCARC_SYSTEM_COMPACT)
                   OSC => OS%COMPACT(NL)
-                  IF (USE_MPI) THEN
-                     NREQ_SCARC = NREQ_SCARC+1
-                     NLEN = 15*OSC%NW + OSC%NWS
-                     CALL MPI_IRECV(OS%RECV_INT(1:NLEN),NLEN,MPI_INTEGER,SNODE, &
-                                    TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
-                  ELSE                      
-                     SOC => SCARC(NOM)%COMPACT(NL)
-                     OSC%WALL(1:OSC%NW)%IXG  = SOC%WALL(1:SOC%NW)%IXG
-                     OSC%WALL(1:OSC%NW)%IYG  = SOC%WALL(1:SOC%NW)%IYG
-                     OSC%WALL(1:OSC%NW)%IZG  = SOC%WALL(1:SOC%NW)%IZG
-                     OSC%WALL(1:OSC%NW)%IXW  = SOC%WALL(1:SOC%NW)%IXW
-                     OSC%WALL(1:OSC%NW)%IYW  = SOC%WALL(1:SOC%NW)%IYW
-                     OSC%WALL(1:OSC%NW)%IZW  = SOC%WALL(1:SOC%NW)%IZW
-                     OSC%WALL(1:OSC%NW)%IXN1 = SOC%WALL(1:SOC%NW)%IXN1
-                     OSC%WALL(1:OSC%NW)%IYN1 = SOC%WALL(1:SOC%NW)%IYN1
-                     OSC%WALL(1:OSC%NW)%IZN1 = SOC%WALL(1:SOC%NW)%IZN1
-                     OSC%WALL(1:OSC%NW)%IXN2 = SOC%WALL(1:SOC%NW)%IXN2
-                     OSC%WALL(1:OSC%NW)%IYN2 = SOC%WALL(1:SOC%NW)%IYN2
-                     OSC%WALL(1:OSC%NW)%IZN2 = SOC%WALL(1:SOC%NW)%IZN2
-                     OSC%WALL(1:OSC%NW)%IOR  = SOC%WALL(1:SOC%NW)%IOR
-                     OSC%WALL(1:OSC%NW)%NOM  = SOC%WALL(1:SOC%NW)%NOM
-                     OSC%WALL(1:OSC%NW)%NCPL = SOC%WALL(1:SOC%NW)%NCPL
-                     DO IW=1,OSC%NW   
-                        OSC%WALL(IW)%ICN(1:OSC%WALL(IW)%NCPL) = SOC%WALL(IW)%ICN(1:SOB%WALL(IW)%NCPL)
-                     ENDDO
-                     IF (NL==NLEVEL_MIN.AND.TYPE_LAYER == NSCARC_LAYER_TWO .AND. &
-                               TYPE_MULTIGRID == NSCARC_MULTIGRID_ALGEBRAIC) THEN
-                        DO IW=1,OSC%NW   
-                           OSC%WALL(IW)%ICN2(1:OSC%WALL(IW)%NCPL) = SOC%WALL(IW)%ICN2(1:SOB%WALL(IW)%NCPL)
-                        ENDDO
-                     ENDIF
-                  ENDIF
+                  NREQ_SCARC = NREQ_SCARC+1
+                  NLEN = 15*OSC%NW + OSC%NWS
+!WRITE(SCARC_LU,'(a,i3,a,5i7)') 'NM=',NM,': WALL    : TRYING TO RECEIVE FROM ', NOM, SNODE, NREQ_SCARC, TAG_SCARC, SIZE(OS%RECV_INT)
+                  CALL MPI_IRECV(OS%RECV_INT(1),SIZE(OS%RECV_INT),MPI_INTEGER,SNODE, &
+                                 TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
             END SELECT
    
          !!!-------------------------------------------------------------------------------------------
@@ -11198,18 +11132,9 @@ RECEIVE_MESH_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
          CASE (NSCARC_EXCHANGE_GRID)
 
             OSC => OS%COMPACT(NL)
-            IF (USE_MPI) THEN
-               NREQ_SCARC = NREQ_SCARC+1
-               CALL MPI_IRECV(OS%RECV_REAL(1),5,MPI_DOUBLE_PRECISION,SNODE, &
-                              TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
-            ELSE
-               SOC => SCARC(NOM)%COMPACT(NL)
-               OSC%NX = SOC%NX
-               OSC%NY = SOC%NY
-               OSC%NZ = SOC%NZ
-               OSC%NC = SOC%NC
-               OSC%NW = SOC%NW
-            ENDIF
+            NREQ_SCARC = NREQ_SCARC+1
+            CALL MPI_IRECV(OS%RECV_REAL(1),5,MPI_DOUBLE_PRECISION,SNODE, &
+                           TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
 
          !!!-------------------------------------------------------------------------------------------
          !!! Exchange number of neighboring cells for AMG method (compact type only)
@@ -11217,16 +11142,9 @@ RECEIVE_MESH_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
          CASE (NSCARC_EXCHANGE_SIZE_MATRIXC)
 
             OSC => OS%COMPACT(NL)
-            IF (USE_MPI) THEN
-               NREQ_SCARC = NREQ_SCARC+1
-               CALL MPI_IRECV(OS%RECV_REAL(1),1,MPI_DOUBLE_PRECISION,SNODE, &
-                              TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
-               OSC%NA  = OS%RECV_REAL(1)
-            ELSE
-               SOC     => SCARC(NOM)%COMPACT(NL)
-               OSC%NA  =  SCARC(NOM)%OSCARC(NM)%COMPACT(NL)%NA0
-            ENDIF
-
+            NREQ_SCARC = NREQ_SCARC+1
+            CALL MPI_IRECV(OS%RECV_REAL(1),1,MPI_DOUBLE_PRECISION,SNODE, &
+                           TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
 
          !!!-------------------------------------------------------------------------------------------
          !!! Exchange number of neighboring cells for AMG method (compact type only)
@@ -11234,31 +11152,9 @@ RECEIVE_MESH_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
          CASE (NSCARC_EXCHANGE_SIZE_TRANSFERC)
 
             OSC => OS%COMPACT(NL)
-            IF (USE_MPI) THEN
-               NREQ_SCARC = NREQ_SCARC+1
-               CALL MPI_IRECV(OS%RECV_REAL(1),9,MPI_DOUBLE_PRECISION,SNODE, &
-                              TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
-               OSC%NC  = OS%RECV_REAL(1)
-               OSC%NW  = OS%RECV_REAL(2)
-               OSC%NCE = OS%RECV_REAL(3)
-               OSC%NW  = OS%RECV_REAL(4)
-               OSC%NCCI= OS%RECV_REAL(5)
-               OSC%NP  = OS%RECV_REAL(6)
-               OSC%NR  = OS%RECV_REAL(7)
-               OSC%NCC = OS%RECV_REAL(8)
-               OSC%NCF = OS%RECV_REAL(9)
-            ELSE
-               SOC    => SCARC(NOM)%COMPACT(NL)
-               OSC%NC  =  SCARC(NOM)%COMPACT(NL)%NC
-               OSC%NW  =  SCARC(NOM)%COMPACT(NL)%NW
-               OSC%NCE =  SCARC(NOM)%COMPACT(NL)%NCE
-               OSC%NW  =  SCARC(NOM)%COMPACT(NL)%NW
-               OSC%NCCI=  SCARC(NOM)%COMPACT(NL)%NCCI
-               OSC%NP  =  SCARC(NOM)%OSCARC(NM)%COMPACT(NL)%NP0
-               OSC%NR  =  SCARC(NOM)%OSCARC(NM)%COMPACT(NL)%NR0
-               OSC%NCC =  SCARC(NOM)%OSCARC(NM)%COMPACT(NL)%NCC0
-               OSC%NCF =  SCARC(NOM)%OSCARC(NM)%COMPACT(NL)%NCF0
-            ENDIF
+            NREQ_SCARC = NREQ_SCARC+1
+            CALL MPI_IRECV(OS%RECV_REAL(1),9,MPI_DOUBLE_PRECISION,SNODE, &
+                           TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
 
 
          !!!-------------------------------------------------------------------------------------------
@@ -11272,8 +11168,9 @@ RECEIVE_MESH_LOOP: DO NM = NMESHES_MIN, NMESHES_MAX
          CASE DEFAULT
 
             NREQ_SCARC = NREQ_SCARC+1
-            IF (USE_MPI) CALL MPI_IRECV(OS%RECV_REAL(1),SIZE(OS%RECV_REAL),MPI_DOUBLE_PRECISION,&
-                                        SNODE,TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
+            CALL MPI_IRECV(OS%RECV_REAL(1),SIZE(OS%RECV_REAL),MPI_DOUBLE_PRECISION,&
+                           SNODE,TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
+!WRITE(SCARC_LU,'(a,i7,a,i3,a,5i7)') 'RECEIVING ', 0 ,' DATA FROM ',NOM,' TO ', NM, TAG_SCARC, SIZE(OS%RECV_REAL)
 
       END SELECT SELECT_EXCHANGE_TYPE
    ENDDO RECEIVE_OMESH_LOOP
@@ -11289,7 +11186,7 @@ SUBROUTINE SCARC_SEND (NL)
 INTEGER, INTENT(IN) :: NL
 INTEGER :: NM, NOM
 INTEGER :: IERR, IW, IPTR, ICPL
-INTEGER :: NLEN, IBUF(10)
+INTEGER :: NLEN
 INTEGER, POINTER:: NW, NX, NY, NC
 REAL(EB), POINTER, DIMENSION(:)    :: BUF_REAL
 INTEGER,  POINTER, DIMENSION(:)    :: BUF_INT
@@ -11342,47 +11239,39 @@ EXCHANGE_SEND_LOOP1: DO NM = NMESHES_MIN, NMESHES_MAX
          !!!-------------------------------------------------------------------------------------------
          CASE (NSCARC_EXCHANGE_ALLOC_INT)
 
-            SELECT CASE (TYPE_SYSTEM)
-               CASE (NSCARC_SYSTEM_BANDED)
-                  SB  =>  S%BANDED(NL)     
-                  OSB => OS%BANDED(NL)    
-                  IF (RNODE /= SNODE) THEN
-                     IBUF(1)= SB%NW
-                     IBUF(2)=OSB%NWS
-                     IF (USE_MPI) THEN
-                        NREQ_SCARC = NREQ_SCARC+1
-                        CALL MPI_ISEND(IBUF(1:2),2,MPI_INTEGER,SNODE, &
-                                      TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
-                     ENDIF
-                  ELSE
-                     OSB%NW  = SCARC(NOM)%BANDED(NL)%NW
-                     OSB%NWS = SCARC(NOM)%OSCARC(NM)%BANDED(NL)%NWS
-                  ENDIF
-               CASE (NSCARC_SYSTEM_COMPACT)
-                  IF (RNODE /= SNODE) THEN
+            IF (RNODE /= SNODE) THEN
+               SELECT CASE (TYPE_SYSTEM)
+                  CASE (NSCARC_SYSTEM_BANDED)
+                     SB  =>  S%BANDED(NL)     
+                     OSB => OS%BANDED(NL)    
+                     OS%IBUF_SEND(1)= SB%NW
+                     OS%IBUF_SEND(2)=OSB%NWS
+                     NREQ_SCARC = NREQ_SCARC+1
+                     CALL MPI_ISEND(OS%IBUF_SEND(1:2),2,MPI_INTEGER,SNODE, &
+                                    TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
+                  CASE (NSCARC_SYSTEM_COMPACT)
                      SC  =>  S%COMPACT(NL)     
                      OSC => OS%COMPACT(NL)     
-                     IBUF(1)= SC%NW
-                     IBUF(2)=OSC%NWS
-                     IF (USE_MPI) THEN
-                        NREQ_SCARC = NREQ_SCARC+1
-                        CALL MPI_ISEND(IBUF(1:2),2,MPI_INTEGER,SNODE, &
-                                      TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
-                     ENDIF
-                  ENDIF
-            END SELECT 
+                     OS%IBUF_SEND(1)= SC%NW
+                     OS%IBUF_SEND(2)=OSC%NWS
+                     NREQ_SCARC = NREQ_SCARC+1
+                     CALL MPI_ISEND(OS%IBUF_SEND(1),SIZE(OS%IBUF_SEND),MPI_INTEGER,SNODE, &
+                                    TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
+!IF (TYPE_DEBUG == NSCARC_DEBUG_INFO2) WRITE(SCARC_LU,'(a,i3,a,5i8)') &
+!   'AFTER ALLOC_INT: SEND to ',NOM,': ', OS%IBUF_SEND(1), OS%IBUF_SEND(2), NREQ_SCARC, SNODE
+               END SELECT 
+            ENDIF
 
          !!!-------------------------------------------------------------------------------------------
          !!! Exchange wall related data
          !!!-------------------------------------------------------------------------------------------
          CASE (NSCARC_EXCHANGE_WALL)
 
-         ! on max level   : take M%WALL from neighbors (ScaRC pointers already defined, nothing to do ...)
-         ! on lover levels: send own WALL to neighbors
-         SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
+            IF (RNODE /= SNODE) THEN
 
-            CASE (NSCARC_SYSTEM_BANDED)
-               IF (RNODE /= SNODE) THEN
+               SELECT_SYSTEM: SELECT CASE (TYPE_SYSTEM)
+
+               CASE (NSCARC_SYSTEM_BANDED)
                   SB  =>  S%BANDED(NL)                       ! corresponds to M  for the level 'NL'
                   OSB => OS%BANDED(NL)                       ! corresponds to M3 for the level 'NL'
                   IPTR=1
@@ -11404,16 +11293,12 @@ EXCHANGE_SEND_LOOP1: DO NM = NMESHES_MIN, NMESHES_MAX
                      OS%SEND_INT(IPTR+14)=SB%WALL(IW)%NCPL
                      IPTR = IPTR + 15
                   ENDDO
-                  IF (USE_MPI) THEN
-                     NREQ_SCARC = NREQ_SCARC+1
-                     NLEN = 15*OSB%NW+OSB%NWS
-                     CALL MPI_ISEND(OS%SEND_INT(1:NLEN),NLEN,MPI_INTEGER,SNODE, &
-                                   TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
-                  ENDIF
-               ENDIF
+                  NREQ_SCARC = NREQ_SCARC+1
+                  NLEN = 15*OSB%NW+OSB%NWS
+                  CALL MPI_ISEND(OS%SEND_INT(1),SIZE(OS%SEND_INT),MPI_INTEGER,SNODE, &
+                                TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
 
-            CASE (NSCARC_SYSTEM_COMPACT)
-               IF (RNODE /= SNODE) THEN
+               CASE (NSCARC_SYSTEM_COMPACT)
                   SC  =>  S%COMPACT(NL)                       ! corresponds to M  for the level 'NL'
                   OSC => OS%COMPACT(NL)                       ! corresponds to M3 for the level 'NL'
                   IPTR=1
@@ -11450,11 +11335,12 @@ EXCHANGE_SEND_LOOP1: DO NM = NMESHES_MIN, NMESHES_MAX
                   ENDDO
                   NREQ_SCARC = NREQ_SCARC+1
                   NLEN = 15*OSC%NW+OSC%NWS
-                  CALL MPI_ISEND(OS%SEND_INT(1:NLEN),NLEN,MPI_INTEGER,SNODE, &
+!WRITE(SCARC_LU,'(a,i7,a,i3,a,5i7)') 'SENDING ', NLEN ,' DATA FROM ',NM,' TO ', NOM, TAG_SCARC, SIZE(OS%SEND_INT)
+                  CALL MPI_ISEND(OS%SEND_INT(1),SIZE(OS%SEND_INT),MPI_INTEGER,SNODE, &
                                  TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
-               ENDIF
 
-         END SELECT SELECT_SYSTEM
+               END SELECT SELECT_SYSTEM
+            ENDIF
 
 
       !!!-------------------------------------------------------------------------------------------
@@ -11466,13 +11352,13 @@ EXCHANGE_SEND_LOOP1: DO NM = NMESHES_MIN, NMESHES_MAX
             SC  =>  S%COMPACT(NL)
             OSC => OS%COMPACT(NL)
             NREQ_SCARC = NREQ_SCARC+1
-            IBUF(1)=SC%NX
-            IBUF(2)=SC%NY
-            IBUF(3)=SC%NZ
-            IBUF(4)=SC%NC
-            IBUF(5)=SC%NW
-            IF (USE_MPI) CALL MPI_ISEND(IBUF(1),5,MPI_INTEGER,SNODE, &
-                                        TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
+            OS%IBUF_SEND(1)=SC%NX
+            OS%IBUF_SEND(2)=SC%NY
+            OS%IBUF_SEND(3)=SC%NZ
+            OS%IBUF_SEND(4)=SC%NC
+            OS%IBUF_SEND(5)=SC%NW
+            CALL MPI_ISEND(OS%IBUF_SEND(1),5,MPI_INTEGER,SNODE, &
+                           TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
          ENDIF
 
       !!!-------------------------------------------------------------------------------------------
@@ -11484,9 +11370,9 @@ EXCHANGE_SEND_LOOP1: DO NM = NMESHES_MIN, NMESHES_MAX
             SB  =>  S%BANDED(NL)
             OSB => OS%BANDED(NL)
             NREQ_SCARC = NREQ_SCARC+1
-            IBUF(1) = OSB%NA0
-            IF (USE_MPI) CALL MPI_ISEND(IBUF(1),1,MPI_INTEGER,SNODE, &
-                                        TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
+            OS%IBUF_SEND(1) = OSB%NA0
+            CALL MPI_ISEND(OS%IBUF_SEND(1),1,MPI_INTEGER,SNODE, &
+                           TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
          ENDIF
 
       !!!-------------------------------------------------------------------------------------------
@@ -11498,9 +11384,9 @@ EXCHANGE_SEND_LOOP1: DO NM = NMESHES_MIN, NMESHES_MAX
             SC  =>  S%COMPACT(NL)
             OSC => OS%COMPACT(NL)
             NREQ_SCARC = NREQ_SCARC+1
-            IBUF(1) = OSC%NA0
-            IF (USE_MPI) CALL MPI_ISEND(IBUF(1),1,MPI_INTEGER,SNODE, &
-                                        TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
+            OS%IBUF_SEND(1) = OSC%NA0
+            CALL MPI_ISEND(OS%IBUF_SEND(1),1,MPI_INTEGER,SNODE, &
+                           TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
          ENDIF
 
       !!!-------------------------------------------------------------------------------------------
@@ -11512,17 +11398,17 @@ EXCHANGE_SEND_LOOP1: DO NM = NMESHES_MIN, NMESHES_MAX
             SC  =>  S%COMPACT(NL)
             OSC => OS%COMPACT(NL)
             NREQ_SCARC = NREQ_SCARC+1
-            IBUF(1) = SC%NC
-            IBUF(2) = SC%NW
-            IBUF(3) = SC%NCE
-            IBUF(4) = SC%NW
-            IBUF(5) = SC%NCCI
-            IBUF(6) = OSC%NP0
-            IBUF(7) = OSC%NR0
-            IBUF(8) = OSC%NCC0
-            IBUF(9) = OSC%NCF0
-            IF (USE_MPI) CALL MPI_ISEND(IBUF(1:9),9,MPI_INTEGER,SNODE, &
-                                        TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
+            OS%IBUF_SEND(1) = SC%NC
+            OS%IBUF_SEND(2) = SC%NW
+            OS%IBUF_SEND(3) = SC%NCE
+            OS%IBUF_SEND(4) = SC%NW
+            OS%IBUF_SEND(5) = SC%NCCI
+            OS%IBUF_SEND(6) = OSC%NP0
+            OS%IBUF_SEND(7) = OSC%NR0
+            OS%IBUF_SEND(8) = OSC%NCC0
+            OS%IBUF_SEND(9) = OSC%NCF0
+            CALL MPI_ISEND(OS%IBUF_SEND(1:9),9,MPI_INTEGER,SNODE, &
+                           TAG_SCARC,MPI_COMM_WORLD,REQ_SCARC(NREQ_SCARC),IERR)
          ENDIF
 
       !!!-------------------------------------------------------------------------------------------
@@ -11593,7 +11479,9 @@ EXCHANGE_SEND_LOOP1: DO NM = NMESHES_MIN, NMESHES_MAX
                      ENDIF
 
                   CASE (NSCARC_EXCHANGE_MATRIX) 
+!WRITE(SCARC_LU,*) 'NM=',NM,': BEFORE PACK_CMATRIX for ', NOM
                      CALL SCARC_PACK_CMATRIX(BUF_REAL, WALL, TYPE_MATRIX, NLEN, NW, NM, NOM, NL)
+!WRITE(SCARC_LU,*) 'NM=',NM,': AFTER  PACK_CMATRIX for ', NOM
             
                   CASE (NSCARC_EXCHANGE_MEASURE) 
                      CALL SCARC_PACK_CVECTOR_REAL2(BUF_REAL, WALL, NSCARC_VECTOR_MEASURE, NLEN, NW, NM, NL)
@@ -11615,8 +11503,9 @@ EXCHANGE_SEND_LOOP1: DO NM = NMESHES_MIN, NMESHES_MAX
          !!! Finally exchange send buffer with corresponding neighbors
          IF (RNODE/=SNODE) THEN
             NREQ_SCARC=NREQ_SCARC+1
-            IF (USE_MPI) CALL MPI_ISEND(BUF_REAL, NLEN, MPI_DOUBLE_PRECISION, SNODE, &
-                                        TAG_SCARC, MPI_COMM_WORLD, REQ_SCARC(NREQ_SCARC), IERR)
+            CALL MPI_ISEND(OS%SEND_REAL, SIZE(OS%SEND_REAL), MPI_DOUBLE_PRECISION, SNODE, &
+                           TAG_SCARC, MPI_COMM_WORLD, REQ_SCARC(NREQ_SCARC), IERR)
+!WRITE(SCARC_LU,'(a,i7,a,i3,a,5i7)') 'SENDING ', NLEN ,' DATA FROM ',NM,' TO ', NOM, TAG_SCARC, SIZE(OS%SEND_REAL)
          ENDIF
 
       END SELECT SELECT_EXCHANGE
@@ -11626,11 +11515,14 @@ EXCHANGE_SEND_LOOP1: DO NM = NMESHES_MIN, NMESHES_MAX
 ENDDO EXCHANGE_SEND_LOOP1
 
 
+IF (TYPE_DEBUG == NSCARC_DEBUG_INFO2) WRITE(SCARC_LU,*) 'BEFORE WAILALL ', NREQ_SCARC
+
 !!!----------------------------------------------------------------------------------------------------
 !!! Information from Mesh NM is received by Mesh NOM  (NOM receiver, NM sender)
 !!!----------------------------------------------------------------------------------------------------
 IF (USE_MPI.AND.NREQ_SCARC/=0) CALL MPI_WAITALL(NREQ_SCARC,REQ_SCARC(1:NREQ_SCARC),MPI_STATUS_IGNORE,IERR)
 
+IF (TYPE_DEBUG == NSCARC_DEBUG_INFO2) WRITE(SCARC_LU,*) 'AFTER WAILALL', IERR
 
 !!!----------------------------------------------------------------------------------------------------
 !!! Extract communication data from corresponding RECEIVE-buffers
@@ -11668,8 +11560,8 @@ EXCHANGE_SEND_LOOP2: DO NOM = NMESHES_MIN, NMESHES_MAX
                SELECT_EXCHANGE_BANDED2: SELECT CASE (TYPE_EXCHANGE)
       
                   CASE (NSCARC_EXCHANGE_ALLOC_INT) 
-                     OSB%NW  = IBUF(1)
-                     OSB%NWS = IBUF(2)
+                     OSB%NW  = OSO%IBUF_RECV(1)
+                     OSB%NWS = OSO%IBUF_RECV(2)
 
                      NLEN = 15*OSB%NW + OSB%NWS
                      ALLOCATE (OSO%RECV_INT(NLEN))
@@ -11678,11 +11570,11 @@ EXCHANGE_SEND_LOOP2: DO NOM = NMESHES_MIN, NMESHES_MAX
                      OSO%SEND_INT = 0
 
                   CASE (NSCARC_EXCHANGE_GRID) 
-                     OSB%NX = IBUF(1)
-                     OSB%NY = IBUF(2)
-                     OSB%NZ = IBUF(3)
-                     OSB%NC = IBUF(4)
-                     OSB%NW = IBUF(5)
+                     OSB%NX = OSO%IBUF_RECV(1)
+                     OSB%NY = OSO%IBUF_RECV(2)
+                     OSB%NZ = OSO%IBUF_RECV(3)
+                     OSB%NC = OSO%IBUF_RECV(4)
+                     OSB%NW = OSO%IBUF_RECV(5)
 
                   CASE (NSCARC_EXCHANGE_VECTOR) 
                      CALL SCARC_UNPACK_BVECTOR_REAL(BUF_REAL, WALL, TYPE_VECTOR, NOM, NL)
@@ -11713,25 +11605,34 @@ EXCHANGE_SEND_LOOP2: DO NOM = NMESHES_MIN, NMESHES_MAX
       
                   CASE (NSCARC_EXCHANGE_ALLOC_INT) 
                      IF (RNODE/=SNODE) THEN
-                        OSC%NW  = IBUF(1)
-                        OSC%NWS = IBUF(2)
+                        OSC%NW  = OSO%IBUF_RECV(1)
+                        OSC%NWS = OSO%IBUF_RECV(2)
+!IF (TYPE_DEBUG == NSCARC_DEBUG_INFO2) WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,a,i5)') &
+!     'SCARC(',NOM,')%OSCARC(',NM,')%COMPACT(',NL,')%NW =',OSC%NW
+!IF (TYPE_DEBUG == NSCARC_DEBUG_INFO2) WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,a,i5)') &
+!     'SCARC(',NOM,')%OSCARC(',NM,')%COMPACT(',NL,')%NWS=',OSC%NWS
                      ELSE
                         OSC%NW  = SCARC(NM)%COMPACT(NL)%NW
                         OSC%NWS = SCARC(NM)%OSCARC(NOM)%COMPACT(NL)%NWS
                      ENDIF
 
-                     NLEN = 15*OSC%NW + OSC%NWS
-                     ALLOCATE (OSO%RECV_INT(NLEN))
-                     OSO%RECV_INT = 0
-                     ALLOCATE (OSO%SEND_INT(NLEN))
-                     OSO%SEND_INT = 0
-
-!WRITE(*,'(a,i3,a,5i7)') 'LEVEL ', NL,': ALLOCATING SEND_INT in length ', NLEN, OSC%NW, 15*OSC%NW, OSC%NWS
+                     IF (NL == NLEVEL_MIN) THEN
+                        NLEN = 15*OSC%NW + OSC%NWS
+                        ALLOCATE (OSO%RECV_INT(NLEN))
+                        OSO%RECV_INT = 0
+                        ALLOCATE (OSO%SEND_INT(NLEN))
+                        OSO%SEND_INT = 0
+!IF (TYPE_DEBUG == NSCARC_DEBUG_INFO2) WRITE(SCARC_LU,'(a,i3,a,i3,a,i3,a,5i7)') &
+!     'LEVEL ', NL,': ALLOCATING SCARC(',NOM,')%OSCARC(',NM,')%SEND_INT in length ', &
+!     NLEN, OSC%NW, 15*OSC%NW, OSC%NWS, MYID+1
+                     ENDIF
 
                   CASE (NSCARC_EXCHANGE_WALL)
                      IF (RNODE/=SNODE) THEN
                         BUF_INT => OSO%RECV_INT
                         IPTR=1
+!IF (TYPE_DEBUG == NSCARC_DEBUG_INFO2) WRITE(SCARC_LU,*) 'NOM=',NOM,': NM=',&
+!     NM,': SIZE(BUF_INT)=',SIZE(OSO%RECV_INT)
                         DO IW = 1, OSC%NW
                            OSC%WALL(IW)%IXG  = BUF_INT(IPTR    )
                            OSC%WALL(IW)%IYG  = BUF_INT(IPTR + 1)
@@ -11802,13 +11703,14 @@ EXCHANGE_SEND_LOOP2: DO NOM = NMESHES_MIN, NMESHES_MAX
                         ENDIF
                      ENDIF
 
+
                   CASE (NSCARC_EXCHANGE_GRID) 
                      IF (RNODE /= SNODE) THEN
-                        OSC%NX = IBUF(1)
-                        OSC%NY = IBUF(2)
-                        OSC%NZ = IBUF(3)
-                        OSC%NC = IBUF(4)
-                        OSC%NW = IBUF(5)
+                        OSC%NX = OSO%IBUF_RECV(1)
+                        OSC%NY = OSO%IBUF_RECV(2)
+                        OSC%NZ = OSO%IBUF_RECV(3)
+                        OSC%NC = OSO%IBUF_RECV(4)
+                        OSC%NW = OSO%IBUF_RECV(5)
                      ELSE
                         SC => SCARC(NM)%COMPACT(NL)
                         OSC%NX =  SC%NX
@@ -11820,22 +11722,22 @@ EXCHANGE_SEND_LOOP2: DO NOM = NMESHES_MIN, NMESHES_MAX
 
                   CASE (NSCARC_EXCHANGE_SIZE_MATRIXC) 
                      IF (RNODE /= SNODE) THEN
-                        OSC%NA = IBUF(1)
+                        OSC%NA = OSO%IBUF_RECV(1)
                      ELSE
                         OSC%NA = SCARC(NM)%OSCARC(NOM)%COMPACT(NL)%NA0
                      ENDIF
 
                   CASE (NSCARC_EXCHANGE_SIZE_TRANSFERC) 
                      IF (RNODE /= SNODE) THEN
-                        OSC%NC  =  IBUF(1)
-                        OSC%NW  =  IBUF(2)
-                        OSC%NCE =  IBUF(3)
-                        OSC%NW  =  IBUF(4)
-                        OSC%NCCI=  IBUF(5)
-                        OSC%NP  =  IBUF(6)
-                        OSC%NR  =  IBUF(7)
-                        OSC%NCC =  IBUF(8)
-                        OSC%NCF =  IBUF(9)
+                        OSC%NC  =  OSO%IBUF_RECV(1)
+                        OSC%NW  =  OSO%IBUF_RECV(2)
+                        OSC%NCE =  OSO%IBUF_RECV(3)
+                        OSC%NW  =  OSO%IBUF_RECV(4)
+                        OSC%NCCI=  OSO%IBUF_RECV(5)
+                        OSC%NP  =  OSO%IBUF_RECV(6)
+                        OSC%NR  =  OSO%IBUF_RECV(7)
+                        OSC%NCC =  OSO%IBUF_RECV(8)
+                        OSC%NCF =  OSO%IBUF_RECV(9)
                      ELSE
                         SC  => SCARC(NM)%COMPACT(NL)
                         SCO => SCARC(NM)%OSCARC(NOM)%COMPACT(NL)
@@ -11860,7 +11762,9 @@ EXCHANGE_SEND_LOOP2: DO NOM = NMESHES_MIN, NMESHES_MAX
                      ENDIF
       
                   CASE (NSCARC_EXCHANGE_MATRIX)
+!WRITE(SCARC_LU,*) 'NOM=',NOM,': BEFORE UNPACK_CMATRIX:',NM
                      CALL SCARC_UNPACK_CMATRIX(BUF_REAL, WALL, TYPE_MATRIX, NOM, NM, NL)
+!WRITE(SCARC_LU,*) 'NOM=',NOM,': AFTER UNPACK_CMATRIX:',NM
       
                   CASE (NSCARC_EXCHANGE_MEASURE)
                      CALL SCARC_UNPACK_CVECTOR_REAL2(BUF_REAL, WALL, NSCARC_VECTOR_MEASURE, NM, NOM, NL)
@@ -12750,11 +12654,14 @@ SELECT CASE (NTYPE)
       UNPACK_RECV_SYSTEM: DO
    
          IW = NINT(RECV_REAL(LL))
+IF (NM==5.AND.NOM==9) WRITE(SCARC_LU,*) 'LL=',LL,': IW=',IW
          IF (IW==-888.OR.IW==-999) EXIT UNPACK_RECV_SYSTEM
          LL = LL + 1
    
+IF (NM==5.AND.NOM==9) WRITE(SCARC_LU,*) 'HALLO=',SC%WALL(2533)%ICE(1)
          !!! ------------------------  First layer  ---------------------------------------------
          ICE = SC%WALL(IW)%ICE(1)
+IF (NM==5.AND.NOM==9) WRITE(SCARC_LU,*) 'ICE=',ICE
          DO ICOL = SC%A_ROW(ICE), SC%A_ROW(ICE+1)-1
             JC0 = NINT(RECV_REAL(LL))
             IF (JC0 > 0) THEN
@@ -12764,9 +12671,16 @@ SELECT CASE (NTYPE)
             ENDIF
             SC%A_COL(ICOL)= JC
             SC%A(ICOL)    = RECV_REAL(LL+1)
+IF (NM==5.AND.NOM==9) WRITE(SCARC_LU,*) 'JC =',JC , ': RECV_REAL(',LL+1,')=',RECV_REAL(LL+1)
             LL = LL + 2
          ENDDO 
 
+
+IF (NM==5.AND.NOM==9) WRITE(SCARC_LU,*) 'UFF'
+IF (NM==5.AND.NOM==9.AND.IW==2532) THEN
+   CALL MPI_FINALIZE(ICE)
+   STOP
+ENDIF
 
           !!! Unpack second cell layer if requested
          IF (NL==NLEVEL_MIN.AND.TYPE_LAYER == NSCARC_LAYER_TWO) THEN
@@ -12779,6 +12693,7 @@ SELECT CASE (NTYPE)
           ENDIF
        ENDDO UNPACK_RECV_SYSTEM
 
+IF (NM==5.AND.NOM==9) WRITE(SCARC_LU,*) 'READY='
 
    !!! -------------------------------------------------------------------------------------------
    !!! Prolongation matrix
