@@ -51,7 +51,19 @@ void outputAxisLabels(){
     glRasterPos3f(x0,y0,z);
     glutBitmapCharacter(large_font,ZZ[0]);
   }
+}
 
+/* ------------------ output3Val ------------------------ */
+
+void output3Val(float x, float y, float z, float val){
+  int len, i;
+  char string[256];
+
+  sprintf(string,"%f",val);
+  glColor3fv(foregroundcolor);
+  glRasterPos3f(x, y, z);
+  len = (int) strlen(string);
+  for (i = 0; i < len; i++)glutBitmapCharacter(large_font,string[i]);
 }
 
 /* ------------------ output3Text ------------------------ */

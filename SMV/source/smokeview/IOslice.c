@@ -6193,6 +6193,7 @@ void drawvslice_cellcenter(const vslicedata *vd){
          GET_SLICE_COLOR(color_v,index_v)
          GET_VEC_DXYZ(v,dy,index_v);
          glColor4fv(color_v);
+         //output3Val(constval,yy1,zhalf,1.0);
          glVertex3f(constval,yy1-dy,zhalf);
          glVertex3f(constval,yy1+dy,zhalf);
        }

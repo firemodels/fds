@@ -745,6 +745,7 @@ EXTERNCPP void outputAxisLabels(void);
 EXTERNCPP void outputLargeText(float x, float y, const char *string);
 EXTERNCPP void outputText(float x, float y, const char *string);
 EXTERNCPP void output3Text(float *color, float x, float y, float z, const char *string);
+EXTERNCPP void output3Val(float x, float y, float z, float val);
 EXTERNCPP void outputBarText(float x, float y, const GLfloat *color, const char *string);
 EXTERNCPP void getzonebounds(const float *pdata, int ndata, int setpmin, float *pmin, int setpmax, float *pmax);
 EXTERNCPP void updatechar(void);
