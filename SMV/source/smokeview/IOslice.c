@@ -63,6 +63,17 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type);
                            if(endianswitch==1)endian_switch(var,size);\
                            FSEEK(RLESLICEFILE,4,SEEK_CUR)
 
+#define GET_VEC_VAL(U,VAL,n) \
+         VAL=0.0;           \
+         if(U!=NULL){       \
+           if(U->compression_type==1){\
+             VAL = U->qval256[U->iqsliceframe[(n)]];\
+           }                                  \
+           else{                              \
+             VAL = U->qslice[(n)];               \
+           }                                  \
+         }
+
 #define GET_VEC_DXYZ(U,DU,n) \
          DU=0.0;           \
          if(U!=NULL){       \
@@ -6212,6 +6223,40 @@ void drawvslice_cellcenter(const vslicedata *vd){
      }
    }
    glEnd();
+   if(vector_cell_text==1){
+     for(j=sd->js1; j<maxj+1; j++){
+       float yhalf;
+       int k;
+       float yy1;
+   
+       yy1 = yplttemp[j];
+       if(j!=maxj)yhalf = (yplttemp[j]+yplttemp[j+1])/2.0;
+       for(k=sd->ks1; k<sd->ks2+1; k++){
+         float zhalf;
+         float z1;
+
+         z1 = zplttemp[k];
+         if(k!=sd->ks2)zhalf = (zplttemp[k]+zplttemp[k+1])/2.0;
+
+         if(k!=sd->ks2){
+           int index_v;
+           float val;
+           
+           index_v = j*sd->nslicek + k + 1;
+           GET_VEC_VAL(v,val,index_v);
+           output3Val(constval,yy1,zhalf,val);
+         }
+         if(j!=maxj){
+           int index_w;
+           float val;
+           
+           index_w = (j+1)*sd->nslicek + k;
+           GET_VEC_VAL(w,val,index_w);
+           output3Val(constval,yhalf,z1,val);
+         }
+       }
+     }
+   }
    SNIFF_ERRORS("after drawvslice_cellcenter:lines dir=1");
 
    glPointSize(vectorpointsize);
@@ -6302,6 +6347,40 @@ void drawvslice_cellcenter(const vslicedata *vd){
    }
    glEnd();
    SNIFF_ERRORS("after drawvslice_cellcenter:lines dir=2");
+   if(vector_cell_text==1){
+     for(i=sd->is1; i<sd->is2+1; i++){
+       float xhalf;
+       float x1;
+       int k;
+   
+       x1 = xplttemp[i];
+       if(i!=sd->is2)xhalf = (xplttemp[i]+xplttemp[i+1])/2.0;
+       for(k=sd->ks1; k<sd->ks2+1; k++){
+         float zhalf;
+         float z1;
+
+         z1 = zplttemp[k];
+         if(k!=sd->ks2)zhalf = (zplttemp[k]+zplttemp[k+1])/2.0;
+
+         if(k!=sd->ks2){
+           int index_u;
+           float val;
+           
+           index_u = i*sd->nslicek + k + 1;
+           GET_VEC_VAL(u,val,index_u);
+           output3Val(x1,constval,zhalf,val);
+         }
+         if(i!=sd->is2){
+           int index_w;
+           float val;
+           
+           index_w = (i+1)*sd->nslicek + k;
+           GET_VEC_VAL(w,val,index_w);
+           output3Val(xhalf,constval,z1,val);
+         }
+       }
+     }
+   }
 
    glPointSize(vectorpointsize);
    glBegin(GL_POINTS);
@@ -6387,6 +6466,41 @@ void drawvslice_cellcenter(const vslicedata *vd){
    }
    glEnd();
    SNIFF_ERRORS("after drawvslice_cellcenter:lines dir=3");
+
+   if(vector_cell_text==1){
+     for(i=sd->is1; i<sd->is2+1; i++){
+       float xhalf;
+       float x1;
+       int j;
+   
+       x1 = xplttemp[i];
+       if(i!=sd->is2)xhalf = (xplttemp[i]+xplttemp[i+1])/2.0;
+       for(j=sd->js1; j<sd->js2+1; j++){
+         float yhalf;
+         float yy1;
+
+         yy1 = yplttemp[j];
+         if(j!=sd->js2)yhalf = (yplttemp[j]+yplttemp[j+1])/2.0;
+
+         if(j!=sd->js2){
+           int index_u;
+           float val;
+           
+           index_u = i*sd->nslicej + j + 1;
+           GET_VEC_VAL(u,val,index_u);
+           output3Val(x1,yhalf,constval,val);
+         }
+         if(i!=sd->is2){
+           int index_v;
+           float val;
+           
+           index_v = (i+1)*sd->nslicej + j;
+           GET_VEC_VAL(v,val,index_v);
+           output3Val(xhalf,yy1,constval,val);
+         }
+       }
+     }
+   }
 
    glPointSize(vectorpointsize);
    glBegin(GL_POINTS);

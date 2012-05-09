@@ -1601,6 +1601,9 @@ void keyboard(unsigned char key, int flag){
         return;
       }
       break;
+    case '@':
+      vector_cell_text = 1 - vector_cell_text;
+      break;
     case '!':
       snap_view_angles();
       break;
@@ -1678,6 +1681,7 @@ void keyboard(unsigned char key, int flag){
     case 1:
       next_xindex(skip_global*FlowDir,0);
       break;
+    case 0:
     case 2:
       next_yindex(skip_global*FlowDir,0);
       break;
