@@ -1,4 +1,4 @@
-&HEAD CHID='objects_dynamic3',TITLE='Smokeview device drawing test SVN $Revision$' /
+&HEAD CHID='objects_dynamic3',TITLE='Smokeview device drawing test SVN $Revision: 7831 $' /
 
  Test the demosphere device.  This device draws a textured sphere that moves
  around in a user defined box.  

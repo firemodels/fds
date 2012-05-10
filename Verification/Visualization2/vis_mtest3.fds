@@ -1,7 +1,7 @@
-&HEAD CHID='vis_mtest1', TITLE='Sandia 1m high flow rate methane pool fire (Test 17), 6 cm resolution SVN $Revision$' /
+&HEAD CHID='vis_mtest3', TITLE='Sandia 1m high flow rate methane pool fire (Test 17), 6 cm resolution SVN $Revision: 9461 $' /
 
 &MULT ID='mesh array', DX=1.5,DY=1.5,DZ=1.0, I_UPPER=1,J_UPPER=1,K_UPPER=3 /
-&MESH IJK=24,24,16, XB=-1.5,0.0,-1.5,0.0,-.0625,0.9375, MULT_ID='mesh array' /
+&MESH IJK=96,96,64, XB=-1.5,0.0,-1.5,0.0,-.0625,0.9375, MULT_ID='mesh array' /
 
 &DUMP NFRAMES=100 DT_SL3D=0.033333 /
 
@@ -41,6 +41,7 @@
 &SLCF XB=-1.5,1.5,-1.5,1.5,-0.0625,3.9375, QUANTITY='TEMPERATURE' / 3D slice
 &SLCF XB=-1.5,1.5,-1.5,1.5,-0.0625,3.9375, QUANTITY='DENSITY',SPEC_ID='SOOT' / 3D slice
 &SLCF XB=-1.5,1.5,-1.5,1.5,-0.0625,3.9375, QUANTITY='SCALAR RESOLUTION', QUANTITY2='TEMPERATURE' /
+
 
 Tieszen et al., Comb. and Flame (2002), Figure 6
 &DEVC XYZ = 0.0,0.0,0.505, QUANTITY = 'W-VELOCITY', ID='W005'/
