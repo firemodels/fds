@@ -3,13 +3,13 @@
 $RUNFDS Visualization capecod
 $RUNFDS Visualization colorbar
 $RUNFDS Visualization colorconv
+$RUNFDS Visualization objects_dynamic
 $RUNFDS Visualization objects_elem
 $RUNFDS Visualization objects_static
-$RUNFDS Visualization objects_dynamic
 $RUNFDS Visualization plume5c
 $RUNFDS Visualization plume5c_bounddef
-$RUNFDS Visualization sillytexture
 $RUNFDS Visualization script_test
+$RUNFDS Visualization sillytexture
 $RUNFDS Visualization smoke_sensor
 $RUNFDS Visualization smoke_test
 $RUNFDS Visualization smoke_test2
