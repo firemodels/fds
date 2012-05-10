@@ -3,6 +3,25 @@
 RENDERDIR
  ..\..\Manuals\SMV_Verification_Guide\SCRIPT_FIGURES
 
+UNLOADALL
+LOADINIFILE
+ plume5c_texturebar.ini
+LOADFILE
+ plume5c_06.sf
+SETTIMEVAL
+ 0.5
+RENDERONCE
+ plume5c_texturebar
+LOADINIFILE
+ plume5c_notexturebar.ini
+LOADFILE
+ plume5c_06.sf
+SETTIMEVAL
+ 0.5
+RENDERONCE
+ plume5c_notexturebar
+
+
 // render slice files
 
 UNLOADALL
@@ -214,6 +233,8 @@ SETTIMEVAL
  30.05
 RENDERONCE
  plume5c_part_30
+RENDERONCE
+ plume5c_part
 
 // render particle files using streaks
 
@@ -236,6 +257,8 @@ SETTIMEVAL
  30.05
 RENDERONCE
  plume5c_part_streak_30
+RENDERONCE
+ plume5c_streak
 
 // render particles using streaks (different length)
 
