@@ -1,7 +1,0 @@
-RENDERDIR
- frames
-VOLSMOKERENDERALL
- 1
- vis_test2_volsmoke
-UNLOADALL
-EXIT

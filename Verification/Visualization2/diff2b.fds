@@ -1,4 +1,4 @@
-&HEAD CHID='diff2a',TITLE='Plume whirl case SVN $Revision$' /
+&HEAD CHID='diff2b',TITLE='Plume whirl case SVN $Revision: 7904 $' /
 
   test of smokediff
 
@@ -14,6 +14,7 @@
 
 &VENT XB=0.5,1.1,0.5,1.1,0.1,0.1,SURF_ID='BURNER' /  fire source on kitchen stove
 &OBST XB=0.5,1.1,0.5,1.1,0.0,0.1 /
+&OBST XB=0.8,0.9,0.8,0.9,2.4,2.5 /
 
 &VENT XB=0.0,1.6,0.0,0.0,0.0,1.6,SURF_ID='OPEN'/
 &VENT XB=1.6,1.6,0.0,1.6,0.0,1.6,SURF_ID='OPEN'/

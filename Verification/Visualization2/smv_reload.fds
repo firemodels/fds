@@ -5,7 +5,7 @@ Run this case with FDS then view it with Smokeview.  Blockages, vents and device
 25, 50, 75 and 100 s.  Load the slice file then press the "u" key peridocically to reload data
 and the .smv file.  Observe that the blockages etc will now appear at the right times.
 
-&HEAD CHID='smv_reload',TITLE='Test OBST and HOLE Creation and Removal, SVN $Revision$' / 
+&HEAD CHID='smv_reload',TITLE='Test OBST and HOLE Creation and Removal, SVN $Revision: 7399 $' / 
 
 &MESH IJK=20,10,20 XB=0.0,1.0,0.0,0.5,0.0,1.0 /
 &MESH IJK=20,10,20 XB=0.0,1.0,0.5,1.0,0.0,1.0 /

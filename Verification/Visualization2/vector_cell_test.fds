@@ -1,4 +1,4 @@
-&HEAD CHID='vector_cell_test',TITLE='cell centered vector plot test case SVN $Revision$' /
+&HEAD CHID='vector_cell_test',TITLE='cell centered vector plot test case SVN $Revision: 10673 $' /
 
   same as plume5a except there is a blockage in the middle of the scene to block the flow
   The purpose of this case is to demonstrate the curved flow (via streak lines) that results.
