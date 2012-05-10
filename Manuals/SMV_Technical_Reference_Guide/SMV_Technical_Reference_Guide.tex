@@ -1478,11 +1478,11 @@ where $x_p$ represents particle position and $V$ represents the velocity field.
 
 The assumption this model uses to compute particle flow is that the the drag force on the particle is large compared to $mg$, the force due to gravity.
 
-Figures \ref{figpart} and \ref{figstreak}
+Figure \ref{figpart}
 shows particles represented as particles and
 as streaks.
-A particle streak represents where a particle is {\em now} and in the recent past.  The streak length is specified as time.
-Static particle images are not effective at displaying motion.  For example, the particle image in Figure \ref{figpart} does not show particle motion.  Streak lines, however, in Figure \ref{figstreak} shows curved motion due to the upper wall obstructions.
+A particle streak visualizes where a particle is located over a period of time.  The streak length is specified as time.
+Static particle images are not effective at displaying motion.  For example, the particle image in Figure \ref{figpart}a does not show particle motion.  Streak lines, however, in Figure \ref{figstreak}b shows curved motion due to interior obstructions.
 Particle size is
 specified using
 \begin{verbatim}
@@ -1494,33 +1494,13 @@ dialog box.  Streak line length is specified in terms of time, a certain number 
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{cc}
-\includegraphics[height=6.0in]{figures/plume5a_part}&
-\includegraphics[height=6.0in]{figures/plume5b_part}\\
-a) Open plume&b) Partially obstructed plume\\
+\includegraphics[height=6.0in]{figures/plume5c_part}&
+\includegraphics[height=6.0in]{figures/plume5c_streak}\\
+a) Particles&b) Partical streaks\\
 \end{tabular}
 \end{center}
-\caption[Particle view of two plume flow cases.]
-{Particle view of two plume flow cases.  The case on the left
-is completely open.  The upper half of the simulation on the right is obstructed.
-  }
+\caption{Plume flow visualized using particles and particle streaks.}
 \label{figpart}%
-\end{figure}
-
-\begin{figure}[\figoptions]
-\begin{center}
-\begin{tabular}{cc}
-\includegraphics[height=6.0in]{figures/plume5a_streak}&
- \includegraphics[height=6.0in]{figures/plume5b_streak}\\
-a) Open plume&b) Partially obstructed plume\\
-\end{tabular}
-\end{center}
-\caption[Streak view of two plume flow cases.  Streak views show plume motion
-resulting from hidden obstructions while particle views do not.]
-{Streak view of two plume flow cases.  Streak views show plume motion
-resulting from hidden obstructions while particle views do not.  The case on the left
-is completely open.  The upper half of the simulation on the right is obstructed.
-  }
-\label{figstreak}%
 \end{figure}
 
 %
