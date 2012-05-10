@@ -1,13 +1,14 @@
-&HEAD CHID='plume5b',TITLE='Plume whirl case SVN $Revision$' /
+&HEAD CHID='diff2a',TITLE='Plume whirl case SVN $Revision: 7904 $' /
 
-  same as plume5a except the top 1.6 m of the domain is closed.
-  The purpose of this case is to demonstrate the curved flow (via streak lines) that results.
+  test of smokediff
 
-&MESH IJK=32,32,64, XB=0.0,1.6,0.0,1.6,0.0,3.2 /
+  diff2b.fds is the same as diff2a.fds except for a one grid cell blockage 2.4 m off the "floor"
 
-&TIME T_END=10. /  Total simulation time
+&MESH IJK=16,16,32, XB=0.0,1.6,0.0,1.6,0.0,3.2 /
 
-&DUMP NFRAMES=200 /
+&TIME T_END=40. /  Total simulation time
+
+&DUMP NFRAMES=800 /
 &REAC C=3,H=8,SOOT_YIELD=0.01,FUEL='PROPANE'/
 &SURF ID='BURNER',HRRPUA=600.0,PART_ID='tracers' /  Ignition source
 

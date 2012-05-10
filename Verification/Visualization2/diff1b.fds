@@ -1,4 +1,4 @@
-&HEAD CHID='diff1a',TITLE='Plume whirl case SVN $Revision$' /
+&HEAD CHID='diff1b',TITLE='Plume whirl case SVN $Revision: 8119 $' /
 
   test of smokediff
 
@@ -50,8 +50,8 @@
       THICKNESS(1:2) = 0.002,0.1 
       TMP_INNER      = 600.0
 /
-
-&SURF ID='BURNER',HRRPUA=600.0,PART_ID='tracers' /  Ignition source
+&REAC C=3,H=8,SOOT_YIELD=0.01,FUEL='PROPANE'/
+&SURF ID='BURNER',HRRPUA=600.1,PART_ID='tracers' /  Ignition source
 
 &VENT XB=0.5,1.1,0.5,1.1,0.1,0.1,SURF_ID='BURNER' /  fire source on kitchen stove
 
@@ -69,7 +69,6 @@
 &ISOF QUANTITY='TEMPERATURE',VALUE(1)=100.0 /  Show 3D contours of temperature at 100 C
 &ISOF QUANTITY='TEMPERATURE',VALUE(1)=200.0 /  Show 3D contours of temperature at 200 C
 &ISOF QUANTITY='TEMPERATURE',VALUE(1)=620.0 /  Show 3D contours of temperature at 620 C
-&ISOF QUANTITY='LUMPED SPECIES 1',VALUE(1)=0.07 /  Show 3D contours of mixture fraction at 0.07
 
 &PART ID='tracers',MASSLESS=.TRUE.,
    QUANTITIES(1:4)='U-VELOCITY','V-VELOCITY','W-VELOCITY'
