@@ -4758,7 +4758,7 @@ void setup_tree_devices(void){
   ntreedeviceinfo = treei - treedeviceinfo + 1;
 }
 
-/* ----------------------- set_zone_devs ----------------------------- */
+/* ----------------------- setup_zone_devs ----------------------------- */
 
 void setup_zone_devs(void){
   int i;

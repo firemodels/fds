@@ -16,6 +16,7 @@ EXTERNCPP void motion_CB(int xm, int ym);
 EXTERNCPP void MenuStatus_CB(int status, int x, int y);
 EXTERNCPP void Idle_CB(void);
 
+SVEXTERN void update_vector_widgets(void);
 EXTERNCPP void update_gslice_parms(void);
 EXTERNCPP void readiso_orig(const char *file, int ifile, int flag, int *errorcode);
 EXTERNCPP void update_plotxyz_all(void);

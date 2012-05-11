@@ -1270,6 +1270,21 @@ void keyboard(unsigned char key, int flag){
         return;
       }
       break;
+    case 'j':
+      if(nrooms>0){
+        zone_highlight_room++;
+        if(zone_highlight_room>=nrooms)zone_highlight_room=0;
+        printf("room %i\n",zone_highlight_room+1);
+      }
+      break;
+    case 'J':
+      if(nrooms>0){
+        zone_highlight = 1 - zone_highlight;
+        if(zone_highlight==1){
+          printf("room %i\n",zone_highlight_room+1);
+        }
+      }
+      break;
     case 'k':
     case 'K':
       visTimeLabels = 1 - visTimeLabels;

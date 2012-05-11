@@ -638,7 +638,7 @@ SVEXTERN float plot3dpointsize, plot3dlinewidth;
 SVEXTERN float SVDECL(vectorlinewidth,1.0);
 SVEXTERN int SVDECL(cell_center_text,0);
 SVEXTERN float SVDECL(gridlinewidth,2.0);
-SVEXTERN void update_vector_widgets(void);
+SVEXTERN int SVDECL(zone_highlight,0),SVDECL(zone_highlight_room,0);
 
 
 SVEXTERN float sprinklerabssize, sensorabssize, heatabssize;

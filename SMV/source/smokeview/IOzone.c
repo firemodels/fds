@@ -807,12 +807,23 @@ void drawroomgeom(void){
 /* draw the frame */
 
   antialias(1);
-  glLineWidth(linewidth);
-  glColor4fv(foregroundcolor);
   glBegin(GL_LINES);
 
   for(i=0;i<nrooms;i++){
     roomdata *roomi;
+
+    if(zone_highlight==1&&zone_highlight_room==i){
+      glEnd();
+      glLineWidth(5.0*linewidth);
+      glBegin(GL_LINES);
+      glColor3f(1.0,0.0,0.0);
+    }
+    else{
+      glEnd();
+      glLineWidth(linewidth);
+      glBegin(GL_LINES);
+      glColor4fv(foregroundcolor);
+    }
 
     roomi = roominfo + i;
     xroom0 = roomi->x0;
