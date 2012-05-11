@@ -100,6 +100,7 @@ GLUI_RadioGroup *render_label_radio=NULL;
 GLUI_Translation *rotate_zx=NULL,*eyerotate_z=NULL;
 GLUI_Translation *translate_z=NULL,*translate_xy=NULL;
 GLUI_Checkbox *blockpath_checkbox=NULL,*cursor_checkbox=NULL;
+GLUI_Checkbox *CHECKBOX_gslice_data=NULL;
 GLUI_Button *eyerotate90_z=NULL,*eyelevel=NULL, *floorlevel=NULL, *reset_saved_view=NULL;
 GLUI_Button *replace_view=NULL,*add_view=NULL,*delete_view=NULL;
 GLUI_Button *startup_button=NULL,*cycle_views_button=NULL;
@@ -148,7 +149,7 @@ void update_gslice_parms(void){
   SPINNER_gslice_center_z->set_float_val(gslice_xyz[2]);
   SPINNER_gslice_normal_az->set_float_val(gslice_normal_azelev[0]);
   SPINNER_gslice_normal_elev->set_float_val(gslice_normal_azelev[1]);
-
+  CHECKBOX_gslice_data->set_int_val(show_gslice_data);
 }
 
 /* ------------------ update_glui_set_view_xyz ------------------------ */
@@ -376,7 +377,7 @@ extern "C" void glui_motion_setup(int main_window){
   SPINNER_gslice_normal_az=glui_motion->add_spinner_to_panel(panel_gslice_normal,"az:",GLUI_SPINNER_FLOAT,gslice_normal_azelev,GSLICE_NORMAL,GSLICE_CB);
   SPINNER_gslice_normal_elev=glui_motion->add_spinner_to_panel(panel_gslice_normal,"elev:",GLUI_SPINNER_FLOAT,gslice_normal_azelev+1,GSLICE_NORMAL,GSLICE_CB);
   GSLICE_CB(GSLICE_NORMAL);
-  glui_motion->add_checkbox_to_panel(panel_gslice,"show gslice data",&show_gslice_data);
+  CHECKBOX_gslice_data=glui_motion->add_checkbox_to_panel(panel_gslice,"show gslice data",&show_gslice_data);
   glui_motion->add_checkbox_to_panel(panel_gslice,"show gslice triangles",&show_gslice_outline);
   glui_motion->add_checkbox_to_panel(panel_gslice,"show gslice normal",&show_gslice_normal);
   

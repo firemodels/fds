@@ -133,7 +133,7 @@ SVEXTERN int npartframes_max;
 SVEXTERN int force_isometric;
 SVEXTERN int SVDECL(updategluiview,1);
 SVEXTERN int render_double,render_double_state,render_double_menu,render_from_menu;
-SVEXTERN int usetexturebar;
+SVEXTERN int SVDECL(usetexturebar,1);
 SVEXTERN int show_smokelighting;
 SVEXTERN int sb_atstart;
 SVEXTERN int SVDECL(cullgeom_portsize,16);
@@ -636,7 +636,7 @@ SVEXTERN float partpointsize,SVDECL(vectorpointsize,2.0),streaklinewidth;
 SVEXTERN float isopointsize, isolinewidth;
 SVEXTERN float plot3dpointsize, plot3dlinewidth;
 SVEXTERN float SVDECL(vectorlinewidth,1.0);
-SVEXTERN int SVDECL(vector_cell_text,0);
+SVEXTERN int SVDECL(cell_center_text,0);
 SVEXTERN float SVDECL(gridlinewidth,2.0);
 SVEXTERN void update_vector_widgets(void);
 

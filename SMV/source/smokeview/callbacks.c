@@ -1159,6 +1159,8 @@ void keyboard(unsigned char key, int flag){
         break;
       case GLUT_ACTIVE_CTRL:
       default:
+        show_gslice_data = 1 - show_gslice_data;
+        update_gslice_parms();
         break;
       }
       break;
@@ -1602,7 +1604,7 @@ void keyboard(unsigned char key, int flag){
       }
       break;
     case '@':
-      vector_cell_text = 1 - vector_cell_text;
+      cell_center_text = 1 - cell_center_text;
       break;
     case '!':
       snap_view_angles();

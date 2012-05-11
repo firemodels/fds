@@ -2087,7 +2087,7 @@ int readsmv(char *file, char *file2){
   int errorcode;
   int noGRIDpresent=1,startpass;
   int nslicefiles=0;
-  slicedata *sliceinfo_copy=NULL, *slicexyzinfo_copy=NULL;
+  slicedata *sliceinfo_copy=NULL;
 
   int ipart=0, islicecount=1, ipatch=0, iroom=0,izone_local=0,ifire=0,iiso=0;
   int ismoke3d=0,ismoke3dcount=1;
