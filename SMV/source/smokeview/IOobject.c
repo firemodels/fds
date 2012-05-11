@@ -736,7 +736,7 @@ void draw_devices(void){
     }
     if(isZoneFireModel==1&&STRCMP(devicei->object->label,"target")==0&&visSensor==0)continue;
     if(devicei->in_zone_csv==1)continue;
-
+    if(isZoneFireModel==1&&STRCMP(devicei->label,"TIME")==0)continue;
     save_use_displaylist=devicei->object->use_displaylist;
     tagval=i+1;
     if(select_device==1&&show_mode==SELECT){
@@ -4756,6 +4756,52 @@ void setup_tree_devices(void){
     treei->vdevices[nvdevices++]=vdeviceptrinfo[i];
   }
   ntreedeviceinfo = treei - treedeviceinfo + 1;
+}
+
+/* ----------------------- set_zone_devs ----------------------------- */
+
+void setup_zone_devs(void){
+  int i;
+
+  for(i=0;i<nzoneinfo;i++){
+    FILE *stream;
+    char *file;
+    int nrows, ncols, buffer_len,ntokens;
+    char *buffer=NULL,**devclabels=NULL;
+    zonedata *zonei;
+    int j;
+
+    zonei = zoneinfo + i;
+    if(zonei->csv!=1)continue;
+    file = zonei->file;
+
+    stream=fopen(file,"r");
+    if(stream==NULL)continue;
+    buffer_len=getrowcols(stream,&nrows,&ncols);
+    if(nrows<=0||ncols<=0||buffer_len<=0){
+      fclose(stream);
+      continue;
+    }
+    buffer_len+=10;
+    rewind(stream);
+
+    NewMemory((void **)&buffer,buffer_len);
+    NewMemory((void **)&devclabels,ncols*sizeof(char *));
+    fgets(buffer,buffer_len,stream);
+    fgets(buffer,buffer_len,stream);
+    parsecsv(buffer,devclabels,ncols,&ntokens);
+    for(j=0;j<ntokens;j++){
+      devicedata *devi;
+
+      trim(devclabels[j]);
+      devclabels[j]=trim_front(devclabels[j]);
+      devi = getdevice(devclabels[j],-1);
+      if(devi!=NULL)devi->in_zone_csv=1;
+    }
+    FREEMEMORY(devclabels);
+    FREEMEMORY(buffer);
+    fclose(stream);
+  }
 }
 
 /* ----------------------- read_device_data ----------------------------- */

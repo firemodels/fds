@@ -27,6 +27,7 @@ EXTERNCPP void setup_glut(int argc, char **argv);
 EXTERNCPP int get_ndevices(char *file);
 EXTERNCPP void readhrr(int flag, int *errorcode);
 EXTERNCPP void read_device_data(char *file, int filetype, int flag);
+EXTERNCPP void setup_zone_devs(void);
 EXTERNCPP void setup_device_data(void);
 EXTERNCPP void read_device_header(char *file, devicedata *devices, int ndevices);
 EXTERNCPP void parse_device_keyword(FILE *stream, devicedata *devicei);

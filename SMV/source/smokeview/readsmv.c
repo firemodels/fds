@@ -4402,6 +4402,7 @@ int readsmv(char *file, char *file2){
           float *xyz, *xyznorm;
           fgets(buffer,255,stream);
 
+          strcpy(devicecopy->label,"");
           xyz = devicecopy->xyz;
           xyznorm = devicecopy->xyznorm;
           xyz[0]=0.0;
@@ -6719,7 +6720,7 @@ typedef struct {
    ************************ wrap up *************************************** 
    ************************************************************************
  */
-
+  CheckMemory;
   update_isocolors();
   CheckMemory;
 
@@ -6744,6 +6745,8 @@ typedef struct {
     if(csvi->type==CSVTYPE_EXT)read_device_data(csvi->file,CSV_EXP,LOAD);
   }
   setup_device_data();
+  if(nzoneinfo>0)setup_zone_devs();
+
 
   init_multi_threading();
 
@@ -7101,12 +7104,12 @@ void parsedatabase(char *file){
     if(nsurfinfo==0){
       FREEMEMORY(surfinfo);
       FREEMEMORY(textureinfo);
-      NewMemory((void **)&surfinfo,nsurfids_shown*sizeof(surfdata));
+      NewMemory((void **)&surfinfo,(nsurfids_shown+10)*sizeof(surfdata));
       NewMemory((void **)&textureinfo,nsurfids_shown*sizeof(surfdata));
     }
     if(nsurfinfo>0){
       if(surfinfo==NULL){
-        NewMemory((void **)&surfinfo,(nsurfids_shown+nsurfinfo)*sizeof(surfdata));
+        NewMemory((void **)&surfinfo,(nsurfids_shown+nsurfinfo+10)*sizeof(surfdata));
       }
       else{
         ResizeMemory((void **)&surfinfo,(nsurfids_shown+nsurfinfo)*sizeof(surfdata));
