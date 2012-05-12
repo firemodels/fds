@@ -1205,7 +1205,6 @@ void keyboard(unsigned char key, int flag){
     case 'G':
       if(gpuactive==1){
         usegpu=1-usegpu;
-        usegpu_slice=usegpu;
       }
       else{
         usegpu=0;
