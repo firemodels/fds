@@ -96,6 +96,7 @@ EXTERNCPP void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, fl
                                  int allocate_memory);
 EXTERNCPP void output_mfed_csv(multislicedata *mslicei);
 EXTERNCPP void ParticlePropShowMenu(int value);
+EXTERNCPP int get_index(float x, int dir, float *plotxyz, int nplotxyz);
 EXTERNCPP void glui_script_disable(void);
 EXTERNCPP void update_slice_contours(int slice_type_index, float line_min, float line_max, int nline_values);
 EXTERNCPP void ScriptMenu(int var);

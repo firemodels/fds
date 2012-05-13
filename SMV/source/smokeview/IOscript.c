@@ -1241,16 +1241,22 @@ void script_showplot3ddata(scriptdata *scripti){
 
   switch (dir){
     case 1:
-      updateshowstep(showhide,DIRX);
-      meshi->plotx=get_plot3d_index(meshi, dir, val);
+      visx_all=showhide;
+      iplotx_all=get_index(val,1,plotx_all,nplotx_all);
+      next_xindex(1,0);
+      next_xindex(-1,0);
       break;
     case 2:
-      updateshowstep(showhide,DIRY);
-      meshi->ploty=get_plot3d_index(meshi, dir, val);
+      visy_all=showhide;
+      iploty_all=get_index(val,2,ploty_all,nploty_all);
+      next_yindex(1,0);
+      next_yindex(-1,0);
       break;
     case 3:
-      updateshowstep(showhide,DIRZ);
-      meshi->plotz=get_plot3d_index(meshi, dir, val);
+      visz_all=showhide;
+      iplotz_all=get_index(val,3,plotz_all,nplotz_all);
+      next_zindex(1,0);
+      next_zindex(-1,0);
       break;
     case 4:
       isolevel=scripti->ival5;

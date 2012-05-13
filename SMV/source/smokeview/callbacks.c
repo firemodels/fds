@@ -39,6 +39,39 @@ char callbacks_revision[]="$Revision$";
 #endif
 #endif
 
+/* ------------------ get_index ------------------------ */
+
+int get_index(float x, int dir, float *plotxyz, int nplotxyz){
+  int i;
+  int return_index=0;
+  float min_val,vali;
+
+  switch (dir){
+    case 1:
+      x=NORMALIZE_X(x);
+      break;
+    case 2:
+      x=NORMALIZE_Y(x);
+      break;
+    case 3:
+      x=NORMALIZE_X(x);
+      break;
+  }
+
+  if(plotxyz!=NULL){
+    min_val=ABS(x-plotxyz[0]);
+    return_index=0;
+    for(i=1;i<nplotxyz;i++){
+      vali = ABS(x-plotxyz[i]);
+      if(vali<min_val){
+        return_index=i;
+        min_val = vali;
+      }
+    }
+  }
+  return return_index;
+}
+
 /* ------------------ next_xindex ------------------------ */
 
 void next_xindex(int inc,int flag){
