@@ -101,7 +101,6 @@ EXTERNCPP void update_slice_contours(int slice_type_index, float line_min, float
 EXTERNCPP void ScriptMenu(int var);
 EXTERNCPP void SmokeColorBarMenu(int var);
 EXTERNCPP void  OBJECT_CB(int flag);
-EXTERNCPP void update_glui_cellcenter_interp(void);
 EXTERNCPP void update_glui_viewlist(void);
 EXTERNCPP void glui_script_enable(void);
 EXTERNCPP void WUI_CB(int var);
@@ -599,7 +598,6 @@ EXTERNCPP void setisocolors(float isomin, float isomax, isodata *sd, int *errorc
 EXTERNCPP void drawvolslice_terrain(const slicedata *sd);
 EXTERNCPP void drawvolslice_texture(const slicedata *sd);
 EXTERNCPP void drawvolslice_cellcenter(const slicedata *sd);
-EXTERNCPP void drawvolslice_cellcenter_interp(const slicedata *sd);
 EXTERNCPP int new_multi_slice(slicedata *sdold,slicedata *sd);
 EXTERNCPP int hide_slice2(slicedata *sdi,slicedata *sdj);
 EXTERNCPP void drawvolslice(const slicedata *sd);

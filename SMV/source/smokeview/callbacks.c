@@ -1533,7 +1533,6 @@ void keyboard(unsigned char key, int flag){
       switch (keystate){
         case GLUT_ACTIVE_ALT:
           skip_slice_in_embedded_mesh = 1 - skip_slice_in_embedded_mesh;
-          update_glui_cellcenter_interp();
           break;
         default:
           ReloadMenu(0);
@@ -1593,13 +1592,7 @@ void keyboard(unsigned char key, int flag){
       break;
     case 'y':
     case 'Y':
-      if(keystate==GLUT_ACTIVE_ALT){
-        cellcenter_interp = 1 - cellcenter_interp;
-        update_glui_cellcenter_interp();
-      }
-      else{
-        visy_all = 1-visy_all;
-      }
+      visy_all = 1-visy_all;
       break;
     case 'z':
     case 'Z':

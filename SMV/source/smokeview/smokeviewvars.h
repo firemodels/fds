@@ -111,7 +111,7 @@ SVEXTERN int levelset_colorbar, wallthickness_colorbar;
 SVEXTERN colorbardata SVDECL(*fire_colorbar,NULL), SVDECL(*fire_custom_colorbar,NULL);
 SVEXTERN float glui_time;
 SVEXTERN int show_mode;
-SVEXTERN int SVDECL(cellcenter_interp,0), SVDECL(cellcenter_slice_active,0), SVDECL(cellcenter_bound_active,0);
+SVEXTERN int SVDECL(cellcenter_slice_active,0), SVDECL(cellcenter_bound_active,0);
 SVEXTERN int SVDECL(part5colorindex,0), SVDECL(show_tracers_always,0);
 SVEXTERN int navatar_colors;
 SVEXTERN int select_avatar, selected_avatar_tag, view_from_selected_avatar;

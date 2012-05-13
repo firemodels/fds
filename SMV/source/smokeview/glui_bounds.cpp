@@ -682,10 +682,6 @@ extern "C" void glui_bounds_setup(int main_window){
     if(n_embedded_meshes>0){
       CHECKBOX_skip_subslice=glui_bounds->add_checkbox_to_panel(panel_slice,_("Skip coarse sub-slice"),&skip_slice_in_embedded_mesh);
     }
-    if(cellcenter_slice_active==1){
-      CHECKBOX_cellcenter_slice_interp = glui_bounds->add_checkbox_to_panel(panel_slice,_("Interpolate cell centered slices"),
-        &cellcenter_interp);
-    }
     if(nfedinfo>0){
       glui_bounds->add_checkbox_to_panel(panel_slice,"Regenerate FED data",&regenerate_fed);
     }
@@ -1749,13 +1745,6 @@ extern "C" void updatepatchlistindex2(char *label){
       break;
     }
   }
-}
-
-/* ------------------ update_glui_streakvalue ------------------------ */
-
-extern "C" void update_glui_cellcenter_interp(void){
-  if(CHECKBOX_cellcenter_slice_interp!=NULL)CHECKBOX_cellcenter_slice_interp->set_int_val(cellcenter_interp);
-  if(CHECKBOX_skip_subslice!=NULL)CHECKBOX_skip_subslice->set_int_val(skip_slice_in_embedded_mesh);
 }
 
 /* ------------------ update_glui_streakvalue ------------------------ */
