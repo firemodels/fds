@@ -1104,23 +1104,38 @@ void keyboard(unsigned char key, int flag){
         break;
       case GLUT_ACTIVE_CTRL:
       default:
-        contour_type++;
-        if(contour_type>2)contour_type=0;
-        update_plot3d_display();
-        updatecolors(-1);
+        if(nrooms>0){
+          zone_highlight_room++;
+          if(zone_highlight_room>=nrooms)zone_highlight_room=0;
+          printf("room %i\n",zone_highlight_room+1);
+        }
+        else{
+          contour_type++;
+          if(contour_type>2)contour_type=0;
+          update_plot3d_display();
+          updatecolors(-1);
+        }
       }
       break;
-#ifdef pp_CULL
     case 'C':
-      if(nsmoke3dinfo>0&&cullactive==1&&gpuactive==1){
-        cullsmoke=1-cullsmoke;
-        update_smoke3dflags();
-        initcull(cullsmoke);
-        print_gpu_cull_state();
+      if(nrooms>0){
+        zone_highlight = 1 - zone_highlight;
+        if(zone_highlight==1){
+          printf("room %i\n",zone_highlight_room+1);
+        }
       }
-      if(cullactive==0||gpuactive==0)cullsmoke=0;
-      break;
+#ifdef pp_CULL
+      else{
+        if(nsmoke3dinfo>0&&cullactive==1&&gpuactive==1){
+          cullsmoke=1-cullsmoke;
+          update_smoke3dflags();
+          initcull(cullsmoke);
+          print_gpu_cull_state();
+        }
+        if(cullactive==0||gpuactive==0)cullsmoke=0;
+      }
 #endif
+      break;
     case 'd':
     case 'D':
       switch (keystate){
@@ -1267,21 +1282,6 @@ void keyboard(unsigned char key, int flag){
       if(unload_qdata==0){
         handleiso();
         return;
-      }
-      break;
-    case 'j':
-      if(nrooms>0){
-        zone_highlight_room++;
-        if(zone_highlight_room>=nrooms)zone_highlight_room=0;
-        printf("room %i\n",zone_highlight_room+1);
-      }
-      break;
-    case 'J':
-      if(nrooms>0){
-        zone_highlight = 1 - zone_highlight;
-        if(zone_highlight==1){
-          printf("room %i\n",zone_highlight_room+1);
-        }
       }
       break;
     case 'k':
