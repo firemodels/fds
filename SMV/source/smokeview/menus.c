@@ -7248,6 +7248,7 @@ updatemenu=0;
     glutAddMenuEntry(_("  T: toggle method for interpolating data color"),6);
     if(cellcenter_slice_active==1){
       glutAddMenuEntry(_("     (also, toggles cell center display on/off)"),6);
+    glutAddMenuEntry(_("  @: display FDS values in cell centered slices"),6);
     }
     glutAddMenuEntry(_("  u: reload files"),6);
     glutAddMenuEntry(_("  L: unload last slice file loaded"),6);
@@ -7281,6 +7282,7 @@ updatemenu=0;
     glutAddMenuEntry(_("  g: toggle grid visibility"),2);
   }
   glutAddMenuEntry(_("  e: toggle between eye, world and world/level rotation motion"),7);
+  glutAddMenuEntry(_("  q: display blockages as specified by user or as used by FDS"),7);
   glutAddMenuEntry(_("  W: toggle clipping - use Options/Clip menu to specify clipping planes"),7);
   glutAddMenuEntry(_("  -: decrement time step, 2D contour planes, 3D contour levels"),2);
   glutAddMenuEntry(_("  space bar: increment time step, 2D contour planes, 3D contour levels"),2);
@@ -7310,7 +7312,9 @@ updatemenu=0;
   glutAddMenuEntry(_("       horizontal/vertical: rotate about z, x axis"),1);
   glutAddMenuEntry(_("  CTRL horizontal/vertical: translate along x, y axis"),1);
   glutAddMenuEntry(_("   ALT horizontal/vertical: translate along z axis"),1);
-  glutAddMenuEntry(_("              double-click: rotate/translate 3D node-centered slice"),1);
+  if(SHOW_gslice_data==1){
+    glutAddMenuEntry(_("              double-click: rotate/translate 3D node-centered slice"),1);
+  }
 
   /* --------------------------------help menu -------------------------- */
 

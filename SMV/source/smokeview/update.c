@@ -340,6 +340,10 @@ void updateShow(void){
         break;
       }
     }
+    if(SHOW_gslice_data!=SHOW_gslice_data_old){
+      SHOW_gslice_data_old=SHOW_gslice_data;
+      updatemenu=1;
+    }
     for(ii=0;ii<nslice_loaded;ii++){
       mesh *slicemesh;
       slicedata *sd;
