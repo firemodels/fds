@@ -607,7 +607,7 @@ void mouse_CB(int button, int state, int x, int y){
   
   // check for double click for translating/rotating 3D slice plane
 
-  if(show_gslice_data==1||show_gslice_outline==1){
+  if(show_gslice_data==1||show_gslice_triangles==1||show_gslice_triangulation==1){
     this_mouse_time=glutGet(GLUT_ELAPSED_TIME)/1000.0;
     if(this_mouse_time-last_mouse_time<0.5){
       gslice_xyz0[0]=gslice_xyz[0];
@@ -1174,8 +1174,6 @@ void keyboard(unsigned char key, int flag){
         break;
       case GLUT_ACTIVE_CTRL:
       default:
-        show_gslice_data = 1 - show_gslice_data;
-        update_gslice_parms();
         break;
       }
       break;
@@ -1189,8 +1187,6 @@ void keyboard(unsigned char key, int flag){
     case 'g':
       switch (keystate){
       case GLUT_ACTIVE_ALT:
-        show_gslice_data = 1 - show_gslice_data;
-        break;
       case GLUT_ACTIVE_CTRL:
       default:
         if(ntotal_blockages>0||isZoneFireModel==0){
@@ -1563,23 +1559,26 @@ void keyboard(unsigned char key, int flag){
       }
       break;
     case 'w':
-    case 'W':
       switch (keystate){
         case GLUT_ACTIVE_ALT:
           DialogMenu(26); // WUI dialog
           break;
         case GLUT_ACTIVE_CTRL:
         default:
-        if(eyeview==EYE_CENTERED){
-          handle_move_keys(GLUT_KEY_UP);
-        }
-        else{
-          xyz_clipplane++;
-          if(xyz_clipplane>2)xyz_clipplane=0;
-          update_clip_all();
-        }
-        break;
+          if(eyeview==EYE_CENTERED){
+            handle_move_keys(GLUT_KEY_UP);
+          }
+          else if(SHOW_gslice_data==1){
+            show_gslice_data = 1 - show_gslice_data;
+            update_gslice_parms();
+          }
+          break;
       }
+      break;
+    case 'W':
+      xyz_clipplane++;
+      if(xyz_clipplane>2)xyz_clipplane=0;
+      update_clip_all();
       break;
     case 'x':
     case 'X':

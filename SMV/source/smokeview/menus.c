@@ -997,7 +997,7 @@ void ViewpointMenu(int value){
 
 
 void DialogMenu(int value){
-
+  glutPostRedisplay();
   switch (value){
 #ifdef pp_SHOOTER
   case 27:
@@ -7218,15 +7218,15 @@ updatemenu=0;
 
   CREATEMENU(webhelpmenu,HelpMenu);
 #ifdef WIN32
-  glutAddMenuEntry(_("Documentation"),-3);
-  glutAddMenuEntry(_("Issue tracker"),-1);
-  glutAddMenuEntry(_("Updates"),-2);
+  glutAddMenuEntry(_("Obtain Documentation"),-3);
+  glutAddMenuEntry(_("Report problems"),-1);
+  glutAddMenuEntry(_("Download software updates"),-2);
   glutAddMenuEntry(_("FDS/Smokeview website"),-4);
 #endif
 #ifdef pp_OSX
-  glutAddMenuEntry(_("Documentation"),-3);
-  glutAddMenuEntry(_("Issue tracker"),-1);
-  glutAddMenuEntry(_("Updates"),-2);
+  glutAddMenuEntry(_("Obtain Documentation"),-3);
+  glutAddMenuEntry(_("Report problems"),-1);
+  glutAddMenuEntry(_("Download software updates"),-2);
   glutAddMenuEntry(_("FDS/Smokeview website"),-4);
 #endif
 #ifndef WIN32
@@ -7281,7 +7281,7 @@ updatemenu=0;
     glutAddMenuEntry(_("  g: toggle grid visibility"),2);
   }
   glutAddMenuEntry(_("  e: toggle between eye, world and world/level rotation motion"),7);
-  glutAddMenuEntry(_("  w: toggle clipping - use Options/Clip menu to specify clipping planes"),7);
+  glutAddMenuEntry(_("  W: toggle clipping - use Options/Clip menu to specify clipping planes"),7);
   glutAddMenuEntry(_("  -: decrement time step, 2D contour planes, 3D contour levels"),2);
   glutAddMenuEntry(_("  space bar: increment time step, 2D contour planes, 3D contour levels"),2);
   glutAddMenuEntry("",1);
@@ -7310,6 +7310,7 @@ updatemenu=0;
   glutAddMenuEntry(_("       horizontal/vertical: rotate about z, x axis"),1);
   glutAddMenuEntry(_("  CTRL horizontal/vertical: translate along x, y axis"),1);
   glutAddMenuEntry(_("   ALT horizontal/vertical: translate along z axis"),1);
+  glutAddMenuEntry(_("              double-click: rotate/translate 3D node-centered slice"),1);
 
   /* --------------------------------help menu -------------------------- */
 

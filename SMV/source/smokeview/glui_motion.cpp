@@ -85,7 +85,6 @@ GLUI_Spinner *SPINNER_gslice_normal_az=NULL;
 GLUI_Spinner *SPINNER_gslice_normal_elev=NULL;
 GLUI_Translation *gslice_htranslate=NULL, *gslice_vtranslate=NULL;
 #endif
-GLUI_Panel *panel_blockageview=NULL;
 GLUI_Panel *panel_rotate=NULL;
 GLUI_Panel *panel_speed=NULL;
 GLUI_Panel *panel_height=NULL;
@@ -276,7 +275,7 @@ extern "C" void glui_motion_setup(int main_window){
   if(showmotion_dialog==0)glui_motion->hide();
 
 #ifdef pp_GSLICE
-  panel_motion = glui_motion->add_rollout(_("Scene Motion"));
+  panel_motion = glui_motion->add_rollout(_("Scene motion"));
 #else
   panel_motion = glui_motion->add_rollout(_("Motion"));
 #endif
@@ -335,15 +334,6 @@ extern "C" void glui_motion_setup(int main_window){
 
   //glui_motion->add_column(false);
 
-  if(nmeshes>1){
-    panel_blockageview = glui_motion->add_rollout("Blockage View",false);
-    for(i=0;i<nmeshes;i++){
-      mesh *meshi;
-
-      meshi = meshinfo + i;
-      glui_motion->add_checkbox_to_panel(panel_blockageview,meshi->label,&meshi->blockvis);
-    }
-  }
 
 #ifdef pp_BETA
   panel_specify = glui_motion->add_rollout_to_panel(panel_motion,_("Specify"));
@@ -354,7 +344,7 @@ extern "C" void glui_motion_setup(int main_window){
 #endif
 
 #ifdef pp_GSLICE
-  panel_gslice = glui_motion->add_rollout(_("Slice Motion"),false);
+  panel_gslice = glui_motion->add_rollout(_("General slice motion"),false);
   gslice_xyz[0]=(xbar0+DENORMALIZE_X(xbar))/2.0;
   gslice_xyz[1]=(ybar0+DENORMALIZE_Y(ybar))/2.0;
   gslice_xyz[2]=(zbar0+DENORMALIZE_Z(zbar))/2.0;
@@ -377,9 +367,10 @@ extern "C" void glui_motion_setup(int main_window){
   SPINNER_gslice_normal_az=glui_motion->add_spinner_to_panel(panel_gslice_normal,"az:",GLUI_SPINNER_FLOAT,gslice_normal_azelev,GSLICE_NORMAL,GSLICE_CB);
   SPINNER_gslice_normal_elev=glui_motion->add_spinner_to_panel(panel_gslice_normal,"elev:",GLUI_SPINNER_FLOAT,gslice_normal_azelev+1,GSLICE_NORMAL,GSLICE_CB);
   GSLICE_CB(GSLICE_NORMAL);
-  CHECKBOX_gslice_data=glui_motion->add_checkbox_to_panel(panel_gslice,"show gslice data",&show_gslice_data);
-  glui_motion->add_checkbox_to_panel(panel_gslice,"show gslice triangles",&show_gslice_outline);
-  glui_motion->add_checkbox_to_panel(panel_gslice,"show gslice normal",&show_gslice_normal);
+  CHECKBOX_gslice_data=glui_motion->add_checkbox_to_panel(panel_gslice,"show data",&show_gslice_data);
+  glui_motion->add_checkbox_to_panel(panel_gslice,"show triangle outline",&show_gslice_triangles);
+  glui_motion->add_checkbox_to_panel(panel_gslice,"show triangulation",&show_gslice_triangulation);
+  glui_motion->add_checkbox_to_panel(panel_gslice,"show plane normal",&show_gslice_normal);
   
 #endif
 

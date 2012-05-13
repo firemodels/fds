@@ -384,7 +384,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 /* ++++++++++++++++++++++++ draw slice files +++++++++++++++++++++++++ */
 
 #ifdef pp_GSLICE
-  if(show_gslice_outline==1||show_gslice_normal==1||show_gslice_normal_keyboard==1){
+  if(show_gslice_triangles==1||show_gslice_normal==1||show_gslice_normal_keyboard==1||show_gslice_triangulation==1){
     drawgslice_outline();
   }
 #endif

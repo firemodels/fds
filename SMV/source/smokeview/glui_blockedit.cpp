@@ -32,6 +32,7 @@ GLUI_StaticText *statictext_blockage_index=NULL;
 GLUI_StaticText *statictext_mesh_index=NULL;
 GLUI_StaticText *statictext_label=NULL;
 
+GLUI_Panel *panel_blockageview=NULL;
 GLUI *glui_edit=NULL;
 GLUI_Panel *panel_obj_select=NULL,*panel_surface=NULL;
 GLUI_Panel *panel_obj_stretch2=NULL,*panel_obj_stretch3=NULL, *panel_obj_stretch4=NULL;
@@ -177,6 +178,19 @@ extern "C" void glui_edit_setup(int main_window){
 
   glui_edit->add_column(false);
 
+  panel_obj_stretch4=glui_edit->add_panel("",GLUI_PANEL_NONE);
+
+  {
+    char meshlabel[255];
+
+    strcpy(meshlabel,_("Mesh:"));
+    strcat(meshlabel,meshinfo->label);
+    statictext_mesh_index=glui_edit->add_statictext_to_panel(panel_obj_stretch4,meshlabel);
+
+  }
+  statictext_blockage_index=glui_edit->add_statictext_to_panel(panel_obj_stretch4,"&OBST number: ");
+  statictext_label=glui_edit->add_statictext_to_panel(panel_obj_stretch4,"&OBST label:");
+
   panel_obj_stretch2 = glui_edit->add_panel("Coordinates");
 
   blockage_checkbox=glui_edit->add_checkbox_to_panel(panel_obj_stretch2,_("Dimensions snapped to grid"),&blockage_snapped,
@@ -207,19 +221,16 @@ extern "C" void glui_edit_setup(int main_window){
   edittext_zmin->set_float_limits(zplt_orig[0],zplt_orig[kbar],GLUI_LIMIT_CLAMP);
   edittext_zmax->set_float_limits(zplt_orig[0],zplt_orig[kbar],GLUI_LIMIT_CLAMP);
 
-  panel_obj_stretch4=glui_edit->add_panel("",GLUI_PANEL_NONE);
+  panel_blockageview = glui_edit->add_rollout("Hide blockages by mesh",false);
+  for(i=0;i<nmeshes;i++){
+    mesh *meshi;
 
-  if(nmeshes>1){
-    char meshlabel[255];
-
-    strcpy(meshlabel,_("Mesh label:"));
-    strcat(meshlabel,meshinfo->label);
-    statictext_mesh_index=glui_edit->add_statictext_to_panel(panel_obj_stretch4,meshlabel);
+    meshi = meshinfo + i;
+    glui_edit->add_checkbox_to_panel(panel_blockageview,meshi->label,&meshi->blockvis);
   }
-  statictext_blockage_index=glui_edit->add_statictext_to_panel(panel_obj_stretch4,"&OBST number: ");
-  statictext_label=glui_edit->add_statictext_to_panel(panel_obj_stretch4,"&OBST label:");
-  glui_edit->add_separator_to_panel(panel_obj_stretch4);
-  BUTTON_blockage_1=glui_edit->add_button_to_panel(panel_obj_stretch4,_("Close"),CLOSE_WINDOW,BUTTON_hide3_CB);
+  glui_edit->add_separator();
+  BUTTON_blockage_1=glui_edit->add_button(_("Close"),CLOSE_WINDOW,BUTTON_hide3_CB);
+
 
   glui_edit->set_main_gfx_window( main_window );
 }

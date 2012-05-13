@@ -37,8 +37,7 @@ char IOslice_revision[]="$Revision$";
                            FSEEK(SLICEFILE,TRAILER_SIZE,SEEK_CUR)
 
 int endianswitch;
-float gslice_valmin, gslice_dval;
-float *gslicedata;
+float gslice_valmin, gslice_valmax, *gslicedata;
 mesh *gslice_valmesh;
 
 
@@ -2943,7 +2942,7 @@ void drawslice_frame(){
             SNIFF_ERRORS("after drawvolslice");
           }
 #ifdef pp_GPU
-          if(sd->volslice==1&&show_gslice_data==1){
+          if(sd->volslice==1&&(show_gslice_data==1)){
             if(usegpu==1){
               Load3DSliceShaders();
               SNIFF_ERRORS("after Load3DSliceShaders");
@@ -3154,7 +3153,7 @@ void drawgslice_outline(void){
 
   glColor3fv(foregroundcolor);
 
-  if(show_gslice_outline==1){
+  if(show_gslice_triangles==1){
     glBegin(GL_LINES);
     for(i=0;i<nmeshes;i++){
       mesh *meshi;
@@ -3180,6 +3179,27 @@ void drawgslice_outline(void){
     glEnd();
   }
 
+  if(show_gslice_triangulation==1){
+    for(i=0;i<nmeshes;i++){
+      mesh *meshi;
+      int j;
+      float del;
+
+      meshi = meshinfo + i;
+      del = meshi->cellsize;
+      del *= del;
+      del /= 4.0;
+      if(meshi->gslice_nverts==0||meshi->gslice_ntriangles==0)continue;
+      for(j=0;j<meshi->gslice_ntriangles;j++){
+        float *xyz1, *xyz2, *xyz3;
+
+        xyz1 = meshi->gslice_verts + 3*meshi->gslice_triangles[3*j];
+        xyz2 = meshi->gslice_verts + 3*meshi->gslice_triangles[3*j+1];
+        xyz3 = meshi->gslice_verts + 3*meshi->gslice_triangles[3*j+2];
+        draw_triangle_outline(xyz1,xyz2,xyz3,del,0);
+      }
+    }
+  }
   // draw normal vector
 
   if(show_gslice_normal==1||show_gslice_normal_keyboard==1){
@@ -3357,6 +3377,7 @@ void drawgslice_data(slicedata *slicei){
   if(meshi->gslice_nverts==0||meshi->gslice_ntriangles==0)return;
   del = meshi->cellsize;
   del *= del;
+  del /= 4.0;
 
   glPushMatrix();
   glScalef(1.0/xyzmaxdiff,1.0/xyzmaxdiff,1.0/xyzmaxdiff);
@@ -3372,7 +3393,7 @@ void drawgslice_data(slicedata *slicei){
   
   gslicedata=slicei->qsliceframe;
   gslice_valmin=valmin;
-  gslice_dval=dval;
+  gslice_valmax=valmax;
   gslice_valmesh=meshi;
 
   for(j=0;j<meshi->gslice_ntriangles;j++){
@@ -3386,7 +3407,6 @@ void drawgslice_data(slicedata *slicei){
     t2 = get_texture_index(xyz2);
     t3 = get_texture_index(xyz3);
   
-    //draw_triangle_outline(xyz1,xyz2,xyz3,del,0);
     draw_triangle(xyz1,xyz2,xyz3,t1,t2,t3,del,0);
   }
   if(use_transparency_data==1)transparentoff();
@@ -5968,17 +5988,17 @@ float get_texture_index(float *xyz){
   float val001,val101,val011,val111;
   float val00,val10,val01,val11;
   float val0, val1;
-  float val;
+  float val, val_fraction;
   int ijk;
   float index;
    
   float *slicedata0;
-  float valmin, dval;
+  float valmin, valmax;
   mesh *valmesh;
 
   slicedata0 = gslicedata;
   valmin = gslice_valmin;
-  dval = gslice_dval;
+  valmax = gslice_valmax;
   valmesh = gslice_valmesh;
 
   xplt = valmesh->xplt_orig;
@@ -5995,9 +6015,9 @@ float get_texture_index(float *xyz){
   ny = jbar + 1;
   nz = kbar + 1;
 
-  GETINDEX(i,xyz[0],xplt[0],dxbar,ibar);
-  GETINDEX(j,xyz[1],yplt[0],dybar,jbar);
-  GETINDEX(k,xyz[2],zplt[0],dzbar,kbar);
+  GETINDEX(i,xyz[0],xplt[0],dxbar,nx);
+  GETINDEX(j,xyz[1],yplt[0],dybar,ny);
+  GETINDEX(k,xyz[2],zplt[0],dzbar,nz);
 
      // val(i,j,k) = di*nj*nk + dj*nk + dk
   ijk = i*nz*ny + j*nz + k;
@@ -6033,8 +6053,39 @@ float get_texture_index(float *xyz){
    val1 = MIX(dy, val11, val01);
   
   val = MIX(dz,val1,val0);
-  GETINDEX(index,val,valmin,dval,256);
-  return index/255.0;
+  val_fraction = (val-valmin)/(valmax-valmin);
+  val_fraction = CLAMP(val_fraction,0.0,1.0);
+  return val_fraction;
+}
+  
+/* ------------------ draw_quad ------------------------ */
+
+void draw_quad(float *v1, float *v2, float *v3, float *v4,
+               float t1, float t2, float t3, float t4,
+               float del, int level){
+  float d13,d24;
+  float dx, dy, dz;
+
+  if(level==0){
+    glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
+    glEnable(GL_TEXTURE_1D);
+    glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
+    glBegin(GL_TRIANGLES);
+  }
+  DIST3(v1,v3,d13);
+  DIST3(v2,v4,d24);
+  if(d13<d24){
+    draw_triangle(v1,v2,v3,t1,t2,t3,del,level+1);
+    draw_triangle(v1,v3,v4,t1,t3,t4,del,level+1);
+  }
+  else{
+    draw_triangle(v1,v2,v4,t1,t2,t4,del,level+1);
+    draw_triangle(v2,v3,v4,t2,t3,t4,del,level+1);
+  }
+  if(level==0){
+    glEnd();
+    glDisable(GL_TEXTURE_1D);
+  }
 }
   
 /* ------------------ draw_triangle ------------------------ */
@@ -6043,9 +6094,9 @@ void draw_triangle(float *v1, float *v2, float *v3,
                    float t1, float t2, float t3,
                    float del, int level){
   float d12, d13 ,d23;
-  float vmid[3];
+  float v12[3],v13[3],v23[3];
   float dx, dy, dz;
-  float tmid;
+  float t12,t13,t23;
 
   if(level==0){
     glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
@@ -6057,67 +6108,81 @@ void draw_triangle(float *v1, float *v2, float *v3,
   DIST3(v1,v3,d13);
   DIST3(v2,v3,d23);
   if(d12<=del&&d13<=del&&d23<del){
-    //float *rgb_ptr;
-
-    //rgb_ptr = rgb_slice + 4*t1;
-    //glColor4fv(rgb_ptr);
     glTexCoord1f(t1);
     glVertex3fv(v1);
 
-//    rgb_ptr = rgb_slice + 4*t2;
-//    glColor4fv(rgb_ptr);
     glTexCoord1f(t2);
     glVertex3fv(v2);
 
-//    rgb_ptr = rgb_slice + 4*t3;
-//    glColor4fv(rgb_ptr);
     glTexCoord1f(t3);
     glVertex3fv(v3);
   }
   else{
-    if(d12>=MAX(d13,d23)){
-      VERT_AVG(v1,v2,vmid);
-      tmid=get_texture_index(vmid);
-      draw_triangle(v1,vmid,v3,
-        t1,tmid,t3,
-        del,level+1);
-      draw_triangle(vmid,v2,v3,
-        tmid,t2,t3,
-        del,level+1);
+    if(d12<=MIN(d13,d23)){
+      VERT_AVG(v1,v3,v13);
+      t13=get_texture_index(v13);
+      VERT_AVG(v2,v3,v23);
+      t23=get_texture_index(v23);
+
+      draw_triangle(v3,v13,v23,t3,t13,t23,del,level+1);
+      draw_quad(v13,v1,v2,v23,t13,t1,t2,t23,del,level+1);
     }
-    else if(d13>=MAX(d12,d23)){
-      VERT_AVG(v1,v3,vmid);
-      tmid=get_texture_index(vmid);
-      draw_triangle(v1,v2,vmid,
-        t1,t2,tmid,
-        del,level+1);
-      draw_triangle(v2,v3,vmid,
-        t2,t3,tmid,
-        del,level+1);
+    else if(d13<=MIN(d12,d23)){
+      VERT_AVG(v1,v2,v12);
+      t12=get_texture_index(v12);
+      VERT_AVG(v2,v3,v23);
+      t23=get_texture_index(v23);
+
+      draw_triangle(v12,v2,v23,t12,t2,t23,del,level+1);
+      draw_quad(v1,v12,v23,v3,t1,t12,t23,t3,del,level+1);
     }
-    else{
-      VERT_AVG(v2,v3,vmid);
-      tmid=get_texture_index(vmid);
-      draw_triangle(v1,v2,vmid,
-        t1,t2,tmid,
-        del,level+1);
-      draw_triangle(v1,vmid,v3,
-        t1,tmid,t3,
-        del,level+1);
+    else{ // d23<=MIN(d12,d13)
+      VERT_AVG(v1,v2,v12);
+      t12=get_texture_index(v12);
+      VERT_AVG(v1,v3,v13);
+      t13=get_texture_index(v13);
+
+      draw_triangle(v1,v12,v13,t1,t12,t13,del,level+1);
+      draw_quad(v12,v2,v3,v13,t12,t2,t3,t13,del,level+1);
     }
   }
   if(level==0){
     glEnd();
     glDisable(GL_TEXTURE_1D);
   }
-
 }
+  
+/* ------------------ draw_quad_outline ------------------------ */
 
+void draw_quad_outline(float *v1, float *v2, float *v3, float *v4,
+               float del, int level){
+  float d13,d24;
+  float dx, dy, dz;
+
+  if(level==0){
+    glBegin(GL_LINES);
+  }
+  DIST3(v1,v3,d13);
+  DIST3(v2,v4,d24);
+  if(d13<d24){
+    draw_triangle_outline(v1,v2,v3,del,level+1);
+    draw_triangle_outline(v1,v3,v4,del,level+1);
+  }
+  else{
+    draw_triangle_outline(v1,v2,v4,del,level+1);
+    draw_triangle_outline(v2,v3,v4,del,level+1);
+  }
+  if(level==0){
+    glEnd();
+  }
+}
+  
 /* ------------------ draw_triangle_outline ------------------------ */
 
-void draw_triangle_outline(float *v1, float *v2, float *v3, float del, int level){
+void draw_triangle_outline(float *v1, float *v2, float *v3, 
+                   float del, int level){
   float d12, d13 ,d23;
-  float vmid[3];
+  float v12[3],v13[3],v23[3];
   float dx, dy, dz;
 
   if(level==0){
@@ -6129,32 +6194,37 @@ void draw_triangle_outline(float *v1, float *v2, float *v3, float del, int level
   if(d12<=del&&d13<=del&&d23<del){
     glVertex3fv(v1);
     glVertex3fv(v2);
+
     glVertex3fv(v2);
     glVertex3fv(v3);
+
     glVertex3fv(v3);
     glVertex3fv(v1);
   }
   else{
-    if(d12>=MAX(d13,d23)){
-      VERT_AVG(v1,v2,vmid);
-      draw_triangle_outline(v1,vmid,v3,del,level+1);
-      draw_triangle_outline(vmid,v2,v3,del,level+1);
+    if(d12<=MIN(d13,d23)){
+      VERT_AVG(v1,v3,v13);
+      VERT_AVG(v2,v3,v23);
+
+      draw_triangle_outline(v3,v13,v23,del,level+1);
+      draw_quad_outline(v13,v1, v2,v23,del,level+1);
     }
-    else if(d13>=MAX(d12,d23)){
-      VERT_AVG(v1,v3,vmid);
-      draw_triangle_outline(v1,v2,vmid,del,level+1);
-      draw_triangle_outline(v2,v3,vmid,del,level+1);
+    else if(d13<=MIN(d12,d23)){
+      VERT_AVG(v1,v2,v12);
+      VERT_AVG(v2,v3,v23);
+
+      draw_triangle_outline(v12,v2,v23,del,level+1);
+      draw_quad_outline(v1,v12,v23,v3,del,level+1);
     }
-    else{
-      VERT_AVG(v2,v3,vmid);
-      draw_triangle_outline(v1,v2,vmid,del,level+1);
-      draw_triangle_outline(v1,vmid,v3,del,level+1);
+    else{ // d23<=MIN(d12,d13)
+      VERT_AVG(v1,v2,v12);
+      VERT_AVG(v1,v3,v13);
+
+      draw_triangle_outline(v1,v12,v13,del,level+1);
+      draw_quad_outline(v12,v2,v3,v13,del,level+1);
     }
   }
   if(level==0){
     glEnd();
   }
 }
-
-
-
