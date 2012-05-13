@@ -524,7 +524,7 @@ void makesvd(char *in_dir, char *smvfile){
   char *file_out=NULL,*svd;
 
   if(smvfile==NULL)return;
-  svd=strrchr(smvfile,".");
+  svd=strrchr(smvfile,'.');
   if(svd==NULL)return;
 
   NewMemory((void **)&file_out,(svd-smvfile)+4+1);
