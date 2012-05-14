@@ -78,6 +78,7 @@ GLUI_Panel *panel_rotatebuttons=NULL, *panel_translate=NULL,*panel_close=NULL;
 GLUI_Panel *panel_gslice=NULL;
 GLUI_Panel *panel_gslice_center=NULL;
 GLUI_Panel *panel_gslice_normal=NULL;
+GLUI_Panel *panel_gslice_show=NULL;
 GLUI_Spinner *SPINNER_gslice_center_x=NULL;
 GLUI_Spinner *SPINNER_gslice_center_y=NULL;
 GLUI_Spinner *SPINNER_gslice_center_z=NULL;
@@ -367,10 +368,12 @@ extern "C" void glui_motion_setup(int main_window){
   SPINNER_gslice_normal_az=glui_motion->add_spinner_to_panel(panel_gslice_normal,"az:",GLUI_SPINNER_FLOAT,gslice_normal_azelev,GSLICE_NORMAL,GSLICE_CB);
   SPINNER_gslice_normal_elev=glui_motion->add_spinner_to_panel(panel_gslice_normal,"elev:",GLUI_SPINNER_FLOAT,gslice_normal_azelev+1,GSLICE_NORMAL,GSLICE_CB);
   GSLICE_CB(GSLICE_NORMAL);
-  CHECKBOX_gslice_data=glui_motion->add_checkbox_to_panel(panel_gslice,"show data",&show_gslice_data);
-  glui_motion->add_checkbox_to_panel(panel_gslice,"show triangle outline",&show_gslice_triangles);
-  glui_motion->add_checkbox_to_panel(panel_gslice,"show triangulation",&show_gslice_triangulation);
-  glui_motion->add_checkbox_to_panel(panel_gslice,"show plane normal",&show_gslice_normal);
+
+  panel_gslice_show = glui_motion->add_panel_to_panel(panel_gslice,_("show"),true);
+  CHECKBOX_gslice_data=glui_motion->add_checkbox_to_panel(panel_gslice_show,"data",&show_gslice_data);
+  glui_motion->add_checkbox_to_panel(panel_gslice_show,"triangle outline",&show_gslice_triangles);
+  glui_motion->add_checkbox_to_panel(panel_gslice_show,"triangulation",&show_gslice_triangulation);
+  glui_motion->add_checkbox_to_panel(panel_gslice_show,"plane normal",&show_gslice_normal);
   
 #endif
 
