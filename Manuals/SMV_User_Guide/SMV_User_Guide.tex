@@ -814,11 +814,11 @@ problems found in video cards on older computers.
 %------------------------ Manipulating the Scene Manually --------------------
 %---------------------------------------------------------------------------------
 
-\chapter{Manipulating the Scene Manually}
-The scene may be manipulated from two points of view, a world or
-global view and a first person or {\em eye}\ view.  These views may
-be switched by pressing the ``e'' key or by selecting the
-appropriate radio button in the {\em Motion/View}\ dialog box.
+\chapter{Manipulating the Scene Manually} The scene may be
+manipulated from two points of view, a world or global view and a
+first person or {\em eye}\ view.  These views may be switched by
+pressing the ``e'' key or by selecting the appropriate radio
+button in the {\em Motion/View}\ dialog box.
 
 \section{World View}
 
@@ -973,6 +973,837 @@ results in a  4x speedup of these actions. } \\ \hline
 \label{tabKEYS}
 \end{center}
 \end{table}
+
+%---------------------------------------------------------------------------------
+%---------------Realistic or Qualitative Visualization - 3D Smoke--------------
+%---------------------------------------------------------------------------------
+
+\chapter{Realistic or Qualitative Visualization - 3D Smoke}
+\FDS\ generates several data files visualized by \smokeview. Each
+file type may be loaded or unloaded using the \loadmenu\  menu
+described in Appendix \ref{sectload}. Visualizations produced by
+these data files are described in this and the following sections.
+The format used to store each of the data files is given in the
+FDS User's Guide~\cite{FDS_Users_Guide}.
+
+Visualizing smoke realistically is a daunting challenge for at
+least three reasons. First, the storage requirements for
+describing smoke can easily exceed the disk capacities of present
+32 bit operating systems such as Linux, \ie\ file sizes can easily
+exceed 2 gigabytes. Second, the computation required both by the
+CPU and the video card to display each frame can easily exceed
+0.1~s, the time corresponding to a 10~frame/s display rate. Third,
+the physics required to describe smoke and its interactions with
+itself and surrounding light sources is complex and
+computationally intensive. Therefore, approximations and
+simplifications are required to display smoke rapidly.
+
+Smoke visualization techniques such as tracer particles or shaded
+2D contours are useful for quantitative analysis but not suitable
+for virtual reality applications, where displays need to be
+realistic and fast as well as accurate. The approach taken by
+Smokeview is to display a series of parallel planes.  Each plane
+is colored black (for smoke) with transparency values pre-computed
+by FDS using time dependent soot densities also computed by FDS
+corresponding to the grid spacings of the simulation. The
+transparencies are adjusted in real time by Smokeview to account
+for differing path lengths through the smoke as the view direction
+changes. The graphics hardware then combines the planes together
+to form one image.
+
+Fire by default is colored a dark shade of orange wherever the
+computed heat release rate per unit volume exceeds a user-defined
+cutoff value.  The visual characteristics of fire are not
+automatically accounted for.  The user though may use the {\em 3D
+Smoke}\ dialog box to change both the color and transparency of
+the fire for fires that have {\em non-standard}\ colors and
+opacities.
+
+The windows version of Smokeview has the option of using the GPU
+or graphics programming unit to perform some of the calculations
+required to visualize realistic smoke.  These calculations consist
+of adjusting the smoke opaqueness as pre-computed in FDS to
+account for off-axis viewing directions. The GPU performs the
+computations in parallel while the former method using the CPU
+performs them sequentially.  For many (but not all) cases, the use
+of the GPU results in a smoke drawing speed up of 50 \% or more.
+This option is turned on or off by pressing the {\em G}\ key.
+
+
+Figure \ref{figsmoke3d} illustrates a visualization of realistic
+smoke.
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+ \includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_smoke_005}&
+ \includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_smoke_010}\\
+ 5.0 s&10.0 s\\
+\includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_smoke_030}&
+\includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_smoke_060}\\
+30.0 s&60.0 s\\
+\end{tabular}
+\end{center}
+\caption{Smoke3d file snapshots at various times in a simulation
+of a townhouse kitchen fire.
+  }
+\label{figsmoke3d}%
+\end{figure}
+
+\chapter{Scientific or Quantitative Visualization}
+\section{Tracer Particles and Streaklines - Particle Files}
+
+\renewcommand{\figheight}{1.4in}
+
+Particle files contain the locations of tracer particles used to
+visualize the flow field. Figure \ref{figparticle} shows several
+snapshots of a developing kitchen fire visualized by using
+particles where particles are colored black. If present, sprinkler
+water droplets would be colored blue. Particles are stored in
+files ending with the extension {\tt .prt5}\footnote{Particle
+files created with FDS version 4 and earlier use the {\tt .part}\
+extension} and are displayed by selecting the particle file entry
+from the \loadmenu\ menu.
+
+Streaklines are a technique for showing motion in a still image.
+Figure \ref{figstreak} shows a snapshot of the same kitchen fire
+using streak lines instead of particles.  The streaks begin at 6 s
+and end at 10 s.
+
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+ \includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_part_005}&
+ \includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_part_010}\\
+ 5.0 s&10.0 s\\
+\includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_part_030}&
+\includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_part_060}\\
+30.0 s&60.0 s\\
+\end{tabular}
+\end{center}
+
+\caption{Townhouse kitchen fire visualized using tracer
+particles.}
+\label{figparticle}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[height=4.0in]{SCRIPT_FIGURES/thouse5_streak_060}
+\end{center}
+
+\caption{Townhouse kitchen fire visualized using streak lines. The
+{\em pin heads}\ shows flow conditions at 10~s, the corresponding
+{\em tails}\ shows conditions 0.25~s.}
+\label{figstreak}%
+\end{figure}
+
+Particle file data may be converted to an isosurace using
+Smokezip.  The isosurface location is defined in terms of particle
+density and the isosurface color is defined in terms of averaged
+particle values. See  Chapter \ref{ch:smokezip} for more details
+on using Smokezip for generating isosurface files from particle
+files and Section \ref{section:isosurace} for some examples.
+
+\section{2D Shaded Contours and Vector Slices - Slice Files}
+
+Slice files contain results recorded within a rectangular array of
+grid points at each recorded time step. Continuously shaded
+contours are drawn for simulation quantities such as temperature,
+gas velocity and heat release rate. Figure \ref{figslice} shows
+several snapshots of a vertical animated slice where the slice is
+colored according to gas temperature. Slice files have file names
+with extension {\tt .sf} and are displayed by selecting the
+desired entry from the \loadmenu\ menu.
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{ccc}
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_slice_005}&
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_slice_010}\\
+5.0 s&10.0 s\\
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_slice_030}&
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_slice_060}&\\
+30.0 s&60.0 s
+&\raisebox{0.0ex}[0pt]{\includegraphics[height=5.0in]{figures/colorbar_20_620}}\\
+\end{tabular}
+\caption [Slice file snapshots of shaded temperature contours.]
+{Slice file snapshots of shaded temperature contours at various
+times in a simulation. These contours were generated by adding
+``{\tt \&SLCF PBY=1.5, QUANTITY='TEMPERATURE' /}'' to the FDS
+input file. }
+\label{figslice}%
+\end{center}
+\end{figure}
+
+
+\indent To specify in FDS a vertical slice 1.5~m from the $y=0$
+boundary colored by temperature, use the line:
+\begin{verbatim}
+&SLCF PBY=1.5 QUANTITY='TEMPERATURE' /
+\end{verbatim}
+A more complete list of output quantities may be found in
+Ref.~\cite{FDS_Users_Guide}.
+
+\paragraph{New data coloring}Smokeview uses a new more precise method for coloring data occurring in
+slice, boundary and PLOT3D files. This is illustrated in Figure
+\ref{fignewslice}.  The colors are now crisper and sharper, more
+accurately representing the underlying data. This is most
+noticeable when selecting the colorbar with the mouse. As before
+this causes a portion of the colorbar to turn black and the
+corresponding region in the scene to also turn black.  Now the
+black color is accurate to the pixel so this feature could be used
+to highlight regions of interest. The improved accuracy is a
+result of the way color interpolations are performed.  The new
+method uses a 1D texture map (the colorbar) to color data.  Colors
+are interpolated within the colorbar.  Color interpolations with
+the former method occurred within the color cube.
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{ccc}
+\includegraphics[width=3.5in]{../SMV_Verification_Guide/SCRIPT_FIGURES/plume5c_notexturebar}&
+\includegraphics[width=3.5in]{../SMV_Verification_Guide/SCRIPT_FIGURES/plume5c_texturebar}\\
+colors interpolated using a 3D color cube&colors interpolated using a 1D texture color bar\\
+\end{tabular}
+\caption [Slice file snapshots illustrating old and new method for
+coloring data.] {Slice file snapshots illustrating old and new
+method for coloring data.}
+\label{fignewslice}%
+\end{center}
+\end{figure}
+
+\paragraph{3D Slice Files}
+The user may visualize a 3D region of data using slice files. The
+slices may be moved from one plane to the next just as with PLOT3D
+files (using left/right, up/down cursor keys or page up/page down
+keys).  To specify in FDS a cube of data from 1.0 to 2.0 in each
+of the X, Y and Z directions, use the line:
+\begin{verbatim}
+&SLCF XB=1.0,2.0,1.0,2.0,1.0,2.0 QUANTITY='TEMPERATURE' /
+\end{verbatim}
+
+
+
+Animated vectors are displayed using data contained in two or more
+slice files.  The direction and length of the vectors are
+determined from the $U$, $V$ and/or $W$ velocity slice files. The
+vector colors are determined from the file (such as temperature)
+selected from the \loadmenu\ menu. The length of the vectors can
+be adjusted by pressing the {\tt `a'}\ key. For cases with a fine
+grid, the number of vectors may be overwhelming.  Vectors may be
+skipped by pressing the {\tt `s'}\ key.  Figure \ref{figvslice}
+shows a sequence of vector slices corresponding to the shaded
+temperature contours found in Figure~\ref{figslice}.
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{ccc}
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_vslice_005}&
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_vslice_010}\\
+5.0 s&10.0 s\\
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_vslice_030}&
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_vslice_060}\\
+30.0 s&60.0 s
+&\raisebox{0.0ex}[0pt]{\includegraphics[height=5.0in]{figures/colorbar_20_620}}\\
+\end{tabular}
+\end{center}
+\caption [Vector slice file snapshots of shaded vector plots.]
+{Vector slice file snapshots of shaded vector plots. These vector
+plots were generated by using ``{\tt \&SLCF
+PBY=1.5,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /}''.}
+\label{figvslice}%
+\end{figure}
+
+To generate the extra velocity files needed to view vector
+animations, add {\tt VECTOR=.TRUE.} to the above {\tt \&SLCF} line
+to obtain:
+\begin{verbatim}
+&SLCF PBY=1.50,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
+\end{verbatim}
+
+\section{2D Shaded Contours on Solid Surfaces - Boundary Files}
+
+Boundary files contain simulation data recorded at blockage or
+wall surfaces. Continuously shaded contours are drawn for
+quantities such as wall surface temperature, radiative flux, \etc.
+Figure \ref{figboundary} shows several snapshots of a boundary
+file animation where the surfaces are colored according to their
+temperature. Boundary files have file names with extension {\tt
+.bf} and are displayed by selecting the desired entry from the
+\loadmenu\  menu. Figure \ref{figtruncboundary} shows the same
+snapshots as in Figure \ref{figboundary} except that data below
+200~\degC is chopped.
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{ccc}
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_bound_005}&
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_bound_010}\\
+5.0 s&10.0 s\\
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_bound_030}&
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_bound_060}\\
+30.0 s&60.0 s
+&\raisebox{0.0ex}[0pt]{\includegraphics[height=5.0in]{figures/colorbar_20_620}}\\
+\end{tabular}
+\end{center}
+\caption [Boundary file snapshots of shaded wall temperatures
+contours (cell averaged data).] {Boundary file snapshots of shaded
+wall temperatures (cell averaged data). These snapshots were
+generated by using ``{\tt\&BNDF QUANTITY='WALL\_TEMPERATURE'/}''.
+}
+\label{figboundary}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{ccc}
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_bound_trunc_005}&
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_bound_trunc_010}\\
+5.0 s&10.0 s\\
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_bound_trunc_030}&
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_bound_trunc_060}\\
+30.0 s&60.0 s
+&\raisebox{0.0ex}[0pt]{\includegraphics[height=5.0in]{figures/colorbar_20_620}}\\
+\end{tabular}
+\end{center}
+\caption [Boundary file snapshots of truncated shaded wall
+temperatures contours (cell averaged data).] {Boundary file
+snapshots of truncated shaded wall temperatures (cell averaged
+data).  Data values are truncated or chopped below 200~\degC.
+These snapshots were generated by using ``{\tt\&BNDF
+QUANTITY='WALL\_TEMPERATURE'/}''. }
+\label{figtruncboundary}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{ccc}
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_bound_cell_005}&
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_bound_cell_010}\\
+5.0 s&10.0 s\\
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_bound_cell_030}&
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_bound_cell_060}\\
+30.0 s&60.0 s
+&\raisebox{0.0ex}[0pt]{\includegraphics[height=5.0in]{figures/colorbar_20_620}}\\
+\end{tabular}
+\end{center}
+\caption [Boundary file snapshots of shaded wall temperatures
+contours (cell centered data).] {Boundary file snapshots of shaded
+wall temperatures (cell centered data) These snapshots were
+generated by using ``{\tt\&BNDF QUANTITY='WALL\_TEMPERATURE'
+CELL\_CENTERED=.TRUE. /}''. }
+\label{figboundary}%
+\end{figure}
+A boundary file containing wall temperature data may be generated
+by using:
+\begin{verbatim}
+&BNDF 'WALL_TEMPERATURE' /
+\end{verbatim}
+Loading a boundary file is a memory intensive operation.  The
+entire boundary file is read in to determine the minimum and
+maximum data values.  These bounds are then used to convert four
+byte floats to one byte color indices.  To drastically reduce the
+memory requirements, simply specify the minimum and maximum data
+bounds using the {\em Set Bounds}\ dialog box.  This should be
+done before loading the boundary file data.  When this is done,
+memory for the boundary file data is allocated for only one time
+step rather than for all time steps.
+
+\section{3D Contours - Isosurface Files}
+\label{section:isosurface}
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_iso_005}&
+\includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_iso_010}\\
+5.0 s&10.0 s\\
+\includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_iso_030}&
+\includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_iso_060}\\
+30.0 s&60.0 s
+\end{tabular}
+\end{center}
+\caption [Isosurface file snapshots of temperature levels. ]
+
+{ Isosurface file snapshots of temperature levels. The orange
+surface is drawn where the air/smoke temperature is 30~\degC\ and
+the white surface is drawn where the air/smoke temperature is
+100~\degC. These snapshots were generated by adding ``{\tt\&ISOF
+QUANTITY='TEMPERATURE',VALUE(1)=30.0,VALUE(2)=100.0 /}'' to the
+FDS input file.}
+\label{figiso}%
+\end{figure}
+
+The surface where a quantity such as temperature attains a given
+value is called an isosurface. An isosurface is also called a
+level surface or 3D contour. Isosurface files contain data
+specifying isosurface locations for a given quantity at one or
+more levels. These surfaces are represented as triangles.
+Isosurface files have file names with extension .iso and are
+displayed by selecting the desired entry from the \loadmenu\ menu.
+
+Isosurfaces are specified in the \fds\ input file with the {\tt
+\&ISOF} keyword.  To specify isosurfaces for temperatures of
+30\degC\ and 100\degC\ as illustrated in Figure \ref{figiso} add
+the line:
+\begin{verbatim}
+&ISOF QUANTITY='TEMPERATURE', VALUE(1)=30.0, VALUE(2)=100.0 /
+\end{verbatim}
+to the FDS input file.  A complete list of isosurface quantities
+may be found in Ref.~\cite{FDS_Users_Guide}
+
+Smokezip may be used to generate isosurfaces from particle data.
+Isosurface locations indicate a boundary separating particle and
+no-particle regions, {\em i.e.}\ wherever particle density is 0.5
+particles per grid cell.  Isosurface  coloring is determined using
+averaged particle data.  Representing particle data with an
+isosurface is useful when particles are used to model objects such
+as trees especially when the objects are viewed up close.  See
+Chapter \ref{ch:smokezip} for more details on generating
+isosurface files from particle files.  Figure \ref{figisoparticle}
+shows a snapshot of a burning tree modeled using particles.  The
+tree is visualized using both particles and an isosurface
+generated from these same particles.
+
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{ccc}
+\includegraphics[height=\figheightAbar]{../SMV_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_parttemp_view1_60}&
+\includegraphics[height=\figheightAbar]{../SMV_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_isotemp_view1_60}\\
+\includegraphics[height=\figheightAbar]{../SMV_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_parttemp_view2_60}&
+\includegraphics[height=\figheightAbar]{../SMV_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_isotemp_view2_60}\\
+\includegraphics[height=\figheightAbar]{../SMV_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_parttemp_view3_60}&
+\includegraphics[height=\figheightAbar]{../SMV_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_isotemp_view3_60}\\
+particles at 60.0~s s&isosurface at 60.0~s
+&\raisebox{0.0ex}[0pt]{\includegraphics[height=8.0in]{figures/iso_colorbar_10_100}}\\
+\\
+\end{tabular}
+\end{center}
+
+\caption{Tree fire visualized using particles and isosurfaces
+generated from  particles.}
+\label{figisoparticle}%
+\end{figure}
+
+\section{Static Data - Plot3D Files} Data stored in Plot3D files
+use a format developed by NASA~\cite{PLOT3D} and are used by many
+CFD programs for representing simulation results. Plot3D files
+store five data values at each grid cell. \FDS\ uses Plot3D files
+to store temperature, three components of velocity (U, V, W) and
+heat release rate. Other quantities may be stored if desired.
+
+An \fds\ simulation will automatically  create Plot3D files at
+several specified times throughout the simulation. Plot3D data is
+visualized in three ways: as 2D contours, vector plots and
+isosurfaces. Figure \ref{fig2dcontour}a shows an example of a 2D
+Plot3D contour. Vector plots may be viewed if one or more of the
+U,V and W velocity components are stored in the Plot3D file. The
+vector length and direction show the direction and relative speed
+of the fluid flow. The vector colors show a scalar fluid quantity
+such as temperature. Figure \ref{figvector2}b shows vectors. The
+vector lengths may be adjusted by depressing the ``a'' key.
+Figure \ref{fig3dcontour} gives an example of isosurfaces. Plot3D
+data are stored in files with extension {\tt .q} .
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_plot3d_val}
+&\includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_plot3d_vec}\\
+a)
+
+\parbox[t]{2.5in}{shaded 2D temperature contour plots in a vertical plane through the fire}
+& b)
+\parbox[t]{2.5in}{shaded temperature vector plot in a vertical plane through the fire.
+The ``a'' key may be depressed to alter the vector sizes. The
+``s'' key may be depressed to alter the number of vectors
+displayed. }
+\end{tabular}
+\end{center}
+\caption{Plot3D contour and vector plot examples.  }
+\label{fig2dcontour}%
+\label{figvector2}
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_plot3d_iso1}
+&\includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_plot3d_iso2}\\
+a) temperature isosurface at 350 \degC&b) temperature isosurface
+at 530 \degC
+\end{tabular}
+\end{center}
+\caption{Plot3D isocontour example.}
+\label{fig3dcontour}%
+\end{figure}
+
+\chapter{Visualizing Zone Fire Data}
+Smokeview may be used to visualize data simulated by a zone fire
+model. The zone fire model, CFAST~\cite{Jones:2004A}, creates data
+files containing geometric information such as room dimensions and
+orientation, vent locations {\em etc.}.  It also outputs modeling
+quantities such as pressure, layer interface heights, and lower
+and upper layer temperatures. Smokeview visualizes the geometric
+layout of the scenario.  It also visualizes the layer interface
+heights, upper layer temperature and vent flow. Vent flow is
+computed internally in Smokeview using the same equations and data
+as used by CFAST.   For a given room, pressures , $P_i$, are
+computed at a number of elevations, $h_i$ using
+\begin{eqnarray*}
+P_i=P_f - \rho_L g \min(h_i,y_L) - \rho_U g \max(h_i-y_L,0)
+\end{eqnarray*}
+where $P_f$ is the pressure at the floor (relative to ambient),
+$\rho_L$ and $\rho_U$ are the lower and upper layer densities
+computed from layer temperatures using the ideal gas law and $g$
+is the acceleration of gravity.  When densities vary continuously
+with height, this becomes $P_i=P_f-\int_0^h \rho(z)gdz$. A
+pressure difference profile is then determined using pressures
+computed on both sides of the given vent.
+
+In the visualization, colors represent the gas temperature of the
+vent flow.  The colors change because the flow may come from
+either the lower (cooler) or upper (hotter) layer.   The length
+and direction of the colored vent flow region represents a vent
+flow speed and direction.  Plumes are represented as inverted
+cones with heights calculated in Smokeview using the same
+correlation as CFAST and heat release rate data computed by CFAST.
+A Smokeview view of the one room sample case that comes with the
+CFAST installation is illustrated in Figure \ref{figcfast}.
+
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[height=3.5in]{figures/standard_0375}
+\end{center}
+\caption{CFAST 6.0 Standard case showing upper layer and vent flow
+at 375 s.}
+\label{figcfast}%
+\end{figure}
+
+%---------------------------------------------------------------------------------
+%------------------------ Controlling and Customizing Smokeview --------------------
+%---------------------------------------------------------------------------------
+
+\part{Controlling and Customizing Smokeview}
+
+\chapter{Setting Options}
+\section{Setting Data Bounds}
+
+Normally, \smokeview\ determines data bounds automatically when it
+loads data. Sometimes, however, it is desirable to override
+\smokeview's choice.  This allows for consistent color shading
+when displaying several data files simultaneously.
+
+\begin{figure}[\figoptions]
+\centerline{
+\includegraphics[width=3.0416666in]{figures/figBOUNDSplot3d}
+} \caption[{\em File/Bounds}\ dialog box showing PLOT3D file
+options.] {{\em File/Bounds}\ dialog box showing PLOT3D file
+options. Select a variable and a bounds type {\em check box/radio
+button}, then enter a lower and/or upper bound. Data may be
+excluded from the plot by selecting a {\em Truncate}\ bound.
+Select type of contour plot to be displayed. Press {\em
+Reload...}\ or {\em Update}\ for the new bounds to take effect.}
+\label{figBOUNDSplot3d}
+\end{figure}
+
+The {\em File/Bounds...}\ dialog box is opened from the
+\frameit{Dialogs}\ menu. Each file type in Figure
+\ref{figBOUNDSplot3d} (slice, particle, Plot3D \etc) has a set of
+{\em radio buttons}\ for selecting the variable type that data
+bounds are to be applied to. These variable types are determined
+from the files generated by \fds\ and are automatically recorded
+in the {\tt .smv} file. The data bounds are set in a pair of edit
+boxes. Radio buttons adjacent to the edit boxes determine what
+type of bounds should be applied.  The \frameit{Update}\ and
+\frameit{Reload}\ buttons are pressed to make the new bounds take
+effect.
+
+\begin{figure}[\figoptions]
+\centerline{\includegraphics[width=2.30555555in]{figures/figBOUND2}
+} \caption[{\em File/Bounds}\ dialog box showing slice and
+boundary file options.] {{\em File/Bounds}\ dialog box showing
+slice and boundary file options. Select a variable and a bounds
+type {\em check box/radio button}, then enter a lower and/or upper
+bound. In the slice portion, data may be excluded from the plot by
+selecting a {\em Truncate}\ bound. In the boundary portion,
+ignited materials may be highlighted if a wall temperature
+boundary file has been saved.
+ Press {\em Reload...}\ or {\em Update}\ for the new bounds to take
+effect.} \label{figBOUNDSslice}
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{ccc}
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_cjet_005}&
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_cjet_010}\\
+5.0 s&10.0 s\\
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_cjet_030}&
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_cjet_060}&\\
+30.0 s&60.0 s
+&\raisebox{0.0ex}[0pt]{\includegraphics[height=5.0in]{figures/colorbar_20_620}}\\
+\end{tabular}
+\caption [Ceiling Jet Visualization.] {   Ceiling jet
+visualization created by {\em chopping data}\ below 140~$^\circ$C
+using the {\tt Bounds Dialog Box} as illustrated in
+Figure~\ref{figBOUNDSslice}. }
+\label{figceilingjet}%
+\end{center}
+\end{figure}
+
+The {\tt Plot3D} and {\tt Slice File}\ portions of the {\em
+File/Bounds}\ dialog box have additional controls used to chop or
+hide data. The settings used in Figure \ref{figBOUNDSslice} were
+used to generate the ceiling jet visualized in
+Figure~\ref{figceilingjet}. Data values less than 140~\degC\ are
+chopped or not drawn in the figure.
+
+Slice file data may be time averaged or smoothed over a user
+selectable time interval.  This option is also implemented from
+the Slice File section of the {\em File/Bounds} dialog box (see
+Figure \ref{figBOUNDSslice}.
+
+The {\bf Boundary File}\ portion of the {\em File/Bounds}\ dialog
+box has an {\bf Ignition} checkbox which allows one to visualize
+when and where the blockage temperature exceeds its ignition
+temperature.
+
+The bounds dialog for PLOT3D display allows one to select between
+three different types of contour plots:  shaded, stepped and line
+contours.
+\section{3D Smoke Options}
+\begin{figure}[\figoptions]
+\centerline{\includegraphics[width=2.9722in]{figures/fig3DSmoke} }
+\caption[Dialog Box for setting 3D smoke options] {Dialog box for
+setting 3D smoke options.   } \label{fig3DSmoke}
+\end{figure}
+Figure \ref{fig3DSmoke} allows one to override Smokeview's choice
+for several of the 3D smoke parameters.  The user may specify the
+color of the fire and the grey level of the smoke.  A grey level
+of $n$ where n ranges from 0 to 7 results in a color of
+$(2^n,2^n,2^n)$ where the three components represent red, green
+and blue contributions.  The {\bf hrrpuv cutoff} input refers to
+the heat release rate required at a node before Smokeview will
+color the node as fire rather than smoke.  The {\bf 50\% flame
+depth} allows one to specify the transparency or optical thickness
+of the fire (for visualization purposes only). A small value
+results in opaquely drawn fire while a large value results in a
+transparently drawn fire. The {\bf Absorption Parameter} setting
+refers to how the smoke slices are drawn.  The {\bf adjust
+off-center} setting causes Smokeview to account for non-axis
+aligned paths. The {\bf adjust off-center + zero at boundary}
+accounts for off center path lengths and zeros smoke density at
+boundaries in order to remove graphical artifacts.
+
+
+\section{Plot3D Viewing Options} Plot3D files are more
+complicated to visualize than time dependent files such as
+particle, slice or boundary files. For example, only the
+transparency and color characteristics of a time file may be
+changed. With Plot3D files however, many attributes may be
+changed. One may view 2D contours along the {\tt X}, {\tt Y}
+and/or {\tt Z} axis of up to six\footnote{ The \fds\ software
+stores temperature, three components of velocity (denoted $u$, $v$
+and $w$) and heat release per unit volume.  If at least one
+velocity component is stored in a Plot3D file, then \smokeview\
+adds speed to the Plot3D variable list.} different simulated
+quantities, view flow vectors and iso or 3D contours. Plot3D file
+visualization is initiated by selecting the desired entry from the
+\loadmenu\ {\tt Plot3D} sub-menu and as with time files one may
+change color and transparency characteristics.
+
+\subsection{2D contours}
+\Smokeview\ displays a 2D contour slice midway along the {\tt Y}
+axis by default when a Plot3D file is first loaded, To step the
+contour slice up by one grid cell along the {\tt Y} axis, depress
+the {\em\tt space bar}. Similarly to step the contour slice down
+by one grid cell along the {\tt Y} axis, depress the ``{\tt -}''
+key. To view a contour along either the {\tt X} or {\tt Z} axis,
+depress the {\tt x} or {\tt z} keys respectively.  Depressing the
+{\tt x}, {\tt y} or {\tt z} keys while the contour is visible will
+cause it to be hidden. The Plot3D variable viewed may be changed
+by either depressing the ``{\tt p}'' key or by selecting the {\tt
+Solution Variable} sub-menu of the \showmenu\ menu.
+
+\subsection{Iso-Contours}Iso-contours also called 3D contours or level surfaces may be
+viewed by depressing the ``{\tt i} key or by selecting the {\tt
+Plot3D>3D Contours} sub-menu of the \showmenu\ menu.
+
+\subsection{Flow vectors}If at least one velocity component is present in the Plot3D
+file then the ``{\tt v}'' key may be depressed in order to view
+flow  vectors. The length and direction of the vector indicates
+the flow direction and speed. The vector color indicates the value
+of the currently displayed quantity. A small dot is drawn at the
+end of the line to indicate flow direction. The vector lengths as
+drawn may be changed by depressing the ``{\tt a}'' key. Vector
+plots may be very dense when the grid is finely meshed. The ``{\tt
+s}'' key may be depressed in order to skip vectors.  For example,
+all vectors are displayed by default.  If the ``{\tt s}'' is
+depressed then every other vector is skipped.
+
+\section{Display Options}
+\subsection{General}
+\begin{figure}[\figoptions]
+\centerline{\includegraphics[width=2.93361in]{figures/figProperties}
+} \caption [Dialog Box for setting miscellaneous Smokeview scene
+properties.] {Dialog Box for setting miscellaneous Smokeview scene
+properties.} \label{figProperties}
+\end{figure}
+The {\em Display}\ dialog box, illustrated in Figure
+\ref{figProperties}, allows one to set various options to control
+the display or {\em look}\ of the Smokeview scene.  It may be
+invoked by selecting the \fbox{Dialogs$>$Display}\ menu item.
+This dialog box also allows one to show or hide loaded data files.
+
+
+\subsection{Stereo}
+Smokeview implements several methods for displaying scenes in
+stereo or 3D.  Each method separates the Smokeview scene in some
+way and sends a {\em left version}\ to your left eye and a {\em
+right version}\ to your right eye. Each method then creates two
+versions of the scene, one version for each eye.
+
+The first method, denoted sequential stereo, works by displaying
+images for the left and right eye alternately in time.  Shuttered
+glasses  synchronized with the monitor are used to ensure that
+only the left eye sees the left image and only the right eye sees
+the right image.  A monitor displaying this type of stereo should
+have a refresh rate of at least 120 frames per second (60 frames
+per second for each eye) otherwise flickering is noticeable.
+Unfortunately, most of today's LCD flat panel monitors typically
+do not have refresh rates faster than 60 to 80 frames per second.
+This method (for Smokeview) requires a video card that supports
+OpenGL {\em QUAD buffering}. This Smokeview stereo option may be
+enabled from the command line by using the {\tt -stereo}\ option.
+
+The second method, denoted left/right stereo, displays the two
+images side by side.  With practice, one can merge both images
+without requiring specialized glasses (though they are available
+if desired) especially if the images are small and not separated
+by a large angle. A trick for seeing the stereo effect is to place
+a finger from each hand in the center of each picture.  Then relax
+your eyes while trying to {\em merge}\ your two fingers together.
+Figure \ref{figlrstereo} show an example of the left/right method
+for generating a stereo image.  This method can generate full
+colored images and requires no equipment (for most people) to view
+but results in smaller images.
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[trim=0.25in 3.75in 0.25in 3.75in, clip, height=2.75in]{SCRIPT_FIGURES/thouse5_iso_lr_stereo}
+\caption[Stereo pair view of a townhouse kitchen fire.]{ Stereo
+pair view of a townhouse kitchen fire. To aid in viewing the
+stereo effect, place a finger in front of each image.  Relax your
+eyes allowing your two fingers and stereo pair images to merge
+into one. } \label{figlrstereo}
+\end{center}
+\end{figure}
+
+The third method, uses color to separate left and right images.
+One method denoted red/blue stereo, displays red and blue versions
+of each image.  Glasses with a red left lens and a blue right lens
+are required to view the image.  As with the shuttered glasses for
+sequential stereo, the colored glasses {\em separate}\ the images
+enabling each eye to see only one image.  Red/blue colored glasses
+may be obtained inexpensively. They also may be made using using
+red and blue cellophane or by coloring clear plastic with read and
+blue marking pens.  Figure \ref{figrbstereo} uses the red/blue
+method for generating a stereo image.  This method generates full
+size images, requires only inexpensive glasses to view but can
+only display monochrome images. The red/cyan method for displaying
+stereo images works similarly to the red/blue method.  The main
+difference is that since cyan is the made up of green and blue
+(the {\em opposite}\ in some sense of red), the combination of red
+and cyan lenses allow all colors to pass to your eyes.
+
+Figures \ref{figrcstereo} uses the red/cyan method for generating
+a stereo image.  As with red/blue, this method generates full size
+images.  However, as stated earlier, this method allows Smokeview
+scenes to be displayed in full color.
+
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[width=6.0in]{SCRIPT_FIGURES/thouse5_iso_rb_stereo}\\
+\caption[Red/blue stereo pair view of a townhouse kitchen fire.]{
+Red/blue stereo pair view of a townhouse kitchen fire. Red/blue
+glasses are required to see the 3D stereo effect. }
+\label{figrbstereo}
+\end{center}
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[width=6.0in]{SCRIPT_FIGURES/thouse5_iso_rc_stereo}\\
+\caption[Red/cyan stereo pair view of a townhouse kitchen fire.]{
+Red/cyan stereo pair view of a townhouse kitchen fire. Red/cyan
+glasses are required to see the 3D stereo effect. }
+\label{figrcstereo}
+\end{center}
+\end{figure}
+
+Figure \ref{figstereodialog} shows the dialog box used to
+configure the stereo option.  If the {\em -stereo}\ command line
+option was used and the video card supports shuttered stereo
+display then the {\em shuttered checkbox}\ in the dialog box will
+be enabled.
+
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[height=1.986111in]{figures/figSTEREO}
+\caption{Dialog box for activating the stereo view option.}
+\label{figstereodialog}
+\end{center}
+\end{figure}
+\section{Clipping Scenes}
+
+
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[width=4.2708333in]{figures/figCLIP}
+\end{center}
+\caption[{\em Clipping}\ dialog box.]{{\em Clipping}\ dialog box.
+Minimum and maximum clip plane values for X, Y and Z planes are
+set using the clipping dialog box.  One has the option when
+clipping of hiding the geometry and data or just the geometry. }
+\label{figCLIP}
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{c}
+\includegraphics[width=3.25in]{SCRIPT_FIGURES/thouse5_smoke_noclip}\\
+a) no clipping\\
+\includegraphics[width=3.25in]{SCRIPT_FIGURES/thouse5_smoke_clip_blockages}\\
+b) clip blockages\\
+\includegraphics[width=3.25in]{SCRIPT_FIGURES/thouse5_smoke_clip_blockages_data}\\
+b) clip blockages and data\\
+\end{tabular}
+\end{center}
+\caption[Clipping a scene.]{Three views of a scene. The first view
+is drawn without clipping, the second view shows the scene
+clipping only the geometry (blockages), the third view shows the
+scene slipping both the geometry and the data.} \label{figCLIPPED}
+\end{figure}
+
+It is difficult to view the interior of a scene when modelling
+complicated geometries.  To alleviate this problem, portions of
+the scene may be hidden or clipped by setting up to six clipping
+planes. OpenGL draws the scene on one side of a clipping plane but
+not the other. In general, a clipping plane may have any
+orientation. Smokeview defines two clipping planes for each of the
+three coordinate axes.   The two x axis clipping planes clip
+regions with $x$ coordinates smaller than an `$x_{min}$' clipping
+value and larger than an `$x_{max}$' value. The y axis and z axis
+clipping planes behave similarly.  Clipping plane values are
+specified using the {\em Clipping}\ dialog box which is opened by
+selecting the \fbox{Dialogs$>$Clip Geometry}\ menu item. Figure
+\ref{figCLIP} shows this dialog box with the $y_{max}$ plane
+active. Figure \ref{figCLIPPED} shows three versions of a scene.
+Figure \ref{figCLIPPED}a is drawn with no clipping. Figure
+\ref{figCLIPPED}b is drawn clipping just the geometry (blockages).
+Figure \ref{figCLIPPED}c is drawn clipping both the geometry and
+the data.
 
 %---------------------------------------------------------------------------------
 %--------------- Creating Custom Objects -----------------------------------------
@@ -2363,783 +3194,11 @@ RENDERALL
 \elist
 
 %---------------------------------------------------------------------------------
-%------------------------ Visualization --------------------
-%---------------------------------------------------------------------------------
-
-\part{Visualization}
-
-%---------------------------------------------------------------------------------
-%---------------Realistic or Qualitative Visualization - 3D Smoke--------------
-%---------------------------------------------------------------------------------
-
-\chapter{Realistic or Qualitative Visualization - 3D Smoke}
-\FDS\ generates several data files visualized by \smokeview. Each
-file type may be loaded or unloaded using the \loadmenu\  menu
-described in Appendix \ref{sectload}. Visualizations produced by
-these data files are described in this and the following sections.
-The format used to store
-each of the data files is given in the FDS User's Guide~\cite{FDS_Users_Guide}.
-
-Visualizing smoke realistically is a daunting
-challenge for at least three reasons. First, the storage
-requirements for describing smoke can easily exceed the disk
-capacities of present 32 bit operating systems such as Linux, \ie\
-file sizes can easily exceed 2 gigabytes. Second, the computation
-required both by the CPU and the video card to display each frame
-can easily exceed 0.1~s, the time corresponding to a 10~frame/s
-display rate. Third, the physics required to describe smoke and
-its interactions with itself and surrounding light sources is
-complex and computationally intensive. Therefore, approximations
-and simplifications are required to display smoke rapidly.
-
-Smoke visualization techniques such as tracer particles or shaded
-2D contours are useful for quantitative analysis but not suitable
-for virtual reality applications, where displays need to be
-realistic and fast as well as accurate. The approach taken by
-Smokeview is to display a series of parallel planes.  Each plane
-is colored black (for smoke) with transparency values pre-computed
-by FDS using time dependent soot densities also computed by FDS
-corresponding to the grid spacings of the simulation. The
-transparencies are adjusted in real time by Smokeview to account
-for differing path lengths through the smoke as the view direction
-changes. The graphics hardware then combines the planes together
-to form one image.
-
-Fire by default is colored a dark shade of orange wherever the
-computed heat release rate per unit volume exceeds a user-defined
-cutoff value.  The visual characteristics of fire are not
-automatically accounted for.  The user though may use the {\em 3D
-Smoke}\ dialog box to change both the color and transparency of
-the fire for fires that have {\em non-standard}\ colors and
-opacities.
-
-The windows version of Smokeview has the option of using the GPU  or
-graphics programming unit to perform some of the calculations required
-to visualize realistic smoke.  These calculations consist of adjusting
-the smoke opaqueness as pre-computed in FDS to account for off-axis
-viewing directions. The GPU performs the computations in parallel while
-the former method using the CPU performs them sequentially.  For many
-(but not all) cases, the use of the GPU results in a smoke drawing speed up of
-50 \% or more.  This option is turned on or off by pressing the {\em G}\ key.
-
-
-Figure \ref{figsmoke3d} illustrates a visualization of realistic
-smoke.
-
-\begin{figure}[\figoptions]
-\begin{center}
-\begin{tabular}{cc}
- \includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_smoke_005}&
- \includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_smoke_010}\\
- 5.0 s&10.0 s\\
-\includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_smoke_030}&
-\includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_smoke_060}\\
-30.0 s&60.0 s\\
-\end{tabular}
-\end{center}
-\caption{Smoke3d file snapshots at various times in a simulation of a
-townhouse kitchen fire.
-  }
-\label{figsmoke3d}%
-\end{figure}
-
-\chapter{Scientific or Quantitative Visualization}
-\section{Tracer Particles and Streaklines - Particle Files}
-
-\renewcommand{\figheight}{1.4in}
-
-Particle files contain the locations of tracer particles used to
-visualize the flow field. Figure
-\ref{figparticle} shows several snapshots of a developing kitchen
-fire visualized by using particles where particles are colored
-black. If present, sprinkler water droplets would be colored blue.
-Particles are stored in files ending with the extension {\tt
-.prt5}\footnote{Particle files created with FDS version 4 and earlier
-use the {\tt .part}\ extension} and are displayed by selecting the particle file entry from the
-\loadmenu\ menu.
-
-Streaklines are a technique for showing motion in a still image.
-Figure \ref{figstreak} shows a snapshot of the same kitchen fire using streak lines instead of particles.  The streaks begin at 6 s and end at 10 s.
-
-
-\begin{figure}[\figoptions]
-\begin{center}
-\begin{tabular}{cc}
- \includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_part_005}&
- \includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_part_010}\\
- 5.0 s&10.0 s\\
-\includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_part_030}&
-\includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_part_060}\\
-30.0 s&60.0 s\\
-\end{tabular}
-\end{center}
-
-\caption{Townhouse kitchen fire visualized using tracer particles.}
-\label{figparticle}%
-\end{figure}
-
-\begin{figure}[\figoptions]
-\begin{center}
-\includegraphics[height=4.0in]{SCRIPT_FIGURES/thouse5_streak_060}
-\end{center}
-
-\caption{Townhouse kitchen fire visualized using streak lines.
-The {\em pin heads}\ shows flow conditions at 10~s, the corresponding
-{\em tails}\ shows conditions 0.25~s.}
-\label{figstreak}%
-\end{figure}
-
-Particle file data may be converted to an isosurace
-using Smokezip.  The isosurface location is defined in terms of particle density
-and the isosurface color is defined in terms of averaged particle values.
-See  Chapter \ref{ch:smokezip} for more details on using Smokezip for
-generating isosurface files from particle files and Section \ref{section:isosurace}
-for some examples.
-
-\section{2D Shaded Contours and Vector Slices - Slice Files}
-
-Slice files contain
-results recorded within a rectangular array of grid points at each
-recorded time step. Continuously shaded contours are drawn for
-simulation quantities such as temperature, gas velocity and heat
-release rate. Figure \ref{figslice} shows several
-snapshots of a vertical animated slice where the slice is colored
-according to gas temperature. Slice files have file names with
-extension {\tt .sf} and are displayed by selecting the desired
-entry from the \loadmenu\ menu.
-
-\begin{figure}[\figoptions]
-\begin{center}
-\begin{tabular}{ccc}
-\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_slice_005}&
-\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_slice_010}\\
-5.0 s&10.0 s\\
-\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_slice_030}&
-\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_slice_060}&\\
-30.0 s&60.0 s
-&\raisebox{0.0ex}[0pt]{\includegraphics[height=5.0in]{figures/colorbar_20_620}}\\
-\end{tabular}
-\caption [Slice file snapshots of shaded temperature contours.]
-{Slice file snapshots of shaded temperature contours at various
-times in a simulation. These contours were generated by adding
-``{\tt \&SLCF PBY=1.5, QUANTITY='TEMPERATURE' /}'' to the FDS input
-file. }
-\label{figslice}%
-\end{center}
-\end{figure}
-
-
-\indent To specify in FDS a vertical slice 1.5~m from the $y=0$
-boundary colored by temperature, use the line:
-\begin{verbatim}
-&SLCF PBY=1.5 QUANTITY='TEMPERATURE' /
-\end{verbatim}
-A more complete list of output quantities may be found in Ref.~\cite{FDS_Users_Guide}.
-
-\paragraph{New data coloring}Smokeview uses a new more precise method for coloring data occurring in
-slice, boundary and PLOT3D files. This is illustrated in Figure \ref{fignewslice}.  The colors are
-now crisper and sharper, more accurately representing the
-underlying data. This is most noticeable when selecting the
-colorbar with the mouse. As before this causes a portion of the
-colorbar to turn black and the corresponding region in the scene
-to also turn black.  Now the black color is accurate to the pixel
-so this feature could be used to highlight regions of interest.
-The improved accuracy is a result of the way color interpolations are performed.  The new method uses a 1D texture map (the colorbar) to color data.  Colors are interpolated within the colorbar.  Color interpolations with the former method occurred within the color cube.
-
-\begin{figure}[\figoptions]
-\begin{center}
-\begin{tabular}{ccc}
-\includegraphics[width=3.5in]{../SMV_Verification_Guide/SCRIPT_FIGURES/plume5c_notexturebar}&
-\includegraphics[width=3.5in]{../SMV_Verification_Guide/SCRIPT_FIGURES/plume5c_texturebar}\\
-colors interpolated using a 3D color cube&colors interpolated using a 1D texture color bar\\
-\end{tabular}
-\caption [Slice file snapshots illustrating old and new method for
-coloring data.] {Slice file snapshots illustrating old and new
-method for coloring data.}
-\label{fignewslice}%
-\end{center}
-\end{figure}
-
-\paragraph{3D Slice Files}
-The user may visualize a 3D region of data using slice files.
-The slices may be moved from one plane to the next just as with
-PLOT3D files (using left/right, up/down cursor keys or page up/page down
-keys).  To specify in FDS a cube of data from 1.0 to 2.0 in each
-of the X, Y and Z directions, use the line:
-\begin{verbatim}
-&SLCF XB=1.0,2.0,1.0,2.0,1.0,2.0 QUANTITY='TEMPERATURE' /
-\end{verbatim}
-
-
-
-Animated vectors are displayed using data contained in two or more
-slice files.  The direction and length of the vectors are
-determined from the $U$, $V$ and/or $W$ velocity slice files. The
-vector colors are determined from the file (such as temperature)
-selected from the \loadmenu\ menu. The length of the vectors can be adjusted by pressing the {\tt `a'}\ key.
-For cases with a fine grid, the number of vectors may be overwhelming.  Vectors may be skipped by pressing the {\tt `s'}\ key.  Figure \ref{figvslice} shows a
-sequence of vector slices corresponding to the shaded temperature
-contours found in Figure~\ref{figslice}.
-
-\begin{figure}[\figoptions]
-\begin{center}
-\begin{tabular}{ccc}
-\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_vslice_005}&
-\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_vslice_010}\\
-5.0 s&10.0 s\\
-\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_vslice_030}&
-\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_vslice_060}\\
-30.0 s&60.0 s
-&\raisebox{0.0ex}[0pt]{\includegraphics[height=5.0in]{figures/colorbar_20_620}}\\
-\end{tabular}
-\end{center}
-\caption [Vector slice file snapshots of shaded vector plots.]
-{Vector slice file snapshots of shaded vector plots. These vector
-plots were generated by using ``{\tt \&SLCF
-PBY=1.5,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /}''.}
-\label{figvslice}%
-\end{figure}
-
-To generate the extra velocity files needed to view vector
-animations, add {\tt VECTOR=.TRUE.} to the above {\tt
-\&SLCF} line to obtain:
-\begin{verbatim}
-&SLCF PBY=1.50,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
-\end{verbatim}
-
-\section{2D Shaded Contours on Solid Surfaces - Boundary Files}
-
-Boundary files contain simulation data recorded at blockage
-or wall surfaces. Continuously shaded contours are drawn for
-quantities such as wall surface temperature, radiative flux, \etc.
-Figure \ref{figboundary} shows several snapshots of a boundary
-file animation where the surfaces are colored according to their
-temperature. Boundary files have file names with extension {\tt
-.bf} and are displayed by selecting the desired entry from the
-\loadmenu\  menu. Figure \ref{figtruncboundary} shows the same snapshots
-as in Figure \ref{figboundary} except that data below 200~\degC is chopped.
-\begin{figure}[\figoptions]
-\begin{center}
-\begin{tabular}{ccc}
-\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_bound_005}&
-\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_bound_010}\\
-5.0 s&10.0 s\\
-\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_bound_030}&
-\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_bound_060}\\
-30.0 s&60.0 s
-&\raisebox{0.0ex}[0pt]{\includegraphics[height=5.0in]{figures/colorbar_20_620}}\\
-\end{tabular}
-\end{center}
-\caption [Boundary file snapshots of shaded wall temperatures
-contours (cell averaged data).] {Boundary file snapshots of shaded wall temperatures (cell averaged data).
-These snapshots were generated by using ``{\tt\&BNDF
-QUANTITY='WALL\_TEMPERATURE'/}''. }
-\label{figboundary}%
-\end{figure}
-
-\begin{figure}[\figoptions]
-\begin{center}
-\begin{tabular}{ccc}
-\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_bound_trunc_005}&
-\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_bound_trunc_010}\\
-5.0 s&10.0 s\\
-\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_bound_trunc_030}&
-\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_bound_trunc_060}\\
-30.0 s&60.0 s
-&\raisebox{0.0ex}[0pt]{\includegraphics[height=5.0in]{figures/colorbar_20_620}}\\
-\end{tabular}
-\end{center}
-\caption [Boundary file snapshots of truncated shaded wall temperatures
-contours (cell averaged data).] {Boundary file snapshots of truncated shaded wall temperatures (cell averaged data).  Data values are truncated or chopped below
-200~\degC.
-These snapshots were generated by using ``{\tt\&BNDF
-QUANTITY='WALL\_TEMPERATURE'/}''. }
-\label{figtruncboundary}%
-\end{figure}
-
-\begin{figure}[\figoptions]
-\begin{center}
-\begin{tabular}{ccc}
-\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_bound_cell_005}&
-\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_bound_cell_010}\\
-5.0 s&10.0 s\\
-\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_bound_cell_030}&
-\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_bound_cell_060}\\
-30.0 s&60.0 s
-&\raisebox{0.0ex}[0pt]{\includegraphics[height=5.0in]{figures/colorbar_20_620}}\\
-\end{tabular}
-\end{center}
-\caption [Boundary file snapshots of shaded wall temperatures
-contours (cell centered data).] {Boundary file snapshots of shaded wall temperatures (cell centered data)
-These snapshots were generated by using ``{\tt\&BNDF
-QUANTITY='WALL\_TEMPERATURE' CELL\_CENTERED=.TRUE. /}''. }
-\label{figboundary}%
-\end{figure}
-A boundary file containing wall temperature data may be
-generated by using:
-\begin{verbatim}
-&BNDF 'WALL_TEMPERATURE' /
-\end{verbatim}
-Loading a boundary file is a memory intensive operation.  The
-entire boundary file is read in to determine the minimum and
-maximum data values.  These bounds are then used to convert four
-byte floats to one byte color indices.  To drastically reduce the
-memory requirements, simply specify the minimum and maximum data
-bounds using the {\em Set Bounds}\ dialog box.  This should be done
-before loading the boundary file data.  When this is done, memory
-for the boundary file data is allocated for only one time step
-rather than for all time steps.
-
-\section{3D Contours - Isosurface Files}
-\label{section:isosurface}
-\begin{figure}[\figoptions]
-\begin{center}
-\begin{tabular}{cc}
-\includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_iso_005}&
-\includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_iso_010}\\
-5.0 s&10.0 s\\
-\includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_iso_030}&
-\includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_iso_060}\\
-30.0 s&60.0 s
-\end{tabular}
-\end{center}
-\caption [Isosurface file snapshots of temperature levels. ]
-
-{ Isosurface file snapshots of temperature levels. The orange
-surface is drawn where the air/smoke temperature is 30~\degC\ and
-the white surface is drawn where the air/smoke temperature is
-100~\degC. These snapshots were generated by adding ``{\tt\&ISOF
-QUANTITY='TEMPERATURE',VALUE(1)=30.0,VALUE(2)=100.0 /}'' to the
-FDS input file.}
-\label{figiso}%
-\end{figure}
-
-The surface where a quantity such as temperature attains a given
-value is called an isosurface. An isosurface is also called a
-level surface or 3D contour. Isosurface files contain data
-specifying isosurface locations for a given quantity at one or
-more levels. These surfaces are represented as triangles.
-Isosurface files have file names with extension .iso and are
-displayed by selecting the desired entry from the \loadmenu\ menu.
-
-Isosurfaces are specified in the \fds\ input file with the {\tt
-\&ISOF} keyword.  To specify isosurfaces for temperatures of
-30\degC\ and 100\degC\ as illustrated in Figure \ref{figiso} add
-the line:
-\begin{verbatim}
-&ISOF QUANTITY='TEMPERATURE', VALUE(1)=30.0, VALUE(2)=100.0 /
-\end{verbatim}
-to the FDS input file.  A complete list of isosurface quantities may be
-found in Ref.~\cite{FDS_Users_Guide}
-
-Smokezip may be used to generate isosurfaces from particle data.
-Isosurface locations indicate a boundary separating particle and no-particle regions,
-{\em i.e.}\ wherever particle density is
-0.5 particles per grid cell.  Isosurface  coloring is determined
-using averaged particle data.  Representing particle data with an isosurface
-is useful when particles are used to model objects such as trees
-especially when the objects are viewed up close.  See Chapter
-\ref{ch:smokezip} for more details on generating isosurface files from
-particle files.  Figure \ref{figisoparticle} shows a snapshot of a
-burning tree modeled using particles.  The tree is visualized using both particles
-and an isosurface generated from these same particles.
-
-
-\begin{figure}[\figoptions]
-\begin{center}
-\begin{tabular}{ccc}
-\includegraphics[height=\figheightAbar]{../SMV_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_parttemp_view1_60}&
-\includegraphics[height=\figheightAbar]{../SMV_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_isotemp_view1_60}\\
-\includegraphics[height=\figheightAbar]{../SMV_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_parttemp_view2_60}&
-\includegraphics[height=\figheightAbar]{../SMV_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_isotemp_view2_60}\\
-\includegraphics[height=\figheightAbar]{../SMV_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_parttemp_view3_60}&
-\includegraphics[height=\figheightAbar]{../SMV_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_isotemp_view3_60}\\
-particles at 60.0~s s&isosurface at 60.0~s
-&\raisebox{0.0ex}[0pt]{\includegraphics[height=8.0in]{figures/iso_colorbar_10_100}}\\
-\\
-\end{tabular}
-\end{center}
-
-\caption{Tree fire visualized using particles and isosurfaces generated from  particles.}
-\label{figisoparticle}%
-\end{figure}
-
-\section{Static Data - Plot3D Files} Data stored in Plot3D files
-use a format developed by NASA~\cite{PLOT3D} and are used by many
-CFD programs for representing simulation results. Plot3D files
-store five data values at each grid cell. \FDS\ uses Plot3D files
-to store temperature, three components of velocity (U, V, W) and
-heat release rate. Other quantities may be stored if desired.
-
-An \fds\ simulation will automatically  create Plot3D files at several
-specified times throughout the simulation. Plot3D data is
-visualized in three ways: as 2D contours, vector plots and
-isosurfaces. Figure \ref{fig2dcontour}a shows an example of a 2D
-Plot3D contour. Vector plots may be viewed if one or more of the
-U,V and W velocity components are stored in the Plot3D file. The
-vector length and direction show the direction and relative speed
-of the fluid flow. The vector colors show a scalar fluid quantity
-such as temperature. Figure \ref{figvector2}b shows vectors.
-The vector lengths may be adjusted by depressing the
-``a'' key.  Figure \ref{fig3dcontour}
-gives an example of isosurfaces.
-Plot3D data are stored in files with extension {\tt .q} .
-
-\begin{figure}[\figoptions]
-\begin{center}
-\begin{tabular}{cc}
-\includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_plot3d_val}
-&\includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_plot3d_vec}\\
-a)
-
-\parbox[t]{2.5in}{shaded 2D temperature contour plots in a vertical plane through the fire}
-&
-b)
-\parbox[t]{2.5in}{shaded temperature vector plot in a vertical plane through the fire.
-The ``a'' key may be depressed to alter the vector sizes.
-The ``s'' key may be depressed to alter the number of vectors displayed.
-}
-\end{tabular}
-\end{center}
-\caption{Plot3D contour and vector plot examples.  }
-\label{fig2dcontour}%
-\label{figvector2}
-\end{figure}
-
-\begin{figure}[\figoptions]
-\begin{center}
-\begin{tabular}{cc}
-\includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_plot3d_iso1}
-&\includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_plot3d_iso2}\\
-a) temperature isosurface at 350 \degC&b) temperature
-isosurface at 530 \degC
-\end{tabular}
-\end{center}
-\caption{Plot3D isocontour example.}
-\label{fig3dcontour}%
-\end{figure}
-
-\chapter{Visualizing Zone Fire Data}
-Smokeview may be used to visualize data simulated by a zone fire model.
-The zone fire model, CFAST~\cite{Jones:2004A}, creates data files containing geometric information such as room dimensions and orientation, vent locations {\em etc.}.  It also outputs modeling quantities such as pressure, layer interface heights, and lower and upper layer temperatures.
-Smokeview visualizes the geometric layout of the scenario.  It also visualizes the layer interface heights, upper layer temperature and vent flow.
-Vent flow
-is computed internally in Smokeview using the same equations and data as used by CFAST.   For a given room, pressures , $P_i$, are computed at a number of elevations, $h_i$ using
-\begin{eqnarray*}
-P_i=P_f - \rho_L g \min(h_i,y_L) - \rho_U g \max(h_i-y_L,0)
-\end{eqnarray*}
-where $P_f$ is the pressure at the floor (relative to ambient), $\rho_L$ and $\rho_U$ are the lower and upper layer densities computed from layer temperatures using the ideal gas law and $g$ is the acceleration of gravity.  When densities vary continuously with height, this becomes $P_i=P_f-\int_0^h \rho(z)gdz$.
-A pressure difference profile is then determined using pressures computed on both sides of the given vent.
-
-In the visualization, colors represent the gas temperature of the vent flow.  The colors change because the flow may come from either the lower (cooler) or upper (hotter) layer.   The length and direction of the colored vent flow region represents a vent flow speed and direction.  Plumes are represented as inverted cones with heights calculated in Smokeview using the same correlation as CFAST and heat release rate data computed by CFAST.
-A Smokeview view of the one room sample case that comes with the CFAST installation is illustrated in Figure \ref{figcfast}.
-
-\begin{figure}[\figoptions]
-\begin{center}
-\includegraphics[height=3.5in]{figures/standard_0375}
-\end{center}
-\caption{CFAST 6.0 Standard case showing upper layer and vent flow at 375 s.}
-\label{figcfast}%
-\end{figure}
-%---------------------------------------------------------------------------------
 %------------------------ Advanced Features --------------------------------------
 %---------------------------------------------------------------------------------
 
 \part{Miscellaneous Topics}
 
-
-\chapter{Setting Options}
-\section{Setting Data Bounds}
-
-Normally, \smokeview\ determines data bounds automatically
-when it loads data. Sometimes, however, it is desirable to
-override \smokeview's choice.  This allows for consistent
-color shading when displaying several data files
-simultaneously.
-
-\begin{figure}[\figoptions]
-\centerline{
-\includegraphics[width=3.0416666in]{figures/figBOUNDSplot3d}
-}
-\caption[{\em File/Bounds}\ dialog box showing PLOT3D file options.]
-{{\em File/Bounds}\ dialog box showing PLOT3D file options. Select a
-variable and a bounds type {\em check box/radio button}, then enter
-a lower and/or upper bound. Data may be excluded from the plot by
-selecting a {\em Truncate}\ bound.  Select type of contour plot to be
-displayed. Press {\em Reload...}\ or {\em Update}\ for the new bounds to
-take effect.} \label{figBOUNDSplot3d}
-\end{figure}
-
-The {\em File/Bounds...}\ dialog box is opened from the
-\frameit{Dialogs}\ menu. Each file type in Figure
-\ref{figBOUNDSplot3d} (slice, particle, Plot3D \etc) has a set of
-{\em radio buttons}\ for selecting the variable type that data bounds
-are to be applied to. These variable types are determined from the
-files generated by \fds\ and are automatically recorded in the
-{\tt .smv} file. The data bounds are set in a pair of edit boxes.
-Radio buttons adjacent to the edit boxes determine what type of
-bounds should be applied.  The \frameit{Update}\ and
-\frameit{Reload}\ buttons are pressed to make the new bounds take
-effect.
-
-\begin{figure}[\figoptions]
-\centerline{\includegraphics[width=2.30555555in]{figures/figBOUND2}
-}
-\caption[{\em File/Bounds}\ dialog box showing slice and boundary file
-options.] {{\em File/Bounds}\ dialog box showing slice and boundary file
-options. Select a variable and a bounds type {\em check box/radio
-button}, then enter a lower and/or upper bound. In the slice
-portion, data may be excluded from the plot by selecting a
-{\em Truncate}\ bound. In the boundary portion, ignited materials may
-be highlighted if a wall temperature boundary file has been saved.
- Press {\em Reload...}\ or {\em Update}\ for the new bounds to take
-effect.} \label{figBOUNDSslice}
-\end{figure}
-
-\begin{figure}[\figoptions]
-\begin{center}
-\begin{tabular}{ccc}
-\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_cjet_005}&
-\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_cjet_010}\\
-5.0 s&10.0 s\\
-\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_cjet_030}&
-\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_cjet_060}&\\
-30.0 s&60.0 s
-&\raisebox{0.0ex}[0pt]{\includegraphics[height=5.0in]{figures/colorbar_20_620}}\\
-\end{tabular}
-\caption [Ceiling Jet Visualization.] {   Ceiling jet
-visualization created by {\em chopping data}\ below 140~$^\circ$C
-using the {\tt Bounds Dialog Box} as illustrated in
-Figure~\ref{figBOUNDSslice}. }
-\label{figceilingjet}%
-\end{center}
-\end{figure}
-
-The {\tt Plot3D} and {\tt Slice File}\ portions of the {\em File/Bounds}\
-dialog box have additional controls used to chop or hide data.
-The settings used in Figure \ref{figBOUNDSslice} were used to
-generate the ceiling jet visualized in Figure~\ref{figceilingjet}.
-Data values less than 140~\degC\ are chopped or not drawn in the
-figure.
-
-Slice file data may be time averaged or smoothed over a user
-selectable time interval.  This option is also implemented from
-the Slice File section of the {\em File/Bounds} dialog box (see Figure
-\ref{figBOUNDSslice}.
-
-The {\bf Boundary File}\ portion of the {\em File/Bounds}\ dialog box has an {\bf
-Ignition} checkbox which allows one to visualize when and where
-the blockage temperature exceeds its ignition temperature.
-
-The bounds dialog for PLOT3D display allows one to select between
-three different types of contour plots:  shaded, stepped and line
-contours.
-\section{3D Smoke Options}
-\begin{figure}[\figoptions]
-\centerline{\includegraphics[width=2.9722in]{figures/fig3DSmoke} }
-\caption[Dialog Box for setting 3D smoke options] {Dialog box for
-setting 3D smoke options.   } \label{fig3DSmoke}
-\end{figure}
-Figure \ref{fig3DSmoke} allows one to override Smokeview's choice
-for several of the 3D smoke parameters.  The user may specify the
-color of the fire and the grey level of the smoke.  A grey level
-of $n$ where n ranges from 0 to 7 results in a color of
-$(2^n,2^n,2^n)$ where the three components represent red, green
-and blue contributions.  The {\bf hrrpuv cutoff} input refers to
-the heat release rate required at a node before Smokeview will
-color the node as fire rather than smoke.  The {\bf 50\% flame
-depth} allows one to specify the transparency or optical thickness
-of the fire (for visualization purposes only). A small value
-results in opaquely drawn fire while a large value results in a
-transparently drawn fire. The {\bf Absorption Parameter} setting
-refers to how the smoke slices are drawn.  The {\bf adjust
-off-center} setting causes Smokeview to account for non-axis
-aligned paths. The {\bf adjust off-center + zero at boundary}
-accounts for off center path lengths and zeros smoke density at
-boundaries in order to remove graphical artifacts.
-
-
-\section{Plot3D Viewing Options} Plot3D files are more
-complicated to visualize than time dependent files such as
-particle, slice or boundary files. For example, only the
-transparency and color characteristics of a time file may be
-changed. With Plot3D files however, many attributes may be
-changed. One may view 2D contours along the {\tt X}, {\tt Y}
-and/or {\tt Z} axis of up to six\footnote{ The \fds\ software
-stores temperature, three components of velocity (denoted $u$, $v$
-and $w$) and heat release per unit volume.  If at least one
-velocity component is stored in a Plot3D file, then \smokeview\
-adds speed to the Plot3D variable list.} different simulated
-quantities, view flow vectors and iso or 3D contours. Plot3D file
-visualization is initiated by selecting the desired entry from the
-\loadmenu\ {\tt Plot3D} sub-menu and as with time files one may
-change color and transparency characteristics.
-
-\subsection{2D contours}
-\Smokeview\ displays a 2D contour slice midway along the
-{\tt Y} axis by default when a Plot3D file is first loaded,
-To step the contour slice up by one grid cell along the
-{\tt Y} axis, depress the {\em\tt space bar}. Similarly to
-step the contour slice down by one grid cell along the {\tt
-Y} axis, depress the ``{\tt -}'' key. To view a contour
-along either the {\tt X} or {\tt Z} axis, depress the {\tt
-x} or {\tt z} keys respectively.  Depressing the {\tt x},
-{\tt y} or {\tt z} keys while the contour is visible will
-cause it to be hidden. The Plot3D variable viewed may be
-changed by either depressing the ``{\tt p}'' key or by
-selecting the {\tt Solution Variable} sub-menu of the
-\showmenu\ menu.
-
-\subsection{Iso-Contours}Iso-contours also called 3D contours or level surfaces may be
-viewed by depressing the ``{\tt i} key or by selecting the
-{\tt Plot3D>3D Contours} sub-menu of the \showmenu\ menu.
-
-\subsection{Flow vectors}If at least one velocity component is present in the Plot3D
-file then the ``{\tt v}'' key may be depressed in order to
-view flow  vectors. The length and direction of the vector
-indicates the flow direction and speed. The vector color
-indicates the value of the currently displayed quantity. A
-small dot is drawn at the end of the line to indicate flow
-direction. The vector lengths as drawn may be changed by
-depressing the ``{\tt a}'' key. Vector plots may be very
-dense when the grid is finely meshed. The ``{\tt s}'' key
-may be depressed in order to skip vectors.  For example,
-all vectors are displayed by default.  If the ``{\tt s}''
-is depressed then every other vector is skipped.
-
-\section{Display Options}
-\subsection{General}
-\begin{figure}[\figoptions]
-\centerline{\includegraphics[width=2.93361in]{figures/figProperties}
-} \caption [Dialog Box for setting miscellaneous Smokeview scene
-properties.] {Dialog Box for setting miscellaneous Smokeview scene
-properties.} \label{figProperties}
-\end{figure}
-The {\em Display}\ dialog box, illustrated in Figure \ref{figProperties},
-allows one to set various options to control the display or
-{\em look}\ of the Smokeview scene.  It may be invoked by selecting
-the \fbox{Dialogs$>$Display}\ menu item.  This dialog box also
-allows one to show or hide loaded data files.
-
-
-\subsection{Stereo}
-Smokeview implements several methods for displaying scenes in stereo or 3D.  Each method separates the
-Smokeview scene in some way and sends a {\em left version}\ to your left eye and a {\em right version}\
-to your right eye.
-Each method then creates two versions of the scene, one version for each eye.
-
-The first method, denoted sequential stereo, works by displaying images for the left and right eye
-alternately in time.  Shuttered glasses  synchronized
-with the monitor are used to ensure that only the left eye sees the left image and only the right eye sees the right image.  A monitor displaying this type of stereo should have a refresh rate of at least 120 frames per second (60 frames per second for each eye) otherwise
-flickering is noticeable.  Unfortunately, most of today's LCD flat panel monitors typically do not have refresh rates faster than 60 to 80 frames per second.  This method (for Smokeview) requires a video card that supports OpenGL {\em QUAD buffering}.
-This Smokeview stereo option may be enabled from the command line by using the {\tt -stereo}\
-option.
-
-The second method, denoted left/right stereo, displays the two images side by side.  With practice, one can merge both images without requiring specialized glasses (though they are available if desired) especially if the images are small and not separated by a large angle.
-A trick for seeing the stereo effect is to place a finger from each hand in the center of each picture.  Then relax your eyes while trying to {\em merge}\ your two fingers together.  Figure \ref{figlrstereo} show an example of the left/right method for generating a stereo image.  This method can generate full colored images and requires no equipment (for most people) to view but results in smaller images.
-\begin{figure}[\figoptions]
-\begin{center}
-\includegraphics[trim=0.25in 3.75in 0.25in 3.75in, clip, height=2.75in]{SCRIPT_FIGURES/thouse5_iso_lr_stereo}
-\caption[Stereo pair view of a townhouse kitchen fire.]{
-Stereo pair view of a townhouse kitchen fire. To aid in viewing the stereo effect, place
-a finger in front of each image.  Relax your eyes allowing your two fingers and stereo pair
-images to merge into one.
-}
-\label{figlrstereo}
-\end{center}
-\end{figure}
-
-The third method, uses color to separate left and right images.  One method denoted red/blue stereo, displays red and blue versions of each image.  Glasses with a red left lens and a blue right lens are required to view the image.  As with the shuttered glasses for sequential stereo, the colored glasses {\em separate}\ the images enabling each eye to see only one image.  Red/blue colored glasses may be obtained inexpensively.
-They also may be made using using red and blue cellophane or by coloring clear plastic with read and blue marking pens.  Figure \ref{figrbstereo} uses the red/blue method for generating a stereo image.  This method generates full size images, requires only inexpensive glasses to view but can only display monochrome images.
-The red/cyan method for displaying stereo images works similarly to the red/blue method.  The main difference is that since cyan is the made up of green and blue (the {\em opposite}\ in some sense of red), the combination of red and cyan lenses allow all colors to pass to your eyes.
-
-Figures \ref{figrcstereo} uses the red/cyan method for generating a stereo image.  As with red/blue, this method generates full size images.  However, as stated earlier, this method allows Smokeview scenes to be displayed in full color.
-
-\begin{figure}[\figoptions]
-\begin{center}
-\includegraphics[width=6.0in]{SCRIPT_FIGURES/thouse5_iso_rb_stereo}\\
-\caption[Red/blue stereo pair view of a townhouse kitchen fire.]{
-Red/blue stereo pair view of a townhouse kitchen fire. Red/blue glasses are required to see the 3D stereo
-effect.
-}
-\label{figrbstereo}
-\end{center}
-\end{figure}
-
-\begin{figure}[\figoptions]
-\begin{center}
-\includegraphics[width=6.0in]{SCRIPT_FIGURES/thouse5_iso_rc_stereo}\\
-\caption[Red/cyan stereo pair view of a townhouse kitchen fire.]{
-Red/cyan stereo pair view of a townhouse kitchen fire. Red/cyan glasses are required to see the 3D stereo
-effect.
-}
-\label{figrcstereo}
-\end{center}
-\end{figure}
-
-Figure \ref{figstereodialog} shows the dialog
-box used to configure the stereo option.  If the {\em -stereo}\ command line option was used and
-the video card supports shuttered stereo display then the {\em shuttered checkbox}\ in the dialog box will be enabled.
-
-\begin{figure}[\figoptions]
-\begin{center}
-\includegraphics[height=1.986111in]{figures/figSTEREO}
-\caption{Dialog
-box for activating the stereo view option.}
-\label{figstereodialog}
-\end{center}
-\end{figure}
-\section{Clipping Scenes}
-
-
-\begin{figure}[\figoptions]
-\begin{center}
-\includegraphics[width=4.2708333in]{figures/figCLIP}
-\end{center}
-\caption[{\em Clipping}\ dialog box.]{{\em Clipping}\ dialog box.
-Minimum and maximum clip plane values for X, Y and Z planes are set
-using the clipping dialog box.  One has the option when clipping of
-hiding the geometry and data
-or just the geometry.
-}
-\label{figCLIP}
-\end{figure}
-
-\begin{figure}[\figoptions]
-\begin{center}
-\begin{tabular}{c}
-\includegraphics[width=3.25in]{SCRIPT_FIGURES/thouse5_smoke_noclip}\\
-a) no clipping\\
-\includegraphics[width=3.25in]{SCRIPT_FIGURES/thouse5_smoke_clip_blockages}\\
-b) clip blockages\\
-\includegraphics[width=3.25in]{SCRIPT_FIGURES/thouse5_smoke_clip_blockages_data}\\
-b) clip blockages and data\\
-\end{tabular}
-\end{center}
-\caption[Clipping a scene.]{Three views of a
-scene. The first view is drawn without clipping, the second
-view shows the scene clipping only the geometry (blockages), the third view
-shows the scene slipping both the geometry and the data.}
-\label{figCLIPPED}
-\end{figure}
-
-It is difficult to view the interior of a scene when modelling
-complicated geometries.  To alleviate this problem, portions of
-the scene may be hidden or clipped by setting up to six clipping
-planes. OpenGL draws the scene on one side of a clipping plane but
-not the other. In general, a clipping plane may have any
-orientation. Smokeview defines two clipping planes for each of the
-three coordinate axes.   The two x axis clipping planes clip
-regions with $x$ coordinates smaller than an `$x_{min}$' clipping
-value and larger than an `$x_{max}$' value. The y axis and z axis
-clipping planes behave similarly.  Clipping plane values are
-specified using the {\em Clipping}\ dialog box which is opened by
-selecting the \fbox{Dialogs$>$Clip Geometry}\ menu item. Figure
-\ref{figCLIP} shows this dialog box with the $y_{max}$ plane active.
-Figure \ref{figCLIPPED} shows three versions of a scene.
-Figure \ref{figCLIPPED}a is drawn with no clipping.
-Figure \ref{figCLIPPED}b is drawn clipping just the geometry (blockages).
-Figure \ref{figCLIPPED}c is drawn clipping both the geometry and the data.
 
 \chapter{Coloring Data}
 \section{Overview}
@@ -3838,27 +3897,17 @@ smokeview -help
 \label{sectionmenu}
 % --------------------MENU OPTIONS -----------------------
 
-The design philosophy used to develop \smokeview\ has been
-to avoid complicated, non-portable user interfaces that are
-costly to implement.  As a result, most of the development
-effort has gone into the visualization (display of particle
-flow, contour plots \etc) rather than user interface design
-and implementation. Smokeview's pop-up menus are
-implemented with GLUT~\cite{OpenGLGlut}, the graphics
-library utility toolkit. The user interacts with
-\smokeview\ \via 1) menus, 2) keyboard shortcuts and 3) the
-preference file (\svini\ or {\tt
-casename.ini}).
+Smokeview's menus are implemented using GLUT~\cite{OpenGLGlut},
+the graphics library utility toolkit. The user interacts with
+\smokeview\ using 1) menus (right clicking with the mouse), 2)
+keyboard shortcuts and 3) the preference file (\svini\ or {\tt
+casename.ini}).  The main menu, illustrated in Figure
+\ref{fig_mainmenu} contains \loadmenu\, \showmenu,
+\frameit{Options}, \frameit{Dialogs}, \frameit{Help} and
+\frameit{Quit}\ menu items. Several of these menu options have
+sub-menus. These menus are described in the following sections.
 
-A {\em pop up}\ menu is displayed when the right mouse is clicked
-anywhere within the scene.  The main menu options as illustrated
-in Figure \ref{fig_mainmenu} are: \loadmenu\, \showmenu,
-\frameit{Options}, \frameit{Dialogs}\, \frameit{Tours},
-\frameit{View} and \frameit{Help}. Several of
-these menu options have sub-menus. These menus are described in
-the following sections.
-
-\section{Main Menu Items}
+\section{Main}
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -3870,22 +3919,15 @@ the following sections.
 \blist
 
 \hitem{Load/Unload}This menu option allows one to load or unload
-particle, isosurface, vector slice, slice, Plot3D or boundary
-files. These time dependent files may be viewed simultaneously,
-but not concurrently with the time independent Plot3D files.
-However, one boundary or one Plot3D file per mesh may be viewed at
-a time. Multiple slices for the same variable may be viewed
-simultaneously. This menu may also be used to load and create
-preference files {\tt .ini files} and to re-read the {\tt .smv}
-file. For more details see Appendix \ref{sectload}.
+data files generated by FDS or CFAST.  This menu may also be used
+to load and create preference files {\tt .ini files} that save the
+state of a Smokeview session. For more details see Appendix
+\ref{sectload}.
 \\
 
-\hitem{Show/Hide}This menu item allows one to show or hide
-the loaded data files and various scene attributes such as
-time/color bars, internal blockages \etc. As a file type is
-shown or hidden (or loaded and unloaded), the color and
-time bars are changed to reflect the currently visible data
-files.
+\hitem{Show/Hide}This menu option allows one to show or hide
+loaded data files and to change various scene attributes such as
+time/color bars, internal blockages \etc.
 More details are given in Appendix \ref{sectshow}.\\
 
 \hitem{Options}This menu allows one to specify various
@@ -3897,20 +3939,10 @@ selecting dialog boxes \etc.
 boxes for setting data bounds, controlling the {\em look}\ of the 3D
 smoke, specifying clip planes \etc.
 
-\hitem{Tour}This menu displays a list of tours stored in the {\tt
-casename.ini}\ preference file.  The {\tt manual}\ tour gives
-control back to the user.  Tours may be defined using the {\em Tour}\
-dialog box.
-
-\hitem{View}Resets the simulation scene to an alternate view. The
-three choices are 1) exterior view, 2) interior view or a 3) user
-defined view.  A viewpoint may be saved by using this menu or by
-using the \fbox{\tt Viewpoint} sub-menu of the \frameit{Options}\
-menu. If a time file is visible then two sub-menus occur allowing
-one to reset the view back to the
-original position or the time bar back to the initial time.\\
-
-\hitem{Help}Displays a list and explanation of keyboard equivalent commands. \\
+\hitem{Help}This menu displays a list and explanation of keyboard
+equivalent commands and provides internet links to documentation
+and software updates.
+. \\
 
 \elist
 
@@ -3924,22 +3956,17 @@ original position or the time bar back to the initial time.\\
 \end{center}
 \end{figure}
 
-\label{sectload}Six types of files may be visualized with
-\smokeview. These files are loaded using the \frameit{LOAD/UNLOAD} menus as illustrated in Figure
-\ref{fig_loadmenu}. They are particle, vector slice, slice,
-boundary, isosurface and Plot3D files. Note that vector
-slice animations use two or more slice files to display the
-animated vector slices. The format of the data contained in
-these files is described in the FDS User's Guide~\cite{FDS_Users_Guide}. A
-sub-menu is present under \loadmenu\ for each file type
-generated for the simulation. Selecting one of the files
-appearing in the sub-menu causes it to be loaded and then
-displayed. The data may be unloaded or freed by selecting
-an \fbox{\tt Unload}\ menu item appearing under the file
-list. Selecting \fbox{\tt Unload All}  as expected will
-unload all files. To hide a data file, select the
-\showmenu\ menu option corresponding to the  file type to
-be hidden.
+\label{sectload}The Load/Unload menu, illustrated in Figure
+\ref{fig_loadmenu}, is used to load or unload data files generated
+by FDS or CFAST.  File formats are described in the FDS User's
+Guide~\cite{FDS_Users_Guide}. A sub-menu is present under
+\loadmenu\ for each file type generated for the simulation.
+Selecting one of the files appearing in the sub-menu causes it to
+be loaded and then displayed. The data may be unloaded or freed by
+selecting an \fbox{\tt Unload}\ menu item appearing under the file
+list. Selecting \fbox{\tt Unload All}  as expected will unload all
+files. To hide a data file, select the \showmenu\ menu option
+corresponding to the  file type to be hidden.
 
 The \smokeview\ {\tt .smv} file contains information about
 all data files appearing in the \loadmenu\  menu item. The
@@ -3947,23 +3974,17 @@ all data files appearing in the \loadmenu\  menu item. The
 Appendix \ref{sectionsmv} for documentation on the format
 of this file).
 
-The character ``{\tt *}'' occurring before a file name in
-one of the sub-menus indicates that the file has already
-been loaded. If the file below is loaded but not visible,
-then use the appropriate \showmenu\ option to make it
-visible.
+The character ``{\tt *}'' occurring before a file nameindicates
+that the file has already been loaded. If the file below is loaded
+but not visible, then use the appropriate \showmenu\ option to
+make it visible.
 
 \blist
 
-\hitem{Open Smokeview ({\tt .smv})}This menu item allows one (on
-the PC) to use an open file dialog box to open a Smokeview scene
-(file with {\tt .smv} extension).  This menu is only active when
-one starts up Smokeview without first specifying a file.  (One
-cannot open a new Smokeview file after one has already been
-opened.)
-
 \hitem{3D Smoke File ({\tt .s3d})}This menu item allows one to
-load realistic smoke, fire or water spray files.
+load soot opacity and hrrpuv (heat release per unit volume) files.
+Smokeview uses the information contained in these files to
+visualize smoke realistically .
 
 \hitem{Slice File ({\tt .sf})} This menu item gives the
 name and location of all available slice
@@ -4079,6 +4100,15 @@ simulation scene.
 \hitem{Hide All}Hide all geometric features described above.
 
 \elist
+
+\subsection{View}Resets the simulation scene to an alternate view.
+The three choices are 1) exterior view, 2) interior view or a 3)
+user defined view.  A viewpoint may be saved by using this menu or
+by using the \fbox{\tt Viewpoint} sub-menu of the
+\frameit{Options}\ menu. If a time file is visible then two
+sub-menus occur allowing one to reset the view back to the
+original position or the time bar back to the initial time.\\
+
 
 \subsection{Animated Surface}
 This menu allows one to control the way isosurfaces are displayed.
@@ -4335,6 +4365,12 @@ mov, avi} \etc) using software available on the internet.
 Rendering may be stopped by selecting \fbox{\tt Cancel}.
 
 The keyboard shortcut for the render option is {\tt r}.
+
+\subsection{Tours}This menu displays a list of tours stored in
+the {\tt casename.ini}\ preference file.  The {\tt manual}\ tour
+gives control back to the user.  Tours may be defined using the
+{\em Tour}\ dialog box.
+
 
 \subsection{Font Size}This option allows one to display text in either a normal or a large font.
 \subsection{Zoom}This menu item allows one to change the perspective by altering the magnification used to display the scene.
