@@ -663,70 +663,23 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
             IF (.NOT.SOLID(CELL_INDEX(II,JJ,KK))) EXIT BLOCK_OUT_LOOP
          ENDDO BLOCK_OUT_LOOP
 
-         ! Initialize particle indices and velocity
-
-         LP%ONE_D%IIG = II
-         LP%ONE_D%JJG = JJ
-         LP%ONE_D%KKG = KK
-         LP%U   = IN%U0
-         LP%V   = IN%V0
-         LP%W   = IN%W0
-
-         ! If the INITIALIZATION group has an ID, match it with a device
-
-         IF (IN%ID/='null') THEN
-            DO NN=1,N_DEVC
-               DV => DEVICE(NN)
-               IF (IN%ID==DV%INIT_ID .AND. I==DV%POINT) THEN
-                  DV%LP_TAG = PARTICLE_TAG
-                  DV%PART_INDEX = ILPC
-                  DV%MESH = NM
-                  DV%X = LP%X
-                  DV%Y = LP%Y
-                  DV%Z = LP%Z
-                  IF (DV%LINE>0 .AND. DV%LINE_COORD_CODE==123) THEN
-                     IF (ABS(IN%DX)>ZERO_P .AND. ABS(IN%DY)<ZERO_P .AND. ABS(IN%DZ)<ZERO_P) DV%LINE_COORD_CODE = 1
-                     IF (ABS(IN%DX)<ZERO_P .AND. ABS(IN%DY)>ZERO_P .AND. ABS(IN%DZ)<ZERO_P) DV%LINE_COORD_CODE = 2
-                     IF (ABS(IN%DX)<ZERO_P .AND. ABS(IN%DY)<ZERO_P .AND. ABS(IN%DZ)>ZERO_P) DV%LINE_COORD_CODE = 3
-                  ENDIF
-               ENDIF
-            ENDDO
-         ENDIF
-
-         ! Process particle and set more initial values
-
-         CALL MAKE_PARTICLE
-
-         LP=>LAGRANGIAN_PARTICLE(NLP)
-      
-         LP%ONE_D%T   = T                       
-         IF (MOD(NLP,LPC%SAMPLING)==0) LP%SHOW = .TRUE.    
-         MASS_SUM = MASS_SUM + LP%PWT*LP%MASS ! if r=0 the sum will stay 0
-   
-         ! Process special particles that are associated with a particular SURFace type
-
-         IF (LPC%N_ORIENTATION>0) THEN
-            LP%ORIENTATION_INDEX = MOD(I-1,LPC%N_ORIENTATION)+1
-            LP%PWT = LP%PWT/REAL(LPC%N_ORIENTATION,EB)
-         ENDIF            
+         CALL BLOCK_INIT_PARTICLE
+                  
+         IN => INITIALIZATION(IB)
+         LP => LAGRANGIAN_PARTICLE(NLP)           
 
       ENDDO INSERT_PARTICLE_LOOP
-   
-      ! Adjust particle weighting factor PWT so that desired MASS_PER_VOLUME is achieved
+      
+      N_INSERT = IN%N_PARTICLES
 
-      IF (MASS_PER_TIME>0._EB) MASS_PER_VOLUME = MASS_PER_TIME*IN%DT_INSERT/BLOCK_VOLUME
-
-      IF (MASS_PER_VOLUME>0._EB) THEN
-         DO I=NLP-IN%N_PARTICLES+1,NLP
-            LAGRANGIAN_PARTICLE(I)%PWT = LAGRANGIAN_PARTICLE(I)%PWT*MASS_PER_VOLUME*BLOCK_VOLUME/MASS_SUM
-         ENDDO
-      ENDIF
    ELSEIF (IN%N_PARTICLES_PER_CELL > 0) THEN TOTAL_OR_PER_CELL
       N_INSERT = 0
       BLOCK_VOLUME = 0._EB
       CALL GET_IJK(X1,Y1,Z1,NM,XI,YJ,ZK,I1,J1,K1)
       CALL GET_IJK(X2,Y2,Z2,NM,XI,YJ,ZK,I2,J2,K2)
-
+      I2 = MIN(I2,IBAR)
+      J2 = MIN(J2,IBAR)
+      K2 = MIN(K2,IBAR)
       DO KK=K1,K2
          DO JJ=J1,J2
             II_LOOP: DO II=I1,I2
@@ -753,77 +706,97 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
                   XC2 = X(II)
                   YC2 = Y(JJ)
                   ZC2 = Z(KK)
-                  CALL RANDOM_RECTANGLE(LP%X,LP%Y,LP%Z,XC1,XC2,YC1,YC2,ZC1,ZC2)
 
-                  ! Initialize particle indices and velocity
-
-                  LP%ONE_D%IIG = II
-                  LP%ONE_D%JJG = JJ
-                  LP%ONE_D%KKG = KK
-                  LP%U   = IN%U0
-                  LP%V   = IN%V0
-                  LP%W   = IN%W0
-
-                  ! If the INITIALIZATION group has an ID, match it with a device
-
-                  IF (IN%ID/='null') THEN
-                     DO ND=1,N_DEVC
-                        DV => DEVICE(ND)
-                        IF (IN%ID==DV%INIT_ID .AND. I==DV%POINT) THEN
-                           DV%LP_TAG = PARTICLE_TAG
-                           DV%PART_INDEX = ILPC
-                           DV%MESH = NM
-                           DV%X = LP%X
-                           DV%Y = LP%Y
-                           DV%Z = LP%Z
-                           IF (DV%LINE>0 .AND. DV%LINE_COORD_CODE==123) THEN
-                              IF (ABS(IN%DX)>ZERO_P .AND. ABS(IN%DY)<ZERO_P .AND. ABS(IN%DZ)<ZERO_P) DV%LINE_COORD_CODE = 1
-                              IF (ABS(IN%DX)<ZERO_P .AND. ABS(IN%DY)>ZERO_P .AND. ABS(IN%DZ)<ZERO_P) DV%LINE_COORD_CODE = 2
-                              IF (ABS(IN%DX)<ZERO_P .AND. ABS(IN%DY)<ZERO_P .AND. ABS(IN%DZ)>ZERO_P) DV%LINE_COORD_CODE = 3
-                           ENDIF
-                        ENDIF
-                     ENDDO
+                  IF (IN%CELL_CENTERED) THEN
+                     LP%X = 0.5_EB*(XC1+XC2)
+                     LP%Y = 0.5_EB*(YC1+YC2)
+                     LP%Z = 0.5_EB*(ZC1+ZC2)
+                  ELSE
+                     CALL RANDOM_RECTANGLE(LP%X,LP%Y,LP%Z,XC1,XC2,YC1,YC2,ZC1,ZC2)                     
                   ENDIF
-
-                  ! Process particle and set more initial values
-
-                  CALL MAKE_PARTICLE
-
-                  LP=>LAGRANGIAN_PARTICLE(NLP)
-      
-                  LP%ONE_D%T   = T                       
-                  IF (MOD(NLP,LPC%SAMPLING)==0) LP%SHOW = .TRUE.    
-                  MASS_SUM = MASS_SUM + LP%PWT*LP%MASS ! if r=0 the sum will stay 0
-   
-                  ! Process special particles that are associated with a particular SURFace type
-
-                  IF (LPC%N_ORIENTATION>0) THEN
-                     LP%ORIENTATION_INDEX = MOD(I-1,LPC%N_ORIENTATION)+1
-                     LP%PWT = LP%PWT/REAL(LPC%N_ORIENTATION,EB)
-                  ENDIF            
                   
+                  CALL BLOCK_INIT_PARTICLE
+                  
+                  IN => INITIALIZATION(IB)
+                  LP => LAGRANGIAN_PARTICLE(NLP)
+       
                ENDDO INSERT_PARTICLE_LOOP_2
             ENDDO II_LOOP
          ENDDO
       ENDDO
 
-      ! Adjust particle weighting factor PWT so that desired MASS_PER_VOLUME is achieved
-
-      IF (MASS_PER_TIME>0._EB) MASS_PER_VOLUME = MASS_PER_TIME*IN%DT_INSERT/BLOCK_VOLUME
-
-      IF (MASS_PER_VOLUME>0._EB) THEN
-         DO I=NLP-N_INSERT+1,NLP
-            LAGRANGIAN_PARTICLE(I)%PWT = LAGRANGIAN_PARTICLE(I)%PWT*MASS_PER_VOLUME*BLOCK_VOLUME/MASS_SUM
-         ENDDO
-      ENDIF      
-
    ENDIF TOTAL_OR_PER_CELL
 
+   ! Adjust particle weighting factor PWT so that desired MASS_PER_VOLUME is achieved
+
+   IF (MASS_PER_TIME>0._EB) MASS_PER_VOLUME = MASS_PER_TIME*IN%DT_INSERT/BLOCK_VOLUME  
+   
+   IF (MASS_PER_VOLUME>0._EB) THEN
+      DO I=NLP-N_INSERT+1,NLP
+         LAGRANGIAN_PARTICLE(I)%PWT = LAGRANGIAN_PARTICLE(I)%PWT*MASS_PER_VOLUME*BLOCK_VOLUME/MASS_SUM
+      ENDDO
+   ENDIF
+   
    IN%ALREADY_INSERTED = .TRUE.                                             
 
 ENDDO VOLUME_INSERT_LOOP
 
 END SUBROUTINE VOLUME_PARTICLE_INSERT
+
+SUBROUTINE BLOCK_INIT_PARTICLE
+INTEGER :: ND
+
+
+IN => INITIALIZATION(IB)
+LP => LAGRANGIAN_PARTICLE(NLP)
+! Initialize particle indices and velocity
+
+LP%ONE_D%IIG = II
+LP%ONE_D%JJG = JJ
+LP%ONE_D%KKG = KK
+LP%U   = IN%U0
+LP%V   = IN%V0
+LP%W   = IN%W0
+
+! If the INITIALIZATION group has an ID, match it with a device
+
+IF (IN%ID/='null') THEN
+   DO ND=1,N_DEVC
+      DV => DEVICE(ND)
+      IF (IN%ID==DV%INIT_ID .AND. I==DV%POINT) THEN
+         DV%LP_TAG = PARTICLE_TAG
+         DV%PART_INDEX = ILPC
+         DV%MESH = NM
+         DV%X = LP%X
+         DV%Y = LP%Y
+         DV%Z = LP%Z
+         IF (DV%LINE>0 .AND. DV%LINE_COORD_CODE==123) THEN
+            IF (ABS(IN%DX)>ZERO_P .AND. ABS(IN%DY)<ZERO_P .AND. ABS(IN%DZ)<ZERO_P) DV%LINE_COORD_CODE = 1
+            IF (ABS(IN%DX)<ZERO_P .AND. ABS(IN%DY)>ZERO_P .AND. ABS(IN%DZ)<ZERO_P) DV%LINE_COORD_CODE = 2
+            IF (ABS(IN%DX)<ZERO_P .AND. ABS(IN%DY)<ZERO_P .AND. ABS(IN%DZ)>ZERO_P) DV%LINE_COORD_CODE = 3
+         ENDIF
+      ENDIF
+   ENDDO
+ENDIF
+
+! Process particle and set more initial values
+
+CALL MAKE_PARTICLE
+
+LP=>LAGRANGIAN_PARTICLE(NLP)
+      
+LP%ONE_D%T   = T                       
+IF (MOD(NLP,LPC%SAMPLING)==0) LP%SHOW = .TRUE.    
+MASS_SUM = MASS_SUM + LP%PWT*LP%MASS ! if r=0 the sum will stay 0
+   
+! Process special particles that are associated with a particular SURFace type
+
+IF (LPC%N_ORIENTATION>0) THEN
+   LP%ORIENTATION_INDEX = MOD(I-1,LPC%N_ORIENTATION)+1
+   LP%PWT = LP%PWT/REAL(LPC%N_ORIENTATION,EB)
+ENDIF     
+
+END SUBROUTINE BLOCK_INIT_PARTICLE
 
 
 SUBROUTINE MAKE_PARTICLE
@@ -966,7 +939,6 @@ ENDIF
 ! Move the PARTICLEs/particles, then compute mass and energy transfer, then add PARTICLE momentum to gas
 
 IF (CORRECTOR) CALL MOVE_PARTICLES(T,NM)
-
 IF (CORRECTOR) CALL PARTICLE_MASS_ENERGY_TRANSFER(T,NM)
 CALL PARTICLE_MOMENTUM_TRANSFER(NM)
 
@@ -1022,6 +994,7 @@ PARTICLE_LOOP: DO I=1,NLP
    ! Determine particle radius
 
    RD  = MAXVAL(LP%ONE_D%X(0:SF%N_CELLS))
+
    IF (.NOT. LPC%MASSLESS .AND. (RD<=0._EB .OR. LP%MASS<=ZERO_P)) CYCLE PARTICLE_LOOP
    RDS = RD*RD
    RDC = RD*RDS
@@ -1373,10 +1346,10 @@ USE PHYSICAL_FUNCTIONS, ONLY : DRAG, GET_VISCOSITY
 USE MATH_FUNCTIONS, ONLY : AFILL2, RANDOM_CHOICE, BOX_MULLER
 INTEGER,INTENT(IN) :: IP,NM
 REAL(EB),INTENT(IN) :: T
-REAL(EB) XI,YJ,ZK,UBAR,VBAR,WBAR,C_DRAG,RVC,UREL,VREL,WREL,QREL,TMP_G,RHO_G,RD,RDS,RDC,X_OLD,Y_OLD,Z_OLD,&
+REAL(EB) XI,YJ,ZK,UBAR,VBAR,WBAR,RVC,UREL,VREL,WREL,QREL,TMP_G,RHO_G,RD,RDS,RDC,X_OLD,Y_OLD,Z_OLD,&
          U_OLD,V_OLD,W_OLD,B_1,THROHALF,ZZ_GET(0:N_TRACKED_SPECIES),RDT,MU_AIR,WAKE_VEL,DROP_DEN,DROP_VOL_FRAC,RE_WAKE,&
-         WE_G,T_BU_BAG,T_BU_STRIP,FP_MASS,HALF_DT2,BETA,OBDT,ALPHA,OPA,DTOPA,BDTOA,MPOM,ALBO,SFAC,BREAKUP_RADIUS(0:NDC),&
-         DD,DD_X,DD_Y,DD_Z,DW_X,DW_Y,DW_Z
+         WE_G,T_BU_BAG,T_BU_STRIP,FP_MASS,HALF_DT2,BETA(3),OBDT(3),ALPHA,OPA,DTOPA,BDTOA(3),MPOM,ALBO,SFAC,BREAKUP_RADIUS(0:NDC),&
+         DD,DD_X,DD_Y,DD_Z,DW_X,DW_Y,DW_Z,K_SCREEN,Y_SCREEN,C_DRAG(3),A_DRAG(3)
 INTEGER IIX,JJY,KKZ,IIG,JJG,KKG
 TYPE(LAGRANGIAN_PARTICLE_TYPE),POINTER::LP=>NULL()
 TYPE(LAGRANGIAN_PARTICLE_CLASS_TYPE),POINTER::LPC=>NULL()
@@ -1387,6 +1360,8 @@ THROHALF = (0.5_EB)**(1./3.)
 B_1 =  1.7321_EB ! SQRT(3)
 NDPC => WORK1
     
+ZZ_GET = 0._EB
+
 LP  => LAGRANGIAN_PARTICLE(IP)  
 LPC => LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)    
 SF  => SURFACE(LPC%SURF_INDEX)
@@ -1466,20 +1441,43 @@ DRAG_LAW_SELECT: SELECT CASE (LPC%DRAG_LAW)
       C_DRAG = 0._EB
    CASE (USER_DRAG)
       C_DRAG = LPC%USER_DRAG_COEFFICIENT
+      A_DRAG = LP%PWT*PI*RDS
+   CASE (SCREEN_DRAG)
+      IF (QREL > ZERO_P .AND. LPC%FREE_AREA_FRACTION < 1.0_EB ) THEN
+         TMP_G  = MAX(TMPMIN,TMP(IIG,JJG,KKG))
+         IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(IIG,JJG,KKG,1:N_TRACKED_SPECIES)
+         CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP_G)
+            K_SCREEN = 3.44E-9_EB*LPC%FREE_AREA_FRACTION**1.6_EB
+            Y_SCREEN = RHO_G/SQRT(K_SCREEN)*4.30E-2_EB*LPC%FREE_AREA_FRACTION**2.13_EB            
+            K_SCREEN = MU_AIR/K_SCREEN
+            !IF(JJG==10 .AND. KKG==10) WRITE(*,*) 'KY:',K_SCREEN,Y_SCREEN            
+            Y_SCREEN = Y_SCREEN * QREL
+            A_DRAG(1) = DY(JJG)*DZ(KKG)
+            C_DRAG(1) = 2._EB*LP%ONE_D%X(1)*(K_SCREEN+Y_SCREEN)*ABS(LPC%ORIENTATION(1,1)*UREL)
+            A_DRAG(2) = DX(IIG)*DZ(KKG)
+            C_DRAG(2) = 2._EB*LP%ONE_D%X(1)*(K_SCREEN+Y_SCREEN)*ABS(LPC%ORIENTATION(1,2)*VREL)
+            A_DRAG(3) = DX(IIG)*DY(KKG)
+            C_DRAG(3) = 2._EB*LP%ONE_D%X(1)*(K_SCREEN+Y_SCREEN)*ABS(LPC%ORIENTATION(1,3)*WREL)
+            !IF(JJG==10 .AND. KKG==10) WRITE(*,*) 'DP:',C_DRAG(1),LP%ONE_D%X(1)
+            C_DRAG = 2._EB*C_DRAG/(RHO_G*QREL**2)            
+            !IF(JJG==10 .AND. KKG==10) WRITE(*,*) 'CD_EFF:',C_DRAG(1)
+      ELSE
+         C_DRAG = 0._EB
+      ENDIF
    CASE DEFAULT
       TMP_G  = MAX(TMPMIN,TMP(IIG,JJG,KKG))
       IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(IIG,JJG,KKG,1:N_TRACKED_SPECIES)
       CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP_G)
       LP%RE  = RHO_G*QREL*2._EB*RD/MU_AIR
-      C_DRAG = DRAG(LP%RE,LPC%DRAG_LAW)
-
+      C_DRAG(1) = DRAG(LP%RE,LPC%DRAG_LAW)
+      A_DRAG = LP%PWT*PI*RDS
       ! Drag reduction model, except for particles associated with a SURF line
 
       WAKE_VEL=1.0_EB
       IF (LPC%SURF_INDEX==DROPLET_SURF_INDEX) THEN
          DROP_DEN      = AVG_DROP_DEN_ALL(IIG,JJG,KKG) 
          DROP_VOL_FRAC = MIN(1._EB,DROP_DEN/LPC%DENSITY)
-         IF (DROP_VOL_FRAC > LPC%DENSE_VOLUME_FRACTION) CALL WAKE_REDUCTION(DROP_VOL_FRAC,LP%RE,C_DRAG,WAKE_VEL)
+         IF (DROP_VOL_FRAC > LPC%DENSE_VOLUME_FRACTION) CALL WAKE_REDUCTION(DROP_VOL_FRAC,LP%RE,C_DRAG(1),WAKE_VEL)
       ENDIF
 
       ! Secondary break-up model
@@ -1490,7 +1488,7 @@ DRAG_LAW_SELECT: SELECT CASE (LPC%DRAG_LAW)
          RE_WAKE     = RHO_G*WAKE_VEL   *2._EB*RD/MU_AIR
          WE_G        = RHO_G*WAKE_VEL**2*2._EB*RD/LPC%SURFACE_TENSION
          ! Shape Deformation
-         C_DRAG = SHAPE_DEFORMATION(RE_WAKE,WE_G,C_DRAG)
+         C_DRAG(1) = SHAPE_DEFORMATION(RE_WAKE,WE_G,C_DRAG(1))
          ! Breakup conditions according to WAVE model by Reitz (1987)
          T_BU_BAG    = T_END-T_BEGIN
          T_BU_STRIP  = T_END-T_BEGIN
@@ -1508,29 +1506,30 @@ DRAG_LAW_SELECT: SELECT CASE (LPC%DRAG_LAW)
                RD = MAX(RD,1.1_EB*LPC%MINIMUM_DIAMETER/2._EB)
             ENDIF
             LP%RE    = RHO_G*QREL*2._EB*RD/MU_AIR
-            C_DRAG   = DRAG(LP%RE,LPC%DRAG_LAW)
+            C_DRAG(1)   = DRAG(LP%RE,LPC%DRAG_LAW)
             LP%PWT   = LP%PWT*RDC/RD**3
             LP%ONE_D%T    = T
             LP%ONE_D%X(1) = RD
             RDS      = RD*RD
             RDC      = RD*RDS
+            A_DRAG = LP%PWT*PI*RDS
             ! Redo wake reduction and shape deformation for the new drop
             ! Drag reduction, except for particles associated with a SURF line
             WAKE_VEL = 1.0_EB
             IF (LPC%SURF_INDEX==DROPLET_SURF_INDEX) THEN
                DROP_DEN      = AVG_DROP_DEN(IIG,JJG,KKG,LPC%ARRAY_INDEX) 
                DROP_VOL_FRAC = MIN(1._EB,DROP_DEN/LPC%DENSITY)
-               IF (DROP_VOL_FRAC > LPC%DENSE_VOLUME_FRACTION) CALL WAKE_REDUCTION(DROP_VOL_FRAC,LP%RE,C_DRAG,WAKE_VEL)
+               IF (DROP_VOL_FRAC > LPC%DENSE_VOLUME_FRACTION) CALL WAKE_REDUCTION(DROP_VOL_FRAC,LP%RE,C_DRAG(1),WAKE_VEL)
             ENDIF
             ! Change in drag coefficient due to deformation of PARTICLE shape (WE_G > 2)
             WAKE_VEL = WAKE_VEL*QREL
             RE_WAKE  = RHO_G*WAKE_VEL   *2._EB*RD/MU_AIR
             WE_G     = RHO_G*WAKE_VEL**2*2._EB*RD/LPC%SURFACE_TENSION
             ! Shape Deformation
-            C_DRAG   = SHAPE_DEFORMATION(RE_WAKE,WE_G,C_DRAG)
+            C_DRAG(1)   = SHAPE_DEFORMATION(RE_WAKE,WE_G,C_DRAG(1))
          ENDIF AGE_IF
       ENDIF BREAKUP
-
+      C_DRAG = C_DRAG(1)
 END SELECT DRAG_LAW_SELECT
 
 ! Move airborne, non-stationary particles
@@ -1547,22 +1546,11 @@ PARTICLE_NON_STATIC_IF: IF (.NOT.LPC%STATIC) THEN
    DTOPA = DT/OPA
    BDTOA = BETA*DTOPA
 
-   LP%U = ( U_OLD + (U_OLD+ALPHA*UBAR)*BDTOA )/OBDT
-   LP%V = ( V_OLD + (V_OLD+ALPHA*VBAR)*BDTOA )/OBDT
-   LP%W = ( W_OLD + (W_OLD+ALPHA*WBAR)*BDTOA )/OBDT
+   LP%U = ( U_OLD + (U_OLD+ALPHA*UBAR)*BDTOA(1) )/OBDT(1)
+   LP%V = ( V_OLD + (V_OLD+ALPHA*VBAR)*BDTOA(2) )/OBDT(2)
+   LP%W = ( W_OLD + (W_OLD+ALPHA*WBAR)*BDTOA(3) )/OBDT(3)
             
-   IF (BETA>ZERO_P) THEN
-      ! fluid momentum source term
-      MPOM = LP%PWT*LP%MASS/(RHO_G/RVC)
-      LP%ACCEL_X = MPOM*(U_OLD-LP%U)*RDT 
-      LP%ACCEL_Y = MPOM*(V_OLD-LP%V)*RDT
-      LP%ACCEL_Z = MPOM*(W_OLD-LP%W)*RDT
-      ! semi-analytical solution for PARTICLE position
-      ALBO = ALPHA*LOG(OBDT)/BETA/OPA
-      LP%X = X_OLD + (U_OLD+ALPHA*UBAR)*DTOPA + ALBO*(U_OLD-UBAR) + GVEC(1)*HALF_DT2
-      LP%Y = Y_OLD + (V_OLD+ALPHA*VBAR)*DTOPA + ALBO*(V_OLD-VBAR) + GVEC(2)*HALF_DT2
-      LP%Z = Z_OLD + (W_OLD+ALPHA*WBAR)*DTOPA + ALBO*(W_OLD-WBAR) + GVEC(3)*HALF_DT2
-   ELSE
+   IF (ALL(BETA<ZERO_P)) THEN
       ! no drag
       LP%ACCEL_X  = 0._EB
       LP%ACCEL_Y  = 0._EB
@@ -1570,6 +1558,25 @@ PARTICLE_NON_STATIC_IF: IF (.NOT.LPC%STATIC) THEN
       LP%X = X_OLD + DT*U_OLD + GVEC(1)*HALF_DT2
       LP%Y = Y_OLD + DT*V_OLD + GVEC(2)*HALF_DT2
       LP%Z = Z_OLD + DT*W_OLD + GVEC(3)*HALF_DT2
+   ELSE
+      MPOM = LP%PWT*LP%MASS/(RHO_G/RVC)
+      IF (BETA(1)>ZERO_P) THEN
+      ! fluid momentum source term
+         LP%ACCEL_X = MPOM*(U_OLD-LP%U)*RDT 
+         ! semi-analytical solution for PARTICLE position
+         ALBO = ALPHA*LOG(OBDT(1))/BETA(1)/OPA
+         LP%X = X_OLD + (U_OLD+ALPHA*UBAR)*DTOPA + ALBO*(U_OLD-UBAR) + GVEC(1)*HALF_DT2
+      ENDIF
+      IF (BETA(2)>ZERO_P) THEN
+         LP%ACCEL_Y = MPOM*(V_OLD-LP%V)*RDT
+         ALBO = ALPHA*LOG(OBDT(2))/BETA(2)/OPA         
+         LP%Y = Y_OLD + (V_OLD+ALPHA*VBAR)*DTOPA + ALBO*(V_OLD-VBAR) + GVEC(2)*HALF_DT2
+      ENDIF
+      IF (BETA(3)>ZERO_P) THEN
+         LP%ACCEL_Z = MPOM*(W_OLD-LP%W)*RDT
+         ALBO = ALPHA*LOG(OBDT(3))/BETA(3)/OPA         
+         LP%Z = Z_OLD + (W_OLD+ALPHA*WBAR)*DTOPA + ALBO*(W_OLD-WBAR) + GVEC(3)*HALF_DT2
+      ENDIF
    ENDIF
    
    ! gravitational acceleration
@@ -1586,15 +1593,17 @@ ENDIF PARTICLE_NON_STATIC_IF
 ! Drag calculation for stationary, airborne particles
 
 PARTICLE_STATIC_IF: IF (LPC%STATIC .AND. .NOT. LPC%TREE) THEN
-   BETA = 0.5_EB*RVC*C_DRAG*(LP%PWT*PI*RDS)*QREL
+   BETA = 0.5_EB*RVC*C_DRAG*A_DRAG*QREL
    OBDT = 1._EB+BETA*DT
-   LP%ACCEL_X = UBAR*(1._EB/OBDT-1._EB)*RDT 
-   LP%ACCEL_Y = VBAR*(1._EB/OBDT-1._EB)*RDT
-   LP%ACCEL_Z = WBAR*(1._EB/OBDT-1._EB)*RDT
+   !IF(JJG==10 .AND. KKG==10) WRITE(*,*) 'B,OB:',BETA,OBDT
+   LP%ACCEL_X = UBAR*(1._EB/OBDT(1)-1._EB)*RDT 
+   !IF(JJG==10 .AND. KKG==10) WRITE(*,*) 'ACCEL:',UREL,LP%ACCEL_X
+   LP%ACCEL_Y = VBAR*(1._EB/OBDT(2)-1._EB)*RDT
+   LP%ACCEL_Z = WBAR*(1._EB/OBDT(3)-1._EB)*RDT   
 ENDIF PARTICLE_STATIC_IF
 
 TREE_PARTICLES: IF (LPC%TREE) THEN
-   SFAC   = LPC%VEG_DRAG_COEFFICIENT*LPC%VEG_SV*LP%VEG_PACKING_RATIO*QREL*C_DRAG
+   SFAC   = LPC%VEG_DRAG_COEFFICIENT*LPC%VEG_SV*LP%VEG_PACKING_RATIO*QREL*C_DRAG(1)
    LP%ACCEL_X  = SFAC*UREL - LP%VEG_MLR*UBAR/RHO_G
    LP%ACCEL_Y  = SFAC*VREL - LP%VEG_MLR*VBAR/RHO_G
    LP%ACCEL_Z  = SFAC*WREL - LP%VEG_MLR*WBAR/RHO_G
