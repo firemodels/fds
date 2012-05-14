@@ -25,36 +25,29 @@ USE GLOBAL_CONSTANTS
  
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),HP=>NULL()
-REAL(EB), POINTER, DIMENSION(:) :: UWP=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,HP
 INTEGER :: I,J,K,IW,IOR,NOM,N_INT_CELLS,IIO,JJO,KKO
 REAL(EB) :: TRM1,TRM2,TRM3,TRM4,RES,LHSS,RHSS,H_OTHER,DWWDT,DVVDT,DUUDT,RFODT,TNOW,DUMMY=0._EB, &
             TSI,TIME_RAMP_FACTOR,DX_OTHER,DY_OTHER,DZ_OTHER,P_EXTERNAL
-TYPE (VENTS_TYPE), POINTER :: VT=>NULL()
-TYPE (WALL_TYPE), POINTER :: WC=>NULL()
+TYPE (VENTS_TYPE), POINTER :: VT
+TYPE (WALL_TYPE), POINTER :: WC
  
 IF (SOLID_PHASE_ONLY) RETURN
-IF (FREEZE_VELOCITY) RETURN
+IF (FREEZE_VELOCITY)  RETURN
+
 TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
-UWP=>WALL_WORK2
 
 IF (PREDICTOR) THEN
    UU => U
    VV => V
    WW => W
    HP => H
-   DO IW=1,N_EXTERNAL_WALL_CELLS
-      UWP(IW) = WALL(IW)%ONE_D%UWS   
-   ENDDO
 ELSE
    UU => US
    VV => VS
    WW => WS
    HP => HS
-   DO IW=1,N_EXTERNAL_WALL_CELLS
-      UWP(IW) = WALL(IW)%ONE_D%UW
-   ENDDO
 ENDIF
 
 ! Miscellaneous settings for wind and baroclinic cases
@@ -71,7 +64,7 @@ RFODT = RELAXATION_FACTOR/DT
 !$OMP PARALLEL DEFAULT(NONE) &
 !$OMP SHARED(N_EXTERNAL_WALL_CELLS,PRESSURE_BC_INDEX,BXS,BXF,BYS,BYF,BZS,BZF,HX,HY,HZ,FVX,FVY,FVZ,DUWDT, &
 !$OMP        IBP1,JBP1,KBP1, &
-!$OMP        PREDICTOR,CORRECTOR,RFODT,UWP,U,V,W,US,VS,WS,IBAR,JBAR,KBAR,DX,DY,DZ, &
+!$OMP        PREDICTOR,CORRECTOR,RFODT,U,V,W,US,VS,WS,IBAR,JBAR,KBAR,DX,DY,DZ, &
 !$OMP        DUUDT,DVVDT,DWWDT,HP, &
 !$OMP        OMESH,MESHES,WALL_WORK1, &
 !$OMP        VENTS,T_BEGIN,T,DUMMY,UU,VV,WW,KRES,H0, &
@@ -112,32 +105,32 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
 
       NOT_OPEN: IF (WC%BOUNDARY_TYPE/=OPEN_BOUNDARY .AND. WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) THEN
 
-         ! Solid boundary that uses a Dirichlet BC to drive the normal component of velocity towards UWP
+         ! Solid boundary that uses a Dirichlet BC to drive the normal component of velocity towards UW or UWS
  
          SELECT CASE(IOR)
             CASE( 1)
-               IF (PREDICTOR) DUUDT =       RFODT*(-UWP(IW)-        U(0,J,K)           )
-               IF (CORRECTOR) DUUDT = 2._EB*RFODT*(-UWP(IW)-0.5_EB*(U(0,J,K)+US(0,J,K)))
+               IF (PREDICTOR) DUUDT =       RFODT*(-WC%ONE_D%UWS -         U(0,J,K)           )
+               IF (CORRECTOR) DUUDT = 2._EB*RFODT*(-WC%ONE_D%UW  - 0.5_EB*(U(0,J,K)+US(0,J,K)))
                BXS(J,K) = HP(1,J,K)     + 0.5_EB*DX(0)   *(DUUDT+FVX(0,J,K))
             CASE(-1) 
-               IF (PREDICTOR) DUUDT =       RFODT*( UWP(IW)-        U(IBAR,J,K)              )
-               IF (CORRECTOR) DUUDT = 2._EB*RFODT*( UWP(IW)-0.5_EB*(U(IBAR,J,K)+US(IBAR,J,K)))
+               IF (PREDICTOR) DUUDT =       RFODT*( WC%ONE_D%UWS -         U(IBAR,J,K)              )
+               IF (CORRECTOR) DUUDT = 2._EB*RFODT*( WC%ONE_D%UW  - 0.5_EB*(U(IBAR,J,K)+US(IBAR,J,K)))
                BXF(J,K) = HP(IBAR,J,K) - 0.5_EB*DX(IBP1)*(DUUDT+FVX(IBAR,J,K))
             CASE( 2)
-               IF (PREDICTOR) DVVDT =       RFODT*(-UWP(IW)-        V(I,0,K)           ) 
-               IF (CORRECTOR) DVVDT = 2._EB*RFODT*(-UWP(IW)-0.5_EB*(V(I,0,K)+VS(I,0,K)))
+               IF (PREDICTOR) DVVDT =       RFODT*(-WC%ONE_D%UWS -         V(I,0,K)           ) 
+               IF (CORRECTOR) DVVDT = 2._EB*RFODT*(-WC%ONE_D%UW  - 0.5_EB*(V(I,0,K)+VS(I,0,K)))
                BYS(I,K) = HP(I,1,K)    + 0.5_EB*DY(0)   *(DVVDT+FVY(I,0,K))
             CASE(-2) 
-               IF (PREDICTOR) DVVDT =       RFODT*( UWP(IW)-        V(I,JBAR,K)              )
-               IF (CORRECTOR) DVVDT = 2._EB*RFODT*( UWP(IW)-0.5_EB*(V(I,JBAR,K)+VS(I,JBAR,K)))
+               IF (PREDICTOR) DVVDT =       RFODT*( WC%ONE_D%UWS -         V(I,JBAR,K)              )
+               IF (CORRECTOR) DVVDT = 2._EB*RFODT*( WC%ONE_D%UW  - 0.5_EB*(V(I,JBAR,K)+VS(I,JBAR,K)))
                BYF(I,K) = HP(I,JBAR,K) - 0.5_EB*DY(JBP1)*(DVVDT+FVY(I,JBAR,K))
             CASE( 3)
-               IF (PREDICTOR) DWWDT =       RFODT*(-UWP(IW)-        W(I,J,0)           )
-               IF (CORRECTOR) DWWDT = 2._EB*RFODT*(-UWP(IW)-0.5_EB*(W(I,J,0)+WS(I,J,0)))
+               IF (PREDICTOR) DWWDT =       RFODT*(-WC%ONE_D%UWS -         W(I,J,0)           )
+               IF (CORRECTOR) DWWDT = 2._EB*RFODT*(-WC%ONE_D%UW  - 0.5_EB*(W(I,J,0)+WS(I,J,0)))
                BZS(I,J) = HP(I,J,1)    + 0.5_EB*DZ(0)   *(DWWDT+FVZ(I,J,0))
             CASE(-3) 
-               IF (PREDICTOR) DWWDT =       RFODT*( UWP(IW)-        W(I,J,KBAR)              )
-               IF (CORRECTOR) DWWDT = 2._EB*RFODT*( UWP(IW)-0.5_EB*(W(I,J,KBAR)+WS(I,J,KBAR)))
+               IF (PREDICTOR) DWWDT =       RFODT*( WC%ONE_D%UWS -         W(I,J,KBAR)              )
+               IF (CORRECTOR) DWWDT = 2._EB*RFODT*( WC%ONE_D%UW  - 0.5_EB*(W(I,J,KBAR)+WS(I,J,KBAR)))
                BZF(I,J) = HP(I,J,KBAR) - 0.5_EB*DZ(KBP1)*(DWWDT+FVZ(I,J,KBAR))
          END SELECT
 
@@ -503,25 +496,18 @@ USE COMP_FUNCTIONS, ONLY: SECOND
 USE GLOBAL_CONSTANTS
 
 INTEGER, INTENT(IN) :: NM
-REAL(EB), POINTER, DIMENSION(:) :: UWP
-INTEGER :: IW,IOR,II,JJ,KK,IIO,JJO,KKO,NOM
-REAL(EB) :: TNOW,U_NEW,V_NEW,W_NEW,U_NEW_OTHER,V_NEW_OTHER,W_NEW_OTHER,VELOCITY_ERROR,DUDT,DVDT,DWDT,ITERATIVE_FACTOR
-TYPE(OMESH_TYPE), POINTER :: OM=>NULL()
-TYPE(MESH_TYPE), POINTER :: M2=>NULL()
-TYPE(WALL_TYPE), POINTER :: WC=>NULL()
+INTEGER :: IW,IOR,II,JJ,KK,IIO,JJO,KKO,N_INT_CELLS
+REAL(EB) :: TNOW,UN_NEW,UN_NEW_OTHER,VELOCITY_ERROR,DUDT,DVDT,DWDT,ITERATIVE_FACTOR
+TYPE(OMESH_TYPE), POINTER :: OM
+TYPE(MESH_TYPE), POINTER :: M2
+TYPE(WALL_TYPE), POINTER :: WC
 
 TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
-UWP => WALL_WORK2
+
 IF (PREDICTOR) THEN
-   DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-      UWP(IW) = WALL(IW)%ONE_D%UWS
-   ENDDO
    ITERATIVE_FACTOR = 0.25_EB
 ELSE
-   DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-      UWP(IW) = WALL(IW)%ONE_D%UW
-   ENDDO
    ITERATIVE_FACTOR = 0.50_EB
 ENDIF
 
@@ -529,13 +515,14 @@ VELOCITY_ERROR_MAX(NM) = 0._EB
 WALL_WORK1 = 0._EB
 
 CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+
    WC=>WALL(IW)
+
    IF (WC%BOUNDARY_TYPE/=SOLID_BOUNDARY .AND. WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE CHECK_WALL_LOOP
 
    IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) THEN
-      NOM = WC%NOM
-      OM => OMESH(NOM)
-      IF (OM%NIC_R/=OM%NIC_S) CYCLE CHECK_WALL_LOOP
+      OM => OMESH(WC%NOM)
+      M2 => MESHES(WC%NOM)
    ENDIF
 
    II  = WC%ONE_D%II
@@ -548,123 +535,118 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    IF (PREDICTOR) THEN
       SELECT CASE(IOR)
          CASE( 1)
-            U_NEW = U(II,JJ,KK)   - DT*(FVX(II,JJ,KK)   + RDXN(II)  *(H(II+1,JJ,KK)-H(II,JJ,KK)))
+            UN_NEW = U(II,JJ,KK)   - DT*(FVX(II,JJ,KK)   + RDXN(II)  *(H(II+1,JJ,KK)-H(II,JJ,KK)))
          CASE(-1)
-            U_NEW = U(II-1,JJ,KK) - DT*(FVX(II-1,JJ,KK) + RDXN(II-1)*(H(II,JJ,KK)-H(II-1,JJ,KK)))
+            UN_NEW = U(II-1,JJ,KK) - DT*(FVX(II-1,JJ,KK) + RDXN(II-1)*(H(II,JJ,KK)-H(II-1,JJ,KK)))
          CASE( 2)
-            V_NEW = V(II,JJ,KK)   - DT*(FVY(II,JJ,KK)   + RDYN(JJ)  *(H(II,JJ+1,KK)-H(II,JJ,KK)))
+            UN_NEW = V(II,JJ,KK)   - DT*(FVY(II,JJ,KK)   + RDYN(JJ)  *(H(II,JJ+1,KK)-H(II,JJ,KK)))
          CASE(-2)
-            V_NEW = V(II,JJ-1,KK) - DT*(FVY(II,JJ-1,KK) + RDYN(JJ-1)*(H(II,JJ,KK)-H(II,JJ-1,KK)))
+            UN_NEW = V(II,JJ-1,KK) - DT*(FVY(II,JJ-1,KK) + RDYN(JJ-1)*(H(II,JJ,KK)-H(II,JJ-1,KK)))
          CASE( 3)
-            W_NEW = W(II,JJ,KK)   - DT*(FVZ(II,JJ,KK)   + RDZN(KK)  *(H(II,JJ,KK+1)-H(II,JJ,KK)))
+            UN_NEW = W(II,JJ,KK)   - DT*(FVZ(II,JJ,KK)   + RDZN(KK)  *(H(II,JJ,KK+1)-H(II,JJ,KK)))
          CASE(-3)
-            W_NEW = W(II,JJ,KK-1) - DT*(FVZ(II,JJ,KK-1) + RDZN(KK-1)*(H(II,JJ,KK)-H(II,JJ,KK-1)))
+            UN_NEW = W(II,JJ,KK-1) - DT*(FVZ(II,JJ,KK-1) + RDZN(KK-1)*(H(II,JJ,KK)-H(II,JJ,KK-1)))
       END SELECT
    ELSE
       SELECT CASE(IOR)
          CASE( 1)
-            U_NEW = 0.5_EB*(U(II,JJ,KK)+US(II,JJ,KK)     - DT*(FVX(II,JJ,KK)   + RDXN(II)  *(HS(II+1,JJ,KK)-HS(II,JJ,KK))))
+            UN_NEW = 0.5_EB*(U(II,JJ,KK)+US(II,JJ,KK)     - DT*(FVX(II,JJ,KK)   + RDXN(II)  *(HS(II+1,JJ,KK)-HS(II,JJ,KK))))
          CASE(-1)
-            U_NEW = 0.5_EB*(U(II-1,JJ,KK)+US(II-1,JJ,KK) - DT*(FVX(II-1,JJ,KK) + RDXN(II-1)*(HS(II,JJ,KK)-HS(II-1,JJ,KK))))
+            UN_NEW = 0.5_EB*(U(II-1,JJ,KK)+US(II-1,JJ,KK) - DT*(FVX(II-1,JJ,KK) + RDXN(II-1)*(HS(II,JJ,KK)-HS(II-1,JJ,KK))))
          CASE( 2)
-            V_NEW = 0.5_EB*(V(II,JJ,KK)+VS(II,JJ,KK)     - DT*(FVY(II,JJ,KK)   + RDYN(JJ)  *(HS(II,JJ+1,KK)-HS(II,JJ,KK))))
+            UN_NEW = 0.5_EB*(V(II,JJ,KK)+VS(II,JJ,KK)     - DT*(FVY(II,JJ,KK)   + RDYN(JJ)  *(HS(II,JJ+1,KK)-HS(II,JJ,KK))))
          CASE(-2)
-            V_NEW = 0.5_EB*(V(II,JJ-1,KK)+VS(II,JJ-1,KK) - DT*(FVY(II,JJ-1,KK) + RDYN(JJ-1)*(HS(II,JJ,KK)-HS(II,JJ-1,KK))))
+            UN_NEW = 0.5_EB*(V(II,JJ-1,KK)+VS(II,JJ-1,KK) - DT*(FVY(II,JJ-1,KK) + RDYN(JJ-1)*(HS(II,JJ,KK)-HS(II,JJ-1,KK))))
          CASE( 3)
-            W_NEW = 0.5_EB*(W(II,JJ,KK)+WS(II,JJ,KK)     - DT*(FVZ(II,JJ,KK)   + RDZN(KK)  *(HS(II,JJ,KK+1)-HS(II,JJ,KK))))
+            UN_NEW = 0.5_EB*(W(II,JJ,KK)+WS(II,JJ,KK)     - DT*(FVZ(II,JJ,KK)   + RDZN(KK)  *(HS(II,JJ,KK+1)-HS(II,JJ,KK))))
          CASE(-3)
-            W_NEW = 0.5_EB*(W(II,JJ,KK-1)+WS(II,JJ,KK-1) - DT*(FVZ(II,JJ,KK-1) + RDZN(KK-1)*(HS(II,JJ,KK)-HS(II,JJ,KK-1))))
+            UN_NEW = 0.5_EB*(W(II,JJ,KK-1)+WS(II,JJ,KK-1) - DT*(FVZ(II,JJ,KK-1) + RDZN(KK-1)*(HS(II,JJ,KK)-HS(II,JJ,KK-1))))
       END SELECT
    ENDIF
 
    ! At interpolated boundaries, compare updated normal component of velocity with that of the other mesh
 
    IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) THEN
-      OM  => OMESH(WC%NOM)
-      M2  =>  MESHES(WC%NOM)
-      IIO = WC%NOM_IB(1)
-      JJO = WC%NOM_IB(2)
-      KKO = WC%NOM_IB(3)
-      IF (PREDICTOR) THEN
-         SELECT CASE(IOR)
-            CASE( 1)
-               DUDT = -OM%FVX(IIO,JJO,KKO)     - M2%RDXN(IIO)  *(OM%H(IIO+1,JJO,KKO)-OM%H(IIO,JJO,KKO))
-               U_NEW_OTHER = OM%U(IIO,JJO,KKO)   + DT*DUDT
-            CASE(-1)
-               DUDT = -OM%FVX(IIO-1,JJO,KKO)   - M2%RDXN(IIO-1)*(OM%H(IIO,JJO,KKO)-OM%H(IIO-1,JJO,KKO))
-               U_NEW_OTHER = OM%U(IIO-1,JJO,KKO) + DT*DUDT
-            CASE( 2)
-               DVDT = -OM%FVY(IIO,JJO,KKO)     - M2%RDYN(JJO)  *(OM%H(IIO,JJO+1,KKO)-OM%H(IIO,JJO,KKO))
-               V_NEW_OTHER = OM%V(IIO,JJO,KKO)   + DT*DVDT
-            CASE(-2)
-               DVDT = -OM%FVY(IIO,JJO-1,KKO)   - M2%RDYN(JJO-1)*(OM%H(IIO,JJO,KKO)-OM%H(IIO,JJO-1,KKO))
-               V_NEW_OTHER = OM%V(IIO,JJO-1,KKO) + DT*DVDT
-            CASE( 3)
-               DWDT = -OM%FVZ(IIO,JJO,KKO)     - M2%RDZN(KKO)  *(OM%H(IIO,JJO,KKO+1)-OM%H(IIO,JJO,KKO))
-               W_NEW_OTHER = OM%W(IIO,JJO,KKO)   + DT*DWDT
-            CASE(-3)
-               DWDT = -OM%FVZ(IIO,JJO,KKO-1)   - M2%RDZN(KKO-1)*(OM%H(IIO,JJO,KKO)-OM%H(IIO,JJO,KKO-1))
-               W_NEW_OTHER = OM%W(IIO,JJO,KKO-1) + DT*DWDT
-         END SELECT
-      ELSE
-         SELECT CASE(IOR)
-            CASE( 1)
-               DUDT = -OM%FVX(IIO,JJO,KKO)     - M2%RDXN(IIO)  *(OM%HS(IIO+1,JJO,KKO)-OM%HS(IIO,JJO,KKO))
-               U_NEW_OTHER = 0.5_EB*(OM%U(IIO,JJO,KKO)+OM%US(IIO,JJO,KKO)     + DT*DUDT)
-            CASE(-1)
-               DUDT = -OM%FVX(IIO-1,JJO,KKO)   - M2%RDXN(IIO-1)*(OM%HS(IIO,JJO,KKO)-OM%HS(IIO-1,JJO,KKO))
-               U_NEW_OTHER = 0.5_EB*(OM%U(IIO-1,JJO,KKO)+OM%US(IIO-1,JJO,KKO) + DT*DUDT)
-            CASE( 2)
-               DVDT = -OM%FVY(IIO,JJO,KKO)     - M2%RDYN(JJO)  *(OM%HS(IIO,JJO+1,KKO)-OM%HS(IIO,JJO,KKO))
-               V_NEW_OTHER = 0.5_EB*(OM%V(IIO,JJO,KKO)+OM%VS(IIO,JJO,KKO)     + DT*DVDT)
-            CASE(-2)
-               DVDT = -OM%FVY(IIO,JJO-1,KKO)   - M2%RDYN(JJO-1)*(OM%HS(IIO,JJO,KKO)-OM%HS(IIO,JJO-1,KKO))
-               V_NEW_OTHER = 0.5_EB*(OM%V(IIO,JJO-1,KKO)+OM%VS(IIO,JJO-1,KKO) + DT*DVDT)
-            CASE( 3)
-               DWDT = -OM%FVZ(IIO,JJO,KKO)     - M2%RDZN(KKO)  *(OM%HS(IIO,JJO,KKO+1)-OM%HS(IIO,JJO,KKO))
-               W_NEW_OTHER = 0.5_EB*(OM%W(IIO,JJO,KKO)+OM%WS(IIO,JJO,KKO)     + DT*DWDT)
-            CASE(-3)
-               DWDT = -OM%FVZ(IIO,JJO,KKO-1)   - M2%RDZN(KKO-1)*(OM%HS(IIO,JJO,KKO)-OM%HS(IIO,JJO,KKO-1))
-               W_NEW_OTHER = 0.5_EB*(OM%W(IIO,JJO,KKO-1)+OM%WS(IIO,JJO,KKO-1) + DT*DWDT)
-         END SELECT
-      ENDIF
+
+      UN_NEW_OTHER = 0._EB
+
+      DO KKO=WC%NOM_IB(3),WC%NOM_IB(6)
+         DO JJO=WC%NOM_IB(2),WC%NOM_IB(5)
+            DO IIO=WC%NOM_IB(1),WC%NOM_IB(4)
+               IF (PREDICTOR) THEN
+                  SELECT CASE(IOR)
+                     CASE( 1)
+                        DUDT = -OM%FVX(IIO,JJO,KKO)   - M2%RDXN(IIO)  *(OM%H(IIO+1,JJO,KKO)-OM%H(IIO,JJO,KKO))
+                        UN_NEW_OTHER = UN_NEW_OTHER + OM%U(IIO,JJO,KKO)   + DT*DUDT
+                     CASE(-1)
+                        DUDT = -OM%FVX(IIO-1,JJO,KKO) - M2%RDXN(IIO-1)*(OM%H(IIO,JJO,KKO)-OM%H(IIO-1,JJO,KKO))
+                        UN_NEW_OTHER = UN_NEW_OTHER + OM%U(IIO-1,JJO,KKO) + DT*DUDT
+                     CASE( 2)
+                        DVDT = -OM%FVY(IIO,JJO,KKO)   - M2%RDYN(JJO)  *(OM%H(IIO,JJO+1,KKO)-OM%H(IIO,JJO,KKO))
+                        UN_NEW_OTHER = UN_NEW_OTHER + OM%V(IIO,JJO,KKO)   + DT*DVDT
+                     CASE(-2)
+                        DVDT = -OM%FVY(IIO,JJO-1,KKO) - M2%RDYN(JJO-1)*(OM%H(IIO,JJO,KKO)-OM%H(IIO,JJO-1,KKO))
+                        UN_NEW_OTHER = UN_NEW_OTHER + OM%V(IIO,JJO-1,KKO) + DT*DVDT
+                     CASE( 3)
+                        DWDT = -OM%FVZ(IIO,JJO,KKO)   - M2%RDZN(KKO)  *(OM%H(IIO,JJO,KKO+1)-OM%H(IIO,JJO,KKO))
+                        UN_NEW_OTHER = UN_NEW_OTHER + OM%W(IIO,JJO,KKO)   + DT*DWDT
+                     CASE(-3)
+                        DWDT = -OM%FVZ(IIO,JJO,KKO-1) - M2%RDZN(KKO-1)*(OM%H(IIO,JJO,KKO)-OM%H(IIO,JJO,KKO-1))
+                        UN_NEW_OTHER = UN_NEW_OTHER + OM%W(IIO,JJO,KKO-1) + DT*DWDT
+                  END SELECT
+               ELSE
+                  SELECT CASE(IOR)
+                     CASE( 1)
+                        DUDT = -OM%FVX(IIO,JJO,KKO)   - M2%RDXN(IIO)  *(OM%HS(IIO+1,JJO,KKO)-OM%HS(IIO,JJO,KKO))
+                        UN_NEW_OTHER = UN_NEW_OTHER + 0.5_EB*(OM%U(IIO,JJO,KKO)+OM%US(IIO,JJO,KKO)     + DT*DUDT)
+                     CASE(-1)
+                        DUDT = -OM%FVX(IIO-1,JJO,KKO) - M2%RDXN(IIO-1)*(OM%HS(IIO,JJO,KKO)-OM%HS(IIO-1,JJO,KKO))
+                        UN_NEW_OTHER = UN_NEW_OTHER + 0.5_EB*(OM%U(IIO-1,JJO,KKO)+OM%US(IIO-1,JJO,KKO) + DT*DUDT)
+                     CASE( 2)
+                        DVDT = -OM%FVY(IIO,JJO,KKO)   - M2%RDYN(JJO)  *(OM%HS(IIO,JJO+1,KKO)-OM%HS(IIO,JJO,KKO))
+                        UN_NEW_OTHER = UN_NEW_OTHER + 0.5_EB*(OM%V(IIO,JJO,KKO)+OM%VS(IIO,JJO,KKO)     + DT*DVDT)
+                     CASE(-2)
+                        DVDT = -OM%FVY(IIO,JJO-1,KKO) - M2%RDYN(JJO-1)*(OM%HS(IIO,JJO,KKO)-OM%HS(IIO,JJO-1,KKO))
+                        UN_NEW_OTHER = UN_NEW_OTHER + 0.5_EB*(OM%V(IIO,JJO-1,KKO)+OM%VS(IIO,JJO-1,KKO) + DT*DVDT)
+                     CASE( 3)
+                        DWDT = -OM%FVZ(IIO,JJO,KKO)   - M2%RDZN(KKO)  *(OM%HS(IIO,JJO,KKO+1)-OM%HS(IIO,JJO,KKO))
+                        UN_NEW_OTHER = UN_NEW_OTHER + 0.5_EB*(OM%W(IIO,JJO,KKO)+OM%WS(IIO,JJO,KKO)     + DT*DWDT)
+                     CASE(-3)
+                        DWDT = -OM%FVZ(IIO,JJO,KKO-1) - M2%RDZN(KKO-1)*(OM%HS(IIO,JJO,KKO)-OM%HS(IIO,JJO,KKO-1))
+                        UN_NEW_OTHER = UN_NEW_OTHER + 0.5_EB*(OM%W(IIO,JJO,KKO-1)+OM%WS(IIO,JJO,KKO-1) + DT*DWDT)
+                  END SELECT
+               ENDIF
+            ENDDO
+         ENDDO
+      ENDDO
+
+      N_INT_CELLS  = (WC%NOM_IB(4)-WC%NOM_IB(1)+1) * (WC%NOM_IB(5)-WC%NOM_IB(2)+1) * (WC%NOM_IB(6)-WC%NOM_IB(3)+1)
+      UN_NEW_OTHER = UN_NEW_OTHER/REAL(N_INT_CELLS,EB)
+
    ENDIF
 
-   ! At solid boundaries, compare updated normal velocity with specified normal velocity (UWP)
+   ! At solid boundaries, compare updated normal velocity with specified normal velocity 
 
    IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
-      SELECT CASE(IOR)
-         CASE( 1)
-            U_NEW_OTHER = -UWP(IW)
-         CASE(-1)
-            U_NEW_OTHER =  UWP(IW)
-         CASE( 2)
-            V_NEW_OTHER = -UWP(IW)
-         CASE(-2)
-            V_NEW_OTHER =  UWP(IW)
-         CASE( 3)
-            W_NEW_OTHER = -UWP(IW)
-         CASE(-3)
-            W_NEW_OTHER =  UWP(IW)
-      END SELECT
+      IF (PREDICTOR) THEN
+         UN_NEW_OTHER = -SIGN(1,IOR)*WC%ONE_D%UWS
+      ELSE
+         UN_NEW_OTHER = -SIGN(1,IOR)*WC%ONE_D%UW
+      ENDIF
    ENDIF
 
    ! Compute velocity difference
 
-   SELECT CASE(ABS(IOR))
-      CASE(1)
-         VELOCITY_ERROR = U_NEW - U_NEW_OTHER
-         IF (IOR>0) WALL_WORK1(IW) = -ITERATIVE_FACTOR*VELOCITY_ERROR*DX(II)/DT
-         IF (IOR<0) WALL_WORK1(IW) =  ITERATIVE_FACTOR*VELOCITY_ERROR*DX(II)/DT
-      CASE(2)
-         VELOCITY_ERROR = V_NEW - V_NEW_OTHER
-         IF (IOR>0) WALL_WORK1(IW) = -ITERATIVE_FACTOR*VELOCITY_ERROR*DY(JJ)/DT
-         IF (IOR<0) WALL_WORK1(IW) =  ITERATIVE_FACTOR*VELOCITY_ERROR*DY(JJ)/DT
-      CASE(3)
-         VELOCITY_ERROR = W_NEW - W_NEW_OTHER
-         IF (IOR>0) WALL_WORK1(IW) = -ITERATIVE_FACTOR*VELOCITY_ERROR*DZ(KK)/DT
-         IF (IOR<0) WALL_WORK1(IW) =  ITERATIVE_FACTOR*VELOCITY_ERROR*DZ(KK)/DT
-   END SELECT
+   VELOCITY_ERROR = UN_NEW - UN_NEW_OTHER
+   WALL_WORK1(IW) = -SIGN(1,IOR)*ITERATIVE_FACTOR*VELOCITY_ERROR/(WC%RDN*DT)
+
+   ! If the grid cells in the current mesh are smaller than those of the other mesh, do not include in error tolerance
+
+   IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) THEN
+      IF (OM%NIC_S>OM%NIC_R) CYCLE CHECK_WALL_LOOP
+   ENDIF
+
+   ! Save maximum velocity error
 
    IF (ABS(VELOCITY_ERROR)>VELOCITY_ERROR_MAX(NM)) THEN
       VELOCITY_ERROR_MAX_I(NM) = II
