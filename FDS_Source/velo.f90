@@ -15,7 +15,7 @@ CHARACTER(255), PARAMETER :: velorev='$Revision$'
 CHARACTER(255), PARAMETER :: velodate='$Date$'
 
 PUBLIC COMPUTE_VELOCITY_FLUX,VELOCITY_PREDICTOR,VELOCITY_CORRECTOR,NO_FLUX,GET_REV_velo, &
-       MATCH_VELOCITY,VELOCITY_BC,CHECK_STABILITY,COMPUTE_VISCOSITY,VISCOSITY_BC
+       MATCH_VELOCITY,MATCH_VELOCITY_FLUX,VELOCITY_BC,CHECK_STABILITY,COMPUTE_VISCOSITY,VISCOSITY_BC
 PRIVATE VELOCITY_FLUX,VELOCITY_FLUX_CYLINDRICAL
  
 CONTAINS
@@ -2190,6 +2190,156 @@ ENDDO EXTERNAL_WALL_LOOP
 
 TUSED(4,NM)=TUSED(4,NM)+SECOND()-TNOW
 END SUBROUTINE MATCH_VELOCITY
+
+
+SUBROUTINE MATCH_VELOCITY_FLUX(NM)
+
+! Force normal component of velocity flux to match at interpolated boundaries
+
+INTEGER  :: NOM,II,JJ,KK,IOR,IW,IIO,JJO,KKO
+INTEGER, INTENT(IN) :: NM
+REAL(EB) :: TNOW,DA_OTHER,FVX_OTHER,FVY_OTHER,FVZ_OTHER
+TYPE (OMESH_TYPE), POINTER :: OM
+TYPE (MESH_TYPE), POINTER :: M2
+TYPE (WALL_TYPE), POINTER :: WC
+
+IF (SOLID_PHASE_ONLY) RETURN
+IF (EVACUATION_ONLY(NM)) RETURN
+
+TNOW = SECOND()
+
+! Assign local variable names
+
+CALL POINT_TO_MESH(NM)
+
+! Loop over all cell edges and determine the appropriate velocity BCs
+
+EXTERNAL_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
+
+   WC=>WALL(IW)
+   IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE EXTERNAL_WALL_LOOP
+
+   II  = WC%ONE_D%II
+   JJ  = WC%ONE_D%JJ
+   KK  = WC%ONE_D%KK
+   IOR = WC%ONE_D%IOR
+   NOM = WC%NOM
+   OM => OMESH(NOM)
+   M2 => MESHES(NOM)
+   
+   ! Determine the area of the interpolated cell face
+   
+   DA_OTHER = 0._EB
+
+   SELECT CASE(ABS(IOR))
+      CASE(1)
+         DO KKO=WC%NOM_IB(3),WC%NOM_IB(6)
+            DO JJO=WC%NOM_IB(2),WC%NOM_IB(5)
+               DO IIO=WC%NOM_IB(1),WC%NOM_IB(4)
+                  DA_OTHER = DA_OTHER + M2%DY(JJO)*M2%DZ(KKO)
+               ENDDO
+            ENDDO
+         ENDDO
+      CASE(2)
+         DO KKO=WC%NOM_IB(3),WC%NOM_IB(6)
+            DO JJO=WC%NOM_IB(2),WC%NOM_IB(5)
+               DO IIO=WC%NOM_IB(1),WC%NOM_IB(4)
+                  DA_OTHER = DA_OTHER + M2%DX(IIO)*M2%DZ(KKO)
+               ENDDO
+            ENDDO
+         ENDDO
+      CASE(3)
+         DO KKO=WC%NOM_IB(3),WC%NOM_IB(6)
+            DO JJO=WC%NOM_IB(2),WC%NOM_IB(5)
+               DO IIO=WC%NOM_IB(1),WC%NOM_IB(4)
+                  DA_OTHER = DA_OTHER + M2%DX(IIO)*M2%DY(JJO)
+               ENDDO
+            ENDDO
+         ENDDO
+   END SELECT
+   
+   ! Determine the normal component of velocity from the other mesh and use it for average
+
+   SELECT CASE(IOR)
+   
+      CASE( 1)
+      
+         FVX_OTHER = 0._EB
+         DO KKO=WC%NOM_IB(3),WC%NOM_IB(6)
+            DO JJO=WC%NOM_IB(2),WC%NOM_IB(5)
+               DO IIO=WC%NOM_IB(1),WC%NOM_IB(4)
+                  FVX_OTHER = FVX_OTHER + OM%FVX(IIO,JJO,KKO)*M2%DY(JJO)*M2%DZ(KKO)/DA_OTHER
+               ENDDO
+            ENDDO
+         ENDDO
+         FVX(0,JJ,KK) = 0.5_EB*(FVX(0,JJ,KK) + FVX_OTHER)
+
+      CASE(-1)
+         
+         FVX_OTHER = 0._EB
+         DO KKO=WC%NOM_IB(3),WC%NOM_IB(6)
+            DO JJO=WC%NOM_IB(2),WC%NOM_IB(5)
+               DO IIO=WC%NOM_IB(1),WC%NOM_IB(4)
+                  FVX_OTHER = FVX_OTHER + OM%FVX(IIO-1,JJO,KKO)*M2%DY(JJO)*M2%DZ(KKO)/DA_OTHER
+               ENDDO
+            ENDDO
+         ENDDO
+         FVX(IBAR,JJ,KK) = 0.5_EB*(FVX(IBAR,JJ,KK) + FVX_OTHER)
+
+      CASE( 2)
+      
+         FVY_OTHER = 0._EB
+         DO KKO=WC%NOM_IB(3),WC%NOM_IB(6)
+            DO JJO=WC%NOM_IB(2),WC%NOM_IB(5)
+               DO IIO=WC%NOM_IB(1),WC%NOM_IB(4)
+                  FVY_OTHER = FVY_OTHER + OM%FVY(IIO,JJO,KKO)*M2%DX(IIO)*M2%DZ(KKO)/DA_OTHER
+               ENDDO
+            ENDDO
+         ENDDO
+         FVY(II,0,KK) = 0.5_EB*(FVY(II,0,KK) + FVY_OTHER)
+
+      CASE(-2)
+      
+         FVY_OTHER = 0._EB
+         DO KKO=WC%NOM_IB(3),WC%NOM_IB(6)
+            DO JJO=WC%NOM_IB(2),WC%NOM_IB(5)
+               DO IIO=WC%NOM_IB(1),WC%NOM_IB(4)
+                  FVY_OTHER = FVY_OTHER + OM%FVY(IIO,JJO-1,KKO)*M2%DX(IIO)*M2%DZ(KKO)/DA_OTHER
+               ENDDO
+            ENDDO
+         ENDDO
+         FVY(II,JBAR,KK) = 0.5_EB*(FVY(II,JBAR,KK) + FVY_OTHER)
+
+      CASE( 3)
+      
+         FVZ_OTHER = 0._EB
+         DO KKO=WC%NOM_IB(3),WC%NOM_IB(6)
+            DO JJO=WC%NOM_IB(2),WC%NOM_IB(5)
+               DO IIO=WC%NOM_IB(1),WC%NOM_IB(4)
+                  FVZ_OTHER = FVZ_OTHER + OM%FVZ(IIO,JJO,KKO)*M2%DX(IIO)*M2%DY(JJO)/DA_OTHER
+               ENDDO
+            ENDDO
+         ENDDO
+         FVZ(II,JJ,0) = 0.5_EB*(FVZ(II,JJ,0) + FVZ_OTHER)
+
+      CASE(-3)
+      
+         FVZ_OTHER = 0._EB
+         DO KKO=WC%NOM_IB(3),WC%NOM_IB(6)
+            DO JJO=WC%NOM_IB(2),WC%NOM_IB(5)
+               DO IIO=WC%NOM_IB(1),WC%NOM_IB(4)
+                  FVZ_OTHER = FVZ_OTHER + OM%FVZ(IIO,JJO,KKO-1)*M2%DX(IIO)*M2%DY(JJO)/DA_OTHER
+               ENDDO
+            ENDDO
+         ENDDO
+         FVZ(II,JJ,KBAR) = 0.5_EB*(FVZ(II,JJ,KBAR) + FVZ_OTHER)
+         
+   END SELECT
+
+ENDDO EXTERNAL_WALL_LOOP
+
+TUSED(4,NM)=TUSED(4,NM)+SECOND()-TNOW
+END SUBROUTINE MATCH_VELOCITY_FLUX
 
 
 SUBROUTINE CHECK_STABILITY(NM,CODE)
