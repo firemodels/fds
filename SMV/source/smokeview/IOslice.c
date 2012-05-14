@@ -4675,8 +4675,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
           float *color_v;
           float dy;
 
-          index_v = (plotx-sd->is1)*sd->nslicej*sd->nslicek;
-          index_v += (j-sd->js1)*sd->nslicek + k + 1 - sd->ks1;
+          index_v = (plotx-sd->is1)*sd->nslicej*sd->nslicek + (j-sd->js1)*sd->nslicek + k + 1 - sd->ks1;
           GET_SLICE_COLOR(color_v,index_v);
           GET_VEC_DXYZ(v,dy,index_v);
           glColor4fv(color_v);
@@ -4688,8 +4687,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
           float *color_w;
           float dz;
 
-          index_w = (plotx-sd->is1)*sd->nslicej*sd->nslicek;
-          index_w += (j-sd->js1+1)*sd->nslicek + k - sd->ks1;
+          index_w = (plotx-sd->is1)*sd->nslicej*sd->nslicek + (j-sd->js1+1)*sd->nslicek + k - sd->ks1;
           GET_SLICE_COLOR(color_w,index_w);
           GET_VEC_DXYZ(w,dz,index_w);
           glColor4fv(color_w);
@@ -4720,8 +4718,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
           float *color_v;
           float dy;
 
-          index_v = (plotx-sd->is1)*sd->nslicej*sd->nslicek;
-          index_v += (j-sd->js1)*sd->nslicek + k - sd->ks1 + 1;
+          index_v = (plotx-sd->is1)*sd->nslicej*sd->nslicek + (j-sd->js1)*sd->nslicek + k - sd->ks1 + 1;
           GET_SLICE_COLOR(color_v,index_v);
           GET_VEC_DXYZ(v,dy,index_v);
           glColor4fv(color_v);
@@ -4732,8 +4729,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
           float *color_w;
           float dz;
 
-          index_w = (plotx-sd->is1)*sd->nslicej*sd->nslicek;
-          index_w += (j-sd->js1+1)*sd->nslicek + k-sd->ks1;
+          index_w = (plotx-sd->is1)*sd->nslicej*sd->nslicek + (j-sd->js1+1)*sd->nslicek + k-sd->ks1;
           GET_SLICE_COLOR(color_w,index_w);
           GET_VEC_DXYZ(w,dz,index_w);
           glColor4fv(color_w);
@@ -4761,8 +4757,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
             int index_v;
             float val;
 
-            index_v = (plotx-sd->is1)*sd->nslicej*sd->nslicek;
-            index_v += (j-sd->js1)*sd->nslicek + k - sd->ks1 + 1;
+            index_v = (plotx-sd->is1)*sd->nslicej*sd->nslicek + (j-sd->js1)*sd->nslicek + k - sd->ks1 + 1;
             GET_VAL(v,val,index_v);
             output3Val(constval,yy1,zhalf,val);
           }
@@ -4804,8 +4799,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
           float *color_u;
           float dx;
           
-          index_u = (i-sd->is1)*sd->nslicej*sd->nslicek;
-          index_u += (ploty-sd->js1)*sd->nslicek + k + 1 - sd->ks1;
+          index_u = (i-sd->is1)*sd->nslicej*sd->nslicek + (ploty-sd->js1)*sd->nslicek + k + 1 - sd->ks1;
           GET_SLICE_COLOR(color_u,index_u)
           GET_VEC_DXYZ(u,dx,index_u);
           glColor4fv(color_u);
@@ -4817,8 +4811,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
           float *color_w;
           float dz;
            
-          index_w = (i+1-sd->is1)*sd->nslicej*sd->nslicek;
-          index_w += (ploty-sd->js1)*sd->nslicek + k - sd->ks1;
+          index_w = (i+1-sd->is1)*sd->nslicej*sd->nslicek + (ploty-sd->js1)*sd->nslicek + k - sd->ks1;
           GET_SLICE_COLOR(color_w,index_w)
           GET_VEC_DXYZ(w,dz,index_w);
           glColor4fv(color_w);
@@ -4852,8 +4845,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
           float *color_u;
           float dx;
           
-          index_u = (i-sd->is1)*sd->nslicej*sd->nslicek;
-          index_u += (ploty-sd->js1)*sd->nslicek + k + 1 - sd->ks1;
+          index_u = (i-sd->is1)*sd->nslicej*sd->nslicek + (ploty-sd->js1)*sd->nslicek + k + 1 - sd->ks1;
           GET_SLICE_COLOR(color_u,index_u)
           GET_VEC_DXYZ(u,dx,index_u);
           glColor4fv(color_u);
@@ -4864,8 +4856,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
           float *color_w;
           float dz;
            
-          index_w = (i+1-sd->is1)*sd->nslicej*sd->nslicek;
-          index_w += (ploty-sd->js1)*sd->nslicek + k - sd->ks1;
+          index_w = (i+1-sd->is1)*sd->nslicej*sd->nslicek + (ploty-sd->js1)*sd->nslicek + k - sd->ks1;
           GET_SLICE_COLOR(color_w,index_w)
           GET_VEC_DXYZ(w,dz,index_w);
           glColor4fv(color_w);
@@ -4897,8 +4888,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
             int index_u;
             float val;
           
-            index_u = (i-sd->is1)*sd->nslicej*sd->nslicek;
-            index_u += (ploty-sd->js1)*sd->nslicek + k + 1 - sd->ks1;
+            index_u = (i-sd->is1)*sd->nslicej*sd->nslicek + (ploty-sd->js1)*sd->nslicek + k + 1 - sd->ks1;
             GET_VAL(u,val,index_u);
             output3Val(x1,constval,zhalf,val);
           }
@@ -4906,8 +4896,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
             int index_w;
             float val;
            
-            index_w = (i+1-sd->is1)*sd->nslicej*sd->nslicek;
-            index_w += (ploty-sd->js1)*sd->nslicek + k - sd->ks1;
+            index_w = (i+1-sd->is1)*sd->nslicej*sd->nslicek + (ploty-sd->js1)*sd->nslicek + k - sd->ks1;
             GET_VAL(w,val,index_w);
             output3Val(xhalf,constval,z1,val);
           }
@@ -4941,8 +4930,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
           float *color_u;
           float dx;
            
-          index_u = (i-sd->is1)*sd->nslicej*sd->nslicek;
-          index_u += (plotz-sd->ks1)+(j+1-sd->js1)*sd->nslicek;
+          index_u = (i-sd->is1)*sd->nslicej*sd->nslicek + (plotz-sd->ks1)+(j+1-sd->js1)*sd->nslicek;
           GET_SLICE_COLOR(color_u,index_u)
           GET_VEC_DXYZ(u,dx,index_u);
           glColor4fv(color_u);
@@ -4954,8 +4942,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
           float *color_v;
           float dy;
            
-          index_v = (i+1-sd->is1)*sd->nslicej*sd->nslicek;
-          index_v += (plotz-sd->ks1)+(j-sd->js1)*sd->nslicek;
+          index_v = (i+1-sd->is1)*sd->nslicej*sd->nslicek + (plotz-sd->ks1)+(j-sd->js1)*sd->nslicek;
           GET_SLICE_COLOR(color_v,index_v)
           GET_VEC_DXYZ(v,dy,index_v);
           glColor4fv(color_v);
@@ -4991,8 +4978,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
           float *color_u;
           float dx;
            
-          index_u = (i-sd->is1)*sd->nslicej*sd->nslicek;
-          index_u += (plotz-sd->ks1)+(j+1-sd->js1)*sd->nslicek;
+          index_u = (i-sd->is1)*sd->nslicej*sd->nslicek + (plotz-sd->ks1)+(j+1-sd->js1)*sd->nslicek;
           GET_SLICE_COLOR(color_u,index_u)
           GET_VEC_DXYZ(u,dx,index_u);
           glColor4fv(color_u);
@@ -5003,8 +4989,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
           float *color_v;
           float dy;
            
-          index_v = (i+1-sd->is1)*sd->nslicej*sd->nslicek;
-          index_v += (plotz-sd->ks1)+(j-sd->js1)*sd->nslicek;
+          index_v = (i+1-sd->is1)*sd->nslicej*sd->nslicek + (plotz-sd->ks1)+(j-sd->js1)*sd->nslicek;
           GET_SLICE_COLOR(color_v,index_v)
           GET_VEC_DXYZ(v,dy,index_v);
           glColor4fv(color_v);
@@ -5037,8 +5022,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
             int index_u;
             float val;
            
-            index_u = (i-sd->is1)*sd->nslicej*sd->nslicek;
-            index_u += (plotz-sd->ks1)+(j+1-sd->js1)*sd->nslicek;
+            index_u = (i-sd->is1)*sd->nslicej*sd->nslicek + (plotz-sd->ks1)+(j+1-sd->js1)*sd->nslicek;
             GET_VAL(u,val,index_u);
             output3Val(x1,yhalf,constval,val);
           }
@@ -5046,8 +5030,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
             int index_v;
             float val;
            
-            index_v = (i+1-sd->is1)*sd->nslicej*sd->nslicek;
-            index_v += (plotz-sd->ks1)+(j-sd->js1)*sd->nslicek;
+            index_v = (i+1-sd->is1)*sd->nslicej*sd->nslicek + (plotz-sd->ks1)+(j-sd->js1)*sd->nslicek;
             GET_VAL(v,val,index_v);
             output3Val(xhalf,yy1,constval,val);
           }
