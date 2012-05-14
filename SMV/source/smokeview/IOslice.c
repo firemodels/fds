@@ -3904,6 +3904,7 @@ void drawvolslice_cellcenter(const slicedata *sd){
   int nx,ny,nxy;
   char *iblank_x, *iblank_y, *iblank_z;
   char *iblank_embed;
+  int incx=0, incy=0, incz=0;
 
   mesh *meshi;
 
@@ -3920,15 +3921,18 @@ void drawvolslice_cellcenter(const slicedata *sd){
     plotx = meshi->iplotx_all[iplotx_all];
     ploty = meshi->iploty_all[iploty_all];
     plotz = meshi->iplotz_all[iplotz_all];
+    incx=1;
+    incy=1;
+    incz=1;
   }
   else{
     plotx = sd->is1;
     ploty = sd->js1;
     plotz = sd->ks1;
   }
-  if(plotx==meshi->ibar)plotx--;
-  if(ploty==meshi->jbar)ploty--;
-  if(plotz==meshi->kbar)plotz--;
+  if(plotx<=1)plotx=1;
+  if(ploty<=1)ploty=1;
+  if(plotz<=1)plotz=1;
 
   ibar=meshi->ibar;
   jbar=meshi->jbar;
@@ -3948,7 +3952,7 @@ void drawvolslice_cellcenter(const slicedata *sd){
     int maxj;
     int j;
 
-    constval = (xplt[plotx]+xplt[plotx+1])/2.0;
+    constval = (xplt[plotx]+xplt[plotx-1])/2.0;
     glBegin(GL_TRIANGLES);
     maxj = sd->js2;
     if(sd->js1+1>maxj){
@@ -3970,8 +3974,7 @@ void drawvolslice_cellcenter(const slicedata *sd){
         if(sd->slicetype!=SLICE_CENTER&&iblank_x[IJK(plotx,j,k)]!=2)continue;
         if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==0)continue;
 
-        index_cell = (plotx-sd->is1)*sd->nslicej*sd->nslicek;
-        index_cell += (j+1-sd->js1)*sd->nslicek + k + 1 - sd->ks1;
+        index_cell = (plotx + 1 -incx-sd->is1)*sd->nslicej*sd->nslicek + (j+1-sd->js1)*sd->nslicek + k + 1 - sd->ks1;
 
         i33 = 4*sd->iqsliceframe[index_cell];
         z1 = zplt[k];
@@ -4013,8 +4016,7 @@ void drawvolslice_cellcenter(const slicedata *sd){
        n+1 (y1,z3) n2+1 (y3,z3)
          n (y1,z1)     n2 (y3,z1)
        */
-          index_cell = (plotx-sd->is1)*sd->nslicej*sd->nslicek;
-          index_cell += (j+1-sd->js1)*sd->nslicek + k + 1 - sd->ks1;
+          index_cell = (plotx + 1 -incx-sd->is1)*sd->nslicej*sd->nslicek + (j+1-sd->js1)*sd->nslicek + k + 1 - sd->ks1;
 
           GET_VAL(sd,val,index_cell);
           output3Val(constval,(yy1+y3)/2.0,(z1+z3)/2.0,val);
@@ -4026,7 +4028,7 @@ void drawvolslice_cellcenter(const slicedata *sd){
     float constval;
     int i;
 
-    constval = (yplt[ploty]+yplt[ploty+1])/2.0;
+    constval = (yplt[ploty]+yplt[ploty-1])/2.0;
     glBegin(GL_TRIANGLES);
     for(i=sd->is1; i<sd->is1+sd->nslicei; i++){
       int index_cell;
@@ -4041,8 +4043,7 @@ void drawvolslice_cellcenter(const slicedata *sd){
 
         if(iblank_y[IJK(i,ploty,k)]!=2)continue;
         if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,ploty,k)]==0)continue;
-        index_cell = (i+1-sd->is1)*sd->nslicej*sd->nslicek;
-        index_cell += (ploty-sd->js1)*sd->nslicek + k+1 - sd->ks1;
+        index_cell = (i+incx-sd->is1)*sd->nslicej*sd->nslicek + (ploty+1-incy-sd->js1)*sd->nslicek + k+1 - sd->ks1;
         i33 = 4*sd->iqsliceframe[index_cell];
         z1 = zplt[k];
         z3 = zplt[k+1];
@@ -4078,8 +4079,7 @@ void drawvolslice_cellcenter(const slicedata *sd){
 
           if(iblank_y[IJK(i,ploty,k)]!=2)continue;
           if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,ploty,k)]==0)continue;
-          index_cell = (i+1-sd->is1)*sd->nslicej*sd->nslicek;
-          index_cell += (ploty-sd->js1)*sd->nslicek + k+1 - sd->ks1;
+          index_cell = (i+incx-sd->is1)*sd->nslicej*sd->nslicek + (ploty+1-incy-sd->js1)*sd->nslicek + k+1 - sd->ks1;
           i33 = 4*sd->iqsliceframe[index_cell];
           z1 = zplt[k];
           z3 = zplt[k+1];
@@ -4099,7 +4099,7 @@ void drawvolslice_cellcenter(const slicedata *sd){
     float constval;
     int i;
 
-    constval = (zplt[plotz]+zplt[plotz+1])/2.0;
+    constval = (zplt[plotz]+zplt[plotz-1])/2.0;
     glBegin(GL_TRIANGLES);
     for(i=sd->is1; i<sd->is1+sd->nslicei; i++){
       float x1, x3;
@@ -4114,8 +4114,7 @@ void drawvolslice_cellcenter(const slicedata *sd){
 
         if(iblank_z[IJK(i,j,plotz)]!=2)continue;
         if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==0)continue;
-        index_cell = (i+1-sd->is1)*sd->nslicej*sd->nslicek;
-        index_cell += (j+1-sd->js1)*sd->nslicek + plotz - sd->ks1;
+        index_cell = (i+1-sd->is1)*sd->nslicej*sd->nslicek + (j+incy-sd->js1)*sd->nslicek + plotz + 1 -incz- sd->ks1;
         i33 = 4*sd->iqsliceframe[index_cell];
         yy1 = yplt[j];
         y3 = yplt[j+1];
@@ -4149,8 +4148,7 @@ void drawvolslice_cellcenter(const slicedata *sd){
           int i33;
           float yy1, y3;
 
-          index_cell = (i+1-sd->is1)*sd->nslicej*sd->nslicek;
-          index_cell += (j+1-sd->js1)*sd->nslicek + plotz - sd->ks1;
+          index_cell = (i+1-sd->is1)*sd->nslicej*sd->nslicek + (j+incy-sd->js1)*sd->nslicek + plotz + 1 -incz- sd->ks1;
           if(iblank_z[IJK(i,j,plotz)]!=2)continue;
           if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==0)continue;
           i33 = 4*sd->iqsliceframe[index_cell];

@@ -218,6 +218,7 @@ void BLOCK_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsiz
 
     if(mesh_xyz==NULL){
       sprintf(meshlabel,"mesh: %i",highlight_mesh+1);
+      mesh_xyz = meshinfo + highlight_mesh;
     }
     else{
       int imesh;
