@@ -6242,7 +6242,7 @@ the stoichiometry of the reaction. The easiest way to explain this is by way of 
 
 \noindent FDS actually assumes the following reaction:
 
-\begin{eqnarray}\label{eq:PVC_reac2}
+\begin{eqnarray}
 1\,\underbrace{\mathrm{ (CH_4) }}_\text{Fuel} \; + \;
 9.636 \; \underbrace{ \mathrm{\left( 0.2076 \; O_2 + 0.7825 \; N_2 + 0.0095 \; H_2O + 0.0004 \; CO_2 \right)}}_\text{Air} \rightarrow \\ [0.1in]
 \nonumber 10.636 \; \underbrace{\mathrm{(0.0944 \; CO_2 +  0.1966 \; H_2O + 0.7090 \; N_2)}}_\text{Products}
@@ -6856,7 +6856,7 @@ For example, water has a {\ct DENSITY} of 1000~kg/m$^3$, whereas a liter of wate
 Also, to limit the particles to a certain region of the domain, add the real sextuplet {\ct XB} to designate the coordinates of a rectangular volume.
 The format for {\ct XB} is the same as that used on the {\ct OBST} line. You can only introduce a cloud of particles within a rectangular block,
 and the volume of the block is calculated according to the dimensions {\ct XB}, regardless of whether there are solid obstructions within this volume. If you introduce
-only a single particle, which is often a handy way of creating a target, you may use the real triplet {\ct XYZ} rather than {\ct XB} to designate the particle's position.
+only a single particle, which is often a handy way of creating a target, you may use the real triplet {\ct XYZ} rather than {\ct XB} to designate the particle's position. You can give this single particle an initial velocity using the real triplet {\ct UVW}.
 
 \footnotesize
 \begin{verbatim}
