@@ -60,6 +60,7 @@ void output3Val(float x, float y, float z, float val){
   char string[256];
 
   sprintf(string,"%f",val);
+  trimzeros(string);
   glColor3fv(foregroundcolor);
   glRasterPos3f(x, y, z);
   len = (int) strlen(string);

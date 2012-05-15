@@ -8927,6 +8927,11 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%f ",&plot3dpointsize);
       continue;
     }
+    if(match(buffer,"GRIDLINEWIDTH")==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f ",&gridlinewidth);
+      continue;
+    }
     if(match(buffer,"PLOT3DLINEWIDTH")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%f ",&plot3dlinewidth);
@@ -9043,9 +9048,19 @@ int readini2(char *inifile, int localfile){
       if(renderfilelabel!=0)renderfilelabel=1;
       continue;
     }
+    if(match(buffer,"CELLCENTERTEXT")==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i ",&cell_center_text);
+      continue;
+    }
     if(match(buffer,"SHOWGRIDLOC")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i ",&visgridloc);
+      continue;
+    }
+    if(match(buffer,"SHOWGRID")==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i ",&visGrid);
       continue;
     }
     if(match(buffer,"SHOWFLOOR")==1){
@@ -10428,6 +10443,8 @@ void writeini(int flag){
   fprintf(fileout," %f\n",isolinewidth);
   fprintf(fileout,"PLOT3DPOINTSIZE\n");
   fprintf(fileout," %f\n",plot3dpointsize);
+  fprintf(fileout,"GRIDLINEWIDTH\n");
+  fprintf(fileout," %f\n",gridlinewidth);
   fprintf(fileout,"PLOT3DLINEWIDTH\n");
   fprintf(fileout," %f\n",plot3dlinewidth);
   fprintf(fileout,"SENSORABSSIZE\n");
@@ -10907,8 +10924,12 @@ void writeini(int flag){
   fprintf(fileout," %i\n",renderfiletype);
   fprintf(fileout,"RENDERFILELABEL\n");
   fprintf(fileout," %i\n",renderfilelabel);
+  fprintf(fileout,"SHOWGRID\n");
+  fprintf(fileout," %i\n",visGrid);
   fprintf(fileout,"SHOWGRIDLOC\n");
   fprintf(fileout," %i\n",visgridloc);
+  fprintf(fileout,"CELLCENTERTEXT\n");
+  fprintf(fileout," %i\n",cell_center_text);
   fprintf(fileout,"PIXELSKIP\n");
   fprintf(fileout," %i\n",pixel_skip);
   fprintf(fileout,"PROJECTION\n");

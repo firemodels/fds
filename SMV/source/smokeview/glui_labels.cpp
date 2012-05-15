@@ -8,6 +8,8 @@
 // svn revision character string2
 extern "C" char glui_labels_revision[]="$Revision$";
 
+extern "C" void ShowHideMenu(int val);
+
 #include <stdio.h>
 #include <string.h>
 #ifdef pp_OSX
@@ -42,6 +44,8 @@ GLUI_Panel *panel_tick1;
 GLUI_Panel *panel_tick1a;
 GLUI_Panel *panel_tick1b;
 GLUI_Panel *panel_tick2;
+GLUI_Spinner *SPINNER_gridlinewidth=NULL;
+GLUI_Spinner *SPINNER_linewidth=NULL;
 GLUI_Spinner *SPINNER_tick_x0=NULL;
 GLUI_Spinner *SPINNER_tick_y0=NULL;
 GLUI_Spinner *SPINNER_tick_z0=NULL;
@@ -261,6 +265,11 @@ extern "C" void glui_labels_setup(int main_window){
   RADIO_fontsize = glui_labels->add_radiogroup_to_panel(panel_label1,&fontindex,LABELS_fontsize,Labels_CB);
   RADIOBUTTON_label_1a=glui_labels->add_radiobutton_to_group(RADIO_fontsize,_("small font"));
   RADIOBUTTON_label_1b=glui_labels->add_radiobutton_to_group(RADIO_fontsize,_("large font"));
+
+  SPINNER_linewidth=glui_labels->add_spinner_to_panel(panel_label1,"blockage line width",GLUI_SPINNER_FLOAT,&linewidth);
+  SPINNER_linewidth->set_float_limits(1.0,10.0,GLUI_LIMIT_CLAMP);
+  SPINNER_gridlinewidth=glui_labels->add_spinner_to_panel(panel_label1,"grid line width",GLUI_SPINNER_FLOAT,&gridlinewidth);
+  SPINNER_gridlinewidth->set_float_limits(1.0,10.0,GLUI_LIMIT_CLAMP);
 
 
   panel_user_tick = glui_labels->add_rollout("User tick settings",false);
@@ -574,11 +583,11 @@ extern "C" void Labels_CB(int var){
     break;
   case LABELS_flip:
     background_flip = 1 - background_flip;
-    ShadeMenu(1);
+    ShowHideMenu(15);
     break;
   case LABELS_shade:
     setbw = 1 - setbw;
-    ShadeMenu(2);
+    ColorBarMenu(-12);
     break;
   case LABELS_transparent:
     break;

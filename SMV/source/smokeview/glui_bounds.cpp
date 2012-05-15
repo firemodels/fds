@@ -2102,7 +2102,7 @@ extern "C" void Slice_CB(int var){
       updatecolors(-1);
       SPINNER_transparent_level->set_float_val(transparent_level);
       SPINNER_labels_transparency_data->set_float_val(transparent_level);
-      SPINNER_labels_transparency_data2->set_float_val(transparent_level);
+      if(SPINNER_labels_transparency_data2!=NULL)SPINNER_labels_transparency_data2->set_float_val(transparent_level);
       break;
 #ifdef pp_SLICECONTOURS
     case LINE_CONTOUR_VALUE:
