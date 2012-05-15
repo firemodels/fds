@@ -245,6 +245,9 @@ $RUNFDS Sprinklers_and_Sprays particle_drag_U100_N16
 $RUNFDS Sprinklers_and_Sprays particle_drag_U50_N1600
 $RUNFDS Sprinklers_and_Sprays particle_drag_U100_N1600
 $RUNFDS Sprinklers_and_Sprays particle_drag_U150_N1600
+$RUNFDS Sprinklers_and_Sprays drag_p1
+$RUNFDS Sprinklers_and_Sprays drag_p01
+$RUNFDS Sprinklers_and_Sprays drag_p001
 $RUNFDS Sprinklers_and_Sprays particle_flux
 $RUNFDS Sprinklers_and_Sprays terminal_velocity_dt\=1_0
 $RUNFDS Sprinklers_and_Sprays terminal_velocity_dt\=0_1
