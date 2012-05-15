@@ -2850,6 +2850,28 @@ F & 150 & 1600 \tabularnewline
 
 \newpage
 
+\section{Pressure Drop through Stationary Particles (drag\_dt)}
+
+The pressure drop test cases consider a 1 m wide by 1 m tall by 2 m long channel with a 2 m/s fixed velocity boundary condition on one end, an {\ct OPEN} boundary condition on the other end, and {\ct FREE\_SLIP} on the y- and z-faces.  Three channels are stacked vertically (each with its own {\ct MESH}, and a plane of particles is placed across each channel at 1 m.  The particles are 0.01 m in diameter and 10 particles are placed per cell.  A {\ct USER\_DRAG\_COEFFICIENT} of 5, 10, and 20 is set for the particles in the channels.  According to
+\be \Delta P=\frac{1}{2} \rho \frac{\sum \, C_{D} \, \pi \, r_{d}^{2}} {A} \ee
+where A$_{cx}$ is the 1 m$^2$ cross-sectional area, the pressure drops in each sub channel is 3.77, 7.54, and 15.1 Pa.  Comparisons of computed and analytical results are shown in Figure~\ref{particle_drag_plots}. It is seen that the pressure drop converges to the analytic solution as the timestep decreases. 
+
+\begin{figure}[ht]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/pressure_drop_p1} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/pressure_drop_p01} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/pressure_drop_p001} &
+\\
+\end{tabular*}
+\caption[Sample cases {\bf drag_dtp1, 01, and 001}.]{Outputs of the {\bf drag\_dt} test cases compared with analytical solutions.}
+\label{pressure_drop_plots}
+\end{figure}
+
+\clearpage
+
+\newpage
+
 \section{Particles in 1D (terminal\_velocity)}
 
 \subsubsection{Ben Trettel, NIST SURF student}
