@@ -2173,6 +2173,9 @@ void ScriptMenu(int value){
       defer_file_loading = 1 - defer_file_loading;
       update_defer();
       break;
+    case SCRIPT_STEP:
+      script_step=1-script_step;
+      break;
     case SCRIPT_START_RECORDING:
       update_script_start();
       get_newscriptfilename(newscriptfilename);
@@ -8665,6 +8668,9 @@ updatemenu=0;
     }
     if(script_recording==NULL)glutAddMenuEntry(_("  Start recording"),SCRIPT_START_RECORDING);
     glutAddMenuEntry(_("  Stop recording"),SCRIPT_STOP_RECORDING);
+    glutAddMenuEntry(_("Option:"),-999);
+    if(script_step==1)glutAddMenuEntry(_("  *step through script using ^"),SCRIPT_STEP);
+    if(script_step==0)glutAddMenuEntry(_("  step through script using ^"),SCRIPT_STEP);
 
   /* --------------------------------loadunload menu -------------------------- */
     {

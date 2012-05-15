@@ -873,8 +873,7 @@ void script_renderall(scriptdata *scripti){
 
   skip_local=scripti->ival;
   if(skip_local<1)skip_local=1;
-  printf("Script: Rendering every %i frames",skip_local);
-  printf("\n");
+  printf("script: Rendering every %i frames\n\n",skip_local);
   RenderMenu(skip_local);
 }
 
@@ -886,7 +885,7 @@ void script_volsmokerenderall(scriptdata *scripti){
   script_loadvolsmokeframe2();
   skip_local=scripti->ival;
   if(skip_local<1)skip_local=1;
-  printf("Script: Rendering every %i frames\n",skip_local);
+  printf("script: Rendering every %i frames\n\n",skip_local);
   RenderMenu(skip_local);
 }
 
@@ -896,8 +895,7 @@ void script_loadparticles(scriptdata *scripti){
   int i;
   int errorcode;
 
-  printf("Script: loading particles files");
-  printf("\n");
+  printf("script: loading particles files\n\n");
 
   npartframes_max=get_min_partframes();
   for(i=0;i<npartinfo;i++){
@@ -929,8 +927,7 @@ void script_loadiso(scriptdata *scripti){
   int i;
   int errorcode;
 
-  printf("Script: loading isosurface files of type: %s",scripti->cval);
-  printf("\n");
+  printf("script: loading isosurface files of type: %s\n\n",scripti->cval);
 
   for(i=0;i<nisoinfo;i++){
     isodata *isoi;
@@ -1025,8 +1022,7 @@ void script_load3dsmoke(scriptdata *scripti){
   int i;
   int errorcode;
 
-  printf("Script: loading smoke3d files of type: %s",scripti->cval);
-  printf("\n");
+  printf("script: loading smoke3d files of type: %s\n\n",scripti->cval);
 
   for(i=0;i<nsmoke3dinfo;i++){
     smoke3ddata *smoke3di;
@@ -1046,8 +1042,7 @@ void script_load3dsmoke(scriptdata *scripti){
 void script_loadslice(scriptdata *scripti){
   int i;
 
-  printf("Script: loading slice files of type: %s",scripti->cval);
-  printf("\n");
+  printf("script: loading slice files of type: %s\n\n",scripti->cval);
 
   for(i=0;i<nmultislices;i++){
     multislicedata *mslicei;
@@ -1077,8 +1072,7 @@ void script_loadvslice(scriptdata *scripti){
   int i;
   float delta_orig;
 
-  printf("Script: loading vector slice files of type: %s",scripti->cval);
-  printf("\n");
+  printf("script: loading vector slice files of type: %s\n\n",scripti->cval);
 
   for(i=0;i<nmultivslices;i++){
     multivslicedata *mvslicei;
@@ -1106,9 +1100,8 @@ void script_loadvslice(scriptdata *scripti){
 void script_loadtour(scriptdata *scripti){
   int i;
 
-  printf("Script: loading tour %s",scripti->cval);
-  printf("\n");
-
+  printf("script: loading tour %s\n\n",scripti->cval);
+  
   for(i=0;i<ntours;i++){
     tourdata *touri;
 
@@ -1131,8 +1124,7 @@ void script_loadboundary(scriptdata *scripti){
   int i;
   int errorcode;
 
-  printf("Script: loading boundary files of type: %s",scripti->cval);
-  printf("\n");
+  printf("Script: loading boundary files of type: %s\n\n",scripti->cval);
 
   for(i=0;i<npatchinfo;i++){
     patchdata *patchi;
@@ -1300,8 +1292,7 @@ void script_partclasstype(scriptdata *scripti){
 /* ------------------ script_loadinifile ------------------------ */
 
 void script_loadinifile(scriptdata *scripti){
-  printf("Script: loading ini file %s",scripti->cval);
-  printf("\n");
+  printf("script: loading ini file %s\n\n",scripti->cval);
   scriptinifilename2=scripti->cval;
   windowresized=0;
   readini(2);
@@ -1315,8 +1306,7 @@ void script_loadfile(scriptdata *scripti){
   int i;
   int errorcode;
 
-  printf("Script: loading file %s",scripti->cval);
-  printf("\n");
+  printf("script: loading file %s\n\n",scripti->cval);
   for(i=0;i<nsliceinfo;i++){
     slicedata *sd;
 
@@ -1419,8 +1409,7 @@ void script_loadplot3d(scriptdata *scripti){
 void script_loadvfile(scriptdata *scripti){
   int i;
 
-  printf("Script: loading vector slice file %s",scripti->cval);
-  printf("\n");
+  printf("script: loading vector slice file %s\n\n",scripti->cval);
   for(i=0;i<nvsliceinfo;i++){
     slicedata *val;
     vslicedata *vslicei;
@@ -1444,8 +1433,7 @@ void script_settimeval(scriptdata *scripti){
   int i;
 
   timeval = scripti->fval;
-  printf("Script: set time to %f",timeval);
-  printf("\n");
+  printf("script: setting time to %f\n\n",timeval);
   if(global_times!=NULL&&nglobal_times>0){
     if(timeval<global_times[0])timeval=global_times[0];
     if(timeval>global_times[nglobal_times-1]-0.0001)timeval=global_times[nglobal_times-1]-0.0001;
@@ -1453,7 +1441,7 @@ void script_settimeval(scriptdata *scripti){
       if(global_times[i]<=timeval&&timeval<global_times[i+1]){
         itimes=i;
         script_itime=i;
-        stept=1;
+        stept=0;
         force_redisplay=1;
         update_framenumber(0);
         UpdateTimeLabels();
@@ -1506,8 +1494,7 @@ void script_setviewpoint(scriptdata *scripti){
   camera *ca;
 
   viewpoint = scripti->cval;
-  printf("Script: set viewpoint to %s",viewpoint);
-  printf("\n");
+  printf("script: set viewpoint to %s\n\n",viewpoint);
   for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
     if(strcmp(scripti->cval,ca->name)==0){
       ResetMenu(ca->view_id);
@@ -1533,7 +1520,8 @@ int run_script(void){
     return returnval;
   }
   scripti = current_script_command;
-  printf("\n ******* running: %s *******\n\n",scripti->command_label);
+  printf("\n");
+  printf("script: %s\n",scripti->command_label);
   switch (scripti->command){
     case SCRIPT_UNLOADALL:
       LoadUnloadMenu(UNLOADALL);
@@ -1541,6 +1529,7 @@ int run_script(void){
     case SCRIPT_RENDERDIR:
       if(scripti->cval!=NULL&&strlen(scripti->cval)>0){
         script_dir_path=scripti->cval;
+        printf("script: setting render path to %s\n",script_dir_path);
       }
       else{
         script_dir_path=NULL;

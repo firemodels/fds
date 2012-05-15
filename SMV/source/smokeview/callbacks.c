@@ -1642,11 +1642,11 @@ void keyboard(unsigned char key, int flag){
         return;
       }
       break;
-    case '@':
-      cell_center_text = 1 - cell_center_text;
-      break;
     case '!':
       snap_view_angles();
+      break;
+    case '@':
+      cell_center_text = 1 - cell_center_text;
       break;
     case '#':
       writeini(LOCAL_INI);
@@ -1663,6 +1663,9 @@ void keyboard(unsigned char key, int flag){
         trainer_mode=0;
         hide_glui_trainer();
       }
+      break;
+    case '^':
+      script_step_now=1;
       break;
     case '&':
       antialiasflag=1-antialiasflag;
@@ -2473,7 +2476,10 @@ void DoScript(void){
     runscript=2;
   }
   script_render_flag=0;
-  if(nscriptinfo>0&&current_script_command!=NULL){
+  if(nscriptinfo>0&&current_script_command!=NULL&&
+    (script_step==0||(script_step==1&&script_step_now==1))
+    ){
+    script_step_now=0;
     if(current_script_command->command==SCRIPT_VOLSMOKERENDERALL){\
       if(current_script_command->exit==0){
         RenderState(1);
