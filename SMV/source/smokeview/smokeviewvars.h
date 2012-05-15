@@ -640,7 +640,7 @@ SVEXTERN int SVDECL(cell_center_text,0);
 SVEXTERN float SVDECL(gridlinewidth,2.0);
 SVEXTERN int SVDECL(zone_highlight,0),SVDECL(zone_highlight_room,0);
 SVEXTERN int SVDECL(script_step,0), SVDECL(script_step_now,0);
-
+SVEXTERN int SVDECL(script_keystate,0);
 
 SVEXTERN float sprinklerabssize, sensorabssize, heatabssize;
 SVEXTERN float sensorrelsize,sensorrelsizeMIN;

@@ -30,6 +30,7 @@ void _Sniff_Errors(char *whereat);
 
 #define FROM_SMOKEVIEW 0
 #define FROM_CALLBACK 1
+#define FROM_SCRIPT 2
 
 #define STEPS_PER_DEG 10.0
 
@@ -101,7 +102,8 @@ void _Sniff_Errors(char *whereat);
 #define SCRIPT_SETTIMEVAL 301
 #define SCRIPT_SETVIEWPOINT 302
 #define SCRIPT_UNLOADALL 303
-#define SCRIPT_EXIT 304
+#define SCRIPT_KEYBOARD 304
+#define SCRIPT_EXIT 305
 
 #define SCRIPT_SLICE_FILE 0
 #define SCRIPT_BOUNDARY_FILE 1

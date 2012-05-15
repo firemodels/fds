@@ -358,6 +358,10 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
+    if(match_upper(buffer,"KEYBOARD") == 1){
+      nscriptinfo++;
+      continue;
+    }
     if(match_upper(buffer,"RENDERDIR") == 1){
       nscriptinfo++;
       continue;
@@ -478,7 +482,7 @@ int compile_script(char *scriptfile){
   while(!feof(stream)){
     if(fgets(buffer2,255,stream)==NULL)break;
     cleanbuffer(buffer,buffer2);
-    if(strncmp(buffer," ",1)==0)continue;
+    if(strlen(buffer)==0)continue;
 
     if(match_upper(buffer,"UNLOADALL") == 1){
       scripti = scriptinfo + nscriptinfo;
@@ -511,6 +515,22 @@ int compile_script(char *scriptfile){
 #else
         if(buffer[len-1]!='/')strcat(buffer,dirseparator);        
 #endif
+        strcpy(scripti->cval,buffer);
+      }
+
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"KEYBOARD") == 1){
+      int len;
+
+      scripti = scriptinfo + nscriptinfo;
+      init_scripti(scripti,SCRIPT_KEYBOARD,buffer);
+      if(fgets(buffer2,255,stream)==NULL)break;
+      cleanbuffer(buffer,buffer2);
+      len = strlen(buffer);
+      if(len>0){
+        NewMemory((void **)&scripti->cval,len+1);
         strcpy(scripti->cval,buffer);
       }
 
@@ -1533,6 +1553,18 @@ int run_script(void){
       }
       else{
         script_dir_path=NULL;
+      }
+      break;
+    case SCRIPT_KEYBOARD:
+      {
+        char *modifier, *key;
+
+        script_keystate=0;
+        key = scripti->cval + strlen(scripti->cval) - 1;
+        if(strncmp(scripti->cval,"ALT",3)==0)script_keystate=GLUT_ACTIVE_ALT;
+
+        keyboard(*key,FROM_SCRIPT);
+        returnval=1;
       }
       break;
     case SCRIPT_RENDERONCE:

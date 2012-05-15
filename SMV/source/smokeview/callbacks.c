@@ -1081,7 +1081,26 @@ void keyboard(unsigned char key, int flag){
   int i;
   int keystate=0;
 
-  if(flag==FROM_CALLBACK)keystate = glutGetModifiers();
+  if(flag==FROM_CALLBACK){
+    keystate = 6&glutGetModifiers();
+    if(scriptoutstream!=NULL&&key!='t'&&key!='r'&&key!='R'){
+      fprintf(scriptoutstream,"KEYBOARD\n");
+      switch (keystate){
+        case GLUT_ACTIVE_ALT:
+          fprintf(scriptoutstream," ALT %c\n",key);
+          break;
+        case GLUT_ACTIVE_CTRL:
+          fprintf(scriptoutstream," CTRL %c\n",key);
+          break;
+        default:
+          fprintf(scriptoutstream," %c\n",key);
+          break;
+      }
+    }
+  }
+  else if(flag==FROM_SCRIPT){
+    keystate=script_keystate;
+  }
   glutPostRedisplay();
   key2 = (char)key;
 
