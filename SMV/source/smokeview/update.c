@@ -1493,7 +1493,7 @@ int getplotstate(int choice){
         i = slice_loaded_list[ii];
         slicei = sliceinfo + i;
         if(slicei->display==0||slicei->type!=islicetype)continue;
-        if(slicei->volslice==0&&visGrid==0)stept = 1; 
+        stept = 1; 
         return DYNAMIC_PLOTS;
       }
       if(visGrid==0)stept = 1;

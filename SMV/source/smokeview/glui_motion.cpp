@@ -346,9 +346,11 @@ extern "C" void glui_motion_setup(int main_window){
 
 #ifdef pp_GSLICE
   panel_gslice = glui_motion->add_rollout(_("General slice motion"),false);
-  gslice_xyz[0]=(xbar0+DENORMALIZE_X(xbar))/2.0;
-  gslice_xyz[1]=(ybar0+DENORMALIZE_Y(ybar))/2.0;
-  gslice_xyz[2]=(zbar0+DENORMALIZE_Z(zbar))/2.0;
+  if(gslice_xyz[0]<-1000000.0&&gslice_xyz[1]<-1000000.0&&gslice_xyz[2]<-1000000.0){
+    gslice_xyz[0]=(xbar0+DENORMALIZE_X(xbar))/2.0;
+    gslice_xyz[1]=(ybar0+DENORMALIZE_Y(ybar))/2.0;
+    gslice_xyz[2]=(zbar0+DENORMALIZE_Z(zbar))/2.0;
+  }
 
   panel_gslice_center = glui_motion->add_panel_to_panel(panel_gslice,_("rotation center"),true);
   SPINNER_gslice_center_x=glui_motion->add_spinner_to_panel(panel_gslice_center,"x:",GLUI_SPINNER_FLOAT,gslice_xyz,GSLICE_TRANSLATE,GSLICE_CB);
@@ -360,11 +362,6 @@ extern "C" void glui_motion_setup(int main_window){
   GSLICE_CB(GSLICE_TRANSLATE);
   
   panel_gslice_normal = glui_motion->add_panel_to_panel(panel_gslice,_("normal"),true);
-  gslice_normal_xyz[0]=0.0;
-  gslice_normal_xyz[1]=0.0;
-  gslice_normal_xyz[2]=1.0;
-  gslice_normal_azelev[0]=0.0;
-  gslice_normal_azelev[1]=90.0;
   SPINNER_gslice_normal_az=glui_motion->add_spinner_to_panel(panel_gslice_normal,"az:",GLUI_SPINNER_FLOAT,gslice_normal_azelev,GSLICE_NORMAL,GSLICE_CB);
   SPINNER_gslice_normal_elev=glui_motion->add_spinner_to_panel(panel_gslice_normal,"elev:",GLUI_SPINNER_FLOAT,gslice_normal_azelev+1,GSLICE_NORMAL,GSLICE_CB);
   GSLICE_CB(GSLICE_NORMAL);

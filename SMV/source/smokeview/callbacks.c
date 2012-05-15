@@ -1683,12 +1683,24 @@ void keyboard(unsigned char key, int flag){
         hide_glui_trainer();
       }
       break;
+    case '%':
+      script_step=1-script_step;
+      break;
     case '^':
       script_step_now=1;
       break;
     case '&':
       antialiasflag=1-antialiasflag;
       printf("antialiasflag=%i\n",antialiasflag);
+      break;
+    case '*':
+      visx_all=0;
+      visy_all=0;
+      visz_all=0;
+      show_gslice_data=0;
+      show_gslice_triangles=0;
+      show_gslice_triangulation=0;
+      show_gslice_normal=0;
       break;
   }
 

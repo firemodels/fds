@@ -7897,14 +7897,28 @@ int readini2(char *inifile, int localfile){
     CheckMemory;
     if(fgets(buffer,255,stream)==NULL)break;
 
-    if(match(buffer,"GRIDPARMS")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i %i",&visx_all, &visy_all, &visz_all);
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i %i",&iplotx_all, &iploty_all, &iplotz_all);
-      if(iplotx_all>nplotx_all-1)iplotx_all=0;
-      if(iploty_all>nploty_all-1)iploty_all=0;
-      if(iplotz_all>nplotz_all-1)iplotz_all=0;
+    if(localfile==1){
+      if(match(buffer,"GSLICEPARMS")==1){
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%i %i %i %i",&show_gslice_data, &show_gslice_triangles, &show_gslice_triangulation, &show_gslice_normal);
+        if(show_gslice_data!=0)show_gslice_data=1;
+        if(show_gslice_triangles!=0)show_gslice_triangles=1;
+        if(show_gslice_triangulation!=0)show_gslice_triangulation=1;
+        if(show_gslice_normal!=0)show_gslice_normal=1;
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%f %f %f",gslice_xyz,gslice_xyz+1,gslice_xyz+2);
+        fgets(buffer,255,stream);
+        sscanf(buffer,"%f %f",gslice_normal_azelev,gslice_normal_azelev+1);
+     }
+     if(match(buffer,"GRIDPARMS")==1){
+       fgets(buffer,255,stream);
+       sscanf(buffer,"%i %i %i",&visx_all, &visy_all, &visz_all);
+       fgets(buffer,255,stream);
+       sscanf(buffer,"%i %i %i",&iplotx_all, &iploty_all, &iplotz_all);
+       if(iplotx_all>nplotx_all-1)iplotx_all=0;
+       if(iploty_all>nploty_all-1)iploty_all=0;
+       if(iplotz_all>nplotz_all-1)iplotz_all=0;
+     }
    }
    if(match(buffer,"SHOWDEVICEVALS")==1){
       fgets(buffer,255,stream);
@@ -10638,6 +10652,16 @@ void writeini(int flag){
     fprintf(fileout,"AVATAREVAC\n");
     fprintf(fileout," %i\n",iavatar_evac);
   }
+  
+  if(flag==LOCAL_INI){
+    fprintf(fileout,"GRIDPARMS\n");
+    fprintf(fileout," %i %i %i\n",visx_all, visy_all, visz_all);
+    fprintf(fileout," %i %i %i\n",iplotx_all, iploty_all, iplotz_all);
+    fprintf(fileout,"GSLICEPARMS\n");
+    fprintf(fileout," %i %i %i %i\n",show_gslice_data, show_gslice_triangles, show_gslice_triangulation, show_gslice_normal);
+    fprintf(fileout," %f %f %f\n",gslice_xyz[0],gslice_xyz[1],gslice_xyz[2]);
+    fprintf(fileout," %f %f\n",gslice_normal_azelev[0],gslice_normal_azelev[1]);
+  }
  
   if(flag==LOCAL_INI){
     {
@@ -10660,9 +10684,6 @@ void writeini(int flag){
       }
     }
 
-    fprintf(fileout,"GRIDPARMS\n");
-    fprintf(fileout,"%i %i %i\n",visx_all, visy_all, visz_all);
-    fprintf(fileout,"%i %i %i\n",iplotx_all, iploty_all, iplotz_all);
     fprintf(fileout,"SHOWDEVICEVALS\n");
     fprintf(fileout," %i %i %i\n",showdeviceval,showvdeviceval,devicetypes_index);
     put_startup_smoke3d(fileout);

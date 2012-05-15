@@ -689,7 +689,17 @@ SVEXTERN int SVDECL(visUsagememory,0);
 #endif
 SVEXTERN float vecyz[4];
 #ifdef pp_GSLICE
-SVEXTERN float gslice_xyz[3],gslice_norm[3],gslice_normal_xyz[3],gslice_normal_azelev[2];
+SVEXTERN float gslice_norm[3];
+#ifdef INMAIN
+SVEXTERN float gslice_xyz[3]={-1000001.0,-1000001.0,-1000001.0};
+SVEXTERN float gslice_normal_xyz[3]={0.0,0.0,1.0};
+SVEXTERN float gslice_normal_azelev[2]={0.0,90.0};
+#else
+SVEXTERN float gslice_xyz[3];
+SVEXTERN float gslice_normal_xyz[3];
+SVEXTERN float gslice_normal_azelev[3];
+#endif
+
 SVEXTERN float gslice_xyz0[3],gslice_normal_azelev0[2];
 SVEXTERN int SVDECL(show_gslice_data,0),SVDECL(SHOW_gslice_data,0),SVDECL(SHOW_gslice_data_old,0),SVDECL(show_gslice_triangles,0);
 SVEXTERN int SVDECL(show_gslice_triangulation,0);
