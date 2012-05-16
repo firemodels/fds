@@ -1510,6 +1510,8 @@ void keyboard(unsigned char key, int flag){
               fprintf(scriptoutstream," %i %i %i %i\n",plotn,visVector,iveclengths,contour_type);
             }
           }
+          fprintf(scriptoutstream,"RENDERCLIP\n");
+          fprintf(scriptoutstream," %i %i %i %i %i\n",clip_rendered_scene,render_clip_left,render_clip_right,render_clip_bottom,render_clip_top);
           if(rflag==0){
             fprintf(scriptoutstream,"RENDERONCE\n");
           }

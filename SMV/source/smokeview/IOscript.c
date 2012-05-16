@@ -38,6 +38,9 @@ void update_menu(void);
 // RENDERDIR
 //  directory name (char) (where rendered files will go)
 
+// RENDERCLIP
+// flag ) left right bottom top indentations in pixels, clip if flag==1
+
 // RENDERONCE
 // file name base (char) (or blank to use smokeview default)
 
@@ -366,6 +369,10 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
+    if(match_upper(buffer,"RENDERCLIP") == 1){
+      nscriptinfo++;
+      continue;
+    }
     if(match_upper(buffer,"RENDERONCE") == 1){
       nscriptinfo++;
       continue;
@@ -533,6 +540,18 @@ int compile_script(char *scriptfile){
         NewMemory((void **)&scripti->cval,len+1);
         strcpy(scripti->cval,buffer);
       }
+
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"RENDERCLIP") == 1){
+      int len;
+
+      scripti = scriptinfo + nscriptinfo;
+      init_scripti(scripti,SCRIPT_RENDERCLIP,buffer);
+      if(fgets(buffer2,255,stream)==NULL)break;
+      cleanbuffer(buffer,buffer2);
+      sscanf(buffer2,"%i %i %i %i %i",&scripti->ival,&scripti->ival2,&scripti->ival3,&scripti->ival4, &scripti->ival5);
 
       nscriptinfo++;
       continue;
@@ -1566,6 +1585,13 @@ int run_script(void){
         keyboard(*key,FROM_SCRIPT);
         returnval=1;
       }
+      break;
+    case SCRIPT_RENDERCLIP:
+      clip_rendered_scene=scripti->ival;
+      render_clip_left=scripti->ival2;
+      render_clip_right=scripti->ival3;
+      render_clip_bottom=scripti->ival4;
+      render_clip_top=scripti->ival5;
       break;
     case SCRIPT_RENDERONCE:
       keyboard('r',FROM_SMOKEVIEW);

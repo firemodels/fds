@@ -7909,6 +7909,7 @@ int readini2(char *inifile, int localfile){
         sscanf(buffer,"%f %f %f",gslice_xyz,gslice_xyz+1,gslice_xyz+2);
         fgets(buffer,255,stream);
         sscanf(buffer,"%f %f",gslice_normal_azelev,gslice_normal_azelev+1);
+        continue;
      }
      if(match(buffer,"GRIDPARMS")==1){
        fgets(buffer,255,stream);
@@ -7918,20 +7919,24 @@ int readini2(char *inifile, int localfile){
        if(iplotx_all>nplotx_all-1)iplotx_all=0;
        if(iploty_all>nploty_all-1)iploty_all=0;
        if(iplotz_all>nplotz_all-1)iplotz_all=0;
+       continue;
      }
    }
    if(match(buffer,"SHOWDEVICEVALS")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %i %i",&showdeviceval,&showvdeviceval,&devicetypes_index);
+      continue;
     }
     if(match(buffer,"USENEWDRAWFACE")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&use_new_drawface);
       if(use_new_drawface!=0)use_new_drawface=1;
+      continue;
     }
     if(match(buffer,"TLOAD")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %f %i %f %i %i",&use_tload_begin,&tload_begin,&use_tload_end,&tload_end,&use_tload_skip,&tload_skip);
+      continue;
     }
     if(match(buffer,"VOLSMOKE")==1){
       fgets(buffer,255,stream);
@@ -8009,7 +8014,7 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%i %i %i",&show_evac_slices,&constant_evac_coloring,&show_evac_colorbar);
       if(show_evac_slices!=1)show_evac_slices=0;
       if(constant_evac_coloring!=1)constant_evac_coloring=0;
-	  data_evac_coloring=1-constant_evac_coloring;
+      data_evac_coloring=1-constant_evac_coloring;
       if(show_evac_colorbar!=1)show_evac_colorbar=0;
       update_slice_menu_show();
       update_evac_parms();
@@ -8021,8 +8026,8 @@ int readini2(char *inifile, int localfile){
 	  dc = direction_color;
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f %f",dc,dc+1,dc+2);
-	  dc[3]=1.0;
-	  direction_color_ptr=getcolorptr(direction_color);
+      dc[3]=1.0;
+      direction_color_ptr=getcolorptr(direction_color);
       update_slice_menu_show();  
       update_evac_parms();
       continue;
@@ -8113,7 +8118,6 @@ int readini2(char *inifile, int localfile){
       if(vertical_factor>4.0)vertical_factor=4.0;
       update_terrain(0,vertical_factor);
       update_terrain_colors();
-    
       continue;
     }
     if(match(buffer,"SMOKESENSORS")==1){
@@ -8274,7 +8278,6 @@ int readini2(char *inifile, int localfile){
       if(devicenorm_length<0.0||devicenorm_length>1.0)devicenorm_length=0.1;
       continue;
     }
-
     if(match(buffer,"SHOWHRRCUTOFF")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&show_hrrcutoff);
@@ -8774,7 +8777,6 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%f %f",&nearclip,&farclip);
       continue;
     }
-
     if(match(buffer,"SHOWTRACERSALWAYS")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&show_tracers_always);
@@ -8805,6 +8807,7 @@ int readini2(char *inifile, int localfile){
         update_partclass_depend(partclassi);
 
       }
+      continue;
     }
     if(localfile==1&&match(buffer,"PART5CLASSVIS")==1){
       int ntemp;
@@ -8821,6 +8824,7 @@ int readini2(char *inifile, int localfile){
         fgets(buffer,255,stream);
         sscanf(buffer,"%i",&partclassj->vis_type);
       }
+      continue;
     }
     if(match(buffer,"PART5COLOR")==1){
       for(i=0;i<npart5prop;i++){
@@ -8841,7 +8845,6 @@ int readini2(char *inifile, int localfile){
       }
       continue;
     }
-
     if(match(buffer,"PART5PROPDISP")==1){
       char *token;
 
@@ -8866,7 +8869,6 @@ int readini2(char *inifile, int localfile){
       CheckMemory;
       continue;
     }
-
     if(match(buffer,"COLORBAR") == 1){
       float *rgb_ini_copy;
       
@@ -9326,7 +9328,7 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%i",&contour_type);
       contour_type=CLAMP(contour_type,0,2);
       continue;
-      }
+    }
     if(match(buffer,"P3VIEW")==1){
       for(i=0;i<nmeshes;i++){
         mesh *meshi;
@@ -9344,22 +9346,22 @@ int readini2(char *inifile, int localfile){
         if(meshi->plotz>meshi->kbar)meshi->plotz=meshi->kbar;
       }
       continue;
-      }
+    }
     if(match(buffer,"P3CONT3DSMOOTH")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&p3cont3dsmooth);
       continue;
-      }
+    }
     if(match(buffer,"SURFINC")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&surfincrement);
       continue;
-      }
+    }
     if(match(buffer,"FRAMERATE")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&visFramerate);
       continue;
-      }
+    }
     if(match(buffer,"SHOWFRAMERATE")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&visFramerate);
@@ -9376,34 +9378,34 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%i",&frameratevalue);
       FrameRateMenu(frameratevalue);
       continue;
-      }
+    }
     if(match(buffer,"SHOWSPRINKPART")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&visSprinkPart);
       continue;
-      }
+    }
     if(match(buffer,"SHOWAXISLABELS")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&visaxislabels);
       continue;
-      }
+    }
 #ifdef pp_memstatus
     if(match(buffer,"SHOWMEMLOAD")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&visAvailmemory);
       continue;
-      }
+    }
 #endif
     if(match(buffer,"SHOWBLOCKLABEL")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&visBlocklabel);
       continue;
-      }
+    }
     if(match(buffer,"SHOWVZONE")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&visVZone);
       continue;
-      }
+    }
     if(match(buffer,"SHOWZONEFIRE")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i ",&viszonefire);
@@ -9414,28 +9416,28 @@ int readini2(char *inifile, int localfile){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&visSZone);
       continue;
-      }
+    }
     if(match(buffer,"SHOWHZONE")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&visHZone);
       continue;
-      }
+    }
     if(match(buffer,"SHOWHAZARDCOLORS")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&sethazardcolor);
       continue;
-      }
+    }
     if(match(buffer,"SHOWSMOKEPART")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&visSmokePart);
       continue;
-      }
+    }
     if(match(buffer,"RENDEROPTION")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&render_option);
       RenderMenu(render_option);
       continue;
-      }
+    }
     if(match(buffer,"SHOWISONORMALS")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&showtrinormal);
@@ -9450,7 +9452,7 @@ int readini2(char *inifile, int localfile){
       showtrioutline=(visAIso&2)/2;
       showtripoints=(visAIso&4)/4;
       continue;
-      }
+    }
     if(trainer_mode==0&&windowresized==0){
       if(match(buffer,"WINDOWWIDTH")==1){
         int scrWidth;
@@ -9465,7 +9467,7 @@ int readini2(char *inifile, int localfile){
           update_screensize=1;
         }
         continue;
-        }
+      }
       if(match(buffer,"WINDOWHEIGHT")==1){
         int scrHeight;
 
@@ -9485,24 +9487,24 @@ int readini2(char *inifile, int localfile){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&visTimeLabels);
       continue;
-      }
+    }
     if(match(buffer,"SHOWCOLORBARS")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&visColorbarLabels);
       continue;
-      }
+    }
     if(match(buffer,"EYEVIEW")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&eyeview);
       continue;
-      }
+    }
     if(localfile==1&&match(buffer,"SCRIPTFILE")==1){
       if(fgets(buffer2,255,stream)==NULL)break;
       cleanbuffer(buffer,buffer2);
       insert_scriptfile(buffer);
       updatemenu=1;
       continue;
-      }
+    }
     if(localfile==1&&match(buffer,"SHOWDEVICES")==1){
       sv_object *obj_typei;
       char *dev_label;
@@ -9524,6 +9526,7 @@ int readini2(char *inifile, int localfile){
           obj_typei->visible=1;
         }
       }
+      continue;
     }
     if(localfile==1&&match(buffer,"XYZCLIP")==1){
       fgets(buffer,255,stream);
@@ -9538,22 +9541,22 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%i %f %i %f",&clip_z, &clip_z_val, &clip_Z, &clip_Z_val);
       updateclipvals=1;
       continue;
-      }
+    }
     if(match(buffer,"NOPART")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&nopart);
       continue;
-      }
+    }
     if(match(buffer,"WINDOWOFFSET")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&titlesafe_offsetBASE);
       continue;
-      }
+    }
     if(match(buffer,"SHOWLIGHT0")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&visLIGHT0);
       UpdateLIGHTS=1;
-      continue;
+    continue;
     }
     if(match(buffer,"SHOWLIGHT1")==1){
       fgets(buffer,255,stream);
@@ -9590,151 +9593,142 @@ int readini2(char *inifile, int localfile){
       continue;
     }
     if(match(buffer,"INPUT_FILE") == 1){
-      {
-        size_t len;
+      size_t len;
 
-        if(fgets(buffer,255,stream)==NULL)break;
-        len=strlen(buffer);
-        buffer[len-1]='\0';
-        trim(buffer);
-        len=strlen(buffer);
+      if(fgets(buffer,255,stream)==NULL)break;
+      len=strlen(buffer);
+      buffer[len-1]='\0';
+      trim(buffer);
+      len=strlen(buffer);
  
-        FREEMEMORY(INI_fds_filein);
-        if(NewMemory((void **)&INI_fds_filein,(unsigned int)(len+1))==0)return 2;
-        STRCPY(INI_fds_filein,buffer);
-        continue;
-      }
-
+      FREEMEMORY(INI_fds_filein);
+      if(NewMemory((void **)&INI_fds_filein,(unsigned int)(len+1))==0)return 2;
+      STRCPY(INI_fds_filein,buffer);
+      continue;
     }
-
-
-      {
-        float *eye,*mat,*angle_zx;
-        int is_viewpoint4=0;
-        int is_viewpoint5=0;
-
     if(match(buffer,"VIEWPOINT3")==1
       ||match(buffer,"VIEWPOINT4")==1
       ||match(buffer,"VIEWPOINT5")==1
       ){
-        int p_type;
+      int p_type;
+      float *eye,*mat,*angle_zx;
+      int is_viewpoint4=0;
+      int is_viewpoint5=0;
 
-        if(match(buffer,"VIEWPOINT4")==1)is_viewpoint4=1;
-        if(match(buffer,"VIEWPOINT5")==1){
-          is_viewpoint4=1;
-          is_viewpoint5=1;
-        }
-        eye=camera_ini->eye;
-        mat=camera_ini->modelview;
-        angle_zx=camera_ini->angle_zx;
-
-        {
-          char name_ini[32];
-          strcpy(name_ini,"ini");
-          init_camera(camera_ini,name_ini);
-        }
-
-		    fgets(buffer,255,stream);
-		    sscanf(buffer,"%i %i %i",&camera_ini->eyeview,&camera_ini->rotation_index,&camera_ini->view_id);
-
-        {
-          float zoom_in;
-          int zoomindex_in;
-
-          zoom_in=zoom;
-          zoomindex_in=zoomindex;
-          fgets(buffer,255,stream);
-	  	    sscanf(buffer,"%f %f %f %f %i",eye,eye+1,eye+2,&zoom_in,&zoomindex_in);
-          zoom=zoom_in;
-          zoomindex=zoomindex_in;
-          if(zoomindex!=-1){
-           if(zoomindex<0)zoomindex=2;
-           if(zoomindex>4)zoomindex=2;
-           zoom=zooms[zoomindex];
-          }
-          else{
-            if(zoom<zooms[0]){
-              zoom=zooms[0];
-              zoomindex=0;
-            }
-            if(zoom>zooms[4]){
-              zoom=zooms[4];
-              zoomindex=4;
-            }
-          }
-          updatezoommenu=1;
-        }
-
-        p_type=0;
-		    fgets(buffer,255,stream);
-		    sscanf(buffer,"%f %f %f %i",
-          &camera_ini->view_angle, 
-          &camera_ini->direction_angle,
-          &camera_ini->elevation_angle,
-          &p_type);
-        if(p_type!=1)p_type=0;
-        camera_ini->projection_type=p_type;
-
-		    fgets(buffer,255,stream);
-		    sscanf(buffer,"%f %f %f",&camera_ini->xcen,&camera_ini->ycen,&camera_ini->zcen);
-
-		    fgets(buffer,255,stream);
-        sscanf(buffer,"%f %f",angle_zx,angle_zx+1);
-
-		    fgets(buffer,255,stream);
-        sscanf(buffer,"%f %f %f %f",mat,mat+1,mat+2,mat+3);
-
-		    fgets(buffer,255,stream);
-        sscanf(buffer,"%f %f %f %f",mat+4,mat+5,mat+6,mat+7);
-
-		    fgets(buffer,255,stream);
-        sscanf(buffer,"%f %f %f %f",mat+8,mat+9,mat+10,mat+11);
-
-		    fgets(buffer,255,stream);
-        sscanf(buffer,"%f %f %f %f",mat+12,mat+13,mat+14,mat+15);
-        if(is_viewpoint5==1){
-          camera *ci;
-
-          ci = camera_ini;
-  		    fgets(buffer,255,stream);
-          sscanf(buffer,"%i %i %i %i %i %i %i",
-            &ci->xyz_clipplane,
-            &ci->clip_x,&ci->clip_y,&ci->clip_z,
-            &ci->clip_X,&ci->clip_Y,&ci->clip_Z);
-  		    fgets(buffer,255,stream);
-          sscanf(buffer,"%f %f %f %f %f %f",
-            &ci->clip_x_val,&ci->clip_y_val,&ci->clip_z_val,
-            &ci->clip_X_val,&ci->clip_Y_val,&ci->clip_Z_val);
-
-        }
-        if(is_viewpoint4==1){
-          char *bufferptr;
-          
-  		    fgets(buffer,255,stream);
-          trim(buffer);
-          bufferptr=trim_front(buffer);
-          strcpy(camera_ini->name,bufferptr);
-          init_camera_list();
-          {
-            //*** following code shouldn't be here but leaving it here commented
-            //    in case it is really necessary
-
-            //  camera *cam;
-
-            insert_camera(&camera_list_first,camera_ini,bufferptr);
-           // if(cam!=NULL){
-           //   cam->view_id=camera_ini->view_id;
-           // }
-          }
-        }
-
-        enable_reset_saved_view();
-        camera_ini->dirty=1;
-        camera_ini->defined=1;
-        continue;
+      if(match(buffer,"VIEWPOINT4")==1)is_viewpoint4=1;
+      if(match(buffer,"VIEWPOINT5")==1){
+        is_viewpoint4=1;
+        is_viewpoint5=1;
       }
-    }
+      eye=camera_ini->eye;
+      mat=camera_ini->modelview;
+      angle_zx=camera_ini->angle_zx;
 
+      {
+        char name_ini[32];
+        strcpy(name_ini,"ini");
+        init_camera(camera_ini,name_ini);
+      }
+
+		  fgets(buffer,255,stream);
+		  sscanf(buffer,"%i %i %i",&camera_ini->eyeview,&camera_ini->rotation_index,&camera_ini->view_id);
+
+      {
+        float zoom_in;
+        int zoomindex_in;
+
+        zoom_in=zoom;
+        zoomindex_in=zoomindex;
+        fgets(buffer,255,stream);
+	  	  sscanf(buffer,"%f %f %f %f %i",eye,eye+1,eye+2,&zoom_in,&zoomindex_in);
+        zoom=zoom_in;
+        zoomindex=zoomindex_in;
+        if(zoomindex!=-1){
+         if(zoomindex<0)zoomindex=2;
+         if(zoomindex>4)zoomindex=2;
+         zoom=zooms[zoomindex];
+        }
+        else{
+          if(zoom<zooms[0]){
+            zoom=zooms[0];
+            zoomindex=0;
+          }
+          if(zoom>zooms[4]){
+            zoom=zooms[4];
+            zoomindex=4;
+          }
+        }
+        updatezoommenu=1;
+      }
+
+      p_type=0;
+		  fgets(buffer,255,stream);
+		  sscanf(buffer,"%f %f %f %i",
+        &camera_ini->view_angle, 
+        &camera_ini->direction_angle,
+        &camera_ini->elevation_angle,
+        &p_type);
+      if(p_type!=1)p_type=0;
+      camera_ini->projection_type=p_type;
+
+		  fgets(buffer,255,stream);
+		  sscanf(buffer,"%f %f %f",&camera_ini->xcen,&camera_ini->ycen,&camera_ini->zcen);
+
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f %f",angle_zx,angle_zx+1);
+
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%f %f %f %f",mat,mat+1,mat+2,mat+3);
+
+		  fgets(buffer,255,stream);
+      sscanf(buffer,"%f %f %f %f",mat+4,mat+5,mat+6,mat+7);
+
+		  fgets(buffer,255,stream);
+      sscanf(buffer,"%f %f %f %f",mat+8,mat+9,mat+10,mat+11);
+
+		  fgets(buffer,255,stream);
+      sscanf(buffer,"%f %f %f %f",mat+12,mat+13,mat+14,mat+15);
+      if(is_viewpoint5==1){
+        camera *ci;
+
+        ci = camera_ini;
+  		  fgets(buffer,255,stream);
+        sscanf(buffer,"%i %i %i %i %i %i %i",
+          &ci->xyz_clipplane,
+          &ci->clip_x,&ci->clip_y,&ci->clip_z,
+          &ci->clip_X,&ci->clip_Y,&ci->clip_Z);
+  		  fgets(buffer,255,stream);
+        sscanf(buffer,"%f %f %f %f %f %f",
+          &ci->clip_x_val,&ci->clip_y_val,&ci->clip_z_val,
+          &ci->clip_X_val,&ci->clip_Y_val,&ci->clip_Z_val);
+
+      }
+      if(is_viewpoint4==1){
+        char *bufferptr;
+          
+  		  fgets(buffer,255,stream);
+        trim(buffer);
+        bufferptr=trim_front(buffer);
+        strcpy(camera_ini->name,bufferptr);
+        init_camera_list();
+        {
+          //*** following code shouldn't be here but leaving it here commented
+          //    in case it is really necessary
+ 
+          //  camera *cam;
+
+          insert_camera(&camera_list_first,camera_ini,bufferptr);
+         // if(cam!=NULL){
+         //   cam->view_id=camera_ini->view_id;
+         // }
+        }
+      }
+
+      enable_reset_saved_view();
+      camera_ini->dirty=1;
+      camera_ini->defined=1;
+      continue;
+    }
     if(match(buffer,"ISOCOLORS")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f",&iso_shininess,&iso_transparency);
