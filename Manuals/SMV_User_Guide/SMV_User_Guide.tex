@@ -3120,16 +3120,30 @@ UNLOADALL
 
 
 \blist
+\hitem{EXIT}Cause Smokeview to quit.
+Usage:
+\begin{verbatim}
+ EXIT
+\end{verbatim}
+
+\hitem{KEYBOARD}Passes a keyboard character to Smokeview
+Usage:
+\begin{verbatim}
+ KEYBOARD
+  c
+\end{verbatim}
+or
+\begin{verbatim}
+ KEYBOARD
+  ALT c
+\end{verbatim}
+where {\tt c}\ is any keyboard character (recognized by Smokeview) and {\tt ALT}\ is the ALT key.
+
 \hitem{LOADTOUR}Load a tour of a given name.
 Usage:
 \begin{verbatim}
 LOADTOUR
  type (char)
-\end{verbatim}
-
-\hitem{UNLOADTOUR}Unload a tour.
-\begin{verbatim}
-UNLOADTOUR
 \end{verbatim}
 
 \hitem{SETTIMEVAL}Set the time for displaying data to a specified value.
@@ -3139,7 +3153,6 @@ SETTIMEVAL
   time (float)
 \end{verbatim}
 
-
 \hitem{SETVIEWPOINT}Set a view point .  The view point must have been previously defined and
 saved in an .ini file.
 Usage:
@@ -3148,11 +3161,14 @@ SETVIEWPOINT
   viewpoint (char)
 \end{verbatim}
 
-\hitem{EXIT}Cause Smokeview to quit.
-Usage:
+\hitem{UNLOADTOUR}Unload a tour.
 \begin{verbatim}
- EXIT
+UNLOADTOUR
 \end{verbatim}
+
+
+
+
 
 \elist
 
@@ -3160,8 +3176,18 @@ Usage:
 
 
 \blist
-\hitem{RENDERDIR} Specify a directory where rendered files should go.
-Usage:
+\hitem{RENDERCLIP} Specify clip offsets in pixels when
+rendering a scene. Clipping is turned on if flag is set to 1 and
+turned off if flag is set to 0. Usage:
+\begin{verbatim}
+RENDERDIR
+  flag left right bottom top
+\end{verbatim}
+Smokeview automatically converts directory separators (`/' for
+Linux/Mac systems and `//' for Windows systems) to the separator
+appropriate for the host system.
+\hitem{RENDERDIR} Specify a
+directory where rendered files should go. Usage:
 \begin{verbatim}
 RENDERDIR
   directory name
