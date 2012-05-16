@@ -165,6 +165,58 @@ int SUB_portfrustum(int quad,
   return 1;
 }
 
+
+ /* ------------------------ CLIP_viewport ------------------------- */
+
+void CLIP_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height){
+  GLdouble x_left, x_right, x_down, x_top;
+  float c_left, c_right, c_top, c_bottom;
+
+  x_left=0.0;
+  x_right=screenWidth;
+  x_down=0.0;
+  x_top=screenHeight;
+
+  if(SUB_portortho(quad,0,0,screenWidth,screenHeight,
+        x_left, x_right, x_down, x_top,
+        s_left, s_down, s_width, s_height)==0){
+          return;
+   }
+
+   c_left = render_clip_left-3;
+   c_right = screenWidth + 3 - render_clip_right;
+   c_bottom = render_clip_bottom -3;
+   c_top = screenHeight + 3 - render_clip_top;
+
+   glMatrixMode(GL_MODELVIEW);
+   glLoadIdentity();
+   glLineWidth(3.0);
+   glBegin(GL_LINES);
+
+   if(c_left>0){
+     glVertex2f(c_left,c_bottom);
+     glVertex2f(c_left,c_top);
+   }
+
+   if(c_right<screenWidth){
+     glVertex2f(c_right,c_bottom);
+     glVertex2f(c_right,c_top);
+   }
+
+   if(c_top<screenHeight){
+     glVertex2f(c_left,c_top);
+     glVertex2f(c_right,c_top);
+   }
+
+   if(c_bottom>0){
+     glVertex2f(c_left,c_bottom);
+     glVertex2f(c_right,c_bottom);
+   }
+   glEnd();
+     
+
+}
+
  /* ------------------------ BLOCK viewport ------------------------- */
 
 void BLOCK_viewport(int quad, GLint s_left, GLint s_down, GLsizei s_width, GLsizei s_height){

@@ -98,6 +98,11 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, GL
 /* ++++++++++++++++++++++++ setup viewports +++++++++++++++++++++++++ */
 
   if(mode==RENDER){
+    if(clip_rendered_scene==1){
+      CLIP_viewport(quad,s_left,s_down,s_width,s_height);
+      SNIFF_ERRORS("after CLIP_viewport");
+    }
+
     BLOCK_viewport(quad,          s_left,s_down,s_width,s_height);
     SNIFF_ERRORS("after BLOCK_viewport");
 

@@ -432,6 +432,21 @@ int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
   unsigned int r, g, b;
   int i,j,rgb_local;
   int x=0, y=0;
+  int width_beg, width_end, height_beg, height_end;
+  int width2, height2;
+
+  width_beg=0;
+  width_end=width;
+  height_beg=0;
+  height_end=height;
+  if(clip_rendered_scene==1){
+    width_beg+=render_clip_left;
+    width_end-=render_clip_right;
+    height_beg+=render_clip_bottom;
+    height_end-=render_clip_top;
+  }
+  width2 = width_end-width_beg;
+  height2 = height_end-height_beg;
 
   RENDERfile = fopen(RENDERfilename, "wb");
   if (RENDERfile == NULL) {
@@ -442,7 +457,7 @@ int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
     warning_message(message);
     return 1;
   }
-  NewMemory((void **)&OpenGLimage,width * height * sizeof(GLubyte) * 3);
+  NewMemory((void **)&OpenGLimage,width2 * height2 * sizeof(GLubyte) * 3);
   if(OpenGLimage == NULL){
     char message[1024];
     
@@ -457,16 +472,16 @@ int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
 
   /* get the image from the OpenGL frame buffer */
 
-  glReadPixels(x, y, width, height, GL_RGB, GL_UNSIGNED_BYTE, OpenGLimage);
+  glReadPixels(width_beg, height_beg, width2, height2, GL_RGB, GL_UNSIGNED_BYTE, OpenGLimage);
 
   /* copy the image from OpenGL memory to GIF memory */
 
   p = OpenGLimage;
 
-  RENDERimage = gdImageCreateTrueColor(width,height);
+  RENDERimage = gdImageCreateTrueColor(width2,height2);
 
-  for (i = height-1 ; i>=0; i--) {
-    for(j=0;j<width;j++){
+  for (i = height2-1 ; i>=0; i--) {
+    for(j=0;j<width2;j++){
       r=*p++; g=*p++; b=*p++;
       rgb_local = (r<<16)|(g<<8)|b;
       gdImageSetPixel(RENDERimage,j,i,rgb_local);
