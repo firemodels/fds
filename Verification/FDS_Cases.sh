@@ -7,6 +7,7 @@ $RUNFDS Atmospheric_Effects stratified_mixing_layer
 
 $RUNFDS Controls activate_vents
 $RUNFDS Controls control_test
+$RUNFDS Controls control_test_2
 $RUNFDS Controls create_remove
 $RUNFDS Controls cycle_test
 $RUNFDS Controls device_test
