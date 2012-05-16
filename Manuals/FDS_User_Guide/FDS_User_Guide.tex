@@ -8467,6 +8467,39 @@ specified with {\ct QUANTITY='CONTROL'}.
 \end{verbatim}
 \normalsize
 
+\subsubsection{Example Case: control\_test\_2 }
+
+The {\bf control\_test\_2} example demonstrates the use of the mathematical and PID control functions.  2 compartments are defined with the left hand compartment initialized to 20 $^\circ$C and the right hand compartment to 10 $^\circ$C.    Control functions are defined to:
+
+\begin{itemize}
+\item Add the temperatures in the two compartments
+\item Subtract the right hand compartment temperature from the left hand compartment temperature
+\item Multiply the left hand temperature by 0.5
+\item Divide the left hand temperature by the right hand temperature
+\item Take the square root of the right hand temperature
+\item Use the time as input to a PID function with a target value of 5 and $K_p$=-0.5, $K_i$=0.001, and $K_d$=1
+\end{itemize}
+
+\footnotesize
+\begin{verbatim}
+&CTRL ID='Add',FUNCTION_TYPE='SUM',INPUT_ID='LHS Temp','RHS Temp'/
+&CTRL ID='Subtract',FUNCTION_TYPE='SUBTRACT',INPUT_ID='RHS Temp','LHS Temp'/
+&CTRL ID='Multiply',FUNCTION_TYPE='MULTIPLY',INPUT_ID='LHS Temp','CONSTANT',CONSTANT=0.5/
+&CTRL ID='Divide',FUNCTION_TYPE='DIVIDE',INPUT_ID='LHS Temp','RHS Temp'/
+&CTRL ID='Power',FUNCTION_TYPE='POWER',INPUT_ID='RHS Temp','CONSTANT',CONSTANT=0.5/
+&CTRL ID='PID',FUNCTION_TYPE='PID',INPUT_ID='Time',TARGET_VALUE=5.,
+          PROPORTIONAL_GAIN=-0.5,INTEGRAL_GAIN=0.001,DIFFERENTIAL_GAIN=1./
+\end{verbatim}
+\normalsize
+
+Results are shown in Figure~\ref{control_test_2_fig}.
+\begin{figure}[ht]
+\centering
+\includegraphics[scale=0.55]{SCRIPT_FIGURES/control_test_2}
+\caption[Output of the {\ct control\_test\_2} case.]{Results of the {\ct control\_test\_2} case.}
+\label{control_test_2_fig}
+\end{figure}
+
 \subsection{Combining Control Functions: A Dry Pipe Sprinkler System}
 \label{info:dry_pipe}
 
