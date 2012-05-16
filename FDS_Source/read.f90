@@ -9059,9 +9059,9 @@ READ_CTRL_LOOP: DO NC=1,N_CTRL
          CF%CONTROL_INDEX = CORE_DUMP
       CASE('SUM')
          CF%CONTROL_INDEX = CF_SUM
-      CASE('SUBRACT')
+      CASE('SUBTRACT')
          CF%CONTROL_INDEX = CF_SUBTRACT
-      CASE('MULITPLY')
+      CASE('MULTIPLY')
          CF%CONTROL_INDEX = CF_MULTIPLY
       CASE('DIVIDE')
          CF%CONTROL_INDEX = CF_DIVIDE
@@ -9070,7 +9070,7 @@ READ_CTRL_LOOP: DO NC=1,N_CTRL
       CASE('PID')
          CF%CONTROL_INDEX = CF_PID
          IF (CF%TARGET_VALUE<-1.E30_EB) THEN
-            WRITE(MESSAGE,'(A,I5,A)')  'ERROR: CTRL ',NC,', PIP controller must be given a TARGET_VALUE'
+            WRITE(MESSAGE,'(A,I5,A)')  'ERROR: CTRL ',NC,', PID controller must be given a TARGET_VALUE'
             CALL SHUTDOWN(MESSAGE)
          ENDIF
       CASE DEFAULT
