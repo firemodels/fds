@@ -2873,7 +2873,7 @@ There are two reserved {\ct SURF\_ID}'s that may be applied to a {\ct VENT} -- {
 
 The first special {\ct VENT} is invoked by the parameter {\ct SURF\_ID='OPEN'}. This is used only if the {\ct VENT} is applied to the exterior boundary of the computational domain, where it denotes a passive opening to the outside. By default, FDS assumes that the exterior boundary of the computational domain (the {\ct XB}s on the {\ct MESH} line) is a solid wall. To change this, use an {\ct OPEN} vent as if it were an open door or window. To create a totally or partially open domain, use {\ct OPEN} vents on the exterior mesh boundaries ({\ct MB}s).
 
-By default, it is assumed that ambient conditions exist beyond the {\ct 'OPEN'} vent. However, in some cases, you may want to alter this assumption, for example, the temperature. If you assume a temperature other than ambient, specify {\ct TMP\_EXTERIOR} along with {\ct SURF\_ID='OPEN'}. Use this option cautiously -- in many situations if you want to describe the exterior of a building, it is better to include the exterior explicitly in your calculation because the flow in and out of the doors and windows will be more naturally captured. See Section~\ref{info:stackeffect} for more details. If you want to specify a non-ambient pressure at the {\ct OPEN} boundary, see Section~\ref{info:pressure_boundary}.
+By default, it is assumed that ambient conditions exist beyond the {\ct 'OPEN'} vent. However, in some cases, you may want to alter this assumption, for example, the temperature. If you assume a temperature other than ambient, specify {\ct TMP\_EXTERIOR} along with {\ct SURF\_ID='OPEN'}. You can modify the time history of this parameter using a ramp function, {\ct TMP\_EXTERIOR\_RAMP}. Use this option cautiously -- in many situations if you want to describe the exterior of a building, it is better to include the exterior explicitly in your calculation because the flow in and out of the doors and windows will be more naturally captured. See Section~\ref{info:stackeffect} for more details. If you want to specify a non-ambient pressure at the {\ct OPEN} boundary, see Section~\ref{info:pressure_boundary}.
 
 The user should also be aware that the {\ct OPEN} pressure boundary condition is most stable for flows that are predominantly normal  to the vent, either mostly in or mostly out.  This is because the prescribed pressure at an {\ct OPEN} boundary is ill-conditioned (a small perturbation to the input may lead to large change in the output) if the flow is parallel to the vent.  Suppose, for example, that an outdoor flow is 10 m/s in the $x$ direction and $\pm 0.001$ m/s in the $z$ direction with an {\ct OPEN} top boundary.  The kinetic energy of this flow is roughly $k=50$ m$^2$/s$^2$.  When the vertical velocity is positive (+0.001 m/s) then the prescribed boundary condition for the stagnation pressure is set to ${\cal H} = k = 50$ m$^2$/s$^2$.  But when the vertical velocity is negative (-0.001 m/s) then ${\cal H} = 0$ (see \cite{FDS_Tech_Guide}).  For this reason, {\ct OPEN} vents are not recommended for the top or side boundaries in an outdoor flow.  See Section \ref{info:mean_forcing} for a better alternative.
 
@@ -7193,7 +7193,7 @@ where $\Delta x$ is the screen thickness and Y and K are empirical constants giv
 \be \hbox{K}= 3.44 \times 10^{-9} \; \hbox{FREE\_AREA\_FRACTION}^{1.6}\ee
 \be \hbox{Y}= 0.043 \; \hbox{FREE\_AREA\_FRACTION}^{2.13}\ee
 
-In the example below an aluminum screen with a 40 \% free area and an 0.0003 m wire diameter is placed normal to the x-axis.  Note that the {\ct LENGTH} on the {\ct SURF}, when multiplied by the diameter, results in 60 \% of the cell area. 
+In the example below an aluminum screen with a 40 \% free area and an 0.0003 m wire diameter is placed normal to the x-axis.  Note that the {\ct LENGTH} on the {\ct SURF}, when multiplied by the diameter, results in 60 \% of the cell area.
 \footnotesize
 \begin{verbatim}
 
@@ -8441,7 +8441,7 @@ The control functions that perform simple math operations ({\ct SUM},  {\ct SUBT
 A PID (Proportional Integral Derivative) control function is a commonly used feedback controller for controlling electrical and mechanical systems.  The function computes an error between a process variable and a desired setpoint.  The goal of the PID function is to minimize the error.  A PID control function is computed as
 \be u(t) \; = \; K_p e(t) \; + \; \; K_i \int_0^t \! e(t) \, dt   \; + \; K_d \frac{de(t)}{dt}\ee
 where $K_p$, $K_i$, and $K_d$ are respectively the {\ct PROPORTIONAL\_GAIN}, the {\ct INTEGRAL\_GAIN}, and the
-{\ct DIFFERENTIAL\_GAIN}; $e(t)$ is the error given by subracting the {\ct TARGET\_VALUE} from the input; and $u(t)$ is the output.  
+{\ct DIFFERENTIAL\_GAIN}; $e(t)$ is the error given by subracting the {\ct TARGET\_VALUE} from the input; and $u(t)$ is the output.
 
 \subsection{Combining Control Functions: A Pre-Action Sprinkler System}
 
@@ -11584,6 +11584,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SURF\_ID}              & Character         & Section~\ref{info:VENT_Basics}                            &               &  {\ct 'INERT'}      \\ \hline
 {\ct TEXTURE\_ORIGIN(3)}    & Real Triplet      & Section~\ref{info:texture_map}                            & m             & (0.,0.,0.)          \\ \hline
 {\ct TMP\_EXTERIOR}         & Real              & Section~\ref{info:Special_VENTS}                          & $^\circ$C     &                     \\ \hline
+{\ct TMP\_EXTERIOR\_RAMP}   & Character         & Section~\ref{info:Special_VENTS}                          &               &                     \\ \hline
 {\ct TRANSPARENCY}          & Real              & Section~\ref{info:colors}                                 &               &   1.0               \\ \hline
 {\ct UVW(3) }               & Real Triplet      & Section~\ref{info:HVAClouvers}                            & m/s           &                     \\ \hline
 {\ct VEL\_RMS}              & Real              & Section~\ref{info:synthetic_turbulence}                   & m/s           & 0.                  \\ \hline
