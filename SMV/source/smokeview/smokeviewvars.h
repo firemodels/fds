@@ -24,6 +24,8 @@
 #include "file_util.h"
 #include "MALLOC.h"
 
+SVEXTERN filelistdata SVDECL(*ini_filelist,NULL);
+SVEXTERN int SVDECL(nini_filelist,0);
 SVEXTERN float this_mouse_time, SVDECL(last_mouse_time,0.0);
 SVEXTERN int move_gslice;
 

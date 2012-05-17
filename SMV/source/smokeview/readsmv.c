@@ -164,26 +164,23 @@ PROP
 /* ------------------ update_inilist ------------------------ */
 
 void update_inilist(void){
-  FILE *filein_inilist=NULL;
-  char ini_listfile[1024];
-  char buffer[255],buffer2[255];
+  char filter[256];
+  int i;
 
-  strcpy(ini_listfile,caseinifilename);
-  strcat(ini_listfile,"list");
-  filein_inilist=fopen(ini_listfile,"r");
-  if(filein_inilist!=NULL){
+  strcpy(filter,fdsprefix);
+  strcat(filter,"*.ini");
+  free_filelist(ini_filelist,&nini_filelist);
+  nini_filelist=get_nfilelist(".",filter);
+  if(nini_filelist>0){
+    get_filelist(".",filter,nini_filelist,&ini_filelist);
 
-    while(!feof(filein_inilist)){
-      CheckMemory;
-      if(fgets(buffer,255,filein_inilist)==NULL)break;
-      if(match(buffer,"INIFILE")==1){
-        if(fgets(buffer2,255,filein_inilist)==NULL)break;
-        cleanbuffer(buffer,buffer2);
-        insert_inifile(buffer);
-        continue;
-        }
+    for(i=0;i<nini_filelist;i++){
+      filelistdata *filei;
+
+      filei = ini_filelist + i;
+      if(filei->type!=0)continue;
+      insert_inifile(filei->file);
     }
-    fclose(filein_inilist);
   }
 }
 
@@ -11297,7 +11294,6 @@ void writeini(int flag){
     scriptfiledata *scriptfile;
     inifiledata *inifile;
     int first_time=1;
-    FILE *fileout_inilist=NULL;
 
     for(scriptfile=first_scriptfile.next;scriptfile->next!=NULL;scriptfile=scriptfile->next){
       char *file;
@@ -11308,22 +11304,6 @@ void writeini(int flag){
         fprintf(fileout," %s\n",file);
       }
     }
-    for(inifile=first_inifile.next;inifile->next!=NULL;inifile=inifile->next){
-      char ini_listfile[1024];
-
-      if(inifile->file==NULL)continue;
-      if(first_time==1){
-        first_time=0;
-        strcpy(ini_listfile,caseinifilename);
-        strcat(ini_listfile,"list");
-        fileout_inilist=fopen(ini_listfile,"w");
-      }
-      if(fileout_inilist!=NULL){
-        fprintf(fileout_inilist,"INIFILE\n");
-        fprintf(fileout_inilist," %s\n",inifile->file);
-      }
-    }
-    if(fileout_inilist!=NULL)fclose(fileout_inilist);
   }
   {
     int svn_num;

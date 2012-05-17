@@ -102,7 +102,6 @@ GLUI_Rollout *rollout_slice_chop=NULL;
 #define SCRIPT_SETSUFFIX 36
 #define SCRIPT_RUNSCRIPT 37
 #define SCRIPT_LOADINI 38
-#define SCRIPT_LISTINI 39
 #define SCRIPT_RENDER 41
 #define SCRIPT_RENDER_SUFFIX 42
 #define SCRIPT_RENDER_DIR 43
@@ -844,11 +843,7 @@ extern "C" void glui_bounds_setup(int main_window){
 
   panel_script2b = glui_bounds->add_panel_to_panel(panel_script2,"",false);
   ini_index=-2;
-  LIST_ini_list = glui_bounds->add_listbox_to_panel(panel_script2b,_("Select:"),&ini_index,SCRIPT_LISTINI,Script_CB);
-  if(file_exists(caseinifilename)==1){
-    ini_index=-1;
-    LIST_ini_list->add_item(-1,caseinifilename);
-  }
+  LIST_ini_list = glui_bounds->add_listbox_to_panel(panel_script2b,_("Select:"),&ini_index);
   {
     inifiledata *inifile;
 
@@ -1412,25 +1407,21 @@ extern "C"  void glui_script_disable(void){
         char *inifilename;
 
         id = LIST_ini_list->get_int_val();
-        if(id==-1){
+        inifilename = get_inifilename(id);
+        if(strcmp(inifilename,caseinifilename)==0){
           readini(0);
-          if(scriptoutstream!=NULL){
-            fprintf(scriptoutstream,"LOADINIFILE\n");
-            fprintf(scriptoutstream," %s\n",caseinifilename);
-          }
         }
         else if(id>=0){
-          inifilename = get_inifilename(id);
           if(inifilename==NULL||strlen(inifilename)==0)break;
           scriptinifilename2=scriptinifilename;
           strcpy(scriptinifilename,inifilename);
           windowresized=0;
           readini(2);
-          if(scriptoutstream!=NULL){
-            fprintf(scriptoutstream,"LOADINIFILE\n");
-            fprintf(scriptoutstream," %s\n",scriptinifilename);
-          }
           scriptinifilename2=NULL;
+        }
+        if(scriptoutstream!=NULL){
+          fprintf(scriptoutstream,"LOADINIFILE\n");
+          fprintf(scriptoutstream," %s\n",inifilename);
         }
       }
       break;
