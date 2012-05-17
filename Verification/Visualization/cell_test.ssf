@@ -4,8 +4,6 @@ RENDERDIR
 // render x direction
 
 UNLOADALL
-LOADINI
- cell_test_x
 KEYBOARD
  *
 LOADFILE
@@ -15,51 +13,45 @@ SETTIMEVAL
 SETVIEWPOINT
  view_x
 RENDERCLIP
- 1 230 230 30 30
+ 1 227 230 58 5
 RENDERONCE
  cell_test_x
 
 // render y direction
 
 UNLOADALL
-LOADINI
- cell_test_y
 KEYBOARD
  *
 LOADFILE
- cell_test_08.sf
+ cell_test_05.sf
 SETTIMEVAL
  0.100000
 SETVIEWPOINT
  view_y
 RENDERCLIP
- 1 300 300 30 30
+ 1 301 298 60 5
 RENDERONCE
  cell_test_y
 
 // render z direction
 
 UNLOADALL
-LOADINI
- cell_test_z
 KEYBOARD
  *
 LOADFILE
- cell_test_09.sf
+ cell_test_13.sf
 SETTIMEVAL
  0.100000
 SETVIEWPOINT
  view_z
 RENDERCLIP
- 1 215 250 15 15
+ 1 240 281 75 20
 RENDERONCE
  cell_test_z
  
 // render 3D direction
 
 UNLOADALL
-LOADINI
- cell_test
 KEYBOARD
  *
 LOADFILE
@@ -75,7 +67,7 @@ KEYBOARD
 KEYBOARD
  z
 RENDERCLIP
- 1 308 238 78 44
+ 1 237 222 60 15
 RENDERONCE
  cell_test_3D
   
