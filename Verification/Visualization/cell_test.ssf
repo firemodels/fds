@@ -9,7 +9,7 @@ LOADINI
 KEYBOARD
  *
 LOADFILE
- cell_test_03.sf
+ cell_test_04.sf
 SETTIMEVAL
  0.100000
 SETVIEWPOINT
@@ -17,7 +17,7 @@ SETVIEWPOINT
 RENDERCLIP
  1 230 230 30 30
 RENDERONCE
- cell_test_x1p5
+ cell_test_x
 
 // render y direction
 
@@ -27,7 +27,7 @@ LOADINI
 KEYBOARD
  *
 LOADFILE
- cell_test_07.sf
+ cell_test_08.sf
 SETTIMEVAL
  0.100000
 SETVIEWPOINT
@@ -35,7 +35,7 @@ SETVIEWPOINT
 RENDERCLIP
  1 300 300 30 30
 RENDERONCE
- cell_test_y2p5
+ cell_test_y
 
 // render z direction
 
@@ -45,7 +45,7 @@ LOADINI
 KEYBOARD
  *
 LOADFILE
- cell_test_12.sf
+ cell_test_09.sf
 SETTIMEVAL
  0.100000
 SETVIEWPOINT
@@ -53,13 +53,13 @@ SETVIEWPOINT
 RENDERCLIP
  1 215 250 15 15
 RENDERONCE
- cell_test_z3p5
+ cell_test_z
  
 // render 3D direction
 
 UNLOADALL
 LOADINI
- cell_test_xyz
+ cell_test
 KEYBOARD
  *
 LOADFILE
@@ -72,8 +72,10 @@ KEYBOARD
  x
 KEYBOARD
  y
+KEYBOARD
+ z
 RENDERCLIP
- 1 295 228 58 52
+ 1 308 238 78 44
 RENDERONCE
  cell_test_3D
   

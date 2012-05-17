@@ -631,20 +631,21 @@ The images for this test were created automatically by running the smokeview scr
 \begin{center}
 \begin{tabular}{cc}
 
- \includegraphics[width=2.7in]{SCRIPT_FIGURES/cell_test_z3p5}&
- \includegraphics[width=2.7in]{SCRIPT_FIGURES/cell_test_3D}\\
+ \includegraphics[width=2.55in]{SCRIPT_FIGURES/cell_test_z}&
+ \includegraphics[width=2.55in]{SCRIPT_FIGURES/cell_test_3D}\\
 
- a) plan view (XY), $1\le i \le 3, 1\le j \le 4, k=4$&
+ a) plan view (XY), $1\le i \le 3, 1\le j \le 4, k=1$&
  b) 3D view\\
- \includegraphics[width=2.7in]{SCRIPT_FIGURES/cell_test_y2p5}&
- \includegraphics[width=3.6in]{SCRIPT_FIGURES/cell_test_x1p5}\\
-  c) elevation view (XZ), $1\le  i \le 3, j=3, 1\le k\le 5$&
-  d) side view (YZ), $i=2,1\le j\le 4,1\le k \le 5$
+ \vspace{0.01in}\\
+ \includegraphics[width=2.55in]{SCRIPT_FIGURES/cell_test_y}&
+ \includegraphics[width=3.4in]{SCRIPT_FIGURES/cell_test_x}\\
+  c) elevation view (XZ), $1\le  i \le 3, j=4, 1\le k\le 5$&
+  d) side view (YZ), $i=3,1\le j\le 4,1\le k \le 5$
 \end{tabular}
 \end{center}
- \caption[Cell centered slice file test.]{Test that Smokeview is inputting cell centered slice file
- data properly.
- Cell values are initialized in FDS to $100*i + 10*j + k$. Cell values displayed by Smokeview should match listed $(i,j,k)$ indices. }
+ \caption[Cell centered slice file test.]{A test to demonstrate that cell centered slice file
+ data is input by Smokeview properly.
+ Cell values are initialized in FDS to $100*i + 10*j + k$. Cell values displayed by Smokeview should match the $(i,j,k)$ grid cell indices. The three plots in the 3D view correspond to the plan, elevation and side view plots.}
 \label{figslicetest}%
 \end{figure}
 
