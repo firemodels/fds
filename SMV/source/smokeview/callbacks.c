@@ -56,6 +56,9 @@ int get_index(float x, int dir, float *plotxyz, int nplotxyz){
     case 3:
       x=NORMALIZE_X(x);
       break;
+    default:
+      ASSERT(0);
+      break;
   }
 
   if(plotxyz!=NULL){

@@ -5971,7 +5971,6 @@ float get_texture_index(float *xyz){
   float val0, val1;
   float val, val_fraction;
   int ijk;
-  float index;
    
   float *slicedata0;
   float valmin, valmax;

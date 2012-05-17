@@ -431,7 +431,6 @@ int SVimage2file(char *RENDERfilename, int rendertype, int width, int height){
   gdImagePtr RENDERimage;
   unsigned int r, g, b;
   int i,j,rgb_local;
-  int x=0, y=0;
   int width_beg, width_end, height_beg, height_end;
   int width2, height2;
 

@@ -545,7 +545,6 @@ int compile_script(char *scriptfile){
       continue;
     }
     if(match_upper(buffer,"RENDERCLIP") == 1){
-      int len;
 
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_RENDERCLIP,buffer);
@@ -1576,7 +1575,7 @@ int run_script(void){
       break;
     case SCRIPT_KEYBOARD:
       {
-        char *modifier, *key;
+        char *key;
 
         script_keystate=0;
         key = scripti->cval + strlen(scripti->cval) - 1;
