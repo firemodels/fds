@@ -117,9 +117,9 @@ void RenderFrame(int view_mode){
        current_script_command->command==SCRIPT_RENDERALL||
        current_script_command->command==SCRIPT_VOLSMOKERENDERALL
        )&&
-       current_script_command->cval!=NULL
+       current_script_command->cval2!=NULL
        ){
-        strcpy(renderfile_name,current_script_command->cval);
+        strcpy(renderfile_name,current_script_command->cval2);
         use_scriptfile=1;
     }
     else{
@@ -312,8 +312,8 @@ int mergescreenbuffers(GLubyte *screenbuffers[4]){
     break;
   }
 
-  if(scriptoutstream!=NULL&&current_script_command!=NULL&&current_script_command->cval!=NULL){
-    strcpy(renderfile2,current_script_command->cval);
+  if(scriptoutstream!=NULL&&current_script_command!=NULL&&current_script_command->cval2!=NULL){
+    strcpy(renderfile2,current_script_command->cval2);
   }
   else{
     strcpy(renderfile2,fdsprefix);
