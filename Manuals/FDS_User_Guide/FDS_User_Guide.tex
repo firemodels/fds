@@ -8549,10 +8549,12 @@ multiply-colored vents that activate at different times, depending on the partic
 
 
 \section{Controlling a \texorpdfstring{{\tt RAMP}}{RAMP}}
+
+\subsection{Changing the Independent variable} 
 \label{info:RAMPDEVC}
 
 For any user defined {\ct RAMP}, the normal independent variable, for example time for {\ct RAMP\_V}, can be replaced by the output of a {\ct DEVC}.
-This is done by specifying the input {\ct DEVC\_ID} one on of the {\ct RAMP} input lines.  When this is done, the current output of the {\ct DEVC} is used, see \ref{info:basic_control} as the independent variable for the {\ct RAMP}.
+This is done by specifying the input {\ct DEVC\_ID} one on of the {\ct RAMP} input lines.  When this is done, the current output of the {\ct DEVC} is used, see \ref{info:basic_control} as the independent variable for the {\ct RAMP}.  A {\ct CTRL\_ID} can also be specified as long as the control function outputs a numerical value (i.e. is a mathematical function, \ref{info:CONTROL_MATH}, or a PID function, \ref{info:CONTROL_PID}).
 In the following example a blower is ramped from 0~\% flow at 20~$^\circ$C, to 50~\% flow when the temperature exceeds 100~$^\circ$C, and to 100~\% flow when the temperature exceeds 200~$^\circ$C.
 This is similar functionality to the {\ct CUSTOM} control function, but it allows for variable response rather than just on or off.
 
@@ -8566,7 +8568,31 @@ This is similar functionality to the {\ct CUSTOM} control function, but it allow
 \end{verbatim}
 \normalsize
 
+\subsection{Freezing the Output Value, Example Case: freeze\_hrr} 
+\label{info:freeze_device}
 
+There are occasions where you may want the value of a {\ct RAMP} to stop updating.  For example, if you are simulating a growing fire in a room with sprinklers, you may wish to stop the fire from growing when a sprinkler over the fire activates.  This type of action can be accomplished by changing the input of the {\ct RAMP} to a {\ct DEVC}, see the previous section, and then giving that {\ct DEVC} either a {\ct NO\_UPDATE\_DEVC\_ID} or a {\ct NO\_UPDATE\_CTRL\_ID}.  When the specified controller changes its state to {\ct .TRUE.} it will cause the {\ct DEVC} to sop updating its value.  Since the {\ct DEVC} is being used as the independent variable to a {\ct RAMP}, the {\ct RAMP} will have its output remain the same.  This is shown in the example below.  A fire is given a linear {\ct RAMP} from 0 to 1000 kW/m$^2$ over 50 s. Rather than using the simulation time, the {\ct RAMP} uses a {\ct DEVC} for the time.  The timer is set to freeze when another {\ct DEVC} measuring time reaches 200~$^\circ$C.  Figure~\ref{freeze_hrr} shows the result of these inputs in the test case {\bf freeze\_device} where it can be seen that the pyrolysis rate stops increasing once the gas temperature reaches 200~$^\circ$C.
+
+\footnotesize
+\begin{verbatim}
+&SURF ID='FIRE',HRRPUA=1000.,RAMP_Q='FRAMP',COLOR='ORANGE'/
+
+&RAMP ID='FRAMP',T=0,F=0,DEVC_ID='FREEZE TIME'/
+&RAMP ID='FRAMP',T=50,F=1/
+
+&DEVC XYZ=0.5,0.5,0.8,QUANTITY='TEMPERATURE',SETPOINT=200.,INITIAL_STATE=.FALSE.,ID='TEMP'/
+&DEVC XYZ=0.5,0.5,0.8,QUANTITY='TIME',NO_UPDATE_DEVC_ID='TEMP',ID='FREEZE TIME'/
+\end{verbatim}
+\normalsize
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{lll}
+\includegraphics[width=3.0in]{SCRIPT_FIGURES/hrr_freeze_T} &
+\includegraphics[width=3.0in]{SCRIPT_FIGURES/hrr_freeze_B} &
+\end{tabular*}
+\caption[Example of freezing the output of a {\ct RAMP}]{Temperature (left) and burning rate (right) outputs of the {\bf freeze\_hrr} test case}
+\label{freeze_hrr}
+\end{figure}
 
 %
 % Section on Smokeview objects
@@ -8574,7 +8600,6 @@ This is similar functionality to the {\ct CUSTOM} control function, but it allow
 
 \input{smv_objects.tex}
 
-\chapter{Output Data}
 \label{info:outputdata}
 
 Before a calculation is started, carefully consider
@@ -10338,47 +10363,49 @@ properties be specified as well. Simply prescribing as many properties as possib
 \multicolumn{5}{|c|}{{\ct DEVC} (Device Parameters)} \\
 \hline \hline
 \endhead
-{\ct BYPASS\_FLOWRATE}      & Real            & Section~\ref{info:aspiration_detector}                       & kg/s  & 0             \\ \hline
-{\ct CONVERSION\_FACTOR}    & Real            & Section~\ref{info:out:DEVC}                                  &       & 1             \\ \hline
-{\ct CTRL\_ID}              & Character       & Section~\ref{info:DEVC}                                      &       &               \\ \hline
-{\ct DELAY}                 & Real            & Section~\ref{info:aspiration_detector}                       & s     & 0             \\ \hline
-{\ct DEPTH}                 & Real            & Section~\ref{info:material_components}                       & m     & 0             \\ \hline
-{\ct DEVC\_ID}              & Character       & Section~\ref{info:aspiration_detector}                       &       &               \\ \hline
-{\ct DRY}                   & Logical         & Section~\ref{info:dry}                                       &       & {\ct .FALSE.} \\ \hline
-{\ct DUCT\_ID}              & Character       & Section~\ref{info:HVAC}                                      &       &               \\ \hline
-{\ct EVACUATION}            & Logical         & Reference~\cite{FDS_Evac_Users_Guide}                        &       & {\ct .FALSE.}    \\ \hline
-{\ct FLOWRATE}              & Real            & Section~\ref{info:aspiration_detector}                       & kg/s  & 0             \\ \hline
-{\ct HIDE\_COORDINATES}     & Logical         & Section~\ref{info:line_file}                                 &       & {\ct .FALSE.} \\ \hline
-{\ct ID}                    & Character       & Section~\ref{info:DEVC}                                      &       &               \\ \hline
-{\ct INITIAL\_STATE}        & Logical         & Section~\ref{info:basic_control}                             &       & {\ct .FALSE.} \\ \hline
-{\ct INIT\_ID}              & Character       & Section~\ref{info:PART_SURF}                                 &       &               \\ \hline
-{\ct IOR}                   & Integer         & Section~\ref{info:DEVC}                                      &       &               \\ \hline
-{\ct LATCH}                 & Logical         & Section~\ref{info:basic_control}                             &       & {\ct .TRUE.}  \\ \hline
-{\ct MATL\_ID}              & Character       & Section~\ref{info:material_components}                       &       &               \\ \hline
-{\ct NODE\_ID}              & Character(2)    & Section~\ref{info:HVAC}                                      &       &               \\ \hline
-{\ct ORIENTATION}           & Real Triplet    & Section~\ref{info:DEVC}                                      &       & 0,0,-1        \\ \hline
-{\ct OUTPUT}                & Logical         & Section~\ref{info:out:DEVC}                                  &       & {\ct .TRUE.}  \\ \hline
-{\ct PART\_ID}              & Character       & Section~\ref{info:outputquantities}                          &       &               \\ \hline
-{\ct PIPE\_INDEX}           & Integer         & Section~\ref{info:pressureramp}                          &       &  1            \\ \hline
-{\ct POINTS}                & Integer         & Section~\ref{info:line_file}                                 &       & 1             \\ \hline
-{\ct PROP\_ID}              & Character       & Section~\ref{info:DEVC}                                      &       &               \\ \hline
-{\ct QUANTITY}              & Character       & Section~\ref{info:DEVC}                                      &       &               \\ \hline
-{\ct RELATIVE}              & Logical         & Section~\ref{info:out:DEVC}                                  &       & {\ct .FALSE.} \\ \hline
-{\ct ROTATION}              & Real            & Section~\ref{info:DEVC}                                      & deg.  & 0             \\ \hline
-{\ct SETPOINT}              & Real            & Section~\ref{info:basic_control}                             &       &               \\ \hline
-{\ct SMOOTHING\_FACTOR}     & Real            & Section~\ref{info:basic_control}                             &       & 0             \\ \hline
-{\ct SPEC\_ID}              & Character       & Section~\ref{info:outputquantities}                          &       &               \\ \hline
-{\ct STATISTICS}            & Character       & Section~\ref{info:statistics}                                &       &               \\ \hline
-{\ct SURF\_ID}              & Character       & Section~\ref{info:statistics}                                &       &               \\ \hline
-{\ct TIME\_AVERAGED}        & Logical         & Section~\ref{info:out:DEVC}                                  &       &  {\ct .TRUE.} \\ \hline
-{\ct TRIP\_DIRECTION}       & Integer         & Section~\ref{info:basic_control}                             &       &  1            \\ \hline
-{\ct UNITS}                 & Character       & Section~\ref{info:out:DEVC}                                  &       &               \\ \hline
-{\ct VELO\_INDEX}           & Integer         & Section~\ref{info:velocity}                                  &       &  0            \\ \hline
-{\ct XB(6)}                 & Real Sextuplet  & Section~\ref{info:statistics}                                & m     &               \\ \hline
-{\ct XYZ(3)}                & Real Triplet    & Section~\ref{info:DEVC}                                      & m     &               \\ \hline
-{\ct X\_ID}                 & Character       & Section~\ref{info:line_file}                                 &       &  {\ct ID-x}   \\ \hline
-{\ct Y\_ID}                 & Character       & Section~\ref{info:line_file}                                 &       &  {\ct ID-y}   \\ \hline
-{\ct Z\_ID}                 & Character       & Section~\ref{info:line_file}                                 &       &  {\ct ID-z}   \\ \hline
+{\ct BYPASS\_FLOWRATE}      & Real            & Section~\ref{info:aspiration_detector}                          & kg/s  & 0             \\ \hline
+{\ct CONVERSION\_FACTOR}    & Real            & Section~\ref{info:out:DEVC}                                     &       & 1             \\ \hline
+{\ct CTRL\_ID}              & Character       & Section~\ref{info:RAMPDEVC}                                     &       &               \\ \hline
+{\ct DELAY}                 & Real            & Section~\ref{info:aspiration_detector}                          & s     & 0             \\ \hline
+{\ct DEPTH}                 & Real            & Section~\ref{info:material_components}                          & m     & 0             \\ \hline
+{\ct DEVC\_ID}              & Character       & Sections~\ref{info:aspiration_detector} and \ref{info:RAMPDEVC} &       &               \\ \hline
+{\ct DRY}                   & Logical         & Section~\ref{info:dry}                                          &       & {\ct .FALSE.} \\ \hline
+{\ct DUCT\_ID}              & Character       & Section~\ref{info:HVAC}                                         &       &               \\ \hline
+{\ct EVACUATION}            & Logical         & Reference~\cite{FDS_Evac_Users_Guide}                           &       & {\ct .FALSE.}    \\ \hline
+{\ct FLOWRATE}              & Real            & Section~\ref{info:aspiration_detector}                          & kg/s  & 0             \\ \hline
+{\ct HIDE\_COORDINATES}     & Logical         & Section~\ref{info:line_file}                                    &       & {\ct .FALSE.} \\ \hline
+{\ct ID}                    & Character       & Section~\ref{info:DEVC}                                         &       &               \\ \hline
+{\ct INITIAL\_STATE}        & Logical         & Section~\ref{info:basic_control}                                &       & {\ct .FALSE.} \\ \hline
+{\ct INIT\_ID}              & Character       & Section~\ref{info:PART_SURF}                                    &       &               \\ \hline
+{\ct IOR}                   & Integer         & Section~\ref{info:DEVC}                                         &       &               \\ \hline
+{\ct LATCH}                 & Logical         & Section~\ref{info:basic_control}                                &       & {\ct .TRUE.}  \\ \hline
+{\ct MATL\_ID}              & Character       & Section~\ref{info:material_components}                          &       &               \\ \hline
+{\ct NODE\_ID}              & Character(2)    & Section~\ref{info:HVAC}                                         &       &               \\ \hline
+{\ct NO\_UPDATE\_DEVC\_ID}  & Character       & Section~\ref{info:freeze_device}                                &       &               \\ \hline
+{\ct NO\_UPDATE\_CTRL\_ID}  & Character       & Section~\ref{info:freeze_device}                                &       &               \\ \hline
+{\ct ORIENTATION}           & Real Triplet    & Section~\ref{info:DEVC}                                         &       & 0,0,-1        \\ \hline
+{\ct OUTPUT}                & Logical         & Section~\ref{info:out:DEVC}                                     &       & {\ct .TRUE.}  \\ \hline
+{\ct PART\_ID}              & Character       & Section~\ref{info:outputquantities}                             &       &               \\ \hline
+{\ct PIPE\_INDEX}           & Integer         & Section~\ref{info:pressureramp}                                 &       &  1            \\ \hline
+{\ct POINTS}                & Integer         & Section~\ref{info:line_file}                                    &       & 1             \\ \hline
+{\ct PROP\_ID}              & Character       & Section~\ref{info:DEVC}                                         &       &               \\ \hline
+{\ct QUANTITY}              & Character       & Section~\ref{info:DEVC}                                         &       &               \\ \hline
+{\ct RELATIVE}              & Logical         & Section~\ref{info:out:DEVC}                                     &       & {\ct .FALSE.} \\ \hline
+{\ct ROTATION}              & Real            & Section~\ref{info:DEVC}                                         & deg.  & 0             \\ \hline
+{\ct SETPOINT}              & Real            & Section~\ref{info:basic_control}                                &       &               \\ \hline
+{\ct SMOOTHING\_FACTOR}     & Real            & Section~\ref{info:basic_control}                                &       & 0             \\ \hline
+{\ct SPEC\_ID}              & Character       & Section~\ref{info:outputquantities}                             &       &               \\ \hline
+{\ct STATISTICS}            & Character       & Section~\ref{info:statistics}                                   &       &               \\ \hline
+{\ct SURF\_ID}              & Character       & Section~\ref{info:statistics}                                   &       &               \\ \hline
+{\ct TIME\_AVERAGED}        & Logical         & Section~\ref{info:out:DEVC}                                     &       &  {\ct .TRUE.} \\ \hline
+{\ct TRIP\_DIRECTION}       & Integer         & Section~\ref{info:basic_control}                                &       &  1            \\ \hline
+{\ct UNITS}                 & Character       & Section~\ref{info:out:DEVC}                                     &       &               \\ \hline
+{\ct VELO\_INDEX}           & Integer         & Section~\ref{info:velocity}                                     &       &  0            \\ \hline
+{\ct XB(6)}                 & Real Sextuplet  & Section~\ref{info:statistics}                                   & m     &               \\ \hline
+{\ct XYZ(3)}                & Real Triplet    & Section~\ref{info:DEVC}                                         & m     &               \\ \hline
+{\ct X\_ID}                 & Character       & Section~\ref{info:line_file}                                    &       &  {\ct ID-x}   \\ \hline
+{\ct Y\_ID}                 & Character       & Section~\ref{info:line_file}                                    &       &  {\ct ID-y}   \\ \hline
+{\ct Z\_ID}                 & Character       & Section~\ref{info:line_file}                                    &       &  {\ct ID-z}   \\ \hline
 \end{longtable}
 
 

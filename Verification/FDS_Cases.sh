@@ -11,6 +11,7 @@ $RUNFDS Controls control_test_2
 $RUNFDS Controls create_remove
 $RUNFDS Controls cycle_test
 $RUNFDS Controls device_test
+$RUNFDS Controls hrr_freeze
 
 $RUNFDS Detectors aspiration_detector
 $RUNFDS Detectors beam_detector
