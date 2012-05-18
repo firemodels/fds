@@ -85,6 +85,19 @@ intel_linux_32 : exe       = background
 intel_linux_32 : $(obj)
 	$(CPP) -o $(bin)/$(exe) $(obj) 
 
+# ------------- OSX 32 ----------------
+#  32 bit osx
+
+intel_osx_32 : FFLAGS    = 
+intel_osx_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_OSX
+intel_osx_32 : CC        = icc
+intel_osx_32 : CPP       = icc
+intel_osx_32 : FC        = ifort
+intel_osx_32 : exe       = background
+
+intel_osx_32 : $(obj)
+	$(CPP) -o $(bin)/$(exe) -m32 $(obj) 
+
 #-------------- Clean Target to remove Object and Module files -----------
 
 .PHONY : clean
