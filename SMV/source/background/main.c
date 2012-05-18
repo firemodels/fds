@@ -42,6 +42,14 @@ void Sleep(int ticks){
   sleep(time);
 }
 #endif
+#ifdef pp_OSX
+void Sleep(int ticks){
+  float time;
+
+  time = ticks/1000.0;
+  sleep(time);
+}
+#endif
 
 /* ------------------ main ------------------------ */
 
