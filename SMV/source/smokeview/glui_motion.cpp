@@ -96,7 +96,7 @@ GLUI_Panel *panel_rotate=NULL;
 GLUI_Panel *panel_speed=NULL;
 GLUI_Panel *panel_height=NULL;
 GLUI_Rollout *panel_motion=NULL;
-GLUI_Rollout *panel_clip=NULL;
+GLUI_Rollout *panel_scene_clip=NULL;
 GLUI_Rollout *panel_specify=NULL;
 GLUI_Panel *panel_translate2=NULL,*panel_translate3=NULL;
 GLUI_Rollout *panel_projection=NULL;
@@ -445,20 +445,20 @@ extern "C" void glui_motion_setup(int main_window){
   render_skip_list->add_item(20,_("Every 20th"));
 
 
-  panel_clip = glui_motion->add_rollout_to_panel(render_panel,"Clip rendered scene");
-  SPINNER_clip_left=glui_motion->add_spinner_to_panel(panel_clip,"left:",GLUI_SPINNER_INT,&render_clip_left);
+  panel_scene_clip = glui_motion->add_rollout_to_panel(render_panel,"Clip rendered scene");
+  SPINNER_clip_left=glui_motion->add_spinner_to_panel(panel_scene_clip,"left:",GLUI_SPINNER_INT,&render_clip_left);
   SPINNER_clip_left->set_int_limits(0,screenWidth);
 
-  SPINNER_clip_right=glui_motion->add_spinner_to_panel(panel_clip,"right:",GLUI_SPINNER_INT,&render_clip_right);
+  SPINNER_clip_right=glui_motion->add_spinner_to_panel(panel_scene_clip,"right:",GLUI_SPINNER_INT,&render_clip_right);
   SPINNER_clip_right->set_int_limits(0,screenWidth);
 
-  SPINNER_clip_bottom=glui_motion->add_spinner_to_panel(panel_clip,"bottom:",GLUI_SPINNER_INT,&render_clip_bottom);
+  SPINNER_clip_bottom=glui_motion->add_spinner_to_panel(panel_scene_clip,"bottom:",GLUI_SPINNER_INT,&render_clip_bottom);
   SPINNER_clip_bottom->set_int_limits(0,screenHeight);
 
-  SPINNER_clip_top=glui_motion->add_spinner_to_panel(panel_clip,"top:",GLUI_SPINNER_INT,&render_clip_top);
+  SPINNER_clip_top=glui_motion->add_spinner_to_panel(panel_scene_clip,"top:",GLUI_SPINNER_INT,&render_clip_top);
   SPINNER_clip_top->set_int_limits(0,screenHeight);
 
-  CHECKBOX_clip_rendered_scene = glui_motion->add_checkbox_to_panel(panel_clip,"clip rendered scene",&clip_rendered_scene);
+  CHECKBOX_clip_rendered_scene = glui_motion->add_checkbox_to_panel(panel_scene_clip,"clip rendered scene",&clip_rendered_scene);
 
   render_start=glui_motion->add_button_to_panel(render_panel,_("Start"),RENDER_START,RENDER_CB);
   render_stop=glui_motion->add_button_to_panel(render_panel,_("Stop"),RENDER_STOP,RENDER_CB);
