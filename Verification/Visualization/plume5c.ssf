@@ -42,6 +42,50 @@ SETTIMEVAL
 RENDERONCE
  plume5c_slice_30
 
+UNLOADALL
+LOADINIFILE
+ plume5c_gslice.ini
+LOADFILE
+ plume5c_30.sf
+KEYBOARD
+ *
+KEYBOARD
+ w
+SETTIMEVAL
+ 0.0
+RENDERONCE
+ plume5c_gslice_00
+SETTIMEVAL
+ 10.05
+RENDERONCE
+ plume5c_gslice_10
+SETTIMEVAL
+ 30.05
+RENDERONCE
+ plume5c_gslice_30
+
+UNLOADALL
+LOADINIFILE
+ plume5c_gslice2.ini
+LOADFILE
+ plume5c_30.sf
+KEYBOARD
+ *
+KEYBOARD
+ w
+SETTIMEVAL
+ 0.0
+RENDERONCE
+ plume5c_gslice2_00
+SETTIMEVAL
+ 10.05
+RENDERONCE
+ plume5c_gslice2_10
+SETTIMEVAL
+ 30.05
+RENDERONCE
+ plume5c_gslice2_30
+
 // render cell centered slice files
 
 UNLOADALL
@@ -61,6 +105,26 @@ SETTIMEVAL
  30.05
 RENDERONCE
  plume5c_slice_cell_30
+
+// render cell centered slice files
+
+UNLOADALL
+LOADINIFILE
+ plume5c_slice_cellchop.ini
+LOADFILE
+ plume5c_14.sf
+SETTIMEVAL
+ 0.0
+RENDERONCE
+ plume5c_slice_cellchop_00
+SETTIMEVAL
+ 10.05
+RENDERONCE
+ plume5c_slice_cellchop_10
+SETTIMEVAL
+ 30.05
+RENDERONCE
+ plume5c_slice_cellchop_30
 
 // render slice files with data chopping
 
