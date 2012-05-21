@@ -243,8 +243,8 @@ CONTROL_SELECT: SELECT CASE (CF%CONTROL_INDEX)
       END SELECT
       IF (STATE2) THEN
          PROCESS_STOP_STATUS=USER_STOP
-	 WRITE(MESSAGE,'(A,A)') 'Run stopped by KILL control function ',TRIM(CF%ID)
-	 WRITE(LU_ERR,'(/A)') TRIM(MESSAGE)
+         WRITE(MESSAGE,'(A,A)') 'Run stopped by KILL control function ',TRIM(CF%ID)
+         WRITE(LU_ERR,'(/A)') TRIM(MESSAGE)
 
          ! For those running FDS on a PC, ensure that error message gets written to the .out file, too.
 
