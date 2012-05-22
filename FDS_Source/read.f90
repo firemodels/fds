@@ -8427,7 +8427,7 @@ INIT_LOOP: DO N=1,N_INIT_READ
             IN%N_PARTICLES     = N_PARTICLES
             IN%N_PARTICLES_PER_CELL = N_PARTICLES_PER_CELL
 
-            IF ( (IN%MASS_PER_TIME>0._EB .OR. IN%MASS_PER_VOLUME>0._EB) .AND. IN%VOLUME<=ZERO_P) THEN
+            IF ( IN%MASS_PER_VOLUME>0._EB .AND. IN%VOLUME<=ZERO_P) THEN
                WRITE(MESSAGE,'(A,I4,A)') 'ERROR: INIT ',N,' XB has no volume'
                CALL SHUTDOWN(MESSAGE)
             ENDIF
@@ -8459,8 +8459,7 @@ INIT_LOOP: DO N=1,N_INIT_READ
                IN%N_PARTICLES = N_PARTICLES*MAX(1,LPC%N_ORIENTATION)
                IF (IN%MASS_PER_TIME>0._EB .OR. IN%MASS_PER_VOLUME>0._EB) THEN
                   IF (LPC%DENSITY < 0._EB) THEN
-                     WRITE(MESSAGE,'(A,A,A)') 'INIT ERROR: PARTicle class ',TRIM(LPC%ID), &
-                        ' requires a density'
+                     WRITE(MESSAGE,'(A,A,A)') 'INIT ERROR: PARTicle class ',TRIM(LPC%ID),' requires a density'
                      CALL SHUTDOWN(MESSAGE)
                   ENDIF
                ENDIF
