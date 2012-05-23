@@ -28,6 +28,12 @@
 <h2>Cluster Usage Notes</h2>
 
 <ul>
+<p><li>becoming root<br>
+To become root, type:<br>
+su -<br>
+Then type the password.<br> Note the "-" in "su -" is important.
+It causes root's startup files to be invoked (<em>ie</em> just typing
+su will not work).
 <p><li>Adding a user account<br>
 If user has an account on the old cluster then use the uid defined in /etc/passwd.BAK on leo.cfr.nist.gov
 <p>cuseradd -u uid  user<br>
