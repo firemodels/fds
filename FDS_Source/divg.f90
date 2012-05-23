@@ -970,7 +970,7 @@ REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP
 REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P            
 REAL(EB) :: DELKDELT,VC,DTDX,DTDY,DTDZ,TNOW,ZZ_GET(0:N_TRACKED_SPECIES), &
             HDIFF,DZDX,DZDY,DZDZ,T,RDT,RHO_D_DZDN,TSI,TIME_RAMP_FACTOR,ZONE_VOLUME,DELTA_P,PRES_RAMP_FACTOR,&
-            TMP_G,TMP_WGT,DIV_DIFF_HEAT_FLUX,H_S,ZZZ(1:4),DU_P,DU_M
+            TMP_G,TMP_WGT,DIV_DIFF_HEAT_FLUX,H_S,ZZZ(1:4),DU_P,DU_M,UN
 TYPE(SURFACE_TYPE), POINTER :: SF
 TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM,SM0
 INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,I,J,K,IPZ,IOPZ
@@ -1691,29 +1691,63 @@ ENDDO
 WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    WC=>WALL(IW)
    IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP
-       
+
    II  = WC%ONE_D%II 
    JJ  = WC%ONE_D%JJ
    KK  = WC%ONE_D%KK
+   IIG = WC%ONE_D%IIG 
+   JJG = WC%ONE_D%JJG
+   KKG = WC%ONE_D%KKG
    IOR = WC%ONE_D%IOR
    IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = WC%ZZ_F(1:N_TRACKED_SPECIES)
    CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,WC%ONE_D%TMP_F)
 
    SELECT CASE(IOR)
       CASE( 1)
-         FX(II,JJ,KK)   = WC%RHO_F*H_S
+         UN = UU(II,JJ,KK)
       CASE(-1)
-         FX(II-1,JJ,KK) = WC%RHO_F*H_S
+         UN = UU(II-1,JJ,KK)
       CASE( 2)
-         FY(II,JJ,KK)   = WC%RHO_F*H_S
+         UN = VV(II,JJ,KK)
       CASE(-2)
-         FY(II,JJ-1,KK) = WC%RHO_F*H_S
+         UN = VV(II,JJ-1,KK)
       CASE( 3)
-         FZ(II,JJ,KK)   = WC%RHO_F*H_S
+         UN = WW(II,JJ,KK)
       CASE(-3)
-         FZ(II,JJ,KK-1) = WC%RHO_F*H_S
+         UN = WW(II,JJ,KK-1)
    END SELECT
-      
+
+   ! In case of interpolated boundary, use the original velocity, not the averaged value
+
+   IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
+
+   SELECT CASE(IOR)
+      CASE( 1)
+         FX(II,JJ,KK)   = RHO_H_S_P(IIG,JJG,KKG) ! zero out DU at wall
+         DU_M = (WC%RHO_F*H_S - RHO_H_S_P(IIG,JJG,KKG))*UN
+         U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) = U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) - DU_M*RDX(IIG)
+      CASE(-1)
+         FX(II-1,JJ,KK) = RHO_H_S_P(IIG,JJG,KKG)
+         DU_P = (WC%RHO_F*H_S - RHO_H_S_P(IIG,JJG,KKG))*UN
+         U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) = U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) + DU_P*RDX(IIG)
+      CASE( 2)
+         FY(II,JJ,KK)   = RHO_H_S_P(IIG,JJG,KKG)
+         DU_M = (WC%RHO_F*H_S - RHO_H_S_P(IIG,JJG,KKG))*UN
+         U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) = U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) - DU_M*RDY(JJG)
+      CASE(-2)
+         FY(II,JJ-1,KK) = RHO_H_S_P(IIG,JJG,KKG)
+         DU_P = (WC%RHO_F*H_S - RHO_H_S_P(IIG,JJG,KKG))*UN
+         U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) = U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) + DU_P*RDY(JJG)
+      CASE( 3)
+         FZ(II,JJ,KK)   = RHO_H_S_P(IIG,JJG,KKG)
+         DU_M = (WC%RHO_F*H_S - RHO_H_S_P(IIG,JJG,KKG))*UN
+         U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) = U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) - DU_M*RDZ(KKG)
+      CASE(-3)
+         FZ(II,JJ,KK-1) = RHO_H_S_P(IIG,JJG,KKG)
+         DU_P = (WC%RHO_F*H_S - RHO_H_S_P(IIG,JJG,KKG))*UN
+         U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) = U_DOT_DEL_RHO_H_S(IIG,JJG,KKG) + DU_P*RDZ(KKG)
+   END SELECT
+
 ENDDO WALL_LOOP
 
 DO K=1,KBAR
@@ -1780,21 +1814,55 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    II  = WC%ONE_D%II 
    JJ  = WC%ONE_D%JJ
    KK  = WC%ONE_D%KK
+   IIG = WC%ONE_D%IIG 
+   JJG = WC%ONE_D%JJG
+   KKG = WC%ONE_D%KKG
    IOR = WC%ONE_D%IOR
 
    SELECT CASE(IOR)
       CASE( 1)
-         FX(II,JJ,KK)   = WC%RHO_F
+         UN = UU(II,JJ,KK)
       CASE(-1)
-         FX(II-1,JJ,KK) = WC%RHO_F
+         UN = UU(II-1,JJ,KK)
       CASE( 2)
-         FY(II,JJ,KK)   = WC%RHO_F
+         UN = VV(II,JJ,KK)
       CASE(-2)
-         FY(II,JJ-1,KK) = WC%RHO_F
+         UN = VV(II,JJ-1,KK)
       CASE( 3)
-         FZ(II,JJ,KK)   = WC%RHO_F
+         UN = WW(II,JJ,KK)
       CASE(-3)
-         FZ(II,JJ,KK-1) = WC%RHO_F
+         UN = WW(II,JJ,KK-1)
+   END SELECT
+
+   ! In case of interpolated boundary, use the original velocity, not the averaged value
+
+   IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
+
+   SELECT CASE(IOR)
+      CASE( 1)
+         FX(II,JJ,KK)   = RHOP(IIG,JJG,KKG) ! zero out DU at wall
+         DU_M = (WC%RHO_F - RHOP(IIG,JJG,KKG))*UN
+         U_DOT_DEL_RHO(IIG,JJG,KKG) = U_DOT_DEL_RHO(IIG,JJG,KKG) - DU_M*RDX(IIG)
+      CASE(-1)
+         FX(II-1,JJ,KK) = RHOP(IIG,JJG,KKG)
+         DU_P = (WC%RHO_F - RHOP(IIG,JJG,KKG))*UN
+         U_DOT_DEL_RHO(IIG,JJG,KKG) = U_DOT_DEL_RHO(IIG,JJG,KKG) + DU_P*RDX(IIG)
+      CASE( 2)
+         FY(II,JJ,KK)   = RHOP(IIG,JJG,KKG)
+         DU_M = (WC%RHO_F - RHOP(IIG,JJG,KKG))*UN
+         U_DOT_DEL_RHO(IIG,JJG,KKG) = U_DOT_DEL_RHO(IIG,JJG,KKG) - DU_M*RDY(JJG)
+      CASE(-2)
+         FY(II,JJ-1,KK) = RHOP(IIG,JJG,KKG)
+         DU_P = (WC%RHO_F - RHOP(IIG,JJG,KKG))*UN
+         U_DOT_DEL_RHO(IIG,JJG,KKG) = U_DOT_DEL_RHO(IIG,JJG,KKG) + DU_P*RDY(JJG)
+      CASE( 3)
+         FZ(II,JJ,KK)   = RHOP(IIG,JJG,KKG)
+         DU_M = (WC%RHO_F - RHOP(IIG,JJG,KKG))*UN
+         U_DOT_DEL_RHO(IIG,JJG,KKG) = U_DOT_DEL_RHO(IIG,JJG,KKG) - DU_M*RDZ(KKG)
+      CASE(-3)
+         FZ(II,JJ,KK-1) = RHOP(IIG,JJG,KKG)
+         DU_P = (WC%RHO_F - RHOP(IIG,JJG,KKG))*UN
+         U_DOT_DEL_RHO(IIG,JJG,KKG) = U_DOT_DEL_RHO(IIG,JJG,KKG) + DU_P*RDZ(KKG)
    END SELECT
       
 ENDDO WALL_LOOP
@@ -1870,25 +1938,59 @@ ENDDO
 WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    WC=>WALL(IW)
    IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP
-       
+
    II  = WC%ONE_D%II 
    JJ  = WC%ONE_D%JJ
    KK  = WC%ONE_D%KK
+   IIG = WC%ONE_D%IIG 
+   JJG = WC%ONE_D%JJG
+   KKG = WC%ONE_D%KKG
    IOR = WC%ONE_D%IOR
 
    SELECT CASE(IOR)
       CASE( 1)
-         FX(II,JJ,KK)   = WC%RHO_F*WC%ZZ_F(N)
+         UN = UU(II,JJ,KK)
       CASE(-1)
-         FX(II-1,JJ,KK) = WC%RHO_F*WC%ZZ_F(N)
+         UN = UU(II-1,JJ,KK)
       CASE( 2)
-         FY(II,JJ,KK)   = WC%RHO_F*WC%ZZ_F(N)
+         UN = VV(II,JJ,KK)
       CASE(-2)
-         FY(II,JJ-1,KK) = WC%RHO_F*WC%ZZ_F(N)
+         UN = VV(II,JJ-1,KK)
       CASE( 3)
-         FZ(II,JJ,KK)   = WC%RHO_F*WC%ZZ_F(N)
+         UN = WW(II,JJ,KK)
       CASE(-3)
-         FZ(II,JJ,KK-1) = WC%RHO_F*WC%ZZ_F(N)
+         UN = WW(II,JJ,KK-1)
+   END SELECT
+
+   ! In case of interpolated boundary, use the original velocity, not the averaged value
+
+   IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) UN = UVW_SAVE(IW)
+
+   SELECT CASE(IOR)
+      CASE( 1)
+         FX(II,JJ,KK)   = RHO_Z_P(IIG,JJG,KKG) ! zero out DU at wall
+         DU_M = (WC%RHO_F*WC%ZZ_F(N) - RHO_Z_P(IIG,JJG,KKG))*UN
+         U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) - DU_M*RDX(IIG)
+      CASE(-1)
+         FX(II-1,JJ,KK) = RHO_Z_P(IIG,JJG,KKG)
+         DU_P = (WC%RHO_F*WC%ZZ_F(N) - RHO_Z_P(IIG,JJG,KKG))*UN
+         U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) + DU_P*RDX(IIG)
+      CASE( 2)
+         FY(II,JJ,KK)   = RHO_Z_P(IIG,JJG,KKG)
+         DU_M = (WC%RHO_F*WC%ZZ_F(N) - RHO_Z_P(IIG,JJG,KKG))*UN
+         U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) - DU_M*RDY(JJG)
+      CASE(-2)
+         FY(II,JJ-1,KK) = RHO_Z_P(IIG,JJG,KKG)
+         DU_P = (WC%RHO_F*WC%ZZ_F(N) - RHO_Z_P(IIG,JJG,KKG))*UN
+         U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) + DU_P*RDY(JJG)
+      CASE( 3)
+         FZ(II,JJ,KK)   = RHO_Z_P(IIG,JJG,KKG)
+         DU_M = (WC%RHO_F*WC%ZZ_F(N) - RHO_Z_P(IIG,JJG,KKG))*UN
+         U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) - DU_M*RDZ(KKG)
+      CASE(-3)
+         FZ(II,JJ,KK-1) = RHO_Z_P(IIG,JJG,KKG)
+         DU_P = (WC%RHO_F*WC%ZZ_F(N) - RHO_Z_P(IIG,JJG,KKG))*UN
+         U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) + DU_P*RDZ(KKG)
    END SELECT
       
 ENDDO WALL_LOOP
