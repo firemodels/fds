@@ -156,7 +156,7 @@ DO
    P = P + DT*( (GAMMA-1)/V*1000.*(HRR-H_K*A_T*(TMP_G-TMP_A)) - GAMMA*P*V_DOT/V )
 
    IF (T>T_CLOCK) THEN
-      WRITE(11,'(F6.1,A1,F6.1,A1,F6.1)') T,',',TMP_G-273.,',',P-P_0
+      WRITE(11,'(F6.1,A1,F6.1,A1,F8.3)') T,',',TMP_G-273.,',',P-P_0
       T_CLOCK = T_CLOCK + T_END/500.
    ENDIF
 
