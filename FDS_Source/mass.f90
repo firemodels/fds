@@ -731,8 +731,7 @@ RHOP(1:IBAR,1:JBAR,1:KBAR) = MIN(RHOMAX,MAX(RHOMIN,RHOP(1:IBAR,1:JBAR,1:KBAR)+DE
 
 END SUBROUTINE CHECK_DENSITY
 
- 
- 
+
 SUBROUTINE CHECK_MASS_FRACTION
 
 ! Redistribute species mass from cells below or above the cut-off limits
