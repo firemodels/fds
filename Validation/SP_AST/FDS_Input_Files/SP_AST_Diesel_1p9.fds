@@ -1,7 +1,7 @@
 &HEAD CHID='SP_AST_Diesel_1p9', TITLE='SP Adiabatic Surface Temperature Validation, Column Test'/
 
 &MESH IJK=36,36,80, XB=-1.8,1.8,-1.8,1.8,0.0,8.0 /
-&TIME T_END=1200. /
+&TIME TIME_SHRINK_FACTOR=10., T_END=1200. /
 
 &REAC FUEL='N-DECANE', SOOT_YIELD=0.05 /
 

@@ -1,7 +1,7 @@
 &HEAD CHID='SP_AST_Test_2', TITLE='SP Adiabatic Surface Temperature Validation, Test 2'/
 
 &MESH IJK=72,48,48, XB=0.00,3.60,-1.20,1.20,0.00,2.4 /
-&TIME T_END=2400.0 /
+&TIME TIME_SHRINK_FACTOR=10., T_END=2400.0 /
 
 &REAC FUEL='PROPANE', C=3., H=8., SOOT_YIELD=0.015 /
 
