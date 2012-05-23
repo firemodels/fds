@@ -1,0 +1,7 @@
+Scatter_Plot_Title,Ind_Title,Dep_Title,Plot_Min,Plot_Max,Title_Position,Key_Position,Plot_Width,Sigma_2_E,Model_Error,Plot_Filename
+"HGL Temperature, FPA",Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,400,0.03 0.95,SouthEast,4,14,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/HGL_Temperature_FPA
+"HGL Temperature, Deal and Beyler",Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,400,0.03 0.95,SouthEast,4,14,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/HGL_Temperature_DB
+"HGL Temperature, MQH",Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,400,0.03 0.95,SouthEast,4,14,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/HGL_Temperature_MQH
+"HGL Temperature, Beyler",Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,400,0.03 0.95,SouthEast,4,14,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/HGL_Temperature_Beyler
+Point Source Radiation Heat Flux,Measured Heat Flux (kW/m$^2$),Predicted Heat Flux (kW/m$^2$),0,40,0.03 0.95,SouthEast,4,14,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Point_Source_Radiation_Heat Flux
+Pressure,Measured Pressure Rise(Pa),Predicted Pressure Rise (Pa),0,300,0.03 0.95,SouthEast,4,14,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Pressure
