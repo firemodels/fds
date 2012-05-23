@@ -1412,13 +1412,13 @@ WBAR = AFILL2(W,IIX,JJY,KKG-1,XI-IIX+.5_EB,YJ-JJY+.5_EB,(LP%Z-Z(KKG-1))*RDZ(KKG)
 
 IF (LPC%MASSLESS .OR. LP%PWT<=ZERO_P) THEN
    IF (LPC%TURBULENT_DISPERSION) THEN
-      DD_X = RHO(IIG+1,JJG,KKG)*MU(IIG+1,JJG,KKG) - RHO(IIG-1,JJG,KKG)*MU(IIG-1,JJG,KKG)
-      DD_Y = RHO(IIG,JJG+1,KKG)*MU(IIG,JJG+1,KKG) - RHO(IIG,JJG-1,KKG)*MU(IIG,JJG-1,KKG)
-      DD_Z = RHO(IIG,JJG,KKG+1)*MU(IIG,JJG,KKG+1) - RHO(IIG,JJG,KKG-1)*MU(IIG,JJG,KKG-1)
+      DD_X = (MU(IIG+1,JJG,KKG) - MU(IIG-1,JJG,KKG))*RSC
+      DD_Y = (MU(IIG,JJG+1,KKG) - MU(IIG,JJG-1,KKG))*RSC
+      DD_Z = (MU(IIG,JJG,KKG+1) - MU(IIG,JJG,KKG-1))*RSC
       LP%U = UBAR + DD_X*RDX(IIG)/RHO(IIG,JJG,KKG)
       LP%V = VBAR + DD_Y*RDY(JJG)/RHO(IIG,JJG,KKG)
       LP%W = WBAR + DD_Z*RDZ(KKG)/RHO(IIG,JJG,KKG)
-      DD   = SQRT(2._EB*MU(IIG,JJG,KKG)*RSC*DT)
+      DD   = SQRT(2._EB*MU(IIG,JJG,KKG)/RHO(IIG,JJG,KKG)*RSC*DT)
       ! generate pairs of standard Gaussian random variables
       CALL BOX_MULLER(DW_X,DW_Y)
       CALL BOX_MULLER(DW_Z,DW_X)
@@ -2041,6 +2041,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
          ! Compute contribution to the divergence
 
          ! Compute change in enthalpy between gas and liquid
+
          CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,TMP_G)
          H_G_OLD = CP * TMP_G * M_GAS
          ZZ_GET = 0._EB
