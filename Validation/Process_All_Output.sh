@@ -33,6 +33,7 @@ $VDIR/Sandia_Plumes/FDS_Output_Files/Process_Output.csh
 $VDIR/Smyth_Slot_Burner/FDS_Output_Files/Process_Output.csh
 $VDIR/SP_AST/FDS_Output_Files/Process_Output.csh
 $VDIR/Steckler_Compartment/FDS_Output_Files/Process_Output.csh
+$VDIR/Turbulent_Jet/FDS_Output_Files/Process_Output.csh
 $VDIR/UL_Commodity/FDS_Output_Files/Process_Output.csh
 $VDIR/UL_NFPRF/FDS_Output_Files/Process_Output.csh
 $VDIR/Ulster_SBI/FDS_Output_Files/Process_Output.csh
