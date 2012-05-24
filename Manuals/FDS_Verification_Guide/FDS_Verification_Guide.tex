@@ -1225,7 +1225,7 @@ through multiple meshes and its mass is conserved. An obstruction is created tha
 
 \clearpage
 
-\subsection{Specified Mass Flux (low\_flux\_hot\_gas\_filling)}
+\subsection{Specified Mass Flux (\texorpdfstring{{\bf low\_flux\_hot\_gas\_filling}}{low\_flux\_hot\_gas\_filling})}
 
 The specification of the fuel mass flux is probably the most commonly used boundary condition for specifying a fire.  When the user specifies the {\ct HRRPUA} (heat release rate per unit area), FDS divides this input by the heat of combustion for the specified fuel (propane by default) and uses this values as the specified mass flux $\dot{m}_{\alpha}^{\prime\prime}$ at the {\ct VENT}.  This seems simple enough.  But the problem is complicated by the fact that the total species flux is the sum of the advective and diffusive fluxes,
 \begin{equation}
@@ -3140,7 +3140,7 @@ In this test case 4 sprinklers are placed in a box.  Three of the sprinklers are
 \section{Turbulent Dispersion (\texorpdfstring{{\textbf{random\_walk}}}{random\_walk}) }
 \label{flow_rate_2}
 
-Two cases are set up to test the turbulent dispersion of tracer particles.  Tracer particles are injected into a channel with a steady laminar flow with mean velocity 1 m/s.  In the first case (random\_walk\_1) the diffusivity is set to $D=0.1$ m$^2$/s.  In the second case (random\_walk\_2) the diffusivity is set to $D=0.01$ m$^2$/s.  The results are compared with Einstein's classic result for Brownian motion \cite{Gardiner:2004}:
+Two cases are set up to test the turbulent dispersion of tracer particles.  Tracer particles are injected into a channel with a steady laminar flow with mean velocity 1 m/s.  In the first case (random\_walk\_1) the diffusivity is set to $D=0.0834$ m$^2$/s (this value results from setting the dynamic viscosity to $\mu = 0.1$ kg/m/s with an ambient density of $\rho=1.199$ kg/m$^3$ and a Schmidt number of unity).  In the second case (random\_walk\_2) the diffusivity is set to $D=0.00834$ m$^2$/s.  The results are compared with Einstein's classic result for Brownian motion \cite{Gardiner:2004}:
 \begin{equation}
 \label{eqn_number_density}
 f(z,t) = \frac{n}{4\pi D} \frac{e^{-z^2/4Dt}}{\sqrt{t}}
