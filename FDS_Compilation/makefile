@@ -446,7 +446,7 @@ irad.o : func.o prec.o cons.o type.o mesh.o
 ieva.o : func.o prec.o cons.o type.o mesh.o
 fire.o : func.o prec.o cons.o type.o mesh.o
 hvac.o : func.o prec.o cons.o type.o mesh.o ctrl.o
-wall.o : func.o prec.o cons.o type.o mesh.o hvac.o
+wall.o : func.o prec.o cons.o type.o mesh.o hvac.o mass.o
 velo.o : func.o prec.o cons.o type.o mesh.o turb.o geom.o
 evac.o : func.o prec.o cons.o type.o mesh.o ieva.o data.o
 divg.o : func.o prec.o cons.o type.o mesh.o scrc.o evac.o
@@ -477,7 +477,7 @@ irad.obj : func.obj prec.obj cons.obj type.obj mesh.obj
 ieva.obj : func.obj prec.obj cons.obj type.obj mesh.obj
 fire.obj : func.obj prec.obj cons.obj type.obj mesh.obj
 hvac.obj : func.obj prec.obj cons.obj type.obj mesh.obj ctrl.obj
-wall.obj : func.obj prec.obj cons.obj type.obj mesh.obj hvac.obj
+wall.obj : func.obj prec.obj cons.obj type.obj mesh.obj hvac.obj mass.obj
 velo.obj : func.obj prec.obj cons.obj type.obj mesh.obj turb.obj geom.obj
 evac.obj : func.obj prec.obj cons.obj type.obj mesh.obj ieva.obj data.obj 
 divg.obj : func.obj prec.obj cons.obj type.obj mesh.obj scrc.obj evac.obj
