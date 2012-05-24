@@ -207,7 +207,7 @@ Gaithersburg, Maryland, USA \\
 \hspace{1.in} \\
 VTT Technical Research Centre of Finland \\
 {\em Espoo, Finland} }
-\flushright{\includegraphics[width=1in]{../Bibliography/VTT_Black_L} }
+\flushright{\includegraphics[width=1in]{../Bibliography/VTT_BLACK_L} }
 
 
 \vspace{.25in}
@@ -510,7 +510,7 @@ Ref.~\cite{Smokeview_Users_Guide}.
 \section{Governing Equations, Assumptions and Numerics}
 
 Following is a brief description of the major components of FDS. Detailed information regarding the assumptions and governing equations associated
-with the model is provided in Section~\ref{govequations}.
+with the model is provided in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Tech_Guide}.
 \begin{description}
 \item[Hydrodynamic Model] FDS
 solves numerically a form of the Navier-Stokes equations appropriate for low-speed, thermally-driven flow with an emphasis on smoke and heat
@@ -547,7 +547,7 @@ sprays are modeled by Lagrangian particles that represent a sampling of the wate
 \section{Limitations}
 
 Although FDS can address most fire scenarios, there are limitations in all of its various algorithms. Some of the more prominent limitations of the
-model are listed here. More specific limitations are discussed as part of the description of the governing equations in Section~\ref{govequations}.
+model are listed here. 
 \begin{description}
 \item[Low Speed Flow Assumption] The use of FDS is limited to low-speed\footnote{Mach numbers less than about 0.3} flow
 with an emphasis on smoke and heat transport from fires. This assumption rules out using the model for any scenario involving flow speeds approaching
@@ -579,8 +579,7 @@ suppression agent like water mist or CO$_2$ is introduced, fuel and oxygen are a
 criteria. The physical mechanisms underlying these phenomena are complex, and are tied closely to the flame temperature and local strain rate,
 neither of which are readily-available in a large scale fire simulation. Subgrid-scale modeling of gas phase suppression and extinction is still an
 area of active research in the combustion community. Until reliable models can be developed for building-scale fire simulations, simple empirical
-rules can be used that prevent burning from taking place when the atmosphere immediately surrounding the fire cannot sustain the combustion. Details
-are found in Section~\ref{combustionsection}.
+rules can be used that prevent burning from taking place when the atmosphere immediately surrounding the fire cannot sustain the combustion. 
 \item[Radiation] Radiative heat transfer is included in the model via
 the solution of the radiation transport equation (RTE) for a gray gas, and in some limited cases using a wide band model.  The RTE is solved using a
 technique similar to finite volume methods for convective transport, thus the name given to it is the Finite Volume Method (FVM). There are several

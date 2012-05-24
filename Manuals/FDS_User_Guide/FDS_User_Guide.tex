@@ -2020,6 +2020,7 @@ restart.
 
 \subsection{Special Topic: Initializing a 3D Velocity Field}
 \label{info:velo_restart}
+\label{info:CSVF}
 
 It may be useful to start a calculation from an established flow field.  Usually this can be accomplished with the normal restart functionality.  But in some circumstances restart may be fragile, or the user may want to specify a profile throughout the entire domain.  For such situations we have added the ability to read the velocity field information from a comma-delimited (.csv) file.  The user has the option of creating the velocity file using FDS or creating their own.  To generate the a velocity initialization file with FDS, in the input file add a {\ct DUMP} line with a {\ct UVW\_TIMER} (time in seconds).  The timer will accept up to 10 values, and will write velocity files for each mesh and each timer index to the working directory.  For example, if the user wants to write the simulation velocity field at 10 minutes into the run, they would add the following:
 
@@ -8550,7 +8551,7 @@ multiply-colored vents that activate at different times, depending on the partic
 
 \section{Controlling a \texorpdfstring{{\tt RAMP}}{RAMP}}
 
-\subsection{Changing the Independent variable} 
+\subsection{Changing the Independent variable}
 \label{info:RAMPDEVC}
 
 For any user defined {\ct RAMP}, the normal independent variable, for example time for {\ct RAMP\_V}, can be replaced by the output of a {\ct DEVC}.
@@ -8568,7 +8569,7 @@ This is similar functionality to the {\ct CUSTOM} control function, but it allow
 \end{verbatim}
 \normalsize
 
-\subsection{Freezing the Output Value, Example Case: freeze\_hrr} 
+\subsection{Freezing the Output Value, Example Case: freeze\_hrr}
 \label{info:freeze_device}
 
 There are occasions where you may want the value of a {\ct RAMP} to stop updating.  For example, if you are simulating a growing fire in a room with sprinklers, you may wish to stop the fire from growing when a sprinkler over the fire activates.  This type of action can be accomplished by changing the input of the {\ct RAMP} to a {\ct DEVC}, see the previous section, and then giving that {\ct DEVC} either a {\ct NO\_UPDATE\_DEVC\_ID} or a {\ct NO\_UPDATE\_CTRL\_ID}.  When the specified controller changes its state to {\ct .TRUE.} it will cause the {\ct DEVC} to sop updating its value.  Since the {\ct DEVC} is being used as the independent variable to a {\ct RAMP}, the {\ct RAMP} will have its output remain the same.  This is shown in the example below.  A fire is given a linear {\ct RAMP} from 0 to 1000 kW/m$^2$ over 50 s. Rather than using the simulation time, the {\ct RAMP} uses a {\ct DEVC} for the time.  The timer is set to freeze when another {\ct DEVC} measuring time reaches 200~$^\circ$C.  Figure~\ref{freeze_hrr} shows the result of these inputs in the test case {\bf freeze\_device} where it can be seen that the pyrolysis rate stops increasing once the gas temperature reaches 200~$^\circ$C.
