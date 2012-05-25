@@ -220,17 +220,17 @@ for i=2:2000
         set(gca,'FontSize',Label_Font_Size)
      
         if strcmp(Flip_Axis,'no')
-            xlabel(Ind_Title,'Interpreter','LaTeX','FontSize',Label_Font_Size)
-            ylabel(Dep_Title,'Interpreter','LaTeX','FontSize',Label_Font_Size)
+            xlabel(Ind_Title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+            ylabel(Dep_Title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
             axis([Min_Ind Max_Ind Min_Dep Max_Dep])
             text(X_Title_Position,Y_Title_Position,...
-                Plot_Title,'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter','LaTeX')
+                Plot_Title,'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
         else
-            xlabel(Dep_Title,'Interpreter','LaTeX','FontSize',Label_Font_Size)
-            ylabel(Ind_Title,'Interpreter','LaTeX','FontSize',Label_Font_Size)
+            xlabel(Dep_Title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+            ylabel(Ind_Title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
             axis([Min_Dep Max_Dep Min_Ind Max_Ind])
             text(X_Title_Position,Y_Title_Position,...
-                Plot_Title,'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter','LaTeX')
+                Plot_Title,'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
         end
         if size(Key_Position)>0
             legend_handle = legend(K,[parse(d1_Key),parse(d2_Key)],'Location',Key_Position);
@@ -238,7 +238,7 @@ for i=2:2000
                pos = get(legend_handle,'position');
                set(legend_handle,'position',[6.5 pos(2:4)])
             end
-            set(legend_handle,'Interpreter','LaTeX');
+            set(legend_handle,'Interpreter',Font_Interpreter);
             set(legend_handle,'Fontsize',Key_Font_Size);
             set(legend_handle,'Box','on');
             if size(d1_Tick)>0
@@ -271,7 +271,7 @@ for i=2:2000
                 Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
             end
             text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-                'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+                'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
         end
         
         % print to pdf
