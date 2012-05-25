@@ -649,9 +649,7 @@ PARTICLE_LOOP: DO IP=1,NLP
    END SELECT
 
    ! In PYROLYSIS, all the mass fluxes are normalized by a virtual area based on the INITIAL radius. 
-   ! Here, correct the mass flux using the CURRENT radius. Also, multiply by LP%PWT to account for split particles
-
-!! ONE_D%AREA = ONE_D%AREA*LP%PWT
+   ! Here, correct the mass flux using the CURRENT radius.
 
    ONE_D%MASSFLUX(0:N_TRACKED_SPECIES)         = ONE_D%MASSFLUX(0:N_TRACKED_SPECIES)       *AREA_SCALING
    ONE_D%MASSFLUX_ACTUAL(0:N_TRACKED_SPECIES)  = ONE_D%MASSFLUX_ACTUAL(0:N_TRACKED_SPECIES)*AREA_SCALING
@@ -751,99 +749,104 @@ ENDIF
 
 METHOD_OF_MASS_TRANSFER: SELECT CASE(SF%SPECIES_BC_INDEX)
 
-CASE (INFLOW_OUTFLOW_MASS_FLUX) METHOD_OF_MASS_TRANSFER
-
-   ! OPEN boundary species BC is done in THERMAL_BC under INFLOW_OUTFLOW 
- 
-CASE (NO_MASS_FLUX) METHOD_OF_MASS_TRANSFER 
-
-   IF (.NOT.SOLID(CELL_INDEX(IIG,JJG,KKG))) WC%ZZ_F(1:N_TRACKED_SPECIES) = ZZP(IIG,JJG,KKG,1:N_TRACKED_SPECIES)
- 
-CASE (SPECIFIED_MASS_FRACTION) METHOD_OF_MASS_TRANSFER
-
-   IF (ABS(TW-T_BEGIN)< SPACING(TW) .AND. ANY(SF%RAMP_INDEX>=1)) THEN
-      IF (PREDICTOR) TSI = T + DT
-      IF (CORRECTOR) TSI = T
-   ELSE
-      IF (PREDICTOR) TSI = T + DT - TW
-      IF (CORRECTOR) TSI = T      - TW
-   ENDIF
-
-   IF (WC%ONE_D%UWS<0._EB) THEN
-      DO N=1,N_TRACKED_SPECIES
-         WC%ZZ_F(N) =  SPECIES_MIXTURE(N)%ZZ0 + EVALUATE_RAMP(TSI,SF%TAU(N),SF%RAMP_INDEX(N))* &
-                        (SF%MASS_FRACTION(N)-SPECIES_MIXTURE(N)%ZZ0)
-      ENDDO
-   ELSE
-      WC%ZZ_F(1:N_TRACKED_SPECIES) = ZZP(IIG,JJG,KKG,1:N_TRACKED_SPECIES)
-   ENDIF
- 
-CASE (SPECIFIED_MASS_FLUX) METHOD_OF_MASS_TRANSFER
-
-   ! If the current time is before the "activation" time, TW, apply simple BCs and get out
-
-   IF (T < TW) THEN
-      ONE_D%MASSFLUX(0) = 0._EB
-      IF (N_TRACKED_SPECIES > 0)  THEN
-         IF (.NOT.SOLID(CELL_INDEX(IIG,JJG,KKG))) THEN
-            WC%ZZ_F(1:N_TRACKED_SPECIES) = ZZP(IIG,JJG,KKG,1:N_TRACKED_SPECIES)
-         ENDIF
-         IF (PREDICTOR) WC%ONE_D%UWS = 0._EB
-         ONE_D%MASSFLUX(1:N_TRACKED_SPECIES) = 0._EB
-         ONE_D%MASSFLUX_ACTUAL(1:N_TRACKED_SPECIES) = 0._EB
+   CASE (INFLOW_OUTFLOW_MASS_FLUX) METHOD_OF_MASS_TRANSFER
+   
+      ! OPEN boundary species BC is done in THERMAL_BC under INFLOW_OUTFLOW 
+    
+   CASE (NO_MASS_FLUX) METHOD_OF_MASS_TRANSFER 
+   
+      IF (.NOT.SOLID(CELL_INDEX(IIG,JJG,KKG))) WC%ZZ_F(1:N_TRACKED_SPECIES) = ZZP(IIG,JJG,KKG,1:N_TRACKED_SPECIES)
+    
+   CASE (SPECIFIED_MASS_FRACTION) METHOD_OF_MASS_TRANSFER
+   
+      IF (ABS(TW-T_BEGIN)< SPACING(TW) .AND. ANY(SF%RAMP_INDEX>=1)) THEN
+         IF (PREDICTOR) TSI = T + DT
+         IF (CORRECTOR) TSI = T
+      ELSE
+         IF (PREDICTOR) TSI = T + DT - TW
+         IF (CORRECTOR) TSI = T      - TW
       ENDIF
-      RETURN
-   ENDIF
-
-   ! Zero out the running counter of Mass Flux Total (MFT)
-
-   MFT = 0._EB
-
-   ! If the user has specified the burning rate, evaluate the ramp and other related parameters
-
-   SUM_MASSFLUX_LOOP: DO N=0,N_TRACKED_SPECIES
-      IF (SF%MASS_FLUX(N) > 0._EB) THEN  ! Use user-specified ramp-up of mass flux
-         IF (ABS(TW-T_BEGIN)< SPACING(WC%ONE_D%T) .AND. SF%RAMP_INDEX(N)>=1) THEN
-            TSI = T + DT
-         ELSE
-            TSI = T + DT - TW
-         ENDIF
-         ONE_D%MASSFLUX(N) = EVALUATE_RAMP(TSI,SF%TAU(N),SF%RAMP_INDEX(N))*SF%MASS_FLUX(N)
-         ONE_D%MASSFLUX_ACTUAL(N) = ONE_D%MASSFLUX(N)
-         ONE_D%MASSFLUX(N) = SF%ADJUST_BURN_RATE(N)*ONE_D%MASSFLUX(N)
-      ENDIF
-      ONE_D%MASSFLUX(N) = ONE_D%MASSFLUX(N)*AREA_ADJUST
-      MFT = MFT + ONE_D%MASSFLUX(N)
-   ENDDO SUM_MASSFLUX_LOOP
-   IF (PRESENT(WALL_INDEX)) THEN
-      IF (WC%EW>0._EB) ONE_D%MASSFLUX(0:N_TRACKED_SPECIES) = ONE_D%MASSFLUX(0:N_TRACKED_SPECIES)*EXP(-WC%EW)
-
-      ! Add total consumed mass to various summing arrays
-
-      CONSUME_MASS: IF (CORRECTOR .AND. SF%THERMALLY_THICK) THEN  
+   
+      IF (WC%ONE_D%UWS<0._EB) THEN
          DO N=1,N_TRACKED_SPECIES
-            OBSTRUCTION(WC%OBST_INDEX)%MASS = OBSTRUCTION(WC%OBST_INDEX)%MASS - ONE_D%MASSFLUX_ACTUAL(N)*DT*WC%AW
+            WC%ZZ_F(N) =  SPECIES_MIXTURE(N)%ZZ0 + EVALUATE_RAMP(TSI,SF%TAU(N),SF%RAMP_INDEX(N))* &
+                           (SF%MASS_FRACTION(N)-SPECIES_MIXTURE(N)%ZZ0)
          ENDDO
-      ENDIF CONSUME_MASS
+      ELSE
+         WC%ZZ_F(1:N_TRACKED_SPECIES) = ZZP(IIG,JJG,KKG,1:N_TRACKED_SPECIES)
+      ENDIF
+    
+   CASE (SPECIFIED_MASS_FLUX) METHOD_OF_MASS_TRANSFER
+   
+      ! If the current time is before the "activation" time, TW, apply simple BCs and get out
+   
+      IF (T < TW) THEN
+         ONE_D%MASSFLUX(0) = 0._EB
+         IF (N_TRACKED_SPECIES > 0)  THEN
+            IF (.NOT.SOLID(CELL_INDEX(IIG,JJG,KKG))) THEN
+               WC%ZZ_F(1:N_TRACKED_SPECIES) = ZZP(IIG,JJG,KKG,1:N_TRACKED_SPECIES)
+            ENDIF
+            IF (PREDICTOR) WC%ONE_D%UWS = 0._EB
+            ONE_D%MASSFLUX(1:N_TRACKED_SPECIES) = 0._EB
+            ONE_D%MASSFLUX_ACTUAL(1:N_TRACKED_SPECIES) = 0._EB
+         ENDIF
+         RETURN
+      ENDIF
+   
+      ! Zero out the running counter of Mass Flux Total (MFT)
+   
+      MFT = 0._EB
+   
+      ! If the user has specified the burning rate, evaluate the ramp and other related parameters
+   
+      SUM_MASSFLUX_LOOP: DO N=0,N_TRACKED_SPECIES
+         IF (SF%MASS_FLUX(N) > 0._EB) THEN  ! Use user-specified ramp-up of mass flux
+            IF (ABS(TW-T_BEGIN)< SPACING(WC%ONE_D%T) .AND. SF%RAMP_INDEX(N)>=1) THEN
+               TSI = T + DT
+            ELSE
+               TSI = T + DT - TW
+            ENDIF
+            ONE_D%MASSFLUX(N) = EVALUATE_RAMP(TSI,SF%TAU(N),SF%RAMP_INDEX(N))*SF%MASS_FLUX(N)
+            ONE_D%MASSFLUX_ACTUAL(N) = ONE_D%MASSFLUX(N)
+            ONE_D%MASSFLUX(N) = SF%ADJUST_BURN_RATE(N)*ONE_D%MASSFLUX(N)
+         ENDIF
+         ONE_D%MASSFLUX(N) = ONE_D%MASSFLUX(N)*AREA_ADJUST
+         MFT = MFT + ONE_D%MASSFLUX(N)
+      ENDDO SUM_MASSFLUX_LOOP
+   
+      ! Convection-diffusion boundary condition at a solid wall cell
 
-      ! Compute the cell face value of the species mass fraction to get the right mass flux
- 
-      DO ITER=1,5
-         UN    = MFT/WC%RHO_F
-         SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
-            DD = 2.*WC%RHODW(N)*WC%RDN
-            ZZ_G  = ZZP(IIG,JJG,KKG,N)
-            WC%ZZ_F(N) = ( ONE_D%MASSFLUX(N) + DD*ZZ_G ) / (DD + UN*WC%RHO_F)
-         ENDDO SPECIES_LOOP
-         ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,WC%ZZ_F(1:N_TRACKED_SPECIES))
-         CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM_F)
-         WC%RHO_F = PBAR_S(KK,WC%PRESSURE_ZONE)/(RSUM_F*WC%ONE_D%TMP_F)
-      ENDDO
+      IF (PRESENT(WALL_INDEX)) THEN
 
-      IF (PREDICTOR) WC%ONE_D%UWS = -UN
-      IF (CORRECTOR) WC%ONE_D%UW  = -UN 
-   ENDIF
+         IF (WC%EW>0._EB) ONE_D%MASSFLUX(0:N_TRACKED_SPECIES) = ONE_D%MASSFLUX(0:N_TRACKED_SPECIES)*EXP(-WC%EW)
+   
+         ! Add total consumed mass to various summing arrays
+   
+         CONSUME_MASS: IF (CORRECTOR .AND. SF%THERMALLY_THICK) THEN  
+            DO N=1,N_TRACKED_SPECIES
+               OBSTRUCTION(WC%OBST_INDEX)%MASS = OBSTRUCTION(WC%OBST_INDEX)%MASS - ONE_D%MASSFLUX_ACTUAL(N)*DT*WC%AW
+            ENDDO
+         ENDIF CONSUME_MASS
+   
+         ! Compute the cell face value of the species mass fraction to get the right mass flux
+    
+         DO ITER=1,5
+            UN    = MFT/WC%RHO_F
+            SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
+               DD = 2.*WC%RHODW(N)*WC%RDN
+               ZZ_G  = ZZP(IIG,JJG,KKG,N)
+               WC%ZZ_F(N) = ( ONE_D%MASSFLUX(N) + DD*ZZ_G ) / (DD + UN*WC%RHO_F)
+            ENDDO SPECIES_LOOP
+            ZZ_GET(1:N_TRACKED_SPECIES) = MAX(0._EB,WC%ZZ_F(1:N_TRACKED_SPECIES))
+            CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM_F)
+            WC%RHO_F = PBAR_S(KK,WC%PRESSURE_ZONE)/(RSUM_F*WC%ONE_D%TMP_F)
+         ENDDO
+   
+         IF (PREDICTOR) WC%ONE_D%UWS = -UN
+         IF (CORRECTOR) WC%ONE_D%UW  = -UN 
 
+      ENDIF
+   
 END SELECT METHOD_OF_MASS_TRANSFER
 
 END SUBROUTINE CALC_SPECIES_BC
