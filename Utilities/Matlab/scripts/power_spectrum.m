@@ -50,26 +50,26 @@ set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 
-xlabel(xaxis_title,'Interpreter','LaTeX','FontSize',Label_Font_Size)
-ylabel(yaxis_title,'Interpreter','LaTeX','FontSize',Label_Font_Size)
+xlabel(xaxis_title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel(yaxis_title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 axis([xmin xmax ymin ymax])
-%h=legend(H,'FDS W, 1.5 cm','Location','Northeast'); set(h,'Interpreter','LaTeX','FontSize',Label_Font_Size)
+%h=legend(H,'FDS W, 1.5 cm','Location','Northeast'); set(h,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 %legend boxoff
 
 xt = 1.5e-1;
 yt = 3.5e0;
-text(xt,yt,title1,'FontSize',Label_Font_Size,'Interpreter','LaTeX')
+text(xt,yt,title1,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 xt = 1.5e-1;
 yt = .9e0;
-text(xt,yt,title2,'FontSize',Label_Font_Size,'Interpreter','LaTeX')
+text(xt,yt,title2,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 
-text(1.5e-1,3.5e-4,'measured','FontSize',Label_Font_Size,'FontName',Font_Name,'Interpreter','LaTeX');
-text(1.5e-1,1.2e-4,'puffing','FontSize',Label_Font_Size,'FontName',Font_Name,'Interpreter','LaTeX');
-text(1.5e-1,.4e-4,'frequency','FontSize',Label_Font_Size,'FontName',Font_Name,'Interpreter','LaTeX');
+text(1.5e-1,3.5e-4,'measured','FontSize',Label_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter);
+text(1.5e-1,1.2e-4,'puffing','FontSize',Label_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter);
+text(1.5e-1,.4e-4,'frequency','FontSize',Label_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter);
 annotation('arrow',[.3 .4],[.3 .3]);
-text(1e1,4e-2,'-5/3','FontSize',Label_Font_Size,'Interpreter','LaTeX')
-%text(1e2,1.1e-3,'Nyquist','FontSize',Label_Font_Size,'Interpreter','LaTeX')
-%text(1.4e2,.4e-3,'limit','FontSize',Label_Font_Size,'Interpreter','LaTeX')
+text(1e1,4e-2,'-5/3','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+%text(1e2,1.1e-3,'Nyquist','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+%text(1.4e2,.4e-3,'limit','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 
 % add SVN if file is available
 
@@ -80,7 +80,7 @@ if exist(svn_file,'file')
     X_SVN_Position = x_lim(1)+0.10*(x_lim(2)-x_lim(1));
     Y_SVN_Position = y_lim(1)+1.90*(y_lim(2)-y_lim(1));
     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 end
 
 % print to pdf

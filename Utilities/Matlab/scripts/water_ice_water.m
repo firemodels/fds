@@ -27,8 +27,8 @@ h=plot(wiw_M(1:500,3),wiw_m(1:500,5),'b-',wiw_M(501:1000,3),wiw_m(501:1000,5),'r
 % Plot attributes
     
 set(gca,'FontName',Font_Name)
-xlabel('Temperature ($^\circ$C)','Interpreter','LaTeX','FontSize',Label_Font_Size)
-ylabel('Liquid concentration (kg/m$^3$)','Interpreter','LaTeX','FontSize',Label_Font_Size)
+xlabel('Temperature ($^\circ$C)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('Liquid concentration (kg/m$^3$)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 legend('Cooling (freezing)','Heating (melting)')
 axis([-10 10 0 1000])
 set(h,'LineStyle','-')
@@ -43,7 +43,7 @@ if exist(SVN_Filename,'file')
     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 end
 
 % Create the PDF files

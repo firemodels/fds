@@ -34,12 +34,12 @@ H(3)=plot(time_scarc_cg_64mesh(1:10:end) ,pres_scarc_cg_64mesh(1:10:end)   ,'ro'
 H(4)=plot(time_scarc_bicg_64mesh(1:10:end),pres_scarc_bicg_64mesh(1:10:end) ,'g^','LineWidth',Line_Width); hold on
 H(5)=plot(time_scarc_gmg_64mesh(1:10:end) ,pres_scarc_gmg_64mesh(1:10:end)  ,'b+','LineWidth',Line_Width); hold on
 
-xlabel('Time (s)','FontSize',Title_Font_Size,'Interpreter','LaTeX')
-ylabel('Pressure (Pa)','FontSize',Title_Font_Size,'Interpreter','LaTeX')
+xlabel('Time (s)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
+ylabel('Pressure (Pa)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 axis([0 1 -2 2])
 legend_handle=legend(H,'FFT 1 mesh','FFT 64 meshes','ScaRC-CG 64 meshes','ScaRC-BICG 64 meshes','ScaRC-GMG 64 meshes','Location','EastOutside');
 legend boxoff
-set(legend_handle,'FontSize',Title_Font_Size,'Interpreter','LaTeX')
+set(legend_handle,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 set(legend_handle,'Position',[6.3 1.75 3.7 1.5])
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)

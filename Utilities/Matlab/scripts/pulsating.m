@@ -76,12 +76,12 @@ H(2)=plot(t_FL2_32,rho_fds_FL2_32,'g--','LineWidth',Line_Width); hold on
 H(3)=plot(t_FL2_64,rho_fds_FL2_64,'b--','LineWidth',Line_Width); hold on
 H(4)=plot(t_FL2_128,rho_fds_FL2_128,'r--','LineWidth',Line_Width); hold on
 
-xlabel('Time (s)','FontSize',Title_Font_Size,'Interpreter','LaTeX')
-ylabel('Density (kg/m$^3$)','FontSize',Title_Font_Size,'Interpreter','LaTeX')
+xlabel('Time (s)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
+ylabel('Density (kg/m$^3$)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 axis([0 12.5 0 2])
 legend_handle=legend(H,'FDS N=16','FDS N=32','FDS N=64','FDS N=128','Analytical Solution','Location','NorthEast');
 legend boxoff
-set(legend_handle,'FontSize',Title_Font_Size,'Interpreter','LaTeX')
+set(legend_handle,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 
@@ -95,7 +95,7 @@ if exist(SVN_Filename,'file')
     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 end
 
 % print to pdf
@@ -122,12 +122,12 @@ H(3)=loglog(h,e_FL4,'g^-','LineWidth',Line_Width); hold on
 H(4)=loglog(h,.1*h,'k--','LineWidth',Line_Width);
 H(5)=loglog(h,.1*h.^2,'k-','LineWidth',Line_Width);
 
-xlabel('Grid Spacing, $\delta x$ (m)','FontSize',Title_Font_Size,'Interpreter','LaTeX')
-ylabel('L2 Error (kg/m$^3$)','FontSize',Title_Font_Size,'Interpreter','LaTeX')
+xlabel('Grid Spacing, $\delta x$ (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
+ylabel('L2 Error (kg/m$^3$)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 axis([1e-2 1e0 1e-6 1e-1])
 legend_handle=legend(H(1:5),'FDS Central','FDS Superbee','FDS CHARM','${\cal O}(\delta x)$','${\cal O}(\delta x^2)$','Location','NorthWest');
 legend boxoff
-set(legend_handle,'FontSize',Title_Font_Size,'Interpreter','LaTeX')
+set(legend_handle,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 
@@ -141,7 +141,7 @@ if exist(SVN_Filename,'file')
     X_SVN_Position = 10^( log10(x_lim(1))+ SVN_Scale_X*( log10(x_lim(2)) - log10(x_lim(1)) ) );
     Y_SVN_Position = 10^( log10(y_lim(1))+ SVN_Scale_Y*( log10(y_lim(2)) - log10(y_lim(1)) ) );
     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 end
 
 % print to pdf

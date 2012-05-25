@@ -31,10 +31,10 @@ set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 axis([0.01 0.2 0.00005 0.01])
 
-xlabel('Grid Spacing, $\delta \!z$ (m)','Interpreter','LaTeX','Fontname','Times')
+xlabel('Grid Spacing, $\delta \!z$ (m)','Interpreter',Font_Interpreter,'Fontname','Times')
 ylabel('Friction Factor Error')
 h = legend(H,'FDS','$\mathcal{O}(\delta \!z)$','$\mathcal{O}(\delta \!z^2)$','Location','Southeast');
-set(h,'Interpreter','LaTeX')
+set(h,'Interpreter',Font_Interpreter)
 
 % add SVN if file is available
 
@@ -46,7 +46,7 @@ if exist(SVN_Filename,'file')
     X_SVN_Position = 10^( log10(x_lim(1))+ SVN_Scale_X*( log10(x_lim(2)) - log10(x_lim(1)) ) );
     Y_SVN_Position = 10^( log10(y_lim(1))+ SVN_Scale_Y*( log10(y_lim(2)) - log10(y_lim(1)) ) );
     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 end
 
 % print to pdf

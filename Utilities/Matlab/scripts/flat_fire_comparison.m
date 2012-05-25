@@ -44,10 +44,10 @@ set(gca, 'Position', [Plot_X, Plot_Y, Plot_Width, Plot_Height])
 set(gcf, 'DefaultLineLineWidth', Line_Width)
 set(gca, 'FontName', Font_Name)
 set(gca, 'FontSize', Label_Font_Size)
-xlabel('$x$-position (m)', 'Interpreter', 'LaTeX','FontSize',Label_Font_Size)
-ylabel('$z$-position (m)', 'Interpreter', 'LaTeX','FontSize',Label_Font_Size)
+xlabel('$x$-position (m)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('$z$-position (m)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
 h = legend(H, 'Flat fire', 'FDS', 'Location', 'Southwest');
-set(h,'Interpreter', 'LaTeX')
+set(h,'Interpreter', Font_Interpreter)
 set(gcf, 'Visible', Figure_Visibility);
 set(gcf, 'PaperUnits', Paper_Units);
 set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
@@ -60,7 +60,7 @@ if exist(SVN_Filename,'file')
     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 end
 display('Printing plot flat_fire_trajectory.pdf...')
 print(gcf,'-dpdf','../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/flat_fire_trajectory')
@@ -76,10 +76,10 @@ set(gca, 'Position', [Plot_X, Plot_Y, Plot_Width, Plot_Height])
 set(gcf, 'DefaultLineLineWidth', Line_Width)
 set(gca, 'FontName', Font_Name)
 set(gca, 'FontSize', Label_Font_Size)
-xlabel('Time (s)', 'Interpreter', 'LaTeX','FontSize',Label_Font_Size)
-ylabel('$x$-position (m)', 'Interpreter', 'LaTeX','FontSize',Label_Font_Size)
+xlabel('Time (s)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('$x$-position (m)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
 h = legend(H, 'Flat fire', 'FDS', 'Location', 'Southeast');
-set(h,'Interpreter', 'LaTeX')
+set(h,'Interpreter', Font_Interpreter)
 set(gcf, 'Visible', Figure_Visibility);
 set(gcf, 'PaperUnits', Paper_Units);
 set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
@@ -92,7 +92,7 @@ if exist(SVN_Filename,'file')
     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 end
 display('Printing plot flat_fire_x.pdf...')
 print(gcf,'-dpdf','../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/flat_fire_x')
@@ -108,10 +108,10 @@ set(gca, 'Position', [Plot_X, Plot_Y, Plot_Width, Plot_Height])
 set(gcf, 'DefaultLineLineWidth', Line_Width)
 set(gca, 'FontName', Font_Name)
 set(gca, 'FontSize', Label_Font_Size)
-xlabel('Time (s)', 'Interpreter', 'LaTeX','FontSize',Label_Font_Size)
-ylabel('$z$-position (m)', 'Interpreter', 'LaTeX','FontSize',Label_Font_Size)
+xlabel('Time (s)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('$z$-position (m)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
 h = legend(H, 'Flat fire', 'FDS', 'Location', 'Southwest');
-set(h,'Interpreter', 'LaTeX')
+set(h,'Interpreter', Font_Interpreter)
 set(gcf, 'Visible', Figure_Visibility);
 set(gcf, 'PaperUnits', Paper_Units);
 set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
@@ -124,7 +124,7 @@ if exist(SVN_Filename,'file')
     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 end
 display('Printing plot flat_fire_z.pdf...')
 print(gcf,'-dpdf','../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/flat_fire_z')
@@ -140,10 +140,10 @@ set(gca, 'Position', [Plot_X, Plot_Y, Plot_Width, Plot_Height])
 set(gcf, 'DefaultLineLineWidth', Line_Width)
 set(gca, 'FontName', Font_Name)
 set(gca, 'FontSize', Label_Font_Size)
-xlabel('Time (s)', 'Interpreter', 'LaTeX','FontSize',Label_Font_Size)
-ylabel('$u$-velocity (m/s)', 'Interpreter', 'LaTeX','FontSize',Label_Font_Size)
+xlabel('Time (s)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('$u$-velocity (m/s)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
 h = legend(H, 'Flat fire', 'FDS', 'Location', 'Northeast');
-set(h,'Interpreter', 'LaTeX')
+set(h,'Interpreter', Font_Interpreter)
 set(gcf, 'Visible', Figure_Visibility);
 set(gcf, 'PaperUnits', Paper_Units);
 set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
@@ -156,7 +156,7 @@ if exist(SVN_Filename,'file')
     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 end
 display('Printing plot flat_fire_u.pdf...')
 print(gcf,'-dpdf','../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/flat_fire_u')
@@ -172,10 +172,10 @@ set(gca, 'Position', [Plot_X, Plot_Y, Plot_Width, Plot_Height])
 set(gcf, 'DefaultLineLineWidth', Line_Width)
 set(gca, 'FontName', Font_Name)
 set(gca, 'FontSize', Label_Font_Size)
-xlabel('Time (s)', 'Interpreter', 'LaTeX','FontSize',Label_Font_Size)
-ylabel('$w$-velocity (m/s)', 'Interpreter', 'LaTeX','FontSize',Label_Font_Size)
+xlabel('Time (s)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('$w$-velocity (m/s)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
 h = legend(H, 'Flat fire', 'FDS', 'Location', 'Southwest');
-set(h,'Interpreter', 'LaTeX')
+set(h,'Interpreter', Font_Interpreter)
 set(gcf, 'Visible', Figure_Visibility);
 set(gcf, 'PaperUnits', Paper_Units);
 set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
@@ -188,7 +188,7 @@ if exist(SVN_Filename,'file')
     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 end
 display('Printing plot flat_fire_w.pdf...')
 print(gcf,'-dpdf','../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/flat_fire_w')

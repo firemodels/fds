@@ -39,11 +39,11 @@ axis([.05 10^4 10^2 10^8])
 
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
-xlabel('Q*','Interpreter','LaTeX','FontSize',Label_Font_Size)
-ylabel('FDS Q (kW)','Interpreter','LaTeX','FontSize',Label_Font_Size)
-text(.1,2e7,'Flame Height Heat Release Verification','FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter','LaTeX')
+xlabel('Q*','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('FDS Q (kW)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+text(.1,2e7,'Flame Height Heat Release Verification','FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 hh=legend(K,'$D^*/\delta x=5$','$D^*/\delta x=10$','$D^*/\delta x=20$','correct','Location','Southeast');
-set(hh,'Interpreter','LaTeX','FontSize',Key_Font_Size)
+set(hh,'Interpreter',Font_Interpreter,'FontSize',Key_Font_Size)
 
 % add SVN if file is available
 
@@ -55,7 +55,7 @@ if exist(SVN_Filename,'file')
     X_SVN_Position = x_lim(1)+0.10*(x_lim(2)-x_lim(1));
     Y_SVN_Position = y_lim(1)+1.70*(y_lim(2)-y_lim(1));
     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 end
 
 % print to pdf

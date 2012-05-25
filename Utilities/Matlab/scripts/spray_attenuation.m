@@ -130,14 +130,14 @@ set(gcf,'DefaultLineLineWidth',Line_Width)
 for n = 1:3
    set(d_ax(n),'Position',[Plot_X+(n-1)*Plot_Height/3,Plot_Y,Plot_Height/3,Plot_Height])
    axis(d_ax(n),[0 9 dmin dmax]);
-   xlabel(d_ax(n),'P (bar)','Interpreter','LaTeX','FontSize',Label_Font_Size)
-   title(d_ax(n),['Nozzle ' Nozzle{n}],'Interpreter','LaTeX','FontSize',Label_Font_Size)
+   xlabel(d_ax(n),'P (bar)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+   title(d_ax(n),['Nozzle ' Nozzle{n}],'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
    hl(n) = legend(hd(n,:),'Exp.','FDS','Location',d_leg_pos{n});
 end
 set(d_ax(2:3),'YTickLabel',[])
 set(d_ax(1),'XTick',[0 2 4 6 8])
 set(d_ax(2:3),'XTick',[2 4 6 8])
-ylabel(d_ax(1),'Mean diameter ($\mu$m)','Interpreter','LaTeX','FontSize',Label_Font_Size)
+ylabel(d_ax(1),'Mean diameter ($\mu$m)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
@@ -159,14 +159,14 @@ set(gcf,'DefaultLineLineWidth',Line_Width)
 for n = 1:3
    set(w_ax(n),'Position',[Plot_X+(n-1)*Plot_Height/3,Plot_Y,Plot_Height/3,Plot_Height])
    axis(w_ax(n),[0 9 wmin wmax]);
-   xlabel(w_ax(n),'P (bar)','Interpreter','LaTeX','FontSize',Label_Font_Size)
-   title(w_ax(n),['Nozzle ' Nozzle{n}],'Interpreter','LaTeX','FontSize',Label_Font_Size)
+   xlabel(w_ax(n),'P (bar)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+   title(w_ax(n),['Nozzle ' Nozzle{n}],'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
    hl(n) = legend(hw(n,:),'Exp.','FDS','Location',w_leg_pos{n});
 end
 set(w_ax(2:3),'YTickLabel',[])
 set(w_ax(1),'XTick',[0 2 4 6 8])
 set(w_ax(2:3),'XTick',[2 4 6 8])
-ylabel(w_ax(1),'Mean W-velocity (m/s)','Interpreter','LaTeX','FontSize',Label_Font_Size)
+ylabel(w_ax(1),'Mean W-velocity (m/s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
@@ -186,8 +186,8 @@ Plot_X = 1.35*(Paper_Height-Plot_Height)/2;
 Plot_Y = 1.25*(Paper_Height-Plot_Height)/2;
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Height,Plot_Height])
 set(hf(3),'DefaultLineLineWidth',Line_Width)
-xlabel('Exp. Attenuation (\%)','Interpreter','LaTeX','FontSize',Label_Font_Size)
-ylabel('FDS Attenuation (\%)','Interpreter','LaTeX','FontSize',Label_Font_Size)
+xlabel('Exp. Attenuation (\%)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('FDS Attenuation (\%)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 hl(n) = legend(ha,'Nozzle A','Nozzle B','Nozzle D','Location','SouthEast');
 
 % print to pdf
@@ -282,8 +282,8 @@ Plot_X = 1.35*(Paper_Height-Plot_Height)/2;
 Plot_Y = 1.25*(Paper_Height-Plot_Height)/2;
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Height,Plot_Height])
 set(hf(4),'DefaultLineLineWidth',Line_Width)
-xlabel('Exp. Attenuation (\%)','Interpreter','LaTeX','FontSize',Label_Font_Size)
-ylabel('FDS Attenuation (\%)','Interpreter','LaTeX','FontSize',Label_Font_Size)
+xlabel('Exp. Attenuation (\%)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('FDS Attenuation (\%)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);

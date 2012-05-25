@@ -65,9 +65,9 @@ xlabel('Measured Activation Time (s)')
 ylabel('Predicted Activation Time (s)')
 
 h = legend(K,'Flat Smooth','Flat Obstructed','13 Smooth','13 Obstructed','24 Smooth','24 Obstructed','Location','SouthEast');
-set(h,'Interpreter','LaTeX')
+set(h,'Interpreter',Font_Interpreter)
 
-text(0.05*xmax,0.95*ymax,'Vettori Sloped Ceiling Activation Times','FontSize',14,'FontName','Times','Interpreter','LaTeX')
+text(0.05*xmax,0.95*ymax,'Vettori Sloped Ceiling Activation Times','FontSize',14,'FontName','Times','Interpreter',Font_Interpreter)
 
 hold off
  

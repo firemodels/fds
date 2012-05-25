@@ -23,8 +23,8 @@ h=plot(TGA_2_N2(:,1),TGA_2_N2(:,2)/100,TGA_20_N2(:,1),TGA_20_N2(:,2)/100,M_2(:,3
 hold on
 set(gca,'FontName',Font_Name)
 axis([0 800 0 1.1])
-xlabel('Temperature ($^\circ$C)','Interpreter','LaTeX','FontSize',Label_Font_Size)
-ylabel('Mass Fraction','Interpreter','LaTeX','FontSize',Label_Font_Size)
+xlabel('Temperature ($^\circ$C)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('Mass Fraction','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 set(h([1 3]),'Color','b')
 set(h([2 4]),'Color','r')
 set(h([3 4]),'LineStyle','--')
@@ -40,7 +40,7 @@ if exist(SVN_Filename,'file')
     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 end
 
 % print pdf

@@ -90,8 +90,8 @@ for j=qrange
          end
         
         % format the legend and axis labels
-        xlabel(Ind_Title,'Interpreter','LaTeX','FontSize',Scat_Label_Font_Size)
-        ylabel(Dep_Title,'Interpreter','LaTeX','FontSize',Scat_Label_Font_Size)
+        xlabel(Ind_Title,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
+        ylabel(Dep_Title,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
         axis([Plot_Min Plot_Max Plot_Min Plot_Max])
         
         set(gca,'Units','inches')
@@ -101,19 +101,19 @@ for j=qrange
         set(gca,'Position',[1,1,4.5,4.5])
         
         text(Plot_Min+Title_Position(1)*(Plot_Max-Plot_Min),Plot_Min+Title_Position(2)*(Plot_Max-Plot_Min),...
-            Scatter_Plot_Title,'FontSize',Scat_Title_Font_Size,'FontName','Times','Interpreter','LaTeX')
+            Scatter_Plot_Title,'FontSize',Scat_Title_Font_Size,'FontName','Times','Interpreter',Font_Interpreter)
   
          if Sigma_E > 0.0
              text(Plot_Min+(Title_Position(1)+0.05)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.05)*(Plot_Max-Plot_Min),...
-                 ['$2 \, \tilde{\sigma}_E$=',num2str(2*Sigma_E,'%4.2f')],'FontSize',12,'FontName','Times','Interpreter','LaTeX')
+                 ['$2 \, \tilde{\sigma}_E$=',num2str(2*Sigma_E,'%4.2f')],'FontSize',12,'FontName','Times','Interpreter',Font_Interpreter)
          end
          
         if strcmp(Model_Error,'yes') & normality==0
             text(Plot_Min+(Title_Position(1)+0.05)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.10)*(Plot_Max-Plot_Min),...
-                ['$2 \, \tilde{\sigma}_M$=',num2str(2*Sigma_M,'%4.2f')],'FontSize',12,'FontName','Times','Interpreter','LaTeX')
+                ['$2 \, \tilde{\sigma}_M$=',num2str(2*Sigma_M,'%4.2f')],'FontSize',12,'FontName','Times','Interpreter',Font_Interpreter)
             
             text(Plot_Min+(Title_Position(1)+0.05)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.15)*(Plot_Max-Plot_Min),...
-                ['Bias =',num2str(delta,'%4.2f')],'FontSize',12,'FontName','Times','Interpreter','LaTeX')
+                ['Bias =',num2str(delta,'%4.2f')],'FontSize',12,'FontName','Times','Interpreter',Font_Interpreter)
         end
         
         C = stripcell(Group_Key_Label);

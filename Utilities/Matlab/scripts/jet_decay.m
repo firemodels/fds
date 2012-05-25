@@ -70,10 +70,10 @@ set(plot_handle,'YTick',[0.2 0.4 0.6 0.8 1.0 1.2])
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Key_Font_Size)
 
-text(1,1.1,'Jet Centerline Velocity Decay','FontSize',Label_Font_Size,'Interpreter','LaTeX')
+text(1,1.1,'Jet Centerline Velocity Decay','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 
-xlabel('$x/h$','FontSize',Label_Font_Size,'Interpreter','LaTeX');
-ylabel('$u_{max}/u_0$','FontSize',Label_Font_Size,'Interpreter','LaTeX')
+xlabel('$x/h$','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter);
+ylabel('$u_{max}/u_0$','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 legend_handle = legend(H,'analytical, m=0.12','analytical, m=0.20',...
 	                     'csmag, $h/\delta x=8$','csmag, $h/\delta x=16$',...
 	                     'dsmag, $h/\delta x=8$','dsmag, $h/\delta x=16$',...
@@ -81,7 +81,7 @@ legend_handle = legend(H,'analytical, m=0.12','analytical, m=0.20',...
 		                 'Vreman, $h/\delta x=8$','Vreman, $h/\delta x=16$',...
 						 'Location','Southwest');
 					 
-set(legend_handle,'Interpreter','LaTeX')
+set(legend_handle,'Interpreter',Font_Interpreter)
 %LP=get(legend_handle,'Position');
 set(legend_handle,'Position',[1.2699    0.8535    2.4    2.2])
 
@@ -112,7 +112,7 @@ if exist(SVN_Filename,'file')
     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 end
 
 % print to pdf
