@@ -80,16 +80,16 @@ for i_plot=1:2
 
     if i_plot==1
        h=plot(t,xf,'k-',t_fds,dmin,'k--',t_fds,dmax,'r--');
-       xlabel('Time (s)','Interpreter','LaTeX','FontSize',Label_Font_Size)
-       ylabel('Phase interface $x_f$ (m)','Interpreter','LaTeX','FontSize',Label_Font_Size)
+       xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+       ylabel('Phase interface $x_f$ (m)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
        legend('Analytical','FDS min','FDS max','Location','SouthEast')
     else
        h=plot(t,T(:,1),'k-',t,T(:,2),'r-',t,T(:,3),'g-'); hold on
        h=plot(M_fds(1:5:nt_fds,1),M_fds(1:5:nt_fds,2),'kd');hold on
        h=plot(M_fds(1:5:nt_fds,1),M_fds(1:5:nt_fds,3),'ro');hold on
        h=plot(M_fds(1:5:nt_fds,1),M_fds(1:5:nt_fds,4),'gs');
-       xlabel('Time (s)','Interpreter','LaTeX','FontSize',Label_Font_Size)
-       ylabel('Temperature ($^\circ$C)','Interpreter','LaTeX','FontSize',Label_Font_Size)       
+       xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+       ylabel('Temperature ($^\circ$C)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)       
        legend('Analytical 1 cm','Analytical 5 cm','Analytical 10 cm','FDS 1 cm','FDS 5 cm','FDS 10 cm')
     end
     
@@ -107,7 +107,7 @@ for i_plot=1:2
         X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
         Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
         text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-            'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+            'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
     end
     
     % Create the PDF files

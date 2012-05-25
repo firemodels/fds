@@ -106,8 +106,8 @@ Plot_X = 1.35*(Paper_Height-Plot_Height)/2;
 Plot_Y = 1.25*(Paper_Height-Plot_Height)/2;
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Height,Plot_Height])
 set(hf(1),'DefaultLineLineWidth',Line_Width)
-xlabel('Measured MEC (volume fraction)','Interpreter','LaTeX','FontSize',Scat_Label_Font_Size)
-ylabel('Predicted MEC (volume fraction)','Interpreter','LaTeX','FontSize',Scat_Label_Font_Size)
+xlabel('Measured MEC (volume fraction)','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
+ylabel('Predicted MEC (volume fraction)','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 %legend(hX,XLegendStr,'Location',X_leg_pos)
 legend(hX,XLegendStr,'Location','NorthWest')
 
@@ -151,8 +151,8 @@ Plot_X = 1.35*(Paper_Height-Plot_Height)/2;
 Plot_Y = 1.25*(Paper_Height-Plot_Height)/2;
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Height,Plot_Height])
 set(hf(2),'DefaultLineLineWidth',Line_Width)
-xlabel('Measured MEC (mass fraction)','Interpreter','LaTeX','FontSize',Scat_Label_Font_Size)
-ylabel('Predicted MEC (mass fraction)','Interpreter','LaTeX','FontSize',Scat_Label_Font_Size)
+xlabel('Measured MEC (mass fraction)','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
+ylabel('Predicted MEC (mass fraction)','Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 %legend(hY,YLegendStr,'Location',Y_leg_pos)
 legend(hY,YLegendStr,'Location','NorthWest')
 

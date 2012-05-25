@@ -274,10 +274,10 @@ end
 
 xt = xmin + .05*(xmax-xmin);
 yt = ymin + .92*(ymax-ymin);
-text(xt,yt,title_label,'FontSize',14,'Interpreter','LaTeX')
+text(xt,yt,title_label,'FontSize',14,'Interpreter',Font_Interpreter)
 xt = xmin + .05*(xmax-xmin);
 yt = ymin + .84*(ymax-ymin);
-text(xt,yt,text_label,'FontSize',14,'Interpreter','LaTeX')
+text(xt,yt,text_label,'FontSize',14,'Interpreter',Font_Interpreter)
 
 plot_style
 set(gca,'Units',Plot_Units)
@@ -300,7 +300,7 @@ if nfds==2; h = legend(H,exp_label,fds_label1,fds_label2,'Location',legend_pos);
 if nfds==3; h = legend(H,exp_label,fds_label1,fds_label2,fds_label3,'Location',legend_pos); end
 if nfds==4; h = legend(H,exp_label,fds_label1,fds_label2,fds_label3,fds_label4,'Location',legend_pos); end
 if nfds==5; h = legend(H,exp_label,fds_label1,fds_label2,fds_label3,fds_label4,fds_label5,'Location',legend_pos); end    
-set(h,'Interpreter','LaTeX')
+set(h,'Interpreter',Font_Interpreter)
 legend boxoff
 
 % add SVN if file is available
@@ -312,7 +312,7 @@ if exist(svn_file,'file')
     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 end
 
 % print to pdf

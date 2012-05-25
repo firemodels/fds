@@ -108,9 +108,9 @@ for i_plot=1:2
     set(gca,'FontName',Font_Name)
     set(AX(1),'FontName',Font_Name)
     set(AX(2),'FontName',Font_Name)
-    xlabel('Temperature ($^\circ$C)','Interpreter','LaTeX','FontSize',Label_Font_Size)
-    set(get(AX(1),'Ylabel'),'String','Mass Fraction','Interpreter','LaTeX','FontSize',Label_Font_Size)
-    set(get(AX(2),'Ylabel'),'String','Reaction Rate (s$^{-1}$) $\times$ 10$^3$','Interpreter','LaTeX','FontSize',Label_Font_Size)
+    xlabel('Temperature ($^\circ$C)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+    set(get(AX(1),'Ylabel'),'String','Mass Fraction','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+    set(get(AX(2),'Ylabel'),'String','Reaction Rate (s$^{-1}$) $\times$ 10$^3$','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
     set(AX(1),'YLim',[0 1.1])
     set(AX(2),'YLim',[0 2.2])
     set(AX(1),'YTickMode','manual')
@@ -143,7 +143,7 @@ for i_plot=1:2
         X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
         Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
         text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-            'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+            'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
     end
     
     % Create the PDF files
