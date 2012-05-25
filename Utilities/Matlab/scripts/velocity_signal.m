@@ -24,16 +24,16 @@ set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 
-xlabel(xaxis_title,'Interpreter','LaTeX','FontSize',Label_Font_Size)
-ylabel(yaxis_title,'Interpreter','LaTeX','FontSize',Label_Font_Size)
+xlabel(xaxis_title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel(yaxis_title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 axis([tmin tmax vmin vmax ])
 
 xt = tmin + .05*(tmax-tmin);
 yt = vmin + .92*(vmax-vmin);
-text(xt,yt,title_label,'FontSize',16,'Interpreter','LaTeX')
+text(xt,yt,title_label,'FontSize',16,'Interpreter',Font_Interpreter)
 xt = tmin + .05*(tmax-tmin);
 yt = vmin + .84*(vmax-vmin);
-text(xt,yt,text_label,'FontSize',16,'Interpreter','LaTeX')
+text(xt,yt,text_label,'FontSize',16,'Interpreter',Font_Interpreter)
 
 set(gca,'YTick',vmin:1:vmax)
 %set(gca,'YMinorTick','on')
@@ -49,7 +49,7 @@ if exist(svn_file,'file')
     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 end
 
 % print to pdf

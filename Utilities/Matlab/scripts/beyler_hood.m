@@ -50,11 +50,11 @@ for j = 1:n
     
     plot([xmin xmax(j)],[ymin ymax],'k-.')
     axis([xmin xmax(j) ymin ymax])
-    xlabel(['Measured ',alt_name{j},' Volume Fraction (\%)'],'Interpreter','LaTeX','FontSize',Label_Font_Size)
-    ylabel(['Predicted ',alt_name{j},' Volume Fraction (\%)'],'Interpreter','LaTeX','FontSize',Label_Font_Size)
+    xlabel(['Measured ',alt_name{j},' Volume Fraction (\%)'],'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+    ylabel(['Predicted ',alt_name{j},' Volume Fraction (\%)'],'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
     
     h = legend(K,'5 cm','-10 cm','0 cm','Location','NorthWest');
-    set(h,'Interpreter','LaTeX')
+    set(h,'Interpreter',Font_Interpreter)
     
     % add SVN if file is available
     
@@ -66,7 +66,7 @@ for j = 1:n
         X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
         Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
         text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-            'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+            'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
     end
     
     % print to pdf

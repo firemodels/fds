@@ -92,7 +92,7 @@ if exist(SVN_Filename,'file')
     X_SVN_Position = 10^( log10(x_lim(1))+ SVN_Scale_X*( log10(x_lim(2)) - log10(x_lim(1)) ) );
     Y_SVN_Position = 10^( log10(y_lim(1))+ SVN_Scale_Y*( log10(y_lim(2)) - log10(y_lim(1)) ) );
     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 end
 
 % print to pdf

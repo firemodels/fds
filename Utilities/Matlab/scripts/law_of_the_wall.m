@@ -30,13 +30,13 @@ semilogx(zp,up,'b-'); hold on
 semilogy(zp,uu,'r--')
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
-text(1.5,8,'$u^+ = z^+$','FontSize',Title_Font_Size,'Interpreter','LaTeX')
-text(200,15,'$u^+ = 2.4 {\rm ln} z^+ + 5.2$','FontSize',Title_Font_Size,'Interpreter','LaTeX','Color',[1 0 0])
-text(500,30,'$u^+ = A(z^+)^B$','FontSize',Title_Font_Size,'Interpreter','LaTeX','Color',[0 0 1])
+text(1.5,8,'$u^+ = z^+$','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
+text(200,15,'$u^+ = 2.4 {\rm ln} z^+ + 5.2$','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Color',[1 0 0])
+text(500,30,'$u^+ = A(z^+)^B$','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Color',[0 0 1])
 line([11.81 11.81],[0 20],'LineStyle','--','Color',[0 0 0])
-text(15,5,'$z^+ = 11.81$','FontSize',Title_Font_Size,'Interpreter','LaTeX');
-xlabel('$z^+$','FontSize',Title_Font_Size,'Interpreter','LaTeX')
-ylabel('$u^+$','FontSize',Title_Font_Size,'Interpreter','LaTeX')
+text(15,5,'$z^+ = 11.81$','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter);
+xlabel('$z^+$','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
+ylabel('$u^+$','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 
 % print pdf
 set(gcf,'Visible',Figure_Visibility);

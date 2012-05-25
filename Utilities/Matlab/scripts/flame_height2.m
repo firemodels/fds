@@ -117,11 +117,11 @@ Title_Position = [0.1 0.9];
 X_Title_Position = 10^(log10(Min_Ind)+Title_Position(1)*(log10(Max_Ind)-log10(Min_Ind)));
 Y_Title_Position = 10^(log10(Min_Dep)+Title_Position(2)*(log10(Max_Dep)-log10(Min_Dep)));
 
-xlabel(Dep_Title,'Interpreter','LaTeX','FontSize',Label_Font_Size)
-ylabel(Ind_Title,'Interpreter','LaTeX','FontSize',Label_Font_Size)
+xlabel(Dep_Title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel(Ind_Title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 axis([Min_Ind Max_Ind Min_Dep Max_Dep])
 text(X_Title_Position,Y_Title_Position,...
-    Plot_Title,'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter','LaTeX')
+    Plot_Title,'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 
 legend_handle=legend(H,...
 	                'Steward',...
@@ -135,8 +135,8 @@ legend_handle=legend(H,...
 					'Min FDS 95\%',...
 					'Location','SoutheastOutside');
 				
-set(legend_handle,'FontName',Font_Name,'Interpreter','LaTeX')
-set(legend_handle,'FontSize',Key_Font_Size,'Interpreter','LaTeX')
+set(legend_handle,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+set(legend_handle,'FontSize',Key_Font_Size,'Interpreter',Font_Interpreter)
 
 %plot_position = get(plot_handle,'Position')
 plot_outerposition = get(plot_handle,'OuterPosition');
@@ -167,7 +167,7 @@ if exist(svn_file,'file')
     X_SVN_Position = 10^( log10(x_lim(1))+ SVN_Scale_X*( log10(x_lim(2)) - log10(x_lim(1)) ) );
     Y_SVN_Position = 10^( log10(y_lim(1))+ SVN_Scale_Y*( log10(y_lim(2)) - log10(y_lim(1)) ) );
     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 end
 
 % print to pdf

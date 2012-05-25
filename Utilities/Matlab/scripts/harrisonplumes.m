@@ -244,8 +244,8 @@ plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1+2*Sigma_E)],'k--')
 plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1-2*Sigma_E)],'k--') 
 
 % format the legend and axis labels
-xlabel(Ind_Title,'Interpreter','LaTeX','FontSize',14)
-ylabel(Dep_Title,'Interpreter','LaTeX','FontSize',14)
+xlabel(Ind_Title,'Interpreter',Font_Interpreter,'FontSize',14)
+ylabel(Dep_Title,'Interpreter',Font_Interpreter,'FontSize',14)
 axis([Plot_Min Plot_Max Plot_Min Plot_Max])
 legend('3D Balcony','3D Adhered','Location','SouthEast')
 
@@ -257,11 +257,11 @@ set(gca,'YTick',get(gca,'XTick'))
 set(gca,'Position',[1,1,4.5,4.5])
         
 text(Plot_Min+Title_Position(1)*(Plot_Max-Plot_Min),Plot_Min+Title_Position(2)*(Plot_Max-Plot_Min),...
-            Scatter_Plot_Title,'FontSize',14,'FontName','Times','Interpreter','LaTeX')
+            Scatter_Plot_Title,'FontSize',14,'FontName','Times','Interpreter',Font_Interpreter)
   
 if Sigma_E > 0.0
     text(Plot_Min+(Title_Position(1)+0.05)*(Plot_Max-Plot_Min),Plot_Min+(Title_Position(2)-0.05)*(Plot_Max-Plot_Min),...
-                 ['$2 \, \sigma_E$=',num2str(2*Sigma_E,'%4.2f')],'FontSize',12,'FontName','Times','Interpreter','LaTeX')
+                 ['$2 \, \sigma_E$=',num2str(2*Sigma_E,'%4.2f')],'FontSize',12,'FontName','Times','Interpreter',Font_Interpreter)
 end
 hold off
 % print to pdf

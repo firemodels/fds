@@ -65,11 +65,11 @@ erro = errvec((length(errvec) - 1):length(errvec));
 set(gca, 'FontName', Font_Name)
 set(gca, 'FontSize', Key_Font_Size)
 
-xlabel('Time Step, $\delta t$ (s)', 'Interpreter', 'LaTeX','FontSize',Label_Font_Size)
+xlabel('Time Step, $\delta t$ (s)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('Terminal Velocity Error','FontSize',Label_Font_Size)
 h = legend(H, 'FDS', '$\mathcal{O}(\delta t)$',...
     '$\mathcal{O}(\delta t^2)$', 'Location', 'Southeast');
-set(h,'Interpreter', 'LaTeX')
+set(h,'Interpreter', Font_Interpreter)
 
 set(gcf, 'Visible', Figure_Visibility);
 set(gcf, 'PaperUnits', Paper_Units);
@@ -84,7 +84,7 @@ if exist(SVN_Filename,'file')
     X_SVN_Position = 10^( log10(x_lim(1))+ SVN_Scale_X*( log10(x_lim(2)) - log10(x_lim(1)) ) );
     Y_SVN_Position = 10^( log10(y_lim(1))+ SVN_Scale_Y*( log10(y_lim(2)) - log10(y_lim(1)) ) );
     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 end
 
 display('Printing plot terminal_velocity_convergence.pdf...')
@@ -111,11 +111,11 @@ erro = Linf((length(Linf) - 1):length(Linf));
 set(gca, 'FontName', Font_Name)
 set(gca, 'FontSize', Key_Font_Size)
 
-xlabel('Time Step, $\delta t$ (s)', 'Interpreter', 'LaTeX','FontSize',Label_Font_Size)
+xlabel('Time Step, $\delta t$ (s)', 'Interpreter', Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('Position Error','FontSize',Label_Font_Size)
 h = legend(H, 'FDS', '$\mathcal{O}(\delta t)$',...
     '$\mathcal{O}(\delta t^2)$', 'Location', 'Southeast');
-set(h,'Interpreter', 'LaTeX')
+set(h,'Interpreter', Font_Interpreter)
 
 set(gcf, 'Visible', Figure_Visibility);
 set(gcf, 'PaperUnits', Paper_Units);
@@ -130,7 +130,7 @@ if exist(SVN_Filename,'file')
     X_SVN_Position = 10^( log10(x_lim(1))+ SVN_Scale_X*( log10(x_lim(2)) - log10(x_lim(1)) ) );
     Y_SVN_Position = 10^( log10(y_lim(1))+ SVN_Scale_Y*( log10(y_lim(2)) - log10(y_lim(1)) ) );
     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 end
 
 display('Printing plot position_convergence.pdf...')
@@ -156,11 +156,11 @@ print(gcf, '-dpdf', '../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/posi
 % set(gca, 'FontName', Font_Name)
 % set(gca, 'FontSize', Key_Font_Size)
 % 
-% xlabel('Time Step, $\delta t$ (s)', 'Interpreter', 'LaTeX')
+% xlabel('Time Step, $\delta t$ (s)', 'Interpreter', Font_Interpreter)
 % ylabel('Position Error')
 % h = legend(H, 'FDS', '$\mathcal{O}(\delta t)$',...
 %     '$\mathcal{O}(\delta t^2)$', 'Location', 'Southeast');
-% set(h,'Interpreter', 'LaTeX')
+% set(h,'Interpreter', Font_Interpreter)
 % 
 % set(gcf, 'Visible', Figure_Visibility);
 % set(gcf, 'PaperUnits', Paper_Units);
@@ -175,7 +175,7 @@ print(gcf, '-dpdf', '../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/posi
 %     X_SVN_Position = 10^( log10(x_lim(1))+ SVN_Scale_X*( log10(x_lim(2)) - log10(x_lim(1)) ) );
 %     Y_SVN_Position = 10^( log10(y_lim(1))+ SVN_Scale_Y*( log10(y_lim(2)) - log10(y_lim(1)) ) );
 %     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 % end
 % 
 % print(gcf, '-dpdf', '../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/position_convergence');

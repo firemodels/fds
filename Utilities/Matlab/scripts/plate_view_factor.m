@@ -57,10 +57,10 @@ set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 
 axis([20 110 30 120])
-xlabel('Number radiation angles','Interpreter','LaTeX','FontSize',Label_Font_Size)
-ylabel('Radiative heat flux (kW/m$^2$)','Interpreter','LaTeX','FontSize',Label_Font_Size)
+xlabel('Number radiation angles','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('Radiative heat flux (kW/m$^2$)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 Plot_Title='Radiative heat flux (plate\_view\_factor)';
-text(30,113,Plot_Title,'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter','LaTeX')
+text(30,113,Plot_Title,'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 leg=legend('Exact 2D','FDS 2D','Exact cart.','FDS cart.','Exact cyl.','FDS cyl.',...
    'Location','SouthEast');
 set(leg,'FontSize',Key_Font_Size);
@@ -75,7 +75,7 @@ if exist(SVN_Filename,'file')
     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter','LaTeX')
+        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 end
 
 % print pdf
