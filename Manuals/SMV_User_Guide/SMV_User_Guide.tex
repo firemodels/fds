@@ -80,6 +80,8 @@ framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
 \newcommand{\everb}{
 \end{Verbatim}
 }
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
 \newcommand{\degC}{$^\circ$C}
 \newcommand{\figoptions}{hbp}
 \newcommand{\hhref}[1]{\href{#1}{{\tt #1}
@@ -815,7 +817,9 @@ problems found in video cards on older computers.
 %------------------------ Manipulating the Scene Manually --------------------
 %---------------------------------------------------------------------------------
 
-\chapter{Manipulating the Scene} The scene may be
+\chapter{Manipulating the Scene}
+
+The scene may be
 manipulated from two points of view, a world or global view and a
 first person or {\em eye}\ view.  These views may be switched by
 pressing the ``e'' key or by selecting the appropriate radio
@@ -856,7 +860,7 @@ Press the {\em M}\ key again to switch back to menu use.
 %\begin{wrapfigure}[15]{O}[0.5in]{3.5in}
 \begin{figure}[\figoptions]
 \centerline{
-\includegraphics[width=2.38888in]{figures/figMOTION}
+\includegraphics[width=2.47222in]{figures/figMOTION}
 }
 \caption[Motion/View/Render Dialog Box - Motion, Window Properties and Viewpoint Regions.]{Motion/View Dialog/Render Box - Motion, Window Properties and Viewpoint Regions. Rotate or translate
 the scene by clicking an {\em arrow}\ and dragging the mouse. The
@@ -882,7 +886,7 @@ where it is drawn in the scene.
 
 \begin{figure}[\figoptions]
 \centerline{
-\includegraphics[width=2.38888in]{figures/figMOTION2}
+\includegraphics[width=1.80555in]{figures/figMOTION2}
 }
 \caption[Motion/View/Render Dialog Box - Render and Scaling/Depth regions.]{Motion/View Dialog/Render Box. Render and Scaling/Depth regions.}
 \label{figMOTIONb}
@@ -979,7 +983,64 @@ results in a  4x speedup of these actions. } \\ \hline
 %---------------Realistic or Qualitative Visualization - 3D Smoke--------------
 %---------------------------------------------------------------------------------
 
-\chapter{Visualizing 3D Smoke}
+\chapter{Visualizing Smoke}
+
+\section{Tracers and Streaklines}
+
+\renewcommand{\figheight}{1.4in}
+
+Particle files contain the locations of tracer particles used to
+visualize the flow field. Figure \ref{figparticle} shows several
+snapshots of a developing kitchen fire visualized by using
+particles where particles are colored black. If present, sprinkler
+water droplets would be colored blue. Particles are stored in
+files ending with the extension {\tt .prt5}\footnote{Particle
+files created with FDS version 4 and earlier use the {\tt .part}\
+extension} and are displayed by selecting the particle file entry
+from the \loadmenu\ menu.
+
+Streaklines are a technique for showing motion in a still image.
+Figure \ref{figstreak} shows a snapshot of the same kitchen fire
+using streak lines instead of particles.  The streaks begin at 6 s
+and end at 10 s.
+
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+ \includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_part_005}&
+ \includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_part_010}\\
+ 5.0 s&10.0 s\\
+\includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_part_030}&
+\includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_part_060}\\
+30.0 s&60.0 s\\
+\end{tabular}
+\end{center}
+
+\caption{Townhouse kitchen fire visualized using tracer
+particles.}
+\label{figparticle}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\includegraphics[height=4.0in]{SCRIPT_FIGURES/thouse5_streak_060}
+\end{center}
+
+\caption{Townhouse kitchen fire visualized using streak lines. The
+{\em pin heads}\ shows flow conditions at 10~s, the corresponding
+{\em tails}\ shows conditions 0.25~s.}
+\label{figstreak}%
+\end{figure}
+
+Particle file data may be converted to an isosurace using
+Smokezip.  The isosurface location is defined in terms of particle
+density and the isosurface color is defined in terms of averaged
+particle values. See  Chapter \ref{ch:smokezip} for more details
+on using Smokezip for generating isosurface files from particle
+files and Section \ref{section:isosurace} for some examples.
+
+\section{Realistic}
 \FDS\ generates several data files visualized by \smokeview. Each
 file type may be loaded or unloaded using the \loadmenu\  menu
 described in Appendix \ref{sectload}. Visualizations produced by
@@ -1052,62 +1113,10 @@ of a townhouse kitchen fire.
 \end{figure}
 
 \chapter{Visualizing Data Quantitatively}
-\section{Tracer Particles and Streaklines - Particle Files}
-
-\renewcommand{\figheight}{1.4in}
-
-Particle files contain the locations of tracer particles used to
-visualize the flow field. Figure \ref{figparticle} shows several
-snapshots of a developing kitchen fire visualized by using
-particles where particles are colored black. If present, sprinkler
-water droplets would be colored blue. Particles are stored in
-files ending with the extension {\tt .prt5}\footnote{Particle
-files created with FDS version 4 and earlier use the {\tt .part}\
-extension} and are displayed by selecting the particle file entry
-from the \loadmenu\ menu.
-
-Streaklines are a technique for showing motion in a still image.
-Figure \ref{figstreak} shows a snapshot of the same kitchen fire
-using streak lines instead of particles.  The streaks begin at 6 s
-and end at 10 s.
-
-
-\begin{figure}[\figoptions]
-\begin{center}
-\begin{tabular}{cc}
- \includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_part_005}&
- \includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_part_010}\\
- 5.0 s&10.0 s\\
-\includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_part_030}&
-\includegraphics[height=\figheightA]{SCRIPT_FIGURES/thouse5_part_060}\\
-30.0 s&60.0 s\\
-\end{tabular}
-\end{center}
-
-\caption{Townhouse kitchen fire visualized using tracer
-particles.}
-\label{figparticle}%
-\end{figure}
-
-\begin{figure}[\figoptions]
-\begin{center}
-\includegraphics[height=4.0in]{SCRIPT_FIGURES/thouse5_streak_060}
-\end{center}
-
-\caption{Townhouse kitchen fire visualized using streak lines. The
-{\em pin heads}\ shows flow conditions at 10~s, the corresponding
-{\em tails}\ shows conditions 0.25~s.}
-\label{figstreak}%
-\end{figure}
-
-Particle file data may be converted to an isosurace using
-Smokezip.  The isosurface location is defined in terms of particle
-density and the isosurface color is defined in terms of averaged
-particle values. See  Chapter \ref{ch:smokezip} for more details
-on using Smokezip for generating isosurface files from particle
-files and Section \ref{section:isosurace} for some examples.
 
 \section{2D Shaded Contours and Vector Slices - Slice Files}
+
+\subsection{Axis aligned slices}
 
 Slice files contain results recorded within a rectangular array of
 grid points at each recorded time step. Continuously shaded
@@ -1138,75 +1147,17 @@ input file. }
 \end{center}
 \end{figure}
 
-\begin{figure}[\figoptions]
-\begin{center}
-\begin{tabular}{ccc}
-\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_gslice_005}&
-\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_gslice_010}\\
-5.0 s&10.0 s\\
-\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_gslice_030}&
-\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_gslice_060}&\\
-30.0 s&60.0 s
-&\raisebox{0.0ex}[0pt]{\includegraphics[height=5.0in]{figures/colorbar_20_620}}\\
-\end{tabular}
-\caption [General oriented temperature slices.]
-{General oriented temperature slices.
-These contours were generated by adding
-``{\tt \&SLCF XB=0.0,6.4,0.0,8.0,0.0,4.8, QUANTITY='TEMPERATURE' /}'' to the FDS
-input file. The slice orientation is changed by double clicking and moving the mouse.}
-\label{figslice}%
-\end{center}
-\end{figure}
-
 \indent To specify in FDS a vertical slice 1.5~m from the $y=0$
 boundary colored by temperature, use the line:
+{\scriptsize
 \begin{verbatim}
 &SLCF PBY=1.5 QUANTITY='TEMPERATURE' /
 \end{verbatim}
+}
 A more complete list of output quantities may be found in
 Ref.~\cite{FDS_Users_Guide}.
 
-\paragraph{New data coloring}Smokeview uses a new more precise method for coloring data occurring in
-slice, boundary and PLOT3D files. This is illustrated in Figure
-\ref{fignewslice}.  The colors are now crisper and sharper, more
-accurately representing the underlying data. This is most
-noticeable when selecting the colorbar with the mouse. As before
-this causes a portion of the colorbar to turn black and the
-corresponding region in the scene to also turn black.  Now the
-black color is accurate to the pixel so this feature could be used
-to highlight regions of interest. The improved accuracy is a
-result of the way color interpolations are performed.  The new
-method uses a 1D texture map (the colorbar) to color data.  Colors
-are interpolated within the colorbar.  Color interpolations with
-the former method occurred within the color cube.
-
-\begin{figure}[\figoptions]
-\begin{center}
-\begin{tabular}{ccc}
-\includegraphics[width=3.5in]{../SMV_Verification_Guide/SCRIPT_FIGURES/plume5c_notexturebar}&
-\includegraphics[width=3.5in]{../SMV_Verification_Guide/SCRIPT_FIGURES/plume5c_texturebar}\\
-colors interpolated using a 3D color cube&colors interpolated using a 1D texture color bar\\
-\end{tabular}
-\caption [Slice file snapshots illustrating old and new method for
-coloring data.] {Slice file snapshots illustrating old and new
-method for coloring data.}
-\label{fignewslice}%
-\end{center}
-\end{figure}
-
-\paragraph{3D Slice Files}
-The user may visualize a 3D region of data using slice files. The
-slices may be moved from one plane to the next just as with PLOT3D
-files (using left/right, up/down cursor keys or page up/page down
-keys).  To specify in FDS a cube of data from 1.0 to 2.0 in each
-of the X, Y and Z directions, use the line:
-\begin{verbatim}
-&SLCF XB=1.0,2.0,1.0,2.0,1.0,2.0 QUANTITY='TEMPERATURE' /
-\end{verbatim}
-
-
-
-Animated vectors are displayed using data contained in two or more
+\paragraph{Vector slices}Animated vectors are displayed using data contained in two or more
 slice files.  The direction and length of the vectors are
 determined from the $U$, $V$ and/or $W$ velocity slice files. The
 vector colors are determined from the file (such as temperature)
@@ -1242,6 +1193,109 @@ to obtain:
 \begin{verbatim}
 &SLCF PBY=1.50,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
 \end{verbatim}
+
+\paragraph{Data coloring}Smokeview uses a 1D texture map for coloring data occurring in
+slice, boundary and PLOT3D files. This is illustrated in Figure
+\ref{fignewslice}.  The colors are now crisper and sharper, more
+accurately representing the underlying data. This is most
+noticeable when selecting the colorbar with the mouse. As before
+this causes a portion of the colorbar to turn black and the
+corresponding region in the scene to also turn black.  Now the
+black color is accurate to the pixel so this feature could be used
+to highlight regions of interest. The improved accuracy is a
+result of the way color interpolations are performed.  Colors
+are interpolated within the colorbar using a 1D texture map.  Color interpolations with
+the former method occurred within the color cube.
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{ccc}
+\includegraphics[width=3.5in]{../SMV_Verification_Guide/SCRIPT_FIGURES/plume5c_notexturebar}&
+\includegraphics[width=3.5in]{../SMV_Verification_Guide/SCRIPT_FIGURES/plume5c_texturebar}\\
+colors interpolated using a 3D color cube&colors interpolated using a 1D texture color bar\\
+\end{tabular}
+\caption [Slice file snapshots illustrating old and new method for
+coloring data.] {Slice file snapshots illustrating old and new
+method for coloring data.}
+\label{fignewslice}%
+\end{center}
+\end{figure}
+
+\subsection{Orientable slices - 3D slices}
+The user may visualize a 3D region of data using slice files.
+To specify a cube of data from 1.0 to 2.0 in each
+of the X, Y and Z directions in FDS , use the line:
+\begin{verbatim}
+&SLCF XB=1.0,2.0,1.0,2.0,1.0,2.0 QUANTITY='TEMPERATURE' /
+\end{verbatim}
+
+A slice from the resulting slice file
+may be moved from one plane to the next just as with PLOT3D
+files (using left/right, up/down cursor keys or page up/page down
+keys).  3D slices may also be oriented arbitrarily (not aligned with a coordinate
+axis) as illustrated in Figure \ref{figgslice}.
+
+To orient a general slice double click within the scene.  While holding down the mouse after double clicking,
+move it from
+side to side or up and down to rotate the general slice.  Double clicking and moving
+the mouse vertically while holding down the {\tt ALT}\
+key causes the center of rotation for the general slice to move up and down.
+Double clicking and moving the mouse horizontally and vertically while holding down
+the {\tt SHIFT}\ key causes the center of rotation for the general slice to move along
+the {\tt X}\ and {\tt Y}\ axis respectively.
+
+General slices may also be oriented using the General slice motion region of the Motion/View/Render dialog box as illustrated
+in Figure \ref{figGSLICE}.
+
+\begin{figure}[\figoptions]
+\centerline{
+\includegraphics[width=1.80555in]{figures/figGSLICE}
+}
+\caption[Motion/View/Render Dialog Box - General slice regions.]{Motion/View/Render Dialog Box - General slice regions.}
+\label{figGSLICE}
+\end{figure}
+
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{ccc}
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_gslice_005}&
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_gslice_010}\\
+5.0 s&10.0 s\\
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_gslice_030}&
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_gslice_060}&\\
+30.0 s&60.0 s
+&\raisebox{0.0ex}[0pt]{\includegraphics[height=5.0in]{figures/colorbar_20_620}}\\
+\end{tabular}
+\caption [General oriented temperature slices.]
+{General oriented temperature slices.
+These contours were generated by adding
+``{\tt \&SLCF XB=0.0,6.4,0.0,8.0,0.0,4.8, QUANTITY='TEMPERATURE' /}'' to the FDS
+input file. The slice orientation is changed by double clicking and moving the mouse.}
+\label{figgslice}%
+\end{center}
+\end{figure}
+
+\subsection{Slices for fractional effective dose data}
+The Fractional Effective Dose index (FED), developed by Purser~\cite{SFPE:Purser}, is a commonly used measure of human incapacitation
+due to the combustion gases. Smokeview computes FED data using
+\be
+\mathrm{FED}_\mathrm{tot} = \mathrm{FED}_\mathrm{CO} \times \mathrm{HV}_\mathrm{CO_2} + \mathrm{FED}_\mathrm{O_2}
+\ee
+if CO2, CO and O2 data is available in the form of slice files specified in the FDS input file.
+These slices need to be specified at the
+same location.  In the following example, a FED slice would be computed at $y=1.6$.
+\begin{verbatim}
+&SLCF PBY=1.6,QUANTITY='VOLUME FRACTION' SPEC_ID='CARBON DIOXIDE' /
+&SLCF PBY=1.6,QUANTITY='VOLUME FRACTION' SPEC_ID='CARBON MONOXIDE' /
+&SLCF PBY=1.6,QUANTITY='VOLUME FRACTION' SPEC_ID='OXYGEN' /
+\end{verbatim}
+
+FED computations are stored by Smokeview in slice files for subsequent use.
+Since this computation
+is performed in Smokeview using data only found in the slices files, time step intervals
+should be chosen to ensure accuracy.  Figure \ref{} illustrates
+an FED slice file.
 
 \section{2D Shaded Contours on Solid Surfaces - Boundary Files}
 
@@ -1406,6 +1460,20 @@ generated from  particles.}
 \label{figisoparticle}%
 \end{figure}
 
+\subsection{Isosurfaces for fractional effective dose data}
+As with 2D slices, Smokeview computes the fractional effective dose (FED) for isosurfaces
+if 3D slices for CO2, CO and O2 are
+specified in the FDS input file.  3D slices are required to compute isosurfaces.
+Again, these slices need to be specified at the
+same location as in
+\begin{verbatim}
+&SLCF XB=0.0,1.6,0.0,1.6,0.0,3.2,QUANTITY='VOLUME FRACTION' SPEC_ID='CARBON DIOXIDE' /
+&SLCF XB=0.0,1.6,0.0,1.6,0.0,3.2,QUANTITY='VOLUME FRACTION' SPEC_ID='CARBON MONOXIDE' /
+&SLCF XB=0.0,1.6,0.0,1.6,0.0,3.2,QUANTITY='VOLUME FRACTION' SPEC_ID='OXYGEN' /
+\end{verbatim}
+Figure \ref{} illustrates
+an FED isosurfaces where the two levels are at 0.3 (incapacitation) and 1.0 (lethality).
+
 \section{Static Data - Plot3D Files} Data stored in Plot3D files
 use a format developed by NASA~\cite{PLOT3D} and are used by many
 CFD programs for representing simulation results. Plot3D files
@@ -1494,10 +1562,10 @@ CFAST installation is illustrated in Figure \ref{figcfast}.
 
 \begin{figure}[\figoptions]
 \begin{center}
-\includegraphics[height=3.5in]{figures/standard_0375}
+\includegraphics[height=3.5in]{SCRIPT_FIGURES/cfast_test_400}
 \end{center}
-\caption{CFAST 6.0 Standard case showing upper layer and vent flow
-at 375 s.}
+\caption{CFAST 6.0 test case showing upper layer and vent flow
+at 400 s.}
 \label{figcfast}%
 \end{figure}
 
@@ -1517,7 +1585,7 @@ when displaying several data files simultaneously.
 
 \begin{figure}[\figoptions]
 \centerline{
-\includegraphics[width=3.0416666in]{figures/figBOUNDSplot3d}
+\includegraphics[width=2.6041666in]{figures/figBOUNDSplot3d}
 } \caption[{\em File/Bounds}\ dialog box showing PLOT3D file
 options.] {{\em File/Bounds}\ dialog box showing PLOT3D file
 options. Select a variable and a bounds type {\em check box/radio
@@ -1541,7 +1609,7 @@ type of bounds should be applied.  The \frameit{Update}\ and
 effect.
 
 \begin{figure}[\figoptions]
-\centerline{\includegraphics[width=2.30555555in]{figures/figBOUND2}
+\centerline{\includegraphics[width=2.375in]{figures/figBOUND2}
 } \caption[{\em File/Bounds}\ dialog box showing slice and
 boundary file options.] {{\em File/Bounds}\ dialog box showing
 slice and boundary file options. Select a variable and a bounds
@@ -1595,7 +1663,7 @@ three different types of contour plots:  shaded, stepped and line
 contours.
 \section{3D Smoke Options}
 \begin{figure}[\figoptions]
-\centerline{\includegraphics[width=2.9722in]{figures/fig3DSmoke} }
+\centerline{\includegraphics[width=3.770833in]{figures/fig3DSmoke} }
 \caption[Dialog Box for setting 3D smoke options] {Dialog box for
 setting 3D smoke options.   } \label{fig3DSmoke}
 \end{figure}
@@ -1666,7 +1734,7 @@ depressed then every other vector is skipped.
 \section{Display Options}
 \subsection{General}
 \begin{figure}[\figoptions]
-\centerline{\includegraphics[width=2.93361in]{figures/figProperties}
+\centerline{\includegraphics[width=3.51388in]{figures/figProperties}
 } \caption [Dialog Box for setting miscellaneous Smokeview scene
 properties.] {Dialog Box for setting miscellaneous Smokeview scene
 properties.} \label{figProperties}
@@ -3907,7 +3975,7 @@ General strategies for improving Smokeview's ability to visualize cases and ther
 
 
 
-\bibliography{../Bibliography/FDS_refs,../Bibliography/FDS_mathcomp,../Bibliography/sv_fire,../Bibliography/sv_graphics}
+\bibliography{../Bibliography/FDS_general,../Bibliography/FDS_refs,../Bibliography/FDS_mathcomp,../Bibliography/sv_fire,../Bibliography/sv_graphics}
 \addcontentsline{toc}{chapter}{References}
 
 \part{Appendices}
@@ -4303,7 +4371,7 @@ The option menu is illustrated in Figure
 \begin{figure}[\figoptions]
 \begin{center}
 \includegraphics[width=3.236111in]{figures/menu_shades}
-\caption{Shades Menu.} \label{fig_shadesmenu}
+\caption{Data Coloring Menu.} \label{fig_shadesmenu}
 \end{center}
 \end{figure}
 \subsection{Shades}
