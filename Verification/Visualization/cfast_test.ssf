@@ -1,0 +1,10 @@
+RENDERDIR
+ ..\..\Manuals\SMV_User_Guide\SCRIPT_FIGURES
+UNLOADALL
+LOADFILE
+ cfast_test_zone.csv
+SETTIMEVAL
+ 400.000000
+RENDERONCE
+ cfast_test_400
+ 
