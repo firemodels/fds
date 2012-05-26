@@ -56,6 +56,8 @@ framerule=3pt,framesep=1pc,fillcolor=\color{yellow}]
 \newcommand{\everb}{
 \end{Verbatim}
 }
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
 \newcommand{\degF}{$^\circ$F}
 \newcommand{\degC}{$^\circ$C}
 \newcommand{\figoptions}{htp}
@@ -1466,7 +1468,6 @@ Therefore the average slope $N$ may be expressed in terms of $N_1$ and $N_2$ as
 N=\frac{1}{1/N_1+1/N_2}
 \end{eqnarray*}
 
-
 \section{Particle Systems}
 \subsection{Massless Particles}
 FDS uses particles as tracer elements to allow one to visualize flow.  FDS
@@ -1494,14 +1495,40 @@ dialog box.  Streak line length is specified in terms of time, a certain number 
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{cc}
-\includegraphics[height=6.0in]{figures/plume5c_part}&
-\includegraphics[height=6.0in]{figures/plume5c_streak}\\
+\includegraphics[width=3.0in]{../SMV_Verification_Guide/SCRIPT_FIGURES/plume5c_part}&
+\includegraphics[width=3.0in]{../SMV_Verification_Guide/SCRIPT_FIGURES/plume5c_streak}\\
 a) Particles&b) Partical streaks\\
 \end{tabular}
 \end{center}
 \caption{Plume flow visualized using particles and particle streaks.}
 \label{figpart}%
 \end{figure}
+
+\section{Computing and Visualizing Fractional Effective Dose data}
+Using CO, CO2 and O2 data computed by FDS, Smokeview computes Fractional Effective Dose (FED) index data.
+The FED, developed by Purser~\cite{SFPE:Purser}, is a commonly used measure of human incapacitation
+due to the combustion gases. Smokeview computes FED data using
+\be
+\mathrm{FED}_\mathrm{tot} = \mathrm{FED}_\mathrm{CO} \times \mathrm{HV}_\mathrm{CO_2} + \mathrm{FED}_\mathrm{O_2}
+\ee
+if CO2, CO and O2 data is available in the form of slice files specified in the FDS input file. Terms involving CN, NOx and irritants
+are neglected.  The fraction of an incapacitating dose of CO is calculated as
+\be
+\mathrm{FED}_\mathrm{CO} = \int_0^t 2.764 \times 10^{-5} \, (C_\mathrm{CO}(t))^{1.036} \, dt
+\ee
+where $t$ is time in minutes and $C_\mathrm{CO}$ is the CO concentration (ppm).
+The fraction of an incapacitating dose of low O${}_2$ hypoxia is calculated as
+\be
+\mathrm{FED}_\mathrm{O_2} =  \int_0^t \frac{dt}{60 \exp \left [ 8.13 - 0.54 \, (20.9 - C_\mathrm{O_2}(t)) \right ] }
+\ee
+where $t$ is time in minutes and $C_\mathrm{O_2}$ is the O${}_2$ concentration (volume per cent).
+The hyperventilation factor induced by carbon dioxide is calculated as
+\be
+\mathrm{HV}_\mathrm{CO_2} = \frac{ \exp( 0.1903 \, C_\mathrm{CO_2}(t) +  2.0004 ) }{7.1} \label{co2hyp}
+\ee
+where $t$ is time in minutes and $C_\mathrm{CO_2}$ is the CO${}_2$ concentration (percent).
+
+Figure \ref{} presents an FED computation where CO, CO2 and O2 are constant.
 
 %
 % -------------------  Volumetric Methods ------------------------
