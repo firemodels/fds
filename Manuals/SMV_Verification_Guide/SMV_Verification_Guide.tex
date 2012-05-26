@@ -710,6 +710,31 @@ The images for this test were created automatically by running the smokeview scr
 \label{figvslicetest}%
 \end{figure}
 
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{rccl}
+ 0.0~s&
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_vslice_00}&
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_vslicechop_00}\\
+ 10.0~s&
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_vslice_10}&
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_vslicechop_10}\\
+ 30.0~s&
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_vslice_30}&
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_vslicechop_30}\\
+ &&data chopped below 140~\degC\\
+ &&&\raisebox{0.5in}[0pt]{\includegraphics[height=7.5in]{figures/colorbar_20_620}}\\
+
+ \end{tabular}
+\end{center}
+ \caption[FED slice file test.] {FED slice file test. A fractional effective dose 
+ is computed for constant CO2, CO and O2 data.  The FED value displayed should
+ equal xxx.}
+\label{figvslicetest}%
+\end{figure}
+
+
+
 \section{3D Smoke}
 Figure \ref{figsmoketest} presents images verifying the display of 3D smoke and fire (heat release per unit volume).
 A series of 3D smoke images are drawn at 1.0~s, 10.0~s and 30.0~s.  The images contain semi-transparent slices derived from both soot density and heat release rate  per unit volume (HRRPUV) data.
