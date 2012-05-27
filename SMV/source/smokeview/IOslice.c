@@ -3436,7 +3436,7 @@ void drawvolslice_texture(const slicedata *sd){
 
   mesh *meshi;
 
-  if(visx_all==0&&visy_all==0&&visz_all==0)return;
+  if(sd->volslice==1&&visx_all==0&&visy_all==0&&visz_all==0)return;
   meshi = meshinfo + sd->blocknumber;
 
   xplt=meshi->xplt;
