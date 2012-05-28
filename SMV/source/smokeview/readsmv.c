@@ -8769,6 +8769,12 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%f %f %f",mscale,mscale+1,mscale+2);
       continue;
     }
+    if(match(buffer,"RENDERCLIP")==1){
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i %i %i %i %i",
+        &clip_rendered_scene,&render_clip_left,&render_clip_right,&render_clip_bottom,&render_clip_top);
+      continue;
+    }
     if(match(buffer,"CLIP")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f",&nearclip,&farclip);
@@ -10980,6 +10986,9 @@ void writeini(int flag){
     fprintf(fileout,"MSCALE\n");
     fprintf(fileout," %f %f %f\n",mscale[0],mscale[1],mscale[2]);
   }
+  fprintf(fileout,"RENDERCLIP\n");
+  fprintf(fileout,"%i %i %i %i %i\n",
+        clip_rendered_scene,render_clip_left,render_clip_right,render_clip_bottom,render_clip_top);
   fprintf(fileout,"CLIP\n");
   fprintf(fileout," %f %f\n",nearclip,farclip);
 
