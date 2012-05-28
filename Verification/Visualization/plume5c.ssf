@@ -5,14 +5,6 @@ RENDERDIR
 
 UNLOADALL
 LOADINIFILE
- plume5c_texturebar.ini
-LOADFILE
- plume5c_06.sf
-SETTIMEVAL
- 0.5
-RENDERONCE
- plume5c_texturebar
-LOADINIFILE
  plume5c_notexturebar.ini
 LOADFILE
  plume5c_06.sf
@@ -20,6 +12,12 @@ SETTIMEVAL
  0.5
 RENDERONCE
  plume5c_notexturebar
+KEYBOARD
+ T
+RENDERONCE
+ plume5c_texturebar
+KEYBOARD
+ (
 
 
 // render slice files
