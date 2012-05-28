@@ -1707,6 +1707,9 @@ void keyboard(unsigned char key, int flag){
       show_gslice_triangulation=0;
       show_gslice_normal=0;
       break;
+    case '(':
+      clip_rendered_scene=1-clip_rendered_scene;
+      break;
   }
 
   skip2=key2-'1'+1;
