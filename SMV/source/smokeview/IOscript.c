@@ -822,6 +822,7 @@ int compile_script(char *scriptfile){
 
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_LOADISO,buffer);
+      if(fgets(buffer2,255,stream)==NULL)break;
       scripti->cval=script_set_buffer(buffer2);
 
       nscriptinfo++;
