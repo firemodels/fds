@@ -2,6 +2,7 @@
 
 $RUNFDS Visualization capecod
 $RUNFDS Visualization cell_test
+$RUNFDS Visualization cfast_test
 $RUNFDS Visualization colorbar
 $RUNFDS Visualization colorconv
 $RUNFDS Visualization objects_dynamic
