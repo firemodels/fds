@@ -440,7 +440,7 @@ OPEN(11,FILE=TRIM(OUTPUT_FILE),FORM='FORMATTED',STATUS='REPLACE')
 
 ! Q_C = Q * (1 - RADIATIVE_FRACTION)
 
-WRITE(11,'(A)') 'Time, HRR, Ceiling jet temperature, Activation time'
+WRITE(11,'(A)') 'Time, Ceiling jet temperature, Activation time, HRR'
 
 ITER = .TRUE.
 T = 0
@@ -479,7 +479,7 @@ DO WHILE (ITER)
    IF ((((T_JET-273 - TMP_A)/(T_JET-273 - ACTIVATION_TEMPERATURE))<=0) .OR. (t_activation<=0)) THEN
       WRITE(11,'(F6.1,A1,F6.1,A1,F6.1,A4)') T,',',Q_C,',',T_JET-273.,',N/A'
    ELSE
-      WRITE(11,'(F6.1,A1,F6.1,A1,F6.1,A1,F6.1)') T,',',Q_C,',',T_JET-273.,',',t_activation
+      WRITE(11,'(F6.1,A1,F6.1,A1,F6.1,A1,F6.1)') T,',',T_JET-273.,',',t_activation,',',Q_C
    ENDIF
 
    IF ((T_JET-273)>ACTIVATION_TEMPERATURE) THEN
