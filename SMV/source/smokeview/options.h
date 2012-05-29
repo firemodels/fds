@@ -45,6 +45,7 @@
 #define pp_LANG
 #define pp_SHOOTER
 #define pp_FREEZE_VOLSMOKE
+#define pp_LIGHT
 
 #define _CRT_SECURE_NO_DEPRECATE
 
@@ -55,7 +56,6 @@
 #ifdef pp_BETA
 // #define pp_BENCHMARK
 //#define pp_GPUDEPTH
-#define pp_LIGHT
 #define pp_OPEN
 #define pp_SHOWLIGHT
 #endif

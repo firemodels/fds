@@ -339,6 +339,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
     int i,j,k;
     int frame_size;
     float *fed_frame,*fed_framem1;
+    float *fed_o2_frame=NULL, *fed_co_frame=NULL;
     float *o2_frame1,*o2_frame2;
     float *co2_frame1,*co2_frame2;
     float *co_frame1,*co_frame2;
@@ -436,6 +437,14 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
 
     times=fed_slice->times;
     fed_frame=fed_slice->qslicedata;
+
+    NewMemory((void **)&fed_o2_frame,frame_size*sizeof(float));
+    NewMemory((void **)&fed_co_frame,frame_size*sizeof(float));
+    for(i=0;i<frame_size;i++){
+      fed_o2_frame[i]=0.0;
+      fed_co_frame[i]=0.0;
+    }
+
     o2_frame1=o2->qslicedata;
     o2_frame2=o2_frame1+frame_size;
 
@@ -493,9 +502,15 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
       for(jj=0;jj<frame_size;jj++){
         float val1, val2;
 
-        val1=FEDCO(  co_frame1[jj])*HVCO2(  co2_frame1[jj])+FEDO2(  o2_frame1[jj]);
-        val2=FEDCO(co_frame2[jj])*HVCO2(co2_frame2[jj])+FEDO2(o2_frame2[jj]);
-        fed_frame[jj] = fed_framem1[jj] + (val1+val2)*dt/2.0;
+        val1=FEDCO(co_frame1[jj])*HVCO2(co2_frame1[jj]);
+        val2=FEDCO(co_frame2[jj])*HVCO2(co2_frame2[jj]);
+        fed_co_frame[jj] += fed_co_frame[jj] + (val1+val2)*dt/2.0;
+        
+        val1=FEDO2(o2_frame1[jj]);
+        val2=FEDO2(o2_frame2[jj]);
+        fed_o2_frame[jj] += (val1+val2)*dt/2.0;
+
+        fed_frame[jj] = fed_framem1[jj] + fed_co_frame[jj] + fed_o2_frame[jj];
       }
       if(fed_slice->volslice==0){
 
@@ -576,6 +591,8 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
                   &reduce_triangles, &error_local2);
       }
     }
+    FREEMEMORY(fed_o2_frame);
+    FREEMEMORY(fed_co_frame);
     FREEMEMORY(fed_slice->qslicedata);
     FREEMEMORY(fed_slice->times);
     Creadslice_frame(0,fedi->o2_index,UNLOAD);
