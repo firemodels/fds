@@ -476,7 +476,7 @@ DO WHILE (ITER)
 
    t_activation = (RTI / SQRT(U_JET)) * LOG((T_JET-273 - TMP_A)/(T_JET-273 - ACTIVATION_TEMPERATURE))
 
-   IF (((T_JET-273 - TMP_A)/(T_JET-273 - ACTIVATION_TEMPERATURE))<0) THEN
+   IF ((((T_JET-273 - TMP_A)/(T_JET-273 - ACTIVATION_TEMPERATURE))<=0) .OR. (t_activation<=0)) THEN
       WRITE(11,'(F6.1,A1,F6.1,A1,F6.1,A4)') T,',',Q_C,',',T_JET-273.,',N/A'
    ELSE
       WRITE(11,'(F6.1,A1,F6.1,A1,F6.1,A1,F6.1)') T,',',Q_C,',',T_JET-273.,',',t_activation
