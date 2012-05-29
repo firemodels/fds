@@ -18,27 +18,34 @@
 #undef pp_release
 #endif
 #ifdef pp_release
-#define PROGVERSION "5.6.3"
+#define PROGVERSION "6.0.0"
 #endif
 
 //VVVVVVVVVVVVVVVVVVVVVVVVVVVVV  turn on options available on all platforms VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
 //#define pp_HIDEMULTI
 //#define pp_GEOMPRINT
+
 #define pp_GSLICE
 #define pp_TERRAIN2GEOM
 #define pp_MOUSEDOWN
 #define pp_GPU
 #define pp_GLEW
+
 #ifdef pp_GPU
 #define pp_CULL
+#define pp_GPUTHROTTLE
 #endif
-#define pp_LIGHT
 //#define pp_MESSAGE
 #define pp_DRAWISO
 #define EGZ
 #define USE_ZLIB
 #define pp_THREAD
+#define pp_SLICECONTOURS
+#define pp_LANG
+#define pp_SHOOTER
+#define pp_FREEZE_VOLSMOKE
+
 #define _CRT_SECURE_NO_DEPRECATE
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -48,15 +55,9 @@
 #ifdef pp_BETA
 // #define pp_BENCHMARK
 //#define pp_GPUDEPTH
+#define pp_LIGHT
 #define pp_OPEN
-#ifdef pp_GPU
-#define pp_GPUTHROTTLE
-#endif
-#define pp_SLICECONTOURS
 #define pp_SHOWLIGHT
-#define pp_LANG
-#define pp_SHOOTER
-#define pp_FREEZE_VOLSMOKE
 #endif
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

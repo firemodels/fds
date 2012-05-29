@@ -316,7 +316,13 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
       ASSERT(0);
       break;
   }
-  readslice(fed_slice->file,fedi->fed_index,UNLOAD,&error_local);
+
+  if(file_type==FED_SLICE){
+    readslice(fed_slice->file,fedi->fed_index,UNLOAD,&error_local);
+  }
+  else if(file_type==FED_ISO){
+    readiso_orig(fed_iso->file,file_index,UNLOAD,&error_local);
+  }
 
   if(flag==UNLOAD)return;
 
