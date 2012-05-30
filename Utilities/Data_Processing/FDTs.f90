@@ -482,7 +482,7 @@ DO WHILE (ITER)
       WRITE(11,'(F6.1,A1,F6.1,A1,F6.1,A1,F6.1)') T,',',T_JET-273.,',',t_activation,',',Q_C
    ENDIF
 
-   IF ((T_JET-273)>ACTIVATION_TEMPERATURE) THEN
+   IF ((t_activation>0) .AND. (t_activation<T)) THEN
       ITER = .FALSE.
    ELSE
       T = T + 1
