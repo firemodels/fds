@@ -37,7 +37,7 @@
 &VENT MB='YMAX',SURF_ID='OPEN' / 
 &VENT MB='ZMAX',SURF_ID='OPEN' / 
 
-&ISOF QUANTITY='TEMPERATURE',VALUE(1)=30.0,100.0 /  Show 3D contours of temperature at 30 C and 100 C
+&ISOF QUANTITY='TEMPERATURE',VALUE(1:2)=30.0,100.0 /  Show 3D contours of temperature at 30 C and 100 C
 
 &SLCF PBX=0.8,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /  Add vector slices colored by temperature
 &SLCF PBY=0.8,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
