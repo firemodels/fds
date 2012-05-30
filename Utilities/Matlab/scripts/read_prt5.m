@@ -8,8 +8,8 @@
 %
 % >> read_prt5('terminal_velocity.prt5','real*8')
 %
-% precision = 'real*4' if EB_PART_FILE=.FALSE.
-% precision = 'real*8' if EB_PART_FILE=.TRUE.
+% precision = 'real*4' if EB_PART_FILE=.FALSE. on the DUMP line
+% precision = 'real*8' if EB_PART_FILE=.TRUE. on the DUMP line
 
 function [STIME, XP, YP, ZP, QP] = read_prt5(filename,precision)
 
