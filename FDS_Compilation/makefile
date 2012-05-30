@@ -376,13 +376,13 @@ aix_mpi : $(obj_mpi)
 
 #GCC and gfortran Version
 
-gnu_win_32 : FFLAGS  = -O1 -ffree-line-length-none -ffree-form
+gnu_win_32 : FFLAGS  = -O1 -static -ffree-line-length-none -ffree-form
 gnu_win_32 : FCOMPL  = gfortran
 gnu_win_32 : obj     = fds_gnu_win_32
 gnu_win_32 : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
-gnu_linux_32 : FFLAGS  = -O1 -ffree-line-length-none -ffree-form
+gnu_linux_32 : FFLAGS  = -O1 -static -ffree-line-length-none -ffree-form
 gnu_linux_32 : FCOMPL  = gfortran
 gnu_linux_32 : obj     = fds_gnu_linux_32
 gnu_linux_32 : $(obj_serial)
