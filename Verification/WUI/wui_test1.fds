@@ -92,7 +92,7 @@
 &ISOF QUANTITY='TEMPERATURE',VALUE(1)=100.0 /  Show 3D contours of temperature at 100 C
 &ISOF QUANTITY='TEMPERATURE',VALUE(1)=200.0 /  Show 3D contours of temperature at 200 C
 &ISOF QUANTITY='TEMPERATURE',VALUE(1)=620.0 /  Show 3D contours of temperature at 620 C
-&ISOF QUANTITY='TEMPERATURE',VALUE(1)=200.0,400.0 /  Show 3D contours of temperature at 200 C
+&ISOF QUANTITY='TEMPERATURE',VALUE(1:2)=200.0,400.0 /  Show 3D contours of temperature at 200 C
 
 &SLCF PBX=0.8,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /  Add vector slices colored by temperature
 &SLCF PBY=0.8,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
