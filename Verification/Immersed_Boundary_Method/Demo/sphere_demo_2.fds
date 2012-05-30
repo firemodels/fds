@@ -1,18 +1,17 @@
-&HEAD CHID='sphere_demo', TITLE='Demo of Matlab convhulln, created by sphere_demo.m' /
+&HEAD CHID='sphere_demo_2', TITLE='Test of heat flux bc with IBM' /
   
-&MESH IJK=64,32,32, XB=-4,4,-2,2,-2,2 /
+&MESH IJK=16,16,16, XB=-2,2,-2,2,-2,2 /
   
-&TIME T_END=10./
+&TIME T_END=100./
   
-&MISC IMMERSED_BOUNDARY_METHOD=1 /
+&MISC NOISE=.FALSE.,STRATIFICATION=.FALSE.,GVEC(3)=0.,IMMERSED_BOUNDARY_METHOD=1 /
+
+&RADI RADIATION=.FALSE./
+
+&SURF ID='adiabatic wall', ADIABATIC=.TRUE., DEFAULT=.TRUE./
+&SURF ID='sphere', COLOR='RED', CONVECTIVE_HEAT_FLUX=10./
   
-&VENT MB='XMIN', SURF_ID='supply' /
-&VENT MB='XMAX', SURF_ID='OPEN' /
-  
-&SURF ID='supply', VEL=-1., COLOR='LIGHT BLUE'/
-&SURF ID='sphere', COLOR='GREEN'/
-  
-&SLCF PBY=0, QUANTITY='VELOCITY', VECTOR=.TRUE. /
+&SLCF PBY=0, QUANTITY='TEMPERATURE', CELL_CENTERED=.TRUE. /
   
 &VERT X=0,0,1 /
 &VERT X=0,0,1 /
