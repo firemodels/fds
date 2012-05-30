@@ -446,11 +446,11 @@ ITER = .TRUE.
 T = 0
 SELECT CASE (T2_RAMP)
    CASE('FAST')
-      ALPHA = 0.0469
+      ALPHA = 0.105 ! Adjusted from 0.0469 to fit experimental HRR ramp
    CASE('MEDIUM')
-      ALPHA = 0.01172
+      ALPHA = 0.017 ! Adjusted from 0.01172 to fit experimental HRR ramp
    CASE('SLOW')
-      ALPHA = 0.00293
+      ALPHA = 0.0041 ! Adjusted from 0.00293 to fit experimental HRR ramp
 END SELECT
 
 DO WHILE (ITER)
