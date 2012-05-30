@@ -1435,39 +1435,40 @@ the line:
 to the FDS input file.  A complete list of isosurface quantities
 may be found in Ref.~\cite{FDS_Users_Guide}
 
-Smokezip may be used to generate isosurfaces from particle data.
-Isosurface locations indicate a boundary separating particle and
-no-particle regions, {\em i.e.}\ wherever particle density is 0.5
-particles per grid cell.  Isosurface  coloring is determined using
-averaged particle data.  Representing particle data with an
-isosurface is useful when particles are used to model objects such
-as trees especially when the objects are viewed up close.  See
-Chapter \ref{ch:smokezip} for more details on generating
-isosurface files from particle files.  Figure \ref{figisoparticle}
-shows a snapshot of a burning tree modeled using particles.  The
-tree is visualized using both particles and an isosurface
-generated from these same particles.
+%uncomment lines below when capability to model trees in FDS is fixed.
+
+%Smokezip may be used to generate isosurfaces from particle data.
+%Isosurface locations indicate a boundary separating particle and
+%no-particle regions, {\em i.e.}\ wherever particle density is 0.5
+%particles per grid cell.  Isosurface  coloring is determined using
+%averaged particle data.  Representing particle data with an
+%isosurface is useful when particles are used to model objects such
+%as trees especially when the objects are viewed up close.  See
+%Chapter \ref{ch:smokezip} for more details on generating
+%isosurface files from particle files.  Figure \ref{figisoparticle}
+%shows a snapshot of a burning tree modeled using particles.  The
+%tree is visualized using both particles and an isosurface
+%generated from these same particles.
 
 
-\begin{figure}[\figoptions]
-\begin{center}
-\begin{tabular}{ccc}
-\includegraphics[height=\figheightAbar]{../SMV_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_parttemp_view1_60}&
-\includegraphics[height=\figheightAbar]{../SMV_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_isotemp_view1_60}\\
-\includegraphics[height=\figheightAbar]{../SMV_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_parttemp_view2_60}&
-\includegraphics[height=\figheightAbar]{../SMV_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_isotemp_view2_60}\\
-\includegraphics[height=\figheightAbar]{../SMV_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_parttemp_view3_60}&
-\includegraphics[height=\figheightAbar]{../SMV_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_isotemp_view3_60}\\
-particles at 60.0~s s&isosurface at 60.0~s
-&\raisebox{0.0ex}[0pt]{\includegraphics[height=8.0in]{figures/iso_colorbar_10_100}}\\
-\\
-\end{tabular}
-\end{center}
-
-\caption{Tree fire visualized using particles and isosurfaces
-generated from  particles.}
-\label{figisoparticle}%
-\end{figure}
+%\begin{figure}[\figoptions]
+%\begin{center}
+%\begin{tabular}{ccc}
+%\includegraphics[height=\figheightAbar]{../SMV_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_parttemp_view1_60}&
+%\includegraphics[height=\figheightAbar]{../SMV_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_isotemp_view1_60}\\
+%\includegraphics[height=\figheightAbar]{../SMV_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_parttemp_view2_60}&
+%\includegraphics[height=\figheightAbar]{../SMV_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_isotemp_view2_60}\\
+%\includegraphics[height=\figheightAbar]{../SMV_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_parttemp_view3_60}&
+%\includegraphics[height=\figheightAbar]{../SMV_Verification_Guide/SCRIPT_FIGURES/onetree_surf_1mesh_isotemp_view3_60}\\
+%particles at 60.0~s s&isosurface at 60.0~s
+%&\raisebox{0.0ex}[0pt]{\includegraphics[height=8.0in]{figures/iso_colorbar_10_100}}\\
+%\\
+%\end{tabular}
+%\end{center}
+%\caption{Tree fire visualized using particles and isosurfaces
+%generated from  particles.}
+%\label{figisoparticle}%
+%\end{figure}
 
 \subsection{Isosurfaces for fractional effective dose data}
 As with 2D slices, Smokeview computes the fractional effective dose (FED) for isosurfaces
@@ -4176,9 +4177,9 @@ FDS.
 \elist
 
 \section{Show/Hide}
-\label{sectshow} The \showmenu\ menu item as illustrated 
+\label{sectshow} The \showmenu\ menu item as illustrated
 in Figure \ref{fig_showhidemenu}\ allows one to
-show or hide various parts of the simulation. These menu items 
+show or hide various parts of the simulation. These menu items
 only appear if they pertain to
 the simulation.  For example the \fbox{\tt Particles}
 sub-menu only appears if a particle file has been loaded.
@@ -4272,15 +4273,15 @@ This menu contains the following sub-menus .
 \end{figure}
 
 \blist
-\hitem{Colorbars}A sub-menu which allows the user to choose and manipulate 
+\hitem{Colorbars}A sub-menu which allows the user to choose and manipulate
 colorbars.
 
 \hitem{Highlight extreme data}This sub-menu allows one to color data above
-the specified maximum or below the specified minimum (extreme data) a 
+the specified maximum or below the specified minimum (extreme data) a
 different color.  This color may be specified using the Customize colorbar
 dialog box.
 
-\hitem{Shade Type}This sub-menu allows one to change the way the colorbar is 
+\hitem{Shade Type}This sub-menu allows one to change the way the colorbar is
 displayed between continuous, stepped (solid blocks of color) and line.
 
 \hitem{Transparent}Toggle contours between opaque and transparent.
@@ -4542,7 +4543,7 @@ portions of the scene.
 \hitem{Customize colorbars}Dialog box for creating new and editing
 existing colorbars.
 
-\hitem{Device/Objects}Dialog box for scaling smokeview objects and 
+\hitem{Device/Objects}Dialog box for scaling smokeview objects and
 showing data values associated with FDS devices.
 
 \hitem{Display}Dialog box for setting various
