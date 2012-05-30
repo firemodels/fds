@@ -72,7 +72,7 @@
 &ISOF QUANTITY='TEMPERATURE',VALUE(1)=100.0 /  Show 3D contours of temperature at 100 C
 &ISOF QUANTITY='TEMPERATURE',VALUE(1)=200.0 /  Show 3D contours of temperature at 200 C
 &ISOF QUANTITY='TEMPERATURE',VALUE(1)=620.0 /  Show 3D contours of temperature at 620 C
-&ISOF QUANTITY='TEMPERATURE',VALUE(1)=200.0,400.0 /  Show 3D contours of temperature at 200 C
+&ISOF QUANTITY='TEMPERATURE',VALUE(1:2)=200.0,400.0 /  Show 3D contours of temperature at 200 C
 
 &PART ID='tracers',MASSLESS=.TRUE.,
    QUANTITIES(1:4)='U-VELOCITY','V-VELOCITY','W-VELOCITY'
