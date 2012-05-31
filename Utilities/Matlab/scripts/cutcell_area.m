@@ -81,7 +81,7 @@ fprintf(fid,'%s\n','Case number  &  Illustration  &  Triangle Area  &  NXP  &  C
 fprintf(fid,'%s %s %6.4f %s %6.4f %s\n', '9    &',  '\includegraphics[totalheight=2.in]{SCRIPT_FIGURES/tri_cube_cut_cell_test_09_image}   &',   tri_area(9),  '&  2     &', cut_area(9), '\\ \noalign{\smallskip}\hline\noalign{\smallskip}');
 fprintf(fid,'%s %s %6.4f %s %6.4f %s\n', '10   &',  '\includegraphics[totalheight=2.in]{SCRIPT_FIGURES/tri_cube_cut_cell_test_10_image}   &',   tri_area(10), '&  5     &', cut_area(10), '\\ \noalign{\smallskip}\hline\noalign{\smallskip}');
 fprintf(fid,'%s %s %6.4f %s %6.4f %s\n', '11   &',  '\includegraphics[totalheight=2.in]{SCRIPT_FIGURES/tri_cube_cut_cell_test_11_image}   &',   tri_area(11), '&  7     &', cut_area(11), '\\ \noalign{\smallskip}\hline\noalign{\smallskip}');
-fprintf(fid,'%s %s %6.4f %s %6.4f %s\n', '12   &',  '\includegraphics[totalheight=2.in]{SCRIPT_FIGURES/tri_cube_cut_cell_test_12_image}   &',   tri_area(11), '&  9     &', cut_area(12), '\\ \noalign{\smallskip}\hline\noalign{\smallskip}');
+fprintf(fid,'%s %s %6.4f %s %6.4f %s\n', '12   &',  '\includegraphics[totalheight=2.in]{SCRIPT_FIGURES/tri_cube_cut_cell_test_12_image}   &',   tri_area(12), '&  9     &', cut_area(12), '\\ \noalign{\smallskip}\hline\noalign{\smallskip}');
 fprintf(fid,'%s\n','\end{tabular}');
 fprintf(fid,'%s\n','\end{center}');
 fprintf(fid,'%s\n','\end{table}');
