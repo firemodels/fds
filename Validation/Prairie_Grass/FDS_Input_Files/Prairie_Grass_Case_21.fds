@@ -1,17 +1,5 @@
-&HEAD CHID=''Prairie_Grass_Case_21'',  TITLE='Prairie Grass Particle Dispersion case 21' /
+&HEAD CHID='Prairie_Grass_Case_21',  TITLE='Prairie Grass Particle Dispersion case 21' /
 
-
--8 meshes, 4m res (x,y,z), Regular domain
-cMESH IJK=50,18,25, XB=0,200,0,75,0,100/
-cMESH IJK=50,18,25, XB=0,200,75,150,0,100/
-cMESH IJK=50,18,25, XB=0,200,150,225,0,100/
-cMESH IJK=50,18,25, XB=0,200,225,300,0,100/
-cMESH IJK=50,18,25, XB=0,200,300,375,0,100/
-cMESH IJK=50,18,25, XB=0,200,375,450,0,100/
-cMESH IJK=50,18,25, XB=0,200,450,525,0,100/
-cMESH IJK=50,18,25, XB=0,200,525,600,0,100/
-
--8 meshes, 8m res (x,y,z), Regular domain
 &MESH IJK=25,9,12, XB=0,200,0,75,0,100/
 &MESH IJK=25,9,12, XB=0,200,75,150,0,100/
 &MESH IJK=25,9,12, XB=0,200,150,225,0,100/
@@ -21,66 +9,27 @@ cMESH IJK=50,18,25, XB=0,200,525,600,0,100/
 &MESH IJK=25,9,12, XB=0,200,450,525,0,100/
 &MESH IJK=25,9,12, XB=0,200,525,600,0,100/
 
-&TIME T_END=1200.0 / 
+&TIME T_END=2400.0 / 
 
-&MISC V0=6.11, TMPA=28.6, P_INF=93800/ - No lapse - approx constant temp for first 800 m alt.
+&MISC V0=6.11, MEAN_FORCING(2)=.TRUE., TMPA=28.6, P_INF=93800/
 
 &DUMP DT_SLCF=1, DT_BNDF=1.0E9, DT_DEVC=600.0/
 
 &PART ID='TRACERS', MASSLESS=.TRUE., TURBULENT_DISPERSION=.TRUE./
 
-- Source 
 &INIT XYZ=100,100,0.46, PART_ID='TRACERS', NUMBER_INITIAL_PARTICLES=20, DT_INSERT=.1/ 
 
+&SURF ID='GROUND', NO_SLIP=.TRUE., DEFAULT=.TRUE., COLOR='FOREST GREEN'/
 
-&SURF ID='GROUND',ROUGHNESS=0.006, COLOR='FOREST GREEN'/
+&SURF ID = 'top', VEL=0., VEL_T(2)=13., NO_SLIP=.TRUE., COLOR='INVISIBLE'/
 
-- Source 0.0484 kg/s  / 16 m2 = 0.003 kg/m2/s
+&VENT XB = 0,200,0,0,0,100,     SURF_ID = 'PERIODIC' /
+&VENT XB = 0,200,600,600,0,100, SURF_ID = 'PERIODIC' /
+&VENT XB = 0,0,0,600,0,100,     SURF_ID = 'PERIODIC' /
+&VENT XB = 200,200,0,600,0,100, SURF_ID = 'PERIODIC' /
+&VENT XB = 0,200,0,600,100,100, SURF_ID = 'top' /
 
-&SURF ID='WIND',VEL=-6.11, PROFILE='ATMOSPHERIC',PLE=0.193,Z0=2.0 /
-
-
-- NOTES
-- stresses estimated from (Pal Arya 2000 -- Panofsky -- Dutton 1984)
- sigu=2.4u* = 0.912
- sigv=1.9u* = 0.722
- sigw=1.3u* = 0.494
- 
- Reynolds stresses = sigmas^2
- streamwise (y-axis here) 0.832
- Crosswind (x-axis) 0.521
- vertical 0.244
-
-- u* for exp 22 = 0.46 m/s (Van Ulden 1978) 
-- Eddy scale = 0.001 * u* / f = 39 m
-
-
--- !!!  u is vel in streamwise direction (parallel to y-axis here) !!!
-
-&VENT XB = 0,200,0,0,0,100
-      SURF_ID='WIND'
-      N_EDDY=500
-      L_EDDY=39.0
-      REYNOLDS_STRESS(1,1)=0.521
-      REYNOLDS_STRESS(2,2)=0.832
-      REYNOLDS_STRESS(3,3)=0.244/
----- not used
-      REYNOLDS_STRESS(2,1)=0.0
-      REYNOLDS_STRESS(3,1)=0.0
-
--- Boundary conditions 
--VENT XB = 0,200,0,0,0,100,SURF_ID = 'WIND' /
-&VENT XB = 0,200,600,600,0,100, SURF_ID = 'OPEN' /
-&VENT MB = XMIN, SURF_ID = 'OPEN' /
-&VENT MB = XMAX, SURF_ID = 'OPEN' /
-&VENT MB = ZMAX, SURF_ID = 'MIRROR' / --plume does not come close to top of domain.
-
-&OBST XB=0,200,0,600,-1,0, SURF_ID = 'GROUND', COLOR='INVISIBLE'/
-
-
--- Outputs
 &SLCF PBX=100,QUANTITY='VELOCITY',VECTOR=.TRUE./
-
 &SLCF PBZ=8,QUANTITY='VELOCITY',VECTOR=.TRUE./
 
 -- Devices in arcs, 2 deg separation at radii=50,100,200,400 m
