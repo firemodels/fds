@@ -1,0 +1,8 @@
+RENDERDIR
+ ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES
+SETTIMEVAL
+ 0.000000
+RENDERCLIP
+ 1 84 84 20 20
+RENDERONCE
+ tri_cube_cut_cell_test_08_image
