@@ -1042,7 +1042,6 @@ PARTICLE_LOOP: DO I=1,NLP
 
    ENDIF SOLID_GAS_MOVE
 
-    
    ! Special case where a particle hits a POROUS_FLOOR
     
    IF (POROUS_FLOOR .AND. LP%Z<ZS .AND. LPC%ARRAY_INDEX>0) THEN
@@ -1358,7 +1357,7 @@ REAL(EB),INTENT(IN) :: T
 REAL(EB) XI,YJ,ZK,UBAR,VBAR,WBAR,RVC,UREL,VREL,WREL,QREL,TMP_G,RHO_G,RD,RDS,RDC,X_OLD,Y_OLD,Z_OLD,&
          U_OLD,V_OLD,W_OLD,B_1,THROHALF,ZZ_GET(0:N_TRACKED_SPECIES),RDT,MU_AIR,WAKE_VEL,DROP_DEN,DROP_VOL_FRAC,RE_WAKE,&
          WE_G,T_BU_BAG,T_BU_STRIP,FP_MASS,HALF_DT2,BETA(3),OBDT(3),ALPHA,OPA,DTOPA,BDTOA(3),MPOM,ALBO,SFAC,BREAKUP_RADIUS(0:NDC),&
-         DD,DD_X,DD_Y,DD_Z,DW_X,DW_Y,DW_Z,K_SCREEN,Y_SCREEN,C_DRAG(3),A_DRAG(3)!!,HAB(3),PARACOR
+         DD,DD_X,DD_Y,DD_Z,DW_X,DW_Y,DW_Z,K_SCREEN,Y_SCREEN,C_DRAG(3),A_DRAG(3),HAB(3),PARACOR,QREL2
 INTEGER IIX,JJY,KKZ,IIG,JJG,KKG
 TYPE(LAGRANGIAN_PARTICLE_TYPE),POINTER::LP=>NULL()
 TYPE(LAGRANGIAN_PARTICLE_CLASS_TYPE),POINTER::LPC=>NULL()
@@ -1567,10 +1566,8 @@ PARTICLE_NON_STATIC_IF: IF (.NOT.LPC%STATIC) THEN
    ELSE
       MPOM = LP%PWT*LP%MASS/(RHO_G/RVC)
       IF (BETA(1)>ZERO_P) THEN
-      ! fluid momentum source term
-         LP%ACCEL_X = MPOM*(U_OLD-LP%U)*RDT 
-         ! semi-analytical solution for PARTICLE position
-         ALBO = ALPHA*LOG(OBDT(1))/BETA(1)/OPA
+         LP%ACCEL_X = MPOM*(U_OLD-LP%U)*RDT    ! fluid momentum source term
+         ALBO = ALPHA*LOG(OBDT(1))/BETA(1)/OPA ! semi-analytical solution for PARTICLE position
          LP%X = X_OLD + (U_OLD+ALPHA*UBAR)*DTOPA + ALBO*(U_OLD-UBAR) + GVEC(1)*HALF_DT2
       ENDIF
       IF (BETA(2)>ZERO_P) THEN
@@ -1586,20 +1583,27 @@ PARTICLE_NON_STATIC_IF: IF (.NOT.LPC%STATIC) THEN
    ENDIF
    
    ! gravitational acceleration
+
+   LP%U = LP%U + GVEC(1)*DT
+   LP%V = LP%V + GVEC(2)*DT
+   LP%W = LP%W + GVEC(3)*DT
    
    ! 2nd-order term for the particle velocities that is parallel to the rel velocity
-   !!HAB = ALPHA*BETA*HALF_DT2/OPA
-   
-   ! The quantity U_j,rel * PARACOR is zero when QREL = sqrt(U_i U_i) is zero.
-   ! But PARACOR itself will explode if QREL is zero, so we'll force it not to.
-   !!IF (QREL == 0._EB) THEN
-   !!   PARACOR = 0 !
-   !!ELSE
-   !!   PARACOR = (UREL*GVEC(1) + VREL*GVEC(2) + WREL*GVEC(3))/(QREL*QREL)
-   !!ENDIF
-   LP%U = LP%U + GVEC(1)*DT !!- HAB(1)*(GVEC(1) + UREL*PARACOR)
-   LP%V = LP%V + GVEC(2)*DT !!- HAB(2)*(GVEC(2) + VREL*PARACOR)
-   LP%W = LP%W + GVEC(3)*DT !!- HAB(3)*(GVEC(3) + WREL*PARACOR)
+
+   IF (SECOND_ORDER_PARTICLE_TRANSPORT) THEN
+      HAB = ALPHA*BETA*HALF_DT2/OPA
+      ! The quantity U_j,rel * PARACOR is zero when QREL = sqrt(U_i U_i) is zero.
+      ! But PARACOR itself will explode if QREL is zero, so we'll force it not to.
+      QREL2=QREL*QREL
+      IF (QREL2<ZERO_P) THEN
+         PARACOR = 0._EB
+      ELSE
+         PARACOR = (UREL*GVEC(1) + VREL*GVEC(2) + WREL*GVEC(3))/QREL2
+      ENDIF
+      LP%U = LP%U - HAB(1)*(GVEC(1) + UREL*PARACOR)
+      LP%V = LP%V - HAB(2)*(GVEC(2) + VREL*PARACOR)
+      LP%W = LP%W - HAB(3)*(GVEC(3) + WREL*PARACOR)
+   ENDIF
             
 ENDIF PARTICLE_NON_STATIC_IF
 
