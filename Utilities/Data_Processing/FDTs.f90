@@ -439,7 +439,7 @@ REAL :: Q,Q_C,T_JET
 
 OPEN(11,FILE=TRIM(OUTPUT_FILE),FORM='FORMATTED',STATUS='REPLACE')
 
-WRITE(11,'(A)') 'Time,Ceiling jet temperature,Activation time,HRR'
+WRITE(11,'(A)') 'Time,Ceiling jet temperature,Activation time,Total HRR'
 
 ITER = .TRUE.
 T = 0
@@ -474,9 +474,9 @@ DO WHILE (ITER)
    t_activation = (RTI / SQRT(U_JET)) * LOG((T_JET-273 - TMP_A)/(T_JET-273 - ACTIVATION_TEMPERATURE))
 
    IF ((((T_JET-273 - TMP_A)/(T_JET-273 - ACTIVATION_TEMPERATURE))<=0) .OR. (t_activation<=0)) THEN
-      WRITE(11,'(F6.1,A1,F6.1,A5,F6.1)') T,',',T_JET-273.,',NaN,',Q_C
+      WRITE(11,'(F6.1,A1,F6.1,A5,F6.1)') T,',',T_JET-273.,',NaN,',Q
    ELSE
-      WRITE(11,'(F6.1,A1,F6.1,A1,F6.1,A1,F6.1)') T,',',T_JET-273.,',',t_activation,',',Q_C
+      WRITE(11,'(F6.1,A1,F6.1,A1,F6.1,A1,F6.1)') T,',',T_JET-273.,',',t_activation,',',Q
    ENDIF
 
    IF ((t_activation>0) .AND. (t_activation<T)) THEN
