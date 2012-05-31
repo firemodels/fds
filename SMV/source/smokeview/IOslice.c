@@ -504,7 +504,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
 
         val1=FEDCO(co_frame1[jj])*HVCO2(co2_frame1[jj]);
         val2=FEDCO(co_frame2[jj])*HVCO2(co2_frame2[jj]);
-        fed_co_frame[jj] += fed_co_frame[jj] + (val1+val2)*dt/2.0;
+        fed_co_frame[jj] += (val1+val2)*dt/2.0;
         
         val1=FEDO2(o2_frame1[jj]);
         val2=FEDO2(o2_frame2[jj]);
