@@ -8,7 +8,7 @@
 
 &MISC IMMERSED_BOUNDARY_METHOD=0 /
 
-&SURF ID='face', COLOR='BLACK' /
+&SURF ID='face', COLOR='GRAY' /
 
 ! The following are 12 examples to test the cut-cell algorithm
 

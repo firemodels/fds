@@ -1,4 +1,4 @@
-&HEAD CHID='tri_cube_cut_cell_test_06', TITLE='test of cut cell area calculation' /
+&HEAD CHID='tri_cube_cut_cell_test_02', TITLE='test of cut cell area calculation' /
 
 &MESH IJK=3,3,3, XB=-1,2,-1,2,-1,2 /
   
@@ -8,14 +8,14 @@
 
 &MISC IMMERSED_BOUNDARY_METHOD=0 /
 
-&SURF ID='face', COLOR='BLACK' /
+&SURF ID='face', COLOR='GRAY' /
 
 ! The following are 12 examples to test the cut-cell algorithm
 
-! example 6
-&VERT X=0.5,0,1/
+! example 2
+&VERT X=1,0.5,1/
 &VERT X=1,1,0.5/
-&VERT X=0,1,0.5/
+&VERT X=0.5,1,1/
 
 ! Facets with vertices, N(3), ordered so that with right-hand rule
 ! the surface normal points toward the gas phase (out of the solid).
