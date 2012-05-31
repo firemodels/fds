@@ -1458,7 +1458,7 @@ DO I=1,3
 ENDDO
 
 !get normal of ploygan 
-IF (ABS(POLY_NORM(1)) >= ABS(POLY_NORM(2)) .AND. ABS(POLY_NORM(1)) >= ABS(POLY_NORM(2)) ) THEN
+IF (ABS(POLY_NORM(1)) >= ABS(POLY_NORM(2)) .AND. ABS(POLY_NORM(1)) >= ABS(POLY_NORM(3)) ) THEN
     IOR = 1
     NA = 2
     NB = 3
@@ -1547,7 +1547,7 @@ TRIANGLE_LOOP: DO I=1,3
         
         IF (DD < EPS) THEN ! almost parallel
             IERR = 0
-            EXIT
+            CYCLE
         ELSE 
             SC = (B*E-C*D)/DD
             TC = (A*E-B*D)/DD
