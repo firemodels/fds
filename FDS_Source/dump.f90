@@ -666,9 +666,9 @@ IF (APPEND) THEN
    OPEN(LU_HRR,FILE=FN_HRR,FORM='FORMATTED',STATUS='OLD',POSITION='APPEND')
 ELSE
    OPEN(LU_HRR,FILE=FN_HRR,FORM='FORMATTED',STATUS='REPLACE')
-   WRITE(TCFORM,'(A,I4.4,A)') "(",10+N_ZONE,"(A,','),A)"
-   WRITE(LU_HRR,TCFORM) 's','kW','kW','kW','kW','kW','kW','kW','kW','kW','kg/s',('Pa',N=1,N_ZONE) 
-   WRITE(LU_HRR,TCFORM) 'Time','HRR','Q_RADI','Q_CONV','Q_COND','Q_DIFF','Q_PRES','Q_PART','Q_ENTH','Q_TOTAL',&
+   WRITE(TCFORM,'(A,I4.4,A)') "(",11+N_ZONE,"(A,','),A)"
+   WRITE(LU_HRR,TCFORM) 's','kW','kW','kW','kW','kW','kW','kW','kW','kW','kW','kg/s',('Pa',N=1,N_ZONE) 
+   WRITE(LU_HRR,TCFORM) 'Time','HRR','Q_RADI','Q_CONV','Q_COND','Q_DIFF','Q_PRES','Q_PART','Q_GEOM','Q_ENTH','Q_TOTAL',&
                         'BURN_RATE',(TRIM(P_ZONE(N)%ID),N=1,N_ZONE) 
 ENDIF
 
@@ -5943,7 +5943,7 @@ TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 ! Zero out enthalpy equation right hand terms, except Q_DOT(7,NM), which has been updated in part.f90.
 
 Q_DOT(1:6,NM) = 0._EB
-Q_DOT(  8,NM) = 0._EB
+Q_DOT(  9,NM) = 0._EB
 
 IF (EVACUATION_ONLY(NM)) RETURN
 
@@ -5973,9 +5973,9 @@ DO K=1,KBAR
 ENDDO
 
 IF (ICYC>0) THEN
-   Q_DOT(8,NM) = (SPECIFIC_ENTHALPY_SUM(NM)-SPECIFIC_ENTHALPY_SUM_OLD)/DT
+   Q_DOT(9,NM) = (SPECIFIC_ENTHALPY_SUM(NM)-SPECIFIC_ENTHALPY_SUM_OLD)/DT
 ELSE
-   Q_DOT(8,NM) = 0._EB
+   Q_DOT(9,NM) = 0._EB
 ENDIF
 
 ! Compute the surface integral of all Del Dot terms
@@ -6062,7 +6062,7 @@ DO NM=1,NMESHES
    ENDIF
 ENDDO
  
-WRITE(TCFORM,'(A,I4.4,5A)') "(",10+N_ZONE,"(",FMT_R,",','),",FMT_R,")"
+WRITE(TCFORM,'(A,I4.4,5A)') "(",11+N_ZONE,"(",FMT_R,",','),",FMT_R,")"
 WRITE(LU_HRR,TCFORM) STIME,0.001_EB*Q_DOT_TOTAL(1:N_Q_DOT),0.001_EB*SUM(Q_DOT_TOTAL(1:N_Q_DOT-1)),&
                      M_DOT_TOTAL(1),(MESHES(1)%PBAR(1,I),I=1,N_ZONE)
  
