@@ -82,6 +82,7 @@ if nargin>=1
 end
 
 figure
+plot_style
 
 % experimental data
 M = csvread(exp_file,1,0);
