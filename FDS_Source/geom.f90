@@ -310,10 +310,10 @@ USE COMP_FUNCTIONS, ONLY: GET_FILE_NUMBER
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T
-INTEGER :: I,J,K,N,IERR,I_MIN,I_MAX,J_MIN,J_MAX,K_MIN,K_MAX,IC,DUMMY_INTEGER,IZERO,LU,CUTCELL_COUNT
+INTEGER :: I,J,K,N,IERR,IERR1,IERR2,I_MIN,I_MAX,J_MIN,J_MAX,K_MIN,K_MAX,IC
+INTEGER :: NP,NXP,DUMMY_INTEGER,IZERO,LU,CUTCELL_COUNT
 TYPE (MESH_TYPE), POINTER :: M
 REAL(EB) :: BB(6),V1(3),V2(3),V3(3),AREA,PC(18),XPC(27)
-INTEGER :: NP,NXP,IERR2
 LOGICAL :: EX,OP
 CHARACTER(60) :: FN
 REAL(FB) :: DUMMY_FB_REAL
@@ -370,7 +370,11 @@ FACE_LOOP: DO N=1,N_FACE
             BB(5) = M%Z(K-1)
             BB(6) = M%Z(K)
             CALL TRIANGLE_BOX_INTERSECT(IERR,V1,V2,V3,BB)
+            
             IF (IERR==1) THEN
+               CALL TRIANGLE_ON_CELL_SURF(IERR1,FACET(N)%NVEC,V1,M%XC(I),M%YC(J),M%ZC(K),M%DX(1),M%DY(1),M%DZ(1))
+               IF (IERR1==-1) CYCLE
+               
                CALL TRI_PLANE_BOX_INTERSECT(NP,PC,V1,V2,V3,BB)
                CALL TRIANGLE_POLYGON_POINTS(IERR2,NXP,XPC,V1,V2,V3,NP,PC,BB)
                IF (IERR2 == 1)  THEN
@@ -1462,12 +1466,12 @@ ENDDO EDGE_LOOP
 ! For more than 3 intersection points
 ! they have to be sorted in order to create a convex polygon
 CALL ELIMATE_REPEATED_POINTS(NP,PC_TMP)
+IF (NP > 3) THEN 
+   CALL SORT_POLYGON_CORNERS(NP,V1,V2,V3,PC_TMP)
+ENDIF
 DO I=1,NP*3
    PC(I) = PC_TMP(I)
 ENDDO
-IF (NP > 3) THEN 
-   CALL SORT_POLYGON_CORNERS(NP,V1,V2,V3,PC)
-ENDIF
 
 RETURN
 END SUBROUTINE TRI_PLANE_BOX_INTERSECT
@@ -1480,7 +1484,7 @@ IMPLICIT NONE
 ! Ref: Gernot Hoffmann, Cube Plane Intersection.
 
 INTEGER, INTENT(IN) :: NP
-REAL(EB), INTENT(INOUT) :: PC(3*NP)
+REAL(EB), INTENT(INOUT) :: PC(27)
 REAL(EB), INTENT(IN) :: V1(3),V2(3),V3(3)
 REAL(EB) :: MEAN_VALUE(3),POLY_NORM(3),R1,R2,TMP(3),U(3),W(3)
 INTEGER :: I,J,K,IOR,NA,NB
@@ -1569,7 +1573,7 @@ TRIANGLE_LOOP: DO I=1,3
          DO K=1,3
             V(K) = PC(J*3+K)-PC((J-1)*3+K)
          ENDDO
-      ELSE IF (J == NP) THEN        
+      ELSE
          DO K=1,3
             V(K) = PC(K)-PC((J-1)*3+K)
          ENDDO
@@ -1665,7 +1669,7 @@ USE MATH_FUNCTIONS, ONLY:NORM2
 IMPLICIT NONE
 
 INTEGER, INTENT(INOUT):: NP
-REAL(EB), INTENT(INOUT) :: PC(3*NP)
+REAL(EB), INTENT(INOUT) :: PC(27)
 INTEGER :: NP2,I,J,K
 REAL(EB), PARAMETER :: EPS=1.E-6_EB
 REAL(EB) :: U(3),V(3),W(3)
@@ -1786,7 +1790,7 @@ DO I=1,NP
          V1(K) = PC((I-1)*3+K)
          V2(K) = PC(I*3+K)
       ENDDO
-   ELSE IF (I == NP) THEN        
+   ELSE
       DO K=1,3
          V1(K) = PC((I-1)*3+K)
          V2(K) = PC(K)
@@ -1797,6 +1801,46 @@ ENDDO
 
 RETURN
 END FUNCTION POLYGON_AREA
+
+
+SUBROUTINE TRIANGLE_ON_CELL_SURF(IERR1,N_VEC,V,XC,YC,ZC,DX,DY,DZ)
+USE MATH_FUNCTIONS, ONLY:NORM2
+IMPLICIT NONE
+
+INTEGER, INTENT(OUT) :: IERR1
+REAL(EB), INTENT(IN) :: N_VEC(3),V(3),XC,YC,ZC,DX,DY,DZ
+REAL(EB) :: DIST(3)
+
+IERR1 = 1
+DIST = 0._EB
+!IF (NORM2(N_VEC)>1._EB) N_VEC = N_VEC/NORM2(N_VEC)
+
+IF (N_VEC(1)==1._EB .OR. N_VEC(1)==-1._EB) THEN
+   DIST(1) = XC-V(1)
+   IF (ABS(DIST(1))==DX*0.5_EB .AND. DOT_PRODUCT(DIST,N_VEC)<0._EB) THEN
+      IERR1 = -1
+   ENDIF
+   RETURN
+ENDIF
+
+IF (N_VEC(2)==1._EB .OR. N_VEC(2)==-1._EB) THEN
+   DIST(2) = YC-V(2)
+   IF (ABS(DIST(2))==DY*0.5_EB .AND. DOT_PRODUCT(DIST,N_VEC)<0._EB) THEN
+      IERR1 = -1
+   ENDIF
+   RETURN
+ENDIF
+
+IF (N_VEC(3)==1._EB .OR. N_VEC(3)==-1._EB) THEN
+   DIST(3) = ZC-V(3)
+   IF (ABS(DIST(3))==DZ*0.5_EB .AND. DOT_PRODUCT(DIST,N_VEC)<0._EB) THEN
+      IERR1 = -1
+   ENDIF
+   RETURN
+ENDIF
+
+RETURN
+END SUBROUTINE TRIANGLE_ON_CELL_SURF
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! End Cut-cell subroutines by Charles Luo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
