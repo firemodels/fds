@@ -145,15 +145,6 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
     }
     zonetu_devs[i]->in_zone_csv=1;
 
-    sprintf(label,"LLOD_%i",i+1);
-    zoneodl_devs[i]=getdevice(label,-1);
-    if(zoneodl_devs[i]==NULL){
-      use_od=0;
-    }
-    else{
-      zoneodl_devs[i]->in_zone_csv=1;
-    }
-
     sprintf(label,"ULOD_%i",i+1);
     zoneodu_devs[i]=getdevice(label,-1);
     if(zoneodu_devs[i]==NULL){
@@ -161,6 +152,16 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
     }
     else{
       zoneodu_devs[i]->in_zone_csv=1;
+    }
+
+    sprintf(label,"LLOD_%i",i+1);
+    zoneodl_devs[i]=getdevice(label,-1);
+    if(zoneodl_devs[i]==NULL)zoneodl_devs[i]=zoneodu_devs[i];
+    if(zoneodl_devs[i]==NULL){
+      use_od=0;
+    }
+    else{
+      zoneodl_devs[i]->in_zone_csv=1;
     }
   }
   if(use_od==1){
@@ -1627,7 +1628,7 @@ void drawroomdata(void){
     zroom = roomi->z1;
     dy = roomi->dy/2.;
 
-    if(sethazardcolor==2&&visSZone==1&&zoneodl!=NULL&&zoneodu!=NULL){
+    if(sethazardcolor==2&&visSZone==1){
 #ifdef pp_GPU
       if(usegpu==1){
         drawzonesmokeGPU(roomi);
