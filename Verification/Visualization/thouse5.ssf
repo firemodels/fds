@@ -4,22 +4,539 @@
 RENDERDIR
  ..\..\Manuals\SMV_User_Guide\SCRIPT_FIGURES
 
+// render 3D smoke
+
+LOADINIFILE
+ thouse5_part.ini
+UNLOADALL
+LOAD3DSMOKE
+ soot mass fraction
+LOAD3DSMOKE
+ HRRPUV
+SETTIMEVAL
+ 5.000000
+RENDERONCE
+ thouse5_smoke_005
+SETTIMEVAL
+ 10.000000
+RENDERONCE
+ thouse5_smoke_010
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ thouse5_smoke_030
+SETTIMEVAL
+ 60.000000
+RENDERONCE
+ thouse5_smoke_060
+
+// render 3D smoke using GPU
+
+LOADINIFILE
+ thouse5_gpu.ini
+LOAD3DSMOKE
+ soot mass fraction
+LOAD3DSMOKE
+ HRRPUV
+SETTIMEVAL
+ 5.0
+RENDERONCE
+ thouse5_smoke_gpu_005 
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ thouse5_smoke_gpu_010 
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ thouse5_smoke_gpu_030 
+
+// render slice files
+
+UNLOADALL
+LOADFILE
+ thouse5_01.sf
+KEYBOARD 
+ *
+KEYBOARD
+ y
+SETTIMEVAL
+ 5.000000
+RENDERONCE
+ thouse5_slice_005
+SETTIMEVAL
+ 10.000000
+RENDERONCE
+ thouse5_slice_010
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ thouse5_slice_030
+SETTIMEVAL
+ 60.000000
+RENDERONCE
+ thouse5_slice_060
+
+// render general slices
+
+UNLOADALL
+LOADINIFILE
+ thouse5_gslice.ini
+LOADFILE
+ thouse5_24.sf
+SETTIMEVAL
+ 5.000000
+RENDERONCE
+ thouse5_gslice_005
+SETTIMEVAL
+ 10.000000
+RENDERONCE
+ thouse5_gslice_010
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ thouse5_gslice_030
+SETTIMEVAL
+ 60.000000
+RENDERONCE
+ thouse5_gslice_060
+
+// render chopped slice file (ceiling jet)
+
+LOADINIFILE
+ thouse5_cjet.ini
+UNLOADALL
+LOADSLICE
+ TEMPERATURE
+ 2 1.500000
+SETTIMEVAL
+ 5.000000
+RENDERONCE
+ thouse5_cjet_005
+SETTIMEVAL
+ 10.000000
+RENDERONCE
+ thouse5_cjet_010
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ thouse5_cjet_030
+SETTIMEVAL
+ 60.000000
+RENDERONCE
+ thouse5_cjet_060
+
+// render vector slice file
+
+UNLOADALL
+LOADVSLICE
+ TEMPERATURE
+ 2 1.500000
+SETTIMEVAL
+ 5.000000
+RENDERONCE
+ thouse5_vslice_005
+SETTIMEVAL
+ 10.000000
+RENDERONCE
+ thouse5_vslice_010
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ thouse5_vslice_030
+SETTIMEVAL
+ 60.000000
+RENDERONCE
+ thouse5_vslice_060
+
+// render iso-surface
+
+UNLOADALL
+LOADISO
+ TEMPERATURE
+SETTIMEVAL
+ 5.000000
+RENDERONCE
+ thouse5_iso_005
+SETTIMEVAL
+ 10.000000
+RENDERONCE
+ thouse5_iso_010
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ thouse5_iso_030
+SETTIMEVAL
+ 60.000000
+RENDERONCE
+ thouse5_iso_060
+
+// render boundary file (cell averaged)
+
+UNLOADALL
+LOADFILE
+ thouse5_03.bf
+SETTIMEVAL
+ 5.000000
+RENDERONCE
+ thouse5_bound_005
+SETTIMEVAL
+ 10.000000
+RENDERONCE
+ thouse5_bound_010
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ thouse5_bound_030
+SETTIMEVAL
+ 60.000000
+RENDERONCE
+ thouse5_bound_060
+
+// render boundary file (cell centered)
+
+LOADFILE
+ thouse5_06.bf
+SETTIMEVAL
+ 5.000000
+RENDERONCE
+ thouse5_bound_cell_005
+SETTIMEVAL
+ 10.000000
+RENDERONCE
+ thouse5_bound_cell_010
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ thouse5_bound_cell_030
+SETTIMEVAL
+ 60.000000
+RENDERONCE
+ thouse5_bound_cell_060
+
+// render boundary file (cell averaged, truncated)
+
+UNLOADALL
+LOADINIFILE
+ thouse5_bound_trunc.ini
+LOADFILE
+ thouse5_03.bf
+SETTIMEVAL
+ 5.000000
+RENDERONCE
+ thouse5_bound_trunc_005
+SETTIMEVAL
+ 10.000000
+RENDERONCE
+ thouse5_bound_trunc_010
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ thouse5_bound_trunc_030
+SETTIMEVAL
+ 60.000000
+RENDERONCE
+ thouse5_bound_trunc_060
+
+// render particles
+
+UNLOADALL
+LOADPARTICLES
+PARTCLASSCOLOR
+ Uniform color
+PARTCLASSCOLOR
+ Uniform color
+PARTCLASSCOLOR
+ Uniform color
+PARTCLASSCOLOR
+ Uniform color
+SETTIMEVAL
+ 5.000000
+RENDERONCE
+ thouse5_part_005
+SETTIMEVAL
+ 10.000000
+RENDERONCE
+ thouse5_part_010
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ thouse5_part_030
+SETTIMEVAL
+ 60.000000
+RENDERONCE
+ thouse5_part_060
+
+// render particles using streaks
+
+LOADINIFILE
+ thouse5_streak.ini
+SETTIMEVAL
+ 5.000000
+RENDERONCE
+ thouse5_streak_005
+SETTIMEVAL
+ 10.000000
+RENDERONCE
+ thouse5_streak_010
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ thouse5_streak_030
+SETTIMEVAL
+ 60.000000
+RENDERONCE
+ thouse5_streak_060
+
+// render OBSTs using solid view
+
+UNLOADALL
+RENDERONCE
+ thouse5_solid
+
+// render OBSTs using outline view
+
+LOADINIFILE
+ thouse5_outline.ini
+RENDERONCE
+ thouse5_outline
+
+// render geometry using hidden view (ie don't draw OBSTs)
+
+LOADINIFILE
+ thouse5_hidden.ini
+RENDERONCE
+ thouse5_hidden
+
+// render vents - don't show open vents
+
+LOADINIFILE
+ thouse5_noopen.ini
+RENDERONCE
+ thouse5_noopen
+
+// render vents - don't show any vents
+
+LOADINIFILE
+ thouse5_novents.ini
+RENDERONCE
+ thouse5_novents
+
+// render PLOT3D stepped contours
+
+UNLOADALL
+LOADINIFILE
+ thouse5_plot3d.ini
+LOADFILE
+ thouse5_0001_00000061_00.q
+SETVIEWPOINT
+ view 2
+RENDERONCE
+ thouse5_plot3d_step
+
+// render PLOT3D line contours
+
+UNLOADALL
+LOADINIFILE
+ thouse5_plot3d2.ini
+LOADFILE
+ thouse5_0001_00000061_00.q
+SETVIEWPOINT
+ view 2
+RENDERONCE
+ thouse5_plot3d_line
+
+// render PLOT3D continuous contours
+
+UNLOADALL
+LOADINIFILE
+ thouse5_plot3d3.ini
+LOADFILE
+ thouse5_0001_00000061_00.q
+SETVIEWPOINT
+ view 2
+RENDERONCE
+ thouse5_plot3d_cont
+
+// render 3D smoke with no clipping
+
+UNLOADALL
+LOAD3DSMOKE
+ soot mass fraction
+LOAD3DSMOKE
+ HRRPUV
+SETVIEWPOINT
+ external
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ thouse5_smoke_noclip
+
+// render 3D smoke while clipping blockages (but not smoke)
+
+LOADINIFILE
+ thouse5_clip_blockages.ini
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ thouse5_smoke_clip_blockages
+
+// render 3D smoke, clipping blockages and smoke
+
+LOADINIFILE
+ thouse5_clip_blockages_data.ini
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ thouse5_smoke_clip_blockages_data
+
+// render geometry with ticks
+
+UNLOADALL
+LOADINIFILE
+ thouse5_ticks.ini
+SETVIEWPOINT
+ front
+RENDERONCE
+ thouse5_ticks
+
+UNLOADALL
+LOADINIFILE
+ thouse5_plot3d.ini
+LOADPLOT3D
+ 1 24.400000
+
+SHOWPLOT3DDATA
+ 1 1 1 0 5.866670
+SHOWPLOT3DDATA
+ 1 2 1 1 1.300000
+SHOWPLOT3DDATA
+ 1 3 1 0 2.400000
+SHOWPLOT3DDATA
+ 1 4 1 0 6
+PLOT3DPROPS
+ 1 0 4 1
+RENDERONCE
+thouse5_plot3d_val 
+
+SHOWPLOT3DDATA
+ 1 1 1 0 5.866670
+SHOWPLOT3DDATA
+ 1 2 1 1 1.300000
+SHOWPLOT3DDATA
+ 1 3 1 0 2.400000
+SHOWPLOT3DDATA
+ 1 4 1 0 6
+PLOT3DPROPS
+ 1 1 4 1
+RENDERONCE
+thouse5_plot3d_vec
+
+SHOWPLOT3DDATA
+ 1 1 1 0 5.866670
+SHOWPLOT3DDATA
+ 1 2 1 0 4.000000
+SHOWPLOT3DDATA
+ 1 3 1 0 2.400000
+SHOWPLOT3DDATA
+ 1 4 1 1 5
+PLOT3DPROPS
+ 1 0 4 1
+RENDERONCE
+thouse5_plot3d_iso1
+
+SHOWPLOT3DDATA
+ 1 1 1 0 5.866670
+SHOWPLOT3DDATA
+ 1 2 1 0 4.000000
+SHOWPLOT3DDATA
+ 1 3 1 0 2.400000
+SHOWPLOT3DDATA
+ 1 4 1 1 8
+PLOT3DPROPS
+ 1 0 4 1
+RENDERONCE
+thouse5_plot3d_iso2
+
+// render two left/right stereo images
+
+UNLOADALL
+LOADISO
+ TEMPERATURE
+LOADINIFILE
+ thouse5_lr_stereo.ini 
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ thouse5_iso_lr_stereo
+
+// render two stereo images
+
+LOADINIFILE
+ thouse5_rc_stereo.ini 
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ thouse5_iso_rc_stereo
+
+// render two stereo images
+
+LOADINIFILE
+ thouse5_rb_stereo.ini 
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ thouse5_iso_rb_stereo
+
+// render same view but not using stereo
+
+LOADINIFILE
+ thouse5_no_stereo.ini 
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ thouse5_iso_no_stereo
+UNLOADALL
+ 
+// render fed iso file
+
+LOADINIFILE
+ thouse5_fed2.ini
+UNLOADALL
+SETVIEWPOINT
+ external
+LOADFILE
+ thouse5_29_fed.iso
+SETTIMEVAL
+ 5.000000
+RENDERONCE
+ thouse5_fed_iso_005
+SETTIMEVAL
+ 10.000000
+RENDERONCE
+ thouse5_fed_iso_010
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ thouse5_fed_iso_030
+SETTIMEVAL
+ 60.000000
+RENDERONCE
+ thouse5_fed_iso_060
+LOADINIFILE
+ thouse5.ini
 
 // render fed slice file
 
 UNLOADALL
 LOADINIFILE
  thouse5_fed.ini
-SETVIEWPOINT
- top
-XSCENECLIP
- 0 -0.006400 0 6.406400
-YSCENECLIP
- 0 -0.008000 0 8.008000
-ZSCENECLIP
- 0 -0.004800 1 2.000000
 SCENECLIP
  1
+SETVIEWPOINT
+ top
+ZSCENECLIP
+ 0 0.0 1 2.000000
 LOADFILE
  thouse5_35_fed.sf
 SETTIMEVAL
@@ -38,6 +555,7 @@ SETTIMEVAL
  60.000000
 RENDERONCE
  thouse5_fed_z1p8_slice_060
-LOADINIFILE
- thouse5.ini
+
+
+
 
