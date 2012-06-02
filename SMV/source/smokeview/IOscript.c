@@ -388,6 +388,22 @@ int compile_script(char *scriptfile){
       nscriptinfo++;
       continue;
     }
+    if(match_upper(buffer,"SCENECLIP") == 1){
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"XSCENECLIP") == 1){
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"YSCENECLIP") == 1){
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"ZSCENECLIP") == 1){
+      nscriptinfo++;
+      continue;
+    }
     if(match_upper(buffer,"RENDERCLIP") == 1){
       nscriptinfo++;
       continue;
@@ -551,6 +567,61 @@ int compile_script(char *scriptfile){
       init_scripti(scripti,SCRIPT_KEYBOARD,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
       scripti->cval=script_set_buffer(buffer2);
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"SCENECLIP") == 1){
+
+      scripti = scriptinfo + nscriptinfo;
+      init_scripti(scripti,SCRIPT_SCENECLIP,buffer);
+      if(fgets(buffer2,255,stream)==NULL)break;
+      scripti->cval=script_set_buffer(buffer2);
+      sscanf(buffer2,"%i",&scripti->ival);
+
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"XSCENECLIP") == 1){
+
+      scripti = scriptinfo + nscriptinfo;
+      init_scripti(scripti,SCRIPT_XSCENECLIP,buffer);
+      if(fgets(buffer2,255,stream)==NULL)break;
+      scripti->cval=script_set_buffer(buffer2);
+      sscanf(buffer2,"%i %f %i %f",&scripti->ival,&scripti->fval,&scripti->ival2,&scripti->fval2);
+
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"XSCENECLIP") == 1){
+
+      scripti = scriptinfo + nscriptinfo;
+      init_scripti(scripti,SCRIPT_XSCENECLIP,buffer);
+      if(fgets(buffer2,255,stream)==NULL)break;
+      scripti->cval=script_set_buffer(buffer2);
+      sscanf(buffer2,"%i %f %i %f",&scripti->ival,&scripti->fval,&scripti->ival2,&scripti->fval2);
+
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"YSCENECLIP") == 1){
+
+      scripti = scriptinfo + nscriptinfo;
+      init_scripti(scripti,SCRIPT_YSCENECLIP,buffer);
+      if(fgets(buffer2,255,stream)==NULL)break;
+      scripti->cval=script_set_buffer(buffer2);
+      sscanf(buffer2,"%i %f %i %f",&scripti->ival,&scripti->fval,&scripti->ival2,&scripti->fval2);
+
+      nscriptinfo++;
+      continue;
+    }
+    if(match_upper(buffer,"ZSCENECLIP") == 1){
+
+      scripti = scriptinfo + nscriptinfo;
+      init_scripti(scripti,SCRIPT_ZSCENECLIP,buffer);
+      if(fgets(buffer2,255,stream)==NULL)break;
+      scripti->cval=script_set_buffer(buffer2);
+      sscanf(buffer2,"%i %f %i %f",&scripti->ival,&scripti->fval,&scripti->ival2,&scripti->fval2);
+
       nscriptinfo++;
       continue;
     }
@@ -1561,6 +1632,34 @@ int run_script(void){
         keyboard(*key,FROM_SCRIPT);
         returnval=1;
       }
+      break;
+    case SCRIPT_SCENECLIP:
+      xyz_clipplane=scripti->ival;
+      updatefacelists=1;
+      break;
+    case SCRIPT_XSCENECLIP:
+      clip_x=scripti->ival;
+      clip_x_val = scripti->fval;
+      
+      clip_X=scripti->ival2;
+      clip_X_val = scripti->fval2;
+      updatefacelists=1;
+      break;
+    case SCRIPT_YSCENECLIP:
+      clip_y=scripti->ival;
+      clip_y_val = scripti->fval;
+      
+      clip_Y=scripti->ival2;
+      clip_Y_val = scripti->fval2;
+      updatefacelists=1;
+      break;
+    case SCRIPT_ZSCENECLIP:
+      clip_z=scripti->ival;
+      clip_z_val = scripti->fval;
+      
+      clip_Z=scripti->ival2;
+      clip_Z_val = scripti->fval2;
+      updatefacelists=1;
       break;
     case SCRIPT_RENDERCLIP:
       clip_rendered_scene=scripti->ival;

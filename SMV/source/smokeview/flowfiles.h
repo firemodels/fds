@@ -131,7 +131,7 @@ typedef struct {
   char command_label[32];
   int ival,ival2,ival3,ival4,ival5;
   char *cval,*cval2;
-  float fval;
+  float fval,fval2;
   int exit,first,remove_frame;
 } scriptdata;
 

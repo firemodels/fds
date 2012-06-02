@@ -90,7 +90,6 @@ extern "C" void glui_clip_setup(int main_window){
 
   panel_clip = glui_clip->add_panel("",GLUI_PANEL_NONE);
   panel_clip_lower = glui_clip->add_panel_to_panel(panel_clip,_("Clip Lower"));
-
   panel_clipx = glui_clip->add_panel_to_panel(panel_clip_lower,"X",GLUI_PANEL_NONE);
   SPINNER_clip_xlower=glui_clip->add_spinner_to_panel(panel_clipx,"X",GLUI_SPINNER_FLOAT,&clip_x_val,SPINNER_xlower,CLIP_CB);
   SPINNER_clip_xlower->set_float_limits(xclip_min,xclip_max,GLUI_LIMIT_CLAMP);

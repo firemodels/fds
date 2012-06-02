@@ -1513,6 +1513,14 @@ void keyboard(unsigned char key, int flag){
               fprintf(scriptoutstream," %i %i %i %i\n",plotn,visVector,iveclengths,contour_type);
             }
           }
+          fprintf(scriptoutstream,"XSCENECLIP\n");
+          fprintf(scriptoutstream," %i %f %i %f\n",clip_x,clip_x_val,clip_X,clip_X_val);
+          fprintf(scriptoutstream,"YSCENECLIP\n");
+          fprintf(scriptoutstream," %i %f %i %f\n",clip_y,clip_y_val,clip_Y,clip_Y_val);
+          fprintf(scriptoutstream,"ZSCENECLIP\n");
+          fprintf(scriptoutstream," %i %f %i %f\n",clip_z,clip_z_val,clip_Z,clip_Z_val);
+          fprintf(scriptoutstream,"SCENECLIP\n");
+          fprintf(scriptoutstream," %i\n",xyz_clipplane);
           fprintf(scriptoutstream,"RENDERCLIP\n");
           fprintf(scriptoutstream," %i %i %i %i %i\n",clip_rendered_scene,render_clip_left,render_clip_right,render_clip_bottom,render_clip_top);
           if(rflag==0){
