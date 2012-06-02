@@ -1286,14 +1286,20 @@ input file. The slice orientation is changed by double clicking and moving the m
 \end{figure}
 
 \subsection{Fractional effective dose (FED) slices}
-The Fractional Effective Dose index (FED), developed by Purser~\cite{SFPE:Purser}, is used as a measure of human incapacitation
-due to the combustion gases. Smokeview computes FED data using
+The fractional effective dose (FED), developed by Purser~\cite{SFPE:Purser}, is a measure of human incapacitation
+due to combustion gases.
+FED index data is computed by Smokeview using CO, $\mathrm{CO_2}$ and $\mathrm{O_2}$ gas
+concentration data computed by FDS.
+This data is made available to Smokeview in the form of slice files.
+Smokeview computes FED data using
 \be
 \mathrm{FED}_\mathrm{tot} = \mathrm{FED}_\mathrm{CO} \times \mathrm{HV}_\mathrm{CO_2} + \mathrm{FED}_\mathrm{O_2}
 \ee
-if CO2, CO and O2 data is available in the form of slice files specified in the FDS input file.
-Species data slices for FED computations need to be specified at the
-same location.  In the following example, a FED slice would be computed at $y=1.6$.
+where $\mathrm{FED}_\mathrm{tot}$ is the total FED, $\mathrm{FED}_\mathrm{CO}$ is the FED due to CO,
+$\mathrm{HV}_\mathrm{CO_2}$ is a hyper-ventilating factor applied to CO and $\mathrm{FED}_\mathrm{O_2}$
+is the FED due to $\mathrm{CO_2}$.
+The species data slices used to compute an FED slice needs to be specified at the
+same location.  In the following, an FED slice would be computed at $y=1.6$.
 \begin{verbatim}
 &SLCF PBY=1.6,QUANTITY='VOLUME FRACTION' SPEC_ID='CARBON DIOXIDE' /
 &SLCF PBY=1.6,QUANTITY='VOLUME FRACTION' SPEC_ID='CARBON MONOXIDE' /
@@ -1309,17 +1315,17 @@ an FED slice file.
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{ccc}
-\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_fed_slice_005}&
-\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_fed_slice_010}\\
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_fed_z1p8_slice_005}&
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_fed_z1p8_slice_010}\\
 5.0 s&10.0 s\\
-\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_fed_slice_030}&
-\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_fed_slice_060}&\\
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_fed_z1p8_slice_030}&
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_fed_z1p8_slice_060}&\\
 30.0 s&60.0 s
 &\raisebox{0.0ex}[0pt]{\includegraphics[height=5.0in]{figures/colorbar_fed}}\\
 \end{tabular}
 \caption [FED slices.]
 {FED slices.
-These contours were generated using CO, CO2 and O2 data slices.
+These contours were generated using CO, $\mathrm{CO_2}$ and $\mathrm{O_2}$ data slices.
 }
 \label{figfedslice}%
 \end{center}
@@ -1491,7 +1497,7 @@ may be found in Ref.~\cite{FDS_Users_Guide}
 
 \subsection{Isosurfaces for fractional effective dose data}
 As with 2D slices, Smokeview computes the fractional effective dose (FED) for isosurfaces
-if 3D slices for CO2, CO and O2 are
+if 3D slices for $\mathrm{CO_2}$, CO and $\mathrm{O_2}$ are
 specified in the FDS input file.  3D slices are required to compute isosurfaces.
 Again, these slices need to be specified at the
 same location as in
@@ -1501,7 +1507,7 @@ same location as in
 &SLCF XB=0.0,1.6,0.0,1.6,0.0,3.2,QUANTITY='VOLUME FRACTION' SPEC_ID='OXYGEN' /
 \end{verbatim}
 Figure \ref{figfediso} illustrates
-an FED isosurfaces where the three levels are at 0.3, 1.0 and 3.0.
+an FED isosurfaces where the three levels are at 0.3 (blue), 1.0 (yellow) and 3.0 (red).
 
 \begin{figure}[\figoptions]
 \begin{center}
