@@ -5932,7 +5932,8 @@ SUBROUTINE UPDATE_HRR(NM)
 ! Q_DOT(5,NM) = int sum h_s rho D grad Z dot dS
 ! Q_DOT(6,NM) = int dp/dt dV
 ! Q_DOT(7,NM) = int q_part dV 
-! Q_DOT(8,NM) = int d(rho h_s)/dt dV
+! Q_DOT(8,NM) = int del dot q'' dV (q'' from unstructured geometry)
+! Q_DOT(9,NM) = int d(rho h_s)/dt dV
 
 USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_HEAT,GET_SENSIBLE_ENTHALPY,GET_SENSIBLE_ENTHALPY_DIFF
 REAL(EB) :: VC,U_N,ZZ_GET(0:N_TRACKED_SPECIES),H_S,HDIFF,H_S_J_ALPHA,CP,SPECIFIC_ENTHALPY_SUM_OLD
