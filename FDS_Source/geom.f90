@@ -310,7 +310,7 @@ USE COMP_FUNCTIONS, ONLY: GET_FILE_NUMBER
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T
-INTEGER :: I,J,K,N,IERR,IERR1,IERR2,I_MIN,I_MAX,J_MIN,J_MAX,K_MIN,K_MAX,IC
+INTEGER :: I,J,K,N,IERR,IERR1,IERR2,I_MIN,I_MAX,J_MIN,J_MAX,K_MIN,K_MAX,IC,IOR
 INTEGER :: NP,NXP,DUMMY_INTEGER,IZERO,LU,CUTCELL_COUNT
 TYPE (MESH_TYPE), POINTER :: M
 REAL(EB) :: BB(6),V1(3),V2(3),V3(3),AREA,PC(18),XPC(27)
@@ -355,14 +355,6 @@ FACE_LOOP: DO N=1,N_FACE
       DO J=J_MIN,J_MAX
          DO I=I_MIN,I_MAX
 
-            IF (M%CUTCELL_INDEX(I,J,K)==0) THEN
-               CUTCELL_COUNT = CUTCELL_COUNT+1
-               IC = CUTCELL_COUNT
-               M%CUTCELL_INDEX(I,J,K) = IC
-            ELSE
-               IC = M%CUTCELL_INDEX(I,J,K)
-            ENDIF
-
             BB(1) = M%X(I-1)
             BB(2) = M%X(I)
             BB(3) = M%Y(J-1)
@@ -371,15 +363,83 @@ FACE_LOOP: DO N=1,N_FACE
             BB(6) = M%Z(K)
             CALL TRIANGLE_BOX_INTERSECT(IERR,V1,V2,V3,BB)
             
-            IF (IERR==1) THEN
-               CALL TRIANGLE_ON_CELL_SURF(IERR1,FACET(N)%NVEC,V1,M%XC(I),M%YC(J),M%ZC(K),M%DX(1),M%DY(1),M%DZ(1))
-               IF (IERR1==-1) CYCLE
-               
+            IF (IERR==1) THEN      
+               CALL TRIANGLE_ON_CELL_SURF(IERR1,FACET(N)%NVEC,V1,M%XC(I), &
+                                          M%YC(J),M%ZC(K),M%DX(I),M%DY(J),M%DZ(K))
+               IF (IERR1==-1) CYCLE ! remove the possibility of double counting
+                              
                CALL TRI_PLANE_BOX_INTERSECT(NP,PC,V1,V2,V3,BB)
                CALL TRIANGLE_POLYGON_POINTS(IERR2,NXP,XPC,V1,V2,V3,NP,PC,BB)
-               IF (IERR2 == 1)  THEN
+               IF (IERR2 == 1)  THEN                  
                   AREA = POLYGON_AREA(NXP,XPC)
-                  CALL CUTCELL_INSERT(IC,AREA,FACET(N)%CUTCELL_LIST)
+                  IF (AREA > 0._EB) THEN
+                     
+                     ! check if the cutcell area needs to be assigned to a neighbor cell
+                     CALL POLYGON_CLOSE_TO_EDGE(IOR,FACET(N)%NVEC,POLYGON_CENTROID(NXP,XPC), &
+                                                M%XC(I),M%YC(J),M%ZC(K),M%DX(I),M%DY(J),M%DZ(K))  
+                     IF (IOR == 0) THEN
+                        IF (M%CUTCELL_INDEX(I,J,K)==0) THEN
+                           CUTCELL_COUNT = CUTCELL_COUNT+1
+                           IC = CUTCELL_COUNT
+                           M%CUTCELL_INDEX(I,J,K) = IC
+                        ELSE
+                           IC = M%CUTCELL_INDEX(I,J,K)
+                        ENDIF
+                     ELSE ! assign the cutcell area to a neighbor cell
+                        SELECT CASE(IOR)
+                           CASE(1)
+                              IF (M%CUTCELL_INDEX(I+1,J,K)==0) THEN
+                                 CUTCELL_COUNT = CUTCELL_COUNT+1
+                                 IC = CUTCELL_COUNT
+                                 M%CUTCELL_INDEX(I+1,J,K) = IC
+                               ELSE
+                                 IC = M%CUTCELL_INDEX(I+1,J,K)
+                               ENDIF
+                           CASE(-1)
+                              IF (M%CUTCELL_INDEX(I-1,J,K)==0) THEN
+                                 CUTCELL_COUNT = CUTCELL_COUNT+1
+                                 IC = CUTCELL_COUNT
+                                 M%CUTCELL_INDEX(I-1,J,K) = IC
+                               ELSE
+                                 IC = M%CUTCELL_INDEX(I-1,J,K)
+                               ENDIF
+                           CASE(2)
+                              IF (M%CUTCELL_INDEX(I,J+1,K)==0) THEN
+                                 CUTCELL_COUNT = CUTCELL_COUNT+1
+                                 IC = CUTCELL_COUNT
+                                 M%CUTCELL_INDEX(I,J+1,K) = IC
+                               ELSE
+                                 IC = M%CUTCELL_INDEX(I,J+1,K)
+                               ENDIF
+                           CASE(-2)
+                              IF (M%CUTCELL_INDEX(I,J-1,K)==0) THEN
+                                 CUTCELL_COUNT = CUTCELL_COUNT+1
+                                 IC = CUTCELL_COUNT
+                                 M%CUTCELL_INDEX(I,J-1,K) = IC
+                               ELSE
+                                 IC = M%CUTCELL_INDEX(I,J-1,K)
+                               ENDIF
+                           CASE(3)
+                              IF (M%CUTCELL_INDEX(I,J,K+1)==0) THEN
+                                 CUTCELL_COUNT = CUTCELL_COUNT+1
+                                 IC = CUTCELL_COUNT
+                                 M%CUTCELL_INDEX(I,J,K+1) = IC
+                               ELSE
+                                 IC = M%CUTCELL_INDEX(I,J,K+1)
+                               ENDIF
+                           CASE(-3)
+                              IF (M%CUTCELL_INDEX(I,J,K-1)==0) THEN
+                                 CUTCELL_COUNT = CUTCELL_COUNT+1
+                                 IC = CUTCELL_COUNT
+                                 M%CUTCELL_INDEX(I,J,K-1) = IC
+                               ELSE
+                                 IC = M%CUTCELL_INDEX(I,J,K-1)
+                               ENDIF
+                        END SELECT
+                     ENDIF
+
+                     CALL CUTCELL_INSERT(IC,AREA,FACET(N)%CUTCELL_LIST)
+                  ENDIF
                ENDIF
             ENDIF
 
@@ -1555,15 +1615,15 @@ TC = 0._EB
 NXP = 0
 TRIANGLE_LOOP: DO I=1,3
    SELECT CASE(I)
-   CASE(1)
-      U = V2-V1
-      S1P0 = V1
-   CASE(2)
-      U = V3-V2
-      S1P0 = V2
-   CASE(3)
-      U = V1-V3
-      S1P0 = V3
+      CASE(1)
+         U = V2-V1
+         S1P0 = V1
+      CASE(2)
+         U = V3-V2
+         S1P0 = V2
+      CASE(3)
+         U = V1-V3
+         S1P0 = V3
    END SELECT
     
    POLYGON_LOOP: DO J=1,NP
@@ -1610,12 +1670,12 @@ ENDDO TRIANGLE_LOOP
 ! add triangle vertices in polygon
 DO I=1,3
    SELECT CASE(I)
-   CASE(1)
-      V = V1
-   CASE(2)
-      V = V2
-   CASE(3)
-      V = V3
+      CASE(1)
+         V = V1
+      CASE(2)
+         V = V2
+      CASE(3)
+         V = V3
    END SELECT
     
    IF (POINT_IN_BB(V,BB)) THEN
@@ -1775,13 +1835,8 @@ INTEGER :: I,K
 REAL(EB) :: V1(3),V2(3),V3(3)
     
 POLYGON_AREA = 0._EB
-V3 = 0._EB ! mean of the polygon
+V3 = POLYGON_CENTROID(NP,PC)
 
-DO I=1,NP
-   DO K=1,3
-      V3(K) = V3(K)+PC((I-1)*3+K)/NP
-   ENDDO
-ENDDO
 DO I=1,NP
    IF (I < NP) THEN
       DO K=1,3
@@ -1799,6 +1854,26 @@ ENDDO
 
 RETURN
 END FUNCTION POLYGON_AREA
+
+
+REAL(EB) FUNCTION POLYGON_CENTROID(NP,PC)
+IMPLICIT NONE
+! Calculate the centroid of polygon vertices
+
+DIMENSION :: POLYGON_CENTROID(3)
+INTEGER, INTENT(IN) :: NP
+REAL(EB), INTENT(IN) :: PC(27)
+INTEGER :: I,K
+
+POLYGON_CENTROID = 0._EB
+DO I=1,NP
+   DO K=1,3
+      POLYGON_CENTROID(K) = POLYGON_CENTROID(K)+PC((I-1)*3+K)/NP
+   ENDDO
+ENDDO
+
+RETURN
+END FUNCTION POLYGON_CENTROID
 
 
 SUBROUTINE TRIANGLE_ON_CELL_SURF(IERR1,N_VEC,V,XC,YC,ZC,DX,DY,DZ)
@@ -1839,6 +1914,48 @@ ENDIF
 
 RETURN
 END SUBROUTINE TRIANGLE_ON_CELL_SURF
+
+
+SUBROUTINE POLYGON_CLOSE_TO_EDGE(IOR,N_VEC,V,XC,YC,ZC,DX,DY,DZ)
+IMPLICIT NONE
+INTEGER, INTENT(OUT) :: IOR
+REAL(EB), INTENT(IN) :: N_VEC(3),V(3),XC,YC,ZC,DX,DY,DZ
+REAL(EB) :: DIST(3),DMAX
+REAL(EB), PARAMETER :: TOLERANCE=0.01_EB
+
+IOR = 0
+DIST(1) = XC-V(1)
+DIST(2) = YC-V(2)
+DIST(3) = ZC-V(3)
+
+IF (ABS(DIST(1)/DX) >= ABS(DIST(2)/DY) .AND. ABS(DIST(1)/DX) >= ABS(DIST(3)/DZ)) THEN
+   DMAX = ABS(DIST(1)/DX*2._EB)
+   IF (DMAX < (1._EB-TOLERANCE) .OR. DOT_PRODUCT(DIST,N_VEC) > 0._EB) RETURN
+   IF (DIST(1) < 0._EB) THEN
+      IOR = 1
+   ELSE
+      IOR = -1
+   ENDIF
+ELSEIF (ABS(DIST(2)/DY) >= ABS(DIST(3)/DZ)) THEN
+   DMAX = ABS(DIST(2)/DY*2._EB)
+   IF (DMAX < (1._EB-TOLERANCE) .OR. DOT_PRODUCT(DIST,N_VEC) > 0._EB) RETURN
+   IF (DIST(2) < 0._EB) THEN
+      IOR = 2
+   ELSE
+      IOR = -2
+   ENDIF
+ELSE
+   DMAX = ABS(DIST(3)/DZ*2._EB)
+   IF (DMAX < (1._EB-TOLERANCE) .OR. DOT_PRODUCT(DIST,N_VEC) > 0._EB) RETURN
+   IF (DIST(3) < 0._EB) THEN
+      IOR = 3
+   ELSE
+      IOR = -3
+   ENDIF
+ENDIF
+   
+RETURN
+END SUBROUTINE POLYGON_CLOSE_TO_EDGE
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! End Cut-cell subroutines by Charles Luo
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
