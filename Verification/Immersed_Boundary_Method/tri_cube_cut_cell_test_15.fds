@@ -1,0 +1,36 @@
+&HEAD CHID='tri_cube_cut_cell_test_15', TITLE='test of cut cell area calculation' /
+
+&MESH IJK=3,3,3, XB=-1,2,-1,2,-1,2 /
+  
+&TIME T_END=1 /
+
+&DUMP CUTCELL_DATA_FILE=.TRUE. /
+
+&MISC IMMERSED_BOUNDARY_METHOD=0 /
+
+&SURF ID='face', COLOR='GRAY' /
+
+! This is to test the case when the triangle is cutting a tiny part of cell A and with normal pointing to cell B
+
+! example 13
+&VERT X=0.2,0.2,0.5/
+&VERT X=0.6,0.2,0.5/
+&VERT X=0.4,0.6,0.5/
+
+&VERT X=0.1,0.1,1./
+&VERT X=0.9,0.1,1.001/
+&VERT X=0.1,0.9,1./
+
+! Facets with vertices, N(3), ordered so that with right-hand rule
+! the surface normal points toward the gas phase (out of the solid).
+
+&FACE N=1,2,3, SURF_ID='face' /
+&FACE N=4,5,6, SURF_ID='face' /
+
+! Both faces 1 and 2 are in cutcell 1
+! but face 2 is contributing (dumping heat/mass) to cutcell 2
+! because its normal pointing to cell 2
+
+&SLCF XB=0,3,0,3,0,3, QUANTITY='P MASK', CELL_CENTERED=.TRUE./
+
+&TAIL /
