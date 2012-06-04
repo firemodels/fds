@@ -228,6 +228,7 @@ Plot_Filename = 'FDS_Validation_Guide/FIGURES/ScatterPlots/Harrison_Spill_Plumes
 
 close all;
 figure(1)
+plot_style
 hold on
 plot(-1,-1, 'ko')
 plot(-1,-1, 'r^')
