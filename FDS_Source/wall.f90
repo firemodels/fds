@@ -95,8 +95,9 @@ LOGICAL :: CALL_PYROLYSIS
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 TYPE(LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP=>NULL()
 
-! unstrurctured geom (experimental)
-INTEGER :: TRI_INDEX,I,J,K,IC
+! Unstrurctured geom (experimental)
+
+INTEGER :: I,J,K,IC,N
 REAL(EB) :: VC,Q_DOT_GEOM
 TYPE(FACET_TYPE), POINTER :: FACE=>NULL()
 TYPE(CUTCELL_LINKED_LIST_TYPE), POINTER :: CL=>NULL()
@@ -167,44 +168,44 @@ END DO WALL_CELL_LOOP
 
 GEOM_IF: IF (N_FACE>0 .AND. CORRECTOR) THEN
 
-D_GEOMETRY  = 0._EB
-Q_DOT(8,NM) = 0._EB ! Contribution of unstructured geometry mass/energy transfer to enthalpy equation
+   D_GEOMETRY  = 0._EB
+   Q_DOT(8,NM) = 0._EB ! Contribution of unstructured geometry mass/energy transfer to enthalpy equation
 
-GEOM_HEAT_FLUX_LOOP: DO TRI_INDEX=1,N_FACE
+   FACE_LOOP: DO N=1,N_FACE
 
-   FACE=>FACET(TRI_INDEX)
-   CL=>FACE%CUTCELL_LIST
-   SF=>SURFACE(FACE%SURF_INDEX)
+      FACE=>FACET(N)
+      CL=>FACE%CUTCELL_LIST
+      SF=>SURFACE(FACE%SURF_INDEX)
 
-   CUTCELL_LOOP: DO
+      CUTCELL_LOOP: DO
 
-      IF ( .NOT. ASSOCIATED(CL) ) EXIT ! if the next index does not exist, exit the loop
+         IF ( .NOT. ASSOCIATED(CL) ) EXIT CUTCELL_LOOP ! if the next index does not exist, exit the loop
 
-      IC = CL%INDEX
-      I = I_CUTCELL(IC)
-      J = J_CUTCELL(IC)
-      K = K_CUTCELL(IC)
-      VC = DX(I)*DY(J)*DZ(K)
+         IC = CL%INDEX
+         I = I_CUTCELL(IC)
+         J = J_CUTCELL(IC)
+         K = K_CUTCELL(IC)
+         VC = DX(I)*DY(J)*DZ(K)
 
-      GEOM_METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
-         CASE(SPECIFIED_TEMPERATURE_FROM_FILE)
-            Q_DOT_GEOM = CL%AREA*SF%H_FIXED*(FACE%TMP_F - TMP(I,J,K))
-         CASE(SPECIFIED_TEMPERATURE)
-            Q_DOT_GEOM = CL%AREA*SF%H_FIXED*(SF%TMP_FRONT - TMP(I,J,K))
-         CASE(CONVECTIVE_FLUX_BC)
-            Q_DOT_GEOM = CL%AREA*SF%CONVECTIVE_HEAT_FLUX
-      END SELECT GEOM_METHOD_OF_HEAT_TRANSFER
+         SELECT CASE(SF%THERMAL_BC_INDEX)
+            CASE(SPECIFIED_TEMPERATURE_FROM_FILE)
+               Q_DOT_GEOM = CL%AREA*SF%H_FIXED*(FACE%TMP_F - TMP(I,J,K))
+            CASE(SPECIFIED_TEMPERATURE)
+               Q_DOT_GEOM = CL%AREA*SF%H_FIXED*(SF%TMP_FRONT - TMP(I,J,K))
+            CASE(CONVECTIVE_FLUX_BC)
+               Q_DOT_GEOM = CL%AREA*SF%CONVECTIVE_HEAT_FLUX
+         END SELECT
 
-      IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
-      CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,TMP(I,J,K))
-      D_GEOMETRY(I,J,K) = D_GEOMETRY(I,J,K) + Q_DOT_GEOM/VC/(RHOP(I,J,K)*CP*TMP(I,J,K))
-      Q_DOT(8,NM) = Q_DOT(8,NM) + Q_DOT_GEOM
+         IF (N_TRACKED_SPECIES>0) ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
+         CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,TMP(I,J,K))
+         D_GEOMETRY(I,J,K) = D_GEOMETRY(I,J,K) + Q_DOT_GEOM/VC/(RHOP(I,J,K)*CP*TMP(I,J,K))
+         Q_DOT(8,NM) = Q_DOT(8,NM) + Q_DOT_GEOM
 
-      CL=>CL%NEXT ! point to the next index in the linked list
+         CL=>CL%NEXT ! point to the next index in the linked list
 
-   ENDDO CUTCELL_LOOP
+      ENDDO CUTCELL_LOOP
 
-ENDDO GEOM_HEAT_FLUX_LOOP
+   ENDDO FACE_LOOP
 
 ENDIF GEOM_IF
 
