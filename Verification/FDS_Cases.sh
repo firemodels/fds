@@ -65,18 +65,18 @@ $RUNFDS HVAC HVAC_tee_loss_2
 $RUNFDS HVAC HVAC_aircoil
 $RUNFDS HVAC HVAC_filter
 
-$RUNFDS Immersed_Boundary_Method/Demo tri_cube_cut_cell_test_01
-$RUNFDS Immersed_Boundary_Method/Demo tri_cube_cut_cell_test_02
-$RUNFDS Immersed_Boundary_Method/Demo tri_cube_cut_cell_test_03
-$RUNFDS Immersed_Boundary_Method/Demo tri_cube_cut_cell_test_04
-$RUNFDS Immersed_Boundary_Method/Demo tri_cube_cut_cell_test_05
-$RUNFDS Immersed_Boundary_Method/Demo tri_cube_cut_cell_test_06
-$RUNFDS Immersed_Boundary_Method/Demo tri_cube_cut_cell_test_07
-$RUNFDS Immersed_Boundary_Method/Demo tri_cube_cut_cell_test_08
-$RUNFDS Immersed_Boundary_Method/Demo tri_cube_cut_cell_test_09
-$RUNFDS Immersed_Boundary_Method/Demo tri_cube_cut_cell_test_10
-$RUNFDS Immersed_Boundary_Method/Demo tri_cube_cut_cell_test_11
-$RUNFDS Immersed_Boundary_Method/Demo tri_cube_cut_cell_test_12
+$RUNFDS Immersed_Boundary_Method tri_cube_cut_cell_test_01
+$RUNFDS Immersed_Boundary_Method tri_cube_cut_cell_test_02
+$RUNFDS Immersed_Boundary_Method tri_cube_cut_cell_test_03
+$RUNFDS Immersed_Boundary_Method tri_cube_cut_cell_test_04
+$RUNFDS Immersed_Boundary_Method tri_cube_cut_cell_test_05
+$RUNFDS Immersed_Boundary_Method tri_cube_cut_cell_test_06
+$RUNFDS Immersed_Boundary_Method tri_cube_cut_cell_test_07
+$RUNFDS Immersed_Boundary_Method tri_cube_cut_cell_test_08
+$RUNFDS Immersed_Boundary_Method tri_cube_cut_cell_test_09
+$RUNFDS Immersed_Boundary_Method tri_cube_cut_cell_test_10
+$RUNFDS Immersed_Boundary_Method tri_cube_cut_cell_test_11
+$RUNFDS Immersed_Boundary_Method tri_cube_cut_cell_test_12
 
 $RUNFDS Miscellaneous pyramid
 
