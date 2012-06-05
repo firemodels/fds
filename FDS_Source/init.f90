@@ -2825,7 +2825,7 @@ SUBROUTINE INITIAL_NOISE(NM)
 ! Generate random noise at the start of the simulation
  
 REAL     :: RN2
-REAL(EB) :: VFAC,RN
+REAL(EB) :: RN
 INTEGER  :: I,J,K,SIZE_RND
 INTEGER, DIMENSION(:), ALLOCATABLE :: SEED_RND
 INTEGER, INTENT(IN) :: NM
@@ -2843,7 +2843,6 @@ DEALLOCATE(SEED_RND)
 
 DO I=1,NM
    CALL RANDOM_NUMBER(RN2)
-   RN = REAL(RN2,EB)
 ENDDO
 
 ! Point to local mesh variables
@@ -2852,8 +2851,6 @@ CALL POINT_TO_MESH(NM)
 
 ! Add random vorticity to cells that are not bounding solid surfaces
 
-VFAC = 0.005_EB
- 
 DO K=1,KBM1
    DO J=1,JBM1
       DO I=1,IBAR
@@ -2861,7 +2858,7 @@ DO K=1,KBM1
              SOLID(CELL_INDEX(I,J+1,K)) .OR. SOLID(CELL_INDEX(I,J+1,K+1)))  CYCLE 
          CALL RANDOM_NUMBER(RN2)
          RN=REAL(RN2,EB)
-         RN = VFAC*(-1._EB + 2._EB*RN)*CELL_SIZE
+         RN = NOISE_VELOCITY*(-1._EB + 2._EB*RN)*CELL_SIZE
          W(I,J,K)   = W(I,J,K)   - RN*RDY(J)
          W(I,J+1,K) = W(I,J+1,K) + RN*RDY(J+1)
          V(I,J,K)   = V(I,J,K)   + RN*RDZ(K)
@@ -2876,7 +2873,7 @@ DO K=1,KBM1
              SOLID(CELL_INDEX(I+1,J,K)) .OR. SOLID(CELL_INDEX(I+1,J,K+1)))  CYCLE 
          CALL RANDOM_NUMBER(RN2)
          RN=REAL(RN2,EB)         
-         RN = VFAC*(-1._EB + 2._EB*RN)*CELL_SIZE
+         RN = NOISE_VELOCITY*(-1._EB + 2._EB*RN)*CELL_SIZE
          W(I,J,K)   = W(I,J,K)   - RN*RDX(I)*R(I)*RRN(I)
          W(I+1,J,K) = W(I+1,J,K) + RN*RDX(I+1)*R(I)*RRN(I+1)
          U(I,J,K)   = U(I,J,K)   + RN*RDZ(K)
@@ -2891,7 +2888,7 @@ DO K=1,KBAR
              SOLID(CELL_INDEX(I+1,J,K)) .OR. SOLID(CELL_INDEX(I+1,J+1,K)))  CYCLE
          CALL RANDOM_NUMBER(RN2)
          RN=REAL(RN2,EB)         
-         RN = VFAC*(-1._EB + 2._EB*RN)*CELL_SIZE
+         RN = NOISE_VELOCITY*(-1._EB + 2._EB*RN)*CELL_SIZE
          V(I,J,K)   = V(I,J,K)   - RN*RDX(I)
          V(I+1,J,K) = V(I+1,J,K) + RN*RDX(I+1)
          U(I,J,K)   = U(I,J,K)   + RN*RDY(J)
