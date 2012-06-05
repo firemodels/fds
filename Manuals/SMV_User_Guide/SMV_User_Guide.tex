@@ -2971,14 +2971,33 @@ setting view points, setting times and rendering images.
 \subsection{Example 1}
 
 This example describes the steps used to create a simple script.  This script
-will load a slice file and then display and render it at 10 s, 20 s, 30 s, 40 s and 50 s.
+will load a slice file and then display and render it at 10 s, 20 s, 30 s and 40 s.
 The script corresponding to the steps listed below is given
-in Figure \ref{figsimplescripttext} .
+in Figure \ref{figsimplescripttext} and the resulting generated images are given 
+in Figure \ref{figsimplescriptimages}.
+.
 \begin{figure}[\figoptions]
-\fdsinput{script_test.ssf}
+\fdsinput{script_slice_test.ssf}
 \caption{Script commands generated using the Smokeview script recorder option.}
 \label{figsimplescripttext}%
 \end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+\includegraphics[height=4.0in]{SCRIPT_FIGURES/script_slice_test_10}&
+\includegraphics[height=4.0in]{SCRIPT_FIGURES/script_slice_test_20}\\
+10.0 s&20.0 s\\
+\includegraphics[height=4.0in]{SCRIPT_FIGURES/script_slice_test_30}&
+\includegraphics[height=4.0in]{SCRIPT_FIGURES/script_slice_test_40}\\
+30.0 s&40.0 s\\
+\end{tabular}
+\end{center}
+\caption{Smokeview images generated using script detailed in
+ Figure \ref{figsimplescripttext}}
+\label{figsimplescriptimages}%
+\end{figure}
+
 
 Note that the keyword, {\tt RENDERDIR}, may used to {\em direct}\ that rendered images be placed in any directory not just the current one.  Also, the {\tt RENDERONCE}\ keywords in this script have a blank line afterwards (put there by default by the Smokeview script recorder).  In this case, Smokeview uses the the default name for the resulting rendered image file.  If this line is not blank, it is then used for the file name.
 
