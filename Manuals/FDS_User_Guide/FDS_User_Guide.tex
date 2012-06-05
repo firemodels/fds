@@ -1925,7 +1925,7 @@ on the order of a millimeter or less in size, or for diagnostic purposes.
 \item[{\ct GVEC}] The 3 components of gravity, in m/s$^2$. The default is {\ct GVEC=0,0,-9.81}.
 \item[{\ct NOISE}] FDS initializes the flow field with a very small amount of ``noise'' to prevent the
 development of a perfectly symmetric flow when the boundary
-and initial conditions are perfectly symmetric. To turn this off, set {\ct NOISE=.FALSE.}
+and initial conditions are perfectly symmetric. To turn this off, set {\ct NOISE=.FALSE.} To control the amount of noise, set {\ct NOISE\_VELOCITY}. Its default value is 0.005~m/s.
 \item[{\ct OVERWRITE}] If {\ct .FALSE.} FDS checks for the existence of  {\ct CHID.out} and stops execution if it exists.
 \item[{\ct P\_INF}] Background pressure (at the ground) in Pa. The default is 101325 Pa.
 \item[{\ct TMPA}] Ambient temperature, the temperature of everything at the start of the simulation. The default is 20~$^\circ$C.
@@ -10819,6 +10819,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct MIXING\_LAYER\_THETA0}                     & Real          & See FDS Verification Guide                                &               &                   \\ \hline
 %{\ct MIXING\_LAYER\_U0}                         & Real          & See FDS Verification Guide                                &  m/s          &                   \\ \hline
 {\ct NOISE}                                     & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
+{\ct NOISE\_VELOCITY}                           & Real          & Section~\ref{info:MISC_Basics}                        &  m/s          & 0.005             \\ \hline
 {\ct NO\_EVACUATION}                            & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
 {\ct OVERWRITE}                                 & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
 %{\ct PERIODIC\_TEST}                            & Integer       & Initial condition for verification test                    &               & 0                 \\ \hline
