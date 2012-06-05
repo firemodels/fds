@@ -1,5 +1,4 @@
 % Trettel
-% last updated 2011-07-19
 
 close all
 clear all
