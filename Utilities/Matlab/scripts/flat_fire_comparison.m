@@ -1,6 +1,6 @@
 % Trettel
 % flat fire comparison
-% 2011-07-14
+% note that fire here is a verb, as in firing a gun, as this approximate solution is for ballistic trajectories
 
 close all
 clear all
