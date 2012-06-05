@@ -483,7 +483,7 @@ the FDS User's Guide~\cite{FDS_Users_Guide}.
 
 \begin{figure}[\figoptions]
 \centerline{
-\includegraphics[width=5.0in]{figures/fds_overview}}
+\includegraphics[width=6.0in]{figures/fds_overview}}
  \caption[FDS file overview]{Diagram illustrating files used and created by the Fire Dynamics
  Simulator (FDS), Smokezip and Smokeview.}
 \label{figfdsoverview}%
@@ -2973,7 +2973,7 @@ setting view points, setting times and rendering images.
 This example describes the steps used to create a simple script.  This script
 will load a slice file and then display and render it at 10 s, 20 s, 30 s and 40 s.
 The script corresponding to the steps listed below is given
-in Figure \ref{figsimplescripttext} and the resulting generated images are given 
+in Figure \ref{figsimplescripttext} and the resulting generated images are given
 in Figure \ref{figsimplescriptimages}.
 .
 \begin{figure}[\figoptions]
@@ -3345,15 +3345,13 @@ UNLOADTOUR
 
 \blist
 \hitem{RENDERCLIP} Specify clip offsets in pixels when
-rendering a scene. Clipping is turned on if flag is set to 1 and
-turned off if flag is set to 0. Usage:
+rendering a scene.  Usage:
 \begin{verbatim}
 RENDERDIR
   flag left right bottom top
 \end{verbatim}
-Smokeview automatically converts directory separators (`/' for
-Linux/Mac systems and `//' for Windows systems) to the separator
-appropriate for the host system.
+where clipping is turn on if {\tt flag}\ is set to 1 and
+turned off if {\tt flag}\ is set to 0.
 \hitem{RENDERDIR} Specify a
 directory where rendered files should go. Usage:
 \begin{verbatim}

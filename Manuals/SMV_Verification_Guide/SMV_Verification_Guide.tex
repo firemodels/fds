@@ -595,14 +595,37 @@ ions]
 \end{figure}
 
 \section{Slices}
-Figure \ref{figslicetest} present images verifying the display of slices.
-Images are drawn at 0.0~s, 10.0~s and 30.0~s.   A portion of the interior gas temperature is initialized to 600.0~\degC\ corresponding to the red rectangular block appearing in the $t=0.0$~s images.
-The first column visualizes all of the data in the slice.  The second data discards or chops data below 140~\degC.
-Note that the color near the chopped boundary should match the color in the colorbar near 140.0~\degC.
-Figure \ref{figvslicetest} present images verifying the display of vector slices.
-Again, vector slice file images are drawn at 5.0~s, 10.0~s and 30.0~s.  The first column draws all vectors while the second column discards or chops vectors below 140~\degC.
-The FDS input file for this test is {\tt plume5c.fds}.
-The images for this test were created automatically by running the smokeview script, {\tt plume5c.ssf}.
+Figure \ref{fignodeslicetest} presents images verifying the
+display of node centered data slices. Images are drawn at 0.0~s,
+10.0~s and 30.0~s. A portion of the interior gas temperature is
+initialized to 600.0~\degC\ corresponding to the red rectangular
+block appearing in the $t=0.0$~s images. The first column
+visualizes all of the data in the slice.  The second column
+discards or chops data below 140~\degC. Note that the color near
+the chopped boundary should match the color in the colorbar near
+140.0~\degC.
+
+Figures \ref{figcellaslicetest} and \ref{figcellbslicetest}
+presents images verifying the display of cell centered data.
+Images in Figure \ref{figcellaslicetest} are drawn at 0.0~s,
+10.0~s and 30.0~s. Images in Figure \ref{figcellbslicetest} tests
+the transfer of data from FDS to Smokeview.
+
+Figure \ref{figvslicetest} present images verifying the display of
+vector slices. Again, vector slice file images are drawn at 5.0~s,
+10.0~s and 30.0~s. The first column draws all vectors while the
+second column discards or chops vectors below 140~\degC.
+
+Figure \ref{figfedslicetest} presents images verifying the display
+of FED or fractional effective dose slices. Images are drawn at
+0.0~s, 10.0~s and 30.0~s and are computed using $\mathrm{CO}$,
+$\mathrm{CO_2}$ and $\mathrm{O_2}$ data slices.
+
+Figure \ref{figgslicetest} presents images of 3D slices oriented
+in two different ways. Images are drawn at 0.0~s, 10.0~s and
+30.0~s.  The FDS input file for these tests is {\tt plume5c.fds}.
+All images were created automatically by running the smokeview
+script, {\tt plume5c.ssf}.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -621,7 +644,7 @@ The images for this test were created automatically by running the smokeview scr
  \end{tabular}
 \end{center}
  \caption[Node centered slice file test.]{Node centered slice file test.  A portion of the interior gas temperature is initialized to 600.0~\degC.  The slice file in this region should be red for the $t=0.0$~s images.  For the chopped contours, the color near the chop boundary should match the color near 140.0~\degC\ in the colorbar.}
-\label{figslicetest}%
+\label{fignodeslicetest}%
 \end{figure}
 
 \begin{figure}[\figoptions]
@@ -641,21 +664,7 @@ The images for this test were created automatically by running the smokeview scr
  \end{tabular}
 \end{center}
  \caption[Cell centered slice file test 1.]{Cell centered slice file test 1.  A portion of the interior gas temperature is initialized to 600.0~\degC.  The slice file in this region should be red for the $t=0.0$~s images.  For the chopped contours, the color near the chop boundary should match the color near 140.0~\degC\ in the colorbar.}
-\label{figslicetest}%
-\end{figure}
-
-\begin{figure}[\figoptions]
-\begin{center}
-\begin{tabular}{cp{1.0in}}
- \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_fed_slice_00}\\
- \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_fed_slice_10}\\
- \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_fed_slice_30}\\
-&\raisebox{0.5in}[0pt]{\includegraphics[height=7.5in]{../SMV_User_Guide/figures/colorbar_fed}}
- \end{tabular}
-\end{center}
- \caption[Node centered FED slice file test.]{Node centered FED slice file test.
- These contours were generated using CO, CO2 and O2 data slices.}
-\label{figslicetest}%
+\label{figcellaslicetest}%
 \end{figure}
 
 \begin{figure}[\figoptions]
@@ -679,29 +688,8 @@ The images for this test were created automatically by running the smokeview scr
  Cell values are initialized in FDS to $100*i + 10*j + k$ where $1\le i \le 3$, $1\le j \le 4$ and $1\le k \le 5$.
  Cell values displayed by Smokeview should match the $(i,j,k)$ grid cell indices.
  The three plots in the 3D view correspond to the plan, elevation and side view plots.}
-\label{figslicetest}%
+\label{figcellbslicetest}%
 \end{figure}
-
-\begin{figure}[\figoptions]
-\begin{center}
-\begin{tabular}{ccp{1.0in}}
- \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_gslice_00}&
- \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_gslice2_00}\\
-
- \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_gslice_10}&
- \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_gslice2_10}\\
-
- \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_gslice_30}&
- \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_gslice2_30}\\
-
- general orientation&second orientation\\
- &&\raisebox{0.5in}[0pt]{\includegraphics[height=7.5in]{figures/colorbar_20_620}}\\
- \end{tabular}
-\end{center}
- \caption[General slice file test.]{General slice file test.  Two orientations are shown at three time steps. }
-\label{figslicetest}%
-\end{figure}
-
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -726,25 +714,37 @@ The images for this test were created automatically by running the smokeview scr
 
 \begin{figure}[\figoptions]
 \begin{center}
-\begin{tabular}{rccl}
- 0.0~s&
- \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_vslice_00}&
- \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_vslicechop_00}\\
- 10.0~s&
- \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_vslice_10}&
- \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_vslicechop_10}\\
- 30.0~s&
- \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_vslice_30}&
- \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_vslicechop_30}\\
- &&data chopped below 140~\degC\\
- &&&\raisebox{0.5in}[0pt]{\includegraphics[height=7.5in]{figures/colorbar_20_620}}\\
-
+\begin{tabular}{cp{1.0in}}
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_fed_slice_00}\\
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_fed_slice_10}\\
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_fed_slice_30}\\
+&\raisebox{0.5in}[0pt]{\includegraphics[height=7.5in]{../SMV_User_Guide/figures/colorbar_fed}}
  \end{tabular}
 \end{center}
- \caption[FED slice file test.] {FED slice file test. A fractional effective dose
- is computed for constant CO2, CO and O2 data.  The FED value displayed should
- equal xxx.}
-\label{figvslicetest}%
+ \caption[Node centered FED slice file test.]{Node centered FED slice file test.
+ These contours were generated using $\mathrm{CO}$,
+$\mathrm{CO_2}$ and $\mathrm{O_2}$ data slices.}
+\label{figfedslicetest}%
+\end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{ccp{1.0in}}
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_gslice_00}&
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_gslice2_00}\\
+
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_gslice_10}&
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_gslice2_10}\\
+
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_gslice_30}&
+ \includegraphics[height=\figheightE]{SCRIPT_FIGURES/plume5c_gslice2_30}\\
+
+ general orientation&second orientation\\
+ &&\raisebox{0.5in}[0pt]{\includegraphics[height=7.5in]{figures/colorbar_20_620}}\\
+ \end{tabular}
+\end{center}
+ \caption[General slice file test.]{General slice file test.  Two orientations are shown at three time steps. }
+\label{figgslicetest}%
 \end{figure}
 
 
