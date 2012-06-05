@@ -511,7 +511,7 @@ ENDIF
 
 ! Compute convective HRR
 
-Q_C = Q * RADIATIVE_FRACTION
+Q_C = Q * (1 - RADIATIVE_FRACTION)
 
 ! Compute fire diameter
 
