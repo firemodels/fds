@@ -2404,7 +2404,6 @@ USE SCRC, ONLY: SCARC_METHOD, SCARC_KRYLOV, SCARC_MULTIGRID, SCARC_SMOOTH, SCARC
 
 
 INTEGER :: NM,I,NN,N,NR,NL,NS,ITMP
-REAL(EB) :: SD
 CHARACTER(30) :: QUANTITY,DATE,ODE_SOLVER
 TYPE(SPECIES_MIXTURE_TYPE),POINTER :: SM=>NULL()
  
@@ -2719,18 +2718,15 @@ SURFLOOP: DO N=0,N_SURF
          WRITE(LU_OUTPUT,'(8X,I3,2X,A)') NN,SF%MATL_NAME(NN)
       ENDDO
       IF (SF%SHRINK)          WRITE(LU_OUTPUT,'(A)')'     Shrinking wall'
-      SD = 0._EB      
       DO NL=1,SF%N_LAYERS
          WRITE(LU_OUTPUT,'(A,I2)')      '     Layer ',NL
          WRITE(LU_OUTPUT,'(A,F8.5)')    '        Thickness   (m): ',SF%LAYER_THICKNESS(NL)
          WRITE(LU_OUTPUT,'(A,F8.2)')    '        Density (kg/m3): ',SF%LAYER_DENSITY(NL)
-         ! ToDo: cylindrical and spherical surfaces
-         SD = SD + SF%LAYER_THICKNESS(NL)*SF%LAYER_DENSITY(NL)
          DO NN=1,SF%N_LAYER_MATL(NL)
             WRITE(LU_OUTPUT,'(8X,A,A,F7.2)') TRIM(SF%LAYER_MATL_NAME(NL,NN)),', Mass fraction: ',SF%LAYER_MATL_FRAC(NL,NN)
          ENDDO
       ENDDO
-      WRITE(LU_OUTPUT,'(A,F9.3,A)')     '     Total surface density ', SD, ' kg/m2'
+      WRITE(LU_OUTPUT,'(A,F9.3,A)')     '     Total surface density ', SF%SURFACE_DENSITY, ' kg/m2'
       WRITE(LU_OUTPUT,'(A,F5.2,A)')     '     Reaction products considered from the first ',SF%LAYER_DIVIDE, ' layers.'
       WRITE(LU_OUTPUT,'(A)')            '     Solid Phase Node, Layer, Coordinates(m):'
       DO I=0,SF%N_CELLS
