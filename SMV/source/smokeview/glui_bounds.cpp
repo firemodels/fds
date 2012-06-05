@@ -105,6 +105,7 @@ GLUI_Rollout *rollout_slice_chop=NULL;
 #define SCRIPT_RENDER 41
 #define SCRIPT_RENDER_SUFFIX 42
 #define SCRIPT_RENDER_DIR 43
+#define SCRIPT_STEP_NOW 44
 
 #define SAVE_SETTINGS 99
 #define CLOSE 98
@@ -134,6 +135,7 @@ GLUI_Rollout *rollout_slice_chop=NULL;
 #endif
 
 GLUI_Button *BUTTON_compress=NULL;
+GLUI_Button *BUTTON_step=NULL;
 #ifdef pp_MEMDEBUG
 GLUI_Rollout *panel_memcheck=NULL;
 #endif
@@ -156,6 +158,8 @@ GLUI_Spinner *SPINNER_line_contour_max=NULL;
 GLUI_Button *BUTTON_update_line_contour=NULL;
 #endif
 GLUI_Spinner *SPINNER_timebounds=NULL;
+GLUI_Panel *panel_run=NULL;
+GLUI_Panel *panel_record=NULL;
 GLUI_Panel *panel_script1=NULL;
 GLUI_Panel *panel_script1a=NULL;
 GLUI_Panel *panel_script1b=NULL;
@@ -203,6 +207,7 @@ GLUI_Checkbox *CHECKBOX_showtrisurface=NULL;
 GLUI_Checkbox *CHECKBOX_showtrioutline=NULL;
 GLUI_Checkbox *CHECKBOX_showtripoints=NULL;
 GLUI_Checkbox *CHECKBOX_defer=NULL;
+GLUI_Checkbox *CHECKBOX_script_step=NULL;
 
 GLUI_Checkbox *CHECKBOX_show_evac_slices=NULL;
 GLUI_Checkbox *CHECKBOX_constant_coloring=NULL;
@@ -308,6 +313,18 @@ extern "C" void update_script_start(void){
 
 extern "C" void update_defer(void){
   CHECKBOX_defer->set_int_val(defer_file_loading);
+}
+
+/* ------------------ update_script_step ------------------------ */
+
+extern "C" void update_script_step(void){
+  CHECKBOX_script_step->set_int_val(script_step);
+  if(script_step==1){
+    BUTTON_step->enable();
+  }
+  else{
+    BUTTON_step->disable();
+  }
 }
 
 /* ------------------ transparency ------------------------ */
@@ -784,22 +801,29 @@ extern "C" void glui_bounds_setup(int main_window){
   }
 #endif
 
-  rollout_SCRIPT = glui_bounds->add_rollout("Scripts/Config",false);
+  rollout_SCRIPT = glui_bounds->add_rollout("Scripts",false);
 
-  panel_script1 = glui_bounds->add_panel_to_panel(rollout_SCRIPT,_("Script files"),true);
+  panel_script1 = glui_bounds->add_panel_to_panel(rollout_SCRIPT,_("Script files"),false);
+  panel_record = glui_bounds->add_panel_to_panel(panel_script1,_("Record"),true);
 
-  panel_script1a = glui_bounds->add_panel_to_panel(panel_script1,"",false);
-  BUTTON_script_start=glui_bounds->add_button_to_panel(panel_script1a,_("Start recording"),SCRIPT_START,Script_CB);
+  panel_script1a = glui_bounds->add_panel_to_panel(panel_record,"",false);
+  BUTTON_script_start=glui_bounds->add_button_to_panel(panel_script1a,_("Start"),SCRIPT_START,Script_CB);
   glui_bounds->add_column_to_panel(panel_script1a,false);
-  BUTTON_script_stop=glui_bounds->add_button_to_panel(panel_script1a,_("Stop recording"),SCRIPT_STOP,Script_CB);
+  BUTTON_script_stop=glui_bounds->add_button_to_panel(panel_script1a,_("Stop"),SCRIPT_STOP,Script_CB);
   BUTTON_script_stop->disable();
 
-  CHECKBOX_defer=glui_bounds->add_checkbox_to_panel(panel_script1,_("Turn off file loading while recording"),&defer_file_loading,
+  CHECKBOX_defer=glui_bounds->add_checkbox_to_panel(panel_record,_("Turn off file loading while recording"),&defer_file_loading,
     SCRIPT_FILE_LOADING,Script_CB);
 
-  panel_script1b = glui_bounds->add_panel_to_panel(panel_script1,"",false);
+  panel_run = glui_bounds->add_panel_to_panel(panel_script1,_("Run"),true);
+  panel_script1b = glui_bounds->add_panel_to_panel(panel_run,"",false);
   BUTTON_script_runscript=glui_bounds->add_button_to_panel(panel_script1b,_("Run script"),SCRIPT_RUNSCRIPT,Script_CB);
   glui_bounds->add_column_to_panel(panel_script1b,false);
+  CHECKBOX_script_step=glui_bounds->add_checkbox_to_panel(panel_run,_("Step through script"),&script_step,
+    SCRIPT_STEP,Script_CB);
+  BUTTON_step=glui_bounds->add_button_to_panel(panel_run,_("Next"),SCRIPT_STEP_NOW,Script_CB);
+  update_script_step();
+
   LIST_scriptlist = glui_bounds->add_listbox_to_panel(panel_script1b,_("Select:"),&script_index,SCRIPT_LIST,Script_CB);
     {
       scriptfiledata *scriptfile;
@@ -819,19 +843,7 @@ extern "C" void glui_bounds_setup(int main_window){
         Script_CB(SCRIPT_LIST);
     }
 
-  panel_script3 = glui_bounds->add_panel_to_panel(rollout_SCRIPT,_("Render images"),true);
-  EDIT_renderdir=glui_bounds->add_edittext_to_panel(panel_script3,_("render directory:"),
-    GLUI_EDITTEXT_TEXT,script_renderdir,SCRIPT_RENDER_DIR,Script_CB);
-  EDIT_renderdir->set_w(260);
-  panel_script1c = glui_bounds->add_panel_to_panel(panel_script3,"",false);
-  BUTTON_script_render=glui_bounds->add_button_to_panel(panel_script1c,_("Render"),SCRIPT_RENDER,Script_CB);
-  glui_bounds->add_column_to_panel(panel_script1c,false);
-  EDIT_rendersuffix=glui_bounds->add_edittext_to_panel(panel_script1c,_("suffix:"),
-    GLUI_EDITTEXT_TEXT,script_renderfilesuffix,SCRIPT_RENDER_SUFFIX,Script_CB);
-  EDIT_rendersuffix->set_w(130);
-  Script_CB(SCRIPT_RENDER_SUFFIX);
-
-  panel_script2 = glui_bounds->add_panel_to_panel(rollout_SCRIPT,_("Config files"),true);
+  panel_script2 = glui_bounds->add_panel_to_panel(rollout_SCRIPT,_("Config"),true);
 
   panel_script2a = glui_bounds->add_panel_to_panel(panel_script2,"",false);
   EDIT_ini=glui_bounds->add_edittext_to_panel(panel_script2a,"suffix:",GLUI_EDITTEXT_TEXT,script_inifile_suffix,SCRIPT_EDIT_INI,Script_CB);
@@ -856,6 +868,18 @@ extern "C" void glui_bounds_setup(int main_window){
   }
   glui_bounds->add_column_to_panel(panel_script2b,false);
   BUTTON_ini_load=glui_bounds->add_button_to_panel(panel_script2b,_("Load"),SCRIPT_LOADINI,Script_CB);
+
+  panel_script3 = glui_bounds->add_panel_to_panel(rollout_SCRIPT,_("Render"),true);
+  EDIT_renderdir=glui_bounds->add_edittext_to_panel(panel_script3,_("directory:"),
+    GLUI_EDITTEXT_TEXT,script_renderdir,SCRIPT_RENDER_DIR,Script_CB);
+  EDIT_renderdir->set_w(260);
+  panel_script1c = glui_bounds->add_panel_to_panel(panel_script3,"",false);
+  BUTTON_script_render=glui_bounds->add_button_to_panel(panel_script1c,_("Render"),SCRIPT_RENDER,Script_CB);
+  glui_bounds->add_column_to_panel(panel_script1c,false);
+  EDIT_rendersuffix=glui_bounds->add_edittext_to_panel(panel_script1c,_("suffix:"),
+    GLUI_EDITTEXT_TEXT,script_renderfilesuffix,SCRIPT_RENDER_SUFFIX,Script_CB);
+  EDIT_rendersuffix->set_w(130);
+  Script_CB(SCRIPT_RENDER_SUFFIX);
 
 #ifdef pp_MEMDEBUG
   panel_memcheck = glui_bounds->add_rollout(_("Memory Check"),false);
@@ -1305,6 +1329,9 @@ extern "C"  void glui_script_disable(void){
     int set_renderlabel;
 
     switch (var){
+    case SCRIPT_STEP_NOW:
+      keyboard('^',FROM_SMOKEVIEW);
+      break;
     case SCRIPT_RENDER_DIR:
       strcpy(label,script_renderdir);
       trim(label);
@@ -1424,6 +1451,10 @@ extern "C"  void glui_script_disable(void){
           fprintf(scriptoutstream," %s\n",inifilename);
         }
       }
+      break;
+    case SCRIPT_STEP:
+      update_script_step();
+      updatemenu=1;
       break;
     case SCRIPT_FILE_LOADING:
       updatemenu=1;

@@ -11155,10 +11155,8 @@ void writeini(int flag){
   fprintf(fileout,"FIREDEPTH\n");
   fprintf(fileout," %f\n",fire_halfdepth);
 
-  if(colorbartype!=colorbartype_default){
-    fprintf(fileout,"COLORBARTYPE\n");
-    fprintf(fileout," %i\n",colorbartype);
-  }
+  fprintf(fileout,"COLORBARTYPE\n");
+  fprintf(fileout," %i\n",colorbartype);
   fprintf(fileout,"VOLSMOKE\n");
   fprintf(fileout," %i %i %i %i %i\n",
     glui_compress_volsmoke,use_multi_threading,load_at_rendertimes,volbw,show_volsmoke_moving);

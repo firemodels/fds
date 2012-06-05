@@ -50,7 +50,7 @@ void PropMenu(int value);
 void initcircle(unsigned int nsegs);
 void UnLoadVolSmoke3DMenu(int value);
 void LoadVolSmoke3DMenu(int value);
-
+void update_script_step(void);
 
 #ifdef WIN32
 
@@ -2158,6 +2158,15 @@ void PeriodicReloads(int value){
   }
 }
 
+
+/* ------------------ ScriptMenu2 ------------------------ */
+
+void ScriptMenu2(int value){
+  script_step=1;
+  update_script_step();
+  ScriptMenu(value);
+}
+
 /* ------------------ ScriptMenu ------------------------ */
 
 void ScriptMenu(int value){
@@ -2176,10 +2185,14 @@ void ScriptMenu(int value){
     case SCRIPT_STEP:
       script_step=1-script_step;
       break;
+    case SCRIPT_START_RECORDING2:
+      defer_file_loading = 1;
+      update_defer();
+      ScriptMenu(SCRIPT_START_RECORDING);
+      break;
     case SCRIPT_START_RECORDING:
       update_script_start();
       get_newscriptfilename(newscriptfilename);
-//      strcpy(scriptinifilename,newscriptfilename);
       script_recording = insert_scriptfile(newscriptfilename);
       scriptoutstream=fopen(newscriptfilename,"w");
       if(scriptoutstream!=NULL){
@@ -2199,6 +2212,14 @@ void ScriptMenu(int value){
             fprintf(scriptoutstream," .\n");
           }
         }
+        fprintf(scriptoutstream,"XSCENECLIP\n");
+        fprintf(scriptoutstream," %i %f %i %f\n",clip_x,clip_x_val,clip_X,clip_X_val);
+        fprintf(scriptoutstream,"YSCENECLIP\n");
+        fprintf(scriptoutstream," %i %f %i %f\n",clip_y,clip_y_val,clip_Y,clip_Y_val);
+        fprintf(scriptoutstream,"ZSCENECLIP\n");
+        fprintf(scriptoutstream," %i %f %i %f\n",clip_z,clip_z_val,clip_Z,clip_Z_val);
+        fprintf(scriptoutstream,"SCENECLIP\n");
+        fprintf(scriptoutstream," %i\n",xyz_clipplane);
       }
       else{
         script_recording->recording=0;
@@ -4459,6 +4480,7 @@ void MENU_vslice(int vec_type){
 /* ------------------ InitMenus ------------------------ */
 
 void InitMenus(int unload){
+  int nscripts;
   int showflag, hideflag;
   int n,i,ii;
   char caselabel[255],chari[4];
@@ -4503,6 +4525,7 @@ static int gridslicemenu=0, blockagemenu=0, immersedmenu=0, loadpatchmenu=0, ven
 static int loadisomenu=0, isosurfacetypemenu=0;
 static int geometrymenu=0, loadunloadmenu=0, reloadmenu=0, aboutmenu=0, disclaimermenu=0, terrain_showmenu=0;
 static int scriptmenu=0;
+static int scriptlistmenu=0,scriptsteplistmenu=0,scriptrecordmenu=0;
 static int loadplot3dmenu=0, unloadvslicemenu=0, unloadslicemenu=0;
 static int loadterrainmenu=0, unloadterrainmenu=0;
 static int loadsmoke3dmenu=0,loadsmoke3dsootmenu=0,loadsmoke3dhrrmenu=0,loadsmoke3dwatermenu=0;
@@ -8618,14 +8641,12 @@ updatemenu=0;
     if(periodic_value!=10)glutAddMenuEntry(_("Reload every 10 minutes"),10);
     glutAddMenuEntry(_("Stop Rendering"),-1);
 
-    CREATEMENU(scriptmenu,ScriptMenu);
 
+    nscripts=0;
     if(script_recording==NULL){
       scriptfiledata *scriptfile;
       STRUCTSTAT statbuffer;
-      int nscripts=0;
 
-      nscripts=0;
       for(scriptfile=first_scriptfile.next;scriptfile->next!=NULL;scriptfile=scriptfile->next){
         char *file;
         int len;
@@ -8640,7 +8661,7 @@ updatemenu=0;
       }
 
       if(nscripts>0){
-        glutAddMenuEntry(_("Run script:"),-999);
+        CREATEMENU(scriptlistmenu,ScriptMenu);
         for(scriptfile=first_scriptfile.next;scriptfile->next!=NULL;scriptfile=scriptfile->next){
           char *file;
           int len;
@@ -8655,22 +8676,36 @@ updatemenu=0;
           strcat(menulabel,file);
           glutAddMenuEntry(menulabel,scriptfile->id);
         }
-        glutAddMenuEntry("-",-999);
-      }
+        CREATEMENU(scriptsteplistmenu,ScriptMenu2);
+        for(scriptfile=first_scriptfile.next;scriptfile->next!=NULL;scriptfile=scriptfile->next){
+          char *file;
+          int len;
 
+          file=scriptfile->file;
+          if(file==NULL)continue;
+          len = strlen(file);
+          if(len<=0)continue;
+          if(STAT(file,&statbuffer)!=0)continue;
+
+          strcpy(menulabel,"  ");
+          strcat(menulabel,file);
+          glutAddMenuEntry(menulabel,scriptfile->id);
+        }
+      }
     }
-    glutAddMenuEntry(_("Create script:"),-999);
-    if(defer_file_loading==1){
-      glutAddMenuEntry(_("  *Turn off file loading while recording"),SCRIPT_FILE_LOADING);
+    CREATEMENU(scriptrecordmenu,ScriptMenu);
+    if(script_recording==NULL){
+      glutAddMenuEntry(_("Start"),SCRIPT_START_RECORDING);
+      glutAddMenuEntry(_("Start (disable file loading)"),SCRIPT_START_RECORDING2);
     }
-    else{
-      glutAddMenuEntry(_("  Turn off file loading while recording"),SCRIPT_FILE_LOADING);
+    glutAddMenuEntry(_("Stop"),SCRIPT_STOP_RECORDING);
+    
+    CREATEMENU(scriptmenu,ScriptMenu);
+    if(nscripts>0){
+      glutAddSubMenu("Run",scriptlistmenu);
+      glutAddSubMenu("Step (using ^)",scriptsteplistmenu);
     }
-    if(script_recording==NULL)glutAddMenuEntry(_("  Start recording"),SCRIPT_START_RECORDING);
-    glutAddMenuEntry(_("  Stop recording"),SCRIPT_STOP_RECORDING);
-    glutAddMenuEntry(_("Option:"),-999);
-    if(script_step==1)glutAddMenuEntry(_("  *step through script using ^"),SCRIPT_STEP);
-    if(script_step==0)glutAddMenuEntry(_("  step through script using ^"),SCRIPT_STEP);
+    glutAddSubMenu("Record",scriptrecordmenu);
 
   /* --------------------------------loadunload menu -------------------------- */
     {
@@ -8791,7 +8826,7 @@ updatemenu=0;
         glutAddMenuEntry("-",999);
       }
       glutAddSubMenu(_("Configuration files"),smokeviewinimenu);
-      glutAddSubMenu(_("Script options"),scriptmenu);
+      glutAddSubMenu(_("Scripts"),scriptmenu);
 #ifdef pp_COMPRESS
       if(smokezippath!=NULL&&(npatchinfo>0||nsmoke3dinfo>0||nsliceinfo>0)){
         glutAddSubMenu(_("Compression"),compressmenu);

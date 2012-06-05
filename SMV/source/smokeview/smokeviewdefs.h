@@ -254,6 +254,7 @@ void _Sniff_Errors(char *whereat);
 #define UNLOADALL 1
 #define SHOWFILES 5
 
+#define SCRIPT_START_RECORDING2 -6
 #define SCRIPT_START_RECORDING -2
 #define SCRIPT_STOP_RECORDING -3
 #define SCRIPT_FILE_LOADING -4
