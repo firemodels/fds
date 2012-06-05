@@ -31,4 +31,7 @@ $FDTs UL_NFPRF_FDTs_Input.txt
 cd $VDIR/Vettori_Flat_Ceiling/FDTs
 $FDTs Vettori_FDTs_Input.txt
 
+cd $VDIR/VTT/FDTs
+$FDTs VTT_FDTs_Input.txt
+
 echo FDTs cases complete
