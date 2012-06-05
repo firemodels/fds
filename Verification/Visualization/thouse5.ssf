@@ -101,31 +101,6 @@ SETTIMEVAL
 RENDERONCE
  thouse5_gslice_060
 
-// render chopped slice file (ceiling jet)
-
-LOADINIFILE
- thouse5_cjet.ini
-UNLOADALL
-LOADSLICE
- TEMPERATURE
- 2 1.500000
-SETTIMEVAL
- 5.000000
-RENDERONCE
- thouse5_cjet_005
-SETTIMEVAL
- 10.000000
-RENDERONCE
- thouse5_cjet_010
-SETTIMEVAL
- 30.000000
-RENDERONCE
- thouse5_cjet_030
-SETTIMEVAL
- 60.000000
-RENDERONCE
- thouse5_cjet_060
-
 // render vector slice file
 
 UNLOADALL
@@ -526,8 +501,6 @@ RENDERONCE
 LOADINIFILE
  thouse5.ini
 
-// render fed slice file
-
 UNLOADALL
 LOADINIFILE
  thouse5_fed.ini
@@ -555,6 +528,35 @@ SETTIMEVAL
  60.000000
 RENDERONCE
  thouse5_fed_z1p5_slice_060
+
+// render chopped slice file (ceiling jet)
+
+LOADINIFILE
+ thouse5_cjet.ini
+UNLOADALL
+LOADSLICE
+ TEMPERATURE
+ 2 1.500000
+SETTIMEVAL
+ 5.000000
+RENDERONCE
+ thouse5_cjet_005
+SETTIMEVAL
+ 10.000000
+RENDERONCE
+ thouse5_cjet_010
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ thouse5_cjet_030
+SETTIMEVAL
+ 60.000000
+RENDERONCE
+ thouse5_cjet_060
+
+
+
+
 
 
 
