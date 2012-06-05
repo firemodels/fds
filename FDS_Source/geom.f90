@@ -313,10 +313,11 @@ REAL(EB), INTENT(IN) :: T
 INTEGER :: I,J,K,N,IERR,IERR1,IERR2,I_MIN,I_MAX,J_MIN,J_MAX,K_MIN,K_MAX,IC,IOR
 INTEGER :: NP,NXP,DUMMY_INTEGER,IZERO,LU,CUTCELL_COUNT
 TYPE (MESH_TYPE), POINTER :: M
-REAL(EB) :: BB(6),V1(3),V2(3),V3(3),AREA,PC(18),XPC(27)
+REAL(EB) :: BB(6),V1(3),V2(3),V3(3),AREA,PC(18),XPC(27),V_POLYGON_CENTROID(3)
 LOGICAL :: EX,OP
 CHARACTER(60) :: FN
 REAL(FB) :: DUMMY_FB_REAL
+REAL(EB), PARAMETER :: CUTCELL_TOLERANCE=1.E-10_EB
 !LOGICAL :: END_OF_LIST
 !TYPE (CUTCELL_LINKED_LIST_TYPE), POINTER :: CL
 
@@ -364,18 +365,18 @@ FACE_LOOP: DO N=1,N_FACE
             CALL TRIANGLE_BOX_INTERSECT(IERR,V1,V2,V3,BB)
             
             IF (IERR==1) THEN      
-               CALL TRIANGLE_ON_CELL_SURF(IERR1,FACET(N)%NVEC,V1,M%XC(I), &
-                                          M%YC(J),M%ZC(K),M%DX(I),M%DY(J),M%DZ(K))
+               CALL TRIANGLE_ON_CELL_SURF(IERR1,FACET(N)%NVEC,V1,M%XC(I),M%YC(J),M%ZC(K),M%DX(I),M%DY(J),M%DZ(K))
                IF (IERR1==-1) CYCLE ! remove the possibility of double counting
                               
                CALL TRI_PLANE_BOX_INTERSECT(NP,PC,V1,V2,V3,BB)
                CALL TRIANGLE_POLYGON_POINTS(IERR2,NXP,XPC,V1,V2,V3,NP,PC,BB)
                IF (IERR2 == 1)  THEN                  
                   AREA = POLYGON_AREA(NXP,XPC)
-                  IF (AREA > 0._EB) THEN
+                  IF (AREA > CUTCELL_TOLERANCE) THEN
                      
                      ! check if the cutcell area needs to be assigned to a neighbor cell
-                     CALL POLYGON_CLOSE_TO_EDGE(IOR,FACET(N)%NVEC,POLYGON_CENTROID(NXP,XPC), &
+                     V_POLYGON_CENTROID = POLYGON_CENTROID(NXP,XPC)
+                     CALL POLYGON_CLOSE_TO_EDGE(IOR,FACET(N)%NVEC,V_POLYGON_CENTROID,&
                                                 M%XC(I),M%YC(J),M%ZC(K),M%DX(I),M%DY(J),M%DZ(K))  
                      IF (IOR == 0) THEN
                         IF (M%CUTCELL_INDEX(I,J,K)==0) THEN
