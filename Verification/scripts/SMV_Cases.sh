@@ -11,6 +11,7 @@ $RUNFDS Visualization objects_static
 $RUNFDS Visualization plume5c
 $RUNFDS Visualization plume5c_bounddef
 $RUNFDS Visualization script_test
+$RUNFDS Visualization script_slice_test
 $RUNFDS Visualization sillytexture
 $RUNFDS Visualization smoke_sensor
 $RUNFDS Visualization smoke_test
