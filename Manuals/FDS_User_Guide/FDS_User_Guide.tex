@@ -7195,15 +7195,19 @@ where $\Delta x$ is the screen thickness and Y and K are empirical constants giv
 \be \hbox{Y}= 0.043 \; \hbox{FREE\_AREA\_FRACTION}^{2.13}\ee
 
 In the example below an aluminum screen with a 40 \% free area and an 0.0003 m wire diameter is placed normal to the x-axis.  Note that the {\ct LENGTH} on the {\ct SURF}, when multiplied by the diameter, results in 60 \% of the cell area.
+
 \footnotesize
 \begin{verbatim}
 
 &MESH IJK=40,20,20,XB=0,2,0,1,0,1/
 
-&SURF ID='SCREEN',THICKNESS=0.00015, GEOMETRY='CYLINDRICAL',LENGTH=0.5,CONVECTION_LENGTH_SCALE=0.0003,MATL_ID='ALUMINUM'/
+&SURF ID='SCREEN',THICKNESS=0.00015, GEOMETRY='CYLINDRICAL',
+      LENGTH=5.,CONVECTION_LENGTH_SCALE=0.0003,MATL_ID='ALUMINUM'/
 &MATL ID='ALUMINUM',DENSITY=2700.,CONDUCTIVITY=200.,SPECIFIC_HEAT=900./
-&PART DRAG_LAW='SCREEN',FREE_AREA_FRACTION=0.4,ID='SCREEN',STATIC=.TRUE.,SURF_ID='SCREEN',ORIENTATION=1,0,0/
-&INIT N_PARTICLES_PER_CELL=1,CELL_CENTERED=.TRUE.,PART_ID='SCREEN',XB=1.01,1.01,0.0,1.0,0.0,1.0/
+&PART DRAG_LAW='SCREEN',FREE_AREA_FRACTION=0.4,ID='SCREEN',STATIC=.TRUE.,
+      SURF_ID='SCREEN',ORIENTATION=1,0,0/
+&INIT N_PARTICLES_PER_CELL=1,CELL_CENTERED=.TRUE.,PART_ID='SCREEN',
+      XB=1.01,1.02,0.0,1.0,0.0,1.0/
 
 \end{verbatim}
 \normalsize
