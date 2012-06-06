@@ -6723,19 +6723,11 @@ corresponds to one individual band of the spectrum.
 \chapter{Particles and Droplets}
 \label{info:PART}
 
-Lagrangian particles\footnote{Throughout this section, the terms ``droplets'' and ``particles'' are used interchangeably. From the point of view of
-FDS, they are all Lagrangian particles; that is, point elements that are not bound by the structure of the underlying grid.} are used in FDS to represent
-water or liquid fuel
-droplets, flow tracers, and various other objects that are not defined or confined by the numerical mesh. Sometimes the
-particles have mass, sometimes they do not. Some evaporate,
-absorb radiation, {\em etc.}
-{\ct PART} is the namelist group that is used to prescribe
-parameters associated with Lagrangian particles.
-
+Lagrangian particles are used in FDS to represent water or liquid fuel droplets, flow tracers, and various other objects that are not defined or confined by the numerical mesh. Sometimes the particles have mass, sometimes they do not. Some evaporate, absorb radiation, {\em etc.}
+{\ct PART} is the namelist group that is used to prescribe parameters associated with Lagrangian particles.
 
 
 \section{Basics}
-
 \label{info:PART_Basics}
 
 Properties of different types of
@@ -6760,6 +6752,8 @@ that defines the properties of the material, for example
 &SURF ...,PART_ID='my smoke' /
 \end{verbatim}
 \normalsize
+
+\noindent
 or the {\ct PART\_ID} can be invoked from a {\ct PROP} line to change
 the properties of the droplets ejected by a sprinkler or nozzle, for example
 
@@ -6768,6 +6762,45 @@ the properties of the droplets ejected by a sprinkler or nozzle, for example
 &PROP ID='Acme 123', QUANTITY='SPRINKLER LINK TEMPERATURE', PART_ID='my water', ... /
 \end{verbatim}
 \normalsize
+
+
+\subsection{Output Quantities}
+\label{info:particle_quantities}
+
+The parameter {\ct QUANTITIES} is an array of character strings indicating which
+scalar quantities should be used to color the particles or droplets when viewed as an
+animation. The choices are \\
+{\ct 'PARTICLE TEMPERATURE'} ($^\circ$C) \\
+{\ct 'PARTICLE DIAMETER'} ($\mu$m) \\
+{\ct 'PARTICLE VELOCITY'} (m/s) \\
+{\ct 'PARTICLE MASS'} (kg) \\
+{\ct 'PARTICLE AGE'} (s) \\
+As a default, if no {\ct QUANTITIES} are specified and none are selected in Smokeview, then
+Smokeview will display particles with a single color.  To select this color specify either {\ct RGB} or
+{\ct COLOR}. By default, water droplets are colored blue and fuel droplets yellow. All others are colored black.
+
+
+\subsection{Massless Particles}
+\label{info:MASSLESS}
+
+The simplest use of Lagrangian particles is for visualization, in which case the
+particles are considered massless tracers. In this case, the particles are
+defined via the line
+
+\footnotesize
+\begin{verbatim}
+&PART ID='tracers', MASSLESS=.TRUE., ... /
+\end{verbatim}
+\normalsize
+
+\noindent
+Note that if the particles are {\ct MASSLESS}, it is not appropriate to color them according to any particular property.
+Particles are not colored by gas phase quantities, but rather by properties of the particle itself. For example,
+{\ct 'PARTICLE TEMPERATURE'} for a non-massless particle refers to the temperature of the particle itself
+rather than the local gas temperature.
+
+Also note that if {\ct MASSLESS=.TRUE.}, the {\ct SAMPLING\_FACTOR} is set to 1 unless you say otherwise, which would be pointless
+since {\ct MASSLESS} particles are for visualization only.
 
 
 
@@ -6825,7 +6858,6 @@ information on devices and controls, see Sections~\ref{info:basic_control}~and~\
 
 
 \subsection{Droplets Introduced at a Sprinkler or Nozzle}
-
 \label{info:sprinkler_droplets}
 
 A sprinkler or nozzle is added to the simulation using a {\ct PROP} line to describe the features of the device and a {\ct DEVC} line to position and orient the
@@ -6844,10 +6876,9 @@ point of causing a numerical instability. If you encounter a numerical instabili
 droplets created per second than the number that can be simulated.
 \end{warning}
 
+
 \subsection{Particles or Droplets Introduced within a Volume}
-
 \label{info:initial_droplets}
-
 
 Sometimes it is convenient to introduce droplets or particles at the start of the simulation. For this purpose, use an {\ct INIT} line with the parameter
 {\ct N\_PARTICLES} to indicate the number of particles within the computational domain at the start of the simulation.  You may also use {\ct N\_PARTICLES\_PER\_CELL} to indicate the number of particles within each grid cell of the computational domain at the start of the simulation.
@@ -6901,26 +6932,27 @@ you must specify a value for {\ct DT\_INSERT}. Otherwise, particles or droplets 
 \item[{\ct SAMPLING\_FACTOR}]     Sampling factor for the output
 file {\ct CHID.prt5}. This parameter can be used to reduce the size
 of the particle output file used to animate the simulation. The default value is 1 for {\ct MASSLESS} particles, meaning that every particle or droplet will be shown in Smokeview.
-The default is 10 for all other types of particles. {\ct MASSLESS} particles are discussed in Section~\ref{part_type}.
+The default is 10 for all other types of particles. {\ct MASSLESS} particles are discussed in Section~\ref{info:MASSLESS}.
 \item[{\ct AGE}]  Number of seconds the particle or droplet exists, after which time it is removed from the calculation. This is a useful parameter to use when
 trying to reduce the number of droplets or particles in a simulation.
 \end{description}
 
 
+
 \clearpage
 
-\section{Particle and Droplet Properties}
+\section{Liquid Droplets}
 
-Lagrangian particles are used to represent a wide variety of objects that cannot be explicitly resolved on the numerical
-mesh. As a result, there are a considerable number of parameters that define them, many of which may not be applicable to
-a particular type of particle or droplet.
+To define an evaporating liquid droplet, you must explicitly specify the gaseous species via the {\ct SPEC} namelist group (see Section~\ref{info:SPEC}), and then
+designate the appropriate {\ct SPEC\_ID} on the {\ct PART} line.
+If the droplets are defined with {\ct SPEC\_ID='WATER VAPOR'}, then the particles will be assigned the thermo-physical properties of water,
+the radiation absorption properties of water, and will be colored blue in Smokeview.
 
 
-\subsection{Thermal Properties}
-
+\subsection{Droplet Thermal Properties}
 \label{thermal_part_props}
 
-To simulate liquid droplets, you must include a {\ct SPEC\_ID} on the {\ct PART} line to indicate the gas species formed as the droplets evaporate. The following parameters should be
+The following parameters should be
 included on the {\ct SPEC} line to control the evaporation. If the liquid properties of the {\ct SPEC\_ID} are included in Table~\ref{tab:gasspecies},
 then no further inputs are required. Otherwise, you must provide all of the following properties of the liquid:
 \begin{description}
@@ -6933,8 +6965,8 @@ then no further inputs are required. Otherwise, you must provide all of the foll
 \item[{\ct H\_V\_REFERENCE\_TEMPERATURE}] The temperature corresponding to the provided {\ct HEAT\_OF\_VAPORIZATION} ($^\circ$C).
 \end{description}
 
-\subsection{Radiative Properties}
 
+\subsection{Radiative Properties}
 \label{radiative_part_props}
 
 The radiative properties of water and fuel droplets are determined automatically.
@@ -6956,6 +6988,7 @@ Below is an example of the use of spectral property table, listing the propertie
 \end{verbatim} \normalsize
 \normalsize
 
+\noindent
 For calculating the absorption of thermal radiation by particles, FDS uses a running average of particle temperature and density. The default averaging factor, {\ct RUN\_AVG\_FAC}, is set to 0.5.
 
 
@@ -6990,6 +7023,7 @@ If you set {\ct CHECK\_DISTRIBUTION=.TRUE.} on the {\ct PART} line, FDS will wri
 
 By default, the range of particle sizes is divided into seven bins, and the sampled particles are divided among these bins. This ensures that a reasonable number of particles is assigned to the entire spectrum of sizes. To change the default number of bins, set {\ct N\_STRATA} on the {\ct PART} line.
 
+
 \subsection{Secondary breakup}
 \label{info:secondary_breakup}
 
@@ -6997,122 +7031,6 @@ If {\ct BREAKUP=.TRUE.} is set on the {\ct PART} line, particles may undergo sec
 In this case you should also specify the {\ct SURFACE\_TENSION} (N/m) of the liquid and the resulting ratio of the Sauter mean diameters,
 {\ct BREAKUP\_RATIO}. Its default is 3/7. Optionally, specify the distribution parameters {\ct BREAKUP\_GAMMA\_D} and {\ct BREAKUP\_SIGMA\_D}.
 
-
-\subsection{Drag}
-\label{info:particle_drag}
-
-For massive particles the default drag law (i.e., the drag coefficient correlation as a function of the Reynolds number based on particle diameter) is that of a sphere.
-To invoke the cylinder drag law set {\ct DRAG\_LAW} to {\ct 'CYLINDER'} on the {\ct PART} line and to invoke the screen drag law (see Section~\ref{info:particle_screen}) set to {\ct 'SCREEN'}  If neither of these options is applicable,
-the user may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct USER\_DRAG\_COEFFICIENT} on {\ct PART}.
-The {\ct USER\_DRAG\_COEFFICIENT} over-rides the {\ct DRAG\_LAW}.  The {\ct USER\_DRAG\_COEFFICIENT} is a triplet indicating the drag along each coordinate axis.  If only the first value of the triplet is assigned, the drag is assumed to be isotropic.
-
-\subsection{Velocity on Solid Surfaces}
-\label{info:surface_droplets}
-
-When a droplet strikes a solid surface, it sticks and is reassigned a new speed and direction. If the surface is
-horizontal, the direction is randomly chosen. If vertical, the direction is downwards.
-The rate at which the droplets move over the horizontal and vertical surfaces is difficult to
-quantify. The parameters {\ct HORIZONTAL\_VELOCITY} and {\ct VERTICAL\_VELOCITY} on the {\ct PART} line
-allow you to control the rate at which droplets move horizontally or vertically (downward). The defaults are
-0.2~m/s and 0.5~m/s, respectively.
-
-There are some applications, like the suppression of racked storage commodities, where it is useful to allow water droplets to move horizontally
-along the underside of a solid object. It is difficult to model this phenomenon precisely because it involves surface tension, surface porosity and
-absorption, and complicated geometry. However, a way to capture some of the effect is to set {\ct ALLOW\_UNDERSIDE\_PARTICLES=.TRUE.} on the
-{\ct MISC} line. It is normally false.
-
-\begin{warning}
-Be aware that when droplets hit obstructions, the vertical direction is assumed to coincide with the $z$ axis, regardless of any change to the gravity vector, {\ct GVEC}.
-\end{warning}
-
-\noindent
-A useful sample case to demonstrate various features of droplet motion on solid obstructions is the test case called {\ct cascade.fds}. Figure~\ref{cascade} shows a stream
-of water droplets impinging on the top of a box followed by the cascading of water droplets over the top edge.
-
-\begin{figure}[ht]
-\begin{center}
-\begin{tabular}{lcr}
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/cascade_1} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/cascade_2} &
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/cascade_3}
-\end{tabular}
-\end{center}
-\caption[Example of water cascading over solid obstructions.]{Smokeview rendering of the {\bf cascade} test case.}
-\label{cascade}
-\end{figure}
-
-\begin{warning}
-\noindent If you do not want droplets to accumulate on solid surfaces, set {\ct ALLOW\_UNDERSIDE\_PARTICLES=.FALSE.} on the
-{\ct MISC} line. It is normally true.
-\end{warning}
-
-
-
-\subsection{Color}
-\label{info:particle_quantities}
-
-The parameter {\ct QUANTITIES} is an array of character strings indicating which
-scalar quantities should be used to color the particles or droplets when viewed as an
-animation. The choices are \\
-{\ct 'PARTICLE TEMPERATURE'} ($^\circ$C) \\
-{\ct 'PARTICLE DIAMETER'} ($\mu$m) \\
-{\ct 'PARTICLE VELOCITY'} (m/s) \\
-{\ct 'PARTICLE MASS'} (kg) \\
-{\ct 'PARTICLE AGE'} (s) \\
-As a default, if no {\ct QUANTITIES} are specified and none are selected in Smokeview, then
-Smokeview will display particles with a single color.  To select this color specify either {\ct RGB} or
-{\ct COLOR}. By default, water droplets are colored blue and fuel droplets yellow. All others are colored black.
-
-
-
-\clearpage
-
-\section{Special Types of Particles and Droplets}
-\label{part_type}
-
-There are several useful attributes that you can assign to particles or droplets, usually via a simple logical parameter. Be aware with each of these parameters that
-specifying it as {\ct .TRUE.} may cause other parameters to be functionally useless, or may cause conflicts that FDS may or may not detect. A good rule of thumb is always to
-ask yourself what is the basic information that {\em must} be conveyed to the program, and stick to that. For example, if the particles are to be {\ct MASSLESS}, there is no
-point in declaring thermal properties because they are only to be used a flow tracers in Smokeview.
-
-\subsection{Massless Particles}
-\label{info:MASSLESS}
-
-The simplest use of Lagrangian particles is for visualization, in which case the
-particles are considered massless tracers. In this case, the particles are
-defined via the line
-
-\footnotesize
-\begin{verbatim}
-&PART ID='tracers', MASSLESS=.TRUE., ... /
-\end{verbatim}
-\normalsize
-
-\noindent
-Note that if the particles are {\ct MASSLESS}, it is not appropriate to color them according to any particular property.
-Particles are not colored by gas phase quantities, but rather by properties of the particle itself. For example,
-{\ct 'PARTICLE TEMPERATURE'} for a non-massless particle refers to the temperature of the particle itself
-rather than the local gas temperature.
-
-Also note that if {\ct MASSLESS=.TRUE.}, the {\ct SAMPLING\_FACTOR} is set to 1 unless you say otherwise, which would be pointless
-since {\ct MASSLESS} particles are for visualization only.
-
-
-\subsection{Static Particles or Droplets}
-\label{info:STATIC}
-
-{\ct STATIC} is a logical parameter indicating whether particles move or just serve
-as obstructions or clutter. Setting {\ct STATIC=.TRUE.} only makes sense in conjunction with a non-zero value of
-{\ct N\_PARTICLES} or {\ct N\_PARTICLES\_PER\_CELL} on the {\ct INIT} line. The default value of {\ct STATIC} is {\ct .FALSE.}
-
-
-\subsection{Water Droplets}
-
-If the droplets are defined with {\ct SPEC\_ID='WATER VAPOR'}, then the particles will be assigned the thermo-physical properties of water,
-the radiation absorption properties of water, and will be colored blue in Smokeview.
-
-If the liquid droplets are to evaporate into some other gaseous species, you must explicitly define the species via the {\ct SPEC} namelist group (see Section~\ref{info:SPEC}), and then
-designate the appropriate {\ct SPEC\_ID} on the {\ct PART} line.
 
 \subsection{Fuel Droplets}
 \label{info:fuel_droplets}
@@ -7185,63 +7103,37 @@ fuel and the amount of fuel being ejected from the
 nozzle. Always test your burner at the resolution of your overall simulation.
 
 
-\subsection{Screens}
-\label{info:particle_screen}
 
-A 2D array of particles can be used to represent the drag given by a window screen.  A window screen is defined on {\ct INIT} by placing particles in a plane using {\ct N\_PARTICLES\_PER\_CELL=1}.  The particles should be defined with a {\ct SURF\_ID} containing the material properties of the screen.  A special drag law for screens is used by setting {\ct DRAG\_LAW} to {\ct 'SCREEN'}, {\ct ORIENTATION}, and {\ct FREE\_AREA\_FRACTION} on {\ct PART}.  {\ct ORIENTATION} is the surface normal to the screen and {\ct FREE\_AREA\_FRACTION} is the fraction of the screen's surface area that is open.  Pressure drop across a screen is given by
-\be \Delta P \; = \; \Delta x \; \left(\frac{\mu}{\hbox{K}} u \; + \; \rho \frac{\hbox{Y}}{\sqrt {\hbox{K}}} u^2 \right)\ee
-where $\Delta x$ is the screen thickness and Y and K are empirical constants given by
-\be \hbox{K}= 3.44 \times 10^{-9} \; \hbox{FREE\_AREA\_FRACTION}^{1.6}\ee
-\be \hbox{Y}= 0.043 \; \hbox{FREE\_AREA\_FRACTION}^{2.13}\ee
-
-In the example below an aluminum screen with a 40 \% free area and an 0.0003 m wire diameter is placed normal to the x-axis.  Note that the {\ct LENGTH} on the {\ct SURF}, when multiplied by the diameter, results in 60 \% of the cell area.
-
-\footnotesize
-\begin{verbatim}
-
-&MESH IJK=40,20,20,XB=0,2,0,1,0,1/
-
-&SURF ID='SCREEN',THICKNESS=0.00015, GEOMETRY='CYLINDRICAL',
-      LENGTH=5.,CONVECTION_LENGTH_SCALE=0.0003,MATL_ID='ALUMINUM'/
-&MATL ID='ALUMINUM',DENSITY=2700.,CONDUCTIVITY=200.,SPECIFIC_HEAT=900./
-&PART DRAG_LAW='SCREEN',FREE_AREA_FRACTION=0.4,ID='SCREEN',STATIC=.TRUE.,
-      SURF_ID='SCREEN',ORIENTATION=1,0,0/
-&INIT N_PARTICLES_PER_CELL=1,CELL_CENTERED=.TRUE.,PART_ID='SCREEN',
-      XB=1.01,1.02,0.0,1.0,0.0,1.0/
-
-\end{verbatim}
-\normalsize
 
 \clearpage
 
-\section{Assigning Complex Properties to Particles}
+\section{Solid Particles}
 \label{info:PART_SURF}
 
-Unless you declare {\ct MASSLESS=.TRUE.} on the {\ct PART} line, it is assumed that the particle has mass and thermal properties that govern its
-heating and evaporation. If you specify a {\ct SPEC\_ID}, then FDS automatically assumes that you want relatively small, thermally-thin evaporating liquid droplets.
-However, it is possible to assign arbitrary surface properties to particles that represent subgrid-scale objects, like office clutter or vegetation. To do this, you add a {\ct SURF\_ID} to the {\ct PART} line. The
-{\ct SURF} properties then over-ride the default properties assigned to particles and droplets. For example, the following input lines create a collection
-of hot spheres:
+Lagrangian particles can be used to represent a wide variety of objects that are too small to resolve on the numerical grid. FDS considers three major classes of Lagrangian particles: massless tracers, liquid droplets, and everything else. If you simply want massless tracers, specify {\ct MASSLESS=.TRUE.} on the {\ct PART} line. If you specify a {\ct SPEC\_ID}, then FDS automatically assumes that you want relatively small, thermally-thin evaporating liquid droplets.
+However, it is possible to assign arbitrary surface properties to particles that represent subgrid-scale objects, like office clutter or vegetation. To do this, you add a {\ct SURF\_ID} to the {\ct PART} line. 
+
+\subsection{Basics}
+
+To demonstrate the basic syntax for solid particles, the following input lines create a collection of hot spheres:
 
 \footnotesize
 \begin{verbatim}
+&PART ID='spheres', SURF_ID='HOT', STATIC=.TRUE., PROP_ID='ball' /
 &SURF ID='HOT', TMP_FRONT=500., RADIUS=0.005, GEOMETRY='SPHERICAL' /
-&PART ID='spheres', SURF_ID='HOT', QUANTITIES='PARTICLE TEMPERATURE', PROP_ID='ball' /
 &PROP ID='ball', SMOKEVIEW_ID='SPHERE', SMOKEVIEW_PARAMETERS(1)='D=0.01' /
 &INIT PART_ID='spheres', XB=0.25,0.75,0.25,0.75,0.25,0.75, N_PARTICLES=10 /
 \end{verbatim}
 \normalsize
 
 \noindent
-The {\ct SURF} line establishes that the particles are hot spheres with a radius of 0.005~m and constant temperature of 500~$^\circ$C. The {\ct PART}
-line establishes a class of particles with the properties of given by the {\ct SURF} line whose {\ct ID='HOT'}. The {\ct PROP} line is used just
-to tell Smokeview that the particles are to be drawn as the appropriate sized spheres. The {\ct INIT} line randomly fills the given volume with
-10 of these hot spheres.
-
-The {\ct SURF} line establishes the particle {\ct GEOMETRY}. Options are {\ct 'SPHERICAL'}, {\ct 'CYLINDRICAL'}, or {\ct 'CARTESIAN'}. If
+The {\ct PART} line establishes a class of particles with the properties given by the {\ct SURF} line {\ct 'HOT'}. {\ct STATIC} is a logical parameter indicating whether particles move or just serve as obstructions or clutter. The default value of {\ct STATIC} is {\ct .FALSE.} The {\ct PROP} line is used just to tell Smokeview that the particles are to be drawn as the appropriate sized spheres.
+The {\ct SURF} line establishes that the particles are hot spheres with a radius of 0.005~m and constant temperature of 500~$^\circ$C.
+The {\ct GEOMETRY} options are {\ct 'SPHERICAL'}, {\ct 'CYLINDRICAL'}, or {\ct 'CARTESIAN'}. If
 {\ct 'SPHERICAL'}, provide the {\ct RADIUS}. If {\ct 'CYLINDRICAL'}, provide the {\ct RADIUS} and the {\ct LENGTH}. If {\ct 'CARTESIAN'}, provide
 the {\ct LENGTH}, {\ct WIDTH}, and {\ct THICKNESS} of the plate. Note that the heat conduction calculation will be done in the appropriate coordinate
 system.
+The {\ct INIT} line randomly fills the given volume with 10 of these hot spheres.
 
 The output quantities associated with complex particles are the same as those for solid walls. For example, to record the temperature of a given
 particle, use lines like the following:
@@ -7253,6 +7145,7 @@ particle, use lines like the following:
 \end{verbatim}
 \normalsize
 
+\noindent
 If the {\ct SURF} line that is associated with the particle class calls for it, the particles will heat up due to convection from the surrounding gases and radiation from near and distant sources. The convective heat transfer coefficient takes into account the particle geometry, and the radiative heat flux is based on the integrated intensity. That is, the radiation heat flux is the average over all angles. However, you can use the parameter {\ct ORIENTATION(1:N,1:3)} to specify {\ct N} unique directions for the particle. For example,
 
 \footnotesize
@@ -7265,6 +7158,39 @@ If the {\ct SURF} line that is associated with the particle class calls for it, 
 specifies that half the particle is facing upwards and half is facing downwards. This is useful if the source of heating does not surround the particles.
 
 
+\subsection{Drag}
+\label{info:particle_drag}
+
+For massive particles the default drag law (i.e., the drag coefficient correlation as a function of the Reynolds number based on particle diameter) is that of a sphere.
+To invoke the cylinder drag law set {\ct DRAG\_LAW} to {\ct 'CYLINDER'} on the {\ct PART} line and to invoke the screen drag law (see Section~\ref{info:particle_screen}) set to {\ct 'SCREEN'}  If neither of these options is applicable,
+the user may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct USER\_DRAG\_COEFFICIENT} on {\ct PART}.
+The {\ct USER\_DRAG\_COEFFICIENT} over-rides the {\ct DRAG\_LAW}.  The {\ct USER\_DRAG\_COEFFICIENT} is a triplet indicating the drag along each coordinate axis.  If only the first value of the triplet is assigned, the drag is assumed to be isotropic.
+
+
+\subsection{Screens}
+\label{info:particle_screen}
+
+A 2-D array of particles can be used to represent the drag exerted by a window screen, as in the following example:
+ 
+\footnotesize
+\begin{verbatim}
+&INIT N_PARTICLES_PER_CELL=1, CELL_CENTERED=.TRUE., PART_ID='SCREEN',
+      XB=1.01,1.02,0.0,1.0,0.0,1.0/
+&PART ID='SCREEN', DRAG_LAW='SCREEN', FREE_AREA_FRACTION=0.4, STATIC=.TRUE.,
+      SURF_ID='SCREEN', ORIENTATION=1,0,0 /
+&SURF ID='SCREEN', THICKNESS=0.00015, GEOMETRY='CYLINDRICAL',
+      LENGTH=5., CONVECTION_LENGTH_SCALE=0.0003, MATL_ID='ALUMINUM' /
+&MATL ID='ALUMINUM', DENSITY=2700., CONDUCTIVITY=200., SPECIFIC_HEAT=900. /
+\end{verbatim}
+\normalsize
+
+\noindent The {\ct INIT} line designates the plane of the screen using the sextuplet {\ct XB}. A single particle is located in each cell with the parameter {\ct N\_PARTICLES\_PER\_CELL=1}.  The particles should be defined with a {\ct SURF\_ID} containing the material properties of the screen.  A special drag law for screens is used by setting {\ct DRAG\_LAW='SCREEN'}.  {\ct ORIENTATION} is the surface normal to the screen and {\ct FREE\_AREA\_FRACTION} is the fraction of the screen's surface area that is open.  The pressure drop across the screen is given by
+\be \Delta P \; = \; \Delta x \; \left(\frac{\mu}{\hbox{K}} u \; + \; \rho \frac{\hbox{Y}}{\sqrt {\hbox{K}}} u^2 \right)\ee
+where $\Delta x$ is the screen thickness and Y and K are empirical constants given by
+\be \hbox{K}= 3.44 \times 10^{-9} \; \hbox{FREE\_AREA\_FRACTION}^{1.6}\ee
+\be \hbox{Y}= 0.043 \; \hbox{FREE\_AREA\_FRACTION}^{2.13}\ee
+
+In the example below an aluminum screen with a 40 \% free area and an 0.0003 m wire diameter is placed normal to the x-axis.  Note that the {\ct LENGTH} on the {\ct SURF}, when multiplied by the diameter, results in 60 \% of the cell area.
 
 
 
@@ -7273,13 +7199,52 @@ specifies that half the particle is facing upwards and half is facing downwards.
 \section{Special Topic: Suppression by Water}
 \label{info:suppression}
 
-Modeling suppression of a fire by a water spray is challenging because
-the relevant physical mechanisms occur at length scales smaller than a
-single mesh cell. In the gas phase, flames are extinguished due to lowered
-temperatures and dilution of the oxygen supply.
+Modeling fire suppression by water has three principal components: transporting the water droplets through the air, tracking the water along the solid surface, and predicting the reduction of the burning rate. This section addresses the latter two.
 
-For the solid phase,
-water reduces the fuel pyrolysis rate by cooling the fuel surface and also
+
+\subsection{Velocity on Solid Surfaces}
+\label{info:surface_droplets}
+
+When a droplet strikes a solid surface, it sticks and is reassigned a new speed and direction. If the surface is
+horizontal, the direction is randomly chosen. If vertical, the direction is downwards.
+The rate at which the droplets move over the horizontal and vertical surfaces is difficult to
+quantify. The parameters {\ct HORIZONTAL\_VELOCITY} and {\ct VERTICAL\_VELOCITY} on the {\ct PART} line
+allow you to control the rate at which droplets move horizontally or vertically (downward). The defaults are
+0.2~m/s and 0.5~m/s, respectively.
+
+There are some applications, like the suppression of racked storage commodities, where it is useful to allow water droplets to move horizontally
+along the underside of a solid object. It is difficult to model this phenomenon precisely because it involves surface tension, surface porosity and
+absorption, and complicated geometry. However, a way to capture some of the effect is to set {\ct ALLOW\_UNDERSIDE\_PARTICLES=.TRUE.} on the
+{\ct MISC} line. It is normally false.
+
+\begin{warning}
+Be aware that when droplets hit obstructions, the vertical direction is assumed to coincide with the $z$ axis, regardless of any change to the gravity vector, {\ct GVEC}.
+\end{warning}
+
+\noindent
+A useful sample case to demonstrate various features of droplet motion on solid obstructions is the test case called {\ct cascade.fds}. Figure~\ref{cascade} shows a stream
+of water droplets impinging on the top of a box followed by the cascading of water droplets over the top edge.
+
+\begin{figure}[ht]
+\begin{center}
+\begin{tabular}{lcr}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/cascade_1} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/cascade_2} &
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/cascade_3}
+\end{tabular}
+\end{center}
+\caption[Example of water cascading over solid obstructions.]{Smokeview rendering of the {\bf cascade} test case.}
+\label{cascade}
+\end{figure}
+
+\begin{warning}
+\noindent If you do not want droplets to accumulate on solid surfaces, set {\ct ALLOW\_UNDERSIDE\_PARTICLES=.FALSE.} on the
+{\ct MISC} line. It is normally true.
+\end{warning}
+
+\subsection{Reduction of the Burning Rate}
+
+Water reduces the fuel pyrolysis rate by cooling the fuel surface and also
 changing the chemical reactions that liberate fuel gases from the solid.
 If the solid or liquid fuel has been given reaction parameters via the {\ct MATL} line, there is no
 need to set any additional suppression parameters. It is assumed that
@@ -11004,7 +10969,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SAMPLING\_FACTOR}              & Integer         & Section~\ref{info:particle_number}      &           & 1             \\ \hline
 {\ct SIGMA\_D}                      & Real            & Section~\ref{info:particle_size}        &           &               \\ \hline
 {\ct SPEC\_ID}                      & Character       & Section~\ref{thermal_part_props}        &           &               \\ \hline
-{\ct STATIC}                        & Logical         & Section~\ref{info:STATIC}               &           & {\ct .FALSE.} \\ \hline
+{\ct STATIC}                        & Logical         & Section~\ref{info:PART_SURF}            &           & {\ct .FALSE.} \\ \hline
 {\ct SURFACE\_TENSION}              & Real            & Section~\ref{info:secondary_breakup}    &   N/m     & 72.8$\cdot 10^3$  \\ \hline
 {\ct SURF\_ID}                      & Character       & Section~\ref{info:PART_SURF}            &           &               \\ \hline
 {\ct USER\_DRAG\_COEFFICIENT(3)}    & Real Array      & Section~\ref{info:particle_drag}        &           & -1.           \\ \hline
