@@ -1,6 +1,6 @@
 % McDermott
 % 5-28-2009
-% master_verification_script.m
+% FDS_verification_script.m
 %
 % If you author a section in the verification guide, create a script
 % that generates all the graphics (in pdf format) in that section and 
@@ -9,7 +9,9 @@
 % model.  Also, add your script to the master list below.
 %
 % The most important script is dataplot.m.  To utilize this script, add the
-% appropriate parameters to a 'd' line in verification_data_config_matlab.csv.
+% appropriate parameters to a 'd' line in FDS_verification_dataplot_inputs.csv.
+% For debug purposes, you can set the switch_id (first column) of the input
+% file to "o" to process only that line.
 %
 % If you create your own script (your plots are not generated with dataplot.m),
 % please do not forget to add the SVN number to the plot.  Examples for how
@@ -29,7 +31,7 @@ wall_internal_radiation;  display('wall_internal_radiation complete...')
 ashrae_7;                 display('ashrae_7 complete...')
 flame_species;            display('flame_species complete...')
 EDM_species;              display('EDM_species complete...')
-cutcell_area;             display('cutcell_area complete...')
+%cutcell_area;             display('cutcell_area complete...')
 
 % The main plotting routine is dataplot
 
