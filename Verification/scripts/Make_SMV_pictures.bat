@@ -7,7 +7,7 @@ set SCRIPT_DIR=%CD%
 set BASEDIR=%CD%\..
 set SVNROOT=%BASEDIR%\..\
 
-set SMOKEVIEW="smokeview"
+set SMOKEVIEW="smokeview_win_64"
 set SMOKEZIP="smokezip_win_64"
 set SMOKEDIFF="smokediff_win_64"
 set BACKGROUND="background"
