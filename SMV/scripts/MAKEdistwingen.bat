@@ -41,8 +41,10 @@ echo filling distribution directory
 IF EXIST %smvdir% rmdir /S /Q %smvdir%
 mkdir %smvdir%
 
-echo copying smokeview_win_%platform%.exe
-copy %smvbuild%\smokeview_win_%platform%.exe %smvdir%\.
+if "%platform%"=="32" echo copying smokeview_win_%platform%.exe to smokeview.exe
+if "%platform%"=="32" copy %smvbuild%\smokeview_win_%platform%.exe %smvdir%\smokeview.exe
+if "%platform%"=="64" echo copying smokeview_win_%platform%.exe
+if "%platform%"=="64" copy %smvbuild%\smokeview_win_%platform%.exe %smvdir%\.
 
 echo copying .po files
 copy *.po %smvdir%\.
