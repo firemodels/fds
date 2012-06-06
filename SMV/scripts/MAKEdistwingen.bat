@@ -30,7 +30,7 @@ set bundledir=%svn_root%\smv\for_bundle
 set smvbuild=%svn_root%\SMV\Build\%BUILDDIR%
 set svzipbuild=%svn_root%\Utilities\smokezip\%BUILDDIR%
 set svdiffbuild=%svn_root%\Utilities\smokediff\%BUILDDIR%
-set bgbuild=%svn_root%\Utilities\background\%BUILDDIR%
+set bgbuild=%svn_root%\Utilities\background\intel_win_32
 
 set zipbase=smv_%version%_win%platform%
 set smvdir=to_google\%zipbase%
@@ -75,6 +75,9 @@ if "%platform%"=="64" copy pthreadVC2_x64.dll %smvdir%\.
 echo copying readme.html
 copy readme.html %smvdir%\release_notes.html
 
+echo copying wrapup_smv_install_%platform%.bat
+copy wrapup_smv_install_%platform%.bat "%smvdir%\wrapup_smv_install.bat
+
 echo
 echo winzipping distribution directory
 cd %smvdir%
@@ -82,7 +85,7 @@ wzzip -a -r -P %zipbase%.zip *
 
 echo
 echo creating self-extracting archive
-wzipse32 %zipbase%.zip -runasadmin -d "C:\Program Files\FDS\%fds_edition%\bin"
+wzipse32 %zipbase%.zip -runasadmin -d "C:\Program Files\FDS\%fds_edition%\bin" -c wrapup_smv_install.bat
 copy %zipbase%.exe ..\.
 
 echo win%platform% Smokeview bundle built
