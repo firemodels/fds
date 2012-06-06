@@ -29,5 +29,5 @@ echo making 64 bit Linux distribution archive
 plink %svn_logon% %scriptdir%/MAKEdistgen.csh %version% linux 64 %linux_hostname%
 
 echo downloading Linux Smokeview files
-pscp %svn_logon%:%bundledir%/smv_%version%_linux_64.tar.gz ..\for_bundle\to_google\.
+pscp %svn_logon%:%bundledir%/smv_%version%_linux64.tar.gz ..\for_bundle\to_google\.
 pause
