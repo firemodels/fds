@@ -57,8 +57,8 @@ msgstr "a: zmiana d?ugo?ci wektora przep?ywu"
 msgid "Abort"
 msgstr "Przerwij"
 
-msgid "About Smokeview"
-msgstr "O Smokeview"
+msgid "About"
+msgstr ""
 
 msgid "Above"
 msgstr "Powy?ej"
@@ -114,6 +114,9 @@ msgstr "Alpha"
 msgid "also, toggles cell center display on/off"
 msgstr "równie?, prze??cza wy?wietlacz centrum komórki on / off"
 
+msgid "ALT horizontal/vertical: translate along z axis"
+msgstr ""
+
 msgid "ALT+u: toggle coarse slice display in embedded mesh"
 msgstr "ALT + U: tryb wy?wietlania kawa?ek grubej siatki osadzone w"
 
@@ -125,9 +128,6 @@ msgstr "ALT + y: je?li obecny jest kawa?ek komórek ?rodku, prze??cz interpolacji
 
 msgid "ALT:   up/down cursor: slide up/down"
 msgstr "ALT: kursorem góra / dó?: slajd w gór? lub w dó?"
-
-msgid "ALT: translate along z axis"
-msgstr "ALT: t?umaczenia wzd?u? osi"
 
 msgid "ALT:left/right cursor: slide left/right"
 msgstr "ALT: kursora lewo / prawo: lewa slajdów / prawo"
@@ -150,8 +150,8 @@ msgstr "Animowane powierzchni"
 msgid "Animated Vector Slices"
 msgstr "Animowane Plastry Vector"
 
-msgid "Animation keyboard commands"
-msgstr "Animacja polecenia klawiatury"
+msgid "Animation"
+msgstr ""
 
 msgid "aperture"
 msgstr "otwór"
@@ -324,8 +324,8 @@ msgstr "Kompresja / Smokezip ... Alt + Z"
 msgid "Compute tracks"
 msgstr "Oblicz utworów"
 
-msgid "Config files"
-msgstr "Pliki konfiguracyjne"
+msgid "Config"
+msgstr ""
 
 msgid "Configuration files"
 msgstr "Pliki konfiguracyjne"
@@ -342,14 +342,11 @@ msgstr ""
 msgid "Continuous contours"
 msgstr "Ci?g?e kontury"
 
-msgid "Create script"
-msgstr "Tworzenie skryptu"
-
 msgid "creating window"
 msgstr ""
 
-msgid "CTRL: translate along x, y axis"
-msgstr "CTRL: t?umaczenia wzd?u? osi X, o? Y"
+msgid "CTRL horizontal/vertical: translate along x, y axis"
+msgstr ""
 
 msgid "CTRL:up/down cursor: move forward/backward 5 times slower"
 msgstr "CTRL: kursorem góra / dó?: przej?cie w przód / ty? 5 razy wolniej"
@@ -435,6 +432,12 @@ msgstr "Wymiary przyci?gany do siatki"
 msgid "Direction vectors"
 msgstr "Kierunek wektora"
 
+msgid "directory"
+msgstr ""
+
+msgid "Disclaimer"
+msgstr ""
+
 msgid "Display"
 msgstr "Wy?wietlacz"
 
@@ -444,16 +447,19 @@ msgstr "wy?wietli? wszystkie"
 msgid "Display data as b/w"
 msgstr ""
 
+msgid "display FDS values in cell centered slices"
+msgstr ""
+
 msgid "Display...  ALT+d"
 msgstr "Wy?wietlacz ... ALT + d"
 
 msgid "Distance to zero parallax plane (m"
 msgstr "Odleg?o?? od p?aszczyzny paralaksy zero (m"
 
-msgid "Documentation"
-msgstr "Dokumentacja"
-
 msgid "does not exist"
+msgstr ""
+
+msgid "double-click: rotate/translate 3D node-centered slice"
 msgstr ""
 
 msgid "Down"
@@ -461,6 +467,9 @@ msgstr "W dó?"
 
 msgid "Download documentation at  http://fire.nist.gov/fds/documentation.html"
 msgstr "Pobierz dokumentacj? w http://fire.nist.gov/fds/documentation.html"
+
+msgid "Download software updates"
+msgstr ""
 
 msgid "Draw"
 msgstr "Rysowa?"
@@ -476,6 +485,9 @@ msgstr "Czas trwania / punktów (wszystkie wycieczki"
 
 msgid "e: toggle between eye, world and world/level rotation motion"
 msgstr "e: prze??cza? si? mi?dzy oczy, ?wiat i ?wiat / ruch rotacji poziomie"
+
+msgid "Edit"
+msgstr ""
 
 msgid "Edit keyframe's view/tension"
 msgstr "Edytuj klatki widzenia / napi?cie"
@@ -663,6 +675,9 @@ msgstr "ogólnych obrotów"
 msgid "General Settings"
 msgstr ""
 
+msgid "General slice motion"
+msgstr ""
+
 msgid "Geometry"
 msgstr "Geometria"
 
@@ -680,6 +695,9 @@ msgstr "globalne max"
 
 msgid "global min"
 msgstr "globalnego min"
+
+msgid "Glut initialization completed\n"
+msgstr ""
 
 msgid "GPU activated. (Press G to deactivate"
 msgstr "GPU aktywowane. (Naci?nij G, aby wy??czy?"
@@ -738,14 +756,14 @@ msgstr "Ukryj wszystkie pliki granicy"
 msgid "Hide all levels"
 msgstr "Ukryj wszystkie poziomy"
 
-msgid "Hide all planes in active mesh"
-msgstr "Ukryj wszystkie samoloty aktywnych oczek"
+msgid "Hide all planes"
+msgstr ""
 
 msgid "Hide all PLOT3D files"
 msgstr "Ukryj wszystkie pliki PLOT3D"
 
-msgid "Hide all tours"
-msgstr "Ukryj wszystkie wycieczki"
+msgid "Hide overlaps"
+msgstr ""
 
 msgid "Hide scene"
 msgstr "scena Ukryj"
@@ -761,6 +779,9 @@ msgstr "etykieta czas hms"
 
 msgid "Horizontal"
 msgstr "Poziomej"
+
+msgid "horizontal/vertical: rotate about z, x axis"
+msgstr ""
 
 msgid "horizontally"
 msgstr "poziomo"
@@ -804,13 +825,13 @@ msgstr ""
 msgid "Initializing callbacks"
 msgstr ""
 
-msgid "Initializing Glut"
-msgstr ""
-
 msgid "Initializing Glut display mode"
 msgstr ""
 
-msgid "Initializing OpenGL"
+msgid "Initializing Glut\n"
+msgstr ""
+
+msgid "Initializing OpenGL\n"
 msgstr ""
 
 msgid "Initializing Smokeview graphics window"
@@ -828,23 +849,14 @@ msgstr "INSERT / HOME / PageUp: Pochyl w dó? / Reset / Pochyl w gór?"
 msgid "Interior"
 msgstr "Wn?trze"
 
-msgid "Interpolate cell centered slices"
-msgstr "komórek interpolowa? ?rodku plastry"
-
 msgid "ISO frame skip"
 msgstr "rama ISO pomin??"
 
 msgid "isosurfaces"
 msgstr "isosurfaces"
 
-msgid "Issue tracker"
-msgstr "issue tracker"
-
 msgid "Italian"
 msgstr ""
-
-msgid "Keyboard motion"
-msgstr "Klawiatura ruchu"
 
 msgid "L: unload last slice file loaded"
 msgstr "L: wy?adowa? ostatniego za?adowanego pliku kawa?ek"
@@ -900,6 +912,9 @@ msgstr ""
 msgid "Line Contours"
 msgstr "Kontury Line"
 
+msgid "Line length"
+msgstr ""
+
 msgid "Line width"
 msgstr "Szeroko?? linii"
 
@@ -942,12 +957,6 @@ msgstr ""
 msgid "Loading smoke and fire data"
 msgstr "?adowanie danych dymu i ognia"
 
-msgid "Loading terrain texture"
-msgstr ""
-
-msgid "Loading textures"
-msgstr ""
-
 msgid "Locations"
 msgstr "Lokalizacje"
 
@@ -975,8 +984,17 @@ msgstr "Maksymalny poziom sta?e"
 msgid "memory allocation error"
 msgstr ""
 
+msgid "Memory Check"
+msgstr ""
+
 msgid "Memory load"
 msgstr "Obci??enie pami?ci"
+
+msgid "Memory usage"
+msgstr ""
+
+msgid "Mesh"
+msgstr ""
 
 msgid "Mesh label"
 msgstr "etykieta Mesh"
@@ -987,8 +1005,8 @@ msgstr "Min"
 msgid "Minimum level solid"
 msgstr "Minimalny poziom sta?e"
 
-msgid "Misc keyboard commands"
-msgstr "Ró?ne komendy klawiatury"
+msgid "Misc"
+msgstr ""
 
 msgid "Motion"
 msgstr "Projekt"
@@ -998,9 +1016,6 @@ msgstr "Projekt / View / Render"
 
 msgid "Motion/View/Render...  ALT+m"
 msgstr "Projekt / View / Render ... ALT + m"
-
-msgid "Mouse motion"
-msgstr "ruchu myszki"
 
 msgid "Move"
 msgstr ""
@@ -1038,6 +1053,9 @@ msgstr "Brak"
 msgid "Normal"
 msgstr "Normalna"
 
+msgid "normal"
+msgstr ""
+
 msgid "not found"
 msgstr ""
 
@@ -1062,6 +1080,9 @@ msgstr "Obiekty"
 msgid "Obstacles"
 msgstr "Przeszkody"
 
+msgid "Obtain Documentation"
+msgstr ""
+
 msgid "Off"
 msgstr "Off"
 
@@ -1085,6 +1106,9 @@ msgstr "Open"
 
 msgid "Open vents as outlines"
 msgstr "Open otwory w postaci konturów"
+
+msgid "OpenGL initialization completed\n\n"
+msgstr ""
 
 msgid "OpenGL lighting"
 msgstr "o?wietlenie OpenGL"
@@ -1143,6 +1167,21 @@ msgstr "Cz?steczki (statyczne"
 msgid "pass"
 msgstr ""
 
+msgid "pass 1 started"
+msgstr ""
+
+msgid "pass 2 started"
+msgstr ""
+
+msgid "pass 3 started"
+msgstr ""
+
+msgid "pass 4 started"
+msgstr ""
+
+msgid "pass 5 started"
+msgstr ""
+
 msgid "Path"
 msgstr "?cie?ka"
 
@@ -1164,8 +1203,8 @@ msgstr "Perspektywy"
 msgid "Planar terrain slice"
 msgstr "Planar kawa?ek terenu"
 
-msgid "Plot3D keyboard commands"
-msgstr "klawiatura Plot3D polecenia"
+msgid "Plot3D"
+msgstr ""
 
 msgid "Point size"
 msgstr "Rozmiar czcionki"
@@ -1200,6 +1239,18 @@ msgstr "Poprzedni"
 msgid "Previous tour"
 msgstr "Poprzednia tour"
 
+msgid "problem reading Smokeview file"
+msgstr ""
+
+msgid "processing config file"
+msgstr ""
+
+msgid "processing smokeview file: %s\n"
+msgstr ""
+
+msgid "q: display blockages as specified by user or as used by FDS"
+msgstr ""
+
 msgid "Quit"
 msgstr "Zamknij"
 
@@ -1221,17 +1272,14 @@ msgstr ""
 msgid "reading cad file"
 msgstr ""
 
-msgid "reading input file"
-msgstr ""
-
-msgid "reading input file completed"
-msgstr ""
-
 msgid "Real time"
 msgstr "W czasie rzeczywistym"
 
 msgid "Realistic"
 msgstr "Realistyczny"
+
+msgid "Record"
+msgstr ""
 
 msgid "red"
 msgstr "czerwony"
@@ -1266,20 +1314,20 @@ msgstr "Od?wie? teraz"
 msgid "Render"
 msgstr "Render"
 
-msgid "render directory"
-msgstr "katalog render"
-
-msgid "Render images"
-msgstr "Render zdj??"
-
 msgid "Replace"
 msgstr "Zast?pi?"
 
 msgid "Report a problem at http://code.google.com/p/fds-smv/issues"
 msgstr "Zg?o? problem w http://code.google.com/p/fds-smv/issues"
 
+msgid "Report problems"
+msgstr ""
+
 msgid "Requested"
 msgstr "Pro?by"
+
+msgid "Research display mode"
+msgstr ""
 
 msgid "Reset"
 msgstr "Reset"
@@ -1296,11 +1344,11 @@ msgstr "Obraca?"
 msgid "Rotate about"
 msgstr "Obró? o"
 
-msgid "rotate around z, x axis"
-msgstr "obraca? si? wokó? z, osi x"
-
 msgid "Rotation"
 msgstr "Obrót"
+
+msgid "rotation center"
+msgstr ""
 
 msgid "Run"
 msgstr ""
@@ -1350,16 +1398,19 @@ msgstr "Skalowanie"
 msgid "Scaling/Depth params"
 msgstr "Skalowanie / params G??boko??"
 
+msgid "Scene motion"
+msgstr ""
+
 msgid "Scratch directory"
 msgstr ""
 
 msgid "Script files"
 msgstr "Script plików"
 
-msgid "Script options"
-msgstr "Opcje skryptu"
-
 msgid "script scriptfile - run the script file scriptfile"
+msgstr ""
+
+msgid "Scripts"
 msgstr ""
 
 msgid "See command shell for details"
@@ -1401,6 +1452,9 @@ msgstr "SHIFT: kursora lewo / prawo: obrót o 90 stopni"
 msgid "Show"
 msgstr "Poka?"
 
+msgid "show"
+msgstr ""
+
 msgid "Show all"
 msgstr "Poka? wszystkie"
 
@@ -1410,14 +1464,11 @@ msgstr "Poka? wszystkie pliki granicy"
 msgid "Show all levels"
 msgstr "Poka? wszystkich poziomach"
 
-msgid "Show all planes in active mesh"
-msgstr "Poka? wszystkie samoloty aktywnych oczek"
+msgid "Show all planes"
+msgstr ""
 
 msgid "Show all PLOT3D files"
 msgstr "Poka? wszystkie pliki PLOT3D"
-
-msgid "Show all tours"
-msgstr "Poka? wszystkie wycieczki"
 
 msgid "Show all vector slice entries"
 msgstr "Poka? wszystkie wpisy kawa?ek wektor"
@@ -1442,6 +1493,12 @@ msgstr ""
 
 msgid "Show file names"
 msgstr "Poka? nazwy pliku"
+
+msgid "show grid"
+msgstr ""
+
+msgid "show grid location"
+msgstr ""
 
 msgid "Show intermediate path nodes"
 msgstr "Poka? w?z?y po?rednie drogi"
@@ -1587,6 +1644,9 @@ msgstr "etykiet Smooth ColorBar"
 msgid "Smooth normal"
 msgstr ""
 
+msgid "Smooth surfaces"
+msgstr ""
+
 msgid "Snap"
 msgstr "Snap"
 
@@ -1635,8 +1695,8 @@ msgstr "sfer"
 msgid "Start"
 msgstr "Start"
 
-msgid "Start recording"
-msgstr "Rozpocz?cie nagrywania"
+msgid "Start (disable file loading"
+msgstr ""
 
 msgid "start time"
 msgstr "czas rozpocz?cia"
@@ -1646,6 +1706,9 @@ msgstr "Pocz?wszy od lokalizacji / pr?dko?ci"
 
 msgid "Step"
 msgstr "Krok"
+
+msgid "Step through script"
+msgstr ""
 
 msgid "Stepped"
 msgstr ""
@@ -1661,9 +1724,6 @@ msgstr "parametrów Stereo"
 
 msgid "Stop"
 msgstr "Stop"
-
-msgid "Stop recording"
-msgstr "Zatrzymaj nagrywanie"
 
 msgid "Stop Rendering"
 msgstr "Stop Rendering"
@@ -1824,6 +1884,9 @@ msgstr "Trójk?ty"
 msgid "Truncate data"
 msgstr "Obci?cie danych"
 
+msgid "Turn off file loading while recording"
+msgstr ""
+
 msgid "Two sided (exterior"
 msgstr "Dwustronny (z zewn?trz"
 
@@ -1884,9 +1947,6 @@ msgstr "etykieta Update"
 msgid "Update tour label"
 msgstr "etykieta tour Update"
 
-msgid "Updates"
-msgstr "Aktualizacje"
-
 msgid "update_bounds - calculate boundary file bounds and save to casename.bini"
 msgstr ""
 
@@ -1944,9 +2004,6 @@ msgstr "pionowo"
 msgid "video hardware does not support stereo"
 msgstr ""
 
-msgid "View"
-msgstr "Zobacz"
-
 msgid "view at startup"
 msgstr "Zobacz na starcie"
 
@@ -1983,8 +2040,8 @@ msgstr ""
 msgid "Volume Render Settings"
 msgstr ""
 
-msgid "w: toggle clipping - use Options/Clip menu to specify clipping planes"
-msgstr "w: prze??czanie wycinek - skorzystaj z opcji / menu Clip okre?li? p?aszczyzny przycinania"
+msgid "W: toggle clipping - use Options/Clip menu to specify clipping planes"
+msgstr ""
 
 msgid "Warning"
 msgstr "Ostrze?enie"
@@ -1994,12 +2051,6 @@ msgstr "wody - wszystkie oczka"
 
 msgid "Water - single mesh"
 msgstr "Woda - jeden oczek"
-
-msgid "Web links"
-msgstr "Przydatne linki"
-
-msgid "Web resources"
-msgstr "zasoby sieci"
 
 msgid "where"
 msgstr ""
@@ -2040,20 +2091,11 @@ msgstr "x, y, z: tryb widoczno?ci dzia?ki konturu wzd?u? osi X, Y i osi Z"
 msgid "xy plane"
 msgstr "p?aszczy?nie xy"
 
-msgid "xy plane (grid turned off"
-msgstr "p?aszczyzny XY (siatka wy??czony"
-
 msgid "xz plane"
 msgstr "p?aszczy?nie xz"
 
-msgid "xz plane (grid turned off"
-msgstr "p?aszczy?nie xz (siatka wy??czony"
-
 msgid "yz plane"
 msgstr "p?aszczyzny YZ"
-
-msgid "yz plane (grid turned off"
-msgstr "p?aszczyzny YZ (siatka wy??czony"
 
 msgid "zero at boundaries"
 msgstr "zero na granicach"
