@@ -381,9 +381,9 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     SPINNER_smokedrawtest_nummax->set_int_limits(1,ijkbarmax);
 #endif
     skipframes = glui_3dsmoke->add_radiogroup_to_panel(panel_slices,&smokeskipm1);
-    glui_3dsmoke->add_radiobutton_to_group(skipframes,_("display all"));
-    glui_3dsmoke->add_radiobutton_to_group(skipframes,_("   ... every 2nd"));
-    glui_3dsmoke->add_radiobutton_to_group(skipframes,_("   ... every 3rd"));
+    glui_3dsmoke->add_radiobutton_to_group(skipframes,_("Display all"));
+    glui_3dsmoke->add_radiobutton_to_group(skipframes,_("   ... Every 2nd"));
+    glui_3dsmoke->add_radiobutton_to_group(skipframes,_("   ... Every 3rd"));
 #ifdef pp_GPU
     SPINNER_smoke3d_rthick=glui_3dsmoke->add_spinner_to_panel(panel_slices,_("Thickness"),
       GLUI_SPINNER_FLOAT,&smoke3d_rthick,SMOKE_RTHICK,SMOKE_3D_CB);
