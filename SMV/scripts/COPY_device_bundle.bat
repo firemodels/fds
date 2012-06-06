@@ -23,7 +23,7 @@ call %envfile%
 
 %svn_drive%
 cd %svn_root%\SMV\for_bundle
-echo copy objects.svo to %ProgramFiles%\fds\fds5\bin
+echo copy objects.svo to %ProgramFiles%\FDS\%fds_edition%\bin
 pause
-copy objects.svo "%ProgramFiles%"\fds\fds5\bin
+copy objects.svo "%ProgramFiles%"\FDS\%fds_edition%\bin
 pause

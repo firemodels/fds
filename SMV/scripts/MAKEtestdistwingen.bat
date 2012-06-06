@@ -81,5 +81,5 @@ wzzip -a -r -p %zipbase%.zip *
 
 echo
 echo creating self-extracting archive
-wzipse32 %zipbase%.zip -runasadmin -d "c:\program files\fds\fds5\bin"
+wzipse32 %zipbase%.zip -runasadmin -d "c:\Program Files\FDS\%fds_edition%\bin"
 copy %zipbase%.exe ..\.
