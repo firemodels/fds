@@ -148,9 +148,9 @@ $RUNFDS Pyrolysis surf_mass_part_char_spher_fuel_split
 $RUNFDS Pyrolysis surf_mass_part_nonchar_cart_fuel_split
 $RUNFDS Pyrolysis surf_mass_part_nonchar_cyl_fuel_split
 $RUNFDS Pyrolysis surf_mass_part_nonchar_spher_fuel_split
-$RUNFDS Pyrolysis two_species_cart
-$RUNFDS Pyrolysis two_species_cyl
-$RUNFDS Pyrolysis two_species_spher
+$RUNFDS Pyrolysis surf_mass_two_species_cart
+$RUNFDS Pyrolysis surf_mass_two_species_cyl
+$RUNFDS Pyrolysis surf_mass_two_species_spher
 $RUNFDS Pyrolysis two_step_solid_reaction
 $RUNFDS Pyrolysis water_ice_water
 $RUNFDS Pyrolysis pcm_slab
