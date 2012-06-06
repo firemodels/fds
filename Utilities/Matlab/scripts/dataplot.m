@@ -1,5 +1,5 @@
-% R. McDermott and C. Cruz
-% 7-06-2009
+% R. McDermott and C. Cruz and S. Hostikka
+% 6-06-2012
 % dataplot.m
 %
 % [saved_data,drange] = dataplot(cfil,vdir,plotdir,[drange])
@@ -24,6 +24,8 @@
 %    configuration file.  For example, [currently] the 'WTC' text string
 %    identifies drange = [13:18], but is much easier to remember if you
 %    happen to work with this set of validation cases frequently.
+%    drange input can be overriden by setting the switch_id in the
+%    configuration file to "o" in those that you want to be processed only.
 %
 % Dependencies:
 %    ../scripts/define_drow_variables.m
@@ -81,12 +83,33 @@ end
 Save_Measured_Metric = zeros(2000,5,5);
 Save_Predicted_Metric = zeros(2000,5,5);
 
-% process the "d" lines one by one
+% search for "o" lines, to process Only those lines.
+
+otest_true = false;
+for i=2:2000
+
+    if i>length(A); break; end
+    P = textscan(A{i},'%q','delimiter',',');
+    parameters = P{:}';
+   
+    otest = strcmp(parameters(find(strcmp(headers,'switch_id'))),'o');
+
+    if otest
+       if ~otest_true
+          otest_true = true;
+          drange = [];
+          dstring = 'null';
+       end
+       drange = [drange i];
+    end
+end
+   
+% process the "d" or "o" lines one by one
 
 for i=2:2000
     
     if i>length(A); break; end
-    
+
     P = textscan(A{i},'%q','delimiter',',');
     parameters = P{:}';
     
@@ -105,8 +128,12 @@ for i=2:2000
     % check to see if d line has been activated in configuration file
     
     dtest = strcmp(parameters(find(strcmp(headers,'switch_id'))),'d');
+
+    % check to see if o line has been activated in configuration file
+
+    otest = strcmp(parameters(find(strcmp(headers,'switch_id'))),'o');
     
-    if itest & dtest
+    if itest & (dtest | otest)
         
         define_drow_variables
         
