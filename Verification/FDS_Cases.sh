@@ -271,7 +271,7 @@ $RUNFDS Sprinklers_and_Sprays water_evaporation_4
 $RUNFDS Sprinklers_and_Sprays water_evaporation_5
 $RUNFDS Sprinklers_and_Sprays water_fuel_sprays
 $RUNFDS Sprinklers_and_Sprays screen_drag_1
-$RUNFDS Sprinklers_and_Sprays screen_drag_1
+$RUNFDS Sprinklers_and_Sprays screen_drag_2
 
 $RUNFDS Scalar_Analytical_Solution pulsating_FL0_16
 $RUNFDS Scalar_Analytical_Solution pulsating_FL0_32
