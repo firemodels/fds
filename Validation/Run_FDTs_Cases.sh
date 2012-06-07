@@ -7,6 +7,13 @@ export SVNROOT=`pwd`/..
 export FDTs=$SVNROOT/Utilities/Data_Processing/FDTs
 export VDIR=$SVNROOT/Validation
 
+# First, compile latest version of FDTs.f90
+
+cd $SVNROOT/Utilities/Data_Processing
+ifort FDTs.f90 -o FDTs
+
+# Then, run all FDTs cases
+
 cd $VDIR/CAROLFIRE/FDTs
 $FDTs CAROLFIRE_THIEF_Inputs.txt
 
