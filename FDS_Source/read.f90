@@ -2618,11 +2618,7 @@ COUNT_REAC_LOOP: DO
    CALL SET_REAC_DEFAULTS
    READ(LU_INPUT,REAC,END=435,ERR=434,IOSTAT=IOS)
    N_REACTIONS = N_REACTIONS + 1
-   IF (A < 0._EB .AND. E < 0._EB .AND. TRIM(SMIX_ID(1))=='null' .AND. TRIM(EQUATION)=='null') THEN
-      SIMPLE_CHEMISTRY = .TRUE.
-      A = 1.E16_EB
-      E = 0._EB
-   ENDIF
+   IF (A < 0._EB .AND. E < 0._EB .AND. TRIM(SMIX_ID(1))=='null' .AND. TRIM(EQUATION)=='null') SIMPLE_CHEMISTRY = .TRUE.
    IF (.NOT.SIMPLE_CHEMISTRY .AND. TRIM(SMIX_ID(1))=='null' .AND. TRIM(EQUATION)=='null') THEN
       WRITE(MESSAGE,'(A,I3,A)') 'ERROR: Problem with REAC ',N_REACTIONS,'. SMIX_ID and NU arrays or EQUATION must be defined'
       CALL SHUTDOWN(MESSAGE)
@@ -2725,8 +2721,12 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
      RN%MODE = EDDY_DISSIPATION
    ENDIF
 
-   IF (A > 1.E15_EB .AND. E == 0._EB) RN%FAST_CHEMISTRY=.TRUE.
-      
+   IF (RN%A < 0._EB .AND. RN%E < 0._EB) THEN 
+      A = 1.E16_EB
+      E = 0._EB
+      RN%FAST_CHEMISTRY=.TRUE.
+   ENDIF
+         
    ! Determine the number of stoichiometric coefficients for this reaction
 
    IF (.NOT.SIMPLE_CHEMISTRY) THEN
@@ -2968,7 +2968,6 @@ REAC_LOOP: DO NR=1,N_REACTIONS
    
    RN%RHO_EXPONENT = RN%RHO_EXPONENT - 1._EB
    RN%A = RN%A *1000._EB*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW
-
    IF (RN%FUEL/='null' .AND. RN%FUEL_SMIX_INDEX<1) THEN
       WRITE(MESSAGE,'(A,I3,A,A,A)') 'ERROR: Problem with REAC ',NR,'. Fuel ',TRIM(RN%FUEL),' not found.'
       CALL SHUTDOWN(MESSAGE)
