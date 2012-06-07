@@ -18,7 +18,7 @@ Rem location of batch files used to set up Intel compilation environment
 call %envfile%
 
 set bundledir=FDS_%fds_version%-SMV_%smv_version%_osx32
-plink %svn_logon% %linux_svn_root%/Utilities/Scripts/BUNDLE_osx32.csh %linux_svn_root% %bundledir% %osx_hostname%
+plink %svn_logon% %linux_svn_root%/Utilities/Scripts/BUNDLE_osx32.csh %linux_svn_root% %bundledir% %osx_hostname% %fds_edition%
 
 set manifest=%svn_root%\Utilities\to_google\manifest_osx_32.html
 echo Downloading manifest
