@@ -1,4 +1,3 @@
-
 &HEAD CHID='UL_NFPRF_2_01',TITLE='UL/NFPRF Heptane Burner Series 2, Test 1' /
 
 &MESH IJK=102,108,45, XB=0,30.5,0,30.5,0.0,9.0 /
