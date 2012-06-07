@@ -28,10 +28,10 @@ fi
 
 cat << EOF > $INSTALLER
 #!/bin/bash
-FDS_root=~/FDS/FDS6
+FDS_root=~/FDS/$FDSEDITION
 
 # record the name of this script and the name of the directory 
-# it will be run in
+# it will run in
 
 THIS=\`pwd\`/\$0
 THISDIR=\`pwd\`
@@ -71,9 +71,8 @@ exit 0
 fi
 fi
 
-#
 # get FDS root directory
-#
+
 echo ""
 #echo "*** FDS Smokeview 6 Installer ***"
 echo "*** This is a test of the script that installs FDS and Smokeview on a "
@@ -147,23 +146,14 @@ setenv FDSBINDIR \`pwd\`/bin
 
 # define openmpi library locations:
 #   32/64 bit gigabit ethernet
-#   64 bit infiniband
 
 set MPIDIST32=/shared/openmpi_32
 set MPIDIST64=/shared/openmpi_64
-set MPIDIST64IB=/shared/openmpi_64ib
 
 # environment for 64 bit gigabit ethernet
 
 if ( "\\\$platform" == "intel64" ) then
 setenv MPIDIST \\\$MPIDIST64
-set FORTLIB=\\\$FDSBINDIR/LIB64
-endif
-
-# environment for 64 bit Infiniband
-
-if ( "\\\$platform" == "ib64" ) then
-setenv MPIDIST \\\$MPIDIST64IB
 set FORTLIB=\\\$FDSBINDIR/LIB64
 endif
 
@@ -193,10 +183,6 @@ if ( \\\$?IFORT_COMPILER ) then
 
 if ( -e \\\$IFORT_COMPILER/bin/ifortvars.csh ) then
 
-if ( "\\\$platform" == "ib64" ) then
-source \\\$IFORT_COMPILER/bin/ifortvars.csh intel64
-endif
-
 if ( "\\\$platform" == "intel64" ) then
 source \\\$IFORT_COMPILER/bin/ifortvars.csh intel64
 endif
@@ -221,11 +207,9 @@ export FDSBINDIR=\`pwd\`/bin
 
 # define openmpi library locations:
 #   32/64 bit gigabit ethernet
-#   64 bit infiniband
 
 MPIDIST32=/shared/openmpi_32
 MPIDIST64=/shared/openmpi_64
-MPIDIST64IB=/shared/openmpi_64ib
 
 # environment for 64 bit gigabit ethernet
 
@@ -243,14 +227,6 @@ export MPIDIST=\\\$MPIDIST32
 FORTLIB=\\\$FDSBINDIR/LIB32
 fi
 
-# environment for 64 bit infiniband
-
-if [ "\\\$platform" == "ib64" ]
-then
-export MPIDIST=\\\$MPIDIST64IB
-FORTLIB=\\\$FDSBINDIR/LIB64
-fi
-
 # Update LD_LIBRARY_PATH and PATH variables
 
 export $LDLIBPATH=\\\$MPIDIST/lib:\\\$FORTLIB:\\\$$LDLIBPATH
@@ -261,11 +237,6 @@ export PATH=\\\$FDSBINDIR:\\\$MPIDIST/bin:\\\$PATH
 if [ ! -e "\\\$IFORT_COMPILER/bin/ifortvars.sh" ]
 then
 return
-fi
-
-if [ "\\\$platform" == "ib64" ]
-then
-source \\\$IFORT_COMPILER/bin/ifortvars.sh intel64
 fi
 
 if [ "\\\$platform" == "intel64" ]

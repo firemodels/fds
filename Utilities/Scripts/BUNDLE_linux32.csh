@@ -7,6 +7,7 @@ setenv bundlebase $2
 setenv runhost $3
 setenv fdshost $3
 setenv smvhost $3
+setenv FDSEDITION $4
 setenv PLATFORM LINUX32
 
 
