@@ -1,0 +1,42 @@
+&HEAD CHID='wind_cube', TITLE='wind tunnel flow over cube' /
+
+&MULT ID='m1', DX=2.0, DY=0.5, DZ=0.7, I_UPPER=2, J_UPPER=2, K_UPPER=2 /
+&MESH IJK=160,40,56, XB=0.0,2.0,0.0,0.5,0.0,0.7, MULT_ID='m1' /
+
+MESH IJK=120,30,42, XB=0,6,0,1.5,0.0,2.1 / ! single coarse mesh, may be helpful for testing
+MESH IJK=240,60,84, XB=0,6,0,1.5,0.0,2.1 / ! single fine mesh
+
+&TIME T_END=25.0 /
+
+&MISC STRATIFICATION=.FALSE., BAROCLINIC=.FALSE. /
+
+&SURF ID='inlet', VEL=-10., COLOR='BLUE'/
+
+&RADI RADIATION=.FALSE./
+
+&OBST XB=2.9,3.1,0.65,0.85,0.0,0.2, COLOR='GRAY' /
+
+&VENT PBX=0, SURF_ID='inlet'/ , N_EDDY=500, L_EDDY=1, VEL_RMS=1 / ! uncomment for sythetic turbulence inflow conditions
+&VENT PBX=6, SURF_ID='OPEN' /
+
+&SLCF PBY=0.75, QUANTITY='VELOCITY', VECTOR=.TRUE. /
+&SLCF PBZ=0.1, QUANTITY='VELOCITY', VECTOR=.TRUE. /
+&SLCF PBZ=0.2, QUANTITY='VELOCITY', VECTOR=.TRUE. /
+&SLCF PBX=3, QUANTITY='VELOCITY', VECTOR=.TRUE. /
+
+&BNDF QUANTITY='PRESSURE COEFFICIENT', PROP_ID='p1'/
+&PROP ID='p1', CHARACTERISTIC_VELOCITY=10.0/
+
+&DEVC XYZ=4.0,0.75,0.1, QUANTITY='U-VELOCITY', ID='u' / ! measure instantaneous velocity at a point just behind the block
+&DEVC XYZ=4.0,0.75,0.1, QUANTITY='V-VELOCITY', ID='v' / ! can be used to check power spectrum
+&DEVC XYZ=4.0,0.75,0.1, QUANTITY='W-VELOCITY', ID='w' /
+
+&TAIL /
+
+
+
+
+
+
+
+
