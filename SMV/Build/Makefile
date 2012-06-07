@@ -32,20 +32,6 @@ BUILD_DIR = $(SOURCE_DIR)/../Build
 LIB_DIR = $(BUILD_DIR)/LIBS
 INC_DIR = $(SOURCE_DIR)/include2
 
-# SYSTEM libraries
-
-SYSTEMLIBS = -lpthread -lXmu -lGLU -lGL -lm
-
-# FORTRAN Library directories for various platforms
-# Define IFORT_COMPILER and IFORT_COMPILER2 in a startup file to point
-#  compiler distribution location.
-
-OSX32FORTLIBDIR  = $(IFORT_COMPILER2)/lib
-OSX64FORTLIBDIR  = ${IFORT_COMPILER2}/lib
-
-LINUX32FORTLIBDIR  = $IFORT_COMPILER/lib/ia32
-LINUX64FORTLIBDIR  = $IFORT_COMPILER/lib/intel64
-
 # Definition of the object variables
 
 obj = main.o menus.o IOscript.o IOshooter.o glui_devices.o glui_message.o glui_shooter.o glui_wui.o csphere.o colortimebar.o smv_endian.o camera.o IOembed.o IOhrr.o IOwui.o IOobject.o IOtour.o glui_labels.o glui_tour.o getdatacolors.o smokeview.o output.o renderfile.o isobox.o getdatabounds.o readsmv.o scontour2d.o glui_3dsmoke.o glui_clip.o glui_stereo.o glui_blockedit.o glui_motion.o glui_bounds.o egz_stdio.o dmalloc.o interp.o assert.o compress3dc.o compress.o IOvolsmoke.o IOsmoke.o IOplot3d.o IOslice.o IOboundary.o IOpart.o IOzone.o IOiso.o IOtarget.o callbacks.o drawGeometry.o glui_colorbar.o skybox.o file_util.o string_util.o startup.o glui_trainer.o shaders.o unit.o threader.o histogram.o translate.o update.o viewports.o smv_geometry.o geometry.o showscene.o getdata.o getsizes.o glew.o
@@ -211,205 +197,218 @@ ms_win_test_64 : $(objwin)
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV  Linux VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
-LIBLINUX32 = $(LIB_DIR)/lib_linux_intel_32
-LIBLINUX64 = $(LIB_DIR)/lib_linux_intel_64
+LINUXSYSTEMLIBS = -lpthread -lXmu -lGLU -lGL -lm
+
+LINUXFORTLIBDIR32  = $IFORT_COMPILER/lib/ia32
+LINUXLIBDIR32 = $(LIB_DIR)/lib_linux_intel_32
+
+LINUXFORTLIBDIR64  = $IFORT_COMPILER/lib/intel64
+LINUXLIBDIR64 = $(LIB_DIR)/lib_linux_intel_64
+
+LINUXSMVLIBS = -lglui -lglut -lgd -ljpeg -lpng -lz
+LINUXINTELLIBS = -lifcore  -lintlc
+
 
 # ------------- intel_linux_32 ----------------
 
-intel_linux_32 : FORTLIBDIR  = $(LINUX32FORTLIBDIR)
+intel_linux_32 : FORTLIBDIR  = $(LINUXFORTLIBDIR32)
 intel_linux_32 : FFLAGS    = -O2 -m32 -static-intel -vec_report0 -fpp -D pp_noappend
 intel_linux_32 : CFLAGS    = -O2 -m32 -static-intel -vec_report0 -D pp_LINUX
+intel_linux_32 : LFLAGS    = -m32 -static-intel
 intel_linux_32 : CC        = icc 
 intel_linux_32 : CPP       = icpc
 intel_linux_32 : FC        = ifort
 intel_linux_32 : exe       = smokeview_linux_32
 
 intel_linux_32 : $(obj)
-	$(CPP) -m32 -o $(bin)/$(exe) $(obj) -static-intel -L$(LIBLINUX32) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore -L/usr/lib $(SYSTEMLIBS)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUXLIBDIR32) -L $(FORTLIBDIR) $(LINUXSMVLIBS) $(LINUXINTELLIBS) -L/usr/lib $(LINUXSYSTEMLIBS)
 
 # ------------- intel_linux_test_32 ----------------
 
-intel_linux_test_32 : FORTLIBDIR  = $(LINUX32FORTLIBDIR)
 intel_linux_test_32 : FFLAGS    = -O2 -m32 -static-intel -vec_report0 -fpp -D pp_noappend
 intel_linux_test_32 : CFLAGS    = -O2 -m32 -static-intel -vec_report0 -D pp_BETA -D pp_LINUX
+intel_linux_test_32 : LFLAGS    = -m32 -static-intel
 intel_linux_test_32 : CC        = icc 
 intel_linux_test_32 : CPP       = icpc
 intel_linux_test_32 : FC        = ifort
 intel_linux_test_32 : exe       = smokeview_linux_test_32
 
 intel_linux_test_32 : $(obj)
-	$(CPP) -m32 -o $(bin)/$(exe) $(obj) -static-intel -L$(LIBLINUX32) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore -L/usr/lib $(SYSTEMLIBS)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUXLIBDIR32) -L $(LINUXFORTLIBDIR32) $(LINUXSMVLIBS) $(LINUXINTELLIBS) -L/usr/lib $(LINUXSYSTEMLIBS)
 
 # ------------- intel_linux_32_dbg ----------------
 
-intel_linux_32_dbg : FORTLIBDIR  = $(LINUX32FORTLIBDIR)
 intel_linux_32_dbg : FFLAGS    = -O0 -m32 -static-intel -traceback -g -fpe0 -fltconsistency -WB -vec_report0 -fpp -D pp_noappend
 intel_linux_32_dbg : CFLAGS    = -O0 -g -m32 -static-intel -vec_report0 -D pp_LINUX
+intel_linux_32_dbg : LFLAGS    = -m32 -static-intel
 intel_linux_32_dbg : CC        = icc 
 intel_linux_32_dbg : CPP       = icpc
 intel_linux_32_dbg : FC        = ifort
 intel_linux_32_dbg : exe       = smokeview_linux_32_dbg
 
 intel_linux_32_dbg : $(obj)
-	$(CPP) -m32 -o $(bin)/$(exe) $(obj) -static-intel -L$(LIBLINUX32) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore $(SYSTEMLIBS)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUXLIBDIR32) -L $(LINUXFORTLIBDIR32) $(LINUXSMVLIBS) $(LINUXINTELLIBS) $(LINUXSYSTEMLIBS)
 
 # ------------- intel_linux_64 ----------------
 
-intel_linux_64 : FORTLIBDIR  = $(LINUX64FORTLIBDIR)
 intel_linux_64 : FFLAGS    = -O2 -m64 -static-intel -vec_report0 -fpp -D pp_noappend
 intel_linux_64 : CFLAGS    = -O2 -m64 -static-intel -vec_report0 -D pp_LINUX64
+intel_linux_64 : LFLAGS    = -m64 -static-intel
 intel_linux_64 : CC        = icc 
 intel_linux_64 : CPP       = icpc
 intel_linux_64 : FC        = ifort
 intel_linux_64 : exe       = smokeview_linux_64
 
 intel_linux_64 : $(obj)
-	$(CPP) -m64 -o $(bin)/$(exe) $(obj) -static-intel -L$(LIBLINUX64) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUXLIBDIR64) -L $(LINUXFORTLIBDIR64) $(LINUXSMVLIBS) $(LINUXINTELLIBS) $(LINUXSYSTEMLIBS)
 
 # ------------- intel_linux_test_64 ----------------
 
-intel_linux_test_64 : FORTLIBDIR  = $(LINUX64FORTLIBDIR)
 intel_linux_test_64 : FFLAGS    = -O2 -m64 -static-intel -traceback -vec_report0 -fpp -D pp_noappend
 intel_linux_test_64 : CFLAGS    = -O2 -m64 -static-intel -traceback -vec_report0 -D pp_LINUX64 -D pp_BETA
+intel_linux_test_64 : LFLAGS    = -m64 -static-intel -traceback
 intel_linux_test_64 : CC        = icc 
 intel_linux_test_64 : CPP       = icpc
 intel_linux_test_64 : FC        = ifort
 intel_linux_test_64 : exe       = smokeview_linux_test_64
 
 intel_linux_test_64 : $(obj)
-	$(CPP) -m64 -traceback -o $(bin)/$(exe) $(obj) -static-intel -L$(LIBLINUX64) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUXLIBDIR64) -L $(LINUXFORTLIBDIR64) $(LINUXSMVLIBS) $(LINUXINTELLIBS) $(LINUXSYSTEMLIBS)
 
 # ------------- intel_linux_test_64_dbg ----------------
 
-intel_linux_test_64_dbg : FORTLIBDIR  = $(LINUX64FORTLIBDIR)
 intel_linux_test_64_dbg : FFLAGS    = -O0 -m64 -static-intel -traceback -g -fpe0 -fltconsistency -WB -vec_report0 -fpp -D pp_noappend
 intel_linux_test_64_dbg : CFLAGS    = -O0 -g -m64 -static-intel -vec_report0 -D pp_LINUX64 -D pp_BETA
+intel_linux_test_64_dbg : LFLAGS    = -m64 -static-intel
 intel_linux_test_64_dbg : CC        = icc 
 intel_linux_test_64_dbg : CPP       = icpc
 intel_linux_test_64_dbg : FC        = ifort
 intel_linux_test_64_dbg : exe       = smokeview_linux_test_64_dbg
 
 intel_linux_test_64_dbg : $(obj)
-	$(CPP) -m64 -o $(bin)/$(exe) $(obj) -static-intel -L$(LIBLINUX64) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUXLIBDIR64) -L $(LINUXFORTLIBDIR64) $(LINUXSMVLIBS) $(LINUXINTELLIBS) $(LINUXSYSTEMLIBS)
 
 
 # ------------- intel_linux_64_dbg ----------------
 
-intel_linux_64_dbg : FORTLIBDIR  = $(LINUX64FORTLIBDIR)
 intel_linux_64_dbg : FFLAGS    = -O0 -m64 -static-intel -traceback -g -fpe0 -fltconsistency -WB -vec_report0 -fpp -D pp_noappend
 intel_linux_64_dbg : CFLAGS    = -O0 -g -m64 -static-intel -vec_report0 -D pp_LINUX64
+intel_linux_64_dbg : LFLAGS    = -m64 -static-intel
 intel_linux_64_dbg : CC        = icc 
 intel_linux_64_dbg : CPP       = icpc
 intel_linux_64_dbg : FC        = ifort
 intel_linux_64_dbg : exe       = smokeview_linux_64_dbg
 
 intel_linux_64_dbg : $(obj)
-	$(CPP) -m64 -o $(bin)/$(exe) $(obj) -static-intel -L$(LIBLINUX64) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUXLIBDIR64) -L $(LINUXFORTLIBDIR64) $(LINUXSMVLIBS) $(LINUXINTELLIBS) $(LINUXSYSTEMLIBS)
 
 # ------------- intel_linux_64_profile ----------------
 
-intel_linux_64_profile : FORTLIBDIR  = $(LINUX64FORTLIBDIR)
 intel_linux_64_profile : FFLAGS    = -O2 -m64 -static-intel -vec_report0 -fpp -D pp_noappend -p
 intel_linux_64_profile : CFLAGS    = -O2 -m64 -static-intel -vec_report0 -D pp_LINUX64 -p
+intel_linux_64_profile : LFLAGS    = -m64 -static-intel
 intel_linux_64_profile : CC        = icc 
 intel_linux_64_profile : CPP       = icpc
 intel_linux_64_profile : FC        = ifort
 intel_linux_64_profile : exe       = smokeview_linux_64p
 
 intel_linux_64_profile : $(obj)
-	$(CPP) -m64 -o $(bin)/$(exe) $(obj) -static-intel -L$(LIBLINUX64) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS) -p
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUXLIBDIR64) -L $(LINUXFORTLIBDIR64) $(LINUXSMVLIBS) $(LINUXINTELLIBS) $(LINUXSYSTEMLIBS) -p
 
 # ------------- gcc_linux_32 ----------------
 
-gcc_linux_32 : IMAGELIBDIR = $(LIB_DIR)/lib_linux_gcc_32
-gcc_linux_32 : FORTLIBDIR  = $(LINUX32FORTLIBDIR)
+gcc_linux_32 : FORTLIBDIR  = $(LINUXFORTLIBDIR32)
 gcc_linux_32 : FFLAGS    = -O2 -m32 -D pp_noappend -ffree-form
 gcc_linux_32 : CFLAGS    = -O2 -m32 -D pp_LINUX
+gcc_linux_32 : LFLAGS    = -m32
 gcc_linux_32 : CC        = gcc
 gcc_linux_32 : CPP       = g++
 gcc_linux_32 : FC        = gfortran
 gcc_linux_32 : exe       = smokeview_linux_32
 
 gcc_linux_32 : $(obj)
-	$(CPP) -m32 -o $(bin)/$(exe) $(obj) -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lgfortran $(SYSTEMLIBS)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(IMAGELIBDIR) -L $(LIB_DIR)/lib_linux_gcc_32 $(LINUXSMVLIBS) -lgfortran $(LINUXSYSTEMLIBS)
 
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV   OSX   VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
+OSXINTELLIB32 = $(LIB_DIR)/lib_osx_intel_32
+OSXSMVLIBS32 = -lz $(OSXINTELLIB32)/libpng.a $(OSXINTELLIB32)/libgd.a $(OSXINTELLIB32)/libglui.a
+
+OSXINTELLIB64 = $(LIB_DIR)/lib_osx_intel_64
+OSXSMVLIBS64 = -lz $(OSXINTELLIB64)/libpng.a $(OSXINTELLIB64)/libgd.a $(OSXINTELLIB64)/libglui.a
+
+OSXFORTLIBDIR32  = $(IFORT_COMPILER2)/lib
+OSXINTELLIBS32 = $(OSXFORTLIBDIR32)/libifcoremt.a $(OSXFORTLIBDIR32)/libimf.a $(OSXFORTLIBDIR32)/libirc.a $(OSXFORTLIBDIR32)/libsvml.a
+
+OSXFORTLIBDIR64  = $(IFORT_COMPILER2)/lib
+OSXINTELLIBS32 = $(OSXFORTLIBDIR64)/libifcoremt.a $(OSXFORTLIBDIR64)/libimf.a $(OSXFORTLIBDIR64)/libirc.a $(OSXFORTLIBDIR64)/libsvml.a
+
 # ------------- intel_osx_32 ----------------
 
-intel_osx_32 : IMAGELIBDIR = $(LIB_DIR)/lib_osx_intel_32
-intel_osx_32 : FORTLIBDIR  = $(OSX32FORTLIBDIR)
 intel_osx_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_OSX
 intel_osx_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_OSX
-intel_osx_32 : LFLAGS    = -static-intel -mmacosx-version-min=10.4 -framework OpenGL -framework GLUT
+intel_osx_32 : LFLAGS    = -m32 -static-intel -mmacosx-version-min=10.4 -framework OpenGL -framework GLUT
 intel_osx_32 : CC        = icc 
 intel_osx_32 : CPP       = icpc
 intel_osx_32 : FC        = ifort
 intel_osx_32 : exe       = smokeview_osx_32
 
 intel_osx_32 : $(obj)
-	icpc -m32 -o $(bin)/$(exe) $(LFLAGS) $(obj)  -lz $(IMAGELIBDIR)/libpng.a $(IMAGELIBDIR)/libgd.a $(IMAGELIBDIR)/libglui.a $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
+	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  $(OSXSMVLIBS32) $(OSXINTELLIBS32)
 
 # ------------- intel_osx_test_32 ----------------
 
-intel_osx_test_32 : IMAGELIBDIR = $(LIB_DIR)/lib_osx_intel_32
-intel_osx_test_32 : FORTLIBDIR  = $(OSX32FORTLIBDIR)
 intel_osx_test_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_OSX -D pp_BETA
 intel_osx_test_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_OSX -D pp_BETA
+intel_osx_test_32 : LFLAGS    = -m32 -static-intel -mmacosx-version-min=10.4 -framework OpenGL -framework GLUT
 intel_osx_test_32 : CC        = icc 
 intel_osx_test_32 : CPP       = icpc
 intel_osx_test_32 : FC        = ifort
 intel_osx_test_32 : exe       = smokeview_osx_test_32
 
 intel_osx_test_32 : $(obj)
-	icpc -m32 -o $(bin)/$(exe) -static-intel $(obj) -mmacosx-version-min=10.4 -framework OpenGL -framework GLUT -lz $(IMAGELIBDIR)/libpng.a $(IMAGELIBDIR)/libgd.a $(IMAGELIBDIR)/libglui.a $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
+	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj) $(OSXSMVLIBS32) $(OSXINTELLIBS32)
 
 # ------------- intel_osx_64 ----------------
 
-intel_osx_64 : IMAGELIBDIR = $(LIB_DIR)/lib_osx_intel_64
-intel_osx_64 : FORTLIBDIR  = $(OSX64FORTLIBDIR)
 intel_osx_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_OSX64 -mmaccox-version-min=10.4
 intel_osx_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_OSX64 -mmacosx-version-min=10.4
-intel_osx_64 : LFLAGS    = -static-intel -framework OpenGL -framework GLUT -mmacosx-version-min=10.4
+intel_osx_64 : LFLAGS    = -m64 -static-intel -framework OpenGL -framework GLUT -mmacosx-version-min=10.4
 intel_osx_64 : CC        = icc 
 intel_osx_64 : CPP       = icpc
 intel_osx_64 : FC        = ifort
 intel_osx_64 : exe       = smokeview_osx_64
 
 intel_osx_64 : $(obj)
-	icpc -m64 -o $(bin)/$(exe) $(LFLAGS) $(obj)  -lz $(IMAGELIBDIR)/libpng.a $(IMAGELIBDIR)/libgd.a $(IMAGELIBDIR)/libglui.a $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
+	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  $(OSXSMVLIBS64) $(OSXINTELLIBS64)
 
 # ------------- intel_osx_test_64 ----------------
 
-intel_osx_test_64 : IMAGELIBDIR = $(LIB_DIR)/lib_osx_intel_64
-intel_osx_test_64 : FORTLIBDIR  = $(OSX64FORTLIBDIR)
 intel_osx_test_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_OSX64 -D pp_BETA
 intel_osx_test_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_OSX64 -D pp_BETA
+intel_osx_test_64 : LFLAGS    = -m64 -static-intel -framework OpenGL -framework GLUT -mmacosx-version-min=10.4
 intel_osx_test_64 : CC        = icc 
 intel_osx_test_64 : CPP       = icpc
 intel_osx_test_64 : FC        = ifort
 intel_osx_test_64 : exe       = smokeview_osx_test_64
 
 intel_osx_test_64 : $(obj)
-	icpc -m64 -o $(bin)/$(exe) -static-intel $(obj)  -mmacosx-version-min=10.4 -framework OpenGL -framework GLUT -lz $(IMAGELIBDIR)/libpng.a $(IMAGELIBDIR)/libgd.a $(IMAGELIBDIR)/libglui.a $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
+	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj) $(OSXSMVLIBS64) $(OSXINTELLIBS64)
 
 # ------------- intel_osx_test_64_db ----------------
 
-intel_osx_test_64_dbg : IMAGELIBDIR = $(LIB_DIR)/lib_osx_intel_64
-intel_osx_test_64_dbg : FORTLIBDIR  = $(OSX64FORTLIBDIR)
 intel_osx_test_64_dbg : FFLAGS    = -O0 -m64 -traceback -g -fpe0 -fltconsistency -WB -vec_report0 -fpp -D pp_BETA -D pp_OSX64 -D pp_noappend -D _DEBUG
 intel_osx_test_64_dbg : CFLAGS    = -O0 -g -m64 -vec_report0 -D pp_OSX64 -D pp_BETA -D _DEBUG
-#intel_osx_test_64_dbg : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_OSX64 -D pp_BETA
-#intel_osx_test_64_dbg : CFLAGS    = -O2 -m64 -vec_report0 -D pp_OSX64 -D pp_BETA
+intel_osx_test_64_dbg : LFLAGS    = -m64 -static-intel -framework OpenGL -framework GLUT -mmacosx-version-min=10.4
 intel_osx_test_64_dbg : CC        = icc 
 intel_osx_test_64_dbg : CPP       = icpc
 intel_osx_test_64_dbg : FC        = ifort
 intel_osx_test_64_dbg : exe       = smokeview_osx_test_64_dbg
 
 intel_osx_test_64_dbg : $(obj)
-	icpc -m64 -o $(bin)/$(exe) -static-intel $(obj)  -mmacosx-version-min=10.4 -framework OpenGL -framework GLUT -lz $(IMAGELIBDIR)/libpng.a $(IMAGELIBDIR)/libgd.a $(IMAGELIBDIR)/libglui.a $(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
+	icpc -o $(bin)/$(exe) $(LFAGS) $(obj) $(OSXSMVLIBS64) $(OSXINTELLIBS64)
 
 
 # ------------- make depend ----------------
