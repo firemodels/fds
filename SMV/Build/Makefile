@@ -229,114 +229,114 @@ ms_win_test_64 : $(objwin)
 
 intel_linux_32 : IMAGELIBDIR = $(LIB_DIR)/lib_linux_intel_32
 intel_linux_32 : FORTLIBDIR  = $(LINUX32FORTLIBDIR)
-intel_linux_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_noappend
-intel_linux_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_LINUX
+intel_linux_32 : FFLAGS    = -O2 -m32 -static-intel -vec_report0 -fpp -D pp_noappend
+intel_linux_32 : CFLAGS    = -O2 -m32 -static-intel -vec_report0 -D pp_LINUX
 intel_linux_32 : CC        = icc 
 intel_linux_32 : CPP       = icpc
 intel_linux_32 : FC        = ifort
 intel_linux_32 : exe       = smokeview_linux_32
 
 intel_linux_32 : $(obj)
-	$(CPP) -m32 -o $(bin)/$(exe) $(obj) -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore -L/usr/lib $(SYSTEMLIBS)
+	$(CPP) -m32 -o $(bin)/$(exe) $(obj) -static-intel -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore -L/usr/lib $(SYSTEMLIBS)
 
 # ------------- intel_linux_test_32 ----------------
 
 intel_linux_test_32 : IMAGELIBDIR = $(LIB_DIR)/lib_linux_intel_32
 intel_linux_test_32 : FORTLIBDIR  = $(LINUX32FORTLIBDIR)
-intel_linux_test_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_noappend
-intel_linux_test_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_BETA -D pp_LINUX
+intel_linux_test_32 : FFLAGS    = -O2 -m32 -static-intel -vec_report0 -fpp -D pp_noappend
+intel_linux_test_32 : CFLAGS    = -O2 -m32 -static-intel -vec_report0 -D pp_BETA -D pp_LINUX
 intel_linux_test_32 : CC        = icc 
 intel_linux_test_32 : CPP       = icpc
 intel_linux_test_32 : FC        = ifort
 intel_linux_test_32 : exe       = smokeview_linux_test_32
 
 intel_linux_test_32 : $(obj)
-	$(CPP) -m32 -o $(bin)/$(exe) $(obj) -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore -L/usr/lib $(SYSTEMLIBS)
+	$(CPP) -m32 -o $(bin)/$(exe) $(obj) -static-intel -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore -L/usr/lib $(SYSTEMLIBS)
 
 # ------------- intel_linux_32_dbg ----------------
 
 intel_linux_32_dbg : IMAGELIBDIR = $(LIB_DIR)/lib_linux_intel_32
 intel_linux_32_dbg : FORTLIBDIR  = $(LINUX32FORTLIBDIR)
-intel_linux_32_dbg : FFLAGS    = -O0 -m32 -traceback -g -fpe0 -fltconsistency -WB -vec_report0 -fpp -D pp_noappend
-intel_linux_32_dbg : CFLAGS    = -O0 -g -m32 -vec_report0 -D pp_LINUX
+intel_linux_32_dbg : FFLAGS    = -O0 -m32 -static-intel -traceback -g -fpe0 -fltconsistency -WB -vec_report0 -fpp -D pp_noappend
+intel_linux_32_dbg : CFLAGS    = -O0 -g -m32 -static-intel -vec_report0 -D pp_LINUX
 intel_linux_32_dbg : CC        = icc 
 intel_linux_32_dbg : CPP       = icpc
 intel_linux_32_dbg : FC        = ifort
 intel_linux_32_dbg : exe       = smokeview_linux_32_dbg
 
 intel_linux_32_dbg : $(obj)
-	$(CPP) -m32 -o $(bin)/$(exe) $(obj) -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore $(SYSTEMLIBS)
+	$(CPP) -m32 -o $(bin)/$(exe) $(obj) -static-intel -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore $(SYSTEMLIBS)
 
 # ------------- intel_linux_64 ----------------
 
 intel_linux_64 : IMAGELIBDIR = $(LIB_DIR)/lib_linux_intel_64
 intel_linux_64 : FORTLIBDIR  = $(LINUX64FORTLIBDIR)
-intel_linux_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_noappend
-intel_linux_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_LINUX64
+intel_linux_64 : FFLAGS    = -O2 -m64 -static-intel -vec_report0 -fpp -D pp_noappend
+intel_linux_64 : CFLAGS    = -O2 -m64 -static-intel -vec_report0 -D pp_LINUX64
 intel_linux_64 : CC        = icc 
 intel_linux_64 : CPP       = icpc
 intel_linux_64 : FC        = ifort
 intel_linux_64 : exe       = smokeview_linux_64
 
 intel_linux_64 : $(obj)
-	$(CPP) -m64 -o $(bin)/$(exe) $(obj) -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS)
+	$(CPP) -m64 -o $(bin)/$(exe) $(obj) -static-intel -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS)
 
 # ------------- intel_linux_test_64 ----------------
 
 intel_linux_test_64 : IMAGELIBDIR = $(LIB_DIR)/lib_linux_intel_64
 intel_linux_test_64 : FORTLIBDIR  = $(LINUX64FORTLIBDIR)
-intel_linux_test_64 : FFLAGS    = -O2 -m64 -traceback -vec_report0 -fpp -D pp_noappend
-intel_linux_test_64 : CFLAGS    = -O2 -m64 -traceback -vec_report0 -D pp_LINUX64 -D pp_BETA
+intel_linux_test_64 : FFLAGS    = -O2 -m64 -static-intel -traceback -vec_report0 -fpp -D pp_noappend
+intel_linux_test_64 : CFLAGS    = -O2 -m64 -static-intel -traceback -vec_report0 -D pp_LINUX64 -D pp_BETA
 intel_linux_test_64 : CC        = icc 
 intel_linux_test_64 : CPP       = icpc
 intel_linux_test_64 : FC        = ifort
 intel_linux_test_64 : exe       = smokeview_linux_test_64
 
 intel_linux_test_64 : $(obj)
-	$(CPP) -m64 -traceback -o $(bin)/$(exe) $(obj) -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS)
+	$(CPP) -m64 -traceback -o $(bin)/$(exe) $(obj) -static-intel -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS)
 
 # ------------- intel_linux_test_64_dbg ----------------
 
 intel_linux_test_64_dbg : IMAGELIBDIR = $(LIB_DIR)/lib_linux_intel_64
 intel_linux_test_64_dbg : FORTLIBDIR  = $(LINUX64FORTLIBDIR)
-intel_linux_test_64_dbg : FFLAGS    = -O0 -m64 -traceback -g -fpe0 -fltconsistency -WB -vec_report0 -fpp -D pp_noappend
-intel_linux_test_64_dbg : CFLAGS    = -O0 -g -m64 -vec_report0 -D pp_LINUX64 -D pp_BETA
+intel_linux_test_64_dbg : FFLAGS    = -O0 -m64 -static-intel -traceback -g -fpe0 -fltconsistency -WB -vec_report0 -fpp -D pp_noappend
+intel_linux_test_64_dbg : CFLAGS    = -O0 -g -m64 -static-intel -vec_report0 -D pp_LINUX64 -D pp_BETA
 intel_linux_test_64_dbg : CC        = icc 
 intel_linux_test_64_dbg : CPP       = icpc
 intel_linux_test_64_dbg : FC        = ifort
 intel_linux_test_64_dbg : exe       = smokeview_linux_test_64_dbg
 
 intel_linux_test_64_dbg : $(obj)
-	$(CPP) -m64 -o $(bin)/$(exe) $(obj) -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS)
+	$(CPP) -m64 -o $(bin)/$(exe) $(obj) -static-intel -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS)
 
 
 # ------------- intel_linux_64_dbg ----------------
 
 intel_linux_64_dbg : IMAGELIBDIR = $(LIB_DIR)/lib_linux_intel_64
 intel_linux_64_dbg : FORTLIBDIR  = $(LINUX64FORTLIBDIR)
-intel_linux_64_dbg : FFLAGS    = -O0 -m64 -traceback -g -fpe0 -fltconsistency -WB -vec_report0 -fpp -D pp_noappend
-intel_linux_64_dbg : CFLAGS    = -O0 -g -m64 -vec_report0 -D pp_LINUX64
+intel_linux_64_dbg : FFLAGS    = -O0 -m64 -static-intel -traceback -g -fpe0 -fltconsistency -WB -vec_report0 -fpp -D pp_noappend
+intel_linux_64_dbg : CFLAGS    = -O0 -g -m64 -static-intel -vec_report0 -D pp_LINUX64
 intel_linux_64_dbg : CC        = icc 
 intel_linux_64_dbg : CPP       = icpc
 intel_linux_64_dbg : FC        = ifort
 intel_linux_64_dbg : exe       = smokeview_linux_64_dbg
 
 intel_linux_64_dbg : $(obj)
-	$(CPP) -m64 -o $(bin)/$(exe) $(obj) -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS)
+	$(CPP) -m64 -o $(bin)/$(exe) $(obj) -static-intel -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS)
 
 # ------------- intel_linux_64_profile ----------------
 
 intel_linux_64_profile : IMAGELIBDIR = $(LIB_DIR)/lib_linux_intel_64
 intel_linux_64_profile : FORTLIBDIR  = $(LINUX64FORTLIBDIR)
-intel_linux_64_profile : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_noappend -p
-intel_linux_64_profile : CFLAGS    = -O2 -m64 -vec_report0 -D pp_LINUX64 -p
+intel_linux_64_profile : FFLAGS    = -O2 -m64 -static-intel -vec_report0 -fpp -D pp_noappend -p
+intel_linux_64_profile : CFLAGS    = -O2 -m64 -static-intel -vec_report0 -D pp_LINUX64 -p
 intel_linux_64_profile : CC        = icc 
 intel_linux_64_profile : CPP       = icpc
 intel_linux_64_profile : FC        = ifort
 intel_linux_64_profile : exe       = smokeview_linux_64p
 
 intel_linux_64_profile : $(obj)
-	$(CPP) -m64 -o $(bin)/$(exe) $(obj) -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS) -p
+	$(CPP) -m64 -o $(bin)/$(exe) $(obj) -static-intel -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS) -p
 
 # ------------- gcc_linux_32 ----------------
 
