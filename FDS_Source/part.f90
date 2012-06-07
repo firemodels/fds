@@ -1563,13 +1563,10 @@ PARTICLE_NON_STATIC_IF: IF (.NOT.LPC%STATIC) THEN ! Move airborne, non-stationar
    LP%V = LP%V + GVEC(2)*DT
    LP%W = LP%W + GVEC(3)*DT
    
-   ! 2nd-order terms for the particle relative velocities
+   ! 2nd-order terms for the particle relative velocities (experimental)
 
-   IF (SECOND_ORDER_PARTICLE_TRANSPORT .AND. LP%MASS>1.E-10_EB) THEN
+   IF (SECOND_ORDER_PARTICLE_TRANSPORT .AND. DT>BETA*HALF_DT2) THEN
       HAB = ALPHA*BETA*HALF_DT2/OPA
-      ! The quantity U_j,rel PARACOR is zero when QREL = sqrt(U_i U_i) is zero.
-      ! But PARACOR itself will explode if QREL is zero, so we'll force it not to.
-      ! PARACOR is parallel to the particle relative velocities.
       QREL2=QREL*QREL
       IF (QREL2<ZERO_P) THEN
          PARACOR = 0._EB
