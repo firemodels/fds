@@ -20,6 +20,6 @@ call %envfile%
 %svn_drive%
 
 cd %svn_root%\FDS_Compilation\intel_win_64
-.\make_fds2
+.\make_fds
 
 pause
