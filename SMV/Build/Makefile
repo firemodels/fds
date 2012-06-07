@@ -73,13 +73,13 @@ no_target:
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV  Windows VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
-WINLIBS = opengl32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib
+WIN_LIBS = opengl32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib
 
-LIBWIN32 = $(LIB_DIR)/lib_win_intel_32
-SMVLIBS32 = $(LIBWIN32)\pthreadVC.lib $(LIBWIN32)\glui.lib $(LIBWIN32)\glut32.lib $(LIBWIN32)\gd.lib $(LIBWIN32)\jpeg.lib $(LIBWIN32)\png.lib $(LIBWIN32)\zlib.lib
+WIN_LIBDIR_32 = $(LIB_DIR)/lib_win_intel_32
+SMV_LIBS_32 = $(WIN_LIBDIR_32)\pthreadVC.lib $(WIN_LIBDIR_32)\glui.lib $(WIN_LIBDIR_32)\glut32.lib $(WIN_LIBDIR_32)\gd.lib $(WIN_LIBDIR_32)\jpeg.lib $(WIN_LIBDIR_32)\png.lib $(WIN_LIBDIR_32)\zlib.lib
 
-LIBWIN64 = $(LIB_DIR)/lib_win_intel_64
-SMVLIBS64 = $(LIBWIN64)\glui.lib $(LIBWIN64)\glut32.lib $(LIBWIN64)\gd.lib $(LIBWIN64)\jpeg.lib $(LIBWIN64)\png.lib $(LIBWIN64)\zlib.lib $(LIBWIN64)\pthreadVC2_x64.lib
+WIN_LIBDIR_64 = $(LIB_DIR)/lib_win_intel_64
+SMV_LIBS_64 = $(WIN_LIBDIR_64)\glui.lib $(WIN_LIBDIR_64)\glut32.lib $(WIN_LIBDIR_64)\gd.lib $(WIN_LIBDIR_64)\jpeg.lib $(WIN_LIBDIR_64)\png.lib $(WIN_LIBDIR_64)\zlib.lib $(WIN_LIBDIR_64)\pthreadVC2_x64.lib
 
 
 # ------------- ms_win_32 ----------------
@@ -94,7 +94,7 @@ ms_win_32 : FC        = ifort
 ms_win_32 : exe       = smokeview_win_32
 
 ms_win_32 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WINLIBS) $(SMVLIBS32)
+	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_32)
 
 # ------------- gcc_win_32 ----------------
 
@@ -107,7 +107,7 @@ gcc_win_32 : FC        = gfortran
 gcc_win_32 : exe       = smokeview_win_32
 
 gcc_win_32 : $(obj)
-	$(CPP) -m32 -o $(bin)/$(exe) $(obj) $(SMVLIBS32)
+	$(CPP) -m32 -o $(bin)/$(exe) $(obj) $(SMV_LIBS_32)
 
 # ------------- intel_win_32 ----------------
 
@@ -121,7 +121,7 @@ intel_win_32 : FC        = ifort
 intel_win_32 : exe       = smokeview_win_32
 
 intel_win_32 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WINLIBS) $(SMVLIBS32)
+	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_32)
 
 # ------------- intel_win_test_32 ----------------
 
@@ -135,7 +135,7 @@ intel_win_test_32 : FC        = ifort
 intel_win_test_32 : exe       = smokeview_win_test_32
 
 intel_win_test_32 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WINLIBS) $(SMVLIBS32)
+	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_32)
 
 # ------------- intel_win_64 ----------------
 
@@ -149,7 +149,7 @@ intel_win_64 : FC        = ifort
 intel_win_64 : exe       = smokeview_win_64
 
 intel_win_64 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WINLIBS) $(SMVLIBS64)
+	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_64)
 
 # ------------- intel_win_test_64 ----------------
 
@@ -163,7 +163,7 @@ intel_win_test_64 : FC        = ifort
 intel_win_test_64 : exe       = smokeview_win_test_64
 
 intel_win_test_64 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WINLIBS) $(SMVLIBS64)
+	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_64)
 
 # ------------- ms_win_64 ----------------
 
@@ -177,7 +177,7 @@ ms_win_64 : FC        = ifort
 ms_win_64 : exe       = smokeview_win_64
 
 ms_win_64 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WINLIBS) $(SMVLIBS64)
+	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_64)
 
 # ------------- ms_win_test_64 ----------------
 
@@ -191,27 +191,26 @@ ms_win_test_64 : FC        = ifort
 ms_win_test_64 : exe       = smokeview_win_64
 
 ms_win_test_64 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WINLIBS) $(SMVLIBS64)
+	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_64)
 
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV  Linux VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
-LINUXSYSTEMLIBS = -lpthread -lXmu -lGLU -lGL -lm
+LINUX_SYSTEMLIBS = -lpthread -lXmu -lGLU -lGL -lm
 
-LINUXFORTLIBDIR32  = $IFORT_COMPILER/lib/ia32
-LINUXLIBDIR32 = $(LIB_DIR)/lib_linux_intel_32
+LINUX_FORT_LIBDIR_32  = $IFORT_COMPILER/lib/ia32
+LINUX_LIBDIR_32 = $(LIB_DIR)/lib_linux_intel_32
 
-LINUXFORTLIBDIR64  = $IFORT_COMPILER/lib/intel64
-LINUXLIBDIR64 = $(LIB_DIR)/lib_linux_intel_64
+LINUX_FORT_LIBDIR_64  = $IFORT_COMPILER/lib/intel64
+LINUX_LIBDIR_64 = $(LIB_DIR)/lib_linux_intel_64
 
-LINUXSMVLIBS = -lglui -lglut -lgd -ljpeg -lpng -lz
-LINUXINTELLIBS = -lifcore  -lintlc
+LINUX_SMV_LIBS = -lglui -lglut -lgd -ljpeg -lpng -lz
+LINUX_INTEL_LIBS = -lifcore  -lintlc
 
 
 # ------------- intel_linux_32 ----------------
 
-intel_linux_32 : FORTLIBDIR  = $(LINUXFORTLIBDIR32)
 intel_linux_32 : FFLAGS    = -O2 -m32 -static-intel -vec_report0 -fpp -D pp_noappend
 intel_linux_32 : CFLAGS    = -O2 -m32 -static-intel -vec_report0 -D pp_LINUX
 intel_linux_32 : LFLAGS    = -m32 -static-intel
@@ -221,7 +220,7 @@ intel_linux_32 : FC        = ifort
 intel_linux_32 : exe       = smokeview_linux_32
 
 intel_linux_32 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUXLIBDIR32) -L $(FORTLIBDIR) $(LINUXSMVLIBS) $(LINUXINTELLIBS) -L/usr/lib $(LINUXSYSTEMLIBS)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUX_LIBDIR_32) -L $(LINUX_FORT_LIBDIR_32) $(LINUX_SMV_LIBS) $(LINUX_INTEL_LIBS) -L/usr/lib $(LINUX_SYSTEMLIBS)
 
 # ------------- intel_linux_test_32 ----------------
 
@@ -234,7 +233,7 @@ intel_linux_test_32 : FC        = ifort
 intel_linux_test_32 : exe       = smokeview_linux_test_32
 
 intel_linux_test_32 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUXLIBDIR32) -L $(LINUXFORTLIBDIR32) $(LINUXSMVLIBS) $(LINUXINTELLIBS) -L/usr/lib $(LINUXSYSTEMLIBS)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUX_LIBDIR_32) -L $(LINUX_FORT_LIBDIR_32) $(LINUX_SMV_LIBS) $(LINUX_INTEL_LIBS) -L/usr/lib $(LINUX_SYSTEMLIBS)
 
 # ------------- intel_linux_32_dbg ----------------
 
@@ -247,7 +246,7 @@ intel_linux_32_dbg : FC        = ifort
 intel_linux_32_dbg : exe       = smokeview_linux_32_dbg
 
 intel_linux_32_dbg : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUXLIBDIR32) -L $(LINUXFORTLIBDIR32) $(LINUXSMVLIBS) $(LINUXINTELLIBS) $(LINUXSYSTEMLIBS)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUX_LIBDIR_32) -L $(LINUX_FORT_LIBDIR_32) $(LINUX_SMV_LIBS) $(LINUX_INTEL_LIBS) $(LINUX_SYSTEMLIBS)
 
 # ------------- intel_linux_64 ----------------
 
@@ -260,7 +259,7 @@ intel_linux_64 : FC        = ifort
 intel_linux_64 : exe       = smokeview_linux_64
 
 intel_linux_64 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUXLIBDIR64) -L $(LINUXFORTLIBDIR64) $(LINUXSMVLIBS) $(LINUXINTELLIBS) $(LINUXSYSTEMLIBS)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUX_LIBDIR_64) -L $(LINUX_FORT_LIBDIR_64) $(LINUX_SMV_LIBS) $(LINUX_INTEL_LIBS) $(LINUX_SYSTEMLIBS)
 
 # ------------- intel_linux_test_64 ----------------
 
@@ -273,7 +272,7 @@ intel_linux_test_64 : FC        = ifort
 intel_linux_test_64 : exe       = smokeview_linux_test_64
 
 intel_linux_test_64 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUXLIBDIR64) -L $(LINUXFORTLIBDIR64) $(LINUXSMVLIBS) $(LINUXINTELLIBS) $(LINUXSYSTEMLIBS)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUX_LIBDIR_64) -L $(LINUX_FORT_LIBDIR_64) $(LINUX_SMV_LIBS) $(LINUX_INTEL_LIBS) $(LINUX_SYSTEMLIBS)
 
 # ------------- intel_linux_test_64_dbg ----------------
 
@@ -286,7 +285,7 @@ intel_linux_test_64_dbg : FC        = ifort
 intel_linux_test_64_dbg : exe       = smokeview_linux_test_64_dbg
 
 intel_linux_test_64_dbg : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUXLIBDIR64) -L $(LINUXFORTLIBDIR64) $(LINUXSMVLIBS) $(LINUXINTELLIBS) $(LINUXSYSTEMLIBS)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUX_LIBDIR_64) -L $(LINUX_FORT_LIBDIR_64) $(LINUX_SMV_LIBS) $(LINUX_INTEL_LIBS) $(LINUX_SYSTEMLIBS)
 
 
 # ------------- intel_linux_64_dbg ----------------
@@ -300,7 +299,7 @@ intel_linux_64_dbg : FC        = ifort
 intel_linux_64_dbg : exe       = smokeview_linux_64_dbg
 
 intel_linux_64_dbg : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUXLIBDIR64) -L $(LINUXFORTLIBDIR64) $(LINUXSMVLIBS) $(LINUXINTELLIBS) $(LINUXSYSTEMLIBS)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUX_LIBDIR_64) -L $(LINUX_FORT_LIBDIR_64) $(LINUX_SMV_LIBS) $(LINUX_INTEL_LIBS) $(LINUX_SYSTEMLIBS)
 
 # ------------- intel_linux_64_profile ----------------
 
@@ -313,11 +312,10 @@ intel_linux_64_profile : FC        = ifort
 intel_linux_64_profile : exe       = smokeview_linux_64p
 
 intel_linux_64_profile : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUXLIBDIR64) -L $(LINUXFORTLIBDIR64) $(LINUXSMVLIBS) $(LINUXINTELLIBS) $(LINUXSYSTEMLIBS) -p
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUX_LIBDIR_64) -L $(LINUX_FORT_LIBDIR_64) $(LINUX_SMV_LIBS) $(LINUX_INTEL_LIBS) $(LINUX_SYSTEMLIBS) -p
 
 # ------------- gcc_linux_32 ----------------
 
-gcc_linux_32 : FORTLIBDIR  = $(LINUXFORTLIBDIR32)
 gcc_linux_32 : FFLAGS    = -O2 -m32 -D pp_noappend -ffree-form
 gcc_linux_32 : CFLAGS    = -O2 -m32 -D pp_LINUX
 gcc_linux_32 : LFLAGS    = -m32
@@ -327,23 +325,23 @@ gcc_linux_32 : FC        = gfortran
 gcc_linux_32 : exe       = smokeview_linux_32
 
 gcc_linux_32 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(IMAGELIBDIR) -L $(LIB_DIR)/lib_linux_gcc_32 $(LINUXSMVLIBS) -lgfortran $(LINUXSYSTEMLIBS)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(IMAGELIBDIR) -L $(LIB_DIR)/lib_linux_gcc_32 $(LINUX_SMV_LIBS) -lgfortran $(LINUX_SYSTEMLIBS)
 
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV   OSX   VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
-OSXINTELLIB32 = $(LIB_DIR)/lib_osx_intel_32
-OSXSMVLIBS32 = -lz $(OSXINTELLIB32)/libpng.a $(OSXINTELLIB32)/libgd.a $(OSXINTELLIB32)/libglui.a
+OSX_INTEL_LIBDIR_32 = $(LIB_DIR)/lib_osx_intel_32
+OSX_SMV_LIBS_32 = -lz $(OSX_INTEL_LIBDIR_32)/libpng.a $(OSX_INTEL_LIBDIR_32)/libgd.a $(OSX_INTEL_LIBDIR_32)/libglui.a
 
-OSXINTELLIB64 = $(LIB_DIR)/lib_osx_intel_64
-OSXSMVLIBS64 = -lz $(OSXINTELLIB64)/libpng.a $(OSXINTELLIB64)/libgd.a $(OSXINTELLIB64)/libglui.a
+OSX_INTEL_LIBDIR_64 = $(LIB_DIR)/lib_osx_intel_64
+OSX_SMV_LIBS_64 = -lz $(OSX_INTEL_LIBDIR_64)/libpng.a $(OSX_INTEL_LIBDIR_64)/libgd.a $(OSX_INTEL_LIBDIR_64)/libglui.a
 
-OSXFORTLIBDIR32  = $(IFORT_COMPILER2)/lib
-OSXINTELLIBS32 = $(OSXFORTLIBDIR32)/libifcoremt.a $(OSXFORTLIBDIR32)/libimf.a $(OSXFORTLIBDIR32)/libirc.a $(OSXFORTLIBDIR32)/libsvml.a
+OSX_FORT_LIBDIR_32  = $(IFORT_COMPILER2)/lib
+OSX_INTEL_LIBS_32 = $(OSX_FORT_LIBDIR_32)/libifcoremt.a $(OSX_FORT_LIBDIR_32)/libimf.a $(OSX_FORT_LIBDIR_32)/libirc.a $(OSX_FORT_LIBDIR_32)/libsvml.a
 
-OSXFORTLIBDIR64  = $(IFORT_COMPILER2)/lib
-OSXINTELLIBS64 = $(OSXFORTLIBDIR64)/libifcoremt.a $(OSXFORTLIBDIR64)/libimf.a $(OSXFORTLIBDIR64)/libirc.a $(OSXFORTLIBDIR64)/libsvml.a
+OSX_FORT_LIBDIR_64  = $(IFORT_COMPILER2)/lib
+OSX_INTEL_LIBS_64 = $(OSX_FORT_LIBDIR_64)/libifcoremt.a $(OSX_FORT_LIBDIR_64)/libimf.a $(OSX_FORT_LIBDIR_64)/libirc.a $(OSX_FORT_LIBDIR_64)/libsvml.a
 
 # ------------- intel_osx_32 ----------------
 
@@ -356,7 +354,7 @@ intel_osx_32 : FC        = ifort
 intel_osx_32 : exe       = smokeview_osx_32
 
 intel_osx_32 : $(obj)
-	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  $(OSXSMVLIBS32) $(OSXINTELLIBS32)
+	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  $(OSX_SMV_LIBS_32) $(OSX_INTEL_LIBS_32)
 
 # ------------- intel_osx_test_32 ----------------
 
@@ -369,7 +367,7 @@ intel_osx_test_32 : FC        = ifort
 intel_osx_test_32 : exe       = smokeview_osx_test_32
 
 intel_osx_test_32 : $(obj)
-	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj) $(OSXSMVLIBS32) $(OSXINTELLIBS32)
+	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj) $(OSX_SMV_LIBS_32) $(OSX_INTEL_LIBS_32)
 
 # ------------- intel_osx_64 ----------------
 
@@ -382,7 +380,7 @@ intel_osx_64 : FC        = ifort
 intel_osx_64 : exe       = smokeview_osx_64
 
 intel_osx_64 : $(obj)
-	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  $(OSXSMVLIBS64) $(OSXINTELLIBS64)
+	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  $(OSX_SMV_LIBS_64) $(OSX_INTEL_LIBS_64)
 
 # ------------- intel_osx_test_64 ----------------
 
@@ -395,7 +393,7 @@ intel_osx_test_64 : FC        = ifort
 intel_osx_test_64 : exe       = smokeview_osx_test_64
 
 intel_osx_test_64 : $(obj)
-	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj) $(OSXSMVLIBS64) $(OSXINTELLIBS64)
+	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj) $(OSX_SMV_LIBS_64) $(OSX_INTEL_LIBS_64)
 
 # ------------- intel_osx_test_64_db ----------------
 
@@ -408,7 +406,7 @@ intel_osx_test_64_dbg : FC        = ifort
 intel_osx_test_64_dbg : exe       = smokeview_osx_test_64_dbg
 
 intel_osx_test_64_dbg : $(obj)
-	icpc -o $(bin)/$(exe) $(LFAGS) $(obj) $(OSXSMVLIBS64) $(OSXINTELLIBS64)
+	icpc -o $(bin)/$(exe) $(LFAGS) $(obj) $(OSX_SMV_LIBS_64) $(OSX_INTEL_LIBS_64)
 
 
 # ------------- make depend ----------------
