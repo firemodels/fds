@@ -87,12 +87,18 @@ no_target:
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV  Windows VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
+WINLIBS = opengl32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib
+
+LIBWIN32 = $(LIB_DIR)/lib_win_intel_32
+SMVLIBS32 = $(LIBWIN32)\pthreadVC.lib $(LIBWIN32)\glui.lib $(LIBWIN32)\glut32.lib $(LIBWIN32)\gd.lib $(LIBWIN32)\jpeg.lib $(LIBWIN32)\png.lib $(LIBWIN32)\zlib.lib
+
+LIBWIN64 = $(LIB_DIR)/lib_win_intel_64
+SMVLIBS64 = $(LIBWIN64)\glui.lib $(LIBWIN64)\glut32.lib $(LIBWIN64)\gd.lib $(LIBWIN64)\jpeg.lib $(LIBWIN64)\png.lib $(LIBWIN64)\zlib.lib $(LIBWIN64)\pthreadVC2_x64.lib
+
+
 # ------------- ms_win_32 ----------------
 
 ms_win_32 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
-ms_win_32 : IMAGELIBDIR = $(LIB_DIR)/lib_win_intel_32
-ms_win_32 : WINLIBS = opengl32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib
-ms_win_32 : SMVLIBS = $(IMAGELIBDIR)\pthreadVC.lib $(IMAGELIBDIR)\glui.lib $(IMAGELIBDIR)\glut32.lib $(IMAGELIBDIR)\gd.lib $(IMAGELIBDIR)\jpeg.lib $(IMAGELIBDIR)\png.lib $(IMAGELIBDIR)\zlib.lib
 ms_win_32 : FFLAGS    = -O2 -fpp -D pp_cvf /iface:stdref
 ms_win_32 : CFLAGS    = -O2 -D WIN32 -D _CONSOLE  -D GLEW_STATIC
 ms_win_32 : LFLAGS    = /F32768000 
@@ -102,13 +108,11 @@ ms_win_32 : FC        = ifort
 ms_win_32 : exe       = smokeview_win_32
 
 ms_win_32 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WINLIBS) $(SMVLIBS)
+	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WINLIBS) $(SMVLIBS32)
 
 # ------------- gcc_win_32 ----------------
 
 gcc_win_32 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
-gcc_win_32 : IMAGELIBDIR = $(LIB_DIR)/lib_win_intel_32
-gcc_win_32 : SMVLIBS = $(IMAGELIBDIR)\pthreadVC.lib $(IMAGELIBDIR)\glui.lib $(IMAGELIBDIR)\glut32.lib $(IMAGELIBDIR)\gd.lib $(IMAGELIBDIR)\jpeg.lib $(IMAGELIBDIR)\png.lib $(IMAGELIBDIR)\zlib.lib
 gcc_win_32 : FFLAGS    = -O2 -m32 -D pp_noappend -ffree-form
 gcc_win_32 : CFLAGS    = -O2 -m32 -D WIN32 -D GLEW_STATIC
 gcc_win_32 : CC        = gcc
@@ -117,14 +121,11 @@ gcc_win_32 : FC        = gfortran
 gcc_win_32 : exe       = smokeview_win_32
 
 gcc_win_32 : $(obj)
-	$(CPP) -m32 -o $(bin)/$(exe) $(obj) $(SMVLIBS)
+	$(CPP) -m32 -o $(bin)/$(exe) $(obj) $(SMVLIBS32)
 
 # ------------- intel_win_32 ----------------
 
 intel_win_32 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
-intel_win_32 : IMAGELIBDIR = $(LIB_DIR)/lib_win_intel_32
-intel_win_32 : WINLIBS = opengl32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib
-intel_win_32 : SMVLIBS = $(IMAGELIBDIR)\pthreadVC.lib $(IMAGELIBDIR)\glui.lib $(IMAGELIBDIR)\glut32.lib $(IMAGELIBDIR)\gd.lib $(IMAGELIBDIR)\jpeg.lib $(IMAGELIBDIR)\png.lib $(IMAGELIBDIR)\zlib.lib
 intel_win_32 : FFLAGS    = -O2 -fpp -D pp_cvf /iface:stdref /arch:IA32
 intel_win_32 : CFLAGS    = -O2 -D WIN32 -D _CONSOLE  -D GLEW_STATIC /arch:IA32
 intel_win_32 : LFLAGS    = /F32768000 
@@ -134,14 +135,11 @@ intel_win_32 : FC        = ifort
 intel_win_32 : exe       = smokeview_win_32
 
 intel_win_32 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WINLIBS) $(SMVLIBS) opengl32.lib
+	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WINLIBS) $(SMVLIBS32)
 
 # ------------- intel_win_test_32 ----------------
 
 intel_win_test_32 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
-intel_win_test_32 : IMAGELIBDIR = $(LIB_DIR)/lib_win_intel_32
-intel_win_test_32 : WINLIBS = opengl32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib
-intel_win_test_32 : SMVLIBS = $(IMAGELIBDIR)\pthreadVC.lib $(IMAGELIBDIR)\glui.lib $(IMAGELIBDIR)\glut32.lib $(IMAGELIBDIR)\gd.lib $(IMAGELIBDIR)\jpeg.lib $(IMAGELIBDIR)\png.lib $(IMAGELIBDIR)\zlib.lib
 intel_win_test_32 : FFLAGS    = -O2 -fpp -D pp_cvf -D pp_BETA   /iface:stdref /arch:IA32
 intel_win_test_32 : CFLAGS    = -O2 -D WIN32 -D _CONSOLE -D pp_BETA -D GLEW_STATIC /arch:IA32
 intel_win_test_32 : LFLAGS    = /F32768000 
@@ -151,14 +149,11 @@ intel_win_test_32 : FC        = ifort
 intel_win_test_32 : exe       = smokeview_win_test_32
 
 intel_win_test_32 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WINLIBS) $(SMVLIBS)
+	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WINLIBS) $(SMVLIBS32)
 
 # ------------- intel_win_64 ----------------
 
 intel_win_64 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
-intel_win_64 : IMAGELIBDIR = $(LIB_DIR)/lib_win_intel_64
-intel_win_64 : WINLIBS = opengl32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib
-intel_win_64 : SMVLIBS =  $(IMAGELIBDIR)\glui.lib $(IMAGELIBDIR)\glut32.lib $(IMAGELIBDIR)\gd.lib $(IMAGELIBDIR)\jpeg.lib $(IMAGELIBDIR)\png.lib $(IMAGELIBDIR)\zlib.lib $(IMAGELIBDIR)\pthreadVC2_x64.lib
 intel_win_64 : FFLAGS    = -O2 -fpp -D pp_cvf -D X64 /iface:stdref
 intel_win_64 : CFLAGS    = -O2 -D WIN32 -D _CONSOLE -D X64 -D GLEW_STATIC
 intel_win_64 : LFLAGS    = /F32768000 
@@ -168,14 +163,11 @@ intel_win_64 : FC        = ifort
 intel_win_64 : exe       = smokeview_win_64
 
 intel_win_64 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WINLIBS) $(SMVLIBS)
+	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WINLIBS) $(SMVLIBS64)
 
 # ------------- intel_win_test_64 ----------------
 
 intel_win_test_64 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
-intel_win_test_64 : IMAGELIBDIR = $(LIB_DIR)/lib_win_intel_64
-intel_win_test_64 : WINLIBS = opengl32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib
-intel_win_test_64 : SMVLIBS =  $(IMAGELIBDIR)\glui.lib $(IMAGELIBDIR)\glut32.lib $(IMAGELIBDIR)\gd.lib $(IMAGELIBDIR)\jpeg.lib $(IMAGELIBDIR)\png.lib $(IMAGELIBDIR)\zlib.lib $(IMAGELIBDIR)\pthreadVC2_x64.lib
 intel_win_test_64 : FFLAGS    = -O2 -traceback -fpp -D pp_cvf -D pp_BETA -D X64 /iface:stdref
 intel_win_test_64 : CFLAGS    = -O2 -traceback -D WIN32 -D _CONSOLE -D X64 -D pp_BETA -D GLEW_STATIC
 intel_win_test_64 : LFLAGS    = /F32768000
@@ -185,14 +177,11 @@ intel_win_test_64 : FC        = ifort
 intel_win_test_64 : exe       = smokeview_win_test_64
 
 intel_win_test_64 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WINLIBS) $(SMVLIBS)
+	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WINLIBS) $(SMVLIBS64)
 
 # ------------- ms_win_64 ----------------
 
 ms_win_64 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
-ms_win_64 : IMAGELIBDIR = $(LIB_DIR)/lib_win_intel_64
-ms_win_64 : WINLIBS = opengl32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib
-ms_win_64 : SMVLIBS =  $(IMAGELIBDIR)\glui.lib $(IMAGELIBDIR)\glut32.lib $(IMAGELIBDIR)\gd.lib $(IMAGELIBDIR)\jpeg.lib $(IMAGELIBDIR)\png.lib $(IMAGELIBDIR)\zlib.lib $(IMAGELIBDIR)\pthreadVC2_x64.lib
 ms_win_64 : FFLAGS    = -O2 -fpp -D pp_cvf -D X64 /iface:stdref
 ms_win_64 : CFLAGS    = -O2 -D WIN32 -D _CONSOLE -D X64 -D GLEW_STATIC
 ms_win_64 : LFLAGS    = /F32768000 
@@ -202,14 +191,11 @@ ms_win_64 : FC        = ifort
 ms_win_64 : exe       = smokeview_win_64
 
 ms_win_64 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WINLIBS) $(SMVLIBS)
+	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WINLIBS) $(SMVLIBS64)
 
 # ------------- ms_win_test_64 ----------------
 
 ms_win_test_64 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
-ms_win_test_64 : IMAGELIBDIR = $(LIB_DIR)/lib_win_intel_64
-ms_win_test_64 : WINLIBS = opengl32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib
-ms_win_test_64 : SMVLIBS =  $(IMAGELIBDIR)\glui.lib $(IMAGELIBDIR)\glut32.lib $(IMAGELIBDIR)\gd.lib $(IMAGELIBDIR)\jpeg.lib $(IMAGELIBDIR)\png.lib $(IMAGELIBDIR)\zlib.lib $(IMAGELIBDIR)\pthreadVC2_x64.lib
 ms_win_test_64 : FFLAGS    = -O2 -fpp -D pp_cvf -D X64 -D pp_BETA /iface:stdref
 ms_win_test_64 : CFLAGS    = -O2 -D WIN32 -D _CONSOLE -D X64 -D pp_BETA -D GLEW_STATIC
 ms_win_test_64 : LFLAGS    = /F32768000 
@@ -219,15 +205,17 @@ ms_win_test_64 : FC        = ifort
 ms_win_test_64 : exe       = smokeview_win_64
 
 ms_win_test_64 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WINLIBS) $(SMVLIBS)
+	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WINLIBS) $(SMVLIBS64)
 
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV  Linux VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
+LIBLINUX32 = $(LIB_DIR)/lib_linux_intel_32
+LIBLINUX64 = $(LIB_DIR)/lib_linux_intel_64
+
 # ------------- intel_linux_32 ----------------
 
-intel_linux_32 : IMAGELIBDIR = $(LIB_DIR)/lib_linux_intel_32
 intel_linux_32 : FORTLIBDIR  = $(LINUX32FORTLIBDIR)
 intel_linux_32 : FFLAGS    = -O2 -m32 -static-intel -vec_report0 -fpp -D pp_noappend
 intel_linux_32 : CFLAGS    = -O2 -m32 -static-intel -vec_report0 -D pp_LINUX
@@ -237,11 +225,10 @@ intel_linux_32 : FC        = ifort
 intel_linux_32 : exe       = smokeview_linux_32
 
 intel_linux_32 : $(obj)
-	$(CPP) -m32 -o $(bin)/$(exe) $(obj) -static-intel -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore -L/usr/lib $(SYSTEMLIBS)
+	$(CPP) -m32 -o $(bin)/$(exe) $(obj) -static-intel -L$(LIBLINUX32) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore -L/usr/lib $(SYSTEMLIBS)
 
 # ------------- intel_linux_test_32 ----------------
 
-intel_linux_test_32 : IMAGELIBDIR = $(LIB_DIR)/lib_linux_intel_32
 intel_linux_test_32 : FORTLIBDIR  = $(LINUX32FORTLIBDIR)
 intel_linux_test_32 : FFLAGS    = -O2 -m32 -static-intel -vec_report0 -fpp -D pp_noappend
 intel_linux_test_32 : CFLAGS    = -O2 -m32 -static-intel -vec_report0 -D pp_BETA -D pp_LINUX
@@ -251,11 +238,10 @@ intel_linux_test_32 : FC        = ifort
 intel_linux_test_32 : exe       = smokeview_linux_test_32
 
 intel_linux_test_32 : $(obj)
-	$(CPP) -m32 -o $(bin)/$(exe) $(obj) -static-intel -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore -L/usr/lib $(SYSTEMLIBS)
+	$(CPP) -m32 -o $(bin)/$(exe) $(obj) -static-intel -L$(LIBLINUX32) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore -L/usr/lib $(SYSTEMLIBS)
 
 # ------------- intel_linux_32_dbg ----------------
 
-intel_linux_32_dbg : IMAGELIBDIR = $(LIB_DIR)/lib_linux_intel_32
 intel_linux_32_dbg : FORTLIBDIR  = $(LINUX32FORTLIBDIR)
 intel_linux_32_dbg : FFLAGS    = -O0 -m32 -static-intel -traceback -g -fpe0 -fltconsistency -WB -vec_report0 -fpp -D pp_noappend
 intel_linux_32_dbg : CFLAGS    = -O0 -g -m32 -static-intel -vec_report0 -D pp_LINUX
@@ -265,11 +251,10 @@ intel_linux_32_dbg : FC        = ifort
 intel_linux_32_dbg : exe       = smokeview_linux_32_dbg
 
 intel_linux_32_dbg : $(obj)
-	$(CPP) -m32 -o $(bin)/$(exe) $(obj) -static-intel -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore $(SYSTEMLIBS)
+	$(CPP) -m32 -o $(bin)/$(exe) $(obj) -static-intel -L$(LIBLINUX32) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore $(SYSTEMLIBS)
 
 # ------------- intel_linux_64 ----------------
 
-intel_linux_64 : IMAGELIBDIR = $(LIB_DIR)/lib_linux_intel_64
 intel_linux_64 : FORTLIBDIR  = $(LINUX64FORTLIBDIR)
 intel_linux_64 : FFLAGS    = -O2 -m64 -static-intel -vec_report0 -fpp -D pp_noappend
 intel_linux_64 : CFLAGS    = -O2 -m64 -static-intel -vec_report0 -D pp_LINUX64
@@ -279,11 +264,10 @@ intel_linux_64 : FC        = ifort
 intel_linux_64 : exe       = smokeview_linux_64
 
 intel_linux_64 : $(obj)
-	$(CPP) -m64 -o $(bin)/$(exe) $(obj) -static-intel -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS)
+	$(CPP) -m64 -o $(bin)/$(exe) $(obj) -static-intel -L$(LIBLINUX64) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS)
 
 # ------------- intel_linux_test_64 ----------------
 
-intel_linux_test_64 : IMAGELIBDIR = $(LIB_DIR)/lib_linux_intel_64
 intel_linux_test_64 : FORTLIBDIR  = $(LINUX64FORTLIBDIR)
 intel_linux_test_64 : FFLAGS    = -O2 -m64 -static-intel -traceback -vec_report0 -fpp -D pp_noappend
 intel_linux_test_64 : CFLAGS    = -O2 -m64 -static-intel -traceback -vec_report0 -D pp_LINUX64 -D pp_BETA
@@ -293,11 +277,10 @@ intel_linux_test_64 : FC        = ifort
 intel_linux_test_64 : exe       = smokeview_linux_test_64
 
 intel_linux_test_64 : $(obj)
-	$(CPP) -m64 -traceback -o $(bin)/$(exe) $(obj) -static-intel -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS)
+	$(CPP) -m64 -traceback -o $(bin)/$(exe) $(obj) -static-intel -L$(LIBLINUX64) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS)
 
 # ------------- intel_linux_test_64_dbg ----------------
 
-intel_linux_test_64_dbg : IMAGELIBDIR = $(LIB_DIR)/lib_linux_intel_64
 intel_linux_test_64_dbg : FORTLIBDIR  = $(LINUX64FORTLIBDIR)
 intel_linux_test_64_dbg : FFLAGS    = -O0 -m64 -static-intel -traceback -g -fpe0 -fltconsistency -WB -vec_report0 -fpp -D pp_noappend
 intel_linux_test_64_dbg : CFLAGS    = -O0 -g -m64 -static-intel -vec_report0 -D pp_LINUX64 -D pp_BETA
@@ -307,12 +290,11 @@ intel_linux_test_64_dbg : FC        = ifort
 intel_linux_test_64_dbg : exe       = smokeview_linux_test_64_dbg
 
 intel_linux_test_64_dbg : $(obj)
-	$(CPP) -m64 -o $(bin)/$(exe) $(obj) -static-intel -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS)
+	$(CPP) -m64 -o $(bin)/$(exe) $(obj) -static-intel -L$(LIBLINUX64) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS)
 
 
 # ------------- intel_linux_64_dbg ----------------
 
-intel_linux_64_dbg : IMAGELIBDIR = $(LIB_DIR)/lib_linux_intel_64
 intel_linux_64_dbg : FORTLIBDIR  = $(LINUX64FORTLIBDIR)
 intel_linux_64_dbg : FFLAGS    = -O0 -m64 -static-intel -traceback -g -fpe0 -fltconsistency -WB -vec_report0 -fpp -D pp_noappend
 intel_linux_64_dbg : CFLAGS    = -O0 -g -m64 -static-intel -vec_report0 -D pp_LINUX64
@@ -322,11 +304,10 @@ intel_linux_64_dbg : FC        = ifort
 intel_linux_64_dbg : exe       = smokeview_linux_64_dbg
 
 intel_linux_64_dbg : $(obj)
-	$(CPP) -m64 -o $(bin)/$(exe) $(obj) -static-intel -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS)
+	$(CPP) -m64 -o $(bin)/$(exe) $(obj) -static-intel -L$(LIBLINUX64) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS)
 
 # ------------- intel_linux_64_profile ----------------
 
-intel_linux_64_profile : IMAGELIBDIR = $(LIB_DIR)/lib_linux_intel_64
 intel_linux_64_profile : FORTLIBDIR  = $(LINUX64FORTLIBDIR)
 intel_linux_64_profile : FFLAGS    = -O2 -m64 -static-intel -vec_report0 -fpp -D pp_noappend -p
 intel_linux_64_profile : CFLAGS    = -O2 -m64 -static-intel -vec_report0 -D pp_LINUX64 -p
@@ -336,7 +317,7 @@ intel_linux_64_profile : FC        = ifort
 intel_linux_64_profile : exe       = smokeview_linux_64p
 
 intel_linux_64_profile : $(obj)
-	$(CPP) -m64 -o $(bin)/$(exe) $(obj) -static-intel -L$(IMAGELIBDIR) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS) -p
+	$(CPP) -m64 -o $(bin)/$(exe) $(obj) -static-intel -L$(LIBLINUX64) -L $(FORTLIBDIR) -lglui -lglut -lgd -ljpeg -lpng -lz -lifcore  -lintlc $(SYSTEMLIBS) -p
 
 # ------------- gcc_linux_32 ----------------
 
