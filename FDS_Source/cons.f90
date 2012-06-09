@@ -28,8 +28,7 @@ INTEGER, PARAMETER :: NO_MASS_FLUX=1,SPECIFIED_MASS_FRACTION=2,SPECIFIED_MASS_FL
                       INFLOW_OUTFLOW_MASS_FLUX=4                                            ! Mass transfer BC
 INTEGER, PARAMETER :: NULL_BOUNDARY=0,SOLID_BOUNDARY=1,OPEN_BOUNDARY=2,MIRROR_BOUNDARY=3, &
                       INTERPOLATED_BOUNDARY=6,PERIODIC_BOUNDARY=7                           ! Boundary Type
-INTEGER, PARAMETER :: FISHPAK_BC_PERIODIC=0, &                                              ! Fishpak (FFT Poisson solver)
-                      FISHPAK_BC_DIRICHLET_DIRICHLET=1, &
+INTEGER, PARAMETER :: FISHPAK_BC_DIRICHLET_DIRICHLET=1, &
                       FISHPAK_BC_DIRICHLET_NEUMANN=2, &
                       FISHPAK_BC_NEUMANN_NEUMANN=3, &
                       FISHPAK_BC_NEUMANN_DIRICHLET=4
