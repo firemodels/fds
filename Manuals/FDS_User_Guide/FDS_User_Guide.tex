@@ -309,7 +309,7 @@ Engineering Laboratory \\
 \hspace{1in} \\
 VTT Technical Research Centre of Finland \\
 {\em Espoo, Finland} }
-\flushright{\includegraphics[width=1in]{../Bibliography/VTT_Black_L} }
+\flushright{\includegraphics[width=1in]{../Bibliography/VTT_BLACK_L} }
 
 
 \vspace{.25in}
@@ -7111,7 +7111,7 @@ nozzle. Always test your burner at the resolution of your overall simulation.
 \label{info:PART_SURF}
 
 Lagrangian particles can be used to represent a wide variety of objects that are too small to resolve on the numerical grid. FDS considers three major classes of Lagrangian particles: massless tracers, liquid droplets, and everything else. If you simply want massless tracers, specify {\ct MASSLESS=.TRUE.} on the {\ct PART} line. If you specify a {\ct SPEC\_ID}, then FDS automatically assumes that you want relatively small, thermally-thin evaporating liquid droplets.
-However, it is possible to assign arbitrary surface properties to particles that represent subgrid-scale objects, like office clutter or vegetation. To do this, you add a {\ct SURF\_ID} to the {\ct PART} line. 
+However, it is possible to assign arbitrary surface properties to particles that represent subgrid-scale objects, like office clutter or vegetation. To do this, you add a {\ct SURF\_ID} to the {\ct PART} line.
 
 \subsection{Basics}
 
@@ -7167,11 +7167,71 @@ the user may specify a constant value of the drag coefficient for a particle cla
 The {\ct USER\_DRAG\_COEFFICIENT} over-rides the {\ct DRAG\_LAW}.  The {\ct USER\_DRAG\_COEFFICIENT} is a triplet indicating the drag along each coordinate axis.  If only the first value of the triplet is assigned, the drag is assumed to be isotropic.
 
 
+\subsection{Vegetation}
+\label{info:vegetation}
+
+Lagrangian particles can be used to represent different types of vegetation, like leaves, grass, and so on. The best way to explain how to use this feature is by way of example. Suppose we want to describe a collection of wet pine needles that occupy a certain volume. The following lines have been extracted from the sample file {\ct WUI/pine\_needles.fds}. Note that all of the values have been chosen simply to demonstrate the technique. These values should not be used for a real calculation.
+
+\footnotesize
+\begin{verbatim}
+&PART ID='pine needles', SAMPLING_FACTOR=1, SURF_ID='wet vegetation', 
+      PROP_ID='needle image', STATIC=.TRUE. /
+&INIT PART_ID='pine needles', XB=0.,1.,0.,1.,0.,1., N_PARTICLES=1000, MASS_PER_VOLUME=1. /
+&PROP ID='needle image', SMOKEVIEW_ID='TUBE', SMOKEVIEW_PARAMETERS='L=0.1','D=0.0005' /
+
+&SURF ID = 'wet vegetation'
+      MATL_ID(1,1:2) = 'PINE','MOISTURE'
+      MATL_MASS_FRACTION(1,1:2) = 0.8,0.2
+      THICKNESS = 0.00025
+      LENGTH = 0.1
+      GEOMETRY = 'CYLINDRICAL' /
+
+&MATL ID = 'PINE'
+      DENSITY = 500.
+      CONDUCTIVITY = 0.1
+      SPECIFIC_HEAT = 1.0
+      N_REACTIONS = 1
+      REFERENCE_TEMPERATURE = 300.
+      NU_MATL = 0.2
+      NU_SPEC = 0.8
+      SPEC_ID = 'GLUCOSE'
+      HEAT_OF_REACTION = 1000
+      MATL_ID  = 'CHAR' /
+
+&MATL ID = 'MOISTURE'
+      DENSITY = 1000.
+      CONDUCTIVITY = 0.1
+      SPECIFIC_HEAT = 4.184
+      N_REACTIONS = 1
+      REFERENCE_TEMPERATURE = 100.
+      NU_SPEC = 1.0
+      SPEC_ID = 'WATER VAPOR'
+      HEAT_OF_REACTION = 2500. /
+
+&MATL ID = 'CHAR'
+      DENSITY = 200.
+      CONDUCTIVITY = 1.0
+      SPECIFIC_HEAT = 1.6 /
+\end{verbatim}
+\normalsize
+
+\noindent In the example, 1~kg of pine needles occupy 1~m$^3$. The number of particles used to represent the pine needles is somewhat arbitrary. FDS will automatically weight the specified number so that the total mass per volume is 1~kg. The needles are modeled as cylinders that are 0.5~mm in diameter. The {\ct THICKNESS} on the {\ct SURF} line refers to the radius of the cylinder in units of m. The needles are all 0.1~m long. The needles contain 20~\% (by mass) moisture, and 80~\% cellulose. The moisture is set to evaporate at 100~$^\circ$C to create water vapor and the cellulose pyrolyses at 300~$^\circ$C to form fuel gas and char. In the example case, the original 1~kg of vegetation is heated until all of the water and fuel evaporate. The fuel is not allowed to burn by setting the ambient oxygen concentration to 1~\%. Figure~\ref{pine_needles} shows the evolution of the fuel, water and char mass. Agreement with the expected values means that mass is conserved. 
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/pine_needles}
+\end{center}
+\caption[Example burning vegetation.]{Evolution of vegetation mass in the {\ct pine\_needles} test case.}
+\label{pine_needles}
+\end{figure}
+
+
+
 \subsection{Screens}
 \label{info:particle_screen}
 
 A 2-D array of particles can be used to represent the drag exerted by a window screen, as in the following example:
- 
+
 \footnotesize
 \begin{verbatim}
 &INIT N_PARTICLES_PER_CELL=1, CELL_CENTERED=.TRUE., PART_ID='SCREEN',
@@ -7184,13 +7244,13 @@ A 2-D array of particles can be used to represent the drag exerted by a window s
 \end{verbatim}
 \normalsize
 
-\noindent The {\ct INIT} line designates the plane of the screen using the sextuplet {\ct XB}. A single particle is located in each cell with the parameter {\ct N\_PARTICLES\_PER\_CELL=1}.  The particles should be defined with a {\ct SURF\_ID} containing the material properties of the screen.  A special drag law for screens is used by setting {\ct DRAG\_LAW='SCREEN'}.  {\ct ORIENTATION} is the surface normal to the screen and {\ct FREE\_AREA\_FRACTION} is the fraction of the screen's surface area that is open.  The pressure drop across the screen is given by
+\noindent The {\ct INIT} line designates the plane of the screen using the sextuplet {\ct XB}. A single particle is located in each cell with the parameter {\ct N\_PARTICLES\_PER\_CELL=1}.  The particles should be defined with a {\ct SURF\_ID} containing the material properties of the screen.  A special drag law for screens is specified via {\ct DRAG\_LAW}.  {\ct ORIENTATION} is the direction normal to the screen and {\ct FREE\_AREA\_FRACTION} is the fraction of the screen's surface area that is open. In the example an aluminum screen with a 40~\% free area and an 0.0003 m wire diameter is placed normal to the $x$-axis.  Note that the {\ct LENGTH} on the {\ct SURF} line, when multiplied by the diameter, results in 60~\% of the cell area.  The pressure drop across the screen is given by
 \be \Delta P \; = \; \Delta x \; \left(\frac{\mu}{\hbox{K}} u \; + \; \rho \frac{\hbox{Y}}{\sqrt {\hbox{K}}} u^2 \right)\ee
 where $\Delta x$ is the screen thickness and Y and K are empirical constants given by
-\be \hbox{K}= 3.44 \times 10^{-9} \; \hbox{FREE\_AREA\_FRACTION}^{1.6}\ee
-\be \hbox{Y}= 0.043 \; \hbox{FREE\_AREA\_FRACTION}^{2.13}\ee
+\be \hbox{K}= 3.44 \times 10^{-9} \; \hbox{\ct FREE\_AREA\_FRACTION}^{1.6}\ee
+\be \hbox{Y}= 0.043 \; \hbox{\ct FREE\_AREA\_FRACTION}^{2.13}\ee
 
-In the example below an aluminum screen with a 40 \% free area and an 0.0003 m wire diameter is placed normal to the x-axis.  Note that the {\ct LENGTH} on the {\ct SURF}, when multiplied by the diameter, results in 60 \% of the cell area.
+
 
 
 
