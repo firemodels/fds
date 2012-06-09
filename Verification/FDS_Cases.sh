@@ -320,6 +320,7 @@ $RUNFDS Turbulence vreman_64
 $RUNFDS Visualization objects_dynamic
 $RUNFDS Visualization objects_static
 
+$RUNFDS WUI pine_needles
 $RUNFDS WUI random_walk_1
 $RUNFDS WUI random_walk_2
 
