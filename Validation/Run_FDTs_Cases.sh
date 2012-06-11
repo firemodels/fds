@@ -23,6 +23,9 @@ $FDTs Fleury_Heat_Flux_FDTs_Input.txt
 cd $VDIR/FM_SNL/FDTs
 $FDTs FM_SNL_FDTs_Input.txt
 
+cd $VDIR/Hamins_CH4/FDTs
+$FDTs Hamins_FDTs_Input.txt
+
 cd $VDIR/LLNL_Enclosure/FDTs
 $FDTs LLNL_FDTs_Input.txt
 
