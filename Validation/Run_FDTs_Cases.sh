@@ -35,13 +35,13 @@ $FDTs Steckler_MQH_Inputs.txt
 cd $VDIR/UL_NFPRF/FDTs
 $FDTs UL_NFPRF_FDTs_Input.txt
 
+cd $VDIR/USN_Hangars/FDTs
+$FDTs USN_Hangars_FDTs_Input.txt
+
 cd $VDIR/Vettori_Flat_Ceiling/FDTs
 $FDTs Vettori_FDTs_Input.txt
 
 cd $VDIR/VTT/FDTs
 $FDTs VTT_FDTs_Input.txt
-
-cd $VDIR/USN_Hangars/FDTs
-$FDTs USN_Hangars_FDTs_Input.txt
 
 echo FDTs cases complete
