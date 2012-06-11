@@ -280,7 +280,7 @@ CHARACTER(30) :: FMT
 OPEN(11,FILE=TRIM(OUTPUT_FILE),FORM='FORMATTED',STATUS='REPLACE')
 
 IF (FLIP_AXIS) THEN
-   WRITE(11,'(A)') 'Height,Radiative Flux'
+   WRITE(11,'(A)') 'Height (cm),Vertical Flux'
 ENDIF
 
 D = SQRT(4.*AREA/PI)
@@ -298,7 +298,7 @@ DO I=1,20
       R = SQRT(X(I)**2+(Z(K)-L_F/3.)**2)
       Q_RAD(K) = (X(I)/R)*CHI_R*Q/(4.*PI*R**2)
       IF (FLIP_AXIS) THEN
-         WRITE(11,'(F6.1,A1,F6.1)') Z(K),',',Q_RAD(K)
+         WRITE(11,'(F6.2,A1,F6.2)') Z(K)*100,',',Q_RAD(K)
       ENDIF
    ENDDO
 
