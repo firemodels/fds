@@ -44,4 +44,7 @@ $FDTs Vettori_FDTs_Input.txt
 cd $VDIR/VTT/FDTs
 $FDTs VTT_FDTs_Input.txt
 
+cd $VDIR/WTC/FDTs
+$FDTs WTC_FDTs_Input.txt
+
 echo FDTs cases complete
