@@ -7,10 +7,10 @@ REAL :: ACTIVATION_TEMPERATURE,A_C,ALPHA,AREA,A_T,A_V,CHI_R,CONDUIT_DIAMETER,CON
         DELTA,DT,H,H_K,H_V,JACKET_THICKNESS,K_S,L,L_F,LEAK_AREA,MASS_PER_LENGTH,M_DOT,P,Q,Q_STAR,Q_STEP,R, &
         RADIATIVE_FRACTION,RHO_AIR,RHO_S,RTI,SCALING_FACTOR,T,t_activation,T_END,T_P,TMP_A,TMP_G,T_CLOCK,U_JET,V, &
         V_DOT,W,W_V
-REAL, DIMENSION(10) :: X,Z,T_PLUME
+REAL, DIMENSION(20) :: X,Z,T_PLUME
 REAL, DIMENSION(30) :: TIME_RAMP,Q_RAMP
 REAL, DIMENSION(0:5) :: TMP_RAMP,T_RAMP
-CHARACTER(20), DIMENSION(10) :: Z_LABEL
+CHARACTER(20), DIMENSION(20) :: Z_LABEL
 LOGICAL :: PROFILE=.FALSE.,ITER=.TRUE.,TIME_OUTPUT=.FALSE.
 INTEGER :: I,IOS
 REAL, PARAMETER :: C_P=1.,G=9.81,GAMMA=1.4,RHO_A=1.2,PI=3.141592654,P_0=101325.
@@ -273,7 +273,7 @@ END SUBROUTINE COMPUTE_BEYLER
 
 SUBROUTINE COMPUTE_POINT_SOURCE_RADIATION
 
-REAL :: R,Q_RAD(10)
+REAL :: R,Q_RAD(20)
 INTEGER :: I,K,N_X,N_Z
 CHARACTER(30) :: FMT
 
@@ -284,11 +284,11 @@ Q_STAR = Q/(RHO_A*C_P*293.*SQRT(G)*D**2.5)
 L_F = D*(3.7*Q_STAR**0.4 - 1.02)
 
 N_X = 0
-DO I=1,10
+DO I=1,20
    IF (X(I)<0.) EXIT
    N_X = N_X + 1
    N_Z = 0
-   DO K=1,10
+   DO K=1,20
       IF (Z(K)<0) EXIT
       N_Z = N_Z + 1
       R = SQRT(X(I)**2+(Z(K)-L_F/3.)**2)
@@ -296,17 +296,17 @@ DO I=1,10
    ENDDO
 
    IF (I==1) THEN
-      WRITE(FMT,'(A,I1.1,5A)') "(",N_Z,"(","A",",','),","A",")"
+      WRITE(FMT,'(A,I2.1,5A)') "(",N_Z,"(","A",",','),","A",")"
       WRITE(11,FMT) 'x',(TRIM(Z_LABEL(K)),K=1,N_Z)
       IF (TIME_OUTPUT) THEN
-         WRITE(FMT,'(A,I1.1,5A)') "(",N_Z,"(","F7.2",",','),","F7.2",")"
+         WRITE(FMT,'(A,I2.1,5A)') "(",N_Z,"(","F7.2",",','),","F7.2",")"
          WRITE(11,FMT) 0.,(Q_RAD(K),K=1,N_Z)
          WRITE(11,FMT) 9999.,(Q_RAD(K),K=1,N_Z)
       ENDIF
    ENDIF
    
    IF (.NOT. TIME_OUTPUT) THEN
-      WRITE(FMT,'(A,I1.1,5A)') "(",N_Z,"(","F7.2",",','),","F7.2",")"
+      WRITE(FMT,'(A,I2.1,5A)') "(",N_Z,"(","F7.2",",','),","F7.2",")"
       WRITE(11,FMT) X(I),(Q_RAD(K),K=1,N_Z)
    ENDIF
 ENDDO
@@ -524,7 +524,7 @@ DO I=1,30
    N_T = N_T + 1
    
    N_Z = 0
-   DO J=1,10
+   DO J=1,20
    IF (Z(J)<0) EXIT
       N_Z = N_Z + 1
       
