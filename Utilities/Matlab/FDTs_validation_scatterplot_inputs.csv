@@ -7,3 +7,4 @@ Point Source Radiation Heat Flux,Measured Heat Flux (kW/m$^2$),Predicted Heat Fl
 Pressure,Measured Pressure Rise (Pa),Predicted Pressure Rise (Pa),0,300,0.03 0.95,SouthEast,4,80,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Pressure
 Sprinkler Activation Time,Measured Activation Time (s),Predicted Activation Time (s),0,300,0.03 0.95,SouthEast,4,16,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Sprinkler_Activation_Time
 Plume Temperatures,Measured Temperature ($^\circ$C),Predicted Temperature ($^\circ$C),0,1000,0.03 0.95,SouthEast,4,14,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Plume_Temperatures
+
