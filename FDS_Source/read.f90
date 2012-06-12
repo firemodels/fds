@@ -1611,8 +1611,8 @@ IF (DNS) THEN
       CALL SHUTDOWN(MESSAGE)
    ENDIF
 ELSE
-   FLUX_LIMITER  = 2
-   TURBULENCE_MODEL='DEARDORFF'
+   FLUX_LIMITER = 2
+   TURBULENCE_MODEL = 'DEARDORFF'
 ENDIF
 
 ! Re-read the line to pick up any user-specified options
