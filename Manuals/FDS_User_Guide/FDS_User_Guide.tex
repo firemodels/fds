@@ -5952,57 +5952,6 @@ total mass conservation. To set the properties of the background species, use th
 
 \clearpage
 
-\section{Surface Deposition of Aerosols}
-\label{info:surface_depo}
-
-FDS contains a model for the deposition of particulate matter, like soot, onto surfaces. Soot deposition can affect smoke detection time or visibility. It can also be used in the evaluation of a specific cause and origin hypothesis by comparing actual and simulated soot patterns following a fire.  Lastly a number of toxicants occur as aerosols (for example radionuclides or chemical or biological agents), and surface deposition is an important phenomena for evaluating dispersion.
-
-Deposition is determined by applying an empirical deposition velocity to the near-wall aerosols.  There are a number of phenomena that cause deposition: thermophoresis (where temperature gradients push the aerosol towards or away from the wall), gravitational settling, diffusive deposition (where the aerosols move along the boundary layer concentration gradient), and turbulent deposition (essentially impact deposition due to a turbulent boundary layer).  Other phenomena such as electrical fields can also result in deposition but are not considered in FDS.  The deposition velocity is determined by assuming the phenomena are independent, computing a deposition velocity for each (respectively u$_{th}$, u$_g$, and u$_{dt}$, a combined diffusion-turbulence velocity), and summing them~\cite{Bixler:1} .  By default FDS will compute all of the phenomena, but they can be selectively disabled with the logical flags {\ct GRAVITATIONAL\_DEPOSITION}, {\ct THERMOPHORETIC\_DEPOSITION}, and {\ct TURBULENT\_DEPOSITION}.
-
-The gravitational velocity is given by~\cite{Davies_Charles}
-\be
-u_g = g m_a \frac{\text{Cn}}{6 \pi \, \chi_d \, \mu \, r_a}
-\ee
-where $\chi_d$ is a shape factor, r$_a$ is the particle radius, Cn is Cunningham's slip factor given by~\cite{Cunningham:1}, and m$_a$ is the particle mass which is computed using the radius and the {\ct DENSITY\_SOLID} (on {\ct SPEC}).
-\be
-\text{Cn} = 1 + 1.25 \; \text{Kn} + 0.41 \; \text{Kn} \; e^{-0.88/\text{Kn}}
-\ee
-where Kn is the particle Knudsen number given by the ratio of the mean free path of the gas to the particle radius ({\ct MEAN\_DIAMETER} on {\ct SPEC}) .  Since, the mean free path of a gas is proportional to its temperature, Kn is computed as~\cite{Sippola:1}
-\be
-\text{Kn} = \frac{0.0065}{r_a} \frac{T_g}{T_\infty}
-\ee
-The thermophoretic velocity is computed as:
-\be
-u_{th} = \frac{K_{th} \nu}{T_g} \; \frac{dT}{dx}
-\ee
-This requires the wall temperature gradient which is only resolved in a DNS simulation. For an LES simulation this is computed from the wall heat transfer coefficient.
-\be
- \frac{dT}{dx} = \frac{h \left( T_g - T_w \right)}{k_g}
-\ee
-$K_{th}$ is the thermophoretic velocity coefficient, and it is calculated using the following correlation~\cite{Brock:1}
-\be
- K_{th} = \frac{2 \, C_s \left(\alpha + C_t \; \text{Kn} \right) \; \text{Cn}}{\left(1 + 3 \, C_m \; \text{Kn} \right) \left(1 + 2 \, \alpha + 2 \, C_t \, \text{Kn} \right) }
-\ee
-where $\alpha$ is the ratio of the gas conductivity to the particle conductivity ({\ct CONDUCTIVITY\_SOLID} on {\ct SPEC}), C$_m$ is the momentum accommodation coefficient (1.14), C$_t$ is the thermal accommodation coefficient (2.18), and C$_s$ is the thermal slip coefficient (1.17).
-The diffusion-turbulence deposition velocity depends upon the flow regime (diffusion, diffusion-impaction, or inertia-moderated).  The deposition velocity for these regimes are given below ~\cite{McCoy_Hanratty}.
-
-\be
-u_{dt} = \left\{ \begin{array}{r@{\quad \quad}c}
-         0.086 \; \text{Sc}^{-0.7} \; u_{\tau}        &  \tau^+ < 0.2 \\
-         3.5 \times 10^{-4} \; {\tau^+}^2 \; u_{\tau} &  0.2 < \tau^+ < 30 \\
-         0.17 \; u_{\tau}                             &  \tau^+ < 30
-         \end{array} \right.
-\ee
-where u$_{\tau}$ is the wall friction velocity computed by the Werner-Wengle model and $\tau^+$ is the dimensionless stopping distance given by~\cite{Ludwig_ICONE}
-\be
- \tau^+=\frac{2 \, \rho_a \, r_a}{18 \, \mu^2}  \; u_{\tau}^2 \; \rho_g
-\ee
-A simple example is given in Section~\ref{info:deposition}.
-
-
-
-
-
 
 \chapter{Combustion}
 
@@ -6422,7 +6371,9 @@ Change the units to kJ/kg by dividing by the molecular weight of the fuel. The h
 \subsection{Soot Deposition}
 \label{info:deposition}
 
-This example shows how to define a reaction that invokes an aerosol deposition model in FDS (e.g. soot deposition).  Note, that this model should be considered an experimental feature. The deposition model is invoked by defining a species with the parameter {\ct AEROSOL=.TRUE.}.  For this example propane will be the fuel with a 5 \% soot yield.  The stoichiometric equation is shown below.
+By default FDS will compute all of the soot deposition phenomena discussed in the Technical Reference Guide, but they can be selectively disabled with the logical flags {\ct GRAVITATIONAL\_DEPOSITION}, {\ct THERMOPHORETIC\_DEPOSITION}, and {\ct TURBULENT\_DEPOSITION}.   The deposition model is invoked by defining a species with the parameter {\ct AEROSOL=.TRUE.} (Note; this model should be considered an experimental feature.).  The properties of the aerosol can be defined on the species input using  {\ct DENSITY\_SOLID}, {\ct CONDUCTIVITY\_SOLID}, and {\ct MEAN\_DIAMETER}.
+
+This example shows how to define a reaction that invokes an aerosol deposition model in FDS (e.g. soot deposition).    For this example propane will be the fuel with a 5 \% soot yield.  The stoichiometric equation is shown below.
 \begin{eqnarray}\label{eq:PROPANE_depo}
 1\,\underbrace{\mathrm{(C_3H_8)}}_\text{Fuel} \,+\, 4.8164 \; \underbrace{\mathrm{(O_2\,+\, 3.7619 \; N_2})}_\text{Air} \, \rightarrow \\
 \nonumber \underbrace{1 \; \mathrm{(18.1182 \; N_2 \, + \, 2.8164 \; CO_2 \,+ \, 4\; H_2O)}}_\text{Products} \,+\,
@@ -11386,9 +11337,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct AEROSOL}                       & Logical     & Section~\ref{info:deposition}           &                   & {\ct .FALSE.} \\ \hline
 {\ct BACKGROUND}                    & Logical     & Section~\ref{info:SPEC}                 &                   & {\ct .FALSE.} \\ \hline
 {\ct CONDUCTIVITY}                  & Real        & Section~\ref{gas_species_props}         & W/m/K             &               \\ \hline
-{\ct CONDUCTIVITY\_SOLID}           & Real        & Section~\ref{info:surface_depo}         & W/m/K             &  0.26         \\ \hline
+{\ct CONDUCTIVITY\_SOLID}           & Real        & Section~\ref{info:deposition}         & W/m/K             &  0.26         \\ \hline
 {\ct DENSITY\_LIQUID}               & Real        & Section~\ref{thermal_part_props}        & kg/m$^3$          &               \\ \hline
-{\ct DENSITY\_SOLID}                & Real        & Section~\ref{info:surface_depo}         & kg/m$^3$          &  1800.        \\ \hline
+{\ct DENSITY\_SOLID}                & Real        & Section~\ref{info:deposition}         & kg/m$^3$          &  1800.        \\ \hline
 {\ct DIFFUSIVITY}                   & Real        & Section~\ref{gas_species_props}         & m$^2$/s           &               \\ \hline
 {\ct EPSILONKLJ}                    & Real        & Section~\ref{gas_species_props}         &                   & 0             \\ \hline
 {\ct FIC\_CONCENTRATION}            & Real        & Section~\ref{info:FED}                  & ppm               & 0.            \\ \hline
@@ -11400,7 +11351,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ID }                           & Character   & Section~\ref{info:SPEC_Basics}          &                   &               \\ \hline
 {\ct MASS\_EXTINCTION\_COEFFICIENT} & Real        & Section~\ref{info:alternative_smoke}    &                   & 0             \\ \hline
 {\ct MASS\_FRACTION\_0}             & Real        & Section~\ref{info:SPEC_Basics}          &                   & 0             \\ \hline
-{\ct MEAN\_DIAMETER}                & Real        & Section~\ref{info:surface_depo}         & m                 & 1.E-6         \\ \hline
+{\ct MEAN\_DIAMETER}                & Real        & Section~\ref{info:deposition}         & m                 & 1.E-6         \\ \hline
 {\ct MELTING\_TEMPERATURE}          & Real        & Section~\ref{thermal_part_props}        & $^\circ$C         &               \\ \hline
 {\ct MW}                            & Real        & Section~\ref{gas_species_props}         & g/mol             & 29.           \\ \hline
 {\ct RAMP\_CP}                      & Character   & Section~\ref{gas_species_props}         &                   &               \\ \hline
