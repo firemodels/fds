@@ -2867,8 +2867,7 @@ Section~\ref{info:colors} and Table \ref{tab:colors}. Also, the parameter {\ct O
 
 \label{info:Special_VENTS}
 
-There are two reserved {\ct SURF\_ID}'s that may be applied to a {\ct VENT} -- {\ct 'OPEN'} and {\ct 'MIRROR'}. The term {\em reserved} means that these two
-{\ct SURF\_ID}s should not be explicitly defined by you. Their properties are predefined.
+There are three reserved {\ct SURF\_ID}'s that may be applied to a {\ct VENT} -- {\ct 'OPEN'}, {\ct 'MIRROR'}, and {\ct 'PERIODIC'}. The term {\em reserved} means that these {\ct SURF\_ID}s should not be explicitly defined by you. Their properties are predefined.
 
 \subsubsection{Open Vents}
 
@@ -2898,6 +2897,20 @@ Note that the mirror image of a scene is {\bf not} shown in Smokeview.
 
 \noindent
 A word of warning about {\ct MIRROR} boundaries in FDS. In conventional RANS (Reynolds-Averaged Navier-Stokes) models, symmetry boundaries are often used as a way of saving on computation time. However, because FDS is an LES (Large Eddy Simulation) model, the use of symmetry boundaries should be considered carefully. The reason for this is that an LES model does not compute a time-averaged solution of the N-S equations. In other words, for a RANS model, a fire plume is represented as an axially-symmetric flow field because that is what you would expect if you time-averaged the actual flow field over a sufficient amount of time. Thus, for a RANS model, a symmetry boundary along the plume centerline is appropriate. In an LES model, however, there is no time-averaging built into the equations, and there is no time-averaged, symmetric solution. Putting a {\ct MIRROR} boundary along the centerline of a fire plume will change its dynamics entirely. It will produce something very much like the flow field of a fire that is adjacent to a vertical wall. For this reason, a {\ct MIRROR} boundary condition is not recommended along the centerline of a turbulent fire plume. If the fire or burner is very small, and the flow is laminar, then the {\ct MIRROR} boundary condition makes sense. In fact, in 2-D calculations, {\ct MIRROR} boundary conditions are employed in the third coordinate direction (this is done automatically, you need not specify it explicitly).
+
+\subsubsection{Periodic Vents}
+
+A {\ct VENT} with {\ct SURF\_ID='PERIODIC'} may be used in combination with another periodic vent on the boundary of the domain in any of the three coordinate directions.  As an example, consider the following:
+
+\footnotesize
+\begin{verbatim}
+&VENT MB='XMIN', SURF_ID='PERIODIC' /
+&VENT MB='XMAX', SURF_ID='PERIODIC' /
+\end{verbatim}
+\normalsize
+In this example, the entire $xmin$ boundary is periodic with the $xmax$ boundary.
+
+Note that periodic vents may not be used to connect offset vents or vents in different coordinate directions.  For such cases, the user must employ HVAC capabilities (see Section \ref{info:HVAC}).
 
 
 
@@ -9718,6 +9731,23 @@ free-stream wind speed, given as {\ct CHARACTERISTIC\_VELOCITY} on the
 \noindent
 Thus, you can either paint values of $C_p$ at all surface points, or create a single time history of $C_p$ using a single device at a single point.
 
+\subsection{Near-wall Grid Resolution}
+\label{info:yplus}
+
+Large-eddy simulations of boundary layer flows fall into two general categories: LES with near-wall resolution and LES with near-wall modeling (wall functions).  FDS employs the latter.  The wall models used in FDS are the Werner-Wengle wall model \cite{Werner:1991} for smooth walls and a rough wall log law for rough walls \cite{Pope:2000}.  For the wall models to function properly, the grid resolution near the wall should fall within a certain range of $y^+$, the nondimensional distance from the wall expressed in viscous units.  To check this, the user may add a boundary file output as follows:
+\footnotesize
+\begin{verbatim}
+&BNDF QUANTITY='YPLUS' /
+\end{verbatim}
+\normalsize
+The value of $y^+$ reported is half (since the velocity lives at the cell face center) the wall-normal cell dimension ($\delta n$) divided by the local viscous length scale, $\delta_\nu$ \cite{Pope:2000}:
+\be
+y^+ = \frac{1}{2} \frac{\delta n}{\delta_\nu} \,\mbox{;} \quad\quad \delta_\nu = \frac{\mu/\rho}{u_\tau} \,\mbox{;} \quad\quad u_\tau = \sqrt{\tau_w/\rho} \,\mbox{,}
+\ee
+where $\tau_w = \mu\,\partial |\mathbf{u}|/\partial n$ is the viscous stress evaluated at the wall ($\tau_w$ is computed by the wall function, $|\mathbf{u}|$ is taken as an estimate of the streamwise velocity component near the wall); the quantity $u_\tau$ is the \emph{friction velocity}.
+
+Wall functions for LES are still under development, but as a general guideline it is recommended that the first grid cell fall within the log layer: a value $y^+=30$ would be considered highly resolved, the upper limit of the log region for statistically stationary boundary layers depends on the Reynolds number, and there are no hard rules for transient flows.  Beyond $y^+=1000$ the first grid cell is likely to fall in the wake region of the boundary layer and may produce unreliable results.  A reasonable target for practical engineering LES is $y^+ = {\cal O}(100)$.
+
 \subsection{Dry Volume and Mass Fractions}
 \label{info:dry}
 
@@ -10097,6 +10127,7 @@ remember that all output quantity names ought to be in single quotes.
 {\ct WALL TEMPERATURE}                          & $T_w$                                         & $^\circ$C      & B,D          \\ \hline
 {\ct WALL THICKNESS}                            & Section~\ref{info:material_components}        & m              & B,D          \\ \hline
 {\ct WAVELET ERROR}$^{*****}$                   & Section~\ref{info:meshquality}                &                & S            \\ \hline
+{\ct YPLUS}                                     & Section~\ref{info:yplus}                      &                & B            \\ \hline
 \end{longtable}
 
 \noindent
