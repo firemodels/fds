@@ -403,5 +403,48 @@ For simplicity, the liquid fuel itself is treated like a thermally-thick
 solid for the purpose of computing the heat conduction. There is no
 computation of the convection of the liquid within the pool.
 
+\section{Aerosol Deposition}
 
+The transport of soot within FDS is done assuming that the soot behaves as a gas.  That is the soot particles are small enough that their terminal velocity is small compared to the fire driven flows of the gas containing the soot.  Near surfaces; however, other mechanisms can effect the soot resulting in its deposition onto surfaces.  The removal of soot via deposition can impact the visibility for egress and the time to detection.  For fire forensics, the amount of soot deposited could be correlated to post-fire observations.  The deposition of particulates is also critical for computing dispersion of aerosol toxicants (ash, radionuclides, and other particulates).  
+
+Deposition is determined by applying an empirical deposition velocity to the near-wall aerosols.  There are a number of phenomena that cause deposition: thermophoresis (where temperature gradients push the aerosol towards or away from the wall), gravitational settling, diffusive deposition (where the aerosols move along the boundary layer concentration gradient), and turbulent deposition (essentially impact deposition due to a turbulent boundary layer).  Other phenomena such as electrical fields can also result in deposition but are not considered in FDS.  The deposition velocity is determined by assuming the phenomena are independent, computing a deposition velocity for each (respectively u$_{th}$, u$_g$, and u$_{dt}$, a combined diffusion-turbulence velocity), and summing them~\cite{Bixler:1} .  
+
+The gravitational velocity is given by~\cite{Davies_Charles}
+\be
+u_g = g m_a \frac{\text{Cn}}{6 \pi \, \chi_d \, \mu \, r_a}
+\ee
+where $\chi_d$ is a shape factor, r$_a$ is the particle radius, Cn is Cunningham's slip factor given by~\cite{Cunningham:1}, and m$_a$ is the particle mass.
+\be
+\text{Cn} = 1 + 1.25 \; \text{Kn} + 0.41 \; \text{Kn} \; e^{-0.88/\text{Kn}}
+\ee
+where Kn is the particle Knudsen number given by the ratio of the mean free path of the gas to the particle radius.  Since, the mean free path of a gas is proportional to its temperature, Kn is computed as~\cite{Sippola:1}
+\be
+\text{Kn} = \frac{0.0065}{r_a} \frac{T_g}{T_\infty}
+\ee
+The thermophoretic velocity is computed as:
+\be
+u_{th} = \frac{K_{th} \nu}{T_g} \; \frac{dT}{dx}
+\ee
+This requires the wall temperature gradient which is only resolved in a DNS simulation. For an LES simulation this is computed from the wall heat transfer coefficient.
+\be
+ \frac{dT}{dx} = \frac{h \left( T_g - T_w \right)}{k_g}
+\ee
+$K_{th}$ is the thermophoretic velocity coefficient, and it is calculated using the following correlation~\cite{Brock:1}
+\be
+ K_{th} = \frac{2 \, C_s \left(\alpha + C_t \; \text{Kn} \right) \; \text{Cn}}{\left(1 + 3 \, C_m \; \text{Kn} \right) \left(1 + 2 \, \alpha + 2 \, C_t \, \text{Kn} \right) }
+\ee
+where $\alpha$ is the ratio of the gas conductivity to the particle conductivity, C$_m$ is the momentum accommodation coefficient (1.14), C$_t$ is the thermal accommodation coefficient (2.18), and C$_s$ is the thermal slip coefficient (1.17).
+The diffusion-turbulence deposition velocity depends upon the flow regime (diffusion, diffusion-impaction, or inertia-moderated).  The deposition velocity for these regimes are given below ~\cite{McCoy_Hanratty}.
+
+\be
+u_{dt} = \left\{ \begin{array}{r@{\quad \quad}c}
+         0.086 \; \text{Sc}^{-0.7} \; u_{\tau}        &  \tau^+ < 0.2 \\
+         3.5 \times 10^{-4} \; {\tau^+}^2 \; u_{\tau} &  0.2 < \tau^+ < 30 \\
+         0.17 \; u_{\tau}                             &  \tau^+ < 30
+         \end{array} \right.
+\ee
+where u$_{\tau}$ is the wall friction velocity computed by the Werner-Wengle model and $\tau^+$ is the dimensionless stopping distance given by~\cite{Ludwig_ICONE}
+\be
+ \tau^+=\frac{2 \, \rho_a \, r_a}{18 \, \mu^2}  \; u_{\tau}^2 \; \rho_g
+\ee
 
