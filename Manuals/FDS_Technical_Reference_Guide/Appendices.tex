@@ -1133,7 +1133,7 @@ When the temperatures of the time step \textit{n+1} are moved to the left side o
 
 \begin{equation}
 \label{bc_front_3}
-  -k_s \frac{T_1^{n+1}-T_0^{n+1}}{\delta x_{\frac{1}{2}}} + \frac{1}{2}hT_{s,\frac{1}{2}}^{n+1} + 4\epsilon\sigma T_{s,\frac{1}{2}}^{n+1^3} T_{s,\frac{1}{2}}^{n+1}
+  -k_s \frac{T_1^{n+1}-T_0^{n+1}}{\delta x_{\frac{1}{2}}} + \frac{1}{2}hT_{s,\frac{1}{2}}^{n+1} + 4\epsilon\sigma T_{s,\frac{1}{2}}^{n^3} T_{s,\frac{1}{2}}^{n+1}
   \approx h(T_g - \frac{1}{2}T_{s,\frac{1}{2}}^n) + 
   \dot{q}_{r, in}^{'''} + 3\epsilon\sigma T_{s,\frac{1}{2}}^{n^4}
 \end{equation}
@@ -1158,16 +1158,16 @@ The temperature at node 0 becomes then
 
 \begin{equation}
 \label{T0}
-  T_{s,0}^{n+1} = \underbrace{\frac{\frac{k_{s,0}}{\delta x_1}-(\frac{1}{4}h_F+2\epsilon_F \sigma T_{s,\frac{1}{2}}^{n^3})}{\frac{k_{s,0}}{\delta x_1}+(\frac{1}{4}h_F+2\epsilon_F \sigma T_{s,\frac{1}{2}}^{n^3})}}_{RFACF2} T_1^{n+1}+
- \underbrace{\frac{h_F(T_g-\frac{1}{2}T_{s,\frac{1}{2}}^n)+\dot{q}_{r,F}^{'''}+4\epsilon_F \sigma T_{s,\frac{1}{2}}^{n^4}}{\frac{k_{s,0}}{\delta x_1}+(\frac{1}{4}h_F+2\epsilon_F \sigma T_{s,\frac{1}{2}}^{n^3})}}_{QDXKF}.
+  T_{s,0}^{n+1} = \underbrace{\frac{\frac{k_{s,0}}{\delta x_{\frac{1}{2}}}-(\frac{1}{4}h_F+2\epsilon_F \sigma T_{s,\frac{1}{2}}^{n^3})}{\frac{k_{s,0}}{\delta x_{\frac{1}{2}}}+(\frac{1}{4}h_F+2\epsilon_F \sigma T_{s,\frac{1}{2}}^{n^3})}}_{RFACF2} T_1^{n+1}+
+ \underbrace{\frac{h_F(T_g-\frac{1}{2}T_{s,\frac{1}{2}}^n)+\dot{q}_{r,F}^{'''}+4\epsilon_F \sigma T_{s,\frac{1}{2}}^{n^4}}{\frac{k_{s,0}}{\delta x_{\frac{1}{2}}}+(\frac{1}{4}h_F+2\epsilon_F \sigma T_{s,\frac{1}{2}}^{n^3})}}_{QDXKF}.
 \end{equation}
 
 In case of non-insulated backing in cartesian geometry, the temperature of virtual node \textit{N+1} is calculated similarly as
 
 \begin{equation}
 \label{TN+1}
-  T_{s,N+1}^{n+1} = \underbrace{\frac{\frac{k_{s,N+1}}{\delta x_1}-(\frac{1}{4}h_B+2\epsilon_B \sigma T_{s,\frac{1}{2}}^{n^3})}{\frac{k_{s,0}}{\delta x_1}+(\frac{1}{4}h_B+2\epsilon_B \sigma T_{s,\frac{1}{2}}^{n^3})}}_{RFACB2} T_1^{n+1}+
- \underbrace{\frac{h_B(T_g-\frac{1}{2}T_{s,\frac{1}{2}}^n)+\dot{q}_{r,B}^{'''}+4\epsilon_B \sigma T_{s,\frac{1}{2}}^{n^4}}{\frac{k_{s,0}}{\delta x_1}+(\frac{1}{4}h_B+2\epsilon_B \sigma T_{s,\frac{1}{2}}^{n^3})}}_{QDXKB}.
+  T_{s,N+1}^{n+1} = \underbrace{\frac{\frac{k_{s,N+1}}{\delta x_{N+\frac{1}{2}}}-(\frac{1}{4}h_B+2\epsilon_B \sigma T_{s,N+\frac{1}{2}}^{n^3})}{\frac{k_{s,N+1}}{\delta x_{N+\frac{1}{2}}}+(\frac{1}{4}h_B+2\epsilon_B \sigma T_{s,N+\frac{1}{2}}^{n^3})}}_{RFACB2} T_{N+1}^{n+1}+
+ \underbrace{\frac{h_B(T_g-\frac{1}{2}T_{s,N+\frac{1}{2}}^n)+\dot{q}_{r,B}^{'''}+4\epsilon_B \sigma T_{s,N+\frac{1}{2}}^{n^4}}{\frac{k_{s,N+1}}{\delta x_{N+\frac{1}{2}}}+(\frac{1}{4}h_B+2\epsilon_B \sigma T_{s,N+\frac{1}{2}}^{n^3})}}_{QDXKB}.
 \end{equation}
 
 For insulated backing and cylindrical and spherical geometries, the boundary condition at node \textit{N+1} (r = 0) is
@@ -1191,8 +1191,8 @@ where
 \begin{equation}
 \label{tridiagonal_2}
 \begin{split}
-& A(i) = -\frac{k_{i+\frac{1}{2}}\delta t}{2(\rho_s c_s)_i}\frac{1}{R_{i-\frac{1}{2}}^I \delta x_i}\frac{R_{i}^I}{\delta x_{i+\frac{1}{2}}} \\
-& B(i) = -\frac{k_{i-\frac{1}{2}}\delta t}{2(\rho_s c_s)_i}\frac{1}{R_{i-\frac{1}{2}}^I \delta x_i}\frac{R_{i-1}^I}{\delta x_{i-\frac{1}{2}}}  \\
+& A(i) = -\frac{k_{i+\frac{1}{2}}\delta t}{2(\rho_s c_s)_i}\frac{1}{r_{i-\frac{1}{2}}^I \delta r_i}\frac{r_{i}^I}{\delta r_{i+\frac{1}{2}}} \\
+& B(i) = -\frac{k_{i-\frac{1}{2}}\delta t}{2(\rho_s c_s)_i}\frac{1}{r_{i-\frac{1}{2}}^I \delta r_i}\frac{r_{i-1}^I}{\delta x_{i-\frac{1}{2}}}  \\
 & C(i) = T_{s,i}^{n}-A(i)(T_{i+1}^n-T_i^n) + B(i) (T_{i}^n-T_{i-1}^n) \\
 & D(i) = 1-A(i)-B(i).  \\
 \end{split}
@@ -1234,7 +1234,7 @@ To solve the eq. (\ref{tridiagonal_1}), tridiagonal matrix algorithm is used. Th
 \label{forward}
 \begin{split}
 & D'(1) = D(1)+B(1)\cdot RFACF2 \\
-& C'(1) = \frac{C(1)-B(1)\cdot QDXKF}{D(1)} \\
+& C'(1) = C(1)-B(1)\cdot QDXKF \\
 & \\
 & D'(i) = D(i)-\frac{B(i)A(i-1)}{D'(i-1)}, i = 2, ..., N-1 \\
 & C'(i) = C(i)-\frac{B(i)C'(i-1)}{D'(i-1)}, i = 2, ..., N-1\\
