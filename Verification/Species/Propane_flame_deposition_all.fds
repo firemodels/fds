@@ -1,11 +1,15 @@
 Propane burner test case to check basic chemistry model and soot deposition
 
-&HEAD CHID='Propane_flame_deposition', TITLE='Verification of simple chemistry flame with soot deposition, SVN $Revision: 3324 $'/
+&HEAD CHID='Propane_flame_deposition_all', TITLE='Verification of simple chemistry flame with soot deposition, SVN $Revision: 3324 $'/
 
 &MESH IJK=10,10,20, XB=0.0,1.0,0.0,1.0,0.0,2.0 /
 
 &TIME T_END=10.0, DT=0.01 /
 &DUMP MASS_FILE=.TRUE., DT_DEVC=0.5/
+
+&MISC GRAVITATIONAL_DEPOSITION  = .TRUE.
+      THERMOPHORETIC_DEPOSITION = .TRUE.
+      TURBULENT_DEPOSITION      = .TRUE. /
 
 &OBST XB = 0.3,0.7,0.3,0.7,0.0,0.10, SURF_IDS = 'BURNER','INERT','INERT' /
 &SURF ID = 'BURNER', HRRPUA=625., RAMP_Q='fire'/
