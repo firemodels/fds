@@ -32,6 +32,7 @@ ashrae_7;                 display('ashrae_7 complete...')
 flame_species;            display('flame_species complete...')
 EDM_species;              display('EDM_species complete...')
 cutcell_area;             display('cutcell_area complete...')
+cat_propane_depo;         display('cat_propane_depo complete...')
 
 % The main plotting routine is dataplot
 
