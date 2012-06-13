@@ -7127,6 +7127,46 @@ the user may specify a constant value of the drag coefficient for a particle cla
 The {\ct USER\_DRAG\_COEFFICIENT} over-rides the {\ct DRAG\_LAW}.  The {\ct USER\_DRAG\_COEFFICIENT} is a triplet indicating the drag along each coordinate axis.  If only the first value of the triplet is assigned, the drag is assumed to be isotropic.
 
 
+\subsection{Gas Generating Particles}
+\label{info:particle_mass_generation}
+
+Lagrangian particles can be used to generate gases at a specified rate. The syntax is similar to that used for a solid wall. For example, the following input lines create three particles -- one shaped like a rectangular plate, one a cylinder, and one a sphere -- that generate argon, sulfur dioxide, and helium, respectively. The particles have no mass; they simply are used to generate the gases at a specified rate.
+
+\footnotesize
+\begin{verbatim}
+&SPEC ID='ARGON' /
+&SPEC ID='SULFUR DIOXIDE' /
+&SPEC ID='HELIUM' /
+
+&INIT PART_ID='plate', XYZ=-1.,0.,1.5, N_PARTICLES=1  /
+&INIT PART_ID='tube',  XYZ= 0.,0.,1.5, N_PARTICLES=1  /
+&INIT PART_ID='ball',  XYZ= 1.,0.,1.5, N_PARTICLES=1  /
+
+&PART ID='plate', SAMPLING_FACTOR=1, SURF_ID='plate bc', STATIC=.TRUE. /
+&PART ID='tube',  SAMPLING_FACTOR=1, SURF_ID='tube bc',  STATIC=.TRUE. /
+&PART ID='ball',  SAMPLING_FACTOR=1, SURF_ID='ball bc',  STATIC=.TRUE. /
+
+&SURF ID='plate bc', LENGTH=0.05, WIDTH=0.05, SPEC_ID(1)='ARGON', 
+      MASS_FLUX(1)=0.1, TAU_MF(1)=0.001 /
+&SURF ID='tube bc',  GEOMETRY='CYLINDRICAL', LENGTH=0.05, RADIUS=0.01, 
+      SPEC_ID(1)='SULFUR DIOXIDE', MASS_FLUX(1)=0.1, TAU_MF(1)=0.001 /
+&SURF ID='ball bc',  GEOMETRY='SPHERICAL', RADIUS=0.01, SPEC_ID(1)='HELIUM', 
+      MASS_FLUX(1)=0.1, TAU_MF(1)=0.001 /
+\end{verbatim}
+\normalsize
+
+\noindent Notice that the {\ct SURF} lines contain the necessary parameters to describe a plate, cylinder and sphere, but they do not contain the parameter {\ct THICKNESS}. The reason is that the particles have no mass. Only the surface area is important. For the plate, the surface area is the length times the width. For the cylinder, the area is twice the radius times the length. For the sphere, the area is $4\pi$ times the radius squared. Figure~\ref{surf_mass_part_specified} displays the output of the test case called {\ct surf\_mass\_part\_specified.fds}, demonstrating that the production rate of the gases is as expected.
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_specified}
+\end{center}
+\caption[Example of specified gas mass production from particles.]{Gas production from three Lagrangian particles.}
+\label{surf_mass_part_specified}
+\end{figure}
+
+
+
 \subsection{Vegetation}
 \label{info:vegetation}
 
@@ -7134,7 +7174,7 @@ Lagrangian particles can be used to represent different types of vegetation, lik
 
 \footnotesize
 \begin{verbatim}
-&PART ID='pine needles', SAMPLING_FACTOR=1, SURF_ID='wet vegetation', 
+&PART ID='pine needles', SAMPLING_FACTOR=1, SURF_ID='wet vegetation',
       PROP_ID='needle image', STATIC=.TRUE. /
 &INIT PART_ID='pine needles', XB=0.,1.,0.,1.,0.,1., N_PARTICLES=1000, MASS_PER_VOLUME=1. /
 &PROP ID='needle image', SMOKEVIEW_ID='TUBE', SMOKEVIEW_PARAMETERS='L=0.1','D=0.0005' /
@@ -7175,13 +7215,13 @@ Lagrangian particles can be used to represent different types of vegetation, lik
 \end{verbatim}
 \normalsize
 
-\noindent In the example, 1~kg of pine needles occupy 1~m$^3$. The number of particles used to represent the pine needles is somewhat arbitrary. FDS will automatically weight the specified number so that the total mass per volume is 1~kg. The needles are modeled as cylinders that are 0.5~mm in diameter. The {\ct THICKNESS} on the {\ct SURF} line refers to the radius of the cylinder in units of m. The needles are all 0.1~m long. The needles contain 20~\% (by mass) moisture, and 80~\% cellulose. The moisture is set to evaporate at 100~$^\circ$C to create water vapor and the cellulose pyrolyses at 300~$^\circ$C to form fuel gas and char. In the example case, the original 1~kg of vegetation is heated until all of the water and fuel evaporate. The fuel is not allowed to burn by setting the ambient oxygen concentration to 1~\%. Figure~\ref{pine_needles} shows the evolution of the fuel, water and char mass. Agreement with the expected values means that mass is conserved. 
+\noindent In the example, 1~kg of pine needles occupy 1~m$^3$. The number of particles used to represent the pine needles is somewhat arbitrary. FDS will automatically weight the specified number so that the total mass per volume is 1~kg. The needles are modeled as cylinders that are 0.5~mm in diameter. The {\ct THICKNESS} on the {\ct SURF} line refers to the radius of the cylinder in units of m. The needles are all 0.1~m long. The needles contain 20~\% (by mass) moisture, and 80~\% cellulose. The moisture is set to evaporate at 100~$^\circ$C to create water vapor and the cellulose pyrolyses at 300~$^\circ$C to form fuel gas and char. In the example case, the original 1~kg of vegetation is heated until all of the water and fuel evaporate. The fuel is not allowed to burn by setting the ambient oxygen concentration to 1~\%. Figure~\ref{pine_needles} shows the evolution of the fuel, water and char mass. Agreement with the expected values means that mass is conserved.
 
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/pine_needles}
 \end{center}
-\caption[Example burning vegetation.]{Evolution of vegetation mass in the {\ct pine\_needles} test case.}
+\caption[Example of burning vegetation.]{Evolution of vegetation mass in the {\ct pine\_needles} test case.}
 \label{pine_needles}
 \end{figure}
 
