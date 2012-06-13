@@ -6435,7 +6435,7 @@ temperature exceeds the {\ct THRESHOLD\_TEMPERATURE}, then the mixed-mode reacti
 
 By default FDS will compute all of the soot deposition phenomena discussed in the Technical Reference Guide, but they can be selectively disabled with the logical flags {\ct GRAVITATIONAL\_DEPOSITION}, {\ct THERMOPHORETIC\_DEPOSITION}, and {\ct TURBULENT\_DEPOSITION}.   The deposition model is invoked by defining a species with the parameter {\ct AEROSOL=.TRUE.} (Note; this model should be considered an experimental feature.).  The properties of the aerosol can be defined on the species input using  {\ct DENSITY\_SOLID}, {\ct CONDUCTIVITY\_SOLID}, and {\ct MEAN\_DIAMETER}.
 
-This example shows how to define a reaction that invokes an aerosol deposition model in FDS (e.g. soot deposition).    For this example propane will be the fuel with a 5 \% soot yield.  The stoichiometric equation is shown below.
+This example shows how to define a reaction that invokes an aerosol deposition model in FDS (e.g., soot deposition).    For this example propane will be the fuel with a 5 \% soot yield.  The stoichiometric equation is shown below.
 \begin{eqnarray}\label{eq:PROPANE_depo}
 1\,\underbrace{\mathrm{(C_3H_8)}}_\text{Fuel} \,+\, 4.8164 \; \underbrace{\mathrm{(O_2\,+\, 3.7619 \; N_2})}_\text{Air} \, \rightarrow \\
 \nonumber 1 \; \underbrace{\mathrm{(18.1182 \; N_2 \, + \, 2.8164 \; CO_2 \,+ \, 4\; H_2O)}}_\text{Products} \,+\,
