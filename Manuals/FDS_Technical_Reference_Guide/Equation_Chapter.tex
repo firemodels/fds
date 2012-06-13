@@ -5,11 +5,11 @@
 This chapter presents the governing equations of FDS and an outline of the general solution procedure. Details are included in subsequent chapters. The purpose of this chapter is to highlight aspects of the solution methodology that make it practical for thermally-driven flow simulations, in particular fire. Some of the major features of the model, in its default operation, are:
 \begin{itemize}
 \item Low Mach, large-eddy simulation (LES)
-\item Explicit, second-order, energy conserving numerics
+\item Explicit, second-order, kinetic-energy-conserving numerics
 \item Structured, uniform, staggered grid
 \item Simple immersed boundary method for treatment of flow obstructions
 \item Generalized ``lumped species'' method (simplified reaction progress variable approach)
-\item Smagorinsky subgrid closure (constant or dynamic coefficient)
+\item Deardorff eddy viscosity subgrid closure
 \item Constant turbulent Schmidt and Prandtl numbers
 \item Eddy dissipation model (fast chemistry) for single-step reaction between fuel and oxidizer
 \item Gray gas radiation with finite volume solution to the radiation transport equation
@@ -32,7 +32,7 @@ The equations for large-eddy simulation (LES) are derived by applying a low-pass
 \bar{\rho}(x,t) = \frac{1}{\Delta}\int_{x-\Delta/2}^{x+\Delta/2} \rho(r,t) \,\mbox{d}r \mbox{.}
 \end{equation}
 
-In FDS, the filter width $\Delta$ is equivalent to the local cell size $\delta x$ and is a key parameter in the submodels for the turbulent viscosity and the reaction time scale discussed later.  The practice of taking $\Delta = \delta x$ is called implicit filtering.  In what follows, the filter formalism is relaxed (the overline notation is suppressed for clarity) since no explicit filtering operations are performed in the algorithm (except within the dynamic procedure).
+In FDS, the filter width $\Delta$ is equivalent to the local cell size $\delta x$ and is a key parameter in the submodels for the turbulent viscosity and the reaction time scale discussed later.  The practice of taking $\Delta = \delta x$ is called implicit filtering.  It is important to appreciate, however, that implicit filtering does not imply dissipative numerics.  FDS employs kinetic-energy-conserving central difference schemes for momentum with physically-based closures for the turbulent stress.  In what follows, the filter formalism is relaxed (the overline notation is suppressed for clarity) since no explicit filtering operations are performed in the algorithm.
 
 \section{Numerical Grid}
 \label{govequations}
@@ -48,7 +48,7 @@ preferred, and the only numerical parameters chosen by the end user are the thre
 is relatively simple to define rectangular obstructions that define the geometry to the level of resolution determined by the
 grid. These obstructions ``snap'' to the underlying grid, a very elementary form of an immersed boundary method (IBM).
 
-The governing equations are approximated using second-order accurate finite differences on a collection of uniformly spaced three-dimensional grids. Multiple meshes can be processed in parallel using Message Passing Interface (MPI) libraries. Scalar quantities are assigned to the center of each grid cell; vector components are assigned at the appropriate cell faces. This is what is commonly referred to as a staggered grid \cite{Harlow:1}.  Its main purpose is to avoid numerical dispersion error (checker-boarding) in pressure-velocity coupling by naturally representing the pressure cell velocity divergence, a very important thermodynamic quantity in the model.
+The governing equations are approximated using second-order accurate finite differences on a collection of uniformly spaced three-dimensional grids. Multiple meshes can be processed in parallel using Message Passing Interface (MPI) libraries. Scalar quantities are assigned to the center of each grid cell; vector components are assigned at the appropriate cell faces. This is what is commonly referred to as a staggered grid \cite{Harlow:1}.  Its main purpose is to avoid ``checker-boarding'' in pressure-velocity coupling by naturally representing the pressure cell velocity divergence, a very important thermodynamic quantity in the model.
 
 \section{Mass and Species Transport}
 \label{sec_lumped_species}
@@ -111,7 +111,7 @@ described in terms of the differences in the background pressures, eliminating t
 The second consequence of the low Mach number approximation is that it eliminates the need to solve the energy transport
 equation explicitly.
 The energy conservation equation is written in terms of the {\em sensible enthalpy}, $h_s$:
-\be \dod{ }{t}(\rho h_s) + \nabla\!\cdot (\rho h_s \bu) = \frac{\mbox{D}p}{\mbox{D}t}  + \dq''' - \dq_b'''
+\be \dod{ }{t}(\rho h_s) + \nabla\!\cdot (\rho h_s \bu) = \frac{\mbox{D}\bar{p}}{\mbox{D}t}  + \dq''' - \dq_b'''
         - \nabla\!\cdot \dbq'' \label{energy} \ee
 Note that the material derivative of the thermodynamic pressure is simplified because of the low Mach number approximation:
 \be
@@ -125,20 +125,15 @@ The term $\dbq''$ represents the conductive and radiative heat fluxes:
 \be \dbq'' = -k \nabla T - \sum_\alpha h_{s,\alpha} \rho D_\alpha \nabla Z_\alpha + \dbq_r'' \ee
 where $k$ is the thermal conductivity and $D_\alpha$ is the diffusivity of species $\alpha$.
 
-As mentioned above, we do not actually solve Eq.~(\ref{energy}). Instead, we form an expression for the divergence of
-the velocity starting with the mass conservation equation (\ref{mass}), and then take the material
-derivative of the equation of state (\ref{basicstate1}):
+As mentioned above, we do not actually solve Eq.~(\ref{energy}). Instead, we factor out the divergence as follows:
 \be
 \label{eqn_simplediv1}
-\Div\mathbf{u} = \frac{1}{\rho} \left( \dot{m}_b^{\tripleprime} -  \frac{\mbox{D} \rho}{\mbox{D} t} \right) =
-\frac{1}{\rho} \,\dot{m}_b^{\tripleprime} -  \frac{1}{\bp} \frac{\mbox{D}\bp}{\mbox{D} t} +
-\overline{W} \frac{\mbox{D}}{\mbox{D} t}\left(\frac{1}{\overline{W}}\right) +
-\frac{1}{T} \frac{\mbox{D} T}{\mbox{D} t}
+\Div\mathbf{u} = \frac{1}{\rho h_s} \left[ \frac{\mbox{D}}{\mbox{D} t}(\bar{p}-\rho h_s) + \dot{q}''' - \dq_b''' - \Div \dot{\mathbf{q}}'' \right]
 \ee
 Expanding the material derivatives on the right hand side of this equation produces a fairly complicated expression for
 the divergence that includes the source and diffusion terms from the mass, species and energy conservation equations.
-However, its importance to the overall algorithm is that it can be computed using only the
-thermodynamic variables $\rho$, $Z_\alpha$, and $\bp$. As will be shown below, the way to advance the flow velocity in time
+Its importance to the overall algorithm is that it can be computed using only the
+thermodynamic variables $\rho$, $Z_\alpha$, and $\bar{p}$. As will be shown below, the way to advance the flow velocity in time
 is to first estimate the thermodynamic variables at the next time step, compute the divergence, and then solve an equation
 for the pressure that will guarantee that the divergence of the updated velocity is identical to that computed solely from
 the thermodynamic variables.
