@@ -1,8 +1,8 @@
 RENDERDIR
  ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES
 LOADFILE
- Propane_flame_deposition_01.bf
+ Propane_flame_deposition_all_01.bf
 SETTIMEVAL
- 5.0
+ 10.0
 RENDERONCE
  Propane_flame_deposition
