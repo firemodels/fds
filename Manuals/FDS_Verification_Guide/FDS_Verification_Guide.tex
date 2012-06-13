@@ -2125,9 +2125,32 @@ Figure~\ref{FED_FIC_SMIX_plot}.
 \label{FED_FIC_SMIX_plot}
 \end{figure}
 
+\clearpage
 
+\newpage
 
+\section{Aerosol Deposition (Propane\_flame\_deposition)}
 
+This example shows how to define a reaction that invokes an aerosol deposition model in FDS (e.g. soot deposition). For this example propane will be the fuel with a 5 \% soot yield.
+
+Figure~\ref{fig:deposition_mass_components} shows the time evolution of soot mass in the gas phase, condensed phase (wall), and total (sum of soot in the gas and condensed phases) for five cases. The five cases are (1) all soot deposition mechanisms active, (2) no soot deposition mechanisms active, (3) gravitational deposition only, (4) thermophoretic deposition only, and (5) turbulent deposition only. Figure~\ref{fig:deposition_mass_total} shows the sum of the gas phase and condensed phase soot masses.
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/Propane_flame_deposition_gas} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/Propane_flame_deposition_wall}
+\end{tabular*}
+\caption[Soot mass from Propane\_flame\_deposition case]{Time evolution of soot mass components for deposition cases. (Left) Soot mass in gas phase. (Right) Soot mass deposited on condensed phase walls.}
+\label{fig:deposition_mass_components}
+\end{figure}
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=5.0in]{SCRIPT_FIGURES/Propane_flame_deposition_total}
+\end{center}
+\caption[Soot mass from Propane\_flame\_deposition case]{Time evolution of total soot mass for deposition cases.}
+\label{fig:deposition_mass_total}
+\end{figure}
 
 
 \chapter{Heat Conduction}
