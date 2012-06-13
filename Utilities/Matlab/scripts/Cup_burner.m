@@ -53,7 +53,7 @@ for s = 1:N_Agents
    [fds_data] = csvread(FDS_File,2);
    n_fds = size(fds_data,1);
    i_first = find(fds_data(1:n_fds,4)>HRR_Limit,1,'first');
-   i_last = find(fds_data(i_first:n_fds,4)<HRR_Limit,1,'first');
+   i_last = find(fds_data(i_first:n_fds,4)<HRR_Limit,1,'first')+(i_first-1);
    if (isempty(i_last))
       % not yet extinguished
       i_last = 1;
