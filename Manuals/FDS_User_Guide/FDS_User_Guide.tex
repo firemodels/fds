@@ -6379,71 +6379,6 @@ Change the units to kJ/kg by dividing by the molecular weight of the fuel. The h
 \end{verbatim} \normalsize
 
 
-
-\subsection{Soot Deposition}
-\label{info:deposition}
-
-By default FDS will compute all of the soot deposition phenomena discussed in the Technical Reference Guide, but they can be selectively disabled with the logical flags {\ct GRAVITATIONAL\_DEPOSITION}, {\ct THERMOPHORETIC\_DEPOSITION}, and {\ct TURBULENT\_DEPOSITION}.   The deposition model is invoked by defining a species with the parameter {\ct AEROSOL=.TRUE.} (Note; this model should be considered an experimental feature.).  The properties of the aerosol can be defined on the species input using  {\ct DENSITY\_SOLID}, {\ct CONDUCTIVITY\_SOLID}, and {\ct MEAN\_DIAMETER}.
-
-This example shows how to define a reaction that invokes an aerosol deposition model in FDS (e.g. soot deposition).    For this example propane will be the fuel with a 5 \% soot yield.  The stoichiometric equation is shown below.
-\begin{eqnarray}\label{eq:PROPANE_depo}
-1\,\underbrace{\mathrm{(C_3H_8)}}_\text{Fuel} \,+\, 4.8164 \; \underbrace{\mathrm{(O_2\,+\, 3.7619 \; N_2})}_\text{Air} \, \rightarrow \\
-\nonumber \underbrace{1 \; \mathrm{(18.1182 \; N_2 \, + \, 2.8164 \; CO_2 \,+ \, 4\; H_2O)}}_\text{Products} \,+\,
-\underbrace{0.1836 \; \mathrm{C}}_\text{Soot}
-\end{eqnarray}
-The example will also use the lumped species formulation to minimize the number of scalar transport equations that need to be solved. Therefore, each species that does not transport by itself will have an {\ct SMIX\_COMPONENT\_ONLY = .TRUE.} designation.  Note that for soot to deposit it must be tracked separately and it must be given {\ct AEROSOL = .TRUE.}.
-
-\footnotesize
-\begin{verbatim}
-&SPEC ID = 'PROPANE' /
-&SPEC ID = 'OXYGEN',            SMIX_COMPONENT_ONLY = .TRUE. /
-&SPEC ID = 'NITROGEN',          SMIX_COMPONENT_ONLY = .TRUE. /
-&SPEC ID = 'WATER VAPOR',       SMIX_COMPONENT_ONLY = .TRUE. /
-&SPEC ID = 'CARBON DIOXIDE',    SMIX_COMPONENT_ONLY = .TRUE. /
-&SPEC ID = 'SOOT',              AEROSOL = .TRUE./
-\end{verbatim} \normalsize
-
-\noindent
-For the oxidizer and products, which are both composed of multiple primitive species, {\ct SMIX} lines are needed to define the composition of the lumped species. As the user, you can define the {\ct SMIX} by either the {\ct MASS\_FRACTIONS} of the component gases or the {\ct VOLUME\_FRACTIONS}. For this case, volume fractions will be used. If Equation \ref{eq:PROPANE_depo} is properly balanced, you can directly use the stoichiometric coefficients of the primitive species to define the lumped species.
-
-\footnotesize
-\begin{verbatim}
-&SMIX ID = 'AIR', SPEC_ID ='NITROGEN','OXYGEN',
-      VOLUME_FRACTION = 3.7619,1., BACKGROUND = .TRUE. /
-&SMIX ID = 'PRODUCTS', SPEC_ID ='NITROGEN','CARBON DIOXIDE','WATER VAPOR',
-      VOLUME_FRACTION = 18.1182,2.8164,4. /
-\end{verbatim} \normalsize
-
-\noindent
-Note: the order of which the {\ct SPEC\_ID}s are defined must be the same order as which you defined your volume fractions or mass fractions.
-
-In this mixing-controlled example, the user is responsible for defining the fuel, heat of combustion of that fuel, species participating the reaction, and the stoichiometric coefficients that describe the reaction. The heat of combustion for PROPANE was found from the SFPE Handbook~\cite{SFPE:Tewarson}. In the lumped species approach, the stoichiometric coefficients for the {\ct SMIX} lines are the coefficients of the lumped species themselves.
-
-\footnotesize
-\begin{verbatim}
-&REAC FUEL = 'PROPANE', HEAT_OF_COMBUSTION=44715.,
-      SMIX_ID = 'PROPANE','AIR','PRODUCTS','SOOT',
-      NU=-1.,-4.8164,1,0.1836/
-\end{verbatim} \normalsize
-
-\noindent
-Note: The sign of {\ct NU} corresponds to whether that species is consumed (-) or produced (+). Figure~\ref{soot_deposition} shows a plot of the soot density on the wall in units of kg/m$^2$.  This boundary quantity is given by the input below.
-
-\footnotesize
-\begin{verbatim}
-&BNDF QUANTITY='SURFACE DEPOSITION', SPEC_ID='SOOT'/
-\end{verbatim} \normalsize
-
-\begin{figure}[ht]
-\centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/Propane_flame_deposition}
-\caption{Wall soot deposition for propane flame with deposition example.}
-\label{soot_deposition}
-\end{figure}
-
-
-
-
 \newpage
 
 \section{Finite Rate Combustion}
@@ -6493,6 +6428,68 @@ as well as the input parameter {\ct THRESHOLD\_TEMPERATURE}.  During a simulatio
 then a mixed-mode reaction will be evaluated as a mixing-controlled reaction.  If there is no heat release from other reactions and the local
 temperature exceeds the {\ct THRESHOLD\_TEMPERATURE}, then the mixed-mode reaction will be evaluated as a finite-rate reaction.
 
+\newpage
+
+\section{Aerosol Deposition}
+\label{info:deposition}
+
+By default FDS will compute all of the soot deposition phenomena discussed in the Technical Reference Guide, but they can be selectively disabled with the logical flags {\ct GRAVITATIONAL\_DEPOSITION}, {\ct THERMOPHORETIC\_DEPOSITION}, and {\ct TURBULENT\_DEPOSITION}.   The deposition model is invoked by defining a species with the parameter {\ct AEROSOL=.TRUE.} (Note; this model should be considered an experimental feature.).  The properties of the aerosol can be defined on the species input using  {\ct DENSITY\_SOLID}, {\ct CONDUCTIVITY\_SOLID}, and {\ct MEAN\_DIAMETER}.
+
+This example shows how to define a reaction that invokes an aerosol deposition model in FDS (e.g. soot deposition).    For this example propane will be the fuel with a 5 \% soot yield.  The stoichiometric equation is shown below.
+\begin{eqnarray}\label{eq:PROPANE_depo}
+1\,\underbrace{\mathrm{(C_3H_8)}}_\text{Fuel} \,+\, 4.8164 \; \underbrace{\mathrm{(O_2\,+\, 3.7619 \; N_2})}_\text{Air} \, \rightarrow \\
+\nonumber 1 \; \underbrace{\mathrm{(18.1182 \; N_2 \, + \, 2.8164 \; CO_2 \,+ \, 4\; H_2O)}}_\text{Products} \,+\,
+\underbrace{0.1836 \; \mathrm{C}}_\text{Soot}
+\end{eqnarray}
+The example will also use the lumped species formulation to minimize the number of scalar transport equations that need to be solved. Therefore, each species that does not transport by itself will have an {\ct SMIX\_COMPONENT\_ONLY = .TRUE.} designation.  Note that for soot to deposit it must be tracked separately and it must be given {\ct AEROSOL = .TRUE.}.
+
+\footnotesize
+\begin{verbatim}
+&SPEC ID = 'PROPANE' /
+&SPEC ID = 'OXYGEN',            SMIX_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'NITROGEN',          SMIX_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'WATER VAPOR',       SMIX_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'CARBON DIOXIDE',    SMIX_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'SOOT',              AEROSOL = .TRUE. /
+\end{verbatim} \normalsize
+
+\noindent
+For the oxidizer and products, which are both composed of multiple primitive species, {\ct SMIX} lines are needed to define the composition of the lumped species. As the user, you can define the {\ct SMIX} by either the {\ct MASS\_FRACTIONS} of the component gases or the {\ct VOLUME\_FRACTIONS}. For this case, volume fractions will be used. If Equation \ref{eq:PROPANE_depo} is properly balanced, you can directly use the stoichiometric coefficients of the primitive species to define the lumped species.
+
+\footnotesize
+\begin{verbatim}
+&SMIX ID = 'AIR', SPEC_ID ='NITROGEN','OXYGEN',
+      VOLUME_FRACTION = 3.7619,1., BACKGROUND = .TRUE. /
+&SMIX ID = 'PRODUCTS', SPEC_ID ='NITROGEN','CARBON DIOXIDE','WATER VAPOR',
+      VOLUME_FRACTION = 18.1182,2.8164,4. /
+\end{verbatim} \normalsize
+
+\noindent
+Note: the order of which the {\ct SPEC\_ID}s are defined must be the same order as which you defined your volume fractions or mass fractions.
+
+In this mixing-controlled example, the user is responsible for defining the fuel, heat of combustion of that fuel, species participating the reaction, and the stoichiometric coefficients that describe the reaction. The heat of combustion for PROPANE was found from the SFPE Handbook~\cite{SFPE:Tewarson}. In the lumped species approach, the stoichiometric coefficients for the {\ct SMIX} lines are the coefficients of the lumped species themselves.
+
+\footnotesize
+\begin{verbatim}
+&REAC FUEL = 'PROPANE', HEAT_OF_COMBUSTION=44715.,
+      SMIX_ID = 'PROPANE','AIR','PRODUCTS','SOOT',
+      NU=-1.,-4.8164,1,0.1836/
+\end{verbatim} \normalsize
+
+\noindent
+Note: The sign of {\ct NU} corresponds to whether that species is consumed (-) or produced (+). Figure~\ref{soot_deposition} shows boundary file output from Smokeview of soot surface deposition on the wall.  This boundary quantity is given by the input below.
+
+\footnotesize
+\begin{verbatim}
+&BNDF QUANTITY='SURFACE DEPOSITION', SPEC_ID='SOOT'/
+\end{verbatim} \normalsize
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/Propane_flame_deposition}
+\caption{Wall soot deposition for propane flame with deposition example.}
+\label{soot_deposition}
+\end{figure}
 
 
 \newpage
@@ -10817,7 +10814,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct FORCE\_VECTOR(3)}                          & Real          & Section~\ref{info:force_vector}                       &               & 0.                \\ \hline
 {\ct FREEZE\_VELOCITY}                          & Logical       & Constant velocity                                     &               & {\ct .FALSE.}     \\ \hline
 {\ct GAMMA}                                     & Real          & Section~\ref{gas_species_props}                       &               & 1.4               \\ \hline
-{\ct GRAVITATIONAL\_DEPOSITION}                 & Logical       & Section~\ref{info:surface_depo}                       &               & {\ct .TRUE.}    \\ \hline
+{\ct GRAVITATIONAL\_DEPOSITION}                 & Logical       & Section~\ref{info:deposition}                       &               & {\ct .TRUE.}    \\ \hline
 {\ct GROUND\_LEVEL}                             & Real          & Section~\ref{info:stratification}                     & m             & 0.                \\ \hline
 {\ct GVEC}                                      & Real triplet  & Section~\ref{info:GVEC}                               & m/s$^2$       & 0,0,-9.81         \\ \hline
 {\ct INITIAL\_UNMIXED\_FRACTION}                & Real           & Section~\ref{info:REAC}                        &                   & 1.0               \\ \hline
@@ -10852,11 +10849,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct STRATIFICATION}                            & Logical       & Section~\ref{info:stratification}                     &               & {\ct .TRUE.}      \\ \hline
 %{\ct TERRAIN\_CASE}                             & Logical       & See Wildland Fire User's Guide                            &               & {\ct .FALSE.}     \\ \hline
 {\ct TEXTURE\_ORIGIN(3)}                        & Char.~Triplet & Section~\ref{info:texture_map}                        & m             & (0.,0.,0.)        \\ \hline
-{\ct THERMOPHORETIC\_DEPOSITION}                & Logical       & Section~\ref{info:surface_depo}                       &               & {\ct .TRUE.}    \\ \hline
+{\ct THERMOPHORETIC\_DEPOSITION}                & Logical       & Section~\ref{info:deposition}                       &               & {\ct .TRUE.}    \\ \hline
 {\ct THICKEN\_OBSTRUCTIONS}                     & Logical       & Section~\ref{info:OBST_Basics}                        &               & {\ct .FALSE.}     \\ \hline
 {\ct TMPA}                                      & Real          & Section~\ref{info:MISC_Basics}                        & $^\circ$C     & 20.               \\ \hline
 {\ct TURBULENCE\_MODEL}                         & Character     & Section~\ref{info:LES}                                &               & {\ct 'DEARDORFF'} \\ \hline
-{\ct TURBULENT\_DEPOSITION}                     & Logical       & Section~\ref{info:surface_depo}                       &               & {\ct .TRUE.}    \\ \hline
+{\ct TURBULENT\_DEPOSITION}                     & Logical       & Section~\ref{info:deposition}                       &               & {\ct .TRUE.}    \\ \hline
 {\ct U0,V0,W0}                                  & Reals         & Section~\ref{info:MISC_Basics}                        & m/s           & 0.                \\ \hline
 %{\ct UVW\_FILE}                                 & Character     & See FDS Verification Guide                                &               &                   \\ \hline
 {\ct VISIBILITY\_FACTOR}                        & Real          & Section~\ref{info:visibility}                         &               & 3                 \\ \hline
