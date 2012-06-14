@@ -2,7 +2,7 @@
 % 6-13-2012
 % cat_propane_depo.m
 %
-% Concatenates columns from coarse and fine line files
+% Concatenates columns from Propane flame deposition FDS cases (/Verification/Species)
 
 % Condensed phase aerosol
 
