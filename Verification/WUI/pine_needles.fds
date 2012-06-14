@@ -8,7 +8,8 @@
       C = 6. 
       H = 12. 
       O = 6. 
-      Y_O2_INFTY=0.01 /
+      HUMIDITY = 0.
+      Y_O2_INFTY = 0.01 /
 
 &SPEC ID='WATER VAPOR', HUMIDITY=0. /
 
