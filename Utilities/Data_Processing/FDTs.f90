@@ -115,13 +115,17 @@ CONTAINS
 
 SUBROUTINE COMPUTE_FPA
 
+REAL :: SIGMA,Q_RAD
+
+SIGMA = 5.67e-11
+
 OPEN(11,FILE=TRIM(OUTPUT_FILE),FORM='FORMATTED',STATUS='REPLACE')
 
 T_P = (RHO_S*C_S/K_S) * (DELTA/2.)**2
 A_T = 2.*L*W + 2.*L*H + 2.*W*H
 TMP_A = TMP_A + 273.
 
-WRITE(11,'(A)') 'Time, Temp'
+WRITE(11,'(A)') 'Time, Temp, Immersed Radiative Flux (kW/m2)'
 
 DO I=0,50
 
@@ -135,7 +139,9 @@ DO I=0,50
 
    TMP_G = TMP_A*(1. + 0.63*(Q/(M_DOT*C_P*TMP_A))**0.72 * (H_K*A_T/(M_DOT*C_P))**-0.36)
 
-   WRITE(11,'(F6.1,A1,F6.1)') T,',',TMP_G-273.
+   Q_RAD = SIGMA*(TMP_G**4-TMP_A**4)
+
+   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2)') T,',',TMP_G-273.,',',Q_RAD
 
 ENDDO
 
@@ -146,7 +152,9 @@ END SUBROUTINE COMPUTE_FPA
 
 SUBROUTINE COMPUTE_DB
 
-REAL :: HRR
+REAL :: HRR,SIGMA,Q_RAD
+
+SIGMA = 5.67e-11
 
 OPEN(11,FILE=TRIM(OUTPUT_FILE),FORM='FORMATTED',STATUS='REPLACE')
 
@@ -154,7 +162,7 @@ A_T = 2.*L*W + 2.*L*H + 2.*W*H
 V = L*W*H
 TMP_A = TMP_A + 273.
 
-WRITE(11,'(A)') 'Time, Temp, Pres'
+WRITE(11,'(A)') 'Time, Temp, Pres, Immersed Radiative Flux (kW/m2)'
 
 DT = 0.05
 P  = P_0
@@ -181,8 +189,10 @@ DO
    ENDIF
    P = P + DT*( (GAMMA-1)/V*1000.*(HRR-H_K*A_T*(TMP_G-TMP_A)) - GAMMA*P*V_DOT/V )
 
+   Q_RAD = SIGMA*(TMP_G**4-TMP_A**4)
+
    IF (T>T_CLOCK) THEN
-      WRITE(11,'(F6.1,A1,F6.1,A1,F8.1)') T,',',TMP_G-273.,',',P-P_0
+      WRITE(11,'(F6.1,A1,F6.1,A1,F8.1,A1,F6.2)') T,',',TMP_G-273.,',',P-P_0,',',Q_RAD
       T_CLOCK = T_CLOCK + T_END/500.
    ENDIF
 
@@ -197,7 +207,9 @@ END SUBROUTINE COMPUTE_DB
 
 SUBROUTINE COMPUTE_MQH
 
-REAL :: RHO_G,Z
+REAL :: RHO_G,Z,SIGMA,Q_RAD
+
+SIGMA = 5.67e-11
 
 OPEN(11,FILE=TRIM(OUTPUT_FILE),FORM='FORMATTED',STATUS='REPLACE')
 
@@ -207,9 +219,9 @@ A_T = 2.*L*W + 2.*L*H + 2.*W*H - A_V
 TMP_A = TMP_A + 273.
 
 IF (PROFILE) THEN
-   WRITE(11,'(A)') 'Height, Temp'
+   WRITE(11,'(A)') 'Height, Temp, Immersed Radiative Flux (kW/m2)'
 ELSE
-   WRITE(11,'(A)') 'Time, Temp, Height'
+   WRITE(11,'(A)') 'Time, Temp, Height, Immersed Radiative Flux (kW/m2)'
 ENDIF
 
 DO I=0,50
@@ -227,15 +239,17 @@ DO I=0,50
    RHO_G = 353./TMP_G
    Z = MAX( H_V , H*(1. + 2.*(0.05/RHO_G)*Q**0.333*T*H**0.667/(3.*L*W) )**-1.5 )
 
-   IF (.NOT.PROFILE) WRITE(11,'(F6.1,A1,F6.1,A1,F6.2)') T,',',TMP_G-273.,',',Z
+   Q_RAD = SIGMA*(TMP_G**4-TMP_A**4)
+
+   IF (.NOT.PROFILE) WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2)') T,',',TMP_G-273.,',',Z,',',Q_RAD
 
 ENDDO
 
 IF (PROFILE) THEN
-   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2)') 0.,',',TMP_A-273.
-   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2)') Z ,',',TMP_A-273.
-   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2)') Z ,',',TMP_G-273.
-   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2)') H ,',',TMP_G-273.
+   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2)') 0.,',',TMP_A-273.,',',Q_RAD
+   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2)') Z ,',',TMP_A-273.,',',Q_RAD
+   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2)') Z ,',',TMP_G-273.,',',Q_RAD
+   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2,A1,F6.2)') H ,',',TMP_G-273.,',',Q_RAD
 ENDIF
 
 CLOSE(11)
@@ -245,7 +259,9 @@ END SUBROUTINE COMPUTE_MQH
 
 SUBROUTINE COMPUTE_BEYLER
 
-REAL :: K1,K2,M
+REAL :: K1,K2,M,SIGMA,Q_RAD
+
+SIGMA = 5.67e-11
 
 OPEN(11,FILE=TRIM(OUTPUT_FILE),FORM='FORMATTED',STATUS='REPLACE')
 
@@ -253,7 +269,7 @@ A_T = 2.*L*W + 2.*L*H + 2.*W*H - A_V
 TMP_A = TMP_A + 273.
 M = L*W*H*RHO_A
 
-WRITE(11,'(A)') 'Time, Temp'
+WRITE(11,'(A)') 'Time, Temp, Immersed Radiative Flux (kW/m2)'
 
 DO I=0,50
 
@@ -264,7 +280,9 @@ DO I=0,50
 
    TMP_G = TMP_A + (2.*K2/K1**2)*(K1*SQRT(T) - 1. + EXP(-K1*SQRT(T)))
 
-   WRITE(11,'(F6.1,A1,F6.1)') T,',',TMP_G-273.
+   Q_RAD = SIGMA*(TMP_G**4-TMP_A**4)
+
+   WRITE(11,'(F6.1,A1,F6.1,A1,F6.2)') T,',',TMP_G-273.,',',Q_RAD
 
 ENDDO
 
