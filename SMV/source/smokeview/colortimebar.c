@@ -52,7 +52,7 @@ void UpdateTimeLabels(void){
 
     hrr = hrrinfo->hrrval[hrrinfo->itime];
     if(hrr<1.0){
-      sprintf(hrrinfo->hrrlabel,"HRR: %4.1f",hrr*1000.0);
+      sprintf(hrrinfo->hrrlabel,"HRR: %4.1f W",hrr*1000.0);
     }
     else if(hrr>1000.0){
       sprintf(hrrinfo->hrrlabel,"HRR: %4.1f MW",hrr/1000.0);
