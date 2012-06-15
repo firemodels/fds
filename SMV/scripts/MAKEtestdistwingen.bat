@@ -34,9 +34,9 @@ IF EXIST %smvdir% rmdir /S /Q %smvdir%
 mkdir %smvdir%
 
 echo copying smokeview_win_test_%platform%.exe
-copy ..\Build\intel_win_test_%platform%\smokeview_win_test_%platform%.exe %smvdir%\smokeview.exe
+Rem copy ..\Build\intel_win_test_%platform%\smokeview_win_test_%platform%.exe %smvdir%\smokeview.exe
 Rem Use following line (and delete above line) after FDS6 is released
-Rem copy ..\Build\intel_win_test_%platform%\smokeview_win_test_%platform%.exe %smvdir%\smokeview_win_%platform%.exe
+copy ..\Build\intel_win_test_%platform%\smokeview_win_test_%platform%.exe %smvdir%\smokeview_win_%platform%.exe
 
 echo copying .po files
 copy *.po %smvdir%\.
