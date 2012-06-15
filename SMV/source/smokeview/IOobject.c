@@ -22,6 +22,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_ROTATEZ    103
 #define SV_SCALEXYZ   104
 #define SV_SCALE      105
+#define SV_SCALEAUTO  106
 #define SV_OFFSETX 108
 #define SV_OFFSETY 109
 #define SV_OFFSETZ 110
@@ -57,6 +58,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_ROTATEY_NUMARGS    1
 #define SV_ROTATEZ_NUMARGS    1
 #define SV_SCALEXYZ_NUMARGS   3
+#define SV_SCALEAUTO_NUMARGS  1
 #define SV_SCALE_NUMARGS      1
 #define SV_OFFSETX_NUMARGS 1
 #define SV_OFFSETY_NUMARGS 1
@@ -93,6 +95,7 @@ char IOobject_revision[]="$Revision$";
 #define SV_ROTATEY_NUMOUTARGS    0
 #define SV_ROTATEZ_NUMOUTARGS    0
 #define SV_SCALEXYZ_NUMOUTARGS   0
+#define SV_SCALEAUTO_NUMOUTARGS  0
 #define SV_SCALE_NUMOUTARGS      0
 #define SV_OFFSETX_NUMOUTARGS 0
 #define SV_OFFSETY_NUMOUTARGS 0
@@ -1332,6 +1335,9 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
       break;
     case SV_SCALEXYZ:
       glScalef(arg[0],arg[1],arg[2]);
+      break;
+    case SV_SCALEAUTO:
+      glScalef(arg[0]*xyzmaxdiff,arg[0]*xyzmaxdiff,arg[0]*xyzmaxdiff);
       break;
     case SV_SCALE:
       glScalef(arg[0],arg[1],arg[2]);
@@ -3989,7 +3995,12 @@ int get_token_id(char *token, int *opptr, int *num_opptr, int *num_outopptr, int
     num_op=SV_SCALEXYZ_NUMARGS;
     num_outop=SV_SCALEXYZ_NUMOUTARGS;
   }
-  else if(STRCMP(token,"scale")==0&&STRCMP(token,"scalexyz")!=0){
+  else if(STRCMP(token,"scaleauto")==0){
+    op=SV_SCALEAUTO;
+    num_op=SV_SCALEAUTO_NUMARGS;
+    num_outop=SV_SCALEAUTO_NUMOUTARGS;
+  }
+  else if(STRCMP(token,"scale")==0&&STRCMP(token,"scalexyz")!=0&&STRCMP(token,"scaleauto")!=0){
     op=SV_SCALE;
     num_op=SV_SCALE_NUMARGS;
     num_outop=SV_SCALE_NUMOUTARGS;
