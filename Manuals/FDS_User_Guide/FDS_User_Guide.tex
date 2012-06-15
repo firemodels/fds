@@ -4391,7 +4391,7 @@ FDS does {\bf not} adjust the burning rate to account for this as it does with v
 like {\ct HRRPUA}.
 \item A parameter called {\ct BULK\_DENSITY} (kg/m$^3$) can be applied to the {\ct OBST} rather than the {\ct SURF} line. This parameter is used
 to determine the combustible mass of the solid object. The calculation uses the user-specified object dimensions, not those of the mesh-adjusted
-object. This parameter over-rides all other parameters from which a combustible mass would be calculated.
+object. This parameter over-rides all other parameters from which a combustible mass would be calculated. Note that without a {\ct BULK\_DENSITY} specified, the total amount of mass burned will depend upon the grid resolution. The use of the {\ct BULK\_DENSITY} parameter ensures a specific fuel mass per unit volume that is independent of the grid resolution.
 \item The mass of the object is based on the densities of the all material components ({\ct MATL}), but it is only consumed by mass fluxes of
 the {\bf known} species. If the sum of the gaseous yields is less than one, it will take longer to consume the mass.
 \end{itemize}
