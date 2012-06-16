@@ -98,8 +98,8 @@ GLUI_Panel *panel_colormap2=NULL;
 GLUI_Panel *panel_colormap=NULL;
 GLUI_Panel *panel_hrrcut=NULL;
 GLUI_Panel *panel_absorption=NULL,*panel_smokesensor=NULL;
-GLUI_Panel *panel_slices=NULL;
-GLUI_Panel *panel_volume=NULL;
+GLUI_Rollout *panel_slices=NULL;
+GLUI_Rollout *panel_volume=NULL;
 GLUI_Panel *panel_testsmoke=NULL;
 GLUI_Spinner *SPINNER_extinct=NULL;
 GLUI_Spinner *SPINNER_smokedens=NULL;
@@ -209,8 +209,8 @@ extern "C" void glui_3dsmoke_setup(int main_window){
 #endif
   if(nsmoke3dinfo>0&&nvolrenderinfo>0){
     rendergroup = glui_3dsmoke->add_radiogroup_to_panel(panel_overall,&smoke_render_option,SMOKE_OPTIONS,SMOKE_3D_CB);
-    glui_3dsmoke->add_radiobutton_to_group(rendergroup,_("Slice Render Settings"));
-    glui_3dsmoke->add_radiobutton_to_group(rendergroup,_("Volume Render Settings"));
+    glui_3dsmoke->add_radiobutton_to_group(rendergroup,_("Slice render settings"));
+    glui_3dsmoke->add_radiobutton_to_group(rendergroup,_("Volume render settings"));
   }
   else{
     smoke_render_option=0;
@@ -261,6 +261,9 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   SPINNER_smoke3d_smoke_shade=glui_3dsmoke->add_spinner_to_panel(panel_colormap,_("smoke albedo"),GLUI_SPINNER_FLOAT,&smoke_shade,SMOKE_SHADE,SMOKE_3D_CB);
   SPINNER_smoke3d_smoke_shade->set_float_limits(0.0,1.0);
 
+  SPINNER_smoke3d_fire_halfdepth=glui_3dsmoke->add_spinner_to_panel(panel_colormap,_("fire half depth (m)"),GLUI_SPINNER_FLOAT,&fire_halfdepth,FIRE_HALFDEPTH,SMOKE_3D_CB);
+  SPINNER_smoke3d_fire_halfdepth->set_float_limits(0.0,10.0);
+
   {
     mesh *meshi;
     
@@ -295,7 +298,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   glui_3dsmoke->add_column_to_panel(panel_overall,false);
 
   if(nvolrenderinfo>0){
-    panel_volume = glui_3dsmoke->add_panel_to_panel(panel_overall,_("Volume Render Settings"));
+    panel_volume = glui_3dsmoke->add_rollout_to_panel(panel_overall,_("Volume Render Settings"),FALSE);
     if(have_volcompressed==1){
       loadvolgroup = glui_3dsmoke->add_radiogroup_to_panel(panel_volume,&glui_load_volcompressed,LOAD_COMPRESSED_DATA,SMOKE_3D_CB);
         glui_3dsmoke->add_radiobutton_to_group(loadvolgroup,_("Load full data"));
@@ -338,7 +341,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   }
 
   if(nsmoke3dinfo>0){
-    panel_slices = glui_3dsmoke->add_panel_to_panel(panel_overall,_("Slices"));
+    panel_slices = glui_3dsmoke->add_rollout_to_panel(panel_overall,_("Slice render settings"),TRUE);
     panel_slices->set_alignment(GLUI_ALIGN_LEFT);
  
 #ifdef pp_GPU
@@ -564,6 +567,16 @@ extern "C" void SMOKE_3D_CB(int var){
     Idle_CB();
     break;
   case FIRE_HALFDEPTH:
+    for(i=0;i<nmeshes;i++){
+      mesh *meshi;
+
+      meshi = meshinfo + i;
+      meshi->update_firehalfdepth=1;
+    }
+    glutPostRedisplay();
+    force_redisplay=1;
+    Idle_CB();
+   break;  
   case FIRE_CUTOFF:
   case FIRE_ALPHA:
     glutPostRedisplay();

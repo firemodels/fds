@@ -7463,6 +7463,7 @@ void initobst(blockagedata *bc, surfdata *surf,int index,int meshindex){
 
 void initmesh(mesh *meshi){
 
+  meshi->update_firehalfdepth=0;
   meshi->iplotx_all=NULL;
   meshi->iploty_all=NULL;
   meshi->iplotz_all=NULL;

@@ -246,7 +246,8 @@ else{\
     fvalue[1]=firecolor[n12];\
     fvalue[2]=firecolor[n22];\
     fvalue[3]=firecolor[n21];\
-    if(fvalue[0]==0.0&&fvalue[1]==0.0&&fvalue[2]==0.0&&fvalue[3]==0.0)continue;\
+    if(value[0]==0&&value[1]==0&&value[2]==0&&value[3]==0&&\
+       fvalue[0]==0&&fvalue[1]==0&&fvalue[2]==0&&fvalue[3]==0)continue;\
   }\
   else{\
     fvalue[0]=0.0;\
@@ -1237,7 +1238,8 @@ void drawsmoke3d(smoke3ddata *smoke3di){
 
   have_light = smoke3di->have_light;
   meshi = meshinfo + smoke3di->blocknumber;
-  if(meshi->merge_alpha==NULL){
+  if(meshi->merge_alpha==NULL||meshi->update_firehalfdepth==1){
+    meshi->update_firehalfdepth=0;
     mergesmoke3dcolors(smoke3di);
   }
   mergealphaptr = meshi->merge_alpha;

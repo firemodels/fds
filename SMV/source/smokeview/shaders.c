@@ -536,7 +536,7 @@ int setSmokeShaders() {
     "  if(hrrlocal>hrrpuv_cutoff){"
     "    colorindex=0.51+(hrrlocal-hrrpuv_cutoff)/(hrrpuv_max_smv-hrrpuv_cutoff);"
     "    colorindex=clamp(colorindex,0.5,1.0);"
-    "    alpha=fire_alpha;"
+    "    alpha=fire_alpha/255.0;"
     "  }"
     "  else{"
     "    colorindex=hrrlocal/hrrpuv_cutoff;"
