@@ -91,16 +91,16 @@ OBJECTDEF  // draw a plane intersecting through FDS meshes
 OBJECTDEF
  sensor
  "GREEN" setcolor
-0.05 SCALEAUTO 1.0 drawsphere
+0.01 SCALEAUTO 1.0 drawsphere
  NEWFRAME
  "RED" setcolor
-0.05 SCALEAUTO 1.0 drawsphere
+0.01 SCALEAUTO 1.0 drawsphere
  NEWFRAME
  "BLUE" setcolor
-0.05 SCALEAUTO 1.0 drawsphere
+0.01 SCALEAUTO 1.0 drawsphere
  NEWFRAME
  "WHITE" setcolor
-0.05 SCALEAUTO 1.0 drawsphere
+0.01 SCALEAUTO 1.0 drawsphere
 
 OBJECTDEF
  heat_detector         // label, name of object
