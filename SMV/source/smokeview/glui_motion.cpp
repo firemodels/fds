@@ -47,10 +47,8 @@ extern "C" char glui_motion_revision[]="$Revision$";
 #define WINDOWSIZE_LIST 17
 #define SNAPVIEW 21
 #define SET_VIEW_XYZ 22
-#ifdef pp_GSLICE
 #define GSLICE_TRANSLATE 24
 #define GSLICE_NORMAL 27
-#endif
 
 #define RENDER_TYPE 0
 #define RENDER_SIZE_LIST 1
@@ -62,9 +60,7 @@ extern "C" char glui_motion_revision[]="$Revision$";
 void EYEVIEW_CB(int var);
 void BUTTON_hide2_CB(int var);
 void BUTTON_Reset_CB(int var);
-#ifdef pp_GSLICE
 void GSLICE_CB(int var);
-#endif
 
 GLUI_Listbox *meshlist1=NULL;
 GLUI_Listbox *render_size_list=NULL;
@@ -74,7 +70,6 @@ GLUI_Button *render_stop=NULL ;
 
 GLUI *glui_motion=NULL;
 GLUI_Panel *panel_rotatebuttons=NULL, *panel_translate=NULL,*panel_close=NULL;
-#ifdef pp_GSLICE
 GLUI_Panel *panel_gslice=NULL;
 GLUI_Panel *panel_gslice_center=NULL;
 GLUI_Panel *panel_gslice_normal=NULL;
@@ -91,7 +86,7 @@ GLUI_Spinner *SPINNER_gslice_center_z=NULL;
 GLUI_Spinner *SPINNER_gslice_normal_az=NULL;
 GLUI_Spinner *SPINNER_gslice_normal_elev=NULL;
 GLUI_Translation *gslice_htranslate=NULL, *gslice_vtranslate=NULL;
-#endif
+
 GLUI_Panel *panel_rotate=NULL;
 GLUI_Panel *panel_speed=NULL;
 GLUI_Panel *panel_height=NULL;
@@ -282,11 +277,7 @@ extern "C" void glui_motion_setup(int main_window){
   glui_motion = GLUI_Master.create_glui(_("Motion/View/Render"),0,0,0);
   if(showmotion_dialog==0)glui_motion->hide();
 
-#ifdef pp_GSLICE
   panel_motion = glui_motion->add_rollout(_("Scene motion"));
-#else
-  panel_motion = glui_motion->add_rollout(_("Motion"));
-#endif
 
   panel_translate2 = glui_motion->add_panel_to_panel(panel_motion,"",GLUI_PANEL_NONE);
   d_eye_xyz[0]=0.0;
@@ -351,7 +342,6 @@ extern "C" void glui_motion_setup(int main_window){
   SPINNER_set_view_z=glui_motion->add_spinner_to_panel(panel_specify,"z:",GLUI_SPINNER_FLOAT,set_view_xyz+2,SET_VIEW_XYZ,TRANSLATE_CB);
 #endif
 
-#ifdef pp_GSLICE
   panel_gslice = glui_motion->add_rollout(_("General slice motion"),false);
   if(gslice_xyz[0]<-1000000.0&&gslice_xyz[1]<-1000000.0&&gslice_xyz[2]<-1000000.0){
     gslice_xyz[0]=(xbar0+DENORMALIZE_X(xbar))/2.0;
@@ -379,8 +369,6 @@ extern "C" void glui_motion_setup(int main_window){
   glui_motion->add_checkbox_to_panel(panel_gslice_show,"triangulation",&show_gslice_triangulation);
   glui_motion->add_checkbox_to_panel(panel_gslice_show,"plane normal",&show_gslice_normal);
   
-#endif
-
   panel_projection = glui_motion->add_rollout(_("Window properties"),false);
   projection_radio=glui_motion->add_radiogroup_to_panel(panel_projection,&projection_type,PROJECTION,TRANSLATE_CB);
   RADIO_button_1a=glui_motion->add_radiobutton_to_group(projection_radio,_("Perspective"));
@@ -738,7 +726,6 @@ extern "C" void showhide_translate(int var){
 
 }
 
-#ifdef pp_GSLICE
 /* ------------------ GSLICE_CB ------------------------ */
 
 void GSLICE_CB(int var){
@@ -775,7 +762,6 @@ void GSLICE_CB(int var){
       break;
   }
 }
-#endif
 
 /* ------------------ TRANSLATE_CB ------------------------ */
 

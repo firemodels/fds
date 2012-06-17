@@ -12,9 +12,7 @@ char shaders_revision[]="$Revision$";
 #include <math.h>
 #include <stdio.h>
 
-#ifdef pp_GLEW
 #include "glew.h"
-#endif
 
 #include "string_util.h"
 #include "smokeviewvars.h"

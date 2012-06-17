@@ -670,9 +670,6 @@ void usage(char **argv){
 #ifdef pp_MESSAGE
     strcat(label,", pp_MESSAGE");
 #endif
-#ifdef pp_MOUSEDOWN
-    strcat(label,", pp_MOUSEDOWN");
-#endif
 #ifdef pp_OSX64
     strcat(label,", pp_OSX64");
 #endif

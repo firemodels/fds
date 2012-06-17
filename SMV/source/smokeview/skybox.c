@@ -6,9 +6,7 @@
 #include <stdio.h>  
 #include <stdlib.h>
 #include <string.h>
-#ifdef pp_GLEW
 #include "glew.h"
-#endif
 #ifdef pp_OSX
 #include <GLUT/glut.h>
 #else

@@ -6,9 +6,7 @@
 char IOsmoke_revision[]="$Revision$";
 
 #include "options.h"
-#ifdef pp_GLEW
 #include "glew.h"
-#endif
 #include <stdio.h>  
 #include <stdlib.h>
 #include <string.h>

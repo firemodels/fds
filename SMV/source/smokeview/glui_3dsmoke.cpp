@@ -310,9 +310,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
       SMOKE_3D_CB(LOAD_COMPRESSED_DATA);
     }
     glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Display data as b/w"),&volbw);
-#ifdef pp_MOUSEDOWN
     glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Show data while moving scene"),&show_volsmoke_moving);
-#endif
     glui_3dsmoke->add_checkbox_to_panel(panel_volume,_("Load data only at render times"),&load_at_rendertimes);
 
     panel_colormap2 = glui_3dsmoke->add_panel_to_panel(panel_volume,"Temp->Colormap");

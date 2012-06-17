@@ -621,9 +621,7 @@ void mouse_CB(int button, int state, int x, int y){
   glutPostRedisplay();
 
   if(state==GLUT_UP){
-#ifdef pp_MOUSEDOWN
     mouse_down=0;
-#endif
     show_gslice_normal_keyboard=0;
     eye_xyz0[0]=eye_xyz[0];
     eye_xyz0[1]=eye_xyz[1];
@@ -637,9 +635,7 @@ void mouse_CB(int button, int state, int x, int y){
     return;
   }
 
-#ifdef pp_MOUSEDOWN
   mouse_down=1;
-#endif
   
   // check for double click for translating/rotating 3D slice plane
 

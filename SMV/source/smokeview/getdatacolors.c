@@ -6,9 +6,7 @@
 char getdatacolors_revision[]="$Revision$";
 
 #include "options.h"
-#ifdef pp_GLEW
 #include "glew.h"
-#endif
 #include <stdio.h>
 #include <string.h>
 #include <math.h>

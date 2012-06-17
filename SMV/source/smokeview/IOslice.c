@@ -6,9 +6,7 @@
 char IOslice_revision[]="$Revision$";
 
 #include "options.h"
-#ifdef pp_GLEW
 #include "glew.h"
-#endif
 #include <stdio.h>
 #ifdef WIN32
 #include <share.h>
@@ -3085,8 +3083,6 @@ void drawvslice_frame(void){
   }
 }
 
-#ifdef pp_GSLICE
-
 /* ------------------ plane_dist ------------------------ */
 
 float plane_dist(float *norm, float *xyz0, float *xyz){
@@ -3382,7 +3378,6 @@ void drawgslice_dataGPU(slicedata *slicei){
   if(cullfaces==1)glEnable(GL_CULL_FACE);
   glPopMatrix();
 }
-#endif
 
 /* ------------------ drawgslice_data ------------------------ */
 

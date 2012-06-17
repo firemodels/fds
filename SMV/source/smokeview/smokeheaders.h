@@ -745,9 +745,7 @@ EXTERNCPP void getzonebounds(const float *pdata, int ndata, int setpmin, float *
 EXTERNCPP void updatechar(void);
 EXTERNCPP void updatetracers(void);
 EXTERNCPP void update_fedinfo(void);
-#ifdef pp_GSLICE
 void update_gslice_planes(void);
-#endif
 
 EXTERNCPP void getPart5Colors(partdata *parti, int nlevels);
 EXTERNCPP void getPartColors(const float *t, int skip, int nt, unsigned char *it,

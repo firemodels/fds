@@ -10,9 +10,7 @@ char IOzone_revision[]="$Revision$";
 #include <stdlib.h> 
 #include <string.h>
 #include <math.h>
-#ifdef pp_GLEW
 #include "glew.h"
-#endif
 
 #include "string_util.h"
 #include "update.h"

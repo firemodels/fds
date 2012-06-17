@@ -66,10 +66,8 @@ SVEXTERN char startup_lang_code[3];
   SVEXTERN float SVDECL(thisMOTIONtime,0.0), SVDECL(lastMOTIONtime,0.0);
   SVEXTERN int SVDECL(GPUnframes,0),SVDECL(MOTIONnframes,0);
 #endif
-#ifdef pp_MOUSEDOWN
 SVEXTERN int SVDECL(mouse_down,0);
 SVEXTERN int SVDECL(show_volsmoke_moving,0);
-#endif
 #ifdef pp_FREEZE_VOLSMOKE
 SVEXTERN int SVDECL(freeze_volsmoke,0);
 #endif
@@ -696,7 +694,6 @@ SVEXTERN int list_memcheck_index;
 SVEXTERN int SVDECL(visUsagememory,0);
 #endif
 SVEXTERN float vecyz[4];
-#ifdef pp_GSLICE
 SVEXTERN float gslice_norm[3];
 #ifdef INMAIN
 SVEXTERN float gslice_xyz[3]={-1000001.0,-1000001.0,-1000001.0};
@@ -712,7 +709,6 @@ SVEXTERN float gslice_xyz0[3],gslice_normal_azelev0[2];
 SVEXTERN int SVDECL(vis_gslice_data,0),SVDECL(SHOW_gslice_data,0),SVDECL(SHOW_gslice_data_old,0),SVDECL(show_gslice_triangles,0);
 SVEXTERN int SVDECL(show_gslice_triangulation,0);
 SVEXTERN int SVDECL(show_gslice_normal,0),SVDECL(show_gslice_normal_keyboard,0);
-#endif
 
 
 SVEXTERN float ventcolor_orig[4];

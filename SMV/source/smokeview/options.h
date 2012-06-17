@@ -26,11 +26,8 @@
 //#define pp_HIDEMULTI
 //#define pp_GEOMPRINT
 
-#define pp_GSLICE
 #define pp_TERRAIN2GEOM
-#define pp_MOUSEDOWN
 #define pp_GPU
-#define pp_GLEW
 
 #ifdef pp_GPU
 #define pp_CULL

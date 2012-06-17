@@ -6,9 +6,7 @@
 char IOvolsmoke_revision[]="$Revision$";
 
 #include "options.h"
-#ifdef pp_GLEW
 #include "glew.h"
-#endif
 #include <stdio.h>  
 #include <stdlib.h>
 #include <math.h>
@@ -994,11 +992,9 @@ void drawsmoke3dGPUVOL(void){
     GPUnframes=0;
   }
 #endif
-#ifdef pp_MOUSEDOWN  
   if(mouse_down==1&&show_volsmoke_moving==0){
     return;
   }
-#endif
 #ifdef pp_GPUDEPTH
   getDepthTexture();
   glUniform1i(GPUvol_depthtexture,4);
