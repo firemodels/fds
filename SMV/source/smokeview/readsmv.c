@@ -7898,8 +7898,8 @@ int readini2(char *inifile, int localfile){
     if(localfile==1){
       if(match(buffer,"GSLICEPARMS")==1){
         fgets(buffer,255,stream);
-        sscanf(buffer,"%i %i %i %i",&show_gslice_data, &show_gslice_triangles, &show_gslice_triangulation, &show_gslice_normal);
-        if(show_gslice_data!=0)show_gslice_data=1;
+        sscanf(buffer,"%i %i %i %i",&vis_gslice_data, &show_gslice_triangles, &show_gslice_triangulation, &show_gslice_normal);
+        if(vis_gslice_data!=0)vis_gslice_data=1;
         if(show_gslice_triangles!=0)show_gslice_triangles=1;
         if(show_gslice_triangulation!=0)show_gslice_triangulation=1;
         if(show_gslice_normal!=0)show_gslice_normal=1;
@@ -10656,7 +10656,7 @@ void writeini(int flag){
     fprintf(fileout," %i %i %i\n",visx_all, visy_all, visz_all);
     fprintf(fileout," %i %i %i\n",iplotx_all, iploty_all, iplotz_all);
     fprintf(fileout,"GSLICEPARMS\n");
-    fprintf(fileout," %i %i %i %i\n",show_gslice_data, show_gslice_triangles, show_gslice_triangulation, show_gslice_normal);
+    fprintf(fileout," %i %i %i %i\n",vis_gslice_data, show_gslice_triangles, show_gslice_triangulation, show_gslice_normal);
     fprintf(fileout," %f %f %f\n",gslice_xyz[0],gslice_xyz[1],gslice_xyz[2]);
     fprintf(fileout," %f %f\n",gslice_normal_azelev[0],gslice_normal_azelev[1]);
   }

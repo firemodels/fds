@@ -1210,7 +1210,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       mesh *meshj;
 
       meshj = meshinfo + sd->blocknumber;
-      show_gslice_data=1;
+      vis_gslice_data=1;
 #ifdef pp_GPU
       if(gpuactive==1){
         init_slice3d_texture(meshj);
@@ -2965,7 +2965,7 @@ void drawslice_frame(){
             SNIFF_ERRORS("after drawvolslice");
           }
 #ifdef pp_GPU
-          if(sd->volslice==1&&(show_gslice_data==1)){
+          if(sd->volslice==1&&(vis_gslice_data==1)){
             if(usegpu==1){
               Load3DSliceShaders();
               SNIFF_ERRORS("after Load3DSliceShaders");
@@ -2980,7 +2980,7 @@ void drawslice_frame(){
             }
           }
 #else
-          if(sd->volslice==1&&show_gslice_data==1){
+          if(sd->volslice==1&&vis_gslice_data==1){
             drawgslice_data(sd);
           }
 #endif

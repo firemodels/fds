@@ -289,7 +289,8 @@ SVEXTERN char SVDECL(*LESsystem,NULL),SVDECL(*LESendian,NULL);
 
 SVEXTERN int show3dsmoke;
 SVEXTERN float frustum[6][4];
-SVEXTERN int showtime, showtime2, showplot3d, showpatch, showslice, showvslice, showsmoke, showzone, showiso, showevac, showvolrender;
+SVEXTERN int showtime, showtime2, showplot3d, showpatch, showslice, showvslice, showsmoke, showzone, showiso, showevac;
+SVEXTERN int SVDECL(showvolrender,0);
 SVEXTERN int vis_slice_contours;
 SVEXTERN int update_slicecontours;
 SVEXTERN int showevac_colorbar;
@@ -708,7 +709,7 @@ SVEXTERN float gslice_normal_azelev[3];
 #endif
 
 SVEXTERN float gslice_xyz0[3],gslice_normal_azelev0[2];
-SVEXTERN int SVDECL(show_gslice_data,0),SVDECL(SHOW_gslice_data,0),SVDECL(SHOW_gslice_data_old,0),SVDECL(show_gslice_triangles,0);
+SVEXTERN int SVDECL(vis_gslice_data,0),SVDECL(SHOW_gslice_data,0),SVDECL(SHOW_gslice_data_old,0),SVDECL(show_gslice_triangles,0);
 SVEXTERN int SVDECL(show_gslice_triangulation,0);
 SVEXTERN int SVDECL(show_gslice_normal,0),SVDECL(show_gslice_normal_keyboard,0);
 #endif

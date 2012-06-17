@@ -156,7 +156,7 @@ void update_gslice_parms(void){
   SPINNER_gslice_center_z->set_float_val(gslice_xyz[2]);
   SPINNER_gslice_normal_az->set_float_val(gslice_normal_azelev[0]);
   SPINNER_gslice_normal_elev->set_float_val(gslice_normal_azelev[1]);
-  CHECKBOX_gslice_data->set_int_val(show_gslice_data);
+  CHECKBOX_gslice_data->set_int_val(vis_gslice_data);
 }
 
 /* ------------------ update_glui_set_view_xyz ------------------------ */
@@ -374,7 +374,7 @@ extern "C" void glui_motion_setup(int main_window){
   GSLICE_CB(GSLICE_NORMAL);
 
   panel_gslice_show = glui_motion->add_panel_to_panel(panel_gslice,_("show"),true);
-  CHECKBOX_gslice_data=glui_motion->add_checkbox_to_panel(panel_gslice_show,"data",&show_gslice_data);
+  CHECKBOX_gslice_data=glui_motion->add_checkbox_to_panel(panel_gslice_show,"data",&vis_gslice_data);
   glui_motion->add_checkbox_to_panel(panel_gslice_show,"triangle outline",&show_gslice_triangles);
   glui_motion->add_checkbox_to_panel(panel_gslice_show,"triangulation",&show_gslice_triangulation);
   glui_motion->add_checkbox_to_panel(panel_gslice_show,"plane normal",&show_gslice_normal);

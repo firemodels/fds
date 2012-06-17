@@ -643,7 +643,7 @@ void mouse_CB(int button, int state, int x, int y){
   
   // check for double click for translating/rotating 3D slice plane
 
-  if(show_gslice_data==1||show_gslice_triangles==1||show_gslice_triangulation==1){
+  if(vis_gslice_data==1||show_gslice_triangles==1||show_gslice_triangulation==1){
     this_mouse_time=glutGet(GLUT_ELAPSED_TIME)/1000.0;
     if(this_mouse_time-last_mouse_time<0.5){
       gslice_xyz0[0]=gslice_xyz[0];
@@ -1629,7 +1629,7 @@ void keyboard(unsigned char key, int flag){
             handle_move_keys(GLUT_KEY_UP);
           }
           else if(SHOW_gslice_data==1){
-            show_gslice_data = 1 - show_gslice_data;
+            vis_gslice_data = 1 - vis_gslice_data;
             update_gslice_parms();
           }
           break;
@@ -1705,7 +1705,7 @@ void keyboard(unsigned char key, int flag){
       visx_all=0;
       visy_all=0;
       visz_all=0;
-      show_gslice_data=0;
+      vis_gslice_data=0;
       show_gslice_triangles=0;
       show_gslice_triangulation=0;
       show_gslice_normal=0;

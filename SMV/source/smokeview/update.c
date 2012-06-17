@@ -133,7 +133,6 @@ void update_framenumber(int changetime){
         sd = sliceinfo+i;
         if(sd->timeslist==NULL)continue;
         sd->itime=sd->timeslist[itimes];
-#ifndef _DEBUG
         //xxx hack
         // do not display last frame of a 3D slice file
         // prevents a smokeview crash
@@ -141,7 +140,6 @@ void update_framenumber(int changetime){
           if(sd->itime==sd->ntimes-1)sd->itime--;
           if(sd->itime<0)sd->itime=0;
         }
-#endif
       }
     }
     if(show3dsmoke==1){
@@ -343,7 +341,7 @@ void updateShow(void){
       i=slice_loaded_list[ii];
       sd = sliceinfo+i;
       if(sd->display==0||sd->type!=islicetype)continue;
-      if(sd->volslice==1&&sd->slicetype==SLICE_NODE)SHOW_gslice_data=1;
+      if(sd->volslice==1&&sd->slicetype==SLICE_NODE&&vis_gslice_data==1)SHOW_gslice_data=1;
       if(sd->ntimes>0){
         sliceflag=1;
         break;

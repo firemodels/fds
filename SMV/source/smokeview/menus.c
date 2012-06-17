@@ -416,13 +416,21 @@ void LightingMenu(int value){
 void SmokeColorBarMenu(int value){
   if(value==-999)return;
   updatemenu=1;
-  glutPostRedisplay();
 
   if(value<0)value=0;
   if(value>ncolorbars-1)value=ncolorbars-1;
   fire_colorbar_index=value;
   fire_colorbar = colorbarinfo + value;
   updatecolors(-1);
+  if(FlowDir>0){
+    keyboard('-',FROM_SMOKEVIEW);
+    keyboard(' ',FROM_SMOKEVIEW);
+  }
+  else{
+    keyboard(' ',FROM_SMOKEVIEW);
+    keyboard('-',FROM_SMOKEVIEW);
+  }
+  glutPostRedisplay();
 }
 
 /* ------------------ ColorBarMenu ------------------------ */

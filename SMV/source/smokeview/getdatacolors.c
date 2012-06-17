@@ -1290,38 +1290,44 @@ void initcadcolors(void){
   }
 }
 
-/* ------------------ update_texturebar ------------------------ */
+/* ------------------ Update_Texturebar ------------------------ */
 
-void update_texturebar(void){
+void Update_Texturebar(void){
   glBindTexture(GL_TEXTURE_1D,texture_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_full);
-  SNIFF_ERRORS("update_texturebar - glTexImage1D A ");
+  SNIFF_ERRORS("Update_Texturebar - glTexImage1D (rgb_full) ");
 
   glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_slice);
-  SNIFF_ERRORS("update_texturebar - glTexImage1D B ");
+  SNIFF_ERRORS("Update_Texturebar - glTexImage1D (rgb_slice) ");
 
   glBindTexture(GL_TEXTURE_1D,texture_patch_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_patch);
-  SNIFF_ERRORS("update_texturebar - glTexImage1D C ");
+  SNIFF_ERRORS("Update_Texturebar - glTexImage1D (rgb_patch) ");
 
   glBindTexture(GL_TEXTURE_1D,texture_plot3d_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_plot3d);
-  SNIFF_ERRORS("update_texturebar - glTexImage1D D ");
+  SNIFF_ERRORS("Update_Texturebar - glTexImage1D (rgb_plot3d) ");
 
   glBindTexture(GL_TEXTURE_1D,texture_iso_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_iso);
-  SNIFF_ERRORS("update_texturebar - glTexImage1D E ");
+  SNIFF_ERRORS("Update_Texturebar - glTexImage1D (rgb_iso) ");
 
   glBindTexture(GL_TEXTURE_1D,smokecolormap_id);
   glTexImage1D(GL_TEXTURE_1D,0,4,256,0,GL_RGBA,GL_FLOAT,rgb_smokecolormap);
-  SNIFF_ERRORS("update_texturebar - glTexImage1D F ");
+  SNIFF_ERRORS("Update_Texturebar - glTexImage1D (rgb_smokecolormap) ");
 
 #ifdef pp_GPU
   if(gpuactive==1&&nvolrenderinfo>0&&showvolrender==1){
     glActiveTexture(GL_TEXTURE2);
     glTexSubImage1D(GL_TEXTURE_1D,0,0,256,GL_RGBA,GL_FLOAT, rgb_smokecolormap);
-    SNIFF_ERRORS("update_texturebar - glTexSubImage1D G ");
+    SNIFF_ERRORS("Update_Texturebar - glTexSubImage1D (rgb_smokecolormap) ");
+    glActiveTexture(GL_TEXTURE0);
+  }
+  if(gpuactive==1&&SHOW_gslice_data==1){
+    glActiveTexture(GL_TEXTURE4);
+    glTexSubImage1D(GL_TEXTURE_1D,0,0,256,GL_RGBA,GL_FLOAT, rgb_slice);
+    SNIFF_ERRORS("updatecolors after glTexSubImage1D (rgb_slice)");
     glActiveTexture(GL_TEXTURE0);
   }
 #endif
@@ -1406,6 +1412,8 @@ void updatecolors(int changecolorindex){
     alpha = colorbarinfo[colorbartype].alpha;
     fire_cb = colorbarinfo[fire_colorbar_index].colorbar;
     for(n=0;n<nrgb_full;n++){
+      int nn;
+
       rgb_full[n][0]=cbi->colorbar[3*n];
       rgb_full[n][1]=cbi->colorbar[3*n+1];
       rgb_full[n][2]=cbi->colorbar[3*n+2];
@@ -1415,9 +1423,10 @@ void updatecolors(int changecolorindex){
       else{
         rgb_full[n][3]=transparent_level_local;
       }
-      rgb_smokecolormap[4*n]=fire_cb[3*n];
-      rgb_smokecolormap[4*n+1]=fire_cb[3*n+1];
-      rgb_smokecolormap[4*n+2]=fire_cb[3*n+2];
+      nn=CLAMP(n,1,nrgb_full-2);
+      rgb_smokecolormap[4*n]=fire_cb[3*nn];
+      rgb_smokecolormap[4*n+1]=fire_cb[3*nn+1];
+      rgb_smokecolormap[4*n+2]=fire_cb[3*nn+2];
       if(alpha[n]==0){
         rgb_smokecolormap[4*n+3]=0.0;
       }
@@ -1612,22 +1621,7 @@ void updatecolors(int changecolorindex){
   }
   updatechopcolors();
   initcadcolors();
-  update_texturebar();
-#ifdef pp_GPU
-  if(gpuactive==1&&nvolrenderinfo>0&&showvolrender==1){
-    glActiveTexture(GL_TEXTURE2);
-    glTexSubImage1D(GL_TEXTURE_1D,0,0,256,GL_RGBA,GL_FLOAT, rgb_smokecolormap);
-    SNIFF_ERRORS("updatecolors after glTexSubImage1D ");
-    glActiveTexture(GL_TEXTURE0);
-  }
-  if(gpuactive==1&&show_gslice_data==1){
-    glActiveTexture(GL_TEXTURE4);
-    glTexSubImage1D(GL_TEXTURE_1D,0,0,256,GL_RGBA,GL_FLOAT, rgb_slice);
-    SNIFF_ERRORS("updatecolors after glTexSubImage1D ");
-    glActiveTexture(GL_TEXTURE0);
-  }
-#endif
-
+  Update_Texturebar();
 }        
 
 /* ------------------ updatechopcolors ------------------------ */
@@ -1834,7 +1828,7 @@ void updatechopcolors(void){
       }
     } 
   }
-  update_texturebar();
+  Update_Texturebar();
 }
 
 /* ------------------ getrgb ------------------------ */
