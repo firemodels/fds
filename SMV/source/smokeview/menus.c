@@ -2193,6 +2193,15 @@ void ScriptMenu(int value){
     case SCRIPT_STEP:
       script_step=1-script_step;
       break;
+    case SCRIPT_CANCEL:
+      current_script_command=NULL;
+      runscript=0;
+      script_step=0;
+      glui_script_enable();
+      break;
+    case SCRIPT_CONTINUE:
+      script_step=0;
+      break;
     case SCRIPT_START_RECORDING2:
       defer_file_loading = 1;
       update_defer();
@@ -8712,6 +8721,8 @@ updatemenu=0;
     if(nscripts>0){
       glutAddSubMenu("Run",scriptlistmenu);
       glutAddSubMenu("Step (using ^)",scriptsteplistmenu);
+      if(script_step==1)glutAddMenuEntry(_("Continue"),SCRIPT_CONTINUE);
+      if(script_step==1||current_script_command!=NULL)glutAddMenuEntry(_("Cancel"),SCRIPT_CANCEL);
     }
     glutAddSubMenu("Record",scriptrecordmenu);
 

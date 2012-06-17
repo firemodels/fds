@@ -259,6 +259,8 @@ void _Sniff_Errors(char *whereat);
 #define SCRIPT_STOP_RECORDING -3
 #define SCRIPT_FILE_LOADING -4
 #define SCRIPT_STEP -5
+#define SCRIPT_CONTINUE -7
+#define SCRIPT_CANCEL -8
 
 #define RENDER 1
 #define SELECT 2

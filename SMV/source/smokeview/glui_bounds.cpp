@@ -106,6 +106,7 @@ GLUI_Rollout *rollout_slice_chop=NULL;
 #define SCRIPT_RENDER_SUFFIX 42
 #define SCRIPT_RENDER_DIR 43
 #define SCRIPT_STEP_NOW 44
+#define SCRIPT_CANCEL_NOW 45
 
 #define SAVE_SETTINGS 99
 #define CLOSE 98
@@ -819,10 +820,10 @@ extern "C" void glui_bounds_setup(int main_window){
   panel_script1b = glui_bounds->add_panel_to_panel(panel_run,"",false);
   BUTTON_script_runscript=glui_bounds->add_button_to_panel(panel_script1b,_("Run script"),SCRIPT_RUNSCRIPT,Script_CB);
   glui_bounds->add_column_to_panel(panel_script1b,false);
-  CHECKBOX_script_step=glui_bounds->add_checkbox_to_panel(panel_run,_("Step through script"),&script_step,
-    SCRIPT_STEP,Script_CB);
+  CHECKBOX_script_step=glui_bounds->add_checkbox_to_panel(panel_run,_("Step through script"),&script_step,SCRIPT_STEP,Script_CB);
   BUTTON_step=glui_bounds->add_button_to_panel(panel_run,_("Next"),SCRIPT_STEP_NOW,Script_CB);
   update_script_step();
+  glui_bounds->add_button_to_panel(panel_run,_("Cancel script"),SCRIPT_CANCEL_NOW,Script_CB);
 
   LIST_scriptlist = glui_bounds->add_listbox_to_panel(panel_script1b,_("Select:"),&script_index,SCRIPT_LIST,Script_CB);
     {
@@ -1331,6 +1332,12 @@ extern "C"  void glui_script_disable(void){
     switch (var){
     case SCRIPT_STEP_NOW:
       keyboard('^',FROM_SMOKEVIEW);
+      break;
+    case SCRIPT_CANCEL_NOW:
+      current_script_command=NULL;
+      runscript=0;
+      script_step=0;
+      glui_script_enable();
       break;
     case SCRIPT_RENDER_DIR:
       strcpy(label,script_renderdir);
