@@ -2729,6 +2729,7 @@ SURFLOOP: DO N=0,N_SURF
          ENDDO
       ENDDO
       WRITE(LU_OUTPUT,'(A,F9.3,A)')     '     Total surface density ', SF%SURFACE_DENSITY, ' kg/m2'
+      IF (SF%LAYER_DIVIDE<=SF%N_LAYERS) &
       WRITE(LU_OUTPUT,'(A,F5.2,A)')     '     Reaction products considered from the first ',SF%LAYER_DIVIDE, ' layers.'
       WRITE(LU_OUTPUT,'(A)')            '     Solid Phase Node, Layer, Coordinates(m):'
       DO I=0,SF%N_CELLS
@@ -2751,10 +2752,10 @@ SURFLOOP: DO N=0,N_SURF
  
    IF (SF%HRRPUA > 0._EB) WRITE(LU_OUTPUT,'(A,F12.1)') '     HRR Per Unit Area (kW/m2) ', SF%HRRPUA/1000._EB
    DO NN=0,N_TRACKED_SPECIES
-      IF (SF%MASS_FRACTION(NN)>ZERO_P) WRITE(LU_OUTPUT,'(A,I2,A,8X,F6.3)') &
-               '     Mixture ',NN,' Mass Fraction',SF%MASS_FRACTION(NN)
-       IF (ABS(SF%MASS_FLUX(NN))>ZERO_P) WRITE(LU_OUTPUT,'(A,I2,A,2X,ES9.2)') &
-              '     Mixture ',NN,' Mass Flux (kg/s/m2)',SF%MASS_FLUX(NN)
+      IF (SF%MASS_FRACTION(NN)>ZERO_P) WRITE(LU_OUTPUT,'(5X,A,A,8X,F6.3)') &
+          TRIM(SPECIES_MIXTURE(NN)%ID),' Mass Fraction',SF%MASS_FRACTION(NN)
+       IF (ABS(SF%MASS_FLUX(NN))>ZERO_P) WRITE(LU_OUTPUT,'(5X,A,A,2X,ES9.2)') &
+          TRIM(SPECIES_MIXTURE(NN)%ID),' Mass Flux (kg/s/m2)',SF%MASS_FLUX(NN)
    ENDDO
    
    IF (ABS(SF%CONV_LENGTH - 1._EB)>SPACING(1._EB)) WRITE(LU_OUTPUT,'(A,ES9.2)') '     Convection length scale (m) ', SF%CONV_LENGTH
