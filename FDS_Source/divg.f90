@@ -410,17 +410,18 @@ ENDDO CORRECTION_LOOP
 
 CYLINDER3: SELECT CASE(CYLINDRICAL)
 CASE(.FALSE.) CYLINDER3   ! 3D or 2D Cartesian
-   DO K=1,KBAR
-   IF (EVACUATION_ONLY(NM)) CYCLE
-      DO J=1,JBAR
-         DO I=1,IBAR
-            DELKDELT = (KDTDX(I,J,K)-KDTDX(I-1,J,K))*RDX(I) + &
-                       (KDTDY(I,J,K)-KDTDY(I,J-1,K))*RDY(J) + &
-                       (KDTDZ(I,J,K)-KDTDZ(I,J,K-1))*RDZ(K)
-            DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + QR(I,J,K)
+   IF (.NOT.EVACUATION_ONLY(NM)) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               DELKDELT = (KDTDX(I,J,K)-KDTDX(I-1,J,K))*RDX(I) + &
+                          (KDTDY(I,J,K)-KDTDY(I,J-1,K))*RDY(J) + &
+                           (KDTDZ(I,J,K)-KDTDZ(I,J,K-1))*RDZ(K)
+               DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + QR(I,J,K)
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
+   END IF
 CASE(.TRUE.) CYLINDER3   ! 2D Cylindrical
    DO K=1,KBAR
       DO J=1,JBAR
@@ -1348,17 +1349,18 @@ ENDDO CORRECTION_LOOP
 
 CYLINDER3: SELECT CASE(CYLINDRICAL)
 CASE(.FALSE.) CYLINDER3   ! 3D or 2D Cartesian
-   DO K=1,KBAR
-   IF (EVACUATION_ONLY(NM)) CYCLE
-      DO J=1,JBAR
-         DO I=1,IBAR
-            DELKDELT = (KDTDX(I,J,K)-KDTDX(I-1,J,K))*RDX(I) + &
-                       (KDTDY(I,J,K)-KDTDY(I,J-1,K))*RDY(J) + &
-                       (KDTDZ(I,J,K)-KDTDZ(I,J,K-1))*RDZ(K)
-            DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + QR(I,J,K)
+   IF (.NOT.EVACUATION_ONLY(NM)) THEN
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               DELKDELT = (KDTDX(I,J,K)-KDTDX(I-1,J,K))*RDX(I) + &
+                          (KDTDY(I,J,K)-KDTDY(I,J-1,K))*RDY(J) + &
+                          (KDTDZ(I,J,K)-KDTDZ(I,J,K-1))*RDZ(K)
+               DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + QR(I,J,K)
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
+   END IF
 CASE(.TRUE.) CYLINDER3   ! 2D Cylindrical
    DO K=1,KBAR
       DO J=1,JBAR
@@ -1374,6 +1376,7 @@ END SELECT CYLINDER3
 
 ! New form of divergence expression starts here
 
+EVACUATION_IF: IF (.NOT.EVACUATION_ONLY(NM)) THEN
 RHO_H_S_P=>WORK1
 
 DO K=0,KBP1
@@ -1411,17 +1414,16 @@ ENDDO
  
 RTRM => WORK1
 
-IF (.NOT.EVACUATION_ONLY(NM)) THEN
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            RTRM(I,J,K) = 1._EB/(RHOP(I,J,K)*CP(I,J,K)*TMP(I,J,K))
-            DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
-         ENDDO
-      ENDDO 
-   ENDDO
-ENDIF
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+         RTRM(I,J,K) = 1._EB/(RHOP(I,J,K)*CP(I,J,K)*TMP(I,J,K))
+         DP(I,J,K) = RTRM(I,J,K)*DP(I,J,K)
+      ENDDO
+   ENDDO 
+ENDDO
+ENDIF EVACUATION_IF
 
 ! Compute (Wbar/rho) Sum (1/W_n) del dot rho*D del Z_n
 
