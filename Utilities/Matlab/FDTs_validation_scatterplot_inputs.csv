@@ -3,8 +3,8 @@ Scatter_Plot_Title,Ind_Title,Dep_Title,Plot_Min,Plot_Max,Title_Position,Key_Posi
 "HGL Temperature, Deal and Beyler",Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,400,0.03 0.95,SouthEast,4,14,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/HGL_Temperature_DB
 "HGL Temperature, MQH",Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,1000,0.03 0.95,SouthEast,4,14,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/HGL_Temperature_MQH
 "HGL Temperature, Beyler",Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,400,0.03 0.95,SouthEast,4,14,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/HGL_Temperature_Beyler
-Immersed Radiation Heat Flux,Measured Heat Flux (kW/m$^2$),Predicted Heat Flux (kW/m$^2$),0,20,0.03 0.95,SouthEast,4,20,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Immersed_Radiation_Heat_Flux
-Point Source Radiation Heat Flux,Measured Heat Flux (kW/m$^2$),Predicted Heat Flux (kW/m$^2$),0,40,0.03 0.95,SouthEast,4,20,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Point_Source_Radiation_Heat Flux
+Immersed Radiation Heat Flux,Measured Heat Flux (kW/m$^2$),Predicted Heat Flux (kW/m$^2$),0,100,0.03 0.95,SouthEast,4,20,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Immersed_Radiation_Heat_Flux
+Point Source Radiation Heat Flux,Measured Heat Flux (kW/m$^2$),Predicted Heat Flux (kW/m$^2$),0,120,0.03 0.95,SouthEast,4,20,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Point_Source_Radiation_Heat Flux
 Pressure,Measured Pressure Rise (Pa),Predicted Pressure Rise (Pa),0,300,0.03 0.95,SouthEast,4,80,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Pressure
 Sprinkler Activation Time,Measured Activation Time (s),Predicted Activation Time (s),0,300,0.03 0.95,SouthEast,4,16,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Sprinkler_Activation_Time
 Plume Temperatures,Measured Temperature ($^\circ$C),Predicted Temperature ($^\circ$C),0,1000,0.03 0.95,SouthEast,4,14,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Plume_Temperatures
