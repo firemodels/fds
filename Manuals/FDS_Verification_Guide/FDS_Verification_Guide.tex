@@ -238,8 +238,8 @@ numerical errors in the model or uncertainty in the measurements
 are attributed to the assumptions and simplifications of the physical model.
 
 Evaluation is critical to establishing both the acceptable uses
-and limitations of a model. Throughout its development, FDS has undergone various forms of evaluation,
-both at NIST and beyond. This volume provides a survey of verification work conducted to date to evaluate FDS.
+and limitations of a model. Throughout its development, FDS has undergone various forms of evaluation.
+This volume provides a survey of verification work conducted to date to evaluate FDS.
 
 
 
@@ -399,7 +399,7 @@ geometry, materials,  combustion phenomena, {\em etc.} By design,  the user  is 
 size,  although the optional numerical parameters are described in both the Technical Reference Guide and the User's Guide.
 
 FDS does not  limit the range of most of  the input parameters because applications often push beyond the  range for which the model has been
-validated.  FDS is still used  for research at NIST and elsewhere, and the developers do not presume to know in all cases what the acceptable range
+validated.  FDS is still used  for research at NIST, VTT, and elsewhere, and the developers do not presume to know in all cases what the acceptable range
 of   any  parameter  is.  Plus,  FDS   solves  the  fundamental conservation  equations  and  is   much  less  susceptible  to  errors resulting
 from  input parameters  that  stray  beyond  the limits  of simpler empirical models.  However, the user is warned  that he/she is responsible for
 the prescription of all parameters.   The FDS manuals can only provide guidance.
@@ -582,12 +582,12 @@ An examination of the structure of the computer program can be used to detect po
 The coding can be verified by a third party either manually or automatically with profiling programs to detect irregularities and
 inconsistencies~\cite{ASTM:E1355}.
 
-At NIST and elsewhere, FDS has been compiled and run on computers manufactured by IBM, Hewlett-Packard, Sun Microsystems, Digital Equipment
+At NIST, VTT, and elsewhere, FDS has been compiled and run on computers manufactured by IBM, Hewlett-Packard, Sun Microsystems, Digital Equipment
 Corporation, Apple, Silicon Graphics, Dell, Compaq, and various other personal computer vendors. The operating systems on these platforms include
 Unix, Linux, Microsoft Windows, and Mac OSX. Compilers used include Lahey Fortran, Digital Visual Fortran, Intel Fortran, IBM XL Fortran, HPUX
 Fortran, Forte Fortran for SunOS, the Portland Group Fortran, and several others. Each combination of hardware, operating system and compiler
 involves a slightly different set of compiler and run-time options and a rigorous evaluation of the source code to test its compliance with the
-Fortran 90 ISO/ANSI standard~\cite{F90}. Through this process, out-dated and potentially harmful code is updated or eliminated, and often the code is
+Fortran 90 ISO/ANSI standard~\cite{F90}. FDS is now compliant with the Fortran~2003 standard. Through this process, out-dated and potentially harmful code is updated or eliminated, and often the code is
 streamlined to improve its optimization on the various machines. However, simply because the FDS source code can be compiled and run on a wide
 variety of platforms does not guarantee that the numerics are correct. It is only the starting point in the process because it at least rules out the
 possibility that erratic or spurious results are due to the platform on which the code is running.
@@ -631,17 +631,17 @@ checks can be made for all of the three dimensional finite difference routines. 
 FDS has a routine that generates a tiny amount of random noise in the initial flow field so as to eliminate any false symmetries that might arise in
 the numerical solution.
 
-The process of adding new routines to FDS is as follows: typically the routine is written by one person (not necessarily a NIST staffer) who takes
+The process of adding new routines to FDS is as follows: typically the routine is written by one person who takes
 the latest version of the source code, adds the new routine, and writes a theoretical and numerical description for the FDS Technical Reference
-Guide, plus a description of the input parameters for the FDS User's Guide. The new version of FDS is then tested at NIST with a number of benchmark
+Guide, plus a description of the input parameters for the FDS User's Guide. The new version of FDS is then tested with a number of benchmark
 scenarios that exercise the range of the new parameters.  Provisional acceptance of the new routine is based on several factors: (1) it produces more
 accurate results when compared to experimental measurement, (2) the theoretical description is sound, and (3) any empirical parameters are obtainable
-from the open literature or standard bench-scale apparatus.  If the new routine is accepted, it is added to a test version of the software and
-evaluated by external users and/or NIST grantees whose research is related to the subject. Assuming that there are no intractable issues that arise
+from the open literature or standard bench-scale apparatus.  If the new routine is accepted, it is added to the working version of the software and
+evaluated by running the standard verification and validation test cases. Assuming that there are no intractable issues that arise
 during the testing period, the new routine eventually becomes part of the release version of FDS.
 
-Even with all the code checking performed at NIST, it is still possible for errors to go unnoticed. One remedy is the fact that the source code for
-FDS is publicly released. Although it consists of on the order of 30,000 lines of Fortran statements, various researchers outside of NIST have been
+Even with all the code checking, it is still possible for errors to go unnoticed. One remedy is the fact that the source code for
+FDS is publicly released. Although it consists of on the order of 100,000 lines of Fortran statements, various independent researchers have been
 able to work with it, add enhancements needed for very specific applications or for research purposes, and report back to the developers bugs that
 have been detected. The source code is organized into 27 separate files, each containing subroutines related to a particular feature of the model,
 like the mass, momentum, and energy conservation equations, sprinkler activation and sprays, the pressure solver, {\em etc.} The lengthiest routines
@@ -878,9 +878,9 @@ Four turublence models are tested: (1) Constant Smagorinsky (csmag), (2) Dynamic
 \section{FDS Wall Flows Part I: Straight Channels}
 \label{fds_wall_flows1}
 
-Wall flows are notoriously challenging for large-eddy simulation (LES) \cite{Baggett:1997,Baggett:1998,Cabot:1995,Pope:2000,Sagaut:2001}.  In spite of their promise and sophistication, practical LES codes are resigned to \emph{model} the wall shear stress as opposed to \emph{resolving} the dynamically important length scales near the wall.
+Wall flows are challenging for large-eddy simulation (LES) \cite{Baggett:1997,Baggett:1998,Cabot:1995,Pope:2000,Sagaut:2001}.  In spite of their promise and sophistication, practical LES codes are resigned to \emph{model} the wall shear stress as opposed to \emph{resolving} the dynamically important length scales near the wall.
 
-In this work we introduce the Werner and Wengle (WW) wall model \cite{Werner:1991} and the rough wall log law from Pope \cite{Pope:2000} into the NIST Fire Dynamics Simulator (FDS) as a practical first step in developing models for turbulent flow around complex geometry and over complex terrain.  Such models are required in order for FDS to accurately model, for example, tunnel fires, smoke transport in complex architectures, and wildland-urban interface (WUI) fires. As a minimum requirement, a wall model should accurately reproduce the mean wall stress for flow in a straight channel.  We verify that this is true for FDS by reproducing the Moody chart, a plot of friction factor versus Reynolds number for pipe flow \cite{Moody:1944}.
+FDS uses the Werner and Wengle (WW) wall model \cite{Werner:1991} and the rough wall log law from Pope \cite{Pope:2000} for modeling turbulent flow around complex geometry and complex terrain.  Such models are required in order for FDS to accurately model, for example, tunnel fires, smoke transport in complex architectures, and wildland-urban interface (WUI) fires. As a minimum requirement, a wall model should accurately reproduce the mean wall stress for flow in a straight channel.  We verify that this is true for FDS by reproducing the Moody chart, a plot of friction factor versus Reynolds number for pipe flow \cite{Moody:1944}.
 
 The remainder of this section is organized as follows. In Section \ref{formulation} we describe the model formulation. Then, in Section \ref{results}, we conduct a verification study of the wall boundary conditions for laminar and turbulent flows in FDS.  From this study we are able to draw quantitative conclusions in Section \ref{conclusions} about the accuracy of the channel flow simulations for smooth and rough walls.
 
@@ -2686,7 +2686,7 @@ cable (the number 11 has no particular meaning other than to distinguish it from
 \begin{figure}[ht]
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/cable_11_insulation_mcc}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/cable_11_jacket_mcc}
-\caption{Results of a micro-calorimetry analysis of a sample of cable insulation (left) and jacket material (right).}
+\caption[Results of a micro-calorimetry analysis of cable materials.]{Results of a micro-calorimetry analysis of a sample of cable insulation (left) and jacket material (right).}
 \label{mcc_plots}
 \end{figure}
 The insulation material exhibits two fairly well-defined peaks, whereas the jacket material exhibits three. Thus, the insulation
@@ -3167,11 +3167,11 @@ In this test case 4 sprinklers are placed in a box.  Three of the sprinklers are
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/flow_rate_2_water_mass}
 \end{tabular*}
 \caption[Output of the flow rate test case.]{Output of the {\bf flow\_rate\_2} test case.}
-\label{flow_rate_2}
+\label{flow_rate_2_figure}
 \end{figure}
 
 \section{Turbulent Dispersion (\texorpdfstring{{\textbf{random\_walk}}}{random\_walk}) }
-\label{flow_rate_2}
+\label{turbulent_dispersion}
 
 Two cases are set up to test the turbulent dispersion of tracer particles.  Tracer particles are injected into a channel with a steady laminar flow with mean velocity 1 m/s.  In the first case (random\_walk\_1) the diffusivity is set to $D=0.0834$ m$^2$/s (this value results from setting the dynamic viscosity to $\mu = 0.1$ kg/m/s with an ambient density of $\rho=1.199$ kg/m$^3$ and a Schmidt number of unity).  In the second case (random\_walk\_2) the diffusivity is set to $D=0.00834$ m$^2$/s.  The results are compared with Einstein's classic result for Brownian motion \cite{Gardiner:2004}:
 \begin{equation}
@@ -3221,7 +3221,7 @@ Node flow losses are implemented by partitioning the node loss to upstream and d
       \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_tee_loss_1} } &
       \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_tee_loss_2} }
    \end{tabular*}
-   \caption{Duct velocities with varied node loss. HVAC\_tee\_loss\_1 (left) and (HVAC\_tee\_loss\_2 (right)}
+   \caption[Duct velocities with varied node loss.]{Duct velocities with varied node loss. HVAC\_tee\_loss\_1 (left) and (HVAC\_tee\_loss\_2 (right)}
    \label{fig_HVAC_node}
 \end{figure}
 
@@ -3259,7 +3259,7 @@ The second duct is placed in the upper half of the compartment and is assigned a
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_e_p_enthalpy.pdf} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/HVAC_e_p_pressure.pdf}
 \end{tabular*}
-\caption{Clockwise from top left: Temperature at 1 s, duct velocities, total enthalpy in the domain, and duct node pressures for the top duct}
+\caption[Results of {\ct HVAC\_energy\_pressure} test case.]{Clockwise from top left: Temperature at 1 s, duct velocities, total enthalpy in the domain, and duct node pressures for the top duct}
 \label{fig_HVAC_e_p}
 \end{figure}
 
@@ -3300,7 +3300,7 @@ two compartments is the same as the pressure difference from leak\_test (190.7~P
       \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/leak_test_2_vector} } &
       \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/leak_test_2.pdf} }
    \end{tabular*}
-   \caption{Vector plot of pressure at 10 s with geometry clipped to show compartment interiors (left) and line plot of zone pressures (right)}
+   \caption[Results of {\ct leak\_test\_2} test case.]{Vector plot of pressure at 10 s with geometry clipped to show compartment interiors (left) and line plot of zone pressures (right)}
    \label{fig_HVAC_leak_fan}
 \end{figure}
 
@@ -3319,7 +3319,7 @@ ASRHAE sample problem 7~\cite{ASHRAE} is a simple HVAC system that represents a 
 \includegraphics[width=3.2in]{FIGURES/HVAC/ashrae_7.pdf} &
 \end{tabular*}
 \input{SCRIPT_FIGURES/ashrae_7.tex}
-\caption{Clockwise from top left: Schematic of ASHRAE sample problem 7, pressure drops for a fixed flow fan curve, pressure drops for a quadratic fan curve, pressure drops for a table defined fan curve}
+\caption[Results of {\ct ashrae\_7} test case.]{Clockwise from top left: Schematic of ASHRAE sample problem 7, pressure drops for a fixed flow fan curve, pressure drops for a quadratic fan curve, pressure drops for a table defined fan curve}
 \label{ASHRAE7}
 \end{figure}
 
