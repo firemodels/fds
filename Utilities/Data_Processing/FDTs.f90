@@ -147,7 +147,7 @@ T_P = (RHO_S*C_S/K_S) * (DELTA/2.)**2
 A_T = 2.*L*W + 2.*L*H + 2.*W*H
 TMP_A = TMP_A + 273.
 
-WRITE(11,'(A)') 'Time, Temp, Immersed Radiation Heat Flux (kW/m2)'
+WRITE(11,'(A)') 'Time, Temp, Immersed HGL Radiation Heat Flux (kW/m2)'
 
 DO I=0,50
 
@@ -184,7 +184,7 @@ A_T = 2.*L*W + 2.*L*H + 2.*W*H
 V = L*W*H
 TMP_A = TMP_A + 273.
 
-WRITE(11,'(A)') 'Time, Temp, Pres, Immersed Radiation Heat Flux (kW/m2)'
+WRITE(11,'(A)') 'Time, Temp, Pres, Immersed HGL Radiation Heat Flux (kW/m2)'
 
 DT = 0.05
 P  = P_0
@@ -241,9 +241,9 @@ A_T = 2.*L*W + 2.*L*H + 2.*W*H - A_V
 TMP_A = TMP_A + 273.
 
 IF (PROFILE) THEN
-   WRITE(11,'(A)') 'Height, Temp, Immersed Radiation Heat Flux (kW/m2)'
+   WRITE(11,'(A)') 'Height, Temp, Immersed HGL Radiation Heat Flux (kW/m2)'
 ELSE
-   WRITE(11,'(A)') 'Time, Temp, Height, Immersed Radiation Heat Flux (kW/m2)'
+   WRITE(11,'(A)') 'Time, Temp, Height, Immersed HGL Radiation Heat Flux (kW/m2)'
 ENDIF
 
 DO I=0,50
@@ -291,7 +291,7 @@ A_T = 2.*L*W + 2.*L*H + 2.*W*H - A_V
 TMP_A = TMP_A + 273.
 M = L*W*H*RHO_A
 
-WRITE(11,'(A)') 'Time, Temp, Immersed Radiation Heat Flux (kW/m2)'
+WRITE(11,'(A)') 'Time, Temp, Immersed HGL Radiation Heat Flux (kW/m2)'
 
 DO I=0,50
 
