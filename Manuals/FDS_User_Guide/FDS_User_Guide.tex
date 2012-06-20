@@ -8813,16 +8813,13 @@ A single ``line'' file can hold more than a single line of data. By default, the
 either {\ct -x}, {\ct -y}, or {\ct -z}. To change these labels, use {\ct X\_ID}, {\ct Y\_ID}, and/or {\ct Z\_ID}. To suppress the coordinate columns altogether, add
 {\ct HIDE\_COORDINATES=.TRUE.} to the {\ct DEVC} line. This is convenient if you have multiple arrays of data that use the same coordinates.
 
-Typically, a {\em line} of devices records a steady-state profile of a particular quantity. For example, the velocity profile in a doorway or the average concentration of
-a particular scalar quantity spanning the width of a buoyant plume are convenient means to compare model and experiment. In addition, if you set
-{\ct STATISTICS='RMS'} on the {\ct DEVC} line, the output will be the {\em root mean square} value of the quantity rather than its mean, $\overline{\phi}$:
+Typically, a {\em line} of devices records a mean profile of a particular quantity, $\overline{\phi}$. For example, the velocity profile in a doorway or the average concentration of a particular scalar quantity spanning the width of a buoyant plume are convenient means to compare model and experiment. In addition, if you set {\ct STATISTICS='RMS'} on the {\ct DEVC} line, the output will be the {\em root mean square} value of the quantity:
 \be
    \phi_{\hbox{rms}} = \sqrt{ \frac{ \sum_{i=1}^n (\phi_i - \overline{\phi})^2 }{n} }
 \ee
-Note that the {\ct 'RMS'} statistic is only appropriate for a line of devices. It is not meant to be used with single devices that record a time history of a given
-quantity. The {\em root mean square} is only meaningful in terms of a steady-state output quantity.
+Note that the {\ct 'RMS'} statistic is only appropriate for a line of devices. It is not meant to be used with single devices that record a time history of a given quantity. The {\em root mean square} is only meaningful in terms of a steady-state output quantity.
 
-
+For line devices it is also possible to record the \emph{min} or the \emph{max} values of the output quantity for each point on the line.  Set {\ct STATISTICS='TIME MIN'} or {\ct STATISTICS='TIME MAX'}.  FDS will output the values over the last {\ct DT\_DEVC\_LINE} of the simulation.
 
 
 \subsection{Quantities within Solids: The \texorpdfstring{{\tt PROF}}{PROF} Namelist Group}
