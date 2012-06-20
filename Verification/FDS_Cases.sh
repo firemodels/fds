@@ -88,6 +88,11 @@ $RUNFDS NS_Analytical_Solution ns2d_64
 $RUNFDS NS_Analytical_Solution ns2d_64_nupt1
 $RUNFDS NS_Analytical_Solution ns2d_8
 $RUNFDS NS_Analytical_Solution ns2d_8_nupt1
+$RUNFDS NS_Analytical_Solution vort2d_40
+$RUNFDS NS_Analytical_Solution vort2d_80
+$RUNFDS NS_Analytical_Solution vort2d_160
+$RUNFDS NS_Analytical_Solution vort2d_320
+$RUNFDS NS_Analytical_Solution vort2d_640
 
 $RUNFDS Pressure_Effects isentropic
 $RUNFDS Pressure_Effects isentropic2
