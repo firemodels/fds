@@ -1,6 +1,6 @@
 &HEAD CHID='Group_A_2x2x3', TITLE='UL Group A Plastic Calorimetry Test' /
 
-&MESH IJK=35,35,80, XB=-1.50,3.75,-1.50,3.75,0.00,12.00 /
+&MESH IJK=35,35,120, XB=-1.50,3.75,-1.50,3.75,0.00,18.00 /
 &TIME T_END=300. /
 
 &RADI RADIATIVE_FRACTION=0.5 /
@@ -9,7 +9,7 @@
       FYI        = 'Styrene, C_8 H_8'
       H          = 8.
       C          = 8.
-      HEAT_OF_COMBUSTION=11442.
+      HEAT_OF_COMBUSTION=40000.
       SOOT_YIELD = 0.164
       CO_YIELD   = 0.06 /
 
@@ -28,8 +28,9 @@
 
 &MATL ID                    = 'CORRUGATED PAPER'
       DENSITY               = 200.
-      CONDUCTIVITY          = 0.02
+      CONDUCTIVITY          = 0.1
       SPECIFIC_HEAT         = 1.5
+      HEAT_OF_COMBUSTION    = 11500.
       EMISSIVITY            = 0.8 /
 
 &SURF ID                    = 'PLASTIC A'
