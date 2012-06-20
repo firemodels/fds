@@ -18,7 +18,7 @@
 #undef pp_release
 #endif
 #ifdef pp_release
-#define PROGVERSION "6.0.0"
+#define PROGVERSION "6.0.1"
 #endif
 
 //VVVVVVVVVVVVVVVVVVVVVVVVVVVVV  turn on options available on all platforms VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
