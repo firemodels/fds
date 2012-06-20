@@ -20,6 +20,20 @@
 <h3>Release Notes</h3>
 
 <ul>
+
+<li>6.0.1 (build 11112) - June 20, 2012
+<ol>
+<li>usability: add options to cancel a running script or continue a "stepped" script
+<li>usability: add the device object command, " arg SCALEAUTO", in order to allow scaling of 
+objects that follow relative to the maximum domain size - 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1658&can=1&sort=-id">Issue 1658</a>)
+<li>usability: display "W" unit for HRR < 1000 - 
+(<a href="http://code.google.com/p/fds-smv/issues/detail?id=1655&can=1&sort=-id">Issue 1655</a>)
+<li>fix: fix some problems with 3D smoke display when using the GPU and add back a widget for controlling fire transparency
+<li>fix: fix logic to determine visibility of the general slice
+
+</ol>
+
 <li>6.0.0 (build 10947) - June 6, 2012
 
 <ol>
@@ -128,7 +142,8 @@ option may be invoked from the menus or using the "L" key -
 <li>usability: show hrrpuv cutoff label when timebar is hidden - 
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1213&can=1&sort=-id">Issue 1213</a>)
 <li>usability: make isosurface generation more efficient by rejecting trivial cases earlier in the generation process
-<li>usability: modify readsmv to read in two files (2nd file created by smokezip which contains entries for additional isosurface surfaces) - addresses issue 1208
+<li>usability: modify readsmv to read in two files (2nd file created by smokezip which contains entries for additional isosurface surfaces) - 
+addresses issue 1208
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1208&can=1&sort=-id">Issue 1208</a>)
 
 <li>fix: eliminate a memory leak occuring when re-reading the .smv file.
