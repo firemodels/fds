@@ -8708,7 +8708,11 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
       WRITE(MESSAGE,'(A,A,A)')  'ERROR: DEVC ',TRIM(ID),' must have coordinates given in terms of XB'
       CALL SHUTDOWN(MESSAGE)
    ENDIF
-   IF (POINTS>1 .AND. STATISTICS/='null' .AND. STATISTICS/='RMS') THEN
+   IF (POINTS>1               .AND. &
+       STATISTICS/='null'     .AND. &
+       STATISTICS/='RMS'      .AND. &
+       STATISTICS/='TIME MIN' .AND. &
+       STATISTICS/='TIME MAX') THEN
       WRITE(MESSAGE,'(A,A,A)')  'ERROR: DEVC ',TRIM(ID),' cannot use POINTS>1 and STATISTICS at the same time'
       CALL SHUTDOWN(MESSAGE)
    ENDIF
@@ -9340,8 +9344,12 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
          CALL SHUTDOWN(MESSAGE)
       ENDIF
 
-      IF (QUANTITY_INDEX > 0 .AND. DV%STATISTICS/='null' .AND. DV%STATISTICS/='TIME INTEGRAL' .AND. &
-          DV%STATISTICS/='RMS' .AND. DV%I1<0) THEN
+      IF (QUANTITY_INDEX > 0             .AND. &
+          DV%STATISTICS/='null'          .AND. &
+          DV%STATISTICS/='TIME INTEGRAL' .AND. &
+          DV%STATISTICS/='RMS'           .AND. &
+          DV%STATISTICS/='TIME MIN'      .AND. &
+          DV%STATISTICS/='TIME MAX'      .AND. DV%I1<0) THEN
          WRITE(MESSAGE,'(A,A)') 'ERROR: XB required when geometrical STATISTICS specified for gas DEVC ',TRIM(DV%ID)
          CALL SHUTDOWN(MESSAGE)
       ENDIF
