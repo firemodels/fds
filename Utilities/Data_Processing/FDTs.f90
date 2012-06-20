@@ -667,7 +667,11 @@ DO WHILE (ITER)
 
    t_activation = X*(H*(1./0.3048))**(4./3.)/(Q*(1./1.05505585))**(1./3.)
 
-   WRITE(11,'(F6.1,A1,F16.1,A1,F6.1)') T,',',t_activation,',',Q
+   IF (t_activation>9999) THEN
+      WRITE(11,'(F6.1,A5,F6.1)') T,',NaN,',Q
+   ELSE
+      WRITE(11,'(F6.1,A1,F6.1,A1,F6.1)') T,',',t_activation,',',Q
+   ENDIF
 
    IF ((t_activation>0) .AND. (t_activation<=T)) THEN
       ITER = .FALSE.
