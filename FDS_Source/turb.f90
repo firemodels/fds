@@ -279,38 +279,77 @@ SUBROUTINE TWOD_VORTEX_CERFACS(NM)
 !-------------------------------------------------------------------------------
 IMPLICIT NONE
 
-INTEGER, INTENT(IN) :: NM
-INTEGER :: I,J,K
-REAL(EB) :: UINF,PINF,RHOINF,MA,RC,GAMMA,BIGGAMMA,EXP_VAL
+	INTEGER, INTENT(IN) :: NM
+	INTEGER :: I,J,K,IZERO,KZERO,IMIN,IMAX,KMIN,KMAX,LU_VORTEX_U,LU_VORTEX_VX,LU_VORTEX_VY
+	REAL(EB) :: UINF,PINF,RHOINF,MA,RC,GAMMA,BIGGAMMA,EXP_VAL
 
-CALL POINT_TO_MESH(NM)
+	CALL POINT_TO_MESH(NM)
 
-UINF     = 3.5_EB         ! REFERENCE VELOCITY, M/S
-PINF     = P_INF !101300._EB     ! AMBIENT PRESSURE, PA
-RHOINF   = RHOA  !1.1717_EB      ! AMBIENT DENSITY, KG/M3
-GAMMA    = 1.4_EB         ! RATIO OF SPECIFIC HEAT
-RC       = 0.01556_EB     ! VORTEX RADIUS, M
-MA       = UINF/SQRT(GAMMA*PINF/RHOINF) ! REFERENCE MACH NUMBER
-EXP_VAL  = EXP(1.0_EB)
-BIGGAMMA = 0.04*UINF*RC*SQRT(EXP_VAL)
+	   UINF     = 35._EB						! Reference Velocity, M/S
+	   PINF     = P_INF						! Ambient Pressure, PA = 101300._EB
+	   RHOINF   = RHOA						! Ambient Density, Kg/M3 = 1.1717_EB
+	   GAMMA    = 1.4_EB						! Ratio of Specific Heat
+	   RC       = 0.01556_EB					! Vortex Radius, M
 
-DO K=0,KBAR
-   DO J=0,JBAR
-      DO I=0,IBAR
-         U(I,J,K) = UINF-BIGGAMMA*(ZC(K)/(RC*RC))*EXP(-(X(I)*X(I)+ZC(K)*ZC(K))/(2._EB*RC*RC))
-      ENDDO
-   ENDDO
-ENDDO
+	! Compute Device Arrays If Requested
+	IF (GENERATE_DEVC) THEN
 
-V=0._EB
+	   IZERO = INT(IBP1/2)
+	   IMIN = IZERO-INT(2.0*RC/DX(1))
+	   IMAX = IZERO+INT(2.0*RC/DX(1))
 
-DO K=0,KBAR
-   DO J=0,JBAR
-      DO I=0,IBAR
-         W(I,J,K) = BIGGAMMA*(XC(I)/(RC*RC))*EXP(-(XC(I)*XC(I)+Z(K)*Z(K))/(2._EB*RC*RC))
-      ENDDO
-   ENDDO
-ENDDO
+	   KZERO = INT(KBP1/2)
+	   KMIN = KZERO-INT(2.0*RC/DX(1))
+	   KMAX = KZERO+INT(2.0*RC/DX(1))
+
+	   LU_VORTEX_U = GET_FILE_NUMBER()
+	   LU_VORTEX_VX = GET_FILE_NUMBER()
+	   LU_VORTEX_VY = GET_FILE_NUMBER()
+	   OPEN(LU_VORTEX_U,FILE='devc_coords_u.fds')		! Save DEVC Lines to file: devc_coords_u.fds
+	   OPEN(LU_VORTEX_VX,FILE='devc_coords_vx.fds')		! Save DEVC Lines to file: devc_coords_vx.fds
+	   OPEN(LU_VORTEX_VY,FILE='devc_coords_vy.fds')		! Save DEVC Lines to file: devc_coords_vy.fds
+	   20 FORMAT(a26,f9.6,a1,f9.6,a1,f9.6,a26)
+
+	   DO K=KMIN,KMAX
+		DO I=IMIN,IMAX
+		   WRITE(LU_VORTEX_U,20) '&DEVC ID=''Profile'', XYZ=', XC(I), ',', YC(JBAR), ',', ZC(K), &
+						 ' QUANTITY=''U-VELOCITY'' /'
+		ENDDO
+	   ENDDO
+
+	   !-------------------------------IMPORTANT NOTE-------------------------------
+	   ! After DEVC Lines Have Been Written Into devc_coords.fds,
+	   ! They Must Be Transferred Into vort_test.fds
+	   !-------------------------------IMPORTANT NOTE-------------------------------
+
+	ELSE
+
+	   MA       = UINF/SQRT(GAMMA*PINF/RHOINF)		! Reference Mach Number
+	   EXP_VAL  = EXP(1.0_EB)					! Euler's Number
+	   BIGGAMMA = 0.04*UINF*RC*SQRT(EXP_VAL)
+
+	   ! Initialize x-direction Velocity Field, U
+	   DO K=0,KBAR
+		DO J=0,JBAR
+		   DO I=0,IBAR
+			U(I,J,K) = UINF-BIGGAMMA*(ZC(K)/(RC*RC))*EXP(-(X(I)*X(I)+ZC(K)*ZC(K))/(2._EB*RC*RC))
+		   ENDDO
+		ENDDO
+	   ENDDO
+
+	   ! Restrict to Two-Dimensional Flow Field
+	   V=0._EB
+
+	   ! Initialize z-direction Velocity Field, W
+	   DO K=0,KBAR
+		DO J=0,JBAR
+		   DO I=0,IBAR
+			W(I,J,K) = BIGGAMMA*(XC(I)/(RC*RC))*EXP(-(XC(I)*XC(I)+Z(K)*Z(K))/(2._EB*RC*RC))
+		   ENDDO
+		ENDDO
+	   ENDDO
+
+	ENDIF
 
 END SUBROUTINE TWOD_VORTEX_CERFACS
 
