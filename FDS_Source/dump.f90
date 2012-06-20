@@ -4088,178 +4088,176 @@ DEVICE_LOOP: DO N=1,N_DEVC
    STAT_COUNT =  0
    SUM_VALUE = 0._EB
    SELECT CASE(DV%STATISTICS)
-      CASE('MAX')
+      CASE('MAX','TIME MAX')
          STAT_VALUE = -HUGE(0.0_EB) + 1.0_EB
-      CASE('MIN')
+      CASE('MIN','TIME MIN')
          STAT_VALUE =  HUGE(0.0_EB) - 1.0_EB
       CASE DEFAULT
          STAT_VALUE =  0.0_EB
    END SELECT
 
-   ! Select either gas or solid phase output quantity
+   ! Select hvac or gas phase or solid phase output quantity
 
-   GAS_OR_SOLID_PHASE: IF (DV%OUTPUT_INDEX>0) THEN 
+   OUTPUT_INDEX_SELECT: SELECT CASE(DV%OUTPUT_INDEX)
 
-      GAS_OR_HVAC: IF (DV%OUTPUT_INDEX >= 300) THEN
-      
-         VALUE = HVAC_OUTPUT(DV%OUTPUT_INDEX,DV%Y_INDEX,DV%Z_INDEX,DV%DUCT_INDEX,DV%NODE_INDEX)
-      
-      ELSE GAS_OR_HVAC
+      CASE(-1000:0) OUTPUT_INDEX_SELECT ! solid phase
 
-         GAS_STATS: IF (DV%STATISTICS=='null' .OR. DV%STATISTICS=='RMS') THEN
+         SOLID_STATS_SELECT: SELECT CASE(DV%STATISTICS)
 
-            VALUE = GAS_PHASE_OUTPUT(DV%I,DV%J,DV%K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,DV%PART_INDEX,DV%VELO_INDEX,&
-                                     DV%PIPE_INDEX,T,NM)
-         ELSEIF (DV%STATISTICS=='TIME INTEGRAL') THEN GAS_STATS
-            VALUE = DV%TI_VALUE + (T-DV%TI_T)* &
-                                 GAS_PHASE_OUTPUT(DV%I,DV%J,DV%K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                  DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM)
-            DV%TI_VALUE = VALUE
-            DV%TI_T = T
+            CASE('null','RMS','TIME MIN','TIME MAX') SOLID_STATS_SELECT
 
-         ELSE GAS_STATS
+               IF (DV%WALL_INDEX>0) THEN
+                  VALUE = SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Z_INDEX,DV%PART_INDEX,OPT_WALL_INDEX=DV%WALL_INDEX)
+               ELSEIF (DV%LP_TAG>0) THEN
+                  CALL GET_LAGRANGIAN_PARTICLE_INDEX(NM,DV%PART_INDEX,DV%LP_TAG,LP_INDEX)
+                  IF (LP_INDEX>0) THEN
+                     VALUE = SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Z_INDEX,DV%PART_INDEX,OPT_LP_INDEX=LP_INDEX)
+                  ELSE
+                     CYCLE DEVICE_LOOP
+                  ENDIF
+               ENDIF
 
-            DO K=DV%K1,DV%K2
-               DO J=DV%J1,DV%J2
-                  DEVICE_CELL_LOOP: DO I=DV%I1,DV%I2
-                     IF (SOLID(CELL_INDEX(I,J,K))) CYCLE DEVICE_CELL_LOOP
-                     VOL = DX(I)*RC(I)*DY(J)*DZ(K)
+            CASE('TIME INTEGRAL') SOLID_STATS_SELECT
+
+               VALUE = DV%TI_VALUE + (T-DV%TI_T)*SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Z_INDEX,&
+                                                                    DV%PART_INDEX,OPT_WALL_INDEX=DV%WALL_INDEX)
+               DV%TI_VALUE = VALUE
+               DV%TI_T = T
+
+            CASE DEFAULT SOLID_STATS_SELECT
+
+               WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+                  IF (WALL(IW)%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE WALL_CELL_LOOP
+                  IF (WALL(IW)%XW<DV%X1-MICRON .OR. WALL(IW)%XW>DV%X2+MICRON .OR. &
+                      WALL(IW)%YW<DV%Y1-MICRON .OR. WALL(IW)%YW>DV%Y2+MICRON .OR. &
+                      WALL(IW)%ZW<DV%Z1-MICRON .OR. WALL(IW)%ZW>DV%Z2+MICRON) CYCLE WALL_CELL_LOOP
+                  SURF_INDEX = WALL(IW)%SURF_INDEX
+                  IF (DV%SURF_ID=='null' .OR. SURFACE(SURF_INDEX)%ID==DV%SURF_ID) THEN
                      NOT_FOUND = .FALSE.
-                     STATISTICS_SELECT: SELECT CASE(DV%STATISTICS)
+                     VALUE = SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Z_INDEX,DV%PART_INDEX,OPT_WALL_INDEX=IW)
+                     SELECT CASE(DV%STATISTICS)
                         CASE('MAX')
-                           STAT_VALUE = MAX(STAT_VALUE, &
-                                       GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                        DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM))
+                           STAT_VALUE = MAX(STAT_VALUE,VALUE)
                         CASE('MIN')
-                           STAT_VALUE = MIN(STAT_VALUE, &
-                                       GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                        DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM))
+                           STAT_VALUE = MIN(STAT_VALUE,VALUE)
                         CASE('MEAN')
-                           STAT_VALUE = STAT_VALUE + &
-                                       GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                        DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM)
+                           STAT_VALUE = STAT_VALUE + VALUE
                            STAT_COUNT = STAT_COUNT + 1
-                        CASE('VOLUME INTEGRAL')
-                           STAT_VALUE = STAT_VALUE + &
-                                       GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                        DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM)*VOL
-                        CASE('MASS INTEGRAL')
-                           STAT_VALUE = STAT_VALUE + &
-                                       GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                        DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM)* &
-                                       VOL*RHO(I,J,K)
-                        CASE('AREA INTEGRAL')
-                           SELECT CASE (ABS(DV%IOR))
-                              CASE(1)
-                                 STAT_VALUE = STAT_VALUE + RC(I)*DY(J)*DZ(K)* &
-                                              GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                               DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM)
-                              CASE(2)
-                                 STAT_VALUE = STAT_VALUE + DX(I)*DZ(K)* &
-                                              GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                               DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM)
-                              CASE(3)
-                                 STAT_VALUE = STAT_VALUE + DX(I)*RC(I)*DY(J)* &
-                                              GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                               DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM)
-                           END SELECT
-                        CASE('TENSOR SURFACE INTEGRAL')
-                           ! similar to 'AREA INTEGRAL' but multiplies by outward unit normal and sums along outside of volume XB
-                           
-                           IND=0
-                           IF (DV%QUANTITY=='F_X') IND=1
-                           IF (DV%QUANTITY=='F_Y') IND=2
-                           IF (DV%QUANTITY=='F_Z') IND=3
-                           
-                           IF (DV%I1/=DV%I2) THEN
-                              IF (I==DV%I1) STAT_VALUE = STAT_VALUE - RC(I)*DY(J)*DZ(K)*TENSOR_OUTPUT(I,J,K,IND,-1,NM)
-                              IF (I==DV%I2) STAT_VALUE = STAT_VALUE + RC(I)*DY(J)*DZ(K)*TENSOR_OUTPUT(I,J,K,IND,+1,NM)
-                           ENDIF
-                           
-                           IF (DV%J1/=DV%J2) THEN              
-                              IF (J==DV%J1) STAT_VALUE = STAT_VALUE - DX(I)*DZ(K)*TENSOR_OUTPUT(I,J,K,IND,-2,NM)
-                              IF (J==DV%J2) STAT_VALUE = STAT_VALUE + DX(I)*DZ(K)*TENSOR_OUTPUT(I,J,K,IND,+2,NM)
-                           ENDIF
-                        
-                           IF (DV%K1/=DV%K2) THEN
-                              IF (K==DV%K1) STAT_VALUE = STAT_VALUE - DX(I)*DY(J)*TENSOR_OUTPUT(I,J,K,IND,-3,NM)
-                              IF (K==DV%K2) STAT_VALUE = STAT_VALUE + DX(I)*DY(J)*TENSOR_OUTPUT(I,J,K,IND,+3,NM)
-                           ENDIF
-                        
-                        CASE('VOLUME MEAN')
-                           STAT_VALUE = STAT_VALUE + &
-                                        GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
-                                                         DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM)*VOL
-                           SUM_VALUE = SUM_VALUE + VOL
-                        CASE('MASS MEAN')
-                           STAT_VALUE = STAT_VALUE + VOL*RHO(I,J,K)* &
-                                        GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,&
-                                                         DV%Z_INDEX,DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM)
-                           SUM_VALUE = SUM_VALUE + VOL*RHO(I,J,K)
+                        CASE('SURFACE INTEGRAL')
+                           STAT_VALUE = STAT_VALUE + VALUE*WALL(IW)%AW 
+                     END SELECT
+                  ENDIF
+               ENDDO WALL_CELL_LOOP
+
+         END SELECT SOLID_STATS_SELECT
+
+      CASE(1:299) OUTPUT_INDEX_SELECT ! gas phase
+
+         GAS_STATS_SELECT: SELECT CASE(DV%STATISTICS)
+
+            CASE('null','RMS','TIME MIN','TIME MAX') GAS_STATS_SELECT
+
+               VALUE = GAS_PHASE_OUTPUT(DV%I,DV%J,DV%K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,DV%PART_INDEX,DV%VELO_INDEX,&
+                                        DV%PIPE_INDEX,T,NM)
+
+            CASE('TIME INTEGRAL') GAS_STATS_SELECT
+
+               VALUE = DV%TI_VALUE + (T-DV%TI_T)*GAS_PHASE_OUTPUT(DV%I,DV%J,DV%K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
+                                                                  DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM)
+               DV%TI_VALUE = VALUE
+               DV%TI_T = T
+
+            CASE DEFAULT GAS_STATS_SELECT
+
+               K_DEVICE_CELL_LOOP: DO K=DV%K1,DV%K2
+                  J_DEVICE_CELL_LOOP: DO J=DV%J1,DV%J2
+                     I_DEVICE_CELL_LOOP: DO I=DV%I1,DV%I2
+                        IF (SOLID(CELL_INDEX(I,J,K))) CYCLE I_DEVICE_CELL_LOOP
+                        VOL = DX(I)*RC(I)*DY(J)*DZ(K)
+                        NOT_FOUND = .FALSE.
+                        STATISTICS_SELECT: SELECT CASE(DV%STATISTICS)
+                           CASE('MAX')
+                              STAT_VALUE = MAX(STAT_VALUE, &
+                                               GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
+                                                                DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM))
+                           CASE('MIN')
+                              STAT_VALUE = MIN(STAT_VALUE, &
+                                               GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
+                                                                DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM))
+                           CASE('MEAN')
+                              STAT_VALUE = STAT_VALUE + GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
+                                                                         DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM)
+                              STAT_COUNT = STAT_COUNT + 1
+                           CASE('VOLUME INTEGRAL')
+                              STAT_VALUE = STAT_VALUE + GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
+                                                                         DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM)*VOL
+                           CASE('MASS INTEGRAL')
+                              STAT_VALUE = STAT_VALUE + GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
+                                                                         DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM)* &
+                                                                         VOL*RHO(I,J,K)
+                           CASE('AREA INTEGRAL')
+                              SELECT CASE (ABS(DV%IOR))
+                                 CASE(1)
+                                    STAT_VALUE = STAT_VALUE + RC(I)*DY(J)*DZ(K)* &
+                                                 GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
+                                                                  DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM)
+                                 CASE(2)
+                                    STAT_VALUE = STAT_VALUE + DX(I)*DZ(K)* &
+                                                 GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
+                                                                  DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM)
+                                 CASE(3)
+                                    STAT_VALUE = STAT_VALUE + DX(I)*RC(I)*DY(J)* &
+                                                 GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
+                                                                  DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM)
+                              END SELECT
+                           CASE('TENSOR SURFACE INTEGRAL')
+                              ! similar to 'AREA INTEGRAL' but multiplies by outward unit normal and sums along outside of XB
+                              IND=0
+                              IF (DV%QUANTITY=='F_X') IND=1
+                              IF (DV%QUANTITY=='F_Y') IND=2
+                              IF (DV%QUANTITY=='F_Z') IND=3
+                              IF (DV%I1/=DV%I2) THEN
+                                 IF (I==DV%I1) STAT_VALUE = STAT_VALUE - RC(I)*DY(J)*DZ(K)*TENSOR_OUTPUT(I,J,K,IND,-1,NM)
+                                 IF (I==DV%I2) STAT_VALUE = STAT_VALUE + RC(I)*DY(J)*DZ(K)*TENSOR_OUTPUT(I,J,K,IND,+1,NM)
+                              ENDIF
+                              IF (DV%J1/=DV%J2) THEN              
+                                 IF (J==DV%J1) STAT_VALUE = STAT_VALUE - DX(I)*DZ(K)*TENSOR_OUTPUT(I,J,K,IND,-2,NM)
+                                 IF (J==DV%J2) STAT_VALUE = STAT_VALUE + DX(I)*DZ(K)*TENSOR_OUTPUT(I,J,K,IND,+2,NM)
+                              ENDIF
+                              IF (DV%K1/=DV%K2) THEN
+                                 IF (K==DV%K1) STAT_VALUE = STAT_VALUE - DX(I)*DY(J)*TENSOR_OUTPUT(I,J,K,IND,-3,NM)
+                                 IF (K==DV%K2) STAT_VALUE = STAT_VALUE + DX(I)*DY(J)*TENSOR_OUTPUT(I,J,K,IND,+3,NM)
+                              ENDIF
+                           CASE('VOLUME MEAN')
+                              STAT_VALUE = STAT_VALUE + &
+                                           GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,DV%Z_INDEX,&
+                                                            DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM)*VOL
+                              SUM_VALUE = SUM_VALUE + VOL
+                           CASE('MASS MEAN')
+                              STAT_VALUE = STAT_VALUE + VOL*RHO(I,J,K)* &
+                                           GAS_PHASE_OUTPUT(I,J,K,DV%OUTPUT_INDEX,0,DV%Y_INDEX,&
+                                                            DV%Z_INDEX,DV%PART_INDEX,DV%VELO_INDEX,DV%PIPE_INDEX,T,NM)
+                              SUM_VALUE = SUM_VALUE + VOL*RHO(I,J,K)
                      END SELECT STATISTICS_SELECT
-                  ENDDO DEVICE_CELL_LOOP
-               ENDDO
-            ENDDO
+                  ENDDO I_DEVICE_CELL_LOOP
+               ENDDO J_DEVICE_CELL_LOOP
+            ENDDO K_DEVICE_CELL_LOOP
 
-         ENDIF GAS_STATS
-      ENDIF GAS_OR_HVAC
+         END SELECT GAS_STATS_SELECT
 
-   ELSE GAS_OR_SOLID_PHASE            
+      CASE(300:1000) OUTPUT_INDEX_SELECT ! hvac
 
-      SOLID_STATS: IF (DV%STATISTICS=='null' .OR. DV%STATISTICS=='RMS') THEN
+         VALUE = HVAC_OUTPUT(DV%OUTPUT_INDEX,DV%Y_INDEX,DV%Z_INDEX,DV%DUCT_INDEX,DV%NODE_INDEX)
 
-         IF (DV%WALL_INDEX>0) THEN
-            VALUE = SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Z_INDEX,DV%PART_INDEX,OPT_WALL_INDEX=DV%WALL_INDEX)
-         ELSEIF (DV%LP_TAG>0) THEN
-            CALL GET_LAGRANGIAN_PARTICLE_INDEX(NM,DV%PART_INDEX,DV%LP_TAG,LP_INDEX)
-            IF (LP_INDEX>0) THEN
-               VALUE = SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Z_INDEX,DV%PART_INDEX,OPT_LP_INDEX=LP_INDEX)
-            ELSE
-               CYCLE DEVICE_LOOP
-            ENDIF
-         ENDIF
-
-      ELSEIF (DV%STATISTICS=='TIME INTEGRAL') THEN SOLID_STATS
-
-         VALUE = DV%TI_VALUE + (T-DV%TI_T)*SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Z_INDEX,&
-                                                              DV%PART_INDEX,OPT_WALL_INDEX=DV%WALL_INDEX)
-         DV%TI_VALUE = VALUE
-         DV%TI_T = T
-
-      ELSE SOLID_STATS
-
-         WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-            IF (WALL(IW)%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE WALL_CELL_LOOP
-            IF (WALL(IW)%XW<DV%X1-MICRON .OR. WALL(IW)%XW>DV%X2+MICRON .OR. &
-                WALL(IW)%YW<DV%Y1-MICRON .OR. WALL(IW)%YW>DV%Y2+MICRON .OR. &
-                WALL(IW)%ZW<DV%Z1-MICRON .OR. WALL(IW)%ZW>DV%Z2+MICRON) CYCLE WALL_CELL_LOOP
-            SURF_INDEX = WALL(IW)%SURF_INDEX
-            IF (DV%SURF_ID=='null' .OR. SURFACE(SURF_INDEX)%ID==DV%SURF_ID) THEN
-               NOT_FOUND = .FALSE.
-               VALUE = SOLID_PHASE_OUTPUT(NM,ABS(DV%OUTPUT_INDEX),DV%Z_INDEX,DV%PART_INDEX,OPT_WALL_INDEX=IW)
-               SELECT CASE(DV%STATISTICS)
-                  CASE('MAX')
-                     STAT_VALUE = MAX(STAT_VALUE,VALUE)
-                  CASE('MIN')
-                     STAT_VALUE = MIN(STAT_VALUE,VALUE)
-                  CASE('MEAN')
-                     STAT_VALUE = STAT_VALUE + VALUE
-                     STAT_COUNT = STAT_COUNT + 1
-                  CASE('SURFACE INTEGRAL')
-                     STAT_VALUE = STAT_VALUE + VALUE*WALL(IW)%AW 
-               END SELECT
-            ENDIF
-         ENDDO WALL_CELL_LOOP
-
-      ENDIF SOLID_STATS
-
-   ENDIF GAS_OR_SOLID_PHASE
+   END SELECT OUTPUT_INDEX_SELECT
 
    ! Update DEViCe values
 
    SELECT CASE (DV%STATISTICS)
       CASE('null')
       CASE('RMS')
+      CASE('TIME MIN')
+      CASE('TIME MAX')
       CASE('TIME INTEGRAL')
       CASE('MASS MEAN','VOLUME MEAN')
          VALUE = STAT_VALUE / SUM_VALUE
@@ -4301,14 +4299,19 @@ DEVICE_LOOP: DO N=1,N_DEVC
    DV%INSTANT_VALUE = VALUE
 
    IF (DV%LINE>0) THEN
-      DV%TIME_INTERVAL = 1._EB
-      DV%AVERAGE_VALUE = (1._EB-WGT)*DV%AVERAGE_VALUE + WGT*DV%INSTANT_VALUE
-      DV%RMS_VALUE     = (1._EB-WGT)*DV%RMS_VALUE     + WGT*(DV%INSTANT_VALUE-DV%AVERAGE_VALUE)**2
-      IF (DV%STATISTICS=='RMS') THEN
-         DV%VALUE = SQRT(DV%RMS_VALUE)
-      ELSE
-         DV%VALUE = DV%AVERAGE_VALUE
+      DV%TIME_INTERVAL  = 1._EB
+      DV%AVERAGE_VALUE  = (1._EB-WGT)*DV%AVERAGE_VALUE + WGT*DV%INSTANT_VALUE
+      DV%RMS_VALUE      = (1._EB-WGT)*DV%RMS_VALUE     + WGT*(DV%INSTANT_VALUE-DV%AVERAGE_VALUE)**2
+      IF (T>(T_END-DT_DEVC_LINE)) THEN
+         DV%TIME_MIN_VALUE = MIN(DV%TIME_MIN_VALUE,DV%INSTANT_VALUE)
+         DV%TIME_MAX_VALUE = MAX(DV%TIME_MAX_VALUE,DV%INSTANT_VALUE)
       ENDIF
+      SELECT CASE(DV%STATISTICS)
+         CASE('RMS');      DV%VALUE = SQRT(DV%RMS_VALUE)
+         CASE('TIME MIN'); DV%VALUE = DV%TIME_MIN_VALUE
+         CASE('TIME MAX'); DV%VALUE = DV%TIME_MAX_VALUE
+         CASE DEFAULT;     DV%VALUE = DV%AVERAGE_VALUE
+      END SELECT
    ELSEIF (DV%TIME_AVERAGED .AND. OUTPUT_QUANTITY(DV%OUTPUT_INDEX)%TIME_AVERAGED) THEN
       DV%TIME_INTERVAL = DV%TIME_INTERVAL + DT
       DV%VALUE = DV%VALUE + VALUE*DT
