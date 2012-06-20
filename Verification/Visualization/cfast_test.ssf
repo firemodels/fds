@@ -19,4 +19,25 @@ SETTIMEVAL
  400.000000
 RENDERONCE
  cfast_test_400
+LOADINIFILE
+ cfast_test_smoke.ini
+UNLOADALL
+LOADFILE
+ cfast_test_zone.csv
+SETTIMEVAL
+ 100.000000
+RENDERONCE
+ cfast_test_smoke_100
+SETTIMEVAL
+ 200.000000
+RENDERONCE
+ cfast_test_smoke_200
+SETTIMEVAL
+ 300.000000
+RENDERONCE
+ cfast_test_smoke_300
+SETTIMEVAL
+ 400.000000
+RENDERONCE
+ cfast_test_smoke_400
  
