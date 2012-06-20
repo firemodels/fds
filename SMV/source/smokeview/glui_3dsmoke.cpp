@@ -298,7 +298,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   glui_3dsmoke->add_column_to_panel(panel_overall,false);
 
   if(nvolrenderinfo>0){
-    panel_volume = glui_3dsmoke->add_rollout_to_panel(panel_overall,_("Volume Render Settings"),FALSE);
+    panel_volume = glui_3dsmoke->add_rollout_to_panel(panel_overall,_("Volume Render Settings"),false);
     if(have_volcompressed==1){
       loadvolgroup = glui_3dsmoke->add_radiogroup_to_panel(panel_volume,&glui_load_volcompressed,LOAD_COMPRESSED_DATA,SMOKE_3D_CB);
         glui_3dsmoke->add_radiobutton_to_group(loadvolgroup,_("Load full data"));
@@ -339,7 +339,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   }
 
   if(nsmoke3dinfo>0){
-    panel_slices = glui_3dsmoke->add_rollout_to_panel(panel_overall,_("Slice render settings"),TRUE);
+    panel_slices = glui_3dsmoke->add_rollout_to_panel(panel_overall,_("Slice render settings"),true);
     panel_slices->set_alignment(GLUI_ALIGN_LEFT);
  
 #ifdef pp_GPU
