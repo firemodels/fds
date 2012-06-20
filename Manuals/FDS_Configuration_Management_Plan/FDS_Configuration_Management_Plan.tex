@@ -287,13 +287,19 @@ the products are necessarily those best suited for the intended purpose.
 \chapter{Preface}
 
 This is Volume 4 of the FDS Technical Reference Guide. Volume 1 describes the mathematical model and numerical method. Volumes~2 and 3 document past and
-present model verification and validation work, respectively. Instructions for using FDS are contained in a separate User's Guide~\cite{FDS_Users_Guide}.
+present model verification and validation work, respectively. Instructions for using FDS are contained in a separate User's Guide~\cite{FDS_Users_Guide}. The purpose of this document is to describe the policies and procedures for developing and maintaining the Fire Dynamics
+Simulator (FDS) and the companion visualization program, Smokeview. Such a document is commonly referred to as a {\em Configuration Management Plan}, known through the rest of this document as ``the Plan.'' This document will be updated as the necessity arises and will establish and provide the basis for a uniform and concise standard of practice for FDS and Smokeview
+development. It is based in part on IEEE Standard 828~\cite{IEEE-828} and ASTM~E1355~\cite{ASTM:E1355}.
 
-The volumes that make up the FDS Technical Reference Guide are based in part on the ASTM E 1355, {\em Standard Guide for Evaluating the Predictive Capability of
+The volumes that make up the FDS Technical Reference Guide are based in part on ASTM E 1355, {\em Standard Guide for Evaluating the Predictive Capability of
 Deterministic Fire Models}~\cite{ASTM:E1355}. ASTM~E~1355 outlines the process of assessing the accuracy of a fire model. Volumes~1 through 3 are the
 result of this evaluation process. The main purpose of the present volume is to describe the process by which the model software is developed and maintained. A model such
 as FDS cannot remain static. As progress is made in fire science, the model needs to be updated and improved, but still shown to reliably predict the kinds of
 phenomena for which it was originally designed.
+
+This document applies only to the program FDS, its companion visualization program called Smokeview,  the related NIST and VTT publications and Internet
+sites, and the various utility programs that support FDS and Smokeview. This document does not apply to third-party software developed by others
+not affiliated with NIST, VTT, or its software development collaborators.
 
 
 
@@ -313,28 +319,9 @@ are described in the Guide, including the source code repository, issue tracking
 \mainmatter
 
 
-\chapter{Model Overview}
+\chapter{Overview of FDS and Smokeview}
 
-
-The purpose of this document is to describe the policies and procedures for developing and maintaining the Fire Dynamics
-Simulator (FDS). Such a document is commonly referred to as a {\em Configuration Management Plan}, known through the rest of this document as ``the Plan.'' This document
-will be updated as the necessity arises and will establish and provide the basis for a uniform and concise standard of practice for the FDS
-development process. It is based in part on IEEE Standard 828~\cite{IEEE-828} and ASTM~E1355~\cite{ASTM:E1355}.
-
-
-\section{Overview of the Fire Dynamics Simulator (FDS) Software Project}
-
-FDS is a Computational Fluid Dynamics (CFD) model of fire-driven fluid flow. The model solves numerically a form of the Navier-Stokes equations
-appropriate for low-speed, thermally-driven flow with an emphasis on smoke and heat transport from fires. The partial derivatives of the conservation
-equations of mass, momentum and energy are approximated as finite differences, and the solution is updated in time on a three-dimensional,
-rectilinear grid. Thermal radiation is computed using a finite volume technique on the same grid as the flow solver. Lagrangian particles are used to
-simulate smoke movement, sprinkler discharge, and fuel sprays.
-
-\section{Applicability}
-
-This document applies only to the program FDS, its companion visualization program called Smokeview,  the related NIST publications and Internet
-site, and the various utility programs that support the two main programs. This document does not apply to third-party software developed by others
-not affiliated with NIST or its software development collaborators.
+This chapter provides a brief overview of the Fire Dynamics Simulator (FDS) and Smokeview, including its history, developers, features, and applications.
 
 
 \section{Type of Model}
@@ -358,11 +345,10 @@ the input file containing all the necessary information needed to perform a simu
 
 \section{Version History}
 
-Version 1 of FDS was publicly released in February 2000, version 2 in December 2001, version 3 in November 2002, and version 4 in July 2004. The
-present version of FDS is 5, first released in October, 2007.
+Version 1 of FDS was publicly released in February 2000, version 2 in December 2001, version 3 in November 2002, version 4 in July 2004, version 5 in October 2007, and version 6 in September 2012.
 
 Starting with FDS 5, a formal revision management system has been implemented to track changes to the FDS source code. The open-source program
-development tools are provided by an Internet-based organization known as Google Code (code.google.com).
+development tools are provided by an Internet-based organization known as GoogleCode (code.google.com).
 
 The version number for FDS has three parts.  For example, FDS 5.2.12 indicates that this is FDS 5, the fifth major release. The 2 indicates a
 significant upgrade (a minor release), but still within the framework of FDS 5.  The 12 indicates the twelveth maintenance release of 5.2, mostly bug fixes and minor user
@@ -372,19 +358,15 @@ requests.
 \section{Model Developers}
 
 
-Currently, FDS is maintained by the Engineering Laboratory, Fire Research Division, of National Institute of Standards and Technology.
-The developers at NIST have formed a loose collaboration of interested stake holders, including:
+Currently, FDS is developed by the NIST Engineering Laboratory, Fire Research Division, in cooperation with VTT Technical Research Centre of Finland.
+The developers at NIST and VTT have formed a loose collaboration of interested stake holders, including:
 \begin{itemize}
-\item VTT Technical Research Centre of Finland, a research and testing
-laboratory similar to NIST
-\item The Society of Fire Protection Engineers (SFPE) who conduct training classes on the use of FDS
-\item Fire protection engineering firms that use the software
-\item Engineering departments at various universities with a particular emphasis on fire
+\item The various contributors listed at the start of this report,
+\item The Society of Fire Protection Engineers (SFPE) who conduct training classes on the use of FDS,
+\item Fire protection engineering firms that use the software,
+\item Some recipients of external grants awarded by the NIST Fire Research Division,
+\item Engineering departments at various universities with a particular emphasis on fire.
 \end{itemize}
-NIST awards grants on a competitive basis to external organizations who conduct research in fire science and engineering. Some of these grants have
-been used to assist the development of FDS. The role of the grantee in supporting day to day development varies. Not all of the developers outside of
-NIST are grantees.
-
 Starting with Version 5, the FDS development team uses an Internet-based development environment called GoogleCode, a free service of the search
 engine company, Google. GoogleCode is a widely used service designed to assist open source software development by providing a repository for source
 code, revision control, program distribution, bug tracking, and various other very useful services.
@@ -547,7 +529,7 @@ sprays are modeled by Lagrangian particles that represent a sampling of the wate
 \section{Limitations}
 
 Although FDS can address most fire scenarios, there are limitations in all of its various algorithms. Some of the more prominent limitations of the
-model are listed here. 
+model are listed here.
 \begin{description}
 \item[Low Speed Flow Assumption] The use of FDS is limited to low-speed\footnote{Mach numbers less than about 0.3} flow
 with an emphasis on smoke and heat transport from fires. This assumption rules out using the model for any scenario involving flow speeds approaching
@@ -579,7 +561,7 @@ suppression agent like water mist or CO$_2$ is introduced, fuel and oxygen are a
 criteria. The physical mechanisms underlying these phenomena are complex, and are tied closely to the flame temperature and local strain rate,
 neither of which are readily-available in a large scale fire simulation. Subgrid-scale modeling of gas phase suppression and extinction is still an
 area of active research in the combustion community. Until reliable models can be developed for building-scale fire simulations, simple empirical
-rules can be used that prevent burning from taking place when the atmosphere immediately surrounding the fire cannot sustain the combustion. 
+rules can be used that prevent burning from taking place when the atmosphere immediately surrounding the fire cannot sustain the combustion.
 \item[Radiation] Radiative heat transfer is included in the model via
 the solution of the radiation transport equation (RTE) for a gray gas, and in some limited cases using a wide band model.  The RTE is solved using a
 technique similar to finite volume methods for convective transport, thus the name given to it is the Finite Volume Method (FVM). There are several
@@ -617,9 +599,9 @@ The central location is known as the {\em Repository}.
 
 \subsection{Project Repository}
 
-All project documents are maintained using the online utility \href{http://code.google.com/opensource}{{Google Code Project Hosting}}, a free service
-offered by Google to support software development for open source applications.  Google Code uses the \href{http://subversion.tigris.org}{{Subversion}} (SVN) revision management system.
-Under this system a centralized repository containing all project files resides on a Google Code server.
+All project documents are maintained using the online utility \href{http://code.google.com/opensource}{{GoogleCode Project Hosting}}, a free service
+offered by Google to support software development for open source applications.  GoogleCode uses the \href{http://subversion.tigris.org}{{Subversion}} (SVN) revision management system.
+Under this system a centralized repository containing all project files resides on a GoogleCode server.
 Subversion uses a single integer that identifies the version of the entire repository rather than of a specific file
 (i.e. anytime a change is made to the repository all files are incremented in version number).  A record of version number when a specific file was last changed is maintained.
 
@@ -637,6 +619,8 @@ The current location of the FDS repository is \href{http://fds-smv.googlecode.co
 \item Scripts and post-processing utilities used for software testing
 \item Web pages and wikis
 \end{enumerate}
+
+In the event of a unexpected change to the GoogleCode service and/or the FDS repository, each member of the development team, plus interested third parties, has a copy of the repository on their local computer. At NIST, the staff computers are regularly backed up as well. Thus, there is very little chance that the project repository will be lost. If need be, the files can be moved to another open source software development site, such as SourceForge. It is expected that if Google decides to end its support for GoogleCode, it will provide its users with the full history of the project.
 
 \subsection{Version Identification}
 
@@ -712,7 +696,7 @@ algorithms in FDS often are based on their acceptance among the practicing engin
 \subsection{Creating a Change Request}
 
 Change requests are submitted using the FDS Issue Tracker.  The Issue Tracker is an online service that is part of
-Google Code.  To submit a new issue to the tracker or to provide follow up comments, the user must sign in with a Google Account.
+GoogleCode.  To submit a new issue to the tracker or to provide follow up comments, the user must sign in with a Google Account.
 The current location of the Issue Tracker can be found through a link under the 'Support' section of the menu
 on the FDS-SMV website \href{http://code.google.com/p/fds-smv/issues/list}{[Link to Tracker]}.
 
@@ -758,6 +742,8 @@ Once a developer has addressed a change request, the modified files are committe
 of the changes will be added to the SVN change log.  This description first identifies the primary component being
 changed (for example: FDS Source or FDS Documentation).  This component identification will be followed by a brief
 summary of the changes made.  The issue identifier will be included as part of that brief description.
+
+Changes to the FDS source code and supporting documentation are reviewed by other members of the team. There is no formal system with which changes are reviewed because the frequency of changes makes it impractical. As a general rule, all team members watch for unintentional commits of copyrighted material or algorithms, and also proprietary data or case studies collected from an end user. FDS itself does not include copyrighted or proprietary data, but occasionally this kind of information is submitted by an end user who has submitted a bug report.
 
 \subsection{Change Verification}
 
