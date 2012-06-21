@@ -10,9 +10,11 @@ echo.
 echo Wrapping up FDS and Smokeview installation.
 echo.
 echo.
-echo Removing pre 5.4 FDS/Smokeview entries (if present) from the System Path.
+echo echo Removing pre 6.0 FDS/Smokeview entries (if present) from the system and user path.
 
 call "%CD%\set_path.exe" -s -m -b -r "nist\fds"
+call "%CD%\set_path.exe" -s -m -b -r "FDS\FDS5"
+call "%CD%\set_path.exe" -u -m -b -r "FDS\FDS5"
 
 echo.
 echo Associating the smv file extension with smokeview_win_64.exe
@@ -20,7 +22,7 @@ echo Associating the smv file extension with smokeview_win_64.exe
 ftype smvDoc="%CD%\bin\smokeview_win_64.exe" "%%1" >Nul
 assoc .smv=smvDoc>Nul
 
-set FDSSTART=%USERPROFILE%\Start Menu\Programs\FDS6
+set FDSSTART=%USERPROFILE%\Start Menu\Programs\%fds_edition%
 
 echo. 
 echo Adding FDS and Smokeview shortcuts to the Start menu.
@@ -47,9 +49,9 @@ mkdir "%FDSSTART%\Guides and Release Notes"
 "%CD%\shortcut.exe" /F:"%FDSSTART%\Overview.lnk"  /T:"%CD%\Documentation\Overview.html" /A:C >NUL
 
 echo.
-echo Adding %CD%\bin to the User Path (if absent) for: %USERNAME%
+echo Adding %CD%\bin to the system path 
 
-call "%CD%\set_path.exe" -m -a "%CD%\bin"
+call "%CD%\set_path.exe" -s -m -a "%CD%\bin"
 
 erase "%CD%"\set_path.exe
 erase "%CD%"\shortcut.exe
