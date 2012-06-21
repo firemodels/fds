@@ -41,19 +41,17 @@ echo filling distribution directory
 IF EXIST %smvdir% rmdir /S /Q %smvdir%
 mkdir %smvdir%
 
-if "%platform%"=="32" echo copying smokeview_win_%platform%.exe to smokeview.exe
-if "%platform%"=="32" copy %smvbuild%\smokeview_win_%platform%.exe %smvdir%\smokeview.exe
-if "%platform%"=="64" echo copying smokeview_win_%platform%.exe
-if "%platform%"=="64" copy %smvbuild%\smokeview_win_%platform%.exe %smvdir%\.
+echo copying smokeview_win_%platform%.exe to smokeview%fdssmv_major_version%_win_%platform%.exe
+copy %smvbuild%\smokeview_win_%platform%.exe %smvdir%\smokeview%fdssmv_major_version%_win_%platform%.exe
 
 echo copying .po files
 copy *.po %smvdir%\.
 
-echo copying smokezip_win_%platform%.exe
-copy %svzipbuild%\smokezip_win_%platform%.exe %smvdir%\.
+echo copying smokezip_win_%platform%.exe to smokezip%fdssmv_major_version%_win_%platform%.exe
+copy %svzipbuild%\smokezip_win_%platform%.exe %smvdir%\smokezip%fdssmv_major_version%_win_%platform%.exe
 
-echo copying smokediff_win_%platform%.exe
-copy %svdiffbuild%\smokediff_win_%platform%.exe %smvdir%\.
+echo copying smokediff_win_%platform%.exe smokediff%fdssmv_major_version%_win_%platform%.exe
+copy %svdiffbuild%\smokediff_win_%platform%.exe %smvdir%\smokediff%fdssmv_major_version%_win_%platform%.exe
 
 echo copying background.exe
 copy %bgbuild%\background.exe %smvdir%\.

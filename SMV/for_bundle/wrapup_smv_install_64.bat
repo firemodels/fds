@@ -13,7 +13,7 @@ echo.
 echo.
 echo Associating the .smv file extension with smokeview_win_64.exe
 
-ftype smvDoc="%CD%\smokeview_win_64.exe" "%%1" >Nul
+ftype smvDoc="%CD%\smokeview%fdssmv_major_version%_win_64.exe" "%%1" >Nul
 assoc .smv=smvDoc>Nul
 
 echo Press any key to complete update.

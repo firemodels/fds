@@ -1,14 +1,17 @@
 @echo off
 Rem ------ FDS/Smokeview version and revision numbers ---------
 
-set smv_version=6.0.0
-set smv_revision=10900
-set fds_version=test_9967
-set fds_revision=9967
-set fds_edition=FDS5
+set smv_version=6.0.1
+set smv_revision=11112
+
+set fds_version=6.0bundletest
+set fds_revision=11109
+
+set fdssmv_major_version=6
 
 Rem ---------- FDS-Smokeview repository settings ------------
 
+set fds_edition=FDS%fdssmv_major_version%
 set svn_root=%userprofile%\fds-smv
 set svn_drive=c:
 set linux_svn_root=FDS-SMV
