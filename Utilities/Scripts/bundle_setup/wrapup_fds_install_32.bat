@@ -20,7 +20,7 @@ echo Associating the smv file extension with smokeview_win_32.exe
 ftype smvDoc="%CD%\bin\smokeview%smv_major_version%_win_32.exe" "%%1" >Nul
 assoc .smv=smvDoc>Nul
 
-set FDSSTART=%USERPROFILE%\Start Menu\Programs\%fds_edition%
+set FDSSTART=%USERPROFILE%\Start Menu\Programs\FDS6
 
 echo. 
 echo Adding FDS and Smokeview shortcuts to the Start menu.

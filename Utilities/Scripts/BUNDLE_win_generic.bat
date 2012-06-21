@@ -44,26 +44,26 @@ mkdir %out_examples%
 mkdir %out_uninstall%
 
 echo.
-echo copying fds_win_%platform%.exe
+echo copying fds_win_%platform%.exe to fds%fdssmv_major_version%_win_%platform%.exe
 copy %fdsdir%\fds_win_%platform%.exe         %out_bin%\fds%fdssmv_major_version%_win_%platform%.exe
 
-echo copying fds_mpi_win_%platform%.exe
+echo copying fds_mpi_win_%platform%.exe to fds%fdssmv_major_version%_mpi_win_%platform%.exe
 copy %fdsmpidir%\fds_mpi_win_%platform%.exe  %out_bin%\fds%fdssmv_major_version%_mpi_win_%platform%.exe
 
-echo copying smokeview_win_%platform%.exe
+echo copying smokeview_win_%platform%.exe to smokeview%fdssmv_major_version%_win_%platform%.exe
 copy %in_smv%\smokeview_win_%platform%.exe   %out_bin%\smokeview%fdssmv_major_version%_win_%platform%.exe
 
-echo copying smokediff_win_%platform%.exe
+echo copying smokediff_win_%platform%.exe to smokediff%fdssmv_major_version%_win_%platform%.exe
 copy %in_smokediff%\intel_win_%platform%\smokediff_win_%platform%.exe     %out_bin%\smokediff%fdssmv_major_version%_win_%platform%.exe
 
-echo copying smokezip_win_%platform%.exe
+echo copying smokezip_win_%platform%.exe to smokezip%fdssmv_major_version%_win_%platform%.exe
 copy %in_smokezip%\intel_win_%platform%\smokezip_win_%platform%.exe       %out_bin%\smokezip%fdssmv_major_version%_win_%platform%.exe 
 
-echo copying fds2ascii_win_%platform%.exe
+echo copying fds2ascii_win_%platform%.exe to fds2ascii%fdssmv_major_version%_win_%platform%.exe
 copy %in_fds2ascii%\intel_win_%platform%\fds2ascii_win_%platform%.exe     %out_bin%\fds2ascii%fdssmv_major_version%_win_%platform%.exe
 
 echo copying background.exe
-copy %in_background%\intel_win_%platform%\background.exe %out_bin%\background.exe
+copy %in_background%\intel_win_32\background.exe %out_bin%\background.exe
 
 echo.
 echo Creating Manifiest
@@ -82,24 +82,24 @@ echo Versions:>> %manifest%
 echo. >> %manifest%
 
 echo -------------------------- >> %manifest%
-echo | %out_bin%\fds_win_%platform%.exe 2>> %manifest%
+echo | %out_bin%\fds%fdssmv_major_version%_win_%platform%.exe 2>> %manifest%
 echo. >> %manifest%
 echo -------------------------- >> %manifest%
-echo | %out_bin%\fds_mpi_win_%platform%.exe 2>> %manifest%
+echo | %out_bin%\fds%fdssmv_major_version%_mpi_win_%platform%.exe 2>> %manifest%
 
 echo. >> %manifest%
 echo -------------------------- >> %manifest%
-%out_bin%\fds2ascii_win_%platform%.exe -v >>%manifest%
+%out_bin%\fds2ascii%fdssmv_major_version%_win_%platform%.exe -v >>%manifest%
 
 echo. >> %manifest%
 echo -------------------------- >> %manifest%
-%out_bin%\smokeview_win_%platform%.exe -v >> %manifest%
+%out_bin%\smokeview%fdssmv_major_version%_win_%platform%.exe -v >> %manifest%
 echo. >> %manifest%
 echo -------------------------- >> %manifest%
-%out_bin%\smokediff_win_%platform%.exe -v >> %manifest%
+%out_bin%\smokediff%fdssmv_major_version%_win_%platform%.exe -v >> %manifest%
 echo. >> %manifest%
 echo -------------------------- >> %manifest%
-%out_bin%\smokezip_win_%platform%.exe -v >> %manifest%
+%out_bin%\smokezip%fdssmv_major_version%_win_%platform%.exe -v >> %manifest%
 
 echo. >> %manifest%
 echo -------------------------- >> %manifest%
