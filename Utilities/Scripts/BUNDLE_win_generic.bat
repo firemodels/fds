@@ -45,22 +45,22 @@ mkdir %out_uninstall%
 
 echo.
 echo copying fds_win_%platform%.exe
-copy %fdsdir%\fds_win_%platform%.exe         %out_bin%\.
+copy %fdsdir%\fds_win_%platform%.exe         %out_bin%\fds%fdssmv_major_version%_win_%platform%.exe
 
 echo copying fds_mpi_win_%platform%.exe
-copy %fdsmpidir%\fds_mpi_win_%platform%.exe  %out_bin%\.
+copy %fdsmpidir%\fds_mpi_win_%platform%.exe  %out_bin%\fds%fdssmv_major_version%_mpi_win_%platform%.exe
 
 echo copying smokeview_win_%platform%.exe
-copy %in_smv%\smokeview_win_%platform%.exe   %out_bin%\.
+copy %in_smv%\smokeview_win_%platform%.exe   %out_bin%\smokeview%fdssmv_major_version%_win_%platform%.exe
 
 echo copying smokediff_win_%platform%.exe
-copy %in_smokediff%\intel_win_%platform%\smokediff_win_%platform%.exe     %out_bin%\.
+copy %in_smokediff%\intel_win_%platform%\smokediff_win_%platform%.exe     %out_bin%\smokediff%fdssmv_major_version%_win_%platform%.exe
 
 echo copying smokezip_win_%platform%.exe
-copy %in_smokezip%\intel_win_%platform%\smokezip_win_%platform%.exe     %out_bin%\.
+copy %in_smokezip%\intel_win_%platform%\smokezip_win_%platform%.exe       %out_bin%\smokezip%fdssmv_major_version%_win_%platform%.exe 
 
 echo copying fds2ascii_win_%platform%.exe
-copy %in_fds2ascii%\intel_win_%platform%\fds2ascii_win_%platform%.exe     %out_bin%\.
+copy %in_fds2ascii%\intel_win_%platform%\fds2ascii_win_%platform%.exe     %out_bin%\fds2ascii%fdssmv_major_version%_win_%platform%.exe
 
 echo copying background.exe
 copy %in_background%\intel_win_%platform%\background.exe %out_bin%\background.exe
