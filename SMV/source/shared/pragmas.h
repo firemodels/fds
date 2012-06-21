@@ -2,7 +2,7 @@
 // $Revision$
 // $Author$
 
-#ifdef pp_WIN_INTEL
+#ifdef pp_INTEL
 #pragma warning (disable:1786)
 #pragma warning (disable:177)		
 #pragma warning (disable:2557)		/* comparison between signed and unsigned operands */
@@ -19,6 +19,7 @@
 #pragma warning (disable:2259)
 #pragma warning (disable:1678)		/* cannot enable speculation unless fenv_access and exception_semantics are disabled */
 #else
+#ifdef WIN32
 #pragma warning (disable:4305)		/* truncation from 'double' to 'GLfloat' */
 #pragma warning (disable:4244)		/* truncation from '__w64' to 'int' */
 #pragma warning (disable:4267)		/* conversion from size_t to int */
@@ -29,4 +30,5 @@
 #pragma warning (disable:4389)		/* signed/unsigned mismatch */
 #pragma warning (disable:4189)		/* local variable set but not referenced */
 #pragma warning (disable:4206)		/* translation unit empty */
+#endif
 #endif

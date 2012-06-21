@@ -4,7 +4,7 @@
 
 #ifndef HISTOGRAM_H_DEFINED
 #define HISTOGRAM_H_DEFINED
-#ifdef pp_WIN_INTEL
+#ifdef INTEL
 #pragma warning (disable:2259)
 #pragma warning (disable:1572)
 #endif

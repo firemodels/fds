@@ -570,10 +570,12 @@ void display_version_info(void){
 #else
     printf("Platform: WIN32 ");
 #endif
-#ifdef pp_WIN_INTEL
+#ifdef pp_INTEL
     printf(" (Intel C/C++)\n");
 #else
+#ifdef WIN32
     printf(" (MSVS C/C++)\n");
+#endif
 #endif
 #endif
 #ifndef pp_OSX64

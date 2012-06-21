@@ -14,7 +14,7 @@
 #pragma float_control( except, on )
 #endif
 
-#ifdef pp_WIN_INTEL
+#ifdef pp_INTEL
 #pragma warning (disable:4996)		
 #pragma warning (disable:4701)		
 #pragma warning (disable:4310)		
