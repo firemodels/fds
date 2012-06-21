@@ -113,7 +113,7 @@ gcc_win_32 : $(obj)
 
 intel_win_32 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
 intel_win_32 : FFLAGS    = -O2 -fpp -D pp_cvf /iface:stdref /arch:IA32
-intel_win_32 : CFLAGS    = -O2 -D WIN32 -D _CONSOLE  -D GLEW_STATIC /arch:IA32
+intel_win_32 : CFLAGS    = -O2 -D WIN32 -D pp_INTEL -D _CONSOLE  -D GLEW_STATIC /arch:IA32
 intel_win_32 : LFLAGS    = /F32768000 
 intel_win_32 : CC        = icl
 intel_win_32 : CPP       = icl
@@ -127,7 +127,7 @@ intel_win_32 : $(objwin)
 
 intel_win_test_32 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
 intel_win_test_32 : FFLAGS    = -O2 -fpp -D pp_cvf -D pp_BETA   /iface:stdref /arch:IA32
-intel_win_test_32 : CFLAGS    = -O2 -D WIN32 -D _CONSOLE -D pp_BETA -D GLEW_STATIC /arch:IA32
+intel_win_test_32 : CFLAGS    = -O2 -D WIN32 -D pp_INTEL -D _CONSOLE -D pp_BETA -D GLEW_STATIC /arch:IA32
 intel_win_test_32 : LFLAGS    = /F32768000 
 intel_win_test_32 : CC        = icl
 intel_win_test_32 : CPP       = icl
@@ -141,7 +141,7 @@ intel_win_test_32 : $(objwin)
 
 intel_win_64 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
 intel_win_64 : FFLAGS    = -O2 -fpp -D pp_cvf -D X64 /iface:stdref
-intel_win_64 : CFLAGS    = -O2 -D WIN32 -D _CONSOLE -D X64 -D GLEW_STATIC
+intel_win_64 : CFLAGS    = -O2 -D WIN32 -D pp_INTEL -D _CONSOLE -D X64 -D GLEW_STATIC
 intel_win_64 : LFLAGS    = /F32768000 
 intel_win_64 : CC        = icl
 intel_win_64 : CPP       = icl
@@ -155,7 +155,7 @@ intel_win_64 : $(objwin)
 
 intel_win_test_64 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
 intel_win_test_64 : FFLAGS    = -O2 -traceback -fpp -D pp_cvf -D pp_BETA -D X64 /iface:stdref
-intel_win_test_64 : CFLAGS    = -O2 -traceback -D WIN32 -D _CONSOLE -D X64 -D pp_BETA -D GLEW_STATIC
+intel_win_test_64 : CFLAGS    = -O2 -traceback -D WIN32 -D pp_INTEL -D _CONSOLE -D X64 -D pp_BETA -D GLEW_STATIC
 intel_win_test_64 : LFLAGS    = /F32768000
 intel_win_test_64 : CC        = icl
 intel_win_test_64 : CPP       = icl
@@ -212,7 +212,7 @@ LINUX_INTEL_LIBS = -lifcore  -lintlc
 # ------------- intel_linux_32 ----------------
 
 intel_linux_32 : FFLAGS    = -O2 -m32 -static-intel -vec_report0 -fpp -D pp_noappend
-intel_linux_32 : CFLAGS    = -O2 -m32 -static-intel -vec_report0 -D pp_LINUX
+intel_linux_32 : CFLAGS    = -O2 -m32 -static-intel -vec_report0 -D pp_LINUX -D pp_INTEL 
 intel_linux_32 : LFLAGS    = -m32 -static-intel
 intel_linux_32 : CC        = icc 
 intel_linux_32 : CPP       = icpc
@@ -225,7 +225,7 @@ intel_linux_32 : $(obj)
 # ------------- intel_linux_test_32 ----------------
 
 intel_linux_test_32 : FFLAGS    = -O2 -m32 -static-intel -vec_report0 -fpp -D pp_noappend
-intel_linux_test_32 : CFLAGS    = -O2 -m32 -static-intel -vec_report0 -D pp_BETA -D pp_LINUX
+intel_linux_test_32 : CFLAGS    = -O2 -m32 -static-intel -vec_report0 -D pp_BETA -D pp_LINUX -D pp_INTEL 
 intel_linux_test_32 : LFLAGS    = -m32 -static-intel
 intel_linux_test_32 : CC        = icc 
 intel_linux_test_32 : CPP       = icpc
@@ -238,7 +238,7 @@ intel_linux_test_32 : $(obj)
 # ------------- intel_linux_32_dbg ----------------
 
 intel_linux_32_dbg : FFLAGS    = -O0 -m32 -static-intel -traceback -g -fpe0 -fltconsistency -WB -vec_report0 -fpp -D pp_noappend
-intel_linux_32_dbg : CFLAGS    = -O0 -g -m32 -static-intel -vec_report0 -D pp_LINUX
+intel_linux_32_dbg : CFLAGS    = -O0 -g -m32 -static-intel -vec_report0 -D pp_LINUX -D pp_INTEL 
 intel_linux_32_dbg : LFLAGS    = -m32 -static-intel
 intel_linux_32_dbg : CC        = icc 
 intel_linux_32_dbg : CPP       = icpc
@@ -251,7 +251,7 @@ intel_linux_32_dbg : $(obj)
 # ------------- intel_linux_64 ----------------
 
 intel_linux_64 : FFLAGS    = -O2 -m64 -static-intel -vec_report0 -fpp -D pp_noappend
-intel_linux_64 : CFLAGS    = -O2 -m64 -static-intel -vec_report0 -D pp_LINUX64
+intel_linux_64 : CFLAGS    = -O2 -m64 -static-intel -vec_report0 -D pp_LINUX64 -D pp_INTEL 
 intel_linux_64 : LFLAGS    = -m64 -static-intel
 intel_linux_64 : CC        = icc 
 intel_linux_64 : CPP       = icpc
@@ -264,7 +264,7 @@ intel_linux_64 : $(obj)
 # ------------- intel_linux_test_64 ----------------
 
 intel_linux_test_64 : FFLAGS    = -O2 -m64 -static-intel -traceback -vec_report0 -fpp -D pp_noappend
-intel_linux_test_64 : CFLAGS    = -O2 -m64 -static-intel -traceback -vec_report0 -D pp_LINUX64 -D pp_BETA
+intel_linux_test_64 : CFLAGS    = -O2 -m64 -static-intel -traceback -vec_report0 -D pp_LINUX64 -D pp_BETA -D pp_INTEL 
 intel_linux_test_64 : LFLAGS    = -m64 -static-intel -traceback
 intel_linux_test_64 : CC        = icc 
 intel_linux_test_64 : CPP       = icpc
@@ -277,7 +277,7 @@ intel_linux_test_64 : $(obj)
 # ------------- intel_linux_test_64_dbg ----------------
 
 intel_linux_test_64_dbg : FFLAGS    = -O0 -m64 -static-intel -traceback -g -fpe0 -fltconsistency -WB -vec_report0 -fpp -D pp_noappend
-intel_linux_test_64_dbg : CFLAGS    = -O0 -g -m64 -static-intel -vec_report0 -D pp_LINUX64 -D pp_BETA
+intel_linux_test_64_dbg : CFLAGS    = -O0 -g -m64 -static-intel -vec_report0 -D pp_LINUX64 -D pp_BETA -D pp_INTEL 
 intel_linux_test_64_dbg : LFLAGS    = -m64 -static-intel
 intel_linux_test_64_dbg : CC        = icc 
 intel_linux_test_64_dbg : CPP       = icpc
@@ -291,7 +291,7 @@ intel_linux_test_64_dbg : $(obj)
 # ------------- intel_linux_64_dbg ----------------
 
 intel_linux_64_dbg : FFLAGS    = -O0 -m64 -static-intel -traceback -g -fpe0 -fltconsistency -WB -vec_report0 -fpp -D pp_noappend
-intel_linux_64_dbg : CFLAGS    = -O0 -g -m64 -static-intel -vec_report0 -D pp_LINUX64
+intel_linux_64_dbg : CFLAGS    = -O0 -g -m64 -static-intel -vec_report0 -D pp_LINUX64 -D pp_INTEL 
 intel_linux_64_dbg : LFLAGS    = -m64 -static-intel
 intel_linux_64_dbg : CC        = icc 
 intel_linux_64_dbg : CPP       = icpc
@@ -304,7 +304,7 @@ intel_linux_64_dbg : $(obj)
 # ------------- intel_linux_64_profile ----------------
 
 intel_linux_64_profile : FFLAGS    = -O2 -m64 -static-intel -vec_report0 -fpp -D pp_noappend -p
-intel_linux_64_profile : CFLAGS    = -O2 -m64 -static-intel -vec_report0 -D pp_LINUX64 -p
+intel_linux_64_profile : CFLAGS    = -O2 -m64 -static-intel -vec_report0 -D pp_LINUX64 -D pp_INTEL -p
 intel_linux_64_profile : LFLAGS    = -m64 -static-intel
 intel_linux_64_profile : CC        = icc 
 intel_linux_64_profile : CPP       = icpc
@@ -346,7 +346,7 @@ OSX_INTEL_LIBS_64 = $(OSX_FORT_LIBDIR_64)/libifcoremt.a $(OSX_FORT_LIBDIR_64)/li
 # ------------- intel_osx_32 ----------------
 
 intel_osx_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_OSX
-intel_osx_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_OSX
+intel_osx_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_OSX -D pp_INTEL 
 intel_osx_32 : LFLAGS    = -m32 -static-intel -mmacosx-version-min=10.4 -framework OpenGL -framework GLUT
 intel_osx_32 : CC        = icc 
 intel_osx_32 : CPP       = icpc
@@ -359,7 +359,7 @@ intel_osx_32 : $(obj)
 # ------------- intel_osx_test_32 ----------------
 
 intel_osx_test_32 : FFLAGS    = -O2 -m32 -vec_report0 -fpp -D pp_OSX -D pp_BETA
-intel_osx_test_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_OSX -D pp_BETA
+intel_osx_test_32 : CFLAGS    = -O2 -m32 -vec_report0 -D pp_OSX -D pp_BETA -D pp_INTEL 
 intel_osx_test_32 : LFLAGS    = -m32 -static-intel -mmacosx-version-min=10.4 -framework OpenGL -framework GLUT
 intel_osx_test_32 : CC        = icc 
 intel_osx_test_32 : CPP       = icpc
@@ -372,7 +372,7 @@ intel_osx_test_32 : $(obj)
 # ------------- intel_osx_64 ----------------
 
 intel_osx_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_OSX64 -mmaccox-version-min=10.4
-intel_osx_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_OSX64 -mmacosx-version-min=10.4
+intel_osx_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_OSX64  -D pp_INTEL -mmacosx-version-min=10.4
 intel_osx_64 : LFLAGS    = -m64 -static-intel -framework OpenGL -framework GLUT -mmacosx-version-min=10.4
 intel_osx_64 : CC        = icc 
 intel_osx_64 : CPP       = icpc
@@ -385,7 +385,7 @@ intel_osx_64 : $(obj)
 # ------------- intel_osx_test_64 ----------------
 
 intel_osx_test_64 : FFLAGS    = -O2 -m64 -vec_report0 -fpp -D pp_OSX64 -D pp_BETA
-intel_osx_test_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_OSX64 -D pp_BETA
+intel_osx_test_64 : CFLAGS    = -O2 -m64 -vec_report0 -D pp_OSX64 -D pp_BETA -D pp_INTEL 
 intel_osx_test_64 : LFLAGS    = -m64 -static-intel -framework OpenGL -framework GLUT -mmacosx-version-min=10.4
 intel_osx_test_64 : CC        = icc 
 intel_osx_test_64 : CPP       = icpc
@@ -398,7 +398,7 @@ intel_osx_test_64 : $(obj)
 # ------------- intel_osx_test_64_db ----------------
 
 intel_osx_test_64_dbg : FFLAGS    = -O0 -m64 -traceback -g -fpe0 -fltconsistency -WB -vec_report0 -fpp -D pp_BETA -D pp_OSX64 -D pp_noappend -D _DEBUG
-intel_osx_test_64_dbg : CFLAGS    = -O0 -g -m64 -vec_report0 -D pp_OSX64 -D pp_BETA -D _DEBUG
+intel_osx_test_64_dbg : CFLAGS    = -O0 -g -m64 -vec_report0 -D pp_OSX64 -D pp_BETA -D _DEBUG -D pp_INTEL 
 intel_osx_test_64_dbg : LFLAGS    = -m64 -static-intel -framework OpenGL -framework GLUT -mmacosx-version-min=10.4
 intel_osx_test_64_dbg : CC        = icc 
 intel_osx_test_64_dbg : CPP       = icpc
