@@ -166,6 +166,8 @@ for i=2:2000
                 Save_Measured_Metric(i,j,1) = mean(M(indices,d1_Dep_Col));
             elseif strcmp(Metric,'all')
                 Save_Measured_Metric(i,j,:) = M(indices,d1_Dep_Col);
+            elseif strcmp(Metric,'threshold')
+                Save_Measured_Metric(i,j,1) = min(M(indices,d1_Dep_Col));
             else
                 Save_Measured_Metric(i,j,1) = 0;
             end
@@ -207,6 +209,8 @@ for i=2:2000
                 Save_Predicted_Metric(i,j,1) = mean(M(indices,d2_Dep_Col));
             elseif strcmp(Metric,'all')
                 Save_Predicted_Metric(i,j,:) = M(indices,d2_Dep_Col);
+            elseif strcmp(Metric,'threshold')
+                Save_Predicted_Metric(i,j,1) = min(M(indices,d2_Dep_Col));
             else
                 Save_Predicted_Metric(i,j,1) = 0;
             end
