@@ -16,5 +16,7 @@ echo Associating the .smv file extension with smokeview.exe
 ftype smvDoc="%CD%\smokeview.exe" "%%1" >Nul
 assoc .smv=smvDoc>Nul
 
+echo Press any key to complete update
+pause>NUL
 erase "%CD%"\wrapup_smv_install.bat
 
