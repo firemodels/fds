@@ -9539,6 +9539,16 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
          DV%SETPOINT = 0.5
          DV%TRIP_DIRECTION = 1
 
+      CASE ('CONTROL VALUE')
+
+         DO NN=1,N_CTRL
+            IF (CONTROL(NN)%ID==DV%CTRL_ID) DV%CTRL_INDEX = NN
+         ENDDO
+         IF (DV%CTRL_ID/='null' .AND. DV%CTRL_INDEX<=0) THEN
+            WRITE(MESSAGE,'(A,A,A)')  'ERROR: CONTROL ',TRIM(DV%CTRL_ID),' does not exist'
+            CALL SHUTDOWN(MESSAGE)
+         ENDIF
+         
       CASE ('ASPIRATION')
 
          ! Check either for a specified SMOKE SPECies, or if simple chemistry model is being used

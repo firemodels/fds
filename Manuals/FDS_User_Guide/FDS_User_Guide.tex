@@ -8246,7 +8246,9 @@ include the attribute {\ct LATCH=.FALSE.} on the relevant {\ct DEVC} or {\ct CTR
 By default, devices and controls may only change state once, like a sprinkler activating or
 smoke detector alarming. {\ct LATCH=.TRUE.} by default for both devices and controls.
 
-The output value of mathematical control functions are available for use by defining a {\ct DEVC} with {\ct QUANTITY='CONTROL'} and setting the {\ct CTRL\_ID} on the {\ct DEVC} input to the {\ct ID} of the control function.
+If you want a {\ct DEVC}, such as a nozzle, to operate based on the logical state of a {\ct CTRL} use {\ct QUANTITY='CONTROL'} and set the {\ct CTRL\_ID} on the {\ct DEVC} input to the {\ct ID} of the control function.
+
+The output value of mathematical control functions are available for use by defining a {\ct DEVC} with {\ct QUANTITY='CONTROL VALUE'} and setting the {\ct CTRL\_ID} on the {\ct DEVC} input to the {\ct ID} of the control function.  You could then use {\ct SETPOINT} to have the {\ct DEVC} operate a particular output value of the mathematical control functions.
 
 \subsection{Control Functions: \texorpdfstring{{\tt ANY}}{ANY}, \texorpdfstring{{\tt ALL}}{ALL}, \texorpdfstring{{\tt ONLY}}{ONLY}, and
 \texorpdfstring{{\tt AT\_LEAST}}{AT\_LEAST}}
@@ -10095,6 +10097,7 @@ remember that all output quantity names ought to be in single quotes.
 {\ct CHAMBER OBSCURATION}                       & Section~\ref{info:smoke_detector}             & \%/m           & D            \\ \hline
 {\ct CONDUCTIVITY}                              & $k$                                           & W/m/k          & D,I,P,S      \\ \hline
 {\ct CONTROL}                                   & Section~\ref{info:CTRL}                       &                & D            \\ \hline
+{\ct CONTROL VALUE}                             & Section~\ref{info:CTRL}                       &                & D            \\ \hline
 {\ct CONVECTIVE HEAT FLUX}                      & $\dq_c''$ (Section~\ref{info:heat_flux})      & kW/m$^2$       & B,D          \\ \hline
 {\ct CPUA}$^{**}$                               & Section~\ref{info:part_output}                & kW/m$^2$       & B,D          \\ \hline
 {\ct CPU TIME}                                  & Elapsed CPU time                              & s              & D            \\ \hline
