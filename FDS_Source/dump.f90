@@ -2527,19 +2527,19 @@ DO N=0,N_TRACKED_SPECIES
    ENDDO
    ITMP = NINT(TMPA)
    WRITE(LU_OUTPUT,'(A)') ' '
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Viscosity (kg/m/s)   Ambient (273 K): ',MU_Z(ITMP,N)*SM%MW
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Viscosity (kg/m/s)   Ambient (293 K): ',MU_Z(ITMP,N)*SM%MW
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ',MU_Z( 500,N)*SM%MW
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ',MU_Z(1000,N)*SM%MW
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ',MU_Z(1500,N)*SM%MW
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Therm. Cond. (W/m/K) Ambient (273 K): ', K_Z(ITMP,N)*SM%MW
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Therm. Cond. (W/m/K) Ambient (293 K): ', K_Z(ITMP,N)*SM%MW
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', K_Z( 500,N)*SM%MW
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', K_Z(1000,N)*SM%MW
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', K_Z(1500,N)*SM%MW
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Spec. Heat (J/kg/K)  Ambient (273 K): ',CP_Z(ITMP,N)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Spec. Heat (J/kg/K)  Ambient (293 K): ',CP_Z(ITMP,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ',CP_Z( 500,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ',CP_Z(1000,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ',CP_Z(1500,N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Diff. Coeff. (m^2/s) Ambient (273 K): ', D_Z(ITMP,N)
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Diff. Coeff. (m^2/s) Ambient (293 K): ', D_Z(ITMP,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', D_Z( 500,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', D_Z(1000,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', D_Z(1500,N)               
@@ -2551,6 +2551,7 @@ IF (N_REACTIONS>0) WRITE(LU_OUTPUT,'(//A)') ' Gas Phase Reaction Information'
 
 REACTION_LOOP: DO N=1,N_REACTIONS
    RN => REACTION(N)
+   IF (.NOT. EDC) THEN
    
    SELECT CASE (COMBUSTION_ODE)
       CASE (SINGLE_EXACT)
@@ -2632,6 +2633,41 @@ REACTION_LOOP: DO N=1,N_REACTIONS
          WRITE(LU_OUTPUT,'(/A)') '   Fuel                           Heat of Combustion (kJ/kg)'    
          WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') RN%FUEL,RN%HEAT_OF_COMBUSTION/1000._EB
    END SELECT
+ELSE
+   SELECT CASE (COMBUSTION_ODE)     
+      CASE (EXPLICIT_EULER)
+         ODE_SOLVER = 'EXPLICIT EULER'
+      CASE (EDCM_RK2)
+            ODE_SOLVER = 'EDCM RK2'
+   END SELECT
+   
+   IF (RN%FYI/='null') WRITE(LU_OUTPUT,'(/3X,A)') RN%FYI
+   IF (RN%ID/='null')  WRITE(LU_OUTPUT,'(/3X,A)') RN%ID   
+   
+   WRITE(LU_OUTPUT,'(/3X,A)')  'Eddy Dissipation Concept Reaction'
+   WRITE(LU_OUTPUT,'(3X,A,A)')  'ODE Solver:  ', ODE_SOLVER
+   WRITE(LU_OUTPUT,'(/3X,A)') 'Tracked Species'
+   WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'         
+   DO NN=0,N_TRACKED_SPECIES
+      IF (ABS(RN%NU(NN)) <=ZERO_P) CYCLE
+      WRITE(LU_OUTPUT,'(3X,A,1X,F12.6)') SPECIES_MIXTURE(NN)%ID,RN%NU(NN) 
+   ENDDO
+   WRITE(LU_OUTPUT,'(/3X,A)') 'Detailed Species'
+   WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'
+   DO NN=1,N_SPECIES
+      IF (ABS(RN%NU_SPECIES(NN))>=ZERO_P) WRITE(LU_OUTPUT,'(3X,A,1X,F9.4)') SPECIES(NN)%ID,RN%NU_SPECIES(NN)
+   ENDDO
+   WRITE(LU_OUTPUT,'(/A)') '   Species ID                     Rate Exponent'
+   DO NN=1,N_SPECIES
+     IF (RN%N_S(NN) <=-998._EB) CYCLE
+     WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') SPECIES(NN)%ID,RN%N_S(NN) 
+   ENDDO
+   WRITE(LU_OUTPUT,'(/A)') '   Arrhenius Constants'
+   WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Pre-exponential:  ',RN%A
+   WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Activation Energy:',RN%E
+   WRITE(LU_OUTPUT,'(/A)') '   Fuel                           Heat of Combustion (kJ/kg)'    
+   WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') RN%FUEL,RN%HEAT_OF_COMBUSTION/1000._EB
+ENDIF      
 ENDDO REACTION_LOOP
 
 ! Print out information about materials

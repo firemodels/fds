@@ -86,19 +86,22 @@ DO K=1,KBAR
          IF (.NOT. DO_REACTION) CYCLE ILOOP
          DZZ(1:N_TRACKED_SPECIES) = ZZ_GET(1:N_TRACKED_SPECIES) ! store old ZZ for divergence term
          ! Easily allow for user selected ODE solver
-         SELECT CASE (COMBUSTION_ODE)
-            CASE(SINGLE_EXACT)
-               CALL ODE_EXACT(I,J,K,ZZ_GET,Q(I,J,K))
-            CASE(EXPLICIT_EULER)
-               CALL ODE_EXPLICIT_EULER(I,J,K,ZZ_GET,Q(I,J,K))
-            CASE(RUNGE_KUTTA_2)
-               CALL ODE_RUNGE_KUTTA_2(I,J,K,ZZ_GET,Q(I,J,K))
-            CASE(RK2_RICHARDSON)
-               CALL ODE_RK2_RICHARDSON(I,J,K,ZZ_GET,Q(I,J,K))
-            CASE(EDCM_RK2)
-               CALL EDC_MODEL(I,J,K,ZZ_GET,Q(I,J,K))
-         END SELECT        
-
+         IF (.NOT. EDC) THEN
+            SELECT CASE (COMBUSTION_ODE)
+               CASE(SINGLE_EXACT)
+                  CALL ODE_EXACT(I,J,K,ZZ_GET,Q(I,J,K))
+               CASE(EXPLICIT_EULER)
+                  CALL ODE_EXPLICIT_EULER(I,J,K,ZZ_GET,Q(I,J,K))
+               CASE(RUNGE_KUTTA_2)
+                  CALL ODE_RUNGE_KUTTA_2(I,J,K,ZZ_GET,Q(I,J,K))
+               CASE(RK2_RICHARDSON)
+                  CALL ODE_RK2_RICHARDSON(I,J,K,ZZ_GET,Q(I,J,K))
+               CASE(EDCM_RK2)
+                  CALL EDC_MODEL(I,J,K,ZZ_GET,Q(I,J,K))
+            END SELECT
+         ELSE
+            CALL COMBUSTION_MODEL(I,J,K,ZZ_GET,Q(I,J,K))
+         ENDIF
          ! Update RSUM and ZZ       
          Q_IF: IF (ABS(Q(I,J,K)) > ZERO_P) THEN
             Q_EXISTS = .TRUE.
@@ -116,7 +119,6 @@ DO K=1,KBAR
                ENDDO
             ENDIF CP_IF
          ENDIF Q_IF
-
       ENDDO ILOOP
    ENDDO
 ENDDO
@@ -1212,9 +1214,7 @@ SELECT CASE (MODE)
       ENDIF     
 
 END SELECT
-
 RETURN
-
 CONTAINS
 
 LOGICAL FUNCTION EXTINCTION(I,J,K,ZZ_IN)
@@ -1267,7 +1267,6 @@ ELSE
    IF ( (DZ_FUEL*CPBAR_F_0 + DZ_AIR*CPBAR_G_0)*TMP(I,J,K) + DZ_FUEL*RN%HEAT_OF_COMBUSTION < &
          (DZ_FUEL*CPBAR_F_N + DZ_AIR*CPBAR_G_N)*RN%CRIT_FLAME_TMP) EXTINCTION = .TRUE.
 ENDIF
-
 END FUNCTION EXTINCTION
 
 
@@ -1276,14 +1275,450 @@ INTEGER, INTENT(IN) :: I,J,K
 REAL(EB) :: EPSK
 
 ! ke dissipation rate, assumes production=dissipation
-
 EPSK = MU(I,J,K)*STRAIN_RATE(I,J,K)**2/RHO(I,J,K)
-
 KSGS = 2.25_EB*(EPSK*DELTA/PI)**TWTH  ! estimate of subgrid ke, from Kolmogorov spectrum
 
 END FUNCTION KSGS
-
 END SUBROUTINE COMPUTE_RATE_CONSTANT
+
+!---------------------------------------------------------------------------------------------------------------------------
+!---------------------------------------------------------------------------------------------------------------------------
+! Stand alone EDCM 
+!---------------------------------------------------------------------------------------------------------------------------
+!---------------------------------------------------------------------------------------------------------------------------
+   
+SUBROUTINE COMBUSTION_MODEL(I,J,K,ZZ_GET,Q_OUT)
+USE COMP_FUNCTIONS, ONLY: SHUTDOWN
+INTEGER,INTENT(IN):: I,J,K
+REAL(EB),INTENT(OUT):: Q_OUT
+REAL(EB),INTENT(INOUT) :: ZZ_GET(0:N_TRACKED_SPECIES)
+REAL(EB) :: ZZ_0(0:N_TRACKED_SPECIES),DZZDT1_1(0:N_TRACKED_SPECIES),DZZDT1_2(0:N_TRACKED_SPECIES),DZZDT2_1(0:N_TRACKED_SPECIES), &
+            DZZDT2_2(0:N_TRACKED_SPECIES),DZZDT4_1(0:N_TRACKED_SPECIES),DZZDT4_2(0:N_TRACKED_SPECIES),RATE_CONSTANT(1:N_REACTIONS),&
+            RATE_CONSTANT2(1:N_REACTIONS),ERR_EST,ERR_TOL,ZZ_TEMP(0:N_TRACKED_SPECIES),Q_SPEC(0:N_TRACKED_SPECIES),&
+            A1(0:N_TRACKED_SPECIES),A2(0:N_TRACKED_SPECIES),A4(0:N_TRACKED_SPECIES),Q_SUM,Q_CALC,&
+            DT_SUB,DT_SUB_NEW,DT_ITER,ZZ_STORE(0:N_TRACKED_SPECIES,0:3),TV(0:2),ZZ_DIFF(0:2),&
+            PHI(0:N_TRACKED_SPECIES),ZZ_GET_0(0:N_TRACKED_SPECIES),ZETA_0,ZETA,ZETA1,CELL_VOLUME,CELL_MASS,&
+            DZZDT(0:N_TRACKED_SPECIES),SPEC_MIX_MASS(0:N_TRACKED_SPECIES,0:1),TOTAL_MIX_MASS(0:1),TAU_D,TAU_G,TAU_U,DELTA
+REAL(EB), PARAMETER :: DT_SUB_MIN=1.E-10_EB
+INTEGER :: NR,NS,NSS,ITER,TVI,RICH_ITER
+INTEGER, PARAMETER :: NODETS=20,SUB_DT1=1,SUB_DT2=2,SUB_DT4=4,TV_ITER_MIN=5,Q_ITER_MAX=10,RICH_ITER_MAX=100
+TYPE(REACTION_TYPE),POINTER :: RN=>NULL()
+
+FIXED_TIME: IF (FIXED_MIX_TIME>0._EB) THEN
+   MIX_TIME(I,J,K)=FIXED_MIX_TIME                  
+   ELSE FIXED_TIME
+      IF (TWO_D) THEN
+         DELTA = MAX(DX(I),DZ(K))
+      ELSE
+         DELTA = MAX(DX(I),DY(J),DZ(K))
+      ENDIF
+      TAU_D=0._EB
+      DO NR =1,N_REACTIONS               
+         RN => REACTION(NR)
+         TAU_D = MAX(TAU_D,D_Z(MIN(4999,NINT(TMP(I,J,K))),RN%FUEL_SMIX_INDEX))
+      ENDDO
+      TAU_D = DELTA**2/TAU_D
+      LES_IF: IF (LES) THEN                      
+         IF (TURB_MODEL==DEARDORFF) THEN
+            TAU_U = 0.1_EB*SC*RHO(I,J,K)*DELTA**2/MU(I,J,K) ! turbulent mixing time scale
+         ELSE
+            TAU_U = DELTA/SQRT(2._EB*KSGS(I,J,K)+1.E-10_EB) ! advective time scale
+         ENDIF
+         TAU_G = SQRT(2._EB*DELTA/(GRAV+1.E-10_EB)) ! acceleration time scale
+         MIX_TIME(I,J,K)=MAX(TAU_CHEM,MIN(TAU_D,TAU_U,TAU_G,TAU_FLAME)) ! Eq. 7, McDermott, McGrattan, Floyd
+      ELSE LES_IF
+         MIX_TIME(I,J,K)= TAU_D
+      ENDIF LES_IF
+ENDIF FIXED_TIME 
+
+ZZ_STORE(:,:) = 0._EB      
+Q_OUT = 0._EB
+Q_CALC = 0._EB
+ITER= 0
+RICH_ITER = 0
+DT_ITER = 0._EB
+DT_SUB = DT 
+DT_SUB_NEW = DT_SUB
+ERR_TOL = RICHARDSON_ERROR_TOLERANCE
+
+ZZ_GET_0 = ZZ_GET
+ZZ_TEMP = ZZ_GET       
+PHI = ZZ_GET_0
+ZETA_0 = INITIAL_UNMIXED_FRACTION
+ZETA = ZETA_0
+ZETA1 = ZETA_0
+CELL_VOLUME = DX(I)*DY(J)*DZ(K)
+CELL_MASS = RHO(I,J,K)*CELL_VOLUME
+DO NS=0,1
+   TOTAL_MIX_MASS(NS) = (1-ZETA_0)*CELL_MASS
+   SPEC_MIX_MASS(:,NS) = ZZ_GET*TOTAL_MIX_MASS(NS)
+ENDDO
+
+INTEGRATION_LOOP: DO WHILE (DT_ITER < DT)
+   IF (COMBUSTION_ODE /= EDCM_RK2) THEN ! Explicit Euler
+      ZETA = ZETA_0*EXP(-DT_SUB/MIX_TIME(I,J,K))
+      TOTAL_MIX_MASS(1) = (1-ZETA)*CELL_MASS  
+      SPEC_MIX_MASS(:,1) = SPEC_MIX_MASS(:,0) + (ZETA_0-ZETA)*CELL_MASS*ZZ_GET_0
+      PHI = SPEC_MIX_MASS(:,1)/(TOTAL_MIX_MASS(1))
+
+      ZZ_0 = MAX(0._EB,PHI)
+      DZZDT1_1 = 0._EB
+      RATE_CONSTANT = 0._EB
+      REACTION_LOOP: DO NR = 1, N_REACTIONS   
+         RN => REACTION(NR)
+         CALL COMPUTE_RATE_CONSTANT_EDCM1(NR,RATE_CONSTANT(NR),ZZ_0,I,J,K,DT_SUB,ITER)
+         DZZDT = RN%NU*SPECIES_MIXTURE%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW*RATE_CONSTANT(NR)
+         IF (ANY(ZZ_0 + (DZZDT1_1+DZZDT)*DT_SUB < 0._EB)) THEN
+            DO NSS=0,N_TRACKED_SPECIES
+               IF (ZZ_0(NSS) + (DZZDT(NSS)+DZZDT1_1(NSS))*DT_SUB < 0._EB .AND. ABS(DZZDT(NSS))>ZERO_P) THEN
+                  RATE_CONSTANT(NR) = MIN(RATE_CONSTANT(NR),ZZ_0(NSS)/&
+                  ((ABS(RN%NU(NSS))*SPECIES_MIXTURE(NSS)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW)*DT_SUB))
+               ENDIF
+            ENDDO
+            DZZDT = RN%NU*SPECIES_MIXTURE%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW*RATE_CONSTANT(NR)
+         ENDIF
+         DZZDT1_1 = DZZDT1_1+DZZDT
+      ENDDO REACTION_LOOP  
+      IF (ALL(DZZDT1_1 < 0._EB)) EXIT INTEGRATION_LOOP    
+      A1 = ZZ_0 + DZZDT1_1*DT_SUB    
+   ELSE ! RK2 w/ Richardson
+   ERR_EST = 10._EB*ERR_TOL
+   SPEC_MIX_MASS(:,0) = PHI*TOTAL_MIX_MASS(1)
+   ZETA = ZETA1
+  
+   RICH_EX_LOOP: DO WHILE (ERR_EST > ERR_TOL)    
+      DT_SUB = DT_SUB_NEW
+      IF (DT_ITER + DT_SUB > DT) THEN
+         DT_SUB = DT - DT_ITER      
+      ENDIF  
+
+      ZETA1 = ZETA_0*EXP(-DT_SUB/MIX_TIME(I,J,K))
+      TOTAL_MIX_MASS(1) = (1-ZETA1)*CELL_MASS     
+      SPEC_MIX_MASS(:,1) = SPEC_MIX_MASS(:,0) + (ZETA-ZETA1)*CELL_MASS*ZZ_GET_0
+      PHI = SPEC_MIX_MASS(:,1)/(TOTAL_MIX_MASS(1))
+
+      !--------------------
+      ! Calculate A1 term
+      ! Time step = DT_SUB
+      !--------------------
+      ZZ_0 = MAX(0._EB,PHI)
+      ODE_LOOP1: DO NS = 1, SUB_DT1
+         DZZDT1_1 = 0._EB
+         DZZDT1_2 = 0._EB
+         RATE_CONSTANT = 0._EB
+         RATE_CONSTANT2 = 0._EB
+         REACTION_LOOP1_1: DO NR = 1, N_REACTIONS   
+            RN => REACTION(NR)
+            CALL COMPUTE_RATE_CONSTANT_EDCM1(NR,RATE_CONSTANT(NR),ZZ_0,I,J,K,DT_SUB,ITER)
+            DZZDT = RN%NU*SPECIES_MIXTURE%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW*RATE_CONSTANT(NR)
+            IF (ANY(ZZ_0 + (DZZDT1_1+DZZDT)*DT_SUB < 0._EB)) THEN
+               DO NSS=0,N_TRACKED_SPECIES
+                  IF (ZZ_0(NSS) + (DZZDT(NSS)+DZZDT1_1(NSS))*DT_SUB < 0._EB .AND. ABS(DZZDT(NSS))>ZERO_P) THEN
+                     RATE_CONSTANT(NR) = MIN(RATE_CONSTANT(NR),ZZ_0(NSS)/&
+                     ((ABS(RN%NU(NSS))*SPECIES_MIXTURE(NSS)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW)*DT_SUB))
+                  ENDIF
+               ENDDO
+               DZZDT = RN%NU*SPECIES_MIXTURE%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW*RATE_CONSTANT(NR)
+            ENDIF
+            DZZDT1_1 = DZZDT1_1+DZZDT
+         ENDDO REACTION_LOOP1_1 
+         A1 = ZZ_0 + DZZDT1_1*DT_SUB
+                         
+         REACTION_LOOP1_2: DO NR = 1, N_REACTIONS   
+            RN => REACTION(NR)
+            CALL COMPUTE_RATE_CONSTANT_EDCM1(NR,RATE_CONSTANT2(NR),A1,I,J,K,DT_SUB,ITER)
+            DZZDT = RN%NU*SPECIES_MIXTURE%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW*RATE_CONSTANT2(NR)
+            IF (ANY(A1 + (DZZDT1_2+DZZDT)*DT_SUB < 0._EB)) THEN
+               DO NSS=0,N_TRACKED_SPECIES
+                  IF (A1(NSS) + (DZZDT(NSS)+DZZDT1_2(NSS))*DT_SUB < 0._EB .AND. ABS(DZZDT(NSS))>ZERO_P) THEN
+                     RATE_CONSTANT2(NR) = MIN(RATE_CONSTANT2(NR),A1(NSS)/&
+                     ((ABS(RN%NU(NSS))*SPECIES_MIXTURE(NSS)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW)*DT_SUB))
+                  ENDIF
+               ENDDO
+               DZZDT = RN%NU*SPECIES_MIXTURE%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW*RATE_CONSTANT2(NR)
+            ENDIF
+            DZZDT1_2 = DZZDT1_2+DZZDT
+         END DO REACTION_LOOP1_2    
+         A1 = A1 + DZZDT1_2*DT_SUB 
+         A1 = 0.5_EB*(ZZ_0 + A1)
+         IF (ABS(SUM(A1)-1._EB) < -ZERO_P) CALL SHUTDOWN('ERROR: Error in Reaction Species')                               
+      ENDDO ODE_LOOP1     
+      !--------------------
+      ! Calculate A2 term
+      ! Time step = DT_SUB/2
+      !-------------------- 
+      ZZ_0 = MAX(0._EB,PHI)
+      ODE_LOOP2: DO NS = 1, SUB_DT2
+         DZZDT2_1 = 0._EB
+         DZZDT2_2 = 0._EB
+         RATE_CONSTANT = 0._EB
+         RATE_CONSTANT2 = 0._EB
+         REACTION_LOOP2_1: DO NR = 1, N_REACTIONS   
+            RN => REACTION(NR)
+            CALL COMPUTE_RATE_CONSTANT_EDCM1(NR,RATE_CONSTANT(NR),ZZ_0,I,J,K,DT_SUB,ITER)
+            DZZDT = RN%NU*SPECIES_MIXTURE%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW*RATE_CONSTANT(NR)
+            IF (ANY(ZZ_0 + (DZZDT2_1+DZZDT)*(DT_SUB/2._EB) < 0._EB)) THEN
+               DO NSS=0,N_TRACKED_SPECIES
+                  IF (ZZ_0(NSS) + (DZZDT(NSS)+DZZDT2_1(NSS))*(DT_SUB/2._EB) < 0._EB .AND. ABS(DZZDT(NSS))>ZERO_P) THEN
+                     RATE_CONSTANT(NR) = MIN(RATE_CONSTANT(NR),ZZ_0(NSS)/&
+                     ((ABS(RN%NU(NSS))*SPECIES_MIXTURE(NSS)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW)*(DT_SUB/2._EB)))
+                  ENDIF
+               ENDDO
+               DZZDT = RN%NU*SPECIES_MIXTURE%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW*RATE_CONSTANT(NR)
+            ENDIF
+            DZZDT2_1 = DZZDT2_1+DZZDT
+         END DO REACTION_LOOP2_1   
+         A2 = ZZ_0 + DZZDT2_1*(DT_SUB/2._EB)
+                  
+         REACTION_LOOP2_2: DO NR = 1, N_REACTIONS   
+            RN => REACTION(NR)
+            CALL COMPUTE_RATE_CONSTANT_EDCM1(NR,RATE_CONSTANT2(NR),A2,I,J,K,DT_SUB,ITER)
+            DZZDT = RN%NU*SPECIES_MIXTURE%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW*RATE_CONSTANT2(NR)
+            IF (ANY(A2 + (DZZDT2_2+DZZDT)*(DT_SUB/2._EB) < 0._EB)) THEN
+               DO NSS=0,N_TRACKED_SPECIES
+                  IF (A2(NSS) + (DZZDT(NSS)+DZZDT2_2(NSS))*(DT_SUB/2._EB) < 0._EB .AND. ABS(DZZDT(NSS))>ZERO_P) THEN
+                     RATE_CONSTANT2(NR) = MIN(RATE_CONSTANT2(NR),A2(NSS)/&
+                     ((ABS(RN%NU(NSS))*SPECIES_MIXTURE(NSS)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW)*(DT_SUB/2._EB)))
+                  ENDIF
+               ENDDO
+               DZZDT = RN%NU*SPECIES_MIXTURE%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW*RATE_CONSTANT2(NR)
+            ENDIF
+            DZZDT2_2 = DZZDT2_2+DZZDT
+         END DO REACTION_LOOP2_2    
+         A2 = A2 + DZZDT2_2*(DT_SUB/2._EB)
+         A2 = 0.5_EB*(ZZ_0 + A2) 
+         IF (ABS(SUM(A2)-1._EB) < -ZERO_P) CALL SHUTDOWN('ERROR: Error in Reaction Species')               
+         ZZ_0 = A2
+      ENDDO ODE_LOOP2
+     
+      !--------------------
+      ! Calculate A4 term
+      ! Time step = DT_SUB/4
+      !-------------------- 
+      ZZ_0 = MAX(0._EB,PHI)
+      ODE_LOOP4: DO NS = 1, SUB_DT4
+         DZZDT4_1 = 0._EB
+         DZZDT4_2 = 0._EB
+         RATE_CONSTANT = 0._EB
+         RATE_CONSTANT2 = 0._EB
+         REACTION_LOOP4_1: DO NR = 1, N_REACTIONS   
+            RN => REACTION(NR)
+            CALL COMPUTE_RATE_CONSTANT_EDCM1(NR,RATE_CONSTANT(NR),ZZ_0,I,J,K,DT_SUB,ITER)
+            DZZDT = RN%NU*SPECIES_MIXTURE%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW*RATE_CONSTANT(NR)
+            IF (ANY(ZZ_0 + (DZZDT4_1+DZZDT)*(DT_SUB/4._EB) < 0._EB)) THEN
+               DO NSS=0,N_TRACKED_SPECIES
+                  IF (ZZ_0(NSS) + (DZZDT(NSS)+DZZDT4_1(NSS))*(DT_SUB/4._EB) < 0._EB .AND. ABS(DZZDT(NSS))>ZERO_P) THEN
+                     RATE_CONSTANT(NR) = MIN(RATE_CONSTANT(NR),ZZ_0(NSS)/&
+                     ((ABS(RN%NU(NSS))*SPECIES_MIXTURE(NSS)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW)*(DT_SUB/4._EB)))
+                  ENDIF
+               ENDDO
+               DZZDT = RN%NU*SPECIES_MIXTURE%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW*RATE_CONSTANT(NR)
+            ENDIF
+            DZZDT4_1 = DZZDT4_1+DZZDT
+         END DO REACTION_LOOP4_1   
+         A4 = ZZ_0 + DZZDT4_1*(DT_SUB/4._EB)
+
+         REACTION_LOOP4_2: DO NR = 1, N_REACTIONS   
+            RN => REACTION(NR)
+            CALL COMPUTE_RATE_CONSTANT_EDCM1(NR,RATE_CONSTANT2(NR),A4,I,J,K,DT_SUB,ITER)
+            DZZDT = RN%NU*SPECIES_MIXTURE%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW*RATE_CONSTANT2(NR)
+            IF (ANY(A4 + (DZZDT4_2+DZZDT)*(DT_SUB/4._EB) < 0._EB)) THEN
+               DO NSS=0,N_TRACKED_SPECIES
+                  IF (A4(NSS) + (DZZDT(NSS)+DZZDT4_2(NSS))*(DT_SUB/4._EB) < 0._EB .AND. ABS(DZZDT(NSS))>ZERO_P) THEN
+                     RATE_CONSTANT2(NR) = MIN(RATE_CONSTANT2(NR),A4(NSS)/&
+                     ((ABS(RN%NU(NSS))*SPECIES_MIXTURE(NSS)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW)*(DT_SUB/4._EB)))
+                  ENDIF
+               ENDDO
+               DZZDT = RN%NU*SPECIES_MIXTURE%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW*RATE_CONSTANT2(NR)
+            ENDIF
+            DZZDT4_2 = DZZDT4_2+DZZDT
+         END DO REACTION_LOOP4_2    
+         A4 = A4 + DZZDT4_2*(DT_SUB/4._EB)
+         A4 = 0.5_EB*(ZZ_0 + A4) 
+         IF (ABS(SUM(A4)-1._EB) < -ZERO_P) CALL SHUTDOWN('ERROR: Error A4 in Reaction Species')            
+         ZZ_0 = A4
+      ENDDO ODE_LOOP4
+
+      ! Species Error Analysis
+      ERR_EST = MAXVAL(ABS((4._EB*A4-A2) - (4._EB*A2-A1)))/45._EB  ! Estimate Error
+      IF (ERR_EST <= ZERO_P) THEN
+         DT_SUB_NEW = DT
+      ELSE
+         DT_SUB_NEW = MAX(DT_SUB*(ERR_TOL/(ERR_EST))**(0.25_EB),DT_SUB_MIN) ! Determine New Time Step
+      ENDIF
+      
+      IF (DT_SUB <= DT_SUB_MIN) EXIT RICH_EX_LOOP
+      RICH_ITER = RICH_ITER+1
+      IF (RICH_ITER >= RICH_ITER_MAX) EXIT RICH_EX_LOOP
+   ENDDO RICH_EX_LOOP 
+   ENDIF
+  
+   DT_ITER = DT_ITER + DT_SUB
+   ITER = ITER + 1
+   MAX_CHEM_SUBIT = MAX(MAX_CHEM_SUBIT,ITER)
+   IF (COMBUSTION_ODE /= EDCM_RK2) THEN 
+      PHI = A1
+   ELSE   
+      PHI = (4._EB*A4-A2)/3._EB
+   ENDIF
+   ZZ_GET =  ZETA*ZZ_GET_0 + (1-ZETA)*PHI
+   ! Heat Release
+   DO NSS = 0,N_TRACKED_SPECIES
+      Q_SPEC(NSS) = -SPECIES_MIXTURE(NSS)%H_F*RHO(I,J,K)*(ZZ_GET(NSS)-ZZ_TEMP(NSS))/SPECIES_MIXTURE(NSS)%MW
+   ENDDO
+   Q_SUM = SUM(Q_SPEC)
+   IF (Q_CALC + Q_SUM > Q_UPPER*DT) THEN
+      Q_OUT = Q_UPPER
+      ZZ_GET = (Q_UPPER*DT/(Q_CALC + Q_SUM))*ZZ_GET
+      EXIT INTEGRATION_LOOP
+   ELSE 
+      Q_CALC = Q_CALC+Q_SUM    
+      Q_OUT = Q_CALC/DT 
+   ENDIF 
+
+   !Total Variation Scheme
+   DO NS = 0,N_TRACKED_SPECIES
+      DO TVI = 0,2
+         ZZ_STORE(NS,TVI)=ZZ_STORE(NS,TVI+1)
+      ENDDO
+      ZZ_STORE(NS,3) = (4._EB*A4(NS)-A2(NS))/3._EB  
+   ENDDO
+   
+   REACTION_LOOP_TV: DO NR = 1, N_REACTIONS   
+      RN => REACTION(NR)      
+      IF (.NOT. RN%REVERSIBLE) CYCLE REACTION_LOOP_TV
+      DO TVI = 0,2
+         TV(TVI) = ABS(ZZ_STORE(RN%FUEL_SMIX_INDEX,TVI+1)-ZZ_STORE(RN%FUEL_SMIX_INDEX,TVI))
+         ZZ_DIFF(TVI) = ZZ_STORE(RN%FUEL_SMIX_INDEX,TVI+1)-ZZ_STORE(RN%FUEL_SMIX_INDEX,TVI)
+      ENDDO
+      IF (SUM(TV) > 0.0_EB .AND. SUM(TV) >= ABS(2.5_EB*SUM(ZZ_DIFF)) .AND. ITER >= TV_ITER_MIN) EXIT INTEGRATION_LOOP
+   ENDDO REACTION_LOOP_TV 
+   ZZ_TEMP = ZZ_GET    
+ENDDO INTEGRATION_LOOP
+RETURN
+CONTAINS
+
+REAL(EB) FUNCTION KSGS(I,J,K)
+INTEGER, INTENT(IN) :: I,J,K
+REAL(EB) :: EPSK
+! ke dissipation rate, assumes production=dissipation
+EPSK = MU(I,J,K)*STRAIN_RATE(I,J,K)**2/RHO(I,J,K)
+KSGS = 2.25_EB*(EPSK*DELTA/PI)**TWTH  ! estimate of subgrid ke, from Kolmogorov spectrum
+END FUNCTION KSGS
+
+END SUBROUTINE COMBUSTION_MODEL
+
+RECURSIVE SUBROUTINE COMPUTE_RATE_CONSTANT_EDCM1(NR,RATE_CONSTANT,ZZ_GET,I,J,K,DT_SUB,ITER)
+USE PHYSICAL_FUNCTIONS, ONLY : GET_MASS_FRACTION_ALL
+REAL(EB), INTENT(IN) :: ZZ_GET(0:N_TRACKED_SPECIES),DT_SUB
+INTEGER, INTENT(IN) :: NR,I,J,K,ITER
+REAL(EB), INTENT(INOUT) :: RATE_CONSTANT
+REAL(EB) :: YY_PRIMITIVE(1:N_SPECIES),ZZ_MIN=1.E-10_EB,RATE_CONSTANT_LIMIT
+INTEGER :: NS
+TYPE(REACTION_TYPE),POINTER :: RN=>NULL()
+RN => REACTION(NR)
+
+IF_SUPPRESSION: IF (SUPPRESSION) THEN
+   IF (ITER==0) THEN
+      IF(EXTINCTION(I,J,K,ZZ_GET)) THEN
+         RATE_CONSTANT = 0._EB
+         RETURN
+      ENDIF
+   ENDIF
+ENDIF IF_SUPPRESSION   
+
+RATE_CONSTANT_LIMIT = 1.E10_EB
+DO NS=0,N_TRACKED_SPECIES
+   IF (RN%NU(NS)<0._EB) THEN
+      RATE_CONSTANT_LIMIT = MIN(RATE_CONSTANT_LIMIT,ZZ_GET(NS)/DT_SUB)
+   ENDIF
+ENDDO
+   
+IF (RN%FAST_CHEMISTRY) THEN
+   RATE_CONSTANT = RATE_CONSTANT_LIMIT
+   RETURN
+ENDIF
+RATE_CONSTANT = 0._EB
+CALL GET_MASS_FRACTION_ALL(ZZ_GET,YY_PRIMITIVE)
+RATE_CONSTANT = RN%A*RHO(I,J,K)**RN%RHO_EXPONENT*EXP(-RN%E/(R0*TMP(I,J,K)))*TMP(I,J,K)**RN%N_T
+IF (ALL(RN%N_S<-998._EB)) THEN
+   DO NS=0,N_TRACKED_SPECIES
+      IF(RN%NU(NS)<0._EB .AND. ZZ_GET(NS) < ZZ_MIN) THEN
+         RATE_CONSTANT = 0._EB
+         RETURN
+      ENDIF            
+   ENDDO
+ELSE
+   DO NS=1,N_SPECIES
+      IF(ABS(RN%N_S(NS)) <= ZERO_P) CYCLE
+      IF(RN%N_S(NS)>= -998._EB) THEN
+         IF (YY_PRIMITIVE(NS) < ZZ_MIN) THEN
+            RATE_CONSTANT = 0._EB
+         ELSE
+            RATE_CONSTANT = YY_PRIMITIVE(NS)**RN%N_S(NS)*RATE_CONSTANT 
+         ENDIF
+      ENDIF
+   ENDDO               
+ENDIF
+RETURN
+
+CONTAINS
+
+LOGICAL FUNCTION EXTINCTION(I,J,K,ZZ_IN)
+USE PHYSICAL_FUNCTIONS,ONLY:GET_AVERAGE_SPECIFIC_HEAT
+REAL(EB),INTENT(IN)::ZZ_IN(0:N_TRACKED_SPECIES)
+REAL(EB):: DZ_AIR,DZ_FUEL,CPBAR_F_0,CPBAR_F_N,CPBAR_G_0,CPBAR_G_N,ZZ_GET(0:N_TRACKED_SPECIES)
+REAL(EB), PARAMETER :: T_CRIT = 1700._EB
+INTEGER, INTENT(IN) :: I,J,K
+INTEGER :: NS
+
+EXTINCTION = .FALSE.
+IF (TMP(I,J,K) < RN%AUTO_IGNITION_TEMPERATURE) THEN
+   EXTINCTION = .TRUE.
+ELSE
+   DZ_FUEL = 1._EB
+   DZ_AIR = 0._EB
+   !Search reactants to find limiting reactant and express it as fuel mass.  This is the amount of fuel
+   !that can burn
+   DO NS = 0,N_TRACKED_SPECIES
+      IF (RN%NU(NS)<-ZERO_P) &
+         DZ_FUEL = MIN(DZ_FUEL,-ZZ_IN(NS)*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW/(RN%NU(NS)*SPECIES_MIXTURE(NS)%MW))
+   ENDDO
+   !Get the specific heat for the fuel at the current and critical flame temperatures
+   ZZ_GET = 0._EB
+   ZZ_GET(RN%FUEL_SMIX_INDEX) = 1._EB
+   CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR_F_0,TMP(I,J,K)) 
+   CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR_F_N,RN%CRIT_FLAME_TMP)
+   ZZ_GET = ZZ_IN
+   !Remove the burnable fuel from the local mixture and renormalize.  The remainder is "air"
+   ZZ_GET(RN%FUEL_SMIX_INDEX) = ZZ_GET(RN%FUEL_SMIX_INDEX) - DZ_FUEL
+   ZZ_GET = ZZ_GET/SUM(ZZ_GET)     
+   !Get the specific heat for the "air"
+   CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR_G_0,TMP(I,J,K)) 
+   CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR_G_N,RN%CRIT_FLAME_TMP) 
+   !Loop over non-fuel reactants and find the mininum.  Determine how much "air" is needed to provide the limting reactant
+   DO NS = 0,N_TRACKED_SPECIES   
+            IF (RN%NU(NS)<-ZERO_P .AND. NS/=RN%FUEL_SMIX_INDEX) &
+              DZ_AIR = MAX(DZ_AIR, -DZ_FUEL*RN%NU(NS)*SPECIES_MIXTURE(NS)%MW/SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW/ZZ_GET(NS))
+   ENDDO
+   !See if enough energy is released to raise the fuel and required "air" temperatures above the critical flame temp
+   IF ( (DZ_FUEL*CPBAR_F_0 + DZ_AIR*CPBAR_G_0)*TMP(I,J,K) + DZ_FUEL*RN%HEAT_OF_COMBUSTION < &
+         (DZ_FUEL*CPBAR_F_N + DZ_AIR*CPBAR_G_N)*RN%CRIT_FLAME_TMP) EXTINCTION = .TRUE.
+ENDIF
+
+! 5.5.3 Extinction Model
+! Get Average Cp Oxidizer
+! DO NS = 0, N_TRACKED_SPECIES
+!    IF (RN%NU(NS)<-ZERO_P .AND. NS/=RN%FUEL_SMIX_INDEX) THEN
+!       CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CPBAR_G_0,TMP(I,J,K)) 
+!    ENDIF
+! ENDDO
+
+
+
+
+END FUNCTION EXTINCTION
+END SUBROUTINE COMPUTE_RATE_CONSTANT_EDCM1
 
 SUBROUTINE GET_REV_fire(MODULE_REV,MODULE_DATE)
 INTEGER,INTENT(INOUT) :: MODULE_REV
