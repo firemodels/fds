@@ -14,13 +14,15 @@ echo Removing pre 5.4 FDS/Smokeview entries (if present) from the system and use
 
 call "%CD%\set_path.exe" -s -m -b -r "nist\fds"
 
-echo.
-echo Associating the smv file extension with smokeview_win_32.exe
+call "%CD%\custom_env.bat"
 
-ftype smvDoc="%CD%\bin\smokeview%smv_major_version%_win_32.exe" "%%1" >Nul
+echo.
+echo Associating the smv file extension with smokeview%fdssmv_major_version%_win_32.exe
+
+ftype smvDoc="%CD%\bin\smokeview%fdssmv_major_version%_win_32.exe" "%%1" >Nul
 assoc .smv=smvDoc>Nul
 
-set FDSSTART=%USERPROFILE%\Start Menu\Programs\FDS6
+set FDSSTART=%ALLUSERSPROFILE%\Start Menu\Programs\%fds_edition%
 
 echo. 
 echo Adding FDS and Smokeview shortcuts to the Start menu.
@@ -58,4 +60,5 @@ echo.
 echo Press any key to complete Installation.
 pause>NUL
 erase "%CD%"\wrapup_fds_install.bat
+erase "%CD%"\custom_env.bat
 
