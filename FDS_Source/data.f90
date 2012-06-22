@@ -2166,13 +2166,13 @@ END SELECT
 END SUBROUTINE JANAF_TABLE_LIQUID
 
 
-SUBROUTINE GAS_PROPS(GAS_NAME,SIGMA,EPSOK,MW,ABSORBING,FORMULA,LISTED,ATOM_COUNTS)
+SUBROUTINE GAS_PROPS(GAS_NAME,SIGMA,EPSOK,MW,ABSORBING,FORMULA,LISTED,ATOM_COUNTS,H_F)
 
 ! Molecular weight (g/mol) and Lennard-Jones properties
 ! Brodkey, R. and Hershey, H. Transport Phenomena: A Unified Approach. McGraw-Hill. 1988
-
+! Heat of Formation (H_F) has units of J/kmol
 USE GLOBAL_CONSTANTS, ONLY: MW_AIR 
-REAL(EB) :: SIGMA,EPSOK,MW,SIGMAIN,EPSOKIN,MWIN,ATOM_COUNTS(118)
+REAL(EB) :: SIGMA,EPSOK,MW,SIGMAIN,EPSOKIN,MWIN,ATOM_COUNTS(118),H_F
 CHARACTER(30) :: GAS_NAME
 CHARACTER(100) :: FORMULA,FORMULAIN
 LOGICAL :: ABSORBING
@@ -2182,175 +2182,212 @@ SIGMAIN = SIGMA
 EPSOKIN = EPSOK
 FORMULAIN = FORMULA
 FORMULA = 'null'
-MWIN    = MW
+MWIN = MW
 MW = -1._EB
+H_F = -1._EB
 LISTED  = .TRUE.
 ATOM_COUNTS = 0._EB
 
 SELECT CASE(GAS_NAME)
    CASE('ACETYLENE')
-      SIGMA=4.033_EB
-      EPSOK=231.8_EB 
-      FORMULA='C2H2'  
+      SIGMA = 4.033_EB
+      EPSOK = 231.8_EB 
+      FORMULA = 'C2H2'
+      H_F = 226.731E6_EB  
       ABSORBING = .TRUE.        
    CASE('ACROLEIN') !Isopropanol as surrogate             
-      SIGMA=4.549_EB
-      EPSOK=576.7_EB 
-      FORMULA='C3H4O'
+      SIGMA = 4.549_EB
+      EPSOK = 576.7_EB 
+      FORMULA = 'C3H4O'
+      H_F = -272.8E6_EB
       ABSORBING = .TRUE.        
    CASE('AIR')             
-      SIGMA=3.711_EB 
-      EPSOK= 78.6_EB  
-      MW=MW_AIR
-      FORMULA='Air'
+      SIGMA = 3.711_EB 
+      EPSOK = 78.6_EB  
+      MW = MW_AIR
+      FORMULA = 'Air'
+      H_F = 0._EB !Computed in read.f90
    CASE('ARGON')
-      SIGMA=3.42_EB
-      EPSOK= 124.0_EB
-      FORMULA='Ar'
+      SIGMA = 3.42_EB
+      EPSOK = 124.0_EB
+      FORMULA = 'Ar'
+      H_F = 0._EB
    CASE('BUTANE')
-      SIGMA=4.687_EB
-      EPSOK=531.4_EB 
+      SIGMA = 4.687_EB
+      EPSOK = 531.4_EB 
       ABSORBING = .TRUE.
-      FORMULA='C4H10'
+      FORMULA = 'C4H10'
+      H_F = -125.6E6_EB
    CASE('CARBON DIOXIDE')  
-      SIGMA=3.941_EB 
-      EPSOK=195.2_EB  
+      SIGMA = 3.941_EB 
+      EPSOK = 195.2_EB  
       ABSORBING = .TRUE.      
-      FORMULA='CO2'
+      FORMULA = 'CO2'
+      H_F = -393.513E6_EB
    CASE('CARBON MONOXIDE') 
-      SIGMA=3.690_EB 
-      EPSOK= 91.7_EB  
+      SIGMA = 3.690_EB 
+      EPSOK = 91.7_EB  
       ABSORBING = .TRUE.
-      FORMULA='CO'
+      FORMULA = 'CO'
+      H_F = -110.523E6_EB
    CASE('ETHANE')
-      SIGMA=4.443_EB
-      EPSOK=215.7_EB 
-      FORMULA='C2H6'  
+      SIGMA = 4.443_EB
+      EPSOK = 215.7_EB 
+      FORMULA = 'C2H6'
+      H_F = -84.E6_EB  
       ABSORBING = .TRUE.     
    CASE('ETHANOL')
-      SIGMA=4.530_EB
-      EPSOK=362.6_EB
-      FORMULA='C2H5OH'  
+      SIGMA = 4.530_EB
+      EPSOK = 362.6_EB
+      FORMULA='C2H5OH'
+      H_F = -234.E6_EB  
    CASE('ETHYLENE')        
-      SIGMA=4.163_EB 
-      EPSOK=224.7_EB 
+      SIGMA = 4.163_EB 
+      EPSOK = 224.7_EB 
+      FORMULA = 'C2H4'
+      H_F = 52.47E6_EB
       ABSORBING = .TRUE.
-      FORMULA='C2H4'
    CASE('FORMALDEHYDE')!Methanol as surrogate        
-      SIGMA=3.626_EB 
-      EPSOK=481.8_EB 
-      FORMULA='CH2O'
+      SIGMA = 3.626_EB 
+      EPSOK = 481.8_EB 
+      FORMULA = 'CH2O'
+      H_F = -115.90E6_EB
    CASE('HELIUM')          
-      SIGMA=2.551_EB 
-      EPSOK= 10.22_EB 
-      FORMULA='He'
+      SIGMA = 2.551_EB 
+      EPSOK = 10.22_EB 
+      FORMULA = 'He'
+      H_F = 0._EB
    CASE('HYDROGEN')        
-      SIGMA=2.827_EB 
-      EPSOK= 59.7_EB
-      FORMULA='H2'
+      SIGMA = 2.827_EB 
+      EPSOK = 59.7_EB
+      FORMULA = 'H2'
+      H_F = 0._EB
    CASE('HYDROGEN BROMIDE')   
-      SIGMA=3.353_EB
-      EPSOK=449._EB
-      FORMULA='HBr'  
+      SIGMA = 3.353_EB
+      EPSOK = 449._EB
+      FORMULA = 'HBr'
+      H_F = -36.44E6_EB  
    CASE('HYDROGEN CHLORIDE')   
-      SIGMA=3.339_EB
-      EPSOK=344.7_EB
-      FORMULA='HCl'  
+      SIGMA = 3.339_EB
+      EPSOK = 344.7_EB
+      FORMULA = 'HCl'
+      H_F = -92.31E6_EB  
    CASE('HYDROGEN CYANIDE')   
-      SIGMA=3.63_EB
-      EPSOK=569.1_EB
-      FORMULA='HCN'  
+      SIGMA = 3.63_EB
+      EPSOK = 569.1_EB
+      FORMULA = 'HCN'
+      H_F = 135.14E6_EB  
     CASE('HYDROGEN FLUORIDE')   
-      SIGMA=3.148_EB
-      EPSOK=330._EB
-      FORMULA='HF'  
+      SIGMA = 3.148_EB
+      EPSOK = 330._EB
+      FORMULA = 'HF'
+      H_F = -272.55E6_EB  
    CASE('ISOPROPANOL')
-      SIGMA=4.549_EB
-      EPSOK=576.7_EB 
-      FORMULA='C3H7OH'  
+      SIGMA = 4.549_EB
+      EPSOK = 576.7_EB 
+      FORMULA = 'C3H7OH'
+      H_F = -272.8E6_EB  
       ABSORBING = .TRUE.
    CASE('METHANE')         
-      SIGMA=3.758_EB 
-      EPSOK=148.6_EB  
+      SIGMA = 3.758_EB 
+      EPSOK = 148.6_EB  
+      FORMULA = 'CH4'
+      H_F = -74.873E6_EB
       ABSORBING = .TRUE.
-      FORMULA='CH4'
    CASE('METHANOL')
-      SIGMA=3.626_EB
-      EPSOK=481.8_EB
-      FORMULA='CH3OH'  
+      SIGMA = 3.626_EB
+      EPSOK = 481.8_EB
+      FORMULA = 'CH3OH'
+      H_F = -205.E6_EB  
    CASE('N-DECANE')
-      SIGMA=5.233_EB
-      EPSOK=226.46_EB
-      FORMULA='C10H22'  
+      SIGMA = 5.233_EB
+      EPSOK = 226.46_EB
+      FORMULA = 'C10H22'
+      H_F = -249.7E6_EB  
    CASE('N-HEPTANE')
-      SIGMA=4.701_EB
-      EPSOK=205.78_EB
-      FORMULA='C7H16'
+      SIGMA = 4.701_EB
+      EPSOK = 205.78_EB
+      FORMULA = 'C7H16'
+      H_F = -187.8E6_EB
    CASE('N-HEXANE')
-      SIGMA=5.949_EB
-      EPSOK=399.3_EB 
-      FORMULA='C6H14'  
+      SIGMA = 5.949_EB
+      EPSOK = 399.3_EB 
+      FORMULA = 'C6H14'
+      H_F = -167.1E6_EB  
       ABSORBING = .TRUE.          
    CASE('N-OCTANE')
-      SIGMA=4.892_EB
-      EPSOK=231.16_EB
-      FORMULA='C8H18'
+      SIGMA = 4.892_EB
+      EPSOK = 231.16_EB
+      FORMULA = 'C8H18'
+      H_F = -208.7E6_EB
    CASE('NITRIC OXIDE')        
-      SIGMA=3.492_EB 
-      EPSOK= 116.7_EB  
-      FORMULA='NO'
+      SIGMA = 3.492_EB 
+      EPSOK = 116.7_EB  
+      FORMULA = 'NO'
+      H_F = 90.29E6_EB
    CASE('NITROGEN')        
-      SIGMA=3.798_EB 
-      EPSOK= 71.4_EB  
-      FORMULA='N2'
+      SIGMA = 3.798_EB 
+      EPSOK = 71.4_EB
+      H_F = 0._EB  
+      FORMULA = 'N2'
    CASE('NITROGEN DIOXIDE') !Paul, P. DRFM, SAND98-8203
-      SIGMA=3.922_EB 
-      EPSOK= 204.88_EB  
-      FORMULA='NO2'      
+      SIGMA = 3.922_EB 
+      EPSOK = 204.88_EB  
+      FORMULA = 'NO2'
+      H_F = 33.10E6_EB      
    CASE('NITROUS OXIDE')
-      SIGMA=3.828_EB 
-      EPSOK= 232.4_EB  
-      FORMULA='N2O'      
+      SIGMA = 3.828_EB 
+      EPSOK = 232.4_EB  
+      FORMULA = 'N2O'
+      H_F = 82.05E6_EB      
    CASE('OXYGEN')          
-      SIGMA=3.467_EB 
-      EPSOK=106.7_EB  
-      FORMULA='O2'
+      SIGMA = 3.467_EB 
+      EPSOK = 106.7_EB
+      FORMULA ='O2'
+      H_F = 0._EB  
    CASE('PROPANE')
-      SIGMA=5.118_EB
-      EPSOK=237.1_EB
-      FORMULA='C3H8'  
+      SIGMA = 5.118_EB
+      EPSOK = 237.1_EB
+      FORMULA = 'C3H8' 
+      H_F = -104.7E6_EB 
       ABSORBING = .TRUE.
    CASE('PROPYLENE')
-      SIGMA=4.678_EB
-      EPSOK=298.9_EB 
-      FORMULA='C3H6'  
+      SIGMA = 4.678_EB
+      EPSOK = 298.9_EB 
+      FORMULA = 'C3H6'
+      H_F = 20.41E6_EB  
       ABSORBING = .TRUE.  
    CASE('SOOT')        
-      SIGMA=3.798_EB 
-      EPSOK= 71.4_EB  
-      MW=ELEMENT(6)%MASS
-      FORMULA='Soot'
+      SIGMA = 3.798_EB 
+      EPSOK = 71.4_EB  
+      MW = ELEMENT(6)%MASS
+      FORMULA = 'Soot'
+      H_F = 0._EB
    CASE('SULFUR DIOXIDE')
-      SIGMA=4.112_EB
-      EPSOK=335.4_EB 
-      FORMULA='SO2'             
+      SIGMA = 4.112_EB
+      EPSOK = 335.4_EB 
+      FORMULA = 'SO2'
+      H_F = -296.84E6_EB             
    CASE('SULFUR HEXAFLUORIDE')
-      SIGMA=5.128_EB
-      EPSOK=222.1_EB 
-      FORMULA='SF6'       
+      SIGMA = 5.128_EB
+      EPSOK = 222.1_EB 
+      FORMULA = 'SF6'
+      H_F = -1220.47E6_EB       
    CASE('TOLUENE')   
-      SIGMA=5.698_EB
-      EPSOK=480._EB !Estimated from BENZENE
-      FORMULA='C6H5CH3'  
+      SIGMA = 5.698_EB
+      EPSOK = 480._EB !Estimated from BENZENE
+      FORMULA = 'C6H5CH3'
+      H_F = 50.1E6_EB  
    CASE('WATER VAPOR')     
-      SIGMA=2.641_EB 
-      EPSOK=809.1_EB  
-      ABSORBING = .TRUE.
-      FORMULA='H2O'
+      SIGMA = 2.641_EB 
+      EPSOK = 809.1_EB  
+      FORMULA = 'H2O'
+      H_F = -241.826E6_EB
+      ABSORBING = .TRUE.            
    CASE DEFAULT            
-      SIGMA=3.711_EB 
-      EPSOK= 78.6_EB
-      MW=MW_AIR 
+      SIGMA = 3.711_EB 
+      EPSOK = 78.6_EB
+      MW = MW_AIR 
       LISTED = .FALSE.
 END SELECT
 IF (SIGMAIN>0._EB) SIGMA = SIGMAIN
@@ -2600,7 +2637,7 @@ INTEGER :: I,J,LEN1,ELEMENT_INDEX
 REAL(EB):: SUBATOM_COUNTS(118)
 
 ATOM_COUNTS = 0._EB
-WEIGHT_SUM=0._EB
+WEIGHT_SUM = 0._EB
 LEN1 = LEN(TRIM(FORMULA))
 I=1
 
