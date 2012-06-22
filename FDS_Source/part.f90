@@ -118,7 +118,7 @@ INTEGER, INTENT(IN) :: NM
 REAL     :: RN,RN2
 REAL(EB) :: PHI_RN,FLOW_RATE,THETA_RN,SPHI,CPHI,MASS_SUM,D_PRES_FACTOR, &
             STHETA,CTHETA,PWT0,PARTICLE_SPEED,SHIFT1,SHIFT2,XTMP,YTMP,ZTMP,VLEN, &
-            TRIGT1,TRIGT2,TNOW,TSI,PIPE_PRESSURE,X1,X2,Y1,Y2,Z1,Z2,BLOCK_VOLUME, &
+            TRIGT1,TRIGT2,TNOW,TSI,PIPE_PRESSURE,X1,X2,Y1,Y2,Z1,Z2,INIT_VOLUME, &
             ETA,ETA_MAX,ETA_MIN,XI,YJ,ZK
 REAL(EB), PARAMETER :: VENT_OFFSET=0.1
 INTEGER :: I,KS,II,JJ,KK,IC,IL,IU,ILPC,DROP_SUM,IIG,JJG,KKG,IW,IOR,STRATUM,IB
@@ -583,7 +583,7 @@ SUBROUTINE VOLUME_PARTICLE_INSERT
 ! Loop over all INIT lines and look for particles inserted within a specified volume
 
 INTEGER :: NN, ND, N_INSERT, I1,J1,K1,I2,J2,K2
-REAL(EB) :: XC1,XC2,YC1,YC2,ZC1,ZC2
+REAL(EB) :: XC1,XC2,YC1,YC2,ZC1,ZC2,X0,Y0,Z0,RR,HH
 
 VOLUME_INSERT_LOOP: DO IB=1,N_INIT
 
@@ -620,18 +620,26 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
 
    IF (IN%N_PARTICLES==0 .AND. IN%N_PARTICLES_PER_CELL==0) CYCLE VOLUME_INSERT_LOOP
 
+   ! Cut off parts of the INIT region that are outside the current mesh
+
+   IF (IN%X1>XF .OR. IN%X2<XS .OR. IN%Y1>YF .OR. IN%Y2<YS .OR. IN%Z1>ZF .OR. IN%Z2<ZS) CYCLE VOLUME_INSERT_LOOP
+   X1 = MAX(IN%X1,XS)
+   X2 = MIN(IN%X2,XF)
+   Y1 = MAX(IN%Y1,YS)
+   Y2 = MIN(IN%Y2,YF)
+   Z1 = MAX(IN%Z1,ZS)
+   Z2 = MIN(IN%Z2,ZF)
+
+   ! Compute the volume of the INIT region
+
    SELECT CASE(IN%SHAPE)      
-   CASE('BLOCK')
-         IF (IN%X1>XF .OR. IN%X2<XS .OR. IN%Y1>YF .OR. IN%Y2<YS .OR. IN%Z1>ZF .OR. IN%Z2<ZS) CYCLE VOLUME_INSERT_LOOP
-         X1 = MAX(IN%X1,XS) 
-         X2 = MIN(IN%X2,XF)
-         Y1 = MAX(IN%Y1,YS) 
-         Y2 = MIN(IN%Y2,YF)
-         Z1 = MAX(IN%Z1,ZS) 
-         Z2 = MIN(IN%Z2,ZF)
-         BLOCK_VOLUME = (X2-X1)*(Y2-Y1)*(Z2-Z1)
-         IF (BLOCK_VOLUME<=0._EB .AND. IN%MASS_PER_VOLUME>0._EB) CYCLE VOLUME_INSERT_LOOP
+      CASE('BLOCK')
+         INIT_VOLUME = (X2-X1)*(Y2-Y1)*(Z2-Z1)
+      CASE('CONE')
+         INIT_VOLUME = PI*(0.5_EB*(IN%X2-IN%X1))**2*(IN%Z2-IN%Z1)/3._EB
    END SELECT
+
+   IF (INIT_VOLUME<=0._EB .AND. IN%MASS_PER_VOLUME>0._EB) CYCLE VOLUME_INSERT_LOOP
 
    ! Assign properties to the initial PARTICLEs/particles
 
@@ -654,16 +662,26 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
 
          ! Get particle coordinates by randomly choosing within the designated volume
 
-         BLOCK_OUT_LOOP:  DO
-            CALL RANDOM_RECTANGLE(LP%X,LP%Y,LP%Z,X1,X2,Y1,Y2,Z1,Z2)
+         CHOOSE_XYZ_LOOP:  DO
+            SELECT CASE(IN%SHAPE)
+               CASE('BLOCK') 
+                  CALL RANDOM_RECTANGLE(LP%X,LP%Y,LP%Z,X1,X2,Y1,Y2,Z1,Z2)
+               CASE('CONE')  
+                  X0 = 0.5_EB*(IN%X1+IN%X2)
+                  Y0 = 0.5_EB*(IN%Y1+IN%Y2)
+                  Z0 = IN%Z1
+                  RR = 0.5_EB*(IN%X2-IN%X1)
+                  HH = IN%Z2-IN%Z1
+                  CALL RANDOM_CONE(NM,LP%X,LP%Y,LP%Z,X0,Y0,Z0,RR,HH)
+            END SELECT
             CALL GET_IJK(LP%X,LP%Y,LP%Z,NM,XI,YJ,ZK,II,JJ,KK)
             LP%X = LP%X + (I-1)*IN%DX
             LP%Y = LP%Y + (I-1)*IN%DY
             LP%Z = LP%Z + (I-1)*IN%DZ
-            IF (.NOT.SOLID(CELL_INDEX(II,JJ,KK))) EXIT BLOCK_OUT_LOOP
-         ENDDO BLOCK_OUT_LOOP
+            IF (.NOT.SOLID(CELL_INDEX(II,JJ,KK))) EXIT CHOOSE_XYZ_LOOP
+         ENDDO CHOOSE_XYZ_LOOP
 
-         CALL BLOCK_INIT_PARTICLE
+         CALL VOLUME_INIT_PARTICLE
                   
          IN => INITIALIZATION(IB)
          LP => LAGRANGIAN_PARTICLE(NLP)           
@@ -675,7 +693,7 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
    ELSEIF (IN%N_PARTICLES_PER_CELL > 0) THEN TOTAL_OR_PER_CELL
 
       N_INSERT = 0
-      BLOCK_VOLUME = 0._EB
+      INIT_VOLUME = 0._EB
       CALL GET_IJK(X1,Y1,Z1,NM,XI,YJ,ZK,I1,J1,K1)
       CALL GET_IJK(X2,Y2,Z2,NM,XI,YJ,ZK,I2,J2,K2)
       I2 = MIN(I2,IBAR)
@@ -685,7 +703,7 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
          DO JJ=J1,J2
             II_LOOP: DO II=I1,I2
                IF (SOLID(CELL_INDEX(II,JJ,KK))) CYCLE II_LOOP
-               BLOCK_VOLUME = BLOCK_VOLUME + DX(II)*DY(JJ)*DZ(KK)               
+               INIT_VOLUME = INIT_VOLUME + DX(II)*DY(JJ)*DZ(KK)               
                INSERT_PARTICLE_LOOP_2: DO NN = 1, IN%N_PARTICLES_PER_CELL
                   N_INSERT = N_INSERT + 1
 
@@ -716,7 +734,7 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
                      CALL RANDOM_RECTANGLE(LP%X,LP%Y,LP%Z,XC1,XC2,YC1,YC2,ZC1,ZC2)                     
                   ENDIF
                   
-                  CALL BLOCK_INIT_PARTICLE
+                  CALL VOLUME_INIT_PARTICLE
                   
                   IN => INITIALIZATION(IB)
                   LP => LAGRANGIAN_PARTICLE(NLP)
@@ -733,7 +751,7 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
    IF (IN%MASS_PER_TIME>0._EB) THEN
       PWT0 = IN%MASS_PER_TIME*IN%DT_INSERT/MASS_SUM
    ELSEIF (IN%MASS_PER_VOLUME>0._EB) THEN
-      PWT0 = IN%MASS_PER_VOLUME*BLOCK_VOLUME/MASS_SUM
+      PWT0 = IN%MASS_PER_VOLUME*INIT_VOLUME/MASS_SUM
    ELSE
       PWT0 = 1._EB
    ENDIF
@@ -749,7 +767,7 @@ ENDDO VOLUME_INSERT_LOOP
 END SUBROUTINE VOLUME_PARTICLE_INSERT
 
 
-SUBROUTINE BLOCK_INIT_PARTICLE
+SUBROUTINE VOLUME_INIT_PARTICLE
 
 ! Initialize particle indices and velocity
 
@@ -805,7 +823,7 @@ ENDIF
 
 MASS_SUM = MASS_SUM + LP%PWT*LP%MASS ! if r=0 the sum will stay 0
 
-END SUBROUTINE BLOCK_INIT_PARTICLE
+END SUBROUTINE VOLUME_INIT_PARTICLE
 
 
 SUBROUTINE MAKE_PARTICLE
