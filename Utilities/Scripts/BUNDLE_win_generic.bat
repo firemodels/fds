@@ -206,6 +206,7 @@ echo Copying wrapup scripts for use in final installation
 
 echo copying wrapup_fds_install_%platform%.bat
 copy "%bundleinfo%\wrapup_fds_install_%platform%.bat" "%out_bundle%\%fdsversion%\wrapup_fds_install.bat
+copy "%bundleinfo%\wrapup_fds_install_gen.bat" "%out_bundle%\%fdsversion%\wrapup_fds_install_gen.bat
 
 echo copying shortcut.exe
 copy "%bundleinfo%\shortcut.exe" "%out_bundle%\%fdsversion%\shortcut.exe"
