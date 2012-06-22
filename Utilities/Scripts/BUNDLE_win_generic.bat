@@ -207,11 +207,6 @@ echo Copying wrapup scripts for use in final installation
 echo copying wrapup_fds_install_%platform%.bat
 copy "%bundleinfo%\wrapup_fds_install_%platform%.bat" "%out_bundle%\%fdsversion%\wrapup_fds_install.bat
 
-set custom_env=%out_bundle%\%fdsversion%\custom_env.bat
-echo @echo off > %custom_env%
-echo set fds_edition=%fds_edition% >> %custom_env%
-echo set fdssmv_major_version=%fdssmv_major_version% >> %custom_env%
-
 echo copying shortcut.exe
 copy "%bundleinfo%\shortcut.exe" "%out_bundle%\%fdsversion%\shortcut.exe"
 

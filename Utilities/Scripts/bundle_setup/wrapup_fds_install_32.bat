@@ -14,15 +14,16 @@ echo Removing pre 5.4 FDS/Smokeview entries (if present) from the system and use
 
 call "%CD%\set_path.exe" -s -m -b -r "nist\fds"
 
-call "%CD%\custom_env.bat"
+set fdssmv_major_version=6
+set platform=32
 
 echo.
-echo Associating the smv file extension with smokeview%fdssmv_major_version%_win_32.exe
+echo Associating the smv file extension with smokeview%fdssmv_major_version%_win_%platform%.exe
 
-ftype smvDoc="%CD%\bin\smokeview%fdssmv_major_version%_win_32.exe" "%%1" >Nul
+ftype smvDoc="%CD%\bin\smokeview%fdssmv_major_version%_win_%platform%.exe" "%%1" >Nul
 assoc .smv=smvDoc>Nul
 
-set FDSSTART=%ALLUSERSPROFILE%\Start Menu\Programs\%fds_edition%
+set FDSSTART=%ALLUSERSPROFILE%\Start Menu\Programs\FDS%fdssmv_major_version%
 
 echo. 
 echo Adding FDS and Smokeview shortcuts to the Start menu.
@@ -56,9 +57,16 @@ call "%CD%\set_path.exe" -s -m -a "%CD%\bin"
 erase "%CD%"\set_path.exe
 erase "%CD%"\shortcut.exe
 
+echo echo. >> Uninstall\Uninstall.bat
+echo echo Removing directory, %CD%\bin, from the System Path >> Uninstall\Uninstall.bat
+echo call "%CD%\Uninstall\set_path.exe" -s -b -r "%CD%\bin" >> Uninstall\Uninstall.bat
+
+echo echo. >> Uninstall\removefds.bat
+echo echo Uninstall Complete.  Press any key to continue.  >> Uninstall\removefds.bat
+echo pause>NUL  >> Uninstall\removefds.bat
+
 echo.
 echo Press any key to complete Installation.
 pause>NUL
 erase "%CD%"\wrapup_fds_install.bat
-erase "%CD%"\custom_env.bat
 
