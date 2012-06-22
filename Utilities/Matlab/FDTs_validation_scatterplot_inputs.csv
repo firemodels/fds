@@ -1,5 +1,5 @@
 Scatter_Plot_Title,Ind_Title,Dep_Title,Plot_Min,Plot_Max,Title_Position,Key_Position,Plot_Width,Sigma_2_E,Model_Error,Plot_Filename
-Cable Temperature,Measured Time to Threshold Temperature (s),Predicted Time to Threshold Temperature (s),0,1700,0.03 0.95,SouthEast,4,14,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Cable_Temperature
+Cable Temperature,Measured Time to Threshold Temperature (s),Predicted Time to Threshold Temperature (s),0,1800,0.03 0.95,SouthEast,4,14,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Cable_Temperature
 "HGL Temperature, FPA",Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,400,0.03 0.95,SouthEast,4,14,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/HGL_Temperature_FPA
 "HGL Temperature, Deal and Beyler",Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,400,0.03 0.95,SouthEast,4,14,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/HGL_Temperature_DB
 "HGL Temperature, MQH",Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,1000,0.03 0.95,SouthEast,4,14,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/HGL_Temperature_MQH
