@@ -6840,26 +6840,34 @@ droplets created per second than the number that can be simulated.
 \subsection{Particles or Droplets Introduced within a Volume}
 \label{info:initial_droplets}
 
-Sometimes it is convenient to introduce droplets or particles at the start of the simulation. For this purpose, use an {\ct INIT} line with the parameter
-{\ct N\_PARTICLES} to indicate the number of particles within the computational domain at the start of the simulation.  You may also use {\ct N\_PARTICLES\_PER\_CELL} to indicate the number of particles within each grid cell of the computational domain at the start of the simulation.
-Its default value is 0, meaning that initially there are no particles present. If non-zero, you may also specify {\ct MASS\_PER\_VOLUME} (kg/m$^3$) if the
-particles have mass. Do not confuse this parameter with {\ct DENSITY}, explained in the next section.
+Sometimes it is convenient to introduce Lagrangian particles within a particular region of the domain. To do this, use an {\ct INIT} line which contains the {\ct PART\_ID} for the type of particle to be inserted. Particles specified via an {\ct INIT} line can represent a number of different kinds of subgrid-scale objects. The particles can be massless tracers or they can be solid or liquid particles with mass. If not massless, specify {\ct MASS\_PER\_VOLUME} in units of kg/m$^3$. Do not confuse this parameter with {\ct DENSITY}, explained in the next section.
 For example, water has a {\ct DENSITY} of 1000~kg/m$^3$, whereas a liter of water broken up into droplets and spread over a cubic meter has a {\ct MASS\_PER\_VOLUME} of 1~kg/m$^3$.
-Also, to limit the particles to a certain region of the domain, add the real sextuplet {\ct XB} to designate the coordinates of a rectangular volume.
-The format for {\ct XB} is the same as that used on the {\ct OBST} line. You can only introduce a cloud of particles within a rectangular block,
-and the volume of the block is calculated according to the dimensions {\ct XB}, regardless of whether there are solid obstructions within this volume. If you introduce
-only a single particle, which is often a handy way of creating a target, you may use the real triplet {\ct XYZ} rather than {\ct XB} to designate the particle's position.  You can give this single particle an initial velocity using the real triplet {\ct UVW}.  When using {\ct N\_PARTICLES\_PER\_CELL}, the particles will be randomly placed within the volume of each cell.  If {\ct CELL\_CENTERED=.TRUE.} is set, then the particles will be placed at the center of each cell.
+
+\subsubsection{Randomly Distributed Particles within a Specified Volume}
+
+The parameter {\ct N\_PARTICLES} on the {\ct INIT} line indicates the number of particles to insert within a specified region of the domain. This region can take on a number of shapes, depending on the parameter {\ct SHAPE}. By default, the region is a rectangular solid designated with the real sextuplet {\ct XB}.
+The format for {\ct XB} is the same as that used on the {\ct OBST} line. Alternatively, you can specify {\ct SHAPE='CONE'}, in which case the particles will be randomly distributed within a vertical cone. This is primarily used for representing trees. The dimensions of the cone are specified via the parameters {\ct RADIUS}, {\ct HEIGHT}, and base position {\ct XYZ}. The latter is a triplet of real numbers designating the point at the center of the base of the cone. Examples of typical {\ct INIT} lines are:
 
 \footnotesize
 \begin{verbatim}
-&PART ID='droplets', DIAMETER=750., SPEC_ID='WATER VAPOR' /
-&PART ID='target', SURF_ID='...' /
-&INIT PART_ID='droplets', XB=..., N_PARTICLES=1000, MASS_PER_VOLUME=3.5 /
-&INIT PART_ID='target',  XYZ=..., N_PARTICLES=1 /
+&INIT PART_ID='droplets', XB=..., N_PARTICLES=..., MASS_PER_VOLUME=... /
+&INIT PART_ID='leaves', XYZ=..., RADIUS=..., HEIGHT=..., SHAPE='CONE', 
+      N_PARTICLES=..., MASS_PER_VOLUME=... /
 \end{verbatim} \normalsize
 
 \noindent
-If you use {\ct XYZ} to position the particle at a specific point, you can also add {\ct DX}, {\ct DY}, and/or {\ct DZ} to create a line of particles that are offset from {\ct XYZ} by these increments in units of meters. For example,
+Note that the volume of the specified region is calculated according to the {\ct SHAPE} dimensions, regardless of whether there are solid obstructions within this region. Note also that the number of particles, {\ct N\_PARTICLES}, is somewhat arbitrary but should be chosen to provide at least a few particles per grid cell. FDS will automatically assign a weighting factor to each particle to ensure that the {\ct MASS\_PER\_VOLUME} is achieved.
+
+\subsubsection{Specifying a Fixed Number of Particles per Grid Cell}
+
+There are special applications where you might want to specify {\ct N\_PARTICLES\_PER\_CELL} to indicate the number of particles within each grid cell of a specified region.
+When using {\ct N\_PARTICLES\_PER\_CELL}, the particles will be randomly placed within each cell.  If you set {\ct CELL\_CENTERED=.TRUE.}, the particles will be placed at the center of each cell.
+
+
+\subsubsection{Single Particle Insertion}
+
+If you introduce
+only a single particle, which is often a handy way of creating a target, you may use the real triplet {\ct XYZ} rather than {\ct XB} to designate the particle's position.  You can give this single particle an initial velocity using the real triplet {\ct UVW}. You can also add {\ct DX}, {\ct DY}, and/or {\ct DZ} to create a line of particles that are offset from {\ct XYZ} by these increments in units of meters. For example,
 
 \footnotesize
 \begin{verbatim}
@@ -6869,7 +6877,10 @@ If you use {\ct XYZ} to position the particle at a specific point, you can also 
 \noindent
 creates a line of 10 particles starting at the point (1.2,3.4,5.6) separated by 0.1~m. This is handy for creating arrays of devices, like heat flux gauges. See Section~\ref{info:heat_flux} for more details.
 
-If you want to introduce particles within a given volume periodically in time and not just initially, set {\ct DT\_INSERT} on
+
+\subsubsection{Periodic Insertion of Particles within a Specified Volume}
+
+If you want to introduce particles within a given region periodically in time and not just initially, set {\ct DT\_INSERT} on
 the {\ct INIT} line to a positive value indicating the time increment (s) for insertion. The parameter {\ct N\_PARTICLES} now indicates the
 number of droplets/particles inserted every {\ct DT\_INSERT} seconds. If the droplets/particles have mass, use {\ct MASS\_PER\_TIME} (kg/s) instead of {\ct MASS\_PER\_VOLUME} to
 indicate how much mass is to be introduced per second.
@@ -7146,11 +7157,11 @@ Lagrangian particles can be used to generate gases at a specified rate. The synt
 &PART ID='tube',  SAMPLING_FACTOR=1, SURF_ID='tube bc',  STATIC=.TRUE. /
 &PART ID='ball',  SAMPLING_FACTOR=1, SURF_ID='ball bc',  STATIC=.TRUE. /
 
-&SURF ID='plate bc', LENGTH=0.05, WIDTH=0.05, SPEC_ID(1)='ARGON', 
+&SURF ID='plate bc', LENGTH=0.05, WIDTH=0.05, SPEC_ID(1)='ARGON',
       MASS_FLUX(1)=0.1, TAU_MF(1)=0.001 /
-&SURF ID='tube bc',  GEOMETRY='CYLINDRICAL', LENGTH=0.05, RADIUS=0.01, 
+&SURF ID='tube bc',  GEOMETRY='CYLINDRICAL', LENGTH=0.05, RADIUS=0.01,
       SPEC_ID(1)='SULFUR DIOXIDE', MASS_FLUX(1)=0.1, TAU_MF(1)=0.001 /
-&SURF ID='ball bc',  GEOMETRY='SPHERICAL', RADIUS=0.01, SPEC_ID(1)='HELIUM', 
+&SURF ID='ball bc',  GEOMETRY='SPHERICAL', RADIUS=0.01, SPEC_ID(1)='HELIUM',
       MASS_FLUX(1)=0.1, TAU_MF(1)=0.001 /
 \end{verbatim}
 \normalsize
@@ -10662,6 +10673,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct DX}                        & Real              & Section~\ref{info:initial_droplets}           & m             & 0.            \\ \hline
 {\ct DY}                        & Real              & Section~\ref{info:initial_droplets}           & m             & 0.            \\ \hline
 {\ct DZ}                        & Real              & Section~\ref{info:initial_droplets}           & m             & 0.            \\ \hline
+{\ct HEIGHT}                    & Real              & Section~\ref{info:initial_droplets}           & m             &               \\ \hline
 {\ct HRRPUV}                    & Real              & Section~\ref{info:INIT}                       & kW/m$^3$      &               \\ \hline
 {\ct ID}                        & Character         & Section~\ref{info:PART_SURF}                  &               &               \\ \hline
 {\ct MASS\_FRACTION(N)}         & Real Array        & Section~\ref{info:INIT}                       & kg/kg         & Ambient       \\ \hline
@@ -10671,6 +10683,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct N\_PARTICLES}              & Integer           & Section~\ref{info:initial_droplets}           &               & 0             \\ \hline
 {\ct N\_PARTICLES\_PER\_CELL}   & Integer           & Section~\ref{info:initial_droplets}           &               & 0             \\ \hline
 {\ct PART\_ID}                  & Character         & Section~\ref{info:initial_droplets}           &               &               \\ \hline
+{\ct RADIUS}                    & Real              & Section~\ref{info:initial_droplets}           & m             &               \\ \hline
 {\ct SHAPE}                     & Character         & Section~\ref{info:initial_droplets}           &               & {\ct 'BLOCK'} \\ \hline
 {\ct SPEC\_ID(N)}               & Character Array   & Section~\ref{info:INIT}                       &               &               \\ \hline
 {\ct TEMPERATURE}               & Real              & Section~\ref{info:INIT}                       & $^\circ$C     & {\ct TMPA}    \\ \hline
