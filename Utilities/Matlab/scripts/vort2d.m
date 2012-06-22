@@ -68,7 +68,7 @@ end
 disp('Plotting...');
 
 % Open directory for plot output
-plot_dir = '../../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/';
+plot_dir = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/';
 
 % Define standard plotting parameters
 plot_style
@@ -330,7 +330,7 @@ dx =[0.0077800 0.0038900 0.0019450 0.0009725];
 dx2=[0.0000605 0.0000151 0.0000038 0.0000009];
 
 % Open data file for reference from FDS_verification_script.m
-RMSFile = fopen([plot_dir,'vort2d_error.csv'],'wt');
+RMSFile = fopen([input_dir,'vort2d_error.csv'],'wt');
     
 % Write column headers
 fprintf(RMSFile,'%s\n','dx, dxmod, dx^2, error1, error2, error3');
