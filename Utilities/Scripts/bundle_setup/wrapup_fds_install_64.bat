@@ -14,13 +14,16 @@ echo echo Removing pre 5.4 FDS/Smokeview entries (if present) from the system an
 
 call "%CD%\set_path.exe" -s -m -b -r "nist\fds"
 
-echo.
-echo Associating the smv file extension with smokeview_win_64.exe
+call "%CD%\custom_env.bat"
 
-ftype smvDoc="%CD%\bin\smokeview%smv_major_version%_win_64.exe" "%%1" >Nul
+echo.
+echo Associating the smv file extension with smokeview%fdssmv_major_version%_win_64.exe
+
+ftype smvDoc="%CD%\bin\smokeview%fdssmv_major_version%_win_64.exe" "%%1" >Nul
 assoc .smv=smvDoc>Nul
 
-set FDSSTART=%USERPROFILE%\Start Menu\Programs\FDS6
+set FDSSTART=%ALLUSERSPROFILE%\Start Menu\Programs\%fds_edition%
+echo FDSSTART=%FDSSTART%
 
 echo. 
 echo Adding FDS and Smokeview shortcuts to the Start menu.
@@ -29,11 +32,22 @@ if exist "%FDSSTART%" rmdir /q /s "%FDSSTART%"
 mkdir "%FDSSTART%"
 
 mkdir "%FDSSTART%\FDS on the Web"
-copy "%CD%\Documentation\FDS_on_the_Web\Software_Updates.url"            "%FDSSTART%\FDS on the Web\Software Updates.url"  
-copy "%CD%\Documentation\FDS_on_the_Web\Documentation_Updates.url"       "%FDSSTART%\FDS on the Web\Documentation Updates.url"  
+echo copying "%CD%\Documentation\FDS_on_the_Web\Software_Updates.url"
+copy "%CD%\Documentation\FDS_on_the_Web\Software_Updates.url"            "%FDSSTART%\FDS on the Web\Software Updates.url"
+
+echo copying "%CD%\Documentation\FDS_on_the_Web\Documentation_Updates.url"
+copy "%CD%\Documentation\FDS_on_the_Web\Documentation_Updates.url"       "%FDSSTART%\FDS on the Web\Documentation Updates.url"
+
+echo copying "%CD%\Documentation\FDS_on_the_Web\Discussion_Group.url"
 copy "%CD%\Documentation\FDS_on_the_Web\Discussion_Group.url"   "%FDSSTART%\FDS on the Web\Discussion Group.url"
+
+echo copying "%CD%\Documentation\FDS_on_the_Web\Official_Web_Site.url"
 copy "%CD%\Documentation\FDS_on_the_Web\Official_Web_Site.url"  "%FDSSTART%\FDS on the Web\Official Web Site.url"
+
+echo copying "%CD%\Documentation\FDS_on_the_Web\Discussion_Group.url"
 copy "%CD%\Documentation\FDS_on_the_Web\Discussion_Group.url"   "%FDSSTART%\FDS on the Web\Discussion Group.url"
+
+echo copy "%CD%\Documentation\FDS_on_the_Web\Issue_Tracker.url"
 copy "%CD%\Documentation\FDS_on_the_Web\Issue_Tracker.url"      "%FDSSTART%\FDS on the Web\Issue Tracker.url"
 
 mkdir "%FDSSTART%\Guides and Release Notes"
@@ -57,5 +71,6 @@ erase "%CD%"\shortcut.exe
 echo.
 echo Press any key to complete Installation.
 pause>NUL
-erase "%CD%"\wrapup_fds_install.bat
+Rem erase "%CD%"\wrapup_fds_install.bat
+Rem erase "%CD%"\custom_env.bat
 
