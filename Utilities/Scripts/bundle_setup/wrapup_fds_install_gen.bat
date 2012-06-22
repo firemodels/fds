@@ -61,9 +61,9 @@ echo echo. >> Uninstall\Uninstall.bat
 echo echo Removing directory, %CD%\bin, from the System Path >> Uninstall\Uninstall.bat
 echo call "%CD%\Uninstall\set_path.exe" -s -b -r "%CD%\bin" >> Uninstall\Uninstall.bat
 
-echo echo. >> Uninstall\removefds.bat
-echo echo Uninstall Complete.  Press any key to continue.  >> Uninstall\removefds.bat
-echo pause>NUL  >> Uninstall\removefds.bat
+echo echo. >> Uninstall\Uninstall.bat
+echo echo Delete the directory, %CD%, (as administrator) to complete the removal of FDS and Smokeview >> Uninstall\Uninstall.bat
+echo pause >> Uninstall\Uninstall.bat
 
 echo.
 echo Press any key to complete Installation.
