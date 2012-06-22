@@ -118,7 +118,7 @@ for j=qrange
         
         C = stripcell(Group_Key_Label);
         [B I] = unique(C);
-        legend(K(I),C(I),'Location',Key_Position,'FontSize',12)
+        legend(K(I),C(I),'Location',Key_Position,'FontSize',12','Interpreter',Font_Interpreter)
         legend boxon
         
         hold off
