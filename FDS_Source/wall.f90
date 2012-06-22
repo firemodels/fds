@@ -300,7 +300,7 @@ CASE (INFLOW_OUTFLOW) METHOD_OF_HEAT_TRANSFER ! Only for wall cells
       CASE(-3) 
          UN = -WW(II,JJ,KK-1)
    END SELECT
-   IF (UN>=0._EB) INFLOW = .TRUE.
+   IF (UN>ZERO_P) INFLOW = .TRUE.
 
    IF (INFLOW) THEN
       TMP_F = TMP_0(KK)
