@@ -31,3 +31,4 @@ HGL Temperature LLNL Enclosures,Measured Temperature Rise ($^\circ$C),Predicted 
 USN Plume Temperatures,Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,250,0.03 0.95,SouthEast,4,0,no,FDS_Validation_Guide/FIGURES/ScatterPlots/USN_Plume_Temperature
 LLNL Enclosure Pressure,Measured Pressure Rise (Pa),Predicted Pressure Rise (Pa),0,150,0.03 0.95,SouthEast,4,0,no,FDS_Validation_Guide/FIGURES/ScatterPlots/LLNL_Pressure
 Pool Fires Burning Rates,Measured Burning Rate (kg/m$^2$/s),Predicted Burning Rate (kg/m$^2$/s),0,0.2,0.03 0.95,SouthEast,4,0,no,FDS_Validation_Guide/FIGURES/ScatterPlots/Pool_Fires_Burning_Rates
+Cable Temperature,Measured Time to Threshold Temperature (s),Predicted Time to Threshold Temperature (s),0,1800,0.03 0.95,SouthEast,4,14,yes,FDS_Validation_Guide/FIGURES/ScatterPlots/Cable_Temperature
