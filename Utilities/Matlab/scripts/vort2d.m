@@ -22,6 +22,7 @@ BigGamma = 0.0359157;
 meshsize = [40 80 160 320];
 
 % Set time step of DEVC output
+%DT = 0.3112/(1000*U0);
 DT = 1.1114*10.^(-4);
 
 % Set the flow-through time
@@ -30,6 +31,7 @@ DT = 1.1114*10.^(-4);
 FLOWTIME = int16(0.3112/(U0*DT));
     
 % Set the number of time steps to be analyzed
+    % Do not set below 3 (see 'Export Error for Plotting')
 TIMESTEPS = 4;
     
 % Allocate space for STEP, STEPSIZE, and DEVCNUM
@@ -46,13 +48,14 @@ end
     
 % Allocate space for arrays
 MatU = cell(4);
+UX_LABELS = cell(1,TIMESTEPS+1);
+UZ_LABELS = cell(1,TIMESTEPS+1);
 COUNT = zeros(4,TIMESTEPS);
-ERROR = zeros(4,TIMESTEPS);
+RMS = zeros(4,TIMESTEPS);
     
 %-------------------------------------------------------------------------%
 % Import Data
 %-------------------------------------------------------------------------%
-disp('Importing Data...');
 
 for m = 1:4
     meshname = num2str(40*2.^(m-1));
@@ -65,26 +68,12 @@ end
 %-------------------------------------------------------------------------%
 % Plot Data
 %-------------------------------------------------------------------------%
-disp('Plotting...');
 
 % Open directory for plot output
 plot_dir = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/';
 
 % Define standard plotting parameters
 plot_style
-
-% Begin figure
-figure
-
-% Set standard plotting parameters
-set(gca,'Units',Plot_Units)
-set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Title_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(gcf,'DefaultLineLineWidth',Line_Width)
-set(gcf,'PaperUnits',Paper_Units);
-set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 
 % Run for each mesh size
 for m = 1:4
@@ -100,7 +89,10 @@ for m = 1:4
     %-----------------------------------------------------------------%
     % Construct U-Velocity Matrices for Each Time Step
     %-----------------------------------------------------------------%
-        
+    
+    % Allocate space for array
+    UARRAY = zeros(STEP(m),STEP(m),TIMESTEPS+1);
+    
     for t = 1:TIMESTEPS+1
             
         % Set time steps to be integer multiples
@@ -140,17 +132,35 @@ for m = 1:4
             
         % Create contour plot of simulated u-velocities
         contour(UARRAYPART,50);
-            
+        
+        % Set standard plotting parameters
+        set(gca,'Units',Plot_Units)
+        set(gca,'FontName',Font_Name)
+        set(gca,'FontSize',Title_Font_Size)
+        set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
+        set(gcf,'DefaultLineLineWidth',Line_Width)
+        set(gcf,'PaperUnits',Paper_Units);
+        set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+        set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+        
         % Save contour plot to file
         print(gcf,'-dpdf',[plot_dir,filename]);
     end
-        
+
     %-----------------------------------------------------------------%
     % Plot U-Velocity at Z=0 Data for a Range of Times
     %-----------------------------------------------------------------%
-            
+
+    % Allocate space for array
+    UXEXACTARRAY = zeros(1,STEP(m));
+    
+    % Define analytical solution
+    for x = 1:STEP(m)
+        UXEXACTARRAY(x) = U0;
+    end
+
     % Plot analytical solution
-    UXEXACT = plot(X,U0,'--');
+    UXEXACT = plot(X,UXEXACTARRAY,'--');
         
     % Define plot color as black
     set(UXEXACT,'Color',[0 0 0],'LineWidth',1.4);
@@ -188,6 +198,33 @@ for m = 1:4
 
     % Specify axes for above plots
     axis([-0.031 0.031 34.5 35.5]);
+    
+    % Set standard plotting parameters
+    set(gca,'Units',Plot_Units)
+    set(gca,'FontName',Font_Name)
+    set(gca,'FontSize',Title_Font_Size)
+    set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
+    set(gcf,'DefaultLineLineWidth',Line_Width)
+    set(gcf,'PaperUnits',Paper_Units);
+    set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+    set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+
+    % Label axes
+    xlabel('X-Coordinate (m)','FontSize',Title_Font_Size,...
+           'Interpreter',Font_Interpreter);
+    ylabel('U-Velocity (m/s)','FontSize',Title_Font_Size,...
+           'Interpreter',Font_Interpreter);
+    
+    % Define legend-label strings
+    UX_LABELS{1} = 'Analytical';
+    for t = 2:TIMESTEPS+2
+        TIME_INDEX = num2str(double((t-2)*FLOWTIME)*DT,'%6.3f');
+        UX_LABELS{t} = ['FDS (t=',TIME_INDEX,' s)'];
+    end
+    
+    % Create legend
+    UX_LEG = legend(UX_LABELS,'Location','NorthWest');
+    set(UX_LEG,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter);
 
     % Save plot to file
     print(gcf,'-dpdf',[plot_dir,'vort2d_',meshname,'_uxgraph']);
@@ -226,9 +263,36 @@ for m = 1:4
 
     % Plot all plots together (from hold on)
     hold off
-
+    
     % Specify axes for above plots
     axis([-0.031 0.031 33.4 36.6]);
+
+    % Set standard plotting parameters
+    set(gca,'Units',Plot_Units)
+    set(gca,'FontName',Font_Name)
+    set(gca,'FontSize',Title_Font_Size)
+    set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
+    set(gcf,'DefaultLineLineWidth',Line_Width)
+    set(gcf,'PaperUnits',Paper_Units);
+    set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+    set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+    
+    % Label axes
+    xlabel('Z-Coordinate (m)','FontSize',Title_Font_Size,...
+           'Interpreter',Font_Interpreter);
+    ylabel('U-Velocity (m/s)','FontSize',Title_Font_Size,...
+           'Interpreter',Font_Interpreter);
+    
+    % Define legend-label strings
+    UZ_LABELS{1} = 'Analytical';
+    for t = 2:TIMESTEPS+2
+        TIME_INDEX = num2str(double((t-2)*FLOWTIME)*DT,'%6.3f');
+        UZ_LABELS{t} = ['FDS (t=',TIME_INDEX,' s)'];
+    end
+    
+    % Create legend
+    UZ_LEG = legend(UZ_LABELS,'Location','NorthEast');
+    set(UZ_LEG,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter);
 
     % Save plot to file
     print(gcf,'-dpdf',[plot_dir,'vort2d_',meshname,'_uzgraph']);
@@ -284,13 +348,33 @@ for m = 1:4
     set(UPGRAPH,'Color',[1 0 0]);
 
     % Specify axes for above plots
-    axis([0.0 0.045 34.6 35.8]);
+    axis([0.0 0.037 34.6 35.8]);
+    
+    % Set standard plotting parameters
+    set(gca,'Units',Plot_Units)
+    set(gca,'FontName',Font_Name)
+    set(gca,'FontSize',Title_Font_Size)
+    set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
+    set(gcf,'DefaultLineLineWidth',Line_Width)
+    set(gcf,'PaperUnits',Paper_Units);
+    set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+    set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+    
+    % Label axes
+    xlabel('Time (s)','FontSize',Title_Font_Size,...
+           'Interpreter',Font_Interpreter);
+    ylabel('U-Velocity (m/s)','FontSize',Title_Font_Size,...
+           'Interpreter',Font_Interpreter);
+    
+    % Create legend
+    UP_LEG = legend('Analytical','FDS','Location','SouthEast');
+    set(UP_LEG,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter);
 
     % Save plot to file
     print(gcf,'-dpdf',[plot_dir,'vort2d_',meshname,'_upgraph']);
     
     %-----------------------------------------------------------------%
-    % Calculate Error Values for X=0
+    % Calculate RMS Error Values for X=0
     %-----------------------------------------------------------------%
 
     for t = 1:TIMESTEPS
@@ -300,7 +384,7 @@ for m = 1:4
             
         % Initialize error arrays
         COUNT(m,t) = 0.0;
-        ERROR(m,t) = 0.0;
+        RMS(m,t) = 0.0;
             
         for j = 1:STEP(m)
                 
@@ -309,15 +393,15 @@ for m = 1:4
                 
             % Calculate analytical u-velocity values
             UZEXACT = U0-BigGamma.*ZVAL.*...
-                          exp(-ZVAL.^2./(2*Rc.^2))./Rc.^2;
+                      exp(-ZVAL.^2./(2*Rc.^2))./Rc.^2;
                 
             % Calculate initial error values
-            ERROR(m,t) = ERROR(m,t)+abs((UZARRAY(j)-UZEXACT)/UZEXACT);
+            RMS(m,t) = RMS(m,t)+((UZARRAY(j)-UZEXACT)).^2;
             COUNT(m,t) = COUNT(m,t)+1.0;
         end
             
         % Calculate averaged error values
-        ERROR(m,t) = ERROR(m,t)/COUNT(m,t);
+        RMS(m,t) = sqrt(RMS(m,t)/COUNT(m,t));
     end
  end
 
@@ -333,15 +417,15 @@ dx2=[0.0000605 0.0000151 0.0000038 0.0000009];
 RMSFile = fopen([input_dir,'vort2d_error.csv'],'wt');
     
 % Write column headers
-fprintf(RMSFile,'%s\n','dx, dxmod, dx^2, error1, error2, error3');
+fprintf(RMSFile,'%s\n','dx, dxmod, dx^2, rms1, rms2, rms3');
     
 % Write error data for all meshes
 for m = 1:4
-    fprintf(RMSFile,'%12.8f, %12.8f, %12.8f, %12.8f, %12.8f, %12.8f\n',...
-            dx(m),8*dx(m),120*dx2(m),ERROR(m,1),ERROR(m,2),ERROR(m,3));
+    fprintf(RMSFile,'%12.9f, %12.9f, %12.9f, %12.9f, %12.9f, %12.9f\n',...
+            dx(m),140*dx(m),4500*dx2(m),RMS(m,1),RMS(m,2),RMS(m,3));
 end
 
-disp('Done');
+
     
     
     
