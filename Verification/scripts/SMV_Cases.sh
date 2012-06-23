@@ -1,6 +1,5 @@
 #!/bin/bash
 
-$RUNFDS Visualization capecod
 $RUNFDS Visualization cell_test
 $RUNFDS Visualization cfast_test
 $RUNFDS Visualization colorbar
