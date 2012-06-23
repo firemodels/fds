@@ -24,9 +24,9 @@ set in_smv=%svn_root%\SMV\for_bundle\to_google\smv_%smv_version%_%smv_revision%_
 set to_google=%svn_root%\Utilities\to_google
 set basename=FDS_%fds_version%-SMV_%smv_version%_Windows
 set out_bundle=%to_google%\%basename%
-set out_bin=%out_bundle%\FDS5\bin
-set out_doc=%out_bundle%\FDS5\Documentation
-set out_examples=%out_bundle%\FDS5\Examples
+set out_bin=%out_bundle%\%fds_edition%\bin
+set out_doc=%out_bundle%\%fds_edition%\Documentation
+set out_examples=%out_bundle%\%fds_edition%\Examples
 
 set bundleinfo=%svn_root%\Utilities\Scripts\bundle_setup
 
@@ -64,7 +64,7 @@ if exist %turbfile% rmdir /S /Q %turbfile%
 echo. 
 echo Compressing %out_bundle%
 
-copy %bundleinfo%\setup.bat %out_bundle%\FDS5\setup.bat
+copy %bundleinfo%\setup.bat %out_bundle%\%fds_edition%\setup.bat
 
 cd %to_google%
 if exist %basename%.zip erase %basename%.zip
@@ -78,5 +78,5 @@ echo Setup is about to install FDS %fds_version% and Smokeview %smv_version% > %
 echo Press Setup to begin installation. > %bundleinfo%\main.txt
 if exist %basename%.exe erase %basename%.exe
 Rem wzipse32 %basename%.zip -d "c:\program files\nist\"
-wzipse32 -setup -a %bundleinfo%\about.txt -st"FDS-Smokeview Setup" -t %bundleinfo%\main.txt -m %bundleinfo%\message.txt %basename%.zip -c FDS5\setup.bat
+wzipse32 -setup -a %bundleinfo%\about.txt -st"FDS-Smokeview Setup" -t %bundleinfo%\main.txt -m %bundleinfo%\message.txt %basename%.zip -c %fds_edition%\setup.bat
 pause
