@@ -10,6 +10,8 @@ setenv smvhost bluesky.cfr.nist.gov
 setenv OSXBUNDLE
 setenv PLATFORM OSX32
 setenv FDSEDITION $4
+setenv FDSVERSION $5
+setenv SMVVERSION $6
 
 setenv manifest manifest_osx_32.html
 
