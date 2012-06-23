@@ -7,7 +7,7 @@ set scp_fds_smvroot=$fds_smvroot
 set fds_smvroot=~/$fds_smvroot
 set fdsroot=$scp_fds_smvroot/FDS_Compilation
 set googledir=$fds_smvroot/Utilities/to_google
-set bundledir=$bundlebase/FDS/FDS6
+set bundledir=$bundlebase/FDS/FDS5
 
 cd $googledir
 rm -rf $bundlebase

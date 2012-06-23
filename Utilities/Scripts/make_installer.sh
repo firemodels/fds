@@ -8,7 +8,7 @@ then
   echo "Creates an FDS/Smokeview installer sh script. "
   echo ""
   echo "  ostype - OSX or LINUX"
-  echo "  ossize - ia32, intel64 or ib64"
+  echo "  ossize - ia32, intel64"
   echo "  FDS.tar.gz - compressed tar file containing FDS distribution"
   echo "  INSTALLER.sh - .sh script containing self-extracting installer"
   echo
@@ -28,6 +28,16 @@ fi
 
 cat << EOF > $INSTALLER
 #!/bin/bash
+if [ \$# -eq 0 ]
+then
+  echo "Usage: $INSTALLER [extract]"
+  echo ""
+  echo "The script \$0 installs FDS and Smokeview on an $ossize $ostypecript system. "
+  echo ""
+  echo "If the extract option is specified then the .tar.gz FDS/Smokewview"
+  echo "install file is extracted instead."
+  exit
+fi
 FDS_root=~/FDS/$FDSEDITION
 
 # record the name of this script and the name of the directory 
