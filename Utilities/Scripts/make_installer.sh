@@ -28,15 +28,20 @@ fi
 
 cat << EOF > $INSTALLER
 #!/bin/bash
-if [ \$# -eq 0 ]
+if [ \$# -eq 1 ]
 then
-  echo "Usage: $INSTALLER [extract]"
+option=\$1
+if [ "\$option" == "-help" ]
+then
+  echo "Usage: $INSTALLER [-extract]"
   echo ""
-  echo "The script \$0 installs FDS and Smokeview on an $ossize $ostypecript system. "
+  echo "This script installs FDS $FDS_VERSION and Smokeview $SMV_VERSION"
+  echo "on an $ossize $ostype system."
   echo ""
-  echo "If the extract option is specified then the .tar.gz FDS/Smokewview"
-  echo "install file is extracted instead."
+  echo "If the -extract option is specified then the installation files"
+  echo "are extracted to $FDS_TAR instead."
   exit
+fi
 fi
 FDS_root=~/FDS/$FDSEDITION
 
@@ -59,7 +64,7 @@ SKIP=\`awk '/^__TARFILE_FOLLOWS__/ { print NR + 1; exit 0; }' \$0\`
 if [ \$# -eq 1 ]
 then
 option=\$1
-if [ "\$option" == "extract" ]
+if [ "\$option" == "-extract" ]
 then
 name=\$0
 THAT=\${name%.*}.tar.gz
