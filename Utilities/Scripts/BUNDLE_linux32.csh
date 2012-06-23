@@ -8,6 +8,9 @@ setenv runhost $3
 setenv fdshost $3
 setenv smvhost $3
 setenv FDSEDITION $4
+setenv FDSVERSION $5
+setenv SMVVERSION $6
+
 setenv PLATFORM LINUX32
 
 
