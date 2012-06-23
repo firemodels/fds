@@ -28,21 +28,16 @@ fi
 
 cat << EOF > $INSTALLER
 #!/bin/bash
-if [ \$# -eq 1 ]
-then
-option=\$1
-if [ "\$option" == "-help" ]
-then
-  echo "Usage: $INSTALLER [-extract]"
-  echo ""
-  echo "This script installs FDS $FDS_VERSION and Smokeview $SMV_VERSION"
-  echo "on an $ossize $ostype system."
-  echo ""
-  echo "If the -extract option is specified then the installation files"
-  echo "are extracted to $FDS_TAR instead."
-  exit
-fi
-fi
+
+echo ""
+echo "FDS $FDSVERSION and Smokeview $SMVVERSION installer for $ostype $ossize"
+echo ""
+echo "Options:"
+echo "  1) Press <Enter> to begin installation"
+echo "  2) Type \"extract\" to copy the installation files to"
+echo "     the file $FDS_TAR"
+echo ""
+
 FDS_root=~/FDS/$FDSEDITION
 
 # record the name of this script and the name of the directory 
@@ -61,13 +56,12 @@ SKIP=\`awk '/^__TARFILE_FOLLOWS__/ { print NR + 1; exit 0; }' \$0\`
 
 # extract tar.gz file from this script if option 1 is 'extract'
 
-if [ \$# -eq 1 ]
-then
-option=\$1
-if [ "\$option" == "-extract" ]
+read  option
+if [ "\$option" == "extract" ]
 then
 name=\$0
-THAT=\${name%.*}.tar.gz
+#THAT=\${name%.*}.tar.gz
+THAT=$FDS_TAR
 if [ -e \$THAT ]
 then
 while true; do
@@ -80,20 +74,19 @@ while true; do
     esac
 done
 fi
-echo Extracting the compressed tar file contained in this installer to \$THAT
+echo Extracting the file embedded in this installer to \$THAT
 tail -n +\$SKIP \$THIS > \$THAT
 exit 0
-fi
 fi
 
 # get FDS root directory
 
 echo ""
 #echo "*** FDS Smokeview 6 Installer ***"
-echo "*** This is a test of the script that installs FDS and Smokeview on a "
-echo "    Linux or OSX computer system."
+echo "*** This is a test of the script that installs FDS $FDSVERSION and Smokeview $SMVVERSION"
+echo "    on a $ostype $ossize system."
 echo ""
-echo "   This script copies files and updates the PATH and LD_LIBRARY_PATH"
+echo "   This installer copies files and updates the PATH and LD_LIBRARY_PATH"
 echo "   variables (DYLD_LIBRARY_PATH on the Mac) so that FDS and Smokeview"
 echo "   may be used from the command line."
 echo ""
