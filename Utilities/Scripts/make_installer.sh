@@ -82,14 +82,6 @@ fi
 # get FDS root directory
 
 echo ""
-#echo "*** FDS Smokeview 6 Installer ***"
-echo "*** This is a test of the script that installs FDS $FDSVERSION and Smokeview $SMVVERSION"
-echo "    on a $ostype $ossize system."
-echo ""
-echo "   This installer copies files and updates the PATH and LD_LIBRARY_PATH"
-echo "   variables (DYLD_LIBRARY_PATH on the Mac) so that FDS and Smokeview"
-echo "   may be used from the command line."
-echo ""
 echo "Where whould you like to install FDS (default: \$FDS_root)"
 read answer
 if [ "\$answer" != "" ]; then
