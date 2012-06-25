@@ -5,6 +5,7 @@ Cable Temperature,Measured Time to Threshold Temperature (s),Predicted Time to T
 "HGL Temperature, MQH",Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,1000,0.03 0.95,SouthEast,4,14,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/HGL_Temperature_MQH
 "HGL Temperature, Beyler",Measured Temperature Rise ($^\circ$C),Predicted Temperature Rise ($^\circ$C),0,400,0.03 0.95,SouthEast,4,14,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/HGL_Temperature_Beyler
 Immersed HGL Radiation Heat Flux,Measured Heat Flux (kW/m$^2$),Predicted Heat Flux (kW/m$^2$),0,100,0.03 0.95,SouthEast,4,20,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Immersed_HGL_Radiation_Heat_Flux
+Immersed Plume Radiation Heat Flux,Measured Heat Flux (kW/m$^2$),Predicted Heat Flux (kW/m$^2$),0,110,0.03 0.95,SouthEast,4,20,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Immersed_Plume_Radiation_Heat_Flux
 Point Source Radiation Heat Flux,Measured Heat Flux (kW/m$^2$),Predicted Heat Flux (kW/m$^2$),0,120,0.03 0.95,SouthEast,4,20,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Point_Source_Radiation_Heat Flux
 Pressure,Measured Pressure Rise (Pa),Predicted Pressure Rise (Pa),0,300,0.03 0.95,SouthEast,4,80,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Pressure
 "Smoke Detector Activation Time, Milke",Measured Activation Time (s),Predicted Activation Time (s),0,100,0.03 0.95,SouthEast,4,16,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Smoke_Detector_Activation_Time_Milke

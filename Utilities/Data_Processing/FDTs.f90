@@ -618,7 +618,7 @@ END SUBROUTINE COMPUTE_HESKESTAD
 
 SUBROUTINE COMPUTE_MCCAFFREY
 
-INTEGER :: I,J,K,N_T,N_Z
+INTEGER :: I,J,K,N_T,N_Z,REGION
 REAL :: Q,Z_Q_2_5,KAPPA,ETA,T_P,SIGMA,Q_RAD(20)
 CHARACTER(30) :: FMT
 
@@ -645,12 +645,15 @@ DO I=1,30
       IF (Z_Q_2_5 < 0.08) THEN
          KAPPA = 6.8
          ETA = 0.5
+         REGION = 1
       ELSEIF ((Z_Q_2_5 >= 0.08) .AND. (Z_Q_2_5 <= 0.20)) THEN
          KAPPA = 1.9
          ETA = 0
+         REGION = 2
       ELSE
          KAPPA = 1.1
          ETA = -(1./3.)
+         REGION = 3
       ENDIF
 
       ! Compute plume centerline temperature
@@ -661,10 +664,13 @@ DO I=1,30
 
       Q_RAD(J) = SIGMA*(T_PLUME(J)**4)
 
+      WRITE(*,*) J, Z_LABEL(J)
+
       IF ((I==1) .AND. (J==1) .AND. (PROFILE)) THEN
-         WRITE(11,'(A)') 'Height, Flux'
+         WRITE(11,'(A)') 'Height,Flux,Region (1=cont.;2=inter.;3=plume)'
+         WRITE(11,'(A5,A1,F6.2,A1,I1)') Z_LABEL(J), ',', Q_RAD(J), ',', REGION
       ELSEIF ((I==1) .AND. (PROFILE)) THEN
-         WRITE(11,'(A5,A1,F16.2)') Z_LABEL(J), ',', Q_RAD(J)
+         WRITE(11,'(A5,A1,F6.2,A1,I1)') Z_LABEL(J), ',', Q_RAD(J), ',', REGION
       ENDIF
 
    ENDDO
