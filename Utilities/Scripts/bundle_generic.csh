@@ -4,32 +4,33 @@
 # where platform may be linux or osx and size may be 32 or 64
 
 setenv manifest manifest$FDSOS.html
+setenv OUT $MAJOR$FDSOS
+setenv OUT
 
 setenv smokeviewdir intel$FDSOS
 setenv smokeview smokeview$FDSOS
-setenv smokeviewout smokeview$MAJOR$FDSOS
-echo smokeview=$smokeview
-echo smokeviewout=$smokeviewout
+setenv smokeviewout smokeview$OUT
 
 setenv smokezipdir intel$FDSOS
 setenv smokezip smokezip$FDSOS
-setenv smokezipout smokezip$MAJOR$FDSOS
+setenv smokezipout smokezip$OUT
 
 setenv smokediffdir intel$FDSOS
 setenv smokediff smokediff$FDSOS
-setenv smokediffout smokediff$MAJOR$FDSOS
+setenv smokediffout smokediff$OUT
 
 setenv fdsdir intel$FDSOS
 setenv fds fds_intel$FDSOS
-setenv fdsout fds$MAJOR$FDSOS
+setenv fdsout fds$OUT
 
 setenv fdsmpidir mpi_intel$FDSOS
 setenv fdsmpi fds_mpi_intel$FDSOS
 setenv fdsmpiout fds$MAJOR\_mpi$FDSOS
+setenv fdsmpiout fds_mpi
 
 setenv fds2asciidir intel$FDSOS
 setenv fds2ascii fds2ascii$FDSOS
-setenv fds2asciiout fds2ascii$MAJOR$FDSOS
+setenv fds2asciiout fds2ascii$OUT
 
 
 set scp_fds_smvroot=$fds_smvroot
