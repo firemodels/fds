@@ -16,30 +16,4 @@ setenv MAJOR $7
 
 set OS=_osx_32
 
-setenv manifest manifest$OS.html
-
-setenv smokeviewdir intel$OS
-setenv smokeview smokeview$OS
-setenv smokeviewout smokeview$MAJOR$OS
-
-setenv smokezipdir intel$OS
-setenv smokezip smokezip$OS
-setenv smokezipout smokezip$MAJOR$OS
-
-setenv smokediffdir intel$OS
-setenv smokediff smokediff$OS
-setenv smokediffout smokediff$OS
-
-setenv fdsdir intel$OS
-setenv fds fds_intel$OS
-setenv fdsout fds$MAJOR$OS
-
-setenv fdsmpidir mpi_intel$OS
-setenv fdsmpi fds_mpi_intel$OS
-setenv fdsmpiout fds$MAJOR\_mpi$OS
-
-setenv fds2asciidir intel$OS
-setenv fds2ascii fds2ascii$OS
-setenv fds2asciiout fds2ascii$MAJOR$OS
-
 $fds_smvroot/Utilities/Scripts/bundle_generic.csh
