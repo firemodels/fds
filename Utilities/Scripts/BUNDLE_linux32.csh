@@ -5,37 +5,41 @@
 setenv fds_smvroot $1
 setenv bundlebase $2
 setenv runhost $3
-setenv fdshost $3
-setenv smvhost $3
+setenv fdshost bluesky.cfr.nist.gov
+setenv smvhost bluesky.cfr.nist.gov
+setenv OSXBUNDLE
+setenv PLATFORM OSX64
 setenv FDSEDITION $4
 setenv FDSVERSION $5
 setenv SMVVERSION $6
+setenv MAJOR $7
 
-setenv PLATFORM LINUX32
+set OS=_linux_32
 
+setenv manifest manifest$OS.html
 
-setenv manifest manifest_linux_32.html
+setenv smokeviewdir intel$OS
+setenv smokeview smokeview$OS
+setenv smokeviewout smokeview$MAJOR$OS
 
-setenv INTELLIB /shared/LIB32
-setenv smokezipdir intel_linux_32
-setenv smokediffdir intel_linux_32
-setenv fdsdir intel_linux_32
-setenv fdsmpidir mpi_intel_linux_32
+setenv smokezipdir intel$OS
+setenv smokezip smokezip$OS
+setenv smokezipout smokezip$MAJOR$OS
 
-setenv smokeviewdir intel_linux_32
-setenv smokeview smokeview_linux_32
-setenv smokezip smokezip_linux_32
-setenv smokediff smokediff_linux_32
+setenv smokediffdir intel$OS
+setenv smokediff smokediff$OS
+setenv smokediffout smokediff$OS
 
-setenv fds fds_intel_linux_32
-setenv fdsmpi fds_mpi_intel_linux_32
+setenv fdsdir intel$OS
+setenv fds fds_intel$OS
+setenv fdsout fds$MAJOR$OS
 
-setenv fdsout fds_linux_32
-setenv fdsmpiout fds_mpi_linux_32
+setenv fdsmpidir mpi_intel$OS
+setenv fdsmpi fds_mpi_intel$OS
+setenv fdsmpiout fds$MAJOR\_mpi$OS
 
-setenv fds2ascii fds2ascii_linux_32
-setenv fds2asciidir intel_linux_32
+setenv fds2asciidir intel$OS
+setenv fds2ascii fds2ascii$OS
+setenv fds2asciiout fds2ascii$MAJOR$OS
 
 $fds_smvroot/Utilities/Scripts/bundle_generic.csh
-
-
