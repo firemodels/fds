@@ -3,6 +3,35 @@
 # this script is called by bundle_platform_size.csh
 # where platform may be linux or osx and size may be 32 or 64
 
+setenv FDSOS =_linux_32
+
+setenv manifest manifest$FDSOS.html
+
+setenv smokeviewdir intel$FDSOS
+setenv smokeview smokeview$FDSOS
+setenv smokeviewout smokeview$MAJOR$FDSOS
+
+setenv smokezipdir intel$FDSOS
+setenv smokezip smokezip$FDSOS
+setenv smokezipout smokezip$MAJOR$FDSOS
+
+setenv smokediffdir intel$FDSOS
+setenv smokediff smokediff$FDSOS
+setenv smokediffout smokediff$MAJOR$FDSOS
+
+setenv fdsdir intel$FDSOS
+setenv fds fds_intel$FDSOS
+setenv fdsout fds$MAJOR$FDSOS
+
+setenv fdsmpidir mpi_intel$FDSOS
+setenv fdsmpi fds_mpi_intel$FDSOS
+setenv fdsmpiout fds$MAJOR\_mpi$FDSOS
+
+setenv fds2asciidir intel$FDSOS
+setenv fds2ascii fds2ascii$FDSOS
+setenv fds2asciiout fds2ascii$MAJOR$FDSOS
+
+
 set scp_fds_smvroot=$fds_smvroot
 set fds_smvroot=~/$fds_smvroot
 set fdsroot=$scp_fds_smvroot/FDS_Compilation
