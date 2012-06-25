@@ -23,6 +23,7 @@ NAMELIST /PRESSURE/ H,L,LEAK_AREA,M_DOT,OUTPUT_FILE,Q,T_END,W
 NAMELIST /THIEF/ CONDUIT_DIAMETER,CONDUIT_THICKNESS,D,JACKET_THICKNESS,MASS_PER_LENGTH,OUTPUT_FILE,T_END,TMP_A,TMP_RAMP,T_RAMP
 NAMELIST /ALPERT/ ALPHA,CUTOFF_TIME,RTI,ACTIVATION_TEMPERATURE,H,R,TMP_A,RADIATIVE_FRACTION,SCALING_FACTOR,OUTPUT_FILE
 NAMELIST /HESKESTAD/ TIME_RAMP,Q_RAMP,Z,A_C,TMP_A,RHO_AIR,RADIATIVE_FRACTION,OUTPUT_FILE,Z_LABEL
+NAMELIST /MCCAFFREY/ TIME_RAMP,Q_RAMP,Z,TMP_A,OUTPUT_FILE,Z_LABEL,PROFILE
 NAMELIST /MOWRER/ ALPHA,CUTOFF_TIME,C_PL,C_CJ,H,R,OUTPUT_FILE
 NAMELIST /MILKE/ ALPHA,CUTOFF_TIME,DELTA_T_C,H,R,RADIATIVE_FRACTION,OUTPUT_FILE
 
@@ -106,22 +107,32 @@ ENDDO
 107 WRITE(0,*) 'Done Heskestad Plume'
 REWIND(10)
 
+! Process MCCAFFREY (Plume Centerline Temperature) lines
+
+DO
+   TIME_RAMP=-1 ; Q_RAMP=-1 ; Z=-1.
+   READ(10,NML=MCCAFFREY,END=108,ERR=99,IOSTAT=IOS)
+   CALL COMPUTE_MCCAFFREY
+ENDDO
+108 WRITE(0,*) 'Done McCaffrey Plume'
+REWIND(10)
+
 ! Process MOWRER (Smoke Detector Activation) lines
 
 DO
-   READ(10,NML=MOWRER,END=108,ERR=99,IOSTAT=IOS)
+   READ(10,NML=MOWRER,END=109,ERR=99,IOSTAT=IOS)
    CALL COMPUTE_MOWRER
 ENDDO
-108 WRITE(0,*) 'Done Smoke Detector Activation (Mowrer)'
+109 WRITE(0,*) 'Done Smoke Detector Activation (Mowrer)'
 REWIND(10)
 
 ! Process MILKE (Smoke Detector Activation) lines
 
 DO
-   READ(10,NML=MILKE,END=109,ERR=99,IOSTAT=IOS)
+   READ(10,NML=MILKE,END=110,ERR=99,IOSTAT=IOS)
    CALL COMPUTE_MILKE
 ENDDO
-109 WRITE(0,*) 'Done Smoke Detector Activation (Milke)'
+110 WRITE(0,*) 'Done Smoke Detector Activation (Milke)'
 REWIND(10)
 
 ! Error message
@@ -561,10 +572,8 @@ END SUBROUTINE COMPUTE_ALPERT
 SUBROUTINE COMPUTE_HESKESTAD
 
 INTEGER :: I,J,K,N_T,N_Z
-REAL :: Q_C,D,Z_0,T_P,SIGMA,Q_RAD(20)
+REAL :: Q_C,D,Z_0,T_P
 CHARACTER(30) :: FMT
-
-SIGMA = 5.67e-11
 
 OPEN(11,FILE=TRIM(OUTPUT_FILE),FORM='FORMATTED',STATUS='REPLACE')
 
@@ -574,7 +583,7 @@ DO I=1,30
    
    N_Z = 0
    DO J=1,20
-      IF (Z(J)<0) EXIT
+   IF (Z(J)<0) EXIT
       N_Z = N_Z + 1
       
       ! Compute convective HRR
@@ -592,23 +601,86 @@ DO I=1,30
       ! Compute plume centerline temperature
 
       T_PLUME(J) = 9.1 * ((TMP_A+273)/(G*(C_P**2.)*(RHO_AIR)**2.))**(1./3.) * (Q_C)**(2./3.) * (Z(J)-Z_0)**(-5./3.) + (TMP_A+273)
-
-      ! Compute immersed plume radiation heat flux
-
-      Q_RAD(J) = SIGMA*(T_PLUME(J)**4)
-
-   ENDDO   
+   ENDDO
+   
    IF (I==1) THEN
-      WRITE(FMT,'(A,I2.1,5A)') "(",N_Z*2,"(","A",",','),","A",")"
-      WRITE(11,FMT) 'Time',(TRIM(Z_LABEL(K)),K=1,N_Z), (TRIM('Radiation '//Z_LABEL(K)),K=1,N_Z)
+      WRITE(FMT,'(A,I1.1,5A)') "(",N_Z,"(","A",",','),","A",")"
+      WRITE(11,FMT) 'Time',(TRIM(Z_LABEL(K)),K=1,N_Z)
    ENDIF
-   WRITE(FMT,'(A,I2.1,5A)') "(",N_Z*2,"(","F7.2",",','),","F7.2",")"
-   WRITE(11,FMT) TIME_RAMP(I), (T_PLUME(K)-273,K=1,N_Z), (Q_RAD(K),K=1,N_Z)
+   WRITE(FMT,'(A,I1.1,5A)') "(",N_Z,"(","F7.2",",','),","F7.2",")"
+   WRITE(11,FMT) TIME_RAMP(I), (T_PLUME(K)-273,K=1,N_Z)
 ENDDO
 
 CLOSE(11)
 
 END SUBROUTINE COMPUTE_HESKESTAD
+
+
+SUBROUTINE COMPUTE_MCCAFFREY
+
+INTEGER :: I,J,K,N_T,N_Z
+REAL :: Q,Z_Q_2_5,KAPPA,ETA,T_P,SIGMA,Q_RAD(20)
+CHARACTER(30) :: FMT
+
+SIGMA = 5.67e-11
+
+OPEN(11,FILE=TRIM(OUTPUT_FILE),FORM='FORMATTED',STATUS='REPLACE')
+
+DO I=1,30
+   IF ((TIME_RAMP(I)<0.) .AND. (.NOT. PROFILE)) EXIT
+   IF ((Z(I)<0.) .AND. (PROFILE)) EXIT
+   N_T = N_T + 1
+   
+   N_Z = 0
+   DO J=1,20
+      IF (Z(J)<0) EXIT
+      N_Z = N_Z + 1
+
+      Q = Q_RAMP(I)
+
+      ! Compute correlation constants depending on continuous, intermittent, or plume regions
+
+      Z_Q_2_5 = Z(J)/(Q)**(2./5.)
+
+      IF (Z_Q_2_5 < 0.08) THEN
+         KAPPA = 6.8
+         ETA = 0.5
+      ELSEIF ((Z_Q_2_5 >= 0.08) .AND. (Z_Q_2_5 <= 0.20)) THEN
+         KAPPA = 1.9
+         ETA = 0
+      ELSE
+         KAPPA = 1.1
+         ETA = -(1./3.)
+      ENDIF
+
+      ! Compute plume centerline temperature
+
+      T_PLUME(J) = (((KAPPA)/(0.9*SQRT(2*G)))**(2.) * (Z_Q_2_5)**(2*ETA-1) * (TMP_A+273)) + (TMP_A+273)
+
+      ! Compute immersed plume radiation heat flux
+
+      Q_RAD(J) = SIGMA*(T_PLUME(J)**4)
+
+      IF ((I==1) .AND. (J==1) .AND. (PROFILE)) THEN
+         WRITE(11,'(A)') 'Height, Flux'
+      ELSEIF ((I==1) .AND. (PROFILE)) THEN
+         WRITE(11,'(A5,A1,F16.2)') Z_LABEL(J), ',', Q_RAD(J)
+      ENDIF
+
+   ENDDO
+
+   IF ((I==1) .AND. (.NOT. PROFILE)) THEN
+      WRITE(FMT,'(A,I2.1,5A)') "(",N_Z*2,"(","A",",','),","A",")"
+      WRITE(11,FMT) 'Time', (TRIM(Z_LABEL(K)),K=1,N_Z), (TRIM('Radiation '//Z_LABEL(K)),K=1,N_Z)
+   ELSEIF (.NOT. PROFILE) THEN
+      WRITE(FMT,'(A,I2.1,5A)') "(",N_Z*2,"(","F7.2",",','),","F7.2",")"
+      WRITE(11,FMT) TIME_RAMP(I), (T_PLUME(K)-273,K=1,N_Z), (Q_RAD(K),K=1,N_Z)
+   ENDIF
+ENDDO
+
+CLOSE(11)
+
+END SUBROUTINE COMPUTE_MCCAFFREY
 
 
 SUBROUTINE COMPUTE_MOWRER
