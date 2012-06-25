@@ -664,8 +664,6 @@ DO I=1,30
 
       Q_RAD(J) = SIGMA*(T_PLUME(J)**4)
 
-      WRITE(*,*) J, Z_LABEL(J)
-
       IF ((I==1) .AND. (J==1) .AND. (PROFILE)) THEN
          WRITE(11,'(A)') 'Height,Flux,Region (1=cont.;2=inter.;3=plume)'
          WRITE(11,'(A5,A1,F6.2,A1,I1)') Z_LABEL(J), ',', Q_RAD(J), ',', REGION
