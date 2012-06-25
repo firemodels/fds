@@ -176,4 +176,4 @@ echo Compressing archive
 gzip    ../$bundlebase.tar
 echo Creating installer
 cd ..
-$makeinstaller $ostype $ossize $bundlebase.tar.gz $bundlebase.sh
+$makeinstaller $ostype $ossize $bundlebase.tar.gz $bundlebase.sh \~/FDS/$FDSEDITION
