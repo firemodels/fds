@@ -9,7 +9,7 @@ setenv fdshost $3
 setenv smvhost $3
 setenv FDSEDITION $4
 setenv FDSVERSION $5
-setenv FDSVERSION $6
+setenv SMVVERSION $6
 
 setenv PLATFORM LINUX64
 

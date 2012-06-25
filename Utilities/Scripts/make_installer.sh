@@ -1,5 +1,5 @@
 #!/bin/bash
-EXPECTED_ARGS=4
+EXPECTED_ARGS=5
 
 if [ $# -ne $EXPECTED_ARGS ]
 then
@@ -11,6 +11,7 @@ then
   echo "  ossize - ia32, intel64"
   echo "  FDS.tar.gz - compressed tar file containing FDS distribution"
   echo "  INSTALLER.sh - .sh script containing self-extracting installer"
+  echo "  installdir - default install directory"
   echo
   exit
 fi
@@ -19,6 +20,7 @@ ostype=$1
 ossize=$2
 FDS_TAR=$3
 INSTALLER=$4
+INSTALLDIR=$5
 
 LDLIBPATH=LD_LIBRARY_PATH
 if [ "$ostype" == "OSX" ]
@@ -38,7 +40,7 @@ echo "  2) Type \"extract\" to copy the installation files to"
 echo "     the file $FDS_TAR"
 echo ""
 
-FDS_root=~/FDS/$FDSEDITION
+FDS_root=$INSTALLDIR
 
 # record the name of this script and the name of the directory 
 # it will run in
@@ -82,7 +84,7 @@ fi
 # get FDS root directory
 
 echo ""
-echo "Where whould you like to install FDS (default: \$FDS_root)"
+echo "Where would you like to install FDS (default: \$FDS_root)"
 read answer
 if [ "\$answer" != "" ]; then
 FDS_root=\$answer
