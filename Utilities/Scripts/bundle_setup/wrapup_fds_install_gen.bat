@@ -16,11 +16,12 @@ echo.
 echo Removing pre 5.4 FDS/Smokeview entries (if present) from the system path.
 
 call "%CD%\set_path.exe" -s -m -b -r "nist\fds"
+call "%CD%\set_path.exe" -u -m -b -r "FDS\FDS5"
 
 echo.
-echo Associating the smv file extension with smokeview%fdssmv_major_version%_win_%platform%.exe
+echo Associating the smv file extension with smokeview.exe
 
-ftype smvDoc="%CD%\bin\smokeview%fdssmv_major_version%_win_%platform%.exe" "%%1" >Nul
+ftype smvDoc="%CD%\bin\smokeview.exe" "%%1" >Nul
 assoc .smv=smvDoc>Nul
 
 set FDSSTART=%ALLUSERSPROFILE%\Start Menu\Programs\FDS%fdssmv_major_version%
@@ -62,7 +63,7 @@ echo echo Removing directory, %CD%\bin, from the System Path >> Uninstall\Uninst
 echo call "%CD%\Uninstall\set_path.exe" -s -b -r "%CD%\bin" >> Uninstall\Uninstall.bat
 
 echo echo. >> Uninstall\Uninstall.bat
-echo echo Delete the directory, %CD%, (as administrator) to complete the removal of FDS and Smokeview >> Uninstall\Uninstall.bat
+echo echo Delete the directory %CD% by hand (as administrator) to complete the removal of FDS and Smokeview >> Uninstall\Uninstall.bat
 echo pause >> Uninstall\Uninstall.bat
 
 echo.

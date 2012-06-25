@@ -43,24 +43,27 @@ mkdir %out_web%
 mkdir %out_examples%
 mkdir %out_uninstall%
 
+set release_version=%fdssmv_major_version%_win_%platform%
+set release_version=
+
 echo.
-echo copying fds_win_%platform%.exe to fds%fdssmv_major_version%_win_%platform%.exe
-copy %fdsdir%\fds_win_%platform%.exe         %out_bin%\fds%fdssmv_major_version%_win_%platform%.exe
+echo copying fds_win_%platform%.exe to fds.exe
+copy %fdsdir%\fds_win_%platform%.exe         %out_bin%\fds%release_version%.exe
 
-echo copying fds_mpi_win_%platform%.exe to fds%fdssmv_major_version%_mpi_win_%platform%.exe
-copy %fdsmpidir%\fds_mpi_win_%platform%.exe  %out_bin%\fds%fdssmv_major_version%_mpi_win_%platform%.exe
+echo copying fds_mpi_win_%platform%.exe to fds_mpi.exe
+copy %fdsmpidir%\fds_mpi_win_%platform%.exe  %out_bin%\fds_mpi.exe
 
-echo copying smokeview_win_%platform%.exe to smokeview%fdssmv_major_version%_win_%platform%.exe
-copy %in_smv%\smokeview_win_%platform%.exe   %out_bin%\smokeview%fdssmv_major_version%_win_%platform%.exe
+echo copying smokeview_win_%platform%.exe to smokeview%release_version%.exe
+copy %in_smv%\smokeview_win_%platform%.exe   %out_bin%\smokeview%release_version%.exe
 
-echo copying smokediff_win_%platform%.exe to smokediff%fdssmv_major_version%_win_%platform%.exe
-copy %in_smokediff%\intel_win_%platform%\smokediff_win_%platform%.exe     %out_bin%\smokediff%fdssmv_major_version%_win_%platform%.exe
+echo copying smokediff_win_%platform%.exe to smokediff%release_version%.exe
+copy %in_smokediff%\intel_win_%platform%\smokediff_win_%platform%.exe     %out_bin%\smokediff%release_version%.exe
 
-echo copying smokezip_win_%platform%.exe to smokezip%fdssmv_major_version%_win_%platform%.exe
-copy %in_smokezip%\intel_win_%platform%\smokezip_win_%platform%.exe       %out_bin%\smokezip%fdssmv_major_version%_win_%platform%.exe 
+echo copying smokezip_win_%platform%.exe to smokezip%release_version%.exe
+copy %in_smokezip%\intel_win_%platform%\smokezip_win_%platform%.exe       %out_bin%\smokezip%release_version%.exe 
 
-echo copying fds2ascii_win_%platform%.exe to fds2ascii%fdssmv_major_version%_win_%platform%.exe
-copy %in_fds2ascii%\intel_win_%platform%\fds2ascii_win_%platform%.exe     %out_bin%\fds2ascii%fdssmv_major_version%_win_%platform%.exe
+echo copying fds2ascii_win_%platform%.exe to fds2ascii%release_version%.exe
+copy %in_fds2ascii%\intel_win_%platform%\fds2ascii_win_%platform%.exe     %out_bin%\fds2ascii%release_version%.exe
 
 echo copying background.exe
 copy %in_background%\intel_win_32\background.exe %out_bin%\background.exe
@@ -82,24 +85,24 @@ echo Versions:>> %manifest%
 echo. >> %manifest%
 
 echo -------------------------- >> %manifest%
-echo | %out_bin%\fds%fdssmv_major_version%_win_%platform%.exe 2>> %manifest%
+echo | %out_bin%\fds%release_version%.exe 2>> %manifest%
 echo. >> %manifest%
 echo -------------------------- >> %manifest%
-echo | %out_bin%\fds%fdssmv_major_version%_mpi_win_%platform%.exe 2>> %manifest%
+echo | %out_bin%\fds%release_version%.exe 2>> %manifest%
 
 echo. >> %manifest%
 echo -------------------------- >> %manifest%
-%out_bin%\fds2ascii%fdssmv_major_version%_win_%platform%.exe -v >>%manifest%
+%out_bin%\fds2ascii%release_version%.exe -v >>%manifest%
 
 echo. >> %manifest%
 echo -------------------------- >> %manifest%
-%out_bin%\smokeview%fdssmv_major_version%_win_%platform%.exe -v >> %manifest%
+%out_bin%\smokeview%release_version%.exe -v >> %manifest%
 echo. >> %manifest%
 echo -------------------------- >> %manifest%
-%out_bin%\smokediff%fdssmv_major_version%_win_%platform%.exe -v >> %manifest%
+%out_bin%\smokediff%release_version%.exe -v >> %manifest%
 echo. >> %manifest%
 echo -------------------------- >> %manifest%
-%out_bin%\smokezip%fdssmv_major_version%_win_%platform%.exe -v >> %manifest%
+%out_bin%\smokezip%release_version%.exe -v >> %manifest%
 
 echo. >> %manifest%
 echo -------------------------- >> %manifest%
@@ -141,9 +144,6 @@ copy "%bundleinfo%\uninstall_fds.bat" "%out_uninstall%\uninstall.bat"
 
 echo copying set_path.exe
 copy "%bundleinfo%\set_path.exe"         "%out_uninstall%\set_path.exe"
-
-Rem Include documentation in the bundle only if the variable, docs_include_in_bundles,
-Rem is not set to 0.  This variable is defined in the fds_smv_env.bat setup  file
 
 echo.
 echo copying FDS_Release_Notes.htm
@@ -230,8 +230,7 @@ cd %to_google%
 echo Setup is about to install FDS %fds_version% and Smokeview %smv_version% > %bundleinfo%\message.txt
 echo Press Setup to begin installation. > %bundleinfo%\main.txt
 if exist %basename%.exe erase %basename%.exe
-wzipse32 %basename%.zip -runasadmin -a %bundleinfo%\about.txt -st"FDS-Smokeview Setup" -d "c:\Program Files\FDS\%fdsversion%" -c wrapup_fds_install.bat
-Rem wzipse32 -setup -a %bundleinfo%\about.txt -st"FDS-Smokeview Setup" -t %bundleinfo%\main.txt -mokcancel %bundleinfo%\message.txt %basename%.zip -c wrapup_fds_install.bat
+wzipse32 %basename%.zip -runasadmin -a %bundleinfo%\about.txt -st"FDS %fds_version% Smokeview %smv_version% Setup" -d "c:\Program Files\FDS\%fdsversion%" -c wrapup_fds_install.bat
 
 start explorer %manifest%
 type %manifest%
