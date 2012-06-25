@@ -1349,7 +1349,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
       CALL GET_WALL_INDEX(NM,II,JJ,KK,IOR,IW)
 
       IF (IW==0 .AND. DV%STATISTICS=='null') THEN
-         WRITE(LU_ERR,'(A,I4,A)') 'ERROR: Reposition DEVC No.',DV%ORDINAL, '. FDS cannot determine which boundary cell to assign'
+         WRITE(LU_ERR,'(A,I4,A)') 'ERROR: Reposition DEVC No.',DV%ORDINAL,'. FDS cannot determine which boundary cell to assign.'
          PROCESS_STOP_STATUS = SETUP_STOP
          RETURN
       ELSE 
@@ -2714,7 +2714,6 @@ EDGE_DIRECTION_2: SELECT CASE(IEC)
                KKO = MAX(1,FLOOR(ZK))
                M%EDGE_INTERPOLATION_FACTOR(IE,1) = ZK-KKO
                IJKE(12,IE) = KKO
-   
             CASE(3)
                IF (IOR>0) IJKE(13,IE) = -NOM
                IF (IOR<0) IJKE(13,IE) =  NOM

@@ -4151,6 +4151,8 @@ DEVICE_LOOP: DO N=1,N_DEVC
                   ELSE
                      CYCLE DEVICE_LOOP
                   ENDIF
+               ELSEIF (DV%FACE_INDEX>0) THEN
+                  VALUE = 1000._EB
                ENDIF
 
             CASE('TIME INTEGRAL') SOLID_STATS_SELECT
