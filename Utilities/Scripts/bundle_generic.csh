@@ -42,7 +42,7 @@ endif
 # smokeview
 
 echo copying $smokeview from $smvbindir on $smvhost
-scp -q $smvhost\:$smvbindir/$smokeview $bundledir/bin/.
+scp -q $smvhost\:$smvbindir/$smokeview $bundledir/bin/$smokeviewout
 
 echo copying textures
 cp $texturedir/*.png $bundledir/bin/textures/.
@@ -51,12 +51,12 @@ cp $texturedir/*.jpg $bundledir/bin/textures/.
 # smokediff
 
 echo copying $smokediff from $smokediffdir on $fdshost
-scp -q $fdshost\:$smokediffroot/$smokediffdir/$smokediff $bundledir/bin/.
+scp -q $fdshost\:$smokediffroot/$smokediffdir/$smokediff $bundledir/bin/$smokediffout
 
 # smokezip
 
 echo copying $smokezip from $smokezipdir on $fdshost
-scp -q $fdshost\:$smokeziproot/$smokezipdir/$smokezip $bundledir/bin/.
+scp -q $fdshost\:$smokeziproot/$smokezipdir/$smokezip $bundledir/bin/$smokezipout
 
 # FDS 
 
@@ -121,7 +121,7 @@ echo copying smokeview.ini from $forbundle
 cp $forbundle/smokeview.ini $bundledir/bin/.
 
 echo copying $fds2ascii from $fds2asciiroot on $fdshost
-scp -q $fdshost\:$fds2asciiroot/$fds2asciidir/$fds2ascii $bundledir/bin/.
+scp -q $fdshost\:$fds2asciiroot/$fds2asciidir/$fds2ascii $bundledir/bin/$fds2asciiout
 
 echo Copying documentation
 cp $bundle_setup/Overview.html $bundledir/Documentation/.
