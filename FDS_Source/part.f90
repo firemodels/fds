@@ -672,8 +672,7 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
                   Z0 = IN%Z1
                   RR = 0.5_EB*(IN%X2-IN%X1)
                   HH = IN%Z2-IN%Z1
-                  !CALL RANDOM_CONE(NM,LP%X,LP%Y,LP%Z,X0,Y0,Z0,RR,HH) ! error message
-				  CALL RANDOM_CONE(LP%X,LP%Y,LP%Z,X0,Y0,Z0,RR,HH)
+                  CALL RANDOM_CONE(NM,LP%X,LP%Y,LP%Z,X0,Y0,Z0,RR,HH) 
             END SELECT
             CALL GET_IJK(LP%X,LP%Y,LP%Z,NM,XI,YJ,ZK,II,JJ,KK)
             LP%X = LP%X + (I-1)*IN%DX
