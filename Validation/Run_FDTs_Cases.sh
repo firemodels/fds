@@ -38,6 +38,9 @@ $FDTs NIST_Dunes_2000_FDTs_Input.txt
 cd $VDIR/NIST_NRC/FDTs
 $FDTs NIST_NRC_FDTs_Input.txt
 
+cd $VDIR/NRL_HAI/FDTs
+$FDTs NRL_HAI_FDTs_Input.txt
+
 cd $VDIR/Steckler_Compartment/FDTs
 $FDTs Steckler_MQH_Inputs.txt
 
