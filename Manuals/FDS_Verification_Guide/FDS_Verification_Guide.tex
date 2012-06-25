@@ -750,112 +750,64 @@ the corresponding location in space and time.  The figure confirms that the adve
 \section{2D Vortex Simulation}
 \label{two_dimensional_vortex}
 
-In FDS, the numerical stability of the CFD program is of utmost importance. In this section we present an analysis of the stability a two-dimensional vortex. We set up an analytically stable flow pattern consisting of a single stable vortex in a constant flow field and attempt to simulate it using FDS. We tested the stability of the regime under a range of square, two-dimensional meshes, 40, 80, 160, and finally 320 cells on a side. This allowed us to determine the numerical stability of our CFD program as a function of mesh size.
+In this section we present another case that demonstrates the second-order accuracy of the FDS code. FDS was used to model an analytically stable flow pattern consisting of a single stable vortex in a constant flow field. The ability of FDS to maintain the geometry of the vortex over time provides a good measure of the order of accuracy achieved by the FDS transport scheme.
 
-\begin{figure}[h]
-   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/vort2d_40_ugraph2}  &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/vort2d_80_ugraph2} \\
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/vort2d_160_ugraph2} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/vort2d_320_ugraph2}
-   \end{tabular*}
-   \caption{Contour plots of the u-velocity field of the vortex after one flow-through time at each grid resolution.}
-   \label{fig_vort2d_main}
-\end{figure}
-
-Analytically, our flow pattern was governed by the equation
+The vortex is the gradient of the potential field,
 \begin{equation}
 \label{eqn_vort2d}
-\Psi_{0} (x,z) = \Gamma \ Exp \left[ - \frac{x^{2} + z^{2}}{2 \ R_{c}^{2}} \right],
+\Psi_{0} (x,z) = \Gamma \ \exp \left[ - \frac{x^{2} + z^{2}}{2 \ R_{c}^{2}} \right],
 \end{equation}
-where $\Gamma$ is a parameter that determines the intensity of the vortices and $R_{c}$ sets the characteristic size of the vortices. This flow pattern is defined such that the point at the center of the two vortices is at $(x,y) = (0,0)$.
-
-The velocity-component fields may be determined by taking the partial derivative of this governing equation with respect to each direction, yielding
-\begin{eqnarray}
-\label{eqn_derivatives}
-\frac{\partial}{\partial x} \Psi_{0} &=& - \frac{\Gamma \ x}{R_{c}^{2}} \ Exp \left[ - \frac{x^{2} + z^{2}}{2 \ R_{c}^{2}} \right], \\
-\frac{\partial}{\partial z} \Psi_{0} &=& - \frac{\Gamma \ z}{R_{c}^{2}} \ Exp \left[ - \frac{x^{2} + z^{2}}{2 \ R_{c}^{2}} \right].
-\end{eqnarray}
-
-Taking into account the constant flow field, $U_{0}$, the individual velocity-component fields may be stated as
+where $\Gamma$ is a parameter that determines the intensity of the vortex and $R_{c}$ sets its characteristic size. This flow pattern is defined such that the point at the center of the two vortices is at $(x,z) = (0,0)$. The velocity components are determined by taking the gradient of the potential field,
 \begin{eqnarray}
 \label{eqn_uvel}
-u (x,z) &=& U_{0} + \frac{\partial}{\partial z} \Psi_{0} \notag \\
-&=& U_{0} - \frac{\Gamma \ z}{R_{c}^{2}} \ Exp \left[ - \frac{x^{2} + z^{2}}{2 \ R_{c}^{2}} \right],
-\end{eqnarray}
-\begin{eqnarray}
-\label{eqn_wvel}
-w (x,z) &=& - \frac{\partial}{\partial x} \Psi_{0} \notag \\
-&=& \frac{\Gamma \ x}{R_{c}^{2}} \ Exp \left[ - \frac{x^{2} + z^{2}}{2 \ R_{c}^{2}} \right],
-\end{eqnarray} where $u$ and $v$ refer to velocity in the $x$- and $y$-directions respectively. For our purposes we need only analyze one component of the velocity field. We will focus our attention on the u-component of velocity.
+u (x,z) &\equiv& U_{0} + \frac{\partial}{\partial z} \Psi_{0} = U_{0} - \frac{\Gamma \ z}{R_{c}^{2}} \ Exp \left[ - \frac{x^{2} + z^{2}}{2 \ R_{c}^{2}} \right], \\
+w (x,z) &\equiv& - \frac{\partial}{\partial x} \Psi_{0} = \frac{\Gamma \ x}{R_{c}^{2}} \ Exp \left[ - \frac{x^{2} + z^{2}}{2 \ R_{c}^{2}} \right],
+\end{eqnarray} where $u$ and $w$ refer to velocity in the $x$- and $z$-directions respectively. For our purposes we need only analyze one component of the velocity field. We will focus our attention on the $u$-component of velocity.
 
-\begin{figure}[t]
-   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/vort2d_80_ugraph4} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/vort2d_160_ugraph4}
-   \end{tabular*}
-   \caption{Contour plot of u-velocity field after three flow-through times at grid resolutions of 6400 (Left) and 25600 (Right).}
-   \label{fig_vort2d_velocitycontours}
-\end{figure}
 
-We define the computational domain as a two-dimensional square region, $L=0.3112$ m on a side, with periodic boundary conditions. As previously stated, this domain is discretized upon meshes of several different sizes. Each square mesh divides the computational domain equally across 1600, 6400, 25600, or 102400 grid cells, corresponding to meshes that are 40, 80, 160, or 320 cells on a side respectively. For the purposes of this test, we set the flow parameters as
+We define the computational domain as a two-dimensional square region, $L=0.3112$ m on a side, with periodic boundary conditions. The domain is discretized on a range of square, two-dimensional meshes of $40^{2}$, $80^{2}$, $160^{2}$, and $320^{2}$ grid cells. For the purposes of this test, we set the flow parameters as
 $$
 \begin{array}{lll}
-U_{0} &&= 35.0 \ \mathrm{m \ s^{-1}}, \\
-R_{c} &= L / 20 &= 1.55600 \times 10^{-2} \ \mathrm{m}, \\
-\Gamma &= 0.04 \ U_{0} \ R_{c} \ \sqrt{e} &= 3.59157 \times 10^{-2}.
+U_{0} &&= 35 \ \mathrm{m / s}, \\
+R_{c} &= L / 20 &= 0.01.556 \ \mathrm{m}, \\
+\Gamma &= 0.04 \ U_{0} \ R_{c} \ \sqrt{e} &= 0.03.59157.
 \end{array}
 $$
 
-FDS simulates the associated pressure field for us, but in order to do so, we must specify a few other standard parameters,
-\begin{eqnarray*}
-T_{0} &=& 300 \ \mathrm{K}, \\
-P_{0} &=& 1.01300 \times 10^{5} \ \mathrm{Pa}, \\
-\rho_{0} &=& 1.17170 \ \mathrm{kg \ m^{-3}}.
-\end{eqnarray*}
-
 The constant flow field and periodic boundary conditions cause the vortex to loop through the computational domain. The `flow-through' time, $t_{f}$, may be defined as the time period required for the stable vortex to return to its original spatial coordinates,
-\begin{eqnarray*}
-t_{f} &=& L / U_{0} \\
-&\approx& 8.8914 \times 10^{-3} \ \mathrm{s}.
-\end{eqnarray*}
-
+\begin{equation*}
+t_{f} = L / U_{0} \simeq 8.8914 \times 10^{-3} \ \mathrm{s}.
+\end{equation*}
 In order to ensure that our numerical simulation can converge to the analytical solution, we must ensure that the Courant-Friedrichs-Lewy (CFL) condition is met. By defining the time-step, $dt$, relative to the grid-cell size, $dx$, such that
 \begin{equation*}
 dt = \frac{dx}{2 U_{0}},
 \end{equation*}
 we can maintain a CFL value of 0.5, which is well below the maximum CFL value of one.
 
-A contour plot of the u-velocity field in the region of the vortex provides a simple characterization of the vortex's geometry. The extent to which this geometry changes over time provides a qualitative measure of the stability of the vortex. Figure 3.5 demonstrates the effectiveness of doubling the grid resolution by portraying the relative distortion of the vortex geometry after two flow-through times.
-
-A more quantitative measure of the stability of the vortex may be found by plotting the u-velocity values just along the z-axis. Figure 3.6 displays such plots for two different grid resolutions. Each line represents a plot taken for a different number of flow-through times such that the red lines represent the vortex after it has undergone the most loops through the computational domain while the green lines represent the vortex in the initial first couple of loops.
-
-\begin{figure}[t]
+\begin{figure}[h!]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/vort2d_80_uzgraph} &
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/vort2d_160_uzgraph}
    \end{tabular*}
-   \caption{u-velocity along the z-axis at $x=0$ plotted for each of the vortex's first four loops through the computational domain. (Left) Grid resolution of 6400. (Right) Grid resolution of 25600.}
+   \caption{$u$-velocity along the $z$-axis at $x=0$ plotted for each of the vortex's first four loops through the computational domain. (Left) $80^{2}$ grid cell model. (Right) $160^{2}$ grid cell model.}
    \label{fig_vort2d_axisvelocity}
 \end{figure}
 
-The broken black line in these plots represents the stable analytical solution. As the vortex undergoes more loops through the computational domain, its velocity profile diverges further and further from the analytically stable profile. While divergence still occurs on the finer mesh, the extent to which it diverges after the same number of flow-through times is significantly smaller.
-
-The rate with which the simulated profiles converge to the analytical ones by means of grid refinement describes the order of error experienced as a result of our numerical methods. In Figure 3.7 we plot the rms error resulting from differences between the simulated and analytical profiles for each grid resolution.
+A plot of $u$-velocity values just along the $z$-axis provides a simple characterization of the vortex's geometry. The extent to which this geometry changes over time provides a qualitative measure of the accuracy of the transport algorithm. Figure \ref{fig_vort2d_axisvelocity} displays such plots for two different grid resolutions. Each line represents a plot taken for a different number of flow-through times such that the red lines represent the vortex after it has undergone the most loops through the computational domain while the green lines represent the vortex in the initial first couple of loops. The broken black line in these plots represents the stable analytical solution. As the vortex undergoes more loops through the computational domain, its velocity profile diverges further and further from the analytically stable profile. While divergence still occurs on the finer mesh, the extent to which it diverges after the same number of flow-through times is significantly smaller.
 
 \begin{center}
-   \begin{figure}[t]
-         \includegraphics[width=\textwidth]{SCRIPT_FIGURES/vort2d_error}
-      \caption{Rms error between simulated and analytical u-velocity values along the z-axis plotted for each grid resolution at each of three subsequent passes of the vortex through the computational domain.}
+   \begin{figure}[h!]
+         \includegraphics[width=6.0in]{SCRIPT_FIGURES/vort2d_error}
+      \caption{Rms error between simulated and analytical $u$-velocity values along the $z$-axis plotted for each grid resolution at each of three subsequent passes of the vortex through the computational domain.}
       \label{fig_vort2d_error}
    \end{figure}
 \end{center}
 
-A log-log plot is used so that power relations appear as straight lines. The three color lines represents the rms error as a function of grid-cell size for each of three subsequent loops of the vortex through the computational domain. The broken and solid black lines represent the plot gradient corresponding to first and second order error respectively. While the error increases with each flow-through time, the gradients of the lines are roughly parallel to the solid black line, indicating second order error in our numerical methods.
+The rate with which the simulated profiles converge to the analytical ones by means of grid refinement describes the order of error experienced as a result of our numerical methods. In Figure \ref{fig_vort2d_error} we plot the rms error resulting from differences between the simulated and analytical profiles for each grid resolution. A log-log plot is used so that power relations appear as straight lines. The three color lines represents the rms error as a function of grid-cell size for each of three subsequent loops of the vortex through the computational domain. The broken and solid black lines represent the plot gradient corresponding to first and second order error respectively. While the error increases with each flow-through time, the gradients of the lines are roughly parallel to the solid black line, indicating second order error in our numerical methods.
 
 \subsection{Time-Dependent Solution}
 
-In order to analyze the stability of the vortex at times other than the flow-through time, it was necessary to derive the time-dependent solution. Given the periodic boundary conditions, the time-dependent governing equation and its corresponding u-velocity field are
+In order to analyze the stability of the vortex at times other than the flow-through time, it was necessary to derive the time-dependent solution. Given the periodic boundary conditions, the time-dependent governing equation and its corresponding $u$-velocity field are
 \begin{equation}
 \label{eqn_vort2d_timedep}
 \Psi (x,z,t) = \Psi_{0} \ Exp \left[\frac{2 \ U_{0} \ x \ t - U_{0}^{2} \ t^{2}}{2 \ R_{c}^{2}} \right],
@@ -865,16 +817,16 @@ In order to analyze the stability of the vortex at times other than the flow-thr
 u (x,z,t) = U_{0} - \Psi_{0} \ \frac{z}{R_{c}^{2}} \ Exp \left[\frac{2 \ U_{0} \ x \ t - U_{0}^{2} \ t^{2}}{2 \ R_{c}^{2}} \right].
 \end{equation}
 
-We collected u-velocity data for a single point in the computational domain, on the lower left fringe of the vortex. Plotting this data over the analytical time-dependent solution portrays exactly where and to what extent the numerical model deviates from the analytical as time progresses. Over time, the original peak that marks the passage of the vortex through the point becomes surrounded by smaller secondary peaks. Figure 3.8 shows this data for each of our four meshes, demonstrating the accuracy of each model.
-
-\begin{figure}[t]
+\begin{figure}[h!]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/vort2d_80_upgraph} &
       \includegraphics[width=3.2in]{SCRIPT_FIGURES/vort2d_160_upgraph}
    \end{tabular*}
-   \caption{Simulated and analytical values of u-velocity at a point plotted as a function of time over a time period equal to four times the flow-through time. (Left) Grid resolution of 6400. (Right) Grid resolution of 25600.}
+   \caption{Simulated and analytical values of $u$-velocity at a point plotted as a function of time over a time period equal to four times the flow-through time. (Left) $80^{2}$ grid cell model. (Right) $160^{2}$ grid cell model.}
    \label{fig_vort2d_pointvelocity}
 \end{figure}
+
+We collected $u$-velocity data for a single point in the computational domain, on the lower left fringe of the vortex. Plotting this data over the analytical time-dependent solution portrays exactly where and to what extent the numerical model deviates from the analytical as time progresses. Over time, the original peak that marks the passage of the vortex through the point becomes surrounded by smaller secondary peaks. Figure \ref{fig_vort2d_pointvelocity} shows this data for each of our four meshes, demonstrating the accuracy of each model.
 
 
 
