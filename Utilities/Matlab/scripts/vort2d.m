@@ -22,8 +22,8 @@ BigGamma = 0.0359157;
 meshsize = [40 80 160 320];
 
 % Set time step of DEVC output
-%DT = 0.3112/(1000*U0);
-DT = 1.1114*10.^(-4);
+DT = 0.3112/(1000*U0);
+%DT = 1.1114*10.^(-4);
 
 % Set the flow-through time
     % The time period required for the vortex to pass through the
