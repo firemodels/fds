@@ -1400,7 +1400,6 @@ ENDIF
 ! Set the boundary velocity place holder to some large negative number
 
 IF (CORRECTOR) THEN
-   
    U_Y => WORK1
    U_Z => WORK2
    V_X => WORK3
@@ -1900,7 +1899,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
       ORIENTATION_LOOP_2: DO ICD=1,2
          IF (ICD==1) THEN
             ICDO=2
-         ELSE !ICD==2)
+         ELSE ! ICD=2
             ICDO=1
          ENDIF
          ICD_SGN = I_SGN*ICD
