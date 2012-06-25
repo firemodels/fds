@@ -13,6 +13,6 @@ setenv FDSVERSION $5
 setenv SMVVERSION $6
 setenv MAJOR $7
 
-setenv FDSOS =_linux_32
+setenv FDSOS _linux_32
 
 $fds_smvroot/Utilities/Scripts/bundle_generic.csh

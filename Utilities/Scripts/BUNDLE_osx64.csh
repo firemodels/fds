@@ -14,6 +14,6 @@ setenv FDSVERSION $5
 setenv SMVVERSION $6
 setenv MAJOR $7
 
-set OS=_osx_64
+setenv FDSOS _osx_64
 
 $fds_smvroot/Utilities/Scripts/bundle_generic.csh

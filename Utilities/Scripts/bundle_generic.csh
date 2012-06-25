@@ -3,13 +3,13 @@
 # this script is called by bundle_platform_size.csh
 # where platform may be linux or osx and size may be 32 or 64
 
-setenv FDSOS =_linux_32
-
 setenv manifest manifest$FDSOS.html
 
 setenv smokeviewdir intel$FDSOS
 setenv smokeview smokeview$FDSOS
 setenv smokeviewout smokeview$MAJOR$FDSOS
+echo smokeview=$smokeview
+echo smokeviewout=$smokeviewout
 
 setenv smokezipdir intel$FDSOS
 setenv smokezip smokezip$FDSOS
