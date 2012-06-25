@@ -676,6 +676,8 @@ DO I=1,30
    IF ((I==1) .AND. (.NOT. PROFILE)) THEN
       WRITE(FMT,'(A,I2.1,5A)') "(",N_Z*2,"(","A",",','),","A",")"
       WRITE(11,FMT) 'Time', (TRIM(Z_LABEL(K)),K=1,N_Z), (TRIM('Radiation '//Z_LABEL(K)),K=1,N_Z)
+      WRITE(FMT,'(A,I2.1,5A)') "(",N_Z*2,"(","F7.2",",','),","F7.2",")"
+      WRITE(11,FMT) TIME_RAMP(I), (T_PLUME(K)-273,K=1,N_Z), (Q_RAD(K),K=1,N_Z)
    ELSEIF (.NOT. PROFILE) THEN
       WRITE(FMT,'(A,I2.1,5A)') "(",N_Z*2,"(","F7.2",",','),","F7.2",")"
       WRITE(11,FMT) TIME_RAMP(I), (T_PLUME(K)-273,K=1,N_Z), (Q_RAD(K),K=1,N_Z)
