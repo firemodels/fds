@@ -110,6 +110,24 @@ fi
   
 # did we succeed?
 
+HOMEBINDIR=~/bin
+if [ ! -d \$HOMEBINDIR ]
+then
+mkdir \$HOMEBINDIR
+fi
+
+cat << FDS > \$HOMEBINDIR/fds6.sh
+#!/bin/bash 
+\$FDS_root/bin/fds \\\$1
+FDS
+chmod +x \$HOMEBINDIR/fds6.sh
+
+cat << SMV > \$HOMEBINDIR/smokeview6.sh
+#!/bin/bash 
+\$FDS_root/bin/smokeview \\\$1
+SMV
+chmod +x \$HOMEBINDIR/smokeview6.sh
+
 if [ ! -d \$FDS_root ]
 then
 echo "\`whoami\` does not have permission to create \$FDS_root."
@@ -177,7 +195,7 @@ endif
 # Update LD_LIBRARY_PATH and PATH variables
 
 setenv $LDLIBPATH \\\$MPIDIST/lib:\\\${FORTLIB}:\\\$$LDLIBPATH
-set path=(\\\$FDSBINDIR \\\$MPIDIST/bin \\\$path)
+set path=(\\\$FDSBINDIR \\\$MPIDIST/bin ~/bin \\\$path)
 
 # if compilers are present then pre-define environment for their use
 
@@ -232,7 +250,7 @@ fi
 # Update LD_LIBRARY_PATH and PATH variables
 
 export $LDLIBPATH=\\\$MPIDIST/lib:\\\$FORTLIB:\\\$$LDLIBPATH
-export PATH=\\\$FDSBINDIR:\\\$MPIDIST/bin:\\\$PATH
+export PATH=\\\$FDSBINDIR:\\\$MPIDIST/bin:~/bin:\\\$PATH
 
 # if compilers are present then pre-define environment for their use
 
