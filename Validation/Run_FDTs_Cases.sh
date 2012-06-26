@@ -47,6 +47,9 @@ $FDTs Steckler_MQH_Inputs.txt
 cd $VDIR/UL_NFPRF/FDTs
 $FDTs UL_NFPRF_FDTs_Input.txt
 
+cd $VDIR/Ulster_SBI/FDTs
+$FDTs Ulster_SBI_FDTs_Input.txt
+
 cd $VDIR/USN_Hangars/FDTs
 $FDTs USN_Hangars_FDTs_Input.txt
 
