@@ -18,6 +18,18 @@ echo Removing pre 5.4 FDS/Smokeview entries (if present) from the system path.
 call "%CD%\set_path.exe" -s -m -b -r "nist\fds"
 call "%CD%\set_path.exe" -u -m -b -r "FDS\FDS5"
 
+if exist c:\bin goto existbin
+mkdir c:\bin
+:existbin
+
+set fds6=c:\bin\fds6.bat
+echo @echo off > %fds6%
+echo "%CD%\bin\fds" %%1 >> %fds6%
+
+set smv6=c:\bin\smokeview6.bat
+echo @echo off > %smv6%
+echo "%CD%\bin\smokeview" %%1 >> %smv6%
+
 echo.
 echo Associating the smv file extension with smokeview.exe
 
@@ -54,6 +66,7 @@ echo.
 echo Adding %CD%\bin to the system path 
 
 call "%CD%\set_path.exe" -s -m -a "%CD%\bin"
+call "%CD%\set_path.exe" -s -m -a "c:\bin"
 
 erase "%CD%"\set_path.exe
 erase "%CD%"\shortcut.exe
