@@ -159,6 +159,13 @@ cat << CSHRC > \$CSHFDS
 #/bin/csh -f
 set platform=\\\$1
 
+# unalias application names installed by FDS installer
+
+unalias fds >& /dev/null
+unalias smokeview >& /dev/null
+unalias smokezip >& /dev/null
+unalias smokediff >& /dev/null
+
 # define FDS bin directory location
 
 setenv FDSBINDIR \`pwd\`/bin
@@ -219,6 +226,13 @@ cat << BASH > \$BASHFDS
 #/bin/bash
 
 platform=\\\$1
+
+# unalias application names installed by FDS installer
+
+unalias fds >& /dev/null
+unalias smokeview >& /dev/null
+unalias smokezip >& /dev/null
+unalias smokediff >& /dev/null
 
 # define FDS bin directory location
 
