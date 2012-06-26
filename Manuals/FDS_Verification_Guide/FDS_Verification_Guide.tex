@@ -752,6 +752,13 @@ the corresponding location in space and time.  The figure confirms that the adve
 
 In this section we present another case that demonstrates the second-order accuracy of the FDS code. FDS was used to model an analytically stable flow pattern consisting of a single stable vortex in a constant flow field. The ability of FDS to maintain the geometry of the vortex over time provides a good measure of the order of accuracy achieved by the FDS transport scheme.
 
+   \begin{figure}[h!]
+         \centering
+         \scalebox{.7}{\includegraphics{FIGURES/vortex_diagram}}
+      \caption{Representative vector field of a two dimensional vortex in a constant flow field.}
+      \label{fig_vort2d_diagram}
+   \end{figure}
+
 The vortex is the gradient of the potential field,
 \begin{equation}
 \label{eqn_vort2d}
@@ -780,7 +787,7 @@ t_{f} = L / U_{0} \simeq 8.8914 \times 10^{-3} \ \mathrm{s}.
 \end{equation*}
 In order to ensure that our numerical simulation can converge to the analytical solution, we must ensure that the Courant-Friedrichs-Lewy (CFL) condition is met. By defining the time-step, $dt$, relative to the grid-cell size, $dx$, such that
 \begin{equation*}
-dt = \frac{dx}{2 U_{0}},
+\mbox{d}t = \frac{dx}{2 U_{0}},
 \end{equation*}
 we can maintain a CFL value of 0.5, which is well below the maximum CFL value of one.
 
@@ -795,13 +802,12 @@ we can maintain a CFL value of 0.5, which is well below the maximum CFL value of
 
 A plot of $u$-velocity values just along the $z$-axis provides a simple characterization of the vortex's geometry. The extent to which this geometry changes over time provides a qualitative measure of the accuracy of the transport algorithm. Figure \ref{fig_vort2d_axisvelocity} displays such plots for two different grid resolutions. Each line represents a plot taken for a different number of flow-through times such that the red lines represent the vortex after it has undergone the most loops through the computational domain while the green lines represent the vortex in the initial first couple of loops. The broken black line in these plots represents the stable analytical solution. As the vortex undergoes more loops through the computational domain, its velocity profile diverges further and further from the analytically stable profile. While divergence still occurs on the finer mesh, the extent to which it diverges after the same number of flow-through times is significantly smaller.
 
-\begin{center}
    \begin{figure}[h!]
-         \includegraphics[width=6.0in]{SCRIPT_FIGURES/vort2d_error}
+         \centering
+         \scalebox{.7}{\includegraphics{SCRIPT_FIGURES/vort2d_error}}
       \caption{Rms error between simulated and analytical $u$-velocity values along the $z$-axis plotted for each grid resolution at each of three subsequent passes of the vortex through the computational domain.}
       \label{fig_vort2d_error}
    \end{figure}
-\end{center}
 
 The rate with which the simulated profiles converge to the analytical ones by means of grid refinement describes the order of error experienced as a result of our numerical methods. In Figure \ref{fig_vort2d_error} we plot the rms error resulting from differences between the simulated and analytical profiles for each grid resolution. A log-log plot is used so that power relations appear as straight lines. The three color lines represents the rms error as a function of grid-cell size for each of three subsequent loops of the vortex through the computational domain. The broken and solid black lines represent the plot gradient corresponding to first and second order error respectively. While the error increases with each flow-through time, the gradients of the lines are roughly parallel to the solid black line, indicating second order error in our numerical methods.
 
@@ -826,7 +832,7 @@ u (x,z,t) = U_{0} - \Psi_{0} \ \frac{z}{R_{c}^{2}} \ Exp \left[\frac{2 \ U_{0} \
    \label{fig_vort2d_pointvelocity}
 \end{figure}
 
-We collected $u$-velocity data for a single point in the computational domain, on the lower left fringe of the vortex. Plotting this data over the analytical time-dependent solution portrays exactly where and to what extent the numerical model deviates from the analytical as time progresses. Over time, the original peak that marks the passage of the vortex through the point becomes surrounded by smaller secondary peaks. Figure \ref{fig_vort2d_pointvelocity} shows this data for each of our four meshes, demonstrating the accuracy of each model.
+We collected $u$-velocity data for a single point in the computational domain, on the lower left fringe of the vortex. Plotting this data over the analytical time-dependent solution portrays exactly where and to what extent the numerical model deviates from the analytical as time progresses. Over time, the original peak that marks the passage of the vortex through the point becomes surrounded by smaller secondary peaks. Figure \ref{fig_vort2d_pointvelocity} shows this data for two different mesh resolutions, $80^{2}$ and $160^{2}$. A mesh resolution of $320^{2}$ grid cells produces a plot that is, to the eye, a perfect match out to four flow-through times.
 
 
 
