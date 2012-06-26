@@ -56,13 +56,12 @@ BASHFDS=/tmp/bashrc_fds.\$\$
  
 SKIP=\`awk '/^__TARFILE_FOLLOWS__/ { print NR + 1; exit 0; }' \$0\`
 
-# extract tar.gz file from this script if option 1 is 'extract'
+# extract tar.gz file from this script if 'extract' specified
 
 read  option
 if [ "\$option" == "extract" ]
 then
 name=\$0
-#THAT=\${name%.*}.tar.gz
 THAT=$FDS_TAR
 if [ -e \$THAT ]
 then
@@ -108,8 +107,6 @@ while true; do
 done
 fi
   
-# did we succeed?
-
 HOMEBINDIR=~/bin
 if [ ! -d \$HOMEBINDIR ]
 then
@@ -118,15 +115,17 @@ fi
 
 cat << FDS > \$HOMEBINDIR/fds6.sh
 #!/bin/bash 
-\$FDS_root/bin/fds \\\$1
+\$FDS_root/bin/fds \\\$@
 FDS
 chmod +x \$HOMEBINDIR/fds6.sh
 
 cat << SMV > \$HOMEBINDIR/smokeview6.sh
 #!/bin/bash 
-\$FDS_root/bin/smokeview \\\$1
+\$FDS_root/bin/smokeview \\\$@
 SMV
 chmod +x \$HOMEBINDIR/smokeview6.sh
+
+# did we succeed?
 
 if [ ! -d \$FDS_root ]
 then
