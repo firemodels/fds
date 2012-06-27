@@ -2457,10 +2457,10 @@ MESH_LOOP: DO NM=1,NMESHES
    WRITE(LU_OUTPUT,'(A,I8)')     '   Cells in the Y Direction      ',M%JBAR
    WRITE(LU_OUTPUT,'(A,I8)')     '   Cells in the Z Direction      ',M%KBAR
    WRITE(LU_OUTPUT,'(//A,I5/)')' Physical Dimensions, Mesh ',NM
-   WRITE(LU_OUTPUT,'(A,F9.3)')   '   Length (m)                    ',M%XF-M%XS
-   WRITE(LU_OUTPUT,'(A,F9.3)')   '   Width  (m)                    ',M%YF-M%YS
-   WRITE(LU_OUTPUT,'(A,F9.3)')   '   Height (m)                    ',M%ZF-M%ZS
-   WRITE(LU_OUTPUT,'(A,F9.3)')   '   Initial Time Step (s)         ',M%DT
+   WRITE(LU_OUTPUT,'(A,F10.3)')  '   Length (m)                  ',M%XF-M%XS
+   WRITE(LU_OUTPUT,'(A,F10.3)')  '   Width  (m)                  ',M%YF-M%YS
+   WRITE(LU_OUTPUT,'(A,F10.3)')  '   Height (m)                  ',M%ZF-M%ZS
+   WRITE(LU_OUTPUT,'(A,F10.3)')  '   Initial Time Step (s)       ',M%DT
 ENDDO MESH_LOOP
 WRITE(LU_OUTPUT,'(//A/)')     ' Miscellaneous Parameters'
 IF (ABS(TIME_SHRINK_FACTOR -1._EB)>SPACING(1._EB)) &
