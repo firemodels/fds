@@ -871,6 +871,8 @@ IF (Z_PLUS>Z_PLUS_TURBULENT) THEN
    SF = 1._EB-TAU_W/(NUODZ*ABS(U1)) ! log layer
 ELSE
    SF = -1._EB ! viscous sublayer
+   TAU_W = 2._EB*NUODZ*ABS(U1)
+   U_TAU = SQRT(TAU_W)
 ENDIF
 
 !! check values...
