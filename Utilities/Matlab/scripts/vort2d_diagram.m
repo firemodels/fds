@@ -113,8 +113,8 @@ set(gca,'FontSize',Title_Font_Size)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Width])
 set(gcf,'DefaultLineLineWidth',Line_Width)
 set(gcf,'PaperUnits',Paper_Units);
-set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+set(gcf,'PaperSize',[Paper_Width Paper_Width]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Width]);
 
 % Save plot to file
 print(gcf,'-dpdf',[plot_dir,'vort2d_diagram']);
