@@ -5189,6 +5189,10 @@ READ_SURF_LOOP: DO N=0,N_SURF
 
    ! Allocate parameters indexed by layer
 
+   IF (TMP_FRONT >= -TMPM) TMPMIN = MIN(TMPMIN,TMP_FRONT+TMPM)
+   IF (TMP_BACK >= -TMPM) TMPMIN = MIN(TMPMIN,TMP_BACK+TMPM)
+   IF (ASSUMED_GAS_TEMPERATURE >= 0._EB) TMPMIN = MIN(TMPMIN,ASSUMED_GAS_TEMPERATURE)
+   
    SF%N_MATL     = N_LIST2
    SF%THERMALLY_THICK = .FALSE.
    IF (SF%N_LAYERS > 0) THEN    
@@ -5202,6 +5206,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
       ALLOCATE(SF%MATL_INDEX(SF%N_MATL))                 ! The list of all material indices associated with the surface
       ALLOCATE(SF%RESIDUE_INDEX(SF%N_MATL,MAX_MATERIALS,MAX_REACTIONS))! Each material associated with the surface has a RESIDUE
    ELSE
+      IF (TMP_FRONT < 0._EB) TMP_FRONT = TMPA - TMPM
       SF%TMP_FRONT                  = TMP_FRONT + TMPM
       SF%TMP_INNER                  = SF%TMP_FRONT
       SF%TMP_BACK                   = SF%TMP_FRONT
@@ -5209,9 +5214,6 @@ READ_SURF_LOOP: DO N=0,N_SURF
    DO NN = 1,SF%N_LAYERS
       IF (TMP_INNER(NN)>= -TMPM) TMPMIN = MIN(TMPMIN,TMP_INNER(NN)+TMPM)
    ENDDO
-   IF (TMP_FRONT >= -TMPM) TMPMIN = MIN(TMPMIN,TMP_FRONT+TMPM)
-   IF (TMP_BACK >= -TMPM) TMPMIN = MIN(TMPMIN,TMP_BACK+TMPM)
-   IF (ASSUMED_GAS_TEMPERATURE >= 0._EB) TMPMIN = MIN(TMPMIN,ASSUMED_GAS_TEMPERATURE)
 
    ! Store the names and indices of all materials associated with the surface
 
@@ -8492,7 +8494,6 @@ INIT_LOOP: DO N=1,N_INIT_READ
                IN%DENSITY        = P_INF/(IN%TEMPERATURE*RR_SUM)
                IN%ADJUST_DENSITY = .TRUE.
             ENDIF
-         
             ! Special case where INIT is used to introduce a block of particles
          
             IN%MASS_PER_TIME   = MASS_PER_TIME
@@ -8543,7 +8544,7 @@ INIT_LOOP: DO N=1,N_INIT_READ
                   ENDIF
                ENDIF
             ENDIF
-            
+
             ! Initial velocity components
 
             IN%U0 = UVW(1)
