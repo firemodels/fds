@@ -1,7 +1,16 @@
 %-------------------------------------------------------------------------%
 % FILE: vort2d.m
 % AUTHOR: Max Gould
-% LAST DATE EDITED: 26 June 2012
+% LAST DATE EDITED: 27 June 2012
+%-------------------------------------------------------------------------%
+
+%-------------------------------------------------------------------------%
+% Generate all plots for the 2D Vortex section
+% of the FDS Verification Guide
+%
+% Dependencies:
+%     ../scripts/vort2d_diagram.m
+%     ../scripts/arrows.m
 %-------------------------------------------------------------------------%
 close all
 clear all
@@ -10,7 +19,7 @@ clear all
 input_dir = '../../Verification/NS_Analytical_Solution/';
 
 %-------------------------------------------------------------------------%
-% Define Variables
+% Define Parameters and Variables
 %-------------------------------------------------------------------------%
 
 % Define basic flow parameters
@@ -248,6 +257,12 @@ for m = 1:4
     % Save plot to file
     print(gcf,'-dpdf',[plot_dir,'vort2d_',meshname,'_upgraph']);
 end
+
+%-------------------------------------------------------------------------%
+% Generate Flow Diagram
+%-------------------------------------------------------------------------%
+
+vort2d_diagram
 
 %-------------------------------------------------------------------------%
 % Export Error Data for Plotting
