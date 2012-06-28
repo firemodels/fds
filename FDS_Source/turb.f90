@@ -812,6 +812,7 @@ REAL(EB), PARAMETER :: ETA=(1._EB+B)/A
 REAL(EB), PARAMETER :: GAMMA=2._EB/(1._EB+B)
 REAL(EB), PARAMETER :: RKAPPA=2.44_EB ! 1./von Karman constant
 REAL(EB), PARAMETER :: BTILDE=7.44_EB ! modified from 8.5, see Pope p. 297
+REAL(EB), PARAMETER :: EPS=1.E-10_EB
 
 REAL(EB) :: TAU_W,NUODZ,Z_PLUS,TAU_ROUGH
 
@@ -866,9 +867,9 @@ NUODZ = NU/DZ
 TAU_W = (ALPHA*(NUODZ)**BETA + ETA*(NUODZ)**B*ABS(U1))**GAMMA ! actually tau_w/rho
 TAU_W = MAX(TAU_W,TAU_ROUGH)
 U_TAU = SQRT(TAU_W)
-Z_PLUS = DZ/(NU/(U_TAU+1.E-10_EB))
+Z_PLUS = DZ/(NU/(U_TAU+EPS)+EPS)
 IF (Z_PLUS>Z_PLUS_TURBULENT) THEN
-   SF = 1._EB-TAU_W/(NUODZ*ABS(U1)) ! log layer
+   SF = 1._EB-TAU_W/(NUODZ*ABS(U1)+EPS) ! log layer
 ELSE
    SF = -1._EB ! viscous sublayer
    TAU_W = 2._EB*NUODZ*ABS(U1)
