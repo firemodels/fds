@@ -311,27 +311,100 @@ IMPLICIT NONE
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T
 INTEGER :: I,J,K,N,IERR,IERR1,IERR2,I_MIN,I_MAX,J_MIN,J_MAX,K_MIN,K_MAX,IC,IOR
-INTEGER :: NP,NXP,DUMMY_INTEGER,IZERO,LU,CUTCELL_COUNT
+INTEGER :: NP,NXP,DUMMY_INTEGER,DUMMY_INTEGER2,DUMMY_INTEGER3,IZERO,LU,CUTCELL_COUNT
 TYPE (MESH_TYPE), POINTER :: M
 REAL(EB) :: BB(6),V1(3),V2(3),V3(3),AREA,PC(18),XPC(27),V_POLYGON_CENTROID(3)
 LOGICAL :: EX,OP
 CHARACTER(60) :: FN
-REAL(FB) :: DUMMY_FB_REAL
+REAL(FB) :: DUMMY_FB_REAL,DUMMY_FB_REAL2
 REAL(EB), PARAMETER :: CUTCELL_TOLERANCE=1.E-10_EB
 !LOGICAL :: END_OF_LIST
 !TYPE (CUTCELL_LINKED_LIST_TYPE), POINTER :: CL
 
-IF (T>T_BEGIN) RETURN ! T (time) will be used later for translation of geometry
+IF (ABS(T-T_BEGIN)>ZERO_P .AND. T<(DT_GEOM*REAL(N_COUP,EB)) ) RETURN ! T (time) will be used later for translation of geometry
+N_COUP = N_COUP + 1
 
 M => MESHES(NM)
 
-ALLOCATE(M%CUTCELL_INDEX(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO) 
-CALL ChkMemErr('READ','CUTCELL_INDEX',IZERO) 
+IF (ABS(T-T_BEGIN)<ZERO_P) THEN
+   ALLOCATE(M%CUTCELL_INDEX(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO) 
+   CALL ChkMemErr('READ','CUTCELL_INDEX',IZERO) 
+ENDIF
 
 M%CUTCELL_INDEX = 0
 CUTCELL_COUNT = 0
 
+DO N=1,N_SURF
+   IF (TRIM(SURFACE(N)%COOR_FILENAME)=='null') CYCLE
+
+   IF (ABS(T-T_BEGIN)<ZERO_P .AND. LU_SFCO<0) THEN
+
+      FN = TRIM(SURFACE(N)%COOR_FILENAME)
+      INQUIRE(FILE=FN,EXIST=EX,OPENED=OP,NUMBER=LU)
+      IF (.NOT.EX) CALL SHUTDOWN('Error: coordinate file does not exist.')
+      IF (OP) CLOSE(LU)
+      LU_SFCO = GET_FILE_NUMBER()
+      OPEN(LU_SFCO,FILE=FN,ACTION='READ',FORM='UNFORMATTED')
+
+      READ(LU_SFCO) DUMMY_INTEGER ! one
+      READ(LU_SFCO) DUMMY_INTEGER ! version
+      READ(LU_SFCO) DUMMY_INTEGER ! n_floats
+      IF (DUMMY_INTEGER>0) READ(LU_SFCO) (DUMMY_FB_REAL, I=1,DUMMY_INTEGER)
+      READ(LU_SFCO) DUMMY_INTEGER ! n_ints
+      IF (DUMMY_INTEGER>0) READ(LU_SFCO) (DUMMY_INTEGER2, I=1,DUMMY_INTEGER)
+
+      READ(LU_SFCO) DUMMY_INTEGER, DUMMY_INTEGER2 ! n_vert_s, n_face_s
+      
+   ENDIF
+
+   READ(LU_SFCO) DUMMY_FB_REAL,DUMMY_INTEGER ! stime,gem_type
+
+   IF (T>=REAL(DUMMY_FB_REAL,EB)) THEN
+      SELECT CASE(DUMMY_INTEGER)
+         CASE(0)
+            READ(LU_SFCO) DUMMY_INTEGER2,DUMMY_INTEGER3 ! n_vert_d,n_face_d
+            
+            IF (DUMMY_INTEGER2>0 .AND. .NOT.ALLOCATED(FB_REAL_VERT_ARRAY)) THEN
+               ALLOCATE(FB_REAL_VERT_ARRAY(DUMMY_INTEGER2*3),STAT=IZERO)
+               CALL ChkMemErr('INIT_IBM','FB_REAL_VERT_ARRAY',IZERO)
+            ENDIF
+            IF (DUMMY_INTEGER3>0) THEN
+               IF (.NOT.ALLOCATED(INT_FACE_VALS_ARRAY)) THEN
+                  ALLOCATE(INT_FACE_VALS_ARRAY(DUMMY_INTEGER3*3),STAT=IZERO)
+                  CALL ChkMemErr('INIT_IBM','FB_REAL_FACE_ARRAY',IZERO)
+               ENDIF
+               IF (.NOT.ALLOCATED(INT_SURF_VALS_ARRAY)) THEN
+                  ALLOCATE(INT_SURF_VALS_ARRAY(DUMMY_INTEGER3),STAT=IZERO)
+                  CALL ChkMemErr('INIT_IBM','INT_SURF_VALS_ARRAY',IZERO)
+               ENDIF
+            ENDIF
+      
+            IF (DUMMY_INTEGER2>0) READ(LU_SFCO) ((FB_REAL_VERT_ARRAY((I-1)*3+J),J=1,3),I=1,DUMMY_INTEGER2)
+            DO I=1,DUMMY_INTEGER2
+               VERTEX(I)%X = REAL(FB_REAL_VERT_ARRAY((I-1)*3+1),EB)
+               VERTEX(I)%Y = REAL(FB_REAL_VERT_ARRAY((I-1)*3+2),EB)
+               VERTEX(I)%Z = REAL(FB_REAL_VERT_ARRAY((I-1)*3+3),EB)
+!                IF (T<10) VERTEX(I)%Z = VERTEX(I)%Z+0.03
+!                IF (T>10 .AND. T<20) VERTEX(I)%Y = VERTEX(I)%Y+0.1
+!                IF (T>20 .AND. T<30) VERTEX(I)%Z = VERTEX(I)%Z-0.02
+!                IF (T>30 .AND. T<60) VERTEX(I)%Y = VERTEX(I)%Y-0.05
+            ENDDO
+            IF (DUMMY_INTEGER3>0) READ(LU_SFCO) ((INT_FACE_VALS_ARRAY((I-1)*3+J),J=1,3),I=1,DUMMY_INTEGER3)
+            IF (DUMMY_INTEGER3>0) READ(LU_SFCO) (INT_SURF_VALS_ARRAY(I),I=1,DUMMY_INTEGER3)
+            ! assuming the surface triangles have the same vertices
+         CASE(1)
+            READ(LU_SFCO) DUMMY_FB_REAL2,DUMMY_FB_REAL2,DUMMY_FB_REAL2,DUMMY_FB_REAL2,&
+                          DUMMY_FB_REAL2,DUMMY_FB_REAL2,DUMMY_FB_REAL2,DUMMY_FB_REAL2
+      END SELECT
+   ELSE
+      BACKSPACE LU_SFCO
+   ENDIF
+ENDDO
+
 FACE_LOOP: DO N=1,N_FACE
+
+   ! re-initialize the cutcell linked list
+   IF (ASSOCIATED(FACET(N)%CUTCELL_LIST)) CALL CUTCELL_DESTROY(FACET(N)%CUTCELL_LIST)
 
    V1 = (/VERTEX(FACET(N)%VERTEX(1))%X,VERTEX(FACET(N)%VERTEX(1))%Y,VERTEX(FACET(N)%VERTEX(1))%Z/)
    V2 = (/VERTEX(FACET(N)%VERTEX(2))%X,VERTEX(FACET(N)%VERTEX(2))%Y,VERTEX(FACET(N)%VERTEX(2))%Z/)
@@ -343,7 +416,7 @@ FACE_LOOP: DO N=1,N_FACE
    BB(4) = MAX(V1(2),V2(2),V3(2))
    BB(5) = MIN(V1(3),V2(3),V3(3))
    BB(6) = MAX(V1(3),V2(3),V3(3))
-
+   
    I_MIN = MAX(1,FLOOR((BB(1)-M%XS)/M%DX(1))-1) ! assumes uniform grid for now
    J_MIN = MAX(1,FLOOR((BB(3)-M%YS)/M%DY(1))-1)
    K_MIN = MAX(1,FLOOR((BB(5)-M%ZS)/M%DZ(1))-1)
@@ -377,18 +450,14 @@ FACE_LOOP: DO N=1,N_FACE
                      ! check if the cutcell area needs to be assigned to a neighbor cell
                      V_POLYGON_CENTROID = POLYGON_CENTROID(NXP,XPC)
                      CALL POLYGON_CLOSE_TO_EDGE(IOR,FACET(N)%NVEC,V_POLYGON_CENTROID,&
-                                                M%XC(I),M%YC(J),M%ZC(K),M%DX(I),M%DY(J),M%DZ(K))  
-                     IF (IOR == 0) THEN
-                        IF (M%CUTCELL_INDEX(I,J,K)==0) THEN
-                           CUTCELL_COUNT = CUTCELL_COUNT+1
-                           IC = CUTCELL_COUNT
-                           M%CUTCELL_INDEX(I,J,K) = IC
-                        ELSE
-                           IC = M%CUTCELL_INDEX(I,J,K)
-                        ENDIF
-                     ELSE ! assign the cutcell area to a neighbor cell
+                                                M%XC(I),M%YC(J),M%ZC(K),M%DX(I),M%DY(J),M%DZ(K))
+                     IF (IOR==1) THEN ! assign the cutcell area to a neighbor cell
                         SELECT CASE(IOR)
                            CASE(1)
+                              IF (I==M%IBAR) THEN 
+                                 IOR=0
+                                 EXIT
+                              ENDIF
                               IF (M%CUTCELL_INDEX(I+1,J,K)==0) THEN
                                  CUTCELL_COUNT = CUTCELL_COUNT+1
                                  IC = CUTCELL_COUNT
@@ -397,6 +466,10 @@ FACE_LOOP: DO N=1,N_FACE
                                  IC = M%CUTCELL_INDEX(I+1,J,K)
                                ENDIF
                            CASE(-1)
+                              IF (I==1) THEN 
+                                 IOR=0
+                                 EXIT
+                              ENDIF
                               IF (M%CUTCELL_INDEX(I-1,J,K)==0) THEN
                                  CUTCELL_COUNT = CUTCELL_COUNT+1
                                  IC = CUTCELL_COUNT
@@ -405,6 +478,10 @@ FACE_LOOP: DO N=1,N_FACE
                                  IC = M%CUTCELL_INDEX(I-1,J,K)
                                ENDIF
                            CASE(2)
+                              IF (J==M%JBAR) THEN 
+                                 IOR=0
+                                 EXIT
+                              ENDIF
                               IF (M%CUTCELL_INDEX(I,J+1,K)==0) THEN
                                  CUTCELL_COUNT = CUTCELL_COUNT+1
                                  IC = CUTCELL_COUNT
@@ -413,6 +490,10 @@ FACE_LOOP: DO N=1,N_FACE
                                  IC = M%CUTCELL_INDEX(I,J+1,K)
                                ENDIF
                            CASE(-2)
+                              IF (J==1) THEN 
+                                 IOR=0
+                                 EXIT
+                              ENDIF
                               IF (M%CUTCELL_INDEX(I,J-1,K)==0) THEN
                                  CUTCELL_COUNT = CUTCELL_COUNT+1
                                  IC = CUTCELL_COUNT
@@ -421,6 +502,10 @@ FACE_LOOP: DO N=1,N_FACE
                                  IC = M%CUTCELL_INDEX(I,J-1,K)
                                ENDIF
                            CASE(3)
+                              IF (K==M%KBAR) THEN 
+                                 IOR=0
+                                 EXIT
+                              ENDIF
                               IF (M%CUTCELL_INDEX(I,J,K+1)==0) THEN
                                  CUTCELL_COUNT = CUTCELL_COUNT+1
                                  IC = CUTCELL_COUNT
@@ -429,6 +514,10 @@ FACE_LOOP: DO N=1,N_FACE
                                  IC = M%CUTCELL_INDEX(I,J,K+1)
                                ENDIF
                            CASE(-3)
+                              IF (K==1) THEN 
+                                 IOR=0
+                                 EXIT
+                              ENDIF
                               IF (M%CUTCELL_INDEX(I,J,K-1)==0) THEN
                                  CUTCELL_COUNT = CUTCELL_COUNT+1
                                  IC = CUTCELL_COUNT
@@ -438,7 +527,17 @@ FACE_LOOP: DO N=1,N_FACE
                                ENDIF
                         END SELECT
                      ENDIF
-
+                     
+                     IF (IOR==0) THEN 
+                        IF (M%CUTCELL_INDEX(I,J,K)==0) THEN
+                           CUTCELL_COUNT = CUTCELL_COUNT+1
+                           IC = CUTCELL_COUNT
+                           M%CUTCELL_INDEX(I,J,K) = IC
+                        ELSE
+                           IC = M%CUTCELL_INDEX(I,J,K)
+                        ENDIF
+                     ENDIF
+                                            
                      CALL CUTCELL_INSERT(IC,AREA,FACET(N)%CUTCELL_LIST)
                   ENDIF
                ENDIF
@@ -457,9 +556,11 @@ CUTCELL_INDEX_IF: IF (CUTCELL_COUNT>0) THEN
    ALLOCATE(M%I_CUTCELL(CUTCELL_COUNT),STAT=IZERO) 
    CALL ChkMemErr('READ','I_CUTCELL',IZERO) 
    M%I_CUTCELL = -1
+   
    ALLOCATE(M%J_CUTCELL(CUTCELL_COUNT),STAT=IZERO) 
    CALL ChkMemErr('READ','J_CUTCELL',IZERO) 
    M%J_CUTCELL = -1
+   
    ALLOCATE(M%K_CUTCELL(CUTCELL_COUNT),STAT=IZERO) 
    CALL ChkMemErr('READ','K_CUTCELL',IZERO) 
    M%K_CUTCELL = -1
@@ -495,9 +596,8 @@ ENDIF CUTCELL_INDEX_IF
 ! Read boundary condition from file
 
 SURF_LOOP: DO N=1,N_SURF
-
-   IF (TRIM(SURFACE(N)%BC_FILENAME)=='null') CYCLE SURF_LOOP
-
+   IF (TRIM(SURFACE(N)%BC_FILENAME)=='null') CYCLE
+   
    IF (ABS(T-T_BEGIN)<ZERO_P .AND. LU_SFBC<0) THEN
 
       FN = TRIM(SURFACE(N)%BC_FILENAME)
@@ -601,6 +701,18 @@ RECURSIVE SUBROUTINE CUTCELL_INSERT(ITEM,AREA,ROOT)
       CALL CUTCELL_INSERT(ITEM,AREA,ROOT%NEXT) 
    ENDIF 
 END SUBROUTINE CUTCELL_INSERT
+
+
+SUBROUTINE CUTCELL_DESTROY(ROOT)
+IMPLICIT NONE
+TYPE(CUTCELL_LINKED_LIST_TYPE), POINTER :: ROOT,CURRENT
+DO WHILE (ASSOCIATED(ROOT))
+  CURRENT => ROOT
+  ROOT => CURRENT%NEXT
+  DEALLOCATE(CURRENT)
+ENDDO
+RETURN
+END SUBROUTINE CUTCELL_DESTROY
 
 
 SUBROUTINE TRIANGLE_BOX_INTERSECT(IERR,V1,V2,V3,BB)
