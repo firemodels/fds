@@ -9790,7 +9790,12 @@ The value of $y^+$ reported is half (since the velocity lives at the cell face c
 \be
 y^+ = \frac{1}{2} \frac{\delta n}{\delta_\nu} \,\mbox{;} \quad\quad \delta_\nu = \frac{\mu/\rho}{u_\tau} \,\mbox{;} \quad\quad u_\tau = \sqrt{\tau_w/\rho} \,\mbox{,}
 \ee
-where $\tau_w = \mu\,\partial |\mathbf{u}|/\partial n$ is the viscous stress evaluated at the wall ($\tau_w$ is computed by the wall function, $|\mathbf{u}|$ is taken as an estimate of the streamwise velocity component near the wall); the quantity $u_\tau$ is the \emph{friction velocity}.
+where $\tau_w = \mu\,\partial |\mathbf{u}|/\partial n$ is the viscous stress evaluated at the wall ($\tau_w$ is computed by the wall function, $|\mathbf{u}|$ is taken as an estimate of the streamwise velocity component near the wall); the quantity $u_\tau$ is the \emph{friction velocity}.  The friction velocity may also be output in a boundary file or via a device attached to a wall.  For example:
+\footnotesize
+\begin{verbatim}
+&DEVC XYZ=1,0,0, QUANTITY='FRICTION VELOCITY', IOR=3, ID='u_tau' /
+\end{verbatim}
+\normalsize
 
 Wall functions for LES are still under development, but as a general guideline it is recommended that the first grid cell fall within the log layer: a value $y^+=30$ would be considered highly resolved, the upper limit of the log region for statistically stationary boundary layers depends on the Reynolds number, and there are no hard rules for transient flows.  Beyond $y^+=1000$ the first grid cell is likely to fall in the wake region of the boundary layer and may produce unreliable results.  A reasonable target for practical engineering LES is $y^+ = {\cal O}(100)$.
 
@@ -10106,6 +10111,7 @@ remember that all output quantity names ought to be in single quotes.
 {\ct ENTHALPY}                                  & Section~\ref{info:enthalpy}                   & kJ/m$^3$       & D,I,P,S      \\ \hline
 {\ct FED}                                       & Section~\ref{info:FED}                        &                & D            \\ \hline
 {\ct FIC}                                       & Section~\ref{info:FED}                        &                & D,S          \\ \hline
+{\ct FRICTION VELOCITY}                         & Section~\ref{info:yplus}                      &                & B,D          \\ \hline
 {\ct GAUGE HEAT FLUX}                           & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
 {\ct H}                                         & $H=|\bu|^2/2 + \tp/\rho_0$                    & (m/s)$^2$      & D,I,P,S      \\ \hline
 {\ct HEAT FLOW}                                 & Section~\ref{info:flows}                      & kW             & D            \\ \hline
@@ -10174,7 +10180,7 @@ remember that all output quantity names ought to be in single quotes.
 {\ct WALL TEMPERATURE}                          & $T_w$                                         & $^\circ$C      & B,D          \\ \hline
 {\ct WALL THICKNESS}                            & Section~\ref{info:material_components}        & m              & B,D          \\ \hline
 {\ct WAVELET ERROR}$^{*****}$                   & Section~\ref{info:meshquality}                &                & S            \\ \hline
-{\ct YPLUS}                                     & Section~\ref{info:yplus}                      &                & B            \\ \hline
+{\ct YPLUS}                                     & Section~\ref{info:yplus}                      &                & B,D          \\ \hline
 \end{longtable}
 
 \noindent
