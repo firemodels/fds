@@ -17,7 +17,28 @@
       TMP_FRONT = 1000.
       TAU_T = 0.0 /
 
-&SURF ID                        = 'Wood'
+&SURF ID                        = 'Wood_1'
+      COLOR                     = 'IVORY BLACK'
+      MATL_ID(1,1)            	= 'PINE'
+      THICKNESS                 = 0.01
+	LENGTH				= 0.04
+	GEOMETRY                	= 'CYLINDRICAL' /
+
+&SURF ID                        = 'Wood_2'
+      COLOR                     = 'IVORY BLACK'
+      MATL_ID(1,1)            	= 'PINE'
+      THICKNESS                 = 0.01
+	LENGTH				= 0.06
+	GEOMETRY                	= 'CYLINDRICAL' /
+
+&SURF ID                        = 'Wood_3'
+      COLOR                     = 'IVORY BLACK'
+      MATL_ID(1,1)            	= 'PINE'
+      THICKNESS                 = 0.01
+	LENGTH				= 0.08
+	GEOMETRY                	= 'CYLINDRICAL' /
+
+&SURF ID                        = 'Wood_4'
       COLOR                     = 'IVORY BLACK'
       MATL_ID(1,1)            	= 'PINE'
       THICKNESS                 = 0.01
@@ -48,14 +69,14 @@
 
 &PART ID		='Wood_part_1', 
 SAMPLING_FACTOR	=1,
-SURF_ID		='Wood', 
+SURF_ID		='Wood_1', 
 PROP_ID		='wood image'
 QUANTITIES		='PARTICLE TEMPERATURE','PARTICLE MASS','PARTICLE DIAMETER',
 STATIC		=.TRUE. /
 
 &PART ID		='Wood_part_2', 
 SAMPLING_FACTOR	=1,
-SURF_ID		='Wood', 
+SURF_ID		='Wood_2', 
 PROP_ID		='wood image'
 QUANTITIES		='PARTICLE TEMPERATURE','PARTICLE MASS','PARTICLE DIAMETER',
 STATIC		=.TRUE. 
@@ -64,7 +85,7 @@ ORIENTATION(2,1:3)=-1,0,0 /
 
 &PART ID		='Wood_part_3', 
 SAMPLING_FACTOR	=1,
-SURF_ID		='Wood', 
+SURF_ID		='Wood_3', 
 PROP_ID		='wood image'
 QUANTITIES		='PARTICLE TEMPERATURE','PARTICLE MASS','PARTICLE DIAMETER',
 STATIC		=.TRUE. 
@@ -73,7 +94,7 @@ ORIENTATION(2,1:3)=0,-1,0 /
 
 &PART ID		='Wood_part_4', 
 SAMPLING_FACTOR	=1,
-SURF_ID		='Wood', 
+SURF_ID		='Wood_4', 
 PROP_ID		='wood image'
 QUANTITIES		='PARTICLE TEMPERATURE','PARTICLE MASS','PARTICLE DIAMETER',
 STATIC		=.TRUE. 
