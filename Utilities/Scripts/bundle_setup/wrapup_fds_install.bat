@@ -6,40 +6,48 @@ pause
 exit
 :dircheck
 
-set fdssmv_major_version=%1
-set platform=%2
-
 echo.
 echo Wrapping up FDS and Smokeview installation.
 echo.
 echo.
-echo Removing pre 5.4 FDS/Smokeview entries (if present) from the system path.
-
+echo Removing previous FDS/Smokeview entries from the system and user path.
 call "%CD%\set_path.exe" -s -m -b -r "nist\fds"
 call "%CD%\set_path.exe" -u -m -b -r "FDS\FDS5"
 
 if exist c:\bin goto existbin
+echo.
+echo Creating the directory c:\bin
 mkdir c:\bin
 :existbin
 
+echo.
+echo Adding fds6.bat and smokeview6.bat aliases to c:\bin
 set fds6=c:\bin\fds6.bat
 echo @echo off > %fds6%
-echo "%CD%\bin\fds" %%1 >> %fds6%
+echo "%CD%\bin\fds" %%* >> %fds6%
 
 set smv6=c:\bin\smokeview6.bat
 echo @echo off > %smv6%
-echo "%CD%\bin\smokeview" %%1 >> %smv6%
+echo "%CD%\bin\smokeview" %%* >> %smv6%
 
 echo.
-echo Associating the smv file extension with smokeview.exe
+echo Adding c:\bin to the system path 
+call "%CD%\set_path.exe" -s -m -a "c:\bin"
+
+echo.
+echo Adding %CD%\bin to the system path 
+call "%CD%\set_path.exe" -s -m -a "%CD%\bin"
+
+echo.
+echo Associating the .smv file extension with smokeview.exe
 
 ftype smvDoc="%CD%\bin\smokeview.exe" "%%1" >Nul
 assoc .smv=smvDoc>Nul
 
-set FDSSTART=%ALLUSERSPROFILE%\Start Menu\Programs\FDS%fdssmv_major_version%
+set FDSSTART=%ALLUSERSPROFILE%\Start Menu\Programs\FDS6
 
 echo. 
-echo Adding FDS and Smokeview shortcuts to the Start menu.
+echo Adding shortcuts to the Start menu.
 if exist "%FDSSTART%" rmdir /q /s "%FDSSTART%"
 
 mkdir "%FDSSTART%"
@@ -62,12 +70,6 @@ mkdir "%FDSSTART%\Guides and Release Notes"
 
 "%CD%\shortcut.exe" /F:"%FDSSTART%\Overview.lnk"  /T:"%CD%\Documentation\Overview.html" /A:C >NUL
 
-echo.
-echo Adding %CD%\bin to the system path 
-
-call "%CD%\set_path.exe" -s -m -a "%CD%\bin"
-call "%CD%\set_path.exe" -s -m -a "c:\bin"
-
 erase "%CD%"\set_path.exe
 erase "%CD%"\shortcut.exe
 
@@ -82,6 +84,6 @@ echo pause >> Uninstall\Uninstall.bat
 echo.
 echo Press any key to complete Installation.
 pause>NUL
+
 erase "%CD%"\wrapup_fds_install.bat
-erase "%CD%"\wrapup_fds_install_gen.bat
 
