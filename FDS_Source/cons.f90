@@ -287,6 +287,9 @@ LOGICAL, ALLOCATABLE, DIMENSION(:) :: LOOP_QRW
 
 LOGICAL :: OMESH_PARTICLES=.FALSE.
 
+! Variables of pyrolysis
+LOGICAL :: CALL_PYROLYSIS
+
 ! Number of initial value, pressure zone, and multiplier derived types
  
 INTEGER :: N_INIT,N_ZONE,N_MULT 
