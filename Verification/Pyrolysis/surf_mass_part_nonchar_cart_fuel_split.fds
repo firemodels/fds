@@ -13,7 +13,15 @@
       TMP_FRONT = 1000.
       TAU_T = 0.0 /
 
-&SURF ID                  	= 'Wood'
+&SURF ID                  	= 'Wood_1'
+      COLOR               	= 'IVORY BLACK'
+      MATL_ID(1,1)        	= 'PINE'
+      THICKNESS           	= 0.01
+	GEOMETRY			= 'CARTESIAN'
+	LENGTH			= 0.04
+	WIDTH				= 0.04 /
+
+&SURF ID                  	= 'Wood_2'
       COLOR               	= 'IVORY BLACK'
       MATL_ID(1,1)        	= 'PINE'
       THICKNESS           	= 0.01
@@ -37,14 +45,14 @@
 
 &PART ID		='Wood_part_1', 
 SAMPLING_FACTOR	=1,
-SURF_ID		='Wood', 
+SURF_ID		='Wood_1', 
 PROP_ID		='wood image'
 QUANTITIES		='PARTICLE TEMPERATURE','PARTICLE MASS','PARTICLE DIAMETER',
 STATIC		=.TRUE. /
 
 &PART ID			='Wood_part_2', 
 SAMPLING_FACTOR		=1,
-SURF_ID			='Wood', 
+SURF_ID			='Wood_2', 
 PROP_ID			='wood image'
 QUANTITIES			='PARTICLE TEMPERATURE','PARTICLE MASS','PARTICLE DIAMETER',
 STATIC			=.TRUE. 
