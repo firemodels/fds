@@ -12,3 +12,5 @@ Pressure,Measured Pressure Rise (Pa),Predicted Pressure Rise (Pa),0,300,0.03 0.9
 "Smoke Detector Activation Time, Mowrer",Measured Activation Time (s),Predicted Activation Time (s),0,100,0.03 0.95,SouthEast,4,16,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Smoke_Detector_Activation_Time_Mowrer
 Sprinkler Activation Time,Measured Activation Time (s),Predicted Activation Time (s),0,300,0.03 0.95,SouthEast,4,16,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Sprinkler_Activation_Time
 Plume Temperature,Measured Temperature ($^\circ$C),Predicted Temperature ($^\circ$C),0,1000,0.03 0.95,SouthEast,4,14,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Plume_Temperature
+Steel Temperature (Insulated),Measured Temperature ($^\circ$C),Predicted Temperature ($^\circ$C),0,1000,0.03 0.95,SouthEast,4,14,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Steel_Temperature_Insulated
+Steel Temperature (Uninsulated),Measured Temperature ($^\circ$C),Predicted Temperature ($^\circ$C),0,1000,0.03 0.95,SouthEast,4,14,yes,FDTs_Validation_Guide/FIGURES/Scatterplots/Steel_Temperature_Uninsulated
