@@ -5202,7 +5202,6 @@ READ_SURF_LOOP: DO N=0,N_SURF
       IF (SF%TMP_INNER(1)>=0._EB) THEN
          SF%TMP_FRONT = SF%TMP_INNER(1)
       ELSE
-         IF (TMP_FRONT < 0._EB) TMP_FRONT = TMPA - TMPM         
          SF%TMP_FRONT = TMP_FRONT + TMPM
       ENDIF
       IF (TMP_BACK < 0._EB) TMP_BACK = TMPA - TMPM
@@ -5213,7 +5212,6 @@ READ_SURF_LOOP: DO N=0,N_SURF
       ALLOCATE(SF%MATL_INDEX(SF%N_MATL))                 ! The list of all material indices associated with the surface
       ALLOCATE(SF%RESIDUE_INDEX(SF%N_MATL,MAX_MATERIALS,MAX_REACTIONS))! Each material associated with the surface has a RESIDUE
    ELSE
-      IF (TMP_FRONT < 0._EB) TMP_FRONT = TMPA - TMPM
       SF%TMP_FRONT                  = TMP_FRONT + TMPM
       SF%TMP_INNER                  = SF%TMP_FRONT
       SF%TMP_BACK                   = SF%TMP_FRONT
