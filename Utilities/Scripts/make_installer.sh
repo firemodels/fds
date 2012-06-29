@@ -113,17 +113,17 @@ then
 mkdir \$HOMEBINDIR
 fi
 
-cat << FDS > \$HOMEBINDIR/fds6.sh
+cat << FDS > \$HOMEBINDIR/fds6
 #!/bin/bash 
 \$FDS_root/bin/fds \\\$@
 FDS
-chmod +x \$HOMEBINDIR/fds6.sh
+chmod +x \$HOMEBINDIR/fds6
 
-cat << SMV > \$HOMEBINDIR/smokeview6.sh
+cat << SMV > \$HOMEBINDIR/smokeview6
 #!/bin/bash 
 \$FDS_root/bin/smokeview \\\$@
 SMV
-chmod +x \$HOMEBINDIR/smokeview6.sh
+chmod +x \$HOMEBINDIR/smokeview6
 
 # did we succeed?
 
