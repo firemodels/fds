@@ -246,19 +246,16 @@ MPIDIST64=/shared/openmpi_64
 
 # environment for 64 bit gigabit ethernet
 
-if [ "\\\$platform" == "intel64" ]
-then
-export MPIDIST=\\\$MPIDIST64
-FORTLIB=\\\$FDSBINDIR/LIB64
-fi
-
-# environment for 32 bit gigabit ethernet
-
-if [ "\\\$platform" == "ia32" ]
-then
-export MPIDIST=\\\$MPIDIST32
-FORTLIB=\\\$FDSBINDIR/LIB32
-fi
+case "\\\$platform" in
+  "intel64" )
+    export MPIDIST=\\\$MPIDIST64
+    FORTLIB=\\\$FDSBINDIR/LIB64
+  ;;
+  "ia32" )
+    export MPIDIST=\\\$MPIDIST32
+    FORTLIB=\\\$FDSBINDIR/LIB32
+  ;;
+esac
 
 # Update LD_LIBRARY_PATH and PATH variables
 
@@ -272,15 +269,11 @@ then
 return
 fi
 
-if [ "\\\$platform" == "intel64" ]
-then
-source \\\$IFORT_COMPILER/bin/ifortvars.sh intel64
-fi
-
-if [ "\\\$platform" == "ia32" ]
-then
-source \\\$IFORT_COMPILER/bin/ifortvars.sh ia32
-fi
+case "\\\$platform" in
+  "intel64" | "ia32" )
+    source \\\$IFORT_COMPILER/bin/ifortvars.sh \\\$platform
+  ;;
+esac
 
 BASH
 
