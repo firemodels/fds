@@ -67,7 +67,7 @@ fprintf(fid,'%s\n','\begin{center}');
 fprintf(fid,'%s\n','\begin{tabular}{|c|c|c|c|c|c|c|} \hline');
 fprintf(fid,'%s\n','$\tau$ & $S(\tau)$ & \multicolumn{2}{|c|}{FDS (I=20,J=20)} &');
 fprintf(fid,'%s\n','\multicolumn{2}{|c|}{FDS (I=20,J=1)} & FDS (I=150) \\ \cline{3-7}');
-fprintf(fid,'%s\n','(m$^{-1}$) & (kW/m$^2$) & 1 band & 6 bands & 1 band & 6 bands & 1 band \\ \hline\hline');
+fprintf(fid,'%s\n',' & (kW/m$^2$) & 1 band & 6 bands & 1 band & 6 bands & 1 band \\ \hline\hline');
 for i=1:6
    fprintf(fid,'%s & %9.4f & %9.4f & %9.4f & %9.4f & %9.4f & %9.4f %s\n',kappa{i},exact(i),flux(i,1:5),'\\');
 end
