@@ -11,7 +11,7 @@ set stopfile=$infile.stop
 
 set scriptfile=$bindir/script.$$
 if(! -e $FDSMPI) then
-  echo "The file $FDSMPI does not exit. Run aborted"
+  echo "The file $FDSMPI does not exist. Run aborted"
   exit
 endif
 if($?LAMNODES) then
@@ -20,11 +20,11 @@ else
   exit
 endif
 if(! -d $fulldir) then
-  echo "The directory $fulldir does not exit. Run aborted."
+  echo "The directory $fulldir does not exist. Run aborted."
   exit
 endif
 if(! -e $fulldir/$in) then
-  echo "The fds input  file, $fulldir/$in does not exit. Run aborted."
+  echo "The fds input  file, $fulldir/$in does not exist. Run aborted."
   exit
 endif
 if($?STOPFDS) then

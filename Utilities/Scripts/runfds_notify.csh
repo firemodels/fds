@@ -12,15 +12,15 @@ set stopfile=$infile.stop
 
 set scriptfile=$bindir/script.$$
 if(! -e $FDS) then
-  echo "The file $FDS does not exit. Run aborted"
+  echo "The file $FDS does not exist. Run aborted"
   exit
 endif
 if(! -d $fulldir) then
-  echo "The directory $fulldir does not exit. Run aborted."
+  echo "The directory $fulldir does not exist. Run aborted."
   exit
 endif
 if(! -e $fulldir/$in) then
-  echo "The fds input  file, $fulldir/$in does not exit. Run aborted."
+  echo "The fds input  file, $fulldir/$in does not exist. Run aborted."
   exit
 endif
 if($?STOPFDS) then
