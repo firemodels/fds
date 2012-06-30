@@ -9,7 +9,7 @@ Propane burner test case to check basic chemistry model and soot deposition
 
 &MISC GRAVITATIONAL_DEPOSITION  = .TRUE.
       THERMOPHORETIC_DEPOSITION = .TRUE.
-      XURBULENT_DEPOSITION      = .TRUE. /
+      TURBULENT_DEPOSITION      = .TRUE. /
 
 &OBST XB = 0.3,0.7,0.3,0.7,0.0,0.10, SURF_IDS = 'BURNER','INERT','INERT' /
 &SURF ID = 'BURNER', HRRPUA=625., RAMP_Q='fire'/
