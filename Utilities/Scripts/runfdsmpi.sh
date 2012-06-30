@@ -37,15 +37,15 @@ stopfile=$infile.stop
 
 scriptfile=$scratchdir/script.$$
 if ! [ -e $FDSMPI ];  then
-  echo "The file $FDSMPI does not exit. Run aborted"
+  echo "The file $FDSMPI does not exist. Run aborted"
   exit
 fi
 if ! [ -d $fulldir ]; then
-  echo "The directory $fulldir does not exit. Run aborted."
+  echo "The directory $fulldir does not exist. Run aborted."
   exit
 fi
 if ! [ -e $fulldir/$in ]; then
-  echo "The fds input file, $fulldir/$in, does not exit. Run aborted."
+  echo "The fds input file, $fulldir/$in, does not exist. Run aborted."
   exit
 fi
 if [ $STOPFDS ]; then
