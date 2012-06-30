@@ -7,15 +7,15 @@ smvscript=$in$movies.ssf
 fulldir=$BASEDIR/$dir
 
 if ! [ -e $SMV ];  then
-  echo "The file $SMV does not exit. Run aborted"
+  echo "The file $SMV does not exist. Run aborted"
   exit
 fi
 if ! [ -d $fulldir ]; then
-  echo "The directory $fulldir does not exit. Run aborted."
+  echo "The directory $fulldir does not exist. Run aborted."
   exit
 fi
 if ! [ -e $fulldir/$in.smv ]; then
-  echo "The smokeview file, $fulldir/$in.smv, does not exit. Run aborted."
+  echo "The smokeview file, $fulldir/$in.smv, does not exist. Run aborted."
   exit
 fi
 
