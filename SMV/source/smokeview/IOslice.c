@@ -2991,6 +2991,9 @@ void drawslice_frame(){
           drawvolslice_terrain(sd);
           SNIFF_ERRORS("after drawvolslice_terrain");
           break;
+        default:
+          ASSERT(0);
+          break;
       }
   }
 }

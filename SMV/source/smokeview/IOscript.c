@@ -561,8 +561,6 @@ int compile_script(char *scriptfile){
       continue;
     }
     if(match_upper(buffer,"KEYBOARD") == 1){
-      int len;
-
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_KEYBOARD,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
@@ -637,8 +635,6 @@ int compile_script(char *scriptfile){
       continue;
     }
     if(match_upper(buffer,"RENDERONCE") == 1){
-      int len;
-
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_RENDERONCE,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
@@ -648,8 +644,6 @@ int compile_script(char *scriptfile){
       continue;
     }
     if(match_upper(buffer,"RENDERDOUBLEONCE") == 1){
-      int len;
-
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_RENDERDOUBLEONCE,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
@@ -659,8 +653,6 @@ int compile_script(char *scriptfile){
       continue;
     }
     if(match_upper(buffer,"RENDERALL") == 1){
-      int len;
-
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_RENDERALL,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
@@ -677,8 +669,6 @@ int compile_script(char *scriptfile){
       continue;
     }
     if(match_upper(buffer,"VOLSMOKERENDERALL") == 1){
-      int len;
-
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_VOLSMOKERENDERALL,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
@@ -713,8 +703,6 @@ int compile_script(char *scriptfile){
       continue;
     }
     if(match_upper(buffer,"LOADFILE") == 1){
-      int len;
-
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_LOADFILE,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
@@ -724,8 +712,6 @@ int compile_script(char *scriptfile){
       continue;
     }
     if(match_upper(buffer,"LOADVFILE") == 1){
-      int len;
-
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_LOADVFILE,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
@@ -743,8 +729,6 @@ int compile_script(char *scriptfile){
       continue;
     }
     if(match_upper(buffer,"LOADBOUNDARY") == 1){
-      int len;
-
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_LOADBOUNDARY,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
@@ -754,8 +738,6 @@ int compile_script(char *scriptfile){
       continue;
     }
     if(match_upper(buffer,"PARTCLASSCOLOR") == 1){
-      int len;
-
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_PARTCLASSCOLOR,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
@@ -765,8 +747,6 @@ int compile_script(char *scriptfile){
       continue;
     }
     if(match_upper(buffer,"PARTCLASSTYPE") == 1){
-      int len;
-
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_PARTCLASSTYPE,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
@@ -801,8 +781,6 @@ int compile_script(char *scriptfile){
       continue;
     }
     if(match_upper(buffer,"LOADTOUR") == 1){
-      int len;
-
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_LOADTOUR,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
@@ -820,8 +798,6 @@ int compile_script(char *scriptfile){
       continue;
     }
     if(match_upper(buffer,"LOAD3DSMOKE") == 1){
-      int len;
-
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_LOAD3DSMOKE,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
@@ -853,8 +829,6 @@ int compile_script(char *scriptfile){
       continue;
     }
     if(match_upper(buffer,"LOADSLICE") == 1){
-      int len;
-
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_LOADSLICE,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
@@ -871,8 +845,6 @@ int compile_script(char *scriptfile){
       continue;
     }
     if(match_upper(buffer,"LOADVSLICE") == 1){
-      int len;
-
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_LOADVSLICE,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
@@ -889,8 +861,6 @@ int compile_script(char *scriptfile){
       continue;
     }
     if(match_upper(buffer,"LOADISO") == 1){
-      int len;
-
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_LOADISO,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;
@@ -930,8 +900,6 @@ int compile_script(char *scriptfile){
       continue;
     }
     if(match_upper(buffer,"SETVIEWPOINT") == 1){
-      int len;
-
       scripti = scriptinfo + nscriptinfo;
       init_scripti(scripti,SCRIPT_SETVIEWPOINT,buffer);
       if(fgets(buffer2,255,stream)==NULL)break;

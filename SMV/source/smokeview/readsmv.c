@@ -11298,8 +11298,6 @@ void writeini(int flag){
   
   if(flag==LOCAL_INI){
     scriptfiledata *scriptfile;
-    inifiledata *inifile;
-    int first_time=1;
 
     for(scriptfile=first_scriptfile.next;scriptfile->next!=NULL;scriptfile=scriptfile->next){
       char *file;

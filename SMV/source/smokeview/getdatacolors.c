@@ -1410,7 +1410,7 @@ void updatecolors(int changecolorindex){
     alpha = colorbarinfo[colorbartype].alpha;
     fire_cb = colorbarinfo[fire_colorbar_index].colorbar;
     for(n=0;n<nrgb_full;n++){
-      int nn;
+      int n2;
 
       rgb_full[n][0]=cbi->colorbar[3*n];
       rgb_full[n][1]=cbi->colorbar[3*n+1];
@@ -1421,10 +1421,10 @@ void updatecolors(int changecolorindex){
       else{
         rgb_full[n][3]=transparent_level_local;
       }
-      nn=CLAMP(n,1,nrgb_full-2);
-      rgb_smokecolormap[4*n]=fire_cb[3*nn];
-      rgb_smokecolormap[4*n+1]=fire_cb[3*nn+1];
-      rgb_smokecolormap[4*n+2]=fire_cb[3*nn+2];
+      n2=CLAMP(n,1,nrgb_full-2);
+      rgb_smokecolormap[4*n]=fire_cb[3*n2];
+      rgb_smokecolormap[4*n+1]=fire_cb[3*n2+1];
+      rgb_smokecolormap[4*n+2]=fire_cb[3*n2+2];
       if(alpha[n]==0){
         rgb_smokecolormap[4*n+3]=0.0;
       }
