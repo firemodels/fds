@@ -350,7 +350,7 @@ the input file containing all the necessary information needed to perform a simu
 Version 1 of FDS was publicly released in February 2000, version 2 in December 2001, version 3 in November 2002, version 4 in July 2004, version 5 in October 2007, and version 6 in September 2012.
 
 Starting with FDS 5, a formal revision management system has been implemented to track changes to the FDS source code. The open-source program
-development tools are provided by an Internet-based organization known as GoogleCode (code.google.com).
+development tools are provided by an Internet-based organization known as Google Code (code.google.com).
 
 The version number for FDS has three parts.  For example, FDS 5.2.12 indicates that this is FDS 5, the fifth major release. The 2 indicates a
 significant upgrade (a minor release), but still within the framework of FDS 5.  The 12 indicates the twelveth maintenance release of 5.2, mostly bug fixes and minor user
@@ -369,17 +369,17 @@ The developers at NIST and VTT have formed a loose collaboration of interested s
 \item Some recipients of external grants awarded by the NIST Fire Research Division,
 \item Engineering departments at various universities with a particular emphasis on fire.
 \end{itemize}
-Starting with Version 5, the FDS development team uses an Internet-based development environment called GoogleCode, a free service of the search
-engine company, Google. GoogleCode is a widely used service designed to assist open source software development by providing a repository for source
+Starting with Version 5, the FDS development team uses an Internet-based development environment called Google Code, a free service of the search
+engine company, Google. Google Code is a widely used service designed to assist open source software development by providing a repository for source
 code, revision control, program distribution, bug tracking, and various other very useful services.
 
 Each member of the FDS development team has an account and password access to the FDS repository. In addition, anonymous access is available to all
 interested users, who can receive the latest versions of the source code, manuals, and other items. Anonymous users simply do not have the power to
 commit changes to any of these items. The power to commit changes to FDS or its manuals can be granted to anyone on a case by case basis.
 
-The FDS manuals are typeset using \LaTeX, specifically, PDF \LaTeX. The \LaTeX files are essentially text files that are under SVN (Subversion)
+The FDS manuals are typeset using \LaTeX, specifically, PDF \LaTeX. The \LaTeX\ files are essentially text files that are under SVN (Subversion)
 control. The figures are either in the form of PDF or jpeg files, depending on whether they are vector or raster format. There are a variety of
-\LaTeX packages available, including MiKTeX. The FDS developers edit the manuals as part of the day to day upkeep of the model. Different editions of
+\LaTeX\ packages available, including MiKTeX. The FDS developers edit the manuals as part of the day to day upkeep of the model. Different editions of
 the manuals are distinguished by date.
 
 
@@ -601,9 +601,9 @@ The central location is known as the {\em Repository}.
 
 \subsection{Project Repository}
 
-All project documents are maintained using the online utility \href{http://code.google.com/opensource}{{GoogleCode Project Hosting}}, a free service
-offered by Google to support software development for open source applications.  GoogleCode uses the \href{http://subversion.tigris.org}{{Subversion}} (SVN) revision management system.
-Under this system a centralized repository containing all project files resides on a GoogleCode server.
+All project documents are maintained using the online utility \href{http://code.google.com/opensource}{{Google Code Project Hosting}}, a free service
+offered by Google to support software development for open source applications.  Google Code uses the \href{http://subversion.tigris.org}{{Subversion}} (SVN) revision management system.
+Under this system a centralized repository containing all project files resides on a Google Code server.
 Subversion uses a single integer that identifies the version of the entire repository rather than of a specific file
 (i.e. anytime a change is made to the repository all files are incremented in version number).  A record of version number when a specific file was last changed is maintained.
 
@@ -622,7 +622,7 @@ The current location of the FDS repository is \href{http://fds-smv.googlecode.co
 \item Web pages and wikis
 \end{enumerate}
 
-In the event of a unexpected change to the GoogleCode service and/or the FDS repository, each member of the development team, plus interested third parties, has a copy of the repository on their local computer. At NIST, the staff computers are regularly backed up as well. Thus, there is very little chance that the project repository will be lost. If need be, the files can be moved to another open source software development site, such as SourceForge. It is expected that if Google decides to end its support for GoogleCode, it will provide its users with the full history of the project.
+In the event of a unexpected change to the Google Code service and/or the FDS repository, each member of the development team, plus interested third parties, has a copy of the repository on their local computer. At NIST, the staff computers are regularly backed up as well. Thus, there is very little chance that the project repository will be lost. If need be, the files can be moved to another open source software development site, such as SourceForge. It is expected that if Google decides to end its support for Google Code, it will provide its users with the full history of the project.
 
 \subsection{Version Identification}
 
@@ -698,7 +698,7 @@ algorithms in FDS often are based on their acceptance among the practicing engin
 \subsection{Creating a Change Request}
 
 Change requests are submitted using the FDS Issue Tracker.  The Issue Tracker is an online service that is part of
-GoogleCode.  To submit a new issue to the tracker or to provide follow up comments, the user must sign in with a Google Account.
+Google Code.  To submit a new issue to the tracker or to provide follow up comments, the user must sign in with a Google Account.
 The current location of the Issue Tracker can be found through a link under the 'Support' section of the menu
 on the FDS-SMV website \href{http://code.google.com/p/fds-smv/issues/list}{[Link to Tracker]}.
 
@@ -754,8 +754,48 @@ the changes will be verified.  Verification can be done by either the requester 
 developer.  Once the changes have been verified to solve the problem reported in the issue, the issue status will
 be changed to {\ct Verified}.  At this point the issue is closed.
 
+\clearpage
+\section{Automated Error Checking and Regression Testing via Firebot}
 
+The FDS codebase undergoes an automated build, verification, validation, and regression testing process, which is similar to a continuous integration system that automates the build/testing cycle for a project. This automated process is referred to as Firebot (\underline{F}DS automat\underline{I}c ve\underline{R}ification and validation t\underline{E}st \underline{BOT}). The Firebot build/test process helps the FDS-SMV development team by performing automatic error checking and collecting performance and accuracy statistics between FDS revisions.
 
+This automated built/test process runs on a regular schedule (at least daily) to ensure that the FDS codebase is free of compiler errors, verification errors, or any other errors that would result in a failure during the build/test cycle. For future reference and comparison, the results of a build/test process are tagged with the SVN revision number that was used. 
+
+Upon completion or failure of the automated build/test process, the results of the build/test process are dispatched to the development team. In the event of a failure, the build/test process is aborted, and the appropriate error logs are dispatched to the development team. The automated build/test process consists of eight build stages, which are described in the following sections.
+
+\subsection*{Stage 1: SVN checkout of FDS-SMV codebase}
+
+The most current version of the FDS codebase is retrieved from the Google Code SVN server. At this stage, the Firebot script ensures that all temporary files are removed and that a clean copy of the revision is used for the later stages, as if an end user were downloading the repository for the first time.
+
+\subsection*{Stage 2: Compilation of FDS debug versions}
+
+The serial and MPI versions of FDS are compiled with debugging flags enabled. This helps to track down and trace any errors early in the build/test process. In addition, any compiler warnings are logged at this time, and the build/test process continues as long as no major compilation errors are found.
+
+\subsection*{Stage 3: Short run of verification suite}
+
+All of the cases in the verification suite are invoked using the FDS debug versions that were compiled in Stage~2. The verification cases are run for at least one time step to ensure that the cases start running without failure. After all of the verification cases run for at least one time step, the cases are stopped using an FDS stop file. Then the logs are checked for Fortran errors, numerical instabilities, missing verification case files, or other FDS errors.
+
+\subsection*{Stage 4: Compilation of FDS release versions}
+
+The serial and MPI release versions of FDS are compiled. In addition, any compiler warnings are logged at this time, and the build/test process continues as long as no major compilation errors are found.
+
+\subsection*{Stage 5: Full run of FDS verification suite}
+
+All of the cases in the verification suite are invoked using the FDS release versions that were compiled in Stage~4. The verification cases are run to completion. After all of the verification cases run to completion, the logs are checked for Fortran errors, numerical instabilities, missing verification case files, or other FDS errors.
+
+\subsection*{Stage 6: Generation of figures in Smokeview}
+
+A script in the FDS Verification Suite is invoked to generate figures in Smokeview using automated Smokeview scripting commands. These figures are used in the FDS User~\cite{FDS_Users_Guide} and Verification~\cite{FDS_Verification_Guide} Guides.
+
+\subsection*{Stage 7: Generation of plots and regression statistics}
+
+A script in the FDS Verification Suite is invoked to generate plots and regression statistics using the results from Stage 5. These plots and figures are used in the FDS User~\cite{FDS_Users_Guide} and Verification~\cite{FDS_Verification_Guide} Guides.
+
+\subsection*{Stage 8: Compilation of  FDS Verification Guide}
+
+The FDS Verification Guide~\cite{FDS_Verification_Guide} is generated to ensure that all figures and equations can be compiled without any \LaTeX\ errors such as missing figures.
+
+\clearpage
 \section{Issuing New Releases}
 
 The decision to change versions of the software is made by consensus of the development team, usually after it is determined that enough
