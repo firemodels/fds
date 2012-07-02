@@ -6405,6 +6405,63 @@ coordinates of the thermocouples.
 
 \elist
 
+\subsection{Zone Modeling Keywords}
+\blist
+
+\hitem{FIRE}The {\tt FIRE}\ keyword defines the location and room number of a zone fire modeling fire.
+The format for the {\tt FIRE}\ keyword is
+\begin{verbatim}
+FIRE
+ i x y z
+\end{verbatim}\hitem{ROOM}
+where {\tt i}\ is the room number and $(x,y,z)$ is the location of the base of the fire.
+
+\hitem{VENTGEOM}The {\tt VENTGEOM}\ keyword defines the location, orientation and size of a zone fire modeling vent (
+with horizontal flow).
+The format for the {\tt VENTGEOM}\ keyword is
+\begin{verbatim}
+VENTGEOM
+ from to face width ventoffset bottom top r g b
+\end{verbatim}
+where {\tt from}\ and {\tt to}  are the ``from'' and ``to'' room indices (ranging from 1 to number of rooms),
+{\tt face}\ is index of the wall (or face) where the vent is located (front wall=1,
+right wall=2, back wall=3, left wall=4), {\tt width}\ is the vent width, {\tt bottom}\ is the elevation of the vent sill, {\tt top}\
+is the elevation of the vent soffit and {\tt r, g, b}\ is the vent color.
+
+\hitem{ROOM}The {\tt ROOM}\ keyword defines the size and location of a zone fire modeling compartment or room.
+The format for the {\tt ROOM}\ keyword is
+\begin{verbatim}
+ROOM
+ x y z
+ x0 y0 z0
+\end{verbatim}\hitem{ROOM}
+where $(x,y,z)$ is the width, depth and height of the room respectively and $(x0,y0,z0)$ is the location of the
+left, front bottom corner of the room.
+
+\hitem{ZONE}The {\tt ZONE}\ keyword defines the file used to store zone fire modeling data and the types of data
+found within the file. The format for the {\tt ZONE}\ keyword is
+\begin{verbatim}
+ZONE
+ file
+ long label
+ short label
+ unit
+ long label
+ short label
+ unit
+ long label
+ short label
+ unit
+ long label
+ short label
+ unit
+\end{verbatim}
+where {\tt file}\ is the name of the file containing the zone fire modeling data.
+Note, Smokeview does not use the label or unit data with CFAST 6 or later.  This data is found within the spread sheet data now used
+to store zone fire modeling data.
+\elist
+
+
 \subsection{Miscellaneous Keywords}
 \blist
 
