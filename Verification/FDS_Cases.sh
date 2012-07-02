@@ -20,6 +20,7 @@ $RUNFDS Energy_Budget energy_budget_adiabatic_walls
 $RUNFDS Energy_Budget energy_budget_cold_walls
 $RUNFDS Energy_Budget energy_budget_dns_100
 $RUNFDS Energy_Budget energy_budget_tmix
+$RUNFDS Energy_Budget energy_budget_solid
 
 $RUNFDS Evacuation evac_smv_testcase0
 $RUNFDS Evacuation evac_smv_testcase1
