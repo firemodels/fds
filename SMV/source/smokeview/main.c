@@ -21,6 +21,7 @@ char main_revision[]="$Revision$";
 
 //  dummy change to update version to  6.0.1
 //  dummy change to force revision  update
+// dummy change to test updated version of smartsvn
 
 /* ------------------ main ------------------------ */
 
