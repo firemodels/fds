@@ -129,6 +129,15 @@ check_compile_fds_db()
       save_build_status
       email_error_message
    fi
+
+   # Check for compiler warnings
+   if [[ `grep warning ${FIREBOT_DIR}/output_stage2a` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      grep warning ${FIREBOT_DIR}/output_stage2a >> $FIREBOT_DIR/output_compiler_warnings
+   fi
 }
 
 #  =================================
@@ -156,6 +165,16 @@ check_compile_fds_mpi_db()
       ERROR_LOG=$FIREBOT_DIR/output_stage2b
       save_build_status
       email_error_message
+   fi
+
+   # Check for compiler warnings
+   # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
+   if [[ `grep warning ${FIREBOT_DIR}/output_stage2b | grep -v 'feupdateenv is not implemented'` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      grep warning ${FIREBOT_DIR}/output_stage2b | grep -v 'feupdateenv is not implemented' >> $FIREBOT_DIR/output_compiler_warnings
    fi
 }
 
@@ -288,6 +307,15 @@ check_compile_fds()
       save_build_status
       email_error_message
    fi
+
+   # Check for compiler warnings
+   if [[ `grep warning ${FIREBOT_DIR}/output_stage4a` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      grep warning ${FIREBOT_DIR}/output_stage4a >> $FIREBOT_DIR/output_compiler_warnings
+   fi
 }
 
 #  ==============================
@@ -315,6 +343,16 @@ check_compile_fds_mpi()
       ERROR_LOG=$FIREBOT_DIR/output_stage4b
       save_build_status
       email_error_message
+   fi
+
+   # Check for compiler warnings
+   # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
+   if [[ `grep warning ${FIREBOT_DIR}/output_stage4b | grep -v 'feupdateenv is not implemented'` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      grep warning ${FIREBOT_DIR}/output_stage4b | grep -v 'feupdateenv is not implemented' >> $FIREBOT_DIR/output_compiler_warnings
    fi
 }
 
@@ -377,8 +415,19 @@ check_verification_cases_long()
    fi
 }
 
+#  =========================================
+#  = Stage 6 - Generate Smokeview pictures =
+#  =========================================
+
+make_fds_pictures()
+{
+   # Run Make FDS Pictures script
+   cd $SVNROOT/Verification
+   ./Make_FDS_Pictures.sh &> $FIREBOT_DIR/output_stage6
+}
+
 #  ============================================
-#  = Stage 6 - Matlab plotting and statistics =
+#  = Stage 7 - Matlab plotting and statistics =
 #  ============================================
 
 run_matlab_plotting()
@@ -392,24 +441,13 @@ run_matlab_plotting()
    sed -i 's/LaTeX/TeX/g' plot_style.m 
 
    cd $SVNROOT/Utilities/Matlab
-   matlab -nodisplay -r "FDS_verification_script;quit" &> $FIREBOT_DIR/output_stage6
+   matlab -nodisplay -r "FDS_verification_script;quit" &> $FIREBOT_DIR/output_stage7
 }
 
 check_matlab_plotting()
 {
    cd $SVNROOT/Manuals/FDS_Verification_Guide
    # XX grep matlab output for errors
-}
-
-#  =========================================
-#  = Stage 7 - Generate Smokeview pictures =
-#  =========================================
-
-make_fds_pictures()
-{
-   # Run Make FDS Pictures script
-   cd $SVNROOT/Verification
-   ./Make_FDS_Pictures.sh &> $FIREBOT_DIR/output_stage7
 }
 
 #  ======================================
@@ -449,26 +487,51 @@ check_verification_guide()
 
 email_success_message()
 {
-   # Send empty email with success message
-   mail -s "[Firebot] Build success! Revision ${SVN_REVISION} passed all build tests." $mailTo < /dev/null > /dev/null
+   cd $FIREBOT_DIR
+   # Check for compiler warnings
+   if [ -e "output_compiler_warnings" ]
+   then
+      # Send email with success message, include compiler warnings
+      mail -s "[Firebot] Build success, with compiler warnings. Revision ${SVN_REVISION} passed all build tests." $mailTo < ${FIREBOT_DIR}/output_compiler_warnings > /dev/null
+   else
+      # Send empty email with success message
+      mail -s "[Firebot] Build success! Revision ${SVN_REVISION} passed all build tests." $mailTo < /dev/null > /dev/null
+   fi
 }
 
 email_error_message()
 {
-   # Send email with failure message, body of email contains appropriate log file
-   mail -s "[Firebot] Build failure! Revision ${SVN_REVISION} build failure at ${BUILD_STAGE_FAILURE}." $mailTo < ${ERROR_LOG} > /dev/null
+   cd $FIREBOT_DIR
+   # Check for compiler warnings
+   if [ -e "output_compiler_warnings" ]
+   then
+      cat output_compiler_warnings >> $ERROR_LOG
+
+      # Send email with failure message and warnings, body of email contains appropriate log file
+      mail -s "[Firebot] Build failure, with compiler warnings! Revision ${SVN_REVISION} build failure at ${BUILD_STAGE_FAILURE}." $mailTo < ${ERROR_LOG} > /dev/null
+   else
+      # Send email with failure message, body of email contains appropriate log file
+      mail -s "[Firebot] Build failure! Revision ${SVN_REVISION} build failure at ${BUILD_STAGE_FAILURE}." $mailTo < ${ERROR_LOG} > /dev/null
+   fi
    exit
 }
 
 save_build_status()
 {
+   cd $FIREBOT_DIR
    # Save status outcome of build to a text file
    if [[ $BUILD_STAGE_FAILURE != "" ]]
    then
       echo "Revision ${SVN_REVISION} build failure at ${BUILD_STAGE_FAILURE}." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
       cat $ERROR_LOG > "$FIREBOT_DIR/history/${SVN_REVISION}_errors.txt"
    else
-      echo "Build success! Revision ${SVN_REVISION} passed all build tests." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
+      if [ -e "output_compiler_warnings" ]
+         then 
+         echo "Revision ${SVN_REVISION} has compiler warnings." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
+         cat $FIREBOT_DIR/output_compiler_warnings > "$FIREBOT_DIR/history/${SVN_REVISION}_errors.txt"
+      else
+         echo "Build success! Revision ${SVN_REVISION} passed all build tests." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
+      fi
    fi
 }
 
@@ -506,11 +569,11 @@ run_verification_cases_long
 check_verification_cases_long
 
 ### Stage 6 ###
-# run_matlab_plotting
-# check_matlab_plotting
+# make_fds_pictures
 
 ### Stage 7 ###
-# make_fds_pictures
+# run_matlab_plotting
+# check_matlab_plotting
 
 ### Stage 8 ###
 # make_verification_guide
