@@ -52,7 +52,7 @@ hr {
 <h3>Firebot Build Status</h3>
 
 This page displays the build status for up to 100 of the most recent builds.</br>
-Hover over a fail or warning status for an error log.</br>"""
+To view a detailed error log, mouse over a fail or warning status.</br>"""
 
 current_time = time.ctime()
 print "</br>"
