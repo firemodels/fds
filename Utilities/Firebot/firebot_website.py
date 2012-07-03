@@ -34,17 +34,30 @@ span.dropt span {position: absolute; left: -9999px;
   margin: 4px 0 0 0px; padding: 3px 3px 3px 3px; 
   border-style:solid; border-color:black; border-width:1px;}
 span.dropt:hover span {margin: 5px 0 0 170px; background: #ffffff; z-index:6;}
+
+hr {
+  width: 50%;
+  height: 2px;
+  color: #000;
+  background-color: #000;
+}
 </style>
 
 </head>
 <body>
 <h1>F<font size=2>DS automat</font>I<font size=2>c ve</font>R<font size=2>ification and validation t</font>E<font size=2>st</font> BOT</h1>
 
+<hr align='left'>
+
 <h3>Firebot Build Status</h3>
 
 This page displays the build status for up to 100 of the most recent builds.</br>
-Hover over a fail or warning status for an error log.</br></br>
-"""
+Hover over a fail or warning status for an error log.</br>"""
+
+current_time = time.ctime()
+print "</br>"
+print "<i>Status last updated: %s</i>" % (current_time)
+print "<hr align='left'></br>"
 
 # Initialize list of history files
 revision_files = os.listdir(firebot_history_dir)
