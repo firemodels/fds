@@ -14,9 +14,9 @@ SVNROOT="/home/kjo/firebot_repo"
 FIREBOT_DIR="/home/kjo/firebot"
 SVN_REVISION=$1
 
-#  ===========
-#  = Warning =
-#  ===========
+#  ====================
+#  = End user warning =
+#  ====================
 
 # Warn if running as user other than firebot
 if [[ `whoami` == "kjo" ]];
@@ -30,6 +30,25 @@ if [[ `whoami` == "kjo" ]];
       echo "Terminating script."
       exit
 fi
+
+#  ===========================
+#  = Exit if already running =
+#  ===========================
+# Abort script if another instance is running
+# This command should return a "2" (from within this script) if only one script is running
+if [[ `pgrep -f firebot_verification | wc -l` -gt 2 ]];
+   then
+      echo "Warning: The Firebot verification script is already running."
+      echo "Terminating this script."
+      exit
+   else
+      # Continue along
+      :
+fi
+
+#  ==========
+#  = Banner =
+#  ==========
 
 #  ====================
 #  = Sample functions =
@@ -528,7 +547,7 @@ save_build_status()
       if [ -e "output_compiler_warnings" ]
          then 
          echo "Revision ${SVN_REVISION} has compiler warnings." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
-         cat $FIREBOT_DIR/output_compiler_warnings > "$FIREBOT_DIR/history/${SVN_REVISION}_errors.txt"
+         cat $FIREBOT_DIR/output_compiler_warnings > "$FIREBOT_DIR/history/${SVN_REVISION}_warnings.txt"
       else
          echo "Build success! Revision ${SVN_REVISION} passed all build tests." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
       fi
