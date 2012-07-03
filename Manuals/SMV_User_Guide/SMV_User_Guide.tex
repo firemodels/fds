@@ -6406,6 +6406,9 @@ coordinates of the thermocouples.
 \elist
 
 \subsection{Zone Modeling Keywords}
+This section contains documentation for keywords used to describe features found in a zone fire model, features such as
+rooms, vents, fires {\em etc.}
+
 \blist
 
 \hitem{FIRE}The {\tt FIRE}\ keyword defines the location and room number of a zone fire modeling fire.
@@ -6414,7 +6417,10 @@ The format for the {\tt FIRE}\ keyword is
 FIRE
  i x y z
 \end{verbatim}\hitem{ROOM}
-where {\tt i}\ is the room number and $(x,y,z)$ is the location of the base of the fire.
+where {\tt i}\ is the room number containing the fire and $(x,y,z)$ is the location within the room of the base of the fire.
+One {\tt FIRE}\ entry is specified  for each fire.
+The order of the {\tt FIRE}\ entries found in the .smv file should correspond
+to the ordering of the fires ({\em i.e.}\ The n'th fire is specified with the n'th .smv {\tt FIRE}\ entry.)
 
 \hitem{VENTGEOM}The {\tt VENTGEOM}\ keyword defines the location, orientation and size of a zone fire modeling vent (
 with horizontal flow).
@@ -6423,10 +6429,13 @@ The format for the {\tt VENTGEOM}\ keyword is
 VENTGEOM
  from to face width ventoffset bottom top r g b
 \end{verbatim}
-where {\tt from}\ and {\tt to}  are the ``from'' and ``to'' room indices (ranging from 1 to number of rooms),
-{\tt face}\ is index of the wall (or face) where the vent is located (front wall=1,
-right wall=2, back wall=3, left wall=4), {\tt width}\ is the vent width, {\tt bottom}\ is the elevation of the vent sill, {\tt top}\
-is the elevation of the vent soffit and {\tt r, g, b}\ is the vent color.
+where {\tt from}\ and {\tt to}  are the room indices (ranging from 1 to the number of rooms) of the ``from'' and ``to'' rooms,
+{\tt face}\ is the index of the wall (or face) where the vent is located (front wall=1,
+right wall=2, back wall=3, left wall=4), {\tt width}\ is the vent width, {\tt bottom}\ is the elevation (relative to the floor) of the vent sill, {\tt top}\
+is the elevation (relative to the floor) of the vent soffit and {\tt r, g, b}\ are the red, green and blue components
+(ranging from 0.0 to 1.0) of the vent color.
+The order of the {\tt VENTGEOM}\ entries found in the .smv file should correspond
+to the ordering of the vents  ({\em i.e.}\ The n'th vent is specified with the n'th .smv {\tt VENTGEOM}\ entry.)
 
 \hitem{ROOM}The {\tt ROOM}\ keyword defines the size and location of a zone fire modeling compartment or room.
 The format for the {\tt ROOM}\ keyword is
@@ -6436,7 +6445,9 @@ ROOM
  x0 y0 z0
 \end{verbatim}\hitem{ROOM}
 where $(x,y,z)$ is the width, depth and height of the room respectively and $(x0,y0,z0)$ is the location of the
-left, front bottom corner of the room.
+left, front, bottom corner of the room.
+The order of the {\tt ROOM}\ entries found in the .smv file should correspond
+to the ordering of the rooms ({\em i.e.}\ The n'th room is specified with the n'th .smv {\tt ROOM}\ entry.)
 
 \hitem{ZONE}The {\tt ZONE}\ keyword defines the file used to store zone fire modeling data and the types of data
 found within the file. The format for the {\tt ZONE}\ keyword is
