@@ -38,8 +38,7 @@ span.dropt:hover span {margin: 5px 0 0 170px; background: #ffffff; z-index:6;}
 
 </head>
 <body>
-<h1>F<font size=2>DS automat</font>I<font size=2>c ve</font>R<font size=2>ification and validation 
-t</font>E<font size=2>st</font> BOT</h1>
+<h1>F<font size=2>DS automat</font>I<font size=2>c ve</font>R<font size=2>ification and validation t</font>E<font size=2>st</font> BOT</h1>
 
 <h3>Firebot Build Status</h3>
 
@@ -75,7 +74,7 @@ for rev in sorted(revision_list, reverse=True)[:100]:
         # Write "Build fail" and hover of error log
         error_line = """Revision number <b>%(revision_num)s</b>:
         <font style='BACKGROUND-COLOR: lightcoral'>[&#10007;]</font>
-        <span class="dropt" title="Error log">Build fail</br>
+        <span class="dropt">Build fail</br>
         <span style="width:700px;">"""
         print error_line % {'revision_num': rev}
 
@@ -96,7 +95,7 @@ for rev in sorted(revision_list, reverse=True)[:100]:
         # Write "Build success, with warnings" and hover of warning log
         error_line = """Revision number <b>%(revision_num)s</b>:
         <font style='BACKGROUND-COLOR: yellow'>[&#8211;]</font>
-        <span class="dropt" title="Warning log">Build success, with warnings</br>
+        <span class="dropt">Build success, with warnings</br>
         <span style="width:700px;">"""
         print error_line % {'revision_num': rev}
 
@@ -109,8 +108,7 @@ for rev in sorted(revision_list, reverse=True)[:100]:
     #  = Case: build success! =
     #  ========================
     else:
-        print "Revision number <b>" + rev + "</b>: <font style='BACKGROUND-COLOR: lime'>[&#10003;]</font> Build 
-success!<br/>"
+        print "Revision number <b>" + rev + "</b>: <font style='BACKGROUND-COLOR: lime'>[&#10003;]</font> Build success!<br/>"
 
     # Print time associated with history file
     print time.ctime(os.path.getmtime(firebot_history_dir + "/" + rev + ".txt"))
