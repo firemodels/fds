@@ -2553,122 +2553,122 @@ IF (N_REACTIONS>0) WRITE(LU_OUTPUT,'(//A)') ' Gas Phase Reaction Information'
 
 REACTION_LOOP: DO N=1,N_REACTIONS
    RN => REACTION(N)
-   IF (.NOT. EDC) THEN
+   EDC_IF: IF (.NOT. EDC) THEN
    
-   SELECT CASE (COMBUSTION_ODE)
-      CASE (SINGLE_EXACT)
-         ODE_SOLVER = 'SINGLE EXACT'      
-      CASE (EXPLICIT_EULER)
-         ODE_SOLVER = 'EXPLICIT EULER'
-      CASE (RUNGE_KUTTA_2)
-         ODE_SOLVER = 'RUNGE-KUTTA 2'
-      CASE (RK2_RICHARDSON)
-            ODE_SOLVER = 'RK2 RICHARDSON'
-      CASE (EDCM_RK2)
-            ODE_SOLVER = 'EDCM RK2'
-   END SELECT
+      SELECT CASE (COMBUSTION_ODE)
+         CASE (SINGLE_EXACT)
+            ODE_SOLVER = 'SINGLE EXACT'      
+         CASE (EXPLICIT_EULER)
+            ODE_SOLVER = 'EXPLICIT EULER'
+         CASE (RUNGE_KUTTA_2)
+            ODE_SOLVER = 'RUNGE-KUTTA 2'
+         CASE (RK2_RICHARDSON)
+               ODE_SOLVER = 'RK2 RICHARDSON'
+         CASE (EDCM_RK2)
+               ODE_SOLVER = 'EDCM RK2'
+      END SELECT
    
-   IF (RN%FYI/='null') WRITE(LU_OUTPUT,'(/3X,A)') RN%FYI
-   IF (RN%ID/='null')  WRITE(LU_OUTPUT,'(/3X,A)') RN%ID
+      IF (RN%FYI/='null') WRITE(LU_OUTPUT,'(/3X,A)') RN%FYI
+      IF (RN%ID/='null')  WRITE(LU_OUTPUT,'(/3X,A)') RN%ID
    
-   SELECT CASE(RN%MODE)
-      CASE(FINITE_RATE)
-         WRITE(LU_OUTPUT,'(/3X,A)')  'Finite Rate Reaction'
-         WRITE(LU_OUTPUT,'(3X,A,A)')  'ODE Solver:  ', ODE_SOLVER
-         WRITE(LU_OUTPUT,'(/3X,A)') 'Tracked Species'
-         WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'         
-         DO NN=0,N_TRACKED_SPECIES
-            IF (ABS(RN%NU(NN)) <=ZERO_P) CYCLE
-            WRITE(LU_OUTPUT,'(3X,A,1X,F12.6)') SPECIES_MIXTURE(NN)%ID,RN%NU(NN) 
-         ENDDO
-         WRITE(LU_OUTPUT,'(/3X,A)') 'Detailed Species'
-         WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'
-         DO NN=1,N_SPECIES
-            IF (ABS(RN%NU_SPECIES(NN))>=ZERO_P) WRITE(LU_OUTPUT,'(3X,A,1X,F9.4)') SPECIES(NN)%ID,RN%NU_SPECIES(NN)
-         ENDDO
-         WRITE(LU_OUTPUT,'(/A)') '   Species ID                     Rate Exponent'
-         DO NN=1,N_SPECIES
-            IF (RN%N_S(NN) <=-998._EB) CYCLE
-            WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') SPECIES(NN)%ID,RN%N_S(NN) 
-         ENDDO
-         WRITE(LU_OUTPUT,'(/A)') '   Arrhenius Constants'
-         WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Pre-exponential:  ',RN%A_IN
-         WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Activation Energy:',RN%E_IN
-         WRITE(LU_OUTPUT,'(/A)') '   Fuel                           Heat of Combustion (kJ/kg)'    
-         WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') RN%FUEL,RN%HEAT_OF_COMBUSTION/1000._EB
-      CASE (EDDY_DISSIPATION)
-         WRITE(LU_OUTPUT,'(/3X,A)')  'Eddy Dissipation Reaction'
-         WRITE(LU_OUTPUT,'(3X,A,A)')  'ODE Solver:  ', ODE_SOLVER
-         WRITE(LU_OUTPUT,'(/3X,A)') 'Tracked Species'
-         WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'
-         DO NN=0,N_TRACKED_SPECIES
-            IF (ABS(RN%NU(NN))>ZERO_P) WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') SPECIES_MIXTURE(NN)%ID,RN%NU(NN) 
-         ENDDO        
-         WRITE(LU_OUTPUT,'(/3X,A)') 'Detailed Species'
-         WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'
-         DO NN=1,N_SPECIES
-            IF (ABS(RN%NU_SPECIES(NN))>ZERO_P) WRITE(LU_OUTPUT,'(3X,A,1X,F9.4)') SPECIES(NN)%ID,RN%NU_SPECIES(NN)
-         ENDDO
-         WRITE(LU_OUTPUT,'(A,F12.3)')  '   Heat of Combustion (kJ/kg)  ',RN%HEAT_OF_COMBUSTION/1000._EB
-      CASE (EDDY_DISSIPATION_CONCEPT)
-         WRITE(LU_OUTPUT,'(/3X,A)')  'Eddy Dissipation Concept Reaction'
-         WRITE(LU_OUTPUT,'(3X,A,A)')  'ODE Solver:  ', ODE_SOLVER
-         WRITE(LU_OUTPUT,'(/3X,A)') 'Tracked Species'
-         WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'         
-         DO NN=0,N_TRACKED_SPECIES
-            IF (ABS(RN%NU(NN)) <=ZERO_P) CYCLE
-            WRITE(LU_OUTPUT,'(3X,A,1X,F12.6)') SPECIES_MIXTURE(NN)%ID,RN%NU(NN) 
-         ENDDO
-         WRITE(LU_OUTPUT,'(/3X,A)') 'Detailed Species'
-         WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'
-         DO NN=1,N_SPECIES
-            IF (ABS(RN%NU_SPECIES(NN))>=ZERO_P) WRITE(LU_OUTPUT,'(3X,A,1X,F9.4)') SPECIES(NN)%ID,RN%NU_SPECIES(NN)
-         ENDDO
-         WRITE(LU_OUTPUT,'(/A)') '   Species ID                     Rate Exponent'
-         DO NN=1,N_SPECIES
-            IF (RN%N_S(NN) <=-998._EB) CYCLE
-            WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') SPECIES(NN)%ID,RN%N_S(NN) 
-         ENDDO
-         WRITE(LU_OUTPUT,'(/A)') '   Arrhenius Constants'
-         WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Pre-exponential:  ',RN%A_IN
-         WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Activation Energy:',RN%E_IN
-         WRITE(LU_OUTPUT,'(/A)') '   Fuel                           Heat of Combustion (kJ/kg)'    
-         WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') RN%FUEL,RN%HEAT_OF_COMBUSTION/1000._EB
-   END SELECT
-ELSE
-   SELECT CASE (COMBUSTION_ODE)     
-      CASE (EXPLICIT_EULER)
-         ODE_SOLVER = 'EXPLICIT EULER'
-      CASE (EDCM_RK2)
-            ODE_SOLVER = 'EDCM RK2'
-   END SELECT
+      SELECT CASE(RN%MODE)
+         CASE(FINITE_RATE)
+            WRITE(LU_OUTPUT,'(/3X,A)')  'Finite Rate Reaction'
+            WRITE(LU_OUTPUT,'(3X,A,A)')  'ODE Solver:  ', ODE_SOLVER
+            WRITE(LU_OUTPUT,'(/3X,A)') 'Tracked Species'
+            WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'         
+            DO NN=0,N_TRACKED_SPECIES
+               IF (ABS(RN%NU(NN)) <=ZERO_P) CYCLE
+               WRITE(LU_OUTPUT,'(3X,A,1X,F12.6)') SPECIES_MIXTURE(NN)%ID,RN%NU(NN) 
+            ENDDO
+            WRITE(LU_OUTPUT,'(/3X,A)') 'Detailed Species'
+            WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'
+            DO NN=1,N_SPECIES
+               IF (ABS(RN%NU_SPECIES(NN))>=ZERO_P) WRITE(LU_OUTPUT,'(3X,A,1X,F9.4)') SPECIES(NN)%ID,RN%NU_SPECIES(NN)
+            ENDDO
+            WRITE(LU_OUTPUT,'(/A)') '   Species ID                     Rate Exponent'
+            DO NN=1,N_SPECIES
+               IF (RN%N_S(NN) <=-998._EB) CYCLE
+               WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') SPECIES(NN)%ID,RN%N_S(NN) 
+            ENDDO
+            WRITE(LU_OUTPUT,'(/A)') '   Arrhenius Constants'
+            WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Pre-exponential:  ',RN%A_IN
+            WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Activation Energy:',RN%E_IN
+            WRITE(LU_OUTPUT,'(/A)') '   Fuel                           Heat of Combustion (kJ/kg)'    
+            WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') RN%FUEL,RN%HEAT_OF_COMBUSTION/1000._EB
+         CASE (EDDY_DISSIPATION)
+            WRITE(LU_OUTPUT,'(/3X,A)')  'Eddy Dissipation Reaction'
+            WRITE(LU_OUTPUT,'(3X,A,A)')  'ODE Solver:  ', ODE_SOLVER
+            WRITE(LU_OUTPUT,'(/3X,A)') 'Tracked Species'
+            WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'
+            DO NN=0,N_TRACKED_SPECIES
+               IF (ABS(RN%NU(NN))>ZERO_P) WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') SPECIES_MIXTURE(NN)%ID,RN%NU(NN) 
+            ENDDO        
+            WRITE(LU_OUTPUT,'(/3X,A)') 'Detailed Species'
+            WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'
+            DO NN=1,N_SPECIES
+               IF (ABS(RN%NU_SPECIES(NN))>ZERO_P) WRITE(LU_OUTPUT,'(3X,A,1X,F9.4)') SPECIES(NN)%ID,RN%NU_SPECIES(NN)
+            ENDDO
+            WRITE(LU_OUTPUT,'(A,F12.3)')  '   Heat of Combustion (kJ/kg)  ',RN%HEAT_OF_COMBUSTION/1000._EB
+         CASE (EDDY_DISSIPATION_CONCEPT)
+            WRITE(LU_OUTPUT,'(/3X,A)')  'Eddy Dissipation Concept Reaction'
+            WRITE(LU_OUTPUT,'(3X,A,A)')  'ODE Solver:  ', ODE_SOLVER
+            WRITE(LU_OUTPUT,'(/3X,A)') 'Tracked Species'
+            WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'         
+            DO NN=0,N_TRACKED_SPECIES
+               IF (ABS(RN%NU(NN)) <=ZERO_P) CYCLE
+               WRITE(LU_OUTPUT,'(3X,A,1X,F12.6)') SPECIES_MIXTURE(NN)%ID,RN%NU(NN) 
+            ENDDO
+            WRITE(LU_OUTPUT,'(/3X,A)') 'Detailed Species'
+            WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'
+            DO NN=1,N_SPECIES
+               IF (ABS(RN%NU_SPECIES(NN))>=ZERO_P) WRITE(LU_OUTPUT,'(3X,A,1X,F9.4)') SPECIES(NN)%ID,RN%NU_SPECIES(NN)
+            ENDDO
+            WRITE(LU_OUTPUT,'(/A)') '   Species ID                     Rate Exponent'
+            DO NN=1,N_SPECIES
+               IF (RN%N_S(NN) <=-998._EB) CYCLE
+               WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') SPECIES(NN)%ID,RN%N_S(NN) 
+            ENDDO
+            WRITE(LU_OUTPUT,'(/A)') '   Arrhenius Constants'
+            WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Pre-exponential:  ',RN%A_IN
+            WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Activation Energy:',RN%E_IN
+            WRITE(LU_OUTPUT,'(/A)') '   Fuel                           Heat of Combustion (kJ/kg)'    
+            WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') RN%FUEL,RN%HEAT_OF_COMBUSTION/1000._EB
+      END SELECT
+   ELSE EDC_IF
+      SELECT CASE (COMBUSTION_ODE)     
+         CASE (EXPLICIT_EULER)
+            ODE_SOLVER = 'EXPLICIT EULER'
+         CASE (EDCM_RK2)
+               ODE_SOLVER = 'EDCM RK2'
+      END SELECT
    
-   IF (RN%FYI/='null') WRITE(LU_OUTPUT,'(/3X,A)') RN%FYI
-   IF (RN%ID/='null')  WRITE(LU_OUTPUT,'(/3X,A)') RN%ID   
+      IF (RN%FYI/='null') WRITE(LU_OUTPUT,'(/3X,A)') RN%FYI
+      IF (RN%ID/='null')  WRITE(LU_OUTPUT,'(/3X,A)') RN%ID   
    
-   WRITE(LU_OUTPUT,'(/3X,A)')  'Eddy Dissipation Concept Reaction'
-   WRITE(LU_OUTPUT,'(3X,A,A)')  'ODE Solver:  ', ODE_SOLVER
-   WRITE(LU_OUTPUT,'(/3X,A)') 'Tracked Species'
-   WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'         
-   DO NN=0,N_TRACKED_SPECIES
-      IF (ABS(RN%NU(NN)) <=ZERO_P) CYCLE
-      WRITE(LU_OUTPUT,'(3X,A,1X,F12.6)') SPECIES_MIXTURE(NN)%ID,RN%NU(NN) 
-   ENDDO
-   WRITE(LU_OUTPUT,'(/3X,A)') 'Detailed Species'
-   WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'
-   DO NN=1,N_SPECIES
-      IF (ABS(RN%NU_SPECIES(NN))>=ZERO_P) WRITE(LU_OUTPUT,'(3X,A,1X,F9.4)') SPECIES(NN)%ID,RN%NU_SPECIES(NN)
-   ENDDO
-   WRITE(LU_OUTPUT,'(/A)') '   Species ID                     Rate Exponent'
-   DO NN=1,N_SPECIES
-     IF (RN%N_S(NN) <=-998._EB) CYCLE
-     WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') SPECIES(NN)%ID,RN%N_S(NN) 
-   ENDDO
-   WRITE(LU_OUTPUT,'(/A)') '   Arrhenius Constants'
-   WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Pre-exponential:  ',RN%A
-   WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Activation Energy:',RN%E
+      WRITE(LU_OUTPUT,'(/3X,A)')  'Eddy Dissipation Concept Reaction'
+      WRITE(LU_OUTPUT,'(3X,A,A)')  'ODE Solver:  ', ODE_SOLVER
+      WRITE(LU_OUTPUT,'(/3X,A)') 'Tracked Species'
+      WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'         
+      DO NN=0,N_TRACKED_SPECIES
+         IF (ABS(RN%NU(NN)) <=ZERO_P) CYCLE
+         WRITE(LU_OUTPUT,'(3X,A,1X,F12.6)') SPECIES_MIXTURE(NN)%ID,RN%NU(NN) 
+      ENDDO
+      WRITE(LU_OUTPUT,'(/3X,A)') 'Detailed Species'
+      WRITE(LU_OUTPUT,'(A)') '   Species ID                     Stoich. Coeff.'
+      DO NN=1,N_SPECIES
+         IF (ABS(RN%NU_SPECIES(NN))>=ZERO_P) WRITE(LU_OUTPUT,'(3X,A,1X,F9.4)') SPECIES(NN)%ID,RN%NU_SPECIES(NN)
+      ENDDO
+      WRITE(LU_OUTPUT,'(/A)') '   Species ID                     Rate Exponent'
+      DO NN=1,N_SPECIES
+        IF (RN%N_S(NN) <=-998._EB) CYCLE
+        WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') SPECIES(NN)%ID,RN%N_S(NN) 
+      ENDDO
+      WRITE(LU_OUTPUT,'(/A)') '   Arrhenius Constants'
+      WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Pre-exponential:  ',RN%A
+      WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Activation Energy:',RN%E
 
-ENDIF      
+   ENDIF EDC_IF    
 ENDDO REACTION_LOOP
 
 ! Print out information about materials
