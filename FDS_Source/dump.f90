@@ -2505,8 +2505,9 @@ SPEC_LOOP: DO N=1,N_SPECIES
          WRITE(LU_OUTPUT,'( 3X,A)') 'Aerosol'
    END SELECT
    IF (SS%SMIX_COMPONENT_ONLY) WRITE(LU_OUTPUT,'( 3X,A)') 'Lumped species component only'
-   WRITE(LU_OUTPUT,'(A,F11.5)')   '   Molecular Weight (g/mol)    ',SS%MW
-   WRITE(LU_OUTPUT,'(A,F8.3)')    '   Ambient Density (kg/m^3)    ',SS%MW*P_INF/(TMPA*R0)
+   WRITE(LU_OUTPUT,'(A,F11.5)')   '   Molecular Weight (g/mol)         ',SS%MW
+   WRITE(LU_OUTPUT,'(A,F8.3)')    '   Ambient Density (kg/m^3)         ',SS%MW*P_INF/(TMPA*R0)
+   WRITE(LU_OUTPUT,'(A,ES13.6)')  '   Enthalpy of Formation (J/kmol)    ',SS%H_F
 ENDDO SPEC_LOOP
 
 ! Write lumped species summary
@@ -2517,9 +2518,10 @@ DO N=0,N_TRACKED_SPECIES
    SM=>SPECIES_MIXTURE(N)
    WRITE(LU_OUTPUT,'(/3X,A)') SM%ID
    IF(N==0) WRITE(LU_OUTPUT,'( 3X,A)') 'Background Species'
-   WRITE(LU_OUTPUT,'(A,F11.5)')   '   Molecular Weight (g/mol)    ',SM%MW
-   WRITE(LU_OUTPUT,'(A,F8.3)')    '   Ambient Density (kg/m^3)    ',SM%MW*P_INF/(TMPA*R0)
-   WRITE(LU_OUTPUT,'(A,F8.3)')    '   Initial Mass Fraction       ',SM%ZZ0
+   WRITE(LU_OUTPUT,'(A,F11.5)')   '   Molecular Weight (g/mol)         ',SM%MW
+   WRITE(LU_OUTPUT,'(A,F8.3)')    '   Ambient Density (kg/m^3)         ',SM%MW*P_INF/(TMPA*R0)
+   WRITE(LU_OUTPUT,'(A,F8.3)')    '   Initial Mass Fraction            ',SM%ZZ0
+   WRITE(LU_OUTPUT,'(A,ES13.6)')  '   Enthalpy of Formation (J/kmol)   ',SM%H_F
    WRITE(LU_OUTPUT,'(/3X,A)') 'Sub Species                    Mass Fraction     Mole Fraction'
    DO NN = 1,N_SPECIES
       IF (SM%SPEC_ID(NN)/='null') WRITE(LU_OUTPUT,'( 3X,A29,A,ES13.6,5X,ES13.6)') &
@@ -2665,8 +2667,7 @@ ELSE
    WRITE(LU_OUTPUT,'(/A)') '   Arrhenius Constants'
    WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Pre-exponential:  ',RN%A
    WRITE(LU_OUTPUT,'(A,1X,ES13.6)')  '   Activation Energy:',RN%E
-   WRITE(LU_OUTPUT,'(/A)') '   Fuel                           Heat of Combustion (kJ/kg)'    
-   WRITE(LU_OUTPUT,'(3X,A,1X,F11.5)') RN%FUEL,RN%HEAT_OF_COMBUSTION/1000._EB
+
 ENDIF      
 ENDDO REACTION_LOOP
 
