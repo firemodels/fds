@@ -8,3 +8,4 @@
 law_of_the_wall          % Figure 1: The law of the wall
 poiseuille_convergence   % Figure 3: Convergence for 2D Poiseuille flow
 fds_moody_chart          % Figure 5: The FDS Moody chart
+yplus                    % Figure X: Title
