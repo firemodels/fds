@@ -1045,8 +1045,8 @@ The height of the first grid cell $\delta z$ is given in viscous units $z^+$ for
 \begin{tabular}{|*{9}{l|}}
 \hline
 $\mbox{d}p/\mbox{d}x$   & \multicolumn{3}{c|}{$z^+$} &  Re$_H$  & $f$ FDS  & $f$ Colebrook & rel. error \\
-\hline (Pa/m)          & $N_z=8$          & $N_z=16$          & $N_z=32$          &                   & $(N_z=32)$ & Eq. (\ref{eqn_colebrook}) & \% \\
-\hline\hline -0.01  & 190              & 95                & 47                & $5.9\times 10^4$  & 0.0212     & 0.0202   & 4.8                 \\
+\hline (Pa/m)           & $N_z=8$          & $N_z=16$          & $N_z=32$          &                   & $(N_z=32)$ & Eq. (\ref{eqn_colebrook}) & \% \\
+\hline\hline -0.01      & 190              & 95                & 47                & $5.9\times 10^4$  & 0.0212     & 0.0202   & 4.8                 \\
 \hline -1.    & $1.9\times 10^3$ & 950               & 470               & $7.5\times 10^5$  & 0.0128     & 0.0122   & 4.6                 \\
 \hline -100.  & $1.9\times 10^4$ & $9.5\times 10^3$  & $4.7\times 10^3$  & $9.8\times 10^6$  & 0.0077     & 0.0081   & 6.0                 \\
 \hline
@@ -1069,6 +1069,35 @@ With the same grid set up as described above the smooth walls, a series of cases
       \caption[FDS Moody chart]{\label{fig_fds_moody_chart} The FDS Moody chart: friction factor, $f$, versus Reynolds number, Re. The solid line for $\mbox{Re} < 2000$ is the analytical result for 2D Poiseuille flow, $f=24/\mbox{Re}$. The solid lines for $\mbox{Re}>2000$ (from the Colebrook equation (\ref{eqn_colebrook})) are for turbulent flow at various levels of relative roughness $z_0/H$ shown on the right axis.  Stars are DNS results from FDS at a single grid resolution ($N_z=64$). Symbols are FDS results for 3D LES with dynamic Smagorinsky.  Black symbols show results for the Werner Wengle wall model at three grid resolutions ($N_z=\{8,16,32\}$).  Colored symbols are FDS results for the rough wall cases at different grid resolutions and relative roughnesses as differentiated by the symbol shapes.}
    \end{center}
 \end{figure}
+
+\paragraph{Near-Wall Grid Resolution (YPLUS)}
+
+The distance from the wall measured in viscous units is called $y^+$. In order to verify that $y^+$ is calculated correctly within FDS, we analyze an example of Poiseuille flow in a square channel with periodic boundaries. The pressure gradient in the $x$-direction, the dynamic viscosity, and the dimensions of the channel are known. This allows us to easily determine the expected values of wall shear stress,
+\begin{equation}
+\label{wall stress}
+\tau_w = - \delta \frac{\mbox{d}p}{\mbox{d}x},
+\end{equation}
+where $p$ is pressure and $\delta$ is half the height of the channel. This, in turn, allows for determining the friction velocity,
+\begin{equation}
+\label{friction velocity}
+u_{\tau} \equiv \sqrt{{\frac{\tau_w}{\rho}}}.
+\end{equation}
+From here we calculate the exact value of $y^+$ for the given flow,
+\begin{equation}
+\label{eqn_yplus}
+y^+ \equiv \frac{y}{\delta_{\nu}} = \frac{u_{\tau}y}{\nu}.
+\end{equation}
+
+In FDS, $\tau_w$ is obtained only from a wall model such as Werner-Wengle. The resolution of the wall-normal streamwise velocity gradient increases with  mesh resolution; the value of $y^+$ decreases accordingly. In this verification case, a wall device is used to output $y^+$ for different mesh resolutions in the $z$-direction. $y^+$ is outputted for a given $\delta z$, height of a cell, $\delta z$ = [1/8, 1/16, 1/32]. Then, the device values obtained are compared with the exact value of $y^+$ for a given mesh resolution. An FDS wall device outputs the mid-cell value of the first cell next to the wall, hence, the $z$ value ($y$ in Eq.~(\ref{eqn_yplus})) used to determine the exact $y^+$ varies with $\delta z$ $(z = \delta z/2)$.
+
+\begin{figure}[h!]
+\begin{center}
+   \scalebox{1.0}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/yplus} }
+   \caption{Verification of FDS $y^+$ output for $\delta z=[1/8, 1/16, 1/32]$.}
+   \label{fig_yplus}
+\end{center}
+\end{figure}
+
 
 \subsection{Conclusions}
 \label{conclusions}
