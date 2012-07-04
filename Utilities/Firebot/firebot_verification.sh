@@ -10,8 +10,8 @@
 #  ===================
 
 mailTo="kristopher.overholt@nist.gov"
-SVNROOT="/home/kjo/firebot_repo"
-FIREBOT_DIR="/home/kjo/firebot"
+SVNROOT="/home/firebot/FDS-SMV"
+FIREBOT_DIR="/home/firebot/firebot"
 SVN_REVISION=$1
 
 #  ====================
@@ -19,7 +19,7 @@ SVN_REVISION=$1
 #  ====================
 
 # Warn if running as user other than firebot
-if [[ `whoami` == "kjo" ]];
+if [[ `whoami` == "firebot" ]];
    then
       # Continue along
       :
@@ -45,10 +45,6 @@ if [[ `pgrep -f firebot_verification | wc -l` -gt 2 ]];
       # Continue along
       :
 fi
-
-#  ==========
-#  = Banner =
-#  ==========
 
 #  ====================
 #  = Sample functions =
