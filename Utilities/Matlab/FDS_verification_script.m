@@ -24,16 +24,16 @@ addpath 'scripts'
 
 % Scripts to run prior to dataplot
 
-radiation_box;            display('radiation_box complete...')
-radiation_plane_layer;    display('radiation_plane_layer complete...')
-ns2d;                     display('ns2d complete...')
-vort2d;                   display('vort2d complete...')
-wall_internal_radiation;  display('wall_internal_radiation complete...')
-ashrae_7;                 display('ashrae_7 complete...')
-flame_species;            display('flame_species complete...')
-EDM_species;              display('EDM_species complete...')
-cutcell_area;             display('cutcell_area complete...')
-cat_propane_depo;         display('cat_propane_depo complete...')
+%radiation_box;            display('radiation_box complete...')
+%radiation_plane_layer;    display('radiation_plane_layer complete...')
+%ns2d;                     display('ns2d complete...')
+%vort2d;                   display('vort2d complete...')
+%wall_internal_radiation;  display('wall_internal_radiation complete...')
+%ashrae_7;                 display('ashrae_7 complete...')
+%flame_species;            display('flame_species complete...')
+%EDM_species;              display('EDM_species complete...')
+%cutcell_area;             display('cutcell_area complete...')
+%cat_propane_depo;         display('cat_propane_depo complete...')
 
 % The main plotting routine is dataplot
 
@@ -45,20 +45,20 @@ plotdir = [pwd,'/../../Manuals/'];
 
 % Special cases
  
-run scripts/turb_model
-run scripts/jet_decay
-run scripts/wall_model
-run scripts/pyrolysis
-run scripts/birch_tga
-run scripts/water_ice_water
-run scripts/pcm_slab
-run scripts/pulsating
-run scripts/compression_wave
-run scripts/plate_view_factor
-run scripts/low_flux_hot_gas_filling
-run scripts/terminal_velocity_convergence
-run scripts/flat_fire_comparison
-run scripts/fluid_part
-run scripts/scarc2d
+%run scripts/turb_model
+%run scripts/jet_decay
+%run scripts/wall_model
+%run scripts/pyrolysis
+%run scripts/birch_tga
+%run scripts/water_ice_water
+%run scripts/pcm_slab
+%run scripts/pulsating
+%run scripts/compression_wave
+%run scripts/plate_view_factor
+%run scripts/low_flux_hot_gas_filling
+%run scripts/terminal_velocity_convergence
+%run scripts/flat_fire_comparison
+%run scripts/fluid_part
+%run scripts/scarc2d
 
 display('verification scripts completed successfully!')
