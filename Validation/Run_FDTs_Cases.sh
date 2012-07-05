@@ -41,6 +41,9 @@ $FDTs NIST_NRC_FDTs_Input.txt
 cd $VDIR/NRL_HAI/FDTs
 $FDTs NRL_HAI_FDTs_Input.txt
 
+cd $VDIR/SP_AST/FDTs
+$FDTs SP_AST_FDTs_Input.txt
+
 cd $VDIR/Steckler_Compartment/FDTs
 $FDTs Steckler_MQH_Inputs.txt
 
