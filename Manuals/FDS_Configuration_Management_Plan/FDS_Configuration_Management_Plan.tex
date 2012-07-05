@@ -755,7 +755,7 @@ developer.  Once the changes have been verified to solve the problem reported in
 be changed to {\ct Verified}.  At this point the issue is closed.
 
 \clearpage
-\section{Automated Error Checking and Regression Testing via Firebot}
+\section{Firebot: Automated Error Checking and Regression Testing}
 
 The FDS codebase undergoes an automated build, verification, validation, and regression testing process, which is similar to a continuous integration system that automates the build/testing cycle for a project. This automated process is referred to as Firebot (\underline{F}DS automat\underline{I}c ve\underline{R}ification and validation t\underline{E}st \underline{BOT}). The Firebot build/test process helps the FDS-SMV development team by performing automatic error checking and collecting performance and accuracy statistics between FDS revisions.
 
@@ -765,35 +765,35 @@ Upon completion or failure of the automated build/test process, the results of t
 
 \subsection*{Stage 1: SVN checkout of FDS-SMV codebase}
 
-The most current version of the FDS codebase is retrieved from the Google Code SVN server. At this stage, the Firebot script ensures that all temporary files are removed and that a clean copy of the revision is used for the later stages, as if an end user were downloading the repository for the first time.
+The most recent version of the FDS-SMV codebase is retrieved from the Google Code SVN server. At this stage, the Firebot script ensures that all temporary files are removed and that a clean copy of the repository is used for the later stages, as if an end user were downloading the repository for the first time.
 
 \subsection*{Stage 2: Compilation of FDS debug versions}
 
-The serial and MPI versions of FDS are compiled with debugging flags enabled. This helps to track down and trace any errors early in the build/test process. In addition, any compiler warnings are logged at this time, and the build/test process continues as long as no major compilation errors are found.
+The serial and MPI versions of FDS are compiled with debugging flags enabled. This stage allows for errors in the source code to be identified and traced early in the build/test process. Any compiler warnings are logged at this time, and the build/test process continues after no major compilation errors are found.
 
 \subsection*{Stage 3: Short run of verification suite}
 
-All of the cases in the verification suite are invoked using the FDS debug versions that were compiled in Stage~2. The verification cases are run for at least one time step to ensure that the cases start running without failure. After all of the verification cases run for at least one time step, the cases are stopped using an FDS stop file. Then the logs are checked for Fortran errors, numerical instabilities, missing verification case files, or other FDS errors.
+All of the cases in the verification suite are invoked using the FDS debug versions that were compiled in Stage~2. The verification cases are run for at least one time step to ensure that the cases start without errors. After all of the verification cases run for at least one time step, the cases are stopped using an FDS stop file. Then the logs are checked for Fortran errors, numerical instabilities, missing verification case files, or other FDS errors.
 
 \subsection*{Stage 4: Compilation of FDS release versions}
 
-The serial and MPI release versions of FDS are compiled. In addition, any compiler warnings are logged at this time, and the build/test process continues as long as no major compilation errors are found.
+The serial and MPI release versions of FDS are compiled. Any compiler warnings are logged at this time, and the build/test process continues after no major compilation errors are found.
 
 \subsection*{Stage 5: Full run of FDS verification suite}
 
-All of the cases in the verification suite are invoked using the FDS release versions that were compiled in Stage~4. The verification cases are run to completion. After all of the verification cases run to completion, the logs are checked for Fortran errors, numerical instabilities, missing verification case files, or other FDS errors.
+All of the cases in the verification suite are invoked using the FDS release versions that were compiled in Stage~4. After all of the verification cases run to completion, the logs are checked for Fortran errors, numerical instabilities, missing verification case files, or other FDS errors.
 
 \subsection*{Stage 6: Generation of figures in Smokeview}
 
-A script in the FDS Verification Suite is invoked to generate figures in Smokeview using automated Smokeview scripting commands. These figures are used in the FDS User~\cite{FDS_Users_Guide} and Verification~\cite{FDS_Verification_Guide} Guides.
+A script in the FDS verification suite is used to generate figures in Smokeview using automated Smokeview scripting commands. These figures are used in the FDS User~\cite{FDS_Users_Guide} and Verification~\cite{FDS_Verification_Guide} Guides as well as the SMV User and Verification Guides.
 
 \subsection*{Stage 7: Generation of plots and regression statistics}
 
-A script in the FDS Verification Suite is invoked to generate plots and regression statistics using the results from Stage 5. These plots and figures are used in the FDS User~\cite{FDS_Users_Guide} and Verification~\cite{FDS_Verification_Guide} Guides.
+A script in the FDS verification suite is used to generate plots and regression statistics using the results from Stage 5. These plots and figures are used in the FDS User~\cite{FDS_Users_Guide} and Verification~\cite{FDS_Verification_Guide} Guides as well as the SMV User and Verification Guides.
 
-\subsection*{Stage 8: Compilation of  FDS Verification Guide}
+\subsection*{Stage 8: Compilation of FDS-SMV Guides}
 
-The FDS Verification Guide~\cite{FDS_Verification_Guide} is generated to ensure that all figures and equations can be compiled without any \LaTeX\ errors such as missing figures.
+The FDS User~\cite{FDS_Users_Guide} and Verification~\cite{FDS_Verification_Guide} Guides along with the SMV User and Verification Guides are generated to ensure that all figures and equations can be compiled without any \LaTeX\ errors.
 
 \clearpage
 \section{Issuing New Releases}
