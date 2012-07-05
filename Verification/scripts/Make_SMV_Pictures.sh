@@ -55,6 +55,9 @@ rm -f *.version
 rm -f *.png
 $SMV -version > smokeview.version
 
+cd $SVNROOT/Verification/Visualization
+$SMOKEZIP -part2iso plumeiso
+
 cd $SVNROOT/Verification
 scripts/SMV_Cases.sh
 cd $CURDIDR
