@@ -379,13 +379,13 @@ ENDDO
 
 ! Initialize unstructured geometry
 
-!IF (N_FACE>0) THEN
-!   DO NM=1,NMESHES
-!      IF (EVACUATION_ONLY(NM)) CYCLE
-!      IF (PROCESS(NM)/=MYID) CYCLE
-!      CALL INIT_IBM(0._EB,NM)
-!   ENDDO
-!ENDIF
+IF (N_FACE>0) THEN
+   DO NM=1,NMESHES
+      IF (EVACUATION_ONLY(NM)) CYCLE
+      IF (PROCESS(NM)/=MYID) CYCLE
+      CALL INIT_IBM(0._EB,NM)
+   ENDDO
+ENDIF
 
 ! Initialize the flow field with random noise to eliminate false symmetries
 
