@@ -67,7 +67,7 @@ SETTIMEVAL
 RENDERONCE
  colorconv_slice_00350
 SETTIMEVAL
- 1000.157959
+ 200.0
 RENDERONCE
- colorconv_slice_10000
+ colorconv_slice_02000
 UNLOADALL
