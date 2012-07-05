@@ -8,6 +8,7 @@ $RUNFDS Visualization objects_dynamic
 $RUNFDS Visualization objects_elem
 $RUNFDS Visualization objects_static
 $RUNFDS Visualization plume5c
+$RUNFDS Visualization plumeiso
 $RUNFDS Visualization plume5c_bounddef
 $RUNFDS Visualization script_test
 $RUNFDS Visualization script_slice_test
