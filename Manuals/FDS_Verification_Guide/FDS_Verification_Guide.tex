@@ -3290,6 +3290,34 @@ As opposed to the other cases above, this case tests the predicted rate of evapo
 \label{water_evaporation_4_plots}
 \end{figure}
 
+\subsection{Case 6}
+
+This case tests the conservation of energy between drops, surfaces, and  the gas.  A 1 m$^3$ box is filled with 1 kg of gas ($c_p$ = 1~kJ/(kg K) and W = 28~g/mol) at an initial temperature of 100~$^\circ$C.  The box is filled with 0.1 kg of droplets ($c_p$ = 2~kJ/(kg K)) that evaporate to the gas.  The droplets have an initial temperature of 20~$^\circ$C, a freezing point of 0~$^\circ$C, a boiling point of 100~$^\circ$C,  and a median diameter of 0.2~mm. All walls except the floor are adiabatic.  The floor is thermally-thin (e.g. high conductivity compared to its thickness) has a total mass of 1 kg, a specific heat of 1~kJ/(kg K), and an initial temperature of 150~$^\circ$C.  At steady-state all the drops will have evaporated, the wall and the gas will be at 115.7~$^\circ$C and the pressure rise will be 16200 Pa (see Fig.~\ref{water_evaporation_6_plots}).
+
+\begin{figure}[h!]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_6_T} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/water_evaporation_6_P}
+\end{tabular*}
+\caption[Sample case {\bf water\_evaporation\_6}]{Output of {\bf water\_evaporation} cases 6.}
+\label{water_evaporation_6_plots}
+\end{figure}
+
+\section{Flow Rate and Pipe Networks (\texorpdfstring{{\textbf{flow\_rate\_2}}}{flow\_rate\_2}) }
+\label{flow_rate_2}
+
+In this test case 4 sprinklers are placed in a box.  Three of the sprinklers are on one pipe network ({\ct PIPE\_INDEX = 1}) and the fourh sprinkler is on a second pipe network ({\ct PIPE\_INDEX = 2}).  The sprinklers are defined with a pressure ramp such that all the sprinklers within a pipe network will flow a total of 10 l/min for any number of open heads.  The sprinklers are set to open every 15 s and to close at 60 s.  The first three sprinklers are one the first pipe and the fourth sprinkler is on the second pipe.  At 45 s, there will have been three sprinklers flowing 10 l /min total for an accumulated flow of 7.5 kg.  At 60 s, there will have been the additional of the fourth sprinkler flowing 10 l/min plus the 10 l/min from the other three sprinklers for a total accumulated mass of 12.5 kg.
+
+\begin{figure}[ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/flow_rate_2_open_nozzles} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/flow_rate_2_water_mass}
+\end{tabular*}
+\caption[Output of the flow rate test case.]{Output of the {\bf flow\_rate\_2} test case.}
+\label{flow_rate_2_figure}
+\end{figure}
+
 \section{Flow Rate and Pipe Networks (\texorpdfstring{{\textbf{flow\_rate\_2}}}{flow\_rate\_2}) }
 \label{flow_rate_2}
 
