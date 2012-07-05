@@ -1,6 +1,6 @@
 &HEAD CHID='thouse5',TITLE='Town House Kitchen Fire SVN $Revision$' /
 
-&MESH IJK=48,80,48, XB=0.0,6.4,0.0,8.0,0.0,4.8 /
+&MESH IJK=24,40,24, XB=0.0,6.4,0.0,8.0,0.0,4.8 /
 
 &TIME T_END=61. /
 &DUMP NFRAMES=610 DT_PL3D=12.2, DT_SL3D=0.1/
