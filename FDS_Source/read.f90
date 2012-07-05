@@ -9856,6 +9856,7 @@ REAL(EB) :: AGL_SLICE
 INTEGER :: N,NN,NM,MESH_NUMBER,N_SLCF_O,NITER,ITER,VELO_INDEX,I_DUM
 LOGICAL :: VECTOR,CELL_CENTERED, FIRE_LINE, EVACUATION,LEVEL_SET_FIRE_LINE
 CHARACTER(30) :: QUANTITY,SPEC_ID,PART_ID,QUANTITY2
+REAL(EB), PARAMETER :: TOL=1.E-10_EB
 TYPE (SLICE_TYPE), POINTER :: SL=>NULL()
 NAMELIST /SLCF/ AGL_SLICE,CELL_CENTERED,EVACUATION,FIRE_LINE,FYI,ID,LEVEL_SET_FIRE_LINE,MAXIMUM_VALUE,MESH_NUMBER,MINIMUM_VALUE,&
                 PART_ID,PBX,PBY,PBZ,QUANTITY,QUANTITY2,SPEC_ID,VECTOR,VELO_INDEX,XB
@@ -9960,18 +9961,36 @@ MESH_LOOP: DO NM=1,NMESHES
  
       NITER = 1
       IF (VECTOR .AND. TWO_D) NITER = 3
-      IF (VECTOR .AND. .NOT. TWO_D)  NITER = 4
+      IF (VECTOR .AND. .NOT. TWO_D) NITER = 4
  
       VECTORLOOP: DO ITER=1,NITER
          N = N + 1
          SL=>SLICE(N)
          SL%ID = ID
-         SL%I1 = NINT( GINV(XB(1)-XS,1,NM)*RDXI)
-         SL%I2 = NINT( GINV(XB(2)-XS,1,NM)*RDXI)
-         SL%J1 = NINT( GINV(XB(3)-YS,2,NM)*RDETA)
-         SL%J2 = NINT( GINV(XB(4)-YS,2,NM)*RDETA)
-         SL%K1 = NINT( GINV(XB(5)-ZS,3,NM)*RDZETA)
-         SL%K2 = NINT( GINV(XB(6)-ZS,3,NM)*RDZETA)
+         IF (CELL_CENTERED .AND. NITER==1) THEN ! scalar raw data
+            DO I=1,IBAR
+               IF ( ABS(XB(1)-XC(I)) < 0.5_EB*DX(I) + TOL ) SL%I1 = I
+               IF ( ABS(XB(2)-XC(I)) < 0.5_EB*DX(I) + TOL ) SL%I2 = I
+            ENDDO
+            DO J=1,JBAR
+               IF ( ABS(XB(3)-YC(J)) < 0.5_EB*DY(J) + TOL ) SL%J1 = J
+               IF ( ABS(XB(4)-YC(J)) < 0.5_EB*DY(J) + TOL ) SL%J2 = J
+            ENDDO
+            DO K=1,KBAR
+               IF ( ABS(XB(5)-ZC(K)) < 0.5_EB*DZ(K) + TOL ) SL%K1 = K
+               IF ( ABS(XB(6)-ZC(K)) < 0.5_EB*DZ(K) + TOL ) SL%K2 = K
+            ENDDO
+            IF (SL%I1<SL%I2) SL%I1=SL%I1-1
+            IF (SL%J1<SL%J2) SL%J1=SL%J1-1
+            IF (SL%K1<SL%K2) SL%K1=SL%K1-1
+         ELSE
+            SL%I1 = NINT( GINV(XB(1)-XS,1,NM)*RDXI )
+            SL%I2 = NINT( GINV(XB(2)-XS,1,NM)*RDXI )
+            SL%J1 = NINT( GINV(XB(3)-YS,2,NM)*RDETA )
+            SL%J2 = NINT( GINV(XB(4)-YS,2,NM)*RDETA )
+            SL%K1 = NINT( GINV(XB(5)-ZS,3,NM)*RDZETA )
+            SL%K2 = NINT( GINV(XB(6)-ZS,3,NM)*RDZETA )
+         ENDIF
          SL%MINMAX(1) = MINIMUM_VALUE
          SL%MINMAX(2) = MAXIMUM_VALUE
          IF (ITER==2)                    QUANTITY = 'U-VELOCITY' 
