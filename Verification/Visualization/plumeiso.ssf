@@ -10,15 +10,15 @@ UNLOADALL
 LOADINIFILE
  plumeiso.ini
 LOADFILE
- plumeiso_01.iso
+ plumeiso.prt5.iso
 SETTIMEVAL
  10.05
 RENDERONCE
- plumeiso_solid_10
+ plumeiso_prt5_iso_10
 SETTIMEVAL
  30.05
 RENDERONCE
- plumeiso_solid_30
+ plumeiso_prt5_iso_30
 
 // render particle files using points
 
@@ -30,8 +30,8 @@ PARTCLASSCOLOR
 SETTIMEVAL
  10.05
 RENDERONCE
- plumeiso_part_10
+ plumeiso_prt5_streak_10
 SETTIMEVAL
  30.05
 RENDERONCE
- plumeiso_part_30
+ plumeiso_prt5_streak_30
