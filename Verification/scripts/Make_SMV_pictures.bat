@@ -7,9 +7,9 @@ set SCRIPT_DIR=%CD%
 set BASEDIR=%CD%\..
 set SVNROOT=%BASEDIR%\..\
 
-set SMOKEVIEW="smokeview_win_64"
-set SMOKEZIP="smokezip_win_64"
-set SMOKEDIFF="smokediff_win_64"
+set SMOKEVIEW="smokeview"
+set SMOKEZIP="smokezip"
+set SMOKEDIFF="smokediff"
 set BACKGROUND="background"
 
 set vis="%BASEDIR%\Visualization"
@@ -45,6 +45,9 @@ echo Creating Smokeview Verification guide info file
 echo converting SMV_Cases.sh case list to SMV_Pictures_Cases.bat
 cd %SCRIPT_DIR%
 %SH2BAT% SMV_Cases.sh SMV_Pictures_Cases.bat
+
+cd %SVNROOT%\Verification\Visualization
+%SMOKEZIP% -f -part2iso plumeiso
 
 echo Generating images
 cd %BASEDIR%
