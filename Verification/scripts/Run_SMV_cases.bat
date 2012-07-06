@@ -6,21 +6,30 @@ set BASEDIR=%CD%\..
 set SVNROOT=%BASEDIR%\..\
 set TIME_FILE=%SCRIPT_DIR%\smv_case_times.txt
 
-Rem Choose one of the following four FDS "definitions" by commenting all lines but one.
-
-Rem set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_32\fds_win_32
-Rem set FDSEXE=fds_win_32
-set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_64\fds_win_64
-Rem set FDSEXE=fds5_win_64
-
-Rem Choose one of the following run options by commenting the line you don't want to use.
-Rem Use the first "FDS" definition to run one case at a time in the forground.
-Rem Use the second "FDS" definition to execute more than one case at a time in the background
-
-Rem set FDS=%FDSEXE%
-set FDS=background -u 85 -d 5 %FDSEXE%
-
 set RUNFDS=call %SVNROOT%\Utilities\Scripts\runfds_win32.bat
+set RUNCFAST=call %SVNROOT%\Utilities\Scripts\runcfast_win32.bat
+
+Rem VVVVVVVVVVVV set parameters VVVVVVVVVVVVVVVVVVVVVV
+
+Rem Choose FDS version (repository or release)
+
+set FDSEXE=%SVNROOT%\FDS_Compilation\intel_win_64\fds_win_64
+Rem set FDSEXE=fds
+
+Rem Choose CFAST version (repository or release)
+
+set CFASTEXE=cfast6
+Rem set CFASTEXE=%SVNROOT%\..\cfast\CFAST\intel_win_64\cfast6_win_64
+
+Rem Run jobs in background (or not)
+
+set background=background -u 85 -d 5
+Rem set background=
+
+Rem ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+set FDS=%background% %FDSEXE%
+set CFAST=%background% %CFASTEXE%
 
 echo You are about to run the Smokeview Verification Test Suite.
 echo Press any key to proceed, CTRL c to abort
@@ -50,6 +59,6 @@ echo "smokeview test cases end" >> %TIME_FILE%
 date /t >> %TIME_FILE%
 time /t >> %TIME_FILE%
 
-echo "FDS cases completed"
+echo "FDS/CFAST cases completed"
 
 pause
