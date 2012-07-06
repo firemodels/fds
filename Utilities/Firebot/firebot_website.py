@@ -79,22 +79,25 @@ for rev in sorted(revision_list, reverse=True)[:100]:
     #  = Case: build fail =
     #  ====================
     if os.path.exists(firebot_history_dir + "/" + rev + "_errors.txt"):
-        # Open error log
+        # Open error logs
         f = open (firebot_history_dir + "/" + rev + "_errors.txt","r")
         error_log = f.readlines()
         f.close()
+        f_stage = open (firebot_history_dir + "/" + rev + ".txt","r")
+        stage_log = f_stage.readlines()
+        f_stage.close()
 
         # Write "Build fail" and hover of error log
         error_line = """Revision number <b>%(revision_num)s</b>:
         <font style='BACKGROUND-COLOR: lightcoral'>[&#10007;]</font>
-        <span class="dropt">Build fail</br>
-        <span style="width:700px;">"""
+        <span class="dropt">Build fail<span style="width:700px;">"""
+
         print error_line % {'revision_num': rev}
 
         for line in error_log:
             print line + "</br>"
 
-        print "</span></span>"
+        print "</span>%s</span></br>" % (stage_log[0].split("failure")[1])
 
     #  ======================================
     #  = Case: build success, with warnings =
