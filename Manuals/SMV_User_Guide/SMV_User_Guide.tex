@@ -1461,7 +1461,7 @@ to the FDS input file.  A complete list of isosurface quantities
 may be found in Ref.~\cite{FDS_Users_Guide}
 
 \subsection{Isosurfaces from particle files}
-The -part2iso option of Smokezip may be used to generate isosurfaces from particle data.
+The Smokezip -part2iso option may be used to generate isosurfaces from particle data.
 Isosurface locations indicate a boundary separating particle and
 no-particle regions, {\em i.e.}\ wherever particle density is 0.5
 particles per grid cell.  Isosurface  coloring is determined using
@@ -1470,18 +1470,21 @@ isosurface is useful when particles are used to model objects such
 as trees especially when the objects are viewed up close.  See
 Chapter \ref{ch:smokezip} for more details on generating
 isosurface files from particle files.  Figure \ref{figisoparticle}
-shows a snapshot of a fire plume generated using particles.  The
-plume is visualized using both particles and an isosurface
+shows a snapshot of a fire plume generated using particles and the command
+\begin{verbatim}
+smokezip -part2iso plumeiso
+\end{verbatim}
+The plume is visualized using both particles and an isosurface
 generated from these same particles.
 
 
 \begin{figure}[\figoptions]
 \begin{center}
 \begin{tabular}{cc}
-\includegraphics[height=\figheightAbar]{../SMV_Verification_Guide/SCRIPT_FIGURES/plumeiso_prt5_streak_10}&
+\includegraphics[height=\figheightAbar]{../SMV_Verification_Guide/SCRIPT_FIGURES/plumeiso_prt5_10}&
 \includegraphics[height=\figheightAbar]{../SMV_Verification_Guide/SCRIPT_FIGURES/plumeiso_prt5_iso_10}\\
 particles at 10.0~s&particle isosurface at 10.0~s\\
-\includegraphics[height=\figheightAbar]{../SMV_Verification_Guide/SCRIPT_FIGURES/plumeiso_prt5_streak_30}&
+\includegraphics[height=\figheightAbar]{../SMV_Verification_Guide/SCRIPT_FIGURES/plumeiso_prt5_30}&
 \includegraphics[height=\figheightAbar]{../SMV_Verification_Guide/SCRIPT_FIGURES/plumeiso_prt5_iso_30}\\
 particles at 30.0~s&particle isosurface at 30.0~s\\
 \end{tabular}
