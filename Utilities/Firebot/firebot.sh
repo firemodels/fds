@@ -494,21 +494,21 @@ run_matlab_plotting()
    sed -i 's/LaTeX/TeX/g' plot_style.m 
 
    cd $SVNROOT/Utilities/Matlab
-   matlab -r "try, disp('Running Matlab Verification script'), FDS_verification_script, catch, disp('Matlab error'), err = lasterror, err.message, err.stack, end, exit" &> $FIREBOT_DIR/output_stage7
-   matlab -r "try, disp('Running Matlab Validation script'), FDS_validation_script, catch, disp('Matlab error'), err = lasterror, err.message, err.stack, end, exit" &> $FIREBOT_DIR/output_stage7
+   matlab -r "try, disp('Running Matlab Verification script'), FDS_verification_script, catch, disp('Matlab error'), err = lasterror, err.message, err.stack, end, exit" &> $FIREBOT_DIR/output_stage7_verification
+   matlab -r "try, disp('Running Matlab Validation script'), FDS_validation_script, catch, disp('Matlab error'), err = lasterror, err.message, err.stack, end, exit" &> $FIREBOT_DIR/output_stage7_validation
 }
 
 check_matlab_plotting()
 {
    # Scan and report any errors in Matlab scripts
    cd $FIREBOT_DIR
-   if [[ `cat $FIREBOT_DIR/output_stage7 | grep "Matlab error"` == "" ]]
+   if [[ `grep -A 50 "Matlab error" $FIREBOT_DIR/output_stage7*` == "" ]]
    then
       # Continue along
       :
    else
       BUILD_STAGE_FAILURE="Stage 7: Matlab plotting and statistics"
-      cat $FIREBOT_DIR/output_stage7 > $FIREBOT_DIR/output_stage7_errors
+      grep -A 50 "Matlab error" $FIREBOT_DIR/output_stage7* > $FIREBOT_DIR/output_stage7_errors
       ERROR_LOG=$FIREBOT_DIR/output_stage7_errors
       save_build_status
       email_error_message
