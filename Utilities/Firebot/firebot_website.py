@@ -90,7 +90,7 @@ for rev in sorted(revision_list, reverse=True)[:100]:
         # Write "Build fail" and hover of error log
         error_line = """Revision number <b>%(revision_num)s</b>:
         <font style='BACKGROUND-COLOR: lightcoral'>[&#10007;]</font>
-        <span class="dropt">Build fail<span style="width:700px;">"""
+        <span class="dropt">Build failure<span style="width:700px;">"""
 
         print error_line % {'revision_num': rev}
 
