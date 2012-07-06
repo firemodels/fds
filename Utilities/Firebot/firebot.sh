@@ -203,6 +203,44 @@ check_compile_fds_mpi_db()
    fi
 }
 
+#  =============================
+#  = Stage 2c - Compile SMV DB =
+#  =============================
+
+compile_smv_db()
+{
+   # Clean and compile SMV DB
+   cd $SVNROOT/SMV/Build/intel_linux_64_dbg
+   make --makefile ../Makefile clean &> /dev/null
+   ./make_smv.sh &> $FIREBOT_DIR/output_stage2c
+}
+
+check_compile_smv_db()
+{
+   # Check for errors in SMV DB compilation
+   cd $SVNROOT/SMV/Build/intel_linux_64_dbg
+   if [ -e "smokeview_linux_64_dbg" ]
+   then
+      # Continue along
+      :
+   else
+      BUILD_STAGE_FAILURE="Stage 2c: SMV DB Compilation"
+      ERROR_LOG=$FIREBOT_DIR/output_stage2c
+      save_build_status
+      email_error_message
+   fi
+
+   # Check for compiler warnings
+   # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
+   if [[ `grep warning ${FIREBOT_DIR}/output_stage2c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      grep warning ${FIREBOT_DIR}/output_stage2c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $FIREBOT_DIR/output_compiler_warnings
+   fi
+}
+
 #  ================================================
 #  = Stage 3 - Run verification cases (short run) =
 #  ================================================
@@ -263,20 +301,20 @@ run_verification_cases_short()
    #  = Run all MPI cases =
    #  =====================
 
-   # Wait for MPI verification cases to start
-   ./FDS_MPI_Cases.sh >> $FIREBOT_DIR/output_stage3 2>&1
-   wait_verification_cases_short_start
+   # # Wait for MPI verification cases to start
+   # ./FDS_MPI_Cases.sh >> $FIREBOT_DIR/output_stage3 2>&1
+   # wait_verification_cases_short_start
 
-   # Wait some additional time for cases to start
-   sleep 30
+   # # Wait some additional time for cases to start
+   # sleep 30
 
-   # Stop all cases
-   export STOPFDS=1
-   ./FDS_MPI_Cases.sh >> $FIREBOT_DIR/output_stage3 2>&1
-   unset STOPFDS
+   # # Stop all cases
+   # export STOPFDS=1
+   # ./FDS_MPI_Cases.sh >> $FIREBOT_DIR/output_stage3 2>&1
+   # unset STOPFDS
 
-   # Wait for MPI verification cases to end
-   wait_verification_cases_short_end
+   # # Wait for MPI verification cases to end
+   # wait_verification_cases_short_end
 
    #  =====================
    #  = Run all SMV cases =
@@ -406,6 +444,44 @@ check_compile_fds_mpi()
    fi
 }
 
+#  ==========================
+#  = Stage 4c - Compile SMV =
+#  ==========================
+
+compile_smv()
+{
+   # Clean and compile SMV
+   cd $SVNROOT/SMV/Build/intel_linux_64
+   make --makefile ../Makefile clean &> /dev/null
+   ./make_smv.sh &> $FIREBOT_DIR/output_stage4c
+}
+
+check_compile_smv()
+{
+   # Check for errors in SMV DB compilation
+   cd $SVNROOT/SMV/Build/intel_linux_64
+   if [ -e "smokeview_linux_64" ]
+   then
+      # Continue along
+      :
+   else
+      BUILD_STAGE_FAILURE="Stage 4c: SMV Compilation"
+      ERROR_LOG=$FIREBOT_DIR/output_stage4c
+      save_build_status
+      email_error_message
+   fi
+
+   # Check for compiler warnings
+   # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
+   if [[ `grep warning ${FIREBOT_DIR}/output_stage4c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      grep warning ${FIREBOT_DIR}/output_stage4c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $FIREBOT_DIR/output_compiler_warnings
+   fi
+}
+
 #  ===============================================
 #  = Stage 5 - Run verification cases (long run) =
 #  ===============================================
@@ -435,7 +511,7 @@ run_verification_cases_long()
 
    # Start running all cases
    ./FDS_Cases.sh &> $FIREBOT_DIR/output_stage5
-   ./FDS_MPI_Cases.sh >> $FIREBOT_DIR/output_stage5 2>&1
+   # ./FDS_MPI_Cases.sh >> $FIREBOT_DIR/output_stage5 2>&1
    ./scripts/SMV_Cases.sh >> $FIREBOT_DIR/output_stage5 2>&1
 
    # Wait for all verification cases to end
@@ -476,7 +552,12 @@ make_fds_pictures()
 {
    # Run Make FDS Pictures script
    cd $SVNROOT/Verification
-   ./Make_FDS_Pictures.sh &> $FIREBOT_DIR/output_stage6
+   export SVNROOT=$SVNROOT
+   export SMV=$SVNROOT/SMV/Build/intel_linux_64/smokeview_linux_64
+   export RUNSMV=$SVNROOT/Utilities/Scripts/runsmv.sh
+   export BASEDIR=$SVNROOT/Verification
+
+   ./FDS_Pictures.sh &> $FIREBOT_DIR/output_stage6
 }
 
 #  ============================================
@@ -667,6 +748,10 @@ check_compile_fds_db
 compile_fds_mpi_db
 check_compile_fds_mpi_db
 
+### Stage 2c ###
+compile_smv_db
+check_compile_smv_db
+
 ### Stage 3 ###
 run_verification_cases_short
 check_verification_cases_short
@@ -678,6 +763,10 @@ check_compile_fds
 ### Stage 4b ###
 compile_fds_mpi
 check_compile_fds_mpi
+
+### Stage 4c ###
+compile_smv
+check_compile_smv
 
 ### Stage 5 ###
 run_verification_cases_long
