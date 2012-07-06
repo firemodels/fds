@@ -20,5 +20,5 @@ $RUNFDS Visualization sprinkler_many
 $RUNFDS Visualization thouse5
 $RUNFDS Visualization transparency
 
-# $RUNFDS WUI fire_line
+$RUNFDS WUI fire_line
 # $RUNFDS WUI onetree_surf_1mesh
