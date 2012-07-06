@@ -16,8 +16,10 @@ export SVNROOT=`pwd`/..
 # for Linux (with queing)
 export FDSEXE=$SVNROOT/FDS_Compilation/intel_linux_64/fds_intel_linux_64
 export FDS=$FDSEXE
+export CFAST=~/cfast/CFAST/intel_linux_64/cfast6_linux_64
 
 # blaze queue (default)
+export RUNCFAST=$SVNROOT/Utilities/Scripts/runcfast.sh
 export RUNFDS=$SVNROOT/Utilities/Scripts/runfds.sh
 export RUNFDSFG=$SVNROOT/Utilities/Scripts/runfds.sh
 
@@ -26,8 +28,14 @@ export RUNFDSFG=$SVNROOT/Utilities/Scripts/runfds.sh
 #export RUNFDSFG=$SVNROOT/Utilities/Scripts/runfds6.sh
 
 # fire70s queue
+#export RUNCFAST=$SVNROOT/Utilities/Scripts/runcfast7.sh
 #export RUNFDS=$SVNROOT/Utilities/Scripts/runfds7.sh
 #export RUNFDSFG=$SVNROOT/Utilities/Scripts/runfds7.sh
+
+# vis queue
+#export RUNCFAST=$SVNROOT/Utilities/Scripts/runcfastv.sh
+#export RUNFDS=$SVNROOT/Utilities/Scripts/runfdsv.sh
+#export RUNFDSFG=$SVNROOT/Utilities/Scripts/runfdsv.sh
 
 export BASEDIR=`pwd`
 # uncomment following line to stop all cases
