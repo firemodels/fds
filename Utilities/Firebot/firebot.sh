@@ -489,7 +489,7 @@ run_matlab_plotting()
    cd $SVNROOT/Utilities/Matlab/scripts
 
    # Replace LaTeX with TeX for Interpreter in plot_style.m
-   # This allows displayless autmaotic Matlab plotting
+   # This allows displayless automatic Matlab plotting
    # Otherwise Matlab crashes due to a known bug
    sed -i 's/LaTeX/TeX/g' plot_style.m 
 
