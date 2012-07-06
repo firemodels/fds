@@ -3274,10 +3274,52 @@ related to $L$ (for high $\RE$, $h \sim L^{-1/5}$). For this reason, $L$ is take
 calculations. You can change the empirical coefficients using {\ct C\_HORIZONTAL} or {\ct C\_VERTICAL} for $C$ and
 {\ct C\_FORCED}, {\ct C\_FORCED\_CYLINDER}, or {\ct C\_FORCED\_SPHERE} for the constant in the Nusselt number correlation, all of which are input on the {\ct MISC} line.  The length scale can be changed for a specific surface by using {\ct CONVECTION\_LENGTH\_SCALE} on the {\ct SURF} line.
 
-\subsubsection{Changing the Convective Heat Transfer Coefficient}
+\subsubsection{Logarithmic Law of the Wall}
 
-If you want to change the default convective heat transfer coefficient, you can set it to a constant using
-{\ct H\_FIXED} on the {\ct SURF} line in units of W/m$^2$/K.
+{\bf Ezgi S. Oztekin}\\
+{\bf Senior Scientist, Fire Research Program, William J. Hughes Technical Center, NJ, 08405}\\
+
+\noindent Near-wall treatments, such as wall models or wall functions, aim to mimic the sudden change from molecular to turbulent transport close to the walls using algebraic formulations without the need of resolving the otherwise computationally expensive region of flow-field. The main theory follows dimensional analysis based on the idea that shear at the wall is constant. Accordingly, the non-dimensional velocity, $u^+$, can be defined as a function of non-dimensional length scale, $y^+ \equiv y/\delta_\nu = y u_\tau/\nu$ ($\delta_\nu$ is the viscous length scale), as $u^+\equiv u/u_\tau = f(y^+) $, where $u_\tau \equiv \sqrt{\tau_w/\rho}$ is the friction velocity. Following the mixing-length hypothesis, $u^+$ is determined by the logarithmic law of the wall in the turbulent regime:
+\begin{equation}
+\label{eqn_loglaw_up}
+u^+ = \frac{1}{\kappa}\ln(A \,y^+)
+\end{equation}
+where the von Karman constant, $\kappa$, and $A$ are universal constants.
+
+In parallel to this formulation, a non-dimensional temperature, $T^+$, is also formulated:
+\begin{equation}
+\label{eqn_loglaw_tmp}
+T^+ = \frac{1}{\kappa_T} \ln(A_T \, y^+)
+\end{equation}
+where $T^+ \equiv (T_w-T)/T_\tau$, and $T_\tau$ is defined with the wall heat flux, $\dot{q}^{''}_w$, as $T_\tau = \dot{q}^{''}_w/\rho_w u_\tau c_p$.  Eq.~(\ref{eqn_loglaw_tmp}) can be rewritten in terms of Eq.~(\ref{eqn_loglaw_up}) as:
+\begin{equation}
+\label{eqn_loglaw_tmp2}
+T^+ = \mbox{Pr}_t \left(u^+ + \ln\left[\frac{A_T}{A}\right]\right) 
+\end{equation}
+where $\mbox{Pr}_t = \kappa/\kappa_T$ is the turbulent Prandtl number.
+
+The second term in the above equation is a function of molecular Prandtl number and can be determined from experimental correlations or assumed profiles for temperatures. Mathematically, this term is the integration constant stemming from the relation between velocity and temperature gradients. Physically, it represents the resistance to the heat and momentum transport close to the wall.
+
+Ignoring the second term in Eq.~(\ref{eqn_loglaw_tmp2}) provides a simple fundamental relation between the non-dimensional mean temperature and velocity:
+\begin{equation}
+T^+ = \mbox{Pr}_t \,u^+
+\end{equation}
+
+In FDS, $u^+$ is calculated using a wall function, such as the Werner-Wengle wall model. The wall heat flux, set as the boundary condition at the first off-wall node, can then be determined as:
+\begin{equation}
+h = \frac{\dot{q}^{''}_w}{\Delta T} = \frac{\rho_w c_p u_\tau^2}{\mbox{Pr}_t u}
+\end{equation}
+To set this heat transfer model for a particular surface use:
+\footnotesize
+\begin{verbatim}
+&SURF ID='whatever', HEAT_TRANSFER_MODEL = 'LOGLAW' /
+\end{verbatim}
+\normalsize
+
+
+\subsubsection{Specified Convective Heat Transfer Coefficient}
+
+If you want to specify the convective heat transfer coefficient, you can set it to a constant using {\ct H\_FIXED} on the {\ct SURF} line in units of W/m$^2$/K.
 
 \subsubsection{Specifying the Heat Flux at a Solid Surface}
 
@@ -11494,10 +11536,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct E\_COEFFICIENT}                  & Real            & Section~\ref{info:suppression}            & m$^2$/kg/s          & 0.                      \\ \hline
 {\ct FREE\_SLIP}                      & Logical         & Section~\ref{info:WALL_MODEL}             &                     & {\ct .FALSE.}           \\ \hline
 {\ct GEOMETRY}                        & Character       & Section~\ref{info:GEOMETRY}               &                     & {\ct 'CARTESIAN'}       \\ \hline
-{\ct HEAT\_OF\_VAPORIZATION }         & Real            & Section~\ref{info:specified_burning}      & kJ/kg               & 0.                      \\ \hline
-{\ct HRRPUA }                         & Real            & Section~\ref{info:gas_burner}             & kW/m$^2$            & 0.                      \\ \hline
+{\ct HEAT\_OF\_VAPORIZATION}          & Real            & Section~\ref{info:specified_burning}      & kJ/kg               & 0.                      \\ \hline
+{\ct HEAT\_TRANSFER\_MODEL}           & Character       & Section~\ref{info:convection}             &                     &                         \\ \hline
+{\ct HRRPUA}                          & Real            & Section~\ref{info:gas_burner}             & kW/m$^2$            & 0.                      \\ \hline
 {\ct H\_FIXED}                        & Real            & Section~\ref{info:convection}             & W/m$^2$/K           &                         \\ \hline
-{\ct ID     }                         & Character       & Section~\ref{info:SURF}                   &                     &                         \\ \hline
+{\ct ID}                              & Character       & Section~\ref{info:SURF}                   &                     &                         \\ \hline
 {\ct IGNITION\_TEMPERATURE}           & Real            & Section~\ref{info:specified_burning}      & $^\circ$C           & 5000.                   \\ \hline
 {\ct LAYER\_DIVIDE}                   & Real            & Section~\ref{info:EXPOSED}                &                     & {\ct N\_LAYERS}/2       \\ \hline
 {\ct LEAK\_PATH}                      & Int.~Pair       & Section~\ref{info:Leaks}                  &                     &                         \\ \hline
