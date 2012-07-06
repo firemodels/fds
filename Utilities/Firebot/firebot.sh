@@ -351,7 +351,7 @@ check_verification_cases_short()
    if [[ `grep 'Run aborted' -rI ${FIREBOT_DIR}/output_stage3` == "" ]] && \
       [[ `grep ERROR: -rI *` == "" ]] && \
       [[ `grep 'STOP: Numerical' -rI *` == "" ]] && \
-      [[ `grep forrtl -rI *` == "" ]]
+      [[ `grep -A 20 forrtl -rI *` == "" ]]
    then
       # Continue along
       :
@@ -361,7 +361,7 @@ check_verification_cases_short()
       grep 'Run aborted' -rI $FIREBOT_DIR/output_stage3 >> $FIREBOT_DIR/output_stage3_errors
       grep ERROR: -rI * >> $FIREBOT_DIR/output_stage3_errors
       grep 'STOP: Numerical' -rI * >> $FIREBOT_DIR/output_stage3_errors
-      grep forrtl -rI * >> $FIREBOT_DIR/output_stage3_errors
+      grep -A 20 forrtl -rI * >> $FIREBOT_DIR/output_stage3_errors
       
       ERROR_LOG=$FIREBOT_DIR/output_stage3_errors
       save_build_status
@@ -526,7 +526,7 @@ check_verification_cases_long()
    if [[ `grep 'Run aborted' -rI ${FIREBOT_DIR}/output_stage5` == "" ]] && \
       [[ `grep ERROR: -rI *` == "" ]] && \
       [[ `grep 'STOP: Numerical' -rI *` == "" ]] && \
-      [[ `grep forrtl -rI *` == "" ]]
+      [[ `grep -A 20 forrtl -rI *` == "" ]]
    then
       # Continue along
       :
@@ -536,7 +536,7 @@ check_verification_cases_long()
       grep 'Run aborted' -rI $FIREBOT_DIR/output_stage5 >> $FIREBOT_DIR/output_stage5_errors
       grep ERROR: -rI * >> $FIREBOT_DIR/output_stage5_errors
       grep 'STOP: Numerical' -rI * >> $FIREBOT_DIR/output_stage5_errors
-      grep forrtl -rI * >> $FIREBOT_DIR/output_stage5_errors
+      grep -A 20 forrtl -rI * >> $FIREBOT_DIR/output_stage5_errors
       
       ERROR_LOG=$FIREBOT_DIR/output_stage5_errors
       save_build_status
