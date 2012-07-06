@@ -27,18 +27,23 @@ progname=qfdsv.sh
 queue=vis
 fi
 
+nprocesses=1
+nprocesses_per_node=1
+
 if [ $# -lt $EXPECTED_ARGS ]
 then
   echo "Usage: $progname [-f repository root] [-n processes per node] [-q queue]"
   echo "               [-r] [-p nprocesses] [fds_command] casename.fds"
   echo ""
-  echo "This script runs 64 bit serial or parallel versions of FDS using an executable"
-  echo "specified on the command line or -r if the respository version is desired. The"
-  echo "parallel FDS is invoked by using -p to specifying multiple processes. Alternate"
-  echo "queues (vis, fire60s or fire70s) are set using the -q option."
+  echo "This script runs a 64 bit serial or parallel FDS using a version specified"
+  echo "on the command line or from the respository if -r is specified. The parallel"
+  echo "FDS is invoked using -p to specify multiple processes. Other queues (vis,"
+  echo "fire60s or fire70s) may be specified using the -q option."
   echo ""
-  echo " -n processes per node - maximum number of processes per node [default: 8,"
-  echo "    (4 for the fire60s and vis queues)]"
+  echo "Options:"
+  echo " -n processes per node - maximum number of processes per node [default: "
+  echo "    (serial: 1, parallel: 8 for new cluster and fire70s nodes, 4 for "
+  echo "                          fire60s and vis nodes)]"
   echo " -p nprocesses - number of processes used to run a case [default: 1] "
   echo " -q queue - name of the queue. choices: [default: $queue (other choices:"  
   echo "    vis, fire60s and fire70s)"
@@ -54,9 +59,7 @@ fi
 
 # default parameter settings
 
-nprocesses=1
 use_repository=0
-nprocesses_per_node=8
 FDSROOT=~/FDS-SMV
 MPIRUN=
 nprocesses_per_node_defined=0
