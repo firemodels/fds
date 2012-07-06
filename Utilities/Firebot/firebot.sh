@@ -81,9 +81,9 @@ fi
 #    return 0
 # }
 
-#  ===========================
-#  = Stage 1 - SVN functions =
-#  ===========================
+#  ============================
+#  = Stage 1 - SVN operations =
+#  ============================
 
 clean_svn_repo()
 {
@@ -115,7 +115,17 @@ do_svn_checkout()
 check_svn_checkout()
 {
    cd $SVNROOT
-   # XX grep for errors in $FIREBOT_DIR/output_stage1
+   # Check for SVN errors
+   if [[ `grep -E 'Updated|At revision' $FIREBOT_DIR/output_stage1 | wc -l` -ne 1 ]];
+   then
+      BUILD_STAGE_FAILURE="Stage 1: SVN Operations"
+      ERROR_LOG=$FIREBOT_DIR/output_stage1
+      save_build_status
+      email_error_message
+   else
+      # Continue along
+      :
+   fi
 }
 
 #  =============================
@@ -223,7 +233,9 @@ run_verification_cases_short()
    cd $SVNROOT/Verification
    export SVNROOT=$SVNROOT
    export FDS=$SVNROOT/FDS_Compilation/intel_linux_64_db/fds_intel_linux_64_db
+   export CFAST=~/cfast/CFAST/intel_linux_64/cfast6_linux_64
    export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_linux_64_db/fds_mpi_intel_linux_64_db
+   export RUNCFAST=$SVNROOT/Utilities/Scripts/runcfast.sh
    export RUNFDS=$SVNROOT/Utilities/Scripts/runfds.sh
    export RUNFDSMPI=$SVNROOT/Utilities/Scripts/runfdsmpi.sh
    export BASEDIR=$SVNROOT/Verification
@@ -263,8 +275,31 @@ run_verification_cases_short()
    ./FDS_MPI_Cases.sh >> $FIREBOT_DIR/output_stage3 2>&1
    unset STOPFDS
 
-   # Wait for MPI verification cases to start
+   # Wait for MPI verification cases to end
    wait_verification_cases_short_end
+
+   #  =====================
+   #  = Run all SMV cases =
+   #  =====================
+
+   # Wait for SMV verification cases to start
+   ./scripts/SMV_Cases.sh >> $FIREBOT_DIR/output_stage3 2>&1
+   wait_verification_cases_short_start
+
+   # Wait some additional time for cases to start
+   sleep 30
+
+   # Stop all cases
+   export STOPFDS=1
+   ./scripts/SMV_Cases.sh >> $FIREBOT_DIR/output_stage3 2>&1
+   unset STOPFDS
+
+   # Wait for MPI verification cases to end
+   wait_verification_cases_short_end
+
+   #  ======================
+   #  = Remove .stop files =
+   #  ======================
 
    # Remove all .stop files from Verification directories (recursively)
    find . -name '*.stop' -exec rm -f {} \;
@@ -334,7 +369,7 @@ check_compile_fds()
 }
 
 #  ==============================
-#  = Stage 4a - Compile FDS MPI =
+#  = Stage 4b - Compile FDS MPI =
 #  ==============================
 
 compile_fds_mpi()
@@ -391,14 +426,17 @@ run_verification_cases_long()
    cd $SVNROOT/Verification
    export SVNROOT=$SVNROOT
    export FDS=$SVNROOT/FDS_Compilation/intel_linux_64/fds_intel_linux_64
+   export CFAST=~/cfast/CFAST/intel_linux_64/cfast6_linux_64
    export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_linux_64/fds_mpi_intel_linux_64
    export RUNFDS=$SVNROOT/Utilities/Scripts/runfds.sh
+   export RUNCFAST=$SVNROOT/Utilities/Scripts/runcfast.sh
    export RUNFDSMPI=$SVNROOT/Utilities/Scripts/runfdsmpi.sh
    export BASEDIR=$SVNROOT/Verification
 
    # Start running all cases
    ./FDS_Cases.sh &> $FIREBOT_DIR/output_stage5
    ./FDS_MPI_Cases.sh >> $FIREBOT_DIR/output_stage5 2>&1
+   ./scripts/SMV_Cases.sh >> $FIREBOT_DIR/output_stage5 2>&1
 
    # Wait for all verification cases to end
    wait_verification_cases_long_end
@@ -456,40 +494,102 @@ run_matlab_plotting()
    sed -i 's/LaTeX/TeX/g' plot_style.m 
 
    cd $SVNROOT/Utilities/Matlab
-   matlab -nodisplay -r "FDS_verification_script;quit" &> $FIREBOT_DIR/output_stage7
+   matlab -r "try, disp('Running Matlab Verification script'), FDS_verification_script, catch, disp('Matlab error'), err = lasterror, err.message, err.stack, end, exit" &> $FIREBOT_DIR/output_stage7
+   matlab -r "try, disp('Running Matlab Validation script'), FDS_validation_script, catch, disp('Matlab error'), err = lasterror, err.message, err.stack, end, exit" &> $FIREBOT_DIR/output_stage7
 }
 
 check_matlab_plotting()
 {
-   cd $SVNROOT/Manuals/FDS_Verification_Guide
-   # XX grep matlab output for errors
-}
-
-#  ======================================
-#  = Stage 8 - Build Verification Guide =
-#  ======================================
-
-make_verification_guide()
-{
-   # Build FDS Verification guide
-   cd $SVNROOT/Manuals/FDS_Verification_Guide
-   pdflatex -interaction nonstopmode FDS_Verification_Guide &> $FIREBOT_DIR/output_stage8
-   bibtex FDS_Verification_Guide >> $FIREBOT_DIR/output_stage8 2>&1
-   pdflatex -interaction nonstopmode FDS_Verification_Guide >> $FIREBOT_DIR/output_stage8 2>&1
-   pdflatex -interaction nonstopmode FDS_Verification_Guide >> $FIREBOT_DIR/output_stage8 2>&1
-}
-
-check_verification_guide()
-{
-   # Scan and report any errors in FDS Verification Guide build process
-   cd $SVNROOT/Manuals/FDS_Verification_Guide
-   if [[ `grep "! LaTeX Error:" -I $FIREBOT_DIR/output_stage8` == "" ]]
+   # Scan and report any errors in Matlab scripts
+   cd $FIREBOT_DIR
+   if [[ `cat $FIREBOT_DIR/output_stage7 | grep "Matlab error"` == "" ]]
    then
       # Continue along
       :
    else
-      BUILD_STAGE_FAILURE="Stage 8: FDS Verification Guide"
-      grep "! LaTeX Error:" -I $FIREBOT_DIR/output_stage8 > $FIREBOT_DIR/output_stage8_errors
+      BUILD_STAGE_FAILURE="Stage 7: Matlab plotting and statistics"
+      cat $FIREBOT_DIR/output_stage7 > $FIREBOT_DIR/output_stage7_errors
+      ERROR_LOG=$FIREBOT_DIR/output_stage7_errors
+      save_build_status
+      email_error_message
+   fi
+}
+
+#  ==================================
+#  = Stage 8 - Build FDS-SMV Guides =
+#  ==================================
+
+make_fds_user_guide()
+{
+   # Build FDS User Guide
+   cd $SVNROOT/Manuals/FDS_User_Guide
+   pdflatex -interaction nonstopmode FDS_User_Guide &> $FIREBOT_DIR/output_stage8_fds_user_guide
+   bibtex FDS_User_Guide >> $FIREBOT_DIR/output_stage8_fds_user_guide 2>&1
+   pdflatex -interaction nonstopmode FDS_User_Guide >> $FIREBOT_DIR/output_stage8_fds_user_guide 2>&1
+   pdflatex -interaction nonstopmode FDS_User_Guide >> $FIREBOT_DIR/output_stage8_fds_user_guide 2>&1
+}
+
+make_fds_technical_guide()
+{
+   # Build FDS Technical Guide
+   cd $SVNROOT/Manuals/FDS_Technical_Reference_Guide
+   pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide &> $FIREBOT_DIR/output_stage8_fds_technical_guide
+   bibtex FDS_Technical_Reference_Guide >> $FIREBOT_DIR/output_stage8_fds_technical_guide 2>&1
+   pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide >> $FIREBOT_DIR/output_stage8_fds_technical_guide 2>&1
+   pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide >> $FIREBOT_DIR/output_stage8_fds_technical_guide 2>&1
+}
+
+make_fds_verification_guide()
+{
+   # Build FDS Verification Guide
+   cd $SVNROOT/Manuals/FDS_Verification_Guide
+   pdflatex -interaction nonstopmode FDS_Verification_Guide &> $FIREBOT_DIR/output_stage8_fds_verification_guide
+   bibtex FDS_Verification_Guide >> $FIREBOT_DIR/output_stage8_fds_verification_guide 2>&1
+   pdflatex -interaction nonstopmode FDS_Verification_Guide >> $FIREBOT_DIR/output_stage8_fds_verification_guide 2>&1
+   pdflatex -interaction nonstopmode FDS_Verification_Guide >> $FIREBOT_DIR/output_stage8_fds_verification_guide 2>&1
+}
+
+make_fds_validation_guide()
+{
+   # Build FDS Validation Guide
+   cd $SVNROOT/Manuals/FDS_Validation_Guide
+   pdflatex -interaction nonstopmode FDS_Validation_Guide &> $FIREBOT_DIR/output_stage8_fds_validation_guide
+   bibtex FDS_Validation_Guide >> $FIREBOT_DIR/output_stage8_fds_validation_guide 2>&1
+   pdflatex -interaction nonstopmode FDS_Validation_Guide >> $FIREBOT_DIR/output_stage8_fds_validation_guide 2>&1
+   pdflatex -interaction nonstopmode FDS_Validation_Guide >> $FIREBOT_DIR/output_stage8_fds_validation_guide 2>&1
+}
+
+make_smv_user_guide()
+{
+   # Build SMV User Guide
+   cd $SVNROOT/Manuals/SMV_User_Guide
+   pdflatex -interaction nonstopmode SMV_User_Guide &> $FIREBOT_DIR/output_stage8_smv_user_guide
+   bibtex SMV_User_Guide >> $FIREBOT_DIR/output_stage8_smv_user_guide 2>&1
+   pdflatex -interaction nonstopmode SMV_User_Guide >> $FIREBOT_DIR/output_stage8_smv_user_guide 2>&1
+   pdflatex -interaction nonstopmode SMV_User_Guide >> $FIREBOT_DIR/output_stage8_smv_user_guide 2>&1
+}
+
+make_smv_verification_guide()
+{
+   # Build SMV Verification Guide
+   cd $SVNROOT/Manuals/SMV_Verification_Guide
+   pdflatex -interaction nonstopmode SMV_Verification_Guide &> $FIREBOT_DIR/output_stage8_smv_verification_guide
+   bibtex SMV_Verification_Guide >> $FIREBOT_DIR/output_stage8_smv_verification_guide 2>&1
+   pdflatex -interaction nonstopmode SMV_Verification_Guide >> $FIREBOT_DIR/output_stage8_smv_verification_guide 2>&1
+   pdflatex -interaction nonstopmode SMV_Verification_Guide >> $FIREBOT_DIR/output_stage8_smv_verification_guide 2>&1
+}
+
+check_all_guides()
+{
+   # Scan and report any errors in FDS Verification Guide build process
+   cd $FIREBOT_DIR
+   if [[ `grep "! LaTeX Error:" -I $FIREBOT_DIR/output_stage8*` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      BUILD_STAGE_FAILURE="Stage 8: FDS-SMV Guides"
+      grep "! LaTeX Error:" -I $FIREBOT_DIR/output_stage8* > $FIREBOT_DIR/output_stage8_errors
       ERROR_LOG=$FIREBOT_DIR/output_stage8_errors
       save_build_status
       email_error_message
@@ -584,15 +684,20 @@ run_verification_cases_long
 check_verification_cases_long
 
 ### Stage 6 ###
-# make_fds_pictures
+make_fds_pictures
 
 ### Stage 7 ###
-# run_matlab_plotting
-# check_matlab_plotting
+run_matlab_plotting
+check_matlab_plotting
 
 ### Stage 8 ###
-# make_verification_guide
-# check_verification_guide
+make_fds_user_guide
+make_fds_technical_guide
+make_fds_verification_guide
+make_fds_validation_guide
+make_smv_verification_guide
+make_smv_verification_guide
+check_all_guides
 
 ### Success! ###
 email_success_message
