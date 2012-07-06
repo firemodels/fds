@@ -14,6 +14,7 @@ export SMOKEZIP=$SVNROOT/Utilities/smokezip/intel_linux_$PLATFORM/smokezip_linux
 export SMOKEDIFF=$SVNROOT/Utilities/smokediff/intel_linux_$PLATFORM/smokediff_linux_$PLATFORM
 export BACKGROUND=$SVNROOT/Utilities/background/intel_linux_32/background
 export RUNFDS=$SVNROOT/Utilities/Scripts/runsmv.sh
+export RUNCFAST=$SVNROOT/Utilities/Scripts/runsmv.sh
 export BASEDIR=`pwd`
 
 export SMVUG=$SVNROOT/Manuals/SMV_User_Guide
