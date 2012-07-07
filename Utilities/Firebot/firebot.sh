@@ -90,7 +90,7 @@ clean_svn_repo()
    # Initialize and start with fresh repo
    # Clean Firebot metafiles
    cd $FIREBOT_DIR
-   rm output_*
+   rm output/*
 
    # Clean up temporary unversioned and modified versioned repository files
    cd $SVNROOT
@@ -102,13 +102,13 @@ do_svn_checkout()
 {
    # If an SVN revision number is specified, then get that revision
    if [[ $SVN_REVISION != "" ]]; then
-      echo "Checking out revision r${SVN_REVISION}." > $FIREBOT_DIR/output_stage1
-      svn update -r $SVN_REVISION >> $FIREBOT_DIR/output_stage1 2>&1
+      echo "Checking out revision r${SVN_REVISION}." > $FIREBOT_DIR/output/stage1
+      svn update -r $SVN_REVISION >> $FIREBOT_DIR/output/stage1 2>&1
    # If no SVN revision number is specified, then get the latest revision
    else
-      echo "Checking out latest revision." > $FIREBOT_DIR/output_stage1
-      svn update >> $FIREBOT_DIR/output_stage1 2>&1
-      SVN_REVISION=`tail -n 1 $FIREBOT_DIR/output_stage1 | sed "s/[^0-9]//g"`
+      echo "Checking out latest revision." > $FIREBOT_DIR/output/stage1
+      svn update >> $FIREBOT_DIR/output/stage1 2>&1
+      SVN_REVISION=`tail -n 1 $FIREBOT_DIR/output/stage1 | sed "s/[^0-9]//g"`
    fi
 }
 
@@ -116,10 +116,10 @@ check_svn_checkout()
 {
    cd $SVNROOT
    # Check for SVN errors
-   if [[ `grep -E 'Updated|At revision' $FIREBOT_DIR/output_stage1 | wc -l` -ne 1 ]];
+   if [[ `grep -E 'Updated|At revision' $FIREBOT_DIR/output/stage1 | wc -l` -ne 1 ]];
    then
       BUILD_STAGE_FAILURE="Stage 1: SVN Operations"
-      ERROR_LOG=$FIREBOT_DIR/output_stage1
+      ERROR_LOG=$FIREBOT_DIR/output/stage1
       save_build_status
       email_error_message
    else
@@ -137,7 +137,7 @@ compile_fds_db()
    # Clean and compile FDS DB
    cd $SVNROOT/FDS_Compilation/intel_linux_64_db
    make --makefile ../makefile clean &> /dev/null
-   ./make_fds.sh &> $FIREBOT_DIR/output_stage2a
+   ./make_fds.sh &> $FIREBOT_DIR/output/stage2a
 }
 
 check_compile_fds_db()
@@ -150,18 +150,18 @@ check_compile_fds_db()
       :
    else
       BUILD_STAGE_FAILURE="Stage 2a: FDS DB Compilation"
-      ERROR_LOG=$FIREBOT_DIR/output_stage2a
+      ERROR_LOG=$FIREBOT_DIR/output/stage2a
       save_build_status
       email_error_message
    fi
 
    # Check for compiler warnings
-   if [[ `grep warning ${FIREBOT_DIR}/output_stage2a` == "" ]]
+   if [[ `grep warning ${FIREBOT_DIR}/output/stage2a` == "" ]]
    then
       # Continue along
       :
    else
-      grep warning ${FIREBOT_DIR}/output_stage2a >> $FIREBOT_DIR/output_compiler_warnings
+      grep warning ${FIREBOT_DIR}/output/stage2a >> $FIREBOT_DIR/output/warnings
    fi
 }
 
@@ -174,7 +174,7 @@ compile_fds_mpi_db()
    # Clean and compile FDS MPI DB
    cd $SVNROOT/FDS_Compilation/mpi_intel_linux_64_db
    make --makefile ../makefile clean &> /dev/null
-   ./make_fds.sh &> $FIREBOT_DIR/output_stage2b
+   ./make_fds.sh &> $FIREBOT_DIR/output/stage2b
 }
 
 check_compile_fds_mpi_db()
@@ -187,19 +187,19 @@ check_compile_fds_mpi_db()
       :
    else
       BUILD_STAGE_FAILURE="Stage 2b: FDS MPI DB Compilation"
-      ERROR_LOG=$FIREBOT_DIR/output_stage2b
+      ERROR_LOG=$FIREBOT_DIR/output/stage2b
       save_build_status
       email_error_message
    fi
 
    # Check for compiler warnings
    # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
-   if [[ `grep warning ${FIREBOT_DIR}/output_stage2b | grep -v 'feupdateenv is not implemented'` == "" ]]
+   if [[ `grep warning ${FIREBOT_DIR}/output/stage2b | grep -v 'feupdateenv is not implemented'` == "" ]]
    then
       # Continue along
       :
    else
-      grep warning ${FIREBOT_DIR}/output_stage2b | grep -v 'feupdateenv is not implemented' >> $FIREBOT_DIR/output_compiler_warnings
+      grep warning ${FIREBOT_DIR}/output/stage2b | grep -v 'feupdateenv is not implemented' >> $FIREBOT_DIR/output/warnings
    fi
 }
 
@@ -212,7 +212,7 @@ compile_smv_db()
    # Clean and compile SMV DB
    cd $SVNROOT/SMV/Build/intel_linux_64_dbg
    make --makefile ../Makefile clean &> /dev/null
-   ./make_smv.sh &> $FIREBOT_DIR/output_stage2c
+   ./make_smv.sh &> $FIREBOT_DIR/output/stage2c
 }
 
 check_compile_smv_db()
@@ -225,19 +225,19 @@ check_compile_smv_db()
       :
    else
       BUILD_STAGE_FAILURE="Stage 2c: SMV DB Compilation"
-      ERROR_LOG=$FIREBOT_DIR/output_stage2c
+      ERROR_LOG=$FIREBOT_DIR/output/stage2c
       save_build_status
       email_error_message
    fi
 
    # Check for compiler warnings
    # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
-   if [[ `grep warning ${FIREBOT_DIR}/output_stage2c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
+   if [[ `grep warning ${FIREBOT_DIR}/output/stage2c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
    then
       # Continue along
       :
    else
-      grep warning ${FIREBOT_DIR}/output_stage2c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $FIREBOT_DIR/output_compiler_warnings
+      grep warning ${FIREBOT_DIR}/output/stage2c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $FIREBOT_DIR/output/warnings
    fi
 }
 
@@ -250,7 +250,7 @@ wait_verification_cases_short_start()
    # Scans qstat and waits for verification cases to start
    while [[ `qstat | grep $(whoami) | grep Q` != '' ]]; do
       JOBS_REMAINING=`qstat | grep $(whoami) | grep Q | wc -l`
-      echo "Waiting for ${JOBS_REMAINING} verification cases to start." >> $FIREBOT_DIR/output_stage3
+      echo "Waiting for ${JOBS_REMAINING} verification cases to start." >> $FIREBOT_DIR/output/stage3
       sleep 30
    done
 }
@@ -260,7 +260,7 @@ wait_verification_cases_short_end()
    # Scans qstat and waits for verification cases to end
    while [[ `qstat | grep $(whoami)` != '' ]]; do
       JOBS_REMAINING=`qstat | grep $(whoami) | wc -l`
-      echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $FIREBOT_DIR/output_stage3
+      echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $FIREBOT_DIR/output/stage3
       sleep 30
    done
 }
@@ -283,7 +283,7 @@ run_verification_cases_short()
    #  ========================
 
    # Wait for serial verification cases to start
-   ./FDS_Cases.sh &> $FIREBOT_DIR/output_stage3
+   ./FDS_Cases.sh &> $FIREBOT_DIR/output/stage3
    wait_verification_cases_short_start
 
    # Wait some additional time for cases to start
@@ -291,7 +291,7 @@ run_verification_cases_short()
 
    # Stop all cases
    export STOPFDS=1
-   ./FDS_Cases.sh >> $FIREBOT_DIR/output_stage3 2>&1
+   ./FDS_Cases.sh >> $FIREBOT_DIR/output/stage3 2>&1
    unset STOPFDS
 
    # Wait for serial verification cases to end
@@ -301,27 +301,8 @@ run_verification_cases_short()
    #  = Run all MPI cases =
    #  =====================
 
-   # # Wait for MPI verification cases to start
-   # ./FDS_MPI_Cases.sh >> $FIREBOT_DIR/output_stage3 2>&1
-   # wait_verification_cases_short_start
-
-   # # Wait some additional time for cases to start
-   # sleep 30
-
-   # # Stop all cases
-   # export STOPFDS=1
-   # ./FDS_MPI_Cases.sh >> $FIREBOT_DIR/output_stage3 2>&1
-   # unset STOPFDS
-
-   # # Wait for MPI verification cases to end
-   # wait_verification_cases_short_end
-
-   #  =====================
-   #  = Run all SMV cases =
-   #  =====================
-
-   # Wait for SMV verification cases to start
-   ./scripts/SMV_Cases.sh >> $FIREBOT_DIR/output_stage3 2>&1
+   # Wait for MPI verification cases to start
+   ./FDS_MPI_Cases.sh >> $FIREBOT_DIR/output/stage3 2>&1
    wait_verification_cases_short_start
 
    # Wait some additional time for cases to start
@@ -329,11 +310,30 @@ run_verification_cases_short()
 
    # Stop all cases
    export STOPFDS=1
-   ./scripts/SMV_Cases.sh >> $FIREBOT_DIR/output_stage3 2>&1
+   ./FDS_MPI_Cases.sh >> $FIREBOT_DIR/output/stage3 2>&1
    unset STOPFDS
 
    # Wait for MPI verification cases to end
    wait_verification_cases_short_end
+
+   #  =====================
+   #  = Run all SMV cases =
+   #  =====================
+
+   # # Wait for SMV verification cases to start
+   # ./scripts/SMV_Cases.sh >> $FIREBOT_DIR/output/stage3 2>&1
+   # wait_verification_cases_short_start
+
+   # # Wait some additional time for cases to start
+   # sleep 30
+
+   # # Stop all cases
+   # export STOPFDS=1
+   # ./scripts/SMV_Cases.sh >> $FIREBOT_DIR/output/stage3 2>&1
+   # unset STOPFDS
+
+   # # Wait for MPI verification cases to end
+   # wait_verification_cases_short_end
 
    #  ======================
    #  = Remove .stop files =
@@ -348,7 +348,7 @@ check_verification_cases_short()
    # Scan and report any errors in FDS verification cases
    cd $SVNROOT/Verification
 
-   if [[ `grep 'Run aborted' -rI ${FIREBOT_DIR}/output_stage3` == "" ]] && \
+   if [[ `grep 'Run aborted' -rI ${FIREBOT_DIR}/output/stage3` == "" ]] && \
       [[ `grep ERROR: -rI *` == "" ]] && \
       [[ `grep 'STOP: Numerical' -rI *` == "" ]] && \
       [[ `grep -A 20 forrtl -rI *` == "" ]]
@@ -358,12 +358,12 @@ check_verification_cases_short()
    else
       BUILD_STAGE_FAILURE="Stage 3: FDS Verification Cases"
       
-      grep 'Run aborted' -rI $FIREBOT_DIR/output_stage3 >> $FIREBOT_DIR/output_stage3_errors
-      grep ERROR: -rI * >> $FIREBOT_DIR/output_stage3_errors
-      grep 'STOP: Numerical' -rI * >> $FIREBOT_DIR/output_stage3_errors
-      grep -A 20 forrtl -rI * >> $FIREBOT_DIR/output_stage3_errors
+      grep 'Run aborted' -rI $FIREBOT_DIR/output/stage3 >> $FIREBOT_DIR/output/stage3_errors
+      grep ERROR: -rI * >> $FIREBOT_DIR/output/stage3_errors
+      grep 'STOP: Numerical' -rI * >> $FIREBOT_DIR/output/stage3_errors
+      grep -A 20 forrtl -rI * >> $FIREBOT_DIR/output/stage3_errors
       
-      ERROR_LOG=$FIREBOT_DIR/output_stage3_errors
+      ERROR_LOG=$FIREBOT_DIR/output/stage3_errors
       save_build_status
       email_error_message
    fi
@@ -378,7 +378,7 @@ compile_fds()
    # Clean and compile FDS
    cd $SVNROOT/FDS_Compilation/intel_linux_64
    make --makefile ../makefile clean &> /dev/null
-   ./make_fds.sh &> $FIREBOT_DIR/output_stage4a
+   ./make_fds.sh &> $FIREBOT_DIR/output/stage4a
 }
 
 check_compile_fds()
@@ -391,18 +391,18 @@ check_compile_fds()
       :
    else
       BUILD_STAGE_FAILURE="Stage 4a: FDS Compilation"
-      ERROR_LOG=$FIREBOT_DIR/output_stage4a
+      ERROR_LOG=$FIREBOT_DIR/output/stage4a
       save_build_status
       email_error_message
    fi
 
    # Check for compiler warnings
-   if [[ `grep warning ${FIREBOT_DIR}/output_stage4a` == "" ]]
+   if [[ `grep warning ${FIREBOT_DIR}/output/stage4a` == "" ]]
    then
       # Continue along
       :
    else
-      grep warning ${FIREBOT_DIR}/output_stage4a >> $FIREBOT_DIR/output_compiler_warnings
+      grep warning ${FIREBOT_DIR}/output/stage4a >> $FIREBOT_DIR/output/warnings
    fi
 }
 
@@ -415,7 +415,7 @@ compile_fds_mpi()
    # Clean and compile FDS MPI
    cd $SVNROOT/FDS_Compilation/mpi_intel_linux_64
    make --makefile ../makefile clean &> /dev/null
-   ./make_fds.sh &> $FIREBOT_DIR/output_stage4b
+   ./make_fds.sh &> $FIREBOT_DIR/output/stage4b
 }
 
 check_compile_fds_mpi()
@@ -428,19 +428,19 @@ check_compile_fds_mpi()
       :
    else
       BUILD_STAGE_FAILURE="Stage 4b: FDS MPI Compilation"
-      ERROR_LOG=$FIREBOT_DIR/output_stage4b
+      ERROR_LOG=$FIREBOT_DIR/output/stage4b
       save_build_status
       email_error_message
    fi
 
    # Check for compiler warnings
    # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
-   if [[ `grep warning ${FIREBOT_DIR}/output_stage4b | grep -v 'feupdateenv is not implemented'` == "" ]]
+   if [[ `grep warning ${FIREBOT_DIR}/output/stage4b | grep -v 'feupdateenv is not implemented'` == "" ]]
    then
       # Continue along
       :
    else
-      grep warning ${FIREBOT_DIR}/output_stage4b | grep -v 'feupdateenv is not implemented' >> $FIREBOT_DIR/output_compiler_warnings
+      grep warning ${FIREBOT_DIR}/output/stage4b | grep -v 'feupdateenv is not implemented' >> $FIREBOT_DIR/output/warnings
    fi
 }
 
@@ -453,7 +453,7 @@ compile_smv()
    # Clean and compile SMV
    cd $SVNROOT/SMV/Build/intel_linux_64
    make --makefile ../Makefile clean &> /dev/null
-   ./make_smv.sh &> $FIREBOT_DIR/output_stage4c
+   ./make_smv.sh &> $FIREBOT_DIR/output/stage4c
 }
 
 check_compile_smv()
@@ -466,19 +466,19 @@ check_compile_smv()
       :
    else
       BUILD_STAGE_FAILURE="Stage 4c: SMV Compilation"
-      ERROR_LOG=$FIREBOT_DIR/output_stage4c
+      ERROR_LOG=$FIREBOT_DIR/output/stage4c
       save_build_status
       email_error_message
    fi
 
    # Check for compiler warnings
    # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
-   if [[ `grep warning ${FIREBOT_DIR}/output_stage4c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
+   if [[ `grep warning ${FIREBOT_DIR}/output/stage4c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
    then
       # Continue along
       :
    else
-      grep warning ${FIREBOT_DIR}/output_stage4c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $FIREBOT_DIR/output_compiler_warnings
+      grep warning ${FIREBOT_DIR}/output/stage4c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $FIREBOT_DIR/output/warnings
    fi
 }
 
@@ -491,7 +491,7 @@ wait_verification_cases_long_end()
    # Scans qstat and waits for verification cases to end
    while [[ `qstat | grep $(whoami)` != '' ]]; do
       JOBS_REMAINING=`qstat | grep $(whoami) | wc -l`
-      echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $FIREBOT_DIR/output_stage5
+      echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $FIREBOT_DIR/output/stage5
       sleep 60
    done
 }
@@ -510,9 +510,9 @@ run_verification_cases_long()
    export BASEDIR=$SVNROOT/Verification
 
    # Start running all cases
-   ./FDS_Cases.sh &> $FIREBOT_DIR/output_stage5
-   # ./FDS_MPI_Cases.sh >> $FIREBOT_DIR/output_stage5 2>&1
-   ./scripts/SMV_Cases.sh >> $FIREBOT_DIR/output_stage5 2>&1
+   ./FDS_Cases.sh &> $FIREBOT_DIR/output/stage5
+   ./FDS_MPI_Cases.sh >> $FIREBOT_DIR/output/stage5 2>&1
+   ./scripts/SMV_Cases.sh >> $FIREBOT_DIR/output/stage5 2>&1
 
    # Wait for all verification cases to end
    wait_verification_cases_long_end
@@ -523,7 +523,7 @@ check_verification_cases_long()
    # Scan and report any errors in FDS verification cases
    cd $SVNROOT/Verification
 
-   if [[ `grep 'Run aborted' -rI ${FIREBOT_DIR}/output_stage5` == "" ]] && \
+   if [[ `grep 'Run aborted' -rI ${FIREBOT_DIR}/output/stage5` == "" ]] && \
       [[ `grep ERROR: -rI *` == "" ]] && \
       [[ `grep 'STOP: Numerical' -rI *` == "" ]] && \
       [[ `grep -A 20 forrtl -rI *` == "" ]]
@@ -533,12 +533,12 @@ check_verification_cases_long()
    else
       BUILD_STAGE_FAILURE="Stage 5: FDS Verification Cases"
       
-      grep 'Run aborted' -rI $FIREBOT_DIR/output_stage5 >> $FIREBOT_DIR/output_stage5_errors
-      grep ERROR: -rI * >> $FIREBOT_DIR/output_stage5_errors
-      grep 'STOP: Numerical' -rI * >> $FIREBOT_DIR/output_stage5_errors
-      grep -A 20 forrtl -rI * >> $FIREBOT_DIR/output_stage5_errors
+      grep 'Run aborted' -rI $FIREBOT_DIR/output/stage5 >> $FIREBOT_DIR/output/stage5_errors
+      grep ERROR: -rI * >> $FIREBOT_DIR/output/stage5_errors
+      grep 'STOP: Numerical' -rI * >> $FIREBOT_DIR/output/stage5_errors
+      grep -A 20 forrtl -rI * >> $FIREBOT_DIR/output/stage5_errors
       
-      ERROR_LOG=$FIREBOT_DIR/output_stage5_errors
+      ERROR_LOG=$FIREBOT_DIR/output/stage5_errors
       save_build_status
       email_error_message
    fi
@@ -557,7 +557,7 @@ make_fds_pictures()
    export RUNSMV=$SVNROOT/Utilities/Scripts/runsmv.sh
    export BASEDIR=$SVNROOT/Verification
 
-   ./FDS_Pictures.sh &> $FIREBOT_DIR/output_stage6
+   ./FDS_Pictures.sh &> $FIREBOT_DIR/output/stage6
 }
 
 #  ============================================
@@ -575,22 +575,22 @@ run_matlab_plotting()
    sed -i 's/LaTeX/TeX/g' plot_style.m 
 
    cd $SVNROOT/Utilities/Matlab
-   matlab -r "try, disp('Running Matlab Verification script'), FDS_verification_script, catch, disp('Matlab error'), err = lasterror, err.message, err.stack, end, exit" &> $FIREBOT_DIR/output_stage7_verification
-   matlab -r "try, disp('Running Matlab Validation script'), FDS_validation_script, catch, disp('Matlab error'), err = lasterror, err.message, err.stack, end, exit" &> $FIREBOT_DIR/output_stage7_validation
+   matlab -r "try, disp('Running Matlab Verification script'), FDS_verification_script, catch, disp('Matlab error'), err = lasterror, err.message, err.stack, end, exit" &> $FIREBOT_DIR/output/stage7_verification
+   matlab -r "try, disp('Running Matlab Validation script'), FDS_validation_script, catch, disp('Matlab error'), err = lasterror, err.message, err.stack, end, exit" &> $FIREBOT_DIR/output/stage7_validation
 }
 
 check_matlab_plotting()
 {
    # Scan and report any errors in Matlab scripts
    cd $FIREBOT_DIR
-   if [[ `grep -A 50 "Matlab error" $FIREBOT_DIR/output_stage7*` == "" ]]
+   if [[ `grep -A 50 "Matlab error" $FIREBOT_DIR/output/stage7*` == "" ]]
    then
       # Continue along
       :
    else
       BUILD_STAGE_FAILURE="Stage 7: Matlab plotting and statistics"
-      grep -A 50 "Matlab error" $FIREBOT_DIR/output_stage7* > $FIREBOT_DIR/output_stage7_errors
-      ERROR_LOG=$FIREBOT_DIR/output_stage7_errors
+      grep -A 50 "Matlab error" $FIREBOT_DIR/output/stage7* > $FIREBOT_DIR/output/stage7_errors
+      ERROR_LOG=$FIREBOT_DIR/output/stage7_errors
       save_build_status
       email_error_message
    fi
@@ -604,74 +604,74 @@ make_fds_user_guide()
 {
    # Build FDS User Guide
    cd $SVNROOT/Manuals/FDS_User_Guide
-   pdflatex -interaction nonstopmode FDS_User_Guide &> $FIREBOT_DIR/output_stage8_fds_user_guide
-   bibtex FDS_User_Guide >> $FIREBOT_DIR/output_stage8_fds_user_guide 2>&1
-   pdflatex -interaction nonstopmode FDS_User_Guide >> $FIREBOT_DIR/output_stage8_fds_user_guide 2>&1
-   pdflatex -interaction nonstopmode FDS_User_Guide >> $FIREBOT_DIR/output_stage8_fds_user_guide 2>&1
+   pdflatex -interaction nonstopmode FDS_User_Guide &> $FIREBOT_DIR/output/stage8_fds_user_guide
+   bibtex FDS_User_Guide >> $FIREBOT_DIR/output/stage8_fds_user_guide 2>&1
+   pdflatex -interaction nonstopmode FDS_User_Guide >> $FIREBOT_DIR/output/stage8_fds_user_guide 2>&1
+   pdflatex -interaction nonstopmode FDS_User_Guide >> $FIREBOT_DIR/output/stage8_fds_user_guide 2>&1
 }
 
 make_fds_technical_guide()
 {
    # Build FDS Technical Guide
    cd $SVNROOT/Manuals/FDS_Technical_Reference_Guide
-   pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide &> $FIREBOT_DIR/output_stage8_fds_technical_guide
-   bibtex FDS_Technical_Reference_Guide >> $FIREBOT_DIR/output_stage8_fds_technical_guide 2>&1
-   pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide >> $FIREBOT_DIR/output_stage8_fds_technical_guide 2>&1
-   pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide >> $FIREBOT_DIR/output_stage8_fds_technical_guide 2>&1
+   pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide &> $FIREBOT_DIR/output/stage8_fds_technical_guide
+   bibtex FDS_Technical_Reference_Guide >> $FIREBOT_DIR/output/stage8_fds_technical_guide 2>&1
+   pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide >> $FIREBOT_DIR/output/stage8_fds_technical_guide 2>&1
+   pdflatex -interaction nonstopmode FDS_Technical_Reference_Guide >> $FIREBOT_DIR/output/stage8_fds_technical_guide 2>&1
 }
 
 make_fds_verification_guide()
 {
    # Build FDS Verification Guide
    cd $SVNROOT/Manuals/FDS_Verification_Guide
-   pdflatex -interaction nonstopmode FDS_Verification_Guide &> $FIREBOT_DIR/output_stage8_fds_verification_guide
-   bibtex FDS_Verification_Guide >> $FIREBOT_DIR/output_stage8_fds_verification_guide 2>&1
-   pdflatex -interaction nonstopmode FDS_Verification_Guide >> $FIREBOT_DIR/output_stage8_fds_verification_guide 2>&1
-   pdflatex -interaction nonstopmode FDS_Verification_Guide >> $FIREBOT_DIR/output_stage8_fds_verification_guide 2>&1
+   pdflatex -interaction nonstopmode FDS_Verification_Guide &> $FIREBOT_DIR/output/stage8_fds_verification_guide
+   bibtex FDS_Verification_Guide >> $FIREBOT_DIR/output/stage8_fds_verification_guide 2>&1
+   pdflatex -interaction nonstopmode FDS_Verification_Guide >> $FIREBOT_DIR/output/stage8_fds_verification_guide 2>&1
+   pdflatex -interaction nonstopmode FDS_Verification_Guide >> $FIREBOT_DIR/output/stage8_fds_verification_guide 2>&1
 }
 
 make_fds_validation_guide()
 {
    # Build FDS Validation Guide
    cd $SVNROOT/Manuals/FDS_Validation_Guide
-   pdflatex -interaction nonstopmode FDS_Validation_Guide &> $FIREBOT_DIR/output_stage8_fds_validation_guide
-   bibtex FDS_Validation_Guide >> $FIREBOT_DIR/output_stage8_fds_validation_guide 2>&1
-   pdflatex -interaction nonstopmode FDS_Validation_Guide >> $FIREBOT_DIR/output_stage8_fds_validation_guide 2>&1
-   pdflatex -interaction nonstopmode FDS_Validation_Guide >> $FIREBOT_DIR/output_stage8_fds_validation_guide 2>&1
+   pdflatex -interaction nonstopmode FDS_Validation_Guide &> $FIREBOT_DIR/output/stage8_fds_validation_guide
+   bibtex FDS_Validation_Guide >> $FIREBOT_DIR/output/stage8_fds_validation_guide 2>&1
+   pdflatex -interaction nonstopmode FDS_Validation_Guide >> $FIREBOT_DIR/output/stage8_fds_validation_guide 2>&1
+   pdflatex -interaction nonstopmode FDS_Validation_Guide >> $FIREBOT_DIR/output/stage8_fds_validation_guide 2>&1
 }
 
 make_smv_user_guide()
 {
    # Build SMV User Guide
    cd $SVNROOT/Manuals/SMV_User_Guide
-   pdflatex -interaction nonstopmode SMV_User_Guide &> $FIREBOT_DIR/output_stage8_smv_user_guide
-   bibtex SMV_User_Guide >> $FIREBOT_DIR/output_stage8_smv_user_guide 2>&1
-   pdflatex -interaction nonstopmode SMV_User_Guide >> $FIREBOT_DIR/output_stage8_smv_user_guide 2>&1
-   pdflatex -interaction nonstopmode SMV_User_Guide >> $FIREBOT_DIR/output_stage8_smv_user_guide 2>&1
+   pdflatex -interaction nonstopmode SMV_User_Guide &> $FIREBOT_DIR/output/stage8_smv_user_guide
+   bibtex SMV_User_Guide >> $FIREBOT_DIR/output/stage8_smv_user_guide 2>&1
+   pdflatex -interaction nonstopmode SMV_User_Guide >> $FIREBOT_DIR/output/stage8_smv_user_guide 2>&1
+   pdflatex -interaction nonstopmode SMV_User_Guide >> $FIREBOT_DIR/output/stage8_smv_user_guide 2>&1
 }
 
 make_smv_verification_guide()
 {
    # Build SMV Verification Guide
    cd $SVNROOT/Manuals/SMV_Verification_Guide
-   pdflatex -interaction nonstopmode SMV_Verification_Guide &> $FIREBOT_DIR/output_stage8_smv_verification_guide
-   bibtex SMV_Verification_Guide >> $FIREBOT_DIR/output_stage8_smv_verification_guide 2>&1
-   pdflatex -interaction nonstopmode SMV_Verification_Guide >> $FIREBOT_DIR/output_stage8_smv_verification_guide 2>&1
-   pdflatex -interaction nonstopmode SMV_Verification_Guide >> $FIREBOT_DIR/output_stage8_smv_verification_guide 2>&1
+   pdflatex -interaction nonstopmode SMV_Verification_Guide &> $FIREBOT_DIR/output/stage8_smv_verification_guide
+   bibtex SMV_Verification_Guide >> $FIREBOT_DIR/output/stage8_smv_verification_guide 2>&1
+   pdflatex -interaction nonstopmode SMV_Verification_Guide >> $FIREBOT_DIR/output/stage8_smv_verification_guide 2>&1
+   pdflatex -interaction nonstopmode SMV_Verification_Guide >> $FIREBOT_DIR/output/stage8_smv_verification_guide 2>&1
 }
 
 check_all_guides()
 {
    # Scan and report any errors in FDS Verification Guide build process
    cd $FIREBOT_DIR
-   if [[ `grep "! LaTeX Error:" -I $FIREBOT_DIR/output_stage8*` == "" ]]
+   if [[ `grep "! LaTeX Error:" -I $FIREBOT_DIR/output/stage8*` == "" ]]
    then
       # Continue along
       :
    else
       BUILD_STAGE_FAILURE="Stage 8: FDS-SMV Guides"
-      grep "! LaTeX Error:" -I $FIREBOT_DIR/output_stage8* > $FIREBOT_DIR/output_stage8_errors
-      ERROR_LOG=$FIREBOT_DIR/output_stage8_errors
+      grep "! LaTeX Error:" -I $FIREBOT_DIR/output/stage8* > $FIREBOT_DIR/output/stage8_errors
+      ERROR_LOG=$FIREBOT_DIR/output/stage8_errors
       save_build_status
       email_error_message
    fi
@@ -685,10 +685,10 @@ email_success_message()
 {
    cd $FIREBOT_DIR
    # Check for compiler warnings
-   if [ -e "output_compiler_warnings" ]
+   if [ -e "output/warnings" ]
    then
       # Send email with success message, include compiler warnings
-      mail -s "[Firebot] Build success, with compiler warnings. Revision ${SVN_REVISION} passed all build tests." $mailTo < ${FIREBOT_DIR}/output_compiler_warnings > /dev/null
+      mail -s "[Firebot] Build success, with compiler warnings. Revision ${SVN_REVISION} passed all build tests." $mailTo < ${FIREBOT_DIR}/output/warnings > /dev/null
    else
       # Send empty email with success message
       mail -s "[Firebot] Build success! Revision ${SVN_REVISION} passed all build tests." $mailTo < /dev/null > /dev/null
@@ -699,9 +699,9 @@ email_error_message()
 {
    cd $FIREBOT_DIR
    # Check for compiler warnings
-   if [ -e "output_compiler_warnings" ]
+   if [ -e "output/warnings" ]
    then
-      cat output_compiler_warnings >> $ERROR_LOG
+      cat output/warnings >> $ERROR_LOG
 
       # Send email with failure message and warnings, body of email contains appropriate log file
       mail -s "[Firebot] Build failure, with compiler warnings! Revision ${SVN_REVISION} build failure at ${BUILD_STAGE_FAILURE}." $mailTo < ${ERROR_LOG} > /dev/null
@@ -721,10 +721,10 @@ save_build_status()
       echo "Revision ${SVN_REVISION} build failure at ${BUILD_STAGE_FAILURE}." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
       cat $ERROR_LOG > "$FIREBOT_DIR/history/${SVN_REVISION}_errors.txt"
    else
-      if [ -e "output_compiler_warnings" ]
+      if [ -e "output/warnings" ]
          then 
          echo "Revision ${SVN_REVISION} has compiler warnings." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
-         cat $FIREBOT_DIR/output_compiler_warnings > "$FIREBOT_DIR/history/${SVN_REVISION}_warnings.txt"
+         cat $FIREBOT_DIR/output/warnings > "$FIREBOT_DIR/history/${SVN_REVISION}_warnings.txt"
       else
          echo "Build success! Revision ${SVN_REVISION} passed all build tests." > "$FIREBOT_DIR/history/${SVN_REVISION}.txt"
       fi
