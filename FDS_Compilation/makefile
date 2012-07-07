@@ -3,7 +3,7 @@
 # To use this makefile, select the appropriate compiler and OS from the list below. For example, to
 # compile the 64 bit parallel version (MPI) of FDS under Linux using the Intel compilers type:
 #
-# make intel_linux_mpi_64
+# make mpi_intel_linux_64
 
 # A make utility for windows may be downloaded from http://gnuwin32.sourceforge.net/packages/make.htm
 
@@ -196,6 +196,7 @@ mpi_intel_linux_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) -o $(obj) $(obj_mpi)
 
 # 32 bit
+
 intel_osx_32 : FFLAGS = -O2  -m32 -heap-arrays -vec_report0 -ipo
 intel_osx_32 : LFLAGS = -static-intel
 intel_osx_32 : FCOMPL = ifort
@@ -246,11 +247,18 @@ intel_osx_64_db : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
 mpi_intel_osx_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -vec_report0 -stand:f03
-mpi_intel_osx_64_db : LFLAGS  = -L$(MPIDIST)/lib -static-intel
-mpi_intel_osx_64_db : FCOMPL  = mpif77
+mpi_intel_osx_64_db : LFLAGS = -L$(MPIDIST)/lib -static-intel
+mpi_intel_osx_64_db : FCOMPL = mpif77
 mpi_intel_osx_64_db : obj = fds_mpi_intel_osx_64_db
 mpi_intel_osx_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
+
+intel_osx_64_dv : FFLAGS = -m64 -O2 -vec_report0 -traceback
+intel_osx_64_dv : LFLAGS = -static-intel
+intel_osx_64_dv : FCOMPL = ifort
+intel_osx_64_dv : obj = fds_intel_osx_64_dv
+intel_osx_64_dv : setup $(obj_serial)
+	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
 #*** IBM XLF Compiler ***
 
