@@ -1501,8 +1501,8 @@ The enthalpy of the mixture at the outlet is $2 \times 1 \times (900+273.15) + 2
 This case tests the ability of FDS to properly conserve the total of the solid phase and the gas phase energy.  A 1 m$^3$ box iis filled with 1 kg of a gas with a specific heat of =1 kJ/(kg K), a molecular weight of 28 g/mol, and an initial temperature of 20 $^\circ$C.  All the walls, except the floor, are adiabatic.  The floor is defined as a 1 mm thick layer of a material with a conductivity of 100 W/(m K),  a specific heat of 1 kJ/(kg K), an initial temperature of 150 $^\circ$C, and a density of 1000 kg/m$^3$.  The initial enthalpy is $1 \times 1 \times (20+273.15) + 1 \times 1 \times (150+273.15)  =  716.3$ kJ.  At the end state the gas will have risen in temperature, the solid will have decreased in temperature, and the pressure will have risen.  Since energy is conserved this occurs at a temperature of 96.3 $^\circ$C.  The final enthalpy is $1 \times 1 \times (96.3+273.15) + 1 \times 1 \times (96.3+273.15) + 22670 / 1000  =  716.3$ kJ. 
 
 \begin{figure}[ht]
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/energy_budget_solid_t}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/energy_budget_solid_p}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/energy_budget_solid_T}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/energy_budget_solid_P}
 \caption{\label{fig_solid_energy} Outputs of temperature [left] and pressure [right] for the energy\_budget\_solid case.  Circles represent the correct result.}
 \end{figure}
 
