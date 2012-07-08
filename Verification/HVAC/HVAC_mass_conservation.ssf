@@ -1,5 +1,5 @@
 RENDERDIR
- ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/HVAC
+ ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES
 LOADFILE
  HVAC_mass_conservation_01.sf
 SETTIMEVAL
