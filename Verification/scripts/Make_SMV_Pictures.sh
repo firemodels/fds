@@ -1,18 +1,67 @@
 #!/bin/bash
 
-#PLATFORM=32
-#IPLATFORM=ia32
-PLATFORM=64
+function usage {
+echo "Make_SMV_Pictures.sh [-d -h -s size -t ]"
+echo "Generates figures for Smokeview verification suite"
+echo ""
+echo "Options"
+echo "-d - use debug version of smokeview"
+echo "-h - display this message"
+echo "-r - use release version of smokeview"
+echo "-s size - use 32 or 64 bit (default) version of smokeview"
+exit
+}
+
+PLATFORM=linux
+SIZE=_64
+DEBUG=
+TEST=_test
+
+while getopts 'dhrs:' OPTION
+do
+case $OPTION  in
+  d)
+   DEBUG=_dbg
+   ;;
+  h)
+   usage;
+   ;;
+  s)
+   SIZE="$OPTARG"
+   if [ $SIZE -eq 64 ] ; then
+     SIZE=_64
+   else
+     SIZE=_32
+   fi
+  ;;
+  r)
+   TEST=
+  ;;
+esac
+done
+shift $(($OPTIND-1))
+
+
+VERSION=$PLATFORM$TEST$SIZE$DEBUG
+VERSION2=$PLATFORM$SIZE
 IPLATFORM=intel64
 CURDIR=`pwd`
 cd ..
 export SVNROOT=`pwd`/..
-#export SMV=$SVNROOT/SMV/Build/intel_linux__$PLATFORM/smokeview_linux_$PLATFORM
-export SMV=$SVNROOT/SMV/Build/intel_linux_test_$PLATFORM/smokeview_linux_test_$PLATFORM
-#export SMV=~/FDS/FDS5/bin/smv5_linux_64
-export SMOKEZIP=$SVNROOT/Utilities/smokezip/intel_linux_$PLATFORM/smokezip_linux_$PLATFORM
-export SMOKEDIFF=$SVNROOT/Utilities/smokediff/intel_linux_$PLATFORM/smokediff_linux_$PLATFORM
-export BACKGROUND=$SVNROOT/Utilities/background/intel_linux_32/background
+
+export SMV=$SVNROOT/SMV/Build/intel_$VERSION/smokeview_$VERSION
+
+export SMOKEZIP=$SVNROOT/Utilities/smokezip/intel_$VERSION2/smokezip_$VERSION2
+export SMOKEDIFF=$SVNROOT/Utilities/smokediff/intel_$VERSION2/smokediff_$VERSION2
+export BACKGROUND=$SVNROOT/Utilities/background/intel_$PLATFORM\_32/background
+
+echo Program locations:
+echo smokeview : $SMV
+echo smokezip  : $SMOKEZIP
+echo smokediff : $SMOKEDIFF
+echo background: $BACKGROUND
+echo
+
 export RUNFDS=$SVNROOT/Utilities/Scripts/runsmv.sh
 export RUNCFAST=$SVNROOT/Utilities/Scripts/runsmv.sh
 export BASEDIR=`pwd`
