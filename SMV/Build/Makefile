@@ -235,6 +235,19 @@ intel_linux_test_32 : exe       = smokeview_linux_test_32
 intel_linux_test_32 : $(obj)
 	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUX_LIBDIR_32) -L $(LINUX_FORT_LIBDIR_32) $(LINUX_SMV_LIBS) $(LINUX_INTEL_LIBS) -L/usr/lib $(LINUX_SYSTEMLIBS)
 
+# ------------- intel_linux_test_32_dbg ----------------
+
+intel_linux_test_32_dbg : FFLAGS    = -O0 -m32 -static-intel -traceback -g -fpe0 -fltconsistency -WB -vec_report0 -fpp -D pp_noappend
+intel_linux_test_32_dbg : CFLAGS    = -O0 -g -m32 -static-intel -vec_report0 -D pp_BETA -D pp_LINUX -D pp_INTEL 
+intel_linux_test_32_dbg : LFLAGS    = -m32 -static-intel
+intel_linux_test_32_dbg : CC        = icc 
+intel_linux_test_32_dbg : CPP       = icpc
+intel_linux_test_32_dbg : FC        = ifort
+intel_linux_test_32_dbg : exe       = smokeview_linux_test_32_dbg
+
+intel_linux_test_32 : $(obj)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUX_LIBDIR_32) -L $(LINUX_FORT_LIBDIR_32) $(LINUX_SMV_LIBS) $(LINUX_INTEL_LIBS) -L/usr/lib $(LINUX_SYSTEMLIBS)
+
 # ------------- intel_linux_32_dbg ----------------
 
 intel_linux_32_dbg : FFLAGS    = -O0 -m32 -static-intel -traceback -g -fpe0 -fltconsistency -WB -vec_report0 -fpp -D pp_noappend
