@@ -553,7 +553,6 @@ In this case the sum of the mass corrections is zero, as desired:
 The discussion above was to provide a simple case for understanding the basic idea behind the correction method.  In a realistic case we must account for multi-dimensional aspects of the problem and for the possibility that neighboring cells may both be out of bounds.  Consider a grid cell whose
 density is outside the specified range. Denote this cell with a ``$c$'' for center. Its volume is $V_c$ and density is $\rho_c^*$, obtained from the transport scheme.  Let the subscript ``$n$'' denote any of the six neighboring cells (in other words, only include cells which share a face with cell $c$).  We want to correct any boundedness violations for the  cell $c$ by shifting mass to or from its neighboring cells $n$:
 \begin{equation}
-\label{eqn_rhocor2}
 \rho_c = \rho_c^* + \delta \rho_c \quad ; \quad \rho_n = \rho_n^* + \delta \rho_n
 \end{equation}
 We first define the total amount of mass we wish to shift:
@@ -570,7 +569,6 @@ The correction terms that guarantee mass conservation ($V_c \, \delta \rho_c = -
 
 Next, to correct species mass fractions that are out of bounds, we follow the exact same procedure.
 \begin{equation}
-\label{eqn_rhocor2}
 Z_c = Z_c^* + \delta Z_c \quad ; \quad Z_n = Z_n^* + \delta Z_n
 \end{equation}
 We define the amount of species mass we wish to shift:
@@ -590,7 +588,6 @@ The correction terms that guarantee mass conservation ($V_c \, \rho_c \, \delta 
 %
 %The discussion above was to provide a simple case for understanding the basic idea behind the correction method.  In a realistic case we must account for multi-dimensional aspects of the problem and for the possibility that neighboring cells may both be out of bounds.  Here again we examine the case of a minimum density boundedness violation. Consider the cell $i$ in a 3D flow with volume $V_i$ and density $\rho_i^*$ obtained from the transport scheme.  Let ${\sf N}$ denote the set of cells containing $i$ and its neighbors, excluding diagonal neighbors (in other words, only include cells which share a face with $i$). We want to correct any boundedness violations for the $i$th cell via
 %\begin{equation}
-%\label{eqn_rhocor2}
 %\rho_i = \rho_i^* + \delta \rho_i
 %\end{equation}
 %
@@ -1022,7 +1019,7 @@ and in spherical coordinates
 The general form is
 
 \begin{equation}
-\label{heat_cond_cyl}
+\label{heat_cond_cyl2}
      \rho_s c_s \frac{\partial T_s}{\partial t} = \frac{1}{r^I}\frac{\partial}{\partial r} (r^I k_s \frac{\partial T_s}{\partial r}) + \dot{q}^{'''}_s, 
 \end{equation}
 
