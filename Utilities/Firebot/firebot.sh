@@ -14,6 +14,19 @@ SVNROOT="/home/firebot/FDS-SMV"
 FIREBOT_DIR="/home/firebot/firebot"
 SVN_REVISION=$1
 
+#  =========================
+#  = External dependencies =
+#  =========================
+#
+#   This script expects the following dependencies to be in place:
+#   
+#   cfast (for Stage 5 - Run_SMV_Cases.sh):
+#      ~/cfast/CFAST/intel_linux_64/cfast6_linux_64
+#
+#   SMV (for Stage 6b - Make_FDS_Pictures.sh)
+#      ~/FDS/FDS6/bin/smokeview_linux_64
+#
+
 #  ====================
 #  = End user warning =
 #  ====================
@@ -36,7 +49,7 @@ fi
 #  ===========================
 # Abort script if another instance is running
 # This command should return a "2" (from within this script) if only one script is running
-if [[ `pgrep -f firebot_verification | wc -l` -gt 2 ]];
+if [[ `pgrep -f firebot.sh | wc -l` -gt 2 ]];
    then
       echo "Warning: The Firebot verification script is already running."
       echo "Terminating this script."
@@ -498,21 +511,16 @@ wait_verification_cases_long_end()
 
 run_verification_cases_long()
 {
-   # Set variables for launching FDS cases on cluster
+   # Start running all FDS verification cases
    cd $SVNROOT/Verification
-   export SVNROOT=$SVNROOT
-   export FDS=$SVNROOT/FDS_Compilation/intel_linux_64/fds_intel_linux_64
-   export CFAST=~/cfast/CFAST/intel_linux_64/cfast6_linux_64
-   export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_linux_64/fds_mpi_intel_linux_64
-   export RUNFDS=$SVNROOT/Utilities/Scripts/runfds.sh
-   export RUNCFAST=$SVNROOT/Utilities/Scripts/runcfast.sh
-   export RUNFDSMPI=$SVNROOT/Utilities/Scripts/runfdsmpi.sh
-   export BASEDIR=$SVNROOT/Verification
+   echo 'Running FDS verification cases:' > $FIREBOT_DIR/output/stage5
+   ./Run_FDS_Cases.sh &> $FIREBOT_DIR/output/stage5
+   echo '' >> $FIREBOT_DIR/output/stage5 2>&1
 
-   # Start running all cases
-   ./FDS_Cases.sh &> $FIREBOT_DIR/output/stage5
-   ./FDS_MPI_Cases.sh >> $FIREBOT_DIR/output/stage5 2>&1
-   ./scripts/SMV_Cases.sh >> $FIREBOT_DIR/output/stage5 2>&1
+   # Start running all SMV verification cases
+   cd $SVNROOT/Verification/scripts
+   echo 'Running SMV verification cases:' > $FIREBOT_DIR/output/stage5
+   ./Run_SMV_Cases.sh >> $FIREBOT_DIR/output/stage5 2>&1
 
    # Wait for all verification cases to end
    wait_verification_cases_long_end
@@ -531,7 +539,7 @@ check_verification_cases_long()
       # Continue along
       :
    else
-      BUILD_STAGE_FAILURE="Stage 5: FDS Verification Cases"
+      BUILD_STAGE_FAILURE="Stage 5: FDS-SMV Verification Cases"
       
       grep 'Run aborted' -rI $FIREBOT_DIR/output/stage5 >> $FIREBOT_DIR/output/stage5_errors
       grep ERROR: -rI * >> $FIREBOT_DIR/output/stage5_errors
@@ -544,20 +552,109 @@ check_verification_cases_long()
    fi
 }
 
-#  =========================================
-#  = Stage 6 - Generate Smokeview pictures =
-#  =========================================
+#  ====================================
+#  = Stage 6a - Compile SMV utilities =
+#  ====================================
+
+compile_smv_utilities()
+{
+   # smokeview test:
+   cd $SVNROOT/SMV/Build/intel_linux_test_64
+   echo 'Compiling SMV test:' > $FIREBOT_DIR/output/stage6a
+   ./make_smv.sh >> $FIREBOT_DIR/output/stage6a 2>&1
+   echo '' >> $FIREBOT_DIR/output/stage6a 2>&1
+   
+   # smokezip:
+   cd $SVNROOT/Utilities/smokezip/intel_linux_64
+   echo 'Compiling smokezip:' >> $FIREBOT_DIR/output/stage6a 2>&1
+   ./make_zip.sh >> $FIREBOT_DIR/output/stage6a 2>&1
+   echo '' >> $FIREBOT_DIR/output/stage6a 2>&1
+   
+   # smokediff:
+   cd $SVNROOT/Utilities/smokediff/intel_linux_64
+   echo 'Compiling smokediff:' >> $FIREBOT_DIR/output/stage6a 2>&1
+   ./make_diff.sh >> $FIREBOT_DIR/output/stage6a 2>&1
+   echo '' >> $FIREBOT_DIR/output/stage6a 2>&1
+   
+   # background:
+   cd $SVNROOT/Utilities/background/intel_linux_32
+   echo 'Compiling background:' >> $FIREBOT_DIR/output/stage6a 2>&1
+   ./make_background.sh >> $FIREBOT_DIR/output/stage6a 2>&1
+}
+
+check_smv_utilities()
+{
+   # Check for errors in SMV utilities compilation
+   cd $SVNROOT
+   if [ -e "$SVNROOT/SMV/Build/intel_linux_test_64/smokeview_linux_test_64" ]  && \
+      [ -e "$SVNROOT/Utilities/smokezip/intel_linux_64/smokezip_linux_64" ]  && \
+      [ -e "$SVNROOT/Utilities/smokediff/intel_linux_64/smokediff_linux_64" ]  && \
+      [ -e "$SVNROOT/Utilities/background/intel_linux_32/background" ]
+   then
+      # Continue along
+      :
+   else
+      BUILD_STAGE_FAILURE="Stage 6: SMV Utilities Compilation"
+      ERROR_LOG=$FIREBOT_DIR/output/stage6a
+      save_build_status
+      email_error_message
+   fi
+}
+
+#  ================================
+#  = Stage 6b - Make FDS pictures =
+#  ================================
 
 make_fds_pictures()
 {
    # Run Make FDS Pictures script
    cd $SVNROOT/Verification
-   export SVNROOT=$SVNROOT
-   export SMV=$SVNROOT/SMV/Build/intel_linux_64/smokeview_linux_64
-   export RUNSMV=$SVNROOT/Utilities/Scripts/runsmv.sh
-   export BASEDIR=$SVNROOT/Verification
+   ./Make_FDS_Pictures.sh &> $FIREBOT_DIR/output/stage6b
+}
 
-   ./FDS_Pictures.sh &> $FIREBOT_DIR/output/stage6
+check_fds_pictures()
+{
+   # Scan and report any errors in make FDS pictures process
+   cd $FIREBOT_DIR
+   if [[ `grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6b` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      BUILD_STAGE_FAILURE="Stage 6b: Make FDS Pictures"
+      grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6b > $FIREBOT_DIR/output/stage6b_errors
+      ERROR_LOG=$FIREBOT_DIR/output/stage6b_errors
+      save_build_status
+      email_error_message
+   fi
+}
+
+#  ================================
+#  = Stage 6c - Make SMV pictures =
+#  ================================
+
+make_smv_pictures()
+{
+   # Run Make SMV Pictures script
+   cd $SVNROOT/Verification/scripts
+   ./Make_SMV_Pictures.sh &> $FIREBOT_DIR/output/stage6c
+}
+
+check_smv_pictures()
+{
+   # Scan and report any errors in make SMV pictures process
+   cd $FIREBOT_DIR
+   if [[ `grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6c` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      BUILD_STAGE_FAILURE="Stage 6c: Make SMV Pictures"
+      grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6c > $FIREBOT_DIR/output/stage6c_errors
+      ERROR_LOG=$FIREBOT_DIR/output/stage6c_errors
+      save_build_status
+      email_error_message
+   fi
 }
 
 #  ============================================
@@ -677,9 +774,9 @@ check_all_guides()
    fi
 }
 
-#  ==========================
-#  = Build status functions =
-#  ==========================
+#  =========================================
+#  = Build status email and save functions =
+#  =========================================
 
 email_success_message()
 {
@@ -772,8 +869,17 @@ check_compile_smv
 run_verification_cases_long
 check_verification_cases_long
 
-### Stage 6 ###
+### Stage 6a ###
+compile_smv_utilities
+check_smv_utilities
+
+### Stage 6b ###
 make_fds_pictures
+check_fds_pictures
+
+### Stage 6c ###
+make_smv_pictures
+check_smv_pictures
 
 ### Stage 7 ###
 run_matlab_plotting
@@ -784,7 +890,7 @@ make_fds_user_guide
 make_fds_technical_guide
 make_fds_verification_guide
 make_fds_validation_guide
-make_smv_verification_guide
+make_smv_user_guide
 make_smv_verification_guide
 check_all_guides
 
