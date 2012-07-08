@@ -514,12 +514,12 @@ run_verification_cases_long()
    # Start running all FDS verification cases
    cd $SVNROOT/Verification
    echo 'Running FDS verification cases:' > $FIREBOT_DIR/output/stage5
-   ./Run_FDS_Cases.sh &> $FIREBOT_DIR/output/stage5
+   ./Run_FDS_Cases.sh >> $FIREBOT_DIR/output/stage5 2>&1
    echo '' >> $FIREBOT_DIR/output/stage5 2>&1
 
    # Start running all SMV verification cases
    cd $SVNROOT/Verification/scripts
-   echo 'Running SMV verification cases:' > $FIREBOT_DIR/output/stage5
+   echo 'Running SMV verification cases:' >> $FIREBOT_DIR/output/stage5 2>&1
    ./Run_SMV_Cases.sh >> $FIREBOT_DIR/output/stage5 2>&1
 
    # Wait for all verification cases to end
@@ -774,9 +774,9 @@ check_all_guides()
    fi
 }
 
-#  =========================================
-#  = Build status email and save functions =
-#  =========================================
+#  ==================================================
+#  = Build status report - email and save functions =
+#  ==================================================
 
 email_success_message()
 {
