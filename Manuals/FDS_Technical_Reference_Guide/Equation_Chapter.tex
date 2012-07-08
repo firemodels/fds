@@ -144,11 +144,11 @@ the thermodynamic variables.
 
 Noting the vector identity $(\bu \cdot \nabla) \bu = \nabla|\bu|^2/2 - \bu\times\bo $ and defining the stagnation energy per unit mass ${\cal H} \equiv |\bu|^2/2 + \tp/\rho$, the momentum equation can be written
 \be \dod{\bu}{t} - \bu\times\bo + \nabla {\cal H} - \tp \, \nabla \left( \frac{1}{\rho}\right) = \frac{1}{\rho} \Big[ (\rho-\rho_0) \bg
-+ \bof_b + \nabla\!\cdot \btau \Big]  \label{momeq} \ee
++ \bof_b + \nabla\!\cdot \btau \Big]  \ee
 The term, $\bof_b$, represents the drag force exerted by the subgrid-scale particles and droplets. The viscous stress, $\btau$, is closed via gradient diffusion with the turbulent viscosity obtained from the Smagorinsky model (constant or dynamic coefficient) \cite{Germano:1991,Moin:1991,Smagorinsky:1}.
 
 It is convenient to write this equation in the form:
-\be \dod{\bu}{t} + \bF + \nabla \cH = 0 \label{simple_momentum_equation} \ee
+\be \dod{\bu}{t} + \bF + \nabla \cH = 0  \ee
 so that a Poisson equation for the pressure can be derived by taking its divergence:
 \be \nabla^2 {\cal H} = -\dod{ }{t} (\nabla\!\cdot \bu) - \nabla\!\cdot \bF    \label{simplephi2} \ee
 Note the appearance of the time derivative of the divergence. This is an important feature of the time marching scheme. Note also that the right hand side of the Poisson equation retains a term that includes the perturbation pressure, $\tp \, \nabla (1/\rho)$. This term accounts for the baroclinic torque. It is included on the right hand side of the Poisson equation by using its value from the previous time step. This approximation allows us to solve a separable form of the Poisson equation, for which there are fast, direct solvers that are optimized for uniform grids~\cite{Sweet:1}.
