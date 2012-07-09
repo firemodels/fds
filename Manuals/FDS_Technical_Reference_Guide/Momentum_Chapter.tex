@@ -295,15 +295,15 @@ since other components of the sgs tensor affect the value of the near-wall veloc
 The model used for $\tau_w = \bar{\tau}_{xz}|_{z=0}$ in FDS is the Werner and Wengle model \cite{Werner:1991} which we now describe.
 
 An important scaling quantity in the near-wall region is the friction velocity, defined as $u^* \equiv \sqrt{\tau_w/\rho}$.
-From the friction velocity we define the nondimensional streamwise velocity $u^+ \equiv u/u^*$ and nondimensional wall-normal distance $z^+ \equiv z/\ell$,
-where $\ell = \mu/(\rho u^*)$. The law of the wall is then given by \cite{Pope:2000,TennekesLumley}
+From the friction velocity we define the nondimensional streamwise velocity $u^+ \equiv u/u^*$ and nondimensional wall-normal distance $z^+ \equiv z/\delta_\nu$,
+where $\delta_\nu = \nu/u^* = \mu/(\rho u^*)$. The law of the wall is then given by \cite{Pope:2000,TennekesLumley}
 \begin{eqnarray}
 \label{eqn_visclayer} u^+ &=& z^+                \hspace{2.27cm}\mbox{for} \quad z^+ < 5 \\
 \label{eqn_loglaw}    u^+ &=& 2.4 \ln z^+ + 5.2  \hspace{0.50cm}\mbox{for} \quad z^+ > 30
 \end{eqnarray}
 The region $5 < z^+ < 30$, where both viscous and inertial stresses are important, is referred to as the buffer layer.  The upper range of the log law depends on the Reynolds number \cite{Pope:2000,Zagarola:1997}.
 
-Werner and Wengle \cite{Werner:1991} propose a simplification to the law of the wall to eliminate the mathematical difficulties of handling the buffer and log layers.  Furthermore, WW suppose that their simplified formula for the streamwise velocity holds \emph{instantaneously} within the LES.  The WW wall law is given by \cite{Sagaut:2001}
+Werner and Wengle \cite{Werner:1991} (WW) propose a simplification to the law of the wall to eliminate the mathematical difficulties of handling the buffer and log layers.  Furthermore, WW suppose that their simplified formula for the streamwise velocity holds \emph{instantaneously} within the LES.  The WW wall law is given by \cite{Sagaut:2001}
 \begin{eqnarray}
 \label{eqn_wwlam}  u^+ &=& z^+        \hspace{1.22cm}\mbox{for} \quad z^+ \le 11.81 \\
 \label{eqn_wwturb} u^+ &=& A (z^+)^B  \hspace{0.50cm}\mbox{for} \quad z^+ > 11.81 \,\mbox{,}
@@ -347,12 +347,18 @@ For rough walls we employ the log law presented in Pope \cite{Pope:2000},
 \label{eqn_roughwallloglaw}
 u^+ = \frac{1}{\kappa} \ln \left(\frac{z}{z_0}\right) + \tilde{B}
 \end{equation}
-The von K\'{a}rm\'{a}n constant is $\kappa=0.41$.  The dimensional roughness height is denoted $z_0$ (prescribed by setting {\tt ROUGHNESS} [in meters] on the {\tt SURF} line). The distance to the wall $z$ is taken as $\delta z/2$ for the first off-wall grid cell (in the wall-normal direction).  Pope notes that the parameter $\tilde{B}$ varies with $z_0/\ell$ but attains a constant value $\tilde{B}=8.5$ in the fully rough limit.
+The von K\'{a}rm\'{a}n constant is $\kappa=0.41$.  The dimensional roughness height is denoted $z_0$ (prescribed by setting {\tt ROUGHNESS} [in meters] on the {\tt SURF} line). The distance to the wall $z$ is taken as $\delta z/2$ for the first off-wall grid cell (in the wall-normal direction).  Pope notes that the parameter $\tilde{B}$ varies with $r^+ = z_0/\delta_\nu$ (the roughness height in viscous units) but attains a constant value $B_2=8.5$ in the fully rough limit.  In FDS, we implement $\tilde{B}$ as the following piece-wise function:
+\begin{equation}
+\tilde{B} = \left\{ \begin{array}{lll} B_{loglaw} + \frac{1}{\kappa}\ln(r^+) & \mbox{if} & r^+ \le 5.83 \\
+                                      \tilde{B}_{max}                        & \mbox{if} & 5.83 < r^+ \le 30.0 \\
+                                      B_2                                    & \mbox{if} & r^+ > 30.0 \end{array} \right.
+\end{equation}
+The additional constants in the piece-wise function are $B_{loglaw} = 5.2$ and $\tilde{B}_{max} = 9.5$.
 
 With these parameters set, the stress for the rough wall case may be obtained from
 \begin{equation}
 \label{eqn_roughwall_stress}
-\tau_w = \bar{\rho} \left( \frac{u}{2.44 \ln (0.5\,\delta z/z_0) + 8.5} \right)^2
+\tau_w = \bar{\rho} \left( \frac{u}{2.44 \ln (0.5\,\delta z/z_0) + \tilde{B}} \right)^2
 \end{equation}
 where $u$ is the streamwise velocity stored at $\delta z/2$.
 
