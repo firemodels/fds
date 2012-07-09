@@ -1,4 +1,4 @@
-MODULE SCRC
+MODULE SCRC  
             
 USE PRECISION_PARAMETERS
 USE GLOBAL_CONSTANTS
@@ -6456,7 +6456,7 @@ SELECT CASE (NTYPE)
                SELECT CASE(ICASE)
                   CASE (0)
                      DO IZ = 1, SCF%NZ ,2
-                        CALL  SCARC_PATCH_CELLTYPES(SCF%CELLTYPE,SCF%NX,SCF%NZ, & 1,SCF%NX  ,1,1,IZ,2,1,2)
+                        CALL  SCARC_PATCH_CELLTYPES(SCF%CELLTYPE,SCF%NX,SCF%NZ, 1,SCF%NX  ,1,1,IZ,2,1,2)
                      ENDDO
                   CASE (1)
                      DO IZ = 1, SCF%NZ-3,2
@@ -6567,11 +6567,11 @@ CALL SCARC_DEBUG_QUANTITY(NSCARC_DEBUG_CELLTYPE, NL, 'SETUP_CELLTYPE', 'GMG_COAR
                SELECT CASE(ICASE)
                   CASE (0)
                      DO IZ = 1, SCF%NZ, INCRZ
-                        CALL  SCARC_PATCH_CELLTYPES(SCF%CELLTYPE,SCF%NX,SCF%NZ, & 1,SCF%NX  ,1,1,IZ,3,1,INCRZ)
+                        CALL  SCARC_PATCH_CELLTYPES(SCF%CELLTYPE,SCF%NX,SCF%NZ, 1,SCF%NX  ,1,1,IZ,3,1,INCRZ)
                      ENDDO
                   CASE (1)
                      DO IZ = 1, SCF%NZ, INCRZ
-                        CALL  SCARC_PATCH_CELLTYPES(SCF%CELLTYPE,SCF%NX,SCF%NZ, & 1,SCF%NX  ,1,1,IZ,2,1,INCRZ)
+                        CALL  SCARC_PATCH_CELLTYPES(SCF%CELLTYPE,SCF%NX,SCF%NZ, 1,SCF%NX  ,1,1,IZ,2,1,INCRZ)
                      ENDDO
                   CASE (3)
                      DO IZ = 1, SCF%NZ, INCRZ
