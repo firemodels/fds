@@ -174,6 +174,7 @@ check_compile_fds_db()
       # Continue along
       :
    else
+      echo "Stage 2a warnings:" >> $FIREBOT_DIR/output/warnings
       grep warning ${FIREBOT_DIR}/output/stage2a >> $FIREBOT_DIR/output/warnings
    fi
 }
@@ -212,6 +213,7 @@ check_compile_fds_mpi_db()
       # Continue along
       :
    else
+      echo "Stage 2b warnings:" >> $FIREBOT_DIR/output/warnings
       grep warning ${FIREBOT_DIR}/output/stage2b | grep -v 'feupdateenv is not implemented' >> $FIREBOT_DIR/output/warnings
    fi
 }
@@ -377,6 +379,7 @@ check_compile_fds()
       # Continue along
       :
    else
+      echo "Stage 4a warnings:" >> $FIREBOT_DIR/output/warnings
       grep warning ${FIREBOT_DIR}/output/stage4a >> $FIREBOT_DIR/output/warnings
    fi
 }
@@ -415,6 +418,7 @@ check_compile_fds_mpi()
       # Continue along
       :
    else
+      echo "Stage 4b warnings:" >> $FIREBOT_DIR/output/warnings
       grep warning ${FIREBOT_DIR}/output/stage4b | grep -v 'feupdateenv is not implemented' >> $FIREBOT_DIR/output/warnings
    fi
 }
@@ -552,6 +556,7 @@ check_compile_smv_db()
       # Continue along
       :
    else
+      echo "Stage 6b warnings:" >> $FIREBOT_DIR/output/warnings
       grep warning ${FIREBOT_DIR}/output/stage6b | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $FIREBOT_DIR/output/warnings
    fi
 }
@@ -618,6 +623,7 @@ check_compile_smv_test()
       # Continue along
       :
    else
+      echo "Stage 6d warnings:" >> $FIREBOT_DIR/output/warnings
       grep warning ${FIREBOT_DIR}/output/stage6d | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $FIREBOT_DIR/output/warnings
    fi
 }
@@ -684,6 +690,7 @@ check_compile_smv()
       # Continue along
       :
    else
+      echo "Stage 6f warnings:" >> $FIREBOT_DIR/output/warnings
       grep warning ${FIREBOT_DIR}/output/stage6f | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $FIREBOT_DIR/output/warnings
    fi
 }
