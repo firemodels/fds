@@ -7287,7 +7287,7 @@ updatemenu=0;
   if(plotstate==DYNAMIC_PLOTS){
     glutAddMenuEntry(_("Animation"),1);
     glutAddMenuEntry(_("  t: set/unset single time step mode"),6);
-    glutAddMenuEntry(_("  o: reset animation to the initial time"),6);
+    glutAddMenuEntry(_("  0: reset animation to the initial time"),6);
     glutAddMenuEntry(_("  T: toggle method for interpolating data color"),6);
     if(cellcenter_slice_active==1){
       glutAddMenuEntry(_("     (also, toggles cell center display on/off)"),6);
