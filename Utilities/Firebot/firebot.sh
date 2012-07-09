@@ -216,44 +216,6 @@ check_compile_fds_mpi_db()
    fi
 }
 
-#  =============================
-#  = Stage 2c - Compile SMV DB =
-#  =============================
-
-compile_smv_db()
-{
-   # Clean and compile SMV DB
-   cd $SVNROOT/SMV/Build/intel_linux_64_dbg
-   make --makefile ../Makefile clean &> /dev/null
-   ./make_smv.sh &> $FIREBOT_DIR/output/stage2c
-}
-
-check_compile_smv_db()
-{
-   # Check for errors in SMV DB compilation
-   cd $SVNROOT/SMV/Build/intel_linux_64_dbg
-   if [ -e "smokeview_linux_64_dbg" ]
-   then
-      # Continue along
-      :
-   else
-      BUILD_STAGE_FAILURE="Stage 2c: SMV DB Compilation"
-      ERROR_LOG=$FIREBOT_DIR/output/stage2c
-      save_build_status
-      email_error_message
-   fi
-
-   # Check for compiler warnings
-   # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
-   if [[ `grep warning ${FIREBOT_DIR}/output/stage2c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
-   then
-      # Continue along
-      :
-   else
-      grep warning ${FIREBOT_DIR}/output/stage2c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $FIREBOT_DIR/output/warnings
-   fi
-}
-
 #  ================================================
 #  = Stage 3 - Run verification cases (short run) =
 #  ================================================
@@ -382,9 +344,9 @@ check_verification_cases_short()
    fi
 }
 
-#  ==========================
-#  = Stage 4a - Compile FDS =
-#  ==========================
+#  ==================================
+#  = Stage 4a - Compile FDS release =
+#  ==================================
 
 compile_fds()
 {
@@ -403,7 +365,7 @@ check_compile_fds()
       # Continue along
       :
    else
-      BUILD_STAGE_FAILURE="Stage 4a: FDS Compilation"
+      BUILD_STAGE_FAILURE="Stage 4a: FDS Release Compilation"
       ERROR_LOG=$FIREBOT_DIR/output/stage4a
       save_build_status
       email_error_message
@@ -419,9 +381,9 @@ check_compile_fds()
    fi
 }
 
-#  ==============================
-#  = Stage 4b - Compile FDS MPI =
-#  ==============================
+#  ======================================
+#  = Stage 4b - Compile FDS MPI release =
+#  ======================================
 
 compile_fds_mpi()
 {
@@ -440,7 +402,7 @@ check_compile_fds_mpi()
       # Continue along
       :
    else
-      BUILD_STAGE_FAILURE="Stage 4b: FDS MPI Compilation"
+      BUILD_STAGE_FAILURE="Stage 4b: FDS MPI Release Compilation"
       ERROR_LOG=$FIREBOT_DIR/output/stage4b
       save_build_status
       email_error_message
@@ -454,44 +416,6 @@ check_compile_fds_mpi()
       :
    else
       grep warning ${FIREBOT_DIR}/output/stage4b | grep -v 'feupdateenv is not implemented' >> $FIREBOT_DIR/output/warnings
-   fi
-}
-
-#  ==========================
-#  = Stage 4c - Compile SMV =
-#  ==========================
-
-compile_smv()
-{
-   # Clean and compile SMV
-   cd $SVNROOT/SMV/Build/intel_linux_64
-   make --makefile ../Makefile clean &> /dev/null
-   ./make_smv.sh &> $FIREBOT_DIR/output/stage4c
-}
-
-check_compile_smv()
-{
-   # Check for errors in SMV DB compilation
-   cd $SVNROOT/SMV/Build/intel_linux_64
-   if [ -e "smokeview_linux_64" ]
-   then
-      # Continue along
-      :
-   else
-      BUILD_STAGE_FAILURE="Stage 4c: SMV Compilation"
-      ERROR_LOG=$FIREBOT_DIR/output/stage4c
-      save_build_status
-      email_error_message
-   fi
-
-   # Check for compiler warnings
-   # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
-   if [[ `grep warning ${FIREBOT_DIR}/output/stage4c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
-   then
-      # Continue along
-      :
-   else
-      grep warning ${FIREBOT_DIR}/output/stage4c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $FIREBOT_DIR/output/warnings
    fi
 }
 
@@ -557,13 +481,7 @@ check_verification_cases_long()
 #  ====================================
 
 compile_smv_utilities()
-{
-   # smokeview test:
-   cd $SVNROOT/SMV/Build/intel_linux_test_64
-   echo 'Compiling SMV test:' > $FIREBOT_DIR/output/stage6a
-   ./make_smv.sh >> $FIREBOT_DIR/output/stage6a 2>&1
-   echo '' >> $FIREBOT_DIR/output/stage6a 2>&1
-   
+{  
    # smokezip:
    cd $SVNROOT/Utilities/smokezip/intel_linux_64
    echo 'Compiling smokezip:' >> $FIREBOT_DIR/output/stage6a 2>&1
@@ -586,61 +504,70 @@ check_smv_utilities()
 {
    # Check for errors in SMV utilities compilation
    cd $SVNROOT
-   if [ -e "$SVNROOT/SMV/Build/intel_linux_test_64/smokeview_linux_test_64" ]  && \
-      [ -e "$SVNROOT/Utilities/smokezip/intel_linux_64/smokezip_linux_64" ]  && \
+   if [ -e "$SVNROOT/Utilities/smokezip/intel_linux_64/smokezip_linux_64" ]  && \
       [ -e "$SVNROOT/Utilities/smokediff/intel_linux_64/smokediff_linux_64" ]  && \
       [ -e "$SVNROOT/Utilities/background/intel_linux_32/background" ]
    then
       # Continue along
       :
    else
-      BUILD_STAGE_FAILURE="Stage 6: SMV Utilities Compilation"
+      BUILD_STAGE_FAILURE="Stage 6a: SMV Utilities Compilation"
       ERROR_LOG=$FIREBOT_DIR/output/stage6a
       save_build_status
       email_error_message
    fi
 }
 
-#  ================================
-#  = Stage 6b - Make FDS pictures =
-#  ================================
+#  =============================
+#  = Stage 6b - Compile SMV DB =
+#  =============================
 
-make_fds_pictures()
+compile_smv_db()
 {
-   # Run Make FDS Pictures script
-   cd $SVNROOT/Verification
-   ./Make_FDS_Pictures.sh &> $FIREBOT_DIR/output/stage6b
+   # Clean and compile SMV DB
+   cd $SVNROOT/SMV/Build/intel_linux_64_dbg
+   make --makefile ../Makefile clean &> /dev/null
+   ./make_smv.sh &> $FIREBOT_DIR/output/stage6b
 }
 
-check_fds_pictures()
+check_compile_smv_db()
 {
-   # Scan and report any errors in make FDS pictures process
-   cd $FIREBOT_DIR
-   if [[ `grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6b` == "" ]]
+   # Check for errors in SMV DB compilation
+   cd $SVNROOT/SMV/Build/intel_linux_64_dbg
+   if [ -e "smokeview_linux_64_dbg" ]
    then
       # Continue along
       :
    else
-      BUILD_STAGE_FAILURE="Stage 6b: Make FDS Pictures"
-      grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6b > $FIREBOT_DIR/output/stage6b_errors
-      ERROR_LOG=$FIREBOT_DIR/output/stage6b_errors
+      BUILD_STAGE_FAILURE="Stage 6b: SMV DB Compilation"
+      ERROR_LOG=$FIREBOT_DIR/output/stage6b
       save_build_status
       email_error_message
    fi
+
+   # Check for compiler warnings
+   # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
+   if [[ `grep warning ${FIREBOT_DIR}/output/stage6b | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      grep warning ${FIREBOT_DIR}/output/stage6b | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $FIREBOT_DIR/output/warnings
+   fi
 }
 
-#  ================================
-#  = Stage 6c - Make SMV pictures =
-#  ================================
+#  =============================================
+#  = Stage 6c - Make SMV pictures (debug mode) =
+#  =============================================
 
-make_smv_pictures()
+make_smv_pictures_db()
 {
-   # Run Make SMV Pictures script
+   # Run Make SMV Pictures script (debug mode)
    cd $SVNROOT/Verification/scripts
-   ./Make_SMV_Pictures.sh &> $FIREBOT_DIR/output/stage6c
+   ./Make_SMV_Pictures.sh -d &> $FIREBOT_DIR/output/stage6c
 }
 
-check_smv_pictures()
+check_smv_pictures_db()
 {
    # Scan and report any errors in make SMV pictures process
    cd $FIREBOT_DIR
@@ -649,9 +576,169 @@ check_smv_pictures()
       # Continue along
       :
    else
-      BUILD_STAGE_FAILURE="Stage 6c: Make SMV Pictures"
+      BUILD_STAGE_FAILURE="Stage 6c: Make SMV Pictures (Debug Mode)"
       grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6c > $FIREBOT_DIR/output/stage6c_errors
       ERROR_LOG=$FIREBOT_DIR/output/stage6c_errors
+      save_build_status
+      email_error_message
+   fi
+}
+
+#  ===============================
+#  = Stage 6d - Compile SMV test =
+#  ===============================
+
+compile_smv_test()
+{
+   # Clean and compile SMV DB
+   cd $SVNROOT/SMV/Build/intel_linux_test_64
+   make --makefile ../Makefile clean &> /dev/null
+   ./make_smv.sh &> $FIREBOT_DIR/output/stage6d
+}
+
+check_compile_smv_test()
+{
+   # Check for errors in SMV test compilation
+   cd $SVNROOT/SMV/Build/intel_linux_test_64
+   if [ -e "smokeview_linux_test_64" ]
+   then
+      # Continue along
+      :
+   else
+      BUILD_STAGE_FAILURE="Stage 6d: SMV Test Compilation"
+      ERROR_LOG=$FIREBOT_DIR/output/stage6d
+      save_build_status
+      email_error_message
+   fi
+
+   # Check for compiler warnings
+   # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
+   if [[ `grep warning ${FIREBOT_DIR}/output/stage6d | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      grep warning ${FIREBOT_DIR}/output/stage6d | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $FIREBOT_DIR/output/warnings
+   fi
+}
+
+#  ============================================
+#  = Stage 6e - Make SMV pictures (test mode) =
+#  ============================================
+
+make_smv_pictures_test()
+{
+   # Run Make SMV Pictures script (test mode)
+   cd $SVNROOT/Verification/scripts
+   ./Make_SMV_Pictures.sh &> $FIREBOT_DIR/output/stage6e
+}
+
+check_smv_pictures_test()
+{
+   # Scan and report any errors in make SMV pictures process
+   cd $FIREBOT_DIR
+   if [[ `grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6e` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      BUILD_STAGE_FAILURE="Stage 6e: Make SMV Pictures (Test Mode)"
+      grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6e > $FIREBOT_DIR/output/stage6e_errors
+      ERROR_LOG=$FIREBOT_DIR/output/stage6e_errors
+      save_build_status
+      email_error_message
+   fi
+}
+
+#  ==================================
+#  = Stage 6f - Compile SMV release =
+#  ==================================
+
+compile_smv()
+{
+   # Clean and compile SMV
+   cd $SVNROOT/SMV/Build/intel_linux_64
+   make --makefile ../Makefile clean &> /dev/null
+   ./make_smv.sh &> $FIREBOT_DIR/output/stage6f
+}
+
+check_compile_smv()
+{
+   # Check for errors in SMV release compilation
+   cd $SVNROOT/SMV/Build/intel_linux_64
+   if [ -e "smokeview_linux_64" ]
+   then
+      # Continue along
+      :
+   else
+      BUILD_STAGE_FAILURE="Stage 6f: SMV Release Compilation"
+      ERROR_LOG=$FIREBOT_DIR/output/stage6f
+      save_build_status
+      email_error_message
+   fi
+
+   # Check for compiler warnings
+   # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
+   if [[ `grep warning ${FIREBOT_DIR}/output/stage6f | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      grep warning ${FIREBOT_DIR}/output/stage6f | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $FIREBOT_DIR/output/warnings
+   fi
+}
+
+#  ===============================================
+#  = Stage 6g - Make SMV pictures (release mode) =
+#  ===============================================
+
+make_smv_pictures()
+{
+   # Run Make SMV Pictures script (release mode)
+   cd $SVNROOT/Verification/scripts
+   ./Make_SMV_Pictures.sh -r &> $FIREBOT_DIR/output/stage6g
+}
+
+check_smv_pictures()
+{
+   # Scan and report any errors in make SMV pictures process
+   cd $FIREBOT_DIR
+   if [[ `grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6g` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      BUILD_STAGE_FAILURE="Stage 6g: Make SMV Pictures (Release Mode)"
+      grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6g > $FIREBOT_DIR/output/stage6g_errors
+      ERROR_LOG=$FIREBOT_DIR/output/stage6g_errors
+      save_build_status
+      email_error_message
+   fi
+}
+
+#  ================================
+#  = Stage 6h - Make FDS pictures =
+#  ================================
+
+make_fds_pictures()
+{
+   # Run Make FDS Pictures script
+   cd $SVNROOT/Verification
+   ./Make_FDS_Pictures.sh &> $FIREBOT_DIR/output/stage6h
+}
+
+check_fds_pictures()
+{
+   # Scan and report any errors in make FDS pictures process
+   cd $FIREBOT_DIR
+   if [[ `grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6h` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      BUILD_STAGE_FAILURE="Stage 6h: Make FDS Pictures"
+      grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6h > $FIREBOT_DIR/output/stage6h_errors
+      ERROR_LOG=$FIREBOT_DIR/output/stage6h_errors
       save_build_status
       email_error_message
    fi
@@ -845,10 +932,6 @@ check_compile_fds_db
 compile_fds_mpi_db
 check_compile_fds_mpi_db
 
-### Stage 2c ###
-compile_smv_db
-check_compile_smv_db
-
 ### Stage 3 ###
 run_verification_cases_short
 check_verification_cases_short
@@ -861,10 +944,6 @@ check_compile_fds
 compile_fds_mpi
 check_compile_fds_mpi
 
-### Stage 4c ###
-compile_smv
-check_compile_smv
-
 ### Stage 5 ###
 run_verification_cases_long
 check_verification_cases_long
@@ -874,12 +953,32 @@ compile_smv_utilities
 check_smv_utilities
 
 ### Stage 6b ###
-make_fds_pictures
-check_fds_pictures
+compile_smv_db
+check_compile_smv_db
 
 ### Stage 6c ###
+make_smv_pictures_db
+check_smv_pictures_db
+
+### Stage 6d ###
+compile_smv_test
+check_compile_smv_test
+
+### Stage 6e ###
+make_smv_pictures_test
+check_smv_pictures_test
+
+### Stage 6f ###
+compile_smv
+check_compile_smv
+
+### Stage 6g ###
 make_smv_pictures
 check_smv_pictures
+
+### Stage 6h ###
+make_fds_pictures
+check_fds_pictures
 
 ### Stage 7 ###
 run_matlab_plotting
