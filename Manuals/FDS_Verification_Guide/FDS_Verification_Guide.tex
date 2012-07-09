@@ -752,46 +752,42 @@ the corresponding location in space and time.  The figure confirms that the adve
 \section{2D Vortex Simulation}
 \label{two_dimensional_vortex}
 
-In this section we present another case that demonstrates the second-order accuracy of the FDS code. FDS was used to model an analytically stable flow pattern consisting of a single stable vortex in a constant flow field. The ability of FDS to maintain the geometry of the vortex over time provides a good measure of the order of accuracy achieved by the FDS transport scheme.
+In this section we present another case that demonstrates the second-order accuracy of the FDS transport algorithm. Consider an analytically stable flow field consisting of a single vortex advected by a uniform flow. Maintaining the geometry of the vortex over time provides a good measure of the order of accuracy of the transport scheme.
 
-   \begin{figure}[h!]
+\begin{figure}[h!]
          \centering
-         \scalebox{.7}{\includegraphics{FIGURES/vort2d_diagram}}
+         \scalebox{.5}{\includegraphics{FIGURES/vort2d_diagram}}
       \caption{Representative vector field of a two dimensional vortex in a constant flow field.}
       \label{fig_vort2d_diagram}
-   \end{figure}
+\end{figure}
 
-The vortex is the gradient of the potential field,
+\noindent The vortex is initially defined as the gradient of the potential field,
 \begin{equation}
 \label{eqn_vort2d}
 \Psi_{0} (x,z) = \Gamma \ \exp \left[ - \frac{x^{2} + z^{2}}{2 \ R_{c}^{2}} \right],
 \end{equation}
-where $\Gamma$ is a parameter that determines the intensity of the vortex and $R_{c}$ sets its characteristic size. This flow pattern is defined such that the point at the center of the two vortices is at $(x,z) = (0,0)$. The velocity components are determined by taking the gradient of the potential field,
+where $\Gamma$ determines its intensity and $R_c$ its characteristic size. The velocity components are determined by taking the gradient of the potential field superimposed on the constant flow field of velocity $U_0$ in the positive $x$ direction,
 \begin{eqnarray}
 \label{eqn_uvel}
-u (x,z) &\equiv& U_{0} + \frac{\partial}{\partial z} \Psi_{0} = U_{0} - \frac{\Gamma \ z}{R_{c}^{2}} \ Exp \left[ - \frac{x^{2} + z^{2}}{2 \ R_{c}^{2}} \right], \\
-w (x,z) &\equiv& - \frac{\partial}{\partial x} \Psi_{0} = \frac{\Gamma \ x}{R_{c}^{2}} \ Exp \left[ - \frac{x^{2} + z^{2}}{2 \ R_{c}^{2}} \right],
-\end{eqnarray} where $u$ and $w$ refer to velocity in the $x$- and $z$-directions respectively. For our purposes we need only analyze one component of the velocity field. We will focus our attention on the $u$-component of velocity.
+u (x,z) &\equiv& U_{0} + \frac{\partial}{\partial z} \Psi_{0} = U_{0} - \frac{\Gamma \ z}{R_{c}^{2}} \exp \left[ - \frac{x^{2} + z^{2}}{2 \ R_{c}^{2}} \right], \\
+w (x,z) &\equiv& - \frac{\partial}{\partial x} \Psi_{0} = \frac{\Gamma \ x}{R_{c}^{2}} \exp \left[ - \frac{x^{2} + z^{2}}{2 \ R_{c}^{2}} \right],
+\end{eqnarray} 
+where $u$ and $w$ refer to velocity in the $x$ and $z$-directions, respectively. For our purposes we need only analyze one component of the velocity field. We will focus our attention on the $u$-component of velocity.
 
-
-We define the computational domain as a two-dimensional square region, $L=0.3112$ m on a side, with periodic boundary conditions. The domain is discretized on a range of square, two-dimensional meshes of $40^{2}$, $80^{2}$, $160^{2}$, and $320^{2}$ grid cells. For the purposes of this test, we set the flow parameters as
+We define the computational domain as a two-dimensional square region, $L=0.3112$~m on a side, with periodic boundary conditions. The domain is discretized for a range of square, two-dimensional meshes of $40^{2}$, $80^{2}$, $160^{2}$, and $320^{2}$ grid cells. For the purposes of this test, we set the flow parameters as
 $$
 \begin{array}{lll}
-U_{0} &&= 35 \ \mathrm{m / s}, \\
-R_{c} &= L / 20 &= 0.01.556 \ \mathrm{m}, \\
-\Gamma &= 0.04 \ U_{0} \ R_{c} \ \sqrt{e} &= 0.03.59157.
+U_{0} &&= 35 \ \mathrm{m/s} \\
+R_{c} &= L / 20 &= 0.01556 \ \mathrm{m} \\
+\Gamma &= 0.04 \ U_{0} \ R_{c} \ \sqrt{e} &= 0.0359157
 \end{array}
 $$
-
-The constant flow field and periodic boundary conditions cause the vortex to loop through the computational domain. The `flow-through' time, $t_{f}$, may be defined as the time period required for the stable vortex to return to its original spatial coordinates,
+The constant flow field and periodic boundary conditions cause the vortex to repeatedly pass through the computational domain. The ``pass-through'' time, $t_{f}$, is defined as the time period required for the stable vortex to return to its original position,
 \begin{equation*}
 t_{f} = L / U_{0} \simeq 8.8914 \times 10^{-3} \ \mathrm{s}.
 \end{equation*}
-In order to ensure that our numerical simulation can converge to the analytical solution, we must ensure that the Courant-Friedrichs-Lewy (CFL) condition is met. By defining the time-step, $dt$, relative to the grid-cell size, $dx$, such that
-\begin{equation*}
-\mbox{d}t = \frac{dx}{2 U_{0}},
-\end{equation*}
-we can maintain a CFL value of 0.5, which is well below the maximum CFL value of one.
+To ensure that the numerical solution converges to the analytical solution, we set the time step, $\dt$, so that the Courant-Friedrichs-Lewy (CFL) number is 0.5.
+
 
 \begin{figure}[h!]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -802,7 +798,7 @@ we can maintain a CFL value of 0.5, which is well below the maximum CFL value of
    \label{fig_vort2d_axisvelocity}
 \end{figure}
 
-A plot of $u$-velocity values just along the $z$-axis provides a simple characterization of the vortex's geometry. The extent to which this geometry changes over time provides a qualitative measure of the accuracy of the transport algorithm. Figure \ref{fig_vort2d_axisvelocity} displays such plots for two different grid resolutions. Each line represents a plot taken for a different number of flow-through times such that the red lines represent the vortex after it has undergone the most loops through the computational domain while the green lines represent the vortex in the initial first couple of loops. The broken black line in these plots represents the stable analytical solution. As the vortex undergoes more loops through the computational domain, its velocity profile diverges further and further from the analytically stable profile. While divergence still occurs on the finer mesh, the extent to which it diverges after the same number of flow-through times is significantly smaller.
+A plot of $u$-velocity values just along the $z$-axis provides a simple characterization of the vortex geometry. The extent to which this geometry changes over time provides a qualitative measure of the accuracy of the transport algorithm. Figure \ref{fig_vort2d_axisvelocity} displays these plots for two different grid resolutions. Each line represents a plot taken for a different number of flow-through times such that the red lines represent the vortex after it has undergone the most passes through the computational domain while the green lines represent the vortex in the initial phase. The broken black line represents the analytical solution. As the vortex undergoes more passes through the computational domain, its velocity profile diverges further and further from the analytical profile. While divergence still occurs on the finer mesh, the extent to which it diverges after the same number of flow-through times is significantly smaller.
 
    \begin{figure}[h!]
          \centering
@@ -811,19 +807,18 @@ A plot of $u$-velocity values just along the $z$-axis provides a simple characte
       \label{fig_vort2d_error}
    \end{figure}
 
-The rate with which the simulated profiles converge to the analytical ones by means of grid refinement describes the order of error experienced as a result of our numerical methods. In Figure \ref{fig_vort2d_error} we plot the rms error resulting from differences between the simulated and analytical profiles for each grid resolution. A log-log plot is used so that power relations appear as straight lines. The three color lines represents the rms error as a function of grid-cell size for each of three subsequent loops of the vortex through the computational domain. The broken and solid black lines represent the plot gradient corresponding to first and second order error respectively. While the error increases with each flow-through time, the gradients of the lines are roughly parallel to the solid black line, indicating second order error in our numerical methods.
+The rate with which the simulated profiles converge to the analytical one defines the order of accuracy of the numerical scheme. In Figure~\ref{fig_vort2d_error} we plot the rms error of the numerical solution as a function of the grid resolution. The three colored curves represent the rms error at three different pass-through times. The broken and solid black lines represent the plot gradient corresponding to first and second order error respectively. While the error increases with each flow-through time, the gradients of the lines are roughly parallel to the solid black line, indicating second-order accuracy of the numerical scheme.
 
-\subsection{Time-Dependent Solution}
-
-In order to analyze the stability of the vortex at times other than the flow-through time, it was necessary to derive the time-dependent solution. Given the periodic boundary conditions, the time-dependent governing equation and its corresponding $u$-velocity field are
+To analyze the stability of the vortex at times other than discrete multiples of the pass-through time, consider the time-dependent potential field and its corresponding $u$-velocity component:
 \begin{equation}
 \label{eqn_vort2d_timedep}
-\Psi (x,z,t) = \Psi_{0} \ Exp \left[\frac{2 \ U_{0} \ x \ t - U_{0}^{2} \ t^{2}}{2 \ R_{c}^{2}} \right],
+\Psi (x,z,t) = \Psi_{0} \exp \left[\frac{2 \ U_{0} \ x \ t - U_{0}^{2} \ t^{2}}{2 \ R_{c}^{2}} \right],
 \end{equation}
 \begin{equation}
 \label{eqn_uvel_timedep}
-u (x,z,t) = U_{0} - \Psi_{0} \ \frac{z}{R_{c}^{2}} \ Exp \left[\frac{2 \ U_{0} \ x \ t - U_{0}^{2} \ t^{2}}{2 \ R_{c}^{2}} \right].
+u (x,z,t) = U_{0} - \Psi_{0} \ \frac{z}{R_{c}^{2}} \exp \left[\frac{2 \ U_{0} \ x \ t - U_{0}^{2} \ t^{2}}{2 \ R_{c}^{2}} \right].
 \end{equation}
+Figure \ref{fig_vort2d_pointvelocity} shows the $u$-velocity at a single point, on the lower left fringe of the vortex, for two different mesh resolutions, $80^{2}$ and $160^{2}$. A mesh resolution of $320^{2}$ grid cells produces a plot that is, to the eye, a perfect match out to four pass-through times.
 
 \begin{figure}[h!]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -834,7 +829,6 @@ u (x,z,t) = U_{0} - \Psi_{0} \ \frac{z}{R_{c}^{2}} \ Exp \left[\frac{2 \ U_{0} \
    \label{fig_vort2d_pointvelocity}
 \end{figure}
 
-We collected $u$-velocity data for a single point in the computational domain, on the lower left fringe of the vortex. Plotting this data over the analytical time-dependent solution portrays exactly where and to what extent the numerical model deviates from the analytical as time progresses. Over time, the original peak that marks the passage of the vortex through the point becomes surrounded by smaller secondary peaks. Figure \ref{fig_vort2d_pointvelocity} shows this data for two different mesh resolutions, $80^{2}$ and $160^{2}$. A mesh resolution of $320^{2}$ grid cells produces a plot that is, to the eye, a perfect match out to four flow-through times.
 
 
 
@@ -1498,7 +1492,7 @@ The enthalpy of the mixture at the outlet is $2 \times 1 \times (900+273.15) + 2
 
 \subsection{Solid phase energy conservation {energy\_budget\_solid})}
 
-This case tests the ability of FDS to properly conserve the total of the solid phase and the gas phase energy.  A 1 m$^3$ box iis filled with 1 kg of a gas with a specific heat of =1 kJ/(kg K), a molecular weight of 28 g/mol, and an initial temperature of 20 $^\circ$C.  All the walls, except the floor, are adiabatic.  The floor is defined as a 1 mm thick layer of a material with a conductivity of 100 W/(m K),  a specific heat of 1 kJ/(kg K), an initial temperature of 150 $^\circ$C, and a density of 1000 kg/m$^3$.  The initial enthalpy is $1 \times 1 \times (20+273.15) + 1 \times 1 \times (150+273.15)  =  716.3$ kJ.  At the end state the gas will have risen in temperature, the solid will have decreased in temperature, and the pressure will have risen.  Since energy is conserved this occurs at a temperature of 96.3 $^\circ$C.  The final enthalpy is $1 \times 1 \times (96.3+273.15) + 1 \times 1 \times (96.3+273.15) + 22670 / 1000  =  716.3$ kJ. 
+This case tests the ability of FDS to properly conserve the total of the solid phase and the gas phase energy.  A 1 m$^3$ box iis filled with 1 kg of a gas with a specific heat of =1 kJ/(kg K), a molecular weight of 28 g/mol, and an initial temperature of 20 $^\circ$C.  All the walls, except the floor, are adiabatic.  The floor is defined as a 1 mm thick layer of a material with a conductivity of 100 W/(m K),  a specific heat of 1 kJ/(kg K), an initial temperature of 150 $^\circ$C, and a density of 1000 kg/m$^3$.  The initial enthalpy is $1 \times 1 \times (20+273.15) + 1 \times 1 \times (150+273.15)  =  716.3$ kJ.  At the end state the gas will have risen in temperature, the solid will have decreased in temperature, and the pressure will have risen.  Since energy is conserved this occurs at a temperature of 96.3 $^\circ$C.  The final enthalpy is $1 \times 1 \times (96.3+273.15) + 1 \times 1 \times (96.3+273.15) + 22670 / 1000  =  716.3$ kJ.
 
 \begin{figure}[ht]
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/energy_budget_solid_T}
@@ -2272,7 +2266,7 @@ Figure~\ref{fig:deposition_mass} shows the time evolution of the gas phase soot 
 \begin{figure}[ht]
 \begin{center}
 \begin{tabular}{c}
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/Propane_flame_deposition_gas} 
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/Propane_flame_deposition_gas}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/Propane_flame_deposition_wall} \\
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/Propane_flame_deposition_total}
 \end{tabular}
@@ -3007,7 +3001,7 @@ F & 150 & 1600 \tabularnewline
 
 The pressure drop test cases consider a 1 m wide by 1 m tall by 2 m long channel with a 2 m/s fixed velocity boundary condition on one end, an {\ct OPEN} boundary condition on the other end, and {\ct FREE\_SLIP} on the y- and z-faces.  Three channels are stacked vertically (each with its own {\ct MESH}, and a plane of particles is placed across each channel at 1 m.  The particles are 0.01 m in diameter and 10 particles are placed per cell.  A {\ct USER\_DRAG\_COEFFICIENT} of 5, 10, and 20 is set for the particles in the channels.  According to
 \be \Delta P=\frac{1}{2} \rho \frac{\sum \, C_{D} \, \pi \, r_{d}^{2}} {A} \ee
-where A$_{cx}$ is the 1 m$^2$ cross-sectional area, the pressure drops in each sub channel is 3.77, 7.54, and 15.1 Pa.  Comparisons of computed and analytical results are shown in Figure~\ref{particle_drag_plots}. It is seen that the pressure drop converges to the analytic solution as the timestep decreases. 
+where A$_{cx}$ is the 1 m$^2$ cross-sectional area, the pressure drops in each sub channel is 3.77, 7.54, and 15.1 Pa.  Comparisons of computed and analytical results are shown in Figure~\ref{particle_drag_plots}. It is seen that the pressure drop converges to the analytic solution as the timestep decreases.
 
 \begin{figure}[ht]
 \noindent
@@ -3027,14 +3021,14 @@ where A$_{cx}$ is the 1 m$^2$ cross-sectional area, the pressure drops in each s
 
 \section{Mesh Screens (screen\_drag)}
 
-These two test cases consider a 1 m wide by 1 m tall by 2 m long channel with either a 2 m/s or a 20 m/s fixed velocity boundary condition fixed velocity boundary condition on one end, an {\ct OPEN} boundary condition on the other end, and {\ct FREE\_SLIP} on the y- and z-faces.  Three channels are stacked vertically (each with its own {\ct MESH}, and a plane of particles is placed across each channel at 1 m.  The plane of particles are defined as a screen with a wire diameter of 0.0003 m.  A {\ct FREE\_AREA\_FRACTION} of 0.1, 0.4, and 0.8 is set for the particles in the channels.  According to the screen drag formula 
+These two test cases consider a 1 m wide by 1 m tall by 2 m long channel with either a 2 m/s or a 20 m/s fixed velocity boundary condition fixed velocity boundary condition on one end, an {\ct OPEN} boundary condition on the other end, and {\ct FREE\_SLIP} on the y- and z-faces.  Three channels are stacked vertically (each with its own {\ct MESH}, and a plane of particles is placed across each channel at 1 m.  The plane of particles are defined as a screen with a wire diameter of 0.0003 m.  A {\ct FREE\_AREA\_FRACTION} of 0.1, 0.4, and 0.8 is set for the particles in the channels.  According to the screen drag formula
 \be  \Delta \hbox{P} \;= \; \left( \frac{\mu}{\hbox{K}} u \; + \; \rho \frac{\hbox{Y}}{\sqrt{\hbox{K}}} u^2 \right) \Delta x_{screen} \ee
 where K and Y are empirical constants defined in the User's Guide, the pressure drops for the 2 m/s inlet should be 126 Pa, 14 Pa, and 5.3 Pa, and for the 20 m/s inlet should be 1260 Pa, 168 Pa, and 124 Pa.   Comparisons of computed and analytical results are shown in Figure~\ref{screen_drag_plots}.
 
 
 \begin{figure}[ht]
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/screen_drag_1} 
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/screen_drag_2} 
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/screen_drag_1}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/screen_drag_2}
 \caption[Sample cases {\bf screen\_drag\_1} and {\bf screen\_drag\_2}.]{Outputs of the {\bf screen\_drag} test cases compared with analytical solutions.}
 \label{screen_drag_plots}
 \end{figure}
