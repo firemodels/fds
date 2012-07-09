@@ -354,6 +354,18 @@ void setup_glut(int argc, char **argv){
   if(smoketempdir==NULL)smoketempdir=getenv("svtempdir");
   if(smoketempdir==NULL)smoketempdir=getenv("TEMP");
   if(smoketempdir==NULL)smoketempdir=getenv("temp");
+  if(smoketempdir==NULL){
+    NewMemory((void **)&smoketempdir,8);
+#ifdef pp_LINUX
+    strcpy(smoketempdir,"/tmp");
+#endif
+#ifdef pp_OSX
+    strcpy(smoketempdir,"/tmp");
+#endif
+#ifdef WIN32
+    strcpy(smoketempdir,"c:\temp");
+#endif
+  }
 
   if(smoketempdir != NULL){
     lensmoketempdir = strlen(smoketempdir);
