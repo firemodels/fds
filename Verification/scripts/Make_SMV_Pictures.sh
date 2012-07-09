@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function usage {
-echo "Make_SMV_Pictures.sh [-d -h -s size -t ]"
+echo "Make_SMV_Pictures.sh [-d -h -r -s size ]"
 echo "Generates figures for Smokeview verification suite"
 echo ""
 echo "Options"
@@ -26,6 +26,9 @@ case $OPTION  in
   h)
    usage;
    ;;
+  r)
+   TEST=
+  ;;
   s)
    SIZE="$OPTARG"
    if [ $SIZE -eq 64 ] ; then
@@ -33,9 +36,6 @@ case $OPTION  in
    else
      SIZE=_32
    fi
-  ;;
-  r)
-   TEST=
   ;;
 esac
 done
