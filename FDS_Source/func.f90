@@ -2219,8 +2219,8 @@ RR(0)  = 0._EB
 CNF(0) = 0._EB
 SUM1=0._EB
 SELECT CASE(DISTRIBUTION)
-CASE('LOG-NORMAL')
-      X1 = IERFC(2._EB*CDF_CUTOFF)
+   CASE('LOG-NORMAL')
+      X1     = IERFC(2._EB*CDF_CUTOFF)
       DD1    = DM*EXP(X1*SQRT(2._EB)*SIGMA)
       DMIN   = MAX(DM*EXP(-X1*SQRT(2._EB)*SIGMA),0._EB)
       DD1    =(DD1-DMIN)/REAL(NPT,EB)
@@ -2236,13 +2236,28 @@ CASE('LOG-NORMAL')
    CASE('ROSIN-RAMMLER')
       DD1    = (-LOG(CDF_CUTOFF)/LOG(2._EB))**(1._EB/GAMMA)*DM
       DMIN   = (-LOG(1._EB-CDF_CUTOFF)/LOG(2._EB))**(1._EB/GAMMA)*DM
-      DD1    =(DD1-DMIN)/REAL(NPT,EB)
+      DD1    = (DD1-DMIN)/REAL(NPT,EB)
       GFAC   = LOG(2._EB)*GAMMA*DD1/(DM**GAMMA)
       DO J=1,NPT
          DI     = DMIN + (J-0.5_EB)*DD1
          RR(J)  = 0.5_EB*DI
          ETRM = EXP(-LOG(2._EB)*(DI/DM)**GAMMA)         
          SUM1 = SUM1 + GFAC*DI**(GAMMA-4._EB)*ETRM
+         CNF(J) = SUM1
+      ENDDO
+      CNF = CNF/SUM1
+   CASE('ROOT-NORMAL')
+      ! 1/(2*sigma*x^3*sqrt(2*pi*x))*exp(-0.5*((sqrt(x)-m)/sigma)^2)
+      X1     = IERFC(2._EB*CDF_CUTOFF)
+      DD1    = (SQRT(DM)+X1*SQRT(2._EB)*SIGMA)**2
+      DMIN   = MAX((SQRT(DM)-X1*SQRT(2._EB)*SIGMA)**2,0._EB)
+      DD1    = (DD1-DMIN)/REAL(NPT,EB)
+      GFAC   =1._EB/(2*SIGMA*SQRT(TWOPI))
+      DO J=1,NPT
+         DI     = DMIN + (J-0.5_EB)*DD1
+         RR(J)  = 0.5_EB*DI
+         ETRM   = EXP(-0.5*((SQRT(DI)-SQRT(DM))/SIGMA)**2)         
+         SUM1   = SUM1 + GFAC*ETRM/(DI**7._EB/2._EB)
          CNF(J) = SUM1
       ENDDO
       CNF = CNF/SUM1
@@ -2374,7 +2389,7 @@ REAL(EB) :: Y_MF_INT, TMP_1
 
 ! Carbon monoxide (CO)
 ! FED_LCO = (3.317E-5 * (C_CO)^1.036 * RMV * (dt/60)) / D;
-!	with RMV=25 [l/min], D=30 [%] COHb concentration at incapacitation and C_CO in ppm
+!   with RMV=25 [l/min], D=30 [%] COHb concentration at incapacitation and C_CO in ppm
 IF (CO_INDEX > 0) THEN
    Call GET_MASS_FRACTION(Y_IN,CO_INDEX,Y_MF_INT)
    TMP_1 = SPECIES(CO_INDEX)%RCON*Y_MF_INT*1.E6_EB/RSUM
@@ -2397,7 +2412,7 @@ IF (TMP_1 > 0) FED = FED + TMP_1/(0.001500_EB*60.0_EB)
 
 ! Cyanide
 ! FED_LCN = (exp(C_CN/43)/220 - 0.0045) * (dt/60);
-!	with C_CN = C_HCN - C_NOx, all in ppm
+!   with C_CN = C_HCN - C_NOx, all in ppm
 IF (HCN_INDEX > 0) THEN
    Call GET_MASS_FRACTION(Y_IN,HCN_INDEX,Y_MF_INT)
    TMP_1 = SPECIES(HCN_INDEX)%RCON*Y_MF_INT/RSUM - TMP_1
@@ -2406,7 +2421,7 @@ ENDIF
 
 ! Irritants
 ! FLD_irr = (C_HCl/F_HCl + C_HBr/F_HBr + C_HF/F_HF + C_SO2/F_SO2 + C_NO2/F_NO2 + C_C3H4O/F_C3H4O + C_CH2O/F_CH2O) * (dt/60);
-!	all in ppm
+!   all in ppm
 TMP_1 = 0._EB
 DO N=1,N_SPECIES
    IF (SPECIES(N)%FLD_LETHAL_DOSE > 0._EB) THEN
