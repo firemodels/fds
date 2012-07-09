@@ -810,11 +810,13 @@ REAL(EB), PARAMETER :: ALPHA=7.202125273562269_EB !! ALPHA=(1._EB-B)/2._EB*A**((
 REAL(EB), PARAMETER :: BETA=1._EB+B
 REAL(EB), PARAMETER :: ETA=(1._EB+B)/A
 REAL(EB), PARAMETER :: GAMMA=2._EB/(1._EB+B)
-REAL(EB), PARAMETER :: RKAPPA=2.44_EB ! 1./von Karman constant
-REAL(EB), PARAMETER :: BTILDE=7.44_EB ! modified from 8.5, see Pope p. 297
+REAL(EB), PARAMETER :: RKAPPA=2.44_EB  ! 1./von Karman constant
+REAL(EB), PARAMETER :: B_LOGLAW=5.2_EB, B2=8.5_EB, BTILDE_MAX = 9.5_EB ! see Pope (2000) pp. 294,297,298
+REAL(EB), PARAMETER :: R_PLUS_SMOOTH=5.83_EB, R_PLUS_ROUGH=30._EB ! approx piece-wise function for Fig. 7.24, Pope (2000) p. 297
 REAL(EB), PARAMETER :: EPS=1.E-10_EB
 
-REAL(EB) :: TAU_W,NUODZ,Z_PLUS,TAU_ROUGH
+REAL(EB) :: TAU_W,NUODZ,Z_PLUS,TAU_ROUGH,BTILDE,D_NU,R_PLUS,TAU_SMOOTH
+INTEGER :: ITER
 
 ! References (for smooth walls):
 !
@@ -857,17 +859,32 @@ REAL(EB) :: TAU_W,NUODZ,Z_PLUS,TAU_ROUGH
 ! tau_w = mu*(u1-u0)/dz = mu*(u1-SF*u1)/dz = mu*u1/dz*(1-SF)
 ! note that tau_w/rho = nu*u1/dz*(1-SF)
 
-TAU_ROUGH = 0._EB
-IF (ROUGHNESS>0._EB) THEN
-   ! Pope (2000)
-   TAU_ROUGH = ( U1/(RKAPPA*LOG(0.5_EB*DZ/ROUGHNESS)+BTILDE) )**2 ! actually tau_w/rho
-ENDIF
 ! Werner-Wengle
 NUODZ = NU/DZ
-TAU_W = (ALPHA*(NUODZ)**BETA + ETA*(NUODZ)**B*ABS(U1))**GAMMA ! actually tau_w/rho
-TAU_W = MAX(TAU_W,TAU_ROUGH)
+TAU_W = (ALPHA*(NUODZ**BETA) + ETA*(NUODZ**B)*ABS(U1))**GAMMA ! actually tau_w/rho
 U_TAU = SQRT(TAU_W)
-Z_PLUS = DZ/(NU/(U_TAU+EPS)+EPS)
+D_NU  = NU/(U_TAU+EPS) ! viscous length scale
+
+! Pope (2000)
+IF (ROUGHNESS>0._EB) THEN
+   TAU_SMOOTH=TAU_W
+   DO ITER=1,2
+      R_PLUS = ROUGHNESS/D_NU ! roughness in viscous units
+      IF (R_PLUS < R_PLUS_SMOOTH) THEN
+         BTILDE = B_LOGLAW + RKAPPA*LOG(R_PLUS) ! Pope (2000) p. 297, Eq. (7.122)
+      ELSEIF (R_PLUS < R_PLUS_ROUGH) THEN
+         BTILDE = BTILDE_MAX ! approximation from Fig. 7.24, Pope (2000) p. 297
+      ELSE
+         BTILDE = B2 ! fully rough
+      ENDIF
+      TAU_ROUGH = ( U1/(RKAPPA*LOG(0.5_EB*DZ/ROUGHNESS)+BTILDE) )**2 ! actually tau_w/rho
+      TAU_W = MAX(TAU_SMOOTH,TAU_ROUGH)
+      U_TAU = SQRT(TAU_W)
+      D_NU  = NU/(U_TAU+EPS)
+   ENDDO
+ENDIF
+
+Z_PLUS = DZ/(D_NU+EPS)
 IF (Z_PLUS>Z_PLUS_TURBULENT) THEN
    SF = 1._EB-TAU_W/(NUODZ*ABS(U1)+EPS) ! log layer
 ELSE
