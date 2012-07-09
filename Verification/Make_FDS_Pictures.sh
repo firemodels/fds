@@ -4,7 +4,7 @@
 # a batch queuing system
 
 export SVNROOT=`pwd`/..
-export SMV=~/FDS/FDS6/bin/smokeview_linux_64
+export SMV=$SVNROOT/SMV/Build/intel_linux_64/smokeview_linux_64
 export RUNSMV=$SVNROOT/Utilities/Scripts/runsmv.sh
 export BASEDIR=`pwd`
 
