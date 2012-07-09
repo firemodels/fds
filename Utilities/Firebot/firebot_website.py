@@ -58,9 +58,8 @@ current_time = time.ctime()
 print "</br>"
 print "<i>Status last updated: %s</i>" % (current_time)
 print "</br></br><hr align='left'></br>"
-print """Latest FDS Manuals: <a href="manuals/FDS_User_Guide.pdf">User</a>, <a href="manuals/FDS_Technical_Reference_Guide.pdf">Technical</a>,"""
-print """<a href="manuals/FDS_Verification_Guide.pdf">Verification</a>, <a href="manuals/FDS_Validation_Guide.pdf">Validation</a></br></br>"""
-print """Latest SMV Manuals: <a href="manuals/SMV_User_Guide.pdf">User</a>, <a href="manuals/SMV_Verification_Guide.pdf">Verification</a>"""
+print """Latest FDS Manuals: <a href="manuals/FDS_User_Guide.pdf">User Guide</a>, <a href="manuals/FDS_Technical_Reference_Guide.pdf">Technical Reference Guide</a>, <a href="manuals/FDS_Verification_Guide.pdf">Verification Guide</a>, <a href="manuals/FDS_Validation_Guide.pdf">Validation Guide</a></br></br>"""
+print """Latest SMV Manuals: <a href="manuals/SMV_User_Guide.pdf">User Guide</a>, <a href="manuals/SMV_Verification_Guide.pdf">Verification Guide</a>"""
 print "</br></br><hr align='left'></br>"
 
 # Initialize list of history files
