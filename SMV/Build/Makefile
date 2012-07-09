@@ -245,7 +245,7 @@ intel_linux_test_32_dbg : CPP       = icpc
 intel_linux_test_32_dbg : FC        = ifort
 intel_linux_test_32_dbg : exe       = smokeview_linux_test_32_dbg
 
-intel_linux_test_32 : $(obj)
+intel_linux_test_32_dbg : $(obj)
 	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LINUX_LIBDIR_32) -L $(LINUX_FORT_LIBDIR_32) $(LINUX_SMV_LIBS) $(LINUX_INTEL_LIBS) -L/usr/lib $(LINUX_SYSTEMLIBS)
 
 # ------------- intel_linux_32_dbg ----------------
