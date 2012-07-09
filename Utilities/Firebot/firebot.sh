@@ -9,7 +9,7 @@
 #  = Input variables =
 #  ===================
 
-mailTo="kristopher.overholt@nist.gov"
+mailTo="kevin.mcgrattan@nist.gov, kristopher.overholt@nist.gov"
 SVNROOT="/home/firebot/FDS-SMV"
 FIREBOT_DIR="/home/firebot/firebot"
 SVN_REVISION=$1
@@ -22,9 +22,6 @@ SVN_REVISION=$1
 #   
 #   cfast (for Stage 5 - Run_SMV_Cases.sh):
 #      ~/cfast/CFAST/intel_linux_64/cfast6_linux_64
-#
-#   SMV (for Stage 6h - Make_FDS_Pictures.sh)
-#      ~/FDS/FDS6/bin/smokeview_linux_64
 #
 
 #  ====================
@@ -58,41 +55,6 @@ if [[ `pgrep -f firebot.sh | wc -l` -gt 2 ]];
       # Continue along
       :
 fi
-
-#  ====================
-#  = Sample functions =
-#  ====================
- 
-# sample_are_there_changes()
-# {
-#    svn up > $FIREBOT_DIR/tmpsvnup
-
-#    grep "^U" $FIREBOT_DIR/tmpsvnup &> /dev/null
-#    if [[ $? == 0 ]]
-#    then
-#       return 1
-#    fi
-
-#    grep "^A" $FIREBOT_DIR/tmpsvnup &> /dev/null
-#    if [[ $? == 0 ]]
-#    then
-#      return 1
-#    fi
-
-#    grep "^D" $FIREBOT_DIR/tmpsvnup &> /dev/null
-#    if [[ $? == 0 ]]
-#    then
-#       return 1
-#    fi
-
-#    grep "^G" $FIREBOT_DIR/tmpsvnup &> /dev/null
-#    if [[ $? == 0 ]]
-#    then
-#       return 1
-#    fi
- 
-#    return 0
-# }
 
 #  ============================
 #  = Stage 1 - SVN operations =
