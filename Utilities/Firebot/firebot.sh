@@ -23,7 +23,7 @@ SVN_REVISION=$1
 #   cfast (for Stage 5 - Run_SMV_Cases.sh):
 #      ~/cfast/CFAST/intel_linux_64/cfast6_linux_64
 #
-#   SMV (for Stage 6b - Make_FDS_Pictures.sh)
+#   SMV (for Stage 6h - Make_FDS_Pictures.sh)
 #      ~/FDS/FDS6/bin/smokeview_linux_64
 #
 
