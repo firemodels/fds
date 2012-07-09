@@ -9,7 +9,7 @@
 #  = Input variables =
 #  ===================
 
-mailTo="kevin.mcgrattan@nist.gov, kristopher.overholt@nist.gov"
+mailTo="kevin.mcgrattan@nist.gov, randall.mcdermott@nist.gov, craig.weinschenk@nist.gov, kristopher.overholt@nist.gov"
 SVNROOT="/home/firebot/FDS-SMV"
 FIREBOT_DIR="/home/firebot/firebot"
 SVN_REVISION=$1
@@ -830,6 +830,19 @@ check_all_guides()
    fi
 }
 
+copy_all_guides_to_website()
+{
+   # Copy all guides to Blaze status website for inspection
+   cd $SVNROOT/Manuals
+   cp FDS_User_Guide/FDS_User_Guide.pdf \
+   FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.pdf \
+   FDS_Verification_Guide/FDS_Verification_Guide.pdf \
+   FDS_Validation_Guide/FDS_Validation_Guide.pdf \
+   SMV_User_Guide/SMV_User_Guide.pdf \
+   SMV_Verification_Guide/SMV_Verification_Guide.pdf \
+   /var/www/html/firebot/manuals/
+}
+
 #  ==================================================
 #  = Build status report - email and save functions =
 #  ==================================================
@@ -961,6 +974,7 @@ make_fds_validation_guide
 make_smv_user_guide
 make_smv_verification_guide
 check_all_guides
+copy_all_guides_to_website
 
 ### Success! ###
 email_success_message

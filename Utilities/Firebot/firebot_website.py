@@ -57,7 +57,11 @@ To view a detailed error log, mouse over a fail or warning status.</br>"""
 current_time = time.ctime()
 print "</br>"
 print "<i>Status last updated: %s</i>" % (current_time)
-print "<hr align='left'></br>"
+print "</br></br><hr align='left'></br>"
+print """Latest FDS Manuals: <a href="manuals/FDS_User_Guide.pdf">User</a>, <a href="manuals/FDS_Technical_Reference_Guide.pdf">Technical</a>,"""
+print """<a href="manuals/FDS_Verification_Guide.pdf">Verification</a>, <a href="manuals/FDS_Validation_Guide.pdf">Validation</a></br></br>"""
+print """Latest SMV Manuals: <a href="manuals/SMV_User_Guide.pdf">User</a>, <a href="manuals/SMV_Verification_Guide.pdf">Verification</a>"""
+print "</br></br><hr align='left'></br>"
 
 # Initialize list of history files
 revision_files = os.listdir(firebot_history_dir)
