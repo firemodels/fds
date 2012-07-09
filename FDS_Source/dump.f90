@@ -285,7 +285,7 @@ LU_HRR   = GET_FILE_NUMBER()
 FN_HRR   = TRIM(CHID)//'_hrr.csv'
 
 ! Device and Control Files
-IF(HISTOGRAM_FILE) THEN
+IF(N_PDPA_HISTOGRAM>0) THEN
         LU_HISTOGRAM=GET_FILE_NUMBER()
         FN_HISTOGRAM=TRIM(CHID)//'_hist.csv'
 ENDIF
@@ -5168,7 +5168,9 @@ SELECT CASE(IND)
             ! Compute numerator and denumerator
             DV%PDPA_NUMER = DV%PDPA_NUMER + LP%PWT*(2._EB*MAXVAL(LP%ONE_D%X))**PY%PDPA_M * VEL
             IF(PY%PDPA_HISTOGRAM)  CALL UPDATE_HISTOGRAM(PY%PDPA_HISTOGRAM_NBINS,PY%PDPA_HISTOGRAM_LIMITS &
-                                              ,DV%PDPA_HISTOGRAM_COUNTS,(2._EB*MAXVAL(LP%ONE_D%X))**PY%PDPA_M * VEL,LP%PWT)
+                                              ,DV%PDPA_HISTOGRAM_COUNTS,&
+                                              (2._EB*MAXVAL(LP%ONE_D%X))**PY%PDPA_M * VEL,&
+                                              LP%PWT*MAXVAL(LP%ONE_D%X)**PY%PDPA_N)
 
             IF ((PY%QUANTITY /= 'NUMBER CONCENTRATION') .AND. &
                 (PY%QUANTITY /= 'MASS CONCENTRATION') .AND. &
@@ -5752,17 +5754,17 @@ SUBROUTINE DUMP_DEVICES(T)
 ! Write out to CHID_devc.csv the DEViCe output quantities every DT_DEVC s
 
 REAL(EB), INTENT(IN) :: T
-REAL(EB) :: STIME
+REAL(EB) :: STIME,DI,DD
+REAL(EB),ALLOCATABLE::CONST(:)
 INTEGER :: I,J,N,NN,N_OUT,LU
 REAL(EB) :: DEVC_TIME
 LOGICAL :: OPN
 CHARACTER(80) :: FN
-
 ! Determine the time to write into file
 
 STIME = T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR
 DEVC_TIME = STIME
-
+ALLOCATE(CONST(N_PDPA_HISTOGRAM))
 ! Load time and line device values into arrays
 
 IF (LU_LINE > 0) THEN
@@ -5770,7 +5772,54 @@ IF (LU_LINE > 0) THEN
    IF (OPN) CLOSE(LU_LINE)
 ENDIF
 
-IF (HISTOGRAM_FILE) OPEN(LU_HISTOGRAM,FILE=FN_HISTOGRAM,STATUS='REPLACE')
+IF (N_PDPA_HISTOGRAM>0) THEN 
+   OPEN(LU_HISTOGRAM,FILE=FN_HISTOGRAM,STATUS='REPLACE')
+   NN=0
+   DO N=1,N_DEVC
+      DV=>DEVICE(N)
+      IF(PROPERTY(DV%PROP_INDEX)%PDPA_HISTOGRAM .AND. DV%OUTPUT) THEN
+         IF(NN>0) THEN
+            WRITE(LU_HISTOGRAM,'(A)',ADVANCE="NO") ',D,'//TRIM(DV%ID)
+         ELSE
+            WRITE(LU_HISTOGRAM,'(A)',ADVANCE="NO") 'D,'//TRIM(DV%ID)
+         ENDIF
+        NN=NN+1
+        CONST(NN)=SUM(DV%PDPA_HISTOGRAM_COUNTS(:))
+        IF(CONST(NN)<=0._EB) CONST(NN)=1._EB
+      ENDIF
+   ENDDO
+   WRITE(LU_HISTOGRAM,'(A)') ""
+   
+   DO I=1,MAX_PDPA_HISTOGRAM_NBINS
+      NN=0
+      DO J=1,N_DEVC
+         DV=>DEVICE(J)
+         IF(PROPERTY(DV%PROP_INDEX)%PDPA_HISTOGRAM .AND. DV%OUTPUT) THEN
+            NN=NN+1
+            IF(NN>1) THEN
+               WRITE(TCFORM,'(5A)') "(',',",FMT_R,",',',",FMT_R,")"
+            ELSE
+               WRITE(TCFORM,'(5A)') "(",FMT_R,",',',",FMT_R,")"
+            ENDIF
+            DD=(PROPERTY(DV%PROP_INDEX)%PDPA_HISTOGRAM_LIMITS(2)-PROPERTY(DV%PROP_INDEX)%PDPA_HISTOGRAM_LIMITS(1))/ &
+                PROPERTY(DV%PROP_INDEX)%PDPA_HISTOGRAM_NBINS
+            IF(PROPERTY(DV%PROP_INDEX)%PDPA_HISTOGRAM_NBINS>=I) THEN
+               DI=(I-0.5_EB)*DD
+               WRITE(LU_HISTOGRAM,TCFORM,ADVANCE="NO") DI,DV%PDPA_HISTOGRAM_COUNTS(I)/CONST(NN)/DD
+            ELSE
+               IF(NN>1) THEN
+                  WRITE(LU_HISTOGRAM,"(A)",ADVANCE="NO") ",,"
+               ELSE
+                  WRITE(LU_HISTOGRAM,"(A)",ADVANCE="NO") ","
+               ENDIF  
+            ENDIF
+         ENDIF
+      ENDDO
+      WRITE(LU_HISTOGRAM,'(A)') ""
+   ENDDO
+ENDIF
+
+DEALLOCATE(CONST)
 NN = 0
 DO N=1,N_DEVC
 
@@ -5780,13 +5829,9 @@ DO N=1,N_DEVC
       TIME_DEVC_VALUE(NN) = REAL(DV%VALUE/DV%TIME_INTERVAL,FB)
       
    ENDIF
-   IF(PROPERTY(DV%PROP_INDEX)%PDPA_HISTOGRAM .AND. DV%OUTPUT) THEN
-        WRITE(TCFORM,'(A,I3,A,I4.4,5A)')  & 
-           "(A",LEN(TRIM(DV%ID)),",',',",PROPERTY(DV%PROP_INDEX)%PDPA_HISTOGRAM_NBINS,"(",FMT_R,",','),",FMT_R,")"
-        WRITE(LU_HISTOGRAM,TCFORM) TRIM(DV%ID),DV%PDPA_HISTOGRAM_COUNTS
-   ENDIF
+
 ENDDO
-IF(HISTOGRAM_FILE) CLOSE(LU_HISTOGRAM)
+IF(N_PDPA_HISTOGRAM>0) CLOSE(LU_HISTOGRAM)
 
 ! Check particle sample distribution
 
