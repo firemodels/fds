@@ -3294,7 +3294,7 @@ T^+ = \frac{1}{\kappa_T} \ln(A_T \, y^+)
 where $T^+ \equiv (T_w-T)/T_\tau$, and $T_\tau$ is defined with the wall heat flux, $\dot{q}^{''}_w$, as $T_\tau = \dot{q}^{''}_w/\rho_w u_\tau c_p$.  Eq.~(\ref{eqn_loglaw_tmp}) can be rewritten in terms of Eq.~(\ref{eqn_loglaw_up}) as:
 \begin{equation}
 \label{eqn_loglaw_tmp2}
-T^+ = \mbox{Pr}_t \left(u^+ + \ln\left[\frac{A_T}{A}\right]\right) 
+T^+ = \mbox{Pr}_t \left(u^+ + \ln\left[\frac{A_T}{A}\right]\right)
 \end{equation}
 where $\mbox{Pr}_t = \kappa/\kappa_T$ is the turbulent Prandtl number.
 
@@ -4652,7 +4652,7 @@ same as the mesh cell size.
 The same couch model is included in a room-scale fire simulation, known as the
 {\bf room\_fire} test case. Figure~\ref{room_fire} shows the fire after 3 and 5~minutes, respectively.
 Only the reaction zone of the fire is shown; the smoke is hidden so that you can see the fire progressing
-along the couch. In this scenario, after 5~minutes, the couch is fully-involved, and after 10~minutes, 
+along the couch. In this scenario, after 5~minutes, the couch is fully-involved, and after 10~minutes,
 the room flashes over.
 
 \begin{figure}[p]
@@ -6893,7 +6893,7 @@ The format for {\ct XB} is the same as that used on the {\ct OBST} line. Alterna
 \footnotesize
 \begin{verbatim}
 &INIT PART_ID='droplets', XB=..., N_PARTICLES=..., MASS_PER_VOLUME=... /
-&INIT PART_ID='leaves', XYZ=..., RADIUS=..., HEIGHT=..., SHAPE='CONE', 
+&INIT PART_ID='leaves', XYZ=..., RADIUS=..., HEIGHT=..., SHAPE='CONE',
       N_PARTICLES=..., MASS_PER_VOLUME=... /
 \end{verbatim} \normalsize
 
@@ -7815,7 +7815,7 @@ A smoke detector is defined in the input file with an entry similar to:
 \begin{verbatim}
 &DEVC ID='SD_29', PROP_ID='Acme Smoke Detector', XYZ=2.3,4.6,3.4 /
 &PROP ID='Acme Smoke Detector', QUANTITY='CHAMBER OBSCURATION', LENGTH=1.8,
-      ACTIVATION_OBSCURATION=3.28 /
+      ACTIVATION_OBSCURATION=3.24 /
 \end{verbatim}
 
 \normalsize
@@ -7826,7 +7826,7 @@ for the single parameter Heskestad model. Note that a {\ct PROP} line is mandato
 \footnotesize
 \begin{verbatim}
 &PROP ID='Acme Smoke Detector I2',QUANTITY='CHAMBER OBSCURATION',
-      ALPHA_E=1.8,BETA_E=-1.1,ALPHA_C=1.0,BETA_C=-0.8,ACTIVATION_OBSCURATION=3.28 /
+      ALPHA_E=1.8,BETA_E=-1.1,ALPHA_C=1.0,BETA_C=-0.8,ACTIVATION_OBSCURATION=3.24 /
 \end{verbatim}
 
 \normalsize
@@ -7839,7 +7839,11 @@ Suggested constants for unidentified ionization and photoelectric detectors
 presented in Table~\ref{tab:sdvalues}.
 {\ct ACTIVATION\_OBSCURATION} is the threshold value in units of \%/m.
 The threshold can be set according to the setting commonly provided by the manufacturer.
-The default setting is 3.28~\%/m (1~\%/ft).
+The default setting\footnote{Note that the conversion of obscuration from units of \%/ft to \%/m is given by:
+\be
+O[\text{\%/m}] = \left[ 1 - \left( 1 - \frac{O[\text{\%/ft}]}{100} \right)^{3.28} \right] \times 100
+\ee
+} is 3.24~\%/m (1~\%/ft).
 
 \begin{table}[ht]
 \caption[Suggested Values for Smoke Detector Model.]{Suggested Values for Smoke Detector Model. See Ref.~\cite{SFPE} for others.}
@@ -7918,9 +7922,9 @@ where $output_i$ is the FDS output for the beam detector of the $i$th path (note
 
 \subsubsection{Example Case: {\bf beam\_detector}}
 
-A 10~m by 10~m by 4~m compartment is filled with smoke, represented as 0.006~kg/kg of
-the lumped species variable, {\ct LUMPEDS SPECIES 1} footnote{In its default mode, the mixing controlled combustion
-model requires transport equations for two gas species -- {\ct LUMPED SPECIES 1} and {\ct LUMPED SPECIES 2}. The first
+A 10~m by 10~m by 4~m compartment is filled with smoke from burning propane, represented as 0.006~kg/kg of
+the lumped species variable, {\ct PRODUCTS} footnote{In its default mode, the mixing controlled combustion
+model requires transport equations for two gas species -- {\ct PROPANE} and {\ct PRODUCTS}. The first
 is just the fuel gas, the second is a combination of the products of combustion.}. The default soot yield is
 0.01~kg/kg, resulting in a uniform soot density of 71.9~mg/m$^3$.
 Using the default mass extinction coefficient of
@@ -9458,8 +9462,8 @@ ${}^*$ $T_m$ is the melting temperature of the associated species.
 
 It is also possible to output histograms of PDPA output quantities. When {\ct PDPA\_HISTOGRAM} is set to {\ct .TRUE.} normalized histogram bin counts  are output to  a csv file from all devices associated with this {\ct PROP}. The number of bins and the limits of the histogram are controlled by parameters on the {\ct PROP} line. The value used in creating the histogram is $d_i^m x$. Note that when making a histogram of diameters, the limits must be given in meters, not microns. Values falling outside the histogram limits are included in the counts of the first and last bins.
 
-The output file contains two-columns for each device giving an histogram output. The first column gives the bin centers and the sceond column gives the normalized bin count. The bin counts are normalized so that the total area of the histogram is 1. Here the histogram is thought consist of equal width bars centered at the given bin centers and heights equal to the corresponding bin count. Volume and area based distributions can be output by setting the {\ct PDPA\_N} parameter on the {\ct PROP} line  to {\ct 3} and {\ct 2} respectively. 
- 
+The output file contains two-columns for each device giving an histogram output. The first column gives the bin centers and the sceond column gives the normalized bin count. The bin counts are normalized so that the total area of the histogram is 1. Here the histogram is thought consist of equal width bars centered at the given bin centers and heights equal to the corresponding bin count. Volume and area based distributions can be output by setting the {\ct PDPA\_N} parameter on the {\ct PROP} line  to {\ct 3} and {\ct 2} respectively.
+
 The properties of the PDPA device are defined using the following keywords on the {\ct PROP} line:
 \begin{description}
 \item[{\ct PART\_ID}] Name of the particle group to limit the computation to. Do not specify to account for all particles.
@@ -11212,7 +11216,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct PROP} (Device Properties)} \\
 \hline \hline
 \endhead
-{\ct ACTIVATION\_OBSCURATION}           & Real          & Section~\ref{info:smoke_detector}         & \%/m                  & 3.28      \\ \hline
+{\ct ACTIVATION\_OBSCURATION}           & Real          & Section~\ref{info:smoke_detector}         & \%/m                  & 3.24      \\ \hline
 {\ct ACTIVATION\_TEMPERATURE}           & Real          & Section~\ref{info:sprinklers}             & $^\circ$C             & 74.        \\ \hline
 {\ct ALPHA\_C}                          & Real          & Section~\ref{info:smoke_detector}         &                       & 1.8       \\ \hline
 {\ct ALPHA\_E}                          & Real          & Section~\ref{info:smoke_detector}         &                       & 0.       \\ \hline
