@@ -11,11 +11,11 @@ export INDIR=Current_Results
 
 /bin/sh -c "cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR"
 
-$RUNFDS $INDIR Group_A_2x2x2
-$RUNFDS $INDIR Group_A_2x2x3 
-$RUNFDS $INDIR Group_A_2x2x4
-$RUNFDS $INDIR Group_A_FM_RDD_p21.fds
-$RUNFDS $INDIR Group_A_FM_RDD_p31.fds
-$RUNFDS $INDIR Group_A_FM_RDD_p39.fds
+#$RUNFDS $INDIR Group_A_2x2x2
+#$RUNFDS $INDIR Group_A_2x2x3 
+#$RUNFDS $INDIR Group_A_2x2x4
+$RUNFDS $INDIR Group_A_FM_RDD_p21
+$RUNFDS $INDIR Group_A_FM_RDD_p31
+$RUNFDS $INDIR Group_A_FM_RDD_p39
 
 echo FDS cases submitted
