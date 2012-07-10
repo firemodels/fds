@@ -51,38 +51,38 @@ hr {
 
 <h3>Firebot Build Status</h3>
 
-This page displays the build status for up to 100 of the most recent builds.</br>
-To view a detailed error log, mouse over a fail or warning status.</br>
+This page displays the build status for up to 100 of the most recent builds.<br>
+To view a detailed error log, mouse over a fail or warning status.<br>
 
-</br>
-<span class="dropt">View a list of build stages</br>
+<br>
+<span class="dropt">View a list of build stages<br>
 <span style="width:700px;">
-<b>Stage 1: </b> SVN operations </br></br>
-<b>Stage 2a:</b> Compile FDS DB </br></br>
-<b>Stage 2b:</b> Compile FDS MPI DB </br></br>
-<b>Stage 3: </b> Run verification cases (short run) </br></br>
-<b>Stage 4a:</b> Compile FDS release </br></br>
-<b>Stage 4b:</b> Compile FDS MPI release </br></br>
-<b>Stage 5: </b> Run verification cases (long run) </br></br>
-<b>Stage 6a:</b> Compile SMV utilities </br></br>
-<b>Stage 6b:</b> Compile SMV DB </br></br>
-<b>Stage 6c:</b> Make SMV pictures (debug mode) </br></br>
-<b>Stage 6d:</b> Compile SMV test </br></br>
-<b>Stage 6e:</b> Make SMV pictures (test mode) </br></br>
-<b>Stage 6f:</b> Compile SMV release </br></br>
-<b>Stage 6g:</b> Make SMV pictures (release mode) </br></br>
-<b>Stage 6h:</b> Make FDS pictures </br></br>
-<b>Stage 7: </b> Matlab plotting and statistics </br></br>
-<b>Stage 8: </b> Build FDS-SMV Guides </br>
+<b>Stage 1: </b> SVN operations <br><br>
+<b>Stage 2a:</b> Compile FDS DB <br><br>
+<b>Stage 2b:</b> Compile FDS MPI DB <br><br>
+<b>Stage 3: </b> Run verification cases (short run) <br><br>
+<b>Stage 4a:</b> Compile FDS release <br><br>
+<b>Stage 4b:</b> Compile FDS MPI release <br><br>
+<b>Stage 5: </b> Run verification cases (long run) <br><br>
+<b>Stage 6a:</b> Compile SMV utilities <br><br>
+<b>Stage 6b:</b> Compile SMV DB <br><br>
+<b>Stage 6c:</b> Make SMV pictures (debug mode) <br><br>
+<b>Stage 6d:</b> Compile SMV test <br><br>
+<b>Stage 6e:</b> Make SMV pictures (test mode) <br><br>
+<b>Stage 6f:</b> Compile SMV release <br><br>
+<b>Stage 6g:</b> Make SMV pictures (release mode) <br><br>
+<b>Stage 6h:</b> Make FDS pictures <br><br>
+<b>Stage 7: </b> Matlab plotting and statistics <br><br>
+<b>Stage 8: </b> Build FDS-SMV Guides <br>
 </span></span>"""
 
 current_time = time.ctime()
-print "</br>"
+print "<br>"
 print "<i>Status last updated: %s</i>" % (current_time)
-print "</br></br><hr align='left'></br>"
-print """Latest FDS Manuals: <a href="manuals/FDS_User_Guide.pdf">User Guide</a>, <a href="manuals/FDS_Technical_Reference_Guide.pdf">Technical Reference Guide</a>, <a href="manuals/FDS_Verification_Guide.pdf">Verification Guide</a>, <a href="manuals/FDS_Validation_Guide.pdf">Validation Guide</a></br></br>"""
+print "<br><br><hr align='left'><br>"
+print """Latest FDS Manuals: <a href="manuals/FDS_User_Guide.pdf">User Guide</a>, <a href="manuals/FDS_Technical_Reference_Guide.pdf">Technical Reference Guide</a>, <a href="manuals/FDS_Verification_Guide.pdf">Verification Guide</a>, <a href="manuals/FDS_Validation_Guide.pdf">Validation Guide</a><br><br>"""
 print """Latest SMV Manuals: <a href="manuals/SMV_User_Guide.pdf">User Guide</a>, <a href="manuals/SMV_Verification_Guide.pdf">Verification Guide</a>"""
-print "</br></br><hr align='left'></br>"
+print "<br><br><hr align='left'><br>"
 
 # Initialize list of history files
 revision_files = os.listdir(firebot_history_dir)
@@ -120,9 +120,9 @@ for rev in sorted(revision_list, reverse=True)[:100]:
         print error_line % {'revision_num': rev}
 
         for line in error_log:
-            print line + "</br>"
+            print line + "<br>"
 
-        print "</span>%s</span></br>" % (stage_log[0].split("failure")[1])
+        print "</span>%s</span><br>" % (stage_log[0].split("failure")[1])
 
     #  ======================================
     #  = Case: build success, with warnings =
@@ -136,12 +136,12 @@ for rev in sorted(revision_list, reverse=True)[:100]:
         # Write "Build success, with warnings" and hover of warning log
         error_line = """Revision number <b>%(revision_num)s</b>:
         <font style='BACKGROUND-COLOR: yellow'>[&#8211;]</font>
-        <span class="dropt">Build success, with warnings</br>
+        <span class="dropt">Build success, with warnings<br>
         <span style="width:700px;">"""
         print error_line % {'revision_num': rev}
 
         for line in warning_log:
-            print line + "</br>"
+            print line + "<br>"
 
         print "</span></span>"
 
@@ -153,7 +153,7 @@ for rev in sorted(revision_list, reverse=True)[:100]:
 
     # Print time associated with history file
     print "<font color='#B0B0B0'><i>" + time.ctime(os.path.getmtime(firebot_history_dir + "/" + rev + ".txt"))  + "</i></font>"
-    print "</br></br>"
+    print "<br><br>"
 
 print """
 </body>
