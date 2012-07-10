@@ -755,10 +755,32 @@ the corresponding location in space and time.  The figure confirms that the adve
 In this section we present another case that demonstrates the second-order accuracy of the FDS transport algorithm. Consider an analytically stable flow field consisting of a single vortex advected by a uniform flow. Maintaining the geometry of the vortex over time provides a good measure of the order of accuracy of the transport scheme.
 
 \begin{figure}[h!]
-         \centering
-         \scalebox{.5}{\includegraphics{FIGURES/vort2d_diagram}}
-      \caption{Representative vector field of a two dimensional vortex in a constant flow field.}
-      \label{fig_vort2d_diagram}
+   \centering
+   \setlength{\unitlength}{0.0008in}
+   \begin{picture}(7300,3420)
+      \put(1030,50){$L = 0.3112$ m}
+      \put(130,850){$U_{0} = 35$ m/s}
+      \put(0,250){\framebox(3112,3112)}
+      \put(1056,1306){\dashbox{100}(1000,1000)}
+      \put(1056,1306){\line(3,-1){3194}}
+      \put(1056,2306){\line(3,1){3194}}
+      \put(100,672){\vector(1,0){450}}
+      \put(100,1394){\vector(1,0){450}}
+      \put(100,2216){\vector(1,0){450}}
+      \put(100,2938){\vector(1,0){450}}
+      \put(2562,672){\vector(1,0){450}}
+      \put(2562,1394){\vector(1,0){450}}
+      \put(2562,2216){\vector(1,0){450}}
+      \put(2562,2938){\vector(1,0){450}}
+      \put(1556,1806){\circle{550}}
+      \put(1281,1806){\vector(0,-1){50}}
+      \put(1831,1806){\vector(0,1){50}}
+      \put(3450,-250){
+         \scalebox{.498}{\includegraphics{FIGURES/vort2d_diagram}}
+      }
+   \end{picture}
+   \caption{Representative vector field of a two dimensional vortex in a constant flow field.}
+   \label{fig_vort2d_diagram}
 \end{figure}
 
 \noindent The vortex is initially defined as the gradient of the potential field,
