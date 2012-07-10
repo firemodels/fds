@@ -33,7 +33,7 @@ span.dropt:hover span {left: 2%; background: #ffffff;}
 span.dropt span {position: absolute; left: -9999px;
   margin: 4px 0 0 0px; padding: 3px 3px 3px 3px; 
   border-style:solid; border-color:black; border-width:1px;}
-span.dropt:hover span {margin: 5px 0 0 170px; background: #ffffff; z-index:6;}
+span.dropt:hover span {margin: 5px 0 0 170px; background: #ebf7f8; z-index:6;}
 
 hr {
   width: 50%;
@@ -45,14 +45,36 @@ hr {
 
 </head>
 <body>
-<h1>F<font size=2>DS automat</font>I<font size=2>c ve</font>R<font size=2>ification and validation t</font>E<font size=2>st</font> BOT</h1>
+<h2><u>F</u><font color="#dddddd">DS automat</font><u>I</u><font color="#dddddd">c ve</font><u>R</u><font color="#dddddd">ification and validation t</font><u>E</u><font color="#dddddd">st</font> BOT</h2>
 
 <hr align='left'>
 
 <h3>Firebot Build Status</h3>
 
 This page displays the build status for up to 100 of the most recent builds.</br>
-To view a detailed error log, mouse over a fail or warning status.</br>"""
+To view a detailed error log, mouse over a fail or warning status.</br>
+
+</br>
+<span class="dropt">View a list of build stages</br>
+<span style="width:700px;">
+<b>Stage 1: </b> SVN operations </br></br>
+<b>Stage 2a:</b> Compile FDS DB </br></br>
+<b>Stage 2b:</b> Compile FDS MPI DB </br></br>
+<b>Stage 3: </b> Run verification cases (short run) </br></br>
+<b>Stage 4a:</b> Compile FDS release </br></br>
+<b>Stage 4b:</b> Compile FDS MPI release </br></br>
+<b>Stage 5: </b> Run verification cases (long run) </br></br>
+<b>Stage 6a:</b> Compile SMV utilities </br></br>
+<b>Stage 6b:</b> Compile SMV DB </br></br>
+<b>Stage 6c:</b> Make SMV pictures (debug mode) </br></br>
+<b>Stage 6d:</b> Compile SMV test </br></br>
+<b>Stage 6e:</b> Make SMV pictures (test mode) </br></br>
+<b>Stage 6f:</b> Compile SMV release </br></br>
+<b>Stage 6g:</b> Make SMV pictures (release mode) </br></br>
+<b>Stage 6h:</b> Make FDS pictures </br></br>
+<b>Stage 7: </b> Matlab plotting and statistics </br></br>
+<b>Stage 8: </b> Build FDS-SMV Guides </br>
+</span></span>"""
 
 current_time = time.ctime()
 print "</br>"
@@ -130,7 +152,7 @@ for rev in sorted(revision_list, reverse=True)[:100]:
         print "Revision number <b>" + rev + "</b>: <font style='BACKGROUND-COLOR: lime'>[&#10003;]</font> Build success!<br/>"
 
     # Print time associated with history file
-    print time.ctime(os.path.getmtime(firebot_history_dir + "/" + rev + ".txt"))
+    print "<font color='#B0B0B0'><i>" + time.ctime(os.path.getmtime(firebot_history_dir + "/" + rev + ".txt"))  + "</i></font>"
     print "</br></br>"
 
 print """
