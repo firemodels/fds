@@ -20,6 +20,15 @@ echo Creating the directory c:\bin
 mkdir c:\bin
 :existbin
 
+set fds5exe="c:\Program Files\FDS\FDS5\bin\fds5.exe"
+set fds5bat="c:\bin\fds5.bat"
+
+if exist %fds5exe% (
+  echo creating FDS5 batch file
+  echo @echo off > %fds5bat%
+  echo %fds5exe% %%* >> %fds5bat%
+)
+
 echo.
 echo Adding fds6.bat and smokeview6.bat aliases to c:\bin
 set fds6=c:\bin\fds6.bat
