@@ -138,6 +138,7 @@ check_compile_fds_db()
    else
       echo "Stage 2a warnings:" >> $FIREBOT_DIR/output/warnings
       grep warning ${FIREBOT_DIR}/output/stage2a >> $FIREBOT_DIR/output/warnings
+      echo "" >> $FIREBOT_DIR/output/warnings
    fi
 }
 
@@ -177,6 +178,7 @@ check_compile_fds_mpi_db()
    else
       echo "Stage 2b warnings:" >> $FIREBOT_DIR/output/warnings
       grep warning ${FIREBOT_DIR}/output/stage2b | grep -v 'feupdateenv is not implemented' >> $FIREBOT_DIR/output/warnings
+      echo "" >> $FIREBOT_DIR/output/warnings
    fi
 }
 
@@ -343,6 +345,7 @@ check_compile_fds()
    else
       echo "Stage 4a warnings:" >> $FIREBOT_DIR/output/warnings
       grep warning ${FIREBOT_DIR}/output/stage4a >> $FIREBOT_DIR/output/warnings
+      echo "" >> $FIREBOT_DIR/output/warnings
    fi
 }
 
@@ -382,6 +385,7 @@ check_compile_fds_mpi()
    else
       echo "Stage 4b warnings:" >> $FIREBOT_DIR/output/warnings
       grep warning ${FIREBOT_DIR}/output/stage4b | grep -v 'feupdateenv is not implemented' >> $FIREBOT_DIR/output/warnings
+      echo "" >> $FIREBOT_DIR/output/warnings
    fi
 }
 
@@ -405,7 +409,7 @@ run_verification_cases_long()
    cd $SVNROOT/Verification
    echo 'Running FDS verification cases:' > $FIREBOT_DIR/output/stage5
    ./Run_FDS_Cases.sh >> $FIREBOT_DIR/output/stage5 2>&1
-   echo '' >> $FIREBOT_DIR/output/stage5 2>&1
+   echo "" >> $FIREBOT_DIR/output/stage5 2>&1
 
    # Start running all SMV verification cases
    cd $SVNROOT/Verification/scripts
@@ -452,13 +456,13 @@ compile_smv_utilities()
    cd $SVNROOT/Utilities/smokezip/intel_linux_64
    echo 'Compiling smokezip:' >> $FIREBOT_DIR/output/stage6a 2>&1
    ./make_zip.sh >> $FIREBOT_DIR/output/stage6a 2>&1
-   echo '' >> $FIREBOT_DIR/output/stage6a 2>&1
+   echo "" >> $FIREBOT_DIR/output/stage6a 2>&1
    
    # smokediff:
    cd $SVNROOT/Utilities/smokediff/intel_linux_64
    echo 'Compiling smokediff:' >> $FIREBOT_DIR/output/stage6a 2>&1
    ./make_diff.sh >> $FIREBOT_DIR/output/stage6a 2>&1
-   echo '' >> $FIREBOT_DIR/output/stage6a 2>&1
+   echo "" >> $FIREBOT_DIR/output/stage6a 2>&1
    
    # background:
    cd $SVNROOT/Utilities/background/intel_linux_32
@@ -520,6 +524,7 @@ check_compile_smv_db()
    else
       echo "Stage 6b warnings:" >> $FIREBOT_DIR/output/warnings
       grep warning ${FIREBOT_DIR}/output/stage6b | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $FIREBOT_DIR/output/warnings
+      echo "" >> $FIREBOT_DIR/output/warnings
    fi
 }
 
@@ -587,6 +592,7 @@ check_compile_smv_test()
    else
       echo "Stage 6d warnings:" >> $FIREBOT_DIR/output/warnings
       grep warning ${FIREBOT_DIR}/output/stage6d | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $FIREBOT_DIR/output/warnings
+      echo "" >> $FIREBOT_DIR/output/warnings
    fi
 }
 
@@ -654,6 +660,7 @@ check_compile_smv()
    else
       echo "Stage 6f warnings:" >> $FIREBOT_DIR/output/warnings
       grep warning ${FIREBOT_DIR}/output/stage6f | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $FIREBOT_DIR/output/warnings
+      echo "" >> $FIREBOT_DIR/output/warnings
    fi
 }
 
@@ -736,13 +743,13 @@ check_matlab_plotting()
 {
    # Scan and report any errors in Matlab scripts
    cd $FIREBOT_DIR
-   if [[ `grep -A 50 "Matlab error" $FIREBOT_DIR/output/stage7*` == "" ]]
+   if [[ `grep -A 50 -E "Matlab error|License checkout failed" $FIREBOT_DIR/output/stage7*` == "" ]]
    then
       # Continue along
       :
    else
       BUILD_STAGE_FAILURE="Stage 7: Matlab plotting and statistics"
-      grep -A 50 "Matlab error" $FIREBOT_DIR/output/stage7* > $FIREBOT_DIR/output/stage7_errors
+      grep -A 50 -E "Matlab error|License checkout failed" $FIREBOT_DIR/output/stage7* > $FIREBOT_DIR/output/stage7_errors
       ERROR_LOG=$FIREBOT_DIR/output/stage7_errors
       save_build_status
       email_error_message
@@ -827,6 +834,17 @@ check_all_guides()
       ERROR_LOG=$FIREBOT_DIR/output/stage8_errors
       save_build_status
       email_error_message
+   fi
+
+   # Check for LaTeX warnings (undefined references or duplicate labels)
+   if [[ `grep "undefined|multiply defined|multiply-defined" -I $FIREBOT_DIR/output/stage8*` == "" ]]
+   then
+      # Continue along
+      :
+   else
+      echo "Stage 8 warnings:" >> $FIREBOT_DIR/output/warnings
+      grep "undefined|multiply defined|multiply-defined" -I $FIREBOT_DIR/output/stage8* >> $FIREBOT_DIR/output/warnings
+      echo "" >> $FIREBOT_DIR/output/warnings
    fi
 }
 
