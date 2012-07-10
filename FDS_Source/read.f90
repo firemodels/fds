@@ -4252,7 +4252,7 @@ CONTAINS
  
 SUBROUTINE SET_PROP_DEFAULTS
  
-ACTIVATION_OBSCURATION   = 3.28_EB     ! %/m
+ACTIVATION_OBSCURATION   = 3.24_EB     ! %/m
 ACTIVATION_TEMPERATURE   = -273.15_EB  ! C
 ALPHA_C                  = 1.8_EB      ! m, Heskestad Length Scale
 ALPHA_E                  = 0.0_EB
