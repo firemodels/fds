@@ -23,7 +23,8 @@ FIREBOT_DIR="/home/firebot/firebot"
 #  = Primary script execution =
 #  ============================
 
-cd $FIREBOT_DIR
+cd $SVNROOT_WIKI
+svn update
 
 # Compare two wiki files, check for changes in Firebot status
    if [[ `diff ${FIREBOT_DIR}/wiki_output/Firebot_Build_Status.wiki ${SVNROOT_WIKI}/Firebot_Build_Status.wiki` == "" ]]
@@ -31,8 +32,7 @@ cd $FIREBOT_DIR
       # No changes, exit script
       exit
    else
-      cd $SVNROOT_WIKI
-      svn update
+      # Changes detected, copy and commit new version
       cp ${FIREBOT_DIR}/wiki_output/Firebot_Build_Status.wiki ${SVNROOT_WIKI}/Firebot_Build_Status.wiki
       svn commit -m 'Firebot: Update Firebot build status wiki page (Firebot_Build_Status)'
    fi
