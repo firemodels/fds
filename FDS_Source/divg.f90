@@ -974,9 +974,11 @@ REAL(EB) :: DELKDELT,VC,DTDX,DTDY,DTDZ,TNOW,ZZ_GET(0:N_TRACKED_SPECIES), &
             TMP_G,TMP_WGT,DIV_DIFF_HEAT_FLUX,H_S,ZZZ(1:4),DU_P,DU_M,UN
 TYPE(SURFACE_TYPE), POINTER :: SF
 TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM,SM0
-INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,I,J,K,IPZ,IOPZ
+INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,I,J,K,IPZ,IOPZ,NF,IC
 TYPE(VENTS_TYPE), POINTER :: VT=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
+TYPE(FACET_TYPE), POINTER :: FACE=>NULL()
+TYPE(CUTCELL_LINKED_LIST_TYPE), POINTER :: CL=>NULL()
  
 IF (SOLID_PHASE_ONLY) RETURN
 IF (PERIODIC_TEST==3) RETURN
@@ -1125,8 +1127,24 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
          CASE(-3)
             RHO_D_DZDZ(IIG,JJG,KKG)   = -RHO_D_DZDN
       END SELECT
-      
    ENDDO WALL_LOOP
+
+   ! Store RHODW for unstructured geometry
+
+   DO NF=1,N_FACE
+      FACE=>FACET(NF)
+      CL=>FACE%CUTCELL_LIST
+      FACE%RHODW(N)=0._EB
+      CUTCELL_LOOP_1: DO
+         IF ( .NOT. ASSOCIATED(CL) ) EXIT CUTCELL_LOOP_1 ! if the next index does not exist, exit the loop
+         IC = CL%INDEX
+         IIG = I_CUTCELL(IC)
+         JJG = J_CUTCELL(IC)
+         KKG = K_CUTCELL(IC)
+         FACE%RHODW(N)  = FACE%RHODW(N) + CL%AREA*RHO_D(IIG,KKG,JJG)
+         CL=>CL%NEXT ! point to the next index in the linked list
+      ENDDO CUTCELL_LOOP_1
+   ENDDO
 
    ! Compute del dot h_n*rho*D del Z_n (part of del dot qdot")
 
@@ -1344,6 +1362,23 @@ CORRECTION_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    END SELECT
    DP(IIG,JJG,KKG) = DP(IIG,JJG,KKG) - WC%ONE_D%QCONF*WC%RDN
 ENDDO CORRECTION_LOOP
+
+! Store KW for unstructured geometry
+
+DO NF=1,N_FACE
+   FACE=>FACET(NF)
+   CL=>FACE%CUTCELL_LIST
+   FACE%KW=0._EB
+   CUTCELL_LOOP_2: DO
+      IF ( .NOT. ASSOCIATED(CL) ) EXIT CUTCELL_LOOP_2 ! if the next index does not exist, exit the loop
+      IC = CL%INDEX
+      IIG = I_CUTCELL(IC)
+      JJG = J_CUTCELL(IC)
+      KKG = K_CUTCELL(IC)
+      FACE%KW  = FACE%KW + CL%AREA*KP(IIG,KKG,JJG)
+      CL=>CL%NEXT ! point to the next index in the linked list
+   ENDDO CUTCELL_LOOP_2
+ENDDO
 
 ! Compute (q + del dot k del T) and add to the divergence
 
