@@ -3598,7 +3598,6 @@ ENDDO
 
 END SUBROUTINE READ_PART
  
-
  
 SUBROUTINE PROC_PART
 
@@ -3646,6 +3645,8 @@ PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
       LPC%DENSITY = MASS/VOLUME
       LPC%FTPR = FOTH*PI*LPC%DENSITY               
    ENDIF
+
+   IF (SF%HEAT_TRANSFER_MODEL>0) CALL SHUTDOWN('ERROR: HEAT_TRANSFER_MODEL not appropriate for PART')
 
    ! Set the flag to do particle exchanges between meshes
 
