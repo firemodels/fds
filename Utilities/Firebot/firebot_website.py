@@ -35,8 +35,12 @@ span.dropt span {position: absolute; left: -9999px;
   border-style:solid; border-color:black; border-width:1px;}
 span.dropt:hover span {margin: 5px 0 0 170px; background: #ebf7f8; z-index:6;}
 
+body{
+font: 16px Arial, sans-serif;
+}
+
 hr {
-  width: 50%;
+  width: 60%;
   height: 2px;
   color: #000;
   background-color: #000;
@@ -45,13 +49,13 @@ hr {
 
 </head>
 <body>
-<h2><u>F</u><font color="#dddddd">DS automat</font><u>I</u><font color="#dddddd">c ve</font><u>R</u><font color="#dddddd">ification and validation t</font><u>E</u><font color="#dddddd">st</font> BOT</h2>
+<h2>FDS Automatic Verification and Validation Test Bot</h2>
 
 <hr align='left'>
 
 <h3>Firebot Build Status</h3>
 
-This page displays the build status for up to 100 of the most recent builds.<br>
+This page displays the build status for up to 100 of the most recent build/test cycles.<br>
 To view a detailed error log, mouse over a fail or warning status.<br>
 
 <br>
@@ -136,7 +140,7 @@ for rev in sorted(revision_list, reverse=True)[:100]:
         # Write "Build success, with warnings" and hover of warning log
         error_line = """Revision <b>%(revision_num)s</b>:
         <font style='BACKGROUND-COLOR: yellow'>[&#8211;]</font>
-        <span class="dropt">Build success, with warnings<br>
+        <span class="dropt">Build success, with warnings.<br>
         <span style="width:700px;">"""
         print error_line % {'revision_num': rev}
 
