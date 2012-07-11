@@ -1637,8 +1637,7 @@ EDGE_LOOP: DO IE=1,N_EDGES
             
             ! Determine if there is a tangential velocity component
 
-            VEL_T_IF: IF (.NOT.SF%SPECIFIED_TANGENTIAL_VELOCITY .AND. .NOT.SYNTHETIC_EDDY_METHOD .AND. &
-                          .NOT. HVAC_TANGENTIAL .OR. IWM==0 .OR. IWP==0) THEN
+            VEL_T_IF: IF (.NOT.SF%SPECIFIED_TANGENTIAL_VELOCITY .AND. .NOT.SYNTHETIC_EDDY_METHOD .AND. .NOT. HVAC_TANGENTIAL) THEN
                VEL_T = 0._EB
             ELSE VEL_T_IF
                VEL_EDDY = 0._EB
