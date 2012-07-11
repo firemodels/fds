@@ -113,7 +113,7 @@ for rev in sorted(revision_list, reverse=True)[:100]:
         f_stage.close()
 
         # Write "Build fail" and hover of error log
-        error_line = """Revision number <b>%(revision_num)s</b>:
+        error_line = """Revision <b>%(revision_num)s</b>:
         <font style='BACKGROUND-COLOR: lightcoral'>[&#10007;]</font>
         <span class="dropt">Build failure<span style="width:700px;">"""
 
@@ -134,7 +134,7 @@ for rev in sorted(revision_list, reverse=True)[:100]:
         f.close()
 
         # Write "Build success, with warnings" and hover of warning log
-        error_line = """Revision number <b>%(revision_num)s</b>:
+        error_line = """Revision <b>%(revision_num)s</b>:
         <font style='BACKGROUND-COLOR: yellow'>[&#8211;]</font>
         <span class="dropt">Build success, with warnings<br>
         <span style="width:700px;">"""
@@ -149,7 +149,7 @@ for rev in sorted(revision_list, reverse=True)[:100]:
     #  = Case: build success! =
     #  ========================
     else:
-        print "Revision number <b>" + rev + "</b>: <font style='BACKGROUND-COLOR: lime'>[&#10003;]</font> Build success!<br/>"
+        print "Revision <b>" + rev + "</b>: <font style='BACKGROUND-COLOR: lime'>[&#10003;]</font> Build success!<br/>"
 
     # Print time associated with history file
     print "<font color='#B0B0B0'><i>" + time.ctime(os.path.getmtime(firebot_history_dir + "/" + rev + ".txt"))  + "</i></font>"
