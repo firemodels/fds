@@ -1,7 +1,7 @@
 @echo off
 
 echo.
-echo Uninstall FDS and Smokeview
+echo Uninstall FDS and Smokeview version 6
 echo.
 echo Press any key to proceed or CTRL C to abort
 pause>NUL

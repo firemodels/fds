@@ -16,13 +16,16 @@ call "%CD%\set_path.exe" -u -m -b -r "FDS\FDS5"
 
 Rem create c:\bin directory
 
+echo
 if exist c:\bin goto existbin
 echo.
 echo Creating the directory c:\bin
 mkdir c:\bin
 :existbin
 
-Rem create 32 bit fds5 alias
+Rem ------------ create aliases ----------------
+
+Rem *** fds5 (32 bit)
 
 set fds5exe="c:\Program Files\FDS\FDS5\bin\fds5.exe"
 set fds5bat="c:\bin\fds5.bat"
@@ -33,48 +36,52 @@ if exist %fds5exe% (
   echo %fds5exe% %%* >> %fds5bat%
 )
 
-Rem create 64 bit fds5 alias
+Rem *** fds5 (64 bit)
 
 set fds5exe="c:\Program Files\FDS\FDS5\bin\fds5_win_64.exe"
-
 if exist %fds5exe% (
   echo Adding fds5.bat to c:\bin
   echo @echo off > %fds5bat%
   echo %fds5exe% %%* >> %fds5bat%
 )
 
-
-Rem create smokeview5 alias
+Rem *** smokeview5
 
 set smv5exe="c:\Program Files\FDS\FDS5\bin\smokeview.exe"
 set smv5bat="c:\bin\smokeview5.bat"
-
 if exist %smv5exe% (
   echo Adding smokeview5.bat to c:\bin
   echo @echo off > %smv5bat%
   echo %smv5exe% %%* >> %smv5bat%
 )
 
-Rem create fds6 and smokeview6 aliases
+Rem *** fds6
 
-echo.
-echo Adding fds6.bat and smokeview6.bat to c:\bin
+echo Adding fds6.bat to c:\bin
 set fds6=c:\bin\fds6.bat
 echo @echo off > %fds6%
 echo "%CD%\bin\fds" %%* >> %fds6%
 
+Rem *** smokeview6
+
+echo Adding smokeview6.bat to c:\bin
 set smv6=c:\bin\smokeview6.bat
 echo @echo off > %smv6%
 echo "%CD%\bin\smokeview" %%* >> %smv6%
 
+Rem ------------ setting up path ------------
+
+Rem *** c:\bin
 echo.
 echo Adding c:\bin to the system path 
 call "%CD%\set_path.exe" -s -m -a "c:\bin"
 
+Rem *** c:\...\FDS\FDS6\bin
 echo.
 echo Adding %CD%\bin to the system path 
 call "%CD%\set_path.exe" -s -m -a "%CD%\bin"
 
+Rem ------------- file association -------------
 echo.
 echo Associating the .smv file extension with smokeview.exe
 
@@ -83,6 +90,7 @@ assoc .smv=smvDoc>Nul
 
 set FDSSTART=%ALLUSERSPROFILE%\Start Menu\Programs\FDS6
 
+Rem ------------- start menu shortcuts ---------------
 echo. 
 echo Adding shortcuts to the Start menu.
 if exist "%FDSSTART%" rmdir /q /s "%FDSSTART%"
@@ -110,6 +118,8 @@ Rem "%CD%\shortcut.exe" /F:"%FDSSTART%\Uninstall.lnk"  /T:"%CD%\Uninstall\uninst
 
 erase "%CD%"\set_path.exe
 erase "%CD%"\shortcut.exe
+
+Rem ----------- setting up uninstall file
 
 echo echo. >> Uninstall\Uninstall.bat
 echo echo Removing directory, %CD%\bin, from the System Path >> Uninstall\Uninstall.bat
