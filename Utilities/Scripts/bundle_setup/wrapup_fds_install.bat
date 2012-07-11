@@ -14,11 +14,15 @@ echo Removing previous FDS/Smokeview entries from the system and user path.
 call "%CD%\set_path.exe" -s -m -b -r "nist\fds"
 call "%CD%\set_path.exe" -u -m -b -r "FDS\FDS5"
 
+Rem create c:\bin directory
+
 if exist c:\bin goto existbin
 echo.
 echo Creating the directory c:\bin
 mkdir c:\bin
 :existbin
+
+Rem create 32 bit fds5 alias
 
 set fds5exe="c:\Program Files\FDS\FDS5\bin\fds5.exe"
 set fds5bat="c:\bin\fds5.bat"
@@ -29,6 +33,8 @@ if exist %fds5exe% (
   echo %fds5exe% %%* >> %fds5bat%
 )
 
+Rem create 64 bit fds5 alias
+
 set fds5exe="c:\Program Files\FDS\FDS5\bin\fds5_win_64.exe"
 
 if exist %fds5exe% (
@@ -36,6 +42,20 @@ if exist %fds5exe% (
   echo @echo off > %fds5bat%
   echo %fds5exe% %%* >> %fds5bat%
 )
+
+
+Rem create smokeview5 alias
+
+set smv5exe="c:\Program Files\FDS\FDS5\bin\smokeview.exe"
+set smv5bat="c:\bin\smokeview5.bat"
+
+if exist %smv5exe% (
+  echo Adding smokeview5.bat to c:\bin
+  echo @echo off > %smv5bat%
+  echo %smv5exe% %%* >> %smv5bat%
+)
+
+Rem create fds6 and smokeview6 aliases
 
 echo.
 echo Adding fds6.bat and smokeview6.bat to c:\bin
@@ -86,6 +106,7 @@ mkdir "%FDSSTART%\Guides and Release Notes"
 "%CD%\shortcut.exe" /F:"%FDSSTART%\Guides and Release Notes\Smokeview release notes.lnk" /T:"%CD%\Documentation\Guides_and_Release_Notes\Smokeview_release_notes.html" /A:C >NUL
 
 "%CD%\shortcut.exe" /F:"%FDSSTART%\Overview.lnk"  /T:"%CD%\Documentation\Overview.html" /A:C >NUL
+Rem "%CD%\shortcut.exe" /F:"%FDSSTART%\Uninstall.lnk"  /T:"%CD%\Uninstall\uninstall.bat" /A:C >NUL
 
 erase "%CD%"\set_path.exe
 erase "%CD%"\shortcut.exe
