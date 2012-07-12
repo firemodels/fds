@@ -88,6 +88,12 @@ intel_win_64 : obj = fds_win_64
 intel_win_64 : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_serial)
 
+intel_win_64_dv : FFLAGS = -O2 /Qvec_report0
+intel_win_64_dv : FCOMPL = ifort
+intel_win_64_dv : obj = fds_win_64_dv
+intel_win_64_dv : setup_win $(objwin_serial)
+	$(FCOMPL) -o $(obj) $(FFLAGS) /F1000000000 $(objwin_serial)
+
 intel_win_64_db : FFLAGS = /Qvec_report0 /nologo /debug:full /Od /extend_source:132 /warn:all /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f03
 intel_win_64_db : FCOMPL = ifort
 intel_win_64_db : obj = fds_win_64_db
