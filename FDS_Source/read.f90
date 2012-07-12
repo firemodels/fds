@@ -1751,10 +1751,8 @@ SIG_FIGS           = 8
 SIG_FIGS_EXP       = 3
 TIMING             = .FALSE.
 UVW_TIMER          = 1.E10_EB
- 
-DT_GEOC      =  1._EB
+
 DT_GEOM      =  1._EB
-DT_BNDC      =  1._EB
 DT_BNDE      = -1._EB
 DT_BNDF      = -1._EB
 DT_RESTART   = 1000000._EB
