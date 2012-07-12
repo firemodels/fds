@@ -31,6 +31,7 @@ set smvbuild=%svn_root%\SMV\Build\%BUILDDIR%
 set svzipbuild=%svn_root%\Utilities\smokezip\%BUILDDIR%
 set svdiffbuild=%svn_root%\Utilities\smokediff\%BUILDDIR%
 set bgbuild=%svn_root%\Utilities\background\intel_win_32
+set sh2bat=%svn_root%\Utilities\Data_Processing
 
 set zipbase=smv_%version%_win%platform%
 set smvdir=to_google\%zipbase%
@@ -71,6 +72,8 @@ if "%platform%"=="32" echo copying pthreadVC.dll
 if "%platform%"=="32" copy pthreadVC.dll %smvdir%\.
 if "%platform%"=="64" echo copying pthreadVC2_x64.dll
 if "%platform%"=="64" copy pthreadVC2_x64.dll %smvdir%\.
+echo copying sh2bat.exe
+copy %sh2bat%\sh2bat.exe %smvdir%\.
 
 echo copying readme.html
 copy readme.html %smvdir%\release_notes.html

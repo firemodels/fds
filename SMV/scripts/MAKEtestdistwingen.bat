@@ -25,6 +25,7 @@ set platform=%1
 set version=test_%smv_revision%
 set zipbase=smv_%version%_win%platform%
 set smvdir=to_google\%zipbase%
+set sh2bat=%svn_root%\Utilities\Data_Processing
 
 cd %svn_root%\SMV\for_bundle
 
@@ -48,7 +49,7 @@ echo copying smokezip_win_%platform%.exe
 copy ..\..\Utilities\smokezip\intel_win_%platform%\smokezip_win_%platform%.exe %smvdir%\smokezip_win_%platform%.exe
 
 echo copying background.exe
-copy ..\..\Utilities\background\intel_win_%platform%\background.exe %smvdir%\background.exe
+copy ..\..\Utilities\background\intel_win_32\background.exe %smvdir%\background.exe
 
 echo copying objects.svo
 copy objects.svo %smvdir%\.
@@ -62,6 +63,9 @@ if "%platform%"=="32" echo copying pthreadVC.dll
 if "%platform%"=="32" copy pthreadVC.dll %smvdir%\.
 if "%platform%"=="64" echo copying pthreadVC2_x64.dll
 if "%platform%"=="64" copy pthreadVC2_x64.dll %smvdir%\.
+echo copying sh2bat.exe
+copy %sh2bat%\sh2bat.exe %smvdir%\.
+
 
 echo copying note.txt
 copy note.txt %smvdir%\.

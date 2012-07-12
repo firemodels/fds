@@ -1,6 +1,6 @@
 @echo off
 
-Rem  Windows batch file to copy smokediffset SVNROOT=~/FDS-SMV
+Rem  Windows batch file to build linux 32 and 64 bit versions of smokezip
 
 Rem setup environment variables (defining where repository resides etc) 
 
@@ -18,13 +18,12 @@ goto:eof
 
 call %envfile%
 
+echo Building 32 Windows versions of sh2bat
+
 %svn_drive%
-
-call %svn_root%\SMV\scripts\MAKEsmdwin32.bat
-call %svn_root%\SMV\scripts\MAKEsmzwin32.bat
-call %svn_root%\SMV\scripts\MAKEbgwin32.bat
-call %svn_root%\SMV\scripts\MAKEf2awin32.bat
-
 cd %svn_root%\Utilities\Data_Processing
 make_sh2bat
+
+echo.
+echo compilation complete
 pause
