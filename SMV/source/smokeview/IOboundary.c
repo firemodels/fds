@@ -2079,7 +2079,7 @@ void drawpatch_frame(void){
     patchi = patchinfo + i;
     if(patchi->filetype!=2)continue;
     if(patchi->loaded==0||patchi->display==0)continue;
-    draw_geomdata(patchi);
+    draw_geomdata(patchi,1);
   }
   for(i=0;i<nmeshes;i++){
     meshi=meshinfo+i;

@@ -100,27 +100,30 @@ error = 0
 read(lu20)one
 read(lu20)version
 nvars=0
+valmin = 1000000000000.0;
+valmax = -valmin
 do itime=1, ntimes
   read(lu20,iostat=finish)times(itime)
   write(6,10)times(itime)
 10 format("boundary element time=",f9.2)  
   if(finish.eq.0)read(lu20,iostat=finish)nvert_s, ntri_s, nvert_d, ntri_d
   nstatics(itime)=ntri_s
-  if(finish.eq.0)read(lu20,iostat=finish)(vals(nvars+i),i=1,ntri_s)
-  valmin = vals(nvars+1)
-  valmax = valmin
-  do i = 2, ntri_s
-    if(vals(nvars+i).lt.valmin)valmin=vals(nvars+i)
-    if(vals(nvars+i).gt.valmax)valmax=vals(nvars+i)
-  end do
+  if(finish.eq.0.and.ntri_s.gt.0)read(lu20,iostat=finish)(vals(nvars+i),i=1,ntri_s)
   ndynamics(itime)=ntri_d
   if(finish.eq.0.and.ntri_d.ne.0)then
     read(lu20,iostat=finish)(vals(nvars+ntri_s+i),i=1,ntri_d)
+!    do i = 1, ntri_d
+!      vals(nvars+ntri_s+i)=times(itime)
+!    end do
   endif
+  do i = 1, ntri_s+ntri_d
+    if(vals(nvars+i).lt.valmin)valmin=vals(nvars+i)
+    if(vals(nvars+i).gt.valmax)valmax=vals(nvars+i)
+  end do
   if(finish.ne.0)return
   nvars = nvars + ntri_s + ntri_d
 end do
-write(6,*)"valmin=",valmin," valmax=",valmax
+write(6,*)"nvars=",nvars,"valmin=",valmin," valmax=",valmax
 
 end subroutine getembeddata
 

@@ -698,7 +698,7 @@ EXTERNCPP void readcadgeom(cadgeom *cd);
 EXTERNCPP void drawcadgeom(const cadgeom *cd);
 EXTERNCPP void drawcad2geom_opaque(const cadgeom *cd,int trans_flag);
 
-EXTERNCPP void draw_geomdata(patchdata *patchi);
+EXTERNCPP void draw_geomdata(patchdata *patchi, int frameflag);
 EXTERNCPP char *newtextptr(char ***texture_list,int *n_texture_list,char *texturebuffer,char *lastbuffer);
 
 EXTERNCPP void readplot3d(char *file, int ifile, int flag,int *errorcode);

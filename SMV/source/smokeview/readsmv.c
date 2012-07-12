@@ -7783,7 +7783,10 @@ void readboundini(void){
         patchdata *patchi;
 
         patchi = patchinfo +i;
-        if(lenbuffer2!=0&&strcmp(patchi->label.shortlabel,buffer2ptr)==0&&patchi->filetype==filetype&&is_file_newer(boundinifilename,patchi->file)==1){
+        if(lenbuffer2!=0&&
+          strcmp(patchi->label.shortlabel,buffer2ptr)==0&&
+          patchi->filetype==filetype&&
+          is_file_newer(boundinifilename,patchi->file)==1){
           bounddata *boundi;
 
           boundi = &patchi->bounds;

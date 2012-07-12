@@ -941,7 +941,7 @@ void read_geomdata(int ifile, int flag, int *errorcode){
 
 /* ------------------ draw_geomdata ------------------------ */
 
-void draw_geomdata(patchdata *patchi){
+void draw_geomdata(patchdata *patchi, int frameflag){
   int i;
 
   for(i=0;i<ngeominfoptrs;i++){
@@ -953,7 +953,13 @@ void draw_geomdata(patchdata *patchi){
 
     geomi = geominfoptrs[i];
     if(geomi->display==0||geomi->loaded==0)continue;
-    geomlisti = geomi->geomlistinfo-1;//xxx check this
+    if(frameflag==0){
+      geomlisti = geomi->geomlistinfo-1;
+    }
+    else{
+      geomlisti = geomi->geomlistinfo+geomi->itime;
+    }
+
     ntris = geomlisti->ntriangles;
 
     glEnable(GL_NORMALIZE);
@@ -980,7 +986,8 @@ void draw_geomdata(patchdata *patchi){
         xyznorm=trianglei->tri_norm;
         glNormal3fv(xyznorm);
 
-        color_index = patchi->geom_ival_static[j];
+        //color_index = patchi->geom_ival_static[j];
+        color_index = patchi->geom_ival_dynamic[j];
         color=rgb_patch+4*color_index;
         glColor3fv(color);
 
@@ -1003,7 +1010,8 @@ void draw_geomdata(patchdata *patchi){
 
         trianglei = geomlisti->triangles+j;
        
-        color_index = patchi->geom_ival_static[j];
+//        color_index = patchi->geom_ival_static[j];
+        color_index = patchi->geom_ival_dynamic[j];
         color=rgb_patch+4*color_index;
         glColor3fv(color);
 
