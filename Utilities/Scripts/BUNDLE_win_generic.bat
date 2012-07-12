@@ -13,6 +13,7 @@ set in_smokezip=%svn_root%\Utilities\smokezip
 set in_background=%svn_root%\Utilities\background
 set in_smv=%svn_root%\SMV\Build\intel_win_%platform%
 set in_for_bundle=%svn_root%\SMV\for_bundle
+set in_sh2bat=%svn_root%\Utilities\Data_Processing
 
 set to_google=%svn_root%\Utilities\to_google
 set basedir=%to_google%\%basename%
@@ -67,6 +68,9 @@ copy %in_fds2ascii%\intel_win_%platform%\fds2ascii_win_%platform%.exe     %out_b
 
 echo copying background.exe
 copy %in_background%\intel_win_32\background.exe %out_bin%\background.exe
+
+echo copying sh2bat.exe
+copy %in_sh2bat%\sh2bat.exe %out_bin%\sh2bat.exe
 
 echo.
 echo Creating Manifiest
