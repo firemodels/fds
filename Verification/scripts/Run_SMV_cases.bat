@@ -36,7 +36,7 @@ echo Press any key to proceed, CTRL c to abort
 pause > Nul
 
 echo creating FDS case list from SMV_Cases.sh
-..\..\Utilities\Data_Processing\sh2bat SMV_Cases.sh SMV_Cases.bat
+sh2bat SMV_Cases.sh SMV_Cases.bat
 
 cd %BASEDIR%
 
