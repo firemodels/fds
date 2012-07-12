@@ -659,10 +659,10 @@ DO N=1,N_FACE
    CUTCELL_LOOP: DO
       IF ( .NOT. ASSOCIATED(CL) ) EXIT CUTCELL_LOOP ! if the next index does not exist, exit the loop
       IC = CL%INDEX
-      IIG = I_CUTCELL(IC)
-      JJG = J_CUTCELL(IC)
-      KKG = K_CUTCELL(IC)
-      VC = DX(IIG)*DY(JJG)*DZ(KKG)
+      IIG = M%I_CUTCELL(IC)
+      JJG = M%J_CUTCELL(IC)
+      KKG = M%K_CUTCELL(IC)
+      VC = M%DX(IIG)*M%DY(JJG)*M%DZ(KKG)
 
       FACE%RDN = FACE%RDN + CL%AREA*VC
 
