@@ -350,7 +350,7 @@ DO I=1,N_FACE
       FACE%NVEC = 0._EB
    ENDIF
 
-   FACE%AREA  = TRIANGLE_AREA(V1,V2,V3)
+   FACE%AREA = TRIANGLE_AREA(V1,V2,V3)
    FACE%TMP_F = SURFACE(FACE%SURF_INDEX)%TMP_FRONT
    FACE%TMP_G = TMPA
 
@@ -673,7 +673,7 @@ DO N=1,N_FACE
       CL=>CL%NEXT ! point to the next index in the linked list
    ENDDO CUTCELL_LOOP
 
-   FACE%RDN = 2._EB/(FACE%RDN/FACE%AREA)**ONTH ! reciprocal of wall normal length scale
+   IF (FACE%RDN /= 0._EB) FACE%RDN = 2._EB/(FACE%RDN/FACE%AREA)**ONTH ! reciprocal of wall normal length scale
 
 ENDDO
 
