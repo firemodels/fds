@@ -41,21 +41,6 @@ if [[ `whoami` == "firebot" ]];
       exit
 fi
 
-#  ===========================
-#  = Exit if already running =
-#  ===========================
-# Abort script if another instance is running
-# This command should return a "2" (from within this script) if only one script is running
-if [[ `pgrep -f firebot.sh | wc -l` -gt 2 ]];
-   then
-      echo "Warning: The Firebot verification script is already running."
-      echo "Terminating this script."
-      exit
-   else
-      # Continue along
-      :
-fi
-
 #  ============================
 #  = Stage 1 - SVN operations =
 #  ============================
