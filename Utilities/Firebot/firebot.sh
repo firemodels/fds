@@ -9,7 +9,7 @@
 #  = Input variables =
 #  ===================
 
-mailTo="kevin.mcgrattan@nist.gov, randall.mcdermott@nist.gov, craig.weinschenk@nist.gov, kristopher.overholt@nist.gov"
+mailTo="kevin.mcgrattan@nist.gov, randall.mcdermott@nist.gov, glenn.forney@nist.gov, craig.weinschenk@nist.gov, kristopher.overholt@nist.gov"
 SVNROOT="/home/firebot/FDS-SMV"
 FIREBOT_DIR="/home/firebot/firebot"
 SVN_REVISION=$1
