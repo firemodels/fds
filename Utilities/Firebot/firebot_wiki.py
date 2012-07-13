@@ -41,8 +41,8 @@ For additional information on Firebot, please refer to the FDS Configuration Man
   * Stage 4b: Compile FDS MPI release
   * Stage 5:  Run verification cases (long run)
   * Stage 6a: Compile SMV utilities
-  * Stage 6b: Compile SMV DB
-  * Stage 6c: Make SMV pictures (debug mode)
+  * Stage 6b: Compile SMV test DB
+  * Stage 6c: Make SMV pictures (test debug mode)
   * Stage 6d: Compile SMV test
   * Stage 6e: Make SMV pictures (test mode)
   * Stage 6f: Compile SMV release

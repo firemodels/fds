@@ -116,13 +116,13 @@ check_compile_fds_db()
    fi
 
    # Check for compiler warnings
-   if [[ `grep warning ${FIREBOT_DIR}/output/stage2a` == "" ]]
+   if [[ `grep -E 'warning|remark' ${FIREBOT_DIR}/output/stage2a` == "" ]]
    then
       # Continue along
       :
    else
       echo "Stage 2a warnings:" >> $FIREBOT_DIR/output/warnings
-      grep warning ${FIREBOT_DIR}/output/stage2a >> $FIREBOT_DIR/output/warnings
+      grep -E 'warning|remark' ${FIREBOT_DIR}/output/stage2a >> $FIREBOT_DIR/output/warnings
       echo "" >> $FIREBOT_DIR/output/warnings
    fi
 }
@@ -156,13 +156,13 @@ check_compile_fds_mpi_db()
 
    # Check for compiler warnings
    # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
-   if [[ `grep warning ${FIREBOT_DIR}/output/stage2b | grep -v 'feupdateenv is not implemented'` == "" ]]
+   if [[ `grep -E 'warning|remark' ${FIREBOT_DIR}/output/stage2b | grep -v 'feupdateenv is not implemented'` == "" ]]
    then
       # Continue along
       :
    else
       echo "Stage 2b warnings:" >> $FIREBOT_DIR/output/warnings
-      grep warning ${FIREBOT_DIR}/output/stage2b | grep -v 'feupdateenv is not implemented' >> $FIREBOT_DIR/output/warnings
+      grep -E 'warning|remark' ${FIREBOT_DIR}/output/stage2b | grep -v 'feupdateenv is not implemented' >> $FIREBOT_DIR/output/warnings
       echo "" >> $FIREBOT_DIR/output/warnings
    fi
 }
@@ -323,13 +323,13 @@ check_compile_fds()
    fi
 
    # Check for compiler warnings
-   if [[ `grep warning ${FIREBOT_DIR}/output/stage4a` == "" ]]
+   if [[ `grep -E 'warning|remark' ${FIREBOT_DIR}/output/stage4a` == "" ]]
    then
       # Continue along
       :
    else
       echo "Stage 4a warnings:" >> $FIREBOT_DIR/output/warnings
-      grep warning ${FIREBOT_DIR}/output/stage4a >> $FIREBOT_DIR/output/warnings
+      grep -E 'warning|remark' ${FIREBOT_DIR}/output/stage4a >> $FIREBOT_DIR/output/warnings
       echo "" >> $FIREBOT_DIR/output/warnings
    fi
 }
@@ -363,13 +363,13 @@ check_compile_fds_mpi()
 
    # Check for compiler warnings
    # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
-   if [[ `grep warning ${FIREBOT_DIR}/output/stage4b | grep -v 'feupdateenv is not implemented'` == "" ]]
+   if [[ `grep -E 'warning|remark' ${FIREBOT_DIR}/output/stage4b | grep -v 'feupdateenv is not implemented'` == "" ]]
    then
       # Continue along
       :
    else
       echo "Stage 4b warnings:" >> $FIREBOT_DIR/output/warnings
-      grep warning ${FIREBOT_DIR}/output/stage4b | grep -v 'feupdateenv is not implemented' >> $FIREBOT_DIR/output/warnings
+      grep -E 'warning|remark' ${FIREBOT_DIR}/output/stage4b | grep -v 'feupdateenv is not implemented' >> $FIREBOT_DIR/output/warnings
       echo "" >> $FIREBOT_DIR/output/warnings
    fi
 }
@@ -439,7 +439,7 @@ compile_smv_utilities()
 {  
    # smokezip:
    cd $SVNROOT/Utilities/smokezip/intel_linux_64
-   echo 'Compiling smokezip:' >> $FIREBOT_DIR/output/stage6a 2>&1
+   echo 'Compiling smokezip:' > $FIREBOT_DIR/output/stage6a 2>&1
    ./make_zip.sh >> $FIREBOT_DIR/output/stage6a 2>&1
    echo "" >> $FIREBOT_DIR/output/stage6a 2>&1
    
@@ -473,28 +473,28 @@ check_smv_utilities()
    fi
 }
 
-#  =============================
-#  = Stage 6b - Compile SMV DB =
-#  =============================
+#  ==================================
+#  = Stage 6b - Compile SMV test DB =
+#  ==================================
 
-compile_smv_db()
+compile_smv_test_db()
 {
-   # Clean and compile SMV DB
-   cd $SVNROOT/SMV/Build/intel_linux_64_dbg
+   # Clean and compile SMV test DB
+   cd $SVNROOT/SMV/Build/intel_linux_test_64_dbg
    make --makefile ../Makefile clean &> /dev/null
    ./make_smv.sh &> $FIREBOT_DIR/output/stage6b
 }
 
-check_compile_smv_db()
+check_compile_smv_test_db()
 {
-   # Check for errors in SMV DB compilation
-   cd $SVNROOT/SMV/Build/intel_linux_64_dbg
-   if [ -e "smokeview_linux_64_dbg" ]
+   # Check for errors in SMV test DB compilation
+   cd $SVNROOT/SMV/Build/intel_linux_test_64_dbg
+   if [ -e "smokeview_linux_test_64_dbg" ]
    then
       # Continue along
       :
    else
-      BUILD_STAGE_FAILURE="Stage 6b: SMV DB Compilation"
+      BUILD_STAGE_FAILURE="Stage 6b: SMV Test DB Compilation"
       ERROR_LOG=$FIREBOT_DIR/output/stage6b
       save_build_status
       email_error_message
@@ -502,24 +502,24 @@ check_compile_smv_db()
 
    # Check for compiler warnings
    # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
-   if [[ `grep warning ${FIREBOT_DIR}/output/stage6b | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
+   if [[ `grep -E 'warning|remark' ${FIREBOT_DIR}/output/stage6b | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
    then
       # Continue along
       :
    else
       echo "Stage 6b warnings:" >> $FIREBOT_DIR/output/warnings
-      grep warning ${FIREBOT_DIR}/output/stage6b | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $FIREBOT_DIR/output/warnings
+      grep -E 'warning|remark' ${FIREBOT_DIR}/output/stage6b | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $FIREBOT_DIR/output/warnings
       echo "" >> $FIREBOT_DIR/output/warnings
    fi
 }
 
-#  =============================================
-#  = Stage 6c - Make SMV pictures (debug mode) =
-#  =============================================
+#  ==================================================
+#  = Stage 6c - Make SMV pictures (test debug mode) =
+#  ==================================================
 
 make_smv_pictures_db()
 {
-   # Run Make SMV Pictures script (debug mode)
+   # Run Make SMV Pictures script (test debug mode)
    cd $SVNROOT/Verification/scripts
    ./Make_SMV_Pictures.sh -d &> $FIREBOT_DIR/output/stage6c
 }
@@ -533,7 +533,7 @@ check_smv_pictures_db()
       # Continue along
       :
    else
-      BUILD_STAGE_FAILURE="Stage 6c: Make SMV Pictures (Debug Mode)"
+      BUILD_STAGE_FAILURE="Stage 6c: Make SMV Pictures (Test Debug Mode)"
       grep -B 50 -A 50 "Segmentation" -I $FIREBOT_DIR/output/stage6c > $FIREBOT_DIR/output/stage6c_errors
       ERROR_LOG=$FIREBOT_DIR/output/stage6c_errors
       save_build_status
@@ -570,13 +570,13 @@ check_compile_smv_test()
 
    # Check for compiler warnings
    # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
-   if [[ `grep warning ${FIREBOT_DIR}/output/stage6d | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
+   if [[ `grep -E 'warning|remark' ${FIREBOT_DIR}/output/stage6d | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
    then
       # Continue along
       :
    else
       echo "Stage 6d warnings:" >> $FIREBOT_DIR/output/warnings
-      grep warning ${FIREBOT_DIR}/output/stage6d | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $FIREBOT_DIR/output/warnings
+      grep -E 'warning|remark' ${FIREBOT_DIR}/output/stage6d | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $FIREBOT_DIR/output/warnings
       echo "" >> $FIREBOT_DIR/output/warnings
    fi
 }
@@ -638,13 +638,13 @@ check_compile_smv()
 
    # Check for compiler warnings
    # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
-   if [[ `grep warning ${FIREBOT_DIR}/output/stage6f | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
+   if [[ `grep -E 'warning|remark' ${FIREBOT_DIR}/output/stage6f | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
    then
       # Continue along
       :
    else
       echo "Stage 6f warnings:" >> $FIREBOT_DIR/output/warnings
-      grep warning ${FIREBOT_DIR}/output/stage6f | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $FIREBOT_DIR/output/warnings
+      grep -E 'warning|remark' ${FIREBOT_DIR}/output/stage6f | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $FIREBOT_DIR/output/warnings
       echo "" >> $FIREBOT_DIR/output/warnings
    fi
 }
@@ -938,8 +938,8 @@ compile_smv_utilities
 check_smv_utilities
 
 ### Stage 6b ###
-compile_smv_db
-check_compile_smv_db
+compile_smv_test_db
+check_compile_smv_test_db
 
 ### Stage 6c ###
 make_smv_pictures_db
